@@ -70,7 +70,7 @@ ifeq ($(HAVE_ROS),1)
 
   ifeq ($(call ros-have-pkg,tf),1)
     ifeq ($(HAVE_TF),1)
-      CFLAGS_tf_thread += $(CFLAGS_TF) $(call ros-pkg-cflags,tf) $(CFLAGS)
+      CFLAGS_tf_thread += $(CFLAGS_TF) $(call ros-pkg-cflags,tf) $(CFLAGS) -Wno-strict-aliasing
       CFLAGS_tf_plugin = $(CFLAGS_tf_thread)
       LDFLAGS_ros_tf += $(LDFLAGS_TF)  $(call ros-pkg-lflags,tf)
       PLUGINS_all += $(PLUGINDIR)/ros-tf.so
