@@ -3,6 +3,7 @@
  *
  *  Created: Thu Jun 04 19:08:13 2009
  *  Copyright  2009  Masrur Doostdar <doostdar@kbsg.rwth-aachen.de>
+ *             2012  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,11 +22,6 @@
 
 #ifndef __UTILS_SYSTEM_GETKEY_H
 #define __UTILS_SYSTEM_GETKEY_H
-
-#include <fcntl.h>
-#include <unistd.h>
-#include <termios.h>
-#include <stdio.h>
 
 namespace fawkes {
   char getkey(int timeout_decisecs = 0);
