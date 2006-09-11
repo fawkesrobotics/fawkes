@@ -34,7 +34,10 @@
 
 using namespace std;
 
-
+/** Method for testing a plugin.
+ * @param p The plugin to be tested
+ * @return true if the plugin was tested successfully, false otherwise
+ */
 bool
 test_plugin(Plugin *p)
 {	
@@ -44,7 +47,10 @@ test_plugin(Plugin *p)
   return true;
 }
 
-
+/** Test a module.
+ * @param m the module to be tested
+ * @return true if the module was tested successfully, false otherwise
+ */
 bool
 test_module(Module *m)
 {
@@ -89,6 +95,11 @@ test_module(Module *m)
 }
 
 
+/** The main test program.
+ * @param argc the number of arguments
+ * @param argv the arguments
+ * @return 0 on success
+ */
 int
 main(int argc, char **argv)
 {

@@ -34,13 +34,13 @@
 
 
 bool
-file_exists(const char *filename)
+File::exists(const char *filename)
 {
   return (access(filename, F_OK) == 0);
 }
 
 bool
-file_is_regular(const char *filename)
+File::isRegular(const char *filename)
 {
   struct stat s;
 

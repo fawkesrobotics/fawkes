@@ -39,8 +39,10 @@ class ModuleManagerFactory
 {
  public:
 
+  /** The module manager type
+   */
   typedef enum {
-    MMT_DL = 1
+    MMT_DL = 1       /**< Standard dl modules, used on Linux systems */
   } ModuleManagerType;
 
   /** Retrieve an module manager instance of the desired type

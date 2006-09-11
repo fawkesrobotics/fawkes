@@ -29,17 +29,34 @@
 
 #include <stdio.h>
 
+/** Simple test plugin for QA application.
+ */
 class TestPlugin : public Plugin {
 
  public:
+  /** Constructor, prints out info message
+   */
   TestPlugin() { printf("TestPlugin constructor called\n"); }
+
+  /** Destrcutor, prints out info message
+   */
   ~TestPlugin() { printf("TestPlugin destructor called\n"); }
+
+  /** Get the type of the plugin.
+   * @return type of plugin
+   */
   Plugin::PluginType getType() { return Plugin::MOTION; }
 
+  /** Get the name of the plugin.
+   * @return name of the plugin
+   */
   const char *  getName() { return "TestPlugin"; }
 };
 
 
+/** Plugin factory function for this plugin.
+ * @return an instance of TestPlugin
+ */
 extern "C"
 Plugin *
 plugin_factory()
@@ -48,9 +65,14 @@ plugin_factory()
 }
 
 
+/** Plugin destruction function for this plugin.
+ * @param plugin The plugin that is to be destroyed. Do not use this plugin
+ *        afterwards
+ */
 extern "C"
 void
 plugin_destroy(Plugin *plugin)
 {
   delete plugin;
 }
+

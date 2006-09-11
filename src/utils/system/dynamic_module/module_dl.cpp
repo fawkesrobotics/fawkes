@@ -40,7 +40,7 @@
 
 const char * ModuleDL::FILE_EXTENSION = "so";
 
-ModuleDL::ModuleDL(std::string filename, ModuleFlags flags)
+ModuleDL::ModuleDL(std::string filename, Module::ModuleFlags flags)
 {
   this->filename = filename;
   this->flags    = flags;
@@ -83,7 +83,7 @@ ModuleDL::open()
   } else {
 
     // check whether we have a readable file right away */
-    if (file_is_regular(full_filename.c_str())) {
+    if (File::isRegular(full_filename.c_str())) {
       // We cannot read the file
       file_found = true;
 

@@ -102,7 +102,7 @@ class ModuleDL : public Module {
   virtual void *  getSymbol(const char *symbol_name);
 
   /** Compare to another ModuleDL instance
-   * @param a reference to the other comparison instance
+   * @param cmod a reference to the other comparison instance
    * @return Returns true, if the full file names of both modules are the
    * same, false otherwise
    */

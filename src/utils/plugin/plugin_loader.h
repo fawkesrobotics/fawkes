@@ -40,7 +40,7 @@
 class PluginLoader {
  public:
 
-  /* Constructor
+  /** Constructor
    * @param plugin_base_dir The base directory where to search for the shared
    * libraries which contain the plugins
    */
