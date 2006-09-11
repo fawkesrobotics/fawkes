@@ -31,7 +31,9 @@ BINDIR = $(BASEDIR)/bin
 LIBDIR = $(BASEDIR)/lib
 PLUGINDIR = $(BASEDIR)/plugins
 VPATH = $(SRCDIR)
-df = $(DEPDIR)/$(*F)
+df = $(DEPDIR)/$(filter_out ._,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
+
+INDENT_STRING = -  
 
 ### Programs used, do not mention trivial stuff like ln, rm, ls as per Makefile manual
 CC = gcc

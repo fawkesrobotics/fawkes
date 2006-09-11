@@ -27,45 +27,47 @@
 .SECONDARY: $(OBJS_all)
 
 .PHONY: all
-all: $(LIBS_all) $(PLUGINS_all) $(BINS_all)
+all: subdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all)
 
 .PHONY: clean
-clean:
-	$(SILENT) echo "--> Cleaning up directory"
-	$(SILENT) rm -rf $(SRCDIR)/$(OBJDIR)
-	$(SILENT) rm -rf $(DEPDIR)
-	$(SILENT) rm -rf $(BINS_all)
-	$(SILENT) rm -rf $(LIBS_all)
-	$(SILENT) rm -rf $(PLUGINS_all)
+clean: subdirs
+	$(SILENT) echo "$(INDENT)--> Cleaning up directory $(CURDIR)"
+	$(SILENT) if [ "$(SRCDIR)/$(OBJDIR)" != "/" ]; then rm -rf $(SRCDIR)/$(OBJDIR) ; fi
+	$(SILENT) if [ "$(DEPDIR)" != "" ]; then rm -rf $(DEPDIR) ; fi
+	$(SILENT) if [ "$(BINS_all)" != "" ]; then rm -rf $(BINS_all) ; fi
+	$(SILENT) if [ "$(LIBS_all)" != "" ]; then rm -rf $(LIBS_all) ; fi
+	$(SILENT) if [ "$(PLUGINS_all)" != "" ]; then rm -rf $(PLUGINS_all) ; fi
 
 .PHONY: subdirs $(SUBDIRS)
 subdirs: $(SUBDIRS)
 
 ifneq ($(SUBDIRS),)
 $(SUBDIRS):
-	$(SILENT) echo "--> Entering sub-directory $@ ---"
-	$(SILENT) $(MAKE) --no-print-directory -C $@
+	$(SILENT) echo "$(INDENT)--- Entering sub-directory $@ ---"
+	$(SILENT) $(MAKE) --no-print-directory -C $@ $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)"
+	$(SILENT) echo "$(INDENT)--- Leaving sub-directory $@ ---"
 endif
 
 %.o: %.cpp
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENT) echo "--> Compiling $(<F) (C++)"
+	$(SILENT) echo "$(INDENT)--> Compiling $(<F) (C++)"
 	$(SILENT) $(CC) -Wp,-M,-MF,$(df).d $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $@ $<
 	$(SILENT) cp -f $(df).d $(df).td; \
-	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	sed -e 's/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(df).td > $(df).d; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e 's/^ *//' \
 	    -e '/^$$/ d' -e 's/$$/ :/' < $(df).td >> $(df).d; \
 	rm -f $(df).td
 
 moc_%.cpp: %.h
-	$(SILENT) echo "--- Running Qt moc on $<, creating $@"
-	$(SILENT) $(MOC) $(MOC_FLAGS) -p $(@D) $< -o $@
+	$(SILENT) echo "$(INDENT)--- Running Qt moc on $<, creating $@"
+	$(SILENT) $(MOC) $(MOC_FLAGS) -p $(@D) $< -o $@q
 
 .SECONDEXPANSION:
 $(BINDIR)/%: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(BINDIR)
-	$(SILENT) echo "--> Linking $* ---"
+	$(SILENT) echo "$(INDENT)--> Linking $* ---"
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
@@ -74,7 +76,7 @@ $(BINDIR)/%: $$(OBJS_$$*)
 
 $(LIBDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(LIBDIR)
-	$(SILENT) echo "--> Linking lib $* ---"
+	$(SILENT) echo "$(INDENT)--> Linking lib $* ---"
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
@@ -82,7 +84,7 @@ $(LIBDIR)/%.so: $$(OBJS_$$*)
 
 $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(PLUGINDIR)
-	$(SILENT) echo "--> Linking plugin $* ---"
+	$(SILENT) echo "$(INDENT)--> Linking plugin $* ---"
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
