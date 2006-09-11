@@ -28,7 +28,7 @@
 #ifndef __UTILS_PLUGIN_PLUGIN_LOADER_H_
 #define __UTILS_PLUGIN_PLUGIN_LOADER_H_
 
-#include <utils/plugin/plugin.h>
+#include <core/plugin.h>
 #include <utils/system/dynamic_module/module_manager.h>
 #include <utils/system/dynamic_module/module.h>
 

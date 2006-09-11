@@ -27,7 +27,7 @@
 
 #include <utils/system/dynamic_module/module_dl.h>
 #include <utils/system/dynamic_module/module_manager_template.h>
-#include <utils/plugin/plugin.h>
+#include <core/plugin.h>
 #include <utils/plugin/plugin_loader.h>
 
 #include <iostream>
