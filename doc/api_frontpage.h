@@ -11,5 +11,4 @@
  * <a href="https://lechuck.informatik.rwth-aachen.de:2342/trac/">Trac Source Code and Project Management</a>
  * system.
  *
- * <br /><br />
  */

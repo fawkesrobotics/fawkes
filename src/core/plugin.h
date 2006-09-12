@@ -35,17 +35,12 @@ class Plugin {
  public:
 
   /** Type of the plugin
-   * Each plugin has a specific type
-   * MOTION - motion plugin
-   * VISION - vision plugin
-   * AGENT - agent plugin
-   * SKILLER - skill plugin
    */
   typedef enum {
-    MOTION,
-    VISION,
-    AGENT,
-    SKILLER
+    MOTION,		/**< motion plugin */
+    VISION,		/**< vision plugin */
+    AGENT,		/**< agent plugin */
+    SKILLER		/**< skill plugin */
   } PluginType;
 
   /** Virtual destructor for pure virtual class

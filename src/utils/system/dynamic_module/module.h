@@ -49,10 +49,25 @@ class Module {
    * MODULE_BIND_MASK - Can be used to encode flags in a longer data field
    */
   typedef enum {
-    MODULE_FLAGS_NONE   = 0,
-    MODULE_BIND_LAZY	= 1 << 0,
-    MODULE_BIND_LOCAL	= 1 << 1,
-    MODULE_BIND_MASK	= 0x03
+    MODULE_FLAGS_NONE   = 0,		/**< No flags */
+    MODULE_BIND_LAZY	= 1 << 0,	/**< Perform lazy binding. Only resolve
+					 *   symbols as thecode that references
+					 *   them is executed. If the symbol
+					 *   is never referenced,then it is
+					 *   never resolved. (Lazy  binding is
+					 *   only performed for function
+					 *   references; references to variables
+					 *   are always immediately bound when
+					 *   the library is loaded.)
+					 */
+    MODULE_BIND_LOCAL	= 1 << 1,	/**< Symbols defined in this library are
+					 *   not made available to resolve
+					 *   references in subsequently
+					 *   loaded libraries.
+					 */
+    MODULE_BIND_MASK	= 1 << 1,	/**< Can be used to encode flags in a
+					 *   longer data field
+					 */
   } ModuleFlags;
 
   /** virtual destructor for pure virtual class
