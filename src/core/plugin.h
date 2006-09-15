@@ -25,8 +25,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __UTILS_PLUGIN_PLUGIN_H_
-#define __UTILS_PLUGIN_PLUGIN_H_
+#ifndef __CORE_PLUGIN_H_
+#define __CORE_PLUGIN_H_
 
 
 /** Plugin interface, derive this class to create a new Fawkes plugin

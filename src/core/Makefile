@@ -1,7 +1,7 @@
 #*****************************************************************************
-#                      Makefile Build System for Fawkes
+#                        Makefile for Fawkes libcore
 #                            -------------------
-#   Created on Wed Sep 06 02:39:46 2006
+#   Created on Tue Sep 12 13:28:19 2006
 #   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -19,10 +19,19 @@
 #
 #*****************************************************************************
 
-BASEDIR = ..
+BASEDIR = ../..
 
-SUBDIRS = core utils
+OBJS_libcore =	\
+		threading/barrier.o		\
+		threading/mutex.o		\
+		threading/read_write_lock.o	\
+		threading/thread.o		\
+		threading/wait_condition.o
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
+LIBS_libcore = stdc++ pthread
+
+OBJS_all = $(OBJS_libcore)
+LIBS_all  = $(LIBDIR)/libcore.so
+
+include $(BASEDIR)/etc/buildsys/base.mk
 
