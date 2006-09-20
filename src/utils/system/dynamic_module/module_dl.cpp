@@ -38,7 +38,7 @@
 #include <string>
 #include <dlfcn.h>
 
-/** @class ModuleDL utils/system/dynamic_modules/module_dl.h
+/** @class ModuleDL utils/system/dynamic_module/module_dl.h
  * A Module implementation for the dl dynamic loader library that comes
  * with glibc, applicable for Linux Systems
  */

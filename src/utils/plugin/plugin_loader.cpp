@@ -82,7 +82,7 @@ PluginLoader::~PluginLoader()
  * using multiple instances is discouraged. If you try to open a plugin
  * a second time it will return the
  * very same instance that it returned on previous load()s.
- * @param plugin The name of the plugin to be loaded, the plugin name has to
+ * @param plugin_name The name of the plugin to be loaded, the plugin name has to
  * correspond to a plugin name and the name of the shared object that will
  * be opened for this plugin (for instance on Linux systems opening the
  * plugin test_plugin will look for plugin_base_dir/test_plugin.so)
