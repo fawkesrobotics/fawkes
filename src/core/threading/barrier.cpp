@@ -38,6 +38,52 @@ class BarrierData
 /// @endcond
 
 
+/** @class Barrier core/threading/barrier.h
+ * A barrier is a synchronization tool which blocks until a given number of
+ * threads have reached the barrier.
+ *
+ * Consider you have three threads all doing work. In the end you have to merge
+ * their results. For this you need a point where all threads are finished. Of
+ * course you don't want another thread waiting and periodically checking if
+ * the other threads are finished, that will loose time - processing time and
+ * the time that passed between the threads being finished and the time when
+ * the controller checked again.
+ *
+ * For this problem we have a barrier. You initialize the barrier with the
+ * number of threads to wait for and then wait in all threads at a specific
+ * point. After this one of the threads can merge the result (and the others
+ * may wait for another "go-on barrier".
+ *
+ * The code in the thread would be
+ * @code
+ * virtual void run()
+ * {
+ *   forever {
+ *     do_something();
+ *     result_barrier->wait();
+ *     if ( master_thread ) {
+ *       merge_results();
+ *     }
+ *     goon_barrier->wait();
+ *   }
+ * }
+ * @endcode
+ *
+ * The threads would all get a reference to the same barriers and one would
+ * have master thread to be true.
+ *
+ * After the barrier has been passed (count threads waited) the barrier is
+ * reset automatically and can be re-used with the same amount of barrier
+ * waiters.
+ *
+ * @ingroup Threading
+ * @author Tim Niemueller
+ */
+
+
+/** Constructor
+ * @param count the number of threads to wait for
+ */
 Barrier::Barrier(unsigned int count)
 {
   barrier_data = new BarrierData();
@@ -45,6 +91,7 @@ Barrier::Barrier(unsigned int count)
 }
 
 
+/** Destructor */
 Barrier::~Barrier()
 {
   pthread_barrier_destroy( &(barrier_data->barrier) );
@@ -52,6 +99,10 @@ Barrier::~Barrier()
 }
 
 
+/** Wait for other threads.
+ * This method will block until as many threads have called wait as you have
+ * given count to the constructor.
+ */
 void
 Barrier::wait()
 {

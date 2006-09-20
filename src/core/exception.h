@@ -30,195 +30,25 @@
 
 class Mutex;
 
-/** Base class for exceptions in Fawkes.
- * Exceptions are a good way to handle errors. If you choose to use
- * exceptions use derivates of this class so that there is a unified way of
- * handling errors in Fawkes. Do <i>not</i> throw an arbitrary class such as
- * a string or integer as this is hard to handle.
- *
- * For your exceptions in general you only need to override the constructor
- * and call the Exception constructor with the appropriate message. In
- * cases where more information is needed about the error add appropriate
- * handlers.
- *
- * In most cases it is bad to just throw an Exception like this:
- *
- * @code
- * if ( error_condition ) {
- *   throw Exception("Out of memory");
- * }
- * @endcode
- *
- * Rather you should explicitly subclass Exception appropriately. For the
- * above example you could have something like this as exception class:
- *
- * @code
- * class OutOfMemException : public Exception
- * {
- *  public:
- *   OutOfMemoryException() : Exception("Out of memory") {}
- * }
- * @endcode
- *
- * And in your handling code you throw a OutOfMemoryException. This is
- * especially useful if it is possible to throw several different exceptions.
- * If the message was different you would have to parse the string for
- * the exact error. This can be avoided if you just catch different
- * exceptions. This is also useful if the Exception is not catched explicitly
- * as this will printout the name of the exception class thrown just before
- * exiting the program. And reading something like
- * "terminate called after throwing an instance of 'OutOfMemoryException'"
- * makes it a lot easier to spot the problem.
- *
- * Exceptions should be catched by reference like this:
- * @code
- * try {
- *   some_operation();
- * } catch (OutOfMemoryException &e) {
- *   std::cout << e.c_str() << std::endl;
- *   error_handling();
- * }
- * @endcode
- *
- * Messages are stored as list. You can utilize this by adding appropriate
- * information through appropriate try/catch statements. This way you can
- * build information path ways that will help to debug your software. Use
- * block like this to append information:
- * @code
- * try {
- *   potentially_failing();
- * } catch {MyException &e) {
- *   e.append("info where exception happened");
- *   throw; // re-throw exception
- * }
- * @endcode
- * This is especially useful if the exception may occur at several different
- * places and it cannot be fixed where it happens.
- *
- *
- * @see example_exception.cpp
- *
- * @author Tim Niemueller
- */
 class Exception {
  public:
 
-  /** Constructor.
-   * Constructs a new exception with the given message.
-   * @param msg The message that this exception should carry. The message is
-   * copied and not just referenced. Thus the memory can be freed if it is a
-   * string on the heap.
-   */
   Exception(const char *msg);
-
-  /** Copy constructor.
-   * The copy constructor is worth some extra discussion. If you do an exception
-   * by value (which you shouldn't in the first place since this will generate a
-   * copy, only do this if you can't avoid it for some reason. Not if you only
-   * THINK that you can't avoid it) the copy constructor is called. If your catch
-   * statements reads like
-   * @code
-   *   try {
-   *     ...
-   *   } catch (Exception e) {
-   *     ...
-   *   }
-   * @endcode
-   * then a copy will be created for the catch block. You throw the exception with
-   * something like
-   * @code
-   *   throw Exception("Boom");
-   * @endcode
-   * This will create an Exception which is valid in the block where you throw the
-   * exception. Now for the catch block a copy is created. Since the exception
-   * holds a pointer on the heap the implicit copy constructor would just copy
-   * the pointer, not the data. So both exceptions point to the same data (to the
-   * message for the base exception). If now both destructors for the exception
-   * are called they both try to free the very same memory. Of course the second
-   * destructor will cause a disaster. If you are lucky your glibc detectes the
-   * problem an kills the application. If you are not that fortunate you will
-   * cause very strange behaviour of your application.
-   *
-   * In general you should not have to worry about this. But if you choose to have
-   * own storage on the heap using either new, malloc or a method that returns
-   * memory on the heap (like strdup()) you have to write your own copy contructor
-   * and copy the memory area or take care that only one exception frees the memory.
-   * @param exc Exception to copy
-   */
   Exception(const Exception &exc);
-
-  /** Destructor.
-   */
   virtual ~Exception();
 
-  /** Get the first message as C string.
-   * Messages are stored in a list. To retrieve the first message and thus
-   * the original message which was given when the exception was created it
-   * should be the most informative message.
-   * @return Returns a constant char array with the message. The message is
-   * private to the exception and may not be modified or freed (hence const)
-   */
   virtual const char * c_str();
-
-  /** Assign an Exception.
-   * As this is one of the Big Three (see C++ FAQ at
-   * http://www.parashift.com/c++-faq-lite/coding-standards.html#faq-27.10) this
-   * is needed because we already need a copy constructor. Read about the
-   * copy constructor why this is the case.
-   * @see Exception(const Exception &exc)
-   * @param exc The exception with the values to assign to this exception.
-   * @return reference to this object. Allows assignment chaining.
-   */
-  Exception& operator=(const Exception &exc);
-
-  /** This can be used to throw this exception.
-   * This can be used to throw this exception instance. This is a precaution if
-   * it is needed. See C++ FAQ 17.10.
-   */
   virtual void raise();
-
-  /** Append messages to the message list.
-   * @param msg Message to append.
-   */
   void append(const char *msg);
-
-  /** Prints trace to stderr.
-   * This prints out a message trace of all messages appended to the exception
-   * in chronological order starting with the oldest (first message appended
-   * via constructor or append(). Output will be sent to stderr.
-   */
   void printTrace();
 
+  Exception& operator=(const Exception &exc);
+
  protected:
-  /** Constructor for subclasses.
-   * This constructor can be used in subclasses is some processing code is
-   * needed (like sprintf) to assign the message. At least assign the empty
-   * string to the message.
-   */
   Exception();
 
-  /** Append messages without lock.
-   * this can be used to append messages without locking the mutex if the mutex
-   * has been locked already to append many messages and keep their order intact
-   * and thus to prevent messages to be appended inbetween.
-   * Used for example in copy constructor.
-   * @param msg message to append
-   */
   void append_nolock(const char *msg);
-
-  /** Append message without copying.
-   * Can be used in subclasses to append messages that have been allocated
-   * on the heap. Use with extreme care. Do not add constant strings! This would
-   * cause your application to crash since the destructor will try to free all
-   * messages.
-   * @param msg Message to append.
-   */
   void append_nocopy(char *msg);
-
-  /** Copy messages from given exception.
-   * Copies the messages from exc to this exception.
-   * @param exc Exception to copy messages from.
-   */
   void copy_messages(const Exception &exc);
 
   /** typedef struct for message list */
@@ -228,22 +58,10 @@ class Exception {
 			      *   in dtor */
   };
 
-  /** List of messages. Should not be NULL. Messages are append with append().
-   * @see append(). Using a custom list to avoid including STL stuff in this core file.
-   */
   message_list_t  *messages;
-
-  /** Iterator to iterate over messages
-   */
   message_list_t  *messages_iterator;
-
-  /** Pointer that points to the very last message. Used for fast appending.
-   */
   message_list_t  *messages_end;
-
-  /** Mutex to protect operations on messages list.
-   */
-  Mutex *messages_mutex;
+  Mutex           *messages_mutex;
 };
 
 

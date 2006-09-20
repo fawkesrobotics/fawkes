@@ -28,38 +28,90 @@
 #include <utils/plugin/plugin_loader.h>
 #include <utils/system/console_colors.h>
 #include <utils/system/dynamic_module/module_manager_factory.h>
+#include <utils/system/dynamic_module/module_manager.h>
+#include <utils/system/dynamic_module/module.h>
 
 #include <iostream>
 
+#include <map>
+#include <string>
+
+/// @cond QA
+class PluginLoaderData
+{
+ public:
+  ModuleManager  *mm;
+  std::map< Plugin *, Module * >    plugin_module_map;
+  std::map< std::string, Plugin * > name_plugin_map;
+  std::map< Plugin *, std::string > plugin_name_map;
+
+  std::string msg_prefix;
+};
+/// @endcond
+
+/** @class PluginLoader utils/plugin/plugin_loader.h
+ * This class manages plugins.
+ * With this class plugins can be loaded and unloaded. Information is
+ * kept about active plugins.
+ *
+ * @author Tim Niemueller
+ */
+
+/** Constructor
+ * @param plugin_base_dir The base directory where to search for the shared
+ * libraries which contain the plugins
+ */
 PluginLoader::PluginLoader(const char *plugin_base_dir)
 {
-  mm = ModuleManagerFactory::getInstance(ModuleManagerFactory::MMT_DL, plugin_base_dir);
-  msg_prefix = std::cblue + "PluginLoader: " + std::cnormal;
+  d = new PluginLoaderData();
+  d->mm = ModuleManagerFactory::getInstance(ModuleManagerFactory::MMT_DL, plugin_base_dir);
+  d->msg_prefix = std::cblue + "PluginLoader: " + std::cnormal;
 }
 
+/** Destructor */
 PluginLoader::~PluginLoader()
 {
-  delete mm;
+  delete d->mm;
+  delete d;
 }
 
 
+/** Load a specific plugin
+ * The plugin loader is clever and guarantees that every plugin is only
+ * loaded once (as long as you use only one instance of the PluginLoader,
+ * using multiple instances is discouraged. If you try to open a plugin
+ * a second time it will return the
+ * very same instance that it returned on previous load()s.
+ * @param plugin The name of the plugin to be loaded, the plugin name has to
+ * correspond to a plugin name and the name of the shared object that will
+ * be opened for this plugin (for instance on Linux systems opening the
+ * plugin test_plugin will look for plugin_base_dir/test_plugin.so)
+ * @param plugin This is a reference to a pointer to the plugin. If the
+ * plugin has been loaded successfully (check the return value) plugin will
+ * point to an instance of the Plugin sub-class. Do not under any
+ * circumstances delete this object, use unload() instead! Since the delete
+ * operator could be overloaded this would result in memory chaos.
+ * @return Returns true on successful loading of the plugin, false otherwise
+ */
 bool
-PluginLoader::load(std::string plugin_name, Plugin *& plugin)
+PluginLoader::load(const char *plugin_name, Plugin *& plugin)
 {
 
-  if ( name_plugin_map.find(plugin_name) != name_plugin_map.end() ) {
-    plugin = name_plugin_map[plugin_name];
+  std::string pn = plugin_name;
+
+  if ( d->name_plugin_map.find(pn) != d->name_plugin_map.end() ) {
+    plugin = d->name_plugin_map[pn];
     return true;
   }
 
   // This is dependent on the system architecture!
-  std::string module_name = plugin_name + "." + mm->getModuleFileExtension();
+  std::string module_name = pn + "." + d->mm->getModuleFileExtension();
 
-  Module *pm = mm->openModule(module_name);
+  Module *pm = d->mm->openModule(module_name);
 
   if ( pm == NULL ) {
     // we could NOT open the plugin module
-    std::cout << msg_prefix << "Could not open the plugin module" << std::endl;
+    std::cout << d->msg_prefix << "Could not open the plugin module" << std::endl;
     return false;
   }
 
@@ -76,27 +128,38 @@ PluginLoader::load(std::string plugin_name, Plugin *& plugin)
 
   plugin = p;
 
-  plugin_module_map[p] = pm;
-  name_plugin_map[plugin_name] = p;
-  plugin_name_map[p] = plugin_name;
+  d->plugin_module_map[p] = pm;
+  d->name_plugin_map[pn] = p;
+  d->plugin_name_map[p] = pn;
 
   return true;
 }
 
 
+/** Unload the given plugin
+ * This will unload the given plugin. The plugin is destroyed with the
+ * proper destroy method from the shared object. The shared object is unloaded
+ * after the destruction of the plugin.
+ * Note that even though you may call load() multiple times per plugin you may
+ * only unload() it once! Every further access will lead to a segmentation
+ * fault.
+ * Make sure that you have closed any resources claimed by the plugin like
+ * threads, memory access etc.
+ * @param plugin The plugin that has to be unloaded
+ */
 void
 PluginLoader::unload(Plugin *plugin)
 {
-  if ( plugin_module_map.find(plugin) != plugin_module_map.end() ) {
+  if ( d->plugin_module_map.find(plugin) != d->plugin_module_map.end() ) {
     
-    PluginDestroyFunc pdf = (PluginDestroyFunc)plugin_module_map[plugin]->getSymbol("plugin_destroy");
+    PluginDestroyFunc pdf = (PluginDestroyFunc)d->plugin_module_map[plugin]->getSymbol("plugin_destroy");
     if ( pdf != NULL ) {
       pdf(plugin);
     }
-    mm->closeModule(plugin_module_map[plugin]);
-    plugin_module_map.erase(plugin);
+    d->mm->closeModule(d->plugin_module_map[plugin]);
+    d->plugin_module_map.erase(plugin);
 
-    name_plugin_map.erase(plugin_name_map[plugin]);
-    plugin_name_map.erase(plugin);
+    d->name_plugin_map.erase(d->plugin_name_map[plugin]);
+    d->plugin_name_map.erase(plugin);
   }
 }

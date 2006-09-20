@@ -32,13 +32,26 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+/** @class File utils/system/file.h
+ * File utility methods.
+ */
 
+
+/** Check if a file exists.
+ * @param filename the name of the file to check
+ * @return true, if the file exists, false otherwise
+ */
 bool
 File::exists(const char *filename)
 {
   return (access(filename, F_OK) == 0);
 }
 
+
+/** Check if a file is a regular file
+ * @param filename the name of the file to check
+ * @return true, if the given path points to a regular file, false otherwise
+ */
 bool
 File::isRegular(const char *filename)
 {

@@ -30,6 +30,7 @@
 
 #include <core/threading/thread.h>
 #include <core/threading/wait_condition.h>
+#include <core/threading/mutex.h>
 
 #include <iostream>
 

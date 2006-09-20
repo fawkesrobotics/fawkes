@@ -30,12 +30,38 @@
 
 #include <pthread.h>
 
+
+/** @class Mutex core/threading/mutex.h
+ * Mutex mutual exclusion lock.
+ * This class is used in a multi-threading environment to lock access to
+ * resources. This is needed to prevent two threads from modifying a value
+ * at the same time or to prevent a thread from getting a dirty copy of
+ * a piece of data (the reader reads while a writer is writing, this could
+ * leave the data in a state where the reader reads half of the new and half
+ * of the old data).
+ *
+ * As a rule of thumb you should lock the mutex as short as possible and as
+ * long as needed. Locking the mutex too long will lead in a bad performance
+ * of the multi-threaded application because many threads are waiting for
+ * the lock and are not doing anything useful.
+ * If you do not lock enough code (and so serialize it) it will cause pain
+ * and errors.
+ *
+ * @ingroup Threading
+ * @see example_mutex_count.cpp
+ *
+ * @author Tim Niemueller
+ */
+
+
+/** Constructor */
 Mutex::Mutex()
 {
   mutex_data = new MutexData();
   pthread_mutex_init(&(mutex_data->mutex), NULL);
 }
 
+/** Destructor */
 Mutex::~Mutex()
 {
   pthread_mutex_destroy(&(mutex_data->mutex));
@@ -44,6 +70,10 @@ Mutex::~Mutex()
 }
 
 
+/** Lock this mutex.
+ * A call to lock() will block until the lock on the mutex could be aquired.
+ * If you want to avoid see consider using tryLock().
+ */
 void
 Mutex::lock()
 {
@@ -51,6 +81,23 @@ Mutex::lock()
 }
 
 
+/** Tries to lock the mutex.
+ * This can also be used to check if a mutex is locked. The code for this
+ * can be:
+ *
+ * @code
+ * bool locked = false;
+ * if ( mutex->tryLock() ) {
+ *   mutex->unlock();
+ *   locked = true;
+ * }
+ * @endcode
+ *
+ * This cannot be implemented in Mutex in a locked() method since this
+ * would lead to race conditions in many situations.
+ *
+ * @return true, if the mutex could be locked, false otherwise.
+ */
 bool
 Mutex::tryLock()
 {
@@ -58,6 +105,7 @@ Mutex::tryLock()
 }
 
 
+/** Unlock the mutex. */
 void
 Mutex::unlock()
 {

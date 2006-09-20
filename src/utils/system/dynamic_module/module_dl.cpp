@@ -38,8 +38,19 @@
 #include <string>
 #include <dlfcn.h>
 
+/** @class ModuleDL utils/system/dynamic_modules/module_dl.h
+ * A Module implementation for the dl dynamic loader library that comes
+ * with glibc, applicable for Linux Systems
+ */
+
+
 const char * ModuleDL::FILE_EXTENSION = "so";
 
+
+/** Constructor for ModuleDL
+ * @param filename Full filename of the module
+ * @param flags Module flags, @see Module
+ */
 ModuleDL::ModuleDL(std::string filename, Module::ModuleFlags flags)
 {
   this->filename = filename;
@@ -53,12 +64,16 @@ ModuleDL::ModuleDL(std::string filename, Module::ModuleFlags flags)
 }
 
 
+/** Destructor of ModuleDL */
 ModuleDL::~ModuleDL()
 {
   close();
 }
 
 
+/** Open the module
+ * @return Returns true if the module could be opened, false otherwise
+ */
 bool
 ModuleDL::open()
 {
@@ -103,6 +118,9 @@ ModuleDL::open()
 }
 
 
+/** Close the module
+ * @return Returns true if the module could be closed, false otherwise
+ */
 bool
 ModuleDL::close()
 {
@@ -122,6 +140,7 @@ ModuleDL::close()
 }
 
 
+/** Increment the reference count of this module */
 void
 ModuleDL::ref()
 {
@@ -129,6 +148,7 @@ ModuleDL::ref()
 }
 
 
+/** Decrease the reference count of this module */
 void
 ModuleDL::unref()
 {
@@ -138,6 +158,10 @@ ModuleDL::unref()
 }
 
 
+/** Check if there are no reference to this module
+ * @return Returns true if there are no references to this module,
+ * false if there is at least one reference
+ */
 bool
 ModuleDL::notref()
 {
@@ -145,6 +169,9 @@ ModuleDL::notref()
 }
 
 
+/** Get the reference count of this module
+ * @return Returns the number of references to this module
+ */
 unsigned int
 ModuleDL::getRefCount()
 {
@@ -152,6 +179,11 @@ ModuleDL::getRefCount()
 }
 
 
+/** Compare to another ModuleDL instance
+ * @param cmod a reference to the other comparison instance
+ * @return Returns true, if the full file names of both modules are the
+ * same, false otherwise
+ */
 bool
 ModuleDL::operator==(ModuleDL &cmod)
 {
@@ -159,6 +191,15 @@ ModuleDL::operator==(ModuleDL &cmod)
 }
 
 
+/** Check if the module has the given symbol
+ * @param symbol_name The name of the symbol.
+ * NOTE: C++ symbols are mangled with type info and thus are not plainly
+ * available as symbol name. Use extern "C" to avoid this.
+ * Read
+ * http://www.isotton.com/howtos/C++-dlopen-mini-HOWTO/C++-dlopen-mini-HOWTO.html
+ * for more information on this topic.
+ * @return Returns true if the symbol was found, false otherwise
+ */
 bool
 ModuleDL::hasSymbol(const char *symbol_name)
 {
@@ -173,6 +214,15 @@ ModuleDL::hasSymbol(const char *symbol_name)
 }
 
 
+/** Get a symbol from the module
+ * @param symbol_name The name of the symbol.
+ * NOTE: C++ symbols are mangled with type info and thus are not plainly
+ * available as symbol name. Use extern "C" to avoid this.
+ * Read
+ * http://www.isotton.com/howtos/C++-dlopen-mini-HOWTO/C++-dlopen-mini-HOWTO.html
+ * for more information on this topic.
+ * @return Returns a pointer to the symbol or NULL if symbol was not found
+ */
 void *
 ModuleDL::getSymbol(const char *symbol_name)
 {
@@ -183,6 +233,9 @@ ModuleDL::getSymbol(const char *symbol_name)
 }
 
 
+/** Get file extension for dl modules
+ * @return Returns the file extension for dl modules, this is "so"
+ */
 const char *
 ModuleDL::getFileExtension()
 {
@@ -190,6 +243,9 @@ ModuleDL::getFileExtension()
 }
 
 
+/** Get the full file name of the module
+ * @return Returns a string with the full file name of the module
+ */
 std::string
 ModuleDL::getFilename()
 {
@@ -197,6 +253,10 @@ ModuleDL::getFilename()
 }
 
 
+/** Get the base file name of the module
+ * @return Returns the base file name of the module. On Unix systems this is
+ * everything after the last slash
+ */
 std::string
 ModuleDL::getBaseFilename()
 {

@@ -29,65 +29,20 @@
 #define __UTILS_PLUGIN_PLUGIN_LOADER_H_
 
 #include <core/plugin.h>
-#include <utils/system/dynamic_module/module_manager.h>
-#include <utils/system/dynamic_module/module.h>
 
-#include <map>
-#include <string>
+class PluginLoaderData;
 
-/** This class manages loaded plugins
- */
 class PluginLoader {
  public:
 
-  /** Constructor
-   * @param plugin_base_dir The base directory where to search for the shared
-   * libraries which contain the plugins
-   */
   PluginLoader(const char *plugin_base_dir);
-
-  /** Destructor */
   ~PluginLoader();
 
-  /** Load a specific plugin
-   * The plugin loader is clever and guarantees that every plugin is only
-   * loaded once (as long as you use only one instance of the PluginLoader,
-   * using multiple instances is discouraged. If you try to open a plugin
-   * a second time it will return the
-   * very same instance that it returned on previous load()s.
-   * @param plugin The name of the plugin to be loaded, the plugin name has to
-   * correspond to a plugin name and the name of the shared object that will
-   * be opened for this plugin (for instance on Linux systems opening the
-   * plugin test_plugin will look for plugin_base_dir/test_plugin.so)
-   * @param plugin This is a reference to a pointer to the plugin. If the
-   * plugin has been loaded successfully (check the return value) plugin will
-   * point to an instance of the Plugin sub-class. Do not under any
-   * circumstances delete this object, use unload() instead! Since the delete
-   * operator could be overloaded this would result in memory chaos.
-   * @return Returns true on successful loading of the plugin, false otherwise
-   */
-  bool load(std::string plugin, Plugin *& plugin);
-
-  /** Unload the given plugin
-   * This will unload the given plugin. The plugin is destroyed with the
-   * proper destroy method from the shared object. The shared object is unloaded
-   * after the destruction of the plugin.
-   * Note that even though you may call load() multiple times per plugin you may
-   * only unload() it once! Every further access will lead to a segmentation
-   * fault.
-   * Make sure that you have closed any resources claimed by the plugin like
-   * threads, memory access etc.
-   * @param plugin The plugin that has to be unloaded
-   */
+  bool load(const char *plugin_name, Plugin *& plugin);
   void unload(Plugin *plugin);
 
  private:
-  ModuleManager  *mm;
-  std::map< Plugin *, Module * >  plugin_module_map;
-  std::map< std::string, Plugin * > name_plugin_map;
-  std::map< Plugin *, std::string > plugin_name_map;
-
-  std::string msg_prefix;
+  PluginLoaderData *d;
 };
 
 

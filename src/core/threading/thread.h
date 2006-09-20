@@ -28,100 +28,31 @@
 #ifndef __CORE_THREADING_THREAD_H_
 #define __CORE_THREADING_THREAD_H_
 
-/** Shortcut for "while (1)"
- */
 #define forever while (1)
 
-/** Thread class encapsulation of pthreads.
- * This is the base class for all threads in Fawkes. Derive this class for
- * your thread.
- *
- * There are two major ways to implement threads. The recommended way is to
- * implement loop(). The default run() implementation will call loop()
- * continuously. An implicit cancel point is set after each loop.
- *
- * If you need a more complex behaviour you may also override run() and
- * implement your own thread behavior.
- * That that without taking special care the advanced debug functionality
- * will not available for threads.
- *
- * @see loop()
- * @see run()
- * @see example_barrier.cpp
- * @see example_mutex_count.cpp
- * @see example_rwlock.cpp
- * @see example_waitcond_serialize.cpp
- *
- * @author Tim Niemueller
- */
 class Thread {
  public:
 
-  /** Virtual empty destructor.
-   */
-  virtual ~Thread() {}
+  virtual ~Thread();
 
-  /** Call this method to actuall start.
-   * This method has to be called after the thread has been instantiated and
-   * initialized to startup.
-   * @return true, if the thread started successfully, false otherwise. error()
-   * will return the error value in that case
-   */
   bool start();
-
-  /** Cancel a thread.
-   * Use this to cancel the thread.
-   * @return 
-   */
   void cancel();
-
-  /** Join the thread.
-   */
   void join();
-
-  /** Detach the thread.
-   */
   void detach();
 
-  /** Check if two threads are the same.
-   * @param thread Thread to compare this thread to.
-   * @return true, if the threads are equal, false otherwise.
-   */
   bool operator==(const Thread &thread);
 
  protected:
-  /** Exit the thread.
-   * You may call this from within your run() method to exit the thread.
-   * @see run()
-   */
   void exit();
 
-  /** Set cancellation point
-   */
   void test_cancel();
 
-  /** Code to execute in the thread.
-   * Executes loop() in each cycle. This is the default implementation and if
-   * you need a more specific behaviour you can override this run() method and
-   * ignore loop().
-   */
   virtual void run();
 
-  /** Code to execute in the thread.
-   * Implement this method to hold the code you want to be executed continously.
-   */
   virtual void loop();
 
  private:
-  /** Entry point for the thread.
-   * This is an utility method that acts as an entry point to the thread.
-   * It is called automatically when you start the thread and will call run()
-   * @param pthis a pointer to the instance that triggered the run of this method
-   */
   static void * entry(void * pthis);
-
-
- private:
 
   // Do not use pthread_t here to avoid including pthread.h
   /* pthread_t */ unsigned long int thread_id;

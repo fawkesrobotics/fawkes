@@ -29,6 +29,21 @@
 #include <utils/system/dynamic_module/module_manager_template.h>
 #include <utils/system/dynamic_module/module_dl.h>
 
+/** @class ModuleManagerFactory utils/system/dynamic_module/module_manager_factory.h
+ * Class with just one static method to retrieve a module manager for the
+ * specified type.
+ * The main reason for this class is to hide the ModuleManagerTemplate
+ * definition from ordinary processes.
+ */
+
+
+/** Retrieve an module manager instance of the desired type
+ * @param mmt ModuleManagerType
+ * @param module_base_dir The base directory where to look for modules, plainly copied
+ * to the module manager, defaults to the empty string which is in most cases not desired
+ * @return Returns an instance of a ModuleManager implementation. Delete after you are
+ * done with this!
+ */
 ModuleManager *
 ModuleManagerFactory::getInstance(ModuleManagerType mmt, std::string module_base_dir)
 {

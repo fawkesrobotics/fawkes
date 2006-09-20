@@ -28,22 +28,10 @@
 #ifndef __UTILS_SYSTEM_FILE_H_
 #define __UTILS_SYSTEM_FILE_H_
 
-/** File utility methods
- */
 class File {
-
  public:
 
-  /** Check if a file exists.
-   * @param filename the name of the file to check
-   * @return true, if the file exists, false otherwise
-   */
   static bool exists(const char *filename);
-
-  /** Check if a file is a regular file
-   * @param filename the name of the file to check
-   * @return true, if the given path points to a regular file, false otherwise
-   */
   static bool isRegular(const char *filename);
 
 };

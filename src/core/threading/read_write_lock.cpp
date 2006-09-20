@@ -40,6 +40,24 @@ class ReadWriteLockData
 /// @endcond
 
 
+/** @class ReadWriteLock core/threading/read_write_lock.h
+ * Read/write lock to allow multiple readers but only a single writer
+ * on the resource at a time.
+ * This can be used if you have a value that only a few writers modify but
+ * several readers use. In this case the readers can read all at the same
+ * time as long as there is no writer modifying the value.
+ *
+ * @ingroup Threading
+ * @see example_rwlock.cpp
+ *
+ * @author Tim Niemueller
+ */
+
+
+/** Constructor
+ * @param policy The read/write lock policy to use. The default is to
+ * prefer writers.
+ */
 ReadWriteLock::ReadWriteLock(ReadWriteLockPolicy policy)
 {
   rwlock_data = new ReadWriteLockData();
@@ -60,6 +78,7 @@ ReadWriteLock::ReadWriteLock(ReadWriteLockPolicy policy)
 }
 
 
+/** Destructor */
 ReadWriteLock::~ReadWriteLock()
 {
   pthread_rwlock_destroy( &(rwlock_data->rwlock) );
@@ -67,6 +86,11 @@ ReadWriteLock::~ReadWriteLock()
 }
 
 
+/** Aquire a reader lock.
+ * This will aquire the lock for reading. Multiple readers can aquire the
+ * lock at the same time. But never when a writer has the lock.
+ * This method will block until the lock has been aquired.
+ */
 void
 ReadWriteLock::lockForRead()
 {
@@ -74,6 +98,11 @@ ReadWriteLock::lockForRead()
 }
 
 
+/** Aquire a writer lock.
+ * This will aquire the lock for writing. Only a single writer at a time
+ * will be allowed to aquire the lock.
+ * This method will block until the lock has been aquired.
+ */
 void
 ReadWriteLock::lockForWrite()
 {
@@ -81,6 +110,12 @@ ReadWriteLock::lockForWrite()
 }
 
 
+/** Tries to aquire a reader lock.
+ * This will try to aquire the lock for reading. This will succeed if
+ * no writer has aquired the lock already. Multiple readers may aquire the
+ * lock.
+ * @return true, if the lock could be aquired, false otherwise.
+ */
 bool
 ReadWriteLock::tryLockForRead()
 {
@@ -88,6 +123,12 @@ ReadWriteLock::tryLockForRead()
 }
 
 
+/** Tries to aquire a writer lock.
+ * This will try to aquire the lock for writing. This will succeed if the
+ * read/write lock is currently unlocked. No other threads may hold this lock
+ * at the same time. Neither for writing nor for reading.
+ * @return true, if the lock has been aquired, false otherwise.
+ */
 bool
 ReadWriteLock::tryLockForWrite()
 {
@@ -95,6 +136,9 @@ ReadWriteLock::tryLockForWrite()
 }
 
 
+/** Release the lock.
+ * Releases the lock, no matter whether it was locked for reading or writing.
+ */
 void
 ReadWriteLock::unlock()
 {

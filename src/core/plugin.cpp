@@ -28,6 +28,74 @@
 
 #include <core/plugin.h>
 
+
+/** @class Plugin core/plugin.h
+ * Plugin interface class.
+ * Derive this class to create a new Fawkes plugin
+ *
+ * @author Tim Niemueller
+ *
+ *
+ * @fn PluginType Plugin::getType()
+ * Get the type of the plugin.
+ * @return type of the plugin
+ *
+ * @fn Plugin::getName()
+ * Get the name of the plugin
+ * @return name of the plugin
+ *
+ */
+
+
+/** @typedef void      (* PluginDestroyFunc)  (Plugin *)
+ * Plugin destructor function for the shared library.
+ * Declare and define this function exactly like this:
+ *
+ * @code
+ * extern "C"
+ * void
+ * plugin_destroy(Plugin *plugin)
+ * {
+ *   delete plugin;
+ * }
+ * @endcode
+ * Do not change the type or name of this function or type of arguments
+ * of this function!
+ *
+ */
+
+/** @typedef Plugin *  (* PluginFactoryFunc)  (void);
+ * Plugin loader function for the shared library
+ * Declare and define this function exactly like this:
+ *
+ * @code
+ * extern "C"
+ * Plugin *
+ * plugin_factory()
+ * {
+ *  return new MightyPlugin();
+ * }
+ * @endcode
+ * Do not change the type or name of this function, replace MightyPlugin
+ * with the name of your plugin derivative.
+ *
+ * @relatesalso Plugin
+ */
+
+
+/** Virtual destructor */
+Plugin::~Plugin()
+{
+}
+
+
+/** Determines if the plugin can be unloaded.
+ * This method tells the plugin loader if this plugin can be unloaded. Use
+ * with care. No plugins but core plugins should return true. Only override
+ * this if needed. The default behaviour if not overridden is to return false.
+ * @return true, if the plugin cannot be unloaded, false otherwise. The default
+ * implementation returns false.
+ */
 bool
 Plugin::persistent()
 {
