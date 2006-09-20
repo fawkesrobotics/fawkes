@@ -67,6 +67,8 @@ class WaitConditionData;
  * }
  * @endcode
  *
+ * @see example_waitcond_serialize.cpp
+ *
  * @author Tim Niemueller
  */
 class WaitCondition {

@@ -48,6 +48,8 @@ class WaitCondition;
  * If you do not lock enough code (and so serialize it) it will cause pain
  * and errors.
  *
+ * @see example_mutex_count.cpp
+ *
  * @author Tim Niemueller
  */
 class Mutex

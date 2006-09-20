@@ -22,13 +22,15 @@
 BASEDIR = ../..
 
 OBJS_libcore =	\
+		exception.o			\
+		plugin.o			\
 		threading/barrier.o		\
 		threading/mutex.o		\
 		threading/read_write_lock.o	\
 		threading/thread.o		\
 		threading/wait_condition.o
 
-LIBS_libcore = stdc++ pthread
+LIBS_libcore = pthread
 
 OBJS_all = $(OBJS_libcore)
 LIBS_all  = $(LIBDIR)/libcore.so

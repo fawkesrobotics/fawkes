@@ -36,6 +36,8 @@ class ReadWriteLockData;
  * several readers use. In this case the readers can read all at the same
  * time as long as there is no writer modifying the value.
  *
+ * @see example_rwlock.cpp
+ *
  * @author Tim Niemueller
  */
 class ReadWriteLock

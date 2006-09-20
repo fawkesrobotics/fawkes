@@ -47,6 +47,11 @@
  *
  * @see loop()
  * @see run()
+ * @see example_barrier.cpp
+ * @see example_mutex_count.cpp
+ * @see example_rwlock.cpp
+ * @see example_waitcond_serialize.cpp
+ *
  * @author Tim Niemueller
  */
 class Thread {

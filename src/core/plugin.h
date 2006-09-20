@@ -57,6 +57,15 @@ class Plugin {
    */
   virtual const char *  getName()                                         = 0;
 
+  /** Determines if the plugin can be unloaded.
+   * This method tells the plugin loader if this plugin can be unloaded. Use
+   * with care. No plugins but core plugins should return true. Only override
+   * this if needed. The default behaviour if not overridden is to return false.
+   * @return true, if the plugin cannot be unloaded, false otherwise. The default
+   * implementation returns false.
+   */
+  virtual bool          persistent();
+
 };
 
 /** Plugin loader function for the shared library
