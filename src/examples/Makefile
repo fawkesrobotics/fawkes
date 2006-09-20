@@ -33,16 +33,21 @@ LIBS_example_rwlock = stdc++ core
 OBJS_example_barrier = example_barrier.o
 LIBS_example_barrier = stdc++ core
 
+OBJS_example_exception = example_exception.o
+LIBS_example_exception = stdc++ core
+
 
 OBJS_all =	$(OBJS_example_mutex)		\
 		$(OBJS_example_wait_condition)	\
 		$(OBJS_example_rwlock)		\
-		$(OBJS_example_barrier)
+		$(OBJS_example_barrier)		\
+		$(OBJS_example_exception)
 
 BINS_all =	$(BINDIR)/example_mutex_count		\
 		$(BINDIR)/example_waitcond_serialize	\
 		$(BINDIR)/example_rwlock		\
-		$(BINDIR)/example_barrier
+		$(BINDIR)/example_barrier		\
+		$(BINDIR)/example_exception
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
