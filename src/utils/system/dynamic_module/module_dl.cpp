@@ -72,8 +72,6 @@ ModuleDL::open()
     full_filename += ".so";
   }
 
-  printf("Full filename: %s\n", full_filename.c_str());
-  
   if ( full_filename == "") {      
     handle = dlopen (NULL, RTLD_GLOBAL | RTLD_LAZY);
 
@@ -87,16 +85,12 @@ ModuleDL::open()
       // We cannot read the file
       file_found = true;
 
-      printf("File is regular\n");
-    
       // ok, try loading the module
-
       handle = dlopen(full_filename.c_str(),
 		      (((flags & MODULE_BIND_LAZY) != 0) ? RTLD_LAZY : RTLD_NOW) |
 		      (((flags & MODULE_BIND_LOCAL) != 0) ? 0 : RTLD_GLOBAL) );
 
       if ( ! handle) {
-	printf("Could not dlopen: %s\n", dlerror());
 	file_found = false;
       } else {
 	is_resident = false;
@@ -169,11 +163,9 @@ bool
 ModuleDL::hasSymbol(const char *symbol_name)
 {
   if( symbol_name == NULL ) {
-    printf("symbol_name == NULL\n");
     return false;
   }
   if ( handle == NULL ) {
-    printf("handle == NULL\n");
     return false;
   }
 

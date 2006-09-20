@@ -1,0 +1,280 @@
+
+/***************************************************************************
+ *  semset.cpp - ICP semaphore sets
+ *
+ *  Generated: Tue Sep 19 15:02:32 2006
+ *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+#include <utils/ipc/semset.h>
+#include <utils/ipc/sem_exceptions.h>
+#include <core/exceptions/system.h>
+
+#include <errno.h>
+
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+
+#include <stdio.h>
+
+/// @cond INTERNALS
+class SemaphoreSetData
+{
+ public:
+  key_t   key;
+  int     semid;
+  int     semflg;
+  int     num_sems;
+};
+
+union semun
+{
+  int val;                   /* value for SETVAL */
+  struct semid_ds *buf;      /* buffer for IPC_STAT & IPC_SET */
+  unsigned short int *array; /* array for GETALL & SETALL */
+  struct seminfo *__buf;     /* buffer for IPC_INFO */
+};
+
+/// @endcond
+
+
+/** @class SemaphoreSet utils/ipc/semset.h
+ * IPC semaphore set.
+ * This class handles semaphore sets. A semaphore is a tool to control access
+ * to so-called critical sections. It is used to ensure that only a single
+ * process at a time is in the critical section or modifying shared data
+ * to avoid corruption.
+ *
+ * Semaphores use a single integer as the semaphore value. It denotes the
+ * number of resources that are available for the given semaphore. For
+ * example if you have two cameras on a robot you may have a value of two
+ * for the semaphore value. If the value reaches zero no more resources are
+ * available. You will have to wait until more resources are freed again.
+ *
+ * Now these individual semaphores are bundled to sets of semaphores. This is
+ * useful since there are situations where you want different semaphores
+ * for different operations on the shared resource. In the case of a shared
+ * memory segment for instance you could have one semaphore for reading
+ * and one for writing.
+ *
+ * @ingroup IPC
+ * @see qa_ipc_semset.cpp
+ * @author Tim Niemueller
+ *
+ *
+ * @var SemaphoreSet::destroy_on_delete
+ * Destroy this semaphore on delete?
+ */
+
+
+/** Constructor.
+ * Creates a new semaphore set. Will try to open the semaphore if it does
+ * exist. Tries to create if create is assured.
+ * @param path Path to generate the id from
+ * @param id Additional info for id.
+ * @param num_sems Number of semaphores to generate in this set. Only used
+ *                 if semaphore set did not already exist and create is
+ *                 assured.
+ * @param destroy_on_delete If true semaphore set is destroyed if instance
+ *                          is deleted.
+ * @param create If true semaphore set is created if it does not exist.
+ */
+SemaphoreSet::SemaphoreSet(const char *path, char id,
+			   int num_sems,
+			   bool destroy_on_delete, bool create)
+{
+  data = new SemaphoreSetData();
+
+  if ( num_sems < 0 ) {
+    num_sems = - num_sems;
+  }
+
+  this->destroy_on_delete = destroy_on_delete;
+  data->num_sems = num_sems;
+
+  data->semflg = 0666;
+  if (create) {
+    data->semflg |= IPC_CREAT;
+  }
+
+  data->key   = ftok(path, id);
+  data->semid = semget(data->key, num_sems, data->semflg);
+
+}
+
+/** Destructor */
+SemaphoreSet::~SemaphoreSet()
+{
+  if ((data->semid != -1) && destroy_on_delete) {
+    semctl(data->semid, 0, IPC_RMID, 0);
+  }
+  delete data;
+}
+
+
+/** Check if the semaphore set is valid.
+ * If the queue could not be opened yet (for example if you gave create=false to the
+ * constructor) isValid() will try to open the queue.
+ * @return This method returns false if the message queue could not be opened
+ *         or if it has been closed, it returns true if messages can be sent or received.
+ */
+bool
+SemaphoreSet::isValid()
+{
+  if (data->semid == -1) {
+    data->semid = semget(data->key, data->num_sems, data->semflg);
+    if (data->semid == -1) {
+      return false;
+    } else {
+      struct semid_ds semds;
+      union semun s;
+      s.buf = &semds;
+      if (semctl(data->semid, 0, IPC_STAT, s) != -1) {
+	return true;
+      } else {
+	data->semid = -1;
+	return false;
+      }
+    }
+  } else {
+    struct semid_ds semds;
+    union semun s;
+    s.buf = &semds;
+    if (semctl(data->semid, 0, IPC_STAT, s) != -1) {
+      return true;
+    } else {
+      data->semid = -1;
+      return false;
+    }
+  }
+}
+
+
+/** Lock resources on the semaphore set.
+ * Locks num resources on semaphore sem_num.
+ * @param sem_num The semaphore number in the set
+ * @param num How many resources to lock? Positive number.
+ * @exception InterruptedException Operation was interrupted (for instance by a signal)
+ * @exception SemCannotLockException Semaphore cannot be locked
+ * @exception SemInvalidException Semaphore set is invalid
+ */
+void
+SemaphoreSet::lock(unsigned short sem_num, short num)
+{
+  if ( data->semid == -1 )  throw SemInvalidException();
+
+  struct sembuf sop;
+  sop.sem_num = sem_num;
+  sop.sem_op  = ((num <= 0) ? num : -num);
+  sop.sem_flg = 0;
+  if ( semop(data->semid, &sop, 1) != 0 ) {
+    if ( errno == EINTR ) throw InterruptedException();
+    else                  throw SemCannotLockException();
+  }
+}
+
+
+/** Try to lock resources on the semaphore set.
+ * @param sem_num The semaphore number in the set
+ * @param num How many resources to lock? Positive number.
+ * @return true, if the semaphore could be locked, false otherwise
+ * @exception InterruptedException Operation was interrupted (for instance by a signal)
+ * @exception SemCannotLockException Semaphore cannot be locked
+ * @exception SemInvalidException Semaphore set is invalid
+ */
+bool
+SemaphoreSet::tryLock(unsigned short sem_num, short num)
+{
+  if ( data->semid == -1 )  throw SemInvalidException();
+
+  struct sembuf sop;
+  sop.sem_num = sem_num;
+  sop.sem_op  = ((num <= 0) ? num : -num);
+  sop.sem_flg = IPC_NOWAIT;
+  if ( semop(data->semid, &sop, 1) != 0 ) {
+    if (errno == EAGAIN) {
+      return false;
+    } else if ( errno == EINTR ) {
+      throw InterruptedException();
+    } else {
+      throw SemCannotLockException();
+    }
+  }
+  return true;
+}
+
+
+/** Unlock resources on the semaphore set.
+ * @param sem_num The semaphore number in the set
+ * @param num How many resources to unlock? Negative number.
+ * @exception InterruptedException Operation was interrupted (for instance by a signal)
+ * @exception SemCannotUnlockException Semaphore cannot be unlocked
+ * @exception SemInvalidException Semaphore set is invalid
+ */
+void
+SemaphoreSet::unlock(unsigned short sem_num, short num)
+{
+  if ( data->semid == -1 )  throw SemInvalidException();
+
+  struct sembuf sop;
+  sop.sem_num = sem_num;
+  sop.sem_op  = ((num >= 0) ? num : -num);
+  sop.sem_flg = 0;
+  if ( semop(data->semid, &sop, 1) != 0 ) {
+    if ( errno == EINTR ) throw InterruptedException();
+    else                  throw SemCannotUnlockException();
+  }
+}
+
+
+/** Set the semaphore value.
+ * @param sem_num The semaphore number in the set
+ * @param val The value to set
+ * @exception SemCannotSetValException Cannot set value
+ */
+void
+SemaphoreSet::setVal(int sem_num, int val)
+{
+  if ( data->semid == -1 )  throw SemInvalidException();
+
+  union semun s;
+  s.val = val;
+
+  if ( semctl(data->semid, sem_num, SETVAL, s) != 0 ) {
+    throw SemCannotSetValException();
+  }
+}
+
+
+/** Get the semaphore value.
+ * @param sem_num The semaphore number in the set
+ * @return value of the semaphore
+ * @exception SemInvalidException Semaphore set is invalid
+ */
+int
+SemaphoreSet::getVal(int sem_num)
+{
+  if ( data->semid == -1 )  throw SemInvalidException();
+
+  return ( semctl(data->semid, sem_num, GETVAL, 0) != 0 );
+}
