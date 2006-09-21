@@ -62,6 +62,7 @@
  * Do not change the type or name of this function or type of arguments
  * of this function!
  *
+ * @relates Plugin
  */
 
 /** @typedef Plugin *  (* PluginFactoryFunc)  (void);
@@ -79,7 +80,7 @@
  * Do not change the type or name of this function, replace MightyPlugin
  * with the name of your plugin derivative.
  *
- * @relatesalso Plugin
+ * @relates Plugin
  */
 
 
