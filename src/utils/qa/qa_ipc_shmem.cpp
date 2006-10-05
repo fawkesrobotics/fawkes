@@ -29,6 +29,7 @@
 ///@cond QA
 
 #include <utils/ipc/shm.h>
+#include <utils/ipc/shm_exceptions.h>
 
 #include <string.h>
 #include <unistd.h>
@@ -50,9 +51,9 @@ class QASharedMemoryHeader : public SharedMemoryHeader
     header.type = type;
   }
 
-  virtual bool matches(unsigned char *buffer)
+  virtual bool matches(void *memptr)
   {
-    return (memcmp(buffer, &header, sizeof(qashmem_header_t)) == 0);
+    return (memcmp(memptr, &header, sizeof(qashmem_header_t)) == 0);
   }
 
   virtual unsigned int size()
@@ -65,14 +66,14 @@ class QASharedMemoryHeader : public SharedMemoryHeader
     return true;
   }
 
-  virtual void initialize(unsigned char *buffer)
+  virtual void initialize(void *memptr)
   {
-    memcpy(buffer, (char *)&header, sizeof(qashmem_header_t));
+    memcpy(memptr, (char *)&header, sizeof(qashmem_header_t));
   }
 
-  virtual void set(unsigned char *buffer)
+  virtual void set(void *memptr)
   {
-    memcpy((char *)&header, buffer, sizeof(qashmem_header_t));
+    memcpy((char *)&header, memptr, sizeof(qashmem_header_t));
   }
 
   virtual unsigned int dataSize()
@@ -102,28 +103,35 @@ main(int argc, char **argv)
 
   QASharedMemoryHeader *h1 = new QASharedMemoryHeader(1);
 
-  // This will create the shared memory segment
-  SharedMemory *s1 = new SharedMemory(MAGIC_TOKEN, h1,
-				      /* read only */ false,
-				      /* create    */ true,
-				      /* destroy   */ true);
+  SharedMemory *s1, *s2;
 
-  // This will attach to the existing shmem segment,
-  // use ipcs to check
-  SharedMemory *s2 = new SharedMemory(MAGIC_TOKEN, h1,
-				      /* read only */ true,
-				      /* create    */ false,
-				      /* destroy   */ false);
+  try {
+    // This will create the shared memory segment
+    s1 = new SharedMemory(MAGIC_TOKEN, h1,
+			  /* read only */ false,
+			  /* create    */ true,
+			  /* destroy   */ true);
 
-  unsigned char *b1 = s1->getBuffer();
-  unsigned char *b2 = s2->getBuffer();
+    // This will attach to the existing shmem segment,
+    // use ipcs to check
+    s2 = new SharedMemory(MAGIC_TOKEN, h1,
+			  /* read only */ true,
+			  /* create    */ false,
+			  /* destroy   */ false);
+  } catch ( ShmCouldNotAttachException &e ) {
+    e.printTrace();
+    exit(1);
+  }
+
+  int *m1 = (int *)s1->getMemPtr();
+  int *m2 = (int *)s2->getMemPtr();
 
   int i = 0;
 
   while ( ! quit ) {
-    *b1 = i;
-    std::cout << "Wrote " << (int)*b1 << " (should be " << i
-	      << ") to b1, afterwards b2 reads: " << (int)*b2
+    *m1 = i;
+    std::cout << "Wrote " << *m1 << " (should be " << i
+	      << ") to b1, afterwards b2 reads: " << *m2
 	      << std::endl;
     usleep(500000);
     ++i;

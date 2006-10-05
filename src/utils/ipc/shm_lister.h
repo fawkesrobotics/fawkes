@@ -65,11 +65,11 @@ class SharedMemoryLister {
    * @param header The data-specific header
    * @param shm_id The id of the shared memory segment
    * @param mem_size the total memory size
-   * @param data pointer to the data segment.
+   * @param memptr pointer to the data segment.
    */
   virtual void printInfo(SharedMemoryHeader *header,
 			 int shm_id, unsigned int mem_size,
-			 unsigned char *data)                = 0;
+			 void *memptr)                = 0;
 };
 
 

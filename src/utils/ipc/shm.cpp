@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  shm.cpp - shared memory image buffer
+ *  shm.cpp - shared memory segment
  *
  *  Generated: Thu Jan 12 14:10:43 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
@@ -56,36 +56,36 @@
  * @fn SharedMemoryHeader::~SharedMemoryHeader()
  * Virtual destructor
  *
- * @fn bool SharedMemoryHeader::matches(unsigned char *buffer)
- * Method to check if the given buffer matches this header.
+ * @fn bool SharedMemoryHeader::matches(void *memptr)
+ * Method to check if the given memptr matches this header.
  * This method is called when searching for a shared memory segment to
  * open, list or erase it.
  * Implement this to distuinguish several shared memory segments that share
  * the same magic token.
- * @param buffer The memory buffer in the shared memory segment where to start
+ * @param memptr The memory chunk in the shared memory segment where to start
  * checking.
- * @return true, if the given data in the buffer matches this header, false
+ * @return true, if the given data in the memory chunk matches this header, false
  * otherwise.
  *
  * @fn unsigned int SharedMemoryHeader::size()
  * Size of the header.
- * The size that is needed in the shared memory buffer to accomodate the
+ * The size that is needed in the shared memory memptr to accomodate the
  * header data. This size has to fit all the data that will be stored in the
  * header. It must return the same size every time.
  *
- * @fn void SharedMemoryHeader::initialize(unsigned char *buffer)
+ * @fn void SharedMemoryHeader::initialize(void *memptr)
  * Initialize the header.
- * This should initialize the header data in the given buffer from the
+ * This should initialize the header data in the given memptr from the
  * data of this SharedMemoryHeader derivate instance. It has to write out
  * all state information that is needed to identify the shared memory
  * segment later on.
- * @param buffer the buffer where the header data shall be written to.
+ * @param memptr the memptr where the header data shall be written to.
  *
- * @fn void SharedMemoryHeader::set(unsigned char *buffer)
- * Set information from buffer.
+ * @fn void SharedMemoryHeader::set(void *memptr)
+ * Set information from memptr.
  * Set the information stored in this SharedMemoryHeader derivate instance
- * from the data stored in the given buffer.
- * @param buffer The buffer where to copy data from.
+ * from the data stored in the given memptr.
+ * @param memptr The memptr where to copy data from.
  *
  * @fn unsigned int SharedMemoryHeader::dataSize()
  * Return the size of the data.
@@ -140,7 +140,7 @@
  * @author Tim Niemueller
  */
 
-/** @var SharedMemory::buffer
+/** @var SharedMemory::memptr
  * Pointer to the data segment.
  */
 /** @var SharedMemory::mem_size
@@ -208,7 +208,7 @@ SharedMemory::SharedMemory(char *magic_token,
   this->destroy_on_delete = destroy_on_delete;
   this->should_create     = create;
 
-  buffer          = NULL;
+  memptr          = NULL;
   shm_magic_token = NULL;
   shm_header      = NULL;
   header          = NULL;
@@ -241,7 +241,7 @@ SharedMemory::SharedMemory(char *magic_token,
  * @exception ShmCouldNotAttachException Could not attach to shared
  *                                       memory segment
  */
-SharedMemory::SharedMemory(char *magic_token,
+SharedMemory::SharedMemory(const char *magic_token,
 			   SharedMemoryHeader *header,
 			   bool is_read_only, bool create, bool destroy_on_delete)
 {
@@ -254,7 +254,7 @@ SharedMemory::SharedMemory(char *magic_token,
   this->destroy_on_delete = destroy_on_delete;
   this->should_create     = create;
 
-  buffer          = NULL;
+  memptr          = NULL;
   shm_magic_token = NULL;
   shm_header      = NULL;
   data_size       = 0;
@@ -266,7 +266,7 @@ SharedMemory::SharedMemory(char *magic_token,
     throw;
   }
 
-  if (buffer == NULL) {
+  if (memptr == NULL) {
     throw ShmCouldNotAttachException("Could not attach to created shared memory segment");
   }
 }
@@ -288,7 +288,7 @@ SharedMemory::~SharedMemory()
 void
 SharedMemory::free()
 {
-  buffer = NULL;
+  memptr = NULL;
   shm_header = NULL;
   shm_magic_token = NULL;
 
@@ -323,8 +323,8 @@ SharedMemory::attach()
     throw ShmNoHeaderException();
   }
 
-  if ((buffer != NULL) && (shared_mem_id != -1)) {
-    // a buffer has already been attached
+  if ((memptr != NULL) && (shared_mem_id != -1)) {
+    // a memptr has already been attached
     //cout << msg_prefix << cyellow << "Shared memory already attached" << cnormal << endl;
     return;
   }
@@ -334,14 +334,14 @@ SharedMemory::attach()
   int              shm_id;
   struct shmid_ds  shm_segment;
   void            *shm_buf;
-  unsigned char   *shm_buffer;
+  void            *shm_ptr;
 
   // Find out maximal number of existing SHM segments
   struct shm_info shm_info;
   max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
 
   if (max_id >= 0) {
-    for ( int i = 0; (buffer == NULL) && (i <= max_id); ++i ) {
+    for ( int i = 0; (memptr == NULL) && (i <= max_id); ++i ) {
 
       shm_id = shmctl( i, SHM_STAT, &shm_segment );
       if ( shm_id < 0 )  continue;
@@ -355,13 +355,13 @@ SharedMemory::attach()
 
 	if ( strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0 ) {
 
-	  shm_buffer = (unsigned char *)shm_buf + MagicTokenSize
-                                                + sizeof(SharedMemory_header_t);
+	  shm_ptr = (char *)shm_buf + MagicTokenSize
+                                    + sizeof(SharedMemory_header_t);
 
-	  if ( header->matches( shm_buffer ) ) {
+	  if ( header->matches( shm_ptr ) ) {
 	    // Image found in memory
 
-	    header->set( shm_buffer );
+	    header->set( shm_ptr );
 	    data_size = header->dataSize();
 	    mem_size  = sizeof(SharedMemory_header_t) + header->size() + data_size;
 
@@ -375,13 +375,13 @@ SharedMemory::attach()
 							(unsigned int) shm_segment.shm_segsz);
 	    }
 
-	    header->set( shm_buffer );
+	    header->set( shm_ptr );
 	    // header->printInfo();
 
 	    // cout << msg_prefix << "Found matching FireVision shared memory segment" << endl;
 	    shared_mem_id = shm_id;
 	    shared_mem    = shm_buf;
-	    buffer        = shm_buffer + header->size();
+	    memptr        = (char *)shm_ptr + header->size();
 
 	  } else {
 	    // not the wanted image
@@ -396,13 +396,16 @@ SharedMemory::attach()
     }
   }
 
-  if (! is_read_only && should_create) {
+  if ((memptr == NULL) && ! is_read_only && should_create) {
     // try to create a new shared memory segment
     char proj     = 0;
     char max_proj = 127;
+
+    created = true;
+
     data_size = header->dataSize();
     mem_size  = sizeof(SharedMemory_header_t) + header->size() + data_size;
-    while ((buffer == NULL) && (proj < max_proj)) {
+    while ((memptr == NULL) && (proj < max_proj)) {
     // no shm segment found, create one
       key_t key = ftok(".", proj++);
       shared_mem_id = shmget(key, mem_size, IPC_CREAT | IPC_EXCL | 0666);
@@ -412,17 +415,16 @@ SharedMemory::attach()
 	  // cout << msg_prefix << "Attached to shared mem" << endl;
 	  shm_magic_token = (char *)shared_mem;
 	  shm_header = (SharedMemory_header_t *)shared_mem + MagicTokenSize;
-	  buffer = (unsigned char *)shared_mem + MagicTokenSize
-	                                       + sizeof(SharedMemory_header_t)
-                                               + header->size();
+	  memptr     = (char *)shared_mem + MagicTokenSize
+	                                  + sizeof(SharedMemory_header_t)
+                                          + header->size();
 
 	  memset((void *)shared_mem, 0, mem_size);
 
 	  strncpy(shm_magic_token, magic_token, MagicTokenSize);
 
-	  header->initialize( (unsigned char*)shared_mem + MagicTokenSize
-                                                         + sizeof(SharedMemory_header_t));
-
+	  header->initialize( (char *)shared_mem + MagicTokenSize
+		                                 + sizeof(SharedMemory_header_t));
 	} else {
 	  // It didn't work out, destroy shared mem and try again
 	  //cout << msg_prefix << flush;
@@ -438,8 +440,8 @@ SharedMemory::attach()
 	}
       }
     }
-    if (buffer == NULL) {
-      throw ShmCouldNotAttachException("Could not attach, buffer still NULL");
+    if (memptr == NULL) {
+      throw ShmCouldNotAttachException("Could not attach, memptr still NULL");
     }
   }
 
@@ -456,16 +458,32 @@ SharedMemory::isReadOnly()
 }
 
 
+/** Determine if the shared memory segment has been created by this instance.
+ * In some situations you want to know if the current instance has created the shared
+ * memory segment or if it attached to an existing shared memory segment. This is
+ * handy for example in master-slave constellations where one process is the master
+ * over a given shared memory segment and other slaves may read but need special
+ * means to alter the data.
+ * This is a somewhat softer variant of exclusive access.
+ * @return true, if this instance of SharedMemory created the segment, false
+ * otherwise
+ */
+bool
+SharedMemory::isCreator()
+{
+  return created;
+}
+
 /** Get a pointer to the shared memory
  * This method returns a pointer to the data-segment of the shared memory
  * segment. It has the size stated as dataSize() from the header.
  * @return pointer to the data-segment
  * @see getDataSize()
  */
-unsigned char *
-SharedMemory::getBuffer()
+void *
+SharedMemory::getMemPtr()
 {
-  return buffer;
+  return memptr;
 }
 
 
@@ -481,15 +499,15 @@ SharedMemory::getDataSize()
 }
 
 
-/** Copies data from the buffer to shared memory.
- * Use this method to copy data from the given external buffer to the
+/** Copies data from the memptr to shared memory.
+ * Use this method to copy data from the given external memptr to the
  * data segment of the shared memory.
- * @param buffer the buffer to copy from
+ * @param memptr the memptr to copy from
  */
 void
-SharedMemory::set(unsigned char *buffer)
+SharedMemory::set(void *memptr)
 {
-  memcpy(this->buffer, buffer, data_size);
+  memcpy(this->memptr, memptr, data_size);
 }
 
 
@@ -522,14 +540,14 @@ SharedMemory::isLocked()
 /** Check validity of shared memory segment.
  * Use this to check if the shared memory segmentis valid. That means that
  * this instance is attached to the shared memory and data can be read from
- * or written to the buffer.
+ * or written to the memptr.
  * @return true, if the shared memory segment is valid and can be utilized,
  *         false otherwise
  */
 bool
 SharedMemory::isValid()
 {
-  return (buffer != NULL);
+  return (memptr != NULL);
 }
 
 
@@ -634,14 +652,14 @@ SharedMemory::list(char *magic_token,
 	shm_header = (SharedMemory_header_t *)shm_buf + MagicTokenSize;
 
 	if (strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0) {
-	  if ( header->matches( (unsigned char*)shm_buf + MagicTokenSize
-                                                        + sizeof(SharedMemory_header_t)) ) {
-	    header->set((unsigned char*)shm_buf + MagicTokenSize
-                                                + sizeof(SharedMemory_header_t));
+	  if ( header->matches( (char *)shm_buf + MagicTokenSize
+                                                         + sizeof(SharedMemory_header_t)) ) {
+	    header->set((char *)shm_buf + MagicTokenSize
+			                         + sizeof(SharedMemory_header_t));
 	    lister->printInfo(header, shm_id, shm_segment.shm_segsz,
-			      (unsigned char*)shm_buf + MagicTokenSize
-                                                      + sizeof(SharedMemory_header_t)
-                                                      + header->size());
+			      (char *)shm_buf + MagicTokenSize
+                                                       + sizeof(SharedMemory_header_t)
+                                                       + header->size());
 	    ++num_segments;
 	  }
 	}
@@ -699,16 +717,16 @@ SharedMemory::erase(char *magic_token,
 	shm_header = (SharedMemory_header_t *)shm_buf + MagicTokenSize;
 
 	if (strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0) {
-	  if ( header->matches( (unsigned char*)shm_buf + MagicTokenSize
-                                                        + sizeof(SharedMemory_header_t)) ) {
-	    header->set((unsigned char*)shm_buf + MagicTokenSize
-                                                + sizeof(SharedMemory_header_t));
+	  if ( header->matches( (char *)shm_buf + MagicTokenSize
+                                                + sizeof(SharedMemory_header_t)) ) {
+	    header->set((char *)shm_buf + MagicTokenSize
+			                + sizeof(SharedMemory_header_t));
 	    shmctl(shm_id, IPC_RMID, NULL);
 	    if ( lister != NULL)
 	      lister->printInfo(header, shm_id, shm_segment.shm_segsz,
-				(unsigned char*)shm_buf + MagicTokenSize
-				                        + sizeof(SharedMemory_header_t)
-						        + header->size());
+				(char *)shm_buf + MagicTokenSize
+				                + sizeof(SharedMemory_header_t)
+				                + header->size());
 	    ++num_segments;
 	  }
 	}
@@ -763,8 +781,8 @@ SharedMemory::exists(char *magic_token,
 	shm_header = (SharedMemory_header_t *)shm_buf + MagicTokenSize;
 
 	if (strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0) {
-	  if ( header->matches((unsigned char *)shm_buf + MagicTokenSize
-                                                        + sizeof(SharedMemory_header_t)) ) {
+	  if ( header->matches((char *)shm_buf + MagicTokenSize
+			                       + sizeof(SharedMemory_header_t)) ) {
 	    found = true;
 	  }
 	}

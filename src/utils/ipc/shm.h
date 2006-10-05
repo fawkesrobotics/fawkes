@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  shm.h - shared memory buffer
+ *  shm.h - shared memory segment
  *
  *  Generated: Thu Jan 12 13:12:24 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
@@ -31,14 +31,15 @@
 class SharedMemoryHeader {
  public:
   virtual ~SharedMemoryHeader() {}
-  virtual bool         matches(unsigned char *buffer)         = 0;
+  virtual bool         matches(void *memptr)                  = 0;
   virtual unsigned int size()                                 = 0;
-  virtual void         initialize(unsigned char *buffer)      = 0;
-  virtual void         set(unsigned char *buffer)             = 0;
+  virtual void         initialize(void *memptr)               = 0;
+  virtual void         set(void *memptr)                      = 0;
   virtual unsigned int dataSize()                             = 0;
 };
 
 class SharedMemoryLister;
+class SemaphoreSet;
 
 class SharedMemory
 {
@@ -47,7 +48,7 @@ class SharedMemory
 
   static const unsigned int MagicTokenSize;
 
-  SharedMemory(char *magic_token,
+  SharedMemory(const char *magic_token,
 	       SharedMemoryHeader *header,
 	       bool is_read_only = false, bool create = true,
 	       bool destroy_on_delete = true);
@@ -58,9 +59,10 @@ class SharedMemory
   bool             isDestroyed();
   bool             isLocked();
   bool             isValid();
-  unsigned char *  getBuffer();
+  bool             isCreator();
+  void *           getMemPtr();
   unsigned int     getDataSize();
-  void             set(unsigned char *buffer);
+  void             set(void *memptr);
   void             setDestroyOnDelete(bool destroy);
 
   static void      list(char *magic_token,
@@ -90,7 +92,9 @@ class SharedMemory
   void attach();
   void free();
 
-  unsigned char          *buffer;
+  // although memptr is in fact treated as void we keep it as unsigned char pointer
+  // for easier pointer arithmetic
+  void                   *memptr;
   unsigned int            mem_size;
   unsigned int            data_size;
   SharedMemoryHeader     *header;
@@ -105,6 +109,9 @@ class SharedMemory
  private:
   void          *shared_mem;
   int            shared_mem_id;
+
+  bool           created;
+  // SemaphoreSet  *semset;
 
 };
 
