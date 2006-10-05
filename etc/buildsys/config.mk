@@ -31,7 +31,7 @@ BINDIR = $(BASEDIR)/bin
 LIBDIR = $(BASEDIR)/lib
 PLUGINDIR = $(BASEDIR)/plugins
 VPATH = $(SRCDIR)
-df = $(DEPDIR)/$(filter_out ._,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
+df = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
 
 INDENT_STRING = -  
 

@@ -48,12 +48,16 @@ $(SUBDIRS):
 	$(SILENT) echo "$(INDENT)--- Leaving sub-directory $@ ---"
 endif
 
+# NOTE: .. are replaced by __. This is needed to have objects that are in upper relative
+# directories are build in .objs, another change is needed below in bin, lib and plugin targets,
+# mocs etc.
 %.o: %.cpp
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo "$(INDENT)--> Compiling $(<F) (C++)"
+	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
 	$(SILENT) $(CC) -Wp,-M,-MF,$(df).d $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
-	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $@ $<
+	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
 	$(SILENT) cp -f $(df).d $(df).td; \
 	sed -e 's/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(df).td > $(df).d; \
 	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e 's/^ *//' \
@@ -61,8 +65,8 @@ endif
 	rm -f $(df).td
 
 moc_%.cpp: %.h
-	$(SILENT) echo "$(INDENT)--- Running Qt moc on $<, creating $@"
-	$(SILENT) $(MOC) $(MOC_FLAGS) -p $(@D) $< -o $@q
+	$(SILENT) echo "$(INDENT)--- Running Qt moc on $<, creating $(subst ..,__,$@)"
+	$(SILENT) $(MOC) $(MOC_FLAGS) -p $(subst ..,__,$(@D)) $< -o $(subst ..,__,$@)
 
 .SECONDEXPANSION:
 $(BINDIR)/%: $$(OBJS_$$*)
@@ -72,7 +76,7 @@ $(BINDIR)/%: $$(OBJS_$$*)
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
-	-o $@ $^
+	-o $@ $(subst ..,__,$^)
 
 $(LIBDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(LIBDIR)
@@ -80,7 +84,7 @@ $(LIBDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
-	-o $@ $^
+	-o $@ $(subst ..,__,$^)
 
 $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(PLUGINDIR)
@@ -88,5 +92,5 @@ $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
-	-o $@ $^
+	-o $@ $(subst ..,__,$^)
 
