@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  system.h - basic system exceptions
+ *  software.h - basic software exceptions
  *
- *  Generated: Mon Sep 18 19:22:36 2006
+ *  Generated: Wed Oct 04 18:37:35 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,34 +25,38 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __CORE_EXCEPTIONS_SYSTEM_H_
-#define __CORE_EXCEPTIONS_SYSTEM_H_
+#ifndef __CORE_EXCEPTIONS_SOFTWARE_H_
+#define __CORE_EXCEPTIONS_SOFTWARE_H_
 
 #include <core/exception.h>
 
-/** System ran out of memory and desired operation could not be fulfilled.
+/** A NULL pointer was supplied where not allowed.
+ * Throw this exception if a pointer to NULL has been supplied where this is
+ * not allowed.
  */
-class OutOfMemoryException : public Exception {
+class NullPointerException : public Exception {
  public:
   /** Constructor
-   * @param msg optional extra message, appended to exception, base message "Out of memory"
+   * @param msg message, appended to exception, base message "NullPointerException"
    */
-  OutOfMemoryException(const char *msg = 0) : Exception("Out of memory")
+  NullPointerException(const char *msg) : Exception("NullPointerException")
   {
     append(msg);
   }
 };
 
-
-/** The current system call has been interrupted (for instance by a signal).
- * Throw this exception if you use libc functions which return EINTR or store
- * EINTR in errno.
+/** Division by zero
+ * Throw this if a division by zero has happened or is about to happen
  */
-class InterruptedException : public Exception {
+class DivisionByZeroException : public Exception {
  public:
-  /** Constructor */
-  InterruptedException() : Exception("Interrupted system call")  {}
+  /** Constructor
+   * @param msg message, appended to exception, base message "Division by zero"
+   */
+  DivisionByZeroException(const char *msg) : Exception("Division by zero")
+  {
+    append(msg);
+  }
 };
-
 
 #endif
