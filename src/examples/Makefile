@@ -24,6 +24,9 @@ BASEDIR = ../..
 OBJS_example_mutex_count = example_mutex_count.o
 LIBS_example_mutex_count = stdc++ core
 
+OBJS_example_mutex_sync = example_mutex_sync.o
+LIBS_example_mutex_sync = stdc++ core
+
 OBJS_example_waitcond_serialize = example_waitcond_serialize.o
 LIBS_example_waitcond_serialize = stdc++ core
 
@@ -37,7 +40,8 @@ OBJS_example_exception = example_exception.o
 LIBS_example_exception = stdc++ core
 
 
-OBJS_all =	$(OBJS_example_mutex)		\
+OBJS_all =	$(OBJS_example_mutex_count)	\
+		$(OBJS_example_mutex_sync)	\
 		$(OBJS_example_wait_condition)	\
 		$(OBJS_example_rwlock)		\
 		$(OBJS_example_barrier)		\
@@ -47,7 +51,8 @@ BINS_all =	$(BINDIR)/example_mutex_count		\
 		$(BINDIR)/example_waitcond_serialize	\
 		$(BINDIR)/example_rwlock		\
 		$(BINDIR)/example_barrier		\
-		$(BINDIR)/example_exception
+		$(BINDIR)/example_exception		\
+		$(BINDIR)/example_mutex_sync
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
