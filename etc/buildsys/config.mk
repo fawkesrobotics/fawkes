@@ -33,8 +33,6 @@ PLUGINDIR = $(BASEDIR)/plugins
 VPATH = $(SRCDIR)
 df = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
 
-INDENT_STRING = -  
-
 ### Programs used, do not mention trivial stuff like ln, rm, ls as per Makefile manual
 CC = gcc
 MOC = $(QTDIR)/bin/moc
@@ -84,4 +82,13 @@ CYAN		= tput setaf 6
 BG_CYAN		= tput setab 6
 BRIGHTCYAN	= tput bold ; tput setaf 6
 NORMAL		= tput sgr0
+
+TBOLDGRAY	= \033[1;30m
+TBLUE		= \033[0;34m
+TBOLDBLUE	= \033[1;34m
+TGREEN		= \033[0;32m
+TBOLDGREEN	= \033[1;32m
+TRED		= \033[0;31m
+TBOLDRED	= \033[1;31m
+TNORMAL		= \033[0;39m
 

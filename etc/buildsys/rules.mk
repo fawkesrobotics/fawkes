@@ -22,6 +22,17 @@
 # see http://make.paulandlesley.org/autodep.html
 # see http://make.paulandlesley.org/rules.html
 
+# indentation definitions, dash (-) is replaced with space
+INDENT_STRING = ---
+INDENT_PRINT := $(subst -, ,$(INDENT))
+ifeq ($(MAKECMDGOALS),clean)
+  ifeq ($(shell test -d qa; if [ "$$?" = "0" ]; then echo "yes"; fi),yes)
+    ifneq ($(findstring qa,$(SUBDIRS)),qa)
+      SUBDIRS += qa
+    endif
+  endif
+endif
+
 -include $(DEPDIR)/*.d
 
 .SECONDARY: $(OBJS_all)
@@ -31,21 +42,32 @@ all: subdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all)
 
 .PHONY: clean
 clean: subdirs
-	$(SILENT) echo "$(INDENT)--> Cleaning up directory $(CURDIR)"
+	$(SILENT) echo -e "$(INDENT_PRINT)--> Cleaning up directory $(TBOLDGRAY)$(CURDIR)$(TNORMAL)"
 	$(SILENT) if [ "$(SRCDIR)/$(OBJDIR)" != "/" ]; then rm -rf $(SRCDIR)/$(OBJDIR) ; fi
 	$(SILENT) if [ "$(DEPDIR)" != "" ]; then rm -rf $(DEPDIR) ; fi
 	$(SILENT) if [ "$(BINS_all)" != "" ]; then rm -rf $(BINS_all) ; fi
 	$(SILENT) if [ "$(LIBS_all)" != "" ]; then rm -rf $(LIBS_all) ; fi
 	$(SILENT) if [ "$(PLUGINS_all)" != "" ]; then rm -rf $(PLUGINS_all) ; fi
 
+ifeq (,$(findstring qa,$(SUBDIRS)))
+.PHONY: qa
+qa: subdirs
+	$(SILENT) if [ -d "$(subst /.objs,,$(realpath $(CURDIR)))/qa" ]; then \
+		echo -e "$(INDENT_PRINT)--> Building QA in $(subst $(realpath $(CURDIR)/$(BASEDIR))/,,$(subst /.objs,,$(realpath $(CURDIR)))/qa)"; \
+		$(MAKE) --no-print-directory -C $(subst /.objs,,$(CURDIR))/qa INDENT="$(INDENT)$(INDENT_STRING)"; \
+	fi
+endif
+
 .PHONY: subdirs $(SUBDIRS)
 subdirs: $(SUBDIRS)
 
 ifneq ($(SUBDIRS),)
 $(SUBDIRS):
-	$(SILENT) echo "$(INDENT)--- Entering sub-directory $@ ---"
+	$(SILENT) echo -e "$(INDENT_PRINT)--- Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"
 	$(SILENT) $(MAKE) --no-print-directory -C $@ $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)"
-	$(SILENT) echo "$(INDENT)--- Leaving sub-directory $@ ---"
+	$(SILENT) if [ "$(MAKECMDGOALS)" != "clean" ]; then \
+		echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $@"; \
+	fi
 endif
 
 # NOTE: .. are replaced by __. This is needed to have objects that are in upper relative
@@ -54,7 +76,7 @@ endif
 %.o: %.cpp
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENT) echo "$(INDENT)--> Compiling $(<F) (C++)"
+	$(SILENT) echo "$(INDENT_PRINT)--> Compiling $(<F) (C++)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
 	$(SILENT) $(CC) -Wp,-M,-MF,$(df).d $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
@@ -65,13 +87,13 @@ endif
 	rm -f $(df).td
 
 moc_%.cpp: %.h
-	$(SILENT) echo "$(INDENT)--- Running Qt moc on $<, creating $(subst ..,__,$@)"
+	$(SILENT) echo "$(INDENT_PRINT)--- Running Qt moc on $<, creating $(subst ..,__,$@)"
 	$(SILENT) $(MOC) $(MOC_FLAGS) -p $(subst ..,__,$(@D)) $< -o $(subst ..,__,$@)
 
 .SECONDEXPANSION:
 $(BINDIR)/%: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(BINDIR)
-	$(SILENT) echo "$(INDENT)--> Linking $* ---"
+	$(SILENT) echo -e "$(INDENT_PRINT)--> Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
@@ -80,7 +102,7 @@ $(BINDIR)/%: $$(OBJS_$$*)
 
 $(LIBDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(LIBDIR)
-	$(SILENT) echo "$(INDENT)--> Linking lib $* ---"
+	$(SILENT) echo -e "$(INDENT_PRINT)--> Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
@@ -88,7 +110,7 @@ $(LIBDIR)/%.so: $$(OBJS_$$*)
 
 $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(PLUGINDIR)
-	$(SILENT) echo "$(INDENT)--> Linking plugin $* ---"
+	$(SILENT) echo -e "$(INDENT_PRINT)--> Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
