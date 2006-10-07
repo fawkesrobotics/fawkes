@@ -35,22 +35,29 @@ class SemaphoreSet {
 
   SemaphoreSet(const char *path, char id,
 	       int num_sems,
-	       bool destroy_on_delete = false,
-	       bool create = false);
+	       bool create = false,
+	       bool destroy_on_delete = false);
+
+  SemaphoreSet(int key,
+	       int num_sems,
+	       bool create = false,
+	       bool destroy_on_delete = false);
+
+  SemaphoreSet( int num_sems,
+	        bool destroy_on_delete = false);
 
   ~SemaphoreSet();
 
   bool isValid();
-
   void lock(unsigned short sem_num = 0, short num = 1);
-
   bool tryLock(unsigned short sem_num = 0, short num = 1);
-
   void unlock(unsigned short sem_num = 0, short num = -1);
-
   void setVal(int sem_num, int val);
+  int  getVal(int sem_num);
+  int  getKey();
+  void setDestroyOnDelete(bool destroy);
 
-  int getVal(int sem_num);
+  static int getFreeKey();
 
  protected:
   bool destroy_on_delete;

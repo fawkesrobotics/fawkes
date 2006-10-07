@@ -28,9 +28,9 @@
 #ifndef __UTILS_IPC_MSG_H_
 #define __UTILS_IPC_MSG_H_
 
-class MessageQueueData;
+class IPCMessageQueueData;
 
-class MessageQueue {
+class IPCMessageQueue {
  public:
 
   static const int MaxMessageSize;
@@ -45,15 +45,15 @@ class MessageQueue {
 			  */
   } MessageStruct;
 
-  MessageQueue(const char *path, char id,
-	       bool destroy_on_delete = false,
-	       bool create = false);
+  IPCMessageQueue(const char *path, char id,
+		  bool create = false,
+		  bool destroy_on_delete = false);
+  
+  IPCMessageQueue(int id,
+		  bool create = false,
+		  bool destroy_on_delete = false);
 
-  MessageQueue(int id,
-	       bool destroy_on_delete = false,
-	       bool create = false);
-
-  ~MessageQueue();
+  ~IPCMessageQueue();
 
   bool isValid();
   bool recv(long mtype, MessageStruct *msg, unsigned int data_size);
@@ -66,7 +66,7 @@ class MessageQueue {
   bool destroy_on_delete;
 
  private:
-  MessageQueueData *data;
+  IPCMessageQueueData *data;
 
 };
 

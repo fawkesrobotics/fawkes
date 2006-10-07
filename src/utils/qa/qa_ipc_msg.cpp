@@ -45,10 +45,10 @@ int
 main( int argc, char **argv )
 {
   // Create message queue, destroy on delete
-  MessageQueue *m1 = new MessageQueue(".", 'A', true, true);
+  IPCMessageQueue *m1 = new IPCMessageQueue(".", 'A', true, true);
 
   // Open, do not create, do not destroy
-  MessageQueue *m2 = new MessageQueue(".", 'A', false, false);
+  IPCMessageQueue *m2 = new IPCMessageQueue(".", 'A', false, false);
 
   for (unsigned int i = 0; i < 10; ++i) {
     simple_msg_t smsg;
@@ -59,8 +59,8 @@ main( int argc, char **argv )
     smsg.mtype = MTYPE;
     sprintf(smsg.msg, "%u", i);
 
-    m1->send((MessageQueue::MessageStruct *)&smsg, sizeof(smsg));
-    m2->recv(MTYPE, (MessageQueue::MessageStruct *)&rmsg, sizeof(rmsg));
+    m1->send((IPCMessageQueue::MessageStruct *)&smsg, sizeof(smsg));
+    m2->recv(MTYPE, (IPCMessageQueue::MessageStruct *)&rmsg, sizeof(rmsg));
 
     printf("Sent: %s     Received: %s\n", smsg.msg, rmsg.msg);
   }

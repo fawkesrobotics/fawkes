@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  msg.cpp - ICP message queue
+ *  msg.cpp - IPC message queue
  *
  *  Generated: Mon Mar 13 17:44:59 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
@@ -35,7 +35,7 @@
 #include <sys/msg.h>
 
 /// @cond INTERNALS
-class MessageQueueData
+class IPCMessageQueueData
 {
  public:
   key_t   key;
@@ -45,8 +45,8 @@ class MessageQueueData
 };
 /// @endcond
 
-/** @class MessageQueue utils/ipc/msg.h
- *IPC message queue.
+/** @class IPCMessageQueue utils/ipc/msg.h
+ * IPC message queue.
  * This class gives access to IPC message queues. You can use this to send
  * messages between different applications running on the same host.
  *
@@ -55,7 +55,7 @@ class MessageQueueData
  * @author Tim Niemueller
  *
  *
- * @var MessageQueue::destroy_on_delete
+ * @var IPCMessageQueue::destroy_on_delete
  * destroy this message queue on delete?
  *
  */
@@ -63,7 +63,7 @@ class MessageQueueData
 
 /** Maximum size of a message.
  */
-const int MessageQueue::MaxMessageSize = 8192; // from linux/msg.h
+const int IPCMessageQueue::MaxMessageSize = 8192; // from linux/msg.h
 
 
 /** Create or open a message queue
@@ -76,9 +76,10 @@ const int MessageQueue::MaxMessageSize = 8192; // from linux/msg.h
  * @param create Create the queue if it does not exist, do not create the queue
  *               otherwise, use isValid() to check if queue was opened
  */
-MessageQueue::MessageQueue(const char *path, char id, bool destroy_on_delete, bool create)
+IPCMessageQueue::IPCMessageQueue(const char *path, char id,
+				 bool create, bool destroy_on_delete)
 {
-  data = new MessageQueueData();
+  data = new IPCMessageQueueData();
 
   this->destroy_on_delete = destroy_on_delete;
 
@@ -101,7 +102,7 @@ MessageQueue::MessageQueue(const char *path, char id, bool destroy_on_delete, bo
  * @param create if true create the queue if it does not exist, do not create the queue
  *               otherwise, use isValid() to check if queue was opened successfully.
  */
-MessageQueue::MessageQueue(int id, bool destroy_on_delete, bool create)
+IPCMessageQueue::IPCMessageQueue(int id, bool create, bool destroy_on_delete)
 {
   this->destroy_on_delete = destroy_on_delete;
 
@@ -110,13 +111,13 @@ MessageQueue::MessageQueue(int id, bool destroy_on_delete, bool create)
     data->msgflg |= IPC_CREAT;
   }
 
-  data->key = ftok(".", id);
+  data->key = id;
   data->msgqid = msgget(data->key, data->msgflg);
 }
 
 
 /** Destructor */
-MessageQueue::~MessageQueue()
+IPCMessageQueue::~IPCMessageQueue()
 {
   if ((data->msgqid != -1) && destroy_on_delete) {
     msgctl(data->msgqid, IPC_RMID, 0);
@@ -132,7 +133,7 @@ MessageQueue::~MessageQueue()
  *         or if it has been closed, it returns true if messages can be sent or received.
  */
 bool
-MessageQueue::isValid()
+IPCMessageQueue::isValid()
 {
   if (data->msgqid == -1) {
     data->msgqid = msgget(data->key, data->msgflg);
@@ -175,7 +176,7 @@ MessageQueue::isValid()
  *                                   with a bigger buffer.
  */
 bool
-MessageQueue::recv(long mtype, MessageStruct *msg, unsigned int data_size)
+IPCMessageQueue::recv(long mtype, MessageStruct *msg, unsigned int data_size)
 {
   if (data->msgqid == -1) return false;
 
@@ -207,7 +208,7 @@ MessageQueue::recv(long mtype, MessageStruct *msg, unsigned int data_size)
  * @see MessageStruct
  */
 bool
-MessageQueue::recvNext(MessageStruct *msg, unsigned int max_data_size,
+IPCMessageQueue::recvNext(MessageStruct *msg, unsigned int max_data_size,
 		       int *data_size)
 {
   if (data->msgqid == -1) return false;
@@ -232,7 +233,7 @@ MessageQueue::recvNext(MessageStruct *msg, unsigned int max_data_size,
  * @see MessageStruct
  */
 bool
-MessageQueue::send(MessageStruct *msg, unsigned int data_size)
+IPCMessageQueue::send(MessageStruct *msg, unsigned int data_size)
 {
   if (data->msgqid == -1) return false;
 
@@ -252,7 +253,7 @@ MessageQueue::send(MessageStruct *msg, unsigned int data_size)
  * @return the message type
  */
 long
-MessageQueue::mtype(char *buffer)
+IPCMessageQueue::mtype(char *buffer)
 {
   return (((struct msgbuf *)buffer)->mtype);
 }

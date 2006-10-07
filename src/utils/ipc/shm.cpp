@@ -34,6 +34,7 @@
 #include <utils/ipc/shm.h>
 #include <utils/ipc/shm_exceptions.h>
 #include <utils/ipc/shm_lister.h>
+#include <utils/ipc/semset.h>
 
 #include <string>
 #include <sys/ipc.h>
@@ -124,8 +125,14 @@
  * the data segment size or if needed an explicit information about the memory
  * size.
  *
- * The data segment can be filled with any data you like. The memory is not
- * protected by any means. You have to do this by yourself using IPC semaphores.
+ * The data segment can be filled with any data you like.
+ *
+ * Semaphores have a simple protection mechanism using IPC semaphores. If a
+ * shared memory segment already has a semaphore assigned at the time it is
+ * opened this semaphore is automatically opened. In any case addSemaphore()
+ * can be used to create (or open if it already exists) a semaphore for the
+ * shared memory segment. Information about the semaphore is stored in the
+ * shared memory general header.
  *
  * This class provides utilities to list, erase and check existence of given
  * shared memory segments. For this often a SharedMemoryLister is used that
@@ -213,6 +220,7 @@ SharedMemory::SharedMemory(char *magic_token,
   shm_header      = NULL;
   header          = NULL;
   data_size       = 0;
+  semset          = NULL;
 }
 
 
@@ -258,6 +266,7 @@ SharedMemory::SharedMemory(const char *magic_token,
   shm_magic_token = NULL;
   shm_header      = NULL;
   data_size       = 0;
+  semset          = NULL;
 
   try {
     attach();
@@ -272,12 +281,17 @@ SharedMemory::SharedMemory(const char *magic_token,
 }
 
 
-/** Destructor
- */
+/** Destructor */
 SharedMemory::~SharedMemory()
 {
   delete[] magic_token;
   free();
+  if ( semset != NULL ) {
+    // if we destroy the shared memory region we can as well delete the semaphore,
+    // it is not necessary anymore.
+    semset->setDestroyOnDelete( destroy_on_delete );
+    delete semset;
+  }
 }
 
 
@@ -293,13 +307,10 @@ SharedMemory::free()
   shm_magic_token = NULL;
 
   if ((shared_mem_id != -1) && !is_read_only && destroy_on_delete ) {
-    //std::cout << "Destroying shared memory segment at id "
-    //          << shared_mem_id << std::endl;
     shmctl(shared_mem_id, IPC_RMID, NULL);
     shared_mem_id = -1;
   }
   if (shared_mem != NULL) {
-    // std::cout << "Detaching from shared memory" << std::endl;
     shmdt(shared_mem);
     shared_mem = NULL;
   }
@@ -325,7 +336,6 @@ SharedMemory::attach()
 
   if ((memptr != NULL) && (shared_mem_id != -1)) {
     // a memptr has already been attached
-    //cout << msg_prefix << cyellow << "Shared memory already attached" << cnormal << endl;
     return;
   }
 
@@ -359,18 +369,13 @@ SharedMemory::attach()
                                     + sizeof(SharedMemory_header_t);
 
 	  if ( header->matches( shm_ptr ) ) {
-	    // Image found in memory
+	    // matching memory segment found
 
 	    header->set( shm_ptr );
 	    data_size = header->dataSize();
 	    mem_size  = sizeof(SharedMemory_header_t) + header->size() + data_size;
 
 	    if (mem_size != (unsigned int) shm_segment.shm_segsz) {
-	      /*
-	      cout << msg_prefix << cred << "Inconsistent image found in memory (mem, "
-		   << mem_size << " vs. " << (unsigned int) shm_segment.shm_segsz
-		   << " bytes)" << cnormal << endl;
-	      */
 	      throw ShmInconsistentSegmentSizeException(mem_size,
 							(unsigned int) shm_segment.shm_segsz);
 	    }
@@ -378,13 +383,17 @@ SharedMemory::attach()
 	    header->set( shm_ptr );
 	    // header->printInfo();
 
-	    // cout << msg_prefix << "Found matching FireVision shared memory segment" << endl;
 	    shared_mem_id = shm_id;
 	    shared_mem    = shm_buf;
 	    memptr        = (char *)shm_ptr + header->size();
 
+	    if ( shm_header->semaphore != 0 ) {
+	      // Houston, we've got a semaphore, open it!
+	      addSemaphore();
+	    }
+
 	  } else {
-	    // not the wanted image
+	    // not the wanted memory segment
 	    shmdt(shm_buf);
 	  }
 	} else {
@@ -392,27 +401,22 @@ SharedMemory::attach()
 	  shmdt(shm_buf);
 	}
       } // else could not attach, ignore
-
     }
   }
 
   if ((memptr == NULL) && ! is_read_only && should_create) {
     // try to create a new shared memory segment
-    char proj     = 0;
-    char max_proj = 127;
-
     created = true;
+    key_t key = 1;
 
     data_size = header->dataSize();
     mem_size  = sizeof(SharedMemory_header_t) + header->size() + data_size;
-    while ((memptr == NULL) && (proj < max_proj)) {
+    while ((memptr == NULL) && (key < INT_MAX)) {
     // no shm segment found, create one
-      key_t key = ftok(".", proj++);
       shared_mem_id = shmget(key, mem_size, IPC_CREAT | IPC_EXCL | 0666);
       if (shared_mem_id != -1) {
 	shared_mem = shmat(shared_mem_id, NULL, 0);
 	if (shared_mem != (void *)-1) {
-	  // cout << msg_prefix << "Attached to shared mem" << endl;
 	  shm_magic_token = (char *)shared_mem;
 	  shm_header = (SharedMemory_header_t *)shared_mem + MagicTokenSize;
 	  memptr     = (char *)shared_mem + MagicTokenSize
@@ -427,13 +431,16 @@ SharedMemory::attach()
 		                                 + sizeof(SharedMemory_header_t));
 	} else {
 	  // It didn't work out, destroy shared mem and try again
-	  //cout << msg_prefix << flush;
-          // perror("Could not attach to created shmem segment");
 	  shmctl(shared_mem_id, IPC_RMID, NULL);
 	  throw ShmCouldNotAttachException("Could not create shared memory segment");
 	}
       } else {
-        if (errno == EINVAL) {
+	if (errno == EEXIST) {
+	  // non-free key number, try next one
+	  // note: we don't care about existing shared memory regions as we scanned
+	  // them before already!
+	  ++key;
+	} else if (errno == EINVAL) {
 	  throw ShmCouldNotAttachException("Could not attach, segment too small or too big");
 	} else {
 	  throw ShmCouldNotAttachException("Could not attach, shmget failed");
@@ -528,12 +535,12 @@ SharedMemory::isDestroyed()
 
 /** Check if memory can be swapped out.
  * This method can be used to check if the memory can be swapped.
- * @return true, if the memory cannot be swapped, false otherwise
+ * @return true, if the memory can be swapped, false otherwise
  */
 bool
-SharedMemory::isLocked()
+SharedMemory::isSwapable()
 {
-  return isLocked(shared_mem_id);
+  return isSwapable(shared_mem_id);
 }
 
 
@@ -551,6 +558,23 @@ SharedMemory::isValid()
 }
 
 
+/** Check if memory segment is protected.
+ * This method can be used to determine if a semaphore has been associated to
+ * this shared memory segment. Locking is not guaranteed, it depends on the
+ * application. Use lock(), tryLock() and unlock() appropriately. You can do
+ * this always, also if you start with unprotected memory. The operations are
+ * just noops in that case. Protection can be enabled by calling addSemaphore().
+ * If a memory segment was protected when it was opened it is automatically
+ * opened in protected mode.
+ * @return true, if semaphore is associated to memory, false otherwise
+ */
+bool
+SharedMemory::isProtected()
+{
+  return (semset != NULL);
+}
+
+
 /** Set deletion behaviour.
  * This has the same effect as the destroy_on_delete parameter given to the
  * constructor.
@@ -561,6 +585,91 @@ void
 SharedMemory::setDestroyOnDelete(bool destroy)
 {
   destroy_on_delete = destroy;
+}
+
+
+/** Add semaphore to shared memory segment.
+ * This adds a semaphore to the system and puts its key in the shared memory
+ * segment header. The semaphore can then be protected via the semaphore by
+ * appropriate locking. If a semaphore has been assigned to the shared memory
+ * segment already but after the segment was opened the semaphore is opened
+ * and no new semaphore is created.
+ */
+void
+SharedMemory::addSemaphore()
+{
+  if (semset != NULL)  return;
+
+  if ( shm_header->semaphore != 0 ) {
+    // a semaphore has been created but not been opened
+    semset = new SemaphoreSet( shm_header->semaphore,
+			       /* num sems    */ 1,
+			       /* create      */ false,
+			       /* dest on del */ false );
+  } else {
+    semset = new SemaphoreSet( /* num sems    */ 1,
+			       /* dest on del */ true );
+    // one and only one may lock the memory
+    semset->unlock();
+    shm_header->semaphore = semset->getKey();
+  }
+}
+
+
+/** Lock shared memory segment.
+ * If the shared memory segment is protected by an associated semaphore it can be
+ * locked with this semaphore by calling this method.
+ * @see isProtected()
+ * @see unlock()
+ * @see tryLock()
+ */
+void
+SharedMemory::lock()
+{
+  if ( semset == NULL ) {
+    return;
+  }
+  semset->lock();
+}
+
+
+/** Try to aquire lock on shared memory segment.
+ * If the shared memory segment is protected by an associated semaphore it can be
+ * locked. With tryLock() you can try to aquire the lock, but the method will not
+ * block if it cannot get the lock but simply return false. This can be used to detect
+ * if memory is locked:
+ * @code
+ * if (mem->tryLock()) {
+ *   // was not locked
+ *   mem->unlock();
+ * } else {
+ *   // is locked
+ * }
+ * @endcode
+ * @see isProtected()
+ * @see unlock()
+ * @see lock()
+ */
+bool
+SharedMemory::tryLock()
+{
+  if ( semset == NULL )  return false;
+  
+  return semset->tryLock();
+}
+
+
+/** Unlock memory.
+ * If the shared memory segment is protected by an associated semaphore it can be
+ * locked. With unlock() you lift the lock on the memory. Be aware that unlocking
+ * a not-locked piece of memory will result in havoc and insanity! Have only exactly
+ * guaranteed pairs of lock/successful tryLock() and unlock()!
+ */
+void
+SharedMemory::unlock()
+{
+  if ( semset == NULL )  return;
+  semset->unlock();
 }
 
 
@@ -593,16 +702,16 @@ SharedMemory::isDestroyed(int shm_id)
 /** Check if memory can be swapped out.
  * This method can be used to check if the memory can be swapped.
  * @param shm_id ID of the shared memory segment.
- * @return true, if the memory cannot be swapped, false otherwise
+ * @return true, if the memory can be swapped, false otherwise
  */
 bool
-SharedMemory::isLocked(int shm_id)
+SharedMemory::isSwapable(int shm_id)
 {
   struct shmid_ds  shm_segment;
   struct ipc_perm *perm = &shm_segment.shm_perm;
 
-  if (shmctl(shm_id , IPC_STAT, &shm_segment ) < 0) {
-    return false;
+  if (shmctl(shm_id, IPC_STAT, &shm_segment ) < 0) {
+    return true;
   } else {
     return (perm->mode & SHM_LOCKED);
   }

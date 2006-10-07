@@ -34,6 +34,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
+#include <limits.h>
 
 #include <stdio.h>
 
@@ -101,7 +102,7 @@ union semun
  */
 SemaphoreSet::SemaphoreSet(const char *path, char id,
 			   int num_sems,
-			   bool destroy_on_delete, bool create)
+			   bool create, bool destroy_on_delete)
 {
   data = new SemaphoreSetData();
 
@@ -121,6 +122,76 @@ SemaphoreSet::SemaphoreSet(const char *path, char id,
   data->semid = semget(data->key, num_sems, data->semflg);
 
 }
+
+
+/** Constructor.
+ * Creates a new semaphore set. Will try to open the semaphore if it does
+ * exist. Tries to create if create is assured.
+ * @param key Key of semaphore set as printed by ipcs.
+ * @param num_sems Number of semaphores to generate in this set. Only used
+ *                 if semaphore set did not already exist and create is
+ *                 assured.
+ * @param destroy_on_delete If true semaphore set is destroyed if instance
+ *                          is deleted.
+ * @param create If true semaphore set is created if it does not exist.
+ */
+SemaphoreSet::SemaphoreSet(int key,
+			   int num_sems,
+			   bool create, bool destroy_on_delete)
+{
+  data = new SemaphoreSetData();
+
+  if ( num_sems < 0 ) {
+    num_sems = - num_sems;
+  }
+
+  this->destroy_on_delete = destroy_on_delete;
+  data->num_sems = num_sems;
+
+  data->semflg = 0666;
+  if (create) {
+    data->semflg |= IPC_CREAT;
+  }
+
+  data->key   = key;
+  data->semid = semget(data->key, num_sems, data->semflg);
+}
+
+
+/** Constructor.
+ * Creates a new semaphore set with a new ID supplied by the system. The
+ * id can be queried with getID.
+ * @param num_sems Number of semaphores to generate in this set. Only used
+ *                 if semaphore set did not already exist and create is
+ *                 assured.
+ * @param destroy_on_delete If true semaphore set is destroyed if instance
+ *                          is deleted.
+ */
+SemaphoreSet::SemaphoreSet(int num_sems,
+			   bool destroy_on_delete)
+{
+  data = new SemaphoreSetData();
+
+  if ( num_sems < 0 ) {
+    num_sems = - num_sems;
+  }
+
+  this->destroy_on_delete = destroy_on_delete;
+  data->num_sems = num_sems;
+
+  data->semflg = 0666;
+  data->semflg |= IPC_CREAT;
+  data->semflg |= IPC_EXCL;  
+
+  for (data->key = 1; data->key < INT_MAX; data->key++) {
+    data->semid = semget(data->key, 1, data->semflg);
+    if ( data->semid != -1 ) {
+      // valid semaphore found
+      break;
+    }
+  }
+}
+
 
 /** Destructor */
 SemaphoreSet::~SemaphoreSet()
@@ -168,7 +239,6 @@ SemaphoreSet::isValid()
     }
   }
 }
-
 
 /** Lock resources on the semaphore set.
  * Locks num resources on semaphore sem_num.
@@ -277,4 +347,56 @@ SemaphoreSet::getVal(int sem_num)
   if ( data->semid == -1 )  throw SemInvalidException();
 
   return ( semctl(data->semid, sem_num, GETVAL, 0) != 0 );
+}
+
+
+/** Get key of semaphore.
+ * @return Key of semaphore as listed by ipcs.
+ */
+int
+SemaphoreSet::getKey()
+{
+  return data->key;
+}
+
+
+/** Set if semaphore set should be destroyed on delete.
+ * If this is set to true the semaphore set is destroyed from the system if this
+ * instance is deleted.
+ * @param destroy set to true, if semaphore set should be destroyed on delete,
+ * false otherwise
+ */
+void
+SemaphoreSet::setDestroyOnDelete(bool destroy)
+{
+  destroy_on_delete = destroy;
+}
+
+
+/* ==================================================================
+ * STATICs
+ */
+
+/** Get a non-zero free key
+ * Scans the key space sequentially until a non-zero unused key is found. Not
+ * that using this can cause a race-condition. You are in most cases better off
+ * using the appropriate constructor that automatically finds a free key.
+ * @return 0, if no free key could be found, otherwise the non-zero unused key
+ */
+int
+SemaphoreSet::getFreeKey()
+{
+  bool found = false;
+  int key;
+  int semid;
+  for (key = 1; key < INT_MAX; ++key) {
+    semid = semget(key, 1, IPC_CREAT | IPC_EXCL);
+    if ( semid != -1 ) {
+      // valid semaphore found
+      semctl(semid, 0, IPC_RMID, 0);
+      found = true;
+      break;
+    }
+  }
+  return (found ? key : 0);
 }

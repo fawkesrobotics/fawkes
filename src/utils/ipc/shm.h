@@ -57,13 +57,19 @@ class SharedMemory
 
   bool             isReadOnly();
   bool             isDestroyed();
-  bool             isLocked();
+  bool             isSwapable();
   bool             isValid();
   bool             isCreator();
+  bool             isProtected();
   void *           getMemPtr();
   unsigned int     getDataSize();
   void             set(void *memptr);
   void             setDestroyOnDelete(bool destroy);
+  void             addSemaphore();
+
+  void             lock();
+  bool             tryLock();
+  void             unlock();
 
   static void      list(char *magic_token,
 			SharedMemoryHeader *header, SharedMemoryLister *lister);
@@ -75,7 +81,7 @@ class SharedMemory
 			  SharedMemoryHeader *header);
 
   static bool      isDestroyed(int shm_id);
-  static bool      isLocked(int shm_id);
+  static bool      isSwapable(int shm_id);
 
  protected:
 
@@ -111,7 +117,7 @@ class SharedMemory
   int            shared_mem_id;
 
   bool           created;
-  // SemaphoreSet  *semset;
+  SemaphoreSet  *semset;
 
 };
 
