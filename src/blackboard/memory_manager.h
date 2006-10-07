@@ -31,6 +31,7 @@
 class BlackBoardSharedMemoryHeader;
 class SharedMemory;
 class Mutex;
+class SemaphoreSet;
 
 // define our own list type std::list is way too fat
 /** Chunk lists as stored in BlackBoard shared memory segment.
@@ -43,15 +44,19 @@ typedef struct chunk_list_t {
   unsigned int   overhang;	/**< number of overhanging bytes in this chunk */
 };
 
+// May be added later if we want/need per chunk semaphores
+//  int            semset_key;	/* key of semaphore for this chunk */
+//  unsigned int   reserved   :16;/* reserved bytes */
+//  unsigned int   semset_sem : 8;/* semaphore number in semaphore set */
+
 
 class BlackBoardMemoryManager
 {
 
  public:
-  BlackBoardMemoryManager(unsigned int memsize, unsigned int version,
+  BlackBoardMemoryManager(unsigned int memsize, unsigned int version, bool master,
 			  const char *shmem_token = "FawkesBlackBoard");
   ~BlackBoardMemoryManager();
-
 
   void * alloc(unsigned int num_bytes);
   void   free(void *chunk_ptr);

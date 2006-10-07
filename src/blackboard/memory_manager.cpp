@@ -60,7 +60,7 @@
  */
 class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
 {
- protected:
+ private:
   /** This struct determines the header in the shared memory segment
    */
   typedef struct {
@@ -225,11 +225,15 @@ class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
  * @param memsize the size of the shared memory segment (data without header)
  * that is being managed.
  * @param version version of the BlackBoard
+ * @param master master mode, this memory manager has to be owner of shared memory segment
  * @param shmem_token shared memory token, passed to SharedMemory
+ * @exception BBMemMgrNotMasterException A matching shared memory segment
+ * has already been created.
  * @see SharedMemory::SharedMemory()
  */
 BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
 						 unsigned int version,
+						 bool master,
 						 const char *shmem_token)
 {
 
@@ -243,11 +247,16 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
 			   /* read only   */ false,
 			   /* create      */ true,
 			   /* dest on del */ true);
-  if ( ! shmem->isCreator() ) {
-    // this might mean trouble, throw general exception for now,
+
+  if ( master && ! shmem->isCreator() ) {
+    // this might mean trouble, we are throw general exception for now,
     // needs more useful handling later
-    throw Exception("Not exclusive owner of shared memory segment");
+    throw BBMemMgrNotMasterException("Not owner of shared memory segment");
   }
+
+  // protect memory, needed for list operations in memory, otherwise
+  // we will have havoc and insanity
+  shmem->addSemaphore();
 
   chunk_list_t *f = (chunk_list_t *)shmem->getMemPtr();
   f->ptr  = (char *)f + sizeof(chunk_list_t);
@@ -283,6 +292,7 @@ void *
 BlackBoardMemoryManager::alloc(unsigned int num_bytes)
 {
   mutex->lock();
+  shmem->lock();
   // search for smallest chunk just big enough for desired size
   chunk_list_t *l = shmem_header->getFreeListHead();
 
@@ -296,15 +306,25 @@ BlackBoardMemoryManager::alloc(unsigned int num_bytes)
     l = l->next;
   }
 
-
   if ( f == NULL ) {
     // Doh, did not find chunk
+    shmem->unlock();
     mutex->unlock();
     throw OutOfMemoryException("BlackBoard ran out of memory");
   }
 
   // remove chunk from free_list
   shmem_header->setFreeListHead( list_remove(shmem_header->getFreeListHead(), f) );
+
+  /*
+  // only chunk's semaphore
+  if ( ptr_sems.find( f->ptr ) != ptr_sems.end() ) {
+    SemaphoreSet *s = ptr_sems[f->ptr];
+    delete s;
+    ptr_sems.erase( f->ptr );
+    f->semset_key = 0;
+  }
+  */
 
   // our old free list chunk is now our new alloc list chunk
   // check if there is free space beyond the requested size that makes it worth
@@ -315,6 +335,7 @@ BlackBoardMemoryManager::alloc(unsigned int num_bytes)
     nfc->ptr = (char *)nfc + sizeof(chunk_list_t);
     nfc->size = f->size - num_bytes - sizeof(chunk_list_t);
     nfc->overhang = 0;
+    
     shmem_header->setFreeListHead( list_add(shmem_header->getFreeListHead(), nfc) );
 
     f->size = num_bytes;
@@ -328,6 +349,7 @@ BlackBoardMemoryManager::alloc(unsigned int num_bytes)
   // alloc new chunk
   shmem_header->setAllocListHead( list_add(shmem_header->getAllocListHead(), f) );
 
+  shmem->unlock();
   mutex->unlock();
   return f->ptr;
 }
@@ -347,6 +369,7 @@ void
 BlackBoardMemoryManager::free(void *chunk_ptr)
 {
   mutex->lock();
+  shmem->lock();
 
   // find chunk in alloc_chunks
   chunk_list_t *ac = list_find_ptr(shmem_header->getAllocListHead(), chunk_ptr);
@@ -364,6 +387,7 @@ BlackBoardMemoryManager::free(void *chunk_ptr)
   // merge adjacent regions
   cleanup_free_chunks();
 
+  shmem->unlock();
   mutex->unlock();
 }
 
