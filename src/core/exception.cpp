@@ -28,6 +28,10 @@
 #include <core/exception.h>
 #include <core/threading/mutex.h>
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -193,6 +197,7 @@ Exception::Exception(const Exception &exc)
  */
 Exception::Exception()
 {
+  messages_mutex = new Mutex();
   messages = NULL;
   messages_end = NULL;
   messages_iterator = NULL;
@@ -217,17 +222,21 @@ Exception::~Exception()
 
 
 /** Append messages to the message list.
- * @param msg Message to append.
+ * @param format format of the message to append, see printf(3) for details about formatting
+ * options.
  */
 void
-Exception::append(const char *msg)
+Exception::append(const char *format, ...)
 {
   // do not append empty messages
-  if (msg == NULL)  return;
+  if (format == NULL)  return;
 
+  va_list arg;
+  va_start(arg, format);
   messages_mutex->lock();
-  append_nolock(msg);
+  append_nolock(format, arg);
   messages_mutex->unlock();
+  va_end(arg);
 }
 
 
@@ -251,6 +260,36 @@ Exception::append_nolock(const char *msg)
     message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
     ml->next = NULL;
     ml->msg = strdup(msg);
+    messages_end->next = ml;
+    messages_end = ml;
+  }
+}
+
+
+/** Append messages without lock by formatted string.
+ * this can be used to append messages without locking the mutex if the mutex
+ * has been locked already to append many messages and keep their order intact
+ * and thus to prevent messages to be appended inbetween.
+ * Used for example in copy constructor.
+ * @param format format of the message to be appended
+ * @param ap argument va_list for format
+ */
+void
+Exception::append_nolock(const char *format, va_list ap)
+{
+  char *msg;
+  vasprintf(&msg, format, ap);
+
+  if ( messages == NULL ) {
+    // This is our first message
+    messages = (message_list_t *)malloc(sizeof(message_list_t));
+    messages->next = NULL;
+    messages->msg  = msg;
+    messages_end = messages;
+  } else {
+    message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
+    ml->next = NULL;
+    ml->msg = msg;
     messages_end->next = ml;
     messages_end = ml;
   }

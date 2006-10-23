@@ -28,6 +28,9 @@
 #ifndef __CORE_EXCEPTION_H_
 #define __CORE_EXCEPTION_H_
 
+// needed for va_list
+#include <stdarg.h>
+
 class Mutex;
 
 class Exception {
@@ -39,7 +42,7 @@ class Exception {
 
   virtual const char * c_str();
   virtual void raise();
-  void append(const char *msg);
+  void append(const char *format, ...);
   void printTrace();
 
   Exception& operator=(const Exception &exc);
@@ -48,6 +51,7 @@ class Exception {
   Exception();
 
   void append_nolock(const char *msg);
+  void append_nolock(const char *format, va_list va);
   void append_nocopy(char *msg);
   void copy_messages(const Exception &exc);
 
