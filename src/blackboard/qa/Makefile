@@ -21,13 +21,16 @@
 
 BASEDIR = ../../..
 
-CFLAGS = -g
+CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\"
 
-LIBS_qa_bb_memmgr = core utils
-OBJS_qa_bb_memmgr =	qa_bb_memmgr.o		\
-			../memory_manager.o
+LIBS_qa_bb_memmgr = core utils blackboard
+OBJS_qa_bb_memmgr = qa_bb_memmgr.o
 
-BINS_all =	$(BINDIR)/qa_bb_memmgr
+LIBS_qa_bb_interface = core utils interfaces blackboard
+OBJS_qa_bb_interface = qa_bb_interface.o
+
+BINS_all =	$(BINDIR)/qa_bb_memmgr		\
+		$(BINDIR)/qa_bb_interface
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

@@ -58,7 +58,7 @@ class BBInconsistentMemoryException : public Exception {
   }
 };
 
-/** Thrown when BlackBoard is not owner of shared memory segment
+/** Thrown if BlackBoard is not owner of shared memory segment
  * This exception is thrown by the memory manager if the memory is not owned but
  * master mode is required.
  * corrupted, for example if there are bytes that belong to neither a free chunk nor
@@ -74,6 +74,64 @@ class BBMemMgrNotMasterException : public Exception {
   {
     append(msg);
   }
+};
+
+
+/** Thrown if shared memory could not be opened. Can happen only if opening the
+ * segment as non-master.
+ */
+class BBMemMgrCannotOpenException : public Exception {
+ public:
+  /** Constructor */
+  BBMemMgrCannotOpenException() : Exception("Cannot open shared memory segment") {}
+};
+
+
+/** Thrown in interfaces lib could not be found.
+ */
+class BlackBoardCannotFindInterfaceModuleException : public Exception {
+ public:
+  /** Constructor */
+  BlackBoardCannotFindInterfaceModuleException() : Exception("Cannot find interface module") {}
+};
+
+
+/** Thrown if no definition of interface or interface generator found.
+ */
+class BlackBoardInterfaceNotFoundException : public Exception {
+ public:
+  /** Constructor
+   * @param type type of interface that could not be found
+   */
+  BlackBoardInterfaceNotFoundException(const char *type) : Exception()
+  {
+    append("Interface of type '%s' not found.", type);
+  }
+};
+
+
+/** Thrown if a writer is already active on an interface that writing has
+ * been requested for.
+ */
+class BlackBoardWriterActiveException : public Exception {
+ public:
+  /** Constructor
+   * @param type type of interface that could not be found
+   * @param id identifier of the interface
+   */
+  BlackBoardWriterActiveException(const char *id, const char *type) : Exception()
+  {
+    append("There is already a writer on interface '%s' of type '%s'", id, type);
+  }
+};
+
+
+/** Thrown if BlackBoard is opened as non-master with no master alive.
+ */
+class BlackBoardNoMasterAliveException : public Exception {
+ public:
+  /** Constructor*/
+  BlackBoardNoMasterAliveException() : Exception("No master BlackBoard alive") {}
 };
 
 #endif

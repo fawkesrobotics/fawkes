@@ -30,6 +30,7 @@
 
 #include <blackboard/memory_manager.h>
 #include <blackboard/exceptions.h>
+#include <blackboard/bbconfig.h>
 
 #include <core/exceptions/system.h>
 
@@ -52,8 +53,6 @@ signal_handler(int signum)
 
 
 #define NUM_CHUNKS 5
-// 2 MB
-#define MEMSIZE (2 * 1024 * 1024)
 
 int
 main(int argc, char **argv)
@@ -61,8 +60,8 @@ main(int argc, char **argv)
 
   signal(SIGINT, signal_handler);
 
-  BlackBoardMemoryManager *mm = new BlackBoardMemoryManager( MEMSIZE,
-							    1 /* version, don't care */,
+  BlackBoardMemoryManager *mm = new BlackBoardMemoryManager( BLACKBOARD_MEMORY_SIZE,
+							    BLACKBOARD_VERSION,
 							    "FawkesBBMemMgrQA" /* token */ );
 
   void *m[NUM_CHUNKS];
@@ -130,7 +129,7 @@ main(int argc, char **argv)
     if (rand() < RAND_MAX / 2) {
       cout << "a" << flush;
       // alloc
-      unsigned int s = (rand() % MEMSIZE) / 1000;
+      unsigned int s = (rand() % BLACKBOARD_MEMORY_SIZE) / 1000;
       if ( s < 20 ) {
 	// min 20 bytes
 	s = 20;
@@ -186,6 +185,7 @@ main(int argc, char **argv)
 	cout << "Overhang detected, allocated chunks:" << endl;
 	mm->printAllocatedChunksInfo();
       }
+      // sleep(10);
     }
     ++modcount;
     usleep(0);

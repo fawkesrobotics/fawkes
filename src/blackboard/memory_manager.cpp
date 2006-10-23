@@ -27,6 +27,7 @@
 
 #include <blackboard/memory_manager.h>
 #include <blackboard/exceptions.h>
+#include <blackboard/shmem_header.h>
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
@@ -34,6 +35,7 @@
 #include <core/threading/mutex.h>
 
 #include <utils/ipc/shm.h>
+#include <utils/ipc/shm_exceptions.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -48,136 +50,13 @@
  */
 #define BBMM_MIN_FREE_CHUNK_SIZE sizeof(chunk_list_t)
 
-/** BlackBoard Shared Memory Header
- * This class is used identify BlackBoard shared memory headers and
- * to interact with the management data in the shared memory segment.
- * The basic options stored in the header is a version identifier
- * and pointers to the list heads of the free and allocated chunk
- * lists.
- *
- * @author Tim Niemueller
- * @see SharedMemoryHeader
- */
-class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
-{
- private:
-  /** This struct determines the header in the shared memory segment
-   */
-  typedef struct {
-    unsigned int  version;		/**< version of the BB */
-    chunk_list_t *free_list_head;	/**< pointer to the free chunks list head */
-    chunk_list_t *alloc_list_head;	/**< pointer to the allocated chunks list head */
-  } BlackBoardSharedMemoryHeaderData;
-
- public:
-  /** Constructor
-   * @param data_size the size of the shared memory segment without the header
-   *                  that should be allocated.
-   * @param version The BB version to store in the shared memory segment to prevent
-   *                conflicts with older software.
-   */
-  BlackBoardSharedMemoryHeader(unsigned int data_size, unsigned int version)
-  {
-    this->data_size      = data_size;
-    this->version        = version;
-    data = NULL;
-  }
-
-  /** Destructor */
-  virtual ~BlackBoardSharedMemoryHeader()
-  {
-  }
-
-  /** Check if the given shared memory segment is a Fawkes BB segment
-   * @param memptr Ptr to the segment
-   * @return true if the version matches, false otherwise
-   */
-  virtual bool         matches(void *memptr)
-  {
-    BlackBoardSharedMemoryHeaderData *md = (BlackBoardSharedMemoryHeaderData *)memptr;
-    return (version == md->version);
-  }
-
-  /** Get the size of the header data.
-   * @return size of the header data
-   */
-  virtual unsigned int size()
-  {
-    return sizeof(BlackBoardSharedMemoryHeaderData);
-  }
-
-  /** Initialize shared memory segment
-   * This copies basic management header data into the shared memory segment.
-   * Basically sets the version and list heads to NULL
-   * @param memptr pointer to the memory
-   */
-  virtual void         initialize(void *memptr)
-  {
-    data = (BlackBoardSharedMemoryHeaderData *)memptr;
-    data->version = version;
-    data->free_list_head = NULL;
-    data->alloc_list_head = NULL;
-  }
-
-  /** Set data of this header
-   * Sets the internal pointer to the shared memory header data 
-   * to the data retrieved from the shared memory segment.
-   * @param memptr pointer to the memory
-   */
-  virtual void         set(void *memptr)
-  {
-    data = (BlackBoardSharedMemoryHeaderData *)memptr;
-  }
-
-  /** Data segment size.
-   * @return size of the data segment without header
-   */
-  virtual unsigned int dataSize()
-  {
-    return data_size;
-  }
-
-  /** Get the head of the free chunks list.
-   * @return pointer to the free list head
-   */
-  chunk_list_t * getFreeListHead()
-  {
-    return data->free_list_head;
-  }
-
-  /** Get the head of the allocated chunks list.
-   * @return pointer to the allocated list head
-   */
-  chunk_list_t * getAllocListHead()
-  {
-    return data->alloc_list_head;
-  }
-
-  /** Set the head of the free chunks list.
-   * @param flh pointer to the new free list head
-   */
-  void setFreeListHead(chunk_list_t *flh)
-  {
-    data->free_list_head = flh;
-  }
-
-  /** Set the head of the allocated chunks list.
-   * @param alh pointer to the new allocated list head
-   */
-  void setAllocListHead(chunk_list_t *alh)
-  {
-    data->alloc_list_head = alh;
-  }
-
- private:
-  unsigned int data_size;
-  unsigned int version;
-  BlackBoardSharedMemoryHeaderData *data;
-};
+// shortcuts
+#define chunk_ptr(a)  (chunk_list_t *)shmem->ptr(a)
+#define chunk_addr(a) (chunk_list_t *)shmem->addr(a)
 
 
 /** @class BlackBoardMemoryManager blackboard/memory_manager.h
- * BlackBoard memory manager
+ * BlackBoard memory manager.
  * This class is used by the BlackBoard to manage the memory in the shared memory
  * segment. A simple strategy is used for memory management as the expected use case
  * is rather simple as well.
@@ -243,28 +122,46 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
   // semaphore, if that fails, throw an exception
   
   shmem_header = new BlackBoardSharedMemoryHeader(memsize, version);
-  shmem = new SharedMemory(shmem_token, shmem_header,
-			   /* read only   */ false,
-			   /* create      */ true,
-			   /* dest on del */ true);
+  try {
+    shmem = new SharedMemory(shmem_token, shmem_header,
+			     /* read only   */ false,
+			     /* create      */ master,
+			     /* dest on del */ master);
+    shmem_header->setSharedMemory(shmem);
+  } catch ( ShmCouldNotAttachException &e ) {
+    throw BBMemMgrCannotOpenException();
+  }
+
+  if ( ! shmem->isValid() ) {
+    throw BBMemMgrCannotOpenException();
+  }
 
   if ( master && ! shmem->isCreator() ) {
-    // this might mean trouble, we are throw general exception for now,
-    // needs more useful handling later
+    // this might mean trouble, we throw an exception if we are not master but
+    // this was requested
     throw BBMemMgrNotMasterException("Not owner of shared memory segment");
   }
 
-  // protect memory, needed for list operations in memory, otherwise
-  // we will have havoc and insanity
-  shmem->addSemaphore();
+  printf("Shared memory base pointer: 0x%x\n", (unsigned int)shmem->getMemPtr());
 
-  chunk_list_t *f = (chunk_list_t *)shmem->getMemPtr();
-  f->ptr  = (char *)f + sizeof(chunk_list_t);
-  f->size = memsize - sizeof(chunk_list_t);
-  f->overhang = 0;
-  f->next = NULL;
-  shmem_header->setFreeListHead(f);
-  shmem_header->setAllocListHead(NULL);
+  if ( master ) {
+    // protect memory, needed for list operations in memory, otherwise
+    // we will have havoc and insanity
+    shmem->addSemaphore();
+
+    // This should not be swapped. Will only worked with greatly extended
+    // ressource limit for this process!
+    shmem->setSwapable(false);
+
+    chunk_list_t *f = (chunk_list_t *)shmem->getMemPtr();
+    f->ptr  = (char *)f + sizeof(chunk_list_t);
+    f->size = memsize - sizeof(chunk_list_t);
+    f->overhang = 0;
+    f->next = NULL;
+
+    shmem_header->setFreeListHead(f);
+    shmem_header->setAllocListHead(NULL);
+  }
 
   mutex = new Mutex();
 }
@@ -282,17 +179,16 @@ BlackBoardMemoryManager::~BlackBoardMemoryManager()
 
 /** Allocate memory.
  * This will allocate memory in the shared memory segment. The strategy is described
- * in the class description.
+ * in the class description. Note: this method does NOT lock the shared memory
+ * system. Chaos and havoc will come down upon you if you do not ensure locking!
  * @exception OutOfMemoryException thrown if not enough free memory is available to
  *                                 accommodate a chunk of the desired size
  * @param num_bytes number of bytes to allocate
  * @return pointer to the memory chunk
  */
 void *
-BlackBoardMemoryManager::alloc(unsigned int num_bytes)
+BlackBoardMemoryManager::alloc_nolock(unsigned int num_bytes)
 {
-  mutex->lock();
-  shmem->lock();
   // search for smallest chunk just big enough for desired size
   chunk_list_t *l = shmem_header->getFreeListHead();
 
@@ -303,7 +199,7 @@ BlackBoardMemoryManager::alloc(unsigned int num_bytes)
 	 ( (f == NULL) || (l->size < f->size) ) ) { // no chunk found or current chunk smaller
       f = l;
     }
-    l = l->next;
+    l = chunk_ptr(l->next);
   }
 
   if ( f == NULL ) {
@@ -332,7 +228,7 @@ BlackBoardMemoryManager::alloc(unsigned int num_bytes)
   if ( f->size >= (num_bytes + BBMM_MIN_FREE_CHUNK_SIZE + sizeof(chunk_list_t)) ) {
     // we will have a new free chunk afterwards
     chunk_list_t *nfc = (chunk_list_t *)((char *)f + sizeof(chunk_list_t) + num_bytes);
-    nfc->ptr = (char *)nfc + sizeof(chunk_list_t);
+    nfc->ptr = shmem->addr((char *)nfc + sizeof(chunk_list_t));
     nfc->size = f->size - num_bytes - sizeof(chunk_list_t);
     nfc->overhang = 0;
     
@@ -349,9 +245,28 @@ BlackBoardMemoryManager::alloc(unsigned int num_bytes)
   // alloc new chunk
   shmem_header->setAllocListHead( list_add(shmem_header->getAllocListHead(), f) );
 
+  return shmem->ptr(f->ptr);
+}
+
+
+/** Allocate memory.
+ * This will allocate memory in the shared memory segment. The strategy is described
+ * in the class description.
+ * @exception OutOfMemoryException thrown if not enough free memory is available to
+ *                                 accommodate a chunk of the desired size
+ * @param num_bytes number of bytes to allocate
+ * @return pointer to the memory chunk
+ */
+void *
+BlackBoardMemoryManager::alloc(unsigned int num_bytes)
+{
+  void * ptr;
+  mutex->lock();
+  shmem->lock();
+  ptr = alloc_nolock(num_bytes);
   shmem->unlock();
   mutex->unlock();
-  return f->ptr;
+  return ptr;
 }
 
 
@@ -360,19 +275,19 @@ BlackBoardMemoryManager::alloc(unsigned int num_bytes)
  * that was returned by alloc(). You may not give a pointer inside a memory chunk or
  * even worse outside of it! See the class description for a brief description of
  * the strategy used.
- * @param chunk_ptr pointer to the chunk of memory
+ * @param ptr pointer to the chunk of memory
  * @exception BlackBoardMemMgrInvalidPointerException a pointer that has not been
  * previously returned by alloc() has been given and could not be found in the
  * allocated chunks list.
  */
 void
-BlackBoardMemoryManager::free(void *chunk_ptr)
+BlackBoardMemoryManager::free(void *ptr)
 {
   mutex->lock();
   shmem->lock();
 
   // find chunk in alloc_chunks
-  chunk_list_t *ac = list_find_ptr(shmem_header->getAllocListHead(), chunk_ptr);
+  chunk_list_t *ac = list_find_ptr(shmem_header->getAllocListHead(), chunk_addr(ptr));
   if ( ac == NULL ) {
     throw BlackBoardMemMgrInvalidPointerException();
   }
@@ -413,42 +328,44 @@ BlackBoardMemoryManager::check()
   while ( f || a ) {
     if ( f == NULL ) {
       mem += a->size + sizeof(chunk_list_t);
-      if ( a->next ) {
+      t = chunk_ptr(a->next);
+      if ( t ) {
 	// check if a is continuous
 	void *next = (char *)a->ptr + a->size + sizeof(chunk_list_t);
-	if ( next != a->next->ptr ) {
+	if ( next != t->ptr ) {
 	  throw BBInconsistentMemoryException("non-contiguos allocated memory");	
 	}
       }
-      a = a->next;
+      a = t;
     } else if ( a == NULL ) {
       mem += f->size + sizeof(chunk_list_t);
-      if ( f->next ) {
+      t = chunk_ptr(f->next);
+      if ( t ) {
 	// check if f is continuous
 	void *next = (char *)f->ptr + f->size + sizeof(chunk_list_t);
-	if ( next != f->next->ptr ) {
+	if ( next != t->ptr ) {
 	  throw BBInconsistentMemoryException("non-contiguos allocated memory");	
 	}
       }
-      f = f->next;
+      f = t;
     } else if ( f->ptr == a->ptr ) {
       throw BBInconsistentMemoryException("ptr cannot be free and allocated at the same time");
     } else if ( f->ptr < a->ptr ) {
       mem += f->size + sizeof(chunk_list_t);
       void *next = (char *)f->ptr + f->size;
-      t = f->next;
+      t = chunk_ptr(f->next);
       if ( (next != t) && (next != a) ) {
 	throw BBInconsistentMemoryException("there are unallocated bytes between chunks (f)");
       }
-      f = f->next;
+      f = t;
     } else {
       mem += a->size + sizeof(chunk_list_t);
       void *next = (char *)a->ptr + a->size;
-      t = a->next;
+      t = chunk_ptr(a->next);
       if ( (next != t) && (next != f) ) {
 	throw BBInconsistentMemoryException("there are unallocated bytes between chunks (a)");
       }
-      a = a->next;
+      a = t;
     }
   }
 
@@ -462,7 +379,7 @@ BlackBoardMemoryManager::check()
  * Prints out a formatted list of free chunks.
  */
 void
-BlackBoardMemoryManager::printFreeChunksInfo()
+BlackBoardMemoryManager::printFreeChunksInfo() const
 {
   list_print_info( shmem_header->getFreeListHead() );
 }
@@ -472,7 +389,7 @@ BlackBoardMemoryManager::printFreeChunksInfo()
  * Prints out a formatted list of allocated chunks.
  */
 void
-BlackBoardMemoryManager::printAllocatedChunksInfo()
+BlackBoardMemoryManager::printAllocatedChunksInfo() const
 {
   list_print_info( shmem_header->getAllocListHead() );
 }
@@ -484,7 +401,7 @@ BlackBoardMemoryManager::printAllocatedChunksInfo()
  * (see class description about overhanging bytes).
  */
 void
-BlackBoardMemoryManager::printPerformanceInfo()
+BlackBoardMemoryManager::printPerformanceInfo() const
 {
   printf("free chunks: %6u, alloc chunks: %6u, max free: %10u, max alloc: %10u, overhang: %10u\n",
 	 list_length( shmem_header->getFreeListHead()),
@@ -499,7 +416,7 @@ BlackBoardMemoryManager::printPerformanceInfo()
  * @return maximum free chunk size
  */
 unsigned int
-BlackBoardMemoryManager::getMaxFreeSize()
+BlackBoardMemoryManager::getMaxFreeSize() const
 {
   chunk_list_t *m = list_get_biggest( shmem_header->getFreeListHead() );
   if ( m == NULL ) {
@@ -510,13 +427,57 @@ BlackBoardMemoryManager::getMaxFreeSize()
 }
 
 
+/** Lock memory.
+ * Locks the whole memory segment used and managed by the memory manager. Will
+ * aquire local mutex lock and global semaphore lock in shared memory segment.
+ */
+void
+BlackBoardMemoryManager::lock()
+{
+  mutex->lock();
+  shmem->lock();
+}
+
+
+/** Try to lock memory.
+ * Tries to lock the whole memory segment used and managed by the memory manager. Will
+ * aquire local mutex lock and global semaphore lock in shared memory segment.
+ * The lock has been successfully aquired if both of these locks could be aquired!
+ * @return true, if the lock could be aquired, false otherwise.
+ */
+bool
+BlackBoardMemoryManager::tryLock()
+{
+  if ( mutex->tryLock() ) {
+    if ( shmem->tryLock() ) {
+      return true;
+    } else {
+      mutex->unlock();
+    }
+  }
+
+  return false;
+}
+
+
+/** Unlock memory.
+ * Releases the lock hold on the shared memory segment and the local mutex lock.
+ */
+void
+BlackBoardMemoryManager::unlock()
+{
+  shmem->unlock();
+  mutex->unlock();
+}
+
+
 /** Get maximum alloced memory size.
  * This method gives information about the maximum allocated chunk size and thus
  * the maximum of memory that has been be allocated in one chunk.
  * @return maximum allocated chunk size
  */
 unsigned int
-BlackBoardMemoryManager::getMaxAllocatedSize()
+BlackBoardMemoryManager::getMaxAllocatedSize() const
 {
   chunk_list_t *m = list_get_biggest( shmem_header->getAllocListHead() );
   if ( m == NULL ) {
@@ -533,13 +494,13 @@ BlackBoardMemoryManager::getMaxAllocatedSize()
  * @return number of overhanging bytes
  */
 unsigned int
-BlackBoardMemoryManager::getOverhangSize()
+BlackBoardMemoryManager::getOverhangSize() const
 {
   unsigned int overhang = 0;
   chunk_list_t *a = shmem_header->getAllocListHead();
   while ( a ) {
     overhang += a->overhang;
-    a = a->next;
+    a = chunk_ptr(a->next);
   }
   return overhang;
 }
@@ -554,18 +515,21 @@ BlackBoardMemoryManager::cleanup_free_chunks()
 {
   bool modified = true;
   chunk_list_t *l;
-
+  chunk_list_t *n; // next
+	
   while (modified) {
     modified = false;
     l = shmem_header->getFreeListHead();
-    while ( l && l->next) {
-      if ( ((char *)l->ptr + l->size + sizeof(chunk_list_t)) == l->next->ptr ) {
+    n = chunk_ptr(l->next);
+    while ( l && n) {
+      if ( ((char *)l->ptr + l->size + sizeof(chunk_list_t)) == n->ptr ) {
 	// re-unite
-	l->size += l->next->size + sizeof(chunk_list_t);
-	l->next = l->next->next;
+	l->size += n->size + sizeof(chunk_list_t);
+	l->next = n->next;
 	modified = true;
       }
-      l = l->next;
+      l = n;
+      n = chunk_ptr(l->next);
     }
   }
 }
@@ -598,12 +562,12 @@ BlackBoardMemoryManager::list_remove(chunk_list_t *list, chunk_list_t *rmel)
 	p->next = l->next;
       } else {
 	// new head
-	new_head = l->next;
+	new_head = chunk_ptr(l->next);
       }
       break;
     }
     p = l;
-    l = l->next;
+    l = chunk_ptr(l->next);
   }
 
   return new_head;
@@ -629,11 +593,11 @@ BlackBoardMemoryManager::list_add(chunk_list_t *list, chunk_list_t *addel)
   while ( l ) {
     if ( addel->ptr < l->ptr ) {
       // add it here
-      addel->next = l;
+      addel->next = chunk_addr(l);
       if ( p != NULL ) {
 	// predecessor needs new successor
 	// before: p->next == l
-	p->next = addel;
+	p->next = chunk_addr(addel);
       } else {
 	new_head = addel;
       }
@@ -642,7 +606,7 @@ BlackBoardMemoryManager::list_add(chunk_list_t *list, chunk_list_t *addel)
       break;
     } else {
       p = l;
-      l = l->next;
+      l = chunk_ptr(l->next);
     }
   }
 
@@ -651,7 +615,7 @@ BlackBoardMemoryManager::list_add(chunk_list_t *list, chunk_list_t *addel)
     // p is last element of list and != NULL
     addel->next = NULL;
     if ( p ) {
-      p->next     = addel;
+      p->next     = chunk_addr(addel);
     } else {
       new_head = addel;
     }
@@ -675,10 +639,10 @@ BlackBoardMemoryManager::list_find_ptr(chunk_list_t *list, void *ptr)
       // found it
       return l;
     } else {
-      l = l->next;
+      l = chunk_ptr(l->next);
     }
   }
-  return l;
+  return NULL;
 }
 
 
@@ -688,15 +652,15 @@ BlackBoardMemoryManager::list_find_ptr(chunk_list_t *list, void *ptr)
  * @param list list with chunks to print
  */
 void
-BlackBoardMemoryManager::list_print_info(chunk_list_t *list)
+BlackBoardMemoryManager::list_print_info(const chunk_list_t *list) const
 {
-  chunk_list_t *l = list;
+  chunk_list_t *l = (chunk_list_t *)list;
   unsigned int i = 0;
 
   while ( l ) {
     printf("Chunk %3u:  0x%x   size=%10u bytes   overhang=%10u bytes\n",
 	   ++i, (unsigned int)l->ptr, l->size, l->overhang);
-    l = l->next;
+    l = chunk_ptr(l->next);
   }
 
 }
@@ -707,12 +671,12 @@ BlackBoardMemoryManager::list_print_info(chunk_list_t *list)
  * @return length of list
  */
 unsigned int
-BlackBoardMemoryManager::list_length(chunk_list_t *list)
+BlackBoardMemoryManager::list_length(const chunk_list_t *list) const
 {
   unsigned int l = 0;
   while ( list ) {
     ++l;
-    list = list->next;
+    list = chunk_ptr(list->next);
   }
   return l;
 }
@@ -723,15 +687,225 @@ BlackBoardMemoryManager::list_length(chunk_list_t *list)
  * @return biggest chunk in list
  */
 chunk_list_t *
-BlackBoardMemoryManager::list_get_biggest(chunk_list_t *list)
+BlackBoardMemoryManager::list_get_biggest(const chunk_list_t *list) const
 {
-  chunk_list_t *b = list;
-  while ( list ) {
-    if ( list->size > b->size ) {
-      b = list;
+  chunk_list_t *b = (chunk_list_t *)list;
+  chunk_list_t *l = (chunk_list_t *)list;
+  while ( l ) {
+    if ( l->size > b->size ) {
+      b = l;
     }
-    list = list->next;
+    l = chunk_ptr(l->next);
   }
 
   return b;
+}
+
+/** Get first element for chunk iteration.
+ * @return Iterator pointing to first memory chunk
+ */
+BlackBoardMemoryManager::ChunkIterator
+BlackBoardMemoryManager::begin()
+{
+  BlackBoardMemoryManager::ChunkIterator rv(shmem, shmem_header->getAllocListHead() );
+  return rv;
+}
+
+
+/** Get end of chunk list.
+ * This returns an iterator that points to the element just beyond the allocated
+ * chunk list.
+ * @return ChunkIterator pointing to a non-existant element beyond the chunk list
+ */
+BlackBoardMemoryManager::ChunkIterator
+BlackBoardMemoryManager::end()
+{
+  BlackBoardMemoryManager::ChunkIterator rv;
+  return rv;
+}
+
+
+/** @class BlackBoardMemoryManager::ChunkIterator blackboard/memory_manager.h
+ * Iterator for memory chunks.
+ * The ChunkIterator can be used to iterate over all allocated memory chunks
+ * in the memory segment.
+ */
+
+/** Constructor.
+ * Will create a instance pointing beyond the end of the lits.
+ */
+BlackBoardMemoryManager::ChunkIterator::ChunkIterator()
+{
+  shmem = NULL;
+  cur = NULL;
+}
+
+/** Constructor
+ * @param cur Current element for chunk list
+ */
+BlackBoardMemoryManager::ChunkIterator::ChunkIterator(SharedMemory *shmem, chunk_list_t *cur)
+{
+  this->shmem = shmem;
+  this->cur   = cur;
+}
+
+
+/** Copy constructor.
+ * @param it Iterator to copy
+ */
+BlackBoardMemoryManager::ChunkIterator::ChunkIterator(const ChunkIterator &it)
+{
+  shmem = it.shmem;
+  cur   = it.cur;
+}
+
+
+/** Increment iterator.
+ * Advances to the next element. This is the infix-operator. It may be used
+ * like this:
+ * @code
+ * for (ChunkIterator cit = memmgr->begin(); cit != memmgr->end(); ++cit) {
+ *   // your code here
+ * }
+ * @endcode
+ * @return Reference to instance itself after advancing to the next element.
+ */
+BlackBoardMemoryManager::ChunkIterator &
+BlackBoardMemoryManager::ChunkIterator::operator++()
+{
+  if ( cur != NULL )  cur = chunk_ptr(cur->next);
+
+  return *this;
+}
+
+
+/** Increment iterator.
+ * Advances to the next element in allocated chunk list. This is the postfix-operator.
+ * It may be used like this:
+ * @code
+ * for (ChunkIterator cit = memmgr->begin(); cit != memmgr->end(); cit++) {
+ *   // your code here
+ * }
+ * @endcode
+ * Note that since a copy of the original iterator has to be created an returned it
+ * the postfix operation takes both, more CPU time and more memory. If possible (especially
+ * if used in a for loop like the example) use the prefix operator!
+ * @see operator++()
+ * @param inc ignored
+ * @return copy of the current instance before advancing to the next element.
+ */
+BlackBoardMemoryManager::ChunkIterator
+BlackBoardMemoryManager::ChunkIterator::operator++(int inc)
+{
+  ChunkIterator rv(*this);
+  if ( cur != NULL )  cur = chunk_ptr(cur->next);
+
+  return rv;
+}
+
+
+/** Advance by a certain amount.
+ * Can be used to add an integer to the iterator to advance many steps in one go.
+ * This operation takes linear time depending on i.
+ * @param i steps to advance in list. If i is bigger than the number of remaining
+ * elements in the list will stop beyond list.
+ * @return reference to current instance after advancing i steps or after reaching
+ * end of list.
+ */
+BlackBoardMemoryManager::ChunkIterator &
+BlackBoardMemoryManager::ChunkIterator::operator+(unsigned int i)
+{
+  for (unsigned int j = 0; (cur != NULL) && (j < i); ++j) {
+    if ( cur != NULL )  cur = chunk_ptr(cur->next);
+  }
+  return *this;
+}
+
+
+/** Advance by a certain amount.
+ * Works like operator+(unsigned int i), provided for convenience.
+ * @param i steps to advance in list
+ * @return reference to current instance after advancing i steps or after reaching
+ * end of list.
+ */
+BlackBoardMemoryManager::ChunkIterator &
+BlackBoardMemoryManager::ChunkIterator::operator+=(unsigned int i)
+{
+  for (unsigned int j = 0; (cur != NULL) && (j < i); ++j) {
+    if ( cur != NULL )  cur = chunk_ptr(cur->next);
+  }
+  return *this;
+}
+
+
+/** Check equality of two iterators.
+ * Can be used to determine if two iterators point to the same chunk.
+ * @param c iterator to compare current instance to
+ * @return true, if iterators point to the same chunk, false otherwise
+ */
+bool
+BlackBoardMemoryManager::ChunkIterator::operator==(const ChunkIterator & c) const
+{
+  return (cur == c.cur);
+}
+
+
+/** Check inequality of two iterators.
+ * Can be used to determine if two iterators point to different chunks.
+ * @param c iterator to compare current instance to
+ * @return true, if iterators point to different chunks of memory, false otherwise
+ */
+bool
+BlackBoardMemoryManager::ChunkIterator::operator!=(const ChunkIterator & c) const
+{
+  return (cur != c.cur);
+}
+
+
+/** Get memory pointer of chunk.
+ * Use this operator to get the pointer to the chunk of memory that this iterator
+ * points to.
+ * @return pointer to memory
+ */
+void *
+BlackBoardMemoryManager::ChunkIterator::operator*() const
+{
+  return ( cur != NULL ) ? shmem->ptr(cur->ptr) : NULL;
+}
+
+
+/** Assign iterator.
+ * Makes the current instance to point to the same memory element as c.
+ * @param c assign value
+ * @return reference to current instance
+ */
+BlackBoardMemoryManager::ChunkIterator &
+BlackBoardMemoryManager::ChunkIterator::operator=(const ChunkIterator & c)
+{
+  this->shmem = c.shmem;
+  this->cur   = c.cur;
+  return *this;
+}
+
+
+/** Get size of data segment.
+ * Returns the size of the memory chunk. This includes overhanging bytes.
+ * @return size of chunk including overhanging bytes
+ */
+unsigned int
+BlackBoardMemoryManager::ChunkIterator::size() const
+{
+  return ( cur != NULL ) ? cur->size : 0;
+}
+
+
+/** Get number of overhanging bytes.
+ * See documentation of BlackBoardMemoryManager about overhanging bytes.
+ * @see BlackBoardMemoryManager
+ * @return number of overhanging bytes.
+ */
+unsigned int
+BlackBoardMemoryManager::ChunkIterator::overhang() const
+{
+  return ( cur != NULL ) ? cur->overhang : 0;
 }

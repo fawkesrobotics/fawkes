@@ -35,10 +35,13 @@ class SemaphoreSet;
 
 // define our own list type std::list is way too fat
 /** Chunk lists as stored in BlackBoard shared memory segment.
+ * The data segment of a chunk follows directly after the header. So if c is a chunk_list_t
+ * pointer to a chunk then the data segment of that chunk can be accessed via
+ * (char *)c + sizeof(chunk_list_t).
  */
 typedef struct chunk_list_t {
-  chunk_list_t  *next;		/**< pointer to next element in list */
-  void          *ptr;		/**< pointer to data segment of chunk */
+  chunk_list_t  *next;		/**< offset to next element in list */
+  void          *ptr;		/**< pointer to data memory */
   unsigned int   size;		/**< total size of chunk, including overhanging bytes,
 				 * excluding header */
   unsigned int   overhang;	/**< number of overhanging bytes in this chunk */
@@ -52,7 +55,7 @@ typedef struct chunk_list_t {
 
 class BlackBoardMemoryManager
 {
-
+ friend class BlackBoardInterfaceManager;
  public:
   BlackBoardMemoryManager(unsigned int memsize, unsigned int version, bool master,
 			  const char *shmem_token = "FawkesBlackBoard");
@@ -63,24 +66,65 @@ class BlackBoardMemoryManager
 
   void   check();
 
-  unsigned int getMaxFreeSize();
-  unsigned int getMaxAllocatedSize();
-  unsigned int getOverhangSize();
+  unsigned int getMaxFreeSize() const;
+  unsigned int getMaxAllocatedSize() const;
+  unsigned int getOverhangSize() const;
 
-  void   printFreeChunksInfo();
-  void   printAllocatedChunksInfo();
-  void   printPerformanceInfo();
+  void   printFreeChunksInfo() const;
+  void   printAllocatedChunksInfo() const;
+  void   printPerformanceInfo() const;
+
+  void   lock();
+  bool   tryLock();
+  void   unlock();
+
+  /*
+  void   lock(void *ptr);
+  bool   tryLock(void *ptr);
+  void   unlock(void *ptr);
+  */
+
+  class ChunkIterator
+  {
+    friend class BlackBoardMemoryManager;
+   private:
+    ChunkIterator(SharedMemory *shmem, chunk_list_t *cur);
+   public:
+    ChunkIterator();
+    ChunkIterator(const ChunkIterator &it);
+    ChunkIterator & operator++ ();        // prefix
+    ChunkIterator   operator++ (int inc); // postfix
+    ChunkIterator & operator+  (unsigned int i);
+    ChunkIterator & operator+= (unsigned int i);
+    bool            operator== (const ChunkIterator & c) const;
+    bool            operator!= (const ChunkIterator & c) const;
+    void *          operator*  () const;
+    ChunkIterator & operator=  (const ChunkIterator & c);
+
+    unsigned int    size() const;
+    unsigned int    overhang() const;
+
+   private:
+    SharedMemory *shmem;
+    chunk_list_t *cur;
+  };
+
+  ChunkIterator begin();
+  ChunkIterator end();
 
  private:
   chunk_list_t * list_add(chunk_list_t *list, chunk_list_t *addel);
   chunk_list_t * list_remove(chunk_list_t *list, chunk_list_t *rmel);
   chunk_list_t * list_find_ptr(chunk_list_t *list, void *ptr);
-  unsigned int   list_length(chunk_list_t *list);
-  chunk_list_t * list_get_biggest(chunk_list_t *list);
+  unsigned int   list_length(const chunk_list_t *list) const;
+  chunk_list_t * list_get_biggest(const chunk_list_t *list) const;
+  chunk_list_t * list_next(const chunk_list_t *list) const;
 
   void cleanup_free_chunks();
 
-  void list_print_info(chunk_list_t *list);
+  void list_print_info(const chunk_list_t *list) const;
+
+  void * alloc_nolock(unsigned int num_bytes);
 
  private:
   BlackBoardSharedMemoryHeader *shmem_header;

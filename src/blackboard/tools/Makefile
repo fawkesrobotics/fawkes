@@ -1,7 +1,7 @@
 #*****************************************************************************
-#                Makefile Build System for Fawkes : BlackBoard
+#              Makefile Build System for Fawkes : BlackBoard QA
 #                            -------------------
-#   Created on Wed Oct 04 10:49:27 2006
+#   Created on Thu Oct 05 14:14:14 2006
 #   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -17,24 +17,24 @@
 # last modified: $Date$
 #            by: $Author$
 #
+#*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 
 CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\"
-SUBDIRS = tools
 
-LIBS_libblackboard = core utils interfaces
-OBJS_libblackboard = interface_manager.o	\
-		     memory_manager.o		\
-		     shmem_header.o		\
-		     shmem_lister.o
+LIBS_bb_cleanup = core utils blackboard
+OBJS_bb_cleanup = bb_cleanup.o
 
-LIBS_blackboard = core utils blackboard
-OBJS_blackboard = blackboard.o
+LIBS_bb_list = core utils blackboard
+OBJS_bb_list = bb_list.o
 
-OBJS_all =	$(OBJS_libblackboard) $(OBJS_blackboard)
-PLUGINS_all =	$(PLUGINDIR)/blackboard.so
-LIBS_all =	$(LIBDIR)/libblackboard.so
+LIBS_bb_meminfo = core utils blackboard
+OBJS_bb_meminfo = bb_meminfo.o
+
+BINS_all =	$(BINDIR)/bb_cleanup	\
+		$(BINDIR)/bb_list	\
+		$(BINDIR)/bb_meminfo
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
