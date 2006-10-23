@@ -21,8 +21,8 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 #include <utils/ipc/semset.h>
@@ -399,4 +399,18 @@ SemaphoreSet::getFreeKey()
     }
   }
   return (found ? key : 0);
+}
+
+
+/** Destroy a semaphore set.
+ * Destroy the semaphore denoted by key. No tests are done if some other
+ * process is using this semaphore. Use with care!
+ * @param key key of the semaphore set
+ */
+void
+SemaphoreSet::destroy(int key)
+{
+  int semid = semget(key, 0, 0);
+  if ( semid == -1 ) return;
+  semctl(semid, 0, IPC_RMID, 0);
 }

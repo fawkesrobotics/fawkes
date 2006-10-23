@@ -22,8 +22,8 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 #ifndef __UTILS_IPC_SHM_EXCEPTIONS_H_
@@ -83,6 +83,36 @@ class ShmDoesNotExistException : public Exception {
  public:
   /** Constructor */
   ShmDoesNotExistException() : Exception("The given shared memory segment does not exist.") {}
+};
+
+
+/** The shared memory is set adress-dependend but could not be opened at the appropriate
+ * address.
+ */
+class ShmCouldNotAttachAddrDepException : public Exception {
+ public:
+  /** Constructor */
+  ShmCouldNotAttachAddrDepException() : Exception("Could not attach to the shared memory "
+						   "segment with the appropriate address") {}
+};
+
+
+/** The address points out of the shared memory.
+ */
+class ShmAddrOutOfBoundsException : public Exception {
+ public:
+  /** Constructor */
+  ShmAddrOutOfBoundsException() : Exception("The address you tried to transform points "
+					    "out of the shared memory segment") {}
+};
+
+/** The pointer does not point inside the shared memory.
+ */
+class ShmPtrOutOfBoundsException : public Exception {
+ public:
+  /** Constructor */
+  ShmPtrOutOfBoundsException() : Exception("The pointer you tried to transform does not "
+					    "point inside the shared memory segment") {}
 };
 
 #endif

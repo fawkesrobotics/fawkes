@@ -21,8 +21,8 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 
@@ -180,6 +180,12 @@
  */
 /** @var SharedMemory::shm_header
  * general header as stored in the shared memory segment
+ */
+/** @var SharedMemory::shm_upper_bound
+ * Upper bound of memory. Used by ptr to determine if the given address is valid.
+ */
+/** @var SharedMemory::shm_offset
+ * Offset to the master's base addr.
  */
 
 /** The magic token size.
@@ -361,7 +367,7 @@ SharedMemory::attach()
 	// Attached
 
 	shm_magic_token = (char *)shm_buf;
-	shm_header = (SharedMemory_header_t *)shm_buf + MagicTokenSize;
+	shm_header = (SharedMemory_header_t *)((char *)shm_buf + MagicTokenSize);
 
 	if ( strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0 ) {
 
@@ -370,6 +376,35 @@ SharedMemory::attach()
 
 	  if ( header->matches( shm_ptr ) ) {
 	    // matching memory segment found
+
+	    /* Does not work as desired :-/
+	    if ( shm_header->shm_addr != 0 ) {
+	      // an specific address has been assigned and it has to be assumed that
+	      // data that depends on these addresses has been stored, try to re-attach
+	      // with the appropriate address, throw an exception if that does not work out
+	      if ( shm_header->shm_addr == shm_buf ) {
+		printf("Already at correct address\n");
+	      }
+	      void *addr = shm_header->shm_addr;
+	      printf("Requested address is 0x%x\n", (unsigned int)addr);
+	      shmdt(shm_buf);
+	      shm_buf = shmat(shm_id, addr,
+			      (is_read_only ? SHM_RDONLY : 0) | SHM_REMAP);
+	      if ( shm_buf == (void *)-1 ) {
+		// the memory segment could not be attached to the given address
+		perror("Attaching to specific addr failed");
+		throw ShmCouldNotAttachAddrDepException();
+	      }
+	      shm_magic_token = (char *)shm_buf;
+	      shm_header = (SharedMemory_header_t *)((char *)shm_buf + MagicTokenSize);
+	      shm_ptr = (char *)shm_buf + MagicTokenSize
+		                        + sizeof(SharedMemory_header_t);
+	    } else {
+	      printf("shm_addr is 0x%x   shm_header at 0x%x\n",
+		     (unsigned int)shm_header->shm_addr,
+		     (unsigned int)shm_header);
+	    }
+	    */
 
 	    header->set( shm_ptr );
 	    data_size = header->dataSize();
@@ -383,9 +418,12 @@ SharedMemory::attach()
 	    header->set( shm_ptr );
 	    // header->printInfo();
 
-	    shared_mem_id = shm_id;
-	    shared_mem    = shm_buf;
-	    memptr        = (char *)shm_ptr + header->size();
+	    shared_mem_id   = shm_id;
+	    shared_mem      = shm_buf;
+	    memptr          = (char *)shm_ptr + header->size();
+	    shm_upper_bound = (void *)((unsigned int)shm_header->shm_addr + mem_size);
+	    shm_offset      = (unsigned int)shared_mem - (unsigned int)shm_header->shm_addr;
+	    shared_mem_upper_bound = (void *)((unsigned int)shared_mem + mem_size);
 
 	    if ( shm_header->semaphore != 0 ) {
 	      // Houston, we've got a semaphore, open it!
@@ -417,13 +455,18 @@ SharedMemory::attach()
       if (shared_mem_id != -1) {
 	shared_mem = shmat(shared_mem_id, NULL, 0);
 	if (shared_mem != (void *)-1) {
+	  memset(shared_mem, 0, mem_size);
+
 	  shm_magic_token = (char *)shared_mem;
-	  shm_header = (SharedMemory_header_t *)shared_mem + MagicTokenSize;
+	  shm_header = (SharedMemory_header_t *)((char *)shared_mem + MagicTokenSize);
+	  shm_header->shm_addr = shared_mem;
+
 	  memptr     = (char *)shared_mem + MagicTokenSize
 	                                  + sizeof(SharedMemory_header_t)
                                           + header->size();
-
-	  memset((void *)shared_mem, 0, mem_size);
+	  shm_upper_bound = (void *)((unsigned int)shared_mem + mem_size);
+	  shared_mem_upper_bound = shm_upper_bound;
+	  shm_offset      = 0;
 
 	  strncpy(shm_magic_token, magic_token, MagicTokenSize);
 
@@ -451,7 +494,74 @@ SharedMemory::attach()
       throw ShmCouldNotAttachException("Could not attach, memptr still NULL");
     }
   }
+}
 
+
+/** Get the real pointer to the data based on an address.
+ * If there is address-dependent data in the shared memory segment (like pointers
+ * to the next element in a linked list) these are only valid for the process
+ * that created the shared memory segment, they are not necessarily valid for
+ * other processes.
+ *
+ * The function takes an address that has been stored in the
+ * shared memory segment and transforms it into a valid local pointer.
+ * Not that this does only work with pointers inside the shared memory segment.
+ * You can only tranform addresses that point to somewhere inside the shared
+ * memory segment!
+ *
+ * We could also have added local offsets, starting with 0 at the beginning
+ * of the shared memory segment. We decided against this since our major our
+ * main concern is that this works fast for the master, because this will be the
+ * Fawkes main application, and for attached processes it may work slower and
+ * we don't care.
+ *
+ * @param addr memory address read from the shared memory segment
+ * @return pointer inside the shared memory segment
+ * @exception ShmAddrOutOfBoundsException This exception is thrown if addr is not NULL,
+ * smaller than the base addr and greater or equal to the base addr plus the memory size.
+ * @see addr()
+ */
+void *
+SharedMemory::ptr(void *addr)
+{
+  if ( shm_offset == 0 )  return addr;
+  if ( addr == NULL) return NULL;
+  if ( (addr < shm_header->shm_addr) ||
+       (addr >= shm_upper_bound) ) {
+    throw ShmAddrOutOfBoundsException();
+  }
+  return (void *)((unsigned int)addr + shm_offset);
+}
+
+
+/** Get an address from a real pointer.
+ * If there is address-dependent data in the shared memory segment (like pointers
+ * to the next element in a linked list) these are only valid for the process
+ * that created the shared memory segment, they are not necessarily valid for
+ * other processes.
+ *
+ * This method takes a pointer that points to data in the shared memory segment
+ * that is valid in the local process and transform it to a pointer that is valid
+ * inside the shared memory segment with respect to the base address used by the
+ * creating process.
+ *
+ * @param ptr pointer to data inside the shared memory segment
+ * @return  memory address valid for the creator of the shared memory segment
+ * @exception ShmPtrOutOfBoundsException This exception is thrown if ptr is not NULL,
+ * smaller than the local base ptr and greater or equal to the local base ptr plus
+ * the memory size.
+ * @see ptr()
+ */
+void *
+SharedMemory::addr(void *ptr)
+{
+  if ( shm_offset == 0 )  return ptr;
+  if ( ptr == NULL) return NULL;
+  if ( (ptr < shared_mem) ||
+       (ptr >= shared_mem_upper_bound) ) {
+    throw ShmPtrOutOfBoundsException();
+  }
+  return (void *)((unsigned int)ptr - shm_offset);
 }
 
 
@@ -616,6 +726,24 @@ SharedMemory::addSemaphore()
 }
 
 
+/** Set shared memory swapable.
+ * Setting memory unswapable (in terms of Linux memory management: lock all
+ * pages related to this memory segment) will only succeed for very small
+ * portions of memory. A resource limit is implied (see getrlimit(2)). In
+ * most cases the maximum amout of locked memory is about 32 KB.
+ * @param swapable set to true, if memory should be allowed to be swaped out.
+ */
+void
+SharedMemory::setSwapable(bool swapable)
+{
+  if (swapable) {
+    shmctl(shared_mem_id, SHM_UNLOCK, NULL);
+  } else {
+    shmctl(shared_mem_id, SHM_LOCK, NULL);
+  }
+}
+
+
 /** Lock shared memory segment.
  * If the shared memory segment is protected by an associated semaphore it can be
  * locked with this semaphore by calling this method.
@@ -713,7 +841,24 @@ SharedMemory::isSwapable(int shm_id)
   if (shmctl(shm_id, IPC_STAT, &shm_segment ) < 0) {
     return true;
   } else {
-    return (perm->mode & SHM_LOCKED);
+    return ! (perm->mode & SHM_LOCKED);
+  }
+}
+
+
+/** Get number of attached processes.
+ * @param shm_id ID of the shared memory segment.
+ * @return number of attached processes
+ */
+unsigned int
+SharedMemory::getNumAttached(int shm_id)
+{
+  struct shmid_ds  shm_segment;
+
+  if (shmctl(shm_id, IPC_STAT, &shm_segment ) < 0) {
+    return 0;
+  } else {
+    return shm_segment.shm_nattch;
   }
 }
 
@@ -758,14 +903,15 @@ SharedMemory::list(char *magic_token,
 	// Attached
 
 	shm_magic_token = (char *)shm_buf;
-	shm_header = (SharedMemory_header_t *)shm_buf + MagicTokenSize;
+	shm_header = (SharedMemory_header_t *)((char *)shm_buf + MagicTokenSize);
 
 	if (strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0) {
 	  if ( header->matches( (char *)shm_buf + MagicTokenSize
                                                          + sizeof(SharedMemory_header_t)) ) {
 	    header->set((char *)shm_buf + MagicTokenSize
 			                         + sizeof(SharedMemory_header_t));
-	    lister->printInfo(header, shm_id, shm_segment.shm_segsz,
+	    lister->printInfo(header, shm_id, shm_header->semaphore,
+			      shm_segment.shm_segsz,
 			      (char *)shm_buf + MagicTokenSize
                                                        + sizeof(SharedMemory_header_t)
                                                        + header->size());
@@ -787,7 +933,8 @@ SharedMemory::list(char *magic_token,
 /** Erase shared memory segments of a given type.
  * This method erases (destroys) all shared memory segments that match the
  * given magic token (first MagicTokenSize bytes, filled with zero) and the
- * given header. The lister is called to format the output.
+ * given header. The lister is called to format the output. If a semaphore
+ * has been assigned to this shared memory segment it is destroyed as well.
  * @param magic_token Token to look for
  * @param header      header to identify interesting segments with matching
  *                    magic_token
@@ -823,16 +970,24 @@ SharedMemory::erase(char *magic_token,
 	// Attached
 
 	shm_magic_token = (char *)shm_buf;
-	shm_header = (SharedMemory_header_t *)shm_buf + MagicTokenSize;
+	shm_header = (SharedMemory_header_t *)((char *)shm_buf + MagicTokenSize);
 
 	if (strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0) {
 	  if ( header->matches( (char *)shm_buf + MagicTokenSize
                                                 + sizeof(SharedMemory_header_t)) ) {
 	    header->set((char *)shm_buf + MagicTokenSize
 			                + sizeof(SharedMemory_header_t));
+
+	    if ( shm_header->semaphore != 0 ) {
+	      // a semaphore has been assigned, destroy!
+	      SemaphoreSet::destroy(shm_header->semaphore);
+	    }
+	    // Mark shared memory segment as destroyed
 	    shmctl(shm_id, IPC_RMID, NULL);
+
 	    if ( lister != NULL)
-	      lister->printInfo(header, shm_id, shm_segment.shm_segsz,
+	      lister->printInfo(header, shm_id, shm_header->semaphore,
+				shm_segment.shm_segsz,
 				(char *)shm_buf + MagicTokenSize
 				                + sizeof(SharedMemory_header_t)
 				                + header->size());
@@ -844,6 +999,84 @@ SharedMemory::erase(char *magic_token,
     }
     if ( num_segments == 0 ) {
       if (lister != NULL) lister->printNoSegments();
+    }
+  }
+
+  if (lister != NULL) lister->printFooter();
+}
+
+
+/** Erase orphaned (attach count = 0) shared memory segments of a given type.
+ * This method erases (destroys) all shared memory segments that match the
+ * given magic token (first MagicTokenSize bytes, filled with zero) and the
+ * given header and where no process is attached to. If a semaphore has been
+ * assigned to this shared memory segment it is destroyed as well.
+ * The lister is called to format the output.
+ * @param magic_token Token to look for
+ * @param header      header to identify interesting segments with matching
+ *                    magic_token
+ * @param lister      Lister used to format output, maybe NULL (default)
+ */
+void
+SharedMemory::erase_orphaned(char *magic_token,
+			     SharedMemoryHeader *header, SharedMemoryLister *lister)
+{
+
+  if (lister != NULL) lister->printHeader();
+
+  int              max_id;
+  int              shm_id;
+  struct shmid_ds  shm_segment;
+  void            *shm_buf;
+
+  char                  *shm_magic_token;
+  SharedMemory_header_t *shm_header;
+  unsigned int     num_segments = 0;
+
+  // Find out maximal number of existing SHM segments
+  struct shm_info shm_info;
+  max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
+  if (max_id >= 0) {
+    for ( int i = 0; i <= max_id; ++i ) {
+
+      shm_id = shmctl( i, SHM_STAT, &shm_segment );
+      if ( shm_id < 0 )  continue;
+      if ( shm_segment.shm_nattch > 0 ) continue;
+
+      shm_buf = shmat(shm_id, NULL, SHM_RDONLY);
+      if (shm_buf != (void *)-1) {
+	// Attached
+
+	shm_magic_token = (char *)shm_buf;
+	shm_header = (SharedMemory_header_t *)((char *)shm_buf + MagicTokenSize);
+
+	if (strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0) {
+	  if ( header->matches( (char *)shm_buf + MagicTokenSize
+                                                + sizeof(SharedMemory_header_t)) ) {
+	    header->set((char *)shm_buf + MagicTokenSize
+			                + sizeof(SharedMemory_header_t));
+
+	    if ( shm_header->semaphore != 0 ) {
+	      // a semaphore has been assigned, destroy!
+	      SemaphoreSet::destroy(shm_header->semaphore);
+	    }
+	    // Mark shared memory segment as destroyed
+	    shmctl(shm_id, IPC_RMID, NULL);
+
+	    if ( lister != NULL)
+	      lister->printInfo(header, shm_id, shm_header->semaphore,
+				shm_segment.shm_segsz,
+				(char *)shm_buf + MagicTokenSize
+				                + sizeof(SharedMemory_header_t)
+				                + header->size());
+	    ++num_segments;
+	  }
+	}
+	shmdt(shm_buf);
+      }
+    }
+    if ( num_segments == 0 ) {
+      if (lister != NULL) lister->printNoOrphanedSegments();
     }
   }
 
@@ -887,7 +1120,7 @@ SharedMemory::exists(char *magic_token,
 	// Attached
 
 	shm_magic_token = (char *)shm_buf;
-	shm_header = (SharedMemory_header_t *)shm_buf + MagicTokenSize;
+	shm_header = (SharedMemory_header_t *)((char *)shm_buf + MagicTokenSize);
 
 	if (strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0) {
 	  if ( header->matches((char *)shm_buf + MagicTokenSize

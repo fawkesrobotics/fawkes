@@ -21,8 +21,8 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 #ifndef __UTILS_IPC_SHM_H_
@@ -55,33 +55,42 @@ class SharedMemory
 
   virtual ~SharedMemory();
 
-  bool             isReadOnly();
-  bool             isDestroyed();
-  bool             isSwapable();
-  bool             isValid();
-  bool             isCreator();
-  bool             isProtected();
-  void *           getMemPtr();
-  unsigned int     getDataSize();
-  void             set(void *memptr);
-  void             setDestroyOnDelete(bool destroy);
-  void             addSemaphore();
+  bool                isReadOnly();
+  bool                isDestroyed();
+  bool                isSwapable();
+  bool                isValid();
+  bool                isCreator();
+  bool                isProtected();
+  void *              getMemPtr();
+  unsigned int        getDataSize();
+  void                set(void *memptr);
+  void                setDestroyOnDelete(bool destroy);
+  void                addSemaphore();
+  void                setSwapable(bool swapable);
 
-  void             lock();
-  bool             tryLock();
-  void             unlock();
+  void                lock();
+  bool                tryLock();
+  void                unlock();
 
-  static void      list(char *magic_token,
-			SharedMemoryHeader *header, SharedMemoryLister *lister);
+  void *              ptr(void *addr);
+  void *              addr(void *ptr);
 
-  static void      erase(char *magic_token,
-			 SharedMemoryHeader *header, SharedMemoryLister *lister = 0);
+  static void         list(char *magic_token,
+			   SharedMemoryHeader *header, SharedMemoryLister *lister);
 
-  static bool      exists(char *magic_token,
-			  SharedMemoryHeader *header);
+  static void         erase(char *magic_token,
+			    SharedMemoryHeader *header, SharedMemoryLister *lister = 0);
 
-  static bool      isDestroyed(int shm_id);
-  static bool      isSwapable(int shm_id);
+  static void         erase_orphaned(char *magic_token,
+				     SharedMemoryHeader *header,
+				     SharedMemoryLister *lister = 0);
+
+  static bool         exists(char *magic_token,
+			     SharedMemoryHeader *header);
+
+  static bool         isDestroyed(int shm_id);
+  static bool         isSwapable(int shm_id);
+  static unsigned int getNumAttached(int shm_id);
 
  protected:
 
@@ -89,6 +98,7 @@ class SharedMemory
    * This header is stored right after the magic token.
    */
   typedef struct {
+    void        *shm_addr;     /**< Desired shared memory address */
     int          semaphore;    /**< Semaphore set ID */
   } SharedMemory_header_t;
 
@@ -110,11 +120,14 @@ class SharedMemory
   char                   *magic_token;
   char                   *shm_magic_token;
   SharedMemory_header_t  *shm_header;
+  void                   *shm_upper_bound;
+  int                     shm_offset;
 
 
  private:
   void          *shared_mem;
   int            shared_mem_id;
+  void          *shared_mem_upper_bound;
 
   bool           created;
   SemaphoreSet  *semset;

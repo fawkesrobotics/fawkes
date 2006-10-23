@@ -21,13 +21,14 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 #ifndef __UTILS_IPC_SHM_LISTER_H_
 #define __UTILS_IPC_SHM_LISTER_H_
 
+class SharedMemoryHeader;
 
 /** Format list output for shared memory segments.
  * Implement this function specific to your SharedMemoryHeader to printout
@@ -45,18 +46,24 @@ class SharedMemoryLister {
    * This should fit on the terminal and thus have a width of at most
    * 79 columns.
    */
-  virtual void printHeader()                                 = 0;
+  virtual void printHeader()                                        = 0;
 
   /** Print footer of the table.
    * This should fit on the terminal and thus have a width of at most
    * 79 columns.
    */
-  virtual void printFooter()                                 = 0;
+  virtual void printFooter()                                        = 0;
 
   /** Print this if no matching segment was found.
    * Called by SharedMemory if no matching segment could be found.
    */
-  virtual void printNoSegments()                             = 0;
+  virtual void printNoSegments()                                    = 0;
+
+  /** Print this if no matching orphaned segment was found.
+   * Called by SharedMemory::erase_orphaned() if no matching segment
+   * could be found.
+   */
+  virtual void printNoOrphanedSegments()                            = 0;
 
   /** Print info about segment.
    * This method is called for every matching shared memory segment.
@@ -64,12 +71,13 @@ class SharedMemoryLister {
    * if needed) about the segment.
    * @param header The data-specific header
    * @param shm_id The id of the shared memory segment
+   * @param semaphore Semaphore key of the given shared memory segment
    * @param mem_size the total memory size
    * @param memptr pointer to the data segment.
    */
   virtual void printInfo(SharedMemoryHeader *header,
-			 int shm_id, unsigned int mem_size,
-			 void *memptr)                = 0;
+			 int shm_id, int semaphore,
+			 unsigned int mem_size, void *memptr)       = 0;
 };
 
 
