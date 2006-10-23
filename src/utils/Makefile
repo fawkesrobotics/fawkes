@@ -27,9 +27,11 @@ OBJS_libutils =	\
 		ipc/msg.o						\
 		ipc/semset.o						\
 		ipc/shm.o						\
+		misc/string_conversions.o				\
 		plugin/plugin_loader.o					\
 		system/dynamic_module/module_dl.o			\
 		system/dynamic_module/module_manager_factory.o		\
+		system/argparser.o					\
 		system/file.o
 LIBS_libutils = stdc++ dl core
 
