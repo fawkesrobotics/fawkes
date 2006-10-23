@@ -38,7 +38,7 @@ endif
 .SECONDARY: $(OBJS_all)
 
 .PHONY: all
-all: subdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all)
+all: $(LIBS_all) $(PLUGINS_all) $(BINS_all) subdirs
 
 .PHONY: clean
 clean: subdirs
@@ -64,7 +64,7 @@ subdirs: $(SUBDIRS)
 ifneq ($(SUBDIRS),)
 $(SUBDIRS):
 	$(SILENT) echo -e "$(INDENT_PRINT)--- Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"
-	$(SILENT) $(MAKE) --no-print-directory -C $@ $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)"
+	$(SILENT) $(MAKE) --no-print-directory -C $(realpath $(SRCDIR)/$@) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)"
 	$(SILENT) if [ "$(MAKECMDGOALS)" != "clean" ]; then \
 		echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $@"; \
 	fi

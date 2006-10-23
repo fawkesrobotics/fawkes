@@ -26,10 +26,10 @@ SILENT = @
 #BASEDIR ?= $(HOME)/robocup/fawkes
 SRCDIR ?= .
 OBJDIR = .objs
-DEPDIR = $(SRCDIR)/.deps
-BINDIR = $(BASEDIR)/bin
-LIBDIR = $(BASEDIR)/lib
-PLUGINDIR = $(BASEDIR)/plugins
+DEPDIR = $(abspath $(SRCDIR)/.deps)
+BINDIR = $(abspath $(BASEDIR)/bin)
+LIBDIR = $(abspath $(BASEDIR)/lib)
+PLUGINDIR = $(abspath $(BASEDIR)/plugins)
 VPATH = $(SRCDIR)
 df = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
 
