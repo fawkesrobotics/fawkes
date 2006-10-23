@@ -37,6 +37,7 @@ df = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
 CC = gcc
 MOC = $(QTDIR)/bin/moc
 DOXYGEN = doxygen
+PKGCONFIG = $(shell which pkg-config)
 
 ### GCC version information
 GCC_VERSION=$(shell LANG=C $CC -v 2>&1 | grep "gcc version" | awk '{ print $3 }')
