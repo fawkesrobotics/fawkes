@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<!-- $Id$ -->
+<interface name="BlackBoardInternalsInterface" author="Tim Niemueller">
+  <data>
+    <comment>This interface gives access to BlackBoard internal data. It is used by
+      management code in the BlackBoard to communicate required data. It can also be
+      used to allow for debugging from the outside.</comment>
+    <field type="unsigned int" name="InstanceSerial">A serial number incremented for each
+    interface access instance of any type. This is not the internal memory serial which is
+    incremented for every interface allocated in the shared memory! The instance serial
+    allows messages to be linked with a specific sending interface instance, and not just
+    with the interface block.</field>
+  </data>
+  <message name="GetInstanceSerial">
+    <comment>Returns a serial which is guaranteed to be unique throughout all access methods
+    as long as BlackBoard management code is used. The reply will include just the unique
+    instance serial.</comment>
+    <!--
+    <reply>
+      <field type="unsigned int" name="InstanceSerial">The unique serial number to used for the
+      allocated interface.</field>
+    </reply> -->
+  </message>
+  <message name="GetMemSerial">
+    <comment>Returns a serial of the data block storage in the BlackBoard memory segment.</comment>
+    <!--
+    <reply>
+      <field type="unsigned int" name="MemSerial">The unique memory serial number determining
+      the memory segment.</field>
+    </reply> -->
+  </message>
+</interface>
+

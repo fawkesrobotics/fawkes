@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<!-- $Id$ -->
+<interface name="TestInterface" author="Tim Niemueller">
+  <constants>
+    <constant type="int" value="5" name="TEST_CONSTANT">Just a test constant</constant>
+    <constant type="float" value="1.2" name="TEST_FLOAT_CONSTANT">Another test constant</constant>
+    <enum name="TestEnum">
+      <comment>Demonstrating enums</comment>
+      <item name="TEST_ENUM_1">Item 1</item>
+      <item name="TEST_ENUM_2">Item 2</item>
+    </enum>
+  </constants>
+  <data>
+    <comment>Test interface. Use this to play around. Do NOT remove any fields, as this
+      interface is used by BlackBoard QA.</comment>
+    <field type="int" name="TestInt">Test integer</field>
+    <field type="unsigned int" bits="8" name="Flags">Flags spit down by the writer</field>
+    <field type="char" length="30" flags="changed_indicator" validfor="5" default="testing default" name="TestString">A test sring</field>
+    <field type="int" name="Result">Result of operation add operation from Calculate message.</field>
+    <field type="unsigned int" name="TestUInt">Test unsigned int</field>
+  </data>
+  <message name="SetTestInt">
+    <comment>Set the test int to the given value.</comment>
+    <ref>TestInt</ref>
+  </message>
+  <message name="SetTestString">
+    <comment>Set test string to this value.</comment>
+    <ref>TestString</ref>
+  </message>
+  <message name="Calculate">
+    <comment>Adds Summand and Addend. Result is put into Result field.</comment>
+    <field type="int" name="Summand">Summand</field>
+    <field type="int" name="Addend">Addend</field>
+  </message>
+</interface>

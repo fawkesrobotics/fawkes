@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id$ -->
+<!--
+ *  DTD for Fawkes interfaces
+ *
+ *  Created: Wed Oct 11 00:57:30 2006
+ *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+-->
+<!ELEMENT interface (constants?, data, message*)>
+<!ATTLIST interface
+	  name    CDATA  #REQUIRED
+	  author  CDATA  #IMPLIED>
+
+  <!ELEMENT constants ((constant | enum)+)>
+    <!ELEMENT constant (#PCDATA)>
+    <!ATTLIST constant
+	      type   CDATA  #REQUIRED
+	      name   CDATA  #REQUIRED
+	      value  CDATA  #REQUIRED>
+
+    <!ELEMENT enum (comment, item+)>
+    <!ATTLIST enum
+	      name  CDATA  #REQUIRED>
+
+      <!ELEMENT item (#PCDATA)>
+      <!ATTLIST item
+		name  CDATA  #REQUIRED>
+
+  <!ELEMENT data (comment, (field | ref)+)>
+
+    <!ELEMENT comment (#PCDATA)>
+
+    <!ELEMENT field (#PCDATA)>
+    <!ATTLIST field
+	      type       CDATA  #REQUIRED
+	      name       CDATA  #REQUIRED
+	      flags      CDATA  #IMPLIED
+	      length     CDATA  #IMPLIED
+	      bits       CDATA  #IMPLIED
+	      validfor   CDATA  '5'
+	      default    CDATA  #IMPLIED
+	      datafield  CDATA  #IMPLIED>
+
+    <!ELEMENT ref (#PCDATA)>
+
+  <!ELEMENT message (comment, (field | ref)*)>
+  <!ATTLIST message
+	    name  CDATA  #REQUIRED>
