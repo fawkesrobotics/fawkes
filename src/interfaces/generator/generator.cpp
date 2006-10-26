@@ -339,8 +339,8 @@ InterfaceGenerator::write_messages_h(FILE *f)
 	    "    %s_data_t *data;\n\n",
 	    (*i).getName().c_str());
 
-    write_ctor_dtor_h(f, "    ", (*i).getName());
     fprintf(f, "   public:\n");
+    write_message_ctor_dtor_h(f, "    ", (*i).getName(), (*i).getFields());
     write_methods_h(f, "    ", (*i).getFields());
 
     fprintf(f, "  };\n\n");
@@ -366,7 +366,8 @@ InterfaceGenerator::write_messages_cpp(FILE *f)
 	    class_name.c_str(), (*i).getName().c_str(), filename_h.c_str(),
 	    (*i).getName().c_str(), (*i).getComment().c_str());
 
-    write_ctor_dtor_cpp(f, (*i).getName(), "Message", class_name + "::");
+    write_message_ctor_dtor_cpp(f, (*i).getName(), "Message", class_name + "::",
+				(*i).getFields());
     write_methods_cpp(f, (*i).getName(), (*i).getFields(), class_name + "::");
 
   }
@@ -410,6 +411,41 @@ InterfaceGenerator::write_ctor_dtor_h(FILE *f, std::string /* indent space */ is
 }
 
 
+/** Write constructor and destructor for message to h file.
+ * @param f file to write to
+ * @param is indentation space
+ * @param classname name of class
+ * @param fields vector of data fields of message
+ */
+void
+InterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* indent space */ is,
+					      string classname,
+					      vector<InterfaceField> fields)
+{
+  vector<InterfaceField>::iterator i;
+
+  if ( fields.size() > 0 ) {
+
+    fprintf(f, "%s%s(", is.c_str(), classname.c_str());
+
+    i = fields.begin();
+    while (i != fields.end()) {
+      fprintf(f, "%s ini%s",
+	      (*i).getAccessType().c_str(), (*i).getName().c_str());
+      ++i;
+      if ( i != fields.end() ) {
+	fprintf(f, ", ");
+      }
+    }
+
+    fprintf(f, ");\n");
+  }
+
+
+  write_ctor_dtor_h(f, is, classname);
+}
+
+
 /** Write constructor and destructor to cpp file.
  * @param f file to write to
  * @param classname name of class
@@ -421,6 +457,86 @@ InterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 					string classname, string super_class,
 					std::string inclusion_prefix)
 {
+   fprintf(f,
+	  "/** Constructor */\n"
+	  "%s%s::%s() : %s()\n"
+	  "{\n"
+	  "  data_size = sizeof(%s_data_t);\n"
+	  "  data_ptr  = malloc(data_size);\n"
+	  "  data      = (%s_data_t *)data_ptr;\n"
+	  "}\n"
+	  "/** Destructor */\n"
+	  "%s%s::~%s()\n"
+	  "{\n"
+	  "  free(data_ptr);\n"
+	  "}\n",
+	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str(),
+	  super_class.c_str(), classname.c_str(), classname.c_str(),
+	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str()
+	  );
+}
+
+
+/** Write constructor and destructor for message to cpp file.
+ * @param f file to write to
+ * @param classname name of class
+ * @param super_class name of base class
+ * @param inclusion_prefix Used if class is included in another class.
+ * @param fields vector of data fields of message
+ */
+void
+InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
+						string classname, string super_class,
+						std::string inclusion_prefix,
+						vector<InterfaceField> fields)
+{
+  vector<InterfaceField>::iterator i;
+
+  if ( fields.size() > 0 ) {
+    fprintf(f,
+	    "/** Constructor with initial values.\n");
+
+    for (i = fields.begin(); i != fields.end(); ++i) {
+      fprintf(f, " * @param ini%s initial value for %s\n",
+	      (*i).getName().c_str(), (*i).getName().c_str());
+    }
+
+    fprintf(f,
+	    " */\n"
+	    "%s%s::%s(",
+	    inclusion_prefix.c_str(), classname.c_str(), classname.c_str());
+
+    i = fields.begin();
+    while (i != fields.end()) {
+      fprintf(f, "%s ini%s",
+	      (*i).getAccessType().c_str(), (*i).getName().c_str());
+      ++i;
+      if ( i != fields.end() ) {
+	fprintf(f, ", ");
+      }
+    }
+
+    fprintf(f,") : %s()\n"
+	    "{\n"
+	    "  data_size = sizeof(%s_data_t);\n"
+	    "  data_ptr  = malloc(data_size);\n"
+	    "  data      = (%s_data_t *)data_ptr;\n",
+	    super_class.c_str(), classname.c_str(), classname.c_str());
+    
+    for (i = fields.begin(); i != fields.end(); ++i) {
+      if ( (*i).getType() == "char" ) {
+	fprintf(f, "  strncpy(data->%s, ini%s, %s);\n",
+		(*i).getName().c_str(), (*i).getName().c_str(),
+		(*i).getLength().c_str());
+      } else {
+	fprintf(f, "  data->%s = ini%s;\n",
+		(*i).getName().c_str(), (*i).getName().c_str());
+      }
+    }
+
+    fprintf(f, "}\n");
+  }
+
   fprintf(f,
 	  "/** Constructor */\n"
 	  "%s%s::%s() : %s()\n"
@@ -432,12 +548,12 @@ InterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 	  "/** Destructor */\n"
 	  "%s%s::~%s()\n"
 	  "{\n"
-	  "  free(data);\n"
 	  "}\n",
 	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str(),
 	  super_class.c_str(), classname.c_str(), classname.c_str(),
 	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str()
 	  );
+
 }
 
 

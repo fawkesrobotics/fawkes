@@ -64,6 +64,13 @@ class InterfaceGenerator
   void write_ctor_dtor_cpp(FILE *f, std::string classname, std::string super_class,
 			   std::string inclusion_prefix);
 
+  void write_message_ctor_dtor_h(FILE *f,  std::string /* indent space */ is,
+				 std::string classname,
+				 std::vector<InterfaceField> fields);
+  void write_message_ctor_dtor_cpp(FILE *f, std::string classname, std::string super_class,
+				   std::string inclusion_prefix,
+				   std::vector<InterfaceField> fields);
+
   void write_methods_h(FILE *f, std::string /* indent space */ is,
 		       std::vector<InterfaceField> fields);
   void write_methods_cpp(FILE *f, std::string classname,
