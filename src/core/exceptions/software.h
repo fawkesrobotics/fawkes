@@ -45,7 +45,8 @@ class NullPointerException : public Exception {
   }
 };
 
-/** Division by zero
+
+/** Division by zero.
  * Throw this if a division by zero has happened or is about to happen
  */
 class DivisionByZeroException : public Exception {
@@ -54,6 +55,74 @@ class DivisionByZeroException : public Exception {
    * @param msg message, appended to exception, base message "Division by zero"
    */
   DivisionByZeroException(const char *msg) : Exception("Division by zero")
+  {
+    append(msg);
+  }
+};
+
+
+/** Type mismatch.
+ * Throw this exception if types of operations do not fit together.
+ */
+class TypeMismatchException : public Exception {
+ public:
+  /** Constructor
+   * @param msg message, appended to exception, base message "Division by zero"
+   */
+  TypeMismatchException(const char *msg) : Exception("Type mismatch")
+  {
+    append(msg);
+  }
+};
+
+
+/** Delete in progress.
+ * Throw this exception if someone tried to access an object that is currently being
+ * destroyed.
+ */
+class DestructionInProgressException : public Exception {
+ public:
+  /** Constructor
+   * @param msg informative message, appended to exception, base message is
+   * "Destruction in progress"
+   */
+  DestructionInProgressException(const char *msg) : Exception("Destruction in progress")
+  {
+    append(msg);
+  }
+};
+
+
+/** Operation on unlocked object.
+ * Throw this exception if someone tried to operate on an object with a method that needs
+ * outside locking. This can be detected utilizing Mutex::tryLock() in many situations.
+ */
+class NotLockedException : public Exception {
+ public:
+  /** Constructor.
+   * @param msg informative message, appended to exception, base message is
+   * "Unsafe operation on not locked object"
+   */
+  NotLockedException(const char *msg) :
+    Exception("Unsafe operation on not locked object")
+  {
+    append(msg);
+  }
+};
+
+
+/** Non-pointer type expected.
+ * Throw this exception if you got a pointer type where you expected to get a non-pointer
+ * type variable.
+ */
+class NonPointerTypeExpectedException : public Exception {
+ public:
+  /** Constructor.
+   * @param msg informative message, appended to exception, base message is
+   * "Non-pointer type expected (template error?)"
+   */
+  NonPointerTypeExpectedException(const char *msg) :
+    Exception("Non-pointer type expected (template error?)")
   {
     append(msg);
   }

@@ -27,8 +27,10 @@ OBJS_libcore =	\
 		threading/barrier.o		\
 		threading/mutex.o		\
 		threading/read_write_lock.o	\
+		threading/refc_rwlock.o		\
 		threading/thread.o		\
-		threading/wait_condition.o
+		threading/wait_condition.o	\
+		utils/refcount.o
 
 LIBS_libcore = pthread
 
