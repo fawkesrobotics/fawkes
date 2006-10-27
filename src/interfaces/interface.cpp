@@ -28,8 +28,7 @@
 #include <interfaces/interface.h>
 
 #include <interfaces/mediators/interface_mediator.h>
-// include <interfaces/message_queue.h>
-#include <core/threading/read_write_lock.h>
+#include <core/threading/refc_rwlock.h>
 
 #include <string.h>
 #include <typeinfo>
@@ -101,7 +100,7 @@ Interface::Interface()
 /** Destructor */
 Interface::~Interface()
 {
-  delete rwlock;
+  rwlock->unref();
 }
 
 
@@ -130,17 +129,6 @@ Interface::write()
   interface_mediator->notifyOfDataChange(this);
 }
 
-
-/*
-unsigned int
-Interface::enqueue(Message *message)
-{
-  if ( ! messageValid(message) ) {
-    throw InterfaceInvalidMessageException(typeid(message).name(), _type);
-  }
-  return message_queue->append(message);
-}
-*/
 
 /** Get data size.
  * @return size in bytes of data segment
@@ -215,6 +203,132 @@ bool
 Interface::hasWriter() const
 {
   return interface_mediator->existsWriter(this);
+}
+
+
+/** Enqueue message at end of queue.
+ * This appends the given message to the queue.
+ * @param message Message to enqueue.
+ */
+unsigned int
+Interface::msgq_enqueue(Message *message)
+{
+  return message_queue->append(message);
+}
+
+
+/** Enqueue message after iterator.
+ * This will enqueue the message at the position after the iterator. This will
+ * fail if this is the end iterator!
+ * @param it Iterator after which to insert the message
+ * @param message message to insert
+ * @exception NullPointerException Thrown if trying to queue at end of message queue.
+ * @exception NotLockedException thrown if message queue is not locked during this operation.
+ */
+unsigned int
+Interface::msgq_enqueue(MessageQueue::MessageIterator &it, Message *message)
+{
+  return message_queue->insert_after(it, message);
+}
+
+
+/** Remove message from queue.
+ * Removes the given message from the queue. Note that if you unref()ed the message
+ * after insertion this will most likely delete the object. It is not safe to use the
+ * message after removing it from the queue in general. Know what you are doing if
+ * you want to use it.
+ * @param message Message to remove.
+ */
+void
+Interface::msgq_remove(Message *message)
+{
+  return message_queue->remove(message);
+}
+
+
+/** Remove message from queue.
+ * Removes message with the given ID from the queue.
+ * @param message_id Message ID to remove.
+ */
+void
+Interface::msgq_remove(unsigned int message_id)
+{
+  return message_queue->remove(message_id);
+}
+
+
+/** Get size of message queue.
+ * @return number of messages in queue.
+ */
+unsigned int
+Interface::msgq_size()
+{
+  return message_queue->size();
+}
+
+
+/** Flush all messages.
+ * Deletes all messages from the queue.
+ */
+void
+Interface::msgq_flush()
+{
+  message_queue->flush();
+}
+
+
+/** Lock message queue.
+ * Lock the message queue. You have to do this before using the iterator safely.
+ */
+void
+Interface::msgq_lock()
+{
+  message_queue->lock();
+}
+
+
+/** Try to lock message queue.
+ * Try to lock the message queue. Returns immediately and does not wait for lock.
+ * @return true, if the lock has been aquired, false otherwise.
+ * @see lock()
+ */
+bool
+Interface::msgq_tryLock()
+{
+  return message_queue->tryLock();
+}
+
+
+/** Unlock message queue.
+ * Give free the lock on the message queue.
+ */
+void
+Interface::msgq_unlock()
+{
+  message_queue->unlock();
+}
+
+/** Get start iterator for message queue.
+ * Not that you must have locked the queue before this operation!
+ * @return iterator to begin of message queue.
+ * @exception NotLockedException thrown if message queue is not locked during this operation.
+ */
+MessageQueue::MessageIterator
+Interface::msgq_begin()
+{
+  return message_queue->begin();
+}
+
+
+/** Get end iterator for message queue.
+ * Not that you must have locked the queue before this operation!
+ * @return iterator beyond end of message queue.
+ * @exception NotLockedException thrown if message queue is not locked during this operation.
+ */
+MessageQueue::MessageIterator
+Interface::msgq_end()
+{
+  return message_queue->end();
 }
 
 

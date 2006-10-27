@@ -26,7 +26,11 @@ CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\"
 LIBS_qa_interface_loader = core utils interfaces
 OBJS_qa_interface_loader = qa_interface_loader.o
 
-BINS_all =	$(BINDIR)/qa_interface_loader
+LIBS_qa_interface_msgq = core utils interfaces
+OBJS_qa_interface_msgq = qa_interface_msgq.o
+
+BINS_all =	$(BINDIR)/qa_interface_loader	\
+		$(BINDIR)/qa_interface_msgq
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

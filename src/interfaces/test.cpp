@@ -2,7 +2,7 @@
 /***************************************************************************
  *  test.cpp - Fawkes BlackBoard Interface - TestInterface
  *
- *  Interface generated: Mon Oct 23 19:14:27 2006
+ *  Interface generated: Fri Oct 27 19:52:26 2006
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2006  Tim Niemueller
  *
@@ -54,7 +54,7 @@ TestInterface::TestInterface() : Interface()
 /** Destructor */
 TestInterface::~TestInterface()
 {
-  free(data);
+  free(data_ptr);
 }
 /* Methods */
 /** Get TestInt value.
@@ -165,6 +165,16 @@ TestInterface::setTestUInt(unsigned int newTestUInt)
  */
 
 
+/** Constructor with initial values.
+ * @param iniTestInt initial value for TestInt
+ */
+TestInterface::SetTestIntMessage::SetTestIntMessage(int iniTestInt) : Message()
+{
+  data_size = sizeof(SetTestIntMessage_data_t);
+  data_ptr  = malloc(data_size);
+  data      = (SetTestIntMessage_data_t *)data_ptr;
+  data->TestInt = iniTestInt;
+}
 /** Constructor */
 TestInterface::SetTestIntMessage::SetTestIntMessage() : Message()
 {
@@ -175,7 +185,6 @@ TestInterface::SetTestIntMessage::SetTestIntMessage() : Message()
 /** Destructor */
 TestInterface::SetTestIntMessage::~SetTestIntMessage()
 {
-  free(data);
 }
 /* Methods */
 /** Get TestInt value.
@@ -205,6 +214,16 @@ TestInterface::SetTestIntMessage::setTestInt(int newTestInt)
  */
 
 
+/** Constructor with initial values.
+ * @param iniTestString initial value for TestString
+ */
+TestInterface::SetTestStringMessage::SetTestStringMessage(char * iniTestString) : Message()
+{
+  data_size = sizeof(SetTestStringMessage_data_t);
+  data_ptr  = malloc(data_size);
+  data      = (SetTestStringMessage_data_t *)data_ptr;
+  strncpy(data->TestString, iniTestString, 30);
+}
 /** Constructor */
 TestInterface::SetTestStringMessage::SetTestStringMessage() : Message()
 {
@@ -215,7 +234,6 @@ TestInterface::SetTestStringMessage::SetTestStringMessage() : Message()
 /** Destructor */
 TestInterface::SetTestStringMessage::~SetTestStringMessage()
 {
-  free(data);
 }
 /* Methods */
 /** Get TestString value.
@@ -245,6 +263,18 @@ TestInterface::SetTestStringMessage::setTestString(char * newTestString)
  */
 
 
+/** Constructor with initial values.
+ * @param iniSummand initial value for Summand
+ * @param iniAddend initial value for Addend
+ */
+TestInterface::CalculateMessage::CalculateMessage(int iniSummand, int iniAddend) : Message()
+{
+  data_size = sizeof(CalculateMessage_data_t);
+  data_ptr  = malloc(data_size);
+  data      = (CalculateMessage_data_t *)data_ptr;
+  data->Summand = iniSummand;
+  data->Addend = iniAddend;
+}
 /** Constructor */
 TestInterface::CalculateMessage::CalculateMessage() : Message()
 {
@@ -255,7 +285,6 @@ TestInterface::CalculateMessage::CalculateMessage() : Message()
 /** Destructor */
 TestInterface::CalculateMessage::~CalculateMessage()
 {
-  free(data);
 }
 /* Methods */
 /** Get Summand value.

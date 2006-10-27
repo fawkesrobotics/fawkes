@@ -2,7 +2,7 @@
 /***************************************************************************
  *  blackboard.h - Fawkes BlackBoard Interface - BlackBoardInternalsInterface
  *
- *  Interface generated: Mon Oct 23 19:14:27 2006
+ *  Interface generated: Fri Oct 27 19:52:26 2006
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2006  Tim Niemueller
  *
@@ -63,10 +63,10 @@ class BlackBoardInternalsInterface : public Interface
 
     GetInstanceSerialMessage_data_t *data;
 
+   public:
     GetInstanceSerialMessage();
     ~GetInstanceSerialMessage();
 
-   public:
     /* Methods */
   };
 
@@ -79,10 +79,10 @@ class BlackBoardInternalsInterface : public Interface
 
     GetMemSerialMessage_data_t *data;
 
+   public:
     GetMemSerialMessage();
     ~GetMemSerialMessage();
 
-   public:
     /* Methods */
   };
 

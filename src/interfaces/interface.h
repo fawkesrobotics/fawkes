@@ -29,14 +29,14 @@
 #define __INTERFACE_H_
 
 #include <interfaces/message.h>
+#include <interfaces/message_queue.h>
 #include <core/exception.h>
 
 #define __INTERFACE_TYPE_SIZE 32
 #define __INTERFACE_ID_SIZE 32
 
-class ReadWriteLock;
+class RefCountRWLock;
 class InterfaceMediator;
-//class MessageQueue;
 
 class InterfaceWriteDeniedException : public Exception
 {
@@ -69,7 +69,17 @@ class Interface
 
   bool          hasWriter() const;
 
-  //unsigned int  enqueue(Message *message);
+  unsigned int  msgq_enqueue(Message *message);
+  unsigned int  msgq_enqueue(MessageQueue::MessageIterator &it, Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_tryLock();
+  void          msgq_unlock();
+  MessageQueue::MessageIterator  msgq_begin();
+  MessageQueue::MessageIterator  msgq_end();
 
  protected:
   Interface();
@@ -88,10 +98,10 @@ class Interface
   unsigned int       mem_serial;
   bool               write_access;
 
-  ReadWriteLock     *rwlock;
+  RefCountRWLock    *rwlock;
 
   InterfaceMediator *interface_mediator;
-  //MessageQueue      *message_queue;
+  MessageQueue      *message_queue;
 
 
   typedef struct imsg_list_t {

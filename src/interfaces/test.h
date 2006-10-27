@@ -2,7 +2,7 @@
 /***************************************************************************
  *  test.h - Fawkes BlackBoard Interface - TestInterface
  *
- *  Interface generated: Mon Oct 23 19:14:27 2006
+ *  Interface generated: Fri Oct 27 19:52:26 2006
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2006  Tim Niemueller
  *
@@ -72,10 +72,11 @@ class TestInterface : public Interface
 
     SetTestIntMessage_data_t *data;
 
+   public:
+    SetTestIntMessage(int iniTestInt);
     SetTestIntMessage();
     ~SetTestIntMessage();
 
-   public:
     /* Methods */
     int getTestInt();
     void setTestInt(int newTestInt);
@@ -91,10 +92,11 @@ class TestInterface : public Interface
 
     SetTestStringMessage_data_t *data;
 
+   public:
+    SetTestStringMessage(char * iniTestString);
     SetTestStringMessage();
     ~SetTestStringMessage();
 
-   public:
     /* Methods */
     char * getTestString();
     void setTestString(char * newTestString);
@@ -111,10 +113,11 @@ class TestInterface : public Interface
 
     CalculateMessage_data_t *data;
 
+   public:
+    CalculateMessage(int iniSummand, int iniAddend);
     CalculateMessage();
     ~CalculateMessage();
 
-   public:
     /* Methods */
     int getSummand();
     void setSummand(int newSummand);

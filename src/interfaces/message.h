@@ -25,41 +25,33 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __BLACKBOARD_MESSAGE_H_
-#define __BLACKBOARD_MESSAGE_H_
+#ifndef __MESSAGE_H_
+#define __MESSAGE_H_
+
+#include <core/utils/refcount.h>
 
 class Mutex;
 
-class Message
+class Message : public RefCount
 {
   friend class MessageQueue;
   friend class Interface;
  public:
   Message();
-
+  Message(Message *mesg);
   Message(Message &mesg);
   virtual ~Message();
 
-  bool              operator== (const Message & m) const;
-  bool              operator!= (const Message & m) const;
   Message &         operator=  (const Message & m);
-
-  void              ref();
-  void              unref();
-  unsigned int      refcount();
-
-  static void       operator delete(void *);
 
  private:
   virtual void *        data();
   virtual unsigned int  datasize();
 
-  unsigned int  msg_id;
+  unsigned int  message_id;
+
   unsigned int  passing_interface_id;  
   unsigned int  originating_interface_id;  
-
-  Mutex        *mutex;
-  unsigned int  refc;
 
  protected:
   void         *data_ptr;

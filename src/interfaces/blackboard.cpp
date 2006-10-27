@@ -2,7 +2,7 @@
 /***************************************************************************
  *  blackboard.cpp - Fawkes BlackBoard Interface - BlackBoardInternalsInterface
  *
- *  Interface generated: Mon Oct 23 19:14:27 2006
+ *  Interface generated: Fri Oct 27 19:52:26 2006
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2006  Tim Niemueller
  *
@@ -51,7 +51,7 @@ BlackBoardInternalsInterface::BlackBoardInternalsInterface() : Interface()
 /** Destructor */
 BlackBoardInternalsInterface::~BlackBoardInternalsInterface()
 {
-  free(data);
+  free(data_ptr);
 }
 /* Methods */
 /** Get InstanceSerial value.
@@ -100,7 +100,6 @@ BlackBoardInternalsInterface::GetInstanceSerialMessage::GetInstanceSerialMessage
 /** Destructor */
 BlackBoardInternalsInterface::GetInstanceSerialMessage::~GetInstanceSerialMessage()
 {
-  free(data);
 }
 /* Methods */
 /** @class BlackBoardInternalsInterface::GetMemSerialMessage interfaces/blackboard.h
@@ -120,7 +119,6 @@ BlackBoardInternalsInterface::GetMemSerialMessage::GetMemSerialMessage() : Messa
 /** Destructor */
 BlackBoardInternalsInterface::GetMemSerialMessage::~GetMemSerialMessage()
 {
-  free(data);
 }
 /* Methods */
 /** Check if message is valid an can be queued.
