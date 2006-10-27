@@ -68,7 +68,16 @@ class BlackBoardMemoryManager
 
   unsigned int getMaxFreeSize() const;
   unsigned int getMaxAllocatedSize() const;
+
+  unsigned int getFreeSize() const;
+  unsigned int getAllocatedSize() const;
   unsigned int getOverhangSize() const;
+
+  unsigned int getNumFreeChunks() const;
+  unsigned int getNumAllocatedChunks() const;
+
+  unsigned int getMemorySize() const;
+  unsigned int getVersion() const;
 
   void   printFreeChunksInfo() const;
   void   printAllocatedChunksInfo() const;

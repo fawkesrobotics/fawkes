@@ -115,7 +115,6 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
 						 bool master,
 						 const char *shmem_token)
 {
-
   this->memsize = memsize;
 
   // open shared memory segment, if it exists try to aquire exclusive
@@ -142,7 +141,7 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
     throw BBMemMgrNotMasterException("Not owner of shared memory segment");
   }
 
-  printf("Shared memory base pointer: 0x%x\n", (unsigned int)shmem->getMemPtr());
+  // printf("Shared memory base pointer: 0x%x\n", (unsigned int)shmem->getMemPtr());
 
   if ( master ) {
     // protect memory, needed for list operations in memory, otherwise
@@ -424,6 +423,84 @@ BlackBoardMemoryManager::getMaxFreeSize() const
   } else {
     return m->size;
   }
+}
+
+
+/** Get total free memory.
+ * This method gives information about the sum of all free chunk sizes. Note that
+ * it is not guaranteed that that much data can be stored in the memory since
+ * fragmentation may have occured. To get information about the biggest piece
+ * of memory that you can allocate use getMaxFreeSize()
+ * @return sum of free chunk sizes
+ */
+unsigned int
+BlackBoardMemoryManager::getFreeSize() const
+{
+  unsigned int free_size = 0;
+  chunk_list_t *l = shmem_header->getFreeListHead();
+  while ( l ) {
+    free_size += l->size;
+    l = chunk_ptr(l->next);
+  }
+  return free_size;
+}
+
+
+/** Get total allocated memory.
+ * This method gives information about the sum of all allocated chunk sizes.
+ * @return sum of allocated chunks sizes
+ */
+unsigned int
+BlackBoardMemoryManager::getAllocatedSize() const
+{
+  unsigned int alloc_size = 0;
+  chunk_list_t *l = shmem_header->getAllocListHead();
+  while ( l ) {
+    alloc_size += l->size;
+    l = chunk_ptr(l->next);
+  }
+  return alloc_size;
+}
+
+
+/** Get number of allocated chunks.
+ * @return number of allocated memory chunks
+ */
+unsigned int
+BlackBoardMemoryManager::getNumAllocatedChunks() const
+{
+  return list_length( shmem_header->getAllocListHead() );
+}
+
+
+/** Get number of free chunks.
+ * @return number of free memory chunks
+ */
+unsigned int
+BlackBoardMemoryManager::getNumFreeChunks() const
+{
+  return list_length( shmem_header->getFreeListHead() );
+}
+
+
+/** Get size of memory.
+ * This does not include memory headers, but only the size of the data segment.
+ * @return size of memory.
+ */
+unsigned int
+BlackBoardMemoryManager::getMemorySize() const
+{
+  return memsize;
+}
+
+
+/** Get BlackBoard version.
+ * @return BlackBoard version
+ */
+unsigned int
+BlackBoardMemoryManager::getVersion() const
+{
+  return shmem_header->getVersion();
 }
 
 

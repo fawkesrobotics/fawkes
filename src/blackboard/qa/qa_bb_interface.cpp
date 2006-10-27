@@ -34,6 +34,7 @@
 #include <blackboard/bbconfig.h>
 
 #include <interfaces/test.h>
+#include <interfaces/blackboard.h>
 
 #include <core/exceptions/system.h>
 
@@ -75,18 +76,19 @@ main(int argc, char **argv)
 
   try {
     cout << "Opening interfaces.. " << flush;
-    ti_writer = dynamic_cast<TestInterface *>(im->openForWriting("TestInterface", "SomeID"));
-    ti_reader = dynamic_cast<TestInterface *>(im->openForReading("TestInterface", "SomeID"));
+    ti_writer = im->openForWriting<TestInterface>("SomeID");
+    ti_reader = im->openForReading<TestInterface>("SomeID");
     cout << "success" << endl;
   } catch (Exception &e) {
     cout << "failed! Aborting" << endl;
+    e.printTrace();
     exit(1);
   }
 
   try {
     cout << "Trying to open second writer.. " << flush;
     TestInterface *ti_writer_two;
-    ti_writer_two = dynamic_cast<TestInterface *>(im->openForWriting("TestInterface", "SomeID"));
+    ti_writer_two = im->openForWriting<TestInterface>("SomeID");
     cout << "BUG: Detection of second writer did NOT work!" << endl;
     exit(2);
   } catch (BlackBoardWriterActiveException &e) {
@@ -104,7 +106,7 @@ main(int argc, char **argv)
   try {
     cout << "Trying to open third writer.. " << flush;
     TestInterface *ti_writer_three;
-    ti_writer_three = dynamic_cast<TestInterface *>(im->openForWriting("TestInterface", "AnotherID"));
+    ti_writer_three = im->openForWriting<TestInterface>("AnotherID");
     cout << "No exception as expected, different ID ok!" << endl;
     im->close(ti_writer_three);
   } catch (BlackBoardWriterActiveException &e) {
@@ -159,6 +161,9 @@ main(int argc, char **argv)
 
     usleep(10);
   }
+
+  im->close(ti_reader);
+  im->close(ti_writer);
 
   delete im;
   delete mm;

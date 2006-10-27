@@ -59,6 +59,8 @@ class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
   void setFreeListHead(chunk_list_t *flh);
   void setAllocListHead(chunk_list_t *alh);
 
+  unsigned int getVersion() const;
+
  private:
   unsigned int data_size;
   unsigned int version;

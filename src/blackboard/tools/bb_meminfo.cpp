@@ -52,8 +52,20 @@ main(int argc, char **argv)
   cout << endl << cblue << "Fawkes BlackBoard Memory Info" << cnormal << endl
        << "========================================================================" << endl;
 
-  printf("Memory Size: %8d bytes    BlackBoard version: %u\n", BLACKBOARD_MEMORY_SIZE,
-	 BLACKBOARD_VERSION);
+  printf("Memory Size: %s%8d%s %sB%s  BlackBoard version: %s%u%s\n"
+	 "Free Memory: %s%8d%s %sB%s  Alloc. memory: %s%8d%s %sB%s  Overhang: %s%8d%s %sB%s\n"
+	 "Free Chunks: %s%8d%s    Alloc. chunks: %s%8d%s\n",
+ 	 cdarkgray.c_str(), memmgr->getMemorySize(), cnormal.c_str(),
+	 clightgray.c_str(), cnormal.c_str(),
+	 cdarkgray.c_str(), memmgr->getVersion(), cnormal.c_str(),
+	 cdarkgray.c_str(), memmgr->getFreeSize(), cnormal.c_str(),
+	 clightgray.c_str(), cnormal.c_str(),
+	 cdarkgray.c_str(), memmgr->getAllocatedSize(), cnormal.c_str(),
+	 clightgray.c_str(), cnormal.c_str(),
+	 cdarkgray.c_str(), memmgr->getOverhangSize(), cnormal.c_str(),
+	 clightgray.c_str(), cnormal.c_str(),
+	 cdarkgray.c_str(), memmgr->getNumFreeChunks(), cnormal.c_str(),
+	 cdarkgray.c_str(), memmgr->getNumAllocatedChunks(), cnormal.c_str());
 
   if ( ! memmgr->tryLock() ) {
     timeval a, b;

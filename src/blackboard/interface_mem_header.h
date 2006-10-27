@@ -31,19 +31,20 @@
 #define __INTERFACE_TYPE_SIZE 32
 #define __INTERFACE_ID_SIZE 32
 
-class ReadWriteLock;
+class RefCountRWLock;
 
 /** This struct is used as header for interfaces in memory chunks.
  * This header is stored at the beginning of each allocated memory chunk.
  */
 typedef struct {
   char             type[__INTERFACE_TYPE_SIZE];	/**< interface type */
-  char             id[__INTERFACE_ID_SIZE];		/**< interface identifier */
-  unsigned int     flag_writer_active :  1;		/**< truf if there is any writer */
-  unsigned int     flag_reserved      : 31;		/**< reserved for future use */
-  unsigned int     refcount;				/**< reference count */
-  unsigned int     serial;				/**< memory serial */
-  ReadWriteLock *  rwlock;				/**< read/write lock for in-process multi-threaded usage */
+  char             id[__INTERFACE_ID_SIZE];	/**< interface identifier */
+  unsigned int     flag_writer_active :  1;	/**< true if there is any writer */
+  unsigned int     flag_reserved      : 31;	/**< reserved for future use */
+  unsigned int     refcount;			/**< reference count */
+  unsigned int     serial;			/**< memory serial */
+  RefCountRWLock   *rwlock;			/**< read/write lock for in-process
+						 * multi-threaded usage */
 } interface_header_t;
 
 

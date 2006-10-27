@@ -30,6 +30,8 @@
 
 #include <interfaces/mediators/interface_mediator.h>
 #include <interfaces/interface.h>
+#include <core/exceptions/software.h>
+#include <typeinfo>
 
 class BlackBoardMemoryManager;
 class BlackBoardInternalsInterface;
@@ -50,8 +52,14 @@ class BlackBoardInterfaceManager : public InterfaceMediator
   virtual bool existsWriter(const Interface *interface) const;
   virtual void notifyOfDataChange(const Interface *interface);
 
+  template <class InterfaceType>
+    InterfaceType * openForReading(const char *identifier);
+
+  template <class InterfaceType>
+    InterfaceType * openForWriting(const char *identifier);
+
  private:
-  Interface *  newInterfaceInstance(const char *type);
+  Interface *  newInterfaceInstance(const char *type, const char *identifier);
   void         deleteInterfaceInstance(Interface *interface);
 
   void *       findInterfaceInMemory(const char *type, const char *identifier);
@@ -61,6 +69,8 @@ class BlackBoardInterfaceManager : public InterfaceMediator
 			       Interface* &interface, void* &ptr);
 
   Interface *  open(const char *interface_type, const char *identifier);
+
+  char * stripClassType(const char *type);
 
   BlackBoardInternalsInterface * openInternalsNonMaster();
 
@@ -73,5 +83,69 @@ class BlackBoardInterfaceManager : public InterfaceMediator
   BlackBoardInternalsInterface *internals;
 
 };
+
+
+/** Get interface of given type.
+ * This will open a new interface for reading just like the non-template version of
+ * openForReading(). But with the template method you will get a correctly typed object
+ * that you can use. An TypeMismatchException is thrown if the string representation
+ * of the type and the actual class type of the interface do not match.
+ * @param identifier identifier of the interface
+ * @return new fully initialized interface instance of requested type
+ * @exception OutOfMemoryException thrown if there is not enough free space for
+ * the requested interface.
+ * @exception TypeMismatchException thrown if type in interface_type and the actual class
+ * type do not fit.
+ */
+template <class InterfaceType>
+InterfaceType *
+BlackBoardInterfaceManager::openForReading(const char *identifier)
+{
+  char *type_name = stripClassType(typeid(InterfaceType).name());
+  InterfaceType *interface = dynamic_cast<InterfaceType *>(openForReading(type_name, identifier));
+  delete[] type_name;
+  if ( interface == 0 ) {
+    throw TypeMismatchException("Interface (R) types do not match");
+  } else {
+    return interface;
+  }
+}
+
+
+
+/** Get writer interface of given type.
+ * This will open a new interface for writing just like the non-template version of
+ * openForWriting(). But with the template method you will get a correctly typed object
+ * that you can use. An TypeMismatchException is thrown if the string representation
+ * of the type and the actual class type of the interface do not match.
+ * @param identifier identifier of the interface
+ * @return new fully initialized interface instance of requested type
+ * @exception OutOfMemoryException thrown if there is not enough free space for
+ * the requested interface.
+ * @exception BlackBoardWriterActiveException thrown if there is already a writing
+ * instance with the same type/id
+ * @exception TypeMismatchException thrown if type in interface_type and the actual class
+ * type do not fit.
+ */
+template <class InterfaceType>
+InterfaceType *
+BlackBoardInterfaceManager::openForWriting(const char *identifier)
+{
+  char *type_name = stripClassType(typeid(InterfaceType).name());
+  InterfaceType *interface;
+  try {
+    interface = dynamic_cast<InterfaceType *>(openForWriting(type_name, identifier));
+  } catch (Exception &e) {
+    // just caught to properly free memory
+    delete[] type_name;
+    throw;
+  }
+  delete[] type_name;
+  if ( interface == 0 ) {
+    throw TypeMismatchException("Interface (W) types do not match");
+  } else {
+    return interface;
+  }
+}
 
 #endif

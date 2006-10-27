@@ -35,11 +35,12 @@
 #include <interfaces/blackboard.h>
 
 #include <core/threading/mutex.h>
-#include <core/threading/read_write_lock.h>
+#include <core/threading/refc_rwlock.h>
 #include <core/exceptions/system.h>
 #include <utils/system/dynamic_module/module_dl.h>
 
 #include <stdlib.h>
+#include <string>
 
 using namespace std;
 
@@ -121,8 +122,26 @@ BlackBoardInterfaceManager::BlackBoardInterfaceManager(BlackBoardMemoryManager *
 /** Destructor */
 BlackBoardInterfaceManager::~BlackBoardInterfaceManager()
 {
+  close(internals);
   delete mutex;
   delete iface_module;
+}
+
+
+/** Strip numbers at the beginning of the class type.
+ * This has been implemented by observations of C++ class names as returned by GCC's
+ * typeid operator.
+ * @param type type name to strip
+ * @return stripped class type
+ */
+char *
+BlackBoardInterfaceManager::stripClassType(const char *type)
+{
+  string t = type;
+  t = t.substr( t.find_first_not_of("0123456789") );
+  char *rv = new char[t.length() + 1];
+  strcpy(rv, t.c_str());
+  return rv;
 }
 
 
@@ -131,12 +150,13 @@ BlackBoardInterfaceManager::~BlackBoardInterfaceManager()
  * for the interface of the given type. If this was found a new instance of the
  * interface is returned.
  * @param type type of the interface
+ * @param identifier identifier of the interface
  * @return a new instance of the requested interface type
  * @exception BlackBoardInterfaceNotFoundException thrown if the factory function
  * for the given interface type could not be found
  */
 Interface *
-BlackBoardInterfaceManager::newInterfaceInstance(const char *type)
+BlackBoardInterfaceManager::newInterfaceInstance(const char *type, const char *identifier)
 {
   char *generator_name = (char *)malloc(strlen("new") + strlen(type) + 1);
   sprintf(generator_name, "new%s", type);
@@ -150,6 +170,8 @@ BlackBoardInterfaceManager::newInterfaceInstance(const char *type)
   Interface *iface = iff();
 
   iface->instance_serial = getNextInstanceSerial();
+  strncpy(iface->_type, type, __INTERFACE_TYPE_SIZE);
+  strncpy(iface->_id, identifier, __INTERFACE_ID_SIZE);
 
   free(generator_name);
   return iface;
@@ -279,12 +301,13 @@ BlackBoardInterfaceManager::openInternalsNonMaster()
       throw BlackBoardNoMasterAliveException();
     }
 
-    iface = newInterfaceInstance("BlackBoardInternalsInterface");
+    iface = newInterfaceInstance("BlackBoardInternalsInterface", "FawkesBlackBoard");
     iface->mem_real_ptr = ptr;
     iface->mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
 
     iface->interface_mediator = this;
     iface->write_access = false;
+    ih->rwlock->ref();
     iface->rwlock = ih->rwlock;
     iface->mem_serial = ih->serial;
     ih->refcount++;
@@ -317,7 +340,7 @@ BlackBoardInterfaceManager::createInterface(const char *type, const char *identi
   interface_header_t *ih;
 
   // create new interface and allocate appropriate chunk
-  interface = newInterfaceInstance(type);
+  interface = newInterfaceInstance(type, identifier);
   try {
     ptr = memmgr->alloc_nolock(interface->datasize() + sizeof(interface_header_t));
     ih  = (interface_header_t *)ptr;
@@ -329,11 +352,9 @@ BlackBoardInterfaceManager::createInterface(const char *type, const char *identi
   }
   strncpy(ih->type, type, __INTERFACE_TYPE_SIZE);
   strncpy(ih->id, identifier, __INTERFACE_ID_SIZE);
-  strncpy(interface->_type, type, __INTERFACE_TYPE_SIZE);
-  strncpy(interface->_id, identifier, __INTERFACE_ID_SIZE);
 
   ih->refcount     = 0;
-  ih->rwlock       = new ReadWriteLock();
+  ih->rwlock       = new RefCountRWLock();
   ih->serial       = getNextMemSerial();
 
   interface->mem_real_ptr  = ptr;
@@ -365,10 +386,11 @@ BlackBoardInterfaceManager::openForReading(const char *type, const char *identif
 
   if ( ptr != NULL ) {
     // found, instantiate new interface for given memory chunk
-    iface = newInterfaceInstance(type);
+    iface = newInterfaceInstance(type, identifier);
     iface->mem_real_ptr = ptr;
     iface->mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
     ih  = (interface_header_t *)ptr;
+    ih->rwlock->ref();
   } else {
     createInterface(type, identifier, iface, ptr);
     ih = (interface_header_t *)ptr;
@@ -420,9 +442,10 @@ BlackBoardInterfaceManager::openForWriting(const char *type, const char *identif
       mutex->unlock();
       throw BlackBoardWriterActiveException(identifier, type);
     }
-    iface = newInterfaceInstance(type);
+    iface = newInterfaceInstance(type, identifier);
     iface->mem_real_ptr = ptr;
     iface->mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
+    ih->rwlock->ref();
   } else {
     createInterface(type, identifier, iface, ptr);
     ih = (interface_header_t *)ptr;

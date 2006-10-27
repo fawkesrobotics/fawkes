@@ -75,6 +75,7 @@ BlackBoardSharedMemoryHeader::~BlackBoardSharedMemoryHeader()
 {
 }
 
+
 /** Check if the given shared memory segment is a Fawkes BB segment
  * @param memptr Ptr to the segment
  * @return true if the version matches, false otherwise
@@ -86,6 +87,7 @@ BlackBoardSharedMemoryHeader::matches(void *memptr)
   return (version == md->version);
 }
 
+
 /** Get the size of the header data.
  * @return size of the header data
  */
@@ -94,6 +96,7 @@ BlackBoardSharedMemoryHeader::size()
 {
   return sizeof(BlackBoardSharedMemoryHeaderData);
 }
+
 
 /** Initialize shared memory segment
  * This copies basic management header data into the shared memory segment.
@@ -110,6 +113,7 @@ BlackBoardSharedMemoryHeader::initialize(void *memptr)
   data->alloc_list_head = NULL;
 }
 
+
 /** Set data of this header
  * Sets the internal pointer to the shared memory header data 
  * to the data retrieved from the shared memory segment.
@@ -121,6 +125,7 @@ BlackBoardSharedMemoryHeader::set(void *memptr)
   data = (BlackBoardSharedMemoryHeaderData *)memptr;
 }
 
+
 /** Data segment size.
  * @return size of the data segment without header
  */
@@ -129,6 +134,7 @@ BlackBoardSharedMemoryHeader::dataSize()
 {
   return data_size;
 }
+
 
 /** Get the head of the free chunks list.
  * @return pointer to the free list head, local pointer, already transformed,
@@ -140,6 +146,7 @@ BlackBoardSharedMemoryHeader::getFreeListHead()
   return (chunk_list_t *)shmem->ptr(data->free_list_head);
 }
 
+
 /** Get the head of the allocated chunks list.
  * @return pointer to the allocated list head, local pointer, already transformed,
  * you can use this without further conversion.
@@ -149,6 +156,7 @@ BlackBoardSharedMemoryHeader::getAllocListHead()
 {
   return (chunk_list_t *)shmem->ptr(data->alloc_list_head);
 }
+
 
 /** Set the head of the free chunks list.
  * @param flh pointer to the new free list head, must be a pointer to the local
@@ -160,6 +168,7 @@ BlackBoardSharedMemoryHeader::setFreeListHead(chunk_list_t *flh)
   data->free_list_head = (chunk_list_t *)shmem->addr(flh);
 }
 
+
 /** Set the head of the allocated chunks list.
  * @param alh pointer to the new allocated list head, must be a pointer to the local
  * shared memory segment. Will be transformed to a shared memory address.
@@ -168,4 +177,14 @@ void
 BlackBoardSharedMemoryHeader::setAllocListHead(chunk_list_t *alh)
 {
   data->alloc_list_head = (chunk_list_t *)shmem->addr(alh);
+}
+
+
+/** Get BlackBoard version.
+ * @return BlackBoard version
+ */
+unsigned int
+BlackBoardSharedMemoryHeader::getVersion() const
+{
+  return data->version;
 }
