@@ -22,7 +22,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software Foundation,
- *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 #ifndef __INTERFACE_H_
@@ -78,6 +78,21 @@ class Interface
   void          msgq_lock();
   bool          msgq_tryLock();
   void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+
+  /** Check if first message has desired type.
+   * @return true, if message has desired type, false otherwise
+   */
+  template <class MessageType>
+    bool           msgq_first_is();
+
+  /** Check if first message has desired type.
+   * @return true, if message has desired type, false otherwise
+   */
+  template <class MessageType>
+    MessageType *  msgq_first();
+
   MessageQueue::MessageIterator  msgq_begin();
   MessageQueue::MessageIterator  msgq_end();
 
@@ -110,6 +125,23 @@ class Interface
   };
 
 };
+
+
+template <class MessageType>
+MessageType *
+Interface::msgq_first();
+{
+  return dynamic_cast<MessageType>(message_queue->first());
+}
+
+
+template <class MessageType>
+bool
+Interface::msgq_first_is()
+{
+  return (dynamic_cast<MessageType>(message_queue->first()) != 0);
+}
+
 
 typedef Interface *  (* InterfaceFactoryFunc)  (void);
 typedef void         (* InterfaceDestroyFunc)  (Interface *);

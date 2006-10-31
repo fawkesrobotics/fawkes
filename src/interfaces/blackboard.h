@@ -2,7 +2,7 @@
 /***************************************************************************
  *  blackboard.h - Fawkes BlackBoard Interface - BlackBoardInternalsInterface
  *
- *  Interface generated: Fri Oct 27 19:52:26 2006
+ *  Interface generated: Mon Oct 30 19:48:49 2006
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2006  Tim Niemueller
  *

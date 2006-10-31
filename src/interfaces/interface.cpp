@@ -36,13 +36,14 @@
 /** @class InterfaceWriteDeniedException interfaces/interface.h
  * This exception is thrown if a write has been attempted on a read-only interface.
  * @see Interface::write()
+ * @ingroup Exceptions
  */
 
 /** @class InterfaceInvalidMessageException interfaces/interface.h
  * This exception is thrown if a message has been queued in the interface which is
  * not recognized by the interface.
+ * @ingroup Exceptions
  */
-
 
 /** Constructor.
  * @param type type of the interface which caused the exception
@@ -329,6 +330,24 @@ MessageQueue::MessageIterator
 Interface::msgq_end()
 {
   return message_queue->end();
+}
+
+
+/** Get the first message from the message queue.
+ * @return first message in queue or NULL if there is none
+ */
+Message *
+Interface::msgq_first()
+{
+  return message_queue->first();
+}
+
+/** Erase first message from queue.
+ */
+void
+Interface::msgq_pop()
+{
+  message_queue->pop();
 }
 
 

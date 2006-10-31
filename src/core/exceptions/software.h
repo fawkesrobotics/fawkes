@@ -21,8 +21,8 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 #ifndef __CORE_EXCEPTIONS_SOFTWARE_H_
@@ -30,102 +30,39 @@
 
 #include <core/exception.h>
 
-/** A NULL pointer was supplied where not allowed.
- * Throw this exception if a pointer to NULL has been supplied where this is
- * not allowed.
- */
 class NullPointerException : public Exception {
  public:
-  /** Constructor
-   * @param msg message, appended to exception, base message "NullPointerException"
-   */
-  NullPointerException(const char *msg) : Exception("NullPointerException")
-  {
-    append(msg);
-  }
+  NullPointerException(const char *msg);
 };
 
 
-/** Division by zero.
- * Throw this if a division by zero has happened or is about to happen
- */
 class DivisionByZeroException : public Exception {
  public:
-  /** Constructor
-   * @param msg message, appended to exception, base message "Division by zero"
-   */
-  DivisionByZeroException(const char *msg) : Exception("Division by zero")
-  {
-    append(msg);
-  }
+  DivisionByZeroException(const char *msg);
 };
 
 
-/** Type mismatch.
- * Throw this exception if types of operations do not fit together.
- */
 class TypeMismatchException : public Exception {
  public:
-  /** Constructor
-   * @param msg message, appended to exception, base message "Division by zero"
-   */
-  TypeMismatchException(const char *msg) : Exception("Type mismatch")
-  {
-    append(msg);
-  }
+  TypeMismatchException(const char *msg);
 };
 
 
-/** Delete in progress.
- * Throw this exception if someone tried to access an object that is currently being
- * destroyed.
- */
 class DestructionInProgressException : public Exception {
  public:
-  /** Constructor
-   * @param msg informative message, appended to exception, base message is
-   * "Destruction in progress"
-   */
-  DestructionInProgressException(const char *msg) : Exception("Destruction in progress")
-  {
-    append(msg);
-  }
+  DestructionInProgressException(const char *msg);
 };
 
 
-/** Operation on unlocked object.
- * Throw this exception if someone tried to operate on an object with a method that needs
- * outside locking. This can be detected utilizing Mutex::tryLock() in many situations.
- */
 class NotLockedException : public Exception {
  public:
-  /** Constructor.
-   * @param msg informative message, appended to exception, base message is
-   * "Unsafe operation on not locked object"
-   */
-  NotLockedException(const char *msg) :
-    Exception("Unsafe operation on not locked object")
-  {
-    append(msg);
-  }
+  NotLockedException(const char *msg);
 };
 
 
-/** Non-pointer type expected.
- * Throw this exception if you got a pointer type where you expected to get a non-pointer
- * type variable.
- */
 class NonPointerTypeExpectedException : public Exception {
  public:
-  /** Constructor.
-   * @param msg informative message, appended to exception, base message is
-   * "Non-pointer type expected (template error?)"
-   */
-  NonPointerTypeExpectedException(const char *msg) :
-    Exception("Non-pointer type expected (template error?)")
-  {
-    append(msg);
-  }
+  NonPointerTypeExpectedException(const char *msg);
 };
 
 #endif

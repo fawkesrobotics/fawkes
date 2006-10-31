@@ -25,12 +25,6 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-
-/** @defgroup IPC Interprocess Communication (IPC)
- * Utilties for interprocess communication like shared memory segments,
- * semaphore sets and message queues.
- */
-
 #include <utils/ipc/shm.h>
 #include <utils/ipc/shm_exceptions.h>
 #include <utils/ipc/shm_lister.h>

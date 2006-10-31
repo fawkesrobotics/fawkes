@@ -21,8 +21,8 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 #include <interfaces/message_queue.h>
@@ -282,6 +282,33 @@ MessageQueue::tryLock()
 void
 MessageQueue::unlock()
 {
+  mutex->unlock();
+}
+
+
+/** Get first message from queue.
+ * @return first message from queue
+ */
+Message *
+MessageQueue::first()
+{
+  if ( list ) {
+    return list->msg;
+  } else {
+    return NULL;
+  }
+}
+
+
+/** Erase first message from queue.
+ */
+void
+MessageQueue::pop()
+{
+  mutex->lock();
+  if ( list ) {
+    remove(list, NULL);
+  }
   mutex->unlock();
 }
 

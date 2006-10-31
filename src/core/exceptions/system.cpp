@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  system.h - basic system exceptions
+ *  system.cpp - basic system exceptions
  *
- *  Generated: Mon Sep 18 19:22:36 2006
+ *  Generated: Sun Oct 29 14:28:17 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,21 +25,30 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __CORE_EXCEPTIONS_SYSTEM_H_
-#define __CORE_EXCEPTIONS_SYSTEM_H_
+#include <core/exceptions/system.h>
 
-#include <core/exception.h>
+/** @class OutOfMemoryException core/exceptions/system.h
+ * System ran out of memory and desired operation could not be fulfilled.
+ * @ingroup Exceptions
+ */
+/** Constructor
+ * @param msg optional extra message, appended to exception, base message "Out of memory"
+ */
+OutOfMemoryException::OutOfMemoryException(const char *msg)
+  : Exception("Out of memory")
+{
+  append(msg);
+}
 
-class OutOfMemoryException : public Exception {
- public:
-  OutOfMemoryException(const char *msg = 0);
-};
 
-
-class InterruptedException : public Exception {
- public:
-  InterruptedException();
-};
-
-
-#endif
+/** @class InterruptedException core/exceptions/system.h
+ * The current system call has been interrupted (for instance by a signal).
+ * Throw this exception if you use libc functions which return EINTR or store
+ * EINTR in errno.
+ * @ingroup Exceptions
+ */
+/** Constructor */
+InterruptedException::InterruptedException()
+  : Exception("Interrupted system call")
+{
+}

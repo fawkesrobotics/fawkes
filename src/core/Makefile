@@ -24,6 +24,8 @@ BASEDIR = ../..
 OBJS_libcore =	\
 		exception.o			\
 		plugin.o			\
+		exceptions/software.o		\
+		exceptions/system.o		\
 		threading/barrier.o		\
 		threading/mutex.o		\
 		threading/read_write_lock.o	\
