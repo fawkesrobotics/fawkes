@@ -1,0 +1,4 @@
+/** @defgroup IPC Interprocess Communication (IPC)
+ * Utilties for interprocess communication like shared memory segments,
+ * semaphore sets and message queues.
+ */

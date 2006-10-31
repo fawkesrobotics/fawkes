@@ -2,7 +2,7 @@
 /***************************************************************************
  *  test.h - Fawkes BlackBoard Interface - TestInterface
  *
- *  Interface generated: Mon Oct 30 19:48:49 2006
+ *  Interface generated: Tue Oct 31 16:26:20 2006
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2006  Tim Niemueller
  *

@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  qa_bb_interface.h - BlackBoard interface QA
+ *  qa_bb_messaging.h - BlackBoard messaging QA
  *
- *  Generated: Tue Oct 17 15:48:45 2006
+ *  Generated: Tue Oct 31 15:36:19 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -21,14 +21,13 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 
 /// @cond QA
 
-#include <blackboard/memory_manager.h>
 #include <blackboard/interface_manager.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
@@ -65,7 +64,6 @@ main(int argc, char **argv)
   signal(SIGINT, signal_handler);
 
   BlackBoardInterfaceManager *im = new BlackBoardInterfaceManager(/* master */  true);
-  const BlackBoardMemoryManager *mm = im->getMemoryManager();
 
   TestInterface *ti_writer;
   TestInterface *ti_reader;
@@ -80,38 +78,6 @@ main(int argc, char **argv)
     e.printTrace();
     exit(1);
   }
-
-  try {
-    cout << "Trying to open second writer.. " << flush;
-    TestInterface *ti_writer_two;
-    ti_writer_two = im->openForWriting<TestInterface>("SomeID");
-    cout << "BUG: Detection of second writer did NOT work!" << endl;
-    exit(2);
-  } catch (BlackBoardWriterActiveException &e) {
-    cout << "exception caught as expected, detected and prevented second writer!" << endl;
-  }
-
-  cout << "Printing some meminfo ===============================================" << endl;
-  cout << "Free chunks:" << endl;
-  mm->printFreeChunksInfo();
-  cout << "Allocated chunks:" << endl;
-  mm->printAllocatedChunksInfo();
-  mm->printPerformanceInfo();
-  cout << "End of meminfo ======================================================" << endl;
-
-  try {
-    cout << "Trying to open third writer.. " << flush;
-    TestInterface *ti_writer_three;
-    ti_writer_three = im->openForWriting<TestInterface>("AnotherID");
-    cout << "No exception as expected, different ID ok!" << endl;
-    im->close(ti_writer_three);
-  } catch (BlackBoardWriterActiveException &e) {
-    cout << "BUG: Third writer with different ID detected as another writer!" << endl;
-    exit(3);
-  }
-
-  cout << endl << endl
-       << "Running data tests ==================================================" << endl;
 
   cout << "Writing initial value ("
        << TestInterface::TEST_CONSTANT << ") into interface as TestInt" << endl;
@@ -135,14 +101,31 @@ main(int argc, char **argv)
 
   while ( ! quit ) {
     int expval = ti_reader->getTestInt() + 1;
-    //cout << "Writing value " << expval
-    // << " into interface as TestInt" << endl;
-    ti_writer->setTestInt( expval );
-    try {
-      ti_writer->write();
-    } catch (InterfaceWriteDeniedException &e) {
-      cout << "BUG: caught write denied exception" << endl;
-      e.printTrace();
+    TestInterface::SetTestIntMessage *m = new TestInterface::SetTestIntMessage(expval);
+    ti_reader->msgq_enqueue(m);
+    // reader does not care about result
+    ti_reader->msgq_flush();
+
+    if ( ti_writer->msgq_size() > 1 ) {
+      cout << "Error, more than one message! flushing." << endl;
+      ti_writer->msgq_flush();
+    }
+
+    if ( ti_writer->msgq_first_is<TestInterface::SetTestStringMessage>() ) {
+      cout << "Message improperly detected to be a SetTestStringMessage" << endl;
+    }
+    if ( ti_writer->msgq_first_is<TestInterface::SetTestIntMessage>() ) {
+      TestInterface::SetTestIntMessage *m2 = ti_writer->msgq_first<TestInterface::SetTestIntMessage>();
+      ti_writer->setTestInt( m2->getTestInt() );
+      try {
+	ti_writer->write();
+      } catch (InterfaceWriteDeniedException &e) {
+	cout << "BUG: caught write denied exception" << endl;
+	e.printTrace();
+      }
+      ti_writer->msgq_pop();
+    } else {
+      cout << "Illegal message type received" << endl;
     }
 
     //cout << "Reading value from reader interface.. " << flush;

@@ -29,8 +29,12 @@ OBJS_qa_bb_memmgr = qa_bb_memmgr.o
 LIBS_qa_bb_interface = core utils interfaces blackboard
 OBJS_qa_bb_interface = qa_bb_interface.o
 
+LIBS_qa_bb_messaging = core utils interfaces blackboard
+OBJS_qa_bb_messaging = qa_bb_messaging.o
+
 BINS_all =	$(BINDIR)/qa_bb_memmgr		\
-		$(BINDIR)/qa_bb_interface
+		$(BINDIR)/qa_bb_interface	\
+		$(BINDIR)/qa_bb_messaging
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

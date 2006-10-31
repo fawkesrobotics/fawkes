@@ -26,6 +26,7 @@ SUBDIRS = tools
 LIBS_libblackboard = core utils interfaces
 OBJS_libblackboard = interface_manager.o	\
 		     memory_manager.o		\
+		     message_manager.o		\
 		     shmem_header.o		\
 		     shmem_lister.o
 

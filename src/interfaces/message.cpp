@@ -21,8 +21,8 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 #include <interfaces/message.h>
@@ -55,8 +55,10 @@ Message::Message()
 {
   message_id = 0;
   data_ptr = NULL;
-  passing_interface_id = 0;
-  originating_interface_id = 0;
+  sender_interface_instance_serial = 0;
+  recipient_interface_mem_serial = 0;
+  _status    = Undefined;
+  _substatus = 0;
 }
 
 
@@ -66,11 +68,13 @@ Message::Message()
 Message::Message(Message &mesg)
 {
   message_id = 0;
-  passing_interface_id = mesg.passing_interface_id;
-  originating_interface_id = mesg.originating_interface_id;
+  sender_interface_instance_serial = 0;
+  recipient_interface_mem_serial = 0;
   data_size = mesg.data_size;
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, mesg.data_ptr, data_size);
+  _status    = Undefined;
+  _substatus = 0;
 }
 
 
@@ -80,16 +84,17 @@ Message::Message(Message &mesg)
 Message::Message(Message *mesg)
 {
   message_id = 0;
-  passing_interface_id = mesg->passing_interface_id;
-  originating_interface_id = mesg->originating_interface_id;
+  sender_interface_instance_serial = 0;
+  recipient_interface_mem_serial = 0;
   data_size = mesg->data_size;
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, mesg->data_ptr, data_size);
+  _status    = Undefined;
+  _substatus = 0;
 }
 
 
-/** Virtual destructor.
- */
+/** Destructor. */
 Message::~Message()
 {
   if ( data_ptr != NULL ) {
@@ -133,4 +138,49 @@ Message::operator=  (const Message & m)
   }
 
   return *this;
+}
+
+
+/** Set the status of the message.
+ * Note that this may only be called on the writer side. For efficiency in message
+ * handling this is not enforced and the responsibility of the programmer to ensure
+ * this.
+ * @param status status of the new message.
+ */
+void
+Message::setStatus(Message::MessageStatus status)
+{
+  _status = status;
+}
+
+
+/** Get status of message.
+ * @return message status
+ */
+Message::MessageStatus
+Message::status()
+{
+  return _status;
+}
+
+
+/** Set sub status of a message.
+ * The sub status is just an unsigned int which may be defined by the application
+ * as needed.
+ * @param sub_status new sub status
+ */
+void
+Message::setSubStatus(unsigned int sub_status)
+{
+  _substatus = sub_status;
+}
+
+
+/** Get sub status.
+ * @return sub status
+ */
+unsigned int
+Message::sub_status()
+{
+  return _substatus;
 }

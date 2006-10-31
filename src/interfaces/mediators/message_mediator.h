@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  message_manager.h - BlackBoard message manager
+ *  message_mediator.h - Fawkes BlackBoard Message Mediator
  *
- *  Generated: Fri Oct 06 11:29:51 2006
+ *  Generated: Sun Oct 29 17:58:19 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,27 +25,23 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __BLACKBOARD_MESSAGE_MANAGER_H_
-#define __BLACKBOARD_MESSAGE_MANAGER_H_
+#ifndef __MESSAGE_MEDIATOR_H_
+#define __MESSAGE_MEDIATOR_H_
 
-#include <interfaces/mediators/message_mediator.h>
-
-class BlackBoardInterfaceManager;
+class Interface;
 class Message;
 
-class BlackBoardMessageManager : public MessageMediator
+class MessageMediator
 {
  public:
-  BlackBoardMessageManager(BlackBoardInterfaceManager *im);
-  ~BlackBoardMessageManager();
+  /** Virtual destructor */
+  virtual ~MessageMediator() {}
 
-  virtual void transmit(Message *message);
-
- private:
-  BlackBoardInterfaceManager *im;
+  /** Transmit message.
+   * @param message message to transmit.
+   */
+  virtual void transmit(Message *message)                              = 0;
 
 };
-
-
 
 #endif

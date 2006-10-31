@@ -21,8 +21,8 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 #ifndef __BLACKBOARD_INTERFACE_MANAGER_H_
@@ -32,17 +32,20 @@
 #include <interfaces/interface.h>
 #include <core/exceptions/software.h>
 #include <typeinfo>
+#include <map>
 
 class BlackBoardMemoryManager;
 class BlackBoardInternalsInterface;
+class BlackBoardMessageManager;
 class Mutex;
 class Module;
 
 class BlackBoardInterfaceManager : public InterfaceMediator
 {
+ friend class BlackBoardMessageManager;
  public:
 
-  BlackBoardInterfaceManager(BlackBoardMemoryManager *memmgr, bool bb_master = false);
+  BlackBoardInterfaceManager(bool bb_master = false);
   virtual ~BlackBoardInterfaceManager();
 
   Interface *  openForReading(const char *interface_type, const char *identifier);
@@ -58,6 +61,8 @@ class BlackBoardInterfaceManager : public InterfaceMediator
   template <class InterfaceType>
     InterfaceType * openForWriting(const char *identifier);
 
+  const BlackBoardMemoryManager *  getMemoryManager() const;
+
  private:
   Interface *  newInterfaceInstance(const char *type, const char *identifier);
   void         deleteInterfaceInstance(Interface *interface);
@@ -68,20 +73,22 @@ class BlackBoardInterfaceManager : public InterfaceMediator
   void         createInterface(const char *type, const char *identifier,
 			       Interface* &interface, void* &ptr);
 
-  Interface *  open(const char *interface_type, const char *identifier);
+  char *       stripClassType(const char *type);
 
-  char * stripClassType(const char *type);
+  Interface *  getWriterForMemSerial(unsigned int mem_serial);
 
   BlackBoardInternalsInterface * openInternalsNonMaster();
 
-
  private:
-  bool                     bb_master;
-  BlackBoardMemoryManager *memmgr;
-  Mutex                   *mutex;
-  Module                  *iface_module;
+  bool                          bb_master;
+  BlackBoardMemoryManager      *memmgr;
+  BlackBoardMessageManager     *msgmgr;
+  Mutex                        *mutex;
+  Module                       *iface_module;
   BlackBoardInternalsInterface *internals;
 
+  std::map< unsigned int, Interface * >  writer_interfaces;
+  std::map< unsigned int, RefCountRWLock * >  rwlocks;
 };
 
 

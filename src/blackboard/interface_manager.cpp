@@ -21,13 +21,15 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 #include <blackboard/interface_manager.h>
 
+#include <blackboard/bbconfig.h>
 #include <blackboard/memory_manager.h>
+#include <blackboard/message_manager.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/interface_mem_header.h>
 
@@ -93,15 +95,20 @@ using namespace std;
 
 
 /** Constructor.
- * @param memmgr Current memory manager that shall be used to allocate memory for
- * interface data storage
+ * The shared memory segment is created with data from bbconfig.h.
  * @param bb_master set to true, if this interface manager should be the master.
+ * @see bbconfig.h
  */
-BlackBoardInterfaceManager::BlackBoardInterfaceManager(BlackBoardMemoryManager *memmgr,
-						       bool bb_master)
+BlackBoardInterfaceManager::BlackBoardInterfaceManager(bool bb_master)
 {
   this->bb_master = bb_master;
-  this->memmgr = memmgr;
+
+  memmgr = new BlackBoardMemoryManager(BLACKBOARD_MEMORY_SIZE,
+				       BLACKBOARD_VERSION,
+				       bb_master,
+				       BLACKBOARD_MAGIC_TOKEN);
+
+  internals = NULL;
   mutex = new Mutex();
   iface_module = new ModuleDL( LIBDIR"/libinterfaces.so" );
   if ( ! iface_module->open() ) {
@@ -109,13 +116,17 @@ BlackBoardInterfaceManager::BlackBoardInterfaceManager(BlackBoardMemoryManager *
   }
   if ( bb_master ) {
     // may throw exception! This is ok and correct behavior
-    Interface *iface = openForWriting("BlackBoardInternalsInterface", "FawkesBlackBoard");
-    internals = dynamic_cast<BlackBoardInternalsInterface *>(iface);
+    internals = openForWriting<BlackBoardInternalsInterface>("FawkesBlackBoard");
     internals->setInstanceSerial( internals->serial() );
     internals->write();
   } else {
-    openInternalsNonMaster();
+    internals = openInternalsNonMaster();
   }
+
+  msgmgr = new BlackBoardMessageManager(this);
+
+  writer_interfaces.clear();
+  rwlocks.clear();
 }
 
 
@@ -125,6 +136,8 @@ BlackBoardInterfaceManager::~BlackBoardInterfaceManager()
   close(internals);
   delete mutex;
   delete iface_module;
+  delete memmgr;
+  delete msgmgr;
 }
 
 
@@ -172,6 +185,8 @@ BlackBoardInterfaceManager::newInterfaceInstance(const char *type, const char *i
   iface->instance_serial = getNextInstanceSerial();
   strncpy(iface->_type, type, __INTERFACE_TYPE_SIZE);
   strncpy(iface->_id, identifier, __INTERFACE_ID_SIZE);
+  iface->interface_mediator = this;
+  iface->message_mediator   = msgmgr;
 
   free(generator_name);
   return iface;
@@ -305,11 +320,11 @@ BlackBoardInterfaceManager::openInternalsNonMaster()
     iface->mem_real_ptr = ptr;
     iface->mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
 
-    iface->interface_mediator = this;
     iface->write_access = false;
-    ih->rwlock->ref();
-    iface->rwlock = ih->rwlock;
+    rwlocks[ih->serial]->ref();
+    iface->rwlock = rwlocks[ih->serial];
     iface->mem_serial = ih->serial;
+    iface->message_queue = new MessageQueue(iface->mem_serial, iface->instance_serial);
     ih->refcount++;
 
   } else {
@@ -353,9 +368,9 @@ BlackBoardInterfaceManager::createInterface(const char *type, const char *identi
   strncpy(ih->type, type, __INTERFACE_TYPE_SIZE);
   strncpy(ih->id, identifier, __INTERFACE_ID_SIZE);
 
-  ih->refcount     = 0;
-  ih->rwlock       = new RefCountRWLock();
-  ih->serial       = getNextMemSerial();
+  ih->refcount        = 0;
+  ih->serial          = getNextMemSerial();
+  rwlocks[ih->serial] = new RefCountRWLock();
 
   interface->mem_real_ptr  = ptr;
   interface->mem_data_ptr  = (char *)ptr + sizeof(interface_header_t);
@@ -390,17 +405,16 @@ BlackBoardInterfaceManager::openForReading(const char *type, const char *identif
     iface->mem_real_ptr = ptr;
     iface->mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
     ih  = (interface_header_t *)ptr;
-    ih->rwlock->ref();
+    rwlocks[ih->serial]->ref();
   } else {
     createInterface(type, identifier, iface, ptr);
-    ih = (interface_header_t *)ptr;
-    ih->serial = getNextMemSerial();
+    ih  = (interface_header_t *)ptr;
   }
 
-  iface->interface_mediator = this;
   iface->write_access = false;
-  iface->rwlock = ih->rwlock;
+  iface->rwlock = rwlocks[ih->serial];
   iface->mem_serial = ih->serial;
+  iface->message_queue = new MessageQueue(iface->mem_serial, iface->instance_serial);
   ih->refcount++;
 
   memmgr->unlock();
@@ -445,21 +459,24 @@ BlackBoardInterfaceManager::openForWriting(const char *type, const char *identif
     iface = newInterfaceInstance(type, identifier);
     iface->mem_real_ptr = ptr;
     iface->mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
-    ih->rwlock->ref();
+    rwlocks[ih->serial]->ref();
   } else {
     createInterface(type, identifier, iface, ptr);
     ih = (interface_header_t *)ptr;
   }
 
-  iface->interface_mediator = this;
   iface->write_access = true;
-  iface->rwlock  = ih->rwlock;
+  iface->rwlock  = rwlocks[ih->serial];
   iface->mem_serial = ih->serial;
+  iface->message_queue = new MessageQueue(iface->mem_serial, iface->instance_serial);
   ih->flag_writer_active = 1;
   ih->refcount++;
 
   memmgr->unlock();
   mutex->unlock();
+
+  writer_interfaces[iface->mem_serial] = iface;
+
   return iface;
 }
 
@@ -480,12 +497,43 @@ BlackBoardInterfaceManager::close(Interface *interface)
   } else {
     if ( interface->write_access ) {
       ih->flag_writer_active = 0;
+      writer_interfaces.erase( interface->mem_serial );
     }
   }
 
   deleteInterfaceInstance( interface );
 
   mutex->unlock();
+}
+
+
+/** Get the writer interface for the given mem serial.
+ * @param mem_serial memory serial to get writer for
+ * @return writer interface for given mem serial, or NULL if non exists
+ * @exception BlackBoardNoWritingInstanceException thrown if no writer
+ * was found for the given interface.
+ */
+Interface *
+BlackBoardInterfaceManager::getWriterForMemSerial(unsigned int mem_serial)
+{
+  if ( writer_interfaces.find(mem_serial) != writer_interfaces.end() ) {
+    return writer_interfaces[mem_serial];
+  } else {
+    throw BlackBoardNoWritingInstanceException();
+  }
+}
+
+
+/** Get memory manager.
+ * This returns a pointer to the used memory manager. The return type
+ * is declared const. Use this only for debugging purposes to output info about
+ * the BlackBoard memory.
+ * @return const pointer to memory manager
+ */
+const BlackBoardMemoryManager *
+BlackBoardInterfaceManager::getMemoryManager() const
+{
+  return memmgr;
 }
 
 
@@ -497,16 +545,7 @@ BlackBoardInterfaceManager::close(Interface *interface)
 bool
 BlackBoardInterfaceManager::existsWriter(const Interface *interface) const
 {
-  // search memory chunks if the desired interface has been allocated already
-  BlackBoardMemoryManager::ChunkIterator cit;
-  for ( cit = memmgr->begin(); cit != memmgr->end(); ++cit ) {
-    if ( interface->mem_real_ptr == *cit ) {
-      interface_header_t *ih = (interface_header_t *)interface->mem_real_ptr;
-      return ih->flag_writer_active;
-    }
-  }
-
-  return false;
+  return (writer_interfaces.find(interface->mem_serial) != writer_interfaces.end());
 }
 
 

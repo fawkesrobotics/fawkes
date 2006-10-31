@@ -37,6 +37,7 @@
 
 class RefCountRWLock;
 class InterfaceMediator;
+class MessageMediator;
 
 class InterfaceWriteDeniedException : public Exception
 {
@@ -52,7 +53,8 @@ class InterfaceInvalidMessageException : public Exception
 
 class Interface
 {
-  friend class BlackBoardInterfaceManager;
+ friend class BlackBoardInterfaceManager;
+ friend class BlackBoardMessageManager;
 
  public:
   virtual ~Interface();
@@ -70,7 +72,6 @@ class Interface
   bool          hasWriter() const;
 
   unsigned int  msgq_enqueue(Message *message);
-  unsigned int  msgq_enqueue(MessageQueue::MessageIterator &it, Message *message);
   void          msgq_remove(Message *message);
   void          msgq_remove(unsigned int message_id);
   unsigned int  msgq_size();
@@ -81,9 +82,6 @@ class Interface
   void          msgq_pop();
   Message *     msgq_first();
 
-  /** Check if first message has desired type.
-   * @return true, if message has desired type, false otherwise
-   */
   template <class MessageType>
     bool           msgq_first_is();
 
@@ -104,6 +102,8 @@ class Interface
   unsigned int  data_size;
 
  private:
+  unsigned int       msgq_append(Message *message);
+
   char               _type[__INTERFACE_TYPE_SIZE + 1];
   char               _id[__INTERFACE_ID_SIZE + 1];
   unsigned int       instance_serial;
@@ -116,6 +116,7 @@ class Interface
   RefCountRWLock    *rwlock;
 
   InterfaceMediator *interface_mediator;
+  MessageMediator   *message_mediator;
   MessageQueue      *message_queue;
 
 
@@ -129,17 +130,20 @@ class Interface
 
 template <class MessageType>
 MessageType *
-Interface::msgq_first();
+Interface::msgq_first()
 {
-  return dynamic_cast<MessageType>(message_queue->first());
+  return dynamic_cast<MessageType *>(message_queue->first());
 }
 
 
+/** Check if first message has desired type.
+ * @return true, if message has desired type, false otherwise
+ */
 template <class MessageType>
 bool
 Interface::msgq_first_is()
 {
-  return (dynamic_cast<MessageType>(message_queue->first()) != 0);
+  return (dynamic_cast<MessageType *>(message_queue->first()) != 0);
 }
 
 

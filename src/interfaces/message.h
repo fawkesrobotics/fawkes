@@ -21,8 +21,8 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
 #ifndef __MESSAGE_H_
@@ -34,9 +34,21 @@ class Mutex;
 
 class Message : public RefCount
 {
-  friend class MessageQueue;
-  friend class Interface;
+ friend class MessageQueue;
+ friend class BlackBoardMessageManager;
  public:
+ /** Message status.
+  * A message has a processing status. This status can have one of the following
+  * values and is global to all messages.
+  */
+ typedef enum {
+   Undefined,		/**< status is undefined (message not queued) */
+   Enqueued,		/**< message has been enqueued, but not yet been processed */ 
+   InProgress,		/**< processing the message has started but is not finished, yet */
+   Success,		/**< message has been successfully processed */
+   Failure		/**< an error occured during message processing */
+ } MessageStatus;
+
   Message();
   Message(Message *mesg);
   Message(Message &mesg);
@@ -44,14 +56,22 @@ class Message : public RefCount
 
   Message &         operator=  (const Message & m);
 
+  void              setStatus(MessageStatus status);
+  MessageStatus     status();
+  void              setSubStatus(unsigned int sub_status);
+  unsigned int      sub_status();
+
  private:
   virtual void *        data();
   virtual unsigned int  datasize();
 
   unsigned int  message_id;
 
-  unsigned int  passing_interface_id;  
-  unsigned int  originating_interface_id;  
+  unsigned int  recipient_interface_mem_serial;  
+  unsigned int  sender_interface_instance_serial;  
+
+  MessageStatus _status;
+  unsigned int  _substatus;
 
  protected:
   void         *data_ptr;

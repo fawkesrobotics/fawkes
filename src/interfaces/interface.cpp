@@ -28,6 +28,7 @@
 #include <interfaces/interface.h>
 
 #include <interfaces/mediators/interface_mediator.h>
+#include <interfaces/mediators/message_mediator.h>
 #include <core/threading/refc_rwlock.h>
 
 #include <string.h>
@@ -102,6 +103,7 @@ Interface::Interface()
 Interface::~Interface()
 {
   rwlock->unref();
+  delete message_queue;
 }
 
 
@@ -208,28 +210,30 @@ Interface::hasWriter() const
 
 
 /** Enqueue message at end of queue.
- * This appends the given message to the queue.
+ * This appends the given message to the queue and transmits the message via the
+ * message mediator.
  * @param message Message to enqueue.
+ * @return message id after message has been queued
+ * @exception MessageAlreadyQueuedException thrown if the message has already been
+ * enqueued to an interface.
  */
 unsigned int
 Interface::msgq_enqueue(Message *message)
 {
-  return message_queue->append(message);
+  unsigned int rv = message_queue->append(message);
+  message_mediator->transmit(message);
+  return rv;
 }
 
 
-/** Enqueue message after iterator.
- * This will enqueue the message at the position after the iterator. This will
- * fail if this is the end iterator!
- * @param it Iterator after which to insert the message
- * @param message message to insert
- * @exception NullPointerException Thrown if trying to queue at end of message queue.
- * @exception NotLockedException thrown if message queue is not locked during this operation.
+/** Enqueue message.
+ * This will enqueue the message without transmitting it via the message mediator.
+ * @param message message to enqueue
  */
 unsigned int
-Interface::msgq_enqueue(MessageQueue::MessageIterator &it, Message *message)
+Interface::msgq_append(Message *message)
 {
-  return message_queue->insert_after(it, message);
+  return message_queue->append(message);
 }
 
 

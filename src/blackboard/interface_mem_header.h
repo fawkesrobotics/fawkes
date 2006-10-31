@@ -43,8 +43,6 @@ typedef struct {
   unsigned int     flag_reserved      : 31;	/**< reserved for future use */
   unsigned int     refcount;			/**< reference count */
   unsigned int     serial;			/**< memory serial */
-  RefCountRWLock   *rwlock;			/**< read/write lock for in-process
-						 * multi-threaded usage */
 } interface_header_t;
 
 

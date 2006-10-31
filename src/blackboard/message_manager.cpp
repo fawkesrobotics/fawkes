@@ -21,26 +21,32 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <blackboad/message_manager.h>
+#include <blackboard/message_manager.h>
+#include <blackboard/interface_manager.h>
+#include <blackboard/exceptions.h>
 
-#include <utils/ipc/msg.h>
-
-/** Constructor */
-MessageManager::MessageManager()
+/** Constructor.
+ * @param im interface manager to query for writer interface
+ */
+BlackBoardMessageManager::BlackBoardMessageManager(BlackBoardInterfaceManager *im)
 {
-  ipc_msgq = new IPCMessageQueue(".", 'B',
-				 /* create      */ true,
-				 /* dest on del */ true);
-
+  this->im = im;
 }
 
 
 /** Destructor */
-MessageManager::~MessageManager()
+BlackBoardMessageManager::~BlackBoardMessageManager()
 {
-  delete ipc_msgq;
+}
+
+
+void
+BlackBoardMessageManager::transmit(Message *message)
+{
+  Interface *writer = im->getWriterForMemSerial(message->recipient_interface_mem_serial);
+  writer->msgq_append(message);
 }

@@ -134,4 +134,14 @@ class BlackBoardNoMasterAliveException : public Exception {
   BlackBoardNoMasterAliveException() : Exception("No master BlackBoard alive") {}
 };
 
+
+/** Thrown if no writer interface is alive.
+ */
+class BlackBoardNoWritingInstanceException : public Exception {
+ public:
+  /** Constructor*/
+  BlackBoardNoWritingInstanceException() : Exception("No writing instance for interface") {}
+};
+
+
 #endif

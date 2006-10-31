@@ -1,0 +1,39 @@
+/** @defgroup FCL Fawkes Core Library
+ * The Fawkes Core Library includes core components that are required to write
+ * basic fawkes plugins.  This is the lowest level in the Fawkes library stack
+ * and must not depend  on any other libraries besides glibc and system calls.
+ *
+ * The Fawkes Core Library provides several basic features  needed by the rest
+ * of the software like:
+ *  - Multi-Threading tools (threads, locking, synchronization)
+ *  - Exceptions (base class for exceptions, basic generic exceptions)
+ *  - Plugin (base class for Fawkes Plugins)
+ *  - Core Utils (utility aspects for Fawkes software, see below)
+ *
+ * In most cases if you look for a place to put you code you are wrong here in
+ * the core library.  You must really know what you are doing. If in doubt ask
+ * Tim Niemueller for decision making help for this. In general if you thought
+ * you  should add  something to  core it is  likely that  the right  place is
+ * somewhere in the Fawkes Utility Library.
+ *
+ * You will note that here is also an utils directory which may make you think
+ * even more that you want to put your code here.  But the utils is only meant
+ * to host utilities that are
+ * - small in code size
+ * - needed in Fawkes components that cannot depend on utils
+ * - are widely used
+ * - fulfill an atomic task
+ * - will not be used but rather are  aspects of software that  you write and
+ *   where classes derive these utility classes.
+ *
+ * The exceptions directory is  _not_  a general place to put your exceptions.
+ * It is only  meant to serve as a  repository of generic  exceptions that are
+ * likely to be  re-used all  over the software.   On the  one hand  these are
+ * system exceptions which are mainly applicable if the error was indicated or
+ * described  via the  usage of errno.   On the other  hand these  are generic
+ * software construction exceptions like null pointer exceptions.
+ *
+ * Rule of thumb: Use Fawkes Core Library, don't hack it.
+ *
+ */
+

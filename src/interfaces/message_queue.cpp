@@ -59,9 +59,16 @@ MessageAlreadyQueuedException::MessageAlreadyQueuedException()
  */
 
 
-/** Constructor */
-MessageQueue::MessageQueue()
+/** Constructor.
+ * @param interface_mem_serial mem serial of interface this message queue belongs to
+ * @param interface_instance_serial instance serial of interface this message queue belongs to
+ */
+MessageQueue::MessageQueue(unsigned int interface_mem_serial,
+			   unsigned int interface_instance_serial)
 {
+  this->interface_mem_serial = interface_mem_serial;
+  this->interface_instance_serial = interface_instance_serial;
+
   list = NULL;
   end_el = NULL;
   next_msg_id = 1;
@@ -93,6 +100,7 @@ MessageQueue::flush()
     free(l);
     l = next;
   }
+  list = NULL;
   mutex->unlock();
 }
 
@@ -100,6 +108,8 @@ MessageQueue::flush()
 /** Append message to queue.
  * @param msg Message to append
  * @return message queue id of the appended message.
+ * @exception MessageAlreadyQueuedException thrown if the message has already been
+ * enqueued to an interface.
  */
 unsigned int
 MessageQueue::append(Message *msg)
@@ -110,6 +120,8 @@ MessageQueue::append(Message *msg)
   mutex->lock();
   unsigned int new_msg_id = 0;
   msg->ref();
+  msg->recipient_interface_mem_serial = interface_mem_serial;
+  msg->sender_interface_instance_serial = interface_instance_serial;
   if ( list == NULL ) {
     list = (msg_list_t *)malloc(sizeof(msg_list_t));
     list->next = NULL;
@@ -138,6 +150,8 @@ MessageQueue::append(Message *msg)
  * @return message queue id of the appended message.
  * @exception NullPointerException thrown if iterator is end iterator.
  * @exception NotLockedException thrown if message queue is not locked during this operation.
+ * @exception MessageAlreadyQueuedException thrown if the message has already been
+ * enqueued to an interface.
  */
 unsigned int
 MessageQueue::insert_after(const MessageIterator &it, Message *msg)
@@ -153,6 +167,8 @@ MessageQueue::insert_after(const MessageIterator &it, Message *msg)
     throw MessageAlreadyQueuedException();
   }
   msg->ref();
+  msg->recipient_interface_mem_serial = interface_mem_serial;
+  msg->sender_interface_instance_serial = interface_instance_serial;
   msg_list_t *l = (msg_list_t *)malloc(sizeof(msg_list_t));
   l->next = it.cur->next;
   l->msg = msg;

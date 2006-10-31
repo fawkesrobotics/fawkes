@@ -1,0 +1,4 @@
+/** @defgroup Exceptions Fawkes Exceptions
+ * This group contains the base exception used in Fawkes and all exception
+ * definitions thrown in Fawkes.
+ */
