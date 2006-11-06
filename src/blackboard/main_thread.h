@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  blackboard.h - BlackBoard plugin
+ *  main_thread.h - BlackBoard main thread
  *
- *  Generated: Sat Sep 16 17:09:15 2006 (on train to Cologne)
+ *  Generated: Tue Oct 31 18:06:16 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,25 +25,25 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __BLACKBOARD_BLACKBOARD_H_
-#define __BLACKBOARD_BLACKBOARD_H_
+#ifndef __BLACKBOARD_MAIN_THREAD_H_
+#define __BLACKBOARD_MAIN_THREAD_H_
 
-#include <core/plugin.h>
+#include <core/threading/thread.h>
 
-class BlackBoardPlugin : public Plugin
+class BlackBoardInterfaceManager;
+
+class BlackBoardMainThread : public Thread
 {
  public:
-  BlackBoardPlugin();
-  ~BlackBoardPlugin();
+  BlackBoardMainThread();
+  ~BlackBoardMainThread();
 
-  virtual PluginType    type() const;
-  virtual const char *  name() const;
-  virtual bool          persistent();
-  virtual ThreadList &  threads();
+  virtual void loop();
+
+  BlackBoardInterfaceManager *  getInterfaceManager() const;
 
  private:
-  ThreadList thread_list;
+  BlackBoardInterfaceManager *im;
 };
-
 
 #endif

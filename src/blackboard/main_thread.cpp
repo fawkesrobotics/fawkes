@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  blackboard.h - BlackBoard plugin
+ *  main_thread.cpp - BlackBoard main thread
  *
- *  Generated: Sat Sep 16 17:09:15 2006 (on train to Cologne)
+ *  Generated: Tue Oct 31 18:37:49 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,25 +25,46 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __BLACKBOARD_BLACKBOARD_H_
-#define __BLACKBOARD_BLACKBOARD_H_
+#include <blackboard/main_thread.h>
+#include <blackboard/interface_manager.h>
 
-#include <core/plugin.h>
 
-class BlackBoardPlugin : public Plugin
+/** @class BlackBoardMainThread blackboard/main_thread.h
+ * Main thread of BlackBoard.
+ * The main thread will create the shared memory segment and instantiate the
+ * interface and message managers.
+ */
+
+/** Constructor. */
+BlackBoardMainThread::BlackBoardMainThread()
+  : Thread(Thread::OPMODE_WAITFORWAKEUP)
 {
- public:
-  BlackBoardPlugin();
-  ~BlackBoardPlugin();
+  im = new BlackBoardInterfaceManager(/* master */ true);
+}
 
-  virtual PluginType    type() const;
-  virtual const char *  name() const;
-  virtual bool          persistent();
-  virtual ThreadList &  threads();
-
- private:
-  ThreadList thread_list;
-};
+/** Destructor. */
+BlackBoardMainThread::~BlackBoardMainThread()
+{
+  delete im;
+}
 
 
-#endif
+/** Get interface manager.
+ * This is a special property of this thread to get access to the interface
+ * manager.
+ * @return interface manager
+ */
+BlackBoardInterfaceManager *
+BlackBoardMainThread::getInterfaceManager() const
+{
+  return im;
+}
+
+
+/** Loop.
+ * Nothing is done.
+ */
+void
+BlackBoardMainThread::loop()
+{
+}

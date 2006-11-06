@@ -24,7 +24,9 @@ CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\"
 SUBDIRS = tools
 
 LIBS_libblackboard = core utils interfaces
-OBJS_libblackboard = interface_manager.o	\
+OBJS_libblackboard = bbthread.o			\
+		     interface_manager.o	\
+		     main_thread.o		\
 		     memory_manager.o		\
 		     message_manager.o		\
 		     shmem_header.o		\

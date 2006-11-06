@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  blackboard.h - BlackBoard plugin
+ *  bbthread.h - BlackBoard thread
  *
- *  Generated: Sat Sep 16 17:09:15 2006 (on train to Cologne)
+ *  Created: Thu Nov  2 14:48:55 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,25 +25,23 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __BLACKBOARD_BLACKBOARD_H_
-#define __BLACKBOARD_BLACKBOARD_H_
+#ifndef __BLACKBOARD_BBTHREAD_H_
+#define __BLACKBOARD_BBTHREAD_H_
 
-#include <core/plugin.h>
+#include <core/threading/fawkes_thread.h>
 
-class BlackBoardPlugin : public Plugin
+class BlackBoardInterfaceManager;
+
+class BlackBoardThread : public FawkesThread
 {
  public:
-  BlackBoardPlugin();
-  ~BlackBoardPlugin();
+  BlackBoardThread();
+  virtual ~BlackBoardThread();
 
-  virtual PluginType    type() const;
-  virtual const char *  name() const;
-  virtual bool          persistent();
-  virtual ThreadList &  threads();
+  void                   setInterfaceManager(BlackBoardInterfaceManager *im);
 
- private:
-  ThreadList thread_list;
+ protected:
+  BlackBoardInterfaceManager *interface_manager;
 };
-
 
 #endif
