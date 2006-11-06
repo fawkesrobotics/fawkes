@@ -1,7 +1,7 @@
 #*****************************************************************************
-#                      Makefile Build System for Fawkes
+#            Makefile Build System for Fawkes : Main Application
 #                            -------------------
-#   Created on Wed Sep 06 02:39:46 2006
+#   Created on Thu Nov 02 19:07:47 2006
 #   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -17,12 +17,18 @@
 # last modified: $Date$
 #            by: $Author$
 #
-#*****************************************************************************
 
-BASEDIR = ..
+BASEDIR = ../..
 
-SUBDIRS = core utils interfaces blackboard mainapp
+CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\"
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
+LIBS_fawkes = core utils interfaces blackboard
+OBJS_fawkes = main.o			\
+	      main_thread.o		\
+	      thread_manager.o
+
+OBJS_all =	$(OBJS_fawkes)
+BINS_all =	$(BINDIR)/fawkes
+
+include $(BASEDIR)/etc/buildsys/base.mk
 
