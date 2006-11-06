@@ -30,8 +30,25 @@
 
 #define forever while (1)
 
+class WaitCondition;
+class Mutex;
+class Barrier;
+
 class Thread {
  public:
+  /** Thread operation mode.
+   * A thread can operate in two different modes. In continuous mode the
+   * thread is on it's own running continuously. No timing is done. You must
+   * use this mode if you implement run() instead of loop(). In
+   * wait-for-wakeup mode the thread will pause after each loop and wait for
+   * an explicit wakeup. This is only guaranteed if you override loop() and
+   * leave run() as it is. Have this in mind of chaos and havoc will
+   * get you.
+   */
+  typedef enum {
+    OPMODE_CONTINUOUS,		/**< operate in continuous mode (default) */
+    OPMODE_WAITFORWAKEUP	/**< operate in wait-for-wakeup mode */
+  } OpMode;
 
   virtual ~Thread();
 
@@ -42,7 +59,13 @@ class Thread {
 
   bool operator==(const Thread &thread);
 
+  void wakeup();
+  void wakeup(Barrier *barrier);
+
+  OpMode opmode() const;
+
  protected:
+  Thread(OpMode op_mode = OPMODE_CONTINUOUS);
   void exit();
 
   void test_cancel();
@@ -56,6 +79,12 @@ class Thread {
 
   // Do not use pthread_t here to avoid including pthread.h
   /* pthread_t */ unsigned long int thread_id;
+
+  Mutex         *sleep_mutex;
+  WaitCondition *sleep_condition;
+  Barrier       *barrier;
+
+  OpMode         op_mode;
 
 };
 

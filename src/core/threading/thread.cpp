@@ -26,6 +26,10 @@
  */
 
 #include <core/threading/thread.h>
+#include <core/threading/mutex.h>
+#include <core/threading/barrier.h>
+#include <core/threading/wait_condition.h>
+#include <core/exceptions/software.h>
 
 #include <pthread.h>
 
@@ -42,6 +46,11 @@
  * There are two major ways to implement threads. The recommended way is to
  * implement loop(). The default run() implementation will call loop()
  * continuously. An implicit cancel point is set after each loop.
+ *
+ * The thread can operate in two modes if the loop() implementation method is
+ * chosen. The loop can either run continuously without a brake, or it can wait
+ * for an explicit wakeup after each loop. Waiting for an explicit wakeup is the
+ * default since this is the common use case in Fawkes.
  *
  * If you need a more complex behaviour you may also override run() and
  * implement your own thread behavior.
@@ -61,9 +70,33 @@
  */
 
 
-/** Virtual empty destructor. */
+/** Constructor.
+ * This constructor is protected so that Thread cannot be instantiated. This
+ * constructor initalizes a few internal variables.
+ * @param op_mode Operation mode, see Thread::OpMode
+ */
+Thread::Thread(OpMode op_mode)
+{
+  this->op_mode = op_mode;
+  if ( op_mode == OPMODE_WAITFORWAKEUP ) {
+    sleep_condition = new WaitCondition();
+    sleep_mutex = new Mutex();
+  } else {
+    sleep_condition = NULL;
+    sleep_mutex = NULL;
+  }
+  thread_id = 0;
+  barrier = NULL;
+}
+
+
+/** Virtual destructor. */
 Thread::~Thread()
 {
+  delete sleep_condition;
+  sleep_condition = NULL;
+  delete sleep_mutex;
+  sleep_mutex = NULL;
 }
 
 
@@ -143,6 +176,15 @@ Thread::cancel()
 }
 
 
+/** Get operation mode.
+ * @return opmode of thread.
+ */
+Thread::OpMode
+Thread::opmode() const
+{
+  return op_mode;
+}
+
 /** Set cancellation point.
  * Tests if the thread has been canceled and if so exits the thread.
  */
@@ -172,10 +214,55 @@ Thread::operator==(const Thread &thread)
 void
 Thread::run()
 {
+  if ( op_mode == OPMODE_WAITFORWAKEUP ) {
+    sleep_mutex->lock();
+    sleep_condition->wait(sleep_mutex);
+    sleep_mutex->unlock();
+  }
   forever {
     loop();
     test_cancel();
+    if ( barrier ) {
+      barrier->wait();
+      barrier = NULL;
+    }
+    if ( op_mode == OPMODE_WAITFORWAKEUP ) {
+      sleep_mutex->lock();
+      sleep_condition->wait(sleep_mutex);
+      sleep_mutex->unlock();
+    }
   }
+}
+
+
+/** Wake up thread.
+ * If the thread is being used in wait for wakeup mode this will wake up the
+ * waiting thread.
+ */
+void
+Thread::wakeup()
+{
+  if ( op_mode == OPMODE_WAITFORWAKEUP ) {
+    sleep_condition->wakeAll();
+  }
+}
+
+
+/** Wake up thread and wait for barrier afterwards.
+ * If the thread is being used in wait for wakeup mode this will wake up the
+ * waiting thread. Additionally after the loop is finished 
+ * @param barrier barrier to wait for after loop
+ */
+void
+Thread::wakeup(Barrier *barrier)
+{
+  if ( op_mode != OPMODE_WAITFORWAKEUP )  return;
+
+  if ( barrier == NULL ) {
+    throw NullPointerException(" Thread::wakeup(): barrier must not be NULL");
+  }
+  this->barrier = barrier;
+  sleep_condition->wakeAll();
 }
 
 

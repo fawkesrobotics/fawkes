@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  plugin.h - Interface for a Fawkes plugin
+ *  thread_list.cpp - Thread list
  *
- *  Generated: Wed Aug 23 15:19:13 2006
+ *  Created: Tue Oct 31 18:20:59 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,34 +25,52 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __CORE_PLUGIN_H_
-#define __CORE_PLUGIN_H_
-
 #include <core/threading/thread_list.h>
+#include <core/threading/thread.h>
 
-class Plugin {
- public:
+/** @class ThreadList core/threading/thread_list.h
+ * List of threads.
+ * This is a list of threads derived from stl::list. It features special
+ * wakeup methods that will wakeup all threads in the list. The list can
+ * and must be locked in iterator operations and when adding or deleting
+ * elements from the list.
+ * @author Tim Niemueller
+ */
 
-  /** Type of the plugin */
-  typedef enum {
-    BLACKBOARD,		/**< BlackBoard plugin */
-    MOTION,		/**< motion plugin */
-    VISION,		/**< vision plugin */
-    AGENT,		/**< agent plugin */
-    SKILLER		/**< skill plugin */
-  } PluginType;
+/** Constructor. */
+ThreadList::ThreadList()
+{
+  clear();
+}
 
-  virtual ~Plugin();
 
-  virtual PluginType    type() const                                   = 0;
-  virtual const char *  name() const                                   = 0;
-  virtual ThreadList &  threads()                                      = 0;
+/** Destructor. */
+ThreadList::~ThreadList()
+{
+}
 
-  virtual bool          persistent();
 
-};
+/** Wakeup all threads in list. */
+void
+ThreadList::wakeup()
+{
+  lock();
+  for (iterator i = begin(); i != end(); ++i) {
+    (*i)->wakeup();
+  }
+  unlock();
+}
 
-typedef Plugin *  (* PluginFactoryFunc)  (void);
-typedef void      (* PluginDestroyFunc)  (Plugin *);
 
-#endif
+/** Wakeup all threads in list and have them wait for the barrier.
+ * @param barrier Barrier to wait for after loop
+ */
+void
+ThreadList::wakeup(Barrier *barrier)
+{
+  lock();
+  for (iterator i = begin(); i != end(); ++i) {
+    (*i)->wakeup(barrier);
+  }
+  unlock();
+}

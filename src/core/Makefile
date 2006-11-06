@@ -27,10 +27,12 @@ OBJS_libcore =	\
 		exceptions/software.o		\
 		exceptions/system.o		\
 		threading/barrier.o		\
+		threading/fawkes_thread.o	\
 		threading/mutex.o		\
 		threading/read_write_lock.o	\
 		threading/refc_rwlock.o		\
 		threading/thread.o		\
+		threading/thread_list.o		\
 		threading/wait_condition.o	\
 		utils/refcount.o
 

@@ -37,14 +37,22 @@
  * @author Tim Niemueller
  *
  *
- * @fn PluginType Plugin::getType()
+ * @fn PluginType Plugin::type() const
  * Get the type of the plugin.
  * @return type of the plugin
  *
- * @fn Plugin::getName()
+ * @fn const char * Plugin::name() const
  * Get the name of the plugin
  * @return name of the plugin
  *
+ * @fn Plugin::threads()
+ * Get a list of threads.
+ * This function shall return a list of threads. See the FawkesThreadManager
+ * for supported special types of threads. This method is called only once
+ * right after the plugin has been initialised. You may not change the
+ * list afterwards by adding or removing threads. Especially you may not delete
+ * the threads!
+ * @return list of threads.
  */
 
 

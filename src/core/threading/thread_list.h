@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  plugin.h - Interface for a Fawkes plugin
+ *  thread_list.h - Thread list
  *
- *  Generated: Wed Aug 23 15:19:13 2006
+ *  Created: Tue Oct 31 18:04:31 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,34 +25,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __CORE_PLUGIN_H_
-#define __CORE_PLUGIN_H_
+#ifndef __CORE_THREADING_THREAD_LIST_H_
+#define __CORE_THREADING_THREAD_LIST_H_
 
-#include <core/threading/thread_list.h>
+#include <core/utils/lock_list.h>
 
-class Plugin {
+class Thread;
+class Barrier;
+
+class ThreadList : public LockList<Thread *>
+{
  public:
-
-  /** Type of the plugin */
-  typedef enum {
-    BLACKBOARD,		/**< BlackBoard plugin */
-    MOTION,		/**< motion plugin */
-    VISION,		/**< vision plugin */
-    AGENT,		/**< agent plugin */
-    SKILLER		/**< skill plugin */
-  } PluginType;
-
-  virtual ~Plugin();
-
-  virtual PluginType    type() const                                   = 0;
-  virtual const char *  name() const                                   = 0;
-  virtual ThreadList &  threads()                                      = 0;
-
-  virtual bool          persistent();
+  ThreadList();
+  ~ThreadList();
+  void wakeup();
+  void wakeup(Barrier *barrier);
 
 };
-
-typedef Plugin *  (* PluginFactoryFunc)  (void);
-typedef void      (* PluginDestroyFunc)  (Plugin *);
 
 #endif
