@@ -29,8 +29,17 @@
 #define __UTILS_PLUGIN_PLUGIN_LOADER_H_
 
 #include <core/plugin.h>
+#include <core/exception.h>
 
 class PluginLoaderData;
+
+class PluginNotFoundException : public Exception
+{
+ public:
+  PluginNotFoundException(const char *plugin_type, const char *add_msg);
+};
+
+
 
 class PluginLoader {
  public:
@@ -38,8 +47,8 @@ class PluginLoader {
   PluginLoader(const char *plugin_base_dir);
   ~PluginLoader();
 
-  bool load(const char *plugin_name, Plugin *& plugin);
-  void unload(Plugin *plugin);
+  Plugin * load(const char *plugin_name);
+  void     unload(Plugin *plugin);
 
  private:
   PluginLoaderData *d;

@@ -47,10 +47,19 @@ class ModuleManagerTemplate : public ModuleManager {
    * @param module_base_dir The module basedir where to look for plugins
    */
   ModuleManagerTemplate(std::string module_base_dir = "")
-    {
-      modules.clear();
-      this->module_base_dir = module_base_dir;
+  {
+    modules.clear();
+    this->module_base_dir = module_base_dir;
+  }
+
+  /** Destructor. */
+  ~ModuleManagerTemplate()
+  {
+    for (typename std::map<std::string, MODULE_CLASS * >::iterator i = modules.begin(); i != modules.end(); ++i) {
+      delete (*i).second;
     }
+    modules.clear();
+  }
 
   /** Open a module
    * @param filename The file name of the module that should be
@@ -68,7 +77,7 @@ class ModuleManagerTemplate : public ModuleManager {
     } else {
       MODULE_CLASS *module = new MODULE_CLASS(module_base_dir + "/" + filename);
       if ( module->open() ) {
-	module->ref();
+	// ref count of module is now 1
 	modules[module->getBaseFilename()] = module;
 	return module;
       } else {

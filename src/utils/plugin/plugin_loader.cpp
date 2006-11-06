@@ -49,6 +49,24 @@ class PluginLoaderData
 };
 /// @endcond
 
+/** @class PluginNotFoundException utils/plugin/plugin_loader.h
+ * This exception is thrown if the requested plugin could not be loaded.
+ * @ingroup Exceptions
+ */
+
+/** Constructor.
+ * @param plugin_type type of the plugin
+ * @param add_msg additional message, reason for problem
+ */
+PluginNotFoundException::PluginNotFoundException(const char *plugin_type,
+						 const char *add_msg)
+  : Exception()
+{
+  append("Plugin of type '%s' could not be found", plugin_type);
+  append(add_msg);
+}
+
+
 /** @class PluginLoader utils/plugin/plugin_loader.h
  * This class manages plugins.
  * With this class plugins can be loaded and unloaded. Information is
@@ -86,22 +104,20 @@ PluginLoader::~PluginLoader()
  * correspond to a plugin name and the name of the shared object that will
  * be opened for this plugin (for instance on Linux systems opening the
  * plugin test_plugin will look for plugin_base_dir/test_plugin.so)
- * @param plugin This is a reference to a pointer to the plugin. If the
- * plugin has been loaded successfully (check the return value) plugin will
- * point to an instance of the Plugin sub-class. Do not under any
+ * @return Returns a pointer to the opened plugin.  Do not under any
  * circumstances delete this object, use unload() instead! Since the delete
  * operator could be overloaded this would result in memory chaos.
- * @return Returns true on successful loading of the plugin, false otherwise
+ * @exception PluginNotFoundException thrown if plugin could not be found
+ * (loading failed)
  */
-bool
-PluginLoader::load(const char *plugin_name, Plugin *& plugin)
+Plugin *
+PluginLoader::load(const char *plugin_name)
 {
 
   std::string pn = plugin_name;
 
   if ( d->name_plugin_map.find(pn) != d->name_plugin_map.end() ) {
-    plugin = d->name_plugin_map[pn];
-    return true;
+    return d->name_plugin_map[pn];
   }
 
   // This is dependent on the system architecture!
@@ -111,28 +127,27 @@ PluginLoader::load(const char *plugin_name, Plugin *& plugin)
 
   if ( pm == NULL ) {
     // we could NOT open the plugin module
-    std::cout << d->msg_prefix << "Could not open the plugin module" << std::endl;
-    return false;
+    // std::cout << d->msg_prefix << "Could not open the plugin module" << std::endl;
+    throw PluginNotFoundException(plugin_name,
+				  "Could not open plugin module");
   }
 
   if ( ! pm->hasSymbol("plugin_factory") ) {
-    return false;
+    throw PluginNotFoundException(plugin_name, "Symbol 'plugin_factory' not found");
   }
 
   PluginFactoryFunc pff = (PluginFactoryFunc)pm->getSymbol("plugin_factory");
 
   Plugin *p = pff();
   if ( p == NULL ) {
-    return false;
+    throw PluginNotFoundException(plugin_name, "Plugin could not be instantiated");
   }
-
-  plugin = p;
 
   d->plugin_module_map[p] = pm;
   d->name_plugin_map[pn] = p;
   d->plugin_name_map[p] = pn;
 
-  return true;
+  return p;
 }
 
 

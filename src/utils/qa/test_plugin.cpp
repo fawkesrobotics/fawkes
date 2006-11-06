@@ -36,21 +36,41 @@ class TestPlugin : public Plugin {
  public:
   /** Constructor, prints out info message
    */
-  TestPlugin() { printf("TestPlugin constructor called\n"); }
+  TestPlugin()
+  {
+    printf("TestPlugin constructor called\n");
+  }
 
   /** Destrcutor, prints out info message
    */
-  ~TestPlugin() { printf("TestPlugin destructor called\n"); }
+  ~TestPlugin()
+  {
+    printf("TestPlugin destructor called\n");
+  }
 
   /** Get the type of the plugin.
    * @return type of plugin
    */
-  Plugin::PluginType getType() { return Plugin::MOTION; }
+  Plugin::PluginType type() const
+  {
+    return Plugin::MOTION;
+  }
 
   /** Get the name of the plugin.
    * @return name of the plugin
    */
-  const char *  getName() { return "TestPlugin"; }
+  const char *  name() const
+  {
+    return "TestPlugin";
+  }
+
+  ThreadList & threads()
+  {
+    return thread_list;
+  }
+
+ private:
+  ThreadList thread_list;
 };
 
 

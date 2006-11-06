@@ -41,8 +41,8 @@ using namespace std;
 bool
 test_plugin(Plugin *p)
 {	
-  cout << "Plugin name: " << p->getName() << endl;
-  cout << "Plugin type: " << p->getType() << endl;
+  cout << "Plugin name: " << p->name() << endl;
+  cout << "Plugin type: " << p->type() << endl;
 
   return true;
 }
@@ -164,13 +164,16 @@ main(int argc, char **argv)
   PluginLoader *pl = new PluginLoader(PLUGINDIR);
 
   Plugin *p;
-  if ( ! pl->load("test_plugin", p) ) {
-    cout << "Could not load plugin" << endl;
-    success = false;
-  } else {
+  try {
+    p = pl->load("test_plugin");
     success = test_plugin(p);
+    pl->unload(p);
+    success = true;
+  } catch (PluginNotFoundException &e) {
+    cout << "Could not load plugin" << endl;
+    e.printTrace();
+    success = false;
   }
-  pl->unload(p);
 
   delete pl;
   if ( success ) {
@@ -179,7 +182,6 @@ main(int argc, char **argv)
     cout << "FAILED module manager tests, aborting further tests" << endl;
     return 3;
   }
-
 
   return 0;
 }

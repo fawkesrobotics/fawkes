@@ -23,6 +23,7 @@ BASEDIR = ../..
 
 CFLAGS = -g
 
+LIBS_libutils = stdc++ dl core
 OBJS_libutils =	\
 		ipc/msg.o						\
 		ipc/semset.o						\
@@ -32,8 +33,8 @@ OBJS_libutils =	\
 		system/dynamic_module/module_dl.o			\
 		system/dynamic_module/module_manager_factory.o		\
 		system/argparser.o					\
-		system/file.o
-LIBS_libutils = stdc++ dl core
+		system/file.o						\
+		system/signal.o
 
 OBJS_all = $(OBJS_libutils)
 LIBS_all  = $(LIBDIR)/libutils.so
