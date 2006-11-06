@@ -61,7 +61,7 @@ main(int argc, char **argv)
 {
 
   unsigned int id;
-  MessageQueue *mq = new MessageQueue();
+  MessageQueue *mq = new MessageQueue(1, 1);
 
   cout << "Message queue initialized, now appending three test messages" << endl;
 
