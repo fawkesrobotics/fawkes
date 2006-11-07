@@ -1,5 +1,5 @@
 
-BASEDIR = ../../..
+BASEDIR = ../../../..
 
 CFLAGS = -g
 

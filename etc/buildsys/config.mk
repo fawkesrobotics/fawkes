@@ -51,8 +51,8 @@ ECLIPSE_LIBDIR  = $(ECLIPSE_PATH)/lib/i386_linux
 ECLIPSE_INCDIR  = $(ECLIPSE_PATH)/include/i386_linux
 
 ### CFLAGS, preprocessor, compiler and linker options
-LDFLAGS_LIBDIRS = -Wl,-R$(HOME)/fawkes/lib,-R$(HOME)/robocup/fawkes/lib,-R$(HOME)/work/fawkes/lib,-R$(ECLIPSE_LIBDIR)
-DEFAULT_INCLUDES = -I$(BASEDIR)/src
+LDFLAGS_LIBDIRS = -Wl,-R$(abspath $(BASEDIR)/lib),-R$(ECLIPSE_LIBDIR)
+DEFAULT_INCLUDES = -I$(BASEDIR)/src -I$(BASEDIR)/src/libs
 CFLAGS_BASE = -Wall -Werror -pthread $(DEFAULT_INCLUDES)
 LDFLAGS_BASE = -L$(LIBDIR)
 LDFLAGS_SHARED = -shared

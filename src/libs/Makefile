@@ -1,7 +1,7 @@
 #*****************************************************************************
-#                      Makefile Build System for Fawkes
+#                  Makefile Build System for Fawkes: Libraries
 #                            -------------------
-#   Created on Wed Sep 06 02:39:46 2006
+#   Created on Tue Nov 07 16:12:59 2006
 #   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -19,9 +19,9 @@
 #
 #*****************************************************************************
 
-BASEDIR = ..
+BASEDIR = ../..
 
-SUBDIRS = libs interfaces blackboard mainapp
+SUBDIRS = core utils
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk

@@ -1,7 +1,7 @@
 #*****************************************************************************
-#                      Makefile Build System for Fawkes
+#                      Makefile for Fawkes Core Library
 #                            -------------------
-#   Created on Sun Sep 03 14:14:14 2006
+#   Created on Tue Sep 12 13:28:19 2006
 #   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -19,25 +19,27 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 
-CFLAGS = -g
+OBJS_libcore =	\
+		exception.o			\
+		plugin.o			\
+		exceptions/software.o		\
+		exceptions/system.o		\
+		threading/barrier.o		\
+		threading/fawkes_thread.o	\
+		threading/mutex.o		\
+		threading/read_write_lock.o	\
+		threading/refc_rwlock.o		\
+		threading/thread.o		\
+		threading/thread_list.o		\
+		threading/wait_condition.o	\
+		utils/refcount.o
 
-LIBS_libutils = stdc++ dl core
-OBJS_libutils =	\
-		ipc/msg.o						\
-		ipc/semset.o						\
-		ipc/shm.o						\
-		misc/string_conversions.o				\
-		plugin/plugin_loader.o					\
-		system/dynamic_module/module_dl.o			\
-		system/dynamic_module/module_manager_factory.o		\
-		system/argparser.o					\
-		system/file.o						\
-		system/signal.o
+LIBS_libcore = pthread
 
-OBJS_all = $(OBJS_libutils)
-LIBS_all  = $(LIBDIR)/libutils.so
+OBJS_all = $(OBJS_libcore)
+LIBS_all  = $(LIBDIR)/libcore.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
