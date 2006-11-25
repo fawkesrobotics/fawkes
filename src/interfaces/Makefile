@@ -62,15 +62,20 @@ LIBS_all = $(LIBDIR)/libinterfaces.so
 include $(BASEDIR)/etc/buildsys/config.mk
 
 
-.SECONDARY: $(SRCS_interfaces)
+.SECONDARY: $(SRCS_interfaces) $(HDRS_interfaces) $(OBJS_all)
+
+ifneq ($(OBJS_interface_generator),)
 $(SRCS_interfaces): $(BINDIR)/interface_generator
 $(SRCS_interfaces): %.cpp: %.xml
 	$(SILENT) echo "$(INDENT_PRINT)--> Generating $(@F) (Interface XML Template)"
 	$(SILENT)$(BINDIR)/interface_generator $<
+endif
 
+ifeq ($(MAKECMDGOALS),interface-clean)
 .PHONY: interface-clean
 interface-clean:
 	$(SILENT) rm -f $(SRCS_interfaces) $(HDRS_interfaces)
+endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
