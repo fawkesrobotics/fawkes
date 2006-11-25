@@ -26,10 +26,14 @@
  */
 
 #include <mainapp/main_thread.h>
-#include <mainapp/thread_manager.h>
-#include <core/plugin.h>
-#include <utils/plugin/plugin_loader.h>
-#include <blackboard/interface_manager.h>
+
+#include <core/threading/thread_manager.h>
+#include <blackboard/blackboard.h>
+#include <mainapp/thread_initializer.h>
+#include <mainapp/plugin_manager.h>
+#include <mainapp/network_manager.h>
+
+#include <stdio.h>
 
 /** @class FawkesMainThread mainapp/main_thread.h
  * Fawkes main thread.
@@ -43,32 +47,24 @@
 /** Constructor. */
 FawkesMainThread::FawkesMainThread()
 {
-  plugin_loader = new PluginLoader(PLUGINDIR);
-  Plugin *bb_plugin = plugin_loader->load("blackboard");
-  plugins.clear();
-  plugins["blackboard"] = bb_plugin;
+  blackboard         = new BlackBoard();
+  thread_initializer = new FawkesThreadInitializer(blackboard);
+  thread_manager     = new ThreadManager(thread_initializer);
+  plugin_manager     = new FawkesPluginManager(thread_manager);
+  network_manager    = new FawkesNetworkManager(thread_manager, 1910);
 
-  ThreadList &tl = bb_plugin->threads();
-
-  thread_manager = new FawkesThreadManager();
-
-  thread_manager->add(tl);
-
-  interface_manager = thread_manager->getInterfaceManager();
+  network_manager->add_handler(plugin_manager);
 }
 
 
 /** Destructor. */
 FawkesMainThread::~FawkesMainThread()
 {
+  delete network_manager;
+  delete plugin_manager;
   delete thread_manager;
-
-  // Unload all plugins
-  for (std::map< std::string, Plugin * >::iterator pit = plugins.begin(); pit != plugins.end(); ++pit) {
-    plugin_loader->unload((*pit).second);
-  }
-
-  delete plugin_loader;
+  delete thread_initializer;
+  delete blackboard;
 }
 
 
@@ -99,5 +95,6 @@ FawkesMainThread::loop()
   thread_manager->wakeup( FawkesThread::WAKEUP_HOOK_POST_LOOP );
   thread_manager->wait(   FawkesThread::WAKEUP_HOOK_POST_LOOP );
 
-  usleep(0);
+  // Load plugins that have been requested in this loop
+  plugin_manager->load();
 }

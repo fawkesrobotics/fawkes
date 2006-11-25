@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  main.cpp - Fawkes main application
+ *  network_manager.h - Fawkes network manager
  *
- *  Generated: Thu Nov  2 16:44:48 2006
+ *  Created: Wed Nov 15 23:52:40 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,57 +25,27 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <mainapp/main_thread.h>
-#include <utils/system/signal.h>
+#ifndef __FAWKES_NETWORK_MANAGER_H_
+#define __FAWKES_NETWORK_MANAGER_H_
 
+class ThreadManager;
+class FawkesNetworkThread;
+class FawkesNetworkHandler;
 
-/** Fawkes main application.
- *
- * @author Tim Niemueller
- */
-class FawkesMainApp : public SignalHandler
+class FawkesNetworkManager
 {
  public:
-  /** Run main thread.
-   * @param argc argument count
-   * @param argv array of arguments
-   */
-  void run(int argc, char **argv)
-  {
-    fmt = new FawkesMainThread();
+  FawkesNetworkManager(ThreadManager *thread_manager, unsigned short int fawkes_port);
+  ~FawkesNetworkManager();
 
-    fmt->start();
-    fmt->join();
-
-    delete fmt;
-  }
-
-  /** Handle signals.
-   * @param signum signal number
-   */
-  void handle_signal(int signum)
-  {
-    if ( (signum == SIGINT) ||
-	 (signum == SIGTERM) ) {
-      fmt->cancel();
-    }
-  }
+  void add_handler(FawkesNetworkHandler *handler);
+  void remove_handler(FawkesNetworkHandler *handler);
 
  private:
-  FawkesMainThread *fmt;
+  unsigned short int      fawkes_port;
+  ThreadManager          *thread_manager;
+  FawkesNetworkThread    *fawkes_network_thread;
+
 };
 
-
-/** Fawkes application.
- * @param argc argument count
- * @param argv array of arguments
- */
-int
-main(int argc, char **argv)
-{
-  FawkesMainApp fawkes;
-  SignalManager::register_handler(SIGINT, &fawkes);
-  SignalManager::register_handler(SIGTERM, &fawkes);
-
-  fawkes.run(argc, argv);
-}
+#endif

@@ -22,10 +22,13 @@ BASEDIR = ../..
 
 CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\"
 
-LIBS_fawkes = core utils interfaces blackboard
-OBJS_fawkes = main.o			\
-	      main_thread.o		\
-	      thread_manager.o
+LIBS_fawkes = core utils interfaces blackboard netcomm
+OBJS_fawkes = \
+	      main.o					\
+	      main_thread.o				\
+	      network_manager.o				\
+	      plugin_manager.o				\
+	      thread_initializer.o
 
 OBJS_all =	$(OBJS_fawkes)
 BINS_all =	$(BINDIR)/fawkes

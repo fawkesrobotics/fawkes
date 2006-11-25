@@ -30,13 +30,11 @@
 
 #include <core/threading/thread.h>
 
-#include <map>
-#include <string>
-
-class BlackBoardInterfaceManager;
-class PluginLoader;
-class Plugin;
-class FawkesThreadManager;
+class BlackBoard;
+class ThreadManager;
+class FawkesPluginManager;
+class FawkesNetworkManager;
+class FawkesThreadInitializer;
 
 class FawkesMainThread : public Thread
 {
@@ -47,12 +45,11 @@ class FawkesMainThread : public Thread
   virtual void loop();
 
  private:
-
-  BlackBoardInterfaceManager *interface_manager;
-  FawkesThreadManager        *thread_manager;
-  PluginLoader               *plugin_loader;
-
-  std::map< std::string, Plugin * > plugins;
+  BlackBoard                 *blackboard;
+  ThreadManager              *thread_manager;
+  FawkesThreadInitializer    *thread_initializer;
+  FawkesPluginManager        *plugin_manager;
+  FawkesNetworkManager       *network_manager;
 };
 
 #endif

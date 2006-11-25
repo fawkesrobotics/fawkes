@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  main.cpp - Fawkes main application
+ *  thread_initializer.h - Fawkes thread initializer
  *
- *  Generated: Thu Nov  2 16:44:48 2006
+ *  Created: Thu Nov 20 00:47:12 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,57 +25,24 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <mainapp/main_thread.h>
-#include <utils/system/signal.h>
+#ifndef __FAWKES_THREAD_INITIALIZER_H_
+#define __FAWKES_THREAD_INITIALIZER_H_
 
+#include <core/threading/thread_initializer.h>
 
-/** Fawkes main application.
- *
- * @author Tim Niemueller
- */
-class FawkesMainApp : public SignalHandler
+class BlackBoard;
+class Thread;
+
+class FawkesThreadInitializer : public ThreadInitializer
 {
  public:
-  /** Run main thread.
-   * @param argc argument count
-   * @param argv array of arguments
-   */
-  void run(int argc, char **argv)
-  {
-    fmt = new FawkesMainThread();
+  FawkesThreadInitializer(BlackBoard *blackboard);
 
-    fmt->start();
-    fmt->join();
-
-    delete fmt;
-  }
-
-  /** Handle signals.
-   * @param signum signal number
-   */
-  void handle_signal(int signum)
-  {
-    if ( (signum == SIGINT) ||
-	 (signum == SIGTERM) ) {
-      fmt->cancel();
-    }
-  }
+  virtual void init(Thread *thread);
 
  private:
-  FawkesMainThread *fmt;
+  BlackBoard *blackboard;
 };
 
 
-/** Fawkes application.
- * @param argc argument count
- * @param argv array of arguments
- */
-int
-main(int argc, char **argv)
-{
-  FawkesMainApp fawkes;
-  SignalManager::register_handler(SIGINT, &fawkes);
-  SignalManager::register_handler(SIGTERM, &fawkes);
-
-  fawkes.run(argc, argv);
-}
+#endif
