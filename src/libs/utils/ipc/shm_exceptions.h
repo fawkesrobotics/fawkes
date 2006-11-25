@@ -3,7 +3,7 @@
  *  shm_exceptions.h - exceptions thrown in shmem utils, do NOT put your own
  *                     application specific exceptions here!
  *
- *  Generated: Thu Feb 09 13:06:52 2006
+ *  Created: Thu Feb 09 13:06:52 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -31,88 +31,51 @@
 
 #include <core/exception.h>
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-
-#include <stdio.h>
-
-/** Could not attach to shared memory segment.
- */
-class ShmCouldNotAttachException : public Exception {
+class ShmCouldNotAttachException : public Exception
+{
  public:
-  /** Constructor
-   * @param msg Message why we could not attach
-   */
-  ShmCouldNotAttachException(const char *msg) : Exception(msg)  {}
+  ShmCouldNotAttachException(const char *msg);
 };
 
 
-/** No shared memory header set before attach()
- */
-class ShmNoHeaderException : public Exception {
+class ShmNoHeaderException : public Exception
+{
  public:
-  /** Constructor */
-  ShmNoHeaderException() : Exception("No SharedMemoryHeader, cannot attach")  {}
+  ShmNoHeaderException();
 };
 
 
-/** Memory size does not match
- */
-class ShmInconsistentSegmentSizeException : public Exception {
+class ShmInconsistentSegmentSizeException : public Exception
+{
  public:
-  /** Constructor
-   * @param desired_mem The exepcted memory size
-   * @param act_mem The actual memory size
-   */
-  ShmInconsistentSegmentSizeException(unsigned int desired_mem, unsigned int act_mem)
-    : Exception()
-  {
-    char *message;
-    asprintf( &message, "Inconsistent shared mem segment found in memory "
-	               "(memory size does not match, desired: %u, actual: %u)",
-	               desired_mem, act_mem);
-    append_nocopy(message);
-  }
+  ShmInconsistentSegmentSizeException(unsigned int desired_mem, unsigned int act_mem);
 };
 
 
-/** Shared memory segment does not exist.
- */
-class ShmDoesNotExistException : public Exception {
+class ShmDoesNotExistException : public Exception
+{
  public:
-  /** Constructor */
-  ShmDoesNotExistException() : Exception("The given shared memory segment does not exist.") {}
+  ShmDoesNotExistException();
 };
 
 
-/** The shared memory is set adress-dependend but could not be opened at the appropriate
- * address.
- */
-class ShmCouldNotAttachAddrDepException : public Exception {
+class ShmCouldNotAttachAddrDepException : public Exception
+{
  public:
-  /** Constructor */
-  ShmCouldNotAttachAddrDepException() : Exception("Could not attach to the shared memory "
-						   "segment with the appropriate address") {}
+  ShmCouldNotAttachAddrDepException();
 };
 
 
-/** The address points out of the shared memory.
- */
-class ShmAddrOutOfBoundsException : public Exception {
+class ShmAddrOutOfBoundsException : public Exception
+{
  public:
-  /** Constructor */
-  ShmAddrOutOfBoundsException() : Exception("The address you tried to transform points "
-					    "out of the shared memory segment") {}
+  ShmAddrOutOfBoundsException();
 };
 
-/** The pointer does not point inside the shared memory.
- */
-class ShmPtrOutOfBoundsException : public Exception {
+class ShmPtrOutOfBoundsException : public Exception
+{
  public:
-  /** Constructor */
-  ShmPtrOutOfBoundsException() : Exception("The pointer you tried to transform does not "
-					    "point inside the shared memory segment") {}
+  ShmPtrOutOfBoundsException();
 };
 
 #endif

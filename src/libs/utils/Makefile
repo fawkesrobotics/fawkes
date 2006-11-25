@@ -28,6 +28,7 @@ OBJS_libutils =	\
 		ipc/msg.o						\
 		ipc/semset.o						\
 		ipc/shm.o						\
+		ipc/shm_exceptions.o					\
 		misc/string_conversions.o				\
 		plugin/plugin_loader.o					\
 		system/dynamic_module/module_dl.o			\

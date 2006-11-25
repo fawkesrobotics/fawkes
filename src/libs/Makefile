@@ -21,7 +21,7 @@
 
 BASEDIR = ../..
 
-SUBDIRS = core utils
+SUBDIRS = core utils netcomm
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
