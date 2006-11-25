@@ -37,6 +37,7 @@ class Exception {
  public:
 
   Exception(const char *msg);
+  Exception(const char *msg, int errno);
   Exception(const Exception &exc);
   virtual ~Exception();
 
@@ -45,6 +46,8 @@ class Exception {
   void append(const char *format, ...);
   void printTrace();
 
+  int errno() const;
+
   Exception& operator=(const Exception &exc);
 
  protected:
@@ -52,7 +55,7 @@ class Exception {
 
   void append_nolock(const char *msg);
   void append_nolock(const char *format, va_list va);
-  void append_nocopy(char *msg);
+  void append_nolock_nocopy(char *msg);
   void copy_messages(const Exception &exc);
 
   /** typedef struct for message list */
@@ -66,6 +69,8 @@ class Exception {
   message_list_t  *messages_iterator;
   message_list_t  *messages_end;
   Mutex           *messages_mutex;
+
+  int              _errno;
 };
 
 

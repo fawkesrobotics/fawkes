@@ -32,6 +32,7 @@
 #include <core/exceptions/software.h>
 
 #include <pthread.h>
+#include <unistd.h>
 
 /** @def forever
  * Shortcut for "while (1)".
@@ -87,6 +88,7 @@ Thread::Thread(OpMode op_mode)
   }
   thread_id = 0;
   barrier = NULL;
+  cancelled = false;
 }
 
 
@@ -115,6 +117,7 @@ Thread::start()
     return false;
   }
 
+  cancelled = false;
   return true;
 }
 
@@ -172,7 +175,10 @@ Thread::detach()
 void
 Thread::cancel()
 {
-  pthread_cancel(thread_id);
+  if ( ! cancelled ) {
+    cancelled = true;
+    pthread_cancel(thread_id);
+  }
 }
 
 
@@ -231,6 +237,7 @@ Thread::run()
       sleep_condition->wait(sleep_mutex);
       sleep_mutex->unlock();
     }
+    usleep(0);
   }
 }
 

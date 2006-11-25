@@ -84,6 +84,8 @@ class Thread {
   WaitCondition *sleep_condition;
   Barrier       *barrier;
 
+  bool           cancelled;
+
   OpMode         op_mode;
 
 };

@@ -35,7 +35,6 @@ class Plugin {
 
   /** Type of the plugin */
   typedef enum {
-    BLACKBOARD,		/**< BlackBoard plugin */
     MOTION,		/**< motion plugin */
     VISION,		/**< vision plugin */
     AGENT,		/**< agent plugin */

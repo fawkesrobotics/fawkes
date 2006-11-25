@@ -123,6 +123,10 @@
 /** @var Exception::messages_mutex
  * Mutex to protect operations on messages list.
  */
+/** @var Exception::_errno
+ * Error number, should be used if the error was caused by a method that supplies
+ * errno.
+ */
 
 
 /** Constructor.
@@ -136,6 +140,8 @@ Exception::Exception(const char *msg)
   messages_mutex = new Mutex();
   messages_mutex->lock();
 
+  _errno = 0;
+
   messages = NULL;
   messages_end = NULL;
   messages_iterator = NULL;
@@ -145,6 +151,42 @@ Exception::Exception(const char *msg)
   } else {
     append_nolock("Basic Exception");
   }
+
+  messages_mutex->unlock();
+}
+
+
+/** Constructor.
+ * Constructs a new exception with the given message and errno value. This
+ * is particularly handy when throwing the exception after a function failed
+ * that returns an error code in errno. 
+ * @param msg The message that this exception should carry. The message is
+ * copied and not just referenced. Thus the memory can be freed if it is a
+ * @param errno error number
+ * string on the heap.
+ */
+Exception::Exception(const char *msg, int errno)
+{
+  messages_mutex = new Mutex();
+  messages_mutex->lock();
+
+  _errno = errno;
+
+  messages = NULL;
+  messages_end = NULL;
+  messages_iterator = NULL;
+
+  if ( msg != NULL ) {
+    append_nolock(msg);
+  } else {
+    append_nolock("Basic Exception");
+  }
+
+  char *errno_msg;
+  char err[200];
+  char *err_s = strerror_r(errno, err, 200);
+  asprintf(&errno_msg, "errno: %i   msg: %s", errno, err_s);
+  append_nolock_nocopy(errno_msg);
 
   messages_mutex->unlock();
 }
@@ -188,6 +230,7 @@ Exception::Exception(const Exception &exc)
 {
   messages_mutex = new Mutex();
 
+  _errno = exc._errno;
   copy_messages(exc);
 }
 
@@ -200,6 +243,7 @@ Exception::Exception(const Exception &exc)
 Exception::Exception()
 {
   messages_mutex = new Mutex();
+  _errno = 0;
   messages = NULL;
   messages_end = NULL;
   messages_iterator = NULL;
@@ -302,11 +346,11 @@ Exception::append_nolock(const char *format, va_list ap)
  * Can be used in subclasses to append messages that have been allocated
  * on the heap. Use with extreme care. Do not add constant strings! This would
  * cause your application to crash since the destructor will try to free all
- * messages.
+ * messages. The message list is not locked.
  * @param msg Message to append.
  */
 void
-Exception::append_nocopy(char *msg)
+Exception::append_nolock_nocopy(char *msg)
 {
   if ( messages == NULL ) {
     // This is our first message
@@ -417,4 +461,14 @@ Exception::printTrace()
   fprintf(stderr,
 	  "============================================================================\n");
   messages_mutex->unlock();
+}
+
+
+/** Get errno.
+ * @return error number, may be 0 if not set
+ */
+int
+Exception::errno() const
+{
+  return _errno;
 }

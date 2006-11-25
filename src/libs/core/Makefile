@@ -21,6 +21,9 @@
 
 BASEDIR = ../../..
 
+CFLAGS = -g
+
+LIBS_libcore = pthread stdc++
 OBJS_libcore =	\
 		exception.o			\
 		plugin.o			\
@@ -33,10 +36,9 @@ OBJS_libcore =	\
 		threading/refc_rwlock.o		\
 		threading/thread.o		\
 		threading/thread_list.o		\
+		threading/thread_manager.o	\
 		threading/wait_condition.o	\
 		utils/refcount.o
-
-LIBS_libcore = pthread
 
 OBJS_all = $(OBJS_libcore)
 LIBS_all  = $(LIBDIR)/libcore.so
