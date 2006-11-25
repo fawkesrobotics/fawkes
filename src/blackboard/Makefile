@@ -25,6 +25,7 @@ SUBDIRS = tools
 
 LIBS_libblackboard = core utils interfaces
 OBJS_libblackboard = bbthread.o			\
+		     blackboard.o		\
 		     interface_manager.o	\
 		     main_thread.o		\
 		     memory_manager.o		\
@@ -32,11 +33,7 @@ OBJS_libblackboard = bbthread.o			\
 		     shmem_header.o		\
 		     shmem_lister.o
 
-LIBS_blackboard = core utils blackboard
-OBJS_blackboard = blackboard.o
-
 OBJS_all =	$(OBJS_libblackboard) $(OBJS_blackboard)
-PLUGINS_all =	$(PLUGINDIR)/blackboard.so
 LIBS_all =	$(LIBDIR)/libblackboard.so
 
 include $(BASEDIR)/etc/buildsys/base.mk

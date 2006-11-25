@@ -29,80 +29,24 @@
 #include <blackboard/main_thread.h>
 
 /** Constructor. */
-BlackBoardPlugin::BlackBoardPlugin()
+BlackBoard::BlackBoard()
 {
-  thread_list.push_back( new BlackBoardMainThread() );
+  im = new BlackBoardInterfaceManager(/* master */ true);
 }
 
 
 /** Destructor. */
-BlackBoardPlugin::~BlackBoardPlugin()
+BlackBoard::~BlackBoard()
 {
-  for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
-    delete (*i);
-  }
-  thread_list.clear();
+  delete im;
 }
 
 
-/** Get presistency.
- * @return true, BlackBoardPlugin is persistent and cannot be unloaded.
+/** Get interface manager.
+ * @return interface manager.
  */
-bool
-BlackBoardPlugin::persistent()
+BlackBoardInterfaceManager *
+BlackBoard::getInterfaceManager()
 {
-  return true;
-}
-
-
-/** Get list of threads.
- * @return list of threads for BlackBoard.
- */
-ThreadList &
-BlackBoardPlugin::threads()
-{
-  return thread_list;
-}
-
-
-/** Get plugin type.
- * @return Plugin::BLACKBOARD
- */
-Plugin::PluginType
-BlackBoardPlugin::type() const
-{
-  return Plugin::BLACKBOARD;
-}
-
-
-/** Get name of plugin.
- * @return BlackBoardPlugin
- */
-const char *
-BlackBoardPlugin::name() const
-{
-  return "BlackBoardPlugin";
-}
-
-
-/** Plugin factory function for this plugin.
- * @return an instance of TestPlugin
- */
-extern "C"
-Plugin *
-plugin_factory()
-{
-  return new BlackBoardPlugin();
-}
-
-
-/** Plugin destruction function for this plugin.
- * @param plugin The plugin that is to be destroyed. Do not use this plugin
- *        afterwards
- */
-extern "C"
-void
-plugin_destroy(Plugin *plugin)
-{
-  delete plugin;
+  return im;
 }

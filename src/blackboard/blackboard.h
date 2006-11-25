@@ -28,21 +28,19 @@
 #ifndef __BLACKBOARD_BLACKBOARD_H_
 #define __BLACKBOARD_BLACKBOARD_H_
 
-#include <core/plugin.h>
+#include <blackboard/interface_manager.h>
 
-class BlackBoardPlugin : public Plugin
+class BlackBoard
 {
  public:
-  BlackBoardPlugin();
-  ~BlackBoardPlugin();
+  BlackBoard();
+  ~BlackBoard();
 
-  virtual PluginType    type() const;
-  virtual const char *  name() const;
-  virtual bool          persistent();
-  virtual ThreadList &  threads();
+  BlackBoardInterfaceManager *  getInterfaceManager();
 
  private:
-  ThreadList thread_list;
+  BlackBoardInterfaceManager *im;
+
 };
 
 
