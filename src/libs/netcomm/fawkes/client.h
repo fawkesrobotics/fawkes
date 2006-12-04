@@ -49,6 +49,8 @@ class FawkesNetworkClient
   void set_nodelay(bool nodelay);
   bool nodelay();
 
+  void wait();
+
   FawkesNetworkMessageQueue *  inbound_queue();
 
  private:

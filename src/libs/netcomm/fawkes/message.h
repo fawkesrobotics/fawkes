@@ -68,8 +68,11 @@ class FawkesNetworkMessage : public RefCount
   FawkesNetworkMessage(unsigned int clid,
 		       unsigned short int cid, unsigned short int msg_id,
 		       void *payload, unsigned int payload_size);
+  FawkesNetworkMessage(unsigned int clid,
+		       unsigned short int cid, unsigned short int msg_id);
   FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
 		       void *payload, unsigned int payload_size);
+  FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id);
   FawkesNetworkMessage();
   virtual ~FawkesNetworkMessage();
 

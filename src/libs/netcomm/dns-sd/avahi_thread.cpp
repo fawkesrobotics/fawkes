@@ -177,13 +177,13 @@ AvahiThread::client_callback(AvahiClient *c, AvahiClientState state,
   case AVAHI_CLIENT_S_RUNNING:        
     /* The server has startup successfully and registered its host
      * name on the network, so it's time to create our services */
-    printf("(Client): RUNNING\n");
+    //printf("(Client): RUNNING\n");
     at->service_publisher->create_services();
     at->browser->create_browsers();
     break;
 
   case AVAHI_CLIENT_S_COLLISION:
-    printf("(Client): COLLISION\n");
+    //printf("(Client): COLLISION\n");
     /* Let's drop our registered services. When the server is back
      * in AVAHI_SERVER_RUNNING state we will register them
      * again with the new host name. */
@@ -192,17 +192,17 @@ AvahiThread::client_callback(AvahiClient *c, AvahiClientState state,
             
   case AVAHI_CLIENT_FAILURE:          
     // Doh!
-    printf("(Client): FAILURE\n");
+    //printf("(Client): FAILURE\n");
     at->recover();
     break;
 
   case AVAHI_CLIENT_CONNECTING:
-    printf("(Client): CONNECTING\n");
+    //printf("(Client): CONNECTING\n");
     break;
 
   case AVAHI_CLIENT_S_REGISTERING:
     // Ignored
-    printf("(Client): REGISTERING\n");
+    //printf("(Client): REGISTERING\n");
     break;
   }
 }

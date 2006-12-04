@@ -97,6 +97,9 @@ FawkesNetworkThread::add_client(FawkesNetworkClientThread *client)
   client->setClientID(next_client_id);
   thread_manager->add(client);
   clients[next_client_id] = client;
+  for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
+    (*hit).second->clientConnected(next_client_id);
+  }
   ++next_client_id;
   clients_mutex->unlock();
 }
@@ -149,9 +152,12 @@ FawkesNetworkThread::loop()
     if ( ! (*cit).second->alive() ) {
       thread_manager->remove((*cit).second);
       delete (*cit).second;
-      unsigned int key = (*cit).first;
+      unsigned int clid = (*cit).first;
       ++cit;
-      clients.erase(key);
+      clients.erase(clid);
+      for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
+	(*hit).second->clientDisconnected(clid);
+      }
     } else {
       ++cit;
     }

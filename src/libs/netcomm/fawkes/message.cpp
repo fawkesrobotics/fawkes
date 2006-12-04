@@ -92,6 +92,20 @@ FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned shor
 }
 
 
+/** Constructor to set single fields without payload.
+ * The client ID is set to zero.
+ * @param cid component ID
+ * @param msg_id message type ID
+ */
+FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id)
+{
+  _msg.header.cid = htons(cid);
+  _msg.header.msg_id = htons(msg_id);
+  _msg.header.payload_size = 0;
+  _msg.payload = NULL;
+}
+
+
 /** Constructor to set single fields and client ID.
  * @param clid client ID
  * @param cid component ID
@@ -108,6 +122,22 @@ FawkesNetworkMessage::FawkesNetworkMessage(unsigned int clid,
   _msg.header.msg_id = htons(msg_id);
   _msg.header.payload_size = htonl(payload_size);
   _msg.payload = payload;
+}
+
+
+/** Constructor to set single fields and client ID without payload.
+ * @param clid client ID
+ * @param cid component ID
+ * @param msg_id message type ID
+ */
+FawkesNetworkMessage::FawkesNetworkMessage(unsigned int clid,
+					   unsigned short int cid, unsigned short int msg_id)
+{
+  _clid = clid;
+  _msg.header.cid = htons(cid);
+  _msg.header.msg_id = htons(msg_id);
+  _msg.header.payload_size = 0;
+  _msg.payload = NULL;
 }
 
 

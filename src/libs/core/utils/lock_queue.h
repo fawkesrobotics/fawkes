@@ -46,6 +46,8 @@ class LockQueue : public std::queue<Type>
   void push_locked(const Type& x);
   void pop_locked();
 
+  void clear();
+
   // not needed, no change to mutex required (thus "incomplete" BigThree)
   //LockList<Type> &  operator=(const LockList<Type> &ll);
  private:
@@ -140,7 +142,19 @@ void
 LockQueue<Type>::pop_locked()
 {
   mutex->lock();
-  std::queue<Type>::pop;
+  std::queue<Type>::pop();
+  mutex->unlock();
+}
+
+/** Clear the queue. */
+template <typename Type>
+void
+LockQueue<Type>::clear()
+{
+  mutex->lock();
+  while ( ! std::queue<Type>::empty() ) {
+    std::queue<Type>::pop();
+  }
   mutex->unlock();
 }
 

@@ -123,6 +123,18 @@ FawkesNetworkHandler::broadcast(unsigned short int msg_id,
 }
 
 
+/** Broadcast message without payload.
+ * @param msg_id message type ID
+ */
+void
+FawkesNetworkHandler::broadcast(unsigned short int msg_id)
+{
+  FawkesNetworkMessage *m = new FawkesNetworkMessage(_id, msg_id);
+  emitter->broadcast(m);
+  m->unref();
+}
+
+
 /** Send a message.
  * Copied through to the emitter.
  * @param msg message to broadcast
@@ -148,6 +160,22 @@ FawkesNetworkHandler::send(unsigned int to_clid, unsigned short int msg_id,
 			   void *payload, unsigned int payload_size)
 {
   FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, _id, msg_id, payload, payload_size);
+  emitter->send(m);
+  m->unref();
+}
+
+
+/** Send a message without payload.
+ * A FawkesNetworkMessage with empty payload is created and sent via the emitter.
+ * This is particularly useful for simple status messages that you want to send.
+ * @param to_clid client ID of recipient
+ * @param msg_id message type id
+ * @see FawkesNetworkEmitter::broadcast()
+ */
+void
+FawkesNetworkHandler::send(unsigned int to_clid, unsigned short int msg_id)
+{
+  FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, _id, msg_id);
   emitter->send(m);
   m->unref();
 }

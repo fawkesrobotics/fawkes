@@ -116,7 +116,9 @@ FawkesNetworkClient::send()
 void
 FawkesNetworkClient::recv()
 {
-  FawkesNetworkTransceiver::recv(s, inbound_msgq);
+  while ( s->available() ) {
+    FawkesNetworkTransceiver::recv(s, inbound_msgq);
+  }
 }
 
 
@@ -153,4 +155,29 @@ FawkesNetworkMessageQueue *
 FawkesNetworkClient::inbound_queue()
 {
   return inbound_msgq;
+}
+
+
+/** Wait until inbound messages have been receive or the connection dies.
+ */
+void
+FawkesNetworkClient::wait()
+{
+  short p = 0;
+  do {
+    try {
+      p = s->poll();
+    } catch (Exception &e) {
+      // make sure we abort waiting
+      p = Socket::POLL_IN;
+    }
+    /*
+    if ( p & Socket::POLL_IN )     printf("POLL_IN\n");
+    if ( p & Socket::POLL_OUT )    printf("POLL_OUT\n");
+    if ( p & Socket::POLL_PRI )    printf("POLL_PRI\n");
+    if ( p & Socket::POLL_HUP )    printf("POLL_HUP\n");
+    if ( p & Socket::POLL_RDHUP )  printf("POLL_RDHUP\n");
+    if ( p & Socket::POLL_ERR )    printf("POLL_ERR\n");
+    */
+  } while ( ! (p & Socket::POLL_IN) );
 }

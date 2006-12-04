@@ -45,8 +45,10 @@ class FawkesNetworkHandler
   void broadcast(FawkesNetworkMessage *msg);
   void broadcast(unsigned short int msg_id,
 		 void *payload, unsigned int payload_size);
+  void broadcast(unsigned short int msg_id);
 
   void send(FawkesNetworkMessage *msg);
+  void send(unsigned int to_clid, unsigned short int msg_id);
   void send(unsigned int to_clid, unsigned short int msg_id,
 	    void *payload, unsigned int payload_size);
 

@@ -139,14 +139,19 @@ FawkesNetworkTransceiver::recv(StreamSocket *s, FawkesNetworkMessageQueue *msgq)
 
       unsigned int payload_size = ntohl(msg.header.payload_size);
 
-      if ( payload_size > (packet_size - read_bytes)) {
-	// this is obviously a problem
-	throw Exception("Protocol error");
-      }
+      if ( payload_size > 0 ) {
 
-      msg.payload = malloc(payload_size);
-      s->read(msg.payload, payload_size);
-      read_bytes += payload_size;
+	if ( payload_size > (packet_size - read_bytes)) {
+	  // this is obviously a problem
+	  throw Exception("Protocol error");
+	}
+
+	msg.payload = malloc(payload_size);
+	s->read(msg.payload, payload_size);
+	read_bytes += payload_size;
+      } else {
+	msg.payload = NULL;
+      }
 
       FawkesNetworkMessage *m = new FawkesNetworkMessage(msg);
       msgq->push(m);

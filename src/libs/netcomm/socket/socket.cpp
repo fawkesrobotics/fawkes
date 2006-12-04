@@ -27,6 +27,7 @@
 
 #include <netcomm/socket/socket.h>
 
+#include <core/exceptions/system.h>
 #include <utils/system/time.h>
 
 #ifndef _GNU_SOURCE
@@ -406,8 +407,13 @@ Socket::available()
 /** Wait for some event on socket.
  * @param timeout timeout in miliseconds to wait. A negative value means to
  * wait forever until an event occurs, zero means just check, don't wait.
+ * @param what what to wait for, a bitwise OR'ed combination of POLL_IN,
+ * POLL_OUT and POLL_PRI.
  * @return Returns a flag value. Use bit-wise AND with the POLL_* constants
  * in this class.
+ * @exception InterruptedException thrown, if poll is interrupted by a signal
+ * @exception SocketException thrown for any other error the poll() syscall can cause,
+ * see Exception::errno() for the cause of the error.
  * @see Socket::POLL_IN
  * @see Socket::POLL_OUT
  * @see Socket::POLL_PRI
@@ -417,7 +423,7 @@ Socket::available()
  * @see Socket::POLL_NVAL
  */
 short
-Socket::poll(int timeout)
+Socket::poll(int timeout, short what)
 {
   if ( sock_fd == -1 ) {
     return POLL_ERR;
@@ -425,10 +431,14 @@ Socket::poll(int timeout)
 
   struct pollfd pfd;
   pfd.fd = sock_fd;
-  pfd.events = POLLIN | POLLOUT | POLLPRI | POLLRDHUP;
+  pfd.events = what;
   pfd.revents = 0;
   if ( ::poll(&pfd, 1, timeout) == -1 ) {
-    throw SocketException("poll() failed", errno);
+    if ( errno == EINTR ) {
+      throw InterruptedException();
+    } else {
+      throw SocketException("poll() failed", errno);
+    }
   } else {
     return pfd.revents;
   }
@@ -439,6 +449,7 @@ Socket::poll(int timeout)
  * Write to the socket. This method can only be used on streams.
  * @param buf buffer to write
  * @param count number of bytes to write from buf
+ * @exception SocketException if the data could not be written or if a timeout occured.
  */
 void
 Socket::write(void *buf, unsigned int count)
@@ -478,6 +489,7 @@ Socket::write(void *buf, unsigned int count)
  * @param buf buffer to write from
  * @param count length of buffer, number of bytes to write to stream
  * @see write
+ * @exception SocketException thrown for any error during reading
  */
 void
 Socket::read(void *buf, unsigned int count)
@@ -493,7 +505,6 @@ Socket::read(void *buf, unsigned int count)
     do {
       retval = ::read(sock_fd, (char *)buf + bytes_read, count - bytes_read);
       if (retval == -1) {
-	perror("Read failed");
 	if (errno != EAGAIN) {
 	  throw SocketException("Could not read data", errno);
 	} else {

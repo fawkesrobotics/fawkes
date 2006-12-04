@@ -83,7 +83,7 @@ class Socket
    */
   virtual Socket *     clone() = 0;
 
-  virtual short        poll(int timeout = -1);
+  virtual short        poll(int timeout = -1, short what = POLL_IN | POLL_HUP | POLL_PRI | POLL_RDHUP);
 
   virtual bool         listening();
 
