@@ -31,6 +31,7 @@
 class ThreadManager;
 class FawkesNetworkThread;
 class FawkesNetworkHandler;
+class AvahiThread;
 
 class FawkesNetworkManager
 {
@@ -45,6 +46,7 @@ class FawkesNetworkManager
   unsigned short int      fawkes_port;
   ThreadManager          *thread_manager;
   FawkesNetworkThread    *fawkes_network_thread;
+  AvahiThread            *avahi_thread;
 
 };
 

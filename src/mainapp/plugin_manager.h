@@ -49,7 +49,7 @@ class FawkesPluginManager : public FawkesNetworkHandler
   void load(const char *plugin_type);
   void unload(const char *plugin_type);
 
-  void load();
+  void process();
 
   virtual void handleNetworkMessage(FawkesNetworkMessage *msg);
   virtual void clientConnected(unsigned int clid);
@@ -67,7 +67,7 @@ class FawkesPluginManager : public FawkesNetworkHandler
   unsigned int next_plugin_id;
   std::map< std::string, unsigned int > plugin_ids;
 
-  LockQueue< std::pair<unsigned int, std::string> > load_queue;
+  LockQueue< FawkesNetworkMessage * > inbound_queue;
 };
 
 #endif

@@ -113,52 +113,80 @@ FawkesPluginManager::unload(const char *plugin_type)
 }
 
 
-/** Load all plugins currently in load queue.
+/** Process all network messages that have been received.
  */
 void
-FawkesPluginManager::load()
+FawkesPluginManager::process()
 {
-  load_queue.lock();
-  while (! load_queue.empty() ) {
-    std::pair<unsigned int, std::string> &p = load_queue.front();
-    try {
-      load(p.second.c_str());
-      plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
-      strncpy(r->name, p.second.c_str(), PLUGIN_MSG_NAME_LENGTH);
-      r->plugin_id = plugin_ids[p.second];
-      send(p.first, MSG_PLUGIN_LOADED, r, sizeof(plugin_loaded_msg_t));
-    } catch (PluginNotFoundException &e) {
-      printf("Plugin %s could not be found\n", p.second.c_str());
+  inbound_queue.lock();
+
+  while ( ! inbound_queue.empty() ) {
+    FawkesNetworkMessage *msg = inbound_queue.front();
+
+    switch (msg->msgid()) {
+    case MSG_PLUGIN_LOAD:
+      if ( msg->payload_size() != sizeof(plugin_load_msg_t) ) {
+	printf("Invalid load message size\n");
+      } else {
+	plugin_load_msg_t *m = (plugin_load_msg_t *)msg->payload();
+	char name[PLUGIN_MSG_NAME_LENGTH + 1];
+	name[PLUGIN_MSG_NAME_LENGTH] = 0;
+	strncpy(name, m->name, PLUGIN_MSG_NAME_LENGTH);
+	try {
+	  load(name);
+	  plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
+	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
+	  r->plugin_id = plugin_ids[name];
+	  broadcast(MSG_PLUGIN_LOADED, r, sizeof(plugin_loaded_msg_t));
+	} catch (PluginNotFoundException &e) {
+	  plugin_load_failed_msg_t *r = (plugin_load_failed_msg_t *)calloc(1, sizeof(plugin_load_failed_msg_t));
+	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
+	  send(msg->clid(), MSG_PLUGIN_LOAD_FAILED, r, sizeof(plugin_load_failed_msg_t));
+	  printf("FawkesPluginManager::load: Plugin %s could not be found\n", name);
+	}
+      }
+      break;
+
+    case MSG_PLUGIN_UNLOAD:
+      if ( msg->payload_size() != sizeof(plugin_unload_msg_t) ) {
+	printf("Invalid unload message size\n");
+      } else {
+	plugin_unload_msg_t *m = (plugin_unload_msg_t *)msg->payload();
+	char name[PLUGIN_MSG_NAME_LENGTH + 1];
+	name[PLUGIN_MSG_NAME_LENGTH] = 0;
+	strncpy(name, m->name, PLUGIN_MSG_NAME_LENGTH);
+	try {
+	  unload(name);
+	  plugin_unloaded_msg_t *r = (plugin_unloaded_msg_t *)calloc(1, sizeof(plugin_unloaded_msg_t));
+	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
+	  broadcast(MSG_PLUGIN_UNLOADED, r, sizeof(plugin_unloaded_msg_t));
+	} catch (PluginNotFoundException &e) {
+	  plugin_unload_failed_msg_t *r = (plugin_unload_failed_msg_t *)calloc(1, sizeof(plugin_unload_failed_msg_t));
+	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
+	  send(msg->clid(), MSG_PLUGIN_UNLOAD_FAILED, r, sizeof(plugin_unload_failed_msg_t));
+	  printf("FawkesPluginManager::unload: Plugin %s could not be found\n", name);
+	}
+      }
+      break;
+
+    default:
+      // error
+      break;
     }
-    load_queue.pop();
+
+    msg->unref();
+    inbound_queue.pop();
   }
-  load_queue.unlock();
+
+  inbound_queue.unlock();
 }
 
 
 void
 FawkesPluginManager::handleNetworkMessage(FawkesNetworkMessage *msg)
 {
-  switch (msg->msgid()) {
-  case MSG_PLUGIN_LOAD:
-    if ( msg->payload_size() != sizeof(plugin_load_msg_t) ) {
-      printf("Invalid message size\n");
-    } else {
-      std::pair<unsigned int, std::string> p;
-      plugin_load_msg_t *m = (plugin_load_msg_t *)msg->payload();
-      p.first = msg->clid();
-      char name[PLUGIN_MSG_NAME_LENGTH + 1];
-      name[PLUGIN_MSG_NAME_LENGTH] = 0;
-      strncpy(name, m->name, PLUGIN_MSG_NAME_LENGTH);
-      p.second = name;
-      load_queue.push_locked(p);
-    }
-    break;
-
-  default:
-    // error
-    break;
-  }
+  msg->ref();
+  inbound_queue.push_locked(msg);
 }
 
 
@@ -167,11 +195,15 @@ FawkesPluginManager::clientConnected(unsigned int clid)
 {
   // send out messages with all loaded plugins
   plugins_mutex->lock();
-  for (pit = plugins.begin(); pit != plugins.end(); ++pit) {
-    plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
-    strncpy(r->name, (*pit).first.c_str(), PLUGIN_MSG_NAME_LENGTH);
-    r->plugin_id = plugin_ids[(*pit).first];
-    send(clid, MSG_PLUGIN_LOADED, r, sizeof(plugin_loaded_msg_t));
+  if ( plugins.size() == 0 ) {
+    send(clid, MSG_PLUGIN_NONE_LOADED);
+  } else {
+    for (pit = plugins.begin(); pit != plugins.end(); ++pit) {
+      plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
+      strncpy(r->name, (*pit).first.c_str(), PLUGIN_MSG_NAME_LENGTH);
+      r->plugin_id = plugin_ids[(*pit).first];
+      send(clid, MSG_PLUGIN_LOADED, r, sizeof(plugin_loaded_msg_t));
+    }
   }
   plugins_mutex->unlock();
 }

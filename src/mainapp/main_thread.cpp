@@ -95,6 +95,6 @@ FawkesMainThread::loop()
   thread_manager->wakeup( FawkesThread::WAKEUP_HOOK_POST_LOOP );
   thread_manager->wait(   FawkesThread::WAKEUP_HOOK_POST_LOOP );
 
-  // Load plugins that have been requested in this loop
-  plugin_manager->load();
+  // Process plugin messages received in this loop
+  plugin_manager->process();
 }
