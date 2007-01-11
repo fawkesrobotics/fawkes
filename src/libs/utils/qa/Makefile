@@ -8,7 +8,6 @@ OBJS_test_plugin = test_plugin.o
 
 LIBS_qa_utils_plugin = utils
 OBJS_qa_utils_plugin = plugin.o
-CFLAGS_plugin = -DPLUGINDIR=\"$(CURDIR)/$(PLUGINDIR)\"
 
 OBJS_qa_utils_ipc_shmem = qa_ipc_shmem.o
 LIBS_qa_utils_ipc_shmem = utils
