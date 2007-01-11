@@ -29,6 +29,7 @@ OBJDIR = .objs
 DEPDIR = $(abspath $(SRCDIR)/.deps)
 BINDIR = $(abspath $(BASEDIR)/bin)
 LIBDIR = $(abspath $(BASEDIR)/lib)
+CONFDIR = $(abspath $(BASEDIR)/cfg)
 PLUGINDIR = $(abspath $(BASEDIR)/plugins)
 VPATH = $(SRCDIR)
 df = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
@@ -53,7 +54,7 @@ ECLIPSE_INCDIR  = $(ECLIPSE_PATH)/include/i386_linux
 ### CFLAGS, preprocessor, compiler and linker options
 LDFLAGS_LIBDIRS = -Wl,-R$(abspath $(BASEDIR)/lib),-R$(ECLIPSE_LIBDIR)
 DEFAULT_INCLUDES = -I$(BASEDIR)/src -I$(BASEDIR)/src/libs
-CFLAGS_BASE = -Wall -Werror -pthread $(DEFAULT_INCLUDES)
+CFLAGS_BASE = -Wall -Werror -pthread $(DEFAULT_INCLUDES) -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 LDFLAGS_BASE = -L$(LIBDIR)
 LDFLAGS_SHARED = -shared
 

@@ -63,7 +63,7 @@ subdirs: $(SUBDIRS)
 
 ifneq ($(SUBDIRS),)
 $(SUBDIRS):
-	$(SILENT) echo -e "$(INDENT_PRINT)--- Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"
+	$(SILENT) echo -e "\n$(INDENT_PRINT)--- Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"
 	$(SILENT) $(MAKE) --no-print-directory -C $(realpath $(SRCDIR)/$@) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)"
 	$(SILENT) if [ "$(MAKECMDGOALS)" != "clean" ]; then \
 		echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $@"; \
@@ -76,7 +76,7 @@ endif
 %.o: %.cpp
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENT) echo "$(INDENT_PRINT)--> Compiling $(<F) (C++)"
+	$(SILENT) echo "$(INDENT_PRINT)--> Compiling $(subst $(SRCDIR)/,,$<) (C++)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
 	$(SILENT) $(CC) -Wp,-M,-MF,$(df).d $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
@@ -87,7 +87,7 @@ endif
 	rm -f $(df).td
 
 moc_%.cpp: %.h
-	$(SILENT) echo "$(INDENT_PRINT)--- Running Qt moc on $<, creating $(subst ..,__,$@)"
+	$(SILENT) echo "$(INDENT_PRINT)--- Running Qt moc on $(subst $(SRCDIR)/,,$<), creating $(subst ..,__,$@)"
 	$(SILENT) $(MOC) $(MOC_FLAGS) -p $(subst ..,__,$(@D)) $< -o $(subst ..,__,$@)
 
 .SECONDEXPANSION:
