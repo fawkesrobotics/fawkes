@@ -35,9 +35,6 @@ OBJS_qa_netcomm_socket_typeof = qa_socket_typeof.o
 LIBS_qa_netcomm_socket_stream = netcomm utils
 OBJS_qa_netcomm_socket_stream = qa_socket_stream.o
 
-LIBS_qa_netcomm_socket_seqpacket = netcomm utils
-OBJS_qa_netcomm_socket_seqpacket = qa_socket_seqpacket.o
-
 LIBS_qa_netcomm_socket_datagram = netcomm utils
 OBJS_qa_netcomm_socket_datagram = qa_socket_datagram.o
 
@@ -45,7 +42,6 @@ BINS_all =	$(BINDIR)/qa_netcomm_avahi_publisher	\
 		$(BINDIR)/qa_netcomm_avahi_browser	\
 		$(BINDIR)/qa_netcomm_socket_typeof	\
 		$(BINDIR)/qa_netcomm_socket_stream	\
-		$(BINDIR)/qa_netcomm_socket_seqpacket	\
 		$(BINDIR)/qa_netcomm_socket_datagram
 
 include $(BASEDIR)/etc/buildsys/base.mk
