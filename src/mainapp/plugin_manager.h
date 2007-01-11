@@ -49,11 +49,10 @@ class FawkesPluginManager : public FawkesNetworkHandler
   void load(const char *plugin_type);
   void unload(const char *plugin_type);
 
-  void process();
-
   virtual void handleNetworkMessage(FawkesNetworkMessage *msg);
   virtual void clientConnected(unsigned int clid);
   virtual void clientDisconnected(unsigned int clid);
+  virtual void processAfterLoop();
 
  private:
   ThreadManager  *thread_manager;

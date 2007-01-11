@@ -30,26 +30,32 @@
 
 #include <core/threading/thread.h>
 
+class ArgumentParser;
 class BlackBoard;
 class ThreadManager;
 class FawkesPluginManager;
 class FawkesNetworkManager;
 class FawkesThreadInitializer;
+class FawkesConfigManager;
+class Configuration;
 
 class FawkesMainThread : public Thread
 {
  public:
-  FawkesMainThread();
+  FawkesMainThread(ArgumentParser *argp);
   virtual ~FawkesMainThread();
 
   virtual void loop();
 
  private:
+  ArgumentParser             *argp;
+  Configuration              *config;
   BlackBoard                 *blackboard;
   ThreadManager              *thread_manager;
   FawkesThreadInitializer    *thread_initializer;
   FawkesPluginManager        *plugin_manager;
   FawkesNetworkManager       *network_manager;
+  FawkesConfigManager        *config_manager;
 };
 
 #endif

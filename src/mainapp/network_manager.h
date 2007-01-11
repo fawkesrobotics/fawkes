@@ -42,6 +42,8 @@ class FawkesNetworkManager
   void add_handler(FawkesNetworkHandler *handler);
   void remove_handler(FawkesNetworkHandler *handler);
 
+  void process();
+
  private:
   unsigned short int      fawkes_port;
   ThreadManager          *thread_manager;

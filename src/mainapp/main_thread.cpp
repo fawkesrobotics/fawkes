@@ -28,10 +28,15 @@
 #include <mainapp/main_thread.h>
 
 #include <core/threading/thread_manager.h>
+
+#include <config/sqlite.h>
+#include <utils/system/argparser.h>
+
 #include <blackboard/blackboard.h>
 #include <mainapp/thread_initializer.h>
 #include <mainapp/plugin_manager.h>
 #include <mainapp/network_manager.h>
+#include <mainapp/config_manager.h>
 
 #include <stdio.h>
 
@@ -44,9 +49,29 @@
  */
 
 
-/** Constructor. */
-FawkesMainThread::FawkesMainThread()
+/** Constructor.
+ * @param argp argument parser
+ */
+FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 {
+  /* Config stuff */
+  const char *config_mutable_file;
+  const char *config_default_file;
+
+  config             = new SQLiteConfiguration(CONFDIR);
+
+  if ( argp->hasArgument("c") ) {
+    config_mutable_file = argp->getArgument("c");
+  } else {
+    config_mutable_file = "config.db";
+  }
+  if ( argp->hasArgument("d") ) {
+    config_default_file = argp->getArgument("d");
+  } else {
+    config_default_file = "default.db";
+  }
+  config->load(config_mutable_file, config_default_file);
+  config_manager     = new FawkesConfigManager(config);
   blackboard         = new BlackBoard();
   thread_initializer = new FawkesThreadInitializer(blackboard);
   thread_manager     = new ThreadManager(thread_initializer);
@@ -54,6 +79,7 @@ FawkesMainThread::FawkesMainThread()
   network_manager    = new FawkesNetworkManager(thread_manager, 1910);
 
   network_manager->add_handler(plugin_manager);
+  network_manager->add_handler(config_manager);
 }
 
 
@@ -65,6 +91,8 @@ FawkesMainThread::~FawkesMainThread()
   delete thread_manager;
   delete thread_initializer;
   delete blackboard;
+  delete config_manager;
+  delete config;
 }
 
 
@@ -95,6 +123,5 @@ FawkesMainThread::loop()
   thread_manager->wakeup( FawkesThread::WAKEUP_HOOK_POST_LOOP );
   thread_manager->wait(   FawkesThread::WAKEUP_HOOK_POST_LOOP );
 
-  // Process plugin messages received in this loop
-  plugin_manager->process();
+  network_manager->process();
 }

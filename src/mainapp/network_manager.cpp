@@ -88,3 +88,12 @@ FawkesNetworkManager::remove_handler(FawkesNetworkHandler *handler)
 {
   fawkes_network_thread->remove_handler(handler);
 }
+
+
+/** Call handler processing methods.
+ */
+void
+FawkesNetworkManager::process()
+{
+  fawkes_network_thread->process();
+}

@@ -20,10 +20,11 @@
 
 BASEDIR = ../..
 
-CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\"
+CFLAGS = -g
 
-LIBS_fawkes = core utils interfaces blackboard netcomm
+LIBS_fawkes = core utils interfaces blackboard netcomm config
 OBJS_fawkes = \
+	      config_manager.o				\
 	      main.o					\
 	      main_thread.o				\
 	      network_manager.o				\

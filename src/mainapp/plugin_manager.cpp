@@ -116,7 +116,7 @@ FawkesPluginManager::unload(const char *plugin_type)
 /** Process all network messages that have been received.
  */
 void
-FawkesPluginManager::process()
+FawkesPluginManager::processAfterLoop()
 {
   inbound_queue.lock();
 

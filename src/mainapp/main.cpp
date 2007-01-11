@@ -27,7 +27,11 @@
 
 #include <mainapp/main_thread.h>
 #include <utils/system/signal.h>
+#include <utils/system/argparser.h>
 
+#include <iostream>
+
+using namespace std;
 
 /** Fawkes main application.
  *
@@ -36,13 +40,13 @@
 class FawkesMainApp : public SignalHandler
 {
  public:
+
   /** Run main thread.
-   * @param argc argument count
-   * @param argv array of arguments
+   * @param argp argument parser
    */
-  void run(int argc, char **argv)
+  void run(ArgumentParser *argp)
   {
-    fmt = new FawkesMainThread();
+    fmt = new FawkesMainThread(argp);
 
     fmt->start();
     fmt->join();
@@ -66,6 +70,21 @@ class FawkesMainApp : public SignalHandler
 };
 
 
+void
+usage(const char *progname)
+{
+  cout << "Fawkes Main Application - Usage Instructions" << endl
+       << "=========================================================================" << endl
+       << "Call with: " << progname << " [options]" << endl
+       << "where [options] is one or more of:" << endl
+       << " -H             these help instructions" << endl
+       << " -c conffile    mutable configuration file, created if it does not exist" << endl
+       << "                if it does however it must contain valid SQLite database" << endl
+       << " -d conffile    default configuration file, created if it does not exist" << endl
+       << "                if it does however it must contain valid SQLite database" << endl
+       << endl;
+}
+
 /** Fawkes application.
  * @param argc argument count
  * @param argv array of arguments
@@ -73,9 +92,20 @@ class FawkesMainApp : public SignalHandler
 int
 main(int argc, char **argv)
 {
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "Hc:d:");
+
+  if ( argp->hasArgument("H") ) {
+    usage(argv[0]);
+    delete argp;
+    return 0;
+  }
+
   FawkesMainApp fawkes;
   SignalManager::register_handler(SIGINT, &fawkes);
   SignalManager::register_handler(SIGTERM, &fawkes);
 
-  fawkes.run(argc, argv);
+  fawkes.run(argp);
+
+  delete argp;
+  return 0;
 }
