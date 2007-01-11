@@ -28,12 +28,14 @@
 #ifndef __TOOLS_PLUGIN_PLUGIN_TOOL_H_
 #define __TOOLS_PLUGIN_PLUGIN_TOOL_H_
 
+#include <netcomm/fawkes/client_handler.h>
 #include <utils/system/signal.h>
 
 class FawkesNetworkClient;
+class FawkesNetworkMessage;
 class ArgumentParser;
 
-class PluginTool : public SignalHandler
+class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
 {
  public:
   PluginTool(ArgumentParser *argp, FawkesNetworkClient *c);
@@ -46,6 +48,9 @@ class PluginTool : public SignalHandler
   void list();
   void watch();
   void run();
+
+  virtual void deregistered();
+  virtual void inboundReceived(FawkesNetworkMessage *msg);
 
  private:
   typedef enum {
@@ -60,6 +65,8 @@ class PluginTool : public SignalHandler
   ArgumentParser *argp;
   const char     *plugin_name;
   bool            quit;
+
+  bool            list_found;
 };
 
 

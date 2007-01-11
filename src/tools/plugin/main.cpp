@@ -38,7 +38,10 @@ main(int argc, char **argv)
 
   FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
   c->connect();
-  c->set_nodelay(true);
+  c->setNoDelay(true);
+
+  // Start thread
+  c->start();
 
   PluginTool *pt = new PluginTool(&argp, c);
 
@@ -46,6 +49,9 @@ main(int argc, char **argv)
   pt->run();
 
   SignalManager::finalize();
+
+  c->cancel();
+  c->join();
 
   delete pt;
   delete c;

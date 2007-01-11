@@ -61,6 +61,8 @@ PluginTool::PluginTool(ArgumentParser *argp, FawkesNetworkClient *c)
   } else {
     opmode = M_LIST;
   }
+
+  list_found = false;
 }
 
 /** Destructor */
@@ -73,7 +75,8 @@ PluginTool::~PluginTool()
  */
 void
 PluginTool::handle_signal(int signum)
-{
+{ 
+  c->wake(FAWKES_CID_PLUGINMANAGER);
   quit = true;
 }
 
@@ -82,10 +85,6 @@ PluginTool::handle_signal(int signum)
 void
 PluginTool::load()
 {
-  c->wait();
-  c->recv();
-  c->inbound_queue()->clear();
-  
   printf("Requesting loading of plugin %s\n", plugin_name);
   plugin_load_msg_t *l = (plugin_load_msg_t *)calloc(1, sizeof(plugin_load_msg_t));
   strncpy(l->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
@@ -95,47 +94,10 @@ PluginTool::load()
 						       l, sizeof(plugin_load_msg_t));
   c->enqueue(msg);
   msg->unref();
-  c->send();
 
-  bool plugin_msg_received = false;
-  do {
-    c->wait();
-    c->recv();
-    FawkesNetworkMessageQueue *q = c->inbound_queue();
-    q->lock();
-    while ( ! q->empty() ) {
-      FawkesNetworkMessage *msg = q->front();
-      if (msg->cid() == FAWKES_CID_PLUGINMANAGER) {
-	if ( msg->msgid() == MSG_PLUGIN_LOADED ) {
-	  if ( msg->payload_size() != sizeof(plugin_loaded_msg_t) ) {
-	    printf("Invalid message size (load succeeded)\n");
-	  } else {
-	    plugin_loaded_msg_t *m = (plugin_loaded_msg_t *)msg->payload();
-	    if ( strncmp(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH) == 0 ) {
-	      plugin_msg_received = true;
-	      printf("Loading of %s succeeded\n", plugin_name);
-	    }
-	  }
-	} else if ( msg->msgid() == MSG_PLUGIN_LOAD_FAILED) {
-	  if ( msg->payload_size() != sizeof(plugin_load_failed_msg_t) ) {
-	    printf("Invalid message size (load failed)\n");
-	  } else {
-	    plugin_load_failed_msg_t *m = (plugin_load_failed_msg_t *)msg->payload();
-	    if ( strncmp(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH) == 0 ) {
-	      plugin_msg_received = true;
-	      printf("Loading of %s failed, see log for reason\n", plugin_name);
-	    }
-	  }
-	} else {
-	  printf("Ignoring unrelated message\n");
-	}
-      }
-      msg->unref();
-      q->pop();
-    }
-    q->unlock();
-    usleep(0);
-  } while ( ! plugin_msg_received );
+  while ( ! quit ) {
+    c->wait(FAWKES_CID_PLUGINMANAGER);
+  }
 }
 
 
@@ -143,10 +105,6 @@ PluginTool::load()
 void
 PluginTool::unload()
 {
-  c->wait();
-  c->recv();
-  c->inbound_queue()->clear();
-
   printf("Requesting unloading of plugin %s\n", plugin_name);
   plugin_unload_msg_t *m = (plugin_unload_msg_t *)calloc(1, sizeof(plugin_unload_msg_t));
   strncpy(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
@@ -156,46 +114,10 @@ PluginTool::unload()
 						       m, sizeof(plugin_unload_msg_t));
   c->enqueue(msg);
   msg->unref();
-  c->send();
 
-  bool plugin_msg_received = false;
-  do {
-    c->wait();
-    c->recv();
-    FawkesNetworkMessageQueue *q = c->inbound_queue();
-    q->lock();
-    while ( ! q->empty() ) {
-      FawkesNetworkMessage *msg = q->front();
-      if (msg->cid() == FAWKES_CID_PLUGINMANAGER) {
-	if ( msg->msgid() == MSG_PLUGIN_UNLOADED ) {
-	  if ( msg->payload_size() != sizeof(plugin_unloaded_msg_t) ) {
-	    printf("Invalid message size (unload succeeded)\n");
-	  } else {
-	    plugin_unloaded_msg_t *m = (plugin_unloaded_msg_t *)msg->payload();
-	    if ( strncmp(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH) == 0 ) {
-	      plugin_msg_received = true;
-	      printf("Unloading of %s succeeded\n", plugin_name);
-	    }
-	  }
-	} else if ( msg->msgid() == MSG_PLUGIN_UNLOAD_FAILED) {
-	  if ( msg->payload_size() != sizeof(plugin_unload_failed_msg_t) ) {
-	    printf("Invalid message size (unload failed)\n");
-	  } else {
-	    plugin_unload_failed_msg_t *m = (plugin_unload_failed_msg_t *)msg->payload();
-	    if ( strncmp(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH) == 0 ) {
-	      plugin_msg_received = true;
-	      printf("Unloading of %s failed, see log for reason\n", plugin_name);
-	    }
-	  }
-	} else {
-	  printf("Ignoring unrelated message\n");
-	}
-      }
-      msg->unref();
-      q->pop();
-    }
-    q->unlock();
-  } while ( ! plugin_msg_received );
+  while ( ! quit ) {
+    c->wait(FAWKES_CID_PLUGINMANAGER);
+  }
 }
 
 
@@ -204,28 +126,7 @@ void
 PluginTool::list()
 {
   // we got a list of loaded messages during startup, show them
-  c->wait();
-  c->recv();
-  FawkesNetworkMessageQueue *q = c->inbound_queue();
-  q->lock();
-  printf("%10s   %-40s\n", "Plugin ID", "Plugin Name");
-  while ( ! q->empty() ) {
-    FawkesNetworkMessage *msg = q->front();
-    if (msg->cid() == FAWKES_CID_PLUGINMANAGER) {
-      if ( msg->msgid() == MSG_PLUGIN_LOADED ) {
-	if ( msg->payload_size() != sizeof(plugin_loaded_msg_t) ) {
-	  printf("Invalid message size (load succeeded)\n");
-	} else {
-	  plugin_loaded_msg_t *m = (plugin_loaded_msg_t *)msg->payload();
-	  printf("%10u   %-40s\n", m->plugin_id, m->name);
-	}
-      } else if ( msg->msgid() == MSG_PLUGIN_NONE_LOADED ) {
-	printf("No plugins loaded\n");
-      }
-    }
-    q->pop();
-  }
-  q->unlock();
+  c->wait(FAWKES_CID_PLUGINMANAGER);
 }
 
 
@@ -236,34 +137,112 @@ PluginTool::watch()
   printf("Watching for plugin events\n");
   printf("%-10s   %-40s\n", "Event", "Plugin Name/ID");
   while ( ! quit ) {
-    c->wait();
-    c->recv();
-    FawkesNetworkMessageQueue *q = c->inbound_queue();
-    q->lock();
-    while ( ! q->empty() ) {
-      FawkesNetworkMessage *msg = q->front();
-      if (msg->cid() == FAWKES_CID_PLUGINMANAGER) {
-	if ( msg->msgid() == MSG_PLUGIN_LOADED ) {
-	  if ( msg->payload_size() != sizeof(plugin_loaded_msg_t) ) {
-	    printf("Invalid message size (load succeeded)\n");
-	  } else {
-	    plugin_loaded_msg_t *m = (plugin_loaded_msg_t *)msg->payload();
-	    printf("%-10s   %s (%u)\n", "loaded", m->name, m->plugin_id);
-	  }
-	} else if ( msg->msgid() == MSG_PLUGIN_UNLOADED ) {
-	  if ( msg->payload_size() != sizeof(plugin_unloaded_msg_t) ) {
-	    printf("Invalid message size (unload succeeded)\n");
-	  } else {
-	    plugin_unloaded_msg_t *m = (plugin_unloaded_msg_t *)msg->payload();
-	    printf("%-10s   %s\n", "unloaded", m->name);
-	  }
+    c->wait(FAWKES_CID_PLUGINMANAGER);
+  }
+}
+
+
+/** Handler has been deregistered.
+ */
+void
+PluginTool::deregistered()
+{
+  quit = true;
+}
+
+
+/** Inbound message received.
+ * @param msg message.
+ */
+void
+PluginTool::inboundReceived(FawkesNetworkMessage *msg)
+{
+  if (msg->cid() != FAWKES_CID_PLUGINMANAGER)  return;
+
+  switch (opmode) {
+  case M_LOAD:
+    if ( msg->msgid() == MSG_PLUGIN_LOADED ) {
+      if ( msg->payload_size() != sizeof(plugin_loaded_msg_t) ) {
+	printf("Invalid message size (load succeeded)\n");
+      } else {
+	plugin_loaded_msg_t *m = (plugin_loaded_msg_t *)msg->payload();
+	if ( strncmp(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH) == 0 ) {
+	  printf("Loading of %s succeeded\n", plugin_name);
+	  quit = true;
 	}
       }
-      msg->unref();
-      q->pop();
+    } else if ( msg->msgid() == MSG_PLUGIN_LOAD_FAILED) {
+      if ( msg->payload_size() != sizeof(plugin_load_failed_msg_t) ) {
+	printf("Invalid message size (load failed)\n");
+      } else {
+	plugin_load_failed_msg_t *m = (plugin_load_failed_msg_t *)msg->payload();
+	if ( strncmp(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH) == 0 ) {
+	  printf("Loading of %s failed, see log for reason\n", plugin_name);
+	  quit = true;
+	}
+      }
     }
-    q->unlock();
-    usleep(0);
+    break;
+
+  case M_UNLOAD:
+    if ( msg->msgid() == MSG_PLUGIN_UNLOADED ) {
+      if ( msg->payload_size() != sizeof(plugin_unloaded_msg_t) ) {
+	printf("Invalid message size (unload succeeded)\n");
+      } else {
+	plugin_unloaded_msg_t *m = (plugin_unloaded_msg_t *)msg->payload();
+	if ( strncmp(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH) == 0 ) {
+	  printf("Unloading of %s succeeded\n", plugin_name);
+	  quit = true;
+	}
+      }
+    } else if ( msg->msgid() == MSG_PLUGIN_UNLOAD_FAILED) {
+      if ( msg->payload_size() != sizeof(plugin_unload_failed_msg_t) ) {
+	printf("Invalid message size (unload failed)\n");
+      } else {
+	plugin_unload_failed_msg_t *m = (plugin_unload_failed_msg_t *)msg->payload();
+	if ( strncmp(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH) == 0 ) {
+	  printf("Unloading of %s failed, see log for reason\n", plugin_name);
+	  quit = true;
+	}
+      }
+    }
+    break;
+
+  case M_LIST:
+    if ( msg->msgid() == MSG_PLUGIN_LOADED ) {
+      if ( msg->payload_size() != sizeof(plugin_loaded_msg_t) ) {
+	printf("Invalid message size (load succeeded)\n");
+      } else {
+	if ( ! list_found ) {
+	  // first
+	  printf("%10s   %-40s\n", "Plugin ID", "Plugin Name");
+	  list_found = true;
+	}
+	plugin_loaded_msg_t *m = (plugin_loaded_msg_t *)msg->payload();
+	printf("%10u   %-40s\n", m->plugin_id, m->name);
+      }
+    } else if ( msg->msgid() == MSG_PLUGIN_NONE_LOADED ) {
+      printf("No plugins loaded\n");
+    }
+    break;
+
+  case M_WATCH:
+    if ( msg->msgid() == MSG_PLUGIN_LOADED ) {
+      if ( msg->payload_size() != sizeof(plugin_loaded_msg_t) ) {
+	printf("Invalid message size (load succeeded)\n");
+      } else {
+	plugin_loaded_msg_t *m = (plugin_loaded_msg_t *)msg->payload();
+	printf("%-10s   %s (%u)\n", "loaded", m->name, m->plugin_id);
+      }
+    } else if ( msg->msgid() == MSG_PLUGIN_UNLOADED ) {
+      if ( msg->payload_size() != sizeof(plugin_unloaded_msg_t) ) {
+	printf("Invalid message size (unload succeeded)\n");
+      } else {
+	plugin_unloaded_msg_t *m = (plugin_unloaded_msg_t *)msg->payload();
+	printf("%-10s   %s\n", "unloaded", m->name);
+      }
+    }
+    break;
   }
 }
 
@@ -272,6 +251,8 @@ PluginTool::watch()
 void
 PluginTool:: run()
 {
+  c->registerHandler(this, FAWKES_CID_PLUGINMANAGER);
+
   switch (opmode) {
   case M_LOAD:
     load();
@@ -289,4 +270,6 @@ PluginTool:: run()
     watch();
     break;
   }
+
+  c->deregisterHandler(FAWKES_CID_PLUGINMANAGER);
 }
