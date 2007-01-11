@@ -48,10 +48,13 @@ using namespace std;
  * @param interface_name name of the interface, should end with Interface
  * @param config_basename basename of the config without suffix
  * @param author author of interface
+ * @param year year of copyright
+ * @param creation_date user-supplied creation date of interface
  * @param data_comment comment in data block.
  */
 InterfaceGenerator::InterfaceGenerator(string directory, string interface_name,
 				       string config_basename, string author,
+				       string year, string creation_date,
 				       string data_comment)
 {
   this->dir    = directory;
@@ -59,7 +62,9 @@ InterfaceGenerator::InterfaceGenerator(string directory, string interface_name,
     dir += "/";
   }
   this->author = author;
-  this->data_comment = data_comment;
+  this->year   = year;
+  this->creation_date = creation_date;
+  this->data_comment  = data_comment;
   filename_cpp = config_basename + ".cpp";
   filename_h   = config_basename + ".h";
   filename_o   = config_basename + ".o";
@@ -170,9 +175,11 @@ InterfaceGenerator::write_header(FILE *f, string filename)
   fprintf(f, "\n/***************************************************************************\n");
   fprintf(f, " *  %s - Fawkes BlackBoard Interface - %s\n", filename.c_str(), class_name.c_str());
   fprintf(f, " *\n");
-  fprintf(f, " *  Interface generated: %s", gendate.c_str()); // gendate contains newline
+  if ( creation_date.length() > 0 ) {
+    fprintf(f, " *  Interface created: %s\n", creation_date.c_str());
+  }
   fprintf(f, " *  Templated created:   Thu Oct 12 10:49:19 2006\n");
-  fprintf(f, " *  Copyright  %u  %s\n", year,
+  fprintf(f, " *  Copyright  %s  %s\n", year.c_str(),
 	  ((author.length() > 0) ? author.c_str() : "AllemaniACs RoboCup Team") );
   fprintf(f, " *\n");
   fprintf(f, " *  $Id$\n");
@@ -685,8 +692,6 @@ InterfaceGenerator::generate()
   localtime_r(&t, &timestruct);
   asctime_r(&timestruct, timestring);
   gendate = timestring;
-
-  year = (timestruct.tm_year + 1900);
 
   FILE *cpp;
   FILE *h;

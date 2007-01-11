@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <!-- $Id$ -->
-<interface name="BlackBoardInternalsInterface" author="Tim Niemueller">
+<interface name="BlackBoardInternalsInterface" author="Tim Niemueller" year="2006-2007">
   <data>
     <comment>This interface gives access to BlackBoard internal data. It is used by
       management code in the BlackBoard to communicate required data. It can also be

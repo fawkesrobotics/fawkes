@@ -43,8 +43,8 @@ main(int argc, char **argv)
 {
   ArgumentParser *argp = new ArgumentParser(argc, argv, "d:");
 
-  vector<char *> *items = argp->getItems();
-  if ( items->size() == 0 ) {
+  vector<char *> & items = argp->getItems();
+  if ( items.size() == 0 ) {
     cout << "Usage: " << argv[0] << " [-d dir] config.xml [config2.xml...]" << endl << endl;
   } else {
     string dir = INTERFACEDIR;
@@ -52,7 +52,7 @@ main(int argc, char **argv)
       dir = argp->getArgument("d");
     }
 
-    for ( vector<char *>::iterator i = items->begin(); i != items->end(); ++i) {
+    for ( vector<char *>::iterator i = items.begin(); i != items.end(); ++i) {
       string s = *i;
       string prefix;
       unsigned int pos;
@@ -86,6 +86,8 @@ main(int argc, char **argv)
 							  iparse->getInterfaceName(),
 							  prefix,
 							  iparse->getInterfaceAuthor(),
+							  iparse->getInterfaceYear(),
+							  iparse->getInterfaceCreationDate(),
 							  iparse->getDataComment()
 							  );
 	igen->setConstants( iparse->getConstants() );

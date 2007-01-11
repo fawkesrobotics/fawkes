@@ -236,6 +236,14 @@ InterfaceParser::parse()
     if ( attr ) {
       author = attr->get_value();
     }
+    attr = el->get_attribute("year");
+    if ( attr ) {
+      year = attr->get_value();
+    }
+    attr = el->get_attribute("created");
+    if ( attr ) {
+      creation_date = attr->get_value();
+    }
   } else {
     throw InterfaceGeneratorInvalidContentException("root is not an element");
   }
@@ -515,6 +523,28 @@ std::string
 InterfaceParser::getInterfaceAuthor()
 {
   return author;
+}
+
+
+/** Get interface copyright year.
+ * Only valid after parse().
+ * @return interface copyright year
+ */
+std::string
+InterfaceParser::getInterfaceYear()
+{
+  return year;
+}
+
+
+/** Get interface creation date as string
+ * Only valid after parse().
+ * @return interface creation date
+ */
+std::string
+InterfaceParser::getInterfaceCreationDate()
+{
+  return creation_date;
 }
 
 

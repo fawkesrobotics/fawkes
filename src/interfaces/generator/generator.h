@@ -42,6 +42,7 @@ class InterfaceGenerator
  public:
   InterfaceGenerator(std::string directory, std::string interface_name,
 		     std::string config_basename, std::string author,
+		     std::string year, std::string creation_date,
 		     std::string data_comment);
   ~InterfaceGenerator();
 
@@ -101,8 +102,9 @@ class InterfaceGenerator
   std::string deflector;
   std::string gendate;
   std::string author;
+  std::string year;
+  std::string creation_date;
   std::string data_comment;
-  unsigned int year;
 };
 
 

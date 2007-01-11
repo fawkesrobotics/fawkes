@@ -59,6 +59,8 @@ class InterfaceParser
 
   std::string                         getInterfaceName();
   std::string                         getInterfaceAuthor();
+  std::string                         getInterfaceYear();
+  std::string                         getInterfaceCreationDate();
   std::vector<InterfaceConstant>      getConstants();
   std::vector<InterfaceEnumConstant>  getEnumConstants();
   std::vector<InterfaceField>         getDataFields();
@@ -70,6 +72,8 @@ class InterfaceParser
   xmlpp::Node      *root;
   std::string       name;
   std::string       author;
+  std::string       year;
+  std::string       creation_date;
   std::string       data_comment;
 
   std::vector<InterfaceConstant>     constants;

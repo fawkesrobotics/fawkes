@@ -23,7 +23,9 @@
 <!ELEMENT interface (constants?, data, message*)>
 <!ATTLIST interface
 	  name    CDATA  #REQUIRED
-	  author  CDATA  #IMPLIED>
+	  author  CDATA  #IMPLIED
+	  created CDATA  #IMPLIED
+	  year    CDATA  #IMPLIED>
 
   <!ELEMENT constants ((constant | enum)+)>
     <!ELEMENT constant (#PCDATA)>

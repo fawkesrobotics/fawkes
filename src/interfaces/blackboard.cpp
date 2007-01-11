@@ -2,9 +2,8 @@
 /***************************************************************************
  *  blackboard.cpp - Fawkes BlackBoard Interface - BlackBoardInternalsInterface
  *
- *  Interface generated: Tue Oct 31 16:26:20 2006
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2006  Tim Niemueller
+ *  Copyright  2006-2007  Tim Niemueller
  *
  *  $Id$
  *
