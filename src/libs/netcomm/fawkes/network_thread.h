@@ -62,6 +62,8 @@ class FawkesNetworkThread : public Thread, public FawkesNetworkEmitter
   void broadcast(FawkesNetworkMessage *msg);
   void send(FawkesNetworkMessage *msg);
 
+  void process();
+
  private:
   ThreadManager       *thread_manager;
 

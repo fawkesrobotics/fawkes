@@ -29,6 +29,7 @@
 #define __NETCOMM_FAWKES_MESSAGE_H_
 
 #include <core/utils/refcount.h>
+#include <core/exceptions/software.h>
 
 /** Fawkes network message header.
  * Header that is prepended to all following messages.
@@ -72,8 +73,11 @@ class FawkesNetworkMessage : public RefCount
 		       unsigned short int cid, unsigned short int msg_id);
   FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
 		       void *payload, unsigned int payload_size);
+  FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
+		       unsigned int payload_size);
   FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id);
   FawkesNetworkMessage();
+
   virtual ~FawkesNetworkMessage();
 
   unsigned int       clid() const;
@@ -81,7 +85,24 @@ class FawkesNetworkMessage : public RefCount
   unsigned short int msgid() const;
   unsigned int       payload_size() const;
   void *             payload() const;
-  const fawkes_message_t & msg() const;
+  const fawkes_message_t & fmsg() const;
+
+  /** Get correctly casted payload.
+   * Use this method to cast the payload to a specific type. The size is
+   * check as a sanity check and a TypeMismatchException is thrown if the
+   * size does not match.
+   * @return casted message
+   * @exception TypeMismatchException payload size does not match requested type
+   */
+  template <typename MT>
+    MT *
+    msg() const
+    {
+      if ( payload_size() != sizeof(MT) ) {
+	throw TypeMismatchException("FawkesNetworkMessage: message has incorrect size for this type");
+      }
+      return (MT *)(_msg.payload);
+    }
 
   void setClientID(unsigned int clid);
   void setComponentID(unsigned short int cid);
@@ -90,6 +111,9 @@ class FawkesNetworkMessage : public RefCount
   void set(fawkes_message_t &msg);
 
  private:
+  void init_cid_msgid(unsigned short int cid, unsigned short int msg_id);
+  void init_payload(unsigned int payload_size);
+
   unsigned int _clid;
   fawkes_message_t _msg;
 };

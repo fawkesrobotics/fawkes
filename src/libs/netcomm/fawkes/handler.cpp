@@ -44,17 +44,22 @@
  * It is guaranteed that the message will not be erased during the handleNetworkMessage()
  * run, but afterwards no guarantee is made. So if you want to store the message internally
  * for example for later processing you have to reference the message.
- */
-/** @fn void FawkesNetworkHandler::clientConnected(unsigned int clid) = 0
+ *
+ * @fn void FawkesNetworkHandler::clientConnected(unsigned int clid) = 0
  * Called when a new client connected. If any actions need to be taken on your side this
  * is the place to do it.
  * @param clid client ID of new client
- */
-
-/** @fn void FawkesNetworkHandler::clientDisconnected(unsigned int clid) = 0
+ *
+ * @fn void FawkesNetworkHandler::clientDisconnected(unsigned int clid) = 0
  * Called when a client disconnected. If any actions need to be taken on your side this
  * is the place to do it. Note that you cannot send any further messages to this client!
  * @param clid client ID of disconnected client
+ *
+ * @fn void FawkesNetworkHandler::processAfterLoop()
+ * Executed after main loop.
+ * Put all final message processing in this method. It is called when there is time
+ * to handle the messages and after the main loop thus that actions here do not
+ * interfere with the rest of the program.
  */
 
 /** Constructor.

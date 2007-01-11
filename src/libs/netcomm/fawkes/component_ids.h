@@ -50,6 +50,8 @@
 // BlackBoard: blackboard/network_handler.h
 #define FAWKES_CID_BLACKBOARD            2
 
+// ConfigManager: mainapp/config_manager.h
+#define FAWKES_CID_CONFIGMANAGER         3
 
 
 /* **** Normal component CIDs **** */

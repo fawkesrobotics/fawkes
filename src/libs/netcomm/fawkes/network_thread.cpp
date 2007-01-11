@@ -235,3 +235,14 @@ FawkesNetworkThread::dispatch(FawkesNetworkMessage *msg)
   msg->ref();
   inbound_messages->push_locked(msg);
 }
+
+
+/** Call handler processing methods.
+ */
+void
+FawkesNetworkThread::process()
+{
+  for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
+    (*hit).second->processAfterLoop();
+  }
+}

@@ -56,6 +56,7 @@ class FawkesNetworkHandler
   virtual void handleNetworkMessage(FawkesNetworkMessage *msg)                = 0;
   virtual void clientConnected(unsigned int clid)                             = 0;
   virtual void clientDisconnected(unsigned int clid)                          = 0;
+  virtual void processAfterLoop()                                             = 0;
 
  protected:
   FawkesNetworkEmitter *emitter;

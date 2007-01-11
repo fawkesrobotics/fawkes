@@ -28,13 +28,27 @@
 #ifndef __NETCOMM_FAWKES_CLIENT_H_
 #define __NETCOMM_FAWKES_CLIENT_H_
 
+#include <core/threading/thread.h>
+#include <core/exception.h>
+
 #include <netcomm/fawkes/message_queue.h>
 #include <netcomm/fawkes/message.h>
 #include <netcomm/fawkes/component_ids.h>
 
-class StreamSocket;
+#include <map>
 
-class FawkesNetworkClient
+class StreamSocket;
+class Mutex;
+class WaitCondition;
+class FawkesNetworkClientHandler;
+
+class HandlerAlreadyRegisteredException : public Exception
+{
+ public:
+  HandlerAlreadyRegisteredException();
+};
+
+class FawkesNetworkClient : public Thread
 {
  public:
   FawkesNetworkClient(const char *host, unsigned short int port);
@@ -44,16 +58,26 @@ class FawkesNetworkClient
   void disconnect();
 
   void enqueue(FawkesNetworkMessage *message);
-  void send();
-  void recv();
-  void set_nodelay(bool nodelay);
+  void setNoDelay(bool nodelay);
   bool nodelay();
 
-  void wait();
+  void wait(unsigned int component_id);
+  void wake(unsigned int component_id);
+
+  void loop();
+
+  void registerHandler(FawkesNetworkClientHandler *handler, unsigned int component_id);
+  void deregisterHandler(unsigned int component_id);
+
+  void setWaitTimeout(unsigned int wait_timeout);
+
+ private:
+  void send();
+  void recv();
+  void sleep();
 
   FawkesNetworkMessageQueue *  inbound_queue();
 
- private:
   const char *hostname;
   unsigned short int port;
 
@@ -61,9 +85,15 @@ class FawkesNetworkClient
   unsigned int buffer_size;
 
   StreamSocket *s;
+  unsigned int wait_timeout;
+
+  Mutex *mutex;
 
   FawkesNetworkMessageQueue *  inbound_msgq;
   FawkesNetworkMessageQueue *  outbound_msgq;
+
+  std::map<unsigned int, FawkesNetworkClientHandler *> handlers;
+  std::map<unsigned int, WaitCondition *> waitconds;
 };
 
 

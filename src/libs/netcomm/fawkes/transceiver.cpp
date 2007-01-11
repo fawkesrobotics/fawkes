@@ -77,7 +77,7 @@ FawkesNetworkTransceiver::send(StreamSocket *s, FawkesNetworkMessageQueue *msgq,
       // we put messages into the buffer until the buffer size is reached, then we
       // write it
       FawkesNetworkMessage *m = msgq->front();
-      const fawkes_message_t &f = m->msg();
+      const fawkes_message_t &f = m->fmsg();
       unsigned int payload_size = m->payload_size();
       if ( (sizeof(fawkes_transfer_header_t) + cur_size + sizeof(fawkes_message_t) + payload_size) > buffer_size ) {
 	// flush buffer
@@ -103,7 +103,7 @@ FawkesNetworkTransceiver::send(StreamSocket *s, FawkesNetworkMessageQueue *msgq,
     }
   } catch (SocketException &e) {
     msgq->unlock();
-    throw ConnectionDiedException("Read failed");
+    throw ConnectionDiedException("Write failed");
   }
   msgq->unlock();
 }

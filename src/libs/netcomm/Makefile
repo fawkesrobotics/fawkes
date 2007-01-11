@@ -52,6 +52,8 @@ OBJS_libnetcomm =					\
 		  socket/socket.o			\
 		  socket/stream.o
 
+#		  socket/datagram_multicast.o		\
+
 OBJS_all = $(OBJS_libnetcomm)
 LIBS_all  = $(LIBDIR)/libnetcomm.so
 
