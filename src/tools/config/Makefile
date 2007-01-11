@@ -1,7 +1,7 @@
 #*****************************************************************************
-#                   Makefile Build System for Fawkes: tools
+#            Makefile Build System for Fawkes : Plugin Tool
 #                            -------------------
-#   Created on Tue Nov 21 18:36:28 2006
+#   Created on Wed Nov 22 00:29:31 2006
 #   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -17,12 +17,16 @@
 # last modified: $Date$
 #            by: $Author$
 #
-#*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 
-SUBDIRS = plugin config
+CFLAGS = -g
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
+LIBS_config = core utils config
+OBJS_config = main.o
+
+OBJS_all =	$(OBJS_config)
+BINS_all =	$(BINDIR)/config
+
+include $(BASEDIR)/etc/buildsys/base.mk
 
