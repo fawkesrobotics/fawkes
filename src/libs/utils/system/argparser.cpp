@@ -178,10 +178,10 @@ ArgumentParser::getArgument(std::string arg, char **value)
  * @return pointer to vector of pointer to non-argument values. Handled internally,
  * do not free or delete!
  */
-std::vector< char* > *
+std::vector< char* > &
 ArgumentParser::getItems()
 {
-  return &items;
+  return items;
 }
 
 

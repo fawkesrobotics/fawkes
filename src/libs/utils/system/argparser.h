@@ -73,7 +73,7 @@ class ArgumentParser
   bool getArgument(std::string arg, char **value);
   std::string getProgramName();
 
-  std::vector< char* > * getItems();
+  std::vector< char* > & getItems();
 
   int      getArgC();
   char **  getArgV();
