@@ -33,7 +33,7 @@
 
 #include <map>
 
-class ThreadManager;
+class ThreadCollector;
 class Mutex;
 class WaitCondition;
 class FawkesNetworkClientThread;
@@ -45,7 +45,7 @@ class FawkesNetworkMessageQueue;
 class FawkesNetworkThread : public Thread, public FawkesNetworkEmitter
 {
  public:
-  FawkesNetworkThread(ThreadManager *thread_manager,
+  FawkesNetworkThread(ThreadCollector *thread_collector,
 		      unsigned int fawkes_port);
   virtual ~FawkesNetworkThread();
 
@@ -65,7 +65,7 @@ class FawkesNetworkThread : public Thread, public FawkesNetworkEmitter
   void process();
 
  private:
-  ThreadManager       *thread_manager;
+  ThreadCollector     *thread_collector;
 
   Mutex               *handlers_mutex;
   Mutex               *clients_mutex;

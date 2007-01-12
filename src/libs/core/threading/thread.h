@@ -62,10 +62,14 @@ class Thread {
   void wakeup();
   void wakeup(Barrier *barrier);
 
-  OpMode opmode() const;
+  OpMode        opmode() const;
+  const char *  name() const;
 
  protected:
-  Thread(OpMode op_mode = OPMODE_CONTINUOUS);
+  Thread();
+  Thread(const char *name);
+  Thread(OpMode op_mode);
+  Thread(const char *name, OpMode op_mode);
   void exit();
 
   void test_cancel();
@@ -76,6 +80,7 @@ class Thread {
 
  private:
   static void * entry(void * pthis);
+  void init(const char *name, OpMode op_mode);
 
   // Do not use pthread_t here to avoid including pthread.h
   /* pthread_t */ unsigned long int thread_id;
@@ -83,6 +88,8 @@ class Thread {
   Mutex         *sleep_mutex;
   WaitCondition *sleep_condition;
   Barrier       *barrier;
+
+  const char    *_name;
 
   bool           cancelled;
 

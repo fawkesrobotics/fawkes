@@ -1,9 +1,10 @@
 
 /***************************************************************************
- *  thread_initializer.h - Fawkes thread initializer
+ *  thread_collector.h - Fawkes thread collector interface
+ *                       based on previous ThreadManager
  *
- *  Created: Thu Nov 20 00:47:12 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jan 11 17:53:44 2007
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,26 +26,23 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FAWKES_THREAD_INITIALIZER_H_
-#define __FAWKES_THREAD_INITIALIZER_H_
+#ifndef __CORE_THREADING_THREAD_COLLECTOR_H_
+#define __CORE_THREADING_THREAD_COLLECTOR_H_
 
-#include <core/threading/thread_initializer.h>
-
-class BlackBoard;
-class Configuration;
 class Thread;
+class ThreadList;
 
-class FawkesThreadInitializer : public ThreadInitializer
+class ThreadCollector
 {
  public:
-  FawkesThreadInitializer(BlackBoard *blackboard, Configuration *config);
+  virtual ~ThreadCollector();
 
-  virtual void init(Thread *thread);
+  virtual void add(ThreadList &tl)                                      = 0;
+  virtual void add(Thread *t)                                           = 0;
 
- private:
-  BlackBoard     *blackboard;
-  Configuration  *config;
+  virtual void remove(ThreadList &tl)                                   = 0;
+  virtual void remove(Thread *t)                                        = 0;
+
 };
-
 
 #endif

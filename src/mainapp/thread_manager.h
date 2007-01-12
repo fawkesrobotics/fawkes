@@ -25,39 +25,33 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __CORE_THREADING_THREAD_MANAGER_H_
-#define __CORE_THREADING_THREAD_MANAGER_H_
+#ifndef __FAWKES_THREAD_MANAGER_H_
+#define __FAWKES_THREAD_MANAGER_H_
 
 #include <core/threading/thread_list.h>
-#include <core/threading/fawkes_thread.h>
+#include <core/threading/thread_collector.h>
 #include <core/exception.h>
+#include <aspect/blocked_timing.h>
 
 #include <map>
 
 class Barrier;
 class ThreadInitializer;
 
-class InvalidWakeupHookException : public Exception
+class FawkesThreadManager : public ThreadCollector
 {
  public:
-  InvalidWakeupHookException()
-    : Exception("The WAKEUP_HOOK_NONE wakeup hook cannot be woken up!") {};
-};
+  FawkesThreadManager(ThreadInitializer *initializer);
+  virtual ~FawkesThreadManager();
 
-class ThreadManager
-{
- public:
-  ThreadManager(ThreadInitializer *initializer);
-  ~ThreadManager();
+  virtual void add(ThreadList &tl);
+  virtual void add(Thread *t);
 
-  void add(ThreadList &tl);
-  void add(Thread *t);
+  virtual void remove(ThreadList &tl);
+  virtual void remove(Thread *t);
 
-  void remove(ThreadList &tl);
-  void remove(Thread *t);
-
-  void wakeup(FawkesThread::WakeupHook hook);
-  void wait(FawkesThread::WakeupHook hook);
+  void wakeup(BlockedTimingAspect::WakeupHook hook);
+  void wait(BlockedTimingAspect::WakeupHook hook);
 
  private:
   void start(ThreadList &tl);
@@ -65,11 +59,12 @@ class ThreadManager
 
   ThreadInitializer *initializer;
 
-  std::map< FawkesThread::WakeupHook, ThreadList > threads;
-  std::map< FawkesThread::WakeupHook, ThreadList >::iterator tit;
+  std::map< BlockedTimingAspect::WakeupHook, ThreadList > threads;
+  std::map< BlockedTimingAspect::WakeupHook, ThreadList >::iterator tit;
 
-  std::map< FawkesThread::WakeupHook, Barrier * >  barriers;
+  std::map< BlockedTimingAspect::WakeupHook, Barrier * >  barriers;
 
+  ThreadList untimed_threads;
 };
 
 #endif

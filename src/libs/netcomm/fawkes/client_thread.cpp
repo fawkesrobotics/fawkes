@@ -46,6 +46,7 @@
  */
 FawkesNetworkClientThread::FawkesNetworkClientThread(StreamSocket *s,
 						     FawkesNetworkThread *parent)
+  : Thread("FawkesNetworkClientThread")
 {
   this->s = s;
   this->parent = parent;

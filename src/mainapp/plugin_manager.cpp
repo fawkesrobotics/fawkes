@@ -27,7 +27,8 @@
 
 #include <mainapp/plugin_manager.h>
 #include <mainapp/plugin_messages.h>
-#include <core/threading/thread_manager.h>
+#include <mainapp/thread_manager.h>
+#include <core/threading/thread_initializer.h>
 #include <core/plugin.h>
 #include <utils/plugin/plugin_loader.h>
 
@@ -49,7 +50,7 @@
  * @param thread_manager thread manager plugin threads will be added to
  * and removed from appropriately.
  */
-FawkesPluginManager::FawkesPluginManager(ThreadManager *thread_manager)
+FawkesPluginManager::FawkesPluginManager(FawkesThreadManager *thread_manager)
   : FawkesNetworkHandler(FAWKES_CID_PLUGINMANAGER)
 {
   plugins.clear();
@@ -86,9 +87,17 @@ FawkesPluginManager::load(const char *plugin_type)
   try {
     Plugin *plugin = plugin_loader->load(plugin_type);
     plugins_mutex->lock();
-    plugins[plugin_type] = plugin;
-    plugin_ids[plugin_type] = next_plugin_id++;
-    thread_manager->add(plugin->threads());
+    try {
+      thread_manager->add(plugin->threads());
+      plugins[plugin_type] = plugin;
+      plugin_ids[plugin_type] = next_plugin_id++;
+    } catch (CannotInitializeThreadException &e) {
+      e.printTrace();
+      printf("Could not initialise one or more threads of plugin %s, unloading plugin", plugin_type);
+      plugins_mutex->unlock();
+      plugin_loader->unload(plugin);
+      throw;
+    }
     plugins_mutex->unlock();
   } catch (Exception &e) {
     throw;
@@ -138,11 +147,11 @@ FawkesPluginManager::processAfterLoop()
 	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
 	  r->plugin_id = plugin_ids[name];
 	  broadcast(MSG_PLUGIN_LOADED, r, sizeof(plugin_loaded_msg_t));
-	} catch (PluginNotFoundException &e) {
+	} catch (Exception &e) {
 	  plugin_load_failed_msg_t *r = (plugin_load_failed_msg_t *)calloc(1, sizeof(plugin_load_failed_msg_t));
 	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
 	  send(msg->clid(), MSG_PLUGIN_LOAD_FAILED, r, sizeof(plugin_load_failed_msg_t));
-	  printf("FawkesPluginManager::load: Plugin %s could not be found\n", name);
+	  printf("FawkesPluginManager::load: Plugin %s could not be loaded\n", name);
 	}
       }
       break;
@@ -156,15 +165,16 @@ FawkesPluginManager::processAfterLoop()
 	name[PLUGIN_MSG_NAME_LENGTH] = 0;
 	strncpy(name, m->name, PLUGIN_MSG_NAME_LENGTH);
 	try {
+	  printf("Unloading %s\n", name);
 	  unload(name);
 	  plugin_unloaded_msg_t *r = (plugin_unloaded_msg_t *)calloc(1, sizeof(plugin_unloaded_msg_t));
 	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
 	  broadcast(MSG_PLUGIN_UNLOADED, r, sizeof(plugin_unloaded_msg_t));
-	} catch (PluginNotFoundException &e) {
+	} catch (Exception &e) {
 	  plugin_unload_failed_msg_t *r = (plugin_unload_failed_msg_t *)calloc(1, sizeof(plugin_unload_failed_msg_t));
 	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
 	  send(msg->clid(), MSG_PLUGIN_UNLOAD_FAILED, r, sizeof(plugin_unload_failed_msg_t));
-	  printf("FawkesPluginManager::unload: Plugin %s could not be found\n", name);
+	  printf("FawkesPluginManager::unload: Plugin %s could not be loaded\n", name);
 	}
       }
       break;

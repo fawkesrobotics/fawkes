@@ -27,16 +27,16 @@
 
 #include <mainapp/main_thread.h>
 
-#include <core/threading/thread_manager.h>
-
 #include <config/sqlite.h>
 #include <utils/system/argparser.h>
+#include <utils/system/hostinfo.h>
 
 #include <blackboard/blackboard.h>
 #include <mainapp/thread_initializer.h>
 #include <mainapp/plugin_manager.h>
 #include <mainapp/network_manager.h>
 #include <mainapp/config_manager.h>
+#include <mainapp/thread_manager.h>
 
 #include <stdio.h>
 
@@ -53,17 +53,20 @@
  * @param argp argument parser
  */
 FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
+  : Thread("FawkesMainThread")
 {
-  /* Config stuff */
-  const char *config_mutable_file;
-  const char *config_default_file;
+  hostinfo = new HostInfo();
 
+  /* Config stuff */
   config             = new SQLiteConfiguration(CONFDIR);
 
   if ( argp->hasArgument("c") ) {
-    config_mutable_file = argp->getArgument("c");
+    config_mutable_file = strdup(argp->getArgument("c"));
   } else {
-    config_mutable_file = "config.db";
+    if ( asprintf(&config_mutable_file, "%s.db", hostinfo->short_name()) == -1 ) {
+      config_mutable_file = strdup(hostinfo->short_name());
+      printf("WARNING: could not asprintf local config file name, using short hostname\n");
+    }
   }
   if ( argp->hasArgument("d") ) {
     config_default_file = argp->getArgument("d");
@@ -73,8 +76,8 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   config->load(config_mutable_file, config_default_file);
   config_manager     = new FawkesConfigManager(config);
   blackboard         = new BlackBoard();
-  thread_initializer = new FawkesThreadInitializer(blackboard);
-  thread_manager     = new ThreadManager(thread_initializer);
+  thread_initializer = new FawkesThreadInitializer(blackboard, config);
+  thread_manager     = new FawkesThreadManager(thread_initializer);
   plugin_manager     = new FawkesPluginManager(thread_manager);
   network_manager    = new FawkesNetworkManager(thread_manager, 1910);
 
@@ -93,6 +96,8 @@ FawkesMainThread::~FawkesMainThread()
   delete blackboard;
   delete config_manager;
   delete config;
+  delete hostinfo;
+  free(config_mutable_file);
 }
 
 
@@ -102,26 +107,29 @@ FawkesMainThread::~FawkesMainThread()
 void
 FawkesMainThread::loop()
 {
-  thread_manager->wakeup( FawkesThread::WAKEUP_HOOK_PRE_LOOP );
-  thread_manager->wait(   FawkesThread::WAKEUP_HOOK_PRE_LOOP );
+  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
+  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
 
-  thread_manager->wakeup( FawkesThread::WAKEUP_HOOK_SENSOR );
-  thread_manager->wait(   FawkesThread::WAKEUP_HOOK_SENSOR );
+  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
+  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
 
-  thread_manager->wakeup( FawkesThread::WAKEUP_HOOK_WORLDSTATE );
-  thread_manager->wait(   FawkesThread::WAKEUP_HOOK_WORLDSTATE );
+  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
+  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
 
-  thread_manager->wakeup( FawkesThread::WAKEUP_HOOK_THINK );
-  thread_manager->wait(   FawkesThread::WAKEUP_HOOK_THINK );
+  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_THINK );
+  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_THINK );
 
-  thread_manager->wakeup( FawkesThread::WAKEUP_HOOK_SKILL );
-  thread_manager->wait(   FawkesThread::WAKEUP_HOOK_SKILL );
+  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_SKILL );
+  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_SKILL );
 
-  thread_manager->wakeup( FawkesThread::WAKEUP_HOOK_ACT );
-  thread_manager->wait(   FawkesThread::WAKEUP_HOOK_ACT );
+  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_ACT );
+  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_ACT );
 
-  thread_manager->wakeup( FawkesThread::WAKEUP_HOOK_POST_LOOP );
-  thread_manager->wait(   FawkesThread::WAKEUP_HOOK_POST_LOOP );
+  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
+  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
 
   network_manager->process();
+
+  test_cancel();
+  usleep(0);
 }

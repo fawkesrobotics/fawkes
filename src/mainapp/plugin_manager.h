@@ -35,7 +35,7 @@
 #include <string>
 #include <utility>
 
-class ThreadManager;
+class FawkesThreadManager;
 class Plugin;
 class PluginLoader;
 class Mutex;
@@ -43,7 +43,7 @@ class Mutex;
 class FawkesPluginManager : public FawkesNetworkHandler
 {
  public:
-  FawkesPluginManager(ThreadManager *thread_manager);
+  FawkesPluginManager(FawkesThreadManager *thread_manager);
   ~FawkesPluginManager();
 
   void load(const char *plugin_type);
@@ -55,8 +55,8 @@ class FawkesPluginManager : public FawkesNetworkHandler
   virtual void processAfterLoop();
 
  private:
-  ThreadManager  *thread_manager;
-  PluginLoader   *plugin_loader;
+  FawkesThreadManager  *thread_manager;
+  PluginLoader         *plugin_loader;
 
   Mutex *plugins_mutex;
 

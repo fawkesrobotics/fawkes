@@ -27,6 +27,9 @@
 
 #include <plugins/example/thread.h>
 
+#include <stdio.h>
+#include <unistd.h>
+
 /** @class ExampleThread plugins/example/thread.h
  * Thread of example plugin.
  * @author Tim Niemueller
@@ -37,11 +40,11 @@
  * @param name thread name
  * @param modc modulo count, every modc iterations a message is printed to stdout
  */
-ExampleThread::ExampleThread(FawkesThread::WakeupHook hook, const char *name,
+ExampleThread::ExampleThread(BlockedTimingAspect::WakeupHook hook, const char *name,
 			     unsigned int modc)
+  : Thread(name, Thread::OPMODE_WAITFORWAKEUP)
 {
   _hook = hook;
-  _name = name;
   this->modc = modc;
   m = 0;
 }
@@ -56,22 +59,12 @@ ExampleThread::~ExampleThread()
 /** Wakeup hook to register for.
  * @return hook when to wakeup this thread
  */
-FawkesThread::WakeupHook
-ExampleThread::hook() const
+BlockedTimingAspect::WakeupHook
+ExampleThread::blocked_timing_hook() const
 {
   return _hook;
 }
 
-
-
-/** Get name of thread.
- * @return name of thread.
- */
-const char *
-ExampleThread::name() const
-{
-  return _name;
-}
 
 
 /** Thread loop.
@@ -81,7 +74,8 @@ void
 ExampleThread::loop()
 {
   if ( (m % modc) == 0 ) {
-    printf("ExampleThread %s called %u times\n", _name, m);
+    printf("ExampleThread %s called %u times\n", name(), m);
   }
   ++m;
+  usleep(0);
 }

@@ -39,25 +39,25 @@
  */
 
 /** Modulo count */
-#define MODC 10
+#define MODC 100
 
 /** Constructor. */
 ExamplePlugin::ExamplePlugin()
 {
   printf("ExamplePlugin constructor called\n");
-  thread_list.push_back(new ExampleThread(FawkesThread::WAKEUP_HOOK_PRE_LOOP,
+  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,
 					  "PreLoopThread", MODC));
-  thread_list.push_back(new ExampleThread(FawkesThread::WAKEUP_HOOK_SENSOR,
+  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_SENSOR,
 					  "SensorThread", MODC));
-  thread_list.push_back(new ExampleThread(FawkesThread::WAKEUP_HOOK_WORLDSTATE,
+  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,
 					  "WorldStateThread", MODC));
-  thread_list.push_back(new ExampleThread(FawkesThread::WAKEUP_HOOK_THINK,
+  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_THINK,
 					  "ThinkThread", MODC));
-  thread_list.push_back(new ExampleThread(FawkesThread::WAKEUP_HOOK_SKILL,
+  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_SKILL,
 					  "SkillThread", MODC));
-  thread_list.push_back(new ExampleThread(FawkesThread::WAKEUP_HOOK_ACT,
+  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_ACT,
 					  "ActThread", MODC));
-  thread_list.push_back(new ExampleThread(FawkesThread::WAKEUP_HOOK_POST_LOOP,
+  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,
 					  "PostLoopThread", MODC));
 }
 

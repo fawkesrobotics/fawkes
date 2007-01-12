@@ -3,7 +3,7 @@
  *  thread_initializer.h - Thread initializer interface
  *
  *  Created: Mon Nov 20 00:52:18 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -28,29 +28,21 @@
 #ifndef __CORE_THREADING_THREAD_INITIALIZER_H_
 #define __CORE_THREADING_THREAD_INITIALIZER_H_
 
+#include <core/exception.h>
+
 class Thread;
 
-/** @class ThreadInitializer core/threading/thread_initializer.h
- * Thread initializer interface.
- * This interface is used by the ThreadManager. The init() method is called
- * for each added thread. If there are any special needs that have to be
- * initialized before the thread is started on the given real classes of
- * the thread this is the way to do it. See Fawkes main application for
- * an example.
- *
- * @author Tim Niemueller
- */
+class CannotInitializeThreadException : public Exception
+{
+ public:
+  CannotInitializeThreadException(const char *msg);
+};
 
 class ThreadInitializer
 {
  public:
-  /** Virtual empty destructor. */
-  virtual ~ThreadInitializer() {}
+  virtual ~ThreadInitializer();
 
-  /** Thread initializer method.
-   * This method is called by the ThreadManager for each newly added Thread.
-   * @param thread thread to initialize.
-   */
   virtual void init(Thread *thread) = 0;
 };
 

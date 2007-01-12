@@ -28,26 +28,28 @@
 #include <mainapp/thread_initializer.h>
 #include <core/threading/thread.h>
 #include <blackboard/blackboard.h>
-#include <blackboard/bbthread.h>
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
 
 /** @class FawkesThreadInitializer mainapp/thread_initializer.h
  * Fawkes Thread Initializer.
  * Initializes threads that are added to the thread manager if needed.
- * Some special thread types are recognized and appropriately
- * initialized. These types are:
- * - BlackBoardThread
- *   The interface manager is set for this type of threads. It is guaranteed
- *   that this happens before the thread is started.
- *
+ * All aspects defined in the Fawkes tree are supported and properly
+ * initialized such that guarantees are met.
+ * @see Aspects
  * @author Tim Niemueller
  */
 
 /** Constructor.
  * @param blackboard BlackBoard
+ * @param config Configuration
  */
-FawkesThreadInitializer::FawkesThreadInitializer(BlackBoard *blackboard)
+FawkesThreadInitializer::FawkesThreadInitializer(BlackBoard *blackboard,
+						 Configuration *config)
 {
   this->blackboard = blackboard;
+  this->config     = config;
 }
 
 
@@ -57,8 +59,23 @@ FawkesThreadInitializer::FawkesThreadInitializer(BlackBoard *blackboard)
 void
 FawkesThreadInitializer::init(Thread *thread)
 {
-  BlackBoardThread *bb_thread;
-  if ( (bb_thread = dynamic_cast<BlackBoardThread *>(thread)) != NULL ) {
-    bb_thread->setInterfaceManager( blackboard->getInterfaceManager() );
+  // printf("Initializing thread %s\n", thread->name());
+
+  BlockedTimingAspect *blocked_timing_thread;
+  if ( (blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread)) != NULL ) {
+    if ( thread->opmode() != Thread::OPMODE_WAITFORWAKEUP ) {
+      throw CannotInitializeThreadException("Thread not in WAITFORWAKEUP mode (required for BlockedTimingAspect)");
+    }
   }
+
+  BlackBoardAspect *blackboard_thread;
+  if ( (blackboard_thread = dynamic_cast<BlackBoardAspect *>(thread)) != NULL ) {
+    blackboard_thread->setInterfaceManager( blackboard->getInterfaceManager() );
+  }
+
+  ConfigurableAspect *configurable_thread;
+  if ( (configurable_thread = dynamic_cast<ConfigurableAspect *>(thread)) != NULL ) {
+    configurable_thread->setConfiguration(config);
+  }
+
 }

@@ -31,7 +31,7 @@
 #include <netcomm/fawkes/message.h>
 #include <netcomm/fawkes/handler.h>
 #include <netcomm/fawkes/message_queue.h>
-#include <core/threading/thread_manager.h>
+#include <core/threading/thread_collector.h>
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
 
@@ -46,13 +46,14 @@
  */
 
 /** Constructor.
- * @param thread_manager thread manager to register new threads with
+ * @param thread_collector thread collector to register new threads with
  * @param fawkes_port port for Fawkes network protocol
  */
-FawkesNetworkThread::FawkesNetworkThread(ThreadManager *thread_manager,
+FawkesNetworkThread::FawkesNetworkThread(ThreadCollector *thread_collector,
 					 unsigned int fawkes_port)
+  : Thread("FawkesNetworkThread")
 {
-  this->thread_manager = thread_manager;
+  this->thread_collector = thread_collector;
   clients.clear();
   next_client_id = 1;
   clients_mutex = new Mutex();
@@ -62,7 +63,7 @@ FawkesNetworkThread::FawkesNetworkThread(ThreadManager *thread_manager,
   inbound_messages = new FawkesNetworkMessageQueue();
 
   acceptor_thread = new FawkesNetworkAcceptorThread(this, fawkes_port);
-  thread_manager->add(acceptor_thread);
+  thread_collector->add(acceptor_thread);
 
 }
 
@@ -71,10 +72,10 @@ FawkesNetworkThread::FawkesNetworkThread(ThreadManager *thread_manager,
 FawkesNetworkThread::~FawkesNetworkThread()
 {
   for (cit = clients.begin(); cit != clients.end(); ++cit) {
-    thread_manager->remove((*cit).second);
+    thread_collector->remove((*cit).second);
     delete (*cit).second;
   }
-  thread_manager->remove(acceptor_thread);
+  thread_collector->remove(acceptor_thread);
   delete acceptor_thread;
 
   delete inbound_messages;
@@ -95,7 +96,7 @@ FawkesNetworkThread::add_client(FawkesNetworkClientThread *client)
 {
   clients_mutex->lock();
   client->setClientID(next_client_id);
-  thread_manager->add(client);
+  thread_collector->add(client);
   clients[next_client_id] = client;
   for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
     (*hit).second->clientConnected(next_client_id);
@@ -150,7 +151,7 @@ FawkesNetworkThread::loop()
   cit = clients.begin();
   while (cit != clients.end()) {
     if ( ! (*cit).second->alive() ) {
-      thread_manager->remove((*cit).second);
+      thread_collector->remove((*cit).second);
       delete (*cit).second;
       unsigned int clid = (*cit).first;
       ++cit;

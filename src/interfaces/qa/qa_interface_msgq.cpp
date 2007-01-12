@@ -27,7 +27,7 @@
 
 /// @cond QA
 
-#include <interfaces/message_queue.h>
+#include <interface/message_queue.h>
 #include <iostream>
 
 #include <interfaces/test.h>

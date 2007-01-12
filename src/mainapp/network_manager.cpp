@@ -27,7 +27,7 @@
 
 #include <mainapp/network_manager.h>
 
-#include <core/threading/thread_manager.h>
+#include <mainapp/thread_manager.h>
 #include <netcomm/fawkes/network_thread.h>
 #include <netcomm/fawkes/handler.h>
 #include <netcomm/dns-sd/avahi_thread.h>
@@ -43,7 +43,7 @@
  * @param thread_manager thread manager that threads shall be registered to
  * @param fawkes_port port to listen on for Fawkes network connections
  */
-FawkesNetworkManager::FawkesNetworkManager(ThreadManager *thread_manager,
+FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
 					   unsigned short int fawkes_port)
 {
   this->fawkes_port    = fawkes_port;

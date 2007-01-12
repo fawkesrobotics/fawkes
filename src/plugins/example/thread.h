@@ -28,24 +28,22 @@
 #ifndef __PLUGINS_EXAMPLE_THREAD_H_
 #define __PLUGINS_EXAMPLE_THREAD_H_
 
-#include <core/threading/fawkes_thread.h>
-#include <core/threading/thread_list.h>
+#include <core/threading/thread.h>
+#include <aspect/blocked_timing.h>
 
-class ExampleThread : public FawkesThread {
+class ExampleThread : public Thread, public BlockedTimingAspect
+{
 
  public:
-  ExampleThread(FawkesThread::WakeupHook hook, const char *name, unsigned int modc);
+  ExampleThread(BlockedTimingAspect::WakeupHook hook, const char *name, unsigned int modc);
   virtual ~ExampleThread();
 
-  virtual FawkesThread::WakeupHook hook() const;
-  virtual const char *             name() const;
+  virtual BlockedTimingAspect::WakeupHook blocked_timing_hook() const;
 
-  virtual void                     loop();
+  virtual void loop();
 
  private:
-  ThreadList thread_list;
-  FawkesThread::WakeupHook _hook;
-  const char *_name;
+  BlockedTimingAspect::WakeupHook _hook;
   unsigned int m;
   unsigned int modc;
 };

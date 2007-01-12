@@ -33,6 +33,7 @@
 
 #include <pthread.h>
 #include <unistd.h>
+#include <typeinfo>
 
 /** @def forever
  * Shortcut for "while (1)".
@@ -71,6 +72,15 @@
  */
 
 
+/** Default Constructor.
+ * This constructor is protected so that Thread cannot be instantiated. This
+ * constructor initalizes a few internal variables.
+ */
+Thread::Thread()
+{
+  init(NULL, OPMODE_CONTINUOUS);
+}
+
 /** Constructor.
  * This constructor is protected so that Thread cannot be instantiated. This
  * constructor initalizes a few internal variables.
@@ -78,7 +88,44 @@
  */
 Thread::Thread(OpMode op_mode)
 {
+  init(NULL, op_mode);
+}
+
+
+/** Constructor.
+ * This constructor is protected so that Thread cannot be instantiated. This
+ * constructor initalizes a few internal variables. Uses continuous
+ * operation mode.
+ * @param name thread name, used for debugging, see Thread::name()
+ */
+Thread::Thread(const char *name)
+{
+  init(name, OPMODE_CONTINUOUS);
+}
+
+
+/** Constructor.
+ * This constructor is protected so that Thread cannot be instantiated. This
+ * constructor initalizes a few internal variables.
+ * @param name thread name, used for debugging, see Thread::name()
+ * @param op_mode Operation mode, see Thread::OpMode
+ */
+Thread::Thread(const char *name, OpMode op_mode)
+{
+  init(name, op_mode);
+}
+
+
+/** Initialize.
+ * Kind of the base constructor.
+ * @param name name of thread
+ * @param op_mode operation mode
+ */
+void
+Thread::init(const char *name, OpMode op_mode)
+{
   this->op_mode = op_mode;
+  this->_name   = name;
   if ( op_mode == OPMODE_WAITFORWAKEUP ) {
     sleep_condition = new WaitCondition();
     sleep_mutex = new Mutex();
@@ -190,6 +237,28 @@ Thread::opmode() const
 {
   return op_mode;
 }
+
+
+/** Get thread name.
+ * @return name of thread
+ */
+const char *
+Thread::name() const
+{
+  if ( _name != NULL ) {
+    return _name;
+  } else {
+    return typeid(this).name();
+  }
+}
+
+
+/** Get name of thread.
+ * This name is mainly used for debugging purposes. Give it a descriptive
+ * name. Is nothing is given the raw class name is used.
+ * @return thread name
+ */
+
 
 /** Set cancellation point.
  * Tests if the thread has been canceled and if so exits the thread.

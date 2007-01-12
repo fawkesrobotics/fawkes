@@ -27,7 +27,7 @@
 
 /// @cond QA
 
-#include <interfaces/interface.h>
+#include <interface/interface.h>
 
 #include <utils/system/dynamic_module/module_dl.h>
 #include <utils/system/argparser.h>

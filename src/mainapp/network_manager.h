@@ -28,7 +28,7 @@
 #ifndef __FAWKES_NETWORK_MANAGER_H_
 #define __FAWKES_NETWORK_MANAGER_H_
 
-class ThreadManager;
+class FawkesThreadManager;
 class FawkesNetworkThread;
 class FawkesNetworkHandler;
 class AvahiThread;
@@ -36,7 +36,7 @@ class AvahiThread;
 class FawkesNetworkManager
 {
  public:
-  FawkesNetworkManager(ThreadManager *thread_manager, unsigned short int fawkes_port);
+  FawkesNetworkManager(FawkesThreadManager *thread_manager, unsigned short int fawkes_port);
   ~FawkesNetworkManager();
 
   void add_handler(FawkesNetworkHandler *handler);
@@ -46,7 +46,7 @@ class FawkesNetworkManager
 
  private:
   unsigned short int      fawkes_port;
-  ThreadManager          *thread_manager;
+  FawkesThreadManager    *thread_manager;
   FawkesNetworkThread    *fawkes_network_thread;
   AvahiThread            *avahi_thread;
 

@@ -32,12 +32,13 @@
 
 class ArgumentParser;
 class BlackBoard;
-class ThreadManager;
+class FawkesThreadManager;
 class FawkesPluginManager;
 class FawkesNetworkManager;
 class FawkesThreadInitializer;
 class FawkesConfigManager;
 class Configuration;
+class HostInfo;
 
 class FawkesMainThread : public Thread
 {
@@ -51,11 +52,15 @@ class FawkesMainThread : public Thread
   ArgumentParser             *argp;
   Configuration              *config;
   BlackBoard                 *blackboard;
-  ThreadManager              *thread_manager;
+  HostInfo                   *hostinfo;
+  FawkesThreadManager        *thread_manager;
   FawkesThreadInitializer    *thread_initializer;
   FawkesPluginManager        *plugin_manager;
   FawkesNetworkManager       *network_manager;
   FawkesConfigManager        *config_manager;
+
+  char *config_mutable_file;
+  char *config_default_file;
 };
 
 #endif

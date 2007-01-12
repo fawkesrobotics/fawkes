@@ -46,6 +46,7 @@
  */
 FawkesNetworkAcceptorThread::FawkesNetworkAcceptorThread(FawkesNetworkThread *parent,
 							 unsigned short int port)
+  : Thread("FawkesNetworkAcceptorThread")
 {
   this->parent = parent;
   this->port   = port;

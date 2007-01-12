@@ -21,7 +21,7 @@
 
 BASEDIR = ..
 
-SUBDIRS = libs interfaces blackboard mainapp
+SUBDIRS = libs interfaces mainapp plugins tools
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
