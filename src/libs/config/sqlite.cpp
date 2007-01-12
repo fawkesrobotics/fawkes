@@ -58,7 +58,7 @@
   "  path      TEXT NOT NULL,\n"					\
   "  type      TEXT NOT NULL,\n"					\
   "  value     NOT NULL,\n"						\
-  "  descr     TEXT,\n"							\
+  "  comment   TEXT,\n"							\
   "  PRIMARY KEY (component, path)\n"					\
   ")"
 
@@ -199,19 +199,20 @@ SQLiteConfiguration::~SQLiteConfiguration()
  *   path      TEXT NOT NULL,
  *   type      TEXT NOT NULL,
  *   value     NOT NULL,
- *   descr     TEXT,
+ *   comment   TEXT,
  *   PRIMARY KEY (component, path)
  * )
  * @endcode
  *
  * After this the 'tagged' table is created with the following schema:
  * @code
- * CREATE TABLE IF NOT EXISTS config (
+ * CREATE TABLE IF NOT EXISTS tagged_config (
  *   tag       TEXT NOT NULL,
  *   component TEXT NOT NULL,
  *   path      TEXT NOT NULL,
  *   type      TEXT NOT NULL,
  *   value     NOT NULL,
+ *   comment   TEXT
  *   PRIMARY KEY (tag, component, path)
  * )
  * @endcode
