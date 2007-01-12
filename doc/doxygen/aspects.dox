@@ -1,0 +1,5 @@
+/** @defgroup Aspects Fawkes Thread Aspects
+ * This group contains the aspects that a thread loaded and run by Fawkes may
+ * have. All these aspects are guaranteed to be properly initialised before the
+ * thread is run or if a problem occurs the thread never being executed.
+ */
