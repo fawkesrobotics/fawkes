@@ -138,7 +138,7 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
   if ( master && ! shmem->isCreator() ) {
     // this might mean trouble, we throw an exception if we are not master but
     // this was requested
-    throw BBMemMgrNotMasterException("Not owner of shared memory segment");
+    throw BBNotMasterException("Not owner of shared memory segment");
   }
 
   // printf("Shared memory base pointer: 0x%x\n", (unsigned int)shmem->getMemPtr());

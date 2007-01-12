@@ -656,8 +656,8 @@ InterfaceGenerator::write_h(FILE *f)
   write_deflector(f);
 
   fprintf(f,
-	  "#include <interfaces/interface.h>\n"
-	  "#include <interfaces/message.h>\n\n"
+	  "#include <interface/interface.h>\n"
+	  "#include <interface/message.h>\n\n"
 	  "class %s : public Interface\n"
 	  "{\n"
 	  "/// @cond INTERNALS\n"

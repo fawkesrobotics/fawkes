@@ -33,8 +33,7 @@
 #include <blackboard/exceptions.h>
 #include <blackboard/interface_mem_header.h>
 
-#include <interfaces/interface.h>
-#include <interfaces/blackboard.h>
+#include <interface/interface.h>
 
 #include <core/threading/mutex.h>
 #include <core/threading/refc_rwlock.h>
@@ -81,11 +80,10 @@ using namespace std;
  * and can be queued.
  *
  * The interface manager can operate in two modes. In master mode the manager is
- * responsible for allocating and managing BlackBoard internal data (stored in the
- * BlackBoardInternalsInterface with identifier "FawkesBlackBoard"). There must be
+ * responsible for allocating and managing BlackBoard internal data. There must be
  * one and only one active master at any given time.
  * In slave mode the interface manager will contact the master to get serials etc.
- * for new interfaces.
+ * for new interfaces. The slave mode is not yet fully supported.
  *
  * @see Interface
  * @see Message
@@ -108,19 +106,11 @@ BlackBoardInterfaceManager::BlackBoardInterfaceManager(bool bb_master)
 				       bb_master,
 				       BLACKBOARD_MAGIC_TOKEN);
 
-  internals = NULL;
+  instance_serial = 1;
   mutex = new Mutex();
   iface_module = new ModuleDL( LIBDIR"/libinterfaces.so" );
   if ( ! iface_module->open() ) {
     throw BlackBoardCannotFindInterfaceModuleException();
-  }
-  if ( bb_master ) {
-    // may throw exception! This is ok and correct behavior
-    internals = openForWriting<BlackBoardInternalsInterface>("FawkesBlackBoard");
-    internals->setInstanceSerial( internals->serial() );
-    internals->write();
-  } else {
-    internals = openInternalsNonMaster();
   }
 
   msgmgr = new BlackBoardMessageManager(this);
@@ -133,7 +123,6 @@ BlackBoardInterfaceManager::BlackBoardInterfaceManager(bool bb_master)
 /** Destructor */
 BlackBoardInterfaceManager::~BlackBoardInterfaceManager()
 {
-  close(internals);
   delete mutex;
   delete iface_module;
   delete memmgr;
@@ -266,75 +255,12 @@ BlackBoardInterfaceManager::getNextMemSerial()
 unsigned int
 BlackBoardInterfaceManager::getNextInstanceSerial()
 {
-  unsigned int serial = 0;
   if ( bb_master ) {
     // simple, just increment value and return it
-    if ( internals != NULL ) {
-      serial = internals->getInstanceSerial() + 1;
-      internals->setInstanceSerial( serial );
-      internals->write();
-    } else {
-      // this is the serial for the internals interface instance, assumably!
-      return 1;
-    }
+    return instance_serial++;
   } else {
-    // Send message to request serial
-    /*
-    BlackBoardIntenrnalsInterface::GetInstanceSerialMessage *m;
-    m = new BlackBoardIntenrnalsInterface::GetInstanceSerialMessage();
-    Message reply = internals->sendWithReplyAndBlock(m);
-    BlackBoardIntenrnalsInterface::GetInstanceSerialMessageReply *r;
-    r = dynamic_cast<BlackBoardIntenrnalsInterface::GetInstanceSerialMessageReply *>(reply);
-    if ( r != NULL ) {
-      serial = r->getInstanceSerial();
-      delete r;
-    }
-    */
+    throw BBNotMasterException("Instance serial can only be requested by BB Master");
   }
-  return serial;
-}
-
-
-/** Open internals interface as slave.
- * @return pointer to a new instance of BlackBoardInternalsInterface
- * @exception BlackBoardNoMasterAliveException thrown if there is no master alive
- * for this BlackBoard. Some weird error occured, investigate!
- */
-BlackBoardInternalsInterface *
-BlackBoardInterfaceManager::openInternalsNonMaster()
-{
-  Interface *iface = NULL;
-
-  mutex->lock();
-  memmgr->lock();
-  void *ptr = findInterfaceInMemory("BlackBoardInternalsInterface", "FawkesBlackBoard");
-
-  if ( ptr ) {
-    // good, check if there is a writer
-    interface_header_t *ih = (interface_header_t *)ptr;
-    if ( ! ih->flag_writer_active ) {
-      throw BlackBoardNoMasterAliveException();
-    }
-
-    iface = newInterfaceInstance("BlackBoardInternalsInterface", "FawkesBlackBoard");
-    iface->mem_real_ptr = ptr;
-    iface->mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
-
-    iface->write_access = false;
-    rwlocks[ih->serial]->ref();
-    iface->rwlock = rwlocks[ih->serial];
-    iface->mem_serial = ih->serial;
-    iface->message_queue = new MessageQueue(iface->mem_serial, iface->instance_serial);
-    ih->refcount++;
-
-  } else {
-    throw BlackBoardNoMasterAliveException();
-  }
-
-  memmgr->unlock();
-  mutex->unlock();
-
-  return dynamic_cast<BlackBoardInternalsInterface *>(iface);
 }
 
 

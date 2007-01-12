@@ -25,7 +25,7 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <interfaces/message.h>
+#include <interface/message.h>
 
 #include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-/** @class Message interfaces/message.h
+/** @class Message interface/message.h
  * Base class for all messages passed through interfaces in Fawkes BlackBoard.
  * Do not use directly.
  */

@@ -25,22 +25,22 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <interfaces/interface.h>
+#include <interface/interface.h>
 
-#include <interfaces/mediators/interface_mediator.h>
-#include <interfaces/mediators/message_mediator.h>
+#include <interface/mediators/interface_mediator.h>
+#include <interface/mediators/message_mediator.h>
 #include <core/threading/refc_rwlock.h>
 
 #include <string.h>
 #include <typeinfo>
 
-/** @class InterfaceWriteDeniedException interfaces/interface.h
+/** @class InterfaceWriteDeniedException interface/interface.h
  * This exception is thrown if a write has been attempted on a read-only interface.
  * @see Interface::write()
  * @ingroup Exceptions
  */
 
-/** @class InterfaceInvalidMessageException interfaces/interface.h
+/** @class InterfaceInvalidMessageException interface/interface.h
  * This exception is thrown if a message has been queued in the interface which is
  * not recognized by the interface.
  * @ingroup Exceptions
@@ -71,7 +71,7 @@ InterfaceInvalidMessageException::InterfaceInvalidMessageException(const char *m
 }
 
 
-/** @class Interface interfaces/interface.h
+/** @class Interface interface/interface.h
  * Base class for all Fawkes BlackBoard interfaces.
  * Never use directly. Use interface generator to create interfaces.
  *

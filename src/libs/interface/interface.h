@@ -28,8 +28,8 @@
 #ifndef __INTERFACE_H_
 #define __INTERFACE_H_
 
-#include <interfaces/message.h>
-#include <interfaces/message_queue.h>
+#include <interface/message.h>
+#include <interface/message_queue.h>
 #include <core/exception.h>
 
 #define __INTERFACE_TYPE_SIZE 32

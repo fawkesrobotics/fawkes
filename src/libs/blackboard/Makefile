@@ -1,5 +1,5 @@
 #*****************************************************************************
-#                Makefile Build System for Fawkes : BlackBoard
+#               Makefile Build System for Fawkes : BlackBoard
 #                            -------------------
 #   Created on Wed Oct 04 10:49:27 2006
 #   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
@@ -18,12 +18,11 @@
 #            by: $Author$
 #
 
-BASEDIR = ../..
+BASEDIR = ../../..
 
 CFLAGS = -g
-SUBDIRS = tools
 
-LIBS_libblackboard = core utils interfaces
+LIBS_libblackboard = core utils interface
 OBJS_libblackboard = blackboard.o		\
 		     interface_manager.o	\
 		     main_thread.o		\

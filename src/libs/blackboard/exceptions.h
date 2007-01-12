@@ -58,19 +58,20 @@ class BBInconsistentMemoryException : public Exception {
   }
 };
 
-/** Thrown if BlackBoard is not owner of shared memory segment
+/** Thrown if BlackBoard is not master and master operation has been requested.
  * This exception is thrown by the memory manager if the memory is not owned but
- * master mode is required.
+ * master mode is required. The interface manager throws it if you try to create
+ * a new interface but are not master.
  * corrupted, for example if there are bytes that belong to neither a free chunk nor
  * a allocated chunk.
  */
-class BBMemMgrNotMasterException : public Exception {
+class BBNotMasterException : public Exception {
  public:
   /** Constructor
    * @param msg message, appended to exception, base message "Memory corruption detected"
    */
-  BBMemMgrNotMasterException(const char *msg)
-    : Exception("Memory corruption detected")
+  BBNotMasterException(const char *msg)
+    : Exception("Not BlackBoard Master!")
   {
     append(msg);
   }

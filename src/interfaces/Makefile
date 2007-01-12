@@ -30,7 +30,7 @@ LIBXMLPP = $(shell $(PKGCONFIG) libxml++-2.6; echo $$?)
 ifeq ($(LIBXMLPP),1)
 $(warning libxml++-devel not installed on your system, you cannot build the interface generator! Interfaces cannot be generated.)
 else
-CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\" \
+CFLAGS = -g \
 	-DINTERFACEDIR=\"$(realpath $(SRCDIR))\" \
 	$(shell pkg-config --cflags libxml++-2.6)
 
@@ -53,8 +53,8 @@ OBJS_interfaces = $(notdir $(patsubst %.xml,%.o,$(wildcard $(SRCDIR)/*.xml)))
 SRCS_interfaces = $(patsubst %.xml,%.cpp,$(wildcard $(SRCDIR)/*.xml))
 HDRS_interfaces = $(patsubst %.xml,%.h,$(wildcard $(SRCDIR)/*.xml))
 
-LIBS_libinterfaces = core
-OBJS_libinterfaces = interface.o message.o message_queue.o $(OBJS_interfaces)
+LIBS_libinterfaces = core interface
+OBJS_libinterfaces = $(OBJS_interfaces)
 
 OBJS_all = $(OBJS_libinterfaces) $(OBJS_interface_generator)
 LIBS_all = $(LIBDIR)/libinterfaces.so

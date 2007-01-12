@@ -19,9 +19,9 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
+BASEDIR = ../../../..
 
-CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\"
+CFLAGS = -g
 
 LIBS_qa_bb_memmgr = core utils blackboard
 OBJS_qa_bb_memmgr = qa_bb_memmgr.o

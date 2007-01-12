@@ -33,7 +33,6 @@
 #include <blackboard/bbconfig.h>
 
 #include <interfaces/test.h>
-#include <interfaces/blackboard.h>
 
 #include <core/exceptions/system.h>
 

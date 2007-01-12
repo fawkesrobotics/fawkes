@@ -28,7 +28,7 @@
 #ifndef __BLACKBOARD_MESSAGE_MANAGER_H_
 #define __BLACKBOARD_MESSAGE_MANAGER_H_
 
-#include <interfaces/mediators/message_mediator.h>
+#include <interface/mediators/message_mediator.h>
 
 class BlackBoardInterfaceManager;
 class Message;

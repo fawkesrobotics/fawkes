@@ -25,8 +25,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <interfaces/message_queue.h>
-#include <interfaces/message.h>
+#include <interface/message_queue.h>
+#include <interface/message.h>
 
 #include <core/threading/mutex.h>
 #include <core/exceptions/software.h>

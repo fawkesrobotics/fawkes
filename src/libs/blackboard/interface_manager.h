@@ -28,14 +28,13 @@
 #ifndef __BLACKBOARD_INTERFACE_MANAGER_H_
 #define __BLACKBOARD_INTERFACE_MANAGER_H_
 
-#include <interfaces/mediators/interface_mediator.h>
-#include <interfaces/interface.h>
+#include <interface/mediators/interface_mediator.h>
+#include <interface/interface.h>
 #include <core/exceptions/software.h>
 #include <typeinfo>
 #include <map>
 
 class BlackBoardMemoryManager;
-class BlackBoardInternalsInterface;
 class BlackBoardMessageManager;
 class Mutex;
 class Module;
@@ -77,15 +76,15 @@ class BlackBoardInterfaceManager : public InterfaceMediator
 
   Interface *  getWriterForMemSerial(unsigned int mem_serial);
 
-  BlackBoardInternalsInterface * openInternalsNonMaster();
-
  private:
   bool                          bb_master;
+
+  unsigned int                  instance_serial;
+
   BlackBoardMemoryManager      *memmgr;
   BlackBoardMessageManager     *msgmgr;
   Mutex                        *mutex;
   Module                       *iface_module;
-  BlackBoardInternalsInterface *internals;
 
   std::map< unsigned int, Interface * >  writer_interfaces;
   std::map< unsigned int, RefCountRWLock * >  rwlocks;

@@ -29,8 +29,8 @@
 #ifndef __INTERFACES_TEST_H_
 #define __INTERFACES_TEST_H_
 
-#include <interfaces/interface.h>
-#include <interfaces/message.h>
+#include <interface/interface.h>
+#include <interface/message.h>
 
 class TestInterface : public Interface
 {
