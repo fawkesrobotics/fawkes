@@ -35,6 +35,7 @@ OBJS_libutils =	\
 		system/dynamic_module/module_manager_factory.o		\
 		system/argparser.o					\
 		system/file.o						\
+		system/hostinfo.o					\
 		system/signal.o
 
 OBJS_all = $(OBJS_libutils)
