@@ -20,12 +20,11 @@
 
 BASEDIR = ../..
 
-CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\"
+CFLAGS = -g
 SUBDIRS = tools
 
 LIBS_libblackboard = core utils interfaces
-OBJS_libblackboard = bbthread.o			\
-		     blackboard.o		\
+OBJS_libblackboard = blackboard.o		\
 		     interface_manager.o	\
 		     main_thread.o		\
 		     memory_manager.o		\
