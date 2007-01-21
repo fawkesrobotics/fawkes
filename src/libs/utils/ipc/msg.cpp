@@ -104,6 +104,8 @@ IPCMessageQueue::IPCMessageQueue(const char *path, char id,
  */
 IPCMessageQueue::IPCMessageQueue(int id, bool create, bool destroy_on_delete)
 {
+  data = new IPCMessageQueueData();
+
   this->destroy_on_delete = destroy_on_delete;
 
   data->msgflg = 0666;

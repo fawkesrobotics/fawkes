@@ -86,11 +86,15 @@ endif
 	    -e '/^$$/ d' -e 's/$$/ :/' < $(df).td >> $(df).d; \
 	rm -f $(df).td
 
+# Make .cpp files depend on Makefile to notice changes to Makefile (like config changes)
+%.cpp: $(SRCDIR)/Makefile
+
 moc_%.cpp: %.h
 	$(SILENT) echo "$(INDENT_PRINT)--- Running Qt moc on $(subst $(SRCDIR)/,,$<), creating $(subst ..,__,$@)"
 	$(SILENT) $(MOC) $(MOC_FLAGS) -p $(subst ..,__,$(@D)) $< -o $(subst ..,__,$@)
 
 .SECONDEXPANSION:
+$(BINDIR)/%: $(SRCDIR)/Makefile
 $(BINDIR)/%: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(BINDIR)
 	$(SILENT) echo -e "$(INDENT_PRINT)--> Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
@@ -100,6 +104,7 @@ $(BINDIR)/%: $$(OBJS_$$*)
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
 	-o $@ $(subst ..,__,$^)
 
+$(LIBDIR)/%.so: $(SRCDIR)/Makefile
 $(LIBDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(LIBDIR)
 	$(SILENT) echo -e "$(INDENT_PRINT)--> Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
@@ -108,6 +113,7 @@ $(LIBDIR)/%.so: $$(OBJS_$$*)
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
 	-o $@ $(subst ..,__,$^)
 
+$(PLUGINDIR)/%.so: $(SRCDIR)/Makefile
 $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(PLUGINDIR)
 	$(SILENT) echo -e "$(INDENT_PRINT)--> Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
@@ -115,4 +121,3 @@ $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
 	-o $@ $(subst ..,__,$^)
-
