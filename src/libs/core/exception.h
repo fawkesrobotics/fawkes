@@ -51,12 +51,6 @@ class Exception {
   Exception& operator=(const Exception &exc);
 
  protected:
-  Exception();
-
-  void append_nolock(const char *msg);
-  void append_nolock(const char *format, va_list va);
-  void append_nolock_nocopy(char *msg);
-  void copy_messages(const Exception &exc);
 
   /** typedef struct for message list */
   typedef struct message_list_t {
@@ -64,6 +58,40 @@ class Exception {
     char            *msg;    /**< pointer to message, may not be NULL, will be freed
 			      *   in dtor */
   };
+
+ public:
+  class iterator
+  {
+    friend class Exception;
+   private:
+    iterator(message_list_t *message_list);
+   public:
+    iterator(const iterator &i);
+    iterator();
+
+    iterator &    operator++ ();        // prefix
+    iterator      operator++ (int inc); // postfix
+
+    bool          operator== (const iterator & i) const;
+    bool          operator!= (const iterator & i) const;
+
+    const char *  operator*  () const;
+    iterator &    operator=  (const iterator & i);
+
+   private:
+    message_list_t *mlist;
+  };
+
+  iterator begin();
+  iterator end();
+
+ protected:
+  Exception();
+
+  void append_nolock(const char *msg);
+  void append_nolock(const char *format, va_list va);
+  void append_nolock_nocopy(char *msg);
+  void copy_messages(const Exception &exc);
 
   message_list_t  *messages;
   message_list_t  *messages_iterator;

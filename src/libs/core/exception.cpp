@@ -472,3 +472,129 @@ Exception::errno() const
 {
   return _errno;
 }
+
+
+/** Get iterator for messages.
+ * @return iterator for messages
+ */
+Exception::iterator
+Exception::begin()
+{
+  Exception::iterator i(messages);
+  return i;
+}
+
+
+/** Get end iterator for messages.
+ * @return end iterator for messages.
+ */
+Exception::iterator
+Exception::end()
+{
+  Exception::iterator i;
+  return i;
+}
+
+
+/** Constructor.
+ * @param message_list list of messages, will be used unlocked so use
+ * with care.
+ */
+Exception::iterator::iterator(message_list_t *message_list)
+{
+  mlist = message_list;
+}
+
+
+/** Plain constructor.
+ * Creates a new invalid iterator (same as Exception::end()).
+ */
+Exception::iterator::iterator()
+{
+  this->mlist = NULL;
+}
+
+
+/** Copy constructor.
+ * @param i iterator to copy
+ */
+Exception::iterator::iterator(const Exception::iterator & i)
+{
+  this->mlist = i.mlist;
+}
+
+
+/** Prefix ++ operator.
+ * @return reference to this iterator after advancing.
+ */
+Exception::iterator &
+Exception::iterator::operator++()
+{
+  if ( mlist != NULL ) {
+    mlist = mlist->next;
+  }
+  return *this;
+}
+
+
+/** Postfix ++ operator.
+ * @return copy of iterator before advancing.
+ */
+Exception::iterator
+Exception::iterator::operator++(int inc)
+{
+  iterator i(mlist);
+  if ( mlist != NULL ) {
+    mlist = mlist->next;
+  }
+  return i;
+}
+
+
+/** Check equality.
+ * @param i iterator to compare to
+ * @return true, if iterators point to the same message, false otherwise
+ */
+bool
+Exception::iterator::operator==(const iterator & i) const
+{
+  return (mlist == i.mlist);
+}
+
+
+/** Check inequality.
+ * @param i iterator to compare to
+ * @return true, if iterators point to different messages, false otherwise
+ */
+bool
+Exception::iterator::operator!=(const iterator & i) const
+{
+  return (mlist != i.mlist);
+}
+
+
+/** Get current message.
+ * Get message at current position. Returns NULL for the invalid ieterator.
+ * @return message or NULL if iterator is invalid
+ */
+const char *
+Exception::iterator::operator* () const
+{
+  if ( mlist != NULL ) {
+    return mlist->msg;
+  } else {
+    return NULL;
+  }
+}
+
+
+/** Assignment operator.
+ * @param i iterator to assign to this iterator.
+ * @return reference to this iterator.
+ */
+Exception::iterator &
+Exception::iterator::operator=(const iterator &i)
+{
+  this->mlist = i.mlist;
+  return *this;
+}

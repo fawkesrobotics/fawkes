@@ -27,7 +27,8 @@ LIBS_libaspects = core blackboard netcomm config
 OBJS_libaspects =	\
 		blackboard.o		\
 		blocked_timing.o	\
-		configurable.o
+		configurable.o		\
+		logging.o
 
 OBJS_all = $(OBJS_libaspects)
 LIBS_all  = $(LIBDIR)/libaspects.so

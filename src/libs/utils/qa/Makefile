@@ -27,13 +27,17 @@ LIBS_qa_utils_ipc_semset = utils
 OBJS_qa_utils_hostinfo = qa_hostinfo.o
 LIBS_qa_utils_hostinfo = utils
 
+OBJS_qa_utils_logger = qa_logger.o
+LIBS_qa_utils_logger = utils
+
 BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_ipc_shmem		\
 		$(BINDIR)/qa_utils_ipc_shmem_lock	\
 		$(BINDIR)/qa_utils_ipc_shmem_lowlevel	\
 		$(BINDIR)/qa_utils_ipc_msg		\
 		$(BINDIR)/qa_utils_ipc_semset		\
-		$(BINDIR)/qa_utils_hostinfo
+		$(BINDIR)/qa_utils_hostinfo		\
+		$(BINDIR)/qa_utils_logger
 
 PLUGINS_all =	$(PLUGINDIR)/test_plugin.so
 
