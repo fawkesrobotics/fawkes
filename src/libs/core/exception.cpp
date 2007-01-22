@@ -538,6 +538,7 @@ Exception::iterator::operator++()
 
 
 /** Postfix ++ operator.
+ * @param inc used to denote postfix operator
  * @return copy of iterator before advancing.
  */
 Exception::iterator

@@ -14,6 +14,10 @@ Fawkes		GNU Compiler Collection	>= 3.4.4		mandatory
 
 Fawkes	        glibc			>= 2.3			mandatory
 
+Fawkes		Avahi			>= 0.6			mandatory
+
+Fawkes		SQLite			>= 3.3			mandatory
+
 FireVision	libdc1394		>= 2.0.0rc3		mandatory
 
 FireVision	libraw1394		>= 1.2.1 (FC5)		mandatory
