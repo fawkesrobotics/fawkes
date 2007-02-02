@@ -24,7 +24,7 @@ BASEDIR = ../../..
 CFLAGS = -g $(shell $(PKGCONFIG) --cflags sqlite3)
 LDFLAGS_libconfig = $(shell $(PKGCONFIG) --libs sqlite3)
 
-LIBS_libconfig = stdc++ dl core netcomm
+LIBS_libconfig = stdc++ core netcomm
 OBJS_libconfig =	\
 		config.o		\
 		netconf.o		\
