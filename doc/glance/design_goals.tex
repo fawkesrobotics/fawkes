@@ -1,0 +1,109 @@
+%
+% $Id$
+%
+% Copyright (c)  2007  Tim Niemueller, AllemaniACs RoboCup Team.
+%
+% Created: Wed Jan 24 2007 15:30:24
+
+\section{Design Goals}
+
+\frame{\tableofcontents[currentsection,hideothersubsections]}
+
+% \begin{block}{}
+%   \begin{quote}
+%     Good judgement comes from experience. Experience comes
+%     from bad judgement.(G. Warren Nutter)
+%   \end{quote}
+% \end{block}
+
+\subsection{Masterplan}
+\begin{frame}
+  \frametitle{What to Keep}
+  \begin{itemize}
+  \item Keep modular structure
+  \item Keep unified information storage (similar to BlackBoard)
+  \item Provide simple templates for new modules
+  \item Provide the well-known tools (RCCC, vis$\_$bb, FireStation)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{What to Avoid}
+  \begin{itemize}
+  \item Avoid polling, events and blocked waiting instead
+  \item Avoid dependencies where possible, have few and document them well
+  \item Avoid code duplication and more approaches where useless
+    (different visions, localizations etc. may be OK, having two thread implementations
+    is useless)
+  \item Avoid everything that makes debugging hard or impossible
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{What to Add and Improve}
+  \begin{itemize}
+  \item Source code management
+  \item Enforce documentation
+  \item Sleek and fast build system
+  \item Easy modular software structure
+  \item Mutual exclusions on information storage
+  \item Throw away stuff not needed any more, it's still in SVN!
+  \item Make it debuggable and do it! (gdb, valgrind, QA apps, unit tests)
+  \item Use exceptions for good error handling and better readability
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Guarantees}
+  \begin{itemize}
+  \item Guarantees ensure certain conditions, behavior and functionality of
+    the software stack
+  \item<2-> Have guarantees!
+  \item<2-> Guarantees minimize error handling in upper levels
+  \item<2-> Failures in guaranteed components are a bug. No more discussion about that.
+  %\item With exception handling errors are well defined and can be handled
+  \item<2-> Not met guarantees are crash points by design
+  \end{itemize}
+  \begin{block}<3>{}
+    \centering
+    Guarantees are needed to keep the code simple, to have well defined
+    software interfaces and to minimize the risk of errors.
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Needed Guarantees (known so far)}
+  \begin{itemize}[<+->]
+  \item \emph{Initialization:} either a component/thread/aspect is successfully
+    initialized or never started
+  \item \emph{Dependencies:} Either all requirements are met or a component cannot run
+    (and the problem is detected!)
+  \item \emph{Concurrency:} There must be mutually exclusive access to critical components
+    like data storage (single writer)
+  \item \emph{Timing:} Guarantee a defined and documented call chain per loop
+  \item \emph{Time Source:} Guarantee that all components use the exact same time source
+  \end{itemize}
+\end{frame}
+
+\subsection{Summary}
+\begin{frame}
+  \frametitle{Summary}
+  \begin{itemize}[<+->]
+  \item Modular
+  \item Unified information storage
+  \item No polling, events
+  \item Central timing and time source
+  \item Debuggable
+  \item Guarantees
+  \item Minimize dependencies
+  \end{itemize}
+  \begin{block}<8>{}
+    \centering
+    One to rule them all: only one dynamic application
+  \end{block}
+\end{frame}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "fawkes-glance"
+%%% End: 

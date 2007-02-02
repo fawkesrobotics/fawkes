@@ -1,0 +1,65 @@
+%
+% $Id$
+%
+% Copyright (c)  2007  Tim Niemueller, AllemaniACs RoboCup Team.
+%
+% Created: Thu Jan 25 2007 15:31:18
+
+\section{Loose Ends}
+
+\frame{\tableofcontents[currentsection,hideallsubsections]}
+
+\subsection{Past and Future}
+\begin{frame}
+  \frametitle{Done}
+  \begin{itemize}
+  \item Threading and synchronization API
+  \item BlackBoard basics (data storage, messaging)
+  \item Network communication (Fawkes Network Protocol)
+  \item Basic utility library
+  \item Main application able to load plugins, and to initialize and run threads
+  \end{itemize}
+  \begin{block}<2>{}
+    Enough to implement the first plugins and tune the call dynamics.
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{To Do}
+  \begin{itemize}
+  \item BlackBoard logging and events
+  \item BlackBoard introspection (+ visual tool)
+  \item Geometry/math library (wip)
+  \item Multicast world info transceiver (wip)
+  \item Porting vision (wip)
+  \item Implementing base applications (world model, agent etc.)
+  \item New control center (probably not for RC2007)
+  \item Graphical config editor
+  \end{itemize}
+  \begin{block}<2>{}
+    The foundation has been constructed, now it needs combined efforts
+    to get it fly.
+  \end{block}
+\end{frame}
+
+\subsection{End of Talk}
+\begin{frame}
+  \hypertarget<1>{hyperref:endoftalk}{}
+  \vfill
+  \begin{centering}
+    {\LARGE Questions and Discussion}
+    \par
+  \end{centering}
+  \vfill
+  %\begin{centering}
+  %  Information compiled at\\
+  %  \url{http://www.niemueller.de/uni/mdnssd/}
+  %  \par
+  %\end{centering}
+\end{frame}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "fawkes-glance"
+%%% End: 

@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   id="svg1906"
+   sodipodi:version="0.32"
+   inkscape:version="0.44.1"
+   sodipodi:docbase="/home/tim/robocup/fawkes/doc/glance/figures"
+   sodipodi:docname="fawkes-diagram-9-plugins.svg">
+  <defs
+     id="defs1908" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.979899"
+     inkscape:cx="366.74774"
+     inkscape:cy="643.44026"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     inkscape:window-width="1390"
+     inkscape:window-height="972"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     showguides="true"
+     inkscape:guide-bbox="true" />
+  <metadata
+     id="metadata1911">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="opacity:1;display:inline">
+    <rect
+       style="opacity:1;fill:#fce94f;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1.03724444;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1892"
+       width="384.64029"
+       height="335.64276"
+       x="142.48933"
+       y="224.15359" />
+    <g
+       id="g7631">
+      <rect
+         y="253.9511"
+         x="360.47528"
+         height="298.48779"
+         width="119.04941"
+         id="rect1874"
+         style="opacity:1;fill:#d3d7cf;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <text
+         id="text4615"
+         y="267.47366"
+         x="364.60419"
+         style="font-size:12px;font-style:normal;font-weight:normal;fill:#555753;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="267.47366"
+           x="364.60419"
+           id="tspan4617"
+           sodipodi:role="line">Plugin X</tspan></text>
+    </g>
+    <g
+       id="g7560">
+      <rect
+         y="283.99954"
+         x="364.5"
+         height="259.03973"
+         width="69.039726"
+         id="rect3719"
+         style="opacity:1;fill:#888a85;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <text
+         transform="matrix(0,-1,1,0,0,0)"
+         id="text4599"
+         y="378.18442"
+         x="-341.18579"
+         style="font-size:12px;font-style:normal;font-weight:normal;writing-mode:lr-tb;fill:#eeeeec;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="378.18442"
+           x="-341.18579"
+           id="tspan4601"
+           sodipodi:role="line">Thread 1</tspan></text>
+    </g>
+    <g
+       id="g7701">
+      <rect
+         y="508.53348"
+         x="368.15366"
+         height="29.692671"
+         width="61.692669"
+         id="rect3707"
+         style="fill:#4e9a06;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <rect
+         y="473.90744"
+         x="368.15366"
+         height="29.692671"
+         width="61.692669"
+         id="rect1933"
+         style="fill:#3465a4;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <rect
+         y="439.2814"
+         x="368.15366"
+         height="29.692671"
+         width="61.692669"
+         id="rect1935"
+         style="fill:#5c3566;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <rect
+         y="404.6553"
+         x="368.15366"
+         height="29.692671"
+         width="61.692669"
+         id="rect1937"
+         style="fill:#f57900;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <g
+       id="g7719">
+      <rect
+         y="254.80786"
+         x="148.49486"
+         height="297.56775"
+         width="199.01027"
+         id="rect2001"
+         style="fill:#888a85;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <text
+         id="text1975"
+         y="267.97873"
+         x="155.05841"
+         style="font-size:12px;font-style:normal;font-weight:normal;fill:#d3d7cf;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="267.97873"
+           x="155.05841"
+           id="tspan1977"
+           sodipodi:role="line">MainThread</tspan></text>
+    </g>
+    <g
+       id="g7613">
+      <g
+         id="g7555">
+        <rect
+           style="fill:#4e9a06;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect1939"
+           width="191.45964"
+           height="29.577002"
+           x="152.27017"
+           y="508.53265" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;fill:#babdb6;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="155.72589"
+           y="522.0321"
+           id="text1983"><tspan
+             sodipodi:role="line"
+             id="tspan1985"
+             x="155.72589"
+             y="522.0321">NetworkManager</tspan></text>
+      </g>
+      <g
+         id="g7545">
+        <rect
+           style="fill:#5c3566;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect1945"
+           width="191.45964"
+           height="29.577002"
+           x="152.27014"
+           y="439.28058" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;fill:#babdb6;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="157.24109"
+           y="452.49515"
+           id="text1991"><tspan
+             sodipodi:role="line"
+             id="tspan1993"
+             x="157.24109"
+             y="452.49515">ConfigManager</tspan></text>
+      </g>
+      <g
+         id="g7540">
+        <rect
+           style="fill:#f57900;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect1995"
+           width="191.00117"
+           height="29.57818"
+           x="152.4994"
+           y="404.42407" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;fill:#babdb6;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="154.75885"
+           y="417.19284"
+           id="text1987"><tspan
+             sodipodi:role="line"
+             id="tspan1989"
+             x="154.75885"
+             y="417.19284">BlackBoard</tspan></text>
+      </g>
+      <g
+         id="g7550">
+        <rect
+           style="fill:#3465a4;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect1943"
+           width="191.45964"
+           height="29.577002"
+           x="152.27017"
+           y="473.90662" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;fill:#babdb6;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="155.72591"
+           y="487.38446"
+           id="text1997"><tspan
+             sodipodi:role="line"
+             id="tspan1999"
+             x="155.72591"
+             y="487.38446">LoggingManager</tspan></text>
+      </g>
+    </g>
+    <g
+       id="g7603">
+      <g
+         id="g7535">
+        <rect
+           style="fill:#babdb6;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect5596"
+           width="191.00117"
+           height="29.57818"
+           x="152.4994"
+           y="369.86224" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;fill:#555753;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="156.57365"
+           y="382.63107"
+           id="text1971"><tspan
+             sodipodi:role="line"
+             id="tspan1973"
+             x="156.57365"
+             y="382.63107">PluginManager</tspan></text>
+      </g>
+      <g
+         id="g7530">
+        <rect
+           style="fill:#babdb6;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect5598"
+           width="191.00117"
+           height="29.57818"
+           x="152.4994"
+           y="336.00186" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;fill:#555753;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="157.07872"
+           y="349.29602"
+           id="text1979"><tspan
+             sodipodi:role="line"
+             id="tspan1981"
+             x="157.07872"
+             y="349.29602">ThreadInitializer</tspan></text>
+      </g>
+    </g>
+    <g
+       id="g7707">
+      <text
+         id="text1959"
+         y="415.25574"
+         x="443.5585"
+         style="font-size:28px;font-style:normal;font-weight:normal;fill:#555753;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="415.25574"
+           x="443.5585"
+           id="tspan1961"
+           sodipodi:role="line">...</tspan></text>
+      <text
+         id="text5600"
+         y="426.0676"
+         x="436.89099"
+         style="font-size:10px;font-style:normal;font-weight:normal;fill:#888a85;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="426.0676"
+           x="436.89099"
+           id="tspan5602"
+           sodipodi:role="line">Threads</tspan></text>
+    </g>
+    <g
+       id="g7713">
+      <text
+         id="text1963"
+         y="415.17703"
+         x="490.71558"
+         style="font-size:28px;font-style:normal;font-weight:normal;fill:#555753;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="415.17703"
+           x="490.71558"
+           id="tspan1965"
+           sodipodi:role="line">...</tspan></text>
+      <text
+         id="text5604"
+         y="426.2601"
+         x="485.73514"
+         style="font-size:10px;font-style:normal;font-weight:normal;fill:#888a85;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           y="426.2601"
+           x="485.73514"
+           id="tspan5606"
+           sodipodi:role="line">Plugins</tspan></text>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:black;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="147.98735"
+       y="237.16908"
+       id="text7396"><tspan
+         sodipodi:role="line"
+         id="tspan7398"
+         x="147.98735"
+         y="237.16908">Fawkes Main Application</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,43 @@
+\documentclass[compress]{beamer}
+
+\usepackage{beamerthemesplit}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage{german}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{epsfig}
+\usepackage{tabularx}
+\usepackage{latexsym}
+\usepackage{url}
+\usepackage{pgf,pgfarrows,pgfshade}
+\usepackage{xcolor}
+\usepackage{eso-pic}
+\usepackage{color}
+\usepackage{type1cm}
+
+\mode<presentation>
+{
+  \usetheme{Aachen}
+  % to hide nav bar uncomment this line
+  \setbeamertemplate{navigation symbols}{}
+
+  %\setbeamercovered{transparent}
+  \setbeamercovered{%
+    again covered={\opaqueness<1->{40}}
+  }
+}
+
+%\pgfdeclareimage[width=4cm]{logo-big}{syslife/logo_big}
+\title{Fawkes at a Glance}
+\subtitle{Introduction to the Fawkes Robot Software Framework}
+\author[Tim Niemueller]{Tim Niemueller $<$tim@niemueller.de$>$}
+\date{February 1st 2007}%$1^{\mathtt{st}} 2007$}
+%\titlegraphic{\pgfuseimage{logo-big}}
+
+% \AtBeginPart{\frame{\partpage}}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "fawkes-glance"
+%%% End: 

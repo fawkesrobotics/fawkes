@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.44.1"
+   sodipodi:docbase="/home/tim/robocup/fawkes/doc/glance/figures"
+   sodipodi:docname="lib-aspects.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.7605291"
+     inkscape:cx="372.04724"
+     inkscape:cy="518.57143"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     inkscape:window-width="1390"
+     inkscape:window-height="972"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     showguides="true"
+     inkscape:guide-bbox="true" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="opacity:1;fill:#a40000;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:0.60239106;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3719"
+       width="239.39761"
+       height="29.39761"
+       x="240.30119"
+       y="483.66339" />
+    <rect
+       style="opacity:1;fill:#555753;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:0.602391;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1874"
+       width="239.39761"
+       height="29.397608"
+       x="239.16518"
+       y="583.79944" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:black;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="346.99219"
+       y="595.11328"
+       id="text3647"><tspan
+         sodipodi:role="line"
+         id="tspan3649"
+         x="346.99219"
+         y="595.11328">core</tspan></text>
+    <rect
+       style="opacity:1;fill:#555753;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:0.34443113;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3705"
+       width="77.655571"
+       height="29.628317"
+       x="402.17221"
+       y="549.56165" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#eeeeec;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="413.98828"
+       y="562.18811"
+       id="text3663"><tspan
+         sodipodi:role="line"
+         id="tspan3665"
+         x="413.98828"
+         y="562.18811">interface</tspan></text>
+    <rect
+       style="opacity:1;fill:#555753;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:0.54895866;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3717"
+       width="198.45105"
+       height="29.451042"
+       x="281.27847"
+       y="516.63666" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#eeeeec;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="347.23447"
+       y="529.224"
+       id="text3667"><tspan
+         sodipodi:role="line"
+         id="tspan3669"
+         x="347.23447"
+         y="529.224">blackboard</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:bold;fill:#eeeeec;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="334.03711"
+       y="495.71136"
+       id="text3671"><tspan
+         sodipodi:role="line"
+         id="tspan3673"
+         x="334.03711"
+         y="495.71136">aspects</tspan></text>
+    <rect
+       style="opacity:1;fill:#555753;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:0.24070539;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3715"
+       width="37.759296"
+       height="29.759295"
+       x="240.12035"
+       y="516.48254" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#eeeeec;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="240.85059"
+       y="529.79199"
+       id="text3675"><tspan
+         sodipodi:role="line"
+         id="tspan3677"
+         x="240.85059"
+         y="529.79199">config</tspan></text>
+    <rect
+       style="opacity:1;fill:#555753;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:0.34443113;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3703"
+       width="77.655571"
+       height="29.628317"
+       x="321.17221"
+       y="549.56165" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#eeeeec;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="348.61984"
+       y="562.18811"
+       id="text3651"><tspan
+         sodipodi:role="line"
+         x="348.61984"
+         y="562.18811"
+         id="tspan3655">utils</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#d3d7cf;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="346.23318"
+       y="573.65216"
+       id="text3683"><tspan
+         sodipodi:role="line"
+         id="tspan3685"
+         x="346.23318"
+         y="573.65216"
+         style="font-size:9px;fill:#d3d7cf">dl, ipc</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#888a85;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="309.2168"
+       y="607.60956"
+       id="text3687"><tspan
+         sodipodi:role="line"
+         id="tspan3689"
+         x="309.2168"
+         y="607.60956"
+         style="font-size:9px;fill:#888a85">glibc, pthread, stdc++</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#d3d7cf;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="244.23877"
+       y="541.15228"
+       id="text3691"><tspan
+         sodipodi:role="line"
+         id="tspan3693"
+         x="244.23877"
+         y="541.15228"
+         style="font-size:9px;fill:#d3d7cf">SQLite</tspan></text>
+    <rect
+       style="opacity:1;fill:#555753;fill-opacity:1;fill-rule:evenodd;stroke:black;stroke-width:0.34458825;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3707"
+       width="77.655411"
+       height="29.655413"
+       x="240.17229"
+       y="549.53448" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#eeeeec;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="250.46776"
+       y="561.4967"
+       id="text3659"><tspan
+         sodipodi:role="line"
+         id="tspan3661"
+         x="250.46776"
+         y="561.4967">netcomm</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#d3d7cf;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="265.33185"
+       y="574.13739"
+       id="text3695"><tspan
+         sodipodi:role="line"
+         id="tspan3697"
+         x="265.33185"
+         y="574.13739"
+         style="font-size:9px;fill:#d3d7cf">Avahi</tspan></text>
+  </g>
+</svg>
