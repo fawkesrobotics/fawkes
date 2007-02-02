@@ -114,10 +114,10 @@ FawkesThreadManager::add(ThreadList &tl)
   // All thread initialized, now add threads to internal structure
   for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
     if ( (timed_thread = dynamic_cast<BlockedTimingAspect *>(*i)) != NULL ) {
-      threads[ timed_thread->blocked_timing_hook() ].lock();
-      threads[ timed_thread->blocked_timing_hook() ].push_back(*i);
-      changed.push_back(timed_thread->blocked_timing_hook());
-      threads[ timed_thread->blocked_timing_hook() ].unlock();
+      threads[ timed_thread->blockedTimingAspectHook() ].lock();
+      threads[ timed_thread->blockedTimingAspectHook() ].push_back(*i);
+      changed.push_back(timed_thread->blockedTimingAspectHook());
+      threads[ timed_thread->blockedTimingAspectHook() ].unlock();
     } else {
       untimed_threads.lock();
       untimed_threads.push_back(*i);
@@ -162,7 +162,7 @@ FawkesThreadManager::add(Thread *thread)
   }
 
   if ( (timed_thread = dynamic_cast<BlockedTimingAspect *>(thread)) != NULL ) {
-    BlockedTimingAspect::WakeupHook hook = timed_thread->blocked_timing_hook();
+    BlockedTimingAspect::WakeupHook hook = timed_thread->blockedTimingAspectHook();
     threads[hook].lock();
     threads[hook].push_back(thread);
     if ( barriers.find(hook) != barriers.end() ) {
@@ -196,7 +196,7 @@ FawkesThreadManager::remove(ThreadList &tl)
   for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
     if ( (timed_thread = dynamic_cast<BlockedTimingAspect *>(*i)) != NULL ) {
       // find thread and remove
-      BlockedTimingAspect::WakeupHook hook = timed_thread->blocked_timing_hook();
+      BlockedTimingAspect::WakeupHook hook = timed_thread->blockedTimingAspectHook();
       threads[hook].lock();
       for (ThreadList::iterator j = threads[hook].begin(); j != threads[hook].end(); ++j) {
 	if ( *j == *i ) {
@@ -248,7 +248,7 @@ FawkesThreadManager::remove(Thread *thread)
 {
   BlockedTimingAspect *timed_thread;
   if ( (timed_thread = dynamic_cast<BlockedTimingAspect *>(thread)) != NULL ) {
-    BlockedTimingAspect::WakeupHook hook = timed_thread->blocked_timing_hook();
+    BlockedTimingAspect::WakeupHook hook = timed_thread->blockedTimingAspectHook();
     threads[hook].lock();
     for (ThreadList::iterator j = threads[hook].begin(); j != threads[hook].end(); ++j) {
       if ( *j == thread ) {

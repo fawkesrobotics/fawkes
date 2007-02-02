@@ -35,7 +35,7 @@ class BlackBoardAspect
  public:
   virtual ~BlackBoardAspect();
 
-  void setInterfaceManager(BlackBoardInterfaceManager *im);
+  void initBlackBoardAspect(BlackBoardInterfaceManager *im);
 
  protected:
   BlackBoardInterfaceManager *interface_manager;

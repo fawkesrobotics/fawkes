@@ -67,7 +67,7 @@ ConfigurableAspect::~ConfigurableAspect()
  * @param config Configuration instance to use.
  */
 void
-ConfigurableAspect::setConfiguration(Configuration *config)
+ConfigurableAspect::initConfigurableAspect(Configuration *config)
 {
   this->config = config;
 }

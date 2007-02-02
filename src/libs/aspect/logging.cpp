@@ -44,7 +44,7 @@
  */
 
 
-/** @var Logger *  LoggingAspect::logger
+/** @var Logger LoggingAspect::logger
  * This is the Logger member used to access the logger.
  * The logger will remain valid for the whole lifetime of the
  * thread.
@@ -62,7 +62,7 @@ LoggingAspect::~LoggingAspect()
  * @param logger Logger instance to use.
  */
 void
-LoggingAspect::setLogger(Logger *logger)
+LoggingAspect::initLoggingAspect(Logger *logger)
 {
   this->logger = logger;
 }

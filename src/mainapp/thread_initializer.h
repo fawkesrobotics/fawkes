@@ -28,22 +28,19 @@
 #ifndef __FAWKES_THREAD_INITIALIZER_H_
 #define __FAWKES_THREAD_INITIALIZER_H_
 
-#include <core/threading/thread_initializer.h>
+#include <aspect/initializer.h>
 
 class BlackBoard;
 class Configuration;
 class Thread;
 
-class FawkesThreadInitializer : public ThreadInitializer
+class FawkesThreadInitializer : public AspectInitializer
 {
  public:
   FawkesThreadInitializer(BlackBoard *blackboard, Configuration *config);
 
   virtual void init(Thread *thread);
 
- private:
-  BlackBoard     *blackboard;
-  Configuration  *config;
 };
 
 

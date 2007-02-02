@@ -35,9 +35,8 @@
 /** @class FawkesThreadInitializer mainapp/thread_initializer.h
  * Fawkes Thread Initializer.
  * Initializes threads that are added to the thread manager if needed.
- * All aspects defined in the Fawkes tree are supported and properly
- * initialized such that guarantees are met.
- * @see Aspects
+ * Calls AspectInitializer::init() to initialize aspect threads.
+ * @see AspectInitializer
  * @author Tim Niemueller
  */
 
@@ -47,9 +46,8 @@
  */
 FawkesThreadInitializer::FawkesThreadInitializer(BlackBoard *blackboard,
 						 Configuration *config)
+  : AspectInitializer(blackboard, config)
 {
-  this->blackboard = blackboard;
-  this->config     = config;
 }
 
 
@@ -59,23 +57,7 @@ FawkesThreadInitializer::FawkesThreadInitializer(BlackBoard *blackboard,
 void
 FawkesThreadInitializer::init(Thread *thread)
 {
-  // printf("Initializing thread %s\n", thread->name());
+  AspectInitializer::init(thread);
 
-  BlockedTimingAspect *blocked_timing_thread;
-  if ( (blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread)) != NULL ) {
-    if ( thread->opmode() != Thread::OPMODE_WAITFORWAKEUP ) {
-      throw CannotInitializeThreadException("Thread not in WAITFORWAKEUP mode (required for BlockedTimingAspect)");
-    }
-  }
-
-  BlackBoardAspect *blackboard_thread;
-  if ( (blackboard_thread = dynamic_cast<BlackBoardAspect *>(thread)) != NULL ) {
-    blackboard_thread->setInterfaceManager( blackboard->getInterfaceManager() );
-  }
-
-  ConfigurableAspect *configurable_thread;
-  if ( (configurable_thread = dynamic_cast<ConfigurableAspect *>(thread)) != NULL ) {
-    configurable_thread->setConfiguration(config);
-  }
-
+  // put any special non-aspect initialization and checks here
 }

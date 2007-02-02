@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  blocked_timing.h - Blocked timing aspect for Fawkes
+ *  initializer.h - Fawkes Aspect initializer
  *
- *  Created: Thu Jan 11 16:49:25 2007
+ *  Created: Tue Jan 30 13:34:54 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,36 +25,26 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __ASPECT_BLOCKED_TIMING_H_
-#define __ASPECT_BLOCKED_TIMING_H_
+#ifndef __ASPECT_INITIALIZER_H_
+#define __ASPECT_INITIALIZER_H_
 
+#include <core/threading/thread_initializer.h>
+
+class BlackBoard;
+class Configuration;
 class Thread;
 
-class BlockedTimingAspect
+class AspectInitializer : public ThreadInitializer
 {
  public:
-  /** Type to define at which hook the thread is woken up.
-   * See FawkesMainThread for information when and in which order the hooks
-   * are called.
-   * @see FawkesMainThread::loop()
-   */
-  typedef enum {
-    WAKEUP_HOOK_PRE_LOOP,	/**< before each loop */
-    WAKEUP_HOOK_SENSOR,		/**< sensor thread */
-    WAKEUP_HOOK_WORLDSTATE,	/**< world state thread */
-    WAKEUP_HOOK_THINK,		/**< think thread (agent) */
-    WAKEUP_HOOK_SKILL,		/**< skill thread (skill module) */
-    WAKEUP_HOOK_ACT,		/**< act thread (motor module etc.) */
-    WAKEUP_HOOK_POST_LOOP	/**< run after loop */
-  } WakeupHook;
+  AspectInitializer(BlackBoard *blackboard, Configuration *config);
 
-  BlockedTimingAspect(WakeupHook wakeup_hook);
-  virtual ~BlockedTimingAspect();
-
-  WakeupHook blockedTimingAspectHook() const;
+  virtual void init(Thread *thread);
 
  private:
-  WakeupHook wakeup_hook;
+  BlackBoard     *blackboard;
+  Configuration  *config;
 };
+
 
 #endif

@@ -48,13 +48,15 @@ BlackBoardAspect::~BlackBoardAspect()
 }
 
 
-/** Set the interface manager.
+/** Init BlackBoard aspect.
+ * This set the BlackBoard interface manager that can be used to access the
+ * BB.
  * It is guaranteed that this is called for a BlackBoardThread before start
  * is called (when running regularly inside Fawkes).
  * @param im interface manager to use
  */
 void
-BlackBoardAspect::setInterfaceManager(BlackBoardInterfaceManager *im)
+BlackBoardAspect::initBlackBoardAspect(BlackBoardInterfaceManager *im)
 {
   interface_manager = im;
 }

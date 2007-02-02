@@ -38,12 +38,9 @@ class ExampleThread : public Thread, public BlockedTimingAspect
   ExampleThread(BlockedTimingAspect::WakeupHook hook, const char *name, unsigned int modc);
   virtual ~ExampleThread();
 
-  virtual BlockedTimingAspect::WakeupHook blocked_timing_hook() const;
-
   virtual void loop();
 
  private:
-  BlockedTimingAspect::WakeupHook _hook;
   unsigned int m;
   unsigned int modc;
 };

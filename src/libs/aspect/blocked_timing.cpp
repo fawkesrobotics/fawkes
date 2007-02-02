@@ -41,18 +41,34 @@
  * @ingroup Aspects
  * @author Tim Niemueller
  *
- * @fn BlockedTimingAspect::WakeupHook BlockedTimingAspect::blocked_timing_hook() const
- * Hook to wakeup this thread.
- * Implement this method to return the hook where this thread should be woken
- * up. It must be guaranteed that this method returns the very same value
- * for the complete life time of the thread.
- * @return hook when to wakeup thread
  */
 
 // Side note: Overriding Thread::run() can make our requirement useless, but
 // we believe in the best of the coder: laziness
 
+/** Constructor.
+ * This special constructor is needed to define the wakeup point.
+ * @param wakeup_hook hook when this thread should be woken up
+ */
+BlockedTimingAspect::BlockedTimingAspect(WakeupHook wakeup_hook)
+{
+  this->wakeup_hook = wakeup_hook;
+}
+
+
 /** Virtual empty destructor. */
 BlockedTimingAspect::~BlockedTimingAspect()
 {
+}
+
+
+/** Get the wakeup hook.
+ * The wakeup hook defines when this thread should be woken up. This heavily
+ * depends on the used main thread.
+ * @return wakeup hook
+ */
+BlockedTimingAspect::WakeupHook
+BlockedTimingAspect::blockedTimingAspectHook() const
+{
+  return wakeup_hook;
 }

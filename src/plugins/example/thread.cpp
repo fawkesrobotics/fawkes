@@ -42,9 +42,9 @@
  */
 ExampleThread::ExampleThread(BlockedTimingAspect::WakeupHook hook, const char *name,
 			     unsigned int modc)
-  : Thread(name, Thread::OPMODE_WAITFORWAKEUP)
+  : Thread(name, Thread::OPMODE_WAITFORWAKEUP),
+    BlockedTimingAspect(hook)
 {
-  _hook = hook;
   this->modc = modc;
   m = 0;
 }
@@ -54,17 +54,6 @@ ExampleThread::ExampleThread(BlockedTimingAspect::WakeupHook hook, const char *n
 ExampleThread::~ExampleThread()
 {
 }
-
-
-/** Wakeup hook to register for.
- * @return hook when to wakeup this thread
- */
-BlockedTimingAspect::WakeupHook
-ExampleThread::blocked_timing_hook() const
-{
-  return _hook;
-}
-
 
 
 /** Thread loop.

@@ -35,7 +35,7 @@ class LoggingAspect
  public:
   virtual ~LoggingAspect();
 
-  void setLogger(Logger *logger);
+  void initLoggingAspect(Logger *logger);
 
  protected:
   Logger *logger;

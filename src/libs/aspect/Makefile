@@ -28,6 +28,7 @@ OBJS_libaspects =	\
 		blackboard.o		\
 		blocked_timing.o	\
 		configurable.o		\
+		initializer.o		\
 		logging.o
 
 OBJS_all = $(OBJS_libaspects)

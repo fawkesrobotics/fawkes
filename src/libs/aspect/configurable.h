@@ -35,7 +35,7 @@ class ConfigurableAspect
  public:
   virtual ~ConfigurableAspect();
 
-  void setConfiguration(Configuration *config);
+  void initConfigurableAspect(Configuration *config);
 
  protected:
   Configuration *config;
