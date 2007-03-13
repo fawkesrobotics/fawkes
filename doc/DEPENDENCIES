@@ -7,6 +7,9 @@ Write comments in a separate line in braces, indented to dependency column.
 
 Module		Dependency and Version				Type
 ------------------------------------------------------------------------------
+Fawkes		Linux kernel		>= 2.6.17		mandatory
+		(older version will not work!)
+
 Fawkes		make			>= 3.81			mandatory
 
 Fawkes		GNU Compiler Collection	>= 3.4.4		mandatory
