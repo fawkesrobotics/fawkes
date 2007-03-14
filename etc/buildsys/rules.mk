@@ -33,10 +33,21 @@ ifeq ($(MAKECMDGOALS),clean)
   endif
 endif
 
+# Dependencies
 -include $(DEPDIR)/*.d
 
+ifneq ($(OBJS_all),)
+# Do not delete .o files to allow for incremental builds
 .SECONDARY: $(OBJS_all)
+# Whenever the Makefile is modified rebuild everything
+$(OBJS_all): $(SRCDIR)/Makefile
+else
+  ifneq ($(DISABLE_OBJS_all_WARNING),1)
+  $(warning OBJS_all is not set. This is probably a bug. If you intended this set DISABLE_OBJS_all_WARNING to 1 to get rid of this warning.)
+  endif
+endif
 
+# One to build 'em all
 .PHONY: all
 all: $(LIBS_all) $(PLUGINS_all) $(BINS_all) subdirs
 
@@ -86,15 +97,11 @@ endif
 	    -e '/^$$/ d' -e 's/$$/ :/' < $(df).td >> $(df).d; \
 	rm -f $(df).td
 
-# Make .cpp files depend on Makefile to notice changes to Makefile (like config changes)
-%.cpp: $(SRCDIR)/Makefile
-
 moc_%.cpp: %.h
 	$(SILENT) echo "$(INDENT_PRINT)--- Running Qt moc on $(subst $(SRCDIR)/,,$<), creating $(subst ..,__,$@)"
 	$(SILENT) $(MOC) $(MOC_FLAGS) -p $(subst ..,__,$(@D)) $< -o $(subst ..,__,$@)
 
 .SECONDEXPANSION:
-$(BINDIR)/%: $(SRCDIR)/Makefile
 $(BINDIR)/%: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(BINDIR)
 	$(SILENT) echo -e "$(INDENT_PRINT)--> Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
@@ -104,7 +111,6 @@ $(BINDIR)/%: $$(OBJS_$$*)
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
 	-o $@ $(subst ..,__,$^)
 
-$(LIBDIR)/%.so: $(SRCDIR)/Makefile
 $(LIBDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(LIBDIR)
 	$(SILENT) echo -e "$(INDENT_PRINT)--> Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
@@ -113,7 +119,6 @@ $(LIBDIR)/%.so: $$(OBJS_$$*)
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
 	-o $@ $(subst ..,__,$^)
 
-$(PLUGINDIR)/%.so: $(SRCDIR)/Makefile
 $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(PLUGINDIR)
 	$(SILENT) echo -e "$(INDENT_PRINT)--> Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
@@ -121,3 +126,4 @@ $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
 	-o $@ $(subst ..,__,$^)
+
