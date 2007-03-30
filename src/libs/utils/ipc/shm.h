@@ -50,8 +50,8 @@ class SharedMemory
 
   SharedMemory(const char *magic_token,
 	       SharedMemoryHeader *header,
-	       bool is_read_only = false, bool create = true,
-	       bool destroy_on_delete = true);
+	       bool is_read_only, bool create,
+	       bool destroy_on_delete);
 
   virtual ~SharedMemory();
 
