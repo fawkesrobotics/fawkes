@@ -26,6 +26,7 @@
 INDENT_STRING = ---
 INDENT_PRINT := $(subst -, ,$(INDENT))
 ifeq ($(MAKECMDGOALS),clean)
+  DISABLE_OBJS_all_WARNING = 1
   ifeq ($(shell test -d qa; if [ "$$?" = "0" ]; then echo "yes"; fi),yes)
     ifneq ($(findstring qa,$(SUBDIRS)),qa)
       SUBDIRS += qa
@@ -42,8 +43,10 @@ ifneq ($(OBJS_all),)
 # Whenever the Makefile is modified rebuild everything
 $(OBJS_all): $(SRCDIR)/Makefile
 else
-  ifneq ($(DISABLE_OBJS_all_WARNING),1)
-  $(warning OBJS_all is not set. This is probably a bug. If you intended this set DISABLE_OBJS_all_WARNING to 1 to get rid of this warning.)
+  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all),)
+    ifneq ($(DISABLE_OBJS_all_WARNING),1)
+    $(warning OBJS_all is not set. This is probably a bug. If you intended this set DISABLE_OBJS_all_WARNING to 1 to get rid of this warning.)
+    endif
   endif
 endif
 
@@ -74,10 +77,15 @@ subdirs: $(SUBDIRS)
 
 ifneq ($(SUBDIRS),)
 $(SUBDIRS):
-	$(SILENT) echo -e "\n$(INDENT_PRINT)--- Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"
-	$(SILENT) $(MAKE) --no-print-directory -C $(realpath $(SRCDIR)/$@) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)"
-	$(SILENT) if [ "$(MAKECMDGOALS)" != "clean" ]; then \
-		echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $@"; \
+	$(SILENT) if [ ! -d $(@) ]; then \
+		echo -e "\n$(INDENT_PRINT)---$(TRED)Directory $(TNORMAL)$(TBOLDRED)$@$(TNORMAL)$(TRED) does not exist, check SUBDIRS variable$(TNORMAL) ---"; \
+		exit 1; \
+	else \
+		echo -e "\n$(INDENT_PRINT)--- Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"; \
+		$(MAKE) --no-print-directory -C $(realpath $(SRCDIR)/$@) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)"; \
+		if [ "$(MAKECMDGOALS)" != "clean" ]; then \
+			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $@"; \
+		fi \
 	fi
 endif
 
