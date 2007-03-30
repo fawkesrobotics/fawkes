@@ -29,7 +29,7 @@
 #define __CORE_EXCEPTION_H_
 
 // needed for va_list
-#include <stdarg.h>
+#include <cstdarg>
 
 class Mutex;
 
