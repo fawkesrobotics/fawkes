@@ -22,6 +22,12 @@
 ### Debugging related options
 SILENT = @
 
+### Build type
+BUILD_TYPE = fawkes
+ifneq ($(realpath $(BASEDIR)/src/Makefile.conf),)
+BUILD_TYPE = RCSoftX
+endif
+
 ### Directories
 #BASEDIR ?= $(HOME)/robocup/fawkes
 SRCDIR ?= .
@@ -57,6 +63,13 @@ DEFAULT_INCLUDES = -I$(BASEDIR)/src -I$(BASEDIR)/src/libs
 CFLAGS_BASE = -Wall -Werror -pthread $(DEFAULT_INCLUDES) -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 LDFLAGS_BASE = -L$(LIBDIR)
 LDFLAGS_SHARED = -shared
+
+### Special treatment if we are build as external in RCSoftX
+ifeq ($(BUILD_TYPE),RCSoftX)
+# External in RCSoftX
+DEFAULT_INCLUDES = -I$(BASEDIR)/src -I$(BASEDIR)/src/fawkes
+LIBDIR = $(abspath $(BASEDIR)/lib/fawkes)
+endif
 
 ### colors, to be used as command, not via echo
 BLACK		= tput setaf 0
