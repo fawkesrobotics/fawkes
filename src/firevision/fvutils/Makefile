@@ -29,7 +29,7 @@ LIBS     = $(VISION_LIBS)
 
 # We are lazy in the utils...
 OBJS_libfvutils := $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))
-#$(patsubst %.cpp,%.o,$(wildcard *.cpp */*.cpp */*/*.cpp */*/*/*.cpp))
+LIBS_libfvutils := utils
 
 OBJS_all = $(OBJS_libfvutils)
 LIBS_all = $(LIBDIR)/libfvutils.so

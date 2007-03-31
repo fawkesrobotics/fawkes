@@ -27,7 +27,7 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-LIBS_libfvcams = $(VISION_CAM_LIBS)
+LIBS_libfvcams = $(VISION_CAM_LIBS) utils fvutils
 OBJS_libfvcams = camera.o			\
 		 cameracontrol.o
 

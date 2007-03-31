@@ -29,6 +29,7 @@ LIBS     = $(VISION_LIBS)
 
 # We are lazy in the models...
 OBJS_libfvmodels := $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))
+LIBS_libfvutils  := utils fvutils
 
 OBJS_all = $(OBJS_libfvmodels)
 LIBS_all = $(LIBDIR)/libfvmodels.so

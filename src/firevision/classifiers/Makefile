@@ -29,6 +29,7 @@ LIBS     = $(VISION_LIBS)
 
 # We are lazy...
 OBJS_libfvclassifiers := $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))
+LIBS_libfvclassifiers := fvutils
 
 OBJS_all = $(OBJS_libfvclassifiers)
 LIBS_all = $(LIBDIR)/libfvclassifiers.so
