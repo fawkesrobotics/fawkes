@@ -21,7 +21,7 @@
 
 BASEDIR = ../..
 
-SUBDIRS = plugin config
+SUBDIRS = blackboard plugin config
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk

@@ -13,9 +13,9 @@
 #
 #*****************************************************************************
 #
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
+#           $Id: Makefile 31 2006-10-23 17:41:08Z tim $
+# last modified: $Date: 2006-10-23 19:41:08 +0200 (Mo, 23 Okt 2006) $
+#            by: $Author: tim $
 #
 #*****************************************************************************
 
@@ -32,6 +32,7 @@ OBJS_bb_list = bb_list.o
 LIBS_bb_meminfo = core utils blackboard
 OBJS_bb_meminfo = bb_meminfo.o
 
+OBJS_all = $(OBJS_bb_cleanup) $(OBJS_bb_list) $(OBJS_bb_meminfo)
 BINS_all =	$(BINDIR)/bb_cleanup	\
 		$(BINDIR)/bb_list	\
 		$(BINDIR)/bb_meminfo

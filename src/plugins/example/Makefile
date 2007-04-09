@@ -27,6 +27,7 @@ LIBS_example_plugin = core utils
 OBJS_example_plugin = example_plugin.o	\
 		      thread.o
 
-PLUGINS_all =	$(PLUGINDIR)/example_plugin.so
+OBJS_all    = $(OBJS_example_plugin)
+PLUGINS_all = $(PLUGINDIR)/example_plugin.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
