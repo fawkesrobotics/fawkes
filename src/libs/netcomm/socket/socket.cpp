@@ -220,6 +220,39 @@ Socket::close()
  * If called for a stream socket this will connect to the remote address. If
  * you call this on a datagram socket you will tune in to a specific sender and
  * receiver.
+ * @param addr_port struct containing address and port to connect to
+ * @param struct_size size of addr_port struct
+ * @exception SocketException thrown if socket cannot connect, check errno for cause
+ */
+void
+Socket::connect(struct sockaddr *addr_port, unsigned int struct_size)
+{
+  if ( sock_fd == -1 )  throw SocketException("Trying to connect invalid socket");
+
+  if (timeout == 0.f) {
+    if ( ::connect(sock_fd, addr_port, struct_size) < 0 ) {
+      throw SocketException("Could not connect", errno);
+    }
+  } else {
+    struct timeval start, now;
+    gettimeofday(&start, NULL);
+    do {
+      if ( ::connect(sock_fd, addr_port, struct_size) < 0 ) {
+	if ( (errno != EINPROGRESS) &&
+	     (errno != EALREADY) ) {
+	  throw SocketException("Could not connect", errno);
+	}
+      }
+      gettimeofday(&now, NULL);
+    } while (time_diff_sec(now, start) < timeout);
+  }
+}
+
+
+/** Connect socket.
+ * If called for a stream socket this will connect to the remote address. If
+ * you call this on a datagram socket you will tune in to a specific sender and
+ * receiver.
  * @param hostname hostname or textual represenation of IP address to connect to
  * @param port port to connect to
  * @exception SocketException thrown if socket cannot connect, check errno for cause
@@ -243,23 +276,7 @@ Socket::connect(const char *hostname, unsigned short int port)
   memcpy((char *)&host.sin_addr.s_addr, h->h_addr, h->h_length);
   host.sin_port = htons(port);
 
-  if (timeout == 0.f) {
-    if ( ::connect(sock_fd, (struct sockaddr *)&host, sizeof(host)) < 0 ) {
-      throw SocketException("Could not connect", errno);
-    }
-  } else {
-    struct timeval start, now;
-    gettimeofday(&start, NULL);
-    do {
-      if ( ::connect(sock_fd, (struct sockaddr *)&host, sizeof(host)) < 0 ) {
-	if ( (errno != EINPROGRESS) &&
-	     (errno != EALREADY) ) {
-	  throw SocketException("Could not connect", errno);
-	}
-      }
-      gettimeofday(&now, NULL);
-    } while (time_diff_sec(now, start) < timeout);
-  }
+  connect((struct sockaddr *)&host, sizeof(host));
 }
 
 
@@ -464,7 +481,7 @@ Socket::write(void *buf, unsigned int count)
     retval = ::write(sock_fd, (char *)buf + bytes_written, count - bytes_written);
     if (retval == -1) {
       if (errno != EAGAIN) {
-	throw SocketException("Could not read data", errno);
+	throw SocketException("Could not write data", errno);
       } else {
 	// just to meet loop condition
 	retval = 0;

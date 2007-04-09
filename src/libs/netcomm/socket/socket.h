@@ -58,6 +58,7 @@ class Socket
   virtual ~Socket();
 
   virtual void         connect(const char *hostname, const unsigned short int port);
+  virtual void         connect(struct sockaddr *addr_port, unsigned int struct_size);
 
   virtual void         bind(const unsigned short int port);
   virtual void         bind(const unsigned short int port,
