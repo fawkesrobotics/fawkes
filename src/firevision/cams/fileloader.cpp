@@ -26,9 +26,11 @@
  */
 
 #include <core/exception.h>
+#include <core/exceptions/software.h>
 #include <cams/fileloader.h>
 #include <fvutils/writers/fvraw.h>
 #include <fvutils/system/filetype.h>
+#include <fvutils/system/camargp.h>
 
 #include <fvutils/readers/fvraw.h>
 #include <fvutils/readers/jpeg.h>
@@ -49,6 +51,26 @@
 FileLoader::FileLoader(const char *filename)
 {
   this->filename = filename;
+  width = height = 0;
+  file_buffer = NULL;
+  this->cspace = CS_UNKNOWN;
+}
+
+
+/** Constructor.
+ * Initialize with the parameters from the given camera argument parser. The following
+ * parameters are supported:
+ * - file=<filename>: open the given file
+ *
+ * @param cap camera argument parser
+ */
+FileLoader::FileLoader(CameraArgumentParser *cap)
+{
+  if ( cap->has("file") ) {
+    this->filename = cap->get("file").c_str();
+  } else {
+    throw MissingParameterException("Parameter file is missing.");
+  }
   width = height = 0;
   file_buffer = NULL;
   this->cspace = CS_UNKNOWN;

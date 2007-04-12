@@ -36,6 +36,8 @@ namespace dc1394 {
 #include <dc1394/control.h>
 }
 
+class CameraArgumentParser;
+
 class FirewireCamera : public Camera, public CameraControl
 {
 
@@ -45,6 +47,7 @@ class FirewireCamera : public Camera, public CameraControl
 		 dc1394::dc1394video_mode_t mode     = dc1394::DC1394_VIDEO_MODE_640x480_YUV422,
 		 dc1394::dc1394speed_t speed         = dc1394::DC1394_ISO_SPEED_400,
 		 int num_buffers=8);
+  FirewireCamera(CameraArgumentParser *cap);
 
   virtual ~FirewireCamera();
 
@@ -93,6 +96,11 @@ class FirewireCamera : public Camera, public CameraControl
   dc1394::dc1394camera_t        *camera;
   dc1394::dc1394camera_t       **cameras;
   dc1394::dc1394video_frame_t   *frame;
+  dc1394::dc1394color_coding_t   format7_coding;
+  int                            format7_width;
+  int                            format7_height;
+  int                            format7_startx;
+  int                            format7_starty;
 };
 
 #endif

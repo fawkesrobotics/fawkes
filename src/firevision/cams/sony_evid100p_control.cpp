@@ -103,7 +103,7 @@ SonyEviD100PControl::SonyEviD100PControl(string port)
   opened = false;
   pan_target = 0;
   tilt_target = 0;
-  effect = EFFECT_NONE;
+  _effect = EFFECT_NONE;
 }
 
 
@@ -423,9 +423,9 @@ SonyEviD100PControl::supports_effects()
 }
 
 bool
-SonyEviD100PControl::supports_effect(unsigned int effect)
+SonyEviD100PControl::supports_effect(unsigned int __effect)
 {
-  switch (effect) {
+  switch (__effect) {
   case EFFECT_NONE:
   case EFFECT_PASTEL:
   case EFFECT_NEGATIVE:
@@ -444,10 +444,10 @@ SonyEviD100PControl::supports_effect(unsigned int effect)
 
 
 void
-SonyEviD100PControl::set_effect(unsigned int effect)
+SonyEviD100PControl::set_effect(unsigned int __effect)
 {
-  this->effect = effect;
-  switch (effect) {
+  this->_effect = __effect;
+  switch (__effect) {
   case EFFECT_NONE:
     visca->resetEffect();
     break;
@@ -485,7 +485,7 @@ SonyEviD100PControl::set_effect(unsigned int effect)
 unsigned int
 SonyEviD100PControl::effect()
 {
-  return effect;
+  return _effect;
 }
 
 

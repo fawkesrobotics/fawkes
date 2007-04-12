@@ -32,12 +32,15 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/ipc/shm_image.h>
 
+class CameraArgumentParser;
+
 class SharedMemoryCamera : public Camera
 {
 
  public:
 
   SharedMemoryCamera(unsigned int image_num=0);
+  SharedMemoryCamera(CameraArgumentParser *cap);
 
   virtual void open();
   virtual void start();
@@ -57,11 +60,14 @@ class SharedMemoryCamera : public Camera
   virtual unsigned int   pixel_height();
   virtual colorspace_t   colorspace();
 
+  virtual unsigned int   number_of_images();
   virtual void           set_image_number(unsigned int n);
 
   SharedMemoryImageBuffer *  shared_memory_image_buffer();
 
  private:
+  void init();
+
   bool opened;
   unsigned int  width;
   unsigned int  height;

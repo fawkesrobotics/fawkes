@@ -60,7 +60,7 @@ class LeutronCamera : public Camera
   virtual unsigned int   pixel_height();
   virtual colorspace_t   colorspace();
 
-  virtual bool           set_image_number(unsigned int n);
+  virtual void           set_image_number(unsigned int n);
 
  private:
   bool opened;

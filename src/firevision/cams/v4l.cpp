@@ -30,6 +30,7 @@
 #include <cams/v4l.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/rgb.h>
+#include <fvutils/system/camargp.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -58,13 +59,31 @@ using namespace std;
 V4LCamera::V4LCamera(const char *device_name)
 {
   started = opened = false;
-  this->device_name = device_name;
+  this->device_name = strdup(device_name);
+}
+
+
+/** Constructor.
+ * Initialize camera with parameters from camera argument parser.
+ * Supported arguments:
+ * - device=<dev>, device file, for example /dev/video0
+ * @param cap camera argument parser
+ */
+V4LCamera::V4LCamera(CameraArgumentParser *cap)
+{
+  started = opened = false;
+  if ( cap->has("device") ) {
+    device_name = strdup(cap->get("device").c_str());
+  } else {
+    throw MissingParameterException("Missing device for V4lCamera");
+  }
 }
 
 
 /** Destructor. */
 V4LCamera::~V4LCamera()
 {
+  free(device_name);
 }
 
 

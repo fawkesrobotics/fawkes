@@ -30,14 +30,21 @@
 
 #include <cams/camera.h>
 #include <fvutils/color/colorspaces.h>
-#include <fvutils/net/fuse_client_tcp.h>
+
+class CameraArgumentParser;
+class FuseClientTCP;
 
 class NetworkCamera : public Camera
 {
 
  public:
 
-  NetworkCamera(char *host, unsigned short port, unsigned int image_num=0, unsigned short proto = PROTOCOL_TCP);
+  NetworkCamera(char *host, unsigned short port,
+		unsigned int image_num=0,
+		unsigned short proto = PROTOCOL_TCP);
+  NetworkCamera(CameraArgumentParser *cap);
+
+  virtual ~NetworkCamera();
 
   virtual void open();
   virtual void start();
@@ -56,6 +63,7 @@ class NetworkCamera : public Camera
   virtual unsigned int   pixel_height();
   virtual colorspace_t   colorspace();
 
+  virtual unsigned int   number_of_images();
   virtual void           set_image_number(unsigned int n);
 
   static const unsigned short PROTOCOL_TCP;

@@ -28,7 +28,9 @@
 #ifndef __FIREVISION_CAMS_FILELOADER_H_
 #define __FIREVISION_CAMS_FILELOADER_H_
 
-#include "cams/camera.h"
+#include <cams/camera.h>
+
+class CameraArgumentParser;
 
 class FileLoader : public Camera
 {
@@ -37,6 +39,7 @@ class FileLoader : public Camera
 
   FileLoader(const char *filename);
   FileLoader(colorspace_t cspace, const char* filename, unsigned int width, unsigned int height);
+  FileLoader(CameraArgumentParser *cap);
 
   virtual void             open();
   virtual void             start();

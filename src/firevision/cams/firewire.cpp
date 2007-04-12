@@ -27,16 +27,21 @@
 
 #include <core/exception.h>
 
-#include <cams/firewire.h>
-
+#include <stdlib.h>
 #include <unistd.h>
-//#include <cstdio>
+
+#include <string>
+
+#include <cams/firewire.h>
+#include <fvutils/system/camargp.h>
+
 
 namespace dc1394 {
 #include <dc1394/utils.h>
 }
 
 using namespace dc1394;
+using namespace std;
 
 /** Constructor.
  * @param framerate desired framerate
@@ -65,7 +70,6 @@ FirewireCamera::FirewireCamera(dc1394::dc1394framerate_t framerate,
     // cerr << msg_prefix << "When in mode YUV422 @ 640x480 with more than 15 fps. Setting framerate to 15fps." << endl;
     this->framerate = DC1394_FRAMERATE_15;
   }
-
 }
 
 
@@ -391,3 +395,116 @@ FirewireCamera::focus_max()
   }
 }
 
+
+
+/** Constructor.
+ * Initialize and take parameters from camera argument parser. The following
+ * arguments are supported:
+ * - mode=<mode> where <mode> is one of
+ *   - 640x480_YUV422
+ *   - 640x480_MONO16
+ *   - FORMAT7_0
+ *   - FORMAT7_1
+ *   - FORMAT7_2
+ *   - FORMAT7_3
+ *   - FORMAT7_4
+ *   - FORMAT7_5
+ *   - FORMAT7_6
+ *   - FORMAT7_7
+ * - coding=<coding>, color coding for Format7, <coding> is one of:
+ *   - YUV422
+ *   - MONO16
+ *   - RAW16
+ * - isospeed=<speed>, ISO speed, <speed> is one of:
+ *   - 400
+ *   - 800
+ * - framerate=<fps>, desired rate in frames per second, <fps> is one of:
+ *   - 15
+ *   - 30
+ *   - 60
+ *   - 120
+ * - nbufs=<nbufs>, number of DMA buffers, integer, 0 < n <= 32
+ * - width=<width>, width in pixels of Format7 ROI
+ * - height=<height>, height in pixels of Format7 ROI
+ * - startx=<startx>, X start of Format7 ROI
+ * - starty=<starty>, Y start of Format7 ROI
+ * @param cap camera argument parser
+ */
+FirewireCamera::FirewireCamera(CameraArgumentParser *cap)
+{
+  // Defaults
+  mode = DC1394_VIDEO_MODE_640x480_YUV422;
+  speed = DC1394_ISO_SPEED_400;
+  framerate = DC1394_FRAMERATE_30;
+  camera = NULL;
+  cameras = NULL;
+  format7_width = format7_height = format7_startx = format7_starty = 0;
+
+  if ( cap->has("mode") ) {
+    string m = cap->get("mode");
+    if ( m == "640x480_MONO16" ) {
+      mode = DC1394_VIDEO_MODE_640x480_MONO16;
+    } else if ( m == "FORMAT7_0" ) {
+      mode = DC1394_VIDEO_MODE_FORMAT7_0;
+    } else if ( m == "FORMAT7_1" ) {
+      mode = DC1394_VIDEO_MODE_FORMAT7_1;
+    } else if ( m == "FORMAT7_2" ) {
+      mode = DC1394_VIDEO_MODE_FORMAT7_2;
+    } else if ( m == "FORMAT7_3" ) {
+      mode = DC1394_VIDEO_MODE_FORMAT7_3;
+    } else if ( m == "FORMAT7_4" ) {
+      mode = DC1394_VIDEO_MODE_FORMAT7_4;
+    } else if ( m == "FORMAT7_5" ) {
+      mode = DC1394_VIDEO_MODE_FORMAT7_5;
+    } else if ( m == "FORMAT7_6" ) {
+      mode = DC1394_VIDEO_MODE_FORMAT7_6;
+    } else if ( m == "FORMAT7_7" ) {
+      mode = DC1394_VIDEO_MODE_FORMAT7_7;
+    }
+  }
+  if ( cap->has("coding") ) {
+    string c = cap->get("coding");
+    if ( c == "YUV422" ) {
+      format7_coding = DC1394_COLOR_CODING_YUV422;
+    } else if ( c == "MONO16" ) {
+      format7_coding = DC1394_COLOR_CODING_MONO16;
+    } else if ( c == "RAW16" ) {
+      format7_coding = DC1394_COLOR_CODING_RAW16;
+    }
+  }
+  if ( cap->has("isospeed") ) {
+    string s = cap->get("isospeed");
+    if ( s == "400" ) {
+      speed = DC1394_ISO_SPEED_400;
+    } else if ( s == "800" ) {
+      speed = DC1394_ISO_SPEED_800;
+    }
+  }
+  if ( cap->has("framerate") ) {
+    string f = cap->get("framerate");
+    if ( f == "15" ) {
+      framerate = DC1394_FRAMERATE_15;
+    } else if ( f == "30" ) {
+      framerate = DC1394_FRAMERATE_30;
+    } else if ( f == "60" ) {
+      framerate = DC1394_FRAMERATE_60;
+    } else if ( f == "120" ) {
+      framerate = DC1394_FRAMERATE_120;
+    }
+  }
+  if ( cap->has("nbufs") ) {
+    num_buffers = atoi(cap->get("nbufs").c_str());
+  }
+  if ( cap->has("width") ) {
+    format7_width = atoi(cap->get("width").c_str());
+  }
+  if ( cap->has("height") ) {
+    format7_height = atoi(cap->get("height").c_str());
+  }
+  if ( cap->has("startx") ) {
+    format7_startx = atoi(cap->get("startx").c_str());
+  }
+  if ( cap->has("starty") ) {
+    format7_starty = atoi(cap->get("starty").c_str());
+  }
+}

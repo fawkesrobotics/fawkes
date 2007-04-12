@@ -27,6 +27,7 @@
 #include <core/exception.h>
 #include <cams/shmem.h>
 #include <fvutils/writers/fvraw.h>
+#include <fvutils/system/camargp.h>
 
 /** @class SharedMemoryCamera <cams/shmem.h>
  * Shared memory camera.
@@ -42,6 +43,37 @@ SharedMemoryCamera::SharedMemoryCamera(unsigned int image_num)
   this->image_num = image_num;
 
   try {
+    init();
+  } catch (Exception &e) {
+    throw;
+  }
+}
+
+
+/** Constructor.
+ * Take configuration data from camera argument parser. The following
+ * options are supported.
+ * - image=<num>, where num is the image number
+ */
+SharedMemoryCamera::SharedMemoryCamera(CameraArgumentParser *cap)
+{
+  image_num = 0;
+  if ( cap->has("image") ) {
+    int i = atoi(cap->get("image").c_str());
+    image_num = (i < 0) ? 0 : (unsigned int)i;
+  }
+  try {
+    init();
+  } catch (Exception &e) {
+    throw;
+  }
+}
+
+
+void
+SharedMemoryCamera::init()
+{
+  try {
     shm_buffer = new SharedMemoryImageBuffer(image_num);
     opened = true;
   } catch (Exception &e) {
@@ -49,7 +81,6 @@ SharedMemoryCamera::SharedMemoryCamera(unsigned int image_num)
     throw;
   }
 }
-
 
 void
 SharedMemoryCamera::open()
@@ -141,6 +172,13 @@ bool
 SharedMemoryCamera::ready()
 {
   return opened;
+}
+
+
+unsigned int
+SharedMemoryCamera::number_of_images()
+{
+  return 0;
 }
 
 

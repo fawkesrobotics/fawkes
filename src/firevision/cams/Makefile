@@ -29,7 +29,8 @@ LIBS     = $(VISION_LIBS)
 
 LIBS_libfvcams = $(VISION_CAM_LIBS) utils fvutils
 OBJS_libfvcams = camera.o			\
-		 cameracontrol.o
+		 cameracontrol.o		\
+		 factory.o
 
 ifeq ($(HAVE_VISCA_CTRL),1)
 OBJS_libfvcams += visca.o

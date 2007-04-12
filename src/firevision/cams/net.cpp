@@ -26,7 +26,13 @@
  */
 
 #include <core/exception.h>
+#include <core/exceptions/software.h>
 #include <cams/net.h>
+
+#include <fvutils/net/fuse_client_tcp.h>
+#include <fvutils/system/camargp.h>
+
+#include <cstring>
 
 /** TCP for transmitting data. */
 const unsigned short NetworkCamera::PROTOCOL_TCP = 1;
@@ -48,7 +54,7 @@ NetworkCamera::NetworkCamera(char *host, unsigned short port, unsigned int image
 {
   this->image_num = image_num;
   this->port = port;
-  this->host = host;
+  this->host = strdup(host);
 
   switch (proto) {
   case PROTOCOL_TCP:
@@ -57,6 +63,42 @@ NetworkCamera::NetworkCamera(char *host, unsigned short port, unsigned int image
   default:
     throw Exception("Unsupported protocol");
   }
+}
+
+
+/** Constructor.
+ * Initialize with parameters from camera argument parser, supported values are:
+ * - host=<host>, hostname or IP of host to connect to
+ * - port=<port>, port number to connect to
+ * - image=<num>, image number of image to retrieve
+ */
+NetworkCamera::NetworkCamera(CameraArgumentParser *cap)
+{
+  image_num = 0;
+  const char *host = "localhost";
+  if ( cap->has("image") ) {
+    int i = atoi(cap->get("image").c_str());
+    image_num = (i < 0) ? 0 : (unsigned int)i;
+  }
+  if ( cap->has("host") ) {
+    host = strdup(cap->get("host").c_str());
+  }
+  if ( cap->has("port") ) {
+    int i = atoi(cap->get("port").c_str());
+    if ( (i < 0) || (i >= 0xFFFF) ) {
+      throw IllegalArgumentException("Port must be in the range 0-65535");
+    }
+    port = (unsigned int)i;
+  }
+
+  fusec = new FuseClientTCP(host, port);
+}
+
+
+NetworkCamera::~NetworkCamera()
+{
+  delete fusec;
+  free(host);
 }
 
 
@@ -175,6 +217,13 @@ bool
 NetworkCamera::ready()
 {
   return fusec->connected();
+}
+
+
+unsigned int
+NetworkCamera::number_of_images()
+{
+  return 0;
 }
 
 

@@ -55,7 +55,7 @@ class Camera
   virtual unsigned int     pixel_height()                          = 0;
   virtual colorspace_t     colorspace()                            = 0;
 
-  virtual unsigned int     number_of_images()                      = 0;
+  // virtual unsigned int     number_of_images()                      = 0;
   virtual void             set_image_number(unsigned int n)        = 0;
 };
 

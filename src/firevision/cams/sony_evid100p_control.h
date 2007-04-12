@@ -137,7 +137,7 @@ class SonyEviD100PControl : public CameraControl
   int pan_target;
   int tilt_target;
 
-  unsigned int effect;
+  unsigned int _effect;
 
 };
 

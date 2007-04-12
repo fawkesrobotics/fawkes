@@ -39,13 +39,6 @@
  * there are query methods to check for a certain feature.
  *
  * @author Tim Niemueller
- *
- * @fn void CameraControl::process_control() = 0
- * Process information.
- * Some operations allow for asynchronous usage (like fetching pan/tilt data).
- * This is because some cameras need some time to retrieve the information and
- * thus it is a good idea to let that run beside the image processin loop. With
- * process the incoming information is processed.
  */
 
 
@@ -57,6 +50,18 @@ const unsigned int CameraControl::EFFECT_NONE = 0;
 
 /** Virtual empty destructor. */
 CameraControl::~CameraControl()
+{
+}
+
+
+/** Process information.
+ * Some operations allow for asynchronous usage (like fetching pan/tilt data).
+ * This is because some cameras need some time to retrieve the information and
+ * thus it is a good idea to let that run beside the image processin loop. With
+ * process the incoming information is processed.
+ */
+void
+CameraControl::process_control()
 {
 }
 

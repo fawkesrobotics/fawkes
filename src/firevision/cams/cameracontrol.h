@@ -36,7 +36,7 @@ class CameraControl
 
   static const unsigned int EFFECT_NONE;
 
-  virtual void         process_control()                                 = 0;
+  virtual void         process_control();
 
   virtual bool         supports_focus();
   virtual bool         auto_focus();
