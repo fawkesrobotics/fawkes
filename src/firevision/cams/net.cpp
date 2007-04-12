@@ -68,9 +68,10 @@ NetworkCamera::NetworkCamera(char *host, unsigned short port, unsigned int image
 
 /** Constructor.
  * Initialize with parameters from camera argument parser, supported values are:
- * - host=<host>, hostname or IP of host to connect to
- * - port=<port>, port number to connect to
- * - image=<num>, image number of image to retrieve
+ * - host=HOST, hostname or IP of host to connect to
+ * - port=PORT, port number to connect to
+ * - image=NUM, image number of image to retrieve
+ * @param cap camera argument parser
  */
 NetworkCamera::NetworkCamera(CameraArgumentParser *cap)
 {
@@ -95,6 +96,7 @@ NetworkCamera::NetworkCamera(CameraArgumentParser *cap)
 }
 
 
+/** Destructor. */
 NetworkCamera::~NetworkCamera()
 {
   delete fusec;
@@ -217,13 +219,6 @@ bool
 NetworkCamera::ready()
 {
   return fusec->connected();
-}
-
-
-unsigned int
-NetworkCamera::number_of_images()
-{
-  return 0;
 }
 
 

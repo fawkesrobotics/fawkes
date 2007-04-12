@@ -53,7 +53,8 @@ SharedMemoryCamera::SharedMemoryCamera(unsigned int image_num)
 /** Constructor.
  * Take configuration data from camera argument parser. The following
  * options are supported.
- * - image=<num>, where num is the image number
+ * - image=NUM, where num is the image number
+ * @param cap camera argument parser
  */
 SharedMemoryCamera::SharedMemoryCamera(CameraArgumentParser *cap)
 {
@@ -172,13 +173,6 @@ bool
 SharedMemoryCamera::ready()
 {
   return opened;
-}
-
-
-unsigned int
-SharedMemoryCamera::number_of_images()
-{
-  return 0;
 }
 
 

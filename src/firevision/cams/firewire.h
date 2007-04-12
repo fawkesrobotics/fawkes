@@ -70,7 +70,6 @@ class FirewireCamera : public Camera, public CameraControl
   virtual colorspace_t   colorspace();
 
   virtual void           set_image_number(unsigned int n);
-  virtual unsigned int   number_of_images();
 
   bool    iso_mode_enabled();
 

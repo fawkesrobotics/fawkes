@@ -60,7 +60,7 @@ FileLoader::FileLoader(const char *filename)
 /** Constructor.
  * Initialize with the parameters from the given camera argument parser. The following
  * parameters are supported:
- * - file=<filename>: open the given file
+ * - file=FILENAME: open the given file
  *
  * @param cap camera argument parser
  */

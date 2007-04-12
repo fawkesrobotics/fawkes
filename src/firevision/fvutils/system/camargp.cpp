@@ -31,6 +31,34 @@
 
 using namespace std;
 
+/** @class CameraArgumentParser <fvutils/system/camargp.h>
+ * Camera argument parser.
+ * Simple parser that will parse a camera parameter string that defines
+ * the camera type and options specific to this camera.
+ *
+ * In general a string is of the form
+ * @code
+ * camera:param1=value1:param2=value2:arg1:arg2
+ * @endcode
+ * The string is a colon-separated (:) list of elements.
+ *
+ * The first element (camera in the example) denotes the camera type.
+ * See the CameraFactory documentation for allowed values. It can be queried
+ * with the camid() method.
+ *
+ * The rest is a list of parameters and arguments. Parameters are key/value
+ * pairs separated by an equals sign. The are then queried with the has(),
+ * get() and parameters() methods. Arguments are simple strings that do not contain
+ * an equals sign and are given as-is via the arguments() method. These could
+ * for example be a list of files etc..
+ *
+ * @see CameraFactory
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param as camera argument string
+ */
 CameraArgumentParser::CameraArgumentParser(const char *as)
 {
   values.clear();
@@ -63,12 +91,19 @@ CameraArgumentParser::CameraArgumentParser(const char *as)
 }
 
 
+/** Destructor. */
 CameraArgumentParser::~CameraArgumentParser()
 {
   values.clear();
+  args.clear();
 }
 
 
+/** Get camera ID.
+ * Get the camera ID. This is the very first element before
+ * the first colon.
+ * @return camera ID string
+ */
 std::string
 CameraArgumentParser::camid() const
 {
@@ -76,6 +111,12 @@ CameraArgumentParser::camid() const
 }
 
 
+/** Check if an parameter was given.
+ * Checks if the given parameter s was given in the argument
+ * string.
+ * @param s parameter key to check for
+ * @return true, if the parameter has been supplied, false otherwise
+ */
 bool
 CameraArgumentParser::has(std::string s) const
 {
@@ -83,6 +124,11 @@ CameraArgumentParser::has(std::string s) const
 }
 
 
+/** Get the value of the given parameter.
+ * @param s key of the parameter to retrieve
+ * @return the value of the given parameter or an empty string if the
+ * parameter was not supplied.
+ */
 std::string
 CameraArgumentParser::get(std::string s)
 {
@@ -94,6 +140,10 @@ CameraArgumentParser::get(std::string s)
 }
 
 
+/** Get the arguments.
+ * Returns a vector of arguments supplied in the argument string.
+ * @return vector of arguments
+ */
 std::vector<std::string>
 CameraArgumentParser::arguments() const
 {
@@ -101,6 +151,9 @@ CameraArgumentParser::arguments() const
 }
 
 
+/** Get a map of parameters.
+ * @returns map of key/value pairs of parameters supplied in the argument string.
+ */
 std::map<std::string, std::string>
 CameraArgumentParser::parameters() const
 {

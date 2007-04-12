@@ -112,12 +112,6 @@
  * Height of image in pixels.
  * @return height of image in pixels
  *
- * @fn unsigned int Camera::number_of_images()
- * Number of images.
- * Some cameras are able to return several different images. This method can be
- * used to determine the number of images available.
- * @return number of available images
- *
  * @fn void Camera::set_image_number(unsigned int n)
  * Set image number to retrieve.
  * If a camera is able to retrieve several images this method can be used to

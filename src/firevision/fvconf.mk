@@ -66,10 +66,10 @@ ifneq ($(realpath $(IPP_DIR)),)
   endif
 endif
 
-VISION_CFLAGS       += $(foreach CAM,$(CAMS),$(if $(HAVE_$(CAM)_CAM),-D$(CAM)_CAM))
+VISION_CFLAGS       += $(foreach CAM,$(CAMS),$(if $(subst 0,,$(HAVE_$(CAM)_CAM)),-DHAVE_$(CAM)_CAM))
 
 ifeq ($(MAKECMDGOALS),printconf)
-VISION_CAM_PRINT     = $(foreach CAM,$(CAMS),"\b"$(CAM): $(if $(HAVE_$(CAM)_CAM),"yes","no")"\n")
+VISION_CAM_PRINT     = $(foreach CAM,$(CAMS),"\b"$(CAM): $(if $(subst 0,,$(HAVE_$(CAM)_CAM)),"yes","no")"\n")
 printconf:
 	$(SILENT)echo "Cameras:"
 	$(SILENT)echo -e $(VISION_CAM_PRINT)

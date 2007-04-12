@@ -60,7 +60,6 @@ class FileLoader : public Camera
   virtual unsigned int     pixel_height();
   virtual colorspace_t     colorspace();
 
-  virtual unsigned int     number_of_images();
   virtual void             set_image_number(unsigned int n);
 
   void                     set_colorspace(colorspace_t c);

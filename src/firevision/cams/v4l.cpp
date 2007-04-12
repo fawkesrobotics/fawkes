@@ -66,7 +66,7 @@ V4LCamera::V4LCamera(const char *device_name)
 /** Constructor.
  * Initialize camera with parameters from camera argument parser.
  * Supported arguments:
- * - device=<dev>, device file, for example /dev/video0
+ * - device=DEV, device file, for example /dev/video0
  * @param cap camera argument parser
  */
 V4LCamera::V4LCamera(CameraArgumentParser *cap)

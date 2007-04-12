@@ -34,25 +34,36 @@
 class UnknownCameraTypeException : public Exception
 {
  public:
-  UnknownCameraTypeException() : Exception("Unknown camera type") {}
+  UnknownCameraTypeException();
 };
 
 class CameraFactory
 {
  public:
-  static Camera * instance(const char *idents);
+  static Camera * instance(const char *as);
 
+  /** Get typed instance of camera.
+   * Creates a new instance and converts it to the requested type. If the type
+   * does not match the requested camera an exception is thrown.
+   * @param as camera argument string
+   * @return typed camera instance
+   * @exception TypeMismatchException thrown, if requested camera does not match
+   * requested type.
+   */
   template <class C>
-    static C* instance(const char *idents);
+    static C* instance(const char *as);
 };
 
 
 template <class C>
-C *
-CameraFactory::instance(const char *idents)
+static C *
+CameraFactory::instance(const char *as)
 {
   Camera *c = CameraFactory::instance(idents);
   C *tc = dynamic_cast<C *>(c);
+  if ( tc == NULL ) {
+    throw TypeMismatchException();
+  }
   return tc;
 }
 

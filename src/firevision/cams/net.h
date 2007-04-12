@@ -63,7 +63,6 @@ class NetworkCamera : public Camera
   virtual unsigned int   pixel_height();
   virtual colorspace_t   colorspace();
 
-  virtual unsigned int   number_of_images();
   virtual void           set_image_number(unsigned int n);
 
   static const unsigned short PROTOCOL_TCP;

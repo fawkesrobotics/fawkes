@@ -400,7 +400,7 @@ FirewireCamera::focus_max()
 /** Constructor.
  * Initialize and take parameters from camera argument parser. The following
  * arguments are supported:
- * - mode=<mode> where <mode> is one of
+ * - mode=MODE where MODE is one of
  *   - 640x480_YUV422
  *   - 640x480_MONO16
  *   - FORMAT7_0
@@ -411,23 +411,23 @@ FirewireCamera::focus_max()
  *   - FORMAT7_5
  *   - FORMAT7_6
  *   - FORMAT7_7
- * - coding=<coding>, color coding for Format7, <coding> is one of:
+ * - coding=CODING, color coding for Format7, CODING is one of:
  *   - YUV422
  *   - MONO16
  *   - RAW16
- * - isospeed=<speed>, ISO speed, <speed> is one of:
+ * - isospeed=SPEED, ISO speed, SPEED is one of:
  *   - 400
  *   - 800
- * - framerate=<fps>, desired rate in frames per second, <fps> is one of:
+ * - framerate=FPS, desired rate in frames per second, FPS is one of:
  *   - 15
  *   - 30
  *   - 60
  *   - 120
- * - nbufs=<nbufs>, number of DMA buffers, integer, 0 < n <= 32
- * - width=<width>, width in pixels of Format7 ROI
- * - height=<height>, height in pixels of Format7 ROI
- * - startx=<startx>, X start of Format7 ROI
- * - starty=<starty>, Y start of Format7 ROI
+ * - nbufs=NBUFS, number of DMA buffers, integer, 0 < n <= 32
+ * - width=WIDTH, width in pixels of Format7 ROI
+ * - height=HEIGHT, height in pixels of Format7 ROI
+ * - startx=STARTX, X start of Format7 ROI
+ * - starty=STARTY, Y start of Format7 ROI
  * @param cap camera argument parser
  */
 FirewireCamera::FirewireCamera(CameraArgumentParser *cap)
