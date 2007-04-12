@@ -283,6 +283,23 @@ JpegImageCompressor::compress()
 
 
 void
+JpegImageCompressor::set_image_dimensions(unsigned int width, unsigned int height)
+{
+  this->width = width;
+  this->height = height;
+}
+
+
+void
+JpegImageCompressor::set_image_buffer(colorspace_t cspace, unsigned char *buffer)
+{
+  if ( cspace == YUV422_PLANAR ) {
+    this->buffer = buffer;
+  }
+}
+
+
+void
 JpegImageCompressor::set_compression_destination(ImageCompressor::CompressionDestination cd)
 {
   compdest = cd;

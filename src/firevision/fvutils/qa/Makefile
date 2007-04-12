@@ -1,7 +1,7 @@
 #*****************************************************************************
-#            Makefile Build System for Fawkes : FireVision Utils
+#           Makefile Build System for Fawkes : FireVision Utils QA
 #                            -------------------
-#   Created on Sun Feb 04 22:32:29 2007
+#   Created on Wed Apr 11 16:00:32 2007
 #   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -18,7 +18,7 @@
 #            by: $Author$
 #
 
-BASEDIR = ../../..
+BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
 CFLAGS   = $(VISION_CFLAGS)
@@ -28,14 +28,11 @@ LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
 # We are lazy in the utils...
-OBJS_libfvutils := $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
-LIBS_libfvutils := utils jpeg png
+OBJS_fv_qa_camargp := qa_camargp.o
+LIBS_fv_qa_camargp := fvutils
 
-OBJS_all = $(OBJS_libfvutils)
-LIBS_all = $(LIBDIR)/libfvutils.so
+OBJS_all = $(OBJS_fv_qa_camargp)
+BINS_all = $(BINDIR)/fv_qa_camargp
 
 include $(BASEDIR)/etc/buildsys/base.mk
-
-test:
-	@echo $(OBJS_all)
 
