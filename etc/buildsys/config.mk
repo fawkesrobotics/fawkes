@@ -25,7 +25,7 @@ SILENT = @
 ### Build type
 BUILD_TYPE = fawkes
 ifneq ($(realpath $(BASEDIR)/src/Makefile.conf),)
-BUILD_TYPE = RCSoftX
+BUILD_TYPE = rcsoftx
 endif
 
 ### Directories
@@ -58,18 +58,11 @@ ECLIPSE_LIBDIR  = $(ECLIPSE_PATH)/lib/i386_linux
 ECLIPSE_INCDIR  = $(ECLIPSE_PATH)/include/i386_linux
 
 ### CFLAGS, preprocessor, compiler and linker options
-LDFLAGS_LIBDIRS = -Wl,-R$(abspath $(BASEDIR)/lib),-R$(ECLIPSE_LIBDIR)
+LDFLAGS_LIBDIRS = -Wl,-R$(LIBDIR),-R$(ECLIPSE_LIBDIR)
 DEFAULT_INCLUDES = -I$(BASEDIR)/src -I$(BASEDIR)/src/libs
 CFLAGS_BASE = -Wall -Werror -pthread $(DEFAULT_INCLUDES) -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 LDFLAGS_BASE = -L$(LIBDIR)
 LDFLAGS_SHARED = -shared
-
-### Special treatment if we are build as external in RCSoftX
-ifeq ($(BUILD_TYPE),RCSoftX)
-# External in RCSoftX
-DEFAULT_INCLUDES = -I$(BASEDIR)/src -I$(BASEDIR)/src/fawkes
-LIBDIR = $(abspath $(BASEDIR)/lib/fawkes)
-endif
 
 ### colors, to be used as command, not via echo
 BLACK		= tput setaf 0
@@ -103,7 +96,22 @@ TBLUE		= \033[0;34m
 TBOLDBLUE	= \033[1;34m
 TGREEN		= \033[0;32m
 TBOLDGREEN	= \033[1;32m
+TBROWN		= \033[0;33m
+TYELLOW		= \033[1;33m
 TRED		= \033[0;31m
 TBOLDRED	= \033[1;31m
 TNORMAL		= \033[0;39m
+TBLACKBG	= \033[40m
+TREDBG		= \033[41m
+TGREENBG	= \033[42m
+TORANGEBG	= \033[43m
+TBLUEBG		= \033[44m
+TMAGENTABG	= \033[45m
+TCYANBG		= \033[46m
+TGREYBG		= \033[47m
+
+### Check if there are special config additions
+ifneq ($(realpath $(BASEDIR)/etc/buildsys/$(BUILD_TYPE)_config.mk),)
+include $(BASEDIR)/etc/buildsys/$(BUILD_TYPE)_config.mk
+endif
 

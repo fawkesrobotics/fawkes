@@ -89,6 +89,10 @@ $(SUBDIRS):
 	fi
 endif
 
+# Cancel built-in implicit rules, they suck
+%: %.cpp
+%: %.c
+
 # NOTE: .. are replaced by __. This is needed to have objects that are in upper relative
 # directories are build in .objs, another change is needed below in bin, lib and plugin targets,
 # mocs etc.
@@ -134,4 +138,10 @@ $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
 	-o $@ $(subst ..,__,$^)
+
+
+### Check if there are special additions
+ifneq ($(realpath $(BASEDIR)/etc/buildsys/$(BUILD_TYPE)_rules.mk),)
+include $(BASEDIR)/etc/buildsys/$(BUILD_TYPE)_rules.mk
+endif
 
