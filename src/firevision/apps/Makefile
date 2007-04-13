@@ -19,11 +19,17 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 
-SUBDIRS = fvutils cams models filters classifiers apps
+SUBDIRS =
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
 include $(BASEDIR)/src/firevision/fvconf.mk
+
+ifeq ($(BUILD_TYPE),rcsoftx)
+# Stuff to be built for RCSoftX only
+SUBDIRS += cannikin
+endif
+
+include $(BASEDIR)/etc/buildsys/rules.mk
 

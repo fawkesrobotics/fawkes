@@ -29,7 +29,7 @@ LIBS     = $(VISION_LIBS)
 
 # We are lazy in the utils...
 OBJS_libfvutils := $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
-LIBS_libfvutils := utils jpeg png
+LIBS_libfvutils := core utils jpeg png
 
 OBJS_all = $(OBJS_libfvutils)
 LIBS_all = $(LIBDIR)/libfvutils.so

@@ -168,6 +168,14 @@ FirewireCamera::start()
 }
 
 
+void
+FirewireCamera::stop()
+{
+  dc1394_capture_stop(camera);
+  dc1394_video_set_transmission(camera, DC1394_OFF);
+}
+
+
 /** Check if ISO mode is enabled.
  * @return true if isochronous transfer is running, false otherwise.
  */

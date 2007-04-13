@@ -1,7 +1,7 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: FireVision
+#          Makefile Build System for Fawkes : FireVision Cannikin
 #                            -------------------
-#   Created on Sun Jan 14 18:24:42 2007
+#   Created on Mon Apr 09 12:13:49 2007 (Easter Monday)
 #   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -19,11 +19,21 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
-
-SUBDIRS = fvutils cams models filters classifiers apps
-
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
+BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
+
+# -Wno-non-virtual-dtor needed to stop gcc from throwing Qt warnings
+CFLAGS   = $(VISION_CFLAGS) -Wno-non-virtual-dtor
+LDFLAGS  = $(VISION_LDFLAGS)
+INCDIRS  = $(VISION_INCDIRS) $(QTDIR)/include
+LIBDIRS  = $(VISION_LIBDIRS) $(QTDIR)/lib
+LIBS     = $(VISION_LIBS)
+
+OBJS_cannikin = $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))
+LIBS_cannikin = core utils rutils fvutils fvcams fvmodels fvclassifiers bb interfaces qt-mt
+
+OBJS_all = $(OBJS_cannikin)
+BINS_all = $(BINDIR)/cannikin
+
+include $(BASEDIR)/etc/buildsys/base.mk
 

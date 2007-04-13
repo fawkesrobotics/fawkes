@@ -22,6 +22,7 @@
 CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L
 
 VISION_INCDIRS      = $(realpath $(BASEDIR)/src/firevision)
+VISION_CFLAGS       = -g
 
 ifneq ($(realpath /usr/include/lv),)
 HAVE_LEUTRON_CAM    = 1
