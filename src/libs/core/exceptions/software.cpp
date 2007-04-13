@@ -122,3 +122,37 @@ NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *msg
 {
   append(msg);
 }
+
+
+/** @class MissingParameterException core/exceptions/software.h
+ * Expected parameter is missing.
+ * Throw this exception if you expected one or more parameters that have not been
+ * supplied.
+ * @ingroup Exceptions
+ */
+/** Constructor.
+ * @param msg informative message, appended to exception, base message is
+ * "Parameter is missing"
+ */
+MissingParameterException::MissingParameterException(const char *msg)
+  :  Exception("Parameter is missing")
+{
+  append(msg);
+}
+
+
+/** @class IllegalArgumentException core/exceptions/software.h
+ * Expected parameter is missing.
+ * Throw this exception if you got a parameter that does not meet some kind of
+ * specification, i.e. it is of the wrong type or out of an allowed value range.
+ * @ingroup Exceptions
+ */
+/** Constructor.
+ * @param msg informative message, appended to exception, base message is
+ * "Illegal Argument"
+ */
+IllegalArgumentException::IllegalArgumentException(const char *msg)
+  :  Exception("Illegal Argument")
+{
+  append(msg);
+}
