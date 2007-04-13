@@ -23,7 +23,7 @@ BASEDIR = ../../..
 
 CFLAGS = -g
 
-LIBS_libutils = stdc++ dl core
+LIBS_libutils = stdc++ dl core magic
 OBJS_libutils =	\
 		ipc/msg.o						\
 		ipc/semset.o						\
