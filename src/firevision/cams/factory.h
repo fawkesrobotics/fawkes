@@ -29,7 +29,11 @@
 #define __FIREVISION_CAMS_FACTORY_H_
 
 #include <core/exception.h>
+#include <core/exceptions/software.h>
+
 #include <cams/camera.h>
+
+#include <cstddef>
 
 class UnknownCameraTypeException : public Exception
 {
@@ -56,10 +60,10 @@ class CameraFactory
 
 
 template <class C>
-static C *
+C *
 CameraFactory::instance(const char *as)
 {
-  Camera *c = CameraFactory::instance(idents);
+  Camera *c = CameraFactory::instance(as);
   C *tc = dynamic_cast<C *>(c);
   if ( tc == NULL ) {
     throw TypeMismatchException();
