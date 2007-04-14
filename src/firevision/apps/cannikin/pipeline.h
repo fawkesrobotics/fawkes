@@ -29,6 +29,8 @@
 #ifndef __FIREVISION_APPS_CANNIKIN_PIPELINE_H_
 #define __FIREVISION_APPS_CANNIKIN_PIPELINE_H_
 
+/// @cond RCSoftX
+
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/roi.h>
 
@@ -174,5 +176,6 @@ class CannikinPipeline : SignalHandler {
 
 };
 
+/// @endcond
 
 #endif

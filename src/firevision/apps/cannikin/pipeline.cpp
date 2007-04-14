@@ -26,6 +26,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+/// @cond RCSoftX
+
 // leutron.h MUST be included before pipeline.h otherwise you will
 // get BadBugs(TM): The dsylib.h conflicts with X.h. There are some variables
 // in dsylib.h named like some definitions in X.h
@@ -134,8 +136,7 @@ void
 CannikinPipeline::init()
 {
 
-  const char *as = config->CameraString.c_str();
-  cam = CameraFactory::instance( as );
+  cam = CameraFactory::instance( config->CameraString.c_str() );
 
   cam->open();
   cam->start();
@@ -400,7 +401,13 @@ void
 CannikinPipeline::loop()
 {
 
-  if ( state == CANNIKIN_STATE_UNINITIALIZED ) return;
+  if ( state == CANNIKIN_STATE_UNINITIALIZED ) {
+    cam->capture();
+    convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
+    memcpy(buffer, buffer_src, buffer_size);
+    cam->dispose_buffer();
+    return;
+  }
 
   switch (state) {
 
@@ -523,3 +530,5 @@ CannikinPipeline::determine_cup_color()
   cam->capture();
   cam->dispose_buffer();
 }
+
+/// @endcond

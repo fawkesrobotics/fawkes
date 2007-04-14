@@ -29,6 +29,8 @@
 #ifndef __FIREVISION_APPS_CANNIKIN_BBCLIENT_H_
 #define __FIREVISION_APPS_CANNIKIN_BBCLIENT_H_
 
+/// @cond RCSoftX
+
 #include <blackboard/clientappl.h>
 #include <utils/system/timestamp.h>
 
@@ -131,5 +133,7 @@ class FirevisionCannikinBBClient : public bb::ClientAppl
   bbClients::Alive_Server          *m_pFrontAliveFakeServer;
 
 }; 
+
+/// @endcond
 
 #endif

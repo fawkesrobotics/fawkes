@@ -25,6 +25,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+/// @cond RCSoftX
+
 #include "bbclient.h"
 #include "pipeline.h"
 #include "config.h"
@@ -354,3 +356,5 @@ FirevisionCannikinBBClient::Exit()
   exit_running = false;
 
 }
+
+/// @endcond RCSoftX

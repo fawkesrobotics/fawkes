@@ -54,6 +54,7 @@ FileLoader::FileLoader(const char *filename)
   width = height = 0;
   file_buffer = NULL;
   this->cspace = CS_UNKNOWN;
+  opened = started = false;
 }
 
 
@@ -74,6 +75,7 @@ FileLoader::FileLoader(CameraArgumentParser *cap)
   width = height = 0;
   file_buffer = NULL;
   this->cspace = CS_UNKNOWN;
+  opened = started = false;
 }
 
 
@@ -105,7 +107,6 @@ FileLoader::open()
   if (opened) return;
 
   std::string ft = fv_filetype_file( filename );
-  //cout << "Detected filetype: " << ft << endl;
 
   if ( ft.find( "JPEG" ) != std::string::npos ) {
     JpegReader *jr = new JpegReader( filename );
@@ -158,6 +159,8 @@ FileLoader::open()
       throw Exception("Invalid color space (buffer size is 0)");
     }
   }
+
+  opened = true;
 }
 
 
