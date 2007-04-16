@@ -48,6 +48,9 @@
 #ifdef HAVE_V4L_CAM
 #include <cams/v4l.h>
 #endif
+#ifdef HAVE_BUMBLEBEE2_CAM
+#include <cams/bumblebee2.h>
+#endif
 
 using namespace std;
 
@@ -125,6 +128,11 @@ CameraFactory::instance(const char *as)
 #ifdef HAVE_V4L_CAM
   if ( cap->camid() == "v4l" ) {
     c = new V4LCamera(cap);
+ }
+#endif
+#ifdef HAVE_BUMBLEBEE2_CAM
+  if ( cap->camid() == "bumblebee2" ) {
+    c = new Bumblebee2Camera(cap);
  }
 #endif
 

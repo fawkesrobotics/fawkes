@@ -28,11 +28,6 @@
 
 /// @cond RCSoftX
 
-// leutron.h MUST be included before pipeline.h otherwise you will
-// get BadBugs(TM): The dsylib.h conflicts with X.h. There are some variables
-// in dsylib.h named like some definitions in X.h
-#include <cams/leutron.h>
-
 #include "pipeline.h"
 #include "config.h"
 
@@ -44,6 +39,7 @@
 #include <fvutils/color/conversions.h>
 
 #include <cams/factory.h>
+#include <cams/bumblebee2.h>
 
 #include <models/scanlines/grid.h>
 #include <models/scanlines/cornerhorizon.h>
@@ -93,8 +89,11 @@ CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
 
   generate_output = argp->hasArgument("o");
 
-  state = CANNIKIN_STATE_UNINITIALIZED;
+  state = CANNIKIN_STATE_DETECTION; // CANNIKIN_STATE_UNINITIALIZED;
   mode = DETECT_CUP;
+
+  cam = NULL;
+  camctrl = NULL;
 }
 
 
@@ -105,7 +104,6 @@ CannikinPipeline::~CannikinPipeline()
   finalize();
 
   delete cam;
-  delete camctrl;
 
   cam = NULL;
   camctrl = NULL;
@@ -209,6 +207,7 @@ CannikinPipeline::init()
 				   FIREVISION_SHM_LUT_FRONT_COLOR,
 				   true /* destroy on free */);
   cm->reset();
+  set_cup_color(CC_YELLOW);
 
 
   /*
@@ -403,8 +402,11 @@ CannikinPipeline::loop()
 
   if ( state == CANNIKIN_STATE_UNINITIALIZED ) {
     cam->capture();
-    convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
-    memcpy(buffer, buffer_src, buffer_size);
+    cam->set_image_number(0); // left
+    // convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
+    memcpy(buffer_src, cam->buffer(), buffer_size);
+    cam->set_image_number(1); // right
+    memcpy(buffer, cam->buffer(), buffer_size);
     cam->dispose_buffer();
     return;
   }
@@ -488,13 +490,32 @@ CannikinPipeline::detect_cup()
       // box_rel->setCenter( mass_point.x, mass_point.y );
       // box_rel->calc();
 
+      /*
       cout << msg_prefix << cgreen << "Mass point found at (" << mass_point.x
 	   << "," << mass_point.y << ")" << endl;
+      */
 
       shm_buffer->setCircle( mass_point.x, mass_point.y, 8 );
       shm_buffer->setCircleFound( true );
 
       shm_buffer->setROI(r->start.x, r->start.y, r->width, r->height);
+
+      if ( generate_output ) {
+	// find distance for ROI center pixel
+	Bumblebee2Camera *bbc = dynamic_cast<Bumblebee2Camera *>(cam);
+	if ( bbc == NULL ) {
+	  cout << "Not a Bumblebee2 camera, cannot print distance info" << endl;
+	}
+	float x, y, z;
+	if ( bbc->get_xyz(r->start.x + r->width / 2, r->start.y + r->height / 2, &x, &y, &z) ) {
+	  cout << msg_prefix << cgreen << "ROI center (px,py) -> (x,y,z) = ("
+	       << r->start.x + r->width / 2 << "," << r->start.y + r->height / 2
+	       << ") -> (" << x << "," << y << "," << z << ")" << cnormal << endl;
+	} else {
+	  cout << "Invalid disparity at (" << r->start.x + r->width / 2
+	       << "," << r->start.y + r->height / 2 << ")" << endl;
+	}
+      }
 
       /*
       if ( generate_output ) {

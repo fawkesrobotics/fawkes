@@ -30,6 +30,7 @@ LIBS     = $(VISION_LIBS)
 LIBS_libfvcams = $(VISION_CAM_LIBS) utils fvutils
 OBJS_libfvcams = camera.o			\
 		 cameracontrol.o		\
+		 cam_exceptions.o		\
 		 factory.o
 
 ifeq ($(HAVE_VISCA_CTRL),1)
@@ -43,6 +44,9 @@ OBJS_libfvcams += dp_ptu.o
 endif
 ifeq ($(HAVE_FIREWIRE_CAM),1)
 OBJS_libfvcams += firewire.o
+endif
+ifeq ($(HAVE_BUMBLEBEE2_CAM),1)
+OBJS_libfvcams += bumblebee2.o
 endif
 ifeq ($(HAVE_LEUTRON_CAM),1)
 OBJS_libfvcams += leutron.o

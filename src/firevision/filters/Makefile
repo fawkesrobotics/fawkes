@@ -29,7 +29,7 @@ LIBS     = $(VISION_LIBS)
 
 # We are lazy...
 OBJS_libfvfilters := $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))
-LIBS_libfvfilters = utils fvutils fvmodels
+LIBS_libfvfilters = utils fvutils fvmodels ippi
 
 OBJS_all = $(OBJS_libfvfilters)
 LIBS_all = $(LIBDIR)/libfvfilters.so

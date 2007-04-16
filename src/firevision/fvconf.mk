@@ -19,27 +19,44 @@
 #
 #*****************************************************************************
 
-CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L
+CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L BUMBLEBEE2
 
 VISION_INCDIRS      = $(realpath $(BASEDIR)/src/firevision)
 VISION_CFLAGS       = -g
 
-ifneq ($(realpath /usr/include/lv),)
+# PTGrey Triclops SDK used for Bumblebee2 stereo processing
+TRICLOPS_SDK=/opt/Triclops3.2.0.8-FC3
+
+ifneq ($(realpath /usr/include/lvsds),)
 HAVE_LEUTRON_CAM    = 1
 HAVE_VISCA_CTRL     = 1
-VISION_LIBDIRs     += /usr/lib/lv
-VISION_INCDIRS     += /usr/include/lv
-VISION_CAM_LIBS    += lvsds.3
+VISION_LIBDIRs     += /usr/lib/lvsds
+VISION_INCDIRS     += /usr/include/lvsds
+VISION_CAM_LIBS    += lvsds.34
 endif
 ifeq ($(HAVE_VISCA_CTRL),1)
 HAVE_EVID100P_CTRL  = 1
 endif
 
 ifneq ($(realpath /usr/include/dc1394),)
-HAVE_FIREWIRE_CAM   = 1
-VISION_CAM_LIBS    += dc1394
+  HAVE_FIREWIRE_CAM   = 1
+  VISION_CAM_LIBS    += dc1394
+
+  # Check if we have PGR Triclops SDK, build Bumblebee2 if we have it
+  ifneq ($(realpath $(TRICLOPS_SDK)/include/triclops.h),)
+    ifeq ($(realpath $(TRICLOPS_SDK)/lib/libtriclops.so),)
+      $(warning Found Triclops SDK, but could not find shared lib, read doc/triclops.txt)
+    else
+      HAVE_BUMBLEBEE2_CAM = 1
+      VISION_INCDIRS += $(TRICLOPS_SDK)/include
+      VISION_LIBDIRS += $(TRICLOPS_SDK)/lib
+      VISION_CAM_LIBS += triclops
+    endif
+  else
+    $(warning PTGrey Triclops SDK not found, Bumblebee2 camera will not be built)
+  endif
 else
-$(warning Cannot build Firewire camera, libdc1394 headers not found)
+  $(warning Cannot build Firewire camera, libdc1394 headers not found)
 endif
 
 HAVE_DPPTU_CTRL     = 0
