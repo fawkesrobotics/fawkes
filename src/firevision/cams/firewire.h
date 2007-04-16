@@ -28,13 +28,10 @@
 #ifndef __FIREVISION_FIREWIRE_H_
 #define __FIREVISION_FIREWIRE_H_
 
-#include "cams/camera.h"
-#include "cams/cameracontrol.h"
+#include <cams/camera.h>
+#include <cams/cameracontrol.h>
 
-namespace dc1394 {
-#include <libraw1394/raw1394.h>
 #include <dc1394/control.h>
-}
 
 class CameraArgumentParser;
 
@@ -43,9 +40,9 @@ class FirewireCamera : public Camera, public CameraControl
 
  public:
 
-  FirewireCamera(dc1394::dc1394framerate_t framerate = dc1394::DC1394_FRAMERATE_30,
-		 dc1394::dc1394video_mode_t mode     = dc1394::DC1394_VIDEO_MODE_640x480_YUV422,
-		 dc1394::dc1394speed_t speed         = dc1394::DC1394_ISO_SPEED_400,
+  FirewireCamera(dc1394framerate_t framerate = DC1394_FRAMERATE_30,
+		 dc1394video_mode_t mode     = DC1394_VIDEO_MODE_640x480_YUV422,
+		 dc1394speed_t speed         = DC1394_ISO_SPEED_400,
 		 int num_buffers=8);
   FirewireCamera(CameraArgumentParser *cap);
 
@@ -81,24 +78,37 @@ class FirewireCamera : public Camera, public CameraControl
   virtual unsigned int   focus_min();
   virtual unsigned int   focus_max();
 
- private:
-  int  drop_frames;
+ protected:
+  /** Number of DMA buffers. */
   int  num_buffers;
+  /** true if camera has been opened, false otherwise */
   bool opened;
+  /** true if camera has been started, false otherwise */
   bool started;
+  /** true if auto focus is enabled, false if disabled */
   bool _auto_focus;
+  /** true, if a valid frame has been received, false otherwise */
   bool valid_frame_received;
 
-  dc1394::dc1394video_mode_t     mode;
-  dc1394::dc1394speed_t          speed;
-  dc1394::dc1394framerate_t      framerate;
-  dc1394::dc1394camera_t        *camera;
-  dc1394::dc1394camera_t       **cameras;
-  dc1394::dc1394video_frame_t   *frame;
-  dc1394::dc1394color_coding_t   format7_coding;
+  /** DC1394 video mode */
+  dc1394video_mode_t     mode;
+  /** DC1394 speed */
+  dc1394speed_t          speed;
+  /** DC1394 framerate */
+  dc1394framerate_t      framerate;
+  /** DC1394 camera handle */
+  dc1394camera_t        *camera;
+  /** Last captured DC1394 video frame */
+  dc1394video_frame_t   *frame;
+  /** Format7 color coding */
+  dc1394color_coding_t   format7_coding;
+  /** Format7 width */
   int                            format7_width;
+  /** Format7 height */
   int                            format7_height;
+  /** Format7 ROI Start X coordinate */
   int                            format7_startx;
+  /** Format7 ROI Start Y coordinate */
   int                            format7_starty;
 };
 

@@ -28,7 +28,7 @@
 #ifndef __FIREVISION_CAMERA_H_
 #define __FIREVISION_CAMERA_H_
 
-#include "fvutils/color/colorspaces.h"
+#include <fvutils/color/colorspaces.h>
 
 class Camera
 {

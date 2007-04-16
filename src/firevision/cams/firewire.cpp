@@ -26,6 +26,7 @@
  */
 
 #include <core/exception.h>
+#include <utils/system/console_colors.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -35,13 +36,16 @@
 #include <cams/firewire.h>
 #include <fvutils/system/camargp.h>
 
-
-namespace dc1394 {
 #include <dc1394/utils.h>
-}
 
-using namespace dc1394;
 using namespace std;
+
+/** @class FirewireCamera <cams/firewire.h>
+ * Firewire camera.
+ * This camera implementation allows for access to IEEE1394 cameras via
+ * libdc1394.
+ * @author Tim Niemueller
+ */
 
 /** Constructor.
  * @param framerate desired framerate
@@ -49,14 +53,13 @@ using namespace std;
  * @param speed IEEE 1394 speed
  * @param num_buffers number of DMA buffers
  */
-FirewireCamera::FirewireCamera(dc1394::dc1394framerate_t framerate,
-			       dc1394::dc1394video_mode_t mode,
-			       dc1394::dc1394speed_t speed,
+FirewireCamera::FirewireCamera(dc1394framerate_t framerate,
+			       dc1394video_mode_t mode,
+			       dc1394speed_t speed,
 			       int num_buffers)
 {
   started = opened = false;
   valid_frame_received = false;
-  drop_frames = 1;
   _auto_focus = true; // assume auto_focus, checked in open()
   this->speed = speed;
   this->num_buffers = num_buffers;
@@ -64,10 +67,9 @@ FirewireCamera::FirewireCamera(dc1394::dc1394framerate_t framerate,
   this->framerate = framerate;
 
   camera = NULL;
-  cameras = NULL;
 
   if ((mode = DC1394_VIDEO_MODE_640x480_YUV422) && (framerate == DC1394_FRAMERATE_30)) {
-    // cerr << msg_prefix << "When in mode YUV422 @ 640x480 with more than 15 fps. Setting framerate to 15fps." << endl;
+    // cerr  << "When in mode YUV422 @ 640x480 with more than 15 fps. Setting framerate to 15fps." << endl;
     this->framerate = DC1394_FRAMERATE_15;
   }
 }
@@ -82,10 +84,10 @@ FirewireCamera::~FirewireCamera()
 void
 FirewireCamera::open()
 {
-
   if (opened) return;
 
   unsigned int i = 0;
+  dc1394camera_t       **cameras;
   unsigned int num_cameras = 0;
   unsigned int cam = 0;
   int found = 0;
@@ -94,10 +96,10 @@ FirewireCamera::open()
 
   if ( dc1394_find_cameras(&cameras, &num_cameras) != DC1394_SUCCESS ) {
     /*
-    cout << msg_prefix << cyellow << "Failure while finding cameras." << cnormal << endl
-	 << msg_prefix << "Please check that" << endl
-	 << msg_prefix << "  - the kernel modules `ieee1394',`raw1394' and `ohci1394' are loaded " << endl
-	 << msg_prefix << "  - you have read/write access to /dev/raw1394" << endl;
+    cout  << cyellow << "Failure while finding cameras." << cnormal << endl
+	  << "Please check that" << endl
+	  << "  - the kernel modules `ieee1394',`raw1394' and `ohci1394' are loaded " << endl
+	  << "  - you have read/write access to /dev/raw1394" << endl;
     */
     throw Exception("Could not find any cameras");
   }
@@ -126,7 +128,7 @@ FirewireCamera::open()
     dc1394_video_set_framerate(camera, framerate);
 
   } else {
-    // cout << msg_prefix << cred << "Could not find any camera." << cnormal << endl;
+    // cout  << cred << "Could not find any camera." << cnormal << endl;
     throw Exception("No cameras connected");;
   }
 
@@ -140,24 +142,22 @@ FirewireCamera::start()
   if (started) return;
 
   if (!opened) {
-    // cout << msg_prefix << cred << "Tried to start closed cam. Giving up." << cnormal << endl;
+    // cout  << cred << "Tried to start closed cam. Giving up." << cnormal << endl;
     return;
   }
 
 
-  //cout << msg_prefix << "Starting camera" << endl;
+  //cout  << "Starting camera" << endl;
 
   if ( dc1394_capture_setup( camera, num_buffers ) != DC1394_SUCCESS ) {
-    //cout << msg_prefix << cred << "Could not start capturing" << endl;
+    // cout  << cred << "Could not start capturing" << endl;
     dc1394_capture_stop(camera);
-    dc1394_free_camera(camera);
     return;
   }
 
   if ( dc1394_video_set_transmission(camera, DC1394_ON) != DC1394_SUCCESS) {
-    //cout << msg_prefix << cred << "Could not start video transmission" << cnormal << endl;
+    // cout  << cred << "Could not start video transmission" << cnormal << endl;
     dc1394_capture_stop(camera);
-    dc1394_free_camera(camera);
     return;
   }
 				
@@ -173,6 +173,7 @@ FirewireCamera::stop()
 {
   dc1394_capture_stop(camera);
   dc1394_video_set_transmission(camera, DC1394_OFF);
+  started = false;
 }
 
 
@@ -184,7 +185,7 @@ FirewireCamera::iso_mode_enabled()
 {
   dc1394switch_t status;
   if ( dc1394_video_get_transmission(camera, &status) != DC1394_SUCCESS) {
-    //cout << msg_prefix << cred << "Could not get transmission status" << cnormal << endl;
+    // cout  << cred << "Could not get transmission status" << cnormal << endl;
     return false;
   } else {
     return (status == DC1394_ON);
@@ -208,12 +209,12 @@ FirewireCamera::capture()
   if (! started) return;
 
   if (! iso_mode_enabled()) {
-    //cout << msg_prefix << cred << "ISO mode enabled while trying to capture" << cnormal << endl;
+    //cout  << cred << "ISO mode enabled while trying to capture" << cnormal << endl;
     return;
   }
 
   if (dc1394_capture_dequeue(camera, DC1394_CAPTURE_POLICY_WAIT, &frame) != DC1394_SUCCESS) {
-    //cout << msg_prefix << cred << "Could not capture frame" << cnormal << endl;
+    //cout  << cred << "Could not capture frame" << cnormal << endl;
     valid_frame_received = false;
   } else {
     valid_frame_received = true;
@@ -255,17 +256,11 @@ FirewireCamera::buffer_size()
 void
 FirewireCamera::close()
 {
-  if (started) {
-    if ( dc1394_video_set_transmission(camera, DC1394_OFF) != DC1394_SUCCESS) {
-      //cout << msg_prefix << cred << "Could not stop video transmission" << cnormal << endl;
-    } else {
-      usleep(50000);
-      if (iso_mode_enabled()) {
-	//cout << msg_prefix << cred << "ISO mode still enabled after trying to shut it down. Will remain on" << cnormal << endl;
-      }
-    }
-    dc1394_capture_stop( camera );
+  if ( started ) stop();
+  if ( opened ) {
     dc1394_free_camera( camera );
+    camera = NULL;
+    opened = false;
   }
 }
 
@@ -273,7 +268,7 @@ FirewireCamera::close()
 void
 FirewireCamera::dispose_buffer()
 {
-  ////cout << msg_prefix << "Finishing move on buffer" << endl;
+  ////cout  << "Finishing move on buffer" << endl;
   dc1394_capture_enqueue( camera, frame );
 }
 
@@ -440,12 +435,15 @@ FirewireCamera::focus_max()
  */
 FirewireCamera::FirewireCamera(CameraArgumentParser *cap)
 {
+  started = opened = false;
+  valid_frame_received = false;
+  _auto_focus = true; // assume auto_focus, checked in open()
+
   // Defaults
   mode = DC1394_VIDEO_MODE_640x480_YUV422;
   speed = DC1394_ISO_SPEED_400;
   framerate = DC1394_FRAMERATE_30;
   camera = NULL;
-  cameras = NULL;
   format7_width = format7_height = format7_startx = format7_starty = 0;
 
   if ( cap->has("mode") ) {
