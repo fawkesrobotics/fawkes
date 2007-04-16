@@ -29,6 +29,7 @@
 #include <fvutils/color/colorspaces.h>
 
 #include <cstring>
+#include <cstdlib>
 
 colorspace_t
 colorspace_by_name(char *mode)
@@ -103,4 +104,11 @@ colorspace_to_string(colorspace_t colorspace)
   default:
     return "CS_UNKNOWN";
   }
+}
+
+
+unsigned char *
+malloc_buffer(colorspace_t colorspace, unsigned int width, unsigned int height)
+{
+  return (unsigned char *)malloc(colorspace_buffer_size(colorspace, width, height));
 }

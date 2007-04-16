@@ -86,8 +86,8 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
 }
 
 
-colorspace_t colorspace_by_name(char *colorspace);
-const char * colorspace_to_string(colorspace_t colorspace);
-
+colorspace_t     colorspace_by_name(char *colorspace);
+const char *     colorspace_to_string(colorspace_t colorspace);
+unsigned char *  malloc_buffer(colorspace_t colorspace, unsigned int width, unsigned int height);
 
 #endif
