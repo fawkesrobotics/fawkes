@@ -50,6 +50,7 @@ class Bumblebee2Camera : public FirewireCamera
 
   virtual unsigned char* buffer();
   virtual unsigned int   buffer_size();
+  unsigned char * buffer_disparity();
 
   virtual colorspace_t   colorspace();
 
@@ -58,7 +59,6 @@ class Bumblebee2Camera : public FirewireCamera
   bool is_bumblebee2();
 
   bool get_xyz(unsigned int px, unsigned int py, float *x, float *y, float *z);
-
  protected:
 
   void get_triclops_context_from_camera();

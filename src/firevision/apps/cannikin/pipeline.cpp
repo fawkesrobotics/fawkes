@@ -55,6 +55,21 @@
 
 using namespace std;
 
+class DisparityPoint {
+ public:
+  DisparityPoint(float x, float y, float z) {
+    this->x = x;
+    this->y = y;
+    this->z = z;
+  }
+
+  float x, y, z;
+
+  bool operator<(const DisparityPoint &p) const {
+    return (z < p.z);
+  }
+};
+
 CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
 {
   param_width = param_height = 0;
@@ -65,6 +80,8 @@ CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
   // This doesn't change because we do the conversion to YUV422_PLANAR
   // and then work on this image
   cspace_to   = YUV422_PLANAR;
+
+  cup_visible = false;
 
   this->argp   = argp;
   this->config = config;
@@ -90,7 +107,7 @@ CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
   generate_output = argp->hasArgument("o");
 
   state = CANNIKIN_STATE_DETECTION; // CANNIKIN_STATE_UNINITIALIZED;
-  mode = DETECT_CUP;
+  _mode = DETECT_CUP;
 
   cam = NULL;
   camctrl = NULL;
@@ -178,27 +195,37 @@ CannikinPipeline::init()
 								    + "/" +
 								    config->ColormapFilestem );
   
-  colormap_filestem_cindex = colormap_filestem.find("%s");
+  cout << "Colormap filestem is '" << colormap_filestem << "'" << endl;
+
+  colormap_filestem_cindex = colormap_filestem.find("%c");
   if ( colormap_filestem_cindex != string::npos ) {
+    // remove %c
+    colormap_filestem.erase(colormap_filestem_cindex, 2);
+
     string tmp;
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "orange");
+    cout << "Adding colormap " << tmp << endl;
     colormaps[CC_ORANGE] = strdup(tmp.c_str());
 
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "yellow");
+    cout << "Adding colormap " << tmp << endl;
     colormaps[CC_YELLOW] = strdup(tmp.c_str());
 
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "red");
+    cout << "Adding colormap " << tmp << endl;
     colormaps[CC_RED] = strdup(tmp.c_str());
 
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "blue");
+    cout << "Adding colormap " << tmp << endl;
     colormaps[CC_BLUE] = strdup(tmp.c_str());
 
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "green");
+    cout << "Adding colormap " << tmp << endl;
     colormaps[CC_GREEN] = strdup(tmp.c_str());
   }
 
@@ -351,10 +378,10 @@ CannikinPipeline::getDataTakenTime(long int *sec, long int *usec)
 
 
 void
-CannikinPipeline::set_mode(cannikin_mode_t mode)
+CannikinPipeline::set_mode(cannikin_mode_t m)
 {
-  this->mode = mode;
-  switch (mode) {
+  _mode = m;
+  switch (_mode) {
   case DETECT_CUP:
     state = CANNIKIN_STATE_REINITIALIZE_COLORMAP;
     break;
@@ -366,12 +393,26 @@ CannikinPipeline::set_mode(cannikin_mode_t mode)
 }
 
 
+CannikinPipeline::cannikin_mode_t
+CannikinPipeline::mode()
+{
+  return _mode;
+}
+
+
 void
 CannikinPipeline::set_cup_color(cup_color_t c) {
-  cup_color = c;
+  _cup_color = c;
   if ( state == CANNIKIN_STATE_DETECTION ) {
     state = CANNIKIN_STATE_REINITIALIZE_COLORMAP;
   }
+}
+
+
+CannikinPipeline::cup_color_t
+CannikinPipeline::cup_color()
+{
+  return _cup_color;
 }
 
 
@@ -389,7 +430,7 @@ CannikinPipeline::done_determining_cup_color()
 }
 
 
-cup_color_t
+CannikinPipeline::cup_color_t
 CannikinPipeline::determined_cup_color()
 {
   return _determined_cup_color;
@@ -399,6 +440,8 @@ CannikinPipeline::determined_cup_color()
 void
 CannikinPipeline::loop()
 {
+
+  cup_visible = false;
 
   if ( state == CANNIKIN_STATE_UNINITIALIZED ) {
     cam->capture();
@@ -435,8 +478,9 @@ CannikinPipeline::loop()
 void
 CannikinPipeline::reinitialize_colormap()
 {
-  if ( colormaps.find(cup_color) != colormaps.end() ) {
-    cm->load(colormaps[cup_color]);
+  if ( colormaps.find(_cup_color) != colormaps.end() ) {
+    cout << "Loading colormap " << colormaps[_cup_color] << endl;
+    cm->load(colormaps[_cup_color]);
   } else {
     cm->reset();
   }
@@ -452,8 +496,7 @@ CannikinPipeline::detect_cup()
 
   // Convert buffer (re-order bytes) and set classifier buffer
   convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
-  memcpy(buffer, buffer_src, buffer_size);
-
+  // memcpy(buffer, buffer_src, buffer_size);
 
   // Classify image, find ROIs by color
   classifier->setSrcBuffer( buffer_src );
@@ -483,40 +526,74 @@ CannikinPipeline::detect_cup()
     
     // Try to detect box shape
     if ((*r).hint == H_BALL) {
-      // box_visible = true;
-
       // classifier->getMassPointOfBall( &(*r), &mass_point );
       // update ball position
       // box_rel->setCenter( mass_point.x, mass_point.y );
       // box_rel->calc();
+
+      cup_visible = true;
 
       /*
       cout << msg_prefix << cgreen << "Mass point found at (" << mass_point.x
 	   << "," << mass_point.y << ")" << endl;
       */
 
-      shm_buffer->setCircle( mass_point.x, mass_point.y, 8 );
-      shm_buffer->setCircleFound( true );
-
       shm_buffer->setROI(r->start.x, r->start.y, r->width, r->height);
 
-      if ( generate_output ) {
-	// find distance for ROI center pixel
-	Bumblebee2Camera *bbc = dynamic_cast<Bumblebee2Camera *>(cam);
-	if ( bbc == NULL ) {
-	  cout << "Not a Bumblebee2 camera, cannot print distance info" << endl;
+      Bumblebee2Camera *bbc = dynamic_cast<Bumblebee2Camera *>(cam);
+      if ( bbc == NULL ) {
+	cout << "Not a Bumblebee2 camera, cannot get_xyz" << endl;
+      } else {
+
+	if ( (r->width > 10) && (r->height > 10) ) {
+	  // Take five points and calculate some distances...
+	  std::vector<DisparityPoint> points;
+	  unsigned int center_x = r->start.x + r->width / 2;
+	  unsigned int center_y = r->start.y + r->height / 2;
+
+	  shm_buffer->setCircle( center_x, center_y, 5 );
+	  shm_buffer->setCircleFound( true );
+
+	  if ( bbc->get_xyz(center_x, center_y, &x, &y, &z) ) {
+	    points.push_back(DisparityPoint(x, y, z));
+	  }
+	  if ( bbc->get_xyz(center_x - 5, center_y - 5, &x, &y, &z) ) {
+	    points.push_back(DisparityPoint(x, y, z));
+	  }
+	  if ( bbc->get_xyz(center_x + 5, center_y - 5, &x, &y, &z) ) {
+	    points.push_back(DisparityPoint(x, y, z));
+	  }
+	  if ( bbc->get_xyz(center_x - 5, center_y + 5, &x, &y, &z) ) {
+	    points.push_back(DisparityPoint(x, y, z));
+	  }
+	  if ( bbc->get_xyz(center_x + 5, center_y + 5, &x, &y, &z) ) {
+	    points.push_back(DisparityPoint(x, y, z));
+	  }
+	  if ( points.empty() ) {
+	    cout << "No valid disparity for all points. Doh!" << endl;
+	    cup_visible = false;
+	  } else {
+	    sort( points.begin(), points.end() );
+	    int elem = (points.size() + 1) / 2;
+	    x = points[elem].x;
+	    y = points[elem].y;
+	    z = points[elem].z;
+	  }
+
+	  memcpy(buffer, bbc->buffer_disparity(), bbc->pixel_width() * bbc->pixel_height());
+	  memset(buffer + width * height, 128, width * height);
 	}
-	float x, y, z;
-	if ( bbc->get_xyz(r->start.x + r->width / 2, r->start.y + r->height / 2, &x, &y, &z) ) {
-	  cout << msg_prefix << cgreen << "ROI center (px,py) -> (x,y,z) = ("
-	       << r->start.x + r->width / 2 << "," << r->start.y + r->height / 2
-	       << ") -> (" << x << "," << y << "," << z << ")" << cnormal << endl;
-	} else {
-	  cout << "Invalid disparity at (" << r->start.x + r->width / 2
-	       << "," << r->start.y + r->height / 2 << ")" << endl;
+
+	if ( generate_output ) {
+	  // find distance for ROI center pixel
+	  if ( cup_visible ) {
+	    cout << msg_prefix << cgreen << " (x,y,z) = ("
+		 << x << "," << y << "," << z << ")" << cnormal << endl;
+	  } else {
+	    cout << msg_prefix << cred << "Cup not visible" << cnormal << endl;
+	  }
 	}
       }
-
       /*
       if ( generate_output ) {
 	cout << msg_prefix << cgreen << "RelPosU: " << cnormal
@@ -550,6 +627,20 @@ CannikinPipeline::determine_cup_color()
 {
   cam->capture();
   cam->dispose_buffer();
+}
+
+
+bool
+CannikinPipeline::get_xyz(float *x, float *y, float *z)
+{
+  if ( cup_visible ) {
+    *x = this->x;
+    *y = this->y;
+    *z = this->z;
+    return true;
+  } else {
+    return false;
+  }
 }
 
 /// @endcond

@@ -44,10 +44,11 @@ class CameraTracker;
 class CameraControl;
 
 namespace bbClients {
-  class Localize_Master_Client;
+  // class Localize_Master_Client;
   class BallPos_Server;
   class CameraControl_Server;
   class Alive_Server;
+  class Cannikin_Server;
 }
 
 class FirevisionCannikinBBClient : public bb::ClientAppl
@@ -62,7 +63,7 @@ class FirevisionCannikinBBClient : public bb::ClientAppl
 
  private:
 
-  void box_not_visible();
+  void cup_not_visible();
 
   ArgumentParser    *argp;
   CannikinConfig    *config;
@@ -127,10 +128,11 @@ class FirevisionCannikinBBClient : public bb::ClientAppl
   CameraTracker         *camera_tracker;
 
 
-  bbClients::Localize_Master_Client *m_pLocalizeMasterClient;
+  // bbClients::Localize_Master_Client *m_pLocalizeMasterClient;
   bbClients::BallPos_Server        *m_pBoxPosServer;
   bbClients::CameraControl_Server  *m_pCameraControlServer;
   bbClients::Alive_Server          *m_pFrontAliveFakeServer;
+  bbClients::Cannikin_Server       *m_pCannikinServer;
 
 }; 
 

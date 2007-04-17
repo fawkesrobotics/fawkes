@@ -55,20 +55,20 @@ class ArgumentParser;
 class SharedMemoryImageBuffer;
 class CannikinConfig;
 
-typedef enum {
-  CC_YELLOW,
-  CC_GREEN,
-  CC_BLUE,
-  CC_RED,
-  CC_ORANGE
-} cup_color_t;
-
 class CannikinPipeline : SignalHandler {
 
  public:
+  typedef enum {
+    CC_YELLOW = 0,
+    CC_GREEN  = 1,
+    CC_BLUE   = 2,
+    CC_RED    = 3,
+    CC_ORANGE = 4
+  } cup_color_t;
+
   typedef enum{
-    DETECT_CUP,
-    DETERMINE_CUP_COLOR,
+    DETECT_CUP = 0,
+    DETERMINE_CUP_COLOR = 1,
   } cannikin_mode_t;
 
   CannikinPipeline(ArgumentParser *argp, CannikinConfig *config);
@@ -88,8 +88,10 @@ class CannikinPipeline : SignalHandler {
   CameraControl *         getCameraControl();
   void                    getDataTakenTime(long int *sec, long int *usec);
 
-  void                    set_mode(cannikin_mode_t mode);
+  void                    set_mode(cannikin_mode_t m);
+  cannikin_mode_t         mode();
 
+  cup_color_t             cup_color();
   void                    set_cup_color(cup_color_t c);
   bool                    is_cup_visible();
 
@@ -97,6 +99,7 @@ class CannikinPipeline : SignalHandler {
   cup_color_t             determined_cup_color();
 
   void                    set_colormap(cup_color_t c, const char *file);
+  bool                    get_xyz(float *x, float *y, float *z);
 
  private:
 
@@ -127,14 +130,16 @@ class CannikinPipeline : SignalHandler {
   bool             old_file_format;
   bool             quit;
 
-  cannikin_mode_t  mode;
+  cannikin_mode_t  _mode;
   cannikin_state_t state;
 
-  cup_color_t      cup_color;
+  cup_color_t      _cup_color;
   cup_color_t      _determined_cup_color;
 
   bool             cup_visible;
   bool             cup_color_determination_done;
+
+  float x, y, z;
 
   struct timeval   data_taken_time;
 

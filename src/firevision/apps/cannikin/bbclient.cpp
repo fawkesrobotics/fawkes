@@ -42,6 +42,7 @@
 #include <interfaces/ballpos_server.h>
 #include <interfaces/camera_control_server.h>
 #include <interfaces/alive_server.h>
+#include <interfaces/cannikin_server.h>
 
 #include <unistd.h>
 
@@ -114,9 +115,11 @@ void FirevisionCannikinBBClient::Init ()
   BBRegisterObj( m_pBoxPosServer );
 
 
+  /*
   // initialize localize master client
   m_pLocalizeMasterClient = new bbClients::Localize_Master_Client(hostname);
   BBRegisterObj( m_pLocalizeMasterClient );
+  */
 
   // initialize camera control server
   m_pCameraControlServer = new bbClients::CameraControl_Server( hostname );
@@ -125,14 +128,19 @@ void FirevisionCannikinBBClient::Init ()
   m_pFrontAliveFakeServer = new bbClients::Alive_Server( "firevision_cannikin", hostname );
   BBRegisterObj( m_pFrontAliveFakeServer );
 
+  m_pCannikinServer = new bbClients::Cannikin_Server( hostname );
+  BBRegisterObj( m_pCannikinServer );
+
   BBOperate();
   m_pBoxPosServer->Update();  
-  m_pLocalizeMasterClient->Update();
+  // m_pLocalizeMasterClient->Update();
   m_pCameraControlServer->Update();
+  m_pCannikinServer->Update();
   BBOperate();
 
-  // Call us every 40ms
-  SetTime( 40 );
+  // Call us every 100ms, this is likely to fail, but BB will just
+  // drop that cycle...
+  SetTime( 100 );
 
   pipeline = new CannikinPipeline(argp, config);
   pipeline->init();
@@ -146,16 +154,14 @@ void FirevisionCannikinBBClient::Init ()
 }
 
 void
-FirevisionCannikinBBClient::box_not_visible()
+FirevisionCannikinBBClient::cup_not_visible()
 {
-  if ( visibility_history > 0 ) {
-    visibility_history = -1;
-  } else {
-    --visibility_history;
-  }
   m_pBoxPosServer->SetVisible( false );
   m_pBoxPosServer->SetConfidence( 0.f );
   m_pBoxPosServer->SetVisibilityHistory( visibility_history );
+
+  m_pCannikinServer->SetVisible( false );
+
   dist_total = 0.f;
   dist_num   = 0;
 
@@ -180,9 +186,18 @@ FirevisionCannikinBBClient::Loop(int Count)
 
   BBOperate();
   
-  m_pLocalizeMasterClient->Update();
+  // m_pLocalizeMasterClient->Update();
   m_pCameraControlServer->Update();
+  m_pCannikinServer->Update();
   BBOperate();
+
+  if ( m_pCannikinServer->ChangedMode() ) {
+    pipeline->set_mode((CannikinPipeline::cannikin_mode_t)m_pCannikinServer->GetMode());
+  }
+
+  if ( m_pCannikinServer->ChangedCupColor() ) {
+    pipeline->set_cup_color((CannikinPipeline::cup_color_t)m_pCannikinServer->GetCupColor());
+  }
 
   // m_pBoxPosServer->SetSource( bbClients::BallPos_Server::SOURCE_CANNIKIN );
 
@@ -192,7 +207,6 @@ FirevisionCannikinBBClient::Loop(int Count)
 				 m_pLocalizeMasterClient->GetCurrentY(),
 				 m_pLocalizeMasterClient->GetCurrentOri()
 				 );
-  */
   timeval t;
   m_pLocalizeMasterClient->GetTimeVal(&t);
   if ( scanline_model != NULL) {
@@ -200,6 +214,7 @@ FirevisionCannikinBBClient::Loop(int Count)
 				  m_pLocalizeMasterClient->GetCurrentY(),
 				  m_pLocalizeMasterClient->GetCurrentOri() );
   }
+
 
 
   if ( show_pose_info ) {
@@ -215,6 +230,7 @@ FirevisionCannikinBBClient::Loop(int Count)
 	 << "  adt=" << (pose_avg_dt / pose_avg_num_samples)
 	 << endl;
   }
+  */
 
   // Do a pipeline cycle
   pipeline->loop();
@@ -243,7 +259,6 @@ FirevisionCannikinBBClient::Loop(int Count)
     box_dist    = box_relative->getDistance();
     box_bearing = box_relative->getBearing();
     box_slope   = box_relative->getSlope();
-    */
 
     if ( visibility_history > 0) {
       ++visibility_history;
@@ -289,8 +304,8 @@ FirevisionCannikinBBClient::Loop(int Count)
     // match that with laser data in Meerkat.
     //
     // KEEP THIS IN MIND!
-    m_pBoxPosServer->SetRelVelX( box_bearing  /* box_rel_vel_x */ );
-    m_pBoxPosServer->SetRelVelY( box_slope    /* box_rel_vel_y */ );
+    m_pBoxPosServer->SetRelVelX( box_bearing  / * box_rel_vel_x * / );
+    m_pBoxPosServer->SetRelVelY( box_slope    / * box_rel_vel_y * / );
 
 
     m_pBoxPosServer->SetVisible( true );
@@ -299,15 +314,37 @@ FirevisionCannikinBBClient::Loop(int Count)
 
     m_pBoxPosServer->SetBearingError( bearing_error );
     m_pBoxPosServer->SetDistanceError( dist_error );
+    */
 
+    if ( pipeline->is_cup_visible() ) {
+      float x, y, z;
+      if ( pipeline->get_xyz(&x, &y, &z) ) {
+	m_pCannikinServer->SetVisible( true );
+	m_pCannikinServer->SetCamX(x);
+	m_pCannikinServer->SetCamY(y);
+	m_pCannikinServer->SetCamZ(z);
+      } else {
+	cup_not_visible();
+      }
+    } else {
+      cup_not_visible();
+    }
 
   } else {
     cout << msg_prefix << cred << "Box is NOT visible" << cnormal << endl;
 
-    box_not_visible();
+    cup_not_visible();
 
   }
   m_pBoxPosServer->UpdateBB();
+
+  m_pCannikinServer->SetAlive( true );
+  m_pCannikinServer->SetCurrentMode((int)pipeline->mode());
+  m_pCannikinServer->SetDeterminationDone(pipeline->done_determining_cup_color());
+  m_pCannikinServer->SetDeterminedCupColor((int)pipeline->determined_cup_color());
+  m_pCannikinServer->SetCurrentCupColor((int)pipeline->cup_color());
+
+  m_pCannikinServer->UpdateBB();
 
   m_pFrontAliveFakeServer->PingAlive();
   m_pFrontAliveFakeServer->UpdateBB();
@@ -349,7 +386,7 @@ FirevisionCannikinBBClient::Exit()
   pipeline->finalize();
 
   delete m_pBoxPosServer;
-  delete m_pLocalizeMasterClient;
+  // delete m_pLocalizeMasterClient;
   delete m_pCameraControlServer;
   delete pipeline;
 

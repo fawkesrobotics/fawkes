@@ -224,7 +224,7 @@ Bumblebee2Camera::open()
 
   triclopsSetEdgeCorrelation( data->triclops, 1 );
   triclopsSetLowpass( data->triclops, 1 );
-  triclopsSetDisparity( data->triclops, 10, 85);
+  triclopsSetDisparity( data->triclops, 5, 100);
   triclopsSetEdgeMask(data->triclops, 11);
   triclopsSetStereoMask(data->triclops, 15);
   triclopsSetSurfaceValidation(data->triclops, 1);
@@ -405,6 +405,21 @@ Bumblebee2Camera::buffer()
 {
   if ( valid_frame_received ) {
     return _buffer;
+  } else {
+    return NULL;
+  }
+}
+
+
+unsigned char *
+Bumblebee2Camera::buffer_disparity()
+{
+  if (valid_frame_received) {
+    if ( data->enable_subpixel_interpolation ) {
+      return NULL; // data->disparity_image_hires.data;
+    } else {
+      return data->disparity_image_lores.data;
+    }
   } else {
     return NULL;
   }
