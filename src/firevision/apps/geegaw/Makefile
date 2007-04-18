@@ -1,7 +1,7 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: FireVision
+#          Makefile Build System for Fawkes : FireVision Cannikin
 #                            -------------------
-#   Created on Sun Jan 14 18:24:42 2007
+#   Created on Mon Apr 09 12:13:49 2007 (Easter Monday)
 #   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -19,17 +19,21 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
-
-SUBDIRS =
-
-include $(BASEDIR)/etc/buildsys/config.mk
+BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
-ifeq ($(BUILD_TYPE),rcsoftx)
-# Stuff to be built for RCSoftX only
-SUBDIRS += cannikin geegaw
-endif
+# -Wno-non-virtual-dtor needed to stop gcc from throwing Qt warnings
+CFLAGS   = $(VISION_CFLAGS) -Wno-non-virtual-dtor
+LDFLAGS  = $(VISION_LDFLAGS)
+INCDIRS  = $(VISION_INCDIRS) $(QTDIR)/include
+LIBDIRS  = $(VISION_LIBDIRS) $(QTDIR)/lib
+LIBS     = $(VISION_LIBS)
 
-include $(BASEDIR)/etc/buildsys/rules.mk
+OBJS_geegaw = bbclient.o config.o main.o pipeline.o
+LIBS_geegaw = core utils rutils fvutils fvcams fvmodels fvclassifiers bb interfaces qt-mt
+
+OBJS_all = $(OBJS_geegaw)
+BINS_all = $(BINDIR)/geegaw
+
+include $(BASEDIR)/etc/buildsys/base.mk
 
