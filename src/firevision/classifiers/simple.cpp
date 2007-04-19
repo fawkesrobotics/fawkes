@@ -33,6 +33,9 @@
 #include <models/scanlines/scanlinemodel.h>
 #include <models/color/colormodel.h>
 
+#include <iostream>
+using namespace std;
+
 /** @class ReallySimpleClassifier <classifiers/simple.h>
  * Simple classifier.
  */
@@ -53,6 +56,7 @@ ReallySimpleClassifier::ReallySimpleClassifier(unsigned int width,
 					       ColorModel *color_model,
 					       unsigned int min_num_points,
 					       unsigned int box_extent,
+					       bool upward,
 					       unsigned int neighbourhood_min_match,
                                                unsigned int grow_by
 					       )
@@ -65,6 +69,7 @@ ReallySimpleClassifier::ReallySimpleClassifier(unsigned int width,
   this->height = height;
   this->min_num_points = min_num_points;
   this->box_extent = box_extent;
+  this->upward = upward;
   this->grow_by = grow_by;
   this->neighbourhood_min_match = neighbourhood_min_match;
 }
@@ -133,7 +138,7 @@ ReallySimpleClassifier::classify()
 {
 
   if (src == NULL) {
-    // cout << "ReallySimpleClassifier: ERROR, src buffer not set. NOT classifying." << endl;
+    //cout << "ReallySimpleClassifier: ERROR, src buffer not set. NOT classifying." << endl;
     return new std::list< ROI >;
   }
 
@@ -201,8 +206,21 @@ ReallySimpleClassifier::classify()
 	}
 
 	if (! ok) {
-	  r.start.x = x;
-	  r.start.y = y;
+          if ( upward ) {
+            if ( x < box_extent ) {
+              x = 0;
+            } else {
+              x -= box_extent;
+            }
+            if ( y < box_extent ) {
+              y = 0;
+            } else {
+              y -= box_extent;
+            }
+	  }
+          r.start.x = x;
+          r.start.y = y;
+
 	  unsigned int to_x = (*scanline_model)->x + box_extent;
 	  unsigned int to_y = (*scanline_model)->y + box_extent;
 	  if (to_x > width)  to_x = width;
@@ -261,7 +279,6 @@ ReallySimpleClassifier::classify()
       roi_it = rv->erase( roi_it );
     }
   }
-
 
   // sort ROIs by number of hint points, descending (and thus call reverse)
   rv->sort();

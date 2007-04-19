@@ -42,6 +42,7 @@ class ReallySimpleClassifier : public Classifier
 			 ColorModel *color_model,
 			 unsigned int min_num_points=6,
 			 unsigned int box_extent = 50,
+			 bool upward = false,
 			 unsigned int neighbourhood_min_match = 8,
                          unsigned int grow_by = 10                );
 
@@ -76,6 +77,8 @@ class ReallySimpleClassifier : public Classifier
   bool         modified;
   unsigned int min_num_points;
   unsigned int box_extent;
+
+  bool         upward;
 
   ScanlineModel *scanline_model;
   ColorModel    *color_model;
