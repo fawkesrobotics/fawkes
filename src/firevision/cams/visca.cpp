@@ -312,7 +312,7 @@ Visca::recv(unsigned int max_wait_ms)
   case VISCA_RESPONSE_ERROR:
     break;
   default:
-    throw ViscaError("Receiving failed, unexpected packet type received");
+    throw ViscaException("Receiving failed, unexpected packet type received");
   }
 }
 
@@ -386,7 +386,7 @@ Visca::send_with_reply()
 /** Receive a packet.
  * @param max_wait_ms maximum wait time in miliseconds
  */
-unsigned int
+void
 Visca::recv_packet(unsigned int max_wait_ms)
 {
   // wait for message
@@ -458,12 +458,13 @@ Visca::handle_response()
     try {
       finish_nonblocking( ibuffer[1] & 0x0F );
     } catch (ViscaException &e) {
-      e.append("handle_response() failed, could not finish non-blocking");
-      throw;
+      // Ignore, happens sometimes without effect
+      // e.append("handle_response() failed, could not finish non-blocking");
+      // throw;
     }
   } else if ( type == VISCA_RESPONSE_ERROR ) {
     finish_nonblocking( ibuffer[1] & 0x0F );
-    throw ViscaError("handle_response(): got an error message from camera");
+    throw ViscaException("handle_response(): got an error message from camera");
   } else {
     ViscaException ve("Got unknown/unhandled response type");
     ve.append("Received message of type %u", type);
@@ -484,9 +485,11 @@ Visca::cancel_command( unsigned int socket )
   obuffer[1] = VISCA_CANCEL | cancel_socket;
   obuffer_length = 1;
 
-  unsigned int err = VISCA_SUCCESS;
-  if ( (err = send_with_reply()) != VISCA_SUCCESS) {
-    return err;
+  try {
+    send_with_reply();
+  } catch (ViscaException &e) {
+    e.append("cancel_command() failed");
+    throw;
   }
 
   if (  ((ibuffer[1] & 0xF0) == VISCA_RESPONSE_ERROR) &&
@@ -494,7 +497,7 @@ Visca::cancel_command( unsigned int socket )
 	((ibuffer[2] == VISCA_ERROR_CANCELLED)) ) {
     return;
   } else {
-    throw ViscaError("Command could not be cancelled");
+    throw ViscaException("Command could not be cancelled");
   }
 }
 
@@ -510,7 +513,7 @@ Visca::process()
     try {
       recv();
       handle_response();
-    } catch (ViscaError &e) {
+    } catch (ViscaException &e) {
       // Ignore this error
       return;
     }
@@ -613,7 +616,7 @@ Visca::getPanTilt(int *pan, int *tilt)
 
   if ( inquire ) {
     if ( inquire != VISCA_RUNINQ_PANTILT ) {
-      throw ViscaError("Inquiry running, but it is not a pan/tilt inquiry");
+      throw ViscaException("Inquiry running, but it is not a pan/tilt inquiry");
     } else {
 #ifdef TIMETRACKER_VISCA
       tracker->pingStart( ttcls_pantilt_get_read );
@@ -859,7 +862,7 @@ Visca::setZoomSpeedTele(unsigned int speed)
 /** Set zoom speed in wide angle.
  * @param speed speed
  */
-unsigned int
+void
 Visca::setZoomSpeedWide(unsigned int speed)
 {
   obuffer[1] = VISCA_COMMAND;

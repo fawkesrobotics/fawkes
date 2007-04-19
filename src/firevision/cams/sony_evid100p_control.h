@@ -53,7 +53,7 @@ class SonyEviD100PControl : public CameraControl
   SonyEviD100PControl(std::string port);
   virtual ~SonyEviD100PControl();
 
-  bool open();
+  void open();
   void close();
   void process_control();
 

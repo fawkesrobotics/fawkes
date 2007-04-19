@@ -104,12 +104,15 @@ SonyEviD100PControl::SonyEviD100PControl(string port)
   pan_target = 0;
   tilt_target = 0;
   _effect = EFFECT_NONE;
+
+  open();
 }
 
 
 /** Destructor. */
 SonyEviD100PControl::~SonyEviD100PControl()
 {
+  close();
   delete visca;
 }
 
@@ -117,30 +120,22 @@ SonyEviD100PControl::~SonyEviD100PControl()
 /** Open visca device.
  * @return true on success
  */
-bool
+void
 SonyEviD100PControl::open()
 {
-  if (opened) return true;
+  if (opened) return;
 
-  if (visca->open(port) != Visca::VISCA_SUCCESS) {
-    cout << "SonyEviD100PControl: Could not open visca" << endl;
-    return false;
-  }
-
-  if ( visca->set_address(1) != Visca::VISCA_SUCCESS) {
-    cout << "SonyEviD100PControl: Could not set address" << endl;
+  try {
+    visca->open(port.c_str());
+    visca->set_address(1);
+    visca->clear();
+  } catch (ViscaException &e) {
     visca->close();
-    return false;
-  }
-
-  if ( visca->clear() != Visca::VISCA_SUCCESS) {
-    cout << "SonyEviD100PControl: Sending CLEAR failed" << endl;
-    visca->close();
-    return false;
+    e.append("Sony EviD100PControl failed");
+    throw;
   }
 
   opened = true;
-  return opened;
 }
 
 
@@ -149,6 +144,7 @@ SonyEviD100PControl::open()
 void
 SonyEviD100PControl::close()
 {
+  if ( ! opened ) return;
   visca->close();
 }
 
@@ -254,7 +250,7 @@ SonyEviD100PControl::set_pan_tilt_rad(float pan, float tilt)
   tpan = (int)rint(  pan  * PAN_STEPS_PER_RAD  );
   ttilt = (int)rint( tilt * TILT_STEPS_PER_RAD );
 
-  setPanTilt(tpan, ttilt);
+  set_pan_tilt(tpan, ttilt);
 }
 
 
@@ -425,8 +421,11 @@ SonyEviD100PControl::supports_effects()
 bool
 SonyEviD100PControl::supports_effect(unsigned int __effect)
 {
+  if ( __effect == EFFECT_NONE ) {
+    return true;
+  }
+
   switch (__effect) {
-  case EFFECT_NONE:
   case EFFECT_PASTEL:
   case EFFECT_NEGATIVE:
   case EFFECT_SEPIA:
@@ -447,10 +446,10 @@ void
 SonyEviD100PControl::set_effect(unsigned int __effect)
 {
   this->_effect = __effect;
-  switch (__effect) {
-  case EFFECT_NONE:
+  if ( __effect == EFFECT_NONE ) {
     visca->resetEffect();
-    break;
+  }
+  switch (__effect) {
   case EFFECT_PASTEL:
     visca->applyEffectPastel();
     break;

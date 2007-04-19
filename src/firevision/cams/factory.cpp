@@ -107,7 +107,7 @@ CameraFactory::instance(const char *as)
 #endif
 #ifdef HAVE_LEUTRON_CAM
   if ( cap->camid() == "leutron" ) {
-    c = new LeutronCamera(cap);
+    c = new LeutronCamera();
   }
 #endif
 #ifdef HAVE_FILELOADER_CAM

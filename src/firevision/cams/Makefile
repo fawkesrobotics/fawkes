@@ -21,7 +21,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
-CFLAGS   = $(VISION_CFLAGS)
+CFLAGS   = $(VISION_CFLAGS) -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
 LDFLAGS  = $(VISION_LDFLAGS)
 INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
@@ -37,7 +37,7 @@ ifeq ($(HAVE_VISCA_CTRL),1)
 OBJS_libfvcams += visca.o
 endif
 ifeq ($(HAVE_EVID100P_CTRL),1)
-OBJS_libfvcams += soony_evid100p_control.o
+OBJS_libfvcams += sony_evid100p_control.o
 endif
 ifeq ($(HAVE_DPPTU_CTRL),1)
 OBJS_libfvcams += dp_ptu.o

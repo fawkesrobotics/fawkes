@@ -36,6 +36,8 @@
 #  include <fstream>
 #endif
 
+#include <cstddef>
+
 class ViscaException : public Exception
 {
  public:
@@ -66,21 +68,21 @@ class Visca {
   void         close();
 
   // basic communication
-  unsigned int set_address(unsigned int num_cameras);
-  unsigned int clear();
+  void         set_address(unsigned int num_cameras);
+  void         clear();
 
   // low level
-  unsigned int send();
-  unsigned int recv(unsigned int max_wait_ms = 10);
-  unsigned int recv_ack(unsigned int *socket = NULL);
+  void         send();
+  void         recv(unsigned int max_wait_ms = 10);
+  void         recv_ack(unsigned int *socket = NULL);
   void         send_with_reply();
-  unsigned int send_nonblocking(unsigned int *socket = NULL);
-  unsigned int cancel_command(unsigned int socket);
+  void         send_nonblocking(unsigned int *socket = NULL);
+  void         cancel_command(unsigned int socket);
   bool         data_available();
   void         process();
 
   // pan tilt stuff
-  unsigned int resetPanTilt();
+  void         resetPanTilt();
   /** Query for pan/tilt but do not wait until finished
    * This will send an inquire to the camera that asks for pan/tilt values but
    * it does not wait for the data! A later call to getPanTilt will then block and
@@ -88,31 +90,31 @@ class Visca {
    * Not that you can _not_ run another inquire (get*) method until this call has
    * finished! You will get VISCA_E_INQRUNNING as error message.
    */
-  unsigned int startGetPanTilt();
-  unsigned int setPanTilt(int pan, int tilt);
-  unsigned int getPanTilt(int *pan, int *tilt);
-  unsigned int setPanTiltLimit(int pan_left, int pan_right, int tilt_up, int tilt_down);
-  unsigned int resetPanTiltLimit();
+  void         startGetPanTilt();
+  void         setPanTilt(int pan, int tilt);
+  void         getPanTilt(int *pan, int *tilt);
+  void         setPanTiltLimit(int pan_left, int pan_right, int tilt_up, int tilt_down);
+  void         resetPanTiltLimit();
 
   // zoom
-  unsigned int resetZoom();
-  unsigned int setZoom(unsigned int zoom);
-  unsigned int getZoom(unsigned int *zoom);
-  unsigned int setZoomSpeedTele(unsigned int speed);
-  unsigned int setZoomSpeedWide(unsigned int speed);
-  unsigned int setZoomDigitalEnabled(bool enabled);
+  void         resetZoom();
+  void         setZoom(unsigned int zoom);
+  void         getZoom(unsigned int *zoom);
+  void         setZoomSpeedTele(unsigned int speed);
+  void         setZoomSpeedWide(unsigned int speed);
+  void         setZoomDigitalEnabled(bool enabled);
 
   // effects, just to play with...
-  unsigned int resetEffect();
-  unsigned int applyEffect(unsigned char effect);
-  unsigned int applyEffectPastel();
-  unsigned int applyEffectNegArt();
-  unsigned int applyEffectSepia();
-  unsigned int applyEffectBnW();
-  unsigned int applyEffectSolarize();
-  unsigned int applyEffectMosaic();
-  unsigned int applyEffectSlim();
-  unsigned int applyEffectStretch();
+  void         resetEffect();
+  void         applyEffect(unsigned char effect);
+  void         applyEffectPastel();
+  void         applyEffectNegArt();
+  void         applyEffectSepia();
+  void         applyEffectBnW();
+  void         applyEffectSolarize();
+  void         applyEffectMosaic();
+  void         applyEffectSlim();
+  void         applyEffectStretch();
 
   unsigned int getWhiteBalanceMode();
 
@@ -349,9 +351,9 @@ class Visca {
   static const unsigned int  VISCA_NONBLOCKING_ZOOM             = 1;
   static const unsigned int  VISCA_NONBLOCKING_NUM              = 2;
 
-  unsigned int recv_packet(unsigned int max_wait_ms = 10);
-  unsigned int handle_response();
-  unsigned int finish_nonblocking(unsigned int socket);
+  void         recv_packet(unsigned int max_wait_ms = 10);
+  void         handle_response();
+  void         finish_nonblocking(unsigned int socket);
 
   int  dev;
   bool opened;

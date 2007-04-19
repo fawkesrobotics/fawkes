@@ -28,11 +28,12 @@
 #include <core/exception.h>
 
 #include <cams/leutron.h>
-#include <utils/color/colorspaces.h>
+#include <fvutils/color/colorspaces.h>
 
 #include <lvdef.h>
 #include <dsylib.h>
 #include <grabber.h>
+#include <cstdlib>
 
 /** @class LeutronCamera <cams/leutron.h>
  * Cameras accessed through Leutron framegrabber.
@@ -184,7 +185,7 @@ LeutronCamera::open()
     }
     opened = true;
   } else {
-    throw Exeption("LeutronCam: Could not find any camera.");
+    throw Exception("LeutronCam: Could not find any camera.");
   }
 
 }
