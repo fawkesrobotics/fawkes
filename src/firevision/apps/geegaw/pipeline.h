@@ -58,7 +58,7 @@ class GeegawConfig;
 class GeegawPipeline : SignalHandler {
 
  public:
-  GeegawPipeline(ArgumentParser *argp, GeegawConfig *config);
+  GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool object_mode);
   ~GeegawPipeline();
 
   void init();
@@ -68,7 +68,6 @@ class GeegawPipeline : SignalHandler {
   void run(unsigned int delay, unsigned int times);
 
   /*
-  RelativePositionModel * getRelativeBoxPosModel();
   GlobalPositionModel *   getGlobalBoxPosModel();
   */
   ScanlineModel *         getScanlineModel();
@@ -76,6 +75,13 @@ class GeegawPipeline : SignalHandler {
   void                    getDataTakenTime(long int *sec, long int *usec);
 
   bool                    obstacles_found();
+  std::list< polar_coord_t >  & getObstacles();
+
+  RelativePositionModel * object_relpos();
+  float                   object_bearing();
+  float                   object_distance();
+
+  void                    pan_tilt(float *pan, float *tilt);
 
  private:
 
@@ -97,6 +103,13 @@ class GeegawPipeline : SignalHandler {
 
   struct timeval   data_taken_time;
 
+  bool  object_mode;
+  float _object_bearing;
+  float _object_distance;
+
+  float pan;
+  float tilt;
+
   unsigned int              width;
   unsigned int              height;
 
@@ -111,7 +124,8 @@ class GeegawPipeline : SignalHandler {
 
   ScanlineModel            *scanlines;
   ColorModelLookupTable    *cm;
-  //Ball                   *box_rel;
+  RelativePositionModel    *rel_pos;
+  RelativePositionModel    *object_relposmod;
   //BallGlobal             *box_glob;
   Classifier               *classifier;
 

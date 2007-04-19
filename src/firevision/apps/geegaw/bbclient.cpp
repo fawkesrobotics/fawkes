@@ -31,6 +31,8 @@
 #include "pipeline.h"
 #include "config.h"
 
+#include <fvutils/camera/tracker.h>
+
 #include <utils/system/argparser.h>
 #include <utils/system/console_colors.h>
 
@@ -82,6 +84,15 @@ FirevisionGeegawBBClient::FirevisionGeegawBBClient(int argc, char* argv[], Argum
   dist_total = bearing_total = 0.f;
   dist_num = bearing_num = 0;
 
+  forward_pan  = 0.f;
+  forward_tilt = 0.f;
+
+  new_pan = new_tilt = last_pan = last_tilt = 0.f;
+
+  box_lost_time.Stamp();
+  box_lost = true;
+
+  object_mode = true;
 }
 
 
@@ -105,16 +116,21 @@ void FirevisionGeegawBBClient::Init ()
   // Config stuff
   config = new GeegawConfig( m_pXMLConfigFile );
 
+  forward_pan  = deg2rad( config->ForwardPan  );
+  forward_tilt = deg2rad( config->ForwardTilt );
+
   // initialize box position server
   m_pVisObsServer = new bbClients::VisionObstacles_Server( hostname );
   BBRegisterObj( m_pVisObsServer );
 
 
-  /*
   // initialize localize master client
   m_pLocalizeMasterClient = new bbClients::Localize_Master_Client(hostname);
   BBRegisterObj( m_pLocalizeMasterClient );
-  */
+
+  // initialize obj position server
+  m_pObjPosServer = new bbClients::BallPos_Server( hostname );
+  BBRegisterObj( m_pObjPosServer );
 
   // initialize camera control server
   m_pCameraControlServer = new bbClients::CameraControl_Server( hostname );
@@ -124,19 +140,34 @@ void FirevisionGeegawBBClient::Init ()
   BBRegisterObj( m_pFrontAliveFakeServer );
 
   BBOperate();
-  // m_pLocalizeMasterClient->Update();
+  m_pLocalizeMasterClient->Update();
   m_pCameraControlServer->Update();
+  m_pObjPosServer->Update();  
   BBOperate();
 
   SetTime( 40 );
 
-  pipeline = new GeegawPipeline(argp, config);
+  pipeline = new GeegawPipeline(argp, config, object_mode);
   pipeline->init();
+
+  camctrl       = pipeline->getCameraControl();
+
+  try {
+    camctrl->set_pan_tilt_rad( forward_pan, forward_tilt );
+  } catch (Exception &e) {
+    cout << "Caught exception, 1" << endl;
+    e.printTrace();
+  }
+
+  obj_relative = pipeline->object_relpos();
+  camera_tracker = new CameraTracker( obj_relative,
+                                      config->CameraHeight,
+                                      config->CameraOrientation);
+  camera_tracker->setMode(CameraTracker::MODE_MODEL);
 
   /*
   box_relative = pipeline->getRelativeBoxPosModel();
   box_global   = pipeline->getGlobalBoxPosModel();
-  camctrl       = pipeline->getCameraControl();
   scanline_model = pipeline->getScanlineModel();
   */
 }
@@ -153,14 +184,19 @@ FirevisionGeegawBBClient::Loop(int Count)
   BBOperate();
   
   m_pCameraControlServer->Update();
+  m_pObjPosServer->Update();  
+  m_pLocalizeMasterClient->Update();
   BBOperate();
 
   // Do a pipeline cycle
   pipeline->loop();
 
 
-  m_pCameraControlServer->SetCurrentPan(  config->CameraBearing  );
-  m_pCameraControlServer->SetCurrentTilt( config->CameraSlope );
+  float pan = 0.f, tilt = 0.f;
+  pipeline->pan_tilt(&pan, &tilt);
+
+  m_pCameraControlServer->SetCurrentPan(  pan  );
+  m_pCameraControlServer->SetCurrentTilt( tilt );
   m_pCameraControlServer->UpdateBB();
   BBOperate();
   // Also update to get the most current target values
@@ -170,21 +206,161 @@ FirevisionGeegawBBClient::Loop(int Count)
   /* Update the information in the BB interface */
   if (pipeline->obstacles_found() ) {
 
-    cout << "Found some" << endl;
+    if ( ! object_mode ) {
+
+      std::list<polar_coord_t> & obstacles = pipeline->getObstacles();
+      std::list<polar_coord_t>::iterator i;
+      int cur_obs = 0;
+      //cout << "======================================================================" << endl;
+      for (i = obstacles.begin(); i != obstacles.end(); ++i) {
+        m_pVisObsServer->SetPosRelAngle( (*i).phi, cur_obs );
+        m_pVisObsServer->SetPosRelDist( (*i).r, cur_obs );
+        m_pVisObsServer->SetPosWidth( 0.1, cur_obs );
+        m_pVisObsServer->SetPosHeight( 0.4, cur_obs );
+        //cout << "Writing obstacle " << cur_obs << " to BB: angle=" << (*i).phi << "  dist="
+        //     << (*i).r << endl;
+        ++cur_obs;
+        if ( cur_obs == bbClients::VisionObstacles_Client::MAX_NUM_OF_OBSTACLES ) {
+          break;
+        }
+      }
+      m_pVisObsServer->SetNumberOfObstacles(cur_obs);
+    } else {
+      m_pVisObsServer->SetNumberOfObstacles(0);
+    }
+
+    if ( visibility_history < 0 ) {
+      visibility_history = 1;
+    } else {
+      ++visibility_history;
+    }
+
+    box_lost = false;
+
+    // Misusing fields here!
+    m_pObjPosServer->SetRelVelX( pipeline->object_bearing() );
+    m_pObjPosServer->SetRelVelY( pipeline->object_distance() );
+    m_pObjPosServer->SetConfidence( 1.f );
+    m_pObjPosServer->SetVisible( true );
+
+    if ( ! object_mode ) {
+      camera_tracker->calc();
+      new_pan = camera_tracker->getNewPan();
+      new_tilt = forward_tilt;
+    }
 
   } else {
-    cout << msg_prefix << cred << "Box is NOT visible" << cnormal << endl;
-
+    cout << msg_prefix << cred << "No obstacles found" << cnormal << endl;
     m_pVisObsServer->SetNumberOfObstacles( 0 );
+    if ( visibility_history > 0 ) {
+      visibility_history = -1;
+    } else {
+      --visibility_history;
+    }
+    m_pObjPosServer->SetVisible( false );
+    m_pObjPosServer->SetConfidence( 0.f );
+    if ( ! object_mode ) {
+      new_pan  = forward_pan;
+      new_tilt = forward_tilt;
+    } else {
+      if (! box_lost) {
+	box_lost = true;
+	box_lost_time.Stamp();
+      }
+    }
 
   }
   m_pVisObsServer->UpdateBB();
+  m_pObjPosServer->SetVisibilityHistory( visibility_history );
+  m_pObjPosServer->UpdateBB();
 
   m_pFrontAliveFakeServer->PingAlive();
   m_pFrontAliveFakeServer->UpdateBB();
 
   BBPing();
   BBOperate();
+
+  if ( object_mode ) {
+    tracking_mode = m_pCameraControlServer->GetTrackingMode();
+    m_pCameraControlServer->SetCurrentTrackingMode( tracking_mode );
+    
+    if ( tracking_mode == bbClients::CameraControl_Client::TRACKING_NONE ) {
+      // no tracking
+    //cout << "Tracking OFF." << endl;
+      if (m_pCameraControlServer->ChangedTargetPan() ||
+	  m_pCameraControlServer->ChangedTargetTilt() ) {
+	// For the Leutron cam we know that this has to be set in one go
+	// anyway so we do this
+	new_pan  = m_pCameraControlServer->GetTargetPan();
+	new_tilt = m_pCameraControlServer->GetTargetTilt();
+      }
+      
+    } else if ( tracking_mode == bbClients::CameraControl_Client::TRACKING_BALL ) {
+      // Track the box
+      //cout << "Tracking BOX." << endl;
+      now.Stamp();
+      if ( box_lost &&
+	   ((now - box_lost_time) >= config->ForwardDelay) ) {
+	new_pan  = forward_pan;
+	new_tilt = forward_tilt;
+      } else {
+	camera_tracker->setMode( CameraTracker::MODE_MODEL );
+	camera_tracker->calc();
+	new_pan  = camera_tracker->getNewPan();
+	//if (config->CameraTrackTilt) {
+	//  new_tilt = camera_tracker->getNewTilt();
+	//} else {
+	  new_tilt = forward_tilt;
+	  //}
+      }
+
+
+    } else if ( tracking_mode == bbClients::CameraControl_Client::TRACKING_WORLD ) {
+      // track a world point
+      //cout << "Tracking POINT (" << m_pCameraControlServer->GetTrackWorldPoint( 0 )
+      //     << "," << m_pCameraControlServer->GetTrackWorldPoint( 1 ) << ")." << endl;
+      camera_tracker->setMode( CameraTracker::MODE_WORLD );
+      camera_tracker->setWorldPoint( m_pCameraControlServer->GetTrackWorldPoint( 0 ),
+				     m_pCameraControlServer->GetTrackWorldPoint( 1 ) );
+      camera_tracker->setRobotPosition( m_pLocalizeMasterClient->GetCurrentX(),
+					m_pLocalizeMasterClient->GetCurrentY(),
+					m_pLocalizeMasterClient->GetCurrentOri() );
+      camera_tracker->calc();
+      new_pan  = camera_tracker->getNewPan();
+      //if (config->CameraTrackTilt) {
+      //new_tilt = camera_tracker->getNewTilt();
+      //} else {
+	new_tilt = forward_tilt;
+	//}
+      
+    } else if ( tracking_mode == bbClients::CameraControl_Client::TRACKING_FORWARD ) {
+      new_pan  = forward_pan;
+      new_tilt = forward_tilt;
+      
+    } else {
+      cout << msg_prefix << cred << "Invalid tracking mode set!" << cnormal << endl;
+    }
+
+  }
+
+    if ( (fabs(new_pan  - last_pan)  >= config->PanMinChange) ||
+	 (fabs(new_tilt - last_tilt) >= config->TiltMinChange)) {
+
+      if ( new_tilt > config->TiltMax ) {
+	new_tilt = config->TiltMax;
+      }
+
+      // only set new pan/tilt if value change was big enough
+      try {
+	camctrl->set_pan_tilt_rad( new_pan, new_tilt );
+      } catch (Exception &e) {
+	cout << "Caught exception, 2" << endl;
+	e.printTrace();
+      }
+      last_pan  = new_pan;
+      last_tilt = new_tilt;
+    }
+
 
   loop_running = false;
 

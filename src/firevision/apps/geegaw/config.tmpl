@@ -1,8 +1,14 @@
 name GeegawConfig
 
-prefix '<RCSoftConfigFile><Lowlevel><FireVision><Stereo><StereoGeneral>'
+prefix '<RCSoftConfigFile><Lowlevel><FireVision><Front><FrontGeneral>'
 string ClassifierType '<ClassifierSettings><ClassifierType>' -- print_out crash_if_missing
 string ShrinkerType '<ClassifierSettings><ShrinkerType>' -- print_out crash_if_missing
+float  ForwardPan '<PanTilt><ForwardPan>' -- print_out crash_if_missing
+float  ForwardTilt '<PanTilt><ForwardTilt>' -- print_out crash_if_missing
+float  ForwardDelay '<PanTilt><ForwardDelay>' -- print_out crash_if_missing
+float  PanMinChange '<PanTilt><PanMinChange>' -- print_out crash_if_missing
+float  TiltMinChange '<PanTilt><TiltMinChange>' -- print_out crash_if_missing
+float  TiltMax '<PanTilt><TiltMinChange>' -- print_out crash_if_missing
 
 prefix '<RCSoftConfigFile><Lowlevel><FireVision><Stereo><StereoGeneral><StereoModelSettings>'
 string ColorModel '<ColorModelType>' -- print_out crash_if_missing
@@ -15,9 +21,10 @@ int    ScanlineGridXOffset '<ScanlineModel><GridModel><GridXOffset>' -- print_ou
 int    ScanlineGridYOffset '<ScanlineModel><GridModel><GridYOffset>' -- print_out crash_if_missing
 
 prefix '<RCSoftConfigFile><Lowlevel><FireVision><Front><RobotFrontSettings hostname="@=HOSTNAME=@">'
-float CameraHeight '<CameraHeight>' -- print_out crash_if_missing
-float CameraOffsetX '<CameraOffsetX>' -- print_out crash_if_missing
-float CameraOffsetY '<CameraOffsetY>' -- print_out crash_if_missing
-float CameraBearing '<CameraBearing>' -- print_out crash_if_missing
-float CameraSlope '<CameraSlope>' -- print_out crash_if_missing
-
+string CameraType '<CameraType>' -- print_out crash_if_missing
+float HorizontalViewingAngle '<CameraSettings type="@CameraType@"><HorizontalViewingAngle>' -- print_out crash_if_missing
+float VerticalViewingAngle '<CameraSettings type="@CameraType@"><VerticalViewingAngle>' -- print_out crash_if_missing
+float CameraHeight '<CameraSettings type="@CameraType@"><CameraHeight>' -- print_out crash_if_missing
+float CameraOffsetX '<CameraSettings type="@CameraType@"><CameraOffsetX>' -- print_out crash_if_missing
+float CameraOffsetY '<CameraSettings type="@CameraType@"><CameraOffsetY>' -- print_out crash_if_missing
+float CameraOrientation '<CameraSettings type="@CameraType@"><CameraOrientation>' -- print_out crash_if_missing

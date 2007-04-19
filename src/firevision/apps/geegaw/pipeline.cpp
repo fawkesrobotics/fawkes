@@ -45,18 +45,20 @@
 #include <cams/sony_evid100p_control.h>
 
 #include <models/scanlines/beams.h>
+#include <models/scanlines/grid.h>
 #include <models/color/thresholds.h>
 #include <models/color/lookuptable.h>
 #include <models/relative_position/box_relative.h>
 
 #include <classifiers/simple.h>
+#include <filters/roidraw.h>
 
 #include <unistd.h>
 #include <iostream>
 
 using namespace std;
 
-GeegawPipeline::GeegawPipeline(ArgumentParser *argp, GeegawConfig *config)
+GeegawPipeline::GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool object_mode)
 {
   param_width = param_height = 0;
   msg_prefix = cblue + "GeegawPipeline: " + cnormal;
@@ -84,6 +86,8 @@ GeegawPipeline::GeegawPipeline(ArgumentParser *argp, GeegawConfig *config)
 
   cam = NULL;
   camctrl = NULL;
+
+  this->object_mode = object_mode;
 }
 
 
@@ -127,8 +131,15 @@ GeegawPipeline::init()
   cam = new LeutronCamera();
   camctrl = new SonyEviD100PControl( "/dev/ttyS0" );
 
-  cam->open();
-  cam->start();
+  cout << msg_prefix << "Opening camera, this may take a while..." << endl;
+
+  try {
+    cam->open();
+    cam->start();
+  } catch (Exception &e) {
+    e.printTrace();
+    throw;
+  }
 
   width  = cam->pixel_width();
   height = cam->pixel_height();
@@ -162,22 +173,25 @@ GeegawPipeline::init()
   buffer3    = (unsigned char *)malloc( buffer_size );
 
   // models
-  scanlines = new ScanlineBeams(width, height, 
-				/* start x  */    width / 2,
-				/* start y  */    height,
-				/* stop_y   */    200,
-				/* offset_y */     10,
-				/* angle_from */  deg2rad(-30),
-				/* angle_range */ deg2rad(60),
-				/* num beams */   10);
+  if ( object_mode ) {
+    scanlines = new ScanlineGrid(width, height, 5, 5);
+  } else {
+    scanlines = new ScanlineBeams(width, height, 
+				  /* start x  */    width / 2,
+				  /* start y  */    height,
+				  /* stop_y   */    150,
+				  /* offset_y */     5,
+				  /* distribute_start_x */ true,
+				  /* angle_from */  deg2rad(-30),
+				  /* angle_range */ deg2rad(60),
+				  /* num beams */   20);
+  }
 
   cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
 				   config->LookupTableWidth,
 				   config->LookupTableHeight,
 				   FIREVISION_SHM_LUT_OMNI_COLOR,
 				   true /* destroy on free */);
-  cm->reset();
-
 
   /*
   // Position models for box
@@ -194,8 +208,34 @@ GeegawPipeline::init()
   box_glob     = new BallGlobal( box_rel );
   */
 
+  rel_pos = new BoxRelative(width, height,
+			    config->CameraHeight,
+			    config->CameraOffsetX,
+			    config->CameraOffsetY,
+			    config->CameraOrientation,
+			    config->HorizontalViewingAngle,
+			    config->VerticalViewingAngle
+			    );
+  rel_pos->setRadius(3);
+
+  object_relposmod = new BoxRelative(width, height,
+				     config->CameraHeight,
+				     config->CameraOffsetX,
+				     config->CameraOffsetY,
+				     config->CameraOrientation,
+				     config->HorizontalViewingAngle,
+				     config->VerticalViewingAngle
+				     );
+  object_relposmod->setRadius(3);
+
+
   // Classifier
-  // classifier   = new ReallySimpleClassifier(width, height, scanlines, cm, 20 /* min pixels to consider */, 30 /* initial box extent */);
+  classifier   = new ReallySimpleClassifier(width, height,
+                                            scanlines, cm,
+                                            10 /* min pixels to consider */,
+                                            30 /* initial box extent */,
+                                            /* upward */ ! object_mode,
+                                            /* neighbourhood min match */ 5);
 
 }
 
@@ -307,10 +347,48 @@ GeegawPipeline::obstacles_found()
 }
 
 
+float
+GeegawPipeline::object_bearing()
+{
+  return _object_bearing;
+}
+
+
+float
+GeegawPipeline::object_distance()
+{
+  return _object_distance;
+}
+
+
+std::list<polar_coord_t> &
+GeegawPipeline::getObstacles()
+{
+  return obstacles;
+}
+
+
+void
+GeegawPipeline::pan_tilt(float *pan, float *tilt)
+{
+  *pan  = this->pan;
+  *tilt = this->tilt;
+}
+
+
+RelativePositionModel *
+GeegawPipeline::object_relpos()
+{
+  return object_relposmod;
+}
+
+
 void
 GeegawPipeline::loop()
 {
+  camctrl->process_control();
 
+  camctrl->start_get_pan_tilt();
   cam->capture();
 
   gettimeofday(&data_taken_time, NULL);
@@ -319,15 +397,60 @@ GeegawPipeline::loop()
   convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
   memcpy(buffer, buffer_src, buffer_size);
 
+  /*
   Drawer *d = new Drawer();
   d->setBuffer( buffer, width, height );
   while ( ! scanlines->finished() ) {
     d->drawPoint((*scanlines)->x, (*scanlines)->y);
     ++(*scanlines);
   }
+  scanlines->reset();
+  */
+  classifier->setSrcBuffer( buffer_src );
+  rois = classifier->classify();
+  obstacles.clear();
+
+  FilterROIDraw *rdf = new FilterROIDraw();
+
+  // Go through all ROIs, count them as obstacles
+  unsigned int max_obstacles = 10;
+  if ( rois->empty() ) {
+    // cout << "Doh, no ROIs!" << endl;
+  }
+  bool first = true;
+  for (r = rois->begin(); r != rois->end(); ++r) {
+    rdf->setDstBuffer(buffer, &(*r));
+    rdf->apply();
+    polar_coord_t o;
+    camctrl->pan_tilt_rad(&pan, &tilt);
+    rel_pos->setPanTilt(pan, tilt);
+    rel_pos->setCenter( (*r).start.x + (*r).width / 2,
+		        (*r).start.y + (*r).height );
+    rel_pos->calc_unfiltered();
+    o.phi = rel_pos->getBearing();
+    o.r   = rel_pos->getDistance();
+    obstacles.push_back(o);
+    if (obstacles.size() == max_obstacles) break;
+
+    if ( first ) {
+      // First is the biggest ROI, set as object
+      object_relposmod->setPanTilt(pan, tilt);
+      object_relposmod->setCenter( (*r).start.x + (*r).width / 2,
+				   (*r).start.y + (*r).height / 2 );
+      object_relposmod->calc_unfiltered();
+      _object_bearing = object_relposmod->getBearing();
+      _object_distance = object_relposmod->getDistance();
+      first = false;
+    }
+  }
+  rois->clear();
+  delete rois;
+  delete rdf;
 
   // Classify image, find ROIs by color
   cam->dispose_buffer();
+  camctrl->process_control();
 }
 
 /// @endcond
+

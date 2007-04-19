@@ -92,7 +92,7 @@ main( int argc, char **argv )
 
     char *config_filename;
     if ( (config_filename = argp->getArgument("x")) == NULL ) {
-      config_filename = "../cfg/rcsoftconfigfile.xml";
+      config_filename = "../cfg/config.xml";
       cout << cblue << "FirevisionGeegaw" << cnormal
 	   << ": No config file given, using default ("
 	   << config_filename << ")" << endl;
@@ -112,7 +112,7 @@ main( int argc, char **argv )
 
     cout << cblue << "FirevisionGeegaw" << cnormal << ": Delay is " << delay << " ms" << endl;
 
-    GeegawPipeline *fp = new GeegawPipeline(argp, c);
+    GeegawPipeline *fp = new GeegawPipeline(argp, c, false);
 
     fp->init();
     fp->run( delay /* delay in ms */);

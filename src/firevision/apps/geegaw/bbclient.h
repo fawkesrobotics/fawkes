@@ -41,12 +41,14 @@ class ArgumentParser;
 class GeegawPipeline;
 class GeegawConfig;
 class CameraControl;
+class CameraTracker;
 
 namespace bbClients {
-  // class Localize_Master_Client;
+  class Localize_Master_Client;
   class CameraControl_Server;
   class Alive_Server;
   class VisionObstacles_Server;
+  class BallPos_Server;
 }
 
 class FirevisionGeegawBBClient : public bb::ClientAppl
@@ -61,6 +63,8 @@ class FirevisionGeegawBBClient : public bb::ClientAppl
 
  private:
 
+  bool object_mode;
+
   ArgumentParser  *argp;
   GeegawConfig    *config;
   GeegawPipeline  *pipeline;
@@ -73,11 +77,14 @@ class FirevisionGeegawBBClient : public bb::ClientAppl
   bool            exit_running;
 
   CameraControl         *camctrl;
+  CameraTracker         *camera_tracker;
 
-  RelativePositionModel *box_relative;
+  RelativePositionModel *obj_relative;
   ScanlineModel         *scanline_model;
 
   std::string msg_prefix;
+
+  int   tracking_mode;
 
   float new_pan;
   float new_tilt;
@@ -108,11 +115,15 @@ class FirevisionGeegawBBClient : public bb::ClientAppl
   Timestamp   box_lost_time;
   bool             box_lost;
 
+  int              visibility_history;
+
   Timestamp   now;
 
   bbClients::VisionObstacles_Server  *m_pVisObsServer;
   bbClients::CameraControl_Server    *m_pCameraControlServer;
   bbClients::Alive_Server            *m_pFrontAliveFakeServer;
+  bbClients::BallPos_Server          *m_pObjPosServer;
+  bbClients::Localize_Master_Client  *m_pLocalizeMasterClient;
 
 }; 
 

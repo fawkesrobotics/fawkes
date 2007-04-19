@@ -30,10 +30,13 @@ LIBDIRS  = $(VISION_LIBDIRS) $(QTDIR)/lib
 LIBS     = $(VISION_LIBS)
 
 OBJS_geegaw = bbclient.o config.o main.o pipeline.o
-LIBS_geegaw = core utils rutils fvutils fvcams fvmodels fvclassifiers bb interfaces qt-mt
+LIBS_geegaw = core utils rutils fvutils fvcams fvmodels fvclassifiers bb interfaces qt-mt fvfilters
 
-OBJS_all = $(OBJS_geegaw)
-BINS_all = $(BINDIR)/geegaw
+OBJS_bbgeegaw = bbgeegaw.o
+LIBS_bbgeegaw = core utils rutils bb interfaces
+
+OBJS_all = $(OBJS_geegaw) $(OBJS_bbgeegaw)
+BINS_all = $(BINDIR)/geegaw $(BINDIR)/bbgeegaw
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
