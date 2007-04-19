@@ -46,6 +46,7 @@ class BoxRelative : public RelativePositionModel
   virtual const char *	getName() const;
   virtual void		setCenter(float x, float y);
   virtual void		setCenter(const center_in_roi_t& c);
+  virtual void          setRadius(float r);
 
   virtual void		setPanTilt(float pan = 0.0f, float tilt = 0.0f);
   virtual void          getPanTilt(float *pan, float *tilt) const;

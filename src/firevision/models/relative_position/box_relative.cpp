@@ -31,6 +31,9 @@
 #include <models/relative_position/box_relative.h>
 #include <utils/math/angle.h>
 
+#include <iostream>
+using namespace std;
+
 /** @class BoxRelative <models/relative_position/box_relative.h>
  * Relative (beer) box position model.
  * Model used in Bremen to get world champions :-)
@@ -144,6 +147,11 @@ BoxRelative::getX(void) const
   return box_x;
 }
 
+void
+BoxRelative::setRadius(float r)
+{
+}
+
 
 void
 BoxRelative::setCenter(float x, float y)
@@ -254,7 +262,16 @@ BoxRelative::calc_unfiltered()
   // invert sign, because slope downward shall be negative
   slope = -((center.y - image_height / 2) * tilt_rad_per_pixel - tilt);
 
-  distance_box_cam = 2.f;
+  distance_box_cam = camera_height * tan(M_PI / 2 + slope);
+  distance_box_motor = distance_box_cam - camera_offset_x;
+
+  /*
+  cout << "pan:" << pan << "  tilt:" << tilt
+       << "  bearing: " << bearing << "  slope:" << slope
+       << "  dist->cam:" << distance_box_cam
+       << "  dist->motor:" << distance_box_motor
+       << endl;
+  */
 
   box_x = cos( bearing ) * distance_box_cam + camera_offset_x;
   box_y = sin( bearing ) * distance_box_cam + camera_offset_y;

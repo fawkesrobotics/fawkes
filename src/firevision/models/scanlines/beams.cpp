@@ -29,14 +29,15 @@
 #include <models/scanlines/beams.h>
 
 #include <cmath>
-#include <iostream>
 
 using namespace std;
 
 ScanlineBeams::ScanlineBeams(unsigned int image_width, unsigned int image_height,
 			     unsigned int start_x, unsigned int start_y,
 			     unsigned int stop_y, unsigned int offset_y,
-			     float angle_from, float angle_range, unsigned int num_beams)
+                             bool distribute_start_x,
+			     float angle_from, float angle_range,
+                             unsigned int num_beams)
 {
   if ( start_y < stop_y )  throw Exception("start_y < stop_y");
   if ( (stop_y > image_height) || (start_y > image_height) ) {
@@ -52,6 +53,7 @@ ScanlineBeams::ScanlineBeams(unsigned int image_width, unsigned int image_height
   this->offset_y = offset_y;
   this->image_width = image_width;
   this->image_height = image_height;
+  this->distribute_start_x = distribute_start_x;
 
   reset();
 }
@@ -191,17 +193,28 @@ ScanlineBeams::reset()
 {
   _finished = false;
 
-  coord.x = start_x;
-  coord.y = start_y;
+  beam_current_pos.clear();
+  if ( distribute_start_x ) {
+    unsigned int offset_start_x = image_width / (num_beams - 1);
+    for (unsigned int i = 0; i < num_beams; ++i) {
+      coord.x = i * offset_start_x;
+      coord.y = start_y;
+      beam_current_pos.push_back(coord);
+    }
+    coord.x = beam_current_pos[0].x;
+    coord.y = beam_current_pos[0].y;
+  } else {
+    coord.x = start_x;
+    coord.y = start_y;
+    beam_current_pos.resize( num_beams, coord );
+  }
 
-  float diff_y = start_y - stop_y;
 
-  next_beam = 0;
-
-  beam_current_pos.resize( num_beams, coord );
   beam_end_pos.clear();
+  next_beam = 0;
   float angle_between_beams = angle_range / num_beams;
   for (unsigned int i = 0; i < num_beams; ++i) {
+    float diff_y = beam_current_pos[i].y - stop_y;
     float diff_x = diff_y * tan( angle_from + (float)i * angle_between_beams );
     point_t end_point;
     end_point.y = stop_y;
@@ -210,11 +223,6 @@ ScanlineBeams::reset()
   }
   first_beam = 0;
   last_beam = beam_end_pos.size() - 1;
-
-  for (unsigned int i = 0; i < num_beams; ++i) {
-    cout << "End point " << i << " is at (" << beam_end_pos[i].x
-	 << "," << beam_end_pos[i].y << ")" << endl;
-  }
 }
 
 const char *

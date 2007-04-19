@@ -41,6 +41,7 @@ class ScanlineBeams : public ScanlineModel
   ScanlineBeams(unsigned int image_width, unsigned int image_height,
 		unsigned int start_x, unsigned int start_y,
 		unsigned int stop_y, unsigned int offset_y,
+                bool distribute_start_x,
 		float angle_from, float angle_range, unsigned int num_beams);
 
   point_t  operator*();
@@ -74,6 +75,7 @@ class ScanlineBeams : public ScanlineModel
   unsigned int offset_y;
   unsigned int image_width;
   unsigned int image_height;
+  bool distribute_start_x;
 
   point_t coord;
   point_t tmp_coord;
