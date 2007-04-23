@@ -49,7 +49,7 @@ ScanlineRadial::ScanlineRadial(unsigned int width, unsigned int height,
 			       unsigned int center_x, unsigned int center_y,
 			       unsigned int radius_increment,
 			       unsigned int step,
-			       unsigned int dead_radius
+			       unsigned int max_radius, unsigned int dead_radius
 			       )
 {
   this->width            = width;
@@ -59,6 +59,8 @@ ScanlineRadial::ScanlineRadial(unsigned int width, unsigned int height,
   this->radius_increment = radius_increment;
   this->step             = step;
   this->dead_radius      = dead_radius;
+  this->max_radius       = max_radius;
+  this->auto_max_radius  = (max_radius == 0);
 
   reset();
 }
@@ -242,16 +244,18 @@ ScanlineRadial::reset()
   coord.x = center_x;
   coord.y = center_y;
 
-  // Calculate distances to corners of image
-  unsigned int dists[4];
-  dists[0] = (unsigned int)sqrt( float(center_x * center_x) + float(center_y * center_y) );
-  dists[1] = (unsigned int)sqrt( float((width - center_x) * (width - center_x)) + float(center_y * center_y) );
-  dists[2] = (unsigned int)sqrt( float((width - center_x) * (width - center_x)) + float((height - center_y) * (height - center_y)) );
-  dists[3] = (unsigned int)sqrt( float(center_x * center_x) + float((height - center_y) * (height - center_y)) );
+  if ( auto_max_radius ) {
+    // Calculate distances to corners of image
+    unsigned int dists[4];
+    dists[0] = (unsigned int)sqrt( float(center_x * center_x) + float(center_y * center_y) );
+    dists[1] = (unsigned int)sqrt( float((width - center_x) * (width - center_x)) + float(center_y * center_y) );
+    dists[2] = (unsigned int)sqrt( float((width - center_x) * (width - center_x)) + float((height - center_y) * (height - center_y)) );
+    dists[3] = (unsigned int)sqrt( float(center_x * center_x) + float((height - center_y) * (height - center_y)) );
 
-  // now the maximum corner distance is the maximum radius
-  simpleBubbleSort(dists, 4);
-  max_radius = dists[0] - 1;
+    // now the maximum corner distance is the maximum radius
+    simpleBubbleSort(dists, 4);
+    max_radius = dists[0] - 1;
+  }
 
   done = false;
 
@@ -279,4 +283,24 @@ unsigned int
 ScanlineRadial::getMargin()
 {
   return radius_increment;
+}
+
+
+void
+ScanlineRadial::set_center(unsigned int center_x, unsigned int center_y)
+{
+  this->center_x = center_x;
+  this->center_y = center_y;
+  reset();
+}
+
+
+void
+ScanlineRadial::set_radius(unsigned int dead_radius, unsigned int max_radius)
+{
+  this->max_radius      = 0;
+  this->dead_radius     = dead_radius;
+  this->auto_max_radius = (max_radius == 0);
+
+  reset();
 }

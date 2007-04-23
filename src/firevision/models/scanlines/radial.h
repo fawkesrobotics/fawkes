@@ -39,7 +39,7 @@ class ScanlineRadial : public ScanlineModel
   ScanlineRadial(unsigned int width, unsigned int height,
 		 unsigned int center_x, unsigned int center_y,
 		 unsigned int radius_increment, unsigned int step,
-		 unsigned int dead_radius = 0
+		 unsigned int max_radius = 0, unsigned int dead_radius = 0
 		 );
 
   point_t  operator*();
@@ -55,6 +55,10 @@ class ScanlineRadial : public ScanlineModel
   virtual void  setRobotPose(float x, float y, float ori) {}
   virtual void  setPanTilt(float pan, float tilt) {}
 
+  void set_center(unsigned int center_x, unsigned int center_y);
+  void set_radius(unsigned int dead_radius, unsigned int max_radius);
+
+
  private:
 
   void simpleBubbleSort(unsigned int array[], unsigned int num_elements);
@@ -68,6 +72,7 @@ class ScanlineRadial : public ScanlineModel
   unsigned int current_radius;
   unsigned int max_radius;
   unsigned int dead_radius;
+  bool         auto_max_radius;
 
   point_t coord;
   point_t tmp_coord;
