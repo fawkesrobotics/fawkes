@@ -37,6 +37,8 @@
 #include <unistd.h>
 #include <string>
 
+#include <utils/math/angle.h>
+
 #include <iostream>
 
 #include <dc1394/utils.h>
@@ -156,6 +158,7 @@ Bumblebee2Camera::open()
   try {
     FirewireCamera::open();
   } catch (Exception &e) {
+    e.printTrace();
     throw;
   }
 
@@ -226,12 +229,29 @@ Bumblebee2Camera::open()
   triclopsSetLowpass( data->triclops, 1 );
   triclopsSetDisparity( data->triclops, 5, 100);
   triclopsSetEdgeMask(data->triclops, 11);
-  triclopsSetStereoMask(data->triclops, 15);
+  triclopsSetStereoMask(data->triclops, 23);
   triclopsSetSurfaceValidation(data->triclops, 1);
   triclopsSetTextureValidation(data->triclops, 0);
 
   triclopsSetDisparityMapping( data->triclops, 10, 85 );
   triclopsSetDisparityMappingOn( data->triclops, 1 );
+
+  /*
+  TriclopsTransform tr;
+  / first index row, second index column
+  tr.matrix[0][0] =  1;  tr.matrix[0][1] =  1;     tr.matrix[0][2] =  0;     tr.matrix[0][3] =  0;
+  tr.matrix[1][0] =  0;  tr.matrix[1][1] =  0;  tr.matrix[1][2] = 0;  tr.matrix[1][3] =  0;
+  tr.matrix[2][0] =  0;  tr.matrix[2][1] =  0;  tr.matrix[2][2] =  0;  tr.matrix[2][3] =  0;
+  tr.matrix[3][0] =  0;  tr.matrix[3][1] =  0;     tr.matrix[3][2] =  0;     tr.matrix[3][3] =  0;
+  
+  * first index col, second index row
+  tr.matrix[0][0] =  1;  tr.matrix[1][0] = 0;     tr.matrix[2][0] =  0;     tr.matrix[3][0] = 0;
+  tr.matrix[0][1] =  0;  tr.matrix[1][1] = 0.34;  tr.matrix[2][1] = -0.94;  tr.matrix[3][1] = 0;
+  tr.matrix[0][2] =  0;  tr.matrix[1][2] = 0.94;  tr.matrix[2][2] =  0.34;  tr.matrix[3][2] = 0;
+  tr.matrix[0][3] =  0;  tr.matrix[1][3] = 0;     tr.matrix[2][3] =  0;     tr.matrix[3][3] = 1;
+
+  triclopsSetTriclopsToWorldTransform(data->triclops, tr);
+  */
 
   int nrows, ncols;
   triclopsGetResolution(data->triclops, &nrows, &ncols);
@@ -378,6 +398,55 @@ Bumblebee2Camera::get_xyz(unsigned int px, unsigned int py, float *x, float *y, 
   return false;
 }
 
+
+bool
+Bumblebee2Camera::get_world_xyz(unsigned int px, unsigned int py, float *x, float *y, float *z)
+{
+  float cam_angle = deg2rad(60);
+  float trans_x = -0.1;
+  float trans_y =  0.05;
+  float trans_z = -0.78;
+  float tx, ty, tz;
+  if ( get_xyz(px, py, &tx, &ty, &tz) ) {
+    /* transform around x axis
+    *x = tx;
+    *y = cos(cam_angle) * ty  + sin(cam_angle) * tz;
+    *z = -sin(cam_angle) * ty + cos(cam_angle) * tz;
+    */
+    float x1, y1, z1, x2, y2, z2, x3, y3, z3;
+    x1 = tx;
+    y1 = cos(cam_angle) * ty  + sin(cam_angle) * tz;
+    z1 = -sin(cam_angle) * ty + cos(cam_angle) * tz;
+    // cout << "Transform 1: (" << tx << "," << ty << "," << tz << ") -> (" << x1 << "," << y1 << "," << z1 << ")" << endl;
+    // *x = y1;
+    // *y =  cos(cam_angle) * x1 + sin(cam_angle) * z1;
+    // *z = -sin(cam_angle) * x1 + cos(cam_angle) * z1;
+    x2 = y1;
+    y2 = x1;
+    z2 = z1;
+    // cout << "Transform 2: (" << x1 << "," << y1 << "," << z1 << ") -> (" << x2 << "," << y2 << "," << z2 << ")" << endl;
+
+    x3 = z2;
+    y3 = y2;
+    z3 = x2;
+    // cout << "Transform 3: (" << x2 << "," << y2 << "," << z2 << ") -> (" << x3 << "," << y3 << "," << z3 << ")" << endl;
+
+    *x = x3 + trans_x;
+    *y = y3 + trans_y;
+    *z = z3 + trans_z; 
+
+    // cout << "Transform 4: (" << x3 << "," << y3 << "," << z3 << ") -> (" << *x << "," << *y << "," << *z << ")" << endl;
+
+    /*
+    *x = ty + trans_x;
+    *y = -sin(cam_angle) * tx + cos(cam_angle) * tz + trans_y;
+    *z = cos(cam_angle) * tx + sin(cam_angle) * tz + trans_z;
+    */
+    return true;
+  } else {
+    return false;
+  }
+}
 
 void
 Bumblebee2Camera::flush()
