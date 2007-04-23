@@ -54,6 +54,7 @@ class Classifier;
 class ArgumentParser;
 class SharedMemoryImageBuffer;
 class CannikinConfig;
+class ScanlineRadial;
 
 class CannikinPipeline : SignalHandler {
 
@@ -100,6 +101,7 @@ class CannikinPipeline : SignalHandler {
 
   void                    set_colormap(cup_color_t c, const char *file);
   bool                    get_xyz(float *x, float *y, float *z);
+  bool                    get_world_xyz(float *x, float *y, float *z);
 
  private:
 
@@ -132,14 +134,18 @@ class CannikinPipeline : SignalHandler {
 
   cannikin_mode_t  _mode;
   cannikin_state_t state;
+  cannikin_state_t last_state;
 
+  // Color detection stuff
+  unsigned int     determine_cycle_num;
+  unsigned int     determined_valid_frames;
   cup_color_t      _cup_color;
   cup_color_t      _determined_cup_color;
 
   bool             cup_visible;
   bool             cup_color_determination_done;
 
-  float x, y, z;
+  float x, y, z, wx, wy, wz;
 
   struct timeval   data_taken_time;
 
@@ -163,6 +169,8 @@ class CannikinPipeline : SignalHandler {
   //Ball                   *box_rel;
   //BallGlobal             *box_glob;
   Classifier               *classifier;
+
+  ScanlineRadial           *disparity_scanlines;
 
   bool                      already_fetched_pantilt;
   cart_coord_t              mass_point;

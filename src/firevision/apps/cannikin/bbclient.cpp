@@ -196,6 +196,7 @@ FirevisionCannikinBBClient::Loop(int Count)
   }
 
   if ( m_pCannikinServer->ChangedCupColor() ) {
+    cout << "Cup color changed" << endl;
     pipeline->set_cup_color((CannikinPipeline::cup_color_t)m_pCannikinServer->GetCupColor());
   }
 
@@ -317,12 +318,22 @@ FirevisionCannikinBBClient::Loop(int Count)
     */
 
     if ( pipeline->is_cup_visible() ) {
-      float x, y, z;
-      if ( pipeline->get_xyz(&x, &y, &z) ) {
+      float x, y, z, wx, wy, wz;
+      if ( pipeline->get_xyz(&x, &y, &z) &&
+           pipeline->get_world_xyz(&wx, &wy, &wz) ) {
 	m_pCannikinServer->SetVisible( true );
 	m_pCannikinServer->SetCamX(x);
 	m_pCannikinServer->SetCamY(y);
 	m_pCannikinServer->SetCamZ(z);
+	m_pCannikinServer->SetX(wx);
+	m_pCannikinServer->SetY(wy);
+	m_pCannikinServer->SetZ(wz);
+
+        float bearing = atan2f(wy, wx);
+        float slope = asin(wx / z);
+
+        m_pCannikinServer->SetBearing(bearing);
+        m_pCannikinServer->SetSlope(slope);
       } else {
 	cup_not_visible();
       }

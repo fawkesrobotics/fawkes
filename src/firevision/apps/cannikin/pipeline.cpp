@@ -42,6 +42,7 @@
 #include <cams/bumblebee2.h>
 
 #include <models/scanlines/grid.h>
+#include <models/scanlines/radial.h>
 #include <models/scanlines/cornerhorizon.h>
 #include <models/color/thresholds.h>
 #include <models/color/lookuptable.h>
@@ -88,6 +89,7 @@ CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
 
   scanlines     = NULL;
   cm            = NULL;
+  disparity_scanlines = NULL;
   /*
   box_rel      = NULL;
   box_glob     = NULL;
@@ -135,6 +137,7 @@ CannikinPipeline::~CannikinPipeline()
   free(buffer3);
 
   delete scanlines;
+  delete disparity_scanlines;
   delete cm;
   /*
   delete box_rel;
@@ -191,6 +194,8 @@ CannikinPipeline::init()
   scanlines = new ScanlineGrid(width, height,
 			       config->ScanlineGridXOffset, config->ScanlineGridYOffset);
 
+  disparity_scanlines = new ScanlineRadial(width, height, width / 2, height / 2, 10, 10);
+
   string colormap_filestem = ColorModelLookupTable::composeFilename(config->ColormapDirectory
 								    + "/" +
 								    config->ColormapFilestem );
@@ -203,20 +208,22 @@ CannikinPipeline::init()
     colormap_filestem.erase(colormap_filestem_cindex, 2);
 
     string tmp;
-    tmp = colormap_filestem;
-    tmp.insert(colormap_filestem_cindex, "orange");
-    cout << "Adding colormap " << tmp << endl;
-    colormaps[CC_ORANGE] = strdup(tmp.c_str());
-
-    tmp = colormap_filestem;
-    tmp.insert(colormap_filestem_cindex, "yellow");
-    cout << "Adding colormap " << tmp << endl;
-    colormaps[CC_YELLOW] = strdup(tmp.c_str());
+    /*
 
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "red");
     cout << "Adding colormap " << tmp << endl;
     colormaps[CC_RED] = strdup(tmp.c_str());
+
+    tmp = colormap_filestem;
+    tmp.insert(colormap_filestem_cindex, "yellow");
+    cout << "Adding colormap " << tmp << endl;
+    colormaps[CC_YELLOW] = strdup(tmp.c_str());
+    */
+    tmp = colormap_filestem;
+    tmp.insert(colormap_filestem_cindex, "orange");
+    cout << "Adding colormap " << tmp << endl;
+    colormaps[CC_ORANGE] = strdup(tmp.c_str());
 
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "blue");
@@ -234,7 +241,7 @@ CannikinPipeline::init()
 				   FIREVISION_SHM_LUT_FRONT_COLOR,
 				   true /* destroy on free */);
   cm->reset();
-  set_cup_color(CC_YELLOW);
+  set_cup_color(CC_ORANGE);
 
 
   /*
@@ -472,6 +479,8 @@ CannikinPipeline::loop()
   default: return;
   }
 
+
+  last_state = state;
 }
 
 
@@ -482,6 +491,7 @@ CannikinPipeline::reinitialize_colormap()
     cout << "Loading colormap " << colormaps[_cup_color] << endl;
     cm->load(colormaps[_cup_color]);
   } else {
+    cout << "Cannot load colormap for requested color!" << endl;
     cm->reset();
   }
 }
@@ -548,12 +558,31 @@ CannikinPipeline::detect_cup()
 	if ( (r->width > 10) && (r->height > 10) ) {
 	  // Take five points and calculate some distances...
 	  std::vector<DisparityPoint> points;
+	  std::vector<DisparityPoint> wpoints;
 	  unsigned int center_x = r->start.x + r->width / 2;
 	  unsigned int center_y = r->start.y + r->height / 2;
 
 	  shm_buffer->setCircle( center_x, center_y, 5 );
 	  shm_buffer->setCircleFound( true );
 
+          points.clear();
+          wpoints.clear();
+
+	  disparity_scanlines->set_center(center_x, center_y);
+	  disparity_scanlines->set_radius(3, min(r->width, r->height));
+
+	  while ( ! disparity_scanlines->finished() ) {
+	    if ( bbc->get_xyz((*disparity_scanlines)->x, (*disparity_scanlines)->y, &x, &y, &z) ) {
+	      points.push_back(DisparityPoint(x, y, z));
+	    }
+	    if ( bbc->get_world_xyz((*disparity_scanlines)->x, (*disparity_scanlines)->y, &wx, &wy, &wz) ) {
+	      wpoints.push_back(DisparityPoint(wx, wy, wz));
+	    }
+
+	    ++(*disparity_scanlines);
+	  }
+
+	  /*
 	  if ( bbc->get_xyz(center_x, center_y, &x, &y, &z) ) {
 	    points.push_back(DisparityPoint(x, y, z));
 	  }
@@ -569,8 +598,25 @@ CannikinPipeline::detect_cup()
 	  if ( bbc->get_xyz(center_x + 5, center_y + 5, &x, &y, &z) ) {
 	    points.push_back(DisparityPoint(x, y, z));
 	  }
-	  if ( points.empty() ) {
-	    cout << "No valid disparity for all points. Doh!" << endl;
+	  if ( bbc->get_world_xyz(center_x, center_y, &wx, &wy, &wz) ) {
+	    wpoints.push_back(DisparityPoint(wx, wy, wz));
+	  }
+	  if ( bbc->get_world_xyz(center_x - 5, center_y - 5, &wx, &wy, &wz) ) {
+	    wpoints.push_back(DisparityPoint(wx, wy, wz));
+	  }
+	  if ( bbc->get_world_xyz(center_x + 5, center_y - 5, &wx, &wy, &wz) ) {
+	    wpoints.push_back(DisparityPoint(wx, wy, wz));
+	  }
+	  if ( bbc->get_world_xyz(center_x - 5, center_y + 5, &wx, &wy, &wz) ) {
+	    wpoints.push_back(DisparityPoint(wx, wy, wz));
+	  }
+	  if ( bbc->get_world_xyz(center_x + 5, center_y + 5, &wx, &wy, &wz) ) {
+	    wpoints.push_back(DisparityPoint(wx, wy, wz));
+	  }
+	  */
+
+	  if ( points.empty() || wpoints.empty() ) {
+	    cout << "No valid disparity for any points. Doh!" << endl;
 	    cup_visible = false;
 	  } else {
 	    sort( points.begin(), points.end() );
@@ -578,6 +624,12 @@ CannikinPipeline::detect_cup()
 	    x = points[elem].x;
 	    y = points[elem].y;
 	    z = points[elem].z;
+
+	    sort( wpoints.begin(), wpoints.end() );
+	    int welem = (wpoints.size() + 1) / 2;
+	    wx = wpoints[welem].x;
+	    wy = wpoints[welem].y;
+	    wz = wpoints[welem].z;
 	  }
 
 	  memcpy(buffer, bbc->buffer_disparity(), bbc->pixel_width() * bbc->pixel_height());
@@ -625,7 +677,104 @@ CannikinPipeline::detect_cup()
 void
 CannikinPipeline::determine_cup_color()
 {
+  if ( state != last_state ) {
+    // First call
+    determined_valid_frames = 0;
+    determine_cycle_num = 0;
+    cup_color_determination_done = false;
+    _cup_color = CC_ORANGE;
+    reinitialize_colormap();
+  }
+
+  if ( cup_color_determination_done ) {
+    return;
+    //     determined_valid_frames = 0;
+    //     determine_cycle_num = 0;
+    //     cup_color_determination_done = false;
+    //     _cup_color = CC_YELLOW;
+    //     reinitialize_colormap();
+  }
+
   cam->capture();
+
+  convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
+  // memcpy(buffer, buffer_src, buffer_size);
+
+  // Classify image, find ROIs by color
+  classifier->setSrcBuffer( buffer_src );
+  rois = classifier->classify();
+
+  if (rois->empty()) {
+    if ( generate_output ) {
+      cout << msg_prefix << cred << "No ROIs!" << cnormal << endl;
+    }
+    // No box
+    shm_buffer->setCircleFound(false);
+    shm_buffer->setROI(0, 0, 0, 0);
+    //box_rel->reset();
+  }
+
+  cout << "Testing ROIs" << endl;
+
+  // Go through all ROIs, filter and recognize shapes
+  for (r = rois->begin(); r != rois->end(); ++r) {
+
+    if ( generate_output ) {
+      cout << msg_prefix << cgreen << "ROI:     " << cnormal
+  	   << "start: (" << (*r).start.x << "," << (*r).start.y << ")"
+    	   << "   width: " << (*r).width
+    	   << "   height: " << (*r).height
+           << endl;
+    }
+    
+    // Try to detect box shape
+    if ((*r).hint == H_BALL) {
+
+      if ( /* (*r).contains(width / 2, height / 2) && */
+	   ((*r).width > 100) && ((*r).height > 100) ) {
+	// we have a possible ROI
+	if ( determine_cycle_num > 0 ) {
+	  --determine_cycle_num;
+	}
+	++determined_valid_frames;
+	if ( determined_valid_frames > 4 ) {
+	  cup_color_determination_done = true;
+	  _determined_cup_color = _cup_color;
+	  if ( _cup_color == CC_ORANGE ) {
+	    cout << "Determined color: ORANGE" << endl;
+	  } else if (_cup_color == CC_GREEN ) {
+	    cout << "Determined color: GREEN" << endl;
+	  } else if (_cup_color == CC_BLUE ) {
+	    cout << "Determined color: BLUE" << endl;
+	  }
+	}
+      } else {
+	cout << "ROI does not have minimum requested size, only "
+	     << (*r).width << " x " << (*r).height << endl;
+      }
+
+    } // end is box
+  } // end for rois
+
+  rois->clear();
+  delete rois;
+
+  ++determine_cycle_num;
+  if ( determine_cycle_num > 10 ) {
+    // we tried for 10 frames, but did not get the needed valid frames, switch
+    // to next color
+    determine_cycle_num = 0;
+    determined_valid_frames = 0;
+    if ( _cup_color == CC_ORANGE ) {
+      _cup_color = CC_GREEN;
+    } else if (_cup_color == CC_GREEN ) {
+      _cup_color = CC_BLUE;
+    } else if (_cup_color == CC_BLUE ) {
+      _cup_color = CC_ORANGE;
+    }
+    reinitialize_colormap();
+  }
+
   cam->dispose_buffer();
 }
 
@@ -637,6 +786,19 @@ CannikinPipeline::get_xyz(float *x, float *y, float *z)
     *x = this->x;
     *y = this->y;
     *z = this->z;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool
+CannikinPipeline::get_world_xyz(float *x, float *y, float *z)
+{
+  if ( cup_visible ) {
+    *x = this->wx;
+    *y = this->wy;
+    *z = this->wz;
     return true;
   } else {
     return false;

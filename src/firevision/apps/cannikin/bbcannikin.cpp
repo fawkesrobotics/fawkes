@@ -30,6 +30,7 @@
 
 #include <unistd.h>
 #include <utils/system/getkey.h>
+#include <utils/math/angle.h>
 
 using namespace std;
 
@@ -121,8 +122,10 @@ CannikinTestBBClient::Loop(int Count)
   if ( display || display_once ) {
     cout << "Cam (X, Y, Z):    (" << m_pCannikin->GetCamX() << ","
 	 << m_pCannikin->GetCamY() << "," << m_pCannikin->GetCamZ() << ")" << endl
-	 << "RobRelPos (X,Y):  (" << m_pCannikin->GetX() << ","
-	 << m_pCannikin->GetX() << ")" << endl
+	 << "RobRelPos (X,Y,Z):  (" << m_pCannikin->GetX() << ","
+	 << m_pCannikin->GetY() << "," << m_pCannikin->GetZ() << ")" << endl
+	 << "Bearing: " << rad2deg(m_pCannikin->GetBearing()) << "°" << endl
+	 << "Slope: " << rad2deg(m_pCannikin->GetSlope()) << "°" << endl
 	 << "Cup visible:  " << m_pCannikin->IsVisible() << endl
 	 << "Cup Color:    ";
     if (m_pCannikin->GetCurrentCupColor() ==  bbClients::Cannikin_Client::CC_YELLOW) {
@@ -148,6 +151,25 @@ CannikinTestBBClient::Loop(int Count)
       cout << "I have no fucking clue";
     }
     cout << endl;
+
+    if ( m_pCannikin->GetCurrentMode() == bbClients::Cannikin_Client::MODE_DETERMINE_CUP_COLOR ) {
+      cout << "Cup color detected: " << ((m_pCannikin->GetDeterminationDone()) ? "Yes" : "No") << endl;
+      cout << "Determined cup color: ";
+      if (m_pCannikin->GetDeterminedCupColor() ==  bbClients::Cannikin_Client::CC_YELLOW) {
+	cout << "yellow";
+      } else if (m_pCannikin->GetDeterminedCupColor() ==  bbClients::Cannikin_Client::CC_BLUE) {
+	cout << "blue";
+      } else if (m_pCannikin->GetDeterminedCupColor() ==  bbClients::Cannikin_Client::CC_GREEN) {
+	cout << "green";
+      } else if (m_pCannikin->GetDeterminedCupColor() ==  bbClients::Cannikin_Client::CC_RED) {
+      cout << "red";
+      } else if (m_pCannikin->GetDeterminedCupColor() ==  bbClients::Cannikin_Client::CC_ORANGE) {
+	cout << "orange";
+      } else {
+	cout << "I have no fucking clue";
+      }
+      cout << endl;
+    }
     display_once = false;
   }
 
