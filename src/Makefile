@@ -21,7 +21,7 @@
 
 BASEDIR = ..
 
-SUBDIRS = libs interfaces mainapp plugins tools
+SUBDIRS = libs interfaces mainapp firevision plugins tools
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk

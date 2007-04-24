@@ -30,8 +30,37 @@
 
 #include <cmath>
 
-using namespace std;
+/** @class ScanlineBeams <models/scanlines/beams.h>
+ * Raytraced beams scanline model.
+ * This model uses a defined number of beams shot from the bottom of the image
+ * towards the top using Bresenham. With this you can have kind of a radar-like
+ * scanline model. Additionally the starting points at the bottom can be
+ * distributed over the full width of the image which alles for a scan aligned
+ * to the image.
+ *
+ * To ease the calculation of the finished state the very last point is traversed
+ * twice.
+ *
+ * @author Tim Niemueller
+ */
 
+/** Construtor.
+ * @param image_width image width
+ * @param image_height image height
+ * @param start_x x coordinate of the starting point, ignored if distributed (see below)
+ * @param start_y y coordinate of the starting point, this is the lowest points of the
+ * the lines and should thus be close to the bottom of the image
+ * @param stop_y Y coordinate for stopping the traversal
+ * @param offset_y number of pixel to advance in Y-direction per iteration
+ * @param distribute_start_x set to true, to distribute the start x coordinates
+ * equidistant over the whole width of the image.
+ * @param angle_from angle to start the scan at, a straight vertical line means
+ * zero rad, clock-wise positive, in radians
+ * @param angle_range the range to use to distribute the beams, clockwise positive,
+ * in radians
+ * @param num_beams number of beams to use
+ * @exception Exception thrown if parameters are out of bounds
+ */
 ScanlineBeams::ScanlineBeams(unsigned int image_width, unsigned int image_height,
 			     unsigned int start_x, unsigned int start_y,
 			     unsigned int stop_y, unsigned int offset_y,

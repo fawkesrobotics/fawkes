@@ -33,7 +33,12 @@
 
 /** @class ScanlineRadial <models/scanlines/radial.h>
  * Radial scanlines.
- * Meant to be used with omnivision.
+ * Uses circles to generate scanline points. A dead radius is ignored in the
+ * center of the image (for example for the camera itself in an omni-vision system).
+ * From there circles are used in radius_increment distances. On each circle points are
+ * generated in a distance of about step pixels. This is done up to a given maximum
+ * radius. If no maximum radius is supplied (max_radius=0) it is automatically
+ * calculated depending on the image size.
  */
 
 /** Constructor.
@@ -43,6 +48,8 @@
  * @param center_y radial center center y
  * @param radius_increment radius increment
  * @param step step
+ * @param max_radius maximum radius, if set to 0 will be calculated
+ * automatically depending on the image dimensions.
  * @param dead_radius inner radius to ignore
  */
 ScanlineRadial::ScanlineRadial(unsigned int width, unsigned int height,
@@ -286,6 +293,12 @@ ScanlineRadial::getMargin()
 }
 
 
+/** Set new center point.
+ * Sets new center point to move around the scanlines in the image.
+ * Does an implicit reset().
+ * @param center_x x coordinate of the new center
+ * @param center_y y coordinate of the new center
+ */
 void
 ScanlineRadial::set_center(unsigned int center_x, unsigned int center_y)
 {
@@ -295,6 +308,12 @@ ScanlineRadial::set_center(unsigned int center_x, unsigned int center_y)
 }
 
 
+/** Set new radius.
+ * Sets the new maximum and dead radius. Does an implicit reset().
+ * @param dead_radius new dead radius
+ * @param max_radius new maximum radius, if set to 0 this is automatically
+ * calculated depending on the image size.
+ */
 void
 ScanlineRadial::set_radius(unsigned int dead_radius, unsigned int max_radius)
 {

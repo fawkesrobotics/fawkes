@@ -25,6 +25,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+/// @cond RCSoftX
+
 #include <blackboard/clientappl.h>
 #include <interfaces/vision_obstacles_client.h>
 
@@ -128,3 +130,5 @@ main(int argc, char **argv)
   bbclient->Main();
   delete bbclient;
 }
+
+/// @endcond

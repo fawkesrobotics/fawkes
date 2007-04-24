@@ -47,6 +47,9 @@ using namespace std;
  * @param color_model color model
  * @param min_num_points minimum number of points in ROI to be considered
  * @param box_extent basic extent of a new ROI
+ * @param upward set to true if you have an upward scanline model, this means that
+ * points are traversed from the bottom to the top. In this case the ROIs are initially
+ * extended towards the top instead of the bottom.
  * @param neighbourhood_min_match minimum number of object pixels to grow neighbourhood
  * @param grow_by grow region by that many pixels
  */

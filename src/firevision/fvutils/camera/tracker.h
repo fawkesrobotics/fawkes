@@ -41,8 +41,6 @@ class CameraTracker {
 
   void  calc();
 
-  void  setPanTilt(float pan, float tilt);
-
   float getNewPan();
   float getNewTilt();
 
@@ -61,8 +59,6 @@ class CameraTracker {
   float  camera_height;
   float  camera_orientation;
 
-  float  pan;
-  float  tilt;
   float  new_pan;
   float  new_tilt;
 

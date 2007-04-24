@@ -25,21 +25,46 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <core/exception.h>
+
 #include <fvutils/camera/tracker.h>
 #include <utils/system/console_colors.h>
 #include <utils/math/angle.h>
 
 #include <models/relative_position/relativepositionmodel.h>
 
-#include <iostream>
 #include <cmath>
 
-using namespace std;
+/** @class CameraTracker <fvutils/camera/tracker.h>
+ * Camera Tracker.
+ * Utility class that allows for tracking and object or a world point
+ * by using a camera pan/tilt unit. It is NOT meant to track an object
+ * in a scene!
+ *
+ * The camera tracker will try to keep the desired object or point in the middle
+ * of the image. Given a relative position model or a world point and robot pose
+ * information and initial information the camera tracker returns pan/tilt angles
+ * that are required to have the object in the center of the image. The using
+ * application can then fulfill this desired angles if this lies within the
+ * physical constraints of the pan/tilt unit.
+ *
+ * @author Tim Niemueller
+ */
 
+/** Model mode, track by a relative world model. */
 const unsigned int CameraTracker::MODE_MODEL = 0;
+/** World point mode, track a world point */
 const unsigned int CameraTracker::MODE_WORLD = 1;
 
 
+/** Constructor.
+ * @param relative_position_model Relative position model to use if in model tracking
+ * mode.
+ * @param camera_height height above ground of the camera, objects are assumed to lie
+ * on the ground plane.
+ * @param camera_ori_deg The angle between the forward position and the actual position
+ * of the camera on the robot in degrees, clock-wise positive.
+ */
 CameraTracker::CameraTracker(RelativePositionModel *relative_position_model,
 			     float camera_height,
                              float camera_ori_deg
@@ -52,11 +77,16 @@ CameraTracker::CameraTracker(RelativePositionModel *relative_position_model,
 }
 
 
+/** Destructor. */
 CameraTracker::~CameraTracker()
 {
 }
 
 
+/** Calculate values.
+ * Based on the set data like robot position, world point and relative position model
+ * this calculates the new desired values for pan and tilt.
+ */
 void
 CameraTracker::calc()
 {
@@ -100,6 +130,9 @@ CameraTracker::calc()
 }
 
 
+/** Get the new pan value.
+ * @return new optimal pan value
+ */
 float
 CameraTracker::getNewPan()
 {
@@ -107,6 +140,9 @@ CameraTracker::getNewPan()
 }
 
 
+/** Get the new tilt value.
+ * @return new optimal tilt value
+ */
 float
 CameraTracker::getNewTilt()
 {
@@ -114,25 +150,25 @@ CameraTracker::getNewTilt()
 }
 
 
-void
-CameraTracker::setPanTilt(float pan, float tilt)
-{
-  this->pan  = pan;
-  this->tilt = tilt;
-}
-
-
+/** Set tracking mode.
+ * @param mode new tracking mode
+ * @exception Exception thrown, if mode is neither MODE_WORLD nor MODE_MODEL
+ */
 void
 CameraTracker::setMode(unsigned int mode)
 {
   if ( (mode == MODE_WORLD) || (mode == MODE_MODEL)) {
     this->mode = mode;
   } else {
-    cout << "CameraTracker: Invalid mode, not setting mode" << endl;
+    throw Exception("CameraTracker: Invalid mode, not setting mode");
   }
 }
 
 
+/** Set relative position model.
+ * Switch the relative position model.
+ * @param rpm new relative position model
+ */
 void
 CameraTracker::setRelativePositionModel(RelativePositionModel *rpm)
 {
@@ -140,6 +176,12 @@ CameraTracker::setRelativePositionModel(RelativePositionModel *rpm)
 }
 
 
+/** Set robot position.
+ * Set the current robot position.
+ * @param x new x coordinate in robot system
+ * @param y new y coordinate in robot system
+ * @param ori new orientation
+ */
 void
 CameraTracker::setRobotPosition(float x, float y, float ori)
 {
@@ -149,6 +191,13 @@ CameraTracker::setRobotPosition(float x, float y, float ori)
 }
 
 
+/** Set world point.
+ * World point to track for the robot. The world point is given in a robot-relative
+ * coordinate system on the ground plane. X-axis is pointing forward, Y-axis to
+ * the right (right-handed coordinate system).
+ * @param x x coordinate to track
+ * @param y y coordinate to track
+ */
 void
 CameraTracker::setWorldPoint(float x, float y)
 {

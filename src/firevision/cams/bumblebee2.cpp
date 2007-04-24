@@ -69,19 +69,40 @@ class Bumblebee2CameraData
 /// @endcond
 
 
+/** @class Bumblebee2Camera <cams/bumblebee2.h>
+ * Bumblebee2 camera.
+ * Camera implementation that allows fo access to the PointGrey Research Bumblebee2
+ * camera. It uses libdc1394 to access the camera for fast image transfers (as recommended
+ * by PTGrey) and the Triclops SDK by PTGrey for calculation of the stereo image.
+ *
+ * This implementation is based on the Firewire implementation and extends it. The
+ * capture() method implicitly does all the stereo processing needed. This cannot
+ * be turned off. The video modes is appropriately configured for the camera. You can
+ * get access to the left and right images where necessary using the set_image_number()
+ * method and the constants LEFT_ORIGINAL and RIGHT_ORIGINAL. The disparity image buffer
+ * can be retrieved via buffer_disparity().
+ *
+ * Currently only the low resolution version (640x480) of the Bumblebee2 is supported,
+ * an extension for the hires version may follow if we get one of these cameras.
+ *
+ * This class also encapsulates a coordinate system transformation that you can use to
+ * transform the coordinates from the camera system to another right-handed system like
+ * the robot system.
+ *
+ * The camera coordinate system has the X-axis pointing to the right,
+ * Y-axis to the floor and Z-axis forward, if the camera is placed parallel to the ground
+ * and you look in the direction of the camera. The origin of the system is in the right
+ * lens system of the Bumblebee.
+ *
+ * @author Tim Niemueller
+ */
+
+
 /** Left image already converted to YUV422_PLANAR */
 const unsigned int Bumblebee2Camera::LEFT_ORIGINAL = 0;
 
 /** Right image already converted to YUV422_PLANAR */
 const unsigned int Bumblebee2Camera::RIGHT_ORIGINAL = 0;
-
-/** @class Bumblebee2Camera <cams/bumblebee2.h>
- * Bumblebee2 stereo camera.
- * This camera implementation allows for access to the IEEE1394 based stereo
- * camera Bumblebee 2 by Point Grey Research.
- * @author Tim Niemueller
- */
-
 
 /// PGR specific registers
 /** Bayer Tile mapping information */
@@ -282,6 +303,11 @@ void Bumblebee2Camera::close()
 }
 
 
+/** Capture and process image.
+ * This method captures an image from the camera and does all the necessary stereo
+ * processing. After a call to capture you can access the original images and the
+ * disparity image.
+ */
 void
 Bumblebee2Camera::capture()
 {
@@ -378,6 +404,21 @@ Bumblebee2Camera::capture()
 }
 
 
+/** Get camera-relative coordinates of a point.
+ * Use this method to get the coordinates in the camera coordinate system of a given
+ * point in the image. It may not be possible to provide such a coordinate if no valid
+ * disparity information could be calculated for the given point.
+ * @param px x coordinate in image
+ * @param py y coordinate in image
+ * @param x contains the x coordinate in the camera-relative coordinate system upon
+ * successful return
+ * @param y contains the y coordinate in the camera-relative coordinate system upon
+ * successful return
+ * @param z contains the z coordinate in the camera-relative coordinate system upon
+ * successful return
+ * @return true, if valid information could be retrieved. In that case (x, y, z) is filled
+ * with the coordinates, false otherwise (x, y, and z are not modified).
+ */
 bool
 Bumblebee2Camera::get_xyz(unsigned int px, unsigned int py, float *x, float *y, float *z)
 {
@@ -399,6 +440,21 @@ Bumblebee2Camera::get_xyz(unsigned int px, unsigned int py, float *x, float *y, 
 }
 
 
+/** Get transformed coordinates of a point.
+ * Use this method to get the coordinates in the transformed coordinate system of a given
+ * point in the image. It may not be possible to provide such a coordinate if no valid
+ * disparity information could be calculated for the given point.
+ * @param px x coordinate in image
+ * @param py y coordinate in image
+ * @param x contains the x coordinate in the camera-relative coordinate system upon
+ * successful return
+ * @param y contains the y coordinate in the camera-relative coordinate system upon
+ * successful return
+ * @param z contains the z coordinate in the camera-relative coordinate system upon
+ * successful return
+ * @return true, if valid information could be retrieved. In that case (x, y, z) is filled
+ * with the coordinates, false otherwise (x, y, and z are not modified).
+ */
 bool
 Bumblebee2Camera::get_world_xyz(unsigned int px, unsigned int py, float *x, float *y, float *z)
 {
@@ -480,6 +536,10 @@ Bumblebee2Camera::buffer()
 }
 
 
+/** Get the disparity image buffer.
+ * Access method to the disparity image buffer.
+ * @return pointer to the internal disparity image buffer
+ */
 unsigned char *
 Bumblebee2Camera::buffer_disparity()
 {
@@ -513,6 +573,9 @@ Bumblebee2Camera::colorspace()
 }
 
 
+/** Check if connected camera is a Bumblebee2.
+ * @return true, if the connected camera is a Bumblebee2, false otherwise
+ */
 bool
 Bumblebee2Camera::is_bumblebee2()
 {
@@ -522,6 +585,10 @@ Bumblebee2Camera::is_bumblebee2()
 }
 
 
+/** Retrieve bayer tile.
+ * This is an internal method that access a special PTGrey register in the camera to
+ * determine the bayer tile mode.
+ */
 void
 Bumblebee2Camera::get_bayer_tile()
 {
@@ -553,6 +620,13 @@ Bumblebee2Camera::get_bayer_tile()
 }
 
 
+/** Retrieve config from camera.
+ * This method retrieves the config from the camera and writes it to a file such that
+ * the Triclops SDK can use it for context initialization.
+ * @param filename filename to write the config to
+ * @exception Exception thrown if there is an error when trying to retrieve the config
+ * or writing it to a file.
+ */
 void
 Bumblebee2Camera::write_triclops_config_from_camera_to_file(const char *filename)
 {
@@ -598,6 +672,11 @@ Bumblebee2Camera::write_triclops_config_from_camera_to_file(const char *filename
 }
 
 
+/** Get Triclops context.
+ * This retrieves calibration information from the camera and stores it into a
+ * temporary file. With this file the Triclops context is initialized. Afterwards
+ * the temporary file is removed.
+ */
 void
 Bumblebee2Camera::get_triclops_context_from_camera()
 {
@@ -616,6 +695,14 @@ Bumblebee2Camera::get_triclops_context_from_camera()
 }
 
 
+/** Deinterlace green buffer.
+ * Method used in stereo processing. Following the PTGrey example, seems useless
+ * if we have YUV planar and thus grey images anyway.
+ * @param src source buffer
+ * @param dest destination buffer
+ * @param width width of the image
+ * @param height height of the image
+ */
 void
 Bumblebee2Camera::deinterlace_green( unsigned char* src, 
 				     unsigned char* dest, 

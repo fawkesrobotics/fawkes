@@ -61,8 +61,7 @@ class Bumblebee2Camera : public FirewireCamera
   bool get_xyz(unsigned int px, unsigned int py, float *x, float *y, float *z);
   bool get_world_xyz(unsigned int px, unsigned int py, float *x, float *y, float *z);
 
- protected:
-
+ private:
   void get_triclops_context_from_camera();
   void write_triclops_config_from_camera_to_file(const char *filename);
   void get_bayer_tile();
