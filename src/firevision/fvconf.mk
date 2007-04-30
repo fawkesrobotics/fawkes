@@ -45,18 +45,12 @@ ifneq ($(realpath /usr/include/dc1394),)
   # Check if we have PGR Triclops SDK, build Bumblebee2 if we have it
   ifneq ($(realpath $(TRICLOPS_SDK)/include/triclops.h),)
     ifeq ($(realpath $(TRICLOPS_SDK)/lib/libtriclops.so),)
-      $(warning Found Triclops SDK, but could not find shared lib, read doc/triclops.txt)
-    else
       HAVE_BUMBLEBEE2_CAM = 1
       VISION_INCDIRS += $(TRICLOPS_SDK)/include
       VISION_LIBDIRS += $(TRICLOPS_SDK)/lib
       VISION_CAM_LIBS += triclops
     endif
-  else
-    $(warning PTGrey Triclops SDK not found, Bumblebee2 camera will not be built)
   endif
-else
-  $(warning Cannot build Firewire camera, libdc1394 headers not found)
 endif
 
 HAVE_DPPTU_CTRL     = 0

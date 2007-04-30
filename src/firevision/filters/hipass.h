@@ -25,6 +25,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef HAVE_IPP
+#error "IPP not installed"
+#endif
+
 #ifndef __FIREVISION_FILTERS_HIPASS_H_
 #define __FIREVISION_FILTERS_HIPASS_H_
 

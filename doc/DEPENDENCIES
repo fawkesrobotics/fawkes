@@ -45,5 +45,8 @@ FireVision	leutron			== 1.96.001		optional
 FireVision	mvslib			>= 1.10			optional
 		(needed to compile sulphur for mvBlueLYNX)
 
+FireVision	Triclops SDK		>= 3.2.0.8		optional
+		(Bumblebee 2 support)
+
 $Id$
 

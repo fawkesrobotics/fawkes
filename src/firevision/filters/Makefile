@@ -27,12 +27,34 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
+ifneq ($(SRCDIR),)
+  ifeq ($(HAVE_IPP),0)
+    # We have no IPP, because of this we have to eliminate many filters
+    # OBJS_libfvfilters = $(filter-out morphology/%,$(OBJS_libfvfilters))
+    IPPI_FILTERS  = $(wildcard $(SRCDIR)/morphology/*.cpp)
+    IPPI_FILTERS += $(shell grep -rl ippi.h $(SRCDIR)/*.cpp | grep -v .svn)
+  else
+    LIBS_libfvfilters += ippi
+  endif
+
+.PHONY: print_unsupported
+print_unsupported:
+	$(SILENT)if [ "$(HAVE_IPP)" != "1" ]; then \
+		for f in $(IPPI_FILTERS:$(SRCDIR)/%.cpp=%); do \
+			echo -e "$(INDENT_PRINT)--> $(TRED)Omitting $$f filter$(TNORMAL) (No IPP installed)"; \
+		done; \
+	fi \
+
+all: print_unsupported
+endif
+
 # We are lazy...
-OBJS_libfvfilters := $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))
-LIBS_libfvfilters = utils fvutils fvmodels ippi
+OBJS_libfvfilters := $(patsubst %.cpp,%.o,$(filter-out $(IPPI_FILTERS:$(SRCDIR)/%=%),$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
+LIBS_libfvfilters = utils fvutils fvmodels
 
 OBJS_all = $(OBJS_libfvfilters)
 LIBS_all = $(LIBDIR)/libfvfilters.so
+
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

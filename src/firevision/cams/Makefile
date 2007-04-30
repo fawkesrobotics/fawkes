@@ -68,5 +68,22 @@ endif
 OBJS_all = $(OBJS_libfvcams)
 LIBS_all = $(LIBDIR)/libfvcams.so
 
+ifneq ($(SRCDIR),)
+.PHONY: print_unsupported
+print_unsupported:
+	$(SILENT)if [ "$(HAVE_FIREWIRE_CAM)" != "1" ]; then \
+		echo -e "$(INDENT_PRINT)--> $(TRED)No Firewire support$(TNORMAL) (install libdc1394-devel)"; \
+	else \
+		if [ "$(HAVE_BUMBLEBEE2_CAM)" != "1" ]; then \
+			echo -e "$(INDENT_PRINT)--> $(TRED)No Bumblebee2 support$(TNORMAL) (install Triclops SDK)"; \
+		fi; \
+	fi
+	$(SILENT)if [ "$(HAVE_LEUTRON_CAM)" != "1" ]; then \
+		echo -e "$(INDENT_PRINT)--> $(TRED)No Leutron support$(TNORMAL) (install Leutron SDK)"; \
+	fi; \
+
+all: print_unsupported
+endif
+
 include $(BASEDIR)/etc/buildsys/base.mk
 
