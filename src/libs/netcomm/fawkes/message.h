@@ -31,6 +31,8 @@
 #include <core/utils/refcount.h>
 #include <core/exceptions/software.h>
 
+#include <cstddef>
+
 /** Fawkes network message header.
  * Header that is prepended to all following messages.
  */
@@ -60,6 +62,11 @@ typedef struct {
   unsigned int  size;	/**< size of the following payload. */
 } fawkes_transfer_header_t;
 
+class FawkesNetworkMessageTooBigException : public Exception
+{
+ public:
+  FawkesNetworkMessageTooBigException(size_t message_size);
+};
 
 class FawkesNetworkMessage : public RefCount
 {
@@ -68,13 +75,13 @@ class FawkesNetworkMessage : public RefCount
   FawkesNetworkMessage(fawkes_message_t &msg);
   FawkesNetworkMessage(unsigned int clid,
 		       unsigned short int cid, unsigned short int msg_id,
-		       void *payload, unsigned int payload_size);
+		       void *payload, size_t payload_size);
   FawkesNetworkMessage(unsigned int clid,
 		       unsigned short int cid, unsigned short int msg_id);
   FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
-		       void *payload, unsigned int payload_size);
+		       void *payload, size_t payload_size);
   FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
-		       unsigned int payload_size);
+		       size_t payload_size);
   FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id);
   FawkesNetworkMessage();
 
@@ -83,7 +90,7 @@ class FawkesNetworkMessage : public RefCount
   unsigned int       clid() const;
   unsigned short int cid() const;
   unsigned short int msgid() const;
-  unsigned int       payload_size() const;
+  size_t             payload_size() const;
   void *             payload() const;
   const fawkes_message_t & fmsg() const;
 
@@ -107,12 +114,12 @@ class FawkesNetworkMessage : public RefCount
   void setClientID(unsigned int clid);
   void setComponentID(unsigned short int cid);
   void setMessageID(unsigned short int msg_id);
-  void setPayload(void *payload, unsigned int payload_size);
+  void setPayload(void *payload, size_t payload_size);
   void set(fawkes_message_t &msg);
 
  private:
   void init_cid_msgid(unsigned short int cid, unsigned short int msg_id);
-  void init_payload(unsigned int payload_size);
+  void init_payload(size_t payload_size);
 
   unsigned int _clid;
   fawkes_message_t _msg;

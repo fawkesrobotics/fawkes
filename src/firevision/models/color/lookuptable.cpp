@@ -382,7 +382,7 @@ ColorModelLookupTable::composeFilename(const string format)
   struct utsname uname_info;
   uname( &uname_info );
 
-  unsigned int loc = rv.find( "%h" );
+  size_t loc = rv.find( "%h" );
   while (loc != string::npos) {
     rv.replace( loc, 2, uname_info.nodename );
     loc = rv.find( "%h" );

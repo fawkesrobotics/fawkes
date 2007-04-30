@@ -415,9 +415,9 @@ SharedMemory::attach()
 	    shared_mem_id   = shm_id;
 	    shared_mem      = shm_buf;
 	    memptr          = (char *)shm_ptr + header->size();
-	    shm_upper_bound = (void *)((unsigned int)shm_header->shm_addr + mem_size);
-	    shm_offset      = (unsigned int)shared_mem - (unsigned int)shm_header->shm_addr;
-	    shared_mem_upper_bound = (void *)((unsigned int)shared_mem + mem_size);
+	    shm_upper_bound = (void *)((size_t)shm_header->shm_addr + mem_size);
+	    shm_offset      = (size_t)shared_mem - (size_t)shm_header->shm_addr;
+	    shared_mem_upper_bound = (void *)((size_t)shared_mem + mem_size);
 
 	    if ( shm_header->semaphore != 0 ) {
 	      // Houston, we've got a semaphore, open it!
@@ -458,7 +458,7 @@ SharedMemory::attach()
 	  memptr     = (char *)shared_mem + MagicTokenSize
 	                                  + sizeof(SharedMemory_header_t)
                                           + header->size();
-	  shm_upper_bound = (void *)((unsigned int)shared_mem + mem_size);
+	  shm_upper_bound = (void *)((size_t)shared_mem + mem_size);
 	  shared_mem_upper_bound = shm_upper_bound;
 	  shm_offset      = 0;
 
@@ -524,7 +524,7 @@ SharedMemory::ptr(void *addr)
        (addr >= shm_upper_bound) ) {
     throw ShmAddrOutOfBoundsException();
   }
-  return (void *)((unsigned int)addr + shm_offset);
+  return (void *)((size_t)addr + shm_offset);
 }
 
 
@@ -555,7 +555,7 @@ SharedMemory::addr(void *ptr)
        (ptr >= shared_mem_upper_bound) ) {
     throw ShmPtrOutOfBoundsException();
   }
-  return (void *)((unsigned int)ptr - shm_offset);
+  return (void *)((size_t)ptr - shm_offset);
 }
 
 

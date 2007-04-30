@@ -25,11 +25,35 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
+#include <core/exception.h>
+
 #include <netcomm/fawkes/message.h>
 
 #include <netinet/in.h>
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstddef>
+
+/** @class FawkesNetworkMessageTooBigException netcomm/fawkes/message.h
+ * The given message size exceeds the limit.
+ * The message payload can only be of a certain size, which is limited especially
+ * by the data type used for the payload size in the header. If you try to assign too
+ * much data to a message this exception is thrown.
+ *
+ * @ingroup Exceptions
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param message_size size of the message that is too big
+ */
+FawkesNetworkMessageTooBigException::FawkesNetworkMessageTooBigException(size_t message_size)
+  : Exception("Network message size too big")
+{
+  fawkes_message_header_t fmh;
+  append("Tried to create message of %l bytes, while only %l bytes allowed", message_size,
+         sizeof(fmh.payload_size));
+}
 
 /** @class FawkesNetworkMessage netcomm/fawkes/message.h
  * Representation of a message that is sent over the network.
@@ -83,8 +107,12 @@ FawkesNetworkMessage::FawkesNetworkMessage(fawkes_message_t &msg)
  * @param payload_size size of payload buffer
  */
 FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
-					   void *payload, unsigned int payload_size)
+					   void *payload, size_t payload_size)
 {
+  if ( payload_size > 0xFFFFFFFF ) {
+    // cannot carry that many bytes
+    throw FawkesNetworkMessageTooBigException(payload_size);
+  }
   _msg.header.cid = htons(cid);
   _msg.header.msg_id = htons(msg_id);
   _msg.header.payload_size = htonl(payload_size);
@@ -100,8 +128,12 @@ FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned shor
  * @param payload_size size of payload buffer
  */
 FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
-					   unsigned int payload_size)
+					   size_t payload_size)
 {
+  if ( payload_size > 0xFFFFFFFF ) {
+    // cannot carry that many bytes
+    throw FawkesNetworkMessageTooBigException(payload_size);
+  }
   _msg.header.cid = htons(cid);
   _msg.header.msg_id = htons(msg_id);
   _msg.header.payload_size = htonl(payload_size);
@@ -132,8 +164,12 @@ FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned shor
  */
 FawkesNetworkMessage::FawkesNetworkMessage(unsigned int clid,
 					   unsigned short int cid, unsigned short int msg_id,
-					   void *payload, unsigned int payload_size)
+					   void *payload, size_t payload_size)
 {
+  if ( payload_size > 0xFFFFFFFF ) {
+    // cannot carry that many bytes
+    throw FawkesNetworkMessageTooBigException(payload_size);
+  }
   _clid = clid;
   _msg.header.cid = htons(cid);
   _msg.header.msg_id = htons(msg_id);
@@ -203,7 +239,7 @@ FawkesNetworkMessage::msgid() const
 /** Get payload size.
  * @return payload size.
  */
-unsigned int
+size_t
 FawkesNetworkMessage::payload_size() const
 {
   return ntohl(_msg.header.payload_size);
@@ -265,8 +301,12 @@ FawkesNetworkMessage::setMessageID(unsigned short int msg_id)
  * @param payload_size size of payload buffer
  */
 void
-FawkesNetworkMessage::setPayload(void *payload, unsigned int payload_size)
+FawkesNetworkMessage::setPayload(void *payload, size_t payload_size)
 {
+  if ( payload_size > 0xFFFFFFFF ) {
+    // cannot carry that many bytes
+    throw FawkesNetworkMessageTooBigException(payload_size);
+  }
   _msg.payload = payload;
   _msg.header.payload_size = htonl(payload_size);
 }

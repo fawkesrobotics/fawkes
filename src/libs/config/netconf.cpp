@@ -728,7 +728,7 @@ NetworkConfiguration::erase(const char *comp, const char *path)
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							MSG_CONFIG_ERASE_VALUE,
 							sizeof(config_erase_value_msg_t));
-  printf("Message generated, size: %u, should be: %u\n", omsg->payload_size(), sizeof(config_erase_value_msg_t));
+  printf("Message generated, size: %lu, should be: %lu\n", omsg->payload_size(), sizeof(config_erase_value_msg_t));
   config_erase_value_msg_t *m = omsg->msg<config_erase_value_msg_t>();
   strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
   strncpy(m->cp.path, path, CONFIG_MSG_COMPONENT_LENGTH);

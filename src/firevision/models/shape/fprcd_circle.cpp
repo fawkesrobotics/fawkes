@@ -355,7 +355,7 @@ printf("Line eliminated... ");
 			// if so, just drop it.
 			for (unsigned int i=0; i<pixels.size(); ++i)
 			{
-printf("pixel.size() = %d, i=%d\n", pixels.size(), i);
+printf("pixel.size() = %ld, i=%d\n", pixels.size(), i);
 				if (fabs(-dy * pixels[i].x + dx * pixels[i].y + 1) / sqrt(dx*dx+dy*dy) < FPRCD_T_da)
 				{
 					vector<point_t>::iterator it = pixels.begin() + i;

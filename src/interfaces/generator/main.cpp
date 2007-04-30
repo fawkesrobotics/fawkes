@@ -55,7 +55,7 @@ main(int argc, char **argv)
     for ( vector<char *>::iterator i = items.begin(); i != items.end(); ++i) {
       string s = *i;
       string prefix;
-      unsigned int pos;
+      size_t pos;
 
       if ( ( pos = s.find_last_of (".")) != string::npos ) {
 	prefix = s.substr(0, pos);

@@ -121,7 +121,7 @@ class SharedMemory
   char                   *shm_magic_token;
   SharedMemory_header_t  *shm_header;
   void                   *shm_upper_bound;
-  int                     shm_offset;
+  long unsigned int       shm_offset;
 
 
  private:

@@ -141,7 +141,7 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
     throw BBNotMasterException("Not owner of shared memory segment");
   }
 
-  // printf("Shared memory base pointer: 0x%x\n", (unsigned int)shmem->getMemPtr());
+  // printf("Shared memory base pointer: 0x%x\n", (size_t)shmem->getMemPtr());
 
   if ( master ) {
     // protect memory, needed for list operations in memory, otherwise
@@ -736,7 +736,7 @@ BlackBoardMemoryManager::list_print_info(const chunk_list_t *list) const
 
   while ( l ) {
     printf("Chunk %3u:  0x%x   size=%10u bytes   overhang=%10u bytes\n",
-	   ++i, (unsigned int)l->ptr, l->size, l->overhang);
+	   ++i, (unsigned int)(size_t)l->ptr, l->size, l->overhang);
     l = chunk_ptr(l->next);
   }
 

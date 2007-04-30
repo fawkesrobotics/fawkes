@@ -664,7 +664,7 @@ Bulb::composeFilename(const char *format)
   struct utsname uname_info;
   uname( &uname_info );
 
-  unsigned int loc = rv.find( "%h" );
+  size_t loc = rv.find( "%h" );
   if (loc != string::npos) {
     rv.replace( loc, 2, uname_info.nodename );
   }
