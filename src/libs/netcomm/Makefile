@@ -31,10 +31,12 @@ else
   endif
 endif
 
-CFLAGS = -g $(shell $(PKGCONFIG) --cflags avahi-client)
+CFLAGS = -g $(shell $(PKGCONFIG) --cflags avahi-client) \
+	 $(shell $(PKGCONFIG) --cflags libcrypto)
 
 LIBS_libnetcomm = core
-LDFLAGS_libnetcomm = $(shell pkg-config --libs avahi-client)
+LDFLAGS_libnetcomm = $(shell pkg-config --libs avahi-client) \
+		     $(shell pkg-config --libs libcrypto)
 OBJS_libnetcomm =					\
 		  dns-sd/avahi_browser.o		\
 		  dns-sd/avahi_service.o		\
@@ -49,10 +51,14 @@ OBJS_libnetcomm =					\
 		  fawkes/network_thread.o		\
 		  fawkes/transceiver.o			\
 		  socket/datagram.o			\
+		  socket/datagram_multicast.o		\
 		  socket/socket.o			\
-		  socket/stream.o
+		  socket/stream.o			\
+		  worldinfo/decrypt.o			\
+		  worldinfo/encrypt.o			\
+		  worldinfo/transceiver.o		\
+		  worldinfo/handler.o
 
-#		  socket/datagram_multicast.o		\
 
 OBJS_all = $(OBJS_libnetcomm)
 LIBS_all  = $(LIBDIR)/libnetcomm.so

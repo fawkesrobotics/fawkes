@@ -38,11 +38,32 @@ OBJS_qa_netcomm_socket_stream = qa_socket_stream.o
 LIBS_qa_netcomm_socket_datagram = netcomm utils
 OBJS_qa_netcomm_socket_datagram = qa_socket_datagram.o
 
-BINS_all =	$(BINDIR)/qa_netcomm_avahi_publisher	\
-		$(BINDIR)/qa_netcomm_avahi_browser	\
-		$(BINDIR)/qa_netcomm_socket_typeof	\
-		$(BINDIR)/qa_netcomm_socket_stream	\
-		$(BINDIR)/qa_netcomm_socket_datagram
+LIBS_qa_netcomm_socket_datagram_multicast = netcomm utils
+OBJS_qa_netcomm_socket_datagram_multicast = qa_socket_datagram_multicast.o
+
+LIBS_qa_netcomm_worldinfo = netcomm utils
+OBJS_qa_netcomm_worldinfo = qa_worldinfo.o
+
+LIBS_qa_netcomm_worldinfo_encryption = netcomm utils
+OBJS_qa_netcomm_worldinfo_encryption = qa_worldinfo_encryption.o
+
+OBJS_all =	$(OBJS_qa_netcomm_avahi_publisher)		\
+		$(OBJS_qa_netcomm_avahi_browser)		\
+		$(OBJS_qa_netcomm_socket_typeof)		\
+		$(OBJS_qa_netcomm_socket_stream)		\
+		$(OBJS_qa_netcomm_socket_datagram)		\
+		$(OBJS_qa_netcomm_socket_datagram_multicast)	\
+		$(OBJS_qa_netcomm_worldinfo)			\
+		$(OBJS_qa_netcomm_worldinfo_encryption)
+
+BINS_all =	$(BINDIR)/qa_netcomm_avahi_publisher		\
+		$(BINDIR)/qa_netcomm_avahi_browser		\
+		$(BINDIR)/qa_netcomm_socket_typeof		\
+		$(BINDIR)/qa_netcomm_socket_stream		\
+		$(BINDIR)/qa_netcomm_socket_datagram		\
+		$(BINDIR)/qa_netcomm_socket_datagram_multicast	\
+		$(BINDIR)/qa_netcomm_worldinfo			\
+		$(BINDIR)/qa_netcomm_worldinfo_encryption
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
