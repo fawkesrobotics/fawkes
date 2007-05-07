@@ -45,6 +45,7 @@ class LockList : public std::list<Type>
 
   void push_back_locked(const Type& x);
   void push_front_locked(const Type& x);
+  void remove_locked(const Type& x);
 
   // not needed, no change to mutex required (thus "incomplete" BigThree)
   //LockList<Type> &  operator=(const LockList<Type> &ll);
@@ -142,6 +143,19 @@ LockList<Type>::push_front_locked(const Type& x)
 {
   mutex->lock();
   std::list<Type>::push_front(x);
+  mutex->unlock();
+}
+
+
+/** Remove element from list with lock protection.
+ * @param x element to remove
+ */
+template <typename Type>
+void
+LockList<Type>::remove_locked(const Type& x)
+{
+  mutex->lock();
+  std::list<Type>::remove(x);
   mutex->unlock();
 }
 
