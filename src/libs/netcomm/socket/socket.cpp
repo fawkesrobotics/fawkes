@@ -469,7 +469,7 @@ Socket::poll(int timeout, short what)
  * @exception SocketException if the data could not be written or if a timeout occured.
  */
 void
-Socket::write(void *buf, unsigned int count)
+Socket::write(void *buf, size_t count)
 {
   int retval = 0;
   unsigned int bytes_written = 0;
@@ -509,7 +509,7 @@ Socket::write(void *buf, unsigned int count)
  * @exception SocketException thrown for any error during reading
  */
 void
-Socket::read(void *buf, unsigned int count)
+Socket::read(void *buf, size_t count)
 {
   int retval = 0;
   unsigned int bytes_read = 0;
@@ -557,14 +557,16 @@ Socket::read(void *buf, unsigned int count)
 
 
 /** Write to the socket.
- * Write to the socket. This method can only be used on streams. Usage of
- * write() is recommended.
+ * Write to the socket. This method can be used on streams or on datagram
+ * sockets which have been tuned to a specific receiver by using connect().
+ * For streams usage of write() is recommended as it is the more intuitive
+ * way to deal with a stream.
  * @param buf buffer to write
  * @param buf_len length of buffer, number of bytes to write to stream
  * @see write
  */
 void
-Socket::send(void *buf, unsigned int buf_len)
+Socket::send(void *buf, size_t buf_len)
 {
   try {
     write(buf,  buf_len);
@@ -582,7 +584,7 @@ Socket::send(void *buf, unsigned int buf_len)
  * @see write
  */
 void
-Socket::recv(void *buf, unsigned int buf_len)
+Socket::recv(void *buf, size_t buf_len)
 {
   try {
     read(buf, buf_len);
@@ -599,8 +601,8 @@ Socket::recv(void *buf, unsigned int buf_len)
  * @param addr_len length of address
  */
 void
-Socket::send(void *buf, unsigned int buf_len,
-	     const struct sockaddr *addr, unsigned int addr_len)
+Socket::send(void *buf, size_t buf_len,
+	     const struct sockaddr *addr, size_t addr_len)
 {
   int retval = 0;
   unsigned int bytes_written = 0;
@@ -633,7 +635,7 @@ Socket::send(void *buf, unsigned int buf_len,
 }
 
 
-/** Received data.
+/** Receive data.
  * @param buf buffer that read data shall be stored in.
  * @param buf_len length of buffer and number of bytes to be read
  * @param addr return parameter, contains address of sender
@@ -641,8 +643,8 @@ Socket::send(void *buf, unsigned int buf_len,
  * contains the actual bytes used.
  */
 void
-Socket::recv(void *buf, unsigned int buf_len,
-	     struct sockaddr *addr, unsigned int *addr_len)
+Socket::recv(void *buf, size_t buf_len,
+	     struct sockaddr *addr, size_t *addr_len)
 {
   int retval = 0;
   unsigned int bytes_read = 0;
@@ -673,6 +675,36 @@ Socket::recv(void *buf, unsigned int buf_len,
   if ( bytes_read < buf_len) {
     throw SocketException("Read timeout");
   }
+}
+
+
+/** Receive data.
+ * @param buf buffer that read data shall be stored in.
+ * @param buf_len set to length of buffer and maximum number of bytes to be read,
+ * upon returns contains the number of actual bytes read
+ * @param addr return parameter, contains address of sender
+ * @param addr_len initially has to contain size of address, on return
+ * contains the actual bytes used.
+ */
+void
+Socket::recv(void *buf, size_t *buf_len,
+	     struct sockaddr *addr, size_t *addr_len)
+{
+  int retval = 0;
+  unsigned int bytes_read = 0;
+
+  retval = ::recvfrom(sock_fd, (char *)buf, *buf_len, 0, addr, addr_len);
+  if (retval == -1) {
+    if (errno != EAGAIN) {
+      throw SocketException("Could not read data", errno);
+    } else {
+      bytes_read = 0;
+    }
+  } else {
+    bytes_read = retval;
+  }
+
+  *buf_len = bytes_read;
 }
 
 
