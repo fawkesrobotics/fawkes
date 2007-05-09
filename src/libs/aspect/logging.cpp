@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  logger.h - Logging aspect for Fawkes
+ *  logging.h - Logging aspect for Fawkes
  *
  *  Created: Wed Jan 17 14:30:20 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
@@ -36,8 +36,8 @@
  * and where. It may be simple console logout or a network logger.
  *
  * It is guaranteed that if used properly from within plugins that
- * setConfiguration() is called before the thread is started and that
- * you can access the configuration via the config member.
+ * initLoggingAspect() is called before the thread is started and that
+ * you can access the logger via the logger member.
  *
  * @ingroup Aspects
  * @author Tim Niemueller

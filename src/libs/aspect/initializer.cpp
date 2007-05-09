@@ -32,6 +32,8 @@
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <aspect/fawkes_network.h>
 
 /** @class AspectInitializer aspect/initializer.h
  * Fawkes Aspect Initializer.
@@ -42,15 +44,34 @@
  * @author Tim Niemueller
  */
 
+
 /** Constructor.
  * @param blackboard BlackBoard
  * @param config Configuration
+ * @param logger Logger
  */
 AspectInitializer::AspectInitializer(BlackBoard *blackboard,
-				     Configuration *config)
+				     Configuration *config,
+				     Logger *logger)
 {
   this->blackboard = blackboard;
   this->config     = config;
+  this->logger     = logger;
+  this->fnethub    = NULL;
+}
+
+
+/** Set Fawkes Network Hub.
+ * Use this to set the Fawkes Network Hub. If you do not use the Fawkes Network
+ * you do not need to call this function to set a hub. In that case threads that
+ * demand the hub will cause an exception to be thrown that the thread cannot be
+ * initialized.
+ * @param fnethub Fawkes Network Hub
+ */
+void
+AspectInitializer::set_fnet_hub(FawkesNetworkHub *fnethub)
+{
+  this->fnethub = fnethub;
 }
 
 
@@ -77,6 +98,28 @@ AspectInitializer::init(Thread *thread)
   ConfigurableAspect *configurable_thread;
   if ( (configurable_thread = dynamic_cast<ConfigurableAspect *>(thread)) != NULL ) {
     configurable_thread->initConfigurableAspect(config);
+  }
+
+  LoggingAspect *logging_thread;
+  if ( (logging_thread = dynamic_cast<LoggingAspect *>(thread)) != NULL ) {
+    logging_thread->initLoggingAspect(logger);
+  }
+
+  FawkesNetworkAspect *fnet_thread;
+  if ( (fnet_thread = dynamic_cast<FawkesNetworkAspect *>(thread)) != NULL ) {
+    if ( fnethub == NULL ) {
+      throw CannotInitializeThreadException("Thread has FawkesNetworkAspect but no FawkesNetworkHub has been set in AspectInitializer");
+    }
+    fnet_thread->initFawkesNetworkAspect(fnethub);
+  }
+
+  try {
+    thread->init();
+  } catch (Exception &e) {
+    e.append("AspectInitiazer called Thread[%s]::init() which failed", thread->name());
+    throw;
+  } catch (...) {
+    throw CannotInitializeThreadException("Thread::init() failed and thread threw unsupported exception");
   }
 
 }

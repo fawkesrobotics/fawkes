@@ -24,12 +24,7 @@ BASEDIR = ../../..
 CFLAGS = -g
 
 LIBS_libaspects = core blackboard netcomm config
-OBJS_libaspects =	\
-		blackboard.o		\
-		blocked_timing.o	\
-		configurable.o		\
-		initializer.o		\
-		logging.o
+OBJS_libaspects = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all = $(OBJS_libaspects)
 LIBS_all  = $(LIBDIR)/libaspects.so

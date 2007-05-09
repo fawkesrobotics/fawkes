@@ -28,7 +28,7 @@
 #ifndef __ASPECT_LOGGING_H_
 #define __ASPECT_LOGGING_H_
 
-class Logger;
+#include <utils/logging/logger.h>
 
 class LoggingAspect
 {

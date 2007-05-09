@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  blackboard.h - BlackBoard aspect for Fawkes
+ *  fawkes_network.h - Fawkes network aspect for Fawkes
  *
- *  Created: Thu Jan 11 16:28:58 2007
+ *  Created: Mon May 07 19:44:18 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,20 +25,20 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __ASPECT_BLACKBOARD_H_
-#define __ASPECT_BLACKBOARD_H_
+#ifndef __ASPECT_FAWKES_NETWORK_H_
+#define __ASPECT_FAWKES_NETWORK_H_
 
-#include <blackboard/interface_manager.h>
+#include <netcomm/fawkes/hub.h>
 
-class BlackBoardAspect
+class FawkesNetworkAspect
 {
  public:
-  virtual ~BlackBoardAspect();
+  virtual ~FawkesNetworkAspect();
 
-  void initBlackBoardAspect(BlackBoardInterfaceManager *im);
+  void initFawkesNetworkAspect(FawkesNetworkHub *fnethub);
 
  protected:
-  BlackBoardInterfaceManager *interface_manager;
+  FawkesNetworkHub *fnethub;
 };
 
 #endif

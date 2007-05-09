@@ -32,18 +32,24 @@
 
 class BlackBoard;
 class Configuration;
+class Logger;
+class FawkesNetworkHub;
 class Thread;
 
 class AspectInitializer : public ThreadInitializer
 {
  public:
-  AspectInitializer(BlackBoard *blackboard, Configuration *config);
+  AspectInitializer(BlackBoard *blackboard, Configuration *config, Logger *logger);
 
   virtual void init(Thread *thread);
 
+  void set_fnet_hub(FawkesNetworkHub *fnethub);
+
  private:
-  BlackBoard     *blackboard;
-  Configuration  *config;
+  BlackBoard        *blackboard;
+  Configuration     *config;
+  Logger            *logger;
+  FawkesNetworkHub  *fnethub;
 };
 
 
