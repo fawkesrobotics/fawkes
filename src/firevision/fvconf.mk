@@ -44,7 +44,7 @@ ifneq ($(realpath /usr/include/dc1394),)
 
   # Check if we have PGR Triclops SDK, build Bumblebee2 if we have it
   ifneq ($(realpath $(TRICLOPS_SDK)/include/triclops.h),)
-    ifeq ($(realpath $(TRICLOPS_SDK)/lib/libtriclops.so),)
+    ifneq ($(realpath $(TRICLOPS_SDK)/lib/libtriclops.so),)
       HAVE_BUMBLEBEE2_CAM = 1
       VISION_INCDIRS += $(TRICLOPS_SDK)/include
       VISION_LIBDIRS += $(TRICLOPS_SDK)/lib
@@ -73,6 +73,7 @@ ifneq ($(realpath $(IPP_DIR)),)
   endif
   ifneq ($(realpath $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/include/ipp.h),)
     HAVE_IPP = 1
+    VISION_CFLAGS  += -DHAVE_IPP
     VISION_LIBDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/sharedlib
     VISION_INCDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/include
   endif
