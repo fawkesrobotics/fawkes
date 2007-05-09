@@ -27,7 +27,6 @@
 
 #include <plugins/example/thread.h>
 
-#include <stdio.h>
 #include <unistd.h>
 
 /** @class ExampleThread plugins/example/thread.h
@@ -53,6 +52,7 @@ ExampleThread::ExampleThread(BlockedTimingAspect::WakeupHook hook, const char *n
 /** Destructor. */
 ExampleThread::~ExampleThread()
 {
+  logger->log_info("ExampleThread", "Destroying thread %s", name());
 }
 
 
@@ -63,7 +63,7 @@ void
 ExampleThread::loop()
 {
   if ( (m % modc) == 0 ) {
-    printf("ExampleThread %s called %u times\n", name(), m);
+    logger->log_info("ExampleThread", "ExampleThready %s called %u times", name(), m);
   }
   ++m;
   usleep(0);

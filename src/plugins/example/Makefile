@@ -23,11 +23,17 @@ BASEDIR = ../../..
 
 CFLAGS = -g
 
-LIBS_example_plugin = core utils
+LIBS_example_plugin = core utils netcomm
 OBJS_example_plugin = example_plugin.o	\
+		      net_thread.o	\
 		      thread.o
 
-OBJS_all    = $(OBJS_example_plugin)
+LIBS_example_plugin_netping = core utils netcomm
+OBJS_example_plugin_netping = example_plugin_netping.o
+
+OBJS_all    = $(OBJS_example_plugin)		\
+	      $(OBJS_example_plugin_netping)
+BINS_all    = $(BINDIR)/example_plugin_netping
 PLUGINS_all = $(PLUGINDIR)/example_plugin.so
 
 include $(BASEDIR)/etc/buildsys/base.mk

@@ -27,8 +27,7 @@
 
 #include <plugins/example/example_plugin.h>
 #include <plugins/example/thread.h>
-
-#include <stdio.h>
+#include <plugins/example/net_thread.h>
 
 /** @class ExamplePlugin plugins/example/example_plugin.h
  * Simple example plugin.
@@ -44,7 +43,7 @@
 /** Constructor. */
 ExamplePlugin::ExamplePlugin()
 {
-  printf("ExamplePlugin constructor called\n");
+  // printf("ExamplePlugin constructor called\n");
   thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,
 					  "PreLoopThread", MODC));
   thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_SENSOR,
@@ -59,12 +58,14 @@ ExamplePlugin::ExamplePlugin()
 					  "ActThread", MODC));
   thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,
 					  "PostLoopThread", MODC));
+  thread_list.push_back(new ExampleNetworkThread("NetworkThread"));
+
 }
 
 /** Destructor, prints out info message */
 ExamplePlugin::~ExamplePlugin()
 {
-  printf("ExamplePlugin destructor called\n");
+  //printf("ExamplePlugin destructor called\n");
   for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
     delete *i;
   }
