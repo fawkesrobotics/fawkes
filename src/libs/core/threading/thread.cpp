@@ -78,7 +78,7 @@
  */
 Thread::Thread()
 {
-  init(NULL, OPMODE_CONTINUOUS);
+  constructor(NULL, OPMODE_CONTINUOUS);
 }
 
 /** Constructor.
@@ -88,7 +88,7 @@ Thread::Thread()
  */
 Thread::Thread(OpMode op_mode)
 {
-  init(NULL, op_mode);
+  constructor(NULL, op_mode);
 }
 
 
@@ -100,7 +100,7 @@ Thread::Thread(OpMode op_mode)
  */
 Thread::Thread(const char *name)
 {
-  init(name, OPMODE_CONTINUOUS);
+  constructor(name, OPMODE_CONTINUOUS);
 }
 
 
@@ -112,7 +112,7 @@ Thread::Thread(const char *name)
  */
 Thread::Thread(const char *name, OpMode op_mode)
 {
-  init(name, op_mode);
+  constructor(name, op_mode);
 }
 
 
@@ -122,7 +122,7 @@ Thread::Thread(const char *name, OpMode op_mode)
  * @param op_mode operation mode
  */
 void
-Thread::init(const char *name, OpMode op_mode)
+Thread::constructor(const char *name, OpMode op_mode)
 {
   this->op_mode = op_mode;
   this->_name   = name;
@@ -146,6 +146,22 @@ Thread::~Thread()
   sleep_condition = NULL;
   delete sleep_mutex;
   sleep_mutex = NULL;
+}
+
+
+/** Initialize the thread.
+ * This method is meant to be used in conjunction with aspects. Some parts
+ * of the initialization may only happen after some aspect of the thread has
+ * been initialized. Implement the init method with these actions. It is
+ * guaranteed to be called just after all aspects have been initialized
+ * and only once in the lifetime of the thread.
+ * Throw an exception if any problem occurs and the thread should not be
+ * run.
+ * @see Aspects
+ */
+void
+Thread::init()
+{
 }
 
 

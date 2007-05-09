@@ -52,6 +52,8 @@ class Thread {
 
   virtual ~Thread();
 
+  virtual void init();
+
   bool start();
   void cancel();
   void join();
@@ -75,12 +77,11 @@ class Thread {
   void test_cancel();
 
   virtual void run();
-
   virtual void loop();
 
  private:
   static void * entry(void * pthis);
-  void init(const char *name, OpMode op_mode);
+  void constructor(const char *name, OpMode op_mode);
 
   // Do not use pthread_t here to avoid including pthread.h
   /* pthread_t */ unsigned long int thread_id;

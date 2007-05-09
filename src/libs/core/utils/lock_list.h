@@ -61,6 +61,7 @@ class LockList : public std::list<Type>
  * with the regular locking methods.
  *
  * @see Mutex
+ * @ingroup FCL
  * @author Tim Niemueller
  */
 

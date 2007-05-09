@@ -102,12 +102,10 @@ RefCount::unref()
 {
   
   ref_mutex->lock();
+  if ( refc == 0 ) {
+    throw DestructionInProgressException("Tried to reference that is currently being deleted");
+  }
   if ( refc > 0 )  --refc;
-  /*
-  ref_mutex->unlock();
-  usleep(0);
-  ref_mutex->lock();
-  */
   if ( refc == 0 ) {
     // commit suicide
     delete this;

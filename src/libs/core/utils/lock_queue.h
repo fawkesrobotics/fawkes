@@ -62,6 +62,7 @@ class LockQueue : public std::queue<Type>
  * with the regular locking methods.
  *
  * @see Mutex
+ * @ingroup FCL
  * @author Tim Niemueller
  */
 
