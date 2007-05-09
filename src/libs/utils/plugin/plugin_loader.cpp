@@ -109,6 +109,7 @@ PluginLoader::~PluginLoader()
  * operator could be overloaded this would result in memory chaos.
  * @exception PluginNotFoundException thrown if plugin could not be found
  * (loading failed)
+ * @exception ModuleOpenException passed along from module manager
  */
 Plugin *
 PluginLoader::load(const char *plugin_name)
@@ -123,7 +124,13 @@ PluginLoader::load(const char *plugin_name)
   // This is dependent on the system architecture!
   std::string module_name = pn + "." + d->mm->getModuleFileExtension();
 
-  Module *pm = d->mm->openModule(module_name);
+  Module *pm;
+  try {
+    pm = d->mm->openModule(module_name);
+  } catch (ModuleOpenException &e) {
+    e.append("PluginLoader failed to open module %s", module_name.c_str());
+    throw;
+  }
 
   if ( pm == NULL ) {
     // we could NOT open the plugin module

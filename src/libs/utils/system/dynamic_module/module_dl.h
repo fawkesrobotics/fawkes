@@ -39,7 +39,7 @@ class ModuleDL : public Module {
 
   virtual ~ModuleDL();
 
-  virtual bool    open();
+  virtual void    open();
   virtual bool    close();
 
   virtual void    ref();

@@ -68,6 +68,7 @@ class ModuleManagerTemplate : public ModuleManager {
    * @return Returns the module if the file was opened successfully
    * or NULL otherwise. Do NOT delete the module after usage but use
    * closeModule to close it.
+   * @exception ModuleOpenException thrown if the module could not be opened
    */
   MODULE_CLASS *  openModule(std::string filename)
   {
@@ -76,13 +77,14 @@ class ModuleManagerTemplate : public ModuleManager {
       return modules[filename];
     } else {
       MODULE_CLASS *module = new MODULE_CLASS(module_base_dir + "/" + filename);
-      if ( module->open() ) {
+      try {
+	module->open();
 	// ref count of module is now 1
 	modules[module->getBaseFilename()] = module;
 	return module;
-      } else {
+      } catch (ModuleOpenException &e) {
 	delete module;
-	return NULL;
+	throw;
       }
     }
   }

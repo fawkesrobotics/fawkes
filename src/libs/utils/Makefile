@@ -24,21 +24,7 @@ BASEDIR = ../../..
 CFLAGS = -g
 
 LIBS_libutils = stdc++ dl core magic
-OBJS_libutils =	\
-		ipc/msg.o						\
-		ipc/semset.o						\
-		ipc/shm.o						\
-		ipc/shm_exceptions.o					\
-		logging/console.o					\
-		logging/logger.o					\
-		misc/string_conversions.o				\
-		plugin/plugin_loader.o					\
-		system/dynamic_module/module_dl.o			\
-		system/dynamic_module/module_manager_factory.o		\
-		system/argparser.o					\
-		system/file.o						\
-		system/hostinfo.o					\
-		system/signal.o
+OBJS_libutils =	$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 
 OBJS_all = $(OBJS_libutils)
 LIBS_all  = $(LIBDIR)/libutils.so

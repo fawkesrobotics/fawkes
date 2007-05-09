@@ -49,6 +49,7 @@ class ModuleManager {
    * @return Returns the module if the file was opened successfully
    * or NULL otherwise. Do NOT delete the module after usage but use
    * closeModule to close it.
+   * @exception ModuleOpenException thrown if the module could not be opened
    */
   virtual Module *  openModule(std::string filename) = 0;
 

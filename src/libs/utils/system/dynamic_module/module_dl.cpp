@@ -35,7 +35,7 @@
 #include <utils/system/dynamic_module/module_dl.h>
 #include <utils/system/file.h>
 
-#include <string>
+#include <cstring>
 #include <dlfcn.h>
 
 /** @class ModuleDL utils/system/dynamic_module/module_dl.h
@@ -73,11 +73,13 @@ ModuleDL::~ModuleDL()
 
 /** Open the module
  * @return Returns true if the module could be opened, false otherwise
+ * @exception ModuleOpenException Thrown if there was any problem while loading the
+ * module
  */
-bool
+void
 ModuleDL::open()
 {
-  if ( handle != NULL )  return true;
+  if ( handle != NULL )  return;
 
   // Note: We assume Linux-style shared objects
   std::string full_filename = "";
@@ -98,23 +100,31 @@ ModuleDL::open()
     // check whether we have a readable file right away */
     if (File::isRegular(full_filename.c_str())) {
       // We cannot read the file
-      file_found = true;
 
       // ok, try loading the module
-      handle = dlopen(full_filename.c_str(),
-		      (((flags & MODULE_BIND_LAZY) != 0) ? RTLD_LAZY : RTLD_NOW) |
-		      (((flags & MODULE_BIND_LOCAL) != 0) ? 0 : RTLD_GLOBAL) );
+      int tflags = ((flags & MODULE_BIND_LAZY) != 0) ? RTLD_LAZY : RTLD_NOW;
+      if ( (flags & MODULE_BIND_LOCAL) != 0 ) {
+	tflags |= RTLD_LOCAL;
+      } else if ( (flags & MODULE_BIND_GLOBAL) != 0 ) {
+	tflags |= RTLD_GLOBAL;
+      }
+      //tflags = RTLD_LAZY;
+      //printf("Loading module %s, flags: %i\n", full_filename.c_str(), tflags);
+      handle = dlopen(full_filename.c_str(), tflags);
 
       if ( ! handle) {
-	file_found = false;
+	char *err = dlerror();
+	if ( err == NULL ) {
+	  throw ModuleOpenException("dlopen failed with an unknown error");
+	} else {
+	  throw ModuleOpenException(err);
+	}
       } else {
 	is_resident = false;
 	ref_count   = 1;
       }
     }
   }
-
-  return file_found;
 }
 
 
