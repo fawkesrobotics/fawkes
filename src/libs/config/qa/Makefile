@@ -26,6 +26,7 @@ CFLAGS = -g
 OBJS_qa_config = qa_config.o
 LIBS_qa_config = config
 
+OBJS_all = $(OBJS_qa_config)
 BINS_all = $(BINDIR)/qa_config
 
 include $(BASEDIR)/etc/buildsys/base.mk
