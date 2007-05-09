@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  emitter.h - Fawkes network emitter interface
+ *  hub.h - Fawkes network hub
  *
- *  Created: Mon Nov 20 15:15:58 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon May 07 19:06:30 2007
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,38 +25,41 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __NETCOMM_FAWKES_EMITTER_H_
-#define __NETCOMM_FAWKES_EMITTER_H_
+#ifndef __NETCOMM_FAWKES_HUB_H_
+#define __NETCOMM_FAWKES_HUB_H_
 
 class FawkesNetworkMessage;
+class FawkesNetworkHandler;
 
-/** @class FawkesNetworkEmitter netcomm/fawkes/emitter.h
- * Fawkes Network Emitter interface.
- * This interface is implemented by owner of the network connection to send
- * data via the network.
- */
-
-class FawkesNetworkEmitter
+class FawkesNetworkHub
 {
  public:
-  /** Virtual empty destructor. */
-  virtual ~FawkesNetworkEmitter() {}
+  virtual ~FawkesNetworkHub();
 
-  /** Method to broadcast a message to all connected clients.
-   * This method shall be implemented thus that the message is sent to all
-   * connected clients.
-   * @param msg message to send.
-   */
   virtual void broadcast(FawkesNetworkMessage *msg)                        = 0;
 
-  /** Method to send a message to a specific client.
-   * The client ID provided in the message is used to determine the correct
-   * recipient. If no client is connected for the given client ID the message
-   * shall be silently ignored.
-   * @param msg message to send
-   */
+  virtual void broadcast(unsigned short int component_id,
+			 unsigned short int msg_id,
+			 void *payload, unsigned int payload_size)         = 0;
+
+  virtual void broadcast(unsigned short int component_id,
+			 unsigned short int msg_id)                        = 0;
+
+
   virtual void send(FawkesNetworkMessage *msg)                             = 0;
-  
+
+  virtual void send(unsigned int to_clid,
+		    unsigned short int component_id,
+		    unsigned short int msg_id)                             = 0;
+
+  virtual void send(unsigned int to_clid,
+		    unsigned short int component_id,
+		    unsigned short int msg_id,
+		    void *payload, unsigned int payload_size)              = 0;
+
+  virtual void add_handler(FawkesNetworkHandler *handler)                  = 0;
+  virtual void remove_handler(FawkesNetworkHandler *handler)               = 0;
+
 };
 
 #endif

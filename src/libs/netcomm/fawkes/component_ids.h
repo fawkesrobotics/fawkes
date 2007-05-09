@@ -57,6 +57,7 @@
 /* **** Normal component CIDs **** */
 
 #define FAWKES_CID_FIREVISION         1001
+#define FAWKES_CID_EXAMPLE_PLUGIN     1002
 
 
 #endif

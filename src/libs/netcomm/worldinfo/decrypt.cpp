@@ -33,7 +33,6 @@
  * Message decryption failed.
  * This exception shall be thrown if there was a problem decrypting a
  * world info message.
- * @ingroup Exceptions
  */
 
 /** Constructor.

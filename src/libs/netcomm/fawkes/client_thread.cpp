@@ -25,13 +25,15 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
+#include <core/exceptions/system.h>
+
 #include <netcomm/fawkes/client_thread.h>
 #include <netcomm/fawkes/network_thread.h>
 #include <netcomm/fawkes/message_queue.h>
 #include <netcomm/fawkes/transceiver.h>
 #include <netcomm/socket/stream.h>
 
-#include <stdio.h>
+#include <cstdio>
 
 /** @class FawkesNetworkClientThread netcomm/fawkes/client_thread.h
  * Fawkes Network Client Thread.
@@ -135,7 +137,14 @@ FawkesNetworkClientThread::recv()
 void
 FawkesNetworkClientThread::loop()
 {
-  short p = s->poll(10); // block for 10 ms
+  
+  short p = 0;
+  try {
+    p = s->poll(10); // block for 10 ms
+  } catch (InterruptedException &e) {
+    // we just ignore this and try it again
+    return;
+  }
 
   if ( (p & Socket::POLL_ERR) ||
        (p & Socket::POLL_HUP) ||

@@ -37,28 +37,7 @@ CFLAGS = -g $(shell $(PKGCONFIG) --cflags avahi-client) \
 LIBS_libnetcomm = core
 LDFLAGS_libnetcomm = $(shell pkg-config --libs avahi-client) \
 		     $(shell pkg-config --libs libcrypto)
-OBJS_libnetcomm =					\
-		  dns-sd/avahi_browser.o		\
-		  dns-sd/avahi_service.o		\
-		  dns-sd/avahi_service_publisher.o	\
-		  dns-sd/avahi_thread.o			\
-		  fawkes/acceptor_thread.o		\
-		  fawkes/client.o			\
-		  fawkes/client_thread.o		\
-		  fawkes/handler.o			\
-		  fawkes/message.o			\
-		  fawkes/message_queue.o		\
-		  fawkes/network_thread.o		\
-		  fawkes/transceiver.o			\
-		  socket/datagram.o			\
-		  socket/datagram_multicast.o		\
-		  socket/socket.o			\
-		  socket/stream.o			\
-		  worldinfo/decrypt.o			\
-		  worldinfo/encrypt.o			\
-		  worldinfo/transceiver.o		\
-		  worldinfo/handler.o
-
+OBJS_libnetcomm = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 
 OBJS_all = $(OBJS_libnetcomm)
 LIBS_all  = $(LIBDIR)/libnetcomm.so

@@ -99,7 +99,7 @@ FawkesNetworkThread::add_client(FawkesNetworkClientThread *client)
   thread_collector->add(client);
   clients[next_client_id] = client;
   for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
-    (*hit).second->clientConnected(next_client_id);
+    (*hit).second->client_connected(next_client_id);
   }
   ++next_client_id;
   clients_mutex->unlock();
@@ -157,7 +157,7 @@ FawkesNetworkThread::loop()
       ++cit;
       clients.erase(clid);
       for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
-	(*hit).second->clientDisconnected(clid);
+	(*hit).second->client_disconnected(clid);
       }
     } else {
       ++cit;
@@ -169,7 +169,7 @@ FawkesNetworkThread::loop()
   while ( ! inbound_messages->empty() ) {
     FawkesNetworkMessage *m = inbound_messages->front();
     if ( handlers.find(m->cid()) != handlers.end()) {
-      handlers[m->cid()]->handleNetworkMessage(m);
+      handlers[m->cid()]->handle_network_message(m);
     }
     m->unref();
     inbound_messages->pop();
@@ -192,9 +192,8 @@ FawkesNetworkThread::wakeup()
 
 
 /** Broadcast a message.
- * Implemented Emitter interface message.
+ * Method to broadcast a message to all connected clients.
  * @param msg Message to broadcast
- * @see FawkesNetworkEmitter::broadcast()
  */
 void
 FawkesNetworkThread::broadcast(FawkesNetworkMessage *msg)
@@ -207,10 +206,45 @@ FawkesNetworkThread::broadcast(FawkesNetworkMessage *msg)
 }
 
 
+/** Broadcast a message.
+ * A FawkesNetworkMessage is created and broacasted via the emitter.
+ * @param component_id component ID
+ * @param msg_id message type id
+ * @param payload payload buffer
+ * @param payload_size size of payload buffer
+ * @see FawkesNetworkEmitter::broadcast()
+ */
+void
+FawkesNetworkThread::broadcast(unsigned short int component_id, unsigned short int msg_id,
+			       void *payload, unsigned int payload_size)
+{
+  FawkesNetworkMessage *m = new FawkesNetworkMessage(component_id, msg_id,
+						     payload, payload_size);
+  broadcast(m);
+  m->unref();
+}
+
+
+/** Broadcast message without payload.
+ * @param component_id component ID
+ * @param msg_id message type ID
+ */
+void
+FawkesNetworkThread::broadcast(unsigned short int component_id, unsigned short int msg_id)
+{
+  FawkesNetworkMessage *m = new FawkesNetworkMessage(component_id, msg_id);
+  broadcast(m);
+  m->unref();
+}
+
+
 /** Send a message.
+ * Method to send a message to a specific client.
+ * The client ID provided in the message is used to determine the correct
+ * recipient. If no client is connected for the given client ID the message
+ * shall be silently ignored.
  * Implemented Emitter interface message.
  * @param msg Message to send
- * @see FawkesNetworkEmitter::send()
  */
 void
 FawkesNetworkThread::send(FawkesNetworkMessage *msg)
@@ -221,6 +255,45 @@ FawkesNetworkThread::send(FawkesNetworkMessage *msg)
       clients[clid]->enqueue(msg);
     }
   }
+}
+
+
+/** Send a message.
+ * A FawkesNetworkMessage is created and sent via the emitter.
+ * @param to_clid client ID of recipient
+ * @param component_id component ID
+ * @param msg_id message type id
+ * @param payload payload buffer
+ * @param payload_size size of payload buffer
+ * @see FawkesNetworkEmitter::broadcast()
+ */
+void
+FawkesNetworkThread::send(unsigned int to_clid,
+			  unsigned short int component_id, unsigned short int msg_id,
+			   void *payload, unsigned int payload_size)
+{
+  FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, component_id, msg_id,
+						     payload, payload_size);
+  send(m);
+  m->unref();
+}
+
+
+/** Send a message without payload.
+ * A FawkesNetworkMessage with empty payload is created and sent via the emitter.
+ * This is particularly useful for simple status messages that you want to send.
+ * @param to_clid client ID of recipient
+ * @param component_id component ID
+ * @param msg_id message type id
+ * @see FawkesNetworkEmitter::broadcast()
+ */
+void
+FawkesNetworkThread::send(unsigned int to_clid,
+			  unsigned short int component_id, unsigned short int msg_id)
+{
+  FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, component_id, msg_id);
+  send(m);
+  m->unref();
 }
 
 
@@ -244,6 +317,6 @@ void
 FawkesNetworkThread::process()
 {
   for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
-    (*hit).second->processAfterLoop();
+    (*hit).second->process_after_loop();
   }
 }

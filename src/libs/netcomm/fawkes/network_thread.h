@@ -29,7 +29,7 @@
 #define __NETCOMM_FAWKES_CLIENT_MANAGER_THREAD_H_
 
 #include <core/threading/thread.h>
-#include <netcomm/fawkes/emitter.h>
+#include <netcomm/fawkes/hub.h>
 
 #include <map>
 
@@ -42,7 +42,7 @@ class FawkesNetworkHandler;
 class FawkesNetworkMessage;
 class FawkesNetworkMessageQueue;
 
-class FawkesNetworkThread : public Thread, public FawkesNetworkEmitter
+class FawkesNetworkThread : public Thread, public FawkesNetworkHub
 {
  public:
   FawkesNetworkThread(ThreadCollector *thread_collector,
@@ -51,17 +51,24 @@ class FawkesNetworkThread : public Thread, public FawkesNetworkEmitter
 
   virtual void loop();
 
-  void add_handler(FawkesNetworkHandler *handler);
-  void remove_handler(FawkesNetworkHandler *handler);
+  virtual void add_handler(FawkesNetworkHandler *handler);
+  virtual void remove_handler(FawkesNetworkHandler *handler);
+
+  virtual void broadcast(FawkesNetworkMessage *msg);
+  virtual void broadcast(unsigned short int component_id, unsigned short int msg_id,
+			 void *payload, unsigned int payload_size);
+  virtual void broadcast(unsigned short int component_id, unsigned short int msg_id);
+
+  virtual void send(FawkesNetworkMessage *msg);
+  virtual void send(unsigned int to_clid,
+		    unsigned short int component_id, unsigned short int msg_id);
+  virtual void send(unsigned int to_clid,
+		    unsigned short int component_id, unsigned short int msg_id,
+		    void *payload, unsigned int payload_size);
 
   void add_client(FawkesNetworkClientThread *client);
-
   void wakeup();
-
   void dispatch(FawkesNetworkMessage *msg);
-  void broadcast(FawkesNetworkMessage *msg);
-  void send(FawkesNetworkMessage *msg);
-
   void process();
 
  private:

@@ -35,27 +35,24 @@
  * @author Tim Niemueller
  */
 
-/** @var FawkesNetworkHandler::emitter
- * Emitter to send messages with.
- */
-/** @fn void FawkesNetworkHandler::handleNetworkMessage(FawkesNetworkMessage *msg) = 0
+/** @fn void FawkesNetworkHandler::handle_network_message(FawkesNetworkMessage *msg) = 0
  * Called for incoming messages that are addressed to the correct component ID.
  * @param msg message to handle. If you want to keep this message you have to ref() it!
  * It is guaranteed that the message will not be erased during the handleNetworkMessage()
  * run, but afterwards no guarantee is made. So if you want to store the message internally
  * for example for later processing you have to reference the message.
  *
- * @fn void FawkesNetworkHandler::clientConnected(unsigned int clid) = 0
+ * @fn void FawkesNetworkHandler::client_connected(unsigned int clid) = 0
  * Called when a new client connected. If any actions need to be taken on your side this
  * is the place to do it.
  * @param clid client ID of new client
  *
- * @fn void FawkesNetworkHandler::clientDisconnected(unsigned int clid) = 0
+ * @fn void FawkesNetworkHandler::client_disconnected(unsigned int clid) = 0
  * Called when a client disconnected. If any actions need to be taken on your side this
  * is the place to do it. Note that you cannot send any further messages to this client!
  * @param clid client ID of disconnected client
  *
- * @fn void FawkesNetworkHandler::processAfterLoop()
+ * @fn void FawkesNetworkHandler::process_after_loop()
  * Executed after main loop.
  * Put all final message processing in this method. It is called when there is time
  * to handle the messages and after the main loop thus that actions here do not
@@ -84,103 +81,4 @@ unsigned short int
 FawkesNetworkHandler::id() const
 {
   return _id;
-}
-
-
-/** Set emitter.
- * This method has to be called before the handler is actually used. If used
- * inside Fawkes this is guaranteed by the thread initializer.
- * @param emitter Fawkes emitter
- */
-void
-FawkesNetworkHandler::setEmitter(FawkesNetworkEmitter *emitter)
-{
-  this->emitter = emitter;
-}
-
-
-/** Broadcast a message.
- * Copied through to the emitter.
- * @param msg message to broadcast
- * @see FawkesNetworkEmitter::broadcast()
- */
-void
-FawkesNetworkHandler::broadcast(FawkesNetworkMessage *msg)
-{
-  emitter->broadcast(msg);
-}
-
-
-/** Broadcast a message.
- * A FawkesNetworkMessage is created and broacasted via the emitter.
- * @param msg_id message type id
- * @param payload payload buffer
- * @param payload_size size of payload buffer
- * @see FawkesNetworkEmitter::broadcast()
- */
-void
-FawkesNetworkHandler::broadcast(unsigned short int msg_id,
-				void *payload, unsigned int payload_size)
-{
-  FawkesNetworkMessage *m = new FawkesNetworkMessage(_id, msg_id, payload, payload_size);
-  emitter->broadcast(m);
-  m->unref();
-}
-
-
-/** Broadcast message without payload.
- * @param msg_id message type ID
- */
-void
-FawkesNetworkHandler::broadcast(unsigned short int msg_id)
-{
-  FawkesNetworkMessage *m = new FawkesNetworkMessage(_id, msg_id);
-  emitter->broadcast(m);
-  m->unref();
-}
-
-
-/** Send a message.
- * Copied through to the emitter.
- * @param msg message to broadcast
- * @see FawkesNetworkEmitter::send()
- */
-void
-FawkesNetworkHandler::send(FawkesNetworkMessage *msg)
-{
-  emitter->send(msg);
-}
-
-
-/** Send a message.
- * A FawkesNetworkMessage is created and sent via the emitter.
- * @param to_clid client ID of recipient
- * @param msg_id message type id
- * @param payload payload buffer
- * @param payload_size size of payload buffer
- * @see FawkesNetworkEmitter::broadcast()
- */
-void
-FawkesNetworkHandler::send(unsigned int to_clid, unsigned short int msg_id,
-			   void *payload, unsigned int payload_size)
-{
-  FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, _id, msg_id, payload, payload_size);
-  emitter->send(m);
-  m->unref();
-}
-
-
-/** Send a message without payload.
- * A FawkesNetworkMessage with empty payload is created and sent via the emitter.
- * This is particularly useful for simple status messages that you want to send.
- * @param to_clid client ID of recipient
- * @param msg_id message type id
- * @see FawkesNetworkEmitter::broadcast()
- */
-void
-FawkesNetworkHandler::send(unsigned int to_clid, unsigned short int msg_id)
-{
-  FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, _id, msg_id);
-  emitter->send(m);
-  m->unref();
 }

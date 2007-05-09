@@ -28,8 +28,6 @@
 #ifndef __NETCOMM_FAWKES_HANDLER_H_
 #define __NETCOMM_FAWKES_HANDLER_H_
 
-// needed anyway, not worth a foreward declaration
-#include <netcomm/fawkes/emitter.h>
 #include <netcomm/fawkes/message.h>
 
 class FawkesNetworkHandler
@@ -40,26 +38,10 @@ class FawkesNetworkHandler
 
   unsigned short int id() const;
 
-  void setEmitter(FawkesNetworkEmitter *emitter);
-
-  void broadcast(FawkesNetworkMessage *msg);
-  void broadcast(unsigned short int msg_id,
-		 void *payload, unsigned int payload_size);
-  void broadcast(unsigned short int msg_id);
-
-  void send(FawkesNetworkMessage *msg);
-  void send(unsigned int to_clid, unsigned short int msg_id);
-  void send(unsigned int to_clid, unsigned short int msg_id,
-	    void *payload, unsigned int payload_size);
-
-
-  virtual void handleNetworkMessage(FawkesNetworkMessage *msg)                = 0;
-  virtual void clientConnected(unsigned int clid)                             = 0;
-  virtual void clientDisconnected(unsigned int clid)                          = 0;
-  virtual void processAfterLoop()                                             = 0;
-
- protected:
-  FawkesNetworkEmitter *emitter;
+  virtual void handle_network_message(FawkesNetworkMessage *msg)           = 0;
+  virtual void client_connected(unsigned int clid)                         = 0;
+  virtual void client_disconnected(unsigned int clid)                      = 0;
+  virtual void process_after_loop()                                        = 0;
 
  private:
   unsigned short int _id;
