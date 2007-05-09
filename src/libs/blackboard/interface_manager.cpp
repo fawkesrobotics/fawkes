@@ -109,8 +109,11 @@ BlackBoardInterfaceManager::BlackBoardInterfaceManager(bool bb_master)
   instance_serial = 1;
   mutex = new Mutex();
   iface_module = new ModuleDL( LIBDIR"/libinterfaces.so" );
-  if ( ! iface_module->open() ) {
-    throw BlackBoardCannotFindInterfaceModuleException();
+  try {
+    iface_module->open();
+  } catch (ModuleOpenException &e) {
+    e.append("BlackBoardInterfaceManager cannot open interface module");
+    throw;
   }
 
   msgmgr = new BlackBoardMessageManager(this);

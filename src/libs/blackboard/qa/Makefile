@@ -32,6 +32,10 @@ OBJS_qa_bb_interface = qa_bb_interface.o
 LIBS_qa_bb_messaging = core utils interfaces blackboard
 OBJS_qa_bb_messaging = qa_bb_messaging.o
 
+OBJS_all =	$(OBJS_qa_bb_memmgr) 		\
+		$(OBJS_qa_bb_interface)		\
+		$(OBJS_qa_bb_messaging)
+
 BINS_all =	$(BINDIR)/qa_bb_memmgr		\
 		$(BINDIR)/qa_bb_interface	\
 		$(BINDIR)/qa_bb_messaging

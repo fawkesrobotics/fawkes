@@ -88,15 +88,6 @@ class BBMemMgrCannotOpenException : public Exception {
 };
 
 
-/** Thrown in interfaces lib could not be found.
- */
-class BlackBoardCannotFindInterfaceModuleException : public Exception {
- public:
-  /** Constructor */
-  BlackBoardCannotFindInterfaceModuleException() : Exception("Cannot find interface module") {}
-};
-
-
 /** Thrown if no definition of interface or interface generator found.
  */
 class BlackBoardInterfaceNotFoundException : public Exception {
