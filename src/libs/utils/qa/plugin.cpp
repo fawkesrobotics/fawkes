@@ -55,10 +55,9 @@ bool
 test_module(Module *m)
 {
   bool success = true;
-  if ( ! m->open() ) {
-    cout << "Could not open module" << endl;
-    success = false;
-  } else {
+  try {
+    m->open();
+ 
     cout << "Successfully opened module" << endl;
   
     if ( ! m->hasSymbol("plugin_factory") ) { // "plugin_factory"
@@ -89,6 +88,10 @@ test_module(Module *m)
       }
     }
     m->close();
+  } catch (Exception &e) {
+    cout << "Could not open module" << endl;
+    e.printTrace();
+    success = false;
   }
 
   return success;

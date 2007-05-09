@@ -455,7 +455,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
   unsigned int num_msgs = (max_num_msgs == 0 ? 0 : 1);
   do {
     struct sockaddr_in from;
-    size_t addr_len = sizeof(addr_len);
+    socklen_t addr_len = sizeof(addr_len);
     size_t bytes = crypt_buffer_size;
 
     if ( max_num_msgs != 0 )  ++num_msgs;

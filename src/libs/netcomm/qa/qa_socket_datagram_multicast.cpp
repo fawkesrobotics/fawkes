@@ -130,7 +130,6 @@ public:
     printf("Waiting for data to reflect\n");
     s->recv(&i, sizeof(i), (struct sockaddr *)&from, &from_len);
     printf("Received %u, reflecting\n", i);
-    usleep(100000);
     s->send(&i, sizeof(i));
   }
 

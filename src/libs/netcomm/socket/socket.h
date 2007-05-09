@@ -73,12 +73,12 @@ class Socket
   virtual void         write(void *buf, size_t count);
   virtual void         send(void *buf, size_t buf_len);
   virtual void         send(void *buf, size_t buf_len,
-			    const struct sockaddr *to_addr, size_t addr_len);
+			    const struct sockaddr *to_addr, socklen_t addr_len);
   virtual void         recv(void *buf, size_t buf_len);
   virtual void         recv(void *buf, size_t buf_len,
-			    struct sockaddr *from_addr, size_t *addr_len);
+			    struct sockaddr *from_addr, socklen_t *addr_len);
   virtual void         recv(void *buf, size_t *buf_len,
-			    struct sockaddr *from_addr, size_t *addr_len);
+			    struct sockaddr *from_addr, socklen_t *addr_len);
 
   /** Clone socket.
    * This method has to be implemented by subclass to correctly clone the instance.

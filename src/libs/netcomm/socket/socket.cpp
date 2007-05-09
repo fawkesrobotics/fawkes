@@ -602,7 +602,7 @@ Socket::recv(void *buf, size_t buf_len)
  */
 void
 Socket::send(void *buf, size_t buf_len,
-	     const struct sockaddr *addr, size_t addr_len)
+	     const struct sockaddr *addr, socklen_t addr_len)
 {
   int retval = 0;
   unsigned int bytes_written = 0;
@@ -644,7 +644,7 @@ Socket::send(void *buf, size_t buf_len,
  */
 void
 Socket::recv(void *buf, size_t buf_len,
-	     struct sockaddr *addr, size_t *addr_len)
+	     struct sockaddr *addr, socklen_t *addr_len)
 {
   int retval = 0;
   unsigned int bytes_read = 0;
@@ -688,7 +688,7 @@ Socket::recv(void *buf, size_t buf_len,
  */
 void
 Socket::recv(void *buf, size_t *buf_len,
-	     struct sockaddr *addr, size_t *addr_len)
+	     struct sockaddr *addr, socklen_t *addr_len)
 {
   int retval = 0;
   unsigned int bytes_read = 0;

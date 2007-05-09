@@ -160,7 +160,7 @@ main(int argc, char **argv)
 	  cout << "Ouch, tried to free invalid pointer" << endl;
 	  cout << "Allocated chunks:" << endl;
 	  mm->printAllocatedChunksInfo();
-	  printf("Pointer tried to free: 0x%x\n", (unsigned int)ptrs[erase]);
+	  printf("Pointer tried to free: 0x%lx\n", (long unsigned int)ptrs[erase]);
 	}
       }
     }

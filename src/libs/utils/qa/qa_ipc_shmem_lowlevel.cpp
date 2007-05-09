@@ -85,7 +85,7 @@ main(int argc, char **argv)
     header_t *header = (header_t *)shmem;
     header->ptr = shmem;
 
-    printf("M: ptr=0x%x\n", (unsigned int)shmem);
+    printf("M: ptr=0x%lx\n", (long unsigned int)shmem);
 
     while ( ! quit ) {
       usleep(100000);
@@ -111,8 +111,8 @@ main(int argc, char **argv)
 
     header_t *header = (header_t *)shmem;
 
-    printf("S: ptr=0x%x   header->ptr=0x%x\n", (unsigned int)shmem,
-	   (unsigned int)header->ptr);
+    printf("S: ptr=0x%lx   header->ptr=0x%lx\n", (long unsigned int)shmem,
+	   (long unsigned int)header->ptr);
 
     if ( shmem != header->ptr ) {
       printf("S: pointers differ, re-attaching\n");
@@ -124,8 +124,8 @@ main(int argc, char **argv)
 	exit(3);
       }
       header = (header_t *)shmem;
-      printf("S: after re-attach: ptr=0x%x   header->ptr=0x%x\n",
-	     (unsigned int)shmem, (unsigned int)header->ptr);
+      printf("S: after re-attach: ptr=0x%lx   header->ptr=0x%lx\n",
+	     (long unsigned int)shmem, (long unsigned int)header->ptr);
     }
 
     /*
