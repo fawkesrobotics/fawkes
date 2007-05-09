@@ -28,7 +28,26 @@
 // Do not include in api reference
 ///@cond QA
 
+#include <core/threading/thread.h>
 #include <utils/logging/console.h>
+
+class LoggerTestThread : public Thread
+{
+ public:
+  LoggerTestThread(Logger *logger)
+  {
+    this->logger = logger;
+  }
+
+  virtual void loop()
+  {
+    logger->log_info("LoggerTestThread", "Testing: %i", 1);
+    cancel();
+  }
+
+ private:
+  Logger *logger;
+};
 
 int
 main(int argc, char **argv)
@@ -47,6 +66,25 @@ main(int argc, char **argv)
   cl.log_info("QA", e);
   cl.log_warn("QA", e);
   cl.log_error("QA", e);
+
+  ConsoleLogger *clp = new ConsoleLogger();
+
+  clp->log_debug("QA", "DEBUG test output %i", 1);
+  clp->log_info("QA", "DEBUG test output %i", 2);
+  clp->log_warn("QA", "DEBUG test output %i", 3);
+  clp->log_error("QA", "DEBUG test output %i", 4);
+
+  clp->log_debug("QA", e);
+  clp->log_info("QA", e);
+  clp->log_warn("QA", e);
+  clp->log_error("QA", e);
+
+  LoggerTestThread *tt = new LoggerTestThread(clp);
+  tt->start();
+  tt->join();
+  delete tt;
+
+  delete clp;
 
   return 0;
 }

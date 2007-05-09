@@ -64,18 +64,85 @@ ConsoleLogger::~ConsoleLogger()
  * @param component component, used to distuinguish logged messages
  * @param format format of the message, see man page of sprintf for available
  * tokens.
+ * @param va variadic argument list
+ */
+void
+ConsoleLogger::vlog_debug(const char *component, const char *format, va_list va)
+{
+  gettimeofday(now, NULL);
+  localtime_r(&now->tv_sec, now_s);
+  fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_darkgray, now_s->tm_hour,
+	  now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+  vfprintf(stderr, format, va);
+  fprintf(stderr, "%s\n", std::c_normal);
+}
+
+
+/** Log informational message.
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ * @param va variadic argument list
+ */
+void
+ConsoleLogger::vlog_info(const char *component, const char *format, va_list va)
+{
+  gettimeofday(now, NULL);
+  localtime_r(&now->tv_sec, now_s);
+  fprintf(stderr, "%02d:%02d:%02d.%06ld %s: ", now_s->tm_hour, now_s->tm_min,
+  	  now_s->tm_sec, now->tv_usec, component);
+  vfprintf(stderr, format, va);
+  fprintf(stderr, "\n");
+}
+
+
+/** Log warning message.
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ * @param va variadic argument list
+ */
+void
+ConsoleLogger::vlog_warn(const char *component, const char *format, va_list va)
+{
+  gettimeofday(now, NULL);
+  localtime_r(&now->tv_sec, now_s);
+  fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_yellow, now_s->tm_hour,
+	  now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+  vfprintf(stderr, format, va);
+  fprintf(stderr, "%s\n", std::c_normal);
+}
+
+
+/** Log error message.
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ * @param va variadic argument list
+ */
+void
+ConsoleLogger::vlog_error(const char *component, const char *format, va_list va)
+{
+  gettimeofday(now, NULL);
+  localtime_r(&now->tv_sec, now_s);
+  fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_red, now_s->tm_hour,
+  	  now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+  vfprintf(stderr, format, va);
+  fprintf(stderr, "%s\n", std::c_normal);
+}
+
+
+/** Log debug message.
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
  */
 void
 ConsoleLogger::log_debug(const char *component, const char *format, ...)
 {
   va_list arg;
-  gettimeofday(now, NULL);
-  localtime_r(&now->tv_sec, now_s);
   va_start(arg, format);
-  fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_darkgray, now_s->tm_hour,
-	  now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
-  vfprintf(stderr, format, arg);
-  fprintf(stderr, "%s\n", std::c_normal);
+  vlog_debug(component, format, arg);
   va_end(arg);
 }
 
@@ -89,13 +156,8 @@ void
 ConsoleLogger::log_info(const char *component, const char *format, ...)
 {
   va_list arg;
-  gettimeofday(now, NULL);
-  localtime_r(&now->tv_sec, now_s);
   va_start(arg, format);
-  fprintf(stderr, "%02d:%02d:%02d.%06ld %s: ", now_s->tm_hour, now_s->tm_min,
-	  now_s->tm_sec, now->tv_usec, component);
-  vfprintf(stderr, format, arg);
-  fprintf(stderr, "\n");
+  vlog_info(component, format, arg);
   va_end(arg);
 }
 
@@ -109,13 +171,8 @@ void
 ConsoleLogger::log_warn(const char *component, const char *format, ...)
 {
   va_list arg;
-  gettimeofday(now, NULL);
-  localtime_r(&now->tv_sec, now_s);
   va_start(arg, format);
-  fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_yellow, now_s->tm_hour,
-	  now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
-  vfprintf(stderr, format, arg);
-  fprintf(stderr, "%s\n", std::c_normal);
+  vlog_warn(component, format, arg);
   va_end(arg);
 }
 
@@ -129,15 +186,11 @@ void
 ConsoleLogger::log_error(const char *component, const char *format, ...)
 {
   va_list arg;
-  gettimeofday(now, NULL);
-  localtime_r(&now->tv_sec, now_s);
   va_start(arg, format);
-  fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_red, now_s->tm_hour,
-	  now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
-  vfprintf(stderr, format, arg);
-  fprintf(stderr, "%s\n", std::c_normal);
+  vlog_error(component, format, arg);
   va_end(arg);
 }
+
 
 /** Log debug message.
  * @param component component, used to distuinguish logged messages

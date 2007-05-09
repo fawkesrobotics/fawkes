@@ -29,6 +29,7 @@
 #define __LOGGING_LOGGER_H_
 
 #include <core/exception.h>
+#include <cstdarg>
 
 class Logger
 {
@@ -39,6 +40,15 @@ class Logger
   virtual void log_info(const char *component, const char *format, ...)    = 0;
   virtual void log_warn(const char *component, const char *format, ...)    = 0;
   virtual void log_error(const char *component, const char *format, ...)   = 0;
+
+  virtual void vlog_debug(const char *component,
+			  const char *format, va_list va)                  = 0;
+  virtual void vlog_info(const char *component,
+			 const char *format, va_list va)                   = 0;
+  virtual void vlog_warn(const char *component,
+			 const char *format, va_list va)                   = 0;
+  virtual void vlog_error(const char *component,
+			  const char *format, va_list va)                  = 0;
 
   virtual void log_debug(const char *component, Exception &e)              = 0;
   virtual void log_info(const char *component, Exception &e)               = 0;

@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  console.h - Fawkes console logger
+ *  multi.h - Fawkes multi logger
  *
- *  Created: Tue Jan 16 21:06:50 2007
+ *  Created: Mon May 07 16:42:23 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,16 +25,21 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __LOGGING_CONSOLE_H_
-#define __LOGGING_CONSOLE_H_
+#ifndef __UTILS_LOGGING_MULTI_H_
+#define __UTILS_LOGGING_MULTI_H_
 
 #include <utils/logging/logger.h>
+#include <core/utils/lock_list.h>
 
-class ConsoleLogger : public Logger
+class MultiLogger : public Logger
 {
  public:
-  ConsoleLogger();
-  virtual ~ConsoleLogger();
+  MultiLogger();
+  MultiLogger(Logger *logger);
+  virtual ~MultiLogger();
+
+  void add_logger(Logger *logger);
+  void remove_logger(Logger *logger);
 
   virtual void log_debug(const char *component, const char *format, ...);
   virtual void log_info(const char *component, const char *format, ...);
@@ -52,8 +57,8 @@ class ConsoleLogger : public Logger
   virtual void log_error(const char *component, Exception &e);
 
  private:
-  struct timeval *now;
-  struct tm *now_s;
+  LockList<Logger *>           loggers;
+  LockList<Logger *>::iterator logit;
 };
 
 #endif
