@@ -36,6 +36,7 @@
 #include <utility>
 
 class FawkesThreadManager;
+class FawkesNetworkHub;
 class Plugin;
 class PluginLoader;
 class Mutex;
@@ -49,14 +50,17 @@ class FawkesPluginManager : public FawkesNetworkHandler
   void load(const char *plugin_type);
   void unload(const char *plugin_type);
 
-  virtual void handleNetworkMessage(FawkesNetworkMessage *msg);
-  virtual void clientConnected(unsigned int clid);
-  virtual void clientDisconnected(unsigned int clid);
-  virtual void processAfterLoop();
+  void set_hub(FawkesNetworkHub *hub);
+
+  virtual void handle_network_message(FawkesNetworkMessage *msg);
+  virtual void client_connected(unsigned int clid);
+  virtual void client_disconnected(unsigned int clid);
+  virtual void process_after_loop();
 
  private:
   FawkesThreadManager  *thread_manager;
   PluginLoader         *plugin_loader;
+  FawkesNetworkHub     *hub;
 
   Mutex *plugins_mutex;
 

@@ -67,26 +67,13 @@ FawkesNetworkManager::~FawkesNetworkManager()
 }
 
 
-/** Add a handler.
- * The handler is registered on the Fawkes network thread and the emitter on the
- * handler is set appropriately.
- * @param handler to add.
+/** Get Fawkes network hub.
+ * @return Fawkes network hubg
  */
-void
-FawkesNetworkManager::add_handler(FawkesNetworkHandler *handler)
+FawkesNetworkHub *
+FawkesNetworkManager::hub()
 {
-  handler->setEmitter(fawkes_network_thread);
-  fawkes_network_thread->add_handler(handler);
-}
-
-
-/** Remove handler.
- * @param handler handler to remove
- */
-void
-FawkesNetworkManager::remove_handler(FawkesNetworkHandler *handler)
-{
-  fawkes_network_thread->remove_handler(handler);
+  return fawkes_network_thread;
 }
 
 

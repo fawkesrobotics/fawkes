@@ -43,10 +43,12 @@
 /** Constructor.
  * @param blackboard BlackBoard
  * @param config Configuration
+ * @param logger Logger
  */
 FawkesThreadInitializer::FawkesThreadInitializer(BlackBoard *blackboard,
-						 Configuration *config)
-  : AspectInitializer(blackboard, config)
+						 Configuration *config,
+						 Logger *logger)
+  : AspectInitializer(blackboard, config, logger)
 {
 }
 
@@ -57,7 +59,11 @@ FawkesThreadInitializer::FawkesThreadInitializer(BlackBoard *blackboard,
 void
 FawkesThreadInitializer::init(Thread *thread)
 {
-  AspectInitializer::init(thread);
+  try {
+    AspectInitializer::init(thread);
+  } catch (Exception &e) {
+    throw;
+  }
 
   // put any special non-aspect initialization and checks here
 }

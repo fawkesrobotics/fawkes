@@ -28,6 +28,9 @@
 #include <mainapp/main_thread.h>
 
 #include <config/sqlite.h>
+#include <utils/logging/multi.h>
+#include <utils/logging/console.h>
+#include <utils/logging/liblogger.h>
 #include <utils/system/argparser.h>
 #include <utils/system/hostinfo.h>
 
@@ -57,6 +60,10 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 {
   hostinfo = new HostInfo();
 
+  /* Logging stuff */
+  multi_logger = new MultiLogger( new ConsoleLogger() );
+  LibLogger::init(multi_logger);
+
   /* Config stuff */
   config             = new SQLiteConfiguration(CONFDIR);
 
@@ -76,28 +83,33 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   config->load(config_mutable_file, config_default_file);
   config_manager     = new FawkesConfigManager(config);
   blackboard         = new BlackBoard();
-  thread_initializer = new FawkesThreadInitializer(blackboard, config);
+  thread_initializer = new FawkesThreadInitializer(blackboard, config, multi_logger);
   thread_manager     = new FawkesThreadManager(thread_initializer);
   plugin_manager     = new FawkesPluginManager(thread_manager);
   network_manager    = new FawkesNetworkManager(thread_manager, 1910);
 
-  network_manager->add_handler(plugin_manager);
-  network_manager->add_handler(config_manager);
+  thread_initializer->set_fnet_hub( network_manager->hub() );
+
+  plugin_manager->set_hub( network_manager->hub() );
+  config_manager->set_hub( network_manager->hub() );
 }
 
 
 /** Destructor. */
 FawkesMainThread::~FawkesMainThread()
 {
-  delete network_manager;
   delete plugin_manager;
-  delete thread_manager;
-  delete thread_initializer;
   delete blackboard;
   delete config_manager;
   delete config;
-  delete hostinfo;
   free(config_mutable_file);
+  delete hostinfo;
+  delete network_manager;
+  delete thread_manager;
+  delete thread_initializer;
+
+  // implicitly frees multi_logger and all sub-loggers
+  LibLogger::finalize();
 }
 
 

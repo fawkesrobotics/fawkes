@@ -29,6 +29,12 @@
 #include <utils/system/signal.h>
 #include <utils/system/argparser.h>
 
+// for -C: bb_cleanup
+#include <utils/ipc/shm.h>
+#include <blackboard/shmem_header.h>
+#include <blackboard/shmem_lister.h>
+#include <blackboard/bbconfig.h>
+
 #include <iostream>
 
 using namespace std;
@@ -78,6 +84,7 @@ usage(const char *progname)
        << "Call with: " << progname << " [options]" << endl
        << "where [options] is one or more of:" << endl
        << " -H             these help instructions" << endl
+       << " -C             cleanup old BB segments" << endl
        << " -c conffile    mutable configuration file, created if it does not exist" << endl
        << "                if it does however it must contain valid SQLite database" << endl
        << " -d conffile    default configuration file, created if it does not exist" << endl
@@ -92,12 +99,21 @@ usage(const char *progname)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "Hc:d:");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "HCc:d:");
 
   if ( argp->hasArgument("H") ) {
     usage(argv[0]);
     delete argp;
     return 0;
+  }
+
+  if ( argp->hasArgument("C") ) {
+    BlackBoardSharedMemoryHeader *bbsh = new BlackBoardSharedMemoryHeader( BLACKBOARD_MEMORY_SIZE,
+									   BLACKBOARD_VERSION );
+    BlackBoardSharedMemoryLister *bblister = new BlackBoardSharedMemoryLister();
+    SharedMemory::erase_orphaned(BLACKBOARD_MAGIC_TOKEN, bbsh, bblister);
+    delete bblister;
+    delete bbsh;
   }
 
   FawkesMainApp fawkes;

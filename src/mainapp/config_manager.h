@@ -41,6 +41,7 @@
 #include <utility>
 
 class ThreadManager;
+class FawkesNetworkHub;
 class Mutex;
 
 class FawkesConfigManager : public FawkesNetworkHandler, public ConfigurationChangeHandler
@@ -49,12 +50,15 @@ class FawkesConfigManager : public FawkesNetworkHandler, public ConfigurationCha
   FawkesConfigManager(Configuration *config);
   ~FawkesConfigManager();
 
-  virtual void handleNetworkMessage(FawkesNetworkMessage *msg);
-  virtual void clientConnected(unsigned int clid);
-  virtual void clientDisconnected(unsigned int clid);
-  virtual void processAfterLoop();
+  void set_hub(FawkesNetworkHub *hub);
 
-  /* From ConfigurationChangeHandler interface */
+  /* from FawkesNetworkHandler interface */
+  virtual void handle_network_message(FawkesNetworkMessage *msg);
+  virtual void client_connected(unsigned int clid);
+  virtual void client_disconnected(unsigned int clid);
+  virtual void process_after_loop();
+
+  /* from ConfigurationChangeHandler interface */
   virtual void configTagChanged(const char *new_location);
   virtual void configValueChanged(const char *component, const char *path,
 				  int value);
@@ -90,6 +94,8 @@ class FawkesConfigManager : public FawkesNetworkHandler, public ConfigurationCha
 
   LockList< unsigned int >           subscribers;
   LockList< unsigned int >::iterator sit;
+
+  FawkesNetworkHub *hub;
 };
 
 #endif

@@ -32,12 +32,13 @@
 
 class BlackBoard;
 class Configuration;
+class Logger;
 class Thread;
 
 class FawkesThreadInitializer : public AspectInitializer
 {
  public:
-  FawkesThreadInitializer(BlackBoard *blackboard, Configuration *config);
+  FawkesThreadInitializer(BlackBoard *blackboard, Configuration *config, Logger *logger);
 
   virtual void init(Thread *thread);
 

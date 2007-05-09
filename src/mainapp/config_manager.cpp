@@ -29,6 +29,7 @@
 #include <config/net_messages.h>
 
 #include <netcomm/fawkes/component_ids.h>
+#include <netcomm/fawkes/hub.h>
 #include <config/config.h>
 
 #include <string.h>
@@ -64,6 +65,19 @@ FawkesConfigManager::~FawkesConfigManager()
 }
 
 
+/** Set Fawkes network hub.
+ * The hub will be used for network communication. The FawkesConfigManager
+ * is automatically added as handler to the hub for config messages.
+ * @param hub Fawkes network hub
+ */
+void
+FawkesConfigManager::set_hub(FawkesNetworkHub *hub)
+{
+  this->hub = hub;
+  hub->add_handler( this );
+}
+
+
 /** Send invalid value message.
  * @param clid client ID
  * @param component component
@@ -74,7 +88,7 @@ FawkesConfigManager::send_inv_value(unsigned int clid,
 				    const char *component, const char *path)
 {
   config_invval_msg_t *r = prepare_msg<config_invval_msg_t>(component, path);
-  send(clid, MSG_CONFIG_INV_VALUE, r, sizeof(config_invval_msg_t));
+  hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INV_VALUE, r, sizeof(config_invval_msg_t));
 }
 
 
@@ -89,7 +103,7 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
     try {
       config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(i->component(), i->path());
       r->f = i->get_float();
-      send(clid, MSG_CONFIG_FLOAT_VALUE, r, sizeof(config_float_value_msg_t));
+      hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE, r, sizeof(config_float_value_msg_t));
     } catch (Exception &e) {
       printf("FawkesConfigManager::send_value: Value %s::%s could not be sent\n", i->component(), i->path());
     }
@@ -97,7 +111,7 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
     try {
       config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(i->component(), i->path());
       r->u = i->get_uint();
-      send(clid, MSG_CONFIG_UINT_VALUE, r, sizeof(config_uint_value_msg_t));
+      hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE, r, sizeof(config_uint_value_msg_t));
     } catch (Exception &e) {
       printf("FawkesConfigManager::send_value: Value %s::%s could not be sent\n", i->component(), i->path());
     }
@@ -105,7 +119,7 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
     try {
       config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(i->component(), i->path());
       r->i = i->get_int();
-      send(clid, MSG_CONFIG_INT_VALUE, r, sizeof(config_int_value_msg_t));
+      hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE, r, sizeof(config_int_value_msg_t));
     } catch (Exception &e) {
       printf("FawkesConfigManager::send_value: Value %s::%s could not be sent\n", i->component(), i->path());
     }
@@ -113,7 +127,7 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
     try {
       config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(i->component(), i->path());
       r->b = (i->get_bool() ? 1 : 0);
-      send(clid, MSG_CONFIG_BOOL_VALUE, r, sizeof(config_bool_value_msg_t));
+      hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE, r, sizeof(config_bool_value_msg_t));
     } catch (Exception &e) {
       printf("FawkesConfigManager::send_value: Value %s::%s could not be sent\n", i->component(), i->path());
     }
@@ -121,7 +135,7 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
     try {
       config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(i->component(), i->path());
       strncpy(r->s, i->get_string().c_str(), CONFIG_MSG_MAX_STRING_LENGTH);
-      send(clid, MSG_CONFIG_STRING_VALUE, r, sizeof(config_string_value_msg_t));
+      hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE, r, sizeof(config_string_value_msg_t));
     } catch (Exception &e) {
       printf("FawkesConfigManager::send_value: Value %s::%s could not be sent\n", i->component(), i->path());
     }
@@ -131,7 +145,7 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
 
 /** Process all network messages that have been received. */
 void
-FawkesConfigManager::processAfterLoop()
+FawkesConfigManager::process_after_loop()
 {
   inbound_queue.lock();
 
@@ -153,7 +167,7 @@ FawkesConfigManager::processAfterLoop()
       }
       delete i;
       config->unlock();
-      send(msg->clid(), MSG_CONFIG_END_OF_VALUES);
+      hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_END_OF_VALUES);
 
     } else if ( msg->msgid() == MSG_CONFIG_ERASE_VALUE ) {
       try {
@@ -168,7 +182,8 @@ FawkesConfigManager::processAfterLoop()
 	config->erase(component, path);
 
 	config_value_erased_msg_t *r = prepare_msg<config_value_erased_msg_t>(component, path);
-	send(msg->clid(), MSG_CONFIG_VALUE_ERASED, r, sizeof(config_value_erased_msg_t));
+	hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_VALUE_ERASED,
+		  r, sizeof(config_value_erased_msg_t));
 
       } catch (Exception &e) {
 	send_inv_value(msg->clid(), "?", "?");
@@ -196,7 +211,8 @@ FawkesConfigManager::processAfterLoop()
 	    float f = config->get_float(component, path);
 	    config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(component, path);
 	    r->f = f;
-	    send(msg->clid(), MSG_CONFIG_FLOAT_VALUE, r, sizeof(config_float_value_msg_t));
+	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE,
+		      r, sizeof(config_float_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
 	    printf("FawkesConfigManager::get_float: Value %s::%s could not be found\n", component, path);
@@ -208,7 +224,8 @@ FawkesConfigManager::processAfterLoop()
 	    unsigned int u = config->get_uint(component, path);
 	    config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(component, path);
 	    r->u = u;
-	    send(msg->clid(), MSG_CONFIG_UINT_VALUE, r, sizeof(config_uint_value_msg_t));
+	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE,
+		      r, sizeof(config_uint_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
 	    printf("FawkesConfigManager::get_uint: Value %s::%s could not be found\n", component, path);
@@ -220,7 +237,8 @@ FawkesConfigManager::processAfterLoop()
 	    int i = config->get_int(component, path);
 	    config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(component, path);
 	    r->i = i;
-	    send(msg->clid(), MSG_CONFIG_INT_VALUE, r, sizeof(config_int_value_msg_t));
+	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE,
+		      r, sizeof(config_int_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
 	    printf("FawkesConfigManager::get_float: Value %s::%s could not be found\n", component, path);
@@ -232,7 +250,8 @@ FawkesConfigManager::processAfterLoop()
 	    bool b = config->get_bool(component, path);
 	    config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(component, path);
 	    r->b = b;
-	    send(msg->clid(), MSG_CONFIG_BOOL_VALUE, r, sizeof(config_bool_value_msg_t));
+	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE,
+		      r, sizeof(config_bool_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
 	    printf("FawkesConfigManager::get_bool: Value %s::%s could not be found\n", component, path);
@@ -244,7 +263,8 @@ FawkesConfigManager::processAfterLoop()
 	    std::string s = config->get_string(component, path);
 	    config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(component, path);
 	    strncpy(r->s, s.c_str(), CONFIG_MSG_MAX_STRING_LENGTH);
-	    send(msg->clid(), MSG_CONFIG_STRING_VALUE, r, sizeof(config_string_value_msg_t));
+	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE,
+		      r, sizeof(config_string_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
 	    printf("FawkesConfigManager::get_string: Value %s::%s could not be found\n", component, path);
@@ -289,7 +309,8 @@ FawkesConfigManager::processAfterLoop()
 	    float f = config->get_float(component, path);
 	    config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(component, path);
 	    r->f = f;
-	    send(msg->clid(), MSG_CONFIG_FLOAT_VALUE, r, sizeof(config_float_value_msg_t));
+	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE,
+		      r, sizeof(config_float_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
 	    printf("FawkesConfigManager::send_float: Value %s::%s could not be set\n", component, path);
@@ -303,7 +324,8 @@ FawkesConfigManager::processAfterLoop()
 	    unsigned int u = config->get_uint(component, path);
 	    config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(component, path);
 	    r->u = u;
-	    send(msg->clid(), MSG_CONFIG_UINT_VALUE, r, sizeof(config_uint_value_msg_t));
+	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE,
+		      r, sizeof(config_uint_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
 	    printf("FawkesConfigManager::send_uint: Value %s::%s could not be set\n", component, path);
@@ -317,7 +339,8 @@ FawkesConfigManager::processAfterLoop()
 	    int i = config->get_int(component, path);
 	    config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(component, path);
 	    r->i = i;
-	    send(msg->clid(), MSG_CONFIG_INT_VALUE, r, sizeof(config_int_value_msg_t));
+	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE,
+		      r, sizeof(config_int_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
 	    printf("FawkesConfigManager::send_int: Value %s::%s could not be set\n", component, path);
@@ -331,7 +354,8 @@ FawkesConfigManager::processAfterLoop()
 	    bool b = config->get_bool(component, path);
 	    config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(component, path);
 	    r->b = (b ? 1 : 0);
-	    send(msg->clid(), MSG_CONFIG_BOOL_VALUE, r, sizeof(config_bool_value_msg_t));
+	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE,
+		      r, sizeof(config_bool_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
 	    printf("FawkesConfigManager::send_bool: Value %s::%s could not be set\n", component, path);
@@ -349,7 +373,8 @@ FawkesConfigManager::processAfterLoop()
 	    s = config->get_string(component, path);
 	    config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(component, path);
 	    strncpy(r->s, s.c_str(), CONFIG_MSG_MAX_STRING_LENGTH);
-	    send(msg->clid(), MSG_CONFIG_STRING_VALUE, r, sizeof(config_string_value_msg_t));
+	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE,
+		      r, sizeof(config_string_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
 	    printf("FawkesConfigManager::send_string: Value %s::%s could not be set\n", component, path);
@@ -375,7 +400,7 @@ FawkesConfigManager::processAfterLoop()
  * @param msg message
  */
 void
-FawkesConfigManager::handleNetworkMessage(FawkesNetworkMessage *msg)
+FawkesConfigManager::handle_network_message(FawkesNetworkMessage *msg)
 {
   msg->ref();
   inbound_queue.push_locked(msg);
@@ -387,7 +412,7 @@ FawkesConfigManager::handleNetworkMessage(FawkesNetworkMessage *msg)
  * @param clid client ID
  */
 void
-FawkesConfigManager::clientConnected(unsigned int clid)
+FawkesConfigManager::client_connected(unsigned int clid)
 {
 }
 
@@ -397,7 +422,7 @@ FawkesConfigManager::clientConnected(unsigned int clid)
  * @param clid client ID
  */
 void
-FawkesConfigManager::clientDisconnected(unsigned int clid)
+FawkesConfigManager::client_disconnected(unsigned int clid)
 {
   subscribers.lock();
   remove(subscribers.begin(), subscribers.end(), clid);
@@ -428,7 +453,8 @@ FawkesConfigManager::configValueChanged(const char *component, const char *path,
     try {
       config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(component, path);
       r->i = value;
-      send(*sit, MSG_CONFIG_INT_VALUE, r, sizeof(config_int_value_msg_t));
+      hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE,
+		r, sizeof(config_int_value_msg_t));
     } catch (Exception &e) {
       printf("FawkesConfigManager::configValueChanged[int]: Value could not be sent to %u\n", *sit);
     }
@@ -451,7 +477,8 @@ FawkesConfigManager::configValueChanged(const char *component, const char *path,
     try {
       config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(component, path);
       r->u = value;
-      send(*sit, MSG_CONFIG_UINT_VALUE, r, sizeof(config_uint_value_msg_t));
+      hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE,
+		r, sizeof(config_uint_value_msg_t));
     } catch (Exception &e) {
       printf("FawkesConfigManager::configValueChanged[uint]: Value could not be sent to %u\n", *sit);
     }
@@ -474,7 +501,8 @@ FawkesConfigManager::configValueChanged(const char *component, const char *path,
     try {
       config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(component, path);
       r->f = value;
-      send(*sit, MSG_CONFIG_FLOAT_VALUE, r, sizeof(config_float_value_msg_t));
+      hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE,
+		r, sizeof(config_float_value_msg_t));
     } catch (Exception &e) {
       printf("FawkesConfigManager::configValueChanged[float]: Value could not be sent to %u\n", *sit);
     }
@@ -497,7 +525,8 @@ FawkesConfigManager::configValueChanged(const char *component, const char *path,
     try {
       config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(component, path);
       r->b = (value ? 1 : 0);
-      send(*sit, MSG_CONFIG_BOOL_VALUE, r, sizeof(config_bool_value_msg_t));
+      hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE,
+		r, sizeof(config_bool_value_msg_t));
     } catch (Exception &e) {
       printf("FawkesConfigManager::configValueChanged[bool]: Value could not be sent to %u\n", *sit);
     }
@@ -520,7 +549,8 @@ FawkesConfigManager::configValueChanged(const char *component, const char *path,
     try {
       config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(component, path);
       strncpy(r->s, value.c_str(), CONFIG_MSG_MAX_STRING_LENGTH);
-      send(*sit, MSG_CONFIG_STRING_VALUE, r, sizeof(config_string_value_msg_t));
+      hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE,
+		r, sizeof(config_string_value_msg_t));
     } catch (Exception &e) {
       printf("FawkesConfigManager::configValueChanged[string]: Value could not be sent to %u\n", *sit);
     }
@@ -540,7 +570,8 @@ FawkesConfigManager::configValueErased(const char *component, const char *path)
   for (sit = subscribers.begin(); sit != subscribers.end(); ++sit) {
     try {
       config_value_erased_msg_t *r = prepare_msg<config_value_erased_msg_t>(component, path);
-      send(*sit, MSG_CONFIG_VALUE_ERASED, r, sizeof(config_value_erased_msg_t));
+      hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_VALUE_ERASED,
+		r, sizeof(config_value_erased_msg_t));
     } catch (Exception &e) {
       printf("FawkesConfigManager::configValueChanged[string]: Value could not be sent to %u\n", *sit);
     }

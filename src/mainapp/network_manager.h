@@ -31,6 +31,7 @@
 class FawkesThreadManager;
 class FawkesNetworkThread;
 class FawkesNetworkHandler;
+class FawkesNetworkHub;
 class AvahiThread;
 
 class FawkesNetworkManager
@@ -39,8 +40,7 @@ class FawkesNetworkManager
   FawkesNetworkManager(FawkesThreadManager *thread_manager, unsigned short int fawkes_port);
   ~FawkesNetworkManager();
 
-  void add_handler(FawkesNetworkHandler *handler);
-  void remove_handler(FawkesNetworkHandler *handler);
+  FawkesNetworkHub *  hub();
 
   void process();
 
