@@ -26,7 +26,6 @@
  */
 
 #include <utils/plugin/plugin_loader.h>
-#include <utils/system/console_colors.h>
 #include <utils/system/dynamic_module/module_manager_factory.h>
 #include <utils/system/dynamic_module/module_manager.h>
 #include <utils/system/dynamic_module/module.h>
@@ -44,8 +43,6 @@ class PluginLoaderData
   std::map< Plugin *, Module * >    plugin_module_map;
   std::map< std::string, Plugin * > name_plugin_map;
   std::map< Plugin *, std::string > plugin_name_map;
-
-  std::string msg_prefix;
 };
 /// @endcond
 
@@ -83,7 +80,6 @@ PluginLoader::PluginLoader(const char *plugin_base_dir)
 {
   d = new PluginLoaderData();
   d->mm = ModuleManagerFactory::getInstance(ModuleManagerFactory::MMT_DL, plugin_base_dir);
-  d->msg_prefix = std::cblue + "PluginLoader: " + std::cnormal;
 }
 
 /** Destructor */
@@ -134,7 +130,6 @@ PluginLoader::load(const char *plugin_name)
 
   if ( pm == NULL ) {
     // we could NOT open the plugin module
-    // std::cout << d->msg_prefix << "Could not open the plugin module" << std::endl;
     throw PluginNotFoundException(plugin_name,
 				  "Could not open plugin module");
   }

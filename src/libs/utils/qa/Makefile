@@ -35,14 +35,14 @@ LIBS_qa_utils_liblogger = utils
 
 OBJS_all =	$(OBJS_test_plugin)			\
 		$(OBJS_qa_utils_plugin)			\
-		$(LIBS_qa_utils_ipc_shmem)		\
-		$(LIBS_qa_utils_ipc_shmem_lock)		\
-		$(LIBS_qa_utils_ipc_shmem_lowlevel)	\
-		$(LIBS_qa_utils_ipc_msg)		\
-		$(LIBS_qa_utils_ipc_semset)		\
-		$(LIBS_qa_utils_hostinfo)		\
-		$(LIBS_qa_utils_logger)			\
-		$(LIBS_qa_utils_liblogger)
+		$(OBJS_qa_utils_ipc_shmem)		\
+		$(OBJS_qa_utils_ipc_shmem_lock)		\
+		$(OBJS_qa_utils_ipc_shmem_lowlevel)	\
+		$(OBJS_qa_utils_ipc_msg)		\
+		$(OBJS_qa_utils_ipc_semset)		\
+		$(OBJS_qa_utils_hostinfo)		\
+		$(OBJS_qa_utils_logger)			\
+		$(OBJS_qa_utils_liblogger)
 
 BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_ipc_shmem		\
