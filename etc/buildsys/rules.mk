@@ -78,10 +78,10 @@ subdirs: $(SUBDIRS)
 ifneq ($(SUBDIRS),)
 $(SUBDIRS):
 	$(SILENT) if [ ! -d $(@) ]; then \
-		echo -e "\n$(INDENT_PRINT)---$(TRED)Directory $(TNORMAL)$(TBOLDRED)$@$(TNORMAL)$(TRED) does not exist, check SUBDIRS variable$(TNORMAL) ---"; \
+		echo -e "$(INDENT_PRINT)---$(TRED)Directory $(TNORMAL)$(TBOLDRED)$@$(TNORMAL)$(TRED) does not exist, check SUBDIRS variable$(TNORMAL) ---"; \
 		exit 1; \
 	else \
-		echo -e "\n$(INDENT_PRINT)--- Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"; \
+		echo -e "$(INDENT_PRINT)--- Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"; \
 		$(MAKE) --no-print-directory -C $(realpath $(SRCDIR)/$@) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)"; \
 		if [ "$(MAKECMDGOALS)" != "clean" ]; then \
 			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $@"; \
