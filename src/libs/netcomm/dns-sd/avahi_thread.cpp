@@ -28,6 +28,10 @@
 #include <netcomm/dns-sd/avahi_thread.h>
 #include <netcomm/dns-sd/avahi_service_publisher.h>
 #include <netcomm/dns-sd/avahi_browser.h>
+#include <netcomm/dns-sd/avahi_resolver.h>
+
+#include <core/threading/mutex.h>
+#include <core/threading/wait_condition.h>
 #include <core/exceptions/software.h>
 
 #include <avahi-common/alternative.h>
@@ -48,11 +52,17 @@
 
 /** Constructor. */
 AvahiThread::AvahiThread()
+  : Thread("AvahiThread")
 {
   service_publisher = new AvahiServicePublisher();
-  browser = new AvahiBrowser();
+  browser           = new AvahiBrowser();
+  _resolver         = new AvahiResolver();
   simple_poll = NULL;
   client = NULL;
+
+  init_mutex        = new Mutex();
+
+  init_mutex->lock();
 }
 
 
@@ -61,6 +71,8 @@ AvahiThread::~AvahiThread()
 {
   delete service_publisher;
   delete browser;
+  delete _resolver;
+  delete init_mutex;
 
   if ( client )
     avahi_client_free( client );
@@ -107,6 +119,17 @@ AvahiThread::unwatch(const char *service_type, AvahiBrowseHandler *h)
 }
 
 
+/** Get Avahi Resolver.
+ * This method returns a pointer to an AvahiResolver.
+ * @return initialized resolver
+ */
+AvahiResolver *
+AvahiThread::resolver()
+{
+  return _resolver;
+}
+
+
 /** Avahi thread loop.
  * The avahi thread calls the simple poll iterate to poll with an infinite
  * timeout. This way the loop blocks until an event occurs.
@@ -142,6 +165,10 @@ AvahiThread::loop()
 void
 AvahiThread::recover()
 {
+  // if someone already gathered the lock we don't care, at least
+  // no waiting thread could have aquired it.
+  init_mutex->tryLock();
+
   service_publisher->group_erase();
   browser->erase_browsers();
 
@@ -172,6 +199,7 @@ AvahiThread::client_callback(AvahiClient *c, AvahiClientState state,
   at->client = c;
   at->service_publisher->client = c;
   at->browser->client = c;
+  at->_resolver->client = c;
 
   switch (state) {
   case AVAHI_CLIENT_S_RUNNING:        
@@ -180,6 +208,8 @@ AvahiThread::client_callback(AvahiClient *c, AvahiClientState state,
     //printf("(Client): RUNNING\n");
     at->service_publisher->create_services();
     at->browser->create_browsers();
+    at->_resolver->set_available( true );
+    at->init_unlock();
     break;
 
   case AVAHI_CLIENT_S_COLLISION:
@@ -194,6 +224,7 @@ AvahiThread::client_callback(AvahiClient *c, AvahiClientState state,
     // Doh!
     //printf("(Client): FAILURE\n");
     at->recover();
+    at->_resolver->set_available( false );
     break;
 
   case AVAHI_CLIENT_CONNECTING:
@@ -205,4 +236,30 @@ AvahiThread::client_callback(AvahiClient *c, AvahiClientState state,
     //printf("(Client): REGISTERING\n");
     break;
   }
+}
+
+
+/** Unlocks init lock.
+ * Only to be called by client_callback().
+ */
+void
+AvahiThread::init_unlock()
+{
+  init_mutex->unlock();
+}
+
+
+/** Waits for the AvahiThread to be initialized.
+ * You can use this if you want to wait until the thread has been
+ * fully initialized and may be used. Since the happens in this thread
+ * it is in general not immediately ready after start().
+ * This will block the calling thread until the AvahiThread has
+ * been initialized. This is done by waiting for a release of an
+ * initialization mutex.
+ */
+void
+AvahiThread::wait_initialized()
+{
+  init_mutex->lock();
+  init_mutex->unlock();
 }

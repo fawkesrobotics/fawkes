@@ -36,6 +36,9 @@
 class AvahiServicePublisher;
 class AvahiBrowser;
 class AvahiBrowseHandler;
+class AvahiResolver;
+class Mutex;
+class WaitCondition;
 
 class AvahiThread : public Thread
 {
@@ -46,6 +49,9 @@ class AvahiThread : public Thread
   void publish(AvahiService *service);
   void watch(const char *service_type, AvahiBrowseHandler *h);
   void unwatch(const char *service_type, AvahiBrowseHandler *h);
+  void wait_initialized();
+
+  AvahiResolver *  resolver();
 
   virtual void loop();
 
@@ -53,6 +59,7 @@ class AvahiThread : public Thread
   typedef struct AvahiSimplePoll AvahiSimplePoll;
 
   static void client_callback(AvahiClient *c, AvahiClientState state, void *instance);
+  void init_unlock();
   void recover();
 
   AvahiSimplePoll  *simple_poll;
@@ -60,6 +67,10 @@ class AvahiThread : public Thread
 
   AvahiServicePublisher *service_publisher;
   AvahiBrowser          *browser;
+  AvahiResolver         *_resolver;
+
+  Mutex                 *init_mutex;
+  WaitCondition         *init_wc;
 };
 
 

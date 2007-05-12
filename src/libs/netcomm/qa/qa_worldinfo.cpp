@@ -29,6 +29,8 @@
 
 #include <core/threading/thread.h>
 #include <netcomm/worldinfo/transceiver.h>
+#include <netcomm/dns-sd/avahi_thread.h>
+#include <netcomm/utils/resolver.h>
 #include <utils/system/signal.h>
 #include <utils/system/argparser.h>
 
@@ -42,12 +44,13 @@ using namespace std;
 class WorldInfoSenderThread : public Thread
 {
 public:
-  WorldInfoSenderThread(unsigned short int port, bool loop)
+  WorldInfoSenderThread(unsigned short int port, bool loop, NetworkNameResolver *rs)
   {
     i = 0;
     try {
       t = new WorldInfoTransceiver("224.16.0.1", port,
-				   "AllemaniACs", "WorldInfoQA");
+				   "AllemaniACs", "WorldInfoQA",
+				   rs);
       t->set_loop( loop );
     } catch (Exception &e) {
       e.printTrace();
@@ -89,12 +92,14 @@ public:
 class WorldInfoReceiverThread : public Thread, public WorldInfoHandler
 {
 public:
-  WorldInfoReceiverThread(unsigned short int port, unsigned int max_num_msgs)
+  WorldInfoReceiverThread(unsigned short int port, unsigned int max_num_msgs,
+			  NetworkNameResolver *rs)
   {
     this->max_num_msgs = max_num_msgs;
     try {
       t = new WorldInfoTransceiver("224.16.0.1", port,
-				   "AllemaniACs", "WorldInfoQA");
+				   "AllemaniACs", "WorldInfoQA",
+				   rs);
       t->add_handler(this);
     } catch (Exception &e) {
       e.printTrace();
@@ -111,6 +116,7 @@ public:
   virtual void loop()
   {
     printf("Waiting for data\n");
+    t->flush_sequence_numbers(10);
     t->recv( /* block = */ true, max_num_msgs );
   }
 
@@ -177,19 +183,33 @@ class WorldInfoQAMain : public SignalHandler
  public:
   WorldInfoQAMain(ArgumentParser *argp)
   {
+    if ( argp->hasArgument("a") ) {
+      at = new AvahiThread();
+      at->start();
+      printf("Waiting for Avahi thread to initialize\n");
+      at->wait_initialized();
+    } else {
+      at = NULL;
+    }
+    rs = new NetworkNameResolver(at);
     s = NULL;
     r = NULL;
     this->argp = argp;
     if ( argp->hasArgument("r") ) {
       printf("Going to be a receiver\n");
-      r = new WorldInfoReceiverThread(1910, argp->hasArgument("s") ? 1 : 0);
+      r = new WorldInfoReceiverThread(1910, argp->hasArgument("s") ? 1 : 0, rs);
     } else {
-      s = new WorldInfoSenderThread(1910, argp->hasArgument("l"));
+      s = new WorldInfoSenderThread(1910, argp->hasArgument("l"), rs);
     }
   }
 
   ~WorldInfoQAMain()
   {
+    if ( at != NULL ) {
+      at->cancel();
+      at->join();
+      delete at;
+    }
     delete s;
     delete r;
   }
@@ -219,19 +239,22 @@ class WorldInfoQAMain : public SignalHandler
   ArgumentParser *argp;
   WorldInfoSenderThread *s;
   WorldInfoReceiverThread *r;
+  NetworkNameResolver *rs;
+  AvahiThread *at;
 };
 
 int
 main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "rlsH");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "arlsH");
 
   if ( argp->hasArgument("H") ) {
-    cout << "Usage: " << argv[0] << "[-r] [-H] [-s] [-l]" << endl
+    cout << "Usage: " << argv[0] << "[-r] [-H] [-s] [-l] [-a]" << endl
 	 << " -r   receiver (sender otherwise)" << endl
 	 << " -H   this help message" << endl
 	 << " -s   single per recv, only process a single message per recv()" << endl
-	 << " -l   enable multicast loop back" << endl;
+	 << " -l   enable multicast loop back" << endl
+	 << " -a   enable Avahi for mDNS lookup" << endl;
     return 0;
   }
 
@@ -240,6 +263,8 @@ main(int argc, char **argv)
   SignalManager::ignore(SIGPIPE);
 
   m.run();
+
+  SignalManager::finalize();
 
   delete argp;
   return 0;

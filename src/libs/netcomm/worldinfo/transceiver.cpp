@@ -33,6 +33,7 @@
 #include <netcomm/worldinfo/decrypt.h>
 
 #include <netcomm/socket/datagram_multicast.h>
+#include <netcomm/utils/resolver.h>
 
 #include <netinet/in.h>
 #include <iostream>
@@ -87,10 +88,13 @@ WorldInfoException::WorldInfoException(const char *msg)
  * @param port UDP port to send information to and receive from
  * @param key encryption key
  * @param iv encryption initialisation vector
+ * @param resolver An initialized network resolver, is NULL is supplied
+ * an internal resolver will be created without mDNS support.
  * @exception OutOfMemoryException thrown if internal buffers cannot be created
  */
 WorldInfoTransceiver::WorldInfoTransceiver(const char *addr, unsigned short port,
-					   const char *key, const char *iv)
+					   const char *key, const char *iv,
+					   NetworkNameResolver *resolver)
 {
   try {
     s = new MulticastDatagramSocket(addr, port);
@@ -124,6 +128,14 @@ WorldInfoTransceiver::WorldInfoTransceiver(const char *addr, unsigned short port
 
   decryptor->set_plain_buffer(in_buffer, WORLDINFO_MTU);
 
+  if ( resolver == NULL ) {
+    this->resolver = new NetworkNameResolver();
+    resolver_delete = true;
+  } else {
+    this->resolver = resolver;
+    resolver_delete = false;
+  }
+
   out_seq = 0;
 }
 
@@ -138,6 +150,9 @@ WorldInfoTransceiver::~WorldInfoTransceiver()
   free(covariance);
   delete s;
   delete encryptor;
+  if ( resolver_delete ) {
+    delete resolver;
+  }
 }
 
 
@@ -180,6 +195,35 @@ WorldInfoTransceiver::rem_handler(WorldInfoHandler *h)
 {
   handlers.remove_locked(h);
 }
+
+
+/** Flush sequence numbers conditionally.
+ * This will conditionally flush the sequence numbers stored per sender. The
+ * sequence numbers are stored per IP. With this method you can flush the
+ * sequence numbers that have been inactive for a specified time. A recommended
+ * value is 10 seconds. You may NOT call this concurrently to recv()!
+ * @param sec number of seconds since that must have passed without a message
+ * to remove a specific IP from sequence list
+ */
+void
+WorldInfoTransceiver::flush_sequence_numbers(unsigned int sec)
+{
+  time_t limit = time(NULL) - sec;
+  
+  std::map<uint32_t, time_t>::iterator   lrtit2;
+  lrtit = last_received_time.begin();
+  while (lrtit != last_received_time.end()) {
+    if ( (*lrtit).second < limit ) {
+      sequence_numbers.erase((*lrtit).first);
+      lrtit2 = lrtit;
+      ++lrtit;
+      last_received_time.erase(lrtit2);
+    } else {
+      ++lrtit;
+    }
+  }
+}
+
 
 /** Set global pose of robot.
  * Global pose of sensing robot (x, y, theta) with the origin in the
@@ -455,7 +499,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
   unsigned int num_msgs = (max_num_msgs == 0 ? 0 : 1);
   do {
     struct sockaddr_in from;
-    socklen_t addr_len = sizeof(addr_len);
+    socklen_t addr_len = sizeof(from);
     size_t bytes = crypt_buffer_size;
 
     if ( max_num_msgs != 0 )  ++num_msgs;
@@ -505,9 +549,15 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
       }
     }
     sequence_numbers[from.sin_addr.s_addr] = cseq;
+    last_received_time[from.sin_addr.s_addr] = time(NULL);
 
     inbound_bytes -= sizeof(worldinfo_header_t);
     inbound_buffer = (unsigned char *)in_buffer + sizeof(worldinfo_header_t);
+
+    char *hostname = NULL;
+    if ( ! resolver->resolve_address((struct sockaddr *)&from, sizeof(from), &hostname) ) {
+      hostname = "unknown";
+    }
 
     // Go through messages
     while ( inbound_bytes > 0 ) {
@@ -528,7 +578,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  worldinfo_pose_message_t *pose_msg = (worldinfo_pose_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
 	    memcpy(covariance, pose_msg->covariance, WORLDINFO_COVARIANCE_SIZE * sizeof(float));
-	    (*hit)->pose_rcvd("test",
+	    (*hit)->pose_rcvd(hostname,
 			      pose_msg->x, pose_msg->y, pose_msg->theta, covariance);
 	  }
 	} else {
@@ -540,7 +590,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	if ( msg_size == sizeof(worldinfo_velocity_message_t) ) {
 	  worldinfo_velocity_message_t *velo_msg = (worldinfo_velocity_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
-	    (*hit)->velocity_rcvd("test",
+	    (*hit)->velocity_rcvd(hostname,
 				  velo_msg->vel_x, velo_msg->vel_y, velo_msg->vel_theta);
 	  }
 	} else {
@@ -553,7 +603,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  worldinfo_relballpos_message_t *ball_msg = (worldinfo_relballpos_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
 	    memcpy(covariance, ball_msg->covariance, WORLDINFO_COVARIANCE_SIZE * sizeof(float));
-	    (*hit)->ball_pos_rcvd("test",
+	    (*hit)->ball_pos_rcvd(hostname,
 				  ball_msg->dist, ball_msg->pitch, ball_msg->yaw,
 				  covariance);
 	  }
@@ -566,7 +616,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	if ( msg_size == sizeof(worldinfo_relballvelo_message_t) ) {
 	  worldinfo_relballvelo_message_t *bvel_msg = (worldinfo_relballvelo_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
-	    (*hit)->ball_velocity_rcvd("test",
+	    (*hit)->ball_velocity_rcvd(hostname,
 				       bvel_msg->vel_x, bvel_msg->vel_y, bvel_msg->vel_z);
 	  }
 	} else {
@@ -578,7 +628,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	if ( msg_size == sizeof(worldinfo_opppose_message_t) ) {
 	  worldinfo_opppose_message_t *oppp_msg = (worldinfo_opppose_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
-	    (*hit)->opponent_pose_rcvd("test",
+	    (*hit)->opponent_pose_rcvd(hostname,
 				       oppp_msg->dist, oppp_msg->angle);
 	  }
 	} else {

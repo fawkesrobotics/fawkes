@@ -34,7 +34,7 @@ endif
 CFLAGS = -g $(shell $(PKGCONFIG) --cflags avahi-client) \
 	 $(shell $(PKGCONFIG) --cflags libcrypto)
 
-LIBS_libnetcomm = core
+LIBS_libnetcomm = core utils
 LDFLAGS_libnetcomm = $(shell pkg-config --libs avahi-client) \
 		     $(shell pkg-config --libs libcrypto)
 OBJS_libnetcomm = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))

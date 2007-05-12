@@ -36,10 +36,13 @@
 
 #include <map>
 #include <string>
+#include <cstddef>
+#include <ctime>
 
 class MulticastDatagramSocket;
 class WorldInfoMessageEncryptor;
 class WorldInfoMessageDecryptor;
+class NetworkNameResolver;
 
 class WorldInfoException : public Exception
 {
@@ -51,7 +54,8 @@ class WorldInfoTransceiver
 {
  public:
   WorldInfoTransceiver(const char *addr, unsigned short port,
-		       const char *key, const char *iv);
+		       const char *key, const char *iv,
+		       NetworkNameResolver *resolver = NULL);
   ~WorldInfoTransceiver();
 
   void add_handler(WorldInfoHandler *h);
@@ -70,6 +74,7 @@ class WorldInfoTransceiver
   void recv(bool block = false, unsigned int max_num_msgs = 0);
 
   void set_loop(bool loop);
+  void flush_sequence_numbers(unsigned int sec);
 
   void *  last_sent_plain_buffer();
   size_t  last_sent_plain_buffer_size();
@@ -85,6 +90,9 @@ class WorldInfoTransceiver
 
   WorldInfoMessageEncryptor *encryptor;
   WorldInfoMessageDecryptor *decryptor;
+
+  NetworkNameResolver       *resolver;
+  bool                       resolver_delete;
 
   void  *in_buffer;
   void  *out_buffer;
@@ -140,7 +148,9 @@ class WorldInfoTransceiver
   LockList<WorldInfoHandler *>::iterator hit;
 
   // Currently we only support IPv4
-  std::map<uint32_t, unsigned int> sequence_numbers;
+  std::map<uint32_t, unsigned int>       sequence_numbers;
+  std::map<uint32_t, time_t>             last_received_time;
+  std::map<uint32_t, time_t>::iterator   lrtit;
 };
 
 

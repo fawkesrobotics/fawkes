@@ -29,6 +29,9 @@ OBJS_qa_netcomm_avahi_publisher = qa_avahi_publisher.o
 LIBS_qa_netcomm_avahi_browser = netcomm utils
 OBJS_qa_netcomm_avahi_browser = qa_avahi_browser.o
 
+LIBS_qa_netcomm_avahi_resolver = netcomm utils
+OBJS_qa_netcomm_avahi_resolver = qa_avahi_resolver.o
+
 LIBS_qa_netcomm_socket_typeof = netcomm
 OBJS_qa_netcomm_socket_typeof = qa_socket_typeof.o
 
@@ -47,23 +50,30 @@ OBJS_qa_netcomm_worldinfo = qa_worldinfo.o
 LIBS_qa_netcomm_worldinfo_encryption = netcomm utils
 OBJS_qa_netcomm_worldinfo_encryption = qa_worldinfo_encryption.o
 
+LIBS_qa_netcomm_resolver = netcomm utils
+OBJS_qa_netcomm_resolver = qa_resolver.o
+
 OBJS_all =	$(OBJS_qa_netcomm_avahi_publisher)		\
 		$(OBJS_qa_netcomm_avahi_browser)		\
+		$(OBJS_qa_netcomm_avahi_resolver)		\
 		$(OBJS_qa_netcomm_socket_typeof)		\
 		$(OBJS_qa_netcomm_socket_stream)		\
 		$(OBJS_qa_netcomm_socket_datagram)		\
 		$(OBJS_qa_netcomm_socket_datagram_multicast)	\
 		$(OBJS_qa_netcomm_worldinfo)			\
-		$(OBJS_qa_netcomm_worldinfo_encryption)
+		$(OBJS_qa_netcomm_worldinfo_encryption)		\
+		$(OBJS_qa_netcomm_resolver)
 
 BINS_all =	$(BINDIR)/qa_netcomm_avahi_publisher		\
 		$(BINDIR)/qa_netcomm_avahi_browser		\
+		$(BINDIR)/qa_netcomm_avahi_resolver		\
 		$(BINDIR)/qa_netcomm_socket_typeof		\
 		$(BINDIR)/qa_netcomm_socket_stream		\
 		$(BINDIR)/qa_netcomm_socket_datagram		\
 		$(BINDIR)/qa_netcomm_socket_datagram_multicast	\
 		$(BINDIR)/qa_netcomm_worldinfo			\
-		$(BINDIR)/qa_netcomm_worldinfo_encryption
+		$(BINDIR)/qa_netcomm_worldinfo_encryption	\
+		$(BINDIR)/qa_netcomm_resolver
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
