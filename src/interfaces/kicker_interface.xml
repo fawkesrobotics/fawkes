@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<!-- $Id$ -->
+<interface name="KickerInterface" author="Daniel Beck" year="2007">
+  <data>
+    <comment>In these variables it is stored how often the right, center or 
+      left kick have been triggered</comment>
+    <field type="int" name="NumKicksRight">Number of Right-Kicks</field>
+    <field type="int" name="NumKicksCenter">Number of Center-Kicks</field>
+    <field type="int" name="NumKicksLeft">Number of Left-Kicks</field>
+  </data>
+  <message name="Kick">
+    <comment>Triggers a kick with the given parameters.</comment>
+    <field type="bool" name="CmdKickRight">CmdKickRight</field>
+    <field type="bool" name="CmdKickCenter">CmdKickCenter</field>
+    <field type="bool" name="CmdKickLeft">CmdKickLeft</field>
+    <field type="int" name="Intensity">Intensity</field>
+    <field type="bool" name="CmdResetCounter">CmdResetCounter</field>
+    <field type="bool" name="CmdActivateBallGuidance">CmdActivateBallGuidance</field>
+  </message>
+</interface>
