@@ -37,6 +37,9 @@ Fawkes		Subversion		>= 1.3			optional
 		(Needed if you want to use the version control system,
 		 older version may suffice to checkout)
 
+Fawkes		libiowkit		>= 1.5.0		optional
+		(IOWarrior SDK)
+
 Fawkes		libxml++		>= 2.14.0		optional
 		needed to build interface_generator
 
