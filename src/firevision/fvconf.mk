@@ -38,6 +38,18 @@ ifeq ($(HAVE_VISCA_CTRL),1)
 HAVE_EVID100P_CTRL  = 1
 endif
 
+# check for JPEG lib
+ifneq ($(realpath /usr/include/jpeglib.h),)
+  HAVE_LIBJPEG   = 1
+  VISION_CFLAGS += -DHAVE_LIBJPEG
+endif
+
+# check for JPEG lib
+ifneq ($(realpath /usr/include/png.h),)
+  HAVE_LIBPNG    = 1
+  VISION_CFLAGS += -DHAVE_PNG
+endif
+
 ifneq ($(realpath /usr/include/dc1394),)
   HAVE_FIREWIRE_CAM   = 1
   VISION_CAM_LIBS    += dc1394

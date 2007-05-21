@@ -26,7 +26,8 @@
 include $(BASEDIR)/etc/buildsys/config.mk
 
 MAKECMDGOALS ?= all
-MAKETARGET = $(MAKE) --no-print-directory -C $@ -f $(CURDIR)/Makefile \
+MAKETARGET = $(MAKE) --no-print-directory --no-keep-going -C $@ \
+                     -f $(CURDIR)/Makefile $(MAKEFLAGS) \
                      SRCDIR=$(CURDIR) BASEDIR=../$(BASEDIR) $(MAKECMDGOALS)
 
 .PHONY: $(OBJDIR)

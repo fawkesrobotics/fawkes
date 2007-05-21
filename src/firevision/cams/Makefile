@@ -64,25 +64,33 @@ ifeq ($(HAVE_SHMEM_CAM),1)
 OBJS_libfvcams += shmem.o
 endif
 
+ifneq ($(HAVE_FIREWIRE_CAM),1)
+WARN_TARGETS += warning_firewire
+endif
+ifneq ($(HAVE_LEUTRON_CAM),1)
+WARN_TARGETS += warning_leutron
+endif
+ifneq ($(HAVE_LIBJPEG),1)
+WARN_TARGETS += warning_libjpeg
+endif
 
 OBJS_all = $(OBJS_libfvcams)
 LIBS_all = $(LIBDIR)/libfvcams.so
 
 ifneq ($(SRCDIR),)
-.PHONY: print_unsupported
-print_unsupported:
-	$(SILENT)if [ "$(HAVE_FIREWIRE_CAM)" != "1" ]; then \
-		echo -e "$(INDENT_PRINT)--> $(TRED)No Firewire support$(TNORMAL) (install libdc1394-devel)"; \
-	else \
-		if [ "$(HAVE_BUMBLEBEE2_CAM)" != "1" ]; then \
-			echo -e "$(INDENT_PRINT)--> $(TRED)No Bumblebee2 support$(TNORMAL) (install Triclops SDK)"; \
-		fi; \
-	fi
-	$(SILENT)if [ "$(HAVE_LEUTRON_CAM)" != "1" ]; then \
-		echo -e "$(INDENT_PRINT)--> $(TRED)No Leutron support$(TNORMAL) (install Leutron SDK)"; \
-	fi; \
+all: $(WARN_TARGETS)
 
-all: print_unsupported
+.PHONY: warning_firewire
+warning_firewire:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)No Firewire support$(TNORMAL) (install libdc1394-devel)";
+
+.PHONY: warning_leutron
+warning_leutron:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)No Leutron support$(TNORMAL) (install Leutron SDK)";
+
+.PHONY: warning_libjpeg
+warning_libjpeg:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)No JPEG support in file loader$(TNORMAL) (install libjpeg[-devel])";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

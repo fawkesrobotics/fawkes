@@ -27,3 +27,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
 include $(BASEDIR)/src/firevision/fvconf.mk
 
+cams: fvutils
+models: fvutils
+filters: fvutils models
+models: fvutils
+classifiers: fvutils

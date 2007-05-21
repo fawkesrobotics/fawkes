@@ -26,3 +26,12 @@ SUBDIRS = core utils interface blackboard netcomm config aspect
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
 
+# Explicit dependencies, this is needed to have make bail out if there is any
+# error. This is also necessary for working parallel build (i.e. for dual core)
+utils: core
+interface: core
+blackboard: core utils interface
+netcomm: core utils
+config: core netcomm utils
+aspect: core utils blackboard netcomm config
+

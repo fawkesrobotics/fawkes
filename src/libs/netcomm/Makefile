@@ -22,14 +22,28 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-ifeq ($(PKGCONFIG),)
-$(error No pkg-config installed, you cannot build the NetComm library!)
-else
-  AVAHI = $(shell $(PKGCONFIG) avahi-client; echo $$?)
-  ifeq ($(AVAHI),1)
-    $(error avahi-devel not installed on your system, you cannot build the NetComm library!)
-  endif
+ifneq ($(PKGCONFIG),)
+  HAVE_AVAHI = $(if $(shell $(PKGCONFIG) --print-errors --errors-to-stdout --exists 'avahi-client'),0,1)
+  HAVE_CRYPTO = $(if $(shell $(PKGCONFIG) --print-errors --errors-to-stdout --exists 'libcrypto'),0,1)
 endif
+ifneq ($(HAVE_AVAHI),1)
+ERROR_TARGETS += error_avahi
+endif
+ifneq ($(HAVE_CRYPTO),1)
+ERROR_TARGETS += error_libcrypto
+endif
+
+#ifneq ($(SRCDIR),)
+all: $(ERROR_TARGETS)
+.PHONY: error_avahi
+error_avahi:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)netcomm cannot be built$(TNORMAL) (No Avahi installed)"
+	$(SILENT)exit 1
+.PHONY: error_libcrypto
+error_libcrypto:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)netcomm cannot be built$(TNORMAL) (No OpenSSL/libcrypto installed)"
+	$(SILENT)exit 1
+#endif
 
 CFLAGS = -g $(shell $(PKGCONFIG) --cflags avahi-client) \
 	 $(shell $(PKGCONFIG) --cflags libcrypto)

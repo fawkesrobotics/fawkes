@@ -68,7 +68,7 @@ ifeq (,$(findstring qa,$(SUBDIRS)))
 qa: subdirs
 	$(SILENT) if [ -d "$(subst /.objs,,$(realpath $(CURDIR)))/qa" ]; then \
 		echo -e "$(INDENT_PRINT)--> Building QA in $(subst $(realpath $(CURDIR)/$(BASEDIR))/,,$(subst /.objs,,$(realpath $(CURDIR)))/qa)"; \
-		$(MAKE) --no-print-directory -C $(subst /.objs,,$(CURDIR))/qa INDENT="$(INDENT)$(INDENT_STRING)"; \
+		$(MAKE) --no-print-directory --no-keep-going -C $(subst /.objs,,$(CURDIR))/qa $(MFLAGS) INDENT="$(INDENT)$(INDENT_STRING)"; \
 	fi
 endif
 
@@ -82,7 +82,8 @@ $(SUBDIRS):
 		exit 1; \
 	else \
 		echo -e "$(INDENT_PRINT)--- Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"; \
-		$(MAKE) --no-print-directory -C $(realpath $(SRCDIR)/$@) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)"; \
+		$(MAKE) --no-print-directory --no-keep-going -C $(realpath $(SRCDIR)/$@) \
+		$(MFLAGS) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)"; \
 		if [ "$(MAKECMDGOALS)" != "clean" ]; then \
 			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $@"; \
 		fi \
@@ -101,10 +102,9 @@ endif
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo "$(INDENT_PRINT)--> Compiling $(subst $(SRCDIR)/,,$<) (C++)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
-	$(SILENT) $(CC) -Wp,-M,-MF,$(df).d $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
+	$(SILENT) $(CC) -MD -MF $(df).td $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
-	$(SILENT) cp -f $(df).d $(df).td; \
-	sed -e 's/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(df).td > $(df).d; \
+	$(SILENT)sed -e 's/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(df).td > $(df).d; \
 	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e 's/^ *//' \
 	    -e '/^$$/ d' -e 's/$$/ :/' < $(df).td >> $(df).d; \
 	rm -f $(df).td

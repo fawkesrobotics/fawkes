@@ -27,9 +27,31 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
+ifneq ($(HAVE_LIBJPEG),1)
+WARN_TARGETS += warning_libjpeg
+FILTER_OUT   += readers/jpeg.o writers/jpeg.o compression/jpeg.o
+else
+UTILS_EXTRA_LIBS += jpeg
+endif
+
+ifneq ($(HAVE_LIBPNG),1)
+WARN_TARGETS += warning_libpng
+FILTER_OUT   += readers/png.o writers/png.o
+else
+UTILS_EXTRA_LIBS += png
+endif
+
+ifneq ($(SRCDIR),)
+all: $(WARN_TARGETS)
+warning_libjpeg:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting JPEG support$(TNORMAL) (No libjpeg[-devel] installed)"
+warning_libpng:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PNG support$(TNORMAL) (No libpng[-devel] installed)"
+endif
+
 # We are lazy in the utils...
-OBJS_libfvutils := $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
-LIBS_libfvutils := core utils jpeg png
+OBJS_libfvutils := $(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
+LIBS_libfvutils := core utils $(UTILS_EXTRA_LIBS)
 
 OBJS_all = $(OBJS_libfvutils)
 LIBS_all = $(LIBDIR)/libfvutils.so

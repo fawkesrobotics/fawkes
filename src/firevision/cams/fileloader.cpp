@@ -33,7 +33,9 @@
 #include <fvutils/system/camargp.h>
 
 #include <fvutils/readers/fvraw.h>
+#ifdef HAVE_LIBJPEG
 #include <fvutils/readers/jpeg.h>
+#endif
 
 #include <cstdio>
 
@@ -108,24 +110,8 @@ FileLoader::open()
 
   std::string ft = fv_filetype_file( filename );
 
-  if ( ft.find( "JPEG" ) != std::string::npos ) {
-    JpegReader *jr = new JpegReader( filename );
-    cspace = jr->colorspace();
-    width  = jr->pixel_width();
-    height = jr->pixel_height();
-    _buffer_size = colorspace_buffer_size( cspace, width, height );
-    file_buffer = (unsigned char*)malloc(_buffer_size);
-    jr->set_buffer( file_buffer );
-    try {
-      jr->read();
-    } catch (Exception &e) {
-      delete jr;
-      e.append("FileLoader::open() failed");
-      throw;
-    }
-    delete jr;
 
-  } else if ( FvRawReader::is_FvRaw(filename) ) {
+  if ( FvRawReader::is_FvRaw(filename) ) {
     FvRawReader *fvrr = new FvRawReader( filename );
     cspace = fvrr->colorspace();
     width  = fvrr->pixel_width();
@@ -141,6 +127,25 @@ FileLoader::open()
       throw;
     }
     delete fvrr;
+
+#ifdef HAVE_LIBJPEG
+  } else if ( ft.find( "JPEG" ) != std::string::npos ) {
+    JpegReader *jr = new JpegReader( filename );
+    cspace = jr->colorspace();
+    width  = jr->pixel_width();
+    height = jr->pixel_height();
+    _buffer_size = colorspace_buffer_size( cspace, width, height );
+    file_buffer = (unsigned char*)malloc(_buffer_size);
+    jr->set_buffer( file_buffer );
+    try {
+      jr->read();
+    } catch (Exception &e) {
+      delete jr;
+      e.append("FileLoader::open() failed");
+      throw;
+    }
+    delete jr;
+#endif
 
   } else {
     _buffer_size = colorspace_buffer_size( cspace, width, height );

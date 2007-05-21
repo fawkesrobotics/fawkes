@@ -23,11 +23,30 @@ BASEDIR = ../../..
 
 CFLAGS = -g
 
+ifneq ($(realpath /usr/include/magic.h),)
+HAVE_LIBMAGIC = 1
+else
+ERROR_TARGETS += error_libmagic
+endif
+
+ifneq ($(SRCDIR),)
+all: $(ERROR_TARGETS)
+.PHONY: error_libmagic
+error_libmagic:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Utils cannot be built$(TNORMAL) (No libmagic installed)"
+	$(SILENT)exit 1
+
+#	$(SILENT)if [ "$(HAVE_LIBMAGIC)" != "1" ]; then 
+#	fi
+endif
+
 LIBS_libutils = stdc++ dl core magic
 OBJS_libutils =	$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 
 OBJS_all = $(OBJS_libutils)
+ifeq ($(HAVE_LIBMAGIC),1)
 LIBS_all  = $(LIBDIR)/libutils.so
+endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
