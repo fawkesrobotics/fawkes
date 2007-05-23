@@ -33,11 +33,8 @@ ifneq ($(SRCDIR),)
 all: $(ERROR_TARGETS)
 .PHONY: error_libmagic
 error_libmagic:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Utils cannot be built$(TNORMAL) (No libmagic installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Utils cannot be built$(TNORMAL) (install file-devel)"
 	$(SILENT)exit 1
-
-#	$(SILENT)if [ "$(HAVE_LIBMAGIC)" != "1" ]; then 
-#	fi
 endif
 
 LIBS_libutils = stdc++ dl core magic

@@ -1,8 +1,9 @@
 #*****************************************************************************
-#            Makefile Build System for Fawkes: FireVision Config
+#           Makefile Build System for Fawkes: Kicker Plugin Config
 #                            -------------------
 #   Created on Fri May 18 15:34:42 2007
-#   copyright (C) 2006-2007 by Daniel Beck, AllemaniACs RoboCup Team
+#   Copyright (C) 2007 by Daniel Beck, AllemaniACs RoboCup Team
+#   Copyright (C) 2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -19,13 +20,13 @@
 #
 #*****************************************************************************
 
-IOWKIT_SDK=/opt/iowkit
+# We now assume a system wide installation via RPM
+#IOWKIT_SDK=/opt/iowkit
+#KICKER_INCDIRS += $(IOWKIT_SDK)/include
+#KICKER_LIBDIRS += $(IOWKIT_SDK)/lib
 
 # Check whether IowKit is installed
-ifneq ($(realpath $(IOWKIT_SDK)/include/iowkit.h),)
-  ifneq ($realpath $(IOWKIT_SDK)/lib/libiowkit.so),)
-    HAVE_IOWKIT = 1
-    KICKER_INCDIRS += $(IOWKIT_SDK)/include
-    KICKER_LIBDIRS += $(IOWKIT_SDK)/lib
-  endif
+ifneq ($(realpath /usr/include/iowkit.h),)
+  HAVE_IOWKIT = 1
 endif
+

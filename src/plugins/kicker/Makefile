@@ -23,17 +23,19 @@ BASEDIR = ../../..
 include $(BASEDIR)/src/plugins/kicker/kickerconf.mk
 
 CFLAGS = -g
-INCDIRS += $(KICKER_INCDIRS)
-LIBDIRS += $(KICKER_LIBDIRS)
+
+ifneq ($(HAVE_IOWKIT),1)
+  WARN_TARGETS += warning_iowkit
+else
+  PLUGINS_all = $(PLUGINDIR)/kicker_plugin.so
+endif
 
 ifneq ($(SRCDIR),)
-.PHONY: print_unsupported
-print_unsupported:
-	$(SILENT)if [ "$(HAVE_IOWKIT)" != "1" ]; then \
-		echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Kicker Plugin$(TNORMAL) (No IowKit installed)"; \
-	fi \
+all: $(WARN_TARGETS)
 
-all: print_unsupported
+.PHONY: warning_iowkit
+warning_iowkit:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Kicker Plugin$(TNORMAL) (install IowKit)"
 endif
 
 LIBS_kicker_plugin = core utils iowkit
@@ -42,8 +44,5 @@ OBJS_kicker_plugin = kicker_plugin.o	\
                      kicker_control.o
 
 OBJS_all    = $(OBJS_kicker_plugin)
-ifeq ($(HAVE_IOWKIT),1)
-  PLUGINS_all = $(PLUGINDIR)/kicker_plugin.so
-endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
