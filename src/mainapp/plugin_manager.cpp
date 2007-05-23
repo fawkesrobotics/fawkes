@@ -158,7 +158,7 @@ FawkesPluginManager::process_after_loop()
 	name[PLUGIN_MSG_NAME_LENGTH] = 0;
 	strncpy(name, m->name, PLUGIN_MSG_NAME_LENGTH);
 	try {
-	  LibLogger::log_info("FawkesPluginManager", "Trying to load %s", "test");
+	  LibLogger::log_info("FawkesPluginManager", "Trying to load %s", name);
 
 	  load(name);
 	  plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));

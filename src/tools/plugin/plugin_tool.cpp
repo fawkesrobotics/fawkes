@@ -45,7 +45,6 @@
  */
 PluginTool::PluginTool(ArgumentParser *argp, FawkesNetworkClient *c)
 {
-  this->argp  = argp;
   this->c     = c;
   plugin_name = NULL;
   quit        = false;
@@ -65,10 +64,73 @@ PluginTool::PluginTool(ArgumentParser *argp, FawkesNetworkClient *c)
   list_found = false;
 }
 
+
+/** Constructor.
+ * This constructor just set the Fawkes network client. A run() call will
+ * fail if not one of set_load_plugin(), set_unload_plugin(), set_watch_mode()
+ * or set_list_mode() has been called before.
+ * @param c Fawkes network client with established connection
+ */
+PluginTool::PluginTool(FawkesNetworkClient *c)
+{
+  this->c     = c;
+  plugin_name = NULL;
+  quit        = false;
+  opmode      = M_UNKNOWN;
+  list_found  = false;
+}
+
 /** Destructor */
 PluginTool::~PluginTool()
 {
 }
+
+
+/** Load plugin on next run.
+ * The next time run is called a LOAD_PLUGIN message is sent for the
+ * given plugin name.
+ * @param plugin_name name of the plugin to load
+ */
+void
+PluginTool::set_load_plugin(const char *plugin_name)
+{
+  this->plugin_name = plugin_name;
+  opmode = M_LOAD;
+}
+
+
+/** Unload plugin on next run.
+ * The next time run is called a UNLOAD_PLUGIN message is sent for the
+ * given plugin name.
+ * @param plugin_name name of the plugin to unload
+ */
+void
+PluginTool::set_unload_plugin(const char *plugin_name)
+{
+  this->plugin_name = plugin_name;
+  opmode = M_UNLOAD;
+}
+
+
+/** Set watch mode.
+ * On next run() call the client will watch for new events.
+ */
+void
+PluginTool::set_watch_mode()
+{
+  opmode = M_WATCH;
+}
+
+
+/** Set list mode.
+ * On next run() call the client will list all loaded plugins once.
+ */
+void
+PluginTool::set_list_mode()
+{
+  opmode = M_LIST;
+}
+
 
 /** Handle signals.
  * @param signum signal number of received signal
@@ -243,6 +305,10 @@ PluginTool::inboundReceived(FawkesNetworkMessage *msg)
       }
     }
     break;
+
+  default:
+    // ignore
+    break;
   }
 }
 
@@ -269,6 +335,9 @@ PluginTool:: run()
   case M_WATCH:
     watch();
     break;
+
+  default:
+    throw Exception("No mode set");
   }
 
   c->deregisterHandler(FAWKES_CID_PLUGINMANAGER);

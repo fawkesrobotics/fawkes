@@ -39,15 +39,23 @@ class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
 {
  public:
   PluginTool(ArgumentParser *argp, FawkesNetworkClient *c);
+  PluginTool(FawkesNetworkClient *c);
   ~PluginTool();
 
   void handle_signal(int signum);
 
+  void set_load_plugin(const char *plugin_name);
+  void set_unload_plugin(const char *plugin_name);
+  void set_watch_mode();
+  void set_list_mode();
+
+  void run();
+
+ private:
   void load();
   void unload();
   void list();
   void watch();
-  void run();
 
   virtual void deregistered();
   virtual void inboundReceived(FawkesNetworkMessage *msg);
@@ -57,12 +65,12 @@ class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
     M_LIST,
     M_LOAD,
     M_UNLOAD,
-    M_WATCH
+    M_WATCH,
+    M_UNKNOWN
   } OperationMode;
 
   FawkesNetworkClient *c;
   OperationMode   opmode;
-  ArgumentParser *argp;
   const char     *plugin_name;
   bool            quit;
 

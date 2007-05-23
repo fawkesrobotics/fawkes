@@ -44,16 +44,14 @@ main(int argc, char **argv)
   c->start();
 
   PluginTool *pt = new PluginTool(&argp, c);
-
   SignalManager::register_handler(SIGINT, pt);
   pt->run();
-
   SignalManager::finalize();
+  delete pt;
 
   c->cancel();
   c->join();
 
-  delete pt;
   delete c;
 
   return 0;
