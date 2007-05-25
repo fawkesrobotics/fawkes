@@ -29,6 +29,8 @@
 #include <core/threading/mutex.h>
 #include <core/threading/barrier.h>
 #include <core/threading/wait_condition.h>
+#include <core/threading/read_write_lock.h>
+#include <core/threading/thread_finalizer.h>
 #include <core/exceptions/software.h>
 
 #include <pthread.h>
@@ -59,8 +61,33 @@
  * That that without taking special care the advanced debug functionality
  * will not available for threads.
  *
+ * Special care has been taken to allow for proper initialization and
+ * finalization. The special behavior of this routines can only be guaranteed
+ * if the threads are managed properly, which is the case if we speak of the
+ * Fawkes thread manager. This applies for the following paragraphs.
+ *
+ * The thread provides an init() routine which may be implemented
+ * and is called just before the thread is started. If you make use of aspects
+ * this is the first time when you can make use of aspects. These aspects
+ * are not initialized in the constructor. init() is called just after the
+ * aspect initialization. This is also the last chance to stop the thread
+ * from being executed if you detect an error. If init() throws any exception
+ * then the thread is never started.
+ *
+ * The methods prepare_finalize(), finalize() and cancel_finalize() are meant
+ * to be used for finalization. First prepare_finalize() is called to prepare
+ * finalization. At this stage the thread can veto and prevent finalization
+ * from happening. For this prepare_finalize_user() has to be implemented
+ * with the proper check, and maybe special actions that are needed to
+ * prepare finalization (which may or may not happen independent from the
+ * result of just this thread, see method description). Afterwards finalize()
+ * may be called (independent of the prepare_finalize() result, see method
+ * description). If finalize() is not executed the thread is notified with
+ * cancel_finalize().
+ *
  * @ingroup Threading
  * @ingroup FCL
+ * @see Aspects
  * @see loop()
  * @see run()
  * @see example_barrier.cpp
@@ -136,6 +163,11 @@ Thread::constructor(const char *name, OpMode op_mode)
   thread_id = 0;
   barrier = NULL;
   cancelled = false;
+
+  threadlist_sync_lock = NULL;
+  finalize_mutex = new Mutex();
+  loop_mutex = new Mutex();
+  finalize_prepared = false;
 }
 
 
@@ -146,6 +178,32 @@ Thread::~Thread()
   sleep_condition = NULL;
   delete sleep_mutex;
   sleep_mutex = NULL;
+  delete loop_mutex;
+  delete finalize_mutex;
+}
+
+
+/** Copy constructor is NOT supported.
+ * Using this constructor will cause havoc and chaos. It's only here
+ * as private constructor to hide it! Therefore if you ever use it
+ * internally it will always throw an exception.
+ * @param t thread to copy.
+ * @exception Exception Always thrown
+ */
+Thread::Thread(const Thread &t)
+{
+  throw Exception("You may not use copy constructor of class Thread");
+}
+
+
+/** Assignment is not allowed.
+ * You may not assign one thread to another.
+ * @param t thread to assign
+ */
+Thread &
+Thread::operator=(const Thread &t)
+{
+  throw Exception("You may not use assignment operator of class Thread");
 }
 
 
@@ -155,13 +213,161 @@ Thread::~Thread()
  * been initialized. Implement the init method with these actions. It is
  * guaranteed to be called just after all aspects have been initialized
  * and only once in the lifetime of the thread.
- * Throw an exception if any problem occurs and the thread should not be
- * run.
+ * Throw an exception if any problem occurs and the thread should not run.
+ *
+ * Just because your init() routine suceeds and everything looks fine for
+ * this thread does not automatically imply that it will run. If it belongs
+ * to a group of threads in a ThreadList and any of the other threads fail
+ * to initialize then no thread from this group is run and thus this thread
+ * will never run. So you should not do any initialization that cannot be
+ * undone in the destructor! finalize() will not be called in that case.
+ *
  * @see Aspects
  */
 void
 Thread::init()
 {
+}
+
+
+/** Prepare finalization.
+ * Check if finalization at this point is possible and if so execute the
+ * steps necessary to prepare for finalization. You also have to make sure
+ * that this state of being able to finalize does not change until either
+ * finalize() or cancel_finalize() is called.
+ *
+ * This method may return false, which means that at this point the thread
+ * cannot be stopped safely. This might be due to a critical internal
+ * condition that may hurt hardware if turned of right now. In this case
+ * a logger should be used to log the reason for the failure. The check is
+ * implemented in prepare_finalize_user(), which the user has to implement
+ * if he needs special treatment.
+ *
+ * Even if the finalization is said to be unsafe and false is returned, the
+ * caller may still decide to finalize this thread, for example if all
+ * threads are shut down on application exit. So you may not rely on the
+ * fact that the thread is not stopped if you return false.
+ *
+ * You may not override this method.
+ *
+ * This is only called on a running thread.
+ *
+ * @return true if the thread can be stopped and destroyed safely, false if
+ * it has to stay alive
+ * @see finalize()
+ * @see cancel_finalize()
+ */
+bool
+Thread::prepare_finalize()
+{
+  if ( finalize_prepared ) {
+    throw CannotFinalizeThreadException("prepare_finalize() has already been called");
+  }
+  if ( ! threadlist_sync_lock ) {
+    // Make sure that prepare_finalize() is called in full before any
+    // cancel_finalize(), possible problem if multiple threads are
+    // queried by a thread list
+    finalize_mutex->lock();
+    // Make sure loop() is not running
+    if (op_mode != OPMODE_CONTINUOUS )  loop_mutex->lock();
+  }
+  bool prepared = prepare_finalize_user();
+  finalize_prepared = true;
+  if ( ! threadlist_sync_lock ) {
+    finalize_mutex->unlock();
+  }
+  return prepared;
+}
+
+
+/** Prepare finalization user implementation.
+ * This method is called by prepare_finalize(). If there can ever be a
+ * situation where it is not safe to turn of a thread at some point in
+ * time then implement this method to determine these unsafe states.
+ *
+ * An example that comes to my mind is our Katana arm. If you turn it off
+ * it looses all power and collapses back upon itself. This may damage the
+ * arm if it is not in a safe position. In this situation this method would
+ * return false to indicate this problem.
+ *
+ * It is up to the user to decide if this should be taken for an implied
+ * signal to get in such a safe state, if this is possible at all.
+ *
+ * This feature should be used rarely as it can have tremendous implications
+ * on the performance and experience of the whole software. In any case your
+ * implementation should somehow inform the user of the problem that caused
+ * the finalization to fail. If you are using aspect use the LoggerAspect and
+ * log the reason.
+ *
+ * The default implementation always allows finalization.
+ * @return true, if the thread can be finalized, false otherwise.
+ */
+bool
+Thread::prepare_finalize_user()
+{
+  return true;
+}
+
+
+/** Finalize the thread.
+ * This method is executed just before the thread is canceled and destroyed.
+ * It is always preceeded by a call to prepare_finalize(). If this is not
+ * the case this is a failure. The condition can be checked with
+ * the boolean variable finalize_prepared.
+ *
+ * This method is meant to be used in conjunction with aspects and to cover
+ * thread inter-dependencies. This routine MUST bring the thread into a safe
+ * state such that it may be canceled and destroyed afterwards. If there is
+ * any reason that this cannot happen make your prepare_finalize() report so.
+ *
+ * This method is called by the thread manager just before the thread is
+ * being cancelled. Here you can do whatever steps are necessary just before
+ * the thread is cancelled. Note that you thread is still running and might
+ * be in the middle of a loop, so it is not a good place to give up on all
+ * resources used. Mind segmentation faults that could happen. Protect the
+ * area with a mutex that you lock at the beginning of your loop and free
+ * in the end, and that you lock at the beginning of finalize and then never
+ * unlock. Also not that the finalization may be canceled afterwards. The
+ * next thing that happens is that either the thread is canceled and destroyed
+ * or that the finalization is canceled and the thread has to run again.
+ *
+ * This is only called on a running thread.
+ *
+ * The default implementation does nothing besides throwing an exception if
+ * prepare_finalize() has not been called.
+ *
+ * @exception Exception thrown if prepare_finalize() has not been called.
+ * @see prepare_finalize()
+ * @see cancel_finalize()
+ */
+void
+Thread::finalize()
+{
+}
+
+
+/** Cancel finalization.
+ * This means that something has happened (for example another thread from
+ * the same plugin) has indicated that it can not be finalized. In that case
+ * also this thread has to continue to run and the finalization is canceled.
+ * The thread is expected to run after the finalization has been canceled as
+ * if the finalization was never tried.
+ *
+ * This is only called on a running thread.
+ * @see prepare_finalize()
+ * @see finalize()
+ */
+void
+Thread::cancel_finalize()
+{
+  if ( ! threadlist_sync_lock ) {
+    finalize_mutex->lock();
+    finalize_prepared = false;
+    if ( op_mode != OPMODE_CONTINUOUS )  loop_mutex->unlock();
+    finalize_mutex->unlock();
+  } else {
+    finalize_prepared = false;
+  }
 }
 
 
@@ -198,6 +404,19 @@ Thread::entry(void *pthis)
   return NULL;
 }
 
+
+/** Set the sync read/write lock.
+ * For proper finalization synchronization of a list of threads a common
+ * read/write lock is needed that all the threads to synchronize share.
+ * See class information for more details.
+ * @param lock new read/write lock, if NULL then single-thread locking
+ * using mutexes is used.
+ */
+void
+Thread::set_threadlist_sync_lock(ReadWriteLock *lock)
+{
+  threadlist_sync_lock = lock;
+}
 
 /** Exit the thread.
  * You may call this from within your run() method to exit the thread.
@@ -311,7 +530,17 @@ Thread::run()
     sleep_mutex->unlock();
   }
   forever {
+    if ( threadlist_sync_lock ) {
+      threadlist_sync_lock->lockForRead();
+    } else {
+      loop_mutex->lock();
+    }
     loop();
+    if ( threadlist_sync_lock ) {
+      threadlist_sync_lock->unlock();
+    } else {
+      loop_mutex->unlock();
+    }
     test_cancel();
     if ( barrier ) {
       barrier->wait();

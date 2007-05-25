@@ -44,6 +44,7 @@ class Exception {
   virtual const char * c_str();
   virtual void raise();
   void append(const char *format, ...);
+  void append(const Exception &e);
   void printTrace();
 
   int errno() const;

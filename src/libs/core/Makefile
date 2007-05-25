@@ -24,21 +24,7 @@ BASEDIR = ../../..
 CFLAGS = -g
 
 LIBS_libcore = pthread stdc++
-OBJS_libcore =	\
-		exception.o			\
-		plugin.o			\
-		exceptions/software.o		\
-		exceptions/system.o		\
-		threading/barrier.o		\
-		threading/mutex.o		\
-		threading/read_write_lock.o	\
-		threading/refc_rwlock.o		\
-		threading/thread.o		\
-		threading/thread_collector.o	\
-		threading/thread_initializer.o	\
-		threading/thread_list.o		\
-		threading/wait_condition.o	\
-		utils/refcount.o
+OBJS_libcore = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 
 OBJS_all = $(OBJS_libcore)
 LIBS_all  = $(LIBDIR)/libcore.so

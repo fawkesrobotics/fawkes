@@ -230,6 +230,10 @@ Exception::Exception(const Exception &exc)
 {
   messages_mutex = new Mutex();
 
+  messages = NULL;
+  messages_end = NULL;
+  messages_iterator = NULL;
+
   _errno = exc._errno;
   copy_messages(exc);
 }
@@ -283,6 +287,16 @@ Exception::append(const char *format, ...)
   append_nolock(format, arg);
   messages_mutex->unlock();
   va_end(arg);
+}
+
+
+/** Append message that are from another Exception.
+ * @param e Exception to copy messages from
+ */
+void
+Exception::append(const Exception &e)
+{
+  copy_messages(e);  
 }
 
 

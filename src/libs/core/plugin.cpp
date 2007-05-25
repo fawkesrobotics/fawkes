@@ -27,32 +27,15 @@
  */
 
 #include <core/plugin.h>
-
+#include <cstring>
 
 /** @class Plugin core/plugin.h
  * Plugin interface class.
- * Derive this class to create a new Fawkes plugin
+ * Derive this class to create a new Fawkes plugin. Your basic task is to
+ * implement the method 
  *
  * @ingroup FCL
  * @author Tim Niemueller
- *
- *
- * @fn PluginType Plugin::type() const
- * Get the type of the plugin.
- * @return type of the plugin
- *
- * @fn const char * Plugin::name() const
- * Get the name of the plugin
- * @return name of the plugin
- *
- * @fn Plugin::threads()
- * Get a list of threads.
- * This function shall return a list of threads. See the FawkesThreadManager
- * for supported special types of threads. This method is called only once
- * right after the plugin has been initialised. You may not change the
- * list afterwards by adding or removing threads. Especially you may not delete
- * the threads!
- * @return list of threads.
  */
 
 
@@ -93,9 +76,26 @@
  */
 
 
+/** Constructor.
+ * Pass the appropriate plugin type and the name of your plugin to this ctor.
+ * @param plugin_type type of the plugin
+ * @param plugin_name name of the plugin
+ */
+Plugin::Plugin(PluginType plugin_type, const char *plugin_name)
+  : thread_list(plugin_name)
+{
+  _type = plugin_type;
+  _name = strdup(plugin_name);
+  if ( ! _name ) {
+    // We do not want to throw an exception here
+    _name = "OutOfMemoryForPluginName";
+  }
+}
+
 /** Virtual destructor */
 Plugin::~Plugin()
 {
+  free(_name);
 }
 
 
@@ -110,4 +110,37 @@ bool
 Plugin::persistent()
 {
   return false;
+}
+
+/** Get a list of threads.
+ * This function shall return a list of threads. See the FawkesThreadManager
+ * for supported special types of threads. This method is called only once
+ * right after the plugin has been initialised. You may not change the
+ * list afterwards by adding or removing threads. Especially you may not delete
+ * the threads!
+ * @return list of threads.
+ */
+ThreadList &
+Plugin::threads()
+{
+  return thread_list;
+}
+
+
+/** Get the type of the plugin.
+ * @return type of the plugin
+ */
+Plugin::PluginType
+Plugin::type() const
+{
+  return _type;
+}
+
+/** Get the name of the plugin.
+ * @return name of the plugin
+ */
+const char *
+Plugin::name() const
+{
+  return _name;
 }

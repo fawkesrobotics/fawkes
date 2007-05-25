@@ -41,13 +41,29 @@ class Plugin {
     SKILLER		/**< skill plugin */
   } PluginType;
 
+  Plugin(PluginType plugin_type, const char *plugin_name);
   virtual ~Plugin();
 
-  virtual PluginType    type() const                                   = 0;
-  virtual const char *  name() const                                   = 0;
-  virtual ThreadList &  threads()                                      = 0;
+  virtual PluginType    type() const;
+  virtual const char *  name() const;
+
+  ThreadList &  threads();
 
   virtual bool          persistent();
+
+ protected:
+  /** Thread list member. Initialise this list with the threads that this
+   * plugin will use. These threads must exist for the whole life time of
+   * the thread. Use sleeping threads if you need to turn on and off threads
+   * dynamically. You may not add threads later to the list, as the list
+   * is shortly after the constructor sealed.
+   * @see ThreadList
+   */
+  ThreadList thread_list;
+
+ private:
+  char       *_name;
+  PluginType  _type;
 
 };
 

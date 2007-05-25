@@ -33,9 +33,12 @@
 class WaitCondition;
 class Mutex;
 class Barrier;
+class ReadWriteLock;
 
 class Thread {
  public:
+  friend class ThreadList;
+
   /** Thread operation mode.
    * A thread can operate in two different modes. In continuous mode the
    * thread is on it's own running continuously. No timing is done. You must
@@ -53,6 +56,10 @@ class Thread {
   virtual ~Thread();
 
   virtual void init();
+  bool prepare_finalize();
+  virtual bool prepare_finalize_user();
+  virtual void finalize();
+  void cancel_finalize();
 
   bool start();
   void cancel();
@@ -79,9 +86,16 @@ class Thread {
   virtual void run();
   virtual void loop();
 
+  /** true if prepare_finalize() has been called and was not stopped with a
+   * cancel_finalize(), false otherwise. */
+  bool finalize_prepared;
+
  private:
+  Thread(const Thread &t);
+  Thread & operator=(const Thread &t);
   static void * entry(void * pthis);
   void constructor(const char *name, OpMode op_mode);
+  void set_threadlist_sync_lock(ReadWriteLock *lock);
 
   // Do not use pthread_t here to avoid including pthread.h
   /* pthread_t */ unsigned long int thread_id;
@@ -90,6 +104,10 @@ class Thread {
   WaitCondition *sleep_condition;
   Barrier       *barrier;
 
+  ReadWriteLock *threadlist_sync_lock;
+  Mutex         *finalize_mutex;
+  Mutex         *loop_mutex;
+
   const char    *_name;
 
   bool           cancelled;
@@ -97,7 +115,5 @@ class Thread {
   OpMode         op_mode;
 
 };
-
-
 
 #endif
