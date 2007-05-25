@@ -70,4 +70,36 @@ class Plugin {
 typedef Plugin *  (* PluginFactoryFunc)  (void);
 typedef void      (* PluginDestroyFunc)  (Plugin *);
 
+/** Plugin factory function for this plugin.
+ * @return an instance of ExamplePlugin
+ */
+#define PLUGIN_FACTORY(plugin_class)			\
+  extern "C"						\
+  Plugin *						\
+  plugin_factory()					\
+  {							\
+    return new plugin_class();				\
+  }
+
+
+/** Plugin destruction function for this plugin.
+ * @param plugin The plugin that is to be destroyed. Do not use this plugin
+ *        afterwards
+ */
+#define PLUGIN_DESTROY(plugin_class)			\
+  extern "C"						\
+  void							\
+  plugin_destroy(plugin_class *plugin)			\
+  {							\
+    delete plugin;					\
+  }
+
+/** Export plugin.
+ * This will create appropriate plugin factory and destroy functions.
+ */
+#define EXPORT_PLUGIN(plugin_class) \
+  PLUGIN_FACTORY(plugin_class)      \
+  				    \
+  PLUGIN_DESTROY(plugin_class)
+
 #endif

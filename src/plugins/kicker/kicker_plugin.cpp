@@ -52,24 +52,4 @@ KickerPlugin::~KickerPlugin()
 }
 
 
-/** Plugin factory function for this plugin.                                    
- * @return an instance of ExamplePlugin                                         
- */
-extern "C"
-Plugin *
-plugin_factory()
-{
-  return new KickerPlugin();
-}
-
-
-/** Plugin destruction function for this plugin.                                
- * @param plugin The plugin that is to be destroyed. Do not use this plugin     
- *        afterwards                                                            
- */
-extern "C"
-void
-plugin_destroy(Plugin *plugin)
-{
-  delete plugin;
-}
+EXPORT_PLUGIN(KickerPlugin)

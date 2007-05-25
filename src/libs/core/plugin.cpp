@@ -31,8 +31,25 @@
 
 /** @class Plugin core/plugin.h
  * Plugin interface class.
- * Derive this class to create a new Fawkes plugin. Your basic task is to
- * implement the method 
+ * Derive this class to create a new Fawkes plugin. There is not much that
+ * you have to do to get a basic plugin working. The base plugin will already
+ * handle all the important details.
+ *
+ * To implement a plugin create a new class that inherits from Plugin. Call
+ * the Plugin constructor with the proper parameters in your derivate's
+ * constructor. Then in your constructor fill the thread_list member with
+ * the threads that your plugin needs. Instantiate all threads that your
+ * plugin may ever need during its lifetime, creating (blocked timing)
+ * threads during the life time of a plugin is not allowed. After the
+ * constructor the thread list has to be considered to be sealed.
+ * At the end of the file add a line like
+ * @code
+ * EXPORT_PLUGIN(PluginClass)
+ * @endcode
+ * where PluginClass is the class name of your plugin. This will create the
+ * proper glue code to make this class loadable as plugin by Fawkes.
+ *
+ * @see ThreadList
  *
  * @ingroup FCL
  * @author Tim Niemueller
@@ -54,6 +71,12 @@
  * Do not change the type or name of this function or type of arguments
  * of this function!
  *
+ * There is a convenience macro that you can use to create a function like
+ * the one above called PLUGIN_FACTORY(class_name).
+ *
+ * It is recommended to use the EXPORT_PLUGIN(class_name) macro which will
+ * create proper plugin factory and destroy functions.
+ *
  * @relates Plugin
  */
 
@@ -71,6 +94,12 @@
  * @endcode
  * Do not change the type or name of this function, replace MightyPlugin
  * with the name of your plugin derivative.
+ *
+ * There is a convenience macro that you can use to create a function like
+ * the one above called PLUGIN_DESTROY(class_name).
+ *
+ * It is recommended to use the EXPORT_PLUGIN(class_name) macro which will
+ * create proper plugin factory and destroy functions.
  *
  * @relates Plugin
  */
