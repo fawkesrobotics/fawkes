@@ -43,13 +43,4 @@ KickerPlugin::KickerPlugin()
 }
 
 
-/** Destructor. */
-KickerPlugin::~KickerPlugin()
-{
-  for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
-    delete *i;
-  }
-}
-
-
 EXPORT_PLUGIN(KickerPlugin)

@@ -65,13 +65,4 @@ ExamplePlugin::ExamplePlugin()
 
 }
 
-/** Destructor, prints out info message */
-ExamplePlugin::~ExamplePlugin()
-{
-  //printf("ExamplePlugin destructor called\n");
-  for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
-    delete *i;
-  }
-}
-
 EXPORT_PLUGIN(ExamplePlugin)

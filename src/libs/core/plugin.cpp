@@ -27,6 +27,7 @@
  */
 
 #include <core/plugin.h>
+#include <core/threading/thread.h>
 #include <cstring>
 
 /** @class Plugin core/plugin.h
@@ -124,6 +125,9 @@ Plugin::Plugin(PluginType plugin_type, const char *plugin_name)
 /** Virtual destructor */
 Plugin::~Plugin()
 {
+  for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
+    delete *i;
+  }
   free(_name);
 }
 

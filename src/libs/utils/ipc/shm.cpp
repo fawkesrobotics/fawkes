@@ -1029,6 +1029,7 @@ SharedMemory::erase_orphaned(char *magic_token,
 
   // Find out maximal number of existing SHM segments
   struct shm_info shm_info;
+  shm_segment.shm_nattch = 0;
   max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
   if (max_id >= 0) {
     for ( int i = 0; i <= max_id; ++i ) {

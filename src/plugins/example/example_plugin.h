@@ -30,13 +30,10 @@
 
 #include <core/plugin.h>
 
-class ExamplePlugin : public Plugin {
-
+class ExamplePlugin : public Plugin
+{
  public:
   ExamplePlugin();
-  ~ExamplePlugin();
-
 };
-
 
 #endif

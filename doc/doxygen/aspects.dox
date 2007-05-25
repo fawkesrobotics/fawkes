@@ -1,5 +1,25 @@
 /** @defgroup Aspects Fawkes Thread Aspects
  * This group contains the aspects that a thread loaded and run by Fawkes may
- * have. All these aspects are guaranteed to be properly initialised before the
- * thread is run or if a problem occurs the thread never being executed.
+ * have.
+ *
+ * Aspects are used in Fawkes to assign specific capabilities to a thread or
+ * to indicate certain needs a thread has.
+ *
+ * Aspects are in general really simple classes that provide some very sharp
+ * defined functionality. In most cases they require a special init method to
+ * be called by an initializer to set a specific member that provides the
+ * thread with extended functionality.
+ *
+ * Aspects are also used to provide certain guarantees to a thread. The thread
+ * may fully rely on these guarantees and does not have to do any checks by
+ * itself to ensure this guarantees. If the thread crashes because one of the
+ * guarantees was not met it is a bug from the surrounding framework which has
+ * to be fixed there.
+ *
+ * The most important guarantee given for aspects that either ALL aspects have
+ * been properly initialized or the thread is never started. That means iff
+ * the thread is running all aspects have been initialized properly.
+ *
+ * Another guarantee is that the aspect is available during the complete
+ * lifetime of the thread.
  */
