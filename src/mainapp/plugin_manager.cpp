@@ -69,7 +69,7 @@ FawkesPluginManager::~FawkesPluginManager()
 {
   // Unload all plugins
   for (pit = plugins.begin(); pit != plugins.end(); ++pit) {
-    thread_manager->remove((*pit).second->threads());
+    thread_manager->force_remove((*pit).second->threads());
     plugin_loader->unload( (*pit).second );
   }
   plugins.clear();
@@ -109,7 +109,7 @@ FawkesPluginManager::load(const char *plugin_type)
       plugin_ids[plugin_type] = next_plugin_id++;
     } catch (CannotInitializeThreadException &e) {
       e.printTrace();
-      LibLogger::log_error("FawkesPluginManager", "Could not initialise one or more threads of plugin %s, unloading plugin", plugin_type);
+      LibLogger::log_error("FawkesPluginManager", "Could not initialize one or more threads of plugin %s, unloading plugin", plugin_type);
       plugins_mutex->unlock();
       plugin_loader->unload(plugin);
       throw;
@@ -130,10 +130,16 @@ FawkesPluginManager::unload(const char *plugin_type)
   if ( plugins.find(plugin_type) == plugins.end() )  return;
 
   plugins_mutex->lock();
-  thread_manager->remove(plugins[plugin_type]->threads());
-  plugin_loader->unload(plugins[plugin_type]);
-  plugins.erase(plugin_type);
-  plugin_ids.erase(plugin_type);
+  try {
+    thread_manager->remove(plugins[plugin_type]->threads());
+    plugin_loader->unload(plugins[plugin_type]);
+    plugins.erase(plugin_type);
+    plugin_ids.erase(plugin_type);
+  } catch (Exception &e) {
+    LibLogger::log_error("FawkesPluginManager", "Could not finalize one or more threads of plugin %s, NOT unloading plugin", plugin_type);
+    plugins_mutex->unlock();
+    throw;
+  }
   plugins_mutex->unlock();
 }
 

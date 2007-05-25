@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  thread_initializer.h - Fawkes thread initializer
+ *  thread_inifin.h - Fawkes thread initializer/finalizer
  *
  *  Created: Thu Nov 20 00:53:50 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
@@ -25,17 +25,17 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <mainapp/thread_initializer.h>
+#include <mainapp/thread_inifin.h>
 #include <core/threading/thread.h>
 #include <blackboard/blackboard.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
 
-/** @class FawkesThreadInitializer mainapp/thread_initializer.h
- * Fawkes Thread Initializer.
+/** @class FawkesThreadIniFin mainapp/thread_inifin.h
+ * Fawkes Thread Initializer/Finalizer.
  * Initializes threads that are added to the thread manager if needed.
- * Calls AspectInitializer::init() to initialize aspect threads.
+ * Calls AspectIniFin::init() to initialize aspect threads.
  * @see AspectInitializer
  * @author Tim Niemueller
  */
@@ -45,25 +45,37 @@
  * @param config Configuration
  * @param logger Logger
  */
-FawkesThreadInitializer::FawkesThreadInitializer(BlackBoard *blackboard,
+FawkesThreadIniFin::FawkesThreadIniFin(BlackBoard *blackboard,
 						 Configuration *config,
 						 Logger *logger)
-  : AspectInitializer(blackboard, config, logger)
+  : AspectIniFin(blackboard, config, logger)
 {
 }
 
 
-/** Initialize thread.
- * @param thread thread to initialize
- */
 void
-FawkesThreadInitializer::init(Thread *thread)
+FawkesThreadIniFin::init(Thread *thread)
 {
   try {
-    AspectInitializer::init(thread);
+    AspectIniFin::init(thread);
   } catch (Exception &e) {
     throw;
   }
 
   // put any special non-aspect initialization and checks here
+  // currently there are non
+}
+
+
+void
+FawkesThreadIniFin::finalize(Thread *thread)
+{
+  try {
+    AspectIniFin::finalize(thread);
+  } catch (Exception &e) {
+    throw;
+  }
+
+  // put any special non-aspect finalization and checks here
+  // currently there are non
 }

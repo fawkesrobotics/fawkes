@@ -35,7 +35,7 @@
 #include <utils/system/hostinfo.h>
 
 #include <blackboard/blackboard.h>
-#include <mainapp/thread_initializer.h>
+#include <mainapp/thread_inifin.h>
 #include <mainapp/plugin_manager.h>
 #include <mainapp/network_manager.h>
 #include <mainapp/config_manager.h>
@@ -83,12 +83,12 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   config->load(config_mutable_file, config_default_file);
   config_manager     = new FawkesConfigManager(config);
   blackboard         = new BlackBoard();
-  thread_initializer = new FawkesThreadInitializer(blackboard, config, multi_logger);
-  thread_manager     = new FawkesThreadManager(thread_initializer);
+  thread_inifin      = new FawkesThreadIniFin(blackboard, config, multi_logger);
+  thread_manager     = new FawkesThreadManager(thread_inifin, thread_inifin);
   plugin_manager     = new FawkesPluginManager(thread_manager);
   network_manager    = new FawkesNetworkManager(thread_manager, 1910);
 
-  thread_initializer->set_fnet_hub( network_manager->hub() );
+  thread_inifin->set_fnet_hub( network_manager->hub() );
 
   plugin_manager->set_hub( network_manager->hub() );
   config_manager->set_hub( network_manager->hub() );
@@ -106,7 +106,7 @@ FawkesMainThread::~FawkesMainThread()
   delete hostinfo;
   delete network_manager;
   delete thread_manager;
-  delete thread_initializer;
+  delete thread_inifin;
 
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();

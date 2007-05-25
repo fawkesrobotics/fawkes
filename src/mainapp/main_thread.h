@@ -35,7 +35,7 @@ class BlackBoard;
 class FawkesThreadManager;
 class FawkesPluginManager;
 class FawkesNetworkManager;
-class FawkesThreadInitializer;
+class FawkesThreadIniFin;
 class FawkesConfigManager;
 class Configuration;
 class MultiLogger;
@@ -55,7 +55,7 @@ class FawkesMainThread : public Thread
   BlackBoard                 *blackboard;
   HostInfo                   *hostinfo;
   FawkesThreadManager        *thread_manager;
-  FawkesThreadInitializer    *thread_initializer;
+  FawkesThreadIniFin         *thread_inifin;
   FawkesPluginManager        *plugin_manager;
   FawkesNetworkManager       *network_manager;
   FawkesConfigManager        *config_manager;

@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  thread_initializer.h - Fawkes thread initializer
+ *  thread_inifin.h - Fawkes thread initializer/finalizer
  *
  *  Created: Thu Nov 20 00:47:12 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
@@ -25,23 +25,23 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FAWKES_THREAD_INITIALIZER_H_
-#define __FAWKES_THREAD_INITIALIZER_H_
+#ifndef __FAWKES_THREAD_INIFIN_H_
+#define __FAWKES_THREAD_INIFIN_H_
 
-#include <aspect/initializer.h>
+#include <aspect/inifin.h>
 
 class BlackBoard;
 class Configuration;
 class Logger;
 class Thread;
 
-class FawkesThreadInitializer : public AspectInitializer
+class FawkesThreadIniFin : public AspectIniFin
 {
  public:
-  FawkesThreadInitializer(BlackBoard *blackboard, Configuration *config, Logger *logger);
+  FawkesThreadIniFin(BlackBoard *blackboard, Configuration *config, Logger *logger);
 
   virtual void init(Thread *thread);
-
+  virtual void finalize(Thread *thread);
 };
 
 

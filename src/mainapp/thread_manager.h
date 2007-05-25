@@ -34,14 +34,17 @@
 #include <aspect/blocked_timing.h>
 
 #include <map>
+#include <list>
 
 class Barrier;
 class ThreadInitializer;
+class ThreadFinalizer;
 
 class FawkesThreadManager : public ThreadCollector
 {
  public:
-  FawkesThreadManager(ThreadInitializer *initializer);
+  FawkesThreadManager(ThreadInitializer *initializer,
+		      ThreadFinalizer   *finalizer);
   virtual ~FawkesThreadManager();
 
   virtual void add(ThreadList &tl);
@@ -50,14 +53,20 @@ class FawkesThreadManager : public ThreadCollector
   virtual void remove(ThreadList &tl);
   virtual void remove(Thread *t);
 
+  virtual void force_remove(ThreadList &tl);
+  virtual void force_remove(Thread *t);
+
   void wakeup(BlockedTimingAspect::WakeupHook hook);
   void wait(BlockedTimingAspect::WakeupHook hook);
 
  private:
-  void start(ThreadList &tl);
-  void stop(ThreadList &tl);
+  void internal_add_thread(Thread *t, std::list<BlockedTimingAspect::WakeupHook> &changed);
+  void internal_remove_thread(Thread *t, std::list<BlockedTimingAspect::WakeupHook> &changed);
+  void update_barriers(std::list<BlockedTimingAspect::WakeupHook> &changed);
 
+ private:
   ThreadInitializer *initializer;
+  ThreadFinalizer   *finalizer;
 
   std::map< BlockedTimingAspect::WakeupHook, ThreadList > threads;
   std::map< BlockedTimingAspect::WakeupHook, ThreadList >::iterator tit;
