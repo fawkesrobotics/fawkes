@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  kicker_plugin.h - Fawkes Kicker-Control Plugin
+ *  finalize_nettler_thread.h - Fawkes Example Plugin Finalize Nettler Thread
  *
- *  Generated: Wed May 09 18:30:13 2007
- *  Copyright  2007  Daniel Beck
+ *  Created: Thu May 24 00:32:22 2007
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,16 +25,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __PLUGINS_KICKER_KICKER_PLUGIN_H_
-#define __PLUGINS_KICKER_KICKER_PLUGIN_H_
+#ifndef __PLUGINS_EXAMPLE_FINALIZE_NETTLER_THREAD_H_
+#define __PLUGINS_EXAMPLE_FINALIZE_NETTLER_THREAD_H_
 
-#include <core/plugin.h>
+#include <core/threading/thread.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/logging.h>
 
-class KickerPlugin : public Plugin {
+class ExampleFinalizeNettlerThread : public Thread, public LoggingAspect
+{
 
  public:
-  KickerPlugin();
-  ~KickerPlugin();
+  ExampleFinalizeNettlerThread(const char *name);
+  virtual ~ExampleFinalizeNettlerThread();
+
+  virtual void init();
+  virtual void loop();
+
+  virtual bool prepare_finalize_user();
+  virtual void finalize();
+
+ private:
+  bool nagged;
 };
 
 

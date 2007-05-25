@@ -37,45 +37,20 @@
 
 /** Constructor. */
 KickerPlugin::KickerPlugin()
+  : Plugin(Plugin::MOTION, "kicker_plugin")
 {
   thread_list.push_back(new KickerThread(BlockedTimingAspect::WAKEUP_HOOK_ACT, "KickerThread"));
 }
 
+
 /** Destructor. */
 KickerPlugin::~KickerPlugin()
 {
-  for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i)
-    {
-      delete *i;
-    }
+  for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
+    delete *i;
+  }
 }
 
-/** Get the type of the plugin.
- * @return type of plugin
- */
-Plugin::PluginType
-KickerPlugin::type() const
-{
-  return Plugin::MOTION;
-}
-
-/** Get the name of the plugin.
- * @return name of the plugin
- */
-const char*
-KickerPlugin::name() const
-{
-  return "KickerPlugin";
-}
-
-/** Get a list with all threads started by the plugin.
- * @return list of all started threads
- */
-ThreadList&
-KickerPlugin::threads()
-{
-  return thread_list;
-}
 
 /** Plugin factory function for this plugin.                                    
  * @return an instance of ExamplePlugin                                         

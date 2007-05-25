@@ -28,6 +28,7 @@
 #include <plugins/example/example_plugin.h>
 #include <plugins/example/thread.h>
 #include <plugins/example/net_thread.h>
+#include <plugins/example/finalize_nettler_thread.h>
 
 /** @class ExamplePlugin plugins/example/example_plugin.h
  * Simple example plugin.
@@ -42,6 +43,7 @@
 
 /** Constructor. */
 ExamplePlugin::ExamplePlugin()
+  : Plugin(Plugin::MOTION, "example_plugin")
 {
   // printf("ExamplePlugin constructor called\n");
   thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,
@@ -59,6 +61,7 @@ ExamplePlugin::ExamplePlugin()
   thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,
 					  "PostLoopThread", MODC));
   thread_list.push_back(new ExampleNetworkThread("NetworkThread"));
+  thread_list.push_back(new ExampleFinalizeNettlerThread("FinalizeNettlerThread"));
 
 }
 
@@ -70,32 +73,6 @@ ExamplePlugin::~ExamplePlugin()
     delete *i;
   }
 }
-
-/** Get the type of the plugin.
- * @return type of plugin
- */
-Plugin::PluginType
-ExamplePlugin::type() const
-{
-  return Plugin::MOTION;
-}
-
-/** Get the name of the plugin.
- * @return name of the plugin
- */
-const char *
-ExamplePlugin::name() const
-{
-  return "ExamplePlugin";
-}
-
-ThreadList &
-ExamplePlugin::threads()
-{
-  return thread_list;
-}
-
-
 
 
 /** Plugin factory function for this plugin.

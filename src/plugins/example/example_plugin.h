@@ -35,12 +35,7 @@ class ExamplePlugin : public Plugin {
  public:
   ExamplePlugin();
   ~ExamplePlugin();
-  Plugin::PluginType type() const;
-  const char *  name() const;
-  ThreadList & threads();
 
- private:
-  ThreadList thread_list;
 };
 
 
