@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  initializer.h - Fawkes Aspect initializer
+ *  inifin.h - Fawkes Aspect initializer/finalizer
  *
  *  Created: Tue Jan 30 13:34:54 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
@@ -25,10 +25,11 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __ASPECT_INITIALIZER_H_
-#define __ASPECT_INITIALIZER_H_
+#ifndef __ASPECT_INIFIN_H_
+#define __ASPECT_INIFIN_H_
 
 #include <core/threading/thread_initializer.h>
+#include <core/threading/thread_finalizer.h>
 
 class BlackBoard;
 class Configuration;
@@ -36,12 +37,13 @@ class Logger;
 class FawkesNetworkHub;
 class Thread;
 
-class AspectInitializer : public ThreadInitializer
+class AspectIniFin : public ThreadInitializer, public ThreadFinalizer
 {
  public:
-  AspectInitializer(BlackBoard *blackboard, Configuration *config, Logger *logger);
+  AspectIniFin(BlackBoard *blackboard, Configuration *config, Logger *logger);
 
   virtual void init(Thread *thread);
+  virtual void finalize(Thread *thread);
 
   void set_fnet_hub(FawkesNetworkHub *fnethub);
 

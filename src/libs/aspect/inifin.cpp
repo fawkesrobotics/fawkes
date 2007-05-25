@@ -25,7 +25,7 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <aspect/initializer.h>
+#include <aspect/inifin.h>
 
 #include <core/threading/thread.h>
 #include <blackboard/blackboard.h>
@@ -35,8 +35,8 @@
 #include <aspect/logging.h>
 #include <aspect/fawkes_network.h>
 
-/** @class AspectInitializer aspect/initializer.h
- * Fawkes Aspect Initializer.
+/** @class AspectIniFin aspect/inifin.h
+ * Fawkes Aspect Initializer/Finalizer.
  * Initializes certain thread aspects.
  * All aspects defined in the Fawkes tree are supported and properly
  * initialized such that guarantees are met.
@@ -50,9 +50,9 @@
  * @param config Configuration
  * @param logger Logger
  */
-AspectInitializer::AspectInitializer(BlackBoard *blackboard,
-				     Configuration *config,
-				     Logger *logger)
+AspectIniFin::AspectIniFin(BlackBoard *blackboard,
+			   Configuration *config,
+			   Logger *logger)
 {
   this->blackboard = blackboard;
   this->config     = config;
@@ -69,7 +69,7 @@ AspectInitializer::AspectInitializer(BlackBoard *blackboard,
  * @param fnethub Fawkes Network Hub
  */
 void
-AspectInitializer::set_fnet_hub(FawkesNetworkHub *fnethub)
+AspectIniFin::set_fnet_hub(FawkesNetworkHub *fnethub)
 {
   this->fnethub = fnethub;
 }
@@ -79,7 +79,7 @@ AspectInitializer::set_fnet_hub(FawkesNetworkHub *fnethub)
  * @param thread thread to initialize
  */
 void
-AspectInitializer::init(Thread *thread)
+AspectIniFin::init(Thread *thread)
 {
   // printf("Initializing thread %s\n", thread->name());
 
@@ -108,7 +108,7 @@ AspectInitializer::init(Thread *thread)
   FawkesNetworkAspect *fnet_thread;
   if ( (fnet_thread = dynamic_cast<FawkesNetworkAspect *>(thread)) != NULL ) {
     if ( fnethub == NULL ) {
-      throw CannotInitializeThreadException("Thread has FawkesNetworkAspect but no FawkesNetworkHub has been set in AspectInitializer");
+      throw CannotInitializeThreadException("Thread has FawkesNetworkAspect but no FawkesNetworkHub has been set in AspectIniFin");
     }
     fnet_thread->initFawkesNetworkAspect(fnethub);
   }
@@ -116,10 +116,30 @@ AspectInitializer::init(Thread *thread)
   try {
     thread->init();
   } catch (Exception &e) {
-    e.append("AspectInitiazer called Thread[%s]::init() which failed", thread->name());
+    e.append("AspectIniFin called Thread[%s]::init() which failed", thread->name());
     throw;
   } catch (...) {
     throw CannotInitializeThreadException("Thread::init() failed and thread threw unsupported exception");
   }
 
+}
+
+
+/** Finalize thread.
+ * @param thread thread to finalize
+ */
+void
+AspectIniFin::finalize(Thread *thread)
+{
+  try {
+    thread->finalize();
+  } catch (CannotFinalizeThreadException &e) {
+    e.append("AspectIniFin called Thread[%s]::finalize() which failed", thread->name());
+    throw;
+  } catch (Exception &e) {
+    e.append("AspectIniFin called Thread[%s]::finalize() which failed", thread->name());
+    throw CannotFinalizeThreadException(e);
+  } catch (...) {
+    throw CannotFinalizeThreadException("Thread::finalize() failed and thread threw unsupported exception");
+  }
 }
