@@ -29,7 +29,7 @@
 #define __FIREVISION_FILTER_SEGMENT_H_
 
 #include <filters/filter.h>
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 class ColorModel;
 

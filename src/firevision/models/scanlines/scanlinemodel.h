@@ -35,7 +35,7 @@
  * header that does not require any linking. Thus you may not split the file.
  */
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 #include <string>
 
 /** @class ScanlineModel <models/scanlines/scanlinemodel.h>

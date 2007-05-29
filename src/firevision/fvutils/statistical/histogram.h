@@ -28,7 +28,7 @@
 #ifndef __FIREVISION_UTILS_HISTOGRAM_H_
 #define __FIREVISION_UTILS_HISTOGRAM_H_
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 #include <iostream>
 
 class Histogram2D

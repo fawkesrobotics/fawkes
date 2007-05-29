@@ -124,7 +124,7 @@ RhtXNode::insert(int x0, int y0, int r0)
  * @param min_votes minimum nomber of votes
  */
 void
-RhtXNode::getNodes(vector< vector< int > > *rv, int min_votes)
+RhtXNode::getNodes(std::vector< std::vector< int > > *rv, int min_votes)
 {
   if (left) {
     ((RhtXNode*)left)->getNodes(rv, min_votes);
@@ -251,7 +251,7 @@ RhtYNode::insert(int y0, int r0)
  * @param x x
  */
 void
-RhtYNode::getNodes(vector< vector< int > > *rv, int min_votes, int x)
+RhtYNode::getNodes(std::vector< std::vector< int > > *rv, int min_votes, int x)
 {
   if (left) {
     ((RhtYNode*)left)->getNodes(rv, min_votes, x);
@@ -387,7 +387,7 @@ int RhtRNode::insert(int r0)
  * @param y y
  */
 void
-RhtRNode::getNodes(vector< vector< int > > *rv, int min_votes, int x, int y)
+RhtRNode::getNodes(std::vector< std::vector< int > > *rv, int min_votes, int x, int y)
 {
   if (left) {
     ((RhtRNode*)left)->getNodes(rv, min_votes, x, y);

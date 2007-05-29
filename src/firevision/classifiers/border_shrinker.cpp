@@ -28,7 +28,7 @@
 #include <classifiers/border_shrinker.h>
 
 #include <fvutils/color/colorspaces.h>
-#include <fvutils/roi.h>
+#include <fvutils/base/roi.h>
 
 #include <models/scanlines/scanlinemodel.h>
 #include <models/color/colormodel.h>

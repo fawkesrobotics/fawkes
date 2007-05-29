@@ -29,8 +29,8 @@
 #define __FIREVISION_COLORCLASSIFIER_H_
 
 #include <list>
-#include <fvutils/types.h>
-#include <fvutils/roi.h>
+#include <fvutils/base/types.h>
+#include <fvutils/base/roi.h>
 
 class Classifier
 {

@@ -28,7 +28,7 @@
 #ifndef __FIREVISION_MODELS_COLOR_COLORMODEL_H_
 #define __FIREVISION_MODELS_COLOR_COLORMODEL_H_
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 class ColorModel
 {

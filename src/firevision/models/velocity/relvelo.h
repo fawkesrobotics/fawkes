@@ -15,7 +15,7 @@
 #include <models/velocity/velocitymodel.h>
 #include <models/relative_position/relativepositionmodel.h>
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
 #include <list>

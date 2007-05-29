@@ -29,7 +29,7 @@
 #define __FIREVISION_SCANLINE_GRID_H_
 
 #include "models/scanlines/scanlinemodel.h"
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 class ScanlineGrid : public ScanlineModel
 {

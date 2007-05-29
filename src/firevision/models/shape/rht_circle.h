@@ -32,7 +32,7 @@
 #include <vector>
 #include <iostream>
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 #include <models/shape/circle.h>
 #include <models/shape/accumulators/ht_accum.h>
 

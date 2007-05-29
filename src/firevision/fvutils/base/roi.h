@@ -28,7 +28,7 @@
 #ifndef __FIREVISION_FVUTILS_ROI_H_
 #define __FIREVISION_FVUTILS_ROI_H_
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 /* The values of this enum-type have to be indexed subsequently,
    beginning with 0. The last value has to be "H_SIZE = ...".

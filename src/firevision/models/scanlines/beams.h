@@ -29,7 +29,7 @@
 #define __FIREVISION_SCANLINE_BEAMS_H_
 
 #include <models/scanlines/scanlinemodel.h>
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 #include <vector>
 

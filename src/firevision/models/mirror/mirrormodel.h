@@ -28,7 +28,7 @@
 #ifndef __FIREVISION_MODELS_MIRRORMODEL_H_
 #define __FIREVISION_MODELS_MIRRORMODEL_H_
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 class MirrorModel
 {

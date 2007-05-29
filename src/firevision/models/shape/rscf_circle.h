@@ -33,7 +33,7 @@
 #include <vector>
 #include <iostream>
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 #include <models/shape/accumulators/fc_accum.h>
 #include <models/shape/circle.h>
 

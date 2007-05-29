@@ -25,11 +25,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <fvutils/roi.h>
+#include <fvutils/base/roi.h>
 
 #include <cstdlib>
 
-/** @class ROI <fvutils/roi.h>
+/** @class ROI <fvutils/base/roi.h>
  * Region of interest.
  * The ROI class is central to FireVision. All image processing is concentrated
  * on the pre-classified interesting parts of the image, denoted by the

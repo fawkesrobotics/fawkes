@@ -32,7 +32,7 @@
 #ifndef __FIREVISION_FVUTILS_ZAUBERSTAB_H_
 #define __FIREVISION_FVUTILS_ZAUBERSTAB_H_
 
-#include "fvutils/types.h"
+#include <fvutils/base/types.h>
 
 #include <vector>
 

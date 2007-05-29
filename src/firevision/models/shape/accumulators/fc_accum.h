@@ -28,7 +28,7 @@
 #ifndef __FIREVISION_FC_ACCUM_H_
 #define __FIREVISION_FC_ACCUM_H_
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 #include <models/shape/circle.h>
 
 class FittedCircle

@@ -28,8 +28,8 @@
 #ifndef __FIREVISION_FILTER_H_
 #define __FIREVISION_FILTER_H_
 
-#include <fvutils/types.h>
-#include <fvutils/roi.h>
+#include <fvutils/base/types.h>
+#include <fvutils/base/roi.h>
 
 class Filter
 {

@@ -33,7 +33,7 @@
 #include <iostream>
 #include <cmath>
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 #include <models/shape/line.h>
 #include <models/shape/accumulators/ht_accum.h>
 

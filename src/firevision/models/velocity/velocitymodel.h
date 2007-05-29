@@ -29,7 +29,7 @@
 #define __FIREVISION_VELOCITYMODEL_H_
 
 #include <sys/time.h>
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 class VelocityModel
 {

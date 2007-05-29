@@ -28,7 +28,7 @@
 #ifndef __FIREVISION_FIT_ACCUM_H_
 #define __FIREVISION_FIT_ACCUM_H_
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 class Circle;
 

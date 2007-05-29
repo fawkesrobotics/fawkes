@@ -34,7 +34,7 @@
 
 #include <fvutils/statistical/imagediff.h>
 #include <fvutils/color/colorspaces.h>
-#include <fvutils/roi.h>
+#include <fvutils/base/roi.h>
 
 /** Marker */
 const unsigned int FilterGeodesicDilation::MARKER = 0;

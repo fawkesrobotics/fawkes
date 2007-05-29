@@ -27,7 +27,7 @@
 
 #include <classifiers/shrinker.h>
 #include <fvutils/color/colorspaces.h>
-#include <fvutils/roi.h>
+#include <fvutils/base/roi.h>
 
 #include <cstddef>
 

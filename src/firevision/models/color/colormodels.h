@@ -28,7 +28,7 @@
 #ifndef __FIREVISION_COLORMODELS_H_
 #define __FIREVISION_COLORMODELS_H_
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 /* To create a new model create a header file that contains an inline function
 for the color model.

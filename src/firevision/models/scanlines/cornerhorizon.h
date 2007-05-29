@@ -34,7 +34,7 @@
 #define __FIREVISION_MODELS_SCANLINE_CORNERHORIZON_H_
 
 #include <models/scanlines/scanlinemodel.h>
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 class CornerHorizon : public ScanlineModel
 {

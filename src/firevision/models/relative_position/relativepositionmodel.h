@@ -29,7 +29,7 @@
 #ifndef __FIREVISION_RELATIVEPOSITIONMODEL_H_
 #define __FIREVISION_RELATIVEPOSITIONMODEL_H_
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 
 class RelativePositionModel
 {

@@ -33,7 +33,7 @@
 #include <vector>
 #include <string>
 
-#include <fvutils/types.h>
+#include <fvutils/base/types.h>
 #include <models/shape/circle.h>
 
 class ROI;

@@ -32,8 +32,8 @@
 #include <vector>
 #include <iostream>
 
-#include <fvutils/types.h>
-#include <fvutils/roi.h>
+#include <fvutils/base/types.h>
+#include <fvutils/base/roi.h>
 #include <models/shape/shapemodel.h>
 
 // constants of the limits of the detected ball
