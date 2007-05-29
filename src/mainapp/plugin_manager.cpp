@@ -37,9 +37,8 @@
 #include <netcomm/fawkes/component_ids.h>
 #include <netcomm/fawkes/hub.h>
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -114,22 +113,19 @@ FawkesPluginManager::list_avail(unsigned int* num_plugins, char*** plugin_list)
 
   *plugin_list = (char**) malloc(sizeof(char*) * PLUGIN_MSG_MAX_NUM_PLUGINS);
 
-  if ( NULL == (plugin_dir = opendir(PLUGINDIR)) )
-    {
-      printf("Opening Plugindir failed.\n");
+  if ( NULL == (plugin_dir = opendir(PLUGINDIR)) ) {
+    LibLogger::log_error("FawkesPluginManager", "Opening Plugindir failed.");
+  }
+  
+  for (unsigned int i = 0; NULL != (dirp = readdir(plugin_dir)); ++i) {
+    char* file_name = dirp->d_name;
+    char* pos = strstr(file_name, file_ext);
+    if (NULL != pos) {
+      (*plugin_list)[*num_plugins] = (char*) malloc(strlen(file_name) + 1);
+      strcpy((*plugin_list)[*num_plugins], file_name);
+      (*num_plugins)++;
     }
-
-  for (unsigned int i = 0; NULL != (dirp = readdir(plugin_dir)); i++)
-    {
-      char* file_name = dirp->d_name;
-      char* pos = strstr(file_name, file_ext);
-      if (NULL != pos)
-	{
- 	  (*plugin_list)[*num_plugins] = (char*) malloc(strlen(file_name) + 1);
- 	  strcpy((*plugin_list)[*num_plugins], file_name);
- 	  (*num_plugins)++;
-	}
-    }
+  }
 
   closedir(plugin_dir);
 }
@@ -200,7 +196,7 @@ FawkesPluginManager::process_after_loop()
     switch (msg->msgid()) {
     case MSG_PLUGIN_LOAD:
       if ( msg->payload_size() != sizeof(plugin_load_msg_t) ) {
-	printf("Invalid load message size\n");
+	LibLogger::log_error("FawkesPluginManager", "Invalid load message size");
       } else {
 	plugin_load_msg_t *m = (plugin_load_msg_t *)msg->payload();
 	char name[PLUGIN_MSG_NAME_LENGTH + 1];
@@ -227,7 +223,7 @@ FawkesPluginManager::process_after_loop()
 
     case MSG_PLUGIN_UNLOAD:
       if ( msg->payload_size() != sizeof(plugin_unload_msg_t) ) {
-	printf("Invalid unload message size\n");
+	LibLogger::log_error("FawkesPluginManager", "Invalid unload message size.");
       } else {
 	plugin_unload_msg_t *m = (plugin_unload_msg_t *)msg->payload();
 	char name[PLUGIN_MSG_NAME_LENGTH + 1];
@@ -253,7 +249,7 @@ FawkesPluginManager::process_after_loop()
 
     case MSG_PLUGIN_LIST_AVAIL:
       if ( msg->payload_size() != sizeof(plugin_list_all_msg_t) ) {
-	printf("Invalid list all message size\n");
+	LibLogger::log_error("FawkesPluginManager", "Invalid list all message size.");
       } else {
 	try {
 	  LibLogger::log_debug("FawkesPluginManager", "Sending list of all available plugins");
