@@ -36,15 +36,18 @@ class KickerControl
   KickerControl();
   ~KickerControl();
 
+  bool open();
+  bool close();
+
   bool set_intensity(unsigned char intensity, bool force = false);
 
-  void kick(bool kick_right,
+  bool kick(bool kick_right,
 	    bool kick_center,
 	    bool kick_left);
   
-  void kick_right(unsigned char intensity = 0xFF);
-  void kick_center(unsigned char intensity = 0xFF);
-  void kick_left(unsigned char intensity = 0xFF);
+  bool kick_right(unsigned char intensity = 0xFF);
+  bool kick_center(unsigned char intensity = 0xFF);
+  bool kick_left(unsigned char intensity = 0xFF);
 
   void get_num_kicks(unsigned int& right,
 		     unsigned int& center,

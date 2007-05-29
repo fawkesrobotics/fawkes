@@ -47,31 +47,56 @@ using namespace std;
 /** Constructor. */
 KickerControl::KickerControl()
 {
-  ioHandle = IowKitOpenDevice();
-  if (NULL == ioHandle)
-    {
-      // report error...
-      cout << "Failed to open IOWarrior!" << endl;
-      opened = false;
-      // ...and exit
-      // TODO
-    }
-  else
-    {
-      opened = true;
-      set_intensity(0, true);
-      kick(false, false, false);
-      reset_counter();
-    }
+  opened = false;
 }
 
 /** Destructor. */
 KickerControl::~KickerControl()
 {
-  set_intensity(0);
-  kick(false, false, false);
+  close();
+}
 
-  IowKitCloseDevice(ioHandle);
+/** Opens the IOWarrior.
+ * @returns true if device was opened succesfully
+ */
+bool
+KickerControl::open()
+{
+  if (!opened)
+    {
+      ioHandle = IowKitOpenDevice();
+      if (NULL == ioHandle)
+	{
+	  opened = false;
+	  return false;
+	}
+      else
+	{
+	  opened = true;
+	  set_intensity(0, true);
+	  kick(false, false, false);
+	  reset_counter();
+	}
+    }
+  
+  return true;
+}
+
+/** Closes the IOWarrior.
+ * @returns true if device was closed succesfully
+ */
+bool
+KickerControl::close()
+{
+  if(opened)
+    {
+      set_intensity(0);
+      kick(false, false, false);
+      
+      IowKitCloseDevice(ioHandle);
+    }
+  
+  return true;
 }
 
 /** Sets the intensity.
@@ -83,18 +108,24 @@ KickerControl::~KickerControl()
 bool
 KickerControl::set_intensity(unsigned char _intensity, bool force)
 {
-  if (intensity > 0xFF)
-    intensity = 0xFF;
-
-  if (intensity != _intensity || force)
+  if (opened)
     {
-      intensity = _intensity;
+      if (intensity > 0xFF)
+	intensity = 0xFF;
       
-      DWORD val;
-      val = INTENSITY_OFFSET * intensity;
-      return write(val);
+      if (intensity != _intensity || force)
+	{
+	  intensity = _intensity;
+	  
+	  DWORD val;
+	  val = INTENSITY_OFFSET * intensity;
+	  return write(val);
+	}
+      
+      return true;
     }
-  return true;
+
+  return false;
 }
 
 /** Triggers a kick.
@@ -102,68 +133,72 @@ KickerControl::set_intensity(unsigned char _intensity, bool force)
  * @param kick_center if true the center/high kicker is triggered
  * @param kick_left if true the left kicker is triggered
  */
-void
+bool
 KickerControl::kick(bool kick_right,
 		    bool kick_center,
 		    bool kick_left)
 {
   DWORD val = 0;
-
+  
   if (kick_right)
     {
       val += KICKER_RIGHT;
       numKicks[0]++;
     }
-
+  
   if (kick_center)
     {
       val += KICKER_CENTER;
       numKicks[1]++;
     }
-
+  
   if (kick_left)
     {
       val += KICKER_LEFT;
       numKicks[2]++;
     }
-
+  
   val += INTENSITY_OFFSET * intensity;
-
-  write(val);
+  
+  if (!write(val))
+    return false;
 
   usleep(WAIT_BEFORE_RETRACT);
 
-  write(INTENSITY_OFFSET * intensity);
+  if (!write(INTENSITY_OFFSET * intensity))
+    return false;
+
+  return true;
 }
 
 /** Trigger the right kicker.
  * @param _intensity adjusts to this intensity before kick is triggered
  */
-void
+bool
 KickerControl::kick_right(unsigned char _intensity)
 {
   set_intensity(_intensity);
-  kick(true, false, false);
+  return kick(true, false, false);
 }
 
 /** Trigger the center kicker.
  * @param _intensity adjusts to this intensity before kick is triggered
  */
-void
+bool
 KickerControl::kick_center(unsigned char _intensity)
 {
   set_intensity(_intensity);
-  kick(false, true, false);
+  return kick(false, true, false);
 }
 
 /** Trigger the left kicker.
  * @param _intensity adjusts to this intensity before kick is triggered
  */
-void
+bool
 KickerControl::kick_left(unsigned char _intensity)
 {
   set_intensity(_intensity);
-  kick(false, false, true);
+  return kick(false, false, true);
 }
 
 /** Returns the number of kicks done with each kicker.
@@ -224,7 +259,11 @@ KickerControl::write(DWORD val)
 			(char*)&report, IOWKIT40_IO_REPORT_SIZE);
       if (res != IOWKIT40_IO_REPORT_SIZE)
 	{
-	  /*
+	  /** Though it works flawlessly it seems that not as many bytes as expected
+	      are written to the device. This needs further investigation!
+	  */
+
+	  /**
 	  cout << "Expected to write " << IOWKIT40_IO_REPORT_SIZE << " bytes." << endl;
 	  cout << "Actually wrote " << res << " bytes." << endl;
 	  */
@@ -235,6 +274,5 @@ KickerControl::write(DWORD val)
       return true;
     }
   
-  cout << "Not writing. Device not opened!" << endl;
   return false;
 }

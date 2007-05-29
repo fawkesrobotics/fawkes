@@ -58,11 +58,16 @@ KickerThread::~KickerThread()
 }
 
 /** Initialize thread.
- * Here, the interface is opened.
+ * Here, the device and the BB-interface are opened.
  */
 void
 KickerThread::init()
 {
+  if ( !kicker_control->open() )
+    {
+      logger->log_info("KickerThread", "Opening IOWarrior failed.");
+    }
+
   try 
     {
       kicker_interface = interface_manager->openForWriting<KickerInterface>("Kicker");
