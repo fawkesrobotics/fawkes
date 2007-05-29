@@ -41,6 +41,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <sys/types.h>
+#include <dirent.h>
+
 /** @class FawkesPluginManager mainapp/plugin_manager.h
  * Fawkes Plugin Manager.
  * This class provides a manager for the plugins used in fawkes. It can
@@ -89,6 +92,46 @@ FawkesPluginManager::set_hub(FawkesNetworkHub *hub)
 {
   this->hub = hub;
   hub->add_handler( this );
+}
+
+/** Generate list of all available plugins.
+ * All files with the extension .so in the PLUGINDIR are returned.
+ * @param num_plugins pointer to an unsigned int where the number
+ * of all plugins is stored
+ * @param plugin_list pointer to the string array where the list of 
+ * all plugins is stored. Memory is allocated at this address and
+ * has to be freed by the caller!
+ */
+void
+FawkesPluginManager::list_avail(unsigned int* num_plugins, char*** plugin_list)
+{
+  DIR* plugin_dir;
+  struct dirent* dirp;
+  /* constant for this somewhere? */
+  const char* file_ext = ".so";
+
+  *num_plugins = 0;
+
+  *plugin_list = (char**) malloc(sizeof(char*) * PLUGIN_MSG_MAX_NUM_PLUGINS);
+
+  if ( NULL == (plugin_dir = opendir(PLUGINDIR)) )
+    {
+      printf("Opening Plugindir failed.\n");
+    }
+
+  for (unsigned int i = 0; NULL != (dirp = readdir(plugin_dir)); i++)
+    {
+      char* file_name = dirp->d_name;
+      char* pos = strstr(file_name, file_ext);
+      if (NULL != pos)
+	{
+ 	  (*plugin_list)[*num_plugins] = (char*) malloc(strlen(file_name) + 1);
+ 	  strcpy((*plugin_list)[*num_plugins], file_name);
+ 	  (*num_plugins)++;
+	}
+    }
+
+  closedir(plugin_dir);
 }
 
 
@@ -204,6 +247,53 @@ FawkesPluginManager::process_after_loop()
 		    r, sizeof(plugin_unload_failed_msg_t));
 	  LibLogger::log_warn("FawkesPluginManager", "Plugin %s could not be unloaded", name);
 	  LibLogger::log_warn("FawkesPluginManager", e);
+	}
+      }
+      break;
+
+    case MSG_PLUGIN_LIST_AVAIL:
+      if ( msg->payload_size() != sizeof(plugin_list_all_msg_t) ) {
+	printf("Invalid list all message size\n");
+      } else {
+	try {
+	  LibLogger::log_debug("FawkesPluginManager", "Sending list of all available plugins");
+	  unsigned int num_plugins;
+	  char **plugin_list;
+	  unsigned int plugin_list_size = 0;
+
+	  list_avail(&num_plugins, &plugin_list);
+
+	  // calculate actual size
+	  for (unsigned int i = 0; i < num_plugins; i++) {
+	    plugin_list_size += strlen(plugin_list[i]) + 1;
+	  }
+
+	  plugin_list_msg_t* r = (plugin_list_msg_t *)calloc(1, sizeof(plugin_list_msg_t));
+	  r->num_plugins = num_plugins;
+	  r->payload_size = sizeof(plugin_list_msg_t) - PLUGIN_MSG_MAX_NUM_PLUGINS * PLUGIN_MSG_NAME_LENGTH + plugin_list_size;
+
+	  char *t;
+	  char *p = (char *)malloc(plugin_list_size);
+	  t = p;
+
+	  for (unsigned int i = 0; i < num_plugins; i++) {
+	    size_t len = strlen(plugin_list[i]);
+	    strcpy(t, plugin_list[i]);
+	    t += len + 1;
+	    free(plugin_list[i]);
+	  }
+
+	  free(plugin_list);
+
+	  memcpy(r->list, p, plugin_list_size); 
+	
+	  hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LIST,
+		    r, r->payload_size);
+	} catch (Exception &e) {
+	  plugin_list_all_failed_msg_t *r = (plugin_list_all_failed_msg_t *)calloc(1, sizeof(plugin_list_all_failed_msg_t));
+	  
+	  hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LIST_AVAIL_FAILED,
+		    r, sizeof(plugin_list_all_failed_msg_t));
 	}
       }
       break;

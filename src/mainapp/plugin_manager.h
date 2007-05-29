@@ -47,6 +47,7 @@ class FawkesPluginManager : public FawkesNetworkHandler
   FawkesPluginManager(FawkesThreadManager *thread_manager);
   ~FawkesPluginManager();
 
+  void list_avail(unsigned int* num_plugins, char*** p);
   void load(const char *plugin_type);
   void unload(const char *plugin_type);
 

@@ -52,8 +52,20 @@
 /** PLUGIN_ALIVE message type ID */
 #define MSG_PLUGIN_ALIVE           10
 
+/** PLUGIN_LIST_ALL message type id */
+#define MSG_PLUGIN_LIST_AVAIL        11
+
+/** PLUGIN_LIST message type id */
+#define MSG_PLUGIN_LIST            12
+
+/** PLUGIN_LIST_ALL_FAILED message type id */
+#define MSG_PLUGIN_LIST_AVAIL_FAILED 13
+
 /** Maximum length of the plugin name field. */
 #define PLUGIN_MSG_NAME_LENGTH 32
+
+/** Maximal number of plugins. */
+#define PLUGIN_MSG_MAX_NUM_PLUGINS 20
 
 /** Load plugin message.
  * Message type Id is MSG_PLUGIN_LOAD.
@@ -75,6 +87,13 @@ typedef struct {
 typedef struct {
   unsigned int plugin_id;	/**< plugin ID of the alive plugin */
 } plugin_alive_msg_t;
+
+/** List all message.
+ * Message type Id is MSG_PLUGIN_LIST_ALL.
+ */
+typedef struct {
+  bool dummy;                                   /**< just a dummy element */
+} plugin_list_all_msg_t;
 
 
 /** Plugin loaded message.
@@ -102,5 +121,18 @@ typedef struct {
   char         name[PLUGIN_MSG_NAME_LENGTH];	/**< name of the plugin that has been unloaded */
 } plugin_unloaded_msg_t;
 
+/** Plugin list message.
+ * Message type ID is MSG_PLUGIN_LIST.
+ */
+typedef struct {
+  unsigned int num_plugins;                     /**< number of available plugins */
+  unsigned int payload_size;                    /**< payload size of this message */
+  char list[PLUGIN_MSG_MAX_NUM_PLUGINS * PLUGIN_MSG_NAME_LENGTH];   /**< list of plugins. plugin names are separated by 0s. */
+} plugin_list_msg_t;
+
+/* List all plugins failed. */
+typedef struct{
+  bool dummy;                                   /**< just a dummy element */
+} plugin_list_all_failed_msg_t;
 
 #endif
