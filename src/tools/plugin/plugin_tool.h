@@ -56,6 +56,7 @@ class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
   void unload();
   void list();
   void watch();
+  void list_avail();
 
   virtual void deregistered();
   virtual void inboundReceived(FawkesNetworkMessage *msg);
@@ -63,6 +64,7 @@ class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
  private:
   typedef enum {
     M_LIST,
+    M_LIST_AVAIL,
     M_LOAD,
     M_UNLOAD,
     M_WATCH,

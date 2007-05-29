@@ -57,6 +57,8 @@ PluginTool::PluginTool(ArgumentParser *argp, FawkesNetworkClient *c)
     plugin_name = argp->getArgument("u");
   } else if ( argp->hasArgument("w") ) {
     opmode = M_WATCH;
+  } else if ( argp->hasArgument("a") ) {
+    opmode = M_LIST_AVAIL;
   } else {
     opmode = M_LIST;
   }
@@ -183,6 +185,25 @@ PluginTool::unload()
 }
 
 
+/** Execute list available operation. */
+void
+PluginTool::list_avail()
+{
+  printf("Request the list of all available plugins\n");
+  plugin_list_all_msg_t *m = (plugin_list_all_msg_t *)calloc(1, sizeof(plugin_list_all_msg_t));
+  
+  FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+						       MSG_PLUGIN_LIST_AVAIL,
+						       m, sizeof(plugin_list_all_msg_t));
+  c->enqueue(msg);
+  msg->unref();
+
+  while ( ! quit ) {
+    c->wait(FAWKES_CID_PLUGINMANAGER);
+  }
+}
+
+
 /** Execute list operation. */
 void
 PluginTool::list()
@@ -270,6 +291,31 @@ PluginTool::inboundReceived(FawkesNetworkMessage *msg)
     }
     break;
 
+  case M_LIST_AVAIL:
+    if (msg->msgid() == MSG_PLUGIN_LIST ) {
+      plugin_list_msg_t *m = (plugin_list_msg_t *)msg->payload();
+      if ( msg->payload_size() != m->payload_size ) {
+	printf("Invalid message size (list all succeded)\n");
+      } else {
+	printf("Available plugins:\n");
+	char* p = m->list;
+	for (unsigned int i = 0; i < m->num_plugins; i++) {
+	  size_t len;
+	  len = strlen(p);
+	  printf("%s\n", p);
+	  p += len + 1;
+	}
+	quit = true;
+      }
+    } else if ( msg->msgid() == MSG_PLUGIN_LIST_AVAIL_FAILED) {
+      if ( msg->payload_size() != sizeof(plugin_list_all_failed_msg_t) ) {
+	printf("Invalid message size (list all failed)\n");
+      } else {
+	printf("Obtaining list of available plugins failed\n");
+      }
+    }
+    break;
+
   case M_LIST:
     if ( msg->msgid() == MSG_PLUGIN_LOADED ) {
       if ( msg->payload_size() != sizeof(plugin_loaded_msg_t) ) {
@@ -326,6 +372,10 @@ PluginTool:: run()
 
   case M_UNLOAD:
     unload();
+    break;
+
+  case M_LIST_AVAIL:
+    list_avail();
     break;
 
   case M_LIST:

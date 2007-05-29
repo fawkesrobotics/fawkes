@@ -34,7 +34,7 @@
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "l:u:w");
+  ArgumentParser argp(argc, argv, "l:u:wa");
 
   FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
   c->connect();
