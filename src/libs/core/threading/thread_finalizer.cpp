@@ -69,11 +69,24 @@ CannotFinalizeThreadException::CannotFinalizeThreadException(Exception &e)
  * an example.
  * @author Tim Niemueller
  *
+ * @fn bool ThreadFinalizer::prepare_finalize(Thread *thread) = 0
+ * Prepare finalization of a thread.
+ * If the finalizer needs to do anything to prepare a maybe following finalize()
+ * can do so here. This is also the only place where it proclaim that finalizing
+ * the given thread at the given time is unsafe.
+ * The finalizer shall NOT call Thread::prepare_finalize().
+ * @param thread thread to prepare finalization for
+ * @see Thread::prepare_finalize()
+ * 
+ *
  * @fn void ThreadFinalizer::finalize(Thread *thread) = 0
+ * Finalize a thread.
  * This method is called by the ThreadManager for each Thread that is to be
  * stopped and removed from the list of running threads.
+ * The finalizer shall NOT call Thread::finalize().
  * @param thread thread to finalize.
  * @exception CannotFinalizeThread thrown if thread can for not b finalized
+ * @see Thread::finalize()
  */
 
 /** Virtual empty destructor. */

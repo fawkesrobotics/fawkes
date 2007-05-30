@@ -150,6 +150,8 @@ ThreadList::wakeup(Barrier *barrier)
  * This is done because it is likely that this will be chained with other
  * actions that require locking, thus you can lock the whole operation.
  * @param initializer thread initializer to use
+ * @exception CannotInitializeThreadException thrown if at least one of the
+ * threads in this list could not be initialized.
  */
 void
 ThreadList::init(ThreadInitializer *initializer)
@@ -157,9 +159,20 @@ ThreadList::init(ThreadInitializer *initializer)
   for (ThreadList::iterator i = begin(); i != end(); ++i) {
     try {
       initializer->init(*i);
+      (*i)->init();
     } catch (CannotInitializeThreadException &e) {
       e.append("Initializing thread in list '%s' failed", _name);
       throw;
+    } catch (Exception &e) {
+      CannotInitializeThreadException ce("ThreadList::init failed");
+      ce.append("Could not initialize thread '%s'", (*i)->name());
+      ce.append(e);
+      throw ce;
+    } catch (...) {
+      CannotInitializeThreadException ce("ThreadList::init failed");
+      ce.append("Could not initialize thread '%s'", (*i)->name());
+      ce.append("Unknown exception caught");
+      throw ce;
     }
   }
 }
@@ -253,17 +266,24 @@ ThreadList::stop()
  * This operation is carried out unlocked. Lock it from the outside if needed.
  * This is done because it is likely that this will be chained with other
  * actions that require locking, thus you can lock the whole operation.
+ * @param finalizer thread finalizer to use to prepare finalization of the threads
  * @return true, if prepare_finalize() returned true for all threads in the
  * list, false if at least one thread returned false.
  */
 bool
-ThreadList::prepare_finalize()
+ThreadList::prepare_finalize(ThreadFinalizer *finalizer)
 {
   _finalize_mutex->lock();
   _sync_lock->lockForWrite();
   bool can_finalize = true;
   for (iterator i = begin(); i != end(); ++i) {
+    // Note that this loop may NOT be interrupted in the middle by break,
+    // since even if the thread denies finalization it can still be finalized
+    // and we have to ensure that every thread got a call to prepare_finalize()!
     try {
+      if ( ! finalizer->prepare_finalize(*i) ) {
+	can_finalize = false;
+      }
       if ( ! (*i)->prepare_finalize() ) {
 	can_finalize = false;
       }
@@ -285,7 +305,7 @@ ThreadList::prepare_finalize()
  * This operation is carried out unlocked. Lock it from the outside if needed.
  * This is done because it is likely that this will be chained with other
  * actions that require locking, thus you can lock the whole operation.
- * @param finalizer thread finalize to use to finalize the threads.
+ * @param finalizer thread finalizer to use to finalize the threads
  */
 void
 ThreadList::finalize(ThreadFinalizer *finalizer)
@@ -299,6 +319,18 @@ ThreadList::finalize(ThreadFinalizer *finalizer)
       error = true;
       me.append("Could not finalize thread '%s' in list '%s'", (*i)->name(), _name);
       me.append(e);
+    }
+    try {
+      (*i)->finalize();
+    } catch (CannotFinalizeThreadException &e) {
+      error = true;
+      me.append("AspectIniFin called Thread[%s]::finalize() which failed", (*i)->name());
+      me.append(e);
+    } catch (Exception &e) {
+      me.append("AspectIniFin called Thread[%s]::finalize() which failed", (*i)->name());
+      me.append(e);
+    } catch (...) {
+      me.append("Thread[%s]::finalize() threw unsupported exception", (*i)->name());
     }
   }
   if ( error ) {
@@ -330,7 +362,7 @@ void
 ThreadList::force_stop(ThreadFinalizer *finalizer)
 {
   try {
-    prepare_finalize();
+    prepare_finalize(finalizer);
     finalize(finalizer);
     stop();
   } catch (Exception &e) {

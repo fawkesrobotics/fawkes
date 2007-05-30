@@ -44,7 +44,8 @@ class ThreadFinalizer
  public:
   virtual ~ThreadFinalizer();
 
-  virtual void finalize(Thread *thread) = 0;
+  virtual bool prepare_finalize(Thread *thread)                      = 0;
+  virtual void finalize(Thread *thread)                              = 0;
 };
 
 #endif

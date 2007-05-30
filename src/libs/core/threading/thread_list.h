@@ -63,7 +63,7 @@ class ThreadList : private LockList<Thread *>
   bool sealed();
 
   void init(ThreadInitializer *initializer);
-  bool prepare_finalize();
+  bool prepare_finalize(ThreadFinalizer *finalizer);
   void finalize(ThreadFinalizer *finalizer);
   void cancel_finalize();
 
