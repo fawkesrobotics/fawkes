@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  inifin.h - Fawkes Aspect initializer/finalizer
+ *  vision_master.h - Vision Master aspect for Fawkes
  *
- *  Created: Tue Jan 30 13:34:54 2007
+ *  Created: Tue May 29 14:45:03 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,42 +25,21 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __ASPECT_INIFIN_H_
-#define __ASPECT_INIFIN_H_
+#ifndef __ASPECT_VISION_MASTER_H_
+#define __ASPECT_VISION_MASTER_H_
 
-#include <core/threading/thread_initializer.h>
-#include <core/threading/thread_finalizer.h>
+class VisionMaster;
 
-class BlackBoard;
-class Configuration;
-class Logger;
-class FawkesNetworkHub;
-class Thread;
-template <class Provider, class Dependant>
-  class OneToManyDependency;
-class VisionMasterAspect;
-class VisionAspect;
-
-class AspectIniFin : public ThreadInitializer, public ThreadFinalizer
+class VisionMasterAspect
 {
  public:
-  AspectIniFin(BlackBoard *blackboard, Configuration *config, Logger *logger);
-  virtual ~AspectIniFin();
+  VisionMasterAspect(VisionMaster *master);
+  virtual ~VisionMasterAspect();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
-  virtual bool prepare_finalize(Thread *thread);
-
-  void set_fnet_hub(FawkesNetworkHub *fnethub);
+  VisionMaster *  vision_master();
 
  private:
-  BlackBoard        *blackboard;
-  Configuration     *config;
-  Logger            *logger;
-  FawkesNetworkHub  *fnethub;
-
-  OneToManyDependency<VisionMasterAspect, VisionAspect> *vision_dependency;
+  VisionMaster *master;
 };
-
 
 #endif

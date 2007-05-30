@@ -34,6 +34,10 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/fawkes_network.h>
+#include <aspect/vision_master.h>
+#include <aspect/vision.h>
+
+#include <utils/constraints/dependency_onetomany.h>
 
 /** @class AspectIniFin aspect/inifin.h
  * Fawkes Aspect Initializer/Finalizer.
@@ -58,6 +62,15 @@ AspectIniFin::AspectIniFin(BlackBoard *blackboard,
   this->config     = config;
   this->logger     = logger;
   this->fnethub    = NULL;
+
+  vision_dependency = new OneToManyDependency<VisionMasterAspect, VisionAspect>();
+}
+
+
+/** Destructor. */
+AspectIniFin::~AspectIniFin()
+{
+  delete vision_dependency;
 }
 
 
@@ -113,15 +126,49 @@ AspectIniFin::init(Thread *thread)
     fnet_thread->initFawkesNetworkAspect(fnethub);
   }
 
-  try {
-    thread->init();
-  } catch (Exception &e) {
-    e.append("AspectIniFin called Thread[%s]::init() which failed", thread->name());
-    throw;
-  } catch (...) {
-    throw CannotInitializeThreadException("Thread::init() failed and thread threw unsupported exception");
+  VisionMasterAspect *vision_master_thread;
+  if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
+    try {
+      vision_dependency->add(vision_master_thread);
+    } catch (DependencyViolationException &e) {
+      CannotInitializeThreadException ce("Dependency violation for VisionProviderAspect detected");
+      ce.append(e);
+      throw ce;
+    }
   }
 
+  VisionAspect *vision_thread;
+  if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
+    try {
+      vision_dependency->add(vision_thread);
+      vision_thread->initVisionAspect( vision_dependency->provider()->vision_master() );
+    } catch (DependencyViolationException &e) {
+      CannotInitializeThreadException ce("Dependency violation for VisionAspect detected");
+      ce.append(e);
+      throw ce;
+    }
+  }
+}
+
+
+bool
+AspectIniFin::prepare_finalize(Thread *thread)
+{
+  VisionMasterAspect *vision_master_thread;
+  if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
+    if ( ! vision_dependency->can_remove(vision_master_thread) ) {
+      return false;
+    }
+  }
+
+  VisionAspect *vision_thread;
+  if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
+    if ( ! vision_dependency->can_remove(vision_thread) ) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 
@@ -131,15 +178,19 @@ AspectIniFin::init(Thread *thread)
 void
 AspectIniFin::finalize(Thread *thread)
 {
-  try {
-    thread->finalize();
-  } catch (CannotFinalizeThreadException &e) {
-    e.append("AspectIniFin called Thread[%s]::finalize() which failed", thread->name());
-    throw;
-  } catch (Exception &e) {
-    e.append("AspectIniFin called Thread[%s]::finalize() which failed", thread->name());
-    throw CannotFinalizeThreadException(e);
-  } catch (...) {
-    throw CannotFinalizeThreadException("Thread::finalize() failed and thread threw unsupported exception");
+  VisionMasterAspect *vision_master_thread;
+  if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
+    try {
+      vision_dependency->remove(vision_master_thread);
+    } catch (DependencyViolationException &e) {
+      CannotFinalizeThreadException ce("Dependency violation for VisionProviderAspect detected");
+      ce.append(e);
+      throw ce;
+    }
+  }
+
+  VisionAspect *vision_thread;
+  if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
+    vision_dependency->remove(vision_thread);
   }
 }
