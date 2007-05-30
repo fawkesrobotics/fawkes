@@ -283,7 +283,7 @@ FawkesThreadManager::remove(ThreadList &tl)
   tl.lock();
 
   try {
-    if ( ! tl.prepare_finalize() ) {
+    if ( ! tl.prepare_finalize(finalizer) ) {
       tl.cancel_finalize();
       tl.unlock();
       CannotFinalizeThreadException e("One or more threads cannot be finalized");
