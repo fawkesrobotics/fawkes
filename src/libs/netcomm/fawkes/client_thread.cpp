@@ -105,7 +105,7 @@ FawkesNetworkClientThread::recv()
     inbound_queue->lock();
     while ( ! inbound_queue->empty() ) {
       FawkesNetworkMessage *m = inbound_queue->front();
-      m->setClientID(_clid);
+      m->set_client_id(_clid);
       parent->dispatch(m);
       m->unref();
       inbound_queue->pop();

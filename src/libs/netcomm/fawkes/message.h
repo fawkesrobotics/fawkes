@@ -31,42 +31,17 @@
 #include <core/utils/refcount.h>
 #include <core/exceptions/software.h>
 
+#include <netcomm/fawkes/message_datatypes.h>
+
 #include <cstddef>
-
-/** Fawkes network message header.
- * Header that is prepended to all following messages.
- */
-typedef struct {
-  unsigned short int  cid;		/**< component id */
-  unsigned short int  msg_id;		/**< message id */
-  unsigned int        payload_size;	/**< payload size in bytes */
-} fawkes_message_header_t;
-
-
-/** Message as stored in local queues.
- * A message takes a header and a pointer to the data that
- * has the size mentioned in header.payload_size that is to be
- * sent over the network.
- */
-typedef struct {
-  fawkes_message_header_t  header;	/**< message header */
-  void                    *payload;	/**< message payload */
-} fawkes_message_t;
-
-
-/** Fawkes transfer header.
- * This header is prepended to a collection of messages that is sent
- * at once.
- */
-typedef struct {
-  unsigned int  size;	/**< size of the following payload. */
-} fawkes_transfer_header_t;
 
 class FawkesNetworkMessageTooBigException : public Exception
 {
  public:
   FawkesNetworkMessageTooBigException(size_t message_size);
 };
+
+class FawkesNetworkMessageContent;
 
 class FawkesNetworkMessage : public RefCount
 {
@@ -80,6 +55,11 @@ class FawkesNetworkMessage : public RefCount
 		       unsigned short int cid, unsigned short int msg_id);
   FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
 		       void *payload, size_t payload_size);
+  FawkesNetworkMessage(unsigned int clid,
+		       unsigned short int cid, unsigned short int msg_id,
+		       FawkesNetworkMessageContent *content);
+  FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
+		       FawkesNetworkMessageContent *content);
   FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
 		       size_t payload_size);
   FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id);
@@ -111,11 +91,39 @@ class FawkesNetworkMessage : public RefCount
       return (MT *)(_msg.payload);
     }
 
-  void setClientID(unsigned int clid);
-  void setComponentID(unsigned short int cid);
-  void setMessageID(unsigned short int msg_id);
-  void setPayload(void *payload, size_t payload_size);
+  /** Get correctly parsed output.
+   * Use this method to cast the payload to a specific complex type. You can use this
+   * routine to parse complex messages that are derived from FawkesNetworkMessageContent.
+   * Note that the class must provide a constructor that takes four parameters: The
+   * component ID, message ID, a pointer to the payload and the payload size. From this
+   * the class shall parse  the output and throw an exception if that for whatever
+   * reason fails.
+   * @return casted message
+   * @exception TypeMismatchException payload size does not match requested type
+   */
+  template <typename MT>
+    MT *
+    msgc() const
+    {
+      try {
+	MT *m = new MT(_msg.header.cid, _msg.header.msg_id,
+		       _msg.payload, payload_size());
+	return m;
+      } catch (Exception &e) {
+	throw;
+      } catch (...) {
+	throw Exception("Unknown exception caught while parsing complex network message");
+      }
+    }
+
+  void set_client_id(unsigned int clid);
+  void set_component_id(unsigned short int cid);
+  void set_message_id(unsigned short int msg_id);
+  void set_payload(void *payload, size_t payload_size);
   void set(fawkes_message_t &msg);
+  void set_content(FawkesNetworkMessageContent *content);
+
+  void pack();
 
  private:
   void init_cid_msgid(unsigned short int cid, unsigned short int msg_id);
@@ -123,6 +131,8 @@ class FawkesNetworkMessage : public RefCount
 
   unsigned int _clid;
   fawkes_message_t _msg;
+
+  FawkesNetworkMessageContent *_content;
 };
 
 #endif

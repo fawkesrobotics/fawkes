@@ -28,6 +28,7 @@
 #include <core/exception.h>
 
 #include <netcomm/fawkes/message.h>
+#include <netcomm/fawkes/message_content.h>
 
 #include <netinet/in.h>
 #include <cstring>
@@ -98,6 +99,7 @@ FawkesNetworkMessage::FawkesNetworkMessage()
  */
 FawkesNetworkMessage::FawkesNetworkMessage(unsigned int clid, fawkes_message_t &msg)
 {
+  _content = NULL;
   _clid = clid;
   memcpy(&_msg, &msg, sizeof(fawkes_message_t));
 }
@@ -109,6 +111,7 @@ FawkesNetworkMessage::FawkesNetworkMessage(unsigned int clid, fawkes_message_t &
  */
 FawkesNetworkMessage::FawkesNetworkMessage(fawkes_message_t &msg)
 {
+  _content = NULL;
   _clid = 0;
   memcpy(&_msg, &msg, sizeof(fawkes_message_t));
 }
@@ -124,6 +127,8 @@ FawkesNetworkMessage::FawkesNetworkMessage(fawkes_message_t &msg)
 FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
 					   void *payload, size_t payload_size)
 {
+  _clid = 0;
+  _content = NULL;
   if ( payload_size > 0xFFFFFFFF ) {
     // cannot carry that many bytes
     throw FawkesNetworkMessageTooBigException(payload_size);
@@ -145,6 +150,8 @@ FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned shor
 FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
 					   size_t payload_size)
 {
+  _content = NULL;
+  _clid = 0;
   if ( payload_size > 0xFFFFFFFF ) {
     // cannot carry that many bytes
     throw FawkesNetworkMessageTooBigException(payload_size);
@@ -163,11 +170,51 @@ FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned shor
  */
 FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id)
 {
+  _content = NULL;
+  _clid = 0;
   _msg.header.cid = htons(cid);
   _msg.header.msg_id = htons(msg_id);
   _msg.header.payload_size = 0;
   _msg.payload = NULL;
 }
+
+
+/** Constructor to set single fields.
+ * The client ID is set to zero.
+ * @param cid component ID
+ * @param msg_id message type ID
+ * @param content complex content object
+ */
+FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid, unsigned short int msg_id,
+					   FawkesNetworkMessageContent *content)
+{
+  _content = content;
+  _clid = 0;
+  _msg.header.cid = htons(cid);
+  _msg.header.msg_id = htons(msg_id);
+  _msg.header.payload_size = 0;
+  _msg.payload = NULL;
+}
+
+
+/** Constructor to set single fields and client ID.
+ * @param clid client ID
+ * @param cid component ID
+ * @param msg_id message type ID
+ * @param content complex content object
+ */
+FawkesNetworkMessage::FawkesNetworkMessage(unsigned int clid,
+					   unsigned short int cid, unsigned short int msg_id,
+					   FawkesNetworkMessageContent *content)
+{
+  _content = content;
+  _clid = clid;
+  _msg.header.cid = htons(cid);
+  _msg.header.msg_id = htons(msg_id);
+  _msg.header.payload_size = 0;
+  _msg.payload = NULL;
+}
+
 
 
 /** Constructor to set single fields and client ID.
@@ -181,6 +228,7 @@ FawkesNetworkMessage::FawkesNetworkMessage(unsigned int clid,
 					   unsigned short int cid, unsigned short int msg_id,
 					   void *payload, size_t payload_size)
 {
+  _content = NULL;
   if ( payload_size > 0xFFFFFFFF ) {
     // cannot carry that many bytes
     throw FawkesNetworkMessageTooBigException(payload_size);
@@ -201,6 +249,7 @@ FawkesNetworkMessage::FawkesNetworkMessage(unsigned int clid,
 FawkesNetworkMessage::FawkesNetworkMessage(unsigned int clid,
 					   unsigned short int cid, unsigned short int msg_id)
 {
+  _content = NULL;
   _clid = clid;
   _msg.header.cid = htons(cid);
   _msg.header.msg_id = htons(msg_id);
@@ -285,7 +334,7 @@ FawkesNetworkMessage::fmsg() const
  * @param clid client ID
  */
 void
-FawkesNetworkMessage::setClientID(unsigned int clid)
+FawkesNetworkMessage::set_client_id(unsigned int clid)
 {
   _clid = clid;
 }
@@ -295,7 +344,7 @@ FawkesNetworkMessage::setClientID(unsigned int clid)
  * @param cid component ID
  */
 void
-FawkesNetworkMessage::setComponentID(unsigned short int cid)
+FawkesNetworkMessage::set_component_id(unsigned short int cid)
 {
   _msg.header.cid = htons(cid);
 }
@@ -305,7 +354,7 @@ FawkesNetworkMessage::setComponentID(unsigned short int cid)
  * @param msg_id message type ID
  */
 void
-FawkesNetworkMessage::setMessageID(unsigned short int msg_id)
+FawkesNetworkMessage::set_message_id(unsigned short int msg_id)
 {
   _msg.header.msg_id = htons(msg_id);
 }
@@ -316,7 +365,7 @@ FawkesNetworkMessage::setMessageID(unsigned short int msg_id)
  * @param payload_size size of payload buffer
  */
 void
-FawkesNetworkMessage::setPayload(void *payload, size_t payload_size)
+FawkesNetworkMessage::set_payload(void *payload, size_t payload_size)
 {
   if ( payload_size > 0xFFFFFFFF ) {
     // cannot carry that many bytes
@@ -334,4 +383,30 @@ void
 FawkesNetworkMessage::set(fawkes_message_t &msg)
 {
   memcpy(&_msg, &msg, sizeof(fawkes_message_t));
+}
+
+
+/** Set complex message content.
+ * @param content complex message content.
+ */
+void
+FawkesNetworkMessage::set_content(FawkesNetworkMessageContent *content)
+{
+  _content = content;
+}
+
+
+/** Pack data for sending.
+ * If complex message sending is required (message content object has been set)
+ * then serialize() is called for the content and the message is prepared for
+ * sending.
+ */
+void
+FawkesNetworkMessage::pack()
+{
+  if ( _content != NULL ) {
+    _content->serialize();
+    _msg.payload = _content->payload();
+    _msg.header.payload_size = htonl(_content->payload_size());
+  }
 }
