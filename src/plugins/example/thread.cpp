@@ -63,7 +63,7 @@ void
 ExampleThread::loop()
 {
   if ( (m % modc) == 0 ) {
-    logger->log_info("ExampleThread", "ExampleThready %s called %u times", name(), m);
+    logger->log_info("ExampleThread", "XYZ 123 ExampleThready %s called %u times", name(), m);
   }
   ++m;
   usleep(0);

@@ -27,7 +27,7 @@ CFLAGS = -g
 ifneq ($(HAVE_IOWKIT),1)
   WARN_TARGETS += warning_iowkit
 else
-  PLUGINS_all = $(PLUGINDIR)/kicker_plugin.so
+  PLUGINS_all = $(PLUGINDIR)/kicker.so
 endif
 
 ifneq ($(SRCDIR),)
@@ -38,11 +38,12 @@ warning_iowkit:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Kicker Plugin$(TNORMAL) (install IowKit)"
 endif
 
-LIBS_kicker_plugin = core utils iowkit
-OBJS_kicker_plugin = kicker_plugin.o	\
+LIBS_kicker = core utils iowkit
+OBJS_kicker = kicker_plugin.o	\
 		     kicker_thread.o	\
                      kicker_control.o
 
-OBJS_all    = $(OBJS_kicker_plugin)
+OBJS_all    = $(OBJS_kicker)
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

@@ -29,6 +29,7 @@
 
 #include <netcomm/fawkes/client.h>
 #include <mainapp/plugin_messages.h>
+#include <mainapp/plugin_list_message.h>
 #include <utils/system/argparser.h>
 
 
@@ -190,11 +191,8 @@ void
 PluginTool::list_avail()
 {
   printf("Request the list of all available plugins\n");
-  plugin_list_all_msg_t *m = (plugin_list_all_msg_t *)calloc(1, sizeof(plugin_list_all_msg_t));
-  
   FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-						       MSG_PLUGIN_LIST_AVAIL,
-						       m, sizeof(plugin_list_all_msg_t));
+						       MSG_PLUGIN_LIST_AVAIL);
   c->enqueue(msg);
   msg->unref();
 
@@ -293,26 +291,17 @@ PluginTool::inboundReceived(FawkesNetworkMessage *msg)
 
   case M_LIST_AVAIL:
     if (msg->msgid() == MSG_PLUGIN_LIST ) {
-      plugin_list_msg_t *m = (plugin_list_msg_t *)msg->payload();
-      if ( msg->payload_size() != m->payload_size ) {
-	printf("Invalid message size (list all succeded)\n");
-      } else {
-	printf("Available plugins:\n");
-	char* p = m->list;
-	for (unsigned int i = 0; i < m->num_plugins; i++) {
-	  size_t len;
-	  len = strlen(p);
-	  printf("%s\n", p);
-	  p += len + 1;
-	}
+      PluginListMessage *plm = msg->msgc<PluginListMessage>();
+      printf("Available plugins:\n");
+      while ( plm->has_next() ) {
+	char *p = plm->next();
+	printf("  %s\n", p);
+	free(p);
 	quit = true;
       }
+      delete plm;
     } else if ( msg->msgid() == MSG_PLUGIN_LIST_AVAIL_FAILED) {
-      if ( msg->payload_size() != sizeof(plugin_list_all_failed_msg_t) ) {
-	printf("Invalid message size (list all failed)\n");
-      } else {
-	printf("Obtaining list of available plugins failed\n");
-      }
+      printf("Obtaining list of available plugins failed\n");
     }
     break;
 

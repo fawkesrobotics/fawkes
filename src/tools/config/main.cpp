@@ -196,7 +196,8 @@ main(int argc, char **argv)
 
   FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
   c->connect();
-  c->setNoDelay(true);
+  // Not needed, will actually harm the performance, especially on slow network
+  // c->setNoDelay(true);
   c->start();
 
   NetworkConfiguration *netconf = new NetworkConfiguration(c);

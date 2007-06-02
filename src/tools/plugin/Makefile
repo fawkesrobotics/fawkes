@@ -22,7 +22,7 @@ BASEDIR = ../../..
 
 CFLAGS = -g
 
-LIBS_plugin = core utils netcomm
+LIBS_plugin = core utils netcomm fawkesmainappmsgs
 OBJS_plugin = main.o	\
 	      plugin_tool.o
 
