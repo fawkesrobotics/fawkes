@@ -28,6 +28,7 @@
 #ifndef __UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_TEMPLATE_H_
 #define __UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_TEMPLATE_H_
 
+#include <core/threading/mutex.h>
 #include <utils/system/dynamic_module/module.h>
 #include <utils/system/dynamic_module/module_manager.h>
 #include <map>
@@ -46,10 +47,11 @@ class ModuleManagerTemplate : public ModuleManager {
   /** Constructor of NetworkManagerTemplate
    * @param module_base_dir The module basedir where to look for plugins
    */
-  ModuleManagerTemplate(std::string module_base_dir = "")
+  ModuleManagerTemplate(const char *module_base_dir = "")
   {
     modules.clear();
     this->module_base_dir = module_base_dir;
+    mutex = new Mutex();
   }
 
   /** Destructor. */
@@ -59,6 +61,7 @@ class ModuleManagerTemplate : public ModuleManager {
       delete (*i).second;
     }
     modules.clear();
+    delete mutex;
   }
 
   /** Open a module
@@ -70,23 +73,28 @@ class ModuleManagerTemplate : public ModuleManager {
    * closeModule to close it.
    * @exception ModuleOpenException thrown if the module could not be opened
    */
-  MODULE_CLASS *  openModule(std::string filename)
+  MODULE_CLASS *  openModule(const char *filename)
   {
+    mutex->lock();
     if ( modules.find(filename) != modules.end() ) {
       modules[filename]->ref();
+      mutex->unlock();
       return modules[filename];
     } else {
-      MODULE_CLASS *module = new MODULE_CLASS(module_base_dir + "/" + filename);
+      MODULE_CLASS *module = new MODULE_CLASS(std::string(module_base_dir) + "/" + filename);
       try {
 	module->open();
 	// ref count of module is now 1
 	modules[module->getBaseFilename()] = module;
+	mutex->unlock();
 	return module;
       } catch (ModuleOpenException &e) {
 	delete module;
+	mutex->unlock();
 	throw;
       }
     }
+    mutex->unlock();
   }
 
   /** Close a module by Module instance
@@ -94,7 +102,7 @@ class ModuleManagerTemplate : public ModuleManager {
    */
   void closeModule(Module *module)
   {
-    closeModule(module->getBaseFilename());
+    closeModule(module->getBaseFilename().c_str());
   }
 
   /** Close a module by filename
@@ -102,8 +110,9 @@ class ModuleManagerTemplate : public ModuleManager {
    * is compared to loaded modules and must match what
    * Module::GetBaseFilename() returns
    */
-  void closeModule(std::string filename)
+  void closeModule(const char *filename)
   {
+    mutex->lock();
     if ( modules.find(filename) != modules.end() ) {
       modules[filename]->unref();
       if (modules[filename]->notref()) {
@@ -111,6 +120,7 @@ class ModuleManagerTemplate : public ModuleManager {
 	modules.erase( filename );
       }
     }
+    mutex->unlock();
   }
 
 
@@ -120,7 +130,7 @@ class ModuleManagerTemplate : public ModuleManager {
    * It is compared to loaded modules and must match what
    * MODULE_CLASS::GetBaseFilename() returns
    */
-  bool moduleOpened(std::string filename)
+  bool moduleOpened(const char *filename)
   {
     return ( modules.find(filename) != modules.end() );
   }
@@ -130,7 +140,7 @@ class ModuleManagerTemplate : public ModuleManager {
    * @return Returns a string with the file extension that has to
    * be used for modules on the current system (for example "so")
    */
-  std::string getModuleFileExtension()
+  const char *getModuleFileExtension()
   {
     return MODULE_CLASS::getFileExtension();
   }
@@ -138,7 +148,8 @@ class ModuleManagerTemplate : public ModuleManager {
  private:
   std::map<std::string, MODULE_CLASS * >            modules;
 
-  std::string module_base_dir;
+  const char *module_base_dir;
+  Mutex *mutex;
 
 };
 

@@ -136,7 +136,7 @@ ModuleDL::close()
 {
   if ( handle == NULL )  return true;
 
-  --ref_count;
+  if ( ref_count > 0 )  --ref_count;
 
   if ( (ref_count == 0) && ! is_resident ) {
     if ( dlclose(handle) != 0 ) {

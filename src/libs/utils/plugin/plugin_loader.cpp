@@ -29,6 +29,7 @@
 #include <utils/system/dynamic_module/module_manager_factory.h>
 #include <utils/system/dynamic_module/module_manager.h>
 #include <utils/system/dynamic_module/module.h>
+#include <utils/plugin/load_thread.h>
 
 #include <iostream>
 
@@ -43,23 +44,40 @@ class PluginLoaderData
   std::map< Plugin *, Module * >    plugin_module_map;
   std::map< std::string, Plugin * > name_plugin_map;
   std::map< Plugin *, std::string > plugin_name_map;
+  std::map<std::string, PluginLoadThread *> load_threads;
 };
 /// @endcond
 
-/** @class PluginNotFoundException utils/plugin/plugin_loader.h
+/** @class PluginLoadException utils/plugin/plugin_loader.h
  * This exception is thrown if the requested plugin could not be loaded.
- * @ingroup Exceptions
  */
 
 /** Constructor.
- * @param plugin_type type of the plugin
+ * @param plugin_name name of the plugin
  * @param add_msg additional message, reason for problem
  */
-PluginNotFoundException::PluginNotFoundException(const char *plugin_type,
-						 const char *add_msg)
+PluginLoadException::PluginLoadException(const char *plugin_name,
+					 const char *add_msg)
   : Exception()
 {
-  append("Plugin of type '%s' could not be found", plugin_type);
+  append("Plugin '%s' could not be loaded", plugin_name);
+  append(add_msg);
+}
+
+
+/** @class PluginUnloadException utils/plugin/plugin_loader.h
+ * This exception is thrown if the requested plugin could not be unloaded.
+ */
+
+/** Constructor.
+ * @param plugin_name name of the plugin
+ * @param add_msg additional message, reason for problem
+ */
+PluginUnloadException::PluginUnloadException(const char *plugin_name,
+					     const char *add_msg)
+  : Exception()
+{
+  append("Plugin '%s' could not be unloaded", plugin_name);
   append(add_msg);
 }
 
@@ -117,39 +135,115 @@ PluginLoader::load(const char *plugin_name)
     return d->name_plugin_map[pn];
   }
 
-  // This is dependent on the system architecture!
-  std::string module_name = pn + "." + d->mm->getModuleFileExtension();
-
-  Module *pm;
+  PluginLoadThread plt(d->mm, plugin_name);
+  plt.load_blocking();
   try {
-    pm = d->mm->openModule(module_name);
-  } catch (ModuleOpenException &e) {
-    e.append("PluginLoader failed to open module %s", module_name.c_str());
+    Plugin *p = plt.plugin();
+
+    d->plugin_module_map[p] = plt.module();
+    d->name_plugin_map[pn] = p;
+    d->plugin_name_map[p] = pn;
+
+    return p;
+  } catch ( PluginLoadException &e) {
+    e.append("PluginLoader failed to load plugin '%s' blocking", plugin_name);
     throw;
   }
+}
 
-  if ( pm == NULL ) {
-    // we could NOT open the plugin module
-    throw PluginNotFoundException(plugin_name,
-				  "Could not open plugin module");
+
+/** Check if a plugin is loaded.
+ * @param plugin_name name of the plugin to chekc
+ * @return true if the plugin is loaded, false otherwise
+ */
+bool
+PluginLoader::is_loaded(const char *plugin_name)
+{
+  return ( d->name_plugin_map.find(plugin_name) != d->name_plugin_map.end() );
+}
+
+
+/** Request deferred loading of plugin.
+ * @param plugin_name name of the plugin to load deferred
+ * @exception PluginLoadException thrown, if the plugin is already loaded or
+ * a load request is already running
+ */
+void
+PluginLoader::request_load(const char *plugin_name)
+{
+  std::string pn = plugin_name;
+
+  if ( d->name_plugin_map.find(pn) != d->name_plugin_map.end() ) {
+    throw PluginLoadException("Cannot request load for already loaded plugin");
   }
 
-  if ( ! pm->hasSymbol("plugin_factory") ) {
-    throw PluginNotFoundException(plugin_name, "Symbol 'plugin_factory' not found");
+  if ( d->load_threads.find(plugin_name) != d->load_threads.end() ) {
+    throw PluginLoadException("Load already requested");    
   }
 
-  PluginFactoryFunc pff = (PluginFactoryFunc)pm->getSymbol("plugin_factory");
+  PluginLoadThread *plt = new PluginLoadThread(d->mm, plugin_name);
+  plt->start();
 
-  Plugin *p = pff();
-  if ( p == NULL ) {
-    throw PluginNotFoundException(plugin_name, "Plugin could not be instantiated");
+  d->load_threads[plugin_name] = plt;
+}
+
+
+/** Check if load operation succeeded.
+ * Checks if the load operation for the given plugin has been finished.
+ * @param plugin_name name of the plugin to check
+ * @return true, if the plugin has finished loading, false otherwise.
+ * @exception PluginLoadException thrown if loading was not requested or
+ * if the load failed.
+ */
+bool
+PluginLoader::finished_load(const char *plugin_name)
+{
+  std::map<std::string, PluginLoadThread *>::iterator i;
+  if ( (i = d->load_threads.find(plugin_name)) == d->load_threads.end() ) {
+    PluginLoadException e("Plugin loading not requested");
+    e.append("Loading of plugin '%s' was not requested");
+    throw e;
+  } else {
+    return (*i).second->finished();
   }
+}
 
-  d->plugin_module_map[p] = pm;
-  d->name_plugin_map[pn] = p;
-  d->plugin_name_map[p] = pn;
 
-  return p;
+/** Finish deferred loading.
+ * Call this to finish a load operation. Check that the load operation
+ * has finished with finished_load() before.
+ * @param plugin_name name of the plugin to finish the load operation of
+ * @return loaded plugin
+ * @exception PluginLoadException thrown, if the loading was not requested,
+ * or the loading has not finished or if the loading failed.
+ */
+Plugin *
+PluginLoader::finish_deferred_load(const char *plugin_name)
+{
+  std::map<std::string, PluginLoadThread *>::iterator i;
+  if ( (i = d->load_threads.find(plugin_name)) == d->load_threads.end() ) {
+    PluginLoadException e("Plugin loading not requested");
+    e.append("Loading of plugin '%s' was not requested");
+    throw e;
+  } else if ( ! (*i).second->finished()) {
+    throw PluginLoadException("Plugin loading not finished");
+  } else {
+    try {
+      Plugin *p = (*i).second->plugin();
+
+      d->plugin_module_map[p]         = (*i).second->module();
+      d->name_plugin_map[plugin_name] = p;
+      d->plugin_name_map[p]           = plugin_name;
+
+      (*i).second->join();
+      delete (*i).second;
+      d->load_threads.erase(i);
+
+      return p;      
+    } catch (Exception &e) {
+      throw;
+    }
+  }  
 }
 
 

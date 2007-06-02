@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  module_manager_factory.h - factory class for module managers
+ *  load_thread.cpp - Plugin load thread
  *
- *  Generated: Sun Sep 11 09:51:41 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu May 31 15:07:18 2007
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,23 +25,38 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_FACTORY_H_
-#define __UTILS_SYSTEM_DYNAMIC_MODULE_MANAGER_FACTORY_H_
+#ifndef __UTILS_PLUGIN_LOAD_THREAD_H_
+#define __UTILS_PLUGIN_LOAD_THREAD_H_
 
-#include <utils/system/dynamic_module/module_manager.h>
+#include <core/threading/thread.h>
+#include <utils/plugin/plugin_loader.h>
 
-class ModuleManagerFactory
+class ModuleManager;
+class Plugin;
+class Module;
+
+class PluginLoadThread : public Thread
 {
  public:
+  PluginLoadThread(ModuleManager *mm, const char *plugin_name);
+  virtual ~PluginLoadThread();
 
-  /** The module manager type
-   */
-  typedef enum {
-    MMT_DL = 1       /**< Standard dl modules, used on Linux systems */
-  } ModuleManagerType;
+  Plugin *  plugin();
+  Module *  module();
+  void      load_blocking();
+  bool      finished();
 
-  static ModuleManager * getInstance(ModuleManagerType mmt,
-				     const char * module_base_dir = "");
+  virtual void loop();
+
+ private:
+  void      load();
+
+  char          *module_name;
+  bool           _finished;
+  ModuleManager *mm;
+  Plugin        *_plugin;
+  Module        *_module;
+  PluginLoadException ple;
 };
 
 #endif

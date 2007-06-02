@@ -29,7 +29,6 @@
 #define __UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_H_
 
 #include <utils/system/dynamic_module/module.h>
-#include <string>
 
 /** Manager interface to load and unload modules, keeps track of loaded modules
  * and does not reload modules if they are already loaded
@@ -51,7 +50,7 @@ class ModuleManager {
    * closeModule to close it.
    * @exception ModuleOpenException thrown if the module could not be opened
    */
-  virtual Module *  openModule(std::string filename) = 0;
+  virtual Module *  openModule(const char *filename) = 0;
 
   /** Close a module by Module instance
    * @param module The module that is to be closed
@@ -63,7 +62,7 @@ class ModuleManager {
    * is compared to loaded modules and must match what
    * Module::GetBaseFilename() returns
    */
-  virtual void      closeModule(std::string filename) = 0;
+  virtual void      closeModule(const char *filename) = 0;
 
   /** Check if the module for the given filename is already
    * opened
@@ -71,13 +70,13 @@ class ModuleManager {
    * It is compared to loaded modules and must match what
    * Module::GetBaseFilename() returns
    */
-  virtual bool      moduleOpened(std::string filename) = 0;
+  virtual bool      moduleOpened(const char *filename) = 0;
 
   /** Get the file extension for the current module type
    * @return Returns a string with the file extension that has to
    * be used for modules on the current system (for example "so")
    */
-  virtual std::string getModuleFileExtension() = 0;
+  virtual const char * getModuleFileExtension() = 0;
 
 };
 

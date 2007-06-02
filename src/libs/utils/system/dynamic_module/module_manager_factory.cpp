@@ -45,7 +45,7 @@
  * done with this!
  */
 ModuleManager *
-ModuleManagerFactory::getInstance(ModuleManagerType mmt, std::string module_base_dir)
+ModuleManagerFactory::getInstance(ModuleManagerType mmt, const char *module_base_dir)
 {
   switch (mmt) {
   case MMT_DL:

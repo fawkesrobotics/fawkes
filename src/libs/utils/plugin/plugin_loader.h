@@ -33,12 +33,17 @@
 
 class PluginLoaderData;
 
-class PluginNotFoundException : public Exception
+class PluginLoadException : public Exception
 {
  public:
-  PluginNotFoundException(const char *plugin_type, const char *add_msg);
+  PluginLoadException(const char *plugin_type, const char *add_msg = NULL);
 };
 
+class PluginUnloadException : public Exception
+{
+ public:
+  PluginUnloadException(const char *plugin_type, const char *add_msg = NULL);
+};
 
 
 class PluginLoader {
@@ -49,6 +54,14 @@ class PluginLoader {
 
   Plugin * load(const char *plugin_name);
   void     unload(Plugin *plugin);
+
+  void     request_load(const char *plugin_name);
+
+  bool     finished_load(const char *plugin_name);
+
+  Plugin * finish_deferred_load(const char *plugin_name);
+
+  bool     is_loaded(const char *plugin_name);
 
  private:
   PluginLoaderData *d;
