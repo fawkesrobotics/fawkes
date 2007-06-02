@@ -95,7 +95,7 @@ class Thread {
   Thread & operator=(const Thread &t);
   static void * entry(void * pthis);
   void constructor(const char *name, OpMode op_mode);
-  void set_threadlist_sync_lock(ReadWriteLock *lock);
+  void set_finalize_sync_lock(ReadWriteLock *lock);
 
   // Do not use pthread_t here to avoid including pthread.h
   /* pthread_t */ unsigned long int thread_id;
@@ -104,11 +104,11 @@ class Thread {
   WaitCondition *sleep_condition;
   Barrier       *barrier;
 
-  ReadWriteLock *threadlist_sync_lock;
+  ReadWriteLock *finalize_sync_lock;
   Mutex         *finalize_mutex;
   Mutex         *loop_mutex;
 
-  const char    *_name;
+  char          *_name;
 
   bool           cancelled;
 

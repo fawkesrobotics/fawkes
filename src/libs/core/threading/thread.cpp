@@ -36,6 +36,8 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <typeinfo>
+#include <cstring>
+#include <cstdlib>
 
 /** @def forever
  * Shortcut for "while (1)".
@@ -57,7 +59,9 @@
  * default since this is the common use case in Fawkes.
  *
  * If you need a more complex behaviour you may also override run() and
- * implement your own thread behavior.
+ * implement your own thread behavior. Not however that you must then
+ * use the continuous opmode to make management facilitities aware, that this
+ * thread will not react as could be expected by a wait-for-wakeup thread.
  * That that without taking special care the advanced debug functionality
  * will not available for threads.
  *
@@ -85,11 +89,31 @@
  * description). If finalize() is not executed the thread is notified with
  * cancel_finalize().
  *
+ * The intialization and finalization procedures may be executed deferred and
+ * concurrent to the running thread itself. The thread is only started however
+ * it init() finished successfully. For the finalization prepare_finalize() and
+ * finalize() can be executed in another thread concurrent to the thread that
+ * is finalized itself! For this the thread implementation will stop the loop()
+ * from being executed. However, the thread will still run, for example it will
+ * wait for wakeup. This way it can be ensured that other threads will continue
+ * to run even this thread is currently not running. An exception is the
+ * ThreadList. For this Thread provides special synchronization features by
+ * which it is possible to stop a thread in the very same loop iteration. That
+ * means that if you have two threads that are woken up at the same time and
+ * maybe even synchronize among each other it is guaranteed that both threads
+ * will finish the running loop and never enter the next loop.
+ *
+ * Because the finalization is done deferred and concurrent put all lengthy
+ * finalization routines in finalize() and avoid this in the destructor, since
+ * a long running destructor will harm the overall performance.
+ * 
+ *
  * @ingroup Threading
  * @ingroup FCL
  * @see Aspects
  * @see loop()
  * @see run()
+ * @see ThreadList
  * @see example_barrier.cpp
  * @see example_mutex_count.cpp
  * @see example_rwlock.cpp
@@ -152,7 +176,12 @@ void
 Thread::constructor(const char *name, OpMode op_mode)
 {
   this->op_mode = op_mode;
-  this->_name   = name;
+
+  if ( name == NULL ) {
+    _name = strdup(typeid(this).name());
+  } else {
+    this->_name   = strdup(name);
+  }
   if ( op_mode == OPMODE_WAITFORWAKEUP ) {
     sleep_condition = new WaitCondition();
     sleep_mutex = new Mutex();
@@ -164,8 +193,8 @@ Thread::constructor(const char *name, OpMode op_mode)
   barrier = NULL;
   cancelled = false;
 
-  threadlist_sync_lock = NULL;
   finalize_mutex = new Mutex();
+  finalize_sync_lock = NULL;
   loop_mutex = new Mutex();
   finalize_prepared = false;
 }
@@ -180,6 +209,7 @@ Thread::~Thread()
   sleep_mutex = NULL;
   delete loop_mutex;
   delete finalize_mutex;
+  free(_name);
 }
 
 
@@ -230,6 +260,16 @@ Thread::init()
 }
 
 
+/** Set finalize barrier.
+ * @param lock sync lock
+ */
+void
+Thread::set_finalize_sync_lock(ReadWriteLock *lock)
+{
+  finalize_sync_lock = lock;
+}
+
+
 /** Prepare finalization.
  * Check if finalization at this point is possible and if so execute the
  * steps necessary to prepare for finalization. You also have to make sure
@@ -263,19 +303,10 @@ Thread::prepare_finalize()
   if ( finalize_prepared ) {
     throw CannotFinalizeThreadException("prepare_finalize() has already been called");
   }
-  if ( ! threadlist_sync_lock ) {
-    // Make sure that prepare_finalize() is called in full before any
-    // cancel_finalize(), possible problem if multiple threads are
-    // queried by a thread list
-    finalize_mutex->lock();
-    // Make sure loop() is not running
-    if (op_mode != OPMODE_CONTINUOUS )  loop_mutex->lock();
-  }
-  bool prepared = prepare_finalize_user();
+  finalize_mutex->lock();
   finalize_prepared = true;
-  if ( ! threadlist_sync_lock ) {
-    finalize_mutex->unlock();
-  }
+  finalize_mutex->unlock();
+  bool prepared = prepare_finalize_user();
   return prepared;
 }
 
@@ -360,14 +391,9 @@ Thread::finalize()
 void
 Thread::cancel_finalize()
 {
-  if ( ! threadlist_sync_lock ) {
-    finalize_mutex->lock();
-    finalize_prepared = false;
-    if ( op_mode != OPMODE_CONTINUOUS )  loop_mutex->unlock();
-    finalize_mutex->unlock();
-  } else {
-    finalize_prepared = false;
-  }
+  finalize_mutex->lock();
+  finalize_prepared = false;
+  finalize_mutex->unlock();
 }
 
 
@@ -404,19 +430,6 @@ Thread::entry(void *pthis)
   return NULL;
 }
 
-
-/** Set the sync read/write lock.
- * For proper finalization synchronization of a list of threads a common
- * read/write lock is needed that all the threads to synchronize share.
- * See class information for more details.
- * @param lock new read/write lock, if NULL then single-thread locking
- * using mutexes is used.
- */
-void
-Thread::set_threadlist_sync_lock(ReadWriteLock *lock)
-{
-  threadlist_sync_lock = lock;
-}
 
 /** Exit the thread.
  * You may call this from within your run() method to exit the thread.
@@ -474,25 +487,16 @@ Thread::opmode() const
 }
 
 
-/** Get thread name.
- * @return name of thread
- */
-const char *
-Thread::name() const
-{
-  if ( _name != NULL ) {
-    return _name;
-  } else {
-    return typeid(this).name();
-  }
-}
-
-
 /** Get name of thread.
  * This name is mainly used for debugging purposes. Give it a descriptive
  * name. Is nothing is given the raw class name is used.
  * @return thread name
  */
+const char *
+Thread::name() const
+{
+  return _name;
+}
 
 
 /** Set cancellation point.
@@ -530,17 +534,22 @@ Thread::run()
     sleep_mutex->unlock();
   }
   forever {
-    if ( threadlist_sync_lock ) {
-      threadlist_sync_lock->lockForRead();
-    } else {
+
+    if ( finalize_sync_lock )  finalize_sync_lock->lockForRead();
+
+    bool run_loop;
+    finalize_mutex->lock();
+    run_loop = ! finalize_prepared;
+    finalize_mutex->unlock();
+
+    if ( run_loop ) {
       loop_mutex->lock();
-    }
-    loop();
-    if ( threadlist_sync_lock ) {
-      threadlist_sync_lock->unlock();
-    } else {
+      loop();
       loop_mutex->unlock();
     }
+
+    if ( finalize_sync_lock )  finalize_sync_lock->unlock();
+
     test_cancel();
     if ( barrier ) {
       barrier->wait();

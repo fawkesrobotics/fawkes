@@ -29,14 +29,15 @@
 #define __CORE_THREADING_THREAD_LIST_H_
 
 #include <core/exception.h>
+#include <core/threading/thread.h>
+#include <core/threading/thread_initializer.h>
+#include <core/threading/thread_finalizer.h>
 #include <core/utils/lock_list.h>
 
-class Thread;
+class ThreadList;
 class Mutex;
 class Barrier;
 class ReadWriteLock;
-class ThreadInitializer;
-class ThreadFinalizer;
 
 class ThreadListSealedException : public Exception
 {
@@ -49,6 +50,51 @@ class ThreadListNotSealedException : public Exception
  public:
   ThreadListNotSealedException(const char *msg);
 };
+
+
+class ThreadListManagementThread : public Thread
+{
+ public:
+  ThreadListManagementThread(const char *name, ThreadList *tl, Exception *e);
+  ~ThreadListManagementThread();
+
+  bool finished();
+  bool success();
+
+  void throw_exception();
+
+ protected:
+  /** Thread list */
+  ThreadList *tl;
+  /** Set to true when done */
+  bool _finished;
+  /** Set to true on success */
+  bool _success;
+  /** Exception to append messages to */
+  Exception *e;
+};
+
+class ThreadListInitThread : public ThreadListManagementThread
+{
+ public:
+  ThreadListInitThread(ThreadList *tl, ThreadInitializer *initializer);
+
+  virtual void loop();
+ private:
+  ThreadInitializer *initializer;
+};
+
+
+class ThreadListFinalizerThread : public ThreadListManagementThread
+{
+ public:
+  ThreadListFinalizerThread(ThreadList *tl, ThreadFinalizer *finalizer);
+
+  virtual void loop();
+ private:
+  ThreadFinalizer *finalizer;
+};
+
 
 class ThreadList : private LockList<Thread *>
 {
@@ -63,9 +109,14 @@ class ThreadList : private LockList<Thread *>
   bool sealed();
 
   void init(ThreadInitializer *initializer);
+  void init_deferred(ThreadInitializer *initializer);
+  bool deferred_init_done();
   bool prepare_finalize(ThreadFinalizer *finalizer);
   void finalize(ThreadFinalizer *finalizer);
   void cancel_finalize();
+  void finalize_deferred(ThreadFinalizer *finalizer);
+  bool deferred_finalize_done();
+
 
   void wakeup();
   void wakeup(Barrier *barrier);
@@ -99,10 +150,12 @@ class ThreadList : private LockList<Thread *>
   using LockList<Thread *>::back;
 
  private:
-  char          *_name;
-  bool           _sealed;
-  Mutex         *_finalize_mutex;
-  ReadWriteLock *_sync_lock;
+  char                      *_name;
+  bool                       _sealed;
+  Mutex                     *_finalize_mutex;
+  ReadWriteLock             *_sync_lock;
+  ThreadListInitThread      *_init_thread;
+  ThreadListFinalizerThread *_fin_thread;
 };
 
 #endif
