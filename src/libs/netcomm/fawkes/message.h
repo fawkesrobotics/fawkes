@@ -31,8 +31,6 @@
 #include <core/utils/refcount.h>
 #include <core/exceptions/software.h>
 
-#include <netcomm/fawkes/message_datatypes.h>
-
 #include <cstddef>
 
 /** Fawkes network message header.
