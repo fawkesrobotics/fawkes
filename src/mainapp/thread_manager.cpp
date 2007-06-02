@@ -226,6 +226,59 @@ FawkesThreadManager::add(ThreadList &tl)
 }
 
 
+/** Add thread from list deferred.
+ * This will start the initialization of the threads deferred.
+ * The threads are not yet added to the internal structures.
+ * @param tl thread list to add deferred
+ */
+void
+FawkesThreadManager::add_deferred(ThreadList &tl)
+{
+  if ( tl.sealed() ) {
+    Exception e("Not accepting new threads from list that is not fresh");
+    e.append("Threads in list '%s' already sealed", tl.name());
+  }
+
+  tl.lock();
+
+  tl.seal();
+  tl.init_deferred(initializer);
+}
+
+
+/** Check if deferred add is done.
+ * @param tl thread list to check
+ * @return true if the deferred add is odone, false otherwise.
+ */
+bool
+FawkesThreadManager::deferred_add_done(ThreadList &tl)
+{
+  std::list<BlockedTimingAspect::WakeupHook> changed;
+  changed.clear();
+
+  try {
+    if ( tl.deferred_init_done() ) {
+      // All thread initialized, now add threads to internal structure
+      for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
+	internal_add_thread(*i, changed);
+      }
+
+      // Re-create barriers where necessary
+      update_barriers(changed);
+
+      tl.start();
+      tl.unlock();
+
+      return true;
+    } else {
+      return false;
+    }
+  } catch (Exception &e) {
+    tl.unlock();
+    throw;
+  }
+}
+
 /** Add one thread.
  * Add the given thread to the thread manager. The threadis initialised
  * as appropriate and started. See the class documentation for supported
@@ -308,6 +361,67 @@ FawkesThreadManager::remove(ThreadList &tl)
   update_barriers(changed);
 
   tl.unlock();
+}
+
+
+/** Remove the given threads deferred.
+ * The thread manager tries to finalize and stop the threads and then removes the
+ * threads from the internal structures.
+ *
+ * The finalization is just started, but not necessarily finished (deferred
+ * operation). Use deferred_remove_done() to check for the result.
+ *
+ * @param tl threads to remove.
+ * @exception ThreadListNotSealedException if the given thread lits tl is not
+ * sealed the thread manager will refuse to remove it
+ */
+void
+FawkesThreadManager::remove_deferred(ThreadList &tl)
+{
+  if ( ! tl.sealed() ) {
+    ThreadListNotSealedException e("Cannot remove unsealed thread list");
+    e.append("Not accepting unsealed list '%s' for removal", tl.name());
+    throw e;
+  }
+
+  tl.lock();
+  tl.finalize_deferred(finalizer);
+}
+
+
+/** Check if deferred removal is done.
+ * @param tl thread list to check
+ * @return true if deferred removal is done, false otherwise
+ */
+bool
+FawkesThreadManager::deferred_remove_done(ThreadList &tl)
+{
+  std::list<BlockedTimingAspect::WakeupHook> changed;
+  changed.clear();
+
+  try {
+    if ( tl.deferred_finalize_done() ) {
+
+      tl.stop();
+
+      // All thread initialized, now add threads to internal structure
+      for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
+	internal_remove_thread(*i, changed);
+      }
+
+      // Re-create barriers where necessary
+      update_barriers(changed);
+
+      tl.unlock();
+
+      return true;
+    } else {
+      return false;
+    }
+  } catch (Exception &e) {
+    tl.unlock();
+    throw;
+  }
 }
 
 

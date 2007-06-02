@@ -32,6 +32,7 @@
 #include <core/utils/lock_queue.h>
 
 #include <map>
+#include <list>
 #include <string>
 #include <utility>
 
@@ -40,16 +41,13 @@ class FawkesNetworkHub;
 class Plugin;
 class PluginLoader;
 class Mutex;
+class PluginListMessage;
 
 class FawkesPluginManager : public FawkesNetworkHandler
 {
  public:
   FawkesPluginManager(FawkesThreadManager *thread_manager);
   ~FawkesPluginManager();
-
-  void list_avail(unsigned int* num_plugins, char*** p);
-  void load(const char *plugin_type);
-  void unload(const char *plugin_type);
 
   void set_hub(FawkesNetworkHub *hub);
 
@@ -59,6 +57,22 @@ class FawkesPluginManager : public FawkesNetworkHandler
   virtual void process_after_loop();
 
  private:
+  PluginListMessage * list_avail();
+  void load(const char *plugin_type);
+  void unload(const char *plugin_type);
+  void request_load(const char *plugin_name, unsigned int client_id);
+  void request_unload(const char *plugin_name, unsigned int client_id);
+  void add_plugin(Plugin *plugin, const char *plugin_name);
+  void send_load_failure(const char *plugin_name, std::list<unsigned int> &clients);
+  void send_load_success(const char *plugin_name, unsigned int client_id);
+  void check_loaded();
+  void check_initialized();
+  void send_unload_failure(const char *plugin_name, std::list<unsigned int> &clients);
+  void send_unload_success(const char *plugin_name, unsigned int client_id);
+  void check_finalized();
+  void add_plugin_deferred(Plugin *plugin, const char *plugin_name);
+
+ private:
   FawkesThreadManager  *thread_manager;
   PluginLoader         *plugin_loader;
   FawkesNetworkHub     *hub;
@@ -66,10 +80,18 @@ class FawkesPluginManager : public FawkesNetworkHandler
   Mutex *plugins_mutex;
 
   std::map< std::string, Plugin * > plugins;
+  std::map< std::string, Plugin * > plugins_deferred;
   std::map< std::string, Plugin * >::iterator pit;
 
   unsigned int next_plugin_id;
   std::map< std::string, unsigned int > plugin_ids;
+  std::map< std::string, unsigned int > plugin_ids_deferred;
+
+  std::map< std::string, std::list< unsigned int > > load_requests;
+  std::map< std::string, std::list< unsigned int > >::iterator lri;
+  std::map< std::string, std::list< unsigned int > > unload_requests;
+  std::map< std::string, std::list< unsigned int > >::iterator ulri;
+  std::list< unsigned int >::iterator lrci;
 
   LockQueue< FawkesNetworkMessage * > inbound_queue;
 };

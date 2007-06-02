@@ -28,6 +28,8 @@
 #ifndef __FAWKES_PLUGIN_MESSAGES_H_
 #define __FAWKES_PLUGIN_MESSAGES_H_
 
+#include <netcomm/utils/dynamic_buffer.h>
+
 /** PLUGIN_LOAD message type ID */
 #define MSG_PLUGIN_LOAD            1
 
@@ -88,14 +90,6 @@ typedef struct {
   unsigned int plugin_id;	/**< plugin ID of the alive plugin */
 } plugin_alive_msg_t;
 
-/** List all message.
- * Message type Id is MSG_PLUGIN_LIST_ALL.
- */
-typedef struct {
-  bool dummy;                                   /**< just a dummy element */
-} plugin_list_all_msg_t;
-
-
 /** Plugin loaded message.
  * Message type ID is MSG_PLUGIN_LOADED.
  */
@@ -125,14 +119,7 @@ typedef struct {
  * Message type ID is MSG_PLUGIN_LIST.
  */
 typedef struct {
-  unsigned int num_plugins;                     /**< number of available plugins */
-  unsigned int payload_size;                    /**< payload size of this message */
-  char list[PLUGIN_MSG_MAX_NUM_PLUGINS * PLUGIN_MSG_NAME_LENGTH];   /**< list of plugins. plugin names are separated by 0s. */
+  dynamic_list_t plugin_list;	/**< dynamically growing list of plugin names. */
 } plugin_list_msg_t;
-
-/* List all plugins failed. */
-typedef struct{
-  bool dummy;                                   /**< just a dummy element */
-} plugin_list_all_failed_msg_t;
 
 #endif

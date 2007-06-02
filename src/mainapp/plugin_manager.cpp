@@ -27,6 +27,7 @@
 
 #include <mainapp/plugin_manager.h>
 #include <mainapp/plugin_messages.h>
+#include <mainapp/plugin_list_message.h>
 #include <mainapp/thread_manager.h>
 #include <core/threading/thread_initializer.h>
 #include <core/plugin.h>
@@ -101,33 +102,253 @@ FawkesPluginManager::set_hub(FawkesNetworkHub *hub)
  * all plugins is stored. Memory is allocated at this address and
  * has to be freed by the caller!
  */
-void
-FawkesPluginManager::list_avail(unsigned int* num_plugins, char*** plugin_list)
+PluginListMessage *
+FawkesPluginManager::list_avail()
 {
   DIR* plugin_dir;
   struct dirent* dirp;
   /* constant for this somewhere? */
   const char* file_ext = ".so";
 
-  *num_plugins = 0;
-
-  *plugin_list = (char**) malloc(sizeof(char*) * PLUGIN_MSG_MAX_NUM_PLUGINS);
+  PluginListMessage *m = new PluginListMessage();
 
   if ( NULL == (plugin_dir = opendir(PLUGINDIR)) ) {
     LibLogger::log_error("FawkesPluginManager", "Opening Plugindir failed.");
+    return m;
   }
-  
+
   for (unsigned int i = 0; NULL != (dirp = readdir(plugin_dir)); ++i) {
     char* file_name = dirp->d_name;
     char* pos = strstr(file_name, file_ext);
     if (NULL != pos) {
-      (*plugin_list)[*num_plugins] = (char*) malloc(strlen(file_name) + 1);
-      strcpy((*plugin_list)[*num_plugins], file_name);
-      (*num_plugins)++;
+      m->append(file_name, strlen(file_name) - strlen(file_ext));
     }
   }
 
   closedir(plugin_dir);
+
+  return m;
+}
+
+
+void
+FawkesPluginManager::request_load(const char *plugin_name, unsigned int client_id)
+{
+  if ( load_requests.find(plugin_name) == load_requests.end() ) {
+    try {
+      LibLogger::log_debug("FawkesPluginManager", "Requesting loading of plugin '%s'", plugin_name);      
+      plugin_loader->request_load(plugin_name);
+    } catch (Exception &e) {
+      LibLogger::log_error("FawkesPluginManager", e);
+    }
+  }
+  load_requests[plugin_name].push_back(client_id);
+  load_requests[plugin_name].sort();
+  load_requests[plugin_name].unique();
+}
+
+
+void
+FawkesPluginManager::request_unload(const char *plugin_name, unsigned int client_id)
+{
+  if ( unload_requests.find(plugin_name) == unload_requests.end() ) {
+    try {
+      LibLogger::log_debug("FawkesPluginManager", "Requesting finalization of plugin '%s'", plugin_name);      
+      thread_manager->remove_deferred(plugins[plugin_name]->threads());
+    } catch (Exception &e) {
+      LibLogger::log_error("FawkesPluginManager", e);
+    }
+  }
+  unload_requests[plugin_name].push_back(client_id);
+  unload_requests[plugin_name].sort();
+  unload_requests[plugin_name].unique();
+}
+
+
+void
+FawkesPluginManager::add_plugin_deferred(Plugin *plugin, const char *plugin_name)
+{
+  try {
+    thread_manager->add_deferred(plugin->threads());
+    plugins_deferred[plugin_name] = plugin;
+    plugin_ids_deferred[plugin_name] = next_plugin_id++;
+  } catch (CannotInitializeThreadException &e) {
+    e.printTrace();
+    LibLogger::log_error("FawkesPluginManager", "Could not initialize one or more threads of plugin %s, unloading plugin", plugin_name);
+    plugin_loader->unload(plugin);
+    throw;
+  }
+}
+
+
+void
+FawkesPluginManager::send_load_failure(const char *plugin_name,
+				       std::list<unsigned int> &clients)
+{
+  for (lrci = clients.begin(); lrci != clients.end(); ++lrci) {
+    plugin_load_failed_msg_t *r = (plugin_load_failed_msg_t *)calloc(1, sizeof(plugin_load_failed_msg_t));
+    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+    hub->send((*lrci), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOAD_FAILED,
+	      r, sizeof(plugin_load_failed_msg_t));
+  }
+}
+
+void
+FawkesPluginManager::send_load_success(const char *plugin_name, unsigned int client_id)
+{
+  plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
+  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+  r->plugin_id = plugin_ids[plugin_name];
+  hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED,
+	    r, sizeof(plugin_loaded_msg_t));
+}
+
+
+
+void
+FawkesPluginManager::send_unload_failure(const char *plugin_name,
+					 std::list<unsigned int> &clients)
+{
+  for (lrci = clients.begin(); lrci != clients.end(); ++lrci) {
+    plugin_unload_failed_msg_t *r = (plugin_unload_failed_msg_t *)calloc(1, sizeof(plugin_unload_failed_msg_t));
+    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+    hub->send((*lrci), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOAD_FAILED,
+	      r, sizeof(plugin_unload_failed_msg_t));
+  }
+}
+
+void
+FawkesPluginManager::send_unload_success(const char *plugin_name, unsigned int client_id)
+{
+  plugin_unloaded_msg_t *r = (plugin_unloaded_msg_t *)calloc(1, sizeof(plugin_unloaded_msg_t));
+  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+  hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOADED,
+	    r, sizeof(plugin_unloaded_msg_t));
+}
+
+
+void
+FawkesPluginManager::check_loaded()
+{
+  plugins_mutex->lock();
+  lri = load_requests.begin();
+  while (lri != load_requests.end()) {
+    std::string name = (*lri).first;
+    if ( plugins_deferred.find(name) != plugins_deferred.end() ) {
+      // Already loaded, deferred initialization running
+      ++lri;
+      continue;
+    }
+    if ( plugin_loader->finished_load(name.c_str()) ) {
+      try {
+	Plugin *p = plugin_loader->finish_deferred_load(name.c_str());
+
+	// LibLogger::log_debug("FawkesPluginManager", "Adding plugin %s", name.c_str());
+	add_plugin_deferred(p, name.c_str());
+
+      } catch (Exception &e) {
+	LibLogger::log_error("FawkesPluginManager", "Could not load plugin '%s'", name.c_str());
+	LibLogger::log_error("FawkesPluginManager", e);
+	send_load_failure(name.c_str(), (*lri).second);
+      }
+
+      ++lri;
+    } else {
+      ++lri;
+    }
+  }
+  plugins_mutex->unlock();
+}
+
+
+void
+FawkesPluginManager::check_finalized()
+{
+  plugins_mutex->lock();
+  ulri = unload_requests.begin();
+  while (ulri != unload_requests.end()) {
+    std::string name = (*ulri).first;
+
+    if ( plugins.find(name) == plugins.end() ) {
+      // Not loaded
+      ++ulri;
+      unload_requests.erase(name.c_str());
+      plugin_unloaded_msg_t *r = (plugin_unloaded_msg_t *)calloc(1, sizeof(plugin_unloaded_msg_t));
+      strncpy(r->name, name.c_str(), PLUGIN_MSG_NAME_LENGTH);
+      hub->broadcast(FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOADED, r, sizeof(plugin_unloaded_msg_t));
+      continue;
+    }
+
+    try {
+      if ( thread_manager->deferred_remove_done(plugins[name]->threads()) ) {
+	plugin_loader->unload(plugins[name]);
+
+	plugins.erase(name);
+	plugin_ids.erase(name);
+      
+	plugin_unloaded_msg_t *r = (plugin_unloaded_msg_t *)calloc(1, sizeof(plugin_unloaded_msg_t));
+	strncpy(r->name, name.c_str(), PLUGIN_MSG_NAME_LENGTH);
+	hub->broadcast(FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOADED, r, sizeof(plugin_unloaded_msg_t));
+
+	LibLogger::log_info("FawkesPluginManager", "Plugin '%s' finalized and unloaded successfully", name.c_str());
+
+	++ulri;
+	unload_requests.erase(name.c_str());
+      } else {
+	++ulri;
+      }
+    } catch (Exception &e) {
+      LibLogger::log_error("FawkesPluginManager", "Could not unload plugin '%s'", name.c_str());
+      LibLogger::log_error("FawkesPluginManager", e);
+      send_unload_failure(name.c_str(), (*ulri).second);
+      ++ulri;
+      unload_requests.erase(name.c_str());
+    }
+  }
+  plugins_mutex->unlock();
+}
+
+
+void
+FawkesPluginManager::check_initialized()
+{
+  pit = plugins_deferred.begin();
+  while (pit != plugins_deferred.end()) {
+    std::string name = (*pit).first;
+    try {
+      LibLogger::log_debug("FawkesPluginManager", "Checking if plugin %s has finished initialization", name.c_str());
+      if ( thread_manager->deferred_add_done((*pit).second->threads()) ) {
+	plugins[name] = (*pit).second;
+	plugin_ids[name] = plugin_ids_deferred[name];
+
+	LibLogger::log_debug("FawkesPluginManager", "Sending success message for %s", name.c_str());
+	plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
+	strncpy(r->name, name.c_str(), PLUGIN_MSG_NAME_LENGTH);
+	r->plugin_id = plugin_ids[name];
+	hub->broadcast(FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED, r, sizeof(plugin_loaded_msg_t));
+
+	++pit;
+	plugins_deferred.erase(name);
+	plugin_ids_deferred.erase(name);
+
+	LibLogger::log_info("FawkesPluginManager", "Plugin %s loaded and initialized successfully", name.c_str());
+
+	load_requests.erase(name.c_str());
+
+      } else {
+	++pit;
+      }
+    } catch (Exception &e) {
+      LibLogger::log_error("FawkesPluginManager", "Initialization of plugin failed");
+      LibLogger::log_error("FawkesPluginManager", e);
+      send_load_failure(name.c_str(), load_requests[name]);
+      load_requests.erase(name.c_str());
+      plugin_loader->unload((*pit).second);
+      ++pit;
+      plugins_deferred.erase(name);
+      plugin_ids_deferred.erase(name);
+    }
+  }
 }
 
 
@@ -188,6 +409,10 @@ FawkesPluginManager::unload(const char *plugin_type)
 void
 FawkesPluginManager::process_after_loop()
 {
+  check_loaded();
+  check_initialized();
+  check_finalized();
+
   inbound_queue.lock();
 
   while ( ! inbound_queue.empty() ) {
@@ -202,21 +427,13 @@ FawkesPluginManager::process_after_loop()
 	char name[PLUGIN_MSG_NAME_LENGTH + 1];
 	name[PLUGIN_MSG_NAME_LENGTH] = 0;
 	strncpy(name, m->name, PLUGIN_MSG_NAME_LENGTH);
-	try {
-	  LibLogger::log_info("FawkesPluginManager", "Trying to load %s", name);
 
-	  load(name);
-	  plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
-	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
-	  r->plugin_id = plugin_ids[name];
-	  hub->broadcast(FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED, r, sizeof(plugin_loaded_msg_t));
-	} catch (Exception &e) {
-	  plugin_load_failed_msg_t *r = (plugin_load_failed_msg_t *)calloc(1, sizeof(plugin_load_failed_msg_t));
-	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
-	  hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOAD_FAILED,
-		    r, sizeof(plugin_load_failed_msg_t));
-	  LibLogger::log_warn("FawkesPluginManager", "Plugin %s could not be loaded", name);
-	  LibLogger::log_warn("FawkesPluginManager", e);
+	if ( plugin_loader->is_loaded(name) ) {
+	  LibLogger::log_info("FawkesPluginManager", "Client requested loading of %s which is already loaded", name);
+	  send_load_success(name, msg->clid());
+	} else {
+	  LibLogger::log_info("FawkesPluginManager", "Requesting deferred loading of %s", name);
+	  request_load(name, msg->clid());
 	}
       }
       break;
@@ -229,68 +446,24 @@ FawkesPluginManager::process_after_loop()
 	char name[PLUGIN_MSG_NAME_LENGTH + 1];
 	name[PLUGIN_MSG_NAME_LENGTH] = 0;
 	strncpy(name, m->name, PLUGIN_MSG_NAME_LENGTH);
-	try {
-	  LibLogger::log_debug("FawkesPluginManager", "Unloading %s", name);
-	  unload(name);
-	  plugin_unloaded_msg_t *r = (plugin_unloaded_msg_t *)calloc(1, sizeof(plugin_unloaded_msg_t));
-	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
-	  hub->broadcast(FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOADED,
-			 r, sizeof(plugin_unloaded_msg_t));
-	} catch (Exception &e) {
-	  plugin_unload_failed_msg_t *r = (plugin_unload_failed_msg_t *)calloc(1, sizeof(plugin_unload_failed_msg_t));
-	  strncpy(r->name, name, PLUGIN_MSG_NAME_LENGTH);
-	  hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOAD_FAILED,
-		    r, sizeof(plugin_unload_failed_msg_t));
-	  LibLogger::log_warn("FawkesPluginManager", "Plugin %s could not be unloaded", name);
-	  LibLogger::log_warn("FawkesPluginManager", e);
+
+	if ( ! plugin_loader->is_loaded(name) ) {
+	  LibLogger::log_info("FawkesPluginManager", "Client requested unloading of %s which is not loaded", name);
+	  send_unload_success(name, msg->clid());
+	} else {
+	  LibLogger::log_info("FawkesPluginManager", "Requesting deferred UNloading of %s", name);
+	  request_unload(name, msg->clid());
 	}
       }
       break;
 
     case MSG_PLUGIN_LIST_AVAIL:
-      if ( msg->payload_size() != sizeof(plugin_list_all_msg_t) ) {
-	LibLogger::log_error("FawkesPluginManager", "Invalid list all message size.");
-      } else {
-	try {
-	  LibLogger::log_debug("FawkesPluginManager", "Sending list of all available plugins");
-	  unsigned int num_plugins;
-	  char **plugin_list;
-	  unsigned int plugin_list_size = 0;
-
-	  list_avail(&num_plugins, &plugin_list);
-
-	  // calculate actual size
-	  for (unsigned int i = 0; i < num_plugins; i++) {
-	    plugin_list_size += strlen(plugin_list[i]) + 1;
-	  }
-
-	  plugin_list_msg_t* r = (plugin_list_msg_t *)calloc(1, sizeof(plugin_list_msg_t));
-	  r->num_plugins = num_plugins;
-	  r->payload_size = sizeof(plugin_list_msg_t) - PLUGIN_MSG_MAX_NUM_PLUGINS * PLUGIN_MSG_NAME_LENGTH + plugin_list_size;
-
-	  char *t;
-	  char *p = (char *)malloc(plugin_list_size);
-	  t = p;
-
-	  for (unsigned int i = 0; i < num_plugins; i++) {
-	    size_t len = strlen(plugin_list[i]);
-	    strcpy(t, plugin_list[i]);
-	    t += len + 1;
-	    free(plugin_list[i]);
-	  }
-
-	  free(plugin_list);
-
-	  memcpy(r->list, p, plugin_list_size); 
-	
-	  hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LIST,
-		    r, r->payload_size);
-	} catch (Exception &e) {
-	  plugin_list_all_failed_msg_t *r = (plugin_list_all_failed_msg_t *)calloc(1, sizeof(plugin_list_all_failed_msg_t));
-	  
-	  hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LIST_AVAIL_FAILED,
-		    r, sizeof(plugin_list_all_failed_msg_t));
-	}
+      try {
+	LibLogger::log_debug("FawkesPluginManager", "Sending list of all available plugins");
+	PluginListMessage *plm = list_avail();
+	hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LIST, plm);
+      } catch (Exception &e) {
+	hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LIST_AVAIL_FAILED);
       }
       break;
 

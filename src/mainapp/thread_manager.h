@@ -50,8 +50,14 @@ class FawkesThreadManager : public ThreadCollector
   virtual void add(ThreadList &tl);
   virtual void add(Thread *t);
 
+  virtual void add_deferred(ThreadList &tl);
+  virtual bool deferred_add_done(ThreadList &tl);
+
   virtual void remove(ThreadList &tl);
   virtual void remove(Thread *t);
+
+  virtual void remove_deferred(ThreadList &tl);
+  virtual bool deferred_remove_done(ThreadList &tl);
 
   virtual void force_remove(ThreadList &tl);
   virtual void force_remove(Thread *t);

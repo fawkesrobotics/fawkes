@@ -22,10 +22,15 @@ BASEDIR = ../..
 
 CFLAGS = -g
 
-LIBS_fawkes = core utils interfaces blackboard netcomm config aspects
-OBJS_fawkes = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+LIBS_libfawkesmainappmsgs = core utils netcomm
+OBJS_libfawkesmainappmsgs = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*_message.cpp)))))
 
-OBJS_all =	$(OBJS_fawkes)
+LIBS_fawkes = core utils interfaces blackboard netcomm config aspects fawkesmainappmsgs
+OBJS_fawkes = $(filter-out $(OBJS_fawkesmainappmsgs),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
+
+OBJS_all =	$(OBJS_fawkes)			\
+		$(OBJS_fawkesmainappmsgs)
+LIBS_all =	$(LIBDIR)/libfawkesmainappmsgs.so
 BINS_all =	$(BINDIR)/fawkes
 
 include $(BASEDIR)/etc/buildsys/base.mk
