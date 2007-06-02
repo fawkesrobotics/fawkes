@@ -27,13 +27,14 @@
 
 #include <core/exceptions/system.h>
 #include <core/exceptions/software.h>
-#include <netcomm/fawkes/dynamic_buffer.h>
+#include <netcomm/utils/dynamic_buffer.h>
 
 #include <cstdlib>
 #include <cstring>
 #include <netinet/in.h>
 
-/** @class DynamicBuffer <netcomm/fawkes/dynamic_buffer.h>
+
+/** @class DynamicBuffer <netcomm/utils/dynamic_buffer.h>
  * Dynamically growing buffer.
  * This class maintains a list or arbitrary data objects stuffed into
  * one consecutive memory. The buffer layout is like the following:
@@ -257,12 +258,12 @@ DynamicBuffer::next(size_t *size)
   }
 
   if ( _it_curel > 0 ) {
-    _it_curhead = (element_header_t *)((size_t)_it_curhead + ntohs(*_it_curhead)
-				                           + sizeof(element_header_t));
-    _it_curdata = (void *)(((size_t)_it_curdata + ntohs(*_it_curhead) + sizeof(element_header_t)));
+    size_t offset = ntohs(*_it_curhead) + sizeof(element_header_t);
+    _it_curhead = (element_header_t *)((size_t)_it_curhead + offset);
+    _it_curdata = (void *)((size_t)_it_curdata + offset);
   }
   ++_it_curel;
-
   *size = ntohs(*_it_curhead);
+
   return _it_curdata;
 }

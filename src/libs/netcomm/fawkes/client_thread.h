@@ -56,10 +56,6 @@ class FawkesNetworkClientThread : public Thread
 
 
   unsigned int  _clid;
-  unsigned int  mtu;
-  void         *send_buffer;
-  void         *b;
-  unsigned int  buffer_size;
   bool          _alive;
   StreamSocket *s;
   FawkesNetworkThread *parent;

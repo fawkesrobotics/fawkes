@@ -37,9 +37,12 @@ class FawkesNetworkMessageContent
   FawkesNetworkMessageContent();
   virtual ~FawkesNetworkMessageContent();
 
-  virtual void serialize() = 0;
+  virtual void   serialize() = 0;
   virtual void * payload();
   virtual size_t payload_size();
+
+ protected:
+  void copy_payload(size_t offset, void *buf, size_t len);
 
  protected:
   /** Pointer to payload. */

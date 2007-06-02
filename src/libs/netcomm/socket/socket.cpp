@@ -469,7 +469,7 @@ Socket::poll(int timeout, short what)
  * @exception SocketException if the data could not be written or if a timeout occured.
  */
 void
-Socket::write(void *buf, size_t count)
+Socket::write(const void *buf, size_t count)
 {
   int retval = 0;
   unsigned int bytes_written = 0;

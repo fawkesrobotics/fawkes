@@ -56,50 +56,23 @@ ConnectionDiedException::ConnectionDiedException(const char *msg)
 /** Send messages.
  * @param s socket over which the data shall be transmitted.
  * @param msgq message queue that contains the messages that have to be sent
- * @param buffer the buffer will be used as outbound buffer. The buffer is
- * filled with as many message that fit into the buffer (determined by buffer_size
- * and the message sizes) and then it is sent over the network. This is done to
- * reduce the number of packets sent to reduce overhead.
- * @param buffer_size size of buffer
  * @exception ConnectionDiedException Thrown if any error occurs during the
  * operation since for any error the conncetion is considered dead.
  */
 void
-FawkesNetworkTransceiver::send(StreamSocket *s, FawkesNetworkMessageQueue *msgq,
-			       void *buffer, unsigned int buffer_size)
+FawkesNetworkTransceiver::send(StreamSocket *s, FawkesNetworkMessageQueue *msgq)
 {
   msgq->lock();
   try {
-    unsigned int cur_size = 0;
-    void *b = (char *)buffer + sizeof(fawkes_transfer_header_t);
-    fawkes_transfer_header_t theader;
     while ( ! msgq->empty() ) {
-      // we put messages into the buffer until the buffer size is reached, then we
-      // write it
       FawkesNetworkMessage *m = msgq->front();
+      m->pack();
       const fawkes_message_t &f = m->fmsg();
       unsigned int payload_size = m->payload_size();
-      if ( (sizeof(fawkes_transfer_header_t) + cur_size + sizeof(fawkes_message_t) + payload_size) > buffer_size ) {
-	// flush buffer
-	theader.size = htonl(cur_size);
-	memcpy(buffer, &theader, sizeof(theader));
-	s->write(buffer, cur_size + sizeof(fawkes_transfer_header_t));
-	b = (char *)buffer + sizeof(fawkes_transfer_header_t);
-	cur_size = 0;
-      }
-      memcpy(b, &(f.header), sizeof(f.header));
-      b = (char *)b + sizeof(f.header);
-      memcpy(b, f.payload, payload_size);
-      b = (char *)b + payload_size;
+      s->write(&(f.header), sizeof(f.header));
+      s->write(f.payload, payload_size);
       m->unref();
-      cur_size += sizeof(f.header) + payload_size;
       msgq->pop();
-    }
-    if ( cur_size > 0 ) {
-      // data needs to be written
-      theader.size = htonl(cur_size);
-      memcpy(buffer, &theader, sizeof(theader));
-      s->write(buffer, cur_size + sizeof(fawkes_transfer_header_t));
     }
   } catch (SocketException &e) {
     msgq->unlock();
@@ -110,52 +83,44 @@ FawkesNetworkTransceiver::send(StreamSocket *s, FawkesNetworkMessageQueue *msgq,
 
 
 /** Receive data.
- * This method receives all messages currently available from the network.
+ * This method receives all messages currently available from the network, or
+ * a limited number depending on max_num_msgs. If max_num_msgs is 0 then all
+ * messages are read. Note that on a busy connection this may cause recv() to
+ * never return! The default is to return after 8 messages.
  * The messages are stored in the supplied message queue.
  * @param s socket to gather messages from
  * @param msgq message queue to store received messages in
+ * @param max_num_msgs maximum number of messages to read from stream in one go.
  * @exception ConnectionDiedException Thrown if any error occurs during the
  * operation since for any error the conncetion is considered dead.
  */
 void
-FawkesNetworkTransceiver::recv(StreamSocket *s, FawkesNetworkMessageQueue *msgq)
+FawkesNetworkTransceiver::recv(StreamSocket *s, FawkesNetworkMessageQueue *msgq,
+			       unsigned int max_num_msgs)
 {
-  unsigned int packet_size = 0;
-  fawkes_transfer_header_t theader;
   msgq->lock();
 
   try {
-    unsigned int read_bytes = 0; // without initial size
-    s->read(&theader, sizeof(theader));
-    // Now we know how many bytes to read and we can detect
-    // errors, start reading messages
-    packet_size = ntohl(theader.size);
-
-    while (read_bytes < packet_size ) {
-
+    unsigned int num_msgs = 0;
+    do {
       fawkes_message_t msg;
       s->read(&(msg.header), sizeof(msg.header));
-      read_bytes += sizeof(msg.header);
 
       unsigned int payload_size = ntohl(msg.header.payload_size);
 
       if ( payload_size > 0 ) {
 
-	if ( payload_size > (packet_size - read_bytes)) {
-	  // this is obviously a problem
-	  throw Exception("Protocol error");
-	}
-
 	msg.payload = malloc(payload_size);
 	s->read(msg.payload, payload_size);
-	read_bytes += payload_size;
       } else {
 	msg.payload = NULL;
       }
 
       FawkesNetworkMessage *m = new FawkesNetworkMessage(msg);
       msgq->push(m);
-    }
+
+      ++num_msgs;
+    } while ( s->available() && (num_msgs < max_num_msgs) );
   } catch (SocketException &e) {
     msgq->unlock();
     throw ConnectionDiedException("Read failed");

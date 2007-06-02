@@ -54,8 +54,6 @@ FawkesNetworkClientThread::FawkesNetworkClientThread(StreamSocket *s,
   this->parent = parent;
   _alive = true;
   _clid = 0;
-  mtu = s->mtu() - 40; // 40 bytes overhead for TCP and IP headers
-  send_buffer = malloc(mtu);
   outbound_queue = new FawkesNetworkMessageQueue();
   inbound_queue = new FawkesNetworkMessageQueue();
 }
@@ -65,7 +63,6 @@ FawkesNetworkClientThread::FawkesNetworkClientThread(StreamSocket *s,
 FawkesNetworkClientThread::~FawkesNetworkClientThread()
 {
   delete s;
-  free(send_buffer);
   delete outbound_queue;
   delete inbound_queue;
 }
@@ -159,7 +156,7 @@ FawkesNetworkClientThread::loop()
 
   if ( ! outbound_queue->empty() ) {
     try {
-      FawkesNetworkTransceiver::send(s, outbound_queue, send_buffer, mtu);  
+      FawkesNetworkTransceiver::send(s, outbound_queue);
     } catch (ConnectionDiedException &e) {
       _alive = false;
       cancel();
@@ -176,10 +173,6 @@ FawkesNetworkClientThread::loop()
 void
 FawkesNetworkClientThread::enqueue(FawkesNetworkMessage *msg)
 {
-  if ( (sizeof(fawkes_message_header_t) + msg->payload_size()) > (mtu - sizeof(unsigned int)) ) {
-    throw Exception("Message too big");
-  }
-
   msg->ref();
   outbound_queue->push_locked(msg);
 }

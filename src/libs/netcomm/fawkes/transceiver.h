@@ -42,9 +42,9 @@ class ConnectionDiedException : public Exception
 class FawkesNetworkTransceiver
 {
  public:
-  static void send(StreamSocket *s, FawkesNetworkMessageQueue *msgq,
-		   void *buffer, unsigned int buffer_size);
-  static void recv(StreamSocket *s, FawkesNetworkMessageQueue *msgq);
+  static void send(StreamSocket *s, FawkesNetworkMessageQueue *msgq);
+  static void recv(StreamSocket *s, FawkesNetworkMessageQueue *msgq,
+		   unsigned int max_num_msgs = 8);
 };
 
 #endif

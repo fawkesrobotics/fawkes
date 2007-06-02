@@ -69,8 +69,6 @@ FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short in
   this->hostname = hostname;
   this->port     = port;
 
-  buffer = NULL;
-  buffer_size = 0;
   wait_timeout = 10;
 
   mutex = new Mutex();
@@ -98,11 +96,6 @@ FawkesNetworkClient::~FawkesNetworkClient()
   outbound_msgq->unlock();  
   delete outbound_msgq;
 
-  if ( buffer != NULL ) {
-    free(buffer);
-    buffer = NULL;
-    buffer_size = 0;
-  }
   for (std::map<unsigned int, WaitCondition *>::iterator i =  waitconds.begin(); i != waitconds.end(); ++i ) {
     delete (*i).second;
   }
@@ -121,8 +114,6 @@ FawkesNetworkClient::connect()
   mutex->lock();
   try {
     s->connect(hostname, port);
-    buffer_size = s->mtu() - 40;
-    buffer = malloc(buffer_size);
   } catch (SocketException &e) {
     mutex->unlock();
     throw;
@@ -157,7 +148,7 @@ FawkesNetworkClient::enqueue(FawkesNetworkMessage *message)
 void
 FawkesNetworkClient::send()
 {
-  FawkesNetworkTransceiver::send(s, outbound_msgq, buffer, buffer_size);
+  FawkesNetworkTransceiver::send(s, outbound_msgq);
 }
 
 

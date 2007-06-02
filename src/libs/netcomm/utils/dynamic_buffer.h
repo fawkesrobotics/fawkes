@@ -25,10 +25,21 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <netcomm/fawkes/message_datatypes.h>
+#ifndef __NETCOMM_UTILS_DYNAMIC_BUFFER_H_
+#define __NETCOMM_UTILS_DYNAMIC_BUFFER_H_
 
 #include <sys/types.h>
 #include <stdint.h>
+
+/** Dynamic list type.
+ * Use this element in your message struct if you want to add a dynamic list.
+ * This is meant to be used in conjunction with DynamicBuffer.
+ */
+typedef struct {
+  uint16_t  size;		/**< total size of list buffer */
+  uint16_t  num_elements;	/**< number of elements in list */
+} dynamic_list_t;
+
 
 class DynamicBuffer
 {
@@ -67,3 +78,5 @@ class DynamicBuffer
   void              *_it_curdata;
 
 };
+
+#endif

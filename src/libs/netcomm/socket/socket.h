@@ -70,7 +70,7 @@ class Socket
   virtual bool         available();
 
   virtual void         read(void *buf, size_t count);
-  virtual void         write(void *buf, size_t count);
+  virtual void         write(const void *buf, size_t count);
   virtual void         send(void *buf, size_t buf_len);
   virtual void         send(void *buf, size_t buf_len,
 			    const struct sockaddr *to_addr, socklen_t addr_len);

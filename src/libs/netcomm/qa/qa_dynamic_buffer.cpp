@@ -27,7 +27,7 @@
 
 /// @cond QA
 
-#include <netcomm/fawkes/dynamic_buffer.h>
+#include <netcomm/utils/dynamic_buffer.h>
 
 #include <iostream>
 #include <cstring>

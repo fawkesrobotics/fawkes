@@ -31,6 +31,7 @@
 #include <netcomm/fawkes/message.h>
 #include <netcomm/fawkes/handler.h>
 #include <netcomm/fawkes/message_queue.h>
+#include <netcomm/fawkes/message_content.h>
 #include <core/threading/thread_collector.h>
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
@@ -274,6 +275,26 @@ FawkesNetworkThread::send(unsigned int to_clid,
 {
   FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, component_id, msg_id,
 						     payload, payload_size);
+  send(m);
+  m->unref();
+}
+
+
+/** Send a message.
+ * A FawkesNetworkMessage is created and sent via the emitter.
+ * @param to_clid client ID of recipient
+ * @param component_id component ID
+ * @param msg_id message type id
+ * @param content Fawkes complex network message content
+ * @see FawkesNetworkEmitter::broadcast()
+ */
+void
+FawkesNetworkThread::send(unsigned int to_clid,
+			  unsigned short int component_id, unsigned short int msg_id,
+			  FawkesNetworkMessageContent *content)
+{
+  FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, component_id, msg_id,
+						     content);
   send(m);
   m->unref();
 }

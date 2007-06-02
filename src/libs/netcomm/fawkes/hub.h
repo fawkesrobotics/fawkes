@@ -30,6 +30,7 @@
 
 class FawkesNetworkMessage;
 class FawkesNetworkHandler;
+class FawkesNetworkMessageContent;
 
 class FawkesNetworkHub
 {
@@ -56,6 +57,11 @@ class FawkesNetworkHub
 		    unsigned short int component_id,
 		    unsigned short int msg_id,
 		    void *payload, unsigned int payload_size)              = 0;
+
+  virtual void send(unsigned int to_clid,
+		    unsigned short int component_id,
+		    unsigned short int msg_id,
+		    FawkesNetworkMessageContent *content)                  = 0;
 
   virtual void add_handler(FawkesNetworkHandler *handler)                  = 0;
   virtual void remove_handler(FawkesNetworkHandler *handler)               = 0;

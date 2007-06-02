@@ -263,9 +263,14 @@ FawkesNetworkMessage::FawkesNetworkMessage(unsigned int clid,
  */
 FawkesNetworkMessage::~FawkesNetworkMessage()
 {
-  if ( _msg.payload != NULL ) {
-    free(_msg.payload);
-    _msg.payload = NULL;
+  if ( _content == NULL ) {
+    if ( _msg.payload != NULL ) {
+      free(_msg.payload);
+      _msg.payload = NULL;
+    }
+  } else {
+    delete _content;
+    _content = NULL;
   }
 }
 

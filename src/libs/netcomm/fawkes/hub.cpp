@@ -86,6 +86,16 @@
  * @param payload buffer with payload
  * @param payload_size payload size
  *
+ * @fn void FawkesNetworkHub::send(unsigned int to_clid, unsigned short int component_id, unsigned short int msg_id, FawkesNetworkMessageContent *content) = 0
+ * This is an overloaded member function, provided for convenience. It
+ * differs from the above function only in what arguments it accepts.
+ * A FawkesNetworkMessage will be created transparently and send to
+ * the client with the given ID.
+ * @param to_clid client ID of recipient
+ * @param component_id component id
+ * @param msg_id message id
+ * @param content complex message content
+ *
  * @fn void FawkesNetworkHub::add_handler(FawkesNetworkHandler *handler) = 0
  * Add a message handler.
  * This message handler is called for incoming messages that have an appropriate

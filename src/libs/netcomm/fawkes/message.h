@@ -35,6 +35,36 @@
 
 #include <cstddef>
 
+/** Fawkes network message header.
+ * Header that is prepended to all following messages.
+ */
+typedef struct {
+  unsigned short int  cid;		/**< component id */
+  unsigned short int  msg_id;		/**< message id */
+  unsigned int        payload_size;	/**< payload size in bytes */
+} fawkes_message_header_t;
+
+
+/** Message as stored in local queues.
+ * A message takes a header and a pointer to the data that
+ * has the size mentioned in header.payload_size that is to be
+ * sent over the network.
+ */
+typedef struct {
+  fawkes_message_header_t  header;	/**< message header */
+  void                    *payload;	/**< message payload */
+} fawkes_message_t;
+
+
+/** Fawkes transfer header.
+ * This header is prepended to a collection of messages that is sent
+ * at once.
+ */
+typedef struct {
+  unsigned int  size;	/**< size of the following payload. */
+} fawkes_transfer_header_t;
+
+
 class FawkesNetworkMessageTooBigException : public Exception
 {
  public:

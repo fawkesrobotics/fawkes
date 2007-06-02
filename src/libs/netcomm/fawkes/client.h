@@ -81,9 +81,6 @@ class FawkesNetworkClient : public Thread
   const char *hostname;
   unsigned short int port;
 
-  void *buffer;
-  unsigned int buffer_size;
-
   StreamSocket *s;
   unsigned int wait_timeout;
 

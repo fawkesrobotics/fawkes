@@ -41,6 +41,7 @@ class FawkesNetworkAcceptorThread;
 class FawkesNetworkHandler;
 class FawkesNetworkMessage;
 class FawkesNetworkMessageQueue;
+class FawkesNetworkMessageContent;
 
 class FawkesNetworkThread : public Thread, public FawkesNetworkHub
 {
@@ -65,6 +66,9 @@ class FawkesNetworkThread : public Thread, public FawkesNetworkHub
   virtual void send(unsigned int to_clid,
 		    unsigned short int component_id, unsigned short int msg_id,
 		    void *payload, unsigned int payload_size);
+  virtual void send(unsigned int to_clid,
+		    unsigned short int component_id, unsigned short int msg_id,
+		    FawkesNetworkMessageContent *content);
 
   void add_client(FawkesNetworkClientThread *client);
   void wakeup();
