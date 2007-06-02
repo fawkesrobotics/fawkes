@@ -156,3 +156,37 @@ IllegalArgumentException::IllegalArgumentException(const char *msg)
 {
   append(msg);
 }
+
+
+/** @class OutOfBoundsException core/exceptions/software.h
+ * Index out of bounds.
+ * Throw this exception if a value is out of bounds or if someone tries to access
+ * an iterator that is not in the allowed range.
+ * @ingroup Exceptions
+ */
+/** Constructor.
+ * @param msg informative message, appended to exception, base message is
+ * "Out Of Bounds"
+ */
+OutOfBoundsException::OutOfBoundsException(const char *msg)
+  :  Exception("Out Of Bounds")
+{
+  append(msg);
+}
+
+
+/** @class AccessViolationException core/exceptions/software.h
+ * Access violates policy.
+ * Throw this exception if a any kind of access violates the policy, for example
+ * if someone tries to write to a read-only memory segment.
+ * @ingroup Exceptions
+ */
+/** Constructor.
+ * @param msg informative message, appended to exception, base message is
+ * "Access Violation"
+ */
+AccessViolationException::AccessViolationException(const char *msg)
+  :  Exception("Access Violation")
+{
+  append(msg);
+}

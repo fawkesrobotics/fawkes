@@ -65,14 +65,28 @@ class NonPointerTypeExpectedException : public Exception {
   NonPointerTypeExpectedException(const char *msg);
 };
 
+
 class MissingParameterException : public Exception {
  public:
   MissingParameterException(const char *msg);
 };
 
+
 class IllegalArgumentException : public Exception {
  public:
   IllegalArgumentException(const char *msg);
+};
+
+
+class OutOfBoundsException : public Exception {
+ public:
+  OutOfBoundsException(const char *msg);
+};
+
+
+class AccessViolationException : public Exception {
+ public:
+  AccessViolationException(const char *msg);
 };
 
 #endif
