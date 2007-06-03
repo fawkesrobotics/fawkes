@@ -172,7 +172,7 @@ main(int argc, char **argv)
     success = test_plugin(p);
     pl->unload(p);
     success = true;
-  } catch (PluginNotFoundException &e) {
+  } catch (PluginLoadException &e) {
     cout << "Could not load plugin" << endl;
     e.printTrace();
     success = false;

@@ -32,6 +32,8 @@
 #include <utils/system/argparser.h>
 #include <utils/logging/liblogger.h>
 #include <utils/logging/console.h>
+#include <utils/logging/file.h>
+#include <core/exceptions/system.h>
 
 #include <netdb.h>
 #include <cstdio>
@@ -154,9 +156,12 @@ main(int argc, char **argv)
   SignalManager::ignore(SIGPIPE);
 
   LibLogger::init();
+  LibLogger::add_logger(new FileLogger("qa_utils_liblogger.log"));
   LibLogger::add_logger(new ConsoleLogger());
 
   m.run();
+
+  LibLogger::finalize();
 
   delete argp;
   return 0;
