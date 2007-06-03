@@ -121,8 +121,7 @@ PluginLoader::~PluginLoader()
  * @return Returns a pointer to the opened plugin.  Do not under any
  * circumstances delete this object, use unload() instead! Since the delete
  * operator could be overloaded this would result in memory chaos.
- * @exception PluginNotFoundException thrown if plugin could not be found
- * (loading failed)
+ * @exception PluginLoadException thrown if plugin could not be loaded
  * @exception ModuleOpenException passed along from module manager
  */
 Plugin *
