@@ -4,6 +4,7 @@
  *
  *  Created: Tue Jan 16 16:47:03 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *             2007       Daniel Beck
  *
  *  $Id$
  *
@@ -25,28 +26,35 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __LOGGING_FILE_H_
-#define __LOGGING_FILE_H_
+#ifndef __UTILS_LOGGING_FILE_H_
+#define __UTILS_LOGGING_FILE_H_
 
 #include <utils/logging/logger.h>
-#include <utils/system/file.h>
+
+class Mutex;
+class File;
 
 class FileLogger : public Logger
 {
  public:
-  FileLogger(char* filename);
+  FileLogger(char* filename, LogLevel min_level = DEBUG);
   virtual ~FileLogger();
 
+  virtual void log(LogLevel level,
+		   const char *component, const char *format, ...);
   virtual void log_debug(const char *component, const char *format, ...);
   virtual void log_info(const char *component, const char *format, ...);
   virtual void log_warn(const char *component, const char *format, ...);
   virtual void log_error(const char *component, const char *format, ...);
 
+  virtual void vlog(LogLevel level, const char *component,
+		    const char *format, va_list va);
   virtual void vlog_debug(const char *component, const char *format, va_list va);
   virtual void vlog_info(const char *component, const char *format, va_list va);
   virtual void vlog_warn(const char *component, const char *format, va_list va);
   virtual void vlog_error(const char *component, const char *format, va_list va);
 
+  virtual void log(LogLevel level, const char *component, Exception &e);
   virtual void log_debug(const char *component, Exception &e);
   virtual void log_info(const char *component, Exception &e);
   virtual void log_warn(const char *component, Exception &e);
@@ -56,7 +64,9 @@ class FileLogger : public Logger
   struct timeval *now;
   struct tm *now_s;
 
-  File *log_file;
+  File       *log_file;
+  Mutex      *mutex;
+  LogLevel    min_level;
 };
 
 #endif

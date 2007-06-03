@@ -104,6 +104,24 @@ MultiLogger::remove_logger(Logger *logger)
 }
 
 
+/** Log message of given log level.
+ * @param level log level
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ */
+void
+MultiLogger::log(LogLevel level, const char *component, const char *format, ...)
+{
+  va_list va;
+  va_start(va, format);
+  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
+    (*logit)->vlog(level, component, format, va);
+  }
+  va_end(va);
+}
+
+
 /** Log debug message.
  * @param component component, used to distuinguish logged messages
  * @param format format of the message, see man page of sprintf for available
@@ -172,6 +190,23 @@ MultiLogger::log_error(const char *component, const char *format, ...)
 }
 
 
+/** Log message for given log level.
+ * @param level log level
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ * @param va variadic argument list
+ */
+void
+MultiLogger::vlog(LogLevel level,
+		  const char *component, const char *format, va_list va)
+{
+  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
+    (*logit)->vlog(level, component, format, va);
+  }
+}
+
+
 /** Log debug message.
  * @param component component, used to distuinguish logged messages
  * @param format format of the message, see man page of sprintf for available
@@ -231,6 +266,20 @@ MultiLogger::vlog_error(const char *component, const char *format, va_list va)
   }
 }
 
+
+
+/** Log exception for given log level.
+ * @param level log level
+ * @param component component, used to distuinguish logged messages
+ * @param e exception to log, exception messages will be logged
+ */
+void
+MultiLogger::log(LogLevel level, const char *component, Exception &e)
+{
+  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
+    (*logit)->log(level, component, e);
+  }
+}
 
 
 /** Log debug message.

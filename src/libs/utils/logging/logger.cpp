@@ -65,6 +65,13 @@
  * result is not what you intended. Thus make sure that you always use the
  * vlog_* method if you pass along a va_list!
  *
+ * @fn void Logger::log(Logger::LogLevel level, const char *component, const char *format, ...) = 0
+ * Log message for given log level.
+ * @param level log level
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ *
  * @fn void Logger::log_debug(const char *component, const char *format, ...) = 0
  * Log debug message.
  * @param component component, used to distuinguish logged messages
@@ -88,6 +95,14 @@
  * @param component component, used to distuinguish logged messages
  * @param format format of the message, see man page of sprintf for available
  * tokens.
+ *
+ * @fn void Logger::vlog(Logger::LogLevel level, const char *component, const char *format, va_list va) = 0
+ * Log message for given log level.
+ * @param level log level
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ * @param va variable argument list
  *
  * @fn void Logger::vlog_debug(const char *component, const char *format, va_list va) = 0
  * Log debug message.
@@ -117,23 +132,29 @@
  * tokens.
  * @param va variable argument list
  *
+ * @fn void Logger::log(Logger::LogLevel level, const char *component, Exception &e) = 0
+ * Log exception for given log level.
+ * @param level log level
+ * @param component component, used to distuinguish logged messages
+ * @param e exception to log, exception messages will be logged
+ *
  * @fn void Logger::log_debug(const char *component, Exception &e) = 0
- * Log debug message.
+ * Log debug exception.
  * @param component component, used to distuinguish logged messages
  * @param e exception to log, exception messages will be logged
  *
  * @fn void Logger::log_info(const char *component, Exception &e) = 0
- * Log informational message.
+ * Log informational exception.
  * @param component component, used to distuinguish logged messages
  * @param e exception to log, exception messages will be logged
  *
  * @fn void Logger::log_warn(const char *component, Exception &e) = 0
- * Log warning message.
+ * Log warning exception.
  * @param component component, used to distuinguish logged messages
  * @param e exception to log, exception messages will be logged
  *
  * @fn void Logger::log_error(const char *component, Exception &e) = 0
- * Log error message.
+ * Log error exception.
  * @param component component, used to distuinguish logged messages
  * @param e exception to log, exception messages will be logged
  *

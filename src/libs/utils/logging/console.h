@@ -25,27 +25,34 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __LOGGING_CONSOLE_H_
-#define __LOGGING_CONSOLE_H_
+#ifndef __UTILS_LOGGING_CONSOLE_H_
+#define __UTILS_LOGGING_CONSOLE_H_
 
 #include <utils/logging/logger.h>
+
+class Mutex;
 
 class ConsoleLogger : public Logger
 {
  public:
-  ConsoleLogger();
+  ConsoleLogger(LogLevel min_level = DEBUG);
   virtual ~ConsoleLogger();
 
+  virtual void log(LogLevel level,
+		   const char *component, const char *format, ...);
   virtual void log_debug(const char *component, const char *format, ...);
   virtual void log_info(const char *component, const char *format, ...);
   virtual void log_warn(const char *component, const char *format, ...);
   virtual void log_error(const char *component, const char *format, ...);
 
+  virtual void vlog(LogLevel level, const char *component,
+		    const char *format, va_list va);
   virtual void vlog_debug(const char *component, const char *format, va_list va);
   virtual void vlog_info(const char *component, const char *format, va_list va);
   virtual void vlog_warn(const char *component, const char *format, va_list va);
   virtual void vlog_error(const char *component, const char *format, va_list va);
 
+  virtual void log(LogLevel level, const char *component, Exception &e);
   virtual void log_debug(const char *component, Exception &e);
   virtual void log_info(const char *component, Exception &e);
   virtual void log_warn(const char *component, Exception &e);
@@ -53,7 +60,9 @@ class ConsoleLogger : public Logger
 
  private:
   struct timeval *now;
-  struct tm *now_s;
+  struct tm      *now_s;
+  Mutex          *mutex;
+  LogLevel        min_level;
 };
 
 #endif
