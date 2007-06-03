@@ -4,6 +4,7 @@
  *
  *  Generated: Wed Aug 30 22:47:11 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *             2007  Daniel Beck
  *
  *  $Id$
  *
@@ -27,14 +28,117 @@
 
 
 #include <utils/system/file.h>
+#include <core/exceptions/system.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
+#include <stdlib.h>
+
+
+/** @class UnableToOpenFileException utils/system/file.h
+ * Opening a file failed for some reason.
+ * @ingroup Exceptions
+ */
+/** Constructor
+ * @param filename the name of the file which couldn't be opened
+ * @param error the errno
+ */
+UnableToOpenFileException::UnableToOpenFileException(const char *filename, int error)
+  : Exception("Unable to open file", error)
+{
+  append(filename);
+}
+
 
 /** @class File utils/system/file.h
  * File utility methods.
  */
+
+
+/** Constructor. 
+ * Independent of the FileOpenMethod files are created with 
+ * permissions 660
+ * @param filename the filename
+ * @param method the method determines what is done if a file with the
+ * specified name already exists
+ */
+File::File(char *filename, FileOpenMethod method)
+{
+  switch (method)
+    {
+    case OVERWRITE:
+      fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+      fn = (char *) malloc( strlen(filename) + 1 );
+      strcpy(fn, filename);
+      break;
+      
+    case APPEND:
+      fd = open(filename, O_RDWR | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+      fn = (char *) malloc( strlen(filename) + 1 );
+      strcpy(fn, filename);
+      break;
+      
+    case ADD_SUFFIX:
+      {
+	fd = open(filename, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+	
+	int index = 1;
+	char *filename_ext = (char *) malloc( strlen(filename) + 5 );
+	strcpy(filename_ext, filename);
+	while ( (-1 == fd) && (EEXIST == errno) )
+	  {
+	    sprintf(filename_ext, "%s.%d", filename, index);
+	    fd = open(filename_ext, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+	    index++;
+	  }
+	fn = filename_ext;
+
+ 	break;
+      }
+      
+      default:
+	printf("%s [line %d]: Unkown method.\n", __FILE__, __LINE__);
+    }
+
+  if (-1 == fd)
+    {
+      throw UnableToOpenFileException(filename, errno);
+    }
+  
+  fp = fdopen(fd, "r+");
+}
+
+
+/** Destructor. */
+File::~File()
+{
+  // this also closes the underlying file descritptor fd
+  fclose(fp);
+  free(fn);
+}
+
+
+/** Get access to the file stream.
+ * @return a pointer to the file stream
+ */
+FILE *
+File::stream() const
+{
+  return fp;
+}
+
+/** Get the file's name.
+ * @return a pointer to a char array where the filename is stored
+ */
+const char *
+File::filename() const
+{
+  return fn;
+}
 
 
 /** Check if a file exists.
