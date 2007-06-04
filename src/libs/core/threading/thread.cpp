@@ -35,7 +35,6 @@
 
 #include <pthread.h>
 #include <unistd.h>
-#include <typeinfo>
 #include <cstring>
 #include <cstdlib>
 
@@ -129,7 +128,7 @@
  */
 Thread::Thread()
 {
-  constructor(NULL, OPMODE_CONTINUOUS);
+  constructor("UnnamedContinuousThread", OPMODE_CONTINUOUS);
 }
 
 /** Constructor.
@@ -139,7 +138,7 @@ Thread::Thread()
  */
 Thread::Thread(OpMode op_mode)
 {
-  constructor(NULL, op_mode);
+  constructor("UnnamedThread", op_mode);
 }
 
 
@@ -176,12 +175,8 @@ void
 Thread::constructor(const char *name, OpMode op_mode)
 {
   this->op_mode = op_mode;
+  this->_name   = strdup(name);
 
-  if ( name == NULL ) {
-    _name = strdup(typeid(this).name());
-  } else {
-    this->_name   = strdup(name);
-  }
   if ( op_mode == OPMODE_WAITFORWAKEUP ) {
     sleep_condition = new WaitCondition();
     sleep_mutex = new Mutex();

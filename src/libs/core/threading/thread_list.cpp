@@ -31,7 +31,6 @@
 #include <core/threading/read_write_lock.h>
 
 #include <string>
-#include <cstring>
 
 /** @class ThreadListSealedException <core/threading/thread_list.h>
  * Thread list sealed exception.
@@ -149,21 +148,24 @@ ThreadListInitThread::ThreadListInitThread(ThreadList *tl, ThreadInitializer *in
 void
 ThreadListInitThread::loop()
 {
+  _success = true;
   for (ThreadList::iterator i = tl->begin(); i != tl->end(); ++i) {
     try {
       initializer->init(*i);
       (*i)->init();
-      _success = true;
     } catch (CannotInitializeThreadException &ex) {
       e->append("Initializing thread in list '%s' failed", tl->name());
       e->append(ex);
+      _success = false;
       break;
     } catch (Exception &ex) {
       e->append("Could not initialize thread '%s'", (*i)->name());
       e->append(ex);
+      _success = false;
       break;
     } catch (...) {
       e->append("Could not initialize thread '%s': unknown exception caught", (*i)->name());
+      _success = false;
       break;
     }
   }
@@ -198,7 +200,6 @@ ThreadListFinalizerThread::loop()
     if ( ! tl->prepare_finalize(finalizer) ) {
       tl->cancel_finalize();
       e->append("ThreadList '%s' cannot be prepared for finalization", tl->name());
-      e->printTrace();
     } else {
       tl->finalize(finalizer);
       _success = true;
@@ -631,7 +632,6 @@ ThreadList::deferred_finalize_done()
 	_fin_thread = NULL;
 	return true;
       } catch (Exception e) {
-	e.printTrace();
 	delete _fin_thread;
 	_fin_thread = NULL;
 	throw;
