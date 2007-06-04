@@ -128,16 +128,23 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
 			     /* dest on del */ master);
     shmem_header->setSharedMemory(shmem);
   } catch ( ShmCouldNotAttachException &e ) {
+    delete shmem_header;
     throw BBMemMgrCannotOpenException();
   }
 
   if ( ! shmem->isValid() ) {
+    shmem->setDestroyOnDelete(false);
+    delete shmem;
+    delete shmem_header;
     throw BBMemMgrCannotOpenException();
   }
 
   if ( master && ! shmem->isCreator() ) {
     // this might mean trouble, we throw an exception if we are not master but
     // this was requested
+    shmem->setDestroyOnDelete(false);
+    delete shmem;
+    delete shmem_header;
     throw BBNotMasterException("Not owner of shared memory segment");
   }
 

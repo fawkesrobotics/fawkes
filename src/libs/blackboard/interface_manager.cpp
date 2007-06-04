@@ -108,11 +108,13 @@ BlackBoardInterfaceManager::BlackBoardInterfaceManager(bool bb_master)
 
   instance_serial = 1;
   mutex = new Mutex();
-  iface_module = new ModuleDL( LIBDIR"/libinterfaces.so" );
   try {
+    iface_module = new ModuleDL( LIBDIR"/libinterfaces.so" );
     iface_module->open();
-  } catch (ModuleOpenException &e) {
+  } catch (Exception &e) {
     e.append("BlackBoardInterfaceManager cannot open interface module");
+    delete mutex;
+    delete iface_module;
     throw;
   }
 
