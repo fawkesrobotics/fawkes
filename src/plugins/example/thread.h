@@ -39,6 +39,7 @@ class ExampleThread : public Thread, public BlockedTimingAspect, public LoggingA
   ExampleThread(BlockedTimingAspect::WakeupHook hook, const char *name, unsigned int modc);
   virtual ~ExampleThread();
 
+  virtual void init();
   virtual void loop();
 
  private:

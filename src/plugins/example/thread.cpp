@@ -56,6 +56,13 @@ ExampleThread::~ExampleThread()
 }
 
 
+void
+ExampleThread::init()
+{
+  logger->log_info("ExampleThread", "%s::init() called", name());
+}
+
+
 /** Thread loop.
  * If num iterations module modc is 0 print out messaege, otherwise do nothing.
  */
@@ -63,7 +70,7 @@ void
 ExampleThread::loop()
 {
   if ( (m % modc) == 0 ) {
-    logger->log_info("ExampleThread", "XYZ 123 ExampleThready %s called %u times", name(), m);
+    logger->log_info("ExampleThread", "ExampleThread %s called %u times", name(), m);
   }
   ++m;
   usleep(0);
