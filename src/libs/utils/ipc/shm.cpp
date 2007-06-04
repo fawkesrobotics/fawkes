@@ -30,11 +30,11 @@
 #include <utils/ipc/shm_lister.h>
 #include <utils/ipc/semset.h>
 
-#include <string>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <errno.h>
-#include <iostream>
+#include <cstring>
+#include <limits.h>
 
 /** @class SharedMemoryHeader utils/ipc/shm.h
  * Interface for shared memory header.
@@ -221,6 +221,7 @@ SharedMemory::SharedMemory(char *magic_token,
   header          = NULL;
   data_size       = 0;
   semset          = NULL;
+  created         = false;
 }
 
 
@@ -267,6 +268,7 @@ SharedMemory::SharedMemory(const char *magic_token,
   shm_header      = NULL;
   data_size       = 0;
   semset          = NULL;
+  created         = false;
 
   try {
     attach();
@@ -370,35 +372,6 @@ SharedMemory::attach()
 
 	  if ( header->matches( shm_ptr ) ) {
 	    // matching memory segment found
-
-	    /* Does not work as desired :-/
-	    if ( shm_header->shm_addr != 0 ) {
-	      // an specific address has been assigned and it has to be assumed that
-	      // data that depends on these addresses has been stored, try to re-attach
-	      // with the appropriate address, throw an exception if that does not work out
-	      if ( shm_header->shm_addr == shm_buf ) {
-		printf("Already at correct address\n");
-	      }
-	      void *addr = shm_header->shm_addr;
-	      printf("Requested address is 0x%x\n", (unsigned int)addr);
-	      shmdt(shm_buf);
-	      shm_buf = shmat(shm_id, addr,
-			      (is_read_only ? SHM_RDONLY : 0) | SHM_REMAP);
-	      if ( shm_buf == (void *)-1 ) {
-		// the memory segment could not be attached to the given address
-		perror("Attaching to specific addr failed");
-		throw ShmCouldNotAttachAddrDepException();
-	      }
-	      shm_magic_token = (char *)shm_buf;
-	      shm_header = (SharedMemory_header_t *)((char *)shm_buf + MagicTokenSize);
-	      shm_ptr = (char *)shm_buf + MagicTokenSize
-		                        + sizeof(SharedMemory_header_t);
-	    } else {
-	      printf("shm_addr is 0x%x   shm_header at 0x%x\n",
-		     (unsigned int)shm_header->shm_addr,
-		     (unsigned int)shm_header);
-	    }
-	    */
 
 	    header->set( shm_ptr );
 	    data_size = header->dataSize();
