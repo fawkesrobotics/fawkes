@@ -25,10 +25,11 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <core/exceptions/software.h>
-
 #include <utils/logging/liblogger.h>
 #include <utils/logging/multi.h>
+
+#include <core/exceptions/software.h>
+#include <core/threading/mutex.h>
 
 
 /** @class LibLogger <utils/logging/liblogger.h>
@@ -51,6 +52,8 @@
 
 /** The internal multi logger. */
 MultiLogger *  LibLogger::logger = NULL;
+/** Internal mutex */
+Mutex *        LibLogger::mutex  = NULL;
 
 
 /** Initialize logger.
@@ -61,11 +64,16 @@ MultiLogger *  LibLogger::logger = NULL;
 void
 LibLogger::init(MultiLogger *multi_logger)
 {
+  if ( logger != NULL ) {
+    throw AccessViolationException("LibLogger already initialized");
+  }
+  mutex = new Mutex();
   if ( multi_logger == NULL ) {
     logger = new MultiLogger();
   } else {
     logger = multi_logger;
   }
+  
 }
 
 
@@ -77,6 +85,7 @@ void
 LibLogger::finalize()
 {
   delete logger;
+  delete mutex;
 }
 
 
@@ -88,7 +97,9 @@ void
 LibLogger::add_logger(Logger *l)
 {
   if ( logger == NULL )  init();
+  mutex->lock();
   logger->add_logger(l);
+  mutex->unlock();
 }
 
 
@@ -100,7 +111,9 @@ void
 LibLogger::remove_logger(Logger *l)
 {
   if ( logger == NULL )  init();
+  mutex->lock();
   logger->remove_logger(l);
+  mutex->unlock();
 }
 
 
@@ -112,11 +125,13 @@ LibLogger::remove_logger(Logger *l)
 void
 LibLogger::log_debug(const char *component, const char *format, ...)
 {
+  mutex->lock();
   va_list va;
   if ( logger == NULL )  init();
   va_start(va, format);
   logger->vlog_debug(component, format, va);
   va_end(va);
+  mutex->unlock();
 }
 
 
@@ -128,11 +143,13 @@ LibLogger::log_debug(const char *component, const char *format, ...)
 void
 LibLogger::log_info(const char *component, const char *format, ...)
 {
+  mutex->lock();
   va_list va;
   if ( logger == NULL )  init();
   va_start(va, format);
   logger->vlog_info(component, format, va);
   va_end(va);
+  mutex->unlock();
 }
 
 
@@ -144,11 +161,13 @@ LibLogger::log_info(const char *component, const char *format, ...)
 void
 LibLogger::log_warn(const char *component, const char *format, ...)
 {
+  mutex->lock();
   va_list va;
   if ( logger == NULL )  init();
   va_start(va, format);
   logger->vlog_warn(component, format, va);
   va_end(va);
+  mutex->unlock();
 }
 
 
@@ -160,11 +179,13 @@ LibLogger::log_warn(const char *component, const char *format, ...)
 void
 LibLogger::log_error(const char *component, const char *format, ...)
 {
+  mutex->lock();
   va_list va;
   if ( logger == NULL )  init();
   va_start(va, format);
   logger->vlog_error(component, format, va);
   va_end(va);
+  mutex->unlock();
 }
 
 
@@ -178,7 +199,9 @@ void
 LibLogger::vlog_debug(const char *component, const char *format, va_list va)
 {
   if ( logger == NULL )  init();
+  mutex->lock();
   logger->vlog_debug(component, format, va);
+  mutex->unlock();
 }
 
 
@@ -192,7 +215,9 @@ void
 LibLogger::vlog_info(const char *component, const char *format, va_list va)
 {
   if ( logger == NULL )  init();
+  mutex->lock();
   logger->vlog_info(component, format, va);
+  mutex->unlock();
 }
 
 
@@ -206,7 +231,9 @@ void
 LibLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
   if ( logger == NULL )  init();
+  mutex->lock();
   logger->vlog_warn(component, format, va);
+  mutex->unlock();
 }
 
 
@@ -220,7 +247,9 @@ void
 LibLogger::vlog_error(const char *component, const char *format, va_list va)
 {
   if ( logger == NULL )  init();
+  mutex->lock();
   logger->vlog_error(component, format, va);
+  mutex->unlock();
 }
 
 
@@ -233,7 +262,9 @@ void
 LibLogger::log_debug(const char *component, Exception &e)
 {
   if ( logger == NULL )  init();
+  mutex->lock();
   logger->log_debug(component, e);
+  mutex->unlock();
 }
 
 /** Log informational message.
@@ -244,7 +275,9 @@ void
 LibLogger::log_info(const char *component, Exception &e)
 {
   if ( logger == NULL )  init();
+  mutex->lock();
   logger->log_info(component, e);
+  mutex->unlock();
 }
 
 
@@ -256,7 +289,9 @@ void
 LibLogger::log_warn(const char *component, Exception &e)
 {
   if ( logger == NULL )  init();
+  mutex->lock();
   logger->log_warn(component, e);
+  mutex->unlock();
 }
 
 
@@ -268,5 +303,7 @@ void
 LibLogger::log_error(const char *component, Exception &e)
 {
   if ( logger == NULL )  init();
+  mutex->lock();
   logger->log_error(component, e);
+  mutex->unlock();
 }

@@ -34,8 +34,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <time.h>
-
-using namespace std;
+#include <cstdio>
 
 /** @class FileLogger logging/file.h
  * Interface for logging to a specified file.
@@ -47,9 +46,10 @@ using namespace std;
 
 /** Constructor. 
  * @param filename the name of the log-file
- * @param min_level minimum log level
+ * @param log_level minimum log level
  */
-FileLogger::FileLogger(char* filename, LogLevel min_level)
+FileLogger::FileLogger(char* filename, LogLevel log_level)
+  : Logger(log_level)
 {
   try {
     log_file = new File(filename, File::ADD_SUFFIX);
@@ -75,29 +75,6 @@ FileLogger::~FileLogger()
 }
 
 
-/** Log message for given log level.
- * @param level log level
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- * @param va variadic argument list
- */
-void
-FileLogger::vlog(LogLevel level,
-		    const char *component, const char *format, va_list va)
-{
-  if ( min_level <= level ) {
-    switch (level) {
-    case DEBUG:  vlog_debug(component, format, va);  break;
-    case INFO:   vlog_info(component, format, va);   break;
-    case WARN:   vlog_warn(component, format, va);   break;
-    case ERROR:  vlog_error(component, format, va);  break;
-    default: break;
-    }
-  }
-}
-
-
 /** Log debug message.
  * @param component component, used to distuinguish logged messages
  * @param format format of the message, see man page of sprintf for available
@@ -107,7 +84,7 @@ FileLogger::vlog(LogLevel level,
 void
 FileLogger::vlog_debug(const char* component, const char* format, va_list va)
 {
-  if (min_level <= DEBUG ) {
+  if (log_level <= DEBUG ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -129,7 +106,7 @@ FileLogger::vlog_debug(const char* component, const char* format, va_list va)
 void
 FileLogger::vlog_info(const char *component, const char *format, va_list va)
 {
-  if (min_level <= INFO ) {
+  if (log_level <= INFO ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -151,7 +128,7 @@ FileLogger::vlog_info(const char *component, const char *format, va_list va)
 void
 FileLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
-  if (min_level <= WARN ) {
+  if (log_level <= WARN ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -173,7 +150,7 @@ FileLogger::vlog_warn(const char *component, const char *format, va_list va)
 void
 FileLogger::vlog_error(const char *component, const char *format, va_list va)
 {
-  if (min_level <= ERROR ) {
+  if (log_level <= ERROR ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -183,22 +160,6 @@ FileLogger::vlog_error(const char *component, const char *format, va_list va)
     fprintf(log_file->stream(), "\n");
     mutex->unlock();
   }
-}
-
-
-/** Log message of given log level.
- * @param level log level
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- */
-void
-FileLogger::log(LogLevel level, const char *component, const char *format, ...)
-{
-  va_list va;
-  va_start(va, format);
-  vlog(level, component, format, va);
-  va_end(va);
 }
 
 
@@ -262,26 +223,6 @@ FileLogger::log_error(const char *component, const char *format, ...)
 }
 
 
-/** Log exception for given log level.
- * @param level log level
- * @param component component, used to distuinguish logged messages
- * @param e exception to log, exception messages will be logged
- */
-void
-FileLogger::log(LogLevel level, const char *component, Exception &e)
-{
-  if ( min_level <= level ) {
-    switch (level) {
-    case DEBUG:  log_debug(component, e);  break;
-    case INFO:   log_info(component, e);   break;
-    case WARN:   log_warn(component, e);   break;
-    case ERROR:  log_error(component, e);  break;
-    default: break;
-    }
-  }
-}
-
-
 /** Log debug message.
  * @param component component, used to distuinguish logged messages
  * @param e exception to log, exception messages will be logged
@@ -289,7 +230,7 @@ FileLogger::log(LogLevel level, const char *component, Exception &e)
 void
 FileLogger::log_debug(const char *component, Exception &e)
 {
-  if ( min_level <= DEBUG ) {
+  if ( log_level <= DEBUG ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -311,7 +252,7 @@ FileLogger::log_debug(const char *component, Exception &e)
 void
 FileLogger::log_info(const char *component, Exception &e)
 {
-  if ( min_level <= DEBUG ) {
+  if ( log_level <= DEBUG ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -333,7 +274,7 @@ FileLogger::log_info(const char *component, Exception &e)
 void
 FileLogger::log_warn(const char *component, Exception &e)
 {
-  if ( min_level <= DEBUG ) {
+  if ( log_level <= DEBUG ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -355,7 +296,7 @@ FileLogger::log_warn(const char *component, Exception &e)
 void
 FileLogger::log_error(const char *component, Exception &e)
 {
-  if ( min_level <= DEBUG ) {
+  if ( log_level <= DEBUG ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();

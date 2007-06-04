@@ -37,7 +37,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
-
+#include <cstdio>
 
 /** @class UnableToOpenFileException utils/system/file.h
  * Opening a file failed for some reason.
@@ -50,12 +50,16 @@
 UnableToOpenFileException::UnableToOpenFileException(const char *filename, int error)
   : Exception("Unable to open file", error)
 {
-  append(filename);
+  append("File that could not be opened: %s", filename);
 }
 
 
 /** @class File utils/system/file.h
  * File utility methods.
+ * Allows for opening a file and provides utilities to check if a file exists
+ * or whether it is a regular file (and not a symbolic link/directory).
+ * @author Tim Niemueller
+ * @author Daniel Beck
  */
 
 
@@ -68,37 +72,35 @@ UnableToOpenFileException::UnableToOpenFileException(const char *filename, int e
  */
 File::File(char *filename, FileOpenMethod method)
 {
+  fd = -1;
+
   switch (method)
     {
     case OVERWRITE:
       fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
-      fn = (char *) malloc( strlen(filename) + 1 );
-      strcpy(fn, filename);
+      fn = strdup(filename);
       break;
       
     case APPEND:
       fd = open(filename, O_RDWR | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
-      fn = (char *) malloc( strlen(filename) + 1 );
-      strcpy(fn, filename);
+      fn = strdup(filename);
       break;
       
     case ADD_SUFFIX:
       {
-	fd = open(filename, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
-	
-	int index = 1;
-	char *filename_ext = (char *) malloc( strlen(filename) + 5 );
-	strcpy(filename_ext, filename);
-	while ( (-1 == fd) && (EEXIST == errno) )
-	  {
-	    sprintf(filename_ext, "%s.%d", filename, index);
-	    fd = open(filename_ext, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
-	    index++;
+	char *filename_ext = strdup(filename);
+	int index = 0;
+	while (File::exists(filename_ext)) {
+	  free(filename_ext);
+	  if ( asprintf(&filename_ext, "%s.%d", filename, ++index) == -1 ) {
+	    throw OutOfMemoryException("Could not allocate filename string");
 	  }
+   
+	}
+	fd = open(filename_ext, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
 	fn = filename_ext;
-
- 	break;
       }
+      break;
       
       default:
 	printf("%s [line %d]: Unkown method.\n", __FILE__, __LINE__);
@@ -157,7 +159,7 @@ File::exists(const char *filename)
  * @return true, if the given path points to a regular file, false otherwise
  */
 bool
-File::isRegular(const char *filename)
+File::is_regular(const char *filename)
 {
   struct stat s;
 

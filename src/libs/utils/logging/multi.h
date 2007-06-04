@@ -31,6 +31,8 @@
 #include <utils/logging/logger.h>
 #include <core/utils/lock_list.h>
 
+class Mutex;
+
 class MultiLogger : public Logger
 {
  public:
@@ -40,6 +42,8 @@ class MultiLogger : public Logger
 
   void add_logger(Logger *logger);
   void remove_logger(Logger *logger);
+
+  virtual void set_loglevel(LogLevel level);
 
   virtual void log(LogLevel level,
 		   const char *component, const char *format, ...);
@@ -62,8 +66,9 @@ class MultiLogger : public Logger
   virtual void log_error(const char *component, Exception &e);
 
  private:
-  LockList<Logger *>           loggers;
-  LockList<Logger *>::iterator logit;
+  LockList<Logger *>            loggers;
+  LockList<Logger *>::iterator  logit;
+  Mutex                        *mutex;
 };
 
 #endif

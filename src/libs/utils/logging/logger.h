@@ -54,17 +54,21 @@ class Logger
     NONE   = 8	/**< use this to disable log output */
   } LogLevel;
 
+  Logger(LogLevel log_level = DEBUG);
   virtual ~Logger();
 
+  virtual void set_loglevel(LogLevel level);
+  virtual LogLevel loglevel();
+
   virtual void log(LogLevel level,
-		   const char *component, const char *format, ...)         = 0;
+		   const char *component, const char *format, ...);
   virtual void log_debug(const char *component, const char *format, ...)   = 0;
   virtual void log_info(const char *component, const char *format, ...)    = 0;
   virtual void log_warn(const char *component, const char *format, ...)    = 0;
   virtual void log_error(const char *component, const char *format, ...)   = 0;
 
   virtual void vlog(LogLevel level, const char *component,
-		    const char *format, va_list va)                  = 0;
+		    const char *format, va_list va);
   virtual void vlog_debug(const char *component,
 			  const char *format, va_list va)                  = 0;
   virtual void vlog_info(const char *component,
@@ -74,13 +78,18 @@ class Logger
   virtual void vlog_error(const char *component,
 			  const char *format, va_list va)                  = 0;
 
-  virtual void log(LogLevel level, const char *component, Exception &e)    = 0;
+  virtual void log(LogLevel level, const char *component, Exception &e);
   virtual void log_debug(const char *component, Exception &e)              = 0;
   virtual void log_info(const char *component, Exception &e)               = 0;
   virtual void log_warn(const char *component, Exception &e)               = 0;
   virtual void log_error(const char *component, Exception &e)              = 0;
 
-
+ protected:
+  /** Minimum log level.
+   * A logger shall only log output with a level equal or above the given level,
+   * it shall ignore all other messages.
+   */
+  LogLevel log_level;
 };
 
 #endif

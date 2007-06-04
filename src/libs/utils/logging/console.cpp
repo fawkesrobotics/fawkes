@@ -46,14 +46,14 @@ using namespace std;
  */
 
 /** Constructor.
- * @param min_level minimum level to log
+ * @param log_level minimum level to log
  */
-ConsoleLogger::ConsoleLogger(LogLevel min_level)
+ConsoleLogger::ConsoleLogger(LogLevel log_level)
+  : Logger(log_level)
 {
   now = (struct timeval *)malloc(sizeof(struct timeval));
   now_s = (struct tm *)malloc(sizeof(struct tm));
   mutex = new Mutex();
-  this->min_level = min_level;
 }
 
 
@@ -62,29 +62,7 @@ ConsoleLogger::~ConsoleLogger()
 {
   free(now);
   free(now_s);
-}
-
-
-/** Log message for given log level.
- * @param level log level
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- * @param va variadic argument list
- */
-void
-ConsoleLogger::vlog(LogLevel level,
-		    const char *component, const char *format, va_list va)
-{
-  if ( min_level <= level ) {
-    switch (level) {
-    case DEBUG:  vlog_debug(component, format, va);  break;
-    case INFO:   vlog_info(component, format, va);   break;
-    case WARN:   vlog_warn(component, format, va);   break;
-    case ERROR:  vlog_error(component, format, va);  break;
-    default: break;
-    }
-  }
+  delete mutex;
 }
 
 
@@ -97,7 +75,7 @@ ConsoleLogger::vlog(LogLevel level,
 void
 ConsoleLogger::vlog_debug(const char *component, const char *format, va_list va)
 {
-  if (min_level <= DEBUG ) {
+  if (log_level <= DEBUG ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -119,7 +97,7 @@ ConsoleLogger::vlog_debug(const char *component, const char *format, va_list va)
 void
 ConsoleLogger::vlog_info(const char *component, const char *format, va_list va)
 {
-  if (min_level <= INFO ) {
+  if (log_level <= INFO ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -141,7 +119,7 @@ ConsoleLogger::vlog_info(const char *component, const char *format, va_list va)
 void
 ConsoleLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
-  if ( min_level <= WARN ) {
+  if ( log_level <= WARN ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -163,7 +141,7 @@ ConsoleLogger::vlog_warn(const char *component, const char *format, va_list va)
 void
 ConsoleLogger::vlog_error(const char *component, const char *format, va_list va)
 {
-  if ( min_level <= ERROR ) {
+  if ( log_level <= ERROR ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -173,22 +151,6 @@ ConsoleLogger::vlog_error(const char *component, const char *format, va_list va)
     fprintf(stderr, "%s\n", std::c_normal);
     mutex->unlock();
   }
-}
-
-
-/** Log message of given log level.
- * @param level log level
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- */
-void
-ConsoleLogger::log(LogLevel level, const char *component, const char *format, ...)
-{
-  va_list va;
-  va_start(va, format);
-  vlog(level, component, format, va);
-  va_end(va);
 }
 
 
@@ -252,26 +214,6 @@ ConsoleLogger::log_error(const char *component, const char *format, ...)
 }
 
 
-/** Log exception for given log level.
- * @param level log level
- * @param component component, used to distuinguish logged messages
- * @param e exception to log, exception messages will be logged
- */
-void
-ConsoleLogger::log(LogLevel level, const char *component, Exception &e)
-{
-  if ( min_level <= level ) {
-    switch (level) {
-    case DEBUG:  log_debug(component, e);  break;
-    case INFO:   log_info(component, e);   break;
-    case WARN:   log_warn(component, e);   break;
-    case ERROR:  log_error(component, e);  break;
-    default: break;
-    }
-  }
-}
-
-
 /** Log debug message.
  * @param component component, used to distuinguish logged messages
  * @param e exception to log, exception messages will be logged
@@ -279,7 +221,7 @@ ConsoleLogger::log(LogLevel level, const char *component, Exception &e)
 void
 ConsoleLogger::log_debug(const char *component, Exception &e)
 {
-  if (min_level <= DEBUG ) {
+  if (log_level <= DEBUG ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -300,7 +242,7 @@ ConsoleLogger::log_debug(const char *component, Exception &e)
 void
 ConsoleLogger::log_info(const char *component, Exception &e)
 {
-  if (min_level <= INFO ) {
+  if (log_level <= INFO ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -322,7 +264,7 @@ ConsoleLogger::log_info(const char *component, Exception &e)
 void
 ConsoleLogger::log_warn(const char *component, Exception &e)
 {
-  if (min_level <= WARN ) {
+  if (log_level <= WARN ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -344,7 +286,7 @@ ConsoleLogger::log_warn(const char *component, Exception &e)
 void
 ConsoleLogger::log_error(const char *component, Exception &e)
 {
-  if (min_level <= DEBUG ) {
+  if (log_level <= DEBUG ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();

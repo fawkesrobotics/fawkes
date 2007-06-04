@@ -34,6 +34,7 @@
 
 class MultiLogger;
 class Logger;
+class Mutex;
 
 class LibLogger
 {
@@ -63,6 +64,7 @@ class LibLogger
   LibLogger(){};
 
   static MultiLogger *logger;
+  static Mutex       *mutex;
 };
 
 #endif

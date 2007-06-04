@@ -52,6 +52,7 @@
 MultiLogger::MultiLogger()
 {
   loggers.clear();
+  mutex = new Mutex();
 }
 
 
@@ -63,6 +64,7 @@ MultiLogger::MultiLogger(Logger *logger)
 {
   loggers.clear();
   loggers.push_back_locked(logger);
+  mutex = new Mutex();
 }
 
 
@@ -77,6 +79,7 @@ MultiLogger::~MultiLogger()
   }
   loggers.clear();
   loggers.unlock();
+  delete mutex;
 }
 
 
@@ -86,11 +89,13 @@ MultiLogger::~MultiLogger()
 void
 MultiLogger::add_logger(Logger *logger)
 {
+  mutex->lock();
   loggers.lock();
   loggers.push_back(logger);
   loggers.sort();
   loggers.unique();
   loggers.unlock();
+  mutex->unlock();
 }
 
 
@@ -100,7 +105,20 @@ MultiLogger::add_logger(Logger *logger)
 void
 MultiLogger::remove_logger(Logger *logger)
 {
+  mutex->lock();
   loggers.remove_locked(logger);
+  mutex->unlock();
+}
+
+
+void
+MultiLogger::set_loglevel(LogLevel level)
+{
+  mutex->lock();
+  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
+    (*logit)->set_loglevel(level);
+  }
+  mutex->unlock();
 }
 
 
@@ -113,12 +131,14 @@ MultiLogger::remove_logger(Logger *logger)
 void
 MultiLogger::log(LogLevel level, const char *component, const char *format, ...)
 {
+  mutex->lock();
   va_list va;
   va_start(va, format);
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->vlog(level, component, format, va);
   }
   va_end(va);
+  mutex->unlock();
 }
 
 
@@ -130,12 +150,14 @@ MultiLogger::log(LogLevel level, const char *component, const char *format, ...)
 void
 MultiLogger::log_debug(const char *component, const char *format, ...)
 {
+  mutex->lock();
   va_list va;
   va_start(va, format);
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->vlog_debug(component, format, va);
   }
   va_end(va);
+  mutex->unlock();
 }
 
 
@@ -147,12 +169,14 @@ MultiLogger::log_debug(const char *component, const char *format, ...)
 void
 MultiLogger::log_info(const char *component, const char *format, ...)
 {
+  mutex->lock();
   va_list va;
   va_start(va, format);
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->vlog_info(component, format, va);
   }
   va_end(va);
+  mutex->unlock();
 }
 
 
@@ -164,12 +188,14 @@ MultiLogger::log_info(const char *component, const char *format, ...)
 void
 MultiLogger::log_warn(const char *component, const char *format, ...)
 {
+  mutex->lock();
   va_list va;
   va_start(va, format);
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->vlog_warn(component, format, va);
   }
   va_end(va);
+  mutex->unlock();
 }
 
 
@@ -181,12 +207,14 @@ MultiLogger::log_warn(const char *component, const char *format, ...)
 void
 MultiLogger::log_error(const char *component, const char *format, ...)
 {
+  mutex->lock();
   va_list va;
   va_start(va, format);
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->vlog_error(component, format, va);
   }
   va_end(va);
+  mutex->unlock();
 }
 
 
@@ -201,9 +229,11 @@ void
 MultiLogger::vlog(LogLevel level,
 		  const char *component, const char *format, va_list va)
 {
+  mutex->lock();
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->vlog(level, component, format, va);
   }
+  mutex->unlock();
 }
 
 
@@ -216,9 +246,11 @@ MultiLogger::vlog(LogLevel level,
 void
 MultiLogger::vlog_debug(const char *component, const char *format, va_list va)
 {
+  mutex->lock();
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->vlog_debug(component, format, va);
   }
+  mutex->unlock();
 }
 
 
@@ -231,9 +263,11 @@ MultiLogger::vlog_debug(const char *component, const char *format, va_list va)
 void
 MultiLogger::vlog_info(const char *component, const char *format, va_list va)
 {
+  mutex->lock();
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->vlog_info(component, format, va);
   }
+  mutex->unlock();
 }
 
 
@@ -246,9 +280,11 @@ MultiLogger::vlog_info(const char *component, const char *format, va_list va)
 void
 MultiLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
+  mutex->lock();
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->vlog_warn(component, format, va);
   }
+  mutex->unlock();
 }
 
 
@@ -261,9 +297,11 @@ MultiLogger::vlog_warn(const char *component, const char *format, va_list va)
 void
 MultiLogger::vlog_error(const char *component, const char *format, va_list va)
 {
+  mutex->lock();
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->vlog_error(component, format, va);
   }
+  mutex->unlock();
 }
 
 
@@ -276,9 +314,11 @@ MultiLogger::vlog_error(const char *component, const char *format, va_list va)
 void
 MultiLogger::log(LogLevel level, const char *component, Exception &e)
 {
+  mutex->lock();
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->log(level, component, e);
   }
+  mutex->unlock();
 }
 
 
@@ -301,9 +341,11 @@ MultiLogger::log_debug(const char *component, Exception &e)
 void
 MultiLogger::log_info(const char *component, Exception &e)
 {
+  mutex->lock();
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->log_error(component, e);
   }
+  mutex->unlock();
 }
 
 
@@ -314,9 +356,11 @@ MultiLogger::log_info(const char *component, Exception &e)
 void
 MultiLogger::log_warn(const char *component, Exception &e)
 {
+  mutex->lock();
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->log_error(component, e);
   }
+  mutex->unlock();
 }
 
 
@@ -327,7 +371,9 @@ MultiLogger::log_warn(const char *component, Exception &e)
 void
 MultiLogger::log_error(const char *component, Exception &e)
 {
+  mutex->lock();
   for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
     (*logit)->log_error(component, e);
   }
+  mutex->unlock();
 }

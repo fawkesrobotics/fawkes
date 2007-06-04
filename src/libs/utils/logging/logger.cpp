@@ -65,13 +65,6 @@
  * result is not what you intended. Thus make sure that you always use the
  * vlog_* method if you pass along a va_list!
  *
- * @fn void Logger::log(Logger::LogLevel level, const char *component, const char *format, ...) = 0
- * Log message for given log level.
- * @param level log level
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- *
  * @fn void Logger::log_debug(const char *component, const char *format, ...) = 0
  * Log debug message.
  * @param component component, used to distuinguish logged messages
@@ -95,14 +88,6 @@
  * @param component component, used to distuinguish logged messages
  * @param format format of the message, see man page of sprintf for available
  * tokens.
- *
- * @fn void Logger::vlog(Logger::LogLevel level, const char *component, const char *format, va_list va) = 0
- * Log message for given log level.
- * @param level log level
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- * @param va variable argument list
  *
  * @fn void Logger::vlog_debug(const char *component, const char *format, va_list va) = 0
  * Log debug message.
@@ -132,12 +117,6 @@
  * tokens.
  * @param va variable argument list
  *
- * @fn void Logger::log(Logger::LogLevel level, const char *component, Exception &e) = 0
- * Log exception for given log level.
- * @param level log level
- * @param component component, used to distuinguish logged messages
- * @param e exception to log, exception messages will be logged
- *
  * @fn void Logger::log_debug(const char *component, Exception &e) = 0
  * Log debug exception.
  * @param component component, used to distuinguish logged messages
@@ -160,7 +139,99 @@
  *
  */
 
+/** Constructor.
+ * @param log_level log level
+ */
+Logger::Logger(LogLevel log_level)
+{
+  this->log_level = log_level;
+}
+
+
 /** Virtual empty destructor. */
 Logger::~Logger()
 {
+}
+
+
+/** Sets the log level.
+ * The log level determines the minimum log level. If a message is logged that
+ * is below this level the message is ignored.
+ * @param level new log level
+ */
+void
+Logger::set_loglevel(LogLevel level)
+{
+  log_level = level;
+}
+
+
+/** Get log level.
+ * @return current log level.
+ */
+Logger::LogLevel
+Logger::loglevel()
+{
+  return log_level;
+}
+
+
+/** Log message for given log level.
+ * @param level log level
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ * @param va variadic argument list
+ */
+void
+Logger::vlog(LogLevel level,
+		    const char *component, const char *format, va_list va)
+{
+  if ( log_level <= level ) {
+    switch (level) {
+    case DEBUG:  vlog_debug(component, format, va);  break;
+    case INFO:   vlog_info(component, format, va);   break;
+    case WARN:   vlog_warn(component, format, va);   break;
+    case ERROR:  vlog_error(component, format, va);  break;
+    default: break;
+    }
+  }
+}
+
+
+/** Log message of given log level.
+ * @param level log level
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ */
+void
+Logger::log(LogLevel level, const char *component, const char *format, ...)
+{
+  if ( log_level <= level ) {
+    va_list va;
+    va_start(va, format);
+    vlog(level, component, format, va);
+    va_end(va);
+  }
+}
+
+
+/** Log exception for given log level.
+ * @param level log level
+ * @param component component, used to distuinguish logged messages
+ * @param e exception to log, exception messages will be logged
+ */
+void
+Logger::log(LogLevel level, const char *component, Exception &e)
+{
+  if ( log_level <= level ) {
+    switch (level) {
+    case DEBUG:  log_debug(component, e);  break;
+    case INFO:   log_info(component, e);   break;
+    case WARN:   log_warn(component, e);   break;
+    case ERROR:  log_error(component, e);  break;
+    default: break;
+    }
+  }
 }

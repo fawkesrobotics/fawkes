@@ -40,21 +40,16 @@ class FileLogger : public Logger
   FileLogger(char* filename, LogLevel min_level = DEBUG);
   virtual ~FileLogger();
 
-  virtual void log(LogLevel level,
-		   const char *component, const char *format, ...);
   virtual void log_debug(const char *component, const char *format, ...);
   virtual void log_info(const char *component, const char *format, ...);
   virtual void log_warn(const char *component, const char *format, ...);
   virtual void log_error(const char *component, const char *format, ...);
 
-  virtual void vlog(LogLevel level, const char *component,
-		    const char *format, va_list va);
   virtual void vlog_debug(const char *component, const char *format, va_list va);
   virtual void vlog_info(const char *component, const char *format, va_list va);
   virtual void vlog_warn(const char *component, const char *format, va_list va);
   virtual void vlog_error(const char *component, const char *format, va_list va);
 
-  virtual void log(LogLevel level, const char *component, Exception &e);
   virtual void log_debug(const char *component, Exception &e);
   virtual void log_info(const char *component, Exception &e);
   virtual void log_warn(const char *component, Exception &e);
@@ -66,7 +61,6 @@ class FileLogger : public Logger
 
   File       *log_file;
   Mutex      *mutex;
-  LogLevel    min_level;
 };
 
 #endif

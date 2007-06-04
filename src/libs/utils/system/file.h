@@ -31,13 +31,12 @@
 
 #include <core/exception.h>
 
-#include <stdio.h>
-
 class UnableToOpenFileException : public Exception {
  public:
   UnableToOpenFileException(const char *filename, int error);
 };
 
+typedef struct _IO_FILE FILE;
 
 class File {
  public:
@@ -54,11 +53,11 @@ class File {
   File(char *filename, FileOpenMethod method = APPEND);
   ~File();
 
-  FILE *stream() const;
-  const char *filename() const;
+  FILE *        stream() const;
+  const char *  filename() const;
 
-  static bool exists(const char *filename);
-  static bool isRegular(const char *filename);
+  static bool   exists(const char *filename);
+  static bool   is_regular(const char *filename);
 
  private:
   int fd;

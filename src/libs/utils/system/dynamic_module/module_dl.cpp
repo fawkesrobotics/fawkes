@@ -98,7 +98,7 @@ ModuleDL::open()
   } else {
 
     // check whether we have a readable file right away */
-    if (File::isRegular(full_filename.c_str())) {
+    if (File::is_regular(full_filename.c_str())) {
       // We cannot read the file
 
       // ok, try loading the module
