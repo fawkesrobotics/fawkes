@@ -72,7 +72,7 @@ main(int argc, char **argv)
       if ( ! File::exists( *i ) ) {
 	cout << "File " << *i << " does not exist" << endl;
 	continue;
-      } else if (! File::isRegular( *i ) ) {
+      } else if (! File::is_regular( *i ) ) {
 	cout << *i << " is not a regular file" << endl;
 	continue;
       }
