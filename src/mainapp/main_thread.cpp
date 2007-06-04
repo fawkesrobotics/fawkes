@@ -31,6 +31,7 @@
 #include <utils/logging/multi.h>
 #include <utils/logging/console.h>
 #include <utils/logging/liblogger.h>
+#include <utils/logging/factory.h>
 #include <utils/system/argparser.h>
 #include <utils/system/hostinfo.h>
 
@@ -58,11 +59,17 @@
 FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   : Thread("FawkesMainThread")
 {
-  hostinfo = new HostInfo();
+  plugin_manager      = NULL;
+  blackboard          = NULL;
+  config_manager      = NULL;
+  config              = NULL;
+  config_mutable_file = NULL;
+  hostinfo            = NULL;
+  network_manager     = NULL;
+  thread_manager      = NULL;
+  thread_inifin       = NULL;
 
-  /* Logging stuff */
-  multi_logger = new MultiLogger( new ConsoleLogger() );
-  LibLogger::init(multi_logger);
+  hostinfo = new HostInfo();
 
   /* Config stuff */
   config             = new SQLiteConfiguration(CONFDIR);
@@ -81,12 +88,69 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     config_default_file = "default.db";
   }
   config->load(config_mutable_file, config_default_file);
-  config_manager     = new FawkesConfigManager(config);
-  blackboard         = new BlackBoard();
-  thread_inifin      = new FawkesThreadIniFin(blackboard, config, multi_logger);
-  thread_manager     = new FawkesThreadManager(thread_inifin, thread_inifin);
-  plugin_manager     = new FawkesPluginManager(thread_manager);
-  network_manager    = new FawkesNetworkManager(thread_manager, 1910);
+
+  /* Logging stuff */
+  char *tmp;
+  Logger::LogLevel log_level = Logger::DEBUG;
+  if ( argp->hasArgument("q") ) {
+    log_level = Logger::INFO;
+    if ( (tmp = argp->getArgument("q")) != NULL ) {
+      for (unsigned int i = 0; i < strlen(tmp); ++i) {
+	if ( tmp[i] == 'q' ) {
+	  switch (log_level) {
+	  case Logger::INFO:  log_level = Logger::WARN; break;
+	  case Logger::WARN:  log_level = Logger::ERROR; break;
+	  case Logger::ERROR: log_level = Logger::NONE; break;
+	  default: break;
+	  }
+	}
+      }
+    }
+  } else if ( (tmp = argp->getArgument("l")) != NULL ) {
+    if ( strcmp(tmp, "debug") == 0 ) {
+      log_level = Logger::DEBUG;
+    } else if ( strcmp(tmp, "info") == 0 ) {
+      log_level = Logger::INFO;
+    } else if ( strcmp(tmp, "warn") == 0 ) {
+      log_level = Logger::WARN;
+    } else if ( strcmp(tmp, "error") == 0 ) {
+      log_level = Logger::ERROR;
+    } else if ( strcmp(tmp, "none") == 0 ) {
+      log_level = Logger::NONE;
+    } else {
+      printf("Unknown log level '%s', using default\n", tmp);
+    }
+  }
+
+  if ( (tmp = argp->getArgument("L")) != NULL ) {
+    try {
+      multi_logger = LoggerFactory::multilogger_instance(tmp);
+    } catch (Exception &e) {
+      e.append("Initializing multi logger failed");
+      destruct();
+      throw;
+    }
+  } else {
+    multi_logger = new MultiLogger(new ConsoleLogger());
+  }
+
+  multi_logger->set_loglevel(log_level);
+  LibLogger::init(multi_logger);
+
+
+  /* Managers */
+  try {
+    config_manager     = new FawkesConfigManager(config);
+    blackboard         = new BlackBoard();
+    thread_inifin      = new FawkesThreadIniFin(blackboard, config, multi_logger);
+    thread_manager     = new FawkesThreadManager(thread_inifin, thread_inifin);
+    plugin_manager     = new FawkesPluginManager(thread_manager);
+    network_manager    = new FawkesNetworkManager(thread_manager, 1910);
+  } catch (Exception &e) {
+    e.append("Initializing managers failed");
+    destruct();
+    throw;
+  }
 
   thread_inifin->set_fnet_hub( network_manager->hub() );
 
@@ -98,11 +162,21 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 /** Destructor. */
 FawkesMainThread::~FawkesMainThread()
 {
+  destruct();
+}
+
+
+/** Destruct.
+ * Mimics destructor, but may be called in ctor exceptions.
+ */
+void
+FawkesMainThread::destruct()
+{
   delete plugin_manager;
   delete blackboard;
   delete config_manager;
   delete config;
-  free(config_mutable_file);
+  if ( config_mutable_file != NULL )  free(config_mutable_file);
   delete hostinfo;
   delete network_manager;
   delete thread_manager;

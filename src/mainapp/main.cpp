@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *  main.cpp - Fawkes main application
  *
@@ -52,7 +51,11 @@ class FawkesMainApp : public SignalHandler
    */
   void run(ArgumentParser *argp)
   {
-    fmt = new FawkesMainThread(argp);
+    try {
+      fmt = new FawkesMainThread(argp);
+    } catch (Exception &e) {
+      throw;
+    }
 
     fmt->start();
     fmt->join();
@@ -89,8 +92,19 @@ usage(const char *progname)
        << "                if it does however it must contain valid SQLite database" << endl
        << " -d conffile    default configuration file, created if it does not exist" << endl
        << "                if it does however it must contain valid SQLite database" << endl
+       << " -q[qqq]        Quiet mode, -q omits debug, -qq debug and info,"
+       << "                -qqq omit debug, info and warn, -qqqq no output of logger" << endl
+       << "                if it does however it must contain valid SQLite database" << endl
+       << " -l level       set log level directly mutually exclusive with -q" << endl
+       << "                level is one of debug, info, warn, error and none" << endl
+       << " -L loggers     define loggers. By default this setting is read from " << endl
+       << "                config file (or console logger if unset in config)." << endl
+       << "                format for loggers is: logger:args[;logger2:args2[!...]]" << endl
+       << "                the loggeroptions depend on the logger. Currently supported are:" << endl
+       << "                  console, file:file.log" << endl
        << endl;
 }
+
 
 /** Fawkes application.
  * @param argc argument count
@@ -99,7 +113,7 @@ usage(const char *progname)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "HCc:d:");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "HCc:d:q::l:L:");
 
   if ( argp->hasArgument("H") ) {
     usage(argv[0]);
@@ -120,7 +134,12 @@ main(int argc, char **argv)
   SignalManager::register_handler(SIGINT, &fawkes);
   SignalManager::register_handler(SIGTERM, &fawkes);
 
-  fawkes.run(argp);
+  try {
+    fawkes.run(argp);
+  } catch (Exception &e) {
+    printf("Running Fawkes failed\n");
+    e.printTrace();
+  }
 
   delete argp;
   return 0;

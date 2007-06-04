@@ -134,7 +134,8 @@ FawkesPluginManager::list_avail()
 void
 FawkesPluginManager::request_load(const char *plugin_name, unsigned int client_id)
 {
-  if ( load_requests.find(plugin_name) == load_requests.end() ) {
+  std::string s = plugin_name;
+  if ( load_requests.find(s) == load_requests.end() ) {
     try {
       LibLogger::log_debug("FawkesPluginManager", "Requesting loading of plugin '%s'", plugin_name);      
       plugin_loader->request_load(plugin_name);
@@ -142,16 +143,17 @@ FawkesPluginManager::request_load(const char *plugin_name, unsigned int client_i
       LibLogger::log_error("FawkesPluginManager", e);
     }
   }
-  load_requests[plugin_name].push_back(client_id);
-  load_requests[plugin_name].sort();
-  load_requests[plugin_name].unique();
+  load_requests[s].push_back(client_id);
+  load_requests[s].sort();
+  load_requests[s].unique();
 }
 
 
 void
 FawkesPluginManager::request_unload(const char *plugin_name, unsigned int client_id)
 {
-  if ( unload_requests.find(plugin_name) == unload_requests.end() ) {
+  std::string s = plugin_name;
+  if ( unload_requests.find(s) == unload_requests.end() ) {
     try {
       LibLogger::log_debug("FawkesPluginManager", "Requesting finalization of plugin '%s'", plugin_name);      
       thread_manager->remove_deferred(plugins[plugin_name]->threads());
@@ -159,9 +161,9 @@ FawkesPluginManager::request_unload(const char *plugin_name, unsigned int client
       LibLogger::log_error("FawkesPluginManager", e);
     }
   }
-  unload_requests[plugin_name].push_back(client_id);
-  unload_requests[plugin_name].sort();
-  unload_requests[plugin_name].unique();
+  unload_requests[s].push_back(client_id);
+  unload_requests[s].sort();
+  unload_requests[s].unique();
 }
 
 
@@ -169,11 +171,10 @@ void
 FawkesPluginManager::add_plugin_deferred(Plugin *plugin, const char *plugin_name)
 {
   try {
-    thread_manager->add_deferred(plugin->threads());
     plugins_deferred[plugin_name] = plugin;
     plugin_ids_deferred[plugin_name] = next_plugin_id++;
+    thread_manager->add_deferred(plugin->threads());
   } catch (CannotInitializeThreadException &e) {
-    e.printTrace();
     LibLogger::log_error("FawkesPluginManager", "Could not initialize one or more threads of plugin %s, unloading plugin", plugin_name);
     plugin_loader->unload(plugin);
     throw;
@@ -251,11 +252,8 @@ FawkesPluginManager::check_loaded()
 	LibLogger::log_error("FawkesPluginManager", e);
 	send_load_failure(name.c_str(), (*lri).second);
       }
-
-      ++lri;
-    } else {
-      ++lri;
     }
+    ++lri;
   }
   plugins_mutex->unlock();
 }
@@ -312,16 +310,17 @@ FawkesPluginManager::check_finalized()
 void
 FawkesPluginManager::check_initialized()
 {
+  plugins_mutex->lock();
   pit = plugins_deferred.begin();
   while (pit != plugins_deferred.end()) {
     std::string name = (*pit).first;
     try {
-      LibLogger::log_debug("FawkesPluginManager", "Checking if plugin %s has finished initialization", name.c_str());
+      // LibLogger::log_debug("FawkesPluginManager", "Checking if plugin %s has finished initialization", name.c_str());
       if ( thread_manager->deferred_add_done((*pit).second->threads()) ) {
 	plugins[name] = (*pit).second;
 	plugin_ids[name] = plugin_ids_deferred[name];
 
-	LibLogger::log_debug("FawkesPluginManager", "Sending success message for %s", name.c_str());
+	// LibLogger::log_debug("FawkesPluginManager", "Sending success message for %s", name.c_str());
 	plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
 	strncpy(r->name, name.c_str(), PLUGIN_MSG_NAME_LENGTH);
 	r->plugin_id = plugin_ids[name];
@@ -333,7 +332,7 @@ FawkesPluginManager::check_initialized()
 
 	LibLogger::log_info("FawkesPluginManager", "Plugin %s loaded and initialized successfully", name.c_str());
 
-	load_requests.erase(name.c_str());
+	load_requests.erase(name);
 
       } else {
 	++pit;
@@ -342,13 +341,14 @@ FawkesPluginManager::check_initialized()
       LibLogger::log_error("FawkesPluginManager", "Initialization of plugin failed");
       LibLogger::log_error("FawkesPluginManager", e);
       send_load_failure(name.c_str(), load_requests[name]);
-      load_requests.erase(name.c_str());
+      load_requests.erase(name);
       plugin_loader->unload((*pit).second);
       ++pit;
       plugins_deferred.erase(name);
       plugin_ids_deferred.erase(name);
     }
   }
+  plugins_mutex->unlock();
 }
 
 
@@ -432,7 +432,7 @@ FawkesPluginManager::process_after_loop()
 	  LibLogger::log_info("FawkesPluginManager", "Client requested loading of %s which is already loaded", name);
 	  send_load_success(name, msg->clid());
 	} else {
-	  LibLogger::log_info("FawkesPluginManager", "Requesting deferred loading of %s", name);
+	  LibLogger::log_info("FawkesPluginManager", "Requesting deferred loading of %ul %s", strlen(name), name);
 	  request_load(name, msg->clid());
 	}
       }

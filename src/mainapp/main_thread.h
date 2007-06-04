@@ -50,6 +50,8 @@ class FawkesMainThread : public Thread
   virtual void loop();
 
  private:
+  void destruct();
+
   ArgumentParser             *argp;
   Configuration              *config;
   BlackBoard                 *blackboard;
