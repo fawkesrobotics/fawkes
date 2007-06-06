@@ -27,6 +27,7 @@
 
 #include <interface/message.h>
 
+#include <core/threading/thread.h>
 #include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
 
@@ -36,7 +37,13 @@
 
 /** @class Message interface/message.h
  * Base class for all messages passed through interfaces in Fawkes BlackBoard.
- * Do not use directly.
+ * Do not use directly, but instead use the interface generator to generate
+ * an interface with accompanying messages.
+ *
+ * The sender ID of the message is automatically determined from the thread
+ * that creates the message.
+ *
+ * @author Tim Niemueller
  */
 
 /** @var Message::data_ptr
@@ -59,6 +66,8 @@ Message::Message()
   recipient_interface_mem_serial = 0;
   _status    = Undefined;
   _substatus = 0;
+  _sender    = strdup(Thread::current_thread()->name());
+  _sender_id = Thread::current_thread_id();
 }
 
 
@@ -75,6 +84,8 @@ Message::Message(Message &mesg)
   memcpy(data_ptr, mesg.data_ptr, data_size);
   _status    = Undefined;
   _substatus = 0;
+  _sender    = strdup(Thread::current_thread()->name());
+  _sender_id = Thread::current_thread_id();
 }
 
 
@@ -91,6 +102,8 @@ Message::Message(Message *mesg)
   memcpy(data_ptr, mesg->data_ptr, data_size);
   _status    = Undefined;
   _substatus = 0;
+  _sender    = strdup(Thread::current_thread()->name());
+  _sender_id = Thread::current_thread_id();
 }
 
 
@@ -101,6 +114,7 @@ Message::~Message()
     free(data_ptr);
     data_ptr = NULL;
   }
+  free(_sender);
 }
 
 
@@ -148,7 +162,7 @@ Message::operator=  (const Message & m)
  * @param status status of the new message.
  */
 void
-Message::setStatus(Message::MessageStatus status)
+Message::set_status(Message::MessageStatus status)
 {
   _status = status;
 }
@@ -170,7 +184,7 @@ Message::status()
  * @param sub_status new sub status
  */
 void
-Message::setSubStatus(unsigned int sub_status)
+Message::set_sub_status(unsigned int sub_status)
 {
   _substatus = sub_status;
 }
@@ -183,4 +197,24 @@ unsigned int
 Message::sub_status()
 {
   return _substatus;
+}
+
+
+/** Get sender of message.
+ * @return name of sending thread
+ */
+const char *
+Message::sender()
+{
+  return _sender;
+}
+
+
+/** Get ID of sender.
+ * @return name of sending thread.
+ */
+pthread_t
+Message::sender_id()
+{
+  return _sender_id;
 }

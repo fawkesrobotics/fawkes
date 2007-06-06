@@ -29,6 +29,7 @@
 #define __MESSAGE_H_
 
 #include <core/utils/refcount.h>
+#include <sys/types.h>
 
 class Mutex;
 
@@ -56,10 +57,12 @@ class Message : public RefCount
 
   Message &         operator=  (const Message & m);
 
-  void              setStatus(MessageStatus status);
+  void              set_status(MessageStatus status);
   MessageStatus     status();
-  void              setSubStatus(unsigned int sub_status);
+  void              set_sub_status(unsigned int sub_status);
   unsigned int      sub_status();
+  pthread_t         sender_id();
+  const char *      sender();
 
  private:
   virtual void *        data();
@@ -70,9 +73,11 @@ class Message : public RefCount
   unsigned int  recipient_interface_mem_serial;  
   unsigned int  sender_interface_instance_serial;  
 
-  MessageStatus _status;
-  unsigned int  _substatus;
+  MessageStatus  _status;
+  unsigned int   _substatus;
 
+  char          *_sender;
+  pthread_t      _sender_id;
  protected:
   void         *data_ptr;
   unsigned int  data_size;
