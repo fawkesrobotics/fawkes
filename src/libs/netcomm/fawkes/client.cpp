@@ -62,6 +62,7 @@ HandlerAlreadyRegisteredException::HandlerAlreadyRegisteredException()
  * @param port port to connect to.
  */
 FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short int port)
+  : Thread("FawkesNetworkClient")
 {
   inbound_msgq = new FawkesNetworkMessageQueue();
   outbound_msgq = new FawkesNetworkMessageQueue();

@@ -37,7 +37,7 @@
 
 /** Constructor. */
 BlackBoardMainThread::BlackBoardMainThread()
-  : Thread(Thread::OPMODE_WAITFORWAKEUP)
+  : Thread("BlackBoardMainThread", Thread::OPMODE_WAITFORWAKEUP)
 {
   im = new BlackBoardInterfaceManager(/* master */ true);
 }

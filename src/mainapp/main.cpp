@@ -134,6 +134,8 @@ main(int argc, char **argv)
   SignalManager::register_handler(SIGINT, &fawkes);
   SignalManager::register_handler(SIGTERM, &fawkes);
 
+  Thread::init_main();
+
   try {
     fawkes.run(argp);
   } catch (Exception &e) {
