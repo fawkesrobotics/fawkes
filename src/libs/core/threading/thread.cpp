@@ -32,11 +32,14 @@
 #include <core/threading/read_write_lock.h>
 #include <core/threading/thread_finalizer.h>
 #include <core/exceptions/software.h>
+#include <core/exceptions/system.h>
 
 #include <pthread.h>
+#include <limits.h>
 #include <unistd.h>
 #include <cstring>
 #include <cstdlib>
+#include <errno.h>
 
 /** @def forever
  * Shortcut for "while (1)".
@@ -46,23 +49,17 @@
 /** @class Thread core/threading/thread.h
  * Thread class encapsulation of pthreads.
  * This is the base class for all threads in Fawkes. Derive this class for
- * your thread.
+ * your thread. Note that you have to set a meaningful name, as this name
+ * is necessary for easier debugging and it is used for internal messaging
+ * via the BlackBoard. Make sure that your name is unique throughout the
+ * software. Using the class name with an additional modifier if it is instantiated
+ * multiple times is a good bet.
  *
- * There are two major ways to implement threads. The recommended way is to
- * implement loop(). The default run() implementation will call loop()
- * continuously. An implicit cancel point is set after each loop.
- *
- * The thread can operate in two modes if the loop() implementation method is
- * chosen. The loop can either run continuously without a brake, or it can wait
- * for an explicit wakeup after each loop. Waiting for an explicit wakeup is the
- * default since this is the common use case in Fawkes.
- *
- * If you need a more complex behaviour you may also override run() and
- * implement your own thread behavior. Not however that you must then
- * use the continuous opmode to make management facilitities aware, that this
- * thread will not react as could be expected by a wait-for-wakeup thread.
- * That that without taking special care the advanced debug functionality
- * will not available for threads.
+ * The thread can operate in two modes. The loop can either run continuously
+ * without a brake, or it can wait for an explicit wakeup after each loop.
+ * Waiting for an explicit wakeup is the default since this is the common use
+ * case in Fawkes and also it is less risky, the developer will easier see that
+ * his thread does not do anything then fixing that the thread takes all CPU time.
  *
  * Special care has been taken to allow for proper initialization and
  * finalization. The special behavior of this routines can only be guaranteed
@@ -121,26 +118,14 @@
  * @author Tim Niemueller
  */
 
+/** We need not initialize this one timely by ourselves thus we do not use Mutex */
+pthread_mutex_t Thread::_thread_key_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-/** Default Constructor.
- * This constructor is protected so that Thread cannot be instantiated. This
- * constructor initalizes a few internal variables.
- */
-Thread::Thread()
-{
-  constructor("UnnamedContinuousThread", OPMODE_CONTINUOUS);
-}
 
-/** Constructor.
- * This constructor is protected so that Thread cannot be instantiated. This
- * constructor initalizes a few internal variables.
- * @param op_mode Operation mode, see Thread::OpMode
- */
-Thread::Thread(OpMode op_mode)
-{
-  constructor("UnnamedThread", op_mode);
-}
+/** Key used to store a reference to the thread object as thread specific data. */
+pthread_key_t Thread::THREAD_KEY = PTHREAD_KEYS_MAX;
 
+#define MAIN_THREAD_NAME "__MainThread__"
 
 /** Constructor.
  * This constructor is protected so that Thread cannot be instantiated. This
@@ -166,6 +151,21 @@ Thread::Thread(const char *name, OpMode op_mode)
 }
 
 
+/** Constructor.
+ * This constructor is protected so that Thread cannot be instantiated. This
+ * constructor initalizes a few internal variables.
+ * This is used to create a Thread wrapper instance for an existing thread.
+ * Use internally only!
+ * @param name thread name, used for debugging, see Thread::name()
+ * @param id thread ID of running thread
+ */
+Thread::Thread(const char *name, pthread_t id)
+{
+  constructor(name, OPMODE_CONTINUOUS);
+  thread_id = id;
+}
+
+
 /** Initialize.
  * Kind of the base constructor.
  * @param name name of thread
@@ -174,6 +174,8 @@ Thread::Thread(const char *name, OpMode op_mode)
 void
 Thread::constructor(const char *name, OpMode op_mode)
 {
+  init_thread_key();
+
   this->op_mode = op_mode;
   this->_name   = strdup(name);
 
@@ -421,7 +423,14 @@ Thread::start()
 Thread::entry(void *pthis)
 {
   Thread *t = (Thread *)pthis;
+
+  // Set thread instance as TSD
+  set_tsd_thread_instance(t);
+
+  // Run thread
   t->run();
+
+  // have no useful exit value
   return NULL;
 }
 
@@ -597,4 +606,85 @@ Thread::wakeup(Barrier *barrier)
 void
 Thread::loop()
 {
+}
+
+void
+Thread::init_thread_key()
+{
+  pthread_mutex_lock(&_thread_key_mutex);
+  if ( THREAD_KEY == PTHREAD_KEYS_MAX ) {
+    // Has not been initialized, do it!
+    int err;
+    if ( (err = pthread_key_create(&THREAD_KEY, NULL)) != 0 ) {
+      if ( ENOMEM == err ) {
+	throw OutOfMemoryException("Could not create key for thread "
+				   "specific data (reference to thread)");
+      } else {
+	throw Exception("Thread key for reference to thread could not be created", err);
+      }
+    }
+  }
+  pthread_mutex_unlock(&_thread_key_mutex);
+}
+
+
+/** Set thread instance in thread-specific data (TSD).
+ * Use thread-specific data to store a reference to the Thread instance in the
+ * pthread struct. Used by current_thread().
+ * @param t thread to set specific data on
+ */
+void
+Thread::set_tsd_thread_instance(Thread *t)
+{
+  int err = 0;
+  if ( (err = pthread_setspecific(THREAD_KEY, t)) != 0 ) {
+    if ( ENOMEM == err ) {
+      throw OutOfMemoryException("Could not set specific data (reference to thread)");
+    } else {
+      throw Exception("Could not set specific data (reference to thread), unknown reason");
+    }
+  }
+}
+
+
+/** Initialize Thread wrapper instance for main thread.
+ * This will create an internal Thread instance such that it can be guaranteed that
+ */
+void
+Thread::init_main()
+{
+  init_thread_key();
+  Thread *t = new Thread(MAIN_THREAD_NAME, pthread_self());
+  set_tsd_thread_instance(t);
+}
+
+
+/** Get the ID of the currently running thread.
+ * This will return the ID of the thread in which's context this method was
+ * called.
+ * @return ID of thread context
+ */
+pthread_t
+Thread::current_thread_id()
+{
+  return pthread_self();
+}
+
+
+/** Get the Thread instance of the currently running thread.
+ * This will return the Thread instance of the thread in which's context this method was
+ * called.
+ * Note that only if the main application ensures to call init_main() it can be guaranteed
+ * that this value is not NULL.
+ * @return ID of thread context
+ * @exception Exception thrown if this method is called before either init_main() is
+ * called or any one thread has been started.
+ */
+Thread *
+Thread::current_thread()
+{
+  if ( THREAD_KEY == PTHREAD_KEYS_MAX ) {
+    throw Exception("No thread has been initialized");
+  }
+  return (Thread *)pthread_getspecific(THREAD_KEY);
 }

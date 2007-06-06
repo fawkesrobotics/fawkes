@@ -28,6 +28,8 @@
 #ifndef __CORE_THREADING_THREAD_H_
 #define __CORE_THREADING_THREAD_H_
 
+#include <sys/types.h>
+
 #define forever while (1)
 
 class WaitCondition;
@@ -74,10 +76,13 @@ class Thread {
   OpMode        opmode() const;
   const char *  name() const;
 
+  static Thread *  current_thread();
+  static pthread_t current_thread_id();
+
+  static void      init_main();
+
  protected:
-  Thread();
   Thread(const char *name);
-  Thread(OpMode op_mode);
   Thread(const char *name, OpMode op_mode);
   void exit();
 
@@ -92,13 +97,16 @@ class Thread {
 
  private:
   Thread(const Thread &t);
+  Thread(const char *name, pthread_t id);
   Thread & operator=(const Thread &t);
   static void * entry(void * pthis);
   void constructor(const char *name, OpMode op_mode);
   void set_finalize_sync_lock(ReadWriteLock *lock);
 
-  // Do not use pthread_t here to avoid including pthread.h
-  /* pthread_t */ unsigned long int thread_id;
+  static void init_thread_key();
+  static void set_tsd_thread_instance(Thread *t);
+
+  pthread_t      thread_id;
 
   Mutex         *sleep_mutex;
   WaitCondition *sleep_condition;
@@ -114,6 +122,9 @@ class Thread {
 
   OpMode         op_mode;
 
+  static pthread_key_t   THREAD_KEY;
+  static pthread_key_t   MAIN_THREAD_KEY;
+  static pthread_mutex_t _thread_key_mutex;
 };
 
 #endif
