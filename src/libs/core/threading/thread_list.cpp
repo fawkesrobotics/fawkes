@@ -322,14 +322,17 @@ ThreadList::init(ThreadInitializer *initializer)
       initializer->init(*i);
       (*i)->init();
     } catch (CannotInitializeThreadException &e) {
+      notify_of_failed_init();
       e.append("Initializing thread in list '%s' failed", _name);
       throw;
     } catch (Exception &e) {
+      notify_of_failed_init();
       CannotInitializeThreadException ce("ThreadList::init failed");
       ce.append("Could not initialize thread '%s'", (*i)->name());
       ce.append(e);
       throw ce;
     } catch (...) {
+      notify_of_failed_init();
       CannotInitializeThreadException ce("ThreadList::init failed");
       ce.append("Could not initialize thread '%s'", (*i)->name());
       ce.append("Unknown exception caught");
@@ -387,11 +390,13 @@ ThreadList::deferred_init_done()
       return true;
     } else {
       try {
+	notify_of_failed_init();
 	_init_thread->throw_exception();
 	delete _init_thread;
 	_init_thread = NULL;
 	return true;
       } catch (Exception &e) {
+	notify_of_failed_init();
 	delete _init_thread;
 	_init_thread = NULL;
 	throw;
@@ -831,4 +836,13 @@ ThreadList::erase(iterator pos)
   if ((*pos)->opmode() != Thread::OPMODE_CONTINUOUS )
     (*pos)->set_finalize_sync_lock(NULL);
   return LockList<Thread *>::erase(pos);
+}
+
+/** Notify all threads of failed init. */
+void
+ThreadList::notify_of_failed_init()
+{
+  for (ThreadList::iterator i = begin(); i != end(); ++i) {
+    (*i)->notify_of_failed_init();
+  }
 }

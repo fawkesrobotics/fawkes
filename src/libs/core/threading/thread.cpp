@@ -31,8 +31,10 @@
 #include <core/threading/wait_condition.h>
 #include <core/threading/read_write_lock.h>
 #include <core/threading/thread_finalizer.h>
+#include <core/threading/thread_notification_listener.h>
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
+#include <core/utils/lock_list.h>
 
 #include <pthread.h>
 #include <limits.h>
@@ -118,8 +120,31 @@
  * @author Tim Niemueller
  */
 
+/** @var bool Thread::finalize_prepared
+ * True if prepare_finalize() has been called and was not stopped with a
+ * cancel_finalize(), false otherwise. */
+
+/** @var Mutex *  Thread::loop_mutex
+ * Mutex that is used to protect a call to loop().
+ * This mutex is locked just before loop() is called and unlocked right after it
+ * has finished. So you can use this lock in your derivate to make sure that a
+ * method does not run while the loop runs.
+ * For example assume that we have a method set_parameter(int x). This method may
+ * only be called if loop() is not running or unpredictable results will occur.
+ * To do this you could write the method as
+ * @code
+ * MyThread::set_parameter(int x)
+ * {
+ *   loop_mutex->lock();
+ *   // do what you need to do...
+ *   loop_mutex->unlock();
+ * }
+ * @endcode
+ */
+
+
 /** We need not initialize this one timely by ourselves thus we do not use Mutex */
-pthread_mutex_t Thread::_thread_key_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t Thread::__thread_key_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 /** Key used to store a reference to the thread object as thread specific data. */
@@ -135,7 +160,7 @@ pthread_key_t Thread::THREAD_KEY = PTHREAD_KEYS_MAX;
  */
 Thread::Thread(const char *name)
 {
-  constructor(name, OPMODE_CONTINUOUS);
+  __constructor(name, OPMODE_CONTINUOUS);
 }
 
 
@@ -147,7 +172,7 @@ Thread::Thread(const char *name)
  */
 Thread::Thread(const char *name, OpMode op_mode)
 {
-  constructor(name, op_mode);
+  __constructor(name, op_mode);
 }
 
 
@@ -161,8 +186,8 @@ Thread::Thread(const char *name, OpMode op_mode)
  */
 Thread::Thread(const char *name, pthread_t id)
 {
-  constructor(name, OPMODE_CONTINUOUS);
-  thread_id = id;
+  __constructor(name, OPMODE_CONTINUOUS);
+  __thread_id = id;
 }
 
 
@@ -172,26 +197,27 @@ Thread::Thread(const char *name, pthread_t id)
  * @param op_mode operation mode
  */
 void
-Thread::constructor(const char *name, OpMode op_mode)
+Thread::__constructor(const char *name, OpMode op_mode)
 {
   init_thread_key();
 
-  this->op_mode = op_mode;
-  this->_name   = strdup(name);
+  __op_mode = op_mode;
+  __name   = strdup(name);
+  __notification_listeners = new LockList<ThreadNotificationListener *>();
 
-  if ( op_mode == OPMODE_WAITFORWAKEUP ) {
-    sleep_condition = new WaitCondition();
-    sleep_mutex = new Mutex();
+  if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
+    __sleep_condition = new WaitCondition();
+    __sleep_mutex = new Mutex();
   } else {
-    sleep_condition = NULL;
-    sleep_mutex = NULL;
+    __sleep_condition = NULL;
+    __sleep_mutex = NULL;
   }
-  thread_id = 0;
-  barrier = NULL;
-  cancelled = false;
+  __thread_id = 0;
+  __barrier = NULL;
+  __cancelled = false;
 
-  finalize_mutex = new Mutex();
-  finalize_sync_lock = NULL;
+  __finalize_mutex = new Mutex();
+  __finalize_sync_lock = NULL;
   loop_mutex = new Mutex();
   finalize_prepared = false;
 }
@@ -200,13 +226,14 @@ Thread::constructor(const char *name, OpMode op_mode)
 /** Virtual destructor. */
 Thread::~Thread()
 {
-  delete sleep_condition;
-  sleep_condition = NULL;
-  delete sleep_mutex;
-  sleep_mutex = NULL;
+  delete __sleep_condition;
+  __sleep_condition = NULL;
+  delete __sleep_mutex;
+  __sleep_mutex = NULL;
   delete loop_mutex;
-  delete finalize_mutex;
-  free(_name);
+  delete __finalize_mutex;
+  free(__name);
+  delete __notification_listeners;
 }
 
 
@@ -263,7 +290,7 @@ Thread::init()
 void
 Thread::set_finalize_sync_lock(ReadWriteLock *lock)
 {
-  finalize_sync_lock = lock;
+  __finalize_sync_lock = lock;
 }
 
 
@@ -300,9 +327,9 @@ Thread::prepare_finalize()
   if ( finalize_prepared ) {
     throw CannotFinalizeThreadException("prepare_finalize() has already been called");
   }
-  finalize_mutex->lock();
+  __finalize_mutex->lock();
   finalize_prepared = true;
-  finalize_mutex->unlock();
+  __finalize_mutex->unlock();
   bool prepared = prepare_finalize_user();
   return prepared;
 }
@@ -388,9 +415,9 @@ Thread::finalize()
 void
 Thread::cancel_finalize()
 {
-  finalize_mutex->lock();
+  __finalize_mutex->lock();
   finalize_prepared = false;
-  finalize_mutex->unlock();
+  __finalize_mutex->unlock();
 }
 
 
@@ -404,12 +431,12 @@ bool
 Thread::start()
 {
   int err;
-  if ( (err = pthread_create(&thread_id, NULL, Thread::entry, this)) != 0) {
+  if ( (err = pthread_create(&__thread_id, NULL, Thread::entry, this)) != 0) {
     // An error occured
     return false;
   }
 
-  cancelled = false;
+  __cancelled = false;
   return true;
 }
 
@@ -426,6 +453,9 @@ Thread::entry(void *pthis)
 
   // Set thread instance as TSD
   set_tsd_thread_instance(t);
+
+  // Notify listeners that this thread started
+  t->notify_of_startup();
 
   // Run thread
   t->run();
@@ -453,7 +483,7 @@ void
 Thread::join()
 {
   void *dont_care;
-  pthread_join(thread_id, &dont_care);
+  pthread_join(__thread_id, &dont_care);
 }
 
 
@@ -464,7 +494,7 @@ Thread::join()
 void
 Thread::detach()
 {
-  pthread_detach(thread_id);
+  pthread_detach(__thread_id);
 }
 
 
@@ -474,9 +504,9 @@ Thread::detach()
 void
 Thread::cancel()
 {
-  if ( ! cancelled ) {
-    cancelled = true;
-    pthread_cancel(thread_id);
+  if ( ! __cancelled ) {
+    __cancelled = true;
+    pthread_cancel(__thread_id);
   }
 }
 
@@ -487,7 +517,7 @@ Thread::cancel()
 Thread::OpMode
 Thread::opmode() const
 {
-  return op_mode;
+  return __op_mode;
 }
 
 
@@ -499,7 +529,7 @@ Thread::opmode() const
 const char *
 Thread::name() const
 {
-  return _name;
+  return __name;
 }
 
 
@@ -520,7 +550,7 @@ Thread::test_cancel()
 bool
 Thread::operator==(const Thread &thread)
 {
-  return ( pthread_equal(thread_id, thread.thread_id) != 0 );
+  return ( pthread_equal(__thread_id, thread.__thread_id) != 0 );
 }
 
 
@@ -532,19 +562,19 @@ Thread::operator==(const Thread &thread)
 void
 Thread::run()
 {
-  if ( op_mode == OPMODE_WAITFORWAKEUP ) {
-    sleep_mutex->lock();
-    sleep_condition->wait(sleep_mutex);
-    sleep_mutex->unlock();
+  if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
+    __sleep_mutex->lock();
+    __sleep_condition->wait(__sleep_mutex);
+    __sleep_mutex->unlock();
   }
   forever {
 
-    if ( finalize_sync_lock )  finalize_sync_lock->lockForRead();
+    if ( __finalize_sync_lock )  __finalize_sync_lock->lockForRead();
 
     bool run_loop;
-    finalize_mutex->lock();
+    __finalize_mutex->lock();
     run_loop = ! finalize_prepared;
-    finalize_mutex->unlock();
+    __finalize_mutex->unlock();
 
     if ( run_loop ) {
       loop_mutex->lock();
@@ -552,17 +582,17 @@ Thread::run()
       loop_mutex->unlock();
     }
 
-    if ( finalize_sync_lock )  finalize_sync_lock->unlock();
+    if ( __finalize_sync_lock )  __finalize_sync_lock->unlock();
 
     test_cancel();
-    if ( barrier ) {
-      barrier->wait();
-      barrier = NULL;
+    if ( __barrier ) {
+      __barrier->wait();
+      __barrier = NULL;
     }
-    if ( op_mode == OPMODE_WAITFORWAKEUP ) {
-      sleep_mutex->lock();
-      sleep_condition->wait(sleep_mutex);
-      sleep_mutex->unlock();
+    if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
+      __sleep_mutex->lock();
+      __sleep_condition->wait(__sleep_mutex);
+      __sleep_mutex->unlock();
     }
     usleep(0);
   }
@@ -576,8 +606,8 @@ Thread::run()
 void
 Thread::wakeup()
 {
-  if ( op_mode == OPMODE_WAITFORWAKEUP ) {
-    sleep_condition->wakeAll();
+  if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
+    __sleep_condition->wakeAll();
   }
 }
 
@@ -590,13 +620,13 @@ Thread::wakeup()
 void
 Thread::wakeup(Barrier *barrier)
 {
-  if ( op_mode != OPMODE_WAITFORWAKEUP )  return;
+  if ( __op_mode != OPMODE_WAITFORWAKEUP )  return;
 
   if ( barrier == NULL ) {
     throw NullPointerException(" Thread::wakeup(): barrier must not be NULL");
   }
-  this->barrier = barrier;
-  sleep_condition->wakeAll();
+  __barrier = barrier;
+  __sleep_condition->wakeAll();
 }
 
 
@@ -608,10 +638,65 @@ Thread::loop()
 {
 }
 
+
+/** Add notification listener.
+ * Add a notification listener for this thread.
+ * @param notification_listener notification listener to add
+ */
+void
+Thread::add_notification_listener(ThreadNotificationListener *notification_listener)
+{
+  __notification_listeners->push_back_locked(notification_listener);
+}
+
+
+/** Remove notification listener.
+ * @param notification_listener notification listener to remove
+ */
+void
+Thread::remove_notification_listener(ThreadNotificationListener *notification_listener)
+{
+  __notification_listeners->remove_locked(notification_listener);
+}
+
+
+/** Notify of successful startup.
+ * This method is called internally in entry().
+ */
+void
+Thread::notify_of_startup()
+{
+  __notification_listeners->lock();
+  LockList<ThreadNotificationListener *>::iterator i;
+  for (i = __notification_listeners->begin(); i != __notification_listeners->end(); ++i) {
+    (*i)->thread_started(this);
+  }
+  __notification_listeners->unlock();  
+}
+
+
+/** Notify of failed init.
+ * This method is called by ThreadList.
+ */
+void
+Thread::notify_of_failed_init()
+{
+  __notification_listeners->lock();
+  LockList<ThreadNotificationListener *>::iterator i;
+  for (i = __notification_listeners->begin(); i != __notification_listeners->end(); ++i) {
+    (*i)->thread_init_failed(this);
+  }
+  __notification_listeners->unlock();
+}
+
+
+/** Intialize thread key.
+ * For internal usage only.
+ */
 void
 Thread::init_thread_key()
 {
-  pthread_mutex_lock(&_thread_key_mutex);
+  pthread_mutex_lock(&__thread_key_mutex);
   if ( THREAD_KEY == PTHREAD_KEYS_MAX ) {
     // Has not been initialized, do it!
     int err;
@@ -624,7 +709,7 @@ Thread::init_thread_key()
       }
     }
   }
-  pthread_mutex_unlock(&_thread_key_mutex);
+  pthread_mutex_unlock(&__thread_key_mutex);
 }
 
 

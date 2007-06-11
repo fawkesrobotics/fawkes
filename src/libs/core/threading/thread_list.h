@@ -146,8 +146,12 @@ class ThreadList : private LockList<Thread *>
   using LockList<Thread *>::tryLock;
   using LockList<Thread *>::unlock;
   using LockList<Thread *>::size;
+  using LockList<Thread *>::empty;
   using LockList<Thread *>::front;
   using LockList<Thread *>::back;
+
+ private:
+  void notify_of_failed_init();
 
  private:
   char                      *_name;

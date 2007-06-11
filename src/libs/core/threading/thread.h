@@ -2,8 +2,8 @@
 /***************************************************************************
  *  thread.h - base class for threads, implementation based on pthreads
  *
- *  Generated: Thu Sep 14 13:06:18 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Sep 14 13:06:18 2006
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -36,6 +36,9 @@ class WaitCondition;
 class Mutex;
 class Barrier;
 class ReadWriteLock;
+class ThreadNotificationListener;
+class ThreadList;
+template <typename Type> class LockList;
 
 class Thread {
  public:
@@ -81,6 +84,9 @@ class Thread {
 
   static void      init_main();
 
+  void add_notification_listener(ThreadNotificationListener *notification_listener);
+  void remove_notification_listener(ThreadNotificationListener *notification_listener);
+
  protected:
   Thread(const char *name);
   Thread(const char *name, OpMode op_mode);
@@ -91,40 +97,42 @@ class Thread {
   virtual void run();
   virtual void loop();
 
-  /** true if prepare_finalize() has been called and was not stopped with a
-   * cancel_finalize(), false otherwise. */
-  bool finalize_prepared;
+  bool       finalize_prepared;
+  Mutex     *loop_mutex;
 
  private:
   Thread(const Thread &t);
   Thread(const char *name, pthread_t id);
   Thread & operator=(const Thread &t);
   static void * entry(void * pthis);
-  void constructor(const char *name, OpMode op_mode);
+  void __constructor(const char *name, OpMode op_mode);
   void set_finalize_sync_lock(ReadWriteLock *lock);
+  void notify_of_failed_init();
+  void notify_of_startup();
 
   static void init_thread_key();
   static void set_tsd_thread_instance(Thread *t);
 
-  pthread_t      thread_id;
+  pthread_t      __thread_id;
 
-  Mutex         *sleep_mutex;
-  WaitCondition *sleep_condition;
-  Barrier       *barrier;
+  Mutex         *__sleep_mutex;
+  WaitCondition *__sleep_condition;
+  Barrier       *__barrier;
 
-  ReadWriteLock *finalize_sync_lock;
-  Mutex         *finalize_mutex;
-  Mutex         *loop_mutex;
+  ReadWriteLock *__finalize_sync_lock;
+  Mutex         *__finalize_mutex;
 
-  char          *_name;
+  char          *__name;
 
-  bool           cancelled;
+  bool           __cancelled;
 
-  OpMode         op_mode;
+  OpMode         __op_mode;
+
+  LockList<ThreadNotificationListener *>  *__notification_listeners;
 
   static pthread_key_t   THREAD_KEY;
   static pthread_key_t   MAIN_THREAD_KEY;
-  static pthread_mutex_t _thread_key_mutex;
+  static pthread_mutex_t __thread_key_mutex;
 };
 
 #endif
