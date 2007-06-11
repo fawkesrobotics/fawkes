@@ -49,6 +49,7 @@ class LibLoggerQAThread : public Thread
 {
 public:
   LibLoggerQAThread(unsigned int thread_num, unsigned int sleep_time_usec)
+    : Thread("LibLoggerQAThread")
   {
     this->sleep_time_usec = sleep_time_usec;
     this->thread_num      = thread_num;

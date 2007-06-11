@@ -33,6 +33,9 @@ LIBS_qa_utils_logger = utils
 OBJS_qa_utils_liblogger = qa_liblogger.o
 LIBS_qa_utils_liblogger = utils
 
+OBJS_qa_utils_time = qa_time.o
+LIBS_qa_utils_time = utils
+
 OBJS_all =	$(OBJS_test_plugin)			\
 		$(OBJS_qa_utils_plugin)			\
 		$(OBJS_qa_utils_ipc_shmem)		\
@@ -42,7 +45,8 @@ OBJS_all =	$(OBJS_test_plugin)			\
 		$(OBJS_qa_utils_ipc_semset)		\
 		$(OBJS_qa_utils_hostinfo)		\
 		$(OBJS_qa_utils_logger)			\
-		$(OBJS_qa_utils_liblogger)
+		$(OBJS_qa_utils_liblogger)		\
+		$(OBJS_qa_utils_time)
 
 BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_ipc_shmem		\
@@ -52,9 +56,10 @@ BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_ipc_semset		\
 		$(BINDIR)/qa_utils_hostinfo		\
 		$(BINDIR)/qa_utils_logger		\
-		$(BINDIR)/qa_utils_liblogger
+		$(BINDIR)/qa_utils_liblogger		\
+		$(BINDIR)/qa_utils_time
 
-PLUGINS_all =	$(PLUGINDIR)/test_plugin.so
+#PLUGINS_all =	$(PLUGINDIR)/test_plugin.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
