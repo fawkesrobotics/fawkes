@@ -206,9 +206,9 @@ Bulb::create()
     shm_lut   = new SharedMemoryLookupTable( lut_id,
 					     width, height,
 					     bytes_per_sample);
-    shm_lut->setDestroyOnDelete( destroy_on_delete );
+    shm_lut->set_destroy_on_delete( destroy_on_delete );
     lut       = (polar_coord_t *)shm_lut->getBuffer();
-    lut_bytes = shm_lut->getDataSize();
+    lut_bytes = shm_lut->data_size();
   } else {
     lut_bytes = width * height * bytes_per_sample;
     lut = (polar_coord_t *)malloc( lut_bytes );
