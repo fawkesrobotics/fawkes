@@ -51,7 +51,7 @@ class HandlerAlreadyRegisteredException : public Exception
 class FawkesNetworkClient : public Thread
 {
  public:
-  FawkesNetworkClient(const char *host, unsigned short int port);
+  FawkesNetworkClient(const char *hostname, unsigned short int port);
   ~FawkesNetworkClient();
 
   void connect();
@@ -78,7 +78,7 @@ class FawkesNetworkClient : public Thread
 
   FawkesNetworkMessageQueue *  inbound_queue();
 
-  const char *hostname;
+  char *hostname;
   unsigned short int port;
 
   StreamSocket *s;

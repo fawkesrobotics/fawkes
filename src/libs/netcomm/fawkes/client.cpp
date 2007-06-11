@@ -67,7 +67,7 @@ FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short in
   inbound_msgq = new FawkesNetworkMessageQueue();
   outbound_msgq = new FawkesNetworkMessageQueue();
   s = new StreamSocket();
-  this->hostname = hostname;
+  this->hostname = strdup(hostname);
   this->port     = port;
 
   wait_timeout = 10;
@@ -103,6 +103,7 @@ FawkesNetworkClient::~FawkesNetworkClient()
   waitconds.clear();
   delete s;
   delete mutex;
+  free(hostname);
 }
 
 
