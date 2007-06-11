@@ -39,7 +39,7 @@ class Bumblebee2Camera : public FirewireCamera
   static const unsigned int LEFT_ORIGINAL;
   static const unsigned int RIGHT_ORIGINAL;
 
-  Bumblebee2Camera(CameraArgumentParser *cap);
+  Bumblebee2Camera(const CameraArgumentParser *cap);
   virtual ~Bumblebee2Camera();
 
   virtual void open();
@@ -50,7 +50,6 @@ class Bumblebee2Camera : public FirewireCamera
 
   virtual unsigned char* buffer();
   virtual unsigned int   buffer_size();
-  unsigned char * buffer_disparity();
 
   virtual colorspace_t   colorspace();
 
@@ -72,21 +71,10 @@ class Bumblebee2Camera : public FirewireCamera
   /** Bayer pattern */
   dc1394color_filter_t bayer_pattern;
 
-  Bumblebee2CameraData *data;
-
   unsigned char *_buffer;
-  unsigned char *buffer_deinterlaced;
-  unsigned char *buffer_rgb;
-  unsigned char *buffer_green;
-  unsigned char *buffer_rgb_left;
-  unsigned char *buffer_rgb_right;
-  unsigned char *buffer_rgb_center;
-  unsigned char *buffer_yuv_left;
-  unsigned char *buffer_yuv_right;
-  unsigned char *buffer_yuv_center;
-
-  bool done;
-
+  unsigned char *_buffer_deinterlaced;
+  unsigned char *_buffer_rgb;
+  unsigned int   _buffer_rgb_size;
 };
 
 #endif

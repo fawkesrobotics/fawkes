@@ -72,12 +72,17 @@ FirewireCamera::FirewireCamera(dc1394framerate_t framerate,
     // cerr  << "When in mode YUV422 @ 640x480 with more than 15 fps. Setting framerate to 15fps." << endl;
     this->framerate = DC1394_FRAMERATE_15;
   }
+
+  model = NULL;
 }
 
 
 /** Empty destructor. */
 FirewireCamera::~FirewireCamera()
 {
+  if ( model != NULL ) {
+    free(model);
+  }
 }
 
 
@@ -433,7 +438,7 @@ FirewireCamera::focus_max()
  * - starty=STARTY, Y start of Format7 ROI
  * @param cap camera argument parser
  */
-FirewireCamera::FirewireCamera(CameraArgumentParser *cap)
+FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
 {
   started = opened = false;
   valid_frame_received = false;
@@ -445,6 +450,7 @@ FirewireCamera::FirewireCamera(CameraArgumentParser *cap)
   framerate = DC1394_FRAMERATE_30;
   camera = NULL;
   format7_width = format7_height = format7_startx = format7_starty = 0;
+  model = strdup(cap->cam_id().c_str());
 
   if ( cap->has("mode") ) {
     string m = cap->get("mode");
@@ -512,5 +518,35 @@ FirewireCamera::FirewireCamera(CameraArgumentParser *cap)
   }
   if ( cap->has("starty") ) {
     format7_starty = atoi(cap->get("starty").c_str());
+  }
+}
+
+
+/** Print list of cameras.
+ * Prints a list of available cameras to stdout.
+ */
+void
+FirewireCamera::print_available_fwcams()
+{
+  
+  dc1394camera_t       **cameras;
+  unsigned int num_cameras = 0;
+
+  if ( dc1394_find_cameras(&cameras, &num_cameras) != DC1394_SUCCESS ) {
+    printf("Finding cameras failed\n");
+    return;
+  }
+
+  if (num_cameras > 0) {
+    // print cameras
+    for (unsigned int i = 0; i < num_cameras; ++i) {
+      printf("Vendor: %30s (%8.0x)  Model: %30s (%8.0x)\n",
+	     cameras[i]->vendor, cameras[i]->vendor_id,
+	     cameras[i]->model, cameras[i]->model_id);
+      dc1394_print_camera_info(cameras[i]);
+      dc1394_free_camera(cameras[i]);
+    }
+  } else {
+    printf("Could not find any cameras\n");
   }
 }

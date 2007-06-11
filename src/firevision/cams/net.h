@@ -42,7 +42,7 @@ class NetworkCamera : public Camera
   NetworkCamera(char *host, unsigned short port,
 		unsigned int image_num=0,
 		unsigned short proto = PROTOCOL_TCP);
-  NetworkCamera(CameraArgumentParser *cap);
+  NetworkCamera(const CameraArgumentParser *cap);
 
   virtual ~NetworkCamera();
 

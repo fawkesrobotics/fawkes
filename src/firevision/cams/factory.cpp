@@ -28,8 +28,6 @@
 #include <cams/factory.h>
 #include <fvutils/system/camargp.h>
 
-#include <string>
-
 #ifdef HAVE_FIREWIRE_CAM
 #include <cams/firewire.h>
 #endif
@@ -54,16 +52,19 @@
 
 using namespace std;
 
-/** @class UnknownCameraException <cams/factory.h>
+/** @class UnknownCameraTypeException <cams/factory.h>
  * Unknown camera exception.
  * Thrown if the requested camera has not been recognized or the needed
  * libraries were not available at compile time.
  */
 
-/** Constructor. */
-UnknownCameraTypeException::UnknownCameraTypeException()
+/** Constructor.
+ * @param msg optional extra message
+ */
+UnknownCameraTypeException::UnknownCameraTypeException(const char *msg)
   : Exception("Unknown camera type")
 {
+  append(msg);
 }
 
 
@@ -76,6 +77,89 @@ UnknownCameraTypeException::UnknownCameraTypeException()
  *
  * @author Tim Niemueller
  */
+
+/** Get camera instance with parameters from given camera argument parser.
+ * This is a convenience method and works like instace(const char *as).
+ * @param cap camera argument parser
+ * @return camera instance
+ * @exception UnknownCameraTypeException thrown if camera type is not known or
+ * was not available at build time.
+ */
+Camera *
+CameraFactory::instance(const CameraArgumentParser *cap)
+{
+  Camera *c = NULL;
+
+  // ######
+  if ( cap->cam_type() == "firewire" ) {
+#ifdef HAVE_FIREWIRE_CAM
+    c = new FirewireCamera(cap);
+#else
+    throw UnknownCameraTypeException("No firewire support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "leutron" ) {
+#ifdef HAVE_LEUTRON_CAM
+    c = new LeutronCamera();
+#else
+    throw UnknownCameraTypeException("No Leutron support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "file" ) {
+#ifdef HAVE_FILELOADER_CAM
+    c = new FileLoader(cap);
+#else
+    throw UnknownCameraTypeException("No file loader support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "shmem" ) {
+#ifdef HAVE_SHMEM_CAM
+    c = new SharedMemoryCamera(cap);
+#else
+    throw UnknownCameraTypeException("No shared memory support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "net" ) {
+#ifdef HAVE_NETWORK_CAM
+    c = new NetworkCamera(cap);
+#else
+    throw UnknownCameraTypeException("No network support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "v4l" ) {
+#ifdef HAVE_V4L_CAM
+    c = new V4LCamera(cap);
+#else
+    throw UnknownCameraTypeException("No video4linux support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "bumblebee2" ) {
+#ifdef HAVE_BUMBLEBEE2_CAM
+    c = new Bumblebee2Camera(cap);
+#else
+    throw UnknownCameraTypeException("No Bumblebee 2 support at compile time");
+#endif
+  }
+
+  if ( c == NULL ) {
+    throw UnknownCameraTypeException();
+  }
+
+  return c;
+}
+
 
 /** Get camera instance.
  * Get an instance of a camera of the given type. The argument string determines
@@ -98,47 +182,9 @@ Camera *
 CameraFactory::instance(const char *as)
 {
   CameraArgumentParser *cap = new CameraArgumentParser(as);
-  Camera *c = NULL;
-
-#ifdef HAVE_FIREWIRE_CAM
-  if ( cap->camid() == "firewire" ) {
-    c = new FirewireCamera(cap);
+  try {
+    return instance(cap);
+  } catch (UnknownCameraTypeException &e) {
+    throw;
   }
-#endif
-#ifdef HAVE_LEUTRON_CAM
-  if ( cap->camid() == "leutron" ) {
-    c = new LeutronCamera();
-  }
-#endif
-#ifdef HAVE_FILELOADER_CAM
-  if ( cap->camid() == "file" ) {
-    c = new FileLoader(cap);
- }
-#endif
-#ifdef HAVE_SHMEM_CAM
-  if ( cap->camid() == "shmem" ) {
-    c = new SharedMemoryCamera(cap);
- }
-#endif
-#ifdef HAVE_NETWORK_CAM
-  if ( cap->camid() == "net" ) {
-    c = new NetworkCamera(cap);
- }
-#endif
-#ifdef HAVE_V4L_CAM
-  if ( cap->camid() == "v4l" ) {
-    c = new V4LCamera(cap);
- }
-#endif
-#ifdef HAVE_BUMBLEBEE2_CAM
-  if ( cap->camid() == "bumblebee2" ) {
-    c = new Bumblebee2Camera(cap);
- }
-#endif
-
-  if ( c == NULL ) {
-    throw UnknownCameraTypeException();
-  }
-
-  return c;
 }

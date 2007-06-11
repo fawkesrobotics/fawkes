@@ -36,11 +36,11 @@
  */
 
 /** Constructor.
- * @param image_num image number to look for.
+ * @param image_id image ID to open
  */
-SharedMemoryCamera::SharedMemoryCamera(unsigned int image_num)
+SharedMemoryCamera::SharedMemoryCamera(const char *image_id)
 {
-  this->image_num = image_num;
+  this->image_id = strdup(image_id);
 
   try {
     init();
@@ -53,15 +53,13 @@ SharedMemoryCamera::SharedMemoryCamera(unsigned int image_num)
 /** Constructor.
  * Take configuration data from camera argument parser. The following
  * options are supported.
- * - image=NUM, where num is the image number
+ * - image_id=ID, where ID is the image ID
  * @param cap camera argument parser
  */
-SharedMemoryCamera::SharedMemoryCamera(CameraArgumentParser *cap)
+SharedMemoryCamera::SharedMemoryCamera(const CameraArgumentParser *cap)
 {
-  image_num = 0;
-  if ( cap->has("image") ) {
-    int i = atoi(cap->get("image").c_str());
-    image_num = (i < 0) ? 0 : (unsigned int)i;
+  if ( cap->has("image_id") ) {
+    image_id = strdup(cap->get("image_id").c_str());
   }
   try {
     init();
@@ -71,11 +69,18 @@ SharedMemoryCamera::SharedMemoryCamera(CameraArgumentParser *cap)
 }
 
 
+/** Destructor. */
+SharedMemoryCamera::~SharedMemoryCamera()
+{
+  free(image_id);
+}
+
+
 void
 SharedMemoryCamera::init()
 {
   try {
-    shm_buffer = new SharedMemoryImageBuffer(image_num);
+    shm_buffer = new SharedMemoryImageBuffer(image_id);
     opened = true;
   } catch (Exception &e) {
     e.append("Failed to open shared memory image");
@@ -112,15 +117,15 @@ SharedMemoryCamera::capture()
 unsigned char*
 SharedMemoryCamera::buffer()
 {
-  return shm_buffer->getBuffer();
+  return shm_buffer->buffer();
 }
 
 unsigned int
 SharedMemoryCamera::buffer_size()
 {
-  return colorspace_buffer_size(shm_buffer->getColorspace(),
-				shm_buffer->getWidth(),
-				shm_buffer->getHeight() );
+  return colorspace_buffer_size(shm_buffer->colorspace(),
+				shm_buffer->width(),
+				shm_buffer->height() );
 }
 
 void
@@ -136,20 +141,20 @@ SharedMemoryCamera::dispose_buffer()
 unsigned int
 SharedMemoryCamera::pixel_width()
 {
-  return shm_buffer->getWidth();
+  return shm_buffer->width();
 }
 
 unsigned int
 SharedMemoryCamera::pixel_height()
 {
-  return shm_buffer->getHeight();
+  return shm_buffer->height();
 }
 
 
 colorspace_t
 SharedMemoryCamera::colorspace()
 {
-  return shm_buffer->getColorspace();
+  return shm_buffer->colorspace();
 }
 
 
@@ -179,9 +184,5 @@ SharedMemoryCamera::ready()
 void
 SharedMemoryCamera::set_image_number(unsigned int n)
 {
-  if (SharedMemoryImageBuffer::exists(n)) {
-    shm_buffer->setImageNumber(n);
-  } else {
-    throw Exception("Image number does not exist");
-  }
+  // ignore for now
 }

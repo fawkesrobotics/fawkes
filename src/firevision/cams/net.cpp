@@ -73,7 +73,7 @@ NetworkCamera::NetworkCamera(char *host, unsigned short port, unsigned int image
  * - image=NUM, image number of image to retrieve
  * @param cap camera argument parser
  */
-NetworkCamera::NetworkCamera(CameraArgumentParser *cap)
+NetworkCamera::NetworkCamera(const CameraArgumentParser *cap)
 {
   image_num = 0;
   const char *host = "localhost";

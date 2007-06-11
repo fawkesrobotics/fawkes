@@ -44,7 +44,7 @@ class FirewireCamera : public Camera, public CameraControl
 		 dc1394video_mode_t mode     = DC1394_VIDEO_MODE_640x480_YUV422,
 		 dc1394speed_t speed         = DC1394_ISO_SPEED_400,
 		 int num_buffers=8);
-  FirewireCamera(CameraArgumentParser *cap);
+  FirewireCamera(const CameraArgumentParser *cap);
 
   virtual ~FirewireCamera();
 
@@ -78,6 +78,8 @@ class FirewireCamera : public Camera, public CameraControl
   virtual unsigned int   focus_min();
   virtual unsigned int   focus_max();
 
+  static void            print_available_fwcams();
+
  protected:
   /** Number of DMA buffers. */
   int  num_buffers;
@@ -110,6 +112,10 @@ class FirewireCamera : public Camera, public CameraControl
   int                            format7_startx;
   /** Format7 ROI Start Y coordinate */
   int                            format7_starty;
+
+  /** Camera model, used in open to identify the camera, if empty first found camera is used */
+  char *model;
+
 };
 
 #endif

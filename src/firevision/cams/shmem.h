@@ -39,8 +39,9 @@ class SharedMemoryCamera : public Camera
 
  public:
 
-  SharedMemoryCamera(unsigned int image_num=0);
-  SharedMemoryCamera(CameraArgumentParser *cap);
+  SharedMemoryCamera(const char *image_id);
+  SharedMemoryCamera(const CameraArgumentParser *cap);
+  ~SharedMemoryCamera();
 
   virtual void open();
   virtual void start();
@@ -67,10 +68,10 @@ class SharedMemoryCamera : public Camera
  private:
   void init();
 
-  bool opened;
+  bool          opened;
   unsigned int  width;
   unsigned int  height;
-  unsigned int  image_num;
+  char *        image_id;
 
   SharedMemoryImageBuffer  *shm_buffer;
 };

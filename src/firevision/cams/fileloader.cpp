@@ -67,7 +67,7 @@ FileLoader::FileLoader(const char *filename)
  *
  * @param cap camera argument parser
  */
-FileLoader::FileLoader(CameraArgumentParser *cap)
+FileLoader::FileLoader(const CameraArgumentParser *cap)
 {
   if ( cap->has("file") ) {
     this->filename = cap->get("file").c_str();

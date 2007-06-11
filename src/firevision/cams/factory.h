@@ -35,16 +35,19 @@
 
 #include <cstddef>
 
+class CameraArgumentParser;
+
 class UnknownCameraTypeException : public Exception
 {
  public:
-  UnknownCameraTypeException();
+  UnknownCameraTypeException(const char *msg = NULL);
 };
 
 class CameraFactory
 {
  public:
   static Camera * instance(const char *as);
+  static Camera * instance(const CameraArgumentParser *cap);
 
   /** Get typed instance of camera.
    * Creates a new instance and converts it to the requested type. If the type

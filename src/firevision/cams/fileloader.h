@@ -39,7 +39,7 @@ class FileLoader : public Camera
 
   FileLoader(const char *filename);
   FileLoader(colorspace_t cspace, const char* filename, unsigned int width, unsigned int height);
-  FileLoader(CameraArgumentParser *cap);
+  FileLoader(const CameraArgumentParser *cap);
 
   virtual void             open();
   virtual void             start();
