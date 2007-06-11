@@ -33,10 +33,12 @@
 
 #include <fvutils/color/colorspaces.h>
 
+#define IMAGE_ID_MAX_LENGTH 32
+
 // Not that there is a relation to ITPimage_packet_header_t
 /** Shared memory header struct for FireVision images. */
 typedef struct {
-  unsigned int  image_num;		/**< image number */
+  char          image_id[IMAGE_ID_MAX_LENGTH];/**< image ID */
   unsigned int  colorspace;		/**< color space */
   unsigned int  width;			/**< width */
   unsigned int  height;			/**< height */
@@ -57,35 +59,35 @@ typedef struct {
 class SharedMemoryImageBufferHeader : public SharedMemoryHeader {
  public:
   SharedMemoryImageBufferHeader();
-  SharedMemoryImageBufferHeader(unsigned int image_num,
+  SharedMemoryImageBufferHeader(const char *image_id,
 				colorspace_t colorspace,
 				unsigned int width,
 				unsigned int height);
   virtual ~SharedMemoryImageBufferHeader();
 
   virtual bool         matches(void *memptr);
-  virtual unsigned int size();
+  virtual size_t       size();
   virtual void         print_info();
   virtual bool         create();
   virtual void         initialize(void *memptr);
   virtual void         set(void *memptr);
-  virtual unsigned int dataSize();
+  virtual size_t       data_size();
 
-  void                 setImageNumber(unsigned int image_num);
-  colorspace_t         getColorspace();
-  unsigned int         getWidth();
-  unsigned int         getHeight();
-  unsigned int         getImageNumber();
+  void                 set_image_id(const char *image_id);
+  colorspace_t         colorspace();
+  unsigned int         width();
+  unsigned int         height();
+  const char *         image_id();
 
-  SharedMemoryImageBuffer_header_t * getRawHeader();
+  SharedMemoryImageBuffer_header_t * raw_header();
 
  private:
   SharedMemoryImageBuffer_header_t *header;
 
-  unsigned int   image_num;
-  colorspace_t   colorspace;
-  unsigned int   width;
-  unsigned int   height;
+  char          *_image_id;
+  colorspace_t   _colorspace;
+  unsigned int   _width;
+  unsigned int   _height;
 };
 
 class SharedMemoryImageBufferLister : public SharedMemoryLister {
@@ -108,55 +110,54 @@ class SharedMemoryImageBuffer : public SharedMemory
 {
 
  public:
-  SharedMemoryImageBuffer(colorspace_t cspace,
-			  unsigned int width, unsigned int height,
-			  unsigned int image_num = 0);
-  SharedMemoryImageBuffer(unsigned int image_num = 0, bool is_read_only = true);
+  SharedMemoryImageBuffer(const char *image_id,
+			  colorspace_t cspace,
+			  unsigned int width, unsigned int height);
+  SharedMemoryImageBuffer(const char *image_id, bool is_read_only = true);
   ~SharedMemoryImageBuffer();
 
-  unsigned char *  getBuffer();
-  colorspace_t     getColorspace();
-  unsigned int     getWidth();
-  unsigned int     getHeight();
-  unsigned int     getROIX();
-  unsigned int     getROIY();
-  unsigned int     getROIWidth();
-  unsigned int     getROIHeight();
-  int              getCircleX();
-  int              getCircleY();
-  unsigned int     getCircleRadius();
-  void             setROIX(unsigned int roi_x);
-  void             setROIY(unsigned int roi_y);
-  void             setROIWidth(unsigned int roi_w);
-  void             setROIHeight(unsigned int roi_h);
-  void             setROI(unsigned int roi_x, unsigned int roi_y,
-			  unsigned int roi_w, unsigned int roi_h);
-  void             setCircleX(int circle_x);
-  void             setCircleY(int circle_y);
-  void             setCircleRadius(unsigned int circle_radius);
-  void             setCircle(int x, int y, unsigned int r);
-  void             setCircleFound(bool found);
-  bool             getCircleFound();
-  bool             setImageNumber(unsigned int n);
+  unsigned char *  buffer();
+  colorspace_t     colorspace();
+  unsigned int     width();
+  unsigned int     height();
+  unsigned int     roi_x();
+  unsigned int     roi_y();
+  unsigned int     roi_width();
+  unsigned int     roi_height();
+  int              circle_x();
+  int              circle_y();
+  unsigned int     circle_radius();
+  bool             circle_found();
+  void             set_roi_x(unsigned int roi_x);
+  void             set_roi_y(unsigned int roi_y);
+  void             set_roi_width(unsigned int roi_w);
+  void             set_roi_height(unsigned int roi_h);
+  void             set_roi(unsigned int roi_x, unsigned int roi_y,
+			   unsigned int roi_w, unsigned int roi_h);
+  void             set_circle_x(int circle_x);
+  void             set_circle_y(int circle_y);
+  void             set_circle_radius(unsigned int circle_radius);
+  void             set_circle(int x, int y, unsigned int r);
+  void             set_circle_found(bool found);
+  bool             set_image_id(const char *image_id);
 
   static void      list();
   static void      cleanup();
-  static bool      exists(unsigned int image_num);
-  static void      wipe(unsigned int image_num);
+  static bool      exists(const char *image_id);
+  static void      wipe(const char *image_id);
 
  private:
-  void constructor(colorspace_t cspace,
+  void constructor(const char *image_id, colorspace_t cspace,
 		   unsigned int width, unsigned int height,
-		   unsigned int image_num,
 		   bool is_read_only);
 
   SharedMemoryImageBufferHeader    *priv_header;
   SharedMemoryImageBuffer_header_t *raw_header;
 
-  unsigned int   image_num;
-  colorspace_t   colorspace;
-  unsigned int   width;
-  unsigned int   height;
+  char *         _image_id;
+  colorspace_t   _colorspace;
+  unsigned int   _width;
+  unsigned int   _height;
 
 
 };

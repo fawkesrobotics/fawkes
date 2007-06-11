@@ -35,8 +35,21 @@
 #include <fvutils/color/rgbyuv.h>
 #include <fvutils/color/bayer.h>
 
-#include <iostream>
+#include <core/exception.h>
+#include <cstring>
 
+/** Convert image from one colorspace to another.
+ * This is a convenience method for unified access to all conversion routines
+ * available in FireVision.
+ * @param from colorspace of the src buffer
+ * @param to colorspace to convert to
+ * @param src source buffer
+ * @param dst destination buffer
+ * @param width width of image in pixels
+ * @param height height of image in pixels
+ * @exception Exception thrown, if the desired conversion combination is not
+ * available.
+ */
 inline void
 convert(colorspace_t   from,  colorspace_t   to,
 	unsigned char *src,   unsigned char *dst,
@@ -88,8 +101,10 @@ convert(colorspace_t   from,  colorspace_t   to,
   } else if ( (from == BAYER_MOSAIC_GBRG) && (to == YUV422_PLANAR) ) {
     bayerGBRG_to_yuv422planar_bilinear(src, dst, width, height);
   } else {
-    std::cout << "Unknown combination of color spaces (" << from << " -> "
-	      << to << ")" << std::endl;
+    Exception e("Cannot convert image data");
+    e.append("No conversion routine from %s to %s available",
+	     colorspace_to_string(from), colorspace_to_string(to));
+    throw e;
   }
 }
 
@@ -107,8 +122,10 @@ grayscale(colorspace_t cspace,
     grayscale_yuv422planar(src, dst, width, height);
     break;
   default:
-    std::cout << "FirevisionUtils: Cannot grayscale images of this color space, yet." << std::endl;
-    break;
+    Exception e("FirevisionUtils: Cannot grayscale image");
+    e.append("Grayscaling of images in colorspace '%s' is not supported",
+	     colorspace_to_string(cspace));
+    throw e;
   }
 }
 

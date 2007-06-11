@@ -38,13 +38,19 @@ using namespace std;
  *
  * In general a string is of the form
  * @code
- * camera:param1=value1:param2=value2:arg1:arg2
+ * camera-type:id-substring:param1=value1:param2=value2:arg1:arg2
  * @endcode
  * The string is a colon-separated (:) list of elements.
  *
  * The first element (camera in the example) denotes the camera type.
  * See the CameraFactory documentation for allowed values. It can be queried
- * with the camid() method.
+ * with the cam_type() method.
+ *
+ * There is one special parameter that is used for all kinds of cameras, the
+ * identifier string (second element). This special value is meant to be used to recognize
+ * the very same camera even if it has different parameters and to distinguish multiple
+ * cameras of the same type (for instance to distinguish two different firewire
+ * cameras). The ID can be queried with cam_id().
  *
  * The rest is a list of parameters and arguments. Parameters are key/value
  * pairs separated by an equals sign. The are then queried with the has(),
@@ -66,20 +72,30 @@ CameraArgumentParser::CameraArgumentParser(const char *as)
   std::string s = as;
   s += ":";
 
-  _camid = s;
-  string::size_type start;
+  _cam_type = s;
+  string::size_type start = 0;
   string::size_type end;
-  if ( (end = s.find(":", 0)) != string::npos ) {
-    _camid = s.substr(0, end);
+  if ( (end = s.find(":", start)) != string::npos ) {
+    _cam_type = s.substr(start, end);
+  } else {
+    _cam_type = "";
   }
   start = end + 1;
+  if ( (end = s.find(":", start)) != string::npos ) {
+    _cam_id = s.substr(start, end - start);
+    start = end + 1;
+  } else {
+    _cam_id = "";
+  }
 
   while ( (end = s.find(":", start)) != string::npos ) {
     string t = s.substr(start, (end - start));
     string::size_type e;
     if ( (e = t.find("=", 0)) != string::npos ) {
       if ( (e > 0 ) && (e < t.length() - 1) ) {
-	values[t.substr(0, e)] = t.substr(e+1);
+	string key   = t.substr(0, e);
+	string value = t.substr(e+1);
+	values[key] = value;
       }
     } else {
       if ( t != "" ) {
@@ -99,15 +115,27 @@ CameraArgumentParser::~CameraArgumentParser()
 }
 
 
+/** Get camera type.
+ * Get the camera type. This is the very first element before
+ * the first colon.
+ * @return camera type
+ */
+std::string
+CameraArgumentParser::cam_type() const
+{
+  return _cam_type;
+}
+
+
 /** Get camera ID.
  * Get the camera ID. This is the very first element before
  * the first colon.
  * @return camera ID string
  */
 std::string
-CameraArgumentParser::camid() const
+CameraArgumentParser::cam_id() const
 {
-  return _camid;
+  return _cam_id;
 }
 
 
@@ -130,10 +158,11 @@ CameraArgumentParser::has(std::string s) const
  * parameter was not supplied.
  */
 std::string
-CameraArgumentParser::get(std::string s)
+CameraArgumentParser::get(std::string s) const
 {
   if ( values.find(s) != values.end() ) {
-    return values[s];
+    // this is needed to be able to make this method const
+    return (*(values.find(s))).first;
   } else {
     return string();
   }

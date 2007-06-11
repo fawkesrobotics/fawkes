@@ -85,17 +85,17 @@ SharedMemoryLookupTable::constructor(unsigned int lut_id,
 				     bool is_read_only)
 {
   this->lut_id         = lut_id;
-  this->is_read_only   = is_read_only;
+  _is_read_only   = is_read_only;
   this->width          = width;
   this->height         = height;
   this->bytes_per_cell = bytes_per_cell;
 
   priv_header = new SharedMemoryLookupTableHeader(lut_id, width, height, bytes_per_cell);
-  header = priv_header;
+  _header = priv_header;
   attach();
   raw_header = priv_header->getRawHeader();
 
-  if (memptr == NULL) {
+  if (_memptr == NULL) {
     throw Exception("Could not create shared memory segment");
   }
 }
@@ -117,7 +117,7 @@ SharedMemoryLookupTable::setLutID(unsigned int lut_id)
   free();
   priv_header->setLutID(lut_id);
   attach();
-  return (memptr != NULL);
+  return (_memptr != NULL);
 }
 
 
@@ -127,7 +127,7 @@ SharedMemoryLookupTable::setLutID(unsigned int lut_id)
 unsigned char *
 SharedMemoryLookupTable::getBuffer()
 {
-  return (unsigned char *)memptr;
+  return (unsigned char *)_memptr;
 }
 
 
@@ -263,15 +263,15 @@ SharedMemoryLookupTableHeader::~SharedMemoryLookupTableHeader()
 }
 
 
-unsigned int
+size_t
 SharedMemoryLookupTableHeader::size()
 {
   return sizeof(SharedMemoryLookupTable_header_t);
 }
 
 
-unsigned int
-SharedMemoryLookupTableHeader::dataSize()
+size_t
+SharedMemoryLookupTableHeader::data_size()
 {
   if (header == NULL) {
     return width * height * bytes_per_cell;
@@ -311,7 +311,7 @@ SharedMemoryLookupTableHeader::matches(void *memptr)
 
 /** Print Info. */
 void
-SharedMemoryLookupTableHeader::printInfo()
+SharedMemoryLookupTableHeader::print_info()
 {
   if (header == NULL) {
     cout << "No image set" << endl;
@@ -484,7 +484,7 @@ SharedMemoryLookupTableLister::printInfo(SharedMemoryHeader *header,
   printf("%-3d %-10d %-10d %-10d %-9d %-9d %s%s\n",
 	 h->getLutID(), shm_id, semaphore, mem_size,
 	 h->getWidth(), h->getHeight(),
-	 (SharedMemory::isSwapable(shm_id) ? "S" : ""),
-	 (SharedMemory::isDestroyed(shm_id) ? "D" : "")
+	 (SharedMemory::is_swapable(shm_id) ? "S" : ""),
+	 (SharedMemory::is_destroyed(shm_id) ? "D" : "")
 	 );
 }

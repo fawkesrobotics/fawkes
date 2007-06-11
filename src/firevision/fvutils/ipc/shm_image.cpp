@@ -46,24 +46,24 @@ using namespace std;
 
 /** Write Constructor.
  * Create a new shared memory segment. Will open a shared memory segment that
- * exactly fits the given information. Will throw an error if image with num
- * image_num exists it will throw an exception an exception.
+ * exactly fits the given information. Will throw an error if image with id
+ * image_id exists.
  * I will create a new segment if no matching segment was found.
  * The segment is accessed in read-write mode.
  *
  * Use this constructor to open a shared memory image buffer for writing.
+ * @param image_id image ID to open
  * @param cspace colorspace
  * @param width image width
  * @param height image height
- * @param image_num image number
  */
-SharedMemoryImageBuffer::SharedMemoryImageBuffer(colorspace_t cspace,
+SharedMemoryImageBuffer::SharedMemoryImageBuffer(const char *image_id,
+						 colorspace_t cspace,
 						 unsigned int width,
-						 unsigned int height,
-						 unsigned int image_num)
+						 unsigned int height)
   : SharedMemory(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, false, true, true)
 {
-  constructor(cspace, width, height, image_num, false);
+  constructor(image_id, cspace, width, height, false);
 }
 
 
@@ -74,35 +74,34 @@ SharedMemoryImageBuffer::SharedMemoryImageBuffer(colorspace_t cspace,
  * the is_read_only argument if needed.
  *
  * Use this constructor to open an image for reading.
- * @param image_num image number
+ * @param image_id Image ID to open
  * @param is_read_only true to open image read-only
  */
-SharedMemoryImageBuffer::SharedMemoryImageBuffer(unsigned int image_num, bool is_read_only)
+SharedMemoryImageBuffer::SharedMemoryImageBuffer(const char *image_id, bool is_read_only)
   : SharedMemory(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, is_read_only, false, false)
 {
-  constructor(CS_UNKNOWN, 0, 0, image_num, is_read_only);
+  constructor(image_id, CS_UNKNOWN, 0, 0, is_read_only);
 }
 
 
 void
-SharedMemoryImageBuffer::constructor(colorspace_t cspace,
+SharedMemoryImageBuffer::constructor(const char *image_id, colorspace_t cspace,
 				     unsigned int width, unsigned int height,
-				     unsigned int image_num,
 				     bool is_read_only)
 {
-  this->image_num = image_num;
-  this->is_read_only = is_read_only;
+  this->_image_id     = strdup(image_id);
+  _is_read_only = is_read_only;
 
-  this->colorspace = cspace;
-  this->width      = width;
-  this->height     = height;
+  _colorspace = cspace;
+  _width      = width;
+  _height     = height;
 
-  priv_header = new SharedMemoryImageBufferHeader(image_num, colorspace, width, height);
-  header = priv_header;
+  priv_header = new SharedMemoryImageBufferHeader(_image_id, _colorspace, width, height);
+  _header = priv_header;
   attach();
-  raw_header = priv_header->getRawHeader();
+  raw_header = priv_header->raw_header();
 
-  if (memptr == NULL) {
+  if (_memptr == NULL) {
     throw Exception("Could not create shared memory segment");
   }
 
@@ -116,17 +115,21 @@ SharedMemoryImageBuffer::~SharedMemoryImageBuffer()
 
 
 /** Set image number.
- * @param image_num new image number
+ * This will close the currently opened image and will try to open the new
+ * image. This operation should be avoided.
+ * @param image_id new image ID
  * @return true on success
  */
 bool
-SharedMemoryImageBuffer::setImageNumber(unsigned int image_num)
+SharedMemoryImageBuffer::set_image_id(const char *image_id)
 {
   free();
-  priv_header->setImageNumber(image_num);
+  ::free(_image_id);
+  _image_id = strdup(image_id);
+  priv_header->set_image_id(_image_id);
   attach();
-  raw_header = priv_header->getRawHeader();
-  return (memptr != NULL);
+  raw_header = priv_header->raw_header();
+  return (_memptr != NULL);
 }
 
 
@@ -134,9 +137,9 @@ SharedMemoryImageBuffer::setImageNumber(unsigned int image_num)
  * @return image buffer.
  */
 unsigned char *
-SharedMemoryImageBuffer::getBuffer()
+SharedMemoryImageBuffer::buffer()
 {
-  return (unsigned char *)memptr;
+  return (unsigned char *)_memptr;
 }
 
 
@@ -144,7 +147,7 @@ SharedMemoryImageBuffer::getBuffer()
  * @return colorspace
  */
 colorspace_t
-SharedMemoryImageBuffer::getColorspace()
+SharedMemoryImageBuffer::colorspace()
 {
   return fuse_ui2cs(raw_header->colorspace);
 }
@@ -154,7 +157,7 @@ SharedMemoryImageBuffer::getColorspace()
  * @return width
  */
 unsigned int
-SharedMemoryImageBuffer::getWidth()
+SharedMemoryImageBuffer::width()
 {
   return raw_header->width;
 }
@@ -164,7 +167,7 @@ SharedMemoryImageBuffer::getWidth()
  * @return image height
  */
 unsigned int
-SharedMemoryImageBuffer::getHeight()
+SharedMemoryImageBuffer::height()
 {
   return raw_header->height;
 }
@@ -174,7 +177,7 @@ SharedMemoryImageBuffer::getHeight()
  * @return ROI X
  */
 unsigned int
-SharedMemoryImageBuffer::getROIX()
+SharedMemoryImageBuffer::roi_x()
 {
   return raw_header->roi_x;
 }
@@ -184,7 +187,7 @@ SharedMemoryImageBuffer::getROIX()
  * @return ROI Y
  */
 unsigned int
-SharedMemoryImageBuffer::getROIY()
+SharedMemoryImageBuffer::roi_y()
 {
   return raw_header->roi_y;
 }
@@ -194,7 +197,7 @@ SharedMemoryImageBuffer::getROIY()
  * @return ROI width
  */
 unsigned int
-SharedMemoryImageBuffer::getROIWidth()
+SharedMemoryImageBuffer::roi_width()
 {
   return raw_header->roi_width;
 }
@@ -204,7 +207,7 @@ SharedMemoryImageBuffer::getROIWidth()
  * @return ROI height
  */
 unsigned int
-SharedMemoryImageBuffer::getROIHeight()
+SharedMemoryImageBuffer::roi_height()
 {
   return raw_header->roi_height;
 }
@@ -214,7 +217,7 @@ SharedMemoryImageBuffer::getROIHeight()
  * @return circle X
  */
 int
-SharedMemoryImageBuffer::getCircleX()
+SharedMemoryImageBuffer::circle_x()
 {
   return raw_header->circle_x;
 }
@@ -224,7 +227,7 @@ SharedMemoryImageBuffer::getCircleX()
  * @return circle Y
  */
 int
-SharedMemoryImageBuffer::getCircleY()
+SharedMemoryImageBuffer::circle_y()
 {
   return raw_header->circle_y;
 }
@@ -234,7 +237,7 @@ SharedMemoryImageBuffer::getCircleY()
  * @return circle radius
  */
 unsigned int
-SharedMemoryImageBuffer::getCircleRadius()
+SharedMemoryImageBuffer::circle_radius()
 {
   return raw_header->circle_radius;
 }
@@ -244,9 +247,9 @@ SharedMemoryImageBuffer::getCircleRadius()
  * @param roi_x new ROI X
  */
 void
-SharedMemoryImageBuffer::setROIX(unsigned int roi_x)
+SharedMemoryImageBuffer::set_roi_x(unsigned int roi_x)
 {
-  if (is_read_only) {
+  if (_is_read_only) {
     throw Exception("Buffer is read-only. Not setting ROI X.");
   }
   raw_header->roi_x = roi_x;
@@ -257,9 +260,9 @@ SharedMemoryImageBuffer::setROIX(unsigned int roi_x)
  * @param roi_y new ROI Y
  */
 void
-SharedMemoryImageBuffer::setROIY(unsigned int roi_y)
+SharedMemoryImageBuffer::set_roi_y(unsigned int roi_y)
 {
-  if (is_read_only) {
+  if (_is_read_only) {
     throw Exception("Buffer is read-only. Not setting ROI Y.");
   }
   raw_header->roi_y = roi_y;
@@ -270,9 +273,9 @@ SharedMemoryImageBuffer::setROIY(unsigned int roi_y)
  * @param roi_w new ROI width
  */
 void
-SharedMemoryImageBuffer::setROIWidth(unsigned int roi_w)
+SharedMemoryImageBuffer::set_roi_width(unsigned int roi_w)
 {
-  if (is_read_only) {
+  if (_is_read_only) {
     throw Exception("Buffer is read-only. Not setting ROI width.");
   }
   raw_header->roi_width = roi_w;
@@ -283,9 +286,9 @@ SharedMemoryImageBuffer::setROIWidth(unsigned int roi_w)
  * @param roi_h new ROI height
  */
 void
-SharedMemoryImageBuffer::setROIHeight(unsigned int roi_h)
+SharedMemoryImageBuffer::set_roi_height(unsigned int roi_h)
 {
-  if (is_read_only) {
+  if (_is_read_only) {
     throw Exception("Buffer is read-only. Not setting ROI height.");
   }
   raw_header->roi_height = roi_h;
@@ -299,10 +302,10 @@ SharedMemoryImageBuffer::setROIHeight(unsigned int roi_h)
  * @param roi_h new ROI height
  */
 void
-SharedMemoryImageBuffer::setROI(unsigned int roi_x, unsigned int roi_y,
-				unsigned int roi_w, unsigned int roi_h)
+SharedMemoryImageBuffer::set_roi(unsigned int roi_x, unsigned int roi_y,
+				 unsigned int roi_w, unsigned int roi_h)
 {
-  if (is_read_only) {
+  if (_is_read_only) {
     throw Exception("Buffer is read-only. Not setting ROI X/Y.");
   }
   raw_header->roi_x = roi_x;
@@ -316,9 +319,9 @@ SharedMemoryImageBuffer::setROI(unsigned int roi_x, unsigned int roi_y,
  * @param circle_x new circle X
  */
 void
-SharedMemoryImageBuffer::setCircleX(int circle_x)
+SharedMemoryImageBuffer::set_circle_x(int circle_x)
 {
-  if (is_read_only) {
+  if (_is_read_only) {
     throw Exception("Buffer is read-only. Not setting circle X.");
   }
   raw_header->circle_x = circle_x;
@@ -329,9 +332,9 @@ SharedMemoryImageBuffer::setCircleX(int circle_x)
  * @param circle_y new circle Y
  */
 void
-SharedMemoryImageBuffer::setCircleY(int circle_y)
+SharedMemoryImageBuffer::set_circle_y(int circle_y)
 {
-  if (is_read_only) {
+  if (_is_read_only) {
     throw Exception("Buffer is read-only. Not setting circle Y.");
   }
   raw_header->circle_y = circle_y;
@@ -342,9 +345,9 @@ SharedMemoryImageBuffer::setCircleY(int circle_y)
  * @param circle_radius new circle radius
  */
 void
-SharedMemoryImageBuffer::setCircleRadius(unsigned int circle_radius)
+SharedMemoryImageBuffer::set_circle_radius(unsigned int circle_radius)
 {
-  if (is_read_only) {
+  if (_is_read_only) {
     throw Exception("Buffer is read-only. Not setting circle radius.");
   }
   raw_header->circle_radius = circle_radius;
@@ -357,9 +360,9 @@ SharedMemoryImageBuffer::setCircleRadius(unsigned int circle_radius)
  * @param r circle radius
  */
 void
-SharedMemoryImageBuffer::setCircle(int x, int y, unsigned int r)
+SharedMemoryImageBuffer::set_circle(int x, int y, unsigned int r)
 {
-  if (is_read_only) {
+  if (_is_read_only) {
     throw Exception("Buffer is read-only. Not setting circle X/Y/radius.");
   }
   raw_header->circle_x      = x;
@@ -372,7 +375,7 @@ SharedMemoryImageBuffer::setCircle(int x, int y, unsigned int r)
  * @param found true if circle found
  */
 void
-SharedMemoryImageBuffer::setCircleFound(bool found)
+SharedMemoryImageBuffer::set_circle_found(bool found)
 {
   raw_header->flag_circle_found = (found ? 1 : 0);
 }
@@ -382,7 +385,7 @@ SharedMemoryImageBuffer::setCircleFound(bool found)
  * @return true if circle was found, false otherwise
  */
 bool
-SharedMemoryImageBuffer::getCircleFound()
+SharedMemoryImageBuffer::circle_found()
 {
   return (raw_header->flag_circle_found == 1);
 }
@@ -417,13 +420,13 @@ SharedMemoryImageBuffer::cleanup()
 
 
 /** Check image availability.
- * @param image_num image number to check
+ * @param image_id image ID to check
  * @return true if shared memory segment with requested image exists
  */
 bool
-SharedMemoryImageBuffer::exists(unsigned int image_num)
+SharedMemoryImageBuffer::exists(const char *image_id)
 {
-  SharedMemoryImageBufferHeader *h      = new SharedMemoryImageBufferHeader(image_num, CS_UNKNOWN, 0, 0);
+  SharedMemoryImageBufferHeader *h      = new SharedMemoryImageBufferHeader(image_id, CS_UNKNOWN, 0, 0);
 
   bool ex = SharedMemory::exists(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h);
 
@@ -433,12 +436,12 @@ SharedMemoryImageBuffer::exists(unsigned int image_num)
 
 
 /** Erase a specific shared memory segment that contains an image.
- * @param image_num image number
+ * @param image_id ID of image to wipe
  */
 void
-SharedMemoryImageBuffer::wipe(unsigned int image_num)
+SharedMemoryImageBuffer::wipe(const char *image_id)
 {
-  SharedMemoryImageBufferHeader *h      = new SharedMemoryImageBufferHeader(image_num, CS_UNKNOWN, 0, 0);
+  SharedMemoryImageBufferHeader *h      = new SharedMemoryImageBufferHeader(image_id, CS_UNKNOWN, 0, 0);
 
   SharedMemory::erase(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h, NULL);
 
@@ -453,29 +456,29 @@ SharedMemoryImageBuffer::wipe(unsigned int image_num)
 /** Constructor. */
 SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader()
 {
-  colorspace = CS_UNKNOWN;
-  image_num = 0xFFFFFFFF;
-  width = 0;
-  height = 0;
+  _colorspace = CS_UNKNOWN;
+  _image_id = NULL;
+  _width = 0;
+  _height = 0;
   header = NULL;
 }
 
 
 /** Constructor.
- * @param image_num image number
+ * @param image_id image id
  * @param colorspace colorspace
  * @param width width
  * @param height height
  */
-SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader(unsigned int image_num,
+SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader(const char *image_id,
 							     colorspace_t colorspace,
 							     unsigned int width,
 							     unsigned int height)
 {
-  this->image_num  = image_num;
-  this->colorspace = colorspace;
-  this->width      = width;
-  this->height     = height;
+  _image_id   = strdup(image_id);
+  _colorspace = colorspace;
+  _width      = width;
+  _height     = height;
 
   header = NULL;
 }
@@ -488,18 +491,18 @@ SharedMemoryImageBufferHeader::~SharedMemoryImageBufferHeader()
 }
 
 
-unsigned int
+size_t
 SharedMemoryImageBufferHeader::size()
 {
   return sizeof(SharedMemoryImageBuffer_header_t);
 }
 
 
-unsigned int
-SharedMemoryImageBufferHeader::dataSize()
+size_t
+SharedMemoryImageBufferHeader::data_size()
 {
   if (header == NULL) {
-    return colorspace_buffer_size(colorspace, width, height);
+    return colorspace_buffer_size(_colorspace, _width, _height);
   } else {
     return colorspace_buffer_size(fuse_ui2cs(header->colorspace), header->width, header->height);
   }
@@ -511,15 +514,15 @@ SharedMemoryImageBufferHeader::matches(void *memptr)
 {
   SharedMemoryImageBuffer_header_t *h = (SharedMemoryImageBuffer_header_t *)memptr;
 
-  if (image_num == 0xFFFFFFFF) {
+  if (_image_id == NULL) {
     return true;
 
-  } else if (h->image_num == image_num) {
+  } else if (strncmp(h->image_id, _image_id, IMAGE_ID_MAX_LENGTH) == 0) {
 
-    if ( (colorspace == CS_UNKNOWN) ||
-	 ((fuse_ui2cs(h->colorspace) == colorspace) &&
-	  (h->width == width) &&
-	  (h->height == height)
+    if ( (_colorspace == CS_UNKNOWN) ||
+	 ((fuse_ui2cs(h->colorspace) == _colorspace) &&
+	  (h->width == _width) &&
+	  (h->height == _height)
 	  )
 	 ) {
       return true;
@@ -543,7 +546,7 @@ SharedMemoryImageBufferHeader::print_info()
   }
   cout << "SharedMemory Image Info: " << endl;
   printf("    address:  0x%lx\n", (long unsigned int)header);
-  cout << "    image num:  " << header->image_num << endl
+  cout << "    image id:  " << header->image_id << endl
        << "    colorspace: " << header->colorspace << endl
        << "    dimensions: " << header->width << "x" << header->height << endl
        << "    ROI:        at (" << header->roi_x << "," << header->roi_y
@@ -561,9 +564,9 @@ SharedMemoryImageBufferHeader::print_info()
 bool
 SharedMemoryImageBufferHeader::create()
 {
-  return ( (colorspace != CS_UNKNOWN) &&
-	   (width > 0) &&
-	   (height > 0) );
+  return ( (_colorspace != CS_UNKNOWN) &&
+	   (_width > 0) &&
+	   (_height > 0) );
 }
 
 
@@ -573,10 +576,10 @@ SharedMemoryImageBufferHeader::initialize(void *memptr)
   header = (SharedMemoryImageBuffer_header_t *)memptr;
   memset(memptr, 0, sizeof(SharedMemoryImageBuffer_header_t));
 	 
-  header->image_num  = image_num;
-  header->colorspace = fuse_cs2ui(colorspace);
-  header->width      = width;
-  header->height     = height;
+  strncpy(header->image_id, _image_id, IMAGE_ID_MAX_LENGTH);
+  header->colorspace = fuse_cs2ui(_colorspace);
+  header->width      = _width;
+  header->height     = _height;
 
 }
 
@@ -585,6 +588,7 @@ void
 SharedMemoryImageBufferHeader::set(void *memptr)
 {
   header = (SharedMemoryImageBuffer_header_t *)memptr;
+  _image_id = strndup(header->image_id, IMAGE_ID_MAX_LENGTH);
 }
 
 
@@ -592,7 +596,7 @@ SharedMemoryImageBufferHeader::set(void *memptr)
  * @return colorspace
  */
 colorspace_t
-SharedMemoryImageBufferHeader::getColorspace()
+SharedMemoryImageBufferHeader::colorspace()
 {
   if (header == NULL) return CS_UNKNOWN;
   return fuse_ui2cs(header->colorspace);
@@ -603,7 +607,7 @@ SharedMemoryImageBufferHeader::getColorspace()
  * @return image width
  */
 unsigned int
-SharedMemoryImageBufferHeader::getWidth()
+SharedMemoryImageBufferHeader::width()
 {
   if (header == NULL) return 0;
   return header->width;
@@ -614,7 +618,7 @@ SharedMemoryImageBufferHeader::getWidth()
  * @return image height
  */
 unsigned int
-SharedMemoryImageBufferHeader::getHeight()
+SharedMemoryImageBufferHeader::height()
 {
   if (header == NULL) return 0;
   return header->height;
@@ -624,21 +628,22 @@ SharedMemoryImageBufferHeader::getHeight()
 /** Get image number
  * @return image number
  */
-unsigned int
-SharedMemoryImageBufferHeader::getImageNumber()
+const char *
+SharedMemoryImageBufferHeader::image_id()
 {
   if (header == NULL) return 0;
-  return header->image_num;
+  return _image_id;
 }
 
 
-/** Set image number
- * @param image_num image number
+/** Set image id
+ * @param image_id image ID
  */
 void
-SharedMemoryImageBufferHeader::setImageNumber(unsigned int image_num)
+SharedMemoryImageBufferHeader::set_image_id(const char *image_id)
 {
-  this->image_num = image_num;
+  ::free(_image_id);
+  _image_id = strdup(image_id);
 }
 
 
@@ -646,7 +651,7 @@ SharedMemoryImageBufferHeader::setImageNumber(unsigned int image_num)
  * @return raw header.
  */
 SharedMemoryImageBuffer_header_t *
-SharedMemoryImageBufferHeader::getRawHeader()
+SharedMemoryImageBufferHeader::raw_header()
 {
   return header;
 }
@@ -710,12 +715,12 @@ SharedMemoryImageBufferLister::printInfo(SharedMemoryHeader *header,
 
   SharedMemoryImageBufferHeader *h = (SharedMemoryImageBufferHeader *)header;
 
-  const char *colorspace = colorspace_to_string(h->getColorspace());
+  const char *colorspace = colorspace_to_string(h->colorspace());
 
-  printf("%-3d %-10d %-10d %-9d %-16s %-5d %-5d %s%s\n",
-	 h->getImageNumber(), shm_id, semaphore, mem_size, colorspace,
-	 h->getWidth(), h->getHeight(),
-	 (SharedMemory::isSwapable(shm_id) ? "S" : ""),
-	 (SharedMemory::isDestroyed(shm_id) ? "D" : "")
+  printf("%-20s %-10d %-10d %-9d %-16s %-5d %-5d %s%s\n",
+	 h->image_id(), shm_id, semaphore, mem_size, colorspace,
+	 h->width(), h->height(),
+	 (SharedMemory::is_swapable(shm_id) ? "S" : ""),
+	 (SharedMemory::is_destroyed(shm_id) ? "D" : "")
 	 );
 }

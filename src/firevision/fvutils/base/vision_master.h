@@ -29,13 +29,16 @@
 #define __FIREVISION_FVUTILS_BASE_VISION_MASTER_H_
 
 class Camera;
+class Thread;
 
 class VisionMaster
 {
  public:
   virtual ~VisionMaster();
 
-  virtual Camera *  request_camera(const char *camera_string)             = 0;
+  virtual Camera *  register_for_camera(const char *camera_string,
+					Thread *thread)                   = 0;
+  virtual void      unregister_thread(Thread *thread)                     = 0;
 };
 
 

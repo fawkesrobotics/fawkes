@@ -36,14 +36,15 @@ using namespace std;
 int
 main(int argc, char **argv)
 {
-  const char *s = "firewire:mode=xy:test=test2:blub";
+  const char *s = "firewire:funny ID:mode=xy:test=test2:blub";
   if ( argc > 1 ) {
     s = argv[1];
   }
 
   CameraArgumentParser *argp = new CameraArgumentParser(s);
 
-  cout << "Camera ID: " << argp->camid() << endl;
+  cout << "Camera Type: " << argp->cam_type() << endl;
+  cout << "Camera ID:   " << argp->cam_id() << endl;
 
   map<string, string> values = argp->parameters();
   map<string, string>::iterator i;

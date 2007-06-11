@@ -29,6 +29,8 @@
 #ifndef __FIREVISION_UTILS_COLOR_COLORSPACES_H_
 #define __FIREVISION_UTILS_COLOR_COLORSPACES_H_
 
+#include <sys/types.h>
+
 typedef enum {
   CS_UNKNOWN         = 0,
   RGB,
@@ -49,8 +51,7 @@ typedef enum {
 } colorspace_t;
 
 
-
-inline unsigned int
+inline size_t
 colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int height)
 {
   switch (cspace) {

@@ -41,13 +41,15 @@ class CameraArgumentParser
   ~CameraArgumentParser();
 
   bool                                has(std::string s) const;
-  std::string                         get(std::string s);
+  std::string                         get(std::string s) const;
   std::map<std::string, std::string>  parameters() const;
   std::vector<std::string>            arguments() const;
-  std::string                         camid() const;
+  std::string                         cam_id() const;
+  std::string                         cam_type() const;
 
  private:
-  std::string _camid;
+  std::string _cam_type;
+  std::string _cam_id;
   std::map<std::string, std::string> values;
   std::vector<std::string> args;
 };

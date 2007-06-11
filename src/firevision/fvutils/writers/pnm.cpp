@@ -30,6 +30,7 @@
 #include <fvutils/color/conversions.h>
 
 #include <cstdio>
+#include <cstdlib>
 
 /** @class PNMWriter <fvutils/writers/pnm.h>
  * PNM file writer.

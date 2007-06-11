@@ -50,12 +50,13 @@ class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
   virtual ~SharedMemoryLookupTableHeader();
 
   virtual bool         matches(void *memptr);
-  virtual unsigned int size();
-  virtual void         printInfo();
+  virtual size_t       size();
   virtual bool         create();
   virtual void         initialize(void *memptr);
   virtual void         set(void *memptr);
-  virtual unsigned int dataSize();
+  virtual size_t       data_size();
+
+  virtual void         print_info();
 
   unsigned int  getLutID();
   void          setLutID(unsigned int lut_id);
