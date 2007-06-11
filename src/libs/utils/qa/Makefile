@@ -59,7 +59,7 @@ BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_liblogger		\
 		$(BINDIR)/qa_utils_time
 
-#PLUGINS_all =	$(PLUGINDIR)/test_plugin.so
+PLUGINS_all =	$(PLUGINDIR)/test_plugin.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
