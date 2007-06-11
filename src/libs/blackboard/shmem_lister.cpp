@@ -112,9 +112,9 @@ BlackBoardSharedMemoryLister::printInfo(SharedMemoryHeader *header,
 					int shm_id, int semaphore,
 					unsigned int mem_size,void *memptr)
 {
-  unsigned int nattch = SharedMemory::getNumAttached(shm_id);
-  bool swapable = SharedMemory::isSwapable(shm_id);
-  bool destroyed = SharedMemory::isDestroyed(shm_id);
+  unsigned int nattch = SharedMemory::num_attached(shm_id);
+  bool swapable = SharedMemory::is_swapable(shm_id);
+  bool destroyed = SharedMemory::is_destroyed(shm_id);
 
   printf ("%-3d %-10d 0x%08x  %-16d %-12d %s%s%s%s%s\n",
           ++num, shm_id, semaphore, mem_size, nattch,

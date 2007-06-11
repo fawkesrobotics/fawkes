@@ -46,14 +46,14 @@ class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
   } BlackBoardSharedMemoryHeaderData;
 
  public:
-  BlackBoardSharedMemoryHeader(unsigned int data_size, unsigned int version);
+  BlackBoardSharedMemoryHeader(size_t data_size, unsigned int version);
   virtual ~BlackBoardSharedMemoryHeader();
   void setSharedMemory(SharedMemory *shmem);
   virtual bool         matches(void *memptr);
-  virtual unsigned int size();
+  virtual size_t       size();
   virtual void         initialize(void *memptr);
   virtual void         set(void *memptr);
-  virtual unsigned int dataSize();
+  virtual size_t       data_size();
   chunk_list_t * getFreeListHead();
   chunk_list_t * getAllocListHead();
   void setFreeListHead(chunk_list_t *flh);
@@ -62,7 +62,7 @@ class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
   unsigned int getVersion() const;
 
  private:
-  unsigned int data_size;
+  size_t _data_size;
   unsigned int version;
   BlackBoardSharedMemoryHeaderData *data;
   SharedMemory                     *shmem;

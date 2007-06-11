@@ -49,10 +49,10 @@
  * @param version The BB version to store in the shared memory segment to prevent
  *                conflicts with older software.
  */
-BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(unsigned int data_size,
+BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(size_t data_size,
 							   unsigned int version)
 {
-  this->data_size      = data_size;
+  this->_data_size      = data_size;
   this->version        = version;
   data = NULL;
 }
@@ -91,7 +91,7 @@ BlackBoardSharedMemoryHeader::matches(void *memptr)
 /** Get the size of the header data.
  * @return size of the header data
  */
-unsigned int
+size_t
 BlackBoardSharedMemoryHeader::size()
 {
   return sizeof(BlackBoardSharedMemoryHeaderData);
@@ -129,10 +129,10 @@ BlackBoardSharedMemoryHeader::set(void *memptr)
 /** Data segment size.
  * @return size of the data segment without header
  */
-unsigned int
-BlackBoardSharedMemoryHeader::dataSize()
+size_t
+BlackBoardSharedMemoryHeader::data_size()
 {
-  return data_size;
+  return _data_size;
 }
 
 

@@ -132,17 +132,17 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
     throw BBMemMgrCannotOpenException();
   }
 
-  if ( ! shmem->isValid() ) {
-    shmem->setDestroyOnDelete(false);
+  if ( ! shmem->is_valid() ) {
+    shmem->set_destroy_on_delete(false);
     delete shmem;
     delete shmem_header;
     throw BBMemMgrCannotOpenException();
   }
 
-  if ( master && ! shmem->isCreator() ) {
+  if ( master && ! shmem->is_creator() ) {
     // this might mean trouble, we throw an exception if we are not master but
     // this was requested
-    shmem->setDestroyOnDelete(false);
+    shmem->set_destroy_on_delete(false);
     delete shmem;
     delete shmem_header;
     throw BBNotMasterException("Not owner of shared memory segment");
@@ -153,13 +153,13 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
   if ( master ) {
     // protect memory, needed for list operations in memory, otherwise
     // we will have havoc and insanity
-    shmem->addSemaphore();
+    shmem->add_semaphore();
 
     // This should not be swapped. Will only worked with greatly extended
     // ressource limit for this process!
-    shmem->setSwapable(false);
+    shmem->set_swapable(false);
 
-    chunk_list_t *f = (chunk_list_t *)shmem->getMemPtr();
+    chunk_list_t *f = (chunk_list_t *)shmem->memptr();
     f->ptr  = (char *)f + sizeof(chunk_list_t);
     f->size = memsize - sizeof(chunk_list_t);
     f->overhang = 0;
@@ -533,7 +533,7 @@ bool
 BlackBoardMemoryManager::tryLock()
 {
   if ( mutex->tryLock() ) {
-    if ( shmem->tryLock() ) {
+    if ( shmem->try_lock() ) {
       return true;
     } else {
       mutex->unlock();

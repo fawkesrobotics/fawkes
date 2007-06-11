@@ -28,14 +28,17 @@
 #ifndef __UTILS_IPC_SHM_H_
 #define __UTILS_IPC_SHM_H_
 
+// for size_t
+#include <sys/types.h>
+
 class SharedMemoryHeader {
  public:
   virtual ~SharedMemoryHeader() {}
   virtual bool         matches(void *memptr)                  = 0;
-  virtual unsigned int size()                                 = 0;
+  virtual size_t       size()                                 = 0;
   virtual void         initialize(void *memptr)               = 0;
   virtual void         set(void *memptr)                      = 0;
-  virtual unsigned int dataSize()                             = 0;
+  virtual size_t       data_size()                            = 0;
 };
 
 class SharedMemoryLister;
@@ -55,21 +58,21 @@ class SharedMemory
 
   virtual ~SharedMemory();
 
-  bool                isReadOnly();
-  bool                isDestroyed();
-  bool                isSwapable();
-  bool                isValid();
-  bool                isCreator();
-  bool                isProtected();
-  void *              getMemPtr();
-  unsigned int        getDataSize();
+  bool                is_read_only();
+  bool                is_destroyed();
+  bool                is_swapable();
+  bool                is_valid();
+  bool                is_creator();
+  bool                is_protected();
+  void *              memptr();
+  size_t              data_size();
   void                set(void *memptr);
-  void                setDestroyOnDelete(bool destroy);
-  void                addSemaphore();
-  void                setSwapable(bool swapable);
+  void                set_destroy_on_delete(bool destroy);
+  void                add_semaphore();
+  void                set_swapable(bool swapable);
 
   void                lock();
-  bool                tryLock();
+  bool                try_lock();
   void                unlock();
 
   void *              ptr(void *addr);
@@ -88,9 +91,9 @@ class SharedMemory
   static bool         exists(char *magic_token,
 			     SharedMemoryHeader *header);
 
-  static bool         isDestroyed(int shm_id);
-  static bool         isSwapable(int shm_id);
-  static unsigned int getNumAttached(int shm_id);
+  static bool         is_destroyed(int shm_id);
+  static bool         is_swapable(int shm_id);
+  static unsigned int num_attached(int shm_id);
 
  protected:
 
@@ -110,27 +113,27 @@ class SharedMemory
 
   // although memptr is in fact treated as void we keep it as unsigned char pointer
   // for easier pointer arithmetic
-  void                   *memptr;
-  unsigned int            mem_size;
-  unsigned int            data_size;
-  SharedMemoryHeader     *header;
-  bool                    is_read_only;
-  bool                    destroy_on_delete;
-  bool                    should_create;
-  char                   *magic_token;
-  char                   *shm_magic_token;
-  SharedMemory_header_t  *shm_header;
-  void                   *shm_upper_bound;
-  long unsigned int       shm_offset;
+  void                   *_memptr;
+  size_t                  _mem_size;
+  size_t                  _data_size;
+  SharedMemoryHeader     *_header;
+  bool                    _is_read_only;
+  bool                    _destroy_on_delete;
+  bool                    _should_create;
+  char                   *_magic_token;
+  char                   *_shm_magic_token;
+  SharedMemory_header_t  *_shm_header;
+  void                   *_shm_upper_bound;
+  long unsigned int       _shm_offset;
 
 
  private:
-  void          *shared_mem;
-  int            shared_mem_id;
-  void          *shared_mem_upper_bound;
+  void          *__shared_mem;
+  int            __shared_mem_id;
+  void          *__shared_mem_upper_bound;
 
-  bool           created;
-  SemaphoreSet  *semset;
+  bool           __created;
+  SemaphoreSet  *__semset;
 
 };
 
