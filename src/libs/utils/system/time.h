@@ -29,6 +29,7 @@
 #define __UTILS_SYSTEM_TIME_H_
 
 #include <sys/time.h>
+#include <iostream>
 
 /** Calculate time difference of two time structs.
  * The calculated time is t = a - b, where t is a represented as the number of
@@ -59,5 +60,32 @@ time_diff_sec(long int a_sec, long int a_usec,
 {
   return a_sec - b_sec + (a_usec - b_usec) / 1000000.f;
 }
+
+class Time
+{
+ public:
+  Time();
+  Time(const timeval* tv);
+  Time(long ms);
+  Time(float sec);
+  ~Time();
+
+  float in_sec() const;
+  long in_msec() const;
+  const timeval* get_timeval() const;
+
+  void set_time(const timeval* tv);
+  void set_time(long ms);
+  void set_time(float sec);
+
+  Time operator+(const Time& t) const;
+  Time operator-(const Time& t) const;
+  void operator+=(const Time& t);
+  void operator-=(const Time& t);
+  friend std::ostream& operator<<(std::ostream&, const Time& t);
+
+ private:
+  timeval time;
+};
 
 #endif
