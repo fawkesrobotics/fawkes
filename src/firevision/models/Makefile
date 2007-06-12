@@ -27,8 +27,12 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
+ifneq ($(HAVE_SHAPE_MODELS),1)
+  MODELS_FILTEROUT += shape/%
+endif
+
 # We are lazy in the models...
-OBJS_libfvmodels := $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))
+OBJS_libfvmodels := $(patsubst %.cpp,%.o,$(filter-out $(MODELS_FILTEROUT),$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 LIBS_libfvutils  := utils fvutils
 
 OBJS_all = $(OBJS_libfvmodels)

@@ -21,14 +21,13 @@
 
 BASEDIR = ../..
 
-SUBDIRS = fvutils cams models filters classifiers apps
+SUBDIRS = fvutils cams models filters classifiers stereo apps
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
 include $(BASEDIR)/src/firevision/fvconf.mk
 
-cams: fvutils
-models: fvutils
-filters: fvutils models
-models: fvutils
-classifiers: fvutils
+cams models filters classifiers: fvutils
+filters: models
+apps: fvutils models cams filters classifiers stereo
+

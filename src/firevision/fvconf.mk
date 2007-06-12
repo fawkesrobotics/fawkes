@@ -19,6 +19,8 @@
 #
 #*****************************************************************************
 
+include $(BASEDIR)/etc/buildsys/config.mk
+
 CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L BUMBLEBEE2
 
 VISION_INCDIRS      = $(realpath $(BASEDIR)/src/firevision)
@@ -52,16 +54,25 @@ endif
 
 ifneq ($(realpath /usr/include/dc1394),)
   HAVE_FIREWIRE_CAM   = 1
+  HAVE_BUMBLEBEE2_CAM = 1
   VISION_CAM_LIBS    += dc1394
+endif
 
-  # Check if we have PGR Triclops SDK, build Bumblebee2 if we have it
+# Check if we have PGR Triclops SDK, build Bumblebee2 if we have it
+ifeq ($(ARCH),x86_64)
+  TRICLOPS_SDK_ERR="Triclops SDK not available on 64-bit systems"
+else
   ifneq ($(realpath $(TRICLOPS_SDK)/include/triclops.h),)
     ifneq ($(realpath $(TRICLOPS_SDK)/lib/libtriclops.so),)
-      HAVE_BUMBLEBEE2_CAM = 1
-      VISION_INCDIRS += $(TRICLOPS_SDK)/include
-      VISION_LIBDIRS += $(TRICLOPS_SDK)/lib
-      VISION_CAM_LIBS += triclops
+      HAVE_TRICLOPS_SDK = 1
+      TRICLOPS_SDK_INCDIRS += $(TRICLOPS_SDK)/include
+      TRICLOPS_SDK_LIBDIRS += $(TRICLOPS_SDK)/lib
+      TRICLOPS_SDK_LIBS    += triclops
+    else
+      TRICLOPS_SDK_ERR = "shared lib not created, use \"make triclops\" in fvstereo"
     endif
+  else
+    TRICLOPS_SDK_ERR = "Triclops SDK not installed"
   endif
 endif
 
@@ -90,6 +101,9 @@ ifneq ($(realpath $(IPP_DIR)),)
     VISION_INCDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/include
   endif
 endif
+
+# Set to 1 to build shape models
+HAVE_SHAPE_MODELS = 0
 
 VISION_CFLAGS       += $(foreach CAM,$(CAMS),$(if $(subst 0,,$(HAVE_$(CAM)_CAM)),-DHAVE_$(CAM)_CAM))
 
