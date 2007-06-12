@@ -77,7 +77,9 @@ endif
 OBJS_all = $(OBJS_libfvcams)
 LIBS_all = $(LIBDIR)/libfvcams.so
 
-ifneq ($(SRCDIR),)
+# Use . instead of nothing here in this pattern because we already included
+# the config in fvconf.mk and thus SRCDIR is set!
+ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
 
 .PHONY: warning_firewire

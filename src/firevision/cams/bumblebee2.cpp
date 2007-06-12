@@ -79,11 +79,15 @@ using namespace std;
  */
 
 
-/** Left image already converted to YUV422_PLANAR */
-const unsigned int Bumblebee2Camera::LEFT_ORIGINAL = 0;
+/** Original image in RAW16 */
+const unsigned int Bumblebee2Camera::ORIGINAL = 0;
 
-/** Right image already converted to YUV422_PLANAR */
-const unsigned int Bumblebee2Camera::RIGHT_ORIGINAL = 0;
+/** Deinterlaced image */
+const unsigned int Bumblebee2Camera::DEINTERLACED = 1;
+
+/** From bayer tile decoded RGB image */
+const unsigned int Bumblebee2Camera::RGB_IMAGE = 2;
+
 
 /// PGR specific registers
 /** Bayer Tile mapping information */
@@ -129,12 +133,17 @@ Bumblebee2Camera::Bumblebee2Camera(const CameraArgumentParser *cap)
     format7_starty = atoi(cap->get("starty").c_str());
   }
 
+  _buffer_deinterlaced = (unsigned char *)malloc(pixel_width() * pixel_height() * 2);
+  _buffer_rgb = malloc_buffer(RGB, pixel_width(), pixel_height() * 2);
+  _buffer = NULL;
 }
 
 
 /** Destructor. */
 Bumblebee2Camera::~Bumblebee2Camera()
 {
+  free(_buffer_deinterlaced);
+  free(_buffer_rgb);
 }
 
 
@@ -163,6 +172,41 @@ Bumblebee2Camera::colorspace()
 }
 
 
+void
+Bumblebee2Camera::capture()
+{
+  try {
+    FirewireCamera::capture();
+  } catch (CaptureException &e) {
+    e.append("Bumblebee2Camera::capture: failed to retrieve image");
+    if ( ORIGINAL == _image_num )  _buffer = NULL;
+    throw;
+  }
+  if ( ORIGINAL == _image_num ) {
+    _buffer = frame->image;
+  }
+}
+
+
+unsigned char *
+Bumblebee2Camera::buffer()
+{
+  return _buffer;
+}
+
+
+void
+Bumblebee2Camera::set_image_number(unsigned int image_num)
+{
+  _image_num = image_num;
+  switch ( image_num ) {
+  case DEINTERLACED: _buffer = _buffer_deinterlaced; break;
+  case RGB_IMAGE: _buffer = _buffer_rgb;
+  default:  _buffer = NULL; break;
+  }
+}
+
+
 /** Check if connected camera is a Bumblebee2.
  * @return true, if the connected camera is a Bumblebee2, false otherwise
  */
@@ -172,6 +216,29 @@ Bumblebee2Camera::is_bumblebee2()
   if ( ! opened ) throw CameraNotOpenedException();
 
   return( strncmp( camera->model, "Bumblebee2", strlen("Bumblebee2") ) == 0);
+}
+
+
+/** De-interlace the 16 bit data into 2 bayer tile pattern images. */
+void
+Bumblebee2Camera::deinterlace_stereo()
+{
+  dc1394_deinterlace_stereo( frame->image, _buffer_deinterlaced,
+			     pixel_width(), 2 * pixel_height() ); 
+}
+
+
+/** Extract RGB color image from the bayer tile image.
+ * This will transform the bayer tile image to an RGB image using the
+ * nearest neighbour method.
+ * Note: this will alias colors on the top and bottom rows
+ */
+void
+Bumblebee2Camera::decode_bayer()
+{
+  dc1394_bayer_decoding_8bit( _buffer_deinterlaced, _buffer_rgb,
+			      pixel_width(), 2 * pixel_height(), 
+			      bayer_pattern, DC1394_BAYER_METHOD_NEAREST ); 
 }
 
 

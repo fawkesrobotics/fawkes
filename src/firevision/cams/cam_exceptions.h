@@ -42,4 +42,10 @@ class CameraNotStartedException : public Exception
   CameraNotStartedException();
 };
 
+
+class CaptureException : public Exception
+{
+ public:
+  CaptureException(const char *msg);
+};
 #endif

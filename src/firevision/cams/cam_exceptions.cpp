@@ -50,3 +50,19 @@ CameraNotStartedException::CameraNotStartedException()
   : Exception("Camera not started")
 {
 }
+
+
+/** @class CaptureException <cams/cam_exceptions.h>
+ * Capturing a frame failed.
+ * This exception is thrown if a camera failed to retrieve a new image from
+ * the camera.
+ */
+
+/** Constructor.
+ * @param msg optional message explaining why capturing failed
+ */
+CaptureException::CaptureException(const char *msg)
+  : Exception("Failed to capture a frame")
+{
+  append(msg);
+}

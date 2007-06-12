@@ -28,12 +28,13 @@
 #include <core/exception.h>
 #include <utils/system/console_colors.h>
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <unistd.h>
 
 #include <string>
 
 #include <cams/firewire.h>
+#include <cams/cam_exceptions.h>
 #include <fvutils/system/camargp.h>
 
 #include <dc1394/utils.h>
@@ -218,9 +219,10 @@ FirewireCamera::capture()
     return;
   }
 
-  if (dc1394_capture_dequeue(camera, DC1394_CAPTURE_POLICY_WAIT, &frame) != DC1394_SUCCESS) {
-    //cout  << cred << "Could not capture frame" << cnormal << endl;
+  dc1394error_t err;
+  if (DC1394_SUCCESS != (err = dc1394_capture_dequeue(camera, DC1394_CAPTURE_POLICY_WAIT, &frame))) {
     valid_frame_received = false;
+    throw CaptureException(dc1394_error_strings[err]);
   } else {
     valid_frame_received = true;
   }

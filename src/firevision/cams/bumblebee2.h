@@ -36,8 +36,9 @@ class Bumblebee2Camera : public FirewireCamera
 {
  public:
 
-  static const unsigned int LEFT_ORIGINAL;
-  static const unsigned int RIGHT_ORIGINAL;
+  static const unsigned int ORIGINAL;
+  static const unsigned int DEINTERLACED;
+  static const unsigned int RGB_IMAGE;
 
   Bumblebee2Camera(const CameraArgumentParser *cap);
   virtual ~Bumblebee2Camera();
@@ -53,16 +54,16 @@ class Bumblebee2Camera : public FirewireCamera
 
   virtual colorspace_t   colorspace();
 
-  virtual void set_image_number(unsigned int n);
+  virtual void set_image_number(unsigned int image_num);
 
   bool is_bumblebee2();
+  void write_triclops_config_from_camera_to_file(const char *filename);
 
-  bool get_xyz(unsigned int px, unsigned int py, float *x, float *y, float *z);
-  bool get_world_xyz(unsigned int px, unsigned int py, float *x, float *y, float *z);
+  void deinterlace_stereo();
+  void decode_bayer();
 
  private:
   void get_triclops_context_from_camera();
-  void write_triclops_config_from_camera_to_file(const char *filename);
   void get_bayer_tile();
   void deinterlace_green( unsigned char* src,  unsigned char* dest, 
 			  unsigned int width,  unsigned int height);
@@ -71,10 +72,10 @@ class Bumblebee2Camera : public FirewireCamera
   /** Bayer pattern */
   dc1394color_filter_t bayer_pattern;
 
+  unsigned int   _image_num;
   unsigned char *_buffer;
   unsigned char *_buffer_deinterlaced;
   unsigned char *_buffer_rgb;
-  unsigned int   _buffer_rgb_size;
 };
 
 #endif
