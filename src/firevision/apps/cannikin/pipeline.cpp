@@ -49,6 +49,8 @@
 #include <models/relative_position/box_relative.h>
 #include <models/global_position/ballglobal.h>
 
+#include <stereo/triclops.h>
+
 #include <classifiers/simple.h>
 
 #include <unistd.h>
@@ -113,6 +115,7 @@ CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
 
   cam = NULL;
   camctrl = NULL;
+  triclops = NULL;
 }
 
 
@@ -123,15 +126,17 @@ CannikinPipeline::~CannikinPipeline()
   finalize();
 
   delete cam;
+  delete triclops;
 
   cam = NULL;
   camctrl = NULL;
+  triclops = NULL;
 
-  cout << msg_prefix << "Deleting shared memory buffer for final image" << endl;
+  //cout << msg_prefix << "Deleting shared memory buffer for final image" << endl;
   delete shm_buffer;
-  cout << msg_prefix << "Deleting shared memory buffer for source image" << endl;
+  //cout << msg_prefix << "Deleting shared memory buffer for source image" << endl;
   delete shm_buffer_src;
-  cout << msg_prefix << "Freeing temporary buffers" << endl;
+  //cout << msg_prefix << "Freeing temporary buffers" << endl;
   free(buffer1);
   free(buffer2);
   free(buffer3);
@@ -158,6 +163,8 @@ CannikinPipeline::init()
 
   cam->open();
   cam->start();
+
+  triclops = new TriclopsStereoProcessor(cam);
 
   width  = cam->pixel_width();
   height = cam->pixel_height();
@@ -452,11 +459,14 @@ CannikinPipeline::loop()
 
   if ( state == CANNIKIN_STATE_UNINITIALIZED ) {
     cam->capture();
-    cam->set_image_number(0); // left
-    // convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
-    memcpy(buffer_src, cam->buffer(), buffer_size);
-    cam->set_image_number(1); // right
-    memcpy(buffer, cam->buffer(), buffer_size);
+    triclops->preprocess_stereo();
+    //cam->set_image_number(Bumblebee2Camera::); // left
+    //convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
+    //memcpy(buffer_src, cam->buffer(), buffer_size);
+    //cam->set_image_number(1); // right
+    //memcpy(buffer, cam->buffer(), buffer_size);
+    memcpy(buffer_src, triclops->yuv_buffer(), buffer_size);
+    memcpy(buffer, triclops->auxiliary_yuv_buffer(), buffer_size);
     cam->dispose_buffer();
     return;
   }
@@ -478,7 +488,6 @@ CannikinPipeline::loop()
 
   default: return;
   }
-
 
   last_state = state;
 }
@@ -502,11 +511,15 @@ CannikinPipeline::detect_cup()
 {
   cam->capture();
 
+  triclops->preprocess();
+  triclops->calculate_yuv();
+
   gettimeofday(&data_taken_time, NULL);
 
   // Convert buffer (re-order bytes) and set classifier buffer
-  convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
-  // memcpy(buffer, buffer_src, buffer_size);
+  //convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
+  //memcpy(buffer, buffer_src, buffer_size);
+  memcpy(buffer_src, triclops->yuv_buffer(), buffer_size);
 
   // Classify image, find ROIs by color
   classifier->setSrcBuffer( buffer_src );
@@ -536,131 +549,69 @@ CannikinPipeline::detect_cup()
     
     // Try to detect box shape
     if ((*r).hint == H_BALL) {
-      // classifier->getMassPointOfBall( &(*r), &mass_point );
-      // update ball position
-      // box_rel->setCenter( mass_point.x, mass_point.y );
-      // box_rel->calc();
-
       cup_visible = true;
-
-      /*
-      cout << msg_prefix << cgreen << "Mass point found at (" << mass_point.x
-	   << "," << mass_point.y << ")" << endl;
-      */
 
       shm_buffer->setROI(r->start.x, r->start.y, r->width, r->height);
 
-      Bumblebee2Camera *bbc = dynamic_cast<Bumblebee2Camera *>(cam);
-      if ( bbc == NULL ) {
-	cout << "Not a Bumblebee2 camera, cannot get_xyz" << endl;
-      } else {
+      triclops->calculate_disparity(*r);
 
-	if ( (r->width > 10) && (r->height > 10) ) {
-	  // Take five points and calculate some distances...
-	  std::vector<DisparityPoint> points;
-	  std::vector<DisparityPoint> wpoints;
-	  unsigned int center_x = r->start.x + r->width / 2;
-	  unsigned int center_y = r->start.y + r->height / 2;
+      if ( (r->width > 10) && (r->height > 10) ) {
+	// Take five points and calculate some distances...
+	std::vector<DisparityPoint> points;
+	std::vector<DisparityPoint> wpoints;
+	unsigned int center_x = r->start.x + r->width / 2;
+	unsigned int center_y = r->start.y + r->height / 2;
 
-	  shm_buffer->setCircle( center_x, center_y, 5 );
-	  shm_buffer->setCircleFound( true );
+	shm_buffer->setCircle( center_x, center_y, 5 );
+	shm_buffer->setCircleFound( true );
 
-          points.clear();
-          wpoints.clear();
+	points.clear();
+	wpoints.clear();
 
-	  disparity_scanlines->set_center(center_x, center_y);
-	  disparity_scanlines->set_radius(3, min(r->width, r->height));
+	disparity_scanlines->set_center(center_x, center_y);
+	disparity_scanlines->set_radius(3, min(r->width, r->height));
 
-	  while ( ! disparity_scanlines->finished() ) {
-	    if ( bbc->get_xyz((*disparity_scanlines)->x, (*disparity_scanlines)->y, &x, &y, &z) ) {
-	      points.push_back(DisparityPoint(x, y, z));
-	    }
-	    if ( bbc->get_world_xyz((*disparity_scanlines)->x, (*disparity_scanlines)->y, &wx, &wy, &wz) ) {
-	      wpoints.push_back(DisparityPoint(wx, wy, wz));
-	    }
-
-	    ++(*disparity_scanlines);
-	  }
-
-	  /*
-	  if ( bbc->get_xyz(center_x, center_y, &x, &y, &z) ) {
+	while ( ! disparity_scanlines->finished() ) {
+	  if ( triclops->get_xyz((*disparity_scanlines)->x, (*disparity_scanlines)->y, &x, &y, &z) ) {
 	    points.push_back(DisparityPoint(x, y, z));
 	  }
-	  if ( bbc->get_xyz(center_x - 5, center_y - 5, &x, &y, &z) ) {
-	    points.push_back(DisparityPoint(x, y, z));
-	  }
-	  if ( bbc->get_xyz(center_x + 5, center_y - 5, &x, &y, &z) ) {
-	    points.push_back(DisparityPoint(x, y, z));
-	  }
-	  if ( bbc->get_xyz(center_x - 5, center_y + 5, &x, &y, &z) ) {
-	    points.push_back(DisparityPoint(x, y, z));
-	  }
-	  if ( bbc->get_xyz(center_x + 5, center_y + 5, &x, &y, &z) ) {
-	    points.push_back(DisparityPoint(x, y, z));
-	  }
-	  if ( bbc->get_world_xyz(center_x, center_y, &wx, &wy, &wz) ) {
+	  if ( triclops->get_world_xyz((*disparity_scanlines)->x, (*disparity_scanlines)->y, &wx, &wy, &wz) ) {
 	    wpoints.push_back(DisparityPoint(wx, wy, wz));
 	  }
-	  if ( bbc->get_world_xyz(center_x - 5, center_y - 5, &wx, &wy, &wz) ) {
-	    wpoints.push_back(DisparityPoint(wx, wy, wz));
-	  }
-	  if ( bbc->get_world_xyz(center_x + 5, center_y - 5, &wx, &wy, &wz) ) {
-	    wpoints.push_back(DisparityPoint(wx, wy, wz));
-	  }
-	  if ( bbc->get_world_xyz(center_x - 5, center_y + 5, &wx, &wy, &wz) ) {
-	    wpoints.push_back(DisparityPoint(wx, wy, wz));
-	  }
-	  if ( bbc->get_world_xyz(center_x + 5, center_y + 5, &wx, &wy, &wz) ) {
-	    wpoints.push_back(DisparityPoint(wx, wy, wz));
-	  }
-	  */
 
-	  if ( points.empty() || wpoints.empty() ) {
-	    cout << "No valid disparity for any points. Doh!" << endl;
+	  ++(*disparity_scanlines);
+	}
+
+	if ( points.empty() || wpoints.empty() ) {
+	  cout << "No valid disparity for any points. Doh!" << endl;
 	    cup_visible = false;
-	  } else {
-	    sort( points.begin(), points.end() );
-	    int elem = (points.size() + 1) / 2;
-	    x = points[elem].x;
-	    y = points[elem].y;
-	    z = points[elem].z;
+	} else {
+	  sort( points.begin(), points.end() );
+	  int elem = (points.size() + 1) / 2;
+	  x = points[elem].x;
+	  y = points[elem].y;
+	  z = points[elem].z;
 
-	    sort( wpoints.begin(), wpoints.end() );
-	    int welem = (wpoints.size() + 1) / 2;
-	    wx = wpoints[welem].x;
-	    wy = wpoints[welem].y;
-	    wz = wpoints[welem].z;
-	  }
-
-	  memcpy(buffer, bbc->buffer_disparity(), bbc->pixel_width() * bbc->pixel_height());
-	  memset(buffer + width * height, 128, width * height);
+	  sort( wpoints.begin(), wpoints.end() );
+	  int welem = (wpoints.size() + 1) / 2;
+	  wx = wpoints[welem].x;
+	  wy = wpoints[welem].y;
+	  wz = wpoints[welem].z;
 	}
 
-	if ( generate_output ) {
-	  // find distance for ROI center pixel
-	  if ( cup_visible ) {
-	    cout << msg_prefix << cgreen << " (x,y,z) = ("
-		 << x << "," << y << "," << z << ")" << cnormal << endl;
-	  } else {
-	    cout << msg_prefix << cred << "Cup not visible" << cnormal << endl;
-	  }
-	}
+	memcpy(buffer, bbc->buffer_disparity(), bbc->pixel_width() * bbc->pixel_height());
+	memset(buffer + width * height, 128, width * height);
       }
-      /*
+
       if ( generate_output ) {
-	cout << msg_prefix << cgreen << "RelPosU: " << cnormal
-	     << "X: " << box_rel->getX()
-	     << "  Y: " << box_rel->getY()
-	     << "  Dist: " << box_rel->getDistance()
-	     << "  Bear: " << box_rel->getBearing()
-	     << endl;
-
-	cout << msg_prefix << cgreen << "GlobPos: " << cnormal
-	     << "X: " << box_glob->getX()
-	     << "  Y: " << box_glob->getY()
-	     << endl;
+	// find distance for ROI center pixel
+	if ( cup_visible ) {
+	  cout << msg_prefix << cgreen << " (x,y,z) = ("
+		 << x << "," << y << "," << z << ")" << cnormal << endl;
+	} else {
+	  cout << msg_prefix << cred << "Cup not visible" << cnormal << endl;
+	}
       }
-      */
 
       break;
     } // end is box

@@ -32,7 +32,7 @@
 /// @cond RCSoftX
 
 #include <fvutils/color/colorspaces.h>
-#include <fvutils/roi.h>
+#include <fvutils/base/roi.h>
 
 #include <utils/system/signal.h>
 

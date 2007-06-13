@@ -29,6 +29,19 @@ INCDIRS  = $(VISION_INCDIRS) $(QTDIR)/include
 LIBDIRS  = $(VISION_LIBDIRS) $(QTDIR)/lib
 LIBS     = $(VISION_LIBS)
 
+ifneq ($(HAVE_TRICLOPS_SDK),1)
+  WARN_TARGETS += warning_triclops
+else
+  BINS_all = $(BINDIR)/cannikin $(BINDIR)/bbcannikin
+endif
+
+ifneq ($(SRCDIR),.)
+all: $(WARN_TARGETS)
+.PHONY: warning_triclops
+warning_triclops:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting cannikin$(TNORMAL) (Triclops SDK not available)"
+endif
+
 OBJS_cannikin = bbclient.o config.o main.o pipeline.o
 LIBS_cannikin = core utils rutils fvutils fvcams fvmodels fvclassifiers bb interfaces qt-mt
 
@@ -36,7 +49,6 @@ OBJS_bbcannikin = bbcannikin.o
 LIBS_bbcannikin = core utils rutils bb interfaces qt-mt
 
 OBJS_all = $(OBJS_cannikin) $(OBJS_bbcannikin)
-BINS_all = $(BINDIR)/cannikin $(BINDIR)/bbcannikin
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

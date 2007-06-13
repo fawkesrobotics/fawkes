@@ -32,7 +32,7 @@
 /// @cond RCSoftX
 
 #include <fvutils/color/colorspaces.h>
-#include <fvutils/roi.h>
+#include <fvutils/base/roi.h>
 
 #include <utils/system/signal.h>
 
@@ -55,6 +55,7 @@ class ArgumentParser;
 class SharedMemoryImageBuffer;
 class CannikinConfig;
 class ScanlineRadial;
+class TriclopsStereoProcessor;
 
 class CannikinPipeline : SignalHandler {
 
@@ -122,6 +123,7 @@ class CannikinPipeline : SignalHandler {
 
   Camera          *cam;
   CameraControl   *camctrl;
+  TriclopsStereoProcessor *triclops;
 
   colorspace_t     cspace_from;
   colorspace_t     cspace_to;
