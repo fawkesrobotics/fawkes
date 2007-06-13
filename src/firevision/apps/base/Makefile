@@ -1,8 +1,8 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: FireVision
+#                 Makefile Build System for Fawkes: Example Plugin
 #                            -------------------
-#   Created on Sun Jan 14 18:24:42 2007
-#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Wed Nov 22 17:05:17 2006
+#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -19,19 +19,19 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
-
-SUBDIRS =
-
-include $(BASEDIR)/etc/buildsys/config.mk
+BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
-ifeq ($(BUILD_TYPE),rcsoftx)
-# Stuff to be built for RCSoftX only
-SUBDIRS += cannikin geegaw
-else
-SUBDIRS += base
-endif
+CFLAGS   = $(VISION_CFLAGS)
+LDFLAGS  = $(VISION_LDFLAGS)
+INCDIRS  = $(VISION_INCDIRS)
+LIBDIRS  = $(VISION_LIBDIRS)
+LIBS     = $(VISION_LIBS)
 
-include $(BASEDIR)/etc/buildsys/rules.mk
+LIBS_fvbase = core utils fvutils fvcams
+OBJS_fvbase = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
+OBJS_all    = $(OBJS_fvbase)
+PLUGINS_all = $(PLUGINDIR)/fvbase.so
+
+include $(BASEDIR)/etc/buildsys/base.mk
