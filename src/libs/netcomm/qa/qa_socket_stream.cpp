@@ -38,6 +38,7 @@ class StreamServerThread : public Thread
 {
 public:
   StreamServerThread()
+    : Thread("StreamServerThread", Thread::OPMODE_CONTINUOUS)
   {
     i = 0;
     s = new StreamSocket();
@@ -101,6 +102,7 @@ class StreamClientThread : public Thread
 {
 public:
   StreamClientThread(const char *host)
+    : Thread("StreamClientThread", Thread::OPMODE_CONTINUOUS)
   {
     if ( host == NULL ) {
       this->host = "127.0.0.1";

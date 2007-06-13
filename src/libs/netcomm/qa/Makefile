@@ -50,6 +50,9 @@ OBJS_qa_netcomm_worldinfo = qa_worldinfo.o
 LIBS_qa_netcomm_worldinfo_encryption = netcomm utils
 OBJS_qa_netcomm_worldinfo_encryption = qa_worldinfo_encryption.o
 
+LIBS_qa_netcomm_worldinfo_msgsizes = netcomm utils
+OBJS_qa_netcomm_worldinfo_msgsizes = qa_worldinfo_msgsizes.o
+
 LIBS_qa_netcomm_resolver = netcomm utils
 OBJS_qa_netcomm_resolver = qa_resolver.o
 
@@ -65,6 +68,7 @@ OBJS_all =	$(OBJS_qa_netcomm_avahi_publisher)		\
 		$(OBJS_qa_netcomm_socket_datagram_multicast)	\
 		$(OBJS_qa_netcomm_worldinfo)			\
 		$(OBJS_qa_netcomm_worldinfo_encryption)		\
+		$(OBJS_qa_netcomm_worldinfo_msgsizes)		\
 		$(OBJS_qa_netcomm_resolver)			\
 		$(OBJS_qa_netcomm_dynamic_buffer)
 
@@ -77,6 +81,7 @@ BINS_all =	$(BINDIR)/qa_netcomm_avahi_publisher		\
 		$(BINDIR)/qa_netcomm_socket_datagram_multicast	\
 		$(BINDIR)/qa_netcomm_worldinfo			\
 		$(BINDIR)/qa_netcomm_worldinfo_encryption	\
+		$(BINDIR)/qa_netcomm_worldinfo_msgsizes		\
 		$(BINDIR)/qa_netcomm_resolver			\
 		$(BINDIR)/qa_netcomm_dynamic_buffer
 

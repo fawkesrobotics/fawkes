@@ -29,7 +29,7 @@
 #define __NETCOMM_WORLDINFO_MESSAGES_H_
 
 #include <netcomm/worldinfo/defs.h>
-
+#include <stdint.h>
 
 /** Robot pose message type ID */
 #define WORLDINFO_MSGTYPE_POSE           1
@@ -41,6 +41,8 @@
 #define WORLDINFO_MSGTYPE_RELBALLVELO    4
 /** Opponent pose message type ID */
 #define WORLDINFO_MSGTYPE_OPP_POSE       5
+/** Fat message containing all the information */
+#define WORLDINFO_MSGTYPE_FAT_WORLDINFO  6
 
 
 /** Per-message header.
@@ -77,7 +79,7 @@ typedef struct {
   float x;	/**< X coordinate */
   float y;	/**< Y coordinate */
   float theta;	/**< orientation */
-  float covariance[WORLDINFO_COVARIANCE_SIZE];	/**< position covariance matrix */
+  float covariance[WORLDINFO_COVARIANCE_SIZE_3X3];	/**< position covariance matrix */
 } worldinfo_pose_message_t;
 
 
@@ -91,6 +93,7 @@ typedef struct {
   float vel_x;	/**< Velocity in X direction */
   float vel_y;	/**< Velocity in Y direction */
   float vel_theta;	/**< Rotational velocity */
+  float covariance[WORLDINFO_COVARIANCE_SIZE_3X3];	/**< velocity covariance matrix */
 } worldinfo_velocity_message_t;
 
 
@@ -108,7 +111,7 @@ typedef struct {
 		 * on the ground plane and the ball */
   float yaw;	/**< yaw to the ball, this is the angle between the robots forward direction
 		 * and the ball on the ground plane */
-  float covariance[WORLDINFO_COVARIANCE_SIZE];	/**< ball covariance matrix */
+  float covariance[WORLDINFO_COVARIANCE_SIZE_3X3];	/**< ball covariance matrix */
 } worldinfo_relballpos_message_t;
 
 
@@ -124,6 +127,7 @@ typedef struct {
   float vel_x;	/**< relative velocity of the ball in x direction */
   float vel_y;	/**< relative velocity of the ball in y direction */
   float vel_z;	/**< relative velocity of the ball in z direction */
+  float covariance[WORLDINFO_COVARIANCE_SIZE_3X3];	/**< ball velocity covariance matrix */
 } worldinfo_relballvelo_message_t;
 
 
@@ -138,6 +142,25 @@ typedef struct {
 typedef struct {
   float dist;	/**< distance to the opponent. */
   float angle;	/**< angle to the opponent */
+  float covariance[WORLDINFO_COVARIANCE_SIZE_2X2];	/**< opponent position covariance matrix */
 } worldinfo_opppose_message_t;
+
+
+/** Fat worldinfo message.
+ * Legacy adapter message to communicate with TU Graz team.
+ */
+typedef struct {
+  uint32_t                        valid_pose          :  1;	/**< 1 if pose is valid, 0 otherwise*/
+  uint32_t                        valid_velo          :  1;	/**< 1 if velo is valid, 0 otherwise*/
+  uint32_t                        valid_relball_pos   :  1;	/**< 1 if relball_pos is valid, 0 otherwise*/
+  uint32_t                        valid_relball_velo  :  1;	/**< 1 if relball_velo is valid, 0 otherwise*/
+  uint32_t                        num_opponents       :  8;	/**< number of opponents with valid data in opponents */
+  uint32_t                        reserved            : 20;	/**< reserved for future use */
+  worldinfo_pose_message_t        pose;				/**< sending robot's pose */
+  worldinfo_velocity_message_t    velo;				/**< sending robot's velocity */
+  worldinfo_relballpos_message_t  relball_pos;			/**< ball position relative to sending robot */
+  worldinfo_relballvelo_message_t relball_velo;			/**< ball velocity relative to sending robot */
+  worldinfo_opppose_message_t     opponents[WORLDINFO_FATMSG_NUMOPPS];	/**< best seen opponents */
+} worldinfo_fat_message_t;
 
 #endif

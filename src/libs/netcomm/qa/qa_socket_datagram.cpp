@@ -39,6 +39,7 @@ class DatagramServerThread : public Thread
 {
 public:
   DatagramServerThread(unsigned short int port, unsigned int to_port)
+    : Thread("DatagramServerThread", Thread::OPMODE_CONTINUOUS)
   {
     i = 0;
     s = new DatagramSocket();
@@ -90,6 +91,7 @@ class DatagramClientThread : public Thread
 {
 public:
   DatagramClientThread(unsigned short int port, unsigned int to_port)
+    : Thread("DatagramClientThread", Thread::OPMODE_CONTINUOUS)
   {
     s = new DatagramSocket();
     s->bind(port);

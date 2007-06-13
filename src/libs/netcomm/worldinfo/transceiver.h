@@ -62,13 +62,13 @@ class WorldInfoTransceiver
   void rem_handler(WorldInfoHandler *h);
 
   void set_pose(float x, float y, float theta, float *covariance);
-  void set_velocity(float vel_x, float vel_y, float vel_theta);
+  void set_velocity(float vel_x, float vel_y, float vel_theta, float *covariance);
 
   void set_ball_pos(float dist, float pitch, float yaw, float *covariance);
-  void set_ball_velocity(float vel_x, float vel_y, float vel_z);
+  void set_ball_velocity(float vel_x, float vel_y, float vel_z, float *covariance);
 
   void clear_opponents();
-  void add_opponent(float distance, float angle);
+  void add_opponent(float distance, float angle, float *covariance);
 
   void send();
   void recv(bool block = false, unsigned int max_num_msgs = 0);
@@ -125,6 +125,7 @@ class WorldInfoTransceiver
   float  vel_x;
   float  vel_y;
   float  vel_theta;
+  float *vel_covariance;
 
   bool   ball_changed;
   float  ball_dist;
@@ -136,10 +137,12 @@ class WorldInfoTransceiver
   float  ball_vel_x;
   float  ball_vel_y;
   float  ball_vel_z;
+  float *ball_vel_covariance;
 
   typedef struct {
-    float distance;
-    float angle;
+    float  distance;
+    float  angle;
+    float *covariance;
   } opponent_t;
   std::list<opponent_t> opponents;
   std::list<opponent_t>::iterator oppit;

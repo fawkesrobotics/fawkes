@@ -51,6 +51,7 @@ class MulticastDatagramServerThread : public Thread
 {
 public:
   MulticastDatagramServerThread(unsigned short int port, bool looping)
+    : Thread("MulticastDatagramServerThread", Thread::OPMODE_CONTINUOUS)
   {
     i = 0;
     try {
@@ -105,6 +106,7 @@ class MulticastDatagramReflectorThread : public Thread
 {
 public:
   MulticastDatagramReflectorThread(unsigned short int port)
+    : Thread("MulticastDatagramReflectorThread", Thread::OPMODE_CONTINUOUS)
   {
     try {
       s = new MulticastDatagramSocket("224.16.0.1", port);

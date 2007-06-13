@@ -38,17 +38,19 @@ class WorldInfoHandler
 			 float *covariance)                                     = 0;
 
   virtual void velocity_rcvd(const char *from_host, float vel_x,
-			     float vel_y, float vel_theta)                      = 0;
+			     float vel_y, float vel_theta, float *covariance)   = 0;
 
   virtual void ball_pos_rcvd(const char *from_host,
 			     float dist, float pitch, float yaw,
 			     float *covariance)                                 = 0;
 
   virtual void ball_velocity_rcvd(const char *from_host,
-				  float vel_x, float vel_y, float vel_z)        = 0;
+				  float vel_x, float vel_y, float vel_z,
+				  float *covariance)                            = 0;
 
   virtual void opponent_pose_rcvd(const char *from_host,
-				  float distance, float angle)                  = 0;
+				  float distance, float angle,
+				  float *covariance)                            = 0;
 };
 
 

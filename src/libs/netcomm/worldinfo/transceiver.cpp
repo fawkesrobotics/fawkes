@@ -35,9 +35,9 @@
 #include <netcomm/socket/datagram_multicast.h>
 #include <netcomm/utils/resolver.h>
 
+#include <utils/logging/liblogger.h>
+
 #include <netinet/in.h>
-#include <iostream>
-using namespace std;
 
 
 /** @class WorldInfoException <netcomm/worldinfo/transceiver.h>
@@ -118,7 +118,7 @@ WorldInfoTransceiver::WorldInfoTransceiver(const char *addr, unsigned short port
   crypt_buffer_size  = encryptor->recommended_crypt_buffer_size();
   crypted_out_buffer = malloc(crypt_buffer_size);
   crypted_in_buffer  = malloc(crypt_buffer_size);
-  covariance         = (float *)malloc(WORLDINFO_COVARIANCE_SIZE * sizeof(float));
+  covariance         = (float *)malloc(WORLDINFO_COVARIANCE_SIZE_3X3 * sizeof(float));
 
   if (! crypted_in_buffer || ! crypted_out_buffer || ! covariance) {
     throw OutOfMemoryException();
@@ -259,14 +259,20 @@ WorldInfoTransceiver::set_pose(float x, float y, float theta, float *covariance)
  * @param vel_y velocity in y direction
  * @param vel_theta rotational velocity, positive velocity means clockwise
  * rotation, negative velocity means counter-clockwise.
+ * @param covariance covariance matrix with 9 entries, ordered as three concatenated
+ * rows (first row, three floats, second row, three floats, third row, three
+ * floats). No length check or whatsoever is done. This will crash if c is not
+ * long enough! c will not be copied but referenced so it has to exist when
+ * send() is called!
  */
 void
-WorldInfoTransceiver::set_velocity(float vel_x, float vel_y, float vel_theta)
+WorldInfoTransceiver::set_velocity(float vel_x, float vel_y, float vel_theta, float *covariance)
 {
-  this->vel_x       = vel_x;
-  this->vel_y       = vel_y;
-  this->vel_theta   = vel_theta;
-  this->vel_changed = true;
+  this->vel_x          = vel_x;
+  this->vel_y          = vel_y;
+  this->vel_theta      = vel_theta;
+  this->vel_covariance = covariance;
+  this->vel_changed    = true;
 }
 
 
@@ -301,14 +307,20 @@ WorldInfoTransceiver::set_ball_pos(float dist, float pitch, float yaw, float *co
  * @param vel_x velocity in x direction
  * @param vel_y velocity in y direction
  * @param vel_z velocity in z direction
+ * @param covariance covariance matrix with 9 entries, ordered as three concatenated
+ * rows (first row, three floats, second row, three floats, third row, three
+ * floats). No length check or whatsoever is done. This will crash if c is not
+ * long enough! c will not be copied but referenced so it has to exist when
+ * send() is called!
  */
 void
-WorldInfoTransceiver::set_ball_velocity(float vel_x, float vel_y, float vel_z)
+WorldInfoTransceiver::set_ball_velocity(float vel_x, float vel_y, float vel_z, float *covariance)
 {
-  ball_vel_x       = vel_x;
-  ball_vel_y       = vel_y;
-  ball_vel_z       = vel_z;
-  ball_vel_changed = true;
+  ball_vel_x          = vel_x;
+  ball_vel_y          = vel_y;
+  ball_vel_z          = vel_z;
+  ball_vel_covariance = covariance;
+  ball_vel_changed    = true;
 }
 
 
@@ -330,11 +342,16 @@ WorldInfoTransceiver::clear_opponents()
  * @param distance to opponent
  * @param angle angle to opponent (angle is zero if opponent is in front of robot,
  * positive if right of robot, negative if left of robot).
+ * @param covariance covariance matrix with 4 entries, ordered as two concatenated
+ * rows (first row, two floats, second row, two floats. No length check or
+ * whatsoever is done. This will crash if c is not
+ * long enough! c will not be copied but referenced so it has to exist when
+ * send() is called!
  */
 void
-WorldInfoTransceiver::add_opponent(float distance, float angle)
+WorldInfoTransceiver::add_opponent(float distance, float angle, float *covariance)
 {
-  opponent_t o = { distance, angle };
+  opponent_t o = { distance, angle, covariance };
   opponents.push_back(o);
 }
 
@@ -398,6 +415,8 @@ WorldInfoTransceiver::send()
 
   reset_outbound();
 
+  worldinfo_fat_message_t fatmsg;
+
   if ( pose_changed ) {
     worldinfo_pose_message_t pm;
     pm.x = pose_x;
@@ -407,16 +426,31 @@ WorldInfoTransceiver::send()
     pose_changed = false;
 
     append_outbound(WORLDINFO_MSGTYPE_POSE, &pm, sizeof(pm));
+
+    // fill fat msg
+    memcpy(&(fatmsg.pose), &pm, sizeof(pm));
+    fatmsg.valid_pose = 1;
+  } else {
+    fatmsg.valid_pose = 0;
   }
+
+
 
   if ( vel_changed ) {
     worldinfo_velocity_message_t vm;
     vm.vel_x     = vel_x;
     vm.vel_y     = vel_y;
     vm.vel_theta = vel_theta;
+    memcpy(&(vm.covariance), vel_covariance, sizeof(vm.covariance));
     vel_changed = false;
 
     append_outbound(WORLDINFO_MSGTYPE_VELO, &vm, sizeof(vm));
+
+    // fill fat msg
+    memcpy(&(fatmsg.velo), &vm, sizeof(vm));
+    fatmsg.valid_velo = 1;
+  } else {
+    fatmsg.valid_velo = 0;
   }
 
   if ( ball_changed ) {
@@ -428,6 +462,12 @@ WorldInfoTransceiver::send()
     ball_changed = false;
 
     append_outbound(WORLDINFO_MSGTYPE_RELBALL, &bm, sizeof(bm));
+
+    // fill fat msg
+    memcpy(&(fatmsg.relball_pos), &bm, sizeof(bm));
+    fatmsg.valid_relball_pos = 1;
+  } else {
+    fatmsg.valid_relball_pos = 0;
   }
 
   if ( ball_vel_changed ) {
@@ -435,25 +475,50 @@ WorldInfoTransceiver::send()
     rbvm.vel_x = ball_vel_x;
     rbvm.vel_y = ball_vel_y;
     rbvm.vel_z = ball_vel_z;
+    memcpy(&(rbvm.covariance), ball_vel_covariance, sizeof(rbvm.covariance));
     ball_vel_changed = false;
 
     append_outbound(WORLDINFO_MSGTYPE_RELBALLVELO, &rbvm, sizeof(rbvm));
+
+    // fill fat msg
+    memcpy(&(fatmsg.relball_velo), &rbvm, sizeof(rbvm));
+    fatmsg.valid_relball_velo = 1;
+  } else {
+    fatmsg.valid_relball_velo = 0;
   }
 
   // Append opponents
+  unsigned int num_opponents = 0;
   for ( oppit = opponents.begin(); oppit != opponents.end(); ++oppit) {
     worldinfo_opppose_message_t opm;
     opm.dist  = (*oppit).distance;
     opm.angle = (*oppit).angle;
+    memcpy(&(opm.covariance), (*oppit).covariance, sizeof(opm.covariance));
 
     append_outbound(WORLDINFO_MSGTYPE_OPP_POSE, &opm, sizeof(opm));
+
+    if ( num_opponents < WORLDINFO_FATMSG_NUMOPPS ) {
+      // fill fat msg
+      memcpy(&(fatmsg.opponents[num_opponents]), &opm, sizeof(opm));
+      ++num_opponents;
+    }
   }
+  fatmsg.num_opponents = num_opponents;
   opponents.clear();
 
   if ( outbound_num_msgs > 0 ) {
+    // send slim msgs
     header->seq      = htonl(out_seq++);
 
     encryptor->set_plain_buffer(out_buffer, outbound_bytes);
+    crypted_out_bytes = encryptor->encrypt();
+
+    s->send(crypted_out_buffer, crypted_out_bytes);
+
+    // send fat msg
+    header->seq      = htonl(out_seq++);
+
+    encryptor->set_plain_buffer(&fatmsg, sizeof(fatmsg));
     crypted_out_bytes = encryptor->encrypt();
 
     s->send(crypted_out_buffer, crypted_out_bytes);
@@ -512,7 +577,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
       inbound_bytes = decryptor->decrypt();
     } catch (MessageDecryptionException &e) {
       e.printTrace();
-      cout << "Message decryption failed, ignoring" << endl;
+      LibLogger::log_warn("WorldInfoTransceiver", "Message decryption failed, ignoring");
       continue;
     }
 
@@ -529,12 +594,12 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
     worldinfo_header_t *header = (worldinfo_header_t *)in_buffer;
     if ( ntohs(header->beef) != 0xBEEF ) {
       // throw WorldInfoException("Incorrect message received, wrong key?");
-      cout << "Invalid message received, ignoring" << endl;
+      LibLogger::log_warn("WorldInfoTransceiver", "Invalid message received (no 0xBEEF), ignoring");
       continue;
     }
 
     if ( header->version != WORLDINFO_VERSION ) {
-      cout << "Unsupported version of world info data received, ignoring" << endl;
+      LibLogger::log_warn("WorldInfoTransceiver", "Unsupported version of world info data received, ignoring");
       continue;
     }
     
@@ -544,7 +609,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
     if ( sequence_numbers.find(from.sin_addr.s_addr) != sequence_numbers.end() ) {
       if ( cseq <= sequence_numbers[from.sin_addr.s_addr] ) {
 	// Already received (loop) or replay attack, just ignore
-	cout << "Received packet twice, ignoring" << endl;
+	LibLogger::log_warn("WorldInfoTransceiver", "Received packet twice, ignoring");
 	continue;
       }
     }
@@ -569,7 +634,9 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
       //cout << "Message type: " << msg_type << "  size: " << msg_size
       //     << "  ntype: " << msgh->type << "  nsize: " << msgh->size << endl;
       if ( inbound_bytes < msg_size ) {
-	cout << "Truncated packet received or protocol error, ignoring rest of packet" << endl;
+	LibLogger::log_warn("WorldInfoTransceiver", "Truncated packet received or protocol "
+			    "error, ignoring rest of packet (got %lu bytes, but expected "
+			    "%lu bytes)", inbound_bytes, msg_size);
 	break;
       }
       switch ( msg_type ) {
@@ -577,12 +644,14 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	if ( msg_size == sizeof(worldinfo_pose_message_t) ) {
 	  worldinfo_pose_message_t *pose_msg = (worldinfo_pose_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
-	    memcpy(covariance, pose_msg->covariance, WORLDINFO_COVARIANCE_SIZE * sizeof(float));
 	    (*hit)->pose_rcvd(hostname,
-			      pose_msg->x, pose_msg->y, pose_msg->theta, covariance);
+			      pose_msg->x, pose_msg->y, pose_msg->theta,
+			      pose_msg->covariance);
 	  }
 	} else {
-	  cout << "Received pose message of invalid size, ignoring" << endl;
+	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid pose message received "
+			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      msg_size, sizeof(worldinfo_pose_message_t));
 	}
 	break;
 
@@ -591,10 +660,13 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  worldinfo_velocity_message_t *velo_msg = (worldinfo_velocity_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
 	    (*hit)->velocity_rcvd(hostname,
-				  velo_msg->vel_x, velo_msg->vel_y, velo_msg->vel_theta);
+				  velo_msg->vel_x, velo_msg->vel_y, velo_msg->vel_theta,
+				  velo_msg->covariance);
 	  }
 	} else {
-	  cout << "Received velocity message of invalid size, ignoring" << endl;
+	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid velocity message received "
+			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      msg_size, sizeof(worldinfo_velocity_message_t));
 	}
 	break;
 
@@ -602,13 +674,14 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	if ( msg_size == sizeof(worldinfo_relballpos_message_t) ) {
 	  worldinfo_relballpos_message_t *ball_msg = (worldinfo_relballpos_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
-	    memcpy(covariance, ball_msg->covariance, WORLDINFO_COVARIANCE_SIZE * sizeof(float));
 	    (*hit)->ball_pos_rcvd(hostname,
 				  ball_msg->dist, ball_msg->pitch, ball_msg->yaw,
-				  covariance);
+				  ball_msg->covariance);
 	  }
 	} else {
-	  cout << "Received relative ball pos message of invalid size, ignoring" << endl;
+	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid relative ball pos message received "
+			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      msg_size, sizeof(worldinfo_relballpos_message_t));
 	}
 	break;
 
@@ -617,10 +690,13 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  worldinfo_relballvelo_message_t *bvel_msg = (worldinfo_relballvelo_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
 	    (*hit)->ball_velocity_rcvd(hostname,
-				       bvel_msg->vel_x, bvel_msg->vel_y, bvel_msg->vel_z);
+				       bvel_msg->vel_x, bvel_msg->vel_y, bvel_msg->vel_z,
+				       bvel_msg->covariance);
 	  }
 	} else {
-	  cout << "Received relative ball velocity message of invalid size, ignoring" << endl;
+	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid relative ball velocity message received "
+			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      msg_size, sizeof(worldinfo_relballvelo_message_t));
 	}
 	break;
 
@@ -629,16 +705,69 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  worldinfo_opppose_message_t *oppp_msg = (worldinfo_opppose_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
 	    (*hit)->opponent_pose_rcvd(hostname,
-				       oppp_msg->dist, oppp_msg->angle);
+				       oppp_msg->dist, oppp_msg->angle,
+				       oppp_msg->covariance);
 	  }
 	} else {
-	  cout << "Received relative ball pos message of invalid size, ignoring" << endl;
+	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid opponent pose message received "
+			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      msg_size, sizeof(worldinfo_opppose_message_t));
+	}
+	break;
+
+      case WORLDINFO_MSGTYPE_FAT_WORLDINFO:
+	if ( msg_size == sizeof(worldinfo_fat_message_t) ) {
+	  worldinfo_fat_message_t *fat_msg = (worldinfo_fat_message_t *)inbound_buffer;
+	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
+	    if ( fat_msg->valid_pose ) {
+	      (*hit)->pose_rcvd(hostname,
+				fat_msg->pose.x, fat_msg->pose.y, fat_msg->pose.theta,
+				fat_msg->pose.covariance);
+	    }
+
+	    if ( fat_msg->valid_velo ) {
+	      (*hit)->velocity_rcvd(hostname,
+				    fat_msg->velo.vel_x, fat_msg->velo.vel_y,
+				    fat_msg->velo.vel_theta, fat_msg->velo.covariance);
+	    }
+	    if ( fat_msg->valid_relball_pos ) {
+	      (*hit)->ball_pos_rcvd(hostname,
+				    fat_msg->relball_pos.dist, fat_msg->relball_pos.pitch,
+				    fat_msg->relball_pos.yaw, fat_msg->relball_pos.covariance);
+	    }
+	    if ( fat_msg->valid_relball_velo ) {
+	      (*hit)->ball_velocity_rcvd(hostname,
+					 fat_msg->relball_velo.vel_x,
+					 fat_msg->relball_velo.vel_y,
+					 fat_msg->relball_velo.vel_z,
+					 fat_msg->relball_velo.covariance);
+	    }
+
+	    if ( fat_msg->num_opponents > WORLDINFO_FATMSG_NUMOPPS ) {
+	      // We can't handle this
+	      LibLogger::log_warn("WorldInfoTransceiver", "Too many opponents marked valid in message "
+				  "(got %lu but expected a maximum of %lu), ignoring",
+				  fat_msg->num_opponents, WORLDINFO_FATMSG_NUMOPPS);
+	    } else {
+	      for ( unsigned int i = 0; i < fat_msg->num_opponents; ++i ) {
+		(*hit)->opponent_pose_rcvd(hostname,
+					   fat_msg->opponents[i].dist,
+					   fat_msg->opponents[i].angle,
+					   fat_msg->opponents[i].covariance);
+	      }
+	    }
+	  } // end for each handler
+	} else {
+	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid fat message received "
+			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      msg_size, sizeof(worldinfo_fat_message_t));
 	}
 	break;
 
 
       default:
-	cout << "Unknown message type " << msg_type << " received, ignoring" << endl;
+	  LibLogger::log_warn("WorldInfoTransceiver", "Unknown message type %u received "
+			      ", ignoring", msg_type);
       }
       // there is more to process
       inbound_bytes  -= msg_size;

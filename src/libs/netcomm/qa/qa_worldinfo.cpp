@@ -45,6 +45,7 @@ class WorldInfoSenderThread : public Thread
 {
 public:
   WorldInfoSenderThread(unsigned short int port, bool loop, NetworkNameResolver *rs)
+    : Thread("WorldInfoSenderThread", Thread::OPMODE_CONTINUOUS)
   {
     i = 0;
     try {
@@ -56,8 +57,8 @@ public:
       e.printTrace();
       throw;
     }
-    covariance = (float *)malloc(WORLDINFO_COVARIANCE_SIZE * sizeof(float));
-    for (unsigned int j = 0; j < WORLDINFO_COVARIANCE_SIZE; ++j) {
+    covariance = (float *)malloc(WORLDINFO_COVARIANCE_SIZE_3X3 * sizeof(float));
+    for (unsigned int j = 0; j < WORLDINFO_COVARIANCE_SIZE_3X3; ++j) {
       covariance[j] = j;
     }
   }
@@ -73,11 +74,11 @@ public:
   {
     printf("Sending %u\n", i);
     t->set_pose(i, i+1, i+2, covariance);
-    t->set_velocity(i+3, i+4, i+5);
+    t->set_velocity(i+3, i+4, i+5, covariance);
     t->set_ball_pos(i+6, i+7, i+8, covariance);
-    t->set_ball_velocity(i+9, i+10, i+11);
-    t->add_opponent(i+12, i+13);
-    t->add_opponent(i+14, i+15);
+    t->set_ball_velocity(i+9, i+10, i+11, covariance);
+    t->add_opponent(i+12, i+13, covariance);
+    t->add_opponent(i+14, i+15, covariance);
     t->send();
     ++i;
   }
@@ -94,6 +95,7 @@ class WorldInfoReceiverThread : public Thread, public WorldInfoHandler
 public:
   WorldInfoReceiverThread(unsigned short int port, unsigned int max_num_msgs,
 			  NetworkNameResolver *rs)
+    : Thread("WorldInfoReceiverThread", Thread::OPMODE_CONTINUOUS)
   {
     this->max_num_msgs = max_num_msgs;
     try {
@@ -126,9 +128,9 @@ public:
   {
     cout << "Pose[" << from_host << "]: (x,y,th)=("
 	 << x << "," << y << "," << theta << "), cov=(";
-    for ( unsigned int i = 0; i < WORLDINFO_COVARIANCE_SIZE; ++i) {
+    for ( unsigned int i = 0; i < WORLDINFO_COVARIANCE_SIZE_3X3; ++i) {
       cout << covariance[i];
-      if ( i != WORLDINFO_COVARIANCE_SIZE-1 ) {
+      if ( i != WORLDINFO_COVARIANCE_SIZE_3X3 - 1 ) {
 	cout << ",";
       }
     }
@@ -136,7 +138,7 @@ public:
   }
 
   virtual void velocity_rcvd(const char *from_host, float vel_x,
-			     float vel_y, float vel_theta)
+			     float vel_y, float vel_theta, float *covariance)
   {
     cout << "Velo[" << from_host << "]: (vx,vy,vth)=("
 	 << vel_x << "," << vel_y << "," << vel_theta << ")" << endl;
@@ -148,9 +150,9 @@ public:
   {
     cout << "Ball[" << from_host << "]: (d,p,y)=("
 	 << dist << "," << pitch << "," << yaw << "), cov=(";
-    for ( unsigned int i = 0; i < WORLDINFO_COVARIANCE_SIZE; ++i) {
+    for ( unsigned int i = 0; i < WORLDINFO_COVARIANCE_SIZE_3X3; ++i) {
       cout << covariance[i];
-      if ( i != WORLDINFO_COVARIANCE_SIZE-1 ) {
+      if ( i != WORLDINFO_COVARIANCE_SIZE_3X3 - 1 ) {
 	cout << ",";
       }
     }
@@ -158,14 +160,14 @@ public:
   }
 
   virtual void ball_velocity_rcvd(const char *from_host,
-				  float vel_x, float vel_y, float vel_z)
+				  float vel_x, float vel_y, float vel_z, float *covariance)
   {
     cout << "BVel[" << from_host << "]: (vx,vy,vz)=("
 	 << vel_x << "," << vel_y << "," << vel_z << ")" << endl;
   }
 
   virtual void opponent_pose_rcvd(const char *from_host,
-			     float distance, float angle)
+			     float distance, float angle, float *covariance)
   {
     cout << "Oppt[" << from_host << "]: (d,a)=("
 	 << distance << "," << angle << ")" << endl;

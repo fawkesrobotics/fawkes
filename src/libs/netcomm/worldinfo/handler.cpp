@@ -43,13 +43,16 @@
  * @param theta rotation of the robot
  * @param covariance covariance matrix, line-wise float array
  *
- * @fn void WorldInfoHandler::velocity_rcvd(const char *from_host, float vel_x, float vel_y, float vel_theta)
+ * @fn void WorldInfoHandler::velocity_rcvd(const char *from_host, float vel_x, float vel_y, float vel_theta, float *covariance)
  * Robot velocity information received.
  * @param from_host transmitting host of this information, if available symbolic name
  * @param vel_x velocity in x direction
  * @param vel_y velocity in y direction
  * @param vel_theta rotational velocity, positive velocity means clockwise
  * rotation, negative velocity means counter-clockwise.
+ * @param covariance covariance matrix with 9 entries, ordered as three concatenated
+ * rows (first row, three floats, second row, three floats, third row, three
+ * floats).
  * @see WorldInfoTransceiver::set_velocity()
  *
  * @fn void WorldInfoHandler::ball_pos_rcvd(const char *from_host, float dist, float pitch, float yaw, float *covariance)
@@ -60,22 +63,28 @@
  * @param yaw yaw angle to ball
  * @param covariance covariance matrix with 9 entries, ordered as three concatenated
  * rows (first row, three floats, second row, three floats, third row, three
- * floats). * @see WorldInfoTransceiver::set_ball_pos()
+ * floats).
+ * @see WorldInfoTransceiver::set_ball_pos()
  *
- * @fn void WorldInfoHandler::ball_velocity_rcvd(const char *from_host, float vel_x, float vel_y, float vel_z)
+ * @fn void WorldInfoHandler::ball_velocity_rcvd(const char *from_host, float vel_x, float vel_y, float vel_z, float *covariance)
  * Ball velocity information received.
  * @param from_host transmitting host of this information, if available symbolic name
  * @param vel_x velocity in x direction
  * @param vel_y velocity in y direction
  * @param vel_z velocity in z direction
+ * @param covariance covariance matrix with 9 entries, ordered as three concatenated
+ * rows (first row, three floats, second row, three floats, third row, three
+ * floats).
  * @see WorldInfoTransceiver::set_ball_velocity()
  *
- * @fn void WorldInfoHandler::opponent_pose_rcvd(const char *from_host, float distance, float angle)
+ * @fn void WorldInfoHandler::opponent_pose_rcvd(const char *from_host, float distance, float angle, , float *covariance)
  * Opponent information received.
  * @param from_host transmitting host of this information, if available symbolic name
  * @param distance to opponent
  * @param angle angle to opponent (angle is zero if opponent is in front of robot,
  * positive if right of robot, negative if left of robot).
+ * @param covariance covariance matrix with 4 entries, ordered as two concatenated
+ * rows (first row, two floats, second row, two floats)
  * @see WorldInfoTransceiver::add_opponent()
  *
  */
