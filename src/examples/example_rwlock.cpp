@@ -45,6 +45,7 @@ class ExampleRWLockWriterThread : public Thread
 {
  public:
   ExampleRWLockWriterThread(ReadWriteLock *rwlock, int *val, unsigned int sleep_time)
+    : Thread("ExampleRWLockWriterThread", Thread::OPMODE_CONTINUOUS)
   {
     this->rwlock     = rwlock;
     this->val        = val;
@@ -53,22 +54,17 @@ class ExampleRWLockWriterThread : public Thread
 
   /** Action!
    */
-  virtual void run()
+  virtual void loop()
   {
-    forever {
-      if ( ! rwlock->tryLockForWrite() ) {
-	cout << "Writer: Readers on lock, waiting for release" << endl;
-	rwlock->lockForWrite();
-	// aquired the lock
-      }
-      cout << "Writer: aquired lock" << endl;
-      (*val)++;
-      usleep(sleep_time);
-      rwlock->unlock();
-
-      // Give other threads a chance to get in
-      usleep(0);
+    if ( ! rwlock->tryLockForWrite() ) {
+      cout << "Writer: Readers on lock, waiting for release" << endl;
+      rwlock->lockForWrite();
+      // aquired the lock
     }
+    cout << "Writer: aquired lock" << endl;
+    (*val)++;
+    usleep(sleep_time);
+    rwlock->unlock();
   }
 
  private:
@@ -87,6 +83,7 @@ class ExampleRWLockReaderThread : public Thread
  public:
   ExampleRWLockReaderThread(string pp,
 			    ReadWriteLock *rwlock, int *val, unsigned int sleep_time)
+    : Thread("ExampleRWLockReaderThread", Thread::OPMODE_CONTINUOUS)
   {
     this->pp         = pp;
     this->rwlock     = rwlock;
@@ -105,9 +102,6 @@ class ExampleRWLockReaderThread : public Thread
     usleep(sleep_time);
     cout << "Reader (" << pp << "): Unlocking" << endl;
     rwlock->unlock();
-
-    // Give other threads a chance to get in
-    usleep(0);
   }
 
  private:

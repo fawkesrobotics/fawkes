@@ -61,10 +61,10 @@ class Thread {
   virtual ~Thread();
 
   virtual void init();
-  bool prepare_finalize();
+          bool prepare_finalize();
   virtual bool prepare_finalize_user();
   virtual void finalize();
-  void cancel_finalize();
+          void cancel_finalize();
 
   bool start();
   void cancel();
@@ -91,10 +91,8 @@ class Thread {
   Thread(const char *name);
   Thread(const char *name, OpMode op_mode);
   void exit();
-
   void test_cancel();
 
-  virtual void run();
   virtual void loop();
 
   bool       finalize_prepared;
@@ -105,6 +103,7 @@ class Thread {
   Thread(const char *name, pthread_t id);
   Thread & operator=(const Thread &t);
   static void * entry(void * pthis);
+  void run();
   void __constructor(const char *name, OpMode op_mode);
   void set_finalize_sync_lock(ReadWriteLock *lock);
   void notify_of_failed_init();

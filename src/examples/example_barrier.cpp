@@ -2,8 +2,8 @@
 /***************************************************************************
  *  example_barrier.cpp - barrier example program
  *
- *  Generated: Thu Sep 15 14:48:11 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Sep 15 14:48:11 2006
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -41,20 +41,19 @@ class ExampleBarrierThread : public Thread
  public:
   ExampleBarrierThread(string pp,
 		       Barrier *barrier, unsigned int sleep_time)
+    : Thread("ExampleBarrierThread", Thread::OPMODE_CONTINUOUS)
   {
     this->pp         = pp;
     this->barrier    = barrier;
     this->sleep_time = sleep_time;
   }
 
-  virtual void run()
+  virtual void loop()
   {
-    forever {
-      usleep( sleep_time );
-      cout << pp << ": Waiting for barrier" << endl;
-      barrier->wait();
-      cout << pp << ": Barrier lifted" << endl;
-    }
+    usleep( sleep_time );
+    cout << pp << ": Waiting for barrier" << endl;
+    barrier->wait();
+    cout << pp << ": Barrier lifted" << endl;
   }
 
  private:

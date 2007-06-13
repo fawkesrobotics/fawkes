@@ -50,6 +50,7 @@ class ExampleWaitCondThread : public Thread
    * @param maxval Maximum value when to reset the value
    */
   ExampleWaitCondThread(WaitCondition *wc, Mutex *m, int *val, int actval, int maxval)
+    : Thread("ExampleWaitCondThread", Thread::OPMODE_CONTINUOUS)
   {
     this->wc     = wc;
     this->m      = m;
@@ -60,26 +61,24 @@ class ExampleWaitCondThread : public Thread
 
   /** Action!
    */
-  virtual void run()
+  virtual void loop()
   {
-    while (1) {
-      m->lock();
-      while (*val != actval) {
-	wc->wait(m);
-      }
-      cout << *val << " called" << endl;
-      *val += 1;
-      if ( *val > maxval ) {
-	*val = 0;
-      }
-      // unlock mutex inside wait condition
-      m->unlock();
-
-      // Cannot call wakeOne() here since result is unpredictable and if not
-      // the next thread is woken up we will end up in a deadlock. So every
-      // thread has to check if it's his turn -> use wakeAll()
-      wc->wakeAll();
+    m->lock();
+    while (*val != actval) {
+      wc->wait(m);
     }
+    cout << *val << " called" << endl;
+    *val += 1;
+    if ( *val > maxval ) {
+      *val = 0;
+    }
+    // unlock mutex inside wait condition
+    m->unlock();
+    
+    // Cannot call wakeOne() here since result is unpredictable and if not
+    // the next thread is woken up we will end up in a deadlock. So every
+    // thread has to check if it's his turn -> use wakeAll()
+    wc->wakeAll();
   }
 
  private:

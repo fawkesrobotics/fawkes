@@ -41,11 +41,16 @@ using namespace std;
 
 /** Small example hread serializing with other threads using a wait condition.
  * Run the program and see them printing out numbers serialized.
+ *
+ * NOTE: This can be done more easily by using ThreadList and Threads in 
+ * wait-for-wakeup mode! This is just a demonstration to improve understanding
+ * of sync constructs.
  */
 class ExampleMutexWaitThread : public Thread
 {
  public:
   ExampleMutexWaitThread(string s)
+    : Thread("ExampleMutexWaitThread", Thread::OPMODE_CONTINUOUS)
   {
     this->s      = s;
 
@@ -86,6 +91,7 @@ class ExampleMutexWaitStarterThread : public Thread
 {
  public:
   ExampleMutexWaitStarterThread()
+    : Thread("ExampleMutexWaitStarterThread", Thread::OPMODE_CONTINUOUS)
   {
     threads.clear();
   }

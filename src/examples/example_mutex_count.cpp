@@ -59,7 +59,9 @@ public:
    */
   ExampleMutexCountThread(string s,
 			  Mutex *m, unsigned int *mutex_count, unsigned int *non_mutex_count,
-			  unsigned int sleep_time) {
+			  unsigned int sleep_time)
+    : Thread("ExampMutexCountThread", Thread::OPMODE_CONTINUOUS)
+  {
     this->s   = s;
     this->sl  = sl;
     this->slt = sleep_time;
@@ -70,34 +72,32 @@ public:
 
   /** Where the action happens
    */
-  virtual void run()
+  virtual void loop()
   {
-    forever {
-      // unprotected modification, another thread could modify the value while
-      // we waste time
-      unsigned int n = *nmc;
-      n++;
-      sleep(0);
-      WASTETIME;
-      *nmc = n;
+    // unprotected modification, another thread could modify the value while
+    // we waste time
+    unsigned int n = *nmc;
+    n++;
+    sleep(0);
+    WASTETIME;
+    *nmc = n;
+      
+    // protected modification, no other thread can modify the value as long as
+    // we have the lock
+    if ( m != NULL )  m->lock();
+    unsigned o = *mc;
+    o++;
+    sleep(0);
+    WASTETIME;
+    *mc = o;
+    if ( m != NULL )  m->unlock();
+    
+    // Out is not mutexed, can lead to wrong printouts, try it (happens rarely)!
+    cout << s << ": mutex: " << *mc << "(non-mutex: " << *nmc << ")" << endl;
 
-      // protected modification, no other thread can modify the value as long as
-      // we have the lock
-      if ( m != NULL )  m->lock();
-      unsigned o = *mc;
-      o++;
-      sleep(0);
-      WASTETIME;
-      *mc = o;
-      if ( m != NULL )  m->unlock();
+    if ( sl )   usleep(slt);
 
-      // Out is not mutexed, can lead to wrong printouts, try it (happens rarely)!
-      cout << s << ": mutex: " << *mc << "(non-mutex: " << *nmc << ")" << endl;
-
-      if ( sl )   usleep(slt);
-
-      test_cancel();
-    }
+    test_cancel();
   }
 
  private:
