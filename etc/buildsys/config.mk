@@ -27,6 +27,7 @@ BUILD_TYPE = fawkes
 ifneq ($(realpath $(BASEDIR)/src/Makefile.conf),)
 BUILD_TYPE = rcsoftx
 endif
+ARCH=$(shell arch)
 
 ### Directories
 #BASEDIR ?= $(HOME)/robocup/fawkes

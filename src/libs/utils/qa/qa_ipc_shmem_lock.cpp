@@ -67,7 +67,7 @@ class QASharedMemoryHeader : public SharedMemoryHeader
     return (memcmp(memptr, &header, sizeof(qashmem_header_t)) == 0);
   }
 
-  virtual unsigned int size()
+  virtual size_t size()
   {
     return sizeof(qashmem_header_t);
   }
@@ -87,7 +87,7 @@ class QASharedMemoryHeader : public SharedMemoryHeader
     memcpy((char *)&header, memptr, sizeof(qashmem_header_t));
   }
 
-  virtual unsigned int dataSize()
+  virtual size_t data_size()
   {
     return 1024;
   }
@@ -124,7 +124,7 @@ main(int argc, char **argv)
 			  /* destroy   */ true);
 
     // Add protection via semaphore
-    s1->addSemaphore();
+    s1->add_semaphore();
 
     // This will attach to the existing shmem segment,
     // use ipcs to check
@@ -149,7 +149,7 @@ main(int argc, char **argv)
     // child
     cout << "Child is alive" << endl;
 
-    int *mc = (int *)s2->getMemPtr();
+    int *mc = (int *)s2->memptr();
 
     while ( ! quit ) {
       int m;
@@ -179,7 +179,7 @@ main(int argc, char **argv)
   } else {
     // father
     cout << "Father is alive" << endl;
-    int *mf = (int *)s1->getMemPtr();
+    int *mf = (int *)s1->memptr();
 
     while ( ! quit ) {
       int m;

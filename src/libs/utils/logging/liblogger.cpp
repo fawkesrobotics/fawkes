@@ -27,6 +27,7 @@
 
 #include <utils/logging/liblogger.h>
 #include <utils/logging/multi.h>
+#include <utils/logging/console.h>
 
 #include <core/exceptions/software.h>
 #include <core/threading/mutex.h>
@@ -69,7 +70,7 @@ LibLogger::init(MultiLogger *multi_logger)
   }
   mutex = new Mutex();
   if ( multi_logger == NULL ) {
-    logger = new MultiLogger();
+    logger = new MultiLogger(new ConsoleLogger());
   } else {
     logger = multi_logger;
   }
@@ -125,6 +126,7 @@ LibLogger::remove_logger(Logger *l)
 void
 LibLogger::log_debug(const char *component, const char *format, ...)
 {
+  if ( logger == NULL )  init();
   mutex->lock();
   va_list va;
   if ( logger == NULL )  init();
@@ -143,6 +145,7 @@ LibLogger::log_debug(const char *component, const char *format, ...)
 void
 LibLogger::log_info(const char *component, const char *format, ...)
 {
+  if ( logger == NULL )  init();
   mutex->lock();
   va_list va;
   if ( logger == NULL )  init();
@@ -161,6 +164,7 @@ LibLogger::log_info(const char *component, const char *format, ...)
 void
 LibLogger::log_warn(const char *component, const char *format, ...)
 {
+  if ( logger == NULL )  init();
   mutex->lock();
   va_list va;
   if ( logger == NULL )  init();
@@ -179,6 +183,7 @@ LibLogger::log_warn(const char *component, const char *format, ...)
 void
 LibLogger::log_error(const char *component, const char *format, ...)
 {
+  if ( logger == NULL )  init();
   mutex->lock();
   va_list va;
   if ( logger == NULL )  init();

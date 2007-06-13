@@ -118,9 +118,8 @@ WorldInfoTransceiver::WorldInfoTransceiver(const char *addr, unsigned short port
   crypt_buffer_size  = encryptor->recommended_crypt_buffer_size();
   crypted_out_buffer = malloc(crypt_buffer_size);
   crypted_in_buffer  = malloc(crypt_buffer_size);
-  covariance         = (float *)malloc(WORLDINFO_COVARIANCE_SIZE_3X3 * sizeof(float));
 
-  if (! crypted_in_buffer || ! crypted_out_buffer || ! covariance) {
+  if (! crypted_in_buffer || ! crypted_out_buffer) {
     throw OutOfMemoryException();
   }
 
@@ -147,7 +146,6 @@ WorldInfoTransceiver::~WorldInfoTransceiver()
   free(in_buffer);
   free(crypted_out_buffer);
   free(crypted_in_buffer);
-  free(covariance);
   delete s;
   delete encryptor;
   if ( resolver_delete ) {

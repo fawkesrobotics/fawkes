@@ -56,7 +56,7 @@ class QASharedMemoryHeader : public SharedMemoryHeader
     return (memcmp(memptr, &header, sizeof(qashmem_header_t)) == 0);
   }
 
-  virtual unsigned int size()
+  virtual size_t size()
   {
     return sizeof(qashmem_header_t);
   }
@@ -76,7 +76,7 @@ class QASharedMemoryHeader : public SharedMemoryHeader
     memcpy((char *)&header, memptr, sizeof(qashmem_header_t));
   }
 
-  virtual unsigned int dataSize()
+  virtual size_t data_size()
   {
     return 1024;
   }
@@ -123,8 +123,8 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  int *m1 = (int *)s1->getMemPtr();
-  int *m2 = (int *)s2->getMemPtr();
+  int *m1 = (int *)s1->memptr();
+  int *m2 = (int *)s2->memptr();
 
   int i = 0;
 

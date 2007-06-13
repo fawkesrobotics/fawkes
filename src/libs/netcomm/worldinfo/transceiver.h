@@ -113,8 +113,6 @@ class WorldInfoTransceiver
   unsigned char *inbound_buffer;
   size_t         inbound_bytes;
 
-  float *covariance;
-
   bool   pose_changed;
   float  pose_x;
   float  pose_y;
