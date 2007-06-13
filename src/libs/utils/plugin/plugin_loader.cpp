@@ -173,11 +173,11 @@ PluginLoader::request_load(const char *plugin_name)
   std::string pn = plugin_name;
 
   if ( d->name_plugin_map.find(pn) != d->name_plugin_map.end() ) {
-    throw PluginLoadException("Cannot request load for already loaded plugin");
+    throw PluginLoadException(plugin_name, "Cannot request load for already loaded plugin");
   }
 
   if ( d->load_threads.find(plugin_name) != d->load_threads.end() ) {
-    throw PluginLoadException("Load already requested");    
+    throw PluginLoadException(plugin_name, "Load already requested");    
   }
 
   PluginLoadThread *plt = new PluginLoadThread(d->mm, plugin_name);
@@ -199,7 +199,7 @@ PluginLoader::finished_load(const char *plugin_name)
 {
   std::map<std::string, PluginLoadThread *>::iterator i;
   if ( (i = d->load_threads.find(plugin_name)) == d->load_threads.end() ) {
-    PluginLoadException e("Plugin loading not requested");
+    PluginLoadException e(plugin_name, "Plugin loading not requested");
     e.append("Loading of plugin '%s' was not requested");
     throw e;
   } else {
@@ -221,11 +221,11 @@ PluginLoader::finish_deferred_load(const char *plugin_name)
 {
   std::map<std::string, PluginLoadThread *>::iterator i;
   if ( (i = d->load_threads.find(plugin_name)) == d->load_threads.end() ) {
-    PluginLoadException e("Plugin loading not requested");
+    PluginLoadException e(plugin_name, "Plugin loading not requested");
     e.append("Loading of plugin '%s' was not requested");
     throw e;
   } else if ( ! (*i).second->finished()) {
-    throw PluginLoadException("Plugin loading not finished");
+    throw PluginLoadException(plugin_name, "Plugin loading not finished");
   } else {
     try {
       Plugin *p = (*i).second->plugin();
@@ -240,6 +240,11 @@ PluginLoader::finish_deferred_load(const char *plugin_name)
 
       return p;      
     } catch (Exception &e) {
+      e.append("PluginLoader::finish_deferred_load() failed");
+      // Cleanup
+      (*i).second->join();
+      delete (*i).second;
+      d->load_threads.erase(i);
       throw;
     }
   }  

@@ -54,6 +54,8 @@ PluginLoadThread::PluginLoadThread(ModuleManager *mm, const char *plugin_name)
 {
   this->mm = mm;
   _finished = false;
+  _module = NULL;
+  _plugin = NULL;
 
   // This is dependent on the system architecture!
   if ( asprintf(&module_name, "%s.%s", plugin_name, mm->getModuleFileExtension()) == -1 ) {
@@ -126,6 +128,7 @@ PluginLoadThread::load()
     _module = mm->openModule(module_name);
   } catch (ModuleOpenException &e) {
     ple.append("PluginLoader failed to open module %s", module_name);
+    ple.append(e);
     return;
   }
 

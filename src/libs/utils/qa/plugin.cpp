@@ -56,10 +56,7 @@ test_module(Module *m)
 {
   bool success = true;
   try {
-    m->open();
  
-    cout << "Successfully opened module" << endl;
-  
     if ( ! m->hasSymbol("plugin_factory") ) { // "plugin_factory"
       cout << "Doh, symbol not found" << endl;
       success = false;
@@ -87,7 +84,6 @@ test_module(Module *m)
 	}
       }
     }
-    m->close();
   } catch (Exception &e) {
     cout << "Could not open module" << endl;
     e.printTrace();
@@ -111,8 +107,15 @@ main(int argc, char **argv)
   bool success = true;
 
   cout << "Running plain module tests" << endl;
-  ModuleDL *m = new ModuleDL(PLUGINDIR"/test_plugin.so");
+  ModuleDL *m = new ModuleDL(PLUGINDIR"/test_splugin.so");
+  try {
+    m->open();
+  } catch (Exception &e) {
+    e.printTrace();
+    throw;
+  }
   success = test_module(m);
+  m->close();
   delete m;
   if ( success ) {
     cout << "SUCCESSFULLY tested plain module" << endl;

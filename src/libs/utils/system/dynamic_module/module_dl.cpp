@@ -99,7 +99,6 @@ ModuleDL::open()
 
     // check whether we have a readable file right away */
     if (File::is_regular(full_filename.c_str())) {
-      // We cannot read the file
 
       // ok, try loading the module
       int tflags = ((flags & MODULE_BIND_LAZY) != 0) ? RTLD_LAZY : RTLD_NOW;
@@ -112,17 +111,23 @@ ModuleDL::open()
       //printf("Loading module %s, flags: %i\n", full_filename.c_str(), tflags);
       handle = dlopen(full_filename.c_str(), tflags);
 
-      if ( ! handle) {
+      if ( NULL == handle) {
 	char *err = dlerror();
-	if ( err == NULL ) {
+	if ( NULL == err ) {
 	  throw ModuleOpenException("dlopen failed with an unknown error");
 	} else {
-	  throw ModuleOpenException(err);
+	  ModuleOpenException e("dlopen failed");
+	  e.append("dlerror: %s", err);
+	  throw e;
 	}
       } else {
 	is_resident = false;
 	ref_count   = 1;
       }
+    } else {
+      ModuleOpenException e("Cannot open module");
+      e.append("File '%s' does not exist", full_filename.c_str());
+      throw e;
     }
   }
 }

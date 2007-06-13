@@ -244,16 +244,19 @@ FawkesPluginManager::check_loaded()
       try {
 	Plugin *p = plugin_loader->finish_deferred_load(name.c_str());
 
-	// LibLogger::log_debug("FawkesPluginManager", "Adding plugin %s", name.c_str());
 	add_plugin_deferred(p, name.c_str());
 
+	++lri;
       } catch (Exception &e) {
 	LibLogger::log_error("FawkesPluginManager", "Could not load plugin '%s'", name.c_str());
 	LibLogger::log_error("FawkesPluginManager", e);
 	send_load_failure(name.c_str(), (*lri).second);
+	++lri;
+	load_requests.erase(name);
       }
+    } else {
+      ++lri;
     }
-    ++lri;
   }
   plugins_mutex->unlock();
 }
@@ -432,7 +435,7 @@ FawkesPluginManager::process_after_loop()
 	  LibLogger::log_info("FawkesPluginManager", "Client requested loading of %s which is already loaded", name);
 	  send_load_success(name, msg->clid());
 	} else {
-	  LibLogger::log_info("FawkesPluginManager", "Requesting deferred loading of %ul %s", strlen(name), name);
+	  LibLogger::log_info("FawkesPluginManager", "Requesting deferred loading of %s", name);
 	  request_load(name, msg->clid());
 	}
       }
