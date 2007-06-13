@@ -21,7 +21,7 @@
 
 BASEDIR = ../..
 
-SUBDIRS = fvutils cams models filters classifiers stereo apps
+SUBDIRS = fvutils cams models filters classifiers apps
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
