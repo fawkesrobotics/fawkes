@@ -189,7 +189,7 @@ TriclopsStereoProcessor::calculate_yuv(bool both)
 
 
 void
-TriclopsStereoProcessor::calculate_disparity()
+TriclopsStereoProcessor::calculate_disparity(ROI *roi)
 {
   // now deinterlace the RGB Buffer
   deinterlace_green( buffer_rgb, buffer_green, _width, 6 * _height );

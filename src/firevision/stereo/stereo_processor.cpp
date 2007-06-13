@@ -71,7 +71,7 @@
  * Depending on the data the specific stereo processor needs the disparity image
  * is calculated.
  * If a region of interest (ROI) is supplied then only this region is processed.
- * @param ROI region of interest to process
+ * @param roi region of interest to process
  *
  * @fn virtual void StereoProcessor::calculate_yuv(bool both = false) = 0
  * Caculate yuv images.

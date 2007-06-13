@@ -47,7 +47,7 @@ class TriclopsStereoProcessor : public StereoProcessor
 			     float *x, float *y, float *z);
 
   virtual void             preprocess_stereo();
-  virtual void             calculate_disparity();
+  virtual void             calculate_disparity(ROI *roi);
   virtual void             calculate_yuv(bool both = false);
   virtual unsigned char *  disparity_buffer();
   virtual unsigned char *  yuv_buffer();
