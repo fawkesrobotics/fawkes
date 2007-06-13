@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  thread_inifin.h - Fawkes thread initializer/finalizer
+ *  clock.cpp - Clock aspect for Fawkes
  *
- *  Created: Thu Nov 20 00:47:12 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue June 12 22:30:33 2007
+ *  Copyright  2007  Daniel Beck
  *
  *  $Id$
  *
@@ -25,25 +25,36 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FAWKES_THREAD_INIFIN_H_
-#define __FAWKES_THREAD_INIFIN_H_
+#include <aspect/clock.h>
+#include <utils/system/clock.h>
 
-#include <aspect/inifin.h>
+/** @class ClockAspect aspect/clock.h
+ * Thread aspect that allows to obtain the current time from the clock.
+ * Threads that need to deal with the current time should have this aspect
+ * and not obtain the time by means of gettimeofday! 
+ *
+ * @ingroup Aspects
+ * @author Daniel Beck
+ */
 
-class BlackBoard;
-class Configuration;
-class Logger;
-class Clock;
-class Thread;
 
-class FawkesThreadIniFin : public AspectIniFin
+/** @var Clock ClockAspect::clock
+ * By means of this member access to the clock is given.
+ */
+
+/** Virtual empty destructor. */
+ClockAspect::~ClockAspect()
 {
- public:
-  FawkesThreadIniFin(BlackBoard *blackboard, Configuration *config, Logger *logger, Clock *clock);
-
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
-};
+}
 
 
-#endif
+/** Set the clock.
+ * It is guaranteed that this is called for a clock thread before
+ * Thread::start() is called (when running regularly inside Fawkes).
+ * @param clock Clock instance to use.
+ */
+void
+ClockAspect::initClockAspect(Clock* clock)
+{
+  this->clock = clock;
+}

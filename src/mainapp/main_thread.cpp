@@ -34,6 +34,7 @@
 #include <utils/logging/factory.h>
 #include <utils/system/argparser.h>
 #include <utils/system/hostinfo.h>
+#include <utils/system/clock.h>
 
 #include <blackboard/blackboard.h>
 #include <mainapp/thread_inifin.h>
@@ -137,12 +138,14 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   multi_logger->set_loglevel(log_level);
   LibLogger::init(multi_logger);
 
+  /* Clock */
+  clock = Clock::init();
 
   /* Managers */
   try {
     config_manager     = new FawkesConfigManager(config);
     blackboard         = new BlackBoard();
-    thread_inifin      = new FawkesThreadIniFin(blackboard, config, multi_logger);
+    thread_inifin      = new FawkesThreadIniFin(blackboard, config, multi_logger, clock);
     thread_manager     = new FawkesThreadManager(thread_inifin, thread_inifin);
     plugin_manager     = new FawkesPluginManager(thread_manager);
     network_manager    = new FawkesNetworkManager(thread_manager, 1910);
@@ -184,6 +187,9 @@ FawkesMainThread::destruct()
 
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();
+
+  Clock::finalize();
+  delete clock;
 }
 
 

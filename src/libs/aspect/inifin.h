@@ -34,6 +34,7 @@
 class BlackBoard;
 class Configuration;
 class Logger;
+class Clock;
 class FawkesNetworkHub;
 class Thread;
 template <class Provider, class Dependant>
@@ -44,7 +45,7 @@ class VisionAspect;
 class AspectIniFin : public ThreadInitializer, public ThreadFinalizer
 {
  public:
-  AspectIniFin(BlackBoard *blackboard, Configuration *config, Logger *logger);
+  AspectIniFin(BlackBoard *blackboard, Configuration *config, Logger *logger, Clock *clock);
   virtual ~AspectIniFin();
 
   virtual void init(Thread *thread);
@@ -57,6 +58,7 @@ class AspectIniFin : public ThreadInitializer, public ThreadFinalizer
   BlackBoard        *blackboard;
   Configuration     *config;
   Logger            *logger;
+  Clock             *clock;
   FawkesNetworkHub  *fnethub;
 
   OneToManyDependency<VisionMasterAspect, VisionAspect> *vision_dependency;

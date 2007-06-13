@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  thread_inifin.h - Fawkes thread initializer/finalizer
+ *  clock.h - Clock aspect for Fawkes
  *
- *  Created: Thu Nov 20 00:47:12 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue June 12 18:36:09 2007
+ *  Copyright  2007  Daniel Beck
  *
  *  $Id$
  *
@@ -25,25 +25,20 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FAWKES_THREAD_INIFIN_H_
-#define __FAWKES_THREAD_INIFIN_H_
+#ifndef __ASPECT_CLOCK_H_
+#define __ASPECT_CLOCK_H_
 
-#include <aspect/inifin.h>
-
-class BlackBoard;
-class Configuration;
-class Logger;
 class Clock;
-class Thread;
 
-class FawkesThreadIniFin : public AspectIniFin
+class ClockAspect
 {
  public:
-  FawkesThreadIniFin(BlackBoard *blackboard, Configuration *config, Logger *logger, Clock *clock);
+    virtual ~ClockAspect();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+    void initClockAspect(Clock* clock);
+
+ protected:
+    Clock* clock;
 };
 
-
-#endif
+#endif /*__ASPECT_CLOCK_H_ */

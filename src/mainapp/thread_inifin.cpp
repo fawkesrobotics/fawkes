@@ -44,11 +44,13 @@
  * @param blackboard BlackBoard
  * @param config Configuration
  * @param logger Logger
+ * @param clock Clock
  */
 FawkesThreadIniFin::FawkesThreadIniFin(BlackBoard *blackboard,
-						 Configuration *config,
-						 Logger *logger)
-  : AspectIniFin(blackboard, config, logger)
+				       Configuration *config,
+				       Logger *logger,
+				       Clock *clock)
+  : AspectIniFin(blackboard, config, logger, clock)
 {
 }
 

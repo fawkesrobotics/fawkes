@@ -33,6 +33,7 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <aspect/clock.h>
 #include <aspect/fawkes_network.h>
 #include <aspect/vision_master.h>
 #include <aspect/vision.h>
@@ -53,14 +54,17 @@
  * @param blackboard BlackBoard
  * @param config Configuration
  * @param logger Logger
+ * @param clock Clock
  */
 AspectIniFin::AspectIniFin(BlackBoard *blackboard,
 			   Configuration *config,
-			   Logger *logger)
+			   Logger *logger,
+			   Clock *clock)
 {
   this->blackboard = blackboard;
   this->config     = config;
   this->logger     = logger;
+  this->clock      = clock;
   this->fnethub    = NULL;
 
   vision_dependency = new OneToManyDependency<VisionMasterAspect, VisionAspect>();
@@ -116,6 +120,11 @@ AspectIniFin::init(Thread *thread)
   LoggingAspect *logging_thread;
   if ( (logging_thread = dynamic_cast<LoggingAspect *>(thread)) != NULL ) {
     logging_thread->initLoggingAspect(logger);
+  }
+
+  ClockAspect *clock_thread;
+  if ( (clock_thread = dynamic_cast<ClockAspect *>(thread)) != NULL ) {
+    clock_thread->initClockAspect(clock);
   }
 
   FawkesNetworkAspect *fnet_thread;

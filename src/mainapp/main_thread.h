@@ -40,6 +40,7 @@ class FawkesConfigManager;
 class Configuration;
 class MultiLogger;
 class HostInfo;
+class Clock;
 
 class FawkesMainThread : public Thread
 {
@@ -62,7 +63,8 @@ class FawkesMainThread : public Thread
   FawkesNetworkManager       *network_manager;
   FawkesConfigManager        *config_manager;
   MultiLogger                *multi_logger;
-
+  Clock                      *clock;
+        
   char *config_mutable_file;
   char *config_default_file;
 };
