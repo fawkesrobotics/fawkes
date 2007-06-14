@@ -32,10 +32,11 @@
  * This class shall be extended by threads that want to use the Fawkes
  * network connection.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
- */
-
-/** @fn void FawkesNetworkHandler::handle_network_message(FawkesNetworkMessage *msg) = 0
+ *
+ *
+ * @fn void FawkesNetworkHandler::handle_network_message(FawkesNetworkMessage *msg) = 0
  * Called for incoming messages that are addressed to the correct component ID.
  * @param msg message to handle. If you want to keep this message you have to ref() it!
  * It is guaranteed that the message will not be erased during the handleNetworkMessage()

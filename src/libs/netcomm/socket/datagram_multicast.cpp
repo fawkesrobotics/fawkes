@@ -38,6 +38,7 @@
  * Multicast datagram socket.
  * An multicast UDP socket on top of IP.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

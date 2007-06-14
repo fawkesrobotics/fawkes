@@ -34,6 +34,7 @@
 
 /** @class ConnectionDiedException netcomm/fawkes/transceiver.h
  * Thrown if the connection died during an operation.
+ * @ingroup NetComm
  */
 
 /** Constructor.
@@ -50,6 +51,7 @@ ConnectionDiedException::ConnectionDiedException(const char *msg)
  * Utility class that provides methods to send and receive messages via
  * the network. Operates on message queues and a given socket.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

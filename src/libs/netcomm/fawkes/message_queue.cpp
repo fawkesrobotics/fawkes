@@ -31,6 +31,7 @@
  * A LockQueue of FawkesNetworkMessage to hold messages in inbound and
  * outbound queues.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

@@ -41,6 +41,7 @@
  * This class gives access to Avahi's possibility to announce services on
  * the network.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

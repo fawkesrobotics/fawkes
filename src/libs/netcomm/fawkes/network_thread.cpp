@@ -43,6 +43,7 @@
  * Maintains a list of clients and reacts on events triggered by the clients.
  * Also runs the acceptor thread.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

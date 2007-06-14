@@ -41,6 +41,7 @@
  * Only a single client handler can be registered per component. If you try
  * to register a handler where there is already a handler this exception
  * is thrown.
+ * @ingroup NetComm
  */
 
 /** Costructor. */
@@ -54,6 +55,7 @@ HandlerAlreadyRegisteredException::HandlerAlreadyRegisteredException()
  * Simple Fawkes network client. Allows access to a remote instance via the
  * network. Encapsulates all needed interaction with the network.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

@@ -32,6 +32,7 @@
  * This interface defines methods called by WorldInfoTransceiver for incoming
  * information.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  *
  *

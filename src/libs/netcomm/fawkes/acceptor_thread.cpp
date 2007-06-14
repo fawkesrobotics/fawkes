@@ -36,6 +36,7 @@
  * that happens the parents FawkesNetworkThread::add_client() is called and
  * the parent thread is woken up.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

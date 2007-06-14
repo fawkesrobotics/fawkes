@@ -43,6 +43,7 @@
  * then initiate searches. The result handler is then informed about
  * the results.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

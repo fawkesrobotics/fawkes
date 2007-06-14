@@ -47,6 +47,7 @@
  * be used instead.
  *
  * @see NetworkNameResolver
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

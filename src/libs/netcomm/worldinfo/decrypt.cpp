@@ -33,6 +33,7 @@
  * Message decryption failed.
  * This exception shall be thrown if there was a problem decrypting a
  * world info message.
+ * @ingroup NetComm
  */
 
 /** Constructor.
@@ -56,6 +57,7 @@ MessageDecryptionException::MessageDecryptionException(char *msg)
  * almost everywhere available and easy to use.
  * 
  * @see WorldInfoMessageEncryptor
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

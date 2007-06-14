@@ -75,6 +75,7 @@
  * answer is available via the host lookup facilities of the system or
  * optional via mDNS.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

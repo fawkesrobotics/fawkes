@@ -39,6 +39,8 @@
  * This interface has to be implemented to make use of the threaded
  * Avahi lookup of names and addresses. After you have ordered a
  * lookup this handler is called with the result.
+ *
+ * @ingroup NetComm
  * @author Tim Niemueller
  *
  * @fn void AvahiResolverHandler::resolved_name(char *name, struct sockaddr *addr, socklen_t addrlen) = 0
@@ -92,6 +94,8 @@ AvahiResolverHandler::~AvahiResolverHandler()
  * Avahi resolver.
  * This utility provides methods for resolving names and addresses using
  * mDNS/DNS-SD via Avahi.
+ *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

@@ -1,0 +1,29 @@
+/** @defgroup NetComm Fawkes Network Communication
+ * This group contains the parts of the Fawkes Network Communication Library
+ * (netcomm).
+ *
+ * Networking in Fawkes is differentiated into several sub-topics.
+ *
+ * \section Base classes
+ * Fawkes provides several primitives for network communication, like a couple of
+ * different socket implementations for differen protocols.
+ *
+ * \section Fawkes Network Protocol
+ * The Fawkes Network Protocol defines a protocol over TCP for generic control
+ * messaging over the network. It is meant to be easily extensible and it is able
+ * to carry arbitrary payloads between Fawkes plugins and tools that communicate
+ * with this plugin. It can be accessed via the FawkesNetworkAspect.
+ *
+ * \section WorldInfo Transceiver
+ * We have implemented a generic protocol to communicate world state information
+ * over the network. For this we provide a FawkesNetworkTransceiver which is able
+ * to send and receive world info data in several well-defined messages. The protocol
+ * uses UDP for quick transmission. It uses encryption to make the protocol
+ * child-proof such that no teams gets into the situation that it may easily
+ * cheat on other teams.
+ *
+ * \section DNS-based service discovery over Mutlicast DNS
+ * This library incorporates DNS-based service discovery and hostname resolution
+ * via Multicast DNS (also known as Bonjour or ZeroConf). It is based on Avahi
+ * and is basically a simple C++ wrapper.
+ */

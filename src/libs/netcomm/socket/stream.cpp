@@ -37,6 +37,7 @@
 /** @class StreamSocket netcomm/socket/stream.h
  * TCP stream socket over IP.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

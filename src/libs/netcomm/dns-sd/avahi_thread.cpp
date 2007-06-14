@@ -47,6 +47,7 @@
  * This thread handles all tasks related to avahi. This is the single
  * interaction point with the Avahi adapter.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

@@ -35,6 +35,7 @@
  * to a specific connected client and to add and remove handlers to process
  * incoming messages.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  *
  * @fn void FawkesNetworkHub::broadcast(FawkesNetworkMessage *msg) = 0

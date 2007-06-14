@@ -33,6 +33,7 @@
  * Message encryption failed.
  * This exception shall be thrown if there was a problem encrypting a
  * world info message.
+ * @ingroup NetComm
  */
 
 /** Constructor.
@@ -70,6 +71,7 @@ MessageEncryptionException::MessageEncryptionException(char *msg)
  * accompanying libcrypto that comes with OpenSSL, not libopenssl itself). It is
  * almost everywhere available and easy to use.
  * 
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

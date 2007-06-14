@@ -42,6 +42,7 @@
  * Representation of a service announced or found via Avahi.
  * This class is used in the C++ wrapper to talk about services.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

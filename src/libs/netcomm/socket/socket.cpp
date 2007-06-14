@@ -60,6 +60,7 @@
  * Socket exception.
  * Thrown if an exception occurs in a socket. If the error was caused by
  * a system call that sets errno this is given to the exception.
+ * @ingroup NetComm
  */
 
 /** Constructor.
@@ -86,6 +87,7 @@ SocketException::SocketException(const char *msg, int _errno)
  * This is the base class for all sockets. You cannot use it directly
  * but you have to use one of the derivatives like StreamSocket or
  * DatagramSocket.
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

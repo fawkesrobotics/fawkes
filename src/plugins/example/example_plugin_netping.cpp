@@ -90,12 +90,12 @@ main(int argc, char **argv)
   c->registerHandler(&r, FAWKES_CID_EXAMPLE_PLUGIN);
 
   char *tmp;
-  unsigned int u = 0;
+  unsigned int *u = (unsigned int *)malloc(sizeof(unsigned int));;
   unsigned int id = 1;
   if ( (tmp = argp.getArgument("n")) != NULL ) {
     int i = atoi(tmp);
     if ( i > 0 ) {
-      u = i;
+      *u = i;
     }
   }
 
@@ -107,9 +107,9 @@ main(int argc, char **argv)
   }
 
 
-  FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_EXAMPLE_PLUGIN, id, &u, sizeof(u));
+  FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_EXAMPLE_PLUGIN, id, u, sizeof(unsigned int));
   c->enqueue(msg);
-  // msg->unref();
+  msg->unref();
 
   while ( ! r.quit ) {
     c->wait(FAWKES_CID_EXAMPLE_PLUGIN);
@@ -123,3 +123,4 @@ main(int argc, char **argv)
 
   return 0;
 }
+

@@ -42,6 +42,7 @@
  * to this buffer and _payload_size contain the size of the buffer.
  *
  * @see DynamicBuffer
+ * @ingroup NetComm
  * @author Tim Niemueller
  *
  * @fn void FawkesNetworkMessageContent::serialize() = 0

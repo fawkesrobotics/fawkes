@@ -33,22 +33,9 @@ class FawkesNetworkMessage;
 class FawkesNetworkClientHandler
 {
  public:
-  /** Virtual empty destructor */
-  virtual ~FawkesNetworkClientHandler() {}
+  virtual ~FawkesNetworkClientHandler();
 
-  /** This handler has been deregistered.
-   * This is called when this handler is deregistered from the
-   * FawkesNetworkClient. Sometimes you may not want to allow this and post
-   * a big fat warning into the log.
-   */
   virtual void deregistered()                                             = 0;
-
-  /** Called for incoming messages.
-   * This is called when an incoming message has been received. If this
-   * method was called one or more times then the a previously carried out
-   * wait(cid) call will continue.
-   * @param m Message
-   */
   virtual void inboundReceived(FawkesNetworkMessage *m)                   = 0;
 
 };

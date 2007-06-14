@@ -42,6 +42,7 @@
 
 /** @class WorldInfoException <netcomm/worldinfo/transceiver.h>
  * Thrown on critical errors in world info handling.
+ * @ingroup NetComm
  */
 
 /** Constructor.
@@ -79,6 +80,7 @@ WorldInfoException::WorldInfoException(const char *msg)
  * You can thus call send() at any time but only changed information
  * (information set since last send() call) is transmitted over the network.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

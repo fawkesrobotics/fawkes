@@ -52,6 +52,7 @@
  * The numbers in the headers are stored in network byte order and thus are
  * suitable for direct sending over the network.
  *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 

@@ -40,23 +40,7 @@
  * The message payload can only be of a certain size, which is limited especially
  * by the data type used for the payload size in the header. If you try to assign too
  * much data to a message this exception is thrown.
- *
- * Note that the message takes over ownership of the payload. This means that it
- * is internally held and freed (using free()) if the message is deleted (if the
- * reference count reaches zero). Because of this you can NOT supply a local variable.
- * The following code is illegal:
- * @code
- * unsigned int u = 0;
- * FawkesNetworkMessage *m = new FawkesNetworkMessage(clid, cid, msgid, &u, sizeof(u));
- * @endcode
- * Rather you have to use the following code:
- * @code
- * unsigned int *u = (unsigned int *)malloc(sizeof(unsigned int));
- * *u = 0;
- * FawkesNetworkMessage *m = new FawkesNetworkMessage(clid, cid, msgid, u, sizeof(unsigned int));
- * @endcode
- *
- * @ingroup Exceptions
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 
@@ -79,6 +63,22 @@ FawkesNetworkMessageTooBigException::FawkesNetworkMessageTooBigException(size_t 
  * it can handle the client ID, which is either the sender or the recipient
  * of a message (depending if it's in an inbound or outbound queue).
  *
+ * Note that the message takes over ownership of the payload. This means that it
+ * is internally held and freed (using free()) if the message is deleted (if the
+ * reference count reaches zero). Because of this you can NOT supply a local variable.
+ * The following code is illegal:
+ * @code
+ * unsigned int u = 0;
+ * FawkesNetworkMessage *m = new FawkesNetworkMessage(clid, cid, msgid, &u, sizeof(u));
+ * @endcode
+ * Rather you have to use the following code:
+ * @code
+ * unsigned int *u = (unsigned int *)malloc(sizeof(unsigned int));
+ * *u = 0;
+ * FawkesNetworkMessage *m = new FawkesNetworkMessage(clid, cid, msgid, u, sizeof(unsigned int));
+ * @endcode
+ *
+ * @ingroup NetComm
  * @author Tim Niemueller
  */
 
