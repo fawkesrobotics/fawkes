@@ -23,12 +23,13 @@ BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 ifeq ($(PKGCONFIG),)
-$(warning No pkg-config installed, you cannot build the interface generator! Interfaces cannot be generated.)
-else
+  WARN_TARGETS += warning_pkgconfig
+endif
+
 
 LIBXMLPP = $(shell $(PKGCONFIG) libxml++-2.6; echo $$?)
 ifeq ($(LIBXMLPP),1)
-$(warning libxml++-devel not installed on your system, you cannot build the interface generator! Interfaces cannot be generated.)
+  WARN_TARGETS += warning_libxmlpp
 else
 CFLAGS = -g \
 	-DINTERFACEDIR=\"$(realpath $(SRCDIR))\" \
@@ -47,6 +48,17 @@ OBJS_interface_generator = generator/constant.o		\
 
 BINS_all = $(BINDIR)/interface_generator
 endif
+
+ifneq ($(SRCDIR),)
+all: $(WARN_TARGETS)
+.PHONY: warning_pkgconfig
+warning_pkgconfig:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting interface generator$(TNORMAL) (pkg-config not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Interfaces cannot be generated$(TNORMAL)"
+.PHONY: warning_libxmlpp
+warning_libxmlpp:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting interface generator$(TNORMAL) (libxml++[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Interfaces cannot be generated$(TNORMAL)"
 endif
 
 OBJS_interfaces = $(notdir $(patsubst %.xml,%.o,$(wildcard $(SRCDIR)/*.xml)))

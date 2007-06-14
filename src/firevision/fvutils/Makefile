@@ -41,7 +41,7 @@ else
 UTILS_EXTRA_LIBS += png
 endif
 
-ifneq ($(SRCDIR),)
+ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
 warning_libjpeg:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting JPEG support$(TNORMAL) (No libjpeg[-devel] installed)"
