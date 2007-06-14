@@ -189,7 +189,6 @@ FawkesMainThread::destruct()
   LibLogger::finalize();
 
   Clock::finalize();
-  delete clock;
 }
 
 

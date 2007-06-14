@@ -88,6 +88,7 @@ void
 Clock::finalize()
 {
   destruct_ok = true;
+  delete instance;
 }
 
 

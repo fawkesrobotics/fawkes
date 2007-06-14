@@ -74,5 +74,7 @@ int main(int argc, char** argv)
   time = watch.clock_time();
   cout << "Current clock time is " << time << endl;
 
+  Clock::finalize();
+
   return 0;
 }
