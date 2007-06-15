@@ -28,6 +28,7 @@
 #include <core/exception.h>
 
 #include <cams/dp_ptu.h>
+#include <fvutils/system/camargp.h>
 
 #include <utils/math/angle.h>
 #include <unistd.h>
@@ -94,11 +95,27 @@ const char * DPPTUControl::DPPTU_VERSION                = "V";
 
 
 /** Constructor.
- * @param port port device file (e.g. /dev/ttyS0)
+ * @param tty_port port device file (e.g. /dev/ttyS0)
  */
-DPPTUControl::DPPTUControl(const char *port)
+DPPTUControl::DPPTUControl(const char *tty_port)
 {
-  this->port = port;
+  this->tty_port = strdup(tty_port);
+  opened = false;
+  max_wait_ms = 10;
+  effect = EFFECT_NONE;
+
+  open();
+}
+
+
+/** Constructor.
+ * Uses camera argument parser to gather arguments. The ID that the camera argument
+ * parser returns is used as the serial port (like /dev/ttyS0).
+ * @param cap camera argument parser
+ */
+DPPTUControl::DPPTUControl(const CameraArgumentParser *cap)
+{
+  tty_port = strdup(cap->cam_id().c_str());
   opened = false;
   max_wait_ms = 10;
   effect = EFFECT_NONE;
@@ -110,6 +127,7 @@ DPPTUControl::DPPTUControl(const char *port)
 /** Destructor. */
 DPPTUControl::~DPPTUControl()
 {
+  free(tty_port);
 }
 
 
@@ -118,7 +136,7 @@ DPPTUControl::open()
 {
   if (opened) return;
 
-  dev = ::open(port, O_RDWR | O_NOCTTY | O_NONBLOCK);
+  dev = ::open(tty_port, O_RDWR | O_NOCTTY | O_NONBLOCK);
   if ( ! dev || ! isatty(dev)) {
     throw Exception("Cannot open device or device is not a TTY");
   }

@@ -26,6 +26,9 @@
  */
 
 #include <cams/sony_evid100p_control.h>
+#include <cams/visca.h>
+#include <fvutils/system/camargp.h>
+#include <termios.h>
 
 #include <utils/math/angle.h>
 
@@ -94,11 +97,30 @@ const unsigned int SonyEviD100PControl::EFFECT_STRETCH  = 8;
 
 
 /** Constructor.
- * @param port serial port (e.g. /dev/ttyS0)
+ * @param tty_port serial port (e.g. /dev/ttyS0)
  */
-SonyEviD100PControl::SonyEviD100PControl(string port)
+SonyEviD100PControl::SonyEviD100PControl(const char *tty_port)
 {
-  this->port = port;
+  this->tty_port = strdup(tty_port);
+  visca = new Visca( /* non-blocking */ false );
+  opened = false;
+  pan_target = 0;
+  tilt_target = 0;
+  _effect = EFFECT_NONE;
+
+  open();
+}
+
+
+/** Constructor.
+ * Uses camera argument parser to gather arguments. The ID that the camera argument
+ * parser returns is used as the serial port (like /dev/ttyS0).
+ * @param cap camera argument parser
+ */
+SonyEviD100PControl::SonyEviD100PControl(const CameraArgumentParser *cap)
+{
+  tty_port = strdup(cap->cam_id().c_str());
+
   visca = new Visca( /* non-blocking */ false );
   opened = false;
   pan_target = 0;
@@ -114,6 +136,7 @@ SonyEviD100PControl::~SonyEviD100PControl()
 {
   close();
   delete visca;
+  free(tty_port);
 }
 
 
@@ -126,7 +149,7 @@ SonyEviD100PControl::open()
   if (opened) return;
 
   try {
-    visca->open(port.c_str());
+    visca->open(tty_port);
     visca->set_address(1);
     visca->clear();
   } catch (ViscaException &e) {

@@ -47,7 +47,6 @@ class Bumblebee2Camera : public FirewireCamera
   virtual void capture();
 
   virtual unsigned char* buffer();
-  virtual unsigned int   buffer_size();
 
   virtual colorspace_t   colorspace();
 

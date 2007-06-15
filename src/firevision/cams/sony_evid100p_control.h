@@ -28,13 +28,10 @@
 #ifndef __FIREVISION_CONTROL_SONYEVID100P_H_
 #define __FIREVISION_CONTROL_SONYEVID100P_H_
 
-#include <iostream>
-#include <string>
-
-#include <termios.h>
-
 #include <cams/cameracontrol.h>
-#include <cams/visca.h>
+
+class CameraArgumentParser;
+class Visca;
 
 class SonyEviD100PControl : public CameraControl
 {
@@ -50,7 +47,8 @@ class SonyEviD100PControl : public CameraControl
   static const unsigned int EFFECT_SLIM;
   static const unsigned int EFFECT_STRETCH;
 
-  SonyEviD100PControl(std::string port);
+  SonyEviD100PControl(const CameraArgumentParser *cap);
+  SonyEviD100PControl(const char *tty_port);
   virtual ~SonyEviD100PControl();
 
   void open();
@@ -107,10 +105,10 @@ class SonyEviD100PControl : public CameraControl
   void         reset_effect();
 
 
-  static const int MAX_PAN;
-  static const int MIN_PAN;
-  static const int MAX_TILT;
-  static const int MIN_TILT;
+  static const int   MAX_PAN;
+  static const int   MIN_PAN;
+  static const int   MAX_TILT;
+  static const int   MIN_TILT;
 
   static const float MAX_PAN_DEG;
   static const float MIN_PAN_DEG;
@@ -129,13 +127,12 @@ class SonyEviD100PControl : public CameraControl
   static const float TILT_STEPS_PER_RAD;
 
  private:
-
   Visca *visca;
-  std::string port;
-  bool opened;
+  char  *tty_port;
+  bool   opened;
 
-  int pan_target;
-  int tilt_target;
+  int    pan_target;
+  int    tilt_target;
 
   unsigned int _effect;
 

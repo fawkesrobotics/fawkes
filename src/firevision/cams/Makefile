@@ -31,7 +31,8 @@ LIBS_libfvcams = $(VISION_CAM_LIBS) utils fvutils
 OBJS_libfvcams = camera.o			\
 		 cameracontrol.o		\
 		 cam_exceptions.o		\
-		 factory.o
+		 factory.o			\
+		 controlfactory.o
 
 ifeq ($(HAVE_VISCA_CTRL),1)
 OBJS_libfvcams += visca.o

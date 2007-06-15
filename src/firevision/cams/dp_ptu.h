@@ -33,12 +33,15 @@
 #define DPPTU_MAX_OBUFFER_SIZE  20
 #define DPPTU_MAX_IBUFFER_SIZE 255
 
+class CameraArgumentParser;
+
 class DPPTUControl : public CameraControl
 {
 
  public:
 
   DPPTUControl(const char *port);
+  DPPTUControl(const CameraArgumentParser *cap);
   virtual ~DPPTUControl();
 
   // pan/tilt
@@ -78,9 +81,9 @@ class DPPTUControl : public CameraControl
 
 
  private:
-  const char *port;
-  int         dev; // fd
-  bool opened;
+  char *tty_port;
+  int   dev; // fd
+  bool  opened;
 
   // commands
   static const char * DPPTU_PAN_ABSPOS;
