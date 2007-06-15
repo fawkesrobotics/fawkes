@@ -89,10 +89,10 @@ ifneq ($(realpath $(IPP_DIR)),)
   # Check versions, use first one found
   IPP_VERSION = $(firstword $(shell ls $(IPP_DIR)))
   # We at least have a IPP, check if it matches our system
-  ARCH = $(shell uname -m)
   INTEL_ARCH = ia32
   ifeq ($(ARCH),x86_64)
     INTEL_ARCH = em64t
+    IPP_ARCH   = em64t
   endif
   ifneq ($(realpath $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/include/ipp.h),)
     HAVE_IPP = 1

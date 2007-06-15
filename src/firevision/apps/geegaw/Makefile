@@ -30,7 +30,7 @@ LIBDIRS  = $(VISION_LIBDIRS) $(QTDIR)/lib
 LIBS     = $(VISION_LIBS)
 
 OBJS_geegaw = bbclient.o config.o main.o pipeline.o
-LIBS_geegaw = core utils rutils fvutils fvcams fvmodels fvclassifiers bb interfaces qt-mt fvfilters
+LIBS_geegaw = core utils rutils fvutils fvcams fvmodels fvclassifiers bb interfaces qt-mt fvfilters pthread
 
 OBJS_bbgeegaw = bbgeegaw.o
 LIBS_bbgeegaw = core utils rutils bb interfaces

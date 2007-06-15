@@ -36,7 +36,7 @@ ifneq ($(SRCDIR),.)
     IPPI_FILTERS  = $(wildcard $(SRCDIR)/morphology/*.cpp)
     IPPI_FILTERS += $(shell grep -rl ippi.h $(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))
   else
-    LIBS_libfvfilters += ippi
+    LIBS_libfvfilters += ippi$(IPP_ARCH)
   endif
 
 .PHONY: print_unsupported
@@ -52,7 +52,7 @@ endif
 
 # We are lazy...
 OBJS_libfvfilters := $(patsubst %.cpp,%.o,$(filter-out $(IPPI_FILTERS:$(SRCDIR)/%=%),$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
-LIBS_libfvfilters = utils fvutils fvmodels
+LIBS_libfvfilters += utils fvutils fvmodels
 
 OBJS_all = $(OBJS_libfvfilters)
 LIBS_all = $(LIBDIR)/libfvfilters.so

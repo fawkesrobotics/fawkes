@@ -41,8 +41,8 @@
 
 #include <fvutils/draw/drawer.h>
 
-#include <cams/leutron.h>
-#include <cams/sony_evid100p_control.h>
+#include <cams/factory.h>
+#include <cams/controlfactory.h>
 
 #include <models/scanlines/beams.h>
 #include <models/scanlines/grid.h>
@@ -128,8 +128,8 @@ void
 GeegawPipeline::init()
 {
 
-  cam = new LeutronCamera();
-  camctrl = new SonyEviD100PControl( "/dev/ttyS0" );
+  cam     = CameraFactory::instance( config->CameraType.c_str() );
+  camctrl = CameraControlFactory::instance( config->CameraControlType.c_str() );
 
   cout << msg_prefix << "Opening camera, this may take a while..." << endl;
 
@@ -162,12 +162,12 @@ GeegawPipeline::init()
   buffer_size = colorspace_buffer_size(YUV422_PLANAR, width, height);
 
   cout << msg_prefix << "Creating shared memory segment for final image" << endl;
-  shm_buffer     = new SharedMemoryImageBuffer(YUV422_PLANAR, width, height, FIREVISION_SHM_IMAGE_OMNI_PROCESSED);
+  shm_buffer     = new SharedMemoryImageBuffer("geegaw-final", YUV422_PLANAR, width, height);
   cout << msg_prefix << "Creating shared memory segment for source image" << endl;
-  shm_buffer_src = new SharedMemoryImageBuffer(YUV422_PLANAR, width, height, FIREVISION_SHM_IMAGE_OMNI_RAW);
+  shm_buffer_src = new SharedMemoryImageBuffer("geegaw-source", YUV422_PLANAR, width, height);
 
-  buffer     = shm_buffer->getBuffer();
-  buffer_src = shm_buffer_src->getBuffer();
+  buffer     = shm_buffer->buffer();
+  buffer_src = shm_buffer_src->buffer();
   buffer1    = (unsigned char *)malloc( buffer_size );
   buffer2    = (unsigned char *)malloc( buffer_size );
   buffer3    = (unsigned char *)malloc( buffer_size );

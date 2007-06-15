@@ -36,9 +36,6 @@
 
 #include <utils/system/signal.h>
 
-#include <cams/camera.h>
-#include <cams/cameracontrol.h>
-
 #include <sys/time.h>
 #include <list>
 #include <string>

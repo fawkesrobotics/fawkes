@@ -33,6 +33,9 @@
 
 #include <fvutils/camera/tracker.h>
 
+#include <cams/camera.h>
+#include <cams/cameracontrol.h>
+
 #include <utils/system/argparser.h>
 #include <utils/system/console_colors.h>
 

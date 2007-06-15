@@ -55,8 +55,8 @@ main( int argc, char **argv )
   ArgumentParser *argp = new ArgumentParser(argc, argv, "f:Lb::x:Hoi:r:l:pvP");
 
   // wipe away all shared memory segments that we are responsible for.
-  SharedMemoryImageBuffer::wipe( FIREVISION_SHM_IMAGE_OMNI_RAW );  
-  SharedMemoryImageBuffer::wipe( FIREVISION_SHM_IMAGE_OMNI_PROCESSED );
+  SharedMemoryImageBuffer::wipe( "geegaw-source" );  
+  SharedMemoryImageBuffer::wipe( "geegaw-final"  );
 
 
   if (argp->hasArgument("H")) {
