@@ -31,9 +31,8 @@
 #include <utils/ipc/shm.h>
 #include <utils/ipc/shm_lister.h>
 
+#include <fvutils/ipc/defs.h>
 #include <fvutils/color/colorspaces.h>
-
-#define IMAGE_ID_MAX_LENGTH 32
 
 // Not that there is a relation to ITPimage_packet_header_t
 /** Shared memory header struct for FireVision images. */
