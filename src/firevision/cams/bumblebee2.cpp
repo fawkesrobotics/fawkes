@@ -90,11 +90,16 @@ const unsigned int Bumblebee2Camera::RGB_IMAGE = 2;
 
 
 /// PGR specific registers
-/** Bayer Tile mapping information */
+/** PTGrey proprietary register: Bayer tile mapping information */
 #define PGR_BAYER_TILE_MAPPING_REGISTER (0x1040)
+
+/** PTGrey proprietary: config data length */
 #define PGR_REG_CONFIG_LENGTH         	(0x1FFC) 
+
+/** PTGrey proprietary register: config register */
 #define PGR_REG_CONFIG_DATA           	(0x2000) 
-/* unit directory offset */
+
+/** PTGrey proprietary register: unit directory offset */
 #define PGR_REG_UNIT_DIRECTORY_OFFSET   (0x0424)
 
 /** Constructor.

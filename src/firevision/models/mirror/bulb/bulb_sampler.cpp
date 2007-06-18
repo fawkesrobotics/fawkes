@@ -45,6 +45,7 @@ using namespace std;
  * @param image_height height of camera images
  * @param color_lut_width width of color LUT
  * @param color_lut_height height of color LUT
+ * @param lut_file COlor lut file that is loaded
  */
 BulbSampler::BulbSampler( unsigned int image_width,
 			  unsigned int image_height,
@@ -77,6 +78,7 @@ BulbSampler::BulbSampler( unsigned int image_width,
  * @param image_height height of camera images
  * @param color_lut_width width of color LUT
  * @param color_lut_height height of color LUT
+ * @param lut_file colormap file name
  */
 BulbSampler::BulbSampler( Bulb *bulb,
 			  unsigned int image_width,

@@ -136,3 +136,5 @@ FirevisionFountainBBClient::isAlive(string program)
   // has to be done twice to yield correct results
   return alive[program];
 }
+
+/// @endcond

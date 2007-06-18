@@ -92,16 +92,16 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 
   /* Logging stuff */
   char *tmp;
-  Logger::LogLevel log_level = Logger::DEBUG;
+  Logger::LogLevel log_level = Logger::LL_DEBUG;
   if ( argp->hasArgument("q") ) {
-    log_level = Logger::INFO;
+    log_level = Logger::LL_INFO;
     if ( (tmp = argp->getArgument("q")) != NULL ) {
       for (unsigned int i = 0; i < strlen(tmp); ++i) {
 	if ( tmp[i] == 'q' ) {
 	  switch (log_level) {
-	  case Logger::INFO:  log_level = Logger::WARN; break;
-	  case Logger::WARN:  log_level = Logger::ERROR; break;
-	  case Logger::ERROR: log_level = Logger::NONE; break;
+	  case Logger::LL_INFO:  log_level = Logger::LL_WARN; break;
+	  case Logger::LL_WARN:  log_level = Logger::LL_ERROR; break;
+	  case Logger::LL_ERROR: log_level = Logger::LL_NONE; break;
 	  default: break;
 	  }
 	}
@@ -109,15 +109,15 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     }
   } else if ( (tmp = argp->getArgument("l")) != NULL ) {
     if ( strcmp(tmp, "debug") == 0 ) {
-      log_level = Logger::DEBUG;
+      log_level = Logger::LL_DEBUG;
     } else if ( strcmp(tmp, "info") == 0 ) {
-      log_level = Logger::INFO;
+      log_level = Logger::LL_INFO;
     } else if ( strcmp(tmp, "warn") == 0 ) {
-      log_level = Logger::WARN;
+      log_level = Logger::LL_WARN;
     } else if ( strcmp(tmp, "error") == 0 ) {
-      log_level = Logger::ERROR;
+      log_level = Logger::LL_ERROR;
     } else if ( strcmp(tmp, "none") == 0 ) {
-      log_level = Logger::NONE;
+      log_level = Logger::LL_NONE;
     } else {
       printf("Unknown log level '%s', using default\n", tmp);
     }

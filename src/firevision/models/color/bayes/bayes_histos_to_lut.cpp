@@ -48,11 +48,11 @@ using namespace std;
  */
 
 /** Constructor.
- * @param histo histograms
+ * @param histos histograms
  * @param w width of lookup table
  * @param h height of lookup table
  */
-BayesHistosToLut::BayesHistosToLut(vector<Histogram2D*> histo,
+BayesHistosToLut::BayesHistosToLut(vector<Histogram2D*> histos,
 				   unsigned int w, 
 				   unsigned int h)
 {

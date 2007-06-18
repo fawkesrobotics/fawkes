@@ -39,9 +39,13 @@ class BulbGeneratorProgressHandler {
  public:
   /** Virtual empty destructor. */
   virtual ~BulbGeneratorProgressHandler() {}
-  /** Set total steps */
+  /** Set total steps.
+   * @param total_steps total number of steps
+   */
   virtual void setTotalSteps(unsigned int total_steps)                  = 0;
-  /** Set progress */
+  /** Set progress.
+   * @param progress current progress
+   */
   virtual void setProgress(unsigned int progress)                       = 0;
   /** Generation finished. */
   virtual void finished()                                               = 0;
