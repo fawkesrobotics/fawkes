@@ -28,7 +28,7 @@ include $(BASEDIR)/src/firevision/fvconf.mk
 
 ifeq ($(BUILD_TYPE),rcsoftx)
 # Stuff to be built for RCSoftX only
-SUBDIRS += cannikin geegaw
+SUBDIRS += cannikin geegaw fountain
 else
 SUBDIRS += base
 endif
