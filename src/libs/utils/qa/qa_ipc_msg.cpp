@@ -34,7 +34,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#define MTYPE 1
+#define QA_MTYPE 1
 
 typedef struct {
   long mtype;
@@ -56,11 +56,11 @@ main( int argc, char **argv )
     memset(&smsg, 0, sizeof(smsg));
     memset(&rmsg, 0, sizeof(rmsg));
 
-    smsg.mtype = MTYPE;
+    smsg.mtype = QA_MTYPE;
     sprintf(smsg.msg, "%u", i);
 
     m1->send((IPCMessageQueue::MessageStruct *)&smsg, sizeof(smsg));
-    m2->recv(MTYPE, (IPCMessageQueue::MessageStruct *)&rmsg, sizeof(rmsg));
+    m2->recv(QA_MTYPE, (IPCMessageQueue::MessageStruct *)&rmsg, sizeof(rmsg));
 
     printf("Sent: %s     Received: %s\n", smsg.msg, rmsg.msg);
   }

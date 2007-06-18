@@ -30,6 +30,8 @@
 
 class IPCMessageQueueData;
 
+#define MTYPE(x) (IPCMessageQueue::mtype(x))
+
 class IPCMessageQueue {
  public:
 
@@ -60,7 +62,15 @@ class IPCMessageQueue {
   bool recvNext(MessageStruct *msg, unsigned int max_data_size, int *data_size);
   bool send(MessageStruct *msg, unsigned int data_size);
 
-  static long mtype(char *buffer);
+  /** Get the message type
+   * @param buffer the buffer of the message as returned by getMessage()
+   * @return the message type
+   */
+  static inline long
+  mtype(char *buffer)
+  {
+    return (((MessageStruct *)buffer)->mtype);
+  }
 
  protected:
   bool destroy_on_delete;

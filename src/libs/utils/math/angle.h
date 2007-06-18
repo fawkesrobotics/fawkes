@@ -30,6 +30,8 @@
 
 #include <cmath>
 
+#include <stdio.h>
+
 inline float
 deg2rad(float deg)
 {
@@ -54,15 +56,22 @@ distance(float x1, float y1, float x2, float y2)
 inline float 
 normalize_mirror_rad(float angle_rad)
 {
-
-  while ( angle_rad < -M_PI ) {
-    angle_rad += (M_PI * 2);
+  if ( (angle_rad < -M_PI) || (angle_rad > M_PI) ) {
+    return ( angle_rad - 2 * M_PI * round(angle_rad / (2 * M_PI)) );
+  } else {
+    return angle_rad;
   }
-  while ( angle_rad > M_PI )  {
-    angle_rad -= (M_PI * 2);
-  }
+}
 
-  return angle_rad;
+inline float
+normalize_rad(float angle_rad)
+{
+  if ( (angle_rad < 0) || (angle_rad > 2 * M_PI) ) {
+    return angle_rad - 2 * M_PI * round(angle_rad / (M_PI * 2));
+  } else {
+    return angle_rad;
+  }
 }
 
 #endif
+

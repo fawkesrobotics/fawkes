@@ -249,13 +249,3 @@ IPCMessageQueue::send(MessageStruct *msg, unsigned int data_size)
   }
 }
 
-
-/** Get the message type
- * @param buffer the buffer of the message as returned by getMessage()
- * @return the message type
- */
-long
-IPCMessageQueue::mtype(char *buffer)
-{
-  return (((struct msgbuf *)buffer)->mtype);
-}
