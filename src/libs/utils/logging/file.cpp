@@ -84,7 +84,7 @@ FileLogger::~FileLogger()
 void
 FileLogger::vlog_debug(const char* component, const char* format, va_list va)
 {
-  if (log_level <= DEBUG ) {
+  if (log_level <= LL_DEBUG ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -106,7 +106,7 @@ FileLogger::vlog_debug(const char* component, const char* format, va_list va)
 void
 FileLogger::vlog_info(const char *component, const char *format, va_list va)
 {
-  if (log_level <= INFO ) {
+  if (log_level <= LL_INFO ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -128,7 +128,7 @@ FileLogger::vlog_info(const char *component, const char *format, va_list va)
 void
 FileLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
-  if (log_level <= WARN ) {
+  if (log_level <= LL_WARN ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -150,7 +150,7 @@ FileLogger::vlog_warn(const char *component, const char *format, va_list va)
 void
 FileLogger::vlog_error(const char *component, const char *format, va_list va)
 {
-  if (log_level <= ERROR ) {
+  if (log_level <= LL_ERROR ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -230,7 +230,7 @@ FileLogger::log_error(const char *component, const char *format, ...)
 void
 FileLogger::log_debug(const char *component, Exception &e)
 {
-  if ( log_level <= DEBUG ) {
+  if ( log_level <= LL_DEBUG ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -252,7 +252,7 @@ FileLogger::log_debug(const char *component, Exception &e)
 void
 FileLogger::log_info(const char *component, Exception &e)
 {
-  if ( log_level <= DEBUG ) {
+  if ( log_level <= LL_INFO ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -274,7 +274,7 @@ FileLogger::log_info(const char *component, Exception &e)
 void
 FileLogger::log_warn(const char *component, Exception &e)
 {
-  if ( log_level <= DEBUG ) {
+  if ( log_level <= LL_WARN ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();
@@ -296,7 +296,7 @@ FileLogger::log_warn(const char *component, Exception &e)
 void
 FileLogger::log_error(const char *component, Exception &e)
 {
-  if ( log_level <= DEBUG ) {
+  if ( log_level <= LL_ERROR ) {
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
     mutex->lock();

@@ -189,10 +189,10 @@ Logger::vlog(LogLevel level,
 {
   if ( log_level <= level ) {
     switch (level) {
-    case DEBUG:  vlog_debug(component, format, va);  break;
-    case INFO:   vlog_info(component, format, va);   break;
-    case WARN:   vlog_warn(component, format, va);   break;
-    case ERROR:  vlog_error(component, format, va);  break;
+    case LL_DEBUG:  vlog_debug(component, format, va);  break;
+    case LL_INFO:   vlog_info(component, format, va);   break;
+    case LL_WARN:   vlog_warn(component, format, va);   break;
+    case LL_ERROR:  vlog_error(component, format, va);  break;
     default: break;
     }
   }
@@ -227,10 +227,10 @@ Logger::log(LogLevel level, const char *component, Exception &e)
 {
   if ( log_level <= level ) {
     switch (level) {
-    case DEBUG:  log_debug(component, e);  break;
-    case INFO:   log_info(component, e);   break;
-    case WARN:   log_warn(component, e);   break;
-    case ERROR:  log_error(component, e);  break;
+    case LL_DEBUG:  log_debug(component, e);  break;
+    case LL_INFO:   log_info(component, e);   break;
+    case LL_WARN:   log_warn(component, e);   break;
+    case LL_ERROR:  log_error(component, e);  break;
     default: break;
     }
   }

@@ -43,18 +43,18 @@ class Logger
    * log level shall be omitted.
    */
   typedef enum {
-    DEBUG  = 0,	/**< debug output, relevant only when tracking down problems */
-    INFO   = 1,	/**< informational output about normal procedures */
-    WARN   = 2,	/**< warning, should be investigated but software still functions,
-		 * an example is that something was requested that is not
-		 * available and thus it is more likely a user error */
-    ERROR  = 4,	/**< error, may be recoverable (software still running) or not
-		 * (software has to terminate). This shall be used if the error
-		 * is a rare situation that should be investigated. */
-    NONE   = 8	/**< use this to disable log output */
+    LL_DEBUG  = 0,	/**< debug output, relevant only when tracking down problems */
+    LL_INFO   = 1,	/**< informational output about normal procedures */
+    LL_WARN   = 2,	/**< warning, should be investigated but software still functions,
+			 * an example is that something was requested that is not
+			 * available and thus it is more likely a user error */
+    LL_ERROR  = 4,	/**< error, may be recoverable (software still running) or not
+			 * (software has to terminate). This shall be used if the error
+			 * is a rare situation that should be investigated. */
+    LL_NONE   = 8	/**< use this to disable log output */
   } LogLevel;
 
-  Logger(LogLevel log_level = DEBUG);
+  Logger(LogLevel log_level = LL_DEBUG);
   virtual ~Logger();
 
   virtual void set_loglevel(LogLevel level);

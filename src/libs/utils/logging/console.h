@@ -35,7 +35,7 @@ class Mutex;
 class ConsoleLogger : public Logger
 {
  public:
-  ConsoleLogger(LogLevel log_level = DEBUG);
+  ConsoleLogger(LogLevel log_level = LL_DEBUG);
   virtual ~ConsoleLogger();
 
   virtual void log_debug(const char *component, const char *format, ...);
