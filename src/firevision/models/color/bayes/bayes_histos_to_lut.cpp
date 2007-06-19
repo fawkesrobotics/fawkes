@@ -58,7 +58,7 @@ BayesHistosToLut::BayesHistosToLut(vector<Histogram2D*> histos,
 {
   width = w;
   height = h;
-  histograms = histo;
+  histograms = histos;
   object_probabilities.resize(histograms.size());
 
   // no as shmem segment
