@@ -136,6 +136,9 @@ FuseClientTCP::connect()
 
   server = gethostbyname( hostname );
 
+  if ( ! server ) {
+    return false;
+  }
   bzero((char *) &serv_addr, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
   bcopy((char *)server->h_addr, 
