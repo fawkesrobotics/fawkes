@@ -110,6 +110,18 @@ endif
 	    -e '/^$$/ d' -e 's/$$/ :/' < $(df).td >> $(df).d; \
 	rm -f $(df).td
 
+%.o: %.c
+	$(SILENT) mkdir -p $(DEPDIR)
+	$(SILENT) mkdir -p $(@D)
+	$(SILENT) echo "$(INDENT_PRINT)--> Compiling $(subst $(SRCDIR)/,,$<) (C)"
+	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
+	$(SILENT) $(CC) -MD -MF $(df).td $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
+	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
+	$(SILENT)sed -e 's/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(df).td > $(df).d; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e 's/^ *//' \
+	    -e '/^$$/ d' -e 's/$$/ :/' < $(df).td >> $(df).d; \
+	rm -f $(df).td
+
 moc_%.cpp: %.h
 	$(SILENT) echo "$(INDENT_PRINT)--- Running Qt moc on $(subst $(SRCDIR)/,,$<), creating $(subst ..,__,$@)"
 	$(SILENT) $(MOC) $(MOC_FLAGS) -p "../$(subst ..,__,$(@D))" $< -o $(subst ..,__,$@)
