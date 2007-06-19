@@ -27,8 +27,10 @@
 
 #include <netcomm/utils/resolver_thread.h>
 #include <netcomm/utils/resolver.h>
+#ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
 #include <netcomm/dns-sd/avahi_resolver.h>
+#endif
 #include <core/exceptions/system.h>
 
 #include <sys/types.h>
@@ -53,6 +55,7 @@
 
 
 /** Constructor.
+ * Available only if Avahi is available at compile time.
  * @param resolver network name resolver to call for results
  * @param avahi_thread Avahi thread, may be NULL in which case mDNS via
  * Avahi is not used.
@@ -63,14 +66,16 @@ NetworkNameResolverThread::NetworkNameResolverThread(NetworkNameResolver *resolv
 {
   this->resolver = resolver;
 
+#ifdef HAVE_AVAHI
   if ( avahi_thread != NULL ) {
     avahi_resolver = avahi_thread->resolver();
   } else {
     avahi_resolver = NULL;
   }
+#endif
+
   namesq.clear();
 }
-
 
 /** Destructor. */
 NetworkNameResolverThread::~NetworkNameResolverThread()
@@ -116,6 +121,7 @@ NetworkNameResolverThread::resolve_name_immediately(const char *name,
     found = true;
   }
 
+#ifdef HAVE_AVAHI
   // resolve names in .local domain with Avahi if available
   char *n = (char *)name + strlen(name) - 6; // 6 == strlen(".local")
   char *f = strstr(name, ".local");
@@ -134,6 +140,7 @@ NetworkNameResolverThread::resolve_name_immediately(const char *name,
     }
   */
   }
+#endif
 
   return found;
 }
@@ -178,9 +185,11 @@ NetworkNameResolverThread::resolve_address_immediately(struct sockaddr *addr, so
     found = true;
   }
 
+#ifdef HAVE_AVAHI
   if ( avahi_resolver ) {
     avahi_resolver->resolve_address(addr, addr_len, this);
   }
+#endif
 
   return found;
 }
@@ -228,6 +237,16 @@ NetworkNameResolverThread::resolve_address(struct sockaddr *addr, socklen_t addr
 }
 
 
+/** Name has been successfully resolved.
+ * The ordered name lookup was successful for the given name resulting in
+ * the given addr of addrlen bytes length.
+ * Note that all of the parameters are given to the handler's ownership, that means
+ * especially that the handler is responsible for freeing the associated memory
+ * after it is done with the result using free() on name and addr.
+ * @param name name that was resolved
+ * @param addr resulting addr record, currently always of type struct sockaddr_in (only IPv4)
+ * @param addrlen length of addr in bytes
+ */
 void
 NetworkNameResolverThread::resolved_name(char *name,
 					 struct sockaddr *addr, socklen_t addrlen)
@@ -236,14 +255,31 @@ NetworkNameResolverThread::resolved_name(char *name,
 }
 
 
+/** Address has been successfully resolved.
+ * The ordered name lookup was successful for the given address resulting in
+ * the given name.
+ * Note that all of the parameters are given to the handler's ownership, that means
+ * especially that the handler is responsible for freeing the associated memory
+ * after it is done with the result using free() on name and addr.
+ * @param name the resulting hostname
+ * @param addr addr record, currently always of type struct sockaddr_in (only IPv4)
+ * @param addrlen length of addr in bytes
+ */
 void
 NetworkNameResolverThread::resolved_address(struct sockaddr_in *addr, socklen_t addrlen,
 					    char *name)
 {
-  printf("DEB Address resolved to %s by Avahi\n", name);
   resolver->addr_resolved((struct sockaddr *)addr, addrlen, name, true);
 }
 
+
+/** Name resolution failed.
+ * The given hostname could not be resolved.
+ * Note that the parameter name is given to the handler's ownership. This means
+ * especially that the handler is responsible for freeing the memory with free()
+ * after it is done with the variable.
+ * @param name name whose lookup failed
+ */
 void
 NetworkNameResolverThread::name_resolution_failed(char *name)
 {
@@ -251,10 +287,17 @@ NetworkNameResolverThread::name_resolution_failed(char *name)
 }
 
 
+/** Address resolution failed.
+ * The given address could not be resolved.
+ * Note that the parameter addr is given to the handler's ownership. This means
+ * especially that the handler is responsible for freeing the memory with free()
+ * after it is done with the variable.
+ * @param addr address whose lookup failed
+ * @param addrlen length of address
+ */
 void
 NetworkNameResolverThread::address_resolution_failed(struct sockaddr_in *addr, socklen_t addrlen)
 {
-  printf("DEB Avahi address resolution failed\n");
   resolver->address_resolution_failed((struct sockaddr *)addr, addrlen);
 }
 

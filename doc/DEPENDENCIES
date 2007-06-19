@@ -16,7 +16,7 @@ Fawkes		GNU Compiler Collection	>= 4.1			mandatory
 
 Fawkes	        glibc			>= 2.3			mandatory
 
-Fawkes		Avahi			>= 0.6			mandatory
+Fawkes		Avahi			>= 0.6			optional
 
 Fawkes		SQLite			>= 3.3			mandatory
 

@@ -31,10 +31,10 @@
 #include <core/threading/thread.h>
 #include <core/utils/lock_hashset.h>
 #include <core/utils/lock_hashmap.h>
-
 #include <utils/misc/string_compare.h>
+#ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_resolver.h>
-
+#endif
 #include <sys/socket.h>
 #include <cstddef>
 #include <utility>
@@ -42,11 +42,15 @@
 class AvahiThread;
 class NetworkNameResolver;
 
+#ifdef HAVE_AVAHI
 class NetworkNameResolverThread : public Thread, public AvahiResolverHandler
+#else
+class NetworkNameResolverThread : public Thread
+#endif
 {
  public:
   NetworkNameResolverThread(NetworkNameResolver *resolver,
-			    AvahiThread *avahi_thread = NULL);
+                            AvahiThread *avahi_thread = NULL);
   ~NetworkNameResolverThread();
 
   void resolve_name(char *name);
@@ -66,7 +70,9 @@ class NetworkNameResolverThread : public Thread, public AvahiResolverHandler
 
  private:
   NetworkNameResolver  *resolver;
+#ifdef HAVE_AVAHI
   AvahiResolver        *avahi_resolver;
+#endif
 
   LockHashSet<char *, __gnu_cxx::hash<char *>, StringEquality>             namesq;
   LockHashSet<char *, __gnu_cxx::hash<char *>, StringEquality>::iterator   nqit;

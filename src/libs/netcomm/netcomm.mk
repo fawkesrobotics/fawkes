@@ -19,26 +19,22 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
-
-include $(BASEDIR)/src/libs/netcomm/netcomm.mk
-
-ifneq ($(SRCDIR),.)
-all: $(WARN_TARGETS) $(ERROR_TARGETS)
-.PHONY: warn_avahi
-warn_avahi:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting mDNS/DNS-SD support$(TNORMAL) (Avahi not installed)"
-.PHONY: error_libcrypto
-error_libcrypto:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)netcomm cannot be built$(TNORMAL) (No OpenSSL/libcrypto installed)"
-	$(SILENT)exit 1
+include $(BASEDIR)/etc/buildsys/config.mk
+ifneq ($(PKGCONFIG),)
+  HAVE_AVAHI     := $(if $(shell $(PKGCONFIG) --print-errors --errors-to-stdout --exists 'avahi-client'),0,1)
+  HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --print-errors --errors-to-stdout --exists 'libcrypto'),0,1)
 endif
-
-LIBS_libnetcomm = core utils
-OBJS_libnetcomm = $(filter-out $(OMIT_OBJECTS),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
-
-OBJS_all = $(OBJS_libnetcomm)
-LIBS_all  = $(LIBDIR)/libnetcomm.so
-
-include $(BASEDIR)/etc/buildsys/base.mk
+ifneq ($(HAVE_AVAHI),1)
+  WARN_TARGETS += warn_avahi
+  OMIT_OBJECTS += dns-sd/%
+else
+  CFLAGS += $(shell $(PKGCONFIG) --cflags avahi-client) -DHAVE_AVAHI
+  LDFLAGS_libnetcomm += $(shell pkg-config --libs avahi-client)
+endif
+ifneq ($(HAVE_LIBCRYPTO),1)
+  ERROR_TARGETS += error_libcrypto
+else
+  CFLAGS += $(shell $(PKGCONFIG) --cflags libcrypto) -DHAVE_LIBCRYPTO
+  LDFLAGS_libnetcomm += $(shell pkg-config --libs libcrypto)
+endif
 

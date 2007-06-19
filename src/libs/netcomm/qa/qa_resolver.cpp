@@ -30,7 +30,9 @@
 #include <netcomm/utils/resolver.h>
 #include <utils/system/signal.h>
 #include <utils/system/argparser.h>
+#ifdef HAVA_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
+#endif
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -46,9 +48,10 @@ class ResolverQAMain : public SignalHandler
     this->argp = argp;
     quit = false;
 
-    at = NULL;
     r = NULL;
 
+#ifdef HAVE_AVAHI
+    at = NULL;
     if ( argp->hasArgument("a") ) {
       printf("Instantiating Avahi thread\n");
       at = new AvahiThread();
@@ -56,18 +59,22 @@ class ResolverQAMain : public SignalHandler
       at->wait_initialized();
       usleep(0);
     }
-
     r = new NetworkNameResolver(at);
+#else
+    r = new NetworkNameResolver();
+#endif
 
   }
 
   ~ResolverQAMain()
   {
+#ifdef HAVE_AVAHI
     if ( at != NULL ) {
       at->cancel();
       at->join();
       delete at;
     }
+#endif
     delete r;
   }
 
@@ -135,9 +142,11 @@ class ResolverQAMain : public SignalHandler
 
  private:
   ArgumentParser *argp;
-  AvahiThread *at;
   NetworkNameResolver *r;
   bool quit;
+#ifdef HAVE_AVAHI
+  AvahiThread *at;
+#endif
 };
 
 int

@@ -21,8 +21,11 @@
 
 BASEDIR = ../../../..
 
+include $(BASEDIR)/src/libs/netcomm/netcomm.mk
+
 CFLAGS = -g
 
+ifeq ($(HAVE_AVAHI),1)
 LIBS_qa_netcomm_avahi_publisher = netcomm utils
 OBJS_qa_netcomm_avahi_publisher = qa_avahi_publisher.o
 
@@ -31,6 +34,11 @@ OBJS_qa_netcomm_avahi_browser = qa_avahi_browser.o
 
 LIBS_qa_netcomm_avahi_resolver = netcomm utils
 OBJS_qa_netcomm_avahi_resolver = qa_avahi_resolver.o
+
+BINS_all +=	$(BINDIR)/qa_netcomm_avahi_publisher		\
+		$(BINDIR)/qa_netcomm_avahi_browser		\
+		$(BINDIR)/qa_netcomm_avahi_resolver
+endif
 
 LIBS_qa_netcomm_socket_typeof = netcomm
 OBJS_qa_netcomm_socket_typeof = qa_socket_typeof.o
@@ -72,10 +80,7 @@ OBJS_all =	$(OBJS_qa_netcomm_avahi_publisher)		\
 		$(OBJS_qa_netcomm_resolver)			\
 		$(OBJS_qa_netcomm_dynamic_buffer)
 
-BINS_all =	$(BINDIR)/qa_netcomm_avahi_publisher		\
-		$(BINDIR)/qa_netcomm_avahi_browser		\
-		$(BINDIR)/qa_netcomm_avahi_resolver		\
-		$(BINDIR)/qa_netcomm_socket_typeof		\
+BINS_all +=	$(BINDIR)/qa_netcomm_socket_typeof		\
 		$(BINDIR)/qa_netcomm_socket_stream		\
 		$(BINDIR)/qa_netcomm_socket_datagram		\
 		$(BINDIR)/qa_netcomm_socket_datagram_multicast	\

@@ -29,7 +29,9 @@
 
 #include <core/threading/thread.h>
 #include <netcomm/worldinfo/transceiver.h>
+#ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
+#endif
 #include <netcomm/utils/resolver.h>
 #include <utils/system/signal.h>
 #include <utils/system/argparser.h>
@@ -185,6 +187,7 @@ class WorldInfoQAMain : public SignalHandler
  public:
   WorldInfoQAMain(ArgumentParser *argp)
   {
+#ifdef HAVE_AVAHI
     if ( argp->hasArgument("a") ) {
       at = new AvahiThread();
       at->start();
@@ -194,6 +197,9 @@ class WorldInfoQAMain : public SignalHandler
       at = NULL;
     }
     rs = new NetworkNameResolver(at);
+#else
+    rs = new NetworkNameResolver();
+#endif
     s = NULL;
     r = NULL;
     this->argp = argp;
@@ -207,11 +213,13 @@ class WorldInfoQAMain : public SignalHandler
 
   ~WorldInfoQAMain()
   {
+#ifdef HAVE_AVAHI
     if ( at != NULL ) {
       at->cancel();
       at->join();
       delete at;
     }
+#endif
     delete s;
     delete r;
   }
@@ -242,7 +250,9 @@ class WorldInfoQAMain : public SignalHandler
   WorldInfoSenderThread *s;
   WorldInfoReceiverThread *r;
   NetworkNameResolver *rs;
+#ifdef HAVE_AVAHI
   AvahiThread *at;
+#endif
 };
 
 int
@@ -255,8 +265,12 @@ main(int argc, char **argv)
 	 << " -r   receiver (sender otherwise)" << endl
 	 << " -H   this help message" << endl
 	 << " -s   single per recv, only process a single message per recv()" << endl
-	 << " -l   enable multicast loop back" << endl
-	 << " -a   enable Avahi for mDNS lookup" << endl;
+#ifdef HAVE_AVAHI
+	 << " -a   enable Avahi for mDNS lookup" << endl
+#else
+	 << " -a   not available (Avahi not installed)" << endl
+#endif
+	 << " -l   enable multicast loop back" << endl;
     return 0;
   }
 

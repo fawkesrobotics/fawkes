@@ -27,8 +27,6 @@
 
 #include <netcomm/utils/resolver.h>
 #include <netcomm/utils/resolver_thread.h>
-#include <netcomm/dns-sd/avahi_thread.h>
-#include <netcomm/dns-sd/avahi_resolver.h>
 #include <core/exceptions/system.h>
 
 #include <sys/types.h>
@@ -81,6 +79,7 @@
 
 
 /** Constructor.
+ * This constructor us available if Avahi is available at compile time.
  * @param avahi_thread Optional avahi thread, Avahi is not used if NULL
  */
 NetworkNameResolver::NetworkNameResolver(AvahiThread *avahi_thread)
