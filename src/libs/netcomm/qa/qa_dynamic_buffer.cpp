@@ -61,7 +61,7 @@ main(int argc, char **argv)
     size_t size;
     void *buf = dr->next(&size);
     strncpy(tmp, (const char *)buf, size);
-    printf("Read string (%lu bytes): '%s'\n", size, tmp);
+    printf("Read string (%lu bytes): '%s'\n", (unsigned long int)size, tmp);
   }
 
   delete dw;

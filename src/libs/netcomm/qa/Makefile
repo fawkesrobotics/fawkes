@@ -21,7 +21,11 @@
 
 BASEDIR = ../../../..
 
-include $(BASEDIR)/src/libs/netcomm/netcomm.mk
+ifneq ($(SRCDIR),)
+include $(SRCDIR)/../netcomm.mk
+else
+include ../netcomm.mk
+endif
 
 CFLAGS = -g
 
