@@ -81,7 +81,7 @@ CameraControlFactory::instance(const CameraArgumentParser *cap)
 
   // ######
   if ( cap->cam_type() == "evid100p" ) {
-#ifdef HAVE_EVID100P_CAM
+#ifdef HAVE_EVID100P_CTRL
     c = new SonyEviD100PControl(cap);
 #else
     throw UnknownCameraControlTypeException("No EviD100P/Visca support at compile time");

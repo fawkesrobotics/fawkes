@@ -128,8 +128,20 @@ void
 GeegawPipeline::init()
 {
 
-  cam     = CameraFactory::instance( config->CameraType.c_str() );
-  camctrl = CameraControlFactory::instance( config->CameraControlType.c_str() );
+  try {
+    cam     = CameraFactory::instance( config->CameraType.c_str() );
+  } catch (UnknownCameraTypeException &e) {
+    cout << msg_prefix << "Failed to instantiate camera." << endl;
+    e.printTrace();
+    throw;
+  }
+  try {
+    camctrl = CameraControlFactory::instance( config->CameraControlType.c_str() );
+  } catch (UnknownCameraControlTypeException &e) {
+    cout << msg_prefix << "Failed to instantiate camera control." << endl;
+    e.printTrace();
+    throw;
+  }
 
   cout << msg_prefix << "Opening camera, this may take a while..." << endl;
 
@@ -162,9 +174,9 @@ GeegawPipeline::init()
   buffer_size = colorspace_buffer_size(YUV422_PLANAR, width, height);
 
   cout << msg_prefix << "Creating shared memory segment for final image" << endl;
-  shm_buffer     = new SharedMemoryImageBuffer("geegaw-final", YUV422_PLANAR, width, height);
+  shm_buffer     = new SharedMemoryImageBuffer("geegaw-processed", YUV422_PLANAR, width, height);
   cout << msg_prefix << "Creating shared memory segment for source image" << endl;
-  shm_buffer_src = new SharedMemoryImageBuffer("geegaw-source", YUV422_PLANAR, width, height);
+  shm_buffer_src = new SharedMemoryImageBuffer("geegaw-raw", YUV422_PLANAR, width, height);
 
   buffer     = shm_buffer->buffer();
   buffer_src = shm_buffer_src->buffer();

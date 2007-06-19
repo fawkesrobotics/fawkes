@@ -63,7 +63,7 @@ main( int argc, char **argv )
 
     char *config_filename;
     if ( (config_filename = argp->getArgument("x")) == NULL ) {
-      config_filename = "../cfg/rcsoftconfigfile.xml";
+      config_filename = "../cfg/config.xml";
       cout << cblue << "FireFountain" << cnormal
 	   << ": No config file given, using default ("
 	   << config_filename << ")" << endl;

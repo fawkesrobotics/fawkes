@@ -85,15 +85,15 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_firewire
 warning_firewire:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)No Firewire support$(TNORMAL) (install libdc1394-devel)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No Firewire support$(TNORMAL) (install libdc1394-devel)";
 
 .PHONY: warning_leutron
 warning_leutron:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)No Leutron support$(TNORMAL) (install Leutron SDK)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No Leutron support$(TNORMAL) (install Leutron SDK)";
 
 .PHONY: warning_libjpeg
 warning_libjpeg:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)No JPEG support in file loader$(TNORMAL) (install libjpeg[-devel])";
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No JPEG support in file loader$(TNORMAL) (install libjpeg[-devel])";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

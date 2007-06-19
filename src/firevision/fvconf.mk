@@ -22,6 +22,7 @@
 include $(BASEDIR)/etc/buildsys/config.mk
 
 CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L BUMBLEBEE2
+CTRLS=EVID100P DPPTU
 
 VISION_INCDIRS      = $(realpath $(BASEDIR)/src/firevision)
 VISION_CFLAGS       = -g
@@ -106,6 +107,7 @@ endif
 HAVE_SHAPE_MODELS = 0
 
 VISION_CFLAGS       += $(foreach CAM,$(CAMS),$(if $(subst 0,,$(HAVE_$(CAM)_CAM)),-DHAVE_$(CAM)_CAM))
+VISION_CFLAGS       += $(foreach CTRL,$(CTRLS),$(if $(subst 0,,$(HAVE_$(CTRL)_CTRL)),-DHAVE_$(CTRL)_CTRL))
 
 ifeq ($(MAKECMDGOALS),printconf)
 VISION_CAM_PRINT     = $(foreach CAM,$(CAMS),"\b"$(CAM): $(if $(subst 0,,$(HAVE_$(CAM)_CAM)),"yes","no")"\n")

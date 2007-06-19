@@ -43,7 +43,7 @@ ifneq ($(SRCDIR),.)
 print_unsupported:
 	$(SILENT)if [ "$(HAVE_IPP)" != "1" ]; then \
 		for f in $(IPPI_FILTERS:$(SRCDIR)/%.cpp=%); do \
-			echo -e "$(INDENT_PRINT)--> $(TRED)Omitting $$f filter$(TNORMAL) (No IPP installed)"; \
+			echo -e "$(INDENT_PRINT)--- $(TRED)Omitting $$f filter$(TNORMAL) (No IPP installed)"; \
 		done; \
 	fi \
 

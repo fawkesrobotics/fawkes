@@ -39,7 +39,7 @@ ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
 .PHONY: warning_triclops
 warning_triclops:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting cannikin$(TNORMAL) (Triclops SDK not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting cannikin$(TNORMAL) (Triclops SDK not available)"
 endif
 
 OBJS_cannikin = bbclient.o config.o main.o pipeline.o

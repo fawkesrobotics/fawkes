@@ -40,7 +40,7 @@ endif
 ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
 warning_triclops:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Triclops SDK support$(TNORMAL) ($(TRICLOPS_SDK_ERR))"
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Triclops SDK support$(TNORMAL) ($(TRICLOPS_SDK_ERR))"
 endif
 
 # We are lazy in the utils...

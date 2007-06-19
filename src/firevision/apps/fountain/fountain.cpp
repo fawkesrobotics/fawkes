@@ -91,6 +91,7 @@ Fountain::init()
   cout << "Initializing Fuse Server.." << flush;
 
   fuses = new FuseServerTCP( port );
+  fuses->bind();
   fuses->setImageCopyMode( FuseServer::DEEP_COPY );
 
   cout << "done" << endl;
@@ -517,6 +518,7 @@ Fountain::run()
 		 (shm_luts[*it]->getBytesPerCell() == fuses->getUploadedLutBytesPerCell(*it)) &&
 		 (shm_luts[*it]->data_size() == fuses->getUploadedLutBufferSize(*it)) ) {
 	      
+	      cout << msg_prefix << "Setting LUT " << *it << endl;
 	      shm_luts[*it]->set( fuses->getUploadedLutBuffer(*it) );
 	      fuses->setUploadLutSuccess(*it, true);
 	      
