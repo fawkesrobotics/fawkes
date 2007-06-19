@@ -68,7 +68,8 @@ ifeq (,$(findstring qa,$(SUBDIRS)))
 qa: subdirs
 	$(SILENT) if [ -d "$(subst /.objs,,$(realpath $(CURDIR)))/qa" ]; then \
 		echo -e "$(INDENT_PRINT)--> Building QA in $(subst $(realpath $(CURDIR)/$(BASEDIR))/,,$(subst /.objs,,$(realpath $(CURDIR)))/qa)"; \
-		$(MAKE) --no-print-directory --no-keep-going -C $(subst /.objs,,$(CURDIR))/qa $(MFLAGS) INDENT="$(INDENT)$(INDENT_STRING)"; \
+		$(MAKE) --no-print-directory --no-keep-going -C "$(subst /.objs,,$(CURDIR))/qa" \
+			SRCDIR="$(subst /.objs,,$(CURDIR))/qa" $(MFLAGS) INDENT="$(INDENT)$(INDENT_STRING)"; \
 	fi
 endif
 
