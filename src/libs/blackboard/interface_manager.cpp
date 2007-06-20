@@ -296,11 +296,14 @@ BlackBoardInterfaceManager::createInterface(const char *type, const char *identi
     mutex->unlock();
     throw;
   }
+  memset(ptr, 0, interface->datasize() + sizeof(interface_header_t));
+
   strncpy(ih->type, type, __INTERFACE_TYPE_SIZE);
   strncpy(ih->id, identifier, __INTERFACE_ID_SIZE);
 
-  ih->refcount        = 0;
-  ih->serial          = getNextMemSerial();
+  ih->refcount           = 0;
+  ih->serial             = getNextMemSerial();
+  ih->flag_writer_active = 0;
   rwlocks[ih->serial] = new RefCountRWLock();
 
   interface->mem_real_ptr  = ptr;
