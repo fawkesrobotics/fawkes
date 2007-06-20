@@ -30,7 +30,9 @@
 #include <mainapp/thread_manager.h>
 #include <netcomm/fawkes/network_thread.h>
 #include <netcomm/fawkes/handler.h>
+#ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
+#endif
 
 /** @class FawkesNetworkManager mainapp/network_manager.h
  * Fawkes Network Manager.
@@ -49,11 +51,13 @@ FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
   this->fawkes_port    = fawkes_port;
   this->thread_manager = thread_manager;
   fawkes_network_thread = new FawkesNetworkThread(thread_manager, fawkes_port);
-  avahi_thread          = new AvahiThread();
   thread_manager->add(fawkes_network_thread);
+#ifdef HAVE_AVAHI
+  avahi_thread          = new AvahiThread();
   thread_manager->add(avahi_thread);
   AvahiService *fawkes_service = new AvahiService("Fawkes", "_fawkes._udp", fawkes_port);
   avahi_thread->publish(fawkes_service);
+#endif
 }
 
 
@@ -61,9 +65,11 @@ FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
 FawkesNetworkManager::~FawkesNetworkManager()
 {
   thread_manager->remove(fawkes_network_thread);
-  thread_manager->remove(avahi_thread);
   delete fawkes_network_thread;
+#ifdef HAVE_AVAHI
+  thread_manager->remove(avahi_thread);
   delete avahi_thread;
+#endif
 }
 
 

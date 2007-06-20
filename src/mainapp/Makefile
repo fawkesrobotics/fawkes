@@ -20,7 +20,7 @@
 
 BASEDIR = ../..
 
-CFLAGS = -g
+include $(BASEDIR)/src/libs/netcomm/netcomm.mk
 
 LIBS_libfawkesmainappmsgs = core utils netcomm
 OBJS_libfawkesmainappmsgs = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*_message.cpp)))))

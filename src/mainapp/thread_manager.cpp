@@ -203,7 +203,7 @@ FawkesThreadManager::add(ThreadList &tl)
 
   // Try to initialise all threads
   try {
-    tl.init(initializer);
+    tl.init(initializer, finalizer);
   } catch (Exception &e) {
     tl.unlock();
     e.append("ThreadManager cannot start one or more threads of thread list '%s'",
@@ -242,12 +242,14 @@ FawkesThreadManager::add_deferred(ThreadList &tl)
   tl.lock();
 
   tl.seal();
-  tl.init_deferred(initializer);
+  tl.init_deferred(initializer, finalizer);
 }
 
 
 /** Check if deferred add is done.
  * @param tl thread list to check
+ * @param finalizer thread finalizer, this is used to finalize threads that have
+ * been fully initialized before some other thread failed.
  * @return true if the deferred add is odone, false otherwise.
  */
 bool
@@ -278,6 +280,7 @@ FawkesThreadManager::deferred_add_done(ThreadList &tl)
     throw;
   }
 }
+
 
 /** Add one thread.
  * Add the given thread to the thread manager. The threadis initialised
