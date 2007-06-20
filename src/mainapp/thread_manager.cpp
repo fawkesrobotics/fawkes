@@ -248,8 +248,6 @@ FawkesThreadManager::add_deferred(ThreadList &tl)
 
 /** Check if deferred add is done.
  * @param tl thread list to check
- * @param finalizer thread finalizer, this is used to finalize threads that have
- * been fully initialized before some other thread failed.
  * @return true if the deferred add is odone, false otherwise.
  */
 bool

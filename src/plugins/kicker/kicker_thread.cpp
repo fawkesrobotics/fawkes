@@ -38,10 +38,7 @@
  */
 
 
-/** Constructor.
- * @param hook hook to register this thread for
- * @param name thread name
- */
+/** Constructor. */
 KickerThread::KickerThread()
   : Thread("KickerThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)

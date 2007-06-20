@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  kicker_interface.cpp - Fawkes BlackBoard Interface - KickerInterface
+ *  kicker.cpp - Fawkes BlackBoard Interface - KickerInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2007  Daniel Beck
@@ -26,12 +26,12 @@
  *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.
  */
 
-#include <interfaces/kicker_interface.h>
+#include <interfaces/kicker.h>
 
 #include <string.h>
 #include <stdlib.h>
 
-/** @class KickerInterface interfaces/kicker_interface.h
+/** @class KickerInterface interfaces/kicker.h
  * KickerInterface Fawkes BlackBoard Interface.
  * In these variables it is stored how often the right, center or 
       left kick have been triggered
@@ -113,7 +113,7 @@ KickerInterface::setNumKicksLeft(int newNumKicksLeft)
 }
 
 /* =========== messages =========== */
-/** @class KickerInterface::KickMessage interfaces/kicker_interface.h
+/** @class KickerInterface::KickMessage interfaces/kicker.h
  * KickMessage Fawkes BlackBoard Interface Message.
  * 
     

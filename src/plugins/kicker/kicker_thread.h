@@ -36,7 +36,11 @@
 class KickerControl;
 class KickerInterface;
 
-class KickerThread : public Thread, public BlockedTimingAspect, public LoggingAspect, public BlackBoardAspect
+class KickerThread
+  : public Thread,
+    public BlockedTimingAspect,
+    public LoggingAspect,
+    public BlackBoardAspect
 {
  public:
   KickerThread();

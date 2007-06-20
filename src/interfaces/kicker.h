@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  kicker_interface.h - Fawkes BlackBoard Interface - KickerInterface
+ *  kicker.h - Fawkes BlackBoard Interface - KickerInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
  *  Copyright  2007  Daniel Beck
@@ -26,8 +26,8 @@
  *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __INTERFACES_KICKER_INTERFACE_H_
-#define __INTERFACES_KICKER_INTERFACE_H_
+#ifndef __INTERFACES_KICKER_H_
+#define __INTERFACES_KICKER_H_
 
 #include <interface/interface.h>
 #include <interface/message.h>
