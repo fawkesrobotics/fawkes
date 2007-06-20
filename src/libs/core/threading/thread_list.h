@@ -77,11 +77,13 @@ class ThreadListManagementThread : public Thread
 class ThreadListInitThread : public ThreadListManagementThread
 {
  public:
-  ThreadListInitThread(ThreadList *tl, ThreadInitializer *initializer);
+  ThreadListInitThread(ThreadList *tl, ThreadInitializer *initializer,
+		       ThreadFinalizer *finalizer);
 
   virtual void loop();
  private:
   ThreadInitializer *initializer;
+  ThreadFinalizer   *finalizer;
 };
 
 
@@ -108,8 +110,8 @@ class ThreadList : private LockList<Thread *>
   void seal();
   bool sealed();
 
-  void init(ThreadInitializer *initializer);
-  void init_deferred(ThreadInitializer *initializer);
+  void init(ThreadInitializer *initializer, ThreadFinalizer *finalizer);
+  void init_deferred(ThreadInitializer *initializer, ThreadFinalizer *finalizer);
   bool deferred_init_done();
   bool prepare_finalize(ThreadFinalizer *finalizer);
   void finalize(ThreadFinalizer *finalizer);

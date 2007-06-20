@@ -66,7 +66,7 @@ class Thread {
   virtual void finalize();
           void cancel_finalize();
 
-  bool start();
+  void start();
   void cancel();
   void join();
   void detach();
@@ -121,9 +121,9 @@ class Thread {
   ReadWriteLock *__finalize_sync_lock;
   Mutex         *__finalize_mutex;
 
-  char          *__name;
-
+  bool           __started;
   bool           __cancelled;
+  char          *__name;
 
   OpMode         __op_mode;
 

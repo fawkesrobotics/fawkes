@@ -104,7 +104,11 @@
  * Because the finalization is done deferred and concurrent put all lengthy
  * finalization routines in finalize() and avoid this in the destructor, since
  * a long running destructor will harm the overall performance.
- * 
+ *
+ * Please read the Fawkes documentation about guarantees (FawkesGuarantees in
+ * the wiki) for information about the given guarantees. Several of these
+ * guarantees are met if Thread is used in conjunction with ThreadList and the
+ * guarantees have been specifically designed for painless plugin development.
  *
  * @ingroup Threading
  * @ingroup FCL
@@ -122,7 +126,10 @@
 
 /** @var bool Thread::finalize_prepared
  * True if prepare_finalize() has been called and was not stopped with a
- * cancel_finalize(), false otherwise. */
+ * cancel_finalize(), false otherwise.
+ * This can also be used in finalize() to detect whether prepare_finalize() was
+ * run or not.
+ */
 
 /** @var Mutex *  Thread::loop_mutex
  * Mutex that is used to protect a call to loop().
@@ -212,9 +219,11 @@ Thread::__constructor(const char *name, OpMode op_mode)
     __sleep_condition = NULL;
     __sleep_mutex = NULL;
   }
-  __thread_id = 0;
-  __barrier = NULL;
-  __cancelled = false;
+
+  __thread_id   = 0;
+  __barrier     = NULL;
+  __started     = false;
+  __cancelled   = false;
 
   __finalize_mutex = new Mutex();
   __finalize_sync_lock = NULL;
@@ -314,7 +323,7 @@ Thread::set_finalize_sync_lock(ReadWriteLock *lock)
  *
  * You may not override this method.
  *
- * This is only called on a running thread.
+ * It is guaranteed that this method is only called for a running thread.
  *
  * @return true if the thread can be stopped and destroyed safely, false if
  * it has to stay alive
@@ -386,7 +395,9 @@ Thread::prepare_finalize_user()
  * next thing that happens is that either the thread is canceled and destroyed
  * or that the finalization is canceled and the thread has to run again.
  *
- * This is only called on a running thread.
+ * Finalize is called on a thread just before it is deleted. It is guaranteed
+ * to be called on a fully initialized thread (if no exception is thrown in
+ * init()) (this guarantee holds in the Fawkes framework).
  *
  * The default implementation does nothing besides throwing an exception if
  * prepare_finalize() has not been called.
@@ -408,7 +419,9 @@ Thread::finalize()
  * The thread is expected to run after the finalization has been canceled as
  * if the finalization was never tried.
  *
- * This is only called on a running thread.
+ * This is only called on a running thread after prepare_finalization() has
+ * been called.
+ *
  * @see prepare_finalize()
  * @see finalize()
  */
@@ -421,23 +434,24 @@ Thread::cancel_finalize()
 }
 
 
-/** Call this method to actuall start.
+/** Call this method to start the thread.
  * This method has to be called after the thread has been instantiated and
- * initialized to startup.
- * @return true, if the thread started successfully, false otherwise. error()
- * will return the error value in that case
+ * initialized to start it. To meet the Fawkes guarantees you this may only
+ * be called if the initialization of the thread has been successful.
  */
-bool
+void
 Thread::start()
 {
   int err;
+  if (__started) {
+    throw Exception("You cannot start the same thread twice!");
+  }
   if ( (err = pthread_create(&__thread_id, NULL, Thread::entry, this)) != 0) {
     // An error occured
-    return false;
+    throw Exception("Could not start thread", err);
   }
 
-  __cancelled = false;
-  return true;
+  __started = true;
 }
 
 

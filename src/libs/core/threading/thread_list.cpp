@@ -136,12 +136,16 @@ ThreadListManagementThread::throw_exception()
 /** Constructor.
  * @param tl thread list to initialize
  * @param initializer initializer to use to initialize threads
+ * @param finalizer finalizer to use to finalize threads that have been successfully
+ * initialized before one thread failed.
  */
-ThreadListInitThread::ThreadListInitThread(ThreadList *tl, ThreadInitializer *initializer)
+ThreadListInitThread::ThreadListInitThread(ThreadList *tl, ThreadInitializer *initializer,
+					   ThreadFinalizer *finalizer)
   : ThreadListManagementThread((std::string("ThreadListInitThread::") + tl->name()).c_str(),
 			       tl, new CannotInitializeThreadException("Deferred thread initialization failed"))
 {
   this->initializer = initializer;
+  this->finalizer   = finalizer;
 }
 
 
@@ -149,10 +153,12 @@ void
 ThreadListInitThread::loop()
 {
   _success = true;
+  ThreadList initialized_threads;
   for (ThreadList::iterator i = tl->begin(); i != tl->end(); ++i) {
     try {
       initializer->init(*i);
       (*i)->init();
+      initialized_threads.push_back(*i);
     } catch (CannotInitializeThreadException &ex) {
       e->append("Initializing thread in list '%s' failed", tl->name());
       e->append(ex);
@@ -169,6 +175,16 @@ ThreadListInitThread::loop()
       break;
     }
   }
+
+  if ( ! _success ) {
+    // finalize initialized threads
+    try {
+      initialized_threads.finalize(finalizer);
+    } catch (Exception &ee) {
+      e->append(ee);
+    }
+  }
+
   _finished = true;
   exit();
 }
@@ -311,33 +327,45 @@ ThreadList::wakeup(Barrier *barrier)
  * This is done because it is likely that this will be chained with other
  * actions that require locking, thus you can lock the whole operation.
  * @param initializer thread initializer to use
+ * @param finalizer finalizer to use to finalize threads that have been successfully
+ * initialized before one thread failed.
  * @exception CannotInitializeThreadException thrown if at least one of the
  * threads in this list could not be initialized.
  */
 void
-ThreadList::init(ThreadInitializer *initializer)
+ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
 {
+  CannotInitializeThreadException cite("Cannot initialize one or more threads");
+  ThreadList initialized_threads;
+  bool success = true;
   for (ThreadList::iterator i = begin(); i != end(); ++i) {
     try {
       initializer->init(*i);
       (*i)->init();
     } catch (CannotInitializeThreadException &e) {
       notify_of_failed_init();
-      e.append("Initializing thread in list '%s' failed", _name);
-      throw;
+      cite.append(e);
+      cite.append("Initializing thread in list '%s' failed", _name);
+      success = false;
+      break;
     } catch (Exception &e) {
       notify_of_failed_init();
-      CannotInitializeThreadException ce("ThreadList::init failed");
-      ce.append("Could not initialize thread '%s'", (*i)->name());
-      ce.append(e);
-      throw ce;
+      cite.append(e);
+      cite.append("Could not initialize thread '%s'", (*i)->name());
+      success = false;
+      break;
     } catch (...) {
       notify_of_failed_init();
-      CannotInitializeThreadException ce("ThreadList::init failed");
-      ce.append("Could not initialize thread '%s'", (*i)->name());
-      ce.append("Unknown exception caught");
-      throw ce;
+      cite.append("Could not initialize thread '%s'", (*i)->name());
+      cite.append("Unknown exception caught");
+      success = false;
+      break;
     }
+  }
+
+  if ( ! success ) {
+    initialized_threads.finalize(finalizer);
+    throw cite;
   }
 }
 
@@ -350,17 +378,19 @@ ThreadList::init(ThreadInitializer *initializer)
  * The initialization is executed deferred in a separate thread. Use
  * deferred_init_done() to check if initialization has finished.
  * @param initializer thread initializer to use
+ * @param finalizer finalizer to use to finalize threads that have been successfully
+ * initialized before one thread failed.
  * @exception CannotInitializeThreadException thrown if a deferred init is
  * already running.
  */
 void
-ThreadList::init_deferred(ThreadInitializer *initializer)
+ThreadList::init_deferred(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
 {
   if (_init_thread != NULL ) {
     throw CannotInitializeThreadException("Initializer thread already running");
   }
 
-  _init_thread = new ThreadListInitThread(this, initializer);
+  _init_thread = new ThreadListInitThread(this, initializer, finalizer);
   _init_thread->start();
 }
 
