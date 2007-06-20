@@ -42,6 +42,7 @@ class ExampleNetworkThread : public Thread, public LoggingAspect, public FawkesN
   virtual ~ExampleNetworkThread();
 
   virtual void init();
+  virtual void finalize();
   virtual void loop();
 
   /* from FawkesNetworkHandler interface */

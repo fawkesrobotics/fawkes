@@ -49,9 +49,6 @@ ExampleNetworkThread::ExampleNetworkThread(const char *name)
 /** Destructor. */
 ExampleNetworkThread::~ExampleNetworkThread()
 {
-  logger->log_info("ExampleNetworkThread", "Destroying thread %s", name());
-  logger->log_info("ExampleNetworkThread", "Removing this thread from list of Fawkes network hub handlers");
-  fnethub->remove_handler( this );
 }
 
 
@@ -67,6 +64,14 @@ void
 ExampleNetworkThread::init()
 {
   fnethub->add_handler( this );
+}
+
+
+void
+ExampleNetworkThread::finalize()
+{
+  logger->log_info("ExampleNetworkThread", "Removing this thread from list of Fawkes network hub handlers");
+  fnethub->remove_handler( this );
 }
 
 

@@ -50,7 +50,6 @@ ExampleFinalizeNettlerThread::ExampleFinalizeNettlerThread(const char *name)
 /** Destructor. */
 ExampleFinalizeNettlerThread::~ExampleFinalizeNettlerThread()
 {
-  logger->log_info("ExampleFinalizeNettlerThread", "Destroying thread %s", name());
 }
 
 

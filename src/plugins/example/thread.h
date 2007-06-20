@@ -41,6 +41,7 @@ class ExampleThread : public Thread, public BlockedTimingAspect, public LoggingA
 
   virtual void init();
   virtual void loop();
+  virtual void finalize();
 
  private:
   unsigned int m;

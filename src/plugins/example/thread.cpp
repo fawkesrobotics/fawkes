@@ -52,14 +52,35 @@ ExampleThread::ExampleThread(BlockedTimingAspect::WakeupHook hook, const char *n
 /** Destructor. */
 ExampleThread::~ExampleThread()
 {
-  logger->log_info("ExampleThread", "Destroying thread %s", name());
+  /** We cannot do the following:
+   * logger->log_info("ExampleThread", "Destroying thread %s", name());
+   *
+   * The reason: We do not know if this thread has been successfully initialized.
+   * It could be, that any other thread that is in the same thread list as this
+   * thread failed to initialize, before the current thread has been initialized.
+   * In this case the LoggingAspect has not been initialized and thus logger is
+   * undefined and this would cause a fatal segfault.
+   */
 }
 
 
 void
 ExampleThread::init()
 {
+
+  /* Try this code to see a failing init in the middle of the thread list.
+    if ( blockedTimingAspectHook() == WAKEUP_HOOK_WORLDSTATE ) {
+      throw Exception("Boom!");
+    }
+  */
   logger->log_info("ExampleThread", "%s::init() called", name());
+}
+
+
+void
+ExampleThread::finalize()
+{
+  logger->log_info("ExampleThread", "%s::finalize() called", name());
 }
 
 
