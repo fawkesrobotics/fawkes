@@ -63,7 +63,8 @@ ExamplePlugin::ExamplePlugin()
 					  "PostLoopThread", MODC));
   thread_list.push_back(new ExampleNetworkThread("NetworkThread"));
   thread_list.push_back(new ExampleFinalizeNettlerThread("FinalizeNettlerThread"));
-  thread_list.push_back(new ExampleBlackBoardThread());
+  thread_list.push_back(new ExampleBlackBoardThread(/* reader */ true));
+  thread_list.push_back(new ExampleBlackBoardThread(/* reader */ false));
 }
 
 EXPORT_PLUGIN(ExamplePlugin)

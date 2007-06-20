@@ -37,11 +37,14 @@
 
 
 /** Constructor.
+ * @param reader set to true, to make this bb thread to open the test interface
+ * read-only, false to open it as a writer
  */
-ExampleBlackBoardThread::ExampleBlackBoardThread()
+ExampleBlackBoardThread::ExampleBlackBoardThread(bool reader)
   : Thread("ExampleBlackBoardThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK)
 {
+  this->reader = reader;
 }
 
 
@@ -72,7 +75,11 @@ ExampleBlackBoardThread::init()
 {
   logger->log_debug(name(), "Opening test interface");
   try {
-    test_interface = interface_manager->openForWriting<TestInterface>("Test");
+    if ( reader ) {
+      test_interface = interface_manager->openForReading<TestInterface>("Test");
+    } else {
+      test_interface = interface_manager->openForWriting<TestInterface>("Test");
+    }
   } catch (Exception& e) {
     e.append("Opening test interface for writing failed");
     throw;

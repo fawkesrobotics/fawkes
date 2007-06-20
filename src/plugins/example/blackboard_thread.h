@@ -42,7 +42,7 @@ class ExampleBlackBoardThread
     public BlackBoardAspect
 {
  public:
-  ExampleBlackBoardThread();
+  ExampleBlackBoardThread(bool reader);
   virtual ~ExampleBlackBoardThread();
 
   virtual void finalize();
@@ -51,6 +51,7 @@ class ExampleBlackBoardThread
 
  private:
   TestInterface* test_interface;  
+  bool           reader;
 };
 
 #endif
