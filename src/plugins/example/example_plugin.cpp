@@ -29,6 +29,7 @@
 #include <plugins/example/thread.h>
 #include <plugins/example/net_thread.h>
 #include <plugins/example/finalize_nettler_thread.h>
+#include <plugins/example/blackboard_thread.h>
 
 /** @class ExamplePlugin plugins/example/example_plugin.h
  * Simple example plugin.
@@ -62,7 +63,7 @@ ExamplePlugin::ExamplePlugin()
 					  "PostLoopThread", MODC));
   thread_list.push_back(new ExampleNetworkThread("NetworkThread"));
   thread_list.push_back(new ExampleFinalizeNettlerThread("FinalizeNettlerThread"));
-
+  thread_list.push_back(new ExampleBlackBoardThread());
 }
 
 EXPORT_PLUGIN(ExamplePlugin)
