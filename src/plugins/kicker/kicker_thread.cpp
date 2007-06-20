@@ -26,36 +26,49 @@
  */
 
 #include <plugins/kicker/kicker_thread.h>
-#include <iostream>
+#include <plugins/kicker/kicker_control.h>
 
-/** @class KickerThread plugins/kicker/kicker_thread.h
+#include <interfaces/kicker.h>
+
+/** @class KickerThread <plugins/kicker/kicker_thread.h>
  * This thread is started by the Kicker plugin and is the connection
  * between the kicker hardware and the blackboard.
  *
  * @author Daniel Beck
  */
 
-using namespace std;
 
 /** Constructor.
  * @param hook hook to register this thread for
  * @param name thread name
  */
-KickerThread::KickerThread(BlockedTimingAspect::WakeupHook hook,
-			   const char* name)
-  : Thread(name, Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(hook)
+KickerThread::KickerThread()
+  : Thread("KickerThread", Thread::OPMODE_WAITFORWAKEUP),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
   kicker_control = new KickerControl();
 }
+
 
 /** Destructor. */
 KickerThread::~KickerThread()
 {
   delete kicker_control;
-  
-  logger->log_info("KickerThread", "Destroying thread %s", name());
 }
+
+
+void
+KickerThread::finalize()
+{
+  try {
+    interface_manager->close(kicker_interface);
+  } catch (Exception &e) {
+    logger->log_error(name(), "Could not close kicker interface");
+    logger->log_error(name(), e);
+  }
+  kicker_control->close();
+}
+
 
 /** Initialize thread.
  * Here, the device and the BB-interface are opened.
@@ -63,19 +76,20 @@ KickerThread::~KickerThread()
 void
 KickerThread::init()
 {
-  if ( !kicker_control->open() )
+  if ( ! kicker_control->open() )
     {
-      logger->log_info("KickerThread", "Opening IOWarrior failed.");
+      throw Exception("Opening IOWarrior failed");
     }
 
-  try 
+  try
     {
       kicker_interface = interface_manager->openForWriting<KickerInterface>("Kicker");
     }
   catch (Exception& e)
     {
-      cout << "Opening interface failed!" << endl;
-      e.printTrace();
+      kicker_control->close();
+      e.append("Opening Kicker interface for writing failed");
+      throw;
     }
 }
 

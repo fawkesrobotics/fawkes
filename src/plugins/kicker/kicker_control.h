@@ -37,7 +37,7 @@ class KickerControl
   ~KickerControl();
 
   bool open();
-  bool close();
+  void close();
 
   bool set_intensity(unsigned char intensity, bool force = false);
 

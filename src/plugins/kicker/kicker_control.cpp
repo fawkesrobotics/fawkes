@@ -85,7 +85,7 @@ KickerControl::open()
 /** Closes the IOWarrior.
  * @returns true if device was closed succesfully
  */
-bool
+void
 KickerControl::close()
 {
   if(opened)
@@ -95,8 +95,6 @@ KickerControl::close()
       
       IowKitCloseDevice(ioHandle);
     }
-  
-  return true;
 }
 
 /** Sets the intensity.

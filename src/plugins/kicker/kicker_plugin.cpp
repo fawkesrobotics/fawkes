@@ -39,7 +39,7 @@
 KickerPlugin::KickerPlugin()
   : Plugin(Plugin::MOTION, "kicker_plugin")
 {
-  thread_list.push_back(new KickerThread(BlockedTimingAspect::WAKEUP_HOOK_ACT, "KickerThread"));
+  thread_list.push_back(new KickerThread());
 }
 
 

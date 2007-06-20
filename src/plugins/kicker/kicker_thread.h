@@ -32,23 +32,23 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
-#include <interfaces/kicker_interface.h>
-#include "kicker_control.h"
+
+class KickerControl;
+class KickerInterface;
 
 class KickerThread : public Thread, public BlockedTimingAspect, public LoggingAspect, public BlackBoardAspect
 {
  public:
-  KickerThread(BlockedTimingAspect::WakeupHook hook, const char* name);
+  KickerThread();
   virtual ~KickerThread();
 
+  virtual void finalize();
   virtual void init();
   virtual void loop();
 
  private:
-  KickerInterface* kicker_interface;
-  
+  KickerInterface* kicker_interface;  
   KickerControl* kicker_control;
-  
 };
 
 #endif /* __PLUGINS_KICKER_THREAD_H_ */
