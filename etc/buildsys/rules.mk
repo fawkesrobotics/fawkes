@@ -52,10 +52,10 @@ endif
 
 # One to build 'em all
 .PHONY: all
-all: $(LIBS_all) $(PLUGINS_all) $(BINS_all) subdirs
+all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) subdirs
 
 .PHONY: clean
-clean: subdirs
+clean: presubdirs subdirs
 	$(SILENT) echo -e "$(INDENT_PRINT)--> Cleaning up directory $(TBOLDGRAY)$(CURDIR)$(TNORMAL)"
 	$(SILENT) if [ "$(SRCDIR)/$(OBJDIR)" != "/" ]; then rm -rf $(SRCDIR)/$(OBJDIR) ; fi
 	$(SILENT) if [ "$(DEPDIR)" != "" ]; then rm -rf $(DEPDIR) ; fi
@@ -65,7 +65,7 @@ clean: subdirs
 
 ifeq (,$(findstring qa,$(SUBDIRS)))
 .PHONY: qa
-qa: subdirs
+qa: presubdirs subdirs
 	$(SILENT) if [ -d "$(subst /.objs,,$(realpath $(CURDIR)))/qa" ]; then \
 		echo -e "$(INDENT_PRINT)--> Building QA in $(subst $(realpath $(CURDIR)/$(BASEDIR))/,,$(subst /.objs,,$(realpath $(CURDIR)))/qa)"; \
 		$(MAKE) --no-print-directory --no-keep-going -C "$(subst /.objs,,$(CURDIR))/qa" \
@@ -73,13 +73,14 @@ qa: subdirs
 	fi
 endif
 
-.PHONY: subdirs $(SUBDIRS)
+.PHONY: presubdirs $(PRESUBDIRS) subdirs $(SUBDIRS)
+presubdirs: $(PRESUBDIRS)
 subdirs: $(SUBDIRS)
 
-ifneq ($(SUBDIRS),)
-$(SUBDIRS):
+ifneq ($(PRESUBDIRS)$(SUBDIRS),)
+$(PRESUBDIRS) $(SUBDIRS):
 	$(SILENT) if [ ! -d "$(realpath $(SRCDIR)/$(@))" ]; then \
-		echo -e "$(INDENT_PRINT)---$(TRED)Directory $(TNORMAL)$(TBOLDRED)$@$(TNORMAL)$(TRED) does not exist, check SUBDIRS variable$(TNORMAL) ---"; \
+		echo -e "$(INDENT_PRINT)---$(TRED)Directory $(TNORMAL)$(TBOLDRED)$@$(TNORMAL)$(TRED) does not exist, check [PRE]SUBDIRS variable$(TNORMAL) ---"; \
 		exit 1; \
 	else \
 		echo -e "$(INDENT_PRINT)--- Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"; \
