@@ -24,17 +24,10 @@ ifneq ($(PKGCONFIG),)
   HAVE_AVAHI     := $(if $(shell $(PKGCONFIG) --print-errors --errors-to-stdout --exists 'avahi-client'),0,1)
   HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --print-errors --errors-to-stdout --exists 'libcrypto'),0,1)
 endif
-ifneq ($(HAVE_AVAHI),1)
-  WARN_TARGETS += warn_avahi
-  OMIT_OBJECTS += dns-sd/%
-else
-  CFLAGS += $(shell $(PKGCONFIG) --cflags avahi-client) -DHAVE_AVAHI
-  LDFLAGS_libnetcomm += $(shell pkg-config --libs avahi-client)
+ifeq ($(HAVE_AVAHI),1)
+  CFLAGS += -DHAVE_AVAHI
 endif
-ifneq ($(HAVE_LIBCRYPTO),1)
-  ERROR_TARGETS += error_libcrypto
-else
-  CFLAGS += $(shell $(PKGCONFIG) --cflags libcrypto) -DHAVE_LIBCRYPTO
-  LDFLAGS_libnetcomm += $(shell pkg-config --libs libcrypto)
+ifeq ($(HAVE_LIBCRYPTO),1)
+  CFLAGS += -DHAVE_LIBCRYPTO
 endif
 

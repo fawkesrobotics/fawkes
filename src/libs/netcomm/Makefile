@@ -27,6 +27,21 @@ else
 include netcomm.mk
 endif
 
+ifneq ($(HAVE_AVAHI),1)
+  WARN_TARGETS += warn_avahi
+  OMIT_OBJECTS += dns-sd/%
+else
+  CFLAGS += $(shell $(PKGCONFIG) --cflags avahi-client)
+  LDFLAGS_libnetcomm += $(shell pkg-config --libs avahi-client)
+endif
+ifneq ($(HAVE_LIBCRYPTO),1)
+  ERROR_TARGETS += error_libcrypto
+else
+  CFLAGS += $(shell $(PKGCONFIG) --cflags libcrypto)
+  LDFLAGS_libnetcomm += $(shell pkg-config --libs libcrypto)
+endif
+
+
 ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS) $(ERROR_TARGETS)
 .PHONY: warn_avahi
