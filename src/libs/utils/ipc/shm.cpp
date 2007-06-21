@@ -599,7 +599,7 @@ SharedMemory::data_size()
 void
 SharedMemory::set(void *memptr)
 {
-  memcpy(_memptr, _memptr, _data_size);
+  memcpy(_memptr, memptr, _data_size);
 }
 
 
