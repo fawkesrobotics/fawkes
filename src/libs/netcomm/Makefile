@@ -37,8 +37,8 @@ endif
 ifneq ($(HAVE_LIBCRYPTO),1)
   ERROR_TARGETS += error_libcrypto
 else
-  CFLAGS += $(shell $(PKGCONFIG) --cflags libcrypto)
-  LDFLAGS_libnetcomm += $(shell pkg-config --libs libcrypto)
+  CFLAGS += $(shell $(PKGCONFIG) --cflags $(LIBCRYPTO_PKG))
+  LDFLAGS_libnetcomm += $(shell pkg-config --libs $(LIBCRYPTO_PKG))
 endif
 
 

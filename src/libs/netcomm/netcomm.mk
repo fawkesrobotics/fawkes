@@ -21,8 +21,13 @@
 
 include $(BASEDIR)/etc/buildsys/config.mk
 ifneq ($(PKGCONFIG),)
-  HAVE_AVAHI     := $(if $(shell $(PKGCONFIG) --print-errors --errors-to-stdout --exists 'avahi-client'),0,1)
-  HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --print-errors --errors-to-stdout --exists 'libcrypto'),0,1)
+  HAVE_AVAHI     := $(if $(shell $(PKGCONFIG) --exists 'avahi-client'; echo $${?/1/}),1,0)
+  HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --exists 'libcrypto'; echo $${?/1/}),1,0)
+  LIBCRYPTO_PKG  := libcrypto
+  ifneq ($(HAVE_LIBCRYPTO),1)
+    HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --exists 'openssl'; echo $${?/1/}),1,0)
+    LIBCRYPTO_PKG  := openssl
+  endif
 endif
 ifeq ($(HAVE_AVAHI),1)
   CFLAGS += -DHAVE_AVAHI

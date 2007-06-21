@@ -122,7 +122,11 @@ const short Socket::POLL_PRI   = POLLPRI;
  * connection.  The _GNU_SOURCE feature test macro must be defined
  * in order to obtain this definition (since Linux 2.6.17).
  */
+#ifdef POLLRDHUP
 const short Socket::POLL_RDHUP = POLLRDHUP;
+#else
+const short Socket::POLL_RDHUP = 0;
+#endif
 
 /** Error condition. */
 const short Socket::POLL_ERR   = POLLERR;
