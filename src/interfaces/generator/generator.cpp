@@ -249,33 +249,9 @@ InterfaceGenerator::write_management_funcs_cpp(FILE *f)
 {
   fprintf(f,
 	  "/// @cond INTERNALS\n"
-	  "Interface *\n"
-	  "private_new%s()\n"
-	  "{\n"
-	  "  return new %s();\n"
-	  "}\n"
-	  "/// @endcond\n"
-	  "/** Create instance of %s.\n"
-	  " * @return instance of %s\n"
-	  " */\n"
-	  "extern \"C\"\n"
-	  "Interface *\n"
-	  "new%s()\n"
-	  "{\n"
-	  "  return private_new%s();\n"
-	  "}\n\n"
-	  "/** Destroy %s instance.\n"
-	  " * @param interface %s instance to destroy.\n"
-	  " */\n"
-	  "extern \"C\"\n"
-	  "void\n"
-	  "delete%s(Interface *interface)\n"
-	  "{\n"
-	  "  delete interface;\n"
-	  "}\n\n",
-	  class_name.c_str(),
-	  class_name.c_str(), class_name.c_str(), class_name.c_str(), class_name.c_str(),
-	  class_name.c_str(), class_name.c_str(), class_name.c_str(), class_name.c_str());
+	  "EXPORT_INTERFACE(%s)\n"
+	  "/// @endcond\n\n",
+	  class_name.c_str());
 }
 
 
@@ -660,9 +636,9 @@ InterfaceGenerator::write_h(FILE *f)
 	  "#include <interface/message.h>\n\n"
 	  "class %s : public Interface\n"
 	  "{\n"
-	  "/// @cond INTERNALS\n"
-	  " friend Interface *  private_new%s();\n"  
-	  "/// @endcond\n"
+	  " /// @cond INTERNALS\n"
+	  " INTERFACE_MGMT_FRIENDS(%s)\n"
+	  " /// @endcond\n"
 	  " private:\n",
 	  class_name.c_str(),
 	  class_name.c_str());

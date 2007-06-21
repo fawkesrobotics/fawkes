@@ -34,9 +34,9 @@
 
 class KickerInterface : public Interface
 {
-/// @cond INTERNALS
- friend Interface *  private_newKickerInterface();
-/// @endcond
+ /// @cond INTERNALS
+ INTERFACE_MGMT_FRIENDS(KickerInterface)
+ /// @endcond
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {

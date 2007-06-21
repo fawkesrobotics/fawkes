@@ -176,11 +176,11 @@ BlackBoardInterfaceManager::newInterfaceInstance(const char *type, const char *i
 
   Interface *iface = iff();
 
-  iface->instance_serial = getNextInstanceSerial();
-  strncpy(iface->_type, type, __INTERFACE_TYPE_SIZE);
-  strncpy(iface->_id, identifier, __INTERFACE_ID_SIZE);
-  iface->interface_mediator = this;
-  iface->message_mediator   = msgmgr;
+  iface->__instance_serial = getNextInstanceSerial();
+  strncpy(iface->__type, type, __INTERFACE_TYPE_SIZE);
+  strncpy(iface->__id, identifier, __INTERFACE_ID_SIZE);
+  iface->__interface_mediator = this;
+  iface->__message_mediator   = msgmgr;
 
   free(generator_name);
   return iface;
@@ -197,11 +197,11 @@ BlackBoardInterfaceManager::newInterfaceInstance(const char *type, const char *i
 void
 BlackBoardInterfaceManager::deleteInterfaceInstance(Interface *interface)
 {
-  char *destroyer_name = (char *)malloc(strlen("delete") + strlen(interface->_type) + 1);
-  sprintf(destroyer_name, "delete%s", interface->_type);
+  char *destroyer_name = (char *)malloc(strlen("delete") + strlen(interface->__type) + 1);
+  sprintf(destroyer_name, "delete%s", interface->__type);
   if ( ! iface_module->hasSymbol(destroyer_name) ) {
     free(destroyer_name);
-    throw BlackBoardInterfaceNotFoundException(interface->_type);
+    throw BlackBoardInterfaceNotFoundException(interface->__type);
   }
 
   InterfaceDestroyFunc idf = (InterfaceDestroyFunc)iface_module->getSymbol(destroyer_name);
@@ -304,10 +304,11 @@ BlackBoardInterfaceManager::createInterface(const char *type, const char *identi
   ih->refcount           = 0;
   ih->serial             = getNextMemSerial();
   ih->flag_writer_active = 0;
+  ih->num_readers        = 0;
   rwlocks[ih->serial] = new RefCountRWLock();
 
-  interface->mem_real_ptr  = ptr;
-  interface->mem_data_ptr  = (char *)ptr + sizeof(interface_header_t);
+  interface->__mem_real_ptr  = ptr;
+  interface->__mem_data_ptr  = (char *)ptr + sizeof(interface_header_t);
 
 }
 
@@ -336,8 +337,8 @@ BlackBoardInterfaceManager::openForReading(const char *type, const char *identif
   if ( ptr != NULL ) {
     // found, instantiate new interface for given memory chunk
     iface = newInterfaceInstance(type, identifier);
-    iface->mem_real_ptr = ptr;
-    iface->mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
+    iface->__mem_real_ptr = ptr;
+    iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
     ih  = (interface_header_t *)ptr;
     rwlocks[ih->serial]->ref();
   } else {
@@ -345,11 +346,12 @@ BlackBoardInterfaceManager::openForReading(const char *type, const char *identif
     ih  = (interface_header_t *)ptr;
   }
 
-  iface->write_access = false;
-  iface->rwlock = rwlocks[ih->serial];
-  iface->mem_serial = ih->serial;
-  iface->message_queue = new MessageQueue(iface->mem_serial, iface->instance_serial);
+  iface->__write_access = false;
+  iface->__rwlock = rwlocks[ih->serial];
+  iface->__mem_serial = ih->serial;
+  iface->__message_queue = new MessageQueue(iface->__mem_serial, iface->__instance_serial);
   ih->refcount++;
+  ih->num_readers++;
 
   memmgr->unlock();
   mutex->unlock();
@@ -391,25 +393,25 @@ BlackBoardInterfaceManager::openForWriting(const char *type, const char *identif
       throw BlackBoardWriterActiveException(identifier, type);
     }
     iface = newInterfaceInstance(type, identifier);
-    iface->mem_real_ptr = ptr;
-    iface->mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
+    iface->__mem_real_ptr = ptr;
+    iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
     rwlocks[ih->serial]->ref();
   } else {
     createInterface(type, identifier, iface, ptr);
     ih = (interface_header_t *)ptr;
   }
 
-  iface->write_access = true;
-  iface->rwlock  = rwlocks[ih->serial];
-  iface->mem_serial = ih->serial;
-  iface->message_queue = new MessageQueue(iface->mem_serial, iface->instance_serial);
+  iface->__write_access = true;
+  iface->__rwlock  = rwlocks[ih->serial];
+  iface->__mem_serial = ih->serial;
+  iface->__message_queue = new MessageQueue(iface->__mem_serial, iface->__instance_serial);
   ih->flag_writer_active = 1;
   ih->refcount++;
 
   memmgr->unlock();
   mutex->unlock();
 
-  writer_interfaces[iface->mem_serial] = iface;
+  writer_interfaces[iface->__mem_serial] = iface;
 
   return iface;
 }
@@ -424,14 +426,16 @@ BlackBoardInterfaceManager::close(Interface *interface)
   mutex->lock();
 
   // reduce refcount and free memory if refcount is zero
-  interface_header_t *ih = (interface_header_t *)interface->mem_real_ptr;
+  interface_header_t *ih = (interface_header_t *)interface->__mem_real_ptr;
   if ( --(ih->refcount) == 0 ) {
     // redeem from memory
-    memmgr->free( interface->mem_real_ptr );
+    memmgr->free( interface->__mem_real_ptr );
   } else {
-    if ( interface->write_access ) {
+    if ( interface->__write_access ) {
       ih->flag_writer_active = 0;
-      writer_interfaces.erase( interface->mem_serial );
+      writer_interfaces.erase( interface->__mem_serial );
+    } else {
+      ih->num_readers--;
     }
   }
 
@@ -479,7 +483,7 @@ BlackBoardInterfaceManager::getMemoryManager() const
 bool
 BlackBoardInterfaceManager::existsWriter(const Interface *interface) const
 {
-  return (writer_interfaces.find(interface->mem_serial) != writer_interfaces.end());
+  return (writer_interfaces.find(interface->__mem_serial) != writer_interfaces.end());
 }
 
 

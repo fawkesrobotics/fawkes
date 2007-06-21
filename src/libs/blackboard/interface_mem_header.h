@@ -28,6 +28,8 @@
 #ifndef __BLACKBOARD_INTERFACE_MEM_HEADER_H_
 #define __BLACKBOARD_INTERFACE_MEM_HEADER_H_
 
+#include <stdint.h>
+
 #define __INTERFACE_TYPE_SIZE 32
 #define __INTERFACE_ID_SIZE 32
 
@@ -39,10 +41,11 @@ class RefCountRWLock;
 typedef struct {
   char             type[__INTERFACE_TYPE_SIZE];	/**< interface type */
   char             id[__INTERFACE_ID_SIZE];	/**< interface identifier */
-  unsigned int     flag_writer_active :  1;	/**< true if there is any writer */
-  unsigned int     flag_reserved      : 31;	/**< reserved for future use */
-  unsigned int     refcount;			/**< reference count */
-  unsigned int     serial;			/**< memory serial */
+  uint16_t         flag_writer_active :  1;	/**< 1 if there is a writer, 0 otherwise */
+  uint16_t         flag_reserved      : 15;	/**< reserved for future use */
+  uint16_t         num_readers;			/**< number of active readers */
+  uint32_t         refcount;			/**< reference count */
+  uint32_t         serial;			/**< memory serial */
 } interface_header_t;
 
 

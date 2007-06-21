@@ -104,20 +104,20 @@ class Interface
  private:
   unsigned int       msgq_append(Message *message);
 
-  char               _type[__INTERFACE_TYPE_SIZE + 1];
-  char               _id[__INTERFACE_ID_SIZE + 1];
-  unsigned int       instance_serial;
+  char               __type[__INTERFACE_TYPE_SIZE + 1];
+  char               __id[__INTERFACE_ID_SIZE + 1];
+  unsigned int       __instance_serial;
 
-  void *             mem_data_ptr;
-  void *             mem_real_ptr;
-  unsigned int       mem_serial;
-  bool               write_access;
+  void *             __mem_data_ptr;
+  void *             __mem_real_ptr;
+  unsigned int       __mem_serial;
+  bool               __write_access;
 
-  RefCountRWLock    *rwlock;
+  RefCountRWLock    *__rwlock;
 
-  InterfaceMediator *interface_mediator;
-  MessageMediator   *message_mediator;
-  MessageQueue      *message_queue;
+  InterfaceMediator *__interface_mediator;
+  MessageMediator   *__message_mediator;
+  MessageQueue      *__message_queue;
 
 
   typedef struct imsg_list_t {
@@ -132,7 +132,7 @@ template <class MessageType>
 MessageType *
 Interface::msgq_first()
 {
-  return dynamic_cast<MessageType *>(message_queue->first());
+  return dynamic_cast<MessageType *>(__message_queue->first());
 }
 
 
@@ -143,11 +143,70 @@ template <class MessageType>
 bool
 Interface::msgq_first_is()
 {
-  return (dynamic_cast<MessageType *>(message_queue->first()) != 0);
+  return (dynamic_cast<MessageType *>(__message_queue->first()) != 0);
 }
 
 
 typedef Interface *  (* InterfaceFactoryFunc)  (void);
 typedef void         (* InterfaceDestroyFunc)  (Interface *);
+
+/** Friend for interface generator function. */
+#define INTERFACE_MGMT_FRIENDS(interface_class)				\
+  friend Interface * private_new##interface_class();			\
+  friend void private_delete##interface_class(interface_class *interface);
+
+/** Interface generator function for this plugin.
+ * @return an instance of the desired interface
+ */
+#define INTERFACE_GENERATOR(interface_class)			\
+  Interface *							\
+  private_new##interface_class()				\
+  {								\
+    return new interface_class();				\
+  }
+
+
+/** Interface delete function for this plugin.
+ * @return an instance of the desired interface
+ */
+#define INTERFACE_DELETER(interface_class)			\
+  void								\
+  private_delete##interface_class(interface_class *interface)	\
+  {								\
+    delete interface;						\
+  }
+
+
+/** Interface factory function.
+ * @return an instance of the desired interface
+ */
+#define INTERFACE_FACTORY(interface_class)			\
+  extern "C"							\
+  Interface *							\
+  new##interface_class()						\
+  {								\
+    return private_new##interface_class();			\
+  }
+
+
+/** Interface destruction function.
+ * @param interface The interface that is to be destroyed.
+ */
+#define INTERFACE_DESTROY(interface_class)		\
+  extern "C"						\
+  void							\
+  delete##interface_class (interface_class *interface)	\
+  {							\
+    private_delete##interface_class(interface);		\
+  }
+
+/** Export interface.
+ * This will create appropriate interface factory and destroy functions.
+ */
+#define EXPORT_INTERFACE(interface_class) \
+  INTERFACE_GENERATOR(interface_class)	  \
+  INTERFACE_DELETER(interface_class)	  \
+  INTERFACE_FACTORY(interface_class)	  \
+  INTERFACE_DESTROY(interface_class)
 
 #endif

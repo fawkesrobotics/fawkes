@@ -286,29 +286,6 @@ KickerInterface::messageValid(const Message *message) const
 }
 
 /// @cond INTERNALS
-Interface *
-private_newKickerInterface()
-{
-  return new KickerInterface();
-}
+EXPORT_INTERFACE(KickerInterface)
 /// @endcond
-/** Create instance of KickerInterface.
- * @return instance of KickerInterface
- */
-extern "C"
-Interface *
-newKickerInterface()
-{
-  return private_newKickerInterface();
-}
-
-/** Destroy KickerInterface instance.
- * @param interface KickerInterface instance to destroy.
- */
-extern "C"
-void
-deleteKickerInterface(Interface *interface)
-{
-  delete interface;
-}
 

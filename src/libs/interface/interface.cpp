@@ -95,15 +95,15 @@ InterfaceInvalidMessageException::InterfaceInvalidMessageException(const char *m
 /** Constructor */
 Interface::Interface()
 {
-  write_access = false;
+  __write_access = false;
 }
 
 
 /** Destructor */
 Interface::~Interface()
 {
-  rwlock->unref();
-  delete message_queue;
+  __rwlock->unref();
+  delete __message_queue;
 }
 
 
@@ -111,9 +111,9 @@ Interface::~Interface()
 void
 Interface::read()
 {
-  rwlock->lockForRead();
-  memcpy(data_ptr, mem_data_ptr, data_size);
-  rwlock->unlock();
+  __rwlock->lockForRead();
+  memcpy(data_ptr, __mem_data_ptr, data_size);
+  __rwlock->unlock();
 }
 
 
@@ -121,15 +121,15 @@ Interface::read()
 void
 Interface::write()
 {
-  if ( ! write_access ) {
-    throw InterfaceWriteDeniedException(_type, _id);
+  if ( ! __write_access ) {
+    throw InterfaceWriteDeniedException(__type, __id);
   }
 
-  rwlock->lockForWrite();
-  memcpy(mem_data_ptr, data_ptr, data_size);
-  rwlock->unlock();
+  __rwlock->lockForWrite();
+  memcpy(__mem_data_ptr, data_ptr, data_size);
+  __rwlock->unlock();
 
-  interface_mediator->notifyOfDataChange(this);
+  __interface_mediator->notifyOfDataChange(this);
 }
 
 
@@ -151,8 +151,8 @@ Interface::datasize() const
 bool
 Interface::operator==(Interface &comp) const
 {
-  return ( (strncmp(_type, comp._type, sizeof(_type)) == 0) &&
-	   (strncmp(_id, comp._id, sizeof(_id)) == 0) );
+  return ( (strncmp(__type, comp.__type, sizeof(__type)) == 0) &&
+	   (strncmp(__id, comp.__id, sizeof(__id)) == 0) );
 }
 
 
@@ -163,7 +163,7 @@ Interface::operator==(Interface &comp) const
 bool
 Interface::oftype(const char *interface_type) const
 {
-  return (strncmp(this->_type, interface_type, sizeof(this->_type)) == 0);
+  return (strncmp(this->__type, interface_type, sizeof(this->__type)) == 0);
 }
 
 
@@ -173,7 +173,7 @@ Interface::oftype(const char *interface_type) const
 const char *
 Interface::type() const
 {
-  return _type;
+  return __type;
 }
 
 
@@ -183,7 +183,7 @@ Interface::type() const
 const char *
 Interface::id() const
 {
-  return _id;
+  return __id;
 }
 
 
@@ -193,7 +193,7 @@ Interface::id() const
 unsigned int
 Interface::serial() const
 {
-  return instance_serial;
+  return __instance_serial;
 }
 
 
@@ -205,7 +205,7 @@ Interface::serial() const
 bool
 Interface::hasWriter() const
 {
-  return interface_mediator->existsWriter(this);
+  return __interface_mediator->existsWriter(this);
 }
 
 
@@ -220,8 +220,8 @@ Interface::hasWriter() const
 unsigned int
 Interface::msgq_enqueue(Message *message)
 {
-  unsigned int rv = message_queue->append(message);
-  message_mediator->transmit(message);
+  unsigned int rv = __message_queue->append(message);
+  __message_mediator->transmit(message);
   return rv;
 }
 
@@ -233,7 +233,7 @@ Interface::msgq_enqueue(Message *message)
 unsigned int
 Interface::msgq_append(Message *message)
 {
-  return message_queue->append(message);
+  return __message_queue->append(message);
 }
 
 
@@ -247,7 +247,7 @@ Interface::msgq_append(Message *message)
 void
 Interface::msgq_remove(Message *message)
 {
-  return message_queue->remove(message);
+  return __message_queue->remove(message);
 }
 
 
@@ -258,7 +258,7 @@ Interface::msgq_remove(Message *message)
 void
 Interface::msgq_remove(unsigned int message_id)
 {
-  return message_queue->remove(message_id);
+  return __message_queue->remove(message_id);
 }
 
 
@@ -268,7 +268,7 @@ Interface::msgq_remove(unsigned int message_id)
 unsigned int
 Interface::msgq_size()
 {
-  return message_queue->size();
+  return __message_queue->size();
 }
 
 
@@ -278,7 +278,7 @@ Interface::msgq_size()
 void
 Interface::msgq_flush()
 {
-  message_queue->flush();
+  __message_queue->flush();
 }
 
 
@@ -288,7 +288,7 @@ Interface::msgq_flush()
 void
 Interface::msgq_lock()
 {
-  message_queue->lock();
+  __message_queue->lock();
 }
 
 
@@ -300,7 +300,7 @@ Interface::msgq_lock()
 bool
 Interface::msgq_tryLock()
 {
-  return message_queue->tryLock();
+  return __message_queue->tryLock();
 }
 
 
@@ -310,7 +310,7 @@ Interface::msgq_tryLock()
 void
 Interface::msgq_unlock()
 {
-  message_queue->unlock();
+  __message_queue->unlock();
 }
 
 /** Get start iterator for message queue.
@@ -321,7 +321,7 @@ Interface::msgq_unlock()
 MessageQueue::MessageIterator
 Interface::msgq_begin()
 {
-  return message_queue->begin();
+  return __message_queue->begin();
 }
 
 
@@ -333,7 +333,7 @@ Interface::msgq_begin()
 MessageQueue::MessageIterator
 Interface::msgq_end()
 {
-  return message_queue->end();
+  return __message_queue->end();
 }
 
 
@@ -343,7 +343,7 @@ Interface::msgq_end()
 Message *
 Interface::msgq_first()
 {
-  return message_queue->first();
+  return __message_queue->first();
 }
 
 /** Erase first message from queue.
@@ -351,14 +351,18 @@ Interface::msgq_first()
 void
 Interface::msgq_pop()
 {
-  message_queue->pop();
+  __message_queue->pop();
 }
 
 
 /** @typedef void      (* InterfaceDestroyFunc)  (Interface *interface)
  * @param interface Interface to destroy
  * Interface destructor function for the shared library.
- * Declare and define this function exactly like this:
+ *
+ * This function should never be written by hand but rather the EXPORT_INTERFACE
+ * macro should be used.
+ *
+ * It has to be declared and defined as:
  *
  * @code
  * extern "C"
@@ -376,7 +380,11 @@ Interface::msgq_pop()
 
 /** @typedef Interface *  (* InterfaceFactoryFunc)  (void);
  * Interface generator function for the shared library
- * Declare and define this function exactly like this:
+ *
+ * This function should never be written by hand but rather the EXPORT_INTERFACE
+ * macro should be used.
+ *
+ * It has to be declared and defined as:
  *
  * @code
  * extern "C"

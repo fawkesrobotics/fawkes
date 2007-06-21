@@ -348,29 +348,6 @@ TestInterface::messageValid(const Message *message) const
 }
 
 /// @cond INTERNALS
-Interface *
-private_newTestInterface()
-{
-  return new TestInterface();
-}
+EXPORT_INTERFACE(TestInterface)
 /// @endcond
-/** Create instance of TestInterface.
- * @return instance of TestInterface
- */
-extern "C"
-Interface *
-newTestInterface()
-{
-  return private_newTestInterface();
-}
-
-/** Destroy TestInterface instance.
- * @param interface TestInterface instance to destroy.
- */
-extern "C"
-void
-deleteTestInterface(Interface *interface)
-{
-  delete interface;
-}
 

@@ -34,9 +34,9 @@
 
 class TestInterface : public Interface
 {
-/// @cond INTERNALS
- friend Interface *  private_newTestInterface();
-/// @endcond
+ /// @cond INTERNALS
+ INTERFACE_MGMT_FRIENDS(TestInterface)
+ /// @endcond
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {

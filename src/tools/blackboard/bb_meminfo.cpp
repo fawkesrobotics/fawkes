@@ -5,7 +5,7 @@
  *  Generated: Fri Oct 20 13:32:38 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
+ *  $Id: bb_meminfo.cpp 37 2006-10-27 21:17:37Z tim $
  *
  ****************************************************************************/
 
@@ -81,8 +81,8 @@ main(int argc, char **argv)
   } else {
     cout << endl << "Interfaces:" << endl;
 
-    printf("%sMemSize  Overhang  Type/ID                            Serial  RefCount%s\n"
-	   "----------------------------------------------------------------------\n",
+    printf("%sMemSize  Overhang  Type/ID                            Serial  Ref  W/R%s\n"
+	   "------------------------------------------------------------------------\n",
 	   cdarkgray.c_str(), cnormal.c_str());
 
     interface_header_t *ih;
@@ -93,9 +93,9 @@ main(int argc, char **argv)
 	break;
       } else {
 	ih = (interface_header_t *)*cit;
-	printf("%7d  %8d  %sT%s %-32s %6d  %8d\n%18s %sI%s %-32s\n",
+	printf("%7d  %8d  %sT%s %-32s %6d  %3d  %1d/%-3d\n%18s %sI%s %-32s\n",
 	       cit.size(), cit.overhang(), clightgray.c_str(), cnormal.c_str(), ih->type,
-	       ih->serial, ih->refcount,
+	       ih->serial, ih->refcount, ih->flag_writer_active, ih->num_readers,
 	       "", clightgray.c_str(), cnormal.c_str(), ih->id);
       }
     }
