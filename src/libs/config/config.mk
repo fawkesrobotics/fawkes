@@ -1,7 +1,7 @@
 #*****************************************************************************
-#           Makefile Build System for Fawkes: Configuration Utils
+#               Makefile Build System for Fawkes: Config Library
 #                            -------------------
-#   Created on Sun Jan 07 14:56:02 2007
+#   Created on Tue Jun 21 15:04:39 2007
 #   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -19,33 +19,10 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys/config.mk
-
-ifneq ($(HAVE_SQLITE),1)
-  ERROR_TARGETS += error_sqlite
-else
-  CFLAGS += $(shell $(PKGCONFIG) --cflags sqlite3)
-  LDFLAGS_libconfig = $(shell $(PKGCONFIG) --libs sqlite3)
-  LIBS_all  = $(LIBDIR)/libconfig.so
+ifneq ($(PKGCONFIG),)
+  HAVE_SQLITE    := $(if $(shell $(PKGCONFIG) --exists 'sqlite3'; echo $${?/1/}),1,0)
 endif
-
-ifneq ($(SRCDIR),.)
-all: $(ERROR_TARGETS)
-.PHONY: error_sqlite
-error_libcrypto:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)libconfig cannot be built$(TNORMAL) (SQLite 3 not installed)"
-	$(SILENT)exit 1
+ifeq ($(HAVE_SQLITE),1)
+  CFLAGS += -DHAVE_SQLITE
 endif
-
-
-LIBS_libconfig = stdc++ core netcomm
-OBJS_libconfig =	\
-		config.o		\
-		netconf.o		\
-		sqlite.o
-
-OBJS_all = $(OBJS_libconfig)
-
-include $(BASEDIR)/etc/buildsys/base.mk
 

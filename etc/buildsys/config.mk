@@ -113,6 +113,17 @@ TGREYBG		= \033[47m
 
 ### Check if there are special config additions
 ifneq ($(realpath $(BASEDIR)/etc/buildsys/$(BUILD_TYPE)_config.mk),)
-include $(BASEDIR)/etc/buildsys/$(BUILD_TYPE)_config.mk
+  include $(BASEDIR)/etc/buildsys/$(BUILD_TYPE)_config.mk
+endif
+
+### Check if there is a local config for this directory
+ifneq ($(SRCDIR),)
+  ifneq ($(realpath $(SRCDIR)/$(notdir $(SRCDIR)).mk),)
+    include $(SRCDIR)/$(notdir $(SRCDIR)).mk
+  endif
+else
+  ifneq ($(realpath $(notdir $(CURDIR))),)
+    include $(notdir $(CURDIR)).mk
+  endif
 endif
 

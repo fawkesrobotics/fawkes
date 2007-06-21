@@ -20,7 +20,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/src/plugins/kicker/kickerconf.mk
+include $(BASEDIR)/etc/buildsys/config.mk
 
 CFLAGS = -g
 
@@ -30,7 +30,7 @@ else
   PLUGINS_all = $(PLUGINDIR)/kicker.so
 endif
 
-ifneq ($(SRCDIR),)
+ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
 
 .PHONY: warning_iowkit

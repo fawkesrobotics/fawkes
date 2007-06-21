@@ -19,7 +19,6 @@
 #
 #*****************************************************************************
 
-include $(BASEDIR)/etc/buildsys/config.mk
 ifneq ($(PKGCONFIG),)
   HAVE_AVAHI     := $(if $(shell $(PKGCONFIG) --exists 'avahi-client'; echo $${?/1/}),1,0)
   HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --exists 'libcrypto'; echo $${?/1/}),1,0)

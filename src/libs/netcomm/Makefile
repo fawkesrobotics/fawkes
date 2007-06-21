@@ -20,12 +20,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-
-ifneq ($(SRCDIR),)
-include $(SRCDIR)/netcomm.mk
-else
-include netcomm.mk
-endif
+include $(BASEDIR)/etc/buildsys/config.mk
 
 ifneq ($(HAVE_AVAHI),1)
   WARN_TARGETS += warn_avahi
