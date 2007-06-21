@@ -24,7 +24,7 @@ BASEDIR = ../../..
 CFLAGS = -g
 
 LIBS_example = core utils netcomm
-OBJS_example = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+OBJS_example = $(filter-out example_plugin_netping.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
 LIBS_example_plugin_netping = core utils netcomm
 OBJS_example_plugin_netping = example_plugin_netping.o
