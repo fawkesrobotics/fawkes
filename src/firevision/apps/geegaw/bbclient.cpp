@@ -95,7 +95,7 @@ FirevisionGeegawBBClient::FirevisionGeegawBBClient(int argc, char* argv[], Argum
   box_lost_time.Stamp();
   box_lost = true;
 
-  object_mode = true;
+  object_mode = argp->hasArgument("O");
 }
 
 

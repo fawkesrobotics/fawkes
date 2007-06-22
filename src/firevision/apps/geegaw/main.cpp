@@ -62,6 +62,9 @@ main( int argc, char **argv )
   if (argp->hasArgument("H")) {
 
     cout << endl << cblue << "FirevisionFront Help" << cnormal << endl << endl
+	 << endl
+	 << cred << " -O        Object mode (use for lost'n'found)" << cnormal << endl
+	 << endl
          << " -o        Output debug information" << endl
 	 << " -p        Show pose (localize) information" << endl
          << " -P        Show pan/tilt information" << endl
@@ -112,7 +115,7 @@ main( int argc, char **argv )
 
     cout << cblue << "FirevisionGeegaw" << cnormal << ": Delay is " << delay << " ms" << endl;
 
-    GeegawPipeline *fp = new GeegawPipeline(argp, c, false);
+    GeegawPipeline *fp = new GeegawPipeline(argp, c, argp->hasArgument("O"));
 
     fp->init();
     fp->run( delay /* delay in ms */);

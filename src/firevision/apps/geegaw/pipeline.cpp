@@ -87,6 +87,11 @@ GeegawPipeline::GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool 
   cam = NULL;
   camctrl = NULL;
 
+  if (object_mode) {
+    cout << "Running in " << cred << "OBJECT" << cnormal << " mode (lost'n'found)" << endl;
+  } else {
+    cout << cred << "NOT" << cnormal << " running in object mode (navigation)" << endl;
+  }
   this->object_mode = object_mode;
 }
 
