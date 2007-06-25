@@ -111,6 +111,11 @@ CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
   }
 
   generate_output = argp->hasArgument("o");
+#ifdef HAVE_TRICLOPS_SDK
+  camless_mode      = argp->hasArgument("C");
+#else
+  camless_mode      = true;
+#endif
 
   state = CANNIKIN_STATE_DETECTION; // CANNIKIN_STATE_UNINITIALIZED;
   _mode = DETECT_CUP;
@@ -119,9 +124,18 @@ CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
 			      true /* destroy on delete */,
 			      true /* create if it does not exist */);
 
-  cam = NULL;
-  camctrl = NULL;
+  cam      = NULL;
+  camctrl  = NULL;
   triclops = NULL;
+  buffer1  = NULL;
+  buffer2  = NULL;
+  buffer3  = NULL;
+  shm_buffer = NULL;
+  shm_buffer_src = NULL;
+  scanlines = NULL;
+  disparity_scanlines = NULL;
+  cm = NULL;
+  classifier = NULL;
 }
 
 
@@ -143,9 +157,9 @@ CannikinPipeline::~CannikinPipeline()
   //cout << msg_prefix << "Deleting shared memory buffer for source image" << endl;
   delete shm_buffer_src;
   //cout << msg_prefix << "Freeing temporary buffers" << endl;
-  free(buffer1);
-  free(buffer2);
-  free(buffer3);
+  if (buffer1)  free(buffer1);
+  if (buffer2)  free(buffer2);
+  if (buffer3)  free(buffer3);
 
   delete scanlines;
   delete disparity_scanlines;
@@ -165,59 +179,65 @@ void
 CannikinPipeline::init()
 {
 
-  cam = CameraFactory::instance( config->CameraString.c_str() );
+  if ( ! camless_mode ) {
+    cam = CameraFactory::instance( config->CameraString.c_str() );
 
-  cam->open();
-  cam->start();
+    cam->open();
+    cam->start();
 
-  triclops = new TriclopsStereoProcessor(cam);
+#ifdef HAVE_TRICLOPS_SDK
+    triclops = new TriclopsStereoProcessor(cam);
 
-  triclops->set_subpixel_interpolation( false );
-  triclops->set_edge_correlation( true );
-  triclops->set_disparity_range(5, 100);
-  triclops->set_edge_masksize(11);
-  triclops->set_stereo_masksize(23);
-  triclops->set_surface_validation( true );
-  triclops->set_texture_validation( false );
-  triclops->set_disparity_mapping( true );
-  triclops->set_disparity_mapping_range(10, 85);
+    triclops->set_subpixel_interpolation( false );
+    triclops->set_edge_correlation( true );
+    triclops->set_disparity_range(5, 100);
+    triclops->set_edge_masksize(11);
+    triclops->set_stereo_masksize(23);
+    triclops->set_surface_validation( true );
+    triclops->set_texture_validation( false );
+    triclops->set_disparity_mapping( true );
+    triclops->set_disparity_mapping_range(10, 85);
+#endif
 
-  width  = cam->pixel_width();
-  height = cam->pixel_height();
-  cspace_from = cam->colorspace();
+    width  = cam->pixel_width();
+    height = cam->pixel_height();
+    cspace_from = cam->colorspace();
 
-  /* NOTE:
-   * buffer_src is the place where the converted image is stored. 
-   * After the processing of a given region is done the resulting image
-   * has to be placed in buffer. Further steps are done on this buffer!
-   * At the beginning of the loop buffer_src will contain the source image in
-   * YUV422_PLANAR format that just arrived from the camera. In later runs
-   * there are already some filtered ROIs. buffer_src is considered to be
-   * read-only. Do not write to this buffer!
-   * buffer2 and buffer3 are available for any operations you would
-   * like to do for temporary storage. Avoid copying too much data around
-   * and think about in-place operations. Two buffers should be sufficient
-   * for most operations.
-   */
+    /* NOTE:
+     * buffer_src is the place where the converted image is stored. 
+     * After the processing of a given region is done the resulting image
+     * has to be placed in buffer. Further steps are done on this buffer!
+     * At the beginning of the loop buffer_src will contain the source image in
+     * YUV422_PLANAR format that just arrived from the camera. In later runs
+     * there are already some filtered ROIs. buffer_src is considered to be
+     * read-only. Do not write to this buffer!
+     * buffer2 and buffer3 are available for any operations you would
+     * like to do for temporary storage. Avoid copying too much data around
+     * and think about in-place operations. Two buffers should be sufficient
+     * for most operations.
+     */
 
-  buffer_size = colorspace_buffer_size(YUV422_PLANAR, width, height);
+    buffer_size = colorspace_buffer_size(YUV422_PLANAR, width, height);
 
-  cout << msg_prefix << "Creating shared memory segment for final image" << endl;
-  shm_buffer     = new SharedMemoryImageBuffer("cannikin-raw", YUV422_PLANAR, width, height);
-  cout << msg_prefix << "Creating shared memory segment for source image" << endl;
-  shm_buffer_src = new SharedMemoryImageBuffer("cannikin-processed", YUV422_PLANAR, width, height);
+    cout << msg_prefix << "Creating shared memory segment for final image" << endl;
+    shm_buffer     = new SharedMemoryImageBuffer("cannikin-raw", YUV422_PLANAR, width, height);
+    cout << msg_prefix << "Creating shared memory segment for source image" << endl;
+    shm_buffer_src = new SharedMemoryImageBuffer("cannikin-processed", YUV422_PLANAR, width, height);
 
-  buffer     = shm_buffer->buffer();
-  buffer_src = shm_buffer_src->buffer();
-  buffer1    = (unsigned char *)malloc( buffer_size );
-  buffer2    = (unsigned char *)malloc( buffer_size );
-  buffer3    = (unsigned char *)malloc( buffer_size );
+    buffer     = shm_buffer->buffer();
+    buffer_src = shm_buffer_src->buffer();
+    buffer1    = (unsigned char *)malloc( buffer_size );
+    buffer2    = (unsigned char *)malloc( buffer_size );
+    buffer3    = (unsigned char *)malloc( buffer_size );
 
-  // models
-  scanlines = new ScanlineGrid(width, height,
-			       config->ScanlineGridXOffset, config->ScanlineGridYOffset);
+    // models
+    scanlines = new ScanlineGrid(width, height,
+				 config->ScanlineGridXOffset, config->ScanlineGridYOffset);
 
-  disparity_scanlines = new ScanlineRadial(width, height, width / 2, height / 2, 10, 10);
+    disparity_scanlines = new ScanlineRadial(width, height, width / 2, height / 2, 10, 10);
+  } // end not camless mode
+
+
 
   string colormap_filestem = ColorModelLookupTable::composeFilename(config->ColormapDirectory
 								    + "/" +
@@ -473,45 +493,66 @@ CannikinPipeline::ipc_messaging()
   if ( msgq->recv(CANNIKIN_MTYPE_SET_STEREOPARAMS, (IPCMessageQueue::MessageStruct *)&stereo_params, sizeof(stereo_params)) ) {
     if ( generate_output ) {
       cout << "RECEIVED stereo parameters:" << endl
-	   << "  Disparity Range:          [" << stereo_params.min_disparity << ".." << stereo_params.min_disparity << "]" << endl
-	   << "  Disparity Mapping Range:  [" << stereo_params.min_disparity_mapping << ".." << stereo_params.min_disparity_mapping << "]" << endl
-	   << "  Edge Mask Size:           " << stereo_params.edge_masksize << endl
-	   << "  Stereo Mask Size:         " << stereo_params.stereo_masksize << endl
+	   << "  Disparity Range:          [" << (unsigned int)stereo_params.min_disparity << ".." << (unsigned int)stereo_params.max_disparity << "]" << endl
+	   << "  Disparity Mapping Range:  [" << (unsigned int)stereo_params.min_disparity_mapping << ".." << (unsigned int)stereo_params.max_disparity_mapping << "]" << endl
+	   << "  Edge Mask Size:           " << (unsigned int)stereo_params.edge_masksize << endl
+	   << "  Stereo Mask Size:         " << (unsigned int)stereo_params.stereo_masksize << endl
 	   << "  Disparity mapping:        " << stereo_params.flag_disparity_mapping << endl
 	   << "  Subpixel Interpolation:   " << stereo_params.flag_subpixel_interpolation << endl
 	   << "  Lowpass filtering:        " << stereo_params.flag_lowpass_filter << endl
 	   << "  Surface Validation:       " << stereo_params.flag_surface_validation << endl
 	   << "  Texture Validation:       " << stereo_params.flag_texture_validation << endl;
     }
-    triclops->set_disparity_range(stereo_params.min_disparity, stereo_params.min_disparity);
-    triclops->set_disparity_mapping_range(stereo_params.min_disparity_mapping, stereo_params.min_disparity_mapping);
-    triclops->set_edge_masksize(stereo_params.edge_masksize);
-    triclops->set_stereo_masksize(stereo_params.stereo_masksize);
-    triclops->set_disparity_mapping(stereo_params.flag_disparity_mapping);
-    triclops->set_subpixel_interpolation(stereo_params.flag_subpixel_interpolation);
-    triclops->set_lowpass(stereo_params.flag_lowpass_filter);
-    triclops->set_surface_validation(stereo_params.flag_surface_validation);
-    triclops->set_texture_validation(stereo_params.flag_texture_validation);
+    if ( ! camless_mode ) {
+#ifdef HAVE_TRICLOPS_SDK
+      triclops->set_disparity_range(stereo_params.min_disparity, stereo_params.min_disparity);
+      triclops->set_disparity_mapping_range(stereo_params.min_disparity_mapping, stereo_params.min_disparity_mapping);
+      triclops->set_edge_masksize(stereo_params.edge_masksize);
+      triclops->set_stereo_masksize(stereo_params.stereo_masksize);
+      triclops->set_disparity_mapping(stereo_params.flag_disparity_mapping);
+      triclops->set_subpixel_interpolation(stereo_params.flag_subpixel_interpolation);
+      triclops->set_lowpass(stereo_params.flag_lowpass_filter);
+      triclops->set_surface_validation(stereo_params.flag_surface_validation);
+      triclops->set_texture_validation(stereo_params.flag_texture_validation);
+#endif
+    }
   }
   if ( msgq->recv(CANNIKIN_MTYPE_GET_STEREOPARAMS, (IPCMessageQueue::MessageStruct *)&mtype, sizeof(mtype)) ) {
     // Someone wants our params, send them!
     stereo_params.mtype = CANNIKIN_MTYPE_STEREOPARAMS;
-    stereo_params.min_disparity = triclops->disparity_range_min();
-    stereo_params.max_disparity = triclops->disparity_range_max();
-    stereo_params.min_disparity_mapping = triclops->disparity_mapping_min();
-    stereo_params.max_disparity_mapping = triclops->disparity_mapping_max();
-    stereo_params.edge_masksize = triclops->edge_masksize();
-    stereo_params.flag_subpixel_interpolation = triclops->subpixel_interpolation();
-    stereo_params.flag_disparity_mapping = triclops->disparity_mapping();
-    stereo_params.flag_surface_validation = triclops->surface_validation();
-    stereo_params.flag_texture_validation = triclops->texture_validation();
-    stereo_params.flag_lowpass_filter = triclops->lowpass();
+    if ( ! camless_mode ) {
+#ifdef HAVE_TRICLOPS_SDK
+      stereo_params.min_disparity = triclops->disparity_range_min();
+      stereo_params.max_disparity = triclops->disparity_range_max();
+      stereo_params.min_disparity_mapping = triclops->disparity_mapping_min();
+      stereo_params.max_disparity_mapping = triclops->disparity_mapping_max();
+      stereo_params.edge_masksize = triclops->edge_masksize();
+      stereo_params.stereo_masksize = triclops->stereo_masksize();
+      stereo_params.flag_subpixel_interpolation = triclops->subpixel_interpolation();
+      stereo_params.flag_disparity_mapping = triclops->disparity_mapping();
+      stereo_params.flag_surface_validation = triclops->surface_validation();
+      stereo_params.flag_texture_validation = triclops->texture_validation();
+      stereo_params.flag_lowpass_filter = triclops->lowpass();
+#endif
+    } else {
+      stereo_params.min_disparity = 10;
+      stereo_params.max_disparity = 20;
+      stereo_params.min_disparity_mapping = 30;
+      stereo_params.max_disparity_mapping = 40;
+      stereo_params.edge_masksize = 11;
+      stereo_params.stereo_masksize = 23;
+      stereo_params.flag_subpixel_interpolation = 1;
+      stereo_params.flag_disparity_mapping = 0;
+      stereo_params.flag_surface_validation = 1;
+      stereo_params.flag_texture_validation = 0;
+      stereo_params.flag_lowpass_filter = 1;
+    }
     if ( generate_output ) {
       cout << "SENDING stereo parameters:" << endl
-	   << "  Disparity Range:          [" << stereo_params.min_disparity << ".." << stereo_params.min_disparity << "]" << endl
-	   << "  Disparity Mapping Range:  [" << stereo_params.min_disparity_mapping << ".." << stereo_params.min_disparity_mapping << "]" << endl
-	   << "  Edge Mask Size:           " << stereo_params.edge_masksize << endl
-	   << "  Stereo Mask Size:         " << stereo_params.stereo_masksize << endl
+	   << "  Disparity Range:          [" << (unsigned int)stereo_params.min_disparity << ".." << (unsigned int)stereo_params.min_disparity << "]" << endl
+	   << "  Disparity Mapping Range:  [" << (unsigned int)stereo_params.min_disparity_mapping << ".." << (unsigned int)stereo_params.min_disparity_mapping << "]" << endl
+	   << "  Edge Mask Size:           " << (unsigned int)stereo_params.edge_masksize << endl
+	   << "  Stereo Mask Size:         " << (unsigned int)stereo_params.stereo_masksize << endl
 	   << "  Disparity mapping:        " << stereo_params.flag_disparity_mapping << endl
 	   << "  Subpixel Interpolation:   " << stereo_params.flag_subpixel_interpolation << endl
 	   << "  Lowpass filtering:        " << stereo_params.flag_lowpass_filter << endl
@@ -530,34 +571,45 @@ CannikinPipeline::loop()
   cup_visible = false;
 
   ipc_messaging();
-
+  
   if ( state == CANNIKIN_STATE_UNINITIALIZED ) {
-    cam->capture();
-    triclops->preprocess_stereo();
-    //cam->set_image_number(Bumblebee2Camera::); // left
-    //convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
-    //memcpy(buffer_src, cam->buffer(), buffer_size);
-    //cam->set_image_number(1); // right
-    //memcpy(buffer, cam->buffer(), buffer_size);
-    memcpy(buffer_src, triclops->yuv_buffer(), buffer_size);
-    memcpy(buffer, triclops->auxiliary_yuv_buffer(), buffer_size);
-    cam->dispose_buffer();
+    if ( ! camless_mode ) {
+      cam->capture();
+#ifdef HAVE_TRICLOPS_SDK
+      triclops->preprocess_stereo();
+      //cam->set_image_number(Bumblebee2Camera::); // left
+      //convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
+      //memcpy(buffer_src, cam->buffer(), buffer_size);
+      //cam->set_image_number(1); // right
+      //memcpy(buffer, cam->buffer(), buffer_size);
+      memcpy(buffer_src, triclops->yuv_buffer(), buffer_size);
+      memcpy(buffer, triclops->auxiliary_yuv_buffer(), buffer_size);
+#endif
+      cam->dispose_buffer();
+    }
     return;
+  }
+
+  if ( state != last_state ) {
+    cout << msg_prefix << "State changed to: ";
   }
 
   switch (state) {
 
   case CANNIKIN_STATE_REINITIALIZE_COLORMAP:
-    reinitialize_colormap();
+    if (state != last_state)  cout << "CANNIKIN_STATE_REINITIALIZE_COLORMAP" << endl;
+    if ( ! camless_mode )  reinitialize_colormap();
     state = CANNIKIN_STATE_DETECTION;
     break;
 
   case CANNIKIN_STATE_DETECTION:
-    detect_cup();
+    if (state != last_state)  cout << "CANNIKIN_STATE_DETECTION" << endl;
+    if ( ! camless_mode )  detect_cup();
     break;
 
   case CANNIKIN_STATE_DETERMINE_CUP_COLOR:
-    determine_cup_color();
+    if (state != last_state)  cout << "CANNIKIN_STATE_DETERMINE_CUP_COLOR" << endl;
+    if ( ! camless_mode )  determine_cup_color();
     break;
 
   default: return;
@@ -583,6 +635,7 @@ CannikinPipeline::reinitialize_colormap()
 void
 CannikinPipeline::detect_cup()
 {
+#ifdef HAVE_TRICLOPS_SDK
   cam->capture();
 
   triclops->preprocess_stereo();
@@ -696,12 +749,14 @@ CannikinPipeline::detect_cup()
 
   cam->dispose_buffer();
 
+#endif /* HAVE_TRICLOPS_SDK */
 }
 
 
 void
 CannikinPipeline::determine_cup_color()
 {
+#ifdef HAVE_TRICLOPS_SDK
   if ( state != last_state ) {
     // First call
     determined_valid_frames = 0;
@@ -801,6 +856,7 @@ CannikinPipeline::determine_cup_color()
   }
 
   cam->dispose_buffer();
+#endif /* HAVE_TRICLOPS_SDK */
 }
 
 

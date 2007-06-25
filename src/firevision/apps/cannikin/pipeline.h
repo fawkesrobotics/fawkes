@@ -141,6 +141,7 @@ class CannikinPipeline : SignalHandler {
   bool             use_fileloader;
   bool             old_file_format;
   bool             quit;
+  bool             camless_mode;
 
   cannikin_mode_t  _mode;
   cannikin_state_t state;

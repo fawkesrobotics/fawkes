@@ -52,7 +52,7 @@ main( int argc, char **argv )
 {
 
   // see help output below for the meaning of the parameters
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "f:Lb::x:Hoi:r:l:pvP");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "f:Lb::x:Hoi:r:l:pvPC");
 
   // wipe away all shared memory segments that we are responsible for.
   SharedMemoryImageBuffer::wipe( "cannikin-raw" );  
@@ -63,6 +63,7 @@ main( int argc, char **argv )
 
     cout << endl << cblue << "FirevisionFront Help" << cnormal << endl << endl
          << " -o        Output debug information" << endl
+         << " -C        Camless mode (no cam, no processing)" << endl
 	 << " -p        Show pose (localize) information" << endl
          << " -P        Show pan/tilt information" << endl
 	 << " -b[delay] Do NOT run as BBClient but standalone, optional delay dly ms" << endl
@@ -92,7 +93,7 @@ main( int argc, char **argv )
 
     char *config_filename;
     if ( (config_filename = argp->getArgument("x")) == NULL ) {
-      config_filename = "../cfg/rcsoftconfigfile.xml";
+      config_filename = "../cfg/config.xml";
       cout << cblue << "FirevisionCannikin" << cnormal
 	   << ": No config file given, using default ("
 	   << config_filename << ")" << endl;

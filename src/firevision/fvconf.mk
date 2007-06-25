@@ -69,6 +69,7 @@ else
       TRICLOPS_SDK_INCDIRS += $(TRICLOPS_SDK)/include
       TRICLOPS_SDK_LIBDIRS += $(TRICLOPS_SDK)/lib
       TRICLOPS_SDK_LIBS    += triclops
+      VISION_CFLAGS += -DHAVE_TRICLOPS_SDK
     else
       TRICLOPS_SDK_ERR = "shared lib not created, use \"make triclops\" in fvstereo"
     endif
