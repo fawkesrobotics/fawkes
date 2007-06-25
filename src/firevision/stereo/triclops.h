@@ -40,11 +40,35 @@ class TriclopsStereoProcessor : public StereoProcessor
   TriclopsStereoProcessor(Camera *camera);
   virtual ~TriclopsStereoProcessor();
 
-  virtual bool get_xyz(unsigned int px, unsigned int py,
-		       float *x, float *y, float *z);
+  virtual bool          subpixel_interpolation();
+  virtual bool          edge_correlation();
+  virtual bool          lowpass();
+  virtual int           disparity_range_min();
+  virtual int           disparity_range_max();
+  virtual unsigned int  edge_masksize();
+  virtual unsigned int  stereo_masksize();
+  virtual bool          surface_validation();
+  virtual bool          texture_validation();
+  virtual unsigned char disparity_mapping_min();
+  virtual unsigned char disparity_mapping_max();
+  virtual bool          disparity_mapping();
 
-  virtual bool get_world_xyz(unsigned int px, unsigned int py,
-			     float *x, float *y, float *z);
+  virtual void          set_subpixel_interpolation(bool enabled);
+  virtual void          set_edge_correlation(bool enabled);
+  virtual void          set_lowpass(bool enabled);
+  virtual void          set_disparity_range(int min, int max);
+  virtual void          set_edge_masksize(unsigned int mask_size); // 3-13
+  virtual void          set_stereo_masksize(unsigned int mask_size); // 1-15
+  virtual void          set_surface_validation(bool enabled);
+  virtual void          set_texture_validation(bool enabled);
+  virtual void          set_disparity_mapping_range(unsigned char min, unsigned char max);
+  virtual void          set_disparity_mapping(bool enabled);
+
+  virtual bool          get_xyz(unsigned int px, unsigned int py,
+				float *x, float *y, float *z);
+
+  virtual bool          get_world_xyz(unsigned int px, unsigned int py,
+				      float *x, float *y, float *z);
 
   virtual void             preprocess_stereo();
   virtual void             calculate_disparity(ROI *roi);

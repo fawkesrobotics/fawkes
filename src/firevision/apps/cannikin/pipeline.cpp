@@ -166,6 +166,16 @@ CannikinPipeline::init()
 
   triclops = new TriclopsStereoProcessor(cam);
 
+  triclops->set_subpixel_interpolation( false );
+  triclops->set_edge_correlation( true );
+  triclops->set_disparity_range(5, 100);
+  triclops->set_edge_masksize(11);
+  triclops->set_stereo_masksize(23);
+  triclops->set_surface_validation( true );
+  triclops->set_texture_validation( false );
+  triclops->set_disparity_mapping( true );
+  triclops->set_disparity_mapping_range(10, 85);
+
   width  = cam->pixel_width();
   height = cam->pixel_height();
   cspace_from = cam->colorspace();
@@ -187,12 +197,12 @@ CannikinPipeline::init()
   buffer_size = colorspace_buffer_size(YUV422_PLANAR, width, height);
 
   cout << msg_prefix << "Creating shared memory segment for final image" << endl;
-  shm_buffer     = new SharedMemoryImageBuffer(YUV422_PLANAR, width, height, FIREVISION_SHM_IMAGE_FRONT_PROCESSED);
+  shm_buffer     = new SharedMemoryImageBuffer("cannikin-raw", YUV422_PLANAR, width, height);
   cout << msg_prefix << "Creating shared memory segment for source image" << endl;
-  shm_buffer_src = new SharedMemoryImageBuffer(YUV422_PLANAR, width, height, FIREVISION_SHM_IMAGE_FRONT_RAW);
+  shm_buffer_src = new SharedMemoryImageBuffer("cannikin-processed", YUV422_PLANAR, width, height);
 
-  buffer     = shm_buffer->getBuffer();
-  buffer_src = shm_buffer_src->getBuffer();
+  buffer     = shm_buffer->buffer();
+  buffer_src = shm_buffer_src->buffer();
   buffer1    = (unsigned char *)malloc( buffer_size );
   buffer2    = (unsigned char *)malloc( buffer_size );
   buffer3    = (unsigned char *)malloc( buffer_size );
@@ -511,7 +521,7 @@ CannikinPipeline::detect_cup()
 {
   cam->capture();
 
-  triclops->preprocess();
+  triclops->preprocess_stereo();
   triclops->calculate_yuv();
 
   gettimeofday(&data_taken_time, NULL);
@@ -530,8 +540,8 @@ CannikinPipeline::detect_cup()
       cout << msg_prefix << cred << "No ROIs!" << cnormal << endl;
     }
     // No box
-    shm_buffer->setCircleFound(false);
-    shm_buffer->setROI(0, 0, 0, 0);
+    shm_buffer->set_circle_found(false);
+    shm_buffer->set_roi(0, 0, 0, 0);
     //box_rel->reset();
   }
 
@@ -551,9 +561,9 @@ CannikinPipeline::detect_cup()
     if ((*r).hint == H_BALL) {
       cup_visible = true;
 
-      shm_buffer->setROI(r->start.x, r->start.y, r->width, r->height);
+      shm_buffer->set_roi(r->start.x, r->start.y, r->width, r->height);
 
-      triclops->calculate_disparity(*r);
+      triclops->calculate_disparity(&(*r));
 
       if ( (r->width > 10) && (r->height > 10) ) {
 	// Take five points and calculate some distances...
@@ -562,8 +572,8 @@ CannikinPipeline::detect_cup()
 	unsigned int center_x = r->start.x + r->width / 2;
 	unsigned int center_y = r->start.y + r->height / 2;
 
-	shm_buffer->setCircle( center_x, center_y, 5 );
-	shm_buffer->setCircleFound( true );
+	shm_buffer->set_circle( center_x, center_y, 5 );
+	shm_buffer->set_circle_found( true );
 
 	points.clear();
 	wpoints.clear();
@@ -599,7 +609,7 @@ CannikinPipeline::detect_cup()
 	  wz = wpoints[welem].z;
 	}
 
-	memcpy(buffer, bbc->buffer_disparity(), bbc->pixel_width() * bbc->pixel_height());
+	memcpy(buffer, triclops->disparity_buffer(), cam->pixel_width() * cam->pixel_height());
 	memset(buffer + width * height, 128, width * height);
       }
 
@@ -660,8 +670,8 @@ CannikinPipeline::determine_cup_color()
       cout << msg_prefix << cred << "No ROIs!" << cnormal << endl;
     }
     // No box
-    shm_buffer->setCircleFound(false);
-    shm_buffer->setROI(0, 0, 0, 0);
+    shm_buffer->set_circle_found(false);
+    shm_buffer->set_roi(0, 0, 0, 0);
     //box_rel->reset();
   }
 

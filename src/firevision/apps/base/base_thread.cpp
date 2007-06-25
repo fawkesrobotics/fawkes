@@ -82,6 +82,9 @@ FvBaseThread::loop()
 }
 
 
+/** Get vision master.
+ * @return vision master
+ */
 VisionMaster *
 FvBaseThread::vision_master()
 {

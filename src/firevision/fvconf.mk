@@ -47,7 +47,7 @@ ifneq ($(realpath /usr/include/jpeglib.h),)
   VISION_CFLAGS += -DHAVE_LIBJPEG
 endif
 
-# check for JPEG lib
+# check for PNG lib
 ifneq ($(realpath /usr/include/png.h),)
   HAVE_LIBPNG    = 1
   VISION_CFLAGS += -DHAVE_PNG

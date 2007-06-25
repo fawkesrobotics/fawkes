@@ -27,12 +27,21 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
+BUILD_TRICLOPS = 1
 ifneq ($(HAVE_TRICLOPS_SDK),1)
-WARN_TARGETS += warning_triclops
-FILTER_OUT   += triclops.o
+  WARN_TARGETS   += warning_triclops
+  BUILD_TRICLOPS  = 0
+endif
+ifneq ($(HAVE_BUMBLEBEE2_CAM),1)
+  WARN_TARGETS   += warning_bumblebee
+  BUILD_TRICLOPS  = 0
+endif
+ifeq ($(BUILD_TRICLOPS),1)
+  INCDIRS += $(TRICLOPS_SDK_INCDIRS)
+  LIBDIRS += $(TRICLOPS_SDK_LIBDIRS)
+  LIBS    += $(TRICLOPS_SDK_LIBS)
 else
-INCDIRS += $(TRICLOPS_SDK_INCDIRS)
-LIBS    += $(TRICLOPS_SDK_LIBS)
+  FILTER_OUT   += triclops.o
 endif
 
 # Use . instead of nothing here in this pattern because we already included
@@ -41,6 +50,9 @@ ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
 warning_triclops:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Triclops SDK support$(TNORMAL) ($(TRICLOPS_SDK_ERR))"
+
+warning_bumblebee:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Triclops SDK support$(TNORMAL) (Bumblebee 2 camera not available)"
 endif
 
 # We are lazy in the utils...
@@ -52,19 +64,19 @@ LIBS_all = $(LIBDIR)/libfvstereo.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
-#triclops:
-#	$(SILENT)if [ -e "$(TRICLOPS_SDK)/include/triclops.h" -a -e "$(TRICLOPS_SDK)/lib/libtriclops.a" -a -e "$(TRICLOPS_SDK)/lib/libpnmutils.a" ]; then \
-#		echo -e "$(INDENT_PRINT)--> Creating $(TBOLDGREEN)$(TRICLOPS_SDK)/lib/libtriclops.so$(TNORMAL)"; \
-#		cd "$(TRICLOPS_SDK)/lib"; \
-#		rm -f libtriclops.so; \
-#		rm -rf objs; \
-#		mkdir objs; \
-#		cd objs; \
-#		ar x ../libtriclops.a; \
-#		ar x ../libpnmutils.a; \
-#		cd ..; \
-#		$(CC) -shared -m32 -lstdc++ -o libtriclops.so objs/*; \
-#	else \
-#		echo -e "$(INDENT_PRINT)$(TRED)--> Cannot create $(TRICLOPS_SDK)/lib/libtriclops.so$(TNORMAL), Triclops SDK not found or incomplete.$(TNORMAL)"; \
-#	fi
+triclops:
+	$(SILENT)if [ -e "$(TRICLOPS_SDK)/include/triclops.h" -a -e "$(TRICLOPS_SDK)/lib/libtriclops.a" -a -e "$(TRICLOPS_SDK)/lib/libpnmutils.a" ]; then \
+		echo -e "$(INDENT_PRINT)--> Creating $(TBOLDGREEN)$(TRICLOPS_SDK)/lib/libtriclops.so$(TNORMAL)"; \
+		cd "$(TRICLOPS_SDK)/lib"; \
+		rm -f libtriclops.so; \
+		rm -rf objs; \
+		mkdir objs; \
+		cd objs; \
+		ar x ../libtriclops.a; \
+		ar x ../libpnmutils.a; \
+		cd ..; \
+		$(CC) -shared -m32 -lstdc++ -o libtriclops.so objs/*; \
+	else \
+		echo -e "$(INDENT_PRINT)$(TRED)--> Cannot create $(TRICLOPS_SDK)/lib/libtriclops.so$(TNORMAL), Triclops SDK not found or incomplete.$(TNORMAL)"; \
+	fi
 

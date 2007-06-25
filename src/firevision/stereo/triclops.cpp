@@ -29,6 +29,7 @@
 
 #include <core/exceptions/software.h>
 #include <cams/bumblebee2.h>
+#include <fvutils/base/roi.h>
 #include <utils/math/angle.h>
 #include <fvutils/color/conversions.h>
 
@@ -106,28 +107,14 @@ TriclopsStereoProcessor::TriclopsStereoProcessor(Camera *camera)
 
   data->enable_subpixel_interpolation = false;
 
-  TriclopsBool on;
-  int masksize;
-  float focal_length;
-  triclopsGetSubpixelInterpolation( data->triclops, &on );
-  //cout << "Triclops Subpixel Interpolation: " << on << endl;
-  triclopsGetEdgeCorrelation( data->triclops, &on );
-  //cout << "Edge correlation: " << on << endl;
-  triclopsGetEdgeMask( data->triclops, &masksize );
-  //cout << "Edge mask: " << masksize << endl;
-  triclopsGetLowpass( data->triclops, &on );
-  //cout << "Low pass filter: " << on << endl;
-  //triclopsGetRectify( data->triclops, &on );
-  //cout << "Rectification: " << on << endl;
-  triclopsGetFocalLength( data->triclops, &focal_length );
-  //cout << "Focal length: " << focal_length << endl;
+  triclopsSetSubpixelInterpolation( data->triclops, 0);
 
   triclopsSetResolutionAndPrepare( data->triclops,
 				   _height, _width,
 				   _height, _width);
 
-  triclopsSetSubpixelInterpolation( data->triclops, data->enable_subpixel_interpolation ? 1 : 0 );
 
+  // Set defaults
   triclopsSetEdgeCorrelation( data->triclops, 1 );
   triclopsSetLowpass( data->triclops, 1 );
   triclopsSetDisparity( data->triclops, 5, 100);
@@ -138,11 +125,6 @@ TriclopsStereoProcessor::TriclopsStereoProcessor(Camera *camera)
 
   triclopsSetDisparityMapping( data->triclops, 10, 85 );
   triclopsSetDisparityMappingOn( data->triclops, 1 );
-
-  int nrows, ncols;
-  triclopsGetResolution(data->triclops, &nrows, &ncols);
-  //cout << "Resolution: " << ncols << "x" << nrows << endl;
-
 }
 
 
@@ -170,6 +152,256 @@ TriclopsStereoProcessor::~TriclopsStereoProcessor()
 }
 
 
+/** Enable or disable subpixel interpolation
+ * @param enabled true to enable, false to disable
+ */
+void
+TriclopsStereoProcessor::set_subpixel_interpolation(bool enabled)
+{
+  data->enable_subpixel_interpolation = enabled;
+  triclopsSetSubpixelInterpolation(data->triclops, enabled);
+}
+
+
+/** Enable or disable edge correlation.
+ * @param enabled true to enable, false to disable
+ */
+void
+TriclopsStereoProcessor::set_edge_correlation(bool enabled)
+{
+  triclopsSetEdgeCorrelation(data->triclops, enabled);
+}
+
+
+/** Enable or disable lowpass filtering before rectification.
+ * @param enabled true to enable, false to disable
+ */
+void
+TriclopsStereoProcessor::set_lowpass(bool enabled)
+{
+  triclopsSetLowpass(data->triclops, enabled);
+}
+
+
+/** Set disparity range.
+ * @param min minimum disparity
+ * @param max maximum disparity
+ */
+void
+TriclopsStereoProcessor::set_disparity_range(int min, int max)
+{
+  triclopsSetDisparity(data->triclops, min, max);
+}
+
+
+/** Set edge mask.
+ * Size of the kernel used for edge detection.
+ * This value must be in the range [3..13].
+ * @param mask_size mask size
+ */
+void
+TriclopsStereoProcessor::set_edge_masksize(unsigned int mask_size)
+{
+  triclopsSetEdgeMask(data->triclops, mask_size);
+}
+
+
+/** Set stereo mask.
+ * Size of the mask used for stereo correlation.
+ * @param mask_size mask size
+ */
+void
+TriclopsStereoProcessor::set_stereo_masksize(unsigned int mask_size)
+{
+  triclopsSetStereoMask(data->triclops, mask_size);
+}
+
+
+/** Enable or disable surface validation.
+ * @param enabled true to enable, false to disable
+ */
+void
+TriclopsStereoProcessor::set_surface_validation(bool enabled)
+{
+  triclopsSetSurfaceValidation(data->triclops, enabled);
+}
+
+
+/** Enable or disable texture validation.
+ * @param enabled true to enable, false to disable
+ */
+void
+TriclopsStereoProcessor::set_texture_validation(bool enabled)
+{
+  triclopsSetTextureValidation(data->triclops, enabled);  
+}
+
+
+/** Set disparity mapping range.
+ * @param min minimum disparity
+ * @param max maximum disparity
+ */
+void
+TriclopsStereoProcessor::set_disparity_mapping_range(unsigned char min, unsigned char max)
+{
+  triclopsSetDisparityMapping(data->triclops, min, max);
+}
+
+
+/** Enable or disable disparity mapping.
+ * @param enabled true to enable, false to disable
+ */
+void
+TriclopsStereoProcessor::set_disparity_mapping(bool enabled)
+{
+  triclopsSetDisparityMappingOn(data->triclops, enabled);
+}
+
+
+/** Check state of subpixel interpolation
+ * @return true if enabled, false otherwise
+ */
+bool
+TriclopsStereoProcessor::subpixel_interpolation()
+{
+  TriclopsBool on;
+  triclopsGetSubpixelInterpolation(data->triclops, &on);
+  return on;
+}
+
+
+/** Check state of edge correlation.
+ * @return true if enabled, false otherwise
+ */
+bool
+TriclopsStereoProcessor::edge_correlation()
+{
+  TriclopsBool on;
+  triclopsGetEdgeCorrelation(data->triclops, &on);
+  return on;
+}
+
+
+/** Check state of lowpass filtering.
+ * @return true if enabled, false otherwise
+ */
+bool
+TriclopsStereoProcessor::lowpass()
+{
+  TriclopsBool on;
+  triclopsGetLowpass(data->triclops, &on);
+  return on;
+}
+
+
+/** Get disparity range min value.
+ * @return disparity range min value
+ */
+int
+TriclopsStereoProcessor::disparity_range_min()
+{
+  int min, max;
+  triclopsGetDisparity( data->triclops, &min, &max );
+  return min;
+}
+
+
+/** Get disparity range max value.
+ * @return disparity range max value
+ */
+int
+TriclopsStereoProcessor::disparity_range_max()
+{
+  int min, max;
+  triclopsGetDisparity( data->triclops, &min, &max );
+  return max;
+}
+
+
+/** Get edge mask size.
+ * @return size of the edge mask
+ */
+unsigned int
+TriclopsStereoProcessor::edge_masksize()
+{
+  int mask_size = 0;
+  triclopsGetEdgeMask( data->triclops, &mask_size );
+  return mask_size;
+}
+
+
+/** Get stereo mask size.
+ * @return size of the stereo mask
+ */
+unsigned int
+TriclopsStereoProcessor::stereo_masksize()
+{
+  int mask_size = 0;
+  triclopsGetStereoMask( data->triclops, &mask_size );
+  return mask_size;
+}
+
+
+/** Check state of surface validation.
+ * @return true if enabled, false otherwise
+ */
+bool
+TriclopsStereoProcessor::surface_validation()
+{
+  TriclopsBool on;
+  triclopsGetSurfaceValidation(data->triclops, &on);
+  return on;
+}
+
+
+/** Check state of texture validation.
+ * @return true if enabled, false otherwise
+ */
+bool
+TriclopsStereoProcessor::texture_validation()
+{
+  TriclopsBool on;
+  triclopsGetTextureValidation(data->triclops, &on);
+  return on;
+}
+
+
+/** Get disparity mapping min value.
+ * @return min value for disparity mapping
+ */
+unsigned char
+TriclopsStereoProcessor::disparity_mapping_min()
+{
+  unsigned char min, max;
+  triclopsGetDisparityMapping( data->triclops, &min, &max );
+  return min;
+}
+
+
+/** Get disparity mapping max value.
+ * @return max value for disparity mapping
+ */
+unsigned char
+TriclopsStereoProcessor::disparity_mapping_max()
+{
+  unsigned char min, max;
+  triclopsGetDisparityMapping( data->triclops, &min, &max );
+  return max;
+}
+
+
+/** Check state of disparity mapping
+ * @return true if enabled, false otherwise
+ */
+bool
+TriclopsStereoProcessor::disparity_mapping()
+{
+  TriclopsBool on;
+  triclopsGetDisparityMappingOn(data->triclops, &on);
+  return on;
+}
+
+
 void
 TriclopsStereoProcessor::preprocess_stereo()
 {
@@ -191,6 +423,25 @@ TriclopsStereoProcessor::calculate_yuv(bool both)
 void
 TriclopsStereoProcessor::calculate_disparity(ROI *roi)
 {
+  TriclopsROI *rois;
+  int          max_rois;
+
+  if ( NULL != roi ) {
+    if ( TriclopsErrorOk == triclopsGetROIs( data->triclops, &rois, &max_rois ) ) {
+      // assume there is always at least one ROI
+      rois[0].col = roi->start.x;
+      rois[0].row = roi->start.y;
+      rois[0].ncols = roi->width;
+      rois[0].nrows = roi->height;
+
+      triclopsSetNumberOfROIs( data->triclops, 1 );
+    } else {
+      triclopsSetNumberOfROIs( data->triclops, 0 );
+    }
+  } else {
+    triclopsSetNumberOfROIs( data->triclops, 0 );
+  }
+
   // now deinterlace the RGB Buffer
   deinterlace_green( buffer_rgb, buffer_green, _width, 6 * _height );
 

@@ -55,8 +55,8 @@ main( int argc, char **argv )
   ArgumentParser *argp = new ArgumentParser(argc, argv, "f:Lb::x:Hoi:r:l:pvP");
 
   // wipe away all shared memory segments that we are responsible for.
-  SharedMemoryImageBuffer::wipe( FIREVISION_SHM_IMAGE_FRONT_RAW );  
-  SharedMemoryImageBuffer::wipe( FIREVISION_SHM_IMAGE_FRONT_PROCESSED );
+  SharedMemoryImageBuffer::wipe( "cannikin-raw" );  
+  SharedMemoryImageBuffer::wipe( "cannikin-processed" );
 
 
   if (argp->hasArgument("H")) {

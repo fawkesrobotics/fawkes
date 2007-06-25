@@ -43,7 +43,7 @@ warning_triclops:
 endif
 
 OBJS_cannikin = bbclient.o config.o main.o pipeline.o
-LIBS_cannikin = core utils rutils fvutils fvcams fvmodels fvclassifiers bb interfaces qt-mt
+LIBS_cannikin = core utils rutils fvutils fvcams fvmodels fvclassifiers fvstereo bb interfaces qt-mt
 
 OBJS_bbcannikin = bbcannikin.o
 LIBS_bbcannikin = core utils rutils bb interfaces qt-mt
