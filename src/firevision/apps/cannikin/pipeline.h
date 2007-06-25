@@ -31,6 +31,8 @@
 
 /// @cond RCSoftX
 
+#include <apps/cannikin/messages.h>
+
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/roi.h>
 
@@ -56,6 +58,7 @@ class SharedMemoryImageBuffer;
 class CannikinConfig;
 class ScanlineRadial;
 class TriclopsStereoProcessor;
+class IPCMessageQueue;
 
 class CannikinPipeline : SignalHandler {
 
@@ -106,6 +109,7 @@ class CannikinPipeline : SignalHandler {
 
  private:
 
+  void ipc_messaging();
   void detect_cup();
   void determine_cup_color();
   void reinitialize_colormap();
@@ -124,6 +128,10 @@ class CannikinPipeline : SignalHandler {
   Camera          *cam;
   CameraControl   *camctrl;
   TriclopsStereoProcessor *triclops;
+
+  IPCMessageQueue *msgq;
+  unsigned long int mtype;
+  cannikin_stereo_params_t stereo_params;
 
   colorspace_t     cspace_from;
   colorspace_t     cspace_to;

@@ -37,6 +37,8 @@
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/ipc/shm_registry.h>
 #include <fvutils/color/conversions.h>
+#include <utils/ipc/msg.h>
+#include <fvutils/ipc/msg_registry.h>
 
 #include <cams/factory.h>
 #include <cams/bumblebee2.h>
@@ -112,6 +114,10 @@ CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
 
   state = CANNIKIN_STATE_DETECTION; // CANNIKIN_STATE_UNINITIALIZED;
   _mode = DETECT_CUP;
+
+  msgq = new IPCMessageQueue( FIREVISION_MSGQ_CANNIKIN,
+			      true /* destroy on delete */,
+			      true /* create if it does not exist */);
 
   cam = NULL;
   camctrl = NULL;
@@ -462,10 +468,68 @@ CannikinPipeline::determined_cup_color()
 
 
 void
+CannikinPipeline::ipc_messaging()
+{
+  if ( msgq->recv(CANNIKIN_MTYPE_SET_STEREOPARAMS, (IPCMessageQueue::MessageStruct *)&stereo_params, sizeof(stereo_params)) ) {
+    if ( generate_output ) {
+      cout << "RECEIVED stereo parameters:" << endl
+	   << "  Disparity Range:          [" << stereo_params.min_disparity << ".." << stereo_params.min_disparity << "]" << endl
+	   << "  Disparity Mapping Range:  [" << stereo_params.min_disparity_mapping << ".." << stereo_params.min_disparity_mapping << "]" << endl
+	   << "  Edge Mask Size:           " << stereo_params.edge_masksize << endl
+	   << "  Stereo Mask Size:         " << stereo_params.stereo_masksize << endl
+	   << "  Disparity mapping:        " << stereo_params.flag_disparity_mapping << endl
+	   << "  Subpixel Interpolation:   " << stereo_params.flag_subpixel_interpolation << endl
+	   << "  Lowpass filtering:        " << stereo_params.flag_lowpass_filter << endl
+	   << "  Surface Validation:       " << stereo_params.flag_surface_validation << endl
+	   << "  Texture Validation:       " << stereo_params.flag_texture_validation << endl;
+    }
+    triclops->set_disparity_range(stereo_params.min_disparity, stereo_params.min_disparity);
+    triclops->set_disparity_mapping_range(stereo_params.min_disparity_mapping, stereo_params.min_disparity_mapping);
+    triclops->set_edge_masksize(stereo_params.edge_masksize);
+    triclops->set_stereo_masksize(stereo_params.stereo_masksize);
+    triclops->set_disparity_mapping(stereo_params.flag_disparity_mapping);
+    triclops->set_subpixel_interpolation(stereo_params.flag_subpixel_interpolation);
+    triclops->set_lowpass(stereo_params.flag_lowpass_filter);
+    triclops->set_surface_validation(stereo_params.flag_surface_validation);
+    triclops->set_texture_validation(stereo_params.flag_texture_validation);
+  }
+  if ( msgq->recv(CANNIKIN_MTYPE_GET_STEREOPARAMS, (IPCMessageQueue::MessageStruct *)&mtype, sizeof(mtype)) ) {
+    // Someone wants our params, send them!
+    stereo_params.mtype = CANNIKIN_MTYPE_STEREOPARAMS;
+    stereo_params.min_disparity = triclops->disparity_range_min();
+    stereo_params.max_disparity = triclops->disparity_range_max();
+    stereo_params.min_disparity_mapping = triclops->disparity_mapping_min();
+    stereo_params.max_disparity_mapping = triclops->disparity_mapping_max();
+    stereo_params.edge_masksize = triclops->edge_masksize();
+    stereo_params.flag_subpixel_interpolation = triclops->subpixel_interpolation();
+    stereo_params.flag_disparity_mapping = triclops->disparity_mapping();
+    stereo_params.flag_surface_validation = triclops->surface_validation();
+    stereo_params.flag_texture_validation = triclops->texture_validation();
+    stereo_params.flag_lowpass_filter = triclops->lowpass();
+    if ( generate_output ) {
+      cout << "SENDING stereo parameters:" << endl
+	   << "  Disparity Range:          [" << stereo_params.min_disparity << ".." << stereo_params.min_disparity << "]" << endl
+	   << "  Disparity Mapping Range:  [" << stereo_params.min_disparity_mapping << ".." << stereo_params.min_disparity_mapping << "]" << endl
+	   << "  Edge Mask Size:           " << stereo_params.edge_masksize << endl
+	   << "  Stereo Mask Size:         " << stereo_params.stereo_masksize << endl
+	   << "  Disparity mapping:        " << stereo_params.flag_disparity_mapping << endl
+	   << "  Subpixel Interpolation:   " << stereo_params.flag_subpixel_interpolation << endl
+	   << "  Lowpass filtering:        " << stereo_params.flag_lowpass_filter << endl
+	   << "  Surface Validation:       " << stereo_params.flag_surface_validation << endl
+	   << "  Texture Validation:       " << stereo_params.flag_texture_validation << endl;
+    }
+    msgq->send((IPCMessageQueue::MessageStruct *)&stereo_params, sizeof(stereo_params));
+  }
+}
+
+
+void
 CannikinPipeline::loop()
 {
 
   cup_visible = false;
+
+  ipc_messaging();
 
   if ( state == CANNIKIN_STATE_UNINITIALIZED ) {
     cam->capture();
