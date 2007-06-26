@@ -49,7 +49,7 @@ OBJS_interface_generator = generator/constant.o		\
 BINS_all = $(BINDIR)/interface_generator
 endif
 
-ifneq ($(SRCDIR),)
+ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
 .PHONY: warning_pkgconfig
 warning_pkgconfig:

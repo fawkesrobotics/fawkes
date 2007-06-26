@@ -20,13 +20,14 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
-include $(BASEDIR)/src/plugins/kicker/kickerconf.mk
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/src/plugins/kicker/kicker.mk
 
 CFLAGS = -g
 INCDIRS += $(KICKER_INCDIRS)
 LIBDIRS += $(KICKER_LIBDIRS)
 
-ifneq ($(SRCDIR),)
+ifneq ($(SRCDIR),.)
 .PHONY: print_unsupported
 print_unsupported:
 	$(SILENT)if [ "$(HAVE_IOWKIT)" != "1" ]; then \

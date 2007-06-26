@@ -4,6 +4,7 @@
  *
  *  Generated: Sun June 03 00:23:59 2007
  *  Copyright  2007  Daniel Beck 
+ *             2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,12 +26,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <utils/system/clock.h>
-#include <utils/system/timesource.h>
+#include <utils/time/clock.h>
+#include <utils/time/timesource.h>
 #include <utils/logging/liblogger.h>
 
-/** @class Clock utils/system/clock.h
- * This is supposed to be the central (wall-) clock in Fawkes.
+#include <cstdlib>
+
+/** @class Clock <utils/time/clock.h>
+ * This is supposed to be the central clock in Fawkes.
  * It is implemented as a singleton to ensure that there is only
  * one object. So-called TimeSources can be registered at the Clock
  * their current time can be retrieved through the Clock.
@@ -38,7 +41,7 @@
  */
 
 /** initialize static members */
-Clock* Clock::instance = 0;
+Clock* Clock::_instance = NULL;
 bool Clock::destruct_ok = false;
 
 /** Constructor. */
@@ -68,15 +71,15 @@ Clock::~Clock()
  * In further calls it just returns a pointer to the Clock object.
  * @return a pointer to the Clock object
  */
-Clock*
-Clock::init()
+Clock *
+Clock::instance()
 {
-  if ( 0 == instance )
+  if ( NULL == _instance )
     {
-      instance = new Clock();
+      _instance = new Clock();
     }
   
-  return instance;
+  return _instance;
 }
 
 
@@ -88,7 +91,7 @@ void
 Clock::finalize()
 {
   destruct_ok = true;
-  delete instance;
+  delete _instance;
 }
 
 
@@ -112,15 +115,21 @@ Clock::register_ext_timesource(TimeSource* ts, bool make_default)
 }
 
 
-/** Makes the external time source the default time source.
+/** Set/unset the external time source as the default time source.
+ * @param ext_is_default true to make external time source the default,
+ * false to disable it as the default.
  */
 void
-Clock::make_ext_default_timesource()
+Clock::set_ext_default_timesource(bool ext_is_default)
 {
-  if (0 != ext_timesource) {
-    ext_default = true;
+  if ( ext_is_default ) {
+    if (NULL != ext_timesource) {
+      ext_default = true;
+    } else {
+      throw Exception("Trying to make the external timesource the default timesource but there is no external timesource");
+    }
   } else {
-    LibLogger::log_warn("Clock", "Trying to make the external timesource the default timesource but there is no external timesource");
+    ext_default = false;
   }
 }
 
@@ -138,28 +147,128 @@ Clock::is_ext_default_timesource() const
 /** Returns the time of the selected time source.
  * @param tv pointer to a timeval struct where the time is written to
  * @param sel allows to select the time source
- * @return returns false if no external time source is registered
  */
-bool
+void
 Clock::get_time(struct timeval* tv, TimesourceSelector sel) const
 {
   if ( (DEFAULT == sel && !ext_default) ||
        REALTIME == sel)
     {
       gettimeofday(tv, 0);
-      return true;
     }
   else if ( (EXTERNAL == sel) && 
-	    (0 == ext_timesource) )
+	    (NULL == ext_timesource) )
     {
-      gettimeofday(tv, 0);
-      return false;
+      throw Exception("No external time source registered");
     }
   else
     {
       ext_timesource->get_time(tv);
-      return true;
     }
+}
+
+
+/** Returns the time of the selected time source.
+ * @param tv pointer to a timeval struct where the time is written to
+ */
+void
+Clock::get_time(struct timeval* tv) const
+{
+  if ( ext_default ) {
+    if ( NULL == ext_timesource ) {
+      throw Exception("No external time source registered");
+    }
+    ext_timesource->get_time(tv);
+  } else {
+    gettimeofday(tv, NULL);
+  }
+}
+
+
+/** Returns the time of the selected time source.
+ * @param time reference to a time where the result is stored
+ */
+void
+Clock::get_time(Time &time) const
+{
+  get_time(&(time.time));
+}
+
+
+
+
+/** Returns the time of the selected time source.
+ * @param time reference to a time where the result is stored
+ * @param sel allows to select the time source
+ */
+void
+Clock::get_time(Time &time, TimesourceSelector sel) const
+{
+  get_time(&(time.time), sel);
+}
+
+
+/** Returns the time of the selected time source.
+ * @param time pointer to a Time instance
+ */
+void
+Clock::get_time(Time *time) const
+{
+  get_time(&(time->time));
+}
+
+
+
+
+/** Returns the time of the selected time source.
+ * @param time pointer to a Time instance where the time is stored
+ * @param sel allows to select the time source
+ */
+void
+Clock::get_time(Time *time, TimesourceSelector sel) const
+{
+  get_time(&(time->time), sel);
+}
+
+
+/** Returns the system time.
+ * @param tv pointer to a timeval struct where the time is written to
+ */
+void
+Clock::get_systime(struct timeval* tv) const
+{
+  gettimeofday(tv, 0);
+}
+
+
+/** Returns the time of the selected time source.
+ * @param time reference to Time instance where the time is stored
+ */
+void
+Clock::get_systime(Time &time) const
+{
+  get_systime(&(time.time));
+}
+
+
+/** Returns the time of the selected time source.
+ * @param time pointer to Time instance where the time is stored
+ */
+void
+Clock::get_systime(Time *time) const
+{
+  get_systime(&(time->time));
+}
+
+
+/** Get the current time.
+ * @return current time
+ */
+Time
+Clock::now() const
+{
+  Time t(_instance);
+  return t.stamp();
 }
 
 
@@ -173,7 +282,7 @@ Clock::ext_to_realtime(const Time& t)
   timeval tv;
   Time ret;
   
-  if (0 != ext_timesource) 
+  if (NULL != ext_timesource) 
     {
       tv = ext_timesource->conv_to_realtime(t.get_timeval());
       ret.set_time(&tv); 

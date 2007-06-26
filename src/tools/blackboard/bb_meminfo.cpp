@@ -5,7 +5,7 @@
  *  Generated: Fri Oct 20 13:32:38 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: bb_meminfo.cpp 37 2006-10-27 21:17:37Z tim $
+ *  $Id$
  *
  ****************************************************************************/
 
@@ -30,7 +30,7 @@
 #include <blackboard/interface_mem_header.h>
 #include <blackboard/exceptions.h>
 #include <utils/system/console_colors.h>
-#include <utils/system/time.h>
+#include <utils/time/time.h>
 
 #include <iostream>
 

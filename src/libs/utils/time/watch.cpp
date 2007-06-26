@@ -25,11 +25,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <utils/system/watch.h>
-#include <utils/system/clock.h>
-#include <utils/system/time.h>
+#include <utils/time/watch.h>
+#include <utils/time/clock.h>
+#include <utils/time/time.h>
 
-/** @class Watch utils/system/watch.h
+/** @class Watch <utils/time/watch.h>
  * This is a stop-watch. Also, one can request the current time from the 
  * clock. Every watch counts time w.r.t. a certain time source.
  * @author Daniel Beck
@@ -37,18 +37,15 @@
 
 
 /** Constructor.
- * @param sel Select the time source from which you want to obtain the time.
- * This can either be the default-, the external-, or the system-time. The
- * selection cannot be changed later.
+ * @param clock clock instance to use for measurement.
  */
-Watch::Watch(Clock::TimesourceSelector sel)
+Watch::Watch(Clock *clock)
 {
-  clock = Clock::init();
+  this->clock = clock;
 
   is_running = false;
   is_paused = false;
 
-  ts_sel = sel;
 }
 
 
@@ -67,7 +64,7 @@ void
 Watch::start(Time* t)
 {
   timeval now;
-  clock->get_time(&now, ts_sel);
+  clock->get_time(&now);
 
   if (is_running && is_paused)
     {
@@ -89,7 +86,7 @@ Watch::start(Time* t)
     }
 
   if (0 != t) {
-    t->set_time(&now);;
+    t->set_time(&now);
   }
 }
 
@@ -102,7 +99,7 @@ void
 Watch::stop(Time* t)
 {
   timeval now;
-  clock->get_time(&now, ts_sel);
+  clock->get_time(&now);
   watch_stop.set_time(&now);
   is_running = false;
 
@@ -128,7 +125,7 @@ void
 Watch::pause(Time* t)
 {
   timeval now;
-  clock->get_time(&now, ts_sel);
+  clock->get_time(&now);
 
   if (!is_paused) {
     pause_start.set_time(&now);
@@ -141,6 +138,16 @@ Watch::pause(Time* t)
 }
 
 
+/** Reset time. */
+void
+Watch::reset()
+{
+  timeval now;
+  clock->get_time(&now);  
+  watch_start.set_time(&now);
+}
+
+
 /** Returns the current watch time.
  * @return the current watch time
  */
@@ -148,7 +155,7 @@ Time
 Watch::watch_time()
 {
   timeval now;
-  clock->get_time(&now, ts_sel);
+  clock->get_time(&now);
 
   Time ret(&now);
 
@@ -178,7 +185,7 @@ Time
 Watch::clock_time()
 {
   timeval now;
-  clock->get_time(&now, ts_sel);
+  clock->get_time(&now);
   Time t(&now);
   return t;
 }

@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  watch.h - A stopwatch
+ *  timesource.h - A clock's timesource
  *
- *  Generated: Sun June 03 00:44:22 2007
+ *  Generated: Sun June 03 10:58:19 2007
  *  Copyright  2007  Daniel Beck 
  *
  *  $Id$
@@ -25,43 +25,29 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __UTILS_SYSTEM_WATCH_H_
-#define __UTILS_SYSTEM_WATCH_H_
-
-//#include <utils/system/time.h>
-#include <utils/system/clock.h>
+#ifndef __UTILS_TIME_TIMESOURCE_H_
+#define __UTILS_TIME_TIMESOURCE_H_
 
 #include <sys/time.h>
 
-class Time;
-
-class Watch
+class TimeSource
 {
  public:
-  Watch(Clock::TimesourceSelector sel = Clock::DEFAULT);
-  virtual ~Watch();
+  /** Constructor. */
+  TimeSource() {}
+  /** Destructor. */
+  virtual ~TimeSource() {}
 
-  void start(Time* t = 0);
-  void stop(Time* t = 0);
-  void pause(Time* t = 0);
+  /** Get the current time.
+   * @param tv the current time is written to this timeval
+   */
+  virtual void get_time(timeval* tv) const = 0;
 
-  Time watch_time();
-  Time clock_time();
-
- private:
-  Time watch_start;
-  Time watch_stop;
-
-  Time pause_start;
-  Time pause_stop;
-  Time pause_time;
-
-  Clock* clock;
-
-  bool is_running;
-  bool is_paused;
-
-  Clock::TimesourceSelector ts_sel;
+  /** Convert a time given w.r.t. this time sources into system time.
+   * @param tv the time to convert
+   * @return the converted time
+   */
+  virtual timeval conv_to_realtime(const timeval* tv) const = 0;
 };
 
-#endif /*  __UTILS_SYSTEM_WATCH_H_ */
+#endif /*  __UTILS_TIME_TIMESOURCE_H_ */

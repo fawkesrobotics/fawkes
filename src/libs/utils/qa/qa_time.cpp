@@ -25,8 +25,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <utils/system/clock.h>
-#include <utils/system/watch.h>
+#include <utils/time/clock.h>
+#include <utils/time/watch.h>
 
 #include <unistd.h>
 
@@ -36,43 +36,45 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-  Watch watch;
-  Time time;
+  Clock *clock = Clock::instance();
+
+  Watch watch(clock);
+  Time time(clock);
 
   time = watch.clock_time();
-  cout << "Current clock time is " << time << endl;
+  cout << "Current clock time is " << time.str() << endl;
 
   watch.start(&time);
-  cout << "Starting watch at " << time << endl;
+  cout << "Starting watch at " << time.str() << endl;
   sleep(1);
 
-  cout << "Watch is running for " << watch.watch_time() << endl;
+  cout << "Watch is running for " << watch.watch_time().str() << endl;
   sleep(1);
 
-  cout << "Watch is running for " << watch.watch_time() << endl;
+  cout << "Watch is running for " << watch.watch_time().str() << endl;
   sleep(1);
 
   watch.pause(&time);
-  cout << "Start pausing at "<< time << endl;
+  cout << "Start pausing at "<< time.str() << endl;
   sleep(1);
 
-  cout << "Watch is running for " << watch.watch_time() << endl;
+  cout << "Watch is running for " << watch.watch_time().str() << endl;
   sleep(1);
 
-  cout << "Watch is running for " << watch.watch_time() << endl;
+  cout << "Watch is running for " << watch.watch_time().str() << endl;
   sleep(1);
 
   watch.start(&time);
-  cout << "Resuming at "<< time << endl;
+  cout << "Resuming at "<< time.str() << endl;
   sleep(1);
 
   watch.stop(&time);
-  cout << "Stopping watch at "<< time << endl;
+  cout << "Stopping watch at "<< time.str() << endl;
 
-  cout << "Watch is running for " << watch.watch_time() << endl;
+  cout << "Watch is running for " << watch.watch_time().str() << endl;
   
   time = watch.clock_time();
-  cout << "Current clock time is " << time << endl;
+  cout << "Current clock time is " << time.str() << endl;
 
   Clock::finalize();
 

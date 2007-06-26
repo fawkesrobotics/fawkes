@@ -4,6 +4,7 @@
  *
  *  Generated: Sun June 03 00:16:29 2007
  *  Copyright  2007  Daniel Beck 
+ *             2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,10 +26,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __UTILS_SYSTEM_CLOCK_H_
-#define __UTILS_SYSTEM_CLOCK_H_
+#ifndef __UTILS_TIME_CLOCK_H_
+#define __UTILS_TIME_CLOCK_H_
 
-#include <utils/system/time.h>
+#include <utils/time/time.h>
 
 class TimeSource;
 
@@ -45,27 +46,39 @@ class Clock
 
   virtual ~Clock();
   
-  static Clock* init();
-  static void finalize();
+  static Clock * instance();
+  static void    finalize();
 
   void register_ext_timesource(TimeSource* ts, bool make_default = false);
-  void make_ext_default_timesource();
+  void set_ext_default_timesource(bool ext_is_default);
   bool is_ext_default_timesource() const;
-
-  bool get_time(struct timeval* tv, TimesourceSelector sel = DEFAULT) const;
-
+  bool has_ext_timesource() const;
   Time ext_to_realtime(const Time& t);
 
-  bool has_ext_timesource() const;
+  void get_time(struct timeval *tv) const;
+  void get_time(struct timeval *tv, TimesourceSelector sel) const;
+
+  void get_time(Time &time) const;
+  void get_time(Time &time, TimesourceSelector sel) const;
+
+  void get_time(Time *time) const;
+  void get_time(Time *time, TimesourceSelector sel) const;
+
+  void get_systime(struct timeval *tv) const;
+  void get_systime(Time &time) const;
+  void get_systime(Time *time) const;
+
+  Time now() const;
+
  private:
   Clock();
 
   static bool destruct_ok;
 
-  TimeSource* ext_timesource;
+  TimeSource *ext_timesource;
   bool ext_default;
 
-  static Clock* instance;
+  static Clock* _instance;
 };
 
-#endif /* __UTILS_SYSTEM_CLOCK_H_ */
+#endif /* __UTILS_TIME_CLOCK_H_ */

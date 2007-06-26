@@ -34,7 +34,7 @@
 #include <utils/logging/factory.h>
 #include <utils/system/argparser.h>
 #include <utils/system/hostinfo.h>
-#include <utils/system/clock.h>
+#include <utils/time/clock.h>
 
 #include <blackboard/blackboard.h>
 #include <mainapp/thread_inifin.h>
@@ -139,7 +139,7 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   LibLogger::init(multi_logger);
 
   /* Clock */
-  clock = Clock::init();
+  clock = Clock::instance();
 
   /* Managers */
   try {
