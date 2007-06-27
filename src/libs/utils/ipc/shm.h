@@ -111,8 +111,6 @@ class SharedMemory
   void attach();
   void free();
 
-  // although memptr is in fact treated as void we keep it as unsigned char pointer
-  // for easier pointer arithmetic
   void                   *_memptr;
   size_t                  _mem_size;
   size_t                  _data_size;

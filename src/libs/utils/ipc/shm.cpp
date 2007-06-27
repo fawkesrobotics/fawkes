@@ -383,7 +383,8 @@ SharedMemory::attach()
 
 	    _header->set( shm_ptr );
 	    _data_size = _header->data_size();
-	    _mem_size  = sizeof(SharedMemory_header_t) + _header->size() + _data_size;
+	    _mem_size  = sizeof(SharedMemory_header_t) + MagicTokenSize
+	                                               + _header->size() + _data_size;
 
 	    if (_mem_size != (unsigned int) shm_segment.shm_segsz) {
 	      throw ShmInconsistentSegmentSizeException(_mem_size,
@@ -423,7 +424,7 @@ SharedMemory::attach()
     key_t key = 1;
 
     _data_size = _header->data_size();
-    _mem_size  = sizeof(SharedMemory_header_t) + _header->size() + _data_size;
+    _mem_size  = sizeof(SharedMemory_header_t) + MagicTokenSize + _header->size() + _data_size;
     while ((_memptr == NULL) && (key < INT_MAX)) {
     // no shm segment found, create one
       __shared_mem_id = shmget(key, _mem_size, IPC_CREAT | IPC_EXCL | 0666);
@@ -469,6 +470,13 @@ SharedMemory::attach()
       throw ShmCouldNotAttachException("Could not attach, memptr still NULL");
     }
   }
+
+  /*
+    printf("__shared_mem=0x%lX  _memptr=0x%lX  _mem_size=%lu  _data_size=%lu  m-s=%lu  ms-ds=%lu\n",
+           (size_t)__shared_mem, (size_t)_memptr, _mem_size, _data_size,
+           (size_t)_memptr - (size_t)__shared_mem, _mem_size - _data_size);
+  */
+
 }
 
 
