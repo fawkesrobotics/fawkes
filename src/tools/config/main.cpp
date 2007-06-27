@@ -30,7 +30,7 @@
 #include <utils/system/argparser.h>
 #include <utils/system/signal.h>
 
-#include <stdio.h>
+#include <iostream>
 
 /** Tool to watch and output config changes.
  */
@@ -193,6 +193,23 @@ int
 main(int argc, char **argv)
 {
   ArgumentParser argp(argc, argv, "H");
+
+  if ( argp.hasArgument("H") ) {
+    std::cout << "Usage: " << argv[0] << " <cmd>" << std::endl
+	      << "where cmd is one of the following:" << std::endl << std::endl
+	      << "  watch" << std::endl
+	      << "    Watch configuration changes" << std::endl << std::endl
+	      << "  get <comp> <path>" << std::endl
+	      << "    Get value for the given component and path" << std::endl << std::endl
+	      << "  set <comp> <path> <value> [type]" << std::endl
+	      << "    Set value for the given component and path to the given type and value" << std::endl
+	      << "    where type is one of float/uint/int/bool/string. The type" << std::endl
+	      << "    is only necessary if you are creating a new value" << std::endl << std::endl
+	      << "  erase <comp> <path>" << std::endl
+	      << "    Erase value for given component and path from config" << std::endl
+	      << std::endl;
+    exit(0);
+  }
 
   FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
   c->connect();
