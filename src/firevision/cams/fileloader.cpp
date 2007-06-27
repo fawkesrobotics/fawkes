@@ -37,6 +37,8 @@
 #include <fvutils/readers/jpeg.h>
 #endif
 
+#include <cstring>
+#include <cstdlib>
 #include <cstdio>
 
 /** @class FileLoader <cams/fileloader.h>
@@ -52,7 +54,7 @@
  */
 FileLoader::FileLoader(const char *filename)
 {
-  this->filename = filename;
+  this->filename = strdup(filename);
   width = height = 0;
   file_buffer = NULL;
   this->cspace = CS_UNKNOWN;
@@ -70,7 +72,7 @@ FileLoader::FileLoader(const char *filename)
 FileLoader::FileLoader(const CameraArgumentParser *cap)
 {
   if ( cap->has("file") ) {
-    this->filename = cap->get("file").c_str();
+    this->filename = strdup(cap->get("file").c_str());
   } else {
     throw MissingParameterException("Parameter file is missing.");
   }
@@ -98,8 +100,15 @@ FileLoader::FileLoader(colorspace_t cspace, const char *filename,
   this->cspace = cspace;
   this->width = width;
   this->height = height;
-  this->filename = filename;
+  this->filename = strdup(filename);
   file_buffer = NULL;
+}
+
+
+/** Destructor. */
+FileLoader::~FileLoader()
+{
+  free(filename);
 }
 
 
