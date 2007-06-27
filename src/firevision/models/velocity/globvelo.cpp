@@ -29,7 +29,7 @@
 #include <cmath>
 #include <models/velocity/globvelo.h>
 
-#include <utils/system/time.h>
+#include <utils/time/time.h>
 
 /** @class VelocityFromGlobal <models/velocity/globvelo.h>
  * Velocity from global positions.
