@@ -682,9 +682,10 @@ SQLiteConfiguration::get_string(const char *comp, const char *path)
   try {
     stmt = get_value(comp, path, "string");
     const char *c = (char *)sqlite3_column_text(stmt, 1);
+    std::string rv = c;
     sqlite3_finalize(stmt);
     mutex->unlock();
-    return c;
+    return rv;
   } catch (Exception &e) {
     // we can't handle
     e.append("SQLiteConfiguration::get_string: Fetching %s::%s failed.", comp, path);
