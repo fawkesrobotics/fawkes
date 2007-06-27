@@ -122,6 +122,8 @@ class ThreadList : private LockList<Thread *>
 
   void wakeup();
   void wakeup(Barrier *barrier);
+  void wakeup_unlocked();
+  void wakeup_unlocked(Barrier *barrier);
   void start();
   void stop();
   void cancel();

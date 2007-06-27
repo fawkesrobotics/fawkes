@@ -307,6 +307,19 @@ ThreadList::wakeup()
 }
 
 
+/** Wakeup all threads in list.
+ * This method wakes up all thread without aquiring the lock first.
+ * This method must only be used if the thread list is locked otherwise!
+ */
+void
+ThreadList::wakeup_unlocked()
+{
+  for (iterator i = begin(); i != end(); ++i) {
+    (*i)->wakeup();
+  }
+}
+
+
 /** Wakeup all threads in list and have them wait for the barrier.
  * @param barrier Barrier to wait for after loop
  */
@@ -318,6 +331,20 @@ ThreadList::wakeup(Barrier *barrier)
     (*i)->wakeup(barrier);
   }
   unlock();
+}
+
+
+/** Wakeup all threads in list and have them wait for the barrier.
+ * This method wakes up all thread without aquiring the lock first.
+ * This method must only be used if the thread list is locked otherwise!
+ * @param barrier Barrier to wait for after loop
+ */
+void
+ThreadList::wakeup_unlocked(Barrier *barrier)
+{
+  for (iterator i = begin(); i != end(); ++i) {
+    (*i)->wakeup(barrier);
+  }
 }
 
 
