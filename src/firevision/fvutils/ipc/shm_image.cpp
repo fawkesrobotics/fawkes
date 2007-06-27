@@ -111,6 +111,8 @@ SharedMemoryImageBuffer::constructor(const char *image_id, colorspace_t cspace,
 /** Destructor. */
 SharedMemoryImageBuffer::~SharedMemoryImageBuffer()
 {
+  ::free(_image_id);
+  delete priv_header;
 }
 
 
@@ -488,6 +490,7 @@ SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader(const char *image_i
 SharedMemoryImageBufferHeader::~SharedMemoryImageBufferHeader()
 {
   header = NULL;
+  free(_image_id);
 }
 
 
@@ -588,6 +591,7 @@ void
 SharedMemoryImageBufferHeader::set(void *memptr)
 {
   header = (SharedMemoryImageBuffer_header_t *)memptr;
+  if ( NULL != _image_id )  free(_image_id);
   _image_id = strndup(header->image_id, IMAGE_ID_MAX_LENGTH);
 }
 
@@ -677,12 +681,13 @@ void
 SharedMemoryImageBufferLister::printHeader()
 {
   cout << endl << cgreen << "FireVision Shared Memory Segments - Images" << cnormal << endl
-       << "========================================================================" << endl
-       << cwhite;
-  printf ("%-3s %-10s %-10s %-9s %-16s %-5s %-5s %s\n",
-          "#", "ShmID", "Semaphore", "Bytes", "Color Space", "Width", "Height", "State");
+       << "========================================================================================" << endl
+       << cdarkgray;
+  printf ("%-20s %-10s %-10s %-9s %-16s %-5s %-5s %s\n",
+          "Image ID", "ShmID", "Semaphore", "Bytes", "Color Space", "Width", "Height",
+	  "State");
   cout << cnormal
-       << "------------------------------------------------------------------------" << endl;
+       << "----------------------------------------------------------------------------------------" << endl;
 }
 
 

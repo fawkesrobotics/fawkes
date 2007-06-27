@@ -27,8 +27,6 @@
 
 #include <fvutils/system/camargp.h>
 
-#include <iostream>
-
 using namespace std;
 
 /** @class CameraArgumentParser <fvutils/system/camargp.h>
@@ -162,7 +160,7 @@ CameraArgumentParser::get(std::string s) const
 {
   if ( values.find(s) != values.end() ) {
     // this is needed to be able to make this method const
-    return (*(values.find(s))).first;
+    return (*(values.find(s))).second;
   } else {
     return string();
   }

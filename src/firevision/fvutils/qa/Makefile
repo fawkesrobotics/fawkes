@@ -27,12 +27,15 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-# We are lazy in the utils...
 OBJS_fv_qa_camargp := qa_camargp.o
 LIBS_fv_qa_camargp := fvutils
 
-OBJS_all = $(OBJS_fv_qa_camargp)
-BINS_all = $(BINDIR)/fv_qa_camargp
+OBJS_fv_qa_yuvconv := qa_yuvconv.o
+LIBS_fv_qa_yuvconv := fvutils
+
+OBJS_all = $(OBJS_fv_qa_camargp) $(OBJS_fv_qa_yuvconv)
+BINS_all = $(BINDIR)/fv_qa_camargp	\
+	   $(BINDIR)/fv_qa_yuvconv
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
