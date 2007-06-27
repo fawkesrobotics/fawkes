@@ -28,7 +28,7 @@
 #ifndef __ASPECT_CONFIGURABLE_H_
 #define __ASPECT_CONFIGURABLE_H_
 
-class Configuration;
+#include <config/config.h>
 
 class ConfigurableAspect
 {

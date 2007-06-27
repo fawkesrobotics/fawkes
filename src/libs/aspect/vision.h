@@ -28,7 +28,7 @@
 #ifndef __ASPECT_VISION_H_
 #define __ASPECT_VISION_H_
 
-class VisionMaster;
+#include <fvutils/base/vision_master.h>
 
 class VisionAspect
 {

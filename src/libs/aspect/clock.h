@@ -28,7 +28,7 @@
 #ifndef __ASPECT_CLOCK_H_
 #define __ASPECT_CLOCK_H_
 
-class Clock;
+#include <utils/time/clock.h>
 
 class ClockAspect
 {

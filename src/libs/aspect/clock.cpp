@@ -26,7 +26,6 @@
  */
 
 #include <aspect/clock.h>
-#include <utils/time/clock.h>
 
 /** @class ClockAspect aspect/clock.h
  * Thread aspect that allows to obtain the current time from the clock.

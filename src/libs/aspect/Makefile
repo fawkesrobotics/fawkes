@@ -22,6 +22,7 @@
 BASEDIR = ../../..
 
 CFLAGS = -g
+INCDIRS += $(realpath $(BASEDIR)/src/firevision)
 
 LIBS_libaspects = core utils blackboard netcomm config
 OBJS_libaspects = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
