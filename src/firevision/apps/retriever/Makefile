@@ -1,7 +1,7 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: FireVision
+#         Makefile Build System for Fawkes: FireVision Retriever Plugin
 #                            -------------------
-#   Created on Sun Jan 14 18:24:42 2007
+#   Created on Tue Jun 26 17:32:34 2007
 #   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -19,19 +19,20 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
-
-SUBDIRS =
-
-include $(BASEDIR)/etc/buildsys/config.mk
+BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
-ifeq ($(BUILD_TYPE),rcsoftx)
-# Stuff to be built for RCSoftX only
-SUBDIRS += cannikin geegaw fountain
-else
-SUBDIRS += base retriever
-endif
+CFLAGS   = $(VISION_CFLAGS)
+LDFLAGS  = $(VISION_LDFLAGS)
+INCDIRS  = $(VISION_INCDIRS)
+LIBDIRS  = $(VISION_LIBDIRS)
+LIBS     = $(VISION_LIBS)
 
-include $(BASEDIR)/etc/buildsys/rules.mk
+LIBS_fvretriever = core utils fvutils fvcams
+OBJS_fvretriever = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+
+OBJS_all    = $(OBJS_fvretriever)
+PLUGINS_all = $(PLUGINDIR)/fvretriever.so
+
+include $(BASEDIR)/etc/buildsys/base.mk
 
