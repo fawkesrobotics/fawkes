@@ -29,6 +29,7 @@
 #include <apps/base/aquisition_thread.h>
 
 #include <core/threading/thread.h>
+#include <core/threading/mutex.h>
 #include <fvutils/system/camargp.h>
 #include <cams/factory.h>
 
@@ -50,22 +51,15 @@ FvBaseThread::FvBaseThread()
     VisionMasterAspect(this)
 {
   // default to 30 seconds
-  _aqt_timeout = 30;
+  _aqt_timeout = 20;
+  timeout_mutex = new Mutex();
 }
 
 
 /** Destructor. */
 FvBaseThread::~FvBaseThread()
 {
-  logger->log_info("FvBaseThread", "Destroying thread %s", name());
-  aquisition_threads.lock();
-  for (ait = aquisition_threads.begin(); ait != aquisition_threads.end(); ++ait) {
-    (*ait).second->cancel();
-    (*ait).second->join();
-    delete (*ait).second;
-  }
-  aquisition_threads.clear();
-  aquisition_threads.unlock();
+  delete timeout_mutex;
 }
 
 
@@ -75,10 +69,56 @@ FvBaseThread::init()
 }
 
 
+void
+FvBaseThread::finalize()
+{
+  logger->log_debug("FvBaseThread", "Finalizing");
+  aquisition_threads.lock();
+  for (ait = aquisition_threads.begin(); ait != aquisition_threads.end(); ++ait) {
+    logger->log_debug("FvBaseThread", "Cancelling aquisition thread %s", (*ait).second->name());
+    (*ait).second->cancel();
+    logger->log_debug(Thread::current_thread()->name(), "Joining aquisition thread %s", (*ait).second->name());
+    (*ait).second->join();
+    delete (*ait).second;
+  }
+  aquisition_threads.clear();
+  aquisition_threads.unlock();
+}
+
+
 /** Thread loop. */
 void
 FvBaseThread::loop()
 {
+  if ( ! timeout_mutex->tryLock() ) {
+    // a timeout has happened
+
+    aquisition_threads.lock();
+    timeout_aqts.lock();
+
+    while ( ! timeout_aqts.empty() ) {
+      const char *id = timeout_aqts.front();
+
+      FvAquisitionThread *aqt = aquisition_threads[id];
+
+      if ( aqt->empty() ) {
+	logger->log_debug(name(), "Stopping thread %s", aqt->name());
+	aquisition_threads.erase(id);
+	aqt->cancel();
+	aqt->join();
+	delete aqt;
+      } else {
+	logger->log_debug(name(), "Aquisition thread %s not empty", aqt->name());
+      }
+
+      timeout_aqts.pop();
+    }
+    timeout_aqts.unlock();
+    aquisition_threads.unlock();
+    timeout_mutex->unlock();
+  } else {
+    timeout_mutex->unlock();
+  }
 }
 
 
@@ -96,12 +136,15 @@ Camera *
 FvBaseThread::register_for_camera(const char *camera_string, Thread *thread)
 {
   Camera *c;
+
+  timeout_mutex->lock();
   aquisition_threads.lock();
+  timeout_aqts.lock();
 
   logger->log_info(name(), "Thread '%s' register for camera '%s'", thread->name(), camera_string);
 
+  CameraArgumentParser *cap = new CameraArgumentParser(camera_string);
   try {
-    CameraArgumentParser *cap = new CameraArgumentParser(camera_string);
     std::string id = cap->cam_type() + ":" + cap->cam_id();
     if ( aquisition_threads.find(id) != aquisition_threads.end() ) {
       // this camera has already been loaded
@@ -109,16 +152,25 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread)
       try {
 	aquisition_threads[id]->add_thread(thread);
       } catch (Exception &e) {
-	aquisition_threads.unlock();
 	e.append("Could not add thread to '%s'", aquisition_threads[id]->name());
 	delete c;
+	delete cap;
+ 	aquisition_threads.unlock();
+	timeout_aqts.unlock();
+	timeout_mutex->unlock();
 	throw;
       }
     } else {
-      CameraArgumentParser *cap = new CameraArgumentParser(camera_string);
       Camera *cam = CameraFactory::instance(cap);
-      cam->open();
-      cam->start();
+      try {
+	cam->open();
+	cam->start();
+      } catch (Exception &e) {
+	delete cam;
+	delete cap;
+	e.append("Could not open or start camera");
+	throw;
+      }
 
       FvAquisitionThread *aqt = new FvAquisitionThread(this, logger, id.c_str(),
 						       cam, _aqt_timeout);
@@ -126,24 +178,34 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread)
       c = aqt->camera_instance();
       aqt->add_thread(thread);
 
+      aquisition_threads[id] = aqt;
       aqt->start();
 
       logger->log_info(name(), "Aquisition thread '%s' started for thread '%s' and camera '%s'",
 		       aqt->name(), thread->name(), id.c_str());
 
-      aquisition_threads[id] = aqt;
     }
   } catch (UnknownCameraTypeException &e) {
-    aquisition_threads.unlock();
+    delete cap;
     e.append("FvBaseVisionMaster: could not instantiate camera");
+    aquisition_threads.unlock();
+    timeout_aqts.unlock();
+    timeout_mutex->unlock();
     throw;
   } catch (Exception &e) {
-    aquisition_threads.unlock();
+    delete cap;
     e.append("FvBaseVisionMaster: could not open or start camera");
+    aquisition_threads.unlock();
+    timeout_aqts.unlock();
+    timeout_mutex->unlock();
     throw;
   }
 
+  delete cap;
+
+  timeout_aqts.unlock();
   aquisition_threads.unlock();
+  timeout_mutex->unlock();
   return c;
 }
 
@@ -169,14 +231,14 @@ FvBaseThread::unregister_thread(Thread *thread)
  */
 void
 FvBaseThread::aqt_timeout(const char *id)
-{
-  aquisition_threads.lock();
-  FvAquisitionThread *aqt = aquisition_threads[id];
-  if ( aqt->empty() ) {
-    aquisition_threads.erase(id);
-    aqt->cancel();
-    aqt->join();
-    delete aqt;
-  }
-  aquisition_threads.unlock();
+{  
+  timeout_mutex->tryLock();
+  // unlocked in loop()
+  logger->log_debug(name(), "Aqusition thread %s timed out", id);
+  timeout_aqts.lock();
+  logger->log_debug(name(), "Pushing Aqusition thread %s", id);
+  timeout_aqts.push(id);
+  logger->log_debug(name(), "Aqusition thread REALLY %s timed out", id);
+  timeout_aqts.unlock();
+
 }

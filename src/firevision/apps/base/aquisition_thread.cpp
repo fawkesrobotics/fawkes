@@ -70,6 +70,8 @@ FvAquisitionThread::FvAquisitionThread(FvBaseThread *base_thread, Logger *logger
   _width       = _camera->pixel_width();
   _height      = _camera->pixel_height();
   _colorspace  = _camera->colorspace();
+  logger->log_debug(name(), "Camera opened, w=%u  h=%u  c=%s", _width, _height,
+		    colorspace_to_string(_colorspace));
   _shm = new SharedMemoryImageBuffer(_image_id, YUV422_PLANAR,
 				     _width, _height);
   _buffer      = _shm->buffer();
@@ -171,6 +173,7 @@ FvAquisitionThread::remove_thread(Thread *thread)
 {
   _running_tl->lock();
   _waiting_tl->lock();
+  _logger->log_debug(name(), "Removing thread %s", thread->name());
   VisionAspect *vision_thread;
   if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
     _running_tl->remove(thread);
@@ -188,8 +191,12 @@ FvAquisitionThread::remove_thread(Thread *thread)
 void
 FvAquisitionThread::thread_started(Thread *thread)
 {
-  _running_tl->push_back_locked(thread);
+  _running_tl->lock();
+  _running_tl->push_back(thread);
   _waiting_tl->remove_locked(thread);
+  delete _running_tl_barrier;
+  _running_tl_barrier = new Barrier(_running_tl->size() + 1);
+  _running_tl->unlock();
   _wait_for_threads_cond->wakeAll();
 }
 
@@ -219,14 +226,16 @@ FvAquisitionThread::loop()
   if ( _running_tl->empty() ) {
     _running_tl->unlock();
     _wait_for_threads_mutex->lock();
+    _logger->log_debug(name(), "Waiting for threads or timeout");
     _wait_for_threads_cond->wait(_wait_for_threads_mutex, _timeout);
     _wait_for_threads_mutex->unlock();
     _running_tl->lock();
   }
   if (empty()) {
+    _logger->log_debug(name(), "Signaling timeout %s", _image_id);
     _base_thread->aqt_timeout(_image_id);
     _running_tl->unlock();
-    return;
+    exit();
   } else if ( _running_tl->empty() ) {
     _running_tl->unlock();
     return;
@@ -239,7 +248,9 @@ FvAquisitionThread::loop()
 	    _camera->buffer(), _buffer,
 	    _width, _height);
 
-    _running_tl->wakeup(_running_tl_barrier);
+    //_logger->log_debug(name(), "Waking threads");
+    _running_tl->wakeup_unlocked(_running_tl_barrier);
+    //_logger->log_debug(name(), "Waiting for threads");
     _running_tl_barrier->wait();
     _running_tl->unlock();
 

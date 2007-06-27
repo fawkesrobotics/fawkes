@@ -30,6 +30,7 @@
 
 #include <core/threading/thread.h>
 #include <core/utils/lock_map.h>
+#include <core/utils/lock_queue.h>
 
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
@@ -40,6 +41,7 @@
 #include <string>
 
 class FvAquisitionThread;
+class Mutex;
 
 class FvBaseThread
 : public Thread,
@@ -54,6 +56,7 @@ class FvBaseThread
 
   virtual void init();
   virtual void loop();
+  virtual void finalize();
 
   virtual VisionMaster *  vision_master();
 
@@ -67,7 +70,8 @@ class FvBaseThread
   LockMap<std::string, FvAquisitionThread *> aquisition_threads;
   LockMap<std::string, FvAquisitionThread *>::iterator ait;
   unsigned int _aqt_timeout;
-
+  LockQueue<const char *>   timeout_aqts;
+  Mutex                    *timeout_mutex;
 };
 
 
