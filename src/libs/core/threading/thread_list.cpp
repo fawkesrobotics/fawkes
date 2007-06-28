@@ -541,7 +541,7 @@ ThreadList::join()
 void
 ThreadList::stop()
 {
-  for (iterator i = begin(); i != end(); ++i) {
+  for (reverse_iterator i = rbegin(); i != rend(); ++i) {
     (*i)->cancel();
     (*i)->join();
   }
@@ -566,7 +566,7 @@ ThreadList::prepare_finalize(ThreadFinalizer *finalizer)
   bool can_finalize = true;
   CannotFinalizeThreadException cfte("Cannot finalize one or more threads");
   bool threw_exception = false;
-  for (iterator i = begin(); i != end(); ++i) {
+  for (reverse_iterator i = rbegin(); i != rend(); ++i) {
     // Note that this loop may NOT be interrupted in the middle by break,
     // since even if the thread denies finalization it can still be finalized
     // and we have to ensure that every thread got a call to prepare_finalize()!
@@ -606,7 +606,7 @@ ThreadList::finalize(ThreadFinalizer *finalizer)
 {
   bool error = false;
   Exception me("One or more threads failed to finalize");
-  for (iterator i = begin(); i != end(); ++i) {
+  for (reverse_iterator i = rbegin(); i != rend(); ++i) {
     try {
       finalizer->finalize(*i);
     } catch (CannotFinalizeThreadException &e) {
@@ -639,7 +639,7 @@ void
 ThreadList::cancel_finalize()
 {
   _finalize_mutex->lock();
-  for (iterator i = begin(); i != end(); ++i) {
+  for (reverse_iterator i = rbegin(); i != rend(); ++i) {
     (*i)->cancel_finalize();
   }
   _finalize_mutex->unlock();
@@ -894,6 +894,7 @@ ThreadList::erase(iterator pos)
     (*pos)->set_finalize_sync_lock(NULL);
   return LockList<Thread *>::erase(pos);
 }
+
 
 /** Notify all threads of failed init. */
 void
