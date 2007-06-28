@@ -71,9 +71,9 @@ FawkesPluginManager::FawkesPluginManager(FawkesThreadManager *thread_manager)
 FawkesPluginManager::~FawkesPluginManager()
 {
   // Unload all plugins
-  for (pit = plugins.begin(); pit != plugins.end(); ++pit) {
-    thread_manager->force_remove((*pit).second->threads());
-    plugin_loader->unload( (*pit).second );
+  for (rpit = plugins.rbegin(); rpit != plugins.rend(); ++rpit) {
+    thread_manager->force_remove((*rpit).second->threads());
+    plugin_loader->unload( (*rpit).second );
   }
   plugins.clear();
   plugin_ids.clear();

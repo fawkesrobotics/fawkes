@@ -82,6 +82,7 @@ class FawkesPluginManager : public FawkesNetworkHandler
   std::map< std::string, Plugin * > plugins;
   std::map< std::string, Plugin * > plugins_deferred;
   std::map< std::string, Plugin * >::iterator pit;
+  std::map< std::string, Plugin * >::reverse_iterator rpit;
 
   unsigned int next_plugin_id;
   std::map< std::string, unsigned int > plugin_ids;
