@@ -80,7 +80,7 @@ KickerThread::init()
 
   try
     {
-      kicker_interface = interface_manager->openForWriting<KickerInterface>("Kicker");
+      kicker_interface = interface_manager->open_for_writing<KickerInterface>("Kicker");
     }
   catch (Exception& e)
     {
