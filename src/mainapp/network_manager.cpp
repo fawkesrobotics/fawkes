@@ -30,8 +30,13 @@
 #include <mainapp/thread_manager.h>
 #include <netcomm/fawkes/network_thread.h>
 #include <netcomm/fawkes/handler.h>
+#include <netcomm/utils/resolver.h>
+#include <netcomm/utils/resolver.h>
 #ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
+#else
+#include <netcomm/service_discovery/dummy_service_publisher.h>
+#include <netcomm/service_discovery/dummy_service_browser.h>
 #endif
 
 /** @class FawkesNetworkManager mainapp/network_manager.h
@@ -54,9 +59,16 @@ FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
   thread_manager->add(fawkes_network_thread);
 #ifdef HAVE_AVAHI
   avahi_thread          = new AvahiThread();
+  _service_publisher     = avahi_thread->avahi_service_publisher();
+  _service_browser       = avahi_thread->avahi_service_browser();
   thread_manager->add(avahi_thread);
   AvahiService *fawkes_service = new AvahiService("Fawkes", "_fawkes._udp", fawkes_port);
   avahi_thread->publish(fawkes_service);
+  _nnresolver = new NetworkNameResolver(avahi_thread);
+#else
+  _service_publisher = new DummyServicePublisher();
+  _service_browser   = new DummyServiceBrowser();
+  _nnresolver        = new NetworkNameResolver();
 #endif
 }
 
@@ -74,12 +86,42 @@ FawkesNetworkManager::~FawkesNetworkManager()
 
 
 /** Get Fawkes network hub.
- * @return Fawkes network hubg
+ * @return Fawkes network hub
  */
 FawkesNetworkHub *
 FawkesNetworkManager::hub()
 {
   return fawkes_network_thread;
+}
+
+
+/** Get network name resolver.
+ * @return network name resolver
+ */
+NetworkNameResolver *
+FawkesNetworkManager::nnresolver()
+{
+  return _nnresolver;
+}
+
+
+/** Get service publisher
+ * @return service publisher
+ */
+ServicePublisher *
+FawkesNetworkManager::service_publisher()
+{
+  return _service_publisher;
+}
+
+
+/** Get service browser.
+ * @return service browser
+ */
+ServiceBrowser *
+FawkesNetworkManager::service_browser()
+{
+  return _service_browser;
 }
 
 

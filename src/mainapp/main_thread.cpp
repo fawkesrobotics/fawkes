@@ -156,6 +156,9 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   }
 
   thread_inifin->set_fnet_hub( network_manager->hub() );
+  thread_inifin->set_network_members( network_manager->nnresolver(),
+				      network_manager->service_publisher(),
+				      network_manager->service_browser() );
 
   plugin_manager->set_hub( network_manager->hub() );
   config_manager->set_hub( network_manager->hub() );

@@ -33,6 +33,9 @@ class FawkesNetworkThread;
 class FawkesNetworkHandler;
 class FawkesNetworkHub;
 class AvahiThread;
+class NetworkNameResolver;
+class ServicePublisher;
+class ServiceBrowser;
 
 class FawkesNetworkManager
 {
@@ -40,7 +43,10 @@ class FawkesNetworkManager
   FawkesNetworkManager(FawkesThreadManager *thread_manager, unsigned short int fawkes_port);
   ~FawkesNetworkManager();
 
-  FawkesNetworkHub *  hub();
+  FawkesNetworkHub *     hub();
+  NetworkNameResolver *  nnresolver();
+  ServicePublisher *     service_publisher();
+  ServiceBrowser *       service_browser();
 
   void process();
 
@@ -50,6 +56,9 @@ class FawkesNetworkManager
   FawkesNetworkThread    *fawkes_network_thread;
   AvahiThread            *avahi_thread;
 
+  NetworkNameResolver    *_nnresolver;
+  ServicePublisher       *_service_publisher;
+  ServiceBrowser         *_service_browser;
 };
 
 #endif
