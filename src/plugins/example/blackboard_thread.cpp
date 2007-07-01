@@ -76,9 +76,9 @@ ExampleBlackBoardThread::init()
   logger->log_debug(name(), "Opening test interface");
   try {
     if ( reader ) {
-      test_interface = interface_manager->openForReading<TestInterface>("Test");
+      test_interface = interface_manager->open_for_reading<TestInterface>("Test");
     } else {
-      test_interface = interface_manager->openForWriting<TestInterface>("Test");
+      test_interface = interface_manager->open_for_writing<TestInterface>("Test");
     }
   } catch (Exception& e) {
     e.append("Opening test interface for writing failed");
