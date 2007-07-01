@@ -35,6 +35,7 @@ class Plugin {
 
   /** Type of the plugin */
   typedef enum {
+    WORLDMODEL,		/**< world model plugin */
     MOTION,		/**< motion plugin */
     VISION,		/**< vision plugin */
     AGENT,		/**< agent plugin */
