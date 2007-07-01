@@ -41,6 +41,9 @@ template <class Provider, class Dependant>
   class OneToManyDependency;
 class VisionMasterAspect;
 class VisionAspect;
+class NetworkNameResolver;
+class ServicePublisher;
+class ServiceBrowser;
 
 class AspectIniFin : public ThreadInitializer, public ThreadFinalizer
 {
@@ -53,13 +56,19 @@ class AspectIniFin : public ThreadInitializer, public ThreadFinalizer
   virtual bool prepare_finalize(Thread *thread);
 
   void set_fnet_hub(FawkesNetworkHub *fnethub);
+  void set_network_members(NetworkNameResolver *nnresolver,
+			   ServicePublisher *service_publisher,
+			   ServiceBrowser *service_browser);
 
  private:
-  BlackBoard        *blackboard;
-  Configuration     *config;
-  Logger            *logger;
-  Clock             *clock;
-  FawkesNetworkHub  *fnethub;
+  BlackBoard          *blackboard;
+  Configuration       *config;
+  Logger              *logger;
+  Clock               *clock;
+  FawkesNetworkHub    *fnethub;
+  NetworkNameResolver *nnresolver;
+  ServicePublisher    *service_publisher;
+  ServiceBrowser      *service_browser;
 
   OneToManyDependency<VisionMasterAspect, VisionAspect> *vision_dependency;
 };

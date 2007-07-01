@@ -37,6 +37,7 @@
 #include <aspect/fawkes_network.h>
 #include <aspect/vision_master.h>
 #include <aspect/vision.h>
+#include <aspect/network.h>
 
 #include <utils/constraints/dependency_onetomany.h>
 
@@ -60,12 +61,16 @@ AspectIniFin::AspectIniFin(BlackBoard *blackboard,
 			   Configuration *config,
 			   Logger *logger,
 			   Clock *clock)
+
 {
   this->blackboard = blackboard;
   this->config     = config;
   this->logger     = logger;
   this->clock      = clock;
   this->fnethub    = NULL;
+  this->nnresolver = NULL;
+  this->service_publisher = NULL;
+  this->service_browser = NULL;
 
   vision_dependency = new OneToManyDependency<VisionMasterAspect, VisionAspect>();
 }
@@ -89,6 +94,26 @@ void
 AspectIniFin::set_fnet_hub(FawkesNetworkHub *fnethub)
 {
   this->fnethub = fnethub;
+}
+
+
+/** Set Fawkes Network Hub.
+ * Use this to initialize the NetworkAspect. If you do not use the Network Aspect
+ * you do not need to call this function to set a hub. In that case threads that
+ * demand this aspect will cause an exception to be thrown that the thread cannot be
+ * initialized.
+ * @param nnresolver network name resolver
+ * @param service_publisher service publisher
+ * @param service_browser service browser
+ */
+void
+AspectIniFin::set_network_members(NetworkNameResolver *nnresolver,
+				  ServicePublisher *service_publisher,
+				  ServiceBrowser *service_browser)
+{
+  this->nnresolver = nnresolver;
+  this->service_publisher = service_publisher;
+  this->service_browser = service_browser;
 }
 
 
@@ -157,6 +182,15 @@ AspectIniFin::init(Thread *thread)
       throw ce;
     }
   }
+
+  NetworkAspect *net_thread;
+  if ( (net_thread = dynamic_cast<NetworkAspect *>(thread)) != NULL ) {
+    if ( (nnresolver == NULL) || (service_publisher == NULL) || (service_browser == NULL) ) {
+      throw CannotInitializeThreadException("Thread has NetworkAspect but required data has not been set in AspectIniFin");
+    }
+    net_thread->initNetworkAspect(nnresolver, service_publisher, service_browser);
+  }
+
 }
 
 
