@@ -27,7 +27,7 @@
 
 #include <netcomm/service_discovery/dummy_service_publisher.h>
 
-/** @class DummyServicePublisher <netcomm/service_discovery/service_publisher.h>
+/** @class DummyServicePublisher <netcomm/service_discovery/dummy_service_publisher.h>
  * Dummy service publisher interface.
  * Does nothing, used to fulfill NetworkAspect guarantees if Avahi is not available.
  */

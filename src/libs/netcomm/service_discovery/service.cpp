@@ -38,7 +38,7 @@
 
 #include <string.h>
 
-/** @class NetworkService netcomm/dns-sd/avahi_service.h
+/** @class NetworkService <netcomm/service_discovery/service.h>
  * Representation of a service announced or found via Avahi.
  * This class is used in the C++ wrapper to talk about services.
  *

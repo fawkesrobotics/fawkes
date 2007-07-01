@@ -32,7 +32,7 @@
  *
  * @fn void ServicePublisher::publish(NetworkService *service) = 0
  * Publish service.
- * @param Service service to publish
+ * @param service service to publish
  */
 
 /** Virtual empty destructor. */

@@ -75,7 +75,8 @@ class ServiceBrowseHandler
    * @param type type of the service
    * @param domain domain of the service
    * @param host_name name of the host that provides the service
-   * @param address Address of the host, read Avahi documentation
+   * @param addr pointer to sockaddr struct of appropriate type for address
+   * @param addr_size size of addr struct
    * @param port port of the service
    * @param txt list of txt records.
    * @param flags extra flags, see Avahi documentation

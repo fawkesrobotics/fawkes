@@ -27,7 +27,7 @@
 
 #include <netcomm/service_discovery/dummy_service_browser.h>
 
-/** @class Dummy ServiceBrowser <netcomm/service_discovery/service_browser.h>
+/** @class DummyServiceBrowser <netcomm/service_discovery/dummy_service_browser.h>
  * Dummy Service browser.
  * Does nothing, used to fulfill NetworkAspect guarantees if Avahi is not available.
  */
