@@ -33,6 +33,7 @@
 #include <core/exceptions/software.h>
 #include <typeinfo>
 #include <map>
+#include <list>
 
 class BlackBoardMemoryManager;
 class BlackBoardMessageManager;
@@ -47,34 +48,38 @@ class BlackBoardInterfaceManager : public InterfaceMediator
   BlackBoardInterfaceManager(bool bb_master = false);
   virtual ~BlackBoardInterfaceManager();
 
-  Interface *  openForReading(const char *interface_type, const char *identifier);
-  Interface *  openForWriting(const char *interface_type, const char *identifier);
+  Interface *  open_for_reading(const char *interface_type, const char *identifier);
+  Interface *  open_for_writing(const char *interface_type, const char *identifier);
   void         close(Interface *interface);
 
-  virtual bool existsWriter(const Interface *interface) const;
-  virtual void notifyOfDataChange(const Interface *interface);
+  std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type);
+  //  template <class InterfaceType>
+  //    std::list<InterfaceType *>  openAllOfTypeForReading(const char *interface_type);
+
+  virtual bool exists_writer(const Interface *interface) const;
+  virtual void notify_of_data_change(const Interface *interface);
 
   template <class InterfaceType>
-    InterfaceType * openForReading(const char *identifier);
+    InterfaceType * open_for_reading(const char *identifier);
 
   template <class InterfaceType>
-    InterfaceType * openForWriting(const char *identifier);
+    InterfaceType * open_for_writing(const char *identifier);
 
-  const BlackBoardMemoryManager *  getMemoryManager() const;
+  const BlackBoardMemoryManager *  memory_manager() const;
 
  private:
-  Interface *  newInterfaceInstance(const char *type, const char *identifier);
-  void         deleteInterfaceInstance(Interface *interface);
+  Interface *  new_interface_instance(const char *type, const char *identifier);
+  void         delete_interface_instance(Interface *interface);
 
-  void *       findInterfaceInMemory(const char *type, const char *identifier);
-  unsigned int getNextMemSerial();
-  unsigned int getNextInstanceSerial();
-  void         createInterface(const char *type, const char *identifier,
-			       Interface* &interface, void* &ptr);
+  void *       find_interface_in_memory(const char *type, const char *identifier);
+  unsigned int next_mem_serial();
+  unsigned int next_instance_serial();
+  void         create_interface(const char *type, const char *identifier,
+				Interface* &interface, void* &ptr);
 
-  char *       stripClassType(const char *type);
+  char *       strip_class_type(const char *type);
 
-  Interface *  getWriterForMemSerial(unsigned int mem_serial);
+  Interface *  writer_for_mem_serial(unsigned int mem_serial);
 
  private:
   bool                          bb_master;
@@ -105,10 +110,10 @@ class BlackBoardInterfaceManager : public InterfaceMediator
  */
 template <class InterfaceType>
 InterfaceType *
-BlackBoardInterfaceManager::openForReading(const char *identifier)
+BlackBoardInterfaceManager::open_for_reading(const char *identifier)
 {
-  char *type_name = stripClassType(typeid(InterfaceType).name());
-  InterfaceType *interface = dynamic_cast<InterfaceType *>(openForReading(type_name, identifier));
+  char *type_name = strip_class_type(typeid(InterfaceType).name());
+  InterfaceType *interface = dynamic_cast<InterfaceType *>(open_for_reading(type_name, identifier));
   delete[] type_name;
   if ( interface == 0 ) {
     throw TypeMismatchException("Interface (R) types do not match");
@@ -135,12 +140,12 @@ BlackBoardInterfaceManager::openForReading(const char *identifier)
  */
 template <class InterfaceType>
 InterfaceType *
-BlackBoardInterfaceManager::openForWriting(const char *identifier)
+BlackBoardInterfaceManager::open_for_writing(const char *identifier)
 {
-  char *type_name = stripClassType(typeid(InterfaceType).name());
+  char *type_name = strip_class_type(typeid(InterfaceType).name());
   InterfaceType *interface;
   try {
-    interface = dynamic_cast<InterfaceType *>(openForWriting(type_name, identifier));
+    interface = dynamic_cast<InterfaceType *>(open_for_writing(type_name, identifier));
   } catch (Exception &e) {
     // just caught to properly free memory
     delete[] type_name;

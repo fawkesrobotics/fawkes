@@ -69,8 +69,8 @@ main(int argc, char **argv)
 
   try {
     cout << "Opening interfaces.. " << flush;
-    ti_writer = im->openForWriting<TestInterface>("SomeID");
-    ti_reader = im->openForReading<TestInterface>("SomeID");
+    ti_writer = im->open_for_writing<TestInterface>("SomeID");
+    ti_reader = im->open_for_reading<TestInterface>("SomeID");
     cout << "success" << endl;
   } catch (Exception &e) {
     cout << "failed! Aborting" << endl;

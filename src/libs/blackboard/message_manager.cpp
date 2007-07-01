@@ -29,6 +29,8 @@
 #include <blackboard/interface_manager.h>
 #include <blackboard/exceptions.h>
 
+#include <utils/logging/liblogger.h>
+
 /** Constructor.
  * @param im interface manager to query for writer interface
  */
@@ -47,6 +49,16 @@ BlackBoardMessageManager::~BlackBoardMessageManager()
 void
 BlackBoardMessageManager::transmit(Message *message)
 {
-  Interface *writer = im->getWriterForMemSerial(message->recipient_interface_mem_serial);
-  writer->msgq_append(message);
+  try {
+    Interface *writer = im->writer_for_mem_serial(message->recipient_interface_mem_serial);
+    writer->msgq_append(message);
+  } catch (BlackBoardNoWritingInstanceException &e) {
+    Interface *iface = message->interface();
+    LibLogger::log_warn("BlackBoardMessageManager", "Cannot transmit message from sender %s "
+			                            "via interface %s (type %s), no writing "
+			                            "instance exists!",
+			message->sender(), (iface != NULL) ? iface->id() : "Unknown",
+			(iface != NULL) ? iface->type() : "unknown");
+  }
+
 }

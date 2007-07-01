@@ -64,15 +64,15 @@ main(int argc, char **argv)
   signal(SIGINT, signal_handler);
 
   BlackBoardInterfaceManager *im = new BlackBoardInterfaceManager(/* master */  true);
-  const BlackBoardMemoryManager *mm = im->getMemoryManager();
+  const BlackBoardMemoryManager *mm = im->memory_manager();
 
   TestInterface *ti_writer;
   TestInterface *ti_reader;
 
   try {
     cout << "Opening interfaces.. " << flush;
-    ti_writer = im->openForWriting<TestInterface>("SomeID");
-    ti_reader = im->openForReading<TestInterface>("SomeID");
+    ti_writer = im->open_for_writing<TestInterface>("SomeID");
+    ti_reader = im->open_for_reading<TestInterface>("SomeID");
     cout << "success" << endl;
   } catch (Exception &e) {
     cout << "failed! Aborting" << endl;
@@ -83,7 +83,7 @@ main(int argc, char **argv)
   try {
     cout << "Trying to open second writer.. " << flush;
     TestInterface *ti_writer_two;
-    ti_writer_two = im->openForWriting<TestInterface>("SomeID");
+    ti_writer_two = im->open_for_writing<TestInterface>("SomeID");
     cout << "BUG: Detection of second writer did NOT work!" << endl;
     exit(2);
   } catch (BlackBoardWriterActiveException &e) {
@@ -101,7 +101,7 @@ main(int argc, char **argv)
   try {
     cout << "Trying to open third writer.. " << flush;
     TestInterface *ti_writer_three;
-    ti_writer_three = im->openForWriting<TestInterface>("AnotherID");
+    ti_writer_three = im->open_for_writing<TestInterface>("AnotherID");
     cout << "No exception as expected, different ID ok!" << endl;
     im->close(ti_writer_three);
   } catch (BlackBoardWriterActiveException &e) {

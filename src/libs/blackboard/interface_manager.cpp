@@ -142,7 +142,7 @@ BlackBoardInterfaceManager::~BlackBoardInterfaceManager()
  * @return stripped class type
  */
 char *
-BlackBoardInterfaceManager::stripClassType(const char *type)
+BlackBoardInterfaceManager::strip_class_type(const char *type)
 {
   string t = type;
   t = t.substr( t.find_first_not_of("0123456789") );
@@ -163,7 +163,7 @@ BlackBoardInterfaceManager::stripClassType(const char *type)
  * for the given interface type could not be found
  */
 Interface *
-BlackBoardInterfaceManager::newInterfaceInstance(const char *type, const char *identifier)
+BlackBoardInterfaceManager::new_interface_instance(const char *type, const char *identifier)
 {
   char *generator_name = (char *)malloc(strlen("new") + strlen(type) + 1);
   sprintf(generator_name, "new%s", type);
@@ -176,7 +176,7 @@ BlackBoardInterfaceManager::newInterfaceInstance(const char *type, const char *i
 
   Interface *iface = iff();
 
-  iface->__instance_serial = getNextInstanceSerial();
+  iface->__instance_serial = next_instance_serial();
   strncpy(iface->__type, type, __INTERFACE_TYPE_SIZE);
   strncpy(iface->__id, identifier, __INTERFACE_ID_SIZE);
   iface->__interface_mediator = this;
@@ -195,7 +195,7 @@ BlackBoardInterfaceManager::newInterfaceInstance(const char *type, const char *i
  * for the given interface could not be found. The interface will not be freed.
  */
 void
-BlackBoardInterfaceManager::deleteInterfaceInstance(Interface *interface)
+BlackBoardInterfaceManager::delete_interface_instance(Interface *interface)
 {
   char *destroyer_name = (char *)malloc(strlen("delete") + strlen(interface->__type) + 1);
   sprintf(destroyer_name, "delete%s", interface->__type);
@@ -216,7 +216,7 @@ BlackBoardInterfaceManager::deleteInterfaceInstance(Interface *interface)
  * @return a pointer to the memory of the interface or NULL if not found
  */
 void *
-BlackBoardInterfaceManager::findInterfaceInMemory(const char *type, const char *identifier)
+BlackBoardInterfaceManager::find_interface_in_memory(const char *type, const char *identifier)
 {
   interface_header_t *ih;
   BlackBoardMemoryManager::ChunkIterator cit;
@@ -238,7 +238,7 @@ BlackBoardInterfaceManager::findInterfaceInMemory(const char *type, const char *
  * @return next unique memory serial
  */
 unsigned int
-BlackBoardInterfaceManager::getNextMemSerial()
+BlackBoardInterfaceManager::next_mem_serial()
 {
   unsigned int serial = 1;
   interface_header_t *ih;
@@ -258,7 +258,7 @@ BlackBoardInterfaceManager::getNextMemSerial()
  * @return next unique instance serial
  */
 unsigned int
-BlackBoardInterfaceManager::getNextInstanceSerial()
+BlackBoardInterfaceManager::next_instance_serial()
 {
   if ( bb_master ) {
     // simple, just increment value and return it
@@ -280,13 +280,13 @@ BlackBoardInterfaceManager::getNextInstanceSerial()
  * BlackBoard to create the interface
  */
 void
-BlackBoardInterfaceManager::createInterface(const char *type, const char *identifier,
-					    Interface* &interface, void* &ptr)
+BlackBoardInterfaceManager::create_interface(const char *type, const char *identifier,
+					     Interface* &interface, void* &ptr)
 {
   interface_header_t *ih;
 
   // create new interface and allocate appropriate chunk
-  interface = newInterfaceInstance(type, identifier);
+  interface = new_interface_instance(type, identifier);
   try {
     ptr = memmgr->alloc_nolock(interface->datasize() + sizeof(interface_header_t));
     ih  = (interface_header_t *)ptr;
@@ -302,7 +302,7 @@ BlackBoardInterfaceManager::createInterface(const char *type, const char *identi
   strncpy(ih->id, identifier, __INTERFACE_ID_SIZE);
 
   ih->refcount           = 0;
-  ih->serial             = getNextMemSerial();
+  ih->serial             = next_mem_serial();
   ih->flag_writer_active = 0;
   ih->num_readers        = 0;
   rwlocks[ih->serial] = new RefCountRWLock();
@@ -323,7 +323,7 @@ BlackBoardInterfaceManager::createInterface(const char *type, const char *identi
  * the requested interface.
  */
 Interface *
-BlackBoardInterfaceManager::openForReading(const char *type, const char *identifier)
+BlackBoardInterfaceManager::open_for_reading(const char *type, const char *identifier)
 {
   mutex->lock();
   Interface *iface = NULL;
@@ -332,17 +332,17 @@ BlackBoardInterfaceManager::openForReading(const char *type, const char *identif
 
   memmgr->lock();
 
-  ptr = findInterfaceInMemory(type, identifier);
+  ptr = find_interface_in_memory(type, identifier);
 
   if ( ptr != NULL ) {
     // found, instantiate new interface for given memory chunk
-    iface = newInterfaceInstance(type, identifier);
+    iface = new_interface_instance(type, identifier);
     iface->__mem_real_ptr = ptr;
     iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
     ih  = (interface_header_t *)ptr;
     rwlocks[ih->serial]->ref();
   } else {
-    createInterface(type, identifier, iface, ptr);
+    create_interface(type, identifier, iface, ptr);
     ih  = (interface_header_t *)ptr;
   }
 
@@ -359,6 +359,55 @@ BlackBoardInterfaceManager::openForReading(const char *type, const char *identif
 }
 
 
+/** Open all interfaces of the given type for reading.
+ * This will create interface instances for all currently registered interfaces of
+ * the given type. The result can be casted to the appropriate type.
+ * @param type type of the interface
+ * @return list of new fully initialized interface instances of requested type. The
+ * is allocated using new and you have to free it using delete after you are done
+ * with it!
+ */
+std::list<Interface *> *
+BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type)
+{
+  mutex->lock();
+  memmgr->lock();
+
+  std::list<Interface *> *rv = new std::list<Interface *>();
+
+  Interface *iface = NULL;
+  interface_header_t *ih;
+  BlackBoardMemoryManager::ChunkIterator cit;
+  for ( cit = memmgr->begin(); cit != memmgr->end(); ++cit ) {
+    ih = (interface_header_t *)*cit;
+    if (strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0) {
+      // found one!
+      // open 
+      void *ptr = *cit;
+      iface = new_interface_instance(ih->type, ih->id);
+      iface->__mem_real_ptr = ptr;
+      iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
+      ih  = (interface_header_t *)ptr;
+      rwlocks[ih->serial]->ref();
+
+      iface->__write_access = false;
+      iface->__rwlock = rwlocks[ih->serial];
+      iface->__mem_serial = ih->serial;
+      iface->__message_queue = new MessageQueue(iface->__mem_serial, iface->__instance_serial);
+      ih->refcount++;
+      ih->num_readers++;
+
+      rv->push_back(iface);
+    }
+  }
+
+  mutex->unlock();
+  memmgr->unlock();
+
+  return rv;
+}
+
+
 /** Open interface for writing.
  * This will create a new interface instance of the given type. The result can be
  * casted to the appropriate type. This will only succeed if there is not already
@@ -372,7 +421,7 @@ BlackBoardInterfaceManager::openForReading(const char *type, const char *identif
  * instance with the same type/id
  */
 Interface *
-BlackBoardInterfaceManager::openForWriting(const char *type, const char *identifier)
+BlackBoardInterfaceManager::open_for_writing(const char *type, const char *identifier)
 {
   mutex->lock();
   memmgr->lock();
@@ -381,7 +430,7 @@ BlackBoardInterfaceManager::openForWriting(const char *type, const char *identif
   void *ptr = NULL;
   interface_header_t *ih;
 
-  ptr = findInterfaceInMemory(type, identifier);
+  ptr = find_interface_in_memory(type, identifier);
 
   if ( ptr != NULL ) {
     // found, check if there is already a writer
@@ -392,12 +441,12 @@ BlackBoardInterfaceManager::openForWriting(const char *type, const char *identif
       mutex->unlock();
       throw BlackBoardWriterActiveException(identifier, type);
     }
-    iface = newInterfaceInstance(type, identifier);
+    iface = new_interface_instance(type, identifier);
     iface->__mem_real_ptr = ptr;
     iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
     rwlocks[ih->serial]->ref();
   } else {
-    createInterface(type, identifier, iface, ptr);
+    create_interface(type, identifier, iface, ptr);
     ih = (interface_header_t *)ptr;
   }
 
@@ -439,7 +488,7 @@ BlackBoardInterfaceManager::close(Interface *interface)
     }
   }
 
-  deleteInterfaceInstance( interface );
+  delete_interface_instance( interface );
 
   mutex->unlock();
 }
@@ -452,7 +501,7 @@ BlackBoardInterfaceManager::close(Interface *interface)
  * was found for the given interface.
  */
 Interface *
-BlackBoardInterfaceManager::getWriterForMemSerial(unsigned int mem_serial)
+BlackBoardInterfaceManager::writer_for_mem_serial(unsigned int mem_serial)
 {
   if ( writer_interfaces.find(mem_serial) != writer_interfaces.end() ) {
     return writer_interfaces[mem_serial];
@@ -469,7 +518,7 @@ BlackBoardInterfaceManager::getWriterForMemSerial(unsigned int mem_serial)
  * @return const pointer to memory manager
  */
 const BlackBoardMemoryManager *
-BlackBoardInterfaceManager::getMemoryManager() const
+BlackBoardInterfaceManager::memory_manager() const
 {
   return memmgr;
 }
@@ -481,7 +530,7 @@ BlackBoardInterfaceManager::getMemoryManager() const
  * @return true, if there is any writer for the given interface, false otherwise
  */
 bool
-BlackBoardInterfaceManager::existsWriter(const Interface *interface) const
+BlackBoardInterfaceManager::exists_writer(const Interface *interface) const
 {
   return (writer_interfaces.find(interface->__mem_serial) != writer_interfaces.end());
 }
@@ -496,7 +545,7 @@ BlackBoardInterfaceManager::existsWriter(const Interface *interface) const
  * @see Interface::write()
  */
 void
-BlackBoardInterfaceManager::notifyOfDataChange(const Interface *interface)
+BlackBoardInterfaceManager::notify_of_data_change(const Interface *interface)
 {
   // do nothing for now
   // printf("Interface %s of type %s has changed\n", interface->id(), interface->type());
