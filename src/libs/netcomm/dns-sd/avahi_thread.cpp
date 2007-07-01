@@ -89,7 +89,7 @@ AvahiThread::~AvahiThread()
  * @param service service to announce
  */
 void
-AvahiThread::publish(AvahiService *service)
+AvahiThread::publish(NetworkService *service)
 {
   service_publisher->publish(service);
 }
@@ -103,7 +103,7 @@ AvahiThread::publish(AvahiService *service)
  * @param h handler to call for events
  */
 void
-AvahiThread::watch(const char *service_type, AvahiBrowseHandler *h)
+AvahiThread::watch(const char *service_type, ServiceBrowseHandler *h)
 {
   browser->add_handler(service_type, h);
 }
@@ -114,7 +114,7 @@ AvahiThread::watch(const char *service_type, AvahiBrowseHandler *h)
  * @param h handler to no longer call for events
  */
 void
-AvahiThread::unwatch(const char *service_type, AvahiBrowseHandler *h)
+AvahiThread::unwatch(const char *service_type, ServiceBrowseHandler *h)
 {
   browser->add_handler(service_type, h);
 }
@@ -128,6 +128,26 @@ AvahiResolver *
 AvahiThread::resolver()
 {
   return _resolver;
+}
+
+
+/** Get service publisher.
+ * @return pointer to initialized Avahi service publisher
+ */
+AvahiServicePublisher *
+AvahiThread::avahi_service_publisher()
+{
+  return service_publisher;
+}
+
+
+/** Get service browser.
+ * @return pointer to initialized Avahi service browser
+ */
+AvahiBrowser *
+AvahiThread::avahi_service_browser()
+{
+  return browser;
 }
 
 

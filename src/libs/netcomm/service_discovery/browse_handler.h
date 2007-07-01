@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  avahi_browse_handler.h - Avahi browse handler
+ *  browse_handler.h - Avahi browse handler
  *
  *  Created: Wed Nov 08 13:16:47 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
@@ -25,16 +25,16 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __NETCOMM_DNSSD_AVAHI_BROWSE_HANDLER_H_
-#define __NETCOMM_DNSSD_AVAHI_BROWSE_HANDLER_H_
+#ifndef __NETCOMM_SERVICE_DISCOVERY_BROWSE_HANDLER_H_
+#define __NETCOMM_SERVICE_DISCOVERY_BROWSE_HANDLER_H_
 
-#include <avahi-common/address.h>
-#include <avahi-client/lookup.h>
+#include <sys/types.h>
+#include <stdint.h>
 
 #include <string>
 #include <list>
 
-/** @class AvahiBrowseHandler netcomm/dns-sd/avahi_browse_handler.h
+/** @class BrowseHandler netcomm/service_discovery/browse_handler.h
  * Interface for class that process browse results.
  * Implement this class if you want to browse for services on the network.
  * Then register your handler and it will be informed of services that
@@ -44,12 +44,11 @@
  *
  * @author Tim Niemueller
  */
-class AvahiBrowseHandler
+class ServiceBrowseHandler
 {
- friend class AvahiBrowser;
  public:
   /** Virtual destructor */
-  virtual ~AvahiBrowseHandler() {};
+  virtual ~ServiceBrowseHandler() {};
 
   /** All results have been retrieved.
    * If you read the DNS-SD specs you will see that there is no explicit
@@ -85,10 +84,11 @@ class AvahiBrowseHandler
 			     const char *type,
 			     const char *domain,
 			     const char *host_name,
-			     const AvahiAddress *address,
+			     const struct sockaddr *addr,
+			     const socklen_t addr_size,
 			     uint16_t port,
 			     std::list<std::string> &txt,
-			     AvahiLookupResultFlags flags
+			     int flags
 			     )                                = 0;
 
   /** A service has been removed from the network.

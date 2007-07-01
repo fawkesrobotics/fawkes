@@ -57,7 +57,7 @@ AvahiServicePublisher::AvahiServicePublisher()
 /** Destructor. */
 AvahiServicePublisher::~AvahiServicePublisher()
 {
-  for (std::list<AvahiService *>::iterator i = services.begin(); i != services.end(); ++i) {
+  for (std::list<NetworkService *>::iterator i = services.begin(); i != services.end(); ++i) {
     delete *i;
   }
   services.clear();
@@ -70,20 +70,27 @@ AvahiServicePublisher::~AvahiServicePublisher()
  * @param service service to publish.
  */
 void
-AvahiServicePublisher::publish(AvahiService *service)
+AvahiServicePublisher::publish(NetworkService *service)
 {
   services.push_back( service );
   if ( group ) {
     // create service with update flag
     int ret = 0;
     // only IPv4 for now
+    AvahiStringList *al = NULL;
+    std::list<std::string> l = service->txt();
+    for (std::list<std::string>::iterator i = l.begin(); i != l.end(); ++i) {
+      al = avahi_string_list_add(al, (*i).c_str());
+    }
     if ( (ret = avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_INET,
 						     AVAHI_PUBLISH_UPDATE,
 						     service->name(), service->type(),
 						     service->domain(), service->host(),
-						     service->port(), service->txt())) < 0) {
+						     service->port(), al)) < 0) {
+      avahi_string_list_free(al);
       throw Exception("Adding Avahi services failed");
     }
+    avahi_string_list_free(al);
   }
 }
 
@@ -104,15 +111,22 @@ AvahiServicePublisher::create_services()
 
   int ret = 0;
 
-  for (std::list<AvahiService *>::iterator i = services.begin(); i != services.end(); ++i) {
+  for (std::list<NetworkService *>::iterator i = services.begin(); i != services.end(); ++i) {
     // only IPv4 for now
+    AvahiStringList *al = NULL;
+    std::list<std::string> l = (*i)->txt();
+    for (std::list<std::string>::iterator j = l.begin(); j != l.end(); ++j) {
+      al = avahi_string_list_add(al, (*j).c_str());
+    }
     if ( (ret = avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_INET,
 						     AVAHI_PUBLISH_USE_MULTICAST,
 						     (*i)->name(), (*i)->type(),
 						     (*i)->domain(), (*i)->host(),
-						     (*i)->port(), (*i)->txt())) < 0) {
+						     (*i)->port(), al)) < 0) {
+      avahi_string_list_free(al);
       throw Exception("Adding Avahi services failed");
     }
+    avahi_string_list_free(al);
   }
 
   /* Tell the server to register the service */
@@ -152,7 +166,7 @@ AvahiServicePublisher::name_collision()
 {
   // give all services a new name, can't decide which service caused the problem
 
-  for (std::list<AvahiService *>::iterator i = services.begin(); i != services.end(); ++i) {
+  for (std::list<NetworkService *>::iterator i = services.begin(); i != services.end(); ++i) {
     char *n;
     /* A service name collision happened. Let's pick a new name */
     n = avahi_alternative_service_name((*i)->name());

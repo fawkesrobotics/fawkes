@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  avahi_service_publisher.h - publish services via avahi
+ *  dummy_service_publisher.cpp - publish services
  *
- *  Created: Tue Nov 07 16:38:00 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri Jun 29 15:30:33 2007 (on flight to RoboCup 2007, Atlanta)
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,40 +25,25 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __NETCOMM_DNSSD_AVAHI_SERVICE_PUBLISHER_H_
-#define __NETCOMM_DNSSD_AVAHI_SERVICE_PUBLISHER_H_
+#include <netcomm/service_discovery/dummy_service_publisher.h>
 
-#include <netcomm/service_discovery/service_publisher.h>
+/** @class DummyServicePublisher <netcomm/service_discovery/service_publisher.h>
+ * Dummy service publisher interface.
+ * Does nothing, used to fulfill NetworkAspect guarantees if Avahi is not available.
+ */
 
-#include <avahi-client/client.h>
-#include <avahi-client/publish.h>
-
-#include <list>
-
-class AvahiServicePublisher : public ServicePublisher
+/** Constructor. */
+DummyServicePublisher::DummyServicePublisher()
 {
- friend class AvahiThread;
+}
 
- public:
-  AvahiServicePublisher();
-  ~AvahiServicePublisher();
-
-  void publish(NetworkService *service);
-
- private:
-  static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state,
-				   void *instance);
-
-  void create_services();
-  void group_reset();
-  void group_erase();
-  void name_collision();
-
-  std::list<NetworkService *> services;
-
-  AvahiClient      *client;
-  AvahiEntryGroup  *group;
-};
+/** Virtual empty destructor. */
+DummyServicePublisher::~DummyServicePublisher()
+{
+}
 
 
-#endif
+void
+DummyServicePublisher::publish(NetworkService *service)
+{
+}

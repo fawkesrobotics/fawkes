@@ -26,7 +26,6 @@
  */
 
 #include <netcomm/dns-sd/avahi_browser.h>
-#include <netcomm/dns-sd/avahi_browse_handler.h>
 
 #include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
@@ -35,6 +34,10 @@
 #include <avahi-common/defs.h>
 #include <avahi-common/malloc.h>
 #include <avahi-common/error.h>
+
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
 
 
 /** @class AvahiBrowser netcomm/dns-sd/avahi_browser.h
@@ -67,10 +70,10 @@ AvahiBrowser::~AvahiBrowser()
  * for the given service and the given handler is called for added or
  * removed services or if an error occurs.
  * @param service_type string of the service type
- * @param h The AvahiBrowseHandler
+ * @param h The ServiceBrowseHandler
  */
 void
-AvahiBrowser::add_handler(const char *service_type, AvahiBrowseHandler *h)
+AvahiBrowser::add_handler(const char *service_type, ServiceBrowseHandler *h)
 {
   //mutex->lock();
   handlers[service_type].push_back(h);
@@ -108,7 +111,7 @@ AvahiBrowser::create_browser(const char *service_type)
 void
 AvahiBrowser::create_browsers()
 {
-  std::map< std::string, std::list<AvahiBrowseHandler *> >::iterator i;
+  std::map< std::string, std::list<ServiceBrowseHandler *> >::iterator i;
   for (i = handlers.begin(); i != handlers.end(); ++i) {
     create_browser( (*i).first.c_str() );
   }
@@ -134,7 +137,7 @@ AvahiBrowser::erase_browsers()
  * @param h the handler
  */
 void
-AvahiBrowser::remove_handler(const char *service_type, AvahiBrowseHandler *h)
+AvahiBrowser::remove_handler(const char *service_type, ServiceBrowseHandler *h)
 {
   //mutex->lock();
   if ( handlers.find(service_type) != handlers.end() ) {
@@ -163,7 +166,7 @@ AvahiBrowser::call_handler_service_removed( const char *name,
 {
   //mutex->lock();
   if ( handlers.find(type) != handlers.end() ) {
-    std::list<AvahiBrowseHandler *>::iterator i;
+    std::list<ServiceBrowseHandler *>::iterator i;
     for ( i = handlers[type].begin(); i != handlers[type].end(); ++i) {
       (*i)->service_removed(name, type, domain);
     }
@@ -193,11 +196,21 @@ AvahiBrowser::call_handler_service_added( const char *name,
 					  AvahiLookupResultFlags flags)
 {
   //mutex->lock();
+  struct sockaddr_in *s;
+  socklen_t slen;
+  if ( address->proto == AVAHI_PROTO_INET ) {
+    slen = sizeof(struct sockaddr_in);
+    s = (struct sockaddr_in *)malloc(slen);
+    s->sin_addr.s_addr = address->data.ipv4.address;
+  } else {
+    // ignore
+    return;
+  }
   if ( handlers.find(type) != handlers.end() ) {
-    std::list<AvahiBrowseHandler *>::iterator i;
+    std::list<ServiceBrowseHandler *>::iterator i;
     for ( i = handlers[type].begin(); i != handlers[type].end(); ++i) {
       (*i)->service_added(name, type, domain, host_name,
-				 address, port, txt, flags);
+			  (struct sockaddr *)s, slen, port, txt, (int)flags);
     }
   }
   //mutex->unlock();
@@ -216,7 +229,7 @@ AvahiBrowser::call_handler_failed( const char *name,
 {
   //mutex->lock();
   if ( handlers.find(type) != handlers.end() ) {
-    std::list<AvahiBrowseHandler *>::iterator i;
+    std::list<ServiceBrowseHandler *>::iterator i;
     for ( i = handlers[type].begin(); i != handlers[type].end(); ++i) {
       (*i)->failed(name, type, domain);
     }
@@ -233,7 +246,7 @@ AvahiBrowser::call_handler_all_for_now(const char *type)
 {
   //mutex->lock();
   if ( handlers.find(type) != handlers.end() ) {
-    std::list<AvahiBrowseHandler *>::iterator i;
+    std::list<ServiceBrowseHandler *>::iterator i;
     for ( i = handlers[type].begin(); i != handlers[type].end(); ++i) {
       (*i)->all_for_now();
     }
@@ -250,7 +263,7 @@ AvahiBrowser::call_handler_cache_exhausted(const char *type)
 {
   //mutex->lock();
   if ( handlers.find(type) != handlers.end() ) {
-    std::list<AvahiBrowseHandler *>::iterator i;
+    std::list<ServiceBrowseHandler *>::iterator i;
     for ( i = handlers[type].begin(); i != handlers[type].end(); ++i) {
       (*i)->cache_exhausted();
     }

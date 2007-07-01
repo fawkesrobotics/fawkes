@@ -25,7 +25,7 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <netcomm/dns-sd/avahi_service.h>
+#include <netcomm/service_discovery/service.h>
 
 #include <sys/types.h>
 #include <inttypes.h>
@@ -38,7 +38,7 @@
 
 #include <string.h>
 
-/** @class AvahiService netcomm/dns-sd/avahi_service.h
+/** @class NetworkService netcomm/dns-sd/avahi_service.h
  * Representation of a service announced or found via Avahi.
  * This class is used in the C++ wrapper to talk about services.
  *
@@ -54,18 +54,17 @@
  * @param host host of service
  * @param port port of service
  */
-AvahiService::AvahiService(const char         *name,
-			   const char         *type,
-			   const char         *domain,
-			   const char         *host,
-			   unsigned short int  port)
+NetworkService::NetworkService(const char         *name,
+			       const char         *type,
+			       const char         *domain,
+			       const char         *host,
+			       unsigned short int  port)
 {
-  _name   = avahi_strdup(name);
-  _type   = avahi_strdup(type);
-  _domain = avahi_strdup(domain);
-  _host   = avahi_strdup(host);
+  _name   = strdup(name);
+  _type   = strdup(type);
+  _domain = strdup(domain);
+  _host   = strdup(host);
   _port   = port;
-  list    = NULL;
 }
 
 
@@ -77,28 +76,25 @@ AvahiService::AvahiService(const char         *name,
  * @param type type of service
  * @param port port of service
  */
-AvahiService::AvahiService(const char         *name,
+NetworkService::NetworkService(const char         *name,
 			   const char         *type,
 			   unsigned short int  port)
 {
-  _name   = avahi_strdup(name);
-  _type   = avahi_strdup(type);
+  _name   = strdup(name);
+  _type   = strdup(type);
   _domain = NULL;
   _host   = NULL;
   _port   = port;
-  list    = NULL;
 }
 
 
 /** Destructor. */
-AvahiService::~AvahiService()
+NetworkService::~NetworkService()
 {
-  avahi_string_list_free( list );
-  list = NULL;
-  avahi_free( _name );
-  avahi_free( _type );
-  avahi_free( _domain );
-  avahi_free( _host );
+  if ( _name   != NULL)  free( _name );
+  if ( _type   != NULL)  free( _type );
+  if ( _domain != NULL)  free( _domain );
+  if ( _host   != NULL)  free( _host );
 }
 
 
@@ -106,9 +102,9 @@ AvahiService::~AvahiService()
  * @param txt TXT record to add, must be a "key=value" string.
  */
 void
-AvahiService::add_txt(const char *txt)
+NetworkService::add_txt(const char *txt)
 {
-  list = avahi_string_list_add( list, txt );
+  list.push_back(txt);
 }
 
 
@@ -116,10 +112,10 @@ AvahiService::add_txt(const char *txt)
  * @param new_name new name
  */
 void
-AvahiService::set_name(const char *new_name)
+NetworkService::set_name(const char *new_name)
 {
-  avahi_free( _name );
-  _name = avahi_strdup(new_name);
+  free( _name );
+  _name = strdup(new_name);
 }
 
 
@@ -127,7 +123,7 @@ AvahiService::set_name(const char *new_name)
  * @return name of service
  */
 const char *
-AvahiService::name()
+NetworkService::name()
 {
   return _name;
 }
@@ -137,7 +133,7 @@ AvahiService::name()
  * @return type of service
  */
 const char *
-AvahiService::type()
+NetworkService::type()
 {
   return _type;
 }
@@ -147,7 +143,7 @@ AvahiService::type()
  * @return domain of service
  */
 const char *
-AvahiService::domain()
+NetworkService::domain()
 {
   return _domain;
 }
@@ -157,7 +153,7 @@ AvahiService::domain()
  * @return host of service
  */
 const char *
-AvahiService::host()
+NetworkService::host()
 {
   return _host;
 }
@@ -167,7 +163,7 @@ AvahiService::host()
  * @return port of service
  */
 unsigned short int
-AvahiService::port()
+NetworkService::port()
 {
   return _port;
 }
@@ -176,31 +172,31 @@ AvahiService::port()
 /** Get TXT record list of service.
  * @return TXT record list of service
  */
-AvahiStringList *
-AvahiService::txt()
+std::list<std::string>
+NetworkService::txt()
 {
   return list;
 }
 
 
-/** Equal operator for AvahiService reference.
+/** Equal operator for NetworkService reference.
  * @param s reference of service to compare to.
  * @return true, if the services are the same (same name and type), false otherwise
  */
 bool
-AvahiService::operator==(const AvahiService &s) const
+NetworkService::operator==(const NetworkService &s) const
 {
   return ( (strcmp(_name, s._name) == 0) &&
 	   (strcmp(_type, s._type) == 0) );
 }
 
 
-/** Equal operator for AvahiService pointer.
+/** Equal operator for NetworkService pointer.
  * @param s pointer to service to compare to.
  * @return true, if the services are the same (same name and type), false otherwise
  */
 bool
-AvahiService::operator==(const AvahiService *s) const
+NetworkService::operator==(const NetworkService *s) const
 {
   return ( (strcmp(_name, s->_name) == 0) &&
 	   (strcmp(_type, s->_type) == 0) );

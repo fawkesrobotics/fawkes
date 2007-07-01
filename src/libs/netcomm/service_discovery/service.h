@@ -25,25 +25,26 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __NETCOMM_DNSSD_AVAHI_SERVICE_H_
-#define __NETCOMM_DNSSD_AVAHI_SERVICE_H_
+#ifndef __NETCOMM_SERVICE_DISCOVERY_SERVICE_H_
+#define __NETCOMM_SERVICE_DISCOVERY_SERVICE_H_
 
-typedef struct AvahiStringList AvahiStringList;
+#include <string>
+#include <list>
 
-class AvahiService
+class NetworkService
 {
  public:
-  AvahiService(const char         *name,
-	       const char         *type,
-	       const char         *domain,
-	       const char         *host,
-	       unsigned short int  port);
+  NetworkService(const char         *name,
+		 const char         *type,
+		 const char         *domain,
+		 const char         *host,
+		 unsigned short int  port);
 
-  AvahiService(const char         *name,
-	       const char         *type,
-	       unsigned short int  port);
+  NetworkService(const char         *name,
+		 const char         *type,
+		 unsigned short int  port);
 
-  ~AvahiService();
+  ~NetworkService();
 
   void add_txt(const char *txt);
 
@@ -54,13 +55,13 @@ class AvahiService
   const char *        domain();
   const char *        host();
   unsigned short int  port();
-  AvahiStringList *   txt();
+  std::list<std::string>  txt();
 
-  bool                operator==(const AvahiService &s) const;
-  bool                operator==(const AvahiService *s) const;
+  bool                operator==(const NetworkService &s) const;
+  bool                operator==(const NetworkService *s) const;
 
  private:
-  AvahiStringList *    list;
+  std::list<std::string> list;
   char *              _name;
   char *              _type;
   char *              _domain;

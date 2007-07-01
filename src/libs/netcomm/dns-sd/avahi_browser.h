@@ -28,8 +28,8 @@
 #ifndef __NETCOMM_DNSSD_AVAHI_BROWSER_H_
 #define __NETCOMM_DNSSD_AVAHI_BROWSER_H_
 
-#include <netcomm/dns-sd/avahi_service.h>
-#include <netcomm/dns-sd/avahi_browse_handler.h>
+#include <netcomm/service_discovery/service.h>
+#include <netcomm/service_discovery/browse_handler.h>
 
 #include <avahi-client/client.h>
 #include <avahi-client/lookup.h>
@@ -49,8 +49,8 @@ class AvahiBrowser
   AvahiBrowser();
   ~AvahiBrowser();
 
-  void add_handler(const char *service_type, AvahiBrowseHandler *h);
-  void remove_handler(const char *service_type, AvahiBrowseHandler *h);
+  void add_handler(const char *service_type, ServiceBrowseHandler *h);
+  void remove_handler(const char *service_type, ServiceBrowseHandler *h);
 
  private:
   static void browse_callback( AvahiServiceBrowser *b,
@@ -101,7 +101,7 @@ class AvahiBrowser
   void erase_browsers();
 
 
-  std::map<std::string, std::list<AvahiBrowseHandler *> > handlers;
+  std::map<std::string, std::list<ServiceBrowseHandler *> > handlers;
   std::map<std::string, AvahiServiceBrowser * > browsers;
 
   AvahiClient      *client;

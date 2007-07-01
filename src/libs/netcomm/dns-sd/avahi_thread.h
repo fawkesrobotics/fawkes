@@ -28,14 +28,14 @@
 #ifndef __NETCOMM_DNSSD_AVAHI_THREAD_H_
 #define __NETCOMM_DNSSD_AVAHI_THREAD_H_
 
-#include <netcomm/dns-sd/avahi_service.h>
+#include <netcomm/service_discovery/service.h>
 #include <core/threading/thread.h>
 
 #include <avahi-client/client.h>
 
 class AvahiServicePublisher;
 class AvahiBrowser;
-class AvahiBrowseHandler;
+class ServiceBrowseHandler;
 class AvahiResolver;
 class Mutex;
 class WaitCondition;
@@ -46,12 +46,15 @@ class AvahiThread : public Thread
   AvahiThread();
   ~AvahiThread();
 
-  void publish(AvahiService *service);
-  void watch(const char *service_type, AvahiBrowseHandler *h);
-  void unwatch(const char *service_type, AvahiBrowseHandler *h);
+  void publish(NetworkService *service);
+  void watch(const char *service_type, ServiceBrowseHandler *h);
+  void unwatch(const char *service_type, ServiceBrowseHandler *h);
   void wait_initialized();
 
   AvahiResolver *  resolver();
+
+  AvahiServicePublisher *   avahi_service_publisher();
+  AvahiBrowser *            avahi_service_browser();
 
   virtual void loop();
 
