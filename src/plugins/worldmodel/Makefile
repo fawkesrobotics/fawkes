@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#              Makefile Build System for Fawkes: WorldModel Plugin
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Fir Jun 29 11:53:13 2007 (on flight to RoboCup 2007, Atlanta)
+#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -19,10 +19,13 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 
-SUBDIRS = worldmodel example kicker
+LIBS_worldmodel = core utils netcomm
+OBJS_worldmodel = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
+OBJS_all    = $(OBJS_worldmodel)
+PLUGINS_all = $(PLUGINDIR)/worldmodel.so
+
+include $(BASEDIR)/etc/buildsys/base.mk
 
