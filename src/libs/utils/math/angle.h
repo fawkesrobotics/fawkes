@@ -25,8 +25,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __UTILS_MATH_H_
-#define __UTILS_MATH_H_
+#ifndef __UTILS_MATH_ANGLE_H_
+#define __UTILS_MATH_ANGLE_H_
 
 #include <cmath>
 
