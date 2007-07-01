@@ -54,6 +54,7 @@ class InterfaceField
   std::string               getType() const;
   std::string               getAccessType() const;
   std::string               getLength() const;
+  unsigned int              getLengthValue() const;
   std::string               getBits() const;
   unsigned int              getNumBits() const;
   std::vector<std::string>  getFlags() const;
@@ -72,6 +73,7 @@ class InterfaceField
   std::string type;
   std::string comment;
   std::string length;
+  unsigned int length_value;
   std::string bits;
   std::string validfor;
   std::string default_value;

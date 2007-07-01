@@ -42,6 +42,7 @@
 InterfaceField::InterfaceField()
 {
   bits_val = 0;
+  length = "";
 }
 
 
@@ -83,6 +84,8 @@ InterfaceField::getAccessType() const
 {
   if ( type == "char" ) {
     return "char *";
+  } else if ( length != "" ) {
+    return type + " *";
   } else {
     return type;
   }
@@ -96,6 +99,12 @@ std::string
 InterfaceField::getLength() const
 {
   return length;
+}
+
+unsigned int
+InterfaceField::getLengthValue() const
+{
+  return length_value;
 }
 
 
@@ -185,6 +194,7 @@ InterfaceField::setComment(const std::string &comment)
 void
 InterfaceField::setLength(const std::string &length)
 {
+  this->length_value = (unsigned int)atoi(length.c_str());
   this->length = length;
 }
 

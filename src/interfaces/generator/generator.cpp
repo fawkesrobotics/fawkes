@@ -587,6 +587,11 @@ InterfaceGenerator::write_methods_cpp(FILE *f, std::string classname,
       fprintf(f,
 	      "  strncpy(data->%s, new%s, sizeof(data->%s));\n",
 	      (*i).getName().c_str(), (*i).getName().c_str(), (*i).getName().c_str());
+    } else if ( (*i).getLength() != "" ) {
+      fprintf(f,
+	      "  memcpy(data->%s, new%s, sizeof(%s) * %s);\n",
+	      (*i).getName().c_str(), (*i).getName().c_str(),
+	      (*i).getType().c_str(), (*i).getLength().c_str());
     } else {
       fprintf(f,
 	      "  data->%s = new%s;\n",

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<!-- $Id$ -->
+<interface name="ObjectPositionInterface" author="Tim Niemueller" year="2007">
+  <constants>
+    <constant type="unsigned int" value="0" name="OTHER">
+      This constant denotes an object that cannot be denoted by any other constant.
+    </constant>
+    <constant type="unsigned int" value="1" name="BALL">
+      This constant denotes a ball object.
+    </constant>
+    <constant type="unsigned int" value="2" name="OPPONENT">
+      This constant denotes an opponent robot.
+    </constant>
+    <constant type="unsigned int" value="3" name="TEAMMEMBER">
+      This constant denotes a robot of the same team.
+    </constant>
+  </constants>
+  <data>
+    <comment>
+      This interface provides access to arbitrary object positions and velocities. You
+      can use it to store the position of any object in the RoboCup domain. There is a type
+      indicator for the RoboCup soccer domain to easily distinguish several well
+      known objects. You may choose not to use this for other application in which case
+      the value should be other (which is also the default).
+    </comment>
+    <field type="unsigned int" name="ObjectType">
+      Object type, use constants to define
+    </field>
+    <field type="float" name="Yaw">
+      Angle between the robot's forward direction and the object on the ground plane.
+      This angle is in a local 3D coordinate system to the robot and given in radians.
+    </field>
+    <field type="float" name="Pitch">
+      Angle between the robot's center position on the ground plane and the middle point
+      of the object (e.g. this denotes the height of the object combined with the distance.
+      The angle is given in radians.
+    </field>
+    <field type="float" name="Distance">
+      Distance from the robot to the object on the ground plane. The distance is given
+      in meters.
+    </field>
+    <field type="float" name="DYPCovariance" length="9">
+      Covariance of Distance/Yaw/Pitch values. This is a 3x3 matrix ordered line by line,
+      first three values represent row, next tree values second row and last three values
+      last row from left to right each.
+    </field>
+    <field type="int" name="WorldX">
+      This is the X coordinate in the cartesian right-handed world coordinate system.
+      This coordinate system has its origin in the center of the field, Y pointing to
+      the opponent's goal and X pointing to the right.
+    </field>
+    <field type="int" name="WorldY">
+      This is the Y coordinate in the cartesian right-handed world coordinate system.
+      This coordinate system has its origin in the center of the field, Y pointing to
+      the opponent's goal and X pointing to the right and Z pointing downwards.
+    </field>
+    <field type="int" name="WorldZ">
+      This is the Z coordinate in the cartesian right-handed world coordinate system.
+      This coordinate system has its origin in the center of the field, Y pointing to
+      the opponent's goal and X pointing to the right.
+    </field>
+    <field type="float" name="XYZCovariance" length="9">
+      Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
+      first three values represent row, next tree values second row and last three values
+      last row from left to right each.
+    </field>
+
+    <field type="float" name="YawVelocity">
+      Gives the velocity of the object for yaw in radians per second.
+    </field>
+    <field type="float" name="PitchVelocity">
+      Gives the velocity of the object for pitch in radians per second.
+    </field>
+    <field type="float" name="DistanceVelocity">
+      Gives the velocity of the object distance meter per second.
+    </field>
+    <field type="float" name="DYPVelocityCovariance" length="9">
+      Covariance of Distance/Yaw/Pitch velocityvalues. This is a 3x3 matrix ordered line by
+      line, first three values represent row, next tree values second row and last three
+      values last row from left to right each.
+    </field>
+
+    <field type="int" name="WorldXVelocity">
+      Velocity of object in the world coordinate system in X-direction in meter per second.
+    </field>
+    <field type="int" name="WorldYVelocity">
+      Velocity of object in the world coordinate system in Y-direction in meter per second.
+    </field>
+    <field type="int" name="WorldZVelocity">
+      Velocity of object in the world coordinate system in Z-direction in meter per second.
+    </field>
+    <field type="float" name="XYZVelocityCovariance" length="9">
+      Covariance of WorldX/WorldY/WorldZ valocity values. This is a 3x3 matrix ordered line
+      by line, first three values represent row, next tree values second row and last three
+      values last row from left to right each.
+    </field>
+
+  </data>
+</interface>
