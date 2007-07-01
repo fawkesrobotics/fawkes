@@ -32,9 +32,11 @@
 #include <sys/types.h>
 
 class Mutex;
+class Interface;
 
 class Message : public RefCount
 {
+ friend class Interface;
  friend class MessageQueue;
  friend class BlackBoardMessageManager;
  public:
@@ -63,10 +65,13 @@ class Message : public RefCount
   unsigned int      sub_status();
   pthread_t         sender_id();
   const char *      sender();
+  Interface *       interface();
 
  private:
   virtual void *        data();
   virtual unsigned int  datasize();
+
+  void                  set_interface(Interface *iface);
 
   unsigned int  message_id;
 
@@ -78,6 +83,9 @@ class Message : public RefCount
 
   char          *_sender;
   pthread_t      _sender_id;
+
+  Interface     *_transmit_via_iface;
+
  protected:
   void         *data_ptr;
   unsigned int  data_size;

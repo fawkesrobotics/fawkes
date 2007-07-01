@@ -40,7 +40,7 @@ class InterfaceMediator
    * @param interface interface to check
    * @return true, if there is any writer for the given interface, false otherwise
    */
-  virtual bool existsWriter(const Interface *interface) const           = 0;
+  virtual bool exists_writer(const Interface *interface) const           = 0;
 
   /** Notify of data change.
    * Notify all subscribers of the given interface of a data change.
@@ -50,7 +50,7 @@ class InterfaceMediator
    * @param interface interface whose subscribers to notify
    * @see Interface::write()
    */
-  virtual void notifyOfDataChange(const Interface *interface)           = 0;
+  virtual void notify_of_data_change(const Interface *interface)         = 0;
 };
 
 #endif

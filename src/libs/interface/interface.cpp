@@ -129,7 +129,7 @@ Interface::write()
   memcpy(__mem_data_ptr, data_ptr, data_size);
   __rwlock->unlock();
 
-  __interface_mediator->notifyOfDataChange(this);
+  __interface_mediator->notify_of_data_change(this);
 }
 
 
@@ -205,7 +205,7 @@ Interface::serial() const
 bool
 Interface::hasWriter() const
 {
-  return __interface_mediator->existsWriter(this);
+  return __interface_mediator->exists_writer(this);
 }
 
 
@@ -220,6 +220,7 @@ Interface::hasWriter() const
 unsigned int
 Interface::msgq_enqueue(Message *message)
 {
+  message->set_interface(this);
   unsigned int rv = __message_queue->append(message);
   __message_mediator->transmit(message);
   return rv;
@@ -233,6 +234,7 @@ Interface::msgq_enqueue(Message *message)
 unsigned int
 Interface::msgq_append(Message *message)
 {
+  message->set_interface(this);
   return __message_queue->append(message);
 }
 

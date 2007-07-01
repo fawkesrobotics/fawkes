@@ -26,13 +26,14 @@
  */
 
 #include <interface/message.h>
+#include <interface/interface.h>
 
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 #include <unistd.h>
 
 /** @class Message interface/message.h
@@ -62,6 +63,7 @@ Message::Message()
 {
   message_id = 0;
   data_ptr = NULL;
+  _transmit_via_iface = NULL;
   sender_interface_instance_serial = 0;
   recipient_interface_mem_serial = 0;
   _status    = Undefined;
@@ -77,6 +79,7 @@ Message::Message()
 Message::Message(Message &mesg)
 {
   message_id = 0;
+  _transmit_via_iface = NULL;
   sender_interface_instance_serial = 0;
   recipient_interface_mem_serial = 0;
   data_size = mesg.data_size;
@@ -95,6 +98,7 @@ Message::Message(Message &mesg)
 Message::Message(Message *mesg)
 {
   message_id = 0;
+  _transmit_via_iface = NULL;
   sender_interface_instance_serial = 0;
   recipient_interface_mem_serial = 0;
   data_size = mesg->data_size;
@@ -217,4 +221,25 @@ pthread_t
 Message::sender_id()
 {
   return _sender_id;
+}
+
+
+/** Set transmitting interface.
+ * Called by Message Manager
+ * @param iface transmitting interface
+ */
+void
+Message::set_interface(Interface *iface)
+{
+  _transmit_via_iface = iface;
+}
+
+
+/** Get transmitting interface.
+ * @return transmitting interface, or NULL if message has not been enqueued, yet.
+ */
+Interface *
+Message::interface()
+{
+  return _transmit_via_iface;
 }
