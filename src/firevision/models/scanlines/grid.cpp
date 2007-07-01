@@ -116,3 +116,68 @@ ScanlineGrid::getMargin()
 {
   return (offset_x > offset_y) ? offset_x : offset_y;
 }
+
+
+void
+ScanlineGrid::setRobotPose(float x, float y, float ori)
+{
+  // ignored
+}
+
+
+void
+ScanlineGrid::setPanTilt(float pan, float tilt)
+{
+  // ignored
+}
+
+
+/** Set dimensions.
+ * Set width and height of scanline grid. Implicitly resets the grid.
+ * @param width width
+ * @param height height
+ */
+void
+ScanlineGrid::setDimensions(unsigned int width, unsigned int height)
+{
+  this->width  = width;
+  this->height = height;
+  // reset
+  coord.x = coord.y = 0;
+}
+
+
+/** Set offset.
+ * Set X and Y offset by which the pointer in the grid is advanced. Implicitly resets the grid.
+ * @param offset_x offset_x
+ * @param offset_y offset_y
+ */
+void
+ScanlineGrid::setOffset(unsigned int offset_x, unsigned int offset_y)
+{
+  this->offset_x = offset_x;
+  this->offset_y = offset_y;
+  // reset
+  coord.x = coord.y = 0;
+}
+
+
+/** Set all grid parameters.
+ * Set width, height, X and Y offset by which the pointer in the grid is advanced.
+ * Implicitly resets the grid.
+ * @param width width
+ * @param height height
+ * @param offset_x offset_x
+ * @param offset_y offset_y
+ */
+void
+ScanlineGrid::setGridParams(unsigned int width, unsigned int height,
+			    unsigned int offset_x, unsigned int offset_y)
+{
+  this->width  = width;
+  this->height = height;
+  this->offset_x = offset_x;
+  this->offset_y = offset_y;
+  // reset
+  coord.x = coord.y = 0;
+}

@@ -57,6 +57,7 @@
 
 #include <unistd.h>
 #include <iostream>
+#include <algorithm>  // for min/max
 
 using namespace std;
 
@@ -234,7 +235,8 @@ CannikinPipeline::init()
     scanlines = new ScanlineGrid(width, height,
 				 config->ScanlineGridXOffset, config->ScanlineGridYOffset);
 
-    disparity_scanlines = new ScanlineRadial(width, height, width / 2, height / 2, 10, 10);
+    //disparity_scanlines = new ScanlineRadial(width, height, width / 2, height / 2, 10, 10);
+    disparity_scanlines = new ScanlineGrid(width, height, 2, 2);
   } // end not camless mode
 
 
@@ -686,8 +688,10 @@ CannikinPipeline::detect_cup()
 	// Take five points and calculate some distances...
 	std::vector<DisparityPoint> points;
 	std::vector<DisparityPoint> wpoints;
-	unsigned int center_x = r->start.x + r->width / 2;
-	unsigned int center_y = r->start.y + r->height / 2;
+	unsigned int half_width = r->width / 2;
+	unsigned int half_height = r->height / 2;
+	unsigned int center_x = r->start.x + half_width;
+	unsigned int center_y = r->start.y + half_height;
 
 	shm_buffer->set_circle( center_x, center_y, 5 );
 	shm_buffer->set_circle_found( true );
@@ -695,8 +699,10 @@ CannikinPipeline::detect_cup()
 	points.clear();
 	wpoints.clear();
 
-	disparity_scanlines->set_center(center_x, center_y);
-	disparity_scanlines->set_radius(3, min(r->width, r->height));
+	//disparity_scanlines->set_center(center_x, center_y);
+	//disparity_scanlines->set_radius(3, min(r->width, r->height));
+	disparity_scanlines->setDimensions(center_x - min(10, half_width),
+					   center_y - ((half_height > 10) ? half_height  - 10 : half_height));
 
 	while ( ! disparity_scanlines->finished() ) {
 	  if ( triclops->get_xyz((*disparity_scanlines)->x, (*disparity_scanlines)->y, &x, &y, &z) ) {

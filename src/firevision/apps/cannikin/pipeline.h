@@ -57,6 +57,7 @@ class ArgumentParser;
 class SharedMemoryImageBuffer;
 class CannikinConfig;
 class ScanlineRadial;
+class ScanlineGrid;
 class TriclopsStereoProcessor;
 class IPCMessageQueue;
 
@@ -181,7 +182,8 @@ class CannikinPipeline : SignalHandler {
   //BallGlobal             *box_glob;
   Classifier               *classifier;
 
-  ScanlineRadial           *disparity_scanlines;
+  //ScanlineRadial           *disparity_scanlines;
+  ScanlineGrid             *disparity_scanlines;
 
   bool                      already_fetched_pantilt;
   cart_coord_t              mass_point;
