@@ -30,8 +30,25 @@ LIBS     = $(VISION_LIBS)
 LIBS_fvshmem = $(VISION_CAM_LIBS) utils fvutils
 OBJS_fvshmem = shmem.o
 
-OBJS_all = $(OBJS_fvshmem)
+LIBS_listfwcams = $(VISION_CAM_LIBS) utils fvcams
+OBJS_listfwcams = listfwcams.o
+
+OBJS_all = $(OBJS_fvshmem) $(OBJS_listfwcams)
 BINS_all = $(BINDIR)/fvshmem
+
+ifeq ($(HAVE_FIREWIRE_CAM),1)
+  BINS_all += $(BINDIR)/listfwcams
+else
+  WARN_TARGETS += warning_listfwcams
+endif
+
+ifneq ($(SRCDIR),.)
+all: $(WARN_TARGETS)
+
+.PHONY: warning_listfwcams
+warning_listfwcams:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building listfwcams$(TNORMAL) (no Firewire camera support)";
+endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

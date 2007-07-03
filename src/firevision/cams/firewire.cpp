@@ -96,7 +96,7 @@ FirewireCamera::open()
   dc1394camera_t       **cameras;
   unsigned int num_cameras = 0;
   unsigned int cam = 0;
-  int found = 0;
+  bool found = false;
 
   opened = false;
 
@@ -111,17 +111,36 @@ FirewireCamera::open()
   }
 
   if (num_cameras > 0) {
-    /* use the first camera found */
-    cam=0;
-    found = 1;
+    if ( strcmp(model, "any") == 0 ) {
+      /* use the first camera found */
+      cam=0;
+      found = true;
 
-    camera = cameras[cam];
-    for (i = 1; i < num_cameras; ++i) {
-      dc1394_free_camera(cameras[i]);
+      camera = cameras[cam];
+      for (i = 1; i < num_cameras; ++i) {
+	dc1394_free_camera(cameras[i]);
+      }
+      free(cameras);
+      cameras = NULL;
+    } else {
+      camera = NULL;
+      for (i = 0; i < num_cameras; ++i) {
+	if ( !found && strcmp(model, cameras[i]->model) == 0) {
+	  // found desired camera
+	  camera = cameras[i];
+	  found = true;
+	} else {
+	  dc1394_free_camera(cameras[i]);
+	}
+      }
+      free(cameras);
+      cameras = NULL;
+      if ( camera == NULL ) {
+	Exception e("Could not find camera");
+	e.append("Camera of model '%s' not found!");
+	throw e;
+      }
     }
-    free(cameras);
-    cameras = NULL;
-
     if (camera->bmode_capable > 0) {
       // set b-mode and reprobe modes,...
       // (higher fps formats might not be reported as available in legacy mode)
@@ -138,7 +157,7 @@ FirewireCamera::open()
     throw Exception("No cameras connected");;
   }
 
-  opened = (found != 0);
+  opened = found;
 }
 
 
