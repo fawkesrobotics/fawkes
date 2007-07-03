@@ -49,6 +49,7 @@ namespace bbClients {
   class Alive_Server;
   class VisionObstacles_Server;
   class BallPos_Server;
+  class Geegaw_Server;
 }
 
 class FirevisionGeegawBBClient : public bb::ClientAppl
@@ -124,6 +125,7 @@ class FirevisionGeegawBBClient : public bb::ClientAppl
   bbClients::Alive_Server            *m_pFrontAliveFakeServer;
   bbClients::BallPos_Server          *m_pObjPosServer;
   bbClients::Localize_Master_Client  *m_pLocalizeMasterClient;
+  bbClients::Geegaw_Server           *m_pGeegawServer;
 
 }; 
 

@@ -30,6 +30,7 @@
 
 #include <models/color/colormodel.h>
 #include <string>
+#include <sys/types.h>
 
 class SharedMemoryLookupTable;
 
@@ -52,6 +53,7 @@ class ColorModelLookupTable : public ColorModel
 
   const char *  getName();
   void          load(const char *file);
+
   void          save(const char *file);
 
   void          set(unsigned int y,
@@ -76,12 +78,15 @@ class ColorModelLookupTable : public ColorModel
    */
   unsigned char *  getBuffer();
 
+  ColorModelLookupTable &  operator+=(const ColorModelLookupTable & cmlt);
+  ColorModelLookupTable &  operator+=(const char *filename);
 
   static std::string composeFilename(const std::string format);
 
  private:
 
   void create();
+  void load_to_buffer(const char *file, unsigned char *buffer, off_t buffer_size);
 
   unsigned int   lut_id;
   unsigned char *lut;

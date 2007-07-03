@@ -48,6 +48,7 @@
 #include <interfaces/camera_control_server.h>
 #include <interfaces/alive_server.h>
 #include <interfaces/vision_obstacles_server.h>
+#include <interfaces/geegaw_server.h>
 
 #include <unistd.h>
 
@@ -60,8 +61,9 @@ using namespace std;
 
 // ==============================================================================
 // Constructor
-FirevisionGeegawBBClient::FirevisionGeegawBBClient(int argc, char* argv[], ArgumentParser *argp) :
-  bb::ClientAppl(argc, argv) 
+FirevisionGeegawBBClient::FirevisionGeegawBBClient(int argc, char* argv[],
+						   ArgumentParser *argp)
+  : bb::ClientAppl(argc, argv) 
 {
   this->argp = argp;
   BBOperate();
@@ -94,8 +96,6 @@ FirevisionGeegawBBClient::FirevisionGeegawBBClient(int argc, char* argv[], Argum
 
   box_lost_time.Stamp();
   box_lost = true;
-
-  object_mode = argp->hasArgument("O");
 }
 
 
@@ -135,6 +135,10 @@ void FirevisionGeegawBBClient::Init ()
   m_pObjPosServer = new bbClients::BallPos_Server( hostname );
   BBRegisterObj( m_pObjPosServer );
 
+  // initialize geegaw server
+  m_pGeegawServer = new bbClients::Geegaw_Server( hostname );
+  BBRegisterObj( m_pGeegawServer );
+
   // initialize camera control server
   m_pCameraControlServer = new bbClients::CameraControl_Server( hostname );
   BBRegisterObj( m_pCameraControlServer );
@@ -150,7 +154,7 @@ void FirevisionGeegawBBClient::Init ()
 
   SetTime( 40 );
 
-  pipeline = new GeegawPipeline(argp, config, object_mode);
+  pipeline = new GeegawPipeline(argp, config);
   pipeline->init();
 
   camctrl       = pipeline->getCameraControl();
@@ -184,16 +188,26 @@ FirevisionGeegawBBClient::Loop(int Count)
 
   loop_running = true;
 
-  BBOperate();
-  
   m_pCameraControlServer->Update();
   m_pObjPosServer->Update();  
   m_pLocalizeMasterClient->Update();
+  m_pGeegawServer->Update();
   BBOperate();
+
+  if ( m_pGeegawServer->ChangedMode() ) {
+    int mode = m_pGeegawServer->GetMode();
+    pipeline->setMode((GeegawPipeline::GeegawOperationMode)mode);
+    m_pGeegawServer->SetCurrentMode(mode);
+    m_pGeegawServer->UpdateBB();
+    BBOperate();
+  }
 
   // Do a pipeline cycle
   pipeline->loop();
 
+  if ( pipeline->addStatusChanged() ) {
+    m_pGeegawServer->SetObjectAddStatus(pipeline->addStatus());
+  }
 
   float pan = 0.f, tilt = 0.f;
   pipeline->pan_tilt(&pan, &tilt);
@@ -209,7 +223,7 @@ FirevisionGeegawBBClient::Loop(int Count)
   /* Update the information in the BB interface */
   if (pipeline->obstacles_found() ) {
 
-    if ( ! object_mode ) {
+    if ( pipeline->getMode() == GeegawPipeline::MODE_OBSTACLES ) {
 
       std::list<polar_coord_t> & obstacles = pipeline->getObstacles();
       std::list<polar_coord_t>::iterator i;
@@ -246,7 +260,7 @@ FirevisionGeegawBBClient::Loop(int Count)
     m_pObjPosServer->SetConfidence( 1.f );
     m_pObjPosServer->SetVisible( true );
 
-    if ( ! object_mode ) {
+    if ( pipeline->getMode() == GeegawPipeline::MODE_OBSTACLES ) {
       camera_tracker->calc();
       new_pan = camera_tracker->getNewPan();
       new_tilt = forward_tilt;
@@ -262,7 +276,7 @@ FirevisionGeegawBBClient::Loop(int Count)
     }
     m_pObjPosServer->SetVisible( false );
     m_pObjPosServer->SetConfidence( 0.f );
-    if ( ! object_mode ) {
+    if ( pipeline->getMode() == GeegawPipeline::MODE_OBSTACLES ) {
       new_pan  = forward_pan;
       new_tilt = forward_tilt;
     } else {
@@ -283,7 +297,7 @@ FirevisionGeegawBBClient::Loop(int Count)
   BBPing();
   BBOperate();
 
-  if ( object_mode ) {
+  if ( pipeline->getMode() == GeegawPipeline::MODE_LOSTNFOUND ) {
     tracking_mode = m_pCameraControlServer->GetTrackingMode();
     m_pCameraControlServer->SetCurrentTrackingMode( tracking_mode );
     

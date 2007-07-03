@@ -40,6 +40,7 @@
 #include <list>
 #include <string>
 #include <map>
+#include <vector>
 
 class Camera;
 class CameraControl;
@@ -55,7 +56,7 @@ class GeegawConfig;
 class GeegawPipeline : SignalHandler {
 
  public:
-  GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool object_mode);
+  GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool object_mode = false);
   ~GeegawPipeline();
 
   void init();
@@ -80,7 +81,34 @@ class GeegawPipeline : SignalHandler {
 
   void                    pan_tilt(float *pan, float *tilt);
 
+  // keep congruent to Geegaw interface constants
+  typedef enum {
+    MODE_OBSTACLES     = 0,
+    MODE_ADD_OBJECT    = 1,
+    MODE_LOSTNFOUND    = 2
+  } GeegawOperationMode;
+
+  // keep congruent to Geegaw interface constants
+  typedef enum {
+    ADDSTATUS_NOTRUNNING   = 0,
+    ADDSTATUS_INPROGRESS   = 1,
+    ADDSTATUS_SUCCESS      = 2,
+    ADDSTATUS_FAILURE      = 3
+  } GeegawAddStatus;
+
+  void setMode(GeegawOperationMode mode);
+  GeegawOperationMode getMode();
+
+  bool addStatusChanged();
+  GeegawAddStatus addStatus();
+
  private:
+  /* private methods */
+  void handle_signal(int signum);
+
+  void detect_obstacles();
+  void detect_object();
+  void add_object();
 
   ArgumentParser  *argp;
   GeegawConfig  *config;
@@ -89,6 +117,7 @@ class GeegawPipeline : SignalHandler {
   Camera          *cam;
   CameraControl   *camctrl;
 
+
   colorspace_t     cspace_from;
   colorspace_t     cspace_to;
   char            *file;
@@ -96,11 +125,14 @@ class GeegawPipeline : SignalHandler {
   int              param_height;
   bool             quit;
 
+  GeegawOperationMode mode;
+  GeegawAddStatus     add_status;
+  GeegawAddStatus     last_add_status;
+
   float x, y, z;
 
   struct timeval   data_taken_time;
 
-  bool  object_mode;
   float _object_bearing;
   float _object_distance;
 
@@ -137,9 +169,14 @@ class GeegawPipeline : SignalHandler {
 
   bool             generate_output;
 
-  /* private methods */
-
-  void handle_signal(int signum);
+  // Color detection stuff
+  unsigned int     determine_cycle_num;
+  unsigned int     determined_valid_frames;
+  ColorModelLookupTable *deter_cm;
+  Classifier            *deter_classifier;
+  std::vector<const char *>  deter_colormaps;
+  unsigned int               deter_nextcm;
+  
 
 };
 

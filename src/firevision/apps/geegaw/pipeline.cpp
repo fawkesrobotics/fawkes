@@ -87,12 +87,7 @@ GeegawPipeline::GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool 
   cam = NULL;
   camctrl = NULL;
 
-  if (object_mode) {
-    cout << "Running in " << cred << "OBJECT" << cnormal << " mode (lost'n'found)" << endl;
-  } else {
-    cout << cred << "NOT" << cnormal << " running in object mode (navigation)" << endl;
-  }
-  this->object_mode = object_mode;
+  mode = object_mode ? MODE_LOSTNFOUND : MODE_OBSTACLES;
 }
 
 
@@ -118,6 +113,7 @@ GeegawPipeline::~GeegawPipeline()
 
   delete scanlines;
   delete cm;
+  delete deter_cm;
   /*
   delete box_rel;
   delete box_glob;
@@ -190,7 +186,7 @@ GeegawPipeline::init()
   buffer3    = (unsigned char *)malloc( buffer_size );
 
   // models
-  if ( object_mode ) {
+  if ( mode == MODE_LOSTNFOUND ) {
     scanlines = new ScanlineGrid(width, height, 5, 5);
   } else {
     scanlines = new ScanlineBeams(width, height, 
@@ -209,6 +205,11 @@ GeegawPipeline::init()
 				   config->LookupTableHeight,
 				   FIREVISION_SHM_LUT_OMNI_COLOR,
 				   true /* destroy on free */);
+  deter_cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
+					 config->LookupTableWidth,
+					 config->LookupTableHeight,
+					 FIREVISION_SHM_LUT_FRONT_COLOR,
+					 true /* destroy on free */);
 
   /*
   // Position models for box
@@ -251,8 +252,15 @@ GeegawPipeline::init()
                                             scanlines, cm,
                                             10 /* min pixels to consider */,
                                             30 /* initial box extent */,
-                                            /* upward */ ! object_mode,
+                                            /* upward */ (mode == MODE_OBSTACLES),
                                             /* neighbourhood min match */ 5);
+
+  deter_classifier   = new ReallySimpleClassifier(width, height,
+						  scanlines, deter_cm,
+						  10 /* min pixels to consider */,
+						  30 /* initial box extent */,
+						  /* upward */ true,
+						  /* neighbourhood min match */ 5);
 
 }
 
@@ -401,28 +409,8 @@ GeegawPipeline::object_relpos()
 
 
 void
-GeegawPipeline::loop()
+GeegawPipeline::detect_obstacles()
 {
-  camctrl->process_control();
-
-  camctrl->start_get_pan_tilt();
-  cam->capture();
-
-  gettimeofday(&data_taken_time, NULL);
-
-  // Convert buffer (re-order bytes) and set classifier buffer
-  convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
-  memcpy(buffer, buffer_src, buffer_size);
-
-  /*
-  Drawer *d = new Drawer();
-  d->setBuffer( buffer, width, height );
-  while ( ! scanlines->finished() ) {
-    d->drawPoint((*scanlines)->x, (*scanlines)->y);
-    ++(*scanlines);
-  }
-  scanlines->reset();
-  */
   classifier->setSrcBuffer( buffer_src );
   rois = classifier->classify();
   obstacles.clear();
@@ -463,10 +451,191 @@ GeegawPipeline::loop()
   rois->clear();
   delete rois;
   delete rdf;
+}
+
+
+void
+GeegawPipeline::detect_object()
+{
+  classifier->setSrcBuffer( buffer_src );
+  rois = classifier->classify();
+  obstacles.clear();
+
+  if ( ! rois->empty() ) {
+    FilterROIDraw *rdf = new FilterROIDraw();
+  
+    r = rois->begin();
+    rdf->setDstBuffer(buffer, &(*r));
+    rdf->apply();
+    camctrl->pan_tilt_rad(&pan, &tilt);
+    rel_pos->setPanTilt(pan, tilt);
+    rel_pos->setCenter( (*r).start.x + (*r).width / 2,
+		        (*r).start.y + (*r).height );
+    rel_pos->calc_unfiltered();
+
+    // First is the biggest ROI, set as object
+    object_relposmod->setPanTilt(pan, tilt);
+    object_relposmod->setCenter( (*r).start.x + (*r).width / 2,
+				   (*r).start.y + (*r).height / 2 );
+    object_relposmod->calc_unfiltered();
+    _object_bearing = object_relposmod->getBearing();
+    _object_distance = object_relposmod->getDistance();
+
+    delete rdf;
+  }
+  rois->clear();
+  delete rois;
+}
+
+
+void
+GeegawPipeline::add_object()
+{
+  if ( (add_status == ADDSTATUS_SUCCESS) || (add_status == ADDSTATUS_FAILURE) ) {
+    return;
+  }
+  obstacles.clear();
+
+  add_status = ADDSTATUS_INPROGRESS;
+
+  deter_classifier->setSrcBuffer( buffer_src );
+  rois = deter_classifier->classify();
+
+  // Go through all ROIs, filter and recognize shapes
+  for (r = rois->begin(); r != rois->end(); ++r) {
+
+    if ( generate_output ) {
+      cout << msg_prefix << cgreen << "ROI:     " << cnormal
+	   << "start: (" << (*r).start.x << "," << (*r).start.y << ")"
+	   << "   width: " << (*r).width
+	   << "   height: " << (*r).height
+	   << endl;
+    }
+    
+    // Try to detect box shape
+    if ((*r).hint == H_BALL) {
+	
+      if ( /* (*r).contains(width / 2, height / 2) && */
+	  ((*r).width > 100) && ((*r).height > 100) ) {
+	// we have a possible ROI
+	if ( determine_cycle_num > 0 ) {
+	  --determine_cycle_num;
+	}
+	++determined_valid_frames;
+	if ( determined_valid_frames > 4 ) {
+	  // we have the object, add it!
+	  *cm += *deter_cm;
+	  add_status = ADDSTATUS_SUCCESS;
+	}
+      }
+    } else {
+      cout << "ROI does not have minimum requested size, only "
+	   << (*r).width << " x " << (*r).height << endl;
+    }
+  } // end for rois
+
+  ++determine_cycle_num;
+  if ( determine_cycle_num > 10 ) {
+    // we tried for 10 frames, but did not get the needed valid frames, switch
+    // to next color
+    determine_cycle_num = 0;
+    determined_valid_frames = 0;
+
+    if ( deter_nextcm < deter_colormaps.size() ) {
+      deter_cm->load(deter_colormaps[deter_nextcm]);
+    } else {
+      // no more colormaps to load!
+      add_status = ADDSTATUS_FAILURE;
+    }
+  }
+}
+
+
+void
+GeegawPipeline::loop()
+{
+  camctrl->process_control();
+
+  camctrl->start_get_pan_tilt();
+  cam->capture();
+
+  gettimeofday(&data_taken_time, NULL);
+
+  // Convert buffer (re-order bytes) and set classifier buffer
+  convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
+  memcpy(buffer, buffer_src, buffer_size);
+
+  if ( mode == MODE_ADD_OBJECT ) {
+    if ( (add_status == ADDSTATUS_NOTRUNNING) || (add_status == ADDSTATUS_INPROGRESS) ) {
+      add_object();
+    }
+  } else if ( mode == MODE_OBSTACLES) {
+    detect_obstacles();
+  } else {
+    detect_object();
+  }
+
 
   // Classify image, find ROIs by color
   cam->dispose_buffer();
   camctrl->process_control();
+}
+
+
+void
+GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
+{
+  this->mode = mode;
+  if ( mode == MODE_ADD_OBJECT ) {
+    determined_valid_frames = 0;
+    determine_cycle_num = 0;
+    if ( deter_colormaps.size() > 0 ) {
+      deter_cm->load(deter_colormaps[0]);
+      deter_nextcm = 1;
+      add_status = ADDSTATUS_NOTRUNNING;
+      last_add_status = ADDSTATUS_NOTRUNNING;
+    } else {
+      add_status = ADDSTATUS_FAILURE;
+      last_add_status = ADDSTATUS_NOTRUNNING;
+    }
+  } else if ( mode == MODE_OBSTACLES ) {
+    delete classifier;
+    classifier   = new ReallySimpleClassifier(width, height,
+					      scanlines, cm,
+					      10 /* min pixels to consider */,
+					      30 /* initial box extent */,
+					      /* upward */ true,
+					      /* neighbourhood min match */ 5);
+  } else if ( mode == MODE_LOSTNFOUND ) {
+    delete classifier;
+    classifier   = new ReallySimpleClassifier(width, height,
+					      scanlines, cm,
+					      10 /* min pixels to consider */,
+					      30 /* initial box extent */,
+					      /* upward */ false,
+					      /* neighbourhood min match */ 5);
+  }
+}
+
+
+GeegawPipeline::GeegawOperationMode
+GeegawPipeline::getMode()
+{
+  return mode;
+}
+
+bool
+GeegawPipeline::addStatusChanged()
+{
+  return (add_status != last_add_status);
+}
+
+
+GeegawPipeline::GeegawAddStatus
+GeegawPipeline::addStatus()
+{
+  last_add_status = add_status;
+  return add_status;
 }
 
 /// @endcond

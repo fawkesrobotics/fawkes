@@ -29,6 +29,7 @@
 
 #include <blackboard/clientappl.h>
 #include <interfaces/vision_obstacles_client.h>
+#include <interfaces/geegaw_client.h>
 
 #include <unistd.h>
 #include <utils/system/getkey.h>
@@ -48,6 +49,7 @@ class GeegawTestBBClient : public bb::ClientAppl
  private:
 
   bbClients::VisionObstacles_Client   *m_pVisObsClient;
+  bbClients::Geegaw_Client   *m_pGeegawClient;
 
 };
 
@@ -83,6 +85,10 @@ void GeegawTestBBClient::Init ()
   m_pVisObsClient = new bbClients::VisionObstacles_Client( hostname );
   BBRegisterObj( m_pVisObsClient );
 
+  // initialize localize camera control client
+  m_pGeegawClient = new bbClients::Geegaw_Client( hostname );
+  BBRegisterObj( m_pGeegawClient );
+
   BBOperate();
   m_pVisObsClient->Update();
   BBOperate();
@@ -100,14 +106,56 @@ GeegawTestBBClient::Loop(int Count)
 { 
 
   m_pVisObsClient->Update();
+  m_pGeegawClient->Update();
   BBOperate();
 
-  cout << "==========================================================================" << endl;
-  for (int i = 0; i < m_pVisObsClient->GetNumberOfObstacles(); ++i) {
-    cout << "Obstacle " << i << " at angle=" << m_pVisObsClient->GetPosRelAngle(i)
-	 << "  dist=" << m_pVisObsClient->GetPosRelDist(i)
-	 << "  width=" << m_pVisObsClient->GetPosWidth(i)
-	 << "  height=" << m_pVisObsClient->GetPosHeight(i) << endl;
+  char key = getkey();
+
+  switch (key) {
+  case 'o':
+    cout << "Requesting switch to OBSTACLES mode" << endl;
+    m_pGeegawClient->SetMode(bbClients::Geegaw_Client::MODE_OBSTACLES);
+    m_pGeegawClient->UpdateBB();
+    BBOperate();
+    break;
+  case 'l':
+    cout << "Requesting switch to LOSTNFOUND mode" << endl;
+    m_pGeegawClient->SetMode(bbClients::Geegaw_Client::MODE_LOSTNFOUND);
+    m_pGeegawClient->UpdateBB();
+    BBOperate();
+    break;
+  case 'a':
+    cout << "Requesting switch to ADD_OBJECT mode" << endl;
+    m_pGeegawClient->SetMode(bbClients::Geegaw_Client::MODE_ADD_OBJECT);
+    m_pGeegawClient->UpdateBB();
+    BBOperate();
+    break;
+  }
+
+  if ( m_pGeegawClient->GetCurrentMode() == bbClients::Geegaw_Client::MODE_OBSTACLES ) {
+    cout << "==========================================================================" << endl;
+    for (int i = 0; i < m_pVisObsClient->GetNumberOfObstacles(); ++i) {
+      cout << "Obstacle " << i << " at angle=" << m_pVisObsClient->GetPosRelAngle(i)
+	   << "  dist=" << m_pVisObsClient->GetPosRelDist(i)
+	   << "  width=" << m_pVisObsClient->GetPosWidth(i)
+	   << "  height=" << m_pVisObsClient->GetPosHeight(i) << endl;
+    }
+  } else if (m_pGeegawClient->GetCurrentMode() == bbClients::Geegaw_Client::MODE_ADD_OBJECT ) {
+    if (m_pGeegawClient->ChangedObjectAddStatus()) {
+      int status = m_pGeegawClient->GetObjectAddStatus();
+      cout << "Add Object status changed to: ";
+      if (status == bbClients::Geegaw_Client::ADD_STATUS_NOTRUNNING) {
+	cout << "NOTRUNNING";
+      } else if ( status == bbClients::Geegaw_Client::ADD_STATUS_INPROGRESS) {
+	cout << "INPROGRESS";
+      } else if ( status == bbClients::Geegaw_Client::ADD_STATUS_SUCCESS) {
+	cout << "SUCCESS";
+      } else if ( status == bbClients::Geegaw_Client::ADD_STATUS_FAILURE) {
+	cout << "FAILURE";
+      }
+    }
+  } else if (m_pGeegawClient->GetCurrentMode() == bbClients::Geegaw_Client::MODE_LOSTNFOUND ) {
+    cout << "lostnfound mode" << endl;
   }
 }
 

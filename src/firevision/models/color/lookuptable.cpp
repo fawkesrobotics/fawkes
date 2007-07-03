@@ -26,12 +26,20 @@
  */
 
 #include <models/color/lookuptable.h>
+
 #include <fvutils/color/yuv.h>
 #include <fvutils/ipc/shm_lut.h>
 #include <fvutils/ipc/shm_registry.h>
 
+#include <core/exceptions/software.h>
+#include <core/exceptions/system.h>
+
 #include <iostream>
 #include <sys/utsname.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <errno.h>
 
 using namespace std;
 
@@ -143,24 +151,53 @@ ColorModelLookupTable::create()
 }
 
 
+/** Load colormap from file to specific buffer.
+ * @param file file to load from
+ * @param buffer buffer to write data to
+ * @param buffer_size size of buffer
+ * @exception TypeMismatchException thrown if the colormaps do not have the
+ * same size.
+ * @exception CouldNotOpenFileException failed to open the given file
+ * @exceptoin FileReadException thrown if reading failed
+ */
+void
+ColorModelLookupTable::load_to_buffer(const char *file, unsigned char *buffer,
+				      off_t buffer_size)
+{
+  struct stat st;
+  if ( stat(file, &st) != 0 ) {
+    throw CouldNotOpenFileException(file, errno, "Could not stat colormap file");
+  }
+
+  if ( st.st_size != buffer_size ) {
+    throw TypeMismatchException("File does not have the required size");
+  }
+
+  FILE *f = fopen(file, "r");
+  if (f == NULL) {
+    throw CouldNotOpenFileException(file, errno, "Could not open colormap file");
+  }
+
+
+  int err = 0;
+  if ( (fread(buffer, buffer_size, 1, f) == 0) && (! feof(f)) && ((err = ferror(f)) != 0)) {
+    fclose(f);
+    throw FileReadException(file, errno, "Could not read colormap data from file");
+  }
+
+  fclose(f);
+}
+
 /** Load LUT from file.
  * @param file filename
+ * @exception CouldNotOpenFileException file could not be opened for whatever reason
+ * @exception TypeMismatchException file does not have the exact size of this colormap
+ * @exception FileReadException data could not be read from the file
  */
 void
 ColorModelLookupTable::load(const char *file)
 {
-  FILE *f = fopen(file, "r");
-  if (f == NULL) {
-    cout << "ColorModelLookupTable: Cannot open file '" << file << "' for loading" << endl;
-    return;
-  }
-
-  int err = 0;
-  if ( (fread(lut, lut_bytes, 1, f) == 0) && (! feof(f)) && ((err = ferror(f)) != 0)) {
-    cout << "ColorModelLookupTable: Cannot not read file '" << file << "' (" << strerror(err) << ")!" << endl;
-  }
-
-  fclose(f);
+  load_to_buffer(file, lut, lut_bytes);
 }
 
 
@@ -268,6 +305,84 @@ ColorModelLookupTable::getBuffer()
 }
 
 
+/** Add another colormap to this one.
+ * The other colormap is traversed. If this colormap has an entry set to background
+ * or other but the supplied colormap has another specific object entry the entry
+ * in this colormap is set to the object. If the colormaps disagree this colormap
+ * takes precedence.
+ * @param cmlt color model lookup table to add
+ * @return this instance with the other color model lookup table added
+ * @exception TypeMismatchException thrown if the colormaps do not have the
+ * same size.
+ */
+ColorModelLookupTable &
+ColorModelLookupTable::operator+=(const ColorModelLookupTable &cmlt)
+{
+  if ( (width != cmlt.width) || (height != cmlt.height) ) {
+    throw TypeMismatchException("Colormaps are of different sizes");
+  }
+
+  unsigned char *this_lut = lut;
+  unsigned char *other_lut = cmlt.lut;
+
+  for (unsigned int i = 0; i < width * height; ++i) {
+    if ( (*this_lut == C_OTHER) || (*this_lut == C_BACKGROUND) ) {
+      // can be overridden
+      if ( (*other_lut != C_OTHER) && (*other_lut != C_BACKGROUND) ) {
+	// there is something that is worth overriding this value
+	*this_lut = *other_lut;
+      }
+    }
+    ++this_lut;
+    ++other_lut;
+  }
+
+  return *this;
+}
+
+
+/** Add another colormap to this one.
+ * This is an overloaded member function for convenience. It adds the lookup table
+ * stored in the given file.
+ * @param filename filename of the file with the LUT to add
+ * @return this instance with the other color model lookup table added
+ * @exception TypeMismatchException thrown if the colormaps do not have the
+ * same size.
+ * @exception CouldNotOpenFileException failed to open the given file
+ * @exception OutOfMemoryException not enough memory for the temporary LUT buffer
+ */
+ColorModelLookupTable &
+ColorModelLookupTable::operator+=(const char *file)
+{
+  unsigned char *tmp = (unsigned char *)malloc( lut_bytes );
+  
+  try {
+    load_to_buffer(file, tmp, lut_bytes);
+  } catch (Exception &e) {
+    throw;
+  }
+
+  unsigned char *this_lut = lut;
+  unsigned char *other_lut = tmp;
+
+  for (unsigned int i = 0; i < width * height; ++i) {
+    if ( (*this_lut == C_OTHER) || (*this_lut == C_BACKGROUND) ) {
+      // can be overridden
+      if ( (*other_lut != C_OTHER) && (*other_lut != C_BACKGROUND) ) {
+	// there is something that is worth overriding this value
+	*this_lut = *other_lut;
+      }
+    }
+    ++this_lut;
+    ++other_lut;
+  }
+
+  free(tmp);
+
+  return *this;
+}
+
+
 /** Create image from LUT.
  * Create image from LUT, useful for debugging and analysing.
  * @param yuv422_planar_buffer contains the image upon return, must be initialized
@@ -281,7 +396,7 @@ ColorModelLookupTable::toImage(unsigned char *yuv422_planar_buffer)
   unsigned char *vp = YUV422_PLANAR_V_PLANE(yuv422_planar_buffer, 512, 512);
 
   color_t c;
-  for (unsigned int v = width; v > 0 ; --v) {
+  for (unsigned int v = height; v > 0 ; --v) {
     for (unsigned int u = 0; u < width; ++u) {
 
       c = determine(128, u, v-1);
