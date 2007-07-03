@@ -42,4 +42,20 @@ class InterruptedException : public Exception {
 };
 
 
+class CouldNotOpenFileException : public Exception {
+ public:
+  CouldNotOpenFileException(const char *filename, int errno,
+			    const char *additional_msg = 0);
+  CouldNotOpenFileException(const char *filename, const char *additional_msg = 0);
+};
+
+
+class FileReadException : public Exception {
+ public:
+  FileReadException(const char *filename, int errno,
+		    const char *additional_msg = 0);
+  FileReadException(const char *filename, const char *additional_msg = 0);
+};
+
+
 #endif
