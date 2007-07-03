@@ -189,13 +189,14 @@ FirevisionGeegawBBClient::Loop(int Count)
   loop_running = true;
 
   m_pCameraControlServer->Update();
-  m_pObjPosServer->Update();  
+  m_pObjPosServer->Update();
   m_pLocalizeMasterClient->Update();
   m_pGeegawServer->Update();
   BBOperate();
 
   if ( m_pGeegawServer->ChangedMode() ) {
     int mode = m_pGeegawServer->GetMode();
+    cout << "Switching to mode " << mode << endl;
     pipeline->setMode((GeegawPipeline::GeegawOperationMode)mode);
     m_pGeegawServer->SetCurrentMode(mode);
     m_pGeegawServer->UpdateBB();
@@ -206,7 +207,10 @@ FirevisionGeegawBBClient::Loop(int Count)
   pipeline->loop();
 
   if ( pipeline->addStatusChanged() ) {
+    cout << msg_prefix << "add status changed to " << pipeline->addStatus() << endl;
     m_pGeegawServer->SetObjectAddStatus(pipeline->addStatus());
+    m_pGeegawServer->UpdateBB();
+    BBOperate();
   }
 
   float pan = 0.f, tilt = 0.f;
@@ -267,7 +271,9 @@ FirevisionGeegawBBClient::Loop(int Count)
     }
 
   } else {
-    cout << msg_prefix << cred << "No obstacles found" << cnormal << endl;
+    if ( pipeline->getMode() == GeegawPipeline::MODE_OBSTACLES ) {
+      cout << msg_prefix << cred << "No obstacles found" << cnormal << endl;
+    }
     m_pVisObsServer->SetNumberOfObstacles( 0 );
     if ( visibility_history > 0 ) {
       visibility_history = -1;

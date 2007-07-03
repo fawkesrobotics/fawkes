@@ -88,6 +88,10 @@ GeegawPipeline::GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool 
   camctrl = NULL;
 
   mode = object_mode ? MODE_LOSTNFOUND : MODE_OBSTACLES;
+
+  deter_colormaps.push_back("../etc/firevision/colormaps/red_box.colormap");
+  deter_colormaps.push_back("../etc/firevision/colormaps/blue_box.colormap");
+  deter_colormaps.push_back("../etc/firevision/colormaps/pineapple.colormap");
 }
 
 
@@ -501,6 +505,10 @@ GeegawPipeline::add_object()
   deter_classifier->setSrcBuffer( buffer_src );
   rois = deter_classifier->classify();
 
+  if ( rois->empty() ) {
+    cout << msg_prefix << "No ROIs found while trying to add" << endl;
+  }
+
   // Go through all ROIs, filter and recognize shapes
   for (r = rois->begin(); r != rois->end(); ++r) {
 
@@ -524,17 +532,20 @@ GeegawPipeline::add_object()
 	++determined_valid_frames;
 	if ( determined_valid_frames > 4 ) {
 	  // we have the object, add it!
+          cout << msg_prefix << "Found object and adding colormap" << endl;
 	  *cm += *deter_cm;
 	  add_status = ADDSTATUS_SUCCESS;
 	}
+      } else {
+        cout << msg_prefix << "Object seen but ROI too small (only " << (*r).width << "x" << (*r).height << ")" << endl;
       }
     } else {
-      cout << "ROI does not have minimum requested size, only "
-	   << (*r).width << " x " << (*r).height << endl;
+      cout << "ROI does not contain object " << endl;
     }
   } // end for rois
 
   ++determine_cycle_num;
+  cout << msg_prefix << determine_cycle_num << " cycles done" << endl;
   if ( determine_cycle_num > 10 ) {
     // we tried for 10 frames, but did not get the needed valid frames, switch
     // to next color
@@ -542,9 +553,11 @@ GeegawPipeline::add_object()
     determined_valid_frames = 0;
 
     if ( deter_nextcm < deter_colormaps.size() ) {
-      deter_cm->load(deter_colormaps[deter_nextcm]);
+      cout << msg_prefix << "Loading next colormap " << deter_colormaps[deter_nextcm] << endl;
+      deter_cm->load(deter_colormaps[deter_nextcm++]);
     } else {
       // no more colormaps to load!
+      cout << msg_prefix << "No more colormaps to try, adding failed" << endl;
       add_status = ADDSTATUS_FAILURE;
     }
   }
@@ -569,9 +582,9 @@ GeegawPipeline::loop()
     if ( (add_status == ADDSTATUS_NOTRUNNING) || (add_status == ADDSTATUS_INPROGRESS) ) {
       add_object();
     }
-  } else if ( mode == MODE_OBSTACLES) {
+  } else if ( mode == MODE_OBSTACLES ) {
     detect_obstacles();
-  } else {
+  } else if ( mode == MODE_LOSTNFOUND ) {
     detect_object();
   }
 
@@ -587,6 +600,7 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
 {
   this->mode = mode;
   if ( mode == MODE_ADD_OBJECT ) {
+    cout << msg_prefix << "Switching to ADD_OBJECT mode" << endl;
     determined_valid_frames = 0;
     determine_cycle_num = 0;
     if ( deter_colormaps.size() > 0 ) {
@@ -595,10 +609,12 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
       add_status = ADDSTATUS_NOTRUNNING;
       last_add_status = ADDSTATUS_NOTRUNNING;
     } else {
+      cout << msg_prefix << "No colormaps set, cannot add" << endl;
       add_status = ADDSTATUS_FAILURE;
       last_add_status = ADDSTATUS_NOTRUNNING;
     }
   } else if ( mode == MODE_OBSTACLES ) {
+    cout << msg_prefix << "Switching to OBSTACLES mode" << endl;
     delete classifier;
     classifier   = new ReallySimpleClassifier(width, height,
 					      scanlines, cm,
@@ -607,6 +623,7 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
 					      /* upward */ true,
 					      /* neighbourhood min match */ 5);
   } else if ( mode == MODE_LOSTNFOUND ) {
+    cout << msg_prefix << "Switching to LOSTNFOUND mode" << endl;
     delete classifier;
     classifier   = new ReallySimpleClassifier(width, height,
 					      scanlines, cm,
@@ -614,6 +631,9 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
 					      30 /* initial box extent */,
 					      /* upward */ false,
 					      /* neighbourhood min match */ 5);
+  } else if ( mode == MODE_RESET_COLORMAP ) {
+    cout << msg_prefix << "RESETting colormap" << endl;
+    cm->reset();
   }
 }
 

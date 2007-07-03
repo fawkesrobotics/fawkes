@@ -51,6 +51,7 @@ class GeegawTestBBClient : public bb::ClientAppl
   bbClients::VisionObstacles_Client   *m_pVisObsClient;
   bbClients::Geegaw_Client   *m_pGeegawClient;
 
+  int last_mode;
 };
 
 
@@ -91,7 +92,10 @@ void GeegawTestBBClient::Init ()
 
   BBOperate();
   m_pVisObsClient->Update();
+  m_pGeegawClient->Update();
   BBOperate();
+
+  last_mode = m_pGeegawClient->GetCurrentMode();
 
   // Call us every 200ms
   SetTime(200);
@@ -108,6 +112,11 @@ GeegawTestBBClient::Loop(int Count)
   m_pVisObsClient->Update();
   m_pGeegawClient->Update();
   BBOperate();
+
+  if ( m_pGeegawClient->GetCurrentMode() != last_mode ) {
+    cout << "Mode switched from " << last_mode << " to " << m_pGeegawClient->GetCurrentMode() << endl;
+    last_mode = m_pGeegawClient->GetCurrentMode();
+  }
 
   char key = getkey();
 
@@ -130,6 +139,11 @@ GeegawTestBBClient::Loop(int Count)
     m_pGeegawClient->UpdateBB();
     BBOperate();
     break;
+  case 'r':
+    cout << "Requesting COLORMAP_RESET" << endl;
+    m_pGeegawClient->SetMode(bbClients::Geegaw_Client::MODE_RESET_COLORMAP);
+    m_pGeegawClient->UpdateBB();
+    BBOperate();
   }
 
   if ( m_pGeegawClient->GetCurrentMode() == bbClients::Geegaw_Client::MODE_OBSTACLES ) {
@@ -152,7 +166,10 @@ GeegawTestBBClient::Loop(int Count)
 	cout << "SUCCESS";
       } else if ( status == bbClients::Geegaw_Client::ADD_STATUS_FAILURE) {
 	cout << "FAILURE";
+      } else {
+	cout << "UNKNOWN";
       }
+      cout << endl;
     }
   } else if (m_pGeegawClient->GetCurrentMode() == bbClients::Geegaw_Client::MODE_LOSTNFOUND ) {
     cout << "lostnfound mode" << endl;

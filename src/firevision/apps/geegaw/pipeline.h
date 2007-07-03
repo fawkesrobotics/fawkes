@@ -83,9 +83,10 @@ class GeegawPipeline : SignalHandler {
 
   // keep congruent to Geegaw interface constants
   typedef enum {
-    MODE_OBSTACLES     = 0,
-    MODE_ADD_OBJECT    = 1,
-    MODE_LOSTNFOUND    = 2
+    MODE_OBSTACLES      = 0,
+    MODE_ADD_OBJECT     = 1,
+    MODE_LOSTNFOUND     = 2,
+    MODE_RESET_COLORMAP = 3
   } GeegawOperationMode;
 
   // keep congruent to Geegaw interface constants
