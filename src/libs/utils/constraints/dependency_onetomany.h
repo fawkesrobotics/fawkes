@@ -140,6 +140,7 @@ OneToManyDependency<Provider, Dependant>::remove(Provider *p)
     throw DependencyViolationException("There are still dependants of provider, "
 				       "cannot accept removal of provider");
   }
+  if ( p == _provider )  _provider = NULL;
 }
 
 
