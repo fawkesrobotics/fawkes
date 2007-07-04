@@ -279,6 +279,7 @@ FawkesConfigManager::process_after_loop()
 	    } else {
 	      send_inv_value(msg->clid(), component, path);
 	    }
+	    delete i;
 	  } catch (ConfigurationException &e) {
 	    e.printTrace();
 	  }

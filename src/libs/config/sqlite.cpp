@@ -163,7 +163,9 @@ SQLiteConfiguration::~SQLiteConfiguration()
 {
   if (opened) {
     opened = false;
-    sqlite3_close(db);
+    if ( sqlite3_close(db) == SQLITE_BUSY ) {
+      printf("Boom, we are dead, database cannot be closed because there are open handles\n");
+    }
   }
   delete mutex;
 }
