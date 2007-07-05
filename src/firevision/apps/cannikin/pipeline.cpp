@@ -39,6 +39,7 @@
 #include <fvutils/color/conversions.h>
 #include <utils/ipc/msg.h>
 #include <fvutils/ipc/msg_registry.h>
+#include <fvutils/draw/drawer.h>
 
 #include <cams/factory.h>
 #include <cams/bumblebee2.h>
@@ -63,13 +64,17 @@ using namespace std;
 
 class DisparityPoint {
  public:
-  DisparityPoint(float x, float y, float z) {
+  DisparityPoint(unsigned int px, unsigned int py,
+		 float x, float y, float z) {
+    this->px = px;
+    this->py = py;
     this->x = x;
     this->y = y;
     this->z = z;
   }
 
   float x, y, z;
+  unsigned int px, py;
 
   bool operator<(const DisparityPoint &p) const {
     return (z < p.z);
@@ -102,6 +107,7 @@ CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
   box_globvelo = NULL;
   */
   classifier    = NULL;
+  drawer = NULL;
 
   if ( (use_fileloader = argp->hasArgument("L")) ) {
     cout <<  msg_prefix << "Fileloader requested. Looking for needed parameters" << endl;
@@ -173,6 +179,7 @@ CannikinPipeline::~CannikinPipeline()
   */
   delete classifier;
 
+  delete drawer;
 }
 
 
@@ -235,8 +242,11 @@ CannikinPipeline::init()
     scanlines = new ScanlineGrid(width, height,
 				 config->ScanlineGridXOffset, config->ScanlineGridYOffset);
 
-    //disparity_scanlines = new ScanlineRadial(width, height, width / 2, height / 2, 10, 10);
-    disparity_scanlines = new ScanlineGrid(width, height, 2, 2);
+    disparity_scanlines = new ScanlineRadial(width, height, width / 2, height / 2, 10, 10);
+    //disparity_scanlines = new ScanlineGrid(width, height, 2, 2);
+
+    drawer = new Drawer();
+    drawer->setBuffer(buffer, width, height);
   } // end not camless mode
 
 
@@ -696,20 +706,36 @@ CannikinPipeline::detect_cup()
 	shm_buffer->set_circle( center_x, center_y, 5 );
 	shm_buffer->set_circle_found( true );
 
+	memcpy(buffer, triclops->disparity_buffer(), cam->pixel_width() * cam->pixel_height());
+	memset(buffer + width * height, 128, width * height);
+
 	points.clear();
 	wpoints.clear();
 
-	//disparity_scanlines->set_center(center_x, center_y);
-	//disparity_scanlines->set_radius(3, min(r->width, r->height));
-	disparity_scanlines->setDimensions(center_x - min(10, half_width),
-					   center_y - ((half_height > 10) ? half_height  - 10 : half_height));
+	disparity_scanlines->set_center(center_x, center_y);
+	disparity_scanlines->set_radius(3, min(r->width, r->height));
+	// disparity_scanlines->setDimensions(center_x - min(10, half_width),
+	                                      center_y - ((half_height > 10) ? half_height  - 10 : half_height));
 
 	while ( ! disparity_scanlines->finished() ) {
-	  if ( triclops->get_xyz((*disparity_scanlines)->x, (*disparity_scanlines)->y, &x, &y, &z) ) {
-	    points.push_back(DisparityPoint(x, y, z));
-	  }
-	  if ( triclops->get_world_xyz((*disparity_scanlines)->x, (*disparity_scanlines)->y, &wx, &wy, &wz) ) {
-	    wpoints.push_back(DisparityPoint(wx, wy, wz));
+	  unsigned int dx = (*disparity_scanlines)->x;
+	  unsigned int dy = (*disparity_scanlines)->y;
+	  if ( (dx > (center_x - min(center_x, 8))) &&
+	       (dx < center_x + 8) ) {
+	    // we only take points close to the x center to get a good bearing
+
+	    if ( triclops->get_xyz(dx, dy, &x, &y, &z) ) {
+	      points.push_back(DisparityPoint(dx, dy, x, y, z));
+	    }
+	    if ( triclops->get_world_xyz(dx, dy, &wx, &wy, &wz) ) {
+	      wpoints.push_back(DisparityPoint(dx, dy, wx, wy, wz));
+	    }
+
+	    drawer->setColor(128, 0, 255); // orange
+	    drawer->setCircle(dx, dy, 2);
+	  } else {
+	    drawer->setColor(128, 255, 0); // blue
+	    drawer->setCircle(dx, dy, 2);
 	  }
 
 	  ++(*disparity_scanlines);
@@ -731,9 +757,6 @@ CannikinPipeline::detect_cup()
 	  wy = wpoints[welem].y;
 	  wz = wpoints[welem].z;
 	}
-
-	memcpy(buffer, triclops->disparity_buffer(), cam->pixel_width() * cam->pixel_height());
-	memset(buffer + width * height, 128, width * height);
       }
 
       if ( generate_output ) {

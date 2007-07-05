@@ -60,6 +60,7 @@ class ScanlineRadial;
 class ScanlineGrid;
 class TriclopsStereoProcessor;
 class IPCMessageQueue;
+class Drawer;
 
 class CannikinPipeline : SignalHandler {
 
@@ -182,8 +183,8 @@ class CannikinPipeline : SignalHandler {
   //BallGlobal             *box_glob;
   Classifier               *classifier;
 
-  //ScanlineRadial           *disparity_scanlines;
-  ScanlineGrid             *disparity_scanlines;
+  ScanlineRadial           *disparity_scanlines;
+  //ScanlineGrid             *disparity_scanlines;
 
   bool                      already_fetched_pantilt;
   cart_coord_t              mass_point;
@@ -195,6 +196,8 @@ class CannikinPipeline : SignalHandler {
   std::map<cup_color_t, char *> colormaps;
 
   bool             generate_output;
+
+  Drawer *drawer;
 
   /* private methods */
 
