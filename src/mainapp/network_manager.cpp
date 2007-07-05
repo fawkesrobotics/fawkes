@@ -82,6 +82,9 @@ FawkesNetworkManager::~FawkesNetworkManager()
   thread_manager->remove(avahi_thread);
   delete avahi_thread;
 #endif
+  delete _service_publisher;
+  delete _service_browser;
+  delete _nnresolver;
 }
 
 
