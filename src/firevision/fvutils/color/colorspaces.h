@@ -47,6 +47,7 @@ typedef enum {
   BAYER_MOSAIC_GBRG,
   BAYER_MOSAIC_GRBG,
   BAYER_MOSAIC_BGGR,
+  RAW16,
   COLORSPACE_N
 } colorspace_t;
 

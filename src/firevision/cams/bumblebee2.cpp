@@ -232,7 +232,7 @@ Bumblebee2Camera::close()
 colorspace_t
 Bumblebee2Camera::colorspace()
 {
-  return YUV422_PLANAR;
+  return RAW16;
 }
 
 
