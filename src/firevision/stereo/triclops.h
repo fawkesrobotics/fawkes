@@ -29,6 +29,7 @@
 #define __FIREVISION_FVUTILS_STEREO_TRICLOPS_H_
 
 #include <stereo/stereo_processor.h>
+#include <sys/types.h>
 
 class Bumblebee2Camera;
 class Camera;
@@ -71,9 +72,10 @@ class TriclopsStereoProcessor : public StereoProcessor
 				      float *x, float *y, float *z);
 
   virtual void             preprocess_stereo();
-  virtual void             calculate_disparity(ROI *roi);
+  virtual void             calculate_disparity(ROI *roi = 0);
   virtual void             calculate_yuv(bool both = false);
   virtual unsigned char *  disparity_buffer();
+  virtual size_t           disparity_buffer_size() const;
   virtual unsigned char *  yuv_buffer();
   virtual unsigned char *  auxiliary_yuv_buffer();
 

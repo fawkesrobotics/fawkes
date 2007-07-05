@@ -138,10 +138,6 @@ TriclopsStereoProcessor::~TriclopsStereoProcessor()
   if ( buffer_yuv_right != NULL )     free(buffer_yuv_right);
   if ( buffer_yuv_left != NULL )      free(buffer_yuv_left);
 
-  if ( buffer_green != NULL )         free(buffer_green);
-  if ( buffer_yuv_right != NULL )     free(buffer_yuv_right);
-  if ( buffer_yuv_left != NULL )      free(buffer_yuv_left);
-
   buffer_green = NULL;
   buffer_rgb = NULL;
   buffer_yuv_right = NULL;
@@ -512,6 +508,17 @@ TriclopsStereoProcessor::disparity_buffer()
 }
 
 
+size_t
+TriclopsStereoProcessor::disparity_buffer_size() const
+{
+  if ( data->enable_subpixel_interpolation ) {
+    return _width * _height * 2;
+  } else {
+    return _width * _height;
+  }
+}
+
+
 unsigned char *
 TriclopsStereoProcessor::yuv_buffer()
 {
@@ -628,7 +635,7 @@ TriclopsStereoProcessor::get_xyz(unsigned int px, unsigned int py, float *x, flo
 bool
 TriclopsStereoProcessor::get_world_xyz(unsigned int px, unsigned int py, float *x, float *y, float *z)
 {
-  float cam_angle = deg2rad(60);
+  float cam_angle = deg2rad(57);
   float trans_x = -0.1;
   float trans_y =  0.05;
   float trans_z = -0.78;
