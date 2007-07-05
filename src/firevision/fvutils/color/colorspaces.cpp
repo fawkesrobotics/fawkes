@@ -63,6 +63,8 @@ colorspace_by_name(char *mode)
     return BAYER_MOSAIC_GRBG;
   } else if (strcmp(mode, "BAYER_MOSAIC_BGGR") == 0) {
     return BAYER_MOSAIC_BGGR;
+  } else if (strcmp(mode, "RAW16") == 0) {
+    return RAW16;
   } else {
     return CS_UNKNOWN;
   }
@@ -101,6 +103,8 @@ colorspace_to_string(colorspace_t colorspace)
     return "BAYER_MOSAIC_GRBG";
   case BAYER_MOSAIC_BGGR:
     return "BAYER_MOSAIC_BGGR";
+  case RAW16:
+    return "RAW16";
   default:
     return "CS_UNKNOWN";
   }

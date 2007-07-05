@@ -52,6 +52,8 @@
  * @param camera_string camera that can be used by CameraFactory to open a
  * camera.
  * @param thread thread to register for this camera
+ * @param raw true to retrieve the raw unconverted image from the camera, false to
+ * get the image in YUV422 planar format
  * @return a reference to the requested camera. Note that this may not be
  * of the C++ type that you may expect for the requested camera, but it may
  * have layers of indirection.

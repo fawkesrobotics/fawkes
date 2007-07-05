@@ -74,6 +74,9 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
   case YUV422_PACKED:
   case YUV422_PLANAR:
     return (width * height * 2);
+
+  case RAW16:
+    return (width * height * 2);
     
   case GRAY8:
   case BAYER_MOSAIC_RGGB:

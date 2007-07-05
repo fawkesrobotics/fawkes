@@ -60,7 +60,9 @@ class FvBaseThread
 
   virtual VisionMaster *  vision_master();
 
-  virtual Camera *  register_for_camera(const char *camera_string, Thread *thread);
+  virtual Camera *  register_for_camera(const char *camera_string,
+					Thread *thread,
+					bool raw = false);
   virtual void      unregister_thread(Thread *thread);
 
   void aqt_timeout(const char *id);

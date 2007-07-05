@@ -37,7 +37,7 @@ class VisionMaster
   virtual ~VisionMaster();
 
   virtual Camera *  register_for_camera(const char *camera_string,
-					Thread *thread)                   = 0;
+					Thread *thread, bool raw = false) = 0;
   virtual void      unregister_thread(Thread *thread)                     = 0;
 };
 

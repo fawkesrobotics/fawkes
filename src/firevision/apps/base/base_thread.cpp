@@ -133,7 +133,7 @@ FvBaseThread::vision_master()
 
 
 Camera *
-FvBaseThread::register_for_camera(const char *camera_string, Thread *thread)
+FvBaseThread::register_for_camera(const char *camera_string, Thread *thread, bool raw)
 {
   Camera *c;
 
@@ -148,9 +148,9 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread)
     std::string id = cap->cam_type() + ":" + cap->cam_id();
     if ( aquisition_threads.find(id) != aquisition_threads.end() ) {
       // this camera has already been loaded
-      c = aquisition_threads[id]->camera_instance();
+      c = aquisition_threads[id]->camera_instance(raw);
       try {
-	aquisition_threads[id]->add_thread(thread);
+	aquisition_threads[id]->add_thread(thread, raw);
       } catch (Exception &e) {
 	e.append("Could not add thread to '%s'", aquisition_threads[id]->name());
 	delete c;
@@ -175,8 +175,8 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread)
       FvAquisitionThread *aqt = new FvAquisitionThread(this, logger, id.c_str(),
 						       cam, _aqt_timeout);
 
-      c = aqt->camera_instance();
-      aqt->add_thread(thread);
+      c = aqt->camera_instance(raw);
+      aqt->add_thread(thread, raw);
 
       aquisition_threads[id] = aqt;
       aqt->start();

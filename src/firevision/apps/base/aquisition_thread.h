@@ -60,18 +60,23 @@ class FvAquisitionThread
   virtual void thread_init_failed(Thread *thread);
 
   // from VisionMaster
-  virtual Camera *  camera_instance();
+  virtual Camera *  camera_instance(bool raw);
   virtual bool      has_thread(Thread *thread);
-  virtual void      add_thread(Thread *thread);
+  virtual void      add_thread(Thread *thread, bool raw);
   virtual void      remove_thread(Thread *thread);
 
  private:
   Camera                   *_camera;
   SharedMemoryImageBuffer  *_shm;
+  SharedMemoryImageBuffer  *_shm_raw;
   char                     *_image_id;
+  char                     *_image_id_raw;
   ThreadList               *_running_tl;
   Barrier                  *_running_tl_barrier;
+  ThreadList               *_running_raw_tl;
+  Barrier                  *_running_raw_tl_barrier;
   ThreadList               *_waiting_tl;
+  ThreadList               *_waiting_raw_tl;
   WaitCondition            *_wait_for_threads_cond;
   Mutex                    *_wait_for_threads_mutex;
   unsigned int              _timeout;
@@ -82,6 +87,7 @@ class FvAquisitionThread
   unsigned int              _width;
   unsigned int              _height;
   unsigned char            *_buffer;
+  unsigned char            *_buffer_raw;
 };
 
 
