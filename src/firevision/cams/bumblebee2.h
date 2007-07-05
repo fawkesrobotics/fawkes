@@ -44,6 +44,7 @@ class Bumblebee2Camera : public FirewireCamera
   virtual ~Bumblebee2Camera();
 
   virtual void open();
+  virtual void close();
   virtual void capture();
 
   virtual unsigned char* buffer();

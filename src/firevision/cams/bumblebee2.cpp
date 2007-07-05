@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string>
+#include <endian.h>
 
 #include <utils/math/angle.h>
 
@@ -102,6 +103,11 @@ const unsigned int Bumblebee2Camera::RGB_IMAGE = 2;
 /** PTGrey proprietary register: unit directory offset */
 #define PGR_REG_UNIT_DIRECTORY_OFFSET   (0x0424)
 
+/** PTGrey proprietary register: image data format */
+#define PGR_REG_IMAGE_DATA_FORMAT       (0x1048)
+/** PTGrey image data format: PGR-specific (little endian) mode */
+#define PTG_Y16_Data_Format_PGR_specific  (0xFFFFFFFE)
+
 /** Constructor.
  * Initialize and take parameters from camera argument parser. The following
  * arguments are supported:
@@ -113,9 +119,14 @@ const unsigned int Bumblebee2Camera::RGB_IMAGE = 2;
  * @param cap camera argument parser
  */
 Bumblebee2Camera::Bumblebee2Camera(const CameraArgumentParser *cap)
-  : FirewireCamera(cap)
+  : FirewireCamera(DC1394_FRAMERATE_30,
+		   DC1394_VIDEO_MODE_FORMAT7_3,
+		   DC1394_ISO_SPEED_400,
+		   /* num buffers */ 8)
 {
   // Defaults
+
+  model = strdup(cap->cam_id().c_str());
   // num_buffers set in constructor call
   format7_coding = DC1394_COLOR_CODING_RAW16;
   format7_width  = 640;
@@ -138,17 +149,16 @@ Bumblebee2Camera::Bumblebee2Camera(const CameraArgumentParser *cap)
     format7_starty = atoi(cap->get("starty").c_str());
   }
 
-  _buffer_deinterlaced = (unsigned char *)malloc(pixel_width() * pixel_height() * 2);
-  _buffer_rgb = malloc_buffer(RGB, pixel_width(), pixel_height() * 2);
-  _buffer = NULL;
+  _buffer_deinterlaced = NULL;
+  _buffer_rgb = NULL;
 }
 
 
 /** Destructor. */
 Bumblebee2Camera::~Bumblebee2Camera()
 {
-  free(_buffer_deinterlaced);
-  free(_buffer_rgb);
+  if (_buffer_deinterlaced != NULL)  free(_buffer_deinterlaced);
+  if (_buffer_rgb != NULL)           free(_buffer_rgb);
 }
 
 
@@ -166,7 +176,56 @@ Bumblebee2Camera::open()
     throw Exception("Bumblebee2Camera::open: FirewireCamera::open dit not suceed");
   }
 
+  _buffer_deinterlaced = (unsigned char *)malloc(pixel_width() * pixel_height() * 2);
+  _buffer_rgb = malloc_buffer(RGB, pixel_width(), pixel_height() * 2);
+  _buffer = NULL;
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+  dc1394error_t err;
+  uint32_t value;
+  typedef struct {
+    uint32_t   presence   :  1;
+    uint32_t   reserved1  : 21;
+    uint32_t   mirror     :  1;
+    uint32_t   bayer_mono :  1;
+    uint32_t   reserved2  :  7;
+    uint32_t   data_format:  1;
+  } idf_t;
+  err = GetCameraControlRegister( camera, PGR_REG_IMAGE_DATA_FORMAT, &value );
+  if ( err != DC1394_SUCCESS ) {
+    throw Exception("Bumblebee2::open: GetCameraControlRegister(PGR_REG_DATA_FORMAT) failed\n");
+  }
+  idf_t *i = (idf_t *)&value;
+  printf("IDF: %u\n", i->data_format);
+  value &= PTG_Y16_Data_Format_PGR_specific;
+  i->data_format = 0;
+  i = (idf_t *)&value;
+  printf("IDF: %u\n", i->data_format);
+  err = SetCameraControlRegister( camera, PGR_REG_IMAGE_DATA_FORMAT, value );
+  if ( err != DC1394_SUCCESS ) {
+    throw Exception("Bumblebee2::open: Setting PGR-specific mode on little-endian system failed\n");
+  }
+#endif
+  
+
   get_bayer_tile();
+}
+
+
+void
+Bumblebee2Camera::close()
+{
+  if ( opened ) {
+    FirewireCamera::close();  
+    if (_buffer_deinterlaced != NULL) {
+      free(_buffer_deinterlaced);
+      _buffer_deinterlaced = NULL;
+    }
+    if (_buffer_rgb != NULL) {
+      free(_buffer_rgb);
+      _buffer_rgb = NULL;
+    }
+  }
 }
 
 
@@ -206,7 +265,7 @@ Bumblebee2Camera::set_image_number(unsigned int image_num)
   _image_num = image_num;
   switch ( image_num ) {
   case DEINTERLACED: _buffer = _buffer_deinterlaced; break;
-  case RGB_IMAGE: _buffer = _buffer_rgb;
+  case RGB_IMAGE: _buffer = _buffer_rgb; break;
   default:  _buffer = NULL; break;
   }
 }

@@ -552,9 +552,10 @@ FirewireCamera::print_available_fwcams()
   
   dc1394camera_t       **cameras;
   unsigned int num_cameras = 0;
+  dc1394error_t err;
 
-  if ( dc1394_find_cameras(&cameras, &num_cameras) != DC1394_SUCCESS ) {
-    printf("Finding cameras failed\n");
+  if ( (err = dc1394_find_cameras(&cameras, &num_cameras)) != DC1394_SUCCESS ) {
+    printf("Finding cameras failed: %s\n", dc1394_error_strings[err]);
     return;
   }
 
