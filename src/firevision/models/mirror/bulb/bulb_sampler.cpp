@@ -27,6 +27,7 @@
  */
 
 #include "models/mirror/bulb/bulb_sampler.h"
+#include <core/exception.h>
 #include <iostream>
 #include <cmath>
 
@@ -55,8 +56,13 @@ BulbSampler::BulbSampler( unsigned int image_width,
 {
   bulb    = new Bulb( image_width, image_height );
 
-  colorLut   = new ColorModelLookupTable ( (char *)lut_file.c_str(), 
-					   color_lut_width, color_lut_height );
+  try {
+    colorLut   = new ColorModelLookupTable ( (char *)lut_file.c_str(), 
+  					   color_lut_width, color_lut_height );
+  } catch (Exception &e) {
+    e.printTrace();
+    throw;
+  }
 
   radial     = new ScanlineRadial( image_width  , image_height, 
 				   image_width/2, image_height/2,

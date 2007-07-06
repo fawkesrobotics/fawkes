@@ -170,7 +170,9 @@ ColorModelLookupTable::load_to_buffer(const char *file, unsigned char *buffer,
   }
 
   if ( st.st_size != buffer_size ) {
-    throw TypeMismatchException("File does not have the required size");
+    TypeMismatchException tme("File does not have the required size");
+    tme.append("Got %lu bytes but expected %lu bytes", st.st_size, buffer_size);
+    throw tme;
   }
 
   FILE *f = fopen(file, "r");
