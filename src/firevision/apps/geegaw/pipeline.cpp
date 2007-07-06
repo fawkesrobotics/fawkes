@@ -658,5 +658,13 @@ GeegawPipeline::addStatus()
   return add_status;
 }
 
+
+void
+GeegawPipeline::setColormap(std::string colormap_filename_without_path)
+{
+  cout << msg_prefix << "Loading colormap " << (config->ColormapDirectory + "/" + colormap_filename_without_path) << endl;
+  cm->load((config->ColormapDirectory + "/" + colormap_filename_without_path).c_str());
+}
+
 /// @endcond
 

@@ -150,6 +150,7 @@ void FirevisionGeegawBBClient::Init ()
   m_pLocalizeMasterClient->Update();
   m_pCameraControlServer->Update();
   m_pObjPosServer->Update();  
+  m_pGeegawServer->Update();
   BBOperate();
 
   SetTime( 40 );
@@ -199,6 +200,14 @@ FirevisionGeegawBBClient::Loop(int Count)
     cout << "Switching to mode " << mode << endl;
     pipeline->setMode((GeegawPipeline::GeegawOperationMode)mode);
     m_pGeegawServer->SetCurrentMode(mode);
+    m_pGeegawServer->UpdateBB();
+    BBOperate();
+  }
+
+  if ( m_pGeegawServer->ChangedColormap() ) {
+    cout << msg_prefix << "Loading colormap " << m_pGeegawServer->GetColormap() << endl;
+    pipeline->setColormap(m_pGeegawServer->GetColormap());
+    m_pGeegawServer->SetCurrentColormap(m_pGeegawServer->GetColormap());
     m_pGeegawServer->UpdateBB();
     BBOperate();
   }

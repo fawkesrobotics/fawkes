@@ -103,6 +103,8 @@ class GeegawPipeline : SignalHandler {
   bool addStatusChanged();
   GeegawAddStatus addStatus();
 
+  void setColormap(std::string colormap_filename_without_path);
+
  private:
   /* private methods */
   void handle_signal(int signum);
