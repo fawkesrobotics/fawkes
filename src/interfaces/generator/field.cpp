@@ -101,6 +101,13 @@ InterfaceField::getLength() const
   return length;
 }
 
+
+/** Get length value.
+ * This gives the length of the value as a uint instead of a string
+ * which is sufficient for the generation of the interface but may not
+ * be sufficient for more elaborated usage.
+ * @return length of the value
+ */
 unsigned int
 InterfaceField::getLengthValue() const
 {
