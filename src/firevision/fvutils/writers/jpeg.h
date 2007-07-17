@@ -50,7 +50,7 @@ class JpegWriter : public Writer {
   unsigned int   height;
   int            quality;
 
-  const char *filename;
+  char *filename;
 
   FILE *outfile;
 };

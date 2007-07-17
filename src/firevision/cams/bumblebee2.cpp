@@ -306,6 +306,70 @@ Bumblebee2Camera::decode_bayer()
 }
 
 
+
+
+
+/** De-interlace the 16 bit data into 2 bayer tile pattern images.
+ * Can be used for offline de-interlacing.
+ * @param raw16 In-buffer RAW16-encoded
+ * @param deinterlaced upon return contains the deinterlaced image
+ * @param width width of image in pixels
+ * @param height height of image in pixels
+ */
+void
+Bumblebee2Camera::deinterlace_stereo(unsigned char *raw16, unsigned char *deinterlaced,
+				     unsigned int width, unsigned int height)
+{
+  dc1394_deinterlace_stereo( raw16, deinterlaced, width, 2 * height ); 
+}
+
+
+/** Extract RGB color image from the bayer tile image.
+ * This will transform the bayer tile image to an RGB image using the
+ * nearest neighbour method.
+ * Note: this will alias colors on the top and bottom rows
+ * @param deinterlaced in-buffer with deinterlaced image
+ * @param rgb upon return contains RGB image
+ * @param width width of image in pixels
+ * @param height height of image in pixels
+ * @param bayer_pattern bayer pattern, one of
+ *  - 0x59595959 (YYYY, no pattern)
+ *  - 0x52474742 (RGGB)
+ *  - 0x47524247 (GRBG)
+ *  - 0x42474752 (BGGR)
+ * This depends on the used camera.
+ */
+void
+Bumblebee2Camera::decode_bayer(unsigned char *deinterlaced, unsigned char *rgb,
+			       unsigned int width, unsigned int height,
+			       bayer_pattern_t bayer_pattern)
+{
+  dc1394color_filter_t dc_bayer_pattern;
+
+  switch (bayer_pattern) {
+  default:
+  case BAYER_PATTERN_YYYY:
+    dc_bayer_pattern = (dc1394color_filter_t) 0;
+    break;
+  case BAYER_PATTERN_RGGB:
+    dc_bayer_pattern = DC1394_COLOR_FILTER_RGGB;
+    break;
+  case BAYER_PATTERN_GBRG:
+    dc_bayer_pattern = DC1394_COLOR_FILTER_GBRG;
+    break;
+  case BAYER_PATTERN_GRBG:
+    dc_bayer_pattern = DC1394_COLOR_FILTER_GRBG;
+    break;
+  case BAYER_PATTERN_BGGR:
+    dc_bayer_pattern = DC1394_COLOR_FILTER_BGGR;
+    break;
+  }
+
+  dc1394_bayer_decoding_8bit( deinterlaced, rgb, width, 2 * height, 
+			      dc_bayer_pattern, DC1394_BAYER_METHOD_NEAREST ); 
+}
+
+
 /** Retrieve bayer tile.
  * This is an internal method that access a special PTGrey register in the camera to
  * determine the bayer tile mode.

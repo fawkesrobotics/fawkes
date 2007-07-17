@@ -28,6 +28,16 @@
 #ifndef __FIREVISION_UTILS_BAYER_H_
 #define __FIREVISION_UTILS_BAYER_H_
 
+/** Bayer pattern enumeration.
+ * This enumeration lists the differen possible bayer patterns.
+ */
+typedef enum {
+  BAYER_PATTERN_YYYY = 0x59595959,	/**< YYYY pattern (no bayer) */
+  BAYER_PATTERN_RGGB = 0x52474742,	/**< RGGB */
+  BAYER_PATTERN_GBRG = 0x47425247,	/**< GBRG */
+  BAYER_PATTERN_GRBG = 0x47524247,	/**< GRBG */
+  BAYER_PATTERN_BGGR = 0x42474752	/**< BGGR */
+} bayer_pattern_t;
 
 void bayerGBRG_to_yuv422planar_nearest_neighbour(unsigned char *bayer, unsigned char *yuv,
 						 unsigned int width, unsigned int height);

@@ -29,6 +29,7 @@
 #define __FIREVISION_CAMS_BUMBLEBEE2_H_
 
 #include <cams/firewire.h>
+#include <fvutils/color/bayer.h>
 
 class Bumblebee2CameraData;
 
@@ -58,6 +59,12 @@ class Bumblebee2Camera : public FirewireCamera
 
   void deinterlace_stereo();
   void decode_bayer();
+
+  static void deinterlace_stereo(unsigned char *raw16, unsigned char *deinterlaced,
+				 unsigned int width, unsigned int height);
+  static void decode_bayer(unsigned char *deinterlaced, unsigned char *rgb,
+			   unsigned int width, unsigned int height,
+			   bayer_pattern_t bayer_pattern);
 
  private:
   void get_triclops_context_from_camera();

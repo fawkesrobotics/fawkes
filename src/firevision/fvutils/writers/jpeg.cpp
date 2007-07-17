@@ -32,6 +32,7 @@
 #include <cstdio>
 #include <cerrno>
 #include <cstdlib>
+#include <cstring>
 #include <jpeglib.h>
 
 /** @class JpegWriter <fvutils/writers/jpeg.h>
@@ -47,13 +48,14 @@ JpegWriter::JpegWriter(const char *filename, int quality)
   buffer = NULL;
 
   this->quality  = (quality > 0) ? quality : -quality;
-  this->filename = filename;
+  this->filename = strdup(filename);
 }
 
 
 /** Destructor. */
 JpegWriter::~JpegWriter()
 {
+  free(filename);
 }
 
 
@@ -70,7 +72,8 @@ JpegWriter::set_buffer(colorspace_t cspace, unsigned char *buffer)
 void
 JpegWriter::set_filename(const char *filename)
 {
-  this->filename = filename;
+  free(this->filename);
+  this->filename = strdup(filename);
 }
 
 
@@ -90,7 +93,9 @@ JpegWriter::write()
   }
 
   if ((outfile = fopen(filename, "wb")) == NULL) {
-    throw Exception("Cannot open JPEG file for writing", errno);
+    Exception e("Cannot open JPEG file for writing", errno);
+    e.append("File %s could not be opened", filename);
+    throw e;
   }
 
   int row_stride;
