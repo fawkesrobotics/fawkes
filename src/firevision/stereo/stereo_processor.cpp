@@ -89,6 +89,10 @@
  * so do not change anything in the buffer or subsequent calls to get_xyz() and
  * get_world_xyz() will return invalid results.
  *
+ * @fn virtual size_t           StereoProcessor::disparity_buffer_size() const = 0
+ * Get disparity buffer size.
+ * @return size in bytes of the disparity image buffer
+ *
  * @fn virtual unsigned char *  StereoProcessor::yuv_buffer() = 0
  * Get YUV-formatted buffer of reference camera.
  * This will return the YUV buffer of the reference image. This is only available

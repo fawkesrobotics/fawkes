@@ -28,6 +28,8 @@
 #ifndef __FIREVISION_FVUTILS_STEREO_STEREO_PROCESSOR_H_
 #define __FIREVISION_FVUTILS_STEREO_STEREO_PROCESSOR_H_
 
+#include <sys/types.h>
+
 class ROI;
 
 class StereoProcessor
@@ -46,6 +48,7 @@ class StereoProcessor
   virtual void             calculate_yuv(bool both = false)              = 0;
 
   virtual unsigned char *  disparity_buffer()                            = 0;
+  virtual size_t           disparity_buffer_size() const                 = 0;
   virtual unsigned char *  yuv_buffer()                                  = 0;
   virtual unsigned char *  auxiliary_yuv_buffer()                        = 0;
 };

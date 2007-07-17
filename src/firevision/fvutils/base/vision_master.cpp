@@ -37,7 +37,7 @@
  *
  * @author Tim Niemueller
  *
- * @fn Camera *  VisionMaster::register_for_camera(const char *camera_string, Thread *thread) = 0
+ * @fn Camera *  VisionMaster::register_for_camera(const char *camera_string, Thread *thread, bool raw) = 0
  * Register thread for camera.
  * This will register a relation between the given thread and the camera identified
  * by the camera string. If the requested camera has not been opened before this

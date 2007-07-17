@@ -346,7 +346,7 @@ ColorModelLookupTable::operator+=(const ColorModelLookupTable &cmlt)
 /** Add another colormap to this one.
  * This is an overloaded member function for convenience. It adds the lookup table
  * stored in the given file.
- * @param filename filename of the file with the LUT to add
+ * @param file filename of the file with the LUT to add
  * @return this instance with the other color model lookup table added
  * @exception TypeMismatchException thrown if the colormaps do not have the
  * same size.

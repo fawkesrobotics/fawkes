@@ -125,6 +125,11 @@ FvAquisitionThread::~FvAquisitionThread()
  * where the image is copied to (or a conversion result is posted to).
  * The returned instance has to bee freed using delete when done with it.
  *
+ * You can decide whether you want to get access to the raw camera image
+ * that has not been modified in any way or to the YUV422_PLANAR image buffer
+ * (a conversion is done if needed). Use the raw parameter to decide whether
+ * to get the raw image (true) or the YUV422_PLANAR image (false).
+ *
  * When a thread is added it is internally put into a waiting queue. Since
  * at the time when it is added the thread is not yet started, and its
  * initialization may even fail. For this reason the aquisition thread
@@ -140,6 +145,8 @@ FvAquisitionThread::~FvAquisitionThread()
  * then quickly loaded again the overhead of closing the camera and then
  * opening it again is avoided.
  *
+ * @param raw true to get access to the raw camera image and not the (maybe)
+ * converted YUV422_PLANAR image.
  * @return camera instance
  */
 Camera *
@@ -180,6 +187,7 @@ FvAquisitionThread::has_thread(Thread *thread)
 /** Add a thread.
  * Adds a thread to the waiting queue and registeres to the thread's notification.
  * @param thread thread to add
+ * @param raw true if this thread accesses the camera in raw mode, false otherwise
  */
 void
 FvAquisitionThread::add_thread(Thread *thread, bool raw)
