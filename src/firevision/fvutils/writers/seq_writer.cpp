@@ -59,8 +59,13 @@ SeqWriter::~SeqWriter()
   delete writer;
   writer = 0;
   
-  free(filename);
-  free(img_path);
+  if ("" != filename) {
+    free(filename);
+  }
+
+  if ("" != img_path) {
+    free(img_path);
+  }
 }
 
 /** Set the path to where the images are stored.
@@ -144,7 +149,8 @@ void SeqWriter::write(unsigned char *buffer)
     }
 
   writer->set_filename(fn);
-  
+  free(fn);
+
   try {
     writer->set_buffer(cspace, buffer);
     writer->write();
