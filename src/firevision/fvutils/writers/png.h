@@ -36,17 +36,9 @@ class PNGWriter : public Writer
  public:
   PNGWriter();
   PNGWriter(const char *filename, unsigned int width, unsigned int height);
+  ~PNGWriter();
 
-  virtual void set_filename(const char *filename);
-  virtual void set_dimensions(unsigned int width, unsigned int height);
   virtual void set_buffer(colorspace_t cspace, unsigned char *buffer);
   virtual void write();
-
- private:
-
-  const char *filename;;
-  unsigned char *buffer;
-  unsigned int width;
-  unsigned int height;
 };
 #endif

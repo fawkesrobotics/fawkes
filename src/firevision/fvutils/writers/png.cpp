@@ -31,6 +31,8 @@
 
 #include <cstdio>
 #include <png.h>
+#include <string.h>
+#include <stdlib.h>
 
 /** @class PNGWriter <fvutils/writers/png.h>
  * PNG file writer.
@@ -38,10 +40,8 @@
 
 /** Constructor. */
 PNGWriter::PNGWriter()
+  : Writer("png")
 {
-  this->filename = "";
-  this->width    = 0;
-  this->height   = 0;
 }
 
 /** Constructor.
@@ -50,12 +50,18 @@ PNGWriter::PNGWriter()
  * @param height height
  */
 PNGWriter::PNGWriter(const char *filename, unsigned int width, unsigned int height)
+  : Writer("png")
 {
-  this->filename = filename;
+  set_filename(filename);
+
   this->width    = width;
   this->height   = height;
 }
 
+/** Destructor. */
+PNGWriter::~PNGWriter()
+{
+}
 
 void
 PNGWriter::set_buffer(colorspace_t cspace, unsigned char *buffer)
@@ -67,25 +73,11 @@ PNGWriter::set_buffer(colorspace_t cspace, unsigned char *buffer)
   }
 }
 
-void
-PNGWriter::set_filename(const char *filename)
-{
-  this->filename = filename;
-}
-
-
-void
-PNGWriter::set_dimensions(unsigned int width, unsigned int height)
-{
-  this->width  = width;
-  this->height = height;
-}
-
 
 void
 PNGWriter::write()
 {
-  if ( (filename == "") ||
+  if ( (filename == 0) ||
        (width == 0) ||
        (height == 0) ) {
     throw Exception("PNGWriter::write(): Illegal data, width==0 || height == 0 || filename=\"\".");

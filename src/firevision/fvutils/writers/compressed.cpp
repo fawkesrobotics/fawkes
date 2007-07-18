@@ -49,7 +49,7 @@ CompressedImageWriter::CompressedImageWriter(ImageCompressor *ic)
 {
   width = height = 0;
   filename = "";
-  colorspace = CS_UNKNOWN;
+  cspace = CS_UNKNOWN;
   buffer = NULL;
 
   image_compressor = ic;
@@ -65,7 +65,9 @@ CompressedImageWriter::~CompressedImageWriter()
 void
 CompressedImageWriter::set_filename(const char *filename)
 {
-  this->filename = filename;
+  free(this->filename);
+  this->filename = strdup(filename);
+
   if ( image_compressor != NULL ) {
     image_compressor->set_filename( filename );
   }
@@ -86,7 +88,7 @@ CompressedImageWriter::set_dimensions(unsigned int width, unsigned int height)
 void
 CompressedImageWriter::set_buffer(colorspace_t cspace, unsigned char *buffer)
 {
-  this->colorspace = cspace;
+  this->cspace     = cspace;
   this->buffer     = buffer;
   if ( image_compressor != NULL ) {
     image_compressor->set_image_buffer( cspace, buffer );
@@ -130,6 +132,6 @@ CompressedImageWriter::set_image_compressor(ImageCompressor *ic)
   if ( ic != NULL ) {
     ic->set_filename( filename );
     ic->set_image_dimensions( width, height );
-    ic->set_image_buffer(colorspace, buffer);
+    ic->set_image_buffer(cspace, buffer);
   }
 }

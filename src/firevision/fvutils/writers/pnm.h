@@ -48,10 +48,9 @@ typedef enum {
 class PNMWriter : public Writer
 {
  public:
+  PNMWriter(PNMFormat format);
   PNMWriter(PNMFormat format, const char *filename, unsigned int width, unsigned int height);
 
-  virtual void set_filename(const char *filename);
-  virtual void set_dimensions(unsigned int width, unsigned int height);
   virtual void set_buffer(colorspace_t cspace, unsigned char *buffer);
   virtual void write();
 
@@ -63,7 +62,6 @@ class PNMWriter : public Writer
   const char * format2string(PNMFormat format);
 
   PNMFormat      format;
-  const char    *filename;
   unsigned int   buffer_size;
   unsigned char *buffer;
   unsigned char *buffer_start;

@@ -35,22 +35,16 @@
 class JpegWriter : public Writer {
 
  public:
+  JpegWriter(int quality = 80);
   JpegWriter(const char *filename, int quality = 80);
   virtual ~JpegWriter();
 
-  virtual void             set_filename(const char *filename);
-  virtual void             set_dimensions(unsigned int width, unsigned int height);
   virtual void             set_buffer(colorspace_t cspace, unsigned char *buffer);
   virtual void             write();
-
+  
  private:
-  unsigned char *buffer;
   unsigned char *row_buffer;
-  unsigned int   width;
-  unsigned int   height;
   int            quality;
-
-  char *filename;
 
   FILE *outfile;
 };

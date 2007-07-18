@@ -38,14 +38,29 @@
 
 /** Constructor.
  * @param format PNM subformat
+ */
+PNMWriter::PNMWriter(PNMFormat format)
+  : Writer("pnm")
+{
+  this->format = format;
+
+  buffer_size = calc_buffer_size();
+  buffer = (unsigned char *)malloc(buffer_size);
+  buffer_start = buffer;
+}
+
+/** Constructor.
+ * @param format PNM subformat
  * @param filename filename
  * @param width image width
  * @param height image height
  */
 PNMWriter::PNMWriter(PNMFormat format, const char *filename, unsigned int width, unsigned int height)
+  : Writer("pnm")
 {
+  set_filename(filename);
+
   this->format = format;
-  this->filename = filename;
   this->width = width;
   this->height = height;
 
@@ -202,20 +217,6 @@ PNMWriter::write_header(bool simulate)
   }
 
   return rv;
-}
-
-void
-PNMWriter::set_filename(const char *filename)
-{
-  this->filename = filename;
-}
-
-
-void
-PNMWriter::set_dimensions(unsigned int width, unsigned int height)
-{
-  this->width  = width;
-  this->height = height;
 }
 
 

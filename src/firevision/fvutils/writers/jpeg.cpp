@@ -34,28 +34,41 @@
 #include <cstdlib>
 #include <cstring>
 #include <jpeglib.h>
+#include <string.h>
 
 /** @class JpegWriter <fvutils/writers/jpeg.h>
  * JPEG file writer.
  */
 
 /** Constructor.
+ * @param quality quality, value between 0 and 100
+ */
+JpegWriter::JpegWriter(int quality)
+  : Writer("jpg")
+{
+  buffer = NULL;
+  
+  this->quality  = (quality > 0) ? quality : -quality;
+}
+
+/** Constructor.
  * @param filename file name to write to
  * @param quality quality, value between 0 and 100
  */
 JpegWriter::JpegWriter(const char *filename, int quality)
+  : Writer("jpg")
 {
+  set_filename(filename);
+
   buffer = NULL;
 
   this->quality  = (quality > 0) ? quality : -quality;
-  this->filename = strdup(filename);
 }
 
 
 /** Destructor. */
 JpegWriter::~JpegWriter()
 {
-  free(filename);
 }
 
 
@@ -67,21 +80,6 @@ JpegWriter::set_buffer(colorspace_t cspace, unsigned char *buffer)
   } else {
     throw Exception("Incompatible colorspace, can only hand YUV422_PLANAR images");
   }
-}
-
-void
-JpegWriter::set_filename(const char *filename)
-{
-  free(this->filename);
-  this->filename = strdup(filename);
-}
-
-
-void
-JpegWriter::set_dimensions(unsigned int width, unsigned int height)
-{
-  this->width  = width;
-  this->height = height;
 }
 
 
@@ -134,3 +132,4 @@ JpegWriter::write()
   fclose( outfile );
 
 }
+

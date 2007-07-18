@@ -27,6 +27,11 @@
 
 #include <fvutils/writers/writer.h>
 
+#include <core/exception.h>
+
+#include <string.h>
+#include <stdlib.h>
+
 /** @class Writer <fvutils/writers/writer.h>
  * Interface to write images.
  * The writer interface defines the general API for image writers. These
@@ -34,26 +39,122 @@
  * PNGs etc.).
  *
  * @author Tim Niemueller
- *
- * @fn void Writer::set_filename(const char *filename)
- * Set filename.
- * @param filename name of file to write to
- *
- * @fn void Writer::set_dimensions(unsigned int width, unsigned int height)
- * Set dimensions of image in pixels.
- * @param width width of image in pixels
- * @param height height of image in pixels.
- *
- * @fn void Writer::set_buffer(colorspace_t cspace, unsigned char *buffer)
- * Set image buffer.
- * @param cspace color space of image
- * @param buffer buffer of image
- *
- * @fn void Writer::write()
+ */
+
+/** @fn void Writer::write()
  * Write to file.
  */
+
+/** @var Writer::filename
+ * The complete filename.
+ */
+
+/** @var Writer::basename
+ * The basename of the file.
+ */
+/** @var Writer::extension
+ * The extension of the file.
+ */
+/** @var Writer::width
+ * The width of the image.
+ */
+/** @var Writer::height
+ * The height of the image.
+ */
+/** @var Writer::cspace
+ * The colorspace of the image.
+ */
+/** @var Writer::buffer
+ * The image-buffer.
+ */
+
+/** Constructor.
+ * @param extension the file extension
+ */
+Writer::Writer(const char *extension)
+{
+  basename = 0;
+  filename = 0;
+
+  this->extension = 0;
+  if (0 != extension) {
+    this->extension = strdup(extension);
+  }
+
+  width = 0;
+  height = 0;
+  cspace = CS_UNKNOWN;
+  buffer = 0;
+}
 
 /** Virtual empty destructor. */
 Writer::~Writer()
 {
+  free(filename);
+  free(basename);
+  free(extension);
+}
+
+/** Set filename.
+ * @param filename name of file to write to. This can either be the complete filename
+ * (including) extension or the basename only in which case the extension is added.
+ */
+void
+Writer::set_filename(const char *filename)
+{
+  free(this->filename);
+  
+  if ( 0 != strstr(filename, ".") ) {
+    this->filename = strdup(filename);
+  } else {
+    free(this->basename);
+    this->basename = strdup(filename);
+
+    // re-generate complete filename
+    if (0 == extension) {
+      throw Exception("Extension not set");
+    }
+
+    this->filename = (char *) malloc( strlen(basename) + strlen(extension) + 1 );
+    strcpy(this->filename, basename);
+    strcat(this->filename, extension);
+  }
+}
+
+/** Set dimensions of image in pixels.
+ * @param width width of image in pixels
+ * @param height height of image in pixels.
+ */
+void
+Writer::set_dimensions(unsigned int width, unsigned int height)
+{
+  this->width = width;
+  this->height = height;
+}
+
+/** Set image buffer.
+ * @param cspace color space of image
+ * @param buffer buffer of image
+ */
+void
+Writer::set_buffer(colorspace_t cspace, unsigned char *buffer)
+{
+  this->cspace = cspace;
+  this->buffer = buffer;
+}
+
+/** Set the filename extension for file written by this writer.
+ * @param extension the extension
+ */
+void
+Writer::set_extension(const char *extension)
+{
+  free(this->extension);
+  this->extension = strdup(extension);
+
+  // re-generate complete filename
+  free(this->filename);
+  this->filename = (char *) malloc( strlen(basename) + strlen(extension) + 1 );
+  strcpy(filename, basename);
+  strcat(filename, extension);
 }

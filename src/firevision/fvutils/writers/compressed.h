@@ -49,12 +49,6 @@ class CompressedImageWriter : public Writer {
  private:
   ImageCompressor *image_compressor;
 
-  const char *filename;
-  unsigned int width;
-  unsigned int height;
-  colorspace_t colorspace;
-  unsigned char *buffer;
-
 };
 
 

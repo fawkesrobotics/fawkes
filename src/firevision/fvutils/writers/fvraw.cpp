@@ -28,6 +28,9 @@
 #include <core/exception.h>
 #include <fvutils/writers/fvraw.h>
 
+#include <string.h>
+#include <stdlib.h>
+
 #include <cstdio>
 #include <cerrno>
 
@@ -41,9 +44,8 @@ const unsigned int FvRawWriter::FILE_IDENTIFIER = 0x17559358; // 16
 
 /** Constructor. */
 FvRawWriter::FvRawWriter()
+  : Writer("raw")
 {
-  filename = "";
-
   header.file_id = FILE_IDENTIFIER;
   header.width = 0;
   header.height = 0;
@@ -60,8 +62,9 @@ FvRawWriter::FvRawWriter()
  */
 FvRawWriter::FvRawWriter(const char *filename,
 			 unsigned int width, unsigned int height)
+  : Writer("raw")
 {
-  this->filename = filename;
+  set_filename(filename);
 
   header.file_id    = FILE_IDENTIFIER;
   header.width      = width;
@@ -82,8 +85,9 @@ FvRawWriter::FvRawWriter(const char *filename,
 FvRawWriter::FvRawWriter(const char *filename,
 			 unsigned int width, unsigned int height,
 			 colorspace_t colorspace, unsigned char *buffer)
+  : Writer("raw")
 {
-  this->filename = filename;
+  set_filename(filename);
 
   header.file_id    = FILE_IDENTIFIER;
   header.width      = width;
@@ -101,16 +105,9 @@ FvRawWriter::~FvRawWriter()
 
 
 void
-FvRawWriter::set_filename(const char *filename)
-{
-  this->filename = filename;
-}
-
-
-void
 FvRawWriter::set_dimensions(unsigned int width, unsigned int height)
 {
-  header.width  = width;
+  header.width = width;
   header.height = height;
 }
 

@@ -41,7 +41,6 @@ class FvRawWriter : public Writer {
 	      colorspace_t colorspace, unsigned char *buffer);
   virtual ~FvRawWriter();
 
-  virtual void             set_filename(const char *filename);
   virtual void             set_dimensions(unsigned int width, unsigned int height);
   virtual void             set_buffer(colorspace_t cspace, unsigned char *buffer);
   virtual void             write();
@@ -58,7 +57,6 @@ class FvRawWriter : public Writer {
   } FvRawHeader;
 
  private:
-  const char *filename;
   FvRawHeader header;
   unsigned char *buffer;
 
