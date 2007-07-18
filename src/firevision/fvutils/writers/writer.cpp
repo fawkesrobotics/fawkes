@@ -117,6 +117,7 @@ Writer::set_filename(const char *filename)
 
     this->filename = (char *) malloc( strlen(basename) + strlen(extension) + 1 );
     strcpy(this->filename, basename);
+    strcat(this->filename, ".");
     strcat(this->filename, extension);
   }
 }
@@ -156,5 +157,6 @@ Writer::set_extension(const char *extension)
   free(this->filename);
   this->filename = (char *) malloc( strlen(basename) + strlen(extension) + 1 );
   strcpy(filename, basename);
+  strcat(this->filename, ".");
   strcat(filename, extension);
 }

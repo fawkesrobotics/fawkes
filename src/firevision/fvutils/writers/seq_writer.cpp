@@ -78,7 +78,10 @@ void SeqWriter::set_path(const char* img_path)
  */
 void SeqWriter::set_filename(const char* filename)
 {
-  free(this->filename);
+  if ("" != this->filename)
+    {
+      free(this->filename);
+    }
   this->filename = strdup(filename);
 }
 
@@ -117,13 +120,27 @@ void SeqWriter::write(unsigned char *buffer)
     {
       // filename: YYYYMMDD-hhmmss_index.ext
       fn = (char*) malloc( strlen(img_path) + strlen(timestring) + 10 );
-      sprintf(fn, "%s/%s_%04u", img_path, timestring, frame_number);
+      if ("" != img_path)
+	{
+	  sprintf(fn, "%s/%s_%04u", img_path, timestring, frame_number);
+	}
+      else
+	{
+	  sprintf(fn, "%s_%04u", timestring, frame_number);
+	}
     }
   else
     {
       // filename: YYYYMMDD-hhmmss_name_index.ext
       fn = (char*) malloc( strlen(img_path) + strlen(timestring) + strlen(filename) + 10 );
-      sprintf(fn, "%s/%s_%s_%4u", img_path, timestring, filename, frame_number);
+      if ("" != img_path)
+	{
+	  sprintf(fn, "%s/%s_%s_%04u", img_path, timestring, filename, frame_number);
+	}
+      else
+	{
+	  sprintf(fn, "%s_%s_%04u", timestring, filename, frame_number);
+	}
     }
 
   writer->set_filename(fn);
@@ -132,6 +149,7 @@ void SeqWriter::write(unsigned char *buffer)
     writer->set_buffer(cspace, buffer);
     writer->write();
   } catch (Exception &e) {
+    e.printTrace();
     throw;
   }
 }
