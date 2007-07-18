@@ -36,7 +36,9 @@
  *
  * Valid types are:
  * - int
+ * - long int
  * - unsigned int
+ * - unsigned long int
  * - bool
  * - float
  * - double
@@ -52,7 +54,9 @@ bool
 InterfaceDataTypeChecker::validType(const std::string &type)
 {
   return (  (type == "int") ||
+	    (type == "long int") ||
 	    (type == "unsigned int") ||
+	    (type == "unsigned long int") ||
 	    (type == "bool") ||
 	    (type == "char") ||
 	    (type == "float") ||
@@ -68,11 +72,11 @@ InterfaceDataTypeChecker::validType(const std::string &type)
 bool
 InterfaceDataTypeChecker::validValue(const std::string &type, const std::string &value)
 {
-  if ( type == "int") {
+  if ( (type == "int") || ( type == "long int")) {
     char *endptr;
     strtol(value.c_str(), &endptr, 10);
     return ( (endptr != NULL) && (endptr[0] == '\0'));
-  } else if (type == "unsigned int") {  
+  } else if ((type == "unsigned int") || (type == "unsigned long int")) {  
     char *endptr;
     int val = strtol(value.c_str(), &endptr, 10);
     if ( (endptr == NULL) || (endptr[0] != '\0') ) {

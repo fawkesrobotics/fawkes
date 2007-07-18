@@ -19,6 +19,8 @@
     <field type="char" length="30" flags="changed_indicator" validfor="5" default="testing default" name="TestString">A test sring</field>
     <field type="int" name="Result">Result of operation add operation from Calculate message.</field>
     <field type="unsigned int" name="TestUInt">Test unsigned int</field>
+    <field type="unsigned long int" name="TestULInt">Test unsigned long int</field>
+    <field type="long int" name="TestLInt">Test long int</field>
   </data>
   <message name="SetTestInt">
     <comment>Set the test int to the given value.</comment>

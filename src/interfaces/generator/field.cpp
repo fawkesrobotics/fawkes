@@ -213,9 +213,6 @@ void
 InterfaceField::setBits(const std::string &bits)
 {
   bits_val = atoi(bits.c_str());
-  if ( bits_val >= 32 ) {
-    throw InterfaceGeneratorInvalidValueException("bits", "unsigned int", "must be in range [1..31]");
-  }
   this->bits = bits;
 }
 
@@ -326,10 +323,22 @@ InterfaceField::valid()
   }
   if ( bits.length() > 0 ) {
     if ( (type != "int") &&
-	 (type != "unsigned int") ) {
+	 (type != "unsigned int") &&
+	 (type != "long int") &&
+	 (type != "unsigned long int") ) {
       throw InterfaceGeneratorInvalidAttributeException(name.c_str(), type.c_str(), "bits");
     } else if ( ! InterfaceDataTypeChecker::validValue("unsigned int", bits) ) {
       throw InterfaceGeneratorInvalidValueException("bits", "unsigned int", bits.c_str());
+    }
+    if ( (type == "int") || (type == "unsigned int") ) {
+      if ( bits_val > sizeof(unsigned int) * 8 ) {
+	throw InterfaceGeneratorInvalidValueException("bits", "unsigned int", "must be in range [1..32]");
+      }
+    }
+    if ( (type == "long int") || (type == "unsigned long int") ) {
+      if ( bits_val > sizeof(unsigned long int) * 8 ) {
+	throw InterfaceGeneratorInvalidValueException("bits", "unsigned long int", "must be in range [1..64]");
+      }
     }
   }
   if ( (validfor.length() > 0) && ! InterfaceDataTypeChecker::validValue("unsigned int", validfor) ) {
@@ -354,11 +363,13 @@ InterfaceField::valid()
  * The overall order is like the following:
  * 1. unsigned int (w/o bit fields)
  * 2. int (w/o bit fields)
- * 3. float
- * 4. double
- * 5. bit fields
- * 6. bool
- * 7. char *
+ * 3. unsigned long int (w/o bit fields)
+ * 4. long int (w/o bit fields)
+ * 5. float
+ * 6. double
+ * 7. bit fields
+ * 8. bool
+ * 9. char *
  * @param f field to compare to
  * @return true, if current instance is small than f, false otherwise
  */
@@ -371,6 +382,19 @@ InterfaceField::operator< (const InterfaceField &f) const
   } else if ( (type == "int") && (bits.length() == 0) ) {
     return ( ((f.type != "int") &&
 	      (f.type != "unsigned int") ) ||
+	     (f.bits.length() > 0) );
+
+  } else if ( (type == "unsigned long int") && (bits.length() == 0) ) {
+    return ( ((f.type != "unsigned long int") &&
+	      (f.type != "unsigned int") &&
+	      (f.type != "int") ) ||
+	     (f.bits.length() > 0) );
+
+  } else if ( (type == "long int") && (bits.length() == 0) ) {
+    return ( ((f.type != "long int") &&
+	      (f.type != "unsigned int") &&
+	      (f.type != "int") &&
+	      (f.type != "unsigned long int") ) ||
 	     (f.bits.length() > 0) );
 
   } else if ( type == "float" ) {
@@ -395,6 +419,17 @@ InterfaceField::operator< (const InterfaceField &f) const
   } else if ( (type == "int") && (bits.length() > 0) ) {
     return ( (f.type != "unsigned int") &&
 	     (f.type != "int") );
+
+  } else if ( (type == "unsigned long int") && (bits.length() > 0) ) {
+    return ( (f.type != "unsigned long int") &&
+	     ((f.type != "unsigned int") || (f.bits.length() > 0) ) &&
+	     ((f.type != "int") || (f.bits.length() > 0) ) );
+
+  } else if ( (type == "long int") && (bits.length() > 0) ) {
+    return ( (f.type != "unsigned long int") &&
+	     (f.type != "unsigned int") &&
+	     (f.type != "int") &&
+	     (f.type != "long int") );
 
   } else {
     // char or unknown, char is always last and thus >=

@@ -156,6 +156,46 @@ TestInterface::setTestUInt(unsigned int newTestUInt)
   data->TestUInt = newTestUInt;
 }
 
+/** Get TestULInt value.
+ * Test unsigned long int
+ * @return TestULInt value
+ */
+unsigned long int
+TestInterface::getTestULInt()
+{
+  return data->TestULInt;
+}
+
+/** Set TestULInt value.
+ * Test unsigned long int
+ * @param newTestULInt new TestULInt value
+ */
+void
+TestInterface::setTestULInt(unsigned long int newTestULInt)
+{
+  data->TestULInt = newTestULInt;
+}
+
+/** Get TestLInt value.
+ * Test long int
+ * @return TestLInt value
+ */
+long int
+TestInterface::getTestLInt()
+{
+  return data->TestLInt;
+}
+
+/** Set TestLInt value.
+ * Test long int
+ * @param newTestLInt new TestLInt value
+ */
+void
+TestInterface::setTestLInt(long int newTestLInt)
+{
+  data->TestLInt = newTestLInt;
+}
+
 /* =========== messages =========== */
 /** @class TestInterface::SetTestIntMessage interfaces/test.h
  * SetTestIntMessage Fawkes BlackBoard Interface Message.

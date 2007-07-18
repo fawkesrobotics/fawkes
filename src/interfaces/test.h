@@ -43,6 +43,8 @@ class TestInterface : public Interface
     unsigned int TestUInt; /**< Test unsigned int */
     int TestInt; /**< Test integer */
     int Result; /**< Result of operation add operation from Calculate message. */
+    unsigned long int TestULInt; /**< Test unsigned long int */
+    long int TestLInt; /**< Test long int */
     unsigned int Flags : 8; /**< Flags spit down by the writer */
     char TestString[30]; /**< A test sring */
   } TestInterface_data_t;
@@ -141,6 +143,10 @@ class TestInterface : public Interface
   void setResult(int newResult);
   unsigned int getTestUInt();
   void setTestUInt(unsigned int newTestUInt);
+  unsigned long int getTestULInt();
+  void setTestULInt(unsigned long int newTestULInt);
+  long int getTestLInt();
+  void setTestLInt(long int newTestLInt);
 
 };
 

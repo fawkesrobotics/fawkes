@@ -130,11 +130,13 @@ InterfaceGenerator::setMessages(const std::vector<InterfaceMessage> &messages)
  * Create struct, try align data well, sort fields:
  * 1. unsigned int (w/o bit fields)
  * 2. int (w/o bit fields)
- * 3. float
- * 4. double
- * 5. bit fields
- * 6. bool
- * 7. char *
+ * 3. unsigned long int (w/o bit fields)
+ * 4. long int (w/o bit fields)
+ * 5. float
+ * 6. double
+ * 7. bit fields
+ * 8. bool
+ * 9. char *
  * @param f file to write to
  * @param name name of struct
  * @param is indentation space
