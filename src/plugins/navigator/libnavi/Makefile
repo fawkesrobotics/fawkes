@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#                 Makefile Build System for Fawkes: Navigator Library
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Fri Jun 29 13:53:45 2007
+#   copyright (C) 2007 by Martin Liebenberg, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -19,10 +19,21 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../../..
 
-SUBDIRS = worldmodel example kicker navigator
+CFLAGS = -g
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
 
+LIBS_libnavigator = core utils netcomm
+OBJS_libnavigator =  obstacle.o \
+										  npoint.o \
+										  nline.o \
+										  navigator_messages.o
+		 
+
+		 
+
+OBJS_all    = $(OBJS_navigator) $(OBJS_libnavigator)
+LIBS_all    = $(LIBDIR)/libnavigator.so
+
+include $(BASEDIR)/etc/buildsys/base.mk

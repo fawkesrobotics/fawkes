@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#                 Makefile Build System for Fawkes: Navigator Plugin
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Tue May 29 18:41:17 2007
+#   copyright (C) 2007 by Martin Liebenberg, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -19,10 +19,23 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../../..
 
-SUBDIRS = worldmodel example kicker navigator
+CFLAGS = -g
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
 
+LIBS_libfuzzy =
+
+OBJS_libfuzzy = 	fuzzy_controller.o \
+							fuzzy_partition.o \
+							fuzzy_set.o \
+							mamdani_fuzzy_controller.o \
+							potential_field_controller.o \
+							smoothing_controller.o \
+							trapezium_set.o \
+							triangle_set.o
+
+OBJS_all    = $(OBJS_libfuzzy)
+LIBS_all = $(LIBDIR)/libfuzzy.so
+
+include $(BASEDIR)/etc/buildsys/base.mk

@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#                 Makefile Build System for Fawkes: Navigator GUI
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Tue May 29 20:00:00 2007
+#   copyright (C) 2007 by Martin Liebenberg, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -19,10 +19,18 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 
-SUBDIRS = worldmodel example kicker navigator
+CFLAGS = -g `pkg-config gtkmm-2.4 --cflags`
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
 
+LIBS_navigator_gui = core utils netcomm navigator
+LDFLAGS_navigator_gui = `pkg-config gtkmm-2.4 --libs`
+OBJS_navigator_gui = navigator_gui.o
+
+BINS_all = $(BINDIR)/navigator_gui
+
+
+OBJS_all    = $(OBJS_navigator_gui)
+
+include $(BASEDIR)/etc/buildsys/base.mk

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<!-- $Id$ -->
+<interface name="NavigatorInterface" author="Martin Liebenberg" year="2007">
+  <data>
+    <comment>Fooba</comment>
+    <field type="int" name="Foo">Foo</field>
+  </data>
+  <message name="Target">
+    <comment>States the next target to navigate to.</comment>
+    <field type="float" name="Distance">Distance to the target.</field>
+    <field type="float" name="Angle">Angle of the target.</field>
+    <field type="float" name="X">X-coordinate of the target.</field>
+    <field type="float" name="Y">Y-coordinate of the target.</field>
+  </message>
+  <message name="Velocity">
+    <comment>States the velocity of the robot.</comment>
+    <field type="float" name="Velocity">Velocity of the robot.</field>
+  </message>
+</interface>

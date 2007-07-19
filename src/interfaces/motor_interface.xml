@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<!-- $Id$ -->
+<interface name="MotorInterface" author="Martin Liebenberg" year="2007">
+  <data>
+    <comment>This are the actual RPMs of the motors taken from the VMC.</comment>
+    <field type="int" name="RPM1">RPM of motor 1.</field>
+    <field type="int" name="RPM2">RPM of motor 2.</field>
+    <field type="int" name="RPM3">RPM of motor 3.</field>
+    <field type="unsigned long int" name="ControllerID">The ID of the Controller Thread, which controlls the motors.</field>
+  </data>
+  <message name="Joystick">
+    <comment>Determines the drive commands.</comment>
+    <field type="float" name="CmdForward">The forward command.</field>
+    <field type="float" name="CmdSideward">The sideward command.</field>
+    <field type="float" name="CmdRotation">The rotation command.</field>
+    <field type="float" name="CmdSpeed">The speed command.</field>
+  </message>
+  <message name="Navigator">
+    <comment>Determines the drive commands.</comment>
+    <field type="float" name="CmdForward">The forward command.</field>
+    <field type="float" name="CmdSideward">The sideward command.</field>
+    <field type="float" name="CmdRotation">The rotation command.</field>
+    <field type="float" name="CmdVelocity">The velocity command.</field>
+  </message>
+  <message name="Switch">
+    <comment>States what controls the motors.</comment>
+    <field type="unsigned int" name="ThreadId">The Thread Id of the Thread
+    		which is allowed to control the motors.</field>
+  </message>
+  <message name="Subscribe">
+    <comment>States what controls the motors.</comment>
+    <field type="unsigned int" name="Subscriber">0 if unsubscribe and 1 if subscribe.</field>
+  </message>
+</interface>

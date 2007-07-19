@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#            Makefile Build System for Fawkes : Joystick Control
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Sat Jun 02 17:38:55 2007
+#   copyright (C) 2007 by Martin Liebenberg, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -17,12 +17,17 @@
 # last modified: $Date$
 #            by: $Author$
 #
-#*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 
-SUBDIRS = worldmodel example kicker navigator
+CFLAGS = -g
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
+LIBS_joystick_control = core utils netcomm navigator config
+OBJS_joystick_control = joystick_tool.o	\
+	      							  joystick.o
+
+OBJS_all =	$(OBJS_joystick_control)
+BINS_all =	$(BINDIR)/joystick_control
+
+include $(BASEDIR)/etc/buildsys/base.mk
 
