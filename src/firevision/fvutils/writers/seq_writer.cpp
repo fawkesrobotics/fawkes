@@ -38,6 +38,7 @@
  */
 
 /** Constructor.
+ * @param writer the actual image writer
  */
 SeqWriter::SeqWriter(Writer* writer)
 {
