@@ -79,6 +79,7 @@ FuzzySet::~FuzzySet()
 }
         
 /** Sets a lettering for this fuzzy set.
+ * @param label new label
  */
 void FuzzySet::setLabel(char* label)
 {
