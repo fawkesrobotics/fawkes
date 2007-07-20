@@ -37,7 +37,7 @@
 #include <cmath>
 #include <unistd.h>
 
-//#define NO_VMC
+#define NO_VMC
 
 /* @class MotorThread plugins/navigator/motor_thread.h
  * The thread controlling the motors.
@@ -135,10 +135,8 @@ MotorThread::finalize()
 void 
 MotorThread::thread_started(Thread *thread)
 {
-  //motor_interface->setControllerID((unsigned long int)6465);//thread->current_thread_id());
-  std::cout << "thread id " << thread->current_thread_id() << std::endl;
-  navigator_thread_id = thread->current_thread_id();
-  motor_interface->setControllerID(navigator_thread_id);//thread->current_thread_id());
+  std::cout << "navigator thread id " << thread->current_thread_id() << std::endl;
+  motor_interface->setControllerID(thread->current_thread_id());
   motor_interface->write();
 }
 
@@ -198,15 +196,15 @@ MotorThread::loop()
       
   
       /*
-      if((++logger_modulo_counter %= 30) == 0)
+        if((++logger_modulo_counter %= 30) == 0)
         {
-          logger->log_info("MotorThread", "if1 forward command: %f  sideward command: %f  rotation command: %f speed commdan: %f", 
-                           forward,
-                           sideward,
-                           rotation,
-                           speed);
+        logger->log_info("MotorThread", "if1 forward command: %f  sideward command: %f  rotation command: %f speed commdan: %f", 
+        forward,
+        sideward,
+        rotation,
+        speed);
         }
-    */
+      */
       motor_interface->msgq_pop();
     }
   else if (/*!extern_control && */motor_interface->msgq_first_is<MotorInterface::NavigatorMessage>() )
@@ -222,46 +220,28 @@ MotorThread::loop()
       speed = msg->getCmdVelocity();
       
   
-    /*  
+      /*  
       // if((++logger_modulo_counter % 30) == 0)
       {
-        logger->log_info("MotorThread", "2 NavigatorMessage forward command: %f  sideward command: %f  roation command: %f speed commdan: %f", 
-                         forward,
-                         sideward,
-                         rotation,
-                         speed);
+      logger->log_info("MotorThread", "2 NavigatorMessage forward command: %f  sideward command: %f  roation command: %f speed commdan: %f", 
+      forward,
+      sideward,
+      rotation,
+      speed);
       }
-    */
+      */
       motor_interface->msgq_pop();
     }
   else if (motor_interface->msgq_first_is<MotorInterface::SubscribeMessage>() )
     {
       MotorInterface::SubscribeMessage* msg = motor_interface->msgq_first<MotorInterface::SubscribeMessage>();
         
-      logger->log_info("MotorThread", "++++++++++++++++++++++++++++++++++++++++++++++msg->getSubsciber %i", msg->getSubscriber());
-      int sub = msg->getSubscriber();
-      logger->log_info("MotorThread", "++++++++++++++++++++++++++++++++++++++++++++++sub %i", sub);
-      /*
-        if(msg->sender_id() != motor_interface->getControllerID())
-        {
-        motor_interface->setControllerID(msg->sender_id());
-        }*/
+      logger->log_info("MotorThread", "++++++++++++++++++++++++++++++++++++++++++++++Subscriber %lu", msg->getSubscriber());
      
-      if(sub == 1)
-        {
-       
-          motor_interface->setControllerID(msg->sender_id());
-          motor_interface->write();
-          //   extern_control = true;
-        }
-      else
-        {
-        
-          motor_interface->setControllerID(navigator_thread_id);
-          motor_interface->write();
-          // extern_control = false;
-          //std::exit(1);
-        }
+     
+      motor_interface->setControllerID(msg->getSubscriber());
+      motor_interface->write();
+      
       motor_interface->msgq_pop();
     }
   else
@@ -273,31 +253,26 @@ MotorThread::loop()
           motor_interface->msgq_pop();
         }
     }
-/*   
-  if((++logger_modulo_counter %= 100) == 0)
-    {
-      logger->log_info("MotorThread", "3 forward command: %f  sideward command: %f  rotation command: %f speed commdan: %f", 
-                       forward,
-                       sideward,
-                       rotation,
-                       speed);
+  /*   
+       if((++logger_modulo_counter %= 100) == 0)
+       {
+       logger->log_info("MotorThread", "3 forward command: %f  sideward command: %f  rotation command: %f speed commdan: %f", 
+       forward,
+       sideward,
+       rotation,
+       speed);
                                                                                                                   
-    }
+       }
   */   
+       
   double dir = 60;
-       
-  double alpha          = ((2./3.) * ((cos(deg2rad(dir))                * sideward)     + (sin(deg2rad(dir))                    * forward))) * speed   + rotation;
-  double beta           = ((2./3.) * ((cos(deg2rad(dir + 120))  * sideward)     + (sin(deg2rad(dir + 120))      * forward))) * speed   + rotation;
-  double gamma          = ((2./3.) * ((cos(deg2rad(dir + 240))  * sideward)     + (sin(deg2rad(dir + 240))      * forward))) * speed   + rotation;
-       
- // alpha *= speed;     
-//  beta *= speed;  
-//  gamma *= speed;
-
-
-#ifndef NO_VMC            
+  double alpha          = ((2./3.) * ((cos(deg2rad(dir))                * sideward)     + (sin(deg2rad(dir))                    * forward))) * speed    + rotation;
+  double beta           = ((2./3.) * ((cos(deg2rad(dir + 120))  * sideward)     + (sin(deg2rad(dir + 120))      * forward)))  * speed  + rotation;
+  double gamma          = ((2./3.) * ((cos(deg2rad(dir + 240))  * sideward)     + (sin(deg2rad(dir + 240))      * forward)))  * speed  + rotation;
+           
+#ifndef NO_VMC 
   if(alpha != 0 || beta != 0 || gamma != 0)
-// && (++timeout_counter < 1000))
+    // && (++timeout_counter < 1000))
     {  
       apiObject->useVMC().MotorRPMs.Set(alpha, beta, gamma);
       timeout_counter = 0;
@@ -310,17 +285,18 @@ MotorThread::loop()
       // logger->log_warn("MotorThread", "STOP");
 
     }
-    usleep(15000);
- /* else
-    {
-      timeout_counter = 2000;
-          logger->log_error("MotorThread", "STOP");
+  usleep(15000);
+  /* else
+     {
+     timeout_counter = 2000;
+     logger->log_error("MotorThread", "STOP");
       
-      if(alpha != 0 || beta != 0 || gamma != 0)
-       {
-        timeout_counter = 0;
-       }
-    }*/
+     if(alpha != 0 || beta != 0 || gamma != 0)
+     {
+     timeout_counter = 0;
+     }
+     }*/
+#endif
   if ( (alpha != old_alpha) || (beta != old_beta) || (gamma != old_gamma) ) {
     logger->log_info("MotorThread", " alpha : %f, beta: %f, gamma: %f, rotation: %f", alpha, beta, gamma, rotation);
     old_alpha = alpha;
@@ -328,7 +304,6 @@ MotorThread::loop()
     old_gamma = gamma;
   }
 
-#endif
            
   /*
     logger->log_info("MotorThread", "RPM1: %f  RPM2: %f  RPM3: %f ", 

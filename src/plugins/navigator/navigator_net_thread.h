@@ -34,6 +34,7 @@
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
+#include <aspect/clock.h>
 #include <netcomm/fawkes/handler.h>
 #include <core/utils/lock_list.h>
 
@@ -45,7 +46,7 @@ class KickerInterface;
 
 class NavigatorNetworkThread : public Thread, public LoggingAspect, public FawkesNetworkAspect,
                                public BlackBoardAspect, public BlockedTimingAspect, public FawkesNetworkHandler, 
-                               public ConfigurableAspect
+                               public ConfigurableAspect, public ClockAspect
 {
 
  public:
@@ -71,9 +72,10 @@ class NavigatorNetworkThread : public Thread, public LoggingAspect, public Fawke
   NavigatorInterface *navigator_interface;
   JoystickControl *joystick_control;
     
-  //  LockList<unsigned int> connected_clients;
   unsigned int connected_control_client;
   LockList<unsigned int> connected_points_and_lines_clients;
+  
+  unsigned long int last_motor_control_thread;
     
   unsigned int logger_modulo_counter;
 };

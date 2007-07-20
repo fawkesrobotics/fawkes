@@ -31,8 +31,8 @@
 #include <plugins/navigator/libnavi/nline.h>
 #include <netcomm/fawkes/component_ids.h>
 #include <plugins/navigator/joystick_control.h>
-#include <interfaces/motor_interface.h>
-#include <interfaces/navigator_interface.h>
+#include <interfaces/motor.h>
+#include <interfaces/navigator.h>
 #include <interfaces/kicker.h>
 #include <plugins/navigator/navigator_thread.h>
 
@@ -136,7 +136,7 @@ NavigatorNetworkThread::init()
   fnethub->add_handler( this );
   
   
-  joystick_control = new JoystickControl(motor_interface, kicker_interface, logger, config);
+  joystick_control = new JoystickControl(motor_interface, kicker_interface, logger, config, clock);
 }
 
 
@@ -210,9 +210,12 @@ NavigatorNetworkThread::handle_network_message(FawkesNetworkMessage *msg)
           logger->log_info("NavigatorNetworkThread", "Message of type %s with payload fwd=%f, swd=%f, rot=%f, speed=%f.", "Joystick Message", u->forward, u->sideward, u->rotation, u->speed);
         }
    
-      if ( motor_interface->getControllerID() == Thread::current_thread_id() ) { 
+      if ( motor_interface->getControllerID() == Thread::current_thread_id() ) 
+      { 
         joystick_control->enqueueCommand(u->forward, u->sideward, u->rotation, u->speed);
-      } else {
+      } 
+      else 
+      {
         logger->log_warn("NavigatorNetworkThread", "Client %u sent joystick message while not subscribed", msg->clid());
       }
     
@@ -229,7 +232,9 @@ NavigatorNetworkThread::handle_network_message(FawkesNetworkMessage *msg)
         {
           connected_control_client = msg->clid();
           MotorInterface::SubscribeMessage* subscribe_msg = new  MotorInterface::SubscribeMessage();
-          subscribe_msg->setSubscriber(1);
+          motor_interface->read();
+          last_motor_control_thread = motor_interface->getControllerID();
+          subscribe_msg->setSubscriber(current_thread_id());
           motor_interface->msgq_enqueue(subscribe_msg); 
        
           logger->log_debug("NavigatorNetworkThread", "Client %u subscribed as controller", connected_control_client);
@@ -255,7 +260,7 @@ NavigatorNetworkThread::handle_network_message(FawkesNetworkMessage *msg)
         {
           connected_control_client = 0;
           MotorInterface::SubscribeMessage* subscribe_msg = new  MotorInterface::SubscribeMessage();
-          subscribe_msg->setSubscriber(0);
+          subscribe_msg->setSubscriber(last_motor_control_thread);
           motor_interface->msgq_enqueue(subscribe_msg); 
         }
     }
@@ -284,9 +289,8 @@ NavigatorNetworkThread::handle_network_message(FawkesNetworkMessage *msg)
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_KICK 
           && msg->clid() == connected_control_client)
     {
-      //logger->log_info("NavigatorNetworkThread", "Message of type kick message received");
       navigator_kick_message_t *u = (navigator_kick_message_t *)msg->payload();
-      //logger->log_info("NavigatorNetworkThread", "payload: %i, %i, %i", u->left, u->center, u->right);
+    //  logger->log_info("NavigatorNetworkThread", "kick message: %i, %i, %i", u->left, u->center, u->right);
       joystick_control->enqueueKick(u->left, u->center, u->right);
     }
   else
@@ -303,7 +307,7 @@ NavigatorNetworkThread::handle_network_message(FawkesNetworkMessage *msg)
 void
 NavigatorNetworkThread::client_connected(unsigned int clid)
 {
-  logger->log_info("NavigatorPlugin", "Client %u connected", clid);
+  logger->log_info("NavigatorNetworkThread", "Client %u connected", clid);
 }
 
 
@@ -314,7 +318,7 @@ NavigatorNetworkThread::client_connected(unsigned int clid)
 void
 NavigatorNetworkThread::client_disconnected(unsigned int clid)
 {
-  logger->log_info("NavigatorPlugin", "Client %u disconnected", clid);
+  logger->log_info("NavigatorNetworkThread", "Client %u disconnected", clid);
   
   connected_points_and_lines_clients.lock();
   std::list<unsigned int>::iterator result;
@@ -330,10 +334,12 @@ NavigatorNetworkThread::client_disconnected(unsigned int clid)
   if(connected_control_client == clid)
     {
       connected_control_client = 0;
-      logger->log_debug("NavigatorPlugin", "Client %u unsubscribed as controller", clid);
+      logger->log_debug("NavigatorNetworkThread", "Client %u unsubscribed as controller", clid);
       MotorInterface::SubscribeMessage* subscribe_msg = new  MotorInterface::SubscribeMessage();
-      subscribe_msg->setSubscriber(0);
+      subscribe_msg->setSubscriber(last_motor_control_thread);
       motor_interface->msgq_enqueue(subscribe_msg); 
+       
+      logger->log_info("NavigatorNetworkThread", "2subscribe", clid);
     }
 }
 
