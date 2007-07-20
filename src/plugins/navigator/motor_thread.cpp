@@ -37,7 +37,7 @@
 #include <cmath>
 #include <unistd.h>
 
-#define NO_VMC
+//#define NO_VMC
 
 /* @class MotorThread plugins/navigator/motor_thread.h
  * The thread controlling the motors.
@@ -70,6 +70,7 @@ MotorThread::MotorThread(NavigatorThread *navigator_thread)
   speed = 0;
   logger_modulo_counter = 0;
   navigator_thread->add_notification_listener(this);
+  timeout_counter = 0;
 }
 
 /** Destructor. */
@@ -196,7 +197,7 @@ MotorThread::loop()
       speed = msg->getCmdSpeed();
       
   
-      
+      /*
       if((++logger_modulo_counter %= 30) == 0)
         {
           logger->log_info("MotorThread", "if1 forward command: %f  sideward command: %f  rotation command: %f speed commdan: %f", 
@@ -205,7 +206,7 @@ MotorThread::loop()
                            rotation,
                            speed);
         }
-    
+    */
       motor_interface->msgq_pop();
     }
   else if (/*!extern_control && */motor_interface->msgq_first_is<MotorInterface::NavigatorMessage>() )
@@ -221,7 +222,7 @@ MotorThread::loop()
       speed = msg->getCmdVelocity();
       
   
-      
+    /*  
       // if((++logger_modulo_counter % 30) == 0)
       {
         logger->log_info("MotorThread", "2 NavigatorMessage forward command: %f  sideward command: %f  roation command: %f speed commdan: %f", 
@@ -230,7 +231,7 @@ MotorThread::loop()
                          rotation,
                          speed);
       }
-    
+    */
       motor_interface->msgq_pop();
     }
   else if (motor_interface->msgq_first_is<MotorInterface::SubscribeMessage>() )
@@ -272,7 +273,7 @@ MotorThread::loop()
           motor_interface->msgq_pop();
         }
     }
-   
+/*   
   if((++logger_modulo_counter %= 100) == 0)
     {
       logger->log_info("MotorThread", "3 forward command: %f  sideward command: %f  rotation command: %f speed commdan: %f", 
@@ -282,29 +283,51 @@ MotorThread::loop()
                        speed);
                                                                                                                   
     }
-     
+  */   
   double dir = 60;
        
-  double alpha          = ((2./3.) * ((cos(deg2rad(dir))                * sideward)     + (sin(deg2rad(dir))                    * forward)))    + rotation;
-  double beta           = ((2./3.) * ((cos(deg2rad(dir + 120))  * sideward)     + (sin(deg2rad(dir + 120))      * forward)))    + rotation;
-  double gamma          = ((2./3.) * ((cos(deg2rad(dir + 240))  * sideward)     + (sin(deg2rad(dir + 240))      * forward)))    + rotation;
+  double alpha          = ((2./3.) * ((cos(deg2rad(dir))                * sideward)     + (sin(deg2rad(dir))                    * forward))) * speed   + rotation;
+  double beta           = ((2./3.) * ((cos(deg2rad(dir + 120))  * sideward)     + (sin(deg2rad(dir + 120))      * forward))) * speed   + rotation;
+  double gamma          = ((2./3.) * ((cos(deg2rad(dir + 240))  * sideward)     + (sin(deg2rad(dir + 240))      * forward))) * speed   + rotation;
        
-  alpha *= speed;     
-  beta *= speed;  
-  gamma *= speed;
+ // alpha *= speed;     
+//  beta *= speed;  
+//  gamma *= speed;
 
 
 #ifndef NO_VMC            
   if(alpha != 0 || beta != 0 || gamma != 0)
+// && (++timeout_counter < 1000))
     {  
       apiObject->useVMC().MotorRPMs.Set(alpha, beta, gamma);
+      timeout_counter = 0;
+      // logger->log_error("MotorThread", "run");
     }
   else
     {
-      //    logger->log_error("MotorThread", "STOP");
+      apiObject->useVMC().MotorRPMs.Set(0, 0, 0);
+      timeout_counter = 0;
+      // logger->log_warn("MotorThread", "STOP");
+
     }
-  //logger->log_info("MotorThread", " alpha : %f, beta: %f, gamma; %f \n", alpha, beta, gamma);
+    usleep(15000);
+ /* else
+    {
+      timeout_counter = 2000;
+          logger->log_error("MotorThread", "STOP");
       
+      if(alpha != 0 || beta != 0 || gamma != 0)
+       {
+        timeout_counter = 0;
+       }
+    }*/
+  if ( (alpha != old_alpha) || (beta != old_beta) || (gamma != old_gamma) ) {
+    logger->log_info("MotorThread", " alpha : %f, beta: %f, gamma: %f, rotation: %f", alpha, beta, gamma, rotation);
+    old_alpha = alpha;
+    old_beta  = beta;
+    old_gamma = gamma;
+  }
+
 #endif
            
   /*

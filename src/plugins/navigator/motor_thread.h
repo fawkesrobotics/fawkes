@@ -74,7 +74,12 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
   double sideward;
   double rotation;
   double speed;
-    
+
+  double old_alpha;
+  double old_beta;
+  double old_gamma;
+  
+  int timeout_counter;  
   pthread_t navigator_thread_id;
     
   unsigned int logger_modulo_counter;

@@ -114,10 +114,11 @@ JoystickControl::enqueueKick(bool left, bool center, bool right)
 void 
 JoystickControl::enqueueCommand(double forward, double sideward, double rotation, double max_speed)
 { 
-  if((++logger_modulo_counter2 %= 100) == 0)
+  /*if((++logger_modulo_counter2 %= 100) == 0)
     {
       logger->log_info("JoystickControl", "enqueueCommand");
     }
+  */
   double axis_scale = sqrt(pow(forward, 2) + pow(sideward, 2));
   double rotation_scale = fabs(rotation);
   
@@ -127,13 +128,13 @@ JoystickControl::enqueueCommand(double forward, double sideward, double rotation
     
       //  if((++logger_modulo_counter2 %= 100) == 0)
       {
-        logger->log_info("JoystickControl", "if1 actual speed: %f max_speed: %f", actual_speed, max_speed);
+    //    logger->log_info("JoystickControl", "if1 actual speed: %f max_speed: %f", actual_speed, max_speed);
       }
     }
   else if(forward == 0. && sideward == 0. && rotation != 0.  && actual_rotation_scale <= rotation_scale && max_speed * rotation_scale >= actual_speed)
     {
       actual_speed += (max_speed * rotation_scale) / config->get_float("navigator", "/joystick_c/max_acceleration");
-      logger->log_info("JoystickControl", "if4 actual speed: %f speed: %f", actual_speed, max_speed);
+    //  logger->log_info("JoystickControl", "if4 actual speed: %f speed: %f", actual_speed, max_speed);
     }
   else if((forward != 0. || sideward != 0. || rotation != 0.) && actual_joystick_axis_scale <= axis_scale && max_speed * axis_scale >= actual_speed)
     {
@@ -142,8 +143,8 @@ JoystickControl::enqueueCommand(double forward, double sideward, double rotation
           actual_speed += (max_speed * axis_scale) / config->get_float("navigator", "/joystick_c/max_acceleration");
           // logger->log_info("JoystickControl", "/joystick_c/max_acceleration: %f", config->get_float("navigator", "/joystick_c/max_acceleration"));
                                                  
-          logger->log_info("JoystickControl", "if2 actual speed: %f speed: %f", actual_speed,max_speed);
-          logger->log_info("JoystickControl", "if2.1 axis_scale: %f", axis_scale);
+    //      logger->log_info("JoystickControl", "if2 actual speed: %f speed: %f", actual_speed,max_speed);
+    //      logger->log_info("JoystickControl", "if2.1 axis_scale: %f", axis_scale);
     
         } 
       catch (Exception &e) 
@@ -157,7 +158,7 @@ JoystickControl::enqueueCommand(double forward, double sideward, double rotation
     {
       actual_speed = 0;
         
-      logger->log_info("JoystickControl", "if3 actual speed: %f speed: %f", actual_speed, max_speed);
+   //   logger->log_info("JoystickControl", "if3 actual speed: %f speed: %f", actual_speed, max_speed);
     } 
   
   actual_joystick_axis_scale = axis_scale;

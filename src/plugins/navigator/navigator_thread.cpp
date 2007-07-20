@@ -94,7 +94,7 @@ NavigatorThread::init()
 void
 NavigatorThread::loop()
 { 
-        
+/*        
   motor_interface->read();
         
   if ( navigator_interface->msgq_first_is<NavigatorInterface::TargetMessage>() )
@@ -128,16 +128,17 @@ NavigatorThread::loop()
       MotorInterface::NavigatorMessage* motor_msg = new  MotorInterface::NavigatorMessage(getVelocityY(), getVelocityX(), 0, getVelocity());
       //float iniCmdRotation, float iniCmdVelocity
       motor_interface->msgq_enqueue(motor_msg); 
-      
+    / *  
       if((++logger_modulo_counter % 5) == 0)
         {
           logger->log_info("NavigatorThread", "send");
-        }
+        }* /
     }
-     
+ / *    
   if((++logger_modulo_counter %= 10) == 0)
     {
       logger->log_info("NavigatorThread", "NavigatorThread called: %lu, %lu", motor_interface->getControllerID(), this->current_thread_id());
-    }
+    }* /
   //usleep(100000);
+  */
 }
