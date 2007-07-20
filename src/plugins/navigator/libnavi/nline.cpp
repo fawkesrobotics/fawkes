@@ -27,39 +27,45 @@
 
 #include <plugins/navigator/libnavi/nline.h>
 
-/** @class NLine plugins/navigator/libnavi/nline.h A line class for
- * communicate such structures to the navigator GUI or others.  @author
- * Martin Liebenberg 
+/** @class NLine <plugins/navigator/libnavi/nline.h>
+ * Class representing a line for the navigator.
+ * A line class for communicate such structures to the navigator GUI or others.
+ * This class defines a line by its two end-points.
+ * @author Martin Liebenberg 
  */
-/** @var NLine::p1 Point 1 of the line. 
+/** @var NPoint NLine::p1
+ * Point 1 of the line. 
  */
-/** @var NLine::p2 Point 2 of the line. 
+/** @var NPoint NLine::p2
+ * Point 2 of the line. 
  */
 
-/** Contructor 
- */
-NLine::NLine ()
+/** Contructor. */
+NLine::NLine()
 {
 }
 
-/** Constructor @param p1 point 1 of the line @param p2 point 2
- * of the line 
+/** Constructor.
+ * @param p1 point 1 of the line
+ * @param p2 point 2 of the line 
  */
-NLine::NLine (NPoint p1, NPoint p2)
+NLine::NLine(NPoint p1, NPoint p2)
 {
   this->p1 = p1;
   this->p2 = p2;
 }
 
-/** Constructor. @param x1 the x-coordinate of point 1 of the line
- * @param y1 the y-coordinate of point 1 of the line @param x2 the
- * x-coordinate of point 2 of the line @param y2 the y-coordinate of
- * point 2 of the line 
+/** Constructor.
+ * @param x1 the x-coordinate of point 1 of the line
+ * @param y1 the y-coordinate of point 1 of the line
+ * @param x2 the x-coordinate of point 2 of the line
+ * @param y2 the y-coordinate of point 2 of the line 
  */
-NLine::NLine (double x1, double y1, double x2, double y2)
+NLine::NLine(double x1, double y1, double x2, double y2)
 {
   this->p1.x = x1;
   this->p1.y = y1;
   this->p2.x = x2;
   this->p2.y = y2;
 }
+
