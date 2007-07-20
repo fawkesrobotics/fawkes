@@ -28,7 +28,7 @@
 
 #include <plugins/navigator/motor_thread.h>
 #include <plugins/navigator/navigator_thread.h>
-#include <interfaces/motor_interface.h>
+#include <interfaces/motor.h>
 #include <utils/math/angle.h>
 
 #include <vmc/LayerClasses/VMC_API.h>

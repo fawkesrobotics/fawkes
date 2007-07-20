@@ -26,8 +26,8 @@
  */
  
 #include <plugins/navigator/navigator_thread.h>
-#include <interfaces/navigator_interface.h>
-#include <interfaces/motor_interface.h>
+#include <interfaces/navigator.h>
+#include <interfaces/motor.h>
 
 #include <unistd.h>
 
@@ -94,51 +94,51 @@ NavigatorThread::init()
 void
 NavigatorThread::loop()
 { 
-/*        
-  motor_interface->read();
+  /*        
+            motor_interface->read();
         
-  if ( navigator_interface->msgq_first_is<NavigatorInterface::TargetMessage>() )
-    {
-      NavigatorInterface::TargetMessage* msg = navigator_interface->msgq_first<NavigatorInterface::TargetMessage>();
+            if ( navigator_interface->msgq_first_is<NavigatorInterface::TargetMessage>() )
+            {
+            NavigatorInterface::TargetMessage* msg = navigator_interface->msgq_first<NavigatorInterface::TargetMessage>();
 
-      logger->log_info("NavigatorThread", "target message received %f, %f", msg->getX(), msg->getY());
+            logger->log_info("NavigatorThread", "target message received %f, %f", msg->getX(), msg->getY());
       
-      goTo_cartesian(msg->getX(), msg->getY());
+            goTo_cartesian(msg->getX(), msg->getY());
       
-      navigator_interface->msgq_pop();
+            navigator_interface->msgq_pop();
       
-    }
-  else if ( navigator_interface->msgq_first_is<NavigatorInterface::VelocityMessage>() )
-    {
-      NavigatorInterface::VelocityMessage* msg = navigator_interface->msgq_first<NavigatorInterface::VelocityMessage>();
+            }
+            else if ( navigator_interface->msgq_first_is<NavigatorInterface::VelocityMessage>() )
+            {
+            NavigatorInterface::VelocityMessage* msg = navigator_interface->msgq_first<NavigatorInterface::VelocityMessage>();
 
-      logger->log_info("NavigatorThread", "velocity message received %f, %f", msg->getVelocity());
+            logger->log_info("NavigatorThread", "velocity message received %f, %f", msg->getVelocity());
       
-      setVelocity(msg->getVelocity());
+            setVelocity(msg->getVelocity());
       
-      navigator_interface->msgq_pop();
+            navigator_interface->msgq_pop();
       
-    }
-  //from navigator
-  // mainLoop();
+            }
+            //from navigator
+            // mainLoop();
   
   
-  if(motor_interface->getControllerID() == current_thread_id())
-    {
-      MotorInterface::NavigatorMessage* motor_msg = new  MotorInterface::NavigatorMessage(getVelocityY(), getVelocityX(), 0, getVelocity());
-      //float iniCmdRotation, float iniCmdVelocity
-      motor_interface->msgq_enqueue(motor_msg); 
-    / *  
-      if((++logger_modulo_counter % 5) == 0)
-        {
-          logger->log_info("NavigatorThread", "send");
-        }* /
-    }
- / *    
-  if((++logger_modulo_counter %= 10) == 0)
-    {
-      logger->log_info("NavigatorThread", "NavigatorThread called: %lu, %lu", motor_interface->getControllerID(), this->current_thread_id());
-    }* /
-  //usleep(100000);
-  */
+            if(motor_interface->getControllerID() == current_thread_id())
+            {
+            MotorInterface::NavigatorMessage* motor_msg = new  MotorInterface::NavigatorMessage(getVelocityY(), getVelocityX(), 0, getVelocity());
+            //float iniCmdRotation, float iniCmdVelocity
+            motor_interface->msgq_enqueue(motor_msg); 
+            / *  
+            if((++logger_modulo_counter % 5) == 0)
+            {
+            logger->log_info("NavigatorThread", "send");
+            }* /
+            }
+            / *    
+            if((++logger_modulo_counter %= 10) == 0)
+            {
+            logger->log_info("NavigatorThread", "NavigatorThread called: %lu, %lu", motor_interface->getControllerID(), this->current_thread_id());
+            }* /
+            //usleep(100000);
+            */
 }
