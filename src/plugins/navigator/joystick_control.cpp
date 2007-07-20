@@ -24,11 +24,12 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <plugins/navigator/joystick_control.h>
 #include <blackboard/interface_manager.h>
 #include <utils/logging/logger.h>
-#include <interfaces/motor_interface.h>
+#include <utils/time/clock.h>
+#include <interfaces/motor.h>
 #include <interfaces/kicker.h>
 #include <config/config.h>
 
@@ -50,37 +51,33 @@
  *     The joystick control gets it from the navigator network thread.
  */
 
- 
+
 /** Constructor. 
  * @param motor_interface the motor interface from the navigator network thread
  * @param kicker_interface the kicker interface from the navigator network thread
  * @param logger the logger from the navigator network thread
  * @param config the config from the navigator network thread
  */
-JoystickControl::JoystickControl(MotorInterface *motor_interface, KickerInterface *kicker_interface,Logger *logger, Configuration *config)
+JoystickControl::JoystickControl(MotorInterface * motor_interface,
+                                  KickerInterface * kicker_interface,
+                                  Logger * logger, Configuration * config,
+                                  Clock * clock)
 {
   this->motor_interface = motor_interface;
   this->kicker_interface = kicker_interface;
   this->logger = logger;
   this->config = config;
+  this->clock = clock;
   actual_speed = 0;
   actual_joystick_axis_scale = 0;
   logger_modulo_counter = 0;
   logger_modulo_counter2 = 0;
+  last_kick_time = clock->now();
 }
 
 /** Destructor. */
 JoystickControl::~JoystickControl()
-{/*
-   try 
-   {
-   interface_manager->close(motor_interface);
-   }
-   catch (Exception& e)
-   {
-   logger->log_error("JoystickControl", "Closing interface failed!");
-   logger->log_error("JoystickControl", e);
-   }*/
+{
 }
 
 /**  With this method the navigator network thread enqueues the kick command
@@ -89,19 +86,26 @@ JoystickControl::~JoystickControl()
  * @param center the center kicker command
  * @param right the right kicker command
  */
-void 
-JoystickControl::enqueueKick(bool left, bool center, bool right) 
+void
+JoystickControl::enqueueKick(bool left, bool center, bool right)
 {
-  KickerInterface::KickMessage* msg = new  KickerInterface::KickMessage(left, center, right, /* intensity */ 150);
-  
-  if(kicker_interface->hasWriter())
-    kicker_interface->msgq_enqueue(msg);
-  
-  //if((++logger_modulo_counter %= 100) == 0)
+  if ((clock->now() - last_kick_time).in_sec() > 1)
     {
-      logger->log_info("JoystickControl", "kick left: %f, center: %f, right: %f", left, center, right);
+      KickerInterface::KickMessage * msg =
+        new KickerInterface::KickMessage (right, center, left, /* intensity */ 150);
+
+      if (kicker_interface->hasWriter())
+        {
+          kicker_interface->msgq_enqueue(msg);
+        }
+
+      logger->log_info("JoystickControl",
+                        "kick left: %i, center: %i, right: %i", left, center,
+                        right);
+
+      last_kick_time = clock->now();
     }
-        
+
 }
 
 /** With this method the navigator network thread enqueues the drive command
@@ -111,56 +115,60 @@ JoystickControl::enqueueKick(bool left, bool center, bool right)
  *  @param rotation rotation command
  *  @param max_speed maximum speed command
  */
-void 
-JoystickControl::enqueueCommand(double forward, double sideward, double rotation, double max_speed)
-{ 
-  /*if((++logger_modulo_counter2 %= 100) == 0)
-    {
-      logger->log_info("JoystickControl", "enqueueCommand");
-    }
-  */
+void
+JoystickControl::enqueueCommand(double forward, double sideward,
+                                 double rotation, double max_speed)
+{
   double axis_scale = sqrt(pow(forward, 2) + pow(sideward, 2));
   double rotation_scale = fabs(rotation);
-  
-  if(max_speed * axis_scale <= actual_speed)// || actual_joystick_axis_scale > sqrt(fabs(forward) + fabs(sideward))/sqrt(2))
+
+  if (max_speed * axis_scale <= actual_speed)   // || actual_joystick_axis_scale > sqrt(fabs(forward) + fabs(sideward))/sqrt(2))
     {
       actual_speed = max_speed * axis_scale;
-    
+
       //  if((++logger_modulo_counter2 %= 100) == 0)
       {
-    //    logger->log_info("JoystickControl", "if1 actual speed: %f max_speed: %f", actual_speed, max_speed);
+        //    logger->log_info("JoystickControl", "if1 actual speed: %f max_speed: %f", actual_speed, max_speed);
       }
     }
-  else if(forward == 0. && sideward == 0. && rotation != 0.  && actual_rotation_scale <= rotation_scale && max_speed * rotation_scale >= actual_speed)
+  else if(forward == 0. && sideward == 0. && rotation != 0.
+           && actual_rotation_scale <= rotation_scale
+           && max_speed * rotation_scale >= actual_speed)
     {
-      actual_speed += (max_speed * rotation_scale) / config->get_float("navigator", "/joystick_c/max_acceleration");
-    //  logger->log_info("JoystickControl", "if4 actual speed: %f speed: %f", actual_speed, max_speed);
+      actual_speed +=
+        (max_speed * rotation_scale) / config->get_float ("navigator",
+                                                          "/joystick_c/max_acceleration");
+      //  logger->log_info("JoystickControl", "if4 actual speed: %f speed: %f", actual_speed, max_speed);
     }
-  else if((forward != 0. || sideward != 0. || rotation != 0.) && actual_joystick_axis_scale <= axis_scale && max_speed * axis_scale >= actual_speed)
+  else if((forward != 0. || sideward != 0. || rotation != 0.)
+           && actual_joystick_axis_scale <= axis_scale
+           && max_speed * axis_scale >= actual_speed)
     {
       try
         {
-          actual_speed += (max_speed * axis_scale) / config->get_float("navigator", "/joystick_c/max_acceleration");
+          actual_speed +=
+            (max_speed * axis_scale) / config->get_float("navigator",
+                                                          "/joystick_c/max_acceleration");
           // logger->log_info("JoystickControl", "/joystick_c/max_acceleration: %f", config->get_float("navigator", "/joystick_c/max_acceleration"));
-                                                 
-    //      logger->log_info("JoystickControl", "if2 actual speed: %f speed: %f", actual_speed,max_speed);
-    //      logger->log_info("JoystickControl", "if2.1 axis_scale: %f", axis_scale);
-    
-        } 
-      catch (Exception &e) 
+
+          //      logger->log_info("JoystickControl", "if2 actual speed: %f speed: %f", actual_speed,max_speed);
+          //      logger->log_info("JoystickControl", "if2.1 axis_scale: %f", axis_scale);
+
+        }
+      catch (Exception & e)
         {
           logger->log_error("JoystickControl", "enqueueCommand()");
           logger->log_error("JoystickControl", e);
           throw;
         }
-    } 
-  else if(forward == 0. && sideward == 0. && rotation == 0.)
+    }
+  else if (forward == 0. && sideward == 0. && rotation == 0.)
     {
       actual_speed = 0;
-        
-   //   logger->log_info("JoystickControl", "if3 actual speed: %f speed: %f", actual_speed, max_speed);
-    } 
-  
+
+      //   logger->log_info("JoystickControl", "if3 actual speed: %f speed: %f", actual_speed, max_speed);
+    }
+
   actual_joystick_axis_scale = axis_scale;
   actual_rotation_scale = rotation_scale;
   /* 
@@ -179,9 +187,11 @@ JoystickControl::enqueueCommand(double forward, double sideward, double rotation
      logger->log_info("JoystickControl", "actual speed: %f max_speed: %f", actual_speed, max_speed);
      logger->log_info("JoystickControl", "actual_joystick_axis_scale: %f sqrt(fabs(forward) + fabs(sideward))/sqrt(2): %f", actual_joystick_axis_scale, sqrt(fabs(forward) + fabs(sideward))/sqrt(2));
   */
-  MotorInterface::JoystickMessage* msg = new  MotorInterface::JoystickMessage(forward, sideward, rotation, actual_speed);
-  
-  motor_interface->msgq_enqueue(msg); 
-  
+  MotorInterface::JoystickMessage * msg =
+    new MotorInterface::JoystickMessage(forward, sideward, rotation,
+                                         actual_speed);
+
+  motor_interface->msgq_enqueue(msg);
+
   // msg->unref();
 }

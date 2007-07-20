@@ -28,17 +28,19 @@
 #ifndef __NAVIGATOR_JOYSTICK_CONTROL_H_
 #define __NAVIGATOR_JOYSTICK_CONTROL_H_
 
-
+#include <utils/time/time.h>
 
 class MotorInterface;
 class Logger;
 class Configuration;
 class KickerInterface;
+class Clock;
 
 class JoystickControl
 {
  public:
-  JoystickControl(MotorInterface *motor_interface, KickerInterface *kicker_interface, Logger *logger, Configuration *config);
+  JoystickControl(MotorInterface *motor_interface, KickerInterface *kicker_interface, 
+  							Logger *logger, Configuration *config, Clock *clock);
   virtual ~JoystickControl();
     
   void enqueueCommand(double forward, double sideward, double rotation, double max_speed);
@@ -54,6 +56,8 @@ class JoystickControl
     
   MotorInterface *motor_interface;
   KickerInterface *kicker_interface;
+  Clock *clock;
+  Time last_kick_time;
         
   unsigned int logger_modulo_counter;
   unsigned int logger_modulo_counter2;
