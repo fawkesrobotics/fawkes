@@ -53,6 +53,7 @@ class KickerThread
  private:
   KickerInterface* kicker_interface;  
   KickerControl* kicker_control;
+
 };
 
 #endif /* __PLUGINS_KICKER_THREAD_H_ */

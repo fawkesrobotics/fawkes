@@ -39,9 +39,10 @@ using namespace std;
 
 #define WAIT_BEFORE_RETRACT  100000
 
-#define KICKER_RIGHT         0x00080000
-#define KICKER_CENTER        0x00100000
-#define KICKER_LEFT          0x00200000
+#define KICKER_RIGHT         0x00010000
+#define KICKER_CENTER        0x00020000
+#define KICKER_LEFT          0x00040000
+#define KICKER_GUIDANCE      0x00080000
 #define INTENSITY_OFFSET     0x01000000
 
 /** Constructor. */
@@ -141,19 +142,19 @@ KickerControl::kick(bool kick_right,
   if (kick_right)
     {
       val += KICKER_RIGHT;
-      numKicks[0]++;
+      num_kicks[0]++;
     }
   
   if (kick_center)
     {
       val += KICKER_CENTER;
-      numKicks[1]++;
+      num_kicks[1]++;
     }
   
   if (kick_left)
     {
       val += KICKER_LEFT;
-      numKicks[2]++;
+      num_kicks[2]++;
     }
   
   val += INTENSITY_OFFSET * intensity;
@@ -199,6 +200,63 @@ KickerControl::kick_left(unsigned char _intensity)
   return kick(false, false, true);
 }
 
+/** Activate the guidance on the right side.
+ * @return true on success, false otherwise
+ */
+bool
+KickerControl::guidance_right()
+{
+  if ( ! _guidance_right )
+    {
+      if ( ! write(INTENSITY_OFFSET * intensity) )
+	{
+	  return false;
+	}
+      
+      _guidance_right = true;
+    }
+  
+  return true;
+}
+
+/** Activate the guidance on the left side.
+ * @return true on success, false otherwise
+ */
+bool
+KickerControl::guidance_left()
+{
+  if ( _guidance_right )
+    {
+      if ( !write(INTENSITY_OFFSET * intensity  + KICKER_GUIDANCE) )
+	return false;
+
+      _guidance_right = false;
+    }
+  
+  return true;
+}
+
+
+/** Check if guidance is activated for right side.
+ * @return true if guidance is activated for right side, false otherwise
+ */
+bool
+KickerControl::is_guidance_right() const
+{
+  return _guidance_right;
+}
+
+
+/** Check if guidance is activated for left side.
+ * @return true if guidance is activated for left side, false otherwise
+ */
+bool
+KickerControl::is_guidance_left() const
+{
+  return ! _guidance_right;
+}
+
+
 /** Returns the number of kicks done with each kicker.
  * @param right reference to a variable where the result will be stored
  * @param center reference to a variable where the result will be stored
@@ -209,9 +267,9 @@ KickerControl::get_num_kicks(unsigned int& right,
 			     unsigned int& center,
 			     unsigned int& left)
 {
-  right = numKicks[0];
-  center= numKicks[1];
-  left = numKicks[2];
+  right  = num_kicks[0];
+  center = num_kicks[1];
+  left   = num_kicks[2];
 }
 
 /** Returns the total number of kicks done with all kickers.
@@ -224,7 +282,7 @@ KickerControl::get_num_kicks_total()
 
   for (unsigned int i = 0; i < 3; i++)
     {
-      total += numKicks[i];
+      total += num_kicks[i];
     }
   
   return total;
@@ -236,7 +294,9 @@ void
 KickerControl::reset_counter()
 {
   for (unsigned int i = 0; i < 3; i++)
-    numKicks[i] = 0;
+    {
+      num_kicks[i] = 0;
+    }
 }
 
 /** Sends commands to the IOWarrior.
@@ -255,6 +315,7 @@ KickerControl::write(DWORD val)
 
       res = IowKitWrite(ioHandle, IOW_PIPE_IO_PINS,
 			(char*)&report, IOWKIT40_IO_REPORT_SIZE);
+
       if (res != IOWKIT40_IO_REPORT_SIZE)
 	{
 	  /** Though it works flawlessly it seems that not as many bytes as expected

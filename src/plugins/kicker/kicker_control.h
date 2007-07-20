@@ -49,6 +49,12 @@ class KickerControl
   bool kick_center(unsigned char intensity = 0xFF);
   bool kick_left(unsigned char intensity = 0xFF);
 
+  bool guidance_right();
+  bool guidance_left();
+
+  bool is_guidance_right() const;
+  bool is_guidance_left() const;
+
   void get_num_kicks(unsigned int& right,
 		     unsigned int& center,
 		     unsigned int& left);
@@ -64,7 +70,8 @@ class KickerControl
   IOWKIT_HANDLE ioHandle;
   DWORD intensity;
 
-  unsigned int numKicks[3];
+  unsigned int num_kicks[3];
+  bool _guidance_right;
 };
 
 
