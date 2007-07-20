@@ -2,20 +2,46 @@
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <!-- $Id$ -->
 <interface name="KickerInterface" author="Daniel Beck" year="2007">
+  <constants>
+    <enum name="GuideBallSideEnum">
+      <comment>
+        Enumeration defining on which side of the robot the ball shall be
+        guided (and thus on which side the arm is to be erected).
+      </comment>
+      <item name="GUIDE_BALL_LEFT">
+        Constant defining that the kicker shall activate the ball guidance device
+        in such a way that the left arm is erected.
+      </item>
+      <item name="GUIDE_BALL_RIGHT">
+        Constant defining that the kicker shall activate the ball guidance device
+        in such a way that the right arm is erected.
+      </item>
+    </enum>
+  </constants>
   <data>
-    <comment>In these variables it is stored how often the right, center or 
-      left kick have been triggered</comment>
-    <field type="int" name="NumKicksRight">Number of Right-Kicks</field>
-    <field type="int" name="NumKicksCenter">Number of Center-Kicks</field>
+    <comment>
+      In these variables it is stored how often the right, center or 
+      left kick have been triggered.
+    </comment>
     <field type="int" name="NumKicksLeft">Number of Left-Kicks</field>
+    <field type="int" name="NumKicksCenter">Number of Center-Kicks</field>
+    <field type="int" name="NumKicksRight">Number of Right-Kicks</field>
+    <field type="GuideBallSideEnum" name="GuideBallSide">Side where the ball
+      guidance arm is currently erected.</field>
   </data>
   <message name="Kick">
     <comment>Triggers a kick with the given parameters.</comment>
-    <field type="bool" name="CmdKickRight">CmdKickRight</field>
-    <field type="bool" name="CmdKickCenter">CmdKickCenter</field>
     <field type="bool" name="CmdKickLeft">CmdKickLeft</field>
+    <field type="bool" name="CmdKickCenter">CmdKickCenter</field>
+    <field type="bool" name="CmdKickRight">CmdKickRight</field>
     <field type="int" name="Intensity">Intensity</field>
-    <field type="bool" name="CmdResetCounter">CmdResetCounter</field>
-    <field type="bool" name="CmdActivateBallGuidance">CmdActivateBallGuidance</field>
+  </message>
+  <message name="ResetCounter">
+    <comment>Reset the internal counter for number of kicks</comment>
+  </message>
+  <message name="GuideBall">
+    <comment>Order change in ball guidance</comment>
+    <field type="GuideBallSideEnum" name="GuideBallSide">Side where to guide the ball and erect the arm.</field>
   </message>
 </interface>
+

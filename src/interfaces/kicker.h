@@ -37,19 +37,37 @@ class KickerInterface : public Interface
  /// @cond INTERNALS
  INTERFACE_MGMT_FRIENDS(KickerInterface)
  /// @endcond
+ public:
+  /* constants */
+
+  /** 
+        Enumeration defining on which side of the robot the ball shall be
+        guided (and thus on which side the arm is to be erected).
+       */
+  typedef enum {
+    GUIDE_BALL_LEFT /**< 
+        Constant defining that the kicker shall activate the ball guidance device
+        in such a way that the left arm is erected.
+       */,
+    GUIDE_BALL_RIGHT /**< 
+        Constant defining that the kicker shall activate the ball guidance device
+        in such a way that the right arm is erected.
+       */
+  } GuideBallSideEnum;
+
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    int NumKicksRight; /**< Number of Right-Kicks */
-    int NumKicksCenter; /**< Number of Center-Kicks */
     int NumKicksLeft; /**< Number of Left-Kicks */
+    int NumKicksCenter; /**< Number of Center-Kicks */
+    int NumKicksRight; /**< Number of Right-Kicks */
+    GuideBallSideEnum GuideBallSide; /**< Side where the ball
+      guidance arm is currently erected. */
   } KickerInterface_data_t;
 
   KickerInterface_data_t *data;
 
  public:
-  /* constants */
-
   /* messages */
   class KickMessage : public Message
   {
@@ -57,33 +75,63 @@ class KickerInterface : public Interface
     /** Internal data storage, do NOT modify! */
     typedef struct {
       int Intensity; /**< Intensity */
-      bool CmdKickRight; /**< CmdKickRight */
-      bool CmdKickCenter; /**< CmdKickCenter */
       bool CmdKickLeft; /**< CmdKickLeft */
-      bool CmdResetCounter; /**< CmdResetCounter */
-      bool CmdActivateBallGuidance; /**< CmdActivateBallGuidance */
+      bool CmdKickCenter; /**< CmdKickCenter */
+      bool CmdKickRight; /**< CmdKickRight */
     } KickMessage_data_t;
 
     KickMessage_data_t *data;
 
    public:
-    KickMessage(bool iniCmdKickRight, bool iniCmdKickCenter, bool iniCmdKickLeft, int iniIntensity, bool iniCmdResetCounter, bool iniCmdActivateBallGuidance);
+    KickMessage(bool iniCmdKickLeft, bool iniCmdKickCenter, bool iniCmdKickRight, int iniIntensity);
     KickMessage();
     ~KickMessage();
 
     /* Methods */
-    bool isCmdKickRight();
-    void setCmdKickRight(bool newCmdKickRight);
-    bool isCmdKickCenter();
-    void setCmdKickCenter(bool newCmdKickCenter);
     bool isCmdKickLeft();
     void setCmdKickLeft(bool newCmdKickLeft);
+    bool isCmdKickCenter();
+    void setCmdKickCenter(bool newCmdKickCenter);
+    bool isCmdKickRight();
+    void setCmdKickRight(bool newCmdKickRight);
     int getIntensity();
     void setIntensity(int newIntensity);
-    bool isCmdResetCounter();
-    void setCmdResetCounter(bool newCmdResetCounter);
-    bool isCmdActivateBallGuidance();
-    void setCmdActivateBallGuidance(bool newCmdActivateBallGuidance);
+  };
+
+  class ResetCounterMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+    } ResetCounterMessage_data_t;
+
+    ResetCounterMessage_data_t *data;
+
+   public:
+    ResetCounterMessage();
+    ~ResetCounterMessage();
+
+    /* Methods */
+  };
+
+  class GuideBallMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      GuideBallSideEnum GuideBallSide; /**< Side where to guide the ball and erect the arm. */
+    } GuideBallMessage_data_t;
+
+    GuideBallMessage_data_t *data;
+
+   public:
+    GuideBallMessage(GuideBallSideEnum iniGuideBallSide);
+    GuideBallMessage();
+    ~GuideBallMessage();
+
+    /* Methods */
+    GuideBallSideEnum getGuideBallSide();
+    void setGuideBallSide(GuideBallSideEnum newGuideBallSide);
   };
 
   virtual bool messageValid(const Message *message) const;
@@ -93,12 +141,14 @@ class KickerInterface : public Interface
 
  public:
   /* Methods */
-  int getNumKicksRight();
-  void setNumKicksRight(int newNumKicksRight);
-  int getNumKicksCenter();
-  void setNumKicksCenter(int newNumKicksCenter);
   int getNumKicksLeft();
   void setNumKicksLeft(int newNumKicksLeft);
+  int getNumKicksCenter();
+  void setNumKicksCenter(int newNumKicksCenter);
+  int getNumKicksRight();
+  void setNumKicksRight(int newNumKicksRight);
+  GuideBallSideEnum getGuideBallSide();
+  void setGuideBallSide(GuideBallSideEnum newGuideBallSide);
 
 };
 

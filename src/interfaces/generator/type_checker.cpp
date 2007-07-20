@@ -48,19 +48,32 @@
 
 /** Check type validity.
  * @param type type string to check
+ * @param enum_constants an optional vector of enumeration constants that are used for
+ * type validation.
  * @return true, if type is valid, false otherwise
  */
 bool
-InterfaceDataTypeChecker::validType(const std::string &type)
+InterfaceDataTypeChecker::validType(const std::string &type, std::vector<InterfaceEnumConstant> *enum_constants)
 {
-  return (  (type == "int") ||
-	    (type == "long int") ||
-	    (type == "unsigned int") ||
-	    (type == "unsigned long int") ||
-	    (type == "bool") ||
-	    (type == "char") ||
-	    (type == "float") ||
-	    (type == "double") );
+  if (  (type == "int") ||
+	(type == "long int") ||
+	(type == "unsigned int") ||
+	(type == "unsigned long int") ||
+	(type == "bool") ||
+	(type == "char") ||
+	(type == "float") ||
+	(type == "double") ) {
+    return true;
+  } else if ( enum_constants != NULL ) {
+    for (std::vector<InterfaceEnumConstant>::iterator i = enum_constants->begin(); i != enum_constants->end(); ++i) {
+      if ( type == (*i).getName() ) {
+	return true;
+      }
+    }
+    return false;
+  } else {
+    return false;
+  }
 }
 
 

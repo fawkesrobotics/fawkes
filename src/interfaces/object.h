@@ -37,6 +37,13 @@ class ObjectPositionInterface : public Interface
  /// @cond INTERNALS
  INTERFACE_MGMT_FRIENDS(ObjectPositionInterface)
  /// @endcond
+ public:
+  /* constants */
+  static const unsigned int OTHER;
+  static const unsigned int BALL;
+  static const unsigned int OPPONENT;
+  static const unsigned int TEAMMEMBER;
+
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
@@ -114,12 +121,6 @@ class ObjectPositionInterface : public Interface
   ObjectPositionInterface_data_t *data;
 
  public:
-  /* constants */
-  static const unsigned int OTHER;
-  static const unsigned int BALL;
-  static const unsigned int OPPONENT;
-  static const unsigned int TEAMMEMBER;
-
   /* messages */
   virtual bool messageValid(const Message *message) const;
  private:

@@ -31,14 +31,17 @@
 #include <string>
 #include <vector>
 
+#include <interfaces/generator/enum_constant.h>
+
 class InterfaceField
 {
  public:
-  InterfaceField();
+  InterfaceField(std::vector<InterfaceEnumConstant> *enum_constants = NULL);
 
   void setComment(const std::string &comment);
   void setName(const std::string &name);
   void setType(const std::string &type);
+  bool isEnumType() const;
   void setLength(const std::string &length);
   void setFlags(const std::vector<std::string> &flags);
   void setValidFor(const std::string &validfor);
@@ -71,6 +74,7 @@ class InterfaceField
 
   std::string name;
   std::string type;
+  bool        is_enum_type;
   std::string comment;
   std::string length;
   unsigned int length_value;
@@ -78,6 +82,7 @@ class InterfaceField
   std::string validfor;
   std::string default_value;
   std::vector<std::string> flags;
+  std::vector<InterfaceEnumConstant> *enum_constants;
 
   unsigned int bits_val;
 };

@@ -33,8 +33,10 @@
 
 /** @class KickerInterface interfaces/kicker.h
  * KickerInterface Fawkes BlackBoard Interface.
- * In these variables it is stored how often the right, center or 
-      left kick have been triggered
+ * 
+      In these variables it is stored how often the right, center or 
+      left kick have been triggered.
+    
  */
 
 
@@ -52,24 +54,24 @@ KickerInterface::~KickerInterface()
   free(data_ptr);
 }
 /* Methods */
-/** Get NumKicksRight value.
- * Number of Right-Kicks
- * @return NumKicksRight value
+/** Get NumKicksLeft value.
+ * Number of Left-Kicks
+ * @return NumKicksLeft value
  */
 int
-KickerInterface::getNumKicksRight()
+KickerInterface::getNumKicksLeft()
 {
-  return data->NumKicksRight;
+  return data->NumKicksLeft;
 }
 
-/** Set NumKicksRight value.
- * Number of Right-Kicks
- * @param newNumKicksRight new NumKicksRight value
+/** Set NumKicksLeft value.
+ * Number of Left-Kicks
+ * @param newNumKicksLeft new NumKicksLeft value
  */
 void
-KickerInterface::setNumKicksRight(int newNumKicksRight)
+KickerInterface::setNumKicksLeft(int newNumKicksLeft)
 {
-  data->NumKicksRight = newNumKicksRight;
+  data->NumKicksLeft = newNumKicksLeft;
 }
 
 /** Get NumKicksCenter value.
@@ -92,24 +94,46 @@ KickerInterface::setNumKicksCenter(int newNumKicksCenter)
   data->NumKicksCenter = newNumKicksCenter;
 }
 
-/** Get NumKicksLeft value.
- * Number of Left-Kicks
- * @return NumKicksLeft value
+/** Get NumKicksRight value.
+ * Number of Right-Kicks
+ * @return NumKicksRight value
  */
 int
-KickerInterface::getNumKicksLeft()
+KickerInterface::getNumKicksRight()
 {
-  return data->NumKicksLeft;
+  return data->NumKicksRight;
 }
 
-/** Set NumKicksLeft value.
- * Number of Left-Kicks
- * @param newNumKicksLeft new NumKicksLeft value
+/** Set NumKicksRight value.
+ * Number of Right-Kicks
+ * @param newNumKicksRight new NumKicksRight value
  */
 void
-KickerInterface::setNumKicksLeft(int newNumKicksLeft)
+KickerInterface::setNumKicksRight(int newNumKicksRight)
 {
-  data->NumKicksLeft = newNumKicksLeft;
+  data->NumKicksRight = newNumKicksRight;
+}
+
+/** Get GuideBallSide value.
+ * Side where the ball
+      guidance arm is currently erected.
+ * @return GuideBallSide value
+ */
+KickerInterface::GuideBallSideEnum
+KickerInterface::getGuideBallSide()
+{
+  return data->GuideBallSide;
+}
+
+/** Set GuideBallSide value.
+ * Side where the ball
+      guidance arm is currently erected.
+ * @param newGuideBallSide new GuideBallSide value
+ */
+void
+KickerInterface::setGuideBallSide(GuideBallSideEnum newGuideBallSide)
+{
+  data->GuideBallSide = newGuideBallSide;
 }
 
 /* =========== messages =========== */
@@ -121,24 +145,20 @@ KickerInterface::setNumKicksLeft(int newNumKicksLeft)
 
 
 /** Constructor with initial values.
- * @param iniCmdKickRight initial value for CmdKickRight
- * @param iniCmdKickCenter initial value for CmdKickCenter
  * @param iniCmdKickLeft initial value for CmdKickLeft
+ * @param iniCmdKickCenter initial value for CmdKickCenter
+ * @param iniCmdKickRight initial value for CmdKickRight
  * @param iniIntensity initial value for Intensity
- * @param iniCmdResetCounter initial value for CmdResetCounter
- * @param iniCmdActivateBallGuidance initial value for CmdActivateBallGuidance
  */
-KickerInterface::KickMessage::KickMessage(bool iniCmdKickRight, bool iniCmdKickCenter, bool iniCmdKickLeft, int iniIntensity, bool iniCmdResetCounter, bool iniCmdActivateBallGuidance) : Message()
+KickerInterface::KickMessage::KickMessage(bool iniCmdKickLeft, bool iniCmdKickCenter, bool iniCmdKickRight, int iniIntensity) : Message()
 {
   data_size = sizeof(KickMessage_data_t);
   data_ptr  = malloc(data_size);
   data      = (KickMessage_data_t *)data_ptr;
-  data->CmdKickRight = iniCmdKickRight;
-  data->CmdKickCenter = iniCmdKickCenter;
   data->CmdKickLeft = iniCmdKickLeft;
+  data->CmdKickCenter = iniCmdKickCenter;
+  data->CmdKickRight = iniCmdKickRight;
   data->Intensity = iniIntensity;
-  data->CmdResetCounter = iniCmdResetCounter;
-  data->CmdActivateBallGuidance = iniCmdActivateBallGuidance;
 }
 /** Constructor */
 KickerInterface::KickMessage::KickMessage() : Message()
@@ -152,24 +172,24 @@ KickerInterface::KickMessage::~KickMessage()
 {
 }
 /* Methods */
-/** Get CmdKickRight value.
- * CmdKickRight
- * @return CmdKickRight value
+/** Get CmdKickLeft value.
+ * CmdKickLeft
+ * @return CmdKickLeft value
  */
 bool
-KickerInterface::KickMessage::isCmdKickRight()
+KickerInterface::KickMessage::isCmdKickLeft()
 {
-  return data->CmdKickRight;
+  return data->CmdKickLeft;
 }
 
-/** Set CmdKickRight value.
- * CmdKickRight
- * @param newCmdKickRight new CmdKickRight value
+/** Set CmdKickLeft value.
+ * CmdKickLeft
+ * @param newCmdKickLeft new CmdKickLeft value
  */
 void
-KickerInterface::KickMessage::setCmdKickRight(bool newCmdKickRight)
+KickerInterface::KickMessage::setCmdKickLeft(bool newCmdKickLeft)
 {
-  data->CmdKickRight = newCmdKickRight;
+  data->CmdKickLeft = newCmdKickLeft;
 }
 
 /** Get CmdKickCenter value.
@@ -192,24 +212,24 @@ KickerInterface::KickMessage::setCmdKickCenter(bool newCmdKickCenter)
   data->CmdKickCenter = newCmdKickCenter;
 }
 
-/** Get CmdKickLeft value.
- * CmdKickLeft
- * @return CmdKickLeft value
+/** Get CmdKickRight value.
+ * CmdKickRight
+ * @return CmdKickRight value
  */
 bool
-KickerInterface::KickMessage::isCmdKickLeft()
+KickerInterface::KickMessage::isCmdKickRight()
 {
-  return data->CmdKickLeft;
+  return data->CmdKickRight;
 }
 
-/** Set CmdKickLeft value.
- * CmdKickLeft
- * @param newCmdKickLeft new CmdKickLeft value
+/** Set CmdKickRight value.
+ * CmdKickRight
+ * @param newCmdKickRight new CmdKickRight value
  */
 void
-KickerInterface::KickMessage::setCmdKickLeft(bool newCmdKickLeft)
+KickerInterface::KickMessage::setCmdKickRight(bool newCmdKickRight)
 {
-  data->CmdKickLeft = newCmdKickLeft;
+  data->CmdKickRight = newCmdKickRight;
 }
 
 /** Get Intensity value.
@@ -232,44 +252,72 @@ KickerInterface::KickMessage::setIntensity(int newIntensity)
   data->Intensity = newIntensity;
 }
 
-/** Get CmdResetCounter value.
- * CmdResetCounter
- * @return CmdResetCounter value
+/** @class KickerInterface::ResetCounterMessage interfaces/kicker.h
+ * ResetCounterMessage Fawkes BlackBoard Interface Message.
+ * 
+    
  */
-bool
-KickerInterface::KickMessage::isCmdResetCounter()
+
+
+/** Constructor */
+KickerInterface::ResetCounterMessage::ResetCounterMessage() : Message()
 {
-  return data->CmdResetCounter;
+  data_size = sizeof(ResetCounterMessage_data_t);
+  data_ptr  = malloc(data_size);
+  data      = (ResetCounterMessage_data_t *)data_ptr;
+}
+/** Destructor */
+KickerInterface::ResetCounterMessage::~ResetCounterMessage()
+{
+}
+/* Methods */
+/** @class KickerInterface::GuideBallMessage interfaces/kicker.h
+ * GuideBallMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param iniGuideBallSide initial value for GuideBallSide
+ */
+KickerInterface::GuideBallMessage::GuideBallMessage(GuideBallSideEnum iniGuideBallSide) : Message()
+{
+  data_size = sizeof(GuideBallMessage_data_t);
+  data_ptr  = malloc(data_size);
+  data      = (GuideBallMessage_data_t *)data_ptr;
+  data->GuideBallSide = iniGuideBallSide;
+}
+/** Constructor */
+KickerInterface::GuideBallMessage::GuideBallMessage() : Message()
+{
+  data_size = sizeof(GuideBallMessage_data_t);
+  data_ptr  = malloc(data_size);
+  data      = (GuideBallMessage_data_t *)data_ptr;
+}
+/** Destructor */
+KickerInterface::GuideBallMessage::~GuideBallMessage()
+{
+}
+/* Methods */
+/** Get GuideBallSide value.
+ * Side where to guide the ball and erect the arm.
+ * @return GuideBallSide value
+ */
+KickerInterface::GuideBallSideEnum
+KickerInterface::GuideBallMessage::getGuideBallSide()
+{
+  return data->GuideBallSide;
 }
 
-/** Set CmdResetCounter value.
- * CmdResetCounter
- * @param newCmdResetCounter new CmdResetCounter value
+/** Set GuideBallSide value.
+ * Side where to guide the ball and erect the arm.
+ * @param newGuideBallSide new GuideBallSide value
  */
 void
-KickerInterface::KickMessage::setCmdResetCounter(bool newCmdResetCounter)
+KickerInterface::GuideBallMessage::setGuideBallSide(GuideBallSideEnum newGuideBallSide)
 {
-  data->CmdResetCounter = newCmdResetCounter;
-}
-
-/** Get CmdActivateBallGuidance value.
- * CmdActivateBallGuidance
- * @return CmdActivateBallGuidance value
- */
-bool
-KickerInterface::KickMessage::isCmdActivateBallGuidance()
-{
-  return data->CmdActivateBallGuidance;
-}
-
-/** Set CmdActivateBallGuidance value.
- * CmdActivateBallGuidance
- * @param newCmdActivateBallGuidance new CmdActivateBallGuidance value
- */
-void
-KickerInterface::KickMessage::setCmdActivateBallGuidance(bool newCmdActivateBallGuidance)
-{
-  data->CmdActivateBallGuidance = newCmdActivateBallGuidance;
+  data->GuideBallSide = newGuideBallSide;
 }
 
 /** Check if message is valid an can be queued.
@@ -280,6 +328,14 @@ KickerInterface::messageValid(const Message *message) const
 {
   const KickMessage *m0 = dynamic_cast<const KickMessage *>(message);
   if ( m0 != NULL ) {
+    return true;
+  }
+  const ResetCounterMessage *m1 = dynamic_cast<const ResetCounterMessage *>(message);
+  if ( m1 != NULL ) {
+    return true;
+  }
+  const GuideBallMessage *m2 = dynamic_cast<const GuideBallMessage *>(message);
+  if ( m2 != NULL ) {
     return true;
   }
   return false;

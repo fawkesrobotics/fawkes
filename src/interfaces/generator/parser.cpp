@@ -90,7 +90,7 @@ InterfaceParser::getFields(xmlpp::Node *node)
     //std::cout << "Field name: " << field_name << std::endl;
     
 
-    InterfaceField f;
+    InterfaceField f(&enum_constants);
     f.setComment(field_comment);
     const Element * el = dynamic_cast<const Element *>(*i);
     if ( el ) {

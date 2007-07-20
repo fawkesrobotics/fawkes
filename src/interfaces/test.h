@@ -37,6 +37,17 @@ class TestInterface : public Interface
  /// @cond INTERNALS
  INTERFACE_MGMT_FRIENDS(TestInterface)
  /// @endcond
+ public:
+  /* constants */
+  static const int TEST_CONSTANT;
+  static const float TEST_FLOAT_CONSTANT;
+
+  /** Demonstrating enums */
+  typedef enum {
+    TEST_ENUM_1 /**< Item 1 */,
+    TEST_ENUM_2 /**< Item 2 */
+  } TestEnum;
+
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
@@ -52,16 +63,6 @@ class TestInterface : public Interface
   TestInterface_data_t *data;
 
  public:
-  /* constants */
-  static const int TEST_CONSTANT;
-  static const float TEST_FLOAT_CONSTANT;
-
-  /** Demonstrating enums */
-  typedef enum {
-    TEST_ENUM_1 /**< Item 1 */,
-    TEST_ENUM_2 /**< Item 2 */
-  } TestEnum;
-
   /* messages */
   class SetTestIntMessage : public Message
   {

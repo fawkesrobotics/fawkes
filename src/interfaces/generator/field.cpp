@@ -38,11 +38,16 @@
  */
 
 
-/** Constructor */
-InterfaceField::InterfaceField()
+/** Constructor.
+ * @param enum_constants enumeration constants that are available and which can be
+ * used as value type.
+ */
+InterfaceField::InterfaceField(std::vector<InterfaceEnumConstant> *enum_constants)
 {
+  this->enum_constants = enum_constants;
   bits_val = 0;
   length = "";
+  is_enum_type = false;
 }
 
 
@@ -91,6 +96,15 @@ InterfaceField::getAccessType() const
   }
 }
 
+
+/** Check if type is an enum type.
+ * @return true if the type of this field is an enum type, false otherwise
+ */
+bool
+InterfaceField::isEnumType() const
+{
+  return is_enum_type;
+}
 
 /** Get field length.
  * @return field length
@@ -171,6 +185,14 @@ InterfaceField::getFlags() const
 void
 InterfaceField::setType(const std::string &type)
 {
+  is_enum_type = false;
+  if ( enum_constants != NULL ) {
+    for (std::vector<InterfaceEnumConstant>::iterator i = enum_constants->begin(); i != enum_constants->end(); ++i) {
+      if ( type == (*i).getName() ) {
+	is_enum_type = true;
+      }
+    }
+  }
   this->type = type;
 }
 
@@ -312,7 +334,7 @@ InterfaceField::setAttribute(const std::string &attr_name, const std::string &at
 void
 InterfaceField::valid()
 {
-  if ( ! InterfaceDataTypeChecker::validType(type) ) {
+  if ( ! InterfaceDataTypeChecker::validType(type, enum_constants) ) {
     throw InterfaceGeneratorInvalidTypeException("field", name.c_str(), type.c_str());
   }
   if ( (name.length() == 0) || (name.find(" ") != std::string::npos) ) {

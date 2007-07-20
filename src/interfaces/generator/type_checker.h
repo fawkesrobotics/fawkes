@@ -29,11 +29,14 @@
 #define __INTERFACES_GENERATOR_TYPE_CHECKED_H_
 
 #include <string>
+#include <vector>
+
+#include <interfaces/generator/enum_constant.h>
 
 class InterfaceDataTypeChecker
 {
  public:
-  static bool validType(const std::string &type);
+  static bool validType(const std::string &type, std::vector<InterfaceEnumConstant> *enum_constants = 0);
   static bool validValue(const std::string &type, const std::string &value);
 };
 

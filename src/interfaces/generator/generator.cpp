@@ -236,7 +236,7 @@ InterfaceGenerator::write_cpp(FILE *f)
 	  class_name.c_str(), data_comment.c_str());
   write_constants_cpp(f);
   write_ctor_dtor_cpp(f, class_name, "Interface", "");
-  write_methods_cpp(f, class_name, data_fields, "");
+  write_methods_cpp(f, class_name, class_name, data_fields, "");
   write_messages_cpp(f);
 
   write_management_funcs_cpp(f);
@@ -353,7 +353,7 @@ InterfaceGenerator::write_messages_cpp(FILE *f)
 
     write_message_ctor_dtor_cpp(f, (*i).getName(), "Message", class_name + "::",
 				(*i).getFields());
-    write_methods_cpp(f, (*i).getName(), (*i).getFields(), class_name + "::");
+    write_methods_cpp(f, class_name, (*i).getName(), (*i).getFields(), class_name + "::");
 
   }
   fprintf(f,
@@ -544,12 +544,14 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 
 /** Write methods to cpp file.
  * @param f file to write to
- * @param classname name of class
+ * @param interface_classname name of the interface class
+ * @param classname name of class (can be interface or message)
  * @param fields fields
  * @param inclusion_prefix used if class is included in another class.
  */
 void
-InterfaceGenerator::write_methods_cpp(FILE *f, std::string classname,
+InterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
+				      std::string classname,
 				      vector<InterfaceField> fields,
 				      std::string inclusion_prefix)
 {
@@ -560,14 +562,15 @@ InterfaceGenerator::write_methods_cpp(FILE *f, std::string classname,
 	    " * %s\n"
 	    " * @return %s value\n"
 	    " */\n"
-	    "%s\n"
+	    "%s%s\n"
 	    "%s%s::%s%s()\n"
 	    "{\n"
 	    "  return data->%s;\n"
 	    "}\n\n",
 	    (*i).getName().c_str(),
-	    (*i).getComment().c_str(),	    
+	    (*i).getComment().c_str(),
 	    (*i).getName().c_str(),
+	    (*i).isEnumType() ? (interface_classname + "::").c_str() : "",
 	    (*i).getAccessType().c_str(),
 	    inclusion_prefix.c_str(), classname.c_str(), ( ((*i).getType() == "bool" ) ? "is" : "get"), (*i).getName().c_str(),
 	    (*i).getName().c_str() );
@@ -646,15 +649,18 @@ InterfaceGenerator::write_h(FILE *f)
 	  " /// @cond INTERNALS\n"
 	  " INTERFACE_MGMT_FRIENDS(%s)\n"
 	  " /// @endcond\n"
-	  " private:\n",
+	  " public:\n",
 	  class_name.c_str(),
 	  class_name.c_str());
+
+  write_constants_h(f);
+
+  fprintf(f, " private:\n");
 
   write_struct(f, class_name + "_data_t", "  ", data_fields);
   fprintf(f, "  %s_data_t *data;\n"
 	  "\n public:\n", class_name.c_str());
 
-  write_constants_h(f);
   write_messages_h(f);
   fprintf(f, " private:\n");
   write_ctor_dtor_h(f, "  ", class_name);
