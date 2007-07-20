@@ -92,12 +92,12 @@ JoystickControl::~JoystickControl()
 void 
 JoystickControl::enqueueKick(bool left, bool center, bool right) 
 {
-  KickerInterface::KickMessage* msg = new  KickerInterface::KickMessage(right, center, left, false, false, false);
+  KickerInterface::KickMessage* msg = new  KickerInterface::KickMessage(left, center, right, /* intensity */ 150);
   
   if(kicker_interface->hasWriter())
     kicker_interface->msgq_enqueue(msg);
   
-  if((++logger_modulo_counter %= 100) == 0)
+  //if((++logger_modulo_counter %= 100) == 0)
     {
       logger->log_info("JoystickControl", "kick left: %f, center: %f, right: %f", left, center, right);
     }
