@@ -321,11 +321,18 @@ JpegImageCompressor::set_destination_buffer(unsigned char *buf, unsigned int buf
 }
 
 
-unsigned int
+size_t
 JpegImageCompressor::compressed_size()
 {
   return jpeg_bytes;
 }
+
+size_t
+JpegImageCompressor::recommended_compressed_buffer_size()
+{
+  return width * height / 5;
+}
+
 
 void
 JpegImageCompressor::set_filename(const char *filename)

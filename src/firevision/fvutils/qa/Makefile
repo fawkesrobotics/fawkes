@@ -30,12 +30,13 @@ LIBS     = $(VISION_LIBS)
 OBJS_fv_qa_camargp := qa_camargp.o
 LIBS_fv_qa_camargp := fvutils
 
-OBJS_fv_qa_yuvconv := qa_yuvconv.o
-LIBS_fv_qa_yuvconv := fvutils
+OBJS_fv_qa_jpegbm := qa_jpegbm.o
+LIBS_fv_qa_jpegbm := fvutils
 
-OBJS_all = $(OBJS_fv_qa_camargp) $(OBJS_fv_qa_yuvconv)
-BINS_all = $(BINDIR)/fv_qa_camargp	\
-	   $(BINDIR)/fv_qa_yuvconv
+OBJS_all = $(OBJS_fv_qa_camargp)		\
+	   $(OBJS_fv_qa_jpegbm)
+BINS_all = $(BINDIR)/fv_qa_camargp		\
+	   $(BINDIR)/fv_qa_jpegbm
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

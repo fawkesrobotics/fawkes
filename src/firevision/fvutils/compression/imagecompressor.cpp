@@ -46,7 +46,7 @@
  * @param buf buffer
  * @param buf_size buffer size
  *
- * @fn unsigned int  ImageCompressor::compressed_size()
+ * @fn size_t ImageCompressor::compressed_size()
  * Get compressed size.
  * @return compressed size
  *
@@ -62,7 +62,7 @@
  * Check if compressor supports desired compression destination.
  * @param cd compression destination
  *
- * @fn unsigned int ImageCompressor::recommended_compressed_buffer_size()
+ * @fn size_t ImageCompressor::recommended_compressed_buffer_size()
  * Get the recommended size for the compressed buffer. It is not guaranteed
  * that this size is really enough for compression but in most cases this should
  * be suitable.

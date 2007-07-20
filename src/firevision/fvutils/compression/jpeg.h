@@ -45,11 +45,12 @@ class JpegImageCompressor : public ImageCompressor {
   virtual void          set_image_dimensions(unsigned int width, unsigned int height);
   virtual void          set_image_buffer(colorspace_t cspace, unsigned char *buffer);
   virtual void          set_destination_buffer(unsigned char *buf, unsigned int buf_size);
-  virtual unsigned int  compressed_size();
+  virtual size_t        compressed_size();
   virtual void          set_filename(const char *filename);
   virtual void          set_compression_destination(ImageCompressor::CompressionDestination cd);
   virtual bool          supports_compression_destination(ImageCompressor::CompressionDestination cd);
   virtual void          compress();
+  virtual size_t        recommended_compressed_buffer_size();
 
  private:
   unsigned char *jpeg_buffer;

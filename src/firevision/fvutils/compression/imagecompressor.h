@@ -29,6 +29,7 @@
 #define __FIREVISION_UTILS_COMPRESSION_IMAGE_COMPRESSOR_H_
 
 #include <fvutils/color/colorspaces.h>
+#include <sys/types.h>
 
 class ImageCompressor {
  public:
@@ -44,11 +45,11 @@ class ImageCompressor {
   virtual void          set_image_dimensions(unsigned int width, unsigned int height)     = 0;
   virtual void          set_image_buffer(colorspace_t cspace, unsigned char *buffer)      = 0;
   virtual void          set_destination_buffer(unsigned char *buf, unsigned int buf_size) = 0;
-  virtual unsigned int  compressed_size()                                                 = 0;
+  virtual size_t        compressed_size()                                                 = 0;
   virtual void          set_filename(const char *filename)                                = 0;
   virtual void          set_compression_destination(CompressionDestination cd)            = 0;
   virtual bool          supports_compression_destination(CompressionDestination cd)       = 0;
-  virtual unsigned int  recommended_compressed_buffer_size()                              = 0;
+  virtual size_t        recommended_compressed_buffer_size()                              = 0;
   virtual void          compress()                                                        = 0;
 
 };
