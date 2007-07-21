@@ -57,6 +57,7 @@
  * @param kicker_interface the kicker interface from the navigator network thread
  * @param logger the logger from the navigator network thread
  * @param config the config from the navigator network thread
+ * @param clock Clock instance
  */
 JoystickControl::JoystickControl(MotorInterface * motor_interface,
                                   KickerInterface * kicker_interface,
