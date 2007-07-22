@@ -20,28 +20,34 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-
-CFLAGS = -g `gts-config --cflags`
-
-ifneq ($(realpath /usr/include/vmc/LayerClasses/VMC_API.h),)
-  HAVE_VMC = 1
-endif
+include $(BASEDIR)/etc/buildsys/config.mk
 
 ifneq ($(HAVE_VMC),1)
   WARN_TARGETS += warning_vmc
-else
-  PLUGINS_all = $(PLUGINDIR)/navigator.so
+endif
+ifneq ($(HAVE_GTS),1)
+  WARN_TARGETS += warning_gts
 endif
 
-ifneq ($(SRCDIR),)
+ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
 
 .PHONY: warning_vmc
 warning_vmc:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Navigator Plugin$(TNORMAL) (install libvmc)"
+
+.PHONY: warning_gts
+warning_gts:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Navigator Plugin$(TNORMAL) (install GTS)"
 endif
 
-PRESUBDIRS = gts fuzzy libnavi
+ifeq ($(BUILD_NAVIGATOR),1)
+  PLUGINS_all = $(PLUGINDIR)/navigator.so
+  CFLAGS  = $(shell $(PKGCONFIG) --cflags gts)
+  LDFLAGS = $(shell $(PKGCONFIG) --libs gts)
+
+  PRESUBDIRS = gts fuzzy libnavi
+endif
 
 LIBS_navigator = core utils vmc netcomm fuzzy gts_obstacle navigator
 OBJS_navigator = navigator_plugin.o \
@@ -52,11 +58,6 @@ OBJS_navigator = navigator_plugin.o \
 		 navigator.o \
 		 pathfinder.o \
 		 path_state.o
-
-		 
-LDFLAGS_navigator = `gts-config --libs`
-
-		 
 
 OBJS_all    = $(OBJS_navigator)
 

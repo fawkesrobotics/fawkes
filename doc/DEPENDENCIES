@@ -43,6 +43,12 @@ Fawkes		libiowkit		>= 1.5.0		optional
 Fawkes		libxml++		>= 2.14.0		optional
 		needed to build interface_generator
 
+Fawkes		gts			>= 0.7.6		optional
+		needed to build navigator plugin
+
+Fawkes		VMC			== 0.91			optional
+		needed to build navigator with real motor support
+
 FireVision	leutron			== 1.96.204		optional
 		(frame grabber for old Leutron PCs)
 
