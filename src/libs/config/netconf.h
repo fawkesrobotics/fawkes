@@ -89,7 +89,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual void          set_string(const char *comp, const char *path,
 				   std::string s);
   virtual void          set_string(const char *comp, const char *path,
-				   const char *s, unsigned int s_length);
+				   const char *s);
 
   virtual void          erase(const char *comp, const char *path);
 

@@ -185,6 +185,26 @@ print_line(Configuration::ValueIterator *i)
 }
 
 
+void
+print_usage(const char *program_name)
+{
+  std::cout << "Usage: " << program_name << " <cmd>" << std::endl
+	    << "where cmd is one of the following:" << std::endl << std::endl
+	    << "  list" << std::endl
+	    << "    List all configuration items" << std::endl << std::endl
+	    << "  watch" << std::endl
+	    << "    Watch configuration changes" << std::endl << std::endl
+	    << "  get <comp> <path>" << std::endl
+	    << "    Get value for the given component and path" << std::endl << std::endl
+	    << "  set <comp> <path> <value> [type]" << std::endl
+	    << "    Set value for the given component and path to the given type and value" << std::endl
+	    << "    where type is one of float/uint/int/bool/string. The type" << std::endl
+	    << "    is only necessary if you are creating a new value" << std::endl << std::endl
+	    << "  erase <comp> <path>" << std::endl
+	    << "    Erase value for given component and path from config" << std::endl
+	    << std::endl;
+}
+
 /** Config tool main.
  * @param argc argument count
  * @param argv arguments
@@ -195,19 +215,7 @@ main(int argc, char **argv)
   ArgumentParser argp(argc, argv, "H");
 
   if ( argp.hasArgument("H") ) {
-    std::cout << "Usage: " << argv[0] << " <cmd>" << std::endl
-	      << "where cmd is one of the following:" << std::endl << std::endl
-	      << "  watch" << std::endl
-	      << "    Watch configuration changes" << std::endl << std::endl
-	      << "  get <comp> <path>" << std::endl
-	      << "    Get value for the given component and path" << std::endl << std::endl
-	      << "  set <comp> <path> <value> [type]" << std::endl
-	      << "    Set value for the given component and path to the given type and value" << std::endl
-	      << "    where type is one of float/uint/int/bool/string. The type" << std::endl
-	      << "    is only necessary if you are creating a new value" << std::endl << std::endl
-	      << "  erase <comp> <path>" << std::endl
-	      << "    Erase value for given component and path from config" << std::endl
-	      << std::endl;
+    print_usage(argv[0]);
     exit(0);
   }
 
@@ -223,7 +231,8 @@ main(int argc, char **argv)
 
   if ( args.size() == 0) {
     // show usage
-    printf("Not enough args\n");
+    printf("Not enough args\n\n");
+    print_usage(argv[0]);
   } else if (strcmp("get", args[0]) == 0) {
     if (args.size() == 3) {
       printf("Requesting value %s::%s\n", args[1], args[2]);

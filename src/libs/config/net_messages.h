@@ -71,7 +71,7 @@
 
 /* Length definitions */
 #define CONFIG_MSG_COMPONENT_LENGTH    32
-#define CONFIG_MSG_PATH_LENGTH         64
+#define CONFIG_MSG_PATH_LENGTH        128
 #define CONFIG_MSG_MAX_STRING_LENGTH  256
 #define CONFIG_MSG_MAX_TAG_LENGTH      64
 

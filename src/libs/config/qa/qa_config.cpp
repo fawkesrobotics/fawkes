@@ -125,6 +125,19 @@ main(int argc, char **argv)
     e.printTrace();
   }
 
+  try {
+    string os = "This ain't no paradoxon";
+    cout << "[LONGSTRING] set s='" << os << "'..." << flush;
+    config->set_string("configqa", "/testing/veryveryveryverylongstring", os);
+    cout << "done" << endl;
+    cout << "[LONGSTRING] get..." << flush;
+    string s = config->get_string("configqa", "/testing/veryveryveryverylongstring");
+    printf("done, s='%s'\n", s.c_str());
+  } catch (ConfigurationException &e) {
+    cout << "failed" << endl;
+    e.printTrace();
+  }
+
   delete config;
 
   return 0;

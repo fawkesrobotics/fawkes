@@ -1036,19 +1036,15 @@ SQLiteConfiguration::set_bool(const char *comp, const char *path, bool b)
 }
 
 
-/** Set new value in configuration of type string
- * @param comp component
- * @param path path to value
- * @param s new value
- * @param s_length length in bytes of s
- */
 void
 SQLiteConfiguration::set_string(const char *comp, const char *path,
-				const char *s, unsigned int s_length)
+				const char *s)
 {
   sqlite3_stmt *stmt;
 
   mutex->lock();
+
+  size_t s_length = strlen(s);
 
   try {
     stmt = prepare_update_value(SQL_UPDATE_VALUE, comp, path);
@@ -1109,7 +1105,7 @@ SQLiteConfiguration::set_string(const char *comp, const char *path,
 void
 SQLiteConfiguration::set_string(const char *comp, const char *path, std::string s)
 {
-  set_string(comp, path, s.c_str(), s.length());
+  set_string(comp, path, s.c_str());
 }
 
 

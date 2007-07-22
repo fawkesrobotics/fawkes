@@ -124,7 +124,7 @@ class Configuration
   virtual void          set_string(const char *comp, const char *path,
 				   std::string s)                         = 0;
   virtual void          set_string(const char *comp, const char *path,
-				   const char *s, unsigned int s_length)  = 0;
+				   const char *s)                         = 0;
 
   virtual void          erase(const char *comp, const char *path)         = 0;
 

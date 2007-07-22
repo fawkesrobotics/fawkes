@@ -110,13 +110,6 @@ NetworkConfiguration::load(const char *name, const char *defaults_name,
 }
 
 
-/** Copy all values from the given configuration.
- * All values from the given configuration are copied. Old values are not erased
- * so that the copied values will overwrite existing values, new values are
- * created, but values existent in current config but not in the copie config
- * will remain unchanged.
- * @param copyconf configuration to copy
- */
 void
 NetworkConfiguration::copy(Configuration *copyconf)
 {
@@ -142,11 +135,6 @@ NetworkConfiguration::copy(Configuration *copyconf)
 }
 
 
-/** Tag this configuration version.
- * This creates a new tagged version of the current config. The tagged config can be
- * accessed via load().
- * @param tag tag for this version
- */
 void
 NetworkConfiguration::tag(const char *tag)
 {
@@ -156,9 +144,6 @@ NetworkConfiguration::tag(const char *tag)
 }
 
 
-/** List of tags.
- * @return list of tags
- */
 std::list<std::string>
 NetworkConfiguration::tags()
 {
@@ -169,22 +154,20 @@ NetworkConfiguration::tags()
 }
 
 
-/** Check if a given value exists.
- * @param comp component
- * @param path path to value
- * @return true if the value exists, false otherwise
- */
 bool
 NetworkConfiguration::exists(const char *comp, const char *path)
 {
-  return false;
+  ValueIterator *i = get_value(comp, path);
+  bool rv = i->valid();
+  delete i;
+  return rv;
 }
 
 
-/** Get type of value.
+/** Get type of field.
  * @param comp component
- * @param path path to value
- * @return string representation of value type
+ * @param path path
+ * @return string of type
  */
 std::string
 NetworkConfiguration::get_type(const char *comp, const char *path)
@@ -199,11 +182,6 @@ NetworkConfiguration::get_type(const char *comp, const char *path)
 }
 
 
-/** Check if a value is of type float
- * @param comp component
- * @param path path to value
- * @return true if the value exists and is of type float
- */
 bool
 NetworkConfiguration::is_float(const char *comp, const char *path)
 {
@@ -211,11 +189,6 @@ NetworkConfiguration::is_float(const char *comp, const char *path)
 }
 
 
-/** Check if a value is of type unsigned int
- * @param comp component
- * @param path path to value
- * @return true if the value exists and is of type unsigned int
- */
 bool
 NetworkConfiguration::is_uint(const char *comp, const char *path)
 {
@@ -223,11 +196,6 @@ NetworkConfiguration::is_uint(const char *comp, const char *path)
 }
 
 
-/** Check if a value is of type int
- * @param comp component
- * @param path path to value
- * @return true if the value exists and is of type int
- */
 bool
 NetworkConfiguration::is_int(const char *comp, const char *path)
 {
@@ -235,11 +203,6 @@ NetworkConfiguration::is_int(const char *comp, const char *path)
 }
 
 
-/** Check if a value is of type bool
- * @param comp component
- * @param path path to value
- * @return true if the value exists and is of type bool
- */
 bool
 NetworkConfiguration::is_bool(const char *comp, const char *path)
 {
@@ -247,11 +210,6 @@ NetworkConfiguration::is_bool(const char *comp, const char *path)
 }
 
 
-/** Check if a value is of type string
- * @param comp component
- * @param path path to value
- * @return true if the value exists and is of type string
- */
 bool
 NetworkConfiguration::is_string(const char *comp, const char *path)
 {
@@ -259,11 +217,6 @@ NetworkConfiguration::is_string(const char *comp, const char *path)
 }
 
 
-/** Send get command.
- * @param comp component of value
- * @param path path of value
- * @param msgid msgid for message.
- */
 void
 NetworkConfiguration::send_get(const char *comp, const char *path, unsigned int msgid)
 {
@@ -292,14 +245,18 @@ NetworkConfiguration::send_get(const char *comp, const char *path, unsigned int 
 }
 
 
-/** Get value from configuration which is of type float
- * @param comp component
- * @param path path to value
- * @return value
- */
 float
 NetworkConfiguration::get_float(const char *comp, const char *path)
 {
+  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_float: "
+			       "Maximum length for component exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_float: "
+			       "Maximum length for path exceeded");
+  }
+
   float f;
   mutex->lock();
 
@@ -337,14 +294,18 @@ NetworkConfiguration::get_float(const char *comp, const char *path)
 }
 
 
-/** Get value from configuration which is of type unsigned int
- * @param comp component
- * @param path path to value
- * @return value
- */
 unsigned int
 NetworkConfiguration::get_uint(const char *comp, const char *path)
 {
+  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_uint: "
+			       "Maximum length for component exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_uint: "
+			       "Maximum length for path exceeded");
+  }
+
   unsigned int u;
   mutex->lock();
 
@@ -382,14 +343,18 @@ NetworkConfiguration::get_uint(const char *comp, const char *path)
 }
 
 
-/** Get value from configuration which is of type int
- * @param comp component
- * @param path path to value
- * @return value
- */
 int
 NetworkConfiguration::get_int(const char *comp, const char *path)
 {
+  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_int: "
+			       "Maximum length for component exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_int: "
+			       "Maximum length for path exceeded");
+  }
+
   int i;
   mutex->lock();
 
@@ -427,14 +392,18 @@ NetworkConfiguration::get_int(const char *comp, const char *path)
 }
 
 
-/** Get value from configuration which is of type bool
- * @param comp component
- * @param path path to value
- * @return value
- */
 bool
 NetworkConfiguration::get_bool(const char *comp, const char *path)
 {
+  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_bool: "
+			       "Maximum length for component exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_bool: "
+			       "Maximum length for path exceeded");
+  }
+
   bool b;
   mutex->lock();
 
@@ -472,14 +441,18 @@ NetworkConfiguration::get_bool(const char *comp, const char *path)
 }
 
 
-/** Get value from configuration which is of type string
- * @param comp component
- * @param path path to value
- * @return value
- */
 std::string
 NetworkConfiguration::get_string(const char *comp, const char *path)
 {
+  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_string: "
+			       "Maximum length for component exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_string: "
+			       "Maximum length for path exceeded");
+  }
+
   std::string s;
   mutex->lock();
 
@@ -520,15 +493,18 @@ NetworkConfiguration::get_string(const char *comp, const char *path)
 }
 
 
-/** Get value from configuration.
- * @param comp component
- * @param path path to value
- * @return value iterator for just this one value, maybe invalid if value does not
- * exists.
- */
 Configuration::ValueIterator *
 NetworkConfiguration::get_value(const char *comp, const char *path)
 {
+  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_value: "
+			       "Maximum length for component exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::get_value: "
+			       "Maximum length for path exceeded");
+  }
+
   Configuration::ValueIterator *i;
   mutex->lock();
 
@@ -567,21 +543,25 @@ NetworkConfiguration::get_value(const char *comp, const char *path)
 }
 
 
-/** Set new value in configuration of type float
- * @param comp component
- * @param path path to value
- * @param f new value
- */
 void
 NetworkConfiguration::set_float(const char *comp, const char *path, float f)
 {
+  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::set_float: "
+			       "Maximum length for component exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::set_float: "
+			       "Maximum length for path exceeded");
+  }
+
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							MSG_CONFIG_SET_FLOAT,
 							sizeof(config_float_value_msg_t));
   config_float_value_msg_t *fm = omsg->msg<config_float_value_msg_t>();
   strncpy(fm->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
-  strncpy(fm->cp.path, path, CONFIG_MSG_COMPONENT_LENGTH);
+  strncpy(fm->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   fm->f = f;
   c->enqueue(omsg);
   omsg->unref();
@@ -594,21 +574,25 @@ NetworkConfiguration::set_float(const char *comp, const char *path, float f)
 }
 
 
-/** Set new value in configuration of type unsigned int
- * @param comp component
- * @param path path to value
- * @param uint new value
- */
 void
 NetworkConfiguration::set_uint(const char *comp, const char *path, unsigned int uint)
 {
+  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::set_uint: "
+			       "Maximum length for component exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::set_uint: "
+			       "Maximum length for path exceeded");
+  }
+
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							MSG_CONFIG_SET_UINT,
 							sizeof(config_uint_value_msg_t));
   config_uint_value_msg_t *m = omsg->msg<config_uint_value_msg_t>();
   strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
-  strncpy(m->cp.path, path, CONFIG_MSG_COMPONENT_LENGTH);
+  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   m->u = uint;
   c->enqueue(omsg);
   omsg->unref();
@@ -621,11 +605,6 @@ NetworkConfiguration::set_uint(const char *comp, const char *path, unsigned int 
 }
 
 
-/** Set new value in configuration of type int
- * @param comp component
- * @param path path to value
- * @param i new value
- */
 void
 NetworkConfiguration::set_int(const char *comp, const char *path, int i)
 {
@@ -635,7 +614,7 @@ NetworkConfiguration::set_int(const char *comp, const char *path, int i)
 							sizeof(config_int_value_msg_t));
   config_int_value_msg_t *m = omsg->msg<config_int_value_msg_t>();
   strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
-  strncpy(m->cp.path, path, CONFIG_MSG_COMPONENT_LENGTH);
+  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   m->i = i;
   c->enqueue(omsg);
   omsg->unref();
@@ -648,21 +627,25 @@ NetworkConfiguration::set_int(const char *comp, const char *path, int i)
 }
 
 
-/** Set new value in configuration of type bool
- * @param comp component
- * @param path path to value
- * @param b new value
- */
 void
 NetworkConfiguration::set_bool(const char *comp, const char *path, bool b)
 {
+  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::set_bool: "
+			       "Maximum length for component exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::set_bool: "
+			       "Maximum length for path exceeded");
+  }
+
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							MSG_CONFIG_SET_BOOL,
 							sizeof(config_bool_value_msg_t));
   config_bool_value_msg_t *m = omsg->msg<config_bool_value_msg_t>();
   strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
-  strncpy(m->cp.path, path, CONFIG_MSG_COMPONENT_LENGTH);
+  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   m->b = (b ? 1 : 0);
   c->enqueue(omsg);
   omsg->unref();
@@ -675,23 +658,30 @@ NetworkConfiguration::set_bool(const char *comp, const char *path, bool b)
 }
 
 
-/** Set new value in configuration of type string
- * @param comp component
- * @param path path to value
- * @param s new value
- * @param s_length length in bytes of s
- */
 void
 NetworkConfiguration::set_string(const char *comp, const char *path,
-				 const char *s, unsigned int s_length)
+				 const char *s)
 {
+  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::set_string: "
+			       "Maximum length for component exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::set_string: "
+			       "Maximum length for path exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_MAX_STRING_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::set_string: "
+			       "Maximum length for string exceeded");
+  }
+
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							MSG_CONFIG_SET_STRING,
 							sizeof(config_string_value_msg_t));
   config_string_value_msg_t *m = omsg->msg<config_string_value_msg_t>();
   strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
-  strncpy(m->cp.path, path, CONFIG_MSG_COMPONENT_LENGTH);
+  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   strncpy(m->s, s, CONFIG_MSG_MAX_STRING_LENGTH);
   c->enqueue(omsg);
   omsg->unref();
@@ -704,26 +694,25 @@ NetworkConfiguration::set_string(const char *comp, const char *path,
 }
 
 
-/** Set new value in configuration of type string
- * @param comp component
- * @param path path to value
- * @param s new value
- */
 void
 NetworkConfiguration::set_string(const char *comp, const char *path, std::string s)
 {
-  set_string(comp, path, s.c_str(), s.length());
+  set_string(comp, path, s.c_str());
 }
 
 
-/** Erase the given value from the configuration. It is not an error if the value does
- * not exists before deletion.
- * @param comp component
- * @param path path to value
- */
 void
 NetworkConfiguration::erase(const char *comp, const char *path)
 {
+  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::erase: "
+			       "Maximum length for component exceeded");
+  }
+  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+    throw OutOfBoundsException("NetworkConfiguration::erase: "
+			       "Maximum length for path exceeded");
+  }
+
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							MSG_CONFIG_ERASE_VALUE,
@@ -731,7 +720,7 @@ NetworkConfiguration::erase(const char *comp, const char *path)
   // printf("Message generated, size: %lu, should be: %lu\n", omsg->payload_size(), sizeof(config_erase_value_msg_t));
   config_erase_value_msg_t *m = omsg->msg<config_erase_value_msg_t>();
   strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
-  strncpy(m->cp.path, path, CONFIG_MSG_COMPONENT_LENGTH);
+  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   c->enqueue(omsg);
   omsg->unref();
   c->wait(FAWKES_CID_CONFIGMANAGER);
@@ -752,9 +741,6 @@ NetworkConfiguration::deregistered()
 }
 
 
-/** Inbound message received.
- * @param m message
- */
 void
 NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
 {
@@ -828,7 +814,7 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
       case MSG_CONFIG_STRING_VALUE:
 	try {
 	  config_string_value_msg_t *sm = m->msg<config_string_value_msg_t>();
-	  mirror_config->set_string(sm->cp.component, sm->cp.path, sm->s, CONFIG_MSG_MAX_STRING_LENGTH);
+	  mirror_config->set_string(sm->cp.component, sm->cp.path, sm->s);
 	} catch (TypeMismatchException &e) {
 	  // Just ignore silently
 	  printf("NetworkConfiguration[mirroring]::inboundReceived: invalid string received");
@@ -843,11 +829,6 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
 }
 
 
-/** Add a configuration change handler.
- * The added handler is called whenever a value changes and the handler
- * desires to get notified for the given component.
- * @param h configuration change handler
- */
 void
 NetworkConfiguration::add_change_handler(ConfigurationChangeHandler *h)
 {
@@ -864,11 +845,6 @@ NetworkConfiguration::add_change_handler(ConfigurationChangeHandler *h)
 }
 
 
-/** Remove a configuration change handler.
- * The handler is removed from the change handler list and no longer called on
- * config changes.
- * @param h configuration change handler
- */
 void
 NetworkConfiguration::rem_change_handler(ConfigurationChangeHandler *h)
 {
@@ -886,8 +862,6 @@ NetworkConfiguration::rem_change_handler(ConfigurationChangeHandler *h)
 
 
 /** Enable or disable mirror mode.
- * If you enable mirror mode, the config is copied over in the background and the
- * configuration is locked until that is finished.
  * @param mirror true to enable mirror mode, false to disable
  */
 void
@@ -939,10 +913,7 @@ NetworkConfiguration::setMirrorMode(bool mirror)
 }
 
 
-/** Lock the config.
- * No further changes or queries can be executed on the configuration and will block until
- * the config is unlocked.
- */
+
 void
 NetworkConfiguration::lock()
 {
@@ -950,10 +921,6 @@ NetworkConfiguration::lock()
 }
 
 
-/** Try to lock the config.
- * @see Configuration::lock()
- * @return true, if the lock has been aquired, false otherwise
- */
 bool
 NetworkConfiguration::tryLock()
 {
@@ -961,9 +928,6 @@ NetworkConfiguration::tryLock()
 }
 
 
-/** Unlock the config.
- * Modifications and queries are possible again.
- */
 void
 NetworkConfiguration::unlock()
 {
@@ -971,11 +935,6 @@ NetworkConfiguration::unlock()
 }
 
 
-/** Iterator for all values.
- * Returns an iterator that can be used to iterate over all values in the current
- * configuration.
- * @return iterator over all values
- */
 Configuration::ValueIterator *
 NetworkConfiguration::iterator()
 {
@@ -987,18 +946,6 @@ NetworkConfiguration::iterator()
 }
 
 
-/** Iterator with search results.
- * Returns an iterator that can be used to iterate over the search results. All values
- * whose component and path start with the given strings are returned.
- * A call like
- * @code
- *   config->search("", "");
- * @endcode
- * is effectively the same as a call to iterator().
- * @param component start of component
- * @param path start of path
- * @return iterator to search results
- */
 Configuration::ValueIterator *
 NetworkConfiguration::search(const char *component, const char *path)
 {
@@ -1076,7 +1023,7 @@ NetworkConfiguration::NetConfValueIterator::NetConfValueIterator(FawkesNetworkMe
 }
 
 
-/** Destructor */
+/** Destructor. */
 NetworkConfiguration::NetConfValueIterator::~NetConfValueIterator()
 {
   delete i;
@@ -1086,10 +1033,6 @@ NetworkConfiguration::NetConfValueIterator::~NetConfValueIterator()
 }
 
 
-/* Check if there is another element and advance to this if possible.
- * This advances to the next element, if there is one.
- * @return true, if another element has been reached, false otherwise
- */
 bool
 NetworkConfiguration::NetConfValueIterator::next()
 {
@@ -1106,11 +1049,6 @@ NetworkConfiguration::NetConfValueIterator::next()
 }
 
 
-/** Check if the current element is valid.
- * This is much like the classic end element for iterators. If the iterator is
- * invalid there all subsequent calls to next() shall fail.
- * @return true, if the iterator is still valid, false otherwise
- */
 bool
 NetworkConfiguration::NetConfValueIterator::valid()
 {
@@ -1118,9 +1056,6 @@ NetworkConfiguration::NetConfValueIterator::valid()
 }
 
 
-/** Component of value.
- * @return component of value.
- */
 const char *
 NetworkConfiguration::NetConfValueIterator::component()
 {
@@ -1136,9 +1071,6 @@ NetworkConfiguration::NetConfValueIterator::component()
 }
 
 
-/** Path of value.
- * @return path of value
- */
 const char *
 NetworkConfiguration::NetConfValueIterator::path()
 {
@@ -1154,9 +1086,6 @@ NetworkConfiguration::NetConfValueIterator::path()
 }
 
 
-/** Type of value.
- * @return string representation of value type.
- */
 const char *
 NetworkConfiguration::NetConfValueIterator::type()
 {
@@ -1180,9 +1109,6 @@ NetworkConfiguration::NetConfValueIterator::type()
 }
 
 
-/** Check if current value is a float.
- * @return true, if value is a float, false otherwise
- */
 bool
 NetworkConfiguration::NetConfValueIterator::is_float()
 {
@@ -1197,9 +1123,6 @@ NetworkConfiguration::NetConfValueIterator::is_float()
 }
 
 
-/** Check if current value is a unsigned int.
- * @return true, if value is a unsigned int, false otherwise
- */
 bool
 NetworkConfiguration::NetConfValueIterator::is_uint()
 {
@@ -1214,9 +1137,6 @@ NetworkConfiguration::NetConfValueIterator::is_uint()
 }
 
 
-/** Check if current value is a int.
- * @return true, if value is a int, false otherwise
- */
 bool
 NetworkConfiguration::NetConfValueIterator::is_int()
 {
@@ -1231,9 +1151,6 @@ NetworkConfiguration::NetConfValueIterator::is_int()
 }
 
 
-/** Check if current value is a bool.
- * @return true, if value is a bool, false otherwise
- */
 bool
 NetworkConfiguration::NetConfValueIterator::is_bool()
 {
@@ -1248,9 +1165,6 @@ NetworkConfiguration::NetConfValueIterator::is_bool()
 }
 
 
-/** Check if current value is a string.
- * @return true, if value is a string, false otherwise
- */
 bool
 NetworkConfiguration::NetConfValueIterator::is_string()
 {
@@ -1265,9 +1179,6 @@ NetworkConfiguration::NetConfValueIterator::is_string()
 }
 
 
-/** Get float value.
- * @return value
- */
 float
 NetworkConfiguration::NetConfValueIterator::get_float()
 {
@@ -1287,9 +1198,6 @@ NetworkConfiguration::NetConfValueIterator::get_float()
 }
 
 
-/** Get unsigned int value.
- * @return value
- */
 unsigned int
 NetworkConfiguration::NetConfValueIterator::get_uint()
 {
@@ -1309,9 +1217,6 @@ NetworkConfiguration::NetConfValueIterator::get_uint()
 }
 
 
-/** Get int value.
- * @return value
- */
 int
 NetworkConfiguration::NetConfValueIterator::get_int()
 {
@@ -1331,9 +1236,6 @@ NetworkConfiguration::NetConfValueIterator::get_int()
 }
 
 
-/** Get bool value.
- * @return value
- */
 bool
 NetworkConfiguration::NetConfValueIterator::get_bool()
 {
@@ -1353,9 +1255,6 @@ NetworkConfiguration::NetConfValueIterator::get_bool()
 }
 
 
-/** Get string value.
- * @return value
- */
 std::string
 NetworkConfiguration::NetConfValueIterator::get_string()
 {

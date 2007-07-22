@@ -185,13 +185,12 @@
  * @param path path to value
  * @param s new string value
  *
- * @fn void Configuration::set_string(const char *comp, const char *path, const char *s, unsigned int s_length)
+ * @fn void Configuration::set_string(const char *comp, const char *path, const char *s)
  * Set new value in configuration of type string. Works like the aforementioned method.
  * Just takes an good ol' char array instead of a std::string.
  * @param comp component
  * @param path path to value
  * @param s new string value
- * @param s_length length in bytes of the string
  *
  * @fn void Configuration::erase(const char *comp, const char *path)
  * Erase the given value from the configuration. It is not an error if the value does
