@@ -1,9 +1,10 @@
 
 /***************************************************************************
- *  naviagtor_net_thread.h - Navigator Plugin Network Thread
+ *  navigator_net_thread.h - Navigator Plugin Network Thread
  *
  *  Generated: Thu May 31 20:38:50 2007
  *  Copyright  2007  Martin Liebenberg
+ *             2007  Tim Niemueller
  *
  *  $Id$
  *
@@ -37,12 +38,17 @@
 #include <aspect/clock.h>
 #include <netcomm/fawkes/handler.h>
 #include <core/utils/lock_list.h>
+#include <core/utils/lock_queue.h>
+
+#include <netinet/in.h>
 
 class JoystickControl;
 class MotorInterface;
 class NavigatorInterface;
 class NavigatorThread;
 class KickerInterface;
+class Time;
+class DatagramSocket;
 
 class NavigatorNetworkThread : public Thread, public LoggingAspect, public FawkesNetworkAspect,
                                public BlackBoardAspect, public BlockedTimingAspect, public FawkesNetworkHandler, 
@@ -62,10 +68,14 @@ class NavigatorNetworkThread : public Thread, public LoggingAspect, public Fawke
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
   virtual void process_after_loop();
-  
-  
+
+
  private:
-  
+
+  void process_udp_message(void *buf, size_t buflen);
+  void process_network_message(FawkesNetworkMessage *msg);
+
+
   NavigatorThread *navigator_thread;
   MotorInterface *motor_interface;
   KickerInterface *kicker_interface;
@@ -75,9 +85,19 @@ class NavigatorNetworkThread : public Thread, public LoggingAspect, public Fawke
   unsigned int connected_control_client;
   LockList<unsigned int> connected_points_and_lines_clients;
   
-  unsigned long int last_motor_control_thread;
+  unsigned long int last_motor_control_thread_id;
+  char *            last_motor_control_thread_name;
     
   unsigned int logger_modulo_counter;
+
+  LockQueue< FawkesNetworkMessage * > inbound_queue;
+
+  DatagramSocket *datagram_socket;
+  bool            blocked_by_udp;
+  Time            last_udp_msg_time;
+  struct sockaddr_in  udp_client_addr;
+  socklen_t           udp_client_addrlen;
+  unsigned char   udp_tmpbuf[1000];
 };
 
 

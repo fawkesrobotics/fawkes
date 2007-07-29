@@ -61,6 +61,9 @@ class JoystickControl
         
   unsigned int logger_modulo_counter;
   unsigned int logger_modulo_counter2;
+
+  float joystick_max_acceleration;
+  float joystick_max_rotation;
 };
 
 

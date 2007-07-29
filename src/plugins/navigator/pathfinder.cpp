@@ -171,7 +171,7 @@ void Pathfinder::delaunay(GtsSurface * surface, std::vector< GtsObstacle *> obst
   
   
   
-  cout << "obstacles.size()" << obstacles.size() << endl;
+  // cout << "obstacles.size()" << obstacles.size() << endl;
   for (guint i = 0; i < obstacles.size(); i++)
     {
       GtsVertex * ver = (GtsVertex *)obstacles[i];//gts_obstacle_new(gts_obstacle_class(),
@@ -385,7 +385,7 @@ bool Pathfinder::test_straight_ahead()
         break;
     }
     
-  std::cout << "--------------straight_ahead------: " << !test << std::endl;
+  // std::cout << "--------------straight_ahead------: " << !test << std::endl;
    
   return !test;
 }
@@ -468,6 +468,7 @@ void Pathfinder::setObstacles(std::vector< Obstacle > obstacles)
  */ 
 void Pathfinder::regainObstacles()
 {
+  /* Shut up!
   std::cout << "===============regain" << std::endl;
   for(unsigned int i = 0; i < obstacles.size(); i++)
     {
@@ -475,6 +476,7 @@ void Pathfinder::regainObstacles()
       std::cout << "obst " << obstacles[i] << std::endl;
       std::cout << "class " << (obstacles[i] == NULL) << std::endl;
     }
+  */
   this->obstacles.clear();
   
   //generate a vector of obstacles in the scanning_area
@@ -575,23 +577,23 @@ std::vector< GtsPoint * > Pathfinder::getPath()
   //if there is no obstacle on the way, then the robot can drive ahead
   if(test_straight_ahead())
     {
-      std::cerr << "Target Point " << target_point << std::endl;
-      std::cerr << "robot Point " << robot_point << std::endl;
+      // std::cerr << "Target Point " << target_point << std::endl;
+      // std::cerr << "robot Point " << robot_point << std::endl;
       solution_path.push_back(gts_point_new(gts_point_class(), robot_point->x, robot_point->y, 0));
       solution_path.push_back(gts_point_new(gts_point_class(), target_point->x, target_point->y, 0));
         
-      std::cerr << "new Target Point " << solution_path[1] << std::endl;
-      std::cerr << "new robot Point " << solution_path[0] << std::endl;
-      cout << "solution_path " << solution_path.size() << endl;
+      // std::cerr << "new Target Point " << solution_path[1] << std::endl;
+      // std::cerr << "new robot Point " << solution_path[0] << std::endl;
+      // cout << "solution_path " << solution_path.size() << endl;
       g_timer_stop (timer);
-      cout << "Time for getPath(): " << g_timer_elapsed (timer, NULL) << endl;
+      // cout << "Time for getPath(): " << g_timer_elapsed (timer, NULL) << endl;
     }
   else 
     {
       // construct a new astar 
-      cout << "construct a new astar" << endl;
+      // cout << "construct a new astar" << endl;
       AStar * astar = new AStar();
-      cout << "Initialized AStar" << endl;
+      // cout << "Initialized AStar" << endl;
 
       // GtsPoint * robot_point_copy = gts_point_new(gts_point_class(), robot_point->x, robot_point->y, 0);
       // construct the initial situation and tell the goal somehow ;-)
@@ -599,41 +601,41 @@ std::vector< GtsPoint * > Pathfinder::getPath()
                                                robot_point, 
                                                gts_point_locate (robot_point, surface, NULL),  target_point, robot_point, 0, 0);
     
-      cout << "Initialized Initial State" << endl;
+      // cout << "Initialized Initial State" << endl;
 
       // solve the problem 
   
       std::vector< AStarState * > solution = astar->solve( initialState );
 
   
-      std::cerr << "Target Point " << target_point << std::endl;
-      std::cerr << "robot Point " << robot_point << std::endl;
+      // std::cerr << "Target Point " << target_point << std::endl;
+      // std::cerr << "robot Point " << robot_point << std::endl;
       // look at the solution
       for (unsigned int i = 0; i < solution.size(); i++ )
         {
           PathState * state = (PathState *)(solution[i]);
           GtsPoint * p = state->getPoint();
-          std::cerr << "getPoint " << p << std::endl;
+          // std::cerr << "getPoint " << p << std::endl;
           solution_path.push_back(gts_point_new(gts_point_class(), p->x, p->y, 0));
-          std::cerr << "new getPoint " << solution_path[solution_path.size() -1] << std::endl;
+          //std::cerr << "new getPoint " << solution_path[solution_path.size() -1] << std::endl;
         }
      
       // and delete the solution afterwards!!!!
       for (unsigned int j = 0; j < solution.size(); j++ )
         {
           PathState * state = (PathState *)(solution[j]);
-          std::cout << "prepar destroying " << state->key << std::endl;
+          // std::cout << "prepar destroying " << state->key << std::endl;
           delete state;
         }
     
       g_timer_stop (timer);
-      cout << "Time for getPath(): " << g_timer_elapsed (timer, NULL) << endl;
+      // cout << "Time for getPath(): " << g_timer_elapsed (timer, NULL) << endl;
       solution_path.push_back(gts_point_new(gts_point_class(), target_point->x, target_point->y, 0));
-      std::cerr << "new getPoint " << solution_path[solution_path.size() -1] << std::endl;
+      // std::cerr << "new getPoint " << solution_path[solution_path.size() -1] << std::endl;
      
       // solution_path.push_back(target_point);
     
-      cout << "solution_path " << solution_path.size() << endl;
+      // cout << "solution_path " << solution_path.size() << endl;
       delete astar;
     }
   g_timer_destroy(timer);

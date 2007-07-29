@@ -37,8 +37,6 @@
 #include <cmath>
 #include <unistd.h>
 
-#define NO_VMC
-
 /* @class MotorThread plugins/navigator/motor_thread.h
  * The thread controlling the motors.
  * It gets some driving commands and calculates the rpms for
@@ -57,10 +55,8 @@
  * The speed command.
  */
  
-/** Constructor. 
- * @param navigator_thread the navigator thread to add this class as notification listener
- */
-MotorThread::MotorThread(NavigatorThread *navigator_thread)
+/** Constructor. */
+MotorThread::MotorThread()
   : Thread("MotorThread", Thread::OPMODE_CONTINUOUS)
 {
   motor_interface = NULL;
@@ -69,8 +65,8 @@ MotorThread::MotorThread(NavigatorThread *navigator_thread)
   rotation = 0;
   speed = 0;
   logger_modulo_counter = 0;
-  navigator_thread->add_notification_listener(this);
   timeout_counter = 0;
+  old_alpha = old_beta = old_gamma = 0.f;
 }
 
 /** Destructor. */
@@ -94,15 +90,16 @@ MotorThread::init()
       logger->log_error("MotorThread", e);
       throw;
     }
-#ifndef NO_VMC
-  apiObject = new VMC::VMC_API();
-  
-  apiObject->selectHardwareAdapter(VMC::RS232);
 
+  apiObject = new VMC::VMC_API();
+
+  apiObject->selectHardwareAdapter(VMC::RS232);
   if ( ! apiObject->selectDevice("/dev/ttyS0") ) {
     throw Exception("MotorThread failed to open serial device VMC");
   }
-#endif  
+
+  motor_interface->setMotorState(MotorInterface::MOTOR_ENABLED);
+  motor_interface->write();
 }
 
 void
@@ -120,48 +117,10 @@ MotorThread::finalize()
       logger->log_error("MotorThread", e);
     }
     
-#ifndef NO_VMC
   apiObject->CloseDevice();
-  
   delete apiObject;
-#endif
 }
 
-/** Is called if the navigator thread is started.
- * It memorizes the id of the navigator thread
- * and sets the navigator as the current controller in the interface.
- * @param thread the navigator thread
- */
-void 
-MotorThread::thread_started(Thread *thread)
-{
-  std::cout << "navigator thread id " << thread->current_thread_id() << std::endl;
-  motor_interface->setControllerID(thread->current_thread_id());
-  motor_interface->write();
-}
-
-/** Just implemented for properness. It's empty.
- * @param thread the navigator thread
- */
-void 
-MotorThread::thread_init_failed(Thread *thread)
-{
-}
-
-/** Sets the driving command.
- * @param forward the forward command
- * @param sideward the sideward command
- * @param rotation the rotation command
- * @param speed the speed command
- */
-void 
-MotorThread::setCommand(double forward, double sideward, double rotation, double speed)
-{
-  this->forward = forward;
-  this->sideward = sideward;
-  this->rotation = rotation;
-  this->speed = speed;
-}
 
 /** Here the driving commands are transformed to the RPMs
  *   for the three motors.
@@ -173,137 +132,99 @@ MotorThread::loop()
     if ( motor_interface->msgq_size() > 0 ) {
     logger->log_error(name(), "We have %u messages", motor_interface->msgq_size());
     }*/
-  if ( motor_interface->msgq_first_is<MotorInterface::JoystickMessage>() )
-    {
-      MotorInterface::JoystickMessage* msg = motor_interface->msgq_first<MotorInterface::JoystickMessage>();
-
-      forward = msg->getCmdForward();
-      
-      sideward = msg->getCmdSideward();
-      
-      try 
-        {
-          rotation = msg->getCmdRotation() / (3 * config->get_float("navigator", "/motor_thread/joystick_rotation"));
-        } 
-      catch (Exception &e) 
-        {
-          logger->log_error("MotorThread", "loop()");
-          logger->log_error("MotorThread", e);
-          throw;
-        }
-      
-      speed = msg->getCmdSpeed();
-      
-  
-      /*
-        if((++logger_modulo_counter %= 30) == 0)
-        {
-        logger->log_info("MotorThread", "if1 forward command: %f  sideward command: %f  rotation command: %f speed commdan: %f", 
-        forward,
-        sideward,
-        rotation,
-        speed);
-        }
-      */
-      motor_interface->msgq_pop();
-    }
-  else if (/*!extern_control && */motor_interface->msgq_first_is<MotorInterface::NavigatorMessage>() )
-    {
-      MotorInterface::NavigatorMessage* msg = motor_interface->msgq_first<MotorInterface::NavigatorMessage>();
-
-      forward = msg->getCmdForward();
-      
-      sideward = msg->getCmdSideward();
-      
-      rotation = msg->getCmdRotation() / 3;
-      
-      speed = msg->getCmdVelocity();
-      
-  
-      /*  
-      // if((++logger_modulo_counter % 30) == 0)
+  if ( ! motor_interface->msgq_empty() ) {
+    if ( motor_interface->msgq_first_is<MotorInterface::TransRotRPMMessage>() )
       {
-      logger->log_info("MotorThread", "2 NavigatorMessage forward command: %f  sideward command: %f  roation command: %f speed commdan: %f", 
-      forward,
-      sideward,
-      rotation,
-      speed);
+	MotorInterface::TransRotRPMMessage* msg = motor_interface->msgq_first<MotorInterface::TransRotRPMMessage>();
+
+	if ( msg->sender_id() == motor_interface->getControllerThreadID() ) {
+	  forward = msg->getForward();
+	  sideward = msg->getSideward();
+	  rotation = msg->getRotation() / 3; // divide by three (motors)
+	  speed = msg->getSpeed();
+          /*
+	  logger->log_debug(name(), "Processing TransRotRPMMessage, forward: %f, "
+			            "sideward: %f, rotation: %f, speed: %f",
+			    forward, sideward, rotation, speed);
+          */
+	} else {
+	  logger->log_warn(name(), "Warning, received TransRotRPMMessage of thread %s (%lu), "
+			   "but the motor is currently controlled by thread %s (%lu)",
+			   msg->sender(), msg->sender_id(),
+			   motor_interface->getControllerThreadName(),
+			   motor_interface->getControllerThreadID());
+	}
       }
-      */
-      motor_interface->msgq_pop();
-    }
-  else if (motor_interface->msgq_first_is<MotorInterface::SubscribeMessage>() )
-    {
-      MotorInterface::SubscribeMessage* msg = motor_interface->msgq_first<MotorInterface::SubscribeMessage>();
-        
-      logger->log_info("MotorThread", "++++++++++++++++++++++++++++++++++++++++++++++Subscriber %lu", msg->getSubscriber());
-     
-     
-      motor_interface->setControllerID(msg->getSubscriber());
-      motor_interface->write();
-      
-      motor_interface->msgq_pop();
-    }
-  else
-    {
-      if(motor_interface->msgq_size() > 0)
-        {
-          logger->log_error("MotorThread", "Message of invalid type received from %s", motor_interface->msgq_first()->sender());
- 
-          motor_interface->msgq_pop();
-        }
-    }
-  /*   
-       if((++logger_modulo_counter %= 100) == 0)
-       {
-       logger->log_info("MotorThread", "3 forward command: %f  sideward command: %f  rotation command: %f speed commdan: %f", 
-       forward,
-       sideward,
-       rotation,
-       speed);
-                                                                                                                  
-       }
-  */   
-       
-  double dir = 60;
-  double alpha          = ((2./3.) * ((cos(deg2rad(dir))                * sideward)     + (sin(deg2rad(dir))                    * forward))) * speed    + rotation;
-  double beta           = ((2./3.) * ((cos(deg2rad(dir + 120))  * sideward)     + (sin(deg2rad(dir + 120))      * forward)))  * speed  + rotation;
-  double gamma          = ((2./3.) * ((cos(deg2rad(dir + 240))  * sideward)     + (sin(deg2rad(dir + 240))      * forward)))  * speed  + rotation;
+    else if (motor_interface->msgq_first_is<MotorInterface::AquireControlMessage>() )
+      {
+	MotorInterface::AquireControlMessage* msg = motor_interface->msgq_first<MotorInterface::AquireControlMessage>();
+
+	if ( msg->getThreadID() == 0 ) {
+	  motor_interface->setControllerThreadID(msg->sender_id());
+	  motor_interface->setControllerThreadName(msg->sender());
+	} else {
+	  motor_interface->setControllerThreadID(msg->getThreadID());
+	  motor_interface->setControllerThreadName(msg->getThreadName());
+	}
+	motor_interface->write();
+
+	logger->log_debug(name(), "Thread %s (%lu) aquired motor control",
+			  motor_interface->getControllerThreadName(),
+			  motor_interface->getControllerThreadID());
+      }
+    else if (motor_interface->msgq_first_is<MotorInterface::SetMotorStateMessage>() )
+      {
+	MotorInterface::SetMotorStateMessage* msg = motor_interface->msgq_first<MotorInterface::SetMotorStateMessage>();
+	// we really want to make sure that we got a correct message with useful values
+	// thus we check every single value
+	if ( msg->getMotorState() == MotorInterface::MOTOR_ENABLED ) {
+	  motor_interface->setMotorState(MotorInterface::MOTOR_ENABLED);
+          logger->log_info(name(), "Enabling motor control");
+	} else if ( msg->getMotorState() == MotorInterface::MOTOR_DISABLED ) {
+	  motor_interface->setMotorState(MotorInterface::MOTOR_DISABLED);
+          logger->log_info(name(), "Disabling motor control");
+	} else {
+	  logger->log_error(name(), "SetMotorStateMessage received with illegal value: %u",
+			    msg->getMotorState());
+	}
+      }
+    else
+      {
+	logger->log_error("MotorThread", "Message of invalid type received from %s", motor_interface->msgq_first()->sender());
+      }
+
+    motor_interface->msgq_pop();
+  }
+
+  double dir    = 60;
+  double alpha  = ((2./3.) * ((cos(deg2rad(dir))       * sideward) + (sin(deg2rad(dir))       * forward))) * speed  + rotation;
+  double beta   = ((2./3.) * ((cos(deg2rad(dir + 120)) * sideward) + (sin(deg2rad(dir + 120)) * forward))) * speed  + rotation;
+  double gamma  = ((2./3.) * ((cos(deg2rad(dir + 240)) * sideward) + (sin(deg2rad(dir + 240)) * forward))) * speed  + rotation;
+
+  /* VERY (!) noisy, use only for debugging
+  logger->log_info("MotorThread", " alpha : %f, beta: %f, gamma: %f, rotation: %f"
+		   " old_alpha : %f, old_beta: %f, old_gamma: %f",
+		   alpha, beta, gamma, rotation,
+		   old_alpha, old_beta, old_gamma );
+  */
            
-#ifndef NO_VMC 
-  if(alpha != 0 || beta != 0 || gamma != 0)
-    // && (++timeout_counter < 1000))
-    {  
-      apiObject->useVMC().MotorRPMs.Set(alpha, beta, gamma);
-      timeout_counter = 0;
-      // logger->log_error("MotorThread", "run");
-    }
-  else
-    {
+  if ( motor_interface->getMotorState() == MotorInterface::MOTOR_ENABLED ) {
+    if(alpha != 0 || beta != 0 || gamma != 0) {  
+	apiObject->useVMC().MotorRPMs.Set(alpha, beta, gamma);
+	timeout_counter = 0;
+    } else {
       apiObject->useVMC().MotorRPMs.Set(0, 0, 0);
       timeout_counter = 0;
-      // logger->log_warn("MotorThread", "STOP");
-
     }
-  usleep(15000);
-  /* else
-     {
-     timeout_counter = 2000;
-     logger->log_error("MotorThread", "STOP");
-      
-     if(alpha != 0 || beta != 0 || gamma != 0)
-     {
-     timeout_counter = 0;
-     }
-     }*/
-#endif
+    usleep(15000);
+  }
   if ( (alpha != old_alpha) || (beta != old_beta) || (gamma != old_gamma) ) {
-    logger->log_info("MotorThread", " alpha : %f, beta: %f, gamma: %f, rotation: %f", alpha, beta, gamma, rotation);
+    logger->log_info("MotorThread", " alpha : %f, beta: %f, gamma: %f, rotation: %f",
+		     alpha, beta, gamma, rotation);
     old_alpha = alpha;
     old_beta  = beta;
     old_gamma = gamma;
   }
-
            
   /*
     logger->log_info("MotorThread", "RPM1: %f  RPM2: %f  RPM3: %f ", 

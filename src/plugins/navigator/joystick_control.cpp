@@ -74,12 +74,23 @@ JoystickControl::JoystickControl(MotorInterface * motor_interface,
   logger_modulo_counter = 0;
   logger_modulo_counter2 = 0;
   last_kick_time = clock->now();
+
+  try {
+    joystick_max_acceleration = config->get_float("navigator",
+						  "/joystick_control/max_acceleration_rpm");
+    joystick_max_rotation     = config->get_float("navigator",
+						  "/joystick_control/max_rotation_rpm");
+  } catch (Exception &e) {
+    e.append("Joystick control could not read all desired config values.");
+    throw;
+  }
 }
 
 /** Destructor. */
 JoystickControl::~JoystickControl()
 {
 }
+
 
 /**  With this method the navigator network thread enqueues the kick command
  *   from the joystick tool to send it out to the kicker plugin.
@@ -118,7 +129,7 @@ JoystickControl::enqueueKick(bool left, bool center, bool right)
  */
 void
 JoystickControl::enqueueCommand(double forward, double sideward,
-                                 double rotation, double max_speed)
+				double rotation, double max_speed)
 {
   double axis_scale = sqrt(pow(forward, 2) + pow(sideward, 2));
   double rotation_scale = fabs(rotation);
@@ -136,9 +147,7 @@ JoystickControl::enqueueCommand(double forward, double sideward,
            && actual_rotation_scale <= rotation_scale
            && max_speed * rotation_scale >= actual_speed)
     {
-      actual_speed +=
-        (max_speed * rotation_scale) / config->get_float ("navigator",
-                                                          "/joystick_c/max_acceleration");
+      actual_speed += (max_speed * rotation_scale) / joystick_max_acceleration;
       //  logger->log_info("JoystickControl", "if4 actual speed: %f speed: %f", actual_speed, max_speed);
     }
   else if((forward != 0. || sideward != 0. || rotation != 0.)
@@ -147,9 +156,7 @@ JoystickControl::enqueueCommand(double forward, double sideward,
     {
       try
         {
-          actual_speed +=
-            (max_speed * axis_scale) / config->get_float("navigator",
-                                                          "/joystick_c/max_acceleration");
+          actual_speed += (max_speed * axis_scale) / joystick_max_acceleration;
           // logger->log_info("JoystickControl", "/joystick_c/max_acceleration: %f", config->get_float("navigator", "/joystick_c/max_acceleration"));
 
           //      logger->log_info("JoystickControl", "if2 actual speed: %f speed: %f", actual_speed,max_speed);
@@ -188,9 +195,11 @@ JoystickControl::enqueueCommand(double forward, double sideward,
      logger->log_info("JoystickControl", "actual speed: %f max_speed: %f", actual_speed, max_speed);
      logger->log_info("JoystickControl", "actual_joystick_axis_scale: %f sqrt(fabs(forward) + fabs(sideward))/sqrt(2): %f", actual_joystick_axis_scale, sqrt(fabs(forward) + fabs(sideward))/sqrt(2));
   */
-  MotorInterface::JoystickMessage * msg =
-    new MotorInterface::JoystickMessage(forward, sideward, rotation,
-                                         actual_speed);
+
+  rotation *= joystick_max_rotation;
+
+  MotorInterface::TransRotRPMMessage * msg =
+    new MotorInterface::TransRotRPMMessage(forward, sideward, rotation, actual_speed);
 
   motor_interface->msgq_enqueue(msg);
 

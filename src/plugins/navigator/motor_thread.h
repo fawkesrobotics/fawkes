@@ -44,25 +44,17 @@ namespace VMC
 
 
 class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect, 
-                    public ConfigurableAspect, public ThreadNotificationListener
+                    public ConfigurableAspect
 {
  public:
-  MotorThread(NavigatorThread *navigator_thread);
+  MotorThread();
         
   virtual ~MotorThread();
         
   virtual void loop();
-    
   virtual void init();
-    
   virtual void finalize();
     
-  void setCommand(double forward, double sideward, double rotation, double speed);
-    
-  void thread_started(Thread *thread);
-    
-  void thread_init_failed(Thread *thread);
-        
  private:
   VMC::VMC_API *apiObject;
     

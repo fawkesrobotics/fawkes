@@ -64,7 +64,6 @@ NavigatorThread::finalize()
 void
 NavigatorThread::init()
 {
-  logger->log_error("NavigatorThread", "Opening navigator interface");
   try 
     {
       navigator_interface = interface_manager->open_for_writing<NavigatorInterface>("Navigator");
@@ -88,6 +87,15 @@ NavigatorThread::init()
       logger->log_error("NavigatorThread", e);
       throw;
     }
+
+}
+
+
+void
+NavigatorThread::once()
+{
+  MotorInterface::AquireControlMessage *msg = new MotorInterface::AquireControlMessage();
+  motor_interface->msgq_enqueue(msg);
 }
 
 

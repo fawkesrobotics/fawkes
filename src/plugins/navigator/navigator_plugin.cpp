@@ -41,13 +41,11 @@ NavigatorPlugin::NavigatorPlugin()
   : Plugin(Plugin::MOTION, "navigator_plugin")
 {
   NavigatorThread *navigator_thread = new NavigatorThread();
-  
-  thread_list.push_back(navigator_thread);
-  
-  thread_list.push_back(new MotorThread(navigator_thread));
 
+  // Motor MUST be first! Navigator sends AquireControlMessage
+  thread_list.push_back(new MotorThread());
+  thread_list.push_back(navigator_thread);
   thread_list.push_back(new NavigatorNetworkThread(navigator_thread));
-  
 }
 
 EXPORT_PLUGIN(NavigatorPlugin)

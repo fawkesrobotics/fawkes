@@ -45,8 +45,11 @@ class NavigatorThread : public Thread, public BlockedTimingAspect, public Loggin
   virtual ~NavigatorThread();
         
   virtual void init();
-  virtual void loop();
   virtual void finalize();
+
+  virtual void loop();
+  virtual void once();
+
  private:
     
   NavigatorInterface *navigator_interface;
