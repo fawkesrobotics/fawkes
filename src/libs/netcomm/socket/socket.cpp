@@ -587,16 +587,19 @@ Socket::send(void *buf, size_t buf_len)
  * read() is recommended.
  * @param buf buffer to read data into
  * @param buf_len length of buffer, number of bytes to read from stream
- * @see write
+ * @exception SocketException thrown if an error occurs or the other side
+ * has closed the connection.
  */
-void
+size_t
 Socket::recv(void *buf, size_t buf_len)
 {
-  try {
-    read(buf, buf_len);
-  } catch (SocketException &e) {
-    throw;
+  ssize_t rv;
+  if ( (rv = ::recv(sock_fd, buf, buf_len, 0)) == -1 ) {
+    throw SocketException("recv() failed", errno);
+  } else if ( rv == 0 ) {
+    throw SocketException("Other side closed the connection");
   }
+  return rv;
 }
 
 
@@ -642,75 +645,28 @@ Socket::send(void *buf, size_t buf_len,
 
 
 /** Receive data.
+ * This will use recvfrom() to read data from the socket and returns the
+ * number of bytes actually read. It will not wait until the requested
+ * number of bytes has been read. Use read() if you need this.
  * @param buf buffer that read data shall be stored in.
  * @param buf_len length of buffer and number of bytes to be read
  * @param addr return parameter, contains address of sender
  * @param addr_len initially has to contain size of address, on return
  * contains the actual bytes used.
  */
-void
+size_t
 Socket::recv(void *buf, size_t buf_len,
 	     struct sockaddr *addr, socklen_t *addr_len)
 {
-  int retval = 0;
-  unsigned int bytes_read = 0;
+  ssize_t rv = 0;
 
-  struct timeval start, now;
-
-  gettimeofday(&start, NULL);
-
-  do {
-    retval = ::recvfrom(sock_fd, (char *)buf + bytes_read, buf_len - bytes_read, 0,
-			addr, addr_len);
-    if (retval == -1) {
-      if (errno != EAGAIN) {
-	throw SocketException("Could not read data", errno);
-      } else {
-	// just to meet loop condition
-	retval = 0;
-      }
-    } else {
-      bytes_read += retval;
-      // reset timeout
-      gettimeofday(&start, NULL);
-    }
-    gettimeofday(&now, NULL);
-    usleep(0);
-  } while ((bytes_read < buf_len) && (time_diff_sec(now, start) < timeout) );
-
-  if ( bytes_read < buf_len) {
-    throw SocketException("Read timeout");
-  }
-}
-
-
-/** Receive data.
- * @param buf buffer that read data shall be stored in.
- * @param buf_len set to length of buffer and maximum number of bytes to be read,
- * upon returns contains the number of actual bytes read
- * @param addr return parameter, contains address of sender
- * @param addr_len initially has to contain size of address, on return
- * contains the actual bytes used.
- */
-void
-Socket::recv(void *buf, size_t *buf_len,
-	     struct sockaddr *addr, socklen_t *addr_len)
-{
-  int retval = 0;
-  unsigned int bytes_read = 0;
-
-  retval = ::recvfrom(sock_fd, (char *)buf, *buf_len, 0, addr, addr_len);
-  if (retval == -1) {
-    if (errno != EAGAIN) {
-      throw SocketException("Could not read data", errno);
-    } else {
-      bytes_read = 0;
-    }
+  if ( (rv = ::recvfrom(sock_fd, buf, buf_len, 0, addr, addr_len)) == -1) {
+    throw SocketException("recvfrom() failed", errno);
+  } else if ( rv == 0 ) {
+    throw SocketException("Peer has closed the connection");
   } else {
-    bytes_read = retval;
+    return rv;
   }
-
-  *buf_len = bytes_read;
 }
 
 

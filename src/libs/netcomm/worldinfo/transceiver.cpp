@@ -569,7 +569,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 
     if ( max_num_msgs != 0 )  ++num_msgs;
 
-    s->recv(crypted_in_buffer, &bytes, (struct sockaddr *)&from, &addr_len);
+    bytes = s->recv(crypted_in_buffer, bytes, (struct sockaddr *)&from, &addr_len);
 
     // decryptor decrypts to in_buffer, see constructor
     decryptor->set_crypt_buffer(crypted_in_buffer, bytes);
