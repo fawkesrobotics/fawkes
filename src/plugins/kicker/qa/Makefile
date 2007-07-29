@@ -41,11 +41,16 @@ LIBS_qa_kicker_control = stdc++ iowkit
 OBJS_qa_kicker_control = qa_kicker_control.o		\
 		         ../kicker_control.o
 
-OBJS_all =	$(OBJS_qa_kicker_control)
+LIBS_qa_kicker_bb = stdc++ core aspects interfaces
+OBJS_qa_kicker_bb = qa_kicker_bb.o
+
+OBJS_all =	$(OBJS_qa_kicker_control)		\
+		$(OBJS_qa_kicker_bb)
 
 ifeq ($(HAVE_IOWKIT),1)
   BINS_all =	$(BINDIR)/qa_kicker_control
 endif
+PLUGINS_all = $(PLUGINDIR)/qa_kicker_bb.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

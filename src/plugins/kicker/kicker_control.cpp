@@ -117,7 +117,7 @@ KickerControl::set_intensity(unsigned char _intensity, bool force)
 	  intensity = _intensity;
 	  
 	  DWORD val;
-	  val = INTENSITY_OFFSET * intensity;
+	  val = INTENSITY_OFFSET * intensity + (_guidance_right ? 0 : KICKER_GUIDANCE);
 	  return write(val);
 	}
       
@@ -158,13 +158,14 @@ KickerControl::kick(bool kick_right,
     }
   
   val += INTENSITY_OFFSET * intensity;
+  val += (_guidance_right ? 0 : KICKER_GUIDANCE);
   
   if (!write(val))
     return false;
 
   usleep(WAIT_BEFORE_RETRACT);
 
-  if (!write(INTENSITY_OFFSET * intensity))
+  if (!write(INTENSITY_OFFSET * intensity + (_guidance_right ? 0 : KICKER_GUIDANCE)))
     return false;
 
   return true;
