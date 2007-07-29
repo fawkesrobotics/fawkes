@@ -78,11 +78,14 @@ class Thread {
 
   OpMode        opmode() const;
   const char *  name() const;
+  pthread_t     thread_id() const;
 
   static Thread *  current_thread();
   static pthread_t current_thread_id();
 
   static void      init_main();
+
+  void set_delete_on_exit(bool del);
 
   void add_notification_listener(ThreadNotificationListener *notification_listener);
   void remove_notification_listener(ThreadNotificationListener *notification_listener);
@@ -93,6 +96,7 @@ class Thread {
   void exit();
   void test_cancel();
 
+  virtual void once();
   virtual void loop();
 
   bool       finalize_prepared;
@@ -123,6 +127,7 @@ class Thread {
 
   bool           __started;
   bool           __cancelled;
+  bool           __delete_on_exit;
   char          *__name;
 
   OpMode         __op_mode;

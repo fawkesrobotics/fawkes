@@ -224,6 +224,7 @@ Thread::__constructor(const char *name, OpMode op_mode)
   __barrier     = NULL;
   __started     = false;
   __cancelled   = false;
+  __delete_on_exit = false;
 
   __finalize_mutex = new Mutex();
   __finalize_sync_lock = NULL;
@@ -472,6 +473,7 @@ Thread::entry(void *pthis)
   t->notify_of_startup();
 
   // Run thread
+  t->once();
   t->run();
 
   // have no useful exit value
@@ -486,6 +488,9 @@ Thread::entry(void *pthis)
 void
 Thread::exit()
 {
+  if ( __delete_on_exit ) {
+    delete this;
+  }
   pthread_exit(NULL);
 }
 
@@ -544,6 +549,16 @@ const char *
 Thread::name() const
 {
   return __name;
+}
+
+
+/** Get ID of thread.
+ * @return thread ID
+ */
+pthread_t
+Thread::thread_id() const
+{
+  return __thread_id;
 }
 
 
@@ -646,12 +661,44 @@ Thread::wakeup(Barrier *barrier)
 
 /** Code to execute in the thread.
  * Implement this method to hold the code you want to be executed continously.
+ * If you do not implement this method, the default is that the thread will exit.
+ * This is useful if you choose to only implement once().
  */
 void
 Thread::loop()
 {
+  if ( __delete_on_exit ) {
+    delete this;
+  }
+  pthread_exit(NULL);
 }
 
+
+/** Execute an action exactly once.
+ * This code is executed once and only once right after the thread is started
+ * before loop() is called.
+ * This is useful if you want to implement an one-shot background job. Just implement
+ * once() and leave once() untouched. Start the thread and detach it and it will just
+ * do its job and then die automatically. If you use set_delete_on_exit(true) even the
+ * Thread instance will be automatically deleted.
+ */
+void
+Thread::once()
+{
+}
+
+
+/** Set whether the thread should be deleted on exit.
+ * If you set this to true the thread instance is deleted if the threads exits
+ * (only on internal exits, not if you cancel the thread!).
+ * This is particularly useful if you only implement once() and not loop().
+ * @param del true to delete thread on exit, false otherwise
+ */
+void
+Thread::set_delete_on_exit(bool del)
+{
+  __delete_on_exit = del;
+}
 
 /** Add notification listener.
  * Add a notification listener for this thread.
