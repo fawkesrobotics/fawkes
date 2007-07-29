@@ -58,9 +58,18 @@ class KickerInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    int NumKicksLeft; /**< Number of Left-Kicks */
-    int NumKicksCenter; /**< Number of Center-Kicks */
-    int NumKicksRight; /**< Number of Right-Kicks */
+    unsigned int CurrentIntensity; /**< 
+      The currently set intensity.
+     */
+    int NumKicksLeft; /**< 
+      Number of Left-Kicks
+     */
+    int NumKicksCenter; /**< 
+      Number of Center-Kicks
+     */
+    int NumKicksRight; /**< 
+      Number of Right-Kicks
+     */
     GuideBallSideEnum GuideBallSide; /**< Side where the ball
       guidance arm is currently erected. */
   } KickerInterface_data_t;
@@ -74,28 +83,28 @@ class KickerInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      int Intensity; /**< Intensity */
-      bool CmdKickLeft; /**< CmdKickLeft */
-      bool CmdKickCenter; /**< CmdKickCenter */
-      bool CmdKickRight; /**< CmdKickRight */
+      unsigned int Intensity; /**< Intensity in the range [0..255]. */
+      bool CmdKickLeft; /**< True to kick with left kicker. */
+      bool CmdKickCenter; /**< True to kick with central kicker. */
+      bool CmdKickRight; /**< True to kick with right kicker. */
     } KickMessage_data_t;
 
     KickMessage_data_t *data;
 
    public:
-    KickMessage(bool iniCmdKickLeft, bool iniCmdKickCenter, bool iniCmdKickRight, int iniIntensity);
+    KickMessage(bool iniCmdKickLeft, bool iniCmdKickCenter, bool iniCmdKickRight, unsigned int iniIntensity);
     KickMessage();
     ~KickMessage();
 
     /* Methods */
     bool isCmdKickLeft();
-    void setCmdKickLeft(bool newCmdKickLeft);
+    void setCmdKickLeft(const bool newCmdKickLeft);
     bool isCmdKickCenter();
-    void setCmdKickCenter(bool newCmdKickCenter);
+    void setCmdKickCenter(const bool newCmdKickCenter);
     bool isCmdKickRight();
-    void setCmdKickRight(bool newCmdKickRight);
-    int getIntensity();
-    void setIntensity(int newIntensity);
+    void setCmdKickRight(const bool newCmdKickRight);
+    unsigned int getIntensity();
+    void setIntensity(const unsigned int newIntensity);
   };
 
   class ResetCounterMessage : public Message
@@ -131,7 +140,7 @@ class KickerInterface : public Interface
 
     /* Methods */
     GuideBallSideEnum getGuideBallSide();
-    void setGuideBallSide(GuideBallSideEnum newGuideBallSide);
+    void setGuideBallSide(const GuideBallSideEnum newGuideBallSide);
   };
 
   virtual bool messageValid(const Message *message) const;
@@ -142,13 +151,15 @@ class KickerInterface : public Interface
  public:
   /* Methods */
   int getNumKicksLeft();
-  void setNumKicksLeft(int newNumKicksLeft);
+  void setNumKicksLeft(const int newNumKicksLeft);
   int getNumKicksCenter();
-  void setNumKicksCenter(int newNumKicksCenter);
+  void setNumKicksCenter(const int newNumKicksCenter);
   int getNumKicksRight();
-  void setNumKicksRight(int newNumKicksRight);
+  void setNumKicksRight(const int newNumKicksRight);
   GuideBallSideEnum getGuideBallSide();
-  void setGuideBallSide(GuideBallSideEnum newGuideBallSide);
+  void setGuideBallSide(const GuideBallSideEnum newGuideBallSide);
+  unsigned int getCurrentIntensity();
+  void setCurrentIntensity(const unsigned int newCurrentIntensity);
 
 };
 

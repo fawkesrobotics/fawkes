@@ -505,6 +505,7 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	    "{\n"
 	    "  data_size = sizeof(%s_data_t);\n"
 	    "  data_ptr  = malloc(data_size);\n"
+	    "  memset(data_ptr, 0, data_size);\n"
 	    "  data      = (%s_data_t *)data_ptr;\n",
 	    super_class.c_str(), classname.c_str(), classname.c_str());
     
@@ -528,6 +529,7 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	  "{\n"
 	  "  data_size = sizeof(%s_data_t);\n"
 	  "  data_ptr  = malloc(data_size);\n"
+	  "  memset(data_ptr, 0, data_size);\n"
 	  "  data      = (%s_data_t *)data_ptr;\n"
 	  "}\n"
 	  "/** Destructor */\n"
@@ -581,7 +583,7 @@ InterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
 	    " * @param new%s new %s value\n"
 	    " */\n"
 	    "void\n"
-	    "%s%s::set%s(%s new%s)\n"
+	    "%s%s::set%s(const %s new%s)\n"
 	    "{\n",
 	    (*i).getName().c_str(),
 	    (*i).getComment().c_str(),	    
@@ -621,7 +623,7 @@ InterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ is,
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
     fprintf(f,
 	    "%s%s %s%s();\n"
-	    "%svoid set%s(%s new%s);\n",
+	    "%svoid set%s(const %s new%s);\n",
 	    is.c_str(), (*i).getAccessType().c_str(),
 	    ( ((*i).getType() == "bool" ) ? "is" : "get"),
 	    (*i).getName().c_str(),

@@ -66,7 +66,7 @@ NavigatorInterface::getFoo()
  * @param newFoo new Foo value
  */
 void
-NavigatorInterface::setFoo(int newFoo)
+NavigatorInterface::setFoo(const int newFoo)
 {
   data->Foo = newFoo;
 }
@@ -89,6 +89,7 @@ NavigatorInterface::TargetMessage::TargetMessage(float iniDistance, float iniAng
 {
   data_size = sizeof(TargetMessage_data_t);
   data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
   data      = (TargetMessage_data_t *)data_ptr;
   data->Distance = iniDistance;
   data->Angle = iniAngle;
@@ -100,6 +101,7 @@ NavigatorInterface::TargetMessage::TargetMessage() : Message()
 {
   data_size = sizeof(TargetMessage_data_t);
   data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
   data      = (TargetMessage_data_t *)data_ptr;
 }
 /** Destructor */
@@ -122,7 +124,7 @@ NavigatorInterface::TargetMessage::getDistance()
  * @param newDistance new Distance value
  */
 void
-NavigatorInterface::TargetMessage::setDistance(float newDistance)
+NavigatorInterface::TargetMessage::setDistance(const float newDistance)
 {
   data->Distance = newDistance;
 }
@@ -142,7 +144,7 @@ NavigatorInterface::TargetMessage::getAngle()
  * @param newAngle new Angle value
  */
 void
-NavigatorInterface::TargetMessage::setAngle(float newAngle)
+NavigatorInterface::TargetMessage::setAngle(const float newAngle)
 {
   data->Angle = newAngle;
 }
@@ -162,7 +164,7 @@ NavigatorInterface::TargetMessage::getX()
  * @param newX new X value
  */
 void
-NavigatorInterface::TargetMessage::setX(float newX)
+NavigatorInterface::TargetMessage::setX(const float newX)
 {
   data->X = newX;
 }
@@ -182,7 +184,7 @@ NavigatorInterface::TargetMessage::getY()
  * @param newY new Y value
  */
 void
-NavigatorInterface::TargetMessage::setY(float newY)
+NavigatorInterface::TargetMessage::setY(const float newY)
 {
   data->Y = newY;
 }
@@ -201,6 +203,7 @@ NavigatorInterface::VelocityMessage::VelocityMessage(float iniVelocity) : Messag
 {
   data_size = sizeof(VelocityMessage_data_t);
   data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
   data      = (VelocityMessage_data_t *)data_ptr;
   data->Velocity = iniVelocity;
 }
@@ -209,6 +212,7 @@ NavigatorInterface::VelocityMessage::VelocityMessage() : Message()
 {
   data_size = sizeof(VelocityMessage_data_t);
   data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
   data      = (VelocityMessage_data_t *)data_ptr;
 }
 /** Destructor */
@@ -231,7 +235,7 @@ NavigatorInterface::VelocityMessage::getVelocity()
  * @param newVelocity new Velocity value
  */
 void
-NavigatorInterface::VelocityMessage::setVelocity(float newVelocity)
+NavigatorInterface::VelocityMessage::setVelocity(const float newVelocity)
 {
   data->Velocity = newVelocity;
 }

@@ -3,7 +3,7 @@
  *  motor.h - Fawkes BlackBoard Interface - MotorInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2007  Martin Liebenberg
+ *  Copyright  2007  Martin Liebenberg, Tim Niemueller
  *
  *  $Id$
  *
@@ -39,117 +39,116 @@ class MotorInterface : public Interface
  /// @endcond
  public:
   /* constants */
+  static const unsigned int MOTOR_ENABLED;
+  static const unsigned int MOTOR_DISABLED;
 
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    int RPM1; /**< RPM of motor 1. */
-    int RPM2; /**< RPM of motor 2. */
-    int RPM3; /**< RPM of motor 3. */
-    unsigned long int ControllerID; /**< The ID of the Controller Thread, which controlls the motors. */
+    int RightRPM; /**< 
+      RPM of the motor on the right front of the robot.
+     */
+    int BackRPM; /**< 
+      RPM of motor on the back of the robot.
+     */
+    int LeftRPM; /**< 
+      RPM of the motor on the left front of the robot.
+     */
+    unsigned long int ControllerThreadID; /**< 
+     The ID of the controlling thread.
+     Only from this thread command messages are accepted.
+     */
+    unsigned int MotorState : 1; /**< 
+      The current state of the motor.
+     */
+    char ControllerThreadName[64]; /**< 
+     The name of the controlling thread.
+   */
   } MotorInterface_data_t;
 
   MotorInterface_data_t *data;
 
  public:
   /* messages */
-  class JoystickMessage : public Message
+  class SetMotorStateMessage : public Message
   {
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float CmdForward; /**< The forward command. */
-      float CmdSideward; /**< The sideward command. */
-      float CmdRotation; /**< The rotation command. */
-      float CmdSpeed; /**< The speed command. */
-    } JoystickMessage_data_t;
+      unsigned int MotorState; /**< 
+      The new motor state to set. Use the MOTOR_* constants.
+     */
+    } SetMotorStateMessage_data_t;
 
-    JoystickMessage_data_t *data;
+    SetMotorStateMessage_data_t *data;
 
    public:
-    JoystickMessage(float iniCmdForward, float iniCmdSideward, float iniCmdRotation, float iniCmdSpeed);
-    JoystickMessage();
-    ~JoystickMessage();
+    SetMotorStateMessage(unsigned int iniMotorState);
+    SetMotorStateMessage();
+    ~SetMotorStateMessage();
 
     /* Methods */
-    float getCmdForward();
-    void setCmdForward(float newCmdForward);
-    float getCmdSideward();
-    void setCmdSideward(float newCmdSideward);
-    float getCmdRotation();
-    void setCmdRotation(float newCmdRotation);
-    float getCmdSpeed();
-    void setCmdSpeed(float newCmdSpeed);
+    unsigned int getMotorState();
+    void setMotorState(const unsigned int newMotorState);
   };
 
-  class NavigatorMessage : public Message
+  class AquireControlMessage : public Message
   {
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float CmdForward; /**< The forward command. */
-      float CmdSideward; /**< The sideward command. */
-      float CmdRotation; /**< The rotation command. */
-      float CmdVelocity; /**< The velocity command. */
-    } NavigatorMessage_data_t;
+      unsigned long int ThreadID; /**< 
+      The thread ID of the thread which is allowed to control the motors.
+      Set to zero to use the data of the current thread (the message is zeroed at
+      creation automatically, so if you do not set anything the sending thread
+      aquires the control.
+     */
+      char ThreadName[64]; /**< 
+      The thread name of the aquiring thread.
+     */
+    } AquireControlMessage_data_t;
 
-    NavigatorMessage_data_t *data;
+    AquireControlMessage_data_t *data;
 
    public:
-    NavigatorMessage(float iniCmdForward, float iniCmdSideward, float iniCmdRotation, float iniCmdVelocity);
-    NavigatorMessage();
-    ~NavigatorMessage();
+    AquireControlMessage(unsigned long int iniThreadID, char * iniThreadName);
+    AquireControlMessage();
+    ~AquireControlMessage();
 
     /* Methods */
-    float getCmdForward();
-    void setCmdForward(float newCmdForward);
-    float getCmdSideward();
-    void setCmdSideward(float newCmdSideward);
-    float getCmdRotation();
-    void setCmdRotation(float newCmdRotation);
-    float getCmdVelocity();
-    void setCmdVelocity(float newCmdVelocity);
+    unsigned long int getThreadID();
+    void setThreadID(const unsigned long int newThreadID);
+    char * getThreadName();
+    void setThreadName(const char * newThreadName);
   };
 
-  class SwitchMessage : public Message
+  class TransRotRPMMessage : public Message
   {
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned int ThreadId; /**< The Thread Id of the Thread
-    		which is allowed to control the motors. */
-    } SwitchMessage_data_t;
+      float Forward; /**< The forward command. */
+      float Sideward; /**< The sideward command. */
+      float Rotation; /**< The rotation command. */
+      float Speed; /**< The speed command. */
+    } TransRotRPMMessage_data_t;
 
-    SwitchMessage_data_t *data;
-
-   public:
-    SwitchMessage(unsigned int iniThreadId);
-    SwitchMessage();
-    ~SwitchMessage();
-
-    /* Methods */
-    unsigned int getThreadId();
-    void setThreadId(unsigned int newThreadId);
-  };
-
-  class SubscribeMessage : public Message
-  {
-   private:
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-      unsigned int Subscriber; /**< 0 if unsubscribe and 1 if subscribe. */
-    } SubscribeMessage_data_t;
-
-    SubscribeMessage_data_t *data;
+    TransRotRPMMessage_data_t *data;
 
    public:
-    SubscribeMessage(unsigned int iniSubscriber);
-    SubscribeMessage();
-    ~SubscribeMessage();
+    TransRotRPMMessage(float iniForward, float iniSideward, float iniRotation, float iniSpeed);
+    TransRotRPMMessage();
+    ~TransRotRPMMessage();
 
     /* Methods */
-    unsigned int getSubscriber();
-    void setSubscriber(unsigned int newSubscriber);
+    float getForward();
+    void setForward(const float newForward);
+    float getSideward();
+    void setSideward(const float newSideward);
+    float getRotation();
+    void setRotation(const float newRotation);
+    float getSpeed();
+    void setSpeed(const float newSpeed);
   };
 
   virtual bool messageValid(const Message *message) const;
@@ -159,14 +158,18 @@ class MotorInterface : public Interface
 
  public:
   /* Methods */
-  int getRPM1();
-  void setRPM1(int newRPM1);
-  int getRPM2();
-  void setRPM2(int newRPM2);
-  int getRPM3();
-  void setRPM3(int newRPM3);
-  unsigned long int getControllerID();
-  void setControllerID(unsigned long int newControllerID);
+  unsigned int getMotorState();
+  void setMotorState(const unsigned int newMotorState);
+  int getRightRPM();
+  void setRightRPM(const int newRightRPM);
+  int getBackRPM();
+  void setBackRPM(const int newBackRPM);
+  int getLeftRPM();
+  void setLeftRPM(const int newLeftRPM);
+  unsigned long int getControllerThreadID();
+  void setControllerThreadID(const unsigned long int newControllerThreadID);
+  char * getControllerThreadName();
+  void setControllerThreadName(const char * newControllerThreadName);
 
 };
 

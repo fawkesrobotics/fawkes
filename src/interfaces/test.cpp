@@ -71,7 +71,7 @@ TestInterface::getTestInt()
  * @param newTestInt new TestInt value
  */
 void
-TestInterface::setTestInt(int newTestInt)
+TestInterface::setTestInt(const int newTestInt)
 {
   data->TestInt = newTestInt;
 }
@@ -91,7 +91,7 @@ TestInterface::getFlags()
  * @param newFlags new Flags value
  */
 void
-TestInterface::setFlags(unsigned int newFlags)
+TestInterface::setFlags(const unsigned int newFlags)
 {
   data->Flags = newFlags;
 }
@@ -111,7 +111,7 @@ TestInterface::getTestString()
  * @param newTestString new TestString value
  */
 void
-TestInterface::setTestString(char * newTestString)
+TestInterface::setTestString(const char * newTestString)
 {
   strncpy(data->TestString, newTestString, sizeof(data->TestString));
 }
@@ -131,7 +131,7 @@ TestInterface::getResult()
  * @param newResult new Result value
  */
 void
-TestInterface::setResult(int newResult)
+TestInterface::setResult(const int newResult)
 {
   data->Result = newResult;
 }
@@ -151,7 +151,7 @@ TestInterface::getTestUInt()
  * @param newTestUInt new TestUInt value
  */
 void
-TestInterface::setTestUInt(unsigned int newTestUInt)
+TestInterface::setTestUInt(const unsigned int newTestUInt)
 {
   data->TestUInt = newTestUInt;
 }
@@ -171,7 +171,7 @@ TestInterface::getTestULInt()
  * @param newTestULInt new TestULInt value
  */
 void
-TestInterface::setTestULInt(unsigned long int newTestULInt)
+TestInterface::setTestULInt(const unsigned long int newTestULInt)
 {
   data->TestULInt = newTestULInt;
 }
@@ -191,7 +191,7 @@ TestInterface::getTestLInt()
  * @param newTestLInt new TestLInt value
  */
 void
-TestInterface::setTestLInt(long int newTestLInt)
+TestInterface::setTestLInt(const long int newTestLInt)
 {
   data->TestLInt = newTestLInt;
 }
@@ -211,6 +211,7 @@ TestInterface::SetTestIntMessage::SetTestIntMessage(int iniTestInt) : Message()
 {
   data_size = sizeof(SetTestIntMessage_data_t);
   data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
   data->TestInt = iniTestInt;
 }
@@ -219,6 +220,7 @@ TestInterface::SetTestIntMessage::SetTestIntMessage() : Message()
 {
   data_size = sizeof(SetTestIntMessage_data_t);
   data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
 }
 /** Destructor */
@@ -241,7 +243,7 @@ TestInterface::SetTestIntMessage::getTestInt()
  * @param newTestInt new TestInt value
  */
 void
-TestInterface::SetTestIntMessage::setTestInt(int newTestInt)
+TestInterface::SetTestIntMessage::setTestInt(const int newTestInt)
 {
   data->TestInt = newTestInt;
 }
@@ -260,6 +262,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage(char * iniTestString) 
 {
   data_size = sizeof(SetTestStringMessage_data_t);
   data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
   strncpy(data->TestString, iniTestString, 30);
 }
@@ -268,6 +271,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage() : Message()
 {
   data_size = sizeof(SetTestStringMessage_data_t);
   data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
 }
 /** Destructor */
@@ -290,7 +294,7 @@ TestInterface::SetTestStringMessage::getTestString()
  * @param newTestString new TestString value
  */
 void
-TestInterface::SetTestStringMessage::setTestString(char * newTestString)
+TestInterface::SetTestStringMessage::setTestString(const char * newTestString)
 {
   strncpy(data->TestString, newTestString, sizeof(data->TestString));
 }
@@ -310,6 +314,7 @@ TestInterface::CalculateMessage::CalculateMessage(int iniSummand, int iniAddend)
 {
   data_size = sizeof(CalculateMessage_data_t);
   data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
   data->Summand = iniSummand;
   data->Addend = iniAddend;
@@ -319,6 +324,7 @@ TestInterface::CalculateMessage::CalculateMessage() : Message()
 {
   data_size = sizeof(CalculateMessage_data_t);
   data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
 }
 /** Destructor */
@@ -341,7 +347,7 @@ TestInterface::CalculateMessage::getSummand()
  * @param newSummand new Summand value
  */
 void
-TestInterface::CalculateMessage::setSummand(int newSummand)
+TestInterface::CalculateMessage::setSummand(const int newSummand)
 {
   data->Summand = newSummand;
 }
@@ -361,7 +367,7 @@ TestInterface::CalculateMessage::getAddend()
  * @param newAddend new Addend value
  */
 void
-TestInterface::CalculateMessage::setAddend(int newAddend)
+TestInterface::CalculateMessage::setAddend(const int newAddend)
 {
   data->Addend = newAddend;
 }

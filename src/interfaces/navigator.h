@@ -70,13 +70,13 @@ class NavigatorInterface : public Interface
 
     /* Methods */
     float getDistance();
-    void setDistance(float newDistance);
+    void setDistance(const float newDistance);
     float getAngle();
-    void setAngle(float newAngle);
+    void setAngle(const float newAngle);
     float getX();
-    void setX(float newX);
+    void setX(const float newX);
     float getY();
-    void setY(float newY);
+    void setY(const float newY);
   };
 
   class VelocityMessage : public Message
@@ -96,7 +96,7 @@ class NavigatorInterface : public Interface
 
     /* Methods */
     float getVelocity();
-    void setVelocity(float newVelocity);
+    void setVelocity(const float newVelocity);
   };
 
   virtual bool messageValid(const Message *message) const;
@@ -107,7 +107,7 @@ class NavigatorInterface : public Interface
  public:
   /* Methods */
   int getFoo();
-  void setFoo(int newFoo);
+  void setFoo(const int newFoo);
 
 };
 

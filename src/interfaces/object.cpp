@@ -84,7 +84,7 @@ ObjectPositionInterface::getObjectType()
  * @param newObjectType new ObjectType value
  */
 void
-ObjectPositionInterface::setObjectType(unsigned int newObjectType)
+ObjectPositionInterface::setObjectType(const unsigned int newObjectType)
 {
   data->ObjectType = newObjectType;
 }
@@ -110,7 +110,7 @@ ObjectPositionInterface::getYaw()
  * @param newYaw new Yaw value
  */
 void
-ObjectPositionInterface::setYaw(float newYaw)
+ObjectPositionInterface::setYaw(const float newYaw)
 {
   data->Yaw = newYaw;
 }
@@ -138,7 +138,7 @@ ObjectPositionInterface::getPitch()
  * @param newPitch new Pitch value
  */
 void
-ObjectPositionInterface::setPitch(float newPitch)
+ObjectPositionInterface::setPitch(const float newPitch)
 {
   data->Pitch = newPitch;
 }
@@ -164,7 +164,7 @@ ObjectPositionInterface::getDistance()
  * @param newDistance new Distance value
  */
 void
-ObjectPositionInterface::setDistance(float newDistance)
+ObjectPositionInterface::setDistance(const float newDistance)
 {
   data->Distance = newDistance;
 }
@@ -192,7 +192,7 @@ ObjectPositionInterface::getDYPCovariance()
  * @param newDYPCovariance new DYPCovariance value
  */
 void
-ObjectPositionInterface::setDYPCovariance(float * newDYPCovariance)
+ObjectPositionInterface::setDYPCovariance(const float * newDYPCovariance)
 {
   memcpy(data->DYPCovariance, newDYPCovariance, sizeof(float) * 9);
 }
@@ -220,7 +220,7 @@ ObjectPositionInterface::getWorldX()
  * @param newWorldX new WorldX value
  */
 void
-ObjectPositionInterface::setWorldX(int newWorldX)
+ObjectPositionInterface::setWorldX(const int newWorldX)
 {
   data->WorldX = newWorldX;
 }
@@ -248,7 +248,7 @@ ObjectPositionInterface::getWorldY()
  * @param newWorldY new WorldY value
  */
 void
-ObjectPositionInterface::setWorldY(int newWorldY)
+ObjectPositionInterface::setWorldY(const int newWorldY)
 {
   data->WorldY = newWorldY;
 }
@@ -276,7 +276,7 @@ ObjectPositionInterface::getWorldZ()
  * @param newWorldZ new WorldZ value
  */
 void
-ObjectPositionInterface::setWorldZ(int newWorldZ)
+ObjectPositionInterface::setWorldZ(const int newWorldZ)
 {
   data->WorldZ = newWorldZ;
 }
@@ -304,7 +304,7 @@ ObjectPositionInterface::getXYZCovariance()
  * @param newXYZCovariance new XYZCovariance value
  */
 void
-ObjectPositionInterface::setXYZCovariance(float * newXYZCovariance)
+ObjectPositionInterface::setXYZCovariance(const float * newXYZCovariance)
 {
   memcpy(data->XYZCovariance, newXYZCovariance, sizeof(float) * 9);
 }
@@ -328,7 +328,7 @@ ObjectPositionInterface::getYawVelocity()
  * @param newYawVelocity new YawVelocity value
  */
 void
-ObjectPositionInterface::setYawVelocity(float newYawVelocity)
+ObjectPositionInterface::setYawVelocity(const float newYawVelocity)
 {
   data->YawVelocity = newYawVelocity;
 }
@@ -352,7 +352,7 @@ ObjectPositionInterface::getPitchVelocity()
  * @param newPitchVelocity new PitchVelocity value
  */
 void
-ObjectPositionInterface::setPitchVelocity(float newPitchVelocity)
+ObjectPositionInterface::setPitchVelocity(const float newPitchVelocity)
 {
   data->PitchVelocity = newPitchVelocity;
 }
@@ -376,7 +376,7 @@ ObjectPositionInterface::getDistanceVelocity()
  * @param newDistanceVelocity new DistanceVelocity value
  */
 void
-ObjectPositionInterface::setDistanceVelocity(float newDistanceVelocity)
+ObjectPositionInterface::setDistanceVelocity(const float newDistanceVelocity)
 {
   data->DistanceVelocity = newDistanceVelocity;
 }
@@ -404,7 +404,7 @@ ObjectPositionInterface::getDYPVelocityCovariance()
  * @param newDYPVelocityCovariance new DYPVelocityCovariance value
  */
 void
-ObjectPositionInterface::setDYPVelocityCovariance(float * newDYPVelocityCovariance)
+ObjectPositionInterface::setDYPVelocityCovariance(const float * newDYPVelocityCovariance)
 {
   memcpy(data->DYPVelocityCovariance, newDYPVelocityCovariance, sizeof(float) * 9);
 }
@@ -428,7 +428,7 @@ ObjectPositionInterface::getWorldXVelocity()
  * @param newWorldXVelocity new WorldXVelocity value
  */
 void
-ObjectPositionInterface::setWorldXVelocity(int newWorldXVelocity)
+ObjectPositionInterface::setWorldXVelocity(const int newWorldXVelocity)
 {
   data->WorldXVelocity = newWorldXVelocity;
 }
@@ -452,7 +452,7 @@ ObjectPositionInterface::getWorldYVelocity()
  * @param newWorldYVelocity new WorldYVelocity value
  */
 void
-ObjectPositionInterface::setWorldYVelocity(int newWorldYVelocity)
+ObjectPositionInterface::setWorldYVelocity(const int newWorldYVelocity)
 {
   data->WorldYVelocity = newWorldYVelocity;
 }
@@ -476,7 +476,7 @@ ObjectPositionInterface::getWorldZVelocity()
  * @param newWorldZVelocity new WorldZVelocity value
  */
 void
-ObjectPositionInterface::setWorldZVelocity(int newWorldZVelocity)
+ObjectPositionInterface::setWorldZVelocity(const int newWorldZVelocity)
 {
   data->WorldZVelocity = newWorldZVelocity;
 }
@@ -504,7 +504,7 @@ ObjectPositionInterface::getXYZVelocityCovariance()
  * @param newXYZVelocityCovariance new XYZVelocityCovariance value
  */
 void
-ObjectPositionInterface::setXYZVelocityCovariance(float * newXYZVelocityCovariance)
+ObjectPositionInterface::setXYZVelocityCovariance(const float * newXYZVelocityCovariance)
 {
   memcpy(data->XYZVelocityCovariance, newXYZVelocityCovariance, sizeof(float) * 9);
 }

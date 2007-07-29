@@ -130,39 +130,39 @@ class ObjectPositionInterface : public Interface
  public:
   /* Methods */
   unsigned int getObjectType();
-  void setObjectType(unsigned int newObjectType);
+  void setObjectType(const unsigned int newObjectType);
   float getYaw();
-  void setYaw(float newYaw);
+  void setYaw(const float newYaw);
   float getPitch();
-  void setPitch(float newPitch);
+  void setPitch(const float newPitch);
   float getDistance();
-  void setDistance(float newDistance);
+  void setDistance(const float newDistance);
   float * getDYPCovariance();
-  void setDYPCovariance(float * newDYPCovariance);
+  void setDYPCovariance(const float * newDYPCovariance);
   int getWorldX();
-  void setWorldX(int newWorldX);
+  void setWorldX(const int newWorldX);
   int getWorldY();
-  void setWorldY(int newWorldY);
+  void setWorldY(const int newWorldY);
   int getWorldZ();
-  void setWorldZ(int newWorldZ);
+  void setWorldZ(const int newWorldZ);
   float * getXYZCovariance();
-  void setXYZCovariance(float * newXYZCovariance);
+  void setXYZCovariance(const float * newXYZCovariance);
   float getYawVelocity();
-  void setYawVelocity(float newYawVelocity);
+  void setYawVelocity(const float newYawVelocity);
   float getPitchVelocity();
-  void setPitchVelocity(float newPitchVelocity);
+  void setPitchVelocity(const float newPitchVelocity);
   float getDistanceVelocity();
-  void setDistanceVelocity(float newDistanceVelocity);
+  void setDistanceVelocity(const float newDistanceVelocity);
   float * getDYPVelocityCovariance();
-  void setDYPVelocityCovariance(float * newDYPVelocityCovariance);
+  void setDYPVelocityCovariance(const float * newDYPVelocityCovariance);
   int getWorldXVelocity();
-  void setWorldXVelocity(int newWorldXVelocity);
+  void setWorldXVelocity(const int newWorldXVelocity);
   int getWorldYVelocity();
-  void setWorldYVelocity(int newWorldYVelocity);
+  void setWorldYVelocity(const int newWorldYVelocity);
   int getWorldZVelocity();
-  void setWorldZVelocity(int newWorldZVelocity);
+  void setWorldZVelocity(const int newWorldZVelocity);
   float * getXYZVelocityCovariance();
-  void setXYZVelocityCovariance(float * newXYZVelocityCovariance);
+  void setXYZVelocityCovariance(const float * newXYZVelocityCovariance);
 
 };
 

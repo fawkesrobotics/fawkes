@@ -81,7 +81,7 @@ class TestInterface : public Interface
 
     /* Methods */
     int getTestInt();
-    void setTestInt(int newTestInt);
+    void setTestInt(const int newTestInt);
   };
 
   class SetTestStringMessage : public Message
@@ -101,7 +101,7 @@ class TestInterface : public Interface
 
     /* Methods */
     char * getTestString();
-    void setTestString(char * newTestString);
+    void setTestString(const char * newTestString);
   };
 
   class CalculateMessage : public Message
@@ -122,9 +122,9 @@ class TestInterface : public Interface
 
     /* Methods */
     int getSummand();
-    void setSummand(int newSummand);
+    void setSummand(const int newSummand);
     int getAddend();
-    void setAddend(int newAddend);
+    void setAddend(const int newAddend);
   };
 
   virtual bool messageValid(const Message *message) const;
@@ -135,19 +135,19 @@ class TestInterface : public Interface
  public:
   /* Methods */
   int getTestInt();
-  void setTestInt(int newTestInt);
+  void setTestInt(const int newTestInt);
   unsigned int getFlags();
-  void setFlags(unsigned int newFlags);
+  void setFlags(const unsigned int newFlags);
   char * getTestString();
-  void setTestString(char * newTestString);
+  void setTestString(const char * newTestString);
   int getResult();
-  void setResult(int newResult);
+  void setResult(const int newResult);
   unsigned int getTestUInt();
-  void setTestUInt(unsigned int newTestUInt);
+  void setTestUInt(const unsigned int newTestUInt);
   unsigned long int getTestULInt();
-  void setTestULInt(unsigned long int newTestULInt);
+  void setTestULInt(const unsigned long int newTestULInt);
   long int getTestLInt();
-  void setTestLInt(long int newTestLInt);
+  void setTestLInt(const long int newTestLInt);
 
 };
 

@@ -23,18 +23,27 @@
       In these variables it is stored how often the right, center or 
       left kick have been triggered.
     </comment>
-    <field type="int" name="NumKicksLeft">Number of Left-Kicks</field>
-    <field type="int" name="NumKicksCenter">Number of Center-Kicks</field>
-    <field type="int" name="NumKicksRight">Number of Right-Kicks</field>
+    <field type="int" name="NumKicksLeft">
+      Number of Left-Kicks
+    </field>
+    <field type="int" name="NumKicksCenter">
+      Number of Center-Kicks
+    </field>
+    <field type="int" name="NumKicksRight">
+      Number of Right-Kicks
+    </field>
     <field type="GuideBallSideEnum" name="GuideBallSide">Side where the ball
       guidance arm is currently erected.</field>
+    <field type="unsigned int" name="CurrentIntensity">
+      The currently set intensity.
+    </field>
   </data>
   <message name="Kick">
     <comment>Triggers a kick with the given parameters.</comment>
-    <field type="bool" name="CmdKickLeft">CmdKickLeft</field>
-    <field type="bool" name="CmdKickCenter">CmdKickCenter</field>
-    <field type="bool" name="CmdKickRight">CmdKickRight</field>
-    <field type="int" name="Intensity">Intensity</field>
+    <field type="bool" name="CmdKickLeft">True to kick with left kicker.</field>
+    <field type="bool" name="CmdKickCenter">True to kick with central kicker.</field>
+    <field type="bool" name="CmdKickRight">True to kick with right kicker.</field>
+    <field type="unsigned int" name="Intensity">Intensity in the range [0..255].</field>
   </message>
   <message name="ResetCounter">
     <comment>Reset the internal counter for number of kicks</comment>

@@ -1,35 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <!-- $Id$ -->
-<interface name="MotorInterface" author="Martin Liebenberg" year="2007">
+<interface name="MotorInterface" author="Martin Liebenberg, Tim Niemueller" year="2007">
+  <constants>
+    <constant type="unsigned int" name="MOTOR_ENABLED" value="0">
+      Motor is enabled and sending drive commands will make the robot move.
+    </constant>
+    <constant type="unsigned int" name="MOTOR_DISABLED" value="1">
+      Motor is disabled. Sending of drive commands is accepted but the robot will NOT
+      move.
+    </constant>
+  </constants>
   <data>
     <comment>This are the actual RPMs of the motors taken from the VMC.</comment>
-    <field type="int" name="RPM1">RPM of motor 1.</field>
-    <field type="int" name="RPM2">RPM of motor 2.</field>
-    <field type="int" name="RPM3">RPM of motor 3.</field>
-    <field type="unsigned long int" name="ControllerID">The ID of the Controller Thread, which controlls the motors.</field>
+    <field type="unsigned int" name="MotorState" bits="1">
+      The current state of the motor.
+    </field>
+    <field type="int" name="RightRPM">
+      RPM of the motor on the right front of the robot.
+    </field>
+    <field type="int" name="BackRPM">
+      RPM of motor on the back of the robot.
+    </field>
+    <field type="int" name="LeftRPM">
+      RPM of the motor on the left front of the robot.
+    </field>
+    <field type="unsigned long int" name="ControllerThreadID">
+     The ID of the controlling thread.
+     Only from this thread command messages are accepted.
+    </field>
+    <field type="char" length="64" name="ControllerThreadName">
+     The name of the controlling thread.
+  </field>
   </data>
-  <message name="Joystick">
-    <comment>Determines the drive commands.</comment>
-    <field type="float" name="CmdForward">The forward command.</field>
-    <field type="float" name="CmdSideward">The sideward command.</field>
-    <field type="float" name="CmdRotation">The rotation command.</field>
-    <field type="float" name="CmdSpeed">The speed command.</field>
+  <message name="SetMotorState">
+    <comment>Sets the current motor state.</comment>
+    <field type="unsigned int" name="MotorState">
+      The new motor state to set. Use the MOTOR_* constants.
+    </field>
   </message>
-  <message name="Navigator">
-    <comment>Determines the drive commands.</comment>
-    <field type="float" name="CmdForward">The forward command.</field>
-    <field type="float" name="CmdSideward">The sideward command.</field>
-    <field type="float" name="CmdRotation">The rotation command.</field>
-    <field type="float" name="CmdVelocity">The velocity command.</field>
+  <message name="AquireControl">
+    <comment>This allows any thread to aquire the control over the motor thread.
+      Use with extreme care!</comment>
+    <field type="unsigned long int" name="ThreadID">
+      The thread ID of the thread which is allowed to control the motors.
+      Set to zero to use the data of the current thread (the message is zeroed at
+      creation automatically, so if you do not set anything the sending thread
+      aquires the control.
+    </field>
+    <field type="char" length="64" name="ThreadName">
+      The thread name of the aquiring thread.
+    </field>
   </message>
-  <message name="Switch">
-    <comment>States what controls the motors.</comment>
-    <field type="unsigned int" name="ThreadId">The Thread Id of the Thread
-    		which is allowed to control the motors.</field>
-  </message>
-  <message name="Subscribe">
-    <comment>States what controls the motors.</comment>
-    <field type="unsigned int" name="Subscriber">0 if unsubscribe and 1 if subscribe.</field>
+  <message name="TransRotRPM">
+    <comment>Determines the drive commands by translation and rotation.</comment>
+    <field type="float" name="Forward">The forward command.</field>
+    <field type="float" name="Sideward">The sideward command.</field>
+    <field type="float" name="Rotation">The rotation command.</field>
+    <field type="float" name="Speed">The speed command.</field>
   </message>
 </interface>
