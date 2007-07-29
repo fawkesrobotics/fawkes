@@ -33,13 +33,13 @@
 class FawkesNetworkClient;
 class FawkesNetworkMessage;
 class NetworkConfiguration;
+class DatagramSocket;
 
 class JoystickTool : public FawkesNetworkClientHandler
 {
  public:
         
-  JoystickTool(const char *host);
-        
+  JoystickTool(const char *host, bool use_udp);
   ~JoystickTool();
         
   void mainLoop();
@@ -47,16 +47,22 @@ class JoystickTool : public FawkesNetworkClientHandler
     
  private:
         
-  FawkesNetworkClient *net_client;
-        
-  NetworkConfiguration *net_config;
-        
   void deregistered();
-        
   void inboundReceived(FawkesNetworkMessage *m);
-        
   bool sending;
-        
+
+  FawkesNetworkClient *net_client;
+  NetworkConfiguration *net_config;
+  DatagramSocket *socket;
+  bool use_udp;
+
+  bool quit;
+  float max_speed;
+
+  float old_forward;
+  float old_sideward;
+  float old_rotation;
+  float old_speed;
 };
 
 #endif /*JOYSTICK_TOOL_H_*/
