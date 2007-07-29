@@ -97,6 +97,7 @@ class MessageQueue
   unsigned int size() const;
 
   void         flush();
+  bool         empty() const;
 
   void         lock();
   bool         tryLock();

@@ -274,6 +274,16 @@ Interface::msgq_size()
 }
 
 
+/** Check if queue is empty.
+ * @return true if queue is empty, false otherwise
+ */
+bool
+Interface::msgq_empty()
+{
+  return __message_queue->empty();
+}
+
+
 /** Flush all messages.
  * Deletes all messages from the queue.
  */

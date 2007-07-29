@@ -266,6 +266,19 @@ MessageQueue::size() const
 }
 
 
+/** Check if message queue is empty.
+ * @return true if message queue is empty, false otherwise
+ */
+bool
+MessageQueue::empty() const
+{
+  mutex->lock();
+  bool rv = ( list == NULL );
+  mutex->unlock();
+  return rv;
+}
+
+
 /** Lock message queue.
  * No operations can be performed on the message queue after locking it.
  * Note that you cannot call any method of the message queue as long as

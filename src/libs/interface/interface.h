@@ -81,6 +81,7 @@ class Interface
   void          msgq_unlock();
   void          msgq_pop();
   Message *     msgq_first();
+  bool          msgq_empty();
 
   template <class MessageType>
     bool           msgq_first_is();
