@@ -34,6 +34,7 @@
 #include <fvutils/color/yuvrgb.h>
 #include <fvutils/color/rgbyuv.h>
 #include <fvutils/color/bayer.h>
+#include <fvutils/color/colorspaces.h>
 
 #include <core/exception.h>
 #include <cstring>
