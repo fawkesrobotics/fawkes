@@ -19,8 +19,8 @@
     <field type="int" name="RightRPM">
       RPM of the motor on the right front of the robot.
     </field>
-    <field type="int" name="BackRPM">
-      RPM of motor on the back of the robot.
+    <field type="int" name="RearRPM">
+      RPM of motor on the rear of the robot.
     </field>
     <field type="int" name="LeftRPM">
       RPM of the motor on the left front of the robot.
@@ -59,4 +59,61 @@
     <field type="float" name="Rotation">The rotation command.</field>
     <field type="float" name="Speed">The speed command.</field>
   </message>
+  <message name="DriveRPM">
+    <comment>Directly set RPM, used for debugging, only use if you know what
+             you are doing. Usage is discouraged.</comment>
+    <field type="float" name="FrontRight">Rotation in RPM of the right front wheel.</field>
+    <field type="float" name="FrontLeft">Rotation in RPM of the left front wheel.</field>
+    <field type="float" name="Rear">Rotation in RPM of the rear wheel.</field>
+  </message>
+  <message name="Trans">
+    <comment>Translate the robot by the given velocities in X/Y direction.</comment>
+    <field type="float" name="VX">Speed in X direction in m/s.</field>
+    <field type="float" name="VY">Speed in Y direction in m/s.</field>
+  </message>
+  <message name="Rot">
+    <comment>Rotate the robot by the given angle speed in rad/s (positive right).</comment>
+    <field type="float" name="Omega">Angle rotation in rad/s.</field>
+  </message>
+  <message name="TransRot">
+    <comment>Translate and rotate the robot at the same time. This is the same as combining a
+             Trans and a Rot message separately. Note that the robot will not drive on a line
+             with VX/VY and then rotate by Omega. Instead the movements are superpositioned
+             which will result in a curve. Use LinTransRot if you want this behaviour.</comment>
+    <field type="float" name="VX">Speed in X direction in m/s.</field>
+    <field type="float" name="VY">Speed in Y direction in m/s.</field>
+    <field type="float" name="Omega">Angle rotation in rad/s.</field>
+  </message>
+  <message name="Orbit">
+    <comment>Orbit around a point. This will make the robot move in a circle around the given
+             point (PX, PY) with the angular speed Omega. With Orbit the robot will not
+             change its orientation and thus it will not focus on the point.</comment>
+    <field type="float" name="PX">Point's X coordinate to orbit.</field>
+    <field type="float" name="PY">Point's Y coordinate to orbit.</field>
+    <field type="float" name="Omega">Angular speed around point in rad/s.</field>
+  </message>
+  <!-- needs sensor feedback, delayed
+  <message name="OrbitRot">
+    <comment>Orbit around a point and rotate the robot whilst doing so. This is
+             the superpositioned movement of Orbit and Rot, while the orbiting is
+	     recalculated to make a circle and take the changed rotation into account.</comment>
+    <field type="float" name="PX">Point's X coordinate to orbit.</field>
+    <field type="float" name="PY">Point's Y coordinate to orbit.</field>
+    <field type="float" name="OmegaOrbit">Angular speed around point in rad/s.</field>
+    <field type="float" name="OmegaRot">Angular speed of the robot's rotation in rad/s.</field>
+  </message>
+  <message name="LinTransRot">
+    <comment>Move along a line with given speed VX/VY and rotate the robot with Omega.</comment>
+    <field type="float" name="VX">Speed for translation in X direction in m/s.</field>
+    <field type="float" name="VY">Speed for translation in Y direction in m/s.</field>
+    <field type="float" name="Omega">Rotational speed in rad/s.</field>
+  </message>
+  <message name="TransOrbit">
+    <comment>Translate with the given speed and keep looking at the given point.</comment>
+    <field type="float" name="VX">Speed for translation in X direction in m/s.</field>
+    <field type="float" name="VY">Speed for translation in Y direction in m/s.</field>
+    <field type="float" name="PX">Point's X coordinate to focus.</field>
+    <field type="float" name="PY">Point's Y coordinate to focus.</field>
+  </message>
+  -->
 </interface>

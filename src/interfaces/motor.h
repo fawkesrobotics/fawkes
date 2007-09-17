@@ -48,8 +48,8 @@ class MotorInterface : public Interface
     int RightRPM; /**< 
       RPM of the motor on the right front of the robot.
      */
-    int BackRPM; /**< 
-      RPM of motor on the back of the robot.
+    int RearRPM; /**< 
+      RPM of motor on the rear of the robot.
      */
     int LeftRPM; /**< 
       RPM of the motor on the left front of the robot.
@@ -151,6 +151,127 @@ class MotorInterface : public Interface
     void setSpeed(const float newSpeed);
   };
 
+  class DriveRPMMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float FrontRight; /**< Rotation in RPM of the right front wheel. */
+      float FrontLeft; /**< Rotation in RPM of the left front wheel. */
+      float Rear; /**< Rotation in RPM of the rear wheel. */
+    } DriveRPMMessage_data_t;
+
+    DriveRPMMessage_data_t *data;
+
+   public:
+    DriveRPMMessage(float iniFrontRight, float iniFrontLeft, float iniRear);
+    DriveRPMMessage();
+    ~DriveRPMMessage();
+
+    /* Methods */
+    float getFrontRight();
+    void setFrontRight(const float newFrontRight);
+    float getFrontLeft();
+    void setFrontLeft(const float newFrontLeft);
+    float getRear();
+    void setRear(const float newRear);
+  };
+
+  class TransMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float VX; /**< Speed in X direction in m/s. */
+      float VY; /**< Speed in Y direction in m/s. */
+    } TransMessage_data_t;
+
+    TransMessage_data_t *data;
+
+   public:
+    TransMessage(float iniVX, float iniVY);
+    TransMessage();
+    ~TransMessage();
+
+    /* Methods */
+    float getVX();
+    void setVX(const float newVX);
+    float getVY();
+    void setVY(const float newVY);
+  };
+
+  class RotMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float Omega; /**< Angle rotation in rad/s. */
+    } RotMessage_data_t;
+
+    RotMessage_data_t *data;
+
+   public:
+    RotMessage(float iniOmega);
+    RotMessage();
+    ~RotMessage();
+
+    /* Methods */
+    float getOmega();
+    void setOmega(const float newOmega);
+  };
+
+  class TransRotMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float VX; /**< Speed in X direction in m/s. */
+      float VY; /**< Speed in Y direction in m/s. */
+      float Omega; /**< Angle rotation in rad/s. */
+    } TransRotMessage_data_t;
+
+    TransRotMessage_data_t *data;
+
+   public:
+    TransRotMessage(float iniVX, float iniVY, float iniOmega);
+    TransRotMessage();
+    ~TransRotMessage();
+
+    /* Methods */
+    float getVX();
+    void setVX(const float newVX);
+    float getVY();
+    void setVY(const float newVY);
+    float getOmega();
+    void setOmega(const float newOmega);
+  };
+
+  class OrbitMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float PX; /**< Point's X coordinate to orbit. */
+      float PY; /**< Point's Y coordinate to orbit. */
+      float Omega; /**< Angular speed around point in rad/s. */
+    } OrbitMessage_data_t;
+
+    OrbitMessage_data_t *data;
+
+   public:
+    OrbitMessage(float iniPX, float iniPY, float iniOmega);
+    OrbitMessage();
+    ~OrbitMessage();
+
+    /* Methods */
+    float getPX();
+    void setPX(const float newPX);
+    float getPY();
+    void setPY(const float newPY);
+    float getOmega();
+    void setOmega(const float newOmega);
+  };
+
   virtual bool messageValid(const Message *message) const;
  private:
   MotorInterface();
@@ -162,8 +283,8 @@ class MotorInterface : public Interface
   void setMotorState(const unsigned int newMotorState);
   int getRightRPM();
   void setRightRPM(const int newRightRPM);
-  int getBackRPM();
-  void setBackRPM(const int newBackRPM);
+  int getRearRPM();
+  void setRearRPM(const int newRearRPM);
   int getLeftRPM();
   void setLeftRPM(const int newLeftRPM);
   unsigned long int getControllerThreadID();

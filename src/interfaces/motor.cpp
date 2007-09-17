@@ -103,28 +103,28 @@ MotorInterface::setRightRPM(const int newRightRPM)
   data->RightRPM = newRightRPM;
 }
 
-/** Get BackRPM value.
+/** Get RearRPM value.
  * 
-      RPM of motor on the back of the robot.
+      RPM of motor on the rear of the robot.
     
- * @return BackRPM value
+ * @return RearRPM value
  */
 int
-MotorInterface::getBackRPM()
+MotorInterface::getRearRPM()
 {
-  return data->BackRPM;
+  return data->RearRPM;
 }
 
-/** Set BackRPM value.
+/** Set RearRPM value.
  * 
-      RPM of motor on the back of the robot.
+      RPM of motor on the rear of the robot.
     
- * @param newBackRPM new BackRPM value
+ * @param newRearRPM new RearRPM value
  */
 void
-MotorInterface::setBackRPM(const int newBackRPM)
+MotorInterface::setRearRPM(const int newRearRPM)
 {
-  data->BackRPM = newBackRPM;
+  data->RearRPM = newRearRPM;
 }
 
 /** Get LeftRPM value.
@@ -461,6 +461,415 @@ MotorInterface::TransRotRPMMessage::setSpeed(const float newSpeed)
   data->Speed = newSpeed;
 }
 
+/** @class MotorInterface::DriveRPMMessage interfaces/motor.h
+ * DriveRPMMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param iniFrontRight initial value for FrontRight
+ * @param iniFrontLeft initial value for FrontLeft
+ * @param iniRear initial value for Rear
+ */
+MotorInterface::DriveRPMMessage::DriveRPMMessage(float iniFrontRight, float iniFrontLeft, float iniRear) : Message()
+{
+  data_size = sizeof(DriveRPMMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (DriveRPMMessage_data_t *)data_ptr;
+  data->FrontRight = iniFrontRight;
+  data->FrontLeft = iniFrontLeft;
+  data->Rear = iniRear;
+}
+/** Constructor */
+MotorInterface::DriveRPMMessage::DriveRPMMessage() : Message()
+{
+  data_size = sizeof(DriveRPMMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (DriveRPMMessage_data_t *)data_ptr;
+}
+/** Destructor */
+MotorInterface::DriveRPMMessage::~DriveRPMMessage()
+{
+}
+/* Methods */
+/** Get FrontRight value.
+ * Rotation in RPM of the right front wheel.
+ * @return FrontRight value
+ */
+float
+MotorInterface::DriveRPMMessage::getFrontRight()
+{
+  return data->FrontRight;
+}
+
+/** Set FrontRight value.
+ * Rotation in RPM of the right front wheel.
+ * @param newFrontRight new FrontRight value
+ */
+void
+MotorInterface::DriveRPMMessage::setFrontRight(const float newFrontRight)
+{
+  data->FrontRight = newFrontRight;
+}
+
+/** Get FrontLeft value.
+ * Rotation in RPM of the left front wheel.
+ * @return FrontLeft value
+ */
+float
+MotorInterface::DriveRPMMessage::getFrontLeft()
+{
+  return data->FrontLeft;
+}
+
+/** Set FrontLeft value.
+ * Rotation in RPM of the left front wheel.
+ * @param newFrontLeft new FrontLeft value
+ */
+void
+MotorInterface::DriveRPMMessage::setFrontLeft(const float newFrontLeft)
+{
+  data->FrontLeft = newFrontLeft;
+}
+
+/** Get Rear value.
+ * Rotation in RPM of the rear wheel.
+ * @return Rear value
+ */
+float
+MotorInterface::DriveRPMMessage::getRear()
+{
+  return data->Rear;
+}
+
+/** Set Rear value.
+ * Rotation in RPM of the rear wheel.
+ * @param newRear new Rear value
+ */
+void
+MotorInterface::DriveRPMMessage::setRear(const float newRear)
+{
+  data->Rear = newRear;
+}
+
+/** @class MotorInterface::TransMessage interfaces/motor.h
+ * TransMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param iniVX initial value for VX
+ * @param iniVY initial value for VY
+ */
+MotorInterface::TransMessage::TransMessage(float iniVX, float iniVY) : Message()
+{
+  data_size = sizeof(TransMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (TransMessage_data_t *)data_ptr;
+  data->VX = iniVX;
+  data->VY = iniVY;
+}
+/** Constructor */
+MotorInterface::TransMessage::TransMessage() : Message()
+{
+  data_size = sizeof(TransMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (TransMessage_data_t *)data_ptr;
+}
+/** Destructor */
+MotorInterface::TransMessage::~TransMessage()
+{
+}
+/* Methods */
+/** Get VX value.
+ * Speed in X direction in m/s.
+ * @return VX value
+ */
+float
+MotorInterface::TransMessage::getVX()
+{
+  return data->VX;
+}
+
+/** Set VX value.
+ * Speed in X direction in m/s.
+ * @param newVX new VX value
+ */
+void
+MotorInterface::TransMessage::setVX(const float newVX)
+{
+  data->VX = newVX;
+}
+
+/** Get VY value.
+ * Speed in Y direction in m/s.
+ * @return VY value
+ */
+float
+MotorInterface::TransMessage::getVY()
+{
+  return data->VY;
+}
+
+/** Set VY value.
+ * Speed in Y direction in m/s.
+ * @param newVY new VY value
+ */
+void
+MotorInterface::TransMessage::setVY(const float newVY)
+{
+  data->VY = newVY;
+}
+
+/** @class MotorInterface::RotMessage interfaces/motor.h
+ * RotMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param iniOmega initial value for Omega
+ */
+MotorInterface::RotMessage::RotMessage(float iniOmega) : Message()
+{
+  data_size = sizeof(RotMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (RotMessage_data_t *)data_ptr;
+  data->Omega = iniOmega;
+}
+/** Constructor */
+MotorInterface::RotMessage::RotMessage() : Message()
+{
+  data_size = sizeof(RotMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (RotMessage_data_t *)data_ptr;
+}
+/** Destructor */
+MotorInterface::RotMessage::~RotMessage()
+{
+}
+/* Methods */
+/** Get Omega value.
+ * Angle rotation in rad/s.
+ * @return Omega value
+ */
+float
+MotorInterface::RotMessage::getOmega()
+{
+  return data->Omega;
+}
+
+/** Set Omega value.
+ * Angle rotation in rad/s.
+ * @param newOmega new Omega value
+ */
+void
+MotorInterface::RotMessage::setOmega(const float newOmega)
+{
+  data->Omega = newOmega;
+}
+
+/** @class MotorInterface::TransRotMessage interfaces/motor.h
+ * TransRotMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param iniVX initial value for VX
+ * @param iniVY initial value for VY
+ * @param iniOmega initial value for Omega
+ */
+MotorInterface::TransRotMessage::TransRotMessage(float iniVX, float iniVY, float iniOmega) : Message()
+{
+  data_size = sizeof(TransRotMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (TransRotMessage_data_t *)data_ptr;
+  data->VX = iniVX;
+  data->VY = iniVY;
+  data->Omega = iniOmega;
+}
+/** Constructor */
+MotorInterface::TransRotMessage::TransRotMessage() : Message()
+{
+  data_size = sizeof(TransRotMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (TransRotMessage_data_t *)data_ptr;
+}
+/** Destructor */
+MotorInterface::TransRotMessage::~TransRotMessage()
+{
+}
+/* Methods */
+/** Get VX value.
+ * Speed in X direction in m/s.
+ * @return VX value
+ */
+float
+MotorInterface::TransRotMessage::getVX()
+{
+  return data->VX;
+}
+
+/** Set VX value.
+ * Speed in X direction in m/s.
+ * @param newVX new VX value
+ */
+void
+MotorInterface::TransRotMessage::setVX(const float newVX)
+{
+  data->VX = newVX;
+}
+
+/** Get VY value.
+ * Speed in Y direction in m/s.
+ * @return VY value
+ */
+float
+MotorInterface::TransRotMessage::getVY()
+{
+  return data->VY;
+}
+
+/** Set VY value.
+ * Speed in Y direction in m/s.
+ * @param newVY new VY value
+ */
+void
+MotorInterface::TransRotMessage::setVY(const float newVY)
+{
+  data->VY = newVY;
+}
+
+/** Get Omega value.
+ * Angle rotation in rad/s.
+ * @return Omega value
+ */
+float
+MotorInterface::TransRotMessage::getOmega()
+{
+  return data->Omega;
+}
+
+/** Set Omega value.
+ * Angle rotation in rad/s.
+ * @param newOmega new Omega value
+ */
+void
+MotorInterface::TransRotMessage::setOmega(const float newOmega)
+{
+  data->Omega = newOmega;
+}
+
+/** @class MotorInterface::OrbitMessage interfaces/motor.h
+ * OrbitMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param iniPX initial value for PX
+ * @param iniPY initial value for PY
+ * @param iniOmega initial value for Omega
+ */
+MotorInterface::OrbitMessage::OrbitMessage(float iniPX, float iniPY, float iniOmega) : Message()
+{
+  data_size = sizeof(OrbitMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (OrbitMessage_data_t *)data_ptr;
+  data->PX = iniPX;
+  data->PY = iniPY;
+  data->Omega = iniOmega;
+}
+/** Constructor */
+MotorInterface::OrbitMessage::OrbitMessage() : Message()
+{
+  data_size = sizeof(OrbitMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (OrbitMessage_data_t *)data_ptr;
+}
+/** Destructor */
+MotorInterface::OrbitMessage::~OrbitMessage()
+{
+}
+/* Methods */
+/** Get PX value.
+ * Point's X coordinate to orbit.
+ * @return PX value
+ */
+float
+MotorInterface::OrbitMessage::getPX()
+{
+  return data->PX;
+}
+
+/** Set PX value.
+ * Point's X coordinate to orbit.
+ * @param newPX new PX value
+ */
+void
+MotorInterface::OrbitMessage::setPX(const float newPX)
+{
+  data->PX = newPX;
+}
+
+/** Get PY value.
+ * Point's Y coordinate to orbit.
+ * @return PY value
+ */
+float
+MotorInterface::OrbitMessage::getPY()
+{
+  return data->PY;
+}
+
+/** Set PY value.
+ * Point's Y coordinate to orbit.
+ * @param newPY new PY value
+ */
+void
+MotorInterface::OrbitMessage::setPY(const float newPY)
+{
+  data->PY = newPY;
+}
+
+/** Get Omega value.
+ * Angular speed around point in rad/s.
+ * @return Omega value
+ */
+float
+MotorInterface::OrbitMessage::getOmega()
+{
+  return data->Omega;
+}
+
+/** Set Omega value.
+ * Angular speed around point in rad/s.
+ * @param newOmega new Omega value
+ */
+void
+MotorInterface::OrbitMessage::setOmega(const float newOmega)
+{
+  data->Omega = newOmega;
+}
+
 /** Check if message is valid an can be queued.
  * @param message Message to check
  */
@@ -477,6 +886,26 @@ MotorInterface::messageValid(const Message *message) const
   }
   const TransRotRPMMessage *m2 = dynamic_cast<const TransRotRPMMessage *>(message);
   if ( m2 != NULL ) {
+    return true;
+  }
+  const DriveRPMMessage *m3 = dynamic_cast<const DriveRPMMessage *>(message);
+  if ( m3 != NULL ) {
+    return true;
+  }
+  const TransMessage *m4 = dynamic_cast<const TransMessage *>(message);
+  if ( m4 != NULL ) {
+    return true;
+  }
+  const RotMessage *m5 = dynamic_cast<const RotMessage *>(message);
+  if ( m5 != NULL ) {
+    return true;
+  }
+  const TransRotMessage *m6 = dynamic_cast<const TransRotMessage *>(message);
+  if ( m6 != NULL ) {
+    return true;
+  }
+  const OrbitMessage *m7 = dynamic_cast<const OrbitMessage *>(message);
+  if ( m7 != NULL ) {
     return true;
   }
   return false;
