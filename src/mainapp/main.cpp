@@ -143,6 +143,8 @@ main(int argc, char **argv)
     e.printTrace();
   }
 
+  Thread::destroy_main();
+
   delete argp;
   return 0;
 }
