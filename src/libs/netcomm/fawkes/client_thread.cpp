@@ -113,8 +113,8 @@ FawkesNetworkClientThread::recv()
   } catch (ConnectionDiedException &e) {
     _alive = false;
     s->close();
-    cancel();
     parent->wakeup();
+    exit();
   }
 }
 
@@ -147,8 +147,8 @@ FawkesNetworkClientThread::loop()
        (p & Socket::POLL_HUP) ||
        (p & Socket::POLL_RDHUP)) {
     _alive = false;
-    cancel();
     parent->wakeup();
+    exit();
   } else if ( p & Socket::POLL_IN ) {
     // Data can be read
     recv();
@@ -159,8 +159,8 @@ FawkesNetworkClientThread::loop()
       FawkesNetworkTransceiver::send(s, outbound_queue);
     } catch (ConnectionDiedException &e) {
       _alive = false;
-      cancel();
       parent->wakeup();
+      exit();
     }
   }
 }
