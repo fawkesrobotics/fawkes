@@ -50,6 +50,7 @@ class SharedMemory
  public:
 
   static const unsigned int MagicTokenSize;
+  static const short        MaxNumConcurrentReaders;
 
   SharedMemory(const char *magic_token,
 	       SharedMemoryHeader *header,
@@ -71,8 +72,10 @@ class SharedMemory
   void                add_semaphore();
   void                set_swapable(bool swapable);
 
-  void                lock();
-  bool                try_lock();
+  void                lock_for_read();
+  bool                try_lock_for_read();
+  void                lock_for_write();
+  bool                try_lock_for_write();
   void                unlock();
 
   void *              ptr(void *addr);
@@ -132,6 +135,9 @@ class SharedMemory
 
   bool           __created;
   SemaphoreSet  *__semset;
+
+  bool           __lock_aquired;
+  bool           __write_lock_aquired;
 
 };
 

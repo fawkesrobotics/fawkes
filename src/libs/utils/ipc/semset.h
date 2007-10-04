@@ -48,16 +48,16 @@ class SemaphoreSet {
 
   ~SemaphoreSet();
 
-  bool isValid();
+  bool valid();
   void lock(unsigned short sem_num = 0, short num = 1);
-  bool tryLock(unsigned short sem_num = 0, short num = 1);
+  bool try_lock(unsigned short sem_num = 0, short num = 1);
   void unlock(unsigned short sem_num = 0, short num = -1);
-  void setVal(int sem_num, int val);
-  int  getVal(int sem_num);
-  int  getKey();
-  void setDestroyOnDelete(bool destroy);
+  void set_value(int sem_num, int val);
+  int  get_value(int sem_num);
+  int  key();
+  void set_destroy_on_delete(bool destroy);
 
-  static int getFreeKey();
+  static int  free_key();
   static void destroy(int key);
 
  protected:

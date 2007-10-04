@@ -121,9 +121,12 @@
  *
  * The data segment can be filled with any data you like.
  *
- * Semaphores have a simple protection mechanism using IPC semaphores. If a
- * shared memory segment already has a semaphore assigned at the time it is
- * opened this semaphore is automatically opened. In any case addSemaphore()
+ * Shared memory segments are protected with a read-write lock implemented with
+ * two IPC semaphores. The writer takes preference in locking. Only a limited
+ * number of concurrent readers can be allowed. The constant
+ * MaxNumberConcurrentReaders defines how many these are.
+ * If a shared memory segment already has a semaphore assigned at the time it
+ * is opened this semaphore is automatically opened. In any case add_semaphore()
  * can be used to create (or open if it already exists) a semaphore for the
  * shared memory segment. Information about the semaphore is stored in the
  * shared memory general header.
@@ -189,6 +192,15 @@
  */
 const unsigned int SharedMemory::MagicTokenSize = 16;
 
+/** Maximum number of concurrent readers.
+ * This constant defines how many readers may concurrently read from
+ * shared memory segments.
+ */
+const short SharedMemory::MaxNumConcurrentReaders = 8;
+
+#define WRITE_MUTEX_SEM 0
+#define READ_SEM        1
+
 
 /** Constructor for derivates.
  * This constructor may only be used by derivatives. It can be used to delay
@@ -226,6 +238,8 @@ SharedMemory::SharedMemory(char *magic_token,
   __shared_mem     = NULL;
   __shared_mem_id  = 0;
   __shared_mem_upper_bound = NULL;
+
+  __write_lock_aquired     = false;
 }
 
 
@@ -278,6 +292,8 @@ SharedMemory::SharedMemory(const char *magic_token,
   __shared_mem_id  = 0;
   __shared_mem_upper_bound = NULL;
 
+  __write_lock_aquired     = false;
+
   try {
     attach();
   } catch (Exception &e) {
@@ -299,7 +315,7 @@ SharedMemory::~SharedMemory()
   if ( __semset != NULL ) {
     // if we destroy the shared memory region we can as well delete the semaphore,
     // it is not necessary anymore.
-    __semset->setDestroyOnDelete( _destroy_on_delete );
+    __semset->set_destroy_on_delete( _destroy_on_delete );
     delete __semset;
   }
 }
@@ -656,7 +672,7 @@ SharedMemory::is_valid()
  * this shared memory segment. Locking is not guaranteed, it depends on the
  * application. Use lock(), tryLock() and unlock() appropriately. You can do
  * this always, also if you start with unprotected memory. The operations are
- * just noops in that case. Protection can be enabled by calling addSemaphore().
+ * just noops in that case. Protection can be enabled by calling add_semaphore().
  * If a memory segment was protected when it was opened it is automatically
  * opened in protected mode.
  * @return true, if semaphore is associated to memory, false otherwise
@@ -696,15 +712,17 @@ SharedMemory::add_semaphore()
   if ( _shm_header->semaphore != 0 ) {
     // a semaphore has been created but not been opened
     __semset = new SemaphoreSet( _shm_header->semaphore,
-				 /* num sems    */ 1,
+				 /* num sems    */ 2,
 				 /* create      */ false,
 				 /* dest on del */ false );
   } else {
-    __semset = new SemaphoreSet( /* num sems    */ 1,
+    __semset = new SemaphoreSet( /* num sems    */ 2,
 				 /* dest on del */ true );
-    // one and only one may lock the memory
-    __semset->unlock();
-    _shm_header->semaphore = __semset->getKey();
+    // one and only one (writer) may lock the memory
+    __semset->unlock(WRITE_MUTEX_SEM);
+    // up to MaxNumConcurrentReaders readers can lock the memory
+    __semset->set_value(READ_SEM, MaxNumConcurrentReaders);
+    _shm_header->semaphore = __semset->key();
   }
 }
 
@@ -727,24 +745,26 @@ SharedMemory::set_swapable(bool swapable)
 }
 
 
-/** Lock shared memory segment.
+/** Lock shared memory segment for reading.
  * If the shared memory segment is protected by an associated semaphore it can be
  * locked with this semaphore by calling this method.
  * @see isProtected()
  * @see unlock()
- * @see tryLock()
+ * @see try_lock_for_read()
  */
 void
-SharedMemory::lock()
+SharedMemory::lock_for_read()
 {
   if ( __semset == NULL ) {
     return;
   }
-  __semset->lock();
+
+  __semset->lock(READ_SEM);
+  __lock_aquired = true;
 }
 
 
-/** Try to aquire lock on shared memory segment.
+/** Try to aquire lock on shared memory segment for reading.
  * If the shared memory segment is protected by an associated semaphore it can be
  * locked. With tryLock() you can try to aquire the lock, but the method will not
  * block if it cannot get the lock but simply return false. This can be used to detect
@@ -762,11 +782,82 @@ SharedMemory::lock()
  * @see lock()
  */
 bool
-SharedMemory::try_lock()
+SharedMemory::try_lock_for_read()
 {
   if ( __semset == NULL )  return false;
   
-  return __semset->tryLock();
+  if ( __semset->try_lock(READ_SEM) ) {
+    __lock_aquired = true;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+/** Lock shared memory segment for writing.
+ * If the shared memory segment is protected by an associated semaphore it can be
+ * locked with this semaphore by calling this method.
+ * @see is_protected()
+ * @see unlock()
+ * @see try_lock_for_read()
+ */
+void
+SharedMemory::lock_for_write()
+{
+  if ( __semset == NULL ) {
+    return;
+  }
+
+  __semset->lock(WRITE_MUTEX_SEM);
+  for ( short i = 0; i < MaxNumConcurrentReaders; ++i) {
+    __semset->lock(READ_SEM);
+  }
+  __write_lock_aquired = true;
+  __lock_aquired = true;
+  __semset->unlock(WRITE_MUTEX_SEM);
+}
+
+
+/** Try to aquire lock on shared memory segment for writing.
+ * If the shared memory segment is protected by an associated semaphore it can be
+ * locked. With tryLock() you can try to aquire the lock, but the method will not
+ * block if it cannot get the lock but simply return false. This can be used to detect
+ * if memory is locked:
+ * @code
+ * if (mem->tryLock()) {
+ *   // was not locked
+ *   mem->unlock();
+ * } else {
+ *   // is locked
+ * }
+ * @endcode
+ * @see isProtected()
+ * @see unlock()
+ * @see lock()
+ */
+bool
+SharedMemory::try_lock_for_write()
+{
+  if ( __semset == NULL )  return false;
+
+  if ( __semset->try_lock(WRITE_MUTEX_SEM) ) {
+    for ( short i = 0; i < MaxNumConcurrentReaders; ++i) {
+      if ( ! __semset->try_lock(READ_SEM) ) {
+	// we up to now locked i-1 readers, unlock 'em and fail
+	for (short j = 0; j < i - 1; ++j) {
+	  __semset->unlock(READ_SEM);
+	}
+	__semset->unlock(WRITE_MUTEX_SEM);
+	return false;
+      }
+    }
+    __lock_aquired = true;
+    __semset->unlock(WRITE_MUTEX_SEM);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 
@@ -779,8 +870,16 @@ SharedMemory::try_lock()
 void
 SharedMemory::unlock()
 {
-  if ( __semset == NULL )  return;
-  __semset->unlock();
+  if ( __semset == NULL || ! __lock_aquired )  return;
+
+  if ( __write_lock_aquired ) {
+    for ( short i = 0; i < MaxNumConcurrentReaders; ++i) {
+      __semset->unlock(READ_SEM);
+    }
+    __write_lock_aquired = false;
+  } else {
+    __semset->unlock(READ_SEM);
+  }
 }
 
 

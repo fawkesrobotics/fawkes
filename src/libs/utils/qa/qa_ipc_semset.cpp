@@ -62,7 +62,7 @@ main( int argc, char **argv )
 
     SemaphoreSet *s2 = new SemaphoreSet(".", 'A', 2, false, false);
 
-    while ( !s2->isValid() ) {
+    while ( !s2->valid() ) {
       // wait for father to open up semaphore, could also set create to true
       // in constructor call
       usleep(100000);

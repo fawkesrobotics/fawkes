@@ -36,8 +36,6 @@
 #include <sys/sem.h>
 #include <limits.h>
 
-#include <stdio.h>
-
 /// @cond INTERNALS
 class SemaphoreSetData
 {
@@ -184,7 +182,7 @@ SemaphoreSet::SemaphoreSet(int num_sems,
   data->semflg |= IPC_EXCL;  
 
   for (data->key = 1; data->key < INT_MAX; data->key++) {
-    data->semid = semget(data->key, 1, data->semflg);
+    data->semid = semget(data->key, num_sems, data->semflg);
     if ( data->semid != -1 ) {
       // valid semaphore found
       break;
@@ -210,7 +208,7 @@ SemaphoreSet::~SemaphoreSet()
  *         or if it has been closed, it returns true if messages can be sent or received.
  */
 bool
-SemaphoreSet::isValid()
+SemaphoreSet::valid()
 {
   if (data->semid == -1) {
     data->semid = semget(data->key, data->num_sems, data->semflg);
@@ -273,7 +271,7 @@ SemaphoreSet::lock(unsigned short sem_num, short num)
  * @exception SemInvalidException Semaphore set is invalid
  */
 bool
-SemaphoreSet::tryLock(unsigned short sem_num, short num)
+SemaphoreSet::try_lock(unsigned short sem_num, short num)
 {
   if ( data->semid == -1 )  throw SemInvalidException();
 
@@ -323,14 +321,15 @@ SemaphoreSet::unlock(unsigned short sem_num, short num)
  * @exception SemCannotSetValException Cannot set value
  */
 void
-SemaphoreSet::setVal(int sem_num, int val)
+SemaphoreSet::set_value(int sem_num, int val)
 {
   if ( data->semid == -1 )  throw SemInvalidException();
 
   union semun s;
   s.val = val;
 
-  if ( semctl(data->semid, sem_num, SETVAL, s) != 0 ) {
+  int rv = 0;
+  if ( ( rv = semctl(data->semid, sem_num, SETVAL, s)) == -1 ) {
     throw SemCannotSetValException();
   }
 }
@@ -342,7 +341,7 @@ SemaphoreSet::setVal(int sem_num, int val)
  * @exception SemInvalidException Semaphore set is invalid
  */
 int
-SemaphoreSet::getVal(int sem_num)
+SemaphoreSet::get_value(int sem_num)
 {
   if ( data->semid == -1 )  throw SemInvalidException();
 
@@ -354,7 +353,7 @@ SemaphoreSet::getVal(int sem_num)
  * @return Key of semaphore as listed by ipcs.
  */
 int
-SemaphoreSet::getKey()
+SemaphoreSet::key()
 {
   return data->key;
 }
@@ -367,7 +366,7 @@ SemaphoreSet::getKey()
  * false otherwise
  */
 void
-SemaphoreSet::setDestroyOnDelete(bool destroy)
+SemaphoreSet::set_destroy_on_delete(bool destroy)
 {
   destroy_on_delete = destroy;
 }
@@ -384,7 +383,7 @@ SemaphoreSet::setDestroyOnDelete(bool destroy)
  * @return 0, if no free key could be found, otherwise the non-zero unused key
  */
 int
-SemaphoreSet::getFreeKey()
+SemaphoreSet::free_key()
 {
   bool found = false;
   int key;
