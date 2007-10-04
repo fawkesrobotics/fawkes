@@ -27,14 +27,17 @@
 
 #include <apps/base/base_thread.h>
 #include <apps/base/aquisition_thread.h>
+#include <apps/base/aqt_vision_threads.h>
 
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
+#include <core/threading/barrier.h>
 #include <fvutils/system/camargp.h>
 #include <cams/factory.h>
 
 #include <apps/base/aquisition_thread.h>
 #include <utils/logging/logger.h>
+#include <aspect/vision.h>
 
 #include <unistd.h>
 
@@ -51,15 +54,15 @@ FvBaseThread::FvBaseThread()
     VisionMasterAspect(this)
 {
   // default to 30 seconds
-  _aqt_timeout = 20;
-  timeout_mutex = new Mutex();
+  _aqt_timeout = 30;
+  aqt_barrier = new Barrier(1);
 }
 
 
 /** Destructor. */
 FvBaseThread::~FvBaseThread()
 {
-  delete timeout_mutex;
+  delete aqt_barrier;
 }
 
 
@@ -72,17 +75,14 @@ FvBaseThread::init()
 void
 FvBaseThread::finalize()
 {
-  logger->log_debug("FvBaseThread", "Finalizing");
-  aquisition_threads.lock();
-  for (ait = aquisition_threads.begin(); ait != aquisition_threads.end(); ++ait) {
-    logger->log_debug("FvBaseThread", "Cancelling aquisition thread %s", (*ait).second->name());
+  aqts.lock();
+  for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
     (*ait).second->cancel();
-    logger->log_debug(Thread::current_thread()->name(), "Joining aquisition thread %s", (*ait).second->name());
     (*ait).second->join();
     delete (*ait).second;
   }
-  aquisition_threads.clear();
-  aquisition_threads.unlock();
+  aqts.clear();
+  aqts.unlock();
 }
 
 
@@ -90,35 +90,72 @@ FvBaseThread::finalize()
 void
 FvBaseThread::loop()
 {
-  if ( ! timeout_mutex->tryLock() ) {
-    // a timeout has happened
+  aqts.lock();
 
-    aquisition_threads.lock();
-    timeout_aqts.lock();
-
-    while ( ! timeout_aqts.empty() ) {
-      const char *id = timeout_aqts.front();
-
-      FvAquisitionThread *aqt = aquisition_threads[id];
-
-      if ( aqt->empty() ) {
-	logger->log_debug(name(), "Stopping thread %s", aqt->name());
-	aquisition_threads.erase(id);
-	aqt->cancel();
-	aqt->join();
-	delete aqt;
-      } else {
-	logger->log_debug(name(), "Aquisition thread %s not empty", aqt->name());
-      }
-
-      timeout_aqts.pop();
+  // Wakeup all cyclic aquisition threads and wait for them
+  for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
+    if ( (*ait).second->aqtmode() == FvAquisitionThread::AqtCyclic ) {
+      //logger->log_error(name(), "Waking Thread %s", (*ait).second->name());
+      (*ait).second->wakeup(aqt_barrier);
     }
-    timeout_aqts.unlock();
-    aquisition_threads.unlock();
-    timeout_mutex->unlock();
-  } else {
-    timeout_mutex->unlock();
   }
+
+  aqt_barrier->wait();
+  
+  // Check for aqt timeouts
+  for (ait = aqts.begin(); ait != aqts.end();) {
+    if ( (*ait).second->_vision_threads->empty() &&
+	 ((*ait).second->_vision_threads->empty_time() > _aqt_timeout) ) {
+      
+      logger->log_info(name(), "Aquisition thread %s timed out, destroying",
+		       (*ait).second->name());
+
+      (*ait).second->cancel();
+      (*ait).second->join();
+      delete (*ait).second;
+      aqts.erase(ait++);
+    } else {
+      ++ait;
+    }
+  }
+
+  for (stit = started_threads.begin(); stit != started_threads.end();) {
+
+    // if the thread is registered in that aqt mark it running
+    (*stit).second->_vision_threads->set_thread_running((*stit).first);
+
+    if ( (*stit).second->_vision_threads->has_cyclic_thread() ) {
+      if ((*stit).second->aqtmode() != FvAquisitionThread::AqtCyclic ) {
+	logger->log_info(name(), "Switching aquisition thread %s to cyclic mode (%s)",
+			 (*stit).second->name(), Thread::current_thread()->name());
+
+	(*stit).second->cancel();
+	(*stit).second->join();
+	(*stit).second->set_aqtmode(FvAquisitionThread::AqtCyclic);
+	(*stit).second->start();
+      }
+    } else if ((*stit).second->aqtmode() != FvAquisitionThread::AqtContinuous ) {
+      logger->log_info(name(), "Switching aquisition thread %s to continuous mode",
+		       (*stit).second->name());
+      (*stit).second->cancel();
+      (*stit).second->join();
+      (*stit).second->set_aqtmode(FvAquisitionThread::AqtContinuous);
+      (*stit).second->start();
+    }
+
+    started_threads.erase( stit++ );
+  }
+
+  // Re-create barrier as necessary after _adding_ threads
+  unsigned int num_cyclic_threads = 0;
+  for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
+    if ( (*ait).second->_vision_threads->has_cyclic_thread() ) {
+      ++num_cyclic_threads;
+    }
+  }
+  cond_recreate_barrier(num_cyclic_threads);
+
+  aqts.unlock();
 }
 
 
@@ -137,32 +174,30 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread, boo
 {
   Camera *c;
 
-  timeout_mutex->lock();
-  aquisition_threads.lock();
-  timeout_aqts.lock();
+  aqts.lock();
 
-  logger->log_info(name(), "Thread '%s' register for camera '%s'", thread->name(), camera_string);
+  logger->log_info(name(), "Thread '%s' registers for camera '%s'", thread->name(), camera_string);
+
+  VisionAspect *vision_thread = dynamic_cast<VisionAspect *>(thread);
+  if ( vision_thread == NULL ) {
+    throw TypeMismatchException("Thread is not a vision thread");
+  }
 
   CameraArgumentParser *cap = new CameraArgumentParser(camera_string);
   try {
     std::string id = cap->cam_type() + ":" + cap->cam_id();
-    if ( aquisition_threads.find(id) != aquisition_threads.end() ) {
+    if ( aqts.find(id) != aqts.end() ) {
       // this camera has already been loaded
-      c = aquisition_threads[id]->camera_instance(raw);
-      try {
-	aquisition_threads[id]->add_thread(thread, raw);
-      } catch (Exception &e) {
-	e.append("Could not add thread to '%s'", aquisition_threads[id]->name());
-	delete c;
-	delete cap;
- 	aquisition_threads.unlock();
-	timeout_aqts.unlock();
-	timeout_mutex->unlock();
-	throw;
-      }
+      c = aqts[id]->camera_instance(raw,
+				    (vision_thread->vision_thread_mode() ==
+				     VisionAspect::CONTINUOUS));
+
+      aqts[id]->_vision_threads->add_waiting_thread(thread, raw);
+
     } else {
-      Camera *cam = CameraFactory::instance(cap);
+      Camera *cam = NULL;
       try {
+	cam = CameraFactory::instance(cap);
 	cam->open();
 	cam->start();
       } catch (Exception &e) {
@@ -172,73 +207,109 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread, boo
 	throw;
       }
 
-      FvAquisitionThread *aqt = new FvAquisitionThread(this, logger, id.c_str(),
-						       cam, _aqt_timeout);
+      FvAquisitionThread *aqt = new FvAquisitionThread(id.c_str(), cam, logger, clock);
 
-      c = aqt->camera_instance(raw);
-      aqt->add_thread(thread, raw);
+      c = aqt->camera_instance(raw, (vision_thread->vision_thread_mode() ==
+				     VisionAspect::CONTINUOUS));
 
-      aquisition_threads[id] = aqt;
+      aqt->_vision_threads->add_waiting_thread(thread, raw);
+
+      aqts[id] = aqt;
       aqt->start();
+
+      // no need to recreate barrier, by default aqts operate in continuous mode
 
       logger->log_info(name(), "Aquisition thread '%s' started for thread '%s' and camera '%s'",
 		       aqt->name(), thread->name(), id.c_str());
 
     }
+
+    thread->add_notification_listener(this);
+
   } catch (UnknownCameraTypeException &e) {
     delete cap;
     e.append("FvBaseVisionMaster: could not instantiate camera");
-    aquisition_threads.unlock();
-    timeout_aqts.unlock();
-    timeout_mutex->unlock();
+    aqts.unlock();
     throw;
   } catch (Exception &e) {
     delete cap;
     e.append("FvBaseVisionMaster: could not open or start camera");
-    aquisition_threads.unlock();
-    timeout_aqts.unlock();
-    timeout_mutex->unlock();
+    aqts.unlock();
     throw;
   }
 
   delete cap;
 
-  timeout_aqts.unlock();
-  aquisition_threads.unlock();
-  timeout_mutex->unlock();
+  aqts.unlock();
   return c;
 }
+
+
+/** Conditionally re-create barriers.
+ * Re-create barriers if the number of cyclic threads has changed.
+ * @param num_cyclic_threads new number of cyclic threads
+ */
+void
+FvBaseThread::cond_recreate_barrier(unsigned int num_cyclic_threads)
+{
+  if ( (num_cyclic_threads + 1) != aqt_barrier->count() ) {
+    delete aqt_barrier;
+    aqt_barrier = new Barrier( num_cyclic_threads + 1 ); // +1 for base thread
+  }
+}
+
 
 void
 FvBaseThread::unregister_thread(Thread *thread)
 {
-  aquisition_threads.lock();
-  for (ait = aquisition_threads.begin(); ait != aquisition_threads.end(); ++ait) {
-    if ( (*ait).second->has_thread(thread) ) {
-      (*ait).second->remove_thread(thread);
+  aqts.lock();
+  unsigned int num_cyclic_threads = 0;
+
+  for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
+
+    // Remove thread from all aqts
+    (*ait).second->_vision_threads->remove_thread(thread);
+
+    if ( (*ait).second->_vision_threads->has_cyclic_thread() ) {
+      ++num_cyclic_threads;
+
+    } else if ((*ait).second->aqtmode() != FvAquisitionThread::AqtContinuous ) {
+      logger->log_info(name(), "Switching aquisition thread %s to continuous mode "
+		               "on unregister", (*ait).second->name());
+      (*ait).second->cancel();
+      (*ait).second->join();
+      (*ait).second->set_aqtmode(FvAquisitionThread::AqtContinuous);
+      (*ait).second->start();
     }
   }
-  aquisition_threads.unlock();
+  // Recreate as necessary after _removing_ threads
+  cond_recreate_barrier(num_cyclic_threads);
+
+  aqts.unlock();
 }
 
 
-/** Timeout signal receiver for aquisition threads.
- * This method is used by FvAquisitionThread to signal a timeout with empty queues.
- * If the aquisition thread is empty (which may change if the aquisition thread
- * calls this method while a new thread is added and the lock was aquired there
- * before we could aquire it) it is stopped and deleted.
- * @param id id of the aquisition thread
- */
 void
-FvBaseThread::aqt_timeout(const char *id)
-{  
-  timeout_mutex->tryLock();
-  // unlocked in loop()
-  logger->log_debug(name(), "Aqusition thread %s timed out", id);
-  timeout_aqts.lock();
-  logger->log_debug(name(), "Pushing Aqusition thread %s", id);
-  timeout_aqts.push(id);
-  logger->log_debug(name(), "Aqusition thread REALLY %s timed out", id);
-  timeout_aqts.unlock();
+FvBaseThread::thread_started(Thread *thread)
+{
+  aqts.lock();
+  //logger->log_debug(name(), "Thread %s started", thread->name());
 
+  for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
+    if ((*ait).second->_vision_threads->has_waiting_thread(thread)) {
+      started_threads[thread] = (*ait).second;
+    }
+  }
+  aqts.unlock();
+}
+
+
+void
+FvBaseThread::thread_init_failed(Thread *thread)
+{
+  aqts.lock();
+  for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
+    (*ait).second->_vision_threads->remove_waiting_thread(thread);
+  }
+  aqts.unlock();
 }

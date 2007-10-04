@@ -29,26 +29,28 @@
 #define __FIREVISION_APPS_BASE_BASE_THREAD_H_
 
 #include <core/threading/thread.h>
+#include <core/threading/thread_notification_listener.h>
 #include <core/utils/lock_map.h>
-#include <core/utils/lock_queue.h>
 
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/vision_master.h>
+#include <aspect/clock.h>
 
 #include <fvutils/base/vision_master.h>
-
 #include <string>
 
 class FvAquisitionThread;
-class Mutex;
+class Barrier;
 
 class FvBaseThread
 : public Thread,
   public BlockedTimingAspect,
   public LoggingAspect,
   public VisionMasterAspect,
-  public VisionMaster
+  public ClockAspect,
+  public VisionMaster,
+  public ThreadNotificationListener
 {
  public:
   FvBaseThread();
@@ -65,15 +67,21 @@ class FvBaseThread
 					bool raw = false);
   virtual void      unregister_thread(Thread *thread);
 
-  void aqt_timeout(const char *id);
-
+  virtual void thread_started(Thread *thread);
+  virtual void thread_init_failed(Thread *thread);
 
  private:
-  LockMap<std::string, FvAquisitionThread *> aquisition_threads;
+  void cond_recreate_barrier(unsigned int num_cyclic_threads);
+
+ private:
+  LockMap<std::string, FvAquisitionThread *> aqts;
   LockMap<std::string, FvAquisitionThread *>::iterator ait;
   unsigned int _aqt_timeout;
-  LockQueue<const char *>   timeout_aqts;
-  Mutex                    *timeout_mutex;
+
+  LockMap<Thread *, FvAquisitionThread *> started_threads;
+  LockMap<Thread *, FvAquisitionThread *>::iterator stit;
+
+  Barrier *aqt_barrier;
 };
 
 

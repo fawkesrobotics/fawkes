@@ -29,41 +29,39 @@
 #define __FIREVISION_APPS_BASE_AQUISITION_THREAD_H_
 
 #include <core/threading/thread.h>
-#include <core/threading/thread_notification_listener.h>
 
+#include <cams/shmem.h>
 #include <fvutils/color/colorspaces.h>
 
-class Barrier;
-class WaitCondition;
-class Mutex;
-class ThreadList;
 class SharedMemoryImageBuffer;
-class Camera;
 class FvBaseThread;
+class FvAqtVisionThreads;
 class Logger;
+class Clock;
 
 class FvAquisitionThread
-: public Thread, public ThreadNotificationListener
+: public Thread
 {
  public:
-  FvAquisitionThread(FvBaseThread *base_thread, Logger *logger,
-		     const char *id, Camera *camera,
-		     unsigned int timeout);
+  friend class FvBaseThread;
+
+  /** Aquisition thread mode. */
+  typedef enum {
+    AqtCyclic,		/**< cyclic mode, use if there is at least one cyclic thread
+			 * for this aquisition thread. */
+    AqtContinuous	/**< continuous mode, use if there are only continuous threads
+			 * for this aquisition thread. */
+  } AqtMode;
+
+  FvAquisitionThread(const char *id, Camera *camera,
+		     Logger *logger, Clock *clock);
   virtual ~FvAquisitionThread();
 
   virtual void loop();
 
-  bool empty();
-
-  // from ThreadNotificationListener
-  virtual void thread_started(Thread *thread);
-  virtual void thread_init_failed(Thread *thread);
-
-  // from VisionMaster
-  virtual Camera *  camera_instance(bool raw);
-  virtual bool      has_thread(Thread *thread);
-  virtual void      add_thread(Thread *thread, bool raw);
-  virtual void      remove_thread(Thread *thread);
+  void set_aqtmode(AqtMode mode);
+  AqtMode aqtmode();
+  SharedMemoryCamera *  camera_instance(bool raw, bool deep_copy);
 
  private:
   Camera                   *_camera;
@@ -71,16 +69,7 @@ class FvAquisitionThread
   SharedMemoryImageBuffer  *_shm_raw;
   char                     *_image_id;
   char                     *_image_id_raw;
-  ThreadList               *_running_tl;
-  Barrier                  *_running_tl_barrier;
-  ThreadList               *_running_raw_tl;
-  Barrier                  *_running_raw_tl_barrier;
-  ThreadList               *_waiting_tl;
-  ThreadList               *_waiting_raw_tl;
-  WaitCondition            *_wait_for_threads_cond;
-  Mutex                    *_wait_for_threads_mutex;
-  unsigned int              _timeout;
-  FvBaseThread             *_base_thread;
+
   Logger                   *_logger;
 
   colorspace_t              _colorspace;
@@ -88,6 +77,9 @@ class FvAquisitionThread
   unsigned int              _height;
   unsigned char            *_buffer;
   unsigned char            *_buffer_raw;
+
+  AqtMode                   _mode;
+  FvAqtVisionThreads       *_vision_threads;
 };
 
 
