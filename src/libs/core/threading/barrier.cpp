@@ -86,6 +86,7 @@ class BarrierData
  */
 Barrier::Barrier(unsigned int count)
 {
+  _count = count;
   barrier_data = new BarrierData();
   pthread_barrier_init( &(barrier_data->barrier), NULL, count );
 }
@@ -109,3 +110,12 @@ Barrier::wait()
   pthread_barrier_wait( &(barrier_data->barrier) );
 }
 
+
+/** Get number of threads this barrier will wait for.
+ * @return number of threads this barrier will wait for.
+ */
+unsigned int
+Barrier::count()
+{
+  return _count;
+}

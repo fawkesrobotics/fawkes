@@ -202,7 +202,7 @@ ThreadListInitThread::loop()
  */
 ThreadListFinalizerThread::ThreadListFinalizerThread(ThreadList *tl,
 						 ThreadFinalizer *finalizer)
-  : ThreadListManagementThread((std::string("ThreadListInitThread::") + tl->name()).c_str(),
+  : ThreadListManagementThread((std::string("ThreadListFinalizerThread::") + tl->name()).c_str(),
 			       tl, new CannotInitializeThreadException("Deferred thread finalization failed"))
 {
   this->finalizer = finalizer;

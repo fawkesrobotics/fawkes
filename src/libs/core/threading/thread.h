@@ -58,6 +58,14 @@ class Thread {
     OPMODE_WAITFORWAKEUP	/**< operate in wait-for-wakeup mode */
   } OpMode;
 
+  /** Cancel state.
+   * The current cancel state of a thread.
+   */
+  typedef enum {
+    CANCEL_ENABLED,	/**< cancellation is possible */
+    CANCEL_DISABLED	/**< thread cannot be cancelled */
+  } CancelState;
+
   virtual ~Thread();
 
   virtual void init();
@@ -84,6 +92,9 @@ class Thread {
   static pthread_t current_thread_id();
 
   static void      init_main();
+  static void      destroy_main();
+
+  static void      set_cancel_state(CancelState new_state, CancelState *old_state = 0);
 
   void set_delete_on_exit(bool del);
 
@@ -95,6 +106,8 @@ class Thread {
   Thread(const char *name, OpMode op_mode);
   void exit();
   void test_cancel();
+
+  void set_opmode(OpMode op_mode);
 
   virtual void once();
   virtual void loop();
@@ -127,6 +140,7 @@ class Thread {
 
   bool           __started;
   bool           __cancelled;
+  bool           __detached;
   bool           __delete_on_exit;
   char          *__name;
 

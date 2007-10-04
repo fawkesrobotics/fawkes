@@ -215,6 +215,7 @@ Thread::__constructor(const char *name, OpMode op_mode)
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
     __sleep_condition = new WaitCondition();
     __sleep_mutex = new Mutex();
+    __sleep_mutex->lock();
   } else {
     __sleep_condition = NULL;
     __sleep_mutex = NULL;
@@ -230,6 +231,8 @@ Thread::__constructor(const char *name, OpMode op_mode)
   __finalize_sync_lock = NULL;
   loop_mutex = new Mutex();
   finalize_prepared = false;
+
+  
 }
 
 
@@ -241,9 +244,13 @@ Thread::~Thread()
   delete __sleep_mutex;
   __sleep_mutex = NULL;
   delete loop_mutex;
+  loop_mutex = NULL;
   delete __finalize_mutex;
+  __finalize_mutex = NULL;
   free(__name);
+  __name = NULL;
   delete __notification_listeners;
+  __notification_listeners = NULL;
 }
 
 
@@ -334,6 +341,9 @@ Thread::set_finalize_sync_lock(ReadWriteLock *lock)
 bool
 Thread::prepare_finalize()
 {
+  if ( ! __started ) {
+    throw CannotFinalizeThreadException("Thread has not been started");
+  }
   if ( finalize_prepared ) {
     throw CannotFinalizeThreadException("prepare_finalize() has already been called");
   }
@@ -429,6 +439,9 @@ Thread::finalize()
 void
 Thread::cancel_finalize()
 {
+  if ( ! __started ) {
+    throw CannotFinalizeThreadException("Cannot cancel finalize, thread has not been started");
+  }
   __finalize_mutex->lock();
   finalize_prepared = false;
   __finalize_mutex->unlock();
@@ -447,12 +460,15 @@ Thread::start()
   if (__started) {
     throw Exception("You cannot start the same thread twice!");
   }
+
+  __cancelled = false;
+  __detached  = false;
+  __started   = true;
+
   if ( (err = pthread_create(&__thread_id, NULL, Thread::entry, this)) != 0) {
     // An error occured
     throw Exception("Could not start thread", err);
   }
-
-  __started = true;
 }
 
 
@@ -466,6 +482,9 @@ Thread::entry(void *pthis)
 {
   Thread *t = (Thread *)pthis;
 
+  // Can be used for easier debugging in gdb, need to make this accessible
+  // printf("Thread %s (%lu) started\n", t->name(), t->thread_id());
+
   // Set thread instance as TSD
   set_tsd_thread_instance(t);
 
@@ -475,6 +494,12 @@ Thread::entry(void *pthis)
   // Run thread
   t->once();
   t->run();
+
+  if ( t->__detached ) {
+    // mark as stopped if detached since the thread will be deleted
+    // after entry() is done
+    t->__started = false;
+  }
 
   // have no useful exit value
   return NULL;
@@ -491,6 +516,8 @@ Thread::exit()
   if ( __delete_on_exit ) {
     delete this;
   }
+
+  __cancelled   = true;
   pthread_exit(NULL);
 }
 
@@ -503,6 +530,24 @@ Thread::join()
 {
   void *dont_care;
   pthread_join(__thread_id, &dont_care);
+  __started = false;
+
+  if ( __sleep_mutex != NULL ) {
+    // We HAVE to release this sleep mutex under any circumstances, so we try
+    // to lock it (locking a locked mutex or unlocking and unlocked mutex are undefined)
+    // and then unlock it. This is for example necessary if a thread is cancelled, and
+    // then set_opmode() is called, this would lead to a deadlock if the thread was
+    // cancelled while waiting for the sleep lock (which is very likely)
+    __sleep_mutex->tryLock();
+    __sleep_mutex->unlock();
+  }
+
+  // Force unlock of these mutexes, otherwise the same bad things as for the sleep
+  // mutex above could happen!
+  __finalize_mutex->tryLock();
+  __finalize_mutex->unlock();
+  loop_mutex->tryLock();
+  loop_mutex->unlock();
 }
 
 
@@ -513,6 +558,7 @@ Thread::join()
 void
 Thread::detach()
 {
+  __detached = true;
   pthread_detach(__thread_id);
 }
 
@@ -523,9 +569,10 @@ Thread::detach()
 void
 Thread::cancel()
 {
-  if ( ! __cancelled ) {
-    __cancelled = true;
-    pthread_cancel(__thread_id);
+  if ( __started && ! __cancelled ) {
+    if ( pthread_cancel(__thread_id) == 0 ) {
+      __cancelled = true;
+    }
   }
 }
 
@@ -539,6 +586,34 @@ Thread::opmode() const
   return __op_mode;
 }
 
+
+/** Set operation mode.
+ * This can be done at any time and the thread will from the next cycle on
+ * run in the new mode.
+ * @param op_mode new operation mode
+ */
+void
+Thread::set_opmode(OpMode op_mode)
+{
+  if ( __started ) {
+    throw Exception("Cannot set thread opmode while running");
+  }
+
+  if ( (__op_mode == OPMODE_WAITFORWAKEUP) &&
+       (op_mode == OPMODE_CONTINUOUS) ) {
+    __op_mode = OPMODE_CONTINUOUS;
+    delete __sleep_condition;
+    delete __sleep_mutex;
+    __sleep_condition = NULL;
+    __sleep_mutex = NULL;
+  } else if ( (__op_mode == OPMODE_CONTINUOUS) &&
+	      (op_mode == OPMODE_WAITFORWAKEUP) ) {
+    __sleep_mutex = new Mutex();
+    __sleep_mutex->lock();
+    __sleep_condition = new WaitCondition();
+    __op_mode = OPMODE_WAITFORWAKEUP;
+  }
+}
 
 /** Get name of thread.
  * This name is mainly used for debugging purposes. Give it a descriptive
@@ -592,10 +667,10 @@ void
 Thread::run()
 {
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
-    __sleep_mutex->lock();
+    // Wait for initial wakeup
     __sleep_condition->wait(__sleep_mutex);
-    __sleep_mutex->unlock();
   }
+
   forever {
 
     if ( __finalize_sync_lock )  __finalize_sync_lock->lockForRead();
@@ -619,9 +694,7 @@ Thread::run()
       __barrier = NULL;
     }
     if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
-      __sleep_mutex->lock();
       __sleep_condition->wait(__sleep_mutex);
-      __sleep_mutex->unlock();
     }
     usleep(0);
   }
@@ -636,7 +709,9 @@ void
 Thread::wakeup()
 {
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
+    __sleep_mutex->lock();
     __sleep_condition->wakeAll();
+    __sleep_mutex->unlock();
   }
 }
 
@@ -654,8 +729,11 @@ Thread::wakeup(Barrier *barrier)
   if ( barrier == NULL ) {
     throw NullPointerException(" Thread::wakeup(): barrier must not be NULL");
   }
+
+  __sleep_mutex->lock();
   __barrier = barrier;
   __sleep_condition->wakeAll();
+  __sleep_mutex->unlock();
 }
 
 
@@ -805,6 +883,23 @@ Thread::init_main()
 }
 
 
+/** Destroy main thread wrapper instance.
+ * This destroys the thread wrapper created with init_main(). Note that
+ * this has to be called from the very same thread that init_main() was called
+ * from, which should be the main thread (somewhere from main() on).
+ */
+void
+Thread::destroy_main()
+{
+  Thread *t = current_thread();
+  if ( strcmp(t->name(), MAIN_THREAD_NAME) == 0 ) {
+    delete t;
+  } else {
+    throw Exception("Main thread can only be destroyed in main thread");
+  }
+}
+
+
 /** Get the ID of the currently running thread.
  * This will return the ID of the thread in which's context this method was
  * called.
@@ -833,4 +928,31 @@ Thread::current_thread()
     throw Exception("No thread has been initialized");
   }
   return (Thread *)pthread_getspecific(THREAD_KEY);
+}
+
+
+/** Set the cancel state of the current thread.
+ * The cancel state can only be set on the current thread. Please also
+ * consider the documentation for pthread_setcancelstate().
+ * @param new_state new cancel state
+ * @param old_state old cancel state
+ */
+void
+Thread::set_cancel_state(CancelState new_state, CancelState *old_state)
+{
+  int oldstate = PTHREAD_CANCEL_ENABLE;
+  int newstate = PTHREAD_CANCEL_ENABLE;
+  if ( new_state == CANCEL_DISABLED ) {
+    newstate = PTHREAD_CANCEL_DISABLE;
+  }
+
+  pthread_setcancelstate(newstate, &oldstate);
+
+  if ( old_state != NULL ) {
+    if ( oldstate == PTHREAD_CANCEL_DISABLE ) {
+      *old_state = CANCEL_DISABLED;
+    } else {
+      *old_state = CANCEL_ENABLED;
+    }
+  }
 }

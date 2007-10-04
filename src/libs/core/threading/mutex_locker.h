@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  barrier.h - Barrier
+ *  mutex_locker.h - Mutex locker
  *
- *  Generated: Thu Sep 15 00:31:50 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Oct 04 16:12:43 2007
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,25 +25,22 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __CORE_THREADING_BARRIER_H_
-#define __CORE_THREADING_BARRIER_H_
+#ifndef __CORE_THREADING_MUTEX_LOCKER_H_
+#define __CORE_THREADING_MUTEX_LOCKER_H_
 
-class BarrierData;
+class Mutex;
 
-class Barrier
+class MutexLocker
 {
  public:
-  Barrier(unsigned int count);
-  ~Barrier();
+  MutexLocker(Mutex *mutex);
+  ~MutexLocker();
 
-  void wait();
-
-  unsigned int count();
+  void relock();
+  void unlock();
 
  private:
-  BarrierData *barrier_data;
-
-  unsigned int _count;
+  Mutex *mutex;
 };
 
 
