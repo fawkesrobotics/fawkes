@@ -29,9 +29,8 @@
 #define __UTILS_LOGGING_MULTI_H_
 
 #include <utils/logging/logger.h>
-#include <core/utils/lock_list.h>
 
-class Mutex;
+class MultiLoggerData;
 
 class MultiLogger : public Logger
 {
@@ -66,9 +65,7 @@ class MultiLogger : public Logger
   virtual void log_error(const char *component, Exception &e);
 
  private:
-  LockList<Logger *>            loggers;
-  LockList<Logger *>::iterator  logit;
-  Mutex                        *mutex;
+  MultiLoggerData *data;
 };
 
 #endif

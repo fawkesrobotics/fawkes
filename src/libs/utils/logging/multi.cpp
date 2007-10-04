@@ -28,6 +28,33 @@
 #include <utils/logging/multi.h>
 #include <utils/logging/logger.h>
 
+/// @cond INTERNALS
+#include <core/utils/lock_list.h>
+#include <core/threading/thread.h>
+
+class MultiLoggerData
+{
+ public:
+  MultiLoggerData()
+  {
+    mutex = new Mutex();
+  }
+
+  ~MultiLoggerData()
+  {
+    delete mutex;
+    mutex = NULL;
+  }
+
+  LockList<Logger *>            loggers;
+  LockList<Logger *>::iterator  logit;
+  Mutex                        *mutex;
+  Thread::CancelState           old_state;
+};
+
+/// @endcond
+
+
 /** @class MultiLogger <utils/logging/multi.h>
  * Log through multiple loggers.
  * It can be hand to have the opportunity to log to multiple channels, for
@@ -51,8 +78,7 @@
  */
 MultiLogger::MultiLogger()
 {
-  loggers.clear();
-  mutex = new Mutex();
+  data = new MultiLoggerData();
 }
 
 
@@ -62,24 +88,23 @@ MultiLogger::MultiLogger()
  */
 MultiLogger::MultiLogger(Logger *logger)
 {
-  loggers.clear();
-  loggers.push_back_locked(logger);
-  mutex = new Mutex();
+  data = new MultiLoggerData();
+  data->loggers.push_back_locked(logger);
 }
 
 
 /** Destructor.
- * This will destroy all sub-loggers (they are deleted).
+ * This will destroy all sub-data->loggers (they are deleted).
  */
 MultiLogger::~MultiLogger()
 {
-  loggers.lock();
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    delete (*logit);
+  data->loggers.lock();
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    delete (*data->logit);
   }
-  loggers.clear();
-  loggers.unlock();
-  delete mutex;
+  data->loggers.clear();
+  data->loggers.unlock();
+  delete data;
 }
 
 
@@ -89,13 +114,15 @@ MultiLogger::~MultiLogger()
 void
 MultiLogger::add_logger(Logger *logger)
 {
-  mutex->lock();
-  loggers.lock();
-  loggers.push_back(logger);
-  loggers.sort();
-  loggers.unique();
-  loggers.unlock();
-  mutex->unlock();
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+  data->loggers.lock();
+  data->loggers.push_back(logger);
+  data->loggers.sort();
+  data->loggers.unique();
+  data->loggers.unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -105,20 +132,26 @@ MultiLogger::add_logger(Logger *logger)
 void
 MultiLogger::remove_logger(Logger *logger)
 {
-  mutex->lock();
-  loggers.remove_locked(logger);
-  mutex->unlock();
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
+  data->loggers.remove_locked(logger);
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
 void
 MultiLogger::set_loglevel(LogLevel level)
 {
-  mutex->lock();
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->set_loglevel(level);
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->set_loglevel(level);
   }
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -131,14 +164,16 @@ MultiLogger::set_loglevel(LogLevel level)
 void
 MultiLogger::log(LogLevel level, const char *component, const char *format, ...)
 {
-  mutex->lock();
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
   va_list va;
   va_start(va, format);
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->vlog(level, component, format, va);
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->vlog(level, component, format, va);
   }
   va_end(va);
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -150,14 +185,16 @@ MultiLogger::log(LogLevel level, const char *component, const char *format, ...)
 void
 MultiLogger::log_debug(const char *component, const char *format, ...)
 {
-  mutex->lock();
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
   va_list va;
   va_start(va, format);
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->vlog_debug(component, format, va);
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->vlog_debug(component, format, va);
   }
   va_end(va);
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -169,14 +206,17 @@ MultiLogger::log_debug(const char *component, const char *format, ...)
 void
 MultiLogger::log_info(const char *component, const char *format, ...)
 {
-  mutex->lock();
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
   va_list va;
   va_start(va, format);
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->vlog_info(component, format, va);
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->vlog_info(component, format, va);
   }
   va_end(va);
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -188,14 +228,17 @@ MultiLogger::log_info(const char *component, const char *format, ...)
 void
 MultiLogger::log_warn(const char *component, const char *format, ...)
 {
-  mutex->lock();
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
   va_list va;
   va_start(va, format);
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->vlog_warn(component, format, va);
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->vlog_warn(component, format, va);
   }
   va_end(va);
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -207,14 +250,17 @@ MultiLogger::log_warn(const char *component, const char *format, ...)
 void
 MultiLogger::log_error(const char *component, const char *format, ...)
 {
-  mutex->lock();
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
   va_list va;
   va_start(va, format);
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->vlog_error(component, format, va);
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->vlog_error(component, format, va);
   }
   va_end(va);
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -229,11 +275,14 @@ void
 MultiLogger::vlog(LogLevel level,
 		  const char *component, const char *format, va_list va)
 {
-  mutex->lock();
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->vlog(level, component, format, va);
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->vlog(level, component, format, va);
   }
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -246,11 +295,14 @@ MultiLogger::vlog(LogLevel level,
 void
 MultiLogger::vlog_debug(const char *component, const char *format, va_list va)
 {
-  mutex->lock();
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->vlog_debug(component, format, va);
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->vlog_debug(component, format, va);
   }
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -263,11 +315,14 @@ MultiLogger::vlog_debug(const char *component, const char *format, va_list va)
 void
 MultiLogger::vlog_info(const char *component, const char *format, va_list va)
 {
-  mutex->lock();
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->vlog_info(component, format, va);
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->vlog_info(component, format, va);
   }
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -280,11 +335,14 @@ MultiLogger::vlog_info(const char *component, const char *format, va_list va)
 void
 MultiLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
-  mutex->lock();
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->vlog_warn(component, format, va);
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->vlog_warn(component, format, va);
   }
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -297,11 +355,14 @@ MultiLogger::vlog_warn(const char *component, const char *format, va_list va)
 void
 MultiLogger::vlog_error(const char *component, const char *format, va_list va)
 {
-  mutex->lock();
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->vlog_error(component, format, va);
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->vlog_error(component, format, va);
   }
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -314,11 +375,14 @@ MultiLogger::vlog_error(const char *component, const char *format, va_list va)
 void
 MultiLogger::log(LogLevel level, const char *component, Exception &e)
 {
-  mutex->lock();
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->log(level, component, e);
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->log(level, component, e);
   }
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -329,8 +393,8 @@ MultiLogger::log(LogLevel level, const char *component, Exception &e)
 void
 MultiLogger::log_debug(const char *component, Exception &e)
 {
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->log_error(component, e);
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->log_error(component, e);
   }
 }
 
@@ -341,11 +405,14 @@ MultiLogger::log_debug(const char *component, Exception &e)
 void
 MultiLogger::log_info(const char *component, Exception &e)
 {
-  mutex->lock();
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->log_error(component, e);
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->log_error(component, e);
   }
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -356,11 +423,14 @@ MultiLogger::log_info(const char *component, Exception &e)
 void
 MultiLogger::log_warn(const char *component, Exception &e)
 {
-  mutex->lock();
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->log_error(component, e);
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->log_error(component, e);
   }
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
 
 
@@ -371,9 +441,12 @@ MultiLogger::log_warn(const char *component, Exception &e)
 void
 MultiLogger::log_error(const char *component, Exception &e)
 {
-  mutex->lock();
-  for (logit = loggers.begin(); logit != loggers.end(); ++logit) {
-    (*logit)->log_error(component, e);
+  data->mutex->lock();
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
+
+  for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
+    (*data->logit)->log_error(component, e);
   }
-  mutex->unlock();
+  Thread::set_cancel_state(data->old_state);
+  data->mutex->unlock();
 }
