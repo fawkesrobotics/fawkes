@@ -38,7 +38,7 @@
  * @return a - b
  */
 inline float
-time_diff_sec(timeval a, timeval b)
+time_diff_sec(const timeval a, const timeval b)
 {
   return a.tv_sec  - b.tv_sec + (a.tv_usec - b.tv_usec) / 1000000.f;
 }
@@ -54,8 +54,8 @@ time_diff_sec(timeval a, timeval b)
  * @return a_sec - b_sec  + (a_usec - b_usec) / 1000000.f
  */
 inline float
-time_diff_sec(long int a_sec, long int a_usec,
-	      long int b_sec, long int b_usec)
+time_diff_sec(const long int a_sec, const long int a_usec,
+	      const long int b_sec, const long int b_usec)
 {
   return a_sec - b_sec + (a_usec - b_usec) / 1000000.f;
 }
@@ -86,6 +86,7 @@ class Time
 
   Time   operator+(const Time& t) const;
   Time   operator-(const Time& t) const;
+  float  operator-(const Time* t) const;
   Time & operator+=(const Time& t);
   Time & operator-=(const Time& t);
   Time & operator=(const Time& t);

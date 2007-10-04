@@ -239,6 +239,17 @@ Time::operator-(const Time& t) const
 }
 
 
+/** Operator that substracts one Time from another.
+ * @param t the Time that is substracted
+ * @return the difference
+ */
+float
+Time::operator-(const Time* t) const
+{
+  return time_diff_sec(time, t->time);
+}
+
+
 /** += operator 
  * @param t the other time
  * @return reference to this instance

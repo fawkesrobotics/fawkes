@@ -68,7 +68,9 @@ class Clock
   void get_systime(Time &time) const;
   void get_systime(Time *time) const;
 
-  Time now() const;
+  Time  now() const;
+  float elapsed(Time *t) const;
+  float sys_elapsed(Time *t) const;
 
  private:
   Clock();

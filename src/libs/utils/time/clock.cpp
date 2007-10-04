@@ -37,7 +37,7 @@
  * It is implemented as a singleton to ensure that there is only
  * one object. So-called TimeSources can be registered at the Clock
  * their current time can be retrieved through the Clock.
- * @author Daniel Beck
+ * @author Daniel Beck, Tim Niemueller
  */
 
 /** initialize static members */
@@ -247,7 +247,7 @@ Clock::get_systime(struct timeval* tv) const
 void
 Clock::get_systime(Time &time) const
 {
-  get_systime(&(time.time));
+  gettimeofday(&(time.time), 0);
 }
 
 
@@ -257,7 +257,7 @@ Clock::get_systime(Time &time) const
 void
 Clock::get_systime(Time *time) const
 {
-  get_systime(&(time->time));
+  gettimeofday(&(time->time), 0);
 }
 
 
@@ -269,6 +269,33 @@ Clock::now() const
 {
   Time t(_instance);
   return t.stamp();
+}
+
+
+/** How much time has elapsed since t?
+ * Calculated as "now - t" in seconds.
+ * @param t time
+ * @return elapsed seconds
+ */
+float
+Clock::elapsed(Time *t) const
+{
+  Time nowt(_instance);
+  return nowt - t;
+}
+
+
+/** How much system time has elapsed since t?
+ * Use only for system time criteria like timeouts.
+ * @param t time
+ * @return elapsed system seconds
+ */
+float
+Clock::sys_elapsed(Time *t) const
+{
+  struct timeval nowt;
+  gettimeofday(&nowt, NULL);
+  return time_diff_sec(nowt, t->time);
 }
 
 
