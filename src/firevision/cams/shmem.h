@@ -39,7 +39,7 @@ class SharedMemoryCamera : public Camera
 
  public:
 
-  SharedMemoryCamera(const char *image_id);
+  SharedMemoryCamera(const char *image_id, bool deep_copy = false);
   SharedMemoryCamera(const CameraArgumentParser *cap);
   ~SharedMemoryCamera();
 
@@ -65,15 +65,24 @@ class SharedMemoryCamera : public Camera
 
   SharedMemoryImageBuffer *  shared_memory_image_buffer();
 
+  virtual void           lock_for_read();
+  virtual bool           try_lock_for_read();
+  virtual void           lock_for_write();
+  virtual bool           try_lock_for_write();
+  virtual void           unlock();
+
  private:
   void init();
 
+  bool          deep_copy;
   bool          opened;
   unsigned int  width;
   unsigned int  height;
   char *        image_id;
 
   SharedMemoryImageBuffer  *shm_buffer;
+
+  unsigned char *deep_buffer;
 };
 
 #endif

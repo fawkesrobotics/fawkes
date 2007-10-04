@@ -25,6 +25,7 @@
  */
 
 #include <core/exception.h>
+#include <core/exceptions/system.h>
 #include <cams/shmem.h>
 #include <fvutils/writers/fvraw.h>
 #include <fvutils/system/camargp.h>
@@ -32,15 +33,27 @@
 /** @class SharedMemoryCamera <cams/shmem.h>
  * Shared memory camera.
  * Camera to retrieve images from a shared memory segment.
+ *
+ * The camera can operate in a so-called deep-copy mode. In this mode a
+ * local internal buffer is created of the size of the image. On capture()
+ * the image is copied from the shared memory buffer to the local buffer
+ * with the shared memory segment locked for reading. This can be used if
+ * the image writing and the image reading processess run asynchronously.
+ * While locking would suffice the copying will account for only short
+ * locking times so that the interference between the two processes is
+ * minimal.
+ *
  * @author Tim Niemueller
  */
 
 /** Constructor.
  * @param image_id image ID to open
+ * @param deep_copy true to operate in deep-copy mode, false otherwise
  */
-SharedMemoryCamera::SharedMemoryCamera(const char *image_id)
+SharedMemoryCamera::SharedMemoryCamera(const char *image_id, bool deep_copy)
 {
   this->image_id = strdup(image_id);
+  this->deep_copy = deep_copy;
 
   try {
     init();
@@ -73,14 +86,24 @@ SharedMemoryCamera::SharedMemoryCamera(const CameraArgumentParser *cap)
 SharedMemoryCamera::~SharedMemoryCamera()
 {
   free(image_id);
+  if ( deep_buffer != NULL ) {
+    free( deep_buffer );
+  }
 }
 
 
 void
 SharedMemoryCamera::init()
 {
+  deep_buffer = NULL;
   try {
     shm_buffer = new SharedMemoryImageBuffer(image_id);
+    if ( deep_copy ) {
+      deep_buffer = (unsigned char *)malloc(shm_buffer->data_size());
+      if ( ! deep_buffer ) {
+	throw OutOfMemoryException("SharedMemoryCamera: Cannot allocate deep buffer");
+      }
+    }
     opened = true;
   } catch (Exception &e) {
     e.append("Failed to open shared memory image");
@@ -112,12 +135,21 @@ SharedMemoryCamera::print_info()
 void
 SharedMemoryCamera::capture()
 {
+  if ( deep_copy ) {
+    shm_buffer->lock_for_read();
+    memcpy(deep_buffer, shm_buffer->buffer(), shm_buffer->data_size());
+    shm_buffer->unlock();
+  }
 }
 
 unsigned char*
 SharedMemoryCamera::buffer()
 {
-  return shm_buffer->buffer();
+  if ( deep_copy ) {
+    return deep_buffer;
+  } else {
+    return shm_buffer->buffer();
+  }
 }
 
 unsigned int
@@ -185,4 +217,52 @@ void
 SharedMemoryCamera::set_image_number(unsigned int n)
 {
   // ignore for now
+}
+
+
+/** Lock image for reading.
+ * Aquire the lock to read images.
+ */
+void
+SharedMemoryCamera::lock_for_read()
+{
+  shm_buffer->lock_for_read();
+}
+
+
+/** Try to lock for reading.
+ * @return true if the lock has been aquired, false otherwise
+ */
+bool
+SharedMemoryCamera::try_lock_for_read()
+{
+  return shm_buffer->try_lock_for_read();
+}
+
+
+/** Lock image for writing.
+ * Aquire the lock to write images.
+ */
+void
+SharedMemoryCamera::lock_for_write()
+{
+  shm_buffer->lock_for_write();
+}
+
+
+/** Try to lock for reading.
+ * @return true if the lock has been aquired, false otherwise
+ */
+bool
+SharedMemoryCamera::try_lock_for_write()
+{
+  return shm_buffer->try_lock_for_write();
+}
+
+
+/** Unlock buffer. */
+void
+SharedMemoryCamera::unlock()
+{
+  shm_buffer->unlock();
 }
