@@ -268,7 +268,7 @@ BlackBoardMemoryManager::alloc(unsigned int num_bytes)
 {
   void * ptr;
   mutex->lock();
-  shmem->lock();
+  shmem->lock_for_write();
   ptr = alloc_nolock(num_bytes);
   shmem->unlock();
   mutex->unlock();
@@ -290,7 +290,7 @@ void
 BlackBoardMemoryManager::free(void *ptr)
 {
   mutex->lock();
-  shmem->lock();
+  shmem->lock_for_write();
 
   // find chunk in alloc_chunks
   chunk_list_t *ac = list_find_ptr(shmem_header->getAllocListHead(), chunk_addr(ptr));
@@ -519,7 +519,7 @@ void
 BlackBoardMemoryManager::lock()
 {
   mutex->lock();
-  shmem->lock();
+  shmem->lock_for_write();
 }
 
 
@@ -533,7 +533,7 @@ bool
 BlackBoardMemoryManager::tryLock()
 {
   if ( mutex->tryLock() ) {
-    if ( shmem->try_lock() ) {
+    if ( shmem->try_lock_for_write() ) {
       return true;
     } else {
       mutex->unlock();
