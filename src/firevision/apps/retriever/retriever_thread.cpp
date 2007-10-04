@@ -38,7 +38,8 @@
 
 /** Constructor. */
 FvRetrieverThread::FvRetrieverThread()
-  : Thread("FvRetrieverThread", Thread::OPMODE_WAITFORWAKEUP)
+  : Thread("FvRetrieverThread", Thread::OPMODE_WAITFORWAKEUP),
+    VisionAspect(VisionAspect::CYCLIC)
 {
 }
 
@@ -52,12 +53,14 @@ FvRetrieverThread::~FvRetrieverThread()
 void
 FvRetrieverThread::init()
 {
+  logger->log_debug(name(), "Registering for camera");
   try {
     cam = vision_master->register_for_camera(config->get_string("firevision", "/retriever/camera").c_str(), this);
   } catch (Exception &e) {
     e.append("FvRetrieverThread::init() failed");
     throw;
   }
+  logger->log_error(name(), "Registered for camera");
   try {
     shm = new SharedMemoryImageBuffer("retriever", cam->colorspace(),
 				      cam->pixel_width(), cam->pixel_height());
@@ -92,4 +95,5 @@ FvRetrieverThread::loop()
   cam->capture();
   memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
   cam->dispose_buffer();
+  logger->log_debug(name(), "DONE");
 }
