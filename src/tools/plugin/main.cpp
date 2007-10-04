@@ -36,6 +36,8 @@ main(int argc, char **argv)
 {
   ArgumentParser argp(argc, argv, "l:u:wa");
 
+  Thread::init_main();
+
   FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
   c->connect();
   // Not needed, will actually harm the performance, especially on slow network
@@ -54,6 +56,8 @@ main(int argc, char **argv)
   c->join();
 
   delete c;
+
+  Thread::destroy_main();
 
   return 0;
 }
