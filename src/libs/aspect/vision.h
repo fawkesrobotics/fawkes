@@ -33,12 +33,24 @@
 class VisionAspect
 {
  public:
+  /** The operation mode of this vision thread.
+   * @see Thread
+   */
+  typedef enum {
+    CYCLIC,	/**< cyclic mode */
+    CONTINUOUS	/**< continuous mode */
+  } VisionThreadMode;
+
+  VisionAspect(VisionThreadMode mode);
   virtual ~VisionAspect();
 
-  void initVisionAspect(VisionMaster *vision_master);
+  void              initVisionAspect(VisionMaster *vision_master);
+  VisionThreadMode  vision_thread_mode();
  protected:
   /** Vision master */
   VisionMaster *vision_master;
+ private:
+  VisionThreadMode __vision_thread_mode;
 };
 
 #endif

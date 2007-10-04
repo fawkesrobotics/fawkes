@@ -174,6 +174,17 @@ AspectIniFin::init(Thread *thread)
   VisionAspect *vision_thread;
   if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
     try {
+      if ( (vision_thread->vision_thread_mode() == VisionAspect::CONTINUOUS) &&
+	   (thread->opmode() != Thread::OPMODE_CONTINUOUS) ) {
+	throw CannotInitializeThreadException("Vision thread operates in continuous "
+					      "mode but thread does not");
+      }
+      if ( (vision_thread->vision_thread_mode() == VisionAspect::CYCLIC) &&
+	   (thread->opmode() != Thread::OPMODE_WAITFORWAKEUP) ) {
+	throw CannotInitializeThreadException("Vision thread operates in cyclic mode but"
+					      "thread does not operate in wait-for-wakeup "
+					      "mode.");
+      }
       vision_dependency->add(vision_thread);
       vision_thread->initVisionAspect( vision_dependency->provider()->vision_master() );
     } catch (DependencyViolationException &e) {
