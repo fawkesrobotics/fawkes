@@ -21,16 +21,27 @@
 
 BASEDIR = ../../..
 
-CFLAGS = -g `pkg-config gtkmm-2.4 --cflags`
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/src/plugins/navigator/navigator.mk
 
+ifneq ($(SRCDIR),.)
+.PHONY: warning_nonavi
+warning_nonavi:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Navigator GUI (navigator not built)$(TNORMAL)"
+
+CFLAGS = -g `pkg-config gtkmm-2.4 --cflags`
+endif
 
 LIBS_navigator_gui = core utils netcomm navigator
 LDFLAGS_navigator_gui = `pkg-config gtkmm-2.4 --libs`
 OBJS_navigator_gui = navigator_gui.o
 
-BINS_all = $(BINDIR)/navigator_gui
-
-
 OBJS_all    = $(OBJS_navigator_gui)
+
+ifeq ($(BUILD_NAVIGATOR),1)
+BINS_all = $(BINDIR)/navigator_gui
+else
+all: warning_nonavi
+endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

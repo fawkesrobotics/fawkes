@@ -20,14 +20,26 @@
 
 BASEDIR = ../../..
 
-CFLAGS = -g
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/src/plugins/navigator/navigator.mk
+
+ifneq ($(SRCDIR),.)
+.PHONY: warning_nonavi
+warning_nonavi:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Navigator GUI (navigator not built)$(TNORMAL)"
+endif
 
 LIBS_joystick_control = core utils netcomm navigator config
 OBJS_joystick_control = joystick_tool.o	\
-	      							  joystick.o
+		        joystick.o
 
 OBJS_all =	$(OBJS_joystick_control)
-BINS_all =	$(BINDIR)/joystick_control
+
+ifeq ($(BUILD_NAVIGATOR),1)
+BINS_all = $(BINDIR)/joystick_control
+else
+all: warning_nonavi
+endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
