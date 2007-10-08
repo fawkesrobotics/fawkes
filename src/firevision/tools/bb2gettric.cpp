@@ -45,8 +45,11 @@ main(int argc, char **argv)
     return -1;
   }
   if ( access(context_file, W_OK) != 0) {
-    fprintf(stderr, "Cannot write to file %s, permission problem?\n", context_file);
-    return -2;
+    // ENOENT is ok, we would have access, but there is no file, yet
+    if ( errno != ENOENT ) {
+      fprintf(stderr, "Cannot write to file %s, permission problem?\n", context_file);
+      return -2;
+    }
   }
 
   CameraArgumentParser *cap = new CameraArgumentParser("bumblebee2:Bumblebee2 BB2-03S2C");
