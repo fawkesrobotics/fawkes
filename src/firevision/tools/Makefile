@@ -39,7 +39,7 @@ OBJS_fvstereodecoder = stereodecoder.o
 LIBS_fvtricalcdisp = $(VISION_CAM_LIBS) utils fvcams fvstereo
 OBJS_fvtricalcdisp = tricalcdisp.o
 
-OBJS_all = $(OBJS_fvshmem) $(OBJS_listfwcams) $(OBJS_stereodecoder) \
+OBJS_all = $(OBJS_fvshmem) $(OBJS_listfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric)
 BINS_all = $(BINDIR)/fvshmem
 
@@ -59,7 +59,7 @@ else
 endif
 
 ifeq ($(HAVE_BUMBLEBEE2_CAM),1)
-  BINS_all += $(BINDIR)/fvbb2gettric $(BINDIR)/stereodecoder
+  BINS_all += $(BINDIR)/fvbb2gettric $(BINDIR)/fvstereodecoder
 else
   WARN_TARGETS += warning_bb2gettric
   WARN_TARGETS += warning_stereodecoder
