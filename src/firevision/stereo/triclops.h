@@ -38,6 +38,8 @@ class TriclopsStereoProcessorData;
 class TriclopsStereoProcessor : public StereoProcessor
 {
  public:
+  TriclopsStereoProcessor(unsigned int width, unsigned int height,
+			  const char *context_file);
   TriclopsStereoProcessor(Camera *camera);
   virtual ~TriclopsStereoProcessor();
 
@@ -71,6 +73,7 @@ class TriclopsStereoProcessor : public StereoProcessor
   virtual bool          get_world_xyz(unsigned int px, unsigned int py,
 				      float *x, float *y, float *z);
 
+  virtual void             set_raw_buffer(unsigned char *raw16_buffer);
   virtual void             preprocess_stereo();
   virtual void             calculate_disparity(ROI *roi = 0);
   virtual void             calculate_yuv(bool both = false);
@@ -86,6 +89,8 @@ class TriclopsStereoProcessor : public StereoProcessor
 			  unsigned int width, 
 			  unsigned int height);
 
+  void create_buffers();
+  void setup_triclops();
 
 
  private:
@@ -101,9 +106,13 @@ class TriclopsStereoProcessor : public StereoProcessor
   unsigned char *buffer_yuv_right;
   unsigned char *buffer_yuv_center;
   unsigned char *_buffer;
+  unsigned char *buffer_deinterlaced;
+  unsigned char *buffer_raw16;
 
   unsigned int _width;
   unsigned int _height;
+
+  char  *_context_file;
 };
 
 #endif

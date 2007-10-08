@@ -28,6 +28,7 @@
 #include <stereo/triclops.h>
 
 #include <core/exceptions/software.h>
+#include <core/exceptions/system.h>
 #include <cams/bumblebee2.h>
 #include <fvutils/base/roi.h>
 #include <utils/math/angle.h>
@@ -35,6 +36,8 @@
 
 // PGR Triclops SDK
 #include <triclops.h>
+
+#include <unistd.h>
 
 /// @cond INTERNALS
 /** Data internal to Triclops stereo processor
@@ -56,10 +59,14 @@ class TriclopsStereoProcessorData
 
 
 /** Constructor.
+ * This constructor initializes this triclops wrapper to work on a real camera.
  * @param camera Must be of type Bumblebee2Camera
  */
 TriclopsStereoProcessor::TriclopsStereoProcessor(Camera *camera)
 {
+  _context_file = NULL;
+  buffer_deinterlaced = NULL;
+
   bb2 = dynamic_cast<Bumblebee2Camera *>(camera);
   if ( ! bb2 ) {
     throw TypeMismatchException("Camera is not of type Bumblebee2Camera");
@@ -73,21 +80,73 @@ TriclopsStereoProcessor::TriclopsStereoProcessor(Camera *camera)
   _width      = bb2->pixel_width();
   _height     = bb2->pixel_height();
 
-  /* Working buffers.
-   * Note that in general cameras should _not_ have internal buffers and do extensive
-   * calculations.
-   *
-   * buffer size calculated as: we have RAW16 format, which means two bytes per
-   * pixel, thus total buffer size must be w * h * 2
-   */
+  create_buffers();
+  try {
+    setup_triclops();
+  } catch (...) {
+    throw;
+  }
+
   buffer_rgb          = bb2->buffer();
+  buffer_rgb_right    = buffer_rgb; 
+  buffer_rgb_left     = buffer_rgb + colorspace_buffer_size(RGB, _width, _height); 
+  buffer_rgb_center   = buffer_rgb_left; // wtf? Done so in pgr code
+}
+
+
+/** Constructor.
+ * With this ctor you can make the triclops wrapper to work on saved images given
+ * the expected image size (of a single image) and the path to the Triclops
+ * context from the used camera.
+ * @param width image width in pixels
+ * @param height image height in pixels
+ * @param context_file Triclops context file
+ */
+TriclopsStereoProcessor::TriclopsStereoProcessor(unsigned int width, unsigned int height,
+						 const char *context_file)
+{
+  _width = width;
+  _height = height;
+  _context_file = strdup(context_file);
+
+  bb2 = NULL;
+
+  create_buffers();
+  try {
+    setup_triclops();
+  } catch (Exception &e) {
+    throw;
+  }
+}
+
+
+/** Create working buffers.
+ * buffer size calculated as: we have RAW16 format, which means two bytes per
+ * pixel, thus total buffer size must be w * h * 2
+ */
+void
+TriclopsStereoProcessor::create_buffers()
+{
   buffer_green        = (unsigned char *)malloc(_width * _height * 2);
   buffer_yuv_right    = malloc_buffer(YUV422_PLANAR, _width, _height);
   buffer_yuv_left     = malloc_buffer(YUV422_PLANAR, _width, _height);
+
+  if ( bb2 ) {
+    buffer_rgb          = bb2->buffer();
+  } else {
+    buffer_rgb = (unsigned char *)malloc(colorspace_buffer_size(RGB, _width, _height) * 2);
+    buffer_deinterlaced = (unsigned char *)malloc(_width * _height * 2);
+  }
   buffer_rgb_right    = buffer_rgb; 
   buffer_rgb_left     = buffer_rgb + colorspace_buffer_size(RGB, _width, _height); 
   buffer_rgb_center   = buffer_rgb_left; // wtf? Done so in pgr code
 
+}
+
+
+void
+TriclopsStereoProcessor::setup_triclops()
+{
   // Internal data
   data = new TriclopsStereoProcessorData();
   // Always the same
@@ -103,8 +162,34 @@ TriclopsStereoProcessor::TriclopsStereoProcessor(Camera *camera)
   data->input.u.rgb.red   = buffer_green;
   data->input.u.rgb.green = buffer_green + _width * _height;
   data->input.u.rgb.blue  = data->input.u.rgb.green;
-  get_triclops_context_from_camera();
 
+  if ( bb2 ) {
+    try {
+      get_triclops_context_from_camera();
+    } catch (Exception &e) {
+      free(data);
+      throw;
+    }
+  } else {
+
+    if ( ! _context_file ) {
+      free(data);
+      throw NullPointerException("TriclopsStereoProcessor: You must supply the path "
+				 "to a valid BB2 context file");
+    }
+
+    if ( access(_context_file, F_OK | R_OK) != 0 ) {
+      free(data);
+      throw CouldNotOpenFileException("TriclopsStereoProcessor: Cannot access context file");
+    }
+    data->err = triclopsGetDefaultContextFromFile(&(data->triclops), _context_file);
+    if ( data->err != TriclopsErrorOk ) {
+      free(data);
+      throw Exception("Fetching Triclops context from camera failed");
+    }
+  }
+
+  // Set defaults
   data->enable_subpixel_interpolation = false;
 
   triclopsSetSubpixelInterpolation( data->triclops, 0);
@@ -113,8 +198,6 @@ TriclopsStereoProcessor::TriclopsStereoProcessor(Camera *camera)
 				   _height, _width,
 				   _height, _width);
 
-
-  // Set defaults
   triclopsSetEdgeCorrelation( data->triclops, 1 );
   triclopsSetLowpass( data->triclops, 1 );
   triclopsSetDisparity( data->triclops, 5, 100);
@@ -137,6 +220,12 @@ TriclopsStereoProcessor::~TriclopsStereoProcessor()
   if ( buffer_green != NULL )         free(buffer_green);
   if ( buffer_yuv_right != NULL )     free(buffer_yuv_right);
   if ( buffer_yuv_left != NULL )      free(buffer_yuv_left);
+  if ( _context_file != NULL)         free(_context_file);
+
+  if ( ! bb2 ) {
+    if ( buffer_rgb)                  free(buffer_rgb);
+    if ( buffer_deinterlaced)         free(buffer_deinterlaced);
+  }
 
   buffer_green = NULL;
   buffer_rgb = NULL;
@@ -145,6 +234,16 @@ TriclopsStereoProcessor::~TriclopsStereoProcessor()
   _buffer = NULL;
 
   delete data;
+}
+
+
+/** Set raw buffer.
+ * @param raw16_buffer buffer containing the stereo image encoded as BB2 RAW16
+ */
+void
+TriclopsStereoProcessor::set_raw_buffer(unsigned char *raw16_buffer)
+{
+  buffer_raw16 = raw16_buffer;
 }
 
 
@@ -401,8 +500,15 @@ TriclopsStereoProcessor::disparity_mapping()
 void
 TriclopsStereoProcessor::preprocess_stereo()
 {
-  bb2->deinterlace_stereo();
-  bb2->decode_bayer();
+  if ( bb2 ) {
+    bb2->deinterlace_stereo();
+    bb2->decode_bayer();
+  } else {
+    Bumblebee2Camera::deinterlace_stereo(buffer_raw16, buffer_deinterlaced,
+					 _width, _height);
+    Bumblebee2Camera::decode_bayer(buffer_deinterlaced, buffer_rgb,
+				   _width, _height, BAYER_PATTERN_BGGR);
+  }
 }
 
 void
