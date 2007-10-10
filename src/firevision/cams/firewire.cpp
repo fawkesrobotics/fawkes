@@ -154,6 +154,13 @@ FirewireCamera::open()
     dc1394_video_set_mode(camera, mode);
     dc1394_video_set_framerate(camera, framerate);
 
+    if (format7_mode_enabled) {
+      dc1394_format7_set_image_size(camera, mode, format7_width, format7_height);
+      dc1394_format7_set_image_position(camera, mode, format7_startx, format7_starty);
+      dc1394_format7_set_color_coding(camera, mode, format7_coding);
+      dc1394_format7_set_byte_per_packet(camera, mode, format7_bpp);
+    }
+
     set_auto_focus(_auto_focus);
     set_auto_shutter(_auto_shutter);
     set_auto_white_balance(_auto_white_balance);
@@ -503,6 +510,7 @@ FirewireCamera::auto_white_balance()
  * - height=HEIGHT, height in pixels of Format7 ROI
  * - startx=STARTX, X start of Format7 ROI
  * - starty=STARTY, Y start of Format7 ROI
+ * - packetsize=BYTES, packet size in BYTES
  * @param cap camera argument parser
  */
 FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
@@ -518,7 +526,9 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   speed = DC1394_ISO_SPEED_400;
   framerate = DC1394_FRAMERATE_30;
   camera = NULL;
+  format7_mode_enabled = false;
   format7_width = format7_height = format7_startx = format7_starty = 0;
+  format7_bpp = 4096;
   model = strdup(cap->cam_id().c_str());
 
   if ( cap->has("mode") ) {
@@ -527,20 +537,28 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
       mode = DC1394_VIDEO_MODE_640x480_MONO16;
     } else if ( m == "FORMAT7_0" ) {
       mode = DC1394_VIDEO_MODE_FORMAT7_0;
+      format7_mode_enabled = true;
     } else if ( m == "FORMAT7_1" ) {
       mode = DC1394_VIDEO_MODE_FORMAT7_1;
+      format7_mode_enabled = true;
     } else if ( m == "FORMAT7_2" ) {
       mode = DC1394_VIDEO_MODE_FORMAT7_2;
+      format7_mode_enabled = true;
     } else if ( m == "FORMAT7_3" ) {
       mode = DC1394_VIDEO_MODE_FORMAT7_3;
+      format7_mode_enabled = true;
     } else if ( m == "FORMAT7_4" ) {
       mode = DC1394_VIDEO_MODE_FORMAT7_4;
+      format7_mode_enabled = true;
     } else if ( m == "FORMAT7_5" ) {
       mode = DC1394_VIDEO_MODE_FORMAT7_5;
+      format7_mode_enabled = true;
     } else if ( m == "FORMAT7_6" ) {
       mode = DC1394_VIDEO_MODE_FORMAT7_6;
+      format7_mode_enabled = true;
     } else if ( m == "FORMAT7_7" ) {
       mode = DC1394_VIDEO_MODE_FORMAT7_7;
+      format7_mode_enabled = true;
     }
   }
   if ( cap->has("coding") ) {
@@ -587,6 +605,9 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   }
   if ( cap->has("starty") ) {
     format7_starty = atoi(cap->get("starty").c_str());
+  }
+  if ( cap->has("packetsize") ) {
+    format7_bpp = atoi(cap->get("packetsize").c_str());
   }
 }
 

@@ -104,17 +104,20 @@ class FirewireCamera : public Camera, public CameraControl
   bool valid_frame_received;
 
   /** DC1394 video mode */
-  dc1394video_mode_t     mode;
+  dc1394video_mode_t             mode;
+  bool                           format7_mode_enabled;
   /** DC1394 speed */
-  dc1394speed_t          speed;
+  dc1394speed_t                  speed;
   /** DC1394 framerate */
-  dc1394framerate_t      framerate;
+  dc1394framerate_t              framerate;
   /** DC1394 camera handle */
-  dc1394camera_t        *camera;
+  dc1394camera_t                *camera;
   /** Last captured DC1394 video frame */
-  dc1394video_frame_t   *frame;
+  dc1394video_frame_t           *frame;
   /** Format7 color coding */
-  dc1394color_coding_t   format7_coding;
+  dc1394color_coding_t           format7_coding;
+  /** Format7 bytes per packet */
+  int                            format7_bpp;
   /** Format7 width */
   int                            format7_width;
   /** Format7 height */
