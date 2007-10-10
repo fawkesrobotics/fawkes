@@ -62,7 +62,7 @@ Clock::~Clock()
     LibLogger::log_error("Clock", "dtor called without calling Clock::finalize() first");
   }
 
-  free(ext_timesource);
+  delete ext_timesource;
 }
 
 
@@ -105,7 +105,7 @@ Clock::finalize()
 void
 Clock::register_ext_timesource(TimeSource* ts, bool make_default)
 {
-  free(ext_timesource);
+  delete ext_timesource;
 
   ext_timesource = ts;
 
