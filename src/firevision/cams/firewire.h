@@ -73,10 +73,17 @@ class FirewireCamera : public Camera, public CameraControl
   virtual bool           supports_focus();
   virtual bool           auto_focus();
   virtual void           set_auto_focus(bool enabled);
+
   virtual unsigned int   focus();
   virtual void           set_focus(unsigned int focus);
   virtual unsigned int   focus_min();
   virtual unsigned int   focus_max();
+
+  virtual bool           auto_shutter();
+  virtual void           set_auto_shutter(bool enabled);
+
+  virtual bool           auto_white_balance();
+  virtual void           set_auto_white_balance(bool enabeld);
 
   static void            print_available_fwcams();
 
@@ -89,6 +96,10 @@ class FirewireCamera : public Camera, public CameraControl
   bool started;
   /** true if auto focus is enabled, false if disabled */
   bool _auto_focus;
+  /** true if auto shutter is enabled, false if disabled */
+  bool _auto_shutter;
+  /** true if auto white balance is enabled, false if disabled */
+  bool _auto_white_balance;
   /** true, if a valid frame has been received, false otherwise */
   bool valid_frame_received;
 

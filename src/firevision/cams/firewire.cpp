@@ -62,6 +62,8 @@ FirewireCamera::FirewireCamera(dc1394framerate_t framerate,
   started = opened = false;
   valid_frame_received = false;
   _auto_focus = true; // assume auto_focus, checked in open()
+  _auto_shutter = false;
+  _auto_white_balance = false;
   this->speed = speed;
   this->num_buffers = num_buffers;
   this->mode = mode;
@@ -151,6 +153,10 @@ FirewireCamera::open()
     dc1394_video_set_iso_speed(camera, speed);
     dc1394_video_set_mode(camera, mode);
     dc1394_video_set_framerate(camera, framerate);
+
+    set_auto_focus(_auto_focus);
+    set_auto_shutter(_auto_shutter);
+    set_auto_white_balance(_auto_white_balance);
 
   } else {
     // cout  << cred << "Could not find any camera." << cnormal << endl;
@@ -394,11 +400,13 @@ FirewireCamera::focus()
   
 }
 
+
 void
 FirewireCamera::set_focus(unsigned int focus)
 {
   dc1394_feature_set_value(camera, DC1394_FEATURE_FOCUS, focus);
 }
+
 
 unsigned int
 FirewireCamera::focus_min()
@@ -412,6 +420,7 @@ FirewireCamera::focus_min()
   }
 }
 
+
 unsigned int
 FirewireCamera::focus_max()
 {
@@ -424,6 +433,43 @@ FirewireCamera::focus_max()
   }
 }
 
+
+void
+FirewireCamera::set_auto_shutter(bool enabled)
+{
+  /* 0 == auto off */
+  if (dc1394_feature_set_mode(camera, DC1394_FEATURE_SHUTTER,
+			      enabled ? DC1394_FEATURE_MODE_AUTO : DC1394_FEATURE_MODE_MANUAL)
+      == DC1394_SUCCESS) {
+    _auto_shutter = enabled;
+  }
+}
+
+
+bool
+FirewireCamera::auto_shutter()
+{
+  return _auto_shutter;
+}
+
+
+void
+FirewireCamera::set_auto_white_balance(bool enabled)
+{
+  /* 0 == auto off */
+  if (dc1394_feature_set_mode(camera, DC1394_FEATURE_WHITE_BALANCE,
+			      enabled ? DC1394_FEATURE_MODE_AUTO : DC1394_FEATURE_MODE_MANUAL)
+      == DC1394_SUCCESS) {
+    _auto_shutter = enabled;
+  }
+}
+
+
+bool
+FirewireCamera::auto_white_balance()
+{
+  return _auto_white_balance;
+}
 
 
 /** Constructor.
@@ -464,6 +510,8 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   started = opened = false;
   valid_frame_received = false;
   _auto_focus = true; // assume auto_focus, checked in open()
+  _auto_shutter = false;
+  _auto_white_balance = false;
 
   // Defaults
   mode = DC1394_VIDEO_MODE_640x480_YUV422;
@@ -549,10 +597,10 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
 void
 FirewireCamera::print_available_fwcams()
 {
-  
+
+  dc1394error_t err;
   dc1394camera_t       **cameras;
   unsigned int num_cameras = 0;
-  dc1394error_t err;
 
   if ( (err = dc1394_find_cameras(&cameras, &num_cameras)) != DC1394_SUCCESS ) {
     printf("Finding cameras failed: %s\n", dc1394_error_strings[err]);
