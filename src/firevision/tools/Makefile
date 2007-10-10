@@ -33,6 +33,9 @@ OBJS_fvshmem = shmem.o
 LIBS_listfwcams = $(VISION_CAM_LIBS) utils fvcams
 OBJS_listfwcams = listfwcams.o
 
+LIBS_fvconverter = fvutils
+OBJS_fvconverter = converter.o
+
 LIBS_fvstereodecoder = $(VISION_CAM_LIBS) utils fvcams
 OBJS_fvstereodecoder = stereodecoder.o
 
@@ -40,8 +43,8 @@ LIBS_fvtricalcdisp = $(VISION_CAM_LIBS) utils fvcams fvstereo
 OBJS_fvtricalcdisp = tricalcdisp.o
 
 OBJS_all = $(OBJS_fvshmem) $(OBJS_listfwcams) $(OBJS_fvstereodecoder) \
-	   $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric)
-BINS_all = $(BINDIR)/fvshmem
+	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric)
+BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvconverter
 
 LIBS_fvbb2gettric = $(VISION_CAM_LIBS) utils fvcams fvutils
 OBJS_fvbb2gettric = bb2gettric.o
