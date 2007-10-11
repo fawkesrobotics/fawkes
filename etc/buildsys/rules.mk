@@ -58,10 +58,10 @@ all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) subdirs
 clean: presubdirs subdirs
 	$(SILENT) echo -e "$(INDENT_PRINT)--> Cleaning up directory $(TBOLDGRAY)$(CURDIR)$(TNORMAL)"
 	$(SILENT) if [ "$(SRCDIR)/$(OBJDIR)" != "/" ]; then rm -rf $(SRCDIR)/$(OBJDIR) ; fi
-	$(SILENT) if [ "$(DEPDIR)" != "" ]; then rm -rf $(DEPDIR) ; fi
-	$(SILENT) if [ "$(BINS_all)" != "" ]; then rm -rf $(BINS_all) ; fi
-	$(SILENT) if [ "$(LIBS_all)" != "" ]; then rm -rf $(LIBS_all) ; fi
-	$(SILENT) if [ "$(PLUGINS_all)" != "" ]; then rm -rf $(PLUGINS_all) ; fi
+	$(SILENT) if [ -n "$(DEPDIR)" ]; then rm -rf $(DEPDIR) ; fi
+	$(SILENT) if [ -n "$(BINS_all)" ]; then rm -rf $(BINS_all) ; fi
+	$(SILENT) if [ -n "$(LIBS_all)" ]; then rm -rf $(LIBS_all) ; fi
+	$(SILENT) if [ -n "$(PLUGINS_all)" ]; then rm -rf $(PLUGINS_all) ; fi
 
 ifeq (,$(findstring qa,$(SUBDIRS)))
 .PHONY: qa
