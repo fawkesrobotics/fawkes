@@ -28,6 +28,10 @@ endif
 ifneq ($(realpath /usr/include/vmc/LayerClasses/VMC_API.h),)
   HAVE_VMC = 1
 endif
+ifneq ($(realpath /usr/include/vmc/LayerClasses/CvmcAPI.h),)
+  HAVE_VMC = 1
+endif
+
 
 BUILD_NAVIGATOR = 1
 ifneq ($(HAVE_VMC),1)
