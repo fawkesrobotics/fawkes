@@ -130,16 +130,15 @@ moc_%.cpp: %.h
 
 .SECONDEXPANSION:
 $(BINDIR)/%: $$(OBJS_$$*)
-	$(SILENT) mkdir -p $(BINDIR)
-	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) mkdir -p $(@D)
+	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
 	-o $@ $(subst ..,__,$^)
 
 $(LIBDIR)/%.so: $$(OBJS_$$*)
-	$(SILENT) mkdir -p $(LIBDIR)
+	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
@@ -147,7 +146,7 @@ $(LIBDIR)/%.so: $$(OBJS_$$*)
 	-o $@ $(subst ..,__,$^)
 
 $(PLUGINDIR)/%.so: $$(OBJS_$$*)
-	$(SILENT) mkdir -p $(PLUGINDIR)
+	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
