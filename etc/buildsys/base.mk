@@ -23,7 +23,7 @@
 #.DEFAULT: all
 
 include $(BASEDIR)/etc/buildsys/config.mk
-ifneq (.objs,$(notdir $(CURDIR)))
+ifneq ($(OBJDIR),$(notdir $(CURDIR)))
   ifneq (clean,$(MAKECMDGOALS))
     include $(BASEDIR)/etc/buildsys/objsdir.mk
   else

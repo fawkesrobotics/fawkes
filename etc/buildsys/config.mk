@@ -2,7 +2,9 @@
 #                      Makefile Build System for Fawkes
 #                            -------------------
 #   Created on Sun Sep 03 14:14:14 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -12,20 +14,15 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 ### Debugging related options
 SILENT = @
 
 ### Build type
-BUILD_TYPE = fawkes
-ifneq ($(realpath $(BASEDIR)/src/Makefile.conf),)
-BUILD_TYPE = rcsoftx
+ifneq ($(realpath $(BASEDIR)/etc/buildsys_local/buildtype.mk),)
+  include $(realpath $(BASEDIR)/etc/buildsys_local/buildtype.mk)
+else
+  BUILD_TYPE = fawkes
 endif
 ARCH=$(shell arch)
 
@@ -112,8 +109,8 @@ TCYANBG		= \033[46m
 TGREYBG		= \033[47m
 
 ### Check if there are special config additions
-ifneq ($(realpath $(BASEDIR)/etc/buildsys/$(BUILD_TYPE)_config.mk),)
-  include $(BASEDIR)/etc/buildsys/$(BUILD_TYPE)_config.mk
+ifneq ($(realpath $(BASEDIR)/etc/buildsys_local/config_$(BUILD_TYPE).mk),)
+  include $(BASEDIR)/etc/buildsys_local/config_$(BUILD_TYPE).mk
 endif
 
 ### Check if there is a local config for this directory

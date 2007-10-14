@@ -37,6 +37,10 @@ endif
 # Dependencies
 -include $(DEPDIR)/*.d
 
+# One to build 'em all
+.PHONY: all
+all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(TARGETS_all) subdirs
+
 ifneq ($(OBJS_all),)
 # Do not delete .o files to allow for incremental builds
 .SECONDARY: $(OBJS_all)
@@ -50,10 +54,6 @@ else
   endif
 endif
 
-# One to build 'em all
-.PHONY: all
-all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) subdirs
-
 .PHONY: clean
 clean: presubdirs subdirs
 	$(SILENT) echo -e "$(INDENT_PRINT)--> Cleaning up directory $(TBOLDGRAY)$(CURDIR)$(TNORMAL)"
@@ -62,6 +62,7 @@ clean: presubdirs subdirs
 	$(SILENT) if [ -n "$(BINS_all)" ]; then rm -rf $(BINS_all) ; fi
 	$(SILENT) if [ -n "$(LIBS_all)" ]; then rm -rf $(LIBS_all) ; fi
 	$(SILENT) if [ -n "$(PLUGINS_all)" ]; then rm -rf $(PLUGINS_all) ; fi
+	$(SILENT) if [ -n "$(TARGETS_all)" ]; then rm -rf $(TARGETS_all) ; fi
 
 ifeq (,$(findstring qa,$(SUBDIRS)))
 .PHONY: qa
@@ -155,7 +156,7 @@ $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 
 
 ### Check if there are special additions
-ifneq ($(realpath $(BASEDIR)/etc/buildsys/$(BUILD_TYPE)_rules.mk),)
-include $(BASEDIR)/etc/buildsys/$(BUILD_TYPE)_rules.mk
+ifneq ($(realpath $(BASEDIR)/etc/buildsys_local/rules_$(BUILD_TYPE).mk),)
+include $(BASEDIR)/etc/buildsys_local/rules_$(BUILD_TYPE).mk
 endif
 
