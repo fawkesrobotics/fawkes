@@ -28,7 +28,7 @@
 #ifndef __TRANSFORM_H_
 #define __TRANSFORM_H_
 
-#include <utils/geometry/matrix.h>
+#include <geometry/matrix.h>
 
 class Vector;
 class GeomPrim;

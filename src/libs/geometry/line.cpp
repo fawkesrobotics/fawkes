@@ -25,13 +25,13 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <utils/geometry/line.h>
+#include <geometry/line.h>
 #include <utils/math/angle.h>
 #include <math.h>
 #include <iostream>
 
 
-/** @class Line libs/utils/geometry/line.h
+/** @class Line libs/geometry/line.h
  * Well, what can one say about a straight line?
  */
 

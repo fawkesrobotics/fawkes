@@ -28,7 +28,7 @@
 #ifndef __POINT_H_
 #define __POINT_H_
 
-#include <utils/geometry/geom_prim.h>
+#include <geometry/geom_prim.h>
 
 class Vector;
 

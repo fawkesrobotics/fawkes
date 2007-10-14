@@ -28,7 +28,7 @@
 #ifndef __LINE_H_
 #define __LINE_H_
 
-#include <utils/geometry/geom_obj.h>
+#include <geometry/geom_obj.h>
 
 class Line : public GeomObj
 {

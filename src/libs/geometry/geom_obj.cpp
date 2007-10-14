@@ -25,13 +25,13 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <utils/geometry/geom_obj.h>
-#include <utils/geometry/transform.h>
+#include <geometry/geom_obj.h>
+#include <geometry/transform.h>
 
 using namespace std;
 
 
-/** @class GeomObj libs/utils/geometry/geom_obj.h
+/** @class GeomObj libs/geometry/geom_obj.h
  * Base class of all geometric objects (e.g. line, circle, cube, etc.).
  * Such objects are defined by means of a reference point and several
  * vectors which are specified wrt. the object's own CS. The transform

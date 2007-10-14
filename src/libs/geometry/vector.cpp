@@ -25,8 +25,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <utils/geometry/vector.h>
-#include <utils/geometry/transform.h>
+#include <geometry/vector.h>
+#include <geometry/transform.h>
 #include <core/exception.h>
 
 #include <math.h>
@@ -35,7 +35,7 @@ using namespace std;
 
 
 
-/** @class Vector libs/utils/geometry/vector.h
+/** @class Vector libs/geometry/vector.h
  * A (homogeneous) vector.
  */
 

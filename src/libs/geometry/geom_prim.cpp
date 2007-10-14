@@ -25,14 +25,14 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <utils/geometry/geom_prim.h>
-#include <utils/geometry/transform.h>
+#include <geometry/geom_prim.h>
+#include <geometry/transform.h>
 #include <core/exception.h>
 
 using namespace std;
 
 
-/** @class GeomPrim libs/utils/geometry/geom_prim.h
+/** @class GeomPrim libs/geometry/geom_prim.h
  * Base class for geometric primitives (Vector and Point).
  */
 

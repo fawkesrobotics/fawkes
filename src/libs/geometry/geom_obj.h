@@ -28,9 +28,9 @@
 #ifndef __GEOM_OBJ_H_
 #define __GEOM_OBJ_H_
 
-#include <utils/geometry/point.h>
-#include <utils/geometry/vector.h>
-#include <utils/geometry/transform.h>
+#include <geometry/point.h>
+#include <geometry/vector.h>
+#include <geometry/transform.h>
 
 #include <vector>
 

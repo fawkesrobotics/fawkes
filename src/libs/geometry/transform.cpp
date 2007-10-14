@@ -25,9 +25,9 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <utils/geometry/transform.h>
-#include <utils/geometry/vector.h>
-#include <utils/geometry/geom_prim.h>
+#include <geometry/transform.h>
+#include <geometry/vector.h>
+#include <geometry/geom_prim.h>
 #include <core/exception.h>
 
 #include <math.h>
@@ -35,7 +35,7 @@
 using namespace std;
 
 
-/** @class Transform libs/utils/geometry/transform.h
+/** @class Transform libs/geometry/transform.h
  * This class describes a homogeneous transformation.
  */
 

@@ -25,14 +25,14 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <utils/geometry/point.h>
-#include <utils/geometry/vector.h>
+#include <geometry/point.h>
+#include <geometry/vector.h>
 #include <core/exception.h>
 
 using namespace std;
 
 
-/** @class Point libs/utils/geometry/point.h
+/** @class Point libs/geometry/point.h
  * A (homogeneous) point.
  */
 

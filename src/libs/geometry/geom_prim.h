@@ -28,7 +28,7 @@
 #ifndef __GEOM_PRIM_H_
 #define __GEOM_PRIM_H_
 
-#include <utils/geometry/matrix.h>
+#include <geometry/matrix.h>
 #include <iostream>
 
 class Transform;

@@ -25,13 +25,13 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <utils/geometry/matrix.h>
+#include <geometry/matrix.h>
 #include <core/exception.h>
 
 using namespace std;
 
 
-/** @class Matrix libs/utils/geometry/matrix.h
+/** @class Matrix libs/geometry/matrix.h
  * A general matrix class. It provides all the 
  * operations that are commonly used with a matrix.
  */

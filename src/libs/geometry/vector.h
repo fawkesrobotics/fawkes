@@ -28,7 +28,7 @@
 #ifndef __VECTOR_H_
 #define __VECTOR_H_
 
-#include <utils/geometry/geom_prim.h>
+#include <geometry/geom_prim.h>
 #include <iostream>
 
 class Vector : public GeomPrim
