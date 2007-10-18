@@ -39,7 +39,7 @@ class NavigatorThread;
 
 namespace VMC 
 {
-  class VMC_API;
+  class CvmcAPI;
 }
 
 
@@ -56,7 +56,7 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
   virtual void finalize();
     
  private:
-  VMC::VMC_API *apiObject;
+  VMC::CvmcAPI *apiObject;
     
   MotorInterface *motor_interface;
         

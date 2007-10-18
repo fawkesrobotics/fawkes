@@ -31,7 +31,7 @@
 #include <interfaces/motor.h>
 #include <utils/math/angle.h>
 
-#include <vmc/LayerClasses/VMC_API.h>
+#include <vmc/LayerClasses/CvmcAPI.h>
 #include <vmc/SupportClasses/Enums.h>
 
 #include <cmath>
@@ -91,7 +91,7 @@ MotorThread::init()
       throw;
     }
 
-  apiObject = new VMC::VMC_API();
+  apiObject = new VMC::CvmcAPI();
 
   apiObject->selectHardwareAdapter(VMC::RS232);
   if ( ! apiObject->selectDevice("/dev/ttyS0") ) {
@@ -117,7 +117,7 @@ MotorThread::finalize()
       logger->log_error("MotorThread", e);
     }
     
-  apiObject->CloseDevice();
+  apiObject->closeDevice();
   delete apiObject;
 }
 
