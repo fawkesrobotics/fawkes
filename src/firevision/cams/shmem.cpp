@@ -89,6 +89,7 @@ SharedMemoryCamera::~SharedMemoryCamera()
   if ( deep_buffer != NULL ) {
     free( deep_buffer );
   }
+  delete shm_buffer;
 }
 
 
