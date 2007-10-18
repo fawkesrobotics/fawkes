@@ -83,7 +83,7 @@ class FirewireCamera : public Camera, public CameraControl
   virtual void           set_auto_shutter(bool enabled);
 
   virtual bool           auto_white_balance();
-  virtual void           set_auto_white_balance(bool enabeld);
+  virtual void           set_auto_white_balance(bool enabled);
 
   static void            print_available_fwcams();
 
@@ -105,6 +105,7 @@ class FirewireCamera : public Camera, public CameraControl
 
   /** DC1394 video mode */
   dc1394video_mode_t             mode;
+  /** Indicator of Format7 status. */
   bool                           format7_mode_enabled;
   /** DC1394 speed */
   dc1394speed_t                  speed;
@@ -126,6 +127,9 @@ class FirewireCamera : public Camera, public CameraControl
   int                            format7_startx;
   /** Format7 ROI Start Y coordinate */
   int                            format7_starty;
+
+  //unsigned int                   white_balance_ub;
+  //unsigned int                   white_balance_vr;
 
   /** Camera model, used in open to identify the camera, if empty first found camera is used */
   char *model;

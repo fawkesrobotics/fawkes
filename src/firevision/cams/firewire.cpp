@@ -441,10 +441,12 @@ FirewireCamera::focus_max()
 }
 
 
+/** Set status of auto shutter.
+ * @param enabled true to enable auto shutter, false to disable.
+ */
 void
 FirewireCamera::set_auto_shutter(bool enabled)
 {
-  /* 0 == auto off */
   if (dc1394_feature_set_mode(camera, DC1394_FEATURE_SHUTTER,
 			      enabled ? DC1394_FEATURE_MODE_AUTO : DC1394_FEATURE_MODE_MANUAL)
       == DC1394_SUCCESS) {
@@ -453,6 +455,9 @@ FirewireCamera::set_auto_shutter(bool enabled)
 }
 
 
+/** Get status of auto shutter.
+ * @return true if auto shutter is enabled, false otherwise
+ */
 bool
 FirewireCamera::auto_shutter()
 {
@@ -460,18 +465,23 @@ FirewireCamera::auto_shutter()
 }
 
 
+/** Set status of auto white balance.
+ * @param enabled true to enable auto white balance, false to disable.
+ */
 void
 FirewireCamera::set_auto_white_balance(bool enabled)
 {
-  /* 0 == auto off */
   if (dc1394_feature_set_mode(camera, DC1394_FEATURE_WHITE_BALANCE,
 			      enabled ? DC1394_FEATURE_MODE_AUTO : DC1394_FEATURE_MODE_MANUAL)
       == DC1394_SUCCESS) {
-    _auto_shutter = enabled;
+    _auto_white_balance = enabled;
   }
 }
 
 
+/** Get status of auto white balance.
+ * @return true if white balance is enabled, false otherwise
+ */
 bool
 FirewireCamera::auto_white_balance()
 {
@@ -511,6 +521,8 @@ FirewireCamera::auto_white_balance()
  * - startx=STARTX, X start of Format7 ROI
  * - starty=STARTY, Y start of Format7 ROI
  * - packetsize=BYTES, packet size in BYTES
+ * - white_balance=(auto|U,V), white balance value, either auto for auto white balance
+ *                             or U/B and V/R values for adjustment
  * @param cap camera argument parser
  */
 FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
@@ -608,6 +620,41 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   }
   if ( cap->has("packetsize") ) {
     format7_bpp = atoi(cap->get("packetsize").c_str());
+  }
+
+  if ( cap->has("white_balance") ) {
+    string w = cap->get("white_balance");
+    if ( w == "auto" ) {
+      _auto_white_balance = true;
+    /*
+    } else {
+      // try to parse U/V values
+      string::size_type commapos = w.find(",", 0);
+      if ( commapos == string::npos ) {
+	throw Exception("Illegal white balance value, neither auto and no command found");
+      }
+      string ub = w.substr(0, commapos);
+      string vr = w.substr(commapos + 1);
+      char *endptr;
+      long int ub_i = strtol(ub.c_str(), &endptr, 10);
+      if ( endptr[0] != 0 ) {
+	throw TypeMismatchException("White balance value for U/B is invalid. "
+				    "String to int conversion failed");
+      } else if ( ub_i < 0 ) {
+	throw OutOfBoundsException("White balance value for U/B < 0");
+      }
+      long int vr_i = strtol(vr.c_str(), &endptr, 10);
+      if ( endptr[0] != 0 ) {
+	throw TypeMismatchException("White balance value for V/R is invalid. "
+				    "String to int conversion failed");
+      } else if ( vr_i < 0 ) {
+	throw OutOfBoundsException("White balance value for V/R < 0");
+      }
+
+      _white_balance_ub = ub_i;
+      _white_balance_vr = vr_i;
+      */
+    }
   }
 }
 
