@@ -70,6 +70,7 @@ class SharedMemoryImageBufferHeader : public SharedMemoryHeader {
   virtual bool         create();
   virtual void         initialize(void *memptr);
   virtual void         set(void *memptr);
+  virtual void         reset();
   virtual size_t       data_size();
 
   void                 set_image_id(const char *image_id);

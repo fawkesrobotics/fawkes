@@ -54,6 +54,7 @@ class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
   virtual bool         create();
   virtual void         initialize(void *memptr);
   virtual void         set(void *memptr);
+  virtual void         reset();
   virtual size_t       data_size();
 
   virtual void         print_info();

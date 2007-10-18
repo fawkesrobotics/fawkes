@@ -596,6 +596,17 @@ SharedMemoryImageBufferHeader::set(void *memptr)
 }
 
 
+void
+SharedMemoryImageBufferHeader::reset()
+{
+  header = NULL;
+  if ( NULL != _image_id ) {
+    free(_image_id);
+    _image_id = NULL;
+  }
+}
+
+
 /** Get colorspace.
  * @return colorspace
  */

@@ -357,6 +357,13 @@ SharedMemoryLookupTableHeader::set(void *memptr)
 }
 
 
+void
+SharedMemoryLookupTableHeader::reset()
+{
+  header = NULL;
+}
+
+
 /** Get LUT width.
  * @return LUT width.
  */
