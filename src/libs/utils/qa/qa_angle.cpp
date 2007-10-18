@@ -43,7 +43,7 @@ main(int argc, char **argv)
 
   f = -M_PI;
   float fnr = normalize_rad(f);
-  expd = -M_PI;
+  expd = M_PI;
   printf("f=%f   normalize_rad(f)=%f   expected=%f\n", f, fnr, expd);
 
   f = 3 * M_PI;
@@ -53,12 +53,17 @@ main(int argc, char **argv)
 
   f = - 3 * M_PI;
   fnr = normalize_rad(f);
-  expd = -M_PI;
+  expd = M_PI;
   printf("f=%f   normalize_rad(f)=%f   expected=%f\n", f, fnr, expd);
 
   f = - 2 * M_PI - 1;
   fnr = normalize_rad(f);
-  expd = -1;
+  expd = 2 * M_PI - 1;
+  printf("f=%f   normalize_rad(f)=%f   expected=%f\n", f, fnr, expd);
+
+  f = 10 * M_PI;
+  fnr = normalize_rad(f);
+  expd = 0;
   printf("f=%f   normalize_rad(f)=%f   expected=%f\n", f, fnr, expd);
 
   return 0;

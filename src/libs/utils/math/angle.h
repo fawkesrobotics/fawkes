@@ -67,7 +67,7 @@ inline float
 normalize_rad(float angle_rad)
 {
   if ( (angle_rad < 0) || (angle_rad > 2 * M_PI) ) {
-    return angle_rad - 2 * M_PI * round(angle_rad / (M_PI * 2));
+    return angle_rad - 2 * M_PI * floor(angle_rad / (M_PI * 2));
   } else {
     return angle_rad;
   }
