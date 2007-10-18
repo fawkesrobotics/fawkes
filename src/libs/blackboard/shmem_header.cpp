@@ -126,6 +126,13 @@ BlackBoardSharedMemoryHeader::set(void *memptr)
 }
 
 
+void
+BlackBoardSharedMemoryHeader::reset()
+{
+  data = NULL;
+}
+
+
 /** Data segment size.
  * @return size of the data segment without header
  */

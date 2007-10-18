@@ -53,6 +53,7 @@ class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
   virtual size_t       size();
   virtual void         initialize(void *memptr);
   virtual void         set(void *memptr);
+  virtual void         reset();
   virtual size_t       data_size();
   chunk_list_t * getFreeListHead();
   chunk_list_t * getAllocListHead();

@@ -38,6 +38,7 @@ class SharedMemoryHeader {
   virtual size_t       size()                                 = 0;
   virtual void         initialize(void *memptr)               = 0;
   virtual void         set(void *memptr)                      = 0;
+  virtual void         reset()                                = 0;
   virtual size_t       data_size()                            = 0;
 };
 

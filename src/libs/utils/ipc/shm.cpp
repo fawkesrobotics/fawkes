@@ -82,6 +82,12 @@
  * from the data stored in the given memptr.
  * @param memptr The memptr where to copy data from.
  *
+ * @fn void SharedMemoryHeader::reset()
+ * Reset information previously set with set().
+ * This shall restore the state the header had before set() was called. This is
+ * used for instance in the SharedMemoryLister after info about one segment
+ * has been printed.
+ *
  * @fn size_t SharedMemoryHeader::data_size()
  * Return the size of the data.
  * The size of the data that will be stored in the shared memory segment.
@@ -406,9 +412,6 @@ SharedMemory::attach()
 	      throw ShmInconsistentSegmentSizeException(_mem_size,
 							(unsigned int) shm_segment.shm_segsz);
 	    }
-
-	    _header->set( shm_ptr );
-	    // header->printInfo();
 
 	    __shared_mem_id   = shm_id;
 	    __shared_mem      = shm_buf;
@@ -997,6 +1000,8 @@ SharedMemory::list(char *magic_token,
 			      (char *)shm_buf + MagicTokenSize
                                                        + sizeof(SharedMemory_header_t)
                                                        + header->size());
+
+	    header->reset();
 	    ++num_segments;
 	  }
 	}
@@ -1067,12 +1072,16 @@ SharedMemory::erase(char *magic_token,
 	    // Mark shared memory segment as destroyed
 	    shmctl(shm_id, IPC_RMID, NULL);
 
-	    if ( lister != NULL)
+	    if ( lister != NULL) {
 	      lister->printInfo(header, shm_id, shm_header->semaphore,
 				shm_segment.shm_segsz,
 				(char *)shm_buf + MagicTokenSize
 				                + sizeof(SharedMemory_header_t)
 				                + header->size());
+	    }
+
+	    header->reset();
+
 	    ++num_segments;
 	  }
 	}
@@ -1146,12 +1155,16 @@ SharedMemory::erase_orphaned(char *magic_token,
 	    // Mark shared memory segment as destroyed
 	    shmctl(shm_id, IPC_RMID, NULL);
 
-	    if ( lister != NULL)
+	    if ( lister != NULL) {
 	      lister->printInfo(header, shm_id, shm_header->semaphore,
 				shm_segment.shm_segsz,
 				(char *)shm_buf + MagicTokenSize
 				                + sizeof(SharedMemory_header_t)
 				                + header->size());
+	    }
+
+	    header->reset();
+
 	    ++num_segments;
 	  }
 	}
