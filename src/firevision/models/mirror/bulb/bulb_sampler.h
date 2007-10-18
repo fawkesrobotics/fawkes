@@ -40,6 +40,9 @@ class BulbSampler {
  public:
 
   BulbSampler( unsigned int image_width,
+	       unsigned int image_height);
+
+  BulbSampler( unsigned int image_width,
 	       unsigned int image_height,
 	       unsigned int lut_width,
 	       unsigned int lut_height,
@@ -64,6 +67,7 @@ class BulbSampler {
   void finalize();
 
   void setBallPosition(field_pos_t ballPos);
+  void setBallPosition(float ball_x, float ball_y);
 
   void setCenter(unsigned int imagePointX, 
 		 unsigned int imagePointY  );  

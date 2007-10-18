@@ -26,7 +26,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "models/mirror/bulb/bulb_sampler.h"
+#include <models/mirror/bulb/bulb_sampler.h>
 #include <core/exception.h>
 #include <iostream>
 #include <cmath>
@@ -74,6 +74,24 @@ BulbSampler::BulbSampler( unsigned int image_width,
 					   colorLut,
 					   0                          ); // min_num_points
 
+}
+
+
+/** Constructor.
+ * This constructor allows for using the bulb sampler without a color model,
+ * this means without auto-ball detection. Note that you will not be able
+ * to call the consider() method that takes an image buffer as parameter.
+ * @param image_width width of camera images
+ * @param image_height height of camera images
+ */
+BulbSampler::BulbSampler( unsigned int image_width,
+			  unsigned int image_height )
+{
+  bulb    = new Bulb( image_width, image_height );
+
+  colorLut = NULL;
+  radial = NULL;
+  classifier = NULL;
 }
 
 
@@ -140,6 +158,11 @@ bool
 BulbSampler::consider(unsigned char *buffer,
 		      float x, float y, float ori,
 		      cart_coord_t *ball_pos_in_image) {
+
+  if ( classifier == NULL ) {
+    throw Exception("Cannot use this consider method in non-detection mode!");
+  }
+
   // find the ball in the image
   cart_coord_t ballPosInImage;
   ballPosInImage.x = 0;
@@ -267,6 +290,21 @@ void
 BulbSampler::setBallPosition(field_pos_t ballPos) {
   this->ballPosition.x = ballPos.x;
   this->ballPosition.y = ballPos.y;
+  cout << "(BulbSampler::setBallPosition): Ball position set to ("
+       << this->ballPosition.x << ", " << this->ballPosition.y << ")." << endl;
+}
+
+
+/** Set ball position.
+ * Ball position is the (global) real-world position
+ * where the ball has been placed.
+ * @param ball_x x coordinate of the ball position
+ * @param ball_y y coordinate of the ball position
+ */
+void
+BulbSampler::setBallPosition(float ball_x, float ball_y) {
+  this->ballPosition.x = ball_x;
+  this->ballPosition.y = ball_y;
   cout << "(BulbSampler::setBallPosition): Ball position set to ("
        << this->ballPosition.x << ", " << this->ballPosition.y << ")." << endl;
 }

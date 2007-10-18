@@ -254,7 +254,7 @@ BulbGenerator::generate()
 	    phi_4 = data->getAngle(u_4, v_4);
 	    
 	    sector_valid = true;
-	  }
+          }
 
 	} // end if point is outside of old sector
 	
@@ -270,7 +270,7 @@ BulbGenerator::generate()
 
 	  for (dpi = data_points.begin(); ! sector_valid && (dpi != data_points.end()); ++dpi) {
 	    unsigned int u = (*dpi).first.x;
-	    unsigned int v = (*dpi).first.y;
+	   unsigned int v = (*dpi).first.y;
 		
 	    // convert to polar coordinates (r_sample, phi_sample)
 	    float phi_sample = normalize_rad( data->getAngle(u, v) );
@@ -355,7 +355,7 @@ BulbGenerator::generate()
 	    phi_4 = data->getAngle(u_4, v_4);
 	    
 	    sector_valid = true;
-	  }
+          }
 
 	}
 
