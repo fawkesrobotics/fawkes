@@ -76,6 +76,8 @@ class CannikinPipeline : SignalHandler {
   typedef enum{
     DETECT_CUP = 0,
     DETERMINE_CUP_COLOR = 1,
+    TEST_MODE = 2,
+    STEREO_TEST_MODE = 3
   } cannikin_mode_t;
 
   CannikinPipeline(ArgumentParser *argp, CannikinConfig *config);
@@ -112,12 +114,15 @@ class CannikinPipeline : SignalHandler {
  private:
 
   void ipc_messaging();
+  void test_mode();
+  void stereo_test_mode();
   void detect_cup();
   void determine_cup_color();
   void reinitialize_colormap();
 
   typedef enum {
-    CANNIKIN_STATE_UNINITIALIZED,
+    CANNIKIN_STATE_TEST_MODE,
+    CANNIKIN_STATE_STEREO_TEST_MODE,
     CANNIKIN_STATE_REINITIALIZE_COLORMAP,
     CANNIKIN_STATE_DETECTION,
     CANNIKIN_STATE_DETERMINE_CUP_COLOR
@@ -194,6 +199,7 @@ class CannikinPipeline : SignalHandler {
   std::list< ROI >::iterator r;
 
   std::map<cup_color_t, char *> colormaps;
+  std::map<cup_color_t, char *>::iterator cmit;
 
   bool             generate_output;
 

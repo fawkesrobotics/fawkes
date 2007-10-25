@@ -332,7 +332,7 @@ FirevisionCannikinBBClient::Loop(int Count)
         float bearing = atan2f(wy, wx);
         float slope = asin(wx / z);
 
-        m_pCannikinServer->SetBearing(bearing);
+        m_pCannikinServer->SetBearing(bearing + /* EVIL EVIL HACK */ deg2rad(3) );
         m_pCannikinServer->SetSlope(slope);
       } else {
 	cup_not_visible();

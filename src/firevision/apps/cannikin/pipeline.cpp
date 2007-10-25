@@ -124,7 +124,7 @@ CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
   camless_mode      = true;
 #endif
 
-  state = CANNIKIN_STATE_DETECTION; // CANNIKIN_STATE_UNINITIALIZED;
+  state = CANNIKIN_STATE_TEST_MODE;
   _mode = DETECT_CUP;
 
   msgq = new IPCMessageQueue( FIREVISION_MSGQ_CANNIKIN,
@@ -228,9 +228,9 @@ CannikinPipeline::init()
     buffer_size = colorspace_buffer_size(YUV422_PLANAR, width, height);
 
     cout << msg_prefix << "Creating shared memory segment for final image" << endl;
-    shm_buffer     = new SharedMemoryImageBuffer("cannikin-raw", YUV422_PLANAR, width, height);
+    shm_buffer     = new SharedMemoryImageBuffer("cannikin-processed", YUV422_PLANAR, width, height);
     cout << msg_prefix << "Creating shared memory segment for source image" << endl;
-    shm_buffer_src = new SharedMemoryImageBuffer("cannikin-processed", YUV422_PLANAR, width, height);
+    shm_buffer_src = new SharedMemoryImageBuffer("cannikin-raw", YUV422_PLANAR, width, height);
 
     buffer     = shm_buffer->buffer();
     buffer_src = shm_buffer_src->buffer();
@@ -242,7 +242,7 @@ CannikinPipeline::init()
     scanlines = new ScanlineGrid(width, height,
 				 config->ScanlineGridXOffset, config->ScanlineGridYOffset);
 
-    disparity_scanlines = new ScanlineRadial(width, height, width / 2, height / 2, 10, 10);
+    disparity_scanlines = new ScanlineRadial(width, height, width / 2, height / 2, 5, 10);
     //disparity_scanlines = new ScanlineGrid(width, height, 2, 2);
 
     drawer = new Drawer();
@@ -263,32 +263,32 @@ CannikinPipeline::init()
     colormap_filestem.erase(colormap_filestem_cindex, 2);
 
     string tmp;
-    /*
 
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "red");
     cout << "Adding colormap " << tmp << endl;
     colormaps[CC_RED] = strdup(tmp.c_str());
 
+    /*
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "yellow");
     cout << "Adding colormap " << tmp << endl;
     colormaps[CC_YELLOW] = strdup(tmp.c_str());
-    */
-    tmp = colormap_filestem;
-    tmp.insert(colormap_filestem_cindex, "orange");
-    cout << "Adding colormap " << tmp << endl;
-    colormaps[CC_ORANGE] = strdup(tmp.c_str());
-
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "blue");
     cout << "Adding colormap " << tmp << endl;
     colormaps[CC_BLUE] = strdup(tmp.c_str());
-
+*/
+    /*
+    tmp = colormap_filestem;
+    tmp.insert(colormap_filestem_cindex, "orange");
+    cout << "Adding colormap " << tmp << endl;
+    colormaps[CC_ORANGE] = strdup(tmp.c_str());
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "green");
     cout << "Adding colormap " << tmp << endl;
     colormaps[CC_GREEN] = strdup(tmp.c_str());
+    */
   }
 
   cm  = new ColorModelLookupTable( config->LookupTableWidth,
@@ -296,7 +296,7 @@ CannikinPipeline::init()
 				   FIREVISION_SHM_LUT_FRONT_COLOR,
 				   true /* destroy on free */);
   cm->reset();
-  set_cup_color(CC_ORANGE);
+  set_cup_color(CC_BLUE);
 
 
   /*
@@ -450,6 +450,12 @@ CannikinPipeline::set_mode(cannikin_mode_t m)
   case DETERMINE_CUP_COLOR:
     state = CANNIKIN_STATE_DETERMINE_CUP_COLOR;
     break;
+  case TEST_MODE:
+    state = CANNIKIN_STATE_TEST_MODE;
+    break;
+  case STEREO_TEST_MODE:
+    state = CANNIKIN_STATE_STEREO_TEST_MODE;
+    break;
   default: break;
   }
 }
@@ -502,76 +508,81 @@ CannikinPipeline::determined_cup_color()
 void
 CannikinPipeline::ipc_messaging()
 {
-  if ( msgq->recv(CANNIKIN_MTYPE_SET_STEREOPARAMS, (IPCMessageQueue::MessageStruct *)&stereo_params, sizeof(stereo_params)) ) {
-    if ( generate_output ) {
-      cout << "RECEIVED stereo parameters:" << endl
-	   << "  Disparity Range:          [" << (unsigned int)stereo_params.min_disparity << ".." << (unsigned int)stereo_params.max_disparity << "]" << endl
-	   << "  Disparity Mapping Range:  [" << (unsigned int)stereo_params.min_disparity_mapping << ".." << (unsigned int)stereo_params.max_disparity_mapping << "]" << endl
-	   << "  Edge Mask Size:           " << (unsigned int)stereo_params.edge_masksize << endl
-	   << "  Stereo Mask Size:         " << (unsigned int)stereo_params.stereo_masksize << endl
-	   << "  Disparity mapping:        " << stereo_params.flag_disparity_mapping << endl
-	   << "  Subpixel Interpolation:   " << stereo_params.flag_subpixel_interpolation << endl
-	   << "  Lowpass filtering:        " << stereo_params.flag_lowpass_filter << endl
-	   << "  Surface Validation:       " << stereo_params.flag_surface_validation << endl
-	   << "  Texture Validation:       " << stereo_params.flag_texture_validation << endl;
-    }
-    if ( ! camless_mode ) {
+  try {
+    if ( msgq->recv(CANNIKIN_MTYPE_SET_STEREOPARAMS, (IPCMessageQueue::MessageStruct *)&stereo_params, sizeof(stereo_params)) ) {
+      if ( generate_output ) {
+	cout << "RECEIVED stereo parameters:" << endl
+	     << "  Disparity Range:          [" << (unsigned int)stereo_params.min_disparity << ".." << (unsigned int)stereo_params.max_disparity << "]" << endl
+	     << "  Disparity Mapping Range:  [" << (unsigned int)stereo_params.min_disparity_mapping << ".." << (unsigned int)stereo_params.max_disparity_mapping << "]" << endl
+	     << "  Edge Mask Size:           " << (unsigned int)stereo_params.edge_masksize << endl
+	     << "  Stereo Mask Size:         " << (unsigned int)stereo_params.stereo_masksize << endl
+	     << "  Disparity mapping:        " << stereo_params.flag_disparity_mapping << endl
+	     << "  Subpixel Interpolation:   " << stereo_params.flag_subpixel_interpolation << endl
+	     << "  Lowpass filtering:        " << stereo_params.flag_lowpass_filter << endl
+	     << "  Surface Validation:       " << stereo_params.flag_surface_validation << endl
+	     << "  Texture Validation:       " << stereo_params.flag_texture_validation << endl;
+      }
+      if ( ! camless_mode ) {
 #ifdef HAVE_TRICLOPS_SDK
-      triclops->set_disparity_range(stereo_params.min_disparity, stereo_params.min_disparity);
-      triclops->set_disparity_mapping_range(stereo_params.min_disparity_mapping, stereo_params.min_disparity_mapping);
-      triclops->set_edge_masksize(stereo_params.edge_masksize);
-      triclops->set_stereo_masksize(stereo_params.stereo_masksize);
-      triclops->set_disparity_mapping(stereo_params.flag_disparity_mapping);
-      triclops->set_subpixel_interpolation(stereo_params.flag_subpixel_interpolation);
-      triclops->set_lowpass(stereo_params.flag_lowpass_filter);
-      triclops->set_surface_validation(stereo_params.flag_surface_validation);
-      triclops->set_texture_validation(stereo_params.flag_texture_validation);
+	triclops->set_disparity_range(stereo_params.min_disparity, stereo_params.min_disparity);
+	triclops->set_disparity_mapping_range(stereo_params.min_disparity_mapping, stereo_params.min_disparity_mapping);
+	triclops->set_edge_masksize(stereo_params.edge_masksize);
+	triclops->set_stereo_masksize(stereo_params.stereo_masksize);
+	triclops->set_disparity_mapping(stereo_params.flag_disparity_mapping);
+	triclops->set_subpixel_interpolation(stereo_params.flag_subpixel_interpolation);
+	triclops->set_lowpass(stereo_params.flag_lowpass_filter);
+	triclops->set_surface_validation(stereo_params.flag_surface_validation);
+	triclops->set_texture_validation(stereo_params.flag_texture_validation);
 #endif
+      }
     }
-  }
-  if ( msgq->recv(CANNIKIN_MTYPE_GET_STEREOPARAMS, (IPCMessageQueue::MessageStruct *)&mtype, sizeof(mtype)) ) {
-    // Someone wants our params, send them!
-    stereo_params.mtype = CANNIKIN_MTYPE_STEREOPARAMS;
-    if ( ! camless_mode ) {
+    if ( msgq->recv(CANNIKIN_MTYPE_GET_STEREOPARAMS, (IPCMessageQueue::MessageStruct *)&mtype, sizeof(mtype)) ) {
+      // Someone wants our params, send them!
+      stereo_params.mtype = CANNIKIN_MTYPE_STEREOPARAMS;
+      if ( ! camless_mode ) {
 #ifdef HAVE_TRICLOPS_SDK
-      stereo_params.min_disparity = triclops->disparity_range_min();
-      stereo_params.max_disparity = triclops->disparity_range_max();
-      stereo_params.min_disparity_mapping = triclops->disparity_mapping_min();
-      stereo_params.max_disparity_mapping = triclops->disparity_mapping_max();
-      stereo_params.edge_masksize = triclops->edge_masksize();
-      stereo_params.stereo_masksize = triclops->stereo_masksize();
-      stereo_params.flag_subpixel_interpolation = triclops->subpixel_interpolation();
-      stereo_params.flag_disparity_mapping = triclops->disparity_mapping();
-      stereo_params.flag_surface_validation = triclops->surface_validation();
-      stereo_params.flag_texture_validation = triclops->texture_validation();
-      stereo_params.flag_lowpass_filter = triclops->lowpass();
+	stereo_params.min_disparity = triclops->disparity_range_min();
+	stereo_params.max_disparity = triclops->disparity_range_max();
+	stereo_params.min_disparity_mapping = triclops->disparity_mapping_min();
+	stereo_params.max_disparity_mapping = triclops->disparity_mapping_max();
+	stereo_params.edge_masksize = triclops->edge_masksize();
+	stereo_params.stereo_masksize = triclops->stereo_masksize();
+	stereo_params.flag_subpixel_interpolation = triclops->subpixel_interpolation();
+	stereo_params.flag_disparity_mapping = triclops->disparity_mapping();
+	stereo_params.flag_surface_validation = triclops->surface_validation();
+	stereo_params.flag_texture_validation = triclops->texture_validation();
+	stereo_params.flag_lowpass_filter = triclops->lowpass();
 #endif
-    } else {
-      stereo_params.min_disparity = 10;
-      stereo_params.max_disparity = 20;
-      stereo_params.min_disparity_mapping = 30;
-      stereo_params.max_disparity_mapping = 40;
-      stereo_params.edge_masksize = 11;
-      stereo_params.stereo_masksize = 23;
-      stereo_params.flag_subpixel_interpolation = 1;
-      stereo_params.flag_disparity_mapping = 0;
-      stereo_params.flag_surface_validation = 1;
-      stereo_params.flag_texture_validation = 0;
-      stereo_params.flag_lowpass_filter = 1;
+      } else {
+	stereo_params.min_disparity = 10;
+	stereo_params.max_disparity = 20;
+	stereo_params.min_disparity_mapping = 30;
+	stereo_params.max_disparity_mapping = 40;
+	stereo_params.edge_masksize = 11;
+	stereo_params.stereo_masksize = 23;
+	stereo_params.flag_subpixel_interpolation = 1;
+	stereo_params.flag_disparity_mapping = 0;
+	stereo_params.flag_surface_validation = 1;
+	stereo_params.flag_texture_validation = 0;
+	stereo_params.flag_lowpass_filter = 1;
+      }
+      if ( generate_output ) {
+	cout << "SENDING stereo parameters:" << endl
+	     << "  Disparity Range:          [" << (unsigned int)stereo_params.min_disparity << ".." << (unsigned int)stereo_params.min_disparity << "]" << endl
+	     << "  Disparity Mapping Range:  [" << (unsigned int)stereo_params.min_disparity_mapping << ".." << (unsigned int)stereo_params.min_disparity_mapping << "]" << endl
+	     << "  Edge Mask Size:           " << (unsigned int)stereo_params.edge_masksize << endl
+	     << "  Stereo Mask Size:         " << (unsigned int)stereo_params.stereo_masksize << endl
+	     << "  Disparity mapping:        " << stereo_params.flag_disparity_mapping << endl
+	     << "  Subpixel Interpolation:   " << stereo_params.flag_subpixel_interpolation << endl
+	     << "  Lowpass filtering:        " << stereo_params.flag_lowpass_filter << endl
+	     << "  Surface Validation:       " << stereo_params.flag_surface_validation << endl
+	     << "  Texture Validation:       " << stereo_params.flag_texture_validation << endl;
+      }
+      msgq->send((IPCMessageQueue::MessageStruct *)&stereo_params, sizeof(stereo_params));
     }
-    if ( generate_output ) {
-      cout << "SENDING stereo parameters:" << endl
-	   << "  Disparity Range:          [" << (unsigned int)stereo_params.min_disparity << ".." << (unsigned int)stereo_params.min_disparity << "]" << endl
-	   << "  Disparity Mapping Range:  [" << (unsigned int)stereo_params.min_disparity_mapping << ".." << (unsigned int)stereo_params.min_disparity_mapping << "]" << endl
-	   << "  Edge Mask Size:           " << (unsigned int)stereo_params.edge_masksize << endl
-	   << "  Stereo Mask Size:         " << (unsigned int)stereo_params.stereo_masksize << endl
-	   << "  Disparity mapping:        " << stereo_params.flag_disparity_mapping << endl
-	   << "  Subpixel Interpolation:   " << stereo_params.flag_subpixel_interpolation << endl
-	   << "  Lowpass filtering:        " << stereo_params.flag_lowpass_filter << endl
-	   << "  Surface Validation:       " << stereo_params.flag_surface_validation << endl
-	   << "  Texture Validation:       " << stereo_params.flag_texture_validation << endl;
-    }
-    msgq->send((IPCMessageQueue::MessageStruct *)&stereo_params, sizeof(stereo_params));
+  } catch (Exception &e) {
+    cout << "IPC messaging failed" << endl;
+    e.printTrace();
   }
 }
 
@@ -584,29 +595,20 @@ CannikinPipeline::loop()
 
   ipc_messaging();
   
-  if ( state == CANNIKIN_STATE_UNINITIALIZED ) {
-    if ( ! camless_mode ) {
-      cam->capture();
-#ifdef HAVE_TRICLOPS_SDK
-      triclops->preprocess_stereo();
-      //cam->set_image_number(Bumblebee2Camera::); // left
-      //convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
-      //memcpy(buffer_src, cam->buffer(), buffer_size);
-      //cam->set_image_number(1); // right
-      //memcpy(buffer, cam->buffer(), buffer_size);
-      memcpy(buffer_src, triclops->yuv_buffer(), buffer_size);
-      memcpy(buffer, triclops->auxiliary_yuv_buffer(), buffer_size);
-#endif
-      cam->dispose_buffer();
-    }
-    return;
-  }
-
   if ( state != last_state ) {
     cout << msg_prefix << "State changed to: ";
   }
 
   switch (state) {
+  case CANNIKIN_STATE_TEST_MODE:
+    if (state != last_state)  cout << "CANNIKIN_STATE_TEST_MODE" << endl;
+    if ( ! camless_mode )  test_mode();
+    break;
+
+  case CANNIKIN_STATE_STEREO_TEST_MODE:
+    if (state != last_state)  cout << "CANNIKIN_STATE_STEREO_TEST_MODE" << endl;
+    if ( ! camless_mode )  stereo_test_mode();
+    break;
 
   case CANNIKIN_STATE_REINITIALIZE_COLORMAP:
     if (state != last_state)  cout << "CANNIKIN_STATE_REINITIALIZE_COLORMAP" << endl;
@@ -628,6 +630,49 @@ CannikinPipeline::loop()
   }
 
   last_state = state;
+}
+
+
+void
+CannikinPipeline::test_mode()
+{
+  cam->capture();
+#ifdef HAVE_TRICLOPS_SDK
+  triclops->preprocess_stereo();
+  triclops->calculate_yuv(/* both */ true);
+  //cam->set_image_number(Bumblebee2Camera::); // left
+  //convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
+  //memcpy(buffer_src, cam->buffer(), buffer_size);
+  //cam->set_image_number(1); // right
+  //memcpy(buffer, cam->buffer(), buffer_size);
+  memcpy(buffer_src, triclops->yuv_buffer(), buffer_size);
+  memcpy(buffer, triclops->auxiliary_yuv_buffer(), buffer_size);
+#endif
+  cam->dispose_buffer();
+}
+
+
+void
+CannikinPipeline::stereo_test_mode()
+{
+  cam->capture();
+#ifdef HAVE_TRICLOPS_SDK
+  triclops->preprocess_stereo();
+  triclops->calculate_yuv(/* both */ false);
+  triclops->calculate_disparity();
+  memcpy(buffer_src, triclops->yuv_buffer(), buffer_size);
+  memset(buffer, 128, buffer_size);
+  memcpy(buffer, triclops->disparity_buffer(), triclops->disparity_buffer_size());
+  disparity_scanlines->set_center(width/2, height/2);
+  disparity_scanlines->set_radius(3, 100);
+  while ( ! disparity_scanlines->finished() ) {
+    unsigned int dx = (*disparity_scanlines)->x;
+    unsigned int dy = (*disparity_scanlines)->y;
+    drawer->drawPoint(dx, dy);
+    ++(*disparity_scanlines);
+  }
+#endif
+  cam->dispose_buffer();
 }
 
 
@@ -713,31 +758,38 @@ CannikinPipeline::detect_cup()
 	wpoints.clear();
 
 	disparity_scanlines->set_center(center_x, center_y);
-	disparity_scanlines->set_radius(3, min(r->width, r->height));
-	// disparity_scanlines->setDimensions(center_x - min(10, half_width),
-	                                      center_y - ((half_height > 10) ? half_height  - 10 : half_height));
+	disparity_scanlines->set_radius(3, 0);
+	cout << msg_prefix << "Setting center_x=" << center_x << "  center_y=" << center_y << "  dead_radius=" << 3 << "   max_radius=" << min(r->width, r->height) << endl;
+	//disparity_scanlines->setDimensions(center_x - min((unsigned int)10, half_width),
+	//				   center_y - ((half_height > 10) ? half_height  - 10 : half_height));
 
 	while ( ! disparity_scanlines->finished() ) {
 	  unsigned int dx = (*disparity_scanlines)->x;
 	  unsigned int dy = (*disparity_scanlines)->y;
-	  if ( (dx > (center_x - min(center_x, 8))) &&
-	       (dx < center_x + 8) ) {
-	    // we only take points close to the x center to get a good bearing
+          if ((dx >= r->start.x) && (dx <= r->start.x + r->width) &&
+              (dy >= r->start.y) && (dy <= r->start.y + r->height) ) {
+  	    if ( (dx > (center_x - min(center_x, (unsigned int)8))) &&
+  	         (dx < center_x + 8) ) {
+	      // we only take points close to the x center to get a good bearing
+              //cout << "checking  ";
+	      if ( triclops->get_xyz(dx, dy, &x, &y, &z) ) {
+	        points.push_back(DisparityPoint(dx, dy, x, y, z));
+	      }
+	      if ( triclops->get_world_xyz(dx, dy, &wx, &wy, &wz) ) {
+	        wpoints.push_back(DisparityPoint(dx, dy, wx, wy, wz));
+                //cout << "using_wp  ";
+	      }
 
-	    if ( triclops->get_xyz(dx, dy, &x, &y, &z) ) {
-	      points.push_back(DisparityPoint(dx, dy, x, y, z));
+              //cout << "OK" << endl;
+	      drawer->setColor(128, 0, 255); // orange
+	      drawer->drawPoint(dx, dy);
+	    } else {
+              //cout << "IGNORING" << endl;
+	      drawer->setColor(128, 255, 0); // blue
+	      drawer->drawPoint(dx, dy);
 	    }
-	    if ( triclops->get_world_xyz(dx, dy, &wx, &wy, &wz) ) {
-	      wpoints.push_back(DisparityPoint(dx, dy, wx, wy, wz));
-	    }
 
-	    drawer->setColor(128, 0, 255); // orange
-	    drawer->setCircle(dx, dy, 2);
-	  } else {
-	    drawer->setColor(128, 255, 0); // blue
-	    drawer->setCircle(dx, dy, 2);
-	  }
-
+          }
 	  ++(*disparity_scanlines);
 	}
 
@@ -763,7 +815,9 @@ CannikinPipeline::detect_cup()
 	// find distance for ROI center pixel
 	if ( cup_visible ) {
 	  cout << msg_prefix << cgreen << " (x,y,z) = ("
-		 << x << "," << y << "," << z << ")" << cnormal << endl;
+		 << x << "," << y << "," << z << ")"
+                 << "    (wx,wy,wz) = (" << wx << "," << wy << "," << wz << ")"
+                 << cnormal << endl;
 	} else {
 	  cout << msg_prefix << cred << "Cup not visible" << cnormal << endl;
 	}
@@ -791,7 +845,7 @@ CannikinPipeline::determine_cup_color()
     determined_valid_frames = 0;
     determine_cycle_num = 0;
     cup_color_determination_done = false;
-    _cup_color = CC_ORANGE;
+    _cup_color = CC_RED;
     reinitialize_colormap();
   }
 
@@ -805,9 +859,10 @@ CannikinPipeline::determine_cup_color()
   }
 
   cam->capture();
-
-  convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
-  // memcpy(buffer, buffer_src, buffer_size);
+  triclops->preprocess_stereo();
+  triclops->calculate_yuv(/* both */ true);
+  memcpy(buffer_src, triclops->yuv_buffer(), buffer_size);
+  memcpy(buffer, triclops->auxiliary_yuv_buffer(), buffer_size);
 
   // Classify image, find ROIs by color
   classifier->setSrcBuffer( buffer_src );
@@ -855,6 +910,10 @@ CannikinPipeline::determine_cup_color()
 	    cout << "Determined color: GREEN" << endl;
 	  } else if (_cup_color == CC_BLUE ) {
 	    cout << "Determined color: BLUE" << endl;
+	  } else if (_cup_color == CC_RED ) {
+	    cout << "Determined color: RED" << endl;
+	  } else if (_cup_color == CC_YELLOW ) {
+	    cout << "Determined color: YELLOW" << endl;
 	  }
 	}
       } else {
@@ -874,12 +933,17 @@ CannikinPipeline::determine_cup_color()
     // to next color
     determine_cycle_num = 0;
     determined_valid_frames = 0;
-    if ( _cup_color == CC_ORANGE ) {
-      _cup_color = CC_GREEN;
-    } else if (_cup_color == CC_GREEN ) {
-      _cup_color = CC_BLUE;
-    } else if (_cup_color == CC_BLUE ) {
-      _cup_color = CC_ORANGE;
+    cmit = colormaps.begin();
+    while (cmit != colormaps.end()) {
+      if ( (*cmit).first == _cup_color ) {
+        ++cmit;
+        if ( cmit == colormaps.end() ) {
+          cmit = colormaps.begin();
+        }
+        _cup_color = ((*cmit).first);
+        break;
+      }
+      ++cmit;
     }
     reinitialize_colormap();
   }

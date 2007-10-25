@@ -210,9 +210,19 @@ CannikinTestBBClient::Loop(int Count)
     break;
   case 'm':
     if (m_pCannikin->GetCurrentMode() == bbClients::Cannikin_Client::MODE_DETECTION ) {
+      printf("Requesting mode switch to: DETERMINE\n");
       m_pCannikin->SetMode(bbClients::Cannikin_Client::MODE_DETERMINE_CUP_COLOR);
       m_pCannikin->UpdateBB();
+    } else if (m_pCannikin->GetCurrentMode() == bbClients::Cannikin_Client::MODE_DETERMINE_CUP_COLOR) {
+      printf("Requesting mode switch to: TESTING\n");
+      m_pCannikin->SetMode(bbClients::Cannikin_Client::MODE_TESTING);
+      m_pCannikin->UpdateBB();
+    } else if (m_pCannikin->GetCurrentMode() == bbClients::Cannikin_Client::MODE_TESTING) {
+      printf("Requesting mode switch to: STEREO_TESTING\n");
+      m_pCannikin->SetMode(bbClients::Cannikin_Client::MODE_STEREO_TESTING);
+      m_pCannikin->UpdateBB();
     } else {
+      printf("Requesting mode switch to: DETECTION\n");
       m_pCannikin->SetMode(bbClients::Cannikin_Client::MODE_DETECTION);
       m_pCannikin->UpdateBB();
     }
