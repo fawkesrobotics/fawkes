@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  avahi_service.cpp - Avahi service representation
+ *  service.cpp - Network service representation
  *
  *  Generated: Tue Nov 07 18:02:23 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -29,17 +29,13 @@
 
 #include <sys/types.h>
 #include <inttypes.h>
-#include <stdarg.h>
-#include <avahi-common/cdecl.h>
-#include <avahi-common/gccmacro.h>
-#include <avahi-common/strlst.h>
-#include <avahi-common/malloc.h>
 #include <cstddef>
 
 #include <string.h>
 
 /** @class NetworkService <netcomm/service_discovery/service.h>
- * Representation of a service announced or found via Avahi.
+ * Representation of a service announced or found via service
+ * discovery (i.e. mDNS/DNS-SD via Avahi).
  * This class is used in the C++ wrapper to talk about services.
  *
  * @ingroup NetComm

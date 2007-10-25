@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  avahi_service.h - Avahi service representation
+ *  service.h - Network service representation
  *
  *  Generated: Tue Nov 07 17:58:10 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
