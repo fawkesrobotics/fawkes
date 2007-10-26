@@ -22,6 +22,29 @@
 # see http://make.paulandlesley.org/autodep.html
 # see http://make.paulandlesley.org/rules.html
 
+include $(abspath $(BASEDIR)/etc/buildsys/ext/gmsl)
+
+MAKE_MIN_VERSION_MAJOR=3
+MAKE_MIN_VERSION_MINOR=81
+
+MAKE_VERSION_SPLITTED=$(call split,.,$(MAKE_VERSION))
+MAKE_VERSION_MAJOR=$(word 1,$(MAKE_VERSION_SPLITTED))
+MAKE_VERSION_MINOR=$(word 2,$(MAKE_VERSION_SPLITTED))
+
+ifneq ($(call gte,$(MAKE_VERSION_MAJOR),$(MAKE_MIN_VERSION_MAJOR)),$(true))
+  MAKE_INSUFFICIENT=1
+else
+  ifeq ($(MAKE_VERSION_MAJOR),$(MAKE_MIN_VERSION_MAJOR))
+    ifneq ($(call gte,$(MAKE_VERSION_MINOR),$(MAKE_MIN_VERSION_MINOR)),$(true))
+      MAKE_INSUFFICIENT=1
+    endif
+  endif
+endif
+
+ifeq ($(MAKE_INSUFFICIENT),1)
+  $(error You need at least GNU Make version $(MAKE_MIN_VERSION_MAJOR).$(MAKE_MIN_VERSION_MINOR), but you have only $(MAKE_VERSION))
+endif
+
 # indentation definitions, dash (-) is replaced with space
 INDENT_STRING = ---
 INDENT_PRINT := $(subst -, ,$(INDENT))
