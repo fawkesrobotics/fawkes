@@ -1,7 +1,7 @@
 #*****************************************************************************
-#                      Makefile Build System for Fawkes
+#     Makefile Build System for Fawkes: Config Settings specific to Fawkes
 #                            -------------------
-#   Created on Sun Sep 03 14:14:14 2006
+#   Created on Tue Oct 30 14:40:55 2007
 #   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #   $Id$
@@ -15,16 +15,12 @@
 #
 #*****************************************************************************
 
-.DEFAULT:
-
-include $(BASEDIR)/etc/buildsys/config.mk
-ifneq ($(OBJDIR),$(notdir $(CURDIR)))
-  ifneq (clean,$(MAKECMDGOALS))
-    include $(BASEDIR)/etc/buildsys/objsdir.mk
-  else
-    include $(BASEDIR)/etc/buildsys/rules.mk
-  endif
-else
-  include $(BASEDIR)/etc/buildsys/rules.mk
-endif
+# Rule for building plugins in PLUGINDIR
+$(PLUGINDIR)/%.so: $$(OBJS_$$*)
+	$(SILENT) mkdir -p $(@D)
+	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
+	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
+	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
+	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
+	-o $@ $(subst ..,__,$^)
 

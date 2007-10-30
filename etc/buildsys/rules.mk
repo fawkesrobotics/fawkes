@@ -2,7 +2,9 @@
 #                      Makefile Build System for Fawkes
 #                            -------------------
 #   Created on Sun Sep 03 14:14:14 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -12,15 +14,12 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 # see http://make.paulandlesley.org/autodep.html
 # see http://make.paulandlesley.org/rules.html
+
+ifndef __buildsys_rules_mk_
+__buildsys_rules_mk := 1
 
 include $(abspath $(BASEDIR)/etc/buildsys/ext/gmsl)
 
@@ -168,17 +167,11 @@ $(LIBDIR)/%.so: $$(OBJS_$$(notdir $$*))
 	$(addprefix -L,$(LIBDIRS_$(notdir $*))) $(addprefix -L,$(LIBDIRS)) \
 	-o $@ $(subst ..,__,$^)
 
-$(PLUGINDIR)/%.so: $$(OBJS_$$*)
-	$(SILENT) mkdir -p $(@D)
-	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
-	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
-	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
-	-o $@ $(subst ..,__,$^)
-
 
 ### Check if there are special additions
 ifneq ($(realpath $(BASEDIR)/etc/buildsys_local/rules_$(BUILD_TYPE).mk),)
 include $(BASEDIR)/etc/buildsys_local/rules_$(BUILD_TYPE).mk
 endif
+
+endif # __buildsys_rules_mk_
 

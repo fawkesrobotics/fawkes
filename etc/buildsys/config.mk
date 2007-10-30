@@ -15,6 +15,10 @@
 #
 #*****************************************************************************
 
+ifndef __buildsys_config_mk_
+__buildsys_config_mk := 1
+
+
 ### Debugging related options
 SILENT = @
 
@@ -48,17 +52,10 @@ PKGCONFIG = $(shell which pkg-config)
 GCC_VERSION=$(shell LANG=C $CC -v 2>&1 | grep "gcc version" | awk '{ print $3 }')
 GCC_VERSION_MAJOR=$(shell LANG=C $(CC) -v 2>&1 | grep "gcc version" | awk '{ print $$3 }' | awk -F. '{ print $$1 }')
 
-### Eclipse
-ECLIPSE_VERSION = 5.7
-ECLIPSE_ARCH    = $(shell uname -i)_$(shell uname -s | tr "[A-Z]" "[a-z]")
-ECLIPSE_PATH    = /usr/local/eclipse_$(ECLIPSE_VERSION)
-ECLIPSE_LIBDIR  = $(ECLIPSE_PATH)/lib/i386_linux
-ECLIPSE_INCDIR  = $(ECLIPSE_PATH)/include/i386_linux
-
 ### CFLAGS, preprocessor, compiler and linker options
-LDFLAGS_LIBDIRS = -Wl,-R$(LIBDIR),-R$(ECLIPSE_LIBDIR) $(LIBDIRS:%=-Wl,-R%)
+LDFLAGS_LIBDIRS = -Wl,-R$(LIBDIR) $(LIBDIRS:%=-Wl,-R%)
 DEFAULT_INCLUDES = -I$(abspath $(BASEDIR)/src) -I$(abspath $(BASEDIR)/src/libs) -I$(abspath $(BASEDIR)/src/firevision)
-CFLAGS_BASE = -g -Wall -Werror -fPIC -pthread $(DEFAULT_INCLUDES) -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\" -DCONFDIR=\"$(CONFDIR)\"
+CFLAGS_BASE = -fPIC -pthread $(DEFAULT_INCLUDES) -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 LDFLAGS_BASE = -L$(LIBDIR)
 LDFLAGS_SHARED = -shared
 
@@ -123,4 +120,6 @@ else
     include $(notdir $(CURDIR)).mk
   endif
 endif
+
+endif # __buildsys_config_mk_
 

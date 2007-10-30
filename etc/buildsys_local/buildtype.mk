@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                      Makefile Build System for Fawkes
+#       Makefile Build System for Fawkes: build type for Fawkes
 #                            -------------------
-#   Created on Sun Sep 03 14:14:14 2006
-#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Mon Oct 29 14:02:45 2007
+#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #   $Id$
 #
@@ -15,16 +15,5 @@
 #
 #*****************************************************************************
 
-.DEFAULT:
-
-include $(BASEDIR)/etc/buildsys/config.mk
-ifneq ($(OBJDIR),$(notdir $(CURDIR)))
-  ifneq (clean,$(MAKECMDGOALS))
-    include $(BASEDIR)/etc/buildsys/objsdir.mk
-  else
-    include $(BASEDIR)/etc/buildsys/rules.mk
-  endif
-else
-  include $(BASEDIR)/etc/buildsys/rules.mk
-endif
+BUILD_TYPE=fawkes
 

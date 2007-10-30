@@ -1,7 +1,7 @@
 #*****************************************************************************
-#                      Makefile Build System for Fawkes
+#   Makefile Build System for Fawkes: Config Settings specific to Fawkes
 #                            -------------------
-#   Created on Sun Sep 03 14:14:14 2006
+#   Created on Tue Apr 10 15:29:29 2007
 #   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #   $Id$
@@ -15,16 +15,5 @@
 #
 #*****************************************************************************
 
-.DEFAULT:
-
-include $(BASEDIR)/etc/buildsys/config.mk
-ifneq ($(OBJDIR),$(notdir $(CURDIR)))
-  ifneq (clean,$(MAKECMDGOALS))
-    include $(BASEDIR)/etc/buildsys/objsdir.mk
-  else
-    include $(BASEDIR)/etc/buildsys/rules.mk
-  endif
-else
-  include $(BASEDIR)/etc/buildsys/rules.mk
-endif
+CFLAGS_BASE += -g -Wall -Werror -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 
