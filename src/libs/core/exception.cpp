@@ -135,7 +135,7 @@
  * copied and not just referenced. Thus the memory can be freed if it is a
  * string on the heap.
  */
-Exception::Exception(const char *msg)
+Exception::Exception(const char *msg) throw()
 {
   messages_mutex = new Mutex();
   messages_mutex->lock();
@@ -165,7 +165,7 @@ Exception::Exception(const char *msg)
  * @param errno error number
  * string on the heap.
  */
-Exception::Exception(const char *msg, int errno)
+Exception::Exception(const char *msg, int errno) throw()
 {
   messages_mutex = new Mutex();
   messages_mutex->lock();
@@ -226,7 +226,7 @@ Exception::Exception(const char *msg, int errno)
  * and copy the memory area or take care that only one exception frees the memory.
  * @param exc Exception to copy
  */
-Exception::Exception(const Exception &exc)
+Exception::Exception(const Exception &exc) throw()
 {
   messages_mutex = new Mutex();
 
@@ -244,7 +244,7 @@ Exception::Exception(const Exception &exc)
  * needed (like sprintf) to assign the message. At least assign the empty
  * string to the message.
  */
-Exception::Exception()
+Exception::Exception() throw()
 {
   messages_mutex = new Mutex();
   _errno = 0;
@@ -255,7 +255,7 @@ Exception::Exception()
 
 
 /** Destructor. */
-Exception::~Exception()
+Exception::~Exception() throw()
 {
   message_list_t *msg_this;
   messages_iterator = messages;
@@ -276,7 +276,7 @@ Exception::~Exception()
  * options.
  */
 void
-Exception::append(const char *format, ...)
+Exception::append(const char *format, ...) throw()
 {
   // do not append empty messages
   if (format == NULL)  return;
@@ -294,7 +294,7 @@ Exception::append(const char *format, ...)
  * @param e Exception to copy messages from
  */
 void
-Exception::append(const Exception &e)
+Exception::append(const Exception &e) throw()
 {
   copy_messages(e);  
 }
@@ -308,7 +308,7 @@ Exception::append(const Exception &e)
  * @param msg message to append
  */
 void
-Exception::append_nolock(const char *msg)
+Exception::append_nolock(const char *msg) throw()
 {
   if ( messages == NULL ) {
     // This is our first message
@@ -335,7 +335,7 @@ Exception::append_nolock(const char *msg)
  * @param ap argument va_list for format
  */
 void
-Exception::append_nolock(const char *format, va_list ap)
+Exception::append_nolock(const char *format, va_list ap) throw()
 {
   char *msg;
   vasprintf(&msg, format, ap);
@@ -364,7 +364,7 @@ Exception::append_nolock(const char *format, va_list ap)
  * @param msg Message to append.
  */
 void
-Exception::append_nolock_nocopy(char *msg)
+Exception::append_nolock_nocopy(char *msg) throw()
 {
   if ( messages == NULL ) {
     // This is our first message
@@ -392,7 +392,7 @@ Exception::append_nolock_nocopy(char *msg)
  * @return reference to this object. Allows assignment chaining.
  */
 Exception &
-Exception::operator=(const Exception &exc)
+Exception::operator=(const Exception &exc) throw()
 {
   messages_mutex = new Mutex();
   copy_messages(exc);
@@ -406,7 +406,7 @@ Exception::operator=(const Exception &exc)
  * @param exc Exception to copy messages from.
  */
 void
-Exception::copy_messages(const Exception &exc)
+Exception::copy_messages(const Exception &exc) throw()
 {
   messages_mutex->lock();
   exc.messages_mutex->lock();
@@ -431,7 +431,7 @@ Exception::copy_messages(const Exception &exc)
  * private to the exception and may not be modified or freed (hence const)
  */
 const char *
-Exception::c_str()
+Exception::c_str() throw()
 {
   if ( messages != NULL ) {
     return messages->msg;
@@ -458,7 +458,7 @@ Exception::raise()
  * via constructor or append(). Output will be sent to stderr.
  */
 void
-Exception::printTrace()
+Exception::printTrace() throw()
 {
   messages_mutex->lock();
   fprintf(stderr, "Exception trace\n"
@@ -482,9 +482,27 @@ Exception::printTrace()
  * @return error number, may be 0 if not set
  */
 int
-Exception::errno() const
+Exception::errno() const throw()
 {
   return _errno;
+}
+
+
+/** Returns a C-style character string describing the general cause
+ * of the current error.
+ * By default it returns the first message in the message array. If no
+ * message has been set "Unknown error" is returned. This method may be
+ * overidden by other exceptions.
+ * @return string describing the general cause of the current error
+ */
+const char *
+Exception::what() const throw()
+{
+  if ( messages != NULL ) {
+    return messages->msg;
+  } else {
+    return "Unknown error";
+  }
 }
 
 
@@ -492,7 +510,7 @@ Exception::errno() const
  * @return iterator for messages
  */
 Exception::iterator
-Exception::begin()
+Exception::begin() throw()
 {
   Exception::iterator i(messages);
   return i;
@@ -503,7 +521,7 @@ Exception::begin()
  * @return end iterator for messages.
  */
 Exception::iterator
-Exception::end()
+Exception::end() throw()
 {
   Exception::iterator i;
   return i;

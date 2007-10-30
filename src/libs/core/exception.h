@@ -30,26 +30,29 @@
 
 // needed for va_list
 #include <cstdarg>
+#include <exception>
 
 class Mutex;
 
-class Exception {
+class Exception : public std::exception {
  public:
 
-  Exception(const char *msg);
-  Exception(const char *msg, int errno);
-  Exception(const Exception &exc);
-  virtual ~Exception();
+  Exception(const char *msg) throw();
+  Exception(const char *msg, int errno) throw();
+  Exception(const Exception &exc) throw();
+  virtual ~Exception() throw();
 
-  virtual const char * c_str();
+  virtual const char * c_str() throw();
   virtual void raise();
-  void append(const char *format, ...);
-  void append(const Exception &e);
-  void printTrace();
+  void append(const char *format, ...) throw();
+  void append(const Exception &e) throw();
+  void printTrace() throw();
 
-  int errno() const;
+  int errno() const throw();
 
-  Exception& operator=(const Exception &exc);
+  virtual const char* what() const throw();
+
+  Exception& operator=(const Exception &exc) throw();
 
  protected:
 
@@ -83,16 +86,16 @@ class Exception {
     message_list_t *mlist;
   };
 
-  iterator begin();
-  iterator end();
+  iterator begin() throw();
+  iterator end() throw();
 
  protected:
-  Exception();
+  Exception() throw();
 
-  void append_nolock(const char *msg);
-  void append_nolock(const char *format, va_list va);
-  void append_nolock_nocopy(char *msg);
-  void copy_messages(const Exception &exc);
+  void append_nolock(const char *msg) throw();
+  void append_nolock(const char *format, va_list va) throw();
+  void append_nolock_nocopy(char *msg) throw();
+  void copy_messages(const Exception &exc) throw();
 
   message_list_t  *messages;
   message_list_t  *messages_iterator;

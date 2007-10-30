@@ -32,29 +32,36 @@
 
 class OutOfMemoryException : public Exception {
  public:
-  OutOfMemoryException(const char *msg = 0);
+  OutOfMemoryException(const char *msg = 0) throw();
 };
 
 
 class InterruptedException : public Exception {
  public:
-  InterruptedException();
+  InterruptedException() throw();
 };
 
 
 class CouldNotOpenFileException : public Exception {
  public:
   CouldNotOpenFileException(const char *filename, int errno,
-			    const char *additional_msg = 0);
-  CouldNotOpenFileException(const char *filename, const char *additional_msg = 0);
+			    const char *additional_msg = 0) throw();
+  CouldNotOpenFileException(const char *filename, const char *additional_msg = 0) throw();
 };
 
 
 class FileReadException : public Exception {
  public:
   FileReadException(const char *filename, int errno,
-		    const char *additional_msg = 0);
-  FileReadException(const char *filename, const char *additional_msg = 0);
+		    const char *additional_msg = 0) throw();
+  FileReadException(const char *filename, const char *additional_msg = 0) throw();
+};
+
+class FileWriteException : public Exception {
+ public:
+  FileWriteException(const char *filename, int errno,
+		     const char *additional_msg = 0) throw();
+  FileWriteException(const char *filename, const char *additional_msg = 0) throw();
 };
 
 

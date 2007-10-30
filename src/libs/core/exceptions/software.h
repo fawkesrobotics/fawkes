@@ -32,61 +32,61 @@
 
 class NullPointerException : public Exception {
  public:
-  NullPointerException(const char *msg);
+  NullPointerException(const char *msg) throw();
 };
 
 
 class DivisionByZeroException : public Exception {
  public:
-  DivisionByZeroException(const char *msg);
+  DivisionByZeroException(const char *msg) throw();
 };
 
 
 class TypeMismatchException : public Exception {
  public:
-  TypeMismatchException(const char *msg);
+  TypeMismatchException(const char *msg) throw();
 };
 
 
 class DestructionInProgressException : public Exception {
  public:
-  DestructionInProgressException(const char *msg);
+  DestructionInProgressException(const char *msg) throw();
 };
 
 
 class NotLockedException : public Exception {
  public:
-  NotLockedException(const char *msg);
+  NotLockedException(const char *msg) throw();
 };
 
 
 class NonPointerTypeExpectedException : public Exception {
  public:
-  NonPointerTypeExpectedException(const char *msg);
+  NonPointerTypeExpectedException(const char *msg) throw();
 };
 
 
 class MissingParameterException : public Exception {
  public:
-  MissingParameterException(const char *msg);
+  MissingParameterException(const char *msg) throw();
 };
 
 
 class IllegalArgumentException : public Exception {
  public:
-  IllegalArgumentException(const char *msg);
+  IllegalArgumentException(const char *msg) throw();
 };
 
 
 class OutOfBoundsException : public Exception {
  public:
-  OutOfBoundsException(const char *msg);
+  OutOfBoundsException(const char *msg) throw();
 };
 
 
 class AccessViolationException : public Exception {
  public:
-  AccessViolationException(const char *msg);
+  AccessViolationException(const char *msg) throw();
 };
 
 #endif

@@ -27,7 +27,7 @@
 
 #include <core/exceptions/software.h>
 
-/** @class NullPointerException core/exceptions/software.h
+/** @class NullPointerException <core/exceptions/software.h>
  * A NULL pointer was supplied where not allowed.
  * Throw this exception if a pointer to NULL has been supplied where this is
  * not allowed.
@@ -36,14 +36,14 @@
 /** Constructor
  * @param msg message, appended to exception, base message "NullPointerException"
  */
-NullPointerException::NullPointerException(const char *msg)
+NullPointerException::NullPointerException(const char *msg) throw()
   : Exception("NullPointerException")
 {
   append(msg);
 }
 
 
-/** @class DivisionByZeroException core/exceptions/software.h
+/** @class DivisionByZeroException <core/exceptions/software.h>
  * Division by zero.
  * Throw this if a division by zero has happened or is about to happen
  * @ingroup Exceptions
@@ -51,14 +51,14 @@ NullPointerException::NullPointerException(const char *msg)
 /** Constructor
  * @param msg message, appended to exception, base message "Division by zero"
  */
-DivisionByZeroException::DivisionByZeroException(const char *msg)
+DivisionByZeroException::DivisionByZeroException(const char *msg) throw()
   : Exception("Division by zero")
 {
   append(msg);
 }
 
 
-/** @class TypeMismatchException core/exceptions/software.h
+/** @class TypeMismatchException <core/exceptions/software.h>
  * Type mismatch.
  * Throw this exception if types of operations do not fit together.
  * @ingroup Exceptions
@@ -66,14 +66,14 @@ DivisionByZeroException::DivisionByZeroException(const char *msg)
 /** Constructor
  * @param msg message, appended to exception, base message "Division by zero"
  */
-TypeMismatchException::TypeMismatchException(const char *msg)
+TypeMismatchException::TypeMismatchException(const char *msg) throw()
   : Exception("Type mismatch")
 {
   append(msg);
 }
 
 
-/** @class DestructionInProgressException core/exceptions/software.h
+/** @class DestructionInProgressException <core/exceptions/software.h>
  * Delete in progress.
  * Throw this exception if someone tried to access an object that is currently being
  * destroyed.
@@ -83,14 +83,14 @@ TypeMismatchException::TypeMismatchException(const char *msg)
  * @param msg informative message, appended to exception, base message is
  * "Destruction in progress"
  */
-DestructionInProgressException::DestructionInProgressException(const char *msg)
+DestructionInProgressException::DestructionInProgressException(const char *msg) throw()
   : Exception("Destruction in progress")
 {
   append(msg);
 }
 
 
-/** @class NotLockedException core/exceptions/software.h
+/** @class NotLockedException <core/exceptions/software.h>
  * Operation on unlocked object.
  * Throw this exception if someone tried to operate on an object with a method that needs
  * outside locking. This can be detected utilizing Mutex::tryLock() in many situations.
@@ -100,14 +100,14 @@ DestructionInProgressException::DestructionInProgressException(const char *msg)
  * @param msg informative message, appended to exception, base message is
  * "Unsafe operation on not locked object"
  */
-NotLockedException::NotLockedException(const char *msg)
+NotLockedException::NotLockedException(const char *msg) throw()
   : Exception("Unsafe operation on not locked object")
 {
   append(msg);
 }
 
 
-/** @class NonPointerTypeExpectedException core/exceptions/software.h
+/** @class NonPointerTypeExpectedException <core/exceptions/software.h>
  * Non-pointer type expected.
  * Throw this exception if you got a pointer type where you expected to get a non-pointer
  * type variable.
@@ -117,14 +117,14 @@ NotLockedException::NotLockedException(const char *msg)
  * @param msg informative message, appended to exception, base message is
  * "Non-pointer type expected (template error?)"
  */
-NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *msg)
+NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *msg) throw()
   :  Exception("Non-pointer type expected (template error?)")
 {
   append(msg);
 }
 
 
-/** @class MissingParameterException core/exceptions/software.h
+/** @class MissingParameterException <core/exceptions/software.h>
  * Expected parameter is missing.
  * Throw this exception if you expected one or more parameters that have not been
  * supplied.
@@ -134,14 +134,14 @@ NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *msg
  * @param msg informative message, appended to exception, base message is
  * "Parameter is missing"
  */
-MissingParameterException::MissingParameterException(const char *msg)
+MissingParameterException::MissingParameterException(const char *msg) throw()
   :  Exception("Parameter is missing")
 {
   append(msg);
 }
 
 
-/** @class IllegalArgumentException core/exceptions/software.h
+/** @class IllegalArgumentException <core/exceptions/software.h>
  * Expected parameter is missing.
  * Throw this exception if you got a parameter that does not meet some kind of
  * specification, i.e. it is of the wrong type or out of an allowed value range.
@@ -151,14 +151,14 @@ MissingParameterException::MissingParameterException(const char *msg)
  * @param msg informative message, appended to exception, base message is
  * "Illegal Argument"
  */
-IllegalArgumentException::IllegalArgumentException(const char *msg)
+IllegalArgumentException::IllegalArgumentException(const char *msg) throw()
   :  Exception("Illegal Argument")
 {
   append(msg);
 }
 
 
-/** @class OutOfBoundsException core/exceptions/software.h
+/** @class OutOfBoundsException >core/exceptions/software.h>
  * Index out of bounds.
  * Throw this exception if a value is out of bounds or if someone tries to access
  * an iterator that is not in the allowed range.
@@ -168,14 +168,14 @@ IllegalArgumentException::IllegalArgumentException(const char *msg)
  * @param msg informative message, appended to exception, base message is
  * "Out Of Bounds"
  */
-OutOfBoundsException::OutOfBoundsException(const char *msg)
+OutOfBoundsException::OutOfBoundsException(const char *msg) throw()
   :  Exception("Out Of Bounds")
 {
   append(msg);
 }
 
 
-/** @class AccessViolationException core/exceptions/software.h
+/** @class AccessViolationException <core/exceptions/software.h>
  * Access violates policy.
  * Throw this exception if a any kind of access violates the policy, for example
  * if someone tries to write to a read-only memory segment.
@@ -185,7 +185,7 @@ OutOfBoundsException::OutOfBoundsException(const char *msg)
  * @param msg informative message, appended to exception, base message is
  * "Access Violation"
  */
-AccessViolationException::AccessViolationException(const char *msg)
+AccessViolationException::AccessViolationException(const char *msg) throw()
   :  Exception("Access Violation")
 {
   append(msg);

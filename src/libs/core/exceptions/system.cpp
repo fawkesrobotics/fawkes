@@ -34,7 +34,7 @@
 /** Constructor
  * @param msg optional extra message, appended to exception, base message "Out of memory"
  */
-OutOfMemoryException::OutOfMemoryException(const char *msg)
+OutOfMemoryException::OutOfMemoryException(const char *msg) throw()
   : Exception("Out of memory")
 {
   append(msg);
@@ -48,7 +48,7 @@ OutOfMemoryException::OutOfMemoryException(const char *msg)
  * @ingroup Exceptions
  */
 /** Constructor */
-InterruptedException::InterruptedException()
+InterruptedException::InterruptedException() throw()
   : Exception("Interrupted system call")
 {
 }
@@ -67,7 +67,7 @@ InterruptedException::InterruptedException()
  * @param additional_msg optional additional message
  */
 CouldNotOpenFileException::CouldNotOpenFileException(const char *filename, int errno,
-						     const char *additional_msg)
+						     const char *additional_msg) throw()
   : Exception("Could not open file", errno)
 {
   append("Failed to open file '%s'", filename);
@@ -78,7 +78,7 @@ CouldNotOpenFileException::CouldNotOpenFileException(const char *filename, int e
  * @param additional_msg optional additional message
  */
 CouldNotOpenFileException::CouldNotOpenFileException(const char *filename,
-						     const char *additional_msg)
+						     const char *additional_msg) throw()
   : Exception("Could not open file")
 {
   append("Failed to open file '%s'", filename);
@@ -90,17 +90,17 @@ CouldNotOpenFileException::CouldNotOpenFileException(const char *filename,
 /** @class FileReadException <core/exceptions/system.h>
  * File could not be read.
  * The file could not be read. Optional error number and message describe the
- * problem in more detai.
+ * problem in more detail.
  * @ingroup Exceptions
  */
 
 /** Constructor with error number.
- * @param filename name of file which coul not be read
+ * @param filename name of file which could not be read
  * @param errno error number
  * @param additional_msg optional additional message
  */
 FileReadException::FileReadException(const char *filename, int errno,
-						     const char *additional_msg)
+				     const char *additional_msg) throw()
   : Exception("Could not read from file", errno)
 {
   append("Failed to read from file '%s'", filename);
@@ -111,9 +111,42 @@ FileReadException::FileReadException(const char *filename, int errno,
  * @param additional_msg optional additional message
  */
 FileReadException::FileReadException(const char *filename,
-						     const char *additional_msg)
-  : Exception("Could read from file")
+				     const char *additional_msg) throw()
+  : Exception("Could not read from file")
 {
   append("Failed to read from file '%s'", filename);
+  append(additional_msg);
+}
+
+
+/** @class FileWriteException <core/exceptions/system.h>
+ * Could not write to file.
+ * Writing to a file failed. Optional error number and message describe the
+ * problem in more detail.
+ * @ingroup Exceptions
+ */
+
+/** Constructor with error number.
+ * @param filename name of file which could not be written to
+ * @param errno error number
+ * @param additional_msg optional additional message
+ */
+FileWriteException::FileWriteException(const char *filename, int errno,
+				       const char *additional_msg) throw()
+  : Exception("Could not write to file", errno)
+{
+  append("Failed to write to file '%s'", filename);
+  append(additional_msg);
+}
+
+/** Constructor with error number.
+ * @param filename name of file which could not be written
+ * @param additional_msg optional additional message
+ */
+FileWriteException::FileWriteException(const char *filename,
+				       const char *additional_msg) throw()
+  : Exception("Could not write to file")
+{
+  append("Failed to write to file '%s'", filename);
   append(additional_msg);
 }

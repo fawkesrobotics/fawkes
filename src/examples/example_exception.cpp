@@ -58,9 +58,9 @@ throw_some_exception()
   int r = rand();
   if ( r < (RAND_MAX / 3)) {
     throw ExampleSmallException();
-  } else if ( r < (RAND_MAX / 3 * 2)) {
-    // printf("Throwing boom\n");
-    // throw ExampleUnhandledException();
+  } else if ( r > 1 - (RAND_MAX / 20)) {
+    printf("Throwing boom\n");
+    throw ExampleUnhandledException();
   } else {
     throw ExampleBigException();
   }
