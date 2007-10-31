@@ -54,7 +54,7 @@ main(int argc, char **argv)
 								  FIREVISION_RECTINFO_CAMERA_MAIN);
 
   RectificationLutInfoBlock *rlib2 = new RectificationLutInfoBlock(WIDTH, HEIGHT,
-								  FIREVISION_RECTINFO_CAMERA_LEFT);
+								   FIREVISION_RECTINFO_CAMERA_LEFT);
 
   /* Random alternative, harder to read though
   for ( int i = 0; i < 10; ++i ) {
@@ -82,6 +82,7 @@ main(int argc, char **argv)
   }
 
   rif->add_rectinfo_block(rlib);
+  rif->add_rectinfo_block(rlib2);
 
   std::list<RectificationInfoBlock *> &blocks = rif->blocks();
 

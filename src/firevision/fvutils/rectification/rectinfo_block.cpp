@@ -30,7 +30,7 @@
 #include <core/exceptions/software.h>
 
 #include <cstdlib>
-#include <cstdio>
+#include <cstring>
 
 /** @class RectificationInfoBlock <fvutils/rectification/rectinfo_block.h>
  * Rectification info block.
@@ -105,15 +105,14 @@ RectificationInfoBlock::RectificationInfoBlock(uint8_t block_type,
   }
   _free_block_chunk = true;
 
+  memset(_block_chunk, 0, _block_size);
+
   _block_header = (rectinfo_block_header_t *)_block_chunk;
   _block_data   = (char *)_block_chunk + sizeof(rectinfo_block_header_t);
 
   _block_header->type   = block_type;
   _block_header->camera = camera;
   _block_header->size   = block_data_size;
-  printf("Type: %u   cam: %u   size: %u\n", _block_header->type, _block_header->camera,
-	 _block_header->size);
-
 }
 
 

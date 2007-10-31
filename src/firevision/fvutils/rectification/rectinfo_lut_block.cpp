@@ -28,8 +28,6 @@
 #include <fvutils/rectification/rectinfo_lut_block.h>
 
 #include <core/exceptions/software.h>
-#include <cstring>
-#include <cstdio>
 
 /** @class RectificationLutInfoBlock <fvutils/rectification/rectinfo_lut_block.h>
  * Recitification Lookup Table Block.
@@ -54,9 +52,6 @@ RectificationLutInfoBlock::RectificationLutInfoBlock(uint16_t width,
   _lut_block_header = (rectinfo_lut_16x16_block_header_t *)_block_data;
   _lut_data         = (rectinfo_lut_16x16_entry_t *)((char *)_block_data +
 						     sizeof(rectinfo_lut_16x16_block_header_t));
-
-  memset(_lut_data, 0, sizeof(rectinfo_lut_16x16_block_header_t) +
-                       (width * height * sizeof(rectinfo_lut_16x16_entry_t)));
 
   _lut_block_header->width  = width;
   _lut_block_header->height = height;

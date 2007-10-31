@@ -135,6 +135,8 @@ RectificationInfoFile::clear()
   }
   info_blocks.clear();
 
+  memset(_header, 0, sizeof(rectinfo_header_t));
+
   _header->magic   = htons(FIREVISION_RECTINFO_MAGIC);
   _header->version = FIREVISION_RECTINFO_CURVER;
   _header->num_blocks = 0;
@@ -236,6 +238,7 @@ RectificationInfoFile::read(const char *file_name)
     if ( bh.type == FIREVISION_RECTINFO_TYPE_LUT_16x16 ) {
       // read LUT
       void * chunk = malloc(sizeof(bh) + bh.size);
+      memset(chunk, 0, sizeof(bh) + bh.size);
       memcpy(chunk, &bh, sizeof(bh));
       void *block_chunk = (char *)chunk + sizeof(bh);
       if ( fread(block_chunk, bh.size, 1, f) != 1 ) {
