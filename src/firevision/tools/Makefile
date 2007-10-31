@@ -42,12 +42,15 @@ OBJS_fvstereodecoder = stereodecoder.o
 LIBS_fvtricalcdisp = $(VISION_CAM_LIBS) utils fvcams fvstereo
 OBJS_fvtricalcdisp = tricalcdisp.o
 
+LIBS_fvbb2gettric = $(VISION_CAM_LIBS) utils fvcams fvutils
+OBJS_fvbb2gettric = bb2gettric.o
+
+LIBS_fvbb2rectlut = $(VISION_CAM_LIBS) utils fvcams fvutils fvstereo
+OBJS_fvbb2rectlut = bb2rectlut.o
+
 OBJS_all = $(OBJS_fvshmem) $(OBJS_listfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric)
 BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvconverter
-
-LIBS_fvbb2gettric = $(VISION_CAM_LIBS) utils fvcams fvutils
-OBJS_fvbb2gettric = bb2gettric.o
 
 ifeq ($(HAVE_TRICLOPS_SDK),1)
   BINS_all += $(BINDIR)/fvtricalcdisp
@@ -68,21 +71,26 @@ else
   WARN_TARGETS += warning_stereodecoder
 endif
 
+ifeq ($(HAVE_BUMBLEBEE2_CAM)$(HAVE_TRICLOPS_SDK),11)
+  BINS_all += $(BINDIR)/fvbb2rectlut
+else
+  WARN_TARGETS += warning_bb2rectlut
+endif
+
 ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_listfwcams
+.PHONY: $(WARN_TARGETS)
 warning_listfwcams:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building listfwcams$(TNORMAL) (no Firewire camera support)";
-.PHONY: warning_stereodecoder
 warning_stereodecoder:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building stereodecoder$(TNORMAL) (no Bumblebee2 camera support)";
-.PHONY: warning_tricalcdisp
 warning_tricalcdisp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvtricalcdisp$(TNORMAL) (no Triclops SDK support)";
-.PHONY: warning_bb2gettric
 warning_bb2gettric:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvbb2gettric$(TNORMAL) (no Bumblebee2 camera support)";
+warning_bb2rectlut:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvbb2rectlut$(TNORMAL) (no Triclops SDK or BB2 support)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
