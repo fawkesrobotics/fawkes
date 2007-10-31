@@ -164,14 +164,30 @@ IllegalArgumentException::IllegalArgumentException(const char *msg) throw()
  * an iterator that is not in the allowed range.
  * @ingroup Exceptions
  */
+
 /** Constructor.
  * @param msg informative message, appended to exception, base message is
  * "Out Of Bounds"
  */
 OutOfBoundsException::OutOfBoundsException(const char *msg) throw()
-  :  Exception("Out Of Bounds")
+  : Exception()
 {
-  append(msg);
+  append("Out Of Bounds: %s", msg);
+}
+
+/** Range constructor.
+ * Additionally to the message the ranges and actual values are added to the
+ * primary message.
+ * @param msg informative message
+ * @param val actual value
+ * @param min minimum required value
+ * @param max maximum allowed value
+ */
+OutOfBoundsException::OutOfBoundsException(const char *msg, float val,
+					   float min, float max) throw()
+  : Exception()
+{
+  append("Out Of Bounds (%s):  min: %f  max: %f  val: %f", msg, min, max, val);
 }
 
 

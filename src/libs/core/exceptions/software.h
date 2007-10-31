@@ -81,6 +81,8 @@ class IllegalArgumentException : public Exception {
 class OutOfBoundsException : public Exception {
  public:
   OutOfBoundsException(const char *msg) throw();
+  OutOfBoundsException(const char *msg, float val,
+		       float min, float max) throw();
 };
 
 
