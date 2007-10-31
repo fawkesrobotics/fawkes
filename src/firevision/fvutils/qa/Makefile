@@ -36,12 +36,17 @@ LIBS_fv_qa_jpegbm := fvutils
 OBJS_fv_qa_shmimg := qa_shmimg.o
 LIBS_fv_qa_shmimg := fvutils
 
+OBJS_fv_qa_rectlut := qa_rectlut.o
+LIBS_fv_qa_rectlut := fvutils
+
 OBJS_all = $(OBJS_fv_qa_camargp)		\
 	   $(OBJS_fv_qa_jpegbm)			\
-	   $(OBJS_fv_qa_shmimg)
+	   $(OBJS_fv_qa_shmimg)			\
+	   $(OBJS_fv_qa_rectlut)
 BINS_all = $(BINDIR)/fv_qa_camargp		\
 	   $(BINDIR)/fv_qa_jpegbm		\
-	   $(BINDIR)/fv_qa_shmimg
+	   $(BINDIR)/fv_qa_shmimg		\
+	   $(BINDIR)/fv_qa_rectlut
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
