@@ -25,8 +25,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_FVUTILS_STEREO_TRICLOPS_H_
-#define __FIREVISION_FVUTILS_STEREO_TRICLOPS_H_
+#ifndef __FIREVISION_STEREO_TRICLOPS_H_
+#define __FIREVISION_STEREO_TRICLOPS_H_
 
 #include <stereo/stereo_processor.h>
 #include <sys/types.h>
@@ -81,6 +81,8 @@ class TriclopsStereoProcessor : public StereoProcessor
   virtual size_t           disparity_buffer_size() const;
   virtual unsigned char *  yuv_buffer();
   virtual unsigned char *  auxiliary_yuv_buffer();
+
+  void    generate_rectification_lut(const char *lut_file);
 
  private:
   void get_triclops_context_from_camera();

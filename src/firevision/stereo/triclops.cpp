@@ -33,11 +33,14 @@
 #include <fvutils/base/roi.h>
 #include <utils/math/angle.h>
 #include <fvutils/color/conversions.h>
+#include <fvutils/rectification/rectfile.h>
+#include <fvutils/rectification/rectinfo_lut_block.h>
 
 // PGR Triclops SDK
 #include <triclops.h>
 
 #include <unistd.h>
+#include <errno.h>
 
 /// @cond INTERNALS
 /** Data internal to Triclops stereo processor
@@ -785,4 +788,48 @@ TriclopsStereoProcessor::get_world_xyz(unsigned int px, unsigned int py, float *
   } else {
     return false;
   }
+}
+
+
+/** Generate rectification LUT.
+ * This will generate a lookup table that can be used for fast rectification of
+ * an image. The lut will be of the dimensions of the currently specified image
+ * (either given to the offline context file constructor or as defined by the supplied
+ * BB2 camera). The file will use RectificationFile to write two RectificationLookupTable
+ * entities, one for each image.
+ * @param lut_file name of the file to write to. The file will be created if
+ * it does not exist and truncated otherwise. The directory where the file has to
+ * be stored has to exist.
+ */
+void
+TriclopsStereoProcessor::generate_rectification_lut(const char *lut_file)
+{
+  RectificationInfoFile *rif = new RectificationInfoFile();
+
+  RectificationLutInfoBlock *lib_left  = new RectificationLutInfoBlock(_width, _height,
+								      FIREVISION_RECTINFO_CAMERA_LEFT);
+  RectificationLutInfoBlock *lib_right = new RectificationLutInfoBlock(_width, _height,
+								       FIREVISION_RECTINFO_CAMERA_RIGHT);
+
+  register float row, col;
+  for (unsigned int h = 0; h < _height; ++h) {
+    for (unsigned int w = 0; w < _height; ++w) {
+      if ( triclopsUnrectifyPixel(data->triclops, TriCam_LEFT, h, w, &row, &col) != TriclopsErrorOk ) {
+	throw Exception("Failed to get unrectified position from Triclops SDK");
+      }
+      lib_left->set_mapping(w, h, (int)roundf(col), (int)roundf(row));
+
+      if ( triclopsUnrectifyPixel(data->triclops, TriCam_RIGHT, h, w, &row, &col) != TriclopsErrorOk ) {
+	throw Exception("Failed to get unrectified position from Triclops SDK");
+      }
+      lib_right->set_mapping(w, h, (int)roundf(col), (int)roundf(row));
+    }
+  }
+
+  rif->add_rectinfo_block(lib_left);
+  rif->add_rectinfo_block(lib_right);
+
+  rif->write(lut_file);
+
+  delete rif;
 }
