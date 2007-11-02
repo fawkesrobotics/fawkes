@@ -28,18 +28,19 @@
 #ifndef __FIREVISION_FVUTILS_RECTIFICATION_RECTFILE_H_
 #define __FIREVISION_FVUTILS_RECTIFICATION_RECTFILE_H_
 
+#include <fvutils/rectification/rectinfo.h>
 #include <list>
 
 class RectificationInfoBlock;
-typedef struct _rectinfo_header_t rectinfo_header_t;
 
 class RectificationInfoFile
 {
  public:
-  RectificationInfoFile();
+  RectificationInfoFile(uint64_t cam_guid);
   ~RectificationInfoFile();
 
   uint8_t  version();
+  uint64_t guid();
   bool     is_big_endian();
   bool     is_little_endian();
 
@@ -54,6 +55,7 @@ class RectificationInfoFile
 
  private:
   rectinfo_header_t  *_header;
+  uint64_t            _cam_guid;
 
   std::list<RectificationInfoBlock *>            info_blocks;
   std::list<RectificationInfoBlock *>::iterator  ibi;

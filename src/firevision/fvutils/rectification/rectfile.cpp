@@ -50,10 +50,14 @@
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-RectificationInfoFile::RectificationInfoFile()
+/** Constructor.
+ * @param cam_guid Camera globally unique identifier.
+ */
+RectificationInfoFile::RectificationInfoFile(uint64_t cam_guid)
 {
   _header = new rectinfo_header_t;
+
+  _cam_guid = cam_guid;
 
   clear();
 }
@@ -110,6 +114,16 @@ RectificationInfoFile::num_blocks()
 }
 
 
+/** Get the GUID of camera.
+ * @return GUID of the camera this rectification info file belongs to.
+ */
+uint64_t
+RectificationInfoFile::guid()
+{
+  return _header->guid;
+}
+
+
 /** Add a rectification info block.
  * This instance takes over ownership of the rectinfo block. This means that the
  * object is automatically deleted if this instance is deleted.
@@ -145,6 +159,7 @@ RectificationInfoFile::clear()
 #else
   _header->endianess = 0;
 #endif
+  _header->guid = _cam_guid;
 }
 
 

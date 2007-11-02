@@ -48,7 +48,7 @@ main(int argc, char **argv)
     s = argv[1];
   }
 
-  RectificationInfoFile *rif = new RectificationInfoFile();
+  RectificationInfoFile *rif = new RectificationInfoFile(0xDEADBEEFDEADBEEF);
 
   RectificationLutInfoBlock *rlib = new RectificationLutInfoBlock(WIDTH, HEIGHT,
 								  FIREVISION_RECTINFO_CAMERA_MAIN);
