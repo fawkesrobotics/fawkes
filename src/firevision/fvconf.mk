@@ -53,10 +53,13 @@ ifneq ($(realpath /usr/include/png.h),)
   VISION_CFLAGS += -DHAVE_PNG
 endif
 
-ifneq ($(realpath /usr/include/dc1394),)
+ifneq ($(PKGCONFIG),)
+  HAVE_LIBDC1394 = $(if $(shell $(PKGCONFIG) --exists 'libdc1394-2'; echo $${?/1/}),1,0)
+endif
+ifeq ($(HAVE_LIBDC1394),1)
   HAVE_FIREWIRE_CAM   = 1
   HAVE_BUMBLEBEE2_CAM = 1
-  VISION_CAM_LIBS    += dc1394
+  VISION_CAM_LIBS    += $(subst -l,,$(shell $(PKGCONFIG) --libs 'libdc1394-2'))
 endif
 
 # Check if we have PGR Triclops SDK, build Bumblebee2 if we have it
