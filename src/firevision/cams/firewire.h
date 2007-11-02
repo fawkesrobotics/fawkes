@@ -33,6 +33,11 @@
 
 #include <dc1394/control.h>
 
+#ifndef __STDC_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS
+#endif
+#include <stdint.h>
+
 class CameraArgumentParser;
 
 class FirewireCamera : public Camera, public CameraControl
@@ -85,7 +90,9 @@ class FirewireCamera : public Camera, public CameraControl
   virtual bool           auto_white_balance();
   virtual void           set_auto_white_balance(bool enabled);
 
-  static void            print_available_fwcams();
+  virtual uint64_t       guid();
+
+  static  void           print_available_fwcams();
 
  protected:
   /** Number of DMA buffers. */

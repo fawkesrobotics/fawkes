@@ -196,11 +196,8 @@ Bumblebee2Camera::open()
     throw Exception("Bumblebee2::open: GetCameraControlRegister(PGR_REG_DATA_FORMAT) failed\n");
   }
   idf_t *i = (idf_t *)&value;
-  printf("IDF: %u\n", i->data_format);
   value &= PTG_Y16_Data_Format_PGR_specific;
   i->data_format = 0;
-  i = (idf_t *)&value;
-  printf("IDF: %u\n", i->data_format);
   err = SetCameraControlRegister( camera, PGR_REG_IMAGE_DATA_FORMAT, value );
   if ( err != DC1394_SUCCESS ) {
     throw Exception("Bumblebee2::open: Setting PGR-specific mode on little-endian system failed\n");

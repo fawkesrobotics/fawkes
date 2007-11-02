@@ -187,7 +187,7 @@ FirewireCamera::start()
 
   //cout  << "Starting camera" << endl;
 
-  if ( dc1394_capture_setup( camera, num_buffers ) != DC1394_SUCCESS ) {
+  if ( dc1394_capture_setup( camera, num_buffers, DC1394_CAPTURE_FLAGS_DEFAULT ) != DC1394_SUCCESS ) {
     // cout  << cred << "Could not start capturing" << endl;
     dc1394_capture_stop(camera);
     return;
@@ -237,6 +237,20 @@ FirewireCamera::print_info()
   if (opened) {
     dc1394_print_camera_info( camera );
   }
+}
+
+
+/** Get Firewire GUID of camera.
+ * @return IEEE1394 GUID
+ */
+uint64_t
+FirewireCamera::guid()
+{
+  if ( ! opened ) {
+    throw Exception("Camera not opened");
+  }
+
+  return camera->id.guid;
 }
 
 void
