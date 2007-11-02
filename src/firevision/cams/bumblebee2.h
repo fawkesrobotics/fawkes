@@ -60,6 +60,10 @@ class Bumblebee2Camera : public FirewireCamera
   void deinterlace_stereo();
   void decode_bayer();
 
+  virtual void     print_info();
+  virtual uint32_t serial_no() const;
+  virtual bool     verify_guid(uint64_t ver_guid) const;
+
   static void deinterlace_stereo(unsigned char *raw16, unsigned char *deinterlaced,
 				 unsigned int width, unsigned int height);
   static void decode_bayer(unsigned char *deinterlaced, unsigned char *rgb,

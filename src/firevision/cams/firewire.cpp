@@ -244,7 +244,7 @@ FirewireCamera::print_info()
  * @return IEEE1394 GUID
  */
 uint64_t
-FirewireCamera::guid()
+FirewireCamera::guid() const
 {
   if ( ! opened ) {
     throw Exception("Camera not opened");

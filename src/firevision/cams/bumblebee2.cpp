@@ -40,13 +40,11 @@
 
 #include <utils/math/angle.h>
 
-#include <iostream>
+#include <cstdio>
 
 #include <dc1394/utils.h>
 #include <dc1394/register.h>
 #include <dc1394/conversions.h>
-
-using namespace std;
 
 
 /** @class Bumblebee2Camera <cams/bumblebee2.h>
@@ -108,6 +106,10 @@ const unsigned int Bumblebee2Camera::RGB_IMAGE = 2;
 /** PTGrey image data format: PGR-specific (little endian) mode */
 #define PTG_Y16_Data_Format_PGR_specific  (0xFFFFFFFE)
 
+/** PTGrey proprietary register: serial number */
+#define PGR_REG_SERIAL_NUMBER           (0x1F20)
+
+/** PTGrey image data format: PGR-specific (little endian) mode */
 /** Constructor.
  * Initialize and take parameters from camera argument parser. The following
  * arguments are supported:
@@ -161,6 +163,60 @@ Bumblebee2Camera::~Bumblebee2Camera()
   if (_buffer_rgb != NULL)           free(_buffer_rgb);
 }
 
+
+/** Get BB2 serial no.
+ * @return BB2 serial number.
+ */
+uint32_t
+Bumblebee2Camera::serial_no() const
+{
+  if ( ! opened )  throw Exception("Camera not opened");
+
+  uint32_t value = 0;
+  dc1394error_t err = GetCameraControlRegister( camera, PGR_REG_SERIAL_NUMBER, &value );
+  if ( err != DC1394_SUCCESS ) {
+    throw Exception("Bumblebee2::serial_no: GetCameraControlRegister(PGR_REG_SERIAL_NUMBER) failed\n");
+  }
+  return value;
+}
+
+
+/** Verify GUID validity.
+ * Compares the given GUID with the GUID of the camera. The GUID may be of two
+ * forms. If the first four bytes are all 0xFF then it is assumed that the
+ * GUID was created from the BB2-specific serial number. For example if a
+ * rectification LUT was generated with the context file only but without
+ * access to the real camera. Otherwise the GUID is matched against the
+ * Firewire GUID.
+ * @param ver_guid GUID to verify
+ * @return true if the given GUID matches the current camera, false otherwise
+ */
+bool
+Bumblebee2Camera::verify_guid(uint64_t ver_guid) const
+{
+  if ( ! opened )  throw Exception("Camera not opened");
+
+  uint64_t tguid = ver_guid;
+  tguid >>= 32;
+  tguid &= 0xFFFFFFFF;
+  if ( tguid == 0xFFFFFFFF ) {
+    // serial number!
+    ver_guid &= 0xFFFFFFFF;
+    return (serial_no() == ver_guid);
+  } else {
+    return (guid() == ver_guid);
+  }
+}
+
+
+void
+Bumblebee2Camera::print_info()
+{
+  FirewireCamera::print_info();
+
+  printf("Serial: %u\n", serial_no());
+  printf("GUID:   0x%016llx\n", guid());
+}
 
 void
 Bumblebee2Camera::open()

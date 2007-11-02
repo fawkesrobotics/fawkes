@@ -90,7 +90,7 @@ class FirewireCamera : public Camera, public CameraControl
   virtual bool           auto_white_balance();
   virtual void           set_auto_white_balance(bool enabled);
 
-  virtual uint64_t       guid();
+  virtual uint64_t       guid() const;
 
   static  void           print_available_fwcams();
 
