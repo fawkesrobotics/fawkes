@@ -415,7 +415,7 @@ InterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* indent spa
 
     i = fields.begin();
     while (i != fields.end()) {
-      fprintf(f, "%s ini%s",
+      fprintf(f, "%s ini_%s",
 	      (*i).getAccessType().c_str(), (*i).getName().c_str());
       ++i;
       if ( i != fields.end() ) {
@@ -482,7 +482,7 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	    "/** Constructor with initial values.\n");
 
     for (i = fields.begin(); i != fields.end(); ++i) {
-      fprintf(f, " * @param ini%s initial value for %s\n",
+      fprintf(f, " * @param ini_%s initial value for %s\n",
 	      (*i).getName().c_str(), (*i).getName().c_str());
     }
 
@@ -493,7 +493,7 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 
     i = fields.begin();
     while (i != fields.end()) {
-      fprintf(f, "%s ini%s",
+      fprintf(f, "%s ini_%s",
 	      (*i).getAccessType().c_str(), (*i).getName().c_str());
       ++i;
       if ( i != fields.end() ) {
@@ -511,11 +511,11 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
     
     for (i = fields.begin(); i != fields.end(); ++i) {
       if ( (*i).getType() == "char" ) {
-	fprintf(f, "  strncpy(data->%s, ini%s, %s);\n",
+	fprintf(f, "  strncpy(data->%s, ini_%s, %s);\n",
 		(*i).getName().c_str(), (*i).getName().c_str(),
 		(*i).getLength().c_str());
       } else {
-	fprintf(f, "  data->%s = ini%s;\n",
+	fprintf(f, "  data->%s = ini_%s;\n",
 		(*i).getName().c_str(), (*i).getName().c_str());
       }
     }
@@ -574,16 +574,16 @@ InterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
 	    (*i).getName().c_str(),
 	    (*i).isEnumType() ? (interface_classname + "::").c_str() : "",
 	    (*i).getAccessType().c_str(),
-	    inclusion_prefix.c_str(), classname.c_str(), ( ((*i).getType() == "bool" ) ? "is" : "get"), (*i).getName().c_str(),
+	    inclusion_prefix.c_str(), classname.c_str(), ( ((*i).getType() == "bool" ) ? "is_" : ""), (*i).getName().c_str(),
 	    (*i).getName().c_str() );
 
     fprintf(f,
 	    "/** Set %s value.\n"
 	    " * %s\n"
-	    " * @param new%s new %s value\n"
+	    " * @param new_%s new %s value\n"
 	    " */\n"
 	    "void\n"
-	    "%s%s::set%s(const %s new%s)\n"
+	    "%s%s::set_%s(const %s new_%s)\n"
 	    "{\n",
 	    (*i).getName().c_str(),
 	    (*i).getComment().c_str(),	    
@@ -592,16 +592,16 @@ InterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
 	    );
     if ( (*i).getType() == "char" ) {
       fprintf(f,
-	      "  strncpy(data->%s, new%s, sizeof(data->%s));\n",
+	      "  strncpy(data->%s, new_%s, sizeof(data->%s));\n",
 	      (*i).getName().c_str(), (*i).getName().c_str(), (*i).getName().c_str());
     } else if ( (*i).getLength() != "" ) {
       fprintf(f,
-	      "  memcpy(data->%s, new%s, sizeof(%s) * %s);\n",
+	      "  memcpy(data->%s, new_%s, sizeof(%s) * %s);\n",
 	      (*i).getName().c_str(), (*i).getName().c_str(),
 	      (*i).getType().c_str(), (*i).getLength().c_str());
     } else {
       fprintf(f,
-	      "  data->%s = new%s;\n",
+	      "  data->%s = new_%s;\n",
 	      (*i).getName().c_str(), (*i).getName().c_str());
     }
     fprintf(f, "}\n\n");
@@ -623,9 +623,9 @@ InterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ is,
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
     fprintf(f,
 	    "%s%s %s%s();\n"
-	    "%svoid set%s(const %s new%s);\n",
+	    "%svoid set_%s(const %s new_%s);\n",
 	    is.c_str(), (*i).getAccessType().c_str(),
-	    ( ((*i).getType() == "bool" ) ? "is" : "get"),
+	    ( ((*i).getType() == "bool" ) ? "is_" : ""),
 	    (*i).getName().c_str(),
 	    is.c_str(), (*i).getName().c_str(),
 	    (*i).getAccessType().c_str(), (*i).getName().c_str()

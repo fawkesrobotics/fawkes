@@ -43,7 +43,7 @@ class NavigatorInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    int Foo; /**< Foo */
+    int foo; /**< Foo */
   } NavigatorInterface_data_t;
 
   NavigatorInterface_data_t *data;
@@ -55,28 +55,28 @@ class NavigatorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float Distance; /**< Distance to the target. */
-      float Angle; /**< Angle of the target. */
-      float X; /**< X-coordinate of the target. */
-      float Y; /**< Y-coordinate of the target. */
+      float distance; /**< Distance to the target. */
+      float angle; /**< Angle of the target. */
+      float x; /**< X-coordinate of the target. */
+      float y; /**< Y-coordinate of the target. */
     } TargetMessage_data_t;
 
     TargetMessage_data_t *data;
 
    public:
-    TargetMessage(float iniDistance, float iniAngle, float iniX, float iniY);
+    TargetMessage(float ini_distance, float ini_angle, float ini_x, float ini_y);
     TargetMessage();
     ~TargetMessage();
 
     /* Methods */
-    float getDistance();
-    void setDistance(const float newDistance);
-    float getAngle();
-    void setAngle(const float newAngle);
-    float getX();
-    void setX(const float newX);
-    float getY();
-    void setY(const float newY);
+    float distance();
+    void set_distance(const float new_distance);
+    float angle();
+    void set_angle(const float new_angle);
+    float x();
+    void set_x(const float new_x);
+    float y();
+    void set_y(const float new_y);
   };
 
   class VelocityMessage : public Message
@@ -84,19 +84,19 @@ class NavigatorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float Velocity; /**< Velocity of the robot. */
+      float velocity; /**< Velocity of the robot. */
     } VelocityMessage_data_t;
 
     VelocityMessage_data_t *data;
 
    public:
-    VelocityMessage(float iniVelocity);
+    VelocityMessage(float ini_velocity);
     VelocityMessage();
     ~VelocityMessage();
 
     /* Methods */
-    float getVelocity();
-    void setVelocity(const float newVelocity);
+    float velocity();
+    void set_velocity(const float new_velocity);
   };
 
   virtual bool messageValid(const Message *message) const;
@@ -106,8 +106,8 @@ class NavigatorInterface : public Interface
 
  public:
   /* Methods */
-  int getFoo();
-  void setFoo(const int newFoo);
+  int foo();
+  void set_foo(const int new_foo);
 
 };
 

@@ -98,7 +98,7 @@ MotorThread::init()
     throw Exception("MotorThread failed to open serial device VMC");
   }
 
-  motor_interface->setMotorState(MotorInterface::MOTOR_ENABLED);
+  motor_interface->set_motor_state(MotorInterface::MOTOR_ENABLED);
   motor_interface->write();
 }
 
@@ -137,11 +137,11 @@ MotorThread::loop()
       {
 	MotorInterface::TransRotRPMMessage* msg = motor_interface->msgq_first<MotorInterface::TransRotRPMMessage>();
 
-	if ( msg->sender_id() == motor_interface->getControllerThreadID() ) {
-	  forward = msg->getForward();
-	  sideward = msg->getSideward();
-	  rotation = msg->getRotation() / 3; // divide by three (motors)
-	  speed = msg->getSpeed();
+	if ( msg->sender_id() == motor_interface->controller_thread_id() ) {
+	  forward = msg->forward();
+	  sideward = msg->sideward();
+	  rotation = msg->rotation() / 3; // divide by three (motors)
+	  speed = msg->speed();
           /*
 	  logger->log_debug(name(), "Processing TransRotRPMMessage, forward: %f, "
 			            "sideward: %f, rotation: %f, speed: %f",
@@ -151,41 +151,41 @@ MotorThread::loop()
 	  logger->log_warn(name(), "Warning, received TransRotRPMMessage of thread %s (%lu), "
 			   "but the motor is currently controlled by thread %s (%lu)",
 			   msg->sender(), msg->sender_id(),
-			   motor_interface->getControllerThreadName(),
-			   motor_interface->getControllerThreadID());
+			   motor_interface->controller_thread_name(),
+			   motor_interface->controller_thread_id());
 	}
       }
     else if (motor_interface->msgq_first_is<MotorInterface::AquireControlMessage>() )
       {
 	MotorInterface::AquireControlMessage* msg = motor_interface->msgq_first<MotorInterface::AquireControlMessage>();
 
-	if ( msg->getThreadID() == 0 ) {
-	  motor_interface->setControllerThreadID(msg->sender_id());
-	  motor_interface->setControllerThreadName(msg->sender());
+	if ( msg->thread_id() == 0 ) {
+	  motor_interface->set_controller_thread_id(msg->sender_id());
+	  motor_interface->set_controller_thread_name(msg->sender());
 	} else {
-	  motor_interface->setControllerThreadID(msg->getThreadID());
-	  motor_interface->setControllerThreadName(msg->getThreadName());
+	  motor_interface->set_controller_thread_id(msg->thread_id());
+	  motor_interface->set_controller_thread_name(msg->thread_name());
 	}
 	motor_interface->write();
 
 	logger->log_debug(name(), "Thread %s (%lu) aquired motor control",
-			  motor_interface->getControllerThreadName(),
-			  motor_interface->getControllerThreadID());
+			  motor_interface->controller_thread_name(),
+			  motor_interface->controller_thread_id());
       }
     else if (motor_interface->msgq_first_is<MotorInterface::SetMotorStateMessage>() )
       {
 	MotorInterface::SetMotorStateMessage* msg = motor_interface->msgq_first<MotorInterface::SetMotorStateMessage>();
 	// we really want to make sure that we got a correct message with useful values
 	// thus we check every single value
-	if ( msg->getMotorState() == MotorInterface::MOTOR_ENABLED ) {
-	  motor_interface->setMotorState(MotorInterface::MOTOR_ENABLED);
+	if ( msg->motor_state() == MotorInterface::MOTOR_ENABLED ) {
+	  motor_interface->set_motor_state(MotorInterface::MOTOR_ENABLED);
           logger->log_info(name(), "Enabling motor control");
-	} else if ( msg->getMotorState() == MotorInterface::MOTOR_DISABLED ) {
-	  motor_interface->setMotorState(MotorInterface::MOTOR_DISABLED);
+	} else if ( msg->motor_state() == MotorInterface::MOTOR_DISABLED ) {
+	  motor_interface->set_motor_state(MotorInterface::MOTOR_DISABLED);
           logger->log_info(name(), "Disabling motor control");
 	} else {
 	  logger->log_error(name(), "SetMotorStateMessage received with illegal value: %u",
-			    msg->getMotorState());
+			    msg->motor_state());
 	}
       }
     else
@@ -208,7 +208,7 @@ MotorThread::loop()
 		   old_alpha, old_beta, old_gamma );
   */
            
-  if ( motor_interface->getMotorState() == MotorInterface::MOTOR_ENABLED ) {
+  if ( motor_interface->motor_state() == MotorInterface::MOTOR_ENABLED ) {
     if(alpha != 0 || beta != 0 || gamma != 0) {  
 	apiObject->useVMC().MotorRPMs.Set(alpha, beta, gamma);
 	timeout_counter = 0;

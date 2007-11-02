@@ -45,23 +45,23 @@ class MotorInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    int RightRPM; /**< 
+    int right_rpm; /**< 
       RPM of the motor on the right front of the robot.
      */
-    int RearRPM; /**< 
+    int rear_rpm; /**< 
       RPM of motor on the rear of the robot.
      */
-    int LeftRPM; /**< 
+    int left_rpm; /**< 
       RPM of the motor on the left front of the robot.
      */
-    unsigned long int ControllerThreadID; /**< 
+    unsigned long int controller_thread_id; /**< 
      The ID of the controlling thread.
      Only from this thread command messages are accepted.
      */
-    unsigned int MotorState : 1; /**< 
+    unsigned int motor_state : 1; /**< 
       The current state of the motor.
      */
-    char ControllerThreadName[64]; /**< 
+    char controller_thread_name[64]; /**< 
      The name of the controlling thread.
    */
   } MotorInterface_data_t;
@@ -75,7 +75,7 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned int MotorState; /**< 
+      unsigned int motor_state; /**< 
       The new motor state to set. Use the MOTOR_* constants.
      */
     } SetMotorStateMessage_data_t;
@@ -83,13 +83,13 @@ class MotorInterface : public Interface
     SetMotorStateMessage_data_t *data;
 
    public:
-    SetMotorStateMessage(unsigned int iniMotorState);
+    SetMotorStateMessage(unsigned int ini_motor_state);
     SetMotorStateMessage();
     ~SetMotorStateMessage();
 
     /* Methods */
-    unsigned int getMotorState();
-    void setMotorState(const unsigned int newMotorState);
+    unsigned int motor_state();
+    void set_motor_state(const unsigned int new_motor_state);
   };
 
   class AquireControlMessage : public Message
@@ -97,13 +97,13 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned long int ThreadID; /**< 
+      unsigned long int thread_id; /**< 
       The thread ID of the thread which is allowed to control the motors.
       Set to zero to use the data of the current thread (the message is zeroed at
       creation automatically, so if you do not set anything the sending thread
       aquires the control.
      */
-      char ThreadName[64]; /**< 
+      char thread_name[64]; /**< 
       The thread name of the aquiring thread.
      */
     } AquireControlMessage_data_t;
@@ -111,15 +111,15 @@ class MotorInterface : public Interface
     AquireControlMessage_data_t *data;
 
    public:
-    AquireControlMessage(unsigned long int iniThreadID, char * iniThreadName);
+    AquireControlMessage(unsigned long int ini_thread_id, char * ini_thread_name);
     AquireControlMessage();
     ~AquireControlMessage();
 
     /* Methods */
-    unsigned long int getThreadID();
-    void setThreadID(const unsigned long int newThreadID);
-    char * getThreadName();
-    void setThreadName(const char * newThreadName);
+    unsigned long int thread_id();
+    void set_thread_id(const unsigned long int new_thread_id);
+    char * thread_name();
+    void set_thread_name(const char * new_thread_name);
   };
 
   class TransRotRPMMessage : public Message
@@ -127,28 +127,28 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float Forward; /**< The forward command. */
-      float Sideward; /**< The sideward command. */
-      float Rotation; /**< The rotation command. */
-      float Speed; /**< The speed command. */
+      float forward; /**< The forward command. */
+      float sideward; /**< The sideward command. */
+      float rotation; /**< The rotation command. */
+      float speed; /**< The speed command. */
     } TransRotRPMMessage_data_t;
 
     TransRotRPMMessage_data_t *data;
 
    public:
-    TransRotRPMMessage(float iniForward, float iniSideward, float iniRotation, float iniSpeed);
+    TransRotRPMMessage(float ini_forward, float ini_sideward, float ini_rotation, float ini_speed);
     TransRotRPMMessage();
     ~TransRotRPMMessage();
 
     /* Methods */
-    float getForward();
-    void setForward(const float newForward);
-    float getSideward();
-    void setSideward(const float newSideward);
-    float getRotation();
-    void setRotation(const float newRotation);
-    float getSpeed();
-    void setSpeed(const float newSpeed);
+    float forward();
+    void set_forward(const float new_forward);
+    float sideward();
+    void set_sideward(const float new_sideward);
+    float rotation();
+    void set_rotation(const float new_rotation);
+    float speed();
+    void set_speed(const float new_speed);
   };
 
   class DriveRPMMessage : public Message
@@ -156,25 +156,25 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float FrontRight; /**< Rotation in RPM of the right front wheel. */
-      float FrontLeft; /**< Rotation in RPM of the left front wheel. */
-      float Rear; /**< Rotation in RPM of the rear wheel. */
+      float front_right; /**< Rotation in RPM of the right front wheel. */
+      float front_left; /**< Rotation in RPM of the left front wheel. */
+      float rear; /**< Rotation in RPM of the rear wheel. */
     } DriveRPMMessage_data_t;
 
     DriveRPMMessage_data_t *data;
 
    public:
-    DriveRPMMessage(float iniFrontRight, float iniFrontLeft, float iniRear);
+    DriveRPMMessage(float ini_front_right, float ini_front_left, float ini_rear);
     DriveRPMMessage();
     ~DriveRPMMessage();
 
     /* Methods */
-    float getFrontRight();
-    void setFrontRight(const float newFrontRight);
-    float getFrontLeft();
-    void setFrontLeft(const float newFrontLeft);
-    float getRear();
-    void setRear(const float newRear);
+    float front_right();
+    void set_front_right(const float new_front_right);
+    float front_left();
+    void set_front_left(const float new_front_left);
+    float rear();
+    void set_rear(const float new_rear);
   };
 
   class TransMessage : public Message
@@ -182,22 +182,22 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float VX; /**< Speed in X direction in m/s. */
-      float VY; /**< Speed in Y direction in m/s. */
+      float vx; /**< Speed in X direction in m/s. */
+      float vy; /**< Speed in Y direction in m/s. */
     } TransMessage_data_t;
 
     TransMessage_data_t *data;
 
    public:
-    TransMessage(float iniVX, float iniVY);
+    TransMessage(float ini_vx, float ini_vy);
     TransMessage();
     ~TransMessage();
 
     /* Methods */
-    float getVX();
-    void setVX(const float newVX);
-    float getVY();
-    void setVY(const float newVY);
+    float vx();
+    void set_vx(const float new_vx);
+    float vy();
+    void set_vy(const float new_vy);
   };
 
   class RotMessage : public Message
@@ -205,19 +205,19 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float Omega; /**< Angle rotation in rad/s. */
+      float omega; /**< Angle rotation in rad/s. */
     } RotMessage_data_t;
 
     RotMessage_data_t *data;
 
    public:
-    RotMessage(float iniOmega);
+    RotMessage(float ini_omega);
     RotMessage();
     ~RotMessage();
 
     /* Methods */
-    float getOmega();
-    void setOmega(const float newOmega);
+    float omega();
+    void set_omega(const float new_omega);
   };
 
   class TransRotMessage : public Message
@@ -225,25 +225,25 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float VX; /**< Speed in X direction in m/s. */
-      float VY; /**< Speed in Y direction in m/s. */
-      float Omega; /**< Angle rotation in rad/s. */
+      float vx; /**< Speed in X direction in m/s. */
+      float vy; /**< Speed in Y direction in m/s. */
+      float omega; /**< Angle rotation in rad/s. */
     } TransRotMessage_data_t;
 
     TransRotMessage_data_t *data;
 
    public:
-    TransRotMessage(float iniVX, float iniVY, float iniOmega);
+    TransRotMessage(float ini_vx, float ini_vy, float ini_omega);
     TransRotMessage();
     ~TransRotMessage();
 
     /* Methods */
-    float getVX();
-    void setVX(const float newVX);
-    float getVY();
-    void setVY(const float newVY);
-    float getOmega();
-    void setOmega(const float newOmega);
+    float vx();
+    void set_vx(const float new_vx);
+    float vy();
+    void set_vy(const float new_vy);
+    float omega();
+    void set_omega(const float new_omega);
   };
 
   class OrbitMessage : public Message
@@ -251,25 +251,25 @@ class MotorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float PX; /**< Point's X coordinate to orbit. */
-      float PY; /**< Point's Y coordinate to orbit. */
-      float Omega; /**< Angular speed around point in rad/s. */
+      float px; /**< Point's X coordinate to orbit. */
+      float py; /**< Point's Y coordinate to orbit. */
+      float omega; /**< Angular speed around point in rad/s. */
     } OrbitMessage_data_t;
 
     OrbitMessage_data_t *data;
 
    public:
-    OrbitMessage(float iniPX, float iniPY, float iniOmega);
+    OrbitMessage(float ini_px, float ini_py, float ini_omega);
     OrbitMessage();
     ~OrbitMessage();
 
     /* Methods */
-    float getPX();
-    void setPX(const float newPX);
-    float getPY();
-    void setPY(const float newPY);
-    float getOmega();
-    void setOmega(const float newOmega);
+    float px();
+    void set_px(const float new_px);
+    float py();
+    void set_py(const float new_py);
+    float omega();
+    void set_omega(const float new_omega);
   };
 
   virtual bool messageValid(const Message *message) const;
@@ -279,18 +279,18 @@ class MotorInterface : public Interface
 
  public:
   /* Methods */
-  unsigned int getMotorState();
-  void setMotorState(const unsigned int newMotorState);
-  int getRightRPM();
-  void setRightRPM(const int newRightRPM);
-  int getRearRPM();
-  void setRearRPM(const int newRearRPM);
-  int getLeftRPM();
-  void setLeftRPM(const int newLeftRPM);
-  unsigned long int getControllerThreadID();
-  void setControllerThreadID(const unsigned long int newControllerThreadID);
-  char * getControllerThreadName();
-  void setControllerThreadName(const char * newControllerThreadName);
+  unsigned int motor_state();
+  void set_motor_state(const unsigned int new_motor_state);
+  int right_rpm();
+  void set_right_rpm(const int new_right_rpm);
+  int rear_rpm();
+  void set_rear_rpm(const int new_rear_rpm);
+  int left_rpm();
+  void set_left_rpm(const int new_left_rpm);
+  unsigned long int controller_thread_id();
+  void set_controller_thread_id(const unsigned long int new_controller_thread_id);
+  char * controller_thread_name();
+  void set_controller_thread_name(const char * new_controller_thread_name);
 
 };
 

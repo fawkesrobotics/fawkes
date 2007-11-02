@@ -51,13 +51,13 @@ class TestInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int TestUInt; /**< Test unsigned int */
-    int TestInt; /**< Test integer */
-    int Result; /**< Result of operation add operation from Calculate message. */
-    unsigned long int TestULInt; /**< Test unsigned long int */
-    long int TestLInt; /**< Test long int */
-    unsigned int Flags : 8; /**< Flags spit down by the writer */
-    char TestString[30]; /**< A test sring */
+    unsigned int test_uint; /**< Test unsigned int */
+    int test_int; /**< Test integer */
+    int result; /**< Result of operation add operation from Calculate message. */
+    unsigned long int test_ulint; /**< Test unsigned long int */
+    long int test_lint; /**< Test long int */
+    unsigned int _flags : 8; /**< Flags spit down by the writer */
+    char test_string[30]; /**< A test sring */
   } TestInterface_data_t;
 
   TestInterface_data_t *data;
@@ -69,19 +69,19 @@ class TestInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      int TestInt; /**< Test integer */
+      int test_int; /**< Test integer */
     } SetTestIntMessage_data_t;
 
     SetTestIntMessage_data_t *data;
 
    public:
-    SetTestIntMessage(int iniTestInt);
+    SetTestIntMessage(int ini_test_int);
     SetTestIntMessage();
     ~SetTestIntMessage();
 
     /* Methods */
-    int getTestInt();
-    void setTestInt(const int newTestInt);
+    int test_int();
+    void set_test_int(const int new_test_int);
   };
 
   class SetTestStringMessage : public Message
@@ -89,19 +89,19 @@ class TestInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      char TestString[30]; /**< A test sring */
+      char test_string[30]; /**< A test sring */
     } SetTestStringMessage_data_t;
 
     SetTestStringMessage_data_t *data;
 
    public:
-    SetTestStringMessage(char * iniTestString);
+    SetTestStringMessage(char * ini_test_string);
     SetTestStringMessage();
     ~SetTestStringMessage();
 
     /* Methods */
-    char * getTestString();
-    void setTestString(const char * newTestString);
+    char * test_string();
+    void set_test_string(const char * new_test_string);
   };
 
   class CalculateMessage : public Message
@@ -109,22 +109,22 @@ class TestInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      int Summand; /**< Summand */
-      int Addend; /**< Addend */
+      int summand; /**< Summand */
+      int addend; /**< Addend */
     } CalculateMessage_data_t;
 
     CalculateMessage_data_t *data;
 
    public:
-    CalculateMessage(int iniSummand, int iniAddend);
+    CalculateMessage(int ini_summand, int ini_addend);
     CalculateMessage();
     ~CalculateMessage();
 
     /* Methods */
-    int getSummand();
-    void setSummand(const int newSummand);
-    int getAddend();
-    void setAddend(const int newAddend);
+    int summand();
+    void set_summand(const int new_summand);
+    int addend();
+    void set_addend(const int new_addend);
   };
 
   virtual bool messageValid(const Message *message) const;
@@ -134,20 +134,20 @@ class TestInterface : public Interface
 
  public:
   /* Methods */
-  int getTestInt();
-  void setTestInt(const int newTestInt);
-  unsigned int getFlags();
-  void setFlags(const unsigned int newFlags);
-  char * getTestString();
-  void setTestString(const char * newTestString);
-  int getResult();
-  void setResult(const int newResult);
-  unsigned int getTestUInt();
-  void setTestUInt(const unsigned int newTestUInt);
-  unsigned long int getTestULInt();
-  void setTestULInt(const unsigned long int newTestULInt);
-  long int getTestLInt();
-  void setTestLInt(const long int newTestLInt);
+  int test_int();
+  void set_test_int(const int new_test_int);
+  unsigned int _flags();
+  void set__flags(const unsigned int new__flags);
+  char * test_string();
+  void set_test_string(const char * new_test_string);
+  int result();
+  void set_result(const int new_result);
+  unsigned int test_uint();
+  void set_test_uint(const unsigned int new_test_uint);
+  unsigned long int test_ulint();
+  void set_test_ulint(const unsigned long int new_test_ulint);
+  long int test_lint();
+  void set_test_lint(const long int new_test_lint);
 
 };
 

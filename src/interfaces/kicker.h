@@ -58,19 +58,19 @@ class KickerInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int CurrentIntensity; /**< 
+    unsigned int current_intensity; /**< 
       The currently set intensity.
      */
-    int NumKicksLeft; /**< 
+    int num_kicks_left; /**< 
       Number of Left-Kicks
      */
-    int NumKicksCenter; /**< 
+    int num_kicks_center; /**< 
       Number of Center-Kicks
      */
-    int NumKicksRight; /**< 
+    int num_kicks_right; /**< 
       Number of Right-Kicks
      */
-    GuideBallSideEnum GuideBallSide; /**< Side where the ball
+    GuideBallSideEnum guide_ball_side; /**< Side where the ball
       guidance arm is currently erected. */
   } KickerInterface_data_t;
 
@@ -83,28 +83,28 @@ class KickerInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      unsigned int Intensity; /**< Intensity in the range [0..255]. */
-      bool CmdKickLeft; /**< True to kick with left kicker. */
-      bool CmdKickCenter; /**< True to kick with central kicker. */
-      bool CmdKickRight; /**< True to kick with right kicker. */
+      unsigned int intensity; /**< Intensity in the range [0..255]. */
+      bool left; /**< True to kick with left kicker. */
+      bool center; /**< True to kick with central kicker. */
+      bool right; /**< True to kick with right kicker. */
     } KickMessage_data_t;
 
     KickMessage_data_t *data;
 
    public:
-    KickMessage(bool iniCmdKickLeft, bool iniCmdKickCenter, bool iniCmdKickRight, unsigned int iniIntensity);
+    KickMessage(bool ini_left, bool ini_center, bool ini_right, unsigned int ini_intensity);
     KickMessage();
     ~KickMessage();
 
     /* Methods */
-    bool isCmdKickLeft();
-    void setCmdKickLeft(const bool newCmdKickLeft);
-    bool isCmdKickCenter();
-    void setCmdKickCenter(const bool newCmdKickCenter);
-    bool isCmdKickRight();
-    void setCmdKickRight(const bool newCmdKickRight);
-    unsigned int getIntensity();
-    void setIntensity(const unsigned int newIntensity);
+    bool is_left();
+    void set_left(const bool new_left);
+    bool is_center();
+    void set_center(const bool new_center);
+    bool is_right();
+    void set_right(const bool new_right);
+    unsigned int intensity();
+    void set_intensity(const unsigned int new_intensity);
   };
 
   class ResetCounterMessage : public Message
@@ -128,19 +128,19 @@ class KickerInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      GuideBallSideEnum GuideBallSide; /**< Side where to guide the ball and erect the arm. */
+      GuideBallSideEnum guide_ball_side; /**< Side where to guide the ball and erect the arm. */
     } GuideBallMessage_data_t;
 
     GuideBallMessage_data_t *data;
 
    public:
-    GuideBallMessage(GuideBallSideEnum iniGuideBallSide);
+    GuideBallMessage(GuideBallSideEnum ini_guide_ball_side);
     GuideBallMessage();
     ~GuideBallMessage();
 
     /* Methods */
-    GuideBallSideEnum getGuideBallSide();
-    void setGuideBallSide(const GuideBallSideEnum newGuideBallSide);
+    GuideBallSideEnum guide_ball_side();
+    void set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side);
   };
 
   virtual bool messageValid(const Message *message) const;
@@ -150,16 +150,16 @@ class KickerInterface : public Interface
 
  public:
   /* Methods */
-  int getNumKicksLeft();
-  void setNumKicksLeft(const int newNumKicksLeft);
-  int getNumKicksCenter();
-  void setNumKicksCenter(const int newNumKicksCenter);
-  int getNumKicksRight();
-  void setNumKicksRight(const int newNumKicksRight);
-  GuideBallSideEnum getGuideBallSide();
-  void setGuideBallSide(const GuideBallSideEnum newGuideBallSide);
-  unsigned int getCurrentIntensity();
-  void setCurrentIntensity(const unsigned int newCurrentIntensity);
+  int num_kicks_left();
+  void set_num_kicks_left(const int new_num_kicks_left);
+  int num_kicks_center();
+  void set_num_kicks_center(const int new_num_kicks_center);
+  int num_kicks_right();
+  void set_num_kicks_right(const int new_num_kicks_right);
+  GuideBallSideEnum guide_ball_side();
+  void set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side);
+  unsigned int current_intensity();
+  void set_current_intensity(const unsigned int new_current_intensity);
 
 };
 

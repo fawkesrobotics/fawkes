@@ -33,7 +33,7 @@
 
 /** @class NavigatorInterface interfaces/navigator.h
  * NavigatorInterface Fawkes BlackBoard Interface.
- * Fooba
+ * Foobar
  */
 
 
@@ -51,24 +51,24 @@ NavigatorInterface::~NavigatorInterface()
   free(data_ptr);
 }
 /* Methods */
-/** Get Foo value.
+/** Get foo value.
  * Foo
- * @return Foo value
+ * @return foo value
  */
 int
-NavigatorInterface::getFoo()
+NavigatorInterface::foo()
 {
-  return data->Foo;
+  return data->foo;
 }
 
-/** Set Foo value.
+/** Set foo value.
  * Foo
- * @param newFoo new Foo value
+ * @param new_foo new foo value
  */
 void
-NavigatorInterface::setFoo(const int newFoo)
+NavigatorInterface::set_foo(const int new_foo)
 {
-  data->Foo = newFoo;
+  data->foo = new_foo;
 }
 
 /* =========== messages =========== */
@@ -80,21 +80,21 @@ NavigatorInterface::setFoo(const int newFoo)
 
 
 /** Constructor with initial values.
- * @param iniDistance initial value for Distance
- * @param iniAngle initial value for Angle
- * @param iniX initial value for X
- * @param iniY initial value for Y
+ * @param ini_distance initial value for distance
+ * @param ini_angle initial value for angle
+ * @param ini_x initial value for x
+ * @param ini_y initial value for y
  */
-NavigatorInterface::TargetMessage::TargetMessage(float iniDistance, float iniAngle, float iniX, float iniY) : Message()
+NavigatorInterface::TargetMessage::TargetMessage(float ini_distance, float ini_angle, float ini_x, float ini_y) : Message()
 {
   data_size = sizeof(TargetMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TargetMessage_data_t *)data_ptr;
-  data->Distance = iniDistance;
-  data->Angle = iniAngle;
-  data->X = iniX;
-  data->Y = iniY;
+  data->distance = ini_distance;
+  data->angle = ini_angle;
+  data->x = ini_x;
+  data->y = ini_y;
 }
 /** Constructor */
 NavigatorInterface::TargetMessage::TargetMessage() : Message()
@@ -109,84 +109,84 @@ NavigatorInterface::TargetMessage::~TargetMessage()
 {
 }
 /* Methods */
-/** Get Distance value.
+/** Get distance value.
  * Distance to the target.
- * @return Distance value
+ * @return distance value
  */
 float
-NavigatorInterface::TargetMessage::getDistance()
+NavigatorInterface::TargetMessage::distance()
 {
-  return data->Distance;
+  return data->distance;
 }
 
-/** Set Distance value.
+/** Set distance value.
  * Distance to the target.
- * @param newDistance new Distance value
+ * @param new_distance new distance value
  */
 void
-NavigatorInterface::TargetMessage::setDistance(const float newDistance)
+NavigatorInterface::TargetMessage::set_distance(const float new_distance)
 {
-  data->Distance = newDistance;
+  data->distance = new_distance;
 }
 
-/** Get Angle value.
+/** Get angle value.
  * Angle of the target.
- * @return Angle value
+ * @return angle value
  */
 float
-NavigatorInterface::TargetMessage::getAngle()
+NavigatorInterface::TargetMessage::angle()
 {
-  return data->Angle;
+  return data->angle;
 }
 
-/** Set Angle value.
+/** Set angle value.
  * Angle of the target.
- * @param newAngle new Angle value
+ * @param new_angle new angle value
  */
 void
-NavigatorInterface::TargetMessage::setAngle(const float newAngle)
+NavigatorInterface::TargetMessage::set_angle(const float new_angle)
 {
-  data->Angle = newAngle;
+  data->angle = new_angle;
 }
 
-/** Get X value.
+/** Get x value.
  * X-coordinate of the target.
- * @return X value
+ * @return x value
  */
 float
-NavigatorInterface::TargetMessage::getX()
+NavigatorInterface::TargetMessage::x()
 {
-  return data->X;
+  return data->x;
 }
 
-/** Set X value.
+/** Set x value.
  * X-coordinate of the target.
- * @param newX new X value
+ * @param new_x new x value
  */
 void
-NavigatorInterface::TargetMessage::setX(const float newX)
+NavigatorInterface::TargetMessage::set_x(const float new_x)
 {
-  data->X = newX;
+  data->x = new_x;
 }
 
-/** Get Y value.
+/** Get y value.
  * Y-coordinate of the target.
- * @return Y value
+ * @return y value
  */
 float
-NavigatorInterface::TargetMessage::getY()
+NavigatorInterface::TargetMessage::y()
 {
-  return data->Y;
+  return data->y;
 }
 
-/** Set Y value.
+/** Set y value.
  * Y-coordinate of the target.
- * @param newY new Y value
+ * @param new_y new y value
  */
 void
-NavigatorInterface::TargetMessage::setY(const float newY)
+NavigatorInterface::TargetMessage::set_y(const float new_y)
 {
-  data->Y = newY;
+  data->y = new_y;
 }
 
 /** @class NavigatorInterface::VelocityMessage interfaces/navigator.h
@@ -197,15 +197,15 @@ NavigatorInterface::TargetMessage::setY(const float newY)
 
 
 /** Constructor with initial values.
- * @param iniVelocity initial value for Velocity
+ * @param ini_velocity initial value for velocity
  */
-NavigatorInterface::VelocityMessage::VelocityMessage(float iniVelocity) : Message()
+NavigatorInterface::VelocityMessage::VelocityMessage(float ini_velocity) : Message()
 {
   data_size = sizeof(VelocityMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (VelocityMessage_data_t *)data_ptr;
-  data->Velocity = iniVelocity;
+  data->velocity = ini_velocity;
 }
 /** Constructor */
 NavigatorInterface::VelocityMessage::VelocityMessage() : Message()
@@ -220,24 +220,24 @@ NavigatorInterface::VelocityMessage::~VelocityMessage()
 {
 }
 /* Methods */
-/** Get Velocity value.
+/** Get velocity value.
  * Velocity of the robot.
- * @return Velocity value
+ * @return velocity value
  */
 float
-NavigatorInterface::VelocityMessage::getVelocity()
+NavigatorInterface::VelocityMessage::velocity()
 {
-  return data->Velocity;
+  return data->velocity;
 }
 
-/** Set Velocity value.
+/** Set velocity value.
  * Velocity of the robot.
- * @param newVelocity new Velocity value
+ * @param new_velocity new velocity value
  */
 void
-NavigatorInterface::VelocityMessage::setVelocity(const float newVelocity)
+NavigatorInterface::VelocityMessage::set_velocity(const float new_velocity)
 {
-  data->Velocity = newVelocity;
+  data->velocity = new_velocity;
 }
 
 /** Check if message is valid an can be queued.

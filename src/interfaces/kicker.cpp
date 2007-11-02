@@ -54,122 +54,122 @@ KickerInterface::~KickerInterface()
   free(data_ptr);
 }
 /* Methods */
-/** Get NumKicksLeft value.
+/** Get num_kicks_left value.
  * 
       Number of Left-Kicks
     
- * @return NumKicksLeft value
+ * @return num_kicks_left value
  */
 int
-KickerInterface::getNumKicksLeft()
+KickerInterface::num_kicks_left()
 {
-  return data->NumKicksLeft;
+  return data->num_kicks_left;
 }
 
-/** Set NumKicksLeft value.
+/** Set num_kicks_left value.
  * 
       Number of Left-Kicks
     
- * @param newNumKicksLeft new NumKicksLeft value
+ * @param new_num_kicks_left new num_kicks_left value
  */
 void
-KickerInterface::setNumKicksLeft(const int newNumKicksLeft)
+KickerInterface::set_num_kicks_left(const int new_num_kicks_left)
 {
-  data->NumKicksLeft = newNumKicksLeft;
+  data->num_kicks_left = new_num_kicks_left;
 }
 
-/** Get NumKicksCenter value.
+/** Get num_kicks_center value.
  * 
       Number of Center-Kicks
     
- * @return NumKicksCenter value
+ * @return num_kicks_center value
  */
 int
-KickerInterface::getNumKicksCenter()
+KickerInterface::num_kicks_center()
 {
-  return data->NumKicksCenter;
+  return data->num_kicks_center;
 }
 
-/** Set NumKicksCenter value.
+/** Set num_kicks_center value.
  * 
       Number of Center-Kicks
     
- * @param newNumKicksCenter new NumKicksCenter value
+ * @param new_num_kicks_center new num_kicks_center value
  */
 void
-KickerInterface::setNumKicksCenter(const int newNumKicksCenter)
+KickerInterface::set_num_kicks_center(const int new_num_kicks_center)
 {
-  data->NumKicksCenter = newNumKicksCenter;
+  data->num_kicks_center = new_num_kicks_center;
 }
 
-/** Get NumKicksRight value.
+/** Get num_kicks_right value.
  * 
       Number of Right-Kicks
     
- * @return NumKicksRight value
+ * @return num_kicks_right value
  */
 int
-KickerInterface::getNumKicksRight()
+KickerInterface::num_kicks_right()
 {
-  return data->NumKicksRight;
+  return data->num_kicks_right;
 }
 
-/** Set NumKicksRight value.
+/** Set num_kicks_right value.
  * 
       Number of Right-Kicks
     
- * @param newNumKicksRight new NumKicksRight value
+ * @param new_num_kicks_right new num_kicks_right value
  */
 void
-KickerInterface::setNumKicksRight(const int newNumKicksRight)
+KickerInterface::set_num_kicks_right(const int new_num_kicks_right)
 {
-  data->NumKicksRight = newNumKicksRight;
+  data->num_kicks_right = new_num_kicks_right;
 }
 
-/** Get GuideBallSide value.
+/** Get guide_ball_side value.
  * Side where the ball
       guidance arm is currently erected.
- * @return GuideBallSide value
+ * @return guide_ball_side value
  */
 KickerInterface::GuideBallSideEnum
-KickerInterface::getGuideBallSide()
+KickerInterface::guide_ball_side()
 {
-  return data->GuideBallSide;
+  return data->guide_ball_side;
 }
 
-/** Set GuideBallSide value.
+/** Set guide_ball_side value.
  * Side where the ball
       guidance arm is currently erected.
- * @param newGuideBallSide new GuideBallSide value
+ * @param new_guide_ball_side new guide_ball_side value
  */
 void
-KickerInterface::setGuideBallSide(const GuideBallSideEnum newGuideBallSide)
+KickerInterface::set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side)
 {
-  data->GuideBallSide = newGuideBallSide;
+  data->guide_ball_side = new_guide_ball_side;
 }
 
-/** Get CurrentIntensity value.
+/** Get current_intensity value.
  * 
       The currently set intensity.
     
- * @return CurrentIntensity value
+ * @return current_intensity value
  */
 unsigned int
-KickerInterface::getCurrentIntensity()
+KickerInterface::current_intensity()
 {
-  return data->CurrentIntensity;
+  return data->current_intensity;
 }
 
-/** Set CurrentIntensity value.
+/** Set current_intensity value.
  * 
       The currently set intensity.
     
- * @param newCurrentIntensity new CurrentIntensity value
+ * @param new_current_intensity new current_intensity value
  */
 void
-KickerInterface::setCurrentIntensity(const unsigned int newCurrentIntensity)
+KickerInterface::set_current_intensity(const unsigned int new_current_intensity)
 {
-  data->CurrentIntensity = newCurrentIntensity;
+  data->current_intensity = new_current_intensity;
 }
 
 /* =========== messages =========== */
@@ -181,21 +181,21 @@ KickerInterface::setCurrentIntensity(const unsigned int newCurrentIntensity)
 
 
 /** Constructor with initial values.
- * @param iniCmdKickLeft initial value for CmdKickLeft
- * @param iniCmdKickCenter initial value for CmdKickCenter
- * @param iniCmdKickRight initial value for CmdKickRight
- * @param iniIntensity initial value for Intensity
+ * @param ini_left initial value for left
+ * @param ini_center initial value for center
+ * @param ini_right initial value for right
+ * @param ini_intensity initial value for intensity
  */
-KickerInterface::KickMessage::KickMessage(bool iniCmdKickLeft, bool iniCmdKickCenter, bool iniCmdKickRight, unsigned int iniIntensity) : Message()
+KickerInterface::KickMessage::KickMessage(bool ini_left, bool ini_center, bool ini_right, unsigned int ini_intensity) : Message()
 {
   data_size = sizeof(KickMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (KickMessage_data_t *)data_ptr;
-  data->CmdKickLeft = iniCmdKickLeft;
-  data->CmdKickCenter = iniCmdKickCenter;
-  data->CmdKickRight = iniCmdKickRight;
-  data->Intensity = iniIntensity;
+  data->left = ini_left;
+  data->center = ini_center;
+  data->right = ini_right;
+  data->intensity = ini_intensity;
 }
 /** Constructor */
 KickerInterface::KickMessage::KickMessage() : Message()
@@ -210,84 +210,84 @@ KickerInterface::KickMessage::~KickMessage()
 {
 }
 /* Methods */
-/** Get CmdKickLeft value.
+/** Get left value.
  * True to kick with left kicker.
- * @return CmdKickLeft value
+ * @return left value
  */
 bool
-KickerInterface::KickMessage::isCmdKickLeft()
+KickerInterface::KickMessage::is_left()
 {
-  return data->CmdKickLeft;
+  return data->left;
 }
 
-/** Set CmdKickLeft value.
+/** Set left value.
  * True to kick with left kicker.
- * @param newCmdKickLeft new CmdKickLeft value
+ * @param new_left new left value
  */
 void
-KickerInterface::KickMessage::setCmdKickLeft(const bool newCmdKickLeft)
+KickerInterface::KickMessage::set_left(const bool new_left)
 {
-  data->CmdKickLeft = newCmdKickLeft;
+  data->left = new_left;
 }
 
-/** Get CmdKickCenter value.
+/** Get center value.
  * True to kick with central kicker.
- * @return CmdKickCenter value
+ * @return center value
  */
 bool
-KickerInterface::KickMessage::isCmdKickCenter()
+KickerInterface::KickMessage::is_center()
 {
-  return data->CmdKickCenter;
+  return data->center;
 }
 
-/** Set CmdKickCenter value.
+/** Set center value.
  * True to kick with central kicker.
- * @param newCmdKickCenter new CmdKickCenter value
+ * @param new_center new center value
  */
 void
-KickerInterface::KickMessage::setCmdKickCenter(const bool newCmdKickCenter)
+KickerInterface::KickMessage::set_center(const bool new_center)
 {
-  data->CmdKickCenter = newCmdKickCenter;
+  data->center = new_center;
 }
 
-/** Get CmdKickRight value.
+/** Get right value.
  * True to kick with right kicker.
- * @return CmdKickRight value
+ * @return right value
  */
 bool
-KickerInterface::KickMessage::isCmdKickRight()
+KickerInterface::KickMessage::is_right()
 {
-  return data->CmdKickRight;
+  return data->right;
 }
 
-/** Set CmdKickRight value.
+/** Set right value.
  * True to kick with right kicker.
- * @param newCmdKickRight new CmdKickRight value
+ * @param new_right new right value
  */
 void
-KickerInterface::KickMessage::setCmdKickRight(const bool newCmdKickRight)
+KickerInterface::KickMessage::set_right(const bool new_right)
 {
-  data->CmdKickRight = newCmdKickRight;
+  data->right = new_right;
 }
 
-/** Get Intensity value.
+/** Get intensity value.
  * Intensity in the range [0..255].
- * @return Intensity value
+ * @return intensity value
  */
 unsigned int
-KickerInterface::KickMessage::getIntensity()
+KickerInterface::KickMessage::intensity()
 {
-  return data->Intensity;
+  return data->intensity;
 }
 
-/** Set Intensity value.
+/** Set intensity value.
  * Intensity in the range [0..255].
- * @param newIntensity new Intensity value
+ * @param new_intensity new intensity value
  */
 void
-KickerInterface::KickMessage::setIntensity(const unsigned int newIntensity)
+KickerInterface::KickMessage::set_intensity(const unsigned int new_intensity)
 {
-  data->Intensity = newIntensity;
+  data->intensity = new_intensity;
 }
 
 /** @class KickerInterface::ResetCounterMessage interfaces/kicker.h
@@ -318,15 +318,15 @@ KickerInterface::ResetCounterMessage::~ResetCounterMessage()
 
 
 /** Constructor with initial values.
- * @param iniGuideBallSide initial value for GuideBallSide
+ * @param ini_guide_ball_side initial value for guide_ball_side
  */
-KickerInterface::GuideBallMessage::GuideBallMessage(GuideBallSideEnum iniGuideBallSide) : Message()
+KickerInterface::GuideBallMessage::GuideBallMessage(GuideBallSideEnum ini_guide_ball_side) : Message()
 {
   data_size = sizeof(GuideBallMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (GuideBallMessage_data_t *)data_ptr;
-  data->GuideBallSide = iniGuideBallSide;
+  data->guide_ball_side = ini_guide_ball_side;
 }
 /** Constructor */
 KickerInterface::GuideBallMessage::GuideBallMessage() : Message()
@@ -341,24 +341,24 @@ KickerInterface::GuideBallMessage::~GuideBallMessage()
 {
 }
 /* Methods */
-/** Get GuideBallSide value.
+/** Get guide_ball_side value.
  * Side where to guide the ball and erect the arm.
- * @return GuideBallSide value
+ * @return guide_ball_side value
  */
 KickerInterface::GuideBallSideEnum
-KickerInterface::GuideBallMessage::getGuideBallSide()
+KickerInterface::GuideBallMessage::guide_ball_side()
 {
-  return data->GuideBallSide;
+  return data->guide_ball_side;
 }
 
-/** Set GuideBallSide value.
+/** Set guide_ball_side value.
  * Side where to guide the ball and erect the arm.
- * @param newGuideBallSide new GuideBallSide value
+ * @param new_guide_ball_side new guide_ball_side value
  */
 void
-KickerInterface::GuideBallMessage::setGuideBallSide(const GuideBallSideEnum newGuideBallSide)
+KickerInterface::GuideBallMessage::set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side)
 {
-  data->GuideBallSide = newGuideBallSide;
+  data->guide_ball_side = new_guide_ball_side;
 }
 
 /** Check if message is valid an can be queued.

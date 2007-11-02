@@ -56,144 +56,144 @@ TestInterface::~TestInterface()
   free(data_ptr);
 }
 /* Methods */
-/** Get TestInt value.
+/** Get test_int value.
  * Test integer
- * @return TestInt value
+ * @return test_int value
  */
 int
-TestInterface::getTestInt()
+TestInterface::test_int()
 {
-  return data->TestInt;
+  return data->test_int;
 }
 
-/** Set TestInt value.
+/** Set test_int value.
  * Test integer
- * @param newTestInt new TestInt value
+ * @param new_test_int new test_int value
  */
 void
-TestInterface::setTestInt(const int newTestInt)
+TestInterface::set_test_int(const int new_test_int)
 {
-  data->TestInt = newTestInt;
+  data->test_int = new_test_int;
 }
 
-/** Get Flags value.
+/** Get _flags value.
  * Flags spit down by the writer
- * @return Flags value
+ * @return _flags value
  */
 unsigned int
-TestInterface::getFlags()
+TestInterface::_flags()
 {
-  return data->Flags;
+  return data->_flags;
 }
 
-/** Set Flags value.
+/** Set _flags value.
  * Flags spit down by the writer
- * @param newFlags new Flags value
+ * @param new__flags new _flags value
  */
 void
-TestInterface::setFlags(const unsigned int newFlags)
+TestInterface::set__flags(const unsigned int new__flags)
 {
-  data->Flags = newFlags;
+  data->_flags = new__flags;
 }
 
-/** Get TestString value.
+/** Get test_string value.
  * A test sring
- * @return TestString value
+ * @return test_string value
  */
 char *
-TestInterface::getTestString()
+TestInterface::test_string()
 {
-  return data->TestString;
+  return data->test_string;
 }
 
-/** Set TestString value.
+/** Set test_string value.
  * A test sring
- * @param newTestString new TestString value
+ * @param new_test_string new test_string value
  */
 void
-TestInterface::setTestString(const char * newTestString)
+TestInterface::set_test_string(const char * new_test_string)
 {
-  strncpy(data->TestString, newTestString, sizeof(data->TestString));
+  strncpy(data->test_string, new_test_string, sizeof(data->test_string));
 }
 
-/** Get Result value.
+/** Get result value.
  * Result of operation add operation from Calculate message.
- * @return Result value
+ * @return result value
  */
 int
-TestInterface::getResult()
+TestInterface::result()
 {
-  return data->Result;
+  return data->result;
 }
 
-/** Set Result value.
+/** Set result value.
  * Result of operation add operation from Calculate message.
- * @param newResult new Result value
+ * @param new_result new result value
  */
 void
-TestInterface::setResult(const int newResult)
+TestInterface::set_result(const int new_result)
 {
-  data->Result = newResult;
+  data->result = new_result;
 }
 
-/** Get TestUInt value.
+/** Get test_uint value.
  * Test unsigned int
- * @return TestUInt value
+ * @return test_uint value
  */
 unsigned int
-TestInterface::getTestUInt()
+TestInterface::test_uint()
 {
-  return data->TestUInt;
+  return data->test_uint;
 }
 
-/** Set TestUInt value.
+/** Set test_uint value.
  * Test unsigned int
- * @param newTestUInt new TestUInt value
+ * @param new_test_uint new test_uint value
  */
 void
-TestInterface::setTestUInt(const unsigned int newTestUInt)
+TestInterface::set_test_uint(const unsigned int new_test_uint)
 {
-  data->TestUInt = newTestUInt;
+  data->test_uint = new_test_uint;
 }
 
-/** Get TestULInt value.
+/** Get test_ulint value.
  * Test unsigned long int
- * @return TestULInt value
+ * @return test_ulint value
  */
 unsigned long int
-TestInterface::getTestULInt()
+TestInterface::test_ulint()
 {
-  return data->TestULInt;
+  return data->test_ulint;
 }
 
-/** Set TestULInt value.
+/** Set test_ulint value.
  * Test unsigned long int
- * @param newTestULInt new TestULInt value
+ * @param new_test_ulint new test_ulint value
  */
 void
-TestInterface::setTestULInt(const unsigned long int newTestULInt)
+TestInterface::set_test_ulint(const unsigned long int new_test_ulint)
 {
-  data->TestULInt = newTestULInt;
+  data->test_ulint = new_test_ulint;
 }
 
-/** Get TestLInt value.
+/** Get test_lint value.
  * Test long int
- * @return TestLInt value
+ * @return test_lint value
  */
 long int
-TestInterface::getTestLInt()
+TestInterface::test_lint()
 {
-  return data->TestLInt;
+  return data->test_lint;
 }
 
-/** Set TestLInt value.
+/** Set test_lint value.
  * Test long int
- * @param newTestLInt new TestLInt value
+ * @param new_test_lint new test_lint value
  */
 void
-TestInterface::setTestLInt(const long int newTestLInt)
+TestInterface::set_test_lint(const long int new_test_lint)
 {
-  data->TestLInt = newTestLInt;
+  data->test_lint = new_test_lint;
 }
 
 /* =========== messages =========== */
@@ -205,15 +205,15 @@ TestInterface::setTestLInt(const long int newTestLInt)
 
 
 /** Constructor with initial values.
- * @param iniTestInt initial value for TestInt
+ * @param ini_test_int initial value for test_int
  */
-TestInterface::SetTestIntMessage::SetTestIntMessage(int iniTestInt) : Message()
+TestInterface::SetTestIntMessage::SetTestIntMessage(int ini_test_int) : Message()
 {
   data_size = sizeof(SetTestIntMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
-  data->TestInt = iniTestInt;
+  data->test_int = ini_test_int;
 }
 /** Constructor */
 TestInterface::SetTestIntMessage::SetTestIntMessage() : Message()
@@ -228,24 +228,24 @@ TestInterface::SetTestIntMessage::~SetTestIntMessage()
 {
 }
 /* Methods */
-/** Get TestInt value.
+/** Get test_int value.
  * Test integer
- * @return TestInt value
+ * @return test_int value
  */
 int
-TestInterface::SetTestIntMessage::getTestInt()
+TestInterface::SetTestIntMessage::test_int()
 {
-  return data->TestInt;
+  return data->test_int;
 }
 
-/** Set TestInt value.
+/** Set test_int value.
  * Test integer
- * @param newTestInt new TestInt value
+ * @param new_test_int new test_int value
  */
 void
-TestInterface::SetTestIntMessage::setTestInt(const int newTestInt)
+TestInterface::SetTestIntMessage::set_test_int(const int new_test_int)
 {
-  data->TestInt = newTestInt;
+  data->test_int = new_test_int;
 }
 
 /** @class TestInterface::SetTestStringMessage interfaces/test.h
@@ -256,15 +256,15 @@ TestInterface::SetTestIntMessage::setTestInt(const int newTestInt)
 
 
 /** Constructor with initial values.
- * @param iniTestString initial value for TestString
+ * @param ini_test_string initial value for test_string
  */
-TestInterface::SetTestStringMessage::SetTestStringMessage(char * iniTestString) : Message()
+TestInterface::SetTestStringMessage::SetTestStringMessage(char * ini_test_string) : Message()
 {
   data_size = sizeof(SetTestStringMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
-  strncpy(data->TestString, iniTestString, 30);
+  strncpy(data->test_string, ini_test_string, 30);
 }
 /** Constructor */
 TestInterface::SetTestStringMessage::SetTestStringMessage() : Message()
@@ -279,24 +279,24 @@ TestInterface::SetTestStringMessage::~SetTestStringMessage()
 {
 }
 /* Methods */
-/** Get TestString value.
+/** Get test_string value.
  * A test sring
- * @return TestString value
+ * @return test_string value
  */
 char *
-TestInterface::SetTestStringMessage::getTestString()
+TestInterface::SetTestStringMessage::test_string()
 {
-  return data->TestString;
+  return data->test_string;
 }
 
-/** Set TestString value.
+/** Set test_string value.
  * A test sring
- * @param newTestString new TestString value
+ * @param new_test_string new test_string value
  */
 void
-TestInterface::SetTestStringMessage::setTestString(const char * newTestString)
+TestInterface::SetTestStringMessage::set_test_string(const char * new_test_string)
 {
-  strncpy(data->TestString, newTestString, sizeof(data->TestString));
+  strncpy(data->test_string, new_test_string, sizeof(data->test_string));
 }
 
 /** @class TestInterface::CalculateMessage interfaces/test.h
@@ -307,17 +307,17 @@ TestInterface::SetTestStringMessage::setTestString(const char * newTestString)
 
 
 /** Constructor with initial values.
- * @param iniSummand initial value for Summand
- * @param iniAddend initial value for Addend
+ * @param ini_summand initial value for summand
+ * @param ini_addend initial value for addend
  */
-TestInterface::CalculateMessage::CalculateMessage(int iniSummand, int iniAddend) : Message()
+TestInterface::CalculateMessage::CalculateMessage(int ini_summand, int ini_addend) : Message()
 {
   data_size = sizeof(CalculateMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
-  data->Summand = iniSummand;
-  data->Addend = iniAddend;
+  data->summand = ini_summand;
+  data->addend = ini_addend;
 }
 /** Constructor */
 TestInterface::CalculateMessage::CalculateMessage() : Message()
@@ -332,44 +332,44 @@ TestInterface::CalculateMessage::~CalculateMessage()
 {
 }
 /* Methods */
-/** Get Summand value.
+/** Get summand value.
  * Summand
- * @return Summand value
+ * @return summand value
  */
 int
-TestInterface::CalculateMessage::getSummand()
+TestInterface::CalculateMessage::summand()
 {
-  return data->Summand;
+  return data->summand;
 }
 
-/** Set Summand value.
+/** Set summand value.
  * Summand
- * @param newSummand new Summand value
+ * @param new_summand new summand value
  */
 void
-TestInterface::CalculateMessage::setSummand(const int newSummand)
+TestInterface::CalculateMessage::set_summand(const int new_summand)
 {
-  data->Summand = newSummand;
+  data->summand = new_summand;
 }
 
-/** Get Addend value.
+/** Get addend value.
  * Addend
- * @return Addend value
+ * @return addend value
  */
 int
-TestInterface::CalculateMessage::getAddend()
+TestInterface::CalculateMessage::addend()
 {
-  return data->Addend;
+  return data->addend;
 }
 
-/** Set Addend value.
+/** Set addend value.
  * Addend
- * @param newAddend new Addend value
+ * @param new_addend new addend value
  */
 void
-TestInterface::CalculateMessage::setAddend(const int newAddend)
+TestInterface::CalculateMessage::set_addend(const int new_addend)
 {
-  data->Addend = newAddend;
+  data->addend = new_addend;
 }
 
 /** Check if message is valid an can be queued.

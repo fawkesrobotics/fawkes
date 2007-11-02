@@ -65,448 +65,448 @@ ObjectPositionInterface::~ObjectPositionInterface()
   free(data_ptr);
 }
 /* Methods */
-/** Get ObjectType value.
+/** Get object_type value.
  * 
       Object type, use constants to define
     
- * @return ObjectType value
+ * @return object_type value
  */
 unsigned int
-ObjectPositionInterface::getObjectType()
+ObjectPositionInterface::object_type()
 {
-  return data->ObjectType;
+  return data->object_type;
 }
 
-/** Set ObjectType value.
+/** Set object_type value.
  * 
       Object type, use constants to define
     
- * @param newObjectType new ObjectType value
+ * @param new_object_type new object_type value
  */
 void
-ObjectPositionInterface::setObjectType(const unsigned int newObjectType)
+ObjectPositionInterface::set_object_type(const unsigned int new_object_type)
 {
-  data->ObjectType = newObjectType;
+  data->object_type = new_object_type;
 }
 
-/** Get Yaw value.
+/** Get yaw value.
  * 
       Angle between the robot's forward direction and the object on the ground plane.
       This angle is in a local 3D coordinate system to the robot and given in radians.
     
- * @return Yaw value
+ * @return yaw value
  */
 float
-ObjectPositionInterface::getYaw()
+ObjectPositionInterface::yaw()
 {
-  return data->Yaw;
+  return data->yaw;
 }
 
-/** Set Yaw value.
+/** Set yaw value.
  * 
       Angle between the robot's forward direction and the object on the ground plane.
       This angle is in a local 3D coordinate system to the robot and given in radians.
     
- * @param newYaw new Yaw value
+ * @param new_yaw new yaw value
  */
 void
-ObjectPositionInterface::setYaw(const float newYaw)
+ObjectPositionInterface::set_yaw(const float new_yaw)
 {
-  data->Yaw = newYaw;
+  data->yaw = new_yaw;
 }
 
-/** Get Pitch value.
+/** Get pitch value.
  * 
       Angle between the robot's center position on the ground plane and the middle point
       of the object (e.g. this denotes the height of the object combined with the distance.
       The angle is given in radians.
     
- * @return Pitch value
+ * @return pitch value
  */
 float
-ObjectPositionInterface::getPitch()
+ObjectPositionInterface::pitch()
 {
-  return data->Pitch;
+  return data->pitch;
 }
 
-/** Set Pitch value.
+/** Set pitch value.
  * 
       Angle between the robot's center position on the ground plane and the middle point
       of the object (e.g. this denotes the height of the object combined with the distance.
       The angle is given in radians.
     
- * @param newPitch new Pitch value
+ * @param new_pitch new pitch value
  */
 void
-ObjectPositionInterface::setPitch(const float newPitch)
+ObjectPositionInterface::set_pitch(const float new_pitch)
 {
-  data->Pitch = newPitch;
+  data->pitch = new_pitch;
 }
 
-/** Get Distance value.
+/** Get distance value.
  * 
       Distance from the robot to the object on the ground plane. The distance is given
       in meters.
     
- * @return Distance value
+ * @return distance value
  */
 float
-ObjectPositionInterface::getDistance()
+ObjectPositionInterface::distance()
 {
-  return data->Distance;
+  return data->distance;
 }
 
-/** Set Distance value.
+/** Set distance value.
  * 
       Distance from the robot to the object on the ground plane. The distance is given
       in meters.
     
- * @param newDistance new Distance value
+ * @param new_distance new distance value
  */
 void
-ObjectPositionInterface::setDistance(const float newDistance)
+ObjectPositionInterface::set_distance(const float new_distance)
 {
-  data->Distance = newDistance;
+  data->distance = new_distance;
 }
 
-/** Get DYPCovariance value.
+/** Get dyp_covariance value.
  * 
       Covariance of Distance/Yaw/Pitch values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
     
- * @return DYPCovariance value
+ * @return dyp_covariance value
  */
 float *
-ObjectPositionInterface::getDYPCovariance()
+ObjectPositionInterface::dyp_covariance()
 {
-  return data->DYPCovariance;
+  return data->dyp_covariance;
 }
 
-/** Set DYPCovariance value.
+/** Set dyp_covariance value.
  * 
       Covariance of Distance/Yaw/Pitch values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
     
- * @param newDYPCovariance new DYPCovariance value
+ * @param new_dyp_covariance new dyp_covariance value
  */
 void
-ObjectPositionInterface::setDYPCovariance(const float * newDYPCovariance)
+ObjectPositionInterface::set_dyp_covariance(const float * new_dyp_covariance)
 {
-  memcpy(data->DYPCovariance, newDYPCovariance, sizeof(float) * 9);
+  memcpy(data->dyp_covariance, new_dyp_covariance, sizeof(float) * 9);
 }
 
-/** Get WorldX value.
+/** Get world_x value.
  * 
       This is the X coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right.
     
- * @return WorldX value
+ * @return world_x value
  */
 int
-ObjectPositionInterface::getWorldX()
+ObjectPositionInterface::world_x()
 {
-  return data->WorldX;
+  return data->world_x;
 }
 
-/** Set WorldX value.
+/** Set world_x value.
  * 
       This is the X coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right.
     
- * @param newWorldX new WorldX value
+ * @param new_world_x new world_x value
  */
 void
-ObjectPositionInterface::setWorldX(const int newWorldX)
+ObjectPositionInterface::set_world_x(const int new_world_x)
 {
-  data->WorldX = newWorldX;
+  data->world_x = new_world_x;
 }
 
-/** Get WorldY value.
+/** Get world_y value.
  * 
       This is the Y coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right and Z pointing downwards.
     
- * @return WorldY value
+ * @return world_y value
  */
 int
-ObjectPositionInterface::getWorldY()
+ObjectPositionInterface::world_y()
 {
-  return data->WorldY;
+  return data->world_y;
 }
 
-/** Set WorldY value.
+/** Set world_y value.
  * 
       This is the Y coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right and Z pointing downwards.
     
- * @param newWorldY new WorldY value
+ * @param new_world_y new world_y value
  */
 void
-ObjectPositionInterface::setWorldY(const int newWorldY)
+ObjectPositionInterface::set_world_y(const int new_world_y)
 {
-  data->WorldY = newWorldY;
+  data->world_y = new_world_y;
 }
 
-/** Get WorldZ value.
+/** Get world_z value.
  * 
       This is the Z coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right.
     
- * @return WorldZ value
+ * @return world_z value
  */
 int
-ObjectPositionInterface::getWorldZ()
+ObjectPositionInterface::world_z()
 {
-  return data->WorldZ;
+  return data->world_z;
 }
 
-/** Set WorldZ value.
+/** Set world_z value.
  * 
       This is the Z coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right.
     
- * @param newWorldZ new WorldZ value
+ * @param new_world_z new world_z value
  */
 void
-ObjectPositionInterface::setWorldZ(const int newWorldZ)
+ObjectPositionInterface::set_world_z(const int new_world_z)
 {
-  data->WorldZ = newWorldZ;
+  data->world_z = new_world_z;
 }
 
-/** Get XYZCovariance value.
+/** Get xyz_covariance value.
  * 
       Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
     
- * @return XYZCovariance value
+ * @return xyz_covariance value
  */
 float *
-ObjectPositionInterface::getXYZCovariance()
+ObjectPositionInterface::xyz_covariance()
 {
-  return data->XYZCovariance;
+  return data->xyz_covariance;
 }
 
-/** Set XYZCovariance value.
+/** Set xyz_covariance value.
  * 
       Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
     
- * @param newXYZCovariance new XYZCovariance value
+ * @param new_xyz_covariance new xyz_covariance value
  */
 void
-ObjectPositionInterface::setXYZCovariance(const float * newXYZCovariance)
+ObjectPositionInterface::set_xyz_covariance(const float * new_xyz_covariance)
 {
-  memcpy(data->XYZCovariance, newXYZCovariance, sizeof(float) * 9);
+  memcpy(data->xyz_covariance, new_xyz_covariance, sizeof(float) * 9);
 }
 
-/** Get YawVelocity value.
+/** Get yaw_velocity value.
  * 
       Gives the velocity of the object for yaw in radians per second.
     
- * @return YawVelocity value
+ * @return yaw_velocity value
  */
 float
-ObjectPositionInterface::getYawVelocity()
+ObjectPositionInterface::yaw_velocity()
 {
-  return data->YawVelocity;
+  return data->yaw_velocity;
 }
 
-/** Set YawVelocity value.
+/** Set yaw_velocity value.
  * 
       Gives the velocity of the object for yaw in radians per second.
     
- * @param newYawVelocity new YawVelocity value
+ * @param new_yaw_velocity new yaw_velocity value
  */
 void
-ObjectPositionInterface::setYawVelocity(const float newYawVelocity)
+ObjectPositionInterface::set_yaw_velocity(const float new_yaw_velocity)
 {
-  data->YawVelocity = newYawVelocity;
+  data->yaw_velocity = new_yaw_velocity;
 }
 
-/** Get PitchVelocity value.
+/** Get pitch_velocity value.
  * 
       Gives the velocity of the object for pitch in radians per second.
     
- * @return PitchVelocity value
+ * @return pitch_velocity value
  */
 float
-ObjectPositionInterface::getPitchVelocity()
+ObjectPositionInterface::pitch_velocity()
 {
-  return data->PitchVelocity;
+  return data->pitch_velocity;
 }
 
-/** Set PitchVelocity value.
+/** Set pitch_velocity value.
  * 
       Gives the velocity of the object for pitch in radians per second.
     
- * @param newPitchVelocity new PitchVelocity value
+ * @param new_pitch_velocity new pitch_velocity value
  */
 void
-ObjectPositionInterface::setPitchVelocity(const float newPitchVelocity)
+ObjectPositionInterface::set_pitch_velocity(const float new_pitch_velocity)
 {
-  data->PitchVelocity = newPitchVelocity;
+  data->pitch_velocity = new_pitch_velocity;
 }
 
-/** Get DistanceVelocity value.
+/** Get distance_velocity value.
  * 
       Gives the velocity of the object distance meter per second.
     
- * @return DistanceVelocity value
+ * @return distance_velocity value
  */
 float
-ObjectPositionInterface::getDistanceVelocity()
+ObjectPositionInterface::distance_velocity()
 {
-  return data->DistanceVelocity;
+  return data->distance_velocity;
 }
 
-/** Set DistanceVelocity value.
+/** Set distance_velocity value.
  * 
       Gives the velocity of the object distance meter per second.
     
- * @param newDistanceVelocity new DistanceVelocity value
+ * @param new_distance_velocity new distance_velocity value
  */
 void
-ObjectPositionInterface::setDistanceVelocity(const float newDistanceVelocity)
+ObjectPositionInterface::set_distance_velocity(const float new_distance_velocity)
 {
-  data->DistanceVelocity = newDistanceVelocity;
+  data->distance_velocity = new_distance_velocity;
 }
 
-/** Get DYPVelocityCovariance value.
+/** Get dyp_velocity_covariance value.
  * 
       Covariance of Distance/Yaw/Pitch velocityvalues. This is a 3x3 matrix ordered line by
       line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
     
- * @return DYPVelocityCovariance value
+ * @return dyp_velocity_covariance value
  */
 float *
-ObjectPositionInterface::getDYPVelocityCovariance()
+ObjectPositionInterface::dyp_velocity_covariance()
 {
-  return data->DYPVelocityCovariance;
+  return data->dyp_velocity_covariance;
 }
 
-/** Set DYPVelocityCovariance value.
+/** Set dyp_velocity_covariance value.
  * 
       Covariance of Distance/Yaw/Pitch velocityvalues. This is a 3x3 matrix ordered line by
       line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
     
- * @param newDYPVelocityCovariance new DYPVelocityCovariance value
+ * @param new_dyp_velocity_covariance new dyp_velocity_covariance value
  */
 void
-ObjectPositionInterface::setDYPVelocityCovariance(const float * newDYPVelocityCovariance)
+ObjectPositionInterface::set_dyp_velocity_covariance(const float * new_dyp_velocity_covariance)
 {
-  memcpy(data->DYPVelocityCovariance, newDYPVelocityCovariance, sizeof(float) * 9);
+  memcpy(data->dyp_velocity_covariance, new_dyp_velocity_covariance, sizeof(float) * 9);
 }
 
-/** Get WorldXVelocity value.
+/** Get world_x_velocity value.
  * 
       Velocity of object in the world coordinate system in X-direction in meter per second.
     
- * @return WorldXVelocity value
+ * @return world_x_velocity value
  */
 int
-ObjectPositionInterface::getWorldXVelocity()
+ObjectPositionInterface::world_x_velocity()
 {
-  return data->WorldXVelocity;
+  return data->world_x_velocity;
 }
 
-/** Set WorldXVelocity value.
+/** Set world_x_velocity value.
  * 
       Velocity of object in the world coordinate system in X-direction in meter per second.
     
- * @param newWorldXVelocity new WorldXVelocity value
+ * @param new_world_x_velocity new world_x_velocity value
  */
 void
-ObjectPositionInterface::setWorldXVelocity(const int newWorldXVelocity)
+ObjectPositionInterface::set_world_x_velocity(const int new_world_x_velocity)
 {
-  data->WorldXVelocity = newWorldXVelocity;
+  data->world_x_velocity = new_world_x_velocity;
 }
 
-/** Get WorldYVelocity value.
+/** Get world_y_velocity value.
  * 
       Velocity of object in the world coordinate system in Y-direction in meter per second.
     
- * @return WorldYVelocity value
+ * @return world_y_velocity value
  */
 int
-ObjectPositionInterface::getWorldYVelocity()
+ObjectPositionInterface::world_y_velocity()
 {
-  return data->WorldYVelocity;
+  return data->world_y_velocity;
 }
 
-/** Set WorldYVelocity value.
+/** Set world_y_velocity value.
  * 
       Velocity of object in the world coordinate system in Y-direction in meter per second.
     
- * @param newWorldYVelocity new WorldYVelocity value
+ * @param new_world_y_velocity new world_y_velocity value
  */
 void
-ObjectPositionInterface::setWorldYVelocity(const int newWorldYVelocity)
+ObjectPositionInterface::set_world_y_velocity(const int new_world_y_velocity)
 {
-  data->WorldYVelocity = newWorldYVelocity;
+  data->world_y_velocity = new_world_y_velocity;
 }
 
-/** Get WorldZVelocity value.
+/** Get world_z_velocity value.
  * 
       Velocity of object in the world coordinate system in Z-direction in meter per second.
     
- * @return WorldZVelocity value
+ * @return world_z_velocity value
  */
 int
-ObjectPositionInterface::getWorldZVelocity()
+ObjectPositionInterface::world_z_velocity()
 {
-  return data->WorldZVelocity;
+  return data->world_z_velocity;
 }
 
-/** Set WorldZVelocity value.
+/** Set world_z_velocity value.
  * 
       Velocity of object in the world coordinate system in Z-direction in meter per second.
     
- * @param newWorldZVelocity new WorldZVelocity value
+ * @param new_world_z_velocity new world_z_velocity value
  */
 void
-ObjectPositionInterface::setWorldZVelocity(const int newWorldZVelocity)
+ObjectPositionInterface::set_world_z_velocity(const int new_world_z_velocity)
 {
-  data->WorldZVelocity = newWorldZVelocity;
+  data->world_z_velocity = new_world_z_velocity;
 }
 
-/** Get XYZVelocityCovariance value.
+/** Get xyz_velocity_covariance value.
  * 
       Covariance of WorldX/WorldY/WorldZ valocity values. This is a 3x3 matrix ordered line
       by line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
     
- * @return XYZVelocityCovariance value
+ * @return xyz_velocity_covariance value
  */
 float *
-ObjectPositionInterface::getXYZVelocityCovariance()
+ObjectPositionInterface::xyz_velocity_covariance()
 {
-  return data->XYZVelocityCovariance;
+  return data->xyz_velocity_covariance;
 }
 
-/** Set XYZVelocityCovariance value.
+/** Set xyz_velocity_covariance value.
  * 
       Covariance of WorldX/WorldY/WorldZ valocity values. This is a 3x3 matrix ordered line
       by line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
     
- * @param newXYZVelocityCovariance new XYZVelocityCovariance value
+ * @param new_xyz_velocity_covariance new xyz_velocity_covariance value
  */
 void
-ObjectPositionInterface::setXYZVelocityCovariance(const float * newXYZVelocityCovariance)
+ObjectPositionInterface::set_xyz_velocity_covariance(const float * new_xyz_velocity_covariance)
 {
-  memcpy(data->XYZVelocityCovariance, newXYZVelocityCovariance, sizeof(float) * 9);
+  memcpy(data->xyz_velocity_covariance, new_xyz_velocity_covariance, sizeof(float) * 9);
 }
 
 /* =========== messages =========== */

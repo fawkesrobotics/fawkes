@@ -47,71 +47,71 @@ class ObjectPositionInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int ObjectType; /**< 
+    unsigned int object_type; /**< 
       Object type, use constants to define
      */
-    int WorldX; /**< 
+    int world_x; /**< 
       This is the X coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right.
      */
-    int WorldY; /**< 
+    int world_y; /**< 
       This is the Y coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right and Z pointing downwards.
      */
-    int WorldZ; /**< 
+    int world_z; /**< 
       This is the Z coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right.
      */
-    int WorldXVelocity; /**< 
+    int world_x_velocity; /**< 
       Velocity of object in the world coordinate system in X-direction in meter per second.
      */
-    int WorldYVelocity; /**< 
+    int world_y_velocity; /**< 
       Velocity of object in the world coordinate system in Y-direction in meter per second.
      */
-    int WorldZVelocity; /**< 
+    int world_z_velocity; /**< 
       Velocity of object in the world coordinate system in Z-direction in meter per second.
      */
-    float Yaw; /**< 
+    float yaw; /**< 
       Angle between the robot's forward direction and the object on the ground plane.
       This angle is in a local 3D coordinate system to the robot and given in radians.
      */
-    float Pitch; /**< 
+    float pitch; /**< 
       Angle between the robot's center position on the ground plane and the middle point
       of the object (e.g. this denotes the height of the object combined with the distance.
       The angle is given in radians.
      */
-    float Distance; /**< 
+    float distance; /**< 
       Distance from the robot to the object on the ground plane. The distance is given
       in meters.
      */
-    float DYPCovariance[9]; /**< 
+    float dyp_covariance[9]; /**< 
       Covariance of Distance/Yaw/Pitch values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
      */
-    float XYZCovariance[9]; /**< 
+    float xyz_covariance[9]; /**< 
       Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
      */
-    float YawVelocity; /**< 
+    float yaw_velocity; /**< 
       Gives the velocity of the object for yaw in radians per second.
      */
-    float PitchVelocity; /**< 
+    float pitch_velocity; /**< 
       Gives the velocity of the object for pitch in radians per second.
      */
-    float DistanceVelocity; /**< 
+    float distance_velocity; /**< 
       Gives the velocity of the object distance meter per second.
      */
-    float DYPVelocityCovariance[9]; /**< 
+    float dyp_velocity_covariance[9]; /**< 
       Covariance of Distance/Yaw/Pitch velocityvalues. This is a 3x3 matrix ordered line by
       line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
      */
-    float XYZVelocityCovariance[9]; /**< 
+    float xyz_velocity_covariance[9]; /**< 
       Covariance of WorldX/WorldY/WorldZ valocity values. This is a 3x3 matrix ordered line
       by line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
@@ -129,40 +129,40 @@ class ObjectPositionInterface : public Interface
 
  public:
   /* Methods */
-  unsigned int getObjectType();
-  void setObjectType(const unsigned int newObjectType);
-  float getYaw();
-  void setYaw(const float newYaw);
-  float getPitch();
-  void setPitch(const float newPitch);
-  float getDistance();
-  void setDistance(const float newDistance);
-  float * getDYPCovariance();
-  void setDYPCovariance(const float * newDYPCovariance);
-  int getWorldX();
-  void setWorldX(const int newWorldX);
-  int getWorldY();
-  void setWorldY(const int newWorldY);
-  int getWorldZ();
-  void setWorldZ(const int newWorldZ);
-  float * getXYZCovariance();
-  void setXYZCovariance(const float * newXYZCovariance);
-  float getYawVelocity();
-  void setYawVelocity(const float newYawVelocity);
-  float getPitchVelocity();
-  void setPitchVelocity(const float newPitchVelocity);
-  float getDistanceVelocity();
-  void setDistanceVelocity(const float newDistanceVelocity);
-  float * getDYPVelocityCovariance();
-  void setDYPVelocityCovariance(const float * newDYPVelocityCovariance);
-  int getWorldXVelocity();
-  void setWorldXVelocity(const int newWorldXVelocity);
-  int getWorldYVelocity();
-  void setWorldYVelocity(const int newWorldYVelocity);
-  int getWorldZVelocity();
-  void setWorldZVelocity(const int newWorldZVelocity);
-  float * getXYZVelocityCovariance();
-  void setXYZVelocityCovariance(const float * newXYZVelocityCovariance);
+  unsigned int object_type();
+  void set_object_type(const unsigned int new_object_type);
+  float yaw();
+  void set_yaw(const float new_yaw);
+  float pitch();
+  void set_pitch(const float new_pitch);
+  float distance();
+  void set_distance(const float new_distance);
+  float * dyp_covariance();
+  void set_dyp_covariance(const float * new_dyp_covariance);
+  int world_x();
+  void set_world_x(const int new_world_x);
+  int world_y();
+  void set_world_y(const int new_world_y);
+  int world_z();
+  void set_world_z(const int new_world_z);
+  float * xyz_covariance();
+  void set_xyz_covariance(const float * new_xyz_covariance);
+  float yaw_velocity();
+  void set_yaw_velocity(const float new_yaw_velocity);
+  float pitch_velocity();
+  void set_pitch_velocity(const float new_pitch_velocity);
+  float distance_velocity();
+  void set_distance_velocity(const float new_distance_velocity);
+  float * dyp_velocity_covariance();
+  void set_dyp_velocity_covariance(const float * new_dyp_velocity_covariance);
+  int world_x_velocity();
+  void set_world_x_velocity(const int new_world_x_velocity);
+  int world_y_velocity();
+  void set_world_y_velocity(const int new_world_y_velocity);
+  int world_z_velocity();
+  void set_world_z_velocity(const int new_world_z_velocity);
+  float * xyz_velocity_covariance();
+  void set_xyz_velocity_covariance(const float * new_xyz_velocity_covariance);
 
 };
 

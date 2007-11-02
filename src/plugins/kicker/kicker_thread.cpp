@@ -91,13 +91,13 @@ KickerThread::init()
 
   kicker_control->set_intensity(0);
 
-  kicker_interface->setNumKicksLeft(0);
-  kicker_interface->setNumKicksCenter(0);
-  kicker_interface->setNumKicksRight(0);
-  kicker_interface->setCurrentIntensity(0);
+  kicker_interface->set_num_kicks_left(0);
+  kicker_interface->set_num_kicks_center(0);
+  kicker_interface->set_num_kicks_right(0);
+  kicker_interface->set_current_intensity(0);
   // per default our ball guidance device guides right if nothing has been done
   // (and the cylinder is in retracted state)
-  kicker_interface->setGuideBallSide(KickerInterface::GUIDE_BALL_RIGHT);
+  kicker_interface->set_guide_ball_side(KickerInterface::GUIDE_BALL_RIGHT);
   kicker_interface->write();
 }
 
@@ -116,13 +116,13 @@ KickerThread::loop()
     {
       KickerInterface::KickMessage* msg = kicker_interface->msgq_first<KickerInterface::KickMessage>();
 
-      unsigned int intensity = msg->getIntensity();
+      unsigned int intensity = msg->intensity();
       if ((intensity >= 0) && (intensity <= 0xFF) )
 	{
-          if ( intensity != kicker_interface->getCurrentIntensity() )
+          if ( intensity != kicker_interface->current_intensity() )
             {
               kicker_control->set_intensity(intensity);
-              kicker_interface->setCurrentIntensity(intensity);
+              kicker_interface->set_current_intensity(intensity);
               // kicker_interface->write() is done below in any case!
             }
 	}
@@ -132,21 +132,21 @@ KickerThread::loop()
         }
 
       logger->log_debug(name(), "Kicking  left: %i  center: %i  right: %i",
-			msg->isCmdKickRight(),
-			msg->isCmdKickCenter(),
-			msg->isCmdKickLeft());
+			msg->is_right(),
+			msg->is_center(),
+			msg->is_left());
 
-      kicker_control->kick(msg->isCmdKickRight(),
-			   msg->isCmdKickCenter(),
-			   msg->isCmdKickLeft());
+      kicker_control->kick(msg->is_right(),
+			   msg->is_center(),
+			   msg->is_left());
 
       unsigned int right, center, left;
 
       kicker_control->get_num_kicks(right, center, left);
 
-      kicker_interface->setNumKicksRight(right);
-      kicker_interface->setNumKicksCenter(center);
-      kicker_interface->setNumKicksLeft(left);
+      kicker_interface->set_num_kicks_right(right);
+      kicker_interface->set_num_kicks_center(center);
+      kicker_interface->set_num_kicks_left(left);
       kicker_interface->write();
     }
   else if ( kicker_interface->msgq_first_is<KickerInterface::ResetCounterMessage>() )
@@ -156,32 +156,32 @@ KickerThread::loop()
 
       kicker_control->get_num_kicks(right, center, left);
 
-      kicker_interface->setNumKicksRight(right);
-      kicker_interface->setNumKicksCenter(center);
-      kicker_interface->setNumKicksLeft(left);
+      kicker_interface->set_num_kicks_right(right);
+      kicker_interface->set_num_kicks_center(center);
+      kicker_interface->set_num_kicks_left(left);
       kicker_interface->write();
     }
   else if ( kicker_interface->msgq_first_is<KickerInterface::GuideBallMessage>() )
     {
       KickerInterface::GuideBallMessage* msg = kicker_interface->msgq_first<KickerInterface::GuideBallMessage>();
-      if ( msg->getGuideBallSide() == KickerInterface::GUIDE_BALL_LEFT ) {
+      if ( msg->guide_ball_side() == KickerInterface::GUIDE_BALL_LEFT ) {
 	if ( kicker_control->guidance_left() ) {
-	  kicker_interface->setGuideBallSide(KickerInterface::GUIDE_BALL_LEFT);
+	  kicker_interface->set_guide_ball_side(KickerInterface::GUIDE_BALL_LEFT);
 	  kicker_interface->write();
           logger->log_debug(name(), "Enabled ball guidance on LEFT side");
 	} else {
 	  logger->log_error(name(), "Could not activate ball guidance on LEFT side");
 	}
-      } else if ( msg->getGuideBallSide() == KickerInterface::GUIDE_BALL_RIGHT ) {
+      } else if ( msg->guide_ball_side() == KickerInterface::GUIDE_BALL_RIGHT ) {
 	if ( kicker_control->guidance_right() ) {
-	  kicker_interface->setGuideBallSide(KickerInterface::GUIDE_BALL_RIGHT);
+	  kicker_interface->set_guide_ball_side(KickerInterface::GUIDE_BALL_RIGHT);
 	  kicker_interface->write();
           logger->log_debug(name(), "Enabled ball guidance on RIGHT side");
 	} else {
 	  logger->log_error(name(), "Could not activate ball guidance on RIGHT side");
 	}
       } else {
-	logger->log_error(name(), "Invalid ball guide side received: %i", msg->getGuideBallSide());
+	logger->log_error(name(), "Invalid ball guide side received: %i", msg->guide_ball_side());
       }
     }
   else

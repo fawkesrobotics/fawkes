@@ -3,18 +3,18 @@
 <!-- $Id$ -->
 <interface name="NavigatorInterface" author="Martin Liebenberg" year="2007">
   <data>
-    <comment>Fooba</comment>
-    <field type="int" name="Foo">Foo</field>
+    <comment>Foobar</comment>
+    <field type="int" name="foo">Foo</field>
   </data>
   <message name="Target">
     <comment>States the next target to navigate to.</comment>
-    <field type="float" name="Distance">Distance to the target.</field>
-    <field type="float" name="Angle">Angle of the target.</field>
-    <field type="float" name="X">X-coordinate of the target.</field>
-    <field type="float" name="Y">Y-coordinate of the target.</field>
+    <field type="float" name="distance">Distance to the target.</field>
+    <field type="float" name="angle">Angle of the target.</field>
+    <field type="float" name="x">X-coordinate of the target.</field>
+    <field type="float" name="y">Y-coordinate of the target.</field>
   </message>
   <message name="Velocity">
     <comment>States the velocity of the robot.</comment>
-    <field type="float" name="Velocity">Velocity of the robot.</field>
+    <field type="float" name="velocity">Velocity of the robot.</field>
   </message>
 </interface>

@@ -13,107 +13,107 @@
   </constants>
   <data>
     <comment>This are the actual RPMs of the motors taken from the VMC.</comment>
-    <field type="unsigned int" name="MotorState" bits="1">
+    <field type="unsigned int" name="motor_state" bits="1">
       The current state of the motor.
     </field>
-    <field type="int" name="RightRPM">
+    <field type="int" name="right_rpm">
       RPM of the motor on the right front of the robot.
     </field>
-    <field type="int" name="RearRPM">
+    <field type="int" name="rear_rpm">
       RPM of motor on the rear of the robot.
     </field>
-    <field type="int" name="LeftRPM">
+    <field type="int" name="left_rpm">
       RPM of the motor on the left front of the robot.
     </field>
-    <field type="unsigned long int" name="ControllerThreadID">
+    <field type="unsigned long int" name="controller_thread_id">
      The ID of the controlling thread.
      Only from this thread command messages are accepted.
     </field>
-    <field type="char" length="64" name="ControllerThreadName">
+    <field type="char" length="64" name="controller_thread_name">
      The name of the controlling thread.
   </field>
   </data>
   <message name="SetMotorState">
     <comment>Sets the current motor state.</comment>
-    <field type="unsigned int" name="MotorState">
+    <field type="unsigned int" name="motor_state">
       The new motor state to set. Use the MOTOR_* constants.
     </field>
   </message>
   <message name="AquireControl">
     <comment>This allows any thread to aquire the control over the motor thread.
       Use with extreme care!</comment>
-    <field type="unsigned long int" name="ThreadID">
+    <field type="unsigned long int" name="thread_id">
       The thread ID of the thread which is allowed to control the motors.
       Set to zero to use the data of the current thread (the message is zeroed at
       creation automatically, so if you do not set anything the sending thread
       aquires the control.
     </field>
-    <field type="char" length="64" name="ThreadName">
+    <field type="char" length="64" name="thread_name">
       The thread name of the aquiring thread.
     </field>
   </message>
   <message name="TransRotRPM">
     <comment>Determines the drive commands by translation and rotation.</comment>
-    <field type="float" name="Forward">The forward command.</field>
-    <field type="float" name="Sideward">The sideward command.</field>
-    <field type="float" name="Rotation">The rotation command.</field>
-    <field type="float" name="Speed">The speed command.</field>
+    <field type="float" name="forward">The forward command.</field>
+    <field type="float" name="sideward">The sideward command.</field>
+    <field type="float" name="rotation">The rotation command.</field>
+    <field type="float" name="speed">The speed command.</field>
   </message>
   <message name="DriveRPM">
     <comment>Directly set RPM, used for debugging, only use if you know what
              you are doing. Usage is discouraged.</comment>
-    <field type="float" name="FrontRight">Rotation in RPM of the right front wheel.</field>
-    <field type="float" name="FrontLeft">Rotation in RPM of the left front wheel.</field>
-    <field type="float" name="Rear">Rotation in RPM of the rear wheel.</field>
+    <field type="float" name="front_right">Rotation in RPM of the right front wheel.</field>
+    <field type="float" name="front_left">Rotation in RPM of the left front wheel.</field>
+    <field type="float" name="rear">Rotation in RPM of the rear wheel.</field>
   </message>
   <message name="Trans">
     <comment>Translate the robot by the given velocities in X/Y direction.</comment>
-    <field type="float" name="VX">Speed in X direction in m/s.</field>
-    <field type="float" name="VY">Speed in Y direction in m/s.</field>
+    <field type="float" name="vx">Speed in X direction in m/s.</field>
+    <field type="float" name="vy">Speed in Y direction in m/s.</field>
   </message>
   <message name="Rot">
     <comment>Rotate the robot by the given angle speed in rad/s (positive right).</comment>
-    <field type="float" name="Omega">Angle rotation in rad/s.</field>
+    <field type="float" name="omega">Angle rotation in rad/s.</field>
   </message>
   <message name="TransRot">
     <comment>Translate and rotate the robot at the same time. This is the same as combining a
              Trans and a Rot message separately. Note that the robot will not drive on a line
              with VX/VY and then rotate by Omega. Instead the movements are superpositioned
              which will result in a curve. Use LinTransRot if you want this behaviour.</comment>
-    <field type="float" name="VX">Speed in X direction in m/s.</field>
-    <field type="float" name="VY">Speed in Y direction in m/s.</field>
-    <field type="float" name="Omega">Angle rotation in rad/s.</field>
+    <field type="float" name="vx">Speed in X direction in m/s.</field>
+    <field type="float" name="vy">Speed in Y direction in m/s.</field>
+    <field type="float" name="omega">Angle rotation in rad/s.</field>
   </message>
   <message name="Orbit">
     <comment>Orbit around a point. This will make the robot move in a circle around the given
              point (PX, PY) with the angular speed Omega. With Orbit the robot will not
              change its orientation and thus it will not focus on the point.</comment>
-    <field type="float" name="PX">Point's X coordinate to orbit.</field>
-    <field type="float" name="PY">Point's Y coordinate to orbit.</field>
-    <field type="float" name="Omega">Angular speed around point in rad/s.</field>
+    <field type="float" name="px">Point's X coordinate to orbit.</field>
+    <field type="float" name="py">Point's Y coordinate to orbit.</field>
+    <field type="float" name="omega">Angular speed around point in rad/s.</field>
   </message>
   <!-- needs sensor feedback, delayed
   <message name="OrbitRot">
     <comment>Orbit around a point and rotate the robot whilst doing so. This is
              the superpositioned movement of Orbit and Rot, while the orbiting is
 	     recalculated to make a circle and take the changed rotation into account.</comment>
-    <field type="float" name="PX">Point's X coordinate to orbit.</field>
-    <field type="float" name="PY">Point's Y coordinate to orbit.</field>
-    <field type="float" name="OmegaOrbit">Angular speed around point in rad/s.</field>
-    <field type="float" name="OmegaRot">Angular speed of the robot's rotation in rad/s.</field>
+    <field type="float" name="px">Point's X coordinate to orbit.</field>
+    <field type="float" name="py">Point's Y coordinate to orbit.</field>
+    <field type="float" name="omega_orbit">Angular speed around point in rad/s.</field>
+    <field type="float" name="omega_rot">Angular speed of the robot's rotation in rad/s.</field>
   </message>
   <message name="LinTransRot">
     <comment>Move along a line with given speed VX/VY and rotate the robot with Omega.</comment>
-    <field type="float" name="VX">Speed for translation in X direction in m/s.</field>
-    <field type="float" name="VY">Speed for translation in Y direction in m/s.</field>
-    <field type="float" name="Omega">Rotational speed in rad/s.</field>
+    <field type="float" name="vx">Speed for translation in X direction in m/s.</field>
+    <field type="float" name="vy">Speed for translation in Y direction in m/s.</field>
+    <field type="float" name="omega">Rotational speed in rad/s.</field>
   </message>
   <message name="TransOrbit">
     <comment>Translate with the given speed and keep looking at the given point.</comment>
-    <field type="float" name="VX">Speed for translation in X direction in m/s.</field>
-    <field type="float" name="VY">Speed for translation in Y direction in m/s.</field>
-    <field type="float" name="PX">Point's X coordinate to focus.</field>
-    <field type="float" name="PY">Point's Y coordinate to focus.</field>
+    <field type="float" name="vx">Speed for translation in X direction in m/s.</field>
+    <field type="float" name="vy">Speed for translation in Y direction in m/s.</field>
+    <field type="float" name="px">Point's X coordinate to focus.</field>
+    <field type="float" name="py">Point's Y coordinate to focus.</field>
   </message>
   -->
 </interface>

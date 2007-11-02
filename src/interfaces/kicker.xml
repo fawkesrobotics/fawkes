@@ -23,34 +23,34 @@
       In these variables it is stored how often the right, center or 
       left kick have been triggered.
     </comment>
-    <field type="int" name="NumKicksLeft">
+    <field type="int" name="num_kicks_left">
       Number of Left-Kicks
     </field>
-    <field type="int" name="NumKicksCenter">
+    <field type="int" name="num_kicks_center">
       Number of Center-Kicks
     </field>
-    <field type="int" name="NumKicksRight">
+    <field type="int" name="num_kicks_right">
       Number of Right-Kicks
     </field>
-    <field type="GuideBallSideEnum" name="GuideBallSide">Side where the ball
+    <field type="GuideBallSideEnum" name="guide_ball_side">Side where the ball
       guidance arm is currently erected.</field>
-    <field type="unsigned int" name="CurrentIntensity">
+    <field type="unsigned int" name="current_intensity">
       The currently set intensity.
     </field>
   </data>
   <message name="Kick">
     <comment>Triggers a kick with the given parameters.</comment>
-    <field type="bool" name="CmdKickLeft">True to kick with left kicker.</field>
-    <field type="bool" name="CmdKickCenter">True to kick with central kicker.</field>
-    <field type="bool" name="CmdKickRight">True to kick with right kicker.</field>
-    <field type="unsigned int" name="Intensity">Intensity in the range [0..255].</field>
+    <field type="bool" name="left">True to kick with left kicker.</field>
+    <field type="bool" name="center">True to kick with central kicker.</field>
+    <field type="bool" name="right">True to kick with right kicker.</field>
+    <field type="unsigned int" name="intensity">Intensity in the range [0..255].</field>
   </message>
   <message name="ResetCounter">
     <comment>Reset the internal counter for number of kicks</comment>
   </message>
   <message name="GuideBall">
     <comment>Order change in ball guidance</comment>
-    <field type="GuideBallSideEnum" name="GuideBallSide">Side where to guide the ball and erect the arm.</field>
+    <field type="GuideBallSideEnum" name="guide_ball_side">Side where to guide the ball and erect the arm.</field>
   </message>
 </interface>
 

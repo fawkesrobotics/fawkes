@@ -55,150 +55,150 @@ MotorInterface::~MotorInterface()
   free(data_ptr);
 }
 /* Methods */
-/** Get MotorState value.
+/** Get motor_state value.
  * 
       The current state of the motor.
     
- * @return MotorState value
+ * @return motor_state value
  */
 unsigned int
-MotorInterface::getMotorState()
+MotorInterface::motor_state()
 {
-  return data->MotorState;
+  return data->motor_state;
 }
 
-/** Set MotorState value.
+/** Set motor_state value.
  * 
       The current state of the motor.
     
- * @param newMotorState new MotorState value
+ * @param new_motor_state new motor_state value
  */
 void
-MotorInterface::setMotorState(const unsigned int newMotorState)
+MotorInterface::set_motor_state(const unsigned int new_motor_state)
 {
-  data->MotorState = newMotorState;
+  data->motor_state = new_motor_state;
 }
 
-/** Get RightRPM value.
+/** Get right_rpm value.
  * 
       RPM of the motor on the right front of the robot.
     
- * @return RightRPM value
+ * @return right_rpm value
  */
 int
-MotorInterface::getRightRPM()
+MotorInterface::right_rpm()
 {
-  return data->RightRPM;
+  return data->right_rpm;
 }
 
-/** Set RightRPM value.
+/** Set right_rpm value.
  * 
       RPM of the motor on the right front of the robot.
     
- * @param newRightRPM new RightRPM value
+ * @param new_right_rpm new right_rpm value
  */
 void
-MotorInterface::setRightRPM(const int newRightRPM)
+MotorInterface::set_right_rpm(const int new_right_rpm)
 {
-  data->RightRPM = newRightRPM;
+  data->right_rpm = new_right_rpm;
 }
 
-/** Get RearRPM value.
+/** Get rear_rpm value.
  * 
       RPM of motor on the rear of the robot.
     
- * @return RearRPM value
+ * @return rear_rpm value
  */
 int
-MotorInterface::getRearRPM()
+MotorInterface::rear_rpm()
 {
-  return data->RearRPM;
+  return data->rear_rpm;
 }
 
-/** Set RearRPM value.
+/** Set rear_rpm value.
  * 
       RPM of motor on the rear of the robot.
     
- * @param newRearRPM new RearRPM value
+ * @param new_rear_rpm new rear_rpm value
  */
 void
-MotorInterface::setRearRPM(const int newRearRPM)
+MotorInterface::set_rear_rpm(const int new_rear_rpm)
 {
-  data->RearRPM = newRearRPM;
+  data->rear_rpm = new_rear_rpm;
 }
 
-/** Get LeftRPM value.
+/** Get left_rpm value.
  * 
       RPM of the motor on the left front of the robot.
     
- * @return LeftRPM value
+ * @return left_rpm value
  */
 int
-MotorInterface::getLeftRPM()
+MotorInterface::left_rpm()
 {
-  return data->LeftRPM;
+  return data->left_rpm;
 }
 
-/** Set LeftRPM value.
+/** Set left_rpm value.
  * 
       RPM of the motor on the left front of the robot.
     
- * @param newLeftRPM new LeftRPM value
+ * @param new_left_rpm new left_rpm value
  */
 void
-MotorInterface::setLeftRPM(const int newLeftRPM)
+MotorInterface::set_left_rpm(const int new_left_rpm)
 {
-  data->LeftRPM = newLeftRPM;
+  data->left_rpm = new_left_rpm;
 }
 
-/** Get ControllerThreadID value.
+/** Get controller_thread_id value.
  * 
      The ID of the controlling thread.
      Only from this thread command messages are accepted.
     
- * @return ControllerThreadID value
+ * @return controller_thread_id value
  */
 unsigned long int
-MotorInterface::getControllerThreadID()
+MotorInterface::controller_thread_id()
 {
-  return data->ControllerThreadID;
+  return data->controller_thread_id;
 }
 
-/** Set ControllerThreadID value.
+/** Set controller_thread_id value.
  * 
      The ID of the controlling thread.
      Only from this thread command messages are accepted.
     
- * @param newControllerThreadID new ControllerThreadID value
+ * @param new_controller_thread_id new controller_thread_id value
  */
 void
-MotorInterface::setControllerThreadID(const unsigned long int newControllerThreadID)
+MotorInterface::set_controller_thread_id(const unsigned long int new_controller_thread_id)
 {
-  data->ControllerThreadID = newControllerThreadID;
+  data->controller_thread_id = new_controller_thread_id;
 }
 
-/** Get ControllerThreadName value.
+/** Get controller_thread_name value.
  * 
      The name of the controlling thread.
   
- * @return ControllerThreadName value
+ * @return controller_thread_name value
  */
 char *
-MotorInterface::getControllerThreadName()
+MotorInterface::controller_thread_name()
 {
-  return data->ControllerThreadName;
+  return data->controller_thread_name;
 }
 
-/** Set ControllerThreadName value.
+/** Set controller_thread_name value.
  * 
      The name of the controlling thread.
   
- * @param newControllerThreadName new ControllerThreadName value
+ * @param new_controller_thread_name new controller_thread_name value
  */
 void
-MotorInterface::setControllerThreadName(const char * newControllerThreadName)
+MotorInterface::set_controller_thread_name(const char * new_controller_thread_name)
 {
-  strncpy(data->ControllerThreadName, newControllerThreadName, sizeof(data->ControllerThreadName));
+  strncpy(data->controller_thread_name, new_controller_thread_name, sizeof(data->controller_thread_name));
 }
 
 /* =========== messages =========== */
@@ -210,15 +210,15 @@ MotorInterface::setControllerThreadName(const char * newControllerThreadName)
 
 
 /** Constructor with initial values.
- * @param iniMotorState initial value for MotorState
+ * @param ini_motor_state initial value for motor_state
  */
-MotorInterface::SetMotorStateMessage::SetMotorStateMessage(unsigned int iniMotorState) : Message()
+MotorInterface::SetMotorStateMessage::SetMotorStateMessage(unsigned int ini_motor_state) : Message()
 {
   data_size = sizeof(SetMotorStateMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetMotorStateMessage_data_t *)data_ptr;
-  data->MotorState = iniMotorState;
+  data->motor_state = ini_motor_state;
 }
 /** Constructor */
 MotorInterface::SetMotorStateMessage::SetMotorStateMessage() : Message()
@@ -233,28 +233,28 @@ MotorInterface::SetMotorStateMessage::~SetMotorStateMessage()
 {
 }
 /* Methods */
-/** Get MotorState value.
+/** Get motor_state value.
  * 
       The new motor state to set. Use the MOTOR_* constants.
     
- * @return MotorState value
+ * @return motor_state value
  */
 unsigned int
-MotorInterface::SetMotorStateMessage::getMotorState()
+MotorInterface::SetMotorStateMessage::motor_state()
 {
-  return data->MotorState;
+  return data->motor_state;
 }
 
-/** Set MotorState value.
+/** Set motor_state value.
  * 
       The new motor state to set. Use the MOTOR_* constants.
     
- * @param newMotorState new MotorState value
+ * @param new_motor_state new motor_state value
  */
 void
-MotorInterface::SetMotorStateMessage::setMotorState(const unsigned int newMotorState)
+MotorInterface::SetMotorStateMessage::set_motor_state(const unsigned int new_motor_state)
 {
-  data->MotorState = newMotorState;
+  data->motor_state = new_motor_state;
 }
 
 /** @class MotorInterface::AquireControlMessage interfaces/motor.h
@@ -265,17 +265,17 @@ MotorInterface::SetMotorStateMessage::setMotorState(const unsigned int newMotorS
 
 
 /** Constructor with initial values.
- * @param iniThreadID initial value for ThreadID
- * @param iniThreadName initial value for ThreadName
+ * @param ini_thread_id initial value for thread_id
+ * @param ini_thread_name initial value for thread_name
  */
-MotorInterface::AquireControlMessage::AquireControlMessage(unsigned long int iniThreadID, char * iniThreadName) : Message()
+MotorInterface::AquireControlMessage::AquireControlMessage(unsigned long int ini_thread_id, char * ini_thread_name) : Message()
 {
   data_size = sizeof(AquireControlMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AquireControlMessage_data_t *)data_ptr;
-  data->ThreadID = iniThreadID;
-  strncpy(data->ThreadName, iniThreadName, 64);
+  data->thread_id = ini_thread_id;
+  strncpy(data->thread_name, ini_thread_name, 64);
 }
 /** Constructor */
 MotorInterface::AquireControlMessage::AquireControlMessage() : Message()
@@ -290,58 +290,58 @@ MotorInterface::AquireControlMessage::~AquireControlMessage()
 {
 }
 /* Methods */
-/** Get ThreadID value.
+/** Get thread_id value.
  * 
       The thread ID of the thread which is allowed to control the motors.
       Set to zero to use the data of the current thread (the message is zeroed at
       creation automatically, so if you do not set anything the sending thread
       aquires the control.
     
- * @return ThreadID value
+ * @return thread_id value
  */
 unsigned long int
-MotorInterface::AquireControlMessage::getThreadID()
+MotorInterface::AquireControlMessage::thread_id()
 {
-  return data->ThreadID;
+  return data->thread_id;
 }
 
-/** Set ThreadID value.
+/** Set thread_id value.
  * 
       The thread ID of the thread which is allowed to control the motors.
       Set to zero to use the data of the current thread (the message is zeroed at
       creation automatically, so if you do not set anything the sending thread
       aquires the control.
     
- * @param newThreadID new ThreadID value
+ * @param new_thread_id new thread_id value
  */
 void
-MotorInterface::AquireControlMessage::setThreadID(const unsigned long int newThreadID)
+MotorInterface::AquireControlMessage::set_thread_id(const unsigned long int new_thread_id)
 {
-  data->ThreadID = newThreadID;
+  data->thread_id = new_thread_id;
 }
 
-/** Get ThreadName value.
+/** Get thread_name value.
  * 
       The thread name of the aquiring thread.
     
- * @return ThreadName value
+ * @return thread_name value
  */
 char *
-MotorInterface::AquireControlMessage::getThreadName()
+MotorInterface::AquireControlMessage::thread_name()
 {
-  return data->ThreadName;
+  return data->thread_name;
 }
 
-/** Set ThreadName value.
+/** Set thread_name value.
  * 
       The thread name of the aquiring thread.
     
- * @param newThreadName new ThreadName value
+ * @param new_thread_name new thread_name value
  */
 void
-MotorInterface::AquireControlMessage::setThreadName(const char * newThreadName)
+MotorInterface::AquireControlMessage::set_thread_name(const char * new_thread_name)
 {
-  strncpy(data->ThreadName, newThreadName, sizeof(data->ThreadName));
+  strncpy(data->thread_name, new_thread_name, sizeof(data->thread_name));
 }
 
 /** @class MotorInterface::TransRotRPMMessage interfaces/motor.h
@@ -352,21 +352,21 @@ MotorInterface::AquireControlMessage::setThreadName(const char * newThreadName)
 
 
 /** Constructor with initial values.
- * @param iniForward initial value for Forward
- * @param iniSideward initial value for Sideward
- * @param iniRotation initial value for Rotation
- * @param iniSpeed initial value for Speed
+ * @param ini_forward initial value for forward
+ * @param ini_sideward initial value for sideward
+ * @param ini_rotation initial value for rotation
+ * @param ini_speed initial value for speed
  */
-MotorInterface::TransRotRPMMessage::TransRotRPMMessage(float iniForward, float iniSideward, float iniRotation, float iniSpeed) : Message()
+MotorInterface::TransRotRPMMessage::TransRotRPMMessage(float ini_forward, float ini_sideward, float ini_rotation, float ini_speed) : Message()
 {
   data_size = sizeof(TransRotRPMMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TransRotRPMMessage_data_t *)data_ptr;
-  data->Forward = iniForward;
-  data->Sideward = iniSideward;
-  data->Rotation = iniRotation;
-  data->Speed = iniSpeed;
+  data->forward = ini_forward;
+  data->sideward = ini_sideward;
+  data->rotation = ini_rotation;
+  data->speed = ini_speed;
 }
 /** Constructor */
 MotorInterface::TransRotRPMMessage::TransRotRPMMessage() : Message()
@@ -381,84 +381,84 @@ MotorInterface::TransRotRPMMessage::~TransRotRPMMessage()
 {
 }
 /* Methods */
-/** Get Forward value.
+/** Get forward value.
  * The forward command.
- * @return Forward value
+ * @return forward value
  */
 float
-MotorInterface::TransRotRPMMessage::getForward()
+MotorInterface::TransRotRPMMessage::forward()
 {
-  return data->Forward;
+  return data->forward;
 }
 
-/** Set Forward value.
+/** Set forward value.
  * The forward command.
- * @param newForward new Forward value
+ * @param new_forward new forward value
  */
 void
-MotorInterface::TransRotRPMMessage::setForward(const float newForward)
+MotorInterface::TransRotRPMMessage::set_forward(const float new_forward)
 {
-  data->Forward = newForward;
+  data->forward = new_forward;
 }
 
-/** Get Sideward value.
+/** Get sideward value.
  * The sideward command.
- * @return Sideward value
+ * @return sideward value
  */
 float
-MotorInterface::TransRotRPMMessage::getSideward()
+MotorInterface::TransRotRPMMessage::sideward()
 {
-  return data->Sideward;
+  return data->sideward;
 }
 
-/** Set Sideward value.
+/** Set sideward value.
  * The sideward command.
- * @param newSideward new Sideward value
+ * @param new_sideward new sideward value
  */
 void
-MotorInterface::TransRotRPMMessage::setSideward(const float newSideward)
+MotorInterface::TransRotRPMMessage::set_sideward(const float new_sideward)
 {
-  data->Sideward = newSideward;
+  data->sideward = new_sideward;
 }
 
-/** Get Rotation value.
+/** Get rotation value.
  * The rotation command.
- * @return Rotation value
+ * @return rotation value
  */
 float
-MotorInterface::TransRotRPMMessage::getRotation()
+MotorInterface::TransRotRPMMessage::rotation()
 {
-  return data->Rotation;
+  return data->rotation;
 }
 
-/** Set Rotation value.
+/** Set rotation value.
  * The rotation command.
- * @param newRotation new Rotation value
+ * @param new_rotation new rotation value
  */
 void
-MotorInterface::TransRotRPMMessage::setRotation(const float newRotation)
+MotorInterface::TransRotRPMMessage::set_rotation(const float new_rotation)
 {
-  data->Rotation = newRotation;
+  data->rotation = new_rotation;
 }
 
-/** Get Speed value.
+/** Get speed value.
  * The speed command.
- * @return Speed value
+ * @return speed value
  */
 float
-MotorInterface::TransRotRPMMessage::getSpeed()
+MotorInterface::TransRotRPMMessage::speed()
 {
-  return data->Speed;
+  return data->speed;
 }
 
-/** Set Speed value.
+/** Set speed value.
  * The speed command.
- * @param newSpeed new Speed value
+ * @param new_speed new speed value
  */
 void
-MotorInterface::TransRotRPMMessage::setSpeed(const float newSpeed)
+MotorInterface::TransRotRPMMessage::set_speed(const float new_speed)
 {
-  data->Speed = newSpeed;
+  data->speed = new_speed;
 }
 
 /** @class MotorInterface::DriveRPMMessage interfaces/motor.h
@@ -469,19 +469,19 @@ MotorInterface::TransRotRPMMessage::setSpeed(const float newSpeed)
 
 
 /** Constructor with initial values.
- * @param iniFrontRight initial value for FrontRight
- * @param iniFrontLeft initial value for FrontLeft
- * @param iniRear initial value for Rear
+ * @param ini_front_right initial value for front_right
+ * @param ini_front_left initial value for front_left
+ * @param ini_rear initial value for rear
  */
-MotorInterface::DriveRPMMessage::DriveRPMMessage(float iniFrontRight, float iniFrontLeft, float iniRear) : Message()
+MotorInterface::DriveRPMMessage::DriveRPMMessage(float ini_front_right, float ini_front_left, float ini_rear) : Message()
 {
   data_size = sizeof(DriveRPMMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (DriveRPMMessage_data_t *)data_ptr;
-  data->FrontRight = iniFrontRight;
-  data->FrontLeft = iniFrontLeft;
-  data->Rear = iniRear;
+  data->front_right = ini_front_right;
+  data->front_left = ini_front_left;
+  data->rear = ini_rear;
 }
 /** Constructor */
 MotorInterface::DriveRPMMessage::DriveRPMMessage() : Message()
@@ -496,64 +496,64 @@ MotorInterface::DriveRPMMessage::~DriveRPMMessage()
 {
 }
 /* Methods */
-/** Get FrontRight value.
+/** Get front_right value.
  * Rotation in RPM of the right front wheel.
- * @return FrontRight value
+ * @return front_right value
  */
 float
-MotorInterface::DriveRPMMessage::getFrontRight()
+MotorInterface::DriveRPMMessage::front_right()
 {
-  return data->FrontRight;
+  return data->front_right;
 }
 
-/** Set FrontRight value.
+/** Set front_right value.
  * Rotation in RPM of the right front wheel.
- * @param newFrontRight new FrontRight value
+ * @param new_front_right new front_right value
  */
 void
-MotorInterface::DriveRPMMessage::setFrontRight(const float newFrontRight)
+MotorInterface::DriveRPMMessage::set_front_right(const float new_front_right)
 {
-  data->FrontRight = newFrontRight;
+  data->front_right = new_front_right;
 }
 
-/** Get FrontLeft value.
+/** Get front_left value.
  * Rotation in RPM of the left front wheel.
- * @return FrontLeft value
+ * @return front_left value
  */
 float
-MotorInterface::DriveRPMMessage::getFrontLeft()
+MotorInterface::DriveRPMMessage::front_left()
 {
-  return data->FrontLeft;
+  return data->front_left;
 }
 
-/** Set FrontLeft value.
+/** Set front_left value.
  * Rotation in RPM of the left front wheel.
- * @param newFrontLeft new FrontLeft value
+ * @param new_front_left new front_left value
  */
 void
-MotorInterface::DriveRPMMessage::setFrontLeft(const float newFrontLeft)
+MotorInterface::DriveRPMMessage::set_front_left(const float new_front_left)
 {
-  data->FrontLeft = newFrontLeft;
+  data->front_left = new_front_left;
 }
 
-/** Get Rear value.
+/** Get rear value.
  * Rotation in RPM of the rear wheel.
- * @return Rear value
+ * @return rear value
  */
 float
-MotorInterface::DriveRPMMessage::getRear()
+MotorInterface::DriveRPMMessage::rear()
 {
-  return data->Rear;
+  return data->rear;
 }
 
-/** Set Rear value.
+/** Set rear value.
  * Rotation in RPM of the rear wheel.
- * @param newRear new Rear value
+ * @param new_rear new rear value
  */
 void
-MotorInterface::DriveRPMMessage::setRear(const float newRear)
+MotorInterface::DriveRPMMessage::set_rear(const float new_rear)
 {
-  data->Rear = newRear;
+  data->rear = new_rear;
 }
 
 /** @class MotorInterface::TransMessage interfaces/motor.h
@@ -564,17 +564,17 @@ MotorInterface::DriveRPMMessage::setRear(const float newRear)
 
 
 /** Constructor with initial values.
- * @param iniVX initial value for VX
- * @param iniVY initial value for VY
+ * @param ini_vx initial value for vx
+ * @param ini_vy initial value for vy
  */
-MotorInterface::TransMessage::TransMessage(float iniVX, float iniVY) : Message()
+MotorInterface::TransMessage::TransMessage(float ini_vx, float ini_vy) : Message()
 {
   data_size = sizeof(TransMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TransMessage_data_t *)data_ptr;
-  data->VX = iniVX;
-  data->VY = iniVY;
+  data->vx = ini_vx;
+  data->vy = ini_vy;
 }
 /** Constructor */
 MotorInterface::TransMessage::TransMessage() : Message()
@@ -589,44 +589,44 @@ MotorInterface::TransMessage::~TransMessage()
 {
 }
 /* Methods */
-/** Get VX value.
+/** Get vx value.
  * Speed in X direction in m/s.
- * @return VX value
+ * @return vx value
  */
 float
-MotorInterface::TransMessage::getVX()
+MotorInterface::TransMessage::vx()
 {
-  return data->VX;
+  return data->vx;
 }
 
-/** Set VX value.
+/** Set vx value.
  * Speed in X direction in m/s.
- * @param newVX new VX value
+ * @param new_vx new vx value
  */
 void
-MotorInterface::TransMessage::setVX(const float newVX)
+MotorInterface::TransMessage::set_vx(const float new_vx)
 {
-  data->VX = newVX;
+  data->vx = new_vx;
 }
 
-/** Get VY value.
+/** Get vy value.
  * Speed in Y direction in m/s.
- * @return VY value
+ * @return vy value
  */
 float
-MotorInterface::TransMessage::getVY()
+MotorInterface::TransMessage::vy()
 {
-  return data->VY;
+  return data->vy;
 }
 
-/** Set VY value.
+/** Set vy value.
  * Speed in Y direction in m/s.
- * @param newVY new VY value
+ * @param new_vy new vy value
  */
 void
-MotorInterface::TransMessage::setVY(const float newVY)
+MotorInterface::TransMessage::set_vy(const float new_vy)
 {
-  data->VY = newVY;
+  data->vy = new_vy;
 }
 
 /** @class MotorInterface::RotMessage interfaces/motor.h
@@ -637,15 +637,15 @@ MotorInterface::TransMessage::setVY(const float newVY)
 
 
 /** Constructor with initial values.
- * @param iniOmega initial value for Omega
+ * @param ini_omega initial value for omega
  */
-MotorInterface::RotMessage::RotMessage(float iniOmega) : Message()
+MotorInterface::RotMessage::RotMessage(float ini_omega) : Message()
 {
   data_size = sizeof(RotMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (RotMessage_data_t *)data_ptr;
-  data->Omega = iniOmega;
+  data->omega = ini_omega;
 }
 /** Constructor */
 MotorInterface::RotMessage::RotMessage() : Message()
@@ -660,24 +660,24 @@ MotorInterface::RotMessage::~RotMessage()
 {
 }
 /* Methods */
-/** Get Omega value.
+/** Get omega value.
  * Angle rotation in rad/s.
- * @return Omega value
+ * @return omega value
  */
 float
-MotorInterface::RotMessage::getOmega()
+MotorInterface::RotMessage::omega()
 {
-  return data->Omega;
+  return data->omega;
 }
 
-/** Set Omega value.
+/** Set omega value.
  * Angle rotation in rad/s.
- * @param newOmega new Omega value
+ * @param new_omega new omega value
  */
 void
-MotorInterface::RotMessage::setOmega(const float newOmega)
+MotorInterface::RotMessage::set_omega(const float new_omega)
 {
-  data->Omega = newOmega;
+  data->omega = new_omega;
 }
 
 /** @class MotorInterface::TransRotMessage interfaces/motor.h
@@ -688,19 +688,19 @@ MotorInterface::RotMessage::setOmega(const float newOmega)
 
 
 /** Constructor with initial values.
- * @param iniVX initial value for VX
- * @param iniVY initial value for VY
- * @param iniOmega initial value for Omega
+ * @param ini_vx initial value for vx
+ * @param ini_vy initial value for vy
+ * @param ini_omega initial value for omega
  */
-MotorInterface::TransRotMessage::TransRotMessage(float iniVX, float iniVY, float iniOmega) : Message()
+MotorInterface::TransRotMessage::TransRotMessage(float ini_vx, float ini_vy, float ini_omega) : Message()
 {
   data_size = sizeof(TransRotMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TransRotMessage_data_t *)data_ptr;
-  data->VX = iniVX;
-  data->VY = iniVY;
-  data->Omega = iniOmega;
+  data->vx = ini_vx;
+  data->vy = ini_vy;
+  data->omega = ini_omega;
 }
 /** Constructor */
 MotorInterface::TransRotMessage::TransRotMessage() : Message()
@@ -715,64 +715,64 @@ MotorInterface::TransRotMessage::~TransRotMessage()
 {
 }
 /* Methods */
-/** Get VX value.
+/** Get vx value.
  * Speed in X direction in m/s.
- * @return VX value
+ * @return vx value
  */
 float
-MotorInterface::TransRotMessage::getVX()
+MotorInterface::TransRotMessage::vx()
 {
-  return data->VX;
+  return data->vx;
 }
 
-/** Set VX value.
+/** Set vx value.
  * Speed in X direction in m/s.
- * @param newVX new VX value
+ * @param new_vx new vx value
  */
 void
-MotorInterface::TransRotMessage::setVX(const float newVX)
+MotorInterface::TransRotMessage::set_vx(const float new_vx)
 {
-  data->VX = newVX;
+  data->vx = new_vx;
 }
 
-/** Get VY value.
+/** Get vy value.
  * Speed in Y direction in m/s.
- * @return VY value
+ * @return vy value
  */
 float
-MotorInterface::TransRotMessage::getVY()
+MotorInterface::TransRotMessage::vy()
 {
-  return data->VY;
+  return data->vy;
 }
 
-/** Set VY value.
+/** Set vy value.
  * Speed in Y direction in m/s.
- * @param newVY new VY value
+ * @param new_vy new vy value
  */
 void
-MotorInterface::TransRotMessage::setVY(const float newVY)
+MotorInterface::TransRotMessage::set_vy(const float new_vy)
 {
-  data->VY = newVY;
+  data->vy = new_vy;
 }
 
-/** Get Omega value.
+/** Get omega value.
  * Angle rotation in rad/s.
- * @return Omega value
+ * @return omega value
  */
 float
-MotorInterface::TransRotMessage::getOmega()
+MotorInterface::TransRotMessage::omega()
 {
-  return data->Omega;
+  return data->omega;
 }
 
-/** Set Omega value.
+/** Set omega value.
  * Angle rotation in rad/s.
- * @param newOmega new Omega value
+ * @param new_omega new omega value
  */
 void
-MotorInterface::TransRotMessage::setOmega(const float newOmega)
+MotorInterface::TransRotMessage::set_omega(const float new_omega)
 {
-  data->Omega = newOmega;
+  data->omega = new_omega;
 }
 
 /** @class MotorInterface::OrbitMessage interfaces/motor.h
@@ -783,19 +783,19 @@ MotorInterface::TransRotMessage::setOmega(const float newOmega)
 
 
 /** Constructor with initial values.
- * @param iniPX initial value for PX
- * @param iniPY initial value for PY
- * @param iniOmega initial value for Omega
+ * @param ini_px initial value for px
+ * @param ini_py initial value for py
+ * @param ini_omega initial value for omega
  */
-MotorInterface::OrbitMessage::OrbitMessage(float iniPX, float iniPY, float iniOmega) : Message()
+MotorInterface::OrbitMessage::OrbitMessage(float ini_px, float ini_py, float ini_omega) : Message()
 {
   data_size = sizeof(OrbitMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (OrbitMessage_data_t *)data_ptr;
-  data->PX = iniPX;
-  data->PY = iniPY;
-  data->Omega = iniOmega;
+  data->px = ini_px;
+  data->py = ini_py;
+  data->omega = ini_omega;
 }
 /** Constructor */
 MotorInterface::OrbitMessage::OrbitMessage() : Message()
@@ -810,64 +810,64 @@ MotorInterface::OrbitMessage::~OrbitMessage()
 {
 }
 /* Methods */
-/** Get PX value.
+/** Get px value.
  * Point's X coordinate to orbit.
- * @return PX value
+ * @return px value
  */
 float
-MotorInterface::OrbitMessage::getPX()
+MotorInterface::OrbitMessage::px()
 {
-  return data->PX;
+  return data->px;
 }
 
-/** Set PX value.
+/** Set px value.
  * Point's X coordinate to orbit.
- * @param newPX new PX value
+ * @param new_px new px value
  */
 void
-MotorInterface::OrbitMessage::setPX(const float newPX)
+MotorInterface::OrbitMessage::set_px(const float new_px)
 {
-  data->PX = newPX;
+  data->px = new_px;
 }
 
-/** Get PY value.
+/** Get py value.
  * Point's Y coordinate to orbit.
- * @return PY value
+ * @return py value
  */
 float
-MotorInterface::OrbitMessage::getPY()
+MotorInterface::OrbitMessage::py()
 {
-  return data->PY;
+  return data->py;
 }
 
-/** Set PY value.
+/** Set py value.
  * Point's Y coordinate to orbit.
- * @param newPY new PY value
+ * @param new_py new py value
  */
 void
-MotorInterface::OrbitMessage::setPY(const float newPY)
+MotorInterface::OrbitMessage::set_py(const float new_py)
 {
-  data->PY = newPY;
+  data->py = new_py;
 }
 
-/** Get Omega value.
+/** Get omega value.
  * Angular speed around point in rad/s.
- * @return Omega value
+ * @return omega value
  */
 float
-MotorInterface::OrbitMessage::getOmega()
+MotorInterface::OrbitMessage::omega()
 {
-  return data->Omega;
+  return data->omega;
 }
 
-/** Set Omega value.
+/** Set omega value.
  * Angular speed around point in rad/s.
- * @param newOmega new Omega value
+ * @param new_omega new omega value
  */
 void
-MotorInterface::OrbitMessage::setOmega(const float newOmega)
+MotorInterface::OrbitMessage::set_omega(const float new_omega)
 {
-  data->Omega = newOmega;
+  data->omega = new_omega;
 }
 
 /** Check if message is valid an can be queued.

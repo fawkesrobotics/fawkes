@@ -14,25 +14,25 @@
   <data>
     <comment>Test interface. Use this to play around. Do NOT remove any fields, as this
       interface is used by BlackBoard QA.</comment>
-    <field type="int" name="TestInt">Test integer</field>
-    <field type="unsigned int" bits="8" name="Flags">Flags spit down by the writer</field>
-    <field type="char" length="30" flags="changed_indicator" validfor="5" default="testing default" name="TestString">A test sring</field>
-    <field type="int" name="Result">Result of operation add operation from Calculate message.</field>
-    <field type="unsigned int" name="TestUInt">Test unsigned int</field>
-    <field type="unsigned long int" name="TestULInt">Test unsigned long int</field>
-    <field type="long int" name="TestLInt">Test long int</field>
+    <field type="int" name="test_int">Test integer</field>
+    <field type="unsigned int" bits="8" name="_flags">Flags spit down by the writer</field>
+    <field type="char" length="30" flags="changed_indicator" validfor="5" default="testing default" name="test_string">A test sring</field>
+    <field type="int" name="result">Result of operation add operation from Calculate message.</field>
+    <field type="unsigned int" name="test_uint">Test unsigned int</field>
+    <field type="unsigned long int" name="test_ulint">Test unsigned long int</field>
+    <field type="long int" name="test_lint">Test long int</field>
   </data>
   <message name="SetTestInt">
     <comment>Set the test int to the given value.</comment>
-    <ref>TestInt</ref>
+    <ref>test_int</ref>
   </message>
   <message name="SetTestString">
     <comment>Set test string to this value.</comment>
-    <ref>TestString</ref>
+    <ref>test_string</ref>
   </message>
   <message name="Calculate">
     <comment>Adds Summand and Addend. Result is put into Result field.</comment>
-    <field type="int" name="Summand">Summand</field>
-    <field type="int" name="Addend">Addend</field>
+    <field type="int" name="summand">Summand</field>
+    <field type="int" name="addend">Addend</field>
   </message>
 </interface>
