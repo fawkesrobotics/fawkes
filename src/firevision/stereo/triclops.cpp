@@ -804,7 +804,18 @@ TriclopsStereoProcessor::get_world_xyz(unsigned int px, unsigned int py, float *
 void
 TriclopsStereoProcessor::generate_rectification_lut(const char *lut_file)
 {
-  RectificationInfoFile *rif = new RectificationInfoFile();
+  uint64_t guid = 0;
+  if ( bb2 ) {
+    guid = bb2->guid();
+  } else {
+    int serial_no;
+    triclopsGetSerialNumber(data->triclops, &serial_no);
+    guid = 0xFFFFFFFF;
+    guid <<= 32;
+    guid |= serial_no;
+  }
+
+  RectificationInfoFile *rif = new RectificationInfoFile(guid);
 
   RectificationLutInfoBlock *lib_left  = new RectificationLutInfoBlock(_width, _height,
 								      FIREVISION_RECTINFO_CAMERA_LEFT);
@@ -833,3 +844,4 @@ TriclopsStereoProcessor::generate_rectification_lut(const char *lut_file)
 
   delete rif;
 }
+
