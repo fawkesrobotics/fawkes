@@ -215,7 +215,11 @@ Bumblebee2Camera::print_info()
   FirewireCamera::print_info();
 
   printf("Serial: %u\n", serial_no());
+#if __WORDSIZE == 64
+  printf("GUID:   0x%016lx\n", guid());
+#else
   printf("GUID:   0x%016llx\n", guid());
+#endif
 }
 
 void
