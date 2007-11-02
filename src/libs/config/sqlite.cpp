@@ -129,6 +129,9 @@
 #define SQL_DELETE_VALUE						\
   "DELETE FROM config WHERE component=? AND PATH=?"
 
+#define SQL_DELETE_DEFAULT_VALUE				\
+  "DELETE FROM defaults.config WHERE component=? AND PATH=?"
+
 
 /** @class SQLiteConfiguration config/sqlite.h
  * Configuration storage using SQLite.
@@ -1132,6 +1135,342 @@ SQLiteConfiguration::erase(const char *comp, const char *path)
 
   if ( sqlite3_step(stmt) != SQLITE_DONE ) {
     ConfigurationException ce("erase/execute", sqlite3_errmsg(db));
+    sqlite3_finalize(stmt);
+    throw ce;    
+  }
+
+  sqlite3_finalize(stmt);
+
+  if ( change_handlers.find(comp) != change_handlers.end() ) {
+    for ( cit = change_handlers[comp].begin(); cit != change_handlers[comp].end(); ++cit) {
+      (*cit)->configValueErased(comp, path);
+    }
+  }
+  if ( change_handlers.find("") != change_handlers.end() ) {
+    for ( cit = change_handlers[""].begin(); cit != change_handlers[""].end(); ++cit) {
+      (*cit)->configValueErased(comp, path);
+    }  
+  }
+}
+
+
+void
+SQLiteConfiguration::set_default_float(const char *comp, const char *path, float f)
+{
+  sqlite3_stmt *stmt;
+
+  mutex->lock();
+
+  try {
+    stmt = prepare_update_value(SQL_UPDATE_DEFAULT_VALUE, comp, path);
+    if ( (sqlite3_bind_double(stmt, 1, f) != SQLITE_OK) ) {
+      ConfigurationException ce("set_default_float/update/bind", sqlite3_errmsg(db));
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw ce;
+    }
+    execute_insert_or_update(stmt);
+  } catch (Exception &e) {
+    sqlite3_finalize(stmt);
+    mutex->unlock();
+    throw;
+  }
+  sqlite3_finalize(stmt);
+
+  if ( sqlite3_changes(db) == 0 ) {
+    // value did not exist, insert
+
+    try {
+      stmt = prepare_insert_value(SQL_INSERT_DEFAULT_VALUE, "float", comp, path);
+      if ( (sqlite3_bind_double(stmt, 4, f) != SQLITE_OK) ) {
+	ConfigurationException ce("set_default_float/insert/bind", sqlite3_errmsg(db));
+	sqlite3_finalize(stmt);
+	mutex->unlock();
+	throw ce;
+      }
+      execute_insert_or_update(stmt);
+    } catch (Exception &e) {
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw;
+    }
+    sqlite3_finalize(stmt);
+  }
+
+  mutex->unlock();
+
+  if ( change_handlers.find(comp) != change_handlers.end() ) {
+    for ( cit = change_handlers[comp].begin(); cit != change_handlers[comp].end(); ++cit) {
+      (*cit)->configValueChanged(comp, path, f);
+    }
+  }
+  if ( change_handlers.find("") != change_handlers.end() ) {
+    for ( cit = change_handlers[""].begin(); cit != change_handlers[""].end(); ++cit) {
+      (*cit)->configValueChanged(comp, path, f);
+    }  
+  }
+}
+
+
+void
+SQLiteConfiguration::set_default_uint(const char *comp, const char *path, unsigned int uint)
+{
+  sqlite3_stmt *stmt;
+
+  mutex->lock();
+
+  try {
+    stmt = prepare_update_value(SQL_UPDATE_DEFAULT_VALUE, comp, path);
+    if ( (sqlite3_bind_int(stmt, 1, uint) != SQLITE_OK) ) {
+      ConfigurationException ce("set_default_uint/update/bind", sqlite3_errmsg(db));
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw ce;
+    }
+    execute_insert_or_update(stmt);
+  } catch (Exception &e) {
+    sqlite3_finalize(stmt);
+    mutex->unlock();
+    throw;
+  }
+  sqlite3_finalize(stmt);
+
+  if ( sqlite3_changes(db) == 0 ) {
+    // value did not exist, insert
+
+    try {
+      stmt = prepare_insert_value(SQL_INSERT_DEFAULT_VALUE, "unsigned int", comp, path);
+      if ( (sqlite3_bind_int(stmt, 4, uint) != SQLITE_OK) ) {
+	ConfigurationException ce("set_default_uint/insert/bind", sqlite3_errmsg(db));
+	sqlite3_finalize(stmt);
+	mutex->unlock();
+	throw ce;
+      }
+      execute_insert_or_update(stmt);
+    } catch (Exception &e) {
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw;
+    }
+    sqlite3_finalize(stmt);
+  }
+  mutex->unlock();
+
+  if ( change_handlers.find(comp) != change_handlers.end() ) {
+    for ( cit = change_handlers[comp].begin(); cit != change_handlers[comp].end(); ++cit) {
+      (*cit)->configValueChanged(comp, path, uint);
+    }
+  }
+  if ( change_handlers.find("") != change_handlers.end() ) {
+    for ( cit = change_handlers[""].begin(); cit != change_handlers[""].end(); ++cit) {
+      (*cit)->configValueChanged(comp, path, uint);
+    }  
+  }
+}
+
+
+void
+SQLiteConfiguration::set_default_int(const char *comp, const char *path, int i)
+{
+  sqlite3_stmt *stmt;
+
+  mutex->lock();
+
+  try {
+    stmt = prepare_update_value(SQL_UPDATE_DEFAULT_VALUE, comp, path);
+    if ( (sqlite3_bind_int(stmt, 1, i) != SQLITE_OK) ) {
+      ConfigurationException ce("set_default_int/update/bind", sqlite3_errmsg(db));
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw ce;
+    }
+    execute_insert_or_update(stmt);
+  } catch (Exception &e) {
+    sqlite3_finalize(stmt);
+    mutex->unlock();
+    throw;
+  }
+  sqlite3_finalize(stmt);
+
+  if ( sqlite3_changes(db) == 0 ) {
+    // value did not exist, insert
+
+    try {
+      stmt = prepare_insert_value(SQL_INSERT_DEFAULT_VALUE, "int", comp, path);
+      if ( (sqlite3_bind_int(stmt, 4, i) != SQLITE_OK) ) {
+	ConfigurationException ce("set_default_int/insert/bind", sqlite3_errmsg(db));
+	sqlite3_finalize(stmt);
+	mutex->unlock();
+	throw ce;
+      }
+      execute_insert_or_update(stmt);
+    } catch (Exception &e) {
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw;
+    }
+    sqlite3_finalize(stmt);
+  }
+
+  mutex->unlock();
+
+  if ( change_handlers.find(comp) != change_handlers.end() ) {
+    for ( cit = change_handlers[comp].begin(); cit != change_handlers[comp].end(); ++cit) {
+      (*cit)->configValueChanged(comp, path, i);
+    }
+  }
+  if ( change_handlers.find("") != change_handlers.end() ) {
+    for ( cit = change_handlers[""].begin(); cit != change_handlers[""].end(); ++cit) {
+      (*cit)->configValueChanged(comp, path, i);
+    }  
+  }
+}
+
+
+void
+SQLiteConfiguration::set_default_bool(const char *comp, const char *path, bool b)
+{
+  sqlite3_stmt *stmt;
+
+  mutex->lock();
+
+  try {
+    stmt = prepare_update_value(SQL_UPDATE_DEFAULT_VALUE, comp, path);
+    if ( (sqlite3_bind_int(stmt, 1, (b ? 1 : 0)) != SQLITE_OK) ) {
+      ConfigurationException ce("set_default_bool/update/bind", sqlite3_errmsg(db));
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw ce;
+    }
+    execute_insert_or_update(stmt);
+  } catch (Exception &e) {
+    sqlite3_finalize(stmt);
+    mutex->unlock();
+    throw;
+  }
+  sqlite3_finalize(stmt);
+
+  if ( sqlite3_changes(db) == 0 ) {
+    // value did not exist, insert
+
+    try {
+      stmt = prepare_insert_value(SQL_INSERT_DEFAULT_VALUE, "bool", comp, path);
+      if ( (sqlite3_bind_int(stmt, 4, (b ? 1 : 0)) != SQLITE_OK) ) {
+	ConfigurationException ce("set_default_bool/insert/bind", sqlite3_errmsg(db));
+	sqlite3_finalize(stmt);
+	mutex->unlock();
+	throw ce;
+      }
+      execute_insert_or_update(stmt);
+    } catch (Exception &e) {
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw;
+    }
+    sqlite3_finalize(stmt);
+  }
+
+  mutex->unlock();
+
+  if ( change_handlers.find(comp) != change_handlers.end() ) {
+    for ( cit = change_handlers[comp].begin(); cit != change_handlers[comp].end(); ++cit) {
+      (*cit)->configValueChanged(comp, path, b);
+    }
+  }
+  if ( change_handlers.find("") != change_handlers.end() ) {
+    for ( cit = change_handlers[""].begin(); cit != change_handlers[""].end(); ++cit) {
+      (*cit)->configValueChanged(comp, path, b);
+    }  
+  }
+}
+
+
+void
+SQLiteConfiguration::set_default_string(const char *comp, const char *path,
+					const char *s)
+{
+  sqlite3_stmt *stmt;
+
+  mutex->lock();
+
+  size_t s_length = strlen(s);
+
+  try {
+    stmt = prepare_update_value(SQL_UPDATE_DEFAULT_VALUE, comp, path);
+    if ( (sqlite3_bind_text(stmt, 1, s, s_length, SQLITE_STATIC) != SQLITE_OK) ) {
+      ConfigurationException ce("set_default_string/update/bind", sqlite3_errmsg(db));
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw ce;
+    }
+    execute_insert_or_update(stmt);
+  } catch (Exception &e) {
+    sqlite3_finalize(stmt);
+    mutex->unlock();
+    throw;
+  }
+  sqlite3_finalize(stmt);
+
+  if ( sqlite3_changes(db) == 0 ) {
+    // value did not exist, insert
+
+    try {
+      stmt = prepare_insert_value(SQL_INSERT_DEFAULT_VALUE, "string", comp, path);
+      if ( (sqlite3_bind_text(stmt, 4, s, s_length, SQLITE_STATIC) != SQLITE_OK) ) {
+	ConfigurationException ce("set_default_string/insert/bind", sqlite3_errmsg(db));
+	sqlite3_finalize(stmt);
+	mutex->unlock();
+	throw ce;
+      }
+      execute_insert_or_update(stmt);
+    } catch (Exception &e) {
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw;
+    }
+    sqlite3_finalize(stmt);
+  }
+
+  mutex->unlock();
+
+  if ( change_handlers.find(comp) != change_handlers.end() ) {
+    for ( cit = change_handlers[comp].begin(); cit != change_handlers[comp].end(); ++cit) {
+      (*cit)->configValueChanged(comp, path, s);
+    }
+  }
+  if ( change_handlers.find("") != change_handlers.end() ) {
+    for ( cit = change_handlers[""].begin(); cit != change_handlers[""].end(); ++cit) {
+      (*cit)->configValueChanged(comp, path, s);
+    }  
+  }
+}
+
+
+void
+SQLiteConfiguration::set_default_string(const char *comp, const char *path, std::string s)
+{
+  set_string(comp, path, s.c_str());
+}
+
+
+void
+SQLiteConfiguration::erase_default(const char *comp, const char *path)
+{
+  sqlite3_stmt *stmt;
+  const char   *tail;
+
+  if ( sqlite3_prepare(db, SQL_DELETE_DEFAULT_VALUE, -1, &stmt, &tail) != SQLITE_OK ) {
+    throw ConfigurationException("erase_default/prepare", sqlite3_errmsg(db));
+  }
+  if ( (sqlite3_bind_text(stmt, 1, comp, -1, NULL) != SQLITE_OK) ||
+       (sqlite3_bind_text(stmt, 2, path, -1, NULL) != SQLITE_OK) ) {
+    ConfigurationException ce("erase_default/bind", sqlite3_errmsg(db));
+    sqlite3_finalize(stmt);
+    throw ce;
+  }
+
+  if ( sqlite3_step(stmt) != SQLITE_DONE ) {
+    ConfigurationException ce("erase_default/execute", sqlite3_errmsg(db));
     sqlite3_finalize(stmt);
     throw ce;    
   }

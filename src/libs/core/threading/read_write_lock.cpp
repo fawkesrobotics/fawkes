@@ -28,8 +28,7 @@
 #include <core/threading/read_write_lock.h>
 
 #include <pthread.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
 
 /// @cond INTERNALS
 class ReadWriteLockData

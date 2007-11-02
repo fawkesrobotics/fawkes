@@ -304,9 +304,14 @@ FawkesConfigManager::process_after_loop()
 
 	switch (msg->msgid()) {
 	case MSG_CONFIG_SET_FLOAT:
+	case MSG_CONFIG_SET_DEFAULT_FLOAT:
 	  try {
 	    config_float_value_msg_t *m = msg->msg<config_float_value_msg_t>();
-	    config->set_float(component, path, m->f);
+	    if ( msg->msgid() == MSG_CONFIG_SET_FLOAT ) {
+	      config->set_float(component, path, m->f);
+	    } else {
+	      config->set_default_float(component, path, m->f);
+	    }
 	    float f = config->get_float(component, path);
 	    config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(component, path);
 	    r->f = f;
@@ -319,9 +324,14 @@ FawkesConfigManager::process_after_loop()
 	  break;
 	
 	case MSG_CONFIG_SET_UINT:
+	case MSG_CONFIG_SET_DEFAULT_UINT:
 	  try {
 	    config_uint_value_msg_t *m = msg->msg<config_uint_value_msg_t>();
-	    config->set_uint(component, path, m->u);
+	    if ( msg->msgid() == MSG_CONFIG_SET_UINT ) {
+	      config->set_uint(component, path, m->u);
+	    } else {
+	      config->set_default_uint(component, path, m->u);
+	    }
 	    unsigned int u = config->get_uint(component, path);
 	    config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(component, path);
 	    r->u = u;
@@ -334,9 +344,14 @@ FawkesConfigManager::process_after_loop()
 	  break;
 	
 	case MSG_CONFIG_SET_INT:
+	case MSG_CONFIG_SET_DEFAULT_INT:
 	  try {
 	    config_int_value_msg_t *m = msg->msg<config_int_value_msg_t>();
-	    config->set_int(component, path, m->i);
+	    if ( msg->msgid() == MSG_CONFIG_SET_INT ) {
+	      config->set_int(component, path, m->i);
+	    } else {
+	      config->set_default_int(component, path, m->i);
+	    }
 	    int i = config->get_int(component, path);
 	    config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(component, path);
 	    r->i = i;
@@ -349,9 +364,14 @@ FawkesConfigManager::process_after_loop()
 	  break;
 	
 	case MSG_CONFIG_SET_BOOL:
+	case MSG_CONFIG_SET_DEFAULT_BOOL:
 	  try {
 	    config_bool_value_msg_t *m = msg->msg<config_bool_value_msg_t>();
-	    config->set_bool(component, path, (m->b != 0));
+	    if ( msg->msgid() == MSG_CONFIG_SET_BOOL ) {
+	      config->set_bool(component, path, (m->b != 0));
+	    } else {
+	      config->set_default_bool(component, path, (m->b != 0));
+	    }
 	    bool b = config->get_bool(component, path);
 	    config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(component, path);
 	    r->b = (b ? 1 : 0);
@@ -364,13 +384,18 @@ FawkesConfigManager::process_after_loop()
 	  break;
 	
 	case MSG_CONFIG_SET_STRING:
+	case MSG_CONFIG_SET_DEFAULT_STRING:
 	  try {
 	    config_string_value_msg_t *m = msg->msg<config_string_value_msg_t>();
 	    char ts[CONFIG_MSG_MAX_STRING_LENGTH + 1];
 	    ts[CONFIG_MSG_MAX_STRING_LENGTH] = 0;
 	    strncpy(ts, m->s, CONFIG_MSG_MAX_STRING_LENGTH);
 	    std::string s = ts;
-	    config->set_string(component, path, s);
+	    if ( msg->msgid() == MSG_CONFIG_SET_STRING ) {
+	      config->set_string(component, path, s);
+	    } else {
+	      config->set_default_string(component, path, s);
+	    }
 	    s = config->get_string(component, path);
 	    config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(component, path);
 	    strncpy(r->s, s.c_str(), CONFIG_MSG_MAX_STRING_LENGTH);

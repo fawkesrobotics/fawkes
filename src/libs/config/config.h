@@ -128,6 +128,27 @@ class Configuration
 
   virtual void          erase(const char *comp, const char *path)         = 0;
 
+  virtual void          set_default_float(const char *comp,
+					  const char *path,
+					  float f)                        = 0;
+  virtual void          set_default_uint(const char *comp,
+					 const char *path,
+					 unsigned int uint)               = 0;
+  virtual void          set_default_int(const char *comp,
+					const char *path,
+					int i)                            = 0;
+  virtual void          set_default_bool(const char *comp,
+					 const char *path,
+					 bool b)                          = 0;
+  virtual void          set_default_string(const char *comp,
+					   const char *path,
+					   std::string s)                 = 0;
+  virtual void          set_default_string(const char *comp,
+					   const char *path,
+					   const char *s)                 = 0;
+
+  virtual void          erase_default(const char *comp, const char *path) = 0;
+
   virtual ValueIterator * iterator()                                      = 0;
 
   virtual ValueIterator * search(const char *component, const char *path) = 0;

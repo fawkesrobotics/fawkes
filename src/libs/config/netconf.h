@@ -93,6 +93,21 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
 
   virtual void          erase(const char *comp, const char *path);
 
+  virtual void          set_default_float(const char *comp, const char *path,
+					  float f);
+  virtual void          set_default_uint(const char *comp, const char *path,
+					 unsigned int uint);
+  virtual void          set_default_int(const char *comp, const char *path,
+					int i);
+  virtual void          set_default_bool(const char *comp, const char *path,
+					 bool b);
+  virtual void          set_default_string(const char *comp, const char *path,
+					   std::string s);
+  virtual void          set_default_string(const char *comp, const char *path,
+					   const char *s);
+
+  virtual void          erase_default(const char *comp, const char *path);
+
   virtual void          deregistered();
   virtual void          inboundReceived(FawkesNetworkMessage *msg);
 
@@ -143,6 +158,18 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
 
  private:
   void send_get(const char *comp, const char *path, unsigned int msgid);
+
+  void set_float_internal(unsigned int msg_type, const char *comp, const char *path, float f);
+  void set_uint_internal(unsigned int msg_type, const char *comp, const char *path,
+			 unsigned int uint);
+  void set_int_internal(unsigned int msg_type, const char *comp, const char *path, int i);
+  void set_bool_internal(unsigned int msg_type, const char *comp, const char *path, bool b);
+  void set_string_internal(unsigned int msg_type, const char *comp, const char *path,
+			   std::string s);
+  void set_string_internal(unsigned int msg_type, const char *comp, const char *path,
+			   const char *s);
+
+  void erase_internal(unsigned int msg_type, const char *comp, const char *path);
 
 
   FawkesNetworkClient  *c;

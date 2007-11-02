@@ -544,7 +544,8 @@ NetworkConfiguration::get_value(const char *comp, const char *path)
 
 
 void
-NetworkConfiguration::set_float(const char *comp, const char *path, float f)
+NetworkConfiguration::set_float_internal(unsigned int msg_type,
+					 const char *comp, const char *path, float f)
 {
   if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::set_float: "
@@ -557,7 +558,7 @@ NetworkConfiguration::set_float(const char *comp, const char *path, float f)
 
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							MSG_CONFIG_SET_FLOAT,
+							msg_type,
 							sizeof(config_float_value_msg_t));
   config_float_value_msg_t *fm = omsg->msg<config_float_value_msg_t>();
   strncpy(fm->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
@@ -575,7 +576,22 @@ NetworkConfiguration::set_float(const char *comp, const char *path, float f)
 
 
 void
-NetworkConfiguration::set_uint(const char *comp, const char *path, unsigned int uint)
+NetworkConfiguration::set_float(const char *comp, const char *path, float f)
+{
+  set_float_internal(MSG_CONFIG_SET_FLOAT, comp, path, f);
+}
+
+
+void
+NetworkConfiguration::set_default_float(const char *comp, const char *path, float f)
+{
+  set_float_internal(MSG_CONFIG_SET_DEFAULT_FLOAT, comp, path, f);
+}
+
+
+void
+NetworkConfiguration::set_uint_internal(unsigned int msg_type,
+					const char *comp, const char *path, unsigned int uint)
 {
   if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::set_uint: "
@@ -588,7 +604,7 @@ NetworkConfiguration::set_uint(const char *comp, const char *path, unsigned int 
 
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							MSG_CONFIG_SET_UINT,
+							msg_type,
 							sizeof(config_uint_value_msg_t));
   config_uint_value_msg_t *m = omsg->msg<config_uint_value_msg_t>();
   strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
@@ -606,11 +622,26 @@ NetworkConfiguration::set_uint(const char *comp, const char *path, unsigned int 
 
 
 void
-NetworkConfiguration::set_int(const char *comp, const char *path, int i)
+NetworkConfiguration::set_uint(const char *comp, const char *path, unsigned int uint)
+{
+  set_uint_internal(MSG_CONFIG_SET_UINT, comp, path, uint);
+}
+
+
+void
+NetworkConfiguration::set_default_uint(const char *comp, const char *path, unsigned int uint)
+{
+  set_uint_internal(MSG_CONFIG_SET_DEFAULT_UINT, comp, path, uint);
+}
+
+
+void
+NetworkConfiguration::set_int_internal(unsigned int msg_type,
+				       const char *comp, const char *path, int i)
 {
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							MSG_CONFIG_SET_INT,
+							msg_type,
 							sizeof(config_int_value_msg_t));
   config_int_value_msg_t *m = omsg->msg<config_int_value_msg_t>();
   strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
@@ -628,7 +659,22 @@ NetworkConfiguration::set_int(const char *comp, const char *path, int i)
 
 
 void
-NetworkConfiguration::set_bool(const char *comp, const char *path, bool b)
+NetworkConfiguration::set_int(const char *comp, const char *path, int i)
+{
+  set_int_internal(MSG_CONFIG_SET_INT, comp, path, i);
+}
+
+
+void
+NetworkConfiguration::set_default_int(const char *comp, const char *path, int i)
+{
+  set_int_internal(MSG_CONFIG_SET_DEFAULT_INT, comp, path, i);
+}
+
+
+void
+NetworkConfiguration::set_bool_internal(unsigned int msg_type,
+					const char *comp, const char *path, bool b)
 {
   if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::set_bool: "
@@ -641,7 +687,7 @@ NetworkConfiguration::set_bool(const char *comp, const char *path, bool b)
 
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							MSG_CONFIG_SET_BOOL,
+							msg_type,
 							sizeof(config_bool_value_msg_t));
   config_bool_value_msg_t *m = omsg->msg<config_bool_value_msg_t>();
   strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
@@ -659,8 +705,23 @@ NetworkConfiguration::set_bool(const char *comp, const char *path, bool b)
 
 
 void
-NetworkConfiguration::set_string(const char *comp, const char *path,
-				 const char *s)
+NetworkConfiguration::set_bool(const char *comp, const char *path, bool b)
+{
+  set_bool_internal(MSG_CONFIG_SET_BOOL, comp, path, b);
+}
+
+
+void
+NetworkConfiguration::set_default_bool(const char *comp, const char *path, bool b)
+{
+  set_bool_internal(MSG_CONFIG_SET_DEFAULT_BOOL, comp, path, b);
+}
+
+
+void
+NetworkConfiguration::set_string_internal(unsigned int msg_type,
+					  const char *comp, const char *path,
+					  const char *s)
 {
   if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::set_string: "
@@ -677,7 +738,7 @@ NetworkConfiguration::set_string(const char *comp, const char *path,
 
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							MSG_CONFIG_SET_STRING,
+							msg_type,
 							sizeof(config_string_value_msg_t));
   config_string_value_msg_t *m = omsg->msg<config_string_value_msg_t>();
   strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
@@ -695,14 +756,36 @@ NetworkConfiguration::set_string(const char *comp, const char *path,
 
 
 void
-NetworkConfiguration::set_string(const char *comp, const char *path, std::string s)
+NetworkConfiguration::set_string(const char *comp, const char *path, const char *s)
 {
-  set_string(comp, path, s.c_str());
+  set_string_internal(MSG_CONFIG_SET_STRING, comp, path, s);
 }
 
 
 void
-NetworkConfiguration::erase(const char *comp, const char *path)
+NetworkConfiguration::set_default_string(const char *comp, const char *path, const char *s)
+{
+  set_string_internal(MSG_CONFIG_SET_DEFAULT_STRING, comp, path, s);
+}
+
+
+void
+NetworkConfiguration::set_string(const char *comp, const char *path, std::string s)
+{
+  set_string_internal(MSG_CONFIG_SET_STRING, comp, path, s.c_str());
+}
+
+
+void
+NetworkConfiguration::set_default_string(const char *comp, const char *path, std::string s)
+{
+  set_string_internal(MSG_CONFIG_SET_DEFAULT_STRING, comp, path, s.c_str());
+}
+
+
+void
+NetworkConfiguration::erase_internal(unsigned int msg_type,
+				     const char *comp, const char *path)
 {
   if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::erase: "
@@ -715,7 +798,7 @@ NetworkConfiguration::erase(const char *comp, const char *path)
 
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							MSG_CONFIG_ERASE_VALUE,
+							msg_type,
 							sizeof(config_erase_value_msg_t));
   // printf("Message generated, size: %lu, should be: %lu\n", omsg->payload_size(), sizeof(config_erase_value_msg_t));
   config_erase_value_msg_t *m = omsg->msg<config_erase_value_msg_t>();
@@ -729,6 +812,20 @@ NetworkConfiguration::erase(const char *comp, const char *path)
     msg = NULL;
   }
   mutex->unlock();
+}
+
+
+void
+NetworkConfiguration::erase(const char *comp, const char *path)
+{
+  erase_internal(MSG_CONFIG_ERASE_VALUE, comp, path);
+}
+
+
+void
+NetworkConfiguration::erase_default(const char *comp, const char *path)
+{
+  erase_internal(MSG_CONFIG_SET_DEFAULT_STRING, comp, path);
 }
 
 

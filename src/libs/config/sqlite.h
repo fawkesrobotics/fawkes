@@ -83,6 +83,21 @@ class SQLiteConfiguration : public Configuration
 
   virtual void          erase(const char *comp, const char *path);
 
+  virtual void          set_default_float(const char *comp, const char *path,
+				  float f);
+  virtual void          set_default_uint(const char *comp, const char *path,
+				 unsigned int uint);
+  virtual void          set_default_int(const char *comp, const char *path,
+				int i);
+  virtual void          set_default_bool(const char *comp, const char *path,
+				 bool b);
+  virtual void          set_default_string(const char *comp, const char *path,
+				   std::string s);
+  virtual void          set_default_string(const char *comp, const char *path,
+				   const char *s);
+
+  virtual void          erase_default(const char *comp, const char *path);
+
  private:
   typedef struct sqlite3_stmt sqlite3_stmt;
 

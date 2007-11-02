@@ -200,8 +200,14 @@ print_usage(const char *program_name)
 	    << "    Set value for the given component and path to the given type and value" << std::endl
 	    << "    where type is one of float/uint/int/bool/string. The type" << std::endl
 	    << "    is only necessary if you are creating a new value" << std::endl << std::endl
+	    << "  set_default <comp> <path> <value> [type]" << std::endl
+	    << "    Set default value for the given component and path to the given type and value" << std::endl
+	    << "    where type is one of float/uint/int/bool/string. The type" << std::endl
+	    << "    is only necessary if you are creating a new value" << std::endl << std::endl
 	    << "  erase <comp> <path>" << std::endl
 	    << "    Erase value for given component and path from config" << std::endl
+	    << "  erase_default <comp> <path>" << std::endl
+	    << "    Erase default value for given component and path from config" << std::endl
 	    << std::endl;
 }
 
@@ -248,7 +254,8 @@ main(int argc, char **argv)
       // Error!
       printf("You must supply component and path arguments\n");
     }
-  } else if (strcmp("set", args[0]) == 0) {
+  } else if ((strcmp("set", args[0]) == 0) || (strcmp("set_default", args[0]) == 0)) {
+    bool set_def = (strcmp("set_default", args[0]) == 0);
     if (args.size() >= 4) {
       // we have at least "set component path value"
       printf("Requesting old value for %s::%s\n", args[1], args[2]);
@@ -283,7 +290,11 @@ main(int argc, char **argv)
 	  if ( endptr[0] != 0 ) {
 	    printf("ERROR: '%s' is not a float\n", args[3]);
 	  } else {
-	    netconf->set_float(args[1], args[2], f);
+	    if ( set_def ) {
+	      netconf->set_float(args[1], args[2], f);
+	    } else {
+	      netconf->set_default_float(args[1], args[2], f);
+	    }
 	  }
 	} else if ( desired_type == "uint" ) {
 	  char *endptr;
@@ -291,7 +302,11 @@ main(int argc, char **argv)
 	  if ( (endptr[0] != 0) || (i < 0) ) {
 	    printf("ERROR: '%s' is not an unsigned int\n", args[3]);
 	  } else {
-	    netconf->set_uint(args[1], args[2], i);
+	    if ( set_def ) {
+	      netconf->set_uint(args[1], args[2], i);
+	    } else {
+	      netconf->set_default_uint(args[1], args[2], i);
+	    }
 	  }
 	} else if ( desired_type == "int" ) {
 	  char *endptr;
@@ -299,7 +314,11 @@ main(int argc, char **argv)
 	  if ( endptr[0] != 0 ) {
 	    printf("ERROR: '%s' is not an int\n", args[3]);
 	  } else {
-	    netconf->set_int(args[1], args[2], i);
+	    if ( set_def ) {
+	      netconf->set_int(args[1], args[2], i);
+	    } else {
+	      netconf->set_default_int(args[1], args[2], i);
+	    }
 	  }
 	} else if ( desired_type == "bool" ) {
 	  bool valid = false;
@@ -314,10 +333,18 @@ main(int argc, char **argv)
 	    printf("ERROR: '%s' is not a boolean.\n", args[3]);
 	  }
 	  if (valid) {
-	    netconf->set_bool(args[1], args[2], b);
+	    if ( set_def ) {
+	      netconf->set_bool(args[1], args[2], b);
+	    } else {
+	      netconf->set_default_bool(args[1], args[2], b);
+	    }
 	  }
 	} else if ( desired_type == "string" ) {
-	  netconf->set_string(args[1], args[2], args[3]);
+	  if ( set_def ) {
+	    netconf->set_string(args[1], args[2], args[3]);
+	  } else {
+	    netconf->set_default_string(args[1], args[2], args[3]);
+	  }
 	} else {
 	  printf("Invalid type: %s\n", desired_type.c_str());
 	}
@@ -337,7 +364,8 @@ main(int argc, char **argv)
     } else {
       printf("Usage: %s set <component> <path> <value> [type]\n", argp.getProgramName().c_str());
     }
-  } else if (strcmp("erase", args[0]) == 0) {
+  } else if ((strcmp("erase", args[0]) == 0) || (strcmp("erase_default", args[0]) == 0)) {
+    bool erase_def = (strcmp("erase_default", args[0]) == 0);
     if (args.size() == 3) {
       printf("Erasing value %s::%s\n", args[1], args[2]);
       bool found = false;
@@ -351,10 +379,14 @@ main(int argc, char **argv)
       }
       delete i;
       if ( found ) {
-	netconf->erase(args[1], args[2]);
+	if ( erase_def ) {
+	  netconf->erase(args[1], args[2]);
+	} else {
+	  netconf->erase_default(args[1], args[2]);
+	}
 	i = netconf->get_value(args[1], args[2]);
 	if ( i->next() ) {
-	  printf("Failed to erase %s::%s\n", args[1], args[2]);
+	  printf("Failed to erase %s::%s (default vs. non-default?)\n", args[1], args[2]);
 	} else {
 	  printf("Successfully erased %s::%s\n", args[1], args[2]);
 	}

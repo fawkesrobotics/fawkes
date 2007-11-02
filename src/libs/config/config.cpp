@@ -198,6 +198,49 @@
  * @param comp component
  * @param path path to value
  *
+ * @fn void Configuration::set_default_float(const char *comp, const char *path, float f)
+ * Set new default value in configuration of type float
+ * @param comp component
+ * @param path path to value
+ * @param f new float value
+ * 
+ * @fn void Configuration::set_default_uint(const char *comp, const char *path, unsigned int uint)
+ * Set new default value in configuration of type unsigned int
+ * @param comp component
+ * @param path path to value
+ * @param uint new unsigned int value
+ * 
+ * @fn void Configuration::set_default_int(const char *comp, const char *path, int i)
+ * Set new default value in configuration of type int
+ * @param comp component
+ * @param path path to value
+ * @param i new int value
+ * 
+ * @fn void Configuration::set_default_bool(const char *comp, const char *path, bool b)
+ * Set new default value in configuration of type bool
+ * @param comp component
+ * @param path path to value
+ * @param b new bool value
+ * 
+ * @fn void Configuration::set_default_string(const char *comp, const char *path, std::string s)
+ * Set new default value in configuration of type string
+ * @param comp component
+ * @param path path to value
+ * @param s new string value
+ *
+ * @fn void Configuration::set_default_string(const char *comp, const char *path, const char *s)
+ * Set new default value in configuration of type string. Works like the aforementioned method.
+ * Just takes an good ol' char array instead of a std::string.
+ * @param comp component
+ * @param path path to value
+ * @param s new string value
+ *
+ * @fn void Configuration::erase_default(const char *comp, const char *path)
+ * Erase the given default value from the configuration. It is not an error if the value does
+ * not exists before deletion.
+ * @param comp component
+ * @param path path to value
+ *
  * @fn Configuration::ValueIterator * Configuration::iterator()
  * Iterator for all values.
  * Returns an iterator that can be used to iterate over all values in the current
