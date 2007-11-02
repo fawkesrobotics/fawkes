@@ -1,12 +1,13 @@
 
 /***************************************************************************
- *  omni_ball_pipeline_thread.cpp - Omni Ball Pipeline Thread
+ *  pipeline_thread.cpp - Omni Ball Pipeline Thread
  *
  *  Created: Fri July 27 12:01:59 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
- *             2007  Daniel Beck
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *             2007       Daniel Beck
+ *             2005       Martin Heracles
  *
- *  $Id: base_thread.cpp 344 2007-10-04 16:37:23Z tim $
+ *  $Id$
  *
  ****************************************************************************/
 
@@ -26,7 +27,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <apps/omni_ball/omni_ball_pipeline_thread.h>
+#include <apps/omni_ball/pipeline_thread.h>
 
 #include <cams/camera.h>
 
@@ -49,9 +50,10 @@
 #include <cstdio>
 
 
-/** @class FvOmniBallPipelineThread <apps/omni_ball/omni_ball_pipeline_thread.h>
+/** @class FvOmniBallPipelineThread <apps/omni_ball/pipeline_thread.h>
  * Ball detector thread.
  *
+ * @author Tim Niemueller (Base)
  * @author Daniel Beck
  */
 
@@ -96,16 +98,13 @@ FvOmniBallPipelineThread::~FvOmniBallPipelineThread()
 void
 FvOmniBallPipelineThread::init()
 {
-  try
-    {
-      cam = vision_master->register_for_camera( config->get_string( cfg_component.c_str(), 
-								    (cfg_path + "/camera").c_str()).c_str(), this );
-    }
-  catch (Exception& e)
-    {
-      e.append("FvOmniBallPipelineThread::init() failed since no camera is specified");
-      throw;
-    }
+  try {
+    cam = vision_master->register_for_camera( config->get_string( cfg_component.c_str(), 
+						    (cfg_path + "/camera").c_str()).c_str(), this );
+  } catch (Exception& e) {
+    e.append("FvOmniBallPipelineThread::init() failed since no camera is specified");
+    throw;
+  }
 
   img_width = cam->pixel_width();
   img_height = cam->pixel_height();
@@ -185,7 +184,7 @@ FvOmniBallPipelineThread::init()
 void
 FvOmniBallPipelineThread::finalize()
 {
-  logger->log_debug(name(), "Unregistering form vision master");
+  logger->log_debug(name(), "Unregistering from vision master");
   vision_master->unregister_thread(this);
   delete cam;
 }
@@ -274,3 +273,4 @@ FvOmniBallPipelineThread::loop()
     delete rois;
   }
 }
+

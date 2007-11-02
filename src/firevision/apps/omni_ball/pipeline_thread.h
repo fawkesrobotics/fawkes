@@ -3,10 +3,11 @@
  *  omni_ball_pipeline_thread.cpp - Omni Ball Pipeline Thread
  *
  *  Created: Thu July 05 19:00:19 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
- *             2007  Daniel Beck
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *             2007       Daniel Beck
+ *             2005       Martin Heracles
  *
- *  $Id: base_thread.cpp 344 2007-10-04 16:37:23Z tim $
+ *  $Id$
  *
  ****************************************************************************/
 
@@ -26,8 +27,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_APPS_OMNIBALL_OMNIBALLPIPELINETHREAD_H_
-#define __FIREVISION_APPS_OMNIBALL_OMNIBALLPIPELINETHREAD_H_
+#ifndef __FIREVISION_APPS_OMNI_BALL_PIPELINE_THREAD_H_
+#define __FIREVISION_APPS_OMNI_BALL_PIPELINE_THREAD_H_
 
 #include <core/threading/thread.h>
 
@@ -96,4 +97,4 @@ class FvOmniBallPipelineThread
   std::list< ROI >::iterator r;
 };
 
-#endif /* __FIREVISION_APPS_OMNIBALL_OMNIBALLPIPELINETHREAD_H_ */
+#endif /* __FIREVISION_APPS_OMNI_BALL_PIPELINE_THREAD_H_ */

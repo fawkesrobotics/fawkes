@@ -1,11 +1,12 @@
 
 /***************************************************************************
- *  omni_ball_plugin.cpp - Omni Ball Plugin
+ *  plugin.h - Omni Ball Plugin
  *
  *  Created: Thu July 05 19:00:19 2007
  *  Copyright  2007  Daniel Beck
+ *             2007  Tim Niemueller [www.niemueller.de]
  *
- *  $Id: base_thread.cpp 344 2007-10-04 16:37:23Z tim $
+ *  $Id$
  *
  ****************************************************************************/
 
@@ -25,24 +26,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <apps/omni_ball/omni_ball_plugin.h>
-#include <apps/omni_ball/omni_ball_pipeline_thread.h>
+#ifndef __FIREVISION_APPS_OMNI_BALL_PLUGIN_H_
+#define __FIREVISION_APPS_OMNI_BALL_PLUGIN_H_
 
+#include <core/plugin.h>
 
-/** @class FvOmniBallPlugin <apps/omni_ball/omni_ball_plugin.h>
- * OmniVision Ball Plugin.
- *
- * @author Daniel Beck
- */
-
-
-/** Constructor.
- * Just adds the pipeline thread to the list of threads
- */
-FvOmniBallPlugin::FvOmniBallPlugin()
-  : Plugin(Plugin::VISION, "fvomniball")
+class FvOmniBallPlugin : public Plugin
 {
-  thread_list.push_back( new FvOmniBallPipelineThread() );
-}
+ public:
+  FvOmniBallPlugin();
+};
 
-EXPORT_PLUGIN(FvOmniBallPlugin)
+#endif
