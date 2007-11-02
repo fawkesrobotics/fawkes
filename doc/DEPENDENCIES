@@ -22,7 +22,7 @@ Fawkes		SQLite			>= 3.3			mandatory
 
 Fawkes		OpenSSL			>= 0.9.7		mandatory
 
-FireVision	libdc1394		>= 2.0.0rc5		mandatory
+FireVision	libdc1394		>= 2.0.0rc7.svn443	mandatory
 
 FireVision	libraw1394		>= 1.2.1 (FC5)		mandatory
 
@@ -46,7 +46,7 @@ Fawkes		libxml++		>= 2.14.0		optional
 Fawkes		gts			>= 0.7.6		optional
 		needed to build navigator plugin
 
-Fawkes		VMC			== 0.91			optional
+Fawkes		VMC			== 0.95			optional
 		needed to build navigator with real motor support
 
 FireVision	leutron			== 1.96.204		optional
