@@ -60,7 +60,6 @@ BulbSampler::BulbSampler( unsigned int image_width,
     colorLut   = new ColorModelLookupTable ( (char *)lut_file.c_str(), 
   					   color_lut_width, color_lut_height );
   } catch (Exception &e) {
-    e.printTrace();
     throw;
   }
 

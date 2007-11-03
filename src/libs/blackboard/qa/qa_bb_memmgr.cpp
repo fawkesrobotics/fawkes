@@ -169,7 +169,7 @@ main(int argc, char **argv)
       mm->check();
     } catch ( BBInconsistentMemoryException &e ) {
       cout << "Inconsistent memory found, printing exception trace" << endl;
-      e.printTrace();
+      e.print_trace();
       cout << "Free chunks:" << endl;
       mm->printFreeChunksInfo();
       cout << "Allocated chunks:" << endl;

@@ -44,7 +44,7 @@ main(int argc, char **argv)
     cout << "done" << endl;
   } catch (CouldNotOpenConfigException &e) {
     cout << "failed" << endl;
-    e.printTrace();
+    e.print_trace();
   }
 
   try {
@@ -57,7 +57,7 @@ main(int argc, char **argv)
     printf("done, f=%f\n", f);
   } catch (ConfigurationException &e) {
     cout << "failed" << endl;
-    e.printTrace();
+    e.print_trace();
   }
 
   try {
@@ -70,7 +70,7 @@ main(int argc, char **argv)
     printf("done, u=%u\n", u);
   } catch (ConfigurationException &e) {
     cout << "failed" << endl;
-    e.printTrace();
+    e.print_trace();
   }
 
   try {
@@ -83,7 +83,7 @@ main(int argc, char **argv)
     printf("done, i=%i\n", i);
   } catch (ConfigurationException &e) {
     cout << "failed" << endl;
-    e.printTrace();
+    e.print_trace();
   }
 
   try {
@@ -96,7 +96,7 @@ main(int argc, char **argv)
     printf("done, b=%s\n", (b ? "true" : "false"));
   } catch (ConfigurationException &e) {
     cout << "failed" << endl;
-    e.printTrace();
+    e.print_trace();
   }
 
   try {
@@ -109,7 +109,7 @@ main(int argc, char **argv)
     printf("done, s='%s'\n", s.c_str());
   } catch (ConfigurationException &e) {
     cout << "failed" << endl;
-    e.printTrace();
+    e.print_trace();
   }
 
   try {
@@ -122,7 +122,7 @@ main(int argc, char **argv)
     cout << endl;
   } catch (ConfigurationException &e) {
     cout << "failed" << endl;
-    e.printTrace();
+    e.print_trace();
   }
 
   try {
@@ -135,7 +135,7 @@ main(int argc, char **argv)
     printf("done, s='%s'\n", s.c_str());
   } catch (ConfigurationException &e) {
     cout << "failed" << endl;
-    e.printTrace();
+    e.print_trace();
   }
 
   delete config;

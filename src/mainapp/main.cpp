@@ -140,7 +140,7 @@ main(int argc, char **argv)
     fawkes.run(argp);
   } catch (Exception &e) {
     printf("Running Fawkes failed\n");
-    e.printTrace();
+    e.print_trace();
   }
 
   Thread::destroy_main();

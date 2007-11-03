@@ -371,8 +371,8 @@ FawkesPluginManager::load(const char *plugin_type)
       plugins[plugin_type] = plugin;
       plugin_ids[plugin_type] = next_plugin_id++;
     } catch (CannotInitializeThreadException &e) {
-      e.printTrace();
-      LibLogger::log_error("FawkesPluginManager", "Could not initialize one or more threads of plugin %s, unloading plugin", plugin_type);
+      e.append("Could not initialize one or more "
+	       "threads of plugin %s, unloading plugin", plugin_type);
       plugins_mutex->unlock();
       plugin_loader->unload(plugin);
       throw;

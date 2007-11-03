@@ -56,7 +56,7 @@ public:
 				   rs);
       t->set_loop( loop );
     } catch (Exception &e) {
-      e.printTrace();
+      e.print_trace();
       throw;
     }
     covariance = (float *)malloc(WORLDINFO_COVARIANCE_SIZE_3X3 * sizeof(float));
@@ -106,7 +106,7 @@ public:
 				   rs);
       t->add_handler(this);
     } catch (Exception &e) {
-      e.printTrace();
+      e.print_trace();
       throw;
     }
   }

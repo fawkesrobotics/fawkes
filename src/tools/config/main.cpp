@@ -400,7 +400,7 @@ main(int argc, char **argv)
     try {
       netconf->setMirrorMode(true);
     } catch (Exception &e) {
-      e.printTrace();
+      e.print_trace();
       return -1;
     }
     print_header();
@@ -420,7 +420,7 @@ main(int argc, char **argv)
     try {
       netconf->setMirrorMode(true);
     } catch (Exception &e) {
-      e.printTrace();
+      e.print_trace();
       return -1;
     }
     print_header();

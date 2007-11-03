@@ -156,7 +156,6 @@ void SeqWriter::write(unsigned char *buffer)
     writer->set_buffer(cspace, buffer);
     writer->write();
   } catch (Exception &e) {
-    e.printTrace();
     throw;
   }
 }

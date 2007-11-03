@@ -32,6 +32,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <cstdarg>
 
 class ExampleSmallException : public Exception
 {
@@ -77,23 +78,40 @@ indirect_throw_some_exception()
   }
 }
 
+void
+variadic_func(const char *format, ...)
+{
+  /*
+  va_list va;
+  va_start(va, format);
+  throw Exception(format, va);
+  va_end(va);
+  */
+  throw Exception("Format received: %s", format);
+}
 
 int
 main(int argc, char **argv)
 {
   srand(42);
 
+  // errno exception
+  // throw Exception(1, "test %s", "blub");
+
+  // throw variadic exception
+  variadic_func("test %s %i %f", "haha", 4, 3.2);
+
   while (1) {
     try {
       indirect_throw_some_exception();
     } catch (ExampleSmallException &se) {
-      std::cout << "Message: " <<  se.c_str() << std::endl;
+      std::cout << "Message: " <<  se.what() << std::endl;
       std::cout << "Trace:" << std::endl;
-      se.printTrace();
+      se.print_trace();
     } catch (ExampleBigException &be) {
-      std::cout << "Message: " << be.c_str() << std::endl;
+      std::cout << "Message: " << be.what() << std::endl;
       std::cout << "Trace:" << std::endl;
-      be.printTrace();
+      be.print_trace();
     }
   }
 }

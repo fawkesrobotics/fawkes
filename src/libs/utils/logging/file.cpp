@@ -54,7 +54,7 @@ FileLogger::FileLogger(char* filename, LogLevel log_level)
   try {
     log_file = new File(filename, File::ADD_SUFFIX);
   } catch (UnableToOpenFileException& e) {
-    e.printTrace();
+    throw;
   }
 
   now = (struct timeval *)malloc(sizeof(struct timeval));

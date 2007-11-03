@@ -228,7 +228,6 @@ Bumblebee2Camera::open()
   try {
     FirewireCamera::open();
   } catch (Exception &e) {
-    e.printTrace();
     throw;
   }
 

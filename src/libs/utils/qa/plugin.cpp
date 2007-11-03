@@ -86,7 +86,7 @@ test_module(Module *m)
     }
   } catch (Exception &e) {
     cout << "Could not open module" << endl;
-    e.printTrace();
+    e.print_trace();
     success = false;
   }
 
@@ -111,7 +111,7 @@ main(int argc, char **argv)
   try {
     m->open();
   } catch (Exception &e) {
-    e.printTrace();
+    e.print_trace();
     throw;
   }
   success = test_module(m);
@@ -177,7 +177,7 @@ main(int argc, char **argv)
     success = true;
   } catch (PluginLoadException &e) {
     cout << "Could not load plugin" << endl;
-    e.printTrace();
+    e.print_trace();
     success = false;
   }
 

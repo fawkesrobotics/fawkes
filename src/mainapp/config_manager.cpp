@@ -27,13 +27,13 @@
 
 #include <mainapp/config_manager.h>
 #include <config/net_messages.h>
+#include <utils/logging/liblogger.h>
 
 #include <netcomm/fawkes/component_ids.h>
 #include <netcomm/fawkes/hub.h>
 #include <config/config.h>
 
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
 
 /** @class FawkesConfigManager mainapp/config_manager.h
  * Fawkes Configuration Manager.
@@ -105,7 +105,10 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
       r->f = i->get_float();
       hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE, r, sizeof(config_float_value_msg_t));
     } catch (Exception &e) {
-      printf("FawkesConfigManager::send_value: Value %s::%s could not be sent\n", i->component(), i->path());
+      LibLogger::log_warn("FawkesConfigManager",
+			  "send_value: Value %s::%s could not be sent\n",
+			  i->component(), i->path());
+      LibLogger::log_warn("FawkesConfigManager", e);
     }
   } else if ( i->is_uint() ) {
     try {
@@ -113,7 +116,10 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
       r->u = i->get_uint();
       hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE, r, sizeof(config_uint_value_msg_t));
     } catch (Exception &e) {
-      printf("FawkesConfigManager::send_value: Value %s::%s could not be sent\n", i->component(), i->path());
+      LibLogger::log_warn("FawkesConfigManager",
+			  "send_value: Value %s::%s could not be sent\n",
+			  i->component(), i->path());
+      LibLogger::log_warn("FawkesConfigManager", e);
     }
   } else if ( i->is_int() ) {
     try {
@@ -121,7 +127,10 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
       r->i = i->get_int();
       hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE, r, sizeof(config_int_value_msg_t));
     } catch (Exception &e) {
-      printf("FawkesConfigManager::send_value: Value %s::%s could not be sent\n", i->component(), i->path());
+      LibLogger::log_warn("FawkesConfigManager",
+			  "send_value: Value %s::%s could not be sent\n",
+			  i->component(), i->path());
+      LibLogger::log_warn("FawkesConfigManager", e);
     }
   } else if ( i->is_bool() ) {
     try {
@@ -129,7 +138,10 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
       r->b = (i->get_bool() ? 1 : 0);
       hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE, r, sizeof(config_bool_value_msg_t));
     } catch (Exception &e) {
-      printf("FawkesConfigManager::send_value: Value %s::%s could not be sent\n", i->component(), i->path());
+      LibLogger::log_warn("FawkesConfigManager",
+			  "send_value: Value %s::%s could not be sent\n",
+			  i->component(), i->path());
+      LibLogger::log_warn("FawkesConfigManager", e);
     }
   } else if ( i->is_string() ) {
     try {
@@ -137,7 +149,10 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
       strncpy(r->s, i->get_string().c_str(), CONFIG_MSG_MAX_STRING_LENGTH);
       hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE, r, sizeof(config_string_value_msg_t));
     } catch (Exception &e) {
-      printf("FawkesConfigManager::send_value: Value %s::%s could not be sent\n", i->component(), i->path());
+      LibLogger::log_warn("FawkesConfigManager",
+			  "send_value: Value %s::%s could not be sent\n",
+			  i->component(), i->path());
+      LibLogger::log_warn("FawkesConfigManager", e);
     }
   }
 }
@@ -188,14 +203,22 @@ FawkesConfigManager::process_after_loop()
       } catch (Exception &e) {
 	send_inv_value(msg->clid(), "?", "?");
 	e.append("Failed to erase value");
-	e.printTrace();
+	LibLogger::log_warn("FawkesConfigManager", "Failed to erase value");
+	LibLogger::log_warn("FawkesConfigManager", e);
       }
 
     } else if ( (msg->msgid() >= MSG_CONFIG_GET_BEGIN) &&
 	 (msg->msgid() <= MSG_CONFIG_GET_END) ) {
 
       if ( msg->payload_size() != sizeof(config_getval_msg_t) ) {
-	printf("CONFIG_GET_FLOAT: Invalid message payload size\n");
+	LibLogger::log_warn("FawkesConfigManager",
+			    "CONFIG_GET_FLOAT: invalid payload size "
+#if __WORDSIZE == 64
+			    "(received %u instead of %u bytes",
+#else
+			    "(received %lu instead of %lu bytes",
+#endif
+			    msg->payload_size(), sizeof(config_getval_msg_t));
       } else {
 	config_getval_msg_t *m = (config_getval_msg_t *)msg->payload();
 	char component[CONFIG_MSG_COMPONENT_LENGTH + 1];
@@ -215,7 +238,10 @@ FawkesConfigManager::process_after_loop()
 		      r, sizeof(config_float_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
-	    printf("FawkesConfigManager::get_float: Value %s::%s could not be found\n", component, path);
+	    LibLogger::log_warn("FawkesConfigManager",
+				"get float: Value %s::%s could not be found\n",
+				component, path);
+	    LibLogger::log_warn("FawkesConfigManager", e);
 	  }
 	  break;
 
@@ -228,7 +254,10 @@ FawkesConfigManager::process_after_loop()
 		      r, sizeof(config_uint_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
-	    printf("FawkesConfigManager::get_uint: Value %s::%s could not be found\n", component, path);
+	    LibLogger::log_warn("FawkesConfigManager",
+				"get uint: Value %s::%s could not be found\n",
+				component, path);
+	    LibLogger::log_warn("FawkesConfigManager", e);
 	  }
 	  break;
 
@@ -241,7 +270,10 @@ FawkesConfigManager::process_after_loop()
 		      r, sizeof(config_int_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
-	    printf("FawkesConfigManager::get_float: Value %s::%s could not be found\n", component, path);
+	    LibLogger::log_warn("FawkesConfigManager",
+				"get int: Value %s::%s could not be found\n",
+				component, path);
+	    LibLogger::log_warn("FawkesConfigManager", e);
 	  }
 	  break;
 
@@ -254,7 +286,10 @@ FawkesConfigManager::process_after_loop()
 		      r, sizeof(config_bool_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
-	    printf("FawkesConfigManager::get_bool: Value %s::%s could not be found\n", component, path);
+	    LibLogger::log_warn("FawkesConfigManager",
+				"get bool: Value %s::%s could not be found\n",
+				component, path);
+	    LibLogger::log_warn("FawkesConfigManager", e);
 	  }
 	  break;
 
@@ -267,7 +302,10 @@ FawkesConfigManager::process_after_loop()
 		      r, sizeof(config_string_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
-	    printf("FawkesConfigManager::get_string: Value %s::%s could not be found\n", component, path);
+	    LibLogger::log_warn("FawkesConfigManager",
+				"get string: Value %s::%s could not be found\n",
+				component, path);
+	    LibLogger::log_warn("FawkesConfigManager", e);
 	  }
 	  break;
 
@@ -281,7 +319,10 @@ FawkesConfigManager::process_after_loop()
 	    }
 	    delete i;
 	  } catch (ConfigurationException &e) {
-	    e.printTrace();
+	    LibLogger::log_warn("FawkesConfigManager",
+				"get value: Value %s::%s could not be found\n",
+				component, path);
+	    LibLogger::log_warn("FawkesConfigManager", e);
 	  }
 	  break;
 
@@ -293,7 +334,14 @@ FawkesConfigManager::process_after_loop()
       char component[CONFIG_MSG_COMPONENT_LENGTH + 1];
       char path[CONFIG_MSG_PATH_LENGTH + 1];
       if ( msg->payload_size() < sizeof(config_descriptor_t)) {
-	printf("FawkesConfigManager::inbound_set: payload too small\n");
+	LibLogger::log_warn("FawkesConfigManager",
+			    "inbound set: payload is too small"
+#if __WORDSIZE == 64
+			    "(%u is less than %u bytes",
+#else
+			    "(%lu is less than %lu bytes",
+#endif
+			    msg->payload_size(), sizeof(config_descriptor_t));
 	send_inv_value(msg->clid(), "?", "?");
       } else {
 	config_descriptor_t *d = (config_descriptor_t *)msg->payload();
@@ -319,7 +367,10 @@ FawkesConfigManager::process_after_loop()
 		      r, sizeof(config_float_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
-	    printf("FawkesConfigManager::send_float: Value %s::%s could not be set\n", component, path);
+	    LibLogger::log_warn("FawkesConfigManager",
+				"set float: Value %s::%s could not be set\n",
+				component, path);
+	    LibLogger::log_warn("FawkesConfigManager", e);
 	  }
 	  break;
 	
@@ -339,7 +390,10 @@ FawkesConfigManager::process_after_loop()
 		      r, sizeof(config_uint_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
-	    printf("FawkesConfigManager::send_uint: Value %s::%s could not be set\n", component, path);
+	    LibLogger::log_warn("FawkesConfigManager",
+				"set uint: Value %s::%s could not be set\n",
+				component, path);
+	    LibLogger::log_warn("FawkesConfigManager", e);
 	  }
 	  break;
 	
@@ -359,7 +413,10 @@ FawkesConfigManager::process_after_loop()
 		      r, sizeof(config_int_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
-	    printf("FawkesConfigManager::send_int: Value %s::%s could not be set\n", component, path);
+	    LibLogger::log_warn("FawkesConfigManager",
+				"set int: Value %s::%s could not be set\n",
+				component, path);
+	    LibLogger::log_warn("FawkesConfigManager", e);
 	  }
 	  break;
 	
@@ -379,7 +436,10 @@ FawkesConfigManager::process_after_loop()
 		      r, sizeof(config_bool_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
-	    printf("FawkesConfigManager::send_bool: Value %s::%s could not be set\n", component, path);
+	    LibLogger::log_warn("FawkesConfigManager",
+				"set bool: Value %s::%s could not be set\n",
+				component, path);
+	    LibLogger::log_warn("FawkesConfigManager", e);
 	  }
 	  break;
 	
@@ -403,8 +463,10 @@ FawkesConfigManager::process_after_loop()
 		      r, sizeof(config_string_value_msg_t));
 	  } catch (Exception &e) {
 	    send_inv_value(msg->clid(), component, path);
-	    printf("FawkesConfigManager::send_string: Value %s::%s could not be set\n", component, path);
-	    e.printTrace();
+	    LibLogger::log_warn("FawkesConfigManager",
+				"set string: Value %s::%s could not be set\n",
+				component, path);
+	    LibLogger::log_warn("FawkesConfigManager", e);
 	  }
 	  break;
 	
@@ -482,7 +544,10 @@ FawkesConfigManager::configValueChanged(const char *component, const char *path,
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE,
 		r, sizeof(config_int_value_msg_t));
     } catch (Exception &e) {
-      printf("FawkesConfigManager::configValueChanged[int]: Value could not be sent to %u\n", *sit);
+      LibLogger::log_warn("FawkesConfigManager",
+			  "configValueChanged[int]: Value for %s::%s could not be sent "
+			  "to client %u\n", component, path, *sit);
+      LibLogger::log_warn("FawkesConfigManager", e);
     }
   }
   subscribers.unlock();
@@ -506,7 +571,10 @@ FawkesConfigManager::configValueChanged(const char *component, const char *path,
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE,
 		r, sizeof(config_uint_value_msg_t));
     } catch (Exception &e) {
-      printf("FawkesConfigManager::configValueChanged[uint]: Value could not be sent to %u\n", *sit);
+      LibLogger::log_warn("FawkesConfigManager",
+			  "configValueChanged[uint]: Value for %s::%s could not be sent "
+			  "to client %u\n", component, path, *sit);
+      LibLogger::log_warn("FawkesConfigManager", e);
     }
   }
   subscribers.unlock();
@@ -530,7 +598,10 @@ FawkesConfigManager::configValueChanged(const char *component, const char *path,
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE,
 		r, sizeof(config_float_value_msg_t));
     } catch (Exception &e) {
-      printf("FawkesConfigManager::configValueChanged[float]: Value could not be sent to %u\n", *sit);
+      LibLogger::log_warn("FawkesConfigManager",
+			  "configValueChanged[float]: Value for %s::%s could not be sent "
+			  "to client %u\n", component, path, *sit);
+      LibLogger::log_warn("FawkesConfigManager", e);
     }
   }
   subscribers.unlock();
@@ -554,7 +625,10 @@ FawkesConfigManager::configValueChanged(const char *component, const char *path,
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE,
 		r, sizeof(config_bool_value_msg_t));
     } catch (Exception &e) {
-      printf("FawkesConfigManager::configValueChanged[bool]: Value could not be sent to %u\n", *sit);
+      LibLogger::log_warn("FawkesConfigManager",
+			  "configValueChanged[bool]: Value for %s::%s could not be sent "
+			  "to client %u\n", component, path, *sit);
+      LibLogger::log_warn("FawkesConfigManager", e);
     }
   }
   subscribers.unlock();
@@ -578,7 +652,10 @@ FawkesConfigManager::configValueChanged(const char *component, const char *path,
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE,
 		r, sizeof(config_string_value_msg_t));
     } catch (Exception &e) {
-      printf("FawkesConfigManager::configValueChanged[string]: Value could not be sent to %u\n", *sit);
+      LibLogger::log_warn("FawkesConfigManager",
+			  "configValueChanged[string]: Value for %s::%s could not be sent "
+			  "to client %u\n", component, path, *sit);
+      LibLogger::log_warn("FawkesConfigManager", e);
     }
   }
   subscribers.unlock();
@@ -599,7 +676,9 @@ FawkesConfigManager::configValueErased(const char *component, const char *path)
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_VALUE_ERASED,
 		r, sizeof(config_value_erased_msg_t));
     } catch (Exception &e) {
-      printf("FawkesConfigManager::configValueChanged[string]: Value could not be sent to %u\n", *sit);
+      LibLogger::log_warn("FawkesConfigManager",
+			  "configValueErased: Value for %s::%s could not be sent "
+			  "to client %u\n", component, path, *sit);
     }
   }
   subscribers.unlock();

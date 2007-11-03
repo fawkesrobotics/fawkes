@@ -66,7 +66,7 @@ public:
 	accepted = true;
 	printf("Server MTU: %u\n", cs->mtu());
       } catch (SocketException &e) {
-	e.printTrace();
+	e.print_trace();
       }
     }
     if ( accepted ) {
@@ -81,7 +81,7 @@ public:
 	}
 	++i;
       } catch (SocketException &e) {
-	e.printTrace();
+	e.print_trace();
 	printf("Loop failed, disconnecting and waiting for new connection\n");
 	delete cs;
 	cs = NULL;
@@ -130,7 +130,7 @@ public:
 	connected = true;
 	printf("Client MTU: %u\n", s->mtu());
       } catch (SocketException &e) {
-	e.printTrace();
+	e.print_trace();
       }
     }
     if ( connected ) {

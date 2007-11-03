@@ -87,8 +87,14 @@
  * }
  * @endcode
  *
- * Messages are stored as list. You can utilize this by adding appropriate
- * information through appropriate try/catch statements. This way you can
+ * Messages are stored as list. The first message however is called the
+ * primary message and it should contain as much information as available.
+ * This message is printed on the screen if the application crashes with an
+ * unhandled exception. So having meaningful content here means that the
+ * error can be traced more easily.
+ *
+ * You can utilize the list feature by adding appropriate information
+ * through appropriate try/catch statements. This way you can
  * build information path ways that will help to debug your software. Use
  * block like this to append information:
  * @code
@@ -131,11 +137,11 @@
 
 /** Constructor.
  * Constructs a new exception with the given message.
- * @param msg The message that this exception should carry. The message is
- * copied and not just referenced. Thus the memory can be freed if it is a
- * string on the heap.
+ * @param format The format of the primary message. Supports the same
+ * arguments as append(). The message is copied and not just referenced.
+ * Thus the memory has to be freed if it is a dynamic  string on the heap.
  */
-Exception::Exception(const char *msg) throw()
+Exception::Exception(const char *format, ...) throw()
 {
   messages_mutex = new Mutex();
   messages_mutex->lock();
@@ -146,10 +152,13 @@ Exception::Exception(const char *msg) throw()
   messages_end = NULL;
   messages_iterator = NULL;
 
-  if ( msg != NULL ) {
-    append_nolock(msg);
+  if ( format != NULL ) {
+    va_list arg;
+    va_start(arg, format);
+    append_nolock_va(format, arg);
+    va_end(arg);
   } else {
-    append_nolock("Basic Exception");
+    append_nolock("Unnkown Exception");
   }
 
   messages_mutex->unlock();
@@ -157,15 +166,43 @@ Exception::Exception(const char *msg) throw()
 
 
 /** Constructor.
+ * Constructs a new exception with the given message.
+ * @param format The format of the primary message. Supports the same
+ * arguments as append(). The message is copied and not just referenced.
+ * Thus the memory has to be freed if it is a dynamic  string on the heap.
+ * @param va va_list with the arguments to print. Must match the format.
+ * See append() for details.
+ */
+Exception::Exception(const char *format, va_list va) throw()
+{
+  messages_mutex = new Mutex();
+  messages_mutex->lock();
+
+  _errno = 0;
+
+  messages = NULL;
+  messages_end = NULL;
+  messages_iterator = NULL;
+
+  if ( format != NULL ) {
+    append_nolock_va(format, va);
+  } else {
+    append_nolock("Unnkown Exception");
+  }
+
+  messages_mutex->unlock();
+}
+
+/** Constructor.
  * Constructs a new exception with the given message and errno value. This
  * is particularly handy when throwing the exception after a function failed
  * that returns an error code in errno. 
- * @param msg The message that this exception should carry. The message is
- * copied and not just referenced. Thus the memory can be freed if it is a
  * @param errno error number
- * string on the heap.
+ * @param format The format of the primary message. Supports the same
+ * arguments as append(). The message is copied and not just referenced.
+ * Thus the memory has to be freed if it is a dynamic  string on the heap.
  */
-Exception::Exception(const char *msg, int errno) throw()
+Exception::Exception(int errno, const char *format, ...) throw()
 {
   messages_mutex = new Mutex();
   messages_mutex->lock();
@@ -176,17 +213,21 @@ Exception::Exception(const char *msg, int errno) throw()
   messages_end = NULL;
   messages_iterator = NULL;
 
-  if ( msg != NULL ) {
-    append_nolock(msg);
+  if ( format != NULL ) {
+    va_list arg;
+    va_start(arg, format);
+    char *ext_format;
+    if ( asprintf(&ext_format, "%s (errno: %i)", format, errno) == -1 ) {
+      append_nolock_va(format, arg);
+    } else {
+      append_nolock_va(ext_format, arg);
+      free(ext_format);
+    }
+    va_end(arg);
   } else {
-    append_nolock("Basic Exception");
+    append_nolock("Exception with errno=%i", errno);
   }
-
-  char *errno_msg;
-  char err[200];
-  char *err_s = strerror_r(errno, err, 200);
-  asprintf(&errno_msg, "errno: %i   msg: %s", errno, err_s);
-  append_nolock_nocopy(errno_msg);
+  append_nolock("Excpetion has errno=%i", errno);
 
   messages_mutex->unlock();
 }
@@ -284,7 +325,7 @@ Exception::append(const char *format, ...) throw()
   va_list arg;
   va_start(arg, format);
   messages_mutex->lock();
-  append_nolock(format, arg);
+  append_nolock_va(format, arg);
   messages_mutex->unlock();
   va_end(arg);
 }
@@ -305,21 +346,33 @@ Exception::append(const Exception &e) throw()
  * has been locked already to append many messages and keep their order intact
  * and thus to prevent messages to be appended inbetween.
  * Used for example in copy constructor.
- * @param msg message to append
+ * @param format The format of the primary message. Supports the same
+ * arguments as append(). The message is copied and not just referenced.
+ * Thus the memory has to be freed if it is a dynamic  string on the heap.
  */
 void
-Exception::append_nolock(const char *msg) throw()
+Exception::append_nolock(const char *format, ...) throw()
 {
+  va_list arg;
+  va_start(arg, format);
+
+  char *msg;
+  if ( vasprintf(&msg, format, arg) == -1 ) {
+    msg = strdup(format);
+  }
+
+  va_end(arg);
+
   if ( messages == NULL ) {
     // This is our first message
     messages = (message_list_t *)malloc(sizeof(message_list_t));
     messages->next = NULL;
-    messages->msg  = strdup(msg);
+    messages->msg  = msg;
     messages_end = messages;
   } else {
     message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
     ml->next = NULL;
-    ml->msg = strdup(msg);
+    ml->msg = msg;
     messages_end->next = ml;
     messages_end = ml;
   }
@@ -335,10 +388,12 @@ Exception::append_nolock(const char *msg) throw()
  * @param ap argument va_list for format
  */
 void
-Exception::append_nolock(const char *format, va_list ap) throw()
+Exception::append_nolock_va(const char *format, va_list ap) throw()
 {
   char *msg;
-  vasprintf(&msg, format, ap);
+  if ( vasprintf(&msg, format, ap) == -1 ) {
+    msg = strdup(format);
+  }
 
   if ( messages == NULL ) {
     // This is our first message
@@ -423,24 +478,6 @@ Exception::copy_messages(const Exception &exc) throw()
 }
 
 
-/** Get the first message as C string.
- * Messages are stored in a list. To retrieve the first message and thus
- * the original message which was given when the exception was created it
- * should be the most informative message.
- * @return Returns a constant char array with the message. The message is
- * private to the exception and may not be modified or freed (hence const)
- */
-const char *
-Exception::c_str() throw()
-{
-  if ( messages != NULL ) {
-    return messages->msg;
-  } else {
-    return "No exception message available";
-  }
-}
-
-
 /** This can be used to throw this exception.
  * This can be used to throw this exception instance. This is a precaution if
  * it is needed. See C++ FAQ 17.10.
@@ -458,7 +495,7 @@ Exception::raise()
  * via constructor or append(). Output will be sent to stderr.
  */
 void
-Exception::printTrace() throw()
+Exception::print_trace() throw()
 {
   messages_mutex->lock();
   fprintf(stderr, "Exception trace\n"
@@ -488,11 +525,15 @@ Exception::errno() const throw()
 }
 
 
-/** Returns a C-style character string describing the general cause
- * of the current error.
- * By default it returns the first message in the message array. If no
- * message has been set "Unknown error" is returned. This method may be
+/** Get primary string.
+ * Messages are stored in a list. The first entry in this list is called primary
+ * message. This is why it is important to have a meaningful first message!
+ * @return Returns a constant char pointer with the message. The message is
+ * private to the exception and may not be modified or freed (hence const)
+ * If no message has been set "Unknown error" is returned. This method may be
  * overidden by other exceptions.
+ * This method is also called by the runtime system if the exception was not
+ * caught and resulted in a program termination.
  * @return string describing the general cause of the current error
  */
 const char *

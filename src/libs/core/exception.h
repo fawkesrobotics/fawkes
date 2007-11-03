@@ -37,16 +37,16 @@ class Mutex;
 class Exception : public std::exception {
  public:
 
-  Exception(const char *msg) throw();
-  Exception(const char *msg, int errno) throw();
+  Exception(const char *format, ...) throw();
+  Exception(const char *format, va_list va) throw();
+  Exception(int errno, const char *format, ...) throw();
   Exception(const Exception &exc) throw();
   virtual ~Exception() throw();
 
-  virtual const char * c_str() throw();
   virtual void raise();
   void append(const char *format, ...) throw();
   void append(const Exception &e) throw();
-  void printTrace() throw();
+  void print_trace() throw();
 
   int errno() const throw();
 
@@ -92,8 +92,8 @@ class Exception : public std::exception {
  protected:
   Exception() throw();
 
-  void append_nolock(const char *msg) throw();
-  void append_nolock(const char *format, va_list va) throw();
+  void append_nolock(const char *format, ...) throw();
+  void append_nolock_va(const char *format, va_list va) throw();
   void append_nolock_nocopy(char *msg) throw();
   void copy_messages(const Exception &exc) throw();
 

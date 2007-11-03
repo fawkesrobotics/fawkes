@@ -694,7 +694,6 @@ SQLiteConfiguration::get_string(const char *comp, const char *path)
   } catch (Exception &e) {
     // we can't handle
     e.append("SQLiteConfiguration::get_string: Fetching %s::%s failed.", comp, path);
-    e.printTrace();
     mutex->unlock();
     throw;
   }

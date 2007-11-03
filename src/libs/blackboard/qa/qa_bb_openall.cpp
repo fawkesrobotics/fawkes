@@ -62,7 +62,7 @@ main(int argc, char **argv)
     cout << "success" << endl;
   } catch (Exception &e) {
     cout << "failed! Aborting" << endl;
-    e.printTrace();
+    e.print_trace();
     exit(1);
   }
 

@@ -214,7 +214,7 @@ main(int argc, char **argv)
       free(yuv_interleaved);
     }
   } catch (Exception &e) {
-    e.printTrace();
+    e.print_trace();
     throw;
   }
 }

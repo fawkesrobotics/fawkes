@@ -576,8 +576,8 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
     try {
       inbound_bytes = decryptor->decrypt();
     } catch (MessageDecryptionException &e) {
-      e.printTrace();
       LibLogger::log_warn("WorldInfoTransceiver", "Message decryption failed, ignoring");
+      LibLogger::log_warn("WorldInfoTransceiver", e);
       continue;
     }
 

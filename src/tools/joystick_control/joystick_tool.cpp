@@ -248,7 +248,7 @@ JoystickTool::mainLoop()
 	}
 
       } catch (Exception &e) {
-	e.printTrace();
+	e.print_trace();
 	throw;
       }
 
@@ -304,7 +304,7 @@ JoystickTool::mainLoop()
       }
     }//while
   } catch(Exception &e) {
-    e.printTrace();
+    e.print_trace();
   }
 }
 

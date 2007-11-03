@@ -76,6 +76,11 @@ class QASharedMemoryHeader : public SharedMemoryHeader
     memcpy((char *)&header, memptr, sizeof(qashmem_header_t));
   }
 
+
+  virtual void reset()
+  {
+  }
+
   virtual size_t data_size()
   {
     return 1024;
@@ -119,7 +124,7 @@ main(int argc, char **argv)
 			  /* create    */ false,
 			  /* destroy   */ false);
   } catch ( ShmCouldNotAttachException &e ) {
-    e.printTrace();
+    e.print_trace();
     exit(1);
   }
 

@@ -76,7 +76,7 @@ main(int argc, char **argv)
     cout << "success" << endl;
   } catch (Exception &e) {
     cout << "failed! Aborting" << endl;
-    e.printTrace();
+    e.print_trace();
     exit(1);
   }
 
@@ -114,43 +114,43 @@ main(int argc, char **argv)
 
   cout << "Writing initial value ("
        << TestInterface::TEST_CONSTANT << ") into interface as TestInt" << endl;
-  ti_writer->setTestInt( 5 );
+  ti_writer->set_test_int( 5 );
   try {
     ti_writer->write();
   } catch (InterfaceWriteDeniedException &e) {
     cout << "BUG: caught write denied exception" << endl;
-    e.printTrace();
+    e.print_trace();
   }
 
   cout << "Reading value from reader interface.. " << flush;
   ti_reader->read();
-  int val = ti_reader->getTestInt();
+  int val = ti_reader->test_int();
   if ( val == TestInterface::TEST_CONSTANT ) {
-    cout << " success, value is " << ti_reader->getTestInt() << " as expected" << endl;
+    cout << " success, value is " << ti_reader->test_int() << " as expected" << endl;
   } else {
-    cout << " failure, value is " << ti_reader->getTestInt() << ", expected "
+    cout << " failure, value is " << ti_reader->test_int() << ", expected "
 	 << TestInterface::TEST_CONSTANT << endl;
   }
 
   while ( ! quit ) {
-    int expval = ti_reader->getTestInt() + 1;
+    int expval = ti_reader->test_int() + 1;
     //cout << "Writing value " << expval
     // << " into interface as TestInt" << endl;
-    ti_writer->setTestInt( expval );
+    ti_writer->set_test_int( expval );
     try {
       ti_writer->write();
     } catch (InterfaceWriteDeniedException &e) {
       cout << "BUG: caught write denied exception" << endl;
-      e.printTrace();
+      e.print_trace();
     }
 
     //cout << "Reading value from reader interface.. " << flush;
     ti_reader->read();
-    int val = ti_reader->getTestInt();
+    int val = ti_reader->test_int();
     if ( val == expval ) {
-      //cout << " success, value is " << ti_reader->getTestInt() << " as expected" << endl;
+      //cout << " success, value is " << ti_reader->test_int() << " as expected" << endl;
     } else {
-      cout << " failure, value is " << ti_reader->getTestInt() << ", expected "
+      cout << " failure, value is " << ti_reader->test_int() << ", expected "
       	   << expval << endl;
     }
 

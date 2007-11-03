@@ -59,7 +59,7 @@ public:
       s->bind();
       s->set_loop(looping);
     } catch (Exception &e) {
-      e.printTrace();
+      e.print_trace();
       throw;
     }
   }
@@ -90,7 +90,7 @@ public:
       ++i;
     } catch (Exception &e) {
       printf("Loop failed\n");
-      e.printTrace();
+      e.print_trace();
       throw;
     }
   }
@@ -112,7 +112,7 @@ public:
       s = new MulticastDatagramSocket("224.16.0.1", port);
       s->bind();
     } catch (Exception &e) {
-      e.printTrace();
+      e.print_trace();
       throw;
     }
     from_len = sizeof(from);
