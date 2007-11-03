@@ -109,7 +109,7 @@ InterfaceParser::getFields(xmlpp::Node *node)
       f.valid();
       result.push_back(f);
     } catch ( Exception &e ) {
-      e.printTrace();
+      e.print_trace();
     }
   }
   for (vector<InterfaceField>::iterator i = result.begin(); i != result.end(); ++i) {
@@ -308,9 +308,9 @@ InterfaceParser::parse()
 	InterfaceConstant constant(const_name, type, value, const_comment);
 	constants.push_back(constant);
       } catch (InterfaceGeneratorInvalidTypeException &e) {
-	e.printTrace();
+	e.print_trace();
       } catch (InterfaceGeneratorInvalidValueException &e) {
-	e.printTrace();
+	e.print_trace();
       }
     }
     for (vector<InterfaceConstant>::iterator i = constants.begin(); i != constants.end(); ++i) {

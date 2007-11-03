@@ -100,7 +100,7 @@ class MessageQueue
   bool         empty() const;
 
   void         lock();
-  bool         tryLock();
+  bool         try_lock();
   void         unlock();
 
   Message *    first();

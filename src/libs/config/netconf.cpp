@@ -1019,9 +1019,9 @@ NetworkConfiguration::lock()
 
 
 bool
-NetworkConfiguration::tryLock()
+NetworkConfiguration::try_lock()
 {
-  return mutex->tryLock();
+  return mutex->try_lock();
 }
 
 

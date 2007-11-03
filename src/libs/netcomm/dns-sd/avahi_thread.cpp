@@ -188,7 +188,7 @@ AvahiThread::recover()
 {
   // if someone already gathered the lock we don't care, at least
   // no waiting thread could have aquired it.
-  init_mutex->tryLock();
+  init_mutex->try_lock();
 
   service_publisher->group_erase();
   browser->erase_browsers();

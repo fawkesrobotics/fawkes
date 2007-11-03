@@ -562,7 +562,7 @@ bool
 ThreadList::prepare_finalize(ThreadFinalizer *finalizer)
 {
   _finalize_mutex->lock();
-  _sync_lock->lockForWrite();
+  _sync_lock->lock_for_write();
   bool can_finalize = true;
   CannotFinalizeThreadException cfte("Cannot finalize one or more threads");
   bool threw_exception = false;

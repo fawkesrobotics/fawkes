@@ -40,7 +40,7 @@ class LockList : public std::list<Type>
   virtual ~LockList();
 
   void lock();
-  bool tryLock();
+  bool try_lock();
   void unlock();
 
   void push_back_locked(const Type& x);
@@ -107,9 +107,9 @@ LockList<Type>::lock()
  */
 template <typename Type>
 bool
-LockList<Type>::tryLock()
+LockList<Type>::try_lock()
 {
-  return mutex->tryLock();
+  return mutex->try_lock();
 }
 
 

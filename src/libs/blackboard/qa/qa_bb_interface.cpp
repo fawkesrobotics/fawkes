@@ -92,10 +92,10 @@ main(int argc, char **argv)
 
   cout << "Printing some meminfo ===============================================" << endl;
   cout << "Free chunks:" << endl;
-  mm->printFreeChunksInfo();
+  mm->print_free_chunks_info();
   cout << "Allocated chunks:" << endl;
-  mm->printAllocatedChunksInfo();
-  mm->printPerformanceInfo();
+  mm->print_allocated_chunks_info();
+  mm->print_performance_info();
   cout << "End of meminfo ======================================================" << endl;
 
   try {

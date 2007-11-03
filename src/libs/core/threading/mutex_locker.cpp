@@ -97,7 +97,7 @@ MutexLocker::MutexLocker(Mutex *mutex)
 /** Destructor */
 MutexLocker::~MutexLocker()
 {
-  mutex->tryLock();
+  mutex->try_lock();
   mutex->unlock();
 }
 

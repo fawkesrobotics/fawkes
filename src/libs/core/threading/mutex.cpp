@@ -73,7 +73,7 @@ Mutex::~Mutex()
 
 /** Lock this mutex.
  * A call to lock() will block until the lock on the mutex could be aquired.
- * If you want to avoid see consider using tryLock().
+ * If you want to avoid see consider using try_lock().
  */
 void
 Mutex::lock()
@@ -88,7 +88,7 @@ Mutex::lock()
  *
  * @code
  * bool locked = false;
- * if ( mutex->tryLock() ) {
+ * if ( mutex->try_lock() ) {
  *   mutex->unlock();
  *   locked = true;
  * }
@@ -100,7 +100,7 @@ Mutex::lock()
  * @return true, if the mutex could be locked, false otherwise.
  */
 bool
-Mutex::tryLock()
+Mutex::try_lock()
 {
   return (pthread_mutex_trylock(&(mutex_data->mutex)) == 0);
 }

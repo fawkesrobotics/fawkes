@@ -32,7 +32,7 @@
 #include <core/exceptions/software.h>
 
 #include <cstddef>
-#include <stdlib.h>
+#include <cstdlib>
 
 /** @class MessageAlreadyQueuedException interface/message_queue.h
  * Message already enqueued exception.
@@ -156,7 +156,7 @@ MessageQueue::append(Message *msg)
 unsigned int
 MessageQueue::insert_after(const MessageIterator &it, Message *msg)
 {
-  if ( mutex->tryLock() ) {
+  if ( mutex->try_lock() ) {
     mutex->unlock();
     throw NotLockedException("Message queue must be locked to insert messages after iterator.");
   }
@@ -232,7 +232,7 @@ MessageQueue::remove(const unsigned int msg_id)
 void
 MessageQueue::remove(msg_list_t *l, msg_list_t *p)
 {
-  if ( mutex->tryLock() ) {
+  if ( mutex->try_lock() ) {
     mutex->unlock();
     throw NotLockedException("Protected remove must be made safe by locking.");
   }
@@ -295,14 +295,14 @@ MessageQueue::lock()
 /** Try to lock message queue.
  * No operations can be performed on the message queue after locking it.
  * Note that you cannot call any method of the message queue as long as
- * the queue is locked. Use tryLock() only to have a secure run-through with
+ * the queue is locked. Use try_lock() only to have a secure run-through with
  * the MessageIterator.
  * @return true, if the lock has been aquired, false otherwise.
  */
 bool
-MessageQueue::tryLock()
+MessageQueue::try_lock()
 {
-  return mutex->tryLock();
+  return mutex->try_lock();
 }
 
 
@@ -349,7 +349,7 @@ MessageQueue::pop()
 MessageQueue::MessageIterator
 MessageQueue::begin()
 {
-  if ( mutex->tryLock() ) {
+  if ( mutex->try_lock() ) {
     mutex->unlock();
     throw NotLockedException("Message queue must be locked to get begin iterator.");
   }
@@ -364,7 +364,7 @@ MessageQueue::begin()
 MessageQueue::MessageIterator
 MessageQueue::end()
 {
-  if ( mutex->tryLock() ) {
+  if ( mutex->try_lock() ) {
     mutex->unlock();
     throw NotLockedException("Message queue must be locked to get end iterator.");
   }

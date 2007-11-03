@@ -42,7 +42,7 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
   virtual ~LockMap();
 
   void lock();
-  bool tryLock();
+  bool try_lock();
   void unlock();
 
  private:
@@ -103,9 +103,9 @@ LockMap<KeyType, ValueType, LessKey>::lock()
  */
 template <typename KeyType, typename ValueType, typename LessKey>
 bool
-LockMap<KeyType, ValueType, LessKey>::tryLock()
+LockMap<KeyType, ValueType, LessKey>::try_lock()
 {
-  return mutex->tryLock();
+  return mutex->try_lock();
 }
 
 

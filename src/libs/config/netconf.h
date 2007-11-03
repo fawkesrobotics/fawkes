@@ -153,7 +153,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   ValueIterator * search(const char *component, const char *path);
 
   void lock();
-  bool tryLock();
+  bool try_lock();
   void unlock();
 
  private:

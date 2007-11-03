@@ -55,19 +55,19 @@ main(int argc, char **argv)
   printf("Memory Size: %s%8d%s %sB%s  BlackBoard version: %s%u%s\n"
 	 "Free Memory: %s%8d%s %sB%s  Alloc. memory: %s%8d%s %sB%s  Overhang: %s%8d%s %sB%s\n"
 	 "Free Chunks: %s%8d%s    Alloc. chunks: %s%8d%s\n",
- 	 cdarkgray.c_str(), memmgr->getMemorySize(), cnormal.c_str(),
+ 	 cdarkgray.c_str(), memmgr->memory_size(), cnormal.c_str(),
 	 clightgray.c_str(), cnormal.c_str(),
-	 cdarkgray.c_str(), memmgr->getVersion(), cnormal.c_str(),
-	 cdarkgray.c_str(), memmgr->getFreeSize(), cnormal.c_str(),
+	 cdarkgray.c_str(), memmgr->version(), cnormal.c_str(),
+	 cdarkgray.c_str(), memmgr->free_size(), cnormal.c_str(),
 	 clightgray.c_str(), cnormal.c_str(),
-	 cdarkgray.c_str(), memmgr->getAllocatedSize(), cnormal.c_str(),
+	 cdarkgray.c_str(), memmgr->allocated_size(), cnormal.c_str(),
 	 clightgray.c_str(), cnormal.c_str(),
-	 cdarkgray.c_str(), memmgr->getOverhangSize(), cnormal.c_str(),
+	 cdarkgray.c_str(), memmgr->overhang_size(), cnormal.c_str(),
 	 clightgray.c_str(), cnormal.c_str(),
-	 cdarkgray.c_str(), memmgr->getNumFreeChunks(), cnormal.c_str(),
-	 cdarkgray.c_str(), memmgr->getNumAllocatedChunks(), cnormal.c_str());
+	 cdarkgray.c_str(), memmgr->num_free_chunks(), cnormal.c_str(),
+	 cdarkgray.c_str(), memmgr->num_allocated_chunks(), cnormal.c_str());
 
-  if ( ! memmgr->tryLock() ) {
+  if ( ! memmgr->try_lock() ) {
     timeval a, b;
     gettimeofday(&a, NULL);
     cout << "Waiting for lock on shared memory.. " << flush;

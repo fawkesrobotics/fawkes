@@ -64,10 +64,10 @@ class ReadWriteLock
 
   virtual ~ReadWriteLock();
 
-  void lockForRead();
-  void lockForWrite();
-  bool tryLockForRead();
-  bool tryLockForWrite();
+  void lock_for_read();
+  void lock_for_write();
+  bool try_lock_for_read();
+  bool try_lock_for_write();
   void unlock();
 
  private:

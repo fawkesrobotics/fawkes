@@ -69,9 +69,9 @@ main(int argc, char **argv)
   cout << "Running basic tests" << endl;
   cout << "=========================================================================" << endl;
 
-  mm->printPerformanceInfo();
+  mm->print_performance_info();
 
-  unsigned int free_before = mm->getMaxFreeSize();
+  unsigned int free_before = mm->max_free_size();
 
   for (unsigned int i = 0; i < NUM_CHUNKS; ++i) {
     cout << "Allocating m[" << i << "] with " << (i+1) * 1000 << " bytes.." << flush;
@@ -79,17 +79,17 @@ main(int argc, char **argv)
     cout << "done" << endl;
   }
 
-  if ( mm->getMaxAllocatedSize() != (NUM_CHUNKS * 1000) ) {
+  if ( mm->max_allocated_size() != (NUM_CHUNKS * 1000) ) {
     cout << "Largest chunk is not " << NUM_CHUNKS * 1000 << " bytes, error, aborting" << endl;
     delete mm;
     exit(1);
   }
 
   cout << "Free chunks:" << endl;
-  mm->printFreeChunksInfo();
+  mm->print_free_chunks_info();
   cout << "Allocated chunks:" << endl;
-  mm->printAllocatedChunksInfo();
-  mm->printPerformanceInfo();
+  mm->print_allocated_chunks_info();
+  mm->print_performance_info();
 
   for (unsigned int i = 0; i < NUM_CHUNKS; ++i) {
     cout << "Freeing m[" << i << "].." << flush;
@@ -97,23 +97,23 @@ main(int argc, char **argv)
     cout << "done" << endl;
   }
 
-  if ( mm->getMaxAllocatedSize() != 0 ) {
+  if ( mm->max_allocated_size() != 0 ) {
     cout << "Largest chunk is not 0 bytes, error, aborting" << endl;
     delete mm;
     exit(2);
   }
 
-  if ( mm->getMaxFreeSize() != free_before ) {
+  if ( mm->max_free_size() != free_before ) {
     cout << "Max free size after tests differe from before test, error, aborting" << endl;
     delete mm;
     exit(3);
   }
 
   cout << "Free chunks:" << endl;
-  mm->printFreeChunksInfo();
+  mm->print_free_chunks_info();
   cout << "Allocated chunks:" << endl;
-  mm->printAllocatedChunksInfo();
-  mm->printPerformanceInfo();
+  mm->print_allocated_chunks_info();
+  mm->print_performance_info();
 
   cout << "Basic tests finished" << endl;
   cout << "=========================================================================" << endl;
@@ -142,10 +142,10 @@ main(int argc, char **argv)
 	cout << "Memory Manager ran out of memory, tried to allocate "
 	     << s << " bytes, detailed info:" << endl;
 	cout << "Free chunks:" << endl;
-	mm->printFreeChunksInfo();
+	mm->print_free_chunks_info();
 	cout << "Allocated chunks:" << endl;
-	mm->printAllocatedChunksInfo();
-	mm->printPerformanceInfo();
+	mm->print_allocated_chunks_info();
+	mm->print_performance_info();
       }
     } else {
       cout << "f" << flush;
@@ -159,7 +159,7 @@ main(int argc, char **argv)
 	} catch ( BlackBoardMemMgrInvalidPointerException &e ) {
 	  cout << "Ouch, tried to free invalid pointer" << endl;
 	  cout << "Allocated chunks:" << endl;
-	  mm->printAllocatedChunksInfo();
+	  mm->print_allocated_chunks_info();
 	  printf("Pointer tried to free: 0x%lx\n", (long unsigned int)ptrs[erase]);
 	}
       }
@@ -171,19 +171,19 @@ main(int argc, char **argv)
       cout << "Inconsistent memory found, printing exception trace" << endl;
       e.print_trace();
       cout << "Free chunks:" << endl;
-      mm->printFreeChunksInfo();
+      mm->print_free_chunks_info();
       cout << "Allocated chunks:" << endl;
-      mm->printAllocatedChunksInfo();
-      mm->printPerformanceInfo();
+      mm->print_allocated_chunks_info();
+      mm->print_performance_info();
       quit = true;
     }
 
     if ( modcount % 10 == 0 ) {
       cout << endl;
-      mm->printPerformanceInfo();
-      if ( mm->getOverhangSize() > 0 ) {
+      mm->print_performance_info();
+      if ( mm->overhang_size() > 0 ) {
 	cout << "Overhang detected, allocated chunks:" << endl;
-	mm->printAllocatedChunksInfo();
+	mm->print_allocated_chunks_info();
       }
       // sleep(10);
     }

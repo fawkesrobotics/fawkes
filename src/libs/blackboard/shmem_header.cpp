@@ -52,9 +52,9 @@
 BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(size_t data_size,
 							   unsigned int version)
 {
-  this->_data_size      = data_size;
-  this->version        = version;
-  data = NULL;
+  _data_size = data_size;
+  _version   = version;
+  data       = NULL;
 }
 
 
@@ -64,7 +64,7 @@ BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(size_t data_size,
  * @param shmem SharedMemory segment used for this header
  */
 void
-BlackBoardSharedMemoryHeader::setSharedMemory(SharedMemory *shmem)
+BlackBoardSharedMemoryHeader::set_shared_memory(SharedMemory *shmem)
 {
   this->shmem = shmem;
 }
@@ -84,7 +84,7 @@ bool
 BlackBoardSharedMemoryHeader::matches(void *memptr)
 {
   BlackBoardSharedMemoryHeaderData *md = (BlackBoardSharedMemoryHeaderData *)memptr;
-  return (version == md->version);
+  return (_version == md->version);
 }
 
 
@@ -107,7 +107,7 @@ void
 BlackBoardSharedMemoryHeader::initialize(void *memptr)
 {
   data = (BlackBoardSharedMemoryHeaderData *)memptr;
-  data->version         = version;
+  data->version         = _version;
   data->shm_addr        = memptr;
   data->free_list_head  = NULL;
   data->alloc_list_head = NULL;
@@ -148,7 +148,7 @@ BlackBoardSharedMemoryHeader::data_size()
  * you can use this without further conversion.
  */
 chunk_list_t *
-BlackBoardSharedMemoryHeader::getFreeListHead()
+BlackBoardSharedMemoryHeader::free_list_head()
 {
   return (chunk_list_t *)shmem->ptr(data->free_list_head);
 }
@@ -159,7 +159,7 @@ BlackBoardSharedMemoryHeader::getFreeListHead()
  * you can use this without further conversion.
  */
 chunk_list_t *
-BlackBoardSharedMemoryHeader::getAllocListHead()
+BlackBoardSharedMemoryHeader::alloc_list_head()
 {
   return (chunk_list_t *)shmem->ptr(data->alloc_list_head);
 }
@@ -170,7 +170,7 @@ BlackBoardSharedMemoryHeader::getAllocListHead()
  * shared memory segment. Will be transformed to a shared memory address.
  */
 void
-BlackBoardSharedMemoryHeader::setFreeListHead(chunk_list_t *flh)
+BlackBoardSharedMemoryHeader::set_free_list_head(chunk_list_t *flh)
 {
   data->free_list_head = (chunk_list_t *)shmem->addr(flh);
 }
@@ -181,7 +181,7 @@ BlackBoardSharedMemoryHeader::setFreeListHead(chunk_list_t *flh)
  * shared memory segment. Will be transformed to a shared memory address.
  */
 void
-BlackBoardSharedMemoryHeader::setAllocListHead(chunk_list_t *alh)
+BlackBoardSharedMemoryHeader::set_alloc_list_head(chunk_list_t *alh)
 {
   data->alloc_list_head = (chunk_list_t *)shmem->addr(alh);
 }
@@ -191,7 +191,7 @@ BlackBoardSharedMemoryHeader::setAllocListHead(chunk_list_t *alh)
  * @return BlackBoard version
  */
 unsigned int
-BlackBoardSharedMemoryHeader::getVersion() const
+BlackBoardSharedMemoryHeader::version() const
 {
   return data->version;
 }

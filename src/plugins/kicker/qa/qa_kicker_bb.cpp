@@ -70,7 +70,7 @@ class KickerQAThread : public Thread, public BlackBoardAspect, public LoggingAsp
   virtual void
   loop()
   {
-    if ( ! kicker_interface->hasWriter() ) {
+    if ( ! kicker_interface->has_writer() ) {
       if ( (++mod_counter %= 20) == 0 ) {
 	logger->log_warn(name(), "No writer for kicker interface, kicker not loaded?");
       }

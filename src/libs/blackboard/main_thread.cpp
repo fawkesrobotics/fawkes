@@ -55,7 +55,7 @@ BlackBoardMainThread::~BlackBoardMainThread()
  * @return interface manager
  */
 BlackBoardInterfaceManager *
-BlackBoardMainThread::getInterfaceManager() const
+BlackBoardMainThread::interface_manager() const
 {
   return im;
 }

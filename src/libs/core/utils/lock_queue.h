@@ -40,7 +40,7 @@ class LockQueue : public std::queue<Type>
   virtual ~LockQueue();
 
   void lock();
-  bool tryLock();
+  bool try_lock();
   void unlock();
 
   void push_locked(const Type& x);
@@ -108,9 +108,9 @@ LockQueue<Type>::lock()
  */
 template <typename Type>
 bool
-LockQueue<Type>::tryLock()
+LockQueue<Type>::try_lock()
 {
-  return mutex->tryLock();
+  return mutex->try_lock();
 }
 
 

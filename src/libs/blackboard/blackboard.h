@@ -36,7 +36,7 @@ class BlackBoard
   BlackBoard();
   ~BlackBoard();
 
-  BlackBoardInterfaceManager *  getInterfaceManager();
+  BlackBoardInterfaceManager *  interface_manager();
 
  private:
   BlackBoardInterfaceManager *im;

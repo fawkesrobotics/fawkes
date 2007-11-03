@@ -66,30 +66,30 @@ class BlackBoardMemoryManager
 
   void   check();
 
-  unsigned int getMaxFreeSize() const;
-  unsigned int getMaxAllocatedSize() const;
+  unsigned int max_free_size() const;
+  unsigned int max_allocated_size() const;
 
-  unsigned int getFreeSize() const;
-  unsigned int getAllocatedSize() const;
-  unsigned int getOverhangSize() const;
+  unsigned int free_size() const;
+  unsigned int allocated_size() const;
+  unsigned int overhang_size() const;
 
-  unsigned int getNumFreeChunks() const;
-  unsigned int getNumAllocatedChunks() const;
+  unsigned int num_free_chunks() const;
+  unsigned int num_allocated_chunks() const;
 
-  unsigned int getMemorySize() const;
-  unsigned int getVersion() const;
+  unsigned int memory_size() const;
+  unsigned int version() const;
 
-  void   printFreeChunksInfo() const;
-  void   printAllocatedChunksInfo() const;
-  void   printPerformanceInfo() const;
+  void   print_free_chunks_info() const;
+  void   print_allocated_chunks_info() const;
+  void   print_performance_info() const;
 
   void   lock();
-  bool   tryLock();
+  bool   try_lock();
   void   unlock();
 
   /*
   void   lock(void *ptr);
-  bool   tryLock(void *ptr);
+  bool   try_lock(void *ptr);
   void   unlock(void *ptr);
   */
 

@@ -46,7 +46,8 @@ BlackBoard::~BlackBoard()
  * @return interface manager.
  */
 BlackBoardInterfaceManager *
-BlackBoard::getInterfaceManager()
+BlackBoard::interface_manager()
 {
   return im;
 }
+

@@ -265,7 +265,7 @@
  * No further changes or queries can be executed on the configuration and will block until
  * the config is unlocked.
  *
- * @fn bool Configuration::tryLock()
+ * @fn bool Configuration::try_lock()
  * Try to lock the config.
  * @see Configuration::lock()
  * @return true, if the lock has been aquired, false otherwise

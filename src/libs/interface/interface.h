@@ -69,7 +69,7 @@ class Interface
   void          read();
   void          write();
 
-  bool          hasWriter() const;
+  bool          has_writer() const;
 
   unsigned int  msgq_enqueue(Message *message);
   void          msgq_remove(Message *message);
@@ -77,7 +77,7 @@ class Interface
   unsigned int  msgq_size();
   void          msgq_flush();
   void          msgq_lock();
-  bool          msgq_tryLock();
+  bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
   Message *     msgq_first();

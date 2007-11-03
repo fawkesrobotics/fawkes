@@ -40,7 +40,7 @@ class BlackBoardMainThread : public Thread
 
   virtual void loop();
 
-  BlackBoardInterfaceManager *  getInterfaceManager() const;
+  BlackBoardInterfaceManager *  interface_manager() const;
 
  private:
   BlackBoardInterfaceManager *im;

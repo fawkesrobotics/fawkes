@@ -538,15 +538,15 @@ Thread::join()
     // and then unlock it. This is for example necessary if a thread is cancelled, and
     // then set_opmode() is called, this would lead to a deadlock if the thread was
     // cancelled while waiting for the sleep lock (which is very likely)
-    __sleep_mutex->tryLock();
+    __sleep_mutex->try_lock();
     __sleep_mutex->unlock();
   }
 
   // Force unlock of these mutexes, otherwise the same bad things as for the sleep
   // mutex above could happen!
-  __finalize_mutex->tryLock();
+  __finalize_mutex->try_lock();
   __finalize_mutex->unlock();
-  loop_mutex->tryLock();
+  loop_mutex->try_lock();
   loop_mutex->unlock();
 }
 
@@ -673,7 +673,7 @@ Thread::run()
 
   forever {
 
-    if ( __finalize_sync_lock )  __finalize_sync_lock->lockForRead();
+    if ( __finalize_sync_lock )  __finalize_sync_lock->lock_for_read();
 
     bool run_loop;
     __finalize_mutex->lock();

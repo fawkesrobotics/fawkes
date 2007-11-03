@@ -44,7 +44,7 @@ printMessages(MessageQueue *mq)
   for ( i = mq->begin(); i != mq->end(); ++i) {
     if ( i.is<TestInterface::SetTestIntMessage>() ) {
       cout << "Message " << i.id() << " int: "
-	   << i.get<TestInterface::SetTestIntMessage>()->getTestInt()
+	   << i.get<TestInterface::SetTestIntMessage>()->test_int()
 	   << "   type: " << typeid((*i)).name()
 	   << endl;
     } else if ( i.is<Message>() ) {

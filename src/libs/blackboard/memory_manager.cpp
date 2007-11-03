@@ -37,10 +37,9 @@
 #include <utils/ipc/shm.h>
 #include <utils/ipc/shm_exceptions.h>
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <string>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
 
 /** If a free chunk is allocated it may be split up into an allocated
  * and a new free chunk. This value determines when this is done. If
@@ -126,7 +125,7 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
 			     /* read only   */ false,
 			     /* create      */ master,
 			     /* dest on del */ master);
-    shmem_header->setSharedMemory(shmem);
+    shmem_header->set_shared_memory(shmem);
   } catch ( ShmCouldNotAttachException &e ) {
     delete shmem_header;
     throw BBMemMgrCannotOpenException();
@@ -165,8 +164,8 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
     f->overhang = 0;
     f->next = NULL;
 
-    shmem_header->setFreeListHead(f);
-    shmem_header->setAllocListHead(NULL);
+    shmem_header->set_free_list_head(f);
+    shmem_header->set_alloc_list_head(NULL);
   }
 
   mutex = new Mutex();
@@ -196,7 +195,7 @@ void *
 BlackBoardMemoryManager::alloc_nolock(unsigned int num_bytes)
 {
   // search for smallest chunk just big enough for desired size
-  chunk_list_t *l = shmem_header->getFreeListHead();
+  chunk_list_t *l = shmem_header->free_list_head();
 
   // Note: free chunks list sorted ascending by ptr
   chunk_list_t *f = NULL;
@@ -216,7 +215,7 @@ BlackBoardMemoryManager::alloc_nolock(unsigned int num_bytes)
   }
 
   // remove chunk from free_list
-  shmem_header->setFreeListHead( list_remove(shmem_header->getFreeListHead(), f) );
+  shmem_header->set_free_list_head( list_remove(shmem_header->free_list_head(), f) );
 
   /*
   // only chunk's semaphore
@@ -238,7 +237,7 @@ BlackBoardMemoryManager::alloc_nolock(unsigned int num_bytes)
     nfc->size = f->size - num_bytes - sizeof(chunk_list_t);
     nfc->overhang = 0;
     
-    shmem_header->setFreeListHead( list_add(shmem_header->getFreeListHead(), nfc) );
+    shmem_header->set_free_list_head( list_add(shmem_header->free_list_head(), nfc) );
 
     f->size = num_bytes;
   } else {
@@ -249,7 +248,7 @@ BlackBoardMemoryManager::alloc_nolock(unsigned int num_bytes)
   }
 
   // alloc new chunk
-  shmem_header->setAllocListHead( list_add(shmem_header->getAllocListHead(), f) );
+  shmem_header->set_alloc_list_head( list_add(shmem_header->alloc_list_head(), f) );
 
   return shmem->ptr(f->ptr);
 }
@@ -293,17 +292,17 @@ BlackBoardMemoryManager::free(void *ptr)
   shmem->lock_for_write();
 
   // find chunk in alloc_chunks
-  chunk_list_t *ac = list_find_ptr(shmem_header->getAllocListHead(), chunk_addr(ptr));
+  chunk_list_t *ac = list_find_ptr(shmem_header->alloc_list_head(), chunk_addr(ptr));
   if ( ac == NULL ) {
     throw BlackBoardMemMgrInvalidPointerException();
   }
 
   // remove from alloc_chunks
-  shmem_header->setAllocListHead( list_remove(shmem_header->getAllocListHead(), ac) );
+  shmem_header->set_alloc_list_head( list_remove(shmem_header->alloc_list_head(), ac) );
 
   // reclaim as free memory
   ac->overhang = 0;
-  shmem_header->setFreeListHead( list_add(shmem_header->getFreeListHead(), ac) );
+  shmem_header->set_free_list_head( list_add(shmem_header->free_list_head(), ac) );
 
   // merge adjacent regions
   cleanup_free_chunks();
@@ -323,8 +322,8 @@ BlackBoardMemoryManager::free(void *ptr)
 void
 BlackBoardMemoryManager::check()
 {
-  chunk_list_t *f = shmem_header->getFreeListHead();
-  chunk_list_t *a = shmem_header->getAllocListHead();
+  chunk_list_t *f = shmem_header->free_list_head();
+  chunk_list_t *a = shmem_header->alloc_list_head();
   chunk_list_t *t = NULL;
 
   unsigned int mem = 0;
@@ -385,9 +384,9 @@ BlackBoardMemoryManager::check()
  * Prints out a formatted list of free chunks.
  */
 void
-BlackBoardMemoryManager::printFreeChunksInfo() const
+BlackBoardMemoryManager::print_free_chunks_info() const
 {
-  list_print_info( shmem_header->getFreeListHead() );
+  list_print_info( shmem_header->free_list_head() );
 }
 
 
@@ -395,9 +394,9 @@ BlackBoardMemoryManager::printFreeChunksInfo() const
  * Prints out a formatted list of allocated chunks.
  */
 void
-BlackBoardMemoryManager::printAllocatedChunksInfo() const
+BlackBoardMemoryManager::print_allocated_chunks_info() const
 {
-  list_print_info( shmem_header->getAllocListHead() );
+  list_print_info( shmem_header->alloc_list_head() );
 }
 
 
@@ -407,12 +406,12 @@ BlackBoardMemoryManager::printAllocatedChunksInfo() const
  * (see class description about overhanging bytes).
  */
 void
-BlackBoardMemoryManager::printPerformanceInfo() const
+BlackBoardMemoryManager::print_performance_info() const
 {
   printf("free chunks: %6u, alloc chunks: %6u, max free: %10u, max alloc: %10u, overhang: %10u\n",
-	 list_length( shmem_header->getFreeListHead()),
-	 list_length( shmem_header->getAllocListHead()),
-	 getMaxFreeSize(), getMaxAllocatedSize(), getOverhangSize());
+	 list_length( shmem_header->free_list_head()),
+	 list_length( shmem_header->alloc_list_head()),
+	 max_free_size(), max_allocated_size(), overhang_size());
 }
 
 
@@ -422,9 +421,9 @@ BlackBoardMemoryManager::printPerformanceInfo() const
  * @return maximum free chunk size
  */
 unsigned int
-BlackBoardMemoryManager::getMaxFreeSize() const
+BlackBoardMemoryManager::max_free_size() const
 {
-  chunk_list_t *m = list_get_biggest( shmem_header->getFreeListHead() );
+  chunk_list_t *m = list_get_biggest( shmem_header->free_list_head() );
   if ( m == NULL ) {
     return 0;
   } else {
@@ -441,10 +440,10 @@ BlackBoardMemoryManager::getMaxFreeSize() const
  * @return sum of free chunk sizes
  */
 unsigned int
-BlackBoardMemoryManager::getFreeSize() const
+BlackBoardMemoryManager::free_size() const
 {
   unsigned int free_size = 0;
-  chunk_list_t *l = shmem_header->getFreeListHead();
+  chunk_list_t *l = shmem_header->free_list_head();
   while ( l ) {
     free_size += l->size;
     l = chunk_ptr(l->next);
@@ -458,10 +457,10 @@ BlackBoardMemoryManager::getFreeSize() const
  * @return sum of allocated chunks sizes
  */
 unsigned int
-BlackBoardMemoryManager::getAllocatedSize() const
+BlackBoardMemoryManager::allocated_size() const
 {
   unsigned int alloc_size = 0;
-  chunk_list_t *l = shmem_header->getAllocListHead();
+  chunk_list_t *l = shmem_header->alloc_list_head();
   while ( l ) {
     alloc_size += l->size;
     l = chunk_ptr(l->next);
@@ -474,9 +473,9 @@ BlackBoardMemoryManager::getAllocatedSize() const
  * @return number of allocated memory chunks
  */
 unsigned int
-BlackBoardMemoryManager::getNumAllocatedChunks() const
+BlackBoardMemoryManager::num_allocated_chunks() const
 {
-  return list_length( shmem_header->getAllocListHead() );
+  return list_length( shmem_header->alloc_list_head() );
 }
 
 
@@ -484,9 +483,9 @@ BlackBoardMemoryManager::getNumAllocatedChunks() const
  * @return number of free memory chunks
  */
 unsigned int
-BlackBoardMemoryManager::getNumFreeChunks() const
+BlackBoardMemoryManager::num_free_chunks() const
 {
-  return list_length( shmem_header->getFreeListHead() );
+  return list_length( shmem_header->free_list_head() );
 }
 
 
@@ -495,7 +494,7 @@ BlackBoardMemoryManager::getNumFreeChunks() const
  * @return size of memory.
  */
 unsigned int
-BlackBoardMemoryManager::getMemorySize() const
+BlackBoardMemoryManager::memory_size() const
 {
   return memsize;
 }
@@ -505,9 +504,9 @@ BlackBoardMemoryManager::getMemorySize() const
  * @return BlackBoard version
  */
 unsigned int
-BlackBoardMemoryManager::getVersion() const
+BlackBoardMemoryManager::version() const
 {
-  return shmem_header->getVersion();
+  return shmem_header->version();
 }
 
 
@@ -530,9 +529,9 @@ BlackBoardMemoryManager::lock()
  * @return true, if the lock could be aquired, false otherwise.
  */
 bool
-BlackBoardMemoryManager::tryLock()
+BlackBoardMemoryManager::try_lock()
 {
-  if ( mutex->tryLock() ) {
+  if ( mutex->try_lock() ) {
     if ( shmem->try_lock_for_write() ) {
       return true;
     } else {
@@ -561,9 +560,9 @@ BlackBoardMemoryManager::unlock()
  * @return maximum allocated chunk size
  */
 unsigned int
-BlackBoardMemoryManager::getMaxAllocatedSize() const
+BlackBoardMemoryManager::max_allocated_size() const
 {
-  chunk_list_t *m = list_get_biggest( shmem_header->getAllocListHead() );
+  chunk_list_t *m = list_get_biggest( shmem_header->alloc_list_head() );
   if ( m == NULL ) {
     return 0;
   } else {
@@ -578,10 +577,10 @@ BlackBoardMemoryManager::getMaxAllocatedSize() const
  * @return number of overhanging bytes
  */
 unsigned int
-BlackBoardMemoryManager::getOverhangSize() const
+BlackBoardMemoryManager::overhang_size() const
 {
   unsigned int overhang = 0;
-  chunk_list_t *a = shmem_header->getAllocListHead();
+  chunk_list_t *a = shmem_header->alloc_list_head();
   while ( a ) {
     overhang += a->overhang;
     a = chunk_ptr(a->next);
@@ -603,7 +602,7 @@ BlackBoardMemoryManager::cleanup_free_chunks()
 	
   while (modified) {
     modified = false;
-    l = shmem_header->getFreeListHead();
+    l = shmem_header->free_list_head();
     n = chunk_ptr(l->next);
     while ( l && n) {
       if ( ((char *)l->ptr + l->size + sizeof(chunk_list_t)) == n->ptr ) {
@@ -791,7 +790,7 @@ BlackBoardMemoryManager::list_get_biggest(const chunk_list_t *list) const
 BlackBoardMemoryManager::ChunkIterator
 BlackBoardMemoryManager::begin()
 {
-  BlackBoardMemoryManager::ChunkIterator rv(shmem, shmem_header->getAllocListHead() );
+  BlackBoardMemoryManager::ChunkIterator rv(shmem, shmem_header->alloc_list_head() );
   return rv;
 }
 

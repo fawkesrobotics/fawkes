@@ -42,7 +42,7 @@ class LockHashSet : public __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>
   virtual ~LockHashSet();
 
   void lock();
-  bool tryLock();
+  bool try_lock();
   void unlock();
 
   void insert_locked(const KeyType& x);
@@ -105,9 +105,9 @@ LockHashSet<KeyType, HashFunction, EqualKey>::lock()
  */
 template <class KeyType, class HashFunction, class EqualKey>
 bool
-LockHashSet<KeyType, HashFunction, EqualKey>::tryLock()
+LockHashSet<KeyType, HashFunction, EqualKey>::try_lock()
 {
-  return mutex->tryLock();
+  return mutex->try_lock();
 }
 
 

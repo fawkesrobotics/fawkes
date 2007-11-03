@@ -1541,9 +1541,9 @@ SQLiteConfiguration::lock()
  * @return true, if the lock has been aquired, false otherwise
  */
 bool
-SQLiteConfiguration::tryLock()
+SQLiteConfiguration::try_lock()
 {
-  return mutex->tryLock();
+  return mutex->try_lock();
 }
 
 /** Unlock the config.

@@ -43,7 +43,7 @@ class LockHashMap : public __gnu_cxx::hash_map<KeyType, ValueType, HashFunction,
   virtual ~LockHashMap();
 
   void lock();
-  bool tryLock();
+  bool try_lock();
   void unlock();
 
  private:
@@ -104,9 +104,9 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::lock()
  */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 bool
-LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::tryLock()
+LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::try_lock()
 {
-  return mutex->tryLock();
+  return mutex->try_lock();
 }
 
 

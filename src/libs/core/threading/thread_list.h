@@ -147,7 +147,7 @@ class ThreadList : private LockList<Thread *>
   using LockList<Thread *>::end;
   using LockList<Thread *>::iterator;
   using LockList<Thread *>::lock;
-  using LockList<Thread *>::tryLock;
+  using LockList<Thread *>::try_lock;
   using LockList<Thread *>::unlock;
   using LockList<Thread *>::size;
   using LockList<Thread *>::empty;

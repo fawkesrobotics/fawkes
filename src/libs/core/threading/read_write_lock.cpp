@@ -92,7 +92,7 @@ ReadWriteLock::~ReadWriteLock()
  * This method will block until the lock has been aquired.
  */
 void
-ReadWriteLock::lockForRead()
+ReadWriteLock::lock_for_read()
 {
   pthread_rwlock_rdlock( &(rwlock_data->rwlock) );
 }
@@ -104,7 +104,7 @@ ReadWriteLock::lockForRead()
  * This method will block until the lock has been aquired.
  */
 void
-ReadWriteLock::lockForWrite()
+ReadWriteLock::lock_for_write()
 {
   pthread_rwlock_wrlock( &(rwlock_data->rwlock) );
 }
@@ -117,7 +117,7 @@ ReadWriteLock::lockForWrite()
  * @return true, if the lock could be aquired, false otherwise.
  */
 bool
-ReadWriteLock::tryLockForRead()
+ReadWriteLock::try_lock_for_read()
 {
   return ( pthread_rwlock_tryrdlock( &(rwlock_data->rwlock) ) == 0 );
 }
@@ -130,7 +130,7 @@ ReadWriteLock::tryLockForRead()
  * @return true, if the lock has been aquired, false otherwise.
  */
 bool
-ReadWriteLock::tryLockForWrite()
+ReadWriteLock::try_lock_for_write()
 {
   return ( pthread_rwlock_trywrlock( &(rwlock_data->rwlock) ) == 0 );
 }

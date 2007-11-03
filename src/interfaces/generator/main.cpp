@@ -100,7 +100,7 @@ main(int argc, char **argv)
 	delete iparse;
       } catch (Exception &e) {
 	cout << "Generating the interface failed." << endl;
-	e.printTrace();
+	e.print_trace();
       }
     }
   }

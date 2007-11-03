@@ -111,7 +111,7 @@ Interface::~Interface()
 void
 Interface::read()
 {
-  __rwlock->lockForRead();
+  __rwlock->lock_for_read();
   memcpy(data_ptr, __mem_data_ptr, data_size);
   __rwlock->unlock();
 }
@@ -125,7 +125,7 @@ Interface::write()
     throw InterfaceWriteDeniedException(__type, __id);
   }
 
-  __rwlock->lockForWrite();
+  __rwlock->lock_for_write();
   memcpy(__mem_data_ptr, data_ptr, data_size);
   __rwlock->unlock();
 
@@ -203,7 +203,7 @@ Interface::serial() const
  * instance.
  */
 bool
-Interface::hasWriter() const
+Interface::has_writer() const
 {
   return __interface_mediator->exists_writer(this);
 }
@@ -310,9 +310,9 @@ Interface::msgq_lock()
  * @see lock()
  */
 bool
-Interface::msgq_tryLock()
+Interface::msgq_try_lock()
 {
-  return __message_queue->tryLock();
+  return __message_queue->try_lock();
 }
 
 

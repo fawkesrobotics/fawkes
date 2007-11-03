@@ -106,7 +106,7 @@ JoystickControl::enqueueKick(bool left, bool center, bool right)
       KickerInterface::KickMessage * msg =
         new KickerInterface::KickMessage (right, center, left, /* intensity */ 150);
 
-      if (kicker_interface->hasWriter())
+      if (kicker_interface->has_writer())
         {
           kicker_interface->msgq_enqueue(msg);
         }
