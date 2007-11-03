@@ -32,9 +32,9 @@
 #define _GNU_SOURCE
 #endif
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 
 /** @class Exception core/exception.h
  * Base class for exceptions in Fawkes.
@@ -142,7 +142,7 @@
  * Thus the memory has to be freed if it is a dynamic  string on the heap.
  */
 Exception::Exception(const char *format, ...) throw()
-{
+{ 
   messages_mutex = new Mutex();
   messages_mutex->lock();
 
@@ -499,7 +499,7 @@ Exception::print_trace() throw()
 {
   messages_mutex->lock();
   fprintf(stderr, "Exception trace\n"
-	  "============================================================================\n");
+	  "=================================================== BEGIN OF EXCEPTION =====\n");
   if ( messages == NULL ) {
     fprintf(stderr, "No messages recorded.\n");
   } else {
@@ -510,7 +510,7 @@ Exception::print_trace() throw()
     }
   }
   fprintf(stderr,
-	  "============================================================================\n");
+	  "=================================================== END OF EXCEPTION =======\n");
   messages_mutex->unlock();
 }
 

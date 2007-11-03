@@ -57,11 +57,11 @@ void
 throw_some_exception()
 {
   int r = rand();
-  if ( r < (RAND_MAX / 3)) {
+  if ( r < (RAND_MAX / 2)) {
     throw ExampleSmallException();
-  } else if ( r > 1 - (RAND_MAX / 20)) {
-    printf("Throwing boom\n");
-    throw ExampleUnhandledException();
+  } else if ( r > (RAND_MAX - RAND_MAX / 20)) {
+    //printf("Throwing boom\n");
+    //throw ExampleUnhandledException();
   } else {
     throw ExampleBigException();
   }
@@ -81,13 +81,13 @@ indirect_throw_some_exception()
 void
 variadic_func(const char *format, ...)
 {
-  /*
   va_list va;
   va_start(va, format);
   throw Exception(format, va);
   va_end(va);
-  */
+  /*
   throw Exception("Format received: %s", format);
+  */
 }
 
 int
@@ -96,10 +96,10 @@ main(int argc, char **argv)
   srand(42);
 
   // errno exception
-  // throw Exception(1, "test %s", "blub");
+  // throw Exception(1, "test %i %s", 3, "blub");
 
   // throw variadic exception
-  variadic_func("test %s %i %f", "haha", 4, 3.2);
+  // variadic_func("test %i %s %i %f", 4, "haha", 4, 3.2);
 
   while (1) {
     try {
