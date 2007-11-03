@@ -43,16 +43,16 @@ main(int argc, char **argv)
 {
   ArgumentParser *argp = new ArgumentParser(argc, argv, "d:");
 
-  vector<char *> & items = argp->getItems();
+  const vector<const char *> & items = argp->items();
   if ( items.size() == 0 ) {
     cout << "Usage: " << argv[0] << " [-d dir] config.xml [config2.xml...]" << endl << endl;
   } else {
     string dir = INTERFACEDIR;
-    if ( argp->hasArgument("d") ) {
-      dir = argp->getArgument("d");
+    if ( argp->has_arg("d") ) {
+      dir = argp->arg("d");
     }
 
-    for ( vector<char *>::iterator i = items.begin(); i != items.end(); ++i) {
+    for ( vector<const char *>::const_iterator i = items.begin(); i != items.end(); ++i) {
       string s = *i;
       string prefix;
       size_t pos;

@@ -72,7 +72,7 @@
  * For more information see man 3 getopt.
  *
  * All arguments that do not belong to parsed options are stored as items and can
- * be retrieved via getItems().
+ * be retrieved via items().
  */
 
 
@@ -84,10 +84,17 @@
  */
 ArgumentParser::ArgumentParser(int argc, char **argv, char *opt_string, option *long_options)
 {
-  this->argc = argc;
-  this->argv = argv;
+  _argc = argc;
+  _argv = argv;
 
-  program_name = basename( argv[0] );
+#ifdef _GNU_SOURCE
+  _program_name = strdup(basename( argv[0] ));
+#else
+  // Non-GNU variants may modify the sting in place
+  char *tmp = strdup(argv[0]);
+  _program_name = strdup(basename(tmp));
+  free(tmp);
+#endif
 
   if (long_options == NULL) {
     int c ;
@@ -100,7 +107,7 @@ ArgumentParser::ArgumentParser(int argc, char **argv, char *opt_string, option *
 	throw MissingArgumentException(c);
       }
       sprintf(tmp, "%c", c);
-      opts[ std::string(tmp) ] = optarg;
+      _opts[ tmp ] = optarg;
     }
   } else {
     int opt_ind = 0;
@@ -110,46 +117,53 @@ ArgumentParser::ArgumentParser(int argc, char **argv, char *opt_string, option *
 	throw UnknownArgumentException(c);
       } else if (c == 0) {
 	// long options
-	opts[ std::string(long_options[opt_ind].name) ] = optarg;
+	_opts[ long_options[opt_ind].name ] = optarg;
       } else {
 	char tmp[2];
 	sprintf(tmp, "%c", c);
-	opts[ std::string(tmp) ] = optarg;
+	_opts[ tmp ] = optarg;
       }
     }
   }
 
-  items.clear();
+  _items.clear();
   int ind = optind;
   while (ind < argc) {
-    items.push_back( argv[ind++] );
+    _items.push_back( argv[ind++] );
   }
 
 }
 
 
+/** Destructor. */
+ArgumentParser::~ArgumentParser()
+{
+  free(_program_name);
+}
+
+
 /** Check if argument has been supplied.
- * @param arg argument to check for
+ * @param argn argument name to check for
  * @return true, if the argument was given on the command line, false otherwise
  */
 bool
-ArgumentParser::hasArgument(std::string arg)
+ArgumentParser::has_arg(const char *argn) const
 {
-  return (opts.count(arg) > 0);
+  return (_opts.count(argn) > 0);
 }
 
 
 /** Get argument value.
  * Use this method to get the value supplied to the given option.
- * @param arg argument to retrieve
+ * @param argn argument name to retrieve
  * @return the argument value. Pointer to static program array. Do not free!
  * Returns NULL if argument was not supplied on command line.
  */
-char *
-ArgumentParser::getArgument(std::string arg)
+const char *
+ArgumentParser::arg(const char *argn)
 {
-  if (opts.count(arg) > 0) {
-    return opts[ arg ];
+  if (_opts.count(argn) > 0) {
+    return _opts[ argn ];
   } else {
     return NULL;
   }
@@ -157,16 +171,19 @@ ArgumentParser::getArgument(std::string arg)
 
 
 /** Get argument while checking availability.
- * @param arg argument to retrieve
- * @param value a pointer to the argument value will be stored here if the argument
- * has been found. The value is unchanged if argument was not supplied.
+ * The argument will be a newly allocated copy of the string. You have to
+ * free it after you are done with it.
+ * @param argn argument name to retrieve
+ * @param value a pointer to a newly allocated copy of the argument value will
+ * be stored here if the argument has been found.
+ * The value is unchanged if argument was not supplied.
  * @return true, if the argument was supplied, false otherwise
  */
 bool
-ArgumentParser::getArgument(std::string arg, char **value)
+ArgumentParser::arg(const char *argn, char **value)
 {
-  if (opts.count(arg) > 0) {
-    *value = opts[ arg ];
+  if (_opts.count(argn) > 0) {
+    *value = strdup(_opts[ argn ]);
     return true;
   } else {
     return false;
@@ -178,10 +195,10 @@ ArgumentParser::getArgument(std::string arg, char **value)
  * @return pointer to vector of pointer to non-argument values. Handled internally,
  * do not free or delete!
  */
-std::vector< char* > &
-ArgumentParser::getItems()
+const std::vector< const char* > &
+ArgumentParser::items() const
 {
-  return items;
+  return _items;
 }
 
 
@@ -189,27 +206,27 @@ ArgumentParser::getItems()
  * @return number of arguments
  */
 int
-ArgumentParser::getArgC()
+ArgumentParser::argc() const
 {
-  return argc;
+  return _argc;
 }
 
 
 /** Program argument array as supplied to constructor.
  * @return argument array.
  */
-char **
-ArgumentParser::getArgV()
+const char **
+ArgumentParser::argv() const
 {
-  return argv;
+  return (const char **)_argv;
 }
 
 
 /** Get name of program.
  * @return the name of the program (argv[0] of argument vector supplied to constructor).
  */
-std::string
-ArgumentParser::getProgramName()
+const char *
+ArgumentParser::program_name() const
 {
-  return program_name;
+  return _program_name;
 }

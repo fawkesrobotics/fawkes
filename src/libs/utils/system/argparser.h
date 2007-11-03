@@ -26,12 +26,11 @@
  */
 
 #ifndef __UTILS_SYSTEM_ARGPARSER_H_
-#define __UTILS_SYSTME_ARGPARSER_H_
+#define __UTILS_SYSTEM_ARGPARSER_H_
 
 #include <core/exception.h>
 
-#include <string>
-#include <map>
+#include <ext/hash_map>
 #include <vector>
 
 #include <getopt.h>
@@ -67,25 +66,27 @@ class ArgumentParser
 {
  public:
   ArgumentParser(int argc, char **argv, char *opt_string, option *long_options = NULL);
+  ~ArgumentParser();
 
-  bool hasArgument(std::string arg);
-  char * getArgument(std::string arg);
-  bool getArgument(std::string arg, char **value);
-  std::string getProgramName();
+  bool         has_arg(const char *argn) const;
+  const char * arg(const char *argn);
+  bool         arg(const char *argn, char **value);
+  const char * program_name() const;
 
-  std::vector< char* > & getItems();
+  const std::vector< const char * > & items() const;
 
-  int      getArgC();
-  char **  getArgV();
+  int            argc() const;
+  const char **  argv() const;
 
  private:
 
-  std::map< std::string, char * > opts;
-  std::vector< char * > items;
-  std::string program_name;
+  __gnu_cxx::hash_map< const char *, const char * > _opts;
+  __gnu_cxx::hash_map< const char *, const char * >::const_iterator  _opts_cit;
+  std::vector< const char * >  _items;
 
-  char **argv;
-  int    argc;
+  char *  _program_name;
+  char ** _argv;
+  int     _argc;
 
 };
 

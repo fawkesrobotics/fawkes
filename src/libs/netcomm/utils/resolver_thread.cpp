@@ -201,10 +201,10 @@ NetworkNameResolverThread::resolve_address_immediately(struct sockaddr *addr, so
  * @param name name to resolve
  */
 void
-NetworkNameResolverThread::resolve_name(char *name)
+NetworkNameResolverThread::resolve_name(const char *name)
 {
   namesq.lock();
-  if ( namesq.find(name) == namesq.end() ) {
+  if ( namesq.find((char *)name) == namesq.end() ) {
     namesq.insert(strdup(name));
     namesq.unlock();
     wakeup();

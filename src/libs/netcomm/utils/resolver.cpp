@@ -144,12 +144,12 @@ NetworkNameResolver::flush_cache()
  * @return true if resolution was successful, false otherwise
  */
 bool
-NetworkNameResolver::resolve_name(char *name,
+NetworkNameResolver::resolve_name(const char *name,
 				  struct sockaddr **addr, socklen_t *addrlen)
 {
-  if ( name2addr_cache.find( name ) != name2addr_cache.end() ) {
+  if ( name2addr_cache.find( (char *)name ) != name2addr_cache.end() ) {
     // the name is in the cache, refetch?
-    std::pair<struct sockaddr *, time_t> &nrec = name2addr_cache[name];
+    std::pair<struct sockaddr *, time_t> &nrec = name2addr_cache[(char *)name];
     if ( nrec.second >= time(NULL) ) {
       // entry outdated, retry
       resolver_thread->resolve_name(name);
@@ -176,7 +176,7 @@ NetworkNameResolver::resolve_name(char *name,
  * @return true if resolution was successful, false otherwise
  */
 bool
-NetworkNameResolver::resolve_name_blocking(char *name,
+NetworkNameResolver::resolve_name_blocking(const char *name,
 					   struct sockaddr **addr, socklen_t *addrlen)
 {
   if ( resolve_name(name, addr, addrlen) ) {
@@ -282,7 +282,6 @@ void
 NetworkNameResolver::addr_resolved(struct sockaddr *addr, socklen_t addrlen,
 				   char *name, bool namefound)
 {
-  printf("DEB Addr resolved to %s\n", name);
   struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
   if ( (a2ncit = addr2name_cache.find( saddr->sin_addr.s_addr )) != addr2name_cache.end() ) {
     // delete old entry

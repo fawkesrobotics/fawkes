@@ -88,11 +88,11 @@ class LibLoggerQAMain : public SignalHandler
   {
     unsigned int sleep_time_usec = 0;
     unsigned int num_threads     = 3;
-    char *tmp;
-    if ( (tmp = argp->getArgument("s")) != NULL ) {
+    const char *tmp;
+    if ( (tmp = argp->arg("s")) != NULL ) {
       sleep_time_usec = atoi(tmp);
     }
-    if ( (tmp = argp->getArgument("n")) != NULL ) {
+    if ( (tmp = argp->arg("n")) != NULL ) {
       num_threads = atoi(tmp);
       if ( num_threads < 0 ) {
 	num_threads = 3;
@@ -144,7 +144,7 @@ main(int argc, char **argv)
 {
   ArgumentParser *argp = new ArgumentParser(argc, argv, "s:n:");
 
-  if ( argp->hasArgument("H") ) {
+  if ( argp->has_arg("H") ) {
     cout << "Usage: " << argv[0] << "[-s n] [-n n]" << endl
 	 << " -s n Sleep time for thres in usec" << endl
 	 << " -H   this help message" << endl

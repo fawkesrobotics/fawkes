@@ -50,15 +50,15 @@ PluginTool::PluginTool(ArgumentParser *argp, FawkesNetworkClient *c)
   plugin_name = NULL;
   quit        = false;
   
-  if ( argp->hasArgument("l") ) {
+  if ( argp->has_arg("l") ) {
     opmode = M_LOAD;
-    plugin_name = argp->getArgument("l");
-  } else if ( argp->hasArgument("u") ) {
+    plugin_name = argp->arg("l");
+  } else if ( argp->has_arg("u") ) {
     opmode = M_UNLOAD;
-    plugin_name = argp->getArgument("u");
-  } else if ( argp->hasArgument("w") ) {
+    plugin_name = argp->arg("u");
+  } else if ( argp->has_arg("w") ) {
     opmode = M_WATCH;
-  } else if ( argp->hasArgument("a") ) {
+  } else if ( argp->has_arg("a") ) {
     opmode = M_LIST_AVAIL;
   } else {
     opmode = M_LIST;

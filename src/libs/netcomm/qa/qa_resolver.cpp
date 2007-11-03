@@ -52,7 +52,7 @@ class ResolverQAMain : public SignalHandler
 
 #ifdef HAVE_AVAHI
     at = NULL;
-    if ( argp->hasArgument("a") ) {
+    if ( argp->has_arg("a") ) {
       printf("Instantiating Avahi thread\n");
       at = new AvahiThread();
       at->start();
@@ -109,10 +109,10 @@ class ResolverQAMain : public SignalHandler
       printf("Successfully resolved address to '%s'\n", name);
     }
 
-    char *tmp;
-    if ( (tmp = argp->getArgument("h")) != NULL ) {
-      printf("Trying to resolve %s\n", tmp);
-      while ( ! quit && ! r->resolve_name(tmp, (struct sockaddr **)&s, &slen) ) {
+    const char *atmp;
+    if ( (atmp = argp->arg("h")) != NULL ) {
+      printf("Trying to resolve %s\n", atmp);
+      while ( ! quit && ! r->resolve_name(atmp, (struct sockaddr **)&s, &slen) ) {
 	usleep(0);
       }
       if ( quit ) {
@@ -123,6 +123,7 @@ class ResolverQAMain : public SignalHandler
       printf("Successfully resolved to 0x%x (%s)\n", s->sin_addr.s_addr, addrp);
 
       struct sockaddr_in so;
+      char *tmp;
       slen = sizeof(so);
       so.sin_addr.s_addr = s->sin_addr.s_addr;
       r->resolve_address((struct sockaddr *)&so, slen, &tmp);

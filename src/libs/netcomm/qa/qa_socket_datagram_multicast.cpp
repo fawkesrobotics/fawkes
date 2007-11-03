@@ -150,11 +150,11 @@ class MulticastDatagramSocketQAMain : public SignalHandler
     s = NULL;
     r = NULL;
     this->argp = argp;
-    if ( argp->hasArgument("r") ) {
+    if ( argp->has_arg("r") ) {
       printf("Going to be a reflector\n");
       r = new MulticastDatagramReflectorThread(1910);
     } else {
-      bool looping = argp->hasArgument("l");
+      bool looping = argp->has_arg("l");
       if ( looping ) {
 	printf("Enabling local loop (we receive own traffic)\n");
       }

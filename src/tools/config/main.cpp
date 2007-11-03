@@ -220,7 +220,7 @@ main(int argc, char **argv)
 {
   ArgumentParser argp(argc, argv, "H");
 
-  if ( argp.hasArgument("H") ) {
+  if ( argp.has_arg("H") ) {
     print_usage(argv[0]);
     exit(0);
   }
@@ -233,7 +233,7 @@ main(int argc, char **argv)
 
   NetworkConfiguration *netconf = new NetworkConfiguration(c);
 
-  std::vector< char* > & args = argp.getItems();
+  const std::vector< const char* > & args = argp.items();
 
   if ( args.size() == 0) {
     // show usage
@@ -362,7 +362,7 @@ main(int argc, char **argv)
 
       }
     } else {
-      printf("Usage: %s set <component> <path> <value> [type]\n", argp.getProgramName().c_str());
+      printf("Usage: %s set <component> <path> <value> [type]\n", argp.program_name());
     }
   } else if ((strcmp("erase", args[0]) == 0) || (strcmp("erase_default", args[0]) == 0)) {
     bool erase_def = (strcmp("erase_default", args[0]) == 0);

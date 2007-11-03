@@ -53,7 +53,7 @@ class NetworkNameResolverThread : public Thread
                             AvahiThread *avahi_thread = NULL);
   ~NetworkNameResolverThread();
 
-  void resolve_name(char *name);
+  void resolve_name(const char *name);
   void resolve_address(struct sockaddr *addr, socklen_t addrlen);
 
   bool resolve_name_immediately(const char *name,

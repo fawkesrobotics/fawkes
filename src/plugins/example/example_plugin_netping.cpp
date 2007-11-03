@@ -89,17 +89,17 @@ main(int argc, char **argv)
   ExamplePluginClientNetworkReceiver r;
   c->registerHandler(&r, FAWKES_CID_EXAMPLE_PLUGIN);
 
-  char *tmp;
+  const char *tmp;
   unsigned int *u = (unsigned int *)malloc(sizeof(unsigned int));;
   unsigned int id = 1;
-  if ( (tmp = argp.getArgument("n")) != NULL ) {
+  if ( (tmp = argp.arg("n")) != NULL ) {
     int i = atoi(tmp);
     if ( i > 0 ) {
       *u = i;
     }
   }
 
-  if ( (tmp = argp.getArgument("i")) != NULL ) {
+  if ( (tmp = argp.arg("i")) != NULL ) {
     int i = atoi(tmp);
     if ( i > 0 ) {
       id = i;

@@ -188,7 +188,7 @@ class WorldInfoQAMain : public SignalHandler
   WorldInfoQAMain(ArgumentParser *argp)
   {
 #ifdef HAVE_AVAHI
-    if ( argp->hasArgument("a") ) {
+    if ( argp->has_arg("a") ) {
       at = new AvahiThread();
       at->start();
       printf("Waiting for Avahi thread to initialize\n");
@@ -203,11 +203,11 @@ class WorldInfoQAMain : public SignalHandler
     s = NULL;
     r = NULL;
     this->argp = argp;
-    if ( argp->hasArgument("r") ) {
+    if ( argp->has_arg("r") ) {
       printf("Going to be a receiver\n");
-      r = new WorldInfoReceiverThread(1910, argp->hasArgument("s") ? 1 : 0, rs);
+      r = new WorldInfoReceiverThread(1910, argp->has_arg("s") ? 1 : 0, rs);
     } else {
-      s = new WorldInfoSenderThread(1910, argp->hasArgument("l"), rs);
+      s = new WorldInfoSenderThread(1910, argp->has_arg("l"), rs);
     }
   }
 
@@ -260,7 +260,7 @@ main(int argc, char **argv)
 {
   ArgumentParser *argp = new ArgumentParser(argc, argv, "arlsH");
 
-  if ( argp->hasArgument("H") ) {
+  if ( argp->has_arg("H") ) {
     cout << "Usage: " << argv[0] << "[-r] [-H] [-s] [-l] [-a]" << endl
 	 << " -r   receiver (sender otherwise)" << endl
 	 << " -H   this help message" << endl

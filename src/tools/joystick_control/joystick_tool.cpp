@@ -314,15 +314,15 @@ int main(int argc, char **argv)
 {
   ArgumentParser *argp = new ArgumentParser(argc, argv, "r:u");
   
-  char *host_name;
+  const char *host_name;
   
-  if ( argp->hasArgument("r") ) {
-    host_name = argp->getArgument("r");
+  if ( argp->has_arg("r") ) {
+    host_name = argp->arg("r");
   } else {
     host_name = "localhost";
   }
   
-  JoystickTool control(host_name, argp->hasArgument("u"));
+  JoystickTool control(host_name, argp->has_arg("u"));
   control.mainLoop(); 
 
   return 0;     

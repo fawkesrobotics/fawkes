@@ -67,16 +67,16 @@ class QAAvahiResolverMain : public SignalHandler, public AvahiResolverHandler
     printf("Waiting until AvahiThread has been initialized\n");
     at->wait_initialized();
 
-    wait_for_name = argp->hasArgument("n");
-    wait_for_addr = argp->hasArgument("a");
+    wait_for_name = argp->has_arg("n");
+    wait_for_addr = argp->has_arg("a");
 
     char *tmp;
-    if ( (tmp = argp->getArgument("n")) != NULL ) {
+    if ( (tmp = argp->arg("n")) != NULL ) {
       printf("Calling name resolver\n");
       ar->resolve_name(tmp, this);
     }
 
-    if ( (tmp = argp->getArgument("a")) != NULL ) {
+    if ( (tmp = argp->arg("a")) != NULL ) {
       printf("Calling address resolver\n");
       struct sockaddr_in saddr;
       if ( inet_pton(AF_INET, tmp, &(saddr.sin_addr)) >= 0 ) {
@@ -156,7 +156,7 @@ main(int argc, char **argv)
 {
   ArgumentParser *argp = new ArgumentParser(argc, argv, "n:a:");
 
-  if ( ! argp->hasArgument("n") && ! argp->hasArgument("a") ) {
+  if ( ! argp->has_arg("n") && ! argp->has_arg("a") ) {
     printf("Usage: %s [-n name] [-a address]\n\n", argv[0]);
     delete argp;
     return -1;

@@ -45,14 +45,14 @@ main(int argc, char **argv)
   ModuleDL *mod = new ModuleDL(LIBDIR"/libinterfaces.so");
   mod->open();
 
-  vector<char *> items = argp->getItems();
+  const vector<const char *> items = argp->items();
 
   if ( items.size() == 0 ) {
-    cout << "Usage: " << argp->getProgramName() << " interface_type [interface_type...]"
+    cout << "Usage: " << argp->program_name() << " interface_type [interface_type...]"
 	 << endl;
   }
 
-  for (vector<char *>::iterator i = items.begin(); i != items.end(); ++i) {
+  for (vector<const char *>::const_iterator i = items.begin(); i != items.end(); ++i) {
     // try to load mod
     const char *type = (*i);
     char *generator_name = (char *)malloc(strlen("new") + strlen(type) + 1);

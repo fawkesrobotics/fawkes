@@ -527,11 +527,11 @@ int main(int argc, char** argv)
 { 
   ArgumentParser *argp = new ArgumentParser(argc, argv, "r:");
   
-  char *host_name;
+  const char *host_name;
   
-  if ( argp->hasArgument("r") ) 
+  if ( argp->has_arg("r") ) 
     {
-      host_name = argp->getArgument("r");
+      host_name = argp->arg("r");
     } 
   else 
     {

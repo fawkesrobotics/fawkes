@@ -205,14 +205,14 @@ main(int argc, char **argv)
 
   ArgumentParser argp(argc, argv, "sc:");
 
-  if ( argp.hasArgument("s") || argp.hasArgument("c") ) {
+  if ( argp.has_arg("s") || argp.has_arg("c") ) {
     // Special mode
-    if ( argp.hasArgument("s") ) {
+    if ( argp.has_arg("s") ) {
       // Only run Server
       m = new StreamSocketQAMain(StreamSocketQAMain::MODE_SERVER);
     } else {
       m = new StreamSocketQAMain(StreamSocketQAMain::MODE_CLIENT,
-				 argp.getArgument("c"));
+				 argp.arg("c"));
     }
   } else {
     m = new StreamSocketQAMain(StreamSocketQAMain::MODE_STANDALONE);
