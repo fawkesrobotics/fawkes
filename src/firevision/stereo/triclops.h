@@ -34,6 +34,7 @@
 class Bumblebee2Camera;
 class Camera;
 class TriclopsStereoProcessorData;
+class RectificationLutInfoBlock;
 
 class TriclopsStereoProcessor : public StereoProcessor
 {
@@ -83,6 +84,7 @@ class TriclopsStereoProcessor : public StereoProcessor
   virtual unsigned char *  auxiliary_yuv_buffer();
 
   void    generate_rectification_lut(const char *lut_file);
+  bool    verify_rectification_lut(const char *lut_file);
 
  private:
   void get_triclops_context_from_camera();

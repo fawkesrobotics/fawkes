@@ -101,7 +101,7 @@ main(int argc, char **argv)
     free(outfile);
 
   } catch (Exception &e) {
-    e.printTrace();
+    e.print_trace();
     throw;
   }
 }

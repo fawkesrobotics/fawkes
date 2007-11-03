@@ -32,6 +32,7 @@
 
 #include <core/exceptions/system.h>
 
+#include <cstring>
 #include <cstdio>
 #include <errno.h>
 #include <netinet/in.h>
@@ -52,12 +53,29 @@
 
 /** Constructor.
  * @param cam_guid Camera globally unique identifier.
+ * @param model String with the model name of the camera
  */
-RectificationInfoFile::RectificationInfoFile(uint64_t cam_guid)
+RectificationInfoFile::RectificationInfoFile(uint64_t cam_guid, const char *model)
 {
   _header = new rectinfo_header_t;
 
   _cam_guid = cam_guid;
+  _model = strdup(model);
+
+  clear();
+}
+
+
+/** Constructor.
+ * This constructor may only be used for reading files, as the GUID of the camera
+ * is invalid for writing.
+ */
+RectificationInfoFile::RectificationInfoFile()
+{
+  _header = new rectinfo_header_t;
+
+  _cam_guid = 0;
+  _model = strdup("");
 
   clear();
 }
@@ -71,6 +89,7 @@ RectificationInfoFile::~RectificationInfoFile()
   }
   info_blocks.clear();
   delete _header;  
+  if (_model != NULL)  free(_model);
 }
 
 
@@ -121,6 +140,16 @@ uint64_t
 RectificationInfoFile::guid()
 {
   return _header->guid;
+}
+
+
+/** Get the model of the camera.
+ * @return string with the camera's model name
+ */
+const char *
+RectificationInfoFile::model()
+{
+  return _model;
 }
 
 
@@ -187,6 +216,7 @@ RectificationInfoFile::write(const char *file_name)
 
   // Just to be safe
   _header->num_blocks = info_blocks.size();
+  strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH);
 
   if ( fwrite(_header, sizeof(rectinfo_header_t), 1, f) != 1 ) {
     fclose(f);
@@ -217,6 +247,8 @@ RectificationInfoFile::read(const char *file_name)
 				                      "for reading");
   }
 
+  clear();
+
   if ( fread(_header, sizeof(rectinfo_header_t), 1, f) != 1) {
     fclose(f);
     throw FileReadException(file_name, errno, "Reading rectlut header failed");
@@ -231,6 +263,9 @@ RectificationInfoFile::read(const char *file_name)
     fclose(f);
     throw Exception("Unsupported version of rectinfo file");
   }
+
+  if ( _model != NULL )  free(_model);
+  _model = strndup(_header->camera_model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH);
 
   if ( _header->endianess ==
 #if __BYTE_ORDER == __BIG_ENDIAN

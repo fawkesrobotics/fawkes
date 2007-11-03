@@ -54,12 +54,13 @@ OBJS_fvbb2info = bb2info.o
 OBJS_all = $(OBJS_fvshmem) $(OBJS_listfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
 	   $(OBJS_fvbb2info)
-BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvconverter
+BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvconverter $(BINDIR)/fvbb2rectlut
 
 ifeq ($(HAVE_TRICLOPS_SDK),1)
   BINS_all += $(BINDIR)/fvtricalcdisp
 else
   WARN_TARGETS += warning_tricalcdisp
+  WARN_TARGETS += warning_bb2rectlut_triclops
 endif
 
 ifeq ($(HAVE_FIREWIRE_CAM),1)
@@ -74,12 +75,7 @@ else
   WARN_TARGETS += warning_bb2gettric
   WARN_TARGETS += warning_bb2info
   WARN_TARGETS += warning_stereodecoder
-endif
-
-ifeq ($(HAVE_BUMBLEBEE2_CAM)$(HAVE_TRICLOPS_SDK),11)
-  BINS_all += $(BINDIR)/fvbb2rectlut
-else
-  WARN_TARGETS += warning_bb2rectlut
+  WARN_TARGETS += warning_bb2rectlut_bb2
 endif
 
 ifneq ($(SRCDIR),.)
@@ -94,8 +90,10 @@ warning_tricalcdisp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvtricalcdisp$(TNORMAL) (no Triclops SDK support)";
 warning_bb2gettric:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvbb2gettric$(TNORMAL) (no Bumblebee2 camera support)";
-warning_bb2rectlut:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvbb2rectlut$(TNORMAL) (no Triclops SDK or BB2 support)";
+warning_bb2rectlut_nobb2:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Building fvbb2rectlut w/o retrieval and verification support$(TNORMAL) (no BB2 support)";
+warning_bb2rectlut_triclops:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Building fvbb2rectlut w/o retrieval and limited verification support$(TNORMAL) (no Triclops SDK)";
 warning_bb2info:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvbb2info$(TNORMAL) (no Bumblebee2 camera support)";
 endif

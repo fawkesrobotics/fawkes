@@ -76,15 +76,15 @@ FirewireCamera::FirewireCamera(dc1394framerate_t framerate,
     this->framerate = DC1394_FRAMERATE_15;
   }
 
-  model = NULL;
+  _model = NULL;
 }
 
 
 /** Empty destructor. */
 FirewireCamera::~FirewireCamera()
 {
-  if ( model != NULL ) {
-    free(model);
+  if ( _model != NULL ) {
+    free(_model);
   }
 }
 
@@ -113,7 +113,7 @@ FirewireCamera::open()
   }
 
   if (num_cameras > 0) {
-    if ( strcmp(model, "any") == 0 ) {
+    if ( strcmp(_model, "any") == 0 ) {
       /* use the first camera found */
       cam=0;
       found = true;
@@ -127,7 +127,7 @@ FirewireCamera::open()
     } else {
       camera = NULL;
       for (i = 0; i < num_cameras; ++i) {
-	if ( !found && strcmp(model, cameras[i]->model) == 0) {
+	if ( !found && strcmp(_model, cameras[i]->model) == 0) {
 	  // found desired camera
 	  camera = cameras[i];
 	  found = true;
@@ -252,6 +252,21 @@ FirewireCamera::guid() const
 
   return camera->id.guid;
 }
+
+
+/** Get camera model.
+ * @return string with the camera model name
+ */
+const char *
+FirewireCamera::model() const
+{
+  if ( ! opened ) {
+    throw Exception("Camera not opened");
+  }
+
+  return camera->model;
+}
+
 
 void
 FirewireCamera::capture()
@@ -555,7 +570,7 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   format7_mode_enabled = false;
   format7_width = format7_height = format7_startx = format7_starty = 0;
   format7_bpp = 4096;
-  model = strdup(cap->cam_id().c_str());
+  _model = strdup(cap->cam_id().c_str());
 
   if ( cap->has("mode") ) {
     string m = cap->get("mode");

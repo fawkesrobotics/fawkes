@@ -36,15 +36,17 @@ class RectificationInfoBlock;
 class RectificationInfoFile
 {
  public:
-  RectificationInfoFile(uint64_t cam_guid);
+  RectificationInfoFile();
+  RectificationInfoFile(uint64_t cam_guid, const char *model);
   ~RectificationInfoFile();
 
-  uint8_t  version();
-  uint64_t guid();
-  bool     is_big_endian();
-  bool     is_little_endian();
+  uint8_t       version();
+  uint64_t      guid();
+  const char *  model();
+  bool          is_big_endian();
+  bool          is_little_endian();
 
-  uint8_t  num_blocks();
+  uint8_t       num_blocks();
 
   void add_rectinfo_block(RectificationInfoBlock *block);
   void write(const char *file_name);
@@ -56,6 +58,7 @@ class RectificationInfoFile
  private:
   rectinfo_header_t  *_header;
   uint64_t            _cam_guid;
+  char               *_model;
 
   std::list<RectificationInfoBlock *>            info_blocks;
   std::list<RectificationInfoBlock *>::iterator  ibi;

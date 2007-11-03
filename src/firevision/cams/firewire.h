@@ -91,6 +91,7 @@ class FirewireCamera : public Camera, public CameraControl
   virtual void           set_auto_white_balance(bool enabled);
 
   virtual uint64_t       guid() const;
+  virtual const char *   model() const;
 
   static  void           print_available_fwcams();
 
@@ -139,7 +140,7 @@ class FirewireCamera : public Camera, public CameraControl
   //unsigned int                   white_balance_vr;
 
   /** Camera model, used in open to identify the camera, if empty first found camera is used */
-  char *model;
+  char *_model;
 
 };
 

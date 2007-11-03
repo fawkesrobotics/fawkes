@@ -805,20 +805,25 @@ void
 TriclopsStereoProcessor::generate_rectification_lut(const char *lut_file)
 {
   uint64_t guid = 0;
+  const char *model;
+
   if ( bb2 ) {
-    guid = bb2->guid();
+    guid  = bb2->guid();
+    model = bb2->model();
   } else {
     int serial_no;
     triclopsGetSerialNumber(data->triclops, &serial_no);
     guid = 0xFFFFFFFF;
     guid <<= 32;
     guid |= serial_no;
+
+    model = "Bumblebee2";
   }
 
-  RectificationInfoFile *rif = new RectificationInfoFile(guid);
+  RectificationInfoFile *rif = new RectificationInfoFile(guid, model);
 
   RectificationLutInfoBlock *lib_left  = new RectificationLutInfoBlock(_width, _height,
-								      FIREVISION_RECTINFO_CAMERA_LEFT);
+								       FIREVISION_RECTINFO_CAMERA_LEFT);
   RectificationLutInfoBlock *lib_right = new RectificationLutInfoBlock(_width, _height,
 								       FIREVISION_RECTINFO_CAMERA_RIGHT);
 
@@ -844,4 +849,96 @@ TriclopsStereoProcessor::generate_rectification_lut(const char *lut_file)
 
   delete rif;
 }
+
+
+/** Verify rectification LUT.
+ * @param lut_file Rectification LUT to verify
+ * @return true if the LUT matches the current camera/context file, false otherwise.
+ */
+bool
+TriclopsStereoProcessor::verify_rectification_lut(const char *lut_file)
+{
+  RectificationInfoFile *rif = new RectificationInfoFile();
+  rif->read(lut_file);
+
+  if ( bb2 ) {
+    if ( ! bb2->verify_guid(rif->guid()) ) {
+      return false;
+    }
+  } else {
+    int serial_no;
+    uint64_t guid = 0;
+    triclopsGetSerialNumber(data->triclops, &serial_no);
+    guid = 0xFFFFFFFF;
+    guid <<= 32;
+    guid |= serial_no;
+
+    if ( rif->guid() != guid ) {
+      return false;
+    }
+  }
+
+  if ( rif->num_blocks() != 2 ) {
+    return false;
+  }
+
+  bool left_ok = false;
+  bool right_ok = false;
+
+  std::list<RectificationInfoBlock *> &blocks = rif->blocks();
+  std::list<RectificationInfoBlock *>::const_iterator i;
+  for (i = blocks.begin(); (i != blocks.end() && ! left_ok && ! right_ok); ++i) {
+    RectificationInfoBlock *rib = *i;
+
+    if ( (rib->camera() != FIREVISION_RECTINFO_CAMERA_LEFT) &&
+	 (rib->camera() != FIREVISION_RECTINFO_CAMERA_RIGHT) ) {
+      continue;
+    }
+
+    if ( rib->type() == FIREVISION_RECTINFO_TYPE_LUT_16x16 ) {
+      RectificationLutInfoBlock *rlib = dynamic_cast<RectificationLutInfoBlock *>(rib);
+      if ( rlib == NULL ) {
+	continue;
+      }
+
+      TriclopsCamera cam;
+      if ( rib->camera() == FIREVISION_RECTINFO_CAMERA_LEFT ) {
+	cam = TriCam_LEFT;
+	if ( left_ok ) continue;
+      } else {
+	cam = TriCam_RIGHT;
+	if ( right_ok ) continue;
+      }
+
+      register float row, col;
+      register uint16_t rx, ry;
+      bool lut_ok = true;
+      for (unsigned int h = 0; (h < _height) && lut_ok; ++h) {
+	for (unsigned int w = 0; w < _height; ++w) {
+	  if ( triclopsUnrectifyPixel(data->triclops, cam, h, w, &row, &col) != TriclopsErrorOk ) {
+	    throw Exception("Failed to get unrectified position from Triclops SDK");
+	  }
+	  rlib->mapping(w, h, &rx, &ry);
+	  if ( (rx != (int)roundf(col)) || (ry != (int)roundf(row)) ) {
+	    lut_ok = false;
+	    break;
+	  }
+	}
+      }
+      
+      if ( lut_ok ) {
+	if ( rib->camera() == FIREVISION_RECTINFO_CAMERA_LEFT ) {
+	  left_ok = true;
+	} else {
+	  right_ok = true;
+	}
+      }
+    }
+  }
+
+  delete rif;
+  return (left_ok && right_ok);
+	 
+}
+
 

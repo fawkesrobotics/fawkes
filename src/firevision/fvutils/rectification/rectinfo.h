@@ -36,6 +36,8 @@
 #define FIREVISION_RECTINFO_MAGIC  0xFF03
 #define FIREVISION_RECTINFO_CURVER 1
 
+#define FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH  32
+
 /** Header for a rectification information file (rectinfo).
  * The header defines the basic parameters needed to correctly interpret the
  * following rectification file data.
@@ -57,6 +59,9 @@
  * camera type use another distinguishing criterion like a serial number. If even that
  * cannot be queried from the camera make one up, for instance a checksum of the
  * robot name which carries the camera or even the (shortened) name itself.
+ * The camera model is stored as a string and can also be used to discriminate a
+ * specific camera. It can also be used for an easier identification of the camera
+ * this file belongs to.
  *
  * Directly following this header the first rectification info is stored. Each info
  * has it's own per-info header defining the size of the info which can be read as
@@ -85,6 +90,7 @@ typedef struct _rectinfo_header_t {
   uint16_t reserved   :  3;	/**< reserved for future use */
   uint16_t num_blocks :  8;	/**< number of rectification info blocks in this file */
   uint64_t guid;		/**< GUID of camera */
+  char     camera_model[FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH]; /**< camera model */
 } rectinfo_header_t;
 
 

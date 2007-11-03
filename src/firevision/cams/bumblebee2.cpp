@@ -128,7 +128,7 @@ Bumblebee2Camera::Bumblebee2Camera(const CameraArgumentParser *cap)
 {
   // Defaults
 
-  model = strdup(cap->cam_id().c_str());
+  _model = strdup(cap->cam_id().c_str());
   // num_buffers set in constructor call
   format7_coding = DC1394_COLOR_CODING_RAW16;
   format7_width  = 640;
