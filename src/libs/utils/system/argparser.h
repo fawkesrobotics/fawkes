@@ -30,6 +30,7 @@
 
 #include <core/exception.h>
 
+#include <utils/misc/string_compare.h>
 #include <ext/hash_map>
 #include <vector>
 
@@ -68,20 +69,21 @@ class ArgumentParser
   ArgumentParser(int argc, char **argv, char *opt_string, option *long_options = NULL);
   ~ArgumentParser();
 
-  bool         has_arg(const char *argn) const;
+  bool         has_arg(const char *argn);
   const char * arg(const char *argn);
   bool         arg(const char *argn, char **value);
   const char * program_name() const;
 
-  const std::vector< const char * > & items() const;
+  const std::vector< const char * > &    items() const;
+  std::vector< const char * >::size_type num_items() const;
 
   int            argc() const;
   const char **  argv() const;
 
  private:
 
-  __gnu_cxx::hash_map< const char *, const char * > _opts;
-  __gnu_cxx::hash_map< const char *, const char * >::const_iterator  _opts_cit;
+  __gnu_cxx::hash_map< char *, const char *, __gnu_cxx::hash<char *>, StringEquality > _opts;
+  __gnu_cxx::hash_map< char *, const char *, __gnu_cxx::hash<char *>, StringEquality >::const_iterator  _opts_cit;
   std::vector< const char * >  _items;
 
   char *  _program_name;

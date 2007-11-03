@@ -87,6 +87,9 @@ ArgumentParser::ArgumentParser(int argc, char **argv, char *opt_string, option *
   _argc = argc;
   _argv = argv;
 
+  _opts.clear();
+  _items.clear();
+
 #ifdef _GNU_SOURCE
   _program_name = strdup(basename( argv[0] ));
 #else
@@ -107,7 +110,7 @@ ArgumentParser::ArgumentParser(int argc, char **argv, char *opt_string, option *
 	throw MissingArgumentException(c);
       }
       sprintf(tmp, "%c", c);
-      _opts[ tmp ] = optarg;
+      _opts[ strdup(tmp) ] = optarg;
     }
   } else {
     int opt_ind = 0;
@@ -117,11 +120,11 @@ ArgumentParser::ArgumentParser(int argc, char **argv, char *opt_string, option *
 	throw UnknownArgumentException(c);
       } else if (c == 0) {
 	// long options
-	_opts[ long_options[opt_ind].name ] = optarg;
+	_opts[ strdup(long_options[opt_ind].name) ] = optarg;
       } else {
 	char tmp[2];
 	sprintf(tmp, "%c", c);
-	_opts[ tmp ] = optarg;
+	_opts[ strdup(tmp) ] = optarg;
       }
     }
   }
@@ -139,6 +142,11 @@ ArgumentParser::ArgumentParser(int argc, char **argv, char *opt_string, option *
 ArgumentParser::~ArgumentParser()
 {
   free(_program_name);
+  while ( ! _opts.empty() ) {
+    char *tmp = (*(_opts.begin())).first;
+    _opts.erase(_opts.begin());
+    free(tmp);
+  }
 }
 
 
@@ -147,9 +155,9 @@ ArgumentParser::~ArgumentParser()
  * @return true, if the argument was given on the command line, false otherwise
  */
 bool
-ArgumentParser::has_arg(const char *argn) const
+ArgumentParser::has_arg(const char *argn)
 {
-  return (_opts.count(argn) > 0);
+  return (_opts.count((char *)argn) > 0);
 }
 
 
@@ -162,8 +170,8 @@ ArgumentParser::has_arg(const char *argn) const
 const char *
 ArgumentParser::arg(const char *argn)
 {
-  if (_opts.count(argn) > 0) {
-    return _opts[ argn ];
+  if (_opts.count((char *)argn) > 0) {
+    return _opts[ (char *)argn ];
   } else {
     return NULL;
   }
@@ -182,8 +190,8 @@ ArgumentParser::arg(const char *argn)
 bool
 ArgumentParser::arg(const char *argn, char **value)
 {
-  if (_opts.count(argn) > 0) {
-    *value = strdup(_opts[ argn ]);
+  if (_opts.count((char *)argn) > 0) {
+    *value = strdup(_opts[ (char *)argn ]);
     return true;
   } else {
     return false;
@@ -199,6 +207,16 @@ const std::vector< const char* > &
 ArgumentParser::items() const
 {
   return _items;
+}
+
+
+/** Get number of non-option items.
+ * @return number of non-opt items.
+ */
+std::vector< const char* >::size_type
+ArgumentParser::num_items() const
+{
+  return _items.size();
 }
 
 
