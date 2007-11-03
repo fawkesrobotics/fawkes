@@ -75,27 +75,27 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   /* Config stuff */
   config             = new SQLiteConfiguration(CONFDIR);
 
-  if ( argp->hasArgument("c") ) {
-    config_mutable_file = strdup(argp->getArgument("c"));
+  if ( argp->has_arg("c") ) {
+    config_mutable_file = strdup(argp->arg("c"));
   } else {
     if ( asprintf(&config_mutable_file, "%s.db", hostinfo->short_name()) == -1 ) {
       config_mutable_file = strdup(hostinfo->short_name());
       printf("WARNING: could not asprintf local config file name, using short hostname\n");
     }
   }
-  if ( argp->hasArgument("d") ) {
-    config_default_file = argp->getArgument("d");
+  if ( argp->has_arg("d") ) {
+    config_default_file = argp->arg("d");
   } else {
     config_default_file = "default.db";
   }
   config->load(config_mutable_file, config_default_file);
 
   /* Logging stuff */
-  char *tmp;
+  const char *tmp;
   Logger::LogLevel log_level = Logger::LL_DEBUG;
-  if ( argp->hasArgument("q") ) {
+  if ( argp->has_arg("q") ) {
     log_level = Logger::LL_INFO;
-    if ( (tmp = argp->getArgument("q")) != NULL ) {
+    if ( (tmp = argp->arg("q")) != NULL ) {
       for (unsigned int i = 0; i < strlen(tmp); ++i) {
 	if ( tmp[i] == 'q' ) {
 	  switch (log_level) {
@@ -107,7 +107,7 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 	}
       }
     }
-  } else if ( (tmp = argp->getArgument("l")) != NULL ) {
+  } else if ( (tmp = argp->arg("l")) != NULL ) {
     if ( strcmp(tmp, "debug") == 0 ) {
       log_level = Logger::LL_DEBUG;
     } else if ( strcmp(tmp, "info") == 0 ) {
@@ -123,7 +123,7 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     }
   }
 
-  if ( (tmp = argp->getArgument("L")) != NULL ) {
+  if ( (tmp = argp->arg("L")) != NULL ) {
     try {
       multi_logger = LoggerFactory::multilogger_instance(tmp);
     } catch (Exception &e) {

@@ -39,7 +39,7 @@ main(int argc, char **argv)
   ArgumentParser *argp = new ArgumentParser(argc, argv, "c::Hl::");
   bool action_done = false;
 
-  if ( argp->hasArgument("H") ) {
+  if ( argp->has_arg("H") ) {
     // Show usage note
     cout << endl << "Usage: " << argv[0] << " [-h] [-c] [-c[t]] [-l] [-m]" << endl
 	 << " -h     Show this help message" << endl
@@ -56,9 +56,9 @@ main(int argc, char **argv)
 	 << endl;
     action_done = true;
   } else {
-    if ( argp->hasArgument("c") ) {
-      char *tmp;
-      if ( (tmp = argp->getArgument("c")) != NULL) {
+    if ( argp->has_arg("c") ) {
+      const char *tmp;
+      if ( (tmp = argp->arg("c")) != NULL) {
 	if ( strchr(tmp, 'i') != NULL) {
 	  SharedMemoryImageBuffer::cleanup();
 	}
@@ -72,9 +72,9 @@ main(int argc, char **argv)
 
       action_done = true;
     }
-    if ( argp->hasArgument("l") ) {
-      char *tmp;
-      if ( (tmp = argp->getArgument("l")) != NULL) {
+    if ( argp->has_arg("l") ) {
+      const char *tmp;
+      if ( (tmp = argp->arg("l")) != NULL) {
 	if ( strchr(tmp, 'i') != NULL) {
 	  SharedMemoryImageBuffer::list();
 	}

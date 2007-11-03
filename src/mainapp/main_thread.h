@@ -66,7 +66,7 @@ class FawkesMainThread : public Thread
   Clock                      *clock;
         
   char *config_mutable_file;
-  char *config_default_file;
+  const char *config_default_file;
 };
 
 #endif

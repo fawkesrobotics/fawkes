@@ -115,13 +115,13 @@ main(int argc, char **argv)
 {
   ArgumentParser *argp = new ArgumentParser(argc, argv, "HCc:d:q::l:L:");
 
-  if ( argp->hasArgument("H") ) {
+  if ( argp->has_arg("H") ) {
     usage(argv[0]);
     delete argp;
     return 0;
   }
 
-  if ( argp->hasArgument("C") ) {
+  if ( argp->has_arg("C") ) {
     BlackBoardSharedMemoryHeader *bbsh = new BlackBoardSharedMemoryHeader( BLACKBOARD_MEMORY_SIZE,
 									   BLACKBOARD_VERSION );
     BlackBoardSharedMemoryLister *bblister = new BlackBoardSharedMemoryLister();
