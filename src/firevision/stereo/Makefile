@@ -27,16 +27,10 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-BUILD_TRICLOPS = 1
 ifneq ($(HAVE_TRICLOPS_SDK),1)
   WARN_TARGETS   += warning_triclops
-  BUILD_TRICLOPS  = 0
 endif
-ifneq ($(HAVE_BUMBLEBEE2_CAM),1)
-  WARN_TARGETS   += warning_bumblebee
-  BUILD_TRICLOPS  = 0
-endif
-ifeq ($(BUILD_TRICLOPS),1)
+ifeq ($(HAVE_TRICLOPS_SDK),1)
   INCDIRS += $(TRICLOPS_SDK_INCDIRS)
   LIBDIRS += $(TRICLOPS_SDK_LIBDIRS)
   LIBS    += $(TRICLOPS_SDK_LIBS)
@@ -50,9 +44,6 @@ ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
 warning_triclops:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Triclops SDK support$(TNORMAL) ($(TRICLOPS_SDK_ERR))"
-
-warning_bumblebee:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Triclops SDK support$(TNORMAL) (Bumblebee 2 camera not available)"
 endif
 
 # We are lazy in the utils...

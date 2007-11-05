@@ -53,7 +53,7 @@ OBJS_fvbb2info = bb2info.o
 
 OBJS_all = $(OBJS_fvshmem) $(OBJS_listfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
-	   $(OBJS_fvbb2info)
+	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut)
 BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvconverter $(BINDIR)/fvbb2rectlut
 
 ifeq ($(HAVE_TRICLOPS_SDK),1)

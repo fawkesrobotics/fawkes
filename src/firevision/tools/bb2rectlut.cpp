@@ -211,6 +211,7 @@ deep_verify(ArgumentParser *argp)
 #else
   printf("Deep verification of the rectification LUT from a camera is not supported,\n"
 	 "because the Bumblebee2 support was not available at compile time.\n");
+  return 0;
 #endif
 }
 

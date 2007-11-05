@@ -66,18 +66,22 @@ endif
 ifeq ($(ARCH),x86_64)
   TRICLOPS_SDK_ERR="Triclops SDK not available on 64-bit systems"
 else
-  ifneq ($(realpath $(TRICLOPS_SDK)/include/triclops.h),)
-    ifneq ($(realpath $(TRICLOPS_SDK)/lib/libtriclops.so),)
-      HAVE_TRICLOPS_SDK = 1
-      TRICLOPS_SDK_INCDIRS += $(TRICLOPS_SDK)/include
-      TRICLOPS_SDK_LIBDIRS += $(TRICLOPS_SDK)/lib
-      TRICLOPS_SDK_LIBS    += triclops
-      VISION_CFLAGS += -DHAVE_TRICLOPS_SDK
-    else
-      TRICLOPS_SDK_ERR = "shared lib not created, use \"make triclops\" in fvstereo"
-    endif
+  ifneq ($(HAVE_BUMBLEBEE2_CAM),1)
+    TRICLOPS_SDK_ERR="Bumblebee2 camera not available"
   else
-    TRICLOPS_SDK_ERR = "Triclops SDK not installed"
+    ifneq ($(realpath $(TRICLOPS_SDK)/include/triclops.h),)
+      ifneq ($(realpath $(TRICLOPS_SDK)/lib/libtriclops.so),)
+        HAVE_TRICLOPS_SDK = 1
+        TRICLOPS_SDK_INCDIRS += $(TRICLOPS_SDK)/include
+        TRICLOPS_SDK_LIBDIRS += $(TRICLOPS_SDK)/lib
+        TRICLOPS_SDK_LIBS    += triclops
+        VISION_CFLAGS += -DHAVE_TRICLOPS_SDK
+      else
+        TRICLOPS_SDK_ERR = "shared lib not created, use \"make triclops\" in fvstereo"
+      endif
+    else
+      TRICLOPS_SDK_ERR = "Triclops SDK not installed"
+    endif
   endif
 endif
 
