@@ -3,6 +3,9 @@ List ALL dependencies here.
 Do NOT exceed a line over 79 chars, use more than one line for an item in
 that case. Use REAL tabs (in Emacs use Ctrl-Q Tab) to separate columns.
 Write comments in a separate line in braces, indented to dependency column.
+List only direct dependencies that we use by ourselves (or that we will use
+in the near future). Do not list dependencies of dependencies if we do not
+directly use it by ourselves.
 
 
 Module		Dependency and Version				Type
@@ -48,6 +51,17 @@ Fawkes		gts			>= 0.7.6		optional
 
 Fawkes		VMC			== 0.95			optional
 		needed to build navigator with real motor support
+
+Fawkes		gtkmm			>= 2.10			optional
+
+Fawkes		glibmm			>= 2.12			optional
+
+Fawkes		cairomm			>= 1.2.4		optional
+
+Fawkes		glademm			>= 2.6.3		optional
+
+FireVision	SDL			>= 1.2.11		optional
+		(strongly recommended for visualization tools)
 
 FireVision	leutron			== 1.96.204		optional
 		(frame grabber for old Leutron PCs)
