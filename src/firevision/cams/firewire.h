@@ -90,6 +90,9 @@ class FirewireCamera : public Camera, public CameraControl
   virtual bool           auto_white_balance();
   virtual void           set_auto_white_balance(bool enabled);
 
+  virtual void           white_balance(unsigned int *ub, unsigned int *vr);
+  virtual void           set_white_balance(unsigned int ub, unsigned int vr);
+
   virtual uint64_t       guid() const;
   virtual const char *   model() const;
 
@@ -136,8 +139,10 @@ class FirewireCamera : public Camera, public CameraControl
   /** Format7 ROI Start Y coordinate */
   int                            format7_starty;
 
-  //unsigned int                   white_balance_ub;
-  //unsigned int                   white_balance_vr;
+  /** White balance U/B value */
+  unsigned int                   _white_balance_ub;
+  /** White balance V/R value */
+  unsigned int                   _white_balance_vr;
 
   /** Camera model, used in open to identify the camera, if empty first found camera is used */
   char *_model;

@@ -26,6 +26,7 @@
  */
 
 #include <core/exception.h>
+#include <core/exceptions/software.h>
 #include <utils/system/console_colors.h>
 
 #include <cstdlib>
@@ -164,9 +165,11 @@ FirewireCamera::open()
     set_auto_focus(_auto_focus);
     set_auto_shutter(_auto_shutter);
     set_auto_white_balance(_auto_white_balance);
+    if ( ! _auto_white_balance) {
+      set_white_balance(_white_balance_ub, _white_balance_vr);
+    }
 
   } else {
-    // cout  << cred << "Could not find any camera." << cnormal << endl;
     throw Exception("No cameras connected");;
   }
 
@@ -518,6 +521,32 @@ FirewireCamera::auto_white_balance()
 }
 
 
+/** Get white balance values.
+ * @param ub contains U/B value upon return
+ * @param vr contains V/R value upon return
+ */
+void
+FirewireCamera::white_balance(unsigned int *ub, unsigned int *vr)
+{
+  if ( dc1394_feature_whitebalance_get_value(camera, ub, vr) != DC1394_SUCCESS ) {
+    throw Exception("Failed to retrieve white balance values");
+  }
+}
+
+
+/** Set white balance values.
+ * @param ub U/B value
+ * @param vr V/R value
+ */
+void
+FirewireCamera::set_white_balance(unsigned int ub, unsigned int vr)
+{
+  if ( dc1394_feature_whitebalance_set_value(camera, ub, vr) != DC1394_SUCCESS ) {
+    throw Exception("Failed to retrieve white balance values");
+  }
+}
+
+
 /** Constructor.
  * Initialize and take parameters from camera argument parser. The following
  * arguments are supported:
@@ -655,12 +684,11 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
     string w = cap->get("white_balance");
     if ( w == "auto" ) {
       _auto_white_balance = true;
-    /*
     } else {
       // try to parse U/V values
       string::size_type commapos = w.find(",", 0);
       if ( commapos == string::npos ) {
-	throw Exception("Illegal white balance value, neither auto and no command found");
+	throw Exception("Illegal white balance value, neither auto and no comma found");
       }
       string ub = w.substr(0, commapos);
       string vr = w.substr(commapos + 1);
@@ -670,19 +698,19 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
 	throw TypeMismatchException("White balance value for U/B is invalid. "
 				    "String to int conversion failed");
       } else if ( ub_i < 0 ) {
-	throw OutOfBoundsException("White balance value for U/B < 0");
+	throw OutOfBoundsException("White balance value for U/B < 0", ub_i, 0, 0xFFFFFFFF);
       }
       long int vr_i = strtol(vr.c_str(), &endptr, 10);
       if ( endptr[0] != 0 ) {
 	throw TypeMismatchException("White balance value for V/R is invalid. "
 				    "String to int conversion failed");
       } else if ( vr_i < 0 ) {
-	throw OutOfBoundsException("White balance value for V/R < 0");
+	throw OutOfBoundsException("White balance value for V/R < 0", vr_i, 0, 0xFFFFFFFF);
       }
 
+      _auto_white_balance = false;
       _white_balance_ub = ub_i;
       _white_balance_vr = vr_i;
-      */
     }
   }
 }

@@ -183,8 +183,11 @@ CameraFactory::instance(const char *as)
 {
   CameraArgumentParser *cap = new CameraArgumentParser(as);
   try {
-    return instance(cap);
+    Camera *cam = instance(cap);
+    delete cap;
+    return cam;
   } catch (UnknownCameraTypeException &e) {
+    delete cap;
     throw;
   }
 }

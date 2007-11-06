@@ -58,6 +58,8 @@ SharedMemoryCamera::SharedMemoryCamera(const char *image_id, bool deep_copy)
   try {
     init();
   } catch (Exception &e) {
+    free(this->image_id);
+    image_id = NULL;
     throw;
   }
 }
@@ -77,6 +79,8 @@ SharedMemoryCamera::SharedMemoryCamera(const CameraArgumentParser *cap)
   try {
     init();
   } catch (Exception &e) {
+    free(image_id);
+    image_id = NULL;
     throw;
   }
 }
