@@ -498,7 +498,7 @@ void
 Exception::print_trace() throw()
 {
   messages_mutex->lock();
-  fprintf(stderr, "Exception trace\n"
+  fprintf(stderr,
 	  "=================================================== BEGIN OF EXCEPTION =====\n");
   if ( messages == NULL ) {
     fprintf(stderr, "No messages recorded.\n");

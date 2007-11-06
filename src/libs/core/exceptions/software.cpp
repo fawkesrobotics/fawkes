@@ -27,6 +27,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <cmath>
+
 /** @class NullPointerException <core/exceptions/software.h>
  * A NULL pointer was supplied where not allowed.
  * Throw this exception if a pointer to NULL has been supplied where this is
@@ -152,9 +154,8 @@ MissingParameterException::MissingParameterException(const char *msg) throw()
  * "Illegal Argument"
  */
 IllegalArgumentException::IllegalArgumentException(const char *msg) throw()
-  :  Exception("Illegal Argument")
+  :  Exception("Illegal Argument: %s", msg)
 {
-  append(msg);
 }
 
 
@@ -187,7 +188,13 @@ OutOfBoundsException::OutOfBoundsException(const char *msg, float val,
 					   float min, float max) throw()
   : Exception()
 {
-  append("Out Of Bounds (%s):  min: %f  max: %f  val: %f", msg, min, max, val);
+  if ( (roundf(val) == val) && (roundf(min) == min) && (roundf(max) == max) ) {
+    // really the values are just integers
+    append("Out Of Bounds (%s):  min: %.0f  max: %.0f  val: %.0f", msg, min, max, val);
+  } else {
+    // at least one "real" float
+    append("Out Of Bounds (%s):  min: %f  max: %f  val: %f", msg, min, max, val);
+  }
 }
 
 
