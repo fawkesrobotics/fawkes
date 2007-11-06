@@ -23,7 +23,6 @@ BASEDIR = ../../../..
 
 CFLAGS = -g
 
-
 LIBS_libfuzzy =
 
 OBJS_libfuzzy = 	fuzzy_controller.o \

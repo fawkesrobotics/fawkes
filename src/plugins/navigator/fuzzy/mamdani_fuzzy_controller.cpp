@@ -1,3 +1,14 @@
+
+/***************************************************************************
+ *  mamdani_fuzzy_controller.cpp - Mamdani Fuzzy Controller
+ *
+ *  Generated: Thu May 31 18:36:55 2007
+ *  Copyright  2007  Martin Liebenberg
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,11 +25,11 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include "mamdani_fuzzy_controller.h"
-#include "fuzzy_set.h"
-#include "fuzzy_partition.h"
+#include <plugins/navigator/fuzzy/mamdani_fuzzy_controller.h>
+#include <plugins/navigator/fuzzy/fuzzy_set.h>
+#include <plugins/navigator/fuzzy/fuzzy_partition.h>
 
-/** @class MamdaniFuzzyController fuzzy/mamdani_fuzzy_controller.h 
+/** @class MamdaniFuzzyController fuzzy/mamdani_fuzzy_controller.h
  *  This is an implementation of a Mandani fuzzy controller.
  *  It implements a singleton fuzzification, an aggregation with minimal operator,
  *  a max-min interference and a continuous defuzzification.
@@ -32,10 +43,10 @@
  * @param inputSets the condition fuzzy sets of this rule
  * @param outputSet the conclusion fuzzy set of this rule
  */
-/** @var MamdaniFuzzyController::Rule::inputSets 
+/** @var MamdaniFuzzyController::Rule::inputSets
  *    A vector the condition fuzzy sets of this rule.
  */
-/** @var MamdaniFuzzyController::Rule::outputSet 
+/** @var MamdaniFuzzyController::Rule::outputSet
  *    The conclusion fuzzy set of this rule.
  */
 /** @var MamdaniFuzzyController::aggregationValues
@@ -44,25 +55,24 @@
 /** @var MamdaniFuzzyController::ruleBase
  *      A vector of pointers of rules for the rule base of this fuzzy controller.
  */
- 
+
 /** Empty standard constructor.*/
 MamdaniFuzzyController::MamdaniFuzzyController()
-{
-}
+{}
 
 /** Constructor.
  * @param inputPartitions a vector of pointers to objects of FuzzyPartition
  * @param outputPartition a pointer to a FuzzyPartition
  */
 MamdaniFuzzyController::MamdaniFuzzyController(std::vector<FuzzyPartition *> *inputPartitions,
-                                               FuzzyPartition* outputPartition)
+    FuzzyPartition* outputPartition)
 {
   this->inputPartitions = inputPartitions;
   this->outputPartition = outputPartition;
 }
 
 
-/** Deconstructor. */
+/** Destructor. */
 MamdaniFuzzyController::~MamdaniFuzzyController()
 {
   for(unsigned int i = 0; i < ruleBase.size(); i++)
@@ -74,11 +84,11 @@ MamdaniFuzzyController::~MamdaniFuzzyController()
  * @param inputSets a vector of pointers to condition fuzzy sets
  * @param outputSet a pointer to the conclusion fuzzy set
  */
-void MamdaniFuzzyController::addRule(std::vector<FuzzySet *> *inputSets, FuzzySet * outputSet) 
+void MamdaniFuzzyController::addRule(std::vector<FuzzySet *> *inputSets, FuzzySet * outputSet)
 {
   ruleBase.push_back(new Rule(inputSets, outputSet));
 }
- 
+
 /** Implements a singleton fuzzification.
  */
 void MamdaniFuzzyController::fuzzification(std::vector<double> values)
@@ -88,11 +98,11 @@ void MamdaniFuzzyController::fuzzification(std::vector<double> values)
       std::vector<FuzzySet *> *sets = inputPartitions->at(i)->getFuzzySets();
       for(unsigned int j = 0; j < sets->size(); j++)
         {
-          sets->at(i)->setAlphaLevel(sets->at(i)->membershipGrade(values[i]));
+          sets->at(j)->setAlphaLevel(sets->at(j)->membershipGrade(values[i]));
         }
     }
 }
- 
+
 /** Implements aggregation with minimal operator.
  *      It generates for each rule a aggregation value.
  */
@@ -103,7 +113,7 @@ void MamdaniFuzzyController::aggregation()
     {
       std::vector<FuzzySet *> *sets = ruleBase[i]->inputSets;
       for(unsigned int j = 0; j < sets->size(); j++)
-        {        
+        {
           double level = sets->at(j)->getAlphaLevel();
           min = std::min(level, min);
         }
@@ -111,7 +121,7 @@ void MamdaniFuzzyController::aggregation()
       min = 1;
     }
 }
- 
+
 /** Implements a max-min interference.
  *      It needs the aggregation values from the aggregation.
  */
@@ -120,19 +130,18 @@ void MamdaniFuzzyController::interference()
   for(unsigned int i = 0; i < ruleBase.size(); i++)
     {
       FuzzySet *set = ruleBase[i]->outputSet;
-      double value = aggregationValues[i];
-      if(set->getAlphaLevel() < value)
-        set->setAlphaLevel(value);
+      set->setAlphaLevel(aggregationValues[i]);
     }
+  aggregationValues.clear();
 }
- 
+
 /** The accumulation method remains empty.
  */
 void MamdaniFuzzyController::accumulation()
 {
   //here is no need for accumulation
 }
- 
+
 /** Implements a continuous defuzzification.
  *      There is the FuzzyPartition::getWeightedAverageMax() method in use.
  */

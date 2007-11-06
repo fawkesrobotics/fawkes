@@ -1,3 +1,14 @@
+
+/***************************************************************************
+ *  fuzzy_set.h - Fuzzy Set
+ *
+ *  Generated: Thu May 31 18:36:55 2007
+ *  Copyright  2007  Martin Liebenberg
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,50 +24,36 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
- 
-#ifndef _FUZZY_SET_H_
-#define _FUZZY_SET_H_
- 
-class FuzzySet 
-{
- public:
-   
-  FuzzySet();
-   
-  virtual ~FuzzySet();
-        
-  virtual double membershipGrade(double x) = 0;
-        
-  virtual void supportBorders(double &left, double &right) = 0;
-        
-  virtual double getFirstAlphaLevelValue() = 0;
 
-  virtual double getMiddleAlphaLevelValue() = 0;
-        
-  long getId();
-        
-  void setLabel(char* label);
-        
-  const char* getLabel();
+#ifndef __PLUGINS_NAVIGATOR_FUZZY_FUZZY_SET_H_
+#define __PLUGINS_NAVIGATOR_FUZZY_FUZZY_SET_H_
 
-  void setAlphaLevel(double alpha);
-        
-  double getAlphaLevel();
-         
-         
- protected:
+class FuzzySet
+  {
+  public:
 
-  char * label;
+    FuzzySet();
+    virtual ~FuzzySet();
+    
+    virtual double membershipGrade(double x) = 0;
+    virtual void supportBorders(double &left, double &right) = 0;
+    virtual double getFirstAlphaLevelValue() = 0;
+    virtual double getMiddleAlphaLevelValue() = 0;
+    
+    long getId();
+    void setLabel(const char* label);
+    const char* getLabel();
+    void setAlphaLevel(double alpha);
+    double getAlphaLevel();
 
-  double alphaLevel;
+  protected:
 
-  double l;
+    char * label;
+    double alphaLevel;
+    double l;
+    double r;
+    long id;
+    static long idCounter;
+  };
 
-  double r;
-
-  long id;
-
-  static long idCounter;
-};
- 
 #endif //_FUZZY_SET_H_

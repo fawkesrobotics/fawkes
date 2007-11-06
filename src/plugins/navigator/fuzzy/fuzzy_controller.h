@@ -1,3 +1,14 @@
+
+/***************************************************************************
+ *  fuzzy_controller.h - Fuzzy Controller
+ *
+ *  Generated: Thu May 31 18:36:55 2007
+ *  Copyright  2007  Martin Liebenberg
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,8 +25,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef FUZZY_CONTROLLER_H_
-#define FUZZY_CONTROLLER_H_
+#ifndef __PLUGINS_NAVIGATOR_FUZZY_FUZZY_CONTROLLER_H_
+#define __PLUGINS_NAVIGATOR_FUZZY_FUZZY_CONTROLLER_H_
 
 #include <vector>
 
@@ -23,35 +34,26 @@ class FuzzyPartition;
 
 
 class FuzzyController
-{
- public:
+  {
+  public:
 
-  FuzzyController();
-        
-  FuzzyController(      std::vector<FuzzyPartition *> *inputPartitions,
-                        FuzzyPartition* outputPartition);
-
-  virtual ~FuzzyController();
-        
-  double control(std::vector<double> inputValues);
-        
- protected:
- 
-  virtual void fuzzification(std::vector<double> values) = 0;
-        
-  virtual void aggregation() = 0;
-        
-  virtual void interference() = 0;
-        
-  virtual void accumulation() = 0;
-        
-  virtual double defuzzification() = 0;
- 
- 
-  std::vector<FuzzyPartition *> *inputPartitions;
+    FuzzyController();
+    FuzzyController(      std::vector<FuzzyPartition *> *inputPartitions,
+                          FuzzyPartition* outputPartition);
+    virtual ~FuzzyController();
     
-  FuzzyPartition *outputPartition;
-        
-};
+    double control(std::vector<double> inputValues);
+
+  protected:
+
+    virtual void fuzzification(std::vector<double> values) = 0;
+    virtual void aggregation() = 0;
+    virtual void interference() = 0;
+    virtual void accumulation() = 0;
+    virtual double defuzzification() = 0;
+
+    std::vector<FuzzyPartition *> *inputPartitions;
+    FuzzyPartition *outputPartition;
+  };
 
 #endif /*FUZZY_CONTROLLER_H_*/

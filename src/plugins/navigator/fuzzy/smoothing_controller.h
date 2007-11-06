@@ -1,3 +1,14 @@
+
+/***************************************************************************
+ *  smoothing_controller.h - Fuzzy Smoothing Controller
+ *
+ *  Generated: Thu May 31 18:36:55 2007
+ *  Copyright  2007  Martin Liebenberg
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,35 +24,30 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
- 
-#ifndef _SMOOTHING_CONTROLLER_H_
-#define _SMOOTHING_CONTROLLER_H_
+
+#ifndef __PLUGINS_NAVIGATOR_FUZZY_SMOOTHING_CONTROLLER_H_
+#define __PLUGINS_NAVIGATOR_FUZZY_SMOOTHING_CONTROLLER_H_
 
 #include <vector>
 
-#include "mamdani_fuzzy_controller.h"
+#include <plugins/navigator/fuzzy/mamdani_fuzzy_controller.h>
 
 class SmoothingController : MamdaniFuzzyController
-{
- public:
-  
-  SmoothingController();
-  
-  virtual ~SmoothingController();
+  {
+  public:
 
-  double control(double x);
-  
- private:
-        
-  std::vector<FuzzySet *> inputSets;
-        
-  std::vector<FuzzySet *> outputSets;
-        
-  std::vector<FuzzySet *> *conditionSets1;
-  
-  std::vector<FuzzySet *> *conditionSets2;
-  
-  std::vector<FuzzySet *> *conditionSets3;
-};
+    SmoothingController();
+    virtual ~SmoothingController();
+
+    double control(double x);
+
+  private:
+
+    std::vector<FuzzySet *> inputSets;
+    std::vector<FuzzySet *> outputSets;
+    std::vector<FuzzySet *> *conditionSets1;
+    std::vector<FuzzySet *> *conditionSets2;
+    std::vector<FuzzySet *> *conditionSets3;
+  };
 
 #endif //_SMOOTHING_CONTROLLER_H_

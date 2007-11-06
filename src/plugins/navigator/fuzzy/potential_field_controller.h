@@ -1,3 +1,14 @@
+
+/***************************************************************************
+ *  potential_field_controller.h - Fuzzy Potential Field Controller
+ *
+ *  Generated: Thu May 31 18:36:55 2007
+ *  Copyright  2007  Martin Liebenberg
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,35 +24,29 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
- 
-#ifndef _POTENTIAL_FIELD_CONTROLLER_H_
-#define _POTENTIAL_FIELD_CONTROLLER_H_
+
+#ifndef __PLUGINS_NAVIGATOR_FUZZY_POTENTIAL_FIELD_CONTROLLER_H_
+#define __PLUGINS_NAVIGATOR_FUZZY_POTENTIAL_FIELD_CONTROLLER_H_
 
 #include <vector>
 
-#include "mamdani_fuzzy_controller.h"
+#include <plugins/navigator/fuzzy/mamdani_fuzzy_controller.h>
 
 class PotentialFieldController : MamdaniFuzzyController
-{
- public:
-  PotentialFieldController(double robot_width);
-        
-  virtual ~PotentialFieldController();
-        
-  double control(double distance);
-        
- private:
-  
-  std::vector<FuzzySet *> inputSets;
-        
-  std::vector<FuzzySet *> outputSets;
-        
-        
-  std::vector<FuzzySet *> *conditionSets1;
-  
-  std::vector<FuzzySet *> *conditionSets2;
-  
-  std::vector<FuzzySet *> *conditionSets3;
-};
+  {
+  public:
+    PotentialFieldController(double robot_width);
+    virtual ~PotentialFieldController();
+
+    double control(double distance);
+
+  private:
+
+    std::vector<FuzzySet *> inputSets;
+    std::vector<FuzzySet *> outputSets;
+    std::vector<FuzzySet *> *conditionSets1;
+    std::vector<FuzzySet *> *conditionSets2;
+    std::vector<FuzzySet *> *conditionSets3;
+  };
 
 #endif //_POTENTIAL_FIELD_CONTROLLER_H_

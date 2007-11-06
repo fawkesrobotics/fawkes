@@ -1,3 +1,14 @@
+
+/***************************************************************************
+ *  fuzzy_controller.cpp - Fuzzy Controller
+ *
+ *  Generated: Thu May 31 18:36:55 2007
+ *  Copyright  2007  Martin Liebenberg
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,12 +25,12 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include "fuzzy_controller.h"
-#include "fuzzy_partition.h"
-#include "fuzzy_set.h"
+#include <plugins/navigator/fuzzy/fuzzy_controller.h>
+#include <plugins/navigator/fuzzy/fuzzy_partition.h>
+#include <plugins/navigator/fuzzy/fuzzy_set.h>
 
 
-/** @class FuzzyController fuzzy/fuzzy_controller.h 
+/** @class FuzzyController fuzzy/fuzzy_controller.h
  * Absract base class for fuzzy controllers.
  *
  * @author Martin Liebenberg
@@ -57,7 +68,7 @@
  *   A pointer to a FuzzyPartition.
  *   It is the output partition which contains the output fuzzy sets.
  */
- 
+
 /** Empty standard constructor.*/
 FuzzyController::FuzzyController()
 {
@@ -75,7 +86,7 @@ FuzzyController::FuzzyController(       std::vector<FuzzyPartition *>* inputPart
   this->outputPartition = outputPartition;
 }
 
-/** Deconstructor. */
+/** Destructor. */
 FuzzyController::~FuzzyController()
 {
   inputPartitions->clear();

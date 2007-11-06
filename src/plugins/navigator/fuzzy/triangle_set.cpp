@@ -1,3 +1,14 @@
+
+/***************************************************************************
+ *  triangle_set.cpp - Fuzzy Triangle Set
+ *
+ *  Generated: Thu May 31 18:36:55 2007
+ *  Copyright  2007  Martin Liebenberg
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,10 +24,11 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
- 
-#include "triangle_set.h"
 
-/** @class TriangleSet triangle_set.h 
+#include <plugins/navigator/fuzzy/triangle_set.h>
+#include <cstring>
+
+/** @class TriangleSet triangle_set.h
  * Fuzzy Triangle Set.
  * This class provides a triangular shaped fuzzy set.
  *
@@ -25,7 +37,7 @@
 /** @var TriangleSet::m
  * The maximum of this set.
  */
- 
+
 /** Constructor.
  * @param l left border of the set
  * @param m the maximum of the set
@@ -38,28 +50,27 @@ TriangleSet::TriangleSet(double l, double m, double r)
   this->m = m;
   alphaLevel = 0;
 }
- 
+
 /** Constructor.
  * @param label a lettering for the set
  * @param l left border of the set
  * @param m the maximum of the set
  * @param r right border of the set
  */
-TriangleSet::TriangleSet(char* label, double l, double m, double r)
+TriangleSet::TriangleSet(const char* label, double l, double m, double r)
 {
-  this->label = label;
+  this->label = strdup(label);
   this->l = l;
   this->r = r;
   this->m = m;
   alphaLevel = 0;
 }
- 
+
 /** Destructor.
  */
 TriangleSet::~TriangleSet()
-{
-}
- 
+{}
+
 /** Returns the grade of membership of x in this set.
  * @param x a value out of the univers of this set
  * @return double, between 0 and 1, containing the grade of membership of x in this set
@@ -77,7 +88,7 @@ double TriangleSet::membershipGrade(double x)
   else
     return 0;
 }
- 
+
 /** Supports the borders of this set.
  * @param left reference which gets the left border
  * @param right reference which gets the right border
@@ -87,7 +98,7 @@ void TriangleSet::supportBorders(double &left, double &right)
   left = l;
   right = r;
 }
- 
+
 /** Returns the first value of the alpha-level set of this fuzzy set.
  * @return double containing the first value of the alpha-level set of this fuzzy set
  */

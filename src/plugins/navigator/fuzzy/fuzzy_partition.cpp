@@ -1,3 +1,14 @@
+
+/***************************************************************************
+ *  fuzzy_partition.cpp - Fuzzy Partition
+ *
+ *  Generated: Thu May 31 18:36:55 2007
+ *  Copyright  2007  Martin Liebenberg
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,12 +25,12 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include "fuzzy_partition.h"
-#include "fuzzy_set.h"
+#include <plugins/navigator/fuzzy/fuzzy_partition.h>
+#include <plugins/navigator/fuzzy/fuzzy_set.h>
 
 #include <float.h>
 
-/** @class FuzzyPartition fuzzy/fuzzy_partition.h 
+/** @class FuzzyPartition fuzzy/fuzzy_partition.h
  * Fuzzy Partition.
  * This class provides a fuzzy partition for a rule base of a fuzzy controller.
  * Therfore there are methods for defuzzification.
@@ -29,10 +40,10 @@
 /** @var FuzzyPartition::sets
  * The fuzzy sets of this partition.
  */
-/** @var FuzzyPartition::minL 
+/** @var FuzzyPartition::minL
  * The minimum left value out of this partition.
  */
-/** @var FuzzyPartition::maxR 
+/** @var FuzzyPartition::maxR
  * The maximum right value out of this partition.
  */
 
@@ -43,7 +54,7 @@ FuzzyPartition::FuzzyPartition()
   minL = 0;
   maxR = 0;
 }
- 
+
 /** Constructor.
  * @param sets the sets constituting this partition
  */
@@ -64,13 +75,12 @@ FuzzyPartition::FuzzyPartition(std::vector<FuzzySet *> *sets)
     }
   if(minL == DBL_MAX)
     minL = 0;
-         
+
 }
- 
+
 /** Destructor. */
 FuzzyPartition::~FuzzyPartition()
-{
-}
+{}
 
 /** Returns the distance between the minimum left value
  *   and the maximum right value out of this partition.
@@ -80,7 +90,7 @@ double FuzzyPartition::getSupportRange()
 {
   return maxR - minL;
 }
- 
+
 /** Returns the maximum right value out of this partition.
  *  @return the maximum right value out of this partition
  */
@@ -88,7 +98,7 @@ double FuzzyPartition::getMaxR()
 {
   return maxR;
 }
- 
+
 /** Returns the minimum left value out of this partition.
  *  @return the minimum left value out of this partition
  */
@@ -97,7 +107,7 @@ double FuzzyPartition::getMinL()
   return minL;
 }
 
- 
+
 /** Returns the first (left) value out of the alpha-level set
  *    with the highest alpha-level. This is needed for defuzzification.
  *  @return the first (left) value out of the alpha-level set 
@@ -119,7 +129,7 @@ double FuzzyPartition::getfirstMax()
     }
   return value;
 }
- 
+
 /** Returns the middle value out of the alpha-level set
  *    with the highest alpha-level. This is needed for defuzzification.
  *  @return the middle value out of the alpha-level set
@@ -142,7 +152,7 @@ double FuzzyPartition::getMiddleMax()
   return value;
 }
 
-/** Returns a kind of weighted average of all maxima of the alpha-level set 
+/** Returns a kind of weighted average of all maxima of the alpha-level set
  *   of all fuzzy sets out of this partition. 
  *   It is a continuous defuzzification in contrast to the other two defuzzification 
  *   methods in this class.
@@ -166,21 +176,21 @@ double FuzzyPartition::getWeightedAverageMax()
           max = i;
         }
     }
-   
+
   double sum = 0;
-  
+
   for(unsigned int i = 0; i < sets->size(); i++)
     {
       if(i != max && maxAlphaLevel != 0)
-        sum += ((sets->at(i)->getMiddleAlphaLevelValue() 
+        sum += ((sets->at(i)->getMiddleAlphaLevelValue()
                  - sets->at(max)->getMiddleAlphaLevelValue())
                 * (sets->at(i)->getAlphaLevel() / maxAlphaLevel));
-                                
+
     }
-   
+
   return middelMaximumValue + sum / 2.;
 }
- 
+
 /**Returns the fuzzy sets of this partition.
  *  @return a vector containing the fuzzy sets of this partitio
  */
@@ -188,4 +198,4 @@ std::vector<FuzzySet *> *FuzzyPartition::getFuzzySets()
 {
   return sets;
 }
- 
+

@@ -1,3 +1,14 @@
+
+/***************************************************************************
+ *  trapezium_set.cpp - Fuzzy Trapezium Set
+ *
+ *  Generated: Thu May 31 18:36:55 2007
+ *  Copyright  2007  Martin Liebenberg
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,7 +25,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
  
-#include "trapezium_set.h"
+#include <plugins/navigator/fuzzy/trapezium_set.h>
+#include <cstring>
 
  
 /** @class TrapeziumSet trapezium_set.h 
@@ -52,9 +64,9 @@ TrapeziumSet::TrapeziumSet(double l, double m1, double m2, double r)
  * @param m2 last value of the maximum
  * @param r right border of the set
  */
-TrapeziumSet::TrapeziumSet(char* label, double l, double m1, double m2, double r)
+TrapeziumSet::TrapeziumSet(const char* label, double l, double m1, double m2, double r)
 {
-  this->label = label;
+  this->label = strdup(label);
   this->l = l;
   this->r = r;
   this->m1 = m1;
@@ -111,4 +123,3 @@ double TrapeziumSet::getMiddleAlphaLevelValue()
 {
   return ( -((alphaLevel - 1) * (r - m2) - m2) + (alphaLevel * (m1 - l) + l)) / 2. ;
 }
-

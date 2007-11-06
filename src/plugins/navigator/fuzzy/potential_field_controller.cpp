@@ -1,3 +1,14 @@
+
+/***************************************************************************
+ *  potential_field_controller.cpp - Fuzzy Potential Field Controller
+ *
+ *  Generated: Thu May 31 18:36:55 2007
+ *  Copyright  2007  Martin Liebenberg
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,12 +24,12 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
- 
-#include "potential_field_controller.h"
-#include "fuzzy_partition.h"
-#include "triangle_set.h"
-#include "trapezium_set.h"
-#include "fuzzy_set.h"
+
+#include <plugins/navigator/fuzzy/potential_field_controller.h>
+#include <plugins/navigator/fuzzy/fuzzy_partition.h>
+#include <plugins/navigator/fuzzy/triangle_set.h>
+#include <plugins/navigator/fuzzy/trapezium_set.h>
+#include <plugins/navigator/fuzzy/fuzzy_set.h>
 
 
 /** @class PotentialFieldController fuzzy/potential_field_controller.h
@@ -27,7 +38,7 @@
  *
  * @author Martin Liebenberg
  */
-/** @var PotentialFieldController::inputSets 
+/** @var PotentialFieldController::inputSets
  * A vector of pointers of FuzzySet. It contains the input fuzzy sets of this controller.
  */
 /** @var PotentialFieldController::outputSets
@@ -47,54 +58,33 @@
  *  @param robot_width at present not in use 
  */
 PotentialFieldController::PotentialFieldController(double robot_width)
-{ 
-  inputSets.push_back(new TrapeziumSet("OK", 10, 30, 100000, 100000));
-  
-  inputSets.push_back(new TriangleSet("NEAR", 5, 10, 15));
-  
-  inputSets.push_back(new TrapeziumSet("TOO_NEAR", 0, 0, 5, 10));
-  
-  
+{
+  inputSets.push_back(new TrapeziumSet("OK", 0.10, 0.30, 100000, 100000));
+  inputSets.push_back(new TriangleSet("NEAR", 0.05, 0.10, 0.15));
+  inputSets.push_back(new TrapeziumSet("TOO_NEAR", 0, 0, 0.1, 0.5));
+
   outputSets.push_back(new TriangleSet("ZERO", 0, 0, 1));
-  
   outputSets.push_back(new TriangleSet("LOW", 0, 1.5, 2.5));
-  
   outputSets.push_back(new TriangleSet("HIGH", 1.25, 2.5, 5));
-   
-   
-  FuzzyPartition *input_partition = new FuzzyPartition(&inputSets); 
-  
-  
-  inputPartitions->push_back(input_partition); 
-  
+
+  FuzzyPartition *input_partition = new FuzzyPartition(&inputSets);
+  inputPartitions->push_back(input_partition);
   outputPartition = new FuzzyPartition(&outputSets);
- 
- 
+
   //the rule base
- 
   conditionSets1 = new std::vector<FuzzySet *>;
-  
   conditionSets1->push_back(inputSets[0]);
-  
-  
   conditionSets2 = new std::vector<FuzzySet *>;
-  
   conditionSets2->push_back(inputSets[1]);
-  
-  
   conditionSets3 = new std::vector<FuzzySet *>;
-  
   conditionSets3->push_back(inputSets[2]);
-  
-  
+
   addRule(conditionSets1, outputSets[0]);
-  
   addRule(conditionSets2, outputSets[1]);
-  
   addRule(conditionSets3, outputSets[2]);
 }
- 
-/** Deconstructor. */
+
+/** Destructor. */
 PotentialFieldController::~PotentialFieldController()
 {
   for(unsigned int i = 0; i < inputSets.size(); i++)
@@ -116,16 +106,15 @@ PotentialFieldController::~PotentialFieldController()
   delete conditionSets3;
   delete outputPartition;
 }
-   
-/** The controlling method of this controller. 
+
+/** The controlling method of this controller.
  *   @param distance the distance between the robot and an obstacle
  *   @see FuzzyController::control
  */
 double PotentialFieldController::control(double distance)
-{ 
+{
   std::vector<double> inputValueVector;
-   
   inputValueVector.push_back(distance);
-   
+
   return MamdaniFuzzyController::control(inputValueVector);
 }
