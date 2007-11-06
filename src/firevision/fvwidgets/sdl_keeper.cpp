@@ -62,8 +62,6 @@ SDLKeeper::init(unsigned int flags)
 {
   MutexLocker lock(&_mutex); 
 
-  printf("Checking for %u returns %u\n", flags, SDL_WasInit(flags));
-
   unsigned int alive_subsys = SDL_WasInit(SDL_INIT_EVERYTHING);
   if ( (alive_subsys & flags) != flags ) {
     // Subsystem has not been initialized, yet

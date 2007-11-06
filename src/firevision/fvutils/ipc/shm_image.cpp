@@ -89,7 +89,7 @@ SharedMemoryImageBuffer::constructor(const char *image_id, colorspace_t cspace,
 				     unsigned int width, unsigned int height,
 				     bool is_read_only)
 {
-  this->_image_id     = strdup(image_id);
+  _image_id     = strdup(image_id);
   _is_read_only = is_read_only;
 
   _colorspace = cspace;
@@ -102,6 +102,9 @@ SharedMemoryImageBuffer::constructor(const char *image_id, colorspace_t cspace,
   raw_header = priv_header->raw_header();
 
   if (_memptr == NULL) {
+    ::free(_image_id);
+    _image_id = NULL;
+    delete priv_header;
     throw Exception("Could not create shared memory segment");
   }
 

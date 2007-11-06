@@ -24,8 +24,8 @@ LIBS     = $(VISION_LIBS)
 
 ifeq ($(HAVE_SDL),1)
   LIBS_all = $(LIBDIR)/libfvwidgets.so
-  CFLAGS  += $(shell $(PKGCONFIG) --cflags 'sdl')
-  LDFLAGS += $(shell $(PKGCONFIG) --libs 'sdl')
+  CFLAGS  += $(SDL_CFLAGS)
+  LDFLAGS += $(SDL_LDFLAGS)
 else
   WARN_TARGETS += warning_sdl
 endif

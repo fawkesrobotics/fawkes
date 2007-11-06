@@ -51,9 +51,12 @@ OBJS_fvbb2rectlut = bb2rectlut.o
 LIBS_fvbb2info = $(VISION_CAM_LIBS) utils fvcams fvutils fvstereo
 OBJS_fvbb2info = bb2info.o
 
+LIBS_fvviewer = $(VISION_CAM_LIBS) utils fvcams fvutils fvwidgets
+OBJS_fvviewer = viewer.o
+
 OBJS_all = $(OBJS_fvshmem) $(OBJS_listfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
-	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut)
+	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer)
 BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvconverter $(BINDIR)/fvbb2rectlut
 
 ifeq ($(HAVE_TRICLOPS_SDK),1)
@@ -77,6 +80,13 @@ else
   WARN_TARGETS += warning_stereodecoder
   WARN_TARGETS += warning_bb2rectlut_bb2
 endif
+ifeq ($(HAVE_SDL),1)
+  BINS_all += $(BINDIR)/fvviewer
+  CFLAGS_viewer += $(SDL_CFLAGS)
+  LDFLAGS_fvviewer += $(SDL_LDFLAGS)
+else
+  WARN_TARGETS += warning_viewer
+endif
 
 ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
@@ -96,6 +106,8 @@ warning_bb2rectlut_triclops:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Building fvbb2rectlut w/o retrieval and limited verification support$(TNORMAL) (no Triclops SDK)";
 warning_bb2info:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvbb2info$(TNORMAL) (no Bumblebee2 camera support)";
+warning_viewer:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvviewer$(TNORMAL) (SDL[-devel] not installed)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
