@@ -89,6 +89,102 @@ ObjectPositionInterface::set_object_type(const unsigned int new_object_type)
   data->object_type = new_object_type;
 }
 
+/** Get supports_relative value.
+ * 
+      Bit field, 1 if the current interface in general has support for relative position data.
+    
+ * @return supports_relative value
+ */
+unsigned int
+ObjectPositionInterface::supports_relative()
+{
+  return data->supports_relative;
+}
+
+/** Set supports_relative value.
+ * 
+      Bit field, 1 if the current interface in general has support for relative position data.
+    
+ * @param new_supports_relative new supports_relative value
+ */
+void
+ObjectPositionInterface::set_supports_relative(const unsigned int new_supports_relative)
+{
+  data->supports_relative = new_supports_relative;
+}
+
+/** Get supports_global value.
+ * 
+      Bit field, 1 if the current interface in general has support for global (world) position data.
+    
+ * @return supports_global value
+ */
+unsigned int
+ObjectPositionInterface::supports_global()
+{
+  return data->supports_global;
+}
+
+/** Set supports_global value.
+ * 
+      Bit field, 1 if the current interface in general has support for global (world) position data.
+    
+ * @param new_supports_global new supports_global value
+ */
+void
+ObjectPositionInterface::set_supports_global(const unsigned int new_supports_global)
+{
+  data->supports_global = new_supports_global;
+}
+
+/** Get has_relative value.
+ * 
+      Bit field, 1 if the current interface at the moment has valid relative position data.
+    
+ * @return has_relative value
+ */
+unsigned int
+ObjectPositionInterface::has_relative()
+{
+  return data->has_relative;
+}
+
+/** Set has_relative value.
+ * 
+      Bit field, 1 if the current interface at the moment has valid relative position data.
+    
+ * @param new_has_relative new has_relative value
+ */
+void
+ObjectPositionInterface::set_has_relative(const unsigned int new_has_relative)
+{
+  data->has_relative = new_has_relative;
+}
+
+/** Get has_global value.
+ * 
+      Bit field, 1 if the current interface at the moment has valid global (world) position data.
+    
+ * @return has_global value
+ */
+unsigned int
+ObjectPositionInterface::has_global()
+{
+  return data->has_global;
+}
+
+/** Set has_global value.
+ * 
+      Bit field, 1 if the current interface at the moment has valid global (world) position data.
+    
+ * @param new_has_global new has_global value
+ */
+void
+ObjectPositionInterface::set_has_global(const unsigned int new_has_global)
+{
+  data->has_global = new_has_global;
+}
+
 /** Get visible value.
  * 
       True, if object is visible.

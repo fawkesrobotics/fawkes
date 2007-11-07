@@ -47,9 +47,6 @@ class ObjectPositionInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    unsigned int object_type; /**< 
-      Object type, use constants to define
-     */
     float yaw; /**< 
       Angle between the robot's forward direction and the object on the ground plane.
       This angle is in a local 3D coordinate system to the robot and given in radians.
@@ -125,6 +122,21 @@ class ObjectPositionInterface : public Interface
       by line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
      */
+    unsigned int object_type : 16; /**< 
+      Object type, use constants to define
+     */
+    unsigned int supports_relative : 1; /**< 
+      Bit field, 1 if the current interface in general has support for relative position data.
+     */
+    unsigned int supports_global : 1; /**< 
+      Bit field, 1 if the current interface in general has support for global (world) position data.
+     */
+    unsigned int has_relative : 1; /**< 
+      Bit field, 1 if the current interface at the moment has valid relative position data.
+     */
+    unsigned int has_global : 1; /**< 
+      Bit field, 1 if the current interface at the moment has valid global (world) position data.
+     */
     bool visible; /**< 
       True, if object is visible.
      */
@@ -143,6 +155,14 @@ class ObjectPositionInterface : public Interface
   /* Methods */
   unsigned int object_type();
   void set_object_type(const unsigned int new_object_type);
+  unsigned int supports_relative();
+  void set_supports_relative(const unsigned int new_supports_relative);
+  unsigned int supports_global();
+  void set_supports_global(const unsigned int new_supports_global);
+  unsigned int has_relative();
+  void set_has_relative(const unsigned int new_has_relative);
+  unsigned int has_global();
+  void set_has_global(const unsigned int new_has_global);
   bool is_visible();
   void set_visible(const bool new_visible);
   float yaw();
