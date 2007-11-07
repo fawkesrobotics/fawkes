@@ -2,8 +2,8 @@
 /***************************************************************************
  *  morphological.h - interface for a morphological filter
  *
- *  Generated: Thu Jun 08 09:58:21 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jun 08 09:58:21 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -36,12 +36,20 @@
 
 class MorphologicalFilter : public Filter {
  public:
+  MorphologicalFilter(const char *name, unsigned int max_num_buffers = 1);
   virtual ~MorphologicalFilter();
-  virtual void setStructuringElement(unsigned char *se,
-				     unsigned int se_width,
-				     unsigned int se_height,
-				     unsigned int se_anchor_x,
-				     unsigned int se_anchor_y )            = 0;
+  virtual void set_structuring_element(unsigned char *se,
+				       unsigned int se_width,
+				       unsigned int se_height,
+				       unsigned int se_anchor_x,
+				       unsigned int se_anchor_y );
+
+ protected:
+  unsigned char *se;
+  unsigned int   se_width;
+  unsigned int   se_height;
+  unsigned int   se_anchor_x;
+  unsigned int   se_anchor_y;
 };
 
 

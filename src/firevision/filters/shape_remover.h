@@ -2,8 +2,8 @@
 /***************************************************************************
  *  shape_remover.h - Header of shape remover
  *
- *  Generated: Wed Sep 28 11:25:04 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Sep 28 11:25:04 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -35,43 +35,16 @@ class Shape;
 
 class FilterShapeRemover : public Filter
 {
-
  public:
-
   FilterShapeRemover();
 
-  virtual void setShape( Shape *shape );
-  virtual void setMargin( unsigned int margin );
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL,
-			    unsigned int buffer_num = 0);
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    unsigned int buffer_num);
-
-  virtual void setDstBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL);
-
-  virtual void setOrientation(orientation_t ori);
-
+  virtual void set_shape( Shape *shape );
+  virtual void set_margin( unsigned int margin );
   virtual void apply();
 
-  virtual const char *  getName();
-
  private:
-  unsigned char *src;
-  unsigned char *dst;
-
-  ROI           *src_roi;
-  ROI           *dst_roi;
-
   Shape *shape;
   unsigned int margin;
-
 };
 
 #endif

@@ -2,8 +2,8 @@
 /***************************************************************************
  *  laplace.h - Header of the laplace filter
  *
- *  Generated: Thu Jun 16 16:28:38 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jun 16 16:28:38 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -38,39 +38,15 @@ class FilterLaplace : public Filter
 {
 
  public:
-
   FilterLaplace();
   FilterLaplace(float sigma, unsigned int size, float scale);
   ~FilterLaplace();
 
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL,
-			    unsigned int buffer_num = 0);
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    unsigned int buffer_num);
-
-  virtual void setDstBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL);
-
-  virtual void setOrientation(orientation_t ori);
-
   virtual void apply();
 
-  virtual const char *  getName();
-
-  static void calculateKernel(int *kernel_buffer, float sigma, unsigned int size, float scale);
+  static void calculate_kernel(int *kernel_buffer, float sigma, unsigned int size, float scale);
 
  private:
-  unsigned char *src;
-  unsigned char *dst;
-
-  ROI           *src_roi;
-  ROI           *dst_roi;
-
   int           *kernel;
   unsigned int   kernel_size;
 };

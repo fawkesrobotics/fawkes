@@ -2,8 +2,8 @@
 /***************************************************************************
  *  median.cpp - Implementation of a median filter
  *
- *  Generated: Mon Jun 05 15:02:36 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jun 05 15:02:36 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -32,53 +32,16 @@
 
 /** @class FilterMedian <filters/median.h>
  * Median filter.
+ * @author Tim Niemueller
  */
 
 /** Constructor.
  * @param mask_size size of median mask
  */
 FilterMedian::FilterMedian(unsigned int mask_size)
+  : Filter("FilterMedian")
 {
   this->mask_size = mask_size;
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
-}
-
-
-void
-FilterMedian::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterMedian::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterMedian::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterMedian::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterMedian::getName()
-{
-  return "FilterMedian";
 }
 
 
@@ -86,16 +49,16 @@ void
 FilterMedian::apply()
 {
   IppiSize size;
-  size.width = src_roi->width - mask_size;
-  size.height = src_roi->height - mask_size;
+  size.width = src_roi[0]->width - mask_size;
+  size.height = src_roi[0]->height - mask_size;
 
   IppiSize mask = { mask_size, mask_size };
   IppiPoint anchor = { (mask_size + 1) / 2, (mask_size + 1) / 2 };
 
   IppStatus status;
 
-  //                                    base + number of bytes to line y              + pixel bytes
-  status = ippiFilterMedian_8u_C1R( src + ((src_roi->start.y + (mask_size + 1) / 2) * src_roi->line_step) + ((src_roi->start.x + ( mask_size + 1) / 2) * src_roi->pixel_step), src_roi->line_step,
+  //                                  base + number of bytes to line y              + pixel bytes
+  status = ippiFilterMedian_8u_C1R( src[0] + ((src_roi[0]->start.y + (mask_size + 1) / 2) * src_roi[0]->line_step) + ((src_roi[0]->start.x + ( mask_size + 1) / 2) * src_roi[0]->pixel_step), src_roi[0]->line_step,
 				    dst + ((dst_roi->start.y + (mask_size + 1) / 2) * dst_roi->line_step) + ((dst_roi->start.x + ( mask_size + 1) / 2) * dst_roi->pixel_step), dst_roi->line_step,
 				    size, mask, anchor );
 

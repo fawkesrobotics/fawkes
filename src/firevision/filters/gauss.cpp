@@ -2,8 +2,8 @@
 /***************************************************************************
  *  gauss.cpp - Implementation of a Gauss filter
  *
- *  Generated: Thu May 12 09:33:55 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu May 12 09:33:55 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -37,44 +37,8 @@
 
 /** Constructor. */
 FilterGauss::FilterGauss()
+  : Filter("FilterGauss")
 {
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
-}
-
-
-void
-FilterGauss::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterGauss::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-void
-FilterGauss::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-void
-FilterGauss::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterGauss::getName()
-{
-  return "FilterGauss";
 }
 
 
@@ -82,13 +46,13 @@ void
 FilterGauss::apply()
 {
   IppiSize size;
-  size.width = src_roi->width;
-  size.height = src_roi->height;
+  size.width = src_roi[0]->width;
+  size.height = src_roi[0]->height;
 
-  /* IppStatus status = */ ippiFilterGauss_8u_C1R( src + (src_roi->start.y * src_roi->line_step) + (src_roi->start.x * src_roi->pixel_step), src_roi->line_step,
-					     dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step), dst_roi->line_step,
-					     size,
-					     ippMskSize5x5 );
+  /* IppStatus status = */ ippiFilterGauss_8u_C1R( src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step), src_roi[0]->line_step,
+						   dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step), dst_roi->line_step,
+						   size,
+						   ippMskSize5x5 );
 
   /*
   cout << "FilterGauss: ippiFilterGauss exit code: " << flush;

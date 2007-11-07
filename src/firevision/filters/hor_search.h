@@ -2,7 +2,7 @@
 /***************************************************************************
  *  hor_search.h - Header of horizontal search filter
  *
- *  Generated: Wed Jul 06 11:52:27 2005
+ *  Created: Wed Jul 06 11:52:27 2005
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *             2005       Yuxiao Hu (Yuxiao.Hu@rwth-aachen.de)
  *
@@ -36,36 +36,11 @@ class FilterHSearch : public Filter
 {
 
  public:
-
   FilterHSearch(ColorModel *cm, color_t what);
-
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL,
-			    unsigned int buffer_num = 0);
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    unsigned int buffer_num);
-
-  virtual void setDstBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL);
-
-  virtual void setOrientation(orientation_t ori);
 
   virtual void apply();
 
-  virtual const char *  getName();
-
  private:
-  unsigned char *src;
-  unsigned char *dst;
-
-  ROI           *src_roi;
-  ROI           *dst_roi;
-
   ColorModel    *cm;
   color_t        what;
 

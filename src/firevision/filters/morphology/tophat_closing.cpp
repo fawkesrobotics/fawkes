@@ -2,8 +2,8 @@
 /***************************************************************************
  *  tophat_closing.cpp - implementation of morphological tophat closing
  *
- *  Generated: Sat Jun 10 16:21:30 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Jun 10 16:21:30 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -53,6 +53,7 @@ const unsigned int FilterTophatClosing::FILTERIMAGE  = 1;
 
 /** Constructor. */
 FilterTophatClosing::FilterTophatClosing()
+  : MorphologicalFilter("Morphological Tophat Closing")
 {
   closing  = new FilterClosing();
   diff     = new FilterDifference();
@@ -71,53 +72,6 @@ FilterTophatClosing::~FilterTophatClosing()
 
 
 void
-FilterTophatClosing::setSrcBuffer(unsigned char *buf, ROI *roi,
-				    orientation_t ori, unsigned int buffer_num)
-{
-  setSrcBuffer(buf, roi, buffer_num);
-}
-
-
-void
-FilterTophatClosing::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  if ( buffer_num >= 2 ) ERROR("Invalid buffer number");
-
-  src[buffer_num] = buf;
-  src_roi[buffer_num] = roi;
-}
-
-
-void
-FilterTophatClosing::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterTophatClosing::setStructuringElement(unsigned char *se,
-					     unsigned int se_width, unsigned int se_height,
-					     unsigned int se_anchor_x, unsigned int se_anchor_y)
-{
-  closing->setStructuringElement( se, se_width, se_height, se_anchor_x, se_anchor_y );
-}
-
-
-void
-FilterTophatClosing::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterTophatClosing::getName()
-{
-  return "FilterTophatClosing";
-}
-
-void
 FilterTophatClosing::apply()
 {
   if ( dst == NULL ) ERROR("dst == NULL");
@@ -125,12 +79,14 @@ FilterTophatClosing::apply()
   if ( src[FILTERIMAGE] == NULL ) ERROR("src[FILTERIMAGE] == NULL");
   if ( *(src_roi[SUBTRACTFROM]) != *(src_roi[FILTERIMAGE]) ) ERROR("marker and mask ROI differ");
 
-  closing->setSrcBuffer( src[FILTERIMAGE], src_roi[FILTERIMAGE] );
-  closing->setDstBuffer( dst, dst_roi );
+  closing->set_structuring_element( se, se_width, se_height, se_anchor_x, se_anchor_y );
 
-  diff->setSrcBuffer( src[SUBTRACTFROM], src_roi[SUBTRACTFROM], 1 );
-  diff->setSrcBuffer( dst, dst_roi, 0 );
-  diff->setDstBuffer( dst, dst_roi );
+  closing->set_src_buffer( src[FILTERIMAGE], src_roi[FILTERIMAGE] );
+  closing->set_dst_buffer( dst, dst_roi );
+
+  diff->set_src_buffer( src[SUBTRACTFROM], src_roi[SUBTRACTFROM], 1 );
+  diff->set_src_buffer( dst, dst_roi, 0 );
+  diff->set_dst_buffer( dst, dst_roi );
 
   closing->apply();
   diff->apply();

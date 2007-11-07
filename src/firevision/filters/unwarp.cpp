@@ -2,8 +2,8 @@
 /***************************************************************************
  *  unwarp.cpp - Implementation of unwarp filter
  *
- *  Generated: Mon Jul 25 11:22:11 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jul 25 11:22:11 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -32,60 +32,24 @@
 #include <cstddef>
 
 
-
 /** @class FilterUnwarp <filters/unwarp.h>
  * Create unwarped image with given mirror model.
- * @param mm mirror model
+ * @author Tim Niemueller
  */
 
 /** Constructor.
  * @param mm mirror model
  */
 FilterUnwarp::FilterUnwarp(MirrorModel *mm)
+  : Filter("FilterUnwarp")
 {
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
   this->mm = mm;
 }
 
 
 void
-FilterUnwarp::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterUnwarp::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-void
-FilterUnwarp::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-void
-FilterUnwarp::setOrientation(orientation_t ori)
-{
-}
-
-const char *
-FilterUnwarp::getName()
-{
-  return "FilterUnwarp";
-}
-
-void
 FilterUnwarp::apply()
 {
-
   // destination y-plane
   register unsigned char *dyp  = dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step);
 
@@ -113,11 +77,11 @@ FilterUnwarp::apply()
       mm->unwarp2warp( dst_roi->start.x + w + 1, dst_roi->start.y + h + 1,
 		       &warp2_x, &warp2_y );
 
-      if ( (warp1_x < src_roi->image_width) &&
-	   (warp1_y < src_roi->image_height) ) {
+      if ( (warp1_x < src_roi[0]->image_width) &&
+	   (warp1_y < src_roi[0]->image_height) ) {
 	// Src pixel is in original image
 
-	YUV422_PLANAR_YUV(src, src_roi->image_width, src_roi->image_height,
+	YUV422_PLANAR_YUV(src[0], src_roi[0]->image_width, src_roi[0]->image_height,
 			  warp1_x, warp1_y,
 			  py1, pu1, pv1);
 
@@ -126,10 +90,10 @@ FilterUnwarp::apply()
 	*dvp   = pv1;
 
 
-	if ( (warp2_x < src_roi->image_width) &&
-	     (warp2_y < src_roi->image_height) ) {
+	if ( (warp2_x < src_roi[0]->image_width) &&
+	     (warp2_y < src_roi[0]->image_height) ) {
 
-	  YUV422_PLANAR_YUV(src, src_roi->image_width, src_roi->image_height,
+	  YUV422_PLANAR_YUV(src[0], src_roi[0]->image_width, src_roi[0]->image_height,
 			  warp2_x, warp2_y,
 			  py2, pu2, pv2);
 	  
@@ -147,10 +111,10 @@ FilterUnwarp::apply()
 	*dup   = 0;
 	*dvp   = 0;
 
-	if ( (warp2_x < src_roi->image_width) &&
-	     (warp2_y < src_roi->image_height) ) {
+	if ( (warp2_x < src_roi[0]->image_width) &&
+	     (warp2_y < src_roi[0]->image_height) ) {
 
-	  YUV422_PLANAR_YUV(src, src_roi->image_width, src_roi->image_height,
+	  YUV422_PLANAR_YUV(src[0], src_roi[0]->image_width, src_roi[0]->image_height,
 			  warp2_x, warp2_y,
 			  py2, pu2, pv2);
 	  

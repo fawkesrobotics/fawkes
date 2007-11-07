@@ -2,8 +2,8 @@
 /***************************************************************************
  *  opening.cpp - implementation of morphological opening filter
  *
- *  Generated: Mon Jun 05 14:00:46 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jun 05 14:00:46 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -41,12 +41,10 @@
 
 /** Constructor. */
 FilterOpening::FilterOpening()
+  : MorphologicalFilter("Morphological Opening")
 {
   dilate = new FilterDilation();
   erode  = new FilterErosion();
-
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
 }
 
 
@@ -59,57 +57,39 @@ FilterOpening::~FilterOpening()
 
 
 void
-FilterOpening::setSrcBuffer(unsigned char *buf, ROI *roi,
-			     orientation_t ori, unsigned int buffer_num)
+FilterOpening::set_src_buffer(unsigned char *buf, ROI *roi,
+			      orientation_t ori, unsigned int buffer_num)
 {
-  src = buf;
-  src_roi = roi;
-
-  erode->setSrcBuffer( buf, roi, ori, buffer_num );
+  Filter::set_src_buffer(buf, roi, ori, buffer_num);
+  erode->set_src_buffer( buf, roi, ori, buffer_num );
 }
 
 
 void
-FilterOpening::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
+FilterOpening::set_src_buffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
 {
-  src = buf;
-  src_roi = roi;
-
-  erode->setSrcBuffer( buf, roi, buffer_num );
+  Filter::set_src_buffer(buf, roi, buffer_num);
+  erode->set_src_buffer( buf, roi, buffer_num );
 }
 
 
 void
-FilterOpening::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
+FilterOpening::set_dst_buffer(unsigned char *buf, ROI *roi)
 {
-  dst = buf;
-  dst_roi = roi;
-
-  erode->setDstBuffer( buf, roi, ori );
-  dilate->setSrcBuffer( buf, roi, ori );
+  Filter::set_dst_buffer(buf, roi);
+  erode->set_dst_buffer( buf, roi );
+  dilate->set_src_buffer( buf, roi );
 }
 
 
 void
-FilterOpening::setOrientation(orientation_t ori)
+FilterOpening::set_structuring_element(unsigned char *se,
+				       unsigned int se_width, unsigned int se_height,
+				       unsigned int se_anchor_x, unsigned int se_anchor_y)
 {
-}
-
-
-void
-FilterOpening::setStructuringElement(unsigned char *se,
-				     unsigned int se_width, unsigned int se_height,
-				     unsigned int se_anchor_x, unsigned int se_anchor_y)
-{
-  dilate->setStructuringElement(se, se_width, se_height, se_anchor_x, se_anchor_y);
-  erode->setStructuringElement(se, se_width, se_height, se_anchor_x, se_anchor_y);
-}
-
-
-const char *
-FilterOpening::getName()
-{
-  return "FilterOpening";
+  MorphologicalFilter::set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
+  dilate->set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
+  erode->set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
 }
 
 

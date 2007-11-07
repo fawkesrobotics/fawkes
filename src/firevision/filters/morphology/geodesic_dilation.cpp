@@ -2,8 +2,8 @@
 /***************************************************************************
  *  geodesic_dilation.cpp - implementation of morphological geodesic dilation
  *
- *  Generated: Sat Jun 10 16:21:30 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Jun 10 16:21:30 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -58,6 +58,7 @@ const unsigned int FilterGeodesicDilation::MASK   = 1;
  * @param se_size Structuring element size.
  */
 FilterGeodesicDilation::FilterGeodesicDilation(unsigned int se_size)
+  : MorphologicalFilter("Morphological Geodesic Dilation", 2)
 {
   this->se_size  = (se_size > 0) ? se_size : 1;
   iterations = 0;
@@ -68,7 +69,7 @@ FilterGeodesicDilation::FilterGeodesicDilation(unsigned int se_size)
 
   isotropic_se = SEGenerator::square(this->se_size, this->se_size);
 
-  dilate->setStructuringElement( isotropic_se, se_size, se_size, se_size / 2, se_size / 2 );
+  dilate->set_structuring_element( isotropic_se, se_size, se_size, se_size / 2, se_size / 2 );
 
   src[MARKER] = src[MASK] = dst = NULL;
   src_roi[MARKER] = src_roi[MASK] = dst_roi = NULL;
@@ -86,54 +87,6 @@ FilterGeodesicDilation::~FilterGeodesicDilation()
 
 
 void
-FilterGeodesicDilation::setSrcBuffer(unsigned char *buf, ROI *roi,
-				    orientation_t ori, unsigned int buffer_num)
-{
-  setSrcBuffer(buf, roi, buffer_num);
-}
-
-
-void
-FilterGeodesicDilation::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  if ( buffer_num >= 2 ) ERROR("Invalid buffer number");
-
-  src[buffer_num] = buf;
-  src_roi[buffer_num] = roi;
-}
-
-
-void
-FilterGeodesicDilation::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterGeodesicDilation::setStructuringElement(unsigned char *se,
-					     unsigned int se_width, unsigned int se_height,
-					     unsigned int se_anchor_x, unsigned int se_anchor_y)
-{
-  // We don't care, only use a squared isotropic element for geodesic reconstruction
-}
-
-
-void
-FilterGeodesicDilation::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterGeodesicDilation::getName()
-{
-  return "FilterGeodesicDilation";
-}
-
-
-void
 FilterGeodesicDilation::apply()
 {
   if ( dst == NULL ) ERROR("dst == NULL");
@@ -147,11 +100,11 @@ FilterGeodesicDilation::apply()
   diff->setBufferA( tmp, src_roi[MARKER]->image_width, src_roi[MARKER]->image_height );
   diff->setBufferB( dst, dst_roi->image_width, dst_roi->image_height );
 
-  dilate->setSrcBuffer( tmp, src_roi[MARKER] );
+  dilate->set_src_buffer( tmp, src_roi[MARKER] );
 
-  min->setSrcBuffer( src[MASK], src_roi[MASK], 0 );
-  min->setSrcBuffer( tmp, src_roi[MARKER], 1 );
-  min->setDstBuffer( tmp, src_roi[MARKER] );
+  min->set_src_buffer( src[MASK], src_roi[MASK], 0 );
+  min->set_src_buffer( tmp, src_roi[MARKER], 1 );
+  min->set_dst_buffer( tmp, src_roi[MARKER] );
 
 
   iterations = 0;
@@ -173,7 +126,7 @@ FilterGeodesicDilation::apply()
  * last call to apply().
  */
 unsigned int
-FilterGeodesicDilation::getNumIterations()
+FilterGeodesicDilation::num_iterations()
 {
   return iterations;
 }

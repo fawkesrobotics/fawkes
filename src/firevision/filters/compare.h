@@ -2,8 +2,8 @@
 /***************************************************************************
  *  compare.h - header for comparison filter
  *
- *  Generated: Mon Jun 05 16:56:05 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jun 05 16:56:05 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -36,34 +36,10 @@ class FilterCompare : public Filter
  public:
   FilterCompare();
 
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL,
-			    unsigned int buffer_num = 0);
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    unsigned int buffer_num);
-
-  virtual void setDstBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL);
-
-  virtual void setOrientation(orientation_t ori);
-
   virtual void apply();
-  virtual const char * getName();
 
   static const unsigned int BACKGROUND;
   static const unsigned int FOREGROUND;
-
- private:
-  unsigned char *src[2];
-  unsigned char *dst;
-
-  ROI           *src_roi[2];
-  ROI           *dst_roi;
-
 };
 
 #endif

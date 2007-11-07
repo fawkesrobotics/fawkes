@@ -5,8 +5,8 @@
  *                         all objects into a colored YUV422_PLANAR buffer
  *                         but only on the scanline model points
  *
- *  Generated: Thu Jul 14 15:04:23 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jul 14 15:04:23 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -44,6 +44,7 @@
  * at scanline points.
  * The pixels are marked with the color matching the segmentation with an
  * appropriate place holder color.
+ * @author Tim Niemueller
  */
 
 /** Constructor.
@@ -51,53 +52,16 @@
  * @param slm scanline model to use
  */
 FilterScanlineSegmentation::FilterScanlineSegmentation(ColorModel *cm, ScanlineModel *slm)
+  : Filter("FilterScanlineSegmentation")
 {
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
   this->cm = cm;
   this->slm = slm;
 }
 
 
 void
-FilterScanlineSegmentation::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterScanlineSegmentation::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-void
-FilterScanlineSegmentation::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
- dst = buf;
-  dst_roi = roi;
-}
-
-void
-FilterScanlineSegmentation::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterScanlineSegmentation::getName()
-{
-  return "FilterScanlineSegmentation";
-}
-
-
-void
 FilterScanlineSegmentation::apply()
 {
-
   unsigned int  x = 0, y = 0;
   unsigned char   py = 0, pu = 0, pv = 0;
   register unsigned char *dyp, *dup, *dvp;
@@ -112,7 +76,7 @@ FilterScanlineSegmentation::apply()
 
 
     // Get source pixel values
-    YUV422_PLANAR_YUV(src, src_roi->image_width, src_roi->image_height, x, y,  py,  pu,  pv);
+    YUV422_PLANAR_YUV(src[0], src_roi[0]->image_width, src_roi[0]->image_height, x, y,  py,  pu,  pv);
 
     // destination y-plane
     dyp  = dst + (y * dst_roi->line_step) + (x * dst_roi->pixel_step);

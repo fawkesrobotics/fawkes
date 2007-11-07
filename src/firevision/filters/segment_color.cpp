@@ -4,8 +4,8 @@
  *                      This filter can be used to draw the segmentation for
  *                      all objects into a colored YUV422_PLANAR buffer
  *
- *  Generated: Mon Jul 04 16:18:15 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jul 04 16:18:15 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -38,54 +38,17 @@
  * Visually marks pixels depending of their classification determined by the
  * supplied color model to make the segmentation visible.
  * The pixels are marked with the color matching the segmentation with an
- * appropriate place holder color.
+ * appropriate place holder color
+ * @author Tim Niemueller
  */
 
 /** Constructor.
  * @param cm color model to use
  */
 FilterColorSegmentation::FilterColorSegmentation(ColorModel *cm)
+  : Filter("FilterColorSegmentation")
 {
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
   this->cm = cm;
-}
-
-
-void
-FilterColorSegmentation::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterColorSegmentation::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterColorSegmentation::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
- dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterColorSegmentation::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterColorSegmentation::getName()
-{
-  return "FilterColorSegmentation";
 }
 
 
@@ -96,13 +59,13 @@ FilterColorSegmentation::apply()
   register unsigned int w = 0;
 
   // source y-plane
-  register unsigned char *yp   = src + (src_roi->start.y * src_roi->line_step) + (src_roi->start.x * src_roi->pixel_step);
+  register unsigned char *yp   = src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step);
   // source u-plane
-  register unsigned char *up   = YUV422_PLANAR_U_PLANE(src, src_roi->image_width, src_roi->image_height)
-                                   + ((src_roi->start.y * src_roi->line_step) / 2 + (src_roi->start.x * src_roi->pixel_step) / 2) ;
+  register unsigned char *up   = YUV422_PLANAR_U_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
+                                   + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2 + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2) ;
   // source v-plane
-  register unsigned char *vp   = YUV422_PLANAR_V_PLANE(src, src_roi->image_width, src_roi->image_height)
-                                   + ((src_roi->start.y * src_roi->line_step) / 2 + (src_roi->start.x * src_roi->pixel_step) / 2);
+  register unsigned char *vp   = YUV422_PLANAR_V_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
+                                   + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2 + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2);
 
   // destination y-plane
   register unsigned char *dyp  = dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step);
@@ -124,8 +87,8 @@ FilterColorSegmentation::apply()
   color_t c1;
   // Unused for now: color_t c2;
 
-  for (h = 0; (h < src_roi->height) && (h < dst_roi->height); ++h) {
-    for (w = 0; (w < src_roi->width) && (w < dst_roi->width); w += 2) {
+  for (h = 0; (h < src_roi[0]->height) && (h < dst_roi->height); ++h) {
+    for (w = 0; (w < src_roi[0]->width) && (w < dst_roi->width); w += 2) {
       c1 = cm->determine(*yp++, *up++, *vp++);
       *yp++;
        //c2 = cm->determine(*yp++, *up++, *vp++);
@@ -187,9 +150,9 @@ FilterColorSegmentation::apply()
 	break;
       }
     }
-    lyp  += src_roi->line_step;
-    lup  += src_roi->line_step / 2;
-    lvp  += src_roi->line_step / 2;
+    lyp  += src_roi[0]->line_step;
+    lup  += src_roi[0]->line_step / 2;
+    lvp  += src_roi[0]->line_step / 2;
     ldyp += dst_roi->line_step;
     ldup += dst_roi->line_step / 2;
     ldvp += dst_roi->line_step / 2;

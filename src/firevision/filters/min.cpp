@@ -2,8 +2,8 @@
 /***************************************************************************
  *  min.cpp - implementation of min intensity filter
  *
- *  Generated: Mon Jun 05 16:57:57 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jun 05 16:57:57 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -27,75 +27,33 @@
 
 #include <filters/min.h>
 
+#include <core/exceptions/software.h>
 #include <fvutils/color/yuv.h>
 #include <cstddef>
 
 
 /** @class FilterMin <filters/min.h>
  * Minimum filter
+ * @author Tim Niemueller
  */
 
 /** Constructor. */
 FilterMin::FilterMin()
+  : Filter("FilterMin", 2)
 {
-  src[0] = src[1] = dst = NULL;
-  src_roi[0] = src_roi[1] = dst_roi = NULL;
-}
-
-
-void
-FilterMin::setSrcBuffer(unsigned char *buf, ROI *roi,
-			     orientation_t ori, unsigned int buffer_num)
-{
-  if ( buffer_num < 2 ) {
-    src[buffer_num] = buf;
-    src_roi[buffer_num] = roi;
-  }
-}
-
-
-void
-FilterMin::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  if ( buffer_num < 2 ) {
-    src[buffer_num] = buf;
-    src_roi[buffer_num] = roi;
-  }
-}
-
-
-void
-FilterMin::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterMin::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterMin::getName()
-{
-  return "FilterMin";
 }
 
 
 void
 FilterMin::apply()
 {
-  if ( src[0] == NULL ) return;
-  if ( src[1] == NULL ) return;
-  if ( src_roi[0] == NULL ) return;
-  if ( src_roi[1] == NULL ) return;
+  if ( src[0] == NULL ) throw NullPointerException("FilterInvert: src buffer 0 is NULL");
+  if ( src[1] == NULL ) throw NullPointerException("FilterInvert: src buffer 1 is NULL");
+  if ( src_roi[0] == NULL ) throw NullPointerException("FilterInvert: src ROI 0 is NULL");
+  if ( src_roi[1] == NULL ) throw NullPointerException("FilterInvert: src ROI 1 is NULL");
 
   register unsigned int h = 0;
   register unsigned int w = 0;
-
 
   // y-plane
   register unsigned char *byp   = src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step);

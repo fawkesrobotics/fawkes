@@ -2,8 +2,8 @@
 /***************************************************************************
  *  compare.cpp - implementation of compare filter
  *
- *  Generated: Mon Jun 05 16:57:57 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jun 05 16:57:57 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -28,7 +28,7 @@
 #include <filters/compare.h>
 
 #include <fvutils/color/yuv.h>
-#include <iostream>
+#include <cstddef>
 
 /** Background image. */
 const unsigned int FilterCompare::BACKGROUND = 0;
@@ -41,53 +41,9 @@ const unsigned int FilterCompare::FOREGROUND = 1;
 
 /** Constructor. */
 FilterCompare::FilterCompare()
-{
-  src[BACKGROUND] = src[FOREGROUND] = dst = NULL;
-  src_roi[BACKGROUND] = src_roi[FOREGROUND] = dst_roi = NULL;
-}
-
-
-void
-FilterCompare::setSrcBuffer(unsigned char *buf, ROI *roi,
-			     orientation_t ori, unsigned int buffer_num)
-{
-  if ( buffer_num < 2 ) {
-    src[buffer_num] = buf;
-    src_roi[buffer_num] = roi;
-  }
-}
-
-
-void
-FilterCompare::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  if ( buffer_num < 2 ) {
-    src[buffer_num] = buf;
-    src_roi[buffer_num] = roi;
-  }
-}
-
-
-void
-FilterCompare::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterCompare::setOrientation(orientation_t ori)
+  : Filter("FilterCompare", 2)
 {
 }
-
-
-const char *
-FilterCompare::getName()
-{
-  return "FilterCompare";
-}
-
 
 void
 FilterCompare::apply()

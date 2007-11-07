@@ -2,8 +2,8 @@
 /***************************************************************************
  *  shape_remover.cpp - Implementation of a shape remover
  *
- *  Generated: Wed Sep 28 11:26:58 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Sep 28 11:26:58 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -36,48 +36,9 @@
 
 /** Constructor. */
 FilterShapeRemover::FilterShapeRemover()
+  : Filter("FilterShapeRemover")
 {
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
-
   shape = NULL;
-}
-
-
-void
-FilterShapeRemover::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterShapeRemover::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterShapeRemover::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterShapeRemover::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterShapeRemover::getName()
-{
-  return "FilterShapeRemover";
 }
 
 
@@ -94,30 +55,30 @@ FilterShapeRemover::apply()
 
   shape->setMargin( margin );
 
-  unsigned char *buffer = src_roi->getROIBufferStart( src );
+  unsigned char *buffer = src_roi[0]->getROIBufferStart( src[0] );
   unsigned char *linestart = buffer;
 
-  if ( (dst == NULL) || (src == dst) ) {
+  if ( (dst == NULL) || (src[0] == dst) ) {
 
-    for (unsigned int h = 0; h < src_roi->height; ++h) {
+    for (unsigned int h = 0; h < src_roi[0]->height; ++h) {
     
-      for (unsigned int w = 0; w < src_roi->width; ++w) {
+      for (unsigned int w = 0; w < src_roi[0]->width; ++w) {
 	if ((*buffer > 240) && (shape->isClose(w, h))) {
 	  *buffer = 0;
 	}
 	buffer++;
       }
       
-      linestart += src_roi->line_step;
+      linestart += src_roi[0]->line_step;
       buffer = linestart;
     }
   } else {
     unsigned char *dst_buffer = dst_roi->getROIBufferStart( dst );
     unsigned char *dst_linestart = dst_buffer;
 
-    for (unsigned int h = 0; h < src_roi->height; ++h) {
+    for (unsigned int h = 0; h < src_roi[0]->height; ++h) {
     
-      for (unsigned int w = 0; w < src_roi->width; ++w) {
+      for (unsigned int w = 0; w < src_roi[0]->width; ++w) {
 	if ((*buffer > 240) && (shape->isClose(w, h))) {
 	  *dst_buffer = 0;
 	} else {
@@ -127,7 +88,7 @@ FilterShapeRemover::apply()
 	dst_buffer++;
       }
       
-      linestart += src_roi->line_step;
+      linestart += src_roi[0]->line_step;
       dst_linestart += dst_roi->line_step;
       buffer = linestart;
       dst_buffer = dst_linestart;
@@ -140,7 +101,7 @@ FilterShapeRemover::apply()
  * @param margin margin around shape to be close to a point.
  */
 void
-FilterShapeRemover::setMargin( unsigned int margin )
+FilterShapeRemover::set_margin( unsigned int margin )
 {
   this->margin = margin;
 }
@@ -150,7 +111,7 @@ FilterShapeRemover::setMargin( unsigned int margin )
  * @param shape shape to remove
  */
 void
-FilterShapeRemover::setShape( Shape *shape )
+FilterShapeRemover::set_shape( Shape *shape )
 {
   this->shape = shape;
 }

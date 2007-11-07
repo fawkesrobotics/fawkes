@@ -2,8 +2,8 @@
 /***************************************************************************
  *  sum.cpp - implementation of sum intensity filter
  *
- *  Generated: Sun Jun 25 19:01:01 2006 (on train to Ac, father in hospital)
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Jun 25 19:01:01 2006 (on train to Ac, father in hospital)
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,7 +25,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "filters/sum.h"
+#include <filters/sum.h>
 
 #include <fvutils/color/yuv.h>
 
@@ -34,55 +34,13 @@
 /** @class FilterSum <filters/sum.h>
  * Sum filter.
  * Adds two images.
+ * @author Tim Niemueller
  */
 
 /** Constructor. */
 FilterSum::FilterSum()
+  : Filter("FilterSum", 2)
 {
-  src[0] = src[1] = dst = NULL;
-  src_roi[0] = src_roi[1] = dst_roi = NULL;
-}
-
-
-void
-FilterSum::setSrcBuffer(unsigned char *buf, ROI *roi,
-			     orientation_t ori, unsigned int buffer_num)
-{
-  if ( buffer_num < 2 ) {
-    src[buffer_num] = buf;
-    src_roi[buffer_num] = roi;
-  }
-}
-
-
-void
-FilterSum::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  if ( buffer_num < 2 ) {
-    src[buffer_num] = buf;
-    src_roi[buffer_num] = roi;
-  }
-}
-
-
-void
-FilterSum::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterSum::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterSum::getName()
-{
-  return "FilterSum";
 }
 
 

@@ -2,8 +2,8 @@
 /***************************************************************************
  *  max.cpp - implementation of max intensity filter
  *
- *  Generated: Sat Jun 10 16:43:41 2006 (FIFA WM 2006, England vs. Paraguay)
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Jun 10 16:43:41 2006 (FIFA WM 2006, England vs. Paraguay)
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -27,74 +27,31 @@
 
 #include <filters/max.h>
 
+#include <core/exceptions/software.h>
 #include <fvutils/color/yuv.h>
 #include <cstddef>
 
 /** @class FilterMax <filters/max.h>
  * Maximum filter.
+ * @author Tim Niemueller
  */
 
 /** Constructor. */
 FilterMax::FilterMax()
-{
-  src[0] = src[1] = dst = NULL;
-  src_roi[0] = src_roi[1] = dst_roi = NULL;
-}
-
-
-void
-FilterMax::setSrcBuffer(unsigned char *buf, ROI *roi,
-			     orientation_t ori, unsigned int buffer_num)
-{
-  if ( buffer_num < 2 ) {
-    src[buffer_num] = buf;
-    src_roi[buffer_num] = roi;
-  }
-}
-
-
-void
-FilterMax::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  if ( buffer_num < 2 ) {
-    src[buffer_num] = buf;
-    src_roi[buffer_num] = roi;
-  }
-}
-
-
-void
-FilterMax::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterMax::setOrientation(orientation_t ori)
+  : Filter("FilterMax", 2)
 {
 }
-
-
-const char *
-FilterMax::getName()
-{
-  return "FilterMax";
-}
-
 
 void
 FilterMax::apply()
 {
-  if ( src[0] == NULL ) return;
-  if ( src[1] == NULL ) return;
-  if ( src_roi[0] == NULL ) return;
-  if ( src_roi[1] == NULL ) return;
+  if ( src[0] == NULL ) throw NullPointerException("FilterInvert: src buffer 0 is NULL");
+  if ( src[1] == NULL ) throw NullPointerException("FilterInvert: src buffer 1 is NULL");
+  if ( src_roi[0] == NULL ) throw NullPointerException("FilterInvert: src ROI 0 is NULL");
+  if ( src_roi[1] == NULL ) throw NullPointerException("FilterInvert: src ROI 1 is NULL");
 
   register unsigned int h = 0;
   register unsigned int w = 0;
-
 
   // y-plane
   register unsigned char *byp   = src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step);

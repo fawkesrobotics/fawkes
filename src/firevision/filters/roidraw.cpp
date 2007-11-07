@@ -2,8 +2,8 @@
 /***************************************************************************
  *  roidraw.cpp - Implementation of ROI draw filter
  *
- *  Generated: Thu Jul 14 16:01:37 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jul 14 16:01:37 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -32,49 +32,13 @@
 /** @class FilterROIDraw <filters/roidraw.h>
  * ROI Drawing filter.
  * This filter visually marks the given region of interest.
+ * @author Tim Niemueller
  */
 
 /** Constructor. */
 FilterROIDraw::FilterROIDraw()
+  : Filter("FilterROIDraw")
 {
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
-}
-
-
-void
-FilterROIDraw::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterROIDraw::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterROIDraw::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
- dst = buf;
-  dst_roi = roi;
-}
-
-void
-FilterROIDraw::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterROIDraw::getName()
-{
-  return "FilterROIDraw";
 }
 
 

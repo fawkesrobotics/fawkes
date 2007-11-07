@@ -2,8 +2,8 @@
 /***************************************************************************
  *  median.h - Header of the median filter
  *
- *  Generated: Mon Jun 05 15:01:26 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jun 05 15:01:26 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -36,38 +36,12 @@
 
 class FilterMedian : public Filter
 {
-
  public:
-
   FilterMedian(unsigned int mask_size);
-
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL,
-			    unsigned int buffer_num = 0);
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    unsigned int buffer_num);
-
-  virtual void setDstBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL);
-
-  virtual void setOrientation(orientation_t ori);
 
   virtual void apply();
 
-  virtual const char *  getName();
-
  private:
-  unsigned char *src;
-  unsigned char *dst;
-
-  ROI           *src_roi;
-  ROI           *dst_roi;
-
   unsigned int   mask_size;
 };
 

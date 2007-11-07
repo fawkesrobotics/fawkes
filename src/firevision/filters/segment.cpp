@@ -4,8 +4,8 @@
  *                This filter can be used to draw the segmentation for a
  *                given object type to the Y-plane of the image
  *
- *  Generated: Mon Jun 27 11:37:57 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jun 27 11:37:57 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -37,6 +37,7 @@
  * Segmentation filter.
  * Visually marks pixels of a given color and makes the segmentation visible.
  * The pixels are marked with bright colors.
+ * @author Tim Niemueller
  */
 
 /** Constructor.
@@ -44,46 +45,10 @@
  * @param what what to mark
  */
 FilterSegment::FilterSegment(ColorModel *cm, color_t what)
+  : Filter("FilterSegment")
 {
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
   this->cm = cm;
   this->what = what;
-}
-
-
-void
-FilterSegment::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterSegment::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-void
-FilterSegment::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
- dst = buf;
-  dst_roi = roi;
-}
-
-void
-FilterSegment::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterSegment::getName()
-{
-  return "FilterSegment";
 }
 
 
@@ -94,13 +59,13 @@ FilterSegment::apply()
   register unsigned int w = 0;
 
   // y-plane
-  register unsigned char *yp   = src + (src_roi->start.y * src_roi->line_step) + (src_roi->start.x * src_roi->pixel_step);
+  register unsigned char *yp   = src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step);
   // u-plane
-  register unsigned char *up   = YUV422_PLANAR_U_PLANE(src, src_roi->image_width, src_roi->image_height)
-                                   + ((src_roi->start.y * src_roi->line_step) / 2 + (src_roi->start.x * src_roi->pixel_step) / 2) ;
+  register unsigned char *up   = YUV422_PLANAR_U_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
+                                   + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2 + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2) ;
   // v-plane
-  register unsigned char *vp   = YUV422_PLANAR_V_PLANE(src, src_roi->image_width, src_roi->image_height)
-                                   + ((src_roi->start.y * src_roi->line_step) / 2 + (src_roi->start.x * src_roi->pixel_step) / 2);
+  register unsigned char *vp   = YUV422_PLANAR_V_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
+                                   + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2 + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2);
 
   // destination y-plane
   register unsigned char *dyp  = dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step);
@@ -111,8 +76,8 @@ FilterSegment::apply()
   unsigned char *lvp  = vp;   // v-plane
   unsigned char *ldyp = dyp;  // destination y-plane
 
-  for (h = 0; (h < src_roi->height) && (h < dst_roi->height); ++h) {
-    for (w = 0; (w < src_roi->width) && (w < dst_roi->width); w += 2) {
+  for (h = 0; (h < src_roi[0]->height) && (h < dst_roi->height); ++h) {
+    for (w = 0; (w < src_roi[0]->width) && (w < dst_roi->width); w += 2) {
       if ( (cm->determine(*yp++, *up, *vp) == what) ) {
 	*dyp++ = 255;
       } else {
@@ -124,9 +89,9 @@ FilterSegment::apply()
 	*dyp++ =   0;
       }
     }
-    lyp  += src_roi->line_step;
-    lup  += src_roi->line_step / 2;
-    lvp  += src_roi->line_step / 2;
+    lyp  += src_roi[0]->line_step;
+    lup  += src_roi[0]->line_step / 2;
+    lvp  += src_roi[0]->line_step / 2;
     ldyp += dst_roi->line_step;
     yp    = lyp;
     up    = lup;

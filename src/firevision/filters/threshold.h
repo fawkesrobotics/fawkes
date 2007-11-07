@@ -2,8 +2,8 @@
 /***************************************************************************
  *  threshold.h - Header of threshold filter
  *
- *  Generated: Tue Jun 07 14:25:53 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Jun 07 14:25:53 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -36,43 +36,16 @@
 
 class FilterThreshold : public Filter
 {
-
  public:
-
   FilterThreshold(unsigned char min = 128, unsigned char min_replace =   0,
 		  unsigned char max = 127, unsigned char max_replace = 255);
 
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL,
-			    unsigned int buffer_num = 0);
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    unsigned int buffer_num);
-
-  virtual void setDstBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL);
-
-  virtual void setOrientation(orientation_t ori);
-
-  virtual void setThresholds(unsigned char min = 128, unsigned char min_replace =   0,
-			     unsigned char max = 127, unsigned char max_replace = 255);
+  void set_thresholds(unsigned char min, unsigned char min_replace,
+		      unsigned char max, unsigned char max_replace);
 
   virtual void apply();
 
-
-  virtual const char *  getName();
-
-
  private:
-  unsigned char *src;
-  unsigned char *dst;
-
-  ROI           *src_roi;
-  ROI           *dst_roi;
-
   unsigned char max;
   unsigned char min;
   unsigned char min_replace;

@@ -2,8 +2,8 @@
 /***************************************************************************
  *  laplace.cpp - Implementation of a laplace filter
  *
- *  Generated: Thu Jun 16 16:30:23 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jun 16 16:30:23 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -35,14 +35,14 @@
 /** @class FilterLaplace <filters/laplace.h>
  * Laplacian filter.
  * Laplacian of Gaussian filter.
+ * @author Tim Niemueller
  */
 
 /** Constructor. */
 FilterLaplace::FilterLaplace()
+  : Filter("FilterLaplace")
 {
   kernel = NULL;
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
 }
 
 
@@ -52,13 +52,11 @@ FilterLaplace::FilterLaplace()
  * @param scale scale factor
  */
 FilterLaplace::FilterLaplace(float sigma, unsigned int size, float scale)
+  : Filter("FilterLaplace")
 {
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
-
   kernel_size = size;
   kernel = (int *)malloc( size * size * sizeof(int) );
-  calculateKernel( kernel, sigma, size, scale );
+  calculate_kernel( kernel, sigma, size, scale );
 }
 
 
@@ -72,54 +70,17 @@ FilterLaplace::~FilterLaplace()
 
 
 void
-FilterLaplace::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterLaplace::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterLaplace::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterLaplace::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterLaplace::getName()
-{
-  return "FilterLaplace";
-}
-
-
-void
 FilterLaplace::apply()
 {
   IppiSize size;
-  size.width = src_roi->width - kernel_size;
-  size.height = src_roi->height - kernel_size;
+  size.width = src_roi[0]->width - kernel_size;
+  size.height = src_roi[0]->height - kernel_size;
 
   IppStatus status;
 
   if ( kernel == NULL ) {
-    //                                    base + number of bytes to line y              + pixel bytes
-    status = ippiFilterLaplace_8u_C1R( src + (src_roi->start.y * src_roi->line_step) + (src_roi->start.x * src_roi->pixel_step), src_roi->line_step,
+    //                                   base + number of bytes to line y              + pixel bytes
+    status = ippiFilterLaplace_8u_C1R( src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step), src_roi[0]->line_step,
 				       dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step), dst_roi->line_step,
 				       size, ippMskSize5x5 );
   } else {
@@ -127,12 +88,12 @@ FilterLaplace::apply()
     IppiPoint kanchor = { (kernel_size + 1) / 2, (kernel_size + 1) / 2 };
 
     /*
-    std::cout << "steps:   " << src_roi->line_step << "   " << dst_roi->line_step << std::endl
+    std::cout << "steps:   " << src_roi[0]->line_step << "   " << dst_roi->line_step << std::endl
 	      << "ksize:   " << ksize.width << " x " << ksize.height << std::endl
 	      << "kanchor: " << kanchor.x << "," << kanchor.y << std::endl;
     */
 
-    status = ippiFilter_8u_C1R( src + ((src_roi->start.y + kernel_size / 2) * src_roi->line_step) + ((src_roi->start.x + kernel_size / 2) * src_roi->pixel_step), src_roi->line_step,
+    status = ippiFilter_8u_C1R( src[0] + ((src_roi[0]->start.y + kernel_size / 2) * src_roi[0]->line_step) + ((src_roi[0]->start.x + kernel_size / 2) * src_roi[0]->pixel_step), src_roi[0]->line_step,
 				dst + ((dst_roi->start.y + kernel_size / 2) * dst_roi->line_step) + ((dst_roi->start.x + kernel_size / 2) * dst_roi->pixel_step), dst_roi->line_step,
 				size, kernel, ksize, kanchor, 1 );
   }
@@ -177,7 +138,7 @@ FilterLaplace::apply()
  * @param scale scale parameter in formula
  */
 void
-FilterLaplace::calculateKernel(int *kernel, float sigma, unsigned int size, float scale)
+FilterLaplace::calculate_kernel(int *kernel, float sigma, unsigned int size, float scale)
 {
   //  title "LoGFUNC__________________________________________"
 

@@ -2,8 +2,8 @@
 /***************************************************************************
  *  closing.cpp - implementation of morphological closing filter
  *
- *  Generated: Mon Jun 05 14:01:15 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jun 05 14:01:15 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -41,12 +41,10 @@
 
 /** Constructor. */
 FilterClosing::FilterClosing()
+  : MorphologicalFilter("Morphological Closing")
 {
   dilate = new FilterDilation();
   erode  = new FilterErosion();
-
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
 }
 
 
@@ -58,58 +56,41 @@ FilterClosing::~FilterClosing()
 }
 
 
-void
-FilterClosing::setSrcBuffer(unsigned char *buf, ROI *roi,
-			     orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
 
-  dilate->setSrcBuffer( buf, roi, ori, buffer_num );
+void
+FilterClosing::set_src_buffer(unsigned char *buf, ROI *roi,
+			      orientation_t ori, unsigned int buffer_num)
+{
+  Filter::set_src_buffer(buf, roi, ori, buffer_num);
+  dilate->set_src_buffer( buf, roi, ori, buffer_num );
 }
 
 
 void
-FilterClosing::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
+FilterClosing::set_src_buffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
 {
-  src = buf;
-  src_roi = roi;
-
-  dilate->setSrcBuffer( src, src_roi, buffer_num );
-} 
-
-
-void
-FilterClosing::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-
-  dilate->setDstBuffer( dst, dst_roi, ori );
-  erode->setSrcBuffer( dst, dst_roi, ori );
+  Filter::set_src_buffer(buf, roi, buffer_num);
+  dilate->set_src_buffer( buf, roi, buffer_num );
 }
 
 
 void
-FilterClosing::setStructuringElement(unsigned char *se,
-				     unsigned int se_width, unsigned int se_height,
-				     unsigned int se_anchor_x, unsigned int se_anchor_y)
+FilterClosing::set_dst_buffer(unsigned char *buf, ROI *roi)
 {
-  dilate->setStructuringElement(se, se_width, se_height, se_anchor_x, se_anchor_y);
-  erode->setStructuringElement(se, se_width, se_height, se_anchor_x, se_anchor_y);
+  Filter::set_dst_buffer(buf, roi);
+  dilate->set_dst_buffer( buf, roi );
+  erode->set_src_buffer( buf, roi );
 }
 
 
 void
-FilterClosing::setOrientation(orientation_t ori)
+FilterClosing::set_structuring_element(unsigned char *se,
+				       unsigned int se_width, unsigned int se_height,
+				       unsigned int se_anchor_x, unsigned int se_anchor_y)
 {
-}
-
-
-const char *
-FilterClosing::getName()
-{
-  return "FilterClosing";
+  MorphologicalFilter::set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
+  dilate->set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
+  erode->set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
 }
 
 

@@ -2,8 +2,8 @@
 /***************************************************************************
  *  dilation.cpp - implementation of morphological dilation filter
  *
- *  Generated: Thu May 25 15:47:01 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu May 25 15:47:01 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -40,10 +40,8 @@
 
 /** Constructor. */
 FilterDilation::FilterDilation()
+  : MorphologicalFilter("Morphological Dilation")
 {
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
-  se = NULL;
 }
 
 
@@ -59,72 +57,13 @@ FilterDilation::FilterDilation()
 FilterDilation::FilterDilation(unsigned char *se,
 			       unsigned int se_width, unsigned int se_height,
 			       unsigned int se_anchor_x, unsigned int se_anchor_y)
+  : MorphologicalFilter("Morphological Dilation")
 {
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
-
   this->se        = se;
   this->se_width  = se_width;
   this->se_height = se_height;
   this->se_anchor_x = se_anchor_x;
   this->se_anchor_y = se_anchor_y;
-
-}
-
-
-/** Destructor. */
-FilterDilation::~FilterDilation()
-{
-}
-
-void
-FilterDilation::setSrcBuffer(unsigned char *buf, ROI *roi,
-			     orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterDilation::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterDilation::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterDilation::setStructuringElement(unsigned char *se,
-				      unsigned int se_width, unsigned int se_height,
-				      unsigned int se_anchor_x, unsigned int se_anchor_y)
-{
-  this->se          = se;
-  this->se_width    = se_width;
-  this->se_height   = se_height;
-  this->se_anchor_x = se_anchor_x;
-  this->se_anchor_y = se_anchor_y;
-}
-
-
-void
-FilterDilation::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterDilation::getName()
-{
-  return "FilterDilation";
 }
 
 
@@ -137,39 +76,39 @@ FilterDilation::apply()
     // standard 3x3 dilation
 
     IppiSize size;
-    size.width = src_roi->width - 2;
-    size.height = src_roi->height - 2;
+    size.width = src_roi[0]->width - 2;
+    size.height = src_roi[0]->height - 2;
 
 
-    if ( (dst == NULL) || (dst == src) ) {
+    if ( (dst == NULL) || (dst == src[0]) ) {
       // In-place
 
       // std::cout << "Running in-place with standard SE" << std::endl;
 
-      status = ippiDilate3x3_8u_C1IR(src + ((src_roi->start.y + 1) * src_roi->line_step) + ((src_roi->start.x + 1) * src_roi->pixel_step),
-				     src_roi->line_step,
+      status = ippiDilate3x3_8u_C1IR(src[0] + ((src_roi[0]->start.y + 1) * src_roi[0]->line_step) + ((src_roi[0]->start.x + 1) * src_roi[0]->pixel_step),
+				     src_roi[0]->line_step,
 				     size);
       
     } else {
       // std::cout << "Running not in-place dilation with standard SE" << std::endl;
 
-      status = ippiDilate3x3_8u_C1R(src + ((src_roi->start.y + 1) * src_roi->line_step) + ((src_roi->start.x + 1) * src_roi->pixel_step),
-				    src_roi->line_step,
+      status = ippiDilate3x3_8u_C1R(src[0] + ((src_roi[0]->start.y + 1) * src_roi[0]->line_step) + ((src_roi[0]->start.x + 1) * src_roi[0]->pixel_step),
+				    src_roi[0]->line_step,
 				    dst + ((dst_roi->start.y + 1) * dst_roi->line_step) + ((dst_roi->start.x + 1) * dst_roi->pixel_step),
 				    dst_roi->line_step,
 				    size);
 
-      yuv422planar_copy_uv(src, dst,
-			   src_roi->image_width, src_roi->image_height,
-			   src_roi->start.x, src_roi->start.y,
-			   src_roi->width, src_roi->height );
+      yuv422planar_copy_uv(src[0], dst,
+			   src_roi[0]->image_width, src_roi[0]->image_height,
+			   src_roi[0]->start.x, src_roi[0]->start.y,
+			   src_roi[0]->width, src_roi[0]->height );
     }
   } else {
     // we have a custom SE
 
     IppiSize size;
-    size.width = src_roi->width - se_width;
-    size.height = src_roi->height - se_width;
+    size.width = src_roi[0]->width - se_width;
+    size.height = src_roi[0]->height - se_width;
 
     IppiSize mask_size = { se_width, se_height };
     IppiPoint mask_anchor = { se_anchor_x, se_anchor_y };
@@ -185,28 +124,28 @@ FilterDilation::apply()
     printf("  dst buf:     0x%x\n", (unsigned int)dst );
     */
 
-    if ( (dst == NULL) || (dst == src) ) {
+    if ( (dst == NULL) || (dst == src[0]) ) {
       // In-place
 
-      status = ippiDilate_8u_C1IR(src + ((src_roi->start.y + (se_height / 2)) * src_roi->line_step) + ((src_roi->start.x + (se_width / 2)) * src_roi->pixel_step),
-				  src_roi->line_step,
+      status = ippiDilate_8u_C1IR(src[0] + ((src_roi[0]->start.y + (se_height / 2)) * src_roi[0]->line_step) + ((src_roi[0]->start.x + (se_width / 2)) * src_roi[0]->pixel_step),
+				  src_roi[0]->line_step,
 				  size,
 				  se, mask_size, mask_anchor);
       
     } else {
       //std::cout << "Running NOT in-place" << std::endl;
 
-      status = ippiDilate_8u_C1R(src + ((src_roi->start.y + (se_height / 2)) * src_roi->line_step) + ((src_roi->start.x + (se_width / 2)) * src_roi->pixel_step),
-				 src_roi->line_step,
+      status = ippiDilate_8u_C1R(src[0] + ((src_roi[0]->start.y + (se_height / 2)) * src_roi[0]->line_step) + ((src_roi[0]->start.x + (se_width / 2)) * src_roi[0]->pixel_step),
+				 src_roi[0]->line_step,
 				 dst + ((dst_roi->start.y + (se_height / 2)) * dst_roi->line_step) + ((dst_roi->start.x + (se_width / 2)) * dst_roi->pixel_step),
 				 dst_roi->line_step,
 				 size,
 				 se, mask_size, mask_anchor);
 
-      yuv422planar_copy_uv(src, dst,
-			   src_roi->image_width, src_roi->image_height,
-			   src_roi->start.x, src_roi->start.y,
-			   src_roi->width, src_roi->height );
+      yuv422planar_copy_uv(src[0], dst,
+			   src_roi[0]->image_width, src_roi[0]->image_height,
+			   src_roi[0]->start.x, src_roi[0]->start.y,
+			   src_roi[0]->width, src_roi[0]->height );
 
     }
   }

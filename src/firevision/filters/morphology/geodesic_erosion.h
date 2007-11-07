@@ -3,8 +3,8 @@
  *  geodesic_erosion.h - header for morphological geodesic erosion
  *                       reconstruction
  *
- *  Generated: Sat Jun 10 16:10:08 2006 (FIFA WM 2006, England vs. Paraguay)
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Jun 10 16:10:08 2006 (FIFA WM 2006, England vs. Paraguay)
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -42,43 +42,16 @@ class FilterGeodesicErosion : public MorphologicalFilter
   FilterGeodesicErosion(unsigned int se_size = 3);
   virtual ~FilterGeodesicErosion();
 
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL,
-			    unsigned int buffer_num = 0);
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    unsigned int buffer_num);
-
-  virtual void setDstBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL);
-
-  virtual void setOrientation(orientation_t ori);
-
-  virtual void setStructuringElement(unsigned char *se,
-				     unsigned int se_width, unsigned int se_height,
-				     unsigned int se_anchor_x, unsigned int se_anchor_y);
-
   virtual void apply();
 
-  virtual const char *  getName();
-
-  virtual unsigned int getNumIterations();
+  virtual unsigned int num_iterations();
 
   static const unsigned int MARKER;
   static const unsigned int MASK;
 
  private:
-  unsigned char *src[2];
-  unsigned char *dst;
-
   unsigned char *isotropic_se;
   unsigned int   se_size;
-
-  ROI           *src_roi[2];
-  ROI           *dst_roi;
 
   FilterErosion  *erode;
   FilterMax      *max;

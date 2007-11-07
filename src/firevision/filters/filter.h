@@ -2,7 +2,7 @@
 /***************************************************************************
  *  filter.h - Abstract class defining a filter
  *
- *  Generated: Tue May 03 19:50:02 2005
+ *  Created: Tue May 03 19:50:02 2005
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -35,27 +35,37 @@ class Filter
 {
 
  public:
+  Filter(const char *name, unsigned int max_num_buffers = 1);
   virtual ~Filter();
 
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL,
-			    unsigned int buffer_num = 0)          = 0;
+  virtual void set_src_buffer(unsigned char *buf, ROI *roi,
+			      orientation_t ori = ORI_HORIZONTAL,
+			      unsigned int buffer_num = 0);
 
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    unsigned int buffer_num)              = 0;
+  virtual void set_src_buffer(unsigned char *buf, ROI *roi,
+			      unsigned int buffer_num);
 
-  virtual void setDstBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL)   = 0;
+  virtual void set_dst_buffer(unsigned char *buf, ROI *roi);
 
-  virtual void setOrientation(orientation_t ori)                  = 0;
-  virtual void apply()                                            = 0 ;
-  virtual const char * getName()                                  = 0;
 
-  void shrinkRegion(ROI *r, unsigned int n);
+  virtual void set_orientation(orientation_t ori, unsigned int buffer_num);
+  virtual const char * name();
 
+  virtual void apply() = 0 ;
+
+  void shrink_region(ROI *r, unsigned int n);
+
+ protected:
+  unsigned int    _max_num_buffers;
+  char           *_name;
+
+  unsigned char  **src;
+  unsigned char  *dst;
+
+  ROI            **src_roi;
+  ROI            *dst_roi;
+
+  orientation_t  *ori;
 };
 
 #endif

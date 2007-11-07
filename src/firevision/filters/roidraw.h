@@ -2,8 +2,8 @@
 /***************************************************************************
  *  roidraw.h - Header of ROI draw filter
  *
- *  Generated: Thu Jul 14 15:59:22 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jul 14 15:59:22 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -32,38 +32,10 @@
 
 class FilterROIDraw : public Filter
 {
-
  public:
-
   FilterROIDraw();
 
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL,
-			    unsigned int buffer_num = 0);
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    unsigned int buffer_num);
-  
-  virtual void setDstBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL);
-
-  virtual void setOrientation(orientation_t ori);
-
   virtual void apply();
-
-  virtual const char *  getName();
-
- private:
-  unsigned char *src;
-  unsigned char *dst;
-
-  ROI           *src_roi;
-  ROI           *dst_roi;
-
 };
 
 #endif

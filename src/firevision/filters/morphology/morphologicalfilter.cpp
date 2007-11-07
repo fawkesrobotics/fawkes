@@ -2,7 +2,7 @@
 /***************************************************************************
  *  morphological.cpp - interface for a morphological filter
  *
- *  Generated: Tue Mar 27 23:27:46 2007
+ *  Created: Tue Mar 27 23:27:46 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -27,14 +27,31 @@
 
 #include <filters/morphology/morphologicalfilter.h>
 
+#include <cstddef>
+
 /** @class MorphologicalFilter <filters/morphology/morphologicalfilter.h>
  * Morphological filter interface.
  * This interface defines specific API details for morphological filters.
  *
  * @author Tim Niemueller
  *
- * @fn MorphologicalFilter::setStructuringElement(unsigned char *se, unsigned int se_width, unsigned int se_height, unsigned int se_anchor_x, unsigned int se_anchor_y )
- * Set the structuring element for successive filter runs.
+ */
+
+MorphologicalFilter::MorphologicalFilter(const char *name, unsigned int max_num_buffers)
+  : Filter(name, max_num_buffers)
+{
+  se = NULL;
+  se_width = se_height = se_anchor_x = se_anchor_y = 0;
+}
+
+
+/** Destructor. */
+MorphologicalFilter::~MorphologicalFilter()
+{
+}
+
+
+/** Set the structuring element for successive filter runs.
  * @param se structuring element buffer. This is just a line-wise concatenated array
  * of values. A value of zero means ignore, any other value means to consider this
  * value.
@@ -43,8 +60,14 @@
  * @param se_anchor_x x coordinate of anchor in structuring element
  * @param se_anchor_y y coordinate of anchor in structuring element
  */
-
-/** Virtual empty destructor. */
-MorphologicalFilter::~MorphologicalFilter()
+void
+MorphologicalFilter::set_structuring_element(unsigned char *se,
+					     unsigned int se_width, unsigned int se_height,
+					     unsigned int se_anchor_x, unsigned int se_anchor_y)
 {
+  this->se          = se;
+  this->se_width    = se_width;
+  this->se_height   = se_height;
+  this->se_anchor_x = se_anchor_x;
+  this->se_anchor_y = se_anchor_y;
 }

@@ -2,8 +2,8 @@
 /***************************************************************************
  *  difference.cpp - implementation of difference intensity filter
  *
- *  Generated: Sun Jun 25 23:07:35 2006 (on train to Ac, father in hospital)
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Jun 25 23:07:35 2006 (on train to Ac, father in hospital)
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -36,51 +36,8 @@
 
 /** Constructor. */
 FilterDifference::FilterDifference()
+  : Filter("FilterDifference", 2)
 {
-  src[0] = src[1] = dst = NULL;
-  src_roi[0] = src_roi[1] = dst_roi = NULL;
-}
-
-
-void
-FilterDifference::setSrcBuffer(unsigned char *buf, ROI *roi,
-			     orientation_t ori, unsigned int buffer_num)
-{
-  if ( buffer_num < 2 ) {
-    src[buffer_num] = buf;
-    src_roi[buffer_num] = roi;
-  }
-}
-
-
-void
-FilterDifference::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  if ( buffer_num < 2 ) {
-    src[buffer_num] = buf;
-    src_roi[buffer_num] = roi;
-  }
-}
-
-
-void
-FilterDifference::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterDifference::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterDifference::getName()
-{
-  return "FilterDifference";
 }
 
 

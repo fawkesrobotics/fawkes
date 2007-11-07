@@ -3,7 +3,7 @@
  *  segenerator.h - Class that helps to create some standard structuring
  *                  elements
  *
- *  Generated: Wed Jun 07 11:23:03 2006
+ *  Created: Wed Jun 07 11:23:03 2006
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$

@@ -2,8 +2,8 @@
 /***************************************************************************
  *  geodesic_erosion.cpp - implementation of morphological geodesic erosion
  *
- *  Generated: Sat Jun 10 16:21:30 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Jun 10 16:21:30 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -56,6 +56,7 @@ const unsigned int FilterGeodesicErosion::MASK   = 1;
  * @param se_size Structuring element size.
  */
 FilterGeodesicErosion::FilterGeodesicErosion(unsigned int se_size)
+  : MorphologicalFilter("Morphological Geodesic Erosion")
 {
   this->se_size  = (se_size > 0) ? se_size : 1;
   iterations = 0;
@@ -66,10 +67,7 @@ FilterGeodesicErosion::FilterGeodesicErosion(unsigned int se_size)
 
   isotropic_se = SEGenerator::square(this->se_size, this->se_size);
 
-  erode->setStructuringElement( isotropic_se, se_size, se_size, se_size / 2, se_size / 2 );
-
-  src[MARKER] = src[MASK] = dst = NULL;
-  src_roi[MARKER] = src_roi[MASK] = dst_roi = NULL;
+  erode->set_structuring_element( isotropic_se, se_size, se_size, se_size / 2, se_size / 2 );
 }
 
 
@@ -80,54 +78,6 @@ FilterGeodesicErosion::~FilterGeodesicErosion()
   delete max;
   delete diff;
   free( isotropic_se );
-}
-
-
-void
-FilterGeodesicErosion::setSrcBuffer(unsigned char *buf, ROI *roi,
-				    orientation_t ori, unsigned int buffer_num)
-{
-  setSrcBuffer(buf, roi, buffer_num);
-}
-
-
-void
-FilterGeodesicErosion::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  if ( buffer_num >= 2 ) ERROR("Invalid buffer number");
-
-  src[buffer_num] = buf;
-  src_roi[buffer_num] = roi;
-}
-
-
-void
-FilterGeodesicErosion::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-
-void
-FilterGeodesicErosion::setStructuringElement(unsigned char *se,
-					     unsigned int se_width, unsigned int se_height,
-					     unsigned int se_anchor_x, unsigned int se_anchor_y)
-{
-  // We don't care, only use a squared isotropic element for geodesic reconstruction
-}
-
-
-void
-FilterGeodesicErosion::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterGeodesicErosion::getName()
-{
-  return "FilterGeodesicErosion";
 }
 
 
@@ -145,11 +95,11 @@ FilterGeodesicErosion::apply()
   diff->setBufferA( tmp, src_roi[MARKER]->image_width, src_roi[MARKER]->image_height );
   diff->setBufferB( dst, dst_roi->image_width, dst_roi->image_height );
 
-  erode->setSrcBuffer( tmp, src_roi[MARKER] );
+  erode->set_src_buffer( tmp, src_roi[MARKER] );
 
-  max->setSrcBuffer( src[MASK], src_roi[MASK], 0 );
-  max->setSrcBuffer( tmp, src_roi[MARKER], 1 );
-  max->setDstBuffer( tmp, src_roi[MARKER] );
+  max->set_src_buffer( src[MASK], src_roi[MASK], 0 );
+  max->set_src_buffer( tmp, src_roi[MARKER], 1 );
+  max->set_dst_buffer( tmp, src_roi[MARKER] );
 
 
   iterations = 0;
@@ -172,7 +122,7 @@ FilterGeodesicErosion::apply()
  * last call to apply().
  */
 unsigned int
-FilterGeodesicErosion::getNumIterations()
+FilterGeodesicErosion::num_iterations()
 {
   return iterations;
 }

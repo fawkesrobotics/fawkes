@@ -2,8 +2,8 @@
 /***************************************************************************
  *  or.cpp - Implementation for "or'ing" images together
  *
- *  Generated: Fri May 13 14:57:10 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri May 13 14:57:10 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -32,59 +32,13 @@
 
 /** @class FilterOr <filters/or.h>
  * Or filter.
+ * @author Tim Niemueller
  */
 
 /** Constructor. */
 FilterOr::FilterOr()
+  : Filter("FilterOr", 2)
 {
-  src[0] = src[1] = dst = NULL;
-  src_roi[0] = src_roi[1] = dst_roi = NULL;
-}
-
-
-void
-FilterOr::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
-{
-  if (buffer_num >= 2) {
-    buffer_num = 0;
-    // cout << "FilterOr: Warning, buffer_num in setSrcBuffer() out of range, assuming 0." << endl;
-  }
-
-  src[buffer_num] = buf;
-  src_roi[buffer_num] = roi;
-
-}
-
-void
-FilterOr::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  if (buffer_num >= 2) {
-    buffer_num = 0;
-    // cout << "FilterOr: Warning, buffer_num in setSrcBuffer() out of range, assuming 0." << endl;
-  }
-
-  src[buffer_num] = buf;
-  src_roi[buffer_num] = roi;
-
-}
-
-void
-FilterOr::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-void
-FilterOr::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterOr::getName()
-{
-  return "FilterOr";
 }
 
 

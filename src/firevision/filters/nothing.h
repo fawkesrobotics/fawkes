@@ -3,8 +3,8 @@
  *  nothing.h - Header of a filter that does nothing. Wonderful, isn't it.
  *              Used in FilterFactory to avoid NULL checks
  *
- *  Generated: Fri Jun 17 13:28:21 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri Jun 17 13:28:21 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -33,35 +33,16 @@
 
 /** @class FilterNothing <filters/nothing.h>
  * A filter that does... nothing.
+ * @author Tim Niemueller
  */
 
 class FilterNothing : public Filter
 {
-
  public:
-
   /** Constructor. */
-  FilterNothing() {}
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL,
-			    unsigned int buffer_num = 0) {}
-
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    unsigned int buffer_num) {}
-
-  virtual void setDstBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL) {}
-
-  virtual void setOrientation(orientation_t ori) {}
+  FilterNothing() : Filter("FilterNothing") {}
 
   virtual void apply() {}
-
-  virtual const char *  getName() { return "FilterNothing"; }
-
 };
 
 #endif

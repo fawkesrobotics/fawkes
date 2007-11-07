@@ -2,8 +2,8 @@
 /***************************************************************************
  *  opening.h - header for morphological opening filter
  *
- *  Generated: Mon Jun 05 13:39:30 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jun 05 13:39:30 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -39,39 +39,24 @@ class FilterOpening : public MorphologicalFilter
   FilterOpening();
   virtual ~FilterOpening();
 
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL,
-			    unsigned int buffer_num = 0);
+  virtual void set_src_buffer(unsigned char *buf, ROI *roi,
+			      orientation_t ori = ORI_HORIZONTAL,
+			      unsigned int buffer_num = 0);
 
-  virtual void setSrcBuffer(unsigned char *buf,
-			    ROI *roi,
-			    unsigned int buffer_num);
+  virtual void set_src_buffer(unsigned char *buf, ROI *roi,
+			      unsigned int buffer_num);
 
-  virtual void setDstBuffer(unsigned char *buf,
-			    ROI *roi,
-			    orientation_t ori = ORI_HORIZONTAL);
+  virtual void set_dst_buffer(unsigned char *buf, ROI *roi);
 
-  virtual void setOrientation(orientation_t ori);
-
-  virtual void setStructuringElement(unsigned char *se,
-				     unsigned int se_width, unsigned int se_height,
-				     unsigned int se_anchor_x, unsigned int se_anchor_y);
+  virtual void set_structuring_element(unsigned char *se,
+				       unsigned int se_width, unsigned int se_height,
+				       unsigned int se_anchor_x, unsigned int se_anchor_y);
 
   virtual void apply();
 
-  virtual const char *  getName();
-
  private:
-  unsigned char *src;
-  unsigned char *dst;
-
-  ROI           *src_roi;
-  ROI           *dst_roi;
-
   FilterDilation *dilate;
   FilterErosion  *erode;
-
 };
 
 #endif

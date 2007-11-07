@@ -2,7 +2,7 @@
 /***************************************************************************
  *  filter.cpp - Abstract class defining a filter
  *
- *  Generated: Mon May 19 15:47:44 2007
+ *  Created: Mon May 19 15:47:44 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -27,63 +27,144 @@
 
 #include <filters/filter.h>
 
+#include <core/exceptions/software.h>
+#include <cstdlib>
+#include <cstring>
+
 /** @class Filter <filters/filter.h>
  * Filter interface.
  * This class defines the general interface that filters are used with.
  *
  * @author Tim Niemueller
  *
- * @fn void Filter::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori = ORI_HORIZONTAL, unsigned int buffer_num = 0) = 0
- * Set the src buffer
- * @param buf Buffer to use as source image
- * @param roi Region Of Interest to work on
- * @param ori Orientation to apply the filter in, maybe ignored
- *            in some filters
- * @param buffer_num source buffer to set for filter that need
- *                   multiple src buffers
- *
- * @fn void Filter::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num) = 0
- * Set the src buffer
- * @param buf Buffer to use as source image
- * @param roi Region Of Interest to work on
- * @param buffer_num source buffer to set for filter that need
- *                   multiple src buffers
- *
- * @fn void Filter::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori = ORI_HORIZONTAL) = 0
- * Set the destination buffer.
- * @param buf Buffer to use as destination image
- * @param roi Region Of Interest where the result is put in the dst image
- * @param ori Orientation to apply the filter in, maybe ignored
- *            in some filters
- *
- * @fn void Filter::setOrientation(orientation_t ori) = 0
- * Set the orientation to apply the filter in, maybe ignored by
- * some filters.
- * @param ori Orientation
- *
  * @fn void Filter::apply() = 0
  * Apply the filter.
  * Apply the filter to the given source and destination
  * buffers with given width and height and orientation
- * (Ori may be ignored for some filters).
- *
- * @fn const char * Filter::getName() = 0
- * Get name of filter.
- * @return name of filter
+ * (ori may be ignored for some filters).
  */
 
-
-/** Empty virtual destructor. */
-Filter::~Filter()
+/** Constructor.
+ * @param name name of the filter
+ * @param max_num_buffers The maximum number of source buffers that can be set.
+ */
+Filter::Filter(const char *name, unsigned int max_num_buffers)
 {
+  if ( max_num_buffers == 0 ) {
+    throw OutOfBoundsException("Need to set at least one buffer", 0, 1, 0xFFFFFFFF);
+  }
+
+  _name = strdup(name);
+
+  src = (unsigned char **)malloc(max_num_buffers * sizeof(unsigned char *));
+  memset(src, 0, max_num_buffers * sizeof(unsigned char *));
+
+  src_roi = (ROI **)malloc(max_num_buffers * sizeof(ROI *));
+  memset(src_roi, 0, max_num_buffers * sizeof(ROI *));
+
+  ori = (orientation_t *)malloc(max_num_buffers * sizeof(orientation_t));
+  memset(ori, 0, max_num_buffers * sizeof(orientation_t));
 }
 
-/** This shinks the regions as needed for a N x N matrix.
+
+/** Destructor. */
+Filter::~Filter()
+{
+  free(_name);
+  free(src);
+  free(src_roi);
+  free(ori);
+}
+
+/** Set source buffer with orientation.
+ * @param buf Buffer to use as source image
+ * @param roi Region Of Interest to work on
+ * @param ori Orientation to apply the filter in, maybe ignored
+ *            in some filters
+ * @param buffer_num source buffer to set for filter that need
+ *                   multiple src buffers
+ * @exception OutOfBoundsException Thrown if buffer_num is illegal
+ */
+void
+Filter::set_src_buffer(unsigned char *buf,
+		       ROI *roi,
+		       orientation_t ori,
+		       unsigned int buffer_num)
+{
+  if ( buffer_num >= _max_num_buffers ) {
+    throw OutOfBoundsException("Invalid buffer number", buffer_num, 0, _max_num_buffers);
+  }
+
+  src[buffer_num]       = buf;
+  src_roi[buffer_num]   = roi;
+  this->ori[buffer_num] = ori;
+}
+
+
+/** Set source buffer.
+ * @param buf Buffer to use as source image
+ * @param roi Region Of Interest to work on
+ * @param buffer_num source buffer to set for filter that need multiple src buffers
+ * @exception OutOfBoundsException Thrown if buffer_num is illegal
+ */
+void
+Filter::set_src_buffer(unsigned char *buf,
+		       ROI *roi,
+		       unsigned int buffer_num)
+{
+  if ( buffer_num >= _max_num_buffers ) {
+    throw OutOfBoundsException("Invalid buffer number", buffer_num, 0, _max_num_buffers);
+  }
+
+  src[buffer_num]     = buf;
+  src_roi[buffer_num] = roi;
+  ori[buffer_num]     = ORI_HORIZONTAL;
+}
+
+
+/** Set the destination buffer.
+ * @param buf Buffer to use as destination image
+ * @param roi Region Of Interest where the result is put in the dst image
+ */
+void
+Filter::set_dst_buffer(unsigned char *buf, ROI *roi)
+{
+  dst     = buf;
+  dst_roi = roi;
+}
+
+
+/** Set the orientation to apply the filter in.
+ * Maybe ignored by some filters.
+ * @param ori Orientation
+ */
+void
+Filter::set_orientation(orientation_t ori, unsigned int buffer_num)
+{
+  if ( buffer_num >= _max_num_buffers ) {
+    throw OutOfBoundsException("Invalid buffer number", buffer_num, 0, _max_num_buffers);
+  }
+
+  this->ori[buffer_num] = ORI_HORIZONTAL;
+}
+
+
+/** Get filter name
+ * @return filter name
+ */
+const char *
+Filter::name()
+{
+  return _name;
+}
+
+
+/** This shrinks the regions as needed for a N x N matrix.
  * @param r ROI to shrink
  * @param n size of the matrix
  */
 void
-Filter::shrinkRegion(ROI *r, unsigned int n)
+Filter::shrink_region(ROI *r, unsigned int n)
 {
   if (r->start.x < (n/2)) {
     r->start.x = n/2;
@@ -98,4 +179,3 @@ Filter::shrinkRegion(ROI *r, unsigned int n)
     r->height -= (r->start.y + r->height) - (r->image_height - (n/2));
   }
 }
-

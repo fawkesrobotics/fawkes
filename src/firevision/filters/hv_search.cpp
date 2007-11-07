@@ -2,9 +2,9 @@
 /***************************************************************************
  *  hv_search.cpp - Implementation of horizontal- and vertical-search filter
  *
- *  Generated: Tue Jul 12 14:40:40 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
- *                   Yuxiao Hu (Yuxiao.Hu@rwth-aachen.de)
+ *  Created: Tue Jul 12 14:40:40 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *             2005       Yuxiao Hu (Yuxiao.Hu@rwth-aachen.de)
  *
  *  $Id$
  *
@@ -37,6 +37,8 @@
  * Horizontal/vertical search filter.
  * This filter works similar to the horizontal search filter, but additionally
  * it search for color changes in vertical direction.
+ * @author Yuxiao Hu
+ * @author Tim Niemueller
  */
 
 
@@ -46,46 +48,10 @@
  * all other colors are background.
  */
 FilterHVSearch::FilterHVSearch(ColorModel *cm, color_t what)
+  : Filter("FilterHVSearch")
 {
-  src = dst = NULL;
-  src_roi = dst_roi = NULL;
   this->cm = cm;
   this->what = what;
-}
-
-
-void
-FilterHVSearch::setSrcBuffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-
-void
-FilterHVSearch::setSrcBuffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
-{
-  src = buf;
-  src_roi = roi;
-}
-
-void
-FilterHVSearch::setDstBuffer(unsigned char *buf, ROI *roi, orientation_t ori)
-{
-  dst = buf;
-  dst_roi = roi;
-}
-
-void
-FilterHVSearch::setOrientation(orientation_t ori)
-{
-}
-
-
-const char *
-FilterHVSearch::getName()
-{
-  return "FilterHVSearch";
 }
 
 
@@ -95,7 +61,7 @@ FilterHVSearch::apply()
   register unsigned int h = 0;
   register unsigned int w = 0;
 
-  unsigned int width = src_roi->width <= dst_roi->width ? src_roi->width : dst_roi->width;
+  unsigned int width = src_roi[0]->width <= dst_roi->width ? src_roi[0]->width : dst_roi->width;
 
   // Here use array to avoid overhead of dynamic mem allocation.
   unsigned int top[width];
@@ -103,13 +69,13 @@ FilterHVSearch::apply()
   bool vflag[width];
 
   // y-plane
-  register unsigned char *yp   = src + (src_roi->start.y * src_roi->line_step) + (src_roi->start.x * src_roi->pixel_step);
+  register unsigned char *yp   = src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step);
   // u-plane
-  register unsigned char *up   = YUV422_PLANAR_U_PLANE(src, src_roi->image_width, src_roi->image_height)
-                                   + ((src_roi->start.y * src_roi->line_step) / 2 + (src_roi->start.x * src_roi->pixel_step) / 2) ;
+  register unsigned char *up   = YUV422_PLANAR_U_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
+                                   + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2 + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2) ;
   // v-plane
-  register unsigned char *vp   = YUV422_PLANAR_V_PLANE(src, src_roi->image_width, src_roi->image_height)
-                                   + ((src_roi->start.y * src_roi->line_step) / 2 + (src_roi->start.x * src_roi->pixel_step) / 2);
+  register unsigned char *vp   = YUV422_PLANAR_V_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
+                                   + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2 + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2);
 
   // destination y-plane
   register unsigned char *dyp  = dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step);
@@ -140,11 +106,11 @@ FilterHVSearch::apply()
   memset(bottom, 0, width * sizeof(unsigned int));
   memset(vflag, 0, width * sizeof(bool));
 
-  for (h = 0; (h < src_roi->height) && (h < dst_roi->height); ++h) {
+  for (h = 0; (h < src_roi[0]->height) && (h < dst_roi->height); ++h) {
     flag = false;
     left = right = 0;
     num_what = 0;
-    for (w = 0; (w < src_roi->width) && (w < dst_roi->width); ++w) {
+    for (w = 0; (w < src_roi[0]->width) && (w < dst_roi->width); ++w) {
       if ( (cm->determine(*yp++, *up, *vp) == what) ) {
 	right = w;
 	if (not_reflect) bottom[w] = h;
@@ -201,9 +167,9 @@ FilterHVSearch::apply()
       }
     }
 
-    lyp  += src_roi->line_step;
-    lup  += src_roi->line_step / 2;
-    lvp  += src_roi->line_step / 2;
+    lyp  += src_roi[0]->line_step;
+    lup  += src_roi[0]->line_step / 2;
+    lvp  += src_roi[0]->line_step / 2;
     ldyp += dst_roi->line_step;
     yp    = lyp;
     up    = lup;
