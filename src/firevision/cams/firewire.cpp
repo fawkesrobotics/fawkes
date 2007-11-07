@@ -184,22 +184,23 @@ FirewireCamera::start()
 
   if (!opened) {
     // cout  << cred << "Tried to start closed cam. Giving up." << cnormal << endl;
-    return;
+    throw Exception("FirewireCamera: Cannot start closed camera");
   }
 
 
   //cout  << "Starting camera" << endl;
 
-  if ( dc1394_capture_setup( camera, num_buffers, DC1394_CAPTURE_FLAGS_DEFAULT ) != DC1394_SUCCESS ) {
+  dc1394error_t err;
+  if ( (err = dc1394_capture_setup( camera, num_buffers, DC1394_CAPTURE_FLAGS_DEFAULT )) != DC1394_SUCCESS ) {
     // cout  << cred << "Could not start capturing" << endl;
     dc1394_capture_stop(camera);
-    return;
+    throw Exception("FirewireCamera: Could not setup capture (%s)", dc1394_error_strings[err]);
   }
 
-  if ( dc1394_video_set_transmission(camera, DC1394_ON) != DC1394_SUCCESS) {
+  if ( (err = dc1394_video_set_transmission(camera, DC1394_ON)) != DC1394_SUCCESS) {
     // cout  << cred << "Could not start video transmission" << cnormal << endl;
     dc1394_capture_stop(camera);
-    return;
+    throw Exception("FirewireCamera: Could not start ISO transmission (%s)", dc1394_error_strings[err]);
   }
 				
   // Give it some time to be ready
@@ -663,6 +664,8 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   }
   if ( cap->has("nbufs") ) {
     num_buffers = atoi(cap->get("nbufs").c_str());
+  } else {
+    num_buffers = 4;
   }
   if ( cap->has("width") ) {
     format7_width = atoi(cap->get("width").c_str());

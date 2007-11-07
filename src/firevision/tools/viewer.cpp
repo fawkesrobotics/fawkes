@@ -83,8 +83,6 @@ main(int argc, char **argv)
     }
     image_id = strtok_r(NULL, "", &save_ptr);
 
-    printf("Host: %s  port: %s  image_id: %s\n", host, port, image_id);
-
     if ( port != NULL ) {
       port_num = atoi(port);
       if ( (port_num < 0) || (port_num > 0xFFFF) ) {
@@ -126,6 +124,8 @@ main(int argc, char **argv)
   ImageDisplay *display = new ImageDisplay(cam->pixel_width(), cam->pixel_height());
   display->show(cam->colorspace(), cam->buffer());
 
+  cam->dispose_buffer();
+
   bool quit = false;
   while (! quit) {
     SDL_Event event;
@@ -138,6 +138,7 @@ main(int argc, char **argv)
 	if ( event.key.keysym.sym == SDLK_SPACE ) {
 	  cam->capture();
 	  display->show(cam->colorspace(), cam->buffer());
+	  cam->dispose_buffer();
 	} else if ( event.key.keysym.sym == SDLK_ESCAPE ) {
 	  quit = true;
 	} else if ( event.key.keysym.sym == SDLK_q ) {
