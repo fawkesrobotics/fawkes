@@ -27,6 +27,9 @@
     <field type="unsigned int" name="object_type">
       Object type, use constants to define
     </field>
+    <field type="bool" name="visible">
+      True, if object is visible.
+    </field>
     <field type="float" name="yaw">
       Angle between the robot's forward direction and the object on the ground plane.
       This angle is in a local 3D coordinate system to the robot and given in radians.
@@ -45,20 +48,29 @@
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
     </field>
-    <field type="int" name="world_x">
+    <field type="float" name="world_x">
       This is the X coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right.
     </field>
-    <field type="int" name="world_y">
+    <field type="float" name="world_y">
       This is the Y coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right and Z pointing downwards.
     </field>
-    <field type="int" name="world_z">
+    <field type="float" name="world_z">
       This is the Z coordinate in the cartesian right-handed world coordinate system.
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right.
+    </field>
+    <field type="float" name="relative_x">
+      This is the X coordinate in the cartesian right-handed robot coordinate system.
+    </field>
+    <field type="float" name="relative_y">
+      This is the Y coordinate in the cartesian right-handed robot coordinate system.
+    </field>
+    <field type="float" name="relative_z">
+      This is the Z coordinate in the cartesian right-handed robot coordinate system.
     </field>
     <field type="float" name="xyz_covariance" length="9">
       Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
@@ -81,13 +93,13 @@
       values last row from left to right each.
     </field>
 
-    <field type="int" name="world_x_velocity">
+    <field type="float" name="world_x_velocity">
       Velocity of object in the world coordinate system in X-direction in meter per second.
     </field>
-    <field type="int" name="world_y_velocity">
+    <field type="float" name="world_y_velocity">
       Velocity of object in the world coordinate system in Y-direction in meter per second.
     </field>
-    <field type="int" name="world_z_velocity">
+    <field type="float" name="world_z_velocity">
       Velocity of object in the world coordinate system in Z-direction in meter per second.
     </field>
     <field type="float" name="xyz_velocity_covariance" length="9">

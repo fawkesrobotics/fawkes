@@ -89,6 +89,30 @@ ObjectPositionInterface::set_object_type(const unsigned int new_object_type)
   data->object_type = new_object_type;
 }
 
+/** Get visible value.
+ * 
+      True, if object is visible.
+    
+ * @return visible value
+ */
+bool
+ObjectPositionInterface::is_visible()
+{
+  return data->visible;
+}
+
+/** Set visible value.
+ * 
+      True, if object is visible.
+    
+ * @param new_visible new visible value
+ */
+void
+ObjectPositionInterface::set_visible(const bool new_visible)
+{
+  data->visible = new_visible;
+}
+
 /** Get yaw value.
  * 
       Angle between the robot's forward direction and the object on the ground plane.
@@ -205,7 +229,7 @@ ObjectPositionInterface::set_dyp_covariance(const float * new_dyp_covariance)
     
  * @return world_x value
  */
-int
+float
 ObjectPositionInterface::world_x()
 {
   return data->world_x;
@@ -220,7 +244,7 @@ ObjectPositionInterface::world_x()
  * @param new_world_x new world_x value
  */
 void
-ObjectPositionInterface::set_world_x(const int new_world_x)
+ObjectPositionInterface::set_world_x(const float new_world_x)
 {
   data->world_x = new_world_x;
 }
@@ -233,7 +257,7 @@ ObjectPositionInterface::set_world_x(const int new_world_x)
     
  * @return world_y value
  */
-int
+float
 ObjectPositionInterface::world_y()
 {
   return data->world_y;
@@ -248,7 +272,7 @@ ObjectPositionInterface::world_y()
  * @param new_world_y new world_y value
  */
 void
-ObjectPositionInterface::set_world_y(const int new_world_y)
+ObjectPositionInterface::set_world_y(const float new_world_y)
 {
   data->world_y = new_world_y;
 }
@@ -261,7 +285,7 @@ ObjectPositionInterface::set_world_y(const int new_world_y)
     
  * @return world_z value
  */
-int
+float
 ObjectPositionInterface::world_z()
 {
   return data->world_z;
@@ -276,9 +300,81 @@ ObjectPositionInterface::world_z()
  * @param new_world_z new world_z value
  */
 void
-ObjectPositionInterface::set_world_z(const int new_world_z)
+ObjectPositionInterface::set_world_z(const float new_world_z)
 {
   data->world_z = new_world_z;
+}
+
+/** Get relative_x value.
+ * 
+      This is the X coordinate in the cartesian right-handed robot coordinate system.
+    
+ * @return relative_x value
+ */
+float
+ObjectPositionInterface::relative_x()
+{
+  return data->relative_x;
+}
+
+/** Set relative_x value.
+ * 
+      This is the X coordinate in the cartesian right-handed robot coordinate system.
+    
+ * @param new_relative_x new relative_x value
+ */
+void
+ObjectPositionInterface::set_relative_x(const float new_relative_x)
+{
+  data->relative_x = new_relative_x;
+}
+
+/** Get relative_y value.
+ * 
+      This is the Y coordinate in the cartesian right-handed robot coordinate system.
+    
+ * @return relative_y value
+ */
+float
+ObjectPositionInterface::relative_y()
+{
+  return data->relative_y;
+}
+
+/** Set relative_y value.
+ * 
+      This is the Y coordinate in the cartesian right-handed robot coordinate system.
+    
+ * @param new_relative_y new relative_y value
+ */
+void
+ObjectPositionInterface::set_relative_y(const float new_relative_y)
+{
+  data->relative_y = new_relative_y;
+}
+
+/** Get relative_z value.
+ * 
+      This is the Z coordinate in the cartesian right-handed robot coordinate system.
+    
+ * @return relative_z value
+ */
+float
+ObjectPositionInterface::relative_z()
+{
+  return data->relative_z;
+}
+
+/** Set relative_z value.
+ * 
+      This is the Z coordinate in the cartesian right-handed robot coordinate system.
+    
+ * @param new_relative_z new relative_z value
+ */
+void
+ObjectPositionInterface::set_relative_z(const float new_relative_z)
+{
+  data->relative_z = new_relative_z;
 }
 
 /** Get xyz_covariance value.
@@ -415,7 +511,7 @@ ObjectPositionInterface::set_dyp_velocity_covariance(const float * new_dyp_veloc
     
  * @return world_x_velocity value
  */
-int
+float
 ObjectPositionInterface::world_x_velocity()
 {
   return data->world_x_velocity;
@@ -428,7 +524,7 @@ ObjectPositionInterface::world_x_velocity()
  * @param new_world_x_velocity new world_x_velocity value
  */
 void
-ObjectPositionInterface::set_world_x_velocity(const int new_world_x_velocity)
+ObjectPositionInterface::set_world_x_velocity(const float new_world_x_velocity)
 {
   data->world_x_velocity = new_world_x_velocity;
 }
@@ -439,7 +535,7 @@ ObjectPositionInterface::set_world_x_velocity(const int new_world_x_velocity)
     
  * @return world_y_velocity value
  */
-int
+float
 ObjectPositionInterface::world_y_velocity()
 {
   return data->world_y_velocity;
@@ -452,7 +548,7 @@ ObjectPositionInterface::world_y_velocity()
  * @param new_world_y_velocity new world_y_velocity value
  */
 void
-ObjectPositionInterface::set_world_y_velocity(const int new_world_y_velocity)
+ObjectPositionInterface::set_world_y_velocity(const float new_world_y_velocity)
 {
   data->world_y_velocity = new_world_y_velocity;
 }
@@ -463,7 +559,7 @@ ObjectPositionInterface::set_world_y_velocity(const int new_world_y_velocity)
     
  * @return world_z_velocity value
  */
-int
+float
 ObjectPositionInterface::world_z_velocity()
 {
   return data->world_z_velocity;
@@ -476,7 +572,7 @@ ObjectPositionInterface::world_z_velocity()
  * @param new_world_z_velocity new world_z_velocity value
  */
 void
-ObjectPositionInterface::set_world_z_velocity(const int new_world_z_velocity)
+ObjectPositionInterface::set_world_z_velocity(const float new_world_z_velocity)
 {
   data->world_z_velocity = new_world_z_velocity;
 }

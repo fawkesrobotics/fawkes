@@ -50,30 +50,6 @@ class ObjectPositionInterface : public Interface
     unsigned int object_type; /**< 
       Object type, use constants to define
      */
-    int world_x; /**< 
-      This is the X coordinate in the cartesian right-handed world coordinate system.
-      This coordinate system has its origin in the center of the field, Y pointing to
-      the opponent's goal and X pointing to the right.
-     */
-    int world_y; /**< 
-      This is the Y coordinate in the cartesian right-handed world coordinate system.
-      This coordinate system has its origin in the center of the field, Y pointing to
-      the opponent's goal and X pointing to the right and Z pointing downwards.
-     */
-    int world_z; /**< 
-      This is the Z coordinate in the cartesian right-handed world coordinate system.
-      This coordinate system has its origin in the center of the field, Y pointing to
-      the opponent's goal and X pointing to the right.
-     */
-    int world_x_velocity; /**< 
-      Velocity of object in the world coordinate system in X-direction in meter per second.
-     */
-    int world_y_velocity; /**< 
-      Velocity of object in the world coordinate system in Y-direction in meter per second.
-     */
-    int world_z_velocity; /**< 
-      Velocity of object in the world coordinate system in Z-direction in meter per second.
-     */
     float yaw; /**< 
       Angle between the robot's forward direction and the object on the ground plane.
       This angle is in a local 3D coordinate system to the robot and given in radians.
@@ -91,6 +67,30 @@ class ObjectPositionInterface : public Interface
       Covariance of Distance/Yaw/Pitch values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
+     */
+    float world_x; /**< 
+      This is the X coordinate in the cartesian right-handed world coordinate system.
+      This coordinate system has its origin in the center of the field, Y pointing to
+      the opponent's goal and X pointing to the right.
+     */
+    float world_y; /**< 
+      This is the Y coordinate in the cartesian right-handed world coordinate system.
+      This coordinate system has its origin in the center of the field, Y pointing to
+      the opponent's goal and X pointing to the right and Z pointing downwards.
+     */
+    float world_z; /**< 
+      This is the Z coordinate in the cartesian right-handed world coordinate system.
+      This coordinate system has its origin in the center of the field, Y pointing to
+      the opponent's goal and X pointing to the right.
+     */
+    float relative_x; /**< 
+      This is the X coordinate in the cartesian right-handed robot coordinate system.
+     */
+    float relative_y; /**< 
+      This is the Y coordinate in the cartesian right-handed robot coordinate system.
+     */
+    float relative_z; /**< 
+      This is the Z coordinate in the cartesian right-handed robot coordinate system.
      */
     float xyz_covariance[9]; /**< 
       Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
@@ -111,10 +111,22 @@ class ObjectPositionInterface : public Interface
       line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
      */
+    float world_x_velocity; /**< 
+      Velocity of object in the world coordinate system in X-direction in meter per second.
+     */
+    float world_y_velocity; /**< 
+      Velocity of object in the world coordinate system in Y-direction in meter per second.
+     */
+    float world_z_velocity; /**< 
+      Velocity of object in the world coordinate system in Z-direction in meter per second.
+     */
     float xyz_velocity_covariance[9]; /**< 
       Covariance of WorldX/WorldY/WorldZ valocity values. This is a 3x3 matrix ordered line
       by line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
+     */
+    bool visible; /**< 
+      True, if object is visible.
      */
   } ObjectPositionInterface_data_t;
 
@@ -131,6 +143,8 @@ class ObjectPositionInterface : public Interface
   /* Methods */
   unsigned int object_type();
   void set_object_type(const unsigned int new_object_type);
+  bool is_visible();
+  void set_visible(const bool new_visible);
   float yaw();
   void set_yaw(const float new_yaw);
   float pitch();
@@ -139,12 +153,18 @@ class ObjectPositionInterface : public Interface
   void set_distance(const float new_distance);
   float * dyp_covariance();
   void set_dyp_covariance(const float * new_dyp_covariance);
-  int world_x();
-  void set_world_x(const int new_world_x);
-  int world_y();
-  void set_world_y(const int new_world_y);
-  int world_z();
-  void set_world_z(const int new_world_z);
+  float world_x();
+  void set_world_x(const float new_world_x);
+  float world_y();
+  void set_world_y(const float new_world_y);
+  float world_z();
+  void set_world_z(const float new_world_z);
+  float relative_x();
+  void set_relative_x(const float new_relative_x);
+  float relative_y();
+  void set_relative_y(const float new_relative_y);
+  float relative_z();
+  void set_relative_z(const float new_relative_z);
   float * xyz_covariance();
   void set_xyz_covariance(const float * new_xyz_covariance);
   float yaw_velocity();
@@ -155,12 +175,12 @@ class ObjectPositionInterface : public Interface
   void set_distance_velocity(const float new_distance_velocity);
   float * dyp_velocity_covariance();
   void set_dyp_velocity_covariance(const float * new_dyp_velocity_covariance);
-  int world_x_velocity();
-  void set_world_x_velocity(const int new_world_x_velocity);
-  int world_y_velocity();
-  void set_world_y_velocity(const int new_world_y_velocity);
-  int world_z_velocity();
-  void set_world_z_velocity(const int new_world_z_velocity);
+  float world_x_velocity();
+  void set_world_x_velocity(const float new_world_x_velocity);
+  float world_y_velocity();
+  void set_world_y_velocity(const float new_world_y_velocity);
+  float world_z_velocity();
+  void set_world_z_velocity(const float new_world_z_velocity);
   float * xyz_velocity_covariance();
   void set_xyz_velocity_covariance(const float * new_xyz_velocity_covariance);
 
