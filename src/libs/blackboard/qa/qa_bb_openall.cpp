@@ -53,12 +53,18 @@ main(int argc, char **argv)
   TestInterface *ti_writer_1;
   TestInterface *ti_writer_2;
   TestInterface *ti_writer_3;
+  TestInterface *ti_writer_4;
+  TestInterface *ti_writer_5;
+  TestInterface *ti_writer_6;
 
   try {
     cout << "Opening interfaces.. " << flush;
     ti_writer_1 = im->open_for_writing<TestInterface>("SomeID 1");
     ti_writer_2 = im->open_for_writing<TestInterface>("SomeID 2");
     ti_writer_3 = im->open_for_writing<TestInterface>("SomeID 3");
+    ti_writer_4 = im->open_for_writing<TestInterface>("AnotherID 1");
+    ti_writer_5 = im->open_for_writing<TestInterface>("AnotherID 2");
+    ti_writer_6 = im->open_for_writing<TestInterface>("AnotherID 3");
     cout << "success" << endl;
   } catch (Exception &e) {
     cout << "failed! Aborting" << endl;
@@ -73,9 +79,21 @@ main(int argc, char **argv)
   }
   delete readers;
 
+  const char* prefix = "Another";
+  readers = im->open_all_of_type_for_reading("TestInterface", prefix);
+  printf("Found %d interfaces with prefix \"%s\"\n", readers->size(), prefix);
+  for (std::list<Interface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
+    printf("Opened reader for interface %s of type %s\n", (*i)->id(), (*i)->type());
+    im->close(*i);
+  }
+  delete readers;
+  
   im->close(ti_writer_1);
   im->close(ti_writer_2);
   im->close(ti_writer_3);
+  im->close(ti_writer_4);
+  im->close(ti_writer_5);
+  im->close(ti_writer_6);
 
   delete im;
 }

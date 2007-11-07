@@ -363,16 +363,18 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
  * This will create interface instances for all currently registered interfaces of
  * the given type. The result can be casted to the appropriate type.
  * @param type type of the interface
+ * @param id_prefix if set only interfaces whose ids have this prefix are returned
  * @return list of new fully initialized interface instances of requested type. The
  * is allocated using new and you have to free it using delete after you are done
  * with it!
  */
 std::list<Interface *> *
-BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type)
+BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type, const char *id_prefix)
 {
   mutex->lock();
   memmgr->lock();
 
+  bool match = false;
   std::list<Interface *> *rv = new std::list<Interface *>();
 
   Interface *iface = NULL;
@@ -380,7 +382,19 @@ BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type)
   BlackBoardMemoryManager::ChunkIterator cit;
   for ( cit = memmgr->begin(); cit != memmgr->end(); ++cit ) {
     ih = (interface_header_t *)*cit;
-    if (strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0) {
+
+    if (NULL == id_prefix) {
+      if (strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0) {
+	match = true;
+      }
+    } else {
+      if (strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0 &&
+	  strncmp(id_prefix, ih->id, strlen(id_prefix)) == 0) {
+	match = true;
+      }
+    }
+      
+    if (match) {
       // found one!
       // open 
       void *ptr = *cit;

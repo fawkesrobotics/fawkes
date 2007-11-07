@@ -52,7 +52,7 @@ class BlackBoardInterfaceManager : public InterfaceMediator
   Interface *  open_for_writing(const char *interface_type, const char *identifier);
   void         close(Interface *interface);
 
-  std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type);
+  std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type, const char *id_prefix = NULL);
   //  template <class InterfaceType>
   //    std::list<InterfaceType *>  openAllOfTypeForReading(const char *interface_type);
 
