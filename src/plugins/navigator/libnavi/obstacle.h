@@ -24,12 +24,13 @@
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
- 
+
 #ifndef __NAVIGATOR_LIBNAVI_OBSTACLE_H_
 #define __NAVIGATOR_LIBNAVI_OBSTACLE_H_
 
+#include <plugins/navigator/libnavi/npoint.h>
 
-class Obstacle
+class Obstacle : public NPoint
 {
  public:
   Obstacle(double width, double distance, double orientation_rad);
@@ -37,8 +38,6 @@ class Obstacle
   Obstacle(double width, double x, double y, double foo);
          
   double width;
-  double x;
-  double y;
   double distance;
   double orientation_degree;
   double orientation_rad;

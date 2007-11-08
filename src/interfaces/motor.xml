@@ -10,11 +10,29 @@
       Motor is disabled. Sending of drive commands is accepted but the robot will NOT
       move.
     </constant>
+    <constant type="unsigned int" name="DRIVE_MODE_RPM" value="1">
+      Motor drives in DriveRPM mode.
+    </constant>
+    <constant type="unsigned int" name="DRIVE_MODE_TRANS" value="2">
+      Motor drives in Trans mode.
+    </constant>
+    <constant type="unsigned int" name="DRIVE_MODE_ROT" value="3">
+      Motor drives in Rot mode.
+    </constant>
+    <constant type="unsigned int" name="DRIVE_MODE_TRANS_ROT" value="4">
+      Motor drives in TransRot mode.
+    </constant>
+    <constant type="unsigned int" name="DRIVE_MODE_ORBIT" value="5">
+      Motor drives in Orbit mode.
+    </constant>
   </constants>
   <data>
     <comment>This are the actual RPMs of the motors taken from the VMC.</comment>
     <field type="unsigned int" name="motor_state" bits="1">
       The current state of the motor.
+    </field>
+    <field type="unsigned int" name="drive_mode">
+      The current drive mode of the motor.
     </field>
     <field type="int" name="right_rpm">
       RPM of the motor on the right front of the robot.
@@ -24,6 +42,27 @@
     </field>
     <field type="int" name="left_rpm">
       RPM of the motor on the left front of the robot.
+    </field>
+    <field type="float" name="odometry_path_length">
+      The actual length of the robot's trajectory since the last ResetOdometry.
+    </field>
+    <field type="float" name="odometry_position_x">
+      The actual position of the robot relative to the position at the last ResetOdometry.
+    </field>
+    <field type="float" name="odometry_position_y">
+      The actual position of the robot relative to the position at the last ResetOdometry.
+    </field>
+    <field type="float" name="odometry_orientation">
+      The actual orientation of the robot relative to the orientation at the last ResetOdometry.
+    </field>
+    <field type="int" name="vx">
+      VX of the robot. Forward.
+    </field>
+    <field type="int" name="vy">
+      VY of the robot. Left.
+    </field>
+    <field type="int" name="omega">
+      Rotation speed of the robot.
     </field>
     <field type="unsigned long int" name="controller_thread_id">
      The ID of the controlling thread.
@@ -39,7 +78,7 @@
       The new motor state to set. Use the MOTOR_* constants.
     </field>
   </message>
-  <message name="AquireControl">
+  <message name="AcquireControl">
     <comment>This allows any thread to aquire the control over the motor thread.
       Use with extreme care!</comment>
     <field type="unsigned long int" name="thread_id">
@@ -52,12 +91,9 @@
       The thread name of the aquiring thread.
     </field>
   </message>
-  <message name="TransRotRPM">
-    <comment>Determines the drive commands by translation and rotation.</comment>
-    <field type="float" name="forward">The forward command.</field>
-    <field type="float" name="sideward">The sideward command.</field>
-    <field type="float" name="rotation">The rotation command.</field>
-    <field type="float" name="speed">The speed command.</field>
+  <message name="ResetOdometry">
+    <comment>Resets the the odometry. It sets OdometryDistance, OdometryPositionX, 
+      OdometryPositionY and OdometryOrientation to zero.</comment>
   </message>
   <message name="DriveRPM">
     <comment>Directly set RPM, used for debugging, only use if you know what
@@ -108,12 +144,12 @@
     <field type="float" name="vy">Speed for translation in Y direction in m/s.</field>
     <field type="float" name="omega">Rotational speed in rad/s.</field>
   </message>
-  <message name="TransOrbit">
+  <message name="TransOrbit"> 
     <comment>Translate with the given speed and keep looking at the given point.</comment>
     <field type="float" name="vx">Speed for translation in X direction in m/s.</field>
     <field type="float" name="vy">Speed for translation in Y direction in m/s.</field>
     <field type="float" name="px">Point's X coordinate to focus.</field>
     <field type="float" name="py">Point's Y coordinate to focus.</field>
   </message>
-  -->
+  --><!-- maby name TransOrbit TransAim -->
 </interface>

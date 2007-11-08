@@ -26,6 +26,7 @@
  */
 
 #include <plugins/navigator/libnavi/nline.h>
+#include <plugins/navigator/libnavi/obstacle.h>
 
 /** @class NLine <plugins/navigator/libnavi/nline.h>
  * Class representing a line for the navigator.
@@ -43,16 +44,34 @@
 /** Contructor. */
 NLine::NLine()
 {
+  p1 = new NPoint();
+  p2 = new NPoint();
 }
 
 /** Constructor.
  * @param p1 point 1 of the line
  * @param p2 point 2 of the line 
  */
-NLine::NLine(NPoint p1, NPoint p2)
+NLine::NLine(NPoint *p1, NPoint *p2)
 {
-  this->p1 = p1;
-  this->p2 = p2;
+  Obstacle *op1 = dynamic_cast<Obstacle *>(p1);
+  if ( op1 )
+    {
+      this->p1 = new Obstacle(op1->width, p1->x, p1->y, 0);
+    }
+  else
+    {
+      this->p1 = new NPoint(p1->x, p1->y);
+    }
+  Obstacle *op2 = dynamic_cast<Obstacle *>(p2);
+  if ( op2 )
+    {
+      this->p2 = new Obstacle(op2->width, p2->x, p2->y, 0);
+    }
+  else
+    {
+      this->p2 = new NPoint(p2->x, p2->y);
+    }
 }
 
 /** Constructor.
@@ -63,9 +82,7 @@ NLine::NLine(NPoint p1, NPoint p2)
  */
 NLine::NLine(double x1, double y1, double x2, double y2)
 {
-  this->p1.x = x1;
-  this->p1.y = y1;
-  this->p2.x = x2;
-  this->p2.y = y2;
+  p1 = new NPoint(x1, y1);
+  p2 = new NPoint(x2, y2);
 }
 

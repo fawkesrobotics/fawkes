@@ -43,15 +43,15 @@ class JoystickControl
   							Logger *logger, Configuration *config, Clock *clock);
   virtual ~JoystickControl();
     
-  void enqueueCommand(double forward, double sideward, double rotation, double max_speed);
+  void enqueueCommand(double forward, double sideward, double rotation, double max_velocity);
 
   void enqueueKick(bool left, bool center, bool right);
  private:
   Logger *logger;
   Configuration *config;
 
-  double actual_speed;
-  double actual_joystick_axis_scale;
+  double actual_velocity;
+  double last_joystick_axis_scale;
   double actual_rotation_scale;
     
   MotorInterface *motor_interface;
@@ -64,6 +64,7 @@ class JoystickControl
 
   float joystick_max_acceleration;
   float joystick_max_rotation;
+  float joystick_max_velocity;
 };
 
 

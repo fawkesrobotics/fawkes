@@ -29,13 +29,15 @@
 #define __NAVIGATOR_MOTOR_THREAD_H_
 
 #include <core/threading/thread.h>
-#include <core/threading/thread_notification_listener.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
+#include <utils/time/time.h>
 
 class MotorInterface;
 class NavigatorThread;
+class Clock;
+class Watch;
 
 namespace VMC 
 {
@@ -60,18 +62,44 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     
   MotorInterface *motor_interface;
         
-  bool extern_control;
+  bool no_vmc;
         
   double forward;
   double sideward;
   double rotation;
-  double speed;
+  double orbit_velocity;
+  double point_x;
+  double point_y;
+  double orbit_angular_velocity;
+  double alpha;
+  double beta;
+  double gamma;
+  double alpha_;
+  double beta_;
+  double gamma_;
+  double odometry_distance;
+  double orbit_direction_x;
+  double orbit_direction_y;
+ // double orbit_rotation_velocity;
+  double last_velocity;
+  double current_velocity;
+  double current_max_velocity;
 
   double old_alpha;
   double old_beta;
   double old_gamma;
   
-  int timeout_counter;  
+  double correction_x;
+  double correction_y;
+  double correction_rotation;
+  
+  Time last_time;
+  Time last_time_odometry;
+  Watch* stop_watch;
+  Time* stop_time;
+  Time last_acceleration_time;
+  
+  Clock* clock;
     
   unsigned int logger_modulo_counter;
 };

@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  joystick.h - Joystick interface
+ *  cjoystick.h - Joystick interface
  *
  *  Generated: Sat Jun 02 17:31:27 2007
  *  Copyright  2007  Nils Springob <nils.springob@crazy-idea.de>
@@ -25,8 +25,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef __TOOLS_JOYSTICK_CONTROL_JOYSTICK_H_
-#define __TOOLS_JOYSTICK_CONTROL_JOYSTICK_H_
+#ifndef __TOOLS_JOYSTICK_JOYSTICK_H_
+#define __TOOLS_JOYSTICK_JOYSTICK_H_
 
 #include <vector>
 #include <string>

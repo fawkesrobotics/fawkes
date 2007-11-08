@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  joystick.cpp - Joystick interface
+ *  cjoystick.cpp - Joystick interface
  *
  *  Generated: Sat Jun 02 17:31:27 2007
  *  Copyright  2007  Nils Springob <nils.springob@crazy-idea.de>
@@ -25,7 +25,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include <tools/joystick_control/joystick.h>
+#include <tools/joystick/cjoystick.h>
  
 #include <linux/joystick.h>
 #include <sys/ioctl.h>
@@ -38,7 +38,7 @@
 
 using namespace std;
 
-/** @class CJoystick <tools/joystick_control/joystick.h>
+/** @class CJoystick <tools/joystick/cjoystick.h>
  *   Interface to a joystick.
  * 
  *  @author Nils Springob

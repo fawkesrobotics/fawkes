@@ -36,6 +36,7 @@ class NPoint
   NPoint(double x, double y);
          
   NPoint &operator=(const NPoint &p);
+  virtual ~NPoint() {};
          
   bool operator==(const NPoint &p);
          

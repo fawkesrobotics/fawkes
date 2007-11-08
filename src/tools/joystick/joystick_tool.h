@@ -25,14 +25,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef __TOOLS_JOYSTICK_CONTROL_JOYSTICK_TOOL_H_
-#define __TOOLS_JOYSTICK_CONTROL_JOYSTICK_TOOL_H_
+#ifndef __TOOLS_JOYSTICK_JOYSTICK_TOOL_H_
+#define __TOOLS_JOYSTICK_JOYSTICK_TOOL_H_
 
 #include <netcomm/fawkes/client_handler.h>
 
 class FawkesNetworkClient;
 class FawkesNetworkMessage;
-class NetworkConfiguration;
 class DatagramSocket;
 
 class JoystickTool : public FawkesNetworkClientHandler
@@ -43,8 +42,7 @@ class JoystickTool : public FawkesNetworkClientHandler
   ~JoystickTool();
         
   void mainLoop();
-    
-    
+  
  private:
         
   void deregistered();
@@ -52,7 +50,6 @@ class JoystickTool : public FawkesNetworkClientHandler
   bool sending;
 
   FawkesNetworkClient *net_client;
-  NetworkConfiguration *net_config;
   DatagramSocket *socket;
   bool use_udp;
 

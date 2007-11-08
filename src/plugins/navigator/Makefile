@@ -49,7 +49,7 @@ ifeq ($(BUILD_NAVIGATOR),1)
   PRESUBDIRS = gts fuzzy libnavi
 endif
 
-LIBS_navigator = core utils vmc netcomm fuzzy gts_obstacle navigator
+LIBS_navigator = core utils vmc netcomm geometry fuzzy gts_obstacle navigator
 OBJS_navigator = navigator_plugin.o \
 		 navigator_thread.o \
 		 joystick_control.o \

@@ -41,10 +41,18 @@ class MotorInterface : public Interface
   /* constants */
   static const unsigned int MOTOR_ENABLED;
   static const unsigned int MOTOR_DISABLED;
+  static const unsigned int DRIVE_MODE_RPM;
+  static const unsigned int DRIVE_MODE_TRANS;
+  static const unsigned int DRIVE_MODE_ROT;
+  static const unsigned int DRIVE_MODE_TRANS_ROT;
+  static const unsigned int DRIVE_MODE_ORBIT;
 
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
+    unsigned int drive_mode; /**< 
+      The current drive mode of the motor.
+     */
     int right_rpm; /**< 
       RPM of the motor on the right front of the robot.
      */
@@ -54,9 +62,30 @@ class MotorInterface : public Interface
     int left_rpm; /**< 
       RPM of the motor on the left front of the robot.
      */
+    int vx; /**< 
+      VX of the robot. Forward.
+     */
+    int vy; /**< 
+      VY of the robot. Left.
+     */
+    int omega; /**< 
+      Rotation speed of the robot.
+     */
     unsigned long int controller_thread_id; /**< 
      The ID of the controlling thread.
      Only from this thread command messages are accepted.
+     */
+    float odometry_path_length; /**< 
+      The actual length of the robot's trajectory since the last ResetOdometry.
+     */
+    float odometry_position_x; /**< 
+      The actual position of the robot relative to the position at the last ResetOdometry.
+     */
+    float odometry_position_y; /**< 
+      The actual position of the robot relative to the position at the last ResetOdometry.
+     */
+    float odometry_orientation; /**< 
+      The actual orientation of the robot relative to the orientation at the last ResetOdometry.
      */
     unsigned int motor_state : 1; /**< 
       The current state of the motor.
@@ -92,7 +121,7 @@ class MotorInterface : public Interface
     void set_motor_state(const unsigned int new_motor_state);
   };
 
-  class AquireControlMessage : public Message
+  class AcquireControlMessage : public Message
   {
    private:
     /** Internal data storage, do NOT modify! */
@@ -106,14 +135,14 @@ class MotorInterface : public Interface
       char thread_name[64]; /**< 
       The thread name of the aquiring thread.
      */
-    } AquireControlMessage_data_t;
+    } AcquireControlMessage_data_t;
 
-    AquireControlMessage_data_t *data;
+    AcquireControlMessage_data_t *data;
 
    public:
-    AquireControlMessage(unsigned long int ini_thread_id, char * ini_thread_name);
-    AquireControlMessage();
-    ~AquireControlMessage();
+    AcquireControlMessage(unsigned long int ini_thread_id, char * ini_thread_name);
+    AcquireControlMessage();
+    ~AcquireControlMessage();
 
     /* Methods */
     unsigned long int thread_id();
@@ -122,33 +151,20 @@ class MotorInterface : public Interface
     void set_thread_name(const char * new_thread_name);
   };
 
-  class TransRotRPMMessage : public Message
+  class ResetOdometryMessage : public Message
   {
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float forward; /**< The forward command. */
-      float sideward; /**< The sideward command. */
-      float rotation; /**< The rotation command. */
-      float speed; /**< The speed command. */
-    } TransRotRPMMessage_data_t;
+    } ResetOdometryMessage_data_t;
 
-    TransRotRPMMessage_data_t *data;
+    ResetOdometryMessage_data_t *data;
 
    public:
-    TransRotRPMMessage(float ini_forward, float ini_sideward, float ini_rotation, float ini_speed);
-    TransRotRPMMessage();
-    ~TransRotRPMMessage();
+    ResetOdometryMessage();
+    ~ResetOdometryMessage();
 
     /* Methods */
-    float forward();
-    void set_forward(const float new_forward);
-    float sideward();
-    void set_sideward(const float new_sideward);
-    float rotation();
-    void set_rotation(const float new_rotation);
-    float speed();
-    void set_speed(const float new_speed);
   };
 
   class DriveRPMMessage : public Message
@@ -281,12 +297,28 @@ class MotorInterface : public Interface
   /* Methods */
   unsigned int motor_state();
   void set_motor_state(const unsigned int new_motor_state);
+  unsigned int drive_mode();
+  void set_drive_mode(const unsigned int new_drive_mode);
   int right_rpm();
   void set_right_rpm(const int new_right_rpm);
   int rear_rpm();
   void set_rear_rpm(const int new_rear_rpm);
   int left_rpm();
   void set_left_rpm(const int new_left_rpm);
+  float odometry_path_length();
+  void set_odometry_path_length(const float new_odometry_path_length);
+  float odometry_position_x();
+  void set_odometry_position_x(const float new_odometry_position_x);
+  float odometry_position_y();
+  void set_odometry_position_y(const float new_odometry_position_y);
+  float odometry_orientation();
+  void set_odometry_orientation(const float new_odometry_orientation);
+  int vx();
+  void set_vx(const int new_vx);
+  int vy();
+  void set_vy(const int new_vy);
+  int omega();
+  void set_omega(const int new_omega);
   unsigned long int controller_thread_id();
   void set_controller_thread_id(const unsigned long int new_controller_thread_id);
   char * controller_thread_name();

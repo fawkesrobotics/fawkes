@@ -240,6 +240,101 @@ NavigatorInterface::VelocityMessage::set_velocity(const float new_velocity)
   data->velocity = new_velocity;
 }
 
+/** @class NavigatorInterface::ObstacleMessage interfaces/navigator.h
+ * ObstacleMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_x initial value for x
+ * @param ini_y initial value for y
+ * @param ini_width initial value for width
+ */
+NavigatorInterface::ObstacleMessage::ObstacleMessage(float ini_x, float ini_y, float ini_width) : Message()
+{
+  data_size = sizeof(ObstacleMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ObstacleMessage_data_t *)data_ptr;
+  data->x = ini_x;
+  data->y = ini_y;
+  data->width = ini_width;
+}
+/** Constructor */
+NavigatorInterface::ObstacleMessage::ObstacleMessage() : Message()
+{
+  data_size = sizeof(ObstacleMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ObstacleMessage_data_t *)data_ptr;
+}
+/** Destructor */
+NavigatorInterface::ObstacleMessage::~ObstacleMessage()
+{
+}
+/* Methods */
+/** Get x value.
+ * X-coordinate of the obstacle.
+ * @return x value
+ */
+float
+NavigatorInterface::ObstacleMessage::x()
+{
+  return data->x;
+}
+
+/** Set x value.
+ * X-coordinate of the obstacle.
+ * @param new_x new x value
+ */
+void
+NavigatorInterface::ObstacleMessage::set_x(const float new_x)
+{
+  data->x = new_x;
+}
+
+/** Get y value.
+ * Y-coordinate of the obstacle.
+ * @return y value
+ */
+float
+NavigatorInterface::ObstacleMessage::y()
+{
+  return data->y;
+}
+
+/** Set y value.
+ * Y-coordinate of the obstacle.
+ * @param new_y new y value
+ */
+void
+NavigatorInterface::ObstacleMessage::set_y(const float new_y)
+{
+  data->y = new_y;
+}
+
+/** Get width value.
+ * Width of the obstacle.
+ * @return width value
+ */
+float
+NavigatorInterface::ObstacleMessage::width()
+{
+  return data->width;
+}
+
+/** Set width value.
+ * Width of the obstacle.
+ * @param new_width new width value
+ */
+void
+NavigatorInterface::ObstacleMessage::set_width(const float new_width)
+{
+  data->width = new_width;
+}
+
 /** Check if message is valid an can be queued.
  * @param message Message to check
  */
@@ -252,6 +347,10 @@ NavigatorInterface::messageValid(const Message *message) const
   }
   const VelocityMessage *m1 = dynamic_cast<const VelocityMessage *>(message);
   if ( m1 != NULL ) {
+    return true;
+  }
+  const ObstacleMessage *m2 = dynamic_cast<const ObstacleMessage *>(message);
+  if ( m2 != NULL ) {
     return true;
   }
   return false;

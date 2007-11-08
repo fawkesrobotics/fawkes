@@ -17,4 +17,10 @@
     <comment>States the velocity of the robot.</comment>
     <field type="float" name="velocity">Velocity of the robot.</field>
   </message>
+  <message name="Obstacle">
+    <comment>States obstacle within the scan area.</comment>
+    <field type="float" name="x">X-coordinate of the obstacle.</field>
+    <field type="float" name="y">Y-coordinate of the obstacle.</field>
+    <field type="float" name="width">Width of the obstacle.</field>
+  </message>
 </interface>

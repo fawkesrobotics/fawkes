@@ -45,7 +45,7 @@ class Pathfinder
 {
  public:
   Pathfinder();
-  Pathfinder(double robot_width, gint scanning_area_width, gint scanning_area_height);
+  Pathfinder(double robot_width, double scanning_area_width, double scanning_area_height);
   ~Pathfinder();
         
   void setTarget(double distance, double direction_rad);
@@ -54,6 +54,7 @@ class Pathfinder
   void setTarget_cartesian(double x, double y);
         
   void setObstacles(std::vector< Obstacle > obstacles);
+  void addObstacle(Obstacle obstacle);
 
   std::vector< GtsPoint * > getPath();
         
@@ -70,8 +71,8 @@ class Pathfinder
   std::vector< Obstacle > map;
 
 
-  gint scanning_area_width;
-  gint scanning_area_height;
+  double scanning_area_width;
+  double scanning_area_height;
 
   
   GtsSurface * surface;

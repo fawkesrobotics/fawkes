@@ -50,7 +50,7 @@ NavigatorPlugin::NavigatorPlugin()
 
 EXPORT_PLUGIN(NavigatorPlugin)
 
-  /** Deconstructor. */
+  /** Destructor. */
   NavigatorPlugin::~NavigatorPlugin()
 {
 }

@@ -36,6 +36,7 @@
 
 class NavigatorInterface;
 class MotorInterface;
+class ObjectPositionInterface;
 
 class NavigatorThread : public Thread, public BlockedTimingAspect, public LoggingAspect,
                         public BlackBoardAspect, public Navigator
@@ -52,8 +53,13 @@ class NavigatorThread : public Thread, public BlockedTimingAspect, public Loggin
 
  private:
     
+  double old_velocity_x;
+  double old_velocity_y;
+  
+  std::list<Interface *> *object_interface_list;
   NavigatorInterface *navigator_interface;
   MotorInterface *motor_interface;
+  ObjectPositionInterface *object_interface;
   int logger_modulo_counter;
 };
 

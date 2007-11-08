@@ -99,6 +99,32 @@ class NavigatorInterface : public Interface
     void set_velocity(const float new_velocity);
   };
 
+  class ObstacleMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float x; /**< X-coordinate of the obstacle. */
+      float y; /**< Y-coordinate of the obstacle. */
+      float width; /**< Width of the obstacle. */
+    } ObstacleMessage_data_t;
+
+    ObstacleMessage_data_t *data;
+
+   public:
+    ObstacleMessage(float ini_x, float ini_y, float ini_width);
+    ObstacleMessage();
+    ~ObstacleMessage();
+
+    /* Methods */
+    float x();
+    void set_x(const float new_x);
+    float y();
+    void set_y(const float new_y);
+    float width();
+    void set_width(const float new_width);
+  };
+
   virtual bool messageValid(const Message *message) const;
  private:
   NavigatorInterface();

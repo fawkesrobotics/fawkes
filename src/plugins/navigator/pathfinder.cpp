@@ -25,11 +25,9 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include "pathfinder.h"
-#include "path_state.h"
+#include <plugins/navigator/pathfinder.h>
+#include <plugins/navigator/path_state.h>
 #include <libs/utils/search/astar.h>
-
-#include <iostream>
 
 extern "C"
 {
@@ -48,10 +46,10 @@ extern "C"
 /** Constructor. */
 Pathfinder::Pathfinder()
 {
-  scanning_area_width = 500;
-  scanning_area_height = 500;
+  scanning_area_width = 0.5;
+  scanning_area_height = 0.5;
 
-  robot_width = 50.;
+  robot_width = 0.5;
    
   initSurface();
 
@@ -65,7 +63,7 @@ Pathfinder::Pathfinder()
  * @param scanning_area_width the width of the scanned area around the robot
  * @param scanning_area_height the height of the scanned area around the robot
  */
-Pathfinder::Pathfinder(double robot_width, gint scanning_area_width, gint scanning_area_height)
+Pathfinder::Pathfinder(double robot_width, double scanning_area_width, double scanning_area_height)
 {   
   this->scanning_area_width = scanning_area_width;
   this->scanning_area_height = scanning_area_height;
@@ -98,10 +96,10 @@ void Pathfinder::initSurface()
   /*****************
    * Scanning Area
    *****************/
-  GtsVertex* v0 = gts_vertex_new(gts_vertex_class(), -scanning_area_width / 2, -scanning_area_height / 2, 0); 
-  GtsVertex* v1 = gts_vertex_new(gts_vertex_class(), -scanning_area_width / 2, +scanning_area_height / 2, 0);
-  GtsVertex* v2 = gts_vertex_new(gts_vertex_class(), +scanning_area_width / 2, +scanning_area_height / 2, 0);
-  GtsVertex* v3 = gts_vertex_new(gts_vertex_class(), +scanning_area_width / 2, -scanning_area_height / 2, 0);
+  GtsVertex* v0 = gts_vertex_new(gts_vertex_class(), -scanning_area_width / 2., -scanning_area_height / 2., 0); 
+  GtsVertex* v1 = gts_vertex_new(gts_vertex_class(), -scanning_area_width / 2., +scanning_area_height / 2., 0);
+  GtsVertex* v2 = gts_vertex_new(gts_vertex_class(), +scanning_area_width / 2., +scanning_area_height / 2., 0);
+  GtsVertex* v3 = gts_vertex_new(gts_vertex_class(), +scanning_area_width / 2., -scanning_area_height / 2., 0);
   
   //the quadrangle around the robot
   GtsEdge*  e0 =  gts_edge_new(gts_edge_class(), v0, v1);
@@ -248,10 +246,11 @@ bool Pathfinder::test_straight_ahead()
    *     |                    |
    *     |                __|____  obstacle_base (width of the obstacle)
    *     |                    | O    obstacle
-   *     |___________| target_base1
-   *     |         T         |  target           > distance between base1 and base2 is the 
-   *    |                                        |                                                      radius of the robot
-   *     |___________|  target_base2
+   *     |                    |
+   *     |___________| target_base1 \
+   *     |         T         |  target            > distance between base1 and base2 is the 
+   *     |                    |                       |                                radius of the robot
+   *     |___________|  target_base2/
    */
   bool test = false;   
    
@@ -462,6 +461,14 @@ void Pathfinder::setObstacles(std::vector< Obstacle > obstacles)
 {
   map = obstacles;
 }
+
+/** Adds an obstacle to the pathfinder.
+ * @param obstacle an obstacle
+ */
+void Pathfinder::addObstacle(Obstacle obstacle)
+{
+  map.push_back(obstacle);
+}
  
 /** Regains the Obstacles from the map if every obstacle
  *   is destoyed by destoying the surface.
@@ -487,7 +494,7 @@ void Pathfinder::regainObstacles()
       Obstacle o = map[i];
       if(!out_of_area(o.x, o.y))//zu schwach, Breite mitberücksichtigen, da sonst, die Hindernisse
         //erst ab der Mitte im Feld auftauchen; ist aber egal, da wir ja eh nicht wissen
-        //was hinter dem scann bereich liegt
+        //was hinter dem scan bereich liegt
         //besser gts_point_locate
         {
           GtsObstacle * obs = gts_obstacle_new(gts_obstacle_class(), o.x, o.y, 0, o.width);
@@ -497,10 +504,10 @@ void Pathfinder::regainObstacles()
     }
 }
  
-/** Checks if a point given by its coordinates is within the scann area.
+/** Checks if a point given by its coordinates is within the scan area.
  * @param x the x-coordinate of the point
  * @param y the y-coordinate of the point
- * @return true if the point is within the scann area, false otherwise
+ * @return true if the point is within the scan area, false otherwise
  */
 //poss. replace by gts_point_locate(GTS_POINT(p), surface,NULL)
 bool Pathfinder::out_of_area(double x, double y)
@@ -577,6 +584,7 @@ std::vector< GtsPoint * > Pathfinder::getPath()
   //if there is no obstacle on the way, then the robot can drive ahead
   if(test_straight_ahead())
     {
+      // std::cerr << "Target Point " << target_point << std::endl;
       // std::cerr << "Target Point " << target_point << std::endl;
       // std::cerr << "robot Point " << robot_point << std::endl;
       solution_path.push_back(gts_point_new(gts_point_class(), robot_point->x, robot_point->y, 0));

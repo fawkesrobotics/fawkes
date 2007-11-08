@@ -34,11 +34,10 @@ extern "C"
 #include <vector> 
 #include <list>
 #include <iostream>
- 
- 
+
 #include <plugins/navigator/libnavi/obstacle.h>
 #include <plugins/navigator/gts/gts_obstacle.h>
- 
+
 class NPoint;
 class NLine;
 class Pathfinder;
@@ -47,12 +46,16 @@ class Pathfinder;
 class Navigator
 {
  public:
-  
 
-    
   Navigator();
   ~Navigator();
-        
+
+  std::list<NPoint *>  *get_surface_points();
+  std::list<NLine *> *get_surface_lines();
+  std::list<NPoint *> *get_path_points();
+  std::list<Obstacle *> *get_obstacles();
+  NPoint * getTargetPoint();
+ protected:
   void goTo_cartesian(double x, double y);
   void goTo_cartesian(double x, double y, double velocity);
   /*
@@ -61,43 +64,35 @@ class Navigator
     void goTo(double ori, double distance, std::vector< Obstacle * >);
   */
   void setObstacles(std::vector< Obstacle  >);
-  //void addObstacle(Obstacle obstacle);
-  
+  void add_obstacle(Obstacle obstacle);
+
   void setVelocity(double velocity);
   void setVelocityRotation(double velocity_rotation);
   double getVelocity();
-    
+
   double getVelocityX();
   double getVelocityY();
   // double getVelocityRotation();
   double getOrientation();
-    
+
   void setElapsedTime(double elapsedTime);
   double getElapsedTime();
-    
-                                        
+
+                        
   void setRoute(std::vector<GtsPoint *> route);
   void mainLoop();
    
-  std::list<NPoint *>  *get_surface_points();
-  std::list<NLine *> *get_surface_lines();
    
-  //fuer NavigatorTest
-  //evtl. direkt vom pathfinder holen?
- protected:
   int getCount();
   std::vector< GtsPoint * > getPath();
   GtsSurface * getSurface();
   
-   
-  
   GtsObstacle * nearestObstacle();
  
-  GtsPoint * getTargetPoint();
   GtsPoint * getRobotPoint();
    
-  int binomialCoefficient(int n, int k);
-  double bernstein(int i, int n, double t);
+ // int binomialCoefficient(int n, int k);
+  double bernstein(unsigned int i, unsigned int n, double t);
    
   //z.B. bei navigator_test beim Routezeichnen
   std::vector<GtsPoint *>  getRoute();
@@ -116,8 +111,8 @@ class Navigator
   bool running_route;
     
   //Abtastbereich der Sensorik
-  gint scanning_area_width;
-  gint scanning_area_height;
+  double scanning_area_width;
+  double scanning_area_height;
      
   double robot_width;
   // GtsPoint * robot_point;

@@ -35,11 +35,11 @@ class NLine
  public:
   NLine();
 
-  NLine(NPoint p1, NPoint p2);
+  NLine(NPoint *p1, NPoint *p2);
   NLine(double x1, double y1, double x2, double y2);
 
-  NPoint p1;
-  NPoint p2;
+  NPoint *p1;
+  NPoint *p2;
 };
 
 #endif

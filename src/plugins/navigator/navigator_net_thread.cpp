@@ -29,6 +29,7 @@
 #include <plugins/navigator/libnavi/navigator_messages.h>
 #include <plugins/navigator/libnavi/npoint.h>
 #include <plugins/navigator/libnavi/nline.h>
+#include <plugins/navigator/libnavi/obstacle.h>
 #include <netcomm/fawkes/component_ids.h>
 #include <plugins/navigator/joystick_control.h>
 #include <interfaces/motor.h>
@@ -53,12 +54,12 @@
  *   The interface to tell the motor thread what is allowed to control the motors.
  */
 
-/** Constructor. 
+/** Constructor.
  * @param navigator_thread the navigator thread to get path informations directly from
  * the navigator
  */
 NavigatorNetworkThread::NavigatorNetworkThread(NavigatorThread *navigator_thread)
-  : Thread("NavigatorNetworkThread", Thread::OPMODE_WAITFORWAKEUP),
+    : Thread("NavigatorNetworkThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
     FawkesNetworkHandler(FAWKES_CID_NAVIGATOR_PLUGIN)
 {
@@ -81,9 +82,10 @@ NavigatorNetworkThread::NavigatorNetworkThread(NavigatorThread *navigator_thread
 /** Destructor. */
 NavigatorNetworkThread::~NavigatorNetworkThread()
 {
-  if ( last_motor_control_thread_name != NULL ) {
-    free( last_motor_control_thread_name );
-  }
+  if ( last_motor_control_thread_name != NULL )
+    {
+      free( last_motor_control_thread_name );
+    }
 }
 
 
@@ -94,10 +96,10 @@ NavigatorNetworkThread::finalize()
 
   logger->log_info("NavigatorNetworkThread", "Removing this thread from list of Fawkes network hub handlers");
   fnethub->remove_handler( this );
-  
+
   delete joystick_control;
-  
-  try 
+
+  try
     {
       interface_manager->close(motor_interface);
       interface_manager->close(navigator_interface);
@@ -114,7 +116,7 @@ void
 NavigatorNetworkThread::init()
 {
 
-  try 
+  try
     {
       motor_interface = interface_manager->open_for_reading<MotorInterface>("Motor");
     }
@@ -125,8 +127,8 @@ NavigatorNetworkThread::init()
       logger->log_error("NavigatorNetworkThread", e);
       throw;
     }
-    
-  try 
+
+  try
     {
       kicker_interface = interface_manager->open_for_reading<KickerInterface>("Kicker");
     }
@@ -137,8 +139,8 @@ NavigatorNetworkThread::init()
       logger->log_error("NavigatorNetworkThread", e);
       throw;
     }
-    
-  try 
+
+  try
     {
       navigator_interface = interface_manager->open_for_reading<NavigatorInterface>("Navigator");
     }
@@ -154,42 +156,51 @@ NavigatorNetworkThread::init()
     {
       joystick_control = new JoystickControl(motor_interface, kicker_interface, logger, config, clock);
     }
-  catch (Exception &e) {
-    e.append("NavigatorNetworkThread could not initialize JoystickControl");
-    throw;
-  }
+  catch (Exception &e)
+    {
+      e.append("NavigatorNetworkThread could not initialize JoystickControl");
+      throw;
+    }
 
 
   unsigned int port = 0;
-  try {
-    port = config->get_uint("navigator", "/network/joystick_port");
-    if ( port > 0xFFFF ) {
-      throw Exception("Navigator joystick port out of range");
+  try
+    {
+      port = config->get_uint("navigator", "/network/joystick_port");
+      if ( port > 0xFFFF )
+        {
+          throw Exception("Navigator joystick port out of range");
+        }
     }
-  } catch (Exception &e) {
-    throw;
-  }
+  catch (Exception &e)
+    {
+      throw;
+    }
 
-  try {
-    datagram_socket = new DatagramSocket(0.1);
-    datagram_socket->bind(port);
-  } catch (Exception &e) {
-    e.append("Could not create navigator joystick socket");
-    throw e;
-  }
+  try
+    {
+      datagram_socket = new DatagramSocket(0.1);
+      datagram_socket->bind(port);
+    }
+  catch (Exception &e)
+    {
+      e.append("Could not create navigator joystick socket");
+      throw e;
+    }
 
   // logger->log_debug("NavigatorNetworkThread", "Adding network handler");
-  fnethub->add_handler( this );  
+  fnethub->add_handler( this );
 }
 
 void
 NavigatorNetworkThread::process_udp_message(void *buf, size_t buflen)
 {
   fawkes_message_t *fmsg = (fawkes_message_t *)buf;
-  if ( ntohs(fmsg->header.cid) != FAWKES_CID_NAVIGATOR_PLUGIN ) {
-    logger->log_warn(name(), "Received message for other component: %u (ignored)", ntohs(fmsg->header.cid));
-    return;
-  }
+  if ( ntohs(fmsg->header.cid) != FAWKES_CID_NAVIGATOR_PLUGIN )
+    {
+      logger->log_warn(name(), "Received message for other component: %u (ignored)", ntohs(fmsg->header.cid));
+      return;
+    }
 
   FawkesNetworkMessage *m = new FawkesNetworkMessage(*fmsg);
   inbound_queue.push_locked(m);
@@ -201,107 +212,210 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
 {
   if(msg->msgid() == NAVIGATOR_MSGTYPE_JOYSTICK )
     {
-      if (connected_control_client == msg->clid()) {
-	// logger->log_debug(name(), "Enqueuing joystick message");
-	navigator_joystick_message_t *u = (navigator_joystick_message_t *)msg->payload();
-	
-	if ( motor_interface->controller_thread_id() == thread_id() ) { 
-	  joystick_control->enqueueCommand(u->forward, u->sideward, u->rotation, u->speed);
-	} else {
-	  logger->log_warn("NavigatorNetworkThread", "Thread %s (%lu) stole our motor control!",
-			   motor_interface->controller_thread_name(),
-			   motor_interface->controller_thread_id());
-	}
-      } else {
-	logger->log_warn("NavigatorNetworkThread", "Client %u sent joystick message while not subscribed", msg->clid());
-      }
+      if (connected_control_client == msg->clid())
+        {
+          navigator_joystick_message_t *u = (navigator_joystick_message_t *)msg->payload();
+
+          if ( motor_interface->controller_thread_id() == thread_id() )
+            {
+              joystick_control->enqueueCommand(u->forward, u->sideward, u->rotation, u->speed);
+            }
+          else
+            {
+              logger->log_warn("NavigatorNetworkThread", "Thread %s (%lu) stole our motor control!",
+                               motor_interface->controller_thread_name(),
+                               motor_interface->controller_thread_id());
+            }
+        }
+      else
+        {
+          logger->log_warn("NavigatorNetworkThread", "Client %u sent joystick message while not subscribed", msg->clid());
+        }
     }
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_SUBSCRIBE)
     {
       navigator_subscribe_message_t *u = (navigator_subscribe_message_t *)msg->payload();
-        
+
       if(u->sub_type_points_and_lines)
         {
           connected_points_and_lines_clients.push_back_locked(msg->clid());
         }
-      else if(u->sub_type_control && connected_control_client == 0 && ! blocked_by_udp)
+
+      if(u->sub_type_odometry)
+        {
+          connected_odometry_clients.push_back_locked(msg->clid());
+        }
+
+      if(u->sub_type_motor_control && connected_control_client == 0 && ! blocked_by_udp)
         {
           connected_control_client = msg->clid();
           motor_interface->read();
           last_motor_control_thread_id = motor_interface->controller_thread_id();
-	  // this needs to be a strncpy, but currently the interfaces do not provide enough
-	  // functionality
-	  if ( last_motor_control_thread_name != NULL ) {
-	    free(last_motor_control_thread_name);
-	  }
-	  last_motor_control_thread_name = strdup(motor_interface->controller_thread_name());
+          // this needs to be a strncpy, but currently the interfaces do not provide enough
+          // functionality
+          if ( last_motor_control_thread_name != NULL )
+            {
+              free(last_motor_control_thread_name);
+            }
+          last_motor_control_thread_name = strdup(motor_interface->controller_thread_name());
 
-          MotorInterface::AquireControlMessage* msg = new  MotorInterface::AquireControlMessage();
-	  msg->set_thread_id(thread_id());
-	  msg->set_thread_name(name());
-          motor_interface->msgq_enqueue(msg); 
-       
-          logger->log_debug("NavigatorNetworkThread", "Client %u subscribed as controller", connected_control_client);
+          MotorInterface::AcquireControlMessage* msg = new  MotorInterface::AcquireControlMessage();
+          msg->set_thread_id(thread_id());
+          msg->set_thread_name(name());
+          motor_interface->msgq_enqueue(msg);
+
+          logger->log_debug("NavigatorNetworkThread", "Client %u subscribed as motor controller", connected_control_client);
         }
-      else if(u->sub_type_control && (connected_control_client != 0 || blocked_by_udp) )
+      else if(u->sub_type_navigator_control && connected_control_client == 0 && ! blocked_by_udp)
+        {
+          connected_control_client = msg->clid();
+
+          logger->log_debug("NavigatorNetworkThread", "Client %u subscribed as navigator controller", connected_control_client);
+        }
+      else if((u->sub_type_motor_control || u->sub_type_navigator_control) && (connected_control_client != 0 || blocked_by_udp) )
         {
           logger->log_warn("NavigatorNetworkThread", "Client %u tried to subscribe but there is already another subscriber (%s)",
-			   msg->clid(), blocked_by_udp ? "UDP" : "Fawkes");
-          fnethub->send(msg->clid(), 
-                        FAWKES_CID_NAVIGATOR_PLUGIN, 
+                           msg->clid(), blocked_by_udp ? "UDP" : "Fawkes");
+          fnethub->send(msg->clid(),
+                        FAWKES_CID_NAVIGATOR_PLUGIN,
                         NAVIGATOR_MSGTYPE_CONTROL_SUBERR);
         }
     }
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_UNSUBSCRIBE)
     {
-      if ( msg->clid() == connected_control_client ) {
-	logger->log_error("NavigatorNetworkThread", "Message of type unsubscribe message received");
-	navigator_unsubscribe_message_t *u = (navigator_unsubscribe_message_t *)msg->payload();
-        
-	if(u->unsub_type_points_and_lines)
-	  {
-	    connected_points_and_lines_clients.remove_locked(msg->clid());
-	  }
-	else if(u->unsub_type_control)
-	  {
-	    connected_control_client = 0;
-	    MotorInterface::AquireControlMessage* msg = new  MotorInterface::AquireControlMessage();
-	    msg->set_thread_id(last_motor_control_thread_id);
-	    msg->set_thread_name(last_motor_control_thread_name);
-	    motor_interface->msgq_enqueue(msg); 
-	  }
-      } else {
-	logger->log_error(name(), "Client %u tried to unsubscribe while not subscribed");
-      }
+      if ( msg->clid() == connected_control_client )
+        {
+          logger->log_info("NavigatorNetworkThread", "Message of type unsubscribe message received");
+          navigator_unsubscribe_message_t *u = (navigator_unsubscribe_message_t *)msg->payload();
+
+          if(u->unsub_type_points_and_lines)
+            {
+              connected_points_and_lines_clients.remove_locked(msg->clid());
+            }
+          else if(u->unsub_type_odometry)
+            {
+              connected_odometry_clients.remove_locked(msg->clid());
+            }
+          else if(u->unsub_type_motor_control)
+            {
+              connected_control_client = 0;
+              MotorInterface::AcquireControlMessage* msg = new  MotorInterface::AcquireControlMessage();
+              msg->set_thread_id(last_motor_control_thread_id);
+              msg->set_thread_name(last_motor_control_thread_name);
+              motor_interface->msgq_enqueue(msg);
+              last_motor_control_thread_id = 0;
+            }
+          else if(u->unsub_type_navigator_control)
+            {
+              connected_control_client = 0;
+            }
+        }
+      else
+        {
+          logger->log_error(name(), "Client %u tried to unsubscribe while not subscribed");
+        }
     }
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_TARGET
           && msg->clid() == connected_control_client)
     {
+      logger->log_info("NavigatorNetworkThread", "Message of type target message received");
       navigator_target_message_t *u = (navigator_target_message_t *)msg->payload();
-      // logger->log_error("NavigatorNetworkThread", "payload: %f, %f", u->x, u->y);
+
       NavigatorInterface::TargetMessage* msg = new  NavigatorInterface::TargetMessage();
-  
+
       msg->set_x(u->x);
       msg->set_y(u->y);
-    
-      navigator_interface->msgq_enqueue(msg); 
+
+      navigator_interface->msgq_enqueue(msg);
     }
-  else if(msg->msgid() == NAVIGATOR_MSGTYPE_VELOCITY 
+  else if(msg->msgid() == NAVIGATOR_MSGTYPE_VELOCITY
           && msg->clid() == connected_control_client)
     {
-      logger->log_error("NavigatorNetworkThread", "Message of type velocity message received");
+      logger->log_info("NavigatorNetworkThread", "Message of type velocity message received");
       navigator_velocity_message_t *u = (navigator_velocity_message_t *)msg->payload();
-      logger->log_error("NavigatorNetworkThread", "payload: %f", u->value);
+
       NavigatorInterface::VelocityMessage* msg = new  NavigatorInterface::VelocityMessage();
       msg->set_velocity(u->value);
-      navigator_interface->msgq_enqueue(msg); 
+      navigator_interface->msgq_enqueue(msg);
     }
-  else if(msg->msgid() == NAVIGATOR_MSGTYPE_KICK 
+  else if(msg->msgid() == NAVIGATOR_MSGTYPE_TRANS_ROT
+          && msg->clid() == connected_control_client)
+    {
+      logger->log_info("NavigatorNetworkThread", "Message of type trans rot message received");
+      navigator_trans_rot_message_t *u = (navigator_trans_rot_message_t *)msg->payload();
+
+      if(u->type_trans_rot)
+        {
+          MotorInterface::TransRotMessage* msg = new  MotorInterface::TransRotMessage();
+
+          msg->set_vx(u->forward);
+          msg->set_vy(u->sideward);
+          msg->set_omega(u->rotation);
+          motor_interface->msgq_enqueue(msg);
+        }
+      else if(u->type_trans)
+        {
+          MotorInterface::TransMessage* msg = new  MotorInterface::TransMessage();
+
+          msg->set_vx(u->forward);
+          msg->set_vy(u->sideward);
+          motor_interface->msgq_enqueue(msg);
+        }
+      else if(u->type_rot)
+        {
+          MotorInterface::RotMessage* msg = new  MotorInterface::RotMessage();
+
+          msg->set_omega(u->rotation);
+          motor_interface->msgq_enqueue(msg);
+        }
+    }
+  else if(msg->msgid() == NAVIGATOR_MSGTYPE_RPM
+          && msg->clid() == connected_control_client)
+    {
+      logger->log_info("NavigatorNetworkThread", "Message of type rpm message received");
+      navigator_rpm_message_t *u = (navigator_rpm_message_t *)msg->payload();
+
+      MotorInterface::DriveRPMMessage* msg = new  MotorInterface::DriveRPMMessage();
+      msg->set_front_left(u->left);
+      msg->set_rear(u->rear);
+      msg->set_front_right(u->right);
+      motor_interface->msgq_enqueue(msg);
+    }
+  else if(msg->msgid() == NAVIGATOR_MSGTYPE_ORBIT
+          && msg->clid() == connected_control_client)
+    {
+      logger->log_info("NavigatorNetworkThread", "Message of type orbit message received");
+      navigator_orbit_message_t *u = (navigator_orbit_message_t *)msg->payload();
+
+      MotorInterface::OrbitMessage* msg = new  MotorInterface::OrbitMessage();
+      msg->set_px(u->orbit_center_x);
+      msg->set_py(u->orbit_center_y);
+      msg->set_omega(u->angular_velocity);
+      motor_interface->msgq_enqueue(msg);
+    }
+  else if(msg->msgid() == NAVIGATOR_MSGTYPE_RESET_ODOMETRY
+          && msg->clid() == connected_control_client)
+    {
+      MotorInterface::ResetOdometryMessage* msg = new MotorInterface::ResetOdometryMessage();
+      motor_interface->msgq_enqueue(msg);
+    }
+  else if(msg->msgid() == NAVIGATOR_MSGTYPE_KICK
           && msg->clid() == connected_control_client)
     {
       navigator_kick_message_t *u = (navigator_kick_message_t *)msg->payload();
-    //  logger->log_info("NavigatorNetworkThread", "kick message: %i, %i, %i", u->left, u->center, u->right);
+      //  logger->log_info("NavigatorNetworkThread", "kick message: %i, %i, %i", u->left, u->center, u->right);
       joystick_control->enqueueKick(u->left, u->center, u->right);
+    }
+  else if(msg->msgid() == NAVIGATOR_MSGTYPE_OBSTACLE
+          && msg->clid() == connected_control_client)
+    {
+      navigator_obstacle_msg_t *u = (navigator_obstacle_msg_t *)msg->payload();
+      NavigatorInterface::ObstacleMessage* msg = new  NavigatorInterface::ObstacleMessage();
+
+      msg->set_x(u->x);
+      msg->set_y(u->y);
+      msg->set_width(u->width);
+      navigator_interface->msgq_enqueue(msg);
     }
   else
     {
@@ -317,92 +431,144 @@ NavigatorNetworkThread::loop()
   motor_interface->read();
 
   inbound_queue.lock();
-  while ( ! inbound_queue.empty() ) {
-    FawkesNetworkMessage *msg = inbound_queue.front();
-    process_network_message(msg);
-    msg->unref();
-    inbound_queue.pop();
-  }
+  while ( ! inbound_queue.empty() )
+    {
+      FawkesNetworkMessage *msg = inbound_queue.front();
+      process_network_message(msg);
+      msg->unref();
+      inbound_queue.pop();
+    }
   inbound_queue.unlock();
 
-  /*
-    int rpm1 = motor_interface->getRPM1();
-    int rpm2 = motor_interface->getRPM2();
-    int rpm3 = motor_interface->getRPM3();
-  */
-  
-  for(std::list<unsigned int>::iterator iterator = connected_points_and_lines_clients.begin(); 
-      iterator != connected_points_and_lines_clients.end(); 
-      iterator++ ) 
+  for(std::list<unsigned int>::iterator iterator = connected_points_and_lines_clients.begin();
+      iterator != connected_points_and_lines_clients.end();
+      iterator++ )
     {
       //send points
+      /*
       std::list<NPoint *> *points = navigator_thread->get_surface_points();
-
       NavigatorNodesListMessage *nodes_list_msg = new NavigatorNodesListMessage(points);
       fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_NODES, nodes_list_msg);
       //   logger->log_info("NavigatorNetworkThread", "send points; connected clients: %i", connected_points_and_lines_clients.size());
-    
+      */
+      
+      //send obstacles
+      std::list<NPoint *> *points = navigator_thread->get_surface_points();
+      // std::list<Obstacle *> *obstacles = navigator_thread->get_obstacles();
+      NavigatorObstaclesListMessage *obstacles_list_msg = new NavigatorObstaclesListMessage(points);
+      fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_OBSTACLES_LIST, obstacles_list_msg);
+      //   logger->log_info("NavigatorNetworkThread", "send points; connected clients: %i", connected_points_and_lines_clients.size());
+
       //send lines
       std::list<NLine *> *lines = navigator_thread->get_surface_lines();
-   
       NavigatorLinesListMessage *lines_list_msg = new NavigatorLinesListMessage(lines);
       fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_LINES, lines_list_msg);
-      logger->log_info("NavigatorNetworkThread", "send lines; connected clients: %i", connected_points_and_lines_clients.size());
-   
-   
-   
+      //   logger->log_info("NavigatorNetworkThread", "send lines; connected clients: %i", connected_points_and_lines_clients.size());
+
+      //send path
+      std::list<NPoint *> *path_points = navigator_thread->get_path_points();
+      NavigatorPathListMessage *path_list_msg = new NavigatorPathListMessage(path_points);
+      fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_PATH, path_list_msg);
+
+      //send target
+      NPoint* target = navigator_thread->getTargetPoint();
+      navigator_target_message_t *target_msg= (navigator_target_message_t *)malloc(sizeof(navigator_target_message_t));
+      target_msg->x = target->x;
+      target_msg->y = target->y;
+      fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_TARGET, target_msg, sizeof(navigator_target_message_t));
+      delete target;
+
       //delete points
-      for(std::list<NPoint *>::iterator point_iterator = points->begin(); 
-          point_iterator != points->end(); 
-          point_iterator++) 
+      for(std::list<NPoint *>::iterator point_iterator = points->
+          begin();
+          point_iterator != points->end();
+          point_iterator++)
         {
           delete *point_iterator;
         }
-      
       points->clear();
-     
+
       //delete lines
-      for(std::list<NLine *>::iterator line_iterator = lines->begin(); 
-          line_iterator != lines->end(); 
-          line_iterator++) 
+      for(std::list<NLine *>
+          ::iterator line_iterator = lines->begin();
+          line_iterator != lines->end();
+          line_iterator++)
         {
           delete *line_iterator;
         }
       lines->clear();
+
+      //delete path_points
+      for(std::list<NPoint *>
+          ::iterator path_iterator = path_points->begin();
+          path_iterator != path_points->end();
+          path_iterator++)
+        {
+          delete *path_iterator;
+        }
+      path_points->clear();
     }
 
-  if ( datagram_socket->available() ) {
-    // there is data that can be read from the socket
-    udp_client_addrlen = sizeof(udp_client_addr);
-    try {
-      unsigned int i = 0;
-      struct sockaddr_in addr;
-      socklen_t addr_len = sizeof(addr);
-      size_t buflen = 0;
-      while ( (++i < 10) &&
-	      ((buflen = datagram_socket->recv(udp_tmpbuf, sizeof(udp_tmpbuf),
-					       (struct sockaddr *)&addr,
-					       &addr_len)) > 0) ) {
-	if ( connected_control_client == 0 ) {
-	  if ( blocked_by_udp) {
-	    // already received UDP traffic, make sure it came from the very same host!
-	    if ( addr.sin_addr.s_addr == udp_client_addr.sin_addr.s_addr ) {
-	      // accepted, process
-	      process_udp_message(udp_tmpbuf, buflen);
-	    } else {
-	      char tmp[INET_ADDRSTRLEN];
-	      inet_ntop(AF_INET, &(addr.sin_addr), tmp, INET_ADDRSTRLEN);
-	      logger->log_warn(name(), "Received UDP message from non-subscribed sender (%s)", tmp);
-	    }
-	  }
-	  blocked_by_udp = true;
-	  
-	} // else ignored, there is a subscriber on the Fawkes line
-      }
-    } catch (Exception &e) {
-      logger->log_warn(name(), e);
+
+  for(std::list<unsigned int>::iterator iterator = connected_odometry_clients.begin();
+      iterator != connected_odometry_clients.end();
+      iterator++ )
+    {
+      navigator_odometry_message_t *odometry_msg= (navigator_odometry_message_t *)malloc(sizeof(navigator_odometry_message_t));
+
+      odometry_msg->path_length = motor_interface->odometry_path_length();
+      odometry_msg->position_x = motor_interface->odometry_position_x();
+      odometry_msg->position_y = motor_interface->odometry_position_y();
+      odometry_msg->orientation = motor_interface->odometry_orientation();
+      odometry_msg->rpm_left = motor_interface->left_rpm();
+      odometry_msg->rpm_rear = motor_interface->rear_rpm();
+      odometry_msg->rpm_right = motor_interface->right_rpm();
+
+      fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_ODOMETRY, odometry_msg, sizeof(navigator_odometry_message_t));
     }
-  }
+
+  if ( datagram_socket->available() )
+    {
+      // there is data that can be read from the socket
+      udp_client_addrlen = sizeof(udp_client_addr);
+      try
+        {
+          unsigned int i = 0;
+          struct sockaddr_in addr;
+          socklen_t addr_len = sizeof(addr);
+          size_t buflen = 0;
+          while ( (++i < 10) &&
+                  ((buflen = datagram_socket->recv(udp_tmpbuf, sizeof(udp_tmpbuf),
+                                                   (struct sockaddr *)&addr,
+                                                   &addr_len)) > 0) )
+            {
+              if ( connected_control_client == 0 )
+                {
+                  if ( blocked_by_udp)
+                    {
+                      // already received UDP traffic, make sure it came from the very same host!
+                      if ( addr.sin_addr.s_addr == udp_client_addr.sin_addr.s_addr )
+                        {
+                          // accepted, process
+                          process_udp_message(udp_tmpbuf, buflen);
+                        }
+                      else
+                        {
+                          char tmp[INET_ADDRSTRLEN];
+                          inet_ntop(AF_INET, &(addr.sin_addr), tmp, INET_ADDRSTRLEN);
+                          logger->log_warn(name(), "Received UDP message from non-subscribed sender (%s)", tmp);
+                        }
+                    }
+                  blocked_by_udp = true;
+
+                } // else ignored, there is a subscriber on the Fawkes line
+            }
+        }
+      catch (Exception &e)
+        {
+          logger->log_warn(name(), e);
+        }
+    }
 
   // logger->log_info("NavigatorNetworkThread", "send; connected clients: %i", connected_points_and_lines_clients.size());
 
@@ -437,27 +603,48 @@ void
 NavigatorNetworkThread::client_disconnected(unsigned int clid)
 {
   // logger->log_info("NavigatorNetworkThread", "Client %u disconnected", clid);
-  
-  connected_points_and_lines_clients.lock();
+
   std::list<unsigned int>::iterator result;
-  result = find( connected_points_and_lines_clients.begin(), 
+
+  connected_points_and_lines_clients.lock();
+  result = find( connected_points_and_lines_clients.begin(),
                  connected_points_and_lines_clients.end()  , clid );
-                        
   if(result != connected_points_and_lines_clients.end())
     {
       connected_points_and_lines_clients.remove(clid);
     }
   connected_points_and_lines_clients.unlock();
-  
+
+  connected_odometry_clients.lock();
+  result = find( connected_odometry_clients.begin(),
+                 connected_odometry_clients.end()  , clid );
+  if(result != connected_odometry_clients.end())
+    {
+      connected_odometry_clients.remove(clid);
+    }
+  connected_odometry_clients.unlock();
+
   if(connected_control_client == clid)
     {
       connected_control_client = 0;
+      /*
+      MotorInterface::AquireControlMessage* msg1 = new  MotorInterface::AquireControlMessage();
+      motor_interface->msgq_enqueue(msg1);
+          
+          MotorInterface::DriveRPMMessage* msg2 = new  MotorInterface::DriveRPMMessage();
+          msg2->setFrontLeft(0.);
+          msg2->setRear(0.);
+          msg2->setFrontRight(0.);
+          motor_interface->msgq_enqueue(msg2);
+      */
       logger->log_debug("NavigatorNetworkThread", "Client %u unsubscribed as controller", clid);
-
-      MotorInterface::AquireControlMessage* msg = new  MotorInterface::AquireControlMessage();
-      msg->set_thread_id(last_motor_control_thread_id);
-      msg->set_thread_name(last_motor_control_thread_name);
-      motor_interface->msgq_enqueue(msg); 
+      if(last_motor_control_thread_id != 0)
+        {
+          MotorInterface::AcquireControlMessage* msg = new  MotorInterface::AcquireControlMessage();
+          msg->set_thread_id(last_motor_control_thread_id);
+          msg->set_thread_name(last_motor_control_thread_name);
+          motor_interface->msgq_enqueue(msg);
+        }
     }
 }
 
@@ -466,5 +653,4 @@ NavigatorNetworkThread::client_disconnected(unsigned int clid)
  */
 void
 NavigatorNetworkThread::process_after_loop()
-{
-}
+{}

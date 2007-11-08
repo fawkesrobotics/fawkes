@@ -26,17 +26,17 @@ include $(BASEDIR)/src/plugins/navigator/navigator.mk
 ifneq ($(SRCDIR),.)
 .PHONY: warning_nonavi
 warning_nonavi:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Navigator GUI (navigator not built)$(TNORMAL)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting JoystickTool (navigator not built)$(TNORMAL)"
 endif
 
-LIBS_joystick_control = core utils netcomm navigator config
-OBJS_joystick_control = joystick_tool.o	\
-		        joystick.o
+LIBS_joystick = core utils netcomm navigator config
+OBJS_joystick = joystick_tool.o	\
+		        cjoystick.o
 
-OBJS_all =	$(OBJS_joystick_control)
+OBJS_all =	$(OBJS_joystick)
 
 ifeq ($(BUILD_NAVIGATOR),1)
-BINS_all = $(BINDIR)/joystick_control
+BINS_all = $(BINDIR)/joystick
 else
 all: warning_nonavi
 endif

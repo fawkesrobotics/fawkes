@@ -37,12 +37,6 @@
 /** @var Obstacle::width
  *              The width of the obstacle.
  */
-/** @var Obstacle::x
- *      The x-coordinate of the obstacle.
- */
-/** @var Obstacle::y
- *      The y-coordinate of the obstacle.
- */
 /** @var Obstacle::distance
  *              The distance between the robot and the obstacle.
  */

@@ -25,8 +25,8 @@ CFLAGS = -g
 
 
 LIBS_libnavigator = core utils netcomm
-OBJS_libnavigator =  obstacle.o \
-										  npoint.o \
+OBJS_libnavigator =    npoint.o \
+									obstacle.o \
 										  nline.o \
 										  navigator_messages.o
 		 
