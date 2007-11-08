@@ -45,10 +45,15 @@ class MorphologicalFilter : public Filter {
 				       unsigned int se_anchor_y );
 
  protected:
+  /** Structuring element */
   unsigned char *se;
+  /** Width of structuring element */
   unsigned int   se_width;
+  /** Height of structuring element */
   unsigned int   se_height;
+  /** Anchor point x offset of structuring element */
   unsigned int   se_anchor_x;
+  /** Anchor point y offset of structuring element */
   unsigned int   se_anchor_y;
 };
 

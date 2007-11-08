@@ -37,6 +37,9 @@
  *
  */
 
+/** Constructor.
+ * @param name filter name
+ * @param max_num_buffers maximum number of source buffers. */
 MorphologicalFilter::MorphologicalFilter(const char *name, unsigned int max_num_buffers)
   : Filter(name, max_num_buffers)
 {

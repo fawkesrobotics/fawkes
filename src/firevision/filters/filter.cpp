@@ -137,6 +137,7 @@ Filter::set_dst_buffer(unsigned char *buf, ROI *roi)
 /** Set the orientation to apply the filter in.
  * Maybe ignored by some filters.
  * @param ori Orientation
+ * @param buffer_num buffer this orientation applies to
  */
 void
 Filter::set_orientation(orientation_t ori, unsigned int buffer_num)

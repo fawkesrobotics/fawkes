@@ -56,15 +56,22 @@ class Filter
   void shrink_region(ROI *r, unsigned int n);
 
  protected:
+  /** Maximum number of buffers */
   unsigned int    _max_num_buffers;
+  /** Filter name */
   char           *_name;
 
+  /** Source buffers, dynamically allocated by Filter ctor. */
   unsigned char  **src;
+  /** Destination buffer */
   unsigned char  *dst;
 
+  /** Source ROIs, dynamically allocated by Filter ctor. */
   ROI            **src_roi;
+  /** Destination ROI */
   ROI            *dst_roi;
 
+  /** Orientations, one for each source image */
   orientation_t  *ori;
 };
 
