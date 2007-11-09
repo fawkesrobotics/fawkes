@@ -55,6 +55,12 @@ NPoint::NPoint(double x, double y)
   this->x = x;
   this->y = y;
 }
+
+
+/** Destructor. */
+NPoint::~NPoint()
+{
+}
         
 /** Assign operator.
  * @param p the point to assign
