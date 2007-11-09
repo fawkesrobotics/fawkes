@@ -96,8 +96,8 @@ Fountain::init()
 
   cout << "done" << endl;
 
-  if (! argp->hasArgument("b") ) {
-    bbclient = new FirevisionFountainBBClient(argp->getArgC(), argp->getArgV());
+  if (! argp->has_arg("b") ) {
+    bbclient = new FirevisionFountainBBClient(argp->argc(), const_cast<char **>(argp->argv()));
     bbclient->Init();
     bbclient->addAliveClient( "firevision_front" );
     bbclient->addAliveClient( "firevision_omni" );
@@ -374,7 +374,7 @@ Fountain::run()
       appl_for_image = applForImage( *it );
 
       // if fountain is image deliverer, start mini image producer
-      if ( appl_for_image == argp->getProgramName() ) {
+      if ( appl_for_image == argp->program_name() ) {
 	cout << msg_prefix << cyellow << "Fountain image requested" << cnormal << endl;
 	unsigned int orig_image_id = getImageIDforMiniImage( *it );
 	if ( orig_image_id == FIREVISION_SHM_IMAGE_INVALID ) {
@@ -400,7 +400,7 @@ Fountain::run()
 	}
       }
 
-      if ( (appl_for_image != argp->getProgramName()) &&
+      if ( (appl_for_image != argp->program_name()) &&
 	   (bbclient != NULL) && ! bbclient->isAlive( appl_for_image ) ) {
 	cout << msg_prefix << cyellow
 	     << "Application " << applForImage( *it ) << " is not alive." << cnormal << endl;

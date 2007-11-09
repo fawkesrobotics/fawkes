@@ -59,7 +59,7 @@ main( int argc, char **argv )
   SharedMemoryImageBuffer::wipe( "geegaw-final"  );
 
 
-  if (argp->hasArgument("H")) {
+  if (argp->has_arg("H")) {
 
     cout << endl << cblue << "FirevisionFront Help" << cnormal << endl << endl
 	 << endl
@@ -86,15 +86,15 @@ main( int argc, char **argv )
 	 << " camera" << endl
 	 << endl;
 
-  } else if (argp->hasArgument("b")) {
+  } else if (argp->has_arg("b")) {
     // Do NOT run bbclient
 
     cout << cblue << "FirevisionGeegaw" << cnormal << ": Running pipeline directly" << endl;
 
     CConfigReader *cr = new CConfigReader();
 
-    char *config_filename;
-    if ( (config_filename = argp->getArgument("x")) == NULL ) {
+    const char *config_filename;
+    if ( (config_filename = argp->arg("x")) == NULL ) {
       config_filename = "../cfg/config.xml";
       cout << cblue << "FirevisionGeegaw" << cnormal
 	   << ": No config file given, using default ("
@@ -103,9 +103,9 @@ main( int argc, char **argv )
     cr->LoadConfFile( config_filename );
     GeegawConfig *c = new GeegawConfig( cr );
 
-    char *tmp;
+    const char *tmp;
     int delay = 0;
-    if ( (tmp = argp->getArgument("b")) != NULL ) {
+    if ( (tmp = argp->arg("b")) != NULL ) {
       delay = atoi(tmp);
       if (delay < 0) {
 	cout << cblue << "FirevisionGeegaw: " << cred << "Invalid delay. Resetting to 0" << cnormal << endl;
@@ -115,7 +115,7 @@ main( int argc, char **argv )
 
     cout << cblue << "FirevisionGeegaw" << cnormal << ": Delay is " << delay << " ms" << endl;
 
-    GeegawPipeline *fp = new GeegawPipeline(argp, c, argp->hasArgument("O"));
+    GeegawPipeline *fp = new GeegawPipeline(argp, c, argp->has_arg("O"));
 
     fp->init();
     fp->run( delay /* delay in ms */);

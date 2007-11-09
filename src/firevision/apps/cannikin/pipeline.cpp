@@ -109,17 +109,17 @@ CannikinPipeline::CannikinPipeline(ArgumentParser *argp, CannikinConfig *config)
   classifier    = NULL;
   drawer = NULL;
 
-  if ( (use_fileloader = argp->hasArgument("L")) ) {
+  if ( (use_fileloader = argp->has_arg("L")) ) {
     cout <<  msg_prefix << "Fileloader requested. Looking for needed parameters" << endl;
-    if ( (file = argp->getArgument("f")) == NULL) {
+    if ( (file = argp->arg("f")) == NULL) {
       file = "../src/modules/robocup/firevision/images/office-ball-kabel-wirrwarr_748x572_leutron.yuv422packed.raw";
       cout << msg_prefix << cred << "No file given, using default (" << file << ")" << cnormal << endl;
     }
   }
 
-  generate_output = argp->hasArgument("o");
+  generate_output = argp->has_arg("o");
 #ifdef HAVE_TRICLOPS_SDK
-  camless_mode      = argp->hasArgument("C");
+  camless_mode      = argp->has_arg("C");
 #else
   camless_mode      = true;
 #endif
@@ -582,7 +582,7 @@ CannikinPipeline::ipc_messaging()
     }
   } catch (Exception &e) {
     cout << "IPC messaging failed" << endl;
-    e.printTrace();
+    e.print_trace();
   }
 }
 

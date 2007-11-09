@@ -142,7 +142,7 @@ class CannikinPipeline : SignalHandler {
 
   colorspace_t     cspace_from;
   colorspace_t     cspace_to;
-  char            *file;
+  const char      *file;
   int              param_width;
   int              param_height;
   bool             use_fileloader;

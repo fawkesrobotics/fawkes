@@ -81,7 +81,7 @@ FirevisionGeegawBBClient::FirevisionGeegawBBClient(int argc, char* argv[],
   pose_avg_dt = 0.f;
   pose_avg_num_samples = 0;
 
-  show_pose_info = argp->hasArgument("p");
+  show_pose_info = argp->arg("p");
 
   bearing_error = 0.05f;
   dist_error    = 0.5f;
@@ -164,7 +164,7 @@ void FirevisionGeegawBBClient::Init ()
     camctrl->set_pan_tilt_rad( forward_pan, forward_tilt );
   } catch (Exception &e) {
     cout << "Caught exception, 1" << endl;
-    e.printTrace();
+    e.print_trace();
   }
 
   obj_relative = pipeline->object_relpos();
@@ -387,7 +387,7 @@ FirevisionGeegawBBClient::Loop(int Count)
 	camctrl->set_pan_tilt_rad( new_pan, new_tilt );
       } catch (Exception &e) {
 	cout << "Caught exception, 2" << endl;
-	e.printTrace();
+	e.print_trace();
       }
       last_pan  = new_pan;
       last_tilt = new_tilt;

@@ -82,7 +82,7 @@ GeegawPipeline::GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool 
   */
   classifier    = NULL;
 
-  generate_output = argp->hasArgument("o");
+  generate_output = argp->has_arg("o");
 
   cam = NULL;
   camctrl = NULL;
@@ -137,14 +137,14 @@ GeegawPipeline::init()
     cam     = CameraFactory::instance( config->CameraType.c_str() );
   } catch (UnknownCameraTypeException &e) {
     cout << msg_prefix << "Failed to instantiate camera." << endl;
-    e.printTrace();
+    e.print_trace();
     throw;
   }
   try {
     camctrl = CameraControlFactory::instance( config->CameraControlType.c_str() );
   } catch (UnknownCameraControlTypeException &e) {
     cout << msg_prefix << "Failed to instantiate camera control." << endl;
-    e.printTrace();
+    e.print_trace();
     throw;
   }
 
@@ -154,7 +154,7 @@ GeegawPipeline::init()
     cam->open();
     cam->start();
   } catch (Exception &e) {
-    e.printTrace();
+    e.print_trace();
     throw;
   }
 
@@ -428,7 +428,7 @@ GeegawPipeline::detect_obstacles()
   }
   bool first = true;
   for (r = rois->begin(); r != rois->end(); ++r) {
-    rdf->setDstBuffer(buffer, &(*r));
+    rdf->set_dst_buffer(buffer, &(*r));
     rdf->apply();
     polar_coord_t o;
     camctrl->pan_tilt_rad(&pan, &tilt);
@@ -469,7 +469,7 @@ GeegawPipeline::detect_object()
     FilterROIDraw *rdf = new FilterROIDraw();
   
     r = rois->begin();
-    rdf->setDstBuffer(buffer, &(*r));
+    rdf->set_dst_buffer(buffer, &(*r));
     rdf->apply();
     camctrl->pan_tilt_rad(&pan, &tilt);
     rel_pos->setPanTilt(pan, tilt);

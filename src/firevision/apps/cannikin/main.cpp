@@ -59,7 +59,7 @@ main( int argc, char **argv )
   SharedMemoryImageBuffer::wipe( "cannikin-processed" );
 
 
-  if (argp->hasArgument("H")) {
+  if (argp->has_arg("H")) {
 
     cout << endl << cblue << "FirevisionFront Help" << cnormal << endl << endl
          << " -o        Output debug information" << endl
@@ -84,15 +84,15 @@ main( int argc, char **argv )
 	 << " camera" << endl
 	 << endl;
 
-  } else if (argp->hasArgument("b")) {
+  } else if (argp->has_arg("b")) {
     // Do NOT run bbclient
 
     cout << cblue << "FirevisionCannikin" << cnormal << ": Running pipeline directly" << endl;
 
     CConfigReader *cr = new CConfigReader();
 
-    char *config_filename;
-    if ( (config_filename = argp->getArgument("x")) == NULL ) {
+    const char *config_filename;
+    if ( (config_filename = argp->arg("x")) == NULL ) {
       config_filename = "../cfg/config.xml";
       cout << cblue << "FirevisionCannikin" << cnormal
 	   << ": No config file given, using default ("
@@ -101,9 +101,9 @@ main( int argc, char **argv )
     cr->LoadConfFile( config_filename );
     CannikinConfig *c = new CannikinConfig( cr );
 
-    char *tmp;
+    const char *tmp;
     int delay = 0;
-    if ( (tmp = argp->getArgument("b")) != NULL ) {
+    if ( (tmp = argp->arg("b")) != NULL ) {
       delay = atoi(tmp);
       if (delay < 0) {
 	cout << cblue << "FirevisionCannikin: " << cred << "Invalid delay. Resetting to 0" << cnormal << endl;

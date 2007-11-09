@@ -76,7 +76,7 @@ FirevisionCannikinBBClient::FirevisionCannikinBBClient(int argc, char* argv[], A
   pose_avg_dt = 0.f;
   pose_avg_num_samples = 0;
 
-  show_pose_info = argp->hasArgument("p");
+  show_pose_info = argp->has_arg("p");
 
   bearing_error = 0.05f;
   dist_error    = 0.5f;
