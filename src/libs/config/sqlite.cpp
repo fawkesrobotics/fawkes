@@ -1088,12 +1088,12 @@ SQLiteConfiguration::set_string(const char *comp, const char *path,
 
   if ( change_handlers.find(comp) != change_handlers.end() ) {
     for ( cit = change_handlers[comp].begin(); cit != change_handlers[comp].end(); ++cit) {
-      (*cit)->configValueChanged(comp, path, s);
+      (*cit)->configValueChanged(comp, path, std::string(s));
     }
   }
   if ( change_handlers.find("") != change_handlers.end() ) {
     for ( cit = change_handlers[""].begin(); cit != change_handlers[""].end(); ++cit) {
-      (*cit)->configValueChanged(comp, path, s);
+      (*cit)->configValueChanged(comp, path, std::string(s));
     }  
   }
 }
