@@ -94,6 +94,9 @@ class ObjectPositionInterface : public Interface
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
      */
+    float extent; /**< 
+      Extent of the seen object.
+     */
     float yaw_velocity; /**< 
       Gives the velocity of the object for yaw in radians per second.
      */
@@ -187,6 +190,8 @@ class ObjectPositionInterface : public Interface
   void set_relative_z(const float new_relative_z);
   float * xyz_covariance();
   void set_xyz_covariance(const float * new_xyz_covariance);
+  float extent();
+  void set_extent(const float new_extent);
   float yaw_velocity();
   void set_yaw_velocity(const float new_yaw_velocity);
   float pitch_velocity();

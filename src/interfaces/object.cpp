@@ -501,6 +501,30 @@ ObjectPositionInterface::set_xyz_covariance(const float * new_xyz_covariance)
   memcpy(data->xyz_covariance, new_xyz_covariance, sizeof(float) * 9);
 }
 
+/** Get extent value.
+ * 
+      Extent of the seen object.
+    
+ * @return extent value
+ */
+float
+ObjectPositionInterface::extent()
+{
+  return data->extent;
+}
+
+/** Set extent value.
+ * 
+      Extent of the seen object.
+    
+ * @param new_extent new extent value
+ */
+void
+ObjectPositionInterface::set_extent(const float new_extent)
+{
+  data->extent = new_extent;
+}
+
 /** Get yaw_velocity value.
  * 
       Gives the velocity of the object for yaw in radians per second.

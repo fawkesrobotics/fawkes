@@ -92,6 +92,10 @@
       last row from left to right each.
     </field>
 
+    <field type="float" name="extent">
+      Extent of the seen object.
+    </field>
+
     <field type="float" name="yaw_velocity">
       Gives the velocity of the object for yaw in radians per second.
     </field>
