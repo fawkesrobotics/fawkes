@@ -23,13 +23,7 @@ BASEDIR = ../../..
 CFLAGS = -g
 
 LIBS_libblackboard = core utils interface
-OBJS_libblackboard = blackboard.o		\
-		     interface_manager.o	\
-		     main_thread.o		\
-		     memory_manager.o		\
-		     message_manager.o		\
-		     shmem_header.o		\
-		     shmem_lister.o
+OBJS_libblackboard = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all =	$(OBJS_libblackboard) $(OBJS_blackboard)
 LIBS_all =	$(LIBDIR)/libblackboard.so

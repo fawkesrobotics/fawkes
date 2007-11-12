@@ -32,6 +32,7 @@
 #include <blackboard/message_manager.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/interface_mem_header.h>
+#include <blackboard/event_listener.h>
 
 #include <interface/interface.h>
 
@@ -39,6 +40,8 @@
 #include <core/threading/refc_rwlock.h>
 #include <core/exceptions/system.h>
 #include <utils/system/dynamic_module/module_dl.h>
+
+#include <utils/logging/liblogger.h>
 
 #include <stdlib.h>
 #include <string>
@@ -90,6 +93,19 @@ using namespace std;
  *
  * @author Tim Niemueller
  */
+
+/** Data changed notification flag. */
+const unsigned int BlackBoardInterfaceManager::BBEL_FLAG_DATA      = 1;
+/** Reader added/removed notification flag. */
+const unsigned int BlackBoardInterfaceManager::BBEL_FLAG_READER    = 2;
+/** Writer added/removed notification flag. */
+const unsigned int BlackBoardInterfaceManager::BBEL_FLAG_WRITER    = 4;
+/** Interface added notification flag. */
+const unsigned int BlackBoardInterfaceManager::BBEL_FLAG_INTERFACE = 8;
+
+/** All notification flag. */
+const unsigned int BlackBoardInterfaceManager::BBEL_FLAG_ALL =
+  BBEL_FLAG_DATA | BBEL_FLAG_READER | BBEL_FLAG_WRITER | BBEL_FLAG_INTERFACE;
 
 
 /** Constructor.
@@ -179,6 +195,7 @@ BlackBoardInterfaceManager::new_interface_instance(const char *type, const char 
   iface->__instance_serial = next_instance_serial();
   strncpy(iface->__type, type, __INTERFACE_TYPE_SIZE);
   strncpy(iface->__id, identifier, __INTERFACE_ID_SIZE);
+  snprintf(iface->__uid, __INTERFACE_UID_SIZE, "%s::%s", type, identifier);
   iface->__interface_mediator = this;
   iface->__message_mediator   = msgmgr;
 
@@ -329,6 +346,7 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
   Interface *iface = NULL;
   void *ptr = NULL;
   interface_header_t *ih;
+  bool created = false;
 
   memmgr->lock();
 
@@ -342,6 +360,7 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
     ih  = (interface_header_t *)ptr;
     rwlocks[ih->serial]->ref();
   } else {
+    created = true;
     create_interface(type, identifier, iface, ptr);
     ih  = (interface_header_t *)ptr;
   }
@@ -355,6 +374,12 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
 
   memmgr->unlock();
   mutex->unlock();
+
+  if ( created ) {
+    notify_of_interface_created(type, identifier);
+  }
+  notify_of_reader_added(iface->uid());
+
   return iface;
 }
 
@@ -369,7 +394,8 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
  * with it!
  */
 std::list<Interface *> *
-BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type, const char *id_prefix)
+BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type,
+							 const char *id_prefix)
 {
   mutex->lock();
   memmgr->lock();
@@ -384,16 +410,14 @@ BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type, const
     ih = (interface_header_t *)*cit;
 
     if (NULL == id_prefix) {
-      if (strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0) {
-	match = true;
-      }
+      match = (strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0);
     } else {
-      if (strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0 &&
-	  strncmp(id_prefix, ih->id, strlen(id_prefix)) == 0) {
-	match = true;
-      }
+      unsigned int len = (id_prefix != NULL) ? strlen(id_prefix) : 0;
+      match = ((strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0) &&
+	       (len <= strlen(ih->id)) &&
+	       (strncmp(id_prefix, ih->id, len) == 0) );
     }
-      
+
     if (match) {
       // found one!
       // open 
@@ -417,6 +441,10 @@ BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type, const
 
   mutex->unlock();
   memmgr->unlock();
+
+  for (std::list<Interface *>::iterator j = rv->begin(); j != rv->end(); ++j) {
+    notify_of_reader_added((*j)->uid());
+  }
 
   return rv;
 }
@@ -443,6 +471,7 @@ BlackBoardInterfaceManager::open_for_writing(const char *type, const char *ident
   Interface *iface = NULL;
   void *ptr = NULL;
   interface_header_t *ih;
+  bool created = false;
 
   ptr = find_interface_in_memory(type, identifier);
 
@@ -460,6 +489,7 @@ BlackBoardInterfaceManager::open_for_writing(const char *type, const char *ident
     iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
     rwlocks[ih->serial]->ref();
   } else {
+    created = true;
     create_interface(type, identifier, iface, ptr);
     ih = (interface_header_t *)ptr;
   }
@@ -472,9 +502,14 @@ BlackBoardInterfaceManager::open_for_writing(const char *type, const char *ident
   ih->refcount++;
 
   memmgr->unlock();
+  writer_interfaces[iface->__mem_serial] = iface;
+
   mutex->unlock();
 
-  writer_interfaces[iface->__mem_serial] = iface;
+  if ( created ) {
+    notify_of_interface_created(type, identifier);
+  }
+  notify_of_writer_added(iface->uid());
 
   return iface;
 }
@@ -490,6 +525,7 @@ BlackBoardInterfaceManager::close(Interface *interface)
 
   // reduce refcount and free memory if refcount is zero
   interface_header_t *ih = (interface_header_t *)interface->__mem_real_ptr;
+  bool killed_writer = interface->__write_access;
   if ( --(ih->refcount) == 0 ) {
     // redeem from memory
     memmgr->free( interface->__mem_real_ptr );
@@ -502,8 +538,15 @@ BlackBoardInterfaceManager::close(Interface *interface)
     }
   }
 
-  delete_interface_instance( interface );
+  mutex->unlock();
+  if (killed_writer) {
+    notify_of_writer_removed(interface);
+  } else {
+    notify_of_reader_removed(interface);
+  }
 
+  mutex->lock();
+  delete_interface_instance( interface );
   mutex->unlock();
 }
 
@@ -550,6 +593,243 @@ BlackBoardInterfaceManager::exists_writer(const Interface *interface) const
 }
 
 
+/** Register BB event listener.
+ * @param listener BlackBoard event listener to register
+ * @param flags an or'ed combination of BBEL_FLAG_DATA, BBEL_FLAG_READER, BBEL_FLAG_WRITER
+ * and BBEL_FLAG_INTERFACE. Only for the given types the event listener is registered.
+ * BBEL_FLAG_ALL can be supplied to register for all events.
+ */
+void
+BlackBoardInterfaceManager::register_listener(BlackBoardEventListener *listener,
+					      unsigned int flags)
+{
+  if ( flags & BBEL_FLAG_DATA ) {
+    BlackBoardEventListener::InterfaceLockHashMapIterator i;
+    BlackBoardEventListener::InterfaceLockHashMap *im = listener->bbel_data_interfaces();
+    __bbel_data.lock();
+    for (i = im->begin(); i != im->end(); ++i) {
+      __bbel_data[(*i).first].push_back(listener);
+    }
+    __bbel_data.unlock();
+  }
+  if ( flags & BBEL_FLAG_READER ) {
+    BlackBoardEventListener::InterfaceLockHashMapIterator i;
+    BlackBoardEventListener::InterfaceLockHashMap *im = listener->bbel_reader_interfaces();
+    __bbel_reader.lock();
+    for (i = im->begin(); i != im->end(); ++i) {
+      __bbel_reader[(*i).first].push_back(listener);
+    }
+    __bbel_reader.unlock();
+  }
+  if ( flags & BBEL_FLAG_WRITER ) {
+    BlackBoardEventListener::InterfaceLockHashMapIterator i;
+    BlackBoardEventListener::InterfaceLockHashMap *im = listener->bbel_writer_interfaces();
+    __bbel_writer.lock();
+    for (i = im->begin(); i != im->end(); ++i) {
+      __bbel_writer[(*i).first].push_back(listener);
+    }
+    __bbel_writer.unlock();
+  }
+  if ( flags & BBEL_FLAG_INTERFACE ) {
+    BlackBoardEventListener::InterfaceTypeLockHashSetIterator i;
+    BlackBoardEventListener::InterfaceTypeLockHashSet *its = listener->bbel_interface_create_types();
+    __bbel_interface.lock();
+    for (i = its->begin(); i != its->end(); ++i) {
+      __bbel_interface[*i].push_back(listener);
+    }
+    __bbel_interface.unlock();
+  }
+}
+
+
+/** Unregister BB event listener.
+ * This will remove the given BlackBoard event listener from any event that it was
+ * previously registered for.
+ * @param listener BlackBoard event listener to remove
+ */
+void
+BlackBoardInterfaceManager::unregister_listener(BlackBoardEventListener *listener)
+{
+  for (BBelLockHashMapIterator i = __bbel_data.begin(); i != __bbel_data.end(); ++i) {
+    BBelListIterator j = (*i).second.begin();
+    while (j != (*i).second.end()) {
+      if ( *j == listener ) {
+	j = (*i).second.erase(j);
+      } else {
+	++j;
+      }
+    }
+  }
+  for (BBelLockHashMapIterator i = __bbel_reader.begin(); i != __bbel_reader.end(); ++i) {
+    BBelListIterator j = (*i).second.begin();
+    while (j != (*i).second.end()) {
+      if ( *j == listener ) {
+	j = (*i).second.erase(j);
+      } else {
+	++j;
+      }
+    }
+  }
+  for (BBelLockHashMapIterator i = __bbel_writer.begin(); i != __bbel_writer.end(); ++i) {
+    BBelListIterator j = (*i).second.begin();
+    while (j != (*i).second.end()) {
+      if ( *j == listener ) {
+	j = (*i).second.erase(j);
+      } else {
+	++j;
+      }
+    }
+  }
+  for (BBelLockHashMapIterator i = __bbel_interface.begin(); i != __bbel_interface.end(); ++i) {
+    BBelListIterator j = (*i).second.begin();
+    while (j != (*i).second.end()) {
+      if ( *j == listener ) {
+	j = (*i).second.erase(j);
+      } else {
+	++j;
+      }
+    }
+  }
+}
+
+/** Notify that interface has been created.
+ * @param uid UID of interface
+ */
+void
+BlackBoardInterfaceManager::notify_of_interface_created(const char *type, const char *id) throw()
+{
+  BBelLockHashMapIterator lhmi;
+  BBelListIterator i, l;
+  if ( (lhmi = __bbel_interface.find(type)) != __bbel_interface.end() ) {
+    BBelList &list = (*lhmi).second;
+    __bbel_interface.lock();
+      for (i = list.begin(); i != list.end(); ++i) {
+	BlackBoardEventListener *bbel = (*i);
+	bbel->bb_interface_created(type, id);
+      }
+      __bbel_interface.unlock();
+  }
+}
+
+
+/** Notify that writer has been added.
+ * @param uid UID of interface
+ */
+void
+BlackBoardInterfaceManager::notify_of_writer_added(const char *uid) throw()
+{
+  BBelLockHashMapIterator lhmi;
+  BBelListIterator i, l;
+  if ( (lhmi = __bbel_writer.find(uid)) != __bbel_writer.end() ) {
+    BBelList &list = (*lhmi).second;
+    __bbel_writer.lock();
+    for (i = list.begin(); i != list.end(); ++i) {
+      BlackBoardEventListener *bbel = (*i);
+      Interface *bbel_iface = bbel->bbel_writer_interface(uid);
+      if (bbel_iface != NULL ) {
+	bbel->bb_interface_writer_added(bbel_iface);
+      } else {
+	LibLogger::log_warn("BlackBoardInterfaceManager", "BBEL registered for writer "
+			    "events (open) for '%s' but has no such interface", uid);
+      }
+    }
+    __bbel_writer.unlock();
+  }
+}
+
+
+/** Notify that writer has been removed.
+ * @param uid UID of interface
+ */
+void
+BlackBoardInterfaceManager::notify_of_writer_removed(const Interface *interface) throw()
+{
+  BBelLockHashMapIterator lhmi;
+  BBelListIterator i, l;
+  const char *uid = interface->uid();
+  if ( (lhmi = __bbel_writer.find(uid)) != __bbel_writer.end() ) {
+    BBelList &list = (*lhmi).second;
+    __bbel_writer.lock();
+    for (i = list.begin(); i != list.end(); ++i) {
+      BlackBoardEventListener *bbel = (*i);
+      Interface *bbel_iface = bbel->bbel_writer_interface(uid);
+      if (bbel_iface != NULL ) {
+	if ( bbel_iface->serial() == interface->serial() ) {
+	  LibLogger::log_warn("BlackBoardInterfaceManager", "Interface instance (writing) "
+			      "for %s removed, but interface instance still in BBEL, this "
+			      "will lead to a fatal problem shortly", uid);
+	} else {
+	  bbel->bb_interface_writer_removed(bbel_iface);
+	}
+      } else {
+	LibLogger::log_warn("BlackBoardInterfaceManager", "BBEL registered for writer "
+			    "events (close) for '%s' but has no such interface", uid);
+      }
+    }
+    __bbel_writer.unlock();
+  }
+}
+
+
+/** Notify that reader has been added.
+ * @param uid UID of interface
+ */
+void
+BlackBoardInterfaceManager::notify_of_reader_added(const char *uid) throw()
+{
+  BBelLockHashMapIterator lhmi;
+  BBelListIterator i, l;
+  if ( (lhmi = __bbel_reader.find(uid)) != __bbel_reader.end() ) {
+    BBelList &list = (*lhmi).second;
+    __bbel_reader.lock();
+    for (i = list.begin(); i != list.end(); ++i) {
+      BlackBoardEventListener *bbel = (*i);
+      Interface *bbel_iface = bbel->bbel_reader_interface(uid);
+      if (bbel_iface != NULL ) {
+	bbel->bb_interface_reader_added(bbel_iface);
+      } else {
+	LibLogger::log_warn("BlackBoardInterfaceManager", "BBEL registered for reader "
+			    "events (open) for '%s' but has no such interface", uid);
+      }
+    }
+    __bbel_reader.unlock();
+  }
+}
+
+
+/** Notify that reader has been removed.
+ * @param uid UID of interface
+ */
+void
+BlackBoardInterfaceManager::notify_of_reader_removed(const Interface *interface) throw()
+{
+  BBelLockHashMapIterator lhmi;
+  BBelListIterator i, l;
+  const char *uid = interface->uid();
+  if ( (lhmi = __bbel_reader.find(uid)) != __bbel_reader.end() ) {
+    BBelList &list = (*lhmi).second;
+    __bbel_reader.lock();
+    for (i = list.begin(); i != list.end(); ++i) {
+      BlackBoardEventListener *bbel = (*i);
+      Interface *bbel_iface = bbel->bbel_reader_interface(uid);
+      if (bbel_iface != NULL ) {
+	if ( bbel_iface->serial() == interface->serial() ) {
+	  LibLogger::log_warn("BlackBoardInterfaceManager", "Interface instance (reading) "
+			      "for %s removed, but interface instance still in BBEL, this "
+			      "will lead to a fatal problem shortly", uid);
+	} else {
+	  bbel->bb_interface_reader_removed(bbel_iface);
+	}
+      } else {
+	LibLogger::log_warn("BlackBoardInterfaceManager", "BBEL registered for reader "
+			    "events (close) for '%s' but has no such interface", uid);
+      }
+    }
+    __bbel_reader.unlock();
+  }
+}
+
+
 /** Notify of data change.
  * Notify all subscribers of the given interface of a data change.
  * This also influences logging and sending data over the network so it is
@@ -561,6 +841,22 @@ BlackBoardInterfaceManager::exists_writer(const Interface *interface) const
 void
 BlackBoardInterfaceManager::notify_of_data_change(const Interface *interface)
 {
-  // do nothing for now
-  // printf("Interface %s of type %s has changed\n", interface->id(), interface->type());
+  BBelLockHashMapIterator lhmi;
+  BBelListIterator i, l;
+  const char *uid = interface->uid();
+  if ( (lhmi = __bbel_data.find(uid)) != __bbel_data.end() ) {
+    BBelList &list = (*lhmi).second;
+    __bbel_data.lock();
+    for (i = list.begin(); i != list.end(); ++i) {
+      BlackBoardEventListener *bbel = (*i);
+      Interface *bbel_iface = bbel->bbel_data_interface(uid);
+      if (bbel_iface != NULL ) {
+	bbel->bb_data_changed(bbel_iface);
+      } else {
+	LibLogger::log_warn("BlackBoardInterfaceManager", "BBEL registered for data change "
+			    "events for '%s' but has no such interface", uid);
+      }
+    }
+    __bbel_data.unlock();
+  }
 }

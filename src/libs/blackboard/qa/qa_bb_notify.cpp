@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  qa_bb_openall.h - BlackBoard interface QA
+ *  qa_bb_notify.cpp - BlackBoard notification QA
  *
- *  Created: Fri Jun 29 13:44:04 2007 (on flight to RoboCup 2007, Atlanta)
+ *  Created: Mon Nov 12 14:35:53 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -31,6 +31,7 @@
 #include <blackboard/blackboard.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
+#include <blackboard/event_listener.h>
 
 #include <interfaces/test.h>
 
@@ -45,13 +46,63 @@
 
 using namespace std;
 
+class QaBBEventListener : public BlackBoardEventListener
+{
+ public:
+  QaBBEventListener()
+  {
+    bbel_add_interface_create_type("TestInterface");
+  }
+
+  virtual void bb_data_changed(Interface *interface) throw()
+  {
+    printf("BBEL: Data in interface %s has been modified\n", interface->uid());
+  }
+
+  virtual void bb_interface_created(const char *type, const char *id) throw()
+  {
+    printf("BBEL: Interface %s of type %s has been created\n", id, type);
+  }
+
+  virtual void bb_interface_writer_added(Interface *interface) throw()
+  {
+    printf("BBEL: Writer has been added to interface %s\n", interface->uid());
+  }
+
+  virtual void bb_interface_writer_removed(Interface *interface) throw()
+  {
+    printf("BBEL: Writer has been removed from interface %s\n", interface->uid());
+  }
+
+  virtual void bb_interface_reader_added(Interface *interface) throw()
+  {
+    printf("BBEL: Reader has been added to interface %s\n", interface->uid());
+  }
+
+  virtual void bb_interface_reader_removed(Interface *interface) throw()
+  {
+    printf("BBEL: Reader has been removed from interface %s\n", interface->uid());
+  }
+
+  virtual void add_interface(Interface *interface) throw()
+  {
+    printf("BBEL: Adding interface %s\n", interface->uid());
+    bbel_add_data_interface(interface);
+    bbel_add_reader_interface(interface);
+    bbel_add_writer_interface(interface);
+  }
+};
+
 
 int
 main(int argc, char **argv)
 {
   LibLogger::init();
+
   BlackBoard *bb = new BlackBoard();
   BlackBoardInterfaceManager *im = bb->interface_manager();
+
+  QaBBEventListener qabbel;
 
   TestInterface *ti_writer_1;
   TestInterface *ti_writer_2;
@@ -64,6 +115,11 @@ main(int argc, char **argv)
     cout << "Opening interfaces.. " << flush;
     ti_writer_1 = im->open_for_writing<TestInterface>("SomeID 1");
     ti_writer_2 = im->open_for_writing<TestInterface>("SomeID 2");
+
+    qabbel.add_interface(ti_writer_1);
+    qabbel.add_interface(ti_writer_2);
+    im->register_listener(&qabbel, BlackBoardInterfaceManager::BBEL_FLAG_ALL);
+
     ti_writer_3 = im->open_for_writing<TestInterface>("SomeID 3");
     ti_writer_4 = im->open_for_writing<TestInterface>("AnotherID 1");
     ti_writer_5 = im->open_for_writing<TestInterface>("AnotherID 2");
@@ -75,27 +131,30 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  std::list<Interface *> *readers = im->open_all_of_type_for_reading("TestInterface");
-  for (std::list<Interface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
+  std::list<TestInterface *> *readers = im->open_all_of_type_for_reading<TestInterface>();
+  for (std::list<TestInterface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
     printf("Opened reader for interface %s of type %s\n", (*i)->id(), (*i)->type());
     im->close(*i);
   }
   delete readers;
 
   const char* prefix = "Another";
-  readers = im->open_all_of_type_for_reading("TestInterface", prefix);
+  readers = im->open_all_of_type_for_reading<TestInterface>(prefix);
 #if __WORDSIZE == 64
   printf("Found %lu interfaces with prefix \"%s\"\n", readers->size(), prefix);
 #else
   printf("Found %u interfaces with prefix \"%s\"\n", readers->size(), prefix);
 #endif
-  for (std::list<Interface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
+  for (std::list<TestInterface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
     printf("Opened reader for interface %s of type %s\n", (*i)->id(), (*i)->type());
     im->close(*i);
   }
   delete readers;
-  
+
+  printf("Removing writer one. This should print a warning.\n");
   im->close(ti_writer_1);
+  im->unregister_listener(&qabbel);
+  printf("Removing other writers. No warning should appear.\n");
   im->close(ti_writer_2);
   im->close(ti_writer_3);
   im->close(ti_writer_4);

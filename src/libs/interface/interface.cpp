@@ -145,6 +145,11 @@ Interface::datasize() const
 
 /** Check equality of two interfaces.
  * Two interfaces are the same if their types and identifiers are equal.
+ * This does not mean that both interfaces are the very same instance for accessing
+ * the BlackBoard. Instead this just means that both instances will access the same
+ * chunk of memory in the BlackBoard and the instances MAY be the same.
+ * If you want to know if two instances are exactly the same compare the instance
+ * serials using the serial() method.
  * @param comp interface to compare current instance with
  * @return true, if interfaces point to the same data, false otherwise
  */
@@ -184,6 +189,20 @@ const char *
 Interface::id() const
 {
   return __id;
+}
+
+
+/** Get unique identifier of interface.
+ * As the name suggests this ID denotes a unique memory instance of this interface
+ * in the blackboard. It is provided by the system and currently returns a string
+ * of the form "type::id", where type is replaced by the type returned by type() and
+ * id is the ID returned by id().
+ * @return string with the unique identifier of the interface.
+ */
+const char *
+Interface::uid() const
+{
+  return __uid;
 }
 
 

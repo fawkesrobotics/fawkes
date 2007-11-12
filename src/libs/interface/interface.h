@@ -34,6 +34,8 @@
 
 #define __INTERFACE_TYPE_SIZE 32
 #define __INTERFACE_ID_SIZE 32
+//                                            type  ::   id
+#define __INTERFACE_UID_SIZE __INTERFACE_TYPE_SIZE + 2 + __INTERFACE_ID_SIZE
 
 class RefCountRWLock;
 class InterfaceMediator;
@@ -63,6 +65,7 @@ class Interface
   unsigned int  datasize() const;
   const char *  type() const;
   const char *  id() const;
+  const char *  uid() const;
   unsigned int  serial() const;
   bool          operator== (Interface &comp) const;
 
@@ -107,6 +110,7 @@ class Interface
 
   char               __type[__INTERFACE_TYPE_SIZE + 1];
   char               __id[__INTERFACE_ID_SIZE + 1];
+  char               __uid[__INTERFACE_UID_SIZE + 1];
   unsigned int       __instance_serial;
 
   void *             __mem_data_ptr;

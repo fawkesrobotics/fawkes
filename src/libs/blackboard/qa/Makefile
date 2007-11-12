@@ -35,15 +35,20 @@ OBJS_qa_bb_messaging = qa_bb_messaging.o
 LIBS_qa_bb_openall = core utils interfaces blackboard
 OBJS_qa_bb_openall = qa_bb_openall.o
 
+LIBS_qa_bb_notify = core utils interfaces blackboard
+OBJS_qa_bb_notify = qa_bb_notify.o
+
 OBJS_all =	$(OBJS_qa_bb_memmgr) 		\
 		$(OBJS_qa_bb_interface)		\
 		$(OBJS_qa_bb_messaging)		\
-		$(OBJS_qa_bb_openall)
+		$(OBJS_qa_bb_openall)		\
+		$(OBJS_qa_bb_notify)
 
 BINS_all =	$(BINDIR)/qa_bb_memmgr		\
 		$(BINDIR)/qa_bb_interface	\
 		$(BINDIR)/qa_bb_messaging	\
-		$(BINDIR)/qa_bb_openall
+		$(BINDIR)/qa_bb_openall		\
+		$(BINDIR)/qa_bb_notify
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
