@@ -1,8 +1,9 @@
+
 /***************************************************************************
  *  bulb.cpp - implements class that defines a light bulb as mirror
  *
- *  Generated: Wed Jul 27 16:19:00 2005
- *  Copyright  2005-2006 Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Jul 27 16:19:00 2005
+ *  Copyright  2005-2007 Tim Niemueller [www.niemueller.de]
  *             2005      Martin Heracles
  *
  *  $Id$
@@ -30,7 +31,7 @@
 #include <models/mirror/bulb.h>
 #include <utils/system/console_colors.h>
 #include <fvutils/ipc/shm_lut.h>
-#include <fvutils/ipc/shm_registry.h>
+
 
 #include <cmath>
 #include <string>
@@ -45,6 +46,8 @@ using namespace std;
  * Bulb mirror lookup table.
  * This mirror model is based on a LUT that will map image pixels to radial
  * coordinates in relative radial coordinates.
+ * @author Tim Niemueller
+ * @author Martin Heracles
  */
 
 

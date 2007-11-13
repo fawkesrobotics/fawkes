@@ -33,6 +33,9 @@
 #include <fvutils/ipc/defs.h>
 #include <stdint.h>
 
+// Magic token to identify FireVision shared memory LUTs
+#define FIREVISION_SHM_LUT_MAGIC_TOKEN "FireVision LUT"
+
 /** Shared memory lookup table header struct. */
 typedef struct {
   char      lut_id[LUT_ID_MAX_LENGTH];		/**< LUT ID */

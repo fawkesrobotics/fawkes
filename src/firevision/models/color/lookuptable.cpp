@@ -29,7 +29,6 @@
 
 #include <fvutils/color/yuv.h>
 #include <fvutils/ipc/shm_lut.h>
-#include <fvutils/ipc/shm_registry.h>
 
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>

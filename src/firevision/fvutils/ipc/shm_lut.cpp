@@ -26,7 +26,6 @@
  */
 
 #include <fvutils/ipc/shm_lut.h>
-#include <fvutils/ipc/shm_registry.h>
 #include <fvutils/ipc/shm_exceptions.h>
 #include <utils/system/console_colors.h>
 

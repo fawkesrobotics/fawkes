@@ -27,7 +27,6 @@
 
 #include <core/exception.h>
 #include <fvutils/ipc/shm_image.h>
-#include <fvutils/ipc/shm_registry.h>
 #include <fvutils/ipc/shm_exceptions.h>
 #include <utils/system/console_colors.h>
 #include <utils/ipc/shm_exceptions.h>

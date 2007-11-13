@@ -31,7 +31,6 @@
 
 #include <fvutils/color/conversions.h>
 #include <fvutils/ipc/shm_image.h>
-#include <fvutils/ipc/shm_registry.h>
 #include <fvutils/scalers/lossy.h>
 
 #include <models/mirror/mirrormodel.h>
