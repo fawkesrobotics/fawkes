@@ -87,6 +87,9 @@ class Thread {
   OpMode        opmode() const;
   const char *  name() const;
   pthread_t     thread_id() const;
+  bool          started() const;
+  bool          cancelled() const;
+  bool          detached() const;
 
   static Thread *  current_thread();
   static pthread_t current_thread_id();

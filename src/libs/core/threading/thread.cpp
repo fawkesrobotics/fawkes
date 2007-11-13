@@ -637,6 +637,36 @@ Thread::thread_id() const
 }
 
 
+/** Check if thread has been started.
+ * @return true if thread has been started, false otherwise
+ */
+bool
+Thread::started() const
+{
+  return __started;
+}
+
+
+/** Check if thread has been cancelled.
+ * @return true if the thread has been cancelled, false otherwise
+ */
+bool
+Thread::cancelled() const
+{
+  return __cancelled;
+}
+
+
+/** Check if thread has been detached.
+ * @return true if the thread has been detached, false otherwise
+ */
+bool
+Thread::detached() const
+{
+  return __detached;
+}
+
+
 /** Set cancellation point.
  * Tests if the thread has been canceled and if so exits the thread.
  */
