@@ -27,7 +27,7 @@
 
 #include <netcomm/fawkes/network_thread.h>
 #include <netcomm/fawkes/client_thread.h>
-#include <netcomm/fawkes/acceptor_thread.h>
+#include <netcomm/utils/acceptor_thread.h>
 #include <netcomm/fawkes/message.h>
 #include <netcomm/fawkes/handler.h>
 #include <netcomm/fawkes/message_queue.h>
@@ -64,7 +64,8 @@ FawkesNetworkThread::FawkesNetworkThread(ThreadCollector *thread_collector,
   wait_cond = new WaitCondition();
   inbound_messages = new FawkesNetworkMessageQueue();
 
-  acceptor_thread = new FawkesNetworkAcceptorThread(this, fawkes_port);
+  acceptor_thread = new NetworkAcceptorThread(this, fawkes_port,
+					      "FawkesNetworkAcceptorThread");
   thread_collector->add(acceptor_thread);
 
 }
@@ -89,14 +90,19 @@ FawkesNetworkThread::~FawkesNetworkThread()
 }
 
 
-/** Add a new client.
- * Called by the FawkesNetworkAcceptorThread if a new client connected.
- * @param client new client
+
+
+/** Add a new connection.
+ * Called by the NetworkAcceptorThread if a new client connected.
+ * @param s socket for new client
  */
 void
-FawkesNetworkThread::add_client(FawkesNetworkClientThread *client)
+FawkesNetworkThread::add_connection(StreamSocket *s) throw()
 {
   clients_mutex->lock();
+
+  FawkesNetworkClientThread *client = new FawkesNetworkClientThread(s, this);
+
   client->setClientID(next_client_id);
   thread_collector->add(client);
   clients[next_client_id] = client;
@@ -105,6 +111,8 @@ FawkesNetworkThread::add_client(FawkesNetworkClientThread *client)
   }
   ++next_client_id;
   clients_mutex->unlock();
+
+  wakeup();
 }
 
 

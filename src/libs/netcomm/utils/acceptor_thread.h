@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  acceptor_thread.h - Thread accepting Fawkes network connections
+ *  acceptor_thread.h - Thread accepting network connections
  *
  *  Created: Fri Nov 17 13:57:14 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,28 +25,32 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __NETCOMM_FAWKES_CONNECTOR_THREAD_H_
-#define __NETCOMM_FAWKES_CONNECTOR_THREAD_H_
+#ifndef __NETCOMM_UTILS_ACCEPTOR_THREAD_H_
+#define __NETCOMM_UTILS_ACCEPTOR_THREAD_H_
 
 #include <core/threading/thread.h>
 
 class StreamSocket;
-class FawkesNetworkThread;
+class NetworkIncomingConnectionHandler;
 
-class FawkesNetworkAcceptorThread : public Thread
+class NetworkAcceptorThread : public Thread
 {
  public:
-  FawkesNetworkAcceptorThread(FawkesNetworkThread *parent,
-			      unsigned short int fawkes_port);
-  ~FawkesNetworkAcceptorThread();
+  NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
+			unsigned short int port,
+			const char *thread_name = "NetworkAcceptorThread");
+  NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
+			StreamSocket *socket,
+			const char *thread_name = "NetworkAcceptorThread");
+  ~NetworkAcceptorThread();
 
   virtual void loop();
 
  private:
-  unsigned short int   port;
-  StreamSocket        *socket;
+  unsigned short int        __port;
+  StreamSocket             *__socket;
 
-  FawkesNetworkThread *parent;
+  NetworkIncomingConnectionHandler *__handler;
 
 };
 

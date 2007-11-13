@@ -30,6 +30,7 @@
 
 #include <core/threading/thread.h>
 #include <netcomm/fawkes/hub.h>
+#include <netcomm/utils/incoming_connection_handler.h>
 
 #include <map>
 
@@ -37,13 +38,16 @@ class ThreadCollector;
 class Mutex;
 class WaitCondition;
 class FawkesNetworkClientThread;
-class FawkesNetworkAcceptorThread;
+class NetworkAcceptorThread;
 class FawkesNetworkHandler;
 class FawkesNetworkMessage;
 class FawkesNetworkMessageQueue;
 class FawkesNetworkMessageContent;
 
-class FawkesNetworkThread : public Thread, public FawkesNetworkHub
+class FawkesNetworkThread
+: public Thread,
+  public FawkesNetworkHub,
+  public NetworkIncomingConnectionHandler
 {
  public:
   FawkesNetworkThread(ThreadCollector *thread_collector,
@@ -70,7 +74,7 @@ class FawkesNetworkThread : public Thread, public FawkesNetworkHub
 		    unsigned short int component_id, unsigned short int msg_id,
 		    FawkesNetworkMessageContent *content);
 
-  void add_client(FawkesNetworkClientThread *client);
+  void add_connection(StreamSocket *s) throw();
   void wakeup();
   void dispatch(FawkesNetworkMessage *msg);
   void process();
@@ -85,7 +89,7 @@ class FawkesNetworkThread : public Thread, public FawkesNetworkHub
 
   unsigned int         next_client_id;
 
-  FawkesNetworkAcceptorThread *acceptor_thread;
+  NetworkAcceptorThread *acceptor_thread;
 
   // key: component id,  value: handler
   std::map<unsigned int, FawkesNetworkHandler *> handlers;
