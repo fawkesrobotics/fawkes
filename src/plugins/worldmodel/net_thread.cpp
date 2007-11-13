@@ -62,12 +62,12 @@ WorldModelNetworkThread::init()
   string encryption_key;
   string encryption_iv;
   try {
-    multicast_addr = config->get_string("worldmodel", "/worldinfo_transceiver/multicast_addr");
-    port = config->get_uint("worldmodel", "/worldinfo_transceiver/port");
-    encryption_key = config->get_string("worldmodel", "/worldinfo_transceiver/encryption_key");
-    encryption_iv  = config->get_string("worldmodel", "/worldinfo_transceiver/encryption_iv");
-    sleep_time_msec = config->get_uint("worldmodel", "/worldinfo_transceiver/sleep_time_msec");
-    max_msgs_per_recv = config->get_uint("worldmodel", "/worldinfo_transceiver/max_msgs_per_recv");
+    multicast_addr = config->get_string("/worldmodel/worldinfo_transceiver/multicast_addr");
+    port = config->get_uint("/worldmodel/worldinfo_transceiver/port");
+    encryption_key = config->get_string("/worldmodel/worldinfo_transceiver/encryption_key");
+    encryption_iv  = config->get_string("/worldmodel/worldinfo_transceiver/encryption_iv");
+    sleep_time_msec = config->get_uint("/worldmodel/worldinfo_transceiver/sleep_time_msec");
+    max_msgs_per_recv = config->get_uint("/worldmodel/worldinfo_transceiver/max_msgs_per_recv");
   } catch (Exception &e) {
     e.append("Could not get required configuration data for worldmodel");
     throw;

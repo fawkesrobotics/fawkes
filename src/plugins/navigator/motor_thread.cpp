@@ -99,13 +99,13 @@ MotorThread::~MotorThread()
 void
 MotorThread::init()
 {
-  correction_x = config->get_float("navigator", "/motor/correction_x");
-  correction_y = config->get_float("navigator", "/motor/correction_y");
-  correction_rotation = config->get_float("navigator", "/motor/correction_rotation");
+  correction_x = config->get_float("/navigator/motor/correction_x");
+  correction_y = config->get_float("/navigator/motor/correction_y");
+  correction_rotation = config->get_float("/navigator/motor/correction_rotation");
 
-  if(config->exists("navigator", "/motor/no_vmc"))
+  if(config->exists("/navigator/motor/no_vmc"))
     {
-      no_vmc = config->get_bool("navigator", "/motor/no_vmc");
+      no_vmc = config->get_bool("/navigator/motor/no_vmc");
     }
   else
     {

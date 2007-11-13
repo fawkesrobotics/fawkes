@@ -30,8 +30,10 @@
 
 #include <core/exception.h>
 #include <config/change_handler.h>
+#include <utils/misc/string_compare.h>
 #include <string>
 #include <list>
+#include <map>
 
 class ConfigurationException : public Exception
 {
@@ -43,13 +45,13 @@ class ConfigurationException : public Exception
 class ConfigEntryNotFoundException : public Exception
 {
  public:
-  ConfigEntryNotFoundException(const char *comp, const char *path);
+  ConfigEntryNotFoundException(const char *path);
 };
 
 class ConfigTypeMismatchException : public Exception
 {
  public:
-  ConfigTypeMismatchException(const char *comp, const char *path,
+  ConfigTypeMismatchException(const char *path,
 			       const char *actual, const char *requested);
 };
 
@@ -71,7 +73,6 @@ class Configuration
     virtual bool          next()                                          = 0;
     virtual bool          valid()                                         = 0;
     
-    virtual const char *  component()                                     = 0;
     virtual const char *  path()                                          = 0;
     virtual const char *  type()                                          = 0;
     
@@ -90,8 +91,8 @@ class Configuration
 
   virtual void          copy(Configuration *copyconf)                     = 0;
 
-  virtual void          add_change_handler(ConfigurationChangeHandler *h) = 0;
-  virtual void          rem_change_handler(ConfigurationChangeHandler *h) = 0;
+  virtual void          add_change_handler(ConfigurationChangeHandler *h);
+  virtual void          rem_change_handler(ConfigurationChangeHandler *h);
 
   virtual void          load(const char *name, const char *defaults_name,
 			     const char *tag = NULL)                      = 0;
@@ -99,63 +100,78 @@ class Configuration
   virtual void          tag(const char *tag)                              = 0;
   virtual std::list<std::string> tags()                                   = 0;
 
-  virtual bool          exists(const char *comp, const char *path)        = 0;
-  virtual bool          is_float(const char *comp, const char *path)      = 0;
-  virtual bool          is_uint(const char *comp, const char *path)       = 0;
-  virtual bool          is_int(const char *comp, const char *path)        = 0;
-  virtual bool          is_bool(const char *comp, const char *path)       = 0;
-  virtual bool          is_string(const char *comp, const char *path)     = 0;
+  virtual bool          exists(const char *path)                          = 0;
+  virtual bool          is_float(const char *path)                        = 0;
+  virtual bool          is_uint(const char *path)                         = 0;
+  virtual bool          is_int(const char *path)                          = 0;
+  virtual bool          is_bool(const char *path)                         = 0;
+  virtual bool          is_string(const char *path)                       = 0;
 
-  virtual float           get_float(const char *comp, const char *path)   = 0;
-  virtual unsigned int    get_uint(const char *comp, const char *path)    = 0;
-  virtual int             get_int(const char *comp, const char *path)     = 0;
-  virtual bool            get_bool(const char *comp, const char *path)    = 0;
-  virtual std::string     get_string(const char *comp, const char *path)  = 0;
-  virtual ValueIterator * get_value(const char *comp, const char *path)   = 0;
+  virtual float           get_float(const char *path)                     = 0;
+  virtual unsigned int    get_uint(const char *path)                      = 0;
+  virtual int             get_int(const char *path)                       = 0;
+  virtual bool            get_bool(const char *path)                      = 0;
+  virtual std::string     get_string(const char *path)                    = 0;
+  virtual ValueIterator * get_value(const char *path)                     = 0;
 
-  virtual void          set_float(const char *comp, const char *path,
+  virtual void          set_float(const char *path,
 				  float f)                                = 0;
-  virtual void          set_uint(const char *comp, const char *path,
+  virtual void          set_uint(const char *path,
 				 unsigned int uint)                       = 0;
-  virtual void          set_int(const char *comp, const char *path,
+  virtual void          set_int(const char *path,
 				int i)                                    = 0;
-  virtual void          set_bool(const char *comp, const char *path,
+  virtual void          set_bool(const char *path,
 				 bool b)                                  = 0;
-  virtual void          set_string(const char *comp, const char *path,
+  virtual void          set_string(const char *path,
 				   std::string s)                         = 0;
-  virtual void          set_string(const char *comp, const char *path,
+  virtual void          set_string(const char *path,
 				   const char *s)                         = 0;
 
-  virtual void          erase(const char *comp, const char *path)         = 0;
+  virtual void          erase(const char *path)                           = 0;
 
-  virtual void          set_default_float(const char *comp,
-					  const char *path,
-					  float f)                        = 0;
-  virtual void          set_default_uint(const char *comp,
-					 const char *path,
+  virtual void          set_default_float(const char *path, float f)      = 0;
+  virtual void          set_default_uint(const char *path,
 					 unsigned int uint)               = 0;
-  virtual void          set_default_int(const char *comp,
-					const char *path,
-					int i)                            = 0;
-  virtual void          set_default_bool(const char *comp,
-					 const char *path,
-					 bool b)                          = 0;
-  virtual void          set_default_string(const char *comp,
-					   const char *path,
+  virtual void          set_default_int(const char *path, int i)          = 0;
+  virtual void          set_default_bool(const char *path, bool b)        = 0;
+  virtual void          set_default_string(const char *path,
 					   std::string s)                 = 0;
-  virtual void          set_default_string(const char *comp,
-					   const char *path,
+  virtual void          set_default_string(const char *path,
 					   const char *s)                 = 0;
 
-  virtual void          erase_default(const char *comp, const char *path) = 0;
+  virtual void          erase_default(const char *path)                   = 0;
 
   virtual ValueIterator * iterator()                                      = 0;
 
-  virtual ValueIterator * search(const char *component, const char *path) = 0;
+  virtual ValueIterator * search(const char *path)                        = 0;
 
   virtual void            lock()                                          = 0;
   virtual bool            try_lock()                                      = 0;
   virtual void            unlock()                                        = 0;
+
+ protected:
+  /** List that contains pointers to ConfigurationChangeHandler */
+  typedef std::list<ConfigurationChangeHandler *> ChangeHandlerList;
+
+  /** Multimap string to config change handlers. */
+  typedef std::multimap<const char *, ConfigurationChangeHandler *, StringLess >
+          ChangeHandlerMultimap;
+
+  /** Config change handler multimap range. */
+  typedef std::pair<ChangeHandlerMultimap::iterator,
+                    ChangeHandlerMultimap::iterator>
+          ChangeHandlerMultimapRange;
+
+  /** Registered change handlers. */
+  ChangeHandlerMultimap                  _change_handlers;
+  /** Change handler range. */
+  ChangeHandlerMultimapRange             _ch_range;
+
+  /** Find handlers for given path.
+   * @param path path to get handlers for
+   * @return list with config change handlers.
+   */
+  ChangeHandlerList * find_handlers(const char *path);
 
 };
 

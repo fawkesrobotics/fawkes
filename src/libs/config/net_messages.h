@@ -76,74 +76,71 @@
 
 
 /* Length definitions */
-#define CONFIG_MSG_COMPONENT_LENGTH    32
 #define CONFIG_MSG_PATH_LENGTH        128
 #define CONFIG_MSG_MAX_STRING_LENGTH  256
 #define CONFIG_MSG_MAX_TAG_LENGTH      64
 
 /** Basic config descriptor.
- * A combination of component and path defines a unique element in the configuration.
+ * Path that defines a unique element in the configuration.
  * It is part of most messages.
  */
 typedef struct {
-  char component[CONFIG_MSG_COMPONENT_LENGTH];	/**< name of component. */
   char path[CONFIG_MSG_PATH_LENGTH];		/**< path to config value. */
 } config_descriptor_t;
 
-/** Get value message.
- */
+/** Get value message. */
 typedef struct {
-  config_descriptor_t  cp;	/**< value component and path */
+  config_descriptor_t  cp;	/**< value descriptor */
 } config_getval_msg_t;
 
 /** Invalid value request message. */
 typedef struct {
-  config_descriptor_t  cp;	/**< value component and path */
+  config_descriptor_t  cp;	/**< value descriptor */
 } config_invval_msg_t;
 
 /** Erase value request. */
 typedef struct {
-  config_descriptor_t  cp;	/**< value component and path */
+  config_descriptor_t  cp;	/**< value descriptor */
 } config_erase_value_msg_t;
 
 /** Value erased message. */
 typedef struct {
-  config_descriptor_t  cp;	/**< value component and path */
+  config_descriptor_t  cp;	/**< value descriptor */
 } config_value_erased_msg_t;
 
 /** Float value message */
 typedef struct {
-  config_descriptor_t  cp;	/**< value component and path */
+  config_descriptor_t  cp;	/**< value descriptor */
   float f;			/**< value */
 } config_float_value_msg_t;
 
 /** Unsigned int value message */
 typedef struct {
-  config_descriptor_t  cp;	/**< value component and path */
+  config_descriptor_t  cp;	/**< value descriptor */
   unsigned int u;		/**< value */
 } config_uint_value_msg_t;
 
 /** Integer value message */
 typedef struct {
-  config_descriptor_t  cp;	/**< value component and path */
+  config_descriptor_t  cp;	/**< value descriptor */
   int i;			/**< value */
 } config_int_value_msg_t;
 
 /** Boolean value message */
 typedef struct {
-  config_descriptor_t  cp;	/**< value component and path */
+  config_descriptor_t  cp;	/**< value descriptor */
   unsigned int b;		/**< value */
 } config_bool_value_msg_t;
 
 /** String value message */
 typedef struct {
-  config_descriptor_t  cp;		/**< value component and path */
+  config_descriptor_t  cp;		/**< value descriptor */
   char s[CONFIG_MSG_MAX_STRING_LENGTH];	/**< value */
 } config_string_value_msg_t;
 
 /** Tag message. */
 typedef struct {
-  config_descriptor_t  cp;		/**< value component and path */
+  config_descriptor_t  cp;		/**< value descriptor */
   char tag[CONFIG_MSG_MAX_TAG_LENGTH];	/**< tag */
 } config_tag_msg_t;
 

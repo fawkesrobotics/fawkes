@@ -38,18 +38,6 @@
  * @fn Configuration::~Configuration()
  * Virtual empty destructor.
  *
- * @fn void Configuration::add_change_handler(ConfigurationChangeHandler *h)
- * Add a configuration change handler.
- * The added handler is called whenever a value changes and the handler
- * desires to get notified for the given component.
- * @param h configuration change handler
- *
- * @fn void Configuration::rem_change_handler(ConfigurationChangeHandler *h)
- * Remove a configuration change handler.
- * The handler is removed from the change handler list and no longer called on
- * config changes.
- * @param h configuration change handler
- *
  * @fn void Configuration::load(const char *name, const char *defaults_name, const char *tag)
  * Load configuration.
  * Loads configuration data, or opens a file, depending on the implementation. After
@@ -82,163 +70,137 @@
  * List of tags.
  * @return list of tags
  * 
- * @fn bool Configuration::exists(const char *comp, const char *path)
+ * @fn bool Configuration::exists(const char *path)
  * Check if a given value exists.
- * @param comp component
  * @param path path to value
  * @return true if the value exists, false otherwise
  * 
- * @fn bool Configuration::is_float(const char *comp, const char *path)
+ * @fn bool Configuration::is_float(const char *path)
  * Check if a value is of type float
- * @param comp component
  * @param path path to value
  * @return true if the value exists and is of type float
  * 
- * @fn bool Configuration::is_uint(const char *comp, const char *path)
+ * @fn bool Configuration::is_uint(const char *path)
  * Check if a value is of type unsigned int
- * @param comp component
  * @param path path to value
  * @return true if the value exists and is of type unsigned int
  * 
- * @fn bool Configuration::is_int(const char *comp, const char *path)
+ * @fn bool Configuration::is_int(const char *path)
  * Check if a value is of type int
- * @param comp component
  * @param path path to value
  * @return true if the value exists and is of type int
  * 
- * @fn bool Configuration::is_bool(const char *comp, const char *path)
+ * @fn bool Configuration::is_bool(const char *path)
  * Check if a value is of type bool
- * @param comp component
  * @param path path to value
  * @return true if the value exists and is of type bool
  * 
- * @fn bool Configuration::is_string(const char *comp, const char *path)
+ * @fn bool Configuration::is_string(const char *path)
  * Check if a value is of type string
- * @param comp component
  * @param path path to value
  * @return true if the value exists and is of type string
  * 
- * @fn float Configuration::get_float(const char *comp, const char *path)
+ * @fn float Configuration::get_float(const char *path)
  * Get value from configuration which is of type float
- * @param comp component
  * @param path path to value
  * @return value
  * 
- * @fn unsigned int Configuration::get_uint(const char *comp, const char *path)
+ * @fn unsigned int Configuration::get_uint(const char *path)
  * Get value from configuration which is of type unsigned int
- * @param comp component
  * @param path path to value
  * @return value
  * 
- * @fn int Configuration::get_int(const char *comp, const char *path)
+ * @fn int Configuration::get_int(const char *path)
  * Get value from configuration which is of type int
- * @param comp component
  * @param path path to value
  * @return value
  * 
- * @fn bool Configuration::get_bool(const char *comp, const char *path)
+ * @fn bool Configuration::get_bool(const char *path)
  * Get value from configuration which is of type bool
- * @param comp component
  * @param path path to value
  * @return value
  * 
- * @fn std::string Configuration::get_string(const char *comp, const char *path)
+ * @fn std::string Configuration::get_string(const char *path)
  * Get value from configuration which is of type string
- * @param comp component
  * @param path path to value
  *
- * @fn Configuration::ValueIterator * Configuration::get_value(const char *comp, const char *path)
+ * @fn Configuration::ValueIterator * Configuration::get_value(const char *path)
  * Get value from configuration.
- * @param comp component
  * @param path path to value
  * @return value iterator for just this one value, maybe invalid if value does not
  * exists.
  *
  * 
- * @fn void Configuration::set_float(const char *comp, const char *path, float f)
+ * @fn void Configuration::set_float(const char *path, float f)
  * Set new value in configuration of type float
- * @param comp component
  * @param path path to value
  * @param f new float value
  * 
- * @fn void Configuration::set_uint(const char *comp, const char *path, unsigned int uint)
+ * @fn void Configuration::set_uint(const char *path, unsigned int uint)
  * Set new value in configuration of type unsigned int
- * @param comp component
  * @param path path to value
  * @param uint new unsigned int value
  * 
- * @fn void Configuration::set_int(const char *comp, const char *path, int i)
+ * @fn void Configuration::set_int(const char *path, int i)
  * Set new value in configuration of type int
- * @param comp component
  * @param path path to value
  * @param i new int value
  * 
- * @fn void Configuration::set_bool(const char *comp, const char *path, bool b)
+ * @fn void Configuration::set_bool(const char *path, bool b)
  * Set new value in configuration of type bool
- * @param comp component
  * @param path path to value
  * @param b new bool value
  * 
- * @fn void Configuration::set_string(const char *comp, const char *path, std::string s)
+ * @fn void Configuration::set_string(const char *path, std::string s)
  * Set new value in configuration of type string
- * @param comp component
  * @param path path to value
  * @param s new string value
  *
- * @fn void Configuration::set_string(const char *comp, const char *path, const char *s)
+ * @fn void Configuration::set_string(const char *path, const char *s)
  * Set new value in configuration of type string. Works like the aforementioned method.
  * Just takes an good ol' char array instead of a std::string.
- * @param comp component
  * @param path path to value
  * @param s new string value
  *
- * @fn void Configuration::erase(const char *comp, const char *path)
+ * @fn void Configuration::erase(const char *path)
  * Erase the given value from the configuration. It is not an error if the value does
  * not exists before deletion.
- * @param comp component
  * @param path path to value
  *
- * @fn void Configuration::set_default_float(const char *comp, const char *path, float f)
+ * @fn void Configuration::set_default_float(const char *path, float f)
  * Set new default value in configuration of type float
- * @param comp component
  * @param path path to value
  * @param f new float value
  * 
- * @fn void Configuration::set_default_uint(const char *comp, const char *path, unsigned int uint)
+ * @fn void Configuration::set_default_uint(const char *path, unsigned int uint)
  * Set new default value in configuration of type unsigned int
- * @param comp component
  * @param path path to value
  * @param uint new unsigned int value
  * 
- * @fn void Configuration::set_default_int(const char *comp, const char *path, int i)
+ * @fn void Configuration::set_default_int(const char *path, int i)
  * Set new default value in configuration of type int
- * @param comp component
  * @param path path to value
  * @param i new int value
  * 
- * @fn void Configuration::set_default_bool(const char *comp, const char *path, bool b)
+ * @fn void Configuration::set_default_bool(const char *path, bool b)
  * Set new default value in configuration of type bool
- * @param comp component
  * @param path path to value
  * @param b new bool value
  * 
- * @fn void Configuration::set_default_string(const char *comp, const char *path, std::string s)
+ * @fn void Configuration::set_default_string(const char *path, std::string s)
  * Set new default value in configuration of type string
- * @param comp component
  * @param path path to value
  * @param s new string value
  *
- * @fn void Configuration::set_default_string(const char *comp, const char *path, const char *s)
+ * @fn void Configuration::set_default_string(const char *path, const char *s)
  * Set new default value in configuration of type string. Works like the aforementioned method.
  * Just takes an good ol' char array instead of a std::string.
- * @param comp component
  * @param path path to value
  * @param s new string value
  *
- * @fn void Configuration::erase_default(const char *comp, const char *path)
+ * @fn void Configuration::erase_default(const char *path)
  * Erase the given default value from the configuration. It is not an error if the value does
  * not exists before deletion.
- * @param comp component
  * @param path path to value
  *
  * @fn Configuration::ValueIterator * Configuration::iterator()
@@ -247,16 +209,15 @@
  * configuration.
  * @return iterator over all values
  *
- * @fn Configuration::ValueIterator * Configuration::search(const char *component, const char *path)
+ * @fn Configuration::ValueIterator * Configuration::search(const char *path)
  * Iterator with search results.
  * Returns an iterator that can be used to iterate over the search results. All values
- * whose component and path start with the given strings are returned.
+ * whose path start with the given strings are returned.
  * A call like
  * @code
- *   config->search("", "");
+ *   config->search("");
  * @endcode
  * is effectively the same as a call to iterator().
- * @param component start of component
  * @param path start of path
  * @return iterator to search results
  *
@@ -309,14 +270,11 @@ ConfigurationException::ConfigurationException(const char *prefix, const char *m
 
 
 /** Constructor.
- * @param component component of value
  * @param path path of value
  */
-ConfigEntryNotFoundException::ConfigEntryNotFoundException(const char *component,
-							   const char *path)
-  : Exception()
+ConfigEntryNotFoundException::ConfigEntryNotFoundException( const char *path)
+  : Exception("Config value for '%s' not found", path)
 {
-  append("Config value for '%s::%s' not found", component, path);
 }
 
 
@@ -326,19 +284,17 @@ ConfigEntryNotFoundException::ConfigEntryNotFoundException(const char *component
  */
 
 /** Constructor.
- * @param component component of value
  * @param path path of value
  * @param actual actual type
  * @param requested requested type
  */
-ConfigTypeMismatchException::ConfigTypeMismatchException(const char *component,
-							 const char *path,
+ConfigTypeMismatchException::ConfigTypeMismatchException(const char *path,
 							 const char *actual,
 							 const char *requested)
   : Exception()
 {
-  append("Config value for '%s::%s' is not of type '%s', but of type '%s'",
-	 component, path, requested, actual);
+  append("Config value for '%s' is not of type '%s', but of type '%s'",
+	 path, requested, actual);
 }
 
 /** @class CouldNotOpenConfigException config/config.h
@@ -377,10 +333,6 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *msg)
  * This is much like the classic end element for iterators. If the iterator is
  * invalid there all subsequent calls to next() shall fail.
  * @return true, if the iterator is still valid, false otherwise
- *
- * @fn const char * Configuration::ValueIterator::component()
- * Component of value.
- * @return component of value.
  *
  * @fn const char * Configuration::ValueIterator::path()
  * Path of value.
@@ -431,3 +383,72 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *msg)
  * @return value
  *
  */
+
+
+
+/** Add a configuration change handler.
+ * The added handler is called whenever a value changes and the handler
+ * desires to get notified for the given component.
+ * @param h configuration change handler
+ */
+void
+Configuration::add_change_handler(ConfigurationChangeHandler *h)
+{
+  const char *c = h->config_monitor_prefix();
+  if ( c == NULL ) {
+    c = "";
+  }
+
+  _change_handlers.insert(ChangeHandlerMultimap::value_type(c, h));
+}
+
+
+/** Remove a configuration change handler.
+ * The handler is removed from the change handler list and no longer called on
+ * config changes.
+ * @param h configuration change handler
+ */
+void
+Configuration::rem_change_handler(ConfigurationChangeHandler *h)
+{
+  const char *c = h->config_monitor_prefix();
+  if ( c == NULL ) {
+    c = "";
+  }
+  bool changed = true;
+  while (changed) {
+    changed = false;
+    for (ChangeHandlerMultimap::const_iterator j = _change_handlers.begin(); !changed && (j != _change_handlers.end()); ++j) {
+      _ch_range = _change_handlers.equal_range((*j).first);
+      for (ChangeHandlerMultimap::iterator i = _ch_range.first; !changed && (i != _ch_range.second); ++i) {
+	if ( (*i).second == h ) {
+	  _change_handlers.erase(i);
+	  changed = true;
+	  break;
+	}
+      }
+      if ( changed)  break;
+    }
+  }
+}
+
+
+/** Find all handlers for the given path.
+ * @param path config path
+ */
+Configuration::ChangeHandlerList *
+Configuration::find_handlers(const char *path)
+{
+  ChangeHandlerList *rv = new ChangeHandlerList();
+  for (ChangeHandlerMultimap::const_iterator j = _change_handlers.begin(); j != _change_handlers.end(); ++j) {
+    if ( strstr(path, (*j).first) == path ) {
+      _ch_range = _change_handlers.equal_range((*j).first);
+      for (ChangeHandlerMultimap::const_iterator i = _ch_range.first; i != _ch_range.second; ++i) {
+	rv->push_back((*i).second);
+      }
+    }
+  }
+
+  return rv;
+}
+

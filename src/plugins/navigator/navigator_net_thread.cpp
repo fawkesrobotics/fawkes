@@ -166,7 +166,7 @@ NavigatorNetworkThread::init()
   unsigned int port = 0;
   try
     {
-      port = config->get_uint("navigator", "/network/joystick_port");
+      port = config->get_uint("/navigator/network/joystick_port");
       if ( port > 0xFFFF )
         {
           throw Exception("Navigator joystick port out of range");

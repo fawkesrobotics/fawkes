@@ -30,10 +30,6 @@
 
 #include <config/config.h>
 
-#include <map>
-#include <list>
-#include <string>
-
 class Mutex;
 
 class SQLiteConfiguration : public Configuration
@@ -44,59 +40,56 @@ class SQLiteConfiguration : public Configuration
 
   virtual void          copy(Configuration *copyconf);
 
-  virtual void          add_change_handler(ConfigurationChangeHandler *h);
-  virtual void          rem_change_handler(ConfigurationChangeHandler *h);
-
   virtual void          load(const char *filename, const char *defaults_filename,
 			     const char *tag = NULL);
 
   virtual void          tag(const char *tag);
   virtual std::list<std::string> tags();
 
-  virtual bool          exists(const char *comp, const char *path);
-  virtual bool          is_float(const char *comp, const char *path);
-  virtual bool          is_uint(const char *comp, const char *path);
-  virtual bool          is_int(const char *comp, const char *path);
-  virtual bool          is_bool(const char *comp, const char *path);
-  virtual bool          is_string(const char *comp, const char *path);
+  virtual bool          exists(const char *path);
+  virtual bool          is_float(const char *path);
+  virtual bool          is_uint(const char *path);
+  virtual bool          is_int(const char *path);
+  virtual bool          is_bool(const char *path);
+  virtual bool          is_string(const char *path);
 
-  virtual std::string     get_type(const char *comp, const char *path);
-  virtual float           get_float(const char *comp, const char *path);
-  virtual unsigned int    get_uint(const char *comp, const char *path);
-  virtual int             get_int(const char *comp, const char *path);
-  virtual bool            get_bool(const char *comp, const char *path);
-  virtual std::string     get_string(const char *comp, const char *path);
-  virtual ValueIterator * get_value(const char *comp, const char *path);
+  virtual std::string     get_type(const char *path);
+  virtual float           get_float(const char *path);
+  virtual unsigned int    get_uint(const char *path);
+  virtual int             get_int(const char *path);
+  virtual bool            get_bool(const char *path);
+  virtual std::string     get_string(const char *path);
+  virtual ValueIterator * get_value(const char *path);
 
-  virtual void          set_float(const char *comp, const char *path,
+  virtual void          set_float(const char *path,
 				  float f);
-  virtual void          set_uint(const char *comp, const char *path,
+  virtual void          set_uint(const char *path,
 				 unsigned int uint);
-  virtual void          set_int(const char *comp, const char *path,
+  virtual void          set_int(const char *path,
 				int i);
-  virtual void          set_bool(const char *comp, const char *path,
+  virtual void          set_bool(const char *path,
 				 bool b);
-  virtual void          set_string(const char *comp, const char *path,
+  virtual void          set_string(const char *path,
 				   std::string s);
-  virtual void          set_string(const char *comp, const char *path,
+  virtual void          set_string(const char *path,
 				   const char *s);
 
-  virtual void          erase(const char *comp, const char *path);
+  virtual void          erase(const char *path);
 
-  virtual void          set_default_float(const char *comp, const char *path,
+  virtual void          set_default_float(const char *path,
 				  float f);
-  virtual void          set_default_uint(const char *comp, const char *path,
+  virtual void          set_default_uint(const char *path,
 				 unsigned int uint);
-  virtual void          set_default_int(const char *comp, const char *path,
+  virtual void          set_default_int(const char *path,
 				int i);
-  virtual void          set_default_bool(const char *comp, const char *path,
+  virtual void          set_default_bool(const char *path,
 				 bool b);
-  virtual void          set_default_string(const char *comp, const char *path,
+  virtual void          set_default_string(const char *path,
 				   std::string s);
-  virtual void          set_default_string(const char *comp, const char *path,
+  virtual void          set_default_string(const char *path,
 				   const char *s);
 
-  virtual void          erase_default(const char *comp, const char *path);
+  virtual void          erase_default(const char *path);
 
  private:
   typedef struct sqlite3_stmt sqlite3_stmt;
@@ -112,7 +105,6 @@ class SQLiteConfiguration : public Configuration
     virtual bool          next();
     virtual bool          valid();
     
-    virtual const char *  component();
     virtual const char *  path();
     virtual const char *  type();
     
@@ -133,7 +125,7 @@ class SQLiteConfiguration : public Configuration
   };
 
   ValueIterator * iterator();
-  ValueIterator * search(const char *component, const char *path);
+  ValueIterator * search(const char *path);
 
   void lock();
   bool try_lock();
@@ -141,28 +133,22 @@ class SQLiteConfiguration : public Configuration
 
  private:
   void            init();
-  std::string     get_type(const char *table, const char *comp, const char *path);
-  bool            exists(const char *sql, const char *comp, const char *path);
-  sqlite3_stmt *  get_value(const char *type, const char *comp, const char *path);
+  std::string     get_type(const char *table, const char *path);
+  bool            exists(const char *sql, const char *path);
+  sqlite3_stmt *  get_value(const char *type, const char *path);
   sqlite3_stmt *  prepare_update_value(const char *sql,
-				       const char *comp, const char *path);
+				       const char *path);
   sqlite3_stmt *  prepare_insert_value(const char *sql, const char *type,
-				       const char *comp, const char *path);
+				       const char *path);
   void            execute_insert_or_update(sqlite3_stmt *stmt);
 
 
  private:
   typedef struct sqlite3 sqlite3;
   sqlite3 *db;
-  /* to do:
-   * - config-iterator
-   */
   const char *conf_path;
   bool opened;
   Mutex *mutex;
-
-  std::map<std::string, std::list<ConfigurationChangeHandler *> >  change_handlers;
-  std::list<ConfigurationChangeHandler *>::iterator                cit;
 
 };
 

@@ -39,11 +39,12 @@ error_libcrypto:
 endif
 
 
-LIBS_libconfig = stdc++ core netcomm
+LIBS_libconfig = stdc++ core utils netcomm
 OBJS_libconfig =	\
 		config.o		\
-		netconf.o		\
-		sqlite.o
+		change_handler.o	\
+		sqlite.o \
+		netconf.o
 
 OBJS_all = $(OBJS_libconfig)
 

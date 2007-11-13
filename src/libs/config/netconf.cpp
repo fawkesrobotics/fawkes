@@ -79,7 +79,6 @@ NetworkConfiguration::NetworkConfiguration(FawkesNetworkClient *c)
   }
   mutex = new Mutex();
   msg = NULL;
-  change_handlers.clear();
   mirror = false;
 }
 
@@ -118,15 +117,15 @@ NetworkConfiguration::copy(Configuration *copyconf)
   Configuration::ValueIterator *i = copyconf->iterator();
   while ( i->next() ) {
     if ( i->is_float() ) {
-      set_float(i->component(), i->path(), i->get_float());
+      set_float(i->path(), i->get_float());
     } else if ( i->is_int() ) {
-      set_int(i->component(), i->path(), i->get_int());
+      set_int(i->path(), i->get_int());
     } else if ( i->is_uint() ) {
-      set_uint(i->component(), i->path(), i->get_uint());
+      set_uint(i->path(), i->get_uint());
     } else if ( i->is_bool() ) {
-      set_bool(i->component(), i->path(), i->get_bool());
+      set_bool(i->path(), i->get_bool());
     } else if ( i->is_string() ) {
-      set_string(i->component(), i->path(), i->get_string());
+      set_string(i->path(), i->get_string());
     }
   }
   delete i;
@@ -155,9 +154,9 @@ NetworkConfiguration::tags()
 
 
 bool
-NetworkConfiguration::exists(const char *comp, const char *path)
+NetworkConfiguration::exists(const char *path)
 {
-  ValueIterator *i = get_value(comp, path);
+  ValueIterator *i = get_value(path);
   bool rv = i->valid();
   delete i;
   return rv;
@@ -165,17 +164,16 @@ NetworkConfiguration::exists(const char *comp, const char *path)
 
 
 /** Get type of field.
- * @param comp component
  * @param path path
  * @return string of type
  */
 std::string
-NetworkConfiguration::get_type(const char *comp, const char *path)
+NetworkConfiguration::get_type(const char *path)
 {
   std::string s = "";
   mutex->lock();
   if ( mirror ) {
-    s = mirror_config->get_type(comp, path);
+    s = mirror_config->get_type(path);
   }
   mutex->unlock();
   return s;
@@ -183,45 +181,44 @@ NetworkConfiguration::get_type(const char *comp, const char *path)
 
 
 bool
-NetworkConfiguration::is_float(const char *comp, const char *path)
+NetworkConfiguration::is_float(const char *path)
 {
-  return (get_type(comp, path) == "float");
+  return (get_type(path) == "float");
 }
 
 
 bool
-NetworkConfiguration::is_uint(const char *comp, const char *path)
+NetworkConfiguration::is_uint(const char *path)
 {
-  return (get_type(comp, path) == "unsigned int");
+  return (get_type(path) == "unsigned int");
 }
 
 
 bool
-NetworkConfiguration::is_int(const char *comp, const char *path)
+NetworkConfiguration::is_int(const char *path)
 {
-  return (get_type(comp, path) == "int");
+  return (get_type(path) == "int");
 }
 
 
 bool
-NetworkConfiguration::is_bool(const char *comp, const char *path)
+NetworkConfiguration::is_bool(const char *path)
 {
-  return (get_type(comp, path) == "bool");
+  return (get_type(path) == "bool");
 }
 
 
 bool
-NetworkConfiguration::is_string(const char *comp, const char *path)
+NetworkConfiguration::is_string(const char *path)
 {
-  return (get_type(comp, path) == "string");
+  return (get_type(path) == "string");
 }
 
 
 void
-NetworkConfiguration::send_get(const char *comp, const char *path, unsigned int msgid)
+NetworkConfiguration::send_get(const char *path, unsigned int msgid)
 {
   config_getval_msg_t *g = (config_getval_msg_t *)calloc(1, sizeof(config_getval_msg_t));
-  strncpy(g->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
   strncpy(g->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							msgid,
@@ -246,12 +243,8 @@ NetworkConfiguration::send_get(const char *comp, const char *path, unsigned int 
 
 
 float
-NetworkConfiguration::get_float(const char *comp, const char *path)
+NetworkConfiguration::get_float(const char *path)
 {
-  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::get_float: "
-			       "Maximum length for component exceeded");
-  }
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_float: "
 			       "Maximum length for path exceeded");
@@ -262,14 +255,14 @@ NetworkConfiguration::get_float(const char *comp, const char *path)
 
   if ( mirror ) {
     try {
-      f = mirror_config->get_float(comp, path);
+      f = mirror_config->get_float(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_float: exception in mirror database");
       throw;
     }
   } else {
     try {
-      send_get(comp, path, MSG_CONFIG_GET_FLOAT);
+      send_get(path, MSG_CONFIG_GET_FLOAT);
 
       config_float_value_msg_t *fm = msg->msg<config_float_value_msg_t>();
       f = fm->f;
@@ -295,12 +288,8 @@ NetworkConfiguration::get_float(const char *comp, const char *path)
 
 
 unsigned int
-NetworkConfiguration::get_uint(const char *comp, const char *path)
+NetworkConfiguration::get_uint(const char *path)
 {
-  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::get_uint: "
-			       "Maximum length for component exceeded");
-  }
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_uint: "
 			       "Maximum length for path exceeded");
@@ -311,14 +300,14 @@ NetworkConfiguration::get_uint(const char *comp, const char *path)
 
   if ( mirror ) {
     try {
-      u = mirror_config->get_uint(comp, path);
+      u = mirror_config->get_uint(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_uint: exception in mirror database");
       throw;
     }
   } else {
     try {
-      send_get(comp, path, MSG_CONFIG_GET_UINT);
+      send_get(path, MSG_CONFIG_GET_UINT);
 
       config_uint_value_msg_t *um = msg->msg<config_uint_value_msg_t>();
       u = um->u;
@@ -344,12 +333,8 @@ NetworkConfiguration::get_uint(const char *comp, const char *path)
 
 
 int
-NetworkConfiguration::get_int(const char *comp, const char *path)
+NetworkConfiguration::get_int(const char *path)
 {
-  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::get_int: "
-			       "Maximum length for component exceeded");
-  }
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_int: "
 			       "Maximum length for path exceeded");
@@ -360,14 +345,14 @@ NetworkConfiguration::get_int(const char *comp, const char *path)
 
   if ( mirror ) {
     try {
-      i = mirror_config->get_int(comp, path);
+      i = mirror_config->get_int(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_int: exception in mirror database");
       throw;
     }
   } else {
     try {
-      send_get(comp, path, MSG_CONFIG_GET_INT);
+      send_get(path, MSG_CONFIG_GET_INT);
 
       config_int_value_msg_t *im = msg->msg<config_int_value_msg_t>();
       i = im->i;
@@ -393,12 +378,8 @@ NetworkConfiguration::get_int(const char *comp, const char *path)
 
 
 bool
-NetworkConfiguration::get_bool(const char *comp, const char *path)
+NetworkConfiguration::get_bool(const char *path)
 {
-  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::get_bool: "
-			       "Maximum length for component exceeded");
-  }
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_bool: "
 			       "Maximum length for path exceeded");
@@ -409,14 +390,14 @@ NetworkConfiguration::get_bool(const char *comp, const char *path)
 
   if ( mirror ) {
     try {
-      b = mirror_config->get_bool(comp, path);
+      b = mirror_config->get_bool(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_bool: exception in mirror database");
       throw;
     }
   } else {
     try {
-      send_get(comp, path, MSG_CONFIG_GET_BOOL);
+      send_get(path, MSG_CONFIG_GET_BOOL);
 
       config_bool_value_msg_t *bm = msg->msg<config_bool_value_msg_t>();
       b = (bm->b != 0);
@@ -442,12 +423,8 @@ NetworkConfiguration::get_bool(const char *comp, const char *path)
 
 
 std::string
-NetworkConfiguration::get_string(const char *comp, const char *path)
+NetworkConfiguration::get_string(const char *path)
 {
-  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::get_string: "
-			       "Maximum length for component exceeded");
-  }
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_string: "
 			       "Maximum length for path exceeded");
@@ -458,14 +435,14 @@ NetworkConfiguration::get_string(const char *comp, const char *path)
 
   if ( mirror ) {
     try {
-      s = mirror_config->get_string(comp, path);
+      s = mirror_config->get_string(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_string: exception in mirror database");
       throw;
     }
   } else {
     try {
-      send_get(comp, path, MSG_CONFIG_GET_STRING);
+      send_get(path, MSG_CONFIG_GET_STRING);
 
       config_string_value_msg_t *sm = msg->msg<config_string_value_msg_t>();
       char ts[CONFIG_MSG_MAX_STRING_LENGTH + 1];
@@ -494,12 +471,8 @@ NetworkConfiguration::get_string(const char *comp, const char *path)
 
 
 Configuration::ValueIterator *
-NetworkConfiguration::get_value(const char *comp, const char *path)
+NetworkConfiguration::get_value(const char *path)
 {
-  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::get_value: "
-			       "Maximum length for component exceeded");
-  }
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_value: "
 			       "Maximum length for path exceeded");
@@ -510,14 +483,13 @@ NetworkConfiguration::get_value(const char *comp, const char *path)
 
   if ( mirror ) {
     try {
-      i = mirror_config->get_value(comp, path);
+      i = mirror_config->get_value(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_float: exception in mirror database");
       throw;
     }
   } else {
     config_getval_msg_t *g = (config_getval_msg_t *)calloc(1, sizeof(config_getval_msg_t));
-    strncpy(g->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
     strncpy(g->cp.path, path, CONFIG_MSG_PATH_LENGTH);
     FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							  MSG_CONFIG_GET_VALUE,
@@ -545,12 +517,8 @@ NetworkConfiguration::get_value(const char *comp, const char *path)
 
 void
 NetworkConfiguration::set_float_internal(unsigned int msg_type,
-					 const char *comp, const char *path, float f)
+					 const char *path, float f)
 {
-  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::set_float: "
-			       "Maximum length for component exceeded");
-  }
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::set_float: "
 			       "Maximum length for path exceeded");
@@ -561,7 +529,6 @@ NetworkConfiguration::set_float_internal(unsigned int msg_type,
 							msg_type,
 							sizeof(config_float_value_msg_t));
   config_float_value_msg_t *fm = omsg->msg<config_float_value_msg_t>();
-  strncpy(fm->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
   strncpy(fm->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   fm->f = f;
   c->enqueue(omsg);
@@ -576,27 +543,23 @@ NetworkConfiguration::set_float_internal(unsigned int msg_type,
 
 
 void
-NetworkConfiguration::set_float(const char *comp, const char *path, float f)
+NetworkConfiguration::set_float(const char *path, float f)
 {
-  set_float_internal(MSG_CONFIG_SET_FLOAT, comp, path, f);
+  set_float_internal(MSG_CONFIG_SET_FLOAT, path, f);
 }
 
 
 void
-NetworkConfiguration::set_default_float(const char *comp, const char *path, float f)
+NetworkConfiguration::set_default_float(const char *path, float f)
 {
-  set_float_internal(MSG_CONFIG_SET_DEFAULT_FLOAT, comp, path, f);
+  set_float_internal(MSG_CONFIG_SET_DEFAULT_FLOAT, path, f);
 }
 
 
 void
 NetworkConfiguration::set_uint_internal(unsigned int msg_type,
-					const char *comp, const char *path, unsigned int uint)
+					const char *path, unsigned int uint)
 {
-  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::set_uint: "
-			       "Maximum length for component exceeded");
-  }
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::set_uint: "
 			       "Maximum length for path exceeded");
@@ -607,7 +570,6 @@ NetworkConfiguration::set_uint_internal(unsigned int msg_type,
 							msg_type,
 							sizeof(config_uint_value_msg_t));
   config_uint_value_msg_t *m = omsg->msg<config_uint_value_msg_t>();
-  strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   m->u = uint;
   c->enqueue(omsg);
@@ -622,29 +584,28 @@ NetworkConfiguration::set_uint_internal(unsigned int msg_type,
 
 
 void
-NetworkConfiguration::set_uint(const char *comp, const char *path, unsigned int uint)
+NetworkConfiguration::set_uint(const char *path, unsigned int uint)
 {
-  set_uint_internal(MSG_CONFIG_SET_UINT, comp, path, uint);
+  set_uint_internal(MSG_CONFIG_SET_UINT, path, uint);
 }
 
 
 void
-NetworkConfiguration::set_default_uint(const char *comp, const char *path, unsigned int uint)
+NetworkConfiguration::set_default_uint(const char *path, unsigned int uint)
 {
-  set_uint_internal(MSG_CONFIG_SET_DEFAULT_UINT, comp, path, uint);
+  set_uint_internal(MSG_CONFIG_SET_DEFAULT_UINT, path, uint);
 }
 
 
 void
 NetworkConfiguration::set_int_internal(unsigned int msg_type,
-				       const char *comp, const char *path, int i)
+				       const char *path, int i)
 {
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							msg_type,
 							sizeof(config_int_value_msg_t));
   config_int_value_msg_t *m = omsg->msg<config_int_value_msg_t>();
-  strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   m->i = i;
   c->enqueue(omsg);
@@ -659,27 +620,23 @@ NetworkConfiguration::set_int_internal(unsigned int msg_type,
 
 
 void
-NetworkConfiguration::set_int(const char *comp, const char *path, int i)
+NetworkConfiguration::set_int(const char *path, int i)
 {
-  set_int_internal(MSG_CONFIG_SET_INT, comp, path, i);
+  set_int_internal(MSG_CONFIG_SET_INT, path, i);
 }
 
 
 void
-NetworkConfiguration::set_default_int(const char *comp, const char *path, int i)
+NetworkConfiguration::set_default_int(const char *path, int i)
 {
-  set_int_internal(MSG_CONFIG_SET_DEFAULT_INT, comp, path, i);
+  set_int_internal(MSG_CONFIG_SET_DEFAULT_INT, path, i);
 }
 
 
 void
 NetworkConfiguration::set_bool_internal(unsigned int msg_type,
-					const char *comp, const char *path, bool b)
+					const char *path, bool b)
 {
-  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::set_bool: "
-			       "Maximum length for component exceeded");
-  }
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::set_bool: "
 			       "Maximum length for path exceeded");
@@ -690,7 +647,6 @@ NetworkConfiguration::set_bool_internal(unsigned int msg_type,
 							msg_type,
 							sizeof(config_bool_value_msg_t));
   config_bool_value_msg_t *m = omsg->msg<config_bool_value_msg_t>();
-  strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   m->b = (b ? 1 : 0);
   c->enqueue(omsg);
@@ -705,28 +661,24 @@ NetworkConfiguration::set_bool_internal(unsigned int msg_type,
 
 
 void
-NetworkConfiguration::set_bool(const char *comp, const char *path, bool b)
+NetworkConfiguration::set_bool(const char *path, bool b)
 {
-  set_bool_internal(MSG_CONFIG_SET_BOOL, comp, path, b);
+  set_bool_internal(MSG_CONFIG_SET_BOOL, path, b);
 }
 
 
 void
-NetworkConfiguration::set_default_bool(const char *comp, const char *path, bool b)
+NetworkConfiguration::set_default_bool(const char *path, bool b)
 {
-  set_bool_internal(MSG_CONFIG_SET_DEFAULT_BOOL, comp, path, b);
+  set_bool_internal(MSG_CONFIG_SET_DEFAULT_BOOL, path, b);
 }
 
 
 void
 NetworkConfiguration::set_string_internal(unsigned int msg_type,
-					  const char *comp, const char *path,
+					  const char *path,
 					  const char *s)
 {
-  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::set_string: "
-			       "Maximum length for component exceeded");
-  }
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::set_string: "
 			       "Maximum length for path exceeded");
@@ -741,7 +693,6 @@ NetworkConfiguration::set_string_internal(unsigned int msg_type,
 							msg_type,
 							sizeof(config_string_value_msg_t));
   config_string_value_msg_t *m = omsg->msg<config_string_value_msg_t>();
-  strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   strncpy(m->s, s, CONFIG_MSG_MAX_STRING_LENGTH);
   c->enqueue(omsg);
@@ -756,41 +707,37 @@ NetworkConfiguration::set_string_internal(unsigned int msg_type,
 
 
 void
-NetworkConfiguration::set_string(const char *comp, const char *path, const char *s)
+NetworkConfiguration::set_string(const char *path, const char *s)
 {
-  set_string_internal(MSG_CONFIG_SET_STRING, comp, path, s);
+  set_string_internal(MSG_CONFIG_SET_STRING, path, s);
 }
 
 
 void
-NetworkConfiguration::set_default_string(const char *comp, const char *path, const char *s)
+NetworkConfiguration::set_default_string(const char *path, const char *s)
 {
-  set_string_internal(MSG_CONFIG_SET_DEFAULT_STRING, comp, path, s);
+  set_string_internal(MSG_CONFIG_SET_DEFAULT_STRING, path, s);
 }
 
 
 void
-NetworkConfiguration::set_string(const char *comp, const char *path, std::string s)
+NetworkConfiguration::set_string(const char *path, std::string s)
 {
-  set_string_internal(MSG_CONFIG_SET_STRING, comp, path, s.c_str());
+  set_string_internal(MSG_CONFIG_SET_STRING, path, s.c_str());
 }
 
 
 void
-NetworkConfiguration::set_default_string(const char *comp, const char *path, std::string s)
+NetworkConfiguration::set_default_string(const char *path, std::string s)
 {
-  set_string_internal(MSG_CONFIG_SET_DEFAULT_STRING, comp, path, s.c_str());
+  set_string_internal(MSG_CONFIG_SET_DEFAULT_STRING, path, s.c_str());
 }
 
 
 void
 NetworkConfiguration::erase_internal(unsigned int msg_type,
-				     const char *comp, const char *path)
+				     const char *path)
 {
-  if ( strlen(comp) > CONFIG_MSG_COMPONENT_LENGTH ) {
-    throw OutOfBoundsException("NetworkConfiguration::erase: "
-			       "Maximum length for component exceeded");
-  }
   if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::erase: "
 			       "Maximum length for path exceeded");
@@ -802,7 +749,6 @@ NetworkConfiguration::erase_internal(unsigned int msg_type,
 							sizeof(config_erase_value_msg_t));
   // printf("Message generated, size: %lu, should be: %lu\n", omsg->payload_size(), sizeof(config_erase_value_msg_t));
   config_erase_value_msg_t *m = omsg->msg<config_erase_value_msg_t>();
-  strncpy(m->cp.component, comp, CONFIG_MSG_COMPONENT_LENGTH);
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   c->enqueue(omsg);
   omsg->unref();
@@ -816,16 +762,16 @@ NetworkConfiguration::erase_internal(unsigned int msg_type,
 
 
 void
-NetworkConfiguration::erase(const char *comp, const char *path)
+NetworkConfiguration::erase(const char *path)
 {
-  erase_internal(MSG_CONFIG_ERASE_VALUE, comp, path);
+  erase_internal(MSG_CONFIG_ERASE_VALUE, path);
 }
 
 
 void
-NetworkConfiguration::erase_default(const char *comp, const char *path)
+NetworkConfiguration::erase_default(const char *path)
 {
-  erase_internal(MSG_CONFIG_SET_DEFAULT_STRING, comp, path);
+  erase_internal(MSG_CONFIG_SET_DEFAULT_STRING, path);
 }
 
 
@@ -850,9 +796,10 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
       switch (m->msgid()) {
       case MSG_CONFIG_END_OF_VALUES:
 	// add all change handlers
-	for (chit = change_handlers.begin(); chit != change_handlers.end(); ++chit) {
-	  for (cit = (*chit).second.begin(); cit != (*chit).second.end(); ++cit) {
-	    mirror_config->add_change_handler(*cit);
+	for (ChangeHandlerMultimap::const_iterator j = _change_handlers.begin(); j != _change_handlers.end(); ++j) {
+	  _ch_range = _change_handlers.equal_range((*j).first);
+	  for (ChangeHandlerMultimap::const_iterator i = _ch_range.first; i != _ch_range.second; ++i) {
+	    mirror_config->add_change_handler((*i).second);
 	  }
 	}
 	mutex->unlock();
@@ -861,7 +808,7 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
       case MSG_CONFIG_VALUE_ERASED:
 	try {
 	  config_value_erased_msg_t *em = m->msg<config_value_erased_msg_t>();
-	  mirror_config->erase(em->cp.component, em->cp.path);
+	  mirror_config->erase(em->cp.path);
 	} catch (Exception &e) {
 	  // Just ignore silently
 	  printf("NetworkConfiguration[mirroring]::inboundReceived: erasing failed");
@@ -871,7 +818,7 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
       case MSG_CONFIG_FLOAT_VALUE:
 	try {
 	  config_float_value_msg_t *fm = m->msg<config_float_value_msg_t>();
-	  mirror_config->set_float(fm->cp.component, fm->cp.path, fm->f);
+	  mirror_config->set_float(fm->cp.path, fm->f);
 	} catch (TypeMismatchException &e) {
 	  // Just ignore silently
 	  printf("NetworkConfiguration[mirroring]::inboundReceived: invalid float received");
@@ -881,7 +828,7 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
       case MSG_CONFIG_UINT_VALUE:
 	try {
 	  config_uint_value_msg_t *um = m->msg<config_uint_value_msg_t>();
-	  mirror_config->set_uint(um->cp.component, um->cp.path, um->u);
+	  mirror_config->set_uint(um->cp.path, um->u);
 	} catch (TypeMismatchException &e) {
 	  // Just ignore silently
 	  printf("NetworkConfiguration[mirroring]::inboundReceived: invalid uint received");
@@ -891,7 +838,7 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
       case MSG_CONFIG_INT_VALUE:
 	try {
 	  config_int_value_msg_t *im = m->msg<config_int_value_msg_t>();
-	  mirror_config->set_int(im->cp.component, im->cp.path, im->i);
+	  mirror_config->set_int(im->cp.path, im->i);
 	} catch (TypeMismatchException &e) {
 	  // Just ignore silently
 	  printf("NetworkConfiguration[mirroring]::inboundReceived: invalid int received");
@@ -901,7 +848,7 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
       case MSG_CONFIG_BOOL_VALUE:
 	try {
 	  config_bool_value_msg_t *bm = m->msg<config_bool_value_msg_t>();
-	  mirror_config->set_bool(bm->cp.component, bm->cp.path, (bm->b != 0));
+	  mirror_config->set_bool(bm->cp.path, (bm->b != 0));
 	} catch (TypeMismatchException &e) {
 	  // Just ignore silently
 	  printf("NetworkConfiguration[mirroring]::inboundReceived: invalid bool received");
@@ -911,7 +858,7 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
       case MSG_CONFIG_STRING_VALUE:
 	try {
 	  config_string_value_msg_t *sm = m->msg<config_string_value_msg_t>();
-	  mirror_config->set_string(sm->cp.component, sm->cp.path, sm->s);
+	  mirror_config->set_string(sm->cp.path, sm->s);
 	} catch (TypeMismatchException &e) {
 	  // Just ignore silently
 	  printf("NetworkConfiguration[mirroring]::inboundReceived: invalid string received");
@@ -929,13 +876,8 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
 void
 NetworkConfiguration::add_change_handler(ConfigurationChangeHandler *h)
 {
-  const char *c = h->configMonitorComponent();
-  if ( c == NULL ) {
-    c = "";
-  }
-  change_handlers[c].push_back(h);
-  change_handlers[c].sort();
-  change_handlers[c].unique();
+  Configuration::add_change_handler(h);
+
   if ( mirror ) {
     mirror_config->add_change_handler(h);
   }
@@ -945,13 +887,7 @@ NetworkConfiguration::add_change_handler(ConfigurationChangeHandler *h)
 void
 NetworkConfiguration::rem_change_handler(ConfigurationChangeHandler *h)
 {
-  const char *c = h->configMonitorComponent();
-  if ( c == NULL ) {
-    c = "";
-  }
-  if ( change_handlers.find(c) != change_handlers.end() ) {
-    remove(change_handlers[c].begin(), change_handlers[c].end(), h);
-  }
+  Configuration::rem_change_handler(h);
   if ( mirror ) {
     mirror_config->rem_change_handler(h);
   }
@@ -1044,10 +980,10 @@ NetworkConfiguration::iterator()
 
 
 Configuration::ValueIterator *
-NetworkConfiguration::search(const char *component, const char *path)
+NetworkConfiguration::search(const char *path)
 {
   if ( mirror ) {
-    return mirror_config->search(component, path);
+    return mirror_config->search(path);
   } else {
     return new NetConfValueIterator();
   }
@@ -1068,7 +1004,6 @@ NetworkConfiguration::NetConfValueIterator::NetConfValueIterator(Configuration::
   iterated_once = false;
   this->i = i;
   msg = NULL;
-  _component = NULL;
   _path = NULL;
 }
 
@@ -1082,7 +1017,6 @@ NetworkConfiguration::NetConfValueIterator::NetConfValueIterator()
   iterated_once = false;
   i = NULL;
   msg = NULL;
-  _component = NULL;
   _path = NULL;
 }
 
@@ -1096,7 +1030,6 @@ NetworkConfiguration::NetConfValueIterator::NetConfValueIterator(FawkesNetworkMe
   i = NULL;
   msg = NULL;
   iterated_once = false;
-  _component = NULL;
   _path = NULL;
 
   if ( (m->cid() == FAWKES_CID_CONFIGMANAGER) &&
@@ -1105,17 +1038,14 @@ NetworkConfiguration::NetConfValueIterator::NetConfValueIterator(FawkesNetworkMe
        (m->payload_size() > sizeof(config_descriptor_t)) ) {
     msg = m;
     msg->ref();
-    // extract component and path
+    // extract path
     // all messages start with config_descriptor!
-    _component = (char *)malloc(CONFIG_MSG_COMPONENT_LENGTH + 1);
     _path      = (char *)malloc(CONFIG_MSG_PATH_LENGTH + 1);
-    _component[CONFIG_MSG_COMPONENT_LENGTH] = 0;
     _path[CONFIG_MSG_PATH_LENGTH] = 0;
     config_descriptor_t *cd = (config_descriptor_t *)msg->payload();
-    strncpy(_component, cd->component, CONFIG_MSG_COMPONENT_LENGTH);
     strncpy(_path, cd->path, CONFIG_MSG_PATH_LENGTH);
   } else {
-    // invalid value, maybe component::path does not exist!
+    // invalid value, maybe path does not exist!
   }
 }
 
@@ -1125,7 +1055,6 @@ NetworkConfiguration::NetConfValueIterator::~NetConfValueIterator()
 {
   delete i;
   if ( msg != NULL )         msg->unref();
-  if ( _component != NULL )  free(_component);
   if ( _path != NULL)        free(_path);
 }
 
@@ -1150,21 +1079,6 @@ bool
 NetworkConfiguration::NetConfValueIterator::valid()
 {
   return ( (i != NULL) || (msg != NULL) );
-}
-
-
-const char *
-NetworkConfiguration::NetConfValueIterator::component()
-{
-  if ( (i == NULL) ) {
-    if ( msg == NULL ) {
-      throw NullPointerException("You may not access component on invalid iterator");
-    } else {
-      return _component;
-    }
-  } else {
-    return i->component();
-  }
 }
 
 

@@ -63,50 +63,50 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual void          tag(const char *tag);
   virtual std::list<std::string> tags();
 
-  virtual bool          exists(const char *comp, const char *path);
-  virtual bool          is_float(const char *comp, const char *path);
-  virtual bool          is_uint(const char *comp, const char *path);
-  virtual bool          is_int(const char *comp, const char *path);
-  virtual bool          is_bool(const char *comp, const char *path);
-  virtual bool          is_string(const char *comp, const char *path);
+  virtual bool          exists(const char *path);
+  virtual bool          is_float(const char *path);
+  virtual bool          is_uint(const char *path);
+  virtual bool          is_int(const char *path);
+  virtual bool          is_bool(const char *path);
+  virtual bool          is_string(const char *path);
 
-  virtual std::string     get_type(const char *comp, const char *path);
-  virtual float           get_float(const char *comp, const char *path);
-  virtual unsigned int    get_uint(const char *comp, const char *path);
-  virtual int             get_int(const char *comp, const char *path);
-  virtual bool            get_bool(const char *comp, const char *path);
-  virtual std::string     get_string(const char *comp, const char *path);
-  virtual ValueIterator * get_value(const char *comp, const char *path);
+  virtual std::string     get_type(const char *path);
+  virtual float           get_float(const char *path);
+  virtual unsigned int    get_uint(const char *path);
+  virtual int             get_int(const char *path);
+  virtual bool            get_bool(const char *path);
+  virtual std::string     get_string(const char *path);
+  virtual ValueIterator * get_value(const char *path);
 
-  virtual void          set_float(const char *comp, const char *path,
+  virtual void          set_float(const char *path,
 				  float f);
-  virtual void          set_uint(const char *comp, const char *path,
+  virtual void          set_uint(const char *path,
 				 unsigned int uint);
-  virtual void          set_int(const char *comp, const char *path,
+  virtual void          set_int(const char *path,
 				int i);
-  virtual void          set_bool(const char *comp, const char *path,
+  virtual void          set_bool(const char *path,
 				 bool b);
-  virtual void          set_string(const char *comp, const char *path,
+  virtual void          set_string(const char *path,
 				   std::string s);
-  virtual void          set_string(const char *comp, const char *path,
+  virtual void          set_string(const char *path,
 				   const char *s);
 
-  virtual void          erase(const char *comp, const char *path);
+  virtual void          erase(const char *path);
 
-  virtual void          set_default_float(const char *comp, const char *path,
+  virtual void          set_default_float(const char *path,
 					  float f);
-  virtual void          set_default_uint(const char *comp, const char *path,
+  virtual void          set_default_uint(const char *path,
 					 unsigned int uint);
-  virtual void          set_default_int(const char *comp, const char *path,
+  virtual void          set_default_int(const char *path,
 					int i);
-  virtual void          set_default_bool(const char *comp, const char *path,
+  virtual void          set_default_bool(const char *path,
 					 bool b);
-  virtual void          set_default_string(const char *comp, const char *path,
+  virtual void          set_default_string(const char *path,
 					   std::string s);
-  virtual void          set_default_string(const char *comp, const char *path,
+  virtual void          set_default_string(const char *path,
 					   const char *s);
 
-  virtual void          erase_default(const char *comp, const char *path);
+  virtual void          erase_default(const char *path);
 
   virtual void          deregistered();
   virtual void          inboundReceived(FawkesNetworkMessage *msg);
@@ -125,7 +125,6 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
     virtual bool          next();
     virtual bool          valid();
     
-    virtual const char *  component();
     virtual const char *  path();
     virtual const char *  type();
     
@@ -145,31 +144,30 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
     Configuration::ValueIterator *i;
     FawkesNetworkMessage  *msg;
     bool iterated_once;
-    char *_component;
     char *_path;
   };
 
   ValueIterator * iterator();
-  ValueIterator * search(const char *component, const char *path);
+  ValueIterator * search(const char *path);
 
   void lock();
   bool try_lock();
   void unlock();
 
  private:
-  void send_get(const char *comp, const char *path, unsigned int msgid);
+  void send_get(const char *path, unsigned int msgid);
 
-  void set_float_internal(unsigned int msg_type, const char *comp, const char *path, float f);
-  void set_uint_internal(unsigned int msg_type, const char *comp, const char *path,
+  void set_float_internal(unsigned int msg_type, const char *path, float f);
+  void set_uint_internal(unsigned int msg_type, const char *path,
 			 unsigned int uint);
-  void set_int_internal(unsigned int msg_type, const char *comp, const char *path, int i);
-  void set_bool_internal(unsigned int msg_type, const char *comp, const char *path, bool b);
-  void set_string_internal(unsigned int msg_type, const char *comp, const char *path,
+  void set_int_internal(unsigned int msg_type, const char *path, int i);
+  void set_bool_internal(unsigned int msg_type, const char *path, bool b);
+  void set_string_internal(unsigned int msg_type, const char *path,
 			   std::string s);
-  void set_string_internal(unsigned int msg_type, const char *comp, const char *path,
+  void set_string_internal(unsigned int msg_type, const char *path,
 			   const char *s);
 
-  void erase_internal(unsigned int msg_type, const char *comp, const char *path);
+  void erase_internal(unsigned int msg_type, const char *path);
 
 
   FawkesNetworkClient  *c;
@@ -180,10 +178,6 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   SQLiteConfiguration *mirror_config;
   char *tmp_volatile;
   char *tmp_default;
-
-  std::map<std::string, std::list<ConfigurationChangeHandler *> >  change_handlers;
-  std::map<std::string, std::list<ConfigurationChangeHandler *> >::iterator  chit;
-  std::list<ConfigurationChangeHandler *>::iterator                cit;
 
 };
 

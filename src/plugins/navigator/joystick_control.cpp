@@ -78,10 +78,8 @@ JoystickControl::JoystickControl(MotorInterface * motor_interface,
 
   try
     {
-      joystick_max_rotation     = config->get_float("navigator",
-                                  "/joystick_control/max_rotation_velocity");
-      joystick_max_velocity     = config->get_float("navigator",
-                                  "/joystick_control/max_velocity");
+      joystick_max_rotation     = config->get_float("/navigator/joystick_control/max_rotation_velocity");
+      joystick_max_velocity     = config->get_float("/navigator/joystick_control/max_velocity");
     }
   catch (Exception &e)
     {

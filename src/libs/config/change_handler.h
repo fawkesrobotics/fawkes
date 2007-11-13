@@ -28,84 +28,23 @@
 #ifndef __CONFIG_CHANGE_HANDLER_H_
 #define __CONFIG_CHANGE_HANDLER_H_
 
-#include <string>
-
-/** @class ConfigurationChangeHandler config/change_handler.h
- * Interface for configuration change handling.
- * One of the major flaws in the old software was that for each
- * configuration change the software had to be restarted. To avoid this
- * change handlers are introduced. Change handlers are called if a value
- * for the given component changes so that appropriate adjustement of the
- * behavior or a proper re-initialisation of a specific component can
- * be conducted.
- */
-
 class ConfigurationChangeHandler
 {
  public:
-  /** Virtual empty destructor. */
-  virtual ~ConfigurationChangeHandler() {}
+  ConfigurationChangeHandler(const char *path_prefix = "");
+  virtual ~ConfigurationChangeHandler();
 
-  /** Called whenever the tag has changed.
-   * This function can be used to detect when data from another tag has been
-   * loaded.
-   * @param new_tag new tag
-   */
-  virtual void configTagChanged(const char *new_tag)                  = 0;
+  virtual void config_tag_changed(const char *new_tag)                       = 0;
+  virtual void config_value_changed(const char *path, int value)             = 0;
+  virtual void config_value_changed(const char *path, unsigned int value)    = 0;
+  virtual void config_value_changed(const char *path, float value)           = 0;
+  virtual void config_value_changed(const char *path, bool value)            = 0;
+  virtual void config_value_changed(const char *path, const char *value)     = 0;
+  virtual void config_value_erased(const char *path)                         = 0;
+  const char *  config_monitor_prefix();
 
-  /** Called whenever an int value has changed.
-   * @param component component of value
-   * @param path path of value
-   * @param value new value
-   */
-  virtual void configValueChanged(const char *component, const char *path,
-				  int value)                               = 0;
-
-  /** Called whenever an unsigned int value has changed.
-   * @param component component of value
-   * @param path path of value
-   * @param value new value
-   */
-  virtual void configValueChanged(const char *component, const char *path,
-				  unsigned int value)                      = 0;
-
-  /** Called whenever an float value has changed.
-   * @param component component of value
-   * @param path path of value
-   * @param value new value
-   */
-  virtual void configValueChanged(const char *component, const char *path,
-				  float value)                             = 0;
-
-  /** Called whenever an boolean value has changed.
-   * @param component component of value
-   * @param path path of value
-   * @param value new value
-   */
-  virtual void configValueChanged(const char *component, const char *path,
-				  bool value)                              = 0;
-
-  /** Called whenever a string value has changed.
-   * @param component component of value
-   * @param path path of value
-   * @param value new value
-   */
-  virtual void configValueChanged(const char *component, const char *path,
-				  std::string value)                       = 0;
-
-
-  /** Called whenever a value has been erased from the config.
-   * @param component component of value
-   * @param path path of value
-   */
-  virtual void configValueErased(const char *component, const char *path)  = 0;
-
-  /** Which component shall be monitored.
-   * Implement this method to return the name of the component whose values you
-   * want to monitor. If NULL or the empty string is returned all components
-   * will be monitored.
-   */
-  virtual const char *  configMonitorComponent()                           = 0;
+ private:
+  char *__path_prefix;
 
 };
 

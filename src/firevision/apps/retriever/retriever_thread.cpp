@@ -53,17 +53,20 @@ FvRetrieverThread::~FvRetrieverThread()
 void
 FvRetrieverThread::init()
 {
-  logger->log_debug(name(), "Registering for camera");
   try {
-    cam = vision_master->register_for_camera(config->get_string("firevision", "/retriever/camera").c_str(), this);
+    logger->log_debug(name(), "Registering for camera '%s'",
+		      config->get_string("/firevision/retriever/camera").c_str());
+    cam = vision_master->register_for_camera(config->get_string("/firevision/retriever/camera").c_str(), this);
   } catch (Exception &e) {
     e.append("FvRetrieverThread::init() failed");
     throw;
   }
-  logger->log_error(name(), "Registered for camera");
   try {
     shm = new SharedMemoryImageBuffer("retriever", cam->colorspace(),
 				      cam->pixel_width(), cam->pixel_height());
+    if ( ! shm->is_valid() ) {
+      throw Exception("Shared memory segment not valid");
+    }
   } catch (Exception &e) {
     vision_master->unregister_thread(this);
     delete cam;
@@ -95,5 +98,5 @@ FvRetrieverThread::loop()
   cam->capture();
   memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
   cam->dispose_buffer();
-  logger->log_debug(name(), "DONE");
+  //logger->log_debug(name(), "DONE");
 }

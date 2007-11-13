@@ -59,31 +59,23 @@ class FawkesConfigManager : public FawkesNetworkHandler, public ConfigurationCha
   virtual void process_after_loop();
 
   /* from ConfigurationChangeHandler interface */
-  virtual void configTagChanged(const char *new_location);
-  virtual void configValueChanged(const char *component, const char *path,
-				  int value);
-  virtual void configValueChanged(const char *component, const char *path,
-				  unsigned int value);
-  virtual void configValueChanged(const char *component, const char *path,
-				  float value);
-  virtual void configValueChanged(const char *component, const char *path,
-				  bool value);
-  virtual void configValueChanged(const char *component, const char *path,
-				  std::string value);
-
-  virtual void configValueErased(const char *component, const char *path);
-  virtual const char *  configMonitorComponent();
+  virtual void config_tag_changed(const char *new_location);
+  virtual void config_value_changed(const char *path, int value);
+  virtual void config_value_changed(const char *path, unsigned int value);
+  virtual void config_value_changed(const char *path, float value);
+  virtual void config_value_changed(const char *path, bool value);
+  virtual void config_value_changed(const char *path, const char *value);
+  virtual void config_value_erased(const char *path);
 
  private:
 
   void send_value(unsigned int clid, Configuration::ValueIterator *i);
-  void send_inv_value(unsigned int clid, const char *component, const char *path);
+  void send_inv_value(unsigned int clid, const char *path);
 
   template <typename T>
-    T *  prepare_msg(const char *component, const char *path)
+    T *  prepare_msg(const char *path)
     {
       T * m = (T *)calloc(1, sizeof(T));
-      strncpy(m->cp.component, component, CONFIG_MSG_COMPONENT_LENGTH);
       strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
       return m;
     }
