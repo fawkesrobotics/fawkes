@@ -54,10 +54,17 @@ OBJS_fvbb2info = bb2info.o
 LIBS_fvviewer = $(VISION_CAM_LIBS) utils fvcams fvutils fvwidgets
 OBJS_fvviewer = viewer.o
 
+LIBS_fvshowyuv = fvutils fvwidgets
+OBJS_fvshowyuv = show_yuv.o
+CFLAGS_show_yuv += $(SDL_CFLAGS)
+LDFLAGS_fvshowyuv += $(SDL_LDFLAGS)
+
 OBJS_all = $(OBJS_fvshmem) $(OBJS_listfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
-	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer)
-BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvconverter $(BINDIR)/fvbb2rectlut
+	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer) \
+	   $(OBJS_fvshowyuv)
+BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvconverter $(BINDIR)/fvbb2rectlut \
+	   $(BINDIR)/fvshowyuv
 
 ifeq ($(HAVE_TRICLOPS_SDK),1)
   BINS_all += $(BINDIR)/fvtricalcdisp

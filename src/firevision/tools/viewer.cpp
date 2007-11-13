@@ -38,6 +38,7 @@
 
 #include <cstring>
 #include <cstdio>
+#include <stdint.h>
 
 #include <SDL.h>
 
@@ -74,6 +75,7 @@ main(int argc, char **argv)
     char *net_string = strdup(argp.arg("n"));
     char *image_id = NULL, *host = NULL, *port = NULL, *save_ptr = NULL;
     int port_num = 5000;
+    int image_num = 0;
 
     if ( strchr(net_string, ':') != NULL ) {
       host = strtok_r(net_string, ":", &save_ptr);
@@ -94,7 +96,12 @@ main(int argc, char **argv)
       throw IllegalArgumentException("Image ID must be specified");
     }
 
-    cam = new NetworkCamera(host, port_num /* image_id */ );
+    image_num = atoi(image_id);
+    if ( image_num < 0 ) {
+      throw OutOfBoundsException("Invalid Image Number", image_num, 0, INT_MAX);
+    }
+
+    cam = new NetworkCamera(host, port_num, image_num);
   } else {
     if ( argp.num_items() == 0 ) {
       print_usage(argp.program_name());
