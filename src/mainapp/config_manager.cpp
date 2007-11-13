@@ -183,17 +183,24 @@ FawkesConfigManager::process_after_loop()
       config->unlock();
       hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_END_OF_VALUES);
 
-    } else if ( msg->msgid() == MSG_CONFIG_ERASE_VALUE ) {
+    } else if ( (msg->msgid() == MSG_CONFIG_ERASE_VALUE) ||
+		(msg->msgid() == MSG_CONFIG_ERASE_DEFAULT_VALUE)) {
+      bool erase_def = (msg->msgid() == MSG_CONFIG_ERASE_DEFAULT_VALUE);
       try {
 	config_erase_value_msg_t *m = msg->msg<config_erase_value_msg_t>();
 	char path[CONFIG_MSG_PATH_LENGTH + 1];
 	path[CONFIG_MSG_PATH_LENGTH] = 0;
 	strncpy(path, m->cp.path, CONFIG_MSG_PATH_LENGTH);
 
-	config->erase(path);
+	if ( erase_def ) {
+	  config->erase_default(path);
+	} else {
+	  config->erase(path);
+	}
 
 	config_value_erased_msg_t *r = prepare_msg<config_value_erased_msg_t>(path);
-	hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_VALUE_ERASED,
+	hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER,
+		  erase_def ? MSG_CONFIG_DEFAULT_VALUE_ERASED : MSG_CONFIG_VALUE_ERASED,
 		  r, sizeof(config_value_erased_msg_t));
 
       } catch (Exception &e) {

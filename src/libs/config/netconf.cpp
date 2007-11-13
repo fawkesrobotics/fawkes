@@ -771,7 +771,7 @@ NetworkConfiguration::erase(const char *path)
 void
 NetworkConfiguration::erase_default(const char *path)
 {
-  erase_internal(MSG_CONFIG_SET_DEFAULT_STRING, path);
+  erase_internal(MSG_CONFIG_ERASE_DEFAULT_VALUE, path);
 }
 
 
@@ -809,6 +809,16 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
 	try {
 	  config_value_erased_msg_t *em = m->msg<config_value_erased_msg_t>();
 	  mirror_config->erase(em->cp.path);
+	} catch (Exception &e) {
+	  // Just ignore silently
+	  printf("NetworkConfiguration[mirroring]::inboundReceived: erasing failed");
+	}
+	break;
+
+      case MSG_CONFIG_DEFAULT_VALUE_ERASED:
+	try {
+	  config_value_erased_msg_t *em = m->msg<config_value_erased_msg_t>();
+	  mirror_config->erase_default(em->cp.path);
 	} catch (Exception &e) {
 	  // Just ignore silently
 	  printf("NetworkConfiguration[mirroring]::inboundReceived: erasing failed");

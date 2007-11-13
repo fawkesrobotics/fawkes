@@ -318,7 +318,7 @@ main(int argc, char **argv)
   } else if ((strcmp("erase", args[0]) == 0) || (strcmp("erase_default", args[0]) == 0)) {
     bool erase_def = (strcmp("erase_default", args[0]) == 0);
     if (args.size() == 2) {
-      printf("Erasing value %s\n", args[1]);
+      printf("Erasing %svalue %s\n", (erase_def ? "default " : ""), args[1]);
       bool found = false;
       Configuration::ValueIterator *i = netconf->get_value(args[1]);
       if ( i->next() ) {
@@ -331,9 +331,9 @@ main(int argc, char **argv)
       delete i;
       if ( found ) {
 	if ( erase_def ) {
-	  netconf->erase(args[1]);
-	} else {
 	  netconf->erase_default(args[1]);
+	} else {
+	  netconf->erase(args[1]);
 	}
 	i = netconf->get_value(args[1]);
 	if ( i->next() ) {
