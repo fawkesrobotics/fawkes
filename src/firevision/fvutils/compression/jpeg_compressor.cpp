@@ -27,7 +27,7 @@
  */
 
 
-#include <fvutils/compression/jpeg.h>
+#include <fvutils/compression/jpeg_compressor.h>
 #include <fvutils/color/yuvrgb.h>
 #include <fvutils/color/rgbyuv.h>
 
@@ -180,7 +180,7 @@ fv_jpeg_memory_source_setup(j_decompress_ptr cinfo, unsigned char *ptr, size_t s
 
 /// @endcond
 
-/** @class JpegImageCompressor <fvutils/compression/jpeg.h>
+/** @class JpegImageCompressor <fvutils/compression/jpeg_compressor.h>
  * Jpeg image compressor.
  */
 

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  imagecompressor.h - image compressor interface
+ *  jpeg_compressor.h - JPEG image compressor interface
  *
- *  Generated: Fri Aug 11 18:53:19 2006 (on train to Cologne)
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri Aug 11 18:53:19 2006 (on train to Cologne)
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,8 +25,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_UTILS_COMPRESSION_JPEG_H_
-#define __FIREVISION_UTILS_COMPRESSION_JPEG_H_
+#ifndef __FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_H_
+#define __FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_H_
 
 #include <fvutils/compression/imagecompressor.h>
 
