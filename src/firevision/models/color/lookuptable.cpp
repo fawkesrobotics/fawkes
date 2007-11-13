@@ -64,7 +64,7 @@ ColorModelLookupTable::ColorModelLookupTable(unsigned int width, unsigned int he
 {
   this->width            = width;
   this->height           = height;
-  this->lut_id           = FIREVISION_SHM_LUT_INVALID;
+  this->lut_id           = NULL;
   this->destroy_on_free  = false;
 
   create();
@@ -81,7 +81,7 @@ ColorModelLookupTable::ColorModelLookupTable(const char *file,
 {
   this->width            = width;
   this->height           = height;
-  this->lut_id           = FIREVISION_SHM_LUT_INVALID;
+  this->lut_id           = NULL;
   this->destroy_on_free  = false;
 
   create();
@@ -92,15 +92,15 @@ ColorModelLookupTable::ColorModelLookupTable(const char *file,
 /** Create a lookup table with given dimensions using shared memory
  * @param width width of lookup table
  * @param height height of lookup table
- * @param lut_id ID of the LUT in shared memory, use a constant from utils/shm_registry.h
+ * @param lut_id ID of the LUT in shared memory
  * @param destroy_on_free true to destroy lookup table in shmem on delete
  */
 ColorModelLookupTable::ColorModelLookupTable(unsigned int width, unsigned int height,
-					     unsigned int lut_id, bool destroy_on_free)
+					     const char *lut_id, bool destroy_on_free)
 {
   this->width            = width;
   this->height           = height;
-  this->lut_id           = lut_id;
+  this->lut_id           = strdup(lut_id);
   this->destroy_on_free  = destroy_on_free;
 
   create();
@@ -117,11 +117,11 @@ ColorModelLookupTable::ColorModelLookupTable(unsigned int width, unsigned int he
  */
 ColorModelLookupTable::ColorModelLookupTable(const char *file,
 					     unsigned int width, unsigned int height,
-					     unsigned int lut_id, bool destroy_on_free)
+					     const char *lut_id, bool destroy_on_free)
 {
   this->width            = width;
   this->height           = height;
-  this->lut_id           = lut_id;
+  this->lut_id           = strdup(lut_id);
   this->destroy_on_free  = destroy_on_free;
 
   create();
@@ -136,12 +136,10 @@ ColorModelLookupTable::create()
 {
   bytes_per_sample = 1;
 
-  if ( lut_id != FIREVISION_SHM_LUT_INVALID ) {
-    shm_lut   = new SharedMemoryLookupTable( lut_id,
-					     width, height,
-					     bytes_per_sample);
+  if ( lut_id != NULL ) {
+    shm_lut   = new SharedMemoryLookupTable( lut_id, width, height, bytes_per_sample);
     shm_lut->set_destroy_on_delete( destroy_on_free );
-    lut       = shm_lut->getBuffer();
+    lut       = shm_lut->buffer();
     lut_bytes = shm_lut->data_size();
   } else {
     lut_bytes = width * height * bytes_per_sample;
@@ -237,12 +235,14 @@ ColorModelLookupTable::reset()
 /** Destructor. */
 ColorModelLookupTable::~ColorModelLookupTable()
 {
-  if ( lut_id != FIREVISION_SHM_LUT_INVALID ) {
+  if ( lut_id != NULL ) {
     delete shm_lut;
+    free(lut_id);
   } else {
     free(lut);
   }
   lut = NULL;
+  lut_id = NULL;
   lut_bytes = 0;
 }
 

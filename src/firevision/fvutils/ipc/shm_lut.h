@@ -30,20 +30,22 @@
 
 #include <utils/ipc/shm.h>
 #include <utils/ipc/shm_lister.h>
+#include <fvutils/ipc/defs.h>
+#include <stdint.h>
 
 /** Shared memory lookup table header struct. */
 typedef struct {
-  unsigned int  lut_id;		/**< LUT ID */
-  unsigned int  width;		/**< LUT width */
-  unsigned int  height;		/**< LUT height */
-  unsigned int  bytes_per_cell;	/**< Bytes per cell */
+  char      lut_id[LUT_ID_MAX_LENGTH];		/**< LUT ID */
+  uint32_t  width;		/**< LUT width */
+  uint32_t  height;		/**< LUT height */
+  uint32_t  bytes_per_cell;	/**< Bytes per cell */
 } SharedMemoryLookupTable_header_t;
 
 
 class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
  public:
   SharedMemoryLookupTableHeader();
-  SharedMemoryLookupTableHeader(unsigned int lut_id,
+  SharedMemoryLookupTableHeader(const char *lut_id,
 				unsigned int width,
 				unsigned int height,
 				unsigned int bytes_per_cell);
@@ -59,21 +61,21 @@ class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
 
   virtual void         print_info();
 
-  unsigned int  getLutID();
-  void          setLutID(unsigned int lut_id);
-  unsigned int  getWidth();
-  unsigned int  getHeight();
-  unsigned int  getBytesPerCell();
+  const char *  lut_id();
+  void          set_lut_id(const char *lut_id);
+  unsigned int  width();
+  unsigned int  height();
+  unsigned int  bytes_per_cell();
 
-  SharedMemoryLookupTable_header_t * getRawHeader();
+  SharedMemoryLookupTable_header_t * raw_header();
 
  private:
-  SharedMemoryLookupTable_header_t *header;
+  SharedMemoryLookupTable_header_t *__header;
 
-  unsigned int   lut_id;
-  unsigned int   width;
-  unsigned int   height;
-  unsigned int   bytes_per_cell;
+  const char    *__lut_id;
+  unsigned int   __width;
+  unsigned int   __height;
+  unsigned int   __bytes_per_cell;
 };
 
 class SharedMemoryLookupTableLister : public SharedMemoryLister {
@@ -95,37 +97,37 @@ class SharedMemoryLookupTable : public SharedMemory
 {
 
  public:
-  SharedMemoryLookupTable( unsigned int lut_id,
+  SharedMemoryLookupTable( const char *lut_id,
 			   unsigned int width, unsigned int height,
 			   unsigned int bytes_per_cell = 1
 			   );
-  SharedMemoryLookupTable(unsigned int lut_id , bool is_read_only = true);
+  SharedMemoryLookupTable(const char *lut_id , bool is_read_only = true);
   ~SharedMemoryLookupTable();
 
-  bool             setLutID(unsigned int lut_id);
-  unsigned char *  getBuffer();
-  unsigned int     getWidth();
-  unsigned int     getHeight();
-  unsigned int     getBytesPerCell();
+  bool             set_lut_id(const char *lut_id);
+  unsigned char *  buffer();
+  unsigned int     width();
+  unsigned int     height();
+  unsigned int     bytes_per_cell();
 
   static void      list();
   static void      cleanup();
-  static bool      exists(unsigned int lut_id);
-  static void      wipe(unsigned int lut_id);
+  static bool      exists(const char *lut_id);
+  static void      wipe(const char *lut_id);
 
  private:
-  void constructor(unsigned int lut_id,
+  void constructor(const char *lut_id,
 		   unsigned int width, unsigned int height,
 		   unsigned int bytes_per_cell,
 		   bool is_read_only);
 
-  SharedMemoryLookupTableHeader    *priv_header;
-  SharedMemoryLookupTable_header_t *raw_header;
+  SharedMemoryLookupTableHeader    *__priv_header;
+  SharedMemoryLookupTable_header_t *__raw_header;
 
-  unsigned int   lut_id;
-  unsigned int   width;
-  unsigned int   height;
-  unsigned int   bytes_per_cell;
+  char          *__lut_id;
+  unsigned int   __width;
+  unsigned int   __height;
+  unsigned int   __bytes_per_cell;
 
 };
 

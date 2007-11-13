@@ -131,8 +131,7 @@ FvOmniBallPipelineThread::init()
       throw;
     }
 
-  mirror = new Bulb( bulb_matrix_file,
-		     FIREVISION_SHM_LUT_OMNI_BULB,
+  mirror = new Bulb( bulb_matrix_file, "omni-ball-bulb",
 		     true /* destroy on delete */ );
   
   free(bulb_matrix_file);
@@ -157,7 +156,7 @@ FvOmniBallPipelineThread::init()
     }
 
   cm = new ColorModelLookupTable(lut_file, 256 /* lut_width */, 256 /* lut_height */,
-				 FIREVISION_SHM_LUT_OMNI_COLOR,
+				 "omni-ball-colormap",
 				 true /* destroy on delete */ );
 
   free(lut_file);

@@ -41,9 +41,9 @@ class ColorModelLookupTable : public ColorModel
   ColorModelLookupTable(unsigned int width, unsigned int height);
   ColorModelLookupTable(const char *file, unsigned int width, unsigned int height);
   ColorModelLookupTable(unsigned int width, unsigned int height,
-			unsigned int lut_id, bool destroy_on_free = false);
+			const char *lut_id, bool destroy_on_free = false);
   ColorModelLookupTable(const char *file, unsigned int width, unsigned int height,
-			unsigned int lut_id, bool destroy_on_free = false);
+			const char *lut_id, bool destroy_on_free = false);
 
   virtual ~ColorModelLookupTable();
 
@@ -88,7 +88,7 @@ class ColorModelLookupTable : public ColorModel
   void create();
   void load_to_buffer(const char *file, unsigned char *buffer, off_t buffer_size);
 
-  unsigned int   lut_id;
+  char          *lut_id;
   unsigned char *lut;
   unsigned int   lut_bytes;
   bool           destroy_on_free;

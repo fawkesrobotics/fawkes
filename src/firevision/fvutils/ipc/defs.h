@@ -31,4 +31,7 @@
 /** Maximum length of image ID (not including null-termination) */
 #define IMAGE_ID_MAX_LENGTH 32
 
+/** Maximum length of LUT ID (not including null-termination) */
+#define LUT_ID_MAX_LENGTH 32
+
 #endif

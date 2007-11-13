@@ -43,11 +43,11 @@ class Bulb : public MirrorModel {
   // This constructor loads an existing bulb model (lut) from file "filename".
   Bulb(const char *filename);
   Bulb(const char *filename,
-       unsigned int lut_id, bool destroy_on_delete = false);
+       const char *lut_id, bool destroy_on_delete = false);
 
   Bulb(unsigned int width, unsigned int height);
   Bulb(unsigned int width, unsigned int height,
-       unsigned int lut_id, bool destroy_on_delete = false);
+       const char *lut_id, bool destroy_on_delete = false);
 
   Bulb(const Bulb &bulb);
 
@@ -148,7 +148,7 @@ class Bulb : public MirrorModel {
 
   bool valid;
 
-  unsigned int   lut_id;
+  char          *lut_id;
   polar_coord_t *lut;
   unsigned int   lut_bytes;
   bool destroy_on_delete;

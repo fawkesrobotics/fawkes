@@ -54,9 +54,7 @@ using namespace std;
  */
 Bulb::Bulb(const char *filename)
 {
-
   init();
-
   load(filename);
 }
 
@@ -69,14 +67,14 @@ Bulb::Bulb(const char *filename)
  * @see SharedMemoryLookupTable
  */
 Bulb::Bulb(const char *filename,
-	   unsigned int lut_id, bool destroy_on_delete)
+	   const char *lut_id, bool destroy_on_delete)
 {
-  this->lut_id            = lut_id;
+  init();
+
+  this->lut_id            = strdup(lut_id);
   this->destroy_on_delete = destroy_on_delete;
 
-  init();
   create();
-
   load(filename);
 }
 
@@ -90,13 +88,13 @@ Bulb::Bulb(const char *filename,
  * @see SharedMemoryLookupTable
  */
 Bulb::Bulb(unsigned int width, unsigned int height,
-	   unsigned int lut_id, bool destroy_on_delete)
+	   const char *lut_id, bool destroy_on_delete)
 {
   init();
 
   this->width             = width;
   this->height            = height;
-  this->lut_id            = lut_id;
+  this->lut_id            = strdup(lut_id);
   this->destroy_on_delete = destroy_on_delete;
 
   valid = ((width > 0) && (height > 0));
@@ -119,7 +117,7 @@ Bulb::Bulb(unsigned int width, unsigned int height)
 
   this->width  = width;
   this->height = height;
-  this->lut_id = FIREVISION_SHM_LUT_INVALID;
+  this->lut_id = NULL;
 
   valid = ((width > 0) && (height > 0));
 
@@ -163,7 +161,7 @@ Bulb::init()
   valid = false;
   width = 0;
   height = 0;
-  lut_id = FIREVISION_SHM_LUT_INVALID;
+  lut_id = NULL;
   image_center_x = 0;
   image_center_y = 0;
 
@@ -189,6 +187,9 @@ Bulb::init()
 Bulb::~Bulb()
 {
   erase();
+  if ( lut_id != NULL ) {
+    free(lut_id);
+  }
 }
 
 
@@ -202,12 +203,12 @@ Bulb::create()
 {
   bytes_per_sample = sizeof(polar_coord_t);
 
-  if ( lut_id != FIREVISION_SHM_LUT_INVALID ) {
+  if ( lut_id != NULL ) {
     shm_lut   = new SharedMemoryLookupTable( lut_id,
 					     width, height,
 					     bytes_per_sample);
     shm_lut->set_destroy_on_delete( destroy_on_delete );
-    lut       = (polar_coord_t *)shm_lut->getBuffer();
+    lut       = (polar_coord_t *)shm_lut->buffer();
     lut_bytes = shm_lut->data_size();
   } else {
     lut_bytes = width * height * bytes_per_sample;
@@ -221,7 +222,7 @@ Bulb::create()
 void
 Bulb::erase()
 {
-  if ( lut_id != FIREVISION_SHM_LUT_INVALID ) {
+  if ( lut_id != NULL ) {
     delete shm_lut;
     shm_lut = NULL;
     lut = NULL;
