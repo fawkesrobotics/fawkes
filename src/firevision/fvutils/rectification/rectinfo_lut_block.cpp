@@ -83,14 +83,6 @@ RectificationLutInfoBlock::RectificationLutInfoBlock(void *chunk, size_t chunk_s
 }
 
 
-/** Get mapping.
- * Use this mapping only VERY sparsely. Instead get the pointer to the data and use
- * this!
- * @param x X pixel coordinate to get mapping for
- * @param y Y pixel coordinate to get mapping for
- * @param to_x Upon return contains the X pixel coordinate of the unrectified image
- * @param to_y Upon return contains the Y pixel coordinate of the unrectified image
- */
 void
 RectificationLutInfoBlock::mapping(uint16_t x, uint16_t y,
 				   uint16_t *to_x, uint16_t *to_y)

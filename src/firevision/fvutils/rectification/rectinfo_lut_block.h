@@ -39,8 +39,8 @@ class RectificationLutInfoBlock : public RectificationInfoBlock
 
   void set_mapping(uint16_t x, uint16_t y,
 		   uint16_t to_x, uint16_t to_y);
-  void mapping(uint16_t x, uint16_t y,
-	       uint16_t *to_x, uint16_t *to_y);
+  virtual void mapping(uint16_t x, uint16_t y,
+		       uint16_t *to_x, uint16_t *to_y);
 
   uint16_t pixel_width();
   uint16_t pixel_height();

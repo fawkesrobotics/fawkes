@@ -42,6 +42,18 @@
  * @author Tim Niemueller
  */
 
+/** @fn void RectificationInfoBlock::mapping(uint16_t x, uint16_t y, uint16_t *to_x, uint16_t *to_y) = 0
+ * Get mapping (to_x, to_y) for (x, y).
+ * This can be used as a general method to access the RectificationInfoBlock mapping.
+ * For many models there may be a better (faster) way to access the mapping information.
+ * It performance matters (and it most probably will) exploit this and use the
+ * provided shortcut.
+ * @param x X pixel coordinate to get mapping for
+ * @param y Y pixel coordinate to get mapping for
+ * @param to_x Upon return contains the X pixel coordinate of the unrectified image
+ * @param to_y Upon return contains the Y pixel coordinate of the unrectified image
+ */
+
 /** @var void * RectificationInfoBlock::_block_chunk
  * Pointer to the internal memory. This points to the raw memory chunk where
  * all data is stored (type agnostic header, type specific header, data).

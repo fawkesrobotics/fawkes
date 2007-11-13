@@ -28,8 +28,8 @@
 #ifndef __FIREVISION_FVUTILS_RECTIFICATION_RECTINFO_BLOCK_H_
 #define __FIREVISION_FVUTILS_RECTIFICATION_RECTINFO_BLOCK_H_
 
-#include <sys/types.h>
 #include <fvutils/rectification/rectinfo.h>
+#include <sys/types.h>
 
 class RectificationInfoBlock
 {
@@ -45,6 +45,8 @@ class RectificationInfoBlock
   uint8_t  type() const;
   uint8_t  camera() const;
   uint32_t size() const;
+
+  virtual void mapping(uint16_t x, uint16_t y, uint16_t *to_x, uint16_t *to_y) = 0;
 
  protected:
   void * _block_chunk;
