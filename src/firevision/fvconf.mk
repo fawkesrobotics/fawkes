@@ -25,7 +25,7 @@ CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L BUMBLEBEE2
 CTRLS=EVID100P DPPTU
 
 VISION_INCDIRS      = $(realpath $(BASEDIR)/src/firevision)
-VISION_CFLAGS       = -g
+VISION_CFLAGS       = -g -D__STDC_LIMIT_MACROS
 
 # PTGrey Triclops SDK used for Bumblebee2 stereo processing
 TRICLOPS_SDK=/opt/Triclops3.2.0.8-FC3
