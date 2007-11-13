@@ -29,8 +29,6 @@
 
 #include <apps/omni_ball/pipeline_thread.h>
 
-#include <cams/camera.h>
-
 #include <fvutils/color/conversions.h>
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/ipc/shm_registry.h>
@@ -44,9 +42,10 @@
 #include <models/mirror/bulb.h>
 
 #include <classifiers/simple.h>
+#include <cams/camera.h>
+#include <interfaces/object.h>
 
 #include <stdlib.h>
-
 #include <cstdio>
 
 
@@ -70,9 +69,7 @@ FvOmniBallPipelineThread::FvOmniBallPipelineThread()
   glob_pos = NULL;
   classifier = NULL;
   shm_buffer = NULL;
-
-  cfg_component = "firevision";
-  cfg_path = "/omnivision/ball";
+  ball_interface = NULL;
 
   cspace_to = YUV422_PLANAR;
 }
@@ -98,13 +95,15 @@ FvOmniBallPipelineThread::~FvOmniBallPipelineThread()
 void
 FvOmniBallPipelineThread::init()
 {
-  try {
-    cam = vision_master->register_for_camera( config->get_string( cfg_component.c_str(), 
-						    (cfg_path + "/camera").c_str()).c_str(), this );
-  } catch (Exception& e) {
-    e.append("FvOmniBallPipelineThread::init() failed since no camera is specified");
-    throw;
-  }
+  try 
+    {
+      cam = vision_master->register_for_camera( config->get_string("/omnivision/camera").c_str(), this );
+    } 
+  catch (Exception& e) 
+    {
+      e.append("FvOmniBallPipelineThread::init() failed since no camera is specified");
+      throw;
+    }
 
   img_width = cam->pixel_width();
   img_height = cam->pixel_height();
@@ -124,8 +123,7 @@ FvOmniBallPipelineThread::init()
 
   try
     {
-      bulb_matrix_file = strdup( config->get_string( cfg_component.c_str(), 
-						     (cfg_path + "/bulb_matrix_file").c_str() ).c_str() );
+      bulb_matrix_file = strdup( config->get_string("/omnivision/mirrormodel").c_str() );
     }
   catch (Exception &e)
     {
@@ -150,8 +148,7 @@ FvOmniBallPipelineThread::init()
 
   try
     {
-      lut_file = strdup( config->get_string( cfg_component.c_str(), 
-					     (cfg_path + "/lut_file").c_str() ).c_str() );
+      lut_file = strdup( config->get_string("/omnivision/ball/colormap").c_str() );
     }
   catch (Exception &e)
     {
@@ -170,13 +167,25 @@ FvOmniBallPipelineThread::init()
   glob_pos = new OmniGlobal(mirror);
 
   // classifier
-  classifier = new ReallySimpleClassifier(img_width, img_height, scanline, cm, 0, 30);		      
+  classifier = new ReallySimpleClassifier(img_width, img_height, scanline, cm, 0, 30);
 
   // TODO: see above
   scaler = new LossyScaler();
   scaler->set_original_dimensions(cam->pixel_width(), cam->pixel_height());
   scaler->set_scaled_dimensions(cam->pixel_width() / 2, cam->pixel_height() / 2);
   scaler->set_scale_factor(0.5);
+
+  // interface
+  try
+    {
+      ball_interface = interface_manager->open_for_writing<ObjectPositionInterface>("OmniBall");
+      ball_interface->set_object_type( ObjectPositionInterface::BALL );
+    }
+  catch (Exception &e)
+    {
+      e.append("Opening ball interface for writing failed");
+      throw;
+    }
 }
 
 
@@ -184,6 +193,16 @@ FvOmniBallPipelineThread::init()
 void
 FvOmniBallPipelineThread::finalize()
 {
+  try
+    {
+      interface_manager->close(ball_interface);
+    }
+  catch (Exception &e)
+    {
+      e.append("Closing ball interface failed");
+      throw;
+    }
+
   logger->log_debug(name(), "Unregistering from vision master");
   vision_master->unregister_thread(this);
   delete cam;
@@ -211,66 +230,90 @@ FvOmniBallPipelineThread::loop()
   rois = classifier->classify();
 
   // post-process ROIs
-
-  if (rois->empty()) {
-    logger->log_warn(name(), "Could not find any ROIs in image");
-  } else {
-
-    // if we have at least one ROI 
-    ball_visible = true;
-
-    // find the ball candidate that is closest to the robot
-    min_dist = 1000000.f;
-    // for each ROI
-    std::list< ROI >::iterator winner_roi = rois->end();
-    for (r = rois->begin(); r != rois->end(); r++) {
-      // if ROI contains ball
-      if (r->hint == H_BALL) {
-	// calculate mass point of ball
-	classifier->getMassPointOfBall( &(*r), &mass_point );
-	// update ball position
-	rel_pos->setCenter( mass_point.x, mass_point.y );
-	rel_pos->calc_unfiltered();
-
-	if (rel_pos->getDistance() < min_dist) {
-	  min_dist = rel_pos->getDistance();
-	  ball_image_x = mass_point.x;
-	  ball_image_y = mass_point.y;
-	  winner_roi = r;
+  if (rois->empty()) 
+    {
+      logger->log_warn(name(), "Could not find any ROIs in image");
+    } 
+  else 
+    {
+      // if we have at least one ROI 
+      ball_visible = true;
+      
+      // find the ball candidate that is closest to the robot
+      min_dist = 1000000.f;
+      // for each ROI
+      std::list< ROI >::iterator winner_roi = rois->end();
+      for (r = rois->begin(); r != rois->end(); r++)
+	{
+	  // if ROI contains ball
+	  if (r->hint == H_BALL)
+	    {
+	      // calculate mass point of ball
+	      classifier->getMassPointOfBall( &(*r), &mass_point );
+	      // update ball position
+	      rel_pos->setCenter( mass_point.x, mass_point.y );
+	      rel_pos->calc_unfiltered();
+	      
+	      if (rel_pos->getDistance() < min_dist) 
+		{
+		  min_dist = rel_pos->getDistance();
+		  ball_image_x = mass_point.x;
+		  ball_image_y = mass_point.y;
+		  winner_roi = r;
+		}
+	    }
 	}
+
+    if ( ball_visible ) 
+      {
+	rel_pos->setCenter( ball_image_x, ball_image_y );
+
+	if ( rel_pos->isPosValid() ) 
+	  {
+	    rel_pos->calc();
+	    glob_pos->setPositionInImage( ball_image_x, ball_image_y );
+	    glob_pos->calc();
+	  } 
+	else 
+	  {
+	    ball_visible = false;
+	  }
       }
-    }
-
-    if ( ball_visible ) {
-      rel_pos->setCenter( ball_image_x, ball_image_y );
-
-      if ( rel_pos->isPosValid() ) {
-	rel_pos->calc();
-
-	glob_pos->setPositionInImage( ball_image_x, ball_image_y );
-	glob_pos->calc();
-      } else {
-	ball_visible = false;
-      }
-    }
     
-    if ( ball_visible && (winner_roi != rois->end())) {
-      shm_buffer->set_circle_found( true );
-      shm_buffer->set_circle( ball_image_x, ball_image_y, 10 );
-      // TODO: see above
-      shm_buffer->set_roi( winner_roi->start.x/2,
-			   winner_roi->start.y/2,
-			   winner_roi->width/2,
-			   winner_roi->height/2 );
-    } else {
-      shm_buffer->set_circle_found( false );
-      shm_buffer->set_roi( 0, 0, 0, 0 );
-      shm_buffer->set_circle( 0, 0, 0 );
-    }
-
+    if ( ball_visible && (winner_roi != rois->end())) 
+      {
+	shm_buffer->set_circle_found( true );
+	shm_buffer->set_circle( ball_image_x, ball_image_y, 10 );
+	// TODO: see above
+	shm_buffer->set_roi( winner_roi->start.x/2,
+			     winner_roi->start.y/2,
+			     winner_roi->width/2,
+			     winner_roi->height/2 );
+      } 
+    else 
+      {
+	shm_buffer->set_circle_found( false );
+	shm_buffer->set_roi( 0, 0, 0, 0 );
+	shm_buffer->set_circle( 0, 0, 0 );
+      }
+    
     // clean up
     rois->clear();
     delete rois;
-  }
+    }
+
+  // write data to interface
+  if (ball_visible)
+    {
+      ball_interface->set_visible(true);
+      ball_interface->set_relative_x( rel_pos->getX() );
+      ball_interface->set_relative_y( rel_pos->getY() );
+      ball_interface->set_distance( rel_pos->getDistance() );
+      ball_interface->set_yaw( rel_pos->getBearing() );
+    }
+  else
+    {
+      ball_interface->set_visible(false);
+    }
 }
 

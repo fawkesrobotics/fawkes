@@ -35,6 +35,7 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/vision.h>
+#include <aspect/blackboard.h>
 
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/types.h>
@@ -49,12 +50,14 @@ class RelativePositionModel;
 class GlobalPositionModel;
 class SharedMemoryImageBuffer;
 class Scaler;
+class ObjectPositionInterface;
 
 class FvOmniBallPipelineThread
 : public Thread,
   public LoggingAspect,
   public VisionAspect,
-  public ConfigurableAspect
+  public ConfigurableAspect,
+  public BlackBoardAspect
 {
  public:
   FvOmniBallPipelineThread();
@@ -65,9 +68,6 @@ class FvOmniBallPipelineThread
   virtual void loop();
 
  private:
-  std::string cfg_component;
-  std::string cfg_path;
-
   Camera* cam;
   ScanlineModel* scanline;
   ColorModel* cm;
@@ -92,6 +92,8 @@ class FvOmniBallPipelineThread
   unsigned int  ball_image_y;
   cart_coord_t  mass_point;
   float         min_dist;
+
+  ObjectPositionInterface* ball_interface;
 
   std::list< ROI > *rois;
   std::list< ROI >::iterator r;
