@@ -34,6 +34,8 @@
 #include <plugins/navigator/libnavi/npoint.h>
 #include <plugins/navigator/libnavi/nline.h>
 #include <utils/math/binomial_coefficient.h>
+#include <utils/math/angle.h>
+#include <geometry/vector.h>
 
 #include <cmath>
 
@@ -213,30 +215,30 @@ std::list<NLine *> *Navigator::get_surface_lines()
           Obstacle *o = new Obstacle(GTS_OBSTACLE(v1)->width, GTS_POINT (v1)->x, GTS_POINT (v1)->y, 0);
           p1 = o;
         }
-       else
+      else
         {
-        	p1->x = GTS_POINT (v1)->x;
-        	p1->y = GTS_POINT (v1)->y;
+          p1->x = GTS_POINT (v1)->x;
+          p1->y = GTS_POINT (v1)->y;
         }
-        
+
       GtsVertex * v2 = GTS_SEGMENT (e)->v2;
       if(GTS_IS_OBSTACLE(v2))
         {
           Obstacle *o = new Obstacle(GTS_OBSTACLE(v2)->width, GTS_POINT (v2)->x, GTS_POINT (v2)->y, 0);
           p2 = o;
         }
-       else
+      else
         {
-        	p2->x = GTS_POINT (v2)->x;
-        	p2->y = GTS_POINT (v2)->y;
+          p2->x = GTS_POINT (v2)->x;
+          p2->y = GTS_POINT (v2)->y;
         }
       //NPoint p1(GTS_POINT (v1)->x, GTS_POINT (v1)->y);
       //GtsVertex * v2 = GTS_SEGMENT (e)->v2;
-     // NPoint p2(GTS_POINT (v2)->x, GTS_POINT (v2)->y);
+      // NPoint p2(GTS_POINT (v2)->x, GTS_POINT (v2)->y);
 
       lines->push_back(new NLine(p1, p2));
-  	delete p1;
-  	delete p2;
+      delete p1;
+      delete p2;
     }
 
   gts_fifo_destroy(edges);
@@ -259,6 +261,31 @@ void Navigator::add_obstacle(Obstacle obstacle)
 {
   map.push_back(obstacle);
   pathfinder->addObstacle(obstacle);
+}
+
+/** Sets the odometry velocity in x-direction.
+ * @param velocity_x the velocity x
+ */
+void Navigator::set_odometry_velocity_x(double velocity_x)
+{
+  odometry_velocity_x = velocity_x;
+}
+
+/** Sets the odometry velocity in y-direction.
+ * @param velocity_y the velocity y
+ */
+void Navigator::set_odometry_velocity_y(double velocity_y)
+{
+  odometry_velocity_y = velocity_y;
+}
+
+
+/** Sets the odometry rotation velocity.
+ * @param rotation rotation velocity
+ */
+void Navigator::set_odometry_velocity_rotation(double rotation)
+{
+  odometry_velocity_rotation = rotation;
 }
 
 /** Sets the velocity of the robot.
@@ -672,8 +699,8 @@ void Navigator::mainLoop()
           {
             force = controller->control(gts_point_distance(GTS_POINT (nearestObs), pathfinder->getRobotPoint())
                                         - robot_width/2. - nearestObs->width/2.);
-       //     std::cout << "-------distance  "  << gts_point_distance(GTS_POINT (nearestObs), pathfinder->getRobotPoint()) - robot_width/2. - nearestObs->width/2. << std::endl;
-      //      std::cout << "-------force " << force << std::endl;
+            //     std::cout << "-------distance  "  << gts_point_distance(GTS_POINT (nearestObs), pathfinder->getRobotPoint()) - robot_width/2. - nearestObs->width/2. << std::endl;
+            //      std::cout << "-------force " << force << std::endl;
             div_x += (pathfinder->getRobotPoint()->x - GTS_POINT (nearestObs)->x) * force;
             div_y += (pathfinder->getRobotPoint()->y - GTS_POINT (nearestObs)->y) * force;
             //nicht normiert
@@ -747,54 +774,130 @@ void Navigator::mainLoop()
        std::cout << "-------velocity_rotation * elapsed_time " << velocity_rotation * elapsed_time << std::endl;
     */
     orientation += velocity_rotation * elapsed_time;
-/*
-    for(unsigned int i = 0; i < path.size(); i++)
-      {
-        //       std::cerr << "manipulate path " << path[i] << std::endl;
-        path[i]->x -=  velocity_x * (elapsed_time);
-        path[i]->y -=  velocity_y * (elapsed_time);
-        if(velocity_rotation != 0)
+    /*
+        for(unsigned int i = 0; i < path.size(); i++)
           {
-            double ori = atan2(path[i]->y, path[i]->x);
-            double radius = sqrt(pow(path[i]->x, 2) + pow(path[i]->y, 2));
-            path[i]->x = radius * cos(ori + velocity_rotation * elapsed_time);
-            path[i]->y = radius * sin(ori + velocity_rotation * elapsed_time);
-          }
-      }*/
-      
-    //has to reset the target, since the path will be deleted
-    pathfinder->setTargetPoint(gts_point_new(gts_point_class(),
-                               path[path.size() - 1]->x -  velocity_x * (elapsed_time), 
-                               path[path.size() - 1]->y -  velocity_y * (elapsed_time), 0));
+            //       std::cerr << "manipulate path " << path[i] << std::endl;
+            path[i]->x -=  velocity_x * (elapsed_time);
+            path[i]->y -=  velocity_y * (elapsed_time);
+            if(velocity_rotation != 0)
+              {
+                double ori = atan2(path[i]->y, path[i]->x);
+                double radius = sqrt(pow(path[i]->x, 2) + pow(path[i]->y, 2));
+                path[i]->x = radius * cos(ori + velocity_rotation * elapsed_time);
+                path[i]->y = radius * sin(ori + velocity_rotation * elapsed_time);
+              }
+          }*/
 
-    for(unsigned int i = 0; i < route.size(); i++)
-      {
-        route[i]->x -=  velocity_x * (elapsed_time);
-        route[i]->y -=  velocity_y * (elapsed_time);
-        if(velocity_rotation != 0)
+
+    /*
+     * Calculation of the new Positions of the target and the obstacle 
+     *****************************************************/
+
+    /*
+        for(unsigned int i = 0; i < route.size(); i++)
           {
             double ori = atan2(route[i]->y, route[i]->x);
-            double radius = sqrt(pow(route[i]->x,2) + pow(route[i]->y, 2));
-            route[i]->x = radius * cos(ori + velocity_rotation * elapsed_time);
-            route[i]->y = radius * sin(ori + velocity_rotation * elapsed_time);
+            route[i]->x -=  odometry_velocity_x * (elapsed_time);// * cos(odometry_orientation);
+            route[i]->y -=  odometry_velocity_y * (elapsed_time);// * sin(odometry_orientation);
+            if(odometry_velocity_rotation != 0)
+              {
+              //  double ori = atan2(route[i]->y, route[i]->x);
+                double radius = sqrt(pow(route[i]->x,2.) + pow(route[i]->y, 2.));
+                route[i]->x = radius * cos(ori + odometry_velocity_rotation * elapsed_time);
+                route[i]->y = radius * sin(ori + odometry_velocity_rotation * elapsed_time);
+              }
           }
-      }
+        */
+    /*
+    std::cout << "-------odometry_velocity_x * elapsed_time " << odometry_velocity_x * elapsed_time << std::endl;
+    std::cout << "-------odometry_velocity_y * elapsed_time " << odometry_velocity_y * elapsed_time << std::endl;
+    std::cout << "-------odometry_velocity_x " << odometry_velocity_x << std::endl;
+    std::cout << "-------odometry_velocity_y " << odometry_velocity_y << std::endl;
+    std::cout << "-------odometry_velocity_rotation " << odometry_velocity_rotation << std::endl;
+    std::cout << "-------odometry_velocity_rotation * elapsed_time " << odometry_velocity_rotation * elapsed_time << std::endl;
 
-    //recalculating the map for the new positions
-    for(unsigned int i = 0; i < map.size(); i++)
-      {//recalculating map
-        map[i].x -= velocity_x * (elapsed_time);
-        map[i].y -= velocity_y * (elapsed_time);
-        if(velocity_rotation != 0)
+    */
+    //   Vector new_position;
+    Vector bend_vector;
+
+    double odometry_difference =  sqrt(pow(odometry_velocity_y, 2.) + pow(odometry_velocity_x, 2.)) * elapsed_time;
+
+    //calculation of the odometry
+    //rotation and tranlation
+    if((odometry_velocity_rotation > 0.000000005 || odometry_velocity_rotation < -0.0000000005) && odometry_difference != 0.)
+      {
+        //recalculation of the arc
+        double turned_angle = odometry_velocity_rotation * elapsed_time;
+
+        double bend_radius = odometry_difference / fabs(turned_angle);
+
+        if(turned_angle < 0)
           {
+            bend_vector.y(bend_radius * sin(atan2(odometry_velocity_y, odometry_velocity_x) - deg2rad(90)));
+            bend_vector.x(bend_radius * cos(atan2(odometry_velocity_y, odometry_velocity_x) - deg2rad(90)));
+          }
+        else
+          {
+            bend_vector.y(bend_radius * sin(atan2(odometry_velocity_y, odometry_velocity_x) + deg2rad(90)));
+            bend_vector.x(bend_radius * cos(atan2(odometry_velocity_y, odometry_velocity_x) + deg2rad(90)));
+          }
+        bend_vector.z(0.);
+
+        //recalculating the map for the new positions
+        for(unsigned int i = 0; i < map.size(); i++)
+          {//recalculating map
+            Vector obstacle_rotation;
+            obstacle_rotation.x(map[i].x);
+            obstacle_rotation.y(map[i].y);
+            obstacle_rotation.z(0.);
+            obstacle_rotation -= bend_vector;
+            obstacle_rotation.rotate_z(-turned_angle);
+            obstacle_rotation += bend_vector;
+            map[i].x = obstacle_rotation.x();
+            map[i].y = obstacle_rotation.y();
+          }
+        //has to reset the target, since the path will be deleted
+        Vector obstacle_rotation;
+        obstacle_rotation.x(path[path.size() - 1]->x);
+        obstacle_rotation.y(path[path.size() - 1]->y);
+        obstacle_rotation -= bend_vector;
+        obstacle_rotation.rotate_z(-turned_angle);
+        obstacle_rotation += bend_vector;
+        pathfinder->setTargetPoint(gts_point_new(gts_point_class(),
+                                   obstacle_rotation.x(),
+                                   obstacle_rotation.y(), 0));
+      }//rotation without translation
+    else if((odometry_velocity_rotation > 0.000000005 || odometry_velocity_rotation < -0.0000000005) && odometry_difference == 0.)
+      {
+        for(unsigned int i = 0; i < map.size(); i++)
+          {//recalculating map
             double ori = atan2(map[i].y, map[i].x);
-            double radius = sqrt(pow(map[i].x,2) + pow(map[i].y, 2));
-            map[i].x = radius * cos(ori + velocity_rotation * elapsed_time);
-            map[i].y = radius * sin(ori + velocity_rotation * elapsed_time);
+            double radius = sqrt(pow(map[i].x,2.) + pow(map[i].y, 2.));
+            map[i].x = radius * cos(ori - odometry_velocity_rotation * elapsed_time);
+            map[i].y = radius * sin(ori - odometry_velocity_rotation * elapsed_time);
+          }
+        //has to reset the target, since the path will be deleted
+
+        double ori = atan2(path[path.size() - 1]->y, path[path.size() - 1]->x);
+        double radius = sqrt(pow(path[path.size() - 1]->x,2.) + pow(path[path.size() - 1]->y, 2.));
+        pathfinder->setTargetPoint(gts_point_new(gts_point_class(),
+                                   radius * cos(ori + odometry_velocity_rotation * elapsed_time),
+                                   radius * sin(ori + odometry_velocity_rotation * elapsed_time), 0));
+
+      }
+    else //translation without rotation
+      {
+        for(unsigned int i = 0; i < map.size(); i++)
+          {//recalculating map
+            map[i].x -= odometry_velocity_x * elapsed_time;
+            map[i].y -= odometry_velocity_y * elapsed_time;
           }
 
-        //       std::cout << "------- map[" << i << "].x : " << map[i].x  << std::endl;
-        //      std::cout << "------- map[" << i << "].y : " << map[i].y << std::endl;
+        //has to reset the target, since the path will be deleted
+        pathfinder->setTargetPoint(gts_point_new(gts_point_class(),
+                                   path[path.size() - 1]->x -  elapsed_time * odometry_velocity_x,
+                                   path[path.size() - 1]->y -  elapsed_time * odometry_velocity_y, 0));
       }
 
     pathfinder->setObstacles(map);

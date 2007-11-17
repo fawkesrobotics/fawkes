@@ -55,14 +55,14 @@
     <field type="float" name="odometry_orientation">
       The actual orientation of the robot relative to the orientation at the last ResetOdometry.
     </field>
-    <field type="int" name="vx">
-      VX of the robot. Forward.
+    <field type="float" name="vx">
+      VX of the robot in m/s. Forward.
     </field>
-    <field type="int" name="vy">
-      VY of the robot. Left.
+    <field type="float" name="vy">
+      VY of the robot in m/s. Left.
     </field>
-    <field type="int" name="omega">
-      Rotation speed of the robot.
+    <field type="float" name="omega">
+      Rotation speed of the robot in rad/s.
     </field>
     <field type="unsigned long int" name="controller_thread_id">
      The ID of the controlling thread.

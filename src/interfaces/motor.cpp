@@ -283,11 +283,11 @@ MotorInterface::set_odometry_orientation(const float new_odometry_orientation)
 
 /** Get vx value.
  * 
-      VX of the robot. Forward.
+      VX of the robot in m/s. Forward.
     
  * @return vx value
  */
-int
+float
 MotorInterface::vx()
 {
   return data->vx;
@@ -295,23 +295,23 @@ MotorInterface::vx()
 
 /** Set vx value.
  * 
-      VX of the robot. Forward.
+      VX of the robot in m/s. Forward.
     
  * @param new_vx new vx value
  */
 void
-MotorInterface::set_vx(const int new_vx)
+MotorInterface::set_vx(const float new_vx)
 {
   data->vx = new_vx;
 }
 
 /** Get vy value.
  * 
-      VY of the robot. Left.
+      VY of the robot in m/s. Left.
     
  * @return vy value
  */
-int
+float
 MotorInterface::vy()
 {
   return data->vy;
@@ -319,23 +319,23 @@ MotorInterface::vy()
 
 /** Set vy value.
  * 
-      VY of the robot. Left.
+      VY of the robot in m/s. Left.
     
  * @param new_vy new vy value
  */
 void
-MotorInterface::set_vy(const int new_vy)
+MotorInterface::set_vy(const float new_vy)
 {
   data->vy = new_vy;
 }
 
 /** Get omega value.
  * 
-      Rotation speed of the robot.
+      Rotation speed of the robot in rad/s.
     
  * @return omega value
  */
-int
+float
 MotorInterface::omega()
 {
   return data->omega;
@@ -343,12 +343,12 @@ MotorInterface::omega()
 
 /** Set omega value.
  * 
-      Rotation speed of the robot.
+      Rotation speed of the robot in rad/s.
     
  * @param new_omega new omega value
  */
 void
-MotorInterface::set_omega(const int new_omega)
+MotorInterface::set_omega(const float new_omega)
 {
   data->omega = new_omega;
 }

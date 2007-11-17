@@ -62,15 +62,6 @@ class MotorInterface : public Interface
     int left_rpm; /**< 
       RPM of the motor on the left front of the robot.
      */
-    int vx; /**< 
-      VX of the robot. Forward.
-     */
-    int vy; /**< 
-      VY of the robot. Left.
-     */
-    int omega; /**< 
-      Rotation speed of the robot.
-     */
     unsigned long int controller_thread_id; /**< 
      The ID of the controlling thread.
      Only from this thread command messages are accepted.
@@ -86,6 +77,15 @@ class MotorInterface : public Interface
      */
     float odometry_orientation; /**< 
       The actual orientation of the robot relative to the orientation at the last ResetOdometry.
+     */
+    float vx; /**< 
+      VX of the robot in m/s. Forward.
+     */
+    float vy; /**< 
+      VY of the robot in m/s. Left.
+     */
+    float omega; /**< 
+      Rotation speed of the robot in rad/s.
      */
     unsigned int motor_state : 1; /**< 
       The current state of the motor.
@@ -313,12 +313,12 @@ class MotorInterface : public Interface
   void set_odometry_position_y(const float new_odometry_position_y);
   float odometry_orientation();
   void set_odometry_orientation(const float new_odometry_orientation);
-  int vx();
-  void set_vx(const int new_vx);
-  int vy();
-  void set_vy(const int new_vy);
-  int omega();
-  void set_omega(const int new_omega);
+  float vx();
+  void set_vx(const float new_vx);
+  float vy();
+  void set_vy(const float new_vy);
+  float omega();
+  void set_omega(const float new_omega);
   unsigned long int controller_thread_id();
   void set_controller_thread_id(const unsigned long int new_controller_thread_id);
   char * controller_thread_name();

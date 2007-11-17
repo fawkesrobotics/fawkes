@@ -464,8 +464,7 @@ NavigatorGUI::inboundReceived(FawkesNetworkMessage *msg)
           NavigatorLinesListMessage::nline_t *l = lines_msg->next();
           NPoint *p1 = 0;
           NPoint *p2 = 0;
-          std::cout << "gui " << l->x1 << ", " << l->y1 << std::endl;
-          std::cout << "gui " << l->x2 << ", " << l->y2 << std::endl;
+
           if ( l->width1 != 0. )
             {
               p1 = new Obstacle(l->width1, -l->y1, -l->x1, 0);
@@ -575,9 +574,9 @@ NavigatorGUI::inboundReceived(FawkesNetworkMessage *msg)
       odometry_point.x = -odometry_msg->position_y * zoom_factor;
       odometry_point.y = -odometry_msg->position_x * zoom_factor;
       odometry_point_mutex->unlock();
-      odometry_orientation_mutex->lock();
-      odometry_orientation = odometry_msg->orientation;
-      odometry_orientation_mutex->unlock();
+      //    odometry_orientation_mutex->lock();
+      //  odometry_orientation = odometry_msg->orientation;
+      //   odometry_orientation_mutex->unlock();
       //      std::cout << "odometry orientation " << odometry_msg->orientation << std::endl;
       //      std::cout << "odometry " << odometry_point.x << ", " << odometry_point.y << std::endl;
       // 	  std::cout << "odometry length " << odometry_msg->path_length << std::endl;
@@ -1202,17 +1201,13 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
 
       //draw the lines
       lines.lock();
-      int o = 0;
       for(LockList<NLine*>::iterator iterator = lines.begin();
           iterator != lines.end(); iterator++)
         {
           context->move_to((*iterator)->p1->x * zoom_factor, (*iterator)->p1->y * zoom_factor);
           context->line_to((*iterator)->p2->x * zoom_factor, (*iterator)->p2->y * zoom_factor);
           context->stroke();
-          std::cout << "list length " << o++ << std::endl;
-
         }
-      std::cout << "list length " << lines.size() << std::endl;
       lines.unlock();
 
       //draw the robot
@@ -1354,10 +1349,10 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
             {
               obstacle2_radius = ob2->width / 2.;
             }
-
+/*
           std::cout << "obstacle1_radius " << obstacle1_radius << std::endl;
           std::cout << "obstacle2_radius " << obstacle2_radius << std::endl;
-
+*/
           double robot_width = 0.5;
 
           gdouble x1 = (*iterator)->p1->x;
@@ -1409,18 +1404,18 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
           else if((distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) <= robot_width * 3)
             {
               next_point2 = next_point3 = next_point1;
-              std::cout << "middle--------------" <<distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p1->y) << " <= " << robot_width * 1.5 << std::endl;
+              //   std::cout << "middle--------------" <<distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p1->y) << " <= " << robot_width * 1.5 << std::endl;
             }
           else //if the edge is narrow then calculate a new point near by the middle
             {
               vector_length = (distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) / 3;
 
               double vector_add = (obstacle1_radius - obstacle2_radius) / 2;
-
-              std::cout << "distance " << distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) << std::endl;
-              std::cout << "obstacle1_radius " << obstacle1_radius << std::endl;
-              std::cout << "vector_length " << vector_length << std::endl;
-
+              /*
+                            std::cout << "distance " << distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) << std::endl;
+                            std::cout << "obstacle1_radius " << obstacle1_radius << std::endl;
+                            std::cout << "vector_length " << vector_length << std::endl;
+              */
               //a point near by the middle, placed toward to p1
               next_point2 = new NPoint(
                               middle_x - vector_x * (vector_length + vector_add),
@@ -1431,8 +1426,8 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
                               middle_x + vector_x * (vector_length + vector_add),
                               middle_y + vector_y * (vector_length + vector_add));
             }
-            
-          std::cout << "distance " << distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) << std::endl;
+
+        //  std::cout << "distance " << distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) << std::endl;
 
           context->set_source_rgb(1.0, 0.0, 0.0);
           context->arc(next_point1->x * zoom_factor, next_point1->y * zoom_factor, 5, 0.0, 2.0 * M_PI);

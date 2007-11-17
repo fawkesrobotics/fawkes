@@ -63,6 +63,9 @@ class Navigator
     void goTo_rad(double ori, double distance);
     void goTo(double ori, double distance, std::vector< Obstacle * >);
   */
+  void set_odometry_velocity_x(double velocity_x);
+  void set_odometry_velocity_y(double velocity_y);
+  void set_odometry_velocity_rotation(double rotation);
   void setObstacles(std::vector< Obstacle  >);
   void add_obstacle(Obstacle obstacle);
 
@@ -114,6 +117,10 @@ class Navigator
   double scanning_area_width;
   double scanning_area_height;
      
+  double odometry_velocity_x;
+  double odometry_velocity_y;
+  double odometry_velocity_rotation;
+  
   double robot_width;
   // GtsPoint * robot_point;
    

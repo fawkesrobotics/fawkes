@@ -652,9 +652,9 @@ MotorThread::loop()
       motor_interface->set_rear_rpm((int)beta);
       motor_interface->set_left_rpm((int)gamma);
     }
-  motor_interface->set_vx((int)(forward_));
-  motor_interface->set_vy((int)(sideward_ ));
-  motor_interface->set_omega((int)(rotation_ / (0.188 * 187.978289782 * 8.656666666666666667)));
+  motor_interface->set_vx(forward_);
+  motor_interface->set_vy(sideward_ );
+  motor_interface->set_omega(rotation_ );
 
   motor_interface->write();
 }//loop

@@ -55,7 +55,7 @@ NavigatorThread::finalize()
     {
       interface_manager->close(navigator_interface);
       interface_manager->close(motor_interface);
-    //  interface_manager->close(object_interface);
+      //  interface_manager->close(object_interface);
     }
   catch (Exception& e)
     {
@@ -118,9 +118,8 @@ NavigatorThread::once()
 void
 NavigatorThread::loop()
 {
-
   motor_interface->read();
-  
+
 
   if ( navigator_interface->msgq_first_is<NavigatorInterface::TargetMessage>() )
     {
@@ -160,28 +159,27 @@ NavigatorThread::loop()
         }
       navigator_interface->msgq_pop();
     }
-    
+
   std::list<Interface *>::iterator i;
   for ( i = object_interface_list->begin(); i != object_interface_list->end(); ++i )
     {
       ObjectPositionInterface *object_interface = (ObjectPositionInterface *) *i;
       float distance = object_interface->distance();
       float yaw = object_interface->yaw();
-      float width = 0.5;
-      logger->log_info("NavigatorThread", "Object at distance = %f, yaw = %f", distance, yaw);
+      float width = object_interface->extent();
+      logger->log_info("NavigatorThread", "Object at distance = %f, yaw = %f, width = %f", distance, yaw, width);
       std::vector<Obstacle> obstacle_list;
       obstacle_list.push_back(*(new Obstacle(width, distance * cos(yaw), distance * sin(yaw), 0)));
       setObstacles(obstacle_list);
     }
-    
+
+  set_odometry_velocity_x(motor_interface->vx());
+  set_odometry_velocity_y(motor_interface->vy());
+  set_odometry_velocity_rotation(motor_interface->omega());
+
   //from navigator
   mainLoop();
-  /*
-  if((++logger_modulo_counter %= 10) == 0)
-    {
-      logger->log_info("NavigatorThread", "x = %f, y = %f, externel_control = %i, external_control_thread_id = %lu", getVelocityX(), getVelocityY(), external_control, external_control_thread_id);
-    }
-    */
+
   if(motor_interface->controller_thread_id() == current_thread_id())
     {
       if(old_velocity_x != getVelocityX() || old_velocity_y != getVelocityY())
@@ -191,10 +189,7 @@ NavigatorThread::loop()
           MotorInterface::TransMessage* motor_msg = new  MotorInterface::TransMessage(getVelocityX(), getVelocityY());
           motor_interface->msgq_enqueue(motor_msg);
 
-          //   if((++logger_modulo_counter % 5) == 0)
-          {
-            logger->log_info("NavigatorThread", "send x = %f, y = %f", getVelocityX(), getVelocityY());
-          }
+          logger->log_info("NavigatorThread", "send x = %f, y = %f", getVelocityX(), getVelocityY());
         }
     }
   /*
@@ -204,5 +199,4 @@ NavigatorThread::loop()
     }
   */
   //usleep(100000);
-
 }
