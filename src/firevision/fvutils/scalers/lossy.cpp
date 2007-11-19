@@ -132,7 +132,7 @@ LossyScaler::scale()
   if ( scal_width < needed_scaled_width() ) return;
   if ( scal_height < needed_scaled_height() ) return;
 
-  const unsigned int skip = (unsigned int)ceil( 1 / scale_factor );
+  float skip = 1 / scale_factor;
   unsigned char *oyp = orig_buffer;
   unsigned char *oup = YUV422_PLANAR_U_PLANE( orig_buffer, orig_width, orig_height );
   unsigned char *ovp = YUV422_PLANAR_V_PLANE( orig_buffer, orig_width, orig_height );
@@ -144,13 +144,39 @@ LossyScaler::scale()
   memset( syp,   0, scal_width * scal_height );
   memset( sup, 128, scal_width * scal_height );
 
-  for ( unsigned int h = 0; h < orig_height; h += skip ) {
-    for ( unsigned int w = 0; w < orig_width; w += 2 * skip ) {
-      syp[ (h / skip) * scal_width + (w / skip) ] = oyp[ h * orig_width + w ];
-      syp[ (h / skip) * scal_width + (w / skip) + 1 ] = oyp[ h * orig_width + w + skip ];
-      sup[ ((h / skip) * scal_width + (w / skip)) / 2 ] = (oup[ (h * orig_width + w) / 2 ] + oup[ (h * orig_width + w + skip) / 2 ]) / 2;
-      svp[ ((h / skip) * scal_width + (w / skip)) / 2 ] = (ovp[ (h * orig_width + w) / 2 ] + ovp[ (h * orig_width + w + skip) / 2 ]) / 2;
-    }
-  }
+  float oh_float = 0.0;
+  float ow_float = 0.0;
 
+  unsigned int oh_pixel;
+  unsigned int ow_pixel;
+  unsigned int ow_pixel_next;
+
+  for (unsigned int h = 0; h < scal_height; ++h) {
+    oh_pixel = (unsigned int) rint(oh_float);
+    ow_float = 0.0;
+
+    if (oh_pixel >= orig_height) {
+      oh_pixel = orig_height - 1;
+    }
+    for (unsigned int w = 0; w < scal_width; w += 2) {
+      ow_pixel = (unsigned int) rint(ow_float);
+      ow_pixel_next = (unsigned int) rint( ow_float + skip);
+      
+      if (ow_pixel >= orig_width) {
+	ow_pixel = orig_width - 1;
+      }
+
+      if (ow_pixel_next >= orig_width) {
+	ow_pixel_next = orig_width - 1;
+      }
+
+      syp[ h * scal_width + w ] = oyp[ oh_pixel * orig_width + ow_pixel ];
+      syp[ h * scal_width + w + 1 ] = oyp[ oh_pixel * orig_width + ow_pixel_next ];
+      sup[ (h * scal_width + w) / 2 ] = (oup[ (oh_pixel * orig_width + ow_pixel) / 2 ] + oup[ (oh_pixel * orig_width + ow_pixel_next) / 2 ]) / 2;
+      svp[ (h * scal_width + w) / 2 ] = (ovp[ (oh_pixel * orig_width + ow_pixel) / 2 ] + ovp[ (oh_pixel * orig_width + ow_pixel_next) / 2 ]) / 2;
+
+      ow_float += 2 * skip;
+    }
+    oh_float += skip;
+  }
 }
