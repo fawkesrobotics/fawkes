@@ -190,13 +190,17 @@ FvAquisitionThread::loop()
     _camera->capture();
     if ( _shm ) {
       //_logger->log_debug(name(), "Convert");
+      _shm->lock_for_write();
       convert(_colorspace, YUV422_PLANAR,
 	      _camera->buffer(), _buffer,
 	      _width, _height);
+      _shm->unlock();
     }
     if ( _shm_raw ) {
       //_logger->log_debug(name(), "Copy");
+      _shm_raw->lock_for_write();
       memcpy(_buffer_raw, _camera->buffer(), _camera->buffer_size());
+      _shm_raw->unlock();
     }
   } catch (Exception &e) {
     //_logger->log_error(name(), "Cannot convert image data");
