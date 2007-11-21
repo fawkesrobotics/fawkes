@@ -37,6 +37,7 @@ class Logger;
 class Clock;
 class FawkesNetworkHub;
 class Thread;
+class ThreadCollector;
 template <class Provider, class Dependant>
   class OneToManyDependency;
 class VisionMasterAspect;
@@ -48,7 +49,8 @@ class ServiceBrowser;
 class AspectIniFin : public ThreadInitializer, public ThreadFinalizer
 {
  public:
-  AspectIniFin(BlackBoard *blackboard, Configuration *config, Logger *logger, Clock *clock);
+  AspectIniFin(BlackBoard *blackboard, ThreadCollector *collector,
+	       Configuration *config, Logger *logger, Clock *clock);
   virtual ~AspectIniFin();
 
   virtual void init(Thread *thread);
@@ -61,16 +63,17 @@ class AspectIniFin : public ThreadInitializer, public ThreadFinalizer
 			   ServiceBrowser *service_browser);
 
  private:
-  BlackBoard          *blackboard;
-  Configuration       *config;
-  Logger              *logger;
-  Clock               *clock;
-  FawkesNetworkHub    *fnethub;
-  NetworkNameResolver *nnresolver;
-  ServicePublisher    *service_publisher;
-  ServiceBrowser      *service_browser;
+  BlackBoard          *__blackboard;
+  ThreadCollector     *__thread_collector;
+  Configuration       *__config;
+  Logger              *__logger;
+  Clock               *__clock;
+  FawkesNetworkHub    *__fnethub;
+  NetworkNameResolver *__nnresolver;
+  ServicePublisher    *__service_publisher;
+  ServiceBrowser      *__service_browser;
 
-  OneToManyDependency<VisionMasterAspect, VisionAspect> *vision_dependency;
+  OneToManyDependency<VisionMasterAspect, VisionAspect> *__vision_dependency;
 };
 
 

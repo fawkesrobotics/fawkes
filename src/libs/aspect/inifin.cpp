@@ -38,6 +38,7 @@
 #include <aspect/vision_master.h>
 #include <aspect/vision.h>
 #include <aspect/network.h>
+#include <aspect/thread_producer.h>
 
 #include <utils/constraints/dependency_onetomany.h>
 
@@ -53,33 +54,36 @@
 
 /** Constructor.
  * @param blackboard BlackBoard
+ * @param collector Thread collector
  * @param config Configuration
  * @param logger Logger
  * @param clock Clock
  */
 AspectIniFin::AspectIniFin(BlackBoard *blackboard,
+			   ThreadCollector *collector,
 			   Configuration *config,
 			   Logger *logger,
 			   Clock *clock)
 
 {
-  this->blackboard = blackboard;
-  this->config     = config;
-  this->logger     = logger;
-  this->clock      = clock;
-  this->fnethub    = NULL;
-  this->nnresolver = NULL;
-  this->service_publisher = NULL;
-  this->service_browser = NULL;
+  __blackboard        = blackboard;
+  __thread_collector  = collector;
+  __config            = config;
+  __logger            = logger;
+  __clock             = clock;
+  __fnethub           = NULL;
+  __nnresolver        = NULL;
+  __service_publisher = NULL;
+  __service_browser   = NULL;
 
-  vision_dependency = new OneToManyDependency<VisionMasterAspect, VisionAspect>();
+  __vision_dependency = new OneToManyDependency<VisionMasterAspect, VisionAspect>();
 }
 
 
 /** Destructor. */
 AspectIniFin::~AspectIniFin()
 {
-  delete vision_dependency;
+  delete __vision_dependency;
 }
 
 
@@ -93,7 +97,7 @@ AspectIniFin::~AspectIniFin()
 void
 AspectIniFin::set_fnet_hub(FawkesNetworkHub *fnethub)
 {
-  this->fnethub = fnethub;
+  __fnethub = fnethub;
 }
 
 
@@ -111,9 +115,9 @@ AspectIniFin::set_network_members(NetworkNameResolver *nnresolver,
 				  ServicePublisher *service_publisher,
 				  ServiceBrowser *service_browser)
 {
-  this->nnresolver = nnresolver;
-  this->service_publisher = service_publisher;
-  this->service_browser = service_browser;
+  __nnresolver = nnresolver;
+  __service_publisher = service_publisher;
+  __service_browser = service_browser;
 }
 
 
@@ -128,44 +132,54 @@ AspectIniFin::init(Thread *thread)
   BlockedTimingAspect *blocked_timing_thread;
   if ( (blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread)) != NULL ) {
     if ( thread->opmode() != Thread::OPMODE_WAITFORWAKEUP ) {
-      throw CannotInitializeThreadException("Thread not in WAITFORWAKEUP mode (required for BlockedTimingAspect)");
+      throw CannotInitializeThreadException("Thread '%s' not in WAITFORWAKEUP mode "
+					    "(required for BlockedTimingAspect)",
+					    thread->name());
     }
   }
 
   BlackBoardAspect *blackboard_thread;
   if ( (blackboard_thread = dynamic_cast<BlackBoardAspect *>(thread)) != NULL ) {
-    blackboard_thread->initBlackBoardAspect( blackboard->interface_manager() );
+    blackboard_thread->initBlackBoardAspect( __blackboard->interface_manager() );
+  }
+
+  ThreadProducerAspect *thread_producer_thread;
+  if ( (thread_producer_thread = dynamic_cast<ThreadProducerAspect *>(thread)) != NULL ) {
+    thread_producer_thread->init_ThreadProducerAspect( __thread_collector );
   }
 
   ConfigurableAspect *configurable_thread;
   if ( (configurable_thread = dynamic_cast<ConfigurableAspect *>(thread)) != NULL ) {
-    configurable_thread->initConfigurableAspect(config);
+    configurable_thread->initConfigurableAspect(__config);
   }
 
   LoggingAspect *logging_thread;
   if ( (logging_thread = dynamic_cast<LoggingAspect *>(thread)) != NULL ) {
-    logging_thread->initLoggingAspect(logger);
+    logging_thread->initLoggingAspect(__logger);
   }
 
   ClockAspect *clock_thread;
   if ( (clock_thread = dynamic_cast<ClockAspect *>(thread)) != NULL ) {
-    clock_thread->initClockAspect(clock);
+    clock_thread->initClockAspect(__clock);
   }
 
   FawkesNetworkAspect *fnet_thread;
   if ( (fnet_thread = dynamic_cast<FawkesNetworkAspect *>(thread)) != NULL ) {
-    if ( fnethub == NULL ) {
-      throw CannotInitializeThreadException("Thread has FawkesNetworkAspect but no FawkesNetworkHub has been set in AspectIniFin");
+    if ( __fnethub == NULL ) {
+      throw CannotInitializeThreadException("Thread '%s' has FawkesNetworkAspect but no "
+					    "FawkesNetworkHub has been set in AspectIniFin",
+					    thread->name());
     }
-    fnet_thread->initFawkesNetworkAspect(fnethub);
+    fnet_thread->initFawkesNetworkAspect(__fnethub);
   }
 
   VisionMasterAspect *vision_master_thread;
   if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
     try {
-      vision_dependency->add(vision_master_thread);
+      __vision_dependency->add(vision_master_thread);
     } catch (DependencyViolationException &e) {
-      CannotInitializeThreadException ce("Dependency violation for VisionProviderAspect detected");
+      CannotInitializeThreadException ce("Dependency violation for VisionProviderAspect "
+					 "detected");
       ce.append(e);
       throw ce;
     }
@@ -176,17 +190,17 @@ AspectIniFin::init(Thread *thread)
     try {
       if ( (vision_thread->vision_thread_mode() == VisionAspect::CONTINUOUS) &&
 	   (thread->opmode() != Thread::OPMODE_CONTINUOUS) ) {
-	throw CannotInitializeThreadException("Vision thread operates in continuous "
-					      "mode but thread does not");
+	throw CannotInitializeThreadException("Vision thread '%s' operates in continuous "
+					      "mode but thread does not", thread->name());
       }
       if ( (vision_thread->vision_thread_mode() == VisionAspect::CYCLIC) &&
 	   (thread->opmode() != Thread::OPMODE_WAITFORWAKEUP) ) {
-	throw CannotInitializeThreadException("Vision thread operates in cyclic mode but"
+	throw CannotInitializeThreadException("Vision thread '%s' operates in cyclic mode but"
 					      "thread does not operate in wait-for-wakeup "
-					      "mode.");
+					      "mode.", thread->name());
       }
-      vision_dependency->add(vision_thread);
-      vision_thread->initVisionAspect( vision_dependency->provider()->vision_master() );
+      __vision_dependency->add(vision_thread);
+      vision_thread->initVisionAspect( __vision_dependency->provider()->vision_master() );
     } catch (DependencyViolationException &e) {
       CannotInitializeThreadException ce("Dependency violation for VisionAspect detected");
       ce.append(e);
@@ -196,10 +210,12 @@ AspectIniFin::init(Thread *thread)
 
   NetworkAspect *net_thread;
   if ( (net_thread = dynamic_cast<NetworkAspect *>(thread)) != NULL ) {
-    if ( (nnresolver == NULL) || (service_publisher == NULL) || (service_browser == NULL) ) {
-      throw CannotInitializeThreadException("Thread has NetworkAspect but required data has not been set in AspectIniFin");
+    if ( (__nnresolver == NULL) || (__service_publisher == NULL) ||
+	 (__service_browser == NULL) ) {
+      throw CannotInitializeThreadException("Thread has NetworkAspect but required data "
+					    "has not been set in AspectIniFin");
     }
-    net_thread->initNetworkAspect(nnresolver, service_publisher, service_browser);
+    net_thread->initNetworkAspect(__nnresolver, __service_publisher, __service_browser);
   }
 
 }
@@ -210,14 +226,14 @@ AspectIniFin::prepare_finalize(Thread *thread)
 {
   VisionMasterAspect *vision_master_thread;
   if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
-    if ( ! vision_dependency->can_remove(vision_master_thread) ) {
+    if ( ! __vision_dependency->can_remove(vision_master_thread) ) {
       return false;
     }
   }
 
   VisionAspect *vision_thread;
   if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
-    if ( ! vision_dependency->can_remove(vision_thread) ) {
+    if ( ! __vision_dependency->can_remove(vision_thread) ) {
       return false;
     }
   }
@@ -235,9 +251,10 @@ AspectIniFin::finalize(Thread *thread)
   VisionMasterAspect *vision_master_thread;
   if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
     try {
-      vision_dependency->remove(vision_master_thread);
+      __vision_dependency->remove(vision_master_thread);
     } catch (DependencyViolationException &e) {
-      CannotFinalizeThreadException ce("Dependency violation for VisionProviderAspect detected");
+      CannotFinalizeThreadException ce("Dependency violation for VisionProviderAspect "
+				       "detected");
       ce.append(e);
       throw ce;
     }
@@ -245,6 +262,6 @@ AspectIniFin::finalize(Thread *thread)
 
   VisionAspect *vision_thread;
   if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
-    vision_dependency->remove(vision_thread);
+    __vision_dependency->remove(vision_thread);
   }
 }
