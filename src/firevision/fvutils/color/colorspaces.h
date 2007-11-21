@@ -32,23 +32,23 @@
 #include <sys/types.h>
 
 typedef enum {
-  CS_UNKNOWN         = 0,
-  RGB,
-  YUV411_PACKED,
-  YUV411_PLANAR,
-  YUY2,
-  BGR,
-  YUV422_PACKED,
-  YUV422_PLANAR,
-  GRAY8,
-  RGB_WITH_ALPHA,
-  BGR_WITH_ALPHA,
-  BAYER_MOSAIC_RGGB,
-  BAYER_MOSAIC_GBRG,
-  BAYER_MOSAIC_GRBG,
-  BAYER_MOSAIC_BGGR,
-  RAW16,
-  COLORSPACE_N
+  CS_UNKNOWN         =  0,
+  RGB                =  1,
+  YUV411_PACKED      =  2,
+  YUV411_PLANAR      =  3,
+  YUY2               =  4,
+  BGR                =  5,
+  YUV422_PACKED      =  6,
+  YUV422_PLANAR      =  7,
+  GRAY8              =  8,
+  RGB_WITH_ALPHA     =  9,
+  BGR_WITH_ALPHA     = 10,
+  BAYER_MOSAIC_RGGB  = 11,
+  BAYER_MOSAIC_GBRG  = 12,
+  BAYER_MOSAIC_GRBG  = 13,
+  BAYER_MOSAIC_BGGR  = 14,
+  RAW16              = 15,
+  COLORSPACE_N       = 16
 } colorspace_t;
 
 
