@@ -47,6 +47,7 @@ class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
 
  public:
   BlackBoardSharedMemoryHeader(size_t data_size, unsigned int version);
+  BlackBoardSharedMemoryHeader(const BlackBoardSharedMemoryHeader *h);
   virtual ~BlackBoardSharedMemoryHeader();
   void           set_shared_memory(SharedMemory *shmem);
   virtual bool   matches(void *memptr);
@@ -55,6 +56,8 @@ class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
   virtual void   set(void *memptr);
   virtual void   reset();
   virtual size_t data_size();
+  virtual SharedMemoryHeader * clone() const;
+  virtual bool   operator==(const SharedMemoryHeader &s) const;
   chunk_list_t * free_list_head();
   chunk_list_t * alloc_list_head();
   void set_free_list_head(chunk_list_t *flh);

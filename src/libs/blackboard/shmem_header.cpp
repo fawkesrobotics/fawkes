@@ -58,6 +58,17 @@ BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(size_t data_size,
 }
 
 
+/** Copy constructor.
+ * @param h header to copy
+ */
+BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(const BlackBoardSharedMemoryHeader *h)
+{
+  _data_size = h->_data_size;
+  _version   = h->_version;
+  data       = h->data;
+}
+
+
 /** Set SharedMemory instance.
  * This is needed for address conversion and must be set right after the constructor
  * call of SharedMemory!
@@ -76,6 +87,14 @@ BlackBoardSharedMemoryHeader::~BlackBoardSharedMemoryHeader()
 }
 
 
+
+SharedMemoryHeader *
+BlackBoardSharedMemoryHeader::clone() const
+{
+  return new BlackBoardSharedMemoryHeader(this);
+}
+
+
 /** Check if the given shared memory segment is a Fawkes BB segment
  * @param memptr Ptr to the segment
  * @return true if the version matches, false otherwise
@@ -87,6 +106,19 @@ BlackBoardSharedMemoryHeader::matches(void *memptr)
   return (_version == md->version);
 }
 
+
+bool
+BlackBoardSharedMemoryHeader::operator==(const SharedMemoryHeader &s) const
+{
+  const BlackBoardSharedMemoryHeader *h = dynamic_cast<const BlackBoardSharedMemoryHeader *>(&s);
+  if ( ! h ) {
+    return false;
+  } else {
+    return ( (_version == h->_version) &&
+	     (_data_size == h->_data_size) &&
+	     (data == h->data) );
+  }
+}
 
 /** Get the size of the header data.
  * @return size of the header data

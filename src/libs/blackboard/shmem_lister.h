@@ -38,14 +38,14 @@ class BlackBoardSharedMemoryLister : public SharedMemoryLister {
   BlackBoardSharedMemoryLister();
   virtual ~BlackBoardSharedMemoryLister();
 
-  virtual void printHeader();
-  virtual void printFooter();
-  virtual void printNoSegments();
-  virtual void printNoOrphanedSegments();
+  virtual void print_header();
+  virtual void print_footer();
+  virtual void print_no_segments();
+  virtual void print_no_orphaned_segments();
 
-  virtual void printInfo(SharedMemoryHeader *header,
-			 int shm_id, int semaphore,
-			 unsigned int mem_size, void *memptr);
+  virtual void print_info(const SharedMemoryHeader *header,
+			  int shm_id, int semaphore,
+			  unsigned int mem_size, const void *memptr);
 
  private:
   unsigned int num;

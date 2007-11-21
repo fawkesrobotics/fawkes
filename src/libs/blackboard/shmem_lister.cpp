@@ -51,7 +51,7 @@ BlackBoardSharedMemoryLister::~BlackBoardSharedMemoryLister()
  * 79 columns.
  */
 void
-BlackBoardSharedMemoryLister::printHeader()
+BlackBoardSharedMemoryLister::print_header()
 {
   cout << endl << cblue << "Fawkes BlackBoard Shared Memory Segments" << cnormal << endl
        << "========================================================================" << endl
@@ -69,7 +69,7 @@ BlackBoardSharedMemoryLister::printHeader()
  * 79 columns.
  */
 void
-BlackBoardSharedMemoryLister::printFooter()
+BlackBoardSharedMemoryLister::print_footer()
 {
   cout << "========================================================================" << endl;
 }
@@ -79,7 +79,7 @@ BlackBoardSharedMemoryLister::printFooter()
  * Called by SharedMemory if no matching segment could be found.
  */
 void
-BlackBoardSharedMemoryLister::printNoSegments()
+BlackBoardSharedMemoryLister::print_no_segments()
 {
   cout << "No Fawkes BlackBoard shared memory segments found" << endl;
 }
@@ -90,7 +90,7 @@ BlackBoardSharedMemoryLister::printNoSegments()
  * could be found.
  */
 void
-BlackBoardSharedMemoryLister::printNoOrphanedSegments()
+BlackBoardSharedMemoryLister::print_no_orphaned_segments()
 {
   cout << "No " << cdarkgray << "orphaned" << cnormal
        << " Fawkes BlackBoard shared memory segments found" << endl;
@@ -108,9 +108,9 @@ BlackBoardSharedMemoryLister::printNoOrphanedSegments()
  * @param memptr pointer to the data segment.
  */
 void
-BlackBoardSharedMemoryLister::printInfo(SharedMemoryHeader *header,
-					int shm_id, int semaphore,
-					unsigned int mem_size,void *memptr)
+BlackBoardSharedMemoryLister::print_info(const SharedMemoryHeader *header,
+					 int shm_id, int semaphore,
+					 unsigned int mem_size, const void *memptr)
 {
   unsigned int nattch = SharedMemory::num_attached(shm_id);
   bool swapable = SharedMemory::is_swapable(shm_id);
