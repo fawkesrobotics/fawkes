@@ -33,12 +33,6 @@
 class StreamSocket;
 class FawkesNetworkMessageQueue;
 
-class ConnectionDiedException : public Exception
-{
- public:
-  ConnectionDiedException(const char *msg);
-};
-
 class FawkesNetworkTransceiver
 {
  public:

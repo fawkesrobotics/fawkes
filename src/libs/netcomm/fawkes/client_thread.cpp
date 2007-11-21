@@ -32,6 +32,7 @@
 #include <netcomm/fawkes/message_queue.h>
 #include <netcomm/fawkes/transceiver.h>
 #include <netcomm/socket/stream.h>
+#include <netcomm/utils/exceptions.h>
 
 #include <cstdio>
 

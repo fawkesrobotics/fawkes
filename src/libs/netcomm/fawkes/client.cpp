@@ -202,19 +202,6 @@ FawkesNetworkClient::setWaitTimeout(unsigned int wait_timeout)
 }
 
 
-/** Get inbound message queue.
- * After a call to recv() all message that could be read at that time
- * are in this queue. Note that you have to look the queue while working
- * on it!
- * @return inbound message queue.
- */
-FawkesNetworkMessageQueue *
-FawkesNetworkClient::inbound_queue()
-{
-  return inbound_msgq;
-}
-
-
 /** Sleep for some time.
  * Wait until inbound messages have been receive, the connection dies or the
  * timeout has been reached, whatever comes first. So you sleep at most timeout ms,
@@ -231,14 +218,6 @@ FawkesNetworkClient::sleep()
     // make sure we abort waiting
     p = Socket::POLL_IN;
   }
-  /*
-    if ( p & Socket::POLL_IN )     printf("POLL_IN\n");
-    if ( p & Socket::POLL_OUT )    printf("POLL_OUT\n");
-    if ( p & Socket::POLL_PRI )    printf("POLL_PRI\n");
-    if ( p & Socket::POLL_HUP )    printf("POLL_HUP\n");
-    if ( p & Socket::POLL_RDHUP )  printf("POLL_RDHUP\n");
-    if ( p & Socket::POLL_ERR )    printf("POLL_ERR\n");
-  */
 }
 
 

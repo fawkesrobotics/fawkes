@@ -29,22 +29,9 @@
 #include <netcomm/fawkes/message.h>
 #include <netcomm/fawkes/message_queue.h>
 #include <netcomm/socket/stream.h>
+#include <netcomm/utils/exceptions.h>
 
 #include <netinet/in.h>
-
-/** @class ConnectionDiedException netcomm/fawkes/transceiver.h
- * Thrown if the connection died during an operation.
- * @ingroup NetComm
- */
-
-/** Constructor.
- * @param msg message
- */
-ConnectionDiedException::ConnectionDiedException(const char *msg)
-  : Exception(msg)
-{
-}
-
 
 /** @class FawkesNetworkTransceiver netcomm/fawkes/transceiver.h
  * Fawkes Network Transceiver.
