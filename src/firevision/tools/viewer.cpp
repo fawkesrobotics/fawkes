@@ -68,10 +68,19 @@ main(int argc, char **argv)
     print_usage(argp.program_name());
     exit(0);
   } else if ( argp.has_arg("s") ) {
+#ifdef HAVE_SHMEM_CAM
     cam = new SharedMemoryCamera(argp.arg("s"));
+#else
+    throw Exception("SharedMemoryCamera not available at compile time");
+#endif
   } else if ( argp.has_arg("f") ) {
+#ifdef HAVE_FILELOADER_CAM
     cam = new FileLoader(argp.arg("f"));
+#else
+    throw Exception("FileLoader not available at compile time");
+#endif
   } else if ( argp.has_arg("n") ) {
+#ifdef HAVE_NETWORK_CAM
     char *net_string = strdup(argp.arg("n"));
     char *image_id = NULL, *host = NULL, *port = NULL, *save_ptr = NULL;
     int port_num = 5000;
@@ -102,6 +111,9 @@ main(int argc, char **argv)
     }
 
     cam = new NetworkCamera(host, port_num, image_num);
+#else
+    throw Exception("NetworkCamera not available at compile time");
+#endif
   } else {
     if ( argp.num_items() == 0 ) {
       print_usage(argp.program_name());

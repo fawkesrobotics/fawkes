@@ -30,8 +30,8 @@ LIBS     = $(VISION_LIBS)
 LIBS_fvshmem = $(VISION_CAM_LIBS) utils fvutils
 OBJS_fvshmem = shmem.o
 
-LIBS_listfwcams = $(VISION_CAM_LIBS) utils fvcams
-OBJS_listfwcams = listfwcams.o
+LIBS_fvlistfwcams = $(VISION_CAM_LIBS) utils fvcams
+OBJS_fvlistfwcams = listfwcams.o
 
 LIBS_fvconverter = fvutils
 OBJS_fvconverter = converter.o
@@ -54,17 +54,20 @@ OBJS_fvbb2info = bb2info.o
 LIBS_fvviewer = $(VISION_CAM_LIBS) utils fvcams fvutils fvwidgets
 OBJS_fvviewer = viewer.o
 
+LIBS_fvnet = utils fvutils
+OBJS_fvnet = net.o
+
 LIBS_fvshowyuv = fvutils fvwidgets
 OBJS_fvshowyuv = show_yuv.o
 CFLAGS_show_yuv += $(SDL_CFLAGS)
 LDFLAGS_fvshowyuv += $(SDL_LDFLAGS)
 
-OBJS_all = $(OBJS_fvshmem) $(OBJS_listfwcams) $(OBJS_fvstereodecoder) \
+OBJS_all = $(OBJS_fvshmem) $(OBJS_fvlistfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
 	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer) \
-	   $(OBJS_fvshowyuv)
+	   $(OBJS_fvshowyuv) $(OBJS_fvnet)
 BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvconverter $(BINDIR)/fvbb2rectlut \
-	   $(BINDIR)/fvshowyuv
+	   $(BINDIR)/fvshowyuv $(BINDIR)/fvnet
 
 ifeq ($(HAVE_TRICLOPS_SDK),1)
   BINS_all += $(BINDIR)/fvtricalcdisp
@@ -74,7 +77,7 @@ else
 endif
 
 ifeq ($(HAVE_FIREWIRE_CAM),1)
-  BINS_all += $(BINDIR)/listfwcams
+  BINS_all += $(BINDIR)/fvlistfwcams
 else
   WARN_TARGETS += warning_listfwcams
 endif
