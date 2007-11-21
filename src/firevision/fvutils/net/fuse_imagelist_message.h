@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  fuse_server.h - network image transport server interface
+ *  fuse_imagelist_message.h - FUSE image list message encapsulation
  *
- *  Generated: Mon Jan 09 15:26:27 2006
+ *  Created: Tue Nov 20 14:56:23 2007 (Ella on heat)
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,39 +25,33 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
+#ifndef __FIREVISION_FVUTILS_NET_FUSE_IMAGELIST_MESSAGE_H_
+#define __FIREVISION_FVUTILS_NET_FUSE_IMAGELIST_MESSAGE_H_
 
-#include <core/threading/thread.h>
-#include <core/utils/lock_list.h>
-#include <netcomm/utils/incoming_connection_handler.h>
+#include <fvutils/net/fuse.h>
+#include <fvutils/net/fuse_message.h>
+#include <sys/types.h>
 
-class ThreadCollector;
-class StreamSocket;
-class NetworkAcceptorThread;
-class FuseServerClientThread;
-
-class FuseServer : public Thread, public NetworkIncomingConnectionHandler {
+class FuseImageListMessage : public FuseNetworkMessage
+{
  public:
+  FuseImageListMessage();
+  FuseImageListMessage(uint32_t type, void *payload, size_t payload_size);
+  ~FuseImageListMessage();
 
-  FuseServer(unsigned short int port, ThreadCollector *collector = NULL);
-  virtual ~FuseServer();
+  void add_imageinfo(const char *image_id, colorspace_t colorspace,
+		     unsigned int pixel_width, unsigned int pixel_height);
 
-  virtual void add_connection(StreamSocket *s) throw();
-  void connection_died(FuseServerClientThread *client) throw();
 
-  virtual void loop();
+  void                reset_iterator();
+  bool                has_next();
+  FUSE_imageinfo_t *  next();
+
+  virtual void pack();
 
  private:
-  NetworkAcceptorThread *__acceptor_thread;
-
-  LockList<FuseServerClientThread *>  __clients;
-  LockList<FuseServerClientThread *>::iterator  __cit;
-
-  LockList<FuseServerClientThread *>  __dead_clients;
-
-  ThreadCollector *__thread_collector;
+  DynamicBuffer  *__list;
+  FUSE_imagelist_message_t __imagelist_msg;
 };
-
 
 #endif

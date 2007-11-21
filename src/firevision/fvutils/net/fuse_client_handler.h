@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  fuse_server.h - network image transport server interface
+ *  fuse_client_handler.h - FUSE network client handler
  *
- *  Generated: Mon Jan 09 15:26:27 2006
+ *  Created: Wed Nov 14 16:47:56 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,38 +25,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
+#ifndef __FIREVISION_FVUTILS_NET_FUSE_CLIENT_HANDLER_H_
+#define __FIREVISION_FVUTILS_NET_FUSE_CLIENT_HANDLER_H_
 
-#include <core/threading/thread.h>
-#include <core/utils/lock_list.h>
-#include <netcomm/utils/incoming_connection_handler.h>
+#include <fvutils/net/fuse.h>
 
-class ThreadCollector;
-class StreamSocket;
-class NetworkAcceptorThread;
-class FuseServerClientThread;
+class FuseNetworkMessage;
 
-class FuseServer : public Thread, public NetworkIncomingConnectionHandler {
+class FuseClientHandler {
  public:
+  virtual ~FuseClientHandler();
 
-  FuseServer(unsigned short int port, ThreadCollector *collector = NULL);
-  virtual ~FuseServer();
-
-  virtual void add_connection(StreamSocket *s) throw();
-  void connection_died(FuseServerClientThread *client) throw();
-
-  virtual void loop();
-
- private:
-  NetworkAcceptorThread *__acceptor_thread;
-
-  LockList<FuseServerClientThread *>  __clients;
-  LockList<FuseServerClientThread *>::iterator  __cit;
-
-  LockList<FuseServerClientThread *>  __dead_clients;
-
-  ThreadCollector *__thread_collector;
+  virtual void fuse_invalid_server_version(uint32_t local_version,
+					   uint32_t remote_version) throw() = 0;
+  virtual void fuse_connection_established() throw() = 0;
+  virtual void fuse_inbound_received(FuseNetworkMessage *m) throw() = 0;
 };
 
 

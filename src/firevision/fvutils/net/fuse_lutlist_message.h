@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  fuse_server.h - network image transport server interface
+ *  fuse_lutlist_message.h - FUSE LUT list message encapsulation
  *
- *  Generated: Mon Jan 09 15:26:27 2006
+ *  Created: Wed Nov 21 16:32:31 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,39 +25,33 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
+#ifndef __FIREVISION_FVUTILS_NET_FUSE_LUTLIST_MESSAGE_H_
+#define __FIREVISION_FVUTILS_NET_FUSE_LUTLIST_MESSAGE_H_
 
-#include <core/threading/thread.h>
-#include <core/utils/lock_list.h>
-#include <netcomm/utils/incoming_connection_handler.h>
+#include <fvutils/net/fuse.h>
+#include <fvutils/net/fuse_message.h>
+#include <sys/types.h>
 
-class ThreadCollector;
-class StreamSocket;
-class NetworkAcceptorThread;
-class FuseServerClientThread;
-
-class FuseServer : public Thread, public NetworkIncomingConnectionHandler {
+class FuseLutListMessage : public FuseNetworkMessage
+{
  public:
+  FuseLutListMessage();
+  FuseLutListMessage(uint32_t type, void *payload, size_t payload_size);
+  ~FuseLutListMessage();
 
-  FuseServer(unsigned short int port, ThreadCollector *collector = NULL);
-  virtual ~FuseServer();
+  void add_lutinfo(const char *lut_id,
+		   unsigned int width, unsigned int height, unsigned int bytes_per_cell);
 
-  virtual void add_connection(StreamSocket *s) throw();
-  void connection_died(FuseServerClientThread *client) throw();
 
-  virtual void loop();
+  void                reset_iterator();
+  bool                has_next();
+  FUSE_lutinfo_t *  next();
+
+  virtual void pack();
 
  private:
-  NetworkAcceptorThread *__acceptor_thread;
-
-  LockList<FuseServerClientThread *>  __clients;
-  LockList<FuseServerClientThread *>::iterator  __cit;
-
-  LockList<FuseServerClientThread *>  __dead_clients;
-
-  ThreadCollector *__thread_collector;
+  DynamicBuffer  *__list;
+  FUSE_lutlist_message_t __lutlist_msg;
 };
-
 
 #endif

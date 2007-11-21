@@ -29,8 +29,9 @@
 #define __FIREVISION_FVUTILS_NET_FUSE_H_
 
 #include <fvutils/color/colorspaces.h>
-
-#define FUSE_ERROR_MSG_LENGTH 100
+#include <stdint.h>
+#include <fvutils/ipc/defs.h>
+#include <netcomm/utils/dynamic_buffer.h>
 
 /* Present this e-a-s-t-e-r e-g-g to Tim and get one package of Maoam! */
 
@@ -40,187 +41,128 @@ typedef enum {
   FUSE_VERSION_2 = 2	/**< Version 2 - current */
 } FUSE_version_t;
 
+/** Current FUSE version */
+#define FUSE_CURRENT_VERSION FUSE_VERSION_2
+
 /** FUSE packet types */
 typedef enum {
-  FUSE_PT_INVALID             = 0xFFFFFFFF,	/**< invalid message, not send over the net, just as internal return code */
-
-  /* bi-directional packages,  1-999 */
-  FUSE_PT_VERSION             = 1,		/**< version */
-  FUSE_PT_RESULT              = 2,		/**< result */
-  FUSE_PT_MESSAGE             = 3,		/**< message */
-  FUSE_PT_DISCONNECT          = 4,		/**< disconnect */
+  /* bi-directional packages,  1-999 and 0xFFFFFFFE */
+  FUSE_MT_GREETING            = 0xFFFFFFFE,	/**< version */
 
   /* server to client, 1000-1999 */
-  FUSE_PT_IMAGE               = 1000,		/**< image */
-  FUSE_PT_LUT                 = 1001,		/**< lookup table */
-  FUSE_PT_IMAGE_INFO          = 1002,		/**< image info */
+  FUSE_MT_IMAGE               = 1000,		/**< image */
+  FUSE_MT_LUT                 = 1001,		/**< lookup table */
+  FUSE_MT_IMAGE_LIST          = 1002,		/**< image list */
+  FUSE_MT_LUT_LIST            = 1003,		/**< lut list */
+  FUSE_MT_GET_IMAGE_FAILED    = 1004,		/**< Fetching an image failed */
+  FUSE_MT_GET_LUT_FAILED      = 1005,		/**< Fetching a LUT failed */
 
   /* client to server, 2000-2999 */
-  FUSE_PT_REQIMAGE            = 2000,		/**< request image */
-  FUSE_PT_GETLUT              = 2001,		/**< get lookup table */
-  FUSE_PT_SETLUT              = 2002,		/**< set lookup table */
-  FUSE_PT_GET_IMAGE_INFO      = 2003,		/**< get image info */
-  FUSE_PT_MESSAGE_SUBSCRIBE   = 2004,		/**< subscribe to message queue */
-  FUSE_PT_MESSAGE_UNSUBSCRIBE = 2005,		/**< unsubscribe from message queue */
+  FUSE_MT_GET_IMAGE           = 2000,		/**< request image */
+  FUSE_MT_GET_LUT             = 2001,		/**< request lookup table */
+  FUSE_MT_SET_LUT             = 2002,		/**< set lookup table */
+  FUSE_MT_GET_IMAGE_LIST      = 2003,		/**< get image list */
+  FUSE_MT_GET_LUT_LIST        = 2004,		/**< get LUT list */
 
-} FUSE_packet_type_t;
+} FUSE_message_type_t;
 
-#define FUSE_RESULT_SUCCESS                0
-#define FUSE_RESULT_ERROR                  1
-#define FUSE_RESULT_ERROR_IMAGE_UNAVAIL    2
-#define FUSE_RESULT_ERROR_LUT_UNAVAIL      3
-#define FUSE_RESULT_ERROR_ALREADY          4
-#define FUSE_RESULT_ERROR_IMAGE_APPL_DEAD  5
-#define FUSE_RESULT_ERROR_LUT_APPL_DEAD    6
-#define FUSE_RESULT_ERROR_TIMEOUT          7
+/** Image format. */
+typedef enum {
+  FUSE_IF_RAW      = 1,	/**< Raw image */
+  FUSE_IF_JPEG     = 2	/**< JPEG image */
+} FUSE_image_format_t;
 
-/** version packet, bi-directional */
-typedef struct {
-  unsigned int version;		/**< version from FUSE_version_t */
-} FUSE_version_packet_t;
 
 /** general packet header */
 typedef struct {
-  unsigned int packet_type;	/**< packet type from FUSE_packet_type_t */
+  uint32_t message_type; /**< packet type from FUSE_message_type_t */
+  uint32_t payload_size; /**< payload size */
 } FUSE_header_t;
 
-/** error packet, bi-directional */
+/** FUSE message. */
 typedef struct {
-  unsigned int packet_type;	/**< packet type from FUSE_packet_type_t */
-  char         error_message[FUSE_ERROR_MSG_LENGTH];	/**< error message (text) */
-} FUSE_error_packet_t;
+  FUSE_header_t  header;	/**< header */
+  void *         payload;	/**< payload */
+} FUSE_message_t;
 
-/** result for request, bi-directional */
+/** version packet, bi-directional */
 typedef struct {
-  unsigned int result;		/**< result code */
-  char         extra[64];	/**< extra data specific to request */
-} FUSE_result_packet_t;
-
-/** message packet header, bi-directional */
-typedef struct {
-  unsigned int msgqid;		/**< message queue ID */
-  unsigned int data_size;	/**< data size */
-} FUSE_message_packet_header_t;
-
+  uint32_t version;	/**< version from FUSE_version_t */
+} FUSE_greeting_message_t;
 
 /** Lookup table packet header.
  * server to client: PT_LUT
  * client to server: PT_SETLUT
  */
 typedef struct {
-  unsigned int lut_id;		/**< LUT ID */
-  unsigned int width;		/**< width of LUT */
-  unsigned int height;		/**< height of LUT */
-  unsigned int bytes_per_cell;	/**< bytes per cell */
-} FUSE_lookuptable_packet_header_t;
+  char     lut_id[LUT_ID_MAX_LENGTH];	/**< LUT ID */
+  uint32_t width;			/**< width of LUT */
+  uint32_t height;			/**< height of LUT */
+  uint32_t bytes_per_cell;		/**< bytes per cell */
+} FUSE_lut_message_header_t;
 
 
 
+//  uint32_t  next_header;		/**< ID of next header. */
 /** Image packet header.
  * (server to client)
  */
 typedef struct {
-  unsigned int  image_num;		/**< image number */
-  unsigned int  colorspace;		/**< color space */
-  unsigned int  width;			/**< width */
-  unsigned int  height;			/**< height */
-  unsigned int  roi_x;			/**< ROI X coordinate */
-  unsigned int  roi_y;			/**< ROI Y coordinate */
-  unsigned int  roi_width;		/**< ROI width */
-  unsigned int  roi_height;		/**< ROI height */
+  char      image_id[IMAGE_ID_MAX_LENGTH];	/**< image ID */
+  uint32_t  format       :  8;			/**< Image format */
+  uint32_t  colorspace   : 16;			/**< color space */
+  uint32_t  reserved     :  8;			/**< reserved for future use */
+  uint32_t  width;				/**< width in pixels */
+  uint32_t  height;				/**< height in pixels */
+  uint32_t  buffer_size;			/**< size of following image buffer in bytes */
+} FUSE_image_message_header_t;
+
+/*
+  uint32_t  roi_x;			*< ROI X coordinate 
+  uint32_t  roi_y;			*< ROI Y coordinate 
+  uint32_t  roi_width;		*< ROI width 
+  uint32_t  roi_height;		*< ROI height 
   // Circle relative to ROI
-  int           circle_x;		/**< circle x coordinate */
-  int           circle_y;		/**< circle y coordinate */
-  unsigned int  circle_radius;		/**< circle radius */
-  unsigned int  flag_circle_found :  1;	/**< circle found, 1 if found */
-  unsigned int  flag_image_ready  :  1;	/**< image ready, 1 if ready */
-  unsigned int  flag_reserved     : 30;	/**< reserved for future use */
-} FUSE_image_packet_header_t;
 
+  int32_t   circle_x;			*< circle x coordinate 
+  int32_t   circle_y;			*< circle y coordinate 
+  uint32_t  circle_radius;		*< circle radius 
+  uint32_t  flag_circle_found :  1;	*< circle found, 1 if found 
+  uint32_t  flag_reserved     : 31;	*< reserved for future use 
+*/
 
-/** Image info packet.
- * (server to client)
- */
 typedef struct {
-  unsigned int  image_num;		/**< image number */
-  unsigned int  colorspace;		/**< color space */
-  unsigned int  width;			/**< width */
-  unsigned int  height;			/**< height */
-} FUSE_image_info_packet_t;
+  char image_id[IMAGE_ID_MAX_LENGTH];	/**< image ID */
+} FUSE_imagedesc_message_t;
 
-
-/** Request image.
- * (client to server)
- */
 typedef struct {
-  unsigned int image_num;	/**< image number */
-} FUSE_reqimage_packet_t;
+  char lut_id[LUT_ID_MAX_LENGTH];	/**< LUT ID */
+} FUSE_lutdesc_message_t;
 
-/** Get image info request.
- * (client to server)
- */
-typedef FUSE_reqimage_packet_t FUSE_get_image_info_packet_t;
-
-/** Get LUT request.
- * (client to server)
- */
 typedef struct {
-  unsigned int lut_id;	/**< LUT ID */
-} FUSE_getlut_packet_t;
+  char      image_id[IMAGE_ID_MAX_LENGTH];	/**< image ID */
+  uint32_t  colorspace   : 16;			/**< color space */
+  uint32_t  reserved     : 16;			/**< reserved for future use */
+  uint32_t  width;				/**< width in pixels */
+  uint32_t  height;				/**< height in pixels */
+  uint32_t  buffer_size;			/**< size of following image buffer in bytes */
+} FUSE_imageinfo_t;
 
-/** Subcribe to message queue.
- * (client to server)
- */
 typedef struct {
-  unsigned int msgqid;	/**< message queue */
-  long         mtype;	/**< message type */
-  unsigned int data_size;	/**< maximum data size. */
-} FUSE_message_subscribe_packet_t;
+  char     lut_id[LUT_ID_MAX_LENGTH];	/**< LUT ID */
+  uint32_t width;			/**< width of LUT */
+  uint32_t height;			/**< height of LUT */
+  uint32_t bytes_per_cell;		/**< bytes per cell */
+} FUSE_lutinfo_t;
 
-/** Unsubscribe from message queue.
- * (client to server)
- */
+/** Image list message. */
 typedef struct {
-  unsigned int msgqid;	/**< message queue ID */
-  long         mtype;	/**< message type */
-} FUSE_message_unsubscribe_packet_t;
+  dynamic_list_t image_list;	/**< DynamicBuffer holding a list of FUSE_imageinfo_t */
+} FUSE_imagelist_message_t;
 
-
-/** Message from message queue. */
+/** LUT list message. */
 typedef struct {
-  unsigned int msgqid;		/**< message queue ID */
-  unsigned int msg_size;	/**< message size */
-  char *msg;			/**< message data */
-} FUSE_message_t;
-
-
-
-/* helper */
-
-/** Convert unsigned int to colorspace_t.
- * @param cspace unsigned int from packet
- * @return colorspace
- */
-inline colorspace_t
-fuse_ui2cs(unsigned int cspace)
-{
-  if (cspace < (unsigned int)COLORSPACE_N) {
-    return (colorspace_t)cspace;
-  } else {
-    return CS_UNKNOWN;
-  }
-}
-
-
-/** Convert colorspace_t to unsigned int.
- * @param cspace colorspace
- * @return unsigned int representation
- */
-inline unsigned int
-fuse_cs2ui(colorspace_t cspace)
-{
-  return (unsigned int)cspace;
-}
-
+  dynamic_list_t lut_list;	/**< DynamicBuffer holding a list of FUSE_lutinfo_t */
+} FUSE_lutlist_message_t;
 
 #endif

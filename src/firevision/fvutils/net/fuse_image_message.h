@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  fuse_server.h - network image transport server interface
+ *  fuse_image_message.h - FUSE image message encapsulation
  *
- *  Generated: Mon Jan 09 15:26:27 2006
+ *  Created: Thu Nov 15 15:53:32 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,39 +25,33 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
+#ifndef __FIREVISION_FVUTILS_NET_FUSE_IMAGE_MESSAGE_H_
+#define __FIREVISION_FVUTILS_NET_FUSE_IMAGE_MESSAGE_H_
 
-#include <core/threading/thread.h>
-#include <core/utils/lock_list.h>
-#include <netcomm/utils/incoming_connection_handler.h>
+#include <fvutils/net/fuse.h>
+#include <fvutils/net/fuse_message.h>
+#include <sys/types.h>
 
-class ThreadCollector;
-class StreamSocket;
-class NetworkAcceptorThread;
-class FuseServerClientThread;
+class SharedMemoryImageBuffer;
 
-class FuseServer : public Thread, public NetworkIncomingConnectionHandler {
+class FuseImageMessage : public FuseNetworkMessage
+{
  public:
+  FuseImageMessage(SharedMemoryImageBuffer *b);
+  FuseImageMessage(uint32_t type, void *payload, size_t payload_size);
 
-  FuseServer(unsigned short int port, ThreadCollector *collector = NULL);
-  virtual ~FuseServer();
-
-  virtual void add_connection(StreamSocket *s) throw();
-  void connection_died(FuseServerClientThread *client) throw();
-
-  virtual void loop();
+  unsigned char *  buffer() const;
+  size_t           buffer_size() const;
+  unsigned int     pixel_width() const;
+  unsigned int     pixel_height() const;
+  unsigned int     colorspace() const;
+  unsigned int     format() const;
 
  private:
-  NetworkAcceptorThread *__acceptor_thread;
-
-  LockList<FuseServerClientThread *>  __clients;
-  LockList<FuseServerClientThread *>::iterator  __cit;
-
-  LockList<FuseServerClientThread *>  __dead_clients;
-
-  ThreadCollector *__thread_collector;
+  unsigned char *__buffer;
+  size_t         __buffer_size;
+  size_t         __payload_size;
+  FUSE_image_message_header_t *__header;
 };
-
 
 #endif

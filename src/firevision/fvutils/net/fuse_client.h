@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  fuse_client.h - network image transport client interface
+ *  fuse_client.h - FUSE network transport client
  *
- *  Generated: Mon Jan 09 15:33:59 2006
+ *  Created: Mon Jan 09 15:33:59 2006
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -28,74 +28,51 @@
 #ifndef __FIREVISION_FVUTILS_NET_FUSE_CLIENT_H_
 #define __FIREVISION_FVUTILS_NET_FUSE_CLIENT_H_
 
-#include <fvutils/color/colorspaces.h>
+#include <fvutils/net/fuse.h>
+#include <core/threading/thread.h>
+#include <sys/types.h>
 
-#include <string>
+class StreamSocket;
+class WaitCondition;
+class Mutex;
+class FuseNetworkMessageQueue;
+class FuseNetworkMessage;
+class FuseClientHandler;
 
-class FuseClient {
+class FuseClient : public Thread {
  public:
+  FuseClient(const char *hostname, unsigned short int port,
+	     FuseClientHandler *handler);
   virtual ~FuseClient();
 
-  virtual bool             connect()                                                    = 0;
-  virtual void             recv()                                                       = 0;
-  virtual void             disconnect()                                                 = 0;
-  virtual bool             connected()                                                  = 0;
-  virtual void             send()                                                       = 0;
+  void connect();
+  void disconnect();
 
-  virtual bool             setImageNumber(unsigned int num)                             = 0;
-  virtual colorspace_t     getImageColorspace() const                                   = 0;
-  virtual unsigned int     getImageWidth() const                                        = 0;
-  virtual unsigned int     getImageHeight() const                                       = 0;
-  virtual void             getImageDimensions(unsigned int *w, unsigned int *h) const   = 0;
-  virtual unsigned char *  getImageBuffer()                                             = 0;
-  virtual void             requestImage(bool request)                                   = 0;
-  virtual unsigned int     getImageNumber() const                                       = 0;
-  virtual bool             imageAvailable() const                                       = 0;
-  virtual bool             isImageApplAlive() const                                     = 0;
-  virtual std::string      getImageDeadAppName() const                                  = 0;
-  virtual void             requestImageInfo(bool request = true)                        = 0;
+  void enqueue(FuseNetworkMessage *m);
+  void enqueue(FUSE_message_type_t type, void *payload, size_t payload_size);
+  void enqueue(FUSE_message_type_t type);
+  void wait();
 
-  virtual unsigned int     getRoiX() const                                              = 0;
-  virtual unsigned int     getRoiY() const                                              = 0;
-  virtual unsigned int     getRoiWidth() const                                          = 0;
-  virtual unsigned int     getRoiHeight() const                                         = 0;
-  virtual int              getCircleX() const                                           = 0;
-  virtual int              getCircleY() const                                           = 0;
-  virtual unsigned int     getCircleRadius() const                                      = 0;
-  virtual bool             getCircleFound() const                                       = 0;
+  virtual void loop();
 
-  virtual bool             setLutID(unsigned int lut_id)                                = 0;
-  virtual unsigned int     getLutWidth() const                                          = 0;
-  virtual unsigned int     getLutHeight() const                                         = 0;
-  virtual unsigned int     getLutBytesPerCell() const                                   = 0;
-  virtual unsigned char *  getLutBuffer() const                                         = 0;
-  virtual unsigned int     getLutBufferSize() const                                     = 0;
-  virtual void             requestLut(bool request)                                     = 0;
-  virtual unsigned int     getLutID() const                                             = 0;
-  virtual bool             lutAvailable() const                                         = 0;
-  virtual bool             isLutApplAlive() const                                       = 0;
-  virtual std::string      getLutDeadAppName() const                                    = 0;
+ private:
+  void send();
+  void recv();
+  void sleep();
 
-  virtual void             setLutUpload(unsigned int lut_id,
-					unsigned int width, unsigned int height,
-					unsigned int bytes_per_cell,
-					unsigned char *buffer,
-					unsigned int buffer_size)                       = 0;
-  virtual void             requestLutUpload(bool request = true)                        = 0;
-  virtual bool             lutUploadSuccess()                                           = 0;
+  char *__hostname;
+  unsigned short int __port;
 
-  virtual void             subscribeMessageQueue(unsigned int msgqid, long mtype,
-						 unsigned int data_size)                = 0;
-  virtual void             unsubscribeMessageQueue(unsigned int msgqid, long mtype)     = 0;
-  virtual void             sendMessage(unsigned int msgqid,
-				       char *msg, unsigned int msg_size)                = 0;
-  virtual bool             isMessageAvailable()                                         = 0;
-  virtual void             getMessage(unsigned int *msgqid,
-				      char **msg, unsigned int *msg_size)               = 0;
+  StreamSocket *__socket;
+  unsigned int __wait_timeout;
 
-  virtual void             freeMessage()                                                = 0;
-  virtual void             dropMessage()                                                = 0;
+  Mutex *__mutex;
 
+  FuseNetworkMessageQueue *  __inbound_msgq;
+  FuseNetworkMessageQueue *  __outbound_msgq;
+
+  FuseClientHandler       *__handler;
+  WaitCondition           *__waitcond;
 };
 
 
