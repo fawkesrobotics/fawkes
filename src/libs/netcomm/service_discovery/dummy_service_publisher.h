@@ -37,6 +37,7 @@ class DummyServicePublisher : public ServicePublisher
   virtual ~DummyServicePublisher();
 
   virtual void publish(NetworkService *service);
+  virtual void unpublish(NetworkService *service);
 };
 
 

@@ -47,3 +47,9 @@ void
 DummyServicePublisher::publish(NetworkService *service)
 {
 }
+
+
+void
+DummyServicePublisher::unpublish(NetworkService *service)
+{
+}

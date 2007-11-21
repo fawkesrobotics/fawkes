@@ -36,6 +36,7 @@ class ServicePublisher
   virtual ~ServicePublisher();
 
   virtual void publish(NetworkService *service) = 0;
+  virtual void unpublish(NetworkService *service) = 0;
 };
 
 

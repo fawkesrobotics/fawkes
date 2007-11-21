@@ -33,6 +33,10 @@
  * @fn void ServicePublisher::publish(NetworkService *service) = 0
  * Publish service.
  * @param service service to publish
+ *
+ * @fn void ServicePublisher::unpublish(NetworkService *service) = 0
+ * Revoke service publication.
+ * @param service service to revoke
  */
 
 /** Virtual empty destructor. */

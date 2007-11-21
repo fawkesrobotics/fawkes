@@ -44,18 +44,20 @@ class NetworkService
 		 const char         *type,
 		 unsigned short int  port);
 
+  NetworkService(const NetworkService *s);
+  NetworkService(const NetworkService &s);
   ~NetworkService();
 
   void add_txt(const char *txt);
 
   void                set_name(const char *new_name);
 
-  const char *        name();
-  const char *        type();
-  const char *        domain();
-  const char *        host();
-  unsigned short int  port();
-  std::list<std::string>  txt();
+  const char *        name() const;
+  const char *        type() const;
+  const char *        domain() const;
+  const char *        host() const;
+  unsigned short int  port() const;
+  const std::list<std::string> & txt() const;
 
   bool                operator==(const NetworkService &s) const;
   bool                operator==(const NetworkService *s) const;

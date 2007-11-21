@@ -73,8 +73,8 @@ NetworkService::NetworkService(const char         *name,
  * @param port port of service
  */
 NetworkService::NetworkService(const char         *name,
-			   const char         *type,
-			   unsigned short int  port)
+			       const char         *type,
+			       unsigned short int  port)
 {
   _name   = strdup(name);
   _type   = strdup(type);
@@ -94,6 +94,48 @@ NetworkService::~NetworkService()
 }
 
 
+/** Copy constructor (pointer).
+ * Create a copy of given NetworkService.
+ * @param s network service to copy from
+ */
+NetworkService::NetworkService(const NetworkService *s)
+{
+  _name = strdup(s->_name);
+  _type = strdup(s->_type);
+  _port = s->_port;
+  if ( s->_domain != NULL ) {
+    _domain = strdup(s->_domain);
+  } else {
+    _domain = NULL;
+  }
+  if ( s->_host != NULL ) {
+    _host = strdup(s->_host);
+  } else {
+    _host = NULL;
+  }
+}
+
+
+/** Copy constructor (reference).
+ * Create a copy of given NetworkService.
+ * @param s network service to copy from
+ */
+NetworkService::NetworkService(const NetworkService &s)
+{
+  _name = strdup(s._name);
+  _type = strdup(s._type);
+  _port = s._port;
+  if ( s._domain != NULL ) {
+    _domain = strdup(s._domain);
+  } else {
+    _domain = NULL;
+  }
+  if ( s._host != NULL ) {
+    _host = strdup(s._host);
+  } else {
+    _host = NULL;
+  }
+}
 /** Add a TXT record.
  * @param txt TXT record to add, must be a "key=value" string.
  */
@@ -119,7 +161,7 @@ NetworkService::set_name(const char *new_name)
  * @return name of service
  */
 const char *
-NetworkService::name()
+NetworkService::name() const
 {
   return _name;
 }
@@ -129,7 +171,7 @@ NetworkService::name()
  * @return type of service
  */
 const char *
-NetworkService::type()
+NetworkService::type() const
 {
   return _type;
 }
@@ -139,7 +181,7 @@ NetworkService::type()
  * @return domain of service
  */
 const char *
-NetworkService::domain()
+NetworkService::domain() const
 {
   return _domain;
 }
@@ -149,7 +191,7 @@ NetworkService::domain()
  * @return host of service
  */
 const char *
-NetworkService::host()
+NetworkService::host() const
 {
   return _host;
 }
@@ -159,7 +201,7 @@ NetworkService::host()
  * @return port of service
  */
 unsigned short int
-NetworkService::port()
+NetworkService::port() const
 {
   return _port;
 }
@@ -168,8 +210,8 @@ NetworkService::port()
 /** Get TXT record list of service.
  * @return TXT record list of service
  */
-std::list<std::string>
-NetworkService::txt()
+const std::list<std::string> &
+NetworkService::txt() const
 {
   return list;
 }
