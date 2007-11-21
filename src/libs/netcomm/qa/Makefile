@@ -20,6 +20,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 ifneq ($(SRCDIR),)
 include $(SRCDIR)/../netcomm.mk

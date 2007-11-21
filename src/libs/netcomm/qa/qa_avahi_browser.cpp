@@ -28,14 +28,14 @@
 /// @cond QA
 
 #include <netcomm/dns-sd/avahi_thread.h>
-#include <netcomm/dns-sd/avahi_browse_handler.h>
+#include <netcomm/service_discovery/browse_handler.h>
 
 #include <core/exception.h>
 #include <utils/system/signal.h>
 
 #include <stdio.h>
 
-class QAAvahiBrowserMain : public SignalHandler, public AvahiBrowseHandler
+class QAAvahiBrowserMain : public SignalHandler, public ServiceBrowseHandler
 {
  public:
   QAAvahiBrowserMain()
@@ -81,10 +81,11 @@ class QAAvahiBrowserMain : public SignalHandler, public AvahiBrowseHandler
 			     const char *type,
 			     const char *domain,
 			     const char *host_name,
-			     const AvahiAddress *address,
+			     const struct sockaddr *addr,
+			     const socklen_t addr_size,
 			     uint16_t port,
 			     std::list<std::string> &txt,
-			     AvahiLookupResultFlags flags
+			     int flags
 			     )
   {
     printf("SERVICE_ADDED: name=%s  type=%s  domain=%s  hostname=%s\n",
@@ -114,7 +115,7 @@ main(int argc, char *argv)
     m.run();
 
   } catch (Exception &e) {
-    e.printTrace();
+    e.print_trace();
   }
 
   SignalManager::finalize();

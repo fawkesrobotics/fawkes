@@ -36,8 +36,8 @@ class QAAvahiPublisherMain : public SignalHandler
  public:
   QAAvahiPublisherMain()
   {
-    AvahiService *as = new AvahiService("Fawkes QA", "_fawkes._udp", 1910);
-    at = new AvahiThread();;
+    NetworkService *as = new NetworkService("Fawkes QA", "_fawkes._udp", 1910);
+    at = new AvahiThread();
     at->publish(as);
   }
 

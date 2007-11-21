@@ -70,7 +70,7 @@ class QAAvahiResolverMain : public SignalHandler, public AvahiResolverHandler
     wait_for_name = argp->has_arg("n");
     wait_for_addr = argp->has_arg("a");
 
-    char *tmp;
+    const char *tmp;
     if ( (tmp = argp->arg("n")) != NULL ) {
       printf("Calling name resolver\n");
       ar->resolve_name(tmp, this);
@@ -169,7 +169,7 @@ main(int argc, char **argv)
     m.run();
 
   } catch (Exception &e) {
-    e.printTrace();
+    e.print_trace();
   }
 
   SignalManager::finalize();
