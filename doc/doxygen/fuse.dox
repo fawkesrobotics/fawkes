@@ -1,0 +1,4 @@
+/** @defgroup FUSE FireVision FUSE Network Protocol
+ * FUSE is the network protocol used by FireVision to communicate vision
+ * specific data over the network.
+ */
