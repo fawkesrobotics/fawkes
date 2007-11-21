@@ -49,20 +49,16 @@
 AvahiServicePublisher::AvahiServicePublisher()
 {
   client = NULL;
-  group = NULL;
-  services.clear();
+  __services.clear();
+
+  __published = false;
 }
 
 
 /** Destructor. */
 AvahiServicePublisher::~AvahiServicePublisher()
 {
-  for (std::list<NetworkService *>::iterator i = services.begin(); i != services.end(); ++i) {
-    delete *i;
-  }
-  services.clear();
-
-  group_erase();
+  erase_groups();
 }
 
 
@@ -72,26 +68,34 @@ AvahiServicePublisher::~AvahiServicePublisher()
 void
 AvahiServicePublisher::publish(NetworkService *service)
 {
-  services.push_back( service );
-  if ( group ) {
-    // create service with update flag
-    int ret = 0;
-    // only IPv4 for now
-    AvahiStringList *al = NULL;
-    std::list<std::string> l = service->txt();
-    for (std::list<std::string>::iterator i = l.begin(); i != l.end(); ++i) {
-      al = avahi_string_list_add(al, (*i).c_str());
+  for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
+    if ( *((*__sit).first) == service ) {
+      throw Exception("Service already registered");
     }
-    if ( (ret = avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_INET,
-						     AVAHI_PUBLISH_UPDATE,
-						     service->name(), service->type(),
-						     service->domain(), service->host(),
-						     service->port(), al)) < 0) {
-      avahi_string_list_free(al);
-      throw Exception("Adding Avahi services failed");
-    }
-    avahi_string_list_free(al);
   }
+  __services[service] = NULL;
+
+  create_services();
+}
+
+
+void
+AvahiServicePublisher::unpublish(NetworkService *service)
+{
+  for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
+    if ( *((*__sit).first) == service ) {
+      group_erase((*__sit).second);
+      __services.erase(__sit);
+      break;
+    }
+  }
+}
+
+
+void
+AvahiServicePublisher::set_published(bool published)
+{
+  __published = published;
 }
 
 
@@ -99,40 +103,51 @@ AvahiServicePublisher::publish(NetworkService *service)
 void
 AvahiServicePublisher::create_services()
 {
+  // the following errors are non-fatal, they can happen since Avahi is started
+  // asynchronously, just ignore them by bailing out
   if ( ! client )  return;
-  if ( group ) return;
-  if ( services.size() == 0) return;
-
-  if ( ! (group = avahi_entry_group_new(client,
-					AvahiServicePublisher::entry_group_callback,
-					this))) {
-    throw NullPointerException("Cannot create service group");
-  }
+  if ( __services.size() == 0) return;
+  if ( ! __published) return;
 
   int ret = 0;
 
-  for (std::list<NetworkService *>::iterator i = services.begin(); i != services.end(); ++i) {
+  for ( __sit = __services.begin(); __sit != __services.end(); ++__sit) {
+
+    if ( (*__sit).second != NULL ) {
+      continue;
+    }
+
+    AvahiEntryGroup *group;
+    if ( ! (group = avahi_entry_group_new(client,
+					  AvahiServicePublisher::entry_group_callback,
+					  this))) {
+      throw NullPointerException("Cannot create service group");
+    }
+
+    (*__sit).second = group;
+
     // only IPv4 for now
     AvahiStringList *al = NULL;
-    std::list<std::string> l = (*i)->txt();
-    for (std::list<std::string>::iterator j = l.begin(); j != l.end(); ++j) {
+    const std::list<std::string> &l = (*__sit).first->txt();
+    for (std::list<std::string>::const_iterator j = l.begin(); j != l.end(); ++j) {
       al = avahi_string_list_add(al, (*j).c_str());
     }
     if ( (ret = avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_INET,
 						     AVAHI_PUBLISH_USE_MULTICAST,
-						     (*i)->name(), (*i)->type(),
-						     (*i)->domain(), (*i)->host(),
-						     (*i)->port(), al)) < 0) {
+						     (*__sit).first->name(), (*__sit).first->type(),
+						     (*__sit).first->domain(), (*__sit).first->host(),
+						     (*__sit).first->port(), al)) < 0) {
       avahi_string_list_free(al);
       throw Exception("Adding Avahi services failed");
     }
     avahi_string_list_free(al);
+
+    /* Tell the server to register the service */
+    if ((ret = avahi_entry_group_commit(group)) < 0) {
+      throw Exception("Registering Avahi services failed");
+    }
   }
 
-  /* Tell the server to register the service */
-  if ((ret = avahi_entry_group_commit(group)) < 0) {
-    throw Exception("Registering Avahi services failed");
-  }
 }
 
 
@@ -141,37 +156,56 @@ AvahiServicePublisher::create_services()
  * again with the new host name (triggered by AvahiThread).
  */
 void
-AvahiServicePublisher::group_reset()
+AvahiServicePublisher::group_reset(AvahiEntryGroup *g)
 {
-  if ( group )
-    avahi_entry_group_reset(group);
+  if ( g ) {
+    avahi_entry_group_reset(g);
+  }
 }
 
 
 /** Erase service group. */
 void
-AvahiServicePublisher::group_erase()
+AvahiServicePublisher::group_erase(AvahiEntryGroup *g)
 {
-  if ( group ) {
-    avahi_entry_group_reset( group );
-    avahi_entry_group_free( group );
-    group = NULL;
+  if ( g ) {
+    avahi_entry_group_reset( g );
+    avahi_entry_group_free( g );
+  }
+}
+
+
+void
+AvahiServicePublisher::erase_groups()
+{
+  for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
+    group_erase((*__sit).second);
+    (*__sit).second = NULL;
+  }
+}
+
+
+void
+AvahiServicePublisher::reset_groups()
+{
+  for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
+    group_reset((*__sit).second);
   }
 }
 
 
 /** Called if there was a name collision. */
 void
-AvahiServicePublisher::name_collision()
+AvahiServicePublisher::name_collision(AvahiEntryGroup *g)
 {
-  // give all services a new name, can't decide which service caused the problem
-
-  for (std::list<NetworkService *>::iterator i = services.begin(); i != services.end(); ++i) {
-    char *n;
-    /* A service name collision happened. Let's pick a new name */
-    n = avahi_alternative_service_name((*i)->name());
-    (*i)->set_name(n);
-    avahi_free(n);
+  for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
+    if ( (*__sit).second == g ) {
+      char *n;
+      /* A service name collision happened. Let's pick a new name */
+      n = avahi_alternative_service_name((*__sit).first->name());
+      (*__sit).first->set_name(n);
+      avahi_free(n);
+    }
   }
 
   create_services();
@@ -196,7 +230,7 @@ AvahiServicePublisher::entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupS
     break;
 
   case AVAHI_ENTRY_GROUP_COLLISION : {
-    asp->name_collision();
+    asp->name_collision(g);
     break;
   }
   
@@ -206,6 +240,6 @@ AvahiServicePublisher::entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupS
 
   case AVAHI_ENTRY_GROUP_UNCOMMITED:
   case AVAHI_ENTRY_GROUP_REGISTERING:
-    ;
+    break;
   }
 }

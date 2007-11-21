@@ -190,7 +190,8 @@ AvahiThread::recover()
   // no waiting thread could have aquired it.
   init_mutex->try_lock();
 
-  service_publisher->group_erase();
+  service_publisher->erase_groups();
+  service_publisher->set_published(false);
   browser->erase_browsers();
 
   if ( client ) {
@@ -227,6 +228,7 @@ AvahiThread::client_callback(AvahiClient *c, AvahiClientState state,
     /* The server has startup successfully and registered its host
      * name on the network, so it's time to create our services */
     //printf("(Client): RUNNING\n");
+    at->service_publisher->set_published(true);
     at->service_publisher->create_services();
     at->browser->create_browsers();
     at->_resolver->set_available( true );
@@ -238,7 +240,7 @@ AvahiThread::client_callback(AvahiClient *c, AvahiClientState state,
     /* Let's drop our registered services. When the server is back
      * in AVAHI_SERVER_RUNNING state we will register them
      * again with the new host name. */
-    at->service_publisher->group_reset();
+    at->service_publisher->reset_groups();
     break;
             
   case AVAHI_CLIENT_FAILURE:          

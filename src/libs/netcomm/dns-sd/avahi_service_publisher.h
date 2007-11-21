@@ -33,7 +33,7 @@
 #include <avahi-client/client.h>
 #include <avahi-client/publish.h>
 
-#include <list>
+#include <map>
 
 class AvahiServicePublisher : public ServicePublisher
 {
@@ -44,20 +44,25 @@ class AvahiServicePublisher : public ServicePublisher
   ~AvahiServicePublisher();
 
   void publish(NetworkService *service);
+  void unpublish(NetworkService *service);
 
  private:
   static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state,
 				   void *instance);
 
+  void set_published(bool published);
   void create_services();
-  void group_reset();
-  void group_erase();
-  void name_collision();
+  void group_reset(AvahiEntryGroup *g);
+  void group_erase(AvahiEntryGroup *g);
+  void name_collision(AvahiEntryGroup *g);
+  void erase_groups();
+  void reset_groups();
 
-  std::list<NetworkService *> services;
+  std::map<NetworkService *, AvahiEntryGroup *>  __services;
+  std::map<NetworkService *, AvahiEntryGroup *>::iterator  __sit;
 
   AvahiClient      *client;
-  AvahiEntryGroup  *group;
+  bool __published;
 };
 
 

@@ -29,6 +29,7 @@
 #define __NETCOMM_DNSSD_AVAHI_BROWSER_H_
 
 #include <netcomm/service_discovery/service.h>
+#include <netcomm/service_discovery/service_browser.h>
 #include <netcomm/service_discovery/browse_handler.h>
 
 #include <avahi-client/client.h>
@@ -41,7 +42,7 @@
 
 class Mutex;
 
-class AvahiBrowser
+class AvahiBrowser : public ServiceBrowser
 {
  friend class AvahiThread;
 
