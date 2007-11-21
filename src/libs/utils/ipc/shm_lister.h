@@ -46,24 +46,24 @@ class SharedMemoryLister {
    * This should fit on the terminal and thus have a width of at most
    * 79 columns.
    */
-  virtual void printHeader()                                        = 0;
+  virtual void print_header()                                          = 0;
 
   /** Print footer of the table.
    * This should fit on the terminal and thus have a width of at most
    * 79 columns.
    */
-  virtual void printFooter()                                        = 0;
+  virtual void print_footer()                                          = 0;
 
   /** Print this if no matching segment was found.
    * Called by SharedMemory if no matching segment could be found.
    */
-  virtual void printNoSegments()                                    = 0;
+  virtual void print_no_segments()                                     = 0;
 
   /** Print this if no matching orphaned segment was found.
    * Called by SharedMemory::erase_orphaned() if no matching segment
    * could be found.
    */
-  virtual void printNoOrphanedSegments()                            = 0;
+  virtual void print_no_orphaned_segments()                            = 0;
 
   /** Print info about segment.
    * This method is called for every matching shared memory segment.
@@ -75,9 +75,9 @@ class SharedMemoryLister {
    * @param mem_size the total memory size
    * @param memptr pointer to the data segment.
    */
-  virtual void printInfo(SharedMemoryHeader *header,
-			 int shm_id, int semaphore,
-			 unsigned int mem_size, void *memptr)       = 0;
+  virtual void print_info(const SharedMemoryHeader *header,
+			  int shm_id, int semaphore,
+			  unsigned int mem_size, const void *memptr)   = 0;
 };
 
 

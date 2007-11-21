@@ -40,6 +40,8 @@ class SharedMemoryHeader {
   virtual void         set(void *memptr)                      = 0;
   virtual void         reset()                                = 0;
   virtual size_t       data_size()                            = 0;
+  virtual SharedMemoryHeader *  clone() const                 = 0;
+  virtual bool         operator==(const SharedMemoryHeader &s) const = 0;
 };
 
 class SharedMemoryLister;
@@ -57,6 +59,8 @@ class SharedMemory
 	       SharedMemoryHeader *header,
 	       bool is_read_only, bool create,
 	       bool destroy_on_delete);
+
+  SharedMemory(const SharedMemory &s);
 
   virtual ~SharedMemory();
 
@@ -98,6 +102,49 @@ class SharedMemory
   static bool         is_destroyed(int shm_id);
   static bool         is_swapable(int shm_id);
   static unsigned int num_attached(int shm_id);
+
+  class SharedMemoryIterator
+  {
+   public:
+    SharedMemoryIterator();
+    SharedMemoryIterator(const SharedMemoryIterator &shmit);
+    SharedMemoryIterator(const char *magic_token, SharedMemoryHeader *header);
+    ~SharedMemoryIterator();
+
+    SharedMemoryIterator &      operator++ ();        // prefix
+    SharedMemoryIterator        operator++ (int inc); // postfix
+    SharedMemoryIterator &      operator+  (unsigned int i);
+    SharedMemoryIterator &      operator+= (unsigned int i);
+    bool                        operator== (const SharedMemoryIterator & s) const;
+    bool                        operator!= (const SharedMemoryIterator & s) const;
+    const SharedMemoryHeader *  operator*  () const;
+    SharedMemoryIterator &      operator=  (const SharedMemoryIterator & shmit);
+
+    const char *                magic_token() const;
+    int                         shmid() const;
+    int                         semaphore() const;
+    size_t                      segmsize() const;
+    size_t                      segmnattch() const;
+    void *                      databuf() const;
+
+  private:
+    void attach();
+    void reset();
+
+    char                   *__magic_token;
+    int                     __max_id;
+    int                     __cur_shmid;
+    int                     __cur_id;
+    SharedMemoryHeader     *__header;
+    void                   *__shm_buf;
+    void                   *__data_buf;
+    int                     __semaphore;
+    size_t                  __segmsize;
+    size_t                  __segmnattch;
+  };
+
+  static SharedMemoryIterator find(const char *magic_token, SharedMemoryHeader *header);
+  static SharedMemoryIterator end();
 
  protected:
 

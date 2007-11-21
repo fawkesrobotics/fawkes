@@ -2,8 +2,8 @@
 /***************************************************************************
  *  shm.cpp - shared memory segment
  *
- *  Generated: Thu Jan 12 14:10:43 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jan 12 14:10:43 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -36,7 +36,7 @@
 #include <cstring>
 #include <limits.h>
 
-/** @class SharedMemoryHeader utils/ipc/shm.h
+/** @class SharedMemoryHeader <utils/ipc/shm.h>
  * Interface for shared memory header.
  * This class has to be implemented to be able to use shared memory segments.
  * It defines a set of properties for the shared memory segment that can be
@@ -95,10 +95,25 @@
  * on the other data set in the header and written to the shared memory
  * segment.
  * @return the size of the data segment
+ *
+ * @fn SharedMemoryHeader *  SharedMemoryHeader::clone() const
+ * Clone this shared memory header.
+ * This method shall return a copied instance of this SharedMemoryHeader derivate.
+ * It should act the same way as the current instance.
+ * @return Clone instance. Remember to delete the instance.
+ *
+ * @fn bool SharedMemoryHeader::operator==(const SharedMemoryHeader &s) const
+ * Check for equality if headers.
+ * This shall be implemented that it compares the current and the given instances for
+ * equality. You probably want to use dynamic_cast to cast the given instance to
+ * a compatible type.
+ * @param s shared memory header to compare to
+ * @return true if the two instances identify the very same shared memory segments,
+ * false otherwise
  */
 
 
-/** @class SharedMemory utils/ipc/shm.h
+/** @class SharedMemory <utils/ipc/shm.h>
  * Shared memory segment.
  * This class gives access to shared memory segment to store arbitrary data.
  * With shared memory data can be shared between several applications. Special
@@ -246,6 +261,47 @@ SharedMemory::SharedMemory(char *magic_token,
   __shared_mem_upper_bound = NULL;
 
   __write_lock_aquired     = false;
+}
+
+
+/** Copy constructor.
+ * If the given SharedMemory was attached this instance will also attach.
+ * @param s SharedMemory instance to copy.
+ */
+SharedMemory::SharedMemory(const SharedMemory &s)
+{
+  _magic_token = new char[MagicTokenSize];
+  memset(_magic_token, 0, MagicTokenSize);
+  strncpy(_magic_token, s._magic_token, MagicTokenSize);
+
+  _is_read_only      = s._is_read_only;
+  _destroy_on_delete = s._destroy_on_delete;
+  _should_create     = s._should_create;
+
+  _memptr          = NULL;
+  _shm_magic_token = NULL;
+  _shm_header      = NULL;
+  _header          = s._header->clone();
+  _data_size       = 0;
+
+  __semset         = NULL;
+  __created        = false;
+  __shared_mem     = NULL;
+  __shared_mem_id  = 0;
+  __shared_mem_upper_bound = NULL;
+
+  __write_lock_aquired     = false;
+
+  try {
+    attach();
+  } catch (Exception &e) {
+    e.append("SharedMemory public copy constructor");
+    throw;
+  }
+
+  if (_memptr == NULL) {
+    throw ShmCouldNotAttachException("Could not attach to created shared memory segment");
+  }
 }
 
 
@@ -962,58 +1018,21 @@ SharedMemory::list(char *magic_token,
 		   SharedMemoryHeader *header, SharedMemoryLister *lister)
 {
 
-  lister->printHeader();
+  lister->print_header();
+  SharedMemoryIterator i = find(magic_token, header);
+  SharedMemoryIterator endi = end();
 
-  int              max_id;
-  int              shm_id;
-  struct shmid_ds  shm_segment;
-  void            *shm_buf;
-
-  char                  *shm_magic_token;
-  SharedMemory_header_t *shm_header;
-
-  unsigned int     num_segments = 0;
-
-  // Find out maximal number of existing SHM segments
-  struct shm_info shm_info;
-  max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
-  if (max_id >= 0) {
-    for ( int i = 0; i <= max_id; ++i ) {
-
-      shm_id = shmctl( i, SHM_STAT, &shm_segment );
-      if ( shm_id < 0 )  continue;
-
-      shm_buf = shmat(shm_id, NULL, SHM_RDONLY);
-      if (shm_buf != (void *)-1) {
-	// Attached
-
-	shm_magic_token = (char *)shm_buf;
-	shm_header = (SharedMemory_header_t *)((char *)shm_buf + MagicTokenSize);
-
-	if (strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0) {
-	  if ( header->matches( (char *)shm_buf + MagicTokenSize
-                                                         + sizeof(SharedMemory_header_t)) ) {
-	    header->set((char *)shm_buf + MagicTokenSize
-			                         + sizeof(SharedMemory_header_t));
-	    lister->printInfo(header, shm_id, shm_header->semaphore,
-			      shm_segment.shm_segsz,
-			      (char *)shm_buf + MagicTokenSize
-                                                       + sizeof(SharedMemory_header_t)
-                                                       + header->size());
-
-	    header->reset();
-	    ++num_segments;
-	  }
-	}
-	shmdt(shm_buf);
-      }
-    }
-    if ( num_segments == 0 ) {
-      lister->printNoSegments();
-    }
+  if ( i == endi ) {
+    lister->print_no_segments();
   }
 
-  lister->printFooter();
+  while ( i != endi ) {
+    lister->print_info(*i, i.shmid(), i.semaphore(), i.segmsize(),
+		      i.databuf());
+    ++i;
+  }
+
+  lister->print_footer();
 }
 
 
@@ -1032,68 +1051,32 @@ SharedMemory::erase(char *magic_token,
 		    SharedMemoryHeader *header, SharedMemoryLister *lister)
 {
 
-  if (lister != NULL) lister->printHeader();
+  if (lister != NULL) lister->print_header();
 
-  int              max_id;
-  int              shm_id;
-  struct shmid_ds  shm_segment;
-  void            *shm_buf;
+  SharedMemoryIterator i = find(magic_token, header);
+  SharedMemoryIterator endi = end();
 
-  char                  *shm_magic_token;
-  SharedMemory_header_t *shm_header;
-  unsigned int     num_segments = 0;
-
-  // Find out maximal number of existing SHM segments
-  struct shm_info shm_info;
-  max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
-  if (max_id >= 0) {
-    for ( int i = 0; i <= max_id; ++i ) {
-
-      shm_id = shmctl( i, SHM_STAT, &shm_segment );
-      if ( shm_id < 0 )  continue;
-
-      shm_buf = shmat(shm_id, NULL, SHM_RDONLY);
-      if (shm_buf != (void *)-1) {
-	// Attached
-
-	shm_magic_token = (char *)shm_buf;
-	shm_header = (SharedMemory_header_t *)((char *)shm_buf + MagicTokenSize);
-
-	if (strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0) {
-	  if ( header->matches( (char *)shm_buf + MagicTokenSize
-                                                + sizeof(SharedMemory_header_t)) ) {
-	    header->set((char *)shm_buf + MagicTokenSize
-			                + sizeof(SharedMemory_header_t));
-
-	    if ( shm_header->semaphore != 0 ) {
-	      // a semaphore has been assigned, destroy!
-	      SemaphoreSet::destroy(shm_header->semaphore);
-	    }
-	    // Mark shared memory segment as destroyed
-	    shmctl(shm_id, IPC_RMID, NULL);
-
-	    if ( lister != NULL) {
-	      lister->printInfo(header, shm_id, shm_header->semaphore,
-				shm_segment.shm_segsz,
-				(char *)shm_buf + MagicTokenSize
-				                + sizeof(SharedMemory_header_t)
-				                + header->size());
-	    }
-
-	    header->reset();
-
-	    ++num_segments;
-	  }
-	}
-	shmdt(shm_buf);
-      }
-    }
-    if ( num_segments == 0 ) {
-      if (lister != NULL) lister->printNoSegments();
-    }
+  if ( (i == endi) && (lister != NULL)) {
+    lister->print_no_segments();
   }
 
-  if (lister != NULL) lister->printFooter();
+  while ( i != endi ) {
+    if ( i.semaphore() != 0 ) {
+      // a semaphore has been assigned, destroy!
+      SemaphoreSet::destroy(i.semaphore());
+    }
+
+    if ( lister != NULL) {
+      lister->print_info(*i, i.shmid(), i.semaphore(), i.segmsize(),
+			 i.databuf());
+    }
+
+    // Mark shared memory segment as destroyed
+    shmctl(i.shmid(), IPC_RMID, NULL);
+    ++i;
+  }
+
+  if (lister != NULL) lister->print_footer();
 }
 
 
@@ -1113,70 +1096,44 @@ SharedMemory::erase_orphaned(char *magic_token,
 			     SharedMemoryHeader *header, SharedMemoryLister *lister)
 {
 
-  if (lister != NULL) lister->printHeader();
+  if (lister != NULL) lister->print_header();
 
-  int              max_id;
-  int              shm_id;
-  struct shmid_ds  shm_segment;
-  void            *shm_buf;
+  SharedMemoryIterator i = find(magic_token, header);
+  SharedMemoryIterator endi = end();
 
-  char                  *shm_magic_token;
-  SharedMemory_header_t *shm_header;
-  unsigned int     num_segments = 0;
-
-  // Find out maximal number of existing SHM segments
-  struct shm_info shm_info;
-  shm_segment.shm_nattch = 0;
-  max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
-  if (max_id >= 0) {
-    for ( int i = 0; i <= max_id; ++i ) {
-
-      shm_id = shmctl( i, SHM_STAT, &shm_segment );
-      if ( shm_id < 0 )  continue;
-      if ( shm_segment.shm_nattch > 0 ) continue;
-
-      shm_buf = shmat(shm_id, NULL, SHM_RDONLY);
-      if (shm_buf != (void *)-1) {
-	// Attached
-
-	shm_magic_token = (char *)shm_buf;
-	shm_header = (SharedMemory_header_t *)((char *)shm_buf + MagicTokenSize);
-
-	if (strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0) {
-	  if ( header->matches( (char *)shm_buf + MagicTokenSize
-                                                + sizeof(SharedMemory_header_t)) ) {
-	    header->set((char *)shm_buf + MagicTokenSize
-			                + sizeof(SharedMemory_header_t));
-
-	    if ( shm_header->semaphore != 0 ) {
-	      // a semaphore has been assigned, destroy!
-	      SemaphoreSet::destroy(shm_header->semaphore);
-	    }
-	    // Mark shared memory segment as destroyed
-	    shmctl(shm_id, IPC_RMID, NULL);
-
-	    if ( lister != NULL) {
-	      lister->printInfo(header, shm_id, shm_header->semaphore,
-				shm_segment.shm_segsz,
-				(char *)shm_buf + MagicTokenSize
-				                + sizeof(SharedMemory_header_t)
-				                + header->size());
-	    }
-
-	    header->reset();
-
-	    ++num_segments;
-	  }
-	}
-	shmdt(shm_buf);
-      }
-    }
-    if ( num_segments == 0 ) {
-      if (lister != NULL) lister->printNoOrphanedSegments();
-    }
+  if ( (i == endi) && (lister != NULL)) {
+    lister->print_no_segments();
   }
 
-  if (lister != NULL) lister->printFooter();
+  unsigned int num_segments = 0;
+
+  while ( i != endi ) {
+    
+    if ( i.segmnattch() == 1 ) {
+      // only iterator attached
+      if ( i.semaphore() != 0 ) {
+	// a semaphore has been assigned, destroy!
+	SemaphoreSet::destroy(i.semaphore());
+      }
+
+      if ( lister != NULL) {
+	lister->print_info(*i, i.shmid(), i.semaphore(), i.segmsize(),
+			   i.databuf());
+      }
+
+      // Mark shared memory segment as destroyed
+      shmctl(i.shmid(), IPC_RMID, NULL);
+
+      ++num_segments;
+    }
+    ++i;
+  }
+
+  if ( (num_segments == 0) && (lister != NULL) ) {
+    lister->print_no_orphaned_segments();
+  }
+
+  if (lister != NULL) lister->print_footer();
 }
 
 
@@ -1193,41 +1150,369 @@ bool
 SharedMemory::exists(char *magic_token,
 		     SharedMemoryHeader *header)
 {
-  int              max_id;
-  int              shm_id;
-  struct shmid_ds  shm_segment;
-  void            *shm_buf;
+  return (find(magic_token, header) != end());
+}
 
-  char                  *shm_magic_token;
-  SharedMemory_header_t *shm_header;
 
-  // Find out maximal number of existing SHM segments
+/** Find SharedMemory segments.
+ * Find SharedMemory segments identified by the supplied magic_token and header.
+ * @param magic_token magic token
+ * @param header shared memory header
+ * @return iterator pointing to the first found element (or end() if none found)
+ */
+SharedMemory::SharedMemoryIterator
+SharedMemory::find(const char *magic_token, SharedMemoryHeader *header)
+{
+  return SharedMemoryIterator(magic_token, header);
+}
+
+
+/** Get invalid iterator.
+ * Returns an iterator to a non-existing element.
+ * @return Non-existing element
+ */
+SharedMemory::SharedMemoryIterator
+SharedMemory::end()
+{
+  return SharedMemoryIterator();
+}
+
+
+/** Constructor.
+ * Constructs invalid iterator.
+ */
+SharedMemory::SharedMemoryIterator::SharedMemoryIterator()
+{
+  __magic_token = NULL;
+  __cur_shmid   = -1;
+  __cur_id      = -1;
+  __header      = NULL;
+  __shm_buf     = NULL;
+  __segmsize    = 0;
+  __segmnattch  = 0;
+
   struct shm_info shm_info;
-  bool found = false;
-  max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
-  if (max_id >= 0) {
-    for ( int i = 0; (! false) && (i <= max_id); ++i ) {
+  __max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
+}
 
-      shm_id = shmctl( i, SHM_STAT, &shm_segment );
-      if ( shm_id < 0 )  continue;
 
-      shm_buf = shmat(shm_id, NULL, SHM_RDONLY);
-      if (shm_buf != (void *)-1) {
-	// Attached
+/** Copy constructor.
+ * @param shmit shared memory iterator to copy
+ */
+SharedMemory::SharedMemoryIterator::SharedMemoryIterator(const SharedMemoryIterator &shmit)
+{
+  __max_id = shmit.__max_id;
+  __header = shmit.__header->clone();
+  __cur_id = shmit.__cur_id;
+  __cur_shmid = shmit.__cur_shmid;
+  __shm_buf = NULL;
+  __segmsize    = 0;
+  __segmnattch  = 0;
 
-	shm_magic_token = (char *)shm_buf;
-	shm_header = (SharedMemory_header_t *)((char *)shm_buf + MagicTokenSize);
+  if ( shmit.__magic_token == NULL ) {
+    __magic_token = NULL;
+  } else {
+    __magic_token = strdup(shmit.__magic_token);
+  }
 
-	if (strncmp(shm_magic_token, magic_token, MagicTokenSize) == 0) {
-	  if ( header->matches((char *)shm_buf + MagicTokenSize
-			                       + sizeof(SharedMemory_header_t)) ) {
-	    found = true;
+  if ( shmit.__shm_buf != (void *)-1 ) {
+    // other iterator is attach, attach as well
+    try {
+      attach();
+    } catch (Exception &e) {
+      // ignore
+    }
+  }
+}
+
+
+/** Constructor.
+ * @param magic_token magic token
+ * @param header shared memory header
+ */
+SharedMemory::SharedMemoryIterator::SharedMemoryIterator(const char *magic_token,
+							 SharedMemoryHeader *header)
+{
+  __magic_token = strdup(magic_token);
+  __header = header->clone();
+  __cur_id = -1;
+  __cur_shmid = -1;
+  __shm_buf = (void *)-1;
+  __segmsize    = 0;
+  __segmnattch  = 0;
+
+  struct shm_info shm_info;
+  __max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
+
+  // Find first shm segment
+  ++(*this);
+}
+
+
+/** Destructor. */
+SharedMemory::SharedMemoryIterator::~SharedMemoryIterator()
+{
+  delete __header;
+  if ( __shm_buf != (void *)-1 ) {
+    shmdt(__shm_buf);
+    __shm_buf = (void *)-1;
+  }
+}
+
+
+/** Attach. */
+void
+SharedMemory::SharedMemoryIterator::attach()
+{
+  struct shmid_ds  shm_segment;
+
+  // Check if segment exists and get info
+  __cur_shmid = shmctl( __cur_id, SHM_STAT, &shm_segment );
+  if ( __cur_shmid < 0 ) {
+    throw ShmCouldNotAttachException("SharedMemoryIterator could not stat");
+  }
+
+  // actually attach
+  __shm_buf = shmat(__cur_shmid, NULL, SHM_RDONLY);
+  if (__shm_buf == (void *)-1) {
+    throw ShmCouldNotAttachException("SharedMemoryIterator could not attach");
+  }
+
+  // do STAT again to get up2date values
+  __cur_shmid = shmctl( __cur_id, SHM_STAT, &shm_segment );
+  if ( __cur_shmid < 0 ) {
+    throw ShmCouldNotAttachException("SharedMemoryIterator could not stat");
+  }
+
+  __segmsize   = shm_segment.shm_segsz;
+  __segmnattch = shm_segment.shm_nattch;
+}
+
+
+/** Reset. */
+void
+SharedMemory::SharedMemoryIterator::reset()
+{
+  if ( __header) __header->reset();
+  if ( __shm_buf != (void *)-1) {
+    shmdt(__shm_buf);
+    __shm_buf = (void *)-1;
+  }
+  __data_buf   = NULL;
+  __semaphore  = -1;
+  __cur_shmid  = -1;
+  __segmsize   = 0;
+  __segmnattch = 0;
+}
+
+
+/** Prefix increment.
+ * @return reference to this instance
+ */
+SharedMemory::SharedMemoryIterator &
+SharedMemory::SharedMemoryIterator::operator++()
+{
+  reset();
+  if (__max_id >= 0) {
+    for (++__cur_id ;__cur_id <= __max_id; ++__cur_id ) {
+      try {
+	attach();
+
+	const char            *shm_magic_token = (char *)__shm_buf;
+	SharedMemory_header_t *shm_header = (SharedMemory_header_t *)((char *)__shm_buf + MagicTokenSize);
+
+	if ( (strncmp(shm_magic_token, __magic_token, MagicTokenSize) == 0) &&
+	     ( !__header || __header->matches( (char *)__shm_buf + MagicTokenSize
+					       + sizeof(SharedMemory_header_t)) ) ) {
+	  // Found one!
+	  __semaphore = shm_header->semaphore;
+	  __data_buf = (char *)__shm_buf + MagicTokenSize
+	                                 + sizeof(SharedMemory_header_t)
+	                                 + (__header ? __header->size() : 0);
+
+	  if ( __header ) {
+	    __header->set((char *)__shm_buf + MagicTokenSize
+			  + sizeof(SharedMemory_header_t));
 	  }
+
+	  break;
 	}
-	shmdt(shm_buf);
+      } catch (ShmCouldNotAttachException &e) {
+	// ignore
       }
+    }
+    if ( __cur_id > __max_id ) {
+      // did not find anything
+      reset();
     }
   }
 
-  return found;
+  return *this;
+}
+
+
+/** Postfix increment operator.
+ * @param inc ignored
+ * @return instance before advancing to the next shared memory segment
+ */
+SharedMemory::SharedMemoryIterator
+SharedMemory::SharedMemoryIterator::operator++(int inc)
+{
+  SharedMemoryIterator rv(*this);
+  ++(*this);
+  return rv;
+}
+
+
+/** Advance by i steps.
+ * @param i number of (matching) segments to advance.
+ * @return reference to this after advancing
+ */
+SharedMemory::SharedMemoryIterator &
+SharedMemory::SharedMemoryIterator::operator+(unsigned int i)
+{
+  for (unsigned int j = 0; j < i; ++j) {
+    ++(*this);
+  }
+  return *this;
+}
+
+
+/** Advance by i steps.
+ * @param i number of (matching) segments to advance.
+ * @return reference to this after advancing
+ */
+SharedMemory::SharedMemoryIterator &
+SharedMemory::SharedMemoryIterator::operator+=(unsigned int i)
+{
+  for (unsigned int j = 0; j < i; ++j) {
+    ++(*this);
+  }
+  return *this;
+}
+
+
+/** Check iterators for equality.
+ * @param s iterator to compare to
+ * @return true if iterators point to the same shared memory segment, false otherwise
+ */
+bool
+SharedMemory::SharedMemoryIterator::operator==(const SharedMemoryIterator & s) const
+{
+  return (__cur_shmid == s.__cur_shmid);
+}
+
+
+/** Check iterators for inequality.
+ * @param s iterator to compare to
+ * @return true if iteraters point to the same shared memory segment, false otherwise
+ */
+bool
+SharedMemory::SharedMemoryIterator::operator!=(const SharedMemoryIterator & s) const
+{
+  return ! (*this == s);
+}
+
+
+/** Get SharedMemoryHeader.
+ * @return shared memory header
+ */
+const SharedMemoryHeader *
+SharedMemory::SharedMemoryIterator::operator*() const
+{
+  return __header;
+}
+
+
+/** Make this instance point to the same segment as shmit.
+ * @param shmit shared memory iterator
+ * @return reference to this instance
+ */
+SharedMemory::SharedMemoryIterator &
+SharedMemory::SharedMemoryIterator::operator=(const SharedMemoryIterator & shmit)
+{
+  if ( __shm_buf != (void *)-1 ) {
+    shmdt(__shm_buf);
+    __shm_buf = (void *)-1;
+  }
+  delete __header;
+
+  __max_id = shmit.__max_id;
+  __header = shmit.__header->clone();
+  __cur_id = shmit.__cur_id;
+  __cur_shmid = shmit.__cur_shmid;
+  __shm_buf = NULL;
+
+  if ( shmit.__magic_token == NULL ) {
+    __magic_token = NULL;
+  } else {
+    __magic_token = strdup(shmit.__magic_token);
+  }
+
+  if ( shmit.__shm_buf != (void *)-1 ) {
+    // other iterator is attach, attach as well
+    attach();
+  }
+
+  return *this;
+}
+
+
+/** Get magic token.
+ * @return magic token.
+ */
+const char *
+SharedMemory::SharedMemoryIterator::magic_token() const
+{
+  return __magic_token;
+}
+
+
+/** Get shared memory ID.
+ * @return shared memory ID
+ */
+int
+SharedMemory::SharedMemoryIterator::shmid() const
+{
+  return __cur_shmid;
+}
+
+
+/** Get semaphore.
+ * @return semaphore
+ */
+int
+SharedMemory::SharedMemoryIterator::semaphore() const
+{
+  return __semaphore;
+}
+
+
+/** Get segment size.
+ * @return segment size
+ */
+size_t
+SharedMemory::SharedMemoryIterator::segmsize() const
+{
+  return __segmsize;
+}
+
+
+/** Get number of attached parties.
+ * @return number of attached parties
+ */
+size_t
+SharedMemory::SharedMemoryIterator::segmnattch() const
+{
+  return __segmnattch;
+}
+
+
+/** Get pointer to data buffer.
+ * @return data buffer
+ */
+void *
+SharedMemory::SharedMemoryIterator::databuf() const
+{
+  return __data_buf;
 }

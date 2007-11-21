@@ -65,15 +65,10 @@ ShmNoHeaderException::ShmNoHeaderException()
  */
 ShmInconsistentSegmentSizeException::ShmInconsistentSegmentSizeException(unsigned int desired_mem,
 									 unsigned int act_mem)
-  : Exception()
+  : Exception("Inconsistent shared mem segment found in memory "
+	      "(memory size does not match, desired: %u, actual: %u)",
+	      desired_mem, act_mem)
 {
-  char *message;
-  asprintf( &message, "Inconsistent shared mem segment found in memory "
-	    "(memory size does not match, desired: %u, actual: %u)",
-	    desired_mem, act_mem);
-  messages_mutex->lock();
-  append_nolock_nocopy(message);
-  messages_mutex->unlock();
 }
 
 
