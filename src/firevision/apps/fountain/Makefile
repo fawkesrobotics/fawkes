@@ -28,23 +28,18 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-OBJS_fountain = fountain.o mini_image_producer.o
-LIBS_fountain = core utils fvutils fvcams fvmodels fvclassifiers fvfilters netcomm
+LIBS_fvfountain = core utils fvutils fvcams fvmodels fvclassifiers fvfilters netcomm
 
 ifeq ($(BUILD_TYPE),rcsoftx)
-  OBJS_fountain += rcxmain.o bbclient.o config.o
-  LIBS_fountain += rutils bb interfaces qt-mt pthread
-  BINS_all       = $(BINDIR)/fountain
-  # -Wno-non-virtual-dtor needed to stop gcc from throwing Qt warnings
-  CFLAGS        += -Wno-non-virtual-dtor
-  INCDIRS       += $(QTDIR)/include
-  LIBDIRS       += $(QTDIR)/lib
+  OBJS_fvfountain = fountain.o mini_image_producer.o rcxmain.o
+  LIBS_fvfountain += pthread
+  BINS_all       = $(BINDIR)/fvfountain
 else
-  OBJS_fountain += fawkes_plugin.o
-#  PLUGINS_all = $(PLUGINDIR)/fountain.so
+  OBJS_fvfountain = fountain_thread.o fountain_plugin.o
+  PLUGINS_all = $(PLUGINDIR)/fvfountain.so
 endif
 
-OBJS_all = $(OBJS_fountain)
+OBJS_all = $(OBJS_fvfountain)
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
