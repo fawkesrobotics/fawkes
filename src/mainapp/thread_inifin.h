@@ -35,11 +35,13 @@ class Configuration;
 class Logger;
 class Clock;
 class Thread;
+class ThreadCollector;
 
 class FawkesThreadIniFin : public AspectIniFin
 {
  public:
-  FawkesThreadIniFin(BlackBoard *blackboard, Configuration *config, Logger *logger, Clock *clock);
+  FawkesThreadIniFin(BlackBoard *blackboard, ThreadCollector *collector,
+		     Configuration *config, Logger *logger, Clock *clock);
 
   virtual void init(Thread *thread);
   virtual void finalize(Thread *thread);

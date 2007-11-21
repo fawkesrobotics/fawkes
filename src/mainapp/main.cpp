@@ -101,7 +101,10 @@ usage(const char *progname)
        << "                config file (or console logger if unset in config)." << endl
        << "                format for loggers is: logger:args[;logger2:args2[!...]]" << endl
        << "                the loggeroptions depend on the logger. Currently supported are:" << endl
-       << "                  console, file:file.log" << endl
+       << "                console, file:file.log" << endl
+       << " -p plugins     Comma-separated list of plugins, for example " << endl
+       << "                fvbase,fvfountain,fvretriever. These plugins will be loaded" << endl
+       << "                in the given order after startup."
        << endl;
 }
 
@@ -113,7 +116,7 @@ usage(const char *progname)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "HCc:d:q::l:L:");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "HCc:d:q::l:L:p:");
 
   if ( argp->has_arg("H") ) {
     usage(argv[0]);

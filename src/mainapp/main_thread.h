@@ -48,6 +48,7 @@ class FawkesMainThread : public Thread
   FawkesMainThread(ArgumentParser *argp);
   virtual ~FawkesMainThread();
 
+  virtual void once();
   virtual void loop();
 
  private:

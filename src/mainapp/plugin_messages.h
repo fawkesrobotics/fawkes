@@ -30,44 +30,27 @@
 
 #include <netcomm/utils/dynamic_buffer.h>
 
-/** PLUGIN_LOAD message type ID */
-#define MSG_PLUGIN_LOAD            1
+/** Plugin message type. */
+typedef enum {
+  MSG_PLUGIN_LOAD               =   1,	/**< request plugin load (plugin_load_msg_t) */
+  MSG_PLUGIN_LOADED             =   2,	/**< plugin loaded (plugin_loaded_msg_t) */
+  MSG_PLUGIN_LOAD_FAILED        =   3,	/**< plugin load failed (plugin_load_failed_msg_t) */
+  MSG_PLUGIN_UNLOAD             =   4,	/**< request plugin unload (plugin_unload_msg_t) */
+  MSG_PLUGIN_UNLOADED           =   5,	/**< plugin unloaded (plugin_unloaded_msg_t) */
+  MSG_PLUGIN_UNLOAD_FAILED      =   6,	/**< plugin unload failed (plugin_unload_failed_msg_t) */
+  MSG_PLUGIN_LIST_AVAIL         =   7,	/**< request list of available plugins */
+  MSG_PLUGIN_AVAIL_LIST         =   8,	/**< list of available plugins (plugin_list_msg_t) */
+  MSG_PLUGIN_AVAIL_LIST_FAILED  =   9,	/**< listing available plugins failed */
+  MSG_PLUGIN_LIST_LOADED        =  10,	/**< request lif of loaded plugins */
+  MSG_PLUGIN_LOADED_LIST        =  11,	/**< list of loaded plugins (plugin_list_msg_t) */
+  MSG_PLUGIN_LOADED_LIST_FAILED =  12,	/**< listing loaded plugins failed */
+  MSG_PLUGIN_SUBSCRIBE_WATCH    =  13,	/**< Subscribe for watching load/unload events */
+  MSG_PLUGIN_UNSUBSCRIBE_WATCH  =  14	/**< Unsubscribe from watching load/unload events */
+} plugin_message_type_t;
 
-/** PLUGIN_LOADED message type ID */
-#define MSG_PLUGIN_LOADED          2
-
-/** PLUGIN_LOAD_FAILED message type ID */
-#define MSG_PLUGIN_LOAD_FAILED     3
-
-/** PLUGIN_UNLOAD message type ID */
-#define MSG_PLUGIN_UNLOAD          4
-
-/** PLUGIN_UNLOADED message type ID */
-#define MSG_PLUGIN_UNLOADED        5
-
-/** PLUGIN_UNLOAD_FAILED message type ID */
-#define MSG_PLUGIN_UNLOAD_FAILED   6
-
-/** PLUGIN_NONE_LOADED message type ID */
-#define MSG_PLUGIN_NONE_LOADED     7
-
-/** PLUGIN_ALIVE message type ID */
-#define MSG_PLUGIN_ALIVE           10
-
-/** PLUGIN_LIST_ALL message type id */
-#define MSG_PLUGIN_LIST_AVAIL        11
-
-/** PLUGIN_LIST message type id */
-#define MSG_PLUGIN_LIST            12
-
-/** PLUGIN_LIST_ALL_FAILED message type id */
-#define MSG_PLUGIN_LIST_AVAIL_FAILED 13
 
 /** Maximum length of the plugin name field. */
 #define PLUGIN_MSG_NAME_LENGTH 32
-
-/** Maximal number of plugins. */
-#define PLUGIN_MSG_MAX_NUM_PLUGINS 20
 
 /** Load plugin message.
  * Message type Id is MSG_PLUGIN_LOAD.
@@ -82,13 +65,6 @@ typedef struct {
 typedef struct {
   char name[PLUGIN_MSG_NAME_LENGTH];	/**< name of te plugin to unload. */
 } plugin_unload_msg_t;
-
-/** Alive message.
- * Message type Id is MSG_PLUGIN_ALIVE.
- */
-typedef struct {
-  unsigned int plugin_id;	/**< plugin ID of the alive plugin */
-} plugin_alive_msg_t;
 
 /** Plugin loaded message.
  * Message type ID is MSG_PLUGIN_LOADED.

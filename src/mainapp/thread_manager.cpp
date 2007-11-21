@@ -30,6 +30,7 @@
 #include <core/threading/barrier.h>
 #include <core/threading/thread_initializer.h>
 #include <core/threading/thread_finalizer.h>
+#include <core/exceptions/software.h>
 
 #include <aspect/blocked_timing.h>
 
@@ -53,14 +54,11 @@
  */
 
 /** Constructor.
- * @param initializer thread initializer
- * @param finalizer thread finalizer
  */
-FawkesThreadManager::FawkesThreadManager(ThreadInitializer *initializer,
-					 ThreadFinalizer *finalizer)
+FawkesThreadManager::FawkesThreadManager()
 {
-  this->initializer = initializer;
-  this->finalizer   = finalizer;
+  initializer = NULL;
+  finalizer   = NULL;
   threads.clear();
   barriers.clear();
 }
@@ -84,6 +82,18 @@ FawkesThreadManager::~FawkesThreadManager()
   barriers.clear();
 }
 
+
+/** Set initializer/finalizer.
+ * This method has to be called before any thread is added/removed.
+ * @param initializer thread initializer
+ * @param finalizer thread finalizer
+ */
+void
+FawkesThreadManager::set_inifin(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
+{
+  this->initializer = initializer;
+  this->finalizer   = finalizer;
+}
 
 
 /** Update barriers.
@@ -193,9 +203,13 @@ FawkesThreadManager::add(ThreadList &tl)
 {
   std::list<BlockedTimingAspect::WakeupHook> changed;
 
+  if ( ! (initializer && finalizer) ) {
+    throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
+  }
+
   if ( tl.sealed() ) {
-    Exception e("Not accepting new threads from list that is not fresh");
-    e.append("Threads in list '%s' already sealed", tl.name());
+    throw Exception("Not accepting new threads from list that is not fresh, "
+		    "list '%s' already sealed", tl.name());
   }
 
   tl.lock();
@@ -234,9 +248,13 @@ FawkesThreadManager::add(ThreadList &tl)
 void
 FawkesThreadManager::add_deferred(ThreadList &tl)
 {
+  if ( ! (initializer && finalizer) ) {
+    throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
+  }
+
   if ( tl.sealed() ) {
-    Exception e("Not accepting new threads from list that is not fresh");
-    e.append("Threads in list '%s' already sealed", tl.name());
+    throw Exception("Not accepting new threads from list that is not fresh, "
+		    "list '%s' already sealed", tl.name());
   }
 
   tl.lock();
@@ -292,6 +310,14 @@ FawkesThreadManager::deferred_add_done(ThreadList &tl)
 void
 FawkesThreadManager::add(Thread *thread)
 {
+  if ( thread == NULL ) {
+    throw NullPointerException("FawkesThreadMananger: cannot add NULL as thread");
+  }
+
+  if ( ! (initializer && finalizer) ) {
+    throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
+  }
+
   try {
     initializer->init(thread);
   } catch (CannotInitializeThreadException &e) {
@@ -326,10 +352,15 @@ FawkesThreadManager::remove(ThreadList &tl)
 {
   std::list<BlockedTimingAspect::WakeupHook> changed;
 
+  if ( ! (initializer && finalizer) ) {
+    throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
+  }
+
+
   if ( ! tl.sealed() ) {
-    ThreadListNotSealedException e("Cannot remove unsealed thread list");
-    e.append("Not accepting unsealed list '%s' for removal", tl.name());
-    throw e;
+    throw ThreadListNotSealedException("(FawkesThreadManager) Cannot remove unsealed thread "
+				       "list. Not accepting unsealed list '%s' for removal",
+				       tl.name());
   }
 
   changed.clear();
@@ -340,9 +371,8 @@ FawkesThreadManager::remove(ThreadList &tl)
     if ( ! tl.prepare_finalize(finalizer) ) {
       tl.cancel_finalize();
       tl.unlock();
-      CannotFinalizeThreadException e("One or more threads cannot be finalized");
-      e.append("One or more threads in list '%s' cannot be finalized", tl.name());
-      throw e;
+      throw CannotFinalizeThreadException("One or more threads in list '%s' cannot be "
+					  "finalized", tl.name());
     }
   } catch (CannotFinalizeThreadException &e) {
     tl.unlock();
@@ -380,9 +410,9 @@ void
 FawkesThreadManager::remove_deferred(ThreadList &tl)
 {
   if ( ! tl.sealed() ) {
-    ThreadListNotSealedException e("Cannot remove unsealed thread list");
-    e.append("Not accepting unsealed list '%s' for removal", tl.name());
-    throw e;
+    throw ThreadListNotSealedException("Cannot remove unsealed thread list. "
+				       "Not accepting unsealed list '%s' for removal",
+				       tl.name());
   }
 
   tl.lock();
@@ -426,7 +456,7 @@ FawkesThreadManager::deferred_remove_done(ThreadList &tl)
 }
 
 
-/** Remove the given threads.
+/** Remove the given thread.
  * The thread manager tries to finalize and stop the thread and then removes the
  * thread from the internal structures.
  *
@@ -441,12 +471,12 @@ FawkesThreadManager::deferred_remove_done(ThreadList &tl)
 void
 FawkesThreadManager::remove(Thread *thread)
 {
+  if ( thread == NULL ) return;
+
   try {
     if ( ! thread->prepare_finalize() ) {
       thread->cancel_finalize();
-      CannotFinalizeThreadException e("Thread cannot be finalized");
-      e.append("Threads '%s' cannot be finalized", thread->name());
-      throw e;
+      throw CannotFinalizeThreadException("Thread '%s'cannot be finalized", thread->name());
     }
   } catch (CannotFinalizeThreadException &e) {
     e.append("FawkesThreadManager cannot stop thread '%s'", thread->name());
@@ -488,9 +518,8 @@ FawkesThreadManager::force_remove(ThreadList &tl)
   std::list<BlockedTimingAspect::WakeupHook> changed;
 
   if ( ! tl.sealed() ) {
-    ThreadListNotSealedException e("Thread list not sealed");
-    e.append("Not accepting unsealed list '%s' for removal", tl.name());
-    throw e;
+    throw ThreadListNotSealedException("Not accepting unsealed list '%s' for removal",
+				       tl.name());
   }
 
   changed.clear();

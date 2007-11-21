@@ -32,8 +32,12 @@
 #include <netcomm/fawkes/handler.h>
 #include <netcomm/utils/resolver.h>
 #include <netcomm/utils/resolver.h>
+#include <utils/logging/liblogger.h>
 #ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
+#include <netcomm/dns-sd/avahi_service_publisher.h>
+#include <netcomm/dns-sd/avahi_browser.h>
+#include <netcomm/service_discovery/service.h>
 #else
 #include <netcomm/service_discovery/dummy_service_publisher.h>
 #include <netcomm/service_discovery/dummy_service_browser.h>
@@ -62,10 +66,16 @@ FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
   _service_publisher     = avahi_thread->avahi_service_publisher();
   _service_browser       = avahi_thread->avahi_service_browser();
   thread_manager->add(avahi_thread);
-  AvahiService *fawkes_service = new AvahiService("Fawkes", "_fawkes._udp", fawkes_port);
-  avahi_thread->publish(fawkes_service);
   _nnresolver = new NetworkNameResolver(avahi_thread);
+  char *fawkes_service_name;
+  asprintf(&fawkes_service_name, "Fawkes on %s", _nnresolver->short_hostname());
+  NetworkService *fawkes_service = new NetworkService(fawkes_service_name,
+						      "_fawkes._tcp", fawkes_port);
+  free(fawkes_service_name);
+  avahi_thread->publish(fawkes_service);
 #else
+  LibLogger::log_warn("FawkesNetworkManager", "Avahi not available, only using dummies "
+		      "for service publishing/browsing.");
   _service_publisher = new DummyServicePublisher();
   _service_browser   = new DummyServiceBrowser();
   _nnresolver        = new NetworkNameResolver();
@@ -81,9 +91,10 @@ FawkesNetworkManager::~FawkesNetworkManager()
 #ifdef HAVE_AVAHI
   thread_manager->remove(avahi_thread);
   delete avahi_thread;
-#endif
+#else
   delete _service_publisher;
   delete _service_browser;
+#endif
   delete _nnresolver;
 }
 

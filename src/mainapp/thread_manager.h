@@ -43,9 +43,10 @@ class ThreadFinalizer;
 class FawkesThreadManager : public ThreadCollector
 {
  public:
-  FawkesThreadManager(ThreadInitializer *initializer,
-		      ThreadFinalizer   *finalizer);
+  FawkesThreadManager();
   virtual ~FawkesThreadManager();
+
+  void set_inifin(ThreadInitializer *initializer, ThreadFinalizer *finalizer);
 
   virtual void add(ThreadList &tl);
   virtual void add(Thread *t);

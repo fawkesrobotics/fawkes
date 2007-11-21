@@ -71,6 +71,7 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   thread_inifin       = NULL;
 
   hostinfo = new HostInfo();
+  this->argp = argp;
 
   /* Config stuff */
   config             = new SQLiteConfiguration(CONFDIR);
@@ -145,8 +146,10 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   try {
     config_manager     = new FawkesConfigManager(config);
     blackboard         = new BlackBoard();
-    thread_inifin      = new FawkesThreadIniFin(blackboard, config, multi_logger, clock);
-    thread_manager     = new FawkesThreadManager(thread_inifin, thread_inifin);
+    thread_manager     = new FawkesThreadManager();
+    thread_inifin      = new FawkesThreadIniFin(blackboard, thread_manager,
+						config, multi_logger, clock);
+    thread_manager->set_inifin(thread_inifin, thread_inifin);
     plugin_manager     = new FawkesPluginManager(thread_manager);
     network_manager    = new FawkesNetworkManager(thread_manager, 1910);
   } catch (Exception &e) {
@@ -194,6 +197,29 @@ FawkesMainThread::destruct()
   Clock::finalize();
 }
 
+void
+FawkesMainThread::once()
+{
+  if ( argp->has_arg("p") ) {
+    char *plugins = strdup(argp->arg("p"));
+    char *saveptr;
+    char *plugin;
+
+    plugin = strtok_r(plugins, ",", &saveptr);
+    while ( plugin ) {
+      try {
+	plugin_manager->load(plugin);
+      } catch (Exception &e) {
+	multi_logger->log_error("FawkesMainThread", "Failed to load plugin %s, "
+				"exception follows", plugin);
+	multi_logger->log_error("FawkesMainThread", e);
+      }
+      plugin = strtok_r(NULL, ",", &saveptr);
+    }
+
+    free(plugins);
+  }
+}
 
 /** Thread loop.
  * Runs the main loop.

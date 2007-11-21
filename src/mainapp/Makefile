@@ -20,6 +20,7 @@
 
 BASEDIR = ../..
 
+include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/libs/netcomm/netcomm.mk
 
 LIBS_libfawkesmainappmsgs = core utils netcomm

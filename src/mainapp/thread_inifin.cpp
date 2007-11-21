@@ -42,15 +42,17 @@
 
 /** Constructor.
  * @param blackboard BlackBoard
+ * @param collector Thread collector
  * @param config Configuration
  * @param logger Logger
  * @param clock Clock
  */
 FawkesThreadIniFin::FawkesThreadIniFin(BlackBoard *blackboard,
+				       ThreadCollector *collector,
 				       Configuration *config,
 				       Logger *logger,
 				       Clock *clock)
-  : AspectIniFin(blackboard, config, logger, clock)
+  : AspectIniFin(blackboard, collector, config, logger, clock)
 {
 }
 
