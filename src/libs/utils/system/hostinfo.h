@@ -41,6 +41,8 @@ class HostInfo
   const char *  sys_release();
   const char *  sys_version();
 
+  void update();
+
  private:
   struct utsname *utsname;
   char *short__name;

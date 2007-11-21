@@ -51,6 +51,35 @@ HostInfo::HostInfo()
     throw NullPointerException("Could not call uname");
   }
 
+  short__name = NULL;
+  domain_name = NULL;
+
+  update();
+}
+
+
+/** Destructor. */
+HostInfo::~HostInfo()
+{
+  free(utsname);
+  free(short__name);
+  free(domain_name);
+}
+
+
+/** Update information.
+ * Gathers the information again.
+ */
+void
+HostInfo::update()
+{
+  if ( short__name != NULL ) {
+    free(short__name);
+  }
+  if (domain_name != NULL) {
+    free(domain_name);
+  }
+
   char *dot;
   if ( (dot = strchr(utsname->nodename, '.')) == NULL ) {
     short__name  = strdup(utsname->nodename);
@@ -66,15 +95,6 @@ HostInfo::HostInfo()
     domain_name[domain_length - 1] = 0;
     strncpy(domain_name, dot + 1, domain_length - 1);
   }
-}
-
-
-/** Destructor. */
-HostInfo::~HostInfo()
-{
-  free(utsname);
-  free(short__name);
-  free(domain_name);
 }
 
 
