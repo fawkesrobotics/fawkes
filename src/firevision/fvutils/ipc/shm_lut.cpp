@@ -104,6 +104,16 @@ SharedMemoryLookupTable::~SharedMemoryLookupTable()
 }
 
 
+/** Get LUT ID.
+ * @return LUT ID
+ */
+const char *
+SharedMemoryLookupTable::lut_id() const
+{
+  return __lut_id;
+}
+
+
 /** Set LUT ID.
  * @param lut_id LUT ID
  * @return true on success
@@ -124,7 +134,7 @@ SharedMemoryLookupTable::set_lut_id(const char *lut_id)
  * @return LUT buffer
  */
 unsigned char *
-SharedMemoryLookupTable::buffer()
+SharedMemoryLookupTable::buffer() const
 {
   return (unsigned char *)_memptr;
 }
@@ -134,7 +144,7 @@ SharedMemoryLookupTable::buffer()
  * @return LUT width
  */
 unsigned int
-SharedMemoryLookupTable::width()
+SharedMemoryLookupTable::width() const
 {
   return __raw_header->width;
 }
@@ -144,7 +154,7 @@ SharedMemoryLookupTable::width()
  * @return LUT height
  */
 unsigned int
-SharedMemoryLookupTable::height()
+SharedMemoryLookupTable::height() const
 {
   return __raw_header->height;
 }
@@ -154,7 +164,7 @@ SharedMemoryLookupTable::height()
  * @return bytes per cell
  */
 unsigned int
-SharedMemoryLookupTable::bytes_per_cell()
+SharedMemoryLookupTable::bytes_per_cell() const
 {
   return __raw_header->bytes_per_cell;
 }
@@ -196,11 +206,8 @@ bool
 SharedMemoryLookupTable::exists(const char *lut_id)
 {
   SharedMemoryLookupTableHeader *h = new SharedMemoryLookupTableHeader(lut_id, 0, 0, 0);
-
   bool ex = SharedMemory::exists(FIREVISION_SHM_LUT_MAGIC_TOKEN, h);
-
   delete h;
-
   return ex;
 }
 
@@ -212,9 +219,7 @@ void
 SharedMemoryLookupTable::wipe(const char *lut_id)
 {
   SharedMemoryLookupTableHeader *h = new SharedMemoryLookupTableHeader(lut_id, 0, 0, 0);
-
   SharedMemory::erase(FIREVISION_SHM_LUT_MAGIC_TOKEN, h, NULL);
-
   delete h;
 }
 
@@ -246,10 +251,28 @@ SharedMemoryLookupTableHeader::SharedMemoryLookupTableHeader(const char *lut_id,
 							     unsigned int height,
 							     unsigned int bytes_per_cell)
 {
-  __lut_id = lut_id;
+  __lut_id = strdup(lut_id);
   __width  = width;
   __height = height;
   __bytes_per_cell = bytes_per_cell;
+
+  __header = NULL;
+}
+
+
+/** Copy constructor.
+ * @param h header to copy data from
+ */
+SharedMemoryLookupTableHeader::SharedMemoryLookupTableHeader(const SharedMemoryLookupTableHeader *h)
+{
+  if( h->__lut_id != NULL ) {
+    __lut_id = strdup(h->__lut_id);
+  } else {
+    __lut_id = NULL;
+  }
+  __width  = h->__width;
+  __height = h->__height;
+  __bytes_per_cell = h->__bytes_per_cell;
 
   __header = NULL;
 }
@@ -259,7 +282,17 @@ SharedMemoryLookupTableHeader::SharedMemoryLookupTableHeader(const char *lut_id,
 SharedMemoryLookupTableHeader::~SharedMemoryLookupTableHeader()
 {
   __header = NULL;
-  __lut_id = NULL;
+  if ( __lut_id != NULL ) {
+    free(__lut_id);
+    __lut_id = NULL;
+  }
+}
+
+
+SharedMemoryHeader *
+SharedMemoryLookupTableHeader::clone() const
+{
+  return new SharedMemoryLookupTableHeader(this);
 }
 
 
@@ -364,11 +397,26 @@ SharedMemoryLookupTableHeader::reset()
 }
 
 
+bool
+SharedMemoryLookupTableHeader::operator==(const SharedMemoryHeader &s) const
+{
+  const SharedMemoryLookupTableHeader *h = dynamic_cast<const SharedMemoryLookupTableHeader *>(&s);
+  if ( ! h ) {
+    return false;
+  } else {
+    return ( (strncmp(__lut_id, h->__lut_id, LUT_ID_MAX_LENGTH) == 0) &&
+	     (__width == h->__width) &&
+	     (__height == h->__height) &&
+	     (__bytes_per_cell == h->__bytes_per_cell) );
+  }
+}
+
+
 /** Get LUT width.
  * @return LUT width.
  */
 unsigned int
-SharedMemoryLookupTableHeader::width()
+SharedMemoryLookupTableHeader::width() const
 {
   if (__header == NULL) return 0;
   return __header->width;
@@ -379,7 +427,7 @@ SharedMemoryLookupTableHeader::width()
  * @return LUT height.
  */
 unsigned int
-SharedMemoryLookupTableHeader::height()
+SharedMemoryLookupTableHeader::height() const
 {
   if (__header == NULL) return 0;
   return __header->height;
@@ -390,7 +438,7 @@ SharedMemoryLookupTableHeader::height()
  * @return bytes per cell.
  */
 unsigned int
-SharedMemoryLookupTableHeader::bytes_per_cell()
+SharedMemoryLookupTableHeader::bytes_per_cell() const
 {
   if (__header == NULL) return 0;
   return __header->bytes_per_cell;
@@ -401,7 +449,7 @@ SharedMemoryLookupTableHeader::bytes_per_cell()
  * @return LUT Id
  */
 const char *
-SharedMemoryLookupTableHeader::lut_id()
+SharedMemoryLookupTableHeader::lut_id() const
 {
   if (__header == NULL) return NULL;
   return __header->lut_id;
@@ -414,7 +462,8 @@ SharedMemoryLookupTableHeader::lut_id()
 void
 SharedMemoryLookupTableHeader::set_lut_id(const char *lut_id)
 {
-  __lut_id = lut_id;
+  if ( __lut_id )  free(__lut_id);
+  __lut_id = strdup(lut_id);
 }
 
 
@@ -445,27 +494,27 @@ SharedMemoryLookupTableLister::~SharedMemoryLookupTableLister()
 
 
 void
-SharedMemoryLookupTableLister::printHeader()
+SharedMemoryLookupTableLister::print_header()
 {
   cout << endl << cgreen << "FireVision Shared Memory Segments - Lookup Tables"
        << cnormal << endl
-       << "========================================================================" << endl
-       << cwhite;
+       << "========================================================================================" << endl
+       << cdarkgray;
   printf ("%-23s %-10s %-10s %-10s %-9s %-9s %-9s\n",
           "LUT ID", "ShmID", "Semaphore", "Bytes", "Width", "Height", "State");
   cout << cnormal
-       << "------------------------------------------------------------------------" << endl;
+       << "----------------------------------------------------------------------------------------" << endl;
 }
 
 
 void
-SharedMemoryLookupTableLister::printFooter()
+SharedMemoryLookupTableLister::print_footer()
 {
 }
 
 
 void
-SharedMemoryLookupTableLister::printNoSegments()
+SharedMemoryLookupTableLister::print_no_segments()
 {
   cout << "No FireVision shared memory segments containing lookup tables found" << endl;
 }
@@ -474,16 +523,16 @@ SharedMemoryLookupTableLister::printNoSegments()
 
 
 void
-SharedMemoryLookupTableLister::printNoOrphanedSegments()
+SharedMemoryLookupTableLister::print_no_orphaned_segments()
 {
   cout << "No orphaned FireVision shared memory segments containing lookup tables found" << endl;
 }
 
 void
-SharedMemoryLookupTableLister::printInfo(SharedMemoryHeader *header,
-					 int shm_id, int semaphore,
-					 unsigned int mem_size,
-					 void *memptr)
+SharedMemoryLookupTableLister::print_info(const SharedMemoryHeader *header,
+					  int shm_id, int semaphore,
+					  unsigned int mem_size,
+					  const void *memptr)
 {
 
   SharedMemoryLookupTableHeader *h = (SharedMemoryLookupTableHeader *)header;

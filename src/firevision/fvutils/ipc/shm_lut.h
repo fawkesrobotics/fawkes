@@ -52,8 +52,10 @@ class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
 				unsigned int width,
 				unsigned int height,
 				unsigned int bytes_per_cell);
+  SharedMemoryLookupTableHeader(const SharedMemoryLookupTableHeader *h);
   virtual ~SharedMemoryLookupTableHeader();
 
+  virtual SharedMemoryHeader *  clone() const;
   virtual bool         matches(void *memptr);
   virtual size_t       size();
   virtual bool         create();
@@ -61,21 +63,22 @@ class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
   virtual void         set(void *memptr);
   virtual void         reset();
   virtual size_t       data_size();
+  virtual bool         operator==(const SharedMemoryHeader & s) const;
 
   virtual void         print_info();
 
-  const char *  lut_id();
+  const char *  lut_id() const;
   void          set_lut_id(const char *lut_id);
-  unsigned int  width();
-  unsigned int  height();
-  unsigned int  bytes_per_cell();
+  unsigned int  width() const;
+  unsigned int  height() const;
+  unsigned int  bytes_per_cell() const;
 
   SharedMemoryLookupTable_header_t * raw_header();
 
  private:
   SharedMemoryLookupTable_header_t *__header;
 
-  const char    *__lut_id;
+  char          *__lut_id;
   unsigned int   __width;
   unsigned int   __height;
   unsigned int   __bytes_per_cell;
@@ -86,13 +89,13 @@ class SharedMemoryLookupTableLister : public SharedMemoryLister {
   SharedMemoryLookupTableLister();
   virtual ~SharedMemoryLookupTableLister();
 
-  virtual void printHeader();
-  virtual void printFooter();
-  virtual void printNoSegments();
-  virtual void printNoOrphanedSegments();
-  virtual void printInfo(SharedMemoryHeader *header,
-			 int shm_id, int semaphore, unsigned int mem_size,
-			 void *memptr);
+  virtual void print_header();
+  virtual void print_footer();
+  virtual void print_no_segments();
+  virtual void print_no_orphaned_segments();
+  virtual void print_info(const SharedMemoryHeader *header,
+			  int shm_id, int semaphore, unsigned int mem_size,
+			  const void *memptr);
 };
 
 
@@ -107,11 +110,12 @@ class SharedMemoryLookupTable : public SharedMemory
   SharedMemoryLookupTable(const char *lut_id , bool is_read_only = true);
   ~SharedMemoryLookupTable();
 
+  const char *     lut_id() const;
   bool             set_lut_id(const char *lut_id);
-  unsigned char *  buffer();
-  unsigned int     width();
-  unsigned int     height();
-  unsigned int     bytes_per_cell();
+  unsigned char *  buffer() const;
+  unsigned int     width() const;
+  unsigned int     height() const;
+  unsigned int     bytes_per_cell() const;
 
   static void      list();
   static void      cleanup();

@@ -98,6 +98,7 @@ SharedMemoryImageBuffer::constructor(const char *image_id, colorspace_t cspace,
   priv_header = new SharedMemoryImageBufferHeader(_image_id, _colorspace, width, height);
   _header = priv_header;
   attach();
+  add_semaphore();
   raw_header = priv_header->raw_header();
 
   if (_memptr == NULL) {
@@ -137,11 +138,21 @@ SharedMemoryImageBuffer::set_image_id(const char *image_id)
 }
 
 
+/** Get Image ID.
+ * @return image id
+ */
+const char *
+SharedMemoryImageBuffer::image_id() const
+{
+  return _image_id;
+}
+
+
 /** Get image buffer.
  * @return image buffer.
  */
 unsigned char *
-SharedMemoryImageBuffer::buffer()
+SharedMemoryImageBuffer::buffer() const
 {
   return (unsigned char *)_memptr;
 }
@@ -151,9 +162,9 @@ SharedMemoryImageBuffer::buffer()
  * @return colorspace
  */
 colorspace_t
-SharedMemoryImageBuffer::colorspace()
+SharedMemoryImageBuffer::colorspace() const
 {
-  return fuse_ui2cs(raw_header->colorspace);
+  return (colorspace_t)raw_header->colorspace;
 }
 
 
@@ -161,7 +172,7 @@ SharedMemoryImageBuffer::colorspace()
  * @return width
  */
 unsigned int
-SharedMemoryImageBuffer::width()
+SharedMemoryImageBuffer::width() const
 {
   return raw_header->width;
 }
@@ -171,7 +182,7 @@ SharedMemoryImageBuffer::width()
  * @return image height
  */
 unsigned int
-SharedMemoryImageBuffer::height()
+SharedMemoryImageBuffer::height() const
 {
   return raw_header->height;
 }
@@ -181,7 +192,7 @@ SharedMemoryImageBuffer::height()
  * @return ROI X
  */
 unsigned int
-SharedMemoryImageBuffer::roi_x()
+SharedMemoryImageBuffer::roi_x() const
 {
   return raw_header->roi_x;
 }
@@ -191,7 +202,7 @@ SharedMemoryImageBuffer::roi_x()
  * @return ROI Y
  */
 unsigned int
-SharedMemoryImageBuffer::roi_y()
+SharedMemoryImageBuffer::roi_y() const
 {
   return raw_header->roi_y;
 }
@@ -201,7 +212,7 @@ SharedMemoryImageBuffer::roi_y()
  * @return ROI width
  */
 unsigned int
-SharedMemoryImageBuffer::roi_width()
+SharedMemoryImageBuffer::roi_width() const
 {
   return raw_header->roi_width;
 }
@@ -211,7 +222,7 @@ SharedMemoryImageBuffer::roi_width()
  * @return ROI height
  */
 unsigned int
-SharedMemoryImageBuffer::roi_height()
+SharedMemoryImageBuffer::roi_height() const
 {
   return raw_header->roi_height;
 }
@@ -221,7 +232,7 @@ SharedMemoryImageBuffer::roi_height()
  * @return circle X
  */
 int
-SharedMemoryImageBuffer::circle_x()
+SharedMemoryImageBuffer::circle_x() const
 {
   return raw_header->circle_x;
 }
@@ -231,7 +242,7 @@ SharedMemoryImageBuffer::circle_x()
  * @return circle Y
  */
 int
-SharedMemoryImageBuffer::circle_y()
+SharedMemoryImageBuffer::circle_y() const
 {
   return raw_header->circle_y;
 }
@@ -241,7 +252,7 @@ SharedMemoryImageBuffer::circle_y()
  * @return circle radius
  */
 unsigned int
-SharedMemoryImageBuffer::circle_radius()
+SharedMemoryImageBuffer::circle_radius() const
 {
   return raw_header->circle_radius;
 }
@@ -389,7 +400,7 @@ SharedMemoryImageBuffer::set_circle_found(bool found)
  * @return true if circle was found, false otherwise
  */
 bool
-SharedMemoryImageBuffer::circle_found()
+SharedMemoryImageBuffer::circle_found() const
 {
   return (raw_header->flag_circle_found == 1);
 }
@@ -464,7 +475,7 @@ SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader()
   _image_id = NULL;
   _width = 0;
   _height = 0;
-  header = NULL;
+  _header = NULL;
 }
 
 
@@ -483,16 +494,41 @@ SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader(const char *image_i
   _colorspace = colorspace;
   _width      = width;
   _height     = height;
+  _header     = NULL;
 
-  header = NULL;
+  _orig_image_id   = NULL;
+  _orig_width      = 0;
+  _orig_height     = 0;
+  _orig_colorspace = CS_UNKNOWN;
+}
+
+
+/** Copy constructor.
+ * @param h shared memory image header to copy
+ */
+SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader(const SharedMemoryImageBufferHeader *h)
+{
+  if ( h->_image_id != NULL ) {
+    _image_id   = strdup(h->_image_id);
+  } else {
+    _image_id = NULL;
+  }
+  _colorspace = h->_colorspace;
+  _width      = h->_width;
+  _height     = h->_height;
+  _header     = h->_header;
+
+  _orig_image_id   = NULL;
+  _orig_width      = 0;
+  _orig_height     = 0;
+  _orig_colorspace = CS_UNKNOWN;
 }
 
 
 /** Destructor. */
 SharedMemoryImageBufferHeader::~SharedMemoryImageBufferHeader()
 {
-  header = NULL;
-  free(_image_id);
+  if ( _image_id != NULL)  free(_image_id);
 }
 
 
@@ -503,13 +539,20 @@ SharedMemoryImageBufferHeader::size()
 }
 
 
+SharedMemoryHeader *
+SharedMemoryImageBufferHeader::clone() const
+{
+  return new SharedMemoryImageBufferHeader(this);
+}
+
+
 size_t
 SharedMemoryImageBufferHeader::data_size()
 {
-  if (header == NULL) {
+  if (_header == NULL) {
     return colorspace_buffer_size(_colorspace, _width, _height);
   } else {
-    return colorspace_buffer_size(fuse_ui2cs(header->colorspace), header->width, header->height);
+    return colorspace_buffer_size((colorspace_t)_header->colorspace, _header->width, _header->height);
   }
 }
 
@@ -525,7 +568,7 @@ SharedMemoryImageBufferHeader::matches(void *memptr)
   } else if (strncmp(h->image_id, _image_id, IMAGE_ID_MAX_LENGTH) == 0) {
 
     if ( (_colorspace == CS_UNKNOWN) ||
-	 ((fuse_ui2cs(h->colorspace) == _colorspace) &&
+	 (((colorspace_t)h->colorspace == _colorspace) &&
 	  (h->width == _width) &&
 	  (h->height == _height)
 	  )
@@ -537,29 +580,44 @@ SharedMemoryImageBufferHeader::matches(void *memptr)
   } else {
     return false;
   }
-
 }
 
+
+bool
+SharedMemoryImageBufferHeader::operator==(const SharedMemoryHeader & s) const
+{
+  const SharedMemoryImageBufferHeader *h = dynamic_cast<const SharedMemoryImageBufferHeader *>(&s);
+  if ( ! h ) {
+    return false;
+  } else {
+    return ( (strncmp(_image_id, h->_image_id, IMAGE_ID_MAX_LENGTH) == 0) &&
+	     (_colorspace == h->_colorspace) &&
+	     (_width == h->_width) &&
+	     (_height == h->_height) );
+  }
+}
 
 /** Print some info. */
 void
 SharedMemoryImageBufferHeader::print_info()
 {
-  if (header == NULL) {
+  if (_image_id == NULL) {
     cout << "No image set" << endl;
     return;
   }
   cout << "SharedMemory Image Info: " << endl;
-  printf("    address:  0x%lx\n", (long unsigned int)header);
-  cout << "    image id:  " << header->image_id << endl
-       << "    colorspace: " << header->colorspace << endl
-       << "    dimensions: " << header->width << "x" << header->height << endl
-       << "    ROI:        at (" << header->roi_x << "," << header->roi_y
+  printf("    address:  0x%lx\n", (long unsigned int)_header);
+  cout << "    image id:  " << _image_id << endl
+       << "    colorspace: " << _colorspace << endl
+       << "    dimensions: " << _width << "x" << _height << endl;
+  /*
+     << "    ROI:        at (" << header->roi_x << "," << header->roi_y
        << ")  dim " << header->roi_width << "x" << header->roi_height << endl
        << "    circle:     " << (header->flag_circle_found ? "" : "not ")
        << "found at (" << header->circle_x << "," << header->circle_y
        << ")  radius " << header->circle_radius << endl
        << "    img ready:  " << (header->flag_image_ready ? "yes" : "no") << endl; 
+  */
 }
 
 
@@ -578,11 +636,11 @@ SharedMemoryImageBufferHeader::create()
 void
 SharedMemoryImageBufferHeader::initialize(void *memptr)
 {
-  header = (SharedMemoryImageBuffer_header_t *)memptr;
+  SharedMemoryImageBuffer_header_t *header = (SharedMemoryImageBuffer_header_t *)memptr;
   memset(memptr, 0, sizeof(SharedMemoryImageBuffer_header_t));
 	 
   strncpy(header->image_id, _image_id, IMAGE_ID_MAX_LENGTH);
-  header->colorspace = fuse_cs2ui(_colorspace);
+  header->colorspace = _colorspace;
   header->width      = _width;
   header->height     = _height;
 
@@ -592,20 +650,40 @@ SharedMemoryImageBufferHeader::initialize(void *memptr)
 void
 SharedMemoryImageBufferHeader::set(void *memptr)
 {
-  header = (SharedMemoryImageBuffer_header_t *)memptr;
-  if ( NULL != _image_id )  free(_image_id);
+  SharedMemoryImageBuffer_header_t *header = (SharedMemoryImageBuffer_header_t *)memptr;
+  if ( NULL != _orig_image_id )  free(_orig_image_id);
+  if ( NULL != _image_id ) {
+    _orig_image_id = strdup(_image_id);
+    free(_image_id);
+  } else {
+    _orig_image_id = NULL;
+  }
+  _orig_width = _width;
+  _orig_height = _height;
+  _orig_colorspace = _colorspace;
+  _header = header;
+
   _image_id = strndup(header->image_id, IMAGE_ID_MAX_LENGTH);
+  _width = header->width;
+  _height = header->height;
+  _colorspace = (colorspace_t)header->colorspace;
 }
 
 
 void
 SharedMemoryImageBufferHeader::reset()
 {
-  header = NULL;
   if ( NULL != _image_id ) {
     free(_image_id);
     _image_id = NULL;
   }
+  if ( _orig_image_id != NULL ) {
+    _image_id = strdup(_orig_image_id);
+  }
+  _width =_orig_width;
+  _height =_orig_height;
+  _colorspace =_orig_colorspace;
+  _header = NULL;
 }
 
 
@@ -613,10 +691,10 @@ SharedMemoryImageBufferHeader::reset()
  * @return colorspace
  */
 colorspace_t
-SharedMemoryImageBufferHeader::colorspace()
+SharedMemoryImageBufferHeader::colorspace() const
 {
-  if (header == NULL) return CS_UNKNOWN;
-  return fuse_ui2cs(header->colorspace);
+  if ( _header)  return (colorspace_t)_header->colorspace;
+  else           return _colorspace;
 }
 
 
@@ -624,10 +702,10 @@ SharedMemoryImageBufferHeader::colorspace()
  * @return image width
  */
 unsigned int
-SharedMemoryImageBufferHeader::width()
+SharedMemoryImageBufferHeader::width() const
 {
-  if (header == NULL) return 0;
-  return header->width;
+  if ( _header)  return _header->width;
+  else           return _width;
 }
 
 
@@ -635,10 +713,10 @@ SharedMemoryImageBufferHeader::width()
  * @return image height
  */
 unsigned int
-SharedMemoryImageBufferHeader::height()
+SharedMemoryImageBufferHeader::height() const
 {
-  if (header == NULL) return 0;
-  return header->height;
+  if ( _header)  return _header->height;
+  else           return _height;
 }
 
 
@@ -646,9 +724,8 @@ SharedMemoryImageBufferHeader::height()
  * @return image number
  */
 const char *
-SharedMemoryImageBufferHeader::image_id()
+SharedMemoryImageBufferHeader::image_id() const
 {
-  if (header == NULL) return 0;
   return _image_id;
 }
 
@@ -659,7 +736,7 @@ SharedMemoryImageBufferHeader::image_id()
 void
 SharedMemoryImageBufferHeader::set_image_id(const char *image_id)
 {
-  ::free(_image_id);
+  if ( _image_id != NULL)  ::free(_image_id);
   _image_id = strdup(image_id);
 }
 
@@ -670,7 +747,7 @@ SharedMemoryImageBufferHeader::set_image_id(const char *image_id)
 SharedMemoryImageBuffer_header_t *
 SharedMemoryImageBufferHeader::raw_header()
 {
-  return header;
+  return _header;
 }
 
 
@@ -691,7 +768,7 @@ SharedMemoryImageBufferLister::~SharedMemoryImageBufferLister()
 
 
 void
-SharedMemoryImageBufferLister::printHeader()
+SharedMemoryImageBufferLister::print_header()
 {
   cout << endl << cgreen << "FireVision Shared Memory Segments - Images" << cnormal << endl
        << "========================================================================================" << endl
@@ -705,30 +782,30 @@ SharedMemoryImageBufferLister::printHeader()
 
 
 void
-SharedMemoryImageBufferLister::printFooter()
+SharedMemoryImageBufferLister::print_footer()
 {
 }
 
 
 void
-SharedMemoryImageBufferLister::printNoSegments()
+SharedMemoryImageBufferLister::print_no_segments()
 {
   cout << "No FireVision shared memory segments found" << endl;
 }
 
 
 void
-SharedMemoryImageBufferLister::printNoOrphanedSegments()
+SharedMemoryImageBufferLister::print_no_orphaned_segments()
 {
   cout << "No orphaned FireVision shared memory segments found" << endl;
 }
 
 
 void
-SharedMemoryImageBufferLister::printInfo(SharedMemoryHeader *header,
-					 int shm_id, int semaphore,
-					 unsigned int mem_size,
-					 void *memptr)
+SharedMemoryImageBufferLister::print_info(const SharedMemoryHeader *header,
+					  int shm_id, int semaphore,
+					  unsigned int mem_size,
+					  const void *memptr)
 {
 
   SharedMemoryImageBufferHeader *h = (SharedMemoryImageBufferHeader *)header;

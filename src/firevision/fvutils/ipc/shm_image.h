@@ -66,8 +66,10 @@ class SharedMemoryImageBufferHeader : public SharedMemoryHeader {
 				colorspace_t colorspace,
 				unsigned int width,
 				unsigned int height);
+  SharedMemoryImageBufferHeader(const SharedMemoryImageBufferHeader *h);
   virtual ~SharedMemoryImageBufferHeader();
 
+  virtual SharedMemoryHeader *  clone() const;
   virtual bool         matches(void *memptr);
   virtual size_t       size();
   virtual void         print_info();
@@ -76,22 +78,28 @@ class SharedMemoryImageBufferHeader : public SharedMemoryHeader {
   virtual void         set(void *memptr);
   virtual void         reset();
   virtual size_t       data_size();
+  virtual bool         operator==(const SharedMemoryHeader & s) const;
 
   void                 set_image_id(const char *image_id);
-  colorspace_t         colorspace();
-  unsigned int         width();
-  unsigned int         height();
-  const char *         image_id();
+  colorspace_t         colorspace() const;
+  unsigned int         width() const;
+  unsigned int         height() const;
+  const char *         image_id() const;
 
   SharedMemoryImageBuffer_header_t * raw_header();
 
  private:
-  SharedMemoryImageBuffer_header_t *header;
-
   char          *_image_id;
   colorspace_t   _colorspace;
   unsigned int   _width;
   unsigned int   _height;
+
+  char          *_orig_image_id;
+  colorspace_t   _orig_colorspace;
+  unsigned int   _orig_width;
+  unsigned int   _orig_height;
+
+  SharedMemoryImageBuffer_header_t *_header;
 };
 
 class SharedMemoryImageBufferLister : public SharedMemoryLister {
@@ -99,14 +107,14 @@ class SharedMemoryImageBufferLister : public SharedMemoryLister {
   SharedMemoryImageBufferLister();
   virtual ~SharedMemoryImageBufferLister();
 
-  virtual void printHeader();
-  virtual void printFooter();
-  virtual void printNoSegments();
-  virtual void printNoOrphanedSegments();
-  virtual void printInfo(SharedMemoryHeader *header,
-			 int shm_id, int semaphore,
-			 unsigned int mem_size,
-			 void *memptr);
+  virtual void print_header();
+  virtual void print_footer();
+  virtual void print_no_segments();
+  virtual void print_no_orphaned_segments();
+  virtual void print_info(const SharedMemoryHeader *header,
+			  int shm_id, int semaphore,
+			  unsigned int mem_size,
+			  const void *memptr);
 };
 
 
@@ -120,18 +128,19 @@ class SharedMemoryImageBuffer : public SharedMemory
   SharedMemoryImageBuffer(const char *image_id, bool is_read_only = true);
   ~SharedMemoryImageBuffer();
 
-  unsigned char *  buffer();
-  colorspace_t     colorspace();
-  unsigned int     width();
-  unsigned int     height();
-  unsigned int     roi_x();
-  unsigned int     roi_y();
-  unsigned int     roi_width();
-  unsigned int     roi_height();
-  int              circle_x();
-  int              circle_y();
-  unsigned int     circle_radius();
-  bool             circle_found();
+  const char *     image_id() const;
+  unsigned char *  buffer() const;
+  colorspace_t     colorspace() const;
+  unsigned int     width() const;
+  unsigned int     height() const;
+  unsigned int     roi_x() const;
+  unsigned int     roi_y() const;
+  unsigned int     roi_width() const;
+  unsigned int     roi_height() const;
+  int              circle_x() const;
+  int              circle_y() const;
+  unsigned int     circle_radius() const;
+  bool             circle_found() const;
   void             set_roi_x(unsigned int roi_x);
   void             set_roi_y(unsigned int roi_y);
   void             set_roi_width(unsigned int roi_w);
