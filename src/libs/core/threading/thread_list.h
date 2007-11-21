@@ -48,7 +48,7 @@ class ThreadListSealedException : public Exception
 class ThreadListNotSealedException : public Exception
 {
  public:
-  ThreadListNotSealedException(const char *msg);
+  ThreadListNotSealedException(const char *format, ...);
 };
 
 

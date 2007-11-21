@@ -35,7 +35,7 @@ class Thread;
 class CannotFinalizeThreadException : public Exception
 {
  public:
-  CannotFinalizeThreadException(const char *msg);
+  CannotFinalizeThreadException(const char *format, ...);
   CannotFinalizeThreadException(Exception &e);
 };
 

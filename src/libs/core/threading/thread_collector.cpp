@@ -45,13 +45,19 @@
  * Adds all the threads in the list to the thread list. Implementations may
  * throw an exception if this fails for whatever reason, read implementation
  * documentation for details. The operation shall be atomic, either all
- * threads are added successfully or none is added at all.
+ * threads are added successfully or none is added at all. If adding fails
+ * a CannotInitializeThreadException is thrown.
+ *
+ * The thread is started if and only if initialization of all threads suceeds.
+ * A CannotInitializeThreadException is thrown if initialization failed for
+ * any thread.
  * @param tl list of threads to add
  *
  * @fn void ThreadCollector::add(Thread *t) = 0
  * Add single thread.
  * Adds the single thread to the internal (implementation specific) thread
- * list.
+ * list. The thread is started if and only if initialization suceeds.
+ * A CannotInitializeThreadException is thrown if initialization failed.
  * @param t thread to add
  *
  * @fn ThreadCollector::remove(ThreadList &tl) = 0
@@ -59,12 +65,19 @@
  * Remove all threads in the thread list from this collector. If there is
  * a thread in the supplied thread list that has never been collected no
  * error shall be thrown but this just be silently ignored.
+ *
+ * The threads are finalized, cancelled and joined. If the finalization fails
+ * for whatever reason the threads are NOT cancelled or stopped.
+ * In that case a CannotFinalizeThreadException is thrown.
  * @param tl list of threads to remove
  *
  * @fn ThreadCollector::remove(Thread *t) = 0
  * Remove single thread.
  * Remove the thread from the internal thread list. If the thread has never
  * been collected no error shall be thrown but just be silently ignored.
+ * The thread is finalized, cancelled and joined. If the finalization fails
+ * for whatever reason the thread is NOT cancelled or stopped. In that case
+ * a CannotFinalizeThreadException is thrown.
  * @param t Thread to remove.
  */
 

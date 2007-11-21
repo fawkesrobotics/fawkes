@@ -61,12 +61,15 @@ ThreadListSealedException::ThreadListSealedException(const char *operation)
  */
 
 /** Constructor.
- * @param msg descriptive message of failed operation
+ * @param format format of message
  */
-ThreadListNotSealedException::ThreadListNotSealedException(const char *msg)
-  : Exception("ThreadList is *not* sealed")
+ThreadListNotSealedException::ThreadListNotSealedException(const char *format, ...)
+  : Exception()
 {
-  append(msg);
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 
@@ -372,19 +375,19 @@ ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
     } catch (CannotInitializeThreadException &e) {
       notify_of_failed_init();
       cite.append(e);
-      cite.append("Initializing thread in list '%s' failed", _name);
+      cite.prepend("Initializing thread in list '%s' failed", _name);
       success = false;
       break;
     } catch (Exception &e) {
       notify_of_failed_init();
       cite.append(e);
-      cite.append("Could not initialize thread '%s'", (*i)->name());
+      cite.prepend("Could not initialize thread '%s'", (*i)->name());
       success = false;
       break;
     } catch (...) {
       notify_of_failed_init();
       cite.append("Could not initialize thread '%s'", (*i)->name());
-      cite.append("Unknown exception caught");
+      cite.prepend("Unknown exception caught");
       success = false;
       break;
     }

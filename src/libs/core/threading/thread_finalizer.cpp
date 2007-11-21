@@ -34,11 +34,15 @@
  */
 
 /** Constructor.
- * @param msg message (reason or symptom of failure)
+ * @param format message format (reason or symptom of failure)
  */
-CannotFinalizeThreadException::CannotFinalizeThreadException(const char *msg)
-  : Exception(msg)
+CannotFinalizeThreadException::CannotFinalizeThreadException(const char *format, ...)
+  : Exception()
 {
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 /** Constructor.
