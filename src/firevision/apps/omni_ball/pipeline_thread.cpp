@@ -96,7 +96,7 @@ FvOmniBallPipelineThread::init()
 {
   try 
     {
-      cam = vision_master->register_for_camera( config->get_string("/omnivision/camera").c_str(), this );
+      cam = vision_master->register_for_camera( config->get_string("/firevision/omnivision/camera").c_str(), this );
     } 
   catch (Exception& e) 
     {
@@ -122,7 +122,7 @@ FvOmniBallPipelineThread::init()
 
   try
     {
-      bulb_matrix_file = strdup( config->get_string("/omnivision/mirrormodel").c_str() );
+      bulb_matrix_file = strdup( config->get_string("/firevision/omnivision/bulb_matrix_file").c_str() );
     }
   catch (Exception &e)
     {
@@ -146,7 +146,7 @@ FvOmniBallPipelineThread::init()
 
   try
     {
-      lut_file = strdup( config->get_string("/omnivision/ball/colormap").c_str() );
+      lut_file = strdup( config->get_string("/firevision/omnivision/ball/colormap").c_str() );
     }
   catch (Exception &e)
     {
