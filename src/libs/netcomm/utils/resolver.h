@@ -41,6 +41,7 @@
 
 class AvahiThread;
 class NetworkNameResolverThread;
+class HostInfo;
 
 class NetworkNameResolver
 {
@@ -56,6 +57,9 @@ class NetworkNameResolver
 
   void flush_cache();
 
+  const char * hostname();
+  const char * short_hostname();
+
  private:
   void name_resolved(char *name, struct sockaddr *addr, socklen_t addrlen);
   void addr_resolved(struct sockaddr *addr, socklen_t addrlen, char *name, bool namefound);
@@ -64,6 +68,7 @@ class NetworkNameResolver
 
  private:
   NetworkNameResolverThread *resolver_thread;
+  HostInfo *__host_info;
 
   LockHashMap<uint32_t, std::pair<char *, time_t> >       addr2name_cache;
   LockHashMap<char *,

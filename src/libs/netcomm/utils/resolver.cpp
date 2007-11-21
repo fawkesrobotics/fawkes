@@ -28,6 +28,7 @@
 #include <netcomm/utils/resolver.h>
 #include <netcomm/utils/resolver_thread.h>
 #include <core/exceptions/system.h>
+#include <utils/system/hostinfo.h>
 
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -91,6 +92,8 @@ NetworkNameResolver::NetworkNameResolver(AvahiThread *avahi_thread)
   resolver_thread->start();
   // Wait for thread to start
   usleep(0);
+
+  __host_info = new HostInfo();
 }
 
 
@@ -101,6 +104,7 @@ NetworkNameResolver::~NetworkNameResolver()
   resolver_thread->cancel();
   resolver_thread->join();
   delete resolver_thread;
+  delete __host_info;
 }
 
 
@@ -122,6 +126,8 @@ NetworkNameResolver::flush_cache()
     name2addr_cache.erase(n2acit);
     free(name);
   }
+  __host_info->update();
+
   /* Leads to a segfault, if one element is in the queue it is deleted
    * two times, do not use
   for (n2acit = name2addr_cache.begin(); n2acit != name2addr_cache.end(); ++n2acit) {
@@ -305,4 +311,24 @@ void
 NetworkNameResolver::address_resolution_failed(struct sockaddr *addr, socklen_t addrlen)
 {
   free(addr);
+}
+
+
+/** Get long hostname.
+ * @return host name
+ */
+const char *
+NetworkNameResolver::hostname()
+{
+  return __host_info->name();
+}
+
+
+/** Get short hostname.
+ * @return short hostname
+ */
+const char *
+NetworkNameResolver::short_hostname()
+{
+  return __host_info->short_name();
 }
