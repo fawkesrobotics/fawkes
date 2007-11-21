@@ -29,7 +29,7 @@
 #include <apps/retriever/retriever_thread.h>
 
 /** @class FvRetrieverPlugin <fvretriever_plugin.h>
- * FireVision Retriever Plugin
+ * FireVision Retriever Plugin.
  * This is the FireVision retriever plugin. It is a simple plugin that will
  * fetch images from a specific camera defined as a configuration setting.
  *
