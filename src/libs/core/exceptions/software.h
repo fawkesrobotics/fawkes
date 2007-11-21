@@ -44,7 +44,7 @@ class DivisionByZeroException : public Exception {
 
 class TypeMismatchException : public Exception {
  public:
-  TypeMismatchException(const char *msg) throw();
+  TypeMismatchException(const char *format, ...) throw();
 };
 
 

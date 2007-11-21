@@ -44,7 +44,9 @@ class Exception : public std::exception {
   virtual ~Exception() throw();
 
   virtual void raise();
+  void prepend(const char *format, ...) throw();
   void append(const char *format, ...) throw();
+  void append_va(const char *format, va_list va) throw();
   void append(const Exception &e) throw();
   void print_trace() throw();
 
@@ -95,6 +97,7 @@ class Exception : public std::exception {
   void append_nolock(const char *format, ...) throw();
   void append_nolock_va(const char *format, va_list va) throw();
   void append_nolock_nocopy(char *msg) throw();
+  void prepend_nolock_va(const char *format, va_list va) throw();
   void copy_messages(const Exception &exc) throw();
 
   message_list_t  *messages;

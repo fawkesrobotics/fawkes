@@ -312,6 +312,25 @@ Exception::~Exception() throw()
 }
 
 
+/** Prepend messages to the message list.
+ * @param format format of the message to prepend, see printf(3) for details about formatting
+ * options.
+ */
+void
+Exception::prepend(const char *format, ...) throw()
+{
+  // do not append empty messages
+  if (format == NULL)  return;
+
+  va_list arg;
+  va_start(arg, format);
+  messages_mutex->lock();
+  prepend_nolock_va(format, arg);
+  messages_mutex->unlock();
+  va_end(arg);
+}
+
+
 /** Append messages to the message list.
  * @param format format of the message to append, see printf(3) for details about formatting
  * options.
@@ -328,6 +347,23 @@ Exception::append(const char *format, ...) throw()
   append_nolock_va(format, arg);
   messages_mutex->unlock();
   va_end(arg);
+}
+
+
+/** Append messages to the message list.
+ * @param format format of the message to append, see printf(3) for details about formatting
+ * options.
+ * @param va va_list with arguments matching the format
+ */
+void
+Exception::append_va(const char *format, va_list va) throw()
+{
+  // do not append empty messages
+  if (format == NULL)  return;
+
+  messages_mutex->lock();
+  append_nolock_va(format, va);
+  messages_mutex->unlock();
 }
 
 
@@ -375,6 +411,37 @@ Exception::append_nolock(const char *format, ...) throw()
     ml->msg = msg;
     messages_end->next = ml;
     messages_end = ml;
+  }
+}
+
+
+/** Prepend messages without lock by formatted string.
+ * This can be used to append messages without locking the mutex if the mutex
+ * has been locked already to append many messages and keep their order intact
+ * and thus to prevent messages to be appended inbetween.
+ * Used for example in copy constructor.
+ * @param format format of the message to be appended
+ * @param ap argument va_list for format
+ */
+void
+Exception::prepend_nolock_va(const char *format, va_list ap) throw()
+{
+  char *msg;
+  if ( vasprintf(&msg, format, ap) == -1 ) {
+    msg = strdup(format);
+  }
+
+  if ( messages == NULL ) {
+    // This is our first message
+    messages = (message_list_t *)malloc(sizeof(message_list_t));
+    messages->next = NULL;
+    messages->msg  = msg;
+    messages_end = messages;
+  } else {
+    message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
+    ml->next = messages;
+    ml->msg = msg;
+    messages = ml;
   }
 }
 

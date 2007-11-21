@@ -39,9 +39,8 @@
  * @param msg message, appended to exception, base message "NullPointerException"
  */
 NullPointerException::NullPointerException(const char *msg) throw()
-  : Exception("NullPointerException")
+  : Exception("NullPointerException: %s", msg)
 {
-  append(msg);
 }
 
 
@@ -54,9 +53,8 @@ NullPointerException::NullPointerException(const char *msg) throw()
  * @param msg message, appended to exception, base message "Division by zero"
  */
 DivisionByZeroException::DivisionByZeroException(const char *msg) throw()
-  : Exception("Division by zero")
+  : Exception("Division by zero: %s", msg)
 {
-  append(msg);
 }
 
 
@@ -66,12 +64,15 @@ DivisionByZeroException::DivisionByZeroException(const char *msg) throw()
  * @ingroup Exceptions
  */
 /** Constructor
- * @param msg message, appended to exception, base message "Division by zero"
+ * @param format message format
  */
-TypeMismatchException::TypeMismatchException(const char *msg) throw()
-  : Exception("Type mismatch")
+TypeMismatchException::TypeMismatchException(const char *format, ...) throw()
+  : Exception()
 {
-  append(msg);
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 
@@ -86,9 +87,8 @@ TypeMismatchException::TypeMismatchException(const char *msg) throw()
  * "Destruction in progress"
  */
 DestructionInProgressException::DestructionInProgressException(const char *msg) throw()
-  : Exception("Destruction in progress")
+  : Exception("Destruction in progress: %s", msg)
 {
-  append(msg);
 }
 
 
@@ -103,9 +103,8 @@ DestructionInProgressException::DestructionInProgressException(const char *msg) 
  * "Unsafe operation on not locked object"
  */
 NotLockedException::NotLockedException(const char *msg) throw()
-  : Exception("Unsafe operation on not locked object")
+  : Exception("Unsafe operation on not locked object: %s", msg)
 {
-  append(msg);
 }
 
 
@@ -209,7 +208,6 @@ OutOfBoundsException::OutOfBoundsException(const char *msg, float val,
  * "Access Violation"
  */
 AccessViolationException::AccessViolationException(const char *msg) throw()
-  :  Exception("Access Violation")
+  :  Exception("Access Violation: %s", msg)
 {
-  append(msg);
 }
