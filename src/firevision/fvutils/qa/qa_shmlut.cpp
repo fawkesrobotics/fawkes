@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  qa_jpegbm.h - QA for benchmarking jpeg compression
+ *  qa_shmlut.h - QA for shared memory lookup table
  *
- *  Created: Fri Jul 20 13:22:51 2007
+ *  Created: Wed Nov 21 17:06:24 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -27,49 +27,28 @@
 
 /// @cond QA
 
-#include <fvutils/color/colorspaces.h>
-#include <fvutils/compression/jpeg_compressor.h>
-
-#include <utils/time/tracker.h>
+#include <fvutils/ipc/shm_lut.h>
 
 #include <iostream>
 
 using namespace std;
 
-#define IMAGE_WIDTH   500
-#define IMAGE_HEIGHT  500
-
-#define NUM_CYCLES 100
-
-// ~ 500 KB should be enough
-#define DEST_BUF_SIZE 500000
-
 int
 main(int argc, char **argv)
 {
+  SharedMemoryLookupTable *lut;
 
-  unsigned char *yuv422planar = malloc_buffer(YUV422_PLANAR, IMAGE_WIDTH, IMAGE_HEIGHT);
-  unsigned char *compressed = (unsigned char *)malloc(DEST_BUF_SIZE);
+  lut = new SharedMemoryLookupTable("QA test LUT", 100, 100, 2);
 
-  JpegImageCompressor *jpeg = new JpegImageCompressor(JpegImageCompressor::JPEG_CS_RGB);
-  jpeg->set_image_dimensions(IMAGE_WIDTH, IMAGE_HEIGHT);
-  jpeg->set_image_buffer(YUV422_PLANAR, yuv422planar);
-  jpeg->set_destination_buffer(compressed, DEST_BUF_SIZE);
-  jpeg->set_compression_destination(ImageCompressor::COMP_DEST_MEM);
-
-  TimeTracker *tracker = new TimeTracker();
-
-  for ( unsigned int i = 0; i < NUM_CYCLES; ++i) {
-    jpeg->compress();
-    tracker->ping(0);
+  if ( lut->is_valid() ) {
+    cout << "IS valid!" << endl;
+  } else {
+    cout << "Is NOT valid!" << endl;
   }
 
-  tracker->printToStdout();
+  sleep(100);
 
-  delete tracker;
-  delete jpeg;
-  free(compressed);
-  free(yuv422planar);
+  delete lut;
 
   return 0;
 }

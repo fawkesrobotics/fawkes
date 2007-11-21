@@ -51,7 +51,7 @@ endif
 
 # We are lazy in the utils...
 OBJS_libfvutils := $(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
-LIBS_libfvutils := core utils $(UTILS_EXTRA_LIBS)
+LIBS_libfvutils := core utils netcomm $(UTILS_EXTRA_LIBS)
 
 OBJS_all = $(OBJS_libfvutils)
 LIBS_all = $(LIBDIR)/libfvutils.so
