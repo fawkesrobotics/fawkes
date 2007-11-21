@@ -30,7 +30,7 @@ ifeq ($(BUILD_TYPE),rcsoftx)
 # Stuff to be built for RCSoftX only
 SUBDIRS += cannikin geegaw fountain
 else
-SUBDIRS += base retriever omni_ball 
+SUBDIRS += base fountain retriever omni_ball 
 endif
 
 include $(BASEDIR)/etc/buildsys/rules.mk
