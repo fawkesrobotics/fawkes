@@ -51,10 +51,12 @@ class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
 
   void run();
 
+  static void print_usage(const char *program_name);
+
  private:
   void load();
   void unload();
-  void list();
+  void list_loaded();
   void watch();
   void list_avail();
 
@@ -63,10 +65,11 @@ class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
 
  private:
   typedef enum {
-    M_LIST,
+    M_LIST_LOADED,
     M_LIST_AVAIL,
     M_LOAD,
     M_UNLOAD,
+    M_RELOAD,
     M_WATCH,
     M_UNKNOWN
   } OperationMode;
@@ -74,6 +77,7 @@ class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
   FawkesNetworkClient *c;
   OperationMode   opmode;
   const char     *plugin_name;
+  const char     *__program_name;
   bool            quit;
 
   bool            list_found;
