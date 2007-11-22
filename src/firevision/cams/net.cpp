@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  net.cpp - Implementation to access over the network
+ *  net.cpp - Camera to access images over the network
  *
- *  Generated: Wed Feb 01 12:24:04 2006
+ *  Created: Wed Feb 01 12:24:04 2006
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,44 +25,48 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <cams/net.h>
+#include <cams/cam_exceptions.h>
+
 #include <core/exception.h>
 #include <core/exceptions/software.h>
-#include <cams/net.h>
 
-#include <fvutils/net/fuse_client_tcp.h>
+#include <fvutils/net/fuse_client.h>
+#include <fvutils/net/fuse_message.h>
+#include <fvutils/net/fuse_image_content.h>
 #include <fvutils/system/camargp.h>
 
 #include <cstring>
-
-/** TCP for transmitting data. */
-const unsigned short NetworkCamera::PROTOCOL_TCP = 1;
 
 /** @class NetworkCamera <cams/net.h>
  * Network camera.
  * Retrieve images via network (FUSE).
  * @see FuseClient
- * @see FuseClientTCP
+ * @author Tim Niemueller
  */
 
 /** Constructor.
  * @param host host to connect to
  * @param port port to connect to
- * @param image_num image number to retrieve
- * @param proto protocol to use, currently only TCP is supported
+ * @param image_id image ID of image to retrieve
  */
-NetworkCamera::NetworkCamera(char *host, unsigned short port, unsigned int image_num, unsigned short proto)
+NetworkCamera::NetworkCamera(const char *host, unsigned short port, const char *image_id)
 {
-  this->image_num = image_num;
-  this->port = port;
-  this->host = strdup(host);
-
-  switch (proto) {
-  case PROTOCOL_TCP:
-    fusec = new FuseClientTCP( host, port );
-    break;
-  default:
-    throw Exception("Unsupported protocol");
+  if ( image_id == NULL ) {
+    throw NullPointerException("NetworkCamera: image_id must not be NULL");
   }
+  if ( host == NULL ) {
+    throw NullPointerException("NetworkCamera: host must not be NULL");
+  }
+  __image_id = strdup(image_id);
+  __host = strdup(host);
+  __port = port;
+
+  __connected       = false;
+  __local_version   = 0;
+  __remote_version  = 0;
+
+  __fusec = new FuseClient(__host, __port, this);
 }
 
 
@@ -70,63 +74,67 @@ NetworkCamera::NetworkCamera(char *host, unsigned short port, unsigned int image
  * Initialize with parameters from camera argument parser, supported values are:
  * - host=HOST, hostname or IP of host to connect to
  * - port=PORT, port number to connect to
- * - image=NUM, image number of image to retrieve
+ * - image=ID, image ID of image to retrieve
  * @param cap camera argument parser
  */
 NetworkCamera::NetworkCamera(const CameraArgumentParser *cap)
 {
-  image_num = 0;
-  const char *host = "localhost";
   if ( cap->has("image") ) {
-    int i = atoi(cap->get("image").c_str());
-    image_num = (i < 0) ? 0 : (unsigned int)i;
+    __image_id = strdup(cap->get("image").c_str());
+  } else {
+    throw NullPointerException("image parameter must be set");
   }
   if ( cap->has("host") ) {
-    host = strdup(cap->get("host").c_str());
+    __host = strdup(cap->get("host").c_str());
+  } else {
+    __host = strdup("localhost");
   }
   if ( cap->has("port") ) {
     int i = atoi(cap->get("port").c_str());
     if ( (i < 0) || (i >= 0xFFFF) ) {
       throw IllegalArgumentException("Port must be in the range 0-65535");
     }
-    port = (unsigned int)i;
+    __port = (unsigned int)i;
+  } else {
+    __port = 5000;
   }
 
-  fusec = new FuseClientTCP(host, port);
+  __connected       = false;
+  __local_version   = 0;
+  __remote_version  = 0;
+
+  __fusec = new FuseClient(__host, __port, this);
 }
 
 
 /** Destructor. */
 NetworkCamera::~NetworkCamera()
 {
-  delete fusec;
-  free(host);
+  delete __fusec;
+  free(__host);
+  free(__image_id);
 }
 
 
 void
 NetworkCamera::open()
 {
-  if (fusec->connect()) {
-    fusec->setImageNumber(image_num);
-    fusec->requestImageInfo();
-    fusec->recv();
-  } else {
-    throw Exception("Could not open FUSE client connection");
-  }
+  __fusec->connect();
+  __fusec->start();
+  __fusec->wait();
 }
 
 
 void
 NetworkCamera::start()
 {
-  started = true;
+  __started = true;
 }
 
 void
 NetworkCamera::stop()
 {
-  started = false;
+  __started = false;
 }
 
 
@@ -139,14 +147,22 @@ NetworkCamera::print_info()
 void
 NetworkCamera::capture()
 {
-  if (! fusec->connected()) {
-    return;
+  if (! __connected) {
+    throw CaptureException("Capture failed, not connected");
+  }
+  if ( __fuse_image ) {
+    throw CaptureException("You must dispose the buffer before fetching a new image");
   }
 
-  fusec->requestImage();
-  fusec->recv();
-  if ( ! fusec->imageAvailable() ) {
-    throw Exception("NetworkCamera: requested image not available");
+  FUSE_imagedesc_message_t *idm = (FUSE_imagedesc_message_t *)malloc(sizeof(FUSE_imagedesc_message_t));
+  memset(idm, 0, sizeof(FUSE_imagedesc_message_t));
+  strncpy(idm->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
+  __fusec->enqueue(FUSE_MT_GET_IMAGE, idm, sizeof(FUSE_imagedesc_message_t));
+
+  __fusec->wait();
+
+  if ( ! __fuse_image ) {
+    throw CaptureException("Fetching the image failed, no image received");
   }
 }
 
@@ -154,12 +170,8 @@ NetworkCamera::capture()
 unsigned char *
 NetworkCamera::buffer()
 {
-  if (! fusec->connected()) {
-    return NULL;
-  }
-
-  if (fusec->imageAvailable()) {
-    return fusec->getImageBuffer();
+  if ( __fuse_image ) {
+    return __fuse_image->buffer();
   } else {
     return NULL;
   }
@@ -168,79 +180,115 @@ NetworkCamera::buffer()
 unsigned int
 NetworkCamera::buffer_size()
 {
-  if (! fusec->connected()) {
+  if (! __fuse_image) {
     return 0;
   }
 
-  return colorspace_buffer_size(fusec->getImageColorspace(),
-				fusec->getImageWidth(),
-				fusec->getImageHeight() );
+  return colorspace_buffer_size((colorspace_t)__fuse_image->colorspace(),
+				__fuse_image->pixel_width(),
+				__fuse_image->pixel_height());
 }
 
 void
 NetworkCamera::close()
 {
-  fusec->disconnect();
-  opened = started = false;
+  __fusec->disconnect();
+  __fusec->cancel();
+  __fusec->join();
+  __opened = __started = false;
 }
 
 void
 NetworkCamera::dispose_buffer()
 {
+  if ( __fuse_message ) {
+    __fuse_message->unref();
+    __fuse_message = NULL;
+  }
+  __fuse_image = NULL;
 }
 
 unsigned int
 NetworkCamera::pixel_width()
 {
-  return fusec->getImageWidth();
+  if ( __fuse_image ) {
+    return __fuse_image->pixel_width();
+  } else {
+    return 0;
+  }
 }
 
 unsigned int
 NetworkCamera::pixel_height()
 {
-  return fusec->getImageHeight();
+  if ( __fuse_image ) {
+    return __fuse_image->pixel_height();
+  } else {
+    return 0;
+  }
 }
 
 
 void
 NetworkCamera::flush()
 {
-  if (! fusec->connected()) {
-    return;
-  }
-
-  for (unsigned short i = 0; (i < 10) && (fusec->imageAvailable()); ++i) {
-    fusec->recv();
-  }
+  if (! __connected)  return;
+  dispose_buffer();
 }
 
 
 bool
 NetworkCamera::ready()
 {
-  return fusec->connected();
+  return __connected;
 }
 
 
 void
 NetworkCamera::set_image_number(unsigned int n)
 {
-  if (! fusec->connected()) {
-    throw Exception("Cannot set image number if not connected");
-  }
-
-  if (fusec->setImageNumber(n)) {
-    this->image_num = n;
-  } else {
-    throw Exception("Could not set image number");
-  }
+  // ignored, has to go away anyway
 }
 
 
 colorspace_t
 NetworkCamera::colorspace()
 {
-  if (! fusec->connected()) return CS_UNKNOWN;
+  if ( __fuse_image ) {
+    return (colorspace_t)__fuse_image->colorspace();
+  } else {
+    return CS_UNKNOWN;
+  }
+}
 
-  return fusec->getImageColorspace();
+
+void
+NetworkCamera::fuse_invalid_server_version(uint32_t local_version,
+					   uint32_t remote_version) throw()
+{
+  __local_version  = local_version;
+  __remote_version = remote_version;
+}
+
+
+void
+NetworkCamera::fuse_connection_established() throw()
+{
+  __connected = true;
+}
+
+
+void
+NetworkCamera::fuse_inbound_received(FuseNetworkMessage *m) throw()
+{
+  try {
+    __fuse_image = m->msgc<FuseImageContent>();
+    if ( __fuse_image ) {
+      __fuse_message = m;
+      __fuse_message->ref();
+    }
+  } catch (Exception &e) {
+    __fuse_image = NULL;
+    __fuse_message = NULL;
+  }
 }

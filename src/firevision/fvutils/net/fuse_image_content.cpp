@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  fuse_image_message.cpp - FUSE image message encapsulation
+ *  fuse_image_content.cpp - FUSE image content encapsulation
  *
  *  Created: Thu Nov 15 15:55:51 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
@@ -25,17 +25,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <fvutils/net/fuse_image_message.h>
+#include <fvutils/net/fuse_image_content.h>
 #include <fvutils/ipc/shm_image.h>
 
 #include <core/exceptions/system.h>
+#include <core/exceptions/software.h>
 
 #include <cstdlib>
 #include <netinet/in.h>
 #include <cstring>
 
-/** @class FuseImageMessage <fvutils/net/fuse_image_message.h>
- * FUSE image message.
+/** @class FuseImageContent <fvutils/net/fuse_image_content.h>
+ * FUSE image content.
  * @ingroup FUSE
  * @ingroup FireVision
  * @author Tim Niemueller
@@ -46,20 +47,18 @@
  * @param payload payload
  * @param payload_size size of payload
  */
-FuseImageMessage::FuseImageMessage(uint32_t type,
+FuseImageContent::FuseImageContent(uint32_t type,
 				   void *payload, size_t payload_size)
 {
   if ( type != FUSE_MT_IMAGE ) {
     throw TypeMismatchException("Type %u != FUSE_MT_IMAGE (%u)", type, FUSE_MT_IMAGE);
   }
 
-  __payload_size = payload_size;
-  _msg.header.message_type = htonl(FUSE_MT_IMAGE);
-  _msg.header.payload_size = htonl(__payload_size);
-  _msg.payload = payload;
+  _payload_size = payload_size;
+  _payload      = payload;
 
-  __header = (FUSE_image_message_header_t *)_msg.payload;
-  __buffer = (unsigned char *)_msg.payload + sizeof(FUSE_image_message_header_t);
+  __header = (FUSE_image_message_header_t *)_payload;
+  __buffer = (unsigned char *)_payload + sizeof(FUSE_image_message_header_t);
 
   __buffer_size = ntohl(__header->buffer_size);
 }
@@ -69,20 +68,18 @@ FuseImageMessage::FuseImageMessage(uint32_t type,
  * Copies data from given buffer.
  * @param b shared memory image buffer to copy image from
  */
-FuseImageMessage::FuseImageMessage(SharedMemoryImageBuffer *b)
+FuseImageContent::FuseImageContent(SharedMemoryImageBuffer *b)
 {
   __buffer_size  = colorspace_buffer_size(b->colorspace(), b->width(), b->height());
-  __payload_size = __buffer_size + sizeof(FUSE_image_message_header_t);
+  _payload_size  = __buffer_size + sizeof(FUSE_image_message_header_t);
+  _payload = malloc(_payload_size);
 
-  _msg.header.message_type = htonl(FUSE_MT_IMAGE);
-  _msg.header.payload_size = htonl(__payload_size);
-  _msg.payload = malloc(__payload_size);
-  if ( _msg.payload == NULL ) {
-    throw OutOfMemoryException("Cannot allocate FuseImageMessage buffer");
+  if ( _payload == NULL ) {
+    throw OutOfMemoryException("Cannot allocate FuseImageContent buffer");
   }
 
-  __header = (FUSE_image_message_header_t *)_msg.payload;
-  __buffer = (unsigned char *)_msg.payload + sizeof(FUSE_image_message_header_t);
+  __header = (FUSE_image_message_header_t *)_payload;
+  __buffer = (unsigned char *)_payload + sizeof(FUSE_image_message_header_t);
 
   strncpy(__header->image_id, b->image_id(), IMAGE_ID_MAX_LENGTH);
   __header->format = FUSE_IF_RAW;
@@ -102,7 +99,7 @@ FuseImageMessage::FuseImageMessage(SharedMemoryImageBuffer *b)
  * @return image buffer
  */
 unsigned char *
-FuseImageMessage::buffer() const
+FuseImageContent::buffer() const
 {
   return __buffer;
 }
@@ -112,7 +109,7 @@ FuseImageMessage::buffer() const
  * @return size of buffer returned by buffer()
  */
 size_t
-FuseImageMessage::buffer_size() const
+FuseImageContent::buffer_size() const
 {
   return __buffer_size;
 }
@@ -122,7 +119,7 @@ FuseImageMessage::buffer_size() const
  * @return width of image in pixels
  */
 unsigned int
-FuseImageMessage::pixel_width() const
+FuseImageContent::pixel_width() const
 {
   return ntohl(__header->width);
 }
@@ -132,7 +129,7 @@ FuseImageMessage::pixel_width() const
  * @return height of image in pixels
  */
 unsigned int
-FuseImageMessage::pixel_height() const
+FuseImageContent::pixel_height() const
 {
   return ntohl(__header->height);
 }
@@ -142,7 +139,7 @@ FuseImageMessage::pixel_height() const
  * @return colorspace
  */
 unsigned int
-FuseImageMessage::colorspace() const
+FuseImageContent::colorspace() const
 {
   return ntohs(__header->colorspace);
 }
@@ -152,7 +149,14 @@ FuseImageMessage::colorspace() const
  * @return format
  */
 unsigned int
-FuseImageMessage::format() const
+FuseImageContent::format() const
 {
   return __header->format;
+}
+
+
+void
+FuseImageContent::serialize()
+{
+  // Nothing to do here
 }

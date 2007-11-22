@@ -31,10 +31,10 @@
 #include <fvutils/net/fuse_server.h>
 #include <fvutils/net/fuse_transceiver.h>
 #include <fvutils/net/fuse_message_queue.h>
-#include <fvutils/net/fuse_image_message.h>
-#include <fvutils/net/fuse_lut_message.h>
-#include <fvutils/net/fuse_imagelist_message.h>
-#include <fvutils/net/fuse_lutlist_message.h>
+#include <fvutils/net/fuse_image_content.h>
+#include <fvutils/net/fuse_lut_content.h>
+#include <fvutils/net/fuse_imagelist_content.h>
+#include <fvutils/net/fuse_lutlist_content.h>
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/ipc/shm_lut.h>
 
@@ -154,14 +154,14 @@ FuseServerClientThread::process_getimage_message(FuseNetworkMessage *m)
 
   if ( (__bit = __buffers.find( tmp_image_id )) != __buffers.end() ) {
     // the buffer had already be opened
-    FuseImageMessage *im = new FuseImageMessage((*__bit).second);
-    __outbound_queue->push(im);
+    FuseImageContent *im = new FuseImageContent((*__bit).second);
+    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
   } else {
     try {
       SharedMemoryImageBuffer *b = new SharedMemoryImageBuffer(tmp_image_id);
       __buffers[tmp_image_id] = b;
-      FuseImageMessage *im = new FuseImageMessage(b);
-      __outbound_queue->push(im);
+      FuseImageContent *im = new FuseImageContent(b);
+      __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
     } catch (Exception &e) {
       // could not open the shared memory segment for some reason, send failure
       FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_IMAGE_FAILED,
@@ -187,14 +187,14 @@ FuseServerClientThread::process_getlut_message(FuseNetworkMessage *m)
 
   if ( (__lit = __luts.find( tmp_lut_id )) != __luts.end() ) {
     // the buffer had already be opened
-    FuseLutMessage *lm = new FuseLutMessage((*__lit).second);
-    __outbound_queue->push(lm);
+    FuseLutContent *lm = new FuseLutContent((*__lit).second);
+    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_LUT, lm));
   } else {
     try {
       SharedMemoryLookupTable *b = new SharedMemoryLookupTable(tmp_lut_id);
       __luts[tmp_lut_id] = b;
-      FuseLutMessage *lm = new FuseLutMessage(b);
-      __outbound_queue->push(lm);
+      FuseLutContent *lm = new FuseLutContent(b);
+      __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_LUT, lm));
     } catch (Exception &e) {
       // could not open the shared memory segment for some reason, send failure
       FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_LUT_FAILED,
@@ -212,7 +212,7 @@ FuseServerClientThread::process_getlut_message(FuseNetworkMessage *m)
 void
 FuseServerClientThread::process_getimagelist_message(FuseNetworkMessage *m)
 {
-  FuseImageListMessage *ilm = new FuseImageListMessage();
+  FuseImageListContent *ilm = new FuseImageListContent();
 
   SharedMemoryImageBufferHeader *h      = new SharedMemoryImageBufferHeader();
   SharedMemory::SharedMemoryIterator i = SharedMemory::find(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h);
@@ -229,7 +229,7 @@ FuseServerClientThread::process_getimagelist_message(FuseNetworkMessage *m)
 
   delete h;
 
-  __outbound_queue->push(ilm);
+  __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE_LIST, ilm));
 }
 
 
@@ -239,7 +239,7 @@ FuseServerClientThread::process_getimagelist_message(FuseNetworkMessage *m)
 void
 FuseServerClientThread::process_getlutlist_message(FuseNetworkMessage *m)
 {
-  FuseLutListMessage *llm = new FuseLutListMessage();
+  FuseLutListContent *llm = new FuseLutListContent();
 
   SharedMemoryLookupTableHeader *h = new SharedMemoryLookupTableHeader();
   SharedMemory::SharedMemoryIterator i = SharedMemory::find(FIREVISION_SHM_LUT_MAGIC_TOKEN, h);
@@ -256,7 +256,7 @@ FuseServerClientThread::process_getlutlist_message(FuseNetworkMessage *m)
 
   delete h;
 
-  __outbound_queue->push(llm);
+  __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_LUT_LIST, llm));
 }
 
 

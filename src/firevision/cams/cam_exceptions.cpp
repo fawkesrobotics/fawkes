@@ -62,7 +62,6 @@ CameraNotStartedException::CameraNotStartedException()
  * @param msg optional message explaining why capturing failed
  */
 CaptureException::CaptureException(const char *msg)
-  : Exception("Failed to capture a frame")
+  : Exception("Failed to capture a frame: %s", msg)
 {
-  append(msg);
 }

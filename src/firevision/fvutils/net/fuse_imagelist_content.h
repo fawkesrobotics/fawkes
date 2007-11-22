@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  fuse_imagelist_message.h - FUSE image list message encapsulation
+ *  fuse_imagelist_content.h - FUSE image list content encapsulation
  *
  *  Created: Tue Nov 20 14:56:23 2007 (Ella on heat)
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
@@ -25,29 +25,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_IMAGELIST_MESSAGE_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_IMAGELIST_MESSAGE_H_
+#ifndef __FIREVISION_FVUTILS_NET_FUSE_IMAGELIST_CONTENT_H_
+#define __FIREVISION_FVUTILS_NET_FUSE_IMAGELIST_CONTENT_H_
 
 #include <fvutils/net/fuse.h>
-#include <fvutils/net/fuse_message.h>
+#include <fvutils/net/fuse_message_content.h>
 #include <sys/types.h>
 
-class FuseImageListMessage : public FuseNetworkMessage
+class FuseImageListContent : public FuseMessageContent
 {
  public:
-  FuseImageListMessage();
-  FuseImageListMessage(uint32_t type, void *payload, size_t payload_size);
-  ~FuseImageListMessage();
+  FuseImageListContent();
+  FuseImageListContent(uint32_t type, void *payload, size_t payload_size);
+  ~FuseImageListContent();
 
   void add_imageinfo(const char *image_id, colorspace_t colorspace,
 		     unsigned int pixel_width, unsigned int pixel_height);
-
 
   void                reset_iterator();
   bool                has_next();
   FUSE_imageinfo_t *  next();
 
-  virtual void pack();
+  virtual void serialize();
 
  private:
   DynamicBuffer  *__list;

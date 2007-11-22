@@ -29,10 +29,10 @@
 #include <fvutils/net/fuse_client.h>
 #include <fvutils/net/fuse_client_handler.h>
 #include <fvutils/net/fuse_message.h>
-#include <fvutils/net/fuse_image_message.h>
-#include <fvutils/net/fuse_lut_message.h>
-#include <fvutils/net/fuse_imagelist_message.h>
-#include <fvutils/net/fuse_lutlist_message.h>
+#include <fvutils/net/fuse_image_content.h>
+#include <fvutils/net/fuse_lut_content.h>
+#include <fvutils/net/fuse_imagelist_content.h>
+#include <fvutils/net/fuse_lutlist_content.h>
 #include <fvutils/writers/fvraw.h>
 
 #include <core/exceptions/software.h>
@@ -72,9 +72,9 @@ class FireVisionNetworkTool : public FuseClientHandler
     case FUSE_MT_IMAGE:
       // we got an image, save it to the given file
       try {
-	FuseImageMessage *im = m->msgc<FuseImageMessage>();
-	FvRawWriter *w = new FvRawWriter(__file, im->pixel_width(), im->pixel_height(),
-					 (colorspace_t)im->colorspace(), im->buffer());
+	FuseImageContent *ic = m->msgc<FuseImageContent>();
+	FvRawWriter *w = new FvRawWriter(__file, ic->pixel_width(), ic->pixel_height(),
+					 (colorspace_t)ic->colorspace(), ic->buffer());
 	w->write();
 	delete w;
       } catch (Exception &e) {
@@ -85,11 +85,11 @@ class FireVisionNetworkTool : public FuseClientHandler
       break;
     case FUSE_MT_IMAGE_LIST:
       try {
-	FuseImageListMessage *ilm = m->msgc<FuseImageListMessage>();
-	if ( ilm->has_next() ) {
+	FuseImageListContent *ilc = m->msgc<FuseImageListContent>();
+	if ( ilc->has_next() ) {
 	  printf("Available images:\n");
-	  while ( ilm->has_next() ) {
-	    FUSE_imageinfo_t *ii = ilm->next();
+	  while ( ilc->has_next() ) {
+	    FUSE_imageinfo_t *ii = ilc->next();
 	    char tmp[IMAGE_ID_MAX_LENGTH + 1];
 	    tmp[IMAGE_ID_MAX_LENGTH] = 0;
 	    strncpy(tmp, ii->image_id, IMAGE_ID_MAX_LENGTH);
@@ -105,11 +105,11 @@ class FireVisionNetworkTool : public FuseClientHandler
       break;
     case FUSE_MT_LUT_LIST:
       try {
-	FuseLutListMessage *llm = m->msgc<FuseLutListMessage>();
-	if ( llm->has_next() ) {
+	FuseLutListContent *llc = m->msgc<FuseLutListContent>();
+	if ( llc->has_next() ) {
 	  printf("Available lookup tables:\n");
-	  while ( llm->has_next() ) {
-	    FUSE_lutinfo_t *li = llm->next();
+	  while ( llc->has_next() ) {
+	    FUSE_lutinfo_t *li = llc->next();
 	    char tmp[LUT_ID_MAX_LENGTH + 1];
 	    tmp[LUT_ID_MAX_LENGTH] = 0;
 	    strncpy(tmp, li->lut_id, LUT_ID_MAX_LENGTH);
@@ -127,9 +127,9 @@ class FireVisionNetworkTool : public FuseClientHandler
     case FUSE_MT_LUT:
       // we got an image, save it to the given file
       try {
-	FuseLutMessage *im = m->msgc<FuseLutMessage>();
+	FuseLutContent *lc = m->msgc<FuseLutContent>();
 	FILE *f = fopen(__file, "w");
-	fwrite(im->buffer(), im->buffer_size(), 1, f);
+	fwrite(lc->buffer(), lc->buffer_size(), 1, f);
 	fclose(f);
       } catch (Exception &e) {
 	printf("Received message cannot be casted to FuseLutMessage\n");

@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  fuse_lut_message.cpp - FUSE LUT message encapsulation
+ *  fuse_lut_content.cpp - FUSE LUT content encapsulation
  *
  *  Created: Wed Nov 21 16:49:18 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
@@ -25,42 +25,41 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <fvutils/net/fuse_lut_message.h>
+#include <fvutils/net/fuse_lut_content.h>
 #include <fvutils/ipc/shm_lut.h>
 
 #include <core/exceptions/system.h>
+#include <core/exceptions/software.h>
 
 #include <cstdlib>
 #include <netinet/in.h>
 #include <cstring>
 
-/** @class FuseLutMessage <fvutils/net/fuse_lut_message.h>
- * FUSE lookup table message.
+/** @class FuseLutContent <fvutils/net/fuse_lut_content.h>
+ * FUSE lookup table content.
  * @ingroup FUSE
  * @ingroup FireVision
  * @author Tim Niemueller
  */
 
 /** Constructor.
- * @param type message type, must be FUSE_MT_LUT
+ * @param type content type, must be FUSE_MT_LUT
  * @param payload payload
  * @param payload_size size of payload
  * @exception TypeMismatchException thrown if type does not equal FUSE_MT_LUT
  */
-FuseLutMessage::FuseLutMessage(uint32_t type,
+FuseLutContent::FuseLutContent(uint32_t type,
 			       void *payload, size_t payload_size)
 {
   if ( type != FUSE_MT_LUT ) {
     throw TypeMismatchException("Type %u != FUSE_MT_LUT (%u)", type, FUSE_MT_LUT);
   }
 
-  __payload_size = payload_size;
-  _msg.header.message_type = htonl(FUSE_MT_LUT);
-  _msg.header.payload_size = htonl(__payload_size);
-  _msg.payload = payload;
+  _payload_size = payload_size;
+  _payload = payload;
 
-  __header = (FUSE_lut_message_header_t *)_msg.payload;
-  __buffer = (unsigned char *)_msg.payload + sizeof(FUSE_lut_message_header_t);
+  __header = (FUSE_lut_message_header_t *)_payload;
+  __buffer = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
 
   __buffer_size = ntohl(__header->width) * ntohl(__header->height) * ntohl(__header->bytes_per_cell);
 }
@@ -69,20 +68,18 @@ FuseLutMessage::FuseLutMessage(uint32_t type,
 /** Constructor.
  * @param b lookup table to copy data from
  */
-FuseLutMessage::FuseLutMessage(SharedMemoryLookupTable *b)
+FuseLutContent::FuseLutContent(SharedMemoryLookupTable *b)
 {
   __buffer_size  = b->width() * b->height() * b->bytes_per_cell();
-  __payload_size = __buffer_size + sizeof(FUSE_lut_message_header_t);
+  _payload_size = __buffer_size + sizeof(FUSE_lut_message_header_t);
 
-  _msg.header.message_type = htonl(FUSE_MT_LUT);
-  _msg.header.payload_size = htonl(__payload_size);
-  _msg.payload = malloc(__payload_size);
-  if ( _msg.payload == NULL ) {
-    throw OutOfMemoryException("Cannot allocate FuseLutMessage buffer");
+  _payload = malloc(_payload_size);
+  if ( _payload == NULL ) {
+    throw OutOfMemoryException("Cannot allocate FuseLutContent buffer");
   }
 
-  __header = (FUSE_lut_message_header_t *)_msg.payload;
-  __buffer = (unsigned char *)_msg.payload + sizeof(FUSE_lut_message_header_t);
+  __header = (FUSE_lut_message_header_t *)_payload;
+  __buffer = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
 
   strncpy(__header->lut_id, b->lut_id(), LUT_ID_MAX_LENGTH);
   __header->width  = htonl(b->width());
@@ -99,7 +96,7 @@ FuseLutMessage::FuseLutMessage(SharedMemoryLookupTable *b)
  * @return buffer
  */
 unsigned char *
-FuseLutMessage::buffer() const
+FuseLutContent::buffer() const
 {
   return __buffer;
 }
@@ -109,7 +106,7 @@ FuseLutMessage::buffer() const
  * @return size of buffer returned by buffer()
  */
 size_t
-FuseLutMessage::buffer_size() const
+FuseLutContent::buffer_size() const
 {
   return __buffer_size;
 }
@@ -119,7 +116,7 @@ FuseLutMessage::buffer_size() const
  * @return width of LUT
  */
 unsigned int
-FuseLutMessage::width() const
+FuseLutContent::width() const
 {
   return ntohl(__header->width);
 }
@@ -129,7 +126,7 @@ FuseLutMessage::width() const
  * @return height of LUT
  */
 unsigned int
-FuseLutMessage::height() const
+FuseLutContent::height() const
 {
   return ntohl(__header->height);
 }
@@ -138,7 +135,14 @@ FuseLutMessage::height() const
  * @return Bytes per cell in LUT
  */
 unsigned int
-FuseLutMessage::bytes_per_cell() const
+FuseLutContent::bytes_per_cell() const
 {
   return ntohs(__header->bytes_per_cell);
+}
+
+
+void
+FuseLutContent::serialize()
+{
+  // Nothing to do here
 }

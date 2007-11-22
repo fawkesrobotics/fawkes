@@ -27,7 +27,7 @@
 
 #include <core/exceptions/software.h>
 #include <fvutils/net/fuse_message.h>
-// include <fvutils/net/fuse_complex_message_content.h>
+#include <fvutils/net/fuse_message_content.h>
 
 #include <cstdio>
 #include <cstring>
@@ -49,6 +49,7 @@
 FuseNetworkMessage::FuseNetworkMessage()
 {
   memset(&_msg, 0, sizeof(_msg));
+  __content = NULL;
 }
 
 
@@ -58,6 +59,7 @@ FuseNetworkMessage::FuseNetworkMessage()
 FuseNetworkMessage::FuseNetworkMessage(FUSE_message_t *msg)
 {
   memcpy(&_msg, msg, sizeof(FUSE_message_t));
+  __content = NULL;
 }
 
 
@@ -72,6 +74,7 @@ FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type,
 				       void *payload, size_t payload_size,
 				       bool copy_payload)
 {
+  __content = NULL;
   _msg.header.message_type = htonl(type);
   _msg.header.payload_size = htonl(payload_size);
 
@@ -90,18 +93,36 @@ FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type,
  */
 FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type)
 {
+  __content = NULL;
   _msg.header.message_type = htonl(type);
   _msg.header.payload_size = htonl(0);
   _msg.payload = NULL;
 }
 
 
+/** Content constructor.
+ * Construct a message with complex message content.
+ * @param type FUSE message type
+ * @param content complex message content.
+ */
+FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type, FuseMessageContent *content)
+{
+  __content = content;
+  _msg.header.message_type = htonl(type);
+  _msg.header.payload_size = htonl(0);
+  _msg.payload = NULL;
+}
+
 /** Destructor. */
 FuseNetworkMessage::~FuseNetworkMessage()
 {
-  if ( _msg.payload != NULL ) {
-    free(_msg.payload);
-    _msg.payload = NULL;
+  if ( __content == NULL ) {
+    if ( _msg.payload != NULL ) {
+      free(_msg.payload);
+      _msg.payload = NULL;
+    }
+  } else {
+    delete __content;
   }
 }
 
@@ -171,20 +192,6 @@ FuseNetworkMessage::set(FUSE_message_t &msg)
   memcpy(&_msg, &msg, sizeof(FUSE_message_t));
 }
 
-
-/** Copy payload into payload buffer to a specified offset.
- * This assumes that you have made sure that the buffer is big enough!
- * @param offset offset in _payload where to copy the data to
- * @param buf buffer to copy from
- * @param len number of bytes to copy from buf
- */
-void
-FuseNetworkMessage::copy_payload(size_t offset, void *buf, size_t len)
-{
-  void *tmp = (void *)((size_t)(_msg.payload) + offset);
-  memcpy(tmp, buf, len);
-}
-
 /** Pack data for sending.
  * Use this if any additional packing is needed before sending the data (for
  * example if using a DynamicBuffer).
@@ -192,4 +199,9 @@ FuseNetworkMessage::copy_payload(size_t offset, void *buf, size_t len)
 void
 FuseNetworkMessage::pack()
 {
+  if ( __content != NULL ) {
+    __content->serialize();
+    _msg.payload = __content->payload();
+    _msg.header.payload_size = htonl(__content->payload_size());
+  }
 }

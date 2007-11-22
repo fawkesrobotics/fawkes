@@ -84,7 +84,6 @@ main(int argc, char **argv)
     char *net_string = strdup(argp.arg("n"));
     char *image_id = NULL, *host = NULL, *port = NULL, *save_ptr = NULL;
     int port_num = 5000;
-    int image_num = 0;
 
     if ( strchr(net_string, ':') != NULL ) {
       host = strtok_r(net_string, ":", &save_ptr);
@@ -105,12 +104,7 @@ main(int argc, char **argv)
       throw IllegalArgumentException("Image ID must be specified");
     }
 
-    image_num = atoi(image_id);
-    if ( image_num < 0 ) {
-      throw OutOfBoundsException("Invalid Image Number", image_num, 0, INT_MAX);
-    }
-
-    cam = new NetworkCamera(host, port_num, image_num);
+    cam = new NetworkCamera(host, port_num, image_id);
 #else
     throw Exception("NetworkCamera not available at compile time");
 #endif

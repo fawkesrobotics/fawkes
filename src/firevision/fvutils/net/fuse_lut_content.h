@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  fuse_image_message.h - FUSE image message encapsulation
+ *  fuse_lut_content.h - FUSE LUT content encapsulation
  *
- *  Created: Thu Nov 15 15:53:32 2007
+ *  Created: Wed Nov 21 16:47:53 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,33 +25,33 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_IMAGE_MESSAGE_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_IMAGE_MESSAGE_H_
+#ifndef __FIREVISION_FVUTILS_NET_FUSE_LUT_CONTENT_H_
+#define __FIREVISION_FVUTILS_NET_FUSE_LUT_CONTENT_H_
 
 #include <fvutils/net/fuse.h>
-#include <fvutils/net/fuse_message.h>
+#include <fvutils/net/fuse_message_content.h>
 #include <sys/types.h>
 
-class SharedMemoryImageBuffer;
+class SharedMemoryLookupTable;
 
-class FuseImageMessage : public FuseNetworkMessage
+class FuseLutContent : public FuseMessageContent
 {
  public:
-  FuseImageMessage(SharedMemoryImageBuffer *b);
-  FuseImageMessage(uint32_t type, void *payload, size_t payload_size);
+  FuseLutContent(SharedMemoryLookupTable *l);
+  FuseLutContent(uint32_t type, void *payload, size_t payload_size);
 
   unsigned char *  buffer() const;
   size_t           buffer_size() const;
-  unsigned int     pixel_width() const;
-  unsigned int     pixel_height() const;
-  unsigned int     colorspace() const;
-  unsigned int     format() const;
+  unsigned int     width() const;
+  unsigned int     height() const;
+  unsigned int     bytes_per_cell() const;
+
+  virtual void     serialize();
 
  private:
   unsigned char *__buffer;
   size_t         __buffer_size;
-  size_t         __payload_size;
-  FUSE_image_message_header_t *__header;
+  FUSE_lut_message_header_t *__header;
 };
 
 #endif

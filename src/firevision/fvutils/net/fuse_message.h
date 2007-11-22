@@ -33,20 +33,18 @@
 #include <fvutils/net/fuse.h>
 #include <sys/types.h>
 
-//class FuseComplexMessageContent;
+class FuseMessageContent;
 
 class FuseNetworkMessage : public RefCount
 {
  public:
   FuseNetworkMessage();
   FuseNetworkMessage(FUSE_message_t *msg);
-  //FuseNetworkMessage(FuseComplexMessageContent *content);
   FuseNetworkMessage(FUSE_message_type_t type, void *payload, size_t payload_size,
 		     bool copy_payload = false);
+  FuseNetworkMessage(FUSE_message_type_t type, FuseMessageContent *content);
   FuseNetworkMessage(FUSE_message_type_t type);
-  virtual ~FuseNetworkMessage();
-
-  virtual void pack();
+  ~FuseNetworkMessage();
 
   uint32_t  type() const;
   size_t    payload_size() const;
@@ -95,15 +93,18 @@ class FuseNetworkMessage : public RefCount
       }
     }
 
+  void pack();
+
   void set_payload(void *payload, size_t payload_size);
   void set(FUSE_message_t &msg);
   //void set_content(FuseComplexMessageContent *content);
 
  protected:
-  void copy_payload(size_t offset, void *buf, size_t len);
-
   /** Internal message. Fill in derivatives. */
   FUSE_message_t _msg;
+
+ private:
+  FuseMessageContent *__content;
 };
 
 #endif

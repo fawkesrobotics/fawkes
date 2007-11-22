@@ -2,8 +2,8 @@
 /***************************************************************************
  *  net.h - This header defines an fuse network client camera
  *
- *  Generated: Wed Feb 01 12:22:06 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Feb 01 12:22:06 2006
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -29,19 +29,19 @@
 #define __FIREVISION_CAMS_NET_H_
 
 #include <cams/camera.h>
-#include <fvutils/color/colorspaces.h>
+#include <fvutils/net/fuse_client_handler.h>
 
 class CameraArgumentParser;
-class FuseClientTCP;
+class FuseClient;
+class FuseImageContent;
+class FuseNetworkMessage;
 
-class NetworkCamera : public Camera
+class NetworkCamera : public Camera, public FuseClientHandler
 {
 
  public:
 
-  NetworkCamera(char *host, unsigned short port,
-		unsigned int image_num=0,
-		unsigned short proto = PROTOCOL_TCP);
+  NetworkCamera(const char *host, unsigned short port, const char *image_id);
   NetworkCamera(const CameraArgumentParser *cap);
 
   virtual ~NetworkCamera();
@@ -65,18 +65,26 @@ class NetworkCamera : public Camera
 
   virtual void           set_image_number(unsigned int n);
 
-  static const unsigned short PROTOCOL_TCP;
+  virtual void fuse_invalid_server_version(uint32_t local_version,
+					   uint32_t remote_version) throw();
+  virtual void fuse_connection_established() throw();
+  virtual void fuse_inbound_received(FuseNetworkMessage *m) throw();
 
  private:
-  bool started;
-  bool opened;
+  bool __started;
+  bool __opened;
 
-  unsigned int    image_num;
-  unsigned short  port;
-  char           *host;
+  bool         __connected;
+  unsigned int __local_version;
+  unsigned int __remote_version;
 
-  FuseClientTCP  *fusec;
+  char               *__host;
+  unsigned short      __port;
+  char               *__image_id;
 
+  FuseClient         *__fusec;
+  FuseImageContent   *__fuse_image;
+  FuseNetworkMessage *__fuse_message;
 };
 
 #endif

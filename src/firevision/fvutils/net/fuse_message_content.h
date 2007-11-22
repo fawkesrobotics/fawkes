@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  fuse_lutlist_message.h - FUSE LUT list message encapsulation
+ *  fuse_message_content.h - FUSE complex message content
  *
- *  Created: Wed Nov 21 16:32:31 2007
+ *  Created: Thu Nov 22 17:17:16 2007
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -25,33 +25,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_LUTLIST_MESSAGE_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_LUTLIST_MESSAGE_H_
+#ifndef __FIREVISION_FVUTILS_NET_FUSE_MESSAGE_CONTENT_H_
+#define __FIREVISION_FVUTILS_NET_FUSE_MESSAGE_CONTENT_H_
 
-#include <fvutils/net/fuse.h>
-#include <fvutils/net/fuse_message.h>
 #include <sys/types.h>
 
-class FuseLutListMessage : public FuseNetworkMessage
+class FuseMessageContent
 {
  public:
-  FuseLutListMessage();
-  FuseLutListMessage(uint32_t type, void *payload, size_t payload_size);
-  ~FuseLutListMessage();
+  FuseMessageContent();
+  virtual ~FuseMessageContent();
 
-  void add_lutinfo(const char *lut_id,
-		   unsigned int width, unsigned int height, unsigned int bytes_per_cell);
+  virtual void   serialize() = 0;
+  virtual void * payload() const;
+  virtual size_t payload_size() const;
 
+ protected:
+  void copy_payload(size_t offset, void *buf, size_t len);
 
-  void                reset_iterator();
-  bool                has_next();
-  FUSE_lutinfo_t *  next();
+ protected:
+  /** Pointer to payload. */
+  void *  _payload;
+  /** Payloda size. */
+  size_t  _payload_size;
 
-  virtual void pack();
-
- private:
-  DynamicBuffer  *__list;
-  FUSE_lutlist_message_t __lutlist_msg;
 };
 
 #endif
