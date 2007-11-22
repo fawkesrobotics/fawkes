@@ -31,7 +31,6 @@
 #include <netcomm/fawkes/network_thread.h>
 #include <netcomm/fawkes/handler.h>
 #include <netcomm/utils/resolver.h>
-#include <netcomm/utils/resolver.h>
 #include <utils/logging/liblogger.h>
 #ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
