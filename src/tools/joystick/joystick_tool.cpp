@@ -5,7 +5,7 @@
  *  Generated: Sat Jun 02 17:45:00 2007
  *  Copyright  2007  Martin Liebenberg
  *
- *  $Id$
+ *  $Id:joystick_tool.cpp 419 2007-11-08 09:45:51Z liebenberg $
  *
  ****************************************************************************/
 
@@ -31,6 +31,7 @@
 #include <plugins/navigator/libnavi/navigator_messages.h>
 
 #include <mainapp/plugin_messages.h>
+#include <mainapp/plugin_list_message.h>
 #include <netcomm/fawkes/client.h>
 #include <netcomm/fawkes/message.h>
 #include <netcomm/socket/socket.h>
@@ -40,7 +41,8 @@
 
 #include <iostream>
 #include <unistd.h>
-#include <cmath>
+#include <cmath> 
+#include <csignal>
 
 /** @class JoystickTool <tools/joystick/joystick_tool.h>
  *   The joystick control for the robots.
@@ -58,6 +60,23 @@
 /** @var JoystickTool::net_client
  *   The fawkes network client to communicate with the navigator plugin.
  */
+ 
+/**
+ * The instance of the joystick tool.
+ */
+JoystickTool *JoystickTool::instance = 0;
+
+/** Signal handler.
+ * For shutting down the joystick tool.
+ * @param signal the signal to handle
+ */
+void JoystickTool::signal_handler(int signal) 
+{ 
+  if (signal == SIGINT || signal == SIGTERM || signal == SIGKILL) 
+   {
+    delete instance;
+   }
+}
 
 /** Contructor.
  * @param host_name the host name of the host to connect to.
@@ -72,10 +91,10 @@ JoystickTool::JoystickTool(const char *host_name, bool use_udp)
     socket->connect(host_name, 1910);
     }
   */
-
+  instance = this;
   net_client = new FawkesNetworkClient(host_name, 1910);
   sending = false;
-
+  signal(SIGINT, signal_handler);
   try
     {
       net_client->connect();
@@ -88,6 +107,14 @@ JoystickTool::JoystickTool(const char *host_name, bool use_udp)
   net_client->start();
   net_client->registerHandler(this, FAWKES_CID_NAVIGATOR_PLUGIN);
   net_client->registerHandler(this, FAWKES_CID_PLUGINMANAGER);
+  net_client->setNoDelay(true);
+  FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_SUBSCRIBE_WATCH);
+  net_client->enqueue(msg1);
+  msg1->unref();
+  FawkesNetworkMessage *msg2 = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+                               MSG_PLUGIN_LIST_LOADED);
+  net_client->enqueue(msg2);
+  msg2->unref();
 
   quit = false;
 
@@ -100,8 +127,13 @@ JoystickTool::JoystickTool(const char *host_name, bool use_udp)
 /** Deconstructor. */
 JoystickTool::~JoystickTool()
 {
+  quit = true;
+  FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNSUBSCRIBE_WATCH);
+  net_client->enqueue(msg);
+  msg->unref();
+  usleep(100000);
+  printf("Got killed\n");
   net_client->disconnect();
-  delete net_client;
 }
 
 /** The handler got deregistered. */
@@ -154,6 +186,36 @@ JoystickTool::inboundReceived(FawkesNetworkMessage *msg)
           net_client->enqueue(msg);
           msg->unref();
         }
+    }
+  else if (msg->msgid() == MSG_PLUGIN_LOADED_LIST )
+    {
+      PluginListMessage *plm = msg->msgc<PluginListMessage>();
+      if ( plm->has_next() )
+        {
+          while ( plm->has_next() )
+            {
+              char *p = plm->next();
+              if(strcmp(p, "navigator") == 0)
+                {
+                  std::cerr << "Navigator plugin loaded." << std::endl;
+                  std::cerr << "Starts sending." << std::endl;
+
+                  sending = true;
+                  
+                  navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
+                  sub_msg->sub_type_motor_control = 1;
+                  FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
+                  net_client->enqueue(msg);
+                  msg->unref();
+                }
+              free(p);
+            }
+        }
+      else
+        {
+          std::cerr << "Navigator plugin is not loaded." << std::endl;
+        }
+      delete plm;
     }
 }
 
@@ -323,8 +385,8 @@ int main(int argc, char **argv)
       host_name = "localhost";
     }
 
-  JoystickTool control(host_name, argp->has_arg("u"));
-  control.mainLoop();
+  JoystickTool *control = new JoystickTool(host_name, argp->has_arg("u"));
+  control->mainLoop();
 
   return 0;
 }

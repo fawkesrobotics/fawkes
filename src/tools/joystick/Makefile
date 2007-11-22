@@ -13,9 +13,9 @@
 #
 #*****************************************************************************
 #
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
+#           $Id:Makefile 419 2007-11-08 09:45:51Z liebenberg $
+# last modified: $Date:2007-11-08 10:45:51 +0100 (Do, 08 Nov 2007) $
+#            by: $Author:liebenberg $
 #
 
 BASEDIR = ../../..
@@ -29,7 +29,7 @@ warning_nonavi:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting JoystickTool (navigator not built)$(TNORMAL)"
 endif
 
-LIBS_joystick = core utils netcomm navigator config
+LIBS_joystick = core utils netcomm navigator fawkesmainappmsgs
 OBJS_joystick = joystick_tool.o	\
 		        cjoystick.o
 

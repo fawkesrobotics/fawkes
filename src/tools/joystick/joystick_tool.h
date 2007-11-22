@@ -5,7 +5,7 @@
  *  Generated: Sat Jun 02 17:45:00 2007
  *  Copyright  2007  Martin Liebenberg
  *
- *  $Id$
+ *  $Id:joystick_tool.h 419 2007-11-08 09:45:51Z liebenberg $
  *
  ****************************************************************************/
 
@@ -43,6 +43,8 @@ class JoystickTool : public FawkesNetworkClientHandler
         
   void mainLoop();
   
+  static JoystickTool *instance;
+  static void signal_handler(int signal);
  private:
         
   void deregistered();
