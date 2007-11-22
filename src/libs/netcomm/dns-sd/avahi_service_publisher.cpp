@@ -59,6 +59,10 @@ AvahiServicePublisher::AvahiServicePublisher()
 AvahiServicePublisher::~AvahiServicePublisher()
 {
   erase_groups();
+  for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
+    delete (*__sit).first;
+  }
+  __services.clear();
 }
 
 
