@@ -33,7 +33,6 @@
 #include <cstdlib>
 #include <netinet/in.h>
 #include <cstring>
-#include <cstdio>
 
 /** @class FuseImageMessage <fvutils/net/fuse_image_message.h>
  * FUSE image message.
@@ -72,14 +71,8 @@ FuseImageMessage::FuseImageMessage(uint32_t type,
  */
 FuseImageMessage::FuseImageMessage(SharedMemoryImageBuffer *b)
 {
-  printf("Colorspace: %u   width: %u   height: %u\n",
-	 b->colorspace(), b->width(), b->height());
-
   __buffer_size  = colorspace_buffer_size(b->colorspace(), b->width(), b->height());
   __payload_size = __buffer_size + sizeof(FUSE_image_message_header_t);
-
-
-  printf("Buffer size: %lu    Payload size: %lu\n", __buffer_size, __payload_size);
 
   _msg.header.message_type = htonl(FUSE_MT_IMAGE);
   _msg.header.payload_size = htonl(__payload_size);
