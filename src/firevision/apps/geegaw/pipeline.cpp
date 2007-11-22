@@ -92,6 +92,8 @@ GeegawPipeline::GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool 
   deter_colormaps.push_back("../etc/firevision/colormaps/red_box.colormap");
   deter_colormaps.push_back("../etc/firevision/colormaps/blue_box.colormap");
   deter_colormaps.push_back("../etc/firevision/colormaps/pineapple.colormap");
+
+  add_status = last_add_status = ADDSTATUS_NOTRUNNING;
 }
 
 
