@@ -28,15 +28,28 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-LIBS_fvfountain = core utils fvutils fvcams fvmodels fvclassifiers fvfilters netcomm
+LIBS_fvfountain = core utils fvutils netcomm
 
 ifeq ($(BUILD_TYPE),rcsoftx)
-  OBJS_fvfountain = fountain.o mini_image_producer.o rcxmain.o
-  LIBS_fvfountain += pthread
-  BINS_all       = $(BINDIR)/fvfountain
+  include $(BASEDIR)/src/fawkes/netcomm/netcomm.mk
+  ifeq ($(realpath $(QTDIR)/include),)
+    WARN_TARGETS += warning_rcxqt
+  else
+    OBJS_fvfountain  = rcxmain.o config.o
+    LIBS_fvfountain += pthread rutils
+    INCDIRS         += $(QTDIR)/include
+    BINS_all         = $(BINDIR)/fvfountain
+  endif
 else
-  OBJS_fvfountain = fountain_thread.o fountain_plugin.o
-  PLUGINS_all = $(PLUGINDIR)/fvfountain.so
+  OBJS_fvfountain  = fountain_thread.o fountain_plugin.o
+  PLUGINS_all      = $(PLUGINDIR)/fvfountain.so
+endif
+
+ifneq ($(SRCDIR),.)
+all: $(WARN_TARGETS)
+.PHONY: warning_rcxqt
+warning_rcxqt:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Cannot build Fountain$(TNORMAL) (qt-devel not installed)";
 endif
 
 OBJS_all = $(OBJS_fvfountain)
