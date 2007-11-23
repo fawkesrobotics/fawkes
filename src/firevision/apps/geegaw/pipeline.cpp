@@ -36,7 +36,6 @@
 #include <utils/math/angle.h>
 
 #include <fvutils/ipc/shm_image.h>
-#include <fvutils/ipc/shm_registry.h>
 #include <fvutils/color/conversions.h>
 
 #include <fvutils/draw/drawer.h>
@@ -209,12 +208,12 @@ GeegawPipeline::init()
   cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
 				   config->LookupTableWidth,
 				   config->LookupTableHeight,
-				   FIREVISION_SHM_LUT_OMNI_COLOR,
+				   "omni-color",
 				   true /* destroy on free */);
   deter_cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
 					 config->LookupTableWidth,
 					 config->LookupTableHeight,
-					 FIREVISION_SHM_LUT_FRONT_COLOR,
+					 "front-color",
 					 true /* destroy on free */);
 
   /*

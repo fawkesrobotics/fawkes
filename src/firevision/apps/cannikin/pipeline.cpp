@@ -35,7 +35,6 @@
 #include <utils/system/argparser.h>
 
 #include <fvutils/ipc/shm_image.h>
-#include <fvutils/ipc/shm_registry.h>
 #include <fvutils/color/conversions.h>
 #include <utils/ipc/msg.h>
 #include <fvutils/ipc/msg_registry.h>
@@ -293,7 +292,7 @@ CannikinPipeline::init()
 
   cm  = new ColorModelLookupTable( config->LookupTableWidth,
 				   config->LookupTableHeight,
-				   FIREVISION_SHM_LUT_FRONT_COLOR,
+				   "front-color",
 				   true /* destroy on free */);
   cm->reset();
   set_cup_color(CC_BLUE);

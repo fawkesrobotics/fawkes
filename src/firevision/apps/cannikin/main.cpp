@@ -43,7 +43,6 @@
 #include <utils/system/console_colors.h>
 
 #include <fvutils/ipc/shm_image.h>
-#include <fvutils/ipc/shm_registry.h>
 
 using namespace std;
 
