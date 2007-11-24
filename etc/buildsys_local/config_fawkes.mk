@@ -15,5 +15,6 @@
 #
 #*****************************************************************************
 
+LIBSRCDIR=$(abspath $(BASEDIR)/src/libs)
 CFLAGS_BASE += -g -Wall -Werror -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 
