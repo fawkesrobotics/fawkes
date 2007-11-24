@@ -40,7 +40,7 @@
 #include <utils/system/argparser.h>
 #include <utils/system/console_colors.h>
 
-#include <libs/netcomm/service_discovery/browse_handler.h>
+#include <netcomm/service_discovery/browse_handler.h>
 #ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
 #endif
