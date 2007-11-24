@@ -196,7 +196,7 @@ AvahiBrowser::call_handler_service_added( const char *name,
 					  AvahiLookupResultFlags flags)
 {
   //mutex->lock();
-  struct sockaddr_in *s;
+  struct sockaddr_in *s = NULL;
   socklen_t slen;
   if ( address->proto == AVAHI_PROTO_INET ) {
     slen = sizeof(struct sockaddr_in);
@@ -213,6 +213,7 @@ AvahiBrowser::call_handler_service_added( const char *name,
 			  (struct sockaddr *)s, slen, port, txt, (int)flags);
     }
   }
+  free(s);
   //mutex->unlock();
 }
 
@@ -231,7 +232,7 @@ AvahiBrowser::call_handler_failed( const char *name,
   if ( handlers.find(type) != handlers.end() ) {
     std::list<ServiceBrowseHandler *>::iterator i;
     for ( i = handlers[type].begin(); i != handlers[type].end(); ++i) {
-      (*i)->failed(name, type, domain);
+      (*i)->browse_failed(name, type, domain);
     }
   }
   //mutex->unlock();

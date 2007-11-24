@@ -70,9 +70,9 @@ class QAAvahiBrowserMain : public SignalHandler, public ServiceBrowseHandler
     printf("CACHE_EXHAUSTED\n");
   }
 
-  virtual void failed(const char *name,
-		      const char *type,
-		      const char *domain)
+  virtual void browse_failed(const char *name,
+			     const char *type,
+			     const char *domain)
   {
     printf("FAILED: name=%s  type=%s  domain=%s\n", name, type, domain);
   }

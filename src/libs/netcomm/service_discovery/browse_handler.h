@@ -66,9 +66,9 @@ class ServiceBrowseHandler
    * @param type type of the service
    * @param domain domain of the service
    */
-  virtual void failed(const char *name,
-		      const char *type,
-		      const char *domain)                     = 0;
+  virtual void browse_failed(const char *name,
+			     const char *type,
+			     const char *domain)              = 0;
 
   /** A service has been announced on the network.
    * @param name name of the service

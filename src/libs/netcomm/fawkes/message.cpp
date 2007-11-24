@@ -90,6 +90,7 @@ FawkesNetworkMessage::FawkesNetworkMessage()
 {
   memset(&_msg, 0, sizeof(_msg));
   _clid = 0;
+  _content = NULL;
 }
 
 
