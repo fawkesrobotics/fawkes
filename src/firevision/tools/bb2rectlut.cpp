@@ -240,11 +240,10 @@ print_info(ArgumentParser *argp)
       printf("File:         %s\n"
 	     "Version:      %u\n"
 	     "Endianess:    %s\n"
+	     "Num Blocks:   %u/%zu (header/read)\n"
 #if __WORDSIZE == 64
-	     "Num Blocks:   %u/%lu (header/read)\n"
 	     "GUID:         0x%016lX\n"
 #else
-	     "Num Blocks:   %u/%u (header/read)\n"
 	     "GUID:         0x%016llX\n"
 #endif
 	     "Camera Model: %s\n",

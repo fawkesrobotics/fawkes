@@ -216,11 +216,7 @@ FawkesConfigManager::process_after_loop()
       if ( msg->payload_size() != sizeof(config_getval_msg_t) ) {
 	LibLogger::log_warn("FawkesConfigManager",
 			    "CONFIG_GET_FLOAT: invalid payload size "
-#if __WORDSIZE == 64
-			    "(received %u instead of %u bytes",
-#else
-			    "(received %lu instead of %lu bytes",
-#endif
+			    "(received %zu instead of %zu bytes",
 			    msg->payload_size(), sizeof(config_getval_msg_t));
       } else {
 	config_getval_msg_t *m = (config_getval_msg_t *)msg->payload();
@@ -335,11 +331,7 @@ FawkesConfigManager::process_after_loop()
       if ( msg->payload_size() < sizeof(config_descriptor_t)) {
 	LibLogger::log_warn("FawkesConfigManager",
 			    "inbound set: payload is too small"
-#if __WORDSIZE == 64
-			    "(%u is less than %u bytes",
-#else
-			    "(%lu is less than %lu bytes",
-#endif
+			    "(%zu is less than %zu bytes",
 			    msg->payload_size(), sizeof(config_descriptor_t));
 	send_inv_value(msg->clid(), "?");
       } else {

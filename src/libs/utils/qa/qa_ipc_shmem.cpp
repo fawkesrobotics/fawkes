@@ -51,6 +51,19 @@ class QASharedMemoryHeader : public SharedMemoryHeader
     header.type = type;
   }
 
+  virtual SharedMemoryHeader *
+  clone() const
+  {
+    QASharedMemoryHeader *qs = new QASharedMemoryHeader(header.type);
+    return qs;
+  }
+
+  virtual bool operator==(const SharedMemoryHeader &s) const
+  {
+    const QASharedMemoryHeader *qs = dynamic_cast<const QASharedMemoryHeader *>(&s);
+    return (qs && (header.type == qs->header.type));
+  }
+
   virtual bool matches(void *memptr)
   {
     return (memcmp(memptr, &header, sizeof(qashmem_header_t)) == 0);

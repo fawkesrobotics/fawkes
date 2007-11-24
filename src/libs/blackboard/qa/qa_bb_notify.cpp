@@ -140,11 +140,7 @@ main(int argc, char **argv)
 
   const char* prefix = "Another";
   readers = im->open_all_of_type_for_reading<TestInterface>(prefix);
-#if __WORDSIZE == 64
-  printf("Found %lu interfaces with prefix \"%s\"\n", readers->size(), prefix);
-#else
-  printf("Found %u interfaces with prefix \"%s\"\n", readers->size(), prefix);
-#endif
+  printf("Found %zu interfaces with prefix \"%s\"\n", readers->size(), prefix);
   for (std::list<TestInterface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
     printf("Opened reader for interface %s of type %s\n", (*i)->id(), (*i)->type());
     im->close(*i);
