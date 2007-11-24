@@ -75,10 +75,10 @@ class ExampleWaitCondThread : public Thread
     // unlock mutex inside wait condition
     m->unlock();
     
-    // Cannot call wakeOne() here since result is unpredictable and if not
+    // Cannot call wake_one() here since result is unpredictable and if not
     // the next thread is woken up we will end up in a deadlock. So every
-    // thread has to check if it's his turn -> use wakeAll()
-    wc->wakeAll();
+    // thread has to check if it's his turn -> use wake_all()
+    wc->wake_all();
   }
 
  private:

@@ -740,7 +740,7 @@ Thread::wakeup()
 {
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
     __sleep_mutex->lock();
-    __sleep_condition->wakeAll();
+    __sleep_condition->wake_all();
     __sleep_mutex->unlock();
   }
 }
@@ -762,7 +762,7 @@ Thread::wakeup(Barrier *barrier)
 
   __sleep_mutex->lock();
   __barrier = barrier;
-  __sleep_condition->wakeAll();
+  __sleep_condition->wake_all();
   __sleep_mutex->unlock();
 }
 

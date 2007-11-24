@@ -71,7 +71,7 @@ class WaitConditionData
  * {
  *   forever {
  *     produce_package();
- *     wait_condition->wakeOne();
+ *     wait_condition->wake_one();
  *   }
  * }
  * @endcode
@@ -111,8 +111,8 @@ WaitCondition::~WaitCondition()
  * we go on. If timeout_sec and timeout_nanosec equal zero waits forever.
  * @param timeout_nanosec Optional timeout in nanoseconds that we will wait at most before
  * we go on. If timeout_sec and timeout_nanosec equal zero waits forever.
- * @return true, if the thread was woken up by another thread calling wakeOne() or
- * wakeAll(). False, if the mutex was unlocked or the timeout has been reached waiting
+ * @return true, if the thread was woken up by another thread calling wake_one() or
+ * wake_all(). False, if the mutex was unlocked or the timeout has been reached waiting
  * for the condition.
  */
 bool
@@ -120,17 +120,42 @@ WaitCondition::wait(Mutex *mutex, unsigned int timeout_sec, unsigned int timeout
 {
   if ( (timeout_sec > 0) || (timeout_nanosec > 0) ) {
     struct timespec ts = { timeout_sec, timeout_nanosec };
-    int err;
-    err = pthread_cond_timedwait( &(cond_data->cond), &(mutex->mutex_data->mutex), &ts );
-    if ( err == 0 ) {
-      return true;
-    } else {
-      return false;
-    }
+    int err = pthread_cond_timedwait( &(cond_data->cond), &(mutex->mutex_data->mutex), &ts );
+    if ( err != 0 ) return false;
   } else {
     pthread_cond_wait( &(cond_data->cond), &(mutex->mutex_data->mutex) );
-    return true;
   }
+  return true;
+}
+
+
+/** Waits for the condition.
+ * Often you just want to block until some event happens and you get woken up, without
+ * actually being interested in a particular mutex. In that case you can use this
+ * method. An internal Mutex will be created (and destroyed) in this method for this
+ * purpose.
+ * @param timeout_sec Optional timeout in seconds that we will wait at most before
+ * we go on. If timeout_sec and timeout_nanosec equal zero waits forever.
+ * @param timeout_nanosec Optional timeout in nanoseconds that we will wait at most before
+ * we go on. If timeout_sec and timeout_nanosec equal zero waits forever.
+ * @return true, if the thread was woken up by another thread calling wake_one() or
+ * wake_all(). False, if the mutex was unlocked or the timeout has been reached waiting
+ * for the condition.
+ */
+bool
+WaitCondition::wait(unsigned int timeout_sec, unsigned int timeout_nanosec)
+{
+  Mutex mutex;
+  mutex.lock();
+  if ( (timeout_sec > 0) || (timeout_nanosec > 0) ) {
+    struct timespec ts = { timeout_sec, timeout_nanosec };
+    int err = pthread_cond_timedwait( &(cond_data->cond), &(mutex.mutex_data->mutex), &ts );
+    if ( err != 0 ) return false;
+  } else {
+    pthread_cond_wait( &(cond_data->cond), &(mutex.mutex_data->mutex) );
+  }
+  mutex.unlock();
+  return true;
 }
 
 
@@ -139,7 +164,7 @@ WaitCondition::wait(Mutex *mutex, unsigned int timeout_sec, unsigned int timeout
  * is given about the order of the woken up threads.
  */
 void
-WaitCondition::wakeOne()
+WaitCondition::wake_one()
 {
   pthread_mutex_lock( &(cond_data->mutex) );
   pthread_cond_signal( &(cond_data->cond) );
@@ -151,7 +176,7 @@ WaitCondition::wakeOne()
  * This wakes up all threads waiting for this condition.
  */
 void
-WaitCondition::wakeAll()
+WaitCondition::wake_all()
 {
   pthread_mutex_lock( &(cond_data->mutex) );
   pthread_cond_broadcast( &(cond_data->cond) );

@@ -229,7 +229,7 @@ FuseClient::loop()
   __inbound_msgq->unlock();
 
   if ( wake ) {
-    __waitcond->wakeAll();
+    __waitcond->wake_all();
   }
 
   __mutex->unlock();

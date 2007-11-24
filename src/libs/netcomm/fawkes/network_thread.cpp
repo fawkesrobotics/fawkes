@@ -197,7 +197,7 @@ FawkesNetworkThread::loop()
 void
 FawkesNetworkThread::wakeup()
 {
-  wait_cond->wakeAll();
+  wait_cond->wake_all();
 }
 
 

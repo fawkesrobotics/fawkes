@@ -37,9 +37,10 @@ class WaitCondition {
   WaitCondition();
   ~WaitCondition();
 
+  bool wait(unsigned int timeout_sec = 0, unsigned int timeout_nanosec = 0);
   bool wait(Mutex *mutex, unsigned int timeout_sec = 0, unsigned int timeout_nanosec = 0);
-  void wakeOne();
-  void wakeAll();
+  void wake_one();
+  void wake_all();
 
  private:
   WaitConditionData *cond_data;

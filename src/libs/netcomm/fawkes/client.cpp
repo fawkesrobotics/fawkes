@@ -291,7 +291,7 @@ FawkesNetworkClient::loop()
   wakeup_list.sort();
   wakeup_list.unique();
   for (std::list<unsigned int>::iterator i = wakeup_list.begin(); i != wakeup_list.end(); ++i) {
-    waitconds[*i]->wakeAll();
+    waitconds[*i]->wake_all();
   }
 
   mutex->unlock();
@@ -323,6 +323,6 @@ void
 FawkesNetworkClient::wake(unsigned int component_id)
 {
   if ( waitconds.find(component_id) != waitconds.end() ) {
-    waitconds[component_id]->wakeAll();
+    waitconds[component_id]->wake_all();
   }
 }
