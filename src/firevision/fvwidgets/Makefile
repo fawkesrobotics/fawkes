@@ -2,7 +2,9 @@
 #           Makefile Build System for Fawkes : FireVision Widgets
 #                            -------------------
 #   Created on Mon Nov 05 17:35:24 2007
-#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -16,11 +18,11 @@
 BASEDIR = ../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
-CFLAGS   = $(VISION_CFLAGS)
-LDFLAGS  = $(VISION_LDFLAGS)
-INCDIRS  = $(VISION_INCDIRS)
-LIBDIRS  = $(VISION_LIBDIRS)
-LIBS     = $(VISION_LIBS)
+CFLAGS   += $(VISION_CFLAGS)
+LDFLAGS  += $(VISION_LDFLAGS)
+INCDIRS  += $(VISION_INCDIRS)
+LIBDIRS  += $(VISION_LIBDIRS)
+LIBS     += $(VISION_LIBS)
 
 ifeq ($(HAVE_SDL),1)
   LIBS_all = $(LIBDIR)/libfvwidgets.so

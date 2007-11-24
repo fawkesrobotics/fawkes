@@ -2,7 +2,9 @@
 #          Makefile Build System for Fawkes : FireVision Cannikin
 #                            -------------------
 #   Created on Mon Apr 09 12:13:49 2007 (Easter Monday)
-#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -12,22 +14,16 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
 # -Wno-non-virtual-dtor needed to stop gcc from throwing Qt warnings
-CFLAGS   = $(VISION_CFLAGS) -Wno-non-virtual-dtor
-LDFLAGS  = $(VISION_LDFLAGS)
-INCDIRS  = $(VISION_INCDIRS) $(QTDIR)/include
-LIBDIRS  = $(VISION_LIBDIRS) $(QTDIR)/lib
-LIBS     = $(VISION_LIBS)
+CFLAGS   += $(VISION_CFLAGS) -Wno-non-virtual-dtor
+LDFLAGS  += $(VISION_LDFLAGS)
+INCDIRS  += $(VISION_INCDIRS) $(QTDIR)/include
+LIBDIRS  += $(VISION_LIBDIRS) $(QTDIR)/lib
+LIBS     += $(VISION_LIBS)
 
 ifneq ($(HAVE_TRICLOPS_SDK),1)
   WARN_TARGETS += warning_triclops

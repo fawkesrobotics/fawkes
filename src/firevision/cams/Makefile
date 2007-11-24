@@ -4,6 +4,8 @@
 #   Created on Sun Jan 14 18:25:34 2007
 #   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
+#   $Id$
+#
 #*****************************************************************************
 #
 #   This program is free software; you can redistribute it and/or modify
@@ -12,20 +14,15 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
 
 BASEDIR = ../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
-CFLAGS   = $(VISION_CFLAGS) -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
-LDFLAGS  = $(VISION_LDFLAGS)
-INCDIRS  = $(VISION_INCDIRS)
-LIBDIRS  = $(VISION_LIBDIRS)
-LIBS     = $(VISION_LIBS)
+CFLAGS   += $(VISION_CFLAGS) -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
+LDFLAGS  += $(VISION_LDFLAGS)
+INCDIRS  += $(VISION_INCDIRS)
+LIBDIRS  += $(VISION_LIBDIRS)
+LIBS     += $(VISION_LIBS)
 
 LIBS_libfvcams = $(VISION_CAM_LIBS) utils fvutils
 OBJS_libfvcams = camera.o			\

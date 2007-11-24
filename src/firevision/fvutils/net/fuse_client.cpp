@@ -91,6 +91,10 @@ FuseClient::~FuseClient()
     __outbound_msgq->pop();
   }
   delete __outbound_msgq;
+
+  delete __mutex;
+  delete __waitcond;
+  delete __socket;
 }
 
 

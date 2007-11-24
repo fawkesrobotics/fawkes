@@ -2,7 +2,9 @@
 #            Makefile Build System for Fawkes : FireVision Tools
 #                            -------------------
 #   Created on Wed Jun 27 14:11:58 2007
-#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -12,20 +14,16 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
 
 BASEDIR = ../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
+include $(LIBSRCDIR)/netcomm/netcomm.mk
 
-CFLAGS   = $(VISION_CFLAGS) -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
-LDFLAGS  = $(VISION_LDFLAGS)
-INCDIRS  = $(VISION_INCDIRS)
-LIBDIRS  = $(VISION_LIBDIRS)
-LIBS     = $(VISION_LIBS)
+CFLAGS   += $(VISION_CFLAGS) -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
+LDFLAGS  += $(VISION_LDFLAGS)
+INCDIRS  += $(VISION_INCDIRS)
+LIBDIRS  += $(VISION_LIBDIRS)
+LIBS     += $(VISION_LIBS)
 
 LIBS_fvshmem = $(VISION_CAM_LIBS) utils fvutils
 OBJS_fvshmem = shmem.o

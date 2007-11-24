@@ -19,6 +19,9 @@
 #
 #*****************************************************************************
 
+ifndef __fvconf_mk_
+__fvconf_mk_ := 1
+
 include $(BASEDIR)/etc/buildsys/config.mk
 
 CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L BUMBLEBEE2
@@ -133,4 +136,6 @@ printconf:
 	$(SILENT)echo VISION_CAM_LIBS: $(VISION_CAM_LIBS)
 	$(SILENT)echo VISION_CFLAGS:   $(VISION_CFLAGS)
 endif
+
+endif # __fvconf_mk_
 

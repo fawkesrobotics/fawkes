@@ -4,6 +4,8 @@
 #   Created on Tue Jun 26 17:32:34 2007
 #   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
+#   $Id$
+#
 #*****************************************************************************
 #
 #   This program is free software; you can redistribute it and/or modify
@@ -16,11 +18,11 @@
 BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
-CFLAGS   = $(VISION_CFLAGS)
-LDFLAGS  = $(VISION_LDFLAGS)
-INCDIRS  = $(VISION_INCDIRS)
-LIBDIRS  = $(VISION_LIBDIRS)
-LIBS     = $(VISION_LIBS)
+CFLAGS   += $(VISION_CFLAGS)
+LDFLAGS  += $(VISION_LDFLAGS)
+INCDIRS  += $(VISION_INCDIRS)
+LIBDIRS  += $(VISION_LIBDIRS)
+LIBS     += $(VISION_LIBS)
 
 LIBS_fvomniball = core utils fvutils fvcams fvmodels fvclassifiers
 OBJS_fvomniball = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))

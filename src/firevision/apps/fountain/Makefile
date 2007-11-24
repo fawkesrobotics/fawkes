@@ -2,7 +2,9 @@
 #           Makefile Build System for Fawkes : FireVision Fountain
 #                            -------------------
 #   Created on Sun Jun 17 17:47:54 2007 (Starbucks)
-#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -12,21 +14,15 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
-CFLAGS   = $(VISION_CFLAGS)
-LDFLAGS  = $(VISION_LDFLAGS)
-INCDIRS  = $(VISION_INCDIRS)
-LIBDIRS  = $(VISION_LIBDIRS)
-LIBS     = $(VISION_LIBS)
+CFLAGS   += $(VISION_CFLAGS)
+LDFLAGS  += $(VISION_LDFLAGS)
+INCDIRS  += $(VISION_INCDIRS)
+LIBDIRS  += $(VISION_LIBDIRS)
+LIBS     += $(VISION_LIBS)
 
 LIBS_fvfountain = core utils fvutils netcomm
 

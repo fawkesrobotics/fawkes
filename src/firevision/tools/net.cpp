@@ -35,11 +35,23 @@
 #include <fvutils/net/fuse_lutlist_content.h>
 #include <fvutils/writers/fvraw.h>
 
+#include <core/threading/wait_condition.h>
 #include <core/exceptions/software.h>
 #include <utils/system/argparser.h>
+#include <utils/system/console_colors.h>
+
+#include <libs/netcomm/service_discovery/browse_handler.h>
+#ifdef HAVE_AVAHI
+#include <netcomm/dns-sd/avahi_thread.h>
+#endif
+
+// for inet_ntop
+#include <arpa/inet.h>
 
 /** FireVision Network Tool */
-class FireVisionNetworkTool : public FuseClientHandler
+class FireVisionNetworkTool
+  : public FuseClientHandler,
+    public ServiceBrowseHandler
 {
  public:
   /** Constructor.
@@ -48,6 +60,8 @@ class FireVisionNetworkTool : public FuseClientHandler
   FireVisionNetworkTool(ArgumentParser *argp)
   {
     __argp = argp;
+    __exploring = false;
+    __explore_waitcond = NULL;
   }
 
   void
@@ -77,6 +91,7 @@ class FireVisionNetworkTool : public FuseClientHandler
 					 (colorspace_t)ic->colorspace(), ic->buffer());
 	w->write();
 	delete w;
+	delete ic;
       } catch (Exception &e) {
 	printf("Received message cannot be casted to FuseImageMessage\n");
 	e.print_trace();
@@ -98,6 +113,7 @@ class FireVisionNetworkTool : public FuseClientHandler
 	} else {
 	  printf("No images available\n");
 	}
+      delete ilc;
       } catch (Exception &e) {
 	printf("Received message cannot be casted to FuseImageListMessage\n");
 	e.print_trace();
@@ -118,6 +134,7 @@ class FireVisionNetworkTool : public FuseClientHandler
 	} else {
 	  printf("No lookup tables available\n");
 	}
+	delete llc;
       } catch (Exception &e) {
 	printf("Received message cannot be casted to FuseImageListMessage\n");
 	e.print_trace();
@@ -131,6 +148,7 @@ class FireVisionNetworkTool : public FuseClientHandler
 	FILE *f = fopen(__file, "w");
 	fwrite(lc->buffer(), lc->buffer_size(), 1, f);
 	fclose(f);
+	delete lc;
       } catch (Exception &e) {
 	printf("Received message cannot be casted to FuseLutMessage\n");
 	e.print_trace();
@@ -143,6 +161,63 @@ class FireVisionNetworkTool : public FuseClientHandler
     }
   }
 
+
+  virtual void all_for_now()
+  {
+    __explore_waitcond->wake_all();
+  }
+
+  virtual void cache_exhausted()
+  {
+  }
+
+  virtual void browse_failed(const char *name,
+			     const char *type,
+			     const char *domain)
+  {
+    printf("Browsing for %s failed\n", type);
+  }
+
+  virtual void service_added(const char *name,
+			     const char *type,
+			     const char *domain,
+			     const char *host_name,
+			     const struct sockaddr *addr,
+			     const socklen_t addr_size,
+			     uint16_t port,
+			     std::list<std::string> &txt,
+			     int flags
+			     )
+  {
+    struct sockaddr_in *s;
+    if ( addr_size == sizeof(struct sockaddr_in) ) {
+      s = (struct sockaddr_in *)addr;
+    } else {
+      printf("%s socket data not IPv4, ignoring\n", name);
+      return;
+    }
+
+    char addrp[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(s->sin_addr), addrp, sizeof(addrp));
+    printf("Found %s%s%s (%s/%s on %u), querying\n",
+	   std::c_blue, name, std::c_normal, host_name, addrp, port);
+
+    __client = new FuseClient(host_name, port, this);
+    __client->connect();
+    __client->start();
+    show_all();
+    __client->join();
+    delete __client;
+
+    printf("\n");
+  }
+
+  virtual void service_removed(const char *name,
+			       const char *type,
+			       const char *domain)
+  {
+  }
+
   /** Print usage message. */
   void
   print_usage()
@@ -152,6 +227,8 @@ class FireVisionNetworkTool : public FuseClientHandler
 	   "  -l             Get LUT\n"
 	   "  -L             Set LUT\n"
 	   "  -s             Show available images and LUTs\n"
+	   "  -e             Explore network. Will query all instances of Fountain\n"
+	   "                 found on the network for all available images and LUTs.\n"
 	   "  -n net_string  Open network camera, the camera string is of the form\n"
 	   "                 host[:port]/id. You have to specify at least the host\n"
 	   "                 and the id, the port is optional and defaults to 5000\n"
@@ -203,6 +280,34 @@ class FireVisionNetworkTool : public FuseClientHandler
     __client->enqueue(FUSE_MT_GET_LUT_LIST);
   }
 
+  /** Explore network.
+   * This will query via service discovery for all Fountain instances on the local
+   * network. It will then connect to each of these and query them for existing images
+   * and lookup tables.
+   */
+  void
+  explore_network()
+  {
+#ifdef HAVE_AVAHI
+    __exploring = true;
+    __explore_waitcond = new WaitCondition();
+
+    __avahi_thread = new AvahiThread();
+    __avahi_thread->start();
+
+    __avahi_thread->watch("_fountain._tcp", this);
+
+    __explore_waitcond->wait();
+    delete __explore_waitcond;
+    __avahi_thread->cancel();
+    __avahi_thread->join();
+    delete __avahi_thread;
+#else
+    printf("\nExploration is not available, since Avahi support is missing. "
+	   "Install avahi-devel and recompile.\n\n");
+#endif
+  }
+
   /** Run. */
   void
   run()
@@ -251,10 +356,14 @@ class FireVisionNetworkTool : public FuseClientHandler
 	}
       }
 
-      __client = new FuseClient(host, port_num, this);
-      __client->connect();
-      __client->start();
+      if ( ! __argp->has_arg("e") ) {
+	__client = new FuseClient(host, port_num, this);
+	__client->connect();
+	__client->start();
+      }
  
+      free(net_string);
+
       if ( __argp->has_arg("i") ) {
 	get_image(id);
       } else if ( __argp->has_arg("l") ) {
@@ -263,13 +372,17 @@ class FireVisionNetworkTool : public FuseClientHandler
 	set_lut(id);
       } else if ( __argp->has_arg("s") ) {
 	show_all();
+      } else if ( __argp->has_arg("e") ) {
+	explore_network();
       } else {
 	print_usage();
 	__client->cancel();
       }
 
-      __client->join();
-      delete __client;
+      if ( ! __argp->has_arg("e") ) {
+	__client->join();
+	delete __client;
+      }
     }
   }
 
@@ -278,16 +391,24 @@ private:
   FuseClient     *__client;
 
   const char     *__file;
+
+  bool            __exploring;
+  WaitCondition  *__explore_waitcond;
+
+#ifdef HAVE_AVAHI
+  AvahiThread    *__avahi_thread;
+#endif
 };
 
 
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "Hn:ilLs");
+  ArgumentParser argp(argc, argv, "Hn:ilLse");
 
   FireVisionNetworkTool *nettool = new FireVisionNetworkTool(&argp);
   nettool->run();
+  delete nettool;
 
   return 0;
 }
