@@ -349,7 +349,7 @@ main(int argc, char **argv)
     }
   } else if (strcmp("watch", args[0]) == 0) {
     try {
-      netconf->setMirrorMode(true);
+      netconf->set_mirror_mode(true);
     } catch (Exception &e) {
       e.print_trace();
       return -1;
@@ -369,7 +369,7 @@ main(int argc, char **argv)
     ccwt.run();
   } else if (strcmp("list", args[0]) == 0) {
     try {
-      netconf->setMirrorMode(true);
+      netconf->set_mirror_mode(true);
     } catch (Exception &e) {
       e.print_trace();
       return -1;

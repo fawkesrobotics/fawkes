@@ -32,6 +32,7 @@
 #include <core/threading/mutex.h>
 #include <netcomm/fawkes/client.h>
 #include <netcomm/fawkes/message.h>
+#include <netcomm/utils/exceptions.h>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -43,9 +44,11 @@
  */
 
 
-/** Constructor. */
-CannotEnableMirroringException::CannotEnableMirroringException()
-  : Exception("Could not enable mirroring, could not create tmp files")
+/** Constructor.
+ * @param msg message describing the problem
+ */
+CannotEnableMirroringException::CannotEnableMirroringException(const char *msg)
+  : Exception("Could not enable mirroring: %s", msg)
 {
 }
 
@@ -70,24 +73,26 @@ CannotEnableMirroringException::CannotEnableMirroringException()
  */
 NetworkConfiguration::NetworkConfiguration(FawkesNetworkClient *c)
 {
+  __connected = c->connected();
   this->c = c;
   try {
-    c->registerHandler(this, FAWKES_CID_CONFIGMANAGER);
+    c->register_handler(this, FAWKES_CID_CONFIGMANAGER);
   } catch (Exception &e) {
     e.append("Failed to register for config manager component on network client");
     throw;
   }
   mutex = new Mutex();
   msg = NULL;
-  mirror = false;
+  __mirror_mode = false;
+  __mirror_mode_before_connection_dead = false;
 }
 
 
 /** Destructor. */
 NetworkConfiguration::~NetworkConfiguration()
 {
-  setMirrorMode(false);
-  c->deregisterHandler(FAWKES_CID_CONFIGMANAGER);
+  set_mirror_mode(false);
+  c->deregister_handler(FAWKES_CID_CONFIGMANAGER);
   if (msg != NULL) {
     msg->unref();
   }
@@ -172,7 +177,7 @@ NetworkConfiguration::get_type(const char *path)
 {
   std::string s = "";
   mutex->lock();
-  if ( mirror ) {
+  if ( __mirror_mode ) {
     s = mirror_config->get_type(path);
   }
   mutex->unlock();
@@ -218,6 +223,10 @@ NetworkConfiguration::is_string(const char *path)
 void
 NetworkConfiguration::send_get(const char *path, unsigned int msgid)
 {
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
+				  "client connection is not alive");
+  }
   config_getval_msg_t *g = (config_getval_msg_t *)calloc(1, sizeof(config_getval_msg_t));
   strncpy(g->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
@@ -249,11 +258,15 @@ NetworkConfiguration::get_float(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_float: "
 			       "Maximum length for path exceeded");
   }
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
+				  "client connection is not alive");
+  }
 
   float f;
   mutex->lock();
 
-  if ( mirror ) {
+  if ( __mirror_mode ) {
     try {
       f = mirror_config->get_float(path);
     } catch (Exception &e) {
@@ -294,11 +307,15 @@ NetworkConfiguration::get_uint(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_uint: "
 			       "Maximum length for path exceeded");
   }
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
+				  "client connection is not alive");
+  }
 
   unsigned int u;
   mutex->lock();
 
-  if ( mirror ) {
+  if ( __mirror_mode ) {
     try {
       u = mirror_config->get_uint(path);
     } catch (Exception &e) {
@@ -339,11 +356,15 @@ NetworkConfiguration::get_int(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_int: "
 			       "Maximum length for path exceeded");
   }
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
+				  "client connection is not alive");
+  }
 
   int i;
   mutex->lock();
 
-  if ( mirror ) {
+  if ( __mirror_mode ) {
     try {
       i = mirror_config->get_int(path);
     } catch (Exception &e) {
@@ -384,11 +405,15 @@ NetworkConfiguration::get_bool(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_bool: "
 			       "Maximum length for path exceeded");
   }
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
+				  "client connection is not alive");
+  }
 
   bool b;
   mutex->lock();
 
-  if ( mirror ) {
+  if ( __mirror_mode ) {
     try {
       b = mirror_config->get_bool(path);
     } catch (Exception &e) {
@@ -429,11 +454,15 @@ NetworkConfiguration::get_string(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_string: "
 			       "Maximum length for path exceeded");
   }
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
+				  "client connection is not alive");
+  }
 
   std::string s;
   mutex->lock();
 
-  if ( mirror ) {
+  if ( __mirror_mode ) {
     try {
       s = mirror_config->get_string(path);
     } catch (Exception &e) {
@@ -477,11 +506,15 @@ NetworkConfiguration::get_value(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_value: "
 			       "Maximum length for path exceeded");
   }
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
+				  "client connection is not alive");
+  }
 
   Configuration::ValueIterator *i;
   mutex->lock();
 
-  if ( mirror ) {
+  if ( __mirror_mode ) {
     try {
       i = mirror_config->get_value(path);
     } catch (Exception &e) {
@@ -523,6 +556,10 @@ NetworkConfiguration::set_float_internal(unsigned int msg_type,
     throw OutOfBoundsException("NetworkConfiguration::set_float: "
 			       "Maximum length for path exceeded");
   }
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
+				  "client connection is not alive");
+  }
 
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
@@ -534,7 +571,7 @@ NetworkConfiguration::set_float_internal(unsigned int msg_type,
   c->enqueue(omsg);
   omsg->unref();
   c->wait(FAWKES_CID_CONFIGMANAGER);
-  if ( ! mirror && (msg != NULL) ) {
+  if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
   }
@@ -564,6 +601,10 @@ NetworkConfiguration::set_uint_internal(unsigned int msg_type,
     throw OutOfBoundsException("NetworkConfiguration::set_uint: "
 			       "Maximum length for path exceeded");
   }
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
+				  "client connection is not alive");
+  }
 
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
@@ -575,7 +616,7 @@ NetworkConfiguration::set_uint_internal(unsigned int msg_type,
   c->enqueue(omsg);
   omsg->unref();
   c->wait(FAWKES_CID_CONFIGMANAGER);
-  if ( ! mirror && (msg != NULL) ) {
+  if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
   }
@@ -601,6 +642,11 @@ void
 NetworkConfiguration::set_int_internal(unsigned int msg_type,
 				       const char *path, int i)
 {
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
+				  "client connection is not alive");
+  }
+
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							msg_type,
@@ -611,7 +657,7 @@ NetworkConfiguration::set_int_internal(unsigned int msg_type,
   c->enqueue(omsg);
   omsg->unref();
   c->wait(FAWKES_CID_CONFIGMANAGER);
-  if ( ! mirror && (msg != NULL) ) {
+  if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
   }
@@ -641,6 +687,10 @@ NetworkConfiguration::set_bool_internal(unsigned int msg_type,
     throw OutOfBoundsException("NetworkConfiguration::set_bool: "
 			       "Maximum length for path exceeded");
   }
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
+				  "client connection is not alive");
+  }
 
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
@@ -652,7 +702,7 @@ NetworkConfiguration::set_bool_internal(unsigned int msg_type,
   c->enqueue(omsg);
   omsg->unref();
   c->wait(FAWKES_CID_CONFIGMANAGER);
-  if ( ! mirror && (msg != NULL) ) {
+  if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
   }
@@ -687,6 +737,10 @@ NetworkConfiguration::set_string_internal(unsigned int msg_type,
     throw OutOfBoundsException("NetworkConfiguration::set_string: "
 			       "Maximum length for string exceeded");
   }
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
+				  "client connection is not alive");
+  }
 
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
@@ -698,7 +752,7 @@ NetworkConfiguration::set_string_internal(unsigned int msg_type,
   c->enqueue(omsg);
   omsg->unref();
   c->wait(FAWKES_CID_CONFIGMANAGER);
-  if ( ! mirror && (msg != NULL) ) {
+  if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
   }
@@ -742,6 +796,10 @@ NetworkConfiguration::erase_internal(unsigned int msg_type,
     throw OutOfBoundsException("NetworkConfiguration::erase: "
 			       "Maximum length for path exceeded");
   }
+  if ( ! __connected ) {
+    throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
+				  "client connection is not alive");
+  }
 
   mutex->lock();
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
@@ -753,7 +811,7 @@ NetworkConfiguration::erase_internal(unsigned int msg_type,
   c->enqueue(omsg);
   omsg->unref();
   c->wait(FAWKES_CID_CONFIGMANAGER);
-  if ( ! mirror && (msg != NULL) ) {
+  if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
   }
@@ -779,20 +837,19 @@ NetworkConfiguration::erase_default(const char *path)
  * Ignored.
  */
 void
-NetworkConfiguration::deregistered()
+NetworkConfiguration::deregistered() throw()
 {
 }
 
 
 void
-NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
+NetworkConfiguration::inbound_received(FawkesNetworkMessage *m) throw()
 {
-
   if ( m->cid() == FAWKES_CID_CONFIGMANAGER ) {
 
     // printf("Received message of type %u\n", m->msgid());
 
-    if ( mirror ) {
+    if ( __mirror_mode ) {
       switch (m->msgid()) {
       case MSG_CONFIG_END_OF_VALUES:
 	// add all change handlers
@@ -884,11 +941,28 @@ NetworkConfiguration::inboundReceived(FawkesNetworkMessage *m)
 
 
 void
+NetworkConfiguration::connection_died() throw()
+{
+  __connected = false;
+  __mirror_mode_before_connection_dead = __mirror_mode;
+  set_mirror_mode(false);
+}
+
+
+void
+NetworkConfiguration::connection_established() throw()
+{
+  __connected = true;
+  set_mirror_mode(__mirror_mode_before_connection_dead);
+}
+
+
+void
 NetworkConfiguration::add_change_handler(ConfigurationChangeHandler *h)
 {
   Configuration::add_change_handler(h);
 
-  if ( mirror ) {
+  if ( __mirror_mode ) {
     mirror_config->add_change_handler(h);
   }
 }
@@ -898,7 +972,7 @@ void
 NetworkConfiguration::rem_change_handler(ConfigurationChangeHandler *h)
 {
   Configuration::rem_change_handler(h);
-  if ( mirror ) {
+  if ( __mirror_mode ) {
     mirror_config->rem_change_handler(h);
   }
 }
@@ -908,11 +982,15 @@ NetworkConfiguration::rem_change_handler(ConfigurationChangeHandler *h)
  * @param mirror true to enable mirror mode, false to disable
  */
 void
-NetworkConfiguration::setMirrorMode(bool mirror)
+NetworkConfiguration::set_mirror_mode(bool mirror)
 {
   if ( mirror ) {
-    if ( ! this->mirror ) {
-      this->mirror = true;
+    if ( ! __mirror_mode ) {
+      if ( ! __connected ) {
+	throw CannotEnableMirroringException("Client connection is dead");
+      }
+
+      __mirror_mode = true;
       // Create local temporary database
       tmp_volatile = (char *)malloc(L_tmpnam);
       tmp_default  = (char *)malloc(L_tmpnam);
@@ -920,12 +998,13 @@ NetworkConfiguration::setMirrorMode(bool mirror)
 	   (tmpnam(tmp_default) == NULL) ) {
 	free(tmp_volatile);
 	free(tmp_default);
-	this->mirror = false;
-	throw CannotEnableMirroringException();
+	__mirror_mode = false;
+	throw CannotEnableMirroringException("Could not create temp files");
       }
 
       mirror_config = new SQLiteConfiguration();
       mirror_config->load(tmp_volatile, tmp_default);
+
 
       // subscribe
       FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
@@ -937,13 +1016,15 @@ NetworkConfiguration::setMirrorMode(bool mirror)
       mutex->lock();
     }
   } else {
-    if ( this->mirror ) {
-      this->mirror = false;
+    if ( __mirror_mode ) {
+      __mirror_mode = false;
       // unsubscribe
-      FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							    MSG_CONFIG_UNSUBSCRIBE);
-      c->enqueue(omsg);
-      omsg->unref();
+      if ( __connected ) {
+	FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
+							      MSG_CONFIG_UNSUBSCRIBE);
+	c->enqueue(omsg);
+	omsg->unref();
+      }
 
       // delete local temporary mirror database
       delete mirror_config;
@@ -981,10 +1062,10 @@ NetworkConfiguration::unlock()
 Configuration::ValueIterator *
 NetworkConfiguration::iterator()
 {
-  if ( mirror ) {
+  if ( __mirror_mode ) {
     return mirror_config->iterator();
   } else {
-    return new NetConfValueIterator();
+    throw Exception("NetworkConfiguration: Iterating only supported in mirror mode");
   }
 }
 
@@ -992,16 +1073,17 @@ NetworkConfiguration::iterator()
 Configuration::ValueIterator *
 NetworkConfiguration::search(const char *path)
 {
-  if ( mirror ) {
+  if ( __mirror_mode ) {
     return mirror_config->search(path);
   } else {
-    return new NetConfValueIterator();
+    throw Exception("NetworkConfiguration: Searching only supported in mirror mode");
   }
 }
 
 
-/** @class NetworkConfiguration::NetConfValueIterator config/netconf.h
+/** @class NetworkConfiguration::NetConfValueIterator <config/netconf.h>
  * Network configuration value iterator.
+ * @author Tim Niemueller
  */
 
 

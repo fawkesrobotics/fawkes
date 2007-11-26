@@ -192,8 +192,10 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
 
 
     FawkesNetworkClient *net_client;
-    void deregistered();
-    void inboundReceived(FawkesNetworkMessage *m);
+    void deregistered() throw();
+    void inbound_received(FawkesNetworkMessage *m) throw();
+    void connection_established() throw();
+    void connection_died() throw();
 
     bool on_idle();
     bool on_expose_event(GdkEventExpose* event);

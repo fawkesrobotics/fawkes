@@ -43,7 +43,7 @@ class SQLiteConfiguration;
 class CannotEnableMirroringException : public Exception
 {
  public:
-  CannotEnableMirroringException();
+  CannotEnableMirroringException(const char *msg);
 };
 
 class NetworkConfiguration : public Configuration, public FawkesNetworkClientHandler
@@ -108,10 +108,12 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
 
   virtual void          erase_default(const char *path);
 
-  virtual void          deregistered();
-  virtual void          inboundReceived(FawkesNetworkMessage *msg);
+  virtual void          deregistered() throw();
+  virtual void          inbound_received(FawkesNetworkMessage *msg) throw();
+  virtual void          connection_died() throw();
+  virtual void          connection_established() throw();
 
-  virtual void          setMirrorMode(bool mirror);
+  virtual void          set_mirror_mode(bool mirror);
 
  class NetConfValueIterator : public Configuration::ValueIterator
   {
@@ -174,11 +176,13 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   FawkesNetworkMessage *msg;
   Mutex *mutex;
 
-  bool mirror;
+  bool __mirror_mode;
+  bool __mirror_mode_before_connection_dead;
   SQLiteConfiguration *mirror_config;
   char *tmp_volatile;
   char *tmp_default;
 
+  bool __connected;
 };
 
 #endif

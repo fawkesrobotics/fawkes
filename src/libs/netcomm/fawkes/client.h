@@ -58,23 +58,25 @@ class FawkesNetworkClient : public Thread
   void disconnect();
 
   void enqueue(FawkesNetworkMessage *message);
-  void setNoDelay(bool nodelay);
-  bool nodelay();
 
   void wait(unsigned int component_id);
   void wake(unsigned int component_id);
 
   void loop();
 
-  void registerHandler(FawkesNetworkClientHandler *handler, unsigned int component_id);
-  void deregisterHandler(unsigned int component_id);
+  void register_handler(FawkesNetworkClientHandler *handler, unsigned int component_id);
+  void deregister_handler(unsigned int component_id);
 
-  void setWaitTimeout(unsigned int wait_timeout);
+  void set_wait_timeout(unsigned int wait_timeout);
+
+  bool connected() const throw();
 
  private:
   void send();
   void recv();
   void sleep();
+  void notify_of_connection_established();
+  void notify_of_connection_dead();
 
   FawkesNetworkMessageQueue *  inbound_queue();
 
@@ -89,8 +91,10 @@ class FawkesNetworkClient : public Thread
   FawkesNetworkMessageQueue *  inbound_msgq;
   FawkesNetworkMessageQueue *  outbound_msgq;
 
-  std::map<unsigned int, FawkesNetworkClientHandler *> handlers;
-  std::map<unsigned int, WaitCondition *> waitconds;
+  typedef std::map<unsigned int, FawkesNetworkClientHandler *> HandlerMap;
+  typedef std::map<unsigned int, WaitCondition *> WaitCondMap;
+  HandlerMap  handlers;
+  WaitCondMap waitconds;
 };
 
 

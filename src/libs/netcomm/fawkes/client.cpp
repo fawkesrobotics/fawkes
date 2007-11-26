@@ -26,6 +26,7 @@
  */
 
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <core/threading/wait_condition.h>
 
 #include <netcomm/fawkes/client.h>
@@ -33,6 +34,7 @@
 #include <netcomm/fawkes/message_queue.h>
 #include <netcomm/fawkes/transceiver.h>
 #include <netcomm/socket/stream.h>
+#include <netcomm/utils/exceptions.h>
 
 #include <list>
 
@@ -68,13 +70,13 @@ FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short in
 {
   inbound_msgq = new FawkesNetworkMessageQueue();
   outbound_msgq = new FawkesNetworkMessageQueue();
-  s = new StreamSocket();
   this->hostname = strdup(hostname);
   this->port     = port;
 
   wait_timeout = 10;
 
   mutex = new Mutex();
+  s = NULL;
 }
 
 
@@ -115,14 +117,16 @@ FawkesNetworkClient::~FawkesNetworkClient()
 void
 FawkesNetworkClient::connect()
 {
-  mutex->lock();
+  MutexLocker lock(mutex);
   try {
+    s = new StreamSocket();
     s->connect(hostname, port);
+    notify_of_connection_established();
   } catch (SocketException &e) {
-    mutex->unlock();
+    delete s;
+    s = NULL;
     throw;
   }
-  mutex->unlock();
 }
 
 
@@ -132,7 +136,8 @@ FawkesNetworkClient::disconnect()
 {
   mutex->lock();
   delete s;
-  s = new StreamSocket();
+  s = NULL;
+  notify_of_connection_dead();
   mutex->unlock();
 }
 
@@ -166,29 +171,6 @@ FawkesNetworkClient::recv()
 }
 
 
-/** Check nodelay of socket.
- * @return true, if nodelay is enabled, false otherwise.
- * @see StreamSocket::nodelay()
- */
-bool
-FawkesNetworkClient::nodelay()
-{
-  return s->nodelay();
-}
-
-
-/** Set nodelay option.
- * @param nodelay true to enable nodelay, false otherwise.
- * @see StreamSocket::set_nodelay()
- * @see StreamSocket::nodelay()
- */
-void
-FawkesNetworkClient::setNoDelay(bool nodelay)
-{
-  s->set_nodelay(nodelay);
-}
-
-
 /** Set the timeout for incoming data.
  * The thread will poll on the socket for the given time for incoming
  * data. If no data is received it will look at the outbound queue and send
@@ -196,7 +178,7 @@ FawkesNetworkClient::setNoDelay(bool nodelay)
  * @param wait_timeout new timeout in miliseconds
  */
 void
-FawkesNetworkClient::setWaitTimeout(unsigned int wait_timeout)
+FawkesNetworkClient::set_wait_timeout(unsigned int wait_timeout)
 {
   this->wait_timeout = wait_timeout;
 }
@@ -228,7 +210,7 @@ FawkesNetworkClient::sleep()
  * @param component_id component ID to register the handler for.
  */
 void
-FawkesNetworkClient::registerHandler(FawkesNetworkClientHandler *handler, unsigned int component_id)
+FawkesNetworkClient::register_handler(FawkesNetworkClientHandler *handler, unsigned int component_id)
 {
   mutex->lock();
   if ( handlers.find(component_id) != handlers.end() ) {
@@ -246,7 +228,7 @@ FawkesNetworkClient::registerHandler(FawkesNetworkClientHandler *handler, unsign
  * @param component_id component ID
  */
 void
-FawkesNetworkClient::deregisterHandler(unsigned int component_id)
+FawkesNetworkClient::deregister_handler(unsigned int component_id)
 {
   mutex->lock();
   if ( handlers.find(component_id) != handlers.end() ) {
@@ -261,26 +243,56 @@ FawkesNetworkClient::deregisterHandler(unsigned int component_id)
 }
 
 
+void
+FawkesNetworkClient::notify_of_connection_dead()
+{
+  for ( HandlerMap::iterator i = handlers.begin(); i != handlers.end(); ++i ) {
+    (*i).second->connection_died();
+  }
+  for ( WaitCondMap::iterator j = waitconds.begin(); j != waitconds.end(); ++j) {
+    (*j).second->wake_all();
+  }
+}
+
+void
+FawkesNetworkClient::notify_of_connection_established()
+{
+  for ( HandlerMap::iterator i = handlers.begin(); i != handlers.end(); ++i ) {
+    (*i).second->connection_established();
+  }
+  for ( WaitCondMap::iterator j = waitconds.begin(); j != waitconds.end(); ++j) {
+    (*j).second->wake_all();
+  }
+}
+
 /** Thread loop.
  * Sends enqueued messages and reads incoming messages off the network.
  */
 void
 FawkesNetworkClient::loop()
 {
+  MutexLocker lock(mutex);
   std::list<unsigned int> wakeup_list;
 
-  mutex->lock();
+  // just return if not connected
+  if (! s ) return;
 
-  send();
-  sleep();
-  recv();
+  try {
+    send();
+    sleep();
+    recv();
+  } catch (ConnectionDiedException &cde) {
+    delete s;
+    s = NULL;
+    notify_of_connection_dead();
+  }
 
   inbound_msgq->lock();
   while ( ! inbound_msgq->empty() ) {
     FawkesNetworkMessage *m = inbound_msgq->front();
     unsigned int cid = m->cid();
     if (handlers.find(cid) != handlers.end()) {
-      handlers[cid]->inboundReceived(m);
+      handlers[cid]->inbound_received(m);
       wakeup_list.push_back(cid);
     }
     m->unref();
@@ -293,8 +305,6 @@ FawkesNetworkClient::loop()
   for (std::list<unsigned int>::iterator i = wakeup_list.begin(); i != wakeup_list.end(); ++i) {
     waitconds[*i]->wake_all();
   }
-
-  mutex->unlock();
 }
 
 
@@ -307,12 +317,10 @@ void
 FawkesNetworkClient::wait(unsigned int component_id)
 {
   if ( waitconds.find(component_id) != waitconds.end() ) {
-    Mutex m;
-    m.lock();
-    waitconds[component_id]->wait(&m);
-    m.unlock();
+    waitconds[component_id]->wait();
   }
 }
+
 
 /** Wake a waiting thread.
  * This will wakeup all threads currently waiting for the specified component ID.
@@ -325,4 +333,14 @@ FawkesNetworkClient::wake(unsigned int component_id)
   if ( waitconds.find(component_id) != waitconds.end() ) {
     waitconds[component_id]->wake_all();
   }
+}
+
+
+/** Check if connection is alive.
+ * @return true if connection is alive at the moment, false otherwise
+ */
+bool
+FawkesNetworkClient::connected() const throw()
+{
+  return (s != NULL);
 }

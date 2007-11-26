@@ -105,9 +105,8 @@ JoystickTool::JoystickTool(const char *host_name, bool use_udp)
       throw;
     }
   net_client->start();
-  net_client->registerHandler(this, FAWKES_CID_NAVIGATOR_PLUGIN);
-  net_client->registerHandler(this, FAWKES_CID_PLUGINMANAGER);
-  net_client->setNoDelay(true);
+  net_client->register_handler(this, FAWKES_CID_NAVIGATOR_PLUGIN);
+  net_client->register_handler(this, FAWKES_CID_PLUGINMANAGER);
   FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_SUBSCRIBE_WATCH);
   net_client->enqueue(msg1);
   msg1->unref();
@@ -138,18 +137,33 @@ JoystickTool::~JoystickTool()
 
 /** The handler got deregistered. */
 void
-JoystickTool::deregistered()
+JoystickTool::deregistered() throw()
 {
   printf("Got deregistered\n");
   quit = true;
 }
+
+void
+JoystickTool::connection_established() throw()
+{
+  printf("Connection established\n");
+}
+
+
+void
+JoystickTool::connection_died() throw()
+{
+  printf("Connection died\n");
+  quit = true;
+}
+
 
 /** Inbound message received.
  * For receiving a subscribe error message.
  * @param m message
  */
 void
-JoystickTool::inboundReceived(FawkesNetworkMessage *msg)
+JoystickTool::inbound_received(FawkesNetworkMessage *msg) throw()
 {
   //    std::cerr << "receive message of type %i" << msg->msgid() << std::endl;
   if(msg->msgid() == NAVIGATOR_MSGTYPE_CONTROL_SUBERR)

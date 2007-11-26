@@ -337,7 +337,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   net_client->start();
 
 
-  net_client->registerHandler(this, FAWKES_CID_NAVIGATOR_PLUGIN);
+  net_client->register_handler(this, FAWKES_CID_NAVIGATOR_PLUGIN);
 
   navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
 
@@ -375,7 +375,7 @@ NavigatorGUI::~NavigatorGUI()
     }
   lines.clear();
 
-  net_client->deregisterHandler(FAWKES_CID_NAVIGATOR_PLUGIN);
+  net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
   net_client->disconnect();
   delete net_client;
 
@@ -404,18 +404,31 @@ NavigatorGUI::~NavigatorGUI()
   delete target_point_mutex;
 }
 
-/** The handler got deregistered. */
 void
-NavigatorGUI::deregistered()
+NavigatorGUI::deregistered() throw()
 {
   printf("Got deregistered\n");
 }
+
+void
+NavigatorGUI::connection_established() throw()
+{
+  printf("Connection established\n");
+}
+
+
+void
+NavigatorGUI::connection_died() throw()
+{
+  printf("Connection died\n");
+}
+
 
 /** Inbound mesage received.
  * @param m message
  */
 void
-NavigatorGUI::inboundReceived(FawkesNetworkMessage *msg)
+NavigatorGUI::inbound_received(FawkesNetworkMessage *msg) throw()
 {
   // std::cerr << "received anything of type " << msg->msgid() << std::endl;
   if (NAVIGATOR_MSGTYPE_NODES == msg->msgid() )

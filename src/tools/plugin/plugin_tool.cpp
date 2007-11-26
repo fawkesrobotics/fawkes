@@ -264,7 +264,7 @@ PluginTool::watch()
 /** Handler has been deregistered.
  */
 void
-PluginTool::deregistered()
+PluginTool::deregistered() throw()
 {
   quit = true;
 }
@@ -274,7 +274,7 @@ PluginTool::deregistered()
  * @param msg message.
  */
 void
-PluginTool::inboundReceived(FawkesNetworkMessage *msg)
+PluginTool::inbound_received(FawkesNetworkMessage *msg) throw()
 {
   if (msg->cid() != FAWKES_CID_PLUGINMANAGER)  return;
 
@@ -370,11 +370,25 @@ PluginTool::inboundReceived(FawkesNetworkMessage *msg)
 }
 
 
+void
+PluginTool::connection_established() throw()
+{
+  // ignored, client has to be connected already
+}
+
+
+void
+PluginTool::connection_died() throw()
+{
+  printf("Connection died, exiting\n");
+  quit = true;
+}
+
 /** Run opmode as requested determined by the arguments. */
 void
 PluginTool:: run()
 {
-  c->registerHandler(this, FAWKES_CID_PLUGINMANAGER);
+  c->register_handler(this, FAWKES_CID_PLUGINMANAGER);
 
   switch (opmode) {
   case M_LOAD:
@@ -407,5 +421,5 @@ PluginTool:: run()
     print_usage(__program_name);
   }
 
-  c->deregisterHandler(FAWKES_CID_PLUGINMANAGER);
+  c->deregister_handler(FAWKES_CID_PLUGINMANAGER);
 }

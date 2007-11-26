@@ -46,7 +46,7 @@ class ExamplePluginClientNetworkReceiver : public FawkesNetworkClientHandler
   }
 
   /** The handler got deregistered. */
-  virtual void deregistered()
+  virtual void deregistered() throw()
   {
     printf("Got deregistered\n");
     quit = true;
@@ -55,7 +55,7 @@ class ExamplePluginClientNetworkReceiver : public FawkesNetworkClientHandler
   /** Inbound mesage received.
    * @param m message
    */
-  virtual void inboundReceived(FawkesNetworkMessage *m)
+  virtual void inbound_received(FawkesNetworkMessage *m) throw()
   {
     if ( m->payload_size() == sizeof(unsigned int) ) {
       unsigned int *u = (unsigned int *)m->payload();
@@ -65,6 +65,19 @@ class ExamplePluginClientNetworkReceiver : public FawkesNetworkClientHandler
     }
     quit = true;
   }
+
+  virtual void connection_died() throw()
+  {
+    printf("Connection died.\n");
+    quit = true;
+  }
+
+
+  virtual void connection_established() throw()
+  {
+    printf("Connection established\n");
+  }
+
 
   /** Set to true if answer has been received or handler was deregistered.
    * False at object creation.
@@ -83,11 +96,10 @@ main(int argc, char **argv)
 
   FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
   c->connect();
-  c->setNoDelay(true);
   c->start();
 
   ExamplePluginClientNetworkReceiver r;
-  c->registerHandler(&r, FAWKES_CID_EXAMPLE_PLUGIN);
+  c->register_handler(&r, FAWKES_CID_EXAMPLE_PLUGIN);
 
   const char *tmp;
   unsigned int *u = (unsigned int *)malloc(sizeof(unsigned int));;
@@ -115,7 +127,7 @@ main(int argc, char **argv)
     c->wait(FAWKES_CID_EXAMPLE_PLUGIN);
   }
 
-  c->deregisterHandler(FAWKES_CID_EXAMPLE_PLUGIN);
+  c->deregister_handler(FAWKES_CID_EXAMPLE_PLUGIN);
 
   c->cancel();
   c->join();
