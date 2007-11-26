@@ -33,18 +33,33 @@
  * @ingroup NetComm
  * @author Tim Niemueller
  *
- * @fn virtual void FawkesNetworkClientHandler::deregistered() = 0
+ * @fn virtual void FawkesNetworkClientHandler::deregistered() throw() = 0
  * This handler has been deregistered.
  * This is called when this handler is deregistered from the
  * FawkesNetworkClient. Sometimes you may not want to allow this and post
  * a big fat warning into the log.
  *
- * @fn virtual void FawkesNetworkClientHandler::inboundReceived(FawkesNetworkMessage *m) = 0
+ * @fn virtual void FawkesNetworkClientHandler::inbound_received(FawkesNetworkMessage *m) throw() = 0
  * Called for incoming messages.
  * This is called when an incoming message has been received. If this
  * method was called one or more times then the a previously carried out
  * wait(cid) call will continue.
  * @param m Message to handle
+ *
+ * @fn virtual void FawkesNetworkClientHandler::connection_established() throw() = 0
+ * Client has established a connection.
+ * Whenever the client establishes a connection this is signaled to handlers with this
+ * method. You can register to a client at any time, you may even enqueue messages to
+ * a client while the connection is dead. If the client at some point gets connected
+ * again, the messages will then be send out in one go. You should use this in your
+ * application though to only send data if the connection is alive and you should let
+ * the user know about the connection status.
+ *
+ * @fn virtual void FawkesNetworkClientHandler::connection_died() throw() = 0
+ * Client connection died.
+ * This method is used to inform handlers that the connection has died for any reason.
+ * No more data can be send and no more messages should be enqueued because it is unclear
+ * when they would be sent.
  *
  */
 
