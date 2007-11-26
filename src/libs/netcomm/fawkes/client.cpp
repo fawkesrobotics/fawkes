@@ -236,8 +236,10 @@ FawkesNetworkClient::deregister_handler(unsigned int component_id)
     handlers.erase(component_id);
   }
   if ( waitconds.find(component_id) != waitconds.end() ) {
-    delete waitconds[component_id];
+    WaitCondition *wc = waitconds[component_id];
     waitconds.erase(component_id);
+    wc->wake_all();
+    delete wc;
   }
   mutex->unlock();
 }
