@@ -21,7 +21,7 @@
 
 BASEDIR = ../..
 
-SUBDIRS = blackboard plugin config joystick navigator_gui
+SUBDIRS = blackboard plugin plugin_gui config joystick navigator_gui
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
