@@ -71,6 +71,7 @@ PluginGui::PluginGui(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
     {
       throw runtime_error("Couldn't find btnConnect");
     }
+  m_btn_connect->set_use_stock(true);
 
   ref_xml->get_widget("trvPlugins", m_trv_plugins);
     if ( !m_trv_plugins )
@@ -201,13 +202,13 @@ PluginGui::update_connection()
   if ( m_backend->is_connected() )
     {
       m_stb_status->push("Connected to " + m_cbe_hosts->get_entry()->get_text());
-      m_btn_connect->set_label("Disconnect");
+      m_btn_connect->set_label(Gtk::Stock::DISCONNECT.id);
     }
   else if ( !m_backend->is_connected() )
     {
       m_plugin_list->clear();
       m_stb_status->push("Connection died");
-      m_btn_connect->set_label("Connect");
+      m_btn_connect->set_label(Gtk::Stock::CONNECT.id);
       m_cbe_hosts->get_entry()->set_text("");
     }
 }
@@ -225,7 +226,7 @@ PluginGui::clicked_connect()
       m_backend->disconnect();
       m_stb_status->push("Disconnected");
       m_cbe_hosts->get_entry()->set_text("");
-      m_btn_connect->set_label("Connect");
+      m_btn_connect->set_label(Gtk::Stock::CONNECT.id);
     }
   else
     {
