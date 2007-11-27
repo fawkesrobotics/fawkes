@@ -582,6 +582,7 @@ FirewireCamera::set_white_balance(unsigned int ub, unsigned int vr)
  * - packetsize=BYTES, packet size in BYTES
  * - white_balance=(auto|U,V), white balance value, either auto for auto white balance
  *                             or U/B and V/R values for adjustment
+ * - shutter=auto, determine the shutter time automatically
  * @param cap camera argument parser
  */
 FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
@@ -682,7 +683,6 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   if ( cap->has("packetsize") ) {
     format7_bpp = atoi(cap->get("packetsize").c_str());
   }
-
   if ( cap->has("white_balance") ) {
     string w = cap->get("white_balance");
     if ( w == "auto" ) {
@@ -714,6 +714,12 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
       _auto_white_balance = false;
       _white_balance_ub = ub_i;
       _white_balance_vr = vr_i;
+    }
+  }
+  if ( cap->has("shutter") ) {
+    string s = cap->get("shutter");
+    if ( s == "auto" ) {
+      _auto_shutter = true;
     }
   }
 }
