@@ -2,7 +2,9 @@
 #            Makefile Build System for Fawkes : Plugin Tool
 #                            -------------------
 #   Created on Wed Nov 22 00:29:31 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -12,25 +14,20 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
 
 BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys_local/gtkconf.mk
+include $(BASEDIR)/etc/buildsys_local/gui.mk
+include $(BASEDIR)/etc/buildsys/ext/gmsl
 
-CFLAGS = -g
-CFLAGS += $(GTK_CFLAGS)
-LDFLAGS += $(GTK_LDFLAGS)
+CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
+LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
 LIBS_pt_gui = core utils netcomm fawkesmainappmsgs
 OBJS_pt_gui = main.o			\
 	      plugin_gui.o		\
 	      backend_thread.o
 
-ifeq ($(HAVE_GTKMM-2.4)$(HAVE_LIBGLADEMM-2.4),11)
+ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
   OBJS_all = $(OBJS_pt_gui)
   BINS_all = $(BINDIR)/pt_gui
 else
@@ -42,7 +39,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
 warning_plugin_gui:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building pt_gui$(TNORMAL) ($(GTK_CONF_ERR) not installed)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building pt_gui$(TNORMAL) $(GUI_ERROR)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
