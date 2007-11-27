@@ -39,6 +39,7 @@ BINDIR = $(abspath $(BASEDIR)/bin)
 LIBDIR = $(abspath $(BASEDIR)/lib)
 CONFDIR = $(abspath $(BASEDIR)/cfg)
 PLUGINDIR = $(abspath $(BASEDIR)/plugins)
+RESDIR = $(abspath $(BASEDIR)/res)
 VPATH = $(SRCDIR)
 df = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
 
