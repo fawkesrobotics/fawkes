@@ -34,4 +34,5 @@ blackboard: core utils interface
 netcomm: core utils
 config: core netcomm utils
 aspect: core utils blackboard netcomm config
+geometry: core
 
