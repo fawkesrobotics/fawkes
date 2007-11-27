@@ -82,31 +82,33 @@ PluginGuiBackendThread::connect(const char* host, unsigned short int port)
     {
       m_client->connect();
       m_client->start();
+
+      m_connected = true;
+      
+      // subscribe for load-/unload messages
+      FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+							   MSG_PLUGIN_SUBSCRIBE_WATCH);
+      m_client->enqueue(msg);
+      msg->unref();
+      
+      // request list of available plugins
+      msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+				     MSG_PLUGIN_LIST_AVAIL);
+      m_client->enqueue(msg);
+      msg->unref();
+      
+      // request list of loaded plugins
+      msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+				     MSG_PLUGIN_LIST_LOADED);
+      m_client->enqueue(msg);
+      msg->unref();
     }
   catch (Exception& e)
     {
       e.print_trace();
+      m_connected = false;
     }
-  m_connected = true;
-
-  // subscribe for load-/unload messages
-  FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-						       MSG_PLUGIN_SUBSCRIBE_WATCH);
-  m_client->enqueue(msg);
-  msg->unref();
-
-  // request list of available plugins
-  msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-				 MSG_PLUGIN_LIST_AVAIL);
-  m_client->enqueue(msg);
-  msg->unref();
   
-  // request list of loaded plugins
-  msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-				 MSG_PLUGIN_LIST_LOADED);
-  m_client->enqueue(msg);
-  msg->unref();
-
   return true;
 }
 
@@ -124,6 +126,7 @@ PluginGuiBackendThread::disconnect()
     m_client->enqueue(msg);
     msg->unref();			
 
+    m_connected = false;
     m_client->disconnect();
     m_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
     m_client->cancel();
@@ -172,8 +175,17 @@ PluginGuiBackendThread::connection_established() throw()
 void
 PluginGuiBackendThread::connection_died() throw()
 {
-  m_connected = false;
-  m_gui->update_connection();
+  if (m_connected)
+    // unexpected loss of connection
+    {
+      m_connected = false;
+      m_gui->update_connection();
+      m_plugin_status.clear();
+      m_gui->update_list();
+      m_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
+      m_client->cancel();
+      m_client->join();
+    }
 }
 
 void
@@ -328,7 +340,7 @@ PluginGuiBackendThread::service_added( const char* name,
 				       std::list<std::string>& txt,
 				       int flags )
 {
-  m_hosts.push_back(host_name);
+  m_hosts[name] = host_name;
   m_gui->update_hosts();
 }
 
@@ -337,17 +349,8 @@ PluginGuiBackendThread::service_removed( const char* name,
 					 const char* type,
 					 const char* domain )
 {
-  /*
-  std::vector<std::string>::iterator hit;
-  for (hit = m_hosts.begin(); hit != m_hosts.end(); hit++)
-    {
-      if (*hit == string(host_name))
-	{
-	  m_hosts.erase(hit);
-	}
-    }
-  m_gui->udpate_hosts();
-  */
+  m_hosts.erase(name);
+  m_gui->update_hosts();
 }
 
 /** Get status of plugins.
@@ -362,10 +365,16 @@ PluginGuiBackendThread::plugin_status()
 /** Return discovered hosts running Fawkes.
  * @return vector with hostnames
  */
-std::vector<std::string>&
+std::vector<std::string>
 PluginGuiBackendThread::hosts()
 {
-  return m_hosts;
+  std::vector<std::string> hosts;
+  std::map<std::string,std::string>::iterator hit;
+  for (hit = m_hosts.begin(); hit != m_hosts.end(); hit++)
+    {
+      hosts.push_back(hit->second);
+    }
+  return hosts;
 }
 
 /** Request loading of specified plugin.

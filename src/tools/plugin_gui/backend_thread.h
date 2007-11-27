@@ -81,7 +81,7 @@ class PluginGuiBackendThread : public Thread,
 			const char* domain );
 
   std::map<std::string,bool>& plugin_status();
-  std::vector<std::string>& hosts();
+  std::vector<std::string> hosts();
   
   void request_load(const char* plugin_name);
   void request_unload(const char* plugin_name);
@@ -90,7 +90,7 @@ class PluginGuiBackendThread : public Thread,
   FawkesNetworkClient* m_client;
   AvahiThread* m_avahi;
   std::map<std::string,bool> m_plugin_status;
-  std::vector<std::string> m_hosts;
+  std::map<std::string,std::string> m_hosts;
   PluginGui* m_gui;
   bool m_connected;
 };

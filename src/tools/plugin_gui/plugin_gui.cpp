@@ -93,6 +93,7 @@ PluginGui::PluginGui(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
   m_btn_connect->signal_clicked().connect( sigc::mem_fun( *this, &PluginGui::clicked_connect ) );
   m_cbe_hosts->get_entry()->set_activates_default(true);
+  m_cbe_hosts->signal_changed().connect( sigc::mem_fun( *this, &PluginGui::changed_host ) );
   
   Gtk::CellRendererToggle* cr_loaded;
   cr_loaded = dynamic_cast<Gtk::CellRendererToggle*>(m_trv_plugins->get_column_cell_renderer(1));
@@ -214,7 +215,7 @@ PluginGui::update_connection()
 }
 
 /** Signal handler.
- * Connects to the specified host.
+ * Connects to the specified host or disconnects in case it were connected.
  */
 void
 PluginGui::clicked_connect()
@@ -240,7 +241,27 @@ PluginGui::clicked_connect()
 }
 
 /** Signal handler.
- * Trigger (un-)loading of plugins.
+ * Connects to the specified host (from the combo box).
+ */
+void
+PluginGui::changed_host()
+{
+  if ( m_backend->is_connected() )
+    {
+      m_plugin_list->clear();
+      m_backend->disconnect();
+      m_btn_connect->set_label(Gtk::Stock::CONNECT.id);      
+    }
+  Glib::ustring host = m_cbe_hosts->get_entry()->get_text();
+  if ( !host.empty() )
+    {
+      m_stb_status->push("Connecting to " + m_cbe_hosts->get_entry()->get_text());
+      m_backend->connect(m_cbe_hosts->get_entry()->get_text().c_str(), 1910);
+    }
+}
+
+/** Signal handler.
+ * Triggers (un-)loading of plugins.
  * @param path path to the corresponding row
  */
 void

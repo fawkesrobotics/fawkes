@@ -79,6 +79,7 @@ class PluginGui : public Gtk::Window
 
   // signal handler
   void clicked_connect();
+  void changed_host();
   void toggled_status(const Glib::ustring path);
 
   // widgets
