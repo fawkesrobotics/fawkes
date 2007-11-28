@@ -66,6 +66,9 @@ class FawkesNetworkHub
   virtual void add_handler(FawkesNetworkHandler *handler)                  = 0;
   virtual void remove_handler(FawkesNetworkHandler *handler)               = 0;
 
+
+  virtual void force_send()                                                = 0;
+
 };
 
 #endif

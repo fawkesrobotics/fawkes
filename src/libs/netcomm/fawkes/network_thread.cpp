@@ -58,9 +58,6 @@ FawkesNetworkThread::FawkesNetworkThread(ThreadCollector *thread_collector,
   this->thread_collector = thread_collector;
   clients.clear();
   next_client_id = 1;
-  clients_mutex = new Mutex();
-  handlers_mutex = new Mutex();
-  wait_mutex = new Mutex();
   wait_cond = new WaitCondition();
   inbound_messages = new FawkesNetworkMessageQueue();
 
@@ -82,10 +79,6 @@ FawkesNetworkThread::~FawkesNetworkThread()
   delete acceptor_thread;
 
   delete inbound_messages;
-
-  delete clients_mutex;
-  delete handlers_mutex;
-  delete wait_mutex;
   delete wait_cond;
 }
 
@@ -99,18 +92,17 @@ FawkesNetworkThread::~FawkesNetworkThread()
 void
 FawkesNetworkThread::add_connection(StreamSocket *s) throw()
 {
-  clients_mutex->lock();
-
   FawkesNetworkClientThread *client = new FawkesNetworkClientThread(s, this);
 
-  client->setClientID(next_client_id);
+  client->set_clid(next_client_id);
   thread_collector->add(client);
+  clients.lock();
   clients[next_client_id] = client;
+  clients.unlock();
   for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
     (*hit).second->client_connected(next_client_id);
   }
   ++next_client_id;
-  clients_mutex->unlock();
 
   wakeup();
 }
@@ -122,13 +114,13 @@ FawkesNetworkThread::add_connection(StreamSocket *s) throw()
 void
 FawkesNetworkThread::add_handler(FawkesNetworkHandler *handler)
 {
-  handlers_mutex->lock();
+  handlers.lock();
   if ( handlers.find(handler->id()) != handlers.end()) {
-    handlers_mutex->unlock();
+    handlers.unlock();
     throw Exception("Handler already registered");
   }
   handlers[handler->id()] = handler;
-  handlers_mutex->unlock();
+  handlers.unlock();
 }
 
 
@@ -138,11 +130,11 @@ FawkesNetworkThread::add_handler(FawkesNetworkHandler *handler)
 void
 FawkesNetworkThread::remove_handler(FawkesNetworkHandler *handler)
 {
-  handlers_mutex->lock();
+  handlers.lock();
   if( handlers.find(handler->id()) != handlers.end() ) {
     handlers.erase(handler->id());
   }
-  handlers_mutex->unlock();
+  handlers.unlock();
 }
 
 
@@ -155,7 +147,7 @@ FawkesNetworkThread::remove_handler(FawkesNetworkHandler *handler)
 void
 FawkesNetworkThread::loop()
 {
-  clients_mutex->lock();
+  clients.lock();
 
   // check for dead clients
   cit = clients.begin();
@@ -186,13 +178,21 @@ FawkesNetworkThread::loop()
   }
   inbound_messages->unlock();
 
-  clients_mutex->unlock();
-  wait_mutex->lock();
-  wait_cond->wait(wait_mutex);
-  wait_mutex->unlock();
+  clients.unlock();
+  wait_cond->wait();
 }
 
 
+/** Force sending of all pending messages. */
+void
+FawkesNetworkThread::force_send()
+{
+  clients.lock();
+  for (cit = clients.begin(); cit != clients.end(); ++cit) {
+    (*cit).second->force_send();
+  }
+  clients.unlock();
+}
 /** Wakeup this thread. */
 void
 FawkesNetworkThread::wakeup()

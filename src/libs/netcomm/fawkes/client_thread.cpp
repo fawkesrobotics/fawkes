@@ -33,6 +33,9 @@
 #include <netcomm/fawkes/transceiver.h>
 #include <netcomm/socket/stream.h>
 #include <netcomm/utils/exceptions.h>
+#include <core/threading/mutex.h>
+#include <core/threading/wait_condition.h>
+#include <utils/system/signal.h>
 
 #include <cstdio>
 
@@ -57,6 +60,8 @@ FawkesNetworkClientThread::FawkesNetworkClientThread(StreamSocket *s,
   _clid = 0;
   outbound_queue = new FawkesNetworkMessageQueue();
   inbound_queue = new FawkesNetworkMessageQueue();
+  _outbound_mutex = new Mutex();
+  _outbound_waitcond = new WaitCondition();
 }
 
 
@@ -84,7 +89,7 @@ FawkesNetworkClientThread::clid() const
  * @param client_id new client ID
  */
 void
-FawkesNetworkClientThread::setClientID(unsigned int client_id)
+FawkesNetworkClientThread::set_clid(unsigned int client_id)
 {
   _clid = client_id;
 }
@@ -119,6 +124,12 @@ FawkesNetworkClientThread::recv()
   }
 }
 
+void
+FawkesNetworkClientThread::once()
+{
+  SignalManager::ignore(SIGUSR1);
+}
+
 
 /** Thread loop.
  * The client thread loop polls on the socket for 10 ms (wait for events
@@ -138,9 +149,10 @@ FawkesNetworkClientThread::loop()
   
   short p = 0;
   try {
-    p = s->poll(10); // block for 10 ms
+    p = s->poll(10); // block for up to 10 ms
   } catch (InterruptedException &e) {
     // we just ignore this and try it again
+    printf("Interrupted\n");
     return;
   }
 
@@ -155,14 +167,22 @@ FawkesNetworkClientThread::loop()
     recv();
   }
 
+  _outbound_mutex->lock();
   if ( ! outbound_queue->empty() ) {
     try {
       FawkesNetworkTransceiver::send(s, outbound_queue);
+      _outbound_mutex->unlock();
+      _outbound_waitcond->wake_all();
     } catch (ConnectionDiedException &e) {
       _alive = false;
+      _outbound_mutex->unlock();
+      _outbound_waitcond->wake_all();
       parent->wakeup();
       exit();
     }
+  } else {
+    _outbound_mutex->unlock();
+    _outbound_waitcond->wake_all();
   }
 }
 
@@ -186,4 +206,19 @@ bool
 FawkesNetworkClientThread::alive() const
 {
   return _alive;
+}
+
+
+/** Force sending of all pending outbound messages.
+ * This is a blocking operation. The current poll will be interrupted by sending
+ * a signal to this thread (and ignoring it) and then wait for the sending to
+ * finish.
+ */
+void
+FawkesNetworkClientThread::force_send()
+{
+  _outbound_mutex->lock();
+  kill(SIGUSR1);
+  _outbound_waitcond->wait(_outbound_mutex);
+  _outbound_mutex->unlock();
 }

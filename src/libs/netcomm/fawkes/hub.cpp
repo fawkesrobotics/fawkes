@@ -108,6 +108,13 @@
  * The message handler is removed from the list of handlers and is no longer
  * called for incoming data.
  * @param handler handler to remove
+ *
+ * @fn void FawkesNetworkHub::force_send() = 0
+ * Force sending of all pending messages.
+ * This will order the sending of all pending outbound messages that are currently
+ * enqueued for clients. The method will block until this is done.
+ * It is not ensured that no messages are added during that time. Make sure that
+ * the call constraints guarantee this.
  */
 
 /** Virtual empty destructor. */

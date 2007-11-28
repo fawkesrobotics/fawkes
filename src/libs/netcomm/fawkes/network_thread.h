@@ -29,10 +29,9 @@
 #define __NETCOMM_FAWKES_CLIENT_MANAGER_THREAD_H_
 
 #include <core/threading/thread.h>
+#include <core/utils/lock_map.h>
 #include <netcomm/fawkes/hub.h>
 #include <netcomm/utils/incoming_connection_handler.h>
-
-#include <map>
 
 class ThreadCollector;
 class Mutex;
@@ -79,25 +78,21 @@ class FawkesNetworkThread
   void dispatch(FawkesNetworkMessage *msg);
   void process();
 
+  void force_send();
+
  private:
-  ThreadCollector     *thread_collector;
-
-  Mutex               *handlers_mutex;
-  Mutex               *clients_mutex;
-  Mutex               *wait_mutex;
-  WaitCondition       *wait_cond;
-
-  unsigned int         next_client_id;
-
+  ThreadCollector       *thread_collector;
+  WaitCondition         *wait_cond;
+  unsigned int           next_client_id;
   NetworkAcceptorThread *acceptor_thread;
 
   // key: component id,  value: handler
-  std::map<unsigned int, FawkesNetworkHandler *> handlers;
-  std::map<unsigned int, FawkesNetworkHandler *>::iterator hit;
+  LockMap<unsigned int, FawkesNetworkHandler *> handlers;
+  LockMap<unsigned int, FawkesNetworkHandler *>::iterator hit;
 
   // key: client id,     value: client thread
-  std::map<unsigned int, FawkesNetworkClientThread *> clients;
-  std::map<unsigned int, FawkesNetworkClientThread *>::iterator cit;
+  LockMap<unsigned int, FawkesNetworkClientThread *> clients;
+  LockMap<unsigned int, FawkesNetworkClientThread *>::iterator cit;
 
   FawkesNetworkMessageQueue *inbound_messages;
 };

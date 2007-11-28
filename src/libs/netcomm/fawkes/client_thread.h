@@ -35,6 +35,8 @@ class StreamSocket;
 class FawkesNetworkThread;
 class FawkesNetworkMessage;
 class FawkesNetworkMessageQueue;
+class WaitCondition;
+class Mutex;
 
 class FawkesNetworkClientThread : public Thread
 {
@@ -42,18 +44,20 @@ class FawkesNetworkClientThread : public Thread
   FawkesNetworkClientThread(StreamSocket *s, FawkesNetworkThread *parent);
   ~FawkesNetworkClientThread();
 
+  virtual void once();
   virtual void loop();
 
   unsigned int clid() const;
-  void         setClientID(unsigned int client_id);
+  void         set_clid(unsigned int client_id);
 
   bool alive() const;
   void enqueue(FawkesNetworkMessage *msg);
 
+  void force_send();
+
  private:
 
   void recv();
-
 
   unsigned int  _clid;
   bool          _alive;
@@ -61,6 +65,8 @@ class FawkesNetworkClientThread : public Thread
   FawkesNetworkThread *parent;
   FawkesNetworkMessageQueue *outbound_queue;
   FawkesNetworkMessageQueue *inbound_queue;
+  WaitCondition *_outbound_waitcond;
+  Mutex         *_outbound_mutex;
 
 };
 
