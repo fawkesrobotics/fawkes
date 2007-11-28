@@ -50,8 +50,6 @@ class Bumblebee2Camera : public FirewireCamera
 
   virtual unsigned char* buffer();
 
-  virtual colorspace_t   colorspace();
-
   virtual void set_image_number(unsigned int image_num);
 
   bool is_bumblebee2();
@@ -78,12 +76,12 @@ class Bumblebee2Camera : public FirewireCamera
 
 
   /** Bayer pattern */
-  dc1394color_filter_t bayer_pattern;
+  dc1394color_filter_t __bayer_pattern;
 
-  unsigned int   _image_num;
-  unsigned char *_buffer;
-  unsigned char *_buffer_deinterlaced;
-  unsigned char *_buffer_rgb;
+  unsigned int   __image_num;
+  unsigned char *__buffer;
+  unsigned char *__buffer_deinterlaced;
+  unsigned char *__buffer_rgb;
 };
 
 #endif

@@ -60,21 +60,24 @@ FirewireCamera::FirewireCamera(dc1394framerate_t framerate,
 			       dc1394speed_t speed,
 			       int num_buffers)
 {
-  started = opened = false;
-  valid_frame_received = false;
+  _started = _opened = false;
+  _valid_frame_received = false;
   _auto_focus = true; // assume auto_focus, checked in open()
   _auto_shutter = false;
   _auto_white_balance = false;
-  this->speed = speed;
-  this->num_buffers = num_buffers;
-  this->mode = mode;
-  this->framerate = framerate;
+  _speed = speed;
+  _num_buffers = num_buffers;
+  _mode = mode;
+  _framerate = framerate;
+  _white_balance_ub = 0xFFFFFFFF;
+  _white_balance_vr = 0xFFFFFFFF;
 
-  camera = NULL;
+  _dc1394 = NULL;
+  _camera = NULL;
 
   if ((mode = DC1394_VIDEO_MODE_640x480_YUV422) && (framerate == DC1394_FRAMERATE_30)) {
     // cerr  << "When in mode YUV422 @ 640x480 with more than 15 fps. Setting framerate to 15fps." << endl;
-    this->framerate = DC1394_FRAMERATE_15;
+    _framerate = DC1394_FRAMERATE_15;
   }
 
   _model = NULL;
@@ -93,129 +96,111 @@ FirewireCamera::~FirewireCamera()
 void
 FirewireCamera::open()
 {
-  if (opened) return;
+  if (_opened) return;
 
-  unsigned int i = 0;
-  dc1394camera_t       **cameras;
-  unsigned int num_cameras = 0;
-  unsigned int cam = 0;
-  bool found = false;
+  _dc1394 = dc1394_new();
+  dc1394camera_list_t *list;
+  dc1394error_t        err;
 
-  opened = false;
-
-  if ( dc1394_find_cameras(&cameras, &num_cameras) != DC1394_SUCCESS ) {
-    /*
-    cout  << cyellow << "Failure while finding cameras." << cnormal << endl
-	  << "Please check that" << endl
-	  << "  - the kernel modules `ieee1394',`raw1394' and `ohci1394' are loaded " << endl
-	  << "  - you have read/write access to /dev/raw1394" << endl;
-    */
-    throw Exception("Could not find any cameras");
+  if ( dc1394_enumerate_cameras(_dc1394, &list) != DC1394_SUCCESS ) {
+    throw Exception("Could not enumerate cameras");
   }
 
-  if (num_cameras > 0) {
+  if (list->num > 0) {
     if ( strcmp(_model, "any") == 0 ) {
       /* use the first camera found */
-      cam=0;
-      found = true;
-
-      camera = cameras[cam];
-      for (i = 1; i < num_cameras; ++i) {
-	dc1394_free_camera(cameras[i]);
+      _camera = dc1394_camera_new(_dc1394, list->ids[0].guid);
+      if (! _camera) {
+        dc1394_free(_dc1394);
+        _dc1394 = NULL;
+        throw Exception("Could not create camera for first foiund camera");
       }
-      free(cameras);
-      cameras = NULL;
     } else {
-      camera = NULL;
-      for (i = 0; i < num_cameras; ++i) {
-	if ( !found && strcmp(_model, cameras[i]->model) == 0) {
+      _camera = NULL;
+      for (unsigned int i = 0; i < list->num; ++i) {
+        dc1394camera_t *tmpcam = dc1394_camera_new(_dc1394, list->ids[i].guid);
+	if ( strcmp(_model, tmpcam->model) == 0) {
 	  // found desired camera
-	  camera = cameras[i];
-	  found = true;
+	  _camera = tmpcam;
+          break;
 	} else {
-	  dc1394_free_camera(cameras[i]);
+	  dc1394_camera_free(tmpcam);
 	}
       }
-      free(cameras);
-      cameras = NULL;
-      if ( camera == NULL ) {
-	Exception e("Could not find camera");
-	e.append("Camera of model '%s' not found!");
-	throw e;
+      if ( _camera == NULL ) {
+	throw Exception("Could not find camera with model %s", _model);
       }
     }
-    if (camera->bmode_capable > 0) {
-      // set b-mode and reprobe modes,...
-      // (higher fps formats might not be reported as available in legacy mode)
-      dc1394_video_set_operation_mode(camera, DC1394_OPERATION_MODE_1394B);
+    if (_camera->bmode_capable > 0) {
+      dc1394_video_set_operation_mode(_camera, DC1394_OPERATION_MODE_1394B);
     }
-    dc1394_cleanup_iso_channels_and_bandwidth(camera);
-    
-    dc1394_video_set_iso_speed(camera, speed);
-    dc1394_video_set_mode(camera, mode);
-    dc1394_video_set_framerate(camera, framerate);
+    if ( //((err = dc1394_cleanup_iso_channels_and_bandwidth(camera)) != DC1394_SUCCESS) ||
+         ((err = dc1394_video_set_iso_speed(_camera, _speed)) != DC1394_SUCCESS) ||
+         ((err = dc1394_video_set_mode(_camera, _mode)) != DC1394_SUCCESS) ||
+         ((err = dc1394_video_set_framerate(_camera, _framerate)) != DC1394_SUCCESS) ) {
+      throw Exception("Setting up the camera failed: %s", dc1394_error_strings[err]);
+    }
 
-    if (format7_mode_enabled) {
-      dc1394_format7_set_image_size(camera, mode, format7_width, format7_height);
-      dc1394_format7_set_image_position(camera, mode, format7_startx, format7_starty);
-      dc1394_format7_set_color_coding(camera, mode, format7_coding);
-      dc1394_format7_set_byte_per_packet(camera, mode, format7_bpp);
+    if (_format7_mode_enabled) {
+      if ( ((err = dc1394_format7_set_image_size(_camera, _mode, _format7_width, _format7_height)) != DC1394_SUCCESS) ||
+           ((err = dc1394_format7_set_image_position(_camera, _mode, _format7_startx, _format7_starty)) != DC1394_SUCCESS) ||
+           ((err = dc1394_format7_set_color_coding(_camera, _mode, _format7_coding)) != DC1394_SUCCESS) ||
+           ((err = dc1394_format7_set_byte_per_packet(_camera, _mode, _format7_bpp)) != DC1394_SUCCESS) ) {
+        throw Exception("Could not setup Format7 parameters: %s", dc1394_error_strings[err]);
+      }
     }
 
     set_auto_focus(_auto_focus);
     set_auto_shutter(_auto_shutter);
     set_auto_white_balance(_auto_white_balance);
-    if ( ! _auto_white_balance) {
+    if ( ! _auto_white_balance &&
+	 (_white_balance_ub != 0xFFFFFFFF) &&
+	 (_white_balance_vr != 0xFFFFFFFF)) {
       set_white_balance(_white_balance_ub, _white_balance_vr);
     }
 
   } else {
-    throw Exception("No cameras connected");;
+    throw Exception("No cameras connected");
   }
 
-  opened = found;
+  _opened = true;
 }
 
 
 void
 FirewireCamera::start()
 {
-  if (started) return;
+  if (_started) return;
 
-  if (!opened) {
-    // cout  << cred << "Tried to start closed cam. Giving up." << cnormal << endl;
+  if (! _opened) {
     throw Exception("FirewireCamera: Cannot start closed camera");
   }
 
-
-  //cout  << "Starting camera" << endl;
-
   dc1394error_t err;
-  if ( (err = dc1394_capture_setup( camera, num_buffers, DC1394_CAPTURE_FLAGS_DEFAULT )) != DC1394_SUCCESS ) {
-    // cout  << cred << "Could not start capturing" << endl;
-    dc1394_capture_stop(camera);
+  if ( (err = dc1394_capture_setup(_camera, _num_buffers, DC1394_CAPTURE_FLAGS_DEFAULT )) != DC1394_SUCCESS ) {
+    dc1394_capture_stop(_camera);
     throw Exception("FirewireCamera: Could not setup capture (%s)", dc1394_error_strings[err]);
   }
 
-  if ( (err = dc1394_video_set_transmission(camera, DC1394_ON)) != DC1394_SUCCESS) {
+  if ( (err = dc1394_video_set_transmission(_camera, DC1394_ON)) != DC1394_SUCCESS) {
     // cout  << cred << "Could not start video transmission" << cnormal << endl;
-    dc1394_capture_stop(camera);
+    dc1394_capture_stop(_camera);
     throw Exception("FirewireCamera: Could not start ISO transmission (%s)", dc1394_error_strings[err]);
   }
 				
   // Give it some time to be ready
   usleep(500000);
 
-  started = true;
+  _started = true;
 }
 
 
 void
 FirewireCamera::stop()
 {
-  dc1394_capture_stop(camera);
-  dc1394_video_set_transmission(camera, DC1394_OFF);
-  started = false;
+  dc1394_video_set_transmission(_camera, DC1394_OFF);
+  dc1394_capture_stop(_camera);
+  _started = false;
 }
 
 
@@ -226,7 +211,7 @@ bool
 FirewireCamera::iso_mode_enabled()
 {
   dc1394switch_t status;
-  if ( dc1394_video_get_transmission(camera, &status) != DC1394_SUCCESS) {
+  if ( dc1394_video_get_transmission(_camera, &status) != DC1394_SUCCESS) {
     // cout  << cred << "Could not get transmission status" << cnormal << endl;
     return false;
   } else {
@@ -238,8 +223,8 @@ FirewireCamera::iso_mode_enabled()
 void
 FirewireCamera::print_info()
 {
-  if (opened) {
-    dc1394_print_camera_info( camera );
+  if (_opened) {
+    dc1394_print_camera_info( _camera );
   }
 }
 
@@ -250,11 +235,11 @@ FirewireCamera::print_info()
 uint64_t
 FirewireCamera::guid() const
 {
-  if ( ! opened ) {
+  if ( ! _opened ) {
     throw Exception("Camera not opened");
   }
 
-  return camera->id.guid;
+  return _camera->guid;
 }
 
 
@@ -264,11 +249,11 @@ FirewireCamera::guid() const
 const char *
 FirewireCamera::model() const
 {
-  if ( ! opened ) {
+  if ( ! _opened ) {
     throw Exception("Camera not opened");
   }
 
-  return camera->model;
+  return _camera->model;
 }
 
 
@@ -276,20 +261,24 @@ void
 FirewireCamera::capture()
 {
 
-  if (! opened) return;
-  if (! started) return;
+  if (! _opened) {
+    throw CaptureException("FirewireCamera(%s): cannot capture on closed camera", _model);
+  }
+  if (! _started) {
+    throw CaptureException("FirewireCamera(%s): cannot capture on stopped camera", _model);
+  }
 
   if (! iso_mode_enabled()) {
-    //cout  << cred << "ISO mode enabled while trying to capture" << cnormal << endl;
-    return;
+    throw CaptureException("FirewireCamera(%s): isochronous transfer not active", _model);
   }
 
   dc1394error_t err;
-  if (DC1394_SUCCESS != (err = dc1394_capture_dequeue(camera, DC1394_CAPTURE_POLICY_WAIT, &frame))) {
-    valid_frame_received = false;
-    throw CaptureException(dc1394_error_strings[err]);
+  if (DC1394_SUCCESS != (err = dc1394_capture_dequeue(_camera, DC1394_CAPTURE_POLICY_WAIT, &_frame))) {
+    _valid_frame_received = false;
+    throw CaptureException("FireWireCamera(%s): capture failed (%s)",
+			   _model, dc1394_error_strings[err]);
   } else {
-    valid_frame_received = true;
+    _valid_frame_received = true;
   }
 }
 
@@ -307,8 +296,8 @@ FirewireCamera::flush()
 unsigned char*
 FirewireCamera::buffer()
 {
-  if ( valid_frame_received ) {
-    return frame->image;
+  if ( _valid_frame_received ) {
+    return _frame->image;
   } else {
     return NULL;
   }
@@ -318,8 +307,8 @@ FirewireCamera::buffer()
 unsigned int
 FirewireCamera::buffer_size()
 {
-  if ( valid_frame_received ) {
-    return frame->total_bytes;
+  if ( _valid_frame_received ) {
+    return _frame->total_bytes;
   } else {
     return 0;
   }
@@ -328,11 +317,13 @@ FirewireCamera::buffer_size()
 void
 FirewireCamera::close()
 {
-  if ( started ) stop();
-  if ( opened ) {
-    dc1394_free_camera( camera );
-    camera = NULL;
-    opened = false;
+  if ( _started ) stop();
+  if ( _opened ) {
+    dc1394_camera_free( _camera );
+    dc1394_free(_dc1394);
+    _camera = NULL;
+    _dc1394 = NULL;
+    _opened = false;
   }
 }
 
@@ -340,20 +331,23 @@ FirewireCamera::close()
 void
 FirewireCamera::dispose_buffer()
 {
-  ////cout  << "Finishing move on buffer" << endl;
-  dc1394_capture_enqueue( camera, frame );
+  dc1394_capture_enqueue( _camera, _frame );
 }
 
 
 unsigned int
 FirewireCamera::pixel_width()
 {
-  if (opened) {
-    if ( valid_frame_received ) {
-      return frame->size[0];
+  if (_opened) {
+    if ( _valid_frame_received ) {
+      return _frame->size[0];
     } else {
       unsigned int width, height;
-      dc1394_get_image_size_from_video_mode(camera, mode, &width, &height);
+      dc1394error_t err;
+      if ((err = dc1394_get_image_size_from_video_mode(_camera, _mode, &width, &height)) != DC1394_SUCCESS) {
+	throw Exception("FirewireCamera(%s): cannot get width (%s)", _model,
+			dc1394_error_strings[err]);
+      }
       return width;
     }
   } else {
@@ -365,12 +359,16 @@ FirewireCamera::pixel_width()
 unsigned int
 FirewireCamera::pixel_height()
 {
-  if (opened) {
-    if ( valid_frame_received ) {
-      return frame->size[1];
+  if (_opened) {
+    if ( _valid_frame_received ) {
+      return _frame->size[1];
     } else {
       unsigned int width, height;
-      dc1394_get_image_size_from_video_mode(camera, mode, &width, &height);
+      dc1394error_t err;
+      if ((err = dc1394_get_image_size_from_video_mode(_camera, _mode, &width, &height)) != DC1394_SUCCESS) {
+	throw Exception("FirewireCamera(%s): cannot get width (%s)", _model,
+			dc1394_error_strings[err]);
+      }
       return height;
     }
   } else {
@@ -383,14 +381,78 @@ colorspace_t
 FirewireCamera::colorspace()
 {
   // this needs to be changed for different modes
-  return YUV422_PACKED;
+  switch (_mode) {
+  case DC1394_VIDEO_MODE_320x240_YUV422:
+  case DC1394_VIDEO_MODE_640x480_YUV422:
+  case DC1394_VIDEO_MODE_800x600_YUV422:
+  case DC1394_VIDEO_MODE_1024x768_YUV422:
+  case DC1394_VIDEO_MODE_1280x960_YUV422:
+  case DC1394_VIDEO_MODE_1600x1200_YUV422:
+    return YUV422_PACKED;
+
+  case DC1394_VIDEO_MODE_640x480_YUV411:
+    return YUV411_PACKED;
+
+
+  case DC1394_VIDEO_MODE_640x480_RGB8:
+  case DC1394_VIDEO_MODE_800x600_RGB8:
+  case DC1394_VIDEO_MODE_1024x768_RGB8:
+  case DC1394_VIDEO_MODE_1280x960_RGB8:
+  case DC1394_VIDEO_MODE_1600x1200_RGB8:
+    return RGB;
+
+  case DC1394_VIDEO_MODE_640x480_MONO8:
+  case DC1394_VIDEO_MODE_800x600_MONO8:
+  case DC1394_VIDEO_MODE_1024x768_MONO8:
+  case DC1394_VIDEO_MODE_1280x960_MONO8:
+  case DC1394_VIDEO_MODE_1600x1200_MONO8:
+    return MONO8;
+
+  case DC1394_VIDEO_MODE_640x480_MONO16:
+  case DC1394_VIDEO_MODE_800x600_MONO16:
+  case DC1394_VIDEO_MODE_1024x768_MONO16:
+  case DC1394_VIDEO_MODE_1280x960_MONO16:
+  case DC1394_VIDEO_MODE_1600x1200_MONO16:
+    return MONO16;
+
+  case DC1394_VIDEO_MODE_FORMAT7_0:
+  case DC1394_VIDEO_MODE_FORMAT7_1:
+  case DC1394_VIDEO_MODE_FORMAT7_2:
+  case DC1394_VIDEO_MODE_FORMAT7_3:
+  case DC1394_VIDEO_MODE_FORMAT7_4:
+  case DC1394_VIDEO_MODE_FORMAT7_5:
+  case DC1394_VIDEO_MODE_FORMAT7_6:
+  case DC1394_VIDEO_MODE_FORMAT7_7:
+    switch (_format7_coding) {
+    case DC1394_COLOR_CODING_MONO8:
+      return MONO8;
+    case DC1394_COLOR_CODING_YUV411:
+      return YUV411_PACKED;
+    case DC1394_COLOR_CODING_YUV422:
+      return YUV422_PACKED;
+    case DC1394_COLOR_CODING_RGB8:
+      return RGB;
+    case DC1394_COLOR_CODING_MONO16:
+      return MONO16;
+    case DC1394_COLOR_CODING_RAW8:
+      return RAW8;
+    case DC1394_COLOR_CODING_RAW16:
+      return RAW16;
+    default:
+      return CS_UNKNOWN;
+    }
+    break;
+
+  default:
+    return CS_UNKNOWN;
+  }
 }
 
 
 bool
 FirewireCamera::ready()
 {
-  return started;
+  return _started;
 }
 
 
@@ -412,11 +474,14 @@ FirewireCamera::supports_focus()
 void
 FirewireCamera::set_auto_focus(bool enabled)
 {
-  /* 0 == auto off */
-  if (dc1394_feature_set_mode(camera, DC1394_FEATURE_FOCUS,
-			      enabled ? DC1394_FEATURE_MODE_AUTO : DC1394_FEATURE_MODE_MANUAL)
+  dc1394error_t err;
+  if ((err = dc1394_feature_set_mode(_camera, DC1394_FEATURE_FOCUS,
+				     enabled ? DC1394_FEATURE_MODE_AUTO : DC1394_FEATURE_MODE_MANUAL))
       == DC1394_SUCCESS) {
     _auto_focus = enabled;
+  } else {
+    throw Exception("FirewireCamera(%s): Setting auto focus failed (%s)", _model,
+		    dc1394_error_strings[err]);
   }
 }
 
@@ -432,7 +497,7 @@ unsigned int
 FirewireCamera::focus()
 {
   unsigned int focus = 0;
-  if (dc1394_feature_get_value(camera, DC1394_FEATURE_FOCUS, &focus) == DC1394_SUCCESS) {
+  if (dc1394_feature_get_value(_camera, DC1394_FEATURE_FOCUS, &focus) == DC1394_SUCCESS) {
     return focus;
   } else {
     return 0;
@@ -444,7 +509,7 @@ FirewireCamera::focus()
 void
 FirewireCamera::set_focus(unsigned int focus)
 {
-  dc1394_feature_set_value(camera, DC1394_FEATURE_FOCUS, focus);
+  dc1394_feature_set_value(_camera, DC1394_FEATURE_FOCUS, focus);
 }
 
 
@@ -453,7 +518,7 @@ FirewireCamera::focus_min()
 {
   unsigned int min = 0;
   unsigned int max = 0;
-  if (dc1394_feature_get_boundaries(camera, DC1394_FEATURE_FOCUS, &min, &max) == DC1394_SUCCESS) {
+  if (dc1394_feature_get_boundaries(_camera, DC1394_FEATURE_FOCUS, &min, &max) == DC1394_SUCCESS) {
     return min;
   } else {
     return 0;
@@ -466,7 +531,7 @@ FirewireCamera::focus_max()
 {
   unsigned int max = 0;
   unsigned int min = 0;
-  if (dc1394_feature_get_boundaries(camera, DC1394_FEATURE_FOCUS, &min, &max) == DC1394_SUCCESS) {
+  if (dc1394_feature_get_boundaries(_camera, DC1394_FEATURE_FOCUS, &min, &max) == DC1394_SUCCESS) {
     return max;
   } else {
     return 0;
@@ -480,7 +545,7 @@ FirewireCamera::focus_max()
 void
 FirewireCamera::set_auto_shutter(bool enabled)
 {
-  if (dc1394_feature_set_mode(camera, DC1394_FEATURE_SHUTTER,
+  if (dc1394_feature_set_mode(_camera, DC1394_FEATURE_SHUTTER,
 			      enabled ? DC1394_FEATURE_MODE_AUTO : DC1394_FEATURE_MODE_MANUAL)
       == DC1394_SUCCESS) {
     _auto_shutter = enabled;
@@ -504,7 +569,7 @@ FirewireCamera::auto_shutter()
 void
 FirewireCamera::set_auto_white_balance(bool enabled)
 {
-  if (dc1394_feature_set_mode(camera, DC1394_FEATURE_WHITE_BALANCE,
+  if (dc1394_feature_set_mode(_camera, DC1394_FEATURE_WHITE_BALANCE,
 			      enabled ? DC1394_FEATURE_MODE_AUTO : DC1394_FEATURE_MODE_MANUAL)
       == DC1394_SUCCESS) {
     _auto_white_balance = enabled;
@@ -529,7 +594,7 @@ FirewireCamera::auto_white_balance()
 void
 FirewireCamera::white_balance(unsigned int *ub, unsigned int *vr)
 {
-  if ( dc1394_feature_whitebalance_get_value(camera, ub, vr) != DC1394_SUCCESS ) {
+  if ( dc1394_feature_whitebalance_get_value(_camera, ub, vr) != DC1394_SUCCESS ) {
     throw Exception("Failed to retrieve white balance values");
   }
 }
@@ -542,7 +607,7 @@ FirewireCamera::white_balance(unsigned int *ub, unsigned int *vr)
 void
 FirewireCamera::set_white_balance(unsigned int ub, unsigned int vr)
 {
-  if ( dc1394_feature_whitebalance_set_value(camera, ub, vr) != DC1394_SUCCESS ) {
+  if ( dc1394_feature_whitebalance_set_value(_camera, ub, vr) != DC1394_SUCCESS ) {
     throw Exception("Failed to retrieve white balance values");
   }
 }
@@ -587,101 +652,104 @@ FirewireCamera::set_white_balance(unsigned int ub, unsigned int vr)
  */
 FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
 {
-  started = opened = false;
-  valid_frame_received = false;
+  _started = _opened = false;
+  _valid_frame_received = false;
   _auto_focus = true; // assume auto_focus, checked in open()
   _auto_shutter = false;
   _auto_white_balance = false;
+  _white_balance_ub = 0xFFFFFFFF;
+  _white_balance_vr = 0xFFFFFFFF;
 
   // Defaults
-  mode = DC1394_VIDEO_MODE_640x480_YUV422;
-  speed = DC1394_ISO_SPEED_400;
-  framerate = DC1394_FRAMERATE_30;
-  camera = NULL;
-  format7_mode_enabled = false;
-  format7_width = format7_height = format7_startx = format7_starty = 0;
-  format7_bpp = 4096;
+  _mode = DC1394_VIDEO_MODE_640x480_YUV422;
+  _speed = DC1394_ISO_SPEED_400;
+  _framerate = DC1394_FRAMERATE_30;
+  _camera = NULL;
+  _dc1394 = NULL;
+  _format7_mode_enabled = false;
+  _format7_width = _format7_height = _format7_startx = _format7_starty = 0;
+  _format7_bpp = 4096;
   _model = strdup(cap->cam_id().c_str());
 
   if ( cap->has("mode") ) {
     string m = cap->get("mode");
     if ( m == "640x480_MONO16" ) {
-      mode = DC1394_VIDEO_MODE_640x480_MONO16;
+      _mode = DC1394_VIDEO_MODE_640x480_MONO16;
     } else if ( m == "FORMAT7_0" ) {
-      mode = DC1394_VIDEO_MODE_FORMAT7_0;
-      format7_mode_enabled = true;
+      _mode = DC1394_VIDEO_MODE_FORMAT7_0;
+      _format7_mode_enabled = true;
     } else if ( m == "FORMAT7_1" ) {
-      mode = DC1394_VIDEO_MODE_FORMAT7_1;
-      format7_mode_enabled = true;
+      _mode = DC1394_VIDEO_MODE_FORMAT7_1;
+      _format7_mode_enabled = true;
     } else if ( m == "FORMAT7_2" ) {
-      mode = DC1394_VIDEO_MODE_FORMAT7_2;
-      format7_mode_enabled = true;
+      _mode = DC1394_VIDEO_MODE_FORMAT7_2;
+      _format7_mode_enabled = true;
     } else if ( m == "FORMAT7_3" ) {
-      mode = DC1394_VIDEO_MODE_FORMAT7_3;
-      format7_mode_enabled = true;
+      _mode = DC1394_VIDEO_MODE_FORMAT7_3;
+      _format7_mode_enabled = true;
     } else if ( m == "FORMAT7_4" ) {
-      mode = DC1394_VIDEO_MODE_FORMAT7_4;
-      format7_mode_enabled = true;
+      _mode = DC1394_VIDEO_MODE_FORMAT7_4;
+      _format7_mode_enabled = true;
     } else if ( m == "FORMAT7_5" ) {
-      mode = DC1394_VIDEO_MODE_FORMAT7_5;
-      format7_mode_enabled = true;
+      _mode = DC1394_VIDEO_MODE_FORMAT7_5;
+      _format7_mode_enabled = true;
     } else if ( m == "FORMAT7_6" ) {
-      mode = DC1394_VIDEO_MODE_FORMAT7_6;
-      format7_mode_enabled = true;
+      _mode = DC1394_VIDEO_MODE_FORMAT7_6;
+      _format7_mode_enabled = true;
     } else if ( m == "FORMAT7_7" ) {
-      mode = DC1394_VIDEO_MODE_FORMAT7_7;
-      format7_mode_enabled = true;
+      _mode = DC1394_VIDEO_MODE_FORMAT7_7;
+      _format7_mode_enabled = true;
     }
   }
   if ( cap->has("coding") ) {
     string c = cap->get("coding");
     if ( c == "YUV422" ) {
-      format7_coding = DC1394_COLOR_CODING_YUV422;
+      _format7_coding = DC1394_COLOR_CODING_YUV422;
     } else if ( c == "MONO16" ) {
-      format7_coding = DC1394_COLOR_CODING_MONO16;
+      _format7_coding = DC1394_COLOR_CODING_MONO16;
     } else if ( c == "RAW16" ) {
-      format7_coding = DC1394_COLOR_CODING_RAW16;
+      _format7_coding = DC1394_COLOR_CODING_RAW16;
     }
   }
   if ( cap->has("isospeed") ) {
     string s = cap->get("isospeed");
     if ( s == "400" ) {
-      speed = DC1394_ISO_SPEED_400;
+      _speed = DC1394_ISO_SPEED_400;
     } else if ( s == "800" ) {
-      speed = DC1394_ISO_SPEED_800;
+      _speed = DC1394_ISO_SPEED_800;
     }
   }
   if ( cap->has("framerate") ) {
     string f = cap->get("framerate");
     if ( f == "15" ) {
-      framerate = DC1394_FRAMERATE_15;
+      _framerate = DC1394_FRAMERATE_15;
     } else if ( f == "30" ) {
-      framerate = DC1394_FRAMERATE_30;
+      _framerate = DC1394_FRAMERATE_30;
     } else if ( f == "60" ) {
-      framerate = DC1394_FRAMERATE_60;
+      _framerate = DC1394_FRAMERATE_60;
     } else if ( f == "120" ) {
-      framerate = DC1394_FRAMERATE_120;
+      _framerate = DC1394_FRAMERATE_120;
     }
   }
   if ( cap->has("nbufs") ) {
-    num_buffers = atoi(cap->get("nbufs").c_str());
+    _num_buffers = atoi(cap->get("nbufs").c_str());
   } else {
-    num_buffers = 4;
+    _num_buffers = 4;
   }
   if ( cap->has("width") ) {
-    format7_width = atoi(cap->get("width").c_str());
+    _format7_width = atoi(cap->get("width").c_str());
   }
   if ( cap->has("height") ) {
-    format7_height = atoi(cap->get("height").c_str());
+    _format7_height = atoi(cap->get("height").c_str());
   }
   if ( cap->has("startx") ) {
-    format7_startx = atoi(cap->get("startx").c_str());
+    _format7_startx = atoi(cap->get("startx").c_str());
   }
   if ( cap->has("starty") ) {
-    format7_starty = atoi(cap->get("starty").c_str());
+    _format7_starty = atoi(cap->get("starty").c_str());
   }
   if ( cap->has("packetsize") ) {
-    format7_bpp = atoi(cap->get("packetsize").c_str());
+    _format7_bpp = atoi(cap->get("packetsize").c_str());
   }
   if ( cap->has("white_balance") ) {
     string w = cap->get("white_balance");
@@ -732,25 +800,21 @@ void
 FirewireCamera::print_available_fwcams()
 {
 
-  dc1394error_t err;
-  dc1394camera_t       **cameras;
-  unsigned int num_cameras = 0;
-
-  if ( (err = dc1394_find_cameras(&cameras, &num_cameras)) != DC1394_SUCCESS ) {
-    printf("Finding cameras failed: %s\n", dc1394_error_strings[err]);
-    return;
+  dc1394_t *dc1394 = dc1394_new();
+  dc1394camera_list_t *list;
+  dc1394error_t        err;
+  if ( (err = dc1394_enumerate_cameras(dc1394, &list)) != DC1394_SUCCESS ) {
+    throw Exception("Could not enumerate cameras: %s", dc1394_error_strings[err]);
   }
 
-  if (num_cameras > 0) {
-    // print cameras
-    for (unsigned int i = 0; i < num_cameras; ++i) {
-      printf("Vendor: %30s (%8.0x)  Model: %30s (%8.0x)\n",
-	     cameras[i]->vendor, cameras[i]->vendor_id,
-	     cameras[i]->model, cameras[i]->model_id);
-      dc1394_print_camera_info(cameras[i]);
-      dc1394_free_camera(cameras[i]);
+  if (list->num > 0) {
+    for (unsigned int i = 0; i < list->num; ++i) {
+      dc1394camera_t *tmpcam = dc1394_camera_new(dc1394, list->ids[i].guid);
+      dc1394_print_camera_info(tmpcam);
+      dc1394_camera_free(tmpcam);
     }
   } else {
     printf("Could not find any cameras\n");
   }
 }
+

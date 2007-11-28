@@ -130,37 +130,37 @@ Bumblebee2Camera::Bumblebee2Camera(const CameraArgumentParser *cap)
 
   _model = strdup(cap->cam_id().c_str());
   // num_buffers set in constructor call
-  format7_coding = DC1394_COLOR_CODING_RAW16;
-  format7_width  = 640;
-  format7_height = 480;
-  format7_startx = format7_starty = 0;
+  _format7_coding = DC1394_COLOR_CODING_RAW16;
+  _format7_width  = 640;
+  _format7_height = 480;
+  _format7_startx = _format7_starty = 0;
 
   if ( cap->has("nbufs") ) {
-    num_buffers = atoi(cap->get("nbufs").c_str());
+    _num_buffers = atoi(cap->get("nbufs").c_str());
   }
   if ( cap->has("width") ) {
-    format7_width = atoi(cap->get("width").c_str());
+    _format7_width = atoi(cap->get("width").c_str());
   }
   if ( cap->has("height") ) {
-    format7_height = atoi(cap->get("height").c_str());
+    _format7_height = atoi(cap->get("height").c_str());
   }
   if ( cap->has("startx") ) {
-    format7_startx = atoi(cap->get("startx").c_str());
+    _format7_startx = atoi(cap->get("startx").c_str());
   }
   if ( cap->has("starty") ) {
-    format7_starty = atoi(cap->get("starty").c_str());
+    _format7_starty = atoi(cap->get("starty").c_str());
   }
 
-  _buffer_deinterlaced = NULL;
-  _buffer_rgb = NULL;
+  __buffer_deinterlaced = NULL;
+  __buffer_rgb = NULL;
 }
 
 
 /** Destructor. */
 Bumblebee2Camera::~Bumblebee2Camera()
 {
-  if (_buffer_deinterlaced != NULL)  free(_buffer_deinterlaced);
-  if (_buffer_rgb != NULL)           free(_buffer_rgb);
+  if (__buffer_deinterlaced != NULL)  free(__buffer_deinterlaced);
+  if (__buffer_rgb != NULL)           free(__buffer_rgb);
 }
 
 
@@ -170,12 +170,12 @@ Bumblebee2Camera::~Bumblebee2Camera()
 uint32_t
 Bumblebee2Camera::serial_no() const
 {
-  if ( ! opened )  throw Exception("Camera not opened");
+  if ( ! _opened )  throw Exception("Camera not opened");
 
   uint32_t value = 0;
-  dc1394error_t err = GetCameraControlRegister( camera, PGR_REG_SERIAL_NUMBER, &value );
+  dc1394error_t err = dc1394_get_control_register( _camera, PGR_REG_SERIAL_NUMBER, &value );
   if ( err != DC1394_SUCCESS ) {
-    throw Exception("Bumblebee2::serial_no: GetCameraControlRegister(PGR_REG_SERIAL_NUMBER) failed\n");
+    throw Exception("Bumblebee2::serial_no: dc1394_get_control_register(PGR_REG_SERIAL_NUMBER) failed\n");
   }
   return value;
 }
@@ -194,7 +194,7 @@ Bumblebee2Camera::serial_no() const
 bool
 Bumblebee2Camera::verify_guid(uint64_t ver_guid) const
 {
-  if ( ! opened )  throw Exception("Camera not opened");
+  if ( ! _opened )  throw Exception("Camera not opened");
 
   uint64_t tguid = ver_guid;
   tguid >>= 32;
@@ -231,13 +231,13 @@ Bumblebee2Camera::open()
     throw;
   }
 
-  if ( ! opened ) {
+  if ( ! _opened ) {
     throw Exception("Bumblebee2Camera::open: FirewireCamera::open dit not suceed");
   }
 
-  _buffer_deinterlaced = (unsigned char *)malloc(pixel_width() * pixel_height() * 2);
-  _buffer_rgb = malloc_buffer(RGB, pixel_width(), pixel_height() * 2);
-  _buffer = NULL;
+  __buffer_deinterlaced = (unsigned char *)malloc(pixel_width() * pixel_height() * 2);
+  __buffer_rgb = malloc_buffer(RGB, pixel_width(), pixel_height() * 2);
+  __buffer = NULL;
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
   dc1394error_t err;
@@ -250,19 +250,18 @@ Bumblebee2Camera::open()
     uint32_t   reserved2  :  7;
     uint32_t   data_format:  1;
   } idf_t;
-  err = GetCameraControlRegister( camera, PGR_REG_IMAGE_DATA_FORMAT, &value );
+  err = dc1394_get_control_register( _camera, PGR_REG_IMAGE_DATA_FORMAT, &value );
   if ( err != DC1394_SUCCESS ) {
-    throw Exception("Bumblebee2::open: GetCameraControlRegister(PGR_REG_DATA_FORMAT) failed\n");
+    throw Exception("Bumblebee2::open: dc1394_get_control_register(PGR_REG_DATA_FORMAT) failed\n");
   }
   idf_t *i = (idf_t *)&value;
   value &= PTG_Y16_Data_Format_PGR_specific;
   i->data_format = 0;
-  err = SetCameraControlRegister( camera, PGR_REG_IMAGE_DATA_FORMAT, value );
+  err = dc1394_set_control_register( _camera, PGR_REG_IMAGE_DATA_FORMAT, value );
   if ( err != DC1394_SUCCESS ) {
     throw Exception("Bumblebee2::open: Setting PGR-specific mode on little-endian system failed\n");
   }
 #endif
-  
 
   get_bayer_tile();
 }
@@ -271,26 +270,18 @@ Bumblebee2Camera::open()
 void
 Bumblebee2Camera::close()
 {
-  if ( opened ) {
+  if ( _opened ) {
     FirewireCamera::close();  
-    if (_buffer_deinterlaced != NULL) {
-      free(_buffer_deinterlaced);
-      _buffer_deinterlaced = NULL;
+    if (__buffer_deinterlaced != NULL) {
+      free(__buffer_deinterlaced);
+      __buffer_deinterlaced = NULL;
     }
-    if (_buffer_rgb != NULL) {
-      free(_buffer_rgb);
-      _buffer_rgb = NULL;
+    if (__buffer_rgb != NULL) {
+      free(__buffer_rgb);
+      __buffer_rgb = NULL;
     }
   }
 }
-
-
-colorspace_t
-Bumblebee2Camera::colorspace()
-{
-  return RAW16;
-}
-
 
 void
 Bumblebee2Camera::capture()
@@ -299,11 +290,11 @@ Bumblebee2Camera::capture()
     FirewireCamera::capture();
   } catch (CaptureException &e) {
     e.append("Bumblebee2Camera::capture: failed to retrieve image");
-    if ( ORIGINAL == _image_num )  _buffer = NULL;
+    if ( ORIGINAL == __image_num )  __buffer = NULL;
     throw;
   }
-  if ( ORIGINAL == _image_num ) {
-    _buffer = frame->image;
+  if ( ORIGINAL == __image_num ) {
+    __buffer = _frame->image;
   }
 }
 
@@ -311,18 +302,18 @@ Bumblebee2Camera::capture()
 unsigned char *
 Bumblebee2Camera::buffer()
 {
-  return _buffer;
+  return __buffer;
 }
 
 
 void
 Bumblebee2Camera::set_image_number(unsigned int image_num)
 {
-  _image_num = image_num;
+  __image_num = image_num;
   switch ( image_num ) {
-  case DEINTERLACED: _buffer = _buffer_deinterlaced; break;
-  case RGB_IMAGE: _buffer = _buffer_rgb; break;
-  default:  _buffer = NULL; break;
+  case DEINTERLACED: __buffer = __buffer_deinterlaced; break;
+  case RGB_IMAGE: __buffer = __buffer_rgb; break;
+  default:  __buffer = NULL; break;
   }
 }
 
@@ -333,9 +324,9 @@ Bumblebee2Camera::set_image_number(unsigned int image_num)
 bool
 Bumblebee2Camera::is_bumblebee2()
 {
-  if ( ! opened ) throw CameraNotOpenedException();
+  if ( ! _opened ) throw CameraNotOpenedException();
 
-  return( strncmp( camera->model, "Bumblebee2", strlen("Bumblebee2") ) == 0);
+  return( strncmp( _camera->model, "Bumblebee2", strlen("Bumblebee2") ) == 0);
 }
 
 
@@ -343,7 +334,7 @@ Bumblebee2Camera::is_bumblebee2()
 void
 Bumblebee2Camera::deinterlace_stereo()
 {
-  dc1394_deinterlace_stereo( frame->image, _buffer_deinterlaced,
+  dc1394_deinterlace_stereo( _frame->image, __buffer_deinterlaced,
 			     pixel_width(), 2 * pixel_height() ); 
 }
 
@@ -356,9 +347,9 @@ Bumblebee2Camera::deinterlace_stereo()
 void
 Bumblebee2Camera::decode_bayer()
 {
-  dc1394_bayer_decoding_8bit( _buffer_deinterlaced, _buffer_rgb,
+  dc1394_bayer_decoding_8bit( __buffer_deinterlaced, __buffer_rgb,
 			      pixel_width(), 2 * pixel_height(), 
-			      bayer_pattern, DC1394_BAYER_METHOD_NEAREST ); 
+			      __bayer_pattern, DC1394_BAYER_METHOD_NEAREST ); 
 }
 
 
@@ -434,7 +425,7 @@ void
 Bumblebee2Camera::get_bayer_tile()
 {
   uint32_t value;
-  if (GetCameraControlRegister( camera, PGR_BAYER_TILE_MAPPING_REGISTER, &value) != DC1394_SUCCESS ) {
+  if (dc1394_get_control_register( _camera, PGR_BAYER_TILE_MAPPING_REGISTER, &value) != DC1394_SUCCESS ) {
     throw Exception("Could not query bayer tile register");
   }
 
@@ -443,19 +434,19 @@ Bumblebee2Camera::get_bayer_tile()
   default:
   case 0x59595959:	// YYYY
     // no bayer
-    bayer_pattern = (dc1394color_filter_t) 0;
+    __bayer_pattern = (dc1394color_filter_t) 0;
     break;
   case 0x52474742:	// RGGB
-    bayer_pattern = DC1394_COLOR_FILTER_RGGB;
+    __bayer_pattern = DC1394_COLOR_FILTER_RGGB;
     break;
   case 0x47425247:	// GBRG
-    bayer_pattern = DC1394_COLOR_FILTER_GBRG;
+    __bayer_pattern = DC1394_COLOR_FILTER_GBRG;
     break;
   case 0x47524247:	// GRBG
-    bayer_pattern = DC1394_COLOR_FILTER_GRBG;
+    __bayer_pattern = DC1394_COLOR_FILTER_GRBG;
     break;
   case 0x42474752:	// BGGR
-    bayer_pattern = DC1394_COLOR_FILTER_BGGR;
+    __bayer_pattern = DC1394_COLOR_FILTER_BGGR;
     break;
   }
 }
@@ -474,9 +465,9 @@ Bumblebee2Camera::write_triclops_config_from_camera_to_file(const char *filename
   dc1394error_t err;
   uint32_t value;
   
-  err = GetCameraControlRegister( camera, PGR_REG_CONFIG_LENGTH, &value );
+  err = dc1394_get_control_register( _camera, PGR_REG_CONFIG_LENGTH, &value );
   if ( err != DC1394_SUCCESS ) {
-    throw Exception("GetCameraControlRegister(PGR_REG_CONFIG_LENGTH) failed\n");
+    throw Exception("dc1394_get_control_register(PGR_REG_CONFIG_LENGTH) failed\n");
   }
    
   // the length of the config file
@@ -493,9 +484,9 @@ Bumblebee2Camera::write_triclops_config_from_camera_to_file(const char *filename
   // Read the config file, and save it to the output file,
   // while fixing endianness.
   for( unsigned long offset = 0 ; offset < file_size_bytes; offset += 4 ) {
-    err = GetCameraControlRegister( camera,
-				    PGR_REG_CONFIG_DATA + offset, 
-				    &value );
+    err = dc1394_get_control_register( _camera,
+				       PGR_REG_CONFIG_DATA + offset, 
+				       &value );
      
     if( err != DC1394_SUCCESS ) {
       Exception e("Failed to get control register");

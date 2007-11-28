@@ -59,9 +59,13 @@ CameraNotStartedException::CameraNotStartedException()
  */
 
 /** Constructor.
- * @param msg optional message explaining why capturing failed
+ * @param format format of the descriptive message
  */
-CaptureException::CaptureException(const char *msg)
-  : Exception("Failed to capture a frame: %s", msg)
+CaptureException::CaptureException(const char *format, ...)
+  : Exception()
 {
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }

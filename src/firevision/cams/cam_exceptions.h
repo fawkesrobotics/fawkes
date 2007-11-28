@@ -46,6 +46,6 @@ class CameraNotStartedException : public Exception
 class CaptureException : public Exception
 {
  public:
-  CaptureException(const char *msg);
+  CaptureException(const char *format, ...);
 };
 #endif

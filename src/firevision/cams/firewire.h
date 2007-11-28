@@ -100,11 +100,11 @@ class FirewireCamera : public Camera, public CameraControl
 
  protected:
   /** Number of DMA buffers. */
-  int  num_buffers;
+  int  _num_buffers;
   /** true if camera has been opened, false otherwise */
-  bool opened;
+  bool _opened;
   /** true if camera has been started, false otherwise */
-  bool started;
+  bool _started;
   /** true if auto focus is enabled, false if disabled */
   bool _auto_focus;
   /** true if auto shutter is enabled, false if disabled */
@@ -112,32 +112,34 @@ class FirewireCamera : public Camera, public CameraControl
   /** true if auto white balance is enabled, false if disabled */
   bool _auto_white_balance;
   /** true, if a valid frame has been received, false otherwise */
-  bool valid_frame_received;
+  bool _valid_frame_received;
 
+  /** DC1394 main context */
+  dc1394_t                      *_dc1394;
   /** DC1394 video mode */
-  dc1394video_mode_t             mode;
+  dc1394video_mode_t             _mode;
   /** Indicator of Format7 status. */
-  bool                           format7_mode_enabled;
+  bool                           _format7_mode_enabled;
   /** DC1394 speed */
-  dc1394speed_t                  speed;
+  dc1394speed_t                  _speed;
   /** DC1394 framerate */
-  dc1394framerate_t              framerate;
+  dc1394framerate_t              _framerate;
   /** DC1394 camera handle */
-  dc1394camera_t                *camera;
+  dc1394camera_t                *_camera;
   /** Last captured DC1394 video frame */
-  dc1394video_frame_t           *frame;
+  dc1394video_frame_t           *_frame;
   /** Format7 color coding */
-  dc1394color_coding_t           format7_coding;
+  dc1394color_coding_t           _format7_coding;
   /** Format7 bytes per packet */
-  int                            format7_bpp;
+  int                            _format7_bpp;
   /** Format7 width */
-  int                            format7_width;
+  int                            _format7_width;
   /** Format7 height */
-  int                            format7_height;
+  int                            _format7_height;
   /** Format7 ROI Start X coordinate */
-  int                            format7_startx;
+  int                            _format7_startx;
   /** Format7 ROI Start Y coordinate */
-  int                            format7_starty;
+  int                            _format7_starty;
 
   /** White balance U/B value */
   unsigned int                   _white_balance_ub;
