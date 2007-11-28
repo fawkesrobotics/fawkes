@@ -332,6 +332,7 @@ FawkesPluginManager::check_finalized()
 
     try {
       if ( thread_manager->deferred_remove_done(plugins[name]->threads()) ) {
+	hub->force_send();
 	plugin_loader->unload(plugins[name]);
 
 	plugins.erase(name);
