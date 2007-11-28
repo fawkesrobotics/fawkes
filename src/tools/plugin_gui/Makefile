@@ -16,7 +16,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys_local/gui.mk
+include $(BASEDIR)/etc/buildsys/gui.mk
 include $(BASEDIR)/etc/buildsys/ext/gmsl
 
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
@@ -26,10 +26,10 @@ LIBS_pt_gui = core utils netcomm fawkesmainappmsgs
 OBJS_pt_gui = main.o			\
 	      plugin_gui.o		\
 	      backend_thread.o
+OBJS_all = $(OBJS_pt_gui)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
-  OBJS_all = $(OBJS_pt_gui)
-  BINS_all = $(BINDIR)/pt_gui
+  BINS_gui = $(BINDIR)/pt_gui
 else
   WARN_TARGETS += warning_plugin_gui
 endif

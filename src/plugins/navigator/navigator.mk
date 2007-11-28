@@ -2,7 +2,9 @@
 #             Makefile Build System for Fawkes: Navigator Plugin
 #                            -------------------
 #   Created on Sun Jul 22 16:14:56 2007
-#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -12,12 +14,6 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 # Check for GTS (Fedora packages gts and gts-devel)
 ifneq ($(PKGCONFIG),)
@@ -25,19 +21,13 @@ ifneq ($(PKGCONFIG),)
 endif
 
 # check for VMC (AllemaniACs custom packages vmc and vmc-devel)
-ifneq ($(realpath /usr/include/vmc/LayerClasses/VMC_API.h),)
-  HAVE_VMC = 1
-endif
 ifneq ($(realpath /usr/include/vmc/LayerClasses/CvmcAPI.h),)
   HAVE_VMC = 1
 endif
 
-
-BUILD_NAVIGATOR = 1
-ifneq ($(HAVE_VMC),1)
-  BUILD_NAVIGATOR = 0
-endif
-ifneq ($(HAVE_GTS),1)
-  BUILD_NAVIGATOR = 0
+ifeq ($(HAVE_VMC)$(HAVE_GTS),11)
+  BUILD_NAVIGATOR = 1
+else
+  NAVIGATOR_ERROR = (gts[-devel] or vmc[-devel] missing)
 endif
 

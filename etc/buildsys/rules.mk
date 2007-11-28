@@ -60,8 +60,12 @@ endif
 -include $(DEPDIR)/*.d
 
 # One to build 'em all
-.PHONY: all
-all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(TARGETS_all) subdirs
+.PHONY: all gui
+ifeq ($(MAKELEVEL),1)
+  EXTRA_ALL = $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui)
+endif
+all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(TARGETS_all) $(EXTRA_ALL) subdirs
+gui: presubdirs $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui) subdirs
 
 ifneq ($(OBJS_all),)
 # Do not delete .o files to allow for incremental builds
@@ -69,9 +73,9 @@ ifneq ($(OBJS_all),)
 # Whenever the Makefile is modified rebuild everything
 $(OBJS_all): $(SRCDIR)/Makefile
 else
-  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all),)
+  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all)$(LIBS_gui)$(PLUGINS_gui)$(BINS_gui),)
     ifneq ($(DISABLE_OBJS_all_WARNING),1)
-    $(warning OBJS_all is not set. This is probably a bug. If you intended this set DISABLE_OBJS_all_WARNING to 1 to get rid of this warning.)
+      $(warning OBJS_all is not set. This is probably a bug. If you intended this set DISABLE_OBJS_all_WARNING to 1 to get rid of this warning.)
     endif
   endif
 endif
@@ -85,6 +89,10 @@ clean: presubdirs subdirs
 	$(SILENT) if [ -n "$(LIBS_all)" ]; then rm -rf $(LIBS_all) ; fi
 	$(SILENT) if [ -n "$(PLUGINS_all)" ]; then rm -rf $(PLUGINS_all) ; fi
 	$(SILENT) if [ -n "$(TARGETS_all)" ]; then rm -rf $(TARGETS_all) ; fi
+	$(SILENT) if [ -n "$(BINS_gui)" ]; then rm -rf $(BINS_gui) ; fi
+	$(SILENT) if [ -n "$(LIBS_gui)" ]; then rm -rf $(LIBS_gui) ; fi
+	$(SILENT) if [ -n "$(PLUGINS_gui)" ]; then rm -rf $(PLUGINS_gui) ; fi
+	$(SILENT) if [ -n "$(TARGETS_gui)" ]; then rm -rf $(TARGETS_gui) ; fi
 
 ifeq (,$(findstring qa,$(SUBDIRS)))
 .PHONY: qa
