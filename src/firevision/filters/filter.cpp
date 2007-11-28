@@ -55,15 +55,16 @@ Filter::Filter(const char *name, unsigned int max_num_buffers)
   }
 
   _name = strdup(name);
+  _max_num_buffers = max_num_buffers;
 
-  src = (unsigned char **)malloc(max_num_buffers * sizeof(unsigned char *));
-  memset(src, 0, max_num_buffers * sizeof(unsigned char *));
+  src = (unsigned char **)malloc(_max_num_buffers * sizeof(unsigned char *));
+  memset(src, 0, _max_num_buffers * sizeof(unsigned char *));
 
-  src_roi = (ROI **)malloc(max_num_buffers * sizeof(ROI *));
-  memset(src_roi, 0, max_num_buffers * sizeof(ROI *));
+  src_roi = (ROI **)malloc(_max_num_buffers * sizeof(ROI *));
+  memset(src_roi, 0, _max_num_buffers * sizeof(ROI *));
 
-  ori = (orientation_t *)malloc(max_num_buffers * sizeof(orientation_t));
-  memset(ori, 0, max_num_buffers * sizeof(orientation_t));
+  ori = (orientation_t *)malloc(_max_num_buffers * sizeof(orientation_t));
+  memset(ori, 0, _max_num_buffers * sizeof(orientation_t));
 }
 
 
