@@ -55,7 +55,7 @@ FilterShapeRemover::apply()
 
   shape->setMargin( margin );
 
-  unsigned char *buffer = src_roi[0]->getROIBufferStart( src[0] );
+  unsigned char *buffer = src_roi[0]->get_roi_buffer_start( src[0] );
   unsigned char *linestart = buffer;
 
   if ( (dst == NULL) || (src[0] == dst) ) {
@@ -73,7 +73,7 @@ FilterShapeRemover::apply()
       buffer = linestart;
     }
   } else {
-    unsigned char *dst_buffer = dst_roi->getROIBufferStart( dst );
+    unsigned char *dst_buffer = dst_roi->get_roi_buffer_start( dst );
     unsigned char *dst_linestart = dst_buffer;
 
     for (unsigned int h = 0; h < src_roi[0]->height; ++h) {

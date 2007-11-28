@@ -48,6 +48,31 @@ ROI* ROI::roi_full_image = NULL;
 ROI::ROI()
 {
   num_hint_points = 1;
+  start.x = start.y = width = height = image_width = image_height = line_step = pixel_step = 0;
+}
+
+
+/** Constructor.
+ * @param start_x Upper left corner of ROI X coordinate
+ * @param start_y Upper left corner of ROI y coordinate
+ * @param width Width of extent of ROI
+ * @param height height of extent of ROI
+ * @param image_width width of full image this ROI belongs to
+ * @param image_height height of full image this ROI belongs to
+ */
+ROI::ROI(unsigned int start_x, unsigned int start_y,
+	 unsigned int width, unsigned int height,
+	 unsigned int image_width, unsigned int image_height)
+{
+  num_hint_points = 1;
+  start.x = start_x;
+  start.y = start_y;
+  this->width = width;
+  this->height = height;
+  this->image_width = image_width;
+  this->image_height = image_height;
+  line_step = image_width;
+  pixel_step = 1;
 }
 
 
@@ -55,7 +80,7 @@ ROI::ROI()
  * @param p point
  */
 void
-ROI::setStart(point_t p)
+ROI::set_start(point_t p)
 {
   start.x = p.x;
   start.y = p.y;
@@ -67,7 +92,7 @@ ROI::setStart(point_t p)
  * @param y y coordinate in image
  */
 void
-ROI::setStart(unsigned int x, unsigned int y)
+ROI::set_start(unsigned int x, unsigned int y)
 {
   start.x = x;
   start.y = y;
@@ -78,7 +103,7 @@ ROI::setStart(unsigned int x, unsigned int y)
  * @param width new width
  */
 void
-ROI::setWidth(unsigned int width)
+ROI::set_width(unsigned int width)
 {
   this->width = width;
 }
@@ -88,7 +113,7 @@ ROI::setWidth(unsigned int width)
  * @return width
  */
 unsigned int
-ROI::getWidth() const
+ROI::get_width() const
 {
   return width;
 }
@@ -98,7 +123,7 @@ ROI::getWidth() const
  * @param height new height
  */
 void
-ROI::setHeight(unsigned int height)
+ROI::set_height(unsigned int height)
 {
   this->height = height;
 }
@@ -108,7 +133,7 @@ ROI::setHeight(unsigned int height)
  * @return height
  */
 unsigned int
-ROI::getHeight() const
+ROI::get_height() const
 {
   return height;
 }
@@ -119,7 +144,7 @@ ROI::getHeight() const
  * @param image_width full width of image.
  */
 void
-ROI::setImageWidth(unsigned int image_width)
+ROI::set_image_width(unsigned int image_width)
 {
   this->image_width = image_width;
 }
@@ -130,7 +155,7 @@ ROI::setImageWidth(unsigned int image_width)
  * @return full width of image.
  */
 unsigned int
-ROI::getImageWidth() const
+ROI::get_image_width() const
 {
   return image_width;
 }
@@ -141,7 +166,7 @@ ROI::getImageWidth() const
  * @param image_height full height of image.
  */
 void
-ROI::setImageHeight(unsigned int image_height)
+ROI::set_image_height(unsigned int image_height)
 {
   this->image_height = image_height;
 }
@@ -152,7 +177,7 @@ ROI::setImageHeight(unsigned int image_height)
  * @return full height of image.
  */
 unsigned int
-ROI::getImageHeight() const
+ROI::get_image_height() const
 {
   return image_height;
 }
@@ -164,7 +189,7 @@ ROI::getImageHeight() const
  * @param step new line step
  */
 void
-ROI::setLineStep(unsigned int step)
+ROI::set_line_step(unsigned int step)
 {
   line_step = step;
 }
@@ -175,7 +200,7 @@ ROI::setLineStep(unsigned int step)
  * @see setLineStep()
  */
 unsigned int
-ROI::getLineStep() const
+ROI::get_line_step() const
 {
   return line_step;
 }
@@ -187,7 +212,7 @@ ROI::getLineStep() const
  * @param step new pixel step.
  */
 void
-ROI::setPixelStep(unsigned int step)
+ROI::set_pixel_step(unsigned int step)
 {
   pixel_step = step;
 }
@@ -198,7 +223,7 @@ ROI::setPixelStep(unsigned int step)
  * @see setPixelStep()
  */
 unsigned int
-ROI::getPixelStep() const
+ROI::get_pixel_step() const
 {
   return pixel_step;
 }
@@ -210,7 +235,7 @@ ROI::getPixelStep() const
  * @return hint
  */
 hint_t
-ROI::getHint() const
+ROI::get_hint() const
 {
   return hint;
 }
@@ -221,7 +246,7 @@ ROI::getHint() const
  * @see getHint()
  */
 void
-ROI::setHint(hint_t hint)
+ROI::set_hint(hint_t hint)
 {
   this->hint = hint;
 }
@@ -443,7 +468,7 @@ ROI::operator=(ROI &roi)
  * @return pointer into buffer where the ROI starts
  */
 unsigned char*
-ROI::getROIBufferStart(unsigned char *buffer) const
+ROI::get_roi_buffer_start(unsigned char *buffer) const
 {
   return (buffer + (start.y * line_step) + (start.x * pixel_step));
 }
@@ -467,7 +492,7 @@ ROI::getROIBufferStart(unsigned char *buffer) const
  *
  */
 unsigned int
-ROI::getNumHintPoints()
+ROI::get_num_hint_points()
 {
   return num_hint_points;
 }
@@ -476,7 +501,7 @@ ROI::getNumHintPoints()
 /** Get full image ROI for given size.
  * Shortcut to get a full size ROI. This ROI is a static member so this
  * method is not thread-safe or reentrant. It is also only valid until the
- * first call to fullImage() with different parameters. Line step is assumed
+ * next call to full_image() with different parameters. Line step is assumed
  * to be the image width, the pixel step is assumed to be one. So this is
  * only useful for b/w or planar images.
  * @param width image width
@@ -484,7 +509,7 @@ ROI::getNumHintPoints()
  * @return full image ROI
  */
 ROI *
-ROI::fullImage(unsigned int width, unsigned int height)
+ROI::full_image(unsigned int width, unsigned int height)
 {
   if (roi_full_image == NULL) {
     roi_full_image = new ROI();

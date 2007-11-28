@@ -57,30 +57,33 @@ class ROI {
  public:
 
   ROI();
+  ROI(unsigned int start_x, unsigned int start_y,
+      unsigned int width, unsigned int height,
+      unsigned int image_width, unsigned int image_height);
 
-  void         setStart(point_t p);
-  void         setStart(unsigned int x, unsigned int y);
+  void         set_start(point_t p);
+  void         set_start(unsigned int x, unsigned int y);
 
-  void         setWidth(unsigned int width);
-  unsigned int getWidth() const;
+  void         set_width(unsigned int width);
+  unsigned int get_width() const;
 
-  void         setHeight(unsigned int height);
-  unsigned int getHeight() const;
+  void         set_height(unsigned int height);
+  unsigned int get_height() const;
 
-  void         setImageWidth(unsigned int image_width);
-  unsigned int getImageWidth() const;
+  void         set_image_width(unsigned int image_width);
+  unsigned int get_image_width() const;
 
-  void         setImageHeight(unsigned int image_height);
-  unsigned int getImageHeight() const;
+  void         set_image_height(unsigned int image_height);
+  unsigned int get_image_height() const;
 
-  void         setLineStep(unsigned int step);
-  unsigned int getLineStep() const;
+  void         set_line_step(unsigned int step);
+  unsigned int get_line_step() const;
 
-  void         setPixelStep(unsigned int step);
-  unsigned int getPixelStep() const;
+  void         set_pixel_step(unsigned int step);
+  unsigned int get_pixel_step() const;
 
-  hint_t       getHint() const;
-  void         setHint(hint_t hint);
+  hint_t       get_hint() const;
+  void         set_hint(hint_t hint);
 
   bool         contains(unsigned int x, unsigned int y);
 
@@ -98,12 +101,12 @@ class ROI {
   bool         operator!=(ROI &roi);
   ROI&         operator=(ROI &roi);
 
-  unsigned int getNumHintPoints();
+  unsigned int get_num_hint_points();
 
 
-  unsigned char*  getROIBufferStart(unsigned char *buffer) const;
+  unsigned char*  get_roi_buffer_start(unsigned char *buffer) const;
 
-  static ROI * fullImage(unsigned int width, unsigned int height);
+  static ROI * full_image(unsigned int width, unsigned int height);
 
 
  public: // Public for quick access
