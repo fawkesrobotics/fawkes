@@ -342,11 +342,11 @@ PluginTool::inbound_received(FawkesNetworkMessage *msg) throw()
 	char *p = plm->next();
 	printf("  %s\n", p);
 	free(p);
-	quit = true;
       }
     } else {
       printf("No plugins available\n");
     }
+    quit = true;
     delete plm;
   } else if (msg->msgid() == MSG_PLUGIN_LOADED_LIST ) {
     PluginListMessage *plm = msg->msgc<PluginListMessage>();
@@ -356,11 +356,11 @@ PluginTool::inbound_received(FawkesNetworkMessage *msg) throw()
 	char *p = plm->next();
 	printf("  %s\n", p);
 	free(p);
-	quit = true;
       }
     } else {
       printf("No plugins loaded\n");
     }
+    quit = true;
     delete plm;
   } else if ( msg->msgid() == MSG_PLUGIN_AVAIL_LIST_FAILED) {
     printf("Obtaining list of available plugins failed\n");
