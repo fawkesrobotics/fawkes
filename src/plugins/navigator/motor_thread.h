@@ -77,6 +77,9 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     double alpha_;
     double beta_;
     double gamma_;
+    double last_alpha_rotations;
+    double last_beta_rotations;
+    double last_gamma_rotations;
     double odometry_distance;
     double orbit_direction_x;
     double orbit_direction_y;
@@ -92,22 +95,20 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     double correction_x;
     double correction_y;
     double correction_rotation;
-    double  correction_translation;
-    double  gear_reduction;
-    double  wheel_radius;
-    double  radius;
-    double  differential_part;
-    double  integral_part;
-    double  linear_part;
-    int  ticks;
+    double correction_translation;
+    double gear_reduction;
+    double wheel_radius;
+    double radius;
+    double differential_part;
+    double integral_part;
+    double linear_part;
+    int ticks;
     
     double translation_rpm_factor;
     double rotation_rpm_factor;
 
     Time last_time;
     Time last_time_odometry;
-    Watch* stop_watch;
-    Time* stop_time;
     Time last_acceleration_time;
 
     Clock* clock;
