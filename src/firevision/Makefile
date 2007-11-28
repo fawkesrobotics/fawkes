@@ -27,4 +27,5 @@ cams models filters classifiers stereo fvwidgets: fvutils
 filters: models
 apps: fvutils models cams filters classifiers stereo
 tools: apps fvutils stereo
+models: classifiers
 

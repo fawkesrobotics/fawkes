@@ -18,6 +18,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 include $(LIBSRCDIR)/netcomm/netcomm.mk
+include $(BASEDIR)/etc/buildsys/gui.mk
 
 CFLAGS   += $(VISION_CFLAGS) -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
 LDFLAGS  += $(VISION_LDFLAGS)
@@ -49,23 +50,25 @@ OBJS_fvbb2rectlut = bb2rectlut.o
 LIBS_fvbb2info = $(VISION_CAM_LIBS) utils fvcams fvutils fvstereo
 OBJS_fvbb2info = bb2info.o
 
-LIBS_fvviewer = $(VISION_CAM_LIBS) utils fvcams fvutils fvwidgets
+LIBS_fvviewer = $(VISION_CAM_LIBS) utils fvcams fvutils fvwidgets fvfilters
 OBJS_fvviewer = viewer.o
+CFLAGS_viewer    += $(CFLAGS_GTKMM) $(CFLAGS_SDL)
+LDFLAGS_fvviewer += $(LDFLAGS_GTKMM) $(LDFLAGS_SDL)
 
 LIBS_fvnet = utils fvutils
 OBJS_fvnet = net.o
 
 LIBS_fvshowyuv = fvutils fvwidgets
 OBJS_fvshowyuv = show_yuv.o
-CFLAGS_show_yuv += $(SDL_CFLAGS)
-LDFLAGS_fvshowyuv += $(SDL_LDFLAGS)
+CFLAGS_show_yuv += $(CFLAGS_SDL)
+LDFLAGS_fvshowyuv += $(LDFLAGS_SDL)
 
 OBJS_all = $(OBJS_fvshmem) $(OBJS_fvlistfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
 	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer) \
 	   $(OBJS_fvshowyuv) $(OBJS_fvnet)
 BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvconverter $(BINDIR)/fvbb2rectlut \
-	   $(BINDIR)/fvshowyuv $(BINDIR)/fvnet
+	   $(BINDIR)/fvnet
 
 ifeq ($(HAVE_TRICLOPS_SDK),1)
   BINS_all += $(BINDIR)/fvtricalcdisp
@@ -88,13 +91,17 @@ else
   WARN_TARGETS += warning_stereodecoder
   WARN_TARGETS += warning_bb2rectlut_bb2
 endif
-ifeq ($(HAVE_SDL),1)
-  BINS_all += $(BINDIR)/fvviewer
-  CFLAGS_viewer += $(SDL_CFLAGS)
-  LDFLAGS_fvviewer += $(SDL_LDFLAGS)
+ifeq ($(HAVE_SDL)$(HAVE_GTKMM),11)
+  BINS_gui += $(BINDIR)/fvviewer
 else
   WARN_TARGETS += warning_viewer
 endif
+ifeq ($(HAVE_SDL),1)
+  BINS_gui += $(BINDIR)/fvshowyuv
+else
+  WARN_TARGETS += warning_showyuv
+endif
+
 
 ifneq ($(SRCDIR),.)
 all: $(WARN_TARGETS)
@@ -115,7 +122,9 @@ warning_bb2rectlut_triclops:
 warning_bb2info:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvbb2info$(TNORMAL) (no Bumblebee2 camera support)";
 warning_viewer:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvviewer$(TNORMAL) (SDL[-devel] not installed)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvviewer$(TNORMAL) (SDL[-devel] not installed) $(GUI_ERROR)";
+warning_showyuv:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvshowyuv$(TNORMAL) (SDL[-devel] not installed)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

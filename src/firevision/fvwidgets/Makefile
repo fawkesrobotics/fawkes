@@ -26,8 +26,8 @@ LIBS     += $(VISION_LIBS)
 
 ifeq ($(HAVE_SDL),1)
   LIBS_all = $(LIBDIR)/libfvwidgets.so
-  CFLAGS  += $(SDL_CFLAGS)
-  LDFLAGS += $(SDL_LDFLAGS)
+  CFLAGS  += $(CFLAGS_SDL)
+  LDFLAGS += $(LDFLAGS_SDL)
 else
   WARN_TARGETS += warning_sdl
 endif

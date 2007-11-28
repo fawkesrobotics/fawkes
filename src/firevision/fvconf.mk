@@ -67,8 +67,8 @@ ifeq ($(HAVE_LIBDC1394),1)
 endif
 
 ifeq ($(HAVE_SDL),1)
-  SDL_CFLAGS  = $(shell $(PKGCONFIG) --cflags 'sdl')
-  SDL_LDFLAGS = $(shell $(PKGCONFIG) --libs 'sdl')
+  CFLAGS_SDL  = $(shell $(PKGCONFIG) --cflags 'sdl')
+  LDFLAGS_SDL = $(shell $(PKGCONFIG) --libs 'sdl')
 endif
 
 # Check if we have PGR Triclops SDK, build Bumblebee2 if we have it
