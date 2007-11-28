@@ -829,7 +829,7 @@ TriclopsStereoProcessor::generate_rectification_lut(const char *lut_file)
 
   register float row, col;
   for (unsigned int h = 0; h < _height; ++h) {
-    for (unsigned int w = 0; w < _height; ++w) {
+    for (unsigned int w = 0; w < _width; ++w) {
       if ( triclopsUnrectifyPixel(data->triclops, TriCam_LEFT, h, w, &row, &col) != TriclopsErrorOk ) {
 	throw Exception("Failed to get unrectified position from Triclops SDK");
       }
@@ -887,7 +887,7 @@ TriclopsStereoProcessor::verify_rectification_lut(const char *lut_file)
 
   RectificationInfoFile::RectInfoBlockVector &blocks = rif->blocks();
   RectificationInfoFile::RectInfoBlockVector::const_iterator i;
-  for (i = blocks.begin(); (i != blocks.end() && ! left_ok && ! right_ok); ++i) {
+  for (i = blocks.begin(); (i != blocks.end() && ! (left_ok && right_ok)); ++i) {
     RectificationInfoBlock *rib = *i;
 
     if ( (rib->camera() != FIREVISION_RECTINFO_CAMERA_LEFT) &&
@@ -914,7 +914,7 @@ TriclopsStereoProcessor::verify_rectification_lut(const char *lut_file)
       register uint16_t rx, ry;
       bool lut_ok = true;
       for (unsigned int h = 0; (h < _height) && lut_ok; ++h) {
-	for (unsigned int w = 0; w < _height; ++w) {
+	for (unsigned int w = 0; w < _width; ++w) {
 	  if ( triclopsUnrectifyPixel(data->triclops, cam, h, w, &row, &col) != TriclopsErrorOk ) {
 	    throw Exception("Failed to get unrectified position from Triclops SDK");
 	  }
@@ -938,7 +938,6 @@ TriclopsStereoProcessor::verify_rectification_lut(const char *lut_file)
 
   delete rif;
   return (left_ok && right_ok);
-	 
 }
 
 
