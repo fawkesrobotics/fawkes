@@ -28,6 +28,8 @@
 #ifndef __FIREVISION_FVUTILS_RECTIFICATION_RECTINFO_H_
 #define __FIREVISION_FVUTILS_RECTIFICATION_RECTINFO_H_
 
+#pragma pack(push,4)
+
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS
 #endif
@@ -155,6 +157,7 @@ typedef struct _rectinfo_lut_16x16_entry_t {
  */
 typedef enum _rectinfo_block_type_t {
   /* supported by file version 1: */
+  FIREVISION_RECTINFO_TYPE_INVALID  = 0,	/**< invalid */
   FIREVISION_RECTINFO_TYPE_LUT_16x16  = 1	/**< Rectification LUT with 16 bit values,
 						   see rectinfo_lut_16x16_block_header_t */
 } rectinfo_block_type_t;
@@ -168,11 +171,20 @@ typedef enum _rectinfo_block_type_t {
  */
 typedef enum _rectinfo_camera_t {
   /* supported by file version 1: */
-  FIREVISION_RECTINFO_CAMERA_MAIN    = 1,	/**< Main image */
-  FIREVISION_RECTINFO_CAMERA_LEFT    = 2,	/**< Left image */
-  FIREVISION_RECTINFO_CAMERA_RIGHT   = 3,	/**< Right image */
-  FIREVISION_RECTINFO_CAMERA_CENTER  = 4,	/**< Center image */
-  FIREVISION_RECTINFO_CAMERA_TOP     = 5	/**< Top image */
+  FIREVISION_RECTINFO_CAMERA_MAIN    = 0,	/**< Main image */
+  FIREVISION_RECTINFO_CAMERA_LEFT    = 1,	/**< Left image */
+  FIREVISION_RECTINFO_CAMERA_RIGHT   = 2,	/**< Right image */
+  FIREVISION_RECTINFO_CAMERA_CENTER  = 3,	/**< Center image */
+  FIREVISION_RECTINFO_CAMERA_TOP     = 4	/**< Top image */
 } rectinfo_camera_t;
 
+/** Rectification camera strings.
+ * Follows the index in rectinfo_camera_t and gives a string for each of the
+ * cameras.
+ */
+extern const char* rectinfo_camera_strings[];
+
+extern const char* rectinfo_type_strings[];
+
+#pragma pack(pop)
 #endif

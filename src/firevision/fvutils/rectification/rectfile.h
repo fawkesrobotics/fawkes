@@ -29,7 +29,7 @@
 #define __FIREVISION_FVUTILS_RECTIFICATION_RECTFILE_H_
 
 #include <fvutils/rectification/rectinfo.h>
-#include <list>
+#include <vector>
 
 class RectificationInfoBlock;
 
@@ -39,6 +39,12 @@ class RectificationInfoFile
   RectificationInfoFile();
   RectificationInfoFile(uint64_t cam_guid, const char *model);
   ~RectificationInfoFile();
+
+  /** Vector that is used for maintaining the rectification info blocks.
+   * For instance use RectificationInfoFile::RectInfoBlockVector::iterator as
+   * iterator to go through the blocks returned by blocks().
+   */
+  typedef std::vector<RectificationInfoBlock *> RectInfoBlockVector;
 
   uint8_t       version();
   uint64_t      guid();
@@ -53,15 +59,15 @@ class RectificationInfoFile
   void read(const char *file_name);
   void clear();
 
-  std::list<RectificationInfoBlock *> &  blocks();
+  RectInfoBlockVector &  blocks();
 
  private:
   rectinfo_header_t  *_header;
   uint64_t            _cam_guid;
   char               *_model;
 
-  std::list<RectificationInfoBlock *>            info_blocks;
-  std::list<RectificationInfoBlock *>::iterator  ibi;
+  RectInfoBlockVector            info_blocks;
+  RectInfoBlockVector::iterator  ibi;
 };
 
 #endif

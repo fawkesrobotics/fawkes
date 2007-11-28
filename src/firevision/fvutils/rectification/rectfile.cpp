@@ -193,10 +193,10 @@ RectificationInfoFile::clear()
 
 
 /** Get all rectification info blocks.
- * @return reference to internal list of rectinfo blocks.
+ * @return reference to internal vector of rectinfo blocks.
  */
-std::list<RectificationInfoBlock *> &
-RectificationInfoFile:: blocks()
+RectificationInfoFile::RectInfoBlockVector &
+RectificationInfoFile::blocks()
 {
   return info_blocks;
 }
@@ -300,7 +300,7 @@ RectificationInfoFile::read(const char *file_name)
       info_blocks.push_back(rlib);
     } else {
       fclose(f);
-      throw Exception("Unsupported file format");
+      throw Exception("Unsupported file format (unknown block type %u)", bh.type);
     }
   }
 
