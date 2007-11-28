@@ -885,8 +885,8 @@ TriclopsStereoProcessor::verify_rectification_lut(const char *lut_file)
   bool left_ok = false;
   bool right_ok = false;
 
-  std::list<RectificationInfoBlock *> &blocks = rif->blocks();
-  std::list<RectificationInfoBlock *>::const_iterator i;
+  RectificationInfoFile::RectInfoBlockVector &blocks = rif->blocks();
+  RectificationInfoFile::RectInfoBlockVector::const_iterator i;
   for (i = blocks.begin(); (i != blocks.end() && ! left_ok && ! right_ok); ++i) {
     RectificationInfoBlock *rib = *i;
 
