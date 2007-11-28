@@ -48,7 +48,10 @@ typedef enum {
   BAYER_MOSAIC_GRBG  = 13,
   BAYER_MOSAIC_BGGR  = 14,
   RAW16              = 15,
-  COLORSPACE_N       = 16
+  RAW8               = 16,
+  MONO8              = 17,
+  MONO16             = 18,
+  COLORSPACE_N       = 19
 } colorspace_t;
 
 
