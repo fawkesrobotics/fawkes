@@ -235,7 +235,7 @@ print_info(ArgumentParser *argp)
     RectificationInfoFile *rif = new RectificationInfoFile();
     try {
       rif->read(lut_file);
-      std::list<RectificationInfoBlock *> &blocks = rif->blocks();
+      RectificationInfoFile::RectInfoBlockVector &blocks = rif->blocks();
 
       printf("File:         %s\n"
 	     "Version:      %u\n"
@@ -253,47 +253,18 @@ print_info(ArgumentParser *argp)
 	     rif->guid(), rif->model());
 
       unsigned int u = 1;
-      std::list<RectificationInfoBlock *>::const_iterator i;
+      RectificationInfoFile::RectInfoBlockVector::const_iterator i;
       for (i = blocks.begin(); i != blocks.end(); ++i) {
 	RectificationInfoBlock *rib = *i;
-
-	const char *type;
-	switch (rib->type()) {
-	case FIREVISION_RECTINFO_TYPE_LUT_16x16:
-	  type = "Rectification LUT (16x16)";
-	  break;
-	default:
-	  type = "Unknown rectification info";
-	  break;
-	}
-
-	const char *camera;
-	switch (rib->camera()) {
-	case FIREVISION_RECTINFO_CAMERA_MAIN:
-	  camera = "Main";
-	  break;
-	case FIREVISION_RECTINFO_CAMERA_LEFT:
-	  camera = "Left";
-	  break;
-	case FIREVISION_RECTINFO_CAMERA_RIGHT:
-	  camera = "Right";
-	  break;
-	case FIREVISION_RECTINFO_CAMERA_CENTER:
-	  camera = "Center";
-	  break;
-	case FIREVISION_RECTINFO_CAMERA_TOP:
-	  camera = "Top";
-	  break;
-	default:
-	  camera = "Unknown";
-	  break;
-	}
 
 	printf("\nRectInfo Block No. %u\n"
 	       "Type:       %s\n"
 	       "Camera:     %s\n"
 	       "Size:       %u\n",
-	       u++, type, camera, rib->size());
+	       u++,
+	       rectinfo_type_strings[rib->type()],
+	       rectinfo_camera_strings[rib->camera()],
+	       rib->size());
 
 	switch (rib->type()) {
 	case FIREVISION_RECTINFO_TYPE_LUT_16x16:

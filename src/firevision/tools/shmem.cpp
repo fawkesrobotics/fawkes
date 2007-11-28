@@ -28,6 +28,8 @@
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/ipc/shm_lut.h>
 #include <utils/system/argparser.h>
+#include <fvutils/writers/fvraw.h>
+
 #include <iostream>
 
 using namespace std;
@@ -36,13 +38,14 @@ int
 main(int argc, char **argv)
 {
 
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "c::Hl::");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "c::Hl::i:");
   bool action_done = false;
 
   if ( argp->has_arg("H") ) {
     // Show usage note
-    cout << endl << "Usage: " << argv[0] << " [-h] [-c] [-c[t]] [-l] [-m]" << endl
+    cout << endl << "Usage: " << argv[0] << " [-h] [-c] [-c[t]] [-l] [-m] [-i image_id] [file]" << endl
 	 << " -h     Show this help message" << endl
+	 << " -i id  Save image ID to file" << endl
 	 << " -c[t]  Cleanup (remove all FireVision related shmem segments of given type)"
 	 << endl
 	 << " -l[t]  List shared memory segments of given type" << endl
@@ -50,12 +53,36 @@ main(int argc, char **argv)
 	 << "        [t] type is a combination of" << endl
 	 << "          i  images" << endl
 	 << "          l  lookup tables" << endl
-	 << "        or empty in which case all known shared memory segments are mangled"
-	 << endl << endl
+	 << "        or empty in which case all known shared memory segments are mangled" << endl
+	 << endl
+	 << "        [file] is a file name. Content depends on the action. The possibilities are: " << endl
+	 << "        for  -i   File where the saved image is stored" << endl
+	 << endl
 	 << "By default all known shared memory segments are listed" << endl
 	 << endl;
     action_done = true;
   } else {
+    if ( argp->has_arg("i") ) {
+      if ( argp->num_items() == 0 ) {
+	printf("You have to give a file name where to store the image\n");
+      } else {
+	const char *image_id = argp->arg("i");
+
+	try {
+	  SharedMemoryImageBuffer *b = new SharedMemoryImageBuffer(image_id);
+	  
+	  FvRawWriter *w = new FvRawWriter(argp->items()[0], b->width(), b->height(),
+					 b->colorspace(), b->buffer());
+	  w->write();
+	  delete w;
+	  delete b;
+	  printf("Image '%s' saved to %s\n", image_id, argp->items()[0]);
+	} catch (Exception &e) {
+	  printf("Failed top save image\n");
+	  e.print_trace();
+	}
+      }
+    }
     if ( argp->has_arg("c") ) {
       const char *tmp;
       if ( (tmp = argp->arg("c")) != NULL) {

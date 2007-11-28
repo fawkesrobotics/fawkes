@@ -35,34 +35,71 @@
 #include <cams/fileloader.h>
 
 #include <fvwidgets/image_display.h>
+#include <fvutils/rectification/rectfile.h>
+#include <fvutils/rectification/rectinfo_block.h>
+#include <filters/rectify.h>
 
 #include <cstring>
 #include <cstdio>
 #include <stdint.h>
 
 #include <SDL.h>
+#ifdef HAVE_GTKMM
+#include <gtkmm.h>
+#endif
+
+#include <fvutils/color/conversions.h>
 
 void
 print_usage(const char *program_name)
 {
-  printf("Usage: %s [-s shmem_id] [-n host[:port]/image_id] [-f file] [cam arg string]\n"
+  printf("Usage: %s [-s shmem_id] [-n host[:port]/image_id] [-f file] [-v] [cam arg string]\n"
 	 "  -s shmem_id    Open shared memory image with given ID\n"
 	 "  -n net_string  Open network camera, the camera string is of the form\n"
 	 "                 host[:port]/image_id. You have to specify at least the host\n"
 	 "                 and the image_id, the port is optional and defaults to 5000\n"
 	 "  -f file        Open file loader camera with given file\n"
+	 "  -v             Verbose output on console\n"
 	 "  cam arg string Can be an arbitrary camera argument string that is understood\n"
 	 "                 by CameraFactory and the desired camera.\n",
 	 program_name);
+}
+
+void
+print_keys()
+{
+  printf("Keys:\n"
+	 "  c        continuous mode (automatic image updating as fast as possible)\n"
+	 "  r        rectify image, will query for rectification info file and possibly\n"
+	 "           for camera if there is more than one block.\n"
+	 "  Shift-R  rectify image, use already loaded lut info file, do not query for\n"
+	 "           new file\n"
+	 "  Space    Refresh image\n"
+	 "  q/Esc    Quit viewer\n");
+}
+
+
+/** Process all outstanding Gtk events. */
+void
+process_gtk_events()
+{
+  while ( Gtk::Main::events_pending() ) {
+    Gtk::Main::iteration();
+  }
 }
 
 
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "Hs:f:n:");
+  ArgumentParser argp(argc, argv, "Hs:f:n:v");
+
+#ifdef HAVE_GTKMM
+  Gtk::Main gtk_main(argc, argv);
+#endif
 
   Camera *cam;
+  bool verbose = argp.has_arg("v");
 
   if ( argp.has_arg("H") ) {
     print_usage(argp.program_name());
@@ -132,12 +169,37 @@ main(int argc, char **argv)
     exit(-2);
   }
 
+  print_keys();
+
+  if ( verbose ) {
+    printf("Camera opened, settings:\n"
+	   "  Colorspace:  %u (%s)\n"
+	   "  Dimensions:  %u x %u\n"
+	   "  Buffer size: %zu\n",
+	   cam->colorspace(), colorspace_to_string(cam->colorspace()),
+	   cam->pixel_width(), cam->pixel_height(),
+	   colorspace_buffer_size(cam->colorspace(), cam->pixel_width(), cam->pixel_height()));
+  }
+
   cam->capture();
 
   ImageDisplay *display = new ImageDisplay(cam->pixel_width(), cam->pixel_height());
   display->show(cam->colorspace(), cam->buffer());
 
   cam->dispose_buffer();
+
+  RectificationInfoFile *rectfile = new RectificationInfoFile();
+  FilterRectify *rectify_filter = NULL;
+  unsigned char *filtered_buffer = malloc_buffer(YUV422_PLANAR,
+						 cam->pixel_width(), cam->pixel_height());
+  unsigned char *unfiltered_buffer = malloc_buffer(YUV422_PLANAR,
+						   cam->pixel_width(), cam->pixel_height());
+  bool rectifying = false;
+  bool continuous = false;
+
+  SDL_Event redraw_event;
+  redraw_event.type = SDL_KEYUP;
+  redraw_event.key.keysym.sym = SDLK_SPACE;
 
   bool quit = false;
   while (! quit) {
@@ -150,13 +212,112 @@ main(int argc, char **argv)
       case SDL_KEYUP:
 	if ( event.key.keysym.sym == SDLK_SPACE ) {
 	  cam->capture();
-	  display->show(cam->colorspace(), cam->buffer());
+	  if ( rectifying ) {
+	    convert(cam->colorspace(), YUV422_PLANAR, cam->buffer(), unfiltered_buffer,
+		    cam->pixel_width(), cam->pixel_height());
+	    ROI *fir = ROI::full_image(cam->pixel_width(), cam->pixel_height());
+	    rectify_filter->set_src_buffer(unfiltered_buffer, fir);
+	    rectify_filter->set_dst_buffer(filtered_buffer, fir);
+	    rectify_filter->apply();
+	    display->show(YUV422_PLANAR, filtered_buffer);
+	  } else {
+	    display->show(cam->colorspace(), cam->buffer());
+	  }
 	  cam->dispose_buffer();
+	  if ( continuous ) {
+	    SDL_PushEvent(&redraw_event);
+	  }
 	} else if ( event.key.keysym.sym == SDLK_ESCAPE ) {
 	  quit = true;
 	} else if ( event.key.keysym.sym == SDLK_q ) {
 	  quit = true;
+	} else if ( event.key.keysym.sym == SDLK_c ) {
+	  continuous = true;
+	  SDL_PushEvent(&redraw_event);
+	} else if ( event.key.keysym.sym == SDLK_r ) {
+#ifdef HAVE_GTKMM
+	  if ( rectifying ) {
+	    rectifying = false;
+	  } else {
+	    if ( ! (SDL_GetModState() & KMOD_LSHIFT) &&
+		 ! (SDL_GetModState() & KMOD_RSHIFT) ||
+		 ! rectify_filter ) {
+	      Gtk::FileChooserDialog fcd("Open Rectification Info File");
+
+	      // Add response buttons the the dialog
+	      fcd.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	      fcd.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+
+	      Gtk::FileFilter filter_rectinfo;
+	      filter_rectinfo.set_name("Rectification Info");
+	      filter_rectinfo.add_pattern("*.rectinfo");
+	      fcd.add_filter(filter_rectinfo);
+
+	      Gtk::FileFilter filter_any;
+	      filter_any.set_name("Any File");
+	      filter_any.add_pattern("*");
+	      fcd.add_filter(filter_any);
+
+	      int result = fcd.run();
+
+	      fcd.hide();
+	      process_gtk_events();
+
+	      if ( result == Gtk::RESPONSE_OK) {
+		// Nice, we got a file
+		try {
+		  rectfile->read(fcd.get_filename().c_str());
+		  if ( rectfile->num_blocks() == 0 ) {
+		    throw Exception("Rectification info file does not contain any info blocks");
+		  }
+		  Gtk::HBox hbox;
+		  Gtk::Label label("Camera: ");
+		  Gtk::ComboBoxText cboxt;
+		  hbox.add(label);
+		  hbox.add(cboxt);
+		  label.show();
+		  cboxt.show();
+
+		  RectificationInfoFile::RectInfoBlockVector & blocks = rectfile->blocks();
+		  for (RectificationInfoFile::RectInfoBlockVector::iterator b = blocks.begin(); b != blocks.end(); ++b) {
+		    Glib::ustring us = rectinfo_camera_strings[(*b)->camera()];
+		    us += Glib::ustring(" (") + rectinfo_type_strings[(*b)->type()] + ")";
+		  cboxt.append_text(us);
+		  }
+		  cboxt.set_active(0);
+
+		  Gtk::Dialog dialog("Choose Camera", false, true);
+		  dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+		  dialog.get_vbox()->add(hbox);
+		  hbox.show();
+		  dialog.run();
+		  dialog.hide();
+		  process_gtk_events();
+		
+		  RectificationInfoBlock *chosen_block = blocks[cboxt.get_active_row_number()];
+
+		  delete rectify_filter;
+		  rectify_filter = new FilterRectify(chosen_block);
+		} catch (Exception &e) {
+		  Gtk::MessageDialog md(e.what(),
+					/* use markup */ false,
+					Gtk::MESSAGE_ERROR);
+		  md.set_title("Reading Rectification Info failed");
+		  md.run();
+		  md.hide();
+		  
+		  process_gtk_events();
+		}
+	      }
+	    }
+	    rectifying =  (rectify_filter != NULL);
+	  }
+	  SDL_PushEvent(&redraw_event);
 	}
+#else
+	printf("Rectification support requires gtkmm(-devel) to be installed "
+	       " at compile time.\n");
+#endif
 	break;
       default:
 	break;
@@ -164,9 +325,14 @@ main(int argc, char **argv)
     }
   }
 
+  delete rectfile;
+  delete rectify_filter;
+  free(filtered_buffer);
+  free(unfiltered_buffer);
 
   cam->close();
   delete cam;
+  delete display;
 
   return 0;
 }
