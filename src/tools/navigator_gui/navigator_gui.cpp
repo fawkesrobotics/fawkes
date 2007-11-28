@@ -109,7 +109,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   angular_velocity_entry->set_range(-6.3, 6.3);
   angular_velocity_entry->set_increments(0.01, 0.1);
   navigator_velocity_entry = new Gtk::SpinButton(0.005, 2);
-  navigator_velocity_entry->set_range(-5.0, 5.0);
+  navigator_velocity_entry->set_range(0, 5.0);
   navigator_velocity_entry->set_increments(0.01, 0.1);
 
   navigator_control_radio = new Gtk::RadioButton("Navigator Control");
