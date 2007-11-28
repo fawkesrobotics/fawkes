@@ -42,6 +42,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <errno.h>
+#include <signal.h>
 
 /** @def forever
  * Shortcut for "while (1)".
@@ -574,6 +575,18 @@ Thread::cancel()
       __cancelled = true;
     }
   }
+}
+
+
+/** Send signal to a thread.
+ * Not that sending an unhandled signal might kill the whole process, not just the
+ * thread!
+ * @param sig signal to send.
+ */
+void
+Thread::kill(int sig)
+{
+  pthread_kill(__thread_id, sig);
 }
 
 

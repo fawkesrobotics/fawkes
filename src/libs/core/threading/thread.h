@@ -78,6 +78,7 @@ class Thread {
   void cancel();
   void join();
   void detach();
+  void kill(int sig);
 
   bool operator==(const Thread &thread);
 
