@@ -53,11 +53,6 @@ namespace Gtk
   class RadioButtonGroup;
   class RadioButton;
   class CheckButton;
-   // {
-    //public:
-   // };
-
-  //typedef RadioButton::Group;
   class EntryCompletion;
   class Window;
   class VBox;
@@ -105,7 +100,7 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::RadioButton* navigator_control_radio;
     Gtk::RadioButton* motor_control_radio;
     Gtk::RadioButton* behold_radio;
-    
+
     Gtk::CheckButton* obstacle_check;
 
     Gtk::RadioButton* rpm_radio;
@@ -173,8 +168,6 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     NPoint cursor_point;
     double odometry_orientation;
     double robot_orientation;
-    bool rotate;
-    int old_x_coordinate;
 
     LockList<NPoint*> points;
     LockList<NLine*> lines;
@@ -193,7 +186,11 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
 
     FawkesNetworkClient *net_client;
     void deregistered() throw();
-    void inbound_received(FawkesNetworkMessage *m) throw();
+    void inbound_received(FawkesNetworkMessage *msg) throw();
+    void process_navigator_message(FawkesNetworkMessage *msg) throw();
+    void process_pluginmanager_message(FawkesNetworkMessage *msg) throw();
+    bool navigator_loaded;
+    
     void connection_established() throw();
     void connection_died() throw();
 

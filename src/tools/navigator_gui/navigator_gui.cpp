@@ -31,6 +31,8 @@
 #include <plugins/navigator/libnavi/npoint.h>
 #include <plugins/navigator/libnavi/obstacle.h>
 
+#include <mainapp/plugin_messages.h>
+#include <mainapp/plugin_list_message.h>
 #include <utils/system/argparser.h>
 #include <netcomm/socket/socket.h>
 #include <netcomm/fawkes/client.h>
@@ -146,6 +148,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   navigator_control = false;
   motor_control = false;
   cursor_over_area = false;
+  navigator_loaded = false;
 
   zooming_adjustment = new Gtk::Adjustment(0.0, 0.0, 100.0);
   zooming_HScale = new Gtk::HScale(*zooming_adjustment);
@@ -307,11 +310,9 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   odometry_point.y = 0.;
   ball_point.x = 1000000.;
   ball_point.y = 1000000.;
-  old_x_coordinate = 0;
 
   odometry_orientation = 0.;
   robot_orientation = 1.6;
-  rotate = false;
   velocity = 0;
 
   set_events(Gdk::BUTTON_PRESS_MASK);
@@ -338,18 +339,25 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
 
 
   net_client->register_handler(this, FAWKES_CID_NAVIGATOR_PLUGIN);
+  net_client->register_handler(this, FAWKES_CID_PLUGINMANAGER);
 
-  navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
-
-  sub_msg->sub_type_points_and_lines = 1;
-  sub_msg->sub_type_odometry = 1;
-
-  FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
-
-  net_client->enqueue(msg);
-
-  msg->unref();
-
+  FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+                               MSG_PLUGIN_SUBSCRIBE_WATCH);
+  net_client->enqueue(msg1);
+  msg1->unref();
+  FawkesNetworkMessage *msg2 = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+                               MSG_PLUGIN_LIST_LOADED);
+  net_client->enqueue(msg2);
+  msg2->unref();
+  /*
+    navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
+    sub_msg->sub_type_points_and_lines = 1;
+    sub_msg->sub_type_odometry = 1;
+    FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN,
+                                NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
+    net_client->enqueue(msg);
+    msg->unref();
+  */
   win->show_all_children();
 
   Gtk::Main::run(*win);
@@ -421,6 +429,7 @@ void
 NavigatorGUI::connection_died() throw()
 {
   printf("Connection died\n");
+  // exit(0);
 }
 
 
@@ -430,10 +439,36 @@ NavigatorGUI::connection_died() throw()
 void
 NavigatorGUI::inbound_received(FawkesNetworkMessage *msg) throw()
 {
-  // std::cerr << "received anything of type " << msg->msgid() << std::endl;
-  if (NAVIGATOR_MSGTYPE_NODES == msg->msgid() )
+  if(msg->cid() == FAWKES_CID_NAVIGATOR_PLUGIN)
+    {
+      process_navigator_message(msg);
+    }
+  else if(msg->cid() == FAWKES_CID_PLUGINMANAGER)
+    {
+      process_pluginmanager_message(msg);
+    }
+}
+
+/** Process messages from the navigator.
+ * @param m message
+ */
+void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
+{
+  if(msg->msgid() == NAVIGATOR_MSGTYPE_CONTROL_SUBERR)
+    {
+      std::cerr << "Error: Subscribing failed.\nMaybe there is already a controlling tool subscribed." << std::endl;
+      navigator_control = false;
+      motor_control = false;
+      behold_radio->set_active();
+      control_button->set_label("Start Control");
+    }
+  else if (NAVIGATOR_MSGTYPE_NODES == msg->msgid() )
     {
       NavigatorNodesListMessage *nodes_msg = msg->msgc<NavigatorNodesListMessage>();
+      if ( ! nodes_msg )
+        {
+          printf("Invalid nodes message received\n");
+        }
 
       points.lock();
 
@@ -602,13 +637,77 @@ NavigatorGUI::inbound_received(FawkesNetworkMessage *msg) throw()
       ball_point.y = -ball_msg->x * zoom_factor;
       ball_point_mutex->unlock();
     }
-  else if(msg->msgid() == NAVIGATOR_MSGTYPE_CONTROL_SUBERR)
+}
+
+
+/** Process messages from the plugin manager.
+ * @param m message
+ */
+void NavigatorGUI::process_pluginmanager_message(FawkesNetworkMessage *msg) throw()
+{
+  if(msg->msgid() == MSG_PLUGIN_UNLOADED)
     {
-      std::cerr << "Error: Subscribing failed.\nMaybe there is already a controlling tool subscribed." << std::endl;
-      navigator_control = false;
-      motor_control = false;
-      behold_radio->set_active();
-      control_button->set_label("Start Control");
+      std::cerr << "Received unload message." << std::endl;
+      plugin_unloaded_msg_t *u = (plugin_unloaded_msg_t *)msg->payload();
+
+      if(strncmp("navigator", u->name, PLUGIN_MSG_NAME_LENGTH) == 0)
+        {
+          std::cerr << "Plugin " << u->name << " unloaded." << std::endl;
+          navigator_control = false;
+          motor_control = false;
+          behold_radio->set_active();
+          control_button->set_label("Start Control");
+          navigator_loaded = false;
+        }
+    }
+  else if(msg->msgid() == MSG_PLUGIN_LOADED)
+    {
+      std::cerr << "Received load message." << std::endl;
+      plugin_loaded_msg_t *lm= (plugin_loaded_msg_t *)msg->payload();
+      if ( strncmp("navigator", lm->name, PLUGIN_MSG_NAME_LENGTH) == 0 )
+        {
+          std::cerr << "Navigator plugin loaded." << std::endl;
+
+          navigator_loaded = true;
+          navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
+          sub_msg->sub_type_points_and_lines = 1;
+          sub_msg->sub_type_odometry = 1;
+          FawkesNetworkMessage *smsg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN,
+                                       NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
+          net_client->enqueue(smsg);
+          smsg->unref();
+        }
+    }
+  else if (msg->msgid() == MSG_PLUGIN_LOADED_LIST )
+    {
+      std::cerr << "Received plugin list." << std::endl;
+      PluginListMessage *plm = msg->msgc<PluginListMessage>();
+      if ( plm->has_next() )
+        {
+          while ( plm->has_next() )
+            {
+              char *p = plm->next();
+              if(strcmp(p, "navigator") == 0)
+                {
+                  std::cerr << "Navigator plugin loaded." << std::endl;
+
+                  navigator_loaded = true;
+                  navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
+                  sub_msg->sub_type_points_and_lines = 1;
+                  sub_msg->sub_type_odometry = 1;
+                  FawkesNetworkMessage *smsg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN,
+                                               NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
+                  net_client->enqueue(smsg);
+                  smsg->unref();
+                }
+              free(p);
+            }
+        }
+      else
+        {
+          std::cerr << "Navigator plugin is not loaded." << std::endl;
+        }
+      delete plm;
     }
 }
 
@@ -816,6 +915,11 @@ bool NavigatorGUI::on_idle()
     {
       reset_odometry_button->set_sensitive(true);
     }
+
+  if(!navigator_loaded)
+    {
+      behold_radio->set_active();
+    }
   usleep(10000);
 
   queue_draw();
@@ -903,76 +1007,86 @@ void NavigatorGUI::on_reset_odometry_button_clicked()
 
 void NavigatorGUI::on_navigator_control_radio_clicked()
 {
-  std::cout << "navigator radio" << std::endl;
-  navigator_control = true;
-  if(motor_control)
+  if(navigator_loaded)
     {
-      navigator_unsubscribe_message_t *unsub_msg = (navigator_unsubscribe_message_t *)calloc(1, sizeof(navigator_unsubscribe_message_t));
-      unsub_msg->unsub_type_motor_control = 1;
-      FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_UNSUBSCRIBE, unsub_msg, sizeof(navigator_unsubscribe_message_t));
+      std::cout << "navigator radio" << std::endl;
+      navigator_control = true;
+      if(motor_control)
+        {
+          navigator_unsubscribe_message_t *unsub_msg = (navigator_unsubscribe_message_t *)calloc(1, sizeof(navigator_unsubscribe_message_t));
+          unsub_msg->unsub_type_motor_control = 1;
+          FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_UNSUBSCRIBE, unsub_msg, sizeof(navigator_unsubscribe_message_t));
+          net_client->enqueue(msg1);
+          msg1->unref();
+        }
+      motor_control = false;
+
+      navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
+      sub_msg->sub_type_navigator_control = 1;
+      FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
       net_client->enqueue(msg1);
       msg1->unref();
+
+      send_stop();
+
+      target_point_mutex->lock();
+      target_point.x = 0.;
+      target_point.y = 0.;
+      target_point_mutex->unlock();
     }
-  motor_control = false;
-
-  navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
-  sub_msg->sub_type_navigator_control = 1;
-  FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
-  net_client->enqueue(msg1);
-  msg1->unref();
-
-  send_stop();
-
-  target_point_mutex->lock();
-  target_point.x = 0.;
-  target_point.y = 0.;
-  target_point_mutex->unlock();
 }
 
 
 void NavigatorGUI::on_motor_control_radio_clicked()
 {
-  std::cout << "motor radio" << std::endl;
-  motor_control = true;
-  if(navigator_control)
+  if(navigator_loaded)
     {
-      navigator_unsubscribe_message_t *unsub_msg = (navigator_unsubscribe_message_t *)calloc(1, sizeof(navigator_unsubscribe_message_t));
-      unsub_msg->unsub_type_navigator_control = 1;
-      FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_UNSUBSCRIBE, unsub_msg, sizeof(navigator_unsubscribe_message_t));
+      std::cout << "motor radio" << std::endl;
+      motor_control = true;
+      if(navigator_control)
+        {
+          navigator_unsubscribe_message_t *unsub_msg = (navigator_unsubscribe_message_t *)calloc(1, sizeof(navigator_unsubscribe_message_t));
+          unsub_msg->unsub_type_navigator_control = 1;
+          FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_UNSUBSCRIBE, unsub_msg, sizeof(navigator_unsubscribe_message_t));
+          net_client->enqueue(msg1);
+          msg1->unref();
+        }
+      navigator_control = false;
+
+      navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
+      sub_msg->sub_type_motor_control = 1;
+      FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
       net_client->enqueue(msg1);
       msg1->unref();
+      send_stop();
     }
-  navigator_control = false;
-
-  navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
-  sub_msg->sub_type_motor_control = 1;
-  FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
-  net_client->enqueue(msg1);
-  msg1->unref();
-  send_stop();
 }
 
 
 void NavigatorGUI::on_behold_radio_clicked()
 {
-  std::cout << "behold radio" << std::endl;
-  send_stop();
-  if(motor_control)
+  std::cout << "behold radio;  navigator: " << navigator_control << "; motor: " << motor_control<< std::endl;
+  if(navigator_loaded)
     {
-      navigator_unsubscribe_message_t *unsub_msg = (navigator_unsubscribe_message_t *)calloc(1, sizeof(navigator_unsubscribe_message_t));
-      unsub_msg->unsub_type_motor_control = 1;
-      FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_UNSUBSCRIBE, unsub_msg, sizeof(navigator_unsubscribe_message_t));
-      net_client->enqueue(msg1);
-      msg1->unref();
-      std::cout << "unsubscribe motor" << std::endl;
-    }
-  else if(navigator_control)
-    {
-      navigator_unsubscribe_message_t *unsub_msg = (navigator_unsubscribe_message_t *)calloc(1, sizeof(navigator_unsubscribe_message_t));
-      unsub_msg->unsub_type_navigator_control = 1;
-      FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_UNSUBSCRIBE, unsub_msg, sizeof(navigator_unsubscribe_message_t));
-      net_client->enqueue(msg1);
-      msg1->unref();
+      send_stop();
+      if(motor_control)
+        {
+          navigator_unsubscribe_message_t *unsub_msg = (navigator_unsubscribe_message_t *)calloc(1, sizeof(navigator_unsubscribe_message_t));
+          unsub_msg->unsub_type_motor_control = 1;
+          FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_UNSUBSCRIBE, unsub_msg, sizeof(navigator_unsubscribe_message_t));
+          net_client->enqueue(msg1);
+          msg1->unref();
+          std::cout << "unsubscribe motor" << std::endl;
+        }
+      else if(navigator_control)
+        {
+          navigator_unsubscribe_message_t *unsub_msg = (navigator_unsubscribe_message_t *)calloc(1, sizeof(navigator_unsubscribe_message_t));
+          unsub_msg->unsub_type_navigator_control = 1;
+          FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_UNSUBSCRIBE, unsub_msg, sizeof(navigator_unsubscribe_message_t));
+          net_client->enqueue(msg1);
+          msg1->unref();
+          std::cout << "unsubscribe navigator" << std::endl;
+        }
     }
   motor_control = false;
   navigator_control = false;
@@ -988,8 +1102,6 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
       if(event->button == 2)
         {
           //std::cout << "pressed right" << std::endl;
-          //rotate = true;
-          //old_x_coordinate = (int)event->x;
           if(obstacle_check->get_active())
             {
               Gtk::Allocation allocation = get_allocation();
@@ -1053,22 +1165,11 @@ bool NavigatorGUI::on_button_release_event(GdkEventButton* event)
 {
   std::cout << "button release" << std::endl;
 
-  if(navigator_control && event->button == 3)
-    {
-      rotate = false;
-    }
-
   return true;
 }
 
 bool NavigatorGUI::on_motion_notify_event(GdkEventMotion* event)
 {
-
-  if(rotate)
-    {
-      robot_orientation += (event->x - old_x_coordinate) / 150;
-      old_x_coordinate = (int)event->x;
-    }
 
   Gtk::Allocation allocation = get_allocation();
 
@@ -1362,10 +1463,10 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
             {
               obstacle2_radius = ob2->width / 2.;
             }
-/*
-          std::cout << "obstacle1_radius " << obstacle1_radius << std::endl;
-          std::cout << "obstacle2_radius " << obstacle2_radius << std::endl;
-*/
+          /*
+                    std::cout << "obstacle1_radius " << obstacle1_radius << std::endl;
+                    std::cout << "obstacle2_radius " << obstacle2_radius << std::endl;
+          */
           double robot_width = 0.5;
 
           gdouble x1 = (*iterator)->p1->x;
@@ -1440,7 +1541,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
                               middle_y + vector_y * (vector_length + vector_add));
             }
 
-        //  std::cout << "distance " << distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) << std::endl;
+          //  std::cout << "distance " << distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) << std::endl;
 
           context->set_source_rgb(1.0, 0.0, 0.0);
           context->arc(next_point1->x * zoom_factor, next_point1->y * zoom_factor, 5, 0.0, 2.0 * M_PI);

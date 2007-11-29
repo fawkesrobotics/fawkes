@@ -28,7 +28,7 @@ include $(BASEDIR)/src/plugins/navigator/navigator.mk
 CFLAGS  += $(CFLAGS_GTKMM)
 LDFLAGS += $(LDFLAGS_GTKMM)
 
-LIBS_navigator_gui = core utils netcomm navigator
+LIBS_navigator_gui = core utils netcomm navigator fawkesmainappmsgs
 OBJS_navigator_gui = navigator_gui.o
 
 OBJS_all = $(OBJS_navigator_gui)
