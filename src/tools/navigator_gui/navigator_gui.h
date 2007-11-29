@@ -168,6 +168,7 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     NPoint cursor_point;
     double odometry_orientation;
     double robot_orientation;
+    double odometry_direction;
 
     LockList<NPoint*> points;
     LockList<NLine*> lines;

@@ -125,7 +125,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   orbit_radio = new Gtk::RadioButton("Orbit");
   navigator_radio = new Gtk::RadioButton("Navigator");
 
-  obstacle_check = new Gtk::CheckButton("simulate Obstacles");
+  obstacle_check = new Gtk::CheckButton("add Obstacles");
 
   right_rpm_label = new Gtk::Label("Right");
   left_rpm_label = new Gtk::Label("Left");
@@ -251,13 +251,14 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
 
   navigator_label_box->add(*navigator_alignment);
   navigator_label_box->add(*navigator_velocity_entry);
+  navigator_label_box->add(*obstacle_check);
 
   rpm_frame->add(*rpm_entry_box);
   velocity_frame->add(*velocity_entry_box);
   orbit_frame->add(*orbit_label_box);
   navigator_frame->add(*navigator_label_box);
 
-  bbox_left->pack_start(*obstacle_check, Gtk::PACK_SHRINK, 4);
+  // bbox_left->pack_start(*obstacle_check, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*rpm_frame, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*velocity_frame, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*orbit_frame, Gtk::PACK_SHRINK, 4);
@@ -311,6 +312,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   ball_point.x = 1000000.;
   ball_point.y = 1000000.;
 
+  odometry_direction = 0.;
   odometry_orientation = 0.;
   robot_orientation = 1.6;
   velocity = 0;
@@ -618,19 +620,23 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
   else if (NAVIGATOR_MSGTYPE_ODOMETRY == msg->msgid())
     {
       navigator_odometry_message_t *odometry_msg =  (navigator_odometry_message_t *)msg->payload();
+
       odometry_point_mutex->lock();
       odometry_point.x = -odometry_msg->position_y * zoom_factor;
       odometry_point.y = -odometry_msg->position_x * zoom_factor;
+      if(odometry_msg->velocity_y == 0. && odometry_msg->velocity_x == 0.)
+        {
+          odometry_direction = 0.;
+        }
+      else
+        {
+          odometry_direction = -atan2(odometry_msg->velocity_y, odometry_msg->velocity_x);
+        }
       odometry_point_mutex->unlock();
-      //    odometry_orientation_mutex->lock();
-      //  odometry_orientation = odometry_msg->orientation;
-      //   odometry_orientation_mutex->unlock();
-      //      std::cout << "odometry orientation " << odometry_msg->orientation << std::endl;
-      //      std::cout << "odometry " << odometry_point.x << ", " << odometry_point.y << std::endl;
-      // 	  std::cout << "odometry length " << odometry_msg->path_length << std::endl;
     }
   else if (NAVIGATOR_MSGTYPE_BALL == msg->msgid())
     {
+      std::cout << "Received a ball message." << std::endl;
       navigator_ball_message_t *ball_msg =  (navigator_ball_message_t *)msg->payload();
       ball_point_mutex->lock();
       ball_point.x = -ball_msg->y * zoom_factor;
@@ -1105,7 +1111,7 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
           if(obstacle_check->get_active())
             {
               Gtk::Allocation allocation = get_allocation();
-              std::cout << "simulate obstacles" << std::endl;
+              std::cout << "add obstacles" << std::endl;
               navigator_obstacle_msg_t *obstacle_msg= (navigator_obstacle_msg_t *)malloc(sizeof(navigator_obstacle_msg_t));
 
               obstacle_msg->x = (float) -(event->y - allocation.get_height() / 2) / zoom_factor;
@@ -1236,7 +1242,6 @@ void NavigatorGUI::send_stop()
 bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
 {
   Glib::RefPtr<Gdk::Window> window = get_window();
-
   if(window)
     {
       Cairo::RefPtr<Cairo::Context> context = window->create_cairo_context();
@@ -1418,28 +1423,28 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       context->fill_preserve();
       context->stroke();
 
-      //draw the odometry point
-      context->save();
-      context->set_source_rgb(0.0, 0.0, 1.0);
       odometry_point_mutex->lock();
+      context->save();
+      //draw the odometry point
+      context->set_source_rgb(0.0, 0.0, 1.0);
+      //   odometry_point_mutex->lock();
       context->arc(odometry_point.x, odometry_point.y, point_radius, 0.0, 2.0 * M_PI);
-      odometry_point_mutex->unlock();
+      //    odometry_point_mutex->unlock();
       context->fill_preserve();
       context->stroke();
 
       //draw the odometry orientation
       context->set_line_width(2.5);
       odometry_orientation_mutex->lock();
-      context->rotate(-odometry_orientation);
+      context->rotate(odometry_direction);
       odometry_orientation_mutex->unlock();
       context->set_line_cap(Cairo::LINE_CAP_ROUND);
       context->move_to(0.,0.);
       context->line_to(0., -40.);
       context->stroke();
 
-      //   context->rotate(robot_orientation);
-
       context->restore();
+      odometry_point_mutex->unlock();
 
       //Debug pathfinder
       lines.lock();

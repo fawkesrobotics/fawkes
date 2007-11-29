@@ -136,6 +136,9 @@ typedef struct {
   float rpm_left; /**< The RPM of the left front wheel of the robot. */
   float rpm_rear; /**< The RPM of the rear wheel of the robot. */
   float rpm_right; /**< The RPM of the right front wheel of the robot. */
+  float velocity_x; /**< The velocity towards x. */
+  float velocity_y; /**< The velocity towards y. */
+  float velocity_rotation; /**< the velocity of the rotation. */
 } navigator_odometry_message_t;
 
 /** The message type to set a target to the navigator.

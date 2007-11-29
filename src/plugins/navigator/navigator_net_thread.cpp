@@ -523,6 +523,10 @@ NavigatorNetworkThread::loop()
       odometry_msg->rpm_left = motor_interface->left_rpm();
       odometry_msg->rpm_rear = motor_interface->rear_rpm();
       odometry_msg->rpm_right = motor_interface->right_rpm();
+      odometry_msg->velocity_x = motor_interface->vx();
+      odometry_msg->velocity_y = motor_interface->vy();
+      odometry_msg->velocity_rotation = motor_interface->omega();
+      
 
       fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_ODOMETRY, odometry_msg, sizeof(navigator_odometry_message_t));
     }

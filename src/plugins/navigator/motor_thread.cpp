@@ -454,7 +454,7 @@ MotorThread::loop()
       motor_interface->msgq_pop();
     }
 
-  //  motor_interface->read();
+ // motor_interface->read();
 
   if(motor_interface->drive_mode() == MotorInterface::DRIVE_MODE_ORBIT)
     {
@@ -550,7 +550,7 @@ MotorThread::loop()
   //                   " old_alpha : %f, old_beta: %f, old_gamma: %f",
   //                   alpha, beta, gamma, rotation,
   //                   old_alpha, old_beta, old_gamma );
-
+/*
   //for saving too much logging
   if ( (alpha != old_alpha) || (beta != old_beta) || (gamma != old_gamma) )
     {
@@ -563,7 +563,7 @@ MotorThread::loop()
       old_beta  = beta;
       old_gamma = gamma;
     }
-
+*/
   /*
     logger->log_info("MotorThread", "RPM1: %f  RPM2: %f  RPM3: %f ", 
     apiObject->useVMC().Motor[0].ActualRPM.getValue(),
@@ -597,10 +597,10 @@ MotorThread::loop()
 
       /*
        * At 2147483647.0 and -2147483647.0 there can happen an overflow.
-       * But this will only happen if the robot drive about 1,000 km.
+       * But this will only happen if the robot drives about 1,000 km.
        * So, we don't care, because the AbsolutRotations will be reset to 0 at every switching off.
        */
-       
+
       last_alpha_rotations += alpha_;
       last_beta_rotations += beta_;
       last_gamma_rotations += gamma_;
