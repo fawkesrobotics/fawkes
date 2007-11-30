@@ -29,6 +29,7 @@
 
 #include <cams/camera.h>
 #include <fvutils/ipc/shm_image.h>
+#include <utils/time/tracker.h>
 
 /** @class FvRetrieverThread <apps/retriever/retriever_thread.h>
  * FireVision retriever thread.
@@ -73,6 +74,12 @@ FvRetrieverThread::init()
     cam = NULL;
     throw;
   }
+
+  __tt = new TimeTracker();
+  __ttc_capture = __tt->add_class("Capture");
+  __ttc_memcpy  = __tt->add_class("Memcpy");
+  __ttc_dispose = __tt->add_class("Dispose");
+  __loop_count  = 0;
 }
 
 
@@ -95,8 +102,17 @@ FvRetrieverThread::loop()
 		    " (cam buffer size: %lu, shm buffer size: %lu)",
 		    cam->buffer_size(), shm->data_size());
   */
+  __tt->ping_start(__ttc_capture);
   cam->capture();
+  __tt->ping_end(__ttc_capture);
+  __tt->ping_start(__ttc_memcpy);
   memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
+  __tt->ping_end(__ttc_memcpy);
+  __tt->ping_start(__ttc_dispose);
   cam->dispose_buffer();
+  __tt->ping_end(__ttc_dispose);
+  if ( (++__loop_count % 200) == 0 ) {
+    __tt->print_to_stdout();
+  }
   //logger->log_debug(name(), "DONE");
 }
