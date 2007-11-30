@@ -541,17 +541,11 @@ SharedMemory::attach()
 	}
       }
     }
-    if (_memptr == NULL) {
-      throw ShmCouldNotAttachException("Could not attach, memptr still NULL");
-    }
   }
 
-  /*
-    printf("__shared_mem=0x%lX  _memptr=0x%lX  _mem_size=%lu  _data_size=%lu  m-s=%lu  ms-ds=%lu\n",
-           (size_t)__shared_mem, (size_t)_memptr, _mem_size, _data_size,
-           (size_t)_memptr - (size_t)__shared_mem, _mem_size - _data_size);
-  */
-
+  if (_memptr == NULL) {
+    throw ShmCouldNotAttachException("Could not attach to shared memory segment");
+  }
 }
 
 
@@ -767,6 +761,7 @@ void
 SharedMemory::add_semaphore()
 {
   if (__semset != NULL)  return;
+  if (_memptr == NULL) throw Exception("Cannot add semaphore if not attached");
 
   if ( _shm_header->semaphore != 0 ) {
     // a semaphore has been created but not been opened
@@ -775,13 +770,19 @@ SharedMemory::add_semaphore()
 				 /* create      */ false,
 				 /* dest on del */ false );
   } else {
-    __semset = new SemaphoreSet( /* num sems    */ 2,
-				 /* dest on del */ true );
-    // one and only one (writer) may lock the memory
-    __semset->unlock(WRITE_MUTEX_SEM);
-    // up to MaxNumConcurrentReaders readers can lock the memory
-    __semset->set_value(READ_SEM, MaxNumConcurrentReaders);
-    _shm_header->semaphore = __semset->key();
+    // no semaphore exist, create one, but only if shmem is not
+    // opened read-only!
+    if ( ! _is_read_only) {
+      __semset = new SemaphoreSet( /* num sems    */ 2,
+				   /* dest on del */ true );
+      // one and only one (writer) may lock the memory
+      __semset->unlock(WRITE_MUTEX_SEM);
+      // up to MaxNumConcurrentReaders readers can lock the memory
+      __semset->set_value(READ_SEM, MaxNumConcurrentReaders);
+      _shm_header->semaphore = __semset->key();
+    } else {
+      throw Exception("Cannot create semaphore for read-only shmem segment");
+    }
   }
 }
 
