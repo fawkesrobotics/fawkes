@@ -60,9 +60,13 @@ SharedMemoryImageBuffer::SharedMemoryImageBuffer(const char *image_id,
 						 colorspace_t cspace,
 						 unsigned int width,
 						 unsigned int height)
-  : SharedMemory(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, false, true, true)
+  : SharedMemory(FIREVISION_SHM_IMAGE_MAGIC_TOKEN,
+		 /* read-only */ false,
+		 /* create */ true,
+		 /* destroy on delete */ true)
 {
   constructor(image_id, cspace, width, height, false);
+  add_semaphore();
 }
 
 
@@ -77,7 +81,7 @@ SharedMemoryImageBuffer::SharedMemoryImageBuffer(const char *image_id,
  * @param is_read_only true to open image read-only
  */
 SharedMemoryImageBuffer::SharedMemoryImageBuffer(const char *image_id, bool is_read_only)
-  : SharedMemory(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, is_read_only, false, false)
+  : SharedMemory(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, is_read_only, /* create */ false, /* destroy */ false)
 {
   constructor(image_id, CS_UNKNOWN, 0, 0, is_read_only);
 }
@@ -97,17 +101,16 @@ SharedMemoryImageBuffer::constructor(const char *image_id, colorspace_t cspace,
 
   priv_header = new SharedMemoryImageBufferHeader(_image_id, _colorspace, width, height);
   _header = priv_header;
-  attach();
-  add_semaphore();
-  raw_header = priv_header->raw_header();
-
-  if (_memptr == NULL) {
+  try {
+    attach();
+    raw_header = priv_header->raw_header();
+  } catch (Exception &e) {
+    e.append("SharedMemoryImageBuffer: could not attach to '%s'\n", image_id);
     ::free(_image_id);
     _image_id = NULL;
     delete priv_header;
-    throw Exception("Could not create shared memory segment");
+    throw;
   }
-
 }
 
 
