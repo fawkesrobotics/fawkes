@@ -35,6 +35,7 @@
 #include <utils/system/argparser.h>
 #include <utils/system/hostinfo.h>
 #include <utils/time/clock.h>
+#include <utils/time/wait.h>
 
 #include <blackboard/blackboard.h>
 #include <mainapp/thread_inifin.h>
@@ -165,6 +166,16 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 
   plugin_manager->set_hub( network_manager->hub() );
   config_manager->set_hub( network_manager->hub() );
+
+  __time_wait = NULL;
+  try {
+    unsigned int min_loop_time = config->get_uint("/fawkes/mainapp/min_loop_time");
+    if ( min_loop_time > 0 ) {
+      __time_wait = new TimeWait(clock, min_loop_time);
+    }
+  } catch (Exception &e) {
+    multi_logger->log_info("FawkesMainApp", "Minimum loop time not set, assuming 0");
+  }
 }
 
 
@@ -227,6 +238,10 @@ FawkesMainThread::once()
 void
 FawkesMainThread::loop()
 {
+  if ( __time_wait ) {
+    __time_wait->mark_start();
+  }
+
   thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
   thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
 
@@ -251,5 +266,10 @@ FawkesMainThread::loop()
   network_manager->process();
 
   test_cancel();
-  usleep(0);
+
+  if ( __time_wait ) {
+    __time_wait->wait();
+  } else {
+    usleep(0);
+  }
 }

@@ -41,6 +41,7 @@ class Configuration;
 class MultiLogger;
 class HostInfo;
 class Clock;
+class TimeWait;
 
 class FawkesMainThread : public Thread
 {
@@ -65,7 +66,8 @@ class FawkesMainThread : public Thread
   FawkesConfigManager        *config_manager;
   MultiLogger                *multi_logger;
   Clock                      *clock;
-        
+  TimeWait                   *__time_wait;
+
   char *config_mutable_file;
   const char *config_default_file;
 };
