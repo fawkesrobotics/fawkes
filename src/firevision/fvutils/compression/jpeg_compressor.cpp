@@ -186,10 +186,12 @@ fv_jpeg_memory_source_setup(j_decompress_ptr cinfo, unsigned char *ptr, size_t s
 
 
 /** Constructor.
+ * @param quality JPEG quality in percent
  * @param jcs Jpeg colorspace
  */
-JpegImageCompressor::JpegImageCompressor(JpegColorspace jcs)
+JpegImageCompressor::JpegImageCompressor(unsigned int quality, JpegColorspace jcs)
 {
+  this->quality = quality;
   jpeg_cs = jcs;
 }
 

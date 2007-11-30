@@ -184,7 +184,7 @@ JpegImageDecompressor::decompress()
 //   fclose(imagefile);
 
   // convert to yuv422packed and store in member frame_buffer
-  convert(RGB, YUV422_PLANAR, buffer, _decompressed_buffer, _width, _height);
+  convert(RGB, YUV422_PLANAR, buffer, _decompressed_buffer, cinfo.output_width, cinfo.output_height);
 
   free(buffer);
 

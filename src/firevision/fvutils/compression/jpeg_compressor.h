@@ -39,7 +39,7 @@ class JpegImageCompressor : public ImageCompressor {
     JPEG_CS_YUV		/**< YUV444 packed */
   };
 
-  JpegImageCompressor(JpegColorspace jcs = JPEG_CS_RGB);
+  JpegImageCompressor(unsigned int quality = 80, JpegColorspace jcs = JPEG_CS_RGB);
   virtual ~JpegImageCompressor();
 
   virtual void          set_image_dimensions(unsigned int width, unsigned int height);
