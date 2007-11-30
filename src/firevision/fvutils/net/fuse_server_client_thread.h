@@ -39,6 +39,7 @@ class FuseNetworkMessageQueue;
 class FuseNetworkMessage;
 class SharedMemoryImageBuffer;
 class SharedMemoryLookupTable;
+class JpegImageCompressor;
 
 class FuseServerClientThread : public Thread
 {
@@ -65,6 +66,8 @@ class FuseServerClientThread : public Thread
 
   FuseNetworkMessageQueue *__outbound_queue;
   FuseNetworkMessageQueue *__inbound_queue;
+
+  JpegImageCompressor *__jpeg_compressor;
 
   std::map< std::string, SharedMemoryImageBuffer * >  __buffers;
   std::map< std::string, SharedMemoryImageBuffer * >::iterator  __bit;

@@ -35,6 +35,8 @@
 
 /* Present this e-a-s-t-e-r e-g-g to Tim and get one package of Maoam! */
 
+#pragma pack(push,4)
+
 /** FUSE version enum. */
 typedef enum {
   FUSE_VERSION_1 = 1,	/**< Version 1 */
@@ -133,7 +135,9 @@ typedef struct {
 
 typedef struct {
   char image_id[IMAGE_ID_MAX_LENGTH];	/**< image ID */
-} FUSE_imagedesc_message_t;
+  uint32_t format   : 8;		/**< requested image format, see FUSE_image_format_t */
+  uint32_t reserved : 24;		/**< reserved for future use */
+} FUSE_imagereq_message_t;
 
 typedef struct {
   char lut_id[LUT_ID_MAX_LENGTH];	/**< LUT ID */
@@ -165,4 +169,5 @@ typedef struct {
   dynamic_list_t lut_list;	/**< DynamicBuffer holding a list of FUSE_lutinfo_t */
 } FUSE_lutlist_message_t;
 
+#pragma pack(pop)
 #endif

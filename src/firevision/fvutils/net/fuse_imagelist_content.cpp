@@ -97,10 +97,10 @@ FuseImageListContent::add_imageinfo(const char *image_id, colorspace_t colorspac
   memset(&imageinfo, 0, sizeof(imageinfo));
 
   strncpy(imageinfo.image_id, image_id, IMAGE_ID_MAX_LENGTH);
-  imageinfo.colorspace = colorspace;
-  imageinfo.width = pixel_width;
-  imageinfo.height = pixel_height;
-  imageinfo.buffer_size = colorspace_buffer_size(colorspace, pixel_width, pixel_height);
+  imageinfo.colorspace = htons(colorspace);
+  imageinfo.width = htonl(pixel_width);
+  imageinfo.height = htonl(pixel_height);
+  imageinfo.buffer_size = htonl(colorspace_buffer_size(colorspace, pixel_width, pixel_height));
 
   __list->append(&imageinfo, sizeof(imageinfo));
 }

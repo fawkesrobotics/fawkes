@@ -93,9 +93,9 @@ FuseLutListContent::add_lutinfo(const char *lut_id,
   memset(&lutinfo, 0, sizeof(lutinfo));
 
   strncpy(lutinfo.lut_id, lut_id, LUT_ID_MAX_LENGTH);
-  lutinfo.width = width;
-  lutinfo.height = height;
-  lutinfo.bytes_per_cell = bytes_per_cell;
+  lutinfo.width = ntohl(width);
+  lutinfo.height = ntohl(height);
+  lutinfo.bytes_per_cell = ntohl(bytes_per_cell);
 
   __list->append(&lutinfo, sizeof(lutinfo));
 }

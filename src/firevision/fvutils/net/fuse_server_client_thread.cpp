@@ -37,6 +37,7 @@
 #include <fvutils/net/fuse_lutlist_content.h>
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/ipc/shm_lut.h>
+#include <fvutils/compression/jpeg_compressor.h>
 
 #include <core/exceptions/system.h>
 #include <netcomm/socket/stream.h>
@@ -62,6 +63,7 @@ FuseServerClientThread::FuseServerClientThread(FuseServer *fuse_server, StreamSo
 {
   __fuse_server = fuse_server;
   __socket = s;
+  __jpeg_compressor = NULL;
 
   __inbound_queue  = new FuseNetworkMessageQueue();
   __outbound_queue  = new FuseNetworkMessageQueue();
@@ -77,6 +79,7 @@ FuseServerClientThread::FuseServerClientThread(FuseServer *fuse_server, StreamSo
 FuseServerClientThread::~FuseServerClientThread()
 {
   delete __socket;
+  delete __jpeg_compressor;
 
   while ( ! __inbound_queue->empty() ) {
     FuseNetworkMessage *m = __inbound_queue->front();
@@ -146,29 +149,58 @@ FuseServerClientThread::process_greeting_message(FuseNetworkMessage *m)
 void
 FuseServerClientThread::process_getimage_message(FuseNetworkMessage *m)
 {
-  FUSE_imagedesc_message_t *idm = m->msg<FUSE_imagedesc_message_t>();
+  FUSE_imagereq_message_t *irm = m->msg<FUSE_imagereq_message_t>();
 
   char tmp_image_id[IMAGE_ID_MAX_LENGTH + 1];
   tmp_image_id[IMAGE_ID_MAX_LENGTH] = 0;
-  strncpy(tmp_image_id, idm->image_id, IMAGE_ID_MAX_LENGTH);
+  strncpy(tmp_image_id, irm->image_id, IMAGE_ID_MAX_LENGTH);
 
-  if ( (__bit = __buffers.find( tmp_image_id )) != __buffers.end() ) {
-    // the buffer had already be opened
-    FuseImageContent *im = new FuseImageContent((*__bit).second);
-    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
-  } else {
+  if ( (__bit = __buffers.find( tmp_image_id )) == __buffers.end() ) {
+    // the buffer has not yet been opened
     try {
       SharedMemoryImageBuffer *b = new SharedMemoryImageBuffer(tmp_image_id);
       __buffers[tmp_image_id] = b;
-      FuseImageContent *im = new FuseImageContent(b);
-      __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
     } catch (Exception &e) {
-      // could not open the shared memory segment for some reason, send failure
+      // ignored
+    }
+  }
+
+  if ( (__bit = __buffers.find( tmp_image_id )) != __buffers.end() ) {
+    // the buffer had already be opened
+    SharedMemoryImageBuffer *eb = (*__bit).second;
+    if ( irm->format == FUSE_IF_RAW ) {
+      FuseImageContent *im = new FuseImageContent(eb);
+      __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
+    } else if ( irm->format == FUSE_IF_JPEG ) {
+      if ( ! __jpeg_compressor) {
+	__jpeg_compressor = new JpegImageCompressor();
+	__jpeg_compressor->set_compression_destination(ImageCompressor::COMP_DEST_MEM);
+      }
+      eb->lock_for_read();
+      __jpeg_compressor->set_image_dimensions(eb->width(), eb->height());
+      __jpeg_compressor->set_image_buffer(eb->colorspace(), eb->buffer());
+      unsigned char *compressed_buffer = (unsigned char *)malloc(__jpeg_compressor->recommended_compressed_buffer_size());
+      __jpeg_compressor->set_destination_buffer(compressed_buffer, __jpeg_compressor->recommended_compressed_buffer_size());
+      __jpeg_compressor->compress();
+      eb->unlock();
+      size_t compressed_buffer_size = __jpeg_compressor->compressed_size();
+      FuseImageContent *im = new FuseImageContent(FUSE_IF_JPEG, eb->image_id(),
+						  compressed_buffer, compressed_buffer_size,
+						  CS_UNKNOWN, eb->width(), eb->height());
+      __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
+      free(compressed_buffer);
+    } else {
       FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_IMAGE_FAILED,
 						      m->payload(), m->payload_size(),
 						      /* copy payload */ true);
       __outbound_queue->push(nm);
     }
+  } else {
+    // could not open the shared memory segment for some reason, send failure
+    FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_IMAGE_FAILED,
+						    m->payload(), m->payload_size(),
+						    /* copy payload */ true);
+    __outbound_queue->push(nm);
   }
 }
 

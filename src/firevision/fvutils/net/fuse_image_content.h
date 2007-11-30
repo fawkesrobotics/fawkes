@@ -39,6 +39,10 @@ class FuseImageContent : public FuseMessageContent
  public:
   FuseImageContent(SharedMemoryImageBuffer *b);
   FuseImageContent(uint32_t type, void *payload, size_t payload_size);
+  FuseImageContent(FUSE_image_format_t image_format, const char *image_id,
+		   unsigned char *buffer, size_t buffer_size,
+		   colorspace_t colorspace,
+		   unsigned int width, unsigned int height);
 
   unsigned char *  buffer() const;
   size_t           buffer_size() const;
@@ -46,6 +50,7 @@ class FuseImageContent : public FuseMessageContent
   unsigned int     pixel_height() const;
   unsigned int     colorspace() const;
   unsigned int     format() const;
+  void             decompress(unsigned char *yuv422_planar_buffer, size_t buffer_size);
 
   virtual void     serialize();
 
