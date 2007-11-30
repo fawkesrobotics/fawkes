@@ -35,6 +35,7 @@
 #include <fvutils/net/fuse_message.h>
 #include <fvutils/net/fuse_image_content.h>
 #include <fvutils/system/camargp.h>
+#include <fvutils/compression/jpeg_decompressor.h>
 
 #include <cstring>
 
@@ -49,8 +50,11 @@
  * @param host host to connect to
  * @param port port to connect to
  * @param image_id image ID of image to retrieve
+ * @param jpeg if true jpeg images will be transferred and automatically be
+ * decompressed, otherwise raw images are transferred
  */
-NetworkCamera::NetworkCamera(const char *host, unsigned short port, const char *image_id)
+NetworkCamera::NetworkCamera(const char *host, unsigned short port, const char *image_id,
+			     bool jpeg)
 {
   if ( image_id == NULL ) {
     throw NullPointerException("NetworkCamera: image_id must not be NULL");
@@ -61,12 +65,21 @@ NetworkCamera::NetworkCamera(const char *host, unsigned short port, const char *
   __image_id = strdup(image_id);
   __host = strdup(host);
   __port = port;
+  __get_jpeg = jpeg;
 
   __connected       = false;
   __local_version   = 0;
   __remote_version  = 0;
+  __decompressor    = NULL;
+  __decompressed_buffer = NULL;
+  __last_width = 0;
+  __last_height = 0;
+  __fuse_image = NULL;
 
   __fusec = new FuseClient(__host, __port, this);
+  if ( __get_jpeg ) {
+    __decompressor = new JpegImageDecompressor();
+  }
 }
 
 
@@ -75,6 +88,8 @@ NetworkCamera::NetworkCamera(const char *host, unsigned short port, const char *
  * - host=HOST, hostname or IP of host to connect to
  * - port=PORT, port number to connect to
  * - image=ID, image ID of image to retrieve
+ * - jpeg=<true|false>, if true JPEGs are recieved and decompressed otherwise
+ *   raw images will be transferred (raw is the default)
  * @param cap camera argument parser
  */
 NetworkCamera::NetworkCamera(const CameraArgumentParser *cap)
@@ -96,23 +111,36 @@ NetworkCamera::NetworkCamera(const CameraArgumentParser *cap)
     }
     __port = (unsigned int)i;
   } else {
-    __port = 5000;
+    __port = 2208;
   }
+
+  __get_jpeg = ( cap->has("jpeg") && (cap->get("jpeg") == "true"));
 
   __connected       = false;
   __local_version   = 0;
   __remote_version  = 0;
+  __decompressor    = NULL;
+  __decompressed_buffer = NULL;
+  __last_width = 0;
+  __last_height = 0;
+  __fuse_image = NULL;
 
   __fusec = new FuseClient(__host, __port, this);
+  if ( __get_jpeg ) {
+    __decompressor = new JpegImageDecompressor();
+  }
 }
 
 
 /** Destructor. */
 NetworkCamera::~NetworkCamera()
 {
+  close();
   delete __fusec;
   free(__host);
   free(__image_id);
+  if ( __decompressed_buffer != NULL) free(__decompressed_buffer);
+  delete __decompressor;
 }
 
 
@@ -154,15 +182,31 @@ NetworkCamera::capture()
     throw CaptureException("You must dispose the buffer before fetching a new image");
   }
 
-  FUSE_imagedesc_message_t *idm = (FUSE_imagedesc_message_t *)malloc(sizeof(FUSE_imagedesc_message_t));
-  memset(idm, 0, sizeof(FUSE_imagedesc_message_t));
-  strncpy(idm->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
-  __fusec->enqueue(FUSE_MT_GET_IMAGE, idm, sizeof(FUSE_imagedesc_message_t));
+  FUSE_imagereq_message_t *irm = (FUSE_imagereq_message_t *)malloc(sizeof(FUSE_imagereq_message_t));
+  memset(irm, 0, sizeof(FUSE_imagereq_message_t));
+  strncpy(irm->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
+  irm->format = (__get_jpeg ? FUSE_IF_JPEG : FUSE_IF_RAW);
+  __fusec->enqueue(FUSE_MT_GET_IMAGE, irm, sizeof(FUSE_imagereq_message_t));
 
   __fusec->wait();
 
   if ( ! __fuse_image ) {
     throw CaptureException("Fetching the image failed, no image received");
+  }
+
+  if ( __get_jpeg ) {
+    if ( (__fuse_image->pixel_width() != __last_width) ||
+	 (__fuse_image->pixel_height() != __last_height) ) {
+      if (__decompressed_buffer != NULL ) {
+	free(__decompressed_buffer);
+      }
+      size_t buffer_size = colorspace_buffer_size(YUV422_PLANAR, __fuse_image->pixel_width(),
+						  __fuse_image->pixel_height());
+      __decompressed_buffer = (unsigned char *)malloc(buffer_size);
+      __decompressor->set_decompressed_buffer(__decompressed_buffer, buffer_size);
+    }
+    __decompressor->set_compressed_buffer(__fuse_image->buffer(), __fuse_image->buffer_size());
+    __decompressor->decompress();
   }
 }
 
@@ -170,42 +214,57 @@ NetworkCamera::capture()
 unsigned char *
 NetworkCamera::buffer()
 {
-  if ( __fuse_image ) {
-    return __fuse_image->buffer();
+  if (__get_jpeg) {
+    return __decompressed_buffer;
   } else {
+    if ( __fuse_image ) {
+      return __fuse_image->buffer();
+    } else {
     return NULL;
+    }
   }
 }
 
 unsigned int
 NetworkCamera::buffer_size()
 {
-  if (! __fuse_image) {
-    return 0;
+  if ( __get_jpeg ) {
+    return colorspace_buffer_size(YUV422_PLANAR, pixel_width(), pixel_height());
+  } else {
+    if (! __fuse_image) {
+      return 0;
+    } else {
+      return colorspace_buffer_size((colorspace_t)__fuse_image->colorspace(),
+				    __fuse_image->pixel_width(),
+				    __fuse_image->pixel_height());
+    }
   }
-
-  return colorspace_buffer_size((colorspace_t)__fuse_image->colorspace(),
-				__fuse_image->pixel_width(),
-				__fuse_image->pixel_height());
 }
 
 void
 NetworkCamera::close()
 {
-  __fusec->disconnect();
-  __fusec->cancel();
-  __fusec->join();
-  __opened = __started = false;
+  dispose_buffer();
+  if ( __started ) {
+    stop();
+  }
+  if ( __opened ) {
+    __fusec->disconnect();
+    __fusec->cancel();
+    __fusec->join();
+    __opened = false;
+  }
 }
 
 void
 NetworkCamera::dispose_buffer()
 {
+  delete __fuse_image;
+  __fuse_image = NULL;
   if ( __fuse_message ) {
     __fuse_message->unref();
     __fuse_message = NULL;
   }
-  __fuse_image = NULL;
 }
 
 unsigned int
@@ -254,10 +313,14 @@ NetworkCamera::set_image_number(unsigned int n)
 colorspace_t
 NetworkCamera::colorspace()
 {
-  if ( __fuse_image ) {
-    return (colorspace_t)__fuse_image->colorspace();
+  if ( __get_jpeg ) {
+    return YUV422_PLANAR;
   } else {
-    return CS_UNKNOWN;
+    if ( __fuse_image ) {
+      return (colorspace_t)__fuse_image->colorspace();
+    } else {
+      return CS_UNKNOWN;
+    }
   }
 }
 

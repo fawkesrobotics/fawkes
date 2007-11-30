@@ -35,13 +35,15 @@ class CameraArgumentParser;
 class FuseClient;
 class FuseImageContent;
 class FuseNetworkMessage;
+class JpegImageDecompressor;
 
 class NetworkCamera : public Camera, public FuseClientHandler
 {
 
  public:
 
-  NetworkCamera(const char *host, unsigned short port, const char *image_id);
+  NetworkCamera(const char *host, unsigned short port, const char *image_id,
+		bool jpeg = false);
   NetworkCamera(const CameraArgumentParser *cap);
 
   virtual ~NetworkCamera();
@@ -81,6 +83,12 @@ class NetworkCamera : public Camera, public FuseClientHandler
   char               *__host;
   unsigned short      __port;
   char               *__image_id;
+
+  bool __get_jpeg;
+  JpegImageDecompressor *__decompressor;
+  unsigned char      *__decompressed_buffer;
+  unsigned int        __last_width;
+  unsigned int        __last_height;
 
   FuseClient         *__fusec;
   FuseImageContent   *__fuse_image;
