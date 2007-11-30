@@ -34,6 +34,7 @@
 #include <fvutils/net/fuse_imagelist_content.h>
 #include <fvutils/net/fuse_lutlist_content.h>
 #include <fvutils/writers/fvraw.h>
+#include <fvutils/color/colorspaces.h>
 
 #include <core/threading/wait_condition.h>
 #include <core/exceptions/software.h>
@@ -87,10 +88,18 @@ class FireVisionNetworkTool
       // we got an image, save it to the given file
       try {
 	FuseImageContent *ic = m->msgc<FuseImageContent>();
-	FvRawWriter *w = new FvRawWriter(__file, ic->pixel_width(), ic->pixel_height(),
-					 (colorspace_t)ic->colorspace(), ic->buffer());
-	w->write();
-	delete w;
+	if ( ic->format() == FUSE_IF_RAW ) {
+	  FvRawWriter *w = new FvRawWriter(__file, ic->pixel_width(), ic->pixel_height(),
+					   (colorspace_t)ic->colorspace(), ic->buffer());
+	  w->write();
+	  delete w;
+	} else if ( ic->format() == FUSE_IF_JPEG ) {
+	  FILE *f = fopen(__file, "w");
+	  fwrite(ic->buffer(), ic->buffer_size(), 1, f);
+	  fclose(f);
+	} else {
+	  printf("Image of unknown format (%u) received.\n", ic->format());
+	}
 	delete ic;
       } catch (Exception &e) {
 	printf("Received message cannot be casted to FuseImageMessage\n");
@@ -108,7 +117,8 @@ class FireVisionNetworkTool
 	    char tmp[IMAGE_ID_MAX_LENGTH + 1];
 	    tmp[IMAGE_ID_MAX_LENGTH] = 0;
 	    strncpy(tmp, ii->image_id, IMAGE_ID_MAX_LENGTH);
-	    printf("  %s\n", tmp);
+	    printf("  %s (%u x %u, %s)\n", tmp, ntohl(ii->width), ntohl(ii->height),
+		   colorspace_to_string((colorspace_t)ntohs(ii->colorspace)));
 	  }
 	} else {
 	  printf("No images available\n");
@@ -129,7 +139,8 @@ class FireVisionNetworkTool
 	    char tmp[LUT_ID_MAX_LENGTH + 1];
 	    tmp[LUT_ID_MAX_LENGTH] = 0;
 	    strncpy(tmp, li->lut_id, LUT_ID_MAX_LENGTH);
-	    printf("  %s\n", tmp);
+	    printf("  %s (%u x %u, %u bpc)\n", tmp,
+		   ntohl(li->width), ntohl(li->height), ntohl(li->bytes_per_cell));
 	  }
 	} else {
 	  printf("No lookup tables available\n");
@@ -157,6 +168,7 @@ class FireVisionNetworkTool
       break;
     default:
       printf("Unhandled message of type %u received\n", m->type());
+      __client->cancel();
       break;
     }
   }
@@ -224,6 +236,7 @@ class FireVisionNetworkTool
   {
     printf("Usage: %s -i/-l/-L/-s -n host[:port]/id file\n"
 	   "  -i             Get image\n"
+	   "  -j             Get JPEG-compressed image\n"
 	   "  -l             Get LUT\n"
 	   "  -L             Set LUT\n"
 	   "  -s             Show available images and LUTs\n"
@@ -240,14 +253,16 @@ class FireVisionNetworkTool
 
   /** Request image.
    * @param image_id Image ID.
+   * @param jpeg if true JPEG images are requested, raw images otherwise
    */
   void
-  get_image(const char *image_id)
+  get_image(const char *image_id, bool jpeg)
   {
-    FUSE_imagedesc_message_t *idm = (FUSE_imagedesc_message_t *)malloc(sizeof(FUSE_imagedesc_message_t));
-    memset(idm, 0, sizeof(FUSE_imagedesc_message_t));
+    FUSE_imagereq_message_t *idm = (FUSE_imagereq_message_t *)malloc(sizeof(FUSE_imagereq_message_t));
+    memset(idm, 0, sizeof(FUSE_imagereq_message_t));
     strncpy(idm->image_id, image_id, IMAGE_ID_MAX_LENGTH);
-    __client->enqueue(FUSE_MT_GET_IMAGE, idm, sizeof(FUSE_imagedesc_message_t));
+    idm->format = (jpeg ? FUSE_IF_JPEG : FUSE_IF_RAW);
+    __client->enqueue(FUSE_MT_GET_IMAGE, idm, sizeof(FUSE_imagereq_message_t));
   }
 
   /** Request LUT.
@@ -323,16 +338,19 @@ class FireVisionNetworkTool
 	net_string = strdup("localhost");
       }
       char *id = NULL, *host = NULL, *port = NULL, *save_ptr = NULL;
-      int port_num = 5000;
+      int port_num = 2208;
+      char *hostport;
       
-      if ( strchr(net_string, ':') != NULL ) {
-	host = strtok_r(net_string, ":", &save_ptr);
-	port = strtok_r(NULL, "/", &save_ptr);
-      } else {
-	host = strtok_r(net_string, "/", &save_ptr);
-      }
+      hostport = strtok_r(net_string, "/", &save_ptr);
       id = strtok_r(NULL, "", &save_ptr);
-    
+
+      if ( strchr(hostport, ':') != NULL ) {
+	host = strtok_r(hostport, ":", &save_ptr);
+	port = strtok_r(NULL, "", &save_ptr);
+      } else {
+	host = hostport;
+      }
+
       if ( port != NULL ) {
 	port_num = atoi(port);
 	if ( (port_num < 0) || (port_num > 0xFFFF) ) {
@@ -340,7 +358,8 @@ class FireVisionNetworkTool
 	}
       }
 
-      if (__argp->has_arg("i") || __argp->has_arg("l") || __argp->has_arg("L")) {
+      if (__argp->has_arg("i") || __argp->has_arg("j") ||
+	  __argp->has_arg("l") || __argp->has_arg("L")) {
 	if ( __argp->num_items() == 0 ) {
 	  print_usage();
 	  printf("\nFile name missing\n\n");
@@ -361,11 +380,11 @@ class FireVisionNetworkTool
 	__client->connect();
 	__client->start();
       }
- 
-      free(net_string);
 
       if ( __argp->has_arg("i") ) {
-	get_image(id);
+	get_image(id, /* JPEG? */ false);
+      } else if ( __argp->has_arg("j") ) {
+	get_image(id, /* JPEG? */ true);
       } else if ( __argp->has_arg("l") ) {
 	get_lut(id);
       } else if ( __argp->has_arg("L") ) {
@@ -383,6 +402,8 @@ class FireVisionNetworkTool
 	__client->join();
 	delete __client;
       }
+
+      free(net_string);
     }
   }
 
@@ -404,7 +425,7 @@ private:
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "Hn:ilLse");
+  ArgumentParser argp(argc, argv, "Hn:ilLsej");
 
   FireVisionNetworkTool *nettool = new FireVisionNetworkTool(&argp);
   nettool->run();

@@ -58,6 +58,7 @@ print_usage(const char *program_name)
 	 "  -n net_string  Open network camera, the camera string is of the form\n"
 	 "                 host[:port]/image_id. You have to specify at least the host\n"
 	 "                 and the image_id, the port is optional and defaults to 5000\n"
+	 "  -j             Receive JPEG images, only valid with -n\n"
 	 "  -f file        Open file loader camera with given file\n"
 	 "  -v             Verbose output on console\n"
 	 "  cam arg string Can be an arbitrary camera argument string that is understood\n"
@@ -92,7 +93,7 @@ process_gtk_events()
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "Hs:f:n:v");
+  ArgumentParser argp(argc, argv, "Hs:f:n:vj");
 
 #ifdef HAVE_GTKMM
   Gtk::Main gtk_main(argc, argv);
@@ -120,15 +121,18 @@ main(int argc, char **argv)
 #ifdef HAVE_NETWORK_CAM
     char *net_string = strdup(argp.arg("n"));
     char *image_id = NULL, *host = NULL, *port = NULL, *save_ptr = NULL;
-    int port_num = 5000;
+    int port_num = 2208;
+    char *hostport;
 
-    if ( strchr(net_string, ':') != NULL ) {
-      host = strtok_r(net_string, ":", &save_ptr);
-      port = strtok_r(NULL, "/", &save_ptr);
-    } else {
-      host = strtok_r(net_string, "/", &save_ptr);
-    }
+    hostport = strtok_r(net_string, "/", &save_ptr);
     image_id = strtok_r(NULL, "", &save_ptr);
+
+    if ( strchr(hostport, ':') != NULL ) {
+      host = strtok_r(hostport, ":", &save_ptr);
+      port = strtok_r(NULL, "", &save_ptr);
+    } else {
+      host = hostport;
+    }
 
     if ( port != NULL ) {
       port_num = atoi(port);
@@ -141,7 +145,7 @@ main(int argc, char **argv)
       throw IllegalArgumentException("Image ID must be specified");
     }
 
-    cam = new NetworkCamera(host, port_num, image_id);
+    cam = new NetworkCamera(host, port_num, image_id, argp.has_arg("j"));
 #else
     throw Exception("NetworkCamera not available at compile time");
 #endif
