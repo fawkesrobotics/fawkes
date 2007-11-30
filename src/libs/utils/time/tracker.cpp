@@ -133,7 +133,7 @@ TimeTracker::ping(string comment)
  * class.
  */
 unsigned int
-TimeTracker::addClass(string name)
+TimeTracker::add_class(string name)
 {
   classTimes.push_back( new vector< struct timeval * > );
   classNames.push_back( new string(name) );
@@ -177,7 +177,7 @@ TimeTracker::ping(unsigned int cls)
  * @param cls class ID
  */
 void
-TimeTracker::pingStart(unsigned int cls)
+TimeTracker::ping_start(unsigned int cls)
 {
   if (cls >= classTimes.size()) return;
 
@@ -199,7 +199,7 @@ TimeTracker::pingStart(unsigned int cls)
  * @param cls class ID to signal end of task
  */
 void
-TimeTracker::pingEnd(unsigned int cls)
+TimeTracker::ping_end(unsigned int cls)
 {
   if (cls >= classTimes.size()) return;
 
@@ -224,7 +224,7 @@ TimeTracker::pingEnd(unsigned int cls)
 
 /** Print results to stdout. */
 void
-TimeTracker::printToStdout()
+TimeTracker::print_to_stdout()
 {
 
   unsigned int i = 0;

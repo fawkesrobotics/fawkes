@@ -32,6 +32,7 @@
 #include <core/exception.h>
 
 #include <time.h>
+#include <cmath>
 #include <cstdio>
 
 /** @class Time <utils/time/time.h>
@@ -124,10 +125,7 @@ Time::~Time()
 float
 Time::in_sec() const
 {
-  float ret_val;
-  ret_val = time.tv_sec + time.tv_usec / 1000000.0;
-  
-  return ret_val;
+  return (time.tv_sec + time.tv_usec / 1000000.0);
 }
 
 
@@ -137,10 +135,17 @@ Time::in_sec() const
 long
 Time::in_msec() const
 {
-  long ret_val;
-  ret_val = time.tv_sec * 1000 + (long) (time.tv_usec / 1000);
-  
-  return ret_val;
+  return (time.tv_sec * 1000 + (long) (time.tv_usec / 1000));
+}
+
+
+/** Convert the stored time into micro-seconds.
+ * @return the time in micro-seconds
+ */
+long
+Time::in_usec() const
+{
+  return (time.tv_sec * 1000000 + time.tv_usec);
 }
 
 
@@ -171,11 +176,8 @@ Time::set_time(const timeval* tv)
 void
 Time::set_time(long ms)
 {
-  time_t sec = (time_t) (ms / 1000.0);
-  suseconds_t usec =  (ms % 1000) * 1000;
-
-  time.tv_sec = sec;
-  time.tv_usec = usec;
+  time.tv_sec  = (time_t) (ms / 1000.0);
+  time.tv_usec = (ms % 1000) * 1000;
 }
 
 
@@ -185,11 +187,8 @@ Time::set_time(long ms)
 void
 Time::set_time(float s)
 {
-  time_t sec = (time_t) s;
-  suseconds_t usec = ((long)s - sec) * 1000000;
-
-  time.tv_sec = sec;
-  time.tv_usec = usec;
+  time.tv_sec  = (time_t)floor(s);
+  time.tv_usec = (suseconds_t)(s - time.tv_sec) * 1000000;
 }
 
 
@@ -257,7 +256,38 @@ Time::operator-(const Time* t) const
 Time &
 Time::operator+=(const Time& t)
 {
-  *this = *this + t;
+  if (time.tv_usec + t.time.tv_usec > 1000000)
+    {
+      time.tv_usec += t.time.tv_usec - 1000000;
+      time.tv_sec  += t.time.tv_sec + 1;
+    }
+  else
+    {
+      time.tv_usec += t.time.tv_usec;
+      time.tv_sec  += t.time.tv_sec;
+    }
+
+  return *this;
+}
+
+
+/** += operator 
+ * @param usec microseconds to add
+ * @return reference to this instance
+*/
+Time &
+Time::operator+=(const long int usec)
+{
+  if ( time.tv_usec + usec > 1000000 )
+    {
+      time.tv_usec += usec - 1000000;
+      time.tv_sec  += 1;
+    }
+  else
+    {
+      time.tv_usec += usec;
+    }
+
   return *this;
 }
 

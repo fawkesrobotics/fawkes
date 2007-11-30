@@ -39,15 +39,15 @@ class TimeTracker {
   TimeTracker();
   ~TimeTracker();
 
-  unsigned int addClass(std::string name);
+  unsigned int add_class(std::string name);
 
   void ping(unsigned int cls);
-  void pingStart(unsigned int cls);
-  void pingEnd(unsigned int cls);
+  void ping_start(unsigned int cls);
+  void ping_end(unsigned int cls);
 
   void ping(std::string comment = "");
   void reset(std::string comment = "");
-  void printToStdout();
+  void print_to_stdout();
   
  private:
   timeval start_time;

@@ -38,7 +38,7 @@
  * @return a - b
  */
 inline float
-time_diff_sec(const timeval a, const timeval b)
+time_diff_sec(const timeval &a, const timeval &b)
 {
   return a.tv_sec  - b.tv_sec + (a.tv_usec - b.tv_usec) / 1000000.f;
 }
@@ -60,6 +60,19 @@ time_diff_sec(const long int a_sec, const long int a_usec,
   return a_sec - b_sec + (a_usec - b_usec) / 1000000.f;
 }
 
+
+/** Get difference between two time structs in microseconds.
+ * The calculated time is t = a - b
+ * @param a time to subtract from
+ * @param b time to subtract
+ * @return difference between a and b in microseconds
+ */
+inline long int
+time_diff_usec(const timeval &a, const timeval &b)
+{
+  return (a.tv_sec - b.tv_sec) * 1000000 + (a.tv_usec - b.tv_usec);
+}
+
 class Clock;
 
 class Time
@@ -75,7 +88,8 @@ class Time
   ~Time();
 
   float in_sec() const;
-  long in_msec() const;
+  long  in_msec() const;
+  long  in_usec() const;
   const timeval* get_timeval() const;
 
   void set_time(const timeval* tv);
@@ -87,6 +101,7 @@ class Time
   Time   operator+(const Time& t) const;
   Time   operator-(const Time& t) const;
   float  operator-(const Time* t) const;
+  Time & operator+=(const long int usec);
   Time & operator+=(const Time& t);
   Time & operator-=(const Time& t);
   Time & operator=(const Time& t);
