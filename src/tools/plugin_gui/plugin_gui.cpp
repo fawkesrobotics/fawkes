@@ -246,6 +246,11 @@ PluginGui::clicked_connect()
 void
 PluginGui::changed_host()
 {
+  if ( -1 == m_cbe_hosts->get_active_row_number() ) 
+    {
+      return;
+    }
+
   if ( m_backend->is_connected() )
     {
       m_plugin_list->clear();

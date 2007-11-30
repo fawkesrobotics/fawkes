@@ -324,8 +324,8 @@ PluginGuiBackendThread::cache_exhausted()
 
 void
 PluginGuiBackendThread::browse_failed( const char* name,
-				      const char* type,
-				      const char* domain )
+				       const char* type,
+				       const char* domain )
 {
 }
 
