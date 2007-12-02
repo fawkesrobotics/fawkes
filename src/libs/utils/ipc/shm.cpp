@@ -435,8 +435,8 @@ SharedMemory::attach()
   void            *shm_ptr;
 
   // Find out maximal number of existing SHM segments
-  struct shm_info shm_info;
-  max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
+  struct shmid_ds shm_info;
+  max_id = shmctl( 0, SHM_INFO, &shm_info );
 
   if (max_id >= 0) {
     for ( int i = 0; (_memptr == NULL) && (i <= max_id); ++i ) {
@@ -1192,8 +1192,8 @@ SharedMemory::SharedMemoryIterator::SharedMemoryIterator()
   __segmsize    = 0;
   __segmnattch  = 0;
 
-  struct shm_info shm_info;
-  __max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
+  struct shmid_ds shm_info;
+  __max_id = shmctl( 0, SHM_INFO, &shm_info );
 }
 
 
@@ -1242,8 +1242,8 @@ SharedMemory::SharedMemoryIterator::SharedMemoryIterator(const char *magic_token
   __segmsize    = 0;
   __segmnattch  = 0;
 
-  struct shm_info shm_info;
-  __max_id = shmctl( 0, SHM_INFO, (struct shmid_ds *)&shm_info );
+  struct shmid_ds shm_info;
+  __max_id = shmctl( 0, SHM_INFO, &shm_info );
 
   // Find first shm segment
   ++(*this);
