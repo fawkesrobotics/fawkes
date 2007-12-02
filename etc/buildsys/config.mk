@@ -31,7 +31,6 @@ endif
 ARCH=$(shell arch)
 
 ### Directories
-#BASEDIR ?= $(HOME)/robocup/fawkes
 SRCDIR ?= .
 OBJDIR = .objs
 DEPDIR = $(abspath $(SRCDIR)/.deps)
@@ -53,12 +52,19 @@ PKGCONFIG = $(shell which pkg-config)
 GCC_VERSION=$(shell LANG=C $CC -v 2>&1 | grep "gcc version" | awk '{ print $3 }')
 GCC_VERSION_MAJOR=$(shell LANG=C $(CC) -v 2>&1 | grep "gcc version" | awk '{ print $$3 }' | awk -F. '{ print $$1 }')
 
+### Features ###
+HAVE_OPENMP=1
+
 ### CFLAGS, preprocessor, compiler and linker options
 LDFLAGS_LIBDIRS = -Wl,-R$(LIBDIR) $(LIBDIRS:%=-Wl,-R%)
 DEFAULT_INCLUDES = -I$(abspath $(BASEDIR)/src) -I$(abspath $(BASEDIR)/src/libs) -I$(abspath $(BASEDIR)/src/firevision)
 CFLAGS_BASE = -fPIC -pthread $(DEFAULT_INCLUDES) -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 LDFLAGS_BASE = -L$(LIBDIR)
 LDFLAGS_SHARED = -shared
+ifeq ($(HAVE_OPENMP),1)
+  CFLAGS_BASE  += -fopenmp
+  LDFLAGS_BASE += -lgomp
+endif
 
 ### colors, to be used as command, not via echo
 BLACK		= tput setaf 0
