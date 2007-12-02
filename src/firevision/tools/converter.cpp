@@ -88,8 +88,8 @@ int main(int argc, char** argv)
       t = strtok(NULL, ".");
     }
 
-  Reader* reader;
-  Writer* writer;
+  Reader* reader = NULL;
+  Writer* writer = NULL;
 
   // FvRaw
   if ( 0 == strcmp(ext_in, "raw") )
@@ -106,6 +106,7 @@ int main(int argc, char** argv)
   else
     {
       cout << "Unknown input file format" << endl;
+      exit(-1);
     }
   
   unsigned char* buffer = (unsigned char*) malloc(BUFFER_SIZE);
@@ -139,6 +140,7 @@ int main(int argc, char** argv)
   else
     {
       cout << "Unknown output file format" << endl;
+      exit(-2);
     }
 
   writer->set_filename(fn_out);
