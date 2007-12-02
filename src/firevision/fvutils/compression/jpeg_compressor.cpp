@@ -31,6 +31,8 @@
 #include <fvutils/color/yuvrgb.h>
 #include <fvutils/color/rgbyuv.h>
 
+#include <core/exception.h>
+
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -213,7 +215,7 @@ JpegImageCompressor::compress()
   fv_jpeg_memory_destination_mgr_t *dest;
 
   // file destination specific
-  FILE *outfile;
+  FILE *outfile = NULL;
 
   /* zero out the compression info structure and
      allocate a new compressor handle */
@@ -237,8 +239,9 @@ JpegImageCompressor::compress()
     // mem
     fv_jpeg_memory_destination_setup(&cinfo, (JOCTET *)jpeg_buffer, jpeg_buffer_size);
   } else {
-    if ((outfile = fopen(filename, "wb")) == NULL) {
-      fprintf(stderr, "JpegImageCompressor: cannot open %s\n", filename);
+    outfile = fopen(filename, "wb");
+    if (outfile == NULL) {
+      throw Exception("JpegImageCompressor: cannot open %s\n", filename);
     }
     jpeg_stdio_dest( &cinfo, outfile );
   }

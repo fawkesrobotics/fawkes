@@ -254,7 +254,7 @@ Bumblebee2Camera::open()
   if ( err != DC1394_SUCCESS ) {
     throw Exception("Bumblebee2::open: dc1394_get_control_register(PGR_REG_DATA_FORMAT) failed\n");
   }
-  idf_t *i = (idf_t *)&value;
+  idf_t *i = (idf_t *)(void *)&value;
   value &= PTG_Y16_Data_Format_PGR_specific;
   i->data_format = 0;
   err = dc1394_set_control_register( _camera, PGR_REG_IMAGE_DATA_FORMAT, value );

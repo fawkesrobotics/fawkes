@@ -125,7 +125,7 @@ PNGWriter::write()
   png_byte row[width * 3];
   png_byte *row_p;
   unsigned char *yp, *up, *vp;
-  unsigned char y1, y2, u, v;
+  unsigned char y1, y2, u = 0, v = 0;
 
   yp = buffer;
   up = YUV422_PLANAR_U_PLANE(buffer, width, height);

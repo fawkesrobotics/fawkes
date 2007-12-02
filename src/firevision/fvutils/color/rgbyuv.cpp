@@ -76,15 +76,15 @@ rgb_to_yuy2(unsigned char *RGB, unsigned char *YUV, unsigned int width, unsigned
 void
 rgb_to_yuv411packed_plainc(unsigned char *RGB, unsigned char *YUV, unsigned int width, unsigned int height)
 {
-  register unsigned int i, j = 0;
-  register int y[4], u, v;
+  register unsigned int i = 0, j = 0;
+  register int y[4] = {0, 0, 0, 0}, u, v;
   register RGB_t *r;
   register unsigned int su = 0;
   register unsigned int sv = 0;
   
   while (i < (width * height)) {
+    r = (RGB_t *)RGB;
     for (register unsigned int k = 0; j <= 4; ++j) {
-      r = (RGB_t *)RGB;
       RGB2YUV(r->R, r->G, r->B, y[k], u, v);
       su += u;
       sv += v;
