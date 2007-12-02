@@ -142,20 +142,24 @@ void
 yuv422packed_to_yuv422planar(unsigned char *packed, unsigned char *planar,
 			     unsigned int width, unsigned int height)
 {
-  register unsigned char *y, *u, *v;
-  register unsigned int i;
+  register volatile unsigned char *y, *u, *v;
+  register int i, iy, iiy;
 
+  unsigned int wh = (width * height);
+  unsigned int wh2 = wh / 2;
   y = planar;
-  u = planar + (width * height);
-  v = u + (width * height / 2);
+  u = planar + wh;
+  v = u + wh2;
 
-  for (i = 0; i < (width * height / 2); ++i) {
-    *u++ = *packed++;
-    *y++ = *packed++;
-    *v++ = *packed++;
-    *y++ = *packed++;
+#pragma omp parallel for private(i, iy, iiy, wh2) shared(y, u, v, packed) schedule(static)
+  for (i = 0; i < (int)wh2; ++i) {
+    iy  = i << 1;
+    iiy = iy << 1;
+    u[i]    = packed[iiy];
+    y[iy]   = packed[iiy + 1];
+    v[i]    = packed[iiy + 2];
+    y[iy+1] = packed[iiy + 3];
   }
-
 }
 
 
