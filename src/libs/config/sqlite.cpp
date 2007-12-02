@@ -737,7 +737,7 @@ SQLiteConfiguration::execute_insert_or_update(sqlite3_stmt *stmt)
 void
 SQLiteConfiguration::set_float(const char *path, float f)
 {
-  sqlite3_stmt *stmt;
+  sqlite3_stmt *stmt = NULL;
 
   mutex->lock();
 
@@ -750,12 +750,12 @@ SQLiteConfiguration::set_float(const char *path, float f)
       throw ce;
     }
     execute_insert_or_update(stmt);
-  } catch (Exception &e) {
     sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
     mutex->unlock();
     throw;
   }
-  sqlite3_finalize(stmt);
 
   if ( sqlite3_changes(db) == 0 ) {
     // value did not exist, insert
@@ -769,12 +769,12 @@ SQLiteConfiguration::set_float(const char *path, float f)
 	throw ce;
       }
       execute_insert_or_update(stmt);
-    } catch (Exception &e) {
       sqlite3_finalize(stmt);
+    } catch (Exception &e) {
+      if ( stmt != NULL ) sqlite3_finalize(stmt);
       mutex->unlock();
       throw;
     }
-    sqlite3_finalize(stmt);
   }
 
   mutex->unlock();
@@ -794,7 +794,7 @@ SQLiteConfiguration::set_float(const char *path, float f)
 void
 SQLiteConfiguration::set_uint(const char *path, unsigned int uint)
 {
-  sqlite3_stmt *stmt;
+  sqlite3_stmt *stmt = NULL;
 
   mutex->lock();
 
@@ -807,12 +807,12 @@ SQLiteConfiguration::set_uint(const char *path, unsigned int uint)
       throw ce;
     }
     execute_insert_or_update(stmt);
-  } catch (Exception &e) {
     sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
     mutex->unlock();
     throw;
   }
-  sqlite3_finalize(stmt);
 
   if ( sqlite3_changes(db) == 0 ) {
     // value did not exist, insert
@@ -826,12 +826,12 @@ SQLiteConfiguration::set_uint(const char *path, unsigned int uint)
 	throw ce;
       }
       execute_insert_or_update(stmt);
-    } catch (Exception &e) {
       sqlite3_finalize(stmt);
+    } catch (Exception &e) {
+      if ( stmt != NULL ) sqlite3_finalize(stmt);
       mutex->unlock();
       throw;
     }
-    sqlite3_finalize(stmt);
   }
   mutex->unlock();
 
@@ -850,7 +850,7 @@ SQLiteConfiguration::set_uint(const char *path, unsigned int uint)
 void
 SQLiteConfiguration::set_int(const char *path, int i)
 {
-  sqlite3_stmt *stmt;
+  sqlite3_stmt *stmt = NULL;
 
   mutex->lock();
 
@@ -863,12 +863,12 @@ SQLiteConfiguration::set_int(const char *path, int i)
       throw ce;
     }
     execute_insert_or_update(stmt);
-  } catch (Exception &e) {
     sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
     mutex->unlock();
     throw;
   }
-  sqlite3_finalize(stmt);
 
   if ( sqlite3_changes(db) == 0 ) {
     // value did not exist, insert
@@ -882,12 +882,12 @@ SQLiteConfiguration::set_int(const char *path, int i)
 	throw ce;
       }
       execute_insert_or_update(stmt);
-    } catch (Exception &e) {
       sqlite3_finalize(stmt);
+    } catch (Exception &e) {
+      if ( stmt != NULL ) sqlite3_finalize(stmt);
       mutex->unlock();
       throw;
     }
-    sqlite3_finalize(stmt);
   }
 
   mutex->unlock();
@@ -907,7 +907,7 @@ SQLiteConfiguration::set_int(const char *path, int i)
 void
 SQLiteConfiguration::set_bool(const char *path, bool b)
 {
-  sqlite3_stmt *stmt;
+  sqlite3_stmt *stmt = NULL;
 
   mutex->lock();
 
@@ -920,12 +920,12 @@ SQLiteConfiguration::set_bool(const char *path, bool b)
       throw ce;
     }
     execute_insert_or_update(stmt);
-  } catch (Exception &e) {
     sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
     mutex->unlock();
     throw;
   }
-  sqlite3_finalize(stmt);
 
   if ( sqlite3_changes(db) == 0 ) {
     // value did not exist, insert
@@ -939,12 +939,12 @@ SQLiteConfiguration::set_bool(const char *path, bool b)
 	throw ce;
       }
       execute_insert_or_update(stmt);
-    } catch (Exception &e) {
       sqlite3_finalize(stmt);
+    } catch (Exception &e) {
+      if ( stmt != NULL ) sqlite3_finalize(stmt);
       mutex->unlock();
       throw;
     }
-    sqlite3_finalize(stmt);
   }
 
   mutex->unlock();
@@ -961,7 +961,7 @@ void
 SQLiteConfiguration::set_string(const char *path,
 				const char *s)
 {
-  sqlite3_stmt *stmt;
+  sqlite3_stmt *stmt = NULL;
 
   mutex->lock();
 
@@ -976,12 +976,12 @@ SQLiteConfiguration::set_string(const char *path,
       throw ce;
     }
     execute_insert_or_update(stmt);
-  } catch (Exception &e) {
     sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
     mutex->unlock();
     throw;
   }
-  sqlite3_finalize(stmt);
 
   if ( sqlite3_changes(db) == 0 ) {
     // value did not exist, insert
@@ -995,12 +995,12 @@ SQLiteConfiguration::set_string(const char *path,
 	throw ce;
       }
       execute_insert_or_update(stmt);
-    } catch (Exception &e) {
       sqlite3_finalize(stmt);
+    } catch (Exception &e) {
+      if ( stmt != NULL ) sqlite3_finalize(stmt);
       mutex->unlock();
       throw;
     }
-    sqlite3_finalize(stmt);
   }
 
   mutex->unlock();
@@ -1062,7 +1062,7 @@ SQLiteConfiguration::erase(const char *path)
 void
 SQLiteConfiguration::set_default_float(const char *path, float f)
 {
-  sqlite3_stmt *stmt;
+  sqlite3_stmt *stmt = NULL;
 
   mutex->lock();
 
@@ -1075,12 +1075,12 @@ SQLiteConfiguration::set_default_float(const char *path, float f)
       throw ce;
     }
     execute_insert_or_update(stmt);
-  } catch (Exception &e) {
     sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
     mutex->unlock();
     throw;
   }
-  sqlite3_finalize(stmt);
 
   if ( sqlite3_changes(db) == 0 ) {
     // value did not exist, insert
@@ -1094,12 +1094,12 @@ SQLiteConfiguration::set_default_float(const char *path, float f)
 	throw ce;
       }
       execute_insert_or_update(stmt);
-    } catch (Exception &e) {
       sqlite3_finalize(stmt);
+    } catch (Exception &e) {
+      if ( stmt != NULL ) sqlite3_finalize(stmt);
       mutex->unlock();
       throw;
     }
-    sqlite3_finalize(stmt);
   }
 
   mutex->unlock();
@@ -1115,7 +1115,7 @@ SQLiteConfiguration::set_default_float(const char *path, float f)
 void
 SQLiteConfiguration::set_default_uint(const char *path, unsigned int uint)
 {
-  sqlite3_stmt *stmt;
+  sqlite3_stmt *stmt = NULL;
 
   mutex->lock();
 
@@ -1128,12 +1128,12 @@ SQLiteConfiguration::set_default_uint(const char *path, unsigned int uint)
       throw ce;
     }
     execute_insert_or_update(stmt);
-  } catch (Exception &e) {
     sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
     mutex->unlock();
     throw;
   }
-  sqlite3_finalize(stmt);
 
   if ( sqlite3_changes(db) == 0 ) {
     // value did not exist, insert
@@ -1147,12 +1147,12 @@ SQLiteConfiguration::set_default_uint(const char *path, unsigned int uint)
 	throw ce;
       }
       execute_insert_or_update(stmt);
-    } catch (Exception &e) {
       sqlite3_finalize(stmt);
+    } catch (Exception &e) {
+      if ( stmt != NULL ) sqlite3_finalize(stmt);
       mutex->unlock();
       throw;
     }
-    sqlite3_finalize(stmt);
   }
   mutex->unlock();
 
@@ -1167,8 +1167,7 @@ SQLiteConfiguration::set_default_uint(const char *path, unsigned int uint)
 void
 SQLiteConfiguration::set_default_int(const char *path, int i)
 {
-  sqlite3_stmt *stmt;
-
+  sqlite3_stmt *stmt = NULL;
   mutex->lock();
 
   try {
@@ -1180,16 +1179,15 @@ SQLiteConfiguration::set_default_int(const char *path, int i)
       throw ce;
     }
     execute_insert_or_update(stmt);
-  } catch (Exception &e) {
     sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
     mutex->unlock();
     throw;
   }
-  sqlite3_finalize(stmt);
 
   if ( sqlite3_changes(db) == 0 ) {
     // value did not exist, insert
-
     try {
       stmt = prepare_insert_value(SQL_INSERT_DEFAULT_VALUE, "int", path);
       if ( (sqlite3_bind_int(stmt, 3, i) != SQLITE_OK) ) {
@@ -1199,12 +1197,12 @@ SQLiteConfiguration::set_default_int(const char *path, int i)
 	throw ce;
       }
       execute_insert_or_update(stmt);
-    } catch (Exception &e) {
       sqlite3_finalize(stmt);
+    } catch (Exception &e) {
+      if ( stmt != NULL ) sqlite3_finalize(stmt);
       mutex->unlock();
       throw;
     }
-    sqlite3_finalize(stmt);
   }
 
   mutex->unlock();
@@ -1220,7 +1218,7 @@ SQLiteConfiguration::set_default_int(const char *path, int i)
 void
 SQLiteConfiguration::set_default_bool(const char *path, bool b)
 {
-  sqlite3_stmt *stmt;
+  sqlite3_stmt *stmt = NULL;
 
   mutex->lock();
 
@@ -1233,12 +1231,12 @@ SQLiteConfiguration::set_default_bool(const char *path, bool b)
       throw ce;
     }
     execute_insert_or_update(stmt);
-  } catch (Exception &e) {
     sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
     mutex->unlock();
     throw;
   }
-  sqlite3_finalize(stmt);
 
   if ( sqlite3_changes(db) == 0 ) {
     // value did not exist, insert
@@ -1252,12 +1250,12 @@ SQLiteConfiguration::set_default_bool(const char *path, bool b)
 	throw ce;
       }
       execute_insert_or_update(stmt);
-    } catch (Exception &e) {
       sqlite3_finalize(stmt);
+    } catch (Exception &e) {
+      if ( stmt != NULL ) sqlite3_finalize(stmt);
       mutex->unlock();
       throw;
     }
-    sqlite3_finalize(stmt);
   }
 
   mutex->unlock();
@@ -1274,10 +1272,9 @@ void
 SQLiteConfiguration::set_default_string(const char *path,
 					const char *s)
 {
-  sqlite3_stmt *stmt;
+  sqlite3_stmt *stmt = NULL;
 
   mutex->lock();
-
   size_t s_length = strlen(s);
 
   try {
@@ -1289,12 +1286,12 @@ SQLiteConfiguration::set_default_string(const char *path,
       throw ce;
     }
     execute_insert_or_update(stmt);
-  } catch (Exception &e) {
     sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
     mutex->unlock();
     throw;
   }
-  sqlite3_finalize(stmt);
 
   if ( sqlite3_changes(db) == 0 ) {
     // value did not exist, insert
@@ -1308,12 +1305,12 @@ SQLiteConfiguration::set_default_string(const char *path,
 	throw ce;
       }
       execute_insert_or_update(stmt);
-    } catch (Exception &e) {
       sqlite3_finalize(stmt);
+    } catch (Exception &e) {
+      if ( stmt != NULL ) sqlite3_finalize(stmt);
       mutex->unlock();
       throw;
     }
-    sqlite3_finalize(stmt);
   }
 
   mutex->unlock();
