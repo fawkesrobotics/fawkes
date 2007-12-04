@@ -50,7 +50,7 @@ class Exception : public std::exception {
   void append(const Exception &e) throw();
   void print_trace() throw();
 
-  int errno() const throw();
+  int errno() throw();
 
   virtual const char* what() const throw();
 

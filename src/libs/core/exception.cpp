@@ -26,6 +26,7 @@
  */
 
 #include <core/exception.h>
+#include <core/macros.h>
 #include <core/threading/mutex.h>
 
 #ifndef _GNU_SOURCE
@@ -586,7 +587,7 @@ Exception::print_trace() throw()
  * @return error number, may be 0 if not set
  */
 int
-Exception::errno() const throw()
+Exception::errno() throw()
 {
   return _errno;
 }
@@ -682,7 +683,7 @@ Exception::iterator::operator++()
  * @return copy of iterator before advancing.
  */
 Exception::iterator
-Exception::iterator::operator++(int inc)
+Exception::iterator::operator++(int inc __unused)
 {
   iterator i(mlist);
   if ( mlist != NULL ) {

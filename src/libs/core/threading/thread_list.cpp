@@ -47,7 +47,7 @@
 ThreadListSealedException::ThreadListSealedException(const char *operation)
   : Exception("ThreadList is sealed")
 {
-  append("Operation '%s' is not allowed on a sealed thread list");
+  append("Operation '%s' is not allowed on a sealed thread list", operation);
 }
 
 

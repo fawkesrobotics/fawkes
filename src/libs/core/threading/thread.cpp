@@ -25,6 +25,7 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
+#include <core/macros.h>
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
 #include <core/threading/barrier.h>
@@ -262,7 +263,7 @@ Thread::~Thread()
  * @param t thread to copy.
  * @exception Exception Always thrown
  */
-Thread::Thread(const Thread &t)
+Thread::Thread(const Thread &t __unused)
 {
   throw Exception("You may not use copy constructor of class Thread");
 }
@@ -273,7 +274,7 @@ Thread::Thread(const Thread &t)
  * @param t thread to assign
  */
 Thread &
-Thread::operator=(const Thread &t)
+Thread::operator=(const Thread &t __unused)
 {
   throw Exception("You may not use assignment operator of class Thread");
 }
