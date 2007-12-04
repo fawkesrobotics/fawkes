@@ -48,23 +48,23 @@ MOC = $(QTDIR)/bin/moc
 DOXYGEN = doxygen
 PKGCONFIG = $(shell which pkg-config)
 
-### GCC version information
-GCC_VERSION=$(shell LANG=C $CC -v 2>&1 | grep "gcc version" | awk '{ print $3 }')
-GCC_VERSION_MAJOR=$(shell LANG=C $(CC) -v 2>&1 | grep "gcc version" | awk '{ print $$3 }' | awk -F. '{ print $$1 }')
+### GCC version information, currently unused and thus commented out
+#ifeq ($(CC),gcc)
+#  GCC_VERSION=$(shell LANG=C $CC -v 2>&1 | grep "gcc version" | awk '{ print $3 }')
+#  GCC_VERSION_MAJOR=$(shell LANG=C $(CC) -v 2>&1 | grep "gcc version" | awk '{ print $$3 }' | awk -F. '{ print $$1 }')
+#endif
 
 ### Features ###
 HAVE_OPENMP=1
 
 ### CFLAGS, preprocessor, compiler and linker options
-LDFLAGS_LIBDIRS = -Wl,-R$(LIBDIR) $(LIBDIRS:%=-Wl,-R%)
+LDFLAGS_LIBDIRS  = -Wl,-R$(LIBDIR) $(LIBDIRS:%=-Wl,-R%)
 DEFAULT_INCLUDES = -I$(abspath $(BASEDIR)/src) -I$(abspath $(BASEDIR)/src/libs) -I$(abspath $(BASEDIR)/src/firevision)
-CFLAGS_BASE = -fPIC -pthread $(DEFAULT_INCLUDES) -DBINDIR=\"$(BINDIR)\" -DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\" -DCONFDIR=\"$(CONFDIR)\"
-LDFLAGS_BASE = -L$(LIBDIR)
-LDFLAGS_SHARED = -shared
-ifeq ($(HAVE_OPENMP),1)
-  CFLAGS_BASE  += -fopenmp
-  LDFLAGS_BASE += -lgomp
-endif
+CFLAGS_BASE      = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP)
+LDFLAGS_BASE     = -L$(LIBDIR) $(LDFLAGS_OPENMP)
+LDFLAGS_SHARED   = -shared
+CFLAGS_OPENMP    = -fopenmp
+LDFLAGS_OPENMP   = -lgomp
 
 ### colors, to be used as command, not via echo
 BLACK		= tput setaf 0
@@ -112,7 +112,12 @@ TMAGENTABG	= \033[45m
 TCYANBG		= \033[46m
 TGREYBG		= \033[47m
 
-### Check if there are special config additions
+### Check if there are special config files for the chosen compiler
+ifneq ($(realpath $(BASEDIR)/etc/buildsys/$(CC).mk),)
+  include $(BASEDIR)/etc/buildsys/$(CC).mk
+endif
+
+### Check if there is a build-type specific configuration
 ifneq ($(realpath $(BASEDIR)/etc/buildsys_local/config_$(BUILD_TYPE).mk),)
   include $(BASEDIR)/etc/buildsys_local/config_$(BUILD_TYPE).mk
 endif
