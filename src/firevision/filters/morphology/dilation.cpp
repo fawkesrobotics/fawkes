@@ -28,6 +28,7 @@
 #include <filters/morphology/dilation.h>
 
 #include <fvutils/color/yuv.h>
+#include <core/exception.h>
 
 #include <cstddef>
 #include <ippi.h>
@@ -150,6 +151,8 @@ FilterDilation::apply()
     }
   }
 
-  //std::cout << "Filter exited with status " << status << std::endl;
+  if ( status != ippStsNoErr ) {
+    throw Exception("Morphological dilation failed with %i\n", status);
+  }
 
 }

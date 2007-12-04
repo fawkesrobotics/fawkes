@@ -27,8 +27,9 @@
 
 #include <filters/sobel.h>
 
+#include <core/exception.h>
+
 #include <ippi.h>
-#include <cstddef>
 
 
 /** @class FilterSobel <filters/sobel.h>
@@ -155,6 +156,10 @@ FilterSobel::apply()
   } else {
     // cout << "FilterSobel: Unsupported direction" << endl;
     status = ippStsNullPtrErr;
+  }
+
+  if ( status != ippStsNoErr ) {
+    throw Exception("Sobel filter failed with %i\n", status);
   }
 
 }

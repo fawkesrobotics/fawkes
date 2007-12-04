@@ -26,8 +26,8 @@
  */
 
 #include <filters/hipass.h>
+#include <core/exception.h>
 
-#include <cstddef>
 #include <ippi.h>
 
 /** @class FilterHipass <filters/hipass.h>
@@ -55,27 +55,7 @@ FilterHipass::apply()
 				    dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step), dst_roi->line_step,
 				    size, ippMskSize3x3 );
 
-  /*
-  cout << "FilterHipass: ippiFilterHipass exit code: " << flush;
-  switch (status) {
-  case ippStsNoErr:
-    cout << "ippStsNoErr";
-    break;
-  case ippStsNullPtrErr:
-    cout << "ippStsNullPtrErr";
-    break;
-  case ippStsSizeErr:
-    cout << "ippStsSizeErr";
-    break;
-  case ippStsStepErr:
-    cout << "ippStsStepErr";
-    break;
-  case ippStsMaskSizeErr:
-    cout << "ippStsMaskSizeErr";
-    break;
-  default:
-    cout << "Unknown status";
+  if ( status != ippStsNoErr ) {
+    throw Exception("Hipass filter failed with %i\n", status);
   }
-  cout << endl;
-  */
 }

@@ -30,8 +30,10 @@
 
 #include <filters/threshold.h>
 
-#include <ippi.h>
+#include <core/exception.h>
+
 #include <cstddef>
+#include <ippi.h>
 
 /** @class FilterThreshold <filters/threshold.h>
  * Threshold filter
@@ -84,17 +86,25 @@ FilterThreshold::apply()
     // In-place
     status = ippiThreshold_GTVal_8u_C1IR( src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step), src_roi[0]->line_step,
 					  size, max, max_replace );
-    status = ippiThreshold_LTVal_8u_C1IR( src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step), src_roi[0]->line_step,
-					  size, min, min_replace );
+    if ( status == ippStsNoErr ) {
+      status = ippiThreshold_LTVal_8u_C1IR( src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step), src_roi[0]->line_step,
+					    size, min, min_replace );
+    }
   } else {
     //                                base + number of bytes to line y              + pixel bytes
     status = ippiThreshold_GTVal_8u_C1R( src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step), src_roi[0]->line_step,
 					 dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step), dst_roi->line_step,
 					 size, max, max_replace );
 
-    status = ippiThreshold_LTVal_8u_C1R( src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step), src_roi[0]->line_step,
-					 dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step), dst_roi->line_step,
-					 size, min, min_replace );
+    if ( status == ippStsNoErr ) {
+      status = ippiThreshold_LTVal_8u_C1R( src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step), src_roi[0]->line_step,
+					   dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step), dst_roi->line_step,
+					   size, min, min_replace );
+    }
+  }
+
+  if ( status != ippStsNoErr ) {
+    throw Exception("Threshold filter failed with %i\n", status);
   }
 
 }

@@ -27,7 +27,7 @@
 
 #include <filters/median.h>
 
-#include <cstddef>
+#include <core/exception.h>
 #include <ippi.h>
 
 /** @class FilterMedian <filters/median.h>
@@ -61,5 +61,9 @@ FilterMedian::apply()
   status = ippiFilterMedian_8u_C1R( src[0] + ((src_roi[0]->start.y + (mask_size + 1) / 2) * src_roi[0]->line_step) + ((src_roi[0]->start.x + ( mask_size + 1) / 2) * src_roi[0]->pixel_step), src_roi[0]->line_step,
 				    dst + ((dst_roi->start.y + (mask_size + 1) / 2) * dst_roi->line_step) + ((dst_roi->start.x + ( mask_size + 1) / 2) * dst_roi->pixel_step), dst_roi->line_step,
 				    size, mask, anchor );
+
+  if ( status != ippStsNoErr ) {
+    throw Exception("Median filter failed with %i\n", status);
+  }
 
 }

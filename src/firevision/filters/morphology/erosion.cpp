@@ -28,6 +28,7 @@
 #include <filters/morphology/erosion.h>
 
 #include <fvutils/color/yuv.h>
+#include <core/exception.h>
 
 #include <cstddef>
 #include <ippi.h>
@@ -111,6 +112,10 @@ FilterErosion::apply()
 			   src_roi[0]->width, src_roi[0]->height );
     }
 
+  }
+
+  if ( status != ippStsNoErr ) {
+    throw Exception("Morphological erosion failed with %i\n", status);
   }
 
 }

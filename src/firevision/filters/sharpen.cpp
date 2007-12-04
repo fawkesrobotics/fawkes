@@ -27,8 +27,9 @@
 
 #include <filters/sharpen.h>
 
+#include <core/exception.h>
+
 #include <ippi.h>
-#include <cstddef>
 
 /** @class FilterSharpen <filters/sharpen.h>
  * Sharpen filter.
@@ -55,5 +56,9 @@ FilterSharpen::apply()
   status = ippiFilterSharpen_8u_C1R( src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step), src_roi[0]->line_step,
 				     dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step), dst_roi->line_step,
 				     size );
+
+  if ( status != ippStsNoErr ) {
+    throw Exception("Sharpen filter failed with %i\n", status);
+  }
 
 }

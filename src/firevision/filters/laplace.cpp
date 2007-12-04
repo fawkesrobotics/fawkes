@@ -27,9 +27,10 @@
 
 #include <filters/laplace.h>
 
+#include <core/exception.h>
+
 #include <ippi.h>
 #include <cmath>
-#include <cstddef>
 #include <cstdlib>
 
 /** @class FilterLaplace <filters/laplace.h>
@@ -96,6 +97,11 @@ FilterLaplace::apply()
     status = ippiFilter_8u_C1R( src[0] + ((src_roi[0]->start.y + kernel_size / 2) * src_roi[0]->line_step) + ((src_roi[0]->start.x + kernel_size / 2) * src_roi[0]->pixel_step), src_roi[0]->line_step,
 				dst + ((dst_roi->start.y + kernel_size / 2) * dst_roi->line_step) + ((dst_roi->start.x + kernel_size / 2) * dst_roi->pixel_step), dst_roi->line_step,
 				size, kernel, ksize, kanchor, 1 );
+
+  }
+
+  if ( status != ippStsNoErr ) {
+    throw Exception("Laplace filter failed with %i\n", status);
   }
 
   /*

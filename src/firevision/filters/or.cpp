@@ -27,6 +27,8 @@
 
 #include "filters/or.h"
 
+#include <core/exception.h>
+
 #include <cstddef>
 #include <ippi.h>
 
@@ -69,27 +71,8 @@ FilterOr::apply()
 			   size);
   }
 
-  /*
-  cout << "FilterOr: ippiFilterOr exit code: " << flush;
-  switch (status) {
-  case ippStsNoErr:
-    cout << "ippStsNoErr";
-    break;
-  case ippStsNullPtrErr:
-    cout << "ippStsNullPtrErr";
-    break;
-  case ippStsSizeErr:
-    cout << "ippStsSizeErr";
-    break;
-  case ippStsStepErr:
-    cout << "ippStsStepErr";
-    break;
-  case ippStsMaskSizeErr:
-    cout << "ippStsMaskSizeErr";
-    break;
-  default:
-    cout << "Unknown status";
+  if ( status != ippStsNoErr ) {
+    throw Exception("Or filter failed with %i\n", status);
   }
-  cout << endl;
-  */
+
 }
