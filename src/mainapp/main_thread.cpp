@@ -44,7 +44,11 @@
 #include <mainapp/config_manager.h>
 #include <mainapp/thread_manager.h>
 
-#include <stdio.h>
+#ifdef USE_TIMETRACKER
+#include <utils/time/tracker.h>
+#endif
+
+#include <cstdio>
 
 /** @class FawkesMainThread mainapp/main_thread.h
  * Fawkes main thread.
@@ -176,6 +180,27 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   } catch (Exception &e) {
     multi_logger->log_info("FawkesMainApp", "Minimum loop time not set, assuming 0");
   }
+#ifdef USE_TIMETRACKER
+  __tt = NULL;
+  try {
+    if (config->get_bool("/fawkes/mainapp/use_time_tracker") ) {
+      __tt = new TimeTracker();
+      __tt_loopcount   = 0;
+      __ttc_pre_loop   = __tt->add_class("Pre Loop");
+      __ttc_sensor     = __tt->add_class("Sensor");
+      __ttc_worldstate = __tt->add_class("World State");
+      __ttc_think      = __tt->add_class("Think");
+      __ttc_skill      = __tt->add_class("Skill");
+      __ttc_act        = __tt->add_class("Act");
+      __ttc_post_loop  = __tt->add_class("Post Loop");
+      __ttc_netproc    = __tt->add_class("Net Proc");
+      __ttc_full_loop  = __tt->add_class("Full Loop");
+      __ttc_real_loop  = __tt->add_class("Real Loop");
+    }
+  } catch (Exception &e) {
+    // ignored, if config value is missing we just don't start the time tracker
+  }
+#endif
 }
 
 
@@ -232,12 +257,41 @@ FawkesMainThread::once()
   }
 }
 
+#ifdef USE_TIMETRACKER
+#define TIMETRACK_START(c1, c2, c3)		\
+  if ( __tt ) {					\
+    __tt->ping_start(c1);			\
+    __tt->ping_start(c2);			\
+    __tt->ping_start(c3);			\
+  }
+#define TIMETRACK_INTER(c1, c2)			\
+  if ( __tt ) {					\
+    __tt->ping_end(c1);			\
+    __tt->ping_start(c2);			\
+  }
+#define TIMETRACK_END(c)			\
+  if ( __tt ) {					\
+    __tt->ping_end(c);				\
+  }
+#define TIMETRACK_OUTPUT			\
+  if ( __tt && (++__tt_loopcount % 100) == 0) {	\
+    __tt->print_to_stdout();\
+  }
+#else
+#define TIMETRACK_START(c1, c2, c3)
+#define TIMETRACK_INTER(c1, c2)
+#define TIMETRACK_END(c)
+#define TIMETRACK_OUTPUT
+#endif
+
 /** Thread loop.
  * Runs the main loop.
  */
 void
 FawkesMainThread::loop()
 {
+  TIMETRACK_START(__ttc_real_loop, __ttc_full_loop, __ttc_pre_loop);
+
   if ( __time_wait ) {
     __time_wait->mark_start();
   }
@@ -245,25 +299,42 @@ FawkesMainThread::loop()
   thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
   thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
 
+  TIMETRACK_INTER(__ttc_pre_loop, __ttc_sensor)
+
   thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
   thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
+
+  TIMETRACK_INTER(__ttc_sensor, __ttc_worldstate)
 
   thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
   thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
 
+  TIMETRACK_INTER(__ttc_worldstate, __ttc_think)
+
   thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_THINK );
   thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_THINK );
+
+  TIMETRACK_INTER(__ttc_think, __ttc_skill)
 
   thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_SKILL );
   thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_SKILL );
 
+  TIMETRACK_INTER(__ttc_skill, __ttc_act)
+
   thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_ACT );
   thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_ACT );
+
+  TIMETRACK_INTER(__ttc_act, __ttc_post_loop)
 
   thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
   thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
 
+  TIMETRACK_INTER(__ttc_post_loop, __ttc_netproc)
+
   network_manager->process();
+
+  TIMETRACK_END(__ttc_netproc);
+  TIMETRACK_END(__ttc_real_loop);
 
   test_cancel();
 
@@ -272,4 +343,7 @@ FawkesMainThread::loop()
   } else {
     usleep(0);
   }
+
+  TIMETRACK_END(__ttc_full_loop);
+  TIMETRACK_OUTPUT
 }

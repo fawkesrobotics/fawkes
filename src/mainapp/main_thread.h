@@ -42,6 +42,9 @@ class MultiLogger;
 class HostInfo;
 class Clock;
 class TimeWait;
+#ifdef USE_TIMETRACKER
+class TimeTracker;
+#endif
 
 class FawkesMainThread : public Thread
 {
@@ -70,6 +73,21 @@ class FawkesMainThread : public Thread
 
   char *config_mutable_file;
   const char *config_default_file;
+
+#ifdef USE_TIMETRACKER
+  TimeTracker  *__tt;
+  unsigned int  __tt_loopcount;
+  unsigned int  __ttc_pre_loop;
+  unsigned int  __ttc_sensor;
+  unsigned int  __ttc_worldstate;
+  unsigned int  __ttc_think;
+  unsigned int  __ttc_skill;
+  unsigned int  __ttc_act;
+  unsigned int  __ttc_post_loop;
+  unsigned int  __ttc_netproc;
+  unsigned int  __ttc_full_loop;
+  unsigned int  __ttc_real_loop;
+#endif
 };
 
 #endif

@@ -28,6 +28,8 @@
 #include <mainapp/plugin_list_message.h>
 
 #include <netcomm/utils/dynamic_buffer.h>
+#include <netcomm/fawkes/component_ids.h>
+#include <core/exceptions/software.h>
 #include <cstdlib>
 #include <cstring>
 
@@ -54,9 +56,13 @@ PluginListMessage::PluginListMessage()
  * @param payload message payload
  * @param payload_size total payload size
  */
-PluginListMessage::PluginListMessage(unsigned int component_id, unsigned int msg_id,
+PluginListMessage::PluginListMessage(unsigned int component_id,
+				     unsigned int msg_id __attribute__((__unused__)),
 				     void *payload, size_t payload_size)
 {
+  if ( component_id != FAWKES_CID_PLUGINMANAGER ) {
+    throw TypeMismatchException("PluginListMessage: invalid component ID");
+  }
   plugin_list_msg_t *tmsg = (plugin_list_msg_t *)payload;
   void *plugin_list_payload = (void *)((size_t)payload + sizeof(msg));
   plugin_list = new DynamicBuffer(&(tmsg->plugin_list), plugin_list_payload,

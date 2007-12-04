@@ -23,6 +23,9 @@ BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/libs/netcomm/netcomm.mk
 
+# Add to enable TimeTracker support in Fawkes main application
+#CFLAGS += -DUSE_TIMETRACKER
+
 LIBS_libfawkesmainappmsgs = core utils netcomm
 OBJS_libfawkesmainappmsgs = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*_message.cpp)))))
 
