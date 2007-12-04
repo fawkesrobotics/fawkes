@@ -75,7 +75,7 @@ FirewireCamera::FirewireCamera(dc1394framerate_t framerate,
   _dc1394 = NULL;
   _camera = NULL;
 
-  if ((mode = DC1394_VIDEO_MODE_640x480_YUV422) && (framerate == DC1394_FRAMERATE_30)) {
+  if ((mode == DC1394_VIDEO_MODE_640x480_YUV422) && (framerate == DC1394_FRAMERATE_30)) {
     // cerr  << "When in mode YUV422 @ 640x480 with more than 15 fps. Setting framerate to 15fps." << endl;
     _framerate = DC1394_FRAMERATE_15;
   }

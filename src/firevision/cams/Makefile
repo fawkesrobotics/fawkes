@@ -18,13 +18,13 @@
 BASEDIR = ../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
-CFLAGS   += $(VISION_CFLAGS) -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
+CFLAGS   += $(VISION_CFLAGS)
 LDFLAGS  += $(VISION_LDFLAGS)
 INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-LIBS_libfvcams = $(VISION_CAM_LIBS) utils fvutils
+LIBS_libfvcams = $(VISION_CAM_LIBS) core utils fvutils
 OBJS_libfvcams = camera.o			\
 		 cameracontrol.o		\
 		 cam_exceptions.o		\
@@ -48,6 +48,8 @@ OBJS_libfvcams += bumblebee2.o
 endif
 ifeq ($(HAVE_LEUTRON_CAM),1)
 OBJS_libfvcams += leutron.o
+# Leutron headers are in a bad shape...
+CFLAGS += -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
 endif
 ifeq ($(HAVE_V4L_CAM),1)
 OBJS_libfvcams += v4l.o
