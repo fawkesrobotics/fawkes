@@ -29,6 +29,7 @@
 #include <config/net_messages.h>
 #include <config/sqlite.h>
 
+#include <core/macros.h>
 #include <core/threading/mutex.h>
 #include <netcomm/fawkes/client.h>
 #include <netcomm/fawkes/message.h>
@@ -108,8 +109,9 @@ NetworkConfiguration::~NetworkConfiguration()
  * @param tag optional tag to restore
  */
 void
-NetworkConfiguration::load(const char *name, const char *defaults_name,
-			   const char *tag)
+NetworkConfiguration::load(const char *name __unused,
+			   const char *defaults_name __unused,
+			   const char *tag __unused)
 {
 }
 
@@ -140,7 +142,7 @@ NetworkConfiguration::copy(Configuration *copyconf)
 
 
 void
-NetworkConfiguration::tag(const char *tag)
+NetworkConfiguration::tag(const char *tag __unused)
 {
   mutex->lock();
 

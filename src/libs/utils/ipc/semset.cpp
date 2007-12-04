@@ -253,7 +253,7 @@ SemaphoreSet::lock(unsigned short sem_num, short num)
 
   struct sembuf sop;
   sop.sem_num = sem_num;
-  sop.sem_op  = ((num <= 0) ? num : -num);
+  sop.sem_op  = (short)((num <= 0) ? num : -num);
   sop.sem_flg = 0;
   if ( semop(data->semid, &sop, 1) != 0 ) {
     if ( errno == EINTR ) throw InterruptedException();
@@ -277,7 +277,7 @@ SemaphoreSet::try_lock(unsigned short sem_num, short num)
 
   struct sembuf sop;
   sop.sem_num = sem_num;
-  sop.sem_op  = ((num <= 0) ? num : -num);
+  sop.sem_op  = (short)((num <= 0) ? num : -num);
   sop.sem_flg = IPC_NOWAIT;
   if ( semop(data->semid, &sop, 1) != 0 ) {
     if (errno == EAGAIN) {
@@ -306,7 +306,7 @@ SemaphoreSet::unlock(unsigned short sem_num, short num)
 
   struct sembuf sop;
   sop.sem_num = sem_num;
-  sop.sem_op  = ((num >= 0) ? num : -num);
+  sop.sem_op  = (short)((num >= 0) ? num : -num);
   sop.sem_flg = 0;
   if ( semop(data->semid, &sop, 1) != 0 ) {
     if ( errno == EINTR ) throw InterruptedException();
@@ -328,8 +328,7 @@ SemaphoreSet::set_value(int sem_num, int val)
   union semun s;
   s.val = val;
 
-  int rv = 0;
-  if ( ( rv = semctl(data->semid, sem_num, SETVAL, s)) == -1 ) {
+  if ( semctl(data->semid, sem_num, SETVAL, s) == -1 ) {
     throw SemCannotSetValException();
   }
 }

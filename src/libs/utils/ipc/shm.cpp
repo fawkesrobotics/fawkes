@@ -29,6 +29,7 @@
 #include <utils/ipc/shm_exceptions.h>
 #include <utils/ipc/shm_lister.h>
 #include <utils/ipc/semset.h>
+#include <core/macros.h>
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -1067,13 +1068,14 @@ SharedMemory::erase(char *magic_token,
       SemaphoreSet::destroy(i.semaphore());
     }
 
+    // Mark shared memory segment as destroyed
+    shmctl(i.shmid(), IPC_RMID, NULL);
+
     if ( lister != NULL) {
       lister->print_info(*i, i.shmid(), i.semaphore(), i.segmsize(),
 			 i.databuf());
     }
 
-    // Mark shared memory segment as destroyed
-    shmctl(i.shmid(), IPC_RMID, NULL);
     ++i;
   }
 
@@ -1117,13 +1119,13 @@ SharedMemory::erase_orphaned(char *magic_token,
 	SemaphoreSet::destroy(i.semaphore());
       }
 
+      // Mark shared memory segment as destroyed
+      shmctl(i.shmid(), IPC_RMID, NULL);
+
       if ( lister != NULL) {
 	lister->print_info(*i, i.shmid(), i.semaphore(), i.segmsize(),
 			   i.databuf());
       }
-
-      // Mark shared memory segment as destroyed
-      shmctl(i.shmid(), IPC_RMID, NULL);
 
       ++num_segments;
     }
@@ -1357,7 +1359,7 @@ SharedMemory::SharedMemoryIterator::operator++()
  * @return instance before advancing to the next shared memory segment
  */
 SharedMemory::SharedMemoryIterator
-SharedMemory::SharedMemoryIterator::operator++(int inc)
+SharedMemory::SharedMemoryIterator::operator++(int inc __unused)
 {
   SharedMemoryIterator rv(*this);
   ++(*this);

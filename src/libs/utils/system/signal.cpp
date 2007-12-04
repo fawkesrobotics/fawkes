@@ -29,8 +29,9 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include "utils/system/signal.h"
-#include <stdlib.h>
+#include <utils/system/signal.h>
+#include <core/macros.h>
+#include <cstdlib>
 
 
 /** @class SignalHandler utils/system/signal.h
@@ -64,6 +65,17 @@
 
 SignalManager *  SignalManager::__instance = NULL;
 SignalHandler *  SignalManager::__signal_handlers[NSIG];
+
+/** Invalid constructor. */
+SignalManager::SignalManager()
+{
+}
+
+
+/** Invalid copy constructor. */
+SignalManager::SignalManager(const SignalManager &cc __unused)
+{
+}
 
 
 /** Get the SignalManager instance

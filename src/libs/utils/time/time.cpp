@@ -125,7 +125,7 @@ Time::~Time()
 float
 Time::in_sec() const
 {
-  return (time.tv_sec + time.tv_usec / 1000000.0);
+  return (time.tv_sec + time.tv_usec / 1000000.f);
 }
 
 
@@ -345,7 +345,7 @@ Time::str()
   // heuristic to distinguish times and time ranges
   if (1000000000 < time.tv_sec) {
     localtime_r( &(time.tv_sec), &time_tm );
-    snprintf(timestr, sizeof(timestr), "%lu:%lu", time.tv_sec, time.tv_usec);
+    snprintf(timestr, sizeof(timestr), "%li:%li", time.tv_sec, time.tv_usec);
   } else {
     gmtime_r( &(time.tv_sec), &time_tm );
     asctime_r(&time_tm, timestr);
@@ -366,7 +366,7 @@ Time::str_r(char *s)
   // heuristic to distinguish times and time ranges
   if (1000000000 < time.tv_sec) {
     localtime_r( &(time.tv_sec), &time_tm );
-    snprintf(s, sizeof(timestr), "%lu:%lu", time.tv_sec, time.tv_usec);
+    snprintf(s, sizeof(timestr), "%li:%li", time.tv_sec, time.tv_usec);
   } else {
     gmtime_r( &(time.tv_sec), &time_tm );
     asctime_r(&time_tm, s);

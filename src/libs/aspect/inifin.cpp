@@ -28,6 +28,7 @@
 #include <aspect/inifin.h>
 
 #include <core/threading/thread.h>
+#include <core/macros.h>
 #include <blackboard/blackboard.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
@@ -129,7 +130,7 @@ AspectIniFin::init(Thread *thread)
 {
   // printf("Initializing thread %s\n", thread->name());
 
-  BlockedTimingAspect *blocked_timing_thread;
+  BlockedTimingAspect *blocked_timing_thread __unused;
   if ( (blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread)) != NULL ) {
     if ( thread->opmode() != Thread::OPMODE_WAITFORWAKEUP ) {
       throw CannotInitializeThreadException("Thread '%s' not in WAITFORWAKEUP mode "

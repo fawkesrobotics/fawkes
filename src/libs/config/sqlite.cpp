@@ -26,6 +26,7 @@
  */
 
 #include <config/sqlite.h>
+#include <core/macros.h>
 #include <core/threading/mutex.h>
 
 #include <sqlite3.h>
@@ -239,7 +240,7 @@ SQLiteConfiguration::init()
  */
 void
 SQLiteConfiguration::load(const char *name, const char *defaults_name,
-			  const char *tag)
+			  const char *tag __unused)
 {
   char *errmsg;
   char *filename;
@@ -249,15 +250,16 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
 
   if ( conf_path != NULL ) {
     if ( asprintf(&filename, "%s/%s", conf_path, name) == -1 ) {
-      free(attach_sql);
       throw CouldNotOpenConfigException("Could not create filename");
     }
     if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, conf_path, defaults_name) == -1 ) {
+      free(filename);
       throw CouldNotOpenConfigException("Could not create attachment SQL");
     }
   } else {
     filename = strdup(name);
     if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS_ABSOLUTE, defaults_name) == -1 ) {
+      free(filename);
       throw CouldNotOpenConfigException("Could not create attachment SQL");
     }
   }
@@ -544,7 +546,7 @@ SQLiteConfiguration::get_float(const char *path)
   mutex->lock();
   try {
     stmt = get_value(path, "float");
-    float f = sqlite3_column_double(stmt, 1);
+    float f = (float)sqlite3_column_double(stmt, 1);
     sqlite3_finalize(stmt);
     mutex->unlock();
     return f;
@@ -1580,7 +1582,7 @@ SQLiteConfiguration::SQLiteValueIterator::is_string()
 float
 SQLiteConfiguration::SQLiteValueIterator::get_float()
 {
-  return sqlite3_column_double(stmt, 2);
+  return (float)sqlite3_column_double(stmt, 2);
 }
 
 

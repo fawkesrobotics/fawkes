@@ -29,8 +29,9 @@
 #include <geometry/vector.h>
 #include <geometry/geom_prim.h>
 #include <core/exception.h>
+#include <core/macros.h>
 
-#include <math.h>
+#include <cmath>
 
 using namespace std;
 
@@ -377,8 +378,10 @@ Transform::operator==(const Transform& t) const
  * @param gamma
  */
 void
-Transform::rotmat2euler( const Matrix& m,
-			 float& alpha, float& beta, float& gamma ) const
+Transform::rotmat2euler( const Matrix& m __unused,
+			 float& alpha __unused,
+			 float& beta __unused,
+			 float& gamma __unused) const
 {
   // TODO
 }

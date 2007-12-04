@@ -53,8 +53,8 @@ class SignalManager {
 
  private:
   // Guard constructors, make sure we are a singleton
-  SignalManager() {};
-  SignalManager(const SignalManager& cc) {}
+  SignalManager();
+  SignalManager(const SignalManager& cc);
 
   static SignalManager *__instance;
 

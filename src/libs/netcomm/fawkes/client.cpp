@@ -193,12 +193,10 @@ FawkesNetworkClient::set_wait_timeout(unsigned int wait_timeout)
 void
 FawkesNetworkClient::sleep()
 {
-  short p = 0;
   try {
-    p = s->poll(wait_timeout /* ms timeout */, Socket::POLL_IN);
+    s->poll(wait_timeout /* ms timeout */, Socket::POLL_IN);
   } catch (Exception &e) {
-    // make sure we abort waiting
-    p = Socket::POLL_IN;
+    // ignored
   }
 }
 

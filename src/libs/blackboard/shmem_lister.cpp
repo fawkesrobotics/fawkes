@@ -28,6 +28,7 @@
 #include <blackboard/shmem_lister.h>
 #include <utils/system/console_colors.h>
 #include <utils/ipc/shm.h>
+#include <core/macros.h>
 
 #include <iostream>
 
@@ -108,15 +109,16 @@ BlackBoardSharedMemoryLister::print_no_orphaned_segments()
  * @param memptr pointer to the data segment.
  */
 void
-BlackBoardSharedMemoryLister::print_info(const SharedMemoryHeader *header,
+BlackBoardSharedMemoryLister::print_info(const SharedMemoryHeader *header __unused,
 					 int shm_id, int semaphore,
-					 unsigned int mem_size, const void *memptr)
+					 unsigned int mem_size,
+					 const void *memptr __unused)
 {
   unsigned int nattch = SharedMemory::num_attached(shm_id);
   bool swapable = SharedMemory::is_swapable(shm_id);
   bool destroyed = SharedMemory::is_destroyed(shm_id);
 
-  printf ("%-3d %-10d 0x%08x  %-16d %-12d %s%s%s%s%s\n",
+  printf ("%-3u %-10d 0x%08x  %-16u %-12u %s%s%s%s%s\n",
           ++num, shm_id, semaphore, mem_size, nattch,
  	  ((nattch > 1) ? "active" : "orphaned"),
 	  ((swapable || destroyed) ? " (" : ""),

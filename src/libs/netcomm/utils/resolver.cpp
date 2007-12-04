@@ -37,7 +37,6 @@
 #include <cstdlib>
 #include <cstdio>
 
-
 /** @class NetworkNameResolver <netcomm/utils/resolver.h>
  * Network name and address resolver.
  * This class implements a facility to resolve host names to addresses
@@ -271,7 +270,8 @@ NetworkNameResolver::resolve_address(struct sockaddr *addr, socklen_t addr_len, 
  * @param addrlen length in bytes of addr
  */
 void
-NetworkNameResolver::name_resolved(char *name, struct sockaddr *addr, socklen_t addrlen)
+NetworkNameResolver::name_resolved(char *name, struct sockaddr *addr,
+				   socklen_t addrlen)
 {
   if ( (n2acit = name2addr_cache.find( name )) != name2addr_cache.end() ) {
     // delete old entry
@@ -285,7 +285,8 @@ NetworkNameResolver::name_resolved(char *name, struct sockaddr *addr, socklen_t 
 
 
 void
-NetworkNameResolver::addr_resolved(struct sockaddr *addr, socklen_t addrlen,
+NetworkNameResolver::addr_resolved(struct sockaddr *addr,
+				   socklen_t addrlen,
 				   char *name, bool namefound)
 {
   struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
@@ -308,7 +309,8 @@ NetworkNameResolver::name_resolution_failed(char *name)
 
 
 void
-NetworkNameResolver::address_resolution_failed(struct sockaddr *addr, socklen_t addrlen)
+NetworkNameResolver::address_resolution_failed(struct sockaddr *addr,
+					       socklen_t addrlen)
 {
   free(addr);
 }

@@ -27,6 +27,7 @@
 
 #include <netcomm/dns-sd/avahi_browser.h>
 
+#include <core/macros.h>
 #include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
 
@@ -287,14 +288,14 @@ AvahiBrowser::call_handler_cache_exhausted(const char *type)
  * the search
  */
 void
-AvahiBrowser::browse_callback( AvahiServiceBrowser *b,
+AvahiBrowser::browse_callback( AvahiServiceBrowser *b __unused,
 			       AvahiIfIndex interface,
 			       AvahiProtocol protocol,
 			       AvahiBrowserEvent event,
 			       const char *name,
 			       const char *type,
 			       const char *domain,
-			       AvahiLookupResultFlags flags,
+			       AvahiLookupResultFlags flags __unused,
 			       void *instance)
 {
   AvahiBrowser *ab = static_cast<AvahiBrowser *>(instance);

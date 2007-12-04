@@ -46,7 +46,7 @@ std::string
 StringConversions::toUpper(std::string str)
 {
   for(unsigned int i = 0; i < str.length(); ++i) {
-    str[i] = toupper(str[i]);
+    str[i] = (char)toupper(str[i]);
   }
   return str;
 }
@@ -60,7 +60,7 @@ std::string
 StringConversions::toLower(std::string str)
 {
    for(unsigned int i = 0; i < str.length(); ++i) {
-     str[i] = tolower(str[i]);
+     str[i] = (char)tolower(str[i]);
    }
    return str;
 }
@@ -175,7 +175,7 @@ StringConversions::toInt(std::string s)
 float
 StringConversions::toFloat(std::string s)
 {
-  return atof(s.c_str());
+  return (float)atof(s.c_str());
 }
 
 

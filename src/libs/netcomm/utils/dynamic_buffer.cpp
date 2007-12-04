@@ -144,7 +144,8 @@ DynamicBuffer::append(const void *data, size_t data_size)
 					                     + sizeof(element_header_t));
   _curdata           = (void *)((size_t)_curdata + data_size + sizeof(element_header_t));
   _db->size          = htons(cur_size + sizeof(element_header_t) + data_size);
-  _db->num_elements  = htons(ntohs(_db->num_elements) + 1);
+  uint16_t tmp = ntohs(_db->num_elements) + 1;
+  _db->num_elements  = htons(tmp);
 }
 
 

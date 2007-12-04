@@ -25,9 +25,10 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <core/exception.h>
-
 #include <netcomm/dns-sd/avahi_resolver.h>
+
+#include <core/macros.h>
+#include <core/exception.h>
 
 #include <avahi-common/error.h>
 #include <netinet/in.h>
@@ -243,12 +244,12 @@ AvahiResolver::remove_address_resolver(AvahiAddressResolver *r)
  */
 void
 AvahiResolver::host_name_resolver_callback(AvahiHostNameResolver *r,
-					   AvahiIfIndex interface,
+					   AvahiIfIndex interface __unused,
 					   AvahiProtocol protocol,
 					   AvahiResolverEvent event,
 					   const char *name,
 					   const AvahiAddress *a,
-					   AvahiLookupResultFlags flags,
+					   AvahiLookupResultFlags flags __unused,
 					   void *userdata)
 {
   AvahiResolverCallbackData *cd = static_cast<AvahiResolverCallbackData *>(userdata);
@@ -260,7 +261,7 @@ AvahiResolver::host_name_resolver_callback(AvahiHostNameResolver *r,
   case AVAHI_RESOLVER_FOUND:
     {
       struct sockaddr_in *res = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
-      res->sin_family = avahi_proto_to_af(protocol);
+      res->sin_family = (unsigned short)avahi_proto_to_af(protocol);
       res->sin_addr.s_addr = a->data.ipv4.address;
       
       cd->second->resolved_name(strdup(name), (struct sockaddr *)res, sizeof(struct sockaddr_in));
@@ -282,12 +283,12 @@ AvahiResolver::host_name_resolver_callback(AvahiHostNameResolver *r,
  */
 void
 AvahiResolver::address_resolver_callback(AvahiAddressResolver *r,
-					 AvahiIfIndex interface,
+					 AvahiIfIndex interface __unused,
 					 AvahiProtocol protocol,
 					 AvahiResolverEvent event,
 					 const AvahiAddress *a,
 					 const char *name,
-					 AvahiLookupResultFlags flags,
+					 AvahiLookupResultFlags flags __unused,
 					 void *userdata)
 {
   AvahiResolverCallbackData *cd = static_cast<AvahiResolverCallbackData *>(userdata);
@@ -296,7 +297,7 @@ AvahiResolver::address_resolver_callback(AvahiAddressResolver *r,
   avahi_address_resolver_free(r);
 
   struct sockaddr_in *res = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
-  res->sin_family = avahi_proto_to_af(protocol);
+  res->sin_family = (unsigned short)avahi_proto_to_af(protocol);
   res->sin_addr.s_addr = a->data.ipv4.address;
 
    switch (event) {

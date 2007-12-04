@@ -257,7 +257,7 @@ TimeTracker::print_to_stdout()
 
   for (time_it = times.begin(); time_it != times.end(); ++time_it) {
     char tmp[10];
-    sprintf(tmp, "%3i.", i + 1);
+    sprintf(tmp, "%3u.", i + 1);
     cout << tmp;
     if (comments.count(i) > 0) {
       cout << "  (" << *comments[i] << ")";
@@ -270,7 +270,7 @@ TimeTracker::print_to_stdout()
       diff_sec_start -= 1;
       diff_usec_start = 1000000 + diff_usec_start;
     }
-    diff_msec_start = diff_usec_start / 1000.0;
+    diff_msec_start = diff_usec_start / 1000.f;
 
     diff_sec_last  = (*time_it)->tv_sec  - last_sec;
     diff_usec_last = (*time_it)->tv_usec - last_usec;
@@ -278,7 +278,7 @@ TimeTracker::print_to_stdout()
       diff_sec_last -= 1;
       diff_usec_last = 1000000 + diff_usec_last;
     }
-    diff_msec_last = diff_usec_last / 1000.0;
+    diff_msec_last = diff_usec_last / 1000.f;
 
     last_sec  = (*time_it)->tv_sec;
     last_usec = (*time_it)->tv_usec;

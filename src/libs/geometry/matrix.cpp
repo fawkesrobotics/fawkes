@@ -202,9 +202,9 @@ Matrix::invert()
       {
 	if (row != col)
 	{
-	  float factor = (*this)(row,col);
-	  i.sub_row(row, col, factor);
-	  this->sub_row(row, col, factor);
+	  float factor2 = (*this)(row,col);
+	  i.sub_row(row, col, factor2);
+	  this->sub_row(row, col, factor2);
 	}
       }
     }

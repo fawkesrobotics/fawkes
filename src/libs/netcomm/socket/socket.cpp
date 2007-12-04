@@ -407,7 +407,7 @@ Socket::accept()
 bool
 Socket::available()
 {
-  if (! sock_fd == -1) return false;
+  if (sock_fd == -1) return false;
 
   fd_set rfds;
   struct timeval tv;

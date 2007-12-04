@@ -113,8 +113,6 @@ AvahiServicePublisher::create_services()
   if ( __services.size() == 0) return;
   if ( ! __published) return;
 
-  int ret = 0;
-
   for ( __sit = __services.begin(); __sit != __services.end(); ++__sit) {
 
     if ( (*__sit).second != NULL ) {
@@ -136,18 +134,18 @@ AvahiServicePublisher::create_services()
     for (std::list<std::string>::const_iterator j = l.begin(); j != l.end(); ++j) {
       al = avahi_string_list_add(al, (*j).c_str());
     }
-    if ( (ret = avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_INET,
-						     AVAHI_PUBLISH_USE_MULTICAST,
-						     (*__sit).first->name(), (*__sit).first->type(),
-						     (*__sit).first->domain(), (*__sit).first->host(),
-						     (*__sit).first->port(), al)) < 0) {
+    if ( avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_INET,
+					      AVAHI_PUBLISH_USE_MULTICAST,
+					      (*__sit).first->name(), (*__sit).first->type(),
+					      (*__sit).first->domain(), (*__sit).first->host(),
+					      (*__sit).first->port(), al) < 0) {
       avahi_string_list_free(al);
       throw Exception("Adding Avahi services failed");
     }
     avahi_string_list_free(al);
 
     /* Tell the server to register the service */
-    if ((ret = avahi_entry_group_commit(group)) < 0) {
+    if (avahi_entry_group_commit(group) < 0) {
       throw Exception("Registering Avahi services failed");
     }
   }
