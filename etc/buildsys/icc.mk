@@ -15,7 +15,7 @@
 #   #
 #*****************************************************************************
 
-# Use Intel compiler
+# Use Intel compiler, only icc >= 10.1 is supported
 
 # We ignore several warnings that are not important to use (-wd flag):
 # 177: entity-kind "entity" was declared but never referenced (like catch Exception, if just re-thrown or unused)

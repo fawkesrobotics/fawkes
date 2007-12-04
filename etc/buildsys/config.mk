@@ -55,7 +55,8 @@ PKGCONFIG = $(shell which pkg-config)
 #endif
 
 ### Features ###
-HAVE_OPENMP=1
+# If gcc is used, enable OpenMP?
+GCC_USE_OPENMP=1
 
 ### CFLAGS, preprocessor, compiler and linker options
 LDFLAGS_LIBDIRS  = -Wl,-R$(LIBDIR) $(LIBDIRS:%=-Wl,-R%)
@@ -63,8 +64,10 @@ DEFAULT_INCLUDES = -I$(abspath $(BASEDIR)/src) -I$(abspath $(BASEDIR)/src/libs) 
 CFLAGS_BASE      = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP)
 LDFLAGS_BASE     = -L$(LIBDIR) $(LDFLAGS_OPENMP)
 LDFLAGS_SHARED   = -shared
-CFLAGS_OPENMP    = -fopenmp
-LDFLAGS_OPENMP   = -lgomp
+ifeq ($(GCC_USE_OPENMP),1)
+  CFLAGS_OPENMP    = -fopenmp
+  LDFLAGS_OPENMP   = -lgomp
+endif
 
 ### colors, to be used as command, not via echo
 BLACK		= tput setaf 0
