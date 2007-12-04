@@ -251,10 +251,8 @@ Bulb::load(const char *filename)
     throw Exception("Cannot open bulb file");
   }
 
-  int err = 0;
   bulb_file_header_t h;
-
-  if ( (fread(&h, sizeof(h), 1, f) == 0) && (! feof(f)) && ((err = ferror(f)) != 0)) {
+  if ( (fread(&h, sizeof(h), 1, f) == 0) && (! feof(f)) && (ferror(f) != 0)) {
     throw Exception("Bulb file header invalid");
   }
 
@@ -269,7 +267,7 @@ Bulb::load(const char *filename)
   erase();
   create();
 
-  if ( (fread(lut, lut_bytes, 1, f) == 0) && (! feof(f)) && ((err = ferror(f)) != 0)) {
+  if ( (fread(lut, lut_bytes, 1, f) == 0) && (! feof(f)) && (ferror(f) != 0)) {
     erase();
     throw Exception("Could not read bulb data from file");
   }

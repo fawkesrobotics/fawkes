@@ -135,10 +135,9 @@ FvOmniBallPipelineThread::init()
   
   free(bulb_matrix_file);
 
-  // scanline model
-  cart_coord_t center;
-  center = mirror->getCenter();
+  // cart_coord_t center = mirror->getCenter();
 
+  // scanline model
   scanline = new ScanlineGrid( img_width, img_height, 5, 5 );
   
   // color model

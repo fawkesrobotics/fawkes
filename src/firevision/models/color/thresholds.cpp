@@ -49,7 +49,7 @@ ColorModelThresholds::determine(unsigned int y,
        v <= THRESHOLD_GREEN_V_HIGH) {
     return C_GREEN;
   }
-  else if (THRESHOLD_ORANGE_U_LOW <= u &&
+  else if (/*THRESHOLD_ORANGE_U_LOW <= u &&*/
 	   u <= THRESHOLD_ORANGE_U_HIGH &&
 	   v >= THRESHOLD_ORANGE_V_LOW) {
     return C_ORANGE;

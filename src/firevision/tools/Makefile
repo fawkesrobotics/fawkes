@@ -20,7 +20,7 @@ include $(BASEDIR)/src/firevision/fvconf.mk
 include $(LIBSRCDIR)/netcomm/netcomm.mk
 include $(BASEDIR)/etc/buildsys/gui.mk
 
-CFLAGS   += $(VISION_CFLAGS) -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
+CFLAGS   += $(VISION_CFLAGS)
 LDFLAGS  += $(VISION_LDFLAGS)
 INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)

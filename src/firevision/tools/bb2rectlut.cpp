@@ -253,9 +253,9 @@ print_info(ArgumentParser *argp)
 	     rif->guid(), rif->model());
 
       unsigned int u = 1;
-      RectificationInfoFile::RectInfoBlockVector::const_iterator i;
-      for (i = blocks.begin(); i != blocks.end(); ++i) {
-	RectificationInfoBlock *rib = *i;
+      RectificationInfoFile::RectInfoBlockVector::const_iterator b;
+      for (b = blocks.begin(); b != blocks.end(); ++b) {
+	RectificationInfoBlock *rib = *b;
 
 	printf("\nRectInfo Block No. %u\n"
 	       "Type:       %s\n"
@@ -273,8 +273,8 @@ print_info(ArgumentParser *argp)
 	    if ( rlib == NULL ) {
 	      printf("** Failure to access LUT_16x16\n");
 	    } else {
-	      printf("LUT width:  %u\n"
-		     "LUT height: %u\n",
+	      printf("LUT width:  %hu\n"
+		     "LUT height: %hu\n",
 		     rlib->pixel_width(), rlib->pixel_height());
 	    }
 	  }

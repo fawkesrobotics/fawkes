@@ -46,13 +46,13 @@ class RectificationInfoFile
    */
   typedef std::vector<RectificationInfoBlock *> RectInfoBlockVector;
 
-  uint8_t       version();
+  unsigned int  version();
   uint64_t      guid();
   const char *  model();
   bool          is_big_endian();
   bool          is_little_endian();
 
-  uint8_t       num_blocks();
+  unsigned int  num_blocks();
 
   void add_rectinfo_block(RectificationInfoBlock *block);
   void write(const char *file_name);

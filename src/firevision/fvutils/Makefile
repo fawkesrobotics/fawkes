@@ -55,6 +55,3 @@ LIBS_all = $(LIBDIR)/libfvutils.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
-test:
-	@echo $(OBJS_all)
-

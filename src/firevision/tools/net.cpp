@@ -211,7 +211,7 @@ class FireVisionNetworkTool
 
     char addrp[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &(s->sin_addr), addrp, sizeof(addrp));
-    printf("Found %s%s%s (%s/%s on %u), querying\n",
+    printf("Found %s%s%s (%s/%s on %hu), querying\n",
 	   std::c_blue, name, std::c_normal, host_name, addrp, port);
 
     __client = new FuseClient(host_name, port, this);
@@ -354,7 +354,7 @@ class FireVisionNetworkTool
       if ( port != NULL ) {
 	port_num = atoi(port);
 	if ( (port_num < 0) || (port_num > 0xFFFF) ) {
-	throw OutOfBoundsException("Invalid port", port_num, 0, 0xFFFF);
+	  throw OutOfBoundsException("Invalid port", port_num, 0, 0xFFFF);
 	}
       }
 

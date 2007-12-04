@@ -115,7 +115,7 @@ PNMWriter::set_buffer(colorspace_t cspace, unsigned char *yuv422_planar_buf)
 	  }
 	} else {
 	  // PNM_PBM_ASCII
-	  sprintf((char *)buffer, "%1u ", y2);
+	  sprintf((char *)buffer, "%c ", y2);
 	  buffer += 2;
 	}
       }
@@ -133,7 +133,7 @@ PNMWriter::set_buffer(colorspace_t cspace, unsigned char *yuv422_planar_buf)
 	  *buffer++ = y1;
 	} else {
 	  // PNM_PGM_ASCII
-	  sprintf((char *)buffer, "%3u ", y1);
+	  sprintf((char *)buffer, "%3c ", y1);
 	  buffer += 4;
 	}
       }
@@ -155,11 +155,11 @@ PNMWriter::set_buffer(colorspace_t cspace, unsigned char *yuv422_planar_buf)
 	v  = *vp++;
 	
 	pixel_yuv_to_rgb(y1, u, v, &r, &g, &b);
-	sprintf((char *)buffer, "%3u %3u %3u  ", r, g, b);
+	sprintf((char *)buffer, "%3c %3c %3c  ", r, g, b);
 	buffer += 13;
 
 	pixel_yuv_to_rgb(y2, u, v, &r, &g, &b);
-	sprintf((char *)buffer, "%3u %3u %3u  ", r, g, b);
+	sprintf((char *)buffer, "%3c %3c %3c  ", r, g, b);
 	buffer += 13;
       }
     }

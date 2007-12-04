@@ -27,6 +27,7 @@
  */
 
 #include <fvutils/color/yuvrgb.h>
+#include <core/macros.h>
 
 #include <fvutils/cpu/mmx.h>
 
@@ -271,14 +272,14 @@ yuv422packed_to_bgr_with_alpha_plainc(unsigned char *YUV, unsigned char *BGR,
 #define RZ(i)  (i >> (BITRES - RES))
 #define FOUR(i) {i, i, i, i}
 
-__attribute__ ((aligned (8))) const volatile unsigned short _const_crvcrv[4] = FOUR(RZ(CRV));
-__attribute__ ((aligned (8))) const volatile unsigned short _const_cbucbu[4] = FOUR(RZ(CBU));
-__attribute__ ((aligned (8))) const volatile unsigned short _const_cgucgu[4] = FOUR(RZ(CGU));
-__attribute__ ((aligned (8))) const volatile unsigned short _const_cgvcgv[4] = FOUR(RZ(CGV));
-__attribute__ ((aligned (8))) const volatile unsigned short _const_ymul  [4] = FOUR(RZ(YMUL));
-__attribute__ ((aligned (8))) const volatile unsigned short _const_128   [4] = FOUR(128);
-__attribute__ ((aligned (8))) const volatile unsigned short _const_32    [4] = FOUR(RZ(OFF));
-__attribute__ ((aligned (8))) const volatile unsigned short _const_16    [4] = FOUR(16);
+__aligned(8) const volatile unsigned short _const_crvcrv[4] = FOUR(RZ(CRV));
+__aligned(8) const volatile unsigned short _const_cbucbu[4] = FOUR(RZ(CBU));
+__aligned(8) const volatile unsigned short _const_cgucgu[4] = FOUR(RZ(CGU));
+__aligned(8) const volatile unsigned short _const_cgvcgv[4] = FOUR(RZ(CGV));
+__aligned(8) const volatile unsigned short _const_ymul  [4] = FOUR(RZ(YMUL));
+__aligned(8) const volatile unsigned short _const_128   [4] = FOUR(128);
+__aligned(8) const volatile unsigned short _const_32    [4] = FOUR(RZ(OFF));
+__aligned(8) const volatile unsigned short _const_16    [4] = FOUR(16);
 
 #define CONST_CRVCRV *_const_crvcrv
 #define CONST_CBUCBU *_const_cbucbu

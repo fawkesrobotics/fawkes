@@ -191,7 +191,7 @@ SharedMemoryLookupTable::cleanup()
   SharedMemoryLookupTableLister *lister = new SharedMemoryLookupTableLister();
   SharedMemoryLookupTableHeader *h      = new SharedMemoryLookupTableHeader();
 
-  SharedMemory::erase(FIREVISION_SHM_LUT_MAGIC_TOKEN, h, lister);
+  SharedMemory::erase_orphaned(FIREVISION_SHM_LUT_MAGIC_TOKEN, h, lister);
 
   delete lister;
   delete h;
@@ -537,7 +537,7 @@ SharedMemoryLookupTableLister::print_info(const SharedMemoryHeader *header,
 
   SharedMemoryLookupTableHeader *h = (SharedMemoryLookupTableHeader *)header;
 
-  printf("%-23s %-10d %-10d %-10d %-9d %-9d %s%s\n",
+  printf("%-23s %-10d %-10d %-10u %-9u %-9u %s%s\n",
 	 h->lut_id(), shm_id, semaphore, mem_size,
 	 h->width(), h->height(),
 	 (SharedMemory::is_swapable(shm_id) ? "S" : ""),

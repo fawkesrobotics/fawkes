@@ -34,6 +34,7 @@
 
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
+#include <core/exceptions/software.h>
 #include <netcomm/socket/stream.h>
 
 #include <cstring>
@@ -183,12 +184,9 @@ FuseClient::enqueue(FUSE_message_type_t type)
 void
 FuseClient::sleep()
 {
-  short p = 0;
   try {
-    p = __socket->poll(__wait_timeout /* ms timeout */, Socket::POLL_IN);
+    __socket->poll(__wait_timeout /* ms timeout */, Socket::POLL_IN);
   } catch (Exception &e) {
-    // make sure we abort waiting
-    p = Socket::POLL_IN;
   }
 }
 
@@ -235,7 +233,6 @@ FuseClient::loop()
   if ( wake ) {
     __waitcond->wake_all();
   }
-
   __mutex->unlock();
 }
 

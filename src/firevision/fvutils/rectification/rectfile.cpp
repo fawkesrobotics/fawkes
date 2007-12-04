@@ -96,7 +96,7 @@ RectificationInfoFile::~RectificationInfoFile()
 /** Get the version of the file.
  * @return version of the file (or the current supported version if no file was loaded)
  */
-uint8_t
+unsigned int
 RectificationInfoFile::version()
 {
   return _header->version;
@@ -126,7 +126,7 @@ RectificationInfoFile::is_little_endian()
 /** Get the number of available info blocks.
  * @return number of available info blocks
  */
-uint8_t
+unsigned int
 RectificationInfoFile::num_blocks()
 {
   return _header->num_blocks;

@@ -31,6 +31,7 @@
 
 #include <fvutils/color/zauberstab.h>
 #include <fvutils/color/yuv.h>
+#include <core/macros.h>
 
 using namespace std;
 
@@ -132,7 +133,9 @@ Zauberstab::findRegion(int seedX,
   if (width == 0) return;
   if (height == 0) return;
 
-  unsigned char py=0, pu=0, pv=0;
+  unsigned char py __unused;
+  unsigned char pu __unused;
+  unsigned char pv;
 
   // delete all slices
   for (unsigned int i = 0; i < region->slices->size(); i++) {
@@ -217,7 +220,9 @@ void
 Zauberstab::addRegion(int seedX,
 		      int seedY) {
 
-  unsigned char py=0, pu=0, pv=0;
+  unsigned char py __unused;
+  unsigned char pu __unused;
+  unsigned char pv=0;
 
   // STEP 1:
   // first of all find the region around (seedX, seedY)
@@ -323,7 +328,9 @@ Zauberstab::findSlice(int x,
   slice->leftX = x;
   slice->rightX = x;
 
-  unsigned char py=0, pu=0, pv=0;
+  unsigned char py __unused;
+  unsigned char pu __unused;
+  unsigned char pv=0;
   int tmpX = x + 1;
 
   YUV422_PLANAR_YUV(buffer, width, height, tmpX, y, py, pu, pv);

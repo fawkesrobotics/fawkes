@@ -188,10 +188,10 @@ BulbGenerator::generate()
 	    float phi_sample = data->getAngle(u, v);
 		
 	    // calculate distance between (r_sample, phi_sample) and (r, phi)
-	    float dist = sqrt( (fabs(float(x)) - fabs(float(u))) *
-			       (fabs(float(x)) - fabs(float(u)))   +
-			       (fabs(float(y)) - fabs(float(v))) *
-			       (fabs(float(y)) - fabs(float(v)))     );
+	    dist = sqrt( (fabs(float(x)) - fabs(float(u))) *
+			 (fabs(float(x)) - fabs(float(u)))   +
+			 (fabs(float(y)) - fabs(float(v))) *
+			 (fabs(float(y)) - fabs(float(v)))     );
 
 	    // update sector points
 	    if (dist < dist_1_minimal && 
@@ -288,10 +288,10 @@ BulbGenerator::generate()
 				   (float(v) - center_y)     );
 
 	    // calculate distance between (r_sample, phi_sample) and (r, phi)
-	    float dist = sqrt( (fabs(float(x)) - fabs(float(u))) *
-			       (fabs(float(x)) - fabs(float(u)))   +
-			       (fabs(float(y)) - fabs(float(v))) *
-			       (fabs(float(y)) - fabs(float(v)))     );
+	    dist = sqrt( (fabs(float(x)) - fabs(float(u))) *
+			 (fabs(float(x)) - fabs(float(u)))   +
+			 (fabs(float(y)) - fabs(float(v))) *
+			 (fabs(float(y)) - fabs(float(v)))     );
 
 
 	    // update sector points

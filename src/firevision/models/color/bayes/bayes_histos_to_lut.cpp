@@ -129,7 +129,7 @@ BayesHistosToLut::getObjectProb(hint_t object)
     break;
   }
 
-  return 0.0f;
+  //return 0.0f;
 
   /*
   if ( object < object_probabilities.size() ) {

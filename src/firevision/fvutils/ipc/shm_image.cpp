@@ -430,7 +430,7 @@ SharedMemoryImageBuffer::cleanup()
   SharedMemoryImageBufferLister *lister = new SharedMemoryImageBufferLister();
   SharedMemoryImageBufferHeader *h      = new SharedMemoryImageBufferHeader();
 
-  SharedMemory::erase(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h, lister);
+  SharedMemory::erase_orphaned(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h, lister);
 
   delete lister;
   delete h;
@@ -815,7 +815,7 @@ SharedMemoryImageBufferLister::print_info(const SharedMemoryHeader *header,
 
   const char *colorspace = colorspace_to_string(h->colorspace());
 
-  printf("%-20s %-10d %-10d %-9d %-16s %-5d %-5d %s%s\n",
+  printf("%-20s %-10d %-10d %-9u %-16s %-5u %-5u %s%s\n",
 	 h->image_id(), shm_id, semaphore, mem_size, colorspace,
 	 h->width(), h->height(),
 	 (SharedMemory::is_swapable(shm_id) ? "S" : ""),

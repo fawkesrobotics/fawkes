@@ -178,8 +178,7 @@ ColorModelLookupTable::load_to_buffer(const char *file, unsigned char *buffer,
   }
 
 
-  int err = 0;
-  if ( (fread(buffer, buffer_size, 1, f) == 0) && (! feof(f)) && ((err = ferror(f)) != 0)) {
+  if ( (fread(buffer, buffer_size, 1, f) == 0) && (! feof(f)) && (ferror(f) != 0)) {
     fclose(f);
     throw FileReadException(file, errno, "Could not read colormap data from file");
   }

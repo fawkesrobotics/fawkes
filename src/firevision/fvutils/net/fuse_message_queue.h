@@ -29,7 +29,6 @@
 #define __FIREVISION_FVUTILS_NET_FUSE_MESSAGE_QUEUE_H_
 
 #include <core/utils/lock_queue.h>
-
 #include <fvutils/net/fuse_message.h>
 
 /** @class FuseNetworkMessageQueue <fvutils/net/fuse_message_queue.h>
