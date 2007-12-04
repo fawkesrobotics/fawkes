@@ -31,8 +31,7 @@ LIBXMLPP = $(shell $(PKGCONFIG) libxml++-2.6; echo $$?)
 ifeq ($(LIBXMLPP),1)
   WARN_TARGETS += warning_libxmlpp
 else
-CFLAGS = -g \
-	-DINTERFACEDIR=\"$(realpath $(SRCDIR))\" \
+CFLAGS += -DINTERFACEDIR=\"$(realpath $(SRCDIR))\" \
 	$(shell pkg-config --cflags libxml++-2.6)
 
 LIBS_interface_generator = core utils

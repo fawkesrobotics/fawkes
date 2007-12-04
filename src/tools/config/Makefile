@@ -22,7 +22,7 @@ BASEDIR = ../../..
 
 CFLAGS = -g
 
-LIBS_config = core utils config
+LIBS_config = core utils config netcomm
 OBJS_config = main.o
 
 OBJS_all =	$(OBJS_config)

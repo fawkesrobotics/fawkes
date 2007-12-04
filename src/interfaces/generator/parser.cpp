@@ -278,7 +278,7 @@ InterfaceParser::parse()
       std::string value;
       std::string const_name;
     
-      const Element * el = dynamic_cast<const Element *>(*i);
+      el = dynamic_cast<const Element *>(*i);
       if ( el ) {
 	// valid element
 	Attribute *attr;
@@ -342,7 +342,7 @@ InterfaceParser::parse()
       }
 
       string enum_name;
-      const Element * el = dynamic_cast<const Element *>(*i);
+      el = dynamic_cast<const Element *>(*i);
       if ( el ) {
 	// valid element
 	Attribute *attr;
@@ -367,7 +367,7 @@ InterfaceParser::parse()
       for (NodeSet::iterator j = items.begin(); j != items.end(); ++j) {
 
 	std::string item_name;
-	const Element * el = dynamic_cast<const Element *>(*j);
+	el = dynamic_cast<const Element *>(*j);
 	if ( el ) {
 	  // valid element
 	  Attribute *attr;
@@ -381,7 +381,7 @@ InterfaceParser::parse()
 	  throw InterfaceGeneratorInvalidContentException("enum item is not an element");
 	}
 	
-	NodeSet comment_set = (*j)->find("text()");
+	comment_set = (*j)->find("text()");
 	if ( comment_set.size() == 0) {
 	  throw InterfaceGeneratorInvalidContentException("enum item without comment");
 	}
@@ -440,7 +440,7 @@ InterfaceParser::parse()
     std::string msg_name;
     std::string msg_comment;
 
-    const Element * el = dynamic_cast<const Element *>(*i);
+    el = dynamic_cast<const Element *>(*i);
     if ( el ) {
       Attribute *attr;
       attr = el->get_attribute("name");
@@ -452,11 +452,11 @@ InterfaceParser::parse()
       throw InterfaceGeneratorInvalidContentException("message is not an element");
     }
 
-    NodeSet comment_set = (*i)->find("text()");
+    comment_set = (*i)->find("text()");
     if ( comment_set.size() == 0) {
       throw InterfaceGeneratorInvalidContentException("message without comment");
     }
-    const TextNode *comment_node = dynamic_cast<const TextNode *>(comment_set[0]);
+    comment_node = dynamic_cast<const TextNode *>(comment_set[0]);
     if ( comment_node ) {
       msg_comment = comment_node->get_content();
     } else {
@@ -487,10 +487,10 @@ InterfaceParser::parse()
 	throw InterfaceGeneratorInvalidContentException("message ref not a text node");
       }
     }
-    for (vector<InterfaceField>::iterator i = msg_fields.begin(); i != msg_fields.end(); ++i) {
-      for (vector<InterfaceField>::iterator j = i + 1; j != msg_fields.end(); ++j) {
-	if ( (*i).getName() == (*j).getName() ) {
-	  throw InterfaceGeneratorAmbiguousNameException((*i).getName().c_str(), "message field");
+    for (vector<InterfaceField>::iterator k = msg_fields.begin(); k != msg_fields.end(); ++k) {
+      for (vector<InterfaceField>::iterator j = k + 1; j != msg_fields.end(); ++j) {
+	if ( (*k).getName() == (*j).getName() ) {
+	  throw InterfaceGeneratorAmbiguousNameException((*k).getName().c_str(), "message field");
 	}
       }
     }

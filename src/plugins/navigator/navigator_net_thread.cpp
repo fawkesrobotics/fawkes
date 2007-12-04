@@ -259,10 +259,10 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
             }
           last_motor_control_thread_name = strdup(motor_interface->controller_thread_name());
 
-          MotorInterface::AcquireControlMessage* msg = new  MotorInterface::AcquireControlMessage();
-          msg->set_thread_id(thread_id());
-          msg->set_thread_name(name());
-          motor_interface->msgq_enqueue(msg);
+          MotorInterface::AcquireControlMessage* acmsg = new MotorInterface::AcquireControlMessage();
+          acmsg->set_thread_id(thread_id());
+          acmsg->set_thread_name(name());
+          motor_interface->msgq_enqueue(acmsg);
 
           logger->log_debug("NavigatorNetworkThread", "Client %u subscribed as motor controller", connected_control_client);
         }
@@ -299,10 +299,10 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
           else if(u->unsub_type_motor_control)
             {
               connected_control_client = 0;
-              MotorInterface::AcquireControlMessage* msg = new  MotorInterface::AcquireControlMessage();
-              msg->set_thread_id(last_motor_control_thread_id);
-              msg->set_thread_name(last_motor_control_thread_name);
-              motor_interface->msgq_enqueue(msg);
+              MotorInterface::AcquireControlMessage* acmsg = new  MotorInterface::AcquireControlMessage();
+              acmsg->set_thread_id(last_motor_control_thread_id);
+              acmsg->set_thread_name(last_motor_control_thread_name);
+              motor_interface->msgq_enqueue(acmsg);
               last_motor_control_thread_id = 0;
             }
           else if(u->unsub_type_navigator_control)
@@ -321,12 +321,12 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
       logger->log_info("NavigatorNetworkThread", "Message of type target message received");
       navigator_target_message_t *u = (navigator_target_message_t *)msg->payload();
 
-      NavigatorInterface::TargetMessage* msg = new  NavigatorInterface::TargetMessage();
+      NavigatorInterface::TargetMessage* tmsg = new  NavigatorInterface::TargetMessage();
 
-      msg->set_x(u->x);
-      msg->set_y(u->y);
+      tmsg->set_x(u->x);
+      tmsg->set_y(u->y);
 
-      navigator_interface->msgq_enqueue(msg);
+      navigator_interface->msgq_enqueue(tmsg);
     }
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_VELOCITY
           && msg->clid() == connected_control_client)
@@ -334,9 +334,9 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
       logger->log_info("NavigatorNetworkThread", "Message of type velocity message received");
       navigator_velocity_message_t *u = (navigator_velocity_message_t *)msg->payload();
 
-      NavigatorInterface::VelocityMessage* msg = new  NavigatorInterface::VelocityMessage();
-      msg->set_velocity(u->value);
-      navigator_interface->msgq_enqueue(msg);
+      NavigatorInterface::VelocityMessage* vmsg = new  NavigatorInterface::VelocityMessage();
+      vmsg->set_velocity(u->value);
+      navigator_interface->msgq_enqueue(vmsg);
     }
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_TRANS_ROT
           && msg->clid() == connected_control_client)
@@ -346,27 +346,27 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
 
       if(u->type_trans_rot)
         {
-          MotorInterface::TransRotMessage* msg = new  MotorInterface::TransRotMessage();
+          MotorInterface::TransRotMessage* trmsg = new  MotorInterface::TransRotMessage();
 
-          msg->set_vx(u->forward);
-          msg->set_vy(u->sideward);
-          msg->set_omega(u->rotation);
-          motor_interface->msgq_enqueue(msg);
+          trmsg->set_vx(u->forward);
+          trmsg->set_vy(u->sideward);
+          trmsg->set_omega(u->rotation);
+          motor_interface->msgq_enqueue(trmsg);
         }
       else if(u->type_trans)
         {
-          MotorInterface::TransMessage* msg = new  MotorInterface::TransMessage();
+          MotorInterface::TransMessage* tmsg = new  MotorInterface::TransMessage();
 
-          msg->set_vx(u->forward);
-          msg->set_vy(u->sideward);
-          motor_interface->msgq_enqueue(msg);
+          tmsg->set_vx(u->forward);
+          tmsg->set_vy(u->sideward);
+          motor_interface->msgq_enqueue(tmsg);
         }
       else if(u->type_rot)
         {
-          MotorInterface::RotMessage* msg = new  MotorInterface::RotMessage();
+          MotorInterface::RotMessage* rmsg = new  MotorInterface::RotMessage();
 
-          msg->set_omega(u->rotation);
-          motor_interface->msgq_enqueue(msg);
+          rmsg->set_omega(u->rotation);
+          motor_interface->msgq_enqueue(rmsg);
         }
     }
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_RPM
@@ -375,11 +375,11 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
       logger->log_info("NavigatorNetworkThread", "Message of type rpm message received");
       navigator_rpm_message_t *u = (navigator_rpm_message_t *)msg->payload();
 
-      MotorInterface::DriveRPMMessage* msg = new  MotorInterface::DriveRPMMessage();
-      msg->set_front_left(u->left);
-      msg->set_rear(u->rear);
-      msg->set_front_right(u->right);
-      motor_interface->msgq_enqueue(msg);
+      MotorInterface::DriveRPMMessage* drmsg = new  MotorInterface::DriveRPMMessage();
+      drmsg->set_front_left(u->left);
+      drmsg->set_rear(u->rear);
+      drmsg->set_front_right(u->right);
+      motor_interface->msgq_enqueue(drmsg);
     }
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_ORBIT
           && msg->clid() == connected_control_client)
@@ -387,17 +387,17 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
       logger->log_info("NavigatorNetworkThread", "Message of type orbit message received");
       navigator_orbit_message_t *u = (navigator_orbit_message_t *)msg->payload();
 
-      MotorInterface::OrbitMessage* msg = new  MotorInterface::OrbitMessage();
-      msg->set_px(u->orbit_center_x);
-      msg->set_py(u->orbit_center_y);
-      msg->set_omega(u->angular_velocity);
-      motor_interface->msgq_enqueue(msg);
+      MotorInterface::OrbitMessage* ommsg = new MotorInterface::OrbitMessage();
+      ommsg->set_px(u->orbit_center_x);
+      ommsg->set_py(u->orbit_center_y);
+      ommsg->set_omega(u->angular_velocity);
+      motor_interface->msgq_enqueue(ommsg);
     }
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_RESET_ODOMETRY
           && msg->clid() == connected_control_client)
     {
-      MotorInterface::ResetOdometryMessage* msg = new MotorInterface::ResetOdometryMessage();
-      motor_interface->msgq_enqueue(msg);
+      MotorInterface::ResetOdometryMessage* romsg = new MotorInterface::ResetOdometryMessage();
+      motor_interface->msgq_enqueue(romsg);
     }
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_KICK
           && msg->clid() == connected_control_client)
@@ -410,12 +410,12 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
           && msg->clid() == connected_control_client)
     {
       navigator_obstacle_msg_t *u = (navigator_obstacle_msg_t *)msg->payload();
-      NavigatorInterface::ObstacleMessage* msg = new  NavigatorInterface::ObstacleMessage();
+      NavigatorInterface::ObstacleMessage* omsg = new  NavigatorInterface::ObstacleMessage();
 
-      msg->set_x(u->x);
-      msg->set_y(u->y);
-      msg->set_width(u->width);
-      navigator_interface->msgq_enqueue(msg);
+      omsg->set_x(u->x);
+      omsg->set_y(u->y);
+      omsg->set_width(u->width);
+      navigator_interface->msgq_enqueue(omsg);
     }
   else
     {

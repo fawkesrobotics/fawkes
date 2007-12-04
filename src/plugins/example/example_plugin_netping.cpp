@@ -59,7 +59,7 @@ class ExamplePluginClientNetworkReceiver : public FawkesNetworkClientHandler
   {
     if ( m->payload_size() == sizeof(unsigned int) ) {
       unsigned int *u = (unsigned int *)m->payload();
-      printf("Received message of type %u with payload u=%u\n", m->msgid(), *u);
+      printf("Received message of type %hu with payload u=%u\n", m->msgid(), *u);
     } else {
       printf("Received message of invalid size, ignoring\n");
     }

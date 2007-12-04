@@ -196,9 +196,9 @@ JoystickTool::inbound_received(FawkesNetworkMessage *msg) throw()
 
           navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
           sub_msg->sub_type_motor_control = 1;
-          FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
-          net_client->enqueue(msg);
-          msg->unref();
+          FawkesNetworkMessage *fmsg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
+          net_client->enqueue(fmsg);
+          fmsg->unref();
         }
     }
   else if (msg->msgid() == MSG_PLUGIN_LOADED_LIST )
@@ -218,9 +218,9 @@ JoystickTool::inbound_received(FawkesNetworkMessage *msg) throw()
                   
                   navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
                   sub_msg->sub_type_motor_control = 1;
-                  FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
-                  net_client->enqueue(msg);
-                  msg->unref();
+                  FawkesNetworkMessage *fmsg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
+                  net_client->enqueue(fmsg);
+                  fmsg->unref();
                 }
               free(p);
             }

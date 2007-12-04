@@ -52,9 +52,9 @@ main(int argc, char **argv)
   cout << endl << cblue << "Fawkes BlackBoard Memory Info" << cnormal << endl
        << "========================================================================" << endl;
 
-  printf("Memory Size: %s%8d%s %sB%s  BlackBoard version: %s%u%s\n"
-	 "Free Memory: %s%8d%s %sB%s  Alloc. memory: %s%8d%s %sB%s  Overhang: %s%8d%s %sB%s\n"
-	 "Free Chunks: %s%8d%s    Alloc. chunks: %s%8d%s\n",
+  printf("Memory Size: %s%8u%s %sB%s  BlackBoard version: %s%u%s\n"
+	 "Free Memory: %s%8u%s %sB%s  Alloc. memory: %s%8u%s %sB%s  Overhang: %s%8u%s %sB%s\n"
+	 "Free Chunks: %s%8u%s    Alloc. chunks: %s%8u%s\n",
  	 cdarkgray.c_str(), memmgr->memory_size(), cnormal.c_str(),
 	 clightgray.c_str(), cnormal.c_str(),
 	 cdarkgray.c_str(), memmgr->version(), cnormal.c_str(),
@@ -93,7 +93,7 @@ main(int argc, char **argv)
 	break;
       } else {
 	ih = (interface_header_t *)*cit;
-	printf("%7d  %8d  %sT%s %-32s %6d  %3d  %1d/%-3d\n%18s %sI%s %-32s\n",
+	printf("%7u  %8u  %sT%s %-32s %6u  %3u  %1d/%-3d\n%18s %sI%s %-32s\n",
 	       cit.size(), cit.overhang(), clightgray.c_str(), cnormal.c_str(), ih->type,
 	       ih->serial, ih->refcount, ih->flag_writer_active, ih->num_readers,
 	       "", clightgray.c_str(), cnormal.c_str(), ih->id);

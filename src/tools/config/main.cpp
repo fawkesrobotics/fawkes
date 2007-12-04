@@ -249,26 +249,26 @@ main(int argc, char **argv)
 	  }
 	} else if ( desired_type == "uint" ) {
 	  char *endptr;
-	  long int i = strtol(args[2], &endptr, 10);
-	  if ( (endptr[0] != 0) || (i < 0) ) {
+	  long int li = strtol(args[2], &endptr, 10);
+	  if ( (endptr[0] != 0) || (li < 0) ) {
 	    printf("ERROR: '%s' is not an unsigned int\n", args[2]);
 	  } else {
 	    if ( set_def ) {
-	      netconf->set_uint(args[1], i);
+	      netconf->set_uint(args[1], li);
 	    } else {
-	      netconf->set_default_uint(args[1], i);
+	      netconf->set_default_uint(args[1], li);
 	    }
 	  }
 	} else if ( desired_type == "int" ) {
 	  char *endptr;
-	  long int i = strtol(args[2], &endptr, 10);
+	  long int li = strtol(args[2], &endptr, 10);
 	  if ( endptr[0] != 0 ) {
 	    printf("ERROR: '%s' is not an int\n", args[2]);
 	  } else {
 	    if ( set_def ) {
-	      netconf->set_int(args[1], i);
+	      netconf->set_int(args[1], li);
 	    } else {
-	      netconf->set_default_int(args[1], i);
+	      netconf->set_default_int(args[1], li);
 	    }
 	  }
 	} else if ( desired_type == "bool" ) {

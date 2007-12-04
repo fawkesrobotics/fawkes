@@ -117,7 +117,7 @@ KickerThread::loop()
       KickerInterface::KickMessage* msg = kicker_interface->msgq_first<KickerInterface::KickMessage>();
 
       unsigned int intensity = msg->intensity();
-      if ((intensity >= 0) && (intensity <= 0xFF) )
+      if (intensity <= 0xFF)
 	{
           if ( intensity != kicker_interface->current_intensity() )
             {
