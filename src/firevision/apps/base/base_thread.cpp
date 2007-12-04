@@ -28,15 +28,18 @@
 #include <apps/base/base_thread.h>
 #include <apps/base/aquisition_thread.h>
 #include <apps/base/aqt_vision_threads.h>
+#include <apps/base/aquisition_thread.h>
 
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
 #include <core/threading/barrier.h>
+#include <utils/logging/logger.h>
+
 #include <fvutils/system/camargp.h>
+#include <fvutils/ipc/shm_image.h>
+#include <fvutils/ipc/shm_lut.h>
 #include <cams/factory.h>
 
-#include <apps/base/aquisition_thread.h>
-#include <utils/logging/logger.h>
 #include <aspect/vision.h>
 
 #include <unistd.h>
@@ -69,6 +72,9 @@ FvBaseThread::~FvBaseThread()
 void
 FvBaseThread::init()
 {
+  // wipe all previously existing FireVision shared memory segments
+  SharedMemoryImageBuffer::cleanup();
+  SharedMemoryLookupTable::cleanup();
 }
 
 
@@ -77,8 +83,7 @@ FvBaseThread::finalize()
 {
   aqts.lock();
   for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
-    (*ait).second->cancel();
-    (*ait).second->join();
+    thread_collector->remove((*ait).second);
     delete (*ait).second;
   }
   aqts.clear();
@@ -110,8 +115,8 @@ FvBaseThread::loop()
       logger->log_info(name(), "Aquisition thread %s timed out, destroying",
 		       (*ait).second->name());
 
-      (*ait).second->cancel();
-      (*ait).second->join();
+      
+      thread_collector->remove((*ait).second);
       delete (*ait).second;
       aqts.erase(ait++);
     } else {
@@ -215,7 +220,7 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread, boo
       aqt->_vision_threads->add_waiting_thread(thread, raw);
 
       aqts[id] = aqt;
-      aqt->start();
+      thread_collector->add(aqt);
 
       // no need to recreate barrier, by default aqts operate in continuous mode
 
@@ -293,8 +298,6 @@ void
 FvBaseThread::thread_started(Thread *thread)
 {
   aqts.lock();
-  //logger->log_debug(name(), "Thread %s started", thread->name());
-
   for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
     if ((*ait).second->_vision_threads->has_waiting_thread(thread)) {
       started_threads[thread] = (*ait).second;

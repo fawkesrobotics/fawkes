@@ -75,11 +75,18 @@ FvRetrieverThread::init()
     throw;
   }
 
-  __tt = new TimeTracker();
-  __ttc_capture = __tt->add_class("Capture");
-  __ttc_memcpy  = __tt->add_class("Memcpy");
-  __ttc_dispose = __tt->add_class("Dispose");
-  __loop_count  = 0;
+  __tt = NULL;
+  try {
+    if ( config->get_bool("/firevision/retriever/use_time_tracker") ) {
+      __tt = new TimeTracker();
+      __ttc_capture = __tt->add_class("Capture");
+      __ttc_memcpy  = __tt->add_class("Memcpy");
+      __ttc_dispose = __tt->add_class("Dispose");
+      __loop_count  = 0;
+    }
+  } catch (Exception &e) {
+    // ignored, not critical
+  }
 }
 
 
@@ -97,22 +104,25 @@ FvRetrieverThread::finalize()
 void
 FvRetrieverThread::loop()
 {
-  /*
-  logger->log_debug(name(), "Capturing frame from camera into shared memory buffer"
-		    " (cam buffer size: %lu, shm buffer size: %lu)",
-		    cam->buffer_size(), shm->data_size());
-  */
-  __tt->ping_start(__ttc_capture);
-  cam->capture();
-  __tt->ping_end(__ttc_capture);
-  __tt->ping_start(__ttc_memcpy);
-  memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
-  __tt->ping_end(__ttc_memcpy);
-  __tt->ping_start(__ttc_dispose);
-  cam->dispose_buffer();
-  __tt->ping_end(__ttc_dispose);
-  if ( (++__loop_count % 200) == 0 ) {
-    __tt->print_to_stdout();
+  if (__tt) {
+    // use time tracker
+    __tt->ping_start(__ttc_capture);
+    cam->capture();
+    __tt->ping_end(__ttc_capture);
+    __tt->ping_start(__ttc_memcpy);
+    memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
+    __tt->ping_end(__ttc_memcpy);
+    __tt->ping_start(__ttc_dispose);
+    cam->dispose_buffer();
+    __tt->ping_end(__ttc_dispose);
+    if ( (++__loop_count % 200) == 0 ) {
+      // output results every 200 loops
+      __tt->print_to_stdout();
+    }
+  } else {
+    // no time tracker
+    cam->capture();
+    memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
+    cam->dispose_buffer();
   }
-  //logger->log_debug(name(), "DONE");
 }

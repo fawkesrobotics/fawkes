@@ -36,6 +36,8 @@
 #include <aspect/logging.h>
 #include <aspect/vision_master.h>
 #include <aspect/clock.h>
+#include <aspect/thread_producer.h>
+#include <aspect/configurable.h>
 
 #include <fvutils/base/vision_master.h>
 #include <string>
@@ -50,6 +52,8 @@ class FvBaseThread
   public VisionMasterAspect,
   public ClockAspect,
   public VisionMaster,
+  public ThreadProducerAspect,
+  public ConfigurableAspect,
   public ThreadNotificationListener
 {
  public:
