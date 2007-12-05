@@ -60,7 +60,14 @@ namespace Gtk
   class ButtonBox;
   class Frame;
   class Alignment;
+  class RefPtr;
 }
+
+namespace Pango
+ {
+  class Layout;
+ }
+//Glib::RefPtr<Pango::Layout>
 
 class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
   {
@@ -93,7 +100,6 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::Label* center_rpm_label;
     Gtk::Label* xv_label;
     Gtk::Label* yv_label;
-    Gtk::Label* rotation_label;
     Gtk::Label* angular_velocity_label;
     Gtk::Label* navigator_velocity_label;
 
@@ -117,25 +123,26 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::ButtonBox* bbox_top;
     Gtk::VBox* bbox_left;
     Gtk::VBox* control_VBox;
+    Gtk::HBox* translation_HBox;
 
 
     Gtk::RadioButton::Group control_group;
 
     Gtk::RadioButton::Group drive_mode_group;
     Gtk::Frame* rpm_frame;
-    Gtk::Frame* velocity_frame;
+    Gtk::Frame* translation_frame;
+    Gtk::Frame* rotation_frame;
     Gtk::Frame* orbit_frame;
     Gtk::Frame* navigator_frame;
 
     Gtk::ButtonBox* rpm_entry_box;
-    Gtk::ButtonBox* velocity_entry_box;
+    Gtk::HBox* trans_rot_entry_box;
 
     Gtk::ButtonBox* rpm_label_box1;
     Gtk::ButtonBox* rpm_label_box2;
     Gtk::ButtonBox* rpm_label_box3;
-    Gtk::ButtonBox* velocity_label_box1;
-    Gtk::ButtonBox* velocity_label_box2;
-    Gtk::ButtonBox* velocity_label_box3;
+    Gtk::ButtonBox* translation_x_label;
+    Gtk::ButtonBox* translation_y_label;
     Gtk::ButtonBox* orbit_label_box;
     Gtk::ButtonBox* navigator_label_box;
 
@@ -144,13 +151,15 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::Alignment* center_rpm_alignment;
     Gtk::Alignment* right_rpm_alignment;
 
-    Gtk::Alignment* x_velocity_alignment;
-    Gtk::Alignment* y_velocity_alignment;
-    Gtk::Alignment* rotation_velocity_alignment;
+    Gtk::Alignment* x_translation_alignment;
+    Gtk::Alignment* y_translation_alignment;
+    Gtk::Alignment* rotation_alignment;
+    Gtk::Alignment* rotation_frame_alignment;
 
     Gtk::Alignment* orbit_alignment;
     Gtk::Alignment* navigator_alignment;
 
+	Glib::RefPtr<Pango::Layout> layout;
 
     double window_width;
     double window_height;
@@ -191,7 +200,7 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     void process_navigator_message(FawkesNetworkMessage *msg) throw();
     void process_pluginmanager_message(FawkesNetworkMessage *msg) throw();
     bool navigator_loaded;
-    
+
     void connection_established() throw();
     void connection_died() throw();
 

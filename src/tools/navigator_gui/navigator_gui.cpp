@@ -80,7 +80,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   win->resize(990, 700);
 
 
-  m_VBox_Main = new Gtk::VBox ;
+  m_VBox_Main = new Gtk::VBox();
   m_HBox_Left = new Gtk::HBox();
 
   right_rpm_entry = new Gtk::SpinButton(1.0, 2);
@@ -130,11 +130,10 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   right_rpm_label = new Gtk::Label("Right");
   left_rpm_label = new Gtk::Label("Left");
   center_rpm_label = new Gtk::Label("Rear");
-  xv_label = new Gtk::Label("X\n[m/s]");
-  yv_label = new Gtk::Label("Y\n[m/s]");
-  rotation_label = new Gtk::Label("Rotation\n[rad/s]");
+  xv_label = new Gtk::Label("X");
+  yv_label = new Gtk::Label("Y");
   angular_velocity_label = new Gtk::Label("Angular Velocity [rad/s]\nSet the orbit center ->>");
-  navigator_velocity_label = new Gtk::Label("Velocity [m/s]");
+  navigator_velocity_label = new Gtk::Label("Maximum Velocity [m/s]");
 
   control_button = new Gtk::Button("Start Control");
   stop_button = new Gtk::Button("STOP");
@@ -150,7 +149,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   cursor_over_area = false;
   navigator_loaded = false;
 
-  zooming_adjustment = new Gtk::Adjustment(0.0, 0.0, 100.0);
+  zooming_adjustment = new Gtk::Adjustment(0.0, -99.9, 100.0);
   zooming_HScale = new Gtk::HScale(*zooming_adjustment);
   zooming_HScale->set_size_request (200, -1);
 
@@ -178,19 +177,19 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   trans_rot_radio->set_active();
 
   rpm_frame = new Gtk::Frame("RPMs");
-  velocity_frame = new Gtk::Frame("Velocities");
+  translation_frame = new Gtk::Frame("Translation [m/s]");
+  rotation_frame = new Gtk::Frame("Rotation [rad/s]");
   orbit_frame = new Gtk::Frame("Orbit");
   navigator_frame = new Gtk::Frame("Navigator");
 
   rpm_entry_box = Gtk::manage( new Gtk::HButtonBox() );
-  velocity_entry_box = Gtk::manage( new Gtk::HButtonBox() );
+  trans_rot_entry_box = new Gtk::HBox();
 
   rpm_label_box1 = Gtk::manage( new Gtk::VButtonBox() );
   rpm_label_box2 = Gtk::manage( new Gtk::VButtonBox() );
   rpm_label_box3 = Gtk::manage( new Gtk::VButtonBox() );
-  velocity_label_box1 = Gtk::manage( new Gtk::VButtonBox() );
-  velocity_label_box2 = Gtk::manage( new Gtk::VButtonBox() );
-  velocity_label_box3 = Gtk::manage( new Gtk::VButtonBox() );
+  translation_x_label = Gtk::manage( new Gtk::VButtonBox() );
+  translation_y_label = Gtk::manage( new Gtk::VButtonBox() );
   orbit_label_box = Gtk::manage( new Gtk::VButtonBox() );
   navigator_label_box = Gtk::manage( new Gtk::VButtonBox() );
 
@@ -201,23 +200,23 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   bbox_top->add(*control_VBox);
   bbox_top->add(*reset_odometry_button);
 
-  left_rpm_alignment = new Gtk::Alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0);
-  center_rpm_alignment = new Gtk::Alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0);
-  right_rpm_alignment = new Gtk::Alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0);
+  left_rpm_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
+  center_rpm_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
+  right_rpm_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
 
-  x_velocity_alignment = new Gtk::Alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0);
-  y_velocity_alignment = new Gtk::Alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0);
-  rotation_velocity_alignment = new Gtk::Alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0);
+  x_translation_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
+  y_translation_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
+  rotation_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_BOTTOM, 0.0, 0.0);
+  rotation_frame_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 1.0);
 
-  orbit_alignment = new Gtk::Alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0);
-  navigator_alignment = new Gtk::Alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, 0.0, 0.0);
+  orbit_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
+  navigator_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
   left_rpm_alignment->add(*left_rpm_label);
   center_rpm_alignment->add(*center_rpm_label);
   right_rpm_alignment->add(*right_rpm_label);
 
-  x_velocity_alignment->add(*xv_label);
-  y_velocity_alignment->add(*yv_label);
-  rotation_velocity_alignment->add(*rotation_label);
+  x_translation_alignment->add(*xv_label);
+  y_translation_alignment->add(*yv_label);
 
   orbit_alignment->add(*angular_velocity_label);
   navigator_alignment->add(*navigator_velocity_label);
@@ -234,17 +233,21 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   rpm_label_box3->add(*right_rpm_entry);
   rpm_entry_box->add(*rpm_label_box3);
 
-  velocity_label_box1->add(*x_velocity_alignment);
-  velocity_label_box1->add(*xv_entry);
-  velocity_entry_box->add(*velocity_label_box1);
+  translation_HBox = new Gtk::HBox(true, 5);
+  translation_x_label->add(*x_translation_alignment);
+  translation_x_label->add(*xv_entry);
+  translation_HBox->add(*translation_x_label);
 
-  velocity_label_box2->add(*y_velocity_alignment);
-  velocity_label_box2->add(*yv_entry);
-  velocity_entry_box->add(*velocity_label_box2);
+  translation_y_label->add(*y_translation_alignment);
+  translation_y_label->add(*yv_entry);
+  translation_HBox->add(*translation_y_label);
+  translation_frame->add(*translation_HBox);
+  trans_rot_entry_box->pack_start(*translation_frame, Gtk::PACK_SHRINK , 4);
 
-  velocity_label_box3->add(*rotation_velocity_alignment);
-  velocity_label_box3->add(*rotation_entry);
-  velocity_entry_box->add(*velocity_label_box3);
+  rotation_alignment->add(*rotation_entry);
+  rotation_frame->add(*rotation_alignment);
+  rotation_frame_alignment->add(*rotation_frame);
+  trans_rot_entry_box->add(*rotation_frame_alignment);
 
   orbit_label_box->add(*orbit_alignment);
   orbit_label_box->add(*angular_velocity_entry);
@@ -254,13 +257,13 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   navigator_label_box->add(*obstacle_check);
 
   rpm_frame->add(*rpm_entry_box);
-  velocity_frame->add(*velocity_entry_box);
+  //velocity_frame->add(*velocity_entry_box);
   orbit_frame->add(*orbit_label_box);
   navigator_frame->add(*navigator_label_box);
 
   // bbox_left->pack_start(*obstacle_check, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*rpm_frame, Gtk::PACK_SHRINK, 4);
-  bbox_left->pack_start(*velocity_frame, Gtk::PACK_SHRINK, 4);
+  bbox_left->pack_start(*trans_rot_entry_box, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*orbit_frame, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*navigator_frame, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*rpm_radio, Gtk::PACK_SHRINK, 4);
@@ -272,7 +275,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
 
   m_VBox_Main-> pack_start(*bbox_top, Gtk::PACK_SHRINK, 4);
   m_VBox_Main-> pack_start(*m_HBox_Left, Gtk::PACK_EXPAND_WIDGET);
-  m_HBox_Left-> pack_start(*bbox_left, Gtk::PACK_SHRINK, 5, 5);
+  m_HBox_Left-> pack_start(*bbox_left, Gtk::PACK_SHRINK, 5);
   m_HBox_Left-> pack_start(*this, Gtk::PACK_EXPAND_WIDGET);
   win->add(*m_VBox_Main);
 
@@ -719,150 +722,70 @@ void NavigatorGUI::process_pluginmanager_message(FawkesNetworkMessage *msg) thro
 
 bool NavigatorGUI::on_idle()
 {
-  //int u = 90;
-  //  FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, 1, &value, sizeof(value));
-  //  net_client->enqueue(msg);
-
-  //net_client->wait(FAWKES_CID_NAVIGATOR_PLUGIN);->wait(FAWKES_CID_NAVIGATOR_PLUGIN);
-  // net_client->wait(FAWKES_CID_NAVIGATOR_PLUGIN);
-  // printf("send\n");
-  // std::cout << "idle" << std::endl;
   if(motor_control)
     {
       if(rpm_radio->get_active())
         {
-          right_rpm_entry->set_sensitive(true);
-          left_rpm_entry->set_sensitive(true);
-          center_rpm_entry->set_sensitive(true);
-          xv_entry->set_sensitive(false);
-          yv_entry->set_sensitive(false);
-          rotation_entry->set_sensitive(false);
-          angular_velocity_entry->set_sensitive(false);
-          navigator_velocity_entry->set_sensitive(false);
-
-          right_rpm_label->set_sensitive(true);
-          left_rpm_label->set_sensitive(true);
-          center_rpm_label->set_sensitive(true);
-          xv_label->set_sensitive(false);
-          yv_label->set_sensitive(false);
-          rotation_label->set_sensitive(false);
-          angular_velocity_label->set_sensitive(false);
-          navigator_velocity_label->set_sensitive(false);
+          translation_frame->set_sensitive(false);
+          rotation_frame->set_sensitive(false);
+          rpm_frame->set_sensitive(true);
+          orbit_frame->set_sensitive(false);
+          navigator_frame->set_sensitive(false);
           send_button->set_sensitive(true);
           target_point.x = 0;
           target_point.y = 0;
         }
       else if(trans_rot_radio->get_active())
         {
-          right_rpm_entry->set_sensitive(false);
-          left_rpm_entry->set_sensitive(false);
-          center_rpm_entry->set_sensitive(false);
-          xv_entry->set_sensitive(true);
-          yv_entry->set_sensitive(true);
-          rotation_entry->set_sensitive(true);
-          angular_velocity_entry->set_sensitive(false);
-          navigator_velocity_entry->set_sensitive(false);
-
-          right_rpm_label->set_sensitive(false);
-          left_rpm_label->set_sensitive(false);
-          center_rpm_label->set_sensitive(false);
-          xv_label->set_sensitive(true);
-          yv_label->set_sensitive(true);
-          rotation_label->set_sensitive(true);
-          angular_velocity_label->set_sensitive(false);
-          navigator_velocity_label->set_sensitive(false);
+          translation_frame->set_sensitive(true);
+          rotation_frame->set_sensitive(true);
+          rpm_frame->set_sensitive(false);
+          orbit_frame->set_sensitive(false);
+          navigator_frame->set_sensitive(false);
           send_button->set_sensitive(true);
           target_point.x = 0;
           target_point.y = 0;
         }
       else if(trans_radio->get_active())
         {
-          right_rpm_entry->set_sensitive(false);
-          left_rpm_entry->set_sensitive(false);
-          center_rpm_entry->set_sensitive(false);
-          xv_entry->set_sensitive(true);
-          yv_entry->set_sensitive(true);
-          rotation_entry->set_sensitive(false);
-          angular_velocity_entry->set_sensitive(false);
-          navigator_velocity_entry->set_sensitive(false);
-
-          right_rpm_label->set_sensitive(false);
-          left_rpm_label->set_sensitive(false);
-          center_rpm_label->set_sensitive(false);
-          xv_label->set_sensitive(true);
-          yv_label->set_sensitive(true);
-          rotation_label->set_sensitive(false);
-          angular_velocity_label->set_sensitive(false);
-          navigator_velocity_label->set_sensitive(false);
+          translation_frame->set_sensitive(true);
+          rotation_frame->set_sensitive(false);
+          rpm_frame->set_sensitive(false);
+          orbit_frame->set_sensitive(false);
+          navigator_frame->set_sensitive(false);
           send_button->set_sensitive(true);
           target_point.x = 0;
           target_point.y = 0;
         }
       else if(rot_radio->get_active())
         {
-          right_rpm_entry->set_sensitive(false);
-          left_rpm_entry->set_sensitive(false);
-          center_rpm_entry->set_sensitive(false);
-          xv_entry->set_sensitive(false);
-          yv_entry->set_sensitive(false);
-          rotation_entry->set_sensitive(true);
-          angular_velocity_entry->set_sensitive(false);
-          navigator_velocity_entry->set_sensitive(false);
-
-          right_rpm_label->set_sensitive(false);
-          left_rpm_label->set_sensitive(false);
-          center_rpm_label->set_sensitive(false);
-          xv_label->set_sensitive(false);
-          yv_label->set_sensitive(false);
-          rotation_label->set_sensitive(true);
-          angular_velocity_label->set_sensitive(false);
-          navigator_velocity_label->set_sensitive(false);
+          translation_frame->set_sensitive(false);
+          rotation_frame->set_sensitive(true);
+          rpm_frame->set_sensitive(false);
+          orbit_frame->set_sensitive(false);
+          navigator_frame->set_sensitive(false);
           send_button->set_sensitive(true);
           target_point.x = 0;
           target_point.y = 0;
         }
       else if(orbit_radio->get_active())
         {
-          right_rpm_entry->set_sensitive(false);
-          left_rpm_entry->set_sensitive(false);
-          center_rpm_entry->set_sensitive(false);
-          xv_entry->set_sensitive(false);
-          yv_entry->set_sensitive(false);
-          rotation_entry->set_sensitive(false);
-          angular_velocity_entry->set_sensitive(true);
-          navigator_velocity_entry->set_sensitive(false);
-
-          right_rpm_label->set_sensitive(false);
-          left_rpm_label->set_sensitive(false);
-          center_rpm_label->set_sensitive(false);
-          xv_label->set_sensitive(false);
-          yv_label->set_sensitive(false);
-          rotation_label->set_sensitive(false);
-          angular_velocity_label->set_sensitive(true);
-          navigator_velocity_label->set_sensitive(false);
+          translation_frame->set_sensitive(false);
+          rotation_frame->set_sensitive(false);
+          rpm_frame->set_sensitive(false);
+          orbit_frame->set_sensitive(true);
+          navigator_frame->set_sensitive(false);
           send_button->set_sensitive(true);
         }
     }
 
   if(navigator_control_radio->get_active())
     {
-      right_rpm_entry->set_sensitive(false);
-      left_rpm_entry->set_sensitive(false);
-      center_rpm_entry->set_sensitive(false);
-      xv_entry->set_sensitive(false);
-      yv_entry->set_sensitive(false);
-      rotation_entry->set_sensitive(false);
-      angular_velocity_entry->set_sensitive(false);
-      navigator_velocity_entry->set_sensitive(true);
-
-      right_rpm_label->set_sensitive(false);
-      left_rpm_label->set_sensitive(false);
-      center_rpm_label->set_sensitive(false);
-      xv_label->set_sensitive(false);
-      yv_label->set_sensitive(false);
-      rotation_label->set_sensitive(false);
-      angular_velocity_label->set_sensitive(false);
-      navigator_velocity_label->set_sensitive(true);
+      translation_frame->set_sensitive(false);
+      rotation_frame->set_sensitive(false);
+      rpm_frame->set_sensitive(false);
+      orbit_frame->set_sensitive(false);
+      navigator_frame->set_sensitive(true);
       send_button->set_sensitive(true);
       stop_button->set_sensitive(true);
 
@@ -885,23 +808,12 @@ bool NavigatorGUI::on_idle()
     }
   else if(behold_radio->get_active())
     {
-      right_rpm_entry->set_sensitive(false);
-      left_rpm_entry->set_sensitive(false);
-      center_rpm_entry->set_sensitive(false);
-      xv_entry->set_sensitive(false);
-      yv_entry->set_sensitive(false);
-      rotation_entry->set_sensitive(false);
-      angular_velocity_entry->set_sensitive(false);
-      navigator_velocity_entry->set_sensitive(false);
+      translation_frame->set_sensitive(false);
+      rotation_frame->set_sensitive(false);
+      rpm_frame->set_sensitive(false);
+      orbit_frame->set_sensitive(false);
+      navigator_frame->set_sensitive(false);
 
-      right_rpm_label->set_sensitive(false);
-      left_rpm_label->set_sensitive(false);
-      center_rpm_label->set_sensitive(false);
-      xv_label->set_sensitive(false);
-      yv_label->set_sensitive(false);
-      rotation_label->set_sensitive(false);
-      angular_velocity_label->set_sensitive(false);
-      navigator_velocity_label->set_sensitive(false);
       send_button->set_sensitive(false);
 
       stop_button->set_sensitive(false);
@@ -1242,6 +1154,7 @@ void NavigatorGUI::send_stop()
 bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
 {
   Glib::RefPtr<Gdk::Window> window = get_window();
+  
   if(window)
     {
       Cairo::RefPtr<Cairo::Context> context = window->create_cairo_context();
@@ -1363,7 +1276,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       //one bezier curve per bezier_points_count path_points
       for(i = 0; i + bezier_points_count - 1 < path.size(); i += bezier_points_count - 1)
         {
-          double distance =  fabs(path[i]->y - path[i+bezier_points_count-1]->y) * 50;
+          double distance = 100;// fabs(path[i]->y - path[i+bezier_points_count-1]->y) * 50;
 
           //draw the bezier for two directions
           for(int m = 0; m < 2; m++)
@@ -1423,13 +1336,11 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       context->fill_preserve();
       context->stroke();
 
+      //draw the odometry point
       odometry_point_mutex->lock();
       context->save();
-      //draw the odometry point
       context->set_source_rgb(0.0, 0.0, 1.0);
-      //   odometry_point_mutex->lock();
       context->arc(odometry_point.x, odometry_point.y, point_radius, 0.0, 2.0 * M_PI);
-      //    odometry_point_mutex->unlock();
       context->fill_preserve();
       context->stroke();
 
@@ -1442,6 +1353,18 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       context->move_to(0.,0.);
       context->line_to(0., -40.);
       context->stroke();
+
+      //draw odometry coordinates
+      layout = Pango::Layout::create (create_pango_context ());
+      char print_string[100];
+      sprintf(print_string, "%.2f, %.2f", -odometry_point.y / zoom_factor, -odometry_point.x / zoom_factor);
+      layout->set_text(print_string);
+
+      Glib::RefPtr<Gdk::GC> gc_odometry = Gdk::GC::create(window);
+      Gdk::Color color("blue");
+      gc_odometry->set_rgb_fg_color(color);
+      window->draw_layout(gc_odometry, (int) 300, (int) 20, layout);
+      layout.clear();
 
       context->restore();
       odometry_point_mutex->unlock();
@@ -1468,10 +1391,6 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
             {
               obstacle2_radius = ob2->width / 2.;
             }
-          /*
-                    std::cout << "obstacle1_radius " << obstacle1_radius << std::endl;
-                    std::cout << "obstacle2_radius " << obstacle2_radius << std::endl;
-          */
           double robot_width = 0.5;
 
           gdouble x1 = (*iterator)->p1->x;
@@ -1530,11 +1449,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
               vector_length = (distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) / 3;
 
               double vector_add = (obstacle1_radius - obstacle2_radius) / 2;
-              /*
-                            std::cout << "distance " << distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) << std::endl;
-                            std::cout << "obstacle1_radius " << obstacle1_radius << std::endl;
-                            std::cout << "vector_length " << vector_length << std::endl;
-              */
+            
               //a point near by the middle, placed toward to p1
               next_point2 = new NPoint(
                               middle_x - vector_x * (vector_length + vector_add),
@@ -1565,7 +1480,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       if(cursor_over_area)
         {
           context->save();
-          Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (create_pango_context ());
+          layout = Pango::Layout::create (create_pango_context ());
           char print_string[100];
           cursor_point_mutex->lock();
           sprintf(print_string, "%.2f, %.2f", -cursor_point.y / zoom_factor, -cursor_point.x / zoom_factor);
@@ -1581,7 +1496,8 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
         }
 
       context.clear();
-    }
+      
+    }//if(window)
 
 
   usleep(10000);
