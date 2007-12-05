@@ -29,7 +29,6 @@
 #include <blackboard/exceptions.h>
 #include <blackboard/shmem_header.h>
 
-#include <core/macros.h>
 #include <core/exception.h>
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
@@ -879,7 +878,7 @@ BlackBoardMemoryManager::ChunkIterator::operator++()
  * @return copy of the current instance before advancing to the next element.
  */
 BlackBoardMemoryManager::ChunkIterator
-BlackBoardMemoryManager::ChunkIterator::operator++(int inc __unused)
+BlackBoardMemoryManager::ChunkIterator::operator++(int inc)
 {
   ChunkIterator rv(*this);
   if ( cur != NULL )  cur = chunk_ptr(cur->next);

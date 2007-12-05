@@ -28,7 +28,6 @@
 #include <interface/message_queue.h>
 #include <interface/message.h>
 
-#include <core/macros.h>
 #include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
 
@@ -434,7 +433,7 @@ MessageQueue::MessageIterator::operator++()
  * @return copy of the current instance before advancing to the next element.
  */
 MessageQueue::MessageIterator
-MessageQueue::MessageIterator::operator++(int inc __unused)
+MessageQueue::MessageIterator::operator++(int inc)
 {
   MessageIterator rv(cur);
   if ( cur != NULL )

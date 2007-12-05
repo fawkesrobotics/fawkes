@@ -27,7 +27,6 @@
  */
 
 #include <fvutils/color/yuvrgb.h>
-#include <core/macros.h>
 
 #include <fvutils/cpu/mmx.h>
 

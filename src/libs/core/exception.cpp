@@ -26,7 +26,6 @@
  */
 
 #include <core/exception.h>
-#include <core/macros.h>
 #include <core/threading/mutex.h>
 
 #ifndef _GNU_SOURCE
@@ -683,7 +682,7 @@ Exception::iterator::operator++()
  * @return copy of iterator before advancing.
  */
 Exception::iterator
-Exception::iterator::operator++(int inc __unused)
+Exception::iterator::operator++(int inc)
 {
   iterator i(mlist);
   if ( mlist != NULL ) {

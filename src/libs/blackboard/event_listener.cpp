@@ -27,7 +27,6 @@
 
 #include <blackboard/event_listener.h>
 #include <interface/interface.h>
-#include <core/macros.h>
 
 /** @class BlackBoardEventListener <blackboard/event_listener.h>
  * BlackBoard event listener.
@@ -122,7 +121,7 @@ BlackBoardEventListener::~BlackBoardEventListener()
  * @param interface interface instance that you supplied to bbel_add_data_interface()
  */
 void
-BlackBoardEventListener::bb_data_changed(Interface *interface __unused) throw()
+BlackBoardEventListener::bb_data_changed(Interface *interface) throw()
 {
 }
 
@@ -138,8 +137,7 @@ BlackBoardEventListener::bb_data_changed(Interface *interface __unused) throw()
  * the duration of the method call
  */
 void
-BlackBoardEventListener::bb_interface_created(const char *type __unused,
-					      const char *id __unused) throw()
+BlackBoardEventListener::bb_interface_created(const char *type, const char *id ) throw()
 {
 }
 
@@ -150,7 +148,7 @@ BlackBoardEventListener::bb_interface_created(const char *type __unused,
  * @param interface interface instance that you supplied to bbel_add_reader_interface()
  */
 void
-BlackBoardEventListener::bb_interface_reader_added(Interface *interface __unused) throw()
+BlackBoardEventListener::bb_interface_reader_added(Interface *interface) throw()
 {
 }
 
@@ -161,7 +159,7 @@ BlackBoardEventListener::bb_interface_reader_added(Interface *interface __unused
  * @param interface interface instance that you supplied to bbel_add_reader_interface()
  */
 void
-BlackBoardEventListener::bb_interface_reader_removed(Interface *interface __unused) throw()
+BlackBoardEventListener::bb_interface_reader_removed(Interface *interface) throw()
 {
 }
 
@@ -172,7 +170,7 @@ BlackBoardEventListener::bb_interface_reader_removed(Interface *interface __unus
  * @param interface interface instance that you supplied to bbel_add_writer_interface()
  */
 void
-BlackBoardEventListener::bb_interface_writer_added(Interface *interface __unused) throw()
+BlackBoardEventListener::bb_interface_writer_added(Interface *interface) throw()
 {
 }
 
@@ -183,7 +181,7 @@ BlackBoardEventListener::bb_interface_writer_added(Interface *interface __unused
  * @param interface interface instance that you supplied to bbel_add_writer_interface()
  */
 void
-BlackBoardEventListener::bb_interface_writer_removed(Interface *interface __unused) throw()
+BlackBoardEventListener::bb_interface_writer_removed(Interface *interface) throw()
 {
 }
 

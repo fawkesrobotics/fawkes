@@ -27,7 +27,6 @@
 
 #include <netcomm/dns-sd/avahi_resolver.h>
 
-#include <core/macros.h>
 #include <core/exception.h>
 
 #include <avahi-common/error.h>
@@ -244,12 +243,12 @@ AvahiResolver::remove_address_resolver(AvahiAddressResolver *r)
  */
 void
 AvahiResolver::host_name_resolver_callback(AvahiHostNameResolver *r,
-					   AvahiIfIndex interface __unused,
+					   AvahiIfIndex interface,
 					   AvahiProtocol protocol,
 					   AvahiResolverEvent event,
 					   const char *name,
 					   const AvahiAddress *a,
-					   AvahiLookupResultFlags flags __unused,
+					   AvahiLookupResultFlags flags,
 					   void *userdata)
 {
   AvahiResolverCallbackData *cd = static_cast<AvahiResolverCallbackData *>(userdata);
@@ -283,12 +282,12 @@ AvahiResolver::host_name_resolver_callback(AvahiHostNameResolver *r,
  */
 void
 AvahiResolver::address_resolver_callback(AvahiAddressResolver *r,
-					 AvahiIfIndex interface __unused,
+					 AvahiIfIndex interface,
 					 AvahiProtocol protocol,
 					 AvahiResolverEvent event,
 					 const AvahiAddress *a,
 					 const char *name,
-					 AvahiLookupResultFlags flags __unused,
+					 AvahiLookupResultFlags flags,
 					 void *userdata)
 {
   AvahiResolverCallbackData *cd = static_cast<AvahiResolverCallbackData *>(userdata);

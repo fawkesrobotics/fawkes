@@ -29,7 +29,6 @@
 #include <utils/ipc/shm_exceptions.h>
 #include <utils/ipc/shm_lister.h>
 #include <utils/ipc/semset.h>
-#include <core/macros.h>
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -1359,7 +1358,7 @@ SharedMemory::SharedMemoryIterator::operator++()
  * @return instance before advancing to the next shared memory segment
  */
 SharedMemory::SharedMemoryIterator
-SharedMemory::SharedMemoryIterator::operator++(int inc __unused)
+SharedMemory::SharedMemoryIterator::operator++(int inc)
 {
   SharedMemoryIterator rv(*this);
   ++(*this);

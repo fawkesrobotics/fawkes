@@ -26,7 +26,6 @@
  */
 
 #include <config/sqlite.h>
-#include <core/macros.h>
 #include <core/threading/mutex.h>
 
 #include <sqlite3.h>
@@ -240,7 +239,7 @@ SQLiteConfiguration::init()
  */
 void
 SQLiteConfiguration::load(const char *name, const char *defaults_name,
-			  const char *tag __unused)
+			  const char *tag)
 {
   char *errmsg;
   char *filename;

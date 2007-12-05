@@ -30,7 +30,6 @@
  */
 
 #include <utils/system/signal.h>
-#include <core/macros.h>
 #include <cstdlib>
 
 
@@ -73,7 +72,7 @@ SignalManager::SignalManager()
 
 
 /** Invalid copy constructor. */
-SignalManager::SignalManager(const SignalManager &cc __unused)
+SignalManager::SignalManager(const SignalManager &cc)
 {
 }
 

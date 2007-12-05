@@ -26,7 +26,6 @@
  */
 
 #include <netcomm/service_discovery/dummy_service_browser.h>
-#include <core/macros.h>
 
 /** @class DummyServiceBrowser <netcomm/service_discovery/dummy_service_browser.h>
  * Dummy Service browser.
@@ -47,15 +46,15 @@ DummyServiceBrowser::~DummyServiceBrowser()
 
 
 void
-DummyServiceBrowser::add_handler(const char *service_type __unused,
-				 ServiceBrowseHandler *h __unused)
+DummyServiceBrowser::add_handler(const char *service_type,
+				 ServiceBrowseHandler *h)
 {
 }
 
 
 void
-DummyServiceBrowser::remove_handler(const char *service_type __unused,
-				    ServiceBrowseHandler *h __unused)
+DummyServiceBrowser::remove_handler(const char *service_type,
+				    ServiceBrowseHandler *h)
 {
 }
 

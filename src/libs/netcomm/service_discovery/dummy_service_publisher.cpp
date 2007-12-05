@@ -26,7 +26,6 @@
  */
 
 #include <netcomm/service_discovery/dummy_service_publisher.h>
-#include <core/macros.h>
 
 /** @class DummyServicePublisher <netcomm/service_discovery/dummy_service_publisher.h>
  * Dummy service publisher interface.
@@ -45,12 +44,12 @@ DummyServicePublisher::~DummyServicePublisher()
 
 
 void
-DummyServicePublisher::publish(NetworkService *service __unused)
+DummyServicePublisher::publish(NetworkService *service)
 {
 }
 
 
 void
-DummyServicePublisher::unpublish(NetworkService *service __unused)
+DummyServicePublisher::unpublish(NetworkService *service)
 {
 }
