@@ -82,11 +82,14 @@ LoggerFactory::instance(const char *type, const char *as)
     char *tmp = strdup(as);
     char *saveptr;
     char *r = strtok_r(tmp, ":", &saveptr);
+    const char *file_name;
     r = strtok_r(tmp, ":", &saveptr);
     if ( r == NULL ) {
-      r = "unnamed.log";
+      file_name = "unnamed.log";
+    } else {
+      file_name = r;
     }
-    l = new FileLogger(r);
+    l = new FileLogger(file_name);
     free(tmp);
   }
 
@@ -116,7 +119,8 @@ LoggerFactory::multilogger_instance(const char *as)
   char *logger_string = strdup(as);
   char *str = logger_string;
   char *saveptr, *r;
-  char *type, *args, *typeargs_saveptr;
+  const char *type, *args;
+  char *typeargs_saveptr;
   const char *logger_delim = ";";
   const char *logger_typeargs_delim = ":";
   while ((r = strtok_r(str, logger_delim, &saveptr)) != NULL ) {

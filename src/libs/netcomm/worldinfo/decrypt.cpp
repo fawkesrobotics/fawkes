@@ -39,7 +39,7 @@
 /** Constructor.
  * @param msg message
  */
-MessageDecryptionException::MessageDecryptionException(char *msg)
+MessageDecryptionException::MessageDecryptionException(const char *msg)
   : Exception(msg)
 {
 }

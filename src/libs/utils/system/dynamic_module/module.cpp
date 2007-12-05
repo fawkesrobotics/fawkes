@@ -35,7 +35,7 @@
 /** Constructor.
  * @param msg message
  */
-ModuleOpenException::ModuleOpenException(char *msg)
+ModuleOpenException::ModuleOpenException(const char *msg)
   : Exception(msg)
 {
 }

@@ -37,7 +37,7 @@ class File;
 class FileLogger : public Logger
 {
  public:
-  FileLogger(char* filename, LogLevel min_level = LL_DEBUG);
+  FileLogger(const char* filename, LogLevel min_level = LL_DEBUG);
   virtual ~FileLogger();
 
   virtual void log_debug(const char *component, const char *format, ...);

@@ -619,7 +619,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
     inbound_bytes -= sizeof(worldinfo_header_t);
     inbound_buffer = (unsigned char *)in_buffer + sizeof(worldinfo_header_t);
 
-    char *hostname = NULL;
+    const char *hostname = NULL;
     if ( ! resolver->resolve_address((struct sockaddr *)&from, sizeof(from), &hostname) ) {
       hostname = "unknown";
     }

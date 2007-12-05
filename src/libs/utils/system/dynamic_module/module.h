@@ -34,7 +34,7 @@
 class ModuleOpenException : public Exception
 {
  public:
-  ModuleOpenException(char *msg);
+  ModuleOpenException(const char *msg);
 };
 
 class Module {

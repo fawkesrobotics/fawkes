@@ -123,7 +123,7 @@ FvRawWriter::set_buffer(colorspace_t cspace, unsigned char *buffer)
 void
 FvRawWriter::write()
 {
-  if ( filename == "" ) {
+  if ( strlen(filename) == 0 ) {
     throw Exception("Cannot write if no file name given");
   }
   if ( header.width == 0 ) {

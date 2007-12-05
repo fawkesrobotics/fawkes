@@ -115,10 +115,12 @@ Plugin::Plugin(PluginType plugin_type, const char *plugin_name)
   : thread_list(plugin_name)
 {
   _type = plugin_type;
-  _name = strdup(plugin_name);
-  if ( ! _name ) {
+  _name_alloc = strdup(plugin_name);
+  if ( ! _name_alloc ) {
     // We do not want to throw an exception here
     _name = "OutOfMemoryForPluginName";
+  } else {
+    _name = _name_alloc;
   }
 }
 
@@ -128,7 +130,7 @@ Plugin::~Plugin()
   for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
     delete *i;
   }
-  free(_name);
+  if (_name_alloc) free(_name_alloc);
 }
 
 

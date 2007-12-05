@@ -70,7 +70,7 @@ UnableToOpenFileException::UnableToOpenFileException(const char *filename, int e
  * @param method the method determines what is done if a file with the
  * specified name already exists
  */
-File::File(char *filename, FileOpenMethod method)
+File::File(const char *filename, FileOpenMethod method)
 {
   fd = -1;
 

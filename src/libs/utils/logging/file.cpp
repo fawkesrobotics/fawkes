@@ -48,7 +48,7 @@
  * @param filename the name of the log-file
  * @param log_level minimum log level
  */
-FileLogger::FileLogger(char* filename, LogLevel log_level)
+FileLogger::FileLogger(const char* filename, LogLevel log_level)
   : Logger(log_level)
 {
   try {

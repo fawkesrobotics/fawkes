@@ -82,7 +82,7 @@
  * @param opt_string option string, see ArgumentParser
  * @param long_options long options, see ArgumentParser
  */
-ArgumentParser::ArgumentParser(int argc, char **argv, char *opt_string, option *long_options)
+ArgumentParser::ArgumentParser(int argc, char **argv, const char *opt_string, option *long_options)
 {
   _argc = argc;
   _argv = argv;

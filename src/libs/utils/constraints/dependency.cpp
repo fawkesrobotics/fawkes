@@ -36,7 +36,7 @@
 /** Constructor.
  * @param msg message
  */
-DependencyViolationException::DependencyViolationException(char *msg)
+DependencyViolationException::DependencyViolationException(const char *msg)
   : Exception(msg)
 {
 }

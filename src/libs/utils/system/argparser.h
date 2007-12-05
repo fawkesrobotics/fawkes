@@ -66,7 +66,7 @@ class MissingArgumentException : public Exception
 class ArgumentParser
 {
  public:
-  ArgumentParser(int argc, char **argv, char *opt_string, option *long_options = NULL);
+  ArgumentParser(int argc, char **argv, const char *opt_string, option *long_options = NULL);
   ~ArgumentParser();
 
   bool         has_arg(const char *argn);

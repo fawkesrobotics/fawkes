@@ -86,17 +86,17 @@ class SharedMemory
   void *              ptr(void *addr);
   void *              addr(void *ptr);
 
-  static void         list(char *magic_token,
+  static void         list(const char *magic_token,
 			   SharedMemoryHeader *header, SharedMemoryLister *lister);
 
-  static void         erase(char *magic_token,
+  static void         erase(const char *magic_token,
 			    SharedMemoryHeader *header, SharedMemoryLister *lister = 0);
 
-  static void         erase_orphaned(char *magic_token,
+  static void         erase_orphaned(const char *magic_token,
 				     SharedMemoryHeader *header,
 				     SharedMemoryLister *lister = 0);
 
-  static bool         exists(char *magic_token,
+  static bool         exists(const char *magic_token,
 			     SharedMemoryHeader *header);
 
   static bool         is_destroyed(int shm_id);
@@ -156,7 +156,7 @@ class SharedMemory
     int          semaphore;    /**< Semaphore set ID */
   } SharedMemory_header_t;
 
-  SharedMemory(char *magic_token,
+  SharedMemory(const char *magic_token,
 	       bool is_read_only, bool create, bool destroy_on_delete);
 
   void attach();

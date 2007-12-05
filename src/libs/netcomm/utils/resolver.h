@@ -53,7 +53,7 @@ class NetworkNameResolver
 
   bool resolve_name(const char *name, struct sockaddr **addr, socklen_t *addrlen);
   bool resolve_name_blocking(const char *name, struct sockaddr **addr, socklen_t *addrlen);
-  bool resolve_address(struct sockaddr *addr, socklen_t addr_len, char **name);
+  bool resolve_address(struct sockaddr *addr, socklen_t addr_len, const char **name);
 
   void flush_cache();
 

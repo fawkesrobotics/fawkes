@@ -33,7 +33,7 @@
 class DependencyViolationException : public Exception
 {
  public:
-  DependencyViolationException(char *msg);
+  DependencyViolationException(const char *msg);
 };
 
 #endif

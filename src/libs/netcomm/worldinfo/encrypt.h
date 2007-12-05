@@ -34,7 +34,7 @@
 class MessageEncryptionException : public Exception
 {
  public:
-  MessageEncryptionException(char *msg);
+  MessageEncryptionException(const char *msg);
 };
 
 class WorldInfoMessageEncryptor

@@ -48,7 +48,7 @@
 CompressedImageWriter::CompressedImageWriter(ImageCompressor *ic)
 {
   width = height = 0;
-  filename = "";
+  filename = strdup("");
   cspace = CS_UNKNOWN;
   buffer = NULL;
 
@@ -59,6 +59,7 @@ CompressedImageWriter::CompressedImageWriter(ImageCompressor *ic)
 /** Destructor. */
 CompressedImageWriter::~CompressedImageWriter()
 {
+  free(filename);
 }
 
 

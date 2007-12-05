@@ -236,7 +236,7 @@ const short SharedMemory::MaxNumConcurrentReaders = 8;
  * @param destroy_on_delete if true the shared memory segment is destroyed
  *                          when this SharedMemory instance is deleted.
  */
-SharedMemory::SharedMemory(char *magic_token,
+SharedMemory::SharedMemory(const char *magic_token,
 			   bool is_read_only,
 			   bool create,
 			   bool destroy_on_delete)
@@ -1016,7 +1016,7 @@ SharedMemory::num_attached(int shm_id)
  * @param lister      Lister used to format output
  */
 void
-SharedMemory::list(char *magic_token,
+SharedMemory::list(const char *magic_token,
 		   SharedMemoryHeader *header, SharedMemoryLister *lister)
 {
 
@@ -1049,7 +1049,7 @@ SharedMemory::list(char *magic_token,
  * @param lister      Lister used to format output, maybe NULL (default)
  */
 void
-SharedMemory::erase(char *magic_token,
+SharedMemory::erase(const char *magic_token,
 		    SharedMemoryHeader *header, SharedMemoryLister *lister)
 {
 
@@ -1095,7 +1095,7 @@ SharedMemory::erase(char *magic_token,
  * @param lister      Lister used to format output, maybe NULL (default)
  */
 void
-SharedMemory::erase_orphaned(char *magic_token,
+SharedMemory::erase_orphaned(const char *magic_token,
 			     SharedMemoryHeader *header, SharedMemoryLister *lister)
 {
 
@@ -1150,7 +1150,7 @@ SharedMemory::erase_orphaned(char *magic_token,
  * otherwise
  */
 bool
-SharedMemory::exists(char *magic_token,
+SharedMemory::exists(const char *magic_token,
 		     SharedMemoryHeader *header)
 {
   return (find(magic_token, header) != end());

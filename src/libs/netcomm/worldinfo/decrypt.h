@@ -34,7 +34,7 @@
 class MessageDecryptionException : public Exception
 {
  public:
-  MessageDecryptionException(char *msg);
+  MessageDecryptionException(const char *msg);
 };
 
 

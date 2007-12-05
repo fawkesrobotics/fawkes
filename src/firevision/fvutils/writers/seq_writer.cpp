@@ -48,8 +48,8 @@ SeqWriter::SeqWriter(Writer* writer)
 
   cspace = CS_UNKNOWN;
 
-  filename = "";
-  img_path = "";
+  filename = strdup("");
+  img_path = strdup("");
 }
 
 
@@ -60,13 +60,8 @@ SeqWriter::~SeqWriter()
   delete writer;
   writer = 0;
   
-  if ("" != filename) {
-    free(filename);
-  }
-
-  if ("" != img_path) {
-    free(img_path);
-  }
+  free(filename);
+  free(img_path);
 }
 
 /** Set the path to where the images are stored.
@@ -74,6 +69,7 @@ SeqWriter::~SeqWriter()
  */
 void SeqWriter::set_path(const char* img_path)
 {
+  free(this->img_path);
   this->img_path = strdup(img_path);
 }
 
@@ -84,10 +80,7 @@ void SeqWriter::set_path(const char* img_path)
  */
 void SeqWriter::set_filename(const char* filename)
 {
-  if (strcmp(this->filename, "") != 0)
-    {
-      free(this->filename);
-    }
+  free(this->filename);
   this->filename = strdup(filename);
 }
 

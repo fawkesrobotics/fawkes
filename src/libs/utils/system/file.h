@@ -50,7 +50,7 @@ class File {
     ADD_SUFFIX		/**< add a suffix (starting with ".1") to the given filename */
   } FileOpenMethod;
 
-  File(char *filename, FileOpenMethod method = APPEND);
+  File(const char *filename, FileOpenMethod method = APPEND);
   ~File();
 
   FILE *        stream() const;

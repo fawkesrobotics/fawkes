@@ -212,7 +212,7 @@ NetworkNameResolver::resolve_name_blocking(const char *name,
  * @return true if resolution was successful, false otherwise
  */
 bool
-NetworkNameResolver::resolve_address(struct sockaddr *addr, socklen_t addr_len, char **name)
+NetworkNameResolver::resolve_address(struct sockaddr *addr, socklen_t addr_len, const char **name)
 {
   struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
 

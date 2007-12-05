@@ -63,7 +63,8 @@ class Plugin {
   ThreadList thread_list;
 
  private:
-  char       *_name;
+  char       *_name_alloc;
+  const char *_name;
   PluginType  _type;
 
 };
