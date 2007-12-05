@@ -134,8 +134,7 @@ class FawkesNetworkMessage : public RefCount
     msgc() const
     {
       try {
-	MT *m = new MT(_msg.header.cid, _msg.header.msg_id,
-		       _msg.payload, payload_size());
+	MT *m = new MT(cid(), msgid(), _msg.payload, payload_size());
 	return m;
       } catch (Exception &e) {
 	throw;
