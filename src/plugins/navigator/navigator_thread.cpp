@@ -134,9 +134,9 @@ NavigatorThread::loop()
       navigator_interface->msgq_pop();
 
     }
-  else if ( navigator_interface->msgq_first_is<NavigatorInterface::VelocityMessage>() )
+  else if ( navigator_interface->msgq_first_is<NavigatorInterface::MaxVelocityMessage>() )
     {
-      NavigatorInterface::VelocityMessage* msg = navigator_interface->msgq_first<NavigatorInterface::VelocityMessage>();
+      NavigatorInterface::MaxVelocityMessage* msg = navigator_interface->msgq_first<NavigatorInterface::MaxVelocityMessage>();
 
       logger->log_info("NavigatorThread", "velocity message received %f", msg->velocity());
 

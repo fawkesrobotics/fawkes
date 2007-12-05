@@ -8,17 +8,16 @@
   </data>
   <message name="Target">
     <comment>States the next target to navigate to.</comment>
-    <field type="float" name="distance">Distance to the target.</field>
-    <field type="float" name="angle">Angle of the target.</field>
-    <field type="float" name="x">X-coordinate of the target.</field>
-    <field type="float" name="y">Y-coordinate of the target.</field>
+    <field type="float" name="x">X-coordinate of the target, in the robot's coordinate system.</field>
+    <field type="float" name="y">Y-coordinate of the target, in the robot's coordinate system.</field>
+    <field type="float" name="orientation">The orientation of the robot at the target.</field>
   </message>
-  <message name="Velocity">
-    <comment>States the velocity of the robot.</comment>
-    <field type="float" name="velocity">Velocity of the robot.</field>
+  <message name="MaxVelocity">
+    <comment>States the maximum velocity of the robot.</comment>
+    <field type="float" name="velocity">Maximum velocity of the robot.</field>
   </message>
   <message name="Obstacle">
-    <comment>States obstacle within the scan area.</comment>
+    <comment>Adds an obstacle within the scan area.</comment>
     <field type="float" name="x">X-coordinate of the obstacle.</field>
     <field type="float" name="y">Y-coordinate of the obstacle.</field>
     <field type="float" name="width">Width of the obstacle.</field>

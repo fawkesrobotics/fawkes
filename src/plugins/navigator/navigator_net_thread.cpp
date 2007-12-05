@@ -334,7 +334,7 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
       logger->log_info("NavigatorNetworkThread", "Message of type velocity message received");
       navigator_velocity_message_t *u = (navigator_velocity_message_t *)msg->payload();
 
-      NavigatorInterface::VelocityMessage* vmsg = new  NavigatorInterface::VelocityMessage();
+      NavigatorInterface::MaxVelocityMessage* vmsg = new  NavigatorInterface::MaxVelocityMessage();
       vmsg->set_velocity(u->value);
       navigator_interface->msgq_enqueue(vmsg);
     }

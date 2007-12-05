@@ -55,44 +55,41 @@ class NavigatorInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float distance; /**< Distance to the target. */
-      float angle; /**< Angle of the target. */
-      float x; /**< X-coordinate of the target. */
-      float y; /**< Y-coordinate of the target. */
+      float x; /**< X-coordinate of the target, in the robot's coordinate system. */
+      float y; /**< Y-coordinate of the target, in the robot's coordinate system. */
+      float orientation; /**< The orientation of the robot at the target. */
     } TargetMessage_data_t;
 
     TargetMessage_data_t *data;
 
    public:
-    TargetMessage(float ini_distance, float ini_angle, float ini_x, float ini_y);
+    TargetMessage(float ini_x, float ini_y, float ini_orientation);
     TargetMessage();
     ~TargetMessage();
 
     /* Methods */
-    float distance();
-    void set_distance(const float new_distance);
-    float angle();
-    void set_angle(const float new_angle);
     float x();
     void set_x(const float new_x);
     float y();
     void set_y(const float new_y);
+    float orientation();
+    void set_orientation(const float new_orientation);
   };
 
-  class VelocityMessage : public Message
+  class MaxVelocityMessage : public Message
   {
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float velocity; /**< Velocity of the robot. */
-    } VelocityMessage_data_t;
+      float velocity; /**< Maximum velocity of the robot. */
+    } MaxVelocityMessage_data_t;
 
-    VelocityMessage_data_t *data;
+    MaxVelocityMessage_data_t *data;
 
    public:
-    VelocityMessage(float ini_velocity);
-    VelocityMessage();
-    ~VelocityMessage();
+    MaxVelocityMessage(float ini_velocity);
+    MaxVelocityMessage();
+    ~MaxVelocityMessage();
 
     /* Methods */
     float velocity();

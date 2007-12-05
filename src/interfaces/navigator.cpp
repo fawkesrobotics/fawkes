@@ -80,21 +80,19 @@ NavigatorInterface::set_foo(const int new_foo)
 
 
 /** Constructor with initial values.
- * @param ini_distance initial value for distance
- * @param ini_angle initial value for angle
  * @param ini_x initial value for x
  * @param ini_y initial value for y
+ * @param ini_orientation initial value for orientation
  */
-NavigatorInterface::TargetMessage::TargetMessage(float ini_distance, float ini_angle, float ini_x, float ini_y) : Message()
+NavigatorInterface::TargetMessage::TargetMessage(float ini_x, float ini_y, float ini_orientation) : Message()
 {
   data_size = sizeof(TargetMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (TargetMessage_data_t *)data_ptr;
-  data->distance = ini_distance;
-  data->angle = ini_angle;
   data->x = ini_x;
   data->y = ini_y;
+  data->orientation = ini_orientation;
 }
 /** Constructor */
 NavigatorInterface::TargetMessage::TargetMessage() : Message()
@@ -109,48 +107,8 @@ NavigatorInterface::TargetMessage::~TargetMessage()
 {
 }
 /* Methods */
-/** Get distance value.
- * Distance to the target.
- * @return distance value
- */
-float
-NavigatorInterface::TargetMessage::distance()
-{
-  return data->distance;
-}
-
-/** Set distance value.
- * Distance to the target.
- * @param new_distance new distance value
- */
-void
-NavigatorInterface::TargetMessage::set_distance(const float new_distance)
-{
-  data->distance = new_distance;
-}
-
-/** Get angle value.
- * Angle of the target.
- * @return angle value
- */
-float
-NavigatorInterface::TargetMessage::angle()
-{
-  return data->angle;
-}
-
-/** Set angle value.
- * Angle of the target.
- * @param new_angle new angle value
- */
-void
-NavigatorInterface::TargetMessage::set_angle(const float new_angle)
-{
-  data->angle = new_angle;
-}
-
 /** Get x value.
- * X-coordinate of the target.
+ * X-coordinate of the target, in the robot's coordinate system.
  * @return x value
  */
 float
@@ -160,7 +118,7 @@ NavigatorInterface::TargetMessage::x()
 }
 
 /** Set x value.
- * X-coordinate of the target.
+ * X-coordinate of the target, in the robot's coordinate system.
  * @param new_x new x value
  */
 void
@@ -170,7 +128,7 @@ NavigatorInterface::TargetMessage::set_x(const float new_x)
 }
 
 /** Get y value.
- * Y-coordinate of the target.
+ * Y-coordinate of the target, in the robot's coordinate system.
  * @return y value
  */
 float
@@ -180,7 +138,7 @@ NavigatorInterface::TargetMessage::y()
 }
 
 /** Set y value.
- * Y-coordinate of the target.
+ * Y-coordinate of the target, in the robot's coordinate system.
  * @param new_y new y value
  */
 void
@@ -189,8 +147,28 @@ NavigatorInterface::TargetMessage::set_y(const float new_y)
   data->y = new_y;
 }
 
-/** @class NavigatorInterface::VelocityMessage interfaces/navigator.h
- * VelocityMessage Fawkes BlackBoard Interface Message.
+/** Get orientation value.
+ * The orientation of the robot at the target.
+ * @return orientation value
+ */
+float
+NavigatorInterface::TargetMessage::orientation()
+{
+  return data->orientation;
+}
+
+/** Set orientation value.
+ * The orientation of the robot at the target.
+ * @param new_orientation new orientation value
+ */
+void
+NavigatorInterface::TargetMessage::set_orientation(const float new_orientation)
+{
+  data->orientation = new_orientation;
+}
+
+/** @class NavigatorInterface::MaxVelocityMessage interfaces/navigator.h
+ * MaxVelocityMessage Fawkes BlackBoard Interface Message.
  * 
     
  */
@@ -199,43 +177,43 @@ NavigatorInterface::TargetMessage::set_y(const float new_y)
 /** Constructor with initial values.
  * @param ini_velocity initial value for velocity
  */
-NavigatorInterface::VelocityMessage::VelocityMessage(float ini_velocity) : Message()
+NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage(float ini_velocity) : Message()
 {
-  data_size = sizeof(VelocityMessage_data_t);
+  data_size = sizeof(MaxVelocityMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (VelocityMessage_data_t *)data_ptr;
+  data      = (MaxVelocityMessage_data_t *)data_ptr;
   data->velocity = ini_velocity;
 }
 /** Constructor */
-NavigatorInterface::VelocityMessage::VelocityMessage() : Message()
+NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage() : Message()
 {
-  data_size = sizeof(VelocityMessage_data_t);
+  data_size = sizeof(MaxVelocityMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (VelocityMessage_data_t *)data_ptr;
+  data      = (MaxVelocityMessage_data_t *)data_ptr;
 }
 /** Destructor */
-NavigatorInterface::VelocityMessage::~VelocityMessage()
+NavigatorInterface::MaxVelocityMessage::~MaxVelocityMessage()
 {
 }
 /* Methods */
 /** Get velocity value.
- * Velocity of the robot.
+ * Maximum velocity of the robot.
  * @return velocity value
  */
 float
-NavigatorInterface::VelocityMessage::velocity()
+NavigatorInterface::MaxVelocityMessage::velocity()
 {
   return data->velocity;
 }
 
 /** Set velocity value.
- * Velocity of the robot.
+ * Maximum velocity of the robot.
  * @param new_velocity new velocity value
  */
 void
-NavigatorInterface::VelocityMessage::set_velocity(const float new_velocity)
+NavigatorInterface::MaxVelocityMessage::set_velocity(const float new_velocity)
 {
   data->velocity = new_velocity;
 }
@@ -345,7 +323,7 @@ NavigatorInterface::messageValid(const Message *message) const
   if ( m0 != NULL ) {
     return true;
   }
-  const VelocityMessage *m1 = dynamic_cast<const VelocityMessage *>(message);
+  const MaxVelocityMessage *m1 = dynamic_cast<const MaxVelocityMessage *>(message);
   if ( m1 != NULL ) {
     return true;
   }
