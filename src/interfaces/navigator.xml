@@ -17,7 +17,7 @@
     <field type="float" name="velocity">Maximum velocity of the robot.</field>
   </message>
   <message name="Obstacle">
-    <comment>Adds an obstacle within the scan area.</comment>
+    <comment>Adds an obstacle within the scan area. It's just for the Navigator GUI.</comment>
     <field type="float" name="x">X-coordinate of the obstacle.</field>
     <field type="float" name="y">Y-coordinate of the obstacle.</field>
     <field type="float" name="width">Width of the obstacle.</field>
