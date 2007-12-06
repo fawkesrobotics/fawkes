@@ -57,7 +57,7 @@ PluginListMessage::PluginListMessage()
  * @param payload_size total payload size
  */
 PluginListMessage::PluginListMessage(unsigned int component_id,
-				     unsigned int msg_id __attribute__((__unused__)),
+				     unsigned int msg_id,
 				     void *payload, size_t payload_size)
 {
   if ( component_id != FAWKES_CID_PLUGINMANAGER ) {
