@@ -70,8 +70,7 @@
  */
 NavigatorGUI::NavigatorGUI(const char *host_name)
 {
-  //Glib::RefPtr<Gdk::Window> window = get_window();
-
+  this->host_name = host_name;
   zoom_factor = 100;
 
   win = new Gtk::Window();
@@ -147,7 +146,8 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   navigator_control = false;
   motor_control = false;
   cursor_over_area = false;
-  navigator_loaded = false;
+  navigator_loaded = true;
+  connected = false;
 
   zooming_adjustment = new Gtk::Adjustment(0.0, -99.9, 100.0);
   zooming_HScale = new Gtk::HScale(*zooming_adjustment);
@@ -181,6 +181,8 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   rotation_frame = new Gtk::Frame("Rotation [rad/s]");
   orbit_frame = new Gtk::Frame("Orbit");
   navigator_frame = new Gtk::Frame("Navigator");
+  status_frame = new Gtk::Frame();
+
 
   rpm_entry_box = Gtk::manage( new Gtk::HButtonBox() );
   trans_rot_entry_box = new Gtk::HBox();
@@ -257,11 +259,14 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   navigator_label_box->add(*obstacle_check);
 
   rpm_frame->add(*rpm_entry_box);
-  //velocity_frame->add(*velocity_entry_box);
   orbit_frame->add(*orbit_label_box);
   navigator_frame->add(*navigator_label_box);
 
-  // bbox_left->pack_start(*obstacle_check, Gtk::PACK_SHRINK, 4);
+  statusbar = new Gtk::Statusbar();
+  statusbar->push("Not connected.", 0);
+  statusbar->set_has_resize_grip(false);
+  status_frame->add(*statusbar);
+
   bbox_left->pack_start(*rpm_frame, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*trans_rot_entry_box, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*orbit_frame, Gtk::PACK_SHRINK, 4);
@@ -273,10 +278,11 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   bbox_left->pack_start(*orbit_radio, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*send_button, Gtk::PACK_SHRINK, 10);
 
-  m_VBox_Main-> pack_start(*bbox_top, Gtk::PACK_SHRINK, 4);
-  m_VBox_Main-> pack_start(*m_HBox_Left, Gtk::PACK_EXPAND_WIDGET);
-  m_HBox_Left-> pack_start(*bbox_left, Gtk::PACK_SHRINK, 5);
-  m_HBox_Left-> pack_start(*this, Gtk::PACK_EXPAND_WIDGET);
+  m_VBox_Main->pack_start(*bbox_top, Gtk::PACK_SHRINK, 4);
+  m_VBox_Main->pack_start(*m_HBox_Left, Gtk::PACK_EXPAND_WIDGET);
+  m_VBox_Main->pack_start(*status_frame, Gtk::PACK_SHRINK);
+  m_HBox_Left->pack_start(*bbox_left, Gtk::PACK_SHRINK, 5);
+  m_HBox_Left->pack_start(*this, Gtk::PACK_EXPAND_WIDGET);
   win->add(*m_VBox_Main);
 
 
@@ -306,8 +312,6 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   robot_radius = 0.25;
 
   //the points in screen coordinates
-  target_point.x = 0.;
-  target_point.y = 0.;
   cursor_point.x = 0.;
   cursor_point.y = 0.;
   odometry_point.x = 0.;
@@ -316,9 +320,12 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   ball_point.y = 1000000.;
 
   odometry_direction = 0.;
+
+  //currently not in use
   odometry_orientation = 0.;
-  robot_orientation = 1.6;
   velocity = 0;
+  mouse_point.x = 0.;
+  mouse_point.y = 0.;
 
   set_events(Gdk::BUTTON_PRESS_MASK);
   add_events(Gdk::BUTTON_RELEASE_MASK);
@@ -328,41 +335,9 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
 
   Glib::signal_idle().connect( sigc::mem_fun(*this, &NavigatorGUI::on_idle) );
 
-  net_client = new FawkesNetworkClient(host_name, 1910);
-  try
-    {
-      net_client->connect();
-    }
-  catch (SocketException &e)
-    {
-      std::cerr << "There has to be runnig a fawkes." << std::endl;
-      throw;
-    }
+  net_client = NULL;
+  connect();
 
-  // net_client->setNoDelay(true);
-  net_client->start();
-
-
-  net_client->register_handler(this, FAWKES_CID_NAVIGATOR_PLUGIN);
-  net_client->register_handler(this, FAWKES_CID_PLUGINMANAGER);
-
-  FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-                               MSG_PLUGIN_SUBSCRIBE_WATCH);
-  net_client->enqueue(msg1);
-  msg1->unref();
-  FawkesNetworkMessage *msg2 = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-                               MSG_PLUGIN_LIST_LOADED);
-  net_client->enqueue(msg2);
-  msg2->unref();
-  /*
-    navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
-    sub_msg->sub_type_points_and_lines = 1;
-    sub_msg->sub_type_odometry = 1;
-    FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN,
-                                NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
-    net_client->enqueue(msg);
-    msg->unref();
-  */
   win->show_all_children();
 
   Gtk::Main::run(*win);
@@ -372,22 +347,8 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
 NavigatorGUI::~NavigatorGUI()
 {
   send_stop();
-  for(LockList<NPoint*>::iterator iterator = points.begin();
-      iterator != points.end(); iterator++)
-    {
-      delete *iterator;
-    }
 
-  points.clear();
-
-
-  for(LockList<NLine*>::iterator iterator = lines.begin();
-      iterator != lines.end(); iterator++)
-    {
-      delete *iterator;
-    }
-  lines.clear();
-
+  net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
   net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
   net_client->disconnect();
   delete net_client;
@@ -399,9 +360,9 @@ NavigatorGUI::~NavigatorGUI()
     {
       delete *iterator;
     }
+  lines.clear();
   lines.unlock();
 
-  lines.clear();
 
   //delete points
   points.lock();
@@ -410,12 +371,73 @@ NavigatorGUI::~NavigatorGUI()
     {
       delete *iterator;
     }
+  points.clear();
   points.unlock();
 
-  points.clear();
+  //delete path_points
+  path_points.lock();
+  for(LockList<NPoint*>::iterator iterator = path_points.begin();
+      iterator != path_points.end(); iterator++)
+    {
+      delete *iterator;
+    }
+  path_points.clear();
+  path_points.unlock();
 
   delete target_point_mutex;
 }
+
+void NavigatorGUI::connect()
+{
+  if(connected)
+    {
+      connected = false;
+      net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
+      net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
+      net_client->cancel();
+      net_client->join();
+    }
+
+  if(net_client != NULL)
+    {
+      delete net_client;
+    }
+  net_client = new FawkesNetworkClient(host_name, 1910);
+
+  net_client->register_handler(this, FAWKES_CID_NAVIGATOR_PLUGIN);
+  net_client->register_handler(this, FAWKES_CID_PLUGINMANAGER);
+
+  try
+    {
+      net_client->connect();
+      connection_is_dead = false;
+
+      net_client->start();
+
+      FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+                                   MSG_PLUGIN_SUBSCRIBE_WATCH);
+      net_client->enqueue(msg1);
+      msg1->unref();
+      FawkesNetworkMessage *msg2 = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+                                   MSG_PLUGIN_LIST_LOADED);
+      net_client->enqueue(msg2);
+      msg2->unref();
+
+      char str[100];
+      strcpy (str,"Connected to ");
+      strcat (str, host_name);
+      strcat (str, ", but the navigator plugin is not loaded.");
+      statusbar->push(str, 1);
+    }
+  catch (SocketException &e)
+    {
+      connection_is_dead = true;
+      std::cerr << "------------------------------------------------------------" <<  std::endl;
+      std::cerr << "There is maybe no fawkes running at " << host_name << "!" <<  std::endl;
+      std::cerr << "------------------------------------------------------------" <<  std::endl;
+    }
+}
+
 
 void
 NavigatorGUI::deregistered() throw()
@@ -427,6 +449,7 @@ void
 NavigatorGUI::connection_established() throw()
 {
   printf("Connection established\n");
+  connected = true;
 }
 
 
@@ -434,9 +457,69 @@ void
 NavigatorGUI::connection_died() throw()
 {
   printf("Connection died\n");
-  // exit(0);
+  reset_gui();
+  statusbar->pop(1);
+
+  printf("Connection died2\n");
+  //net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
+  // net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
+  /*
+  printf("Connection cancel\n");
+  net_client->cancel();
+  printf("Connection join\n");
+  net_client->join();*/
+  printf("Connection is dead\n");
+
+  connection_is_dead = true;
 }
 
+/**
+ * Delets all displayable stuff and resets some values.
+ */
+void
+NavigatorGUI::reset_gui()
+{
+  odometry_direction = 0.;
+  odometry_orientation = 0.;
+  odometry_point.x = 0.;
+  odometry_point.y = 0.;
+  ball_point.x = 1000000.;
+  ball_point.y = 1000000.;
+  navigator_control = false;
+  motor_control = false;
+  navigator_loaded = false;
+
+  //delete lines
+  lines.lock();
+  for(LockList<NLine*>::iterator iterator = lines.begin();
+      iterator != lines.end(); iterator++)
+    {
+      delete *iterator;
+    }
+  lines.clear();
+  lines.unlock();
+
+  //delete points
+  points.lock();
+  for(LockList<NPoint*>::iterator iterator = points.begin();
+      iterator != points.end(); iterator++)
+    {
+      delete *iterator;
+    }
+  points.clear();
+  points.unlock();
+
+  //delete path_points
+  path_points.lock();
+  for(LockList<NPoint*>::iterator iterator = path_points.begin();
+      iterator != path_points.end(); iterator++)
+    {
+      delete *iterator;
+    }
+  path_points.clear();
+  path_points.unlock();
+  std::cout << "rest_gui" << std::endl;
+}
 
 /** Inbound mesage received.
  * @param m message
@@ -475,15 +558,13 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
           printf("Invalid nodes message received\n");
         }
 
-      points.lock();
-
       //delete points
+      points.lock();
       for(LockList<NPoint*>::iterator iterator = points.begin();
           iterator != points.end(); iterator++)
         {
           delete *iterator;
         }
-
       points.clear();
 
       //add points
@@ -501,16 +582,15 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
     {
       NavigatorLinesListMessage *lines_msg = msg->msgc<NavigatorLinesListMessage>();
 
-      lines.lock();
-
       //delete lines
+      lines.lock();
       for(LockList<NLine*>::iterator iterator = lines.begin();
           iterator != lines.end(); iterator++)
         {
           delete *iterator;
         }
-
       lines.clear();
+
       //add lines
       while (lines_msg->has_next())
         {
@@ -545,9 +625,8 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
     {
       NavigatorPathListMessage *path_msg = msg->msgc<NavigatorPathListMessage>();
 
-      path_points.lock();
-
       //delete path_points
+      path_points.lock();
       for(LockList<NPoint*>::iterator iterator = path_points.begin();
           iterator != path_points.end(); iterator++)
         {
@@ -561,7 +640,6 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
           NavigatorPathListMessage::npoint_t *p = path_msg->next();
           path_points.push_back(new NPoint(-p->y, -p->x));
         }
-
       path_points.unlock();
 
       delete path_msg;
@@ -615,9 +693,9 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
     {
       navigator_target_message_t *target_msg =  (navigator_target_message_t *)msg->payload();
       target_point_mutex->lock();
-      target_point.x = -target_msg->y * zoom_factor;
-      target_point.y = -target_msg->x * zoom_factor; //negative, because of the screen coordinates
-      //     std::cout << "target_point " << target_point.x << ", " << odometry_point.y << std::endl;
+      mouse_point.x = -target_msg->y * zoom_factor;
+      mouse_point.y = -target_msg->x * zoom_factor; //negative, because of the screen coordinates
+      //     std::cout << "mouse_point " << mouse_point.x << ", " << odometry_point.y << std::endl;
       target_point_mutex->unlock();
     }
   else if (NAVIGATOR_MSGTYPE_ODOMETRY == msg->msgid())
@@ -662,11 +740,8 @@ void NavigatorGUI::process_pluginmanager_message(FawkesNetworkMessage *msg) thro
       if(strncmp("navigator", u->name, PLUGIN_MSG_NAME_LENGTH) == 0)
         {
           std::cerr << "Plugin " << u->name << " unloaded." << std::endl;
-          navigator_control = false;
-          motor_control = false;
-          behold_radio->set_active();
-          control_button->set_label("Start Control");
-          navigator_loaded = false;
+          statusbar->pop(1);
+          reset_gui();
         }
     }
   else if(msg->msgid() == MSG_PLUGIN_LOADED)
@@ -676,7 +751,11 @@ void NavigatorGUI::process_pluginmanager_message(FawkesNetworkMessage *msg) thro
       if ( strncmp("navigator", lm->name, PLUGIN_MSG_NAME_LENGTH) == 0 )
         {
           std::cerr << "Navigator plugin loaded." << std::endl;
-
+          char * str = new char[100];
+          strcpy(str, "Connected to ");
+          strcat(str, host_name);
+          strcat(str, " and NavigatorPlugin is loaded.");
+          statusbar->push(str, 1);
           navigator_loaded = true;
           navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
           sub_msg->sub_type_points_and_lines = 1;
@@ -700,6 +779,11 @@ void NavigatorGUI::process_pluginmanager_message(FawkesNetworkMessage *msg) thro
                 {
                   std::cerr << "Navigator plugin loaded." << std::endl;
 
+                  char *str = new char[100];
+                  strcpy(str, "Connected to ");
+                  strcat(str, host_name);
+                  strcat(str, " and NavigatorPlugin is loaded.");
+                  statusbar->push(str, 1);
                   navigator_loaded = true;
                   navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
                   sub_msg->sub_type_points_and_lines = 1;
@@ -714,6 +798,7 @@ void NavigatorGUI::process_pluginmanager_message(FawkesNetworkMessage *msg) thro
         }
       else
         {
+          navigator_loaded = false;
           std::cerr << "Navigator plugin is not loaded." << std::endl;
         }
       delete plm;
@@ -732,8 +817,8 @@ bool NavigatorGUI::on_idle()
           orbit_frame->set_sensitive(false);
           navigator_frame->set_sensitive(false);
           send_button->set_sensitive(true);
-          target_point.x = 0;
-          target_point.y = 0;
+          mouse_point.x = 0;
+          mouse_point.y = 0;
         }
       else if(trans_rot_radio->get_active())
         {
@@ -743,8 +828,8 @@ bool NavigatorGUI::on_idle()
           orbit_frame->set_sensitive(false);
           navigator_frame->set_sensitive(false);
           send_button->set_sensitive(true);
-          target_point.x = 0;
-          target_point.y = 0;
+          mouse_point.x = 0;
+          mouse_point.y = 0;
         }
       else if(trans_radio->get_active())
         {
@@ -754,8 +839,8 @@ bool NavigatorGUI::on_idle()
           orbit_frame->set_sensitive(false);
           navigator_frame->set_sensitive(false);
           send_button->set_sensitive(true);
-          target_point.x = 0;
-          target_point.y = 0;
+          mouse_point.x = 0;
+          mouse_point.y = 0;
         }
       else if(rot_radio->get_active())
         {
@@ -765,8 +850,8 @@ bool NavigatorGUI::on_idle()
           orbit_frame->set_sensitive(false);
           navigator_frame->set_sensitive(false);
           send_button->set_sensitive(true);
-          target_point.x = 0;
-          target_point.y = 0;
+          mouse_point.x = 0;
+          mouse_point.y = 0;
         }
       else if(orbit_radio->get_active())
         {
@@ -834,11 +919,39 @@ bool NavigatorGUI::on_idle()
       reset_odometry_button->set_sensitive(true);
     }
 
-  if(!navigator_loaded)
+  if(!navigator_loaded || connection_is_dead)
     {
       behold_radio->set_active();
     }
   usleep(10000);
+
+  if(connection_is_dead)
+    {
+      char str[100];
+      strcpy (str,"There is no connection to a Fawkes running at ");
+      strcat (str, host_name);
+      strcat (str, ".\nDo you want to retry to connect to ");
+      strcat (str, host_name);
+      strcat (str, "?");
+      Gtk::MessageDialog* dialog = new Gtk::MessageDialog((Gtk::Window&)*win, str,
+                                   true, Gtk::MESSAGE_QUESTION,
+                                   Gtk::BUTTONS_OK_CANCEL, true);
+      dialog->set_secondary_text(
+        "If not the program will terminate.");
+      dialog->set_title("Question");
+      int result = dialog->run();
+      delete dialog;
+      switch (result)
+        {
+        case Gtk::RESPONSE_OK:
+          printf("Try to connect.\n");
+          connect();
+          break;
+        default:
+          exit(1);
+          break;
+        }
+    }
 
   queue_draw();
   return true;
@@ -897,8 +1010,8 @@ void NavigatorGUI::on_send_button_clicked()
   else  if(orbit_radio->get_active() && motor_control_radio->get_active())
     {
       navigator_orbit_message_t *orbit_msg = (navigator_orbit_message_t *)malloc(sizeof(navigator_orbit_message_t));
-      orbit_msg->orbit_center_x = -target_point.y / zoom_factor;
-      orbit_msg->orbit_center_y = -target_point.x / zoom_factor;
+      orbit_msg->orbit_center_x = -mouse_point.y / zoom_factor;
+      orbit_msg->orbit_center_y = -mouse_point.x / zoom_factor;
       orbit_msg->angular_velocity = angular_velocity_entry->get_value();
       FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_ORBIT, orbit_msg, sizeof(navigator_orbit_message_t));
       net_client->enqueue(msg);
@@ -927,7 +1040,6 @@ void NavigatorGUI::on_navigator_control_radio_clicked()
 {
   if(navigator_loaded)
     {
-      std::cout << "navigator radio" << std::endl;
       navigator_control = true;
       if(motor_control)
         {
@@ -948,8 +1060,8 @@ void NavigatorGUI::on_navigator_control_radio_clicked()
       send_stop();
 
       target_point_mutex->lock();
-      target_point.x = 0.;
-      target_point.y = 0.;
+      mouse_point.x = 0.;
+      mouse_point.y = 0.;
       target_point_mutex->unlock();
     }
 }
@@ -959,7 +1071,6 @@ void NavigatorGUI::on_motor_control_radio_clicked()
 {
   if(navigator_loaded)
     {
-      std::cout << "motor radio" << std::endl;
       motor_control = true;
       if(navigator_control)
         {
@@ -983,7 +1094,6 @@ void NavigatorGUI::on_motor_control_radio_clicked()
 
 void NavigatorGUI::on_behold_radio_clicked()
 {
-  std::cout << "behold radio;  navigator: " << navigator_control << "; motor: " << motor_control<< std::endl;
   if(navigator_loaded)
     {
       send_stop();
@@ -1012,14 +1122,11 @@ void NavigatorGUI::on_behold_radio_clicked()
 
 bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
 {
-  // std::cout << "pressed " << event->x << ", " << event->y << std::endl;
-  //std::cout << "pressed button" << event->button << std::endl;
   if(navigator_control)
     {
       //middle button
       if(event->button == 2)
         {
-          //std::cout << "pressed right" << std::endl;
           if(obstacle_check->get_active())
             {
               Gtk::Allocation allocation = get_allocation();
@@ -1042,14 +1149,14 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
           Gtk::Allocation allocation = get_allocation();
 
           target_point_mutex->lock();
-          target_point.x = (float) (event->x - allocation.get_width() / 2);
-          target_point.y = (float) (event->y - allocation.get_height() / 2);
+          mouse_point.x = (float) (event->x - allocation.get_width() / 2);
+          mouse_point.y = (float) (event->y - allocation.get_height() / 2);
           target_point_mutex->unlock();
 
           navigator_target_message_t *target_msg= (navigator_target_message_t *)malloc(sizeof(navigator_target_message_t));
 
-          target_msg->x = -target_point.y / zoom_factor;
-          target_msg->y = -target_point.x / zoom_factor; // negative because target_point is in screen coordinates
+          target_msg->x = -mouse_point.y / zoom_factor;
+          target_msg->y = -mouse_point.x / zoom_factor; // negative because mouse_point is in screen coordinates
           std::cout << "pressed " <<  target_msg->x << ", " <<  target_msg->y << std::endl;
 
           FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_TARGET, target_msg, sizeof(navigator_target_message_t));
@@ -1070,8 +1177,8 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
       Gtk::Allocation allocation = get_allocation();
 
       target_point_mutex->lock();
-      target_point.x = (float) (event->x - allocation.get_width() / 2);
-      target_point.y = (float) (event->y - allocation.get_height() / 2);
+      mouse_point.x = (float) (event->x - allocation.get_width() / 2);
+      mouse_point.y = (float) (event->y - allocation.get_height() / 2);
       target_point_mutex->unlock();
     }
 
@@ -1081,8 +1188,6 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
 
 bool NavigatorGUI::on_button_release_event(GdkEventButton* event)
 {
-  std::cout << "button release" << std::endl;
-
   return true;
 }
 
@@ -1154,7 +1259,7 @@ void NavigatorGUI::send_stop()
 bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
 {
   Glib::RefPtr<Gdk::Window> window = get_window();
-  
+
   if(window)
     {
       Cairo::RefPtr<Cairo::Context> context = window->create_cairo_context();
@@ -1307,18 +1412,17 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
         }
       path_points.unlock();
 
-      //draw the target point
-      if(navigator_control || (motor_control && orbit_radio->get_active()))
+      //draw the orbit center
+      if(motor_control && orbit_radio->get_active())
         {
           context->save();
           context->set_source_rgb(1.0, 0.0, 0.0);
           target_point_mutex->lock();
-          context->arc(target_point.x, target_point.y, point_radius, 0.0, 2.0 * M_PI);
+          context->arc(mouse_point.x, mouse_point.y, point_radius, 0.0, 2.0 * M_PI);
           target_point_mutex->unlock();
           context->fill_preserve();
           context->stroke();
 
-          //    context->rotate(robot_orientation);
 
           context->move_to(0, 0);
           context->line_to(0, -robot_radius * 1.5);
@@ -1449,7 +1553,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
               vector_length = (distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) / 3;
 
               double vector_add = (obstacle1_radius - obstacle2_radius) / 2;
-            
+
               //a point near by the middle, placed toward to p1
               next_point2 = new NPoint(
                               middle_x - vector_x * (vector_length + vector_add),
@@ -1496,7 +1600,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
         }
 
       context.clear();
-      
+
     }//if(window)
 
 

@@ -61,13 +61,13 @@ namespace Gtk
   class Frame;
   class Alignment;
   class RefPtr;
+  class Statusbar;
 }
 
 namespace Pango
- {
+  {
   class Layout;
- }
-//Glib::RefPtr<Pango::Layout>
+}
 
 class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
   {
@@ -77,6 +77,7 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     virtual ~NavigatorGUI();
 
   private:
+    const char *host_name;
 
     Gtk::Window* win;
 
@@ -134,6 +135,7 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::Frame* rotation_frame;
     Gtk::Frame* orbit_frame;
     Gtk::Frame* navigator_frame;
+    Gtk::Frame* status_frame;
 
     Gtk::ButtonBox* rpm_entry_box;
     Gtk::HBox* trans_rot_entry_box;
@@ -159,7 +161,9 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::Alignment* orbit_alignment;
     Gtk::Alignment* navigator_alignment;
 
-	Glib::RefPtr<Pango::Layout> layout;
+    Gtk::Statusbar* statusbar;
+
+    Glib::RefPtr<Pango::Layout> layout;
 
     double window_width;
     double window_height;
@@ -173,10 +177,9 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
 
     NPoint ball_point;
     NPoint odometry_point;
-    NPoint target_point;
+    NPoint mouse_point;
     NPoint cursor_point;
     double odometry_orientation;
-    double robot_orientation;
     double odometry_direction;
 
     LockList<NPoint*> points;
@@ -200,9 +203,13 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     void process_navigator_message(FawkesNetworkMessage *msg) throw();
     void process_pluginmanager_message(FawkesNetworkMessage *msg) throw();
     bool navigator_loaded;
+    bool connection_is_dead;
+    bool connected;
 
     void connection_established() throw();
     void connection_died() throw();
+    void reset_gui();
+    void connect();
 
     bool on_idle();
     bool on_expose_event(GdkEventExpose* event);
