@@ -241,7 +241,7 @@ main(int argc, char **argv)
 	  if ( endptr[0] != 0 ) {
 	    printf("ERROR: '%s' is not a float\n", args[2]);
 	  } else {
-	    if ( set_def ) {
+	    if ( ! set_def ) {
 	      netconf->set_float(args[1], f);
 	    } else {
 	      netconf->set_default_float(args[1], f);
@@ -253,7 +253,7 @@ main(int argc, char **argv)
 	  if ( (endptr[0] != 0) || (li < 0) ) {
 	    printf("ERROR: '%s' is not an unsigned int\n", args[2]);
 	  } else {
-	    if ( set_def ) {
+	    if ( ! set_def ) {
 	      netconf->set_uint(args[1], li);
 	    } else {
 	      netconf->set_default_uint(args[1], li);
@@ -265,7 +265,7 @@ main(int argc, char **argv)
 	  if ( endptr[0] != 0 ) {
 	    printf("ERROR: '%s' is not an int\n", args[2]);
 	  } else {
-	    if ( set_def ) {
+	    if ( ! set_def ) {
 	      netconf->set_int(args[1], li);
 	    } else {
 	      netconf->set_default_int(args[1], li);
@@ -284,14 +284,16 @@ main(int argc, char **argv)
 	    printf("ERROR: '%s' is not a boolean.\n", args[2]);
 	  }
 	  if (valid) {
-	    if ( set_def ) {
+	    if ( ! set_def ) {
+	      printf("Setting bool\n");
 	      netconf->set_bool(args[1], b);
 	    } else {
+	      printf("Setting default bool\n");
 	      netconf->set_default_bool(args[1], b);
 	    }
 	  }
 	} else if ( desired_type == "string" ) {
-	  if ( set_def ) {
+	  if ( ! set_def ) {
 	    netconf->set_string(args[1], args[2]);
 	  } else {
 	    netconf->set_default_string(args[1], args[2]);
