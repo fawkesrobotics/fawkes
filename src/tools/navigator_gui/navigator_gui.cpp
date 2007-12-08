@@ -518,7 +518,16 @@ NavigatorGUI::reset_gui()
     }
   path_points.clear();
   path_points.unlock();
-  std::cout << "rest_gui" << std::endl;
+
+  //delete obstacle_points
+  obstacle_points.lock();
+  for(LockList<Obstacle*>::iterator iterator = obstacle_points.begin();
+      iterator != obstacle_points.end(); iterator++)
+    {
+      delete *iterator;
+    }
+  obstacle_points.clear();
+  obstacle_points.unlock();
 }
 
 /** Inbound mesage received.
