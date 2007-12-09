@@ -226,6 +226,10 @@ FawkesMainThread::destruct()
   delete network_manager;
   delete thread_manager;
   delete thread_inifin;
+  delete __time_wait;
+#ifdef USE_TIMETRACER
+  delete __tt;
+#endif
 
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();

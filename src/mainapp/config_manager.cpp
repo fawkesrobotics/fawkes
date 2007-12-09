@@ -27,6 +27,7 @@
 
 #include <mainapp/config_manager.h>
 #include <config/net_messages.h>
+#include <config/net_list_content.h>
 #include <utils/logging/liblogger.h>
 
 #include <netcomm/fawkes/component_ids.h>
@@ -86,7 +87,7 @@ FawkesConfigManager::set_hub(FawkesNetworkHub *hub)
 void
 FawkesConfigManager::send_inv_value(unsigned int clid, const char *path)
 {
-  config_invval_msg_t *r = prepare_msg<config_invval_msg_t>(path);
+  config_invval_msg_t *r = prepare_msg<config_invval_msg_t>(path, false);
   hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INV_VALUE, r, sizeof(config_invval_msg_t));
 }
 
@@ -100,7 +101,7 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
 {
   if ( i->is_float() ) {
     try {
-      config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(i->path());
+      config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(i->path(), i->is_default());
       r->f = i->get_float();
       hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE, r, sizeof(config_float_value_msg_t));
     } catch (Exception &e) {
@@ -111,7 +112,7 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
     }
   } else if ( i->is_uint() ) {
     try {
-      config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(i->path());
+      config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(i->path(), i->is_default());
       r->u = i->get_uint();
       hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE, r, sizeof(config_uint_value_msg_t));
     } catch (Exception &e) {
@@ -122,7 +123,7 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
     }
   } else if ( i->is_int() ) {
     try {
-      config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(i->path());
+      config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(i->path(), i->is_default());
       r->i = i->get_int();
       hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE, r, sizeof(config_int_value_msg_t));
     } catch (Exception &e) {
@@ -133,7 +134,7 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
     }
   } else if ( i->is_bool() ) {
     try {
-      config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(i->path());
+      config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(i->path(), i->is_default());
       r->b = (i->get_bool() ? 1 : 0);
       hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE, r, sizeof(config_bool_value_msg_t));
     } catch (Exception &e) {
@@ -144,7 +145,7 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
     }
   } else if ( i->is_string() ) {
     try {
-      config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(i->path());
+      config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(i->path(), i->is_default());
       strncpy(r->s, i->get_string().c_str(), CONFIG_MSG_MAX_STRING_LENGTH);
       hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE, r, sizeof(config_string_value_msg_t));
     } catch (Exception &e) {
@@ -175,13 +176,15 @@ FawkesConfigManager::process_after_loop()
       subscribers.unique();
 
       config->lock();
+      ConfigListContent *content = new ConfigListContent();
       Configuration::ValueIterator *i = config->iterator();
       while ( i->next() ) {
-	send_value(msg->clid(), i);
+	content->append(i);
+	//send_value(msg->clid(), i);
       }
       delete i;
+      hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_LIST, content);
       config->unlock();
-      hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_END_OF_VALUES);
 
     } else if ( (msg->msgid() == MSG_CONFIG_ERASE_VALUE) ||
 		(msg->msgid() == MSG_CONFIG_ERASE_DEFAULT_VALUE)) {
@@ -198,7 +201,7 @@ FawkesConfigManager::process_after_loop()
 	  config->erase(path);
 	}
 
-	config_value_erased_msg_t *r = prepare_msg<config_value_erased_msg_t>(path);
+	config_value_erased_msg_t *r = prepare_msg<config_value_erased_msg_t>(path, erase_def);
 	hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER,
 		  erase_def ? MSG_CONFIG_DEFAULT_VALUE_ERASED : MSG_CONFIG_VALUE_ERASED,
 		  r, sizeof(config_value_erased_msg_t));
@@ -228,7 +231,8 @@ FawkesConfigManager::process_after_loop()
 	case MSG_CONFIG_GET_FLOAT:
 	  try {
 	    float f = config->get_float(path);
-	    config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(path);
+	    bool  d = config->is_default(path);
+	    config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(path, d);
 	    r->f = f;
 	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE,
 		      r, sizeof(config_float_value_msg_t));
@@ -244,7 +248,8 @@ FawkesConfigManager::process_after_loop()
 	case MSG_CONFIG_GET_UINT:
 	  try {
 	    unsigned int u = config->get_uint(path);
-	    config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(path);
+	    bool  d = config->is_default(path);
+	    config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(path, d);
 	    r->u = u;
 	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE,
 		      r, sizeof(config_uint_value_msg_t));
@@ -260,7 +265,8 @@ FawkesConfigManager::process_after_loop()
 	case MSG_CONFIG_GET_INT:
 	  try {
 	    int i = config->get_int(path);
-	    config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(path);
+	    bool  d = config->is_default(path);
+	    config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(path, d);
 	    r->i = i;
 	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE,
 		      r, sizeof(config_int_value_msg_t));
@@ -276,7 +282,8 @@ FawkesConfigManager::process_after_loop()
 	case MSG_CONFIG_GET_BOOL:
 	  try {
 	    bool b = config->get_bool(path);
-	    config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(path);
+	    bool d = config->is_default(path);
+	    config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(path, d);
 	    r->b = b;
 	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE,
 		      r, sizeof(config_bool_value_msg_t));
@@ -292,7 +299,8 @@ FawkesConfigManager::process_after_loop()
 	case MSG_CONFIG_GET_STRING:
 	  try {
 	    std::string s = config->get_string(path);
-	    config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(path);
+	    bool  d = config->is_default(path);
+	    config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(path, d);
 	    strncpy(r->s, s.c_str(), CONFIG_MSG_MAX_STRING_LENGTH);
 	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE,
 		      r, sizeof(config_string_value_msg_t));
@@ -350,7 +358,7 @@ FawkesConfigManager::process_after_loop()
 	      config->set_default_float(path, m->f);
 	    }
 	    float f = config->get_float(path);
-	    config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(path);
+	    config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(path, (msg->msgid() == MSG_CONFIG_SET_DEFAULT_FLOAT));
 	    r->f = f;
 	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE,
 		      r, sizeof(config_float_value_msg_t));
@@ -373,7 +381,7 @@ FawkesConfigManager::process_after_loop()
 	      config->set_default_uint(path, m->u);
 	    }
 	    unsigned int u = config->get_uint(path);
-	    config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(path);
+	    config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(path, (msg->msgid() == MSG_CONFIG_SET_DEFAULT_UINT));
 	    r->u = u;
 	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE,
 		      r, sizeof(config_uint_value_msg_t));
@@ -396,7 +404,7 @@ FawkesConfigManager::process_after_loop()
 	      config->set_default_int(path, m->i);
 	    }
 	    int i = config->get_int(path);
-	    config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(path);
+	    config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(path, (msg->msgid() == MSG_CONFIG_SET_DEFAULT_INT));
 	    r->i = i;
 	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE,
 		      r, sizeof(config_int_value_msg_t));
@@ -419,7 +427,7 @@ FawkesConfigManager::process_after_loop()
 	      config->set_default_bool(path, (m->b != 0));
 	    }
 	    bool b = config->get_bool(path);
-	    config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(path);
+	    config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(path, (msg->msgid() == MSG_CONFIG_SET_DEFAULT_BOOL));
 	    r->b = (b ? 1 : 0);
 	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE,
 		      r, sizeof(config_bool_value_msg_t));
@@ -446,7 +454,7 @@ FawkesConfigManager::process_after_loop()
 	      config->set_default_string(path, s);
 	    }
 	    s = config->get_string(path);
-	    config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(path);
+	    config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(path, (msg->msgid() == MSG_CONFIG_SET_DEFAULT_STRING));
 	    strncpy(r->s, s.c_str(), CONFIG_MSG_MAX_STRING_LENGTH);
 	    hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE,
 		      r, sizeof(config_string_value_msg_t));
@@ -523,7 +531,7 @@ FawkesConfigManager::config_value_changed(const char *path, int value)
   subscribers.lock();
   for (sit = subscribers.begin(); sit != subscribers.end(); ++sit) {
     try {
-      config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(path);
+      config_int_value_msg_t *r = prepare_msg<config_int_value_msg_t>(path, false);
       r->i = value;
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE,
 		r, sizeof(config_int_value_msg_t));
@@ -544,7 +552,7 @@ FawkesConfigManager::config_value_changed(const char *path, unsigned int value)
   subscribers.lock();
   for (sit = subscribers.begin(); sit != subscribers.end(); ++sit) {
     try {
-      config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(path);
+      config_uint_value_msg_t *r = prepare_msg<config_uint_value_msg_t>(path, false);
       r->u = value;
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE,
 		r, sizeof(config_uint_value_msg_t));
@@ -565,7 +573,7 @@ FawkesConfigManager::config_value_changed(const char *path, float value)
   subscribers.lock();
   for (sit = subscribers.begin(); sit != subscribers.end(); ++sit) {
     try {
-      config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(path);
+      config_float_value_msg_t *r = prepare_msg<config_float_value_msg_t>(path, false);
       r->f = value;
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE,
 		r, sizeof(config_float_value_msg_t));
@@ -586,7 +594,7 @@ FawkesConfigManager::config_value_changed(const char *path, bool value)
   subscribers.lock();
   for (sit = subscribers.begin(); sit != subscribers.end(); ++sit) {
     try {
-      config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(path);
+      config_bool_value_msg_t *r = prepare_msg<config_bool_value_msg_t>(path, false);
       r->b = (value ? 1 : 0);
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE,
 		r, sizeof(config_bool_value_msg_t));
@@ -607,7 +615,7 @@ FawkesConfigManager::config_value_changed(const char *path, const char *value)
   subscribers.lock();
   for (sit = subscribers.begin(); sit != subscribers.end(); ++sit) {
     try {
-      config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(path);
+      config_string_value_msg_t *r = prepare_msg<config_string_value_msg_t>(path, false);
       strncpy(r->s, value, CONFIG_MSG_MAX_STRING_LENGTH);
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE,
 		r, sizeof(config_string_value_msg_t));
@@ -628,7 +636,7 @@ FawkesConfigManager::config_value_erased(const char *path)
   subscribers.lock();
   for (sit = subscribers.begin(); sit != subscribers.end(); ++sit) {
     try {
-      config_value_erased_msg_t *r = prepare_msg<config_value_erased_msg_t>(path);
+      config_value_erased_msg_t *r = prepare_msg<config_value_erased_msg_t>(path, false);
       hub->send(*sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_VALUE_ERASED,
 		r, sizeof(config_value_erased_msg_t));
     } catch (Exception &e) {

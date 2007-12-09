@@ -73,10 +73,11 @@ class FawkesConfigManager : public FawkesNetworkHandler, public ConfigurationCha
   void send_inv_value(unsigned int clid, const char *path);
 
   template <typename T>
-    T *  prepare_msg(const char *path)
+    T *  prepare_msg(const char *path, bool is_default)
     {
       T * m = (T *)calloc(1, sizeof(T));
       strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
+      m->cp.is_default = is_default;
       return m;
     }
 

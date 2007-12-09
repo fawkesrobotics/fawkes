@@ -40,11 +40,7 @@ endif
 
 
 LIBS_libconfig = stdc++ core utils netcomm
-OBJS_libconfig =	\
-		config.o		\
-		change_handler.o	\
-		sqlite.o \
-		netconf.o
+OBJS_libconfig = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all = $(OBJS_libconfig)
 

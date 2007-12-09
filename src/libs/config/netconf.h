@@ -69,6 +69,8 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual bool          is_int(const char *path);
   virtual bool          is_bool(const char *path);
   virtual bool          is_string(const char *path);
+  
+  virtual bool          is_default(const char *path);
 
   virtual std::string     get_type(const char *path);
   virtual float           get_float(const char *path);
@@ -135,6 +137,8 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
     virtual bool          is_int();
     virtual bool          is_bool();
     virtual bool          is_string();
+
+    virtual bool          is_default();
 
     virtual float         get_float();
     virtual unsigned int  get_uint();

@@ -62,32 +62,32 @@ class ConfigChangeWatcherTool : public ConfigurationChangeHandler, public Signal
 
   virtual void config_value_changed(const char *path, int value)
   {
-    printf("%-48s| %-8s| %-23i\n", path, "int", value);
+    printf("? %-55s| %-8s| %-14i\n", path, "int", value);
   }
 
   virtual void config_value_changed(const char *path, unsigned int value)
   {
-    printf("%-48s| %-8s| %-23u\n", path, "uint", value);
+    printf("? %-55s| %-8s| %-14u\n", path, "uint", value);
   }
 
   virtual void config_value_changed(const char *path, float value)
   {
-    printf("%-48s| %-8s| %-23f\n", path, "float", value);
+    printf("? %-55s| %-8s| %-14f\n", path, "float", value);
   }
 
   virtual void config_value_changed(const char *path, bool value)
   {
-    printf("%-48s| %-8s| %-23s\n", path, "bool", (value ? "true" : "false"));
+    printf("? %-55s| %-8s| %-14s\n", path, "bool", (value ? "true" : "false"));
   }
 
   virtual void config_value_changed(const char *path, const char *value)
   {
-    printf("%-48s| %-8s| %-23s\n", path, "string", value);
+    printf("? %-55s| %-8s| %-14s\n", path, "string", value);
   }
 
   virtual void config_value_erased(const char *path)
   {
-    printf("%-48s| %-8s| %-23s\n", path, "", "ERASED");
+    printf("? %-55s| %-8s| %-14s\n", path, "", "ERASED");
   }
 
 
@@ -111,8 +111,8 @@ class ConfigChangeWatcherTool : public ConfigurationChangeHandler, public Signal
 void
 print_header()
 {
-  printf("%-48s| %-8s| %-23s\n", "Path", "Type", "Value");
-  printf("------------------------------------------------------------------------------------\n");
+  printf("D %-55s| %-8s| %-14s\n", "Path", "Type", "Value");
+  printf("--------------------------------------------------------------------------------------\n");
 }
 
 
@@ -123,15 +123,15 @@ void
 print_line(Configuration::ValueIterator *i)
 {
   if ( i->is_float() ) {
-    printf("%-48s| %-8s| %-23f\n", i->path(), i->type(), i->get_float());
+    printf("%s %-55s| %-8s| %-14f\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_float());
   } else if ( i->is_uint() ) {
-    printf("%-48s| %-8s| %-23u\n", i->path(), i->type(), i->get_uint());
+    printf("%s %-55s| %-8s| %-14u\n", (i->is_default() ? "*" : " "), i->path(), "uint", i->get_uint());
   } else if ( i->is_int() ) {
-    printf("%-48s| %-8s| %-23i\n", i->path(), i->type(), i->get_int());
+    printf("%s %-55s| %-8s| %-14i\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_int());
   } else if ( i->is_bool() ) {
-    printf("%-48s| %-8s| %-23s\n", i->path(), i->type(), (i->get_bool() ? "true" : "false"));
+    printf("%s %-55s| %-8s| %-14s\n", (i->is_default() ? "*" : " "), i->path(), i->type(), (i->get_bool() ? "true" : "false"));
   } else if ( i->is_string() ) {
-    printf("%-48s| %-8s| %-23s\n", i->path(), i->type(), i->get_string().c_str());
+    printf("%s %-55s| %-8s| %-14s\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_string().c_str());
   }
 }
 
@@ -285,10 +285,8 @@ main(int argc, char **argv)
 	  }
 	  if (valid) {
 	    if ( ! set_def ) {
-	      printf("Setting bool\n");
 	      netconf->set_bool(args[1], b);
 	    } else {
-	      printf("Setting default bool\n");
 	      netconf->set_default_bool(args[1], b);
 	    }
 	  }

@@ -87,6 +87,8 @@ class Configuration
     virtual int           get_int()                                       = 0;
     virtual bool          get_bool()                                      = 0;
     virtual std::string   get_string()                                    = 0;
+
+    virtual bool          is_default()                                    = 0;
   };
 
   virtual void          copy(Configuration *copyconf)                     = 0;
@@ -106,6 +108,8 @@ class Configuration
   virtual bool          is_int(const char *path)                          = 0;
   virtual bool          is_bool(const char *path)                         = 0;
   virtual bool          is_string(const char *path)                       = 0;
+
+  virtual bool          is_default(const char *path)                      = 0;
 
   virtual float           get_float(const char *path)                     = 0;
   virtual unsigned int    get_uint(const char *path)                      = 0;

@@ -28,6 +28,7 @@
 #include <config/netconf.h>
 #include <config/net_messages.h>
 #include <config/sqlite.h>
+#include <config/net_list_content.h>
 
 #include <core/threading/mutex.h>
 #include <netcomm/fawkes/client.h>
@@ -164,6 +165,16 @@ NetworkConfiguration::exists(const char *path)
 {
   ValueIterator *i = get_value(path);
   bool rv = i->valid();
+  delete i;
+  return rv;
+}
+
+
+bool
+NetworkConfiguration::is_default(const char *path)
+{
+  ValueIterator *i = get_value(path);
+  bool rv = i->is_default();
   delete i;
   return rv;
 }
@@ -806,7 +817,6 @@ NetworkConfiguration::erase_internal(unsigned int msg_type,
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							msg_type,
 							sizeof(config_erase_value_msg_t));
-  // printf("Message generated, size: %lu, should be: %lu\n", omsg->payload_size(), sizeof(config_erase_value_msg_t));
   config_erase_value_msg_t *m = omsg->msg<config_erase_value_msg_t>();
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   c->enqueue(omsg);
@@ -848,11 +858,59 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m) throw()
 {
   if ( m->cid() == FAWKES_CID_CONFIGMANAGER ) {
 
-    // printf("Received message of type %u\n", m->msgid());
-
     if ( __mirror_mode ) {
       switch (m->msgid()) {
-      case MSG_CONFIG_END_OF_VALUES:
+      case MSG_CONFIG_LIST:
+	// put all values into mirror database
+	{
+	  ConfigListContent *clc = m->msgc<ConfigListContent>();
+	  while ( clc->has_next() ) {
+	    config_list_entity_t *cle = clc->next();
+	    switch ( cle->type ) {
+	    case MSG_CONFIG_FLOAT_VALUE:
+	      if ( cle->cp.is_default ) {
+		mirror_config->set_default_float(cle->cp.path, cle->data.f);
+	      } else {
+		mirror_config->set_float(cle->cp.path, cle->data.f);
+	      }
+	      break;
+
+	    case MSG_CONFIG_INT_VALUE:
+	      if ( cle->cp.is_default ) {
+		mirror_config->set_default_int(cle->cp.path, cle->data.i);
+	      } else {
+		mirror_config->set_int(cle->cp.path, cle->data.i);
+	      }
+	      break;
+
+	    case MSG_CONFIG_UINT_VALUE:
+	      if ( cle->cp.is_default ) {
+		mirror_config->set_default_uint(cle->cp.path, cle->data.u);
+	      } else {
+		mirror_config->set_uint(cle->cp.path, cle->data.u);
+	      }
+	      break;
+
+	    case MSG_CONFIG_BOOL_VALUE:
+	      if ( cle->cp.is_default ) {
+		mirror_config->set_default_bool(cle->cp.path, cle->data.b == 1);
+	      } else {
+		mirror_config->set_bool(cle->cp.path, cle->data.b == 1);
+	      }
+	      break;
+
+	    case MSG_CONFIG_STRING_VALUE:
+	      if ( cle->cp.is_default ) {
+		mirror_config->set_default_string(cle->cp.path, cle->data.s);
+	      } else {
+		mirror_config->set_string(cle->cp.path, cle->data.s);
+	      }
+	      break;
+	    }
+	  }
+	  delete clc;
+	}
+
 	// add all change handlers
 	for (ChangeHandlerMultimap::const_iterator j = _change_handlers.begin(); j != _change_handlers.end(); ++j) {
 	  _ch_range = _change_handlers.equal_range((*j).first);
@@ -1279,6 +1337,19 @@ NetworkConfiguration::NetConfValueIterator::is_string()
     return (msg->msgid() == MSG_CONFIG_STRING_VALUE);
   } else {
     return i->is_string();
+  }
+}
+
+
+bool
+NetworkConfiguration::NetConfValueIterator::is_default()
+{
+  if ( i == NULL ) {
+    //if ( msg == NULL ) {
+      throw NullPointerException("You may not access value methods on invalid iterator");
+      //}
+  } else {
+    return i->is_default();
   }
 }
 

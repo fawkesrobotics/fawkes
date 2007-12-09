@@ -61,6 +61,22 @@ main(int argc, char **argv)
   }
 
   try {
+    float of = 5.234;
+    cout << "[DEFAULT FLOAT] set f=" << of << "..." << flush;
+    config->set_default_float("/testing/default_float", of);
+    cout << "done" << endl;
+    cout << "[DEFAULT_FLOAT] get..." << flush;
+    float f = config->get_float("/testing/default_float");
+    if ( ! config->is_default("/testing/default_float") ) {
+      throw ConfigurationException("/testing/default_float is not in default config");
+    }
+    printf("done, f=%f\n", f);
+  } catch (ConfigurationException &e) {
+    cout << "failed" << endl;
+    e.print_trace();
+  }
+
+  try {
     unsigned int ou = 6;
     cout << "[UINT] set u=" << ou << "..." << flush;
     config->set_uint("/testing/uint", ou);
@@ -136,6 +152,13 @@ main(int argc, char **argv)
   } catch (ConfigurationException &e) {
     cout << "failed" << endl;
     e.print_trace();
+  }
+
+  Configuration::ValueIterator *i = config->iterator();
+  while (i->next()) {
+    if ( i->is_float() ) {
+      printf("FLOAT: %s = %f (default: %i)\n", i->path(), i->get_float(), i->is_default());
+    }
   }
 
   delete config;

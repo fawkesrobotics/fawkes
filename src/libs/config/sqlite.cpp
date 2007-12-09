@@ -77,20 +77,20 @@
   "ATTACH DATABASE '%s' AS defaults"
 
 #define SQL_SELECT_VALUE_TYPE						\
-  "SELECT type,value FROM config WHERE path=? UNION "			\
-  "SELECT type,value FROM defaults.config AS dc "			\
+  "SELECT type, value, 0 AS is_default FROM config WHERE path=? UNION "	\
+  "SELECT type, value, 1 AS is_default FROM defaults.config AS dc "	\
   "WHERE path=? AND NOT EXISTS "					\
   "(SELECT path FROM config WHERE dc.path=path)"
 
 #define SQL_SELECT_COMPLETE						\
-  "SELECT * FROM config WHERE path=? UNION "				\
-  "SELECT * FROM defaults.config AS dc "				\
+  "SELECT *, 0 AS is_default FROM config WHERE path=? UNION "				\
+  "SELECT *, 1 AS is_default FROM defaults.config AS dc "				\
   "WHERE path=? AND NOT EXISTS "					\
   "(SELECT path FROM config WHERE dc.path = path)"
 
 #define SQL_SELECT_TYPE							\
-  "SELECT type FROM config WHERE path=? UNION "				\
-  "SELECT type FROM defaults.config AS dc "				\
+  "SELECT type, 0 AS is_default FROM config WHERE path=? UNION "				\
+  "SELECT type, 1 AS is_default FROM defaults.config AS dc "				\
   "WHERE path=? AND NOT EXISTS "					\
   "(SELECT path FROM config WHERE dc.path = path)"
 
@@ -115,8 +115,9 @@
   "SELECT \"%s\",* FROM config"
 
 #define SQL_SELECT_ALL							\
-  "SELECT * FROM config UNION "						\
-  "SELECT * FROM defaults.config AS dc WHERE NOT EXISTS "		\
+  "SELECT *, 0 AS is_default FROM config UNION "						\
+  "SELECT *, 1 AS is_default FROM defaults.config AS dc "		\
+  "WHERE NOT EXISTS "							\
   "(SELECT path FROM config WHERE dc.path = path)"
 
 #define SQL_DELETE_VALUE						\
@@ -489,6 +490,38 @@ bool
 SQLiteConfiguration::is_string(const char *path)
 {
   return (get_type(path) == "string");
+}
+
+
+/** Check if a given value is a default value.
+ * @param path path to value
+ * @return true if the value is default, false otherwise
+ */
+bool
+SQLiteConfiguration::is_default(const char *path)
+{
+  mutex->lock();
+  sqlite3_stmt *stmt;
+  const char   *tail;
+  bool e;
+
+  if ( sqlite3_prepare(db, SQL_SELECT_TYPE, -1, &stmt, &tail) != SQLITE_OK ) {
+    mutex->unlock();
+    throw ConfigurationException("is_default/prepare", sqlite3_errmsg(db));
+  }
+  if ( sqlite3_bind_text(stmt, 1, path, -1, NULL) != SQLITE_OK ) {
+    mutex->unlock();
+    throw ConfigurationException("is_default/bind/path", sqlite3_errmsg(db));
+  }
+  if ( sqlite3_bind_text(stmt, 2, path, -1, NULL) != SQLITE_OK ) {
+    mutex->unlock();
+    throw ConfigurationException("is_default/bind/path", sqlite3_errmsg(db));
+  }
+  e = ( (sqlite3_step(stmt) == SQLITE_ROW) && (sqlite3_column_int(stmt, 1) == 1 ));
+  sqlite3_finalize(stmt);
+
+  mutex->unlock();
+  return e;
 }
 
 
@@ -1572,6 +1605,12 @@ bool
 SQLiteConfiguration::SQLiteValueIterator::is_string()
 {
   return (strcmp("string", (const char *)sqlite3_column_text(stmt, 1)) == 0);
+}
+
+bool
+SQLiteConfiguration::SQLiteValueIterator::is_default()
+{
+  return (sqlite3_column_int(stmt, 4) == 1);
 }
 
 

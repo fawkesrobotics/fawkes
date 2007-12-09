@@ -28,58 +28,62 @@
 #ifndef __FAWKES_CONFIG_MESSAGES_H_
 #define __FAWKES_CONFIG_MESSAGES_H_
 
-#define MSG_CONFIG_GET_FLOAT           1
-#define MSG_CONFIG_GET_UINT            2
-#define MSG_CONFIG_GET_INT             3
-#define MSG_CONFIG_GET_BOOL            4
-#define MSG_CONFIG_GET_STRING          5
-#define MSG_CONFIG_GET_VALUE           6
-#define MSG_CONFIG_GET_BEGIN           MSG_CONFIG_GET_FLOAT
-#define MSG_CONFIG_GET_END             MSG_CONFIG_GET_VALUE
-#define MSG_CONFIG_GET_ALL             7
+#include <stdint.h>
+#include <netcomm/utils/dynamic_buffer.h>
 
-#define MSG_CONFIG_SET_FLOAT          10
-#define MSG_CONFIG_SET_UINT           11
-#define MSG_CONFIG_SET_INT            12
-#define MSG_CONFIG_SET_BOOL           13
-#define MSG_CONFIG_SET_STRING         14
-#define MSG_CONFIG_SET_DEFAULT_FLOAT  15
-#define MSG_CONFIG_SET_DEFAULT_UINT   16
-#define MSG_CONFIG_SET_DEFAULT_INT    17
-#define MSG_CONFIG_SET_DEFAULT_BOOL   18
-#define MSG_CONFIG_SET_DEFAULT_STRING 19
-#define MSG_CONFIG_SET_BEGIN          MSG_CONFIG_SET_FLOAT
-#define MSG_CONFIG_SET_END            MSG_CONFIG_SET_DEFAULT_STRING
-#define MSG_CONFIG_ERASE_VALUE         20
-#define MSG_CONFIG_ERASE_DEFAULT_VALUE 21
+#pragma pack(push,4)
 
-#define MSG_CONFIG_GET_TAGS           25
-#define MSG_CONFIG_LOAD_TAG           26
-#define MSG_CONFIG_SAVE_TAG           27
-#define MSG_CONFIG_INV_TAG            28
-#define MSG_CONFIG_DEL_TAG            29
+#define MSG_CONFIG_GET_FLOAT             1
+#define MSG_CONFIG_GET_UINT              2
+#define MSG_CONFIG_GET_INT               3
+#define MSG_CONFIG_GET_BOOL              4
+#define MSG_CONFIG_GET_STRING            5
+#define MSG_CONFIG_GET_VALUE             6
+#define MSG_CONFIG_GET_BEGIN             MSG_CONFIG_GET_FLOAT
+#define MSG_CONFIG_GET_END               MSG_CONFIG_GET_VALUE
+#define MSG_CONFIG_GET_ALL               7
 
-#define MSG_CONFIG_FLOAT_VALUE        30
-#define MSG_CONFIG_UINT_VALUE         31
-#define MSG_CONFIG_INT_VALUE          32
-#define MSG_CONFIG_BOOL_VALUE         33
-#define MSG_CONFIG_STRING_VALUE       34
-#define MSG_CONFIG_VALUE_BEGIN        MSG_CONFIG_FLOAT_VALUE
-#define MSG_CONFIG_VALUE_END          MSG_CONFIG_STRING_VALUE
-/* End of config values */
-#define MSG_CONFIG_END_OF_VALUES      35
-#define MSG_CONFIG_INV_VALUE          36
-#define MSG_CONFIG_VALUE_ERASED       37
+#define MSG_CONFIG_SET_FLOAT            10
+#define MSG_CONFIG_SET_UINT             11
+#define MSG_CONFIG_SET_INT              12
+#define MSG_CONFIG_SET_BOOL             13
+#define MSG_CONFIG_SET_STRING           14
+#define MSG_CONFIG_SET_DEFAULT_FLOAT    15
+#define MSG_CONFIG_SET_DEFAULT_UINT     16
+#define MSG_CONFIG_SET_DEFAULT_INT      17
+#define MSG_CONFIG_SET_DEFAULT_BOOL     18
+#define MSG_CONFIG_SET_DEFAULT_STRING   19
+#define MSG_CONFIG_SET_BEGIN            MSG_CONFIG_SET_FLOAT
+#define MSG_CONFIG_SET_END              MSG_CONFIG_SET_DEFAULT_STRING
+#define MSG_CONFIG_ERASE_VALUE          20
+#define MSG_CONFIG_ERASE_DEFAULT_VALUE  21
+
+#define MSG_CONFIG_GET_TAGS             25
+#define MSG_CONFIG_LOAD_TAG             26
+#define MSG_CONFIG_SAVE_TAG             27
+#define MSG_CONFIG_INV_TAG              28
+#define MSG_CONFIG_DEL_TAG              29
+
+#define MSG_CONFIG_FLOAT_VALUE          30
+#define MSG_CONFIG_UINT_VALUE           31
+#define MSG_CONFIG_INT_VALUE            32
+#define MSG_CONFIG_BOOL_VALUE           33
+#define MSG_CONFIG_STRING_VALUE         34
+#define MSG_CONFIG_VALUE_BEGIN          MSG_CONFIG_FLOAT_VALUE
+#define MSG_CONFIG_VALUE_END            MSG_CONFIG_STRING_VALUE
+#define MSG_CONFIG_INV_VALUE            36
+#define MSG_CONFIG_VALUE_ERASED         37
 #define MSG_CONFIG_DEFAULT_VALUE_ERASED 38
+#define MSG_CONFIG_LIST                 39
 
-#define MSG_CONFIG_SUBSCRIBE          50
-#define MSG_CONFIG_UNSUBSCRIBE        51
+#define MSG_CONFIG_SUBSCRIBE            50
+#define MSG_CONFIG_UNSUBSCRIBE          51
 
 
 /* Length definitions */
-#define CONFIG_MSG_PATH_LENGTH        128
-#define CONFIG_MSG_MAX_STRING_LENGTH  256
-#define CONFIG_MSG_MAX_TAG_LENGTH      64
+#define CONFIG_MSG_PATH_LENGTH         128
+#define CONFIG_MSG_MAX_STRING_LENGTH   256
+#define CONFIG_MSG_MAX_TAG_LENGTH       64
 
 /** Basic config descriptor.
  * Path that defines a unique element in the configuration.
@@ -87,6 +91,9 @@
  */
 typedef struct {
   char path[CONFIG_MSG_PATH_LENGTH];		/**< path to config value. */
+  uint32_t   is_default :  1;			/**< 1 if value is a default value, 0
+						 * otherwise, only for get response */
+  uint32_t   reserved   : 31;			/**< Reserved for future use. */
 } config_descriptor_t;
 
 /** Get value message. */
@@ -118,19 +125,19 @@ typedef struct {
 /** Unsigned int value message */
 typedef struct {
   config_descriptor_t  cp;	/**< value descriptor */
-  unsigned int u;		/**< value */
+  uint32_t u;			/**< value */
 } config_uint_value_msg_t;
 
 /** Integer value message */
 typedef struct {
   config_descriptor_t  cp;	/**< value descriptor */
-  int i;			/**< value */
+  int32_t i;			/**< value */
 } config_int_value_msg_t;
 
 /** Boolean value message */
 typedef struct {
   config_descriptor_t  cp;	/**< value descriptor */
-  unsigned int b;		/**< value */
+  uint32_t b;			/**< value */
 } config_bool_value_msg_t;
 
 /** String value message */
@@ -145,5 +152,26 @@ typedef struct {
   char tag[CONFIG_MSG_MAX_TAG_LENGTH];	/**< tag */
 } config_tag_msg_t;
 
+
+/** Config list message. */
+typedef struct {
+  dynamic_list_t config_list;	/**< DynamicBuffer for list */
+} config_list_msg_t;
+
+/** Config list entity. */
+typedef struct {
+  config_descriptor_t cp;	/**< Config descriptor. */
+  uint32_t   type       : 8;	/**< type of entity, uses MSG_CONFIG_*_VALUE message IDs */
+  uint32_t   reserved   : 24;	/**< reserved for future use */
+  union {
+    float    f;					/**< float value */
+    uint32_t u;					/**< unsigned int value */
+    int32_t  i;					/**< int value */
+    int32_t  b;					/**< bool value */
+    char     s[CONFIG_MSG_MAX_STRING_LENGTH];	/**< string value */
+  } data;					/**< data union */
+} config_list_entity_t;
+
+#pragma pack(pop)
 
 #endif

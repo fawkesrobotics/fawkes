@@ -29,8 +29,14 @@ LIBS_qa_config = config
 OBJS_qa_config_change_handler = qa_config_change_handler.o
 LIBS_qa_config_change_handler = config
 
-OBJS_all = $(OBJS_qa_config) $(OBJS_qa_config_change_handler)
-BINS_all = $(BINDIR)/qa_config $(BINDIR)/qa_config_change_handler
+OBJS_qa_config_net_list_content = qa_net_list_content.o
+LIBS_qa_config_net_list_content = config fawkesmainappmsgs
+
+OBJS_all = $(OBJS_qa_config) $(OBJS_qa_config_change_handler) \
+	$(OBJS_qa_config_net_list_content)
+BINS_all = $(BINDIR)/qa_config 				\
+	$(BINDIR)/qa_config_change_handler 		\
+	$(BINDIR)/qa_config_net_list_content
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

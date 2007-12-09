@@ -53,6 +53,8 @@ class SQLiteConfiguration : public Configuration
   virtual bool          is_bool(const char *path);
   virtual bool          is_string(const char *path);
 
+  virtual bool          is_default(const char *path);
+
   virtual std::string     get_type(const char *path);
   virtual float           get_float(const char *path);
   virtual unsigned int    get_uint(const char *path);
@@ -113,6 +115,8 @@ class SQLiteConfiguration : public Configuration
     virtual bool          is_int();
     virtual bool          is_bool();
     virtual bool          is_string();
+
+    virtual bool          is_default();
 
     virtual float         get_float();
     virtual unsigned int  get_uint();
