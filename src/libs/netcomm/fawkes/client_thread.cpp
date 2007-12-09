@@ -69,6 +69,8 @@ FawkesNetworkClientThread::FawkesNetworkClientThread(StreamSocket *s,
 FawkesNetworkClientThread::~FawkesNetworkClientThread()
 {
   delete s;
+  delete _outbound_mutex;
+  delete _outbound_waitcond;
   delete outbound_queue;
   delete inbound_queue;
 }

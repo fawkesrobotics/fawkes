@@ -102,7 +102,7 @@ class ResolverQAMain : public SignalHandler
       printf("Successfully resolved to 0x%x again\n", s->sin_addr.s_addr);
     }
 
-    char *name;
+    const char *name;
     if ( ! r->resolve_address((struct sockaddr *)s, slen, &name) ) {
       // printf("Resolving address failed\n");
     } else {
@@ -123,7 +123,7 @@ class ResolverQAMain : public SignalHandler
       printf("Successfully resolved to 0x%x (%s)\n", s->sin_addr.s_addr, addrp);
 
       struct sockaddr_in so;
-      char *tmp;
+      const char *tmp;
       slen = sizeof(so);
       so.sin_addr.s_addr = s->sin_addr.s_addr;
       r->resolve_address((struct sockaddr *)&so, slen, &tmp);

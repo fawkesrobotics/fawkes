@@ -44,10 +44,11 @@
  * of the list. The list itself is formed by concatenated memory regions,
  * each preceeded by a two byte length value.
  *
- * The list may be at most 64 KB in total size (including in-between headers).
+ * The list may be at most 4 GB in total size (including in-between headers)
+ * Each list item by itself can be at most 64 KB in size.
  * The buffer starts with an initial size. If this initial size is exceeded
- * the buffer size is doubled. If the double size would exceed 64 KB it is
- * increased to exactly 64 KB.
+ * the buffer size is doubled. If the double size would exceed 4 GB it is
+ * increased to exactly 4 GB.
  *
  * The numbers in the headers are stored in network byte order and thus are
  * suitable for direct sending over the network.
@@ -71,8 +72,12 @@ DynamicBuffer::DynamicBuffer(dynamic_list_t *db, size_t initial_buffer_size)
   _curhead     = (element_header_t *)_buffer;
   _curdata     = (void *)((size_t)_buffer + sizeof(element_header_t));
 
-  _db->size         = htons(0);
-  _db->num_elements = htons(0);
+  _db->size         = htonl(0);
+  _db->num_elements = htonl(0);
+
+  _it_curhead = NULL;
+  _it_curdata = NULL;
+  _it_curel = 0;
 }
 
 
@@ -121,11 +126,11 @@ DynamicBuffer::append(const void *data, size_t data_size)
 {
   if ( _read_only ) throw AccessViolationException("DynamicBuffer is read-only");
 
-  if ( data_size > (0xFFFF - 2) ) {
+  if ( data_size > (0xFFFF - sizeof(element_header_t)) ) {
     throw IllegalArgumentException("Buffer size too big, max 65535 bytes");
   }
 
-  size_t cur_size = ntohs(_db->size);
+  size_t cur_size = ntohl(_db->size);
   if ( (cur_size + data_size + sizeof(element_header_t)) > _buffer_size ) {
     try {
       increase();
@@ -143,9 +148,9 @@ DynamicBuffer::append(const void *data, size_t data_size)
   _curhead           = (element_header_t *)((size_t)_curhead + data_size
 					                     + sizeof(element_header_t));
   _curdata           = (void *)((size_t)_curdata + data_size + sizeof(element_header_t));
-  _db->size          = htons(cur_size + sizeof(element_header_t) + data_size);
-  uint16_t tmp = ntohs(_db->num_elements) + 1;
-  _db->num_elements  = htons(tmp);
+  _db->size          = htonl(cur_size + sizeof(element_header_t) + data_size);
+  uint16_t tmp = ntohl(_db->num_elements) + 1;
+  _db->num_elements  = htonl(tmp);
 }
 
 
@@ -167,11 +172,11 @@ DynamicBuffer::increase()
 {
   size_t new_buffer_size;
 
-  if ( (_buffer_size * 2) >= 0xFFFF ) {
-    if ( _buffer_size == 0xFFFF ) {
+  if ( (_buffer_size) >= 0xFFFFFFFF / 2 ) {
+    if ( _buffer_size == 0xFFFFFFFF ) {
       throw OutOfMemoryException("Dynamic buffer may not be greater than 64KB");
     } else {
-      new_buffer_size = 0xFFFF;
+      new_buffer_size = 0xFFFFFFFF;
     }
   } else {
     new_buffer_size = _buffer_size * 2;
@@ -197,7 +202,7 @@ DynamicBuffer::increase()
 size_t
 DynamicBuffer::buffer_size()
 {
-  return ntohs(_db->size);
+  return ntohl(_db->size);
 }
 
 
@@ -219,7 +224,7 @@ DynamicBuffer::real_buffer_size()
 unsigned int
 DynamicBuffer::num_elements()
 {
-  return ntohs(_db->num_elements);
+  return ntohl(_db->num_elements);
 }
 
 
@@ -241,7 +246,7 @@ DynamicBuffer::reset_iterator()
 bool
 DynamicBuffer::has_next()
 {
-  return (_read_only && (_it_curel < (ntohs(_db->num_elements))));
+  return (_read_only && (_it_curel < (ntohl(_db->num_elements))));
 }
 
 

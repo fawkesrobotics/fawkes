@@ -31,15 +31,18 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+#pragma pack(push,4)
+
 /** Dynamic list type.
  * Use this element in your message struct if you want to add a dynamic list.
  * This is meant to be used in conjunction with DynamicBuffer.
  */
 typedef struct {
-  uint16_t  size;		/**< total size of list buffer */
-  uint16_t  num_elements;	/**< number of elements in list */
+  uint32_t  size;		/**< total size of list buffer */
+  uint32_t  num_elements;	/**< number of elements in list */
 } dynamic_list_t;
 
+#pragma pack(pop)
 
 class DynamicBuffer
 {
