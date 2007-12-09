@@ -318,14 +318,14 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   odometry_point.y = 0.;
   ball_point.x = 1000000.;
   ball_point.y = 1000000.;
+  mouse_point.x = 0.;
+  mouse_point.y = 0.;
 
   odometry_direction = 0.;
 
   //currently not in use
   odometry_orientation = 0.;
   velocity = 0;
-  mouse_point.x = 0.;
-  mouse_point.y = 0.;
 
   set_events(Gdk::BUTTON_PRESS_MASK);
   add_events(Gdk::BUTTON_RELEASE_MASK);
@@ -483,6 +483,8 @@ NavigatorGUI::reset_gui()
   odometry_orientation = 0.;
   odometry_point.x = 0.;
   odometry_point.y = 0.;
+  mouse_point.x = 0.;
+  mouse_point.y = 0.;
   ball_point.x = 1000000.;
   ball_point.y = 1000000.;
   navigator_control = false;
@@ -697,7 +699,7 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
       points.unlock();
 
       delete obstacle_msg;
-    }
+    }/*
   else if (NAVIGATOR_MSGTYPE_TARGET == msg->msgid() && navigator_control)
     {
       navigator_target_message_t *target_msg =  (navigator_target_message_t *)msg->payload();
@@ -706,14 +708,14 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
       mouse_point.y = -target_msg->x * zoom_factor; //negative, because of the screen coordinates
       //     std::cout << "mouse_point " << mouse_point.x << ", " << odometry_point.y << std::endl;
       target_point_mutex->unlock();
-    }
+    }*/
   else if (NAVIGATOR_MSGTYPE_ODOMETRY == msg->msgid())
     {
       navigator_odometry_message_t *odometry_msg =  (navigator_odometry_message_t *)msg->payload();
 
       odometry_point_mutex->lock();
-      odometry_point.x = -odometry_msg->position_y * zoom_factor;
-      odometry_point.y = -odometry_msg->position_x * zoom_factor;
+      odometry_point.x = -odometry_msg->position_y;
+      odometry_point.y = -odometry_msg->position_x;
       if(odometry_msg->velocity_y == 0. && odometry_msg->velocity_x == 0.)
         {
           odometry_direction = 0.;
@@ -1019,8 +1021,8 @@ void NavigatorGUI::on_send_button_clicked()
   else  if(orbit_radio->get_active() && motor_control_radio->get_active())
     {
       navigator_orbit_message_t *orbit_msg = (navigator_orbit_message_t *)malloc(sizeof(navigator_orbit_message_t));
-      orbit_msg->orbit_center_x = -mouse_point.y / zoom_factor;
-      orbit_msg->orbit_center_y = -mouse_point.x / zoom_factor;
+      orbit_msg->orbit_center_x = -mouse_point.y;
+      orbit_msg->orbit_center_y = -mouse_point.x;
       orbit_msg->angular_velocity = angular_velocity_entry->get_value();
       FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_ORBIT, orbit_msg, sizeof(navigator_orbit_message_t));
       net_client->enqueue(msg);
@@ -1186,8 +1188,8 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
       Gtk::Allocation allocation = get_allocation();
 
       target_point_mutex->lock();
-      mouse_point.x = (float) (event->x - allocation.get_width() / 2);
-      mouse_point.y = (float) (event->y - allocation.get_height() / 2);
+      mouse_point.x = (float) (event->x - allocation.get_width() / 2) / zoom_factor;
+      mouse_point.y = (float) (event->y - allocation.get_height() / 2) / zoom_factor;
       target_point_mutex->unlock();
     }
 
@@ -1202,15 +1204,12 @@ bool NavigatorGUI::on_button_release_event(GdkEventButton* event)
 
 bool NavigatorGUI::on_motion_notify_event(GdkEventMotion* event)
 {
-
   Gtk::Allocation allocation = get_allocation();
 
   cursor_point_mutex->lock();
   cursor_point.x = (float) (event->x - allocation.get_width() / 2);
   cursor_point.y = (float) (event->y - allocation.get_height() / 2);
   cursor_point_mutex->unlock();
-
-
 
   return true;
 }
@@ -1427,7 +1426,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
           context->save();
           context->set_source_rgb(1.0, 0.0, 0.0);
           target_point_mutex->lock();
-          context->arc(mouse_point.x, mouse_point.y, point_radius, 0.0, 2.0 * M_PI);
+          context->arc(mouse_point.x * zoom_factor, mouse_point.y * zoom_factor, point_radius, 0.0, 2.0 * M_PI);
           target_point_mutex->unlock();
           context->fill_preserve();
           context->stroke();
@@ -1453,7 +1452,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       odometry_point_mutex->lock();
       context->save();
       context->set_source_rgb(0.0, 0.0, 1.0);
-      context->arc(odometry_point.x, odometry_point.y, point_radius, 0.0, 2.0 * M_PI);
+      context->arc(odometry_point.x * zoom_factor, odometry_point.y * zoom_factor, point_radius, 0.0, 2.0 * M_PI);
       context->fill_preserve();
       context->stroke();
 
@@ -1470,7 +1469,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       //draw odometry coordinates
       layout = Pango::Layout::create (create_pango_context ());
       char print_string[100];
-      sprintf(print_string, "%.2f, %.2f", -odometry_point.y / zoom_factor, -odometry_point.x / zoom_factor);
+      sprintf(print_string, "%.2f, %.2f", -odometry_point.y, -odometry_point.x);
       layout->set_text(print_string);
 
       Glib::RefPtr<Gdk::GC> gc_odometry = Gdk::GC::create(window);
