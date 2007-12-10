@@ -100,7 +100,7 @@ HAVE_NETWORK_CAM    = 1
 HAVE_SHMEM_CAM      = 1
 HAVE_V4L_CAM        = 0
 
-# Check for external libraries
+### Check for external libraries
 IPP_DIR  = /opt/intel/ipp
 HAVE_IPP = 0
 ifneq ($(realpath $(IPP_DIR)),)
@@ -120,6 +120,12 @@ ifneq ($(realpath $(IPP_DIR)),)
   endif
 endif
 
+HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_OPENCV),1)
+  CFLAGS_OPENCV = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
+  LDFLAGS_OPENCV = $(shell $(PKGCONFIG) --libs 'opencv')
+endif
+
 # Set to 1 to build shape models
 HAVE_SHAPE_MODELS = 1
 
@@ -127,10 +133,16 @@ VISION_CFLAGS       += $(foreach CAM,$(CAMS),$(if $(subst 0,,$(HAVE_$(CAM)_CAM))
 VISION_CFLAGS       += $(foreach CTRL,$(CTRLS),$(if $(subst 0,,$(HAVE_$(CTRL)_CTRL)),-DHAVE_$(CTRL)_CTRL))
 
 ifeq ($(MAKECMDGOALS),printconf)
-VISION_CAM_PRINT     = $(foreach CAM,$(CAMS),"\b"$(CAM): $(if $(subst 0,,$(HAVE_$(CAM)_CAM)),"yes","no")"\n")
+VISION_CAM_PRINT     = $(foreach CAM,$(CAMS),$(CAM): $(if $(subst 0,,$(HAVE_$(CAM)_CAM)),"yes","no")\n)
+VISION_CTRL_PRINT    = $(foreach CTRL,$(CTRLS),$(CTRL): $(if $(subst 0,,$(HAVE_$(CTRL)_CTRL)),"yes","no")\n)
+VISION_LIBS_PRINT    = $(foreach DLIB,LIBJPEG LIBPNG LIBDC1394 SDL TRICLOPS_SDK IPP OPENCV SHAPE_MODELS,$(DLIB): $(if $(subst 0,,$(HAVE_$(DLIB))),"yes","no")\n)
 printconf:
 	$(SILENT)echo "Cameras:"
-	$(SILENT)echo -e $(VISION_CAM_PRINT)
+	$(SILENT)echo -e " $(VISION_CAM_PRINT)"
+	$(SILENT)echo "Controls:"
+	$(SILENT)echo -e " $(VISION_CTRL_PRINT)"
+	$(SILENT)echo "Libs:"
+	$(SILENT)echo -e " $(VISION_LIBS_PRINT)"
 	$(SILENT)echo VISION_LIBDIRS:  $(VISION_LIBDIRS)
 	$(SILENT)echo VISION_INCDIRS:  $(VISION_INCDIRS)
 	$(SILENT)echo VISION_CAM_LIBS: $(VISION_CAM_LIBS)
