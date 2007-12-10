@@ -45,7 +45,7 @@ class Camera;
 class ScanlineModel;
 class ColorModel;
 class MirrorModel;
-class ReallySimpleClassifier;
+class SimpleColorClassifier;
 class RelativePositionModel;
 class GlobalPositionModel;
 class SharedMemoryImageBuffer;
@@ -74,7 +74,7 @@ class FvOmniBallPipelineThread
   MirrorModel* mirror;
   RelativePositionModel* rel_pos;
   GlobalPositionModel* glob_pos;
-  ReallySimpleClassifier* classifier;
+  SimpleColorClassifier* classifier;
   SharedMemoryImageBuffer* shm_buffer;
   Scaler* scaler;
 

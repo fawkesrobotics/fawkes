@@ -199,7 +199,7 @@ FvFrontPipelineThread::init()
 				   __cfg_colormap_width, __cfg_colormap_height,
 				   "front-colormap", /* destroy on delete */ true);
 
-  __classifier = new ReallySimpleClassifier(__scanlines, __cm);
+  __classifier = new SimpleColorClassifier(__scanlines, __cm);
 
 
   if ( __cfg_shrinker_type == "shrinker" ) {

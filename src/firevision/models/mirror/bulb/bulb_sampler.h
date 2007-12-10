@@ -90,7 +90,7 @@ class BulbSampler {
   Bulb                   *bulb;
   ColorModelLookupTable  *colorLut;
   ScanlineRadial         *radial;
-  ReallySimpleClassifier *classifier;
+  SimpleColorClassifier *classifier;
 
   std::list< ROI >           *rois;
   std::list< ROI >::iterator  r;

@@ -25,18 +25,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_COLORCLASSIFIER_SIMPLE_H_
-#define __FIREVISION_COLORCLASSIFIER_SIMPLE_H_
+#ifndef __FIREVISION_CLASSIFIERS_SIMPLE_H_
+#define __FIREVISION_CLASSIFIERS_SIMPLE_H_
 
-#include "classifiers/classifier.h"
+#include <classifiers/classifier.h>
 
 class ScanlineModel;
 class ColorModel;
 
-class ReallySimpleClassifier : public Classifier
+class SimpleColorClassifier : public Classifier
 {
  public:
-  ReallySimpleClassifier(ScanlineModel *scanline_model,
+  SimpleColorClassifier(ScanlineModel *scanline_model,
 			 ColorModel *color_model,
 			 unsigned int min_num_points=6,
 			 unsigned int box_extent = 50,
@@ -46,10 +46,9 @@ class ReallySimpleClassifier : public Classifier
  
   virtual std::list< ROI > * classify();
 
-  virtual void getMassPointOfBall( ROI *roi, cart_coord_t *massPoint );
+  virtual void get_mass_point_of_ball( ROI *roi, cart_coord_t *massPoint );
 
  private:
-
   unsigned int consider_neighbourhood(unsigned int x, unsigned int y, color_t what);
 
   unsigned char *src;

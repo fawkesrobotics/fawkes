@@ -45,7 +45,7 @@
 class Camera;
 class ScanlineModel;
 class ColorModel;
-class ReallySimpleClassifier;
+class SimpleColorClassifier;
 class SharedMemoryImageBuffer;
 class ObjectPositionInterface;
 class CameraControl;
@@ -93,7 +93,7 @@ class FvFrontPipelineThread
   ShapeModel               *__circle_model;
   BallRelative             *__ball_rel;
   BallGlobal               *__ball_glob;
-  ReallySimpleClassifier   *__classifier;
+  SimpleColorClassifier    *__classifier;
   Shrinker                 *__shrinker;
 
   ObjectPositionInterface  *__ball_interface;

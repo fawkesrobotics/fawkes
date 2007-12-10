@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  simple.cpp - Implementation of a ReallySimpleClassifier
+ *  simple.cpp - Implementation of a SimpleColorClassifier
  *
  *  Created: Thu May 16 2005
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
@@ -33,7 +33,7 @@
 #include <models/scanlines/scanlinemodel.h>
 #include <models/color/colormodel.h>
 
-/** @class ReallySimpleClassifier <classifiers/simple.h>
+/** @class SimpleColorClassifier <classifiers/simple.h>
  * Simple classifier.
  */
 
@@ -48,15 +48,14 @@
  * @param neighbourhood_min_match minimum number of object pixels to grow neighbourhood
  * @param grow_by grow region by that many pixels
  */
-ReallySimpleClassifier::ReallySimpleClassifier(ScanlineModel *scanline_model,
-					       ColorModel *color_model,
-					       unsigned int min_num_points,
-					       unsigned int box_extent,
-					       bool upward,
-					       unsigned int neighbourhood_min_match,
-                                               unsigned int grow_by
-					       )
-  : Classifier("ReallySimpleClassifier")
+SimpleColorClassifier::SimpleColorClassifier(ScanlineModel *scanline_model,
+					     ColorModel *color_model,
+					     unsigned int min_num_points,
+					     unsigned int box_extent,
+					     bool upward,
+					     unsigned int neighbourhood_min_match,
+					     unsigned int grow_by)
+  : Classifier("SimpleColorClassifier")
 {
   modified = false;
   this->scanline_model = scanline_model;
@@ -70,7 +69,7 @@ ReallySimpleClassifier::ReallySimpleClassifier(ScanlineModel *scanline_model,
 
 
 unsigned int
-ReallySimpleClassifier::consider_neighbourhood( unsigned int x, unsigned int y , color_t what)
+SimpleColorClassifier::consider_neighbourhood( unsigned int x, unsigned int y , color_t what)
 {
   color_t c;
   unsigned int num_what = 0;
@@ -115,11 +114,11 @@ ReallySimpleClassifier::consider_neighbourhood( unsigned int x, unsigned int y ,
 }
 
 std::list< ROI > *
-ReallySimpleClassifier::classify()
+SimpleColorClassifier::classify()
 {
 
   if (_src == NULL) {
-    //cout << "ReallySimpleClassifier: ERROR, src buffer not set. NOT classifying." << endl;
+    //cout << "SimpleColorClassifier: ERROR, src buffer not set. NOT classifying." << endl;
     return new std::list< ROI >;
   }
 
@@ -144,7 +143,7 @@ ReallySimpleClassifier::classify()
     YUV422_PLANAR_YUV(_src, _width, _height, x, y, yp, up, vp);
 
     /*
-    cout << "ReallySimpleClassifier: Checking at ("
+    cout << "SimpleColorClassifier: Checking at ("
 	 << x
 	 << ","
 	 << y
@@ -274,8 +273,8 @@ ReallySimpleClassifier::classify()
  * @param massPoint contains mass point upon return
  */
 void
-ReallySimpleClassifier::getMassPointOfBall( ROI *roi, cart_coord_t *massPoint ) {
-
+SimpleColorClassifier::get_mass_point_of_ball( ROI *roi, cart_coord_t *massPoint )
+{
   unsigned int nrOfOrangePixels;
   nrOfOrangePixels = 0;
   massPoint->x     = 0;

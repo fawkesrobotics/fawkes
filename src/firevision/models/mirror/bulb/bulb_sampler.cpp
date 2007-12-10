@@ -70,9 +70,7 @@ BulbSampler::BulbSampler( unsigned int image_width,
 				   __image_width / 2, __image_height / 2,
 				   5, 5, 10);
 
-  classifier = new ReallySimpleClassifier( radial, 
-					   colorLut,
-					   0                          ); // min_num_points
+  classifier = new SimpleColorClassifier( radial, colorLut, /* min num points */ 0);
 
 }
 
@@ -125,8 +123,8 @@ BulbSampler::BulbSampler( Bulb *bulb,
 				   5, 5,
 				   10                              );
 
-  classifier = new ReallySimpleClassifier( radial,  colorLut,
-					   /* min num points */ 0);
+  classifier = new SimpleColorClassifier( radial,  colorLut,
+					  /* min num points */ 0);
 
 }
 
@@ -197,7 +195,7 @@ BulbSampler::consider(unsigned char *buffer,
   for (r = rois->begin(); r != rois->end(); ++r) {
     if (r->hint == H_BALL) {
       // consider mass point of ball
-      classifier->getMassPointOfBall( &(*r), &massPoint );
+      classifier->get_mass_point_of_ball( &(*r), &massPoint );
 	
       /*
       if (display != NULL) {
@@ -445,7 +443,7 @@ BulbSampler::calculateOmniOrientation(unsigned char *buffer) {
   for (r = rois->begin(); r != rois->end(); ++r) {
     if (r->hint == H_BALL) {
       // consider distance from omni-camera center to mass point of ball
-      classifier->getMassPointOfBall( &(*r), &massPoint );
+      classifier->get_mass_point_of_ball( &(*r), &massPoint );
       distance = getDistance( (bulb->getCenter()).x, (bulb->getCenter()).y,
 			      massPoint.x             , massPoint.y               );
       if (distance < minDistance) {

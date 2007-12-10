@@ -164,7 +164,7 @@ FvOmniBallPipelineThread::init()
   glob_pos = new OmniGlobal(mirror);
 
   // classifier
-  classifier = new ReallySimpleClassifier(scanline, cm, 0, 30);
+  classifier = new SimpleColorClassifier(scanline, cm, 0, 30);
 
   // TODO: see above
   scaler = new LossyScaler();
@@ -246,7 +246,7 @@ FvOmniBallPipelineThread::loop()
 	  if (r->hint == H_BALL)
 	    {
 	      // calculate mass point of ball
-	      classifier->getMassPointOfBall( &(*r), &mass_point );
+	      classifier->get_mass_point_of_ball( &(*r), &mass_point );
 	      // update ball position
 	      rel_pos->setCenter( mass_point.x, mass_point.y );
 	      rel_pos->calc_unfiltered();
