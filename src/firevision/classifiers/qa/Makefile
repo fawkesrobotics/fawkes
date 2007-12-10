@@ -1,7 +1,7 @@
 #*****************************************************************************
-#        Makefile Build System for Fawkes : FireVision Classifiers
+#         Makefile Build System for Fawkes : FireVision Classifiers QA
 #                            -------------------
-#   Created on Mon Mar 19 15:12:35 2007
+#   Created on Mon Dec 10 23:30:29 2007
 #   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #   $Id$
@@ -15,7 +15,7 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
+BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
 
 CFLAGS   += $(VISION_CFLAGS)
@@ -24,19 +24,13 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-ifeq ($(HAVE_OPENCV),1)
-  CFLAGS  += $(CFLAGS_OPENCV)
-  LDFLAGS += $(LDFLAGS_OPENCV)
-else
-  FILTER_OUT += faces.cpp
-endif
-  
+OBJS_fv_qa_facesclassifier := qa_facesclassifier.o
+LIBS_fv_qa_facesclassifier := fvclassifiers fvutils fvwidgets fvfilters
+CFLAGS_qa_facesclassifier += $(CFLAGS_SDL)
+LDFLAGS_fv_qa_facesclassifier += $(LDFLAGS_SDL)
 
-OBJS_libfvclassifiers := $(patsubst %.cpp,%.o,$(filter-out $(FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
-LIBS_libfvclassifiers := fvutils
-
-OBJS_all = $(OBJS_libfvclassifiers)
-LIBS_all = $(LIBDIR)/libfvclassifiers.so
+OBJS_all = $(OBJS_fv_qa_facesclassifier)
+BINS_all = $(BINDIR)/fv_qa_facesclassifier
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
