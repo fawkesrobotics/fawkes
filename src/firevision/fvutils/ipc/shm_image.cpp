@@ -423,12 +423,19 @@ SharedMemoryImageBuffer::list()
 }
 
 
-/** Erase all shared memory segments that contain FireVision images. */
+/** Erase all shared memory segments that contain FireVision images.
+ * @param use_lister if true a lister is used to print the shared memory segments
+ * to stdout while cleaning up.
+ */
 void
-SharedMemoryImageBuffer::cleanup()
+SharedMemoryImageBuffer::cleanup(bool use_lister)
 {
-  SharedMemoryImageBufferLister *lister = new SharedMemoryImageBufferLister();
+  SharedMemoryImageBufferLister *lister = NULL;
   SharedMemoryImageBufferHeader *h      = new SharedMemoryImageBufferHeader();
+
+  if (use_lister) {
+    lister = new SharedMemoryImageBufferLister();
+  }
 
   SharedMemory::erase_orphaned(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h, lister);
 

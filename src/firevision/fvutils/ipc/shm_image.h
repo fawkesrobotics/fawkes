@@ -155,7 +155,7 @@ class SharedMemoryImageBuffer : public SharedMemory
   bool             set_image_id(const char *image_id);
 
   static void      list();
-  static void      cleanup();
+  static void      cleanup(bool use_lister = true);
   static bool      exists(const char *image_id);
   static void      wipe(const char *image_id);
 

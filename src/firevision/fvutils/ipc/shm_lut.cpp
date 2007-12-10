@@ -184,12 +184,19 @@ SharedMemoryLookupTable::list()
 }
 
 
-/** Erase all shared memory segments that contain FireVision LUTs. */
+/** Erase all shared memory segments that contain FireVision LUTs.
+ * @param use_lister if true a lister is used to print the shared memory segments
+ * to stdout while cleaning up.
+ */
 void
-SharedMemoryLookupTable::cleanup()
+SharedMemoryLookupTable::cleanup(bool use_lister)
 {
-  SharedMemoryLookupTableLister *lister = new SharedMemoryLookupTableLister();
+  SharedMemoryLookupTableLister *lister = NULL;
   SharedMemoryLookupTableHeader *h      = new SharedMemoryLookupTableHeader();
+
+  if ( use_lister ) {
+    lister = new SharedMemoryLookupTableLister();
+  }
 
   SharedMemory::erase_orphaned(FIREVISION_SHM_LUT_MAGIC_TOKEN, h, lister);
 

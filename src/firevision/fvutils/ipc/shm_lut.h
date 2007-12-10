@@ -118,7 +118,7 @@ class SharedMemoryLookupTable : public SharedMemory
   unsigned int     bytes_per_cell() const;
 
   static void      list();
-  static void      cleanup();
+  static void      cleanup(bool use_lister = true);
   static bool      exists(const char *lut_id);
   static void      wipe(const char *lut_id);
 

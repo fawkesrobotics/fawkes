@@ -102,10 +102,8 @@ convert(colorspace_t   from,  colorspace_t   to,
   } else if ( (from == BAYER_MOSAIC_GBRG) && (to == YUV422_PLANAR) ) {
     bayerGBRG_to_yuv422planar_bilinear(src, dst, width, height);
   } else {
-    Exception e("Cannot convert image data");
-    e.append("No conversion routine from %s to %s available",
-	     colorspace_to_string(from), colorspace_to_string(to));
-    throw e;
+    throw Exception("Cannot convert image data from %s to %s",
+		    colorspace_to_string(from), colorspace_to_string(to));
   }
 }
 
