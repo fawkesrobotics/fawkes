@@ -100,6 +100,11 @@
  * @param path path to value
  * @return true if the value exists and is of type string
  * 
+ * @fn bool Configuration::is_default(const char *path)
+ * Check if a value was read from the default config.
+ * @param path path to value
+ * @return true if the value exists and is only stored in the default config
+ * 
  * @fn float Configuration::get_float(const char *path)
  * Get value from configuration which is of type float
  * @param path path to value
@@ -361,6 +366,10 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *msg)
  * @fn bool Configuration::ValueIterator::is_string()
  * Check if current value is a string.
  * @return true, if value is a string, false otherwise
+ *
+ * @fn bool Configuration::ValueIterator::is_default()
+ * Check if current value was read from the default config.
+ * @return true, if value was read from the default config, false otherwise
  *
  * @fn float Configuration::ValueIterator::get_float()
  * Get float value.
