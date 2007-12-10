@@ -73,7 +73,7 @@
 #define SQL_ATTACH_DEFAULTS			\
   "ATTACH DATABASE '%s/%s' AS defaults"
 
-#define SQL_ATTACH_DEFAULTS_ABSOLUTE			\
+#define SQL_ATTACH_DEFAULTS_ABSOLUTE		\
   "ATTACH DATABASE '%s' AS defaults"
 
 #define SQL_SELECT_VALUE_TYPE						\
@@ -83,14 +83,15 @@
   "(SELECT path FROM config WHERE dc.path=path)"
 
 #define SQL_SELECT_COMPLETE						\
-  "SELECT *, 0 AS is_default FROM config WHERE path=? UNION "				\
-  "SELECT *, 1 AS is_default FROM defaults.config AS dc "				\
-  "WHERE path=? AND NOT EXISTS "					\
-  "(SELECT path FROM config WHERE dc.path = path)"
+  "SELECT *, 0 AS is_default FROM config WHERE path LIKE ? UNION "	\
+  "SELECT *, 1 AS is_default FROM defaults.config AS dc "		\
+  "WHERE path LIKE ? AND NOT EXISTS "					\
+  "(SELECT path FROM config WHERE dc.path = path) "			\
+  "ORDER BY path"
 
 #define SQL_SELECT_TYPE							\
-  "SELECT type, 0 AS is_default FROM config WHERE path=? UNION "				\
-  "SELECT type, 1 AS is_default FROM defaults.config AS dc "				\
+  "SELECT type, 0 AS is_default FROM config WHERE path=? UNION "	\
+  "SELECT type, 1 AS is_default FROM defaults.config AS dc "		\
   "WHERE path=? AND NOT EXISTS "					\
   "(SELECT path FROM config WHERE dc.path = path)"
 
@@ -111,23 +112,24 @@
 
 #define SQL_INSERT_TAG							\
   "INSERT INTO tagged_config "						\
-  "(tag, path, type, value, comment) "			\
+  "(tag, path, type, value, comment) "					\
   "SELECT \"%s\",* FROM config"
 
 #define SQL_SELECT_ALL							\
-  "SELECT *, 0 AS is_default FROM config UNION "						\
+  "SELECT *, 0 AS is_default FROM config UNION "			\
   "SELECT *, 1 AS is_default FROM defaults.config AS dc "		\
   "WHERE NOT EXISTS "							\
-  "(SELECT path FROM config WHERE dc.path = path)"
+  "(SELECT path FROM config WHERE dc.path = path) "			\
+  "ORDER BY path"
 
-#define SQL_DELETE_VALUE						\
+#define SQL_DELETE_VALUE			\
   "DELETE FROM config WHERE path=?"
 
-#define SQL_DELETE_DEFAULT_VALUE				\
+#define SQL_DELETE_DEFAULT_VALUE		\
   "DELETE FROM defaults.config WHERE path=?"
 
 
-/** @class SQLiteConfiguration config/sqlite.h
+/** @class SQLiteConfiguration <config/sqlite.h>
  * Configuration storage using SQLite.
  * This implementation of the Configuration interface uses SQLite to store the
  * configuration.
@@ -1480,9 +1482,7 @@ SQLiteConfiguration::search(const char *path)
     throw ConfigurationException("begin: Binding text for path failed (2)");
   }
 
-  free(p);
-
-  return new SQLiteValueIterator(stmt);
+  return new SQLiteValueIterator(stmt, p);
 }
 
 /** @class SQLiteConfiguration::SQLiteValueIterator config/sqlite.h
@@ -1493,9 +1493,10 @@ SQLiteConfiguration::search(const char *path)
 /** Constructor.
  * @param stmt compiled SQLite statement
  */
-SQLiteConfiguration::SQLiteValueIterator::SQLiteValueIterator(sqlite3_stmt *stmt)
+SQLiteConfiguration::SQLiteValueIterator::SQLiteValueIterator(sqlite3_stmt *stmt, void *p)
 {
   this->stmt = stmt;
+  __p = p;
 }
 
 
@@ -1505,6 +1506,9 @@ SQLiteConfiguration::SQLiteValueIterator::~SQLiteValueIterator()
   if ( stmt != NULL ) {
     sqlite3_finalize(stmt);
     stmt = NULL;
+  }
+  if ( __p != NULL ) {
+    free(__p);
   }
 }
 
@@ -1516,9 +1520,9 @@ SQLiteConfiguration::SQLiteValueIterator::~SQLiteValueIterator()
 bool
 SQLiteConfiguration::SQLiteValueIterator::next()
 {
-  if ( stmt == NULL)  return false;
+  if ( stmt == NULL) return false;
 
-  if ( sqlite3_step(stmt) == SQLITE_ROW ) {
+  if (sqlite3_step(stmt) == SQLITE_ROW ) {
     return true;
   } else {
     sqlite3_finalize(stmt);

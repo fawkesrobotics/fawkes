@@ -1345,9 +1345,41 @@ bool
 NetworkConfiguration::NetConfValueIterator::is_default()
 {
   if ( i == NULL ) {
-    //if ( msg == NULL ) {
+    if ( msg == NULL ) {
       throw NullPointerException("You may not access value methods on invalid iterator");
-      //}
+    } else {
+      unsigned int msgid = msg->msgid();
+      switch (msgid) {
+      case MSG_CONFIG_FLOAT_VALUE:
+	{
+	  config_float_value_msg_t *m = msg->msg<config_float_value_msg_t>();
+	  return m->cp.is_default;
+	}
+      case MSG_CONFIG_UINT_VALUE:
+	{
+	  config_uint_value_msg_t *m = msg->msg<config_uint_value_msg_t>();
+	  return m->cp.is_default;
+	}
+      case MSG_CONFIG_INT_VALUE:
+	{
+	  config_int_value_msg_t *m = msg->msg<config_int_value_msg_t>();
+	  return m->cp.is_default;
+	}
+      case MSG_CONFIG_BOOL_VALUE:
+	{
+	  config_bool_value_msg_t *m = msg->msg<config_bool_value_msg_t>();
+	  return m->cp.is_default;
+	}
+      case MSG_CONFIG_STRING_VALUE:
+	{
+	  config_string_value_msg_t *m = msg->msg<config_string_value_msg_t>();
+	  return m->cp.is_default;
+	}
+      }
+
+      throw TypeMismatchException("NetworkConfiguration: Neither in mirror mode nor "
+				  "iterator to value message");
+    }
   } else {
     return i->is_default();
   }

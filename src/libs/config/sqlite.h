@@ -101,7 +101,7 @@ class SQLiteConfiguration : public Configuration
   {
     friend class SQLiteConfiguration;
    protected:
-    SQLiteValueIterator(sqlite3_stmt *stmt);
+    SQLiteValueIterator(sqlite3_stmt *stmt, void *p = NULL);
    public:
     virtual ~SQLiteValueIterator();
     virtual bool          next();
@@ -126,6 +126,7 @@ class SQLiteConfiguration : public Configuration
 
    private:
     sqlite3_stmt *stmt;
+    void *__p;
   };
 
   ValueIterator * iterator();
