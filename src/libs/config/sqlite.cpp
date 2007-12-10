@@ -1492,6 +1492,8 @@ SQLiteConfiguration::search(const char *path)
 
 /** Constructor.
  * @param stmt compiled SQLite statement
+ * @param p pointer to arbitrary data that is freed (not deleted!) when the iterator
+ * is deleted.
  */
 SQLiteConfiguration::SQLiteValueIterator::SQLiteValueIterator(sqlite3_stmt *stmt, void *p)
 {
