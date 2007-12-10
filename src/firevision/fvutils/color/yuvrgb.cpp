@@ -83,6 +83,8 @@ yuv411packed_to_rgb_plainc(unsigned char *YUV, unsigned char *RGB,
   }
 }
 
+
+
 /** YUV to RGB Conversion
  * B = 1.164(Y - 16)                  + 2.018(U - 128)
  * G = 1.164(Y - 16) - 0.813(V - 128) - 0.391(U - 128)
@@ -132,6 +134,51 @@ yuv422planar_to_rgb_plainc(unsigned char *planar, unsigned char *RGB, unsigned i
     *RGB++ = clip( (76284 * y2 -  25625 * u - 53281 * v ) >> 16 );
     *RGB++ = clip( (76284 * y2 + 132252 * u             ) >> 16 );
 
+  }
+}
+
+
+/** Convert YUV422 planar to BGR.
+ * Use formula in aforementioned function.
+ * @param YUV YUV422 planar buffer
+ * @param BGR BGR buffer
+ * @param width Width of the image contained in the YUV buffer
+ * @param height Height of the image contained in the YUV buffer
+ */
+void
+yuv422planar_to_bgr_plainc(unsigned char *planar, unsigned char *BGR,
+			   unsigned int width, unsigned int height)
+{
+
+  register short y1, y2, u, v;
+  register unsigned char *yp, *up, *vp;
+  register unsigned int i;
+
+  yp = planar;
+  up = planar + (width * height);
+  vp = up + (width * height / 2);
+
+  for (i = 0; i < (width * height / 2); ++i) {
+
+    y1 = *yp++;
+    y2 = *yp++;
+    u  = *up++;
+    v  = *vp++;
+
+    y1 -=  16;
+    y2 -=  16;
+    u  -= 128;
+    v  -= 128;
+
+    // Set red, green and blue bytes for pixel 0
+    *BGR++ = clip( (76284 * y1 + 132252 * u             ) >> 16 );
+    *BGR++ = clip( (76284 * y1 -  25625 * u - 53281 * v ) >> 16 );
+    *BGR++ = clip( (76284 * y1 + 104595 * v             ) >> 16 );
+
+    // Set red, green and blue bytes for pixel 1
+    *BGR++ = clip( (76284 * y2 + 132252 * u             ) >> 16 );
+    *BGR++ = clip( (76284 * y2 -  25625 * u - 53281 * v ) >> 16 );
+    *BGR++ = clip( (76284 * y2 + 104595 * v             ) >> 16 );
   }
 }
 

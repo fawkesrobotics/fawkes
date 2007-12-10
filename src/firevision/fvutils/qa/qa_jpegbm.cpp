@@ -64,7 +64,7 @@ main(int argc, char **argv)
     tracker->ping(0);
   }
 
-  tracker->printToStdout();
+  tracker->print_to_stdout();
 
   delete tracker;
   delete jpeg;
