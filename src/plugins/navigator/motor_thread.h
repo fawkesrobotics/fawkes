@@ -33,11 +33,11 @@
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 #include <utils/time/time.h>
+#include <geometry/vector.h>
 
 class MotorInterface;
 class NavigatorThread;
 class Clock;
-class Watch;
 
 namespace VMC
   {
@@ -68,8 +68,8 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     double sideward;
     double rotation;
     double orbit_velocity;
-    double point_x;
-    double point_y;
+  //  double point_x;
+  //  double point_y;
     double orbit_angular_velocity;
     double alpha;
     double beta;
@@ -80,9 +80,17 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     double last_alpha_rotations;
     double last_beta_rotations;
     double last_gamma_rotations;
+    double last_alpha;
+    double last_beta;
+    double last_gamma;
     double odometry_distance;
     double orbit_direction_x;
     double orbit_direction_y;
+    Vector orbit_direction;
+    Vector orbit_center;
+    Vector orbit_position;
+    double orbit_radius;
+    double orbit_sign;
     // double orbit_rotation_velocity;
     double last_velocity;
     double current_velocity;
@@ -103,6 +111,7 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     double integral_part;
     double linear_part;
     int ticks;
+    bool stopped;
     
     double translation_rpm_factor;
     double rotation_rpm_factor;
@@ -110,6 +119,8 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     Time last_time;
     Time last_time_odometry;
     Time last_acceleration_time;
+    double time_difference;
+    bool start_time;
 
     Clock* clock;
 
