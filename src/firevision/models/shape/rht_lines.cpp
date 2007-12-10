@@ -72,7 +72,7 @@ int
 RhtLinesModel::parseImage( unsigned char *buf,
 			   ROI *roi            )
 {
-  unsigned char *buffer = roi->getROIBufferStart(buf);
+  unsigned char *buffer = roi->get_roi_buffer_start(buf);
 
   struct timeval   start, now;
 

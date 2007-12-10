@@ -91,7 +91,7 @@ int RcdCircleModel::parseImage( unsigned char* buf,
 				ROI *roi )
 {
   
-  unsigned char *buffer = roi->getROIBufferStart(buf);
+  unsigned char *buffer = roi->get_roi_buffer_start(buf);
   unsigned char *line_start = buffer;
 
   unsigned int     x, y;
@@ -113,7 +113,7 @@ int RcdCircleModel::parseImage( unsigned char* buf,
   // First, find all the pixels on the edges,
   // and store them in the 'pixels' vector.
   // NEW: excluding the hollow window
-  buffer = roi->getROIBufferStart(buf);
+  buffer = roi->get_roi_buffer_start(buf);
   line_start = buffer;
 
   // Find the boundary of the ball,

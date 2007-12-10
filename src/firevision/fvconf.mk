@@ -121,7 +121,7 @@ ifneq ($(realpath $(IPP_DIR)),)
 endif
 
 # Set to 1 to build shape models
-HAVE_SHAPE_MODELS = 0
+HAVE_SHAPE_MODELS = 1
 
 VISION_CFLAGS       += $(foreach CAM,$(CAMS),$(if $(subst 0,,$(HAVE_$(CAM)_CAM)),-DHAVE_$(CAM)_CAM))
 VISION_CFLAGS       += $(foreach CTRL,$(CTRLS),$(if $(subst 0,,$(HAVE_$(CTRL)_CTRL)),-DHAVE_$(CTRL)_CTRL))
