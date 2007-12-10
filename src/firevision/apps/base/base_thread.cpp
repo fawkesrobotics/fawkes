@@ -73,8 +73,9 @@ void
 FvBaseThread::init()
 {
   // wipe all previously existing FireVision shared memory segments
-  SharedMemoryImageBuffer::cleanup();
-  SharedMemoryLookupTable::cleanup();
+  // that are orphaned
+  SharedMemoryImageBuffer::cleanup(/* use lister */ false);
+  SharedMemoryLookupTable::cleanup(/* use lister */ false);
 }
 
 

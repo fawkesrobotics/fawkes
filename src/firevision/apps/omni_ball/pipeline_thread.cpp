@@ -164,7 +164,7 @@ FvOmniBallPipelineThread::init()
   glob_pos = new OmniGlobal(mirror);
 
   // classifier
-  classifier = new ReallySimpleClassifier(img_width, img_height, scanline, cm, 0, 30);
+  classifier = new ReallySimpleClassifier(scanline, cm, 0, 30);
 
   // TODO: see above
   scaler = new LossyScaler();
@@ -222,7 +222,7 @@ FvOmniBallPipelineThread::loop()
   ball_visible = false;
 
   // run classifier
-  classifier->setSrcBuffer( buffer );
+  classifier->set_src_buffer( buffer, img_width, img_height );
 
   rois = classifier->classify();
 

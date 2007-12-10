@@ -84,6 +84,9 @@ class BulbSampler {
 
  private:
 
+  unsigned int __image_width;
+  unsigned int __image_height;
+
   Bulb                   *bulb;
   ColorModelLookupTable  *colorLut;
   ScanlineRadial         *radial;

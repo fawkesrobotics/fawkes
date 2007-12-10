@@ -2,8 +2,8 @@
 /***************************************************************************
  *  simple.cpp - Implementation of a ReallySimpleClassifier
  *
- *  Generated: Thu May 16 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu May 16 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -33,16 +33,11 @@
 #include <models/scanlines/scanlinemodel.h>
 #include <models/color/colormodel.h>
 
-#include <iostream>
-using namespace std;
-
 /** @class ReallySimpleClassifier <classifiers/simple.h>
  * Simple classifier.
  */
 
 /** Constructor.
- * @param width image width
- * @param height image height
  * @param scanline_model scanline model
  * @param color_model color model
  * @param min_num_points minimum number of points in ROI to be considered
@@ -53,9 +48,7 @@ using namespace std;
  * @param neighbourhood_min_match minimum number of object pixels to grow neighbourhood
  * @param grow_by grow region by that many pixels
  */
-ReallySimpleClassifier::ReallySimpleClassifier(unsigned int width,
-					       unsigned int height,
-					       ScanlineModel *scanline_model,
+ReallySimpleClassifier::ReallySimpleClassifier(ScanlineModel *scanline_model,
 					       ColorModel *color_model,
 					       unsigned int min_num_points,
 					       unsigned int box_extent,
@@ -63,31 +56,16 @@ ReallySimpleClassifier::ReallySimpleClassifier(unsigned int width,
 					       unsigned int neighbourhood_min_match,
                                                unsigned int grow_by
 					       )
+  : Classifier("ReallySimpleClassifier")
 {
-  src = NULL;
   modified = false;
   this->scanline_model = scanline_model;
   this->color_model = color_model;
-  this->width = width;
-  this->height = height;
   this->min_num_points = min_num_points;
   this->box_extent = box_extent;
   this->upward = upward;
   this->grow_by = grow_by;
   this->neighbourhood_min_match = neighbourhood_min_match;
-}
-
-
-void
-ReallySimpleClassifier::setSrcBuffer(unsigned char *buf) {
-  src = buf;
-}
-
-
-const char *
-ReallySimpleClassifier::getName() const
-{
-  return "ReallySimpleClassifier";
 }
 
 
@@ -108,10 +86,10 @@ ReallySimpleClassifier::consider_neighbourhood( unsigned int x, unsigned int y ,
     start_y = 0;
   }
 
-  if (x > width - end_x) {
+  if (x > _width - end_x) {
     end_x = 0;
   }
-  if (y == height - end_y) {
+  if (y == _height - end_y) {
     end_y = 0;
   }
 
@@ -124,7 +102,7 @@ ReallySimpleClassifier::consider_neighbourhood( unsigned int x, unsigned int y ,
       //      cout << "x=" << x << "  dx=" << dx << "  +=" << x+dx
       //   << "  y=" << y << "  dy=" << dy << "  +2=" << y+dy << endl;
 
-      YUV422_PLANAR_YUV(src, width, height, x+dx, y+dy, yp, up, vp);
+      YUV422_PLANAR_YUV(_src, _width, _height, x+dx, y+dy, yp, up, vp);
       c = color_model->determine(yp, up, vp);
 
       if (c == what) {
@@ -140,7 +118,7 @@ std::list< ROI > *
 ReallySimpleClassifier::classify()
 {
 
-  if (src == NULL) {
+  if (_src == NULL) {
     //cout << "ReallySimpleClassifier: ERROR, src buffer not set. NOT classifying." << endl;
     return new std::list< ROI >;
   }
@@ -163,7 +141,7 @@ ReallySimpleClassifier::classify()
     x = (*scanline_model)->x;
     y = (*scanline_model)->y;
 
-    YUV422_PLANAR_YUV(src, width, height, x, y, yp, up, vp);
+    YUV422_PLANAR_YUV(_src, _width, _height, x, y, yp, up, vp);
 
     /*
     cout << "ReallySimpleClassifier: Checking at ("
@@ -226,23 +204,23 @@ ReallySimpleClassifier::classify()
 
 	  unsigned int to_x = (*scanline_model)->x + box_extent;
 	  unsigned int to_y = (*scanline_model)->y + box_extent;
-	  if (to_x > width)  to_x = width;
-	  if (to_y > height) to_y = height;
+	  if (to_x > _width)  to_x = _width;
+	  if (to_y > _height) to_y = _height;
 	  r.width = to_x - r.start.x;
 	  r.height = to_y - r.start.y;
 	  r.hint = H_BALL;
 
-	  r.line_step = width;
+	  r.line_step = _width;
 	  r.pixel_step = 1;
 
-	  r.image_width  = width;
-	  r.image_height = height;
+	  r.image_width  = _width;
+	  r.image_height = _height;
 
-	  if ( (r.start.x + r.width) > width ) {
-	    r.width -= (r.start.x + r.width) - width;
+	  if ( (r.start.x + r.width) > _width ) {
+	    r.width -= (r.start.x + r.width) - _width;
 	  }
-	  if ( (r.start.y + r.height) > height ) {
-	    r.height -= (r.start.y + r.height) - height;
+	  if ( (r.start.y + r.height) > _height ) {
+	    r.height -= (r.start.y + r.height) - _height;
 	  }
 
 	  rv->push_back( r );
@@ -307,10 +285,10 @@ ReallySimpleClassifier::getMassPointOfBall( ROI *roi, cart_coord_t *massPoint ) 
   register unsigned int h = 0;
   register unsigned int w = 0;
   // planes
-  register unsigned char *yp   = src + (roi->start.y * roi->line_step) + (roi->start.x * roi->pixel_step);
-  register unsigned char *up   = YUV422_PLANAR_U_PLANE(src, roi->image_width, roi->image_height)
+  register unsigned char *yp   = _src + (roi->start.y * roi->line_step) + (roi->start.x * roi->pixel_step);
+  register unsigned char *up   = YUV422_PLANAR_U_PLANE(_src, roi->image_width, roi->image_height)
                                    + ((roi->start.y * roi->line_step) / 2 + (roi->start.x * roi->pixel_step) / 2) ;
-  register unsigned char *vp   = YUV422_PLANAR_V_PLANE(src, roi->image_width, roi->image_height)
+  register unsigned char *vp   = YUV422_PLANAR_V_PLANE(_src, roi->image_width, roi->image_height)
                                    + ((roi->start.y * roi->line_step) / 2 + (roi->start.x * roi->pixel_step) / 2);
   // line starts
   unsigned char *lyp  = yp; 

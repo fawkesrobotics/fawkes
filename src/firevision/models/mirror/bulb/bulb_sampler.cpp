@@ -54,7 +54,10 @@ BulbSampler::BulbSampler( unsigned int image_width,
 			  unsigned int color_lut_height,
 			  string lut_file)
 {
-  bulb    = new Bulb( image_width, image_height );
+  __image_width  = image_width;
+  __image_height = image_height;
+
+  bulb    = new Bulb( __image_width, __image_height );
 
   try {
     colorLut   = new ColorModelLookupTable ( (char *)lut_file.c_str(), 
@@ -63,13 +66,11 @@ BulbSampler::BulbSampler( unsigned int image_width,
     throw;
   }
 
-  radial     = new ScanlineRadial( image_width  , image_height, 
-				   image_width/2, image_height/2,
-				   5, 5,
-				   10                              );
+  radial     = new ScanlineRadial( __image_width    , __image_height, 
+				   __image_width / 2, __image_height / 2,
+				   5, 5, 10);
 
-  classifier = new ReallySimpleClassifier( image_width, image_height, 
-					   radial, 
+  classifier = new ReallySimpleClassifier( radial, 
 					   colorLut,
 					   0                          ); // min_num_points
 
@@ -86,6 +87,8 @@ BulbSampler::BulbSampler( unsigned int image_width,
 BulbSampler::BulbSampler( unsigned int image_width,
 			  unsigned int image_height )
 {
+  __image_width = image_width;
+  __image_height = image_height;
   bulb    = new Bulb( image_width, image_height );
 
   colorLut = NULL;
@@ -110,6 +113,8 @@ BulbSampler::BulbSampler( Bulb *bulb,
 			  unsigned int color_lut_height,
 			  string lut_file)
 {
+  __image_width = image_width;
+  __image_height = image_height;
   this->bulb = bulb;
 
   colorLut   = new ColorModelLookupTable ( (char *)lut_file.c_str(), 
@@ -120,10 +125,8 @@ BulbSampler::BulbSampler( Bulb *bulb,
 				   5, 5,
 				   10                              );
 
-  classifier = new ReallySimpleClassifier( image_width, image_height, 
-					   radial, 
-					   colorLut,
-					   0                          ); // min_num_points
+  classifier = new ReallySimpleClassifier( radial,  colorLut,
+					   /* min num points */ 0);
 
 }
 
@@ -166,7 +169,7 @@ BulbSampler::consider(unsigned char *buffer,
   cart_coord_t ballPosInImage;
   ballPosInImage.x = 0;
   ballPosInImage.y = 0;
-  classifier->setSrcBuffer( buffer );
+  classifier->set_src_buffer( buffer, __image_width, __image_height );
   rois = classifier->classify();
   if ( rois->empty() ) {
     cout << "No ROIs!" << endl;
@@ -424,7 +427,7 @@ BulbSampler::calculateOmniOrientation(unsigned char *buffer) {
   cart_coord_t ballPosInImage;
   ballPosInImage.x = 0;
   ballPosInImage.y = 0;
-  classifier->setSrcBuffer( buffer );
+  classifier->set_src_buffer( buffer, __image_width, __image_height );
   rois = classifier->classify();
   if ( rois->empty() ) {
     cout << "(BulbSampler::calculateOmniOrientation): No ROIs!" << endl;

@@ -2,8 +2,8 @@
 /***************************************************************************
  *  simple.h - Header for ReallySimpleClassifier
  *
- *  Generated: Wed May 18 11:39:10 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed May 18 11:39:10 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -36,31 +36,17 @@ class ColorModel;
 class ReallySimpleClassifier : public Classifier
 {
  public:
-
-  ReallySimpleClassifier(unsigned int width, unsigned int height,
-			 ScanlineModel *scanline_model,
+  ReallySimpleClassifier(ScanlineModel *scanline_model,
 			 ColorModel *color_model,
 			 unsigned int min_num_points=6,
 			 unsigned int box_extent = 50,
 			 bool upward = false,
 			 unsigned int neighbourhood_min_match = 8,
                          unsigned int grow_by = 10                );
-
-  /* NOTE: This buffer must be YUV422_PLANAR!
-   */
-  virtual void setSrcBuffer(unsigned char *buf);
-
-  virtual const char *  getName() const;
-
+ 
   virtual std::list< ROI > * classify();
 
-  /* Method "getMassPointOfBall"
-   *   calculates mass point of all orange pixels
-   *   that occur within "roi",
-   *   and writes result to "*massPoint"
-   */
-  virtual void getMassPointOfBall( ROI *roi, 
-				   cart_coord_t *massPoint );
+  virtual void getMassPointOfBall( ROI *roi, cart_coord_t *massPoint );
 
  private:
 

@@ -2,8 +2,8 @@
 /***************************************************************************
  *  classifier.h - Abstract class defining a (color) classifier
  *
- *  Generated: Tue May 03 19:50:02 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue May 03 19:50:02 2005
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,24 +25,35 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_COLORCLASSIFIER_H_
-#define __FIREVISION_COLORCLASSIFIER_H_
+#ifndef __FIREVISION_CLASSIFIERS_CLASSIFIER_H_
+#define __FIREVISION_CLASSIFIERS_CLASSIFIER_H_
 
-#include <list>
-#include <fvutils/base/types.h>
 #include <fvutils/base/roi.h>
+#include <list>
 
 class Classifier
 {
 
  public:
+  Classifier(const char *name);
   virtual ~Classifier();
 
-  virtual void setSrcBuffer(unsigned char *buf)     = 0;
+  virtual void set_src_buffer(unsigned char *yuv422_planar,
+			      unsigned int width, unsigned int height);
+  virtual const char *  name() const;
 
-  virtual const char *  getName() const             = 0;
+  virtual std::list< ROI > * classify()                      = 0;
 
-  virtual std::list< ROI > * classify()             = 0;
+ protected:
+  /** Source buffer, encoded as YUV422_PLANAR */
+  unsigned char *_src;
+  /** Width in pixels of _src buffer */
+  unsigned int   _width;
+  /** Height in pixels of _src buffer */
+  unsigned int   _height;
+
+ private:
+  char *__name;
 
 };
 

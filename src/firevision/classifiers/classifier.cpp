@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  classifier.h - Abstract class defining a (color) classifier
+ *  classifier.cpp - Abstract class defining a classifier
  *
- *  Generated: Tue May 03 19:50:02 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Dec 10 11:35:36 2007
+ *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -28,29 +28,61 @@
 #include <classifiers/classifier.h>
 
 /** @class Classifier <classifiers/classifier.h>
- * Classifier interface.
- * The classifier finds regions of interest (ROI) by some
- * a priori knowledge like known colors or shapes.
- * The list of ROIs returned by classify() _must_
+ * Classifier to extract regions of interest.
+ * The classifier finds regions of interest (ROI) by some a priori knowledge
+ * like known colors or shapes. The list of ROIs returned by classify() _must_
  * be disjunct, meaning that no ROIs overlap each other.
- * Do appropriate merging or shrinking of the ROIs. See
- * the ReallySimpleClassifier for an example.
+ * Do appropriate merging or shrinking of the ROIs. See the ReallySimpleClassifier
+ * for an example.
+ * @author Tim Niemueller
  *
- * @fn Classifier::setSrcBuffer(unsigned char *buf)
- * Set the src buffer.
- * @param buf buffer
- *
- * @fn const char * Classifier::getName() const
- * Get name of classifier
- * @return name of classifier
- *
- * @fn std::list< ROI > * Classifier::classify()
+ * @fn std::list< ROI > * Classifier::classify() = 0
  * Classify image.
- * @return list of ROIs from classified image. You must free the memory
- * after usage on your own!
+ * The current buffer is processed and scanned for the features the classifier
+ * has been written and initialized for. It returns a list of disjunct regions
+ * of interest.
+ * @return disjunct list of extracted regions of interest
  */
 
-/** Virtual empty destructor. */
+
+/** Constructor.
+ * @param name classifier name
+ */
+Classifier::Classifier(const char *name)
+{
+  __name = strdup(name);
+}
+
+
+/** Destructor. */
 Classifier::~Classifier()
 {
+  free(__name);
+}
+
+
+/** Set source buffer.
+ * @param yuv422_planar a YUV422 planar buffer with the source image to
+ * classify. The classifier may NOT modify the image in any way. If that is
+ * required the classifier shall make a copy of the image.
+ * @param width width of buffer in pixels
+ * @param height height of buffer in pixels
+ */
+void
+Classifier::set_src_buffer(unsigned char *yuv422_planar, unsigned int width,
+			   unsigned int height)
+{
+  _src    = yuv422_planar;
+  _width  = width;
+  _height = height;
+}
+
+
+/** Get name of classifier.
+ * @return name of classifier.
+ */
+const char *
+Classifier::name() const
+{
+  return __name;
 }
