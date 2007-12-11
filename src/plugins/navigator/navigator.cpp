@@ -489,7 +489,7 @@ double Navigator::s(double t)
  */
 void Navigator::goTo_cartesian(double x, double y)
 {
-  goTo_cartesian(x, y, 0);
+  goTo_cartesian(x, y, velocity);
 }
 
 /** Sets a target and a velocity.
