@@ -553,9 +553,6 @@ void Navigator::destroy_path()
  */
 void Navigator::mainLoop()
 {
-  //while(true)
-  {
-    usleep(N_DELAY);
     double current_time = g_timer_elapsed( time_emitter, NULL );
     elapsed_time = current_time - last_time;
     last_time = current_time;
@@ -913,6 +910,6 @@ void Navigator::mainLoop()
       else
       current_degree = 0;
     */
-  }
+  
 }
 
