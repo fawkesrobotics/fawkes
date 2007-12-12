@@ -57,6 +57,8 @@ class ROI {
  public:
 
   ROI();
+  ROI(const ROI &roi);
+  ROI(const ROI *roi);
   ROI(unsigned int start_x, unsigned int start_y,
       unsigned int width, unsigned int height,
       unsigned int image_width, unsigned int image_height);

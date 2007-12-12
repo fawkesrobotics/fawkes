@@ -76,6 +76,40 @@ ROI::ROI(unsigned int start_x, unsigned int start_y,
 }
 
 
+/** Copy constructor.
+ * @param roi reference to ROI to copy
+ */
+ROI::ROI(const ROI &roi)
+{
+  start           = roi.start;
+  width           = roi.width;
+  height          = roi.height;
+  image_width     = roi.image_width;
+  image_height    = roi.image_height;
+  line_step       = roi.line_step;
+  pixel_step      = roi.pixel_step;
+  hint            = roi.hint;
+  num_hint_points = roi.num_hint_points;  
+}
+
+
+/** Copy constructor.
+ * @param roi pointer to ROI to copy
+ */
+ROI::ROI(const ROI *roi)
+{
+  start           = roi->start;
+  width           = roi->width;
+  height          = roi->height;
+  image_width     = roi->image_width;
+  image_height    = roi->image_height;
+  line_step       = roi->line_step;
+  pixel_step      = roi->pixel_step;
+  hint            = roi->hint;
+  num_hint_points = roi->num_hint_points;  
+}
+
+
 /** Set upper left corner of ROI.
  * @param p point
  */
