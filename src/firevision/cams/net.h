@@ -30,6 +30,7 @@
 
 #include <cams/camera.h>
 #include <fvutils/net/fuse_client_handler.h>
+#include <vector>
 
 class CameraArgumentParser;
 class FuseClient;
@@ -41,7 +42,7 @@ class NetworkCamera : public Camera, public FuseClientHandler
 {
 
  public:
-
+  NetworkCamera(const char *host, unsigned short port, bool jpeg = false);
   NetworkCamera(const char *host, unsigned short port, const char *image_id,
 		bool jpeg = false);
   NetworkCamera(const CameraArgumentParser *cap);
@@ -65,7 +66,10 @@ class NetworkCamera : public Camera, public FuseClientHandler
   virtual unsigned int   pixel_height();
   virtual colorspace_t   colorspace();
 
+  virtual void           set_image_id(const char *image_id);
   virtual void           set_image_number(unsigned int n);
+
+  virtual std::vector<FUSE_imageinfo_t>& image_list();
 
   virtual void fuse_invalid_server_version(uint32_t local_version,
 					   uint32_t remote_version) throw();
@@ -93,6 +97,8 @@ class NetworkCamera : public Camera, public FuseClientHandler
   FuseClient         *__fusec;
   FuseImageContent   *__fuse_image;
   FuseNetworkMessage *__fuse_message;
+
+  std::vector<FUSE_imageinfo_t> __image_list;
 };
 
 #endif

@@ -34,8 +34,11 @@
 #include <fvutils/net/fuse_client.h>
 #include <fvutils/net/fuse_message.h>
 #include <fvutils/net/fuse_image_content.h>
+#include <fvutils/net/fuse_imagelist_content.h>
 #include <fvutils/system/camargp.h>
 #include <fvutils/compression/jpeg_decompressor.h>
+
+#include <netinet/in.h>
 
 #include <cstring>
 
@@ -45,6 +48,40 @@
  * @see FuseClient
  * @author Tim Niemueller
  */
+
+/** Constructor.
+ * Allows to initiate a NetworkCamera w/o specifying an image id. This can be
+ * done later with the set_image_id() method.
+ * @param host host to connect to
+ * @param port port to connect to
+ * @param jpeg if true jpeg images will be transferred and automatically be
+ * decompressed, otherwise raw images are transferred
+ */
+NetworkCamera::NetworkCamera(const char *host, unsigned short port, bool jpeg)
+{
+  if ( host == NULL ) {
+    throw NullPointerException("NetworkCamera: host must not be NULL");
+  }
+  __image_id = 0;
+  __host = strdup(host);
+  __port = port;
+  __get_jpeg = jpeg;
+
+  __connected       = false;
+  __local_version   = 0;
+  __remote_version  = 0;
+  __decompressor    = NULL;
+  __decompressed_buffer = NULL;
+  __last_width = 0;
+  __last_height = 0;
+  __fuse_image = NULL;
+  __fuse_message = NULL;
+
+  __fusec = new FuseClient(__host, __port, this);
+  if ( __get_jpeg ) {
+    __decompressor = new JpegImageDecompressor();
+  }
+}
 
 /** Constructor.
  * @param host host to connect to
@@ -75,6 +112,7 @@ NetworkCamera::NetworkCamera(const char *host, unsigned short port, const char *
   __last_width = 0;
   __last_height = 0;
   __fuse_image = NULL;
+  __fuse_message = NULL;
 
   __fusec = new FuseClient(__host, __port, this);
   if ( __get_jpeg ) {
@@ -124,6 +162,7 @@ NetworkCamera::NetworkCamera(const CameraArgumentParser *cap)
   __last_width = 0;
   __last_height = 0;
   __fuse_image = NULL;
+  __fuse_message = NULL;
 
   __fusec = new FuseClient(__host, __port, this);
   if ( __get_jpeg ) {
@@ -150,6 +189,7 @@ NetworkCamera::open()
   __fusec->connect();
   __fusec->start();
   __fusec->wait();
+  __opened = true;
 }
 
 
@@ -180,6 +220,9 @@ NetworkCamera::capture()
   }
   if ( __fuse_image ) {
     throw CaptureException("You must dispose the buffer before fetching a new image");
+  }
+  if ( !__image_id ) {
+    throw CaptureException("You must specify an image id");
   }
 
   FUSE_imagereq_message_t *irm = (FUSE_imagereq_message_t *)malloc(sizeof(FUSE_imagereq_message_t));
@@ -304,6 +347,13 @@ NetworkCamera::ready()
 
 
 void
+NetworkCamera::set_image_id(const char *image_id)
+{
+  __image_id = strdup(image_id);
+}
+
+
+void
 NetworkCamera::set_image_number(unsigned int n)
 {
   // ignored, has to go away anyway
@@ -322,6 +372,22 @@ NetworkCamera::colorspace()
       return CS_UNKNOWN;
     }
   }
+}
+
+
+std::vector<FUSE_imageinfo_t>&
+NetworkCamera::image_list()
+{
+  __image_list.clear();
+
+  if (! __connected) {
+    throw CaptureException("Capture failed, not connected");
+  }
+
+  __fusec->enqueue(FUSE_MT_GET_IMAGE_LIST);
+  __fusec->wait();
+
+  return __image_list;
 }
 
 
@@ -344,14 +410,48 @@ NetworkCamera::fuse_connection_established() throw()
 void
 NetworkCamera::fuse_inbound_received(FuseNetworkMessage *m) throw()
 {
-  try {
-    __fuse_image = m->msgc<FuseImageContent>();
-    if ( __fuse_image ) {
-      __fuse_message = m;
-      __fuse_message->ref();
+  switch(m->type()) {
+
+  case FUSE_MT_IMAGE:
+    try {
+      __fuse_image = m->msgc<FuseImageContent>();
+      if ( __fuse_image ) {
+	__fuse_message = m;
+	__fuse_message->ref();
+      }
+    } catch (Exception &e) {
+      __fuse_image = NULL;
+      __fuse_message = NULL;
     }
-  } catch (Exception &e) {
-    __fuse_image = NULL;
-    __fuse_message = NULL;
+    break;
+
+  case FUSE_MT_IMAGE_LIST:
+    try {
+      FuseImageListContent* fuse_image_list = m->msgc<FuseImageListContent>();
+      if (fuse_image_list ) {
+	while ( fuse_image_list->has_next() ) {
+	  FUSE_imageinfo_t *iip = fuse_image_list->next();
+	  FUSE_imageinfo_t ii;
+	  strncpy(ii.image_id, iip->image_id, IMAGE_ID_MAX_LENGTH);
+	  ii.colorspace = ntohs(iip->colorspace);
+	  ii.width = ntohl(iip->width);
+	  ii.height = ntohl(iip->height);
+	  ii.buffer_size = ntohl(iip->buffer_size);
+	  __image_list.push_back(ii);
+	  
+	  /*
+	  printf("NetworkCamera: id: %s  width: %d  height: %d  cs: %s\n",
+		 ii.image_id, ii.width, ii.height, colorspace_to_string((colorspace_t) ii.colorspace));
+	  */
+	}
+      }
+    }
+    catch (Exception &e) {
+    }
+    break;
+
+  default:
+      break;
   }
 }
+

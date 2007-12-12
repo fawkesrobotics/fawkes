@@ -87,6 +87,8 @@ FirewireCamera::FirewireCamera(dc1394framerate_t framerate,
 /** Empty destructor. */
 FirewireCamera::~FirewireCamera()
 {
+  close();
+  
   if ( _model != NULL ) {
     free(_model);
   }
