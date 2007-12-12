@@ -33,7 +33,7 @@ ifneq ($(SRCDIR),.)
     IPPI_FILTERS  = $(wildcard $(SRCDIR)/morphology/*.cpp)
     IPPI_FILTERS += $(shell grep -rl ippi.h $(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))
   else
-    LIBS_libfvfilters += ippi$(IPP_ARCH)
+    LIBS_libfvfilters += ippi$(IPP_ARCH) ippcore$(IPP_ARCH) guide
   endif
 
 .PHONY: print_unsupported
