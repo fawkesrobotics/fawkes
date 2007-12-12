@@ -27,8 +27,6 @@
 
 /// @cond QA
 
-#include <SDL.h>
-
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/readers/jpeg.h>
 #include <classifiers/faces.h>
@@ -74,15 +72,7 @@ main(int argc, char **argv)
   ImageDisplay *display = new ImageDisplay(reader->pixel_width(), reader->pixel_height());
   display->show(buffer);
 
-  bool quit = false;
-  while (! quit) {
-    SDL_Event event;
-    if ( SDL_WaitEvent(&event) ) {
-      if (event.type == SDL_QUIT) {
-	quit = true;
-      }
-    }
-  }
+  display->loop_until_quit();
 
   delete display;
 
