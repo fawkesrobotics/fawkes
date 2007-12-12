@@ -114,3 +114,43 @@ ImageDisplay::show(unsigned char *yuv422_planar_buffer)
   SDL_UnlockYUVOverlay(_overlay);
   SDL_DisplayYUVOverlay(_overlay, _rect);
 }
+
+/** Process a few SDL events.
+ * @param max_num_events maximum number of events to process.
+ */
+void
+ImageDisplay::process_events(unsigned int max_num_events)
+{
+  unsigned int proc = 0;
+  SDL_Event event;
+  while ( (proc++ < max_num_events) && (SDL_PollEvent(&event)) ) {
+    // nothing to do here
+  }
+}
+
+
+/** Process SDL events until quit.
+ * Process SDL events and keeps the window responsive until either
+ * the key "q" or "Esc" are pressed.
+ */
+void
+ImageDisplay::loop_until_quit()
+{
+  bool quit = false;
+  while (! quit) {
+    SDL_Event event;
+    if ( SDL_WaitEvent(&event) ) {
+      switch (event.type) {
+      case SDL_QUIT:
+	quit = true;
+	break;
+      case SDL_KEYUP:
+	if ( (event.key.keysym.sym == SDLK_ESCAPE) ||
+	     (event.key.keysym.sym == SDLK_q) ) {
+	  quit = true;
+	}
+	break;
+      }
+    }
+  }
+}

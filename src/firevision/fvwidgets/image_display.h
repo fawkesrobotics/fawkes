@@ -43,6 +43,9 @@ class ImageDisplay
   void show(colorspace_t colorspace, unsigned char *buffer);
   void show(unsigned char *yuv422_planar_buffer);
 
+  void process_events(unsigned int max_num_events = 10);
+  void loop_until_quit();
+
  private:
   SDL_Surface *_surface;
   SDL_Overlay *_overlay;
