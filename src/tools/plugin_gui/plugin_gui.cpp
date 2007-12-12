@@ -210,7 +210,7 @@ PluginGui::update_connection()
       m_plugin_list->clear();
       m_stb_status->push("Connection died");
       m_btn_connect->set_label(Gtk::Stock::CONNECT.id);
-      m_cbe_hosts->get_entry()->set_text("");
+      //      m_cbe_hosts->get_entry()->set_text("");
     }
 }
 
@@ -226,7 +226,7 @@ PluginGui::clicked_connect()
       m_stb_status->push("Disconnecting ...");
       m_backend->disconnect();
       m_stb_status->push("Disconnected");
-      m_cbe_hosts->get_entry()->set_text("");
+      //      m_cbe_hosts->get_entry()->set_text("");
       m_btn_connect->set_label(Gtk::Stock::CONNECT.id);
     }
   else

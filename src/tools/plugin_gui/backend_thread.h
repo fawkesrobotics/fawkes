@@ -93,6 +93,7 @@ class PluginGuiBackendThread : public Thread,
   std::map<std::string,std::string> m_hosts;
   PluginGui* m_gui;
   bool m_connected;
+  bool m_connection_died;
 };
 
 #endif /* __TOOLS_PLUGIN_PLUGIN_GUI_BACKEND_THREAD_H_ */

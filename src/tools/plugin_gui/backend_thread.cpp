@@ -54,6 +54,7 @@ PluginGuiBackendThread::PluginGuiBackendThread(PluginGui* gui)
   m_avahi->watch("_fawkes._tcp", this);
   m_avahi->start();
   m_connected = false;
+  m_connection_died = false;
   m_gui = gui;
   m_hosts.clear();
 }
@@ -158,6 +159,14 @@ PluginGuiBackendThread::loop()
     {
       m_client->wait(FAWKES_CID_PLUGINMANAGER);
     }
+
+  if (m_connection_died)
+    {
+      m_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
+      m_client->cancel();
+      m_client->join();
+      m_connection_died = false;
+    }
 }
 
 void
@@ -182,9 +191,7 @@ PluginGuiBackendThread::connection_died() throw()
       m_gui->update_connection();
       m_plugin_status.clear();
       m_gui->update_list();
-      m_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
-      m_client->cancel();
-      m_client->join();
+      m_connection_died = true;
     }
 }
 
