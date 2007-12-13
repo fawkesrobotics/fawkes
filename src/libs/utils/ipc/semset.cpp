@@ -153,6 +153,10 @@ SemaphoreSet::SemaphoreSet(int key,
 
   data->key   = key;
   data->semid = semget(data->key, num_sems, data->semflg);
+
+  if ( data->semid == -1 ) {
+    throw Exception(errno, "Creating the semaphore set failed, maybe key does not exist");
+  }
 }
 
 

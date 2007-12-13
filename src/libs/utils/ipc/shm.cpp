@@ -372,14 +372,17 @@ SharedMemory::SharedMemory(const char *magic_token,
 /** Destructor */
 SharedMemory::~SharedMemory()
 {
-  delete[] _magic_token;
-  free();
   if ( __semset != NULL ) {
     // if we destroy the shared memory region we can as well delete the semaphore,
     // it is not necessary anymore.
     __semset->set_destroy_on_delete( _destroy_on_delete );
+    if ( _destroy_on_delete && ! _is_read_only ) {
+      _shm_header->semaphore = 0;
+    }
     delete __semset;
   }
+  delete[] _magic_token;
+  free();
 }
 
 
@@ -443,6 +446,8 @@ SharedMemory::attach()
 
       shm_id = shmctl( i, SHM_STAT, &shm_segment );
       if ( shm_id < 0 )  continue;
+      // Could be done to forbid attaching to destroyed segments
+      // if ( shm_segment.shm_perm.mode & SHM_DEST )  continue;
 
       shm_buf = shmat(shm_id, NULL, _is_read_only ? SHM_RDONLY : 0);
       if (shm_buf != (void *)-1) {
@@ -1274,6 +1279,13 @@ SharedMemory::SharedMemoryIterator::attach()
     throw ShmCouldNotAttachException("SharedMemoryIterator could not stat");
   }
 
+  /* Could be done, since we probably want to list destroyed segments we don't do it here
+  // check if segment has not been destroyed
+  if ( shm_segment.shm_perm.mode & SHM_DEST ) {
+    throw ShmCouldNotAttachException("SharedMemoryIterator: Segment already destroyed");
+  }
+  */
+
   // actually attach
   __shm_buf = shmat(__cur_shmid, NULL, SHM_RDONLY);
   if (__shm_buf == (void *)-1) {
@@ -1283,7 +1295,8 @@ SharedMemory::SharedMemoryIterator::attach()
   // do STAT again to get up2date values
   __cur_shmid = shmctl( __cur_id, SHM_STAT, &shm_segment );
   if ( __cur_shmid < 0 ) {
-    throw ShmCouldNotAttachException("SharedMemoryIterator could not stat");
+    shmdt(__shm_buf);
+    throw ShmCouldNotAttachException("SharedMemoryIterator could not stat (2)");
   }
 
   __segmsize   = shm_segment.shm_segsz;
@@ -1338,6 +1351,8 @@ SharedMemory::SharedMemoryIterator::operator++()
 	  }
 
 	  break;
+	} else {
+	  reset();
 	}
       } catch (ShmCouldNotAttachException &e) {
 	// ignore
