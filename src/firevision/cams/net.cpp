@@ -346,6 +346,9 @@ NetworkCamera::ready()
 }
 
 
+/** Select the image that is opened.
+ * @param image_id the image id
+ */
 void
 NetworkCamera::set_image_id(const char *image_id)
 {
