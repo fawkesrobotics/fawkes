@@ -457,7 +457,6 @@ void
 NavigatorGUI::connection_died() throw()
 {
   printf("Connection died\n");
-  reset_gui();
   statusbar->pop(1);
 
   printf("Connection died2\n");
@@ -938,6 +937,8 @@ bool NavigatorGUI::on_idle()
 
   if(connection_is_dead)
     {
+ 	  reset_gui();
+      queue_draw();
       char str[100];
       strcpy (str,"There is no connection to a Fawkes running at ");
       strcat (str, host_name);
@@ -948,7 +949,7 @@ bool NavigatorGUI::on_idle()
                                    true, Gtk::MESSAGE_QUESTION,
                                    Gtk::BUTTONS_OK_CANCEL, true);
       dialog->set_secondary_text(
-        "If not the program will terminate.");
+        "If not, the program will terminate.");
       dialog->set_title("Question");
       int result = dialog->run();
       delete dialog;
