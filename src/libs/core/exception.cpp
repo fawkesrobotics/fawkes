@@ -217,17 +217,17 @@ Exception::Exception(int errno, const char *format, ...) throw()
     va_list arg;
     va_start(arg, format);
     char *ext_format;
-    if ( asprintf(&ext_format, "%s (errno: %i)", format, errno) == -1 ) {
+    if ( asprintf(&ext_format, "%s (errno: %i, %s)", format, errno, strerror(errno)) == -1 ) {
       append_nolock_va(format, arg);
     } else {
+      append_nolock("Exception with errno=%i (%s)", errno, strerror(errno));
       append_nolock_va(ext_format, arg);
       free(ext_format);
     }
     va_end(arg);
   } else {
-    append_nolock("Exception with errno=%i", errno);
+    append_nolock("Exception with errno=%i (%s)", errno, strerror(errno));
   }
-  append_nolock("Excpetion has errno=%i", errno);
 
   messages_mutex->unlock();
 }
