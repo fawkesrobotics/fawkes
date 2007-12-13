@@ -30,6 +30,7 @@
 
 #include <core/threading/thread_initializer.h>
 #include <core/threading/thread_finalizer.h>
+#include <core/threading/thread_notification_listener.h>
 
 class BlackBoard;
 class Configuration;
@@ -46,7 +47,10 @@ class NetworkNameResolver;
 class ServicePublisher;
 class ServiceBrowser;
 
-class AspectIniFin : public ThreadInitializer, public ThreadFinalizer
+class AspectIniFin
+: public ThreadInitializer,
+  public ThreadFinalizer,
+  public ThreadNotificationListener
 {
  public:
   AspectIniFin(BlackBoard *blackboard, ThreadCollector *collector,
@@ -61,6 +65,9 @@ class AspectIniFin : public ThreadInitializer, public ThreadFinalizer
   void set_network_members(NetworkNameResolver *nnresolver,
 			   ServicePublisher *service_publisher,
 			   ServiceBrowser *service_browser);
+
+  virtual void thread_started(Thread *thread);
+  virtual void thread_init_failed(Thread *thread);
 
  private:
   BlackBoard          *__blackboard;

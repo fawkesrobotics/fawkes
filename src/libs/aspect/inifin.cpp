@@ -178,6 +178,7 @@ AspectIniFin::init(Thread *thread)
   if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
     try {
       __vision_dependency->add(vision_master_thread);
+      thread->add_notification_listener(this);
     } catch (DependencyViolationException &e) {
       CannotInitializeThreadException ce("Dependency violation for VisionProviderAspect "
 					 "detected");
@@ -202,6 +203,7 @@ AspectIniFin::init(Thread *thread)
       }
       __vision_dependency->add(vision_thread);
       vision_thread->initVisionAspect( __vision_dependency->provider()->vision_master() );
+      thread->add_notification_listener(this);
     } catch (DependencyViolationException &e) {
       CannotInitializeThreadException ce("Dependency violation for VisionAspect detected");
       ce.append(e);
@@ -228,6 +230,8 @@ AspectIniFin::prepare_finalize(Thread *thread)
   VisionMasterAspect *vision_master_thread;
   if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
     if ( ! __vision_dependency->can_remove(vision_master_thread) ) {
+      __logger->log_error("AspectIniFin", "Cannot remove vision master, there are "
+			  "still vision threads that depend on it");
       return false;
     }
   }
@@ -235,6 +239,8 @@ AspectIniFin::prepare_finalize(Thread *thread)
   VisionAspect *vision_thread;
   if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
     if ( ! __vision_dependency->can_remove(vision_thread) ) {
+      __logger->log_error("AspectIniFin", "Cannot remove vision thread, dependency "
+			  "violation");
       return false;
     }
   }
@@ -264,5 +270,26 @@ AspectIniFin::finalize(Thread *thread)
   VisionAspect *vision_thread;
   if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
     __vision_dependency->remove(vision_thread);
+  }
+}
+
+
+void
+AspectIniFin::thread_started(Thread *thread)
+{
+  // ignored
+}
+
+
+void
+AspectIniFin::thread_init_failed(Thread *thread)
+{
+  try {
+    finalize(thread);
+  } catch (Exception &e) {
+    __logger->log_error("AspectIniFin", "Initialization of thread '%s' failed, but "
+			"the thread thread could not be internally finalized",
+			thread->name());
+    __logger->log_error("AspectIniFin", e);
   }
 }
