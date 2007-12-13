@@ -375,6 +375,9 @@ NetworkCamera::colorspace()
 }
 
 
+/** List the available images.
+ * @return a vector containing information about the available images
+ */
 std::vector<FUSE_imageinfo_t>&
 NetworkCamera::image_list()
 {
