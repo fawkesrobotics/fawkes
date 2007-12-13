@@ -47,9 +47,8 @@ class ColorModel;
 class MirrorModel;
 class SimpleColorClassifier;
 class RelativePositionModel;
-class GlobalPositionModel;
+/* class GlobalPositionModel; */
 class SharedMemoryImageBuffer;
-class Scaler;
 class ObjectPositionInterface;
 
 class FvOmniBallPipelineThread
@@ -73,10 +72,9 @@ class FvOmniBallPipelineThread
   ColorModel* cm;
   MirrorModel* mirror;
   RelativePositionModel* rel_pos;
-  GlobalPositionModel* glob_pos;
+  /* GlobalPositionModel* glob_pos; */
   SimpleColorClassifier* classifier;
   SharedMemoryImageBuffer* shm_buffer;
-  Scaler* scaler;
 
   size_t buffer_size;
   unsigned char* buffer;

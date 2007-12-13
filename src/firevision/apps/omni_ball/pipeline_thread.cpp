@@ -47,6 +47,9 @@
 #include <stdlib.h>
 #include <cstdio>
 
+#include <string>
+
+using namespace std;
 
 /** @class FvOmniBallPipelineThread <apps/omni_ball/pipeline_thread.h>
  * Ball detector thread.
@@ -65,7 +68,7 @@ FvOmniBallPipelineThread::FvOmniBallPipelineThread()
   cm = NULL;
   mirror = NULL;
   rel_pos = NULL;
-  glob_pos = NULL;
+  //  glob_pos = NULL;
   classifier = NULL;
   shm_buffer = NULL;
   ball_interface = NULL;
@@ -81,9 +84,8 @@ FvOmniBallPipelineThread::~FvOmniBallPipelineThread()
   delete cm;
   delete mirror;
   delete rel_pos;
-  delete glob_pos;
+  //  delete glob_pos;
   delete classifier;
-  delete shm_buffer;
 }
 
 
@@ -94,6 +96,7 @@ FvOmniBallPipelineThread::~FvOmniBallPipelineThread()
 void
 FvOmniBallPipelineThread::init()
 {
+  // camera
   try 
     {
       cam = vision_master->register_for_camera( config->get_string("/firevision/omnivision/camera").c_str(), this );
@@ -104,85 +107,68 @@ FvOmniBallPipelineThread::init()
       throw;
     }
 
-  img_width = cam->pixel_width();
-  img_height = cam->pixel_height();
-  cspace_from = cam->colorspace();
-  
-  // shm buffer
-  // TODO: image dimensions are temporally scaled down by a factor of two
-  // until we have appropriate viewing tools
-  buffer_size = colorspace_buffer_size(cspace_to, img_width, img_height);
-  shm_buffer = new SharedMemoryImageBuffer("omni-processed",
-					   cspace_to, img_width/2, img_height/2);
-  // TODO: working on the camera buffer...
-  buffer = /*shm_buffer*/cam->buffer();
-  
-  // mirror
-  char* bulb_matrix_file;
-
-  try
-    {
-      bulb_matrix_file = strdup( config->get_string("/firevision/omnivision/bulb_matrix_file").c_str() );
-    }
-  catch (Exception &e)
-    {
-      e.append("OmniBallPipeline::init() failed since config parameters are missing");
-      throw;
-    }
-
-  mirror = new Bulb( bulb_matrix_file, "omni-ball-bulb",
-		     true /* destroy on delete */ );
-  
-  free(bulb_matrix_file);
-
-  // cart_coord_t center = mirror->getCenter();
-
-  // scanline model
-  scanline = new ScanlineGrid( img_width, img_height, 5, 5 );
-  
-  // color model
-  char* lut_file;
-
-  try
-    {
-      lut_file = strdup( config->get_string("/firevision/omnivision/ball/colormap").c_str() );
-    }
-  catch (Exception &e)
-    {
-      e.append("OmniBallPipeline>::init() failed since config parameters are missing");
-      throw;
-    }
-
-  cm = new ColorModelLookupTable(lut_file, 256 /* lut_width */, 256 /* lut_height */,
-				 "omni-ball-colormap",
-				 true /* destroy on delete */ );
-
-  free(lut_file);
-  
-  // position models
-  rel_pos = new OmniRelative(mirror);
-  glob_pos = new OmniGlobal(mirror);
-
-  // classifier
-  classifier = new SimpleColorClassifier(scanline, cm, 0, 30);
-
-  // TODO: see above
-  scaler = new LossyScaler();
-  scaler->set_original_dimensions(cam->pixel_width(), cam->pixel_height());
-  scaler->set_scaled_dimensions(cam->pixel_width() / 2, cam->pixel_height() / 2);
-  scaler->set_scale_factor(0.5);
-
   // interface
   try
     {
       ball_interface = interface_manager->open_for_writing<ObjectPositionInterface>("OmniBall");
       ball_interface->set_object_type( ObjectPositionInterface::BALL );
+      ball_interface->set_visible(false);
+      ball_interface->write();
     }
   catch (Exception &e)
     {
+      delete cam;
+      cam = 0;
       e.append("Opening ball interface for writing failed");
       throw;
     }
+
+  // config
+  // mirror & color model
+  string mirror_calib_file;
+  string colormap;
+  try
+    {
+      mirror_calib_file = config->get_string("/firevision/omnivision/mirror");
+      colormap = config->get_string("/firevision/omnivision/colormap_ball");
+    }
+  catch (Exception &e)
+    {
+      delete cam;
+      cam = 0;
+      interface_manager->close(ball_interface);
+      e.append("OmniBallPipeline::init() failed since config parameters are missing");
+      throw;
+    }
+
+  string mirror_calib_path = string(CONFDIR) + "/firevision/mirror/" + mirror_calib_file;
+  mirror = new Bulb( mirror_calib_path.c_str(), "omni-ball-bulb",
+		     true /* destroy on delete */ );
+
+  string colormap_path = string(CONFDIR) + "/firevision/colormaps/" + colormap;
+  cm = new ColorModelLookupTable(colormap_path.c_str(), 256 /* lut_width */, 256 /* lut_height */,
+				 "omni-ball-colormap", true /* destroy on delete */ );
+  
+  // image properties
+  img_width = cam->pixel_width();
+  img_height = cam->pixel_height();
+  cspace_from = cam->colorspace();
+  
+  buffer_size = colorspace_buffer_size(cspace_to, img_width, img_height);
+  shm_buffer = new SharedMemoryImageBuffer("omni-ball-processed", cspace_to,
+					   img_width, img_height);
+  buffer = shm_buffer->buffer();
+  
+  
+  // scanline model
+  scanline = new ScanlineGrid( img_width, img_height, 5, 5 );
+  
+  // position models
+  rel_pos = new OmniRelative(mirror);
+  //  glob_pos = new OmniGlobal(mirror);
+
+  // classifier
+  classifier = new SimpleColorClassifier(scanline, cm, 0, 30);
 }
 
 
@@ -192,6 +178,8 @@ FvOmniBallPipelineThread::finalize()
 {
   try
     {
+      ball_interface->set_visible(false);
+      ball_interface->write();
       interface_manager->close(ball_interface);
     }
   catch (Exception &e)
@@ -203,6 +191,8 @@ FvOmniBallPipelineThread::finalize()
   logger->log_debug(name(), "Unregistering from vision master");
   vision_master->unregister_thread(this);
   delete cam;
+  delete shm_buffer;
+  shm_buffer = NULL;
 }
 
 
@@ -212,11 +202,7 @@ void
 FvOmniBallPipelineThread::loop()
 {
   cam->capture();
-  // TODO: see above
-  //  convert(cspace_from, cspace_to, cam->buffer(), buffer, img_width, img_height);
-  scaler->set_original_buffer(cam->buffer());
-  scaler->set_scaled_buffer(shm_buffer->buffer());
-  scaler->scale();
+  convert(cspace_from, cspace_to, cam->buffer(), buffer, img_width, img_height);
   cam->dispose_buffer();
 
   ball_visible = false;
@@ -268,8 +254,10 @@ FvOmniBallPipelineThread::loop()
 	if ( rel_pos->isPosValid() ) 
 	  {
 	    rel_pos->calc();
+	    /*
 	    glob_pos->setPositionInImage( ball_image_x, ball_image_y );
 	    glob_pos->calc();
+	    */
 	  } 
 	else 
 	  {
@@ -281,11 +269,10 @@ FvOmniBallPipelineThread::loop()
       {
 	shm_buffer->set_circle_found( true );
 	shm_buffer->set_circle( ball_image_x, ball_image_y, 10 );
-	// TODO: see above
-	shm_buffer->set_roi( winner_roi->start.x/2,
-			     winner_roi->start.y/2,
-			     winner_roi->width/2,
-			     winner_roi->height/2 );
+	shm_buffer->set_roi( winner_roi->start.x,
+			     winner_roi->start.y,
+			     winner_roi->width,
+			     winner_roi->height );
       } 
     else 
       {
@@ -312,5 +299,7 @@ FvOmniBallPipelineThread::loop()
     {
       ball_interface->set_visible(false);
     }
+
+  ball_interface->write();
 }
 
