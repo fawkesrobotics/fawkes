@@ -165,9 +165,7 @@ FawkesNetworkClient::send()
 void
 FawkesNetworkClient::recv()
 {
-  while ( s->available() ) {
-    FawkesNetworkTransceiver::recv(s, inbound_msgq);
-  }
+  FawkesNetworkTransceiver::recv(s, inbound_msgq);
 }
 
 
