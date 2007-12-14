@@ -110,13 +110,12 @@ ConfigListContent::append(Configuration::ValueIterator *i)
 void
 ConfigListContent::append_float(const char *path, float f, bool def_val)
 {
-  config_list_entity_t cle;
+  config_list_float_entity_t cle;
   memset(&cle, 0, sizeof(cle));
-  strncpy(cle.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle.type = MSG_CONFIG_FLOAT_VALUE;
-  cle.cp.is_default = (def_val ? 1 : 0);
-  cle.reserved = 0;
-  cle.data.f = f;
+  strncpy(cle.header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
+  cle.header.type = MSG_CONFIG_FLOAT_VALUE;
+  cle.header.cp.is_default = (def_val ? 1 : 0);
+  cle.f = f;
   config_list->append(&cle, sizeof(cle));
 }
 
@@ -129,13 +128,12 @@ ConfigListContent::append_float(const char *path, float f, bool def_val)
 void
 ConfigListContent::append_int(const char *path, int i, bool def_val)
 {
-  config_list_entity_t cle;
+  config_list_int_entity_t cle;
   memset(&cle, 0, sizeof(cle));
-  strncpy(cle.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle.type = MSG_CONFIG_INT_VALUE;
-  cle.cp.is_default = (def_val ? 1 : 0);
-  cle.reserved = 0;
-  cle.data.i = i;
+  strncpy(cle.header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
+  cle.header.type = MSG_CONFIG_INT_VALUE;
+  cle.header.cp.is_default = (def_val ? 1 : 0);
+  cle.i = i;
   config_list->append(&cle, sizeof(cle));
 }
 
@@ -148,13 +146,12 @@ ConfigListContent::append_int(const char *path, int i, bool def_val)
 void
 ConfigListContent::append_uint(const char *path, unsigned int u, bool def_val)
 {
-  config_list_entity_t cle;
+  config_list_uint_entity_t cle;
   memset(&cle, 0, sizeof(cle));
-  strncpy(cle.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle.type = MSG_CONFIG_UINT_VALUE;
-  cle.cp.is_default = (def_val ? 1 : 0);
-  cle.reserved = 0;
-  cle.data.u = u;
+  strncpy(cle.header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
+  cle.header.type = MSG_CONFIG_UINT_VALUE;
+  cle.header.cp.is_default = (def_val ? 1 : 0);
+  cle.u = u;
   config_list->append(&cle, sizeof(cle));
 }
 
@@ -167,13 +164,12 @@ ConfigListContent::append_uint(const char *path, unsigned int u, bool def_val)
 void
 ConfigListContent::append_bool(const char *path, bool b, bool def_val)
 {
-  config_list_entity_t cle;
+  config_list_bool_entity_t cle;
   memset(&cle, 0, sizeof(cle));
-  strncpy(cle.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle.type = MSG_CONFIG_BOOL_VALUE;
-  cle.cp.is_default = (def_val ? 1 : 0);
-  cle.reserved = 0;
-  cle.data.b = b;
+  strncpy(cle.header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
+  cle.header.type = MSG_CONFIG_BOOL_VALUE;
+  cle.header.cp.is_default = (def_val ? 1 : 0);
+  cle.b = b;
   config_list->append(&cle, sizeof(cle));
 }
 
@@ -186,13 +182,12 @@ ConfigListContent::append_bool(const char *path, bool b, bool def_val)
 void
 ConfigListContent::append_string(const char *path, const char *s, bool def_val)
 {
-  config_list_entity_t cle;
+  config_list_string_entity_t cle;
   memset(&cle, 0, sizeof(cle));
-  strncpy(cle.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle.type = MSG_CONFIG_STRING_VALUE;
-  cle.cp.is_default = (def_val ? 1 : 0);
-  cle.reserved = 0;
-  strncpy(cle.data.s, s, CONFIG_MSG_MAX_STRING_LENGTH);
+  strncpy(cle.header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
+  cle.header.type = MSG_CONFIG_STRING_VALUE;
+  cle.header.cp.is_default = (def_val ? 1 : 0);
+  strncpy(cle.s, s, CONFIG_MSG_MAX_STRING_LENGTH);
   config_list->append(&cle, sizeof(cle));
 }
 
@@ -229,13 +224,13 @@ ConfigListContent::has_next()
 
 
 /** Get next plugin from list.
+ * @param upon return contains the size of the returned data element.
  * @return next plugin from list. This string has been allocated via strndup, so
  * you have to free it yourself!
  */
-config_list_entity_t *
-ConfigListContent::next()
+config_list_entity_header_t *
+ConfigListContent::next(size_t *size)
 {
-  size_t size;
-  void *tmp = config_list->next(&size);
-  return (config_list_entity_t *)tmp;
+  void *tmp = config_list->next(size);
+  return (config_list_entity_header_t *)tmp;
 }

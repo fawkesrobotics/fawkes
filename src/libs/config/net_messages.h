@@ -158,19 +158,42 @@ typedef struct {
   dynamic_list_t config_list;	/**< DynamicBuffer for list */
 } config_list_msg_t;
 
-/** Config list entity. */
+/** Config list entity header. */
 typedef struct {
   config_descriptor_t cp;	/**< Config descriptor. */
   uint32_t   type       : 8;	/**< type of entity, uses MSG_CONFIG_*_VALUE message IDs */
   uint32_t   reserved   : 24;	/**< reserved for future use */
-  union {
-    float    f;					/**< float value */
-    uint32_t u;					/**< unsigned int value */
-    int32_t  i;					/**< int value */
-    int32_t  b;					/**< bool value */
-    char     s[CONFIG_MSG_MAX_STRING_LENGTH];	/**< string value */
-  } data;					/**< data union */
-} config_list_entity_t;
+} config_list_entity_header_t;
+
+/** Config list float entity. */
+typedef struct {
+  config_list_entity_header_t  header;	/**< config entity header */
+  float    f;				/**< float value */
+} config_list_float_entity_t;
+
+/** Config list unsigned int entity. */
+typedef struct {
+  config_list_entity_header_t  header;	/**< config entity header */
+  uint32_t u;				/**< uint value */
+} config_list_uint_entity_t;
+
+/** Config list int entity. */
+typedef struct {
+  config_list_entity_header_t  header;	/**< config entity header */
+  int32_t i;				/**< float value */
+} config_list_int_entity_t;
+
+/** Config list bool entity. */
+typedef struct {
+  config_list_entity_header_t  header;	/**< config entity header */
+  int32_t b;				/**< 0 is false, everything else is true */
+} config_list_bool_entity_t;
+
+/** Config list string entity. */
+typedef struct {
+  config_list_entity_header_t  header;		/**< config entity header */
+  char     s[CONFIG_MSG_MAX_STRING_LENGTH];	/**< string value */
+} config_list_string_entity_t;
 
 #pragma pack(pop)
 

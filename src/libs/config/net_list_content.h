@@ -51,9 +51,9 @@ class ConfigListContent : public FawkesNetworkMessageContent
 
   virtual void serialize();
 
-  void                    reset_iterator();
-  bool                    has_next();
-  config_list_entity_t *  next();
+  void                           reset_iterator();
+  bool                           has_next();
+  config_list_entity_header_t *  next(size_t *size);
 
  private:
   DynamicBuffer     *config_list;

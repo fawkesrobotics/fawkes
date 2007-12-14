@@ -865,47 +865,66 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m) throw()
 	{
 	  ConfigListContent *clc = m->msgc<ConfigListContent>();
 	  while ( clc->has_next() ) {
-	    config_list_entity_t *cle = clc->next();
+	    size_t cle_size = 0;
+	    config_list_entity_header_t *cle = clc->next(&cle_size);
 	    switch ( cle->type ) {
 	    case MSG_CONFIG_FLOAT_VALUE:
-	      if ( cle->cp.is_default ) {
-		mirror_config->set_default_float(cle->cp.path, cle->data.f);
-	      } else {
-		mirror_config->set_float(cle->cp.path, cle->data.f);
+	      if ( cle_size == sizeof(config_list_float_entity_t) ) {
+		config_list_float_entity_t *clev = (config_list_float_entity_t *)cle;
+		if ( cle->cp.is_default ) {
+		  mirror_config->set_default_float(cle->cp.path, clev->f);
+		} else {
+		  mirror_config->set_float(cle->cp.path, clev->f);
+		}
+		break;
 	      }
-	      break;
 
 	    case MSG_CONFIG_INT_VALUE:
-	      if ( cle->cp.is_default ) {
-		mirror_config->set_default_int(cle->cp.path, cle->data.i);
-	      } else {
-		mirror_config->set_int(cle->cp.path, cle->data.i);
+	      if ( cle_size == sizeof(config_list_int_entity_t) ) {
+		config_list_int_entity_t *clev = (config_list_int_entity_t *)cle;
+		if ( cle->cp.is_default ) {
+		  mirror_config->set_default_int(cle->cp.path, clev->i);
+		} else {
+		  mirror_config->set_int(cle->cp.path, clev->i);
+		}
+		break;
 	      }
-	      break;
 
 	    case MSG_CONFIG_UINT_VALUE:
-	      if ( cle->cp.is_default ) {
-		mirror_config->set_default_uint(cle->cp.path, cle->data.u);
-	      } else {
-		mirror_config->set_uint(cle->cp.path, cle->data.u);
+	      if ( cle_size == sizeof(config_list_uint_entity_t) ) {
+		config_list_uint_entity_t *clev = (config_list_uint_entity_t *)cle;
+		if ( cle->cp.is_default ) {
+		  mirror_config->set_default_uint(cle->cp.path, clev->u);
+		} else {
+		  mirror_config->set_uint(cle->cp.path, clev->u);
+		}
+		break;
 	      }
-	      break;
 
 	    case MSG_CONFIG_BOOL_VALUE:
-	      if ( cle->cp.is_default ) {
-		mirror_config->set_default_bool(cle->cp.path, cle->data.b == 1);
-	      } else {
-		mirror_config->set_bool(cle->cp.path, cle->data.b == 1);
+	      if ( cle_size == sizeof(config_list_bool_entity_t) ) {
+		config_list_bool_entity_t *clev = (config_list_bool_entity_t *)cle;
+		if ( cle->cp.is_default ) {
+		  mirror_config->set_default_bool(cle->cp.path, clev->b != 0);
+		} else {
+		  mirror_config->set_bool(cle->cp.path, clev->b != 0);
+		}
+		break;
 	      }
-	      break;
 
 	    case MSG_CONFIG_STRING_VALUE:
-	      if ( cle->cp.is_default ) {
-		mirror_config->set_default_string(cle->cp.path, cle->data.s);
-	      } else {
-		mirror_config->set_string(cle->cp.path, cle->data.s);
+	      if ( cle_size == sizeof(config_list_string_entity_t) ) {
+		config_list_string_entity_t *clev = (config_list_string_entity_t *)cle;
+		char tmp[CONFIG_MSG_MAX_STRING_LENGTH + 1];
+		tmp[CONFIG_MSG_MAX_STRING_LENGTH] = '\0';
+		strncpy(tmp, clev->s, CONFIG_MSG_MAX_STRING_LENGTH);
+		if ( cle->cp.is_default ) {
+		  mirror_config->set_default_string(cle->cp.path, tmp);
+		} else {
+		  mirror_config->set_string(cle->cp.path, tmp);
+		}
+		break;
 	      }
-	      break;
 	    }
 	  }
 	  delete clc;
