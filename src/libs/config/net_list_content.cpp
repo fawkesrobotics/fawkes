@@ -224,9 +224,10 @@ ConfigListContent::has_next()
 
 
 /** Get next plugin from list.
- * @param upon return contains the size of the returned data element.
- * @return next plugin from list. This string has been allocated via strndup, so
- * you have to free it yourself!
+ * @param size upon return contains the size of the returned data element.
+ * @return next config entitiy from the list. The value is only of the type of
+ * the header. Check the message type and the size and cast the message to the correct
+ * entity.
  */
 config_list_entity_header_t *
 ConfigListContent::next(size_t *size)
