@@ -31,6 +31,7 @@
 #include <netcomm/utils/network_logger.h>
 #include <utils/logging/console.h>
 #include <utils/system/signal.h>
+#include <utils/system/argparser.h>
 
 /// @cond INTERNALS
 
@@ -39,12 +40,24 @@ class NetLogConsolePrinter
     public SignalHandler
 {
  public:
-  NetLogConsolePrinter()
+  NetLogConsolePrinter(const char *hostport)
   {
     logger = new ConsoleLogger();
     quit = false;
 
-    client = new FawkesNetworkClient("localhost", 1910);
+    char *hp = strdup(hostport);
+    const char *hostname = strtok(hp, ":");
+    const char *portstr = strtok(NULL, "");
+    int port = 1910;
+    if ( portstr ) {
+      port = atoi(portstr);
+      if ( (port < 0) || ( port > 0xFFFF ) ) {
+	printf("Invalid port given, must be in range [1:65535]. Using default 1910 instead\n");
+	port = 1910;
+      }
+    }
+
+    client = new FawkesNetworkClient(hostname, port);
     client->connect();
     client->start();
     client->register_handler(this, FAWKES_CID_NETWORKLOGGER);
@@ -113,10 +126,24 @@ class NetLogConsolePrinter
 /// @endcond
 
 
+void
+print_usage(const char *program_name)
+{
+  printf("Usage: %s [hostname[:port]]\n", program_name);
+}
+
 int
 main(int argc, char **argv)
 {
-  NetLogConsolePrinter printer;
+  ArgumentParser argp(argc, argv, "h");
+
+  if ( argp.has_arg("h") ) {
+    print_usage(argv[0]);
+    exit(0);
+  }
+
+  const char *hostport = (argp.num_items() > 0) ? argp.items()[0] : "localhost:1910";
+  NetLogConsolePrinter printer(hostport);
 
   SignalManager::register_handler(SIGINT, &printer);
   printer.run();
