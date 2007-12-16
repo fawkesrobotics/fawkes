@@ -53,12 +53,15 @@
 // ConfigManager: mainapp/config_manager.h
 #define FAWKES_CID_CONFIGMANAGER         3
 
+// NetworkLogger: netcomm/utils/network_logger.h
+#define FAWKES_CID_NETWORKLOGGER         4
+
 
 /* **** Normal component CIDs **** */
 
 #define FAWKES_CID_FIREVISION         1001
 #define FAWKES_CID_EXAMPLE_PLUGIN     1002
-#define FAWKES_CID_NAVIGATOR_PLUGIN     1003
+#define FAWKES_CID_NAVIGATOR_PLUGIN   1003
 
 
 #endif

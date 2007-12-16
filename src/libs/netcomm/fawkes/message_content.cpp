@@ -103,7 +103,7 @@ FawkesNetworkMessageContent::payload_size()
  * @param len number of bytes to copy from buf
  */
 void
-FawkesNetworkMessageContent::copy_payload(size_t offset, void *buf, size_t len)
+FawkesNetworkMessageContent::copy_payload(size_t offset, const void *buf, size_t len)
 {
   void *tmp = (void *)((size_t)_payload + offset);
   memcpy(tmp, buf, len);

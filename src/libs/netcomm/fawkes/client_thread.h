@@ -44,7 +44,6 @@ class FawkesNetworkClientThread : public Thread
   FawkesNetworkClientThread(StreamSocket *s, FawkesNetworkThread *parent);
   ~FawkesNetworkClientThread();
 
-  virtual void once();
   virtual void loop();
 
   unsigned int clid() const;

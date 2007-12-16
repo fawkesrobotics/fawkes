@@ -42,7 +42,7 @@ class FawkesNetworkMessageContent
   virtual size_t payload_size();
 
  protected:
-  void copy_payload(size_t offset, void *buf, size_t len);
+  void copy_payload(size_t offset, const void *buf, size_t len);
 
  protected:
   /** Pointer to payload. */

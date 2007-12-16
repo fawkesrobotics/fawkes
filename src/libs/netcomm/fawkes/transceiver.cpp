@@ -91,14 +91,13 @@ FawkesNetworkTransceiver::recv(StreamSocket *s, FawkesNetworkMessageQueue *msgq,
 
   try {
     unsigned int num_msgs = 0;
-    do {
+    while ( s->available() && (num_msgs++ < max_num_msgs) ) {
       fawkes_message_t msg;
       s->read(&(msg.header), sizeof(msg.header));
 
       unsigned int payload_size = ntohl(msg.header.payload_size);
 
       if ( payload_size > 0 ) {
-
 	msg.payload = malloc(payload_size);
 	s->read(msg.payload, payload_size);
       } else {
@@ -107,9 +106,7 @@ FawkesNetworkTransceiver::recv(StreamSocket *s, FawkesNetworkMessageQueue *msgq,
 
       FawkesNetworkMessage *m = new FawkesNetworkMessage(msg);
       msgq->push(m);
-
-      ++num_msgs;
-    } while ( s->available() && (num_msgs < max_num_msgs) );
+    }
   } catch (SocketException &e) {
     msgq->unlock();
     throw ConnectionDiedException("Read failed");

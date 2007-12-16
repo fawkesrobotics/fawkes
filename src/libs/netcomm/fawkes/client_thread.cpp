@@ -35,9 +35,6 @@
 #include <netcomm/utils/exceptions.h>
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
-#include <utils/system/signal.h>
-
-#include <cstdio>
 
 /** @class FawkesNetworkClientThread netcomm/fawkes/client_thread.h
  * Fawkes Network Client Thread.
@@ -126,12 +123,6 @@ FawkesNetworkClientThread::recv()
   }
 }
 
-void
-FawkesNetworkClientThread::once()
-{
-  SignalManager::ignore(SIGUSR1);
-}
-
 
 /** Thread loop.
  * The client thread loop polls on the socket for 10 ms (wait for events
@@ -154,7 +145,6 @@ FawkesNetworkClientThread::loop()
     p = s->poll(10); // block for up to 10 ms
   } catch (InterruptedException &e) {
     // we just ignore this and try it again
-    printf("Interrupted\n");
     return;
   }
 
@@ -220,7 +210,6 @@ void
 FawkesNetworkClientThread::force_send()
 {
   _outbound_mutex->lock();
-  kill(SIGUSR1);
   _outbound_waitcond->wait(_outbound_mutex);
   _outbound_mutex->unlock();
 }
