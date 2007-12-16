@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                   Makefile Build System for Fawkes: tools
+#            Makefile Build System for Fawkes : Log Tool
 #                            -------------------
-#   Created on Tue Nov 21 18:36:28 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Sat Dec 15 02:02:54 2007
+#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -17,12 +17,16 @@
 # last modified: $Date$
 #            by: $Author$
 #
-#*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 
-SUBDIRS = blackboard plugin logview config joystick plugin_gui navigator_gui
+CFLAGS = -g
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
+LIBS_logview = core utils netcomm
+OBJS_logview = main.o
+
+OBJS_all =	$(OBJS_logview)
+BINS_all =	$(BINDIR)/logview
+
+include $(BASEDIR)/etc/buildsys/base.mk
 
