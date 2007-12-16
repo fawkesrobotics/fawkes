@@ -39,6 +39,7 @@ class FawkesThreadIniFin;
 class FawkesConfigManager;
 class Configuration;
 class MultiLogger;
+class NetworkLogger;
 class HostInfo;
 class Clock;
 class TimeWait;
@@ -68,6 +69,7 @@ class FawkesMainThread : public Thread
   FawkesNetworkManager       *network_manager;
   FawkesConfigManager        *config_manager;
   MultiLogger                *multi_logger;
+  NetworkLogger              *network_logger;
   Clock                      *clock;
   TimeWait                   *__time_wait;
 

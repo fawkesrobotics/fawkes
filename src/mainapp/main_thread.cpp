@@ -36,6 +36,7 @@
 #include <utils/system/hostinfo.h>
 #include <utils/time/clock.h>
 #include <utils/time/wait.h>
+#include <netcomm/utils/network_logger.h>
 
 #include <blackboard/blackboard.h>
 #include <mainapp/thread_inifin.h>
@@ -163,6 +164,9 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     throw;
   }
 
+  network_logger = new NetworkLogger(network_manager->hub(), log_level);
+  multi_logger->add_logger(network_logger);
+
   thread_inifin->set_fnet_hub( network_manager->hub() );
   thread_inifin->set_network_members( network_manager->nnresolver(),
 				      network_manager->service_publisher(),
@@ -217,6 +221,11 @@ FawkesMainThread::~FawkesMainThread()
 void
 FawkesMainThread::destruct()
 {
+  // Must delete network logger first since network manager has to die before the LibLogger
+  // is finalized.
+  multi_logger->remove_logger(network_logger);
+  delete network_logger;
+
   delete plugin_manager;
   delete blackboard;
   delete config_manager;
