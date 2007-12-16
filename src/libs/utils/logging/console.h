@@ -53,6 +53,26 @@ class ConsoleLogger : public Logger
   virtual void log_warn(const char *component, Exception &e);
   virtual void log_error(const char *component, Exception &e);
 
+  virtual void tlog_debug(struct timeval *t, const char *component, const char *format, ...);
+  virtual void tlog_info(struct timeval *t, const char *component, const char *format, ...);
+  virtual void tlog_warn(struct timeval *t, const char *component, const char *format, ...);
+  virtual void tlog_error(struct timeval *t, const char *component, const char *format, ...);
+
+  virtual void tlog_debug(struct timeval *t, const char *component, Exception &e);
+  virtual void tlog_info(struct timeval *t, const char *component, Exception &e);
+  virtual void tlog_warn(struct timeval *t, const char *component, Exception &e);
+  virtual void tlog_error(struct timeval *t, const char *component, Exception &e);
+
+  virtual void vtlog_debug(struct timeval *t, const char *component,
+			   const char *format, va_list va);
+  virtual void vtlog_info(struct timeval *t, const char *component,
+			  const char *format, va_list va);
+  virtual void vtlog_warn(struct timeval *t, const char *component,
+			  const char *format, va_list va);
+  virtual void vtlog_error(struct timeval *t, const char *component,
+			   const char *format, va_list va);
+
+
  private:
   struct timeval *now;
   struct tm      *now_s;

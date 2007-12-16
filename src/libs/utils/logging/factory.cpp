@@ -64,6 +64,8 @@ UnknownLoggerTypeException::UnknownLoggerTypeException(const char *msg)
  * Supported logger types:
  * - console, ConsoleLogger
  * - file, FileLogger
+ * NOT supported:
+ * - NetworkLogger, needs a FawkesNetworkHub which cannot be passed by parameter
  * @param type logger type
  * @param as logger argument string
  * @return logger instance of requested type

@@ -67,6 +67,13 @@ class Logger
   virtual void log_warn(const char *component, const char *format, ...)    = 0;
   virtual void log_error(const char *component, const char *format, ...)   = 0;
 
+
+  virtual void log(LogLevel level, const char *component, Exception &e);
+  virtual void log_debug(const char *component, Exception &e)              = 0;
+  virtual void log_info(const char *component, Exception &e)               = 0;
+  virtual void log_warn(const char *component, Exception &e)               = 0;
+  virtual void log_error(const char *component, Exception &e)              = 0;
+
   virtual void vlog(LogLevel level, const char *component,
 		    const char *format, va_list va);
   virtual void vlog_debug(const char *component,
@@ -78,11 +85,40 @@ class Logger
   virtual void vlog_error(const char *component,
 			  const char *format, va_list va)                  = 0;
 
-  virtual void log(LogLevel level, const char *component, Exception &e);
-  virtual void log_debug(const char *component, Exception &e)              = 0;
-  virtual void log_info(const char *component, Exception &e)               = 0;
-  virtual void log_warn(const char *component, Exception &e)               = 0;
-  virtual void log_error(const char *component, Exception &e)              = 0;
+
+  virtual void tlog(LogLevel level, struct timeval *t,
+		    const char *component, const char *format, ...);
+  virtual void tlog_debug(struct timeval *t, const char *component,
+			  const char *format, ...)                         = 0;
+  virtual void tlog_info(struct timeval *t, const char *component,
+			 const char *format, ...)                          = 0;
+  virtual void tlog_warn(struct timeval *t, const char *component,
+			 const char *format, ...)                          = 0;
+  virtual void tlog_error(struct timeval *t, const char *component,
+			  const char *format, ...)                         = 0;
+
+  virtual void tlog(LogLevel level, struct timeval *t, const char *component,
+		    Exception &e);
+  virtual void tlog_debug(struct timeval *t, const char *component,
+			  Exception &e)                                    = 0;
+  virtual void tlog_info(struct timeval *t, const char *component,
+			 Exception &e)                                     = 0;
+  virtual void tlog_warn(struct timeval *t, const char *component,
+			 Exception &e)                                     = 0;
+  virtual void tlog_error(struct timeval *t, const char *component,
+			  Exception &e)                                    = 0;
+
+  virtual void vtlog(LogLevel level, struct timeval *t, const char *component,
+		     const char *format, va_list va);
+  virtual void vtlog_debug(struct timeval *t, const char *component,
+			   const char *format, va_list va)                  = 0;
+  virtual void vtlog_info(struct timeval *t, const char *component,
+			  const char *format, va_list va)                   = 0;
+  virtual void vtlog_warn(struct timeval *t, const char *component,
+			  const char *format, va_list va)                   = 0;
+  virtual void vtlog_error(struct timeval *t, const char *component,
+			   const char *format, va_list va)                  = 0;
+
 
  protected:
   /** Minimum log level.

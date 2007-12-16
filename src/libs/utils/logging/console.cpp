@@ -41,7 +41,7 @@ using namespace std;
  * output will be color coded due to the importance of the output.
  *
  * Debug output will be drawn in grey font, informational output in console
- * default color, warnings will be printed in yellow and errors in red.
+ * default color, warnings will be printed in brown/orange and errors in red.
  *
  */
 
@@ -66,19 +66,13 @@ ConsoleLogger::~ConsoleLogger()
 }
 
 
-/** Log debug message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- * @param va variadic argument list
- */
 void
 ConsoleLogger::vlog_debug(const char *component, const char *format, va_list va)
 {
   if (log_level <= LL_DEBUG ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
     fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_darkgray, now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
     vfprintf(stderr, format, va);
@@ -88,19 +82,13 @@ ConsoleLogger::vlog_debug(const char *component, const char *format, va_list va)
 }
 
 
-/** Log informational message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- * @param va variadic argument list
- */
 void
 ConsoleLogger::vlog_info(const char *component, const char *format, va_list va)
 {
   if (log_level <= LL_INFO ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
     fprintf(stderr, "%02d:%02d:%02d.%06ld %s: ", now_s->tm_hour, now_s->tm_min,
 	    now_s->tm_sec, now->tv_usec, component);
     vfprintf(stderr, format, va);
@@ -110,20 +98,14 @@ ConsoleLogger::vlog_info(const char *component, const char *format, va_list va)
 }
 
 
-/** Log warning message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- * @param va variadic argument list
- */
 void
 ConsoleLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
   if ( log_level <= LL_WARN ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
-    fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_yellow, now_s->tm_hour,
+    fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_brown, now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
     vfprintf(stderr, format, va);
     fprintf(stderr, "%s\n", std::c_normal);
@@ -132,19 +114,13 @@ ConsoleLogger::vlog_warn(const char *component, const char *format, va_list va)
 }
 
 
-/** Log error message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- * @param va variadic argument list
- */
 void
 ConsoleLogger::vlog_error(const char *component, const char *format, va_list va)
 {
   if ( log_level <= LL_ERROR ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
     fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_red, now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
     vfprintf(stderr, format, va);
@@ -154,11 +130,6 @@ ConsoleLogger::vlog_error(const char *component, const char *format, va_list va)
 }
 
 
-/** Log debug message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- */
 void
 ConsoleLogger::log_debug(const char *component, const char *format, ...)
 {
@@ -169,11 +140,6 @@ ConsoleLogger::log_debug(const char *component, const char *format, ...)
 }
 
 
-/** Log informational message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- */
 void
 ConsoleLogger::log_info(const char *component, const char *format, ...)
 {
@@ -184,11 +150,6 @@ ConsoleLogger::log_info(const char *component, const char *format, ...)
 }
 
 
-/** Log warning message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- */
 void
 ConsoleLogger::log_warn(const char *component, const char *format, ...)
 {
@@ -199,11 +160,6 @@ ConsoleLogger::log_warn(const char *component, const char *format, ...)
 }
 
 
-/** Log error message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- */
 void
 ConsoleLogger::log_error(const char *component, const char *format, ...)
 {
@@ -214,17 +170,13 @@ ConsoleLogger::log_error(const char *component, const char *format, ...)
 }
 
 
-/** Log debug message.
- * @param component component, used to distuinguish logged messages
- * @param e exception to log, exception messages will be logged
- */
 void
 ConsoleLogger::log_debug(const char *component, Exception &e)
 {
   if (log_level <= LL_DEBUG ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", std::c_darkgray, now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
@@ -235,17 +187,14 @@ ConsoleLogger::log_debug(const char *component, Exception &e)
   }
 }
 
-/** Log informational message.
- * @param component component, used to distuinguish logged messages
- * @param e exception to log, exception messages will be logged
- */
+
 void
 ConsoleLogger::log_info(const char *component, Exception &e)
 {
   if (log_level <= LL_INFO ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(stderr, "%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
@@ -257,19 +206,15 @@ ConsoleLogger::log_info(const char *component, Exception &e)
 }
 
 
-/** Log warning message.
- * @param component component, used to distuinguish logged messages
- * @param e exception to log, exception messages will be logged
- */
 void
 ConsoleLogger::log_warn(const char *component, Exception &e)
 {
   if (log_level <= LL_WARN ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", std::c_yellow, now_s->tm_hour,
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", std::c_brown, now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
       fprintf(stderr, *i);
       fprintf(stderr, "%s\n", std::c_normal);
@@ -279,23 +224,189 @@ ConsoleLogger::log_warn(const char *component, Exception &e)
 }
 
 
-/** Log error message.
- * @param component component, used to distuinguish logged messages
- * @param e exception to log, exception messages will be logged
- */
 void
 ConsoleLogger::log_error(const char *component, Exception &e)
 {
   if (log_level <= LL_DEBUG ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", std::c_red, now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
       fprintf(stderr, *i);
       fprintf(stderr, "%s\n", std::c_normal);
     }
+    mutex->unlock();
+  }
+}
+
+
+void
+ConsoleLogger::tlog_debug(struct timeval *t, const char *component, const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  vtlog_debug(t, component, format, arg);
+  va_end(arg);
+}
+
+
+void
+ConsoleLogger::tlog_info(struct timeval *t, const char *component, const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  vtlog_info(t, component, format, arg);
+  va_end(arg);
+}
+
+
+void
+ConsoleLogger::tlog_warn(struct timeval *t, const char *component, const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  vtlog_warn(t, component, format, arg);
+  va_end(arg);
+}
+
+
+void
+ConsoleLogger::tlog_error(struct timeval *t, const char *component, const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  vtlog_error(t, component, format, arg);
+  va_end(arg);
+}
+
+
+void
+ConsoleLogger::tlog_debug(struct timeval *t, const char *component, Exception &e)
+{
+  if (log_level <= LL_DEBUG ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", std::c_darkgray, now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+      fprintf(stderr, *i);
+      fprintf(stderr, "%s\n", std::c_normal);
+    }
+    mutex->unlock();
+  }
+}
+
+
+void
+ConsoleLogger::tlog_info(struct timeval *t, const char *component, Exception &e)
+{
+  if (log_level <= LL_INFO ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
+      fprintf(stderr, "%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", now_s->tm_hour,
+	      now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+      fprintf(stderr, *i);
+      fprintf(stderr, "%s\n", std::c_normal);
+    }
+    mutex->unlock();
+  }
+}
+
+
+void
+ConsoleLogger::tlog_warn(struct timeval *t, const char *component, Exception &e)
+{
+  if (log_level <= LL_WARN ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", std::c_brown, now_s->tm_hour,
+	      now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+      fprintf(stderr, *i);
+      fprintf(stderr, "%s\n", std::c_normal);
+    }
+    mutex->unlock();
+  }
+}
+
+
+void
+ConsoleLogger::tlog_error(struct timeval *t, const char *component, Exception &e)
+{
+  if (log_level <= LL_DEBUG ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", std::c_red, now_s->tm_hour,
+	      now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+      fprintf(stderr, *i);
+      fprintf(stderr, "%s\n", std::c_normal);
+    }
+    mutex->unlock();
+  }
+}
+
+
+
+
+void
+ConsoleLogger::vtlog_debug(struct timeval *t, const char *component, const char *format, va_list va)
+{
+  if (log_level <= LL_DEBUG ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_darkgray, now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+    vfprintf(stderr, format, va);
+    fprintf(stderr, "%s\n", std::c_normal);
+    mutex->unlock();
+  }
+}
+
+
+void
+ConsoleLogger::vtlog_info(struct timeval *t, const char *component, const char *format, va_list va)
+{
+  if (log_level <= LL_INFO ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    fprintf(stderr, "%02d:%02d:%02d.%06ld %s: ", now_s->tm_hour, now_s->tm_min,
+	    now_s->tm_sec, t->tv_usec, component);
+    vfprintf(stderr, format, va);
+    fprintf(stderr, "\n");
+    mutex->unlock();
+  }
+}
+
+
+void
+ConsoleLogger::vtlog_warn(struct timeval *t, const char *component, const char *format, va_list va)
+{
+  if ( log_level <= LL_WARN ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_brown, now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+    vfprintf(stderr, format, va);
+    fprintf(stderr, "%s\n", std::c_normal);
+    mutex->unlock();
+  }
+}
+
+
+void
+ConsoleLogger::vtlog_error(struct timeval *t, const char *component, const char *format, va_list va)
+{
+  if ( log_level <= LL_ERROR ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_red, now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+    vfprintf(stderr, format, va);
+    fprintf(stderr, "%s\n", std::c_normal);
     mutex->unlock();
   }
 }

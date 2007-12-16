@@ -75,99 +75,6 @@ FileLogger::~FileLogger()
 }
 
 
-/** Log debug message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- * @param va variadic argument list
- */
-void
-FileLogger::vlog_debug(const char* component, const char* format, va_list va)
-{
-  if (log_level <= LL_DEBUG ) {
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "D", now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    mutex->unlock();
-  }
-}
-
-
-/** Log informational message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- * @param va variadic argument list
- */
-void
-FileLogger::vlog_info(const char *component, const char *format, va_list va)
-{
-  if (log_level <= LL_INFO ) {
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "I", now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    mutex->unlock();
-  }
-}
-
-
-/** Log warning message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- * @param va variadic argument list
- */
-void
-FileLogger::vlog_warn(const char *component, const char *format, va_list va)
-{
-  if (log_level <= LL_WARN ) {
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "W", now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    mutex->unlock();
-  }
-}
-
-
-/** Log error message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- * @param va variadic argument list
- */
-void
-FileLogger::vlog_error(const char *component, const char *format, va_list va)
-{
-  if (log_level <= LL_ERROR ) {
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
-    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "E", now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
-    vfprintf(log_file->stream(), format, va);
-    fprintf(log_file->stream(), "\n");
-    mutex->unlock();
-  }
-}
-
-
-/** Log debug message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- */
 void
 FileLogger::log_debug(const char *component, const char *format, ...)
 {
@@ -178,11 +85,6 @@ FileLogger::log_debug(const char *component, const char *format, ...)
 }
 
 
-/** Log informational message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- */
 void
 FileLogger::log_info(const char *component, const char *format, ...)
 {
@@ -193,11 +95,6 @@ FileLogger::log_info(const char *component, const char *format, ...)
 }
 
 
-/** Log warning message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- */
 void
 FileLogger::log_warn(const char *component, const char *format, ...)
 {
@@ -208,11 +105,6 @@ FileLogger::log_warn(const char *component, const char *format, ...)
 }
 
 
-/** Log error message.
- * @param component component, used to distuinguish logged messages
- * @param format format of the message, see man page of sprintf for available
- * tokens.
- */
 void
 FileLogger::log_error(const char *component, const char *format, ...)
 {
@@ -223,17 +115,13 @@ FileLogger::log_error(const char *component, const char *format, ...)
 }
 
 
-/** Log debug message.
- * @param component component, used to distuinguish logged messages
- * @param e exception to log, exception messages will be logged
- */
 void
 FileLogger::log_debug(const char *component, Exception &e)
 {
   if ( log_level <= LL_DEBUG ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "D", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
@@ -245,17 +133,13 @@ FileLogger::log_debug(const char *component, Exception &e)
 }
 
 
-/** Log informational message.
- * @param component component, used to distuinguish logged messages
- * @param e exception to log, exception messages will be logged
- */
 void
 FileLogger::log_info(const char *component, Exception &e)
 {
   if ( log_level <= LL_INFO ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "I", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
@@ -267,17 +151,13 @@ FileLogger::log_info(const char *component, Exception &e)
 }
 
 
-/** Log warning message.
- * @param component component, used to distuinguish logged messages
- * @param e exception to log, exception messages will be logged
- */
 void
 FileLogger::log_warn(const char *component, Exception &e)
 {
   if ( log_level <= LL_WARN ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "W", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
@@ -289,23 +169,251 @@ FileLogger::log_warn(const char *component, Exception &e)
 }
 
 
-/** Log error message.
- * @param component component, used to distuinguish logged messages
- * @param e exception to log, exception messages will be logged
- */
 void
 FileLogger::log_error(const char *component, Exception &e)
 {
   if ( log_level <= LL_ERROR ) {
+    mutex->lock();
     gettimeofday(now, NULL);
     localtime_r(&now->tv_sec, now_s);
-    mutex->lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "E", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
       fprintf(log_file->stream(), *i);
       fprintf(log_file->stream(), "\n");
     }
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::vlog_debug(const char* component, const char* format, va_list va)
+{
+  if (log_level <= LL_DEBUG ) {
+    mutex->lock();
+    gettimeofday(now, NULL);
+    localtime_r(&now->tv_sec, now_s);
+    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "D", now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+    vfprintf(log_file->stream(), format, va);
+    fprintf(log_file->stream(), "\n");
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::vlog_info(const char *component, const char *format, va_list va)
+{
+  if (log_level <= LL_INFO ) {
+    mutex->lock();
+    gettimeofday(now, NULL);
+    localtime_r(&now->tv_sec, now_s);
+    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "I", now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+    vfprintf(log_file->stream(), format, va);
+    fprintf(log_file->stream(), "\n");
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::vlog_warn(const char *component, const char *format, va_list va)
+{
+  if (log_level <= LL_WARN ) {
+    mutex->lock();
+    gettimeofday(now, NULL);
+    localtime_r(&now->tv_sec, now_s);
+    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "W", now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+    vfprintf(log_file->stream(), format, va);
+    fprintf(log_file->stream(), "\n");
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::vlog_error(const char *component, const char *format, va_list va)
+{
+  if (log_level <= LL_ERROR ) {
+    mutex->lock();
+    gettimeofday(now, NULL);
+    localtime_r(&now->tv_sec, now_s);
+    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "E", now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+    vfprintf(log_file->stream(), format, va);
+    fprintf(log_file->stream(), "\n");
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::tlog_debug(struct timeval *t, const char *component, const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  vtlog_debug(t, component, format, arg);
+  va_end(arg);
+}
+
+
+void
+FileLogger::tlog_info(struct timeval *t, const char *component, const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  vtlog_info(t, component, format, arg);
+  va_end(arg);
+}
+
+
+void
+FileLogger::tlog_warn(struct timeval *t, const char *component, const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  vtlog_warn(t, component, format, arg);
+  va_end(arg);
+}
+
+
+void
+FileLogger::tlog_error(struct timeval *t, const char *component, const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  vtlog_error(t, component, format, arg);
+  va_end(arg);
+}
+
+
+void
+FileLogger::tlog_debug(struct timeval *t, const char *component, Exception &e)
+{
+  if ( log_level <= LL_DEBUG ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
+      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "D", now_s->tm_hour,
+	      now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+      fprintf(log_file->stream(), *i);
+      fprintf(log_file->stream(), "\n");
+    }
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::tlog_info(struct timeval *t, const char *component, Exception &e)
+{
+  if ( log_level <= LL_INFO ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
+      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "I", now_s->tm_hour,
+	      now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+      fprintf(log_file->stream(), *i);
+      fprintf(log_file->stream(), "\n");
+    }
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::tlog_warn(struct timeval *t, const char *component, Exception &e)
+{
+  if ( log_level <= LL_WARN ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
+      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "W", now_s->tm_hour,
+	      now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+      fprintf(log_file->stream(), *i);
+      fprintf(log_file->stream(), "\n");
+    }
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::tlog_error(struct timeval *t, const char *component, Exception &e)
+{
+  if ( log_level <= LL_ERROR ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
+      fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "E", now_s->tm_hour,
+	      now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+      fprintf(log_file->stream(), *i);
+      fprintf(log_file->stream(), "\n");
+    }
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::vtlog_debug(struct timeval *t, const char* component, const char* format, va_list va)
+{
+  if (log_level <= LL_DEBUG ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "D", now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+    vfprintf(log_file->stream(), format, va);
+    fprintf(log_file->stream(), "\n");
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::vtlog_info(struct timeval *t, const char *component, const char *format, va_list va)
+{
+  if (log_level <= LL_INFO ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "I", now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+    vfprintf(log_file->stream(), format, va);
+    fprintf(log_file->stream(), "\n");
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::vtlog_warn(struct timeval *t, const char *component, const char *format, va_list va)
+{
+  if (log_level <= LL_WARN ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "W", now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+    vfprintf(log_file->stream(), format, va);
+    fprintf(log_file->stream(), "\n");
+    mutex->unlock();
+  }
+}
+
+
+void
+FileLogger::vtlog_error(struct timeval *t, const char *component, const char *format, va_list va)
+{
+  if (log_level <= LL_ERROR ) {
+    mutex->lock();
+    localtime_r(&t->tv_sec, now_s);
+    fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "E", now_s->tm_hour,
+	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
+    vfprintf(log_file->stream(), format, va);
+    fprintf(log_file->stream(), "\n");
     mutex->unlock();
   }
 }

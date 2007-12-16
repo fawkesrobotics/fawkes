@@ -137,6 +137,90 @@
  * @param component component, used to distuinguish logged messages
  * @param e exception to log, exception messages will be logged
  *
+ * @fn void Logger::tlog_debug(struct timeval *t, const char *component, const char *format, ...) = 0
+ * Log debug message for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ *
+ * @fn void Logger::tlog_info(struct timeval *t, const char *component, const char *format, ...) = 0
+ * Log informational message for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ *
+ * @fn void Logger::tlog_warn(struct timeval *t, const char *component, const char *format, ...) = 0
+ * Log warning message for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ *
+ * @fn void Logger::tlog_error(struct timeval *t, const char *component, const char *format, ...) = 0
+ * Log error message for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ *
+ * @fn void Logger::tlog_debug(struct timeval *t, const char *component, Exception &e) = 0
+ * Log debug exception for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param e exception to log, exception messages will be logged
+ *
+ * @fn void Logger::tlog_info(struct timeval *t, const char *component, Exception &e) = 0
+ * Log informational exception for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param e exception to log, exception messages will be logged
+ *
+ * @fn void Logger::tlog_warn(struct timeval *t, const char *component, Exception &e) = 0
+ * Log warning exception for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param e exception to log, exception messages will be logged
+ *
+ * @fn void Logger::tlog_error(struct timeval *t, const char *component, Exception &e) = 0
+ * Log error exception for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param e exception to log, exception messages will be logged
+ *
+ * @fn void Logger::vtlog_debug(struct timeval *t, const char *component, const char *format, va_list va) = 0
+ * Log debug message for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ * @param va variable argument list
+ *
+ * @fn void Logger::vtlog_info(struct timeval *t, const char *component, const char *format, va_list va) = 0
+ * Log informational message for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ * @param va variable argument list
+ *
+ * @fn void Logger::vtlog_warn(struct timeval *t, const char *component, const char *format, va_list va) = 0
+ * Log warning message for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ * @param va variable argument list
+ *
+ * @fn void Logger::vtlog_error(struct timeval *t, const char *component, const char *format, va_list va) = 0
+ * Log error message for specific time.
+ * @param t time for this message to log
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ * @param va variable argument list
+ *
  */
 
 /** Constructor.
@@ -185,7 +269,7 @@ Logger::loglevel()
  */
 void
 Logger::vlog(LogLevel level,
-		    const char *component, const char *format, va_list va)
+	     const char *component, const char *format, va_list va)
 {
   if ( log_level <= level ) {
     switch (level) {
@@ -193,6 +277,31 @@ Logger::vlog(LogLevel level,
     case LL_INFO:   vlog_info(component, format, va);   break;
     case LL_WARN:   vlog_warn(component, format, va);   break;
     case LL_ERROR:  vlog_error(component, format, va);  break;
+    default: break;
+    }
+  }
+}
+
+
+
+/** Log message for given log level and time.
+ * @param level log level
+ * @param t time
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ * @param va variadic argument list
+ */
+void
+Logger::vtlog(LogLevel level, struct timeval *t,
+	      const char *component, const char *format, va_list va)
+{
+  if ( log_level <= level ) {
+    switch (level) {
+    case LL_DEBUG:  vtlog_debug(t, component, format, va);  break;
+    case LL_INFO:   vtlog_info(t, component, format, va);   break;
+    case LL_WARN:   vtlog_warn(t, component, format, va);   break;
+    case LL_ERROR:  vtlog_error(t, component, format, va);  break;
     default: break;
     }
   }
@@ -231,6 +340,48 @@ Logger::log(LogLevel level, const char *component, Exception &e)
     case LL_INFO:   log_info(component, e);   break;
     case LL_WARN:   log_warn(component, e);   break;
     case LL_ERROR:  log_error(component, e);  break;
+    default: break;
+    }
+  }
+}
+
+
+
+/** Log message of given log level and time.
+ * @param t time
+ * @param level log level
+ * @param component component, used to distuinguish logged messages
+ * @param format format of the message, see man page of sprintf for available
+ * tokens.
+ */
+void
+Logger::tlog(LogLevel level, struct timeval *t,
+	     const char *component, const char *format, ...)
+{
+  if ( log_level <= level ) {
+    va_list va;
+    va_start(va, format);
+    vtlog(level, t, component, format, va);
+    va_end(va);
+  }
+}
+
+
+/** Log exception for given log level.
+ * @param t time
+ * @param level log level
+ * @param component component, used to distuinguish logged messages
+ * @param e exception to log, exception messages will be logged
+ */
+void
+Logger::tlog(LogLevel level, struct timeval *t, const char *component, Exception &e)
+{
+  if ( log_level <= level ) {
+    switch (level) {
+    case LL_DEBUG:  tlog_debug(t, component, e);  break;
+    case LL_INFO:   tlog_info(t, component, e);   break;
+    case LL_WARN:   tlog_warn(t, component, e);   break;
+    case LL_ERROR:  tlog_error(t, component, e);  break;
     default: break;
     }
   }
