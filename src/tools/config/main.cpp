@@ -169,9 +169,9 @@ print_usage(const char *program_name)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "H");
+  ArgumentParser argp(argc, argv, "h");
 
-  if ( argp.has_arg("H") ) {
+  if ( argp.has_arg("h") ) {
     print_usage(argv[0]);
     exit(0);
   }

@@ -83,25 +83,24 @@ void
 usage(const char *progname)
 {
   cout << "Fawkes Main Application - Usage Instructions" << endl
-       << "=========================================================================" << endl
+       << "===============================================================================" << endl
        << "Call with: " << progname << " [options]" << endl
        << "where [options] is one or more of:" << endl
-       << " -H             these help instructions" << endl
+       << " -h             these help instructions" << endl
        << " -C             cleanup old BB segments" << endl
        << " -c conffile    mutable configuration file, created if it does not exist" << endl
        << "                if it does however it must contain valid SQLite database" << endl
        << " -d conffile    default configuration file, created if it does not exist" << endl
        << "                if it does however it must contain valid SQLite database" << endl
-       << " -q[qqq]        Quiet mode, -q omits debug, -qq debug and info,"
+       << " -q[qqq]        Quiet mode, -q omits debug, -qq debug and info," << endl
        << "                -qqq omit debug, info and warn, -qqqq no output of logger" << endl
-       << "                if it does however it must contain valid SQLite database" << endl
        << " -l level       set log level directly mutually exclusive with -q" << endl
        << "                level is one of debug, info, warn, error and none" << endl
        << " -L loggers     define loggers. By default this setting is read from " << endl
        << "                config file (or console logger if unset in config)." << endl
        << "                format for loggers is: logger:args[;logger2:args2[!...]]" << endl
-       << "                the loggeroptions depend on the logger. Currently supported are:" << endl
-       << "                console, file:file.log" << endl
+       << "                the loggeroptions depend on the logger. Currently supported:" << endl
+       << "                console (default), file:file.log, network logger always starts" << endl
        << " -p plugins     Comma-separated list of plugins, for example " << endl
        << "                fvbase,fvfountain,fvretriever. These plugins will be loaded" << endl
        << "                in the given order after startup."
@@ -116,9 +115,9 @@ usage(const char *progname)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "HCc:d:q::l:L:p:");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:");
 
-  if ( argp->has_arg("H") ) {
+  if ( argp->has_arg("h") ) {
     usage(argv[0]);
     delete argp;
     return 0;

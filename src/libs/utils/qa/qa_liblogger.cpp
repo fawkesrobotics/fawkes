@@ -144,10 +144,10 @@ main(int argc, char **argv)
 {
   ArgumentParser *argp = new ArgumentParser(argc, argv, "s:n:");
 
-  if ( argp->has_arg("H") ) {
+  if ( argp->has_arg("h") ) {
     cout << "Usage: " << argv[0] << "[-s n] [-n n]" << endl
 	 << " -s n Sleep time for thres in usec" << endl
-	 << " -H   this help message" << endl
+	 << " -h   this help message" << endl
 	 << " -n n number of threads" << endl;
     return 0;
   }

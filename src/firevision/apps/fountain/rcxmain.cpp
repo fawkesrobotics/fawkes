@@ -53,7 +53,7 @@ class FountainRCSoftX : public SignalHandler
  public:
   FountainRCSoftX(int argc, char **argv)
   {
-    __argp   = new ArgumentParser(argc, argv, "Hx:");
+    __argp   = new ArgumentParser(argc, argv, "hx:");
     __logger = new ConsoleLogger();
 
 #ifdef HAVE_AVAHI
@@ -93,15 +93,15 @@ class FountainRCSoftX : public SignalHandler
   void
   print_usage()
   {
-    printf("Usage: %s [-x config] [-H]\n"
-	   "  -H             Show this help message\n"
+    printf("Usage: %s [-x config] [-h]\n"
+	   "  -h             Show this help message\n"
 	   "  -x config      Load given RCSoftX config file\n",
 	   __argp->program_name());
   }
 
   void run()
   {
-    if ( __argp->has_arg("H") ) {
+    if ( __argp->has_arg("h") ) {
       print_usage();
       return;
     }

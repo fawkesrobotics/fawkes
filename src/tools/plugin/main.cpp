@@ -34,9 +34,9 @@
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "Hl:u:r:waL");
+  ArgumentParser argp(argc, argv, "hl:u:r:waL");
 
-  if ( argp.has_arg("H") ) {
+  if ( argp.has_arg("h") ) {
     PluginTool::print_usage(argp.program_name());
     exit(0);
   }

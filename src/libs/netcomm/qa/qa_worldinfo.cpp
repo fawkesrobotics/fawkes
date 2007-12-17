@@ -258,12 +258,12 @@ class WorldInfoQAMain : public SignalHandler
 int
 main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "arlsH");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "arlsh");
 
-  if ( argp->has_arg("H") ) {
-    cout << "Usage: " << argv[0] << "[-r] [-H] [-s] [-l] [-a]" << endl
+  if ( argp->has_arg("h") ) {
+    cout << "Usage: " << argv[0] << "[-r] [-h] [-s] [-l] [-a]" << endl
 	 << " -r   receiver (sender otherwise)" << endl
-	 << " -H   this help message" << endl
+	 << " -h   this help message" << endl
 	 << " -s   single per recv, only process a single message per recv()" << endl
 #ifdef HAVE_AVAHI
 	 << " -a   enable Avahi for mDNS lookup" << endl

@@ -38,10 +38,10 @@ int
 main(int argc, char **argv)
 {
 
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "c::Hl::i:");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "c::hl::i:");
   bool action_done = false;
 
-  if ( argp->has_arg("H") ) {
+  if ( argp->has_arg("h") ) {
     // Show usage note
     cout << endl << "Usage: " << argv[0] << " [-h] [-c] [-c[t]] [-l] [-m] [-i image_id] [file]" << endl
 	 << " -h     Show this help message" << endl

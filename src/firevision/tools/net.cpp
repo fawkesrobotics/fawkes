@@ -327,7 +327,7 @@ class FireVisionNetworkTool
   void
   run()
   {
-    if ( __argp->has_arg("H") ) {
+    if ( __argp->has_arg("h") ) {
       print_usage();
       exit(0);
     } else {
@@ -425,7 +425,7 @@ private:
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "Hn:ilLsej");
+  ArgumentParser argp(argc, argv, "hn:ilLsej");
 
   FireVisionNetworkTool *nettool = new FireVisionNetworkTool(&argp);
   nettool->run();

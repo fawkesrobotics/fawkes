@@ -51,14 +51,14 @@ main( int argc, char **argv )
 {
 
   // see help output below for the meaning of the parameters
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "f:Lb::x:Hoi:r:l:pvP");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "f:Lb::x:hoi:r:l:pvP");
 
   // wipe away all shared memory segments that we are responsible for.
   SharedMemoryImageBuffer::wipe( "geegaw-source" );  
   SharedMemoryImageBuffer::wipe( "geegaw-final"  );
 
 
-  if (argp->has_arg("H")) {
+  if (argp->has_arg("h")) {
 
     cout << endl << cblue << "FirevisionFront Help" << cnormal << endl << endl
 	 << endl
@@ -74,7 +74,7 @@ main( int argc, char **argv )
          << " -i robot  Connect to remote robot BB, mutually exclusive with -b" << endl
          << " -r robot  Connect to remote robot BB, mutually exclusive with -b" << endl
          << " -l.       Connect to local BB, mutually exclusive with -b" << endl
-	 << " -H        Shows this help" << endl
+	 << " -h        Shows this help" << endl
 	 << endl
 	 << "Examples:" << endl
 	 << endl

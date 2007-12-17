@@ -93,7 +93,7 @@ process_gtk_events()
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "Hs:f:n:vj");
+  ArgumentParser argp(argc, argv, "hs:f:n:vj");
 
 #ifdef HAVE_GTKMM
   Gtk::Main gtk_main(argc, argv);
@@ -102,7 +102,7 @@ main(int argc, char **argv)
   Camera *cam;
   bool verbose = argp.has_arg("v");
 
-  if ( argp.has_arg("H") ) {
+  if ( argp.has_arg("h") ) {
     print_usage(argp.program_name());
     exit(0);
   } else if ( argp.has_arg("s") ) {
