@@ -74,7 +74,6 @@ class ConsoleLogger : public Logger
 
 
  private:
-  struct timeval *now;
   struct tm      *now_s;
   Mutex          *mutex;
 };

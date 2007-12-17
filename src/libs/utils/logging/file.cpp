@@ -57,7 +57,6 @@ FileLogger::FileLogger(const char* filename, LogLevel log_level)
     throw;
   }
 
-  now = (struct timeval *)malloc(sizeof(struct timeval));
   now_s = (struct tm *)malloc(sizeof(struct tm));
 
   mutex = new Mutex();
@@ -67,7 +66,6 @@ FileLogger::FileLogger(const char* filename, LogLevel log_level)
 /** Destructor. */
 FileLogger::~FileLogger()
 {
-  free(now);
   free(now_s);
   
   delete log_file;
@@ -119,12 +117,13 @@ void
 FileLogger::log_debug(const char *component, Exception &e)
 {
   if ( log_level <= LL_DEBUG ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "D", now_s->tm_hour,
-	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	      now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(log_file->stream(), *i);
       fprintf(log_file->stream(), "\n");
     }
@@ -137,12 +136,13 @@ void
 FileLogger::log_info(const char *component, Exception &e)
 {
   if ( log_level <= LL_INFO ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "I", now_s->tm_hour,
-	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	      now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(log_file->stream(), *i);
       fprintf(log_file->stream(), "\n");
     }
@@ -155,12 +155,13 @@ void
 FileLogger::log_warn(const char *component, Exception &e)
 {
   if ( log_level <= LL_WARN ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "W", now_s->tm_hour,
-	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	      now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(log_file->stream(), *i);
       fprintf(log_file->stream(), "\n");
     }
@@ -173,12 +174,13 @@ void
 FileLogger::log_error(const char *component, Exception &e)
 {
   if ( log_level <= LL_ERROR ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s [EXCEPTION]: ", "E", now_s->tm_hour,
-	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	      now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(log_file->stream(), *i);
       fprintf(log_file->stream(), "\n");
     }
@@ -191,11 +193,12 @@ void
 FileLogger::vlog_debug(const char* component, const char* format, va_list va)
 {
   if (log_level <= LL_DEBUG ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "D", now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
     mutex->unlock();
@@ -207,11 +210,12 @@ void
 FileLogger::vlog_info(const char *component, const char *format, va_list va)
 {
   if (log_level <= LL_INFO ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "I", now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
     mutex->unlock();
@@ -223,11 +227,12 @@ void
 FileLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
   if (log_level <= LL_WARN ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "W", now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
     mutex->unlock();
@@ -239,11 +244,12 @@ void
 FileLogger::vlog_error(const char *component, const char *format, va_list va)
 {
   if (log_level <= LL_ERROR ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     fprintf(log_file->stream(), "%s %02d:%02d:%02d.%06ld %s: ", "E", now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
     mutex->unlock();

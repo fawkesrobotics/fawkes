@@ -51,7 +51,6 @@ using namespace std;
 ConsoleLogger::ConsoleLogger(LogLevel log_level)
   : Logger(log_level)
 {
-  now = (struct timeval *)malloc(sizeof(struct timeval));
   now_s = (struct tm *)malloc(sizeof(struct tm));
   mutex = new Mutex();
 }
@@ -60,7 +59,6 @@ ConsoleLogger::ConsoleLogger(LogLevel log_level)
 /** Destructor. */
 ConsoleLogger::~ConsoleLogger()
 {
-  free(now);
   free(now_s);
   delete mutex;
 }
@@ -70,11 +68,12 @@ void
 ConsoleLogger::vlog_debug(const char *component, const char *format, va_list va)
 {
   if (log_level <= LL_DEBUG ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_darkgray, now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
     vfprintf(stderr, format, va);
     fprintf(stderr, "%s\n", std::c_normal);
     mutex->unlock();
@@ -86,11 +85,12 @@ void
 ConsoleLogger::vlog_info(const char *component, const char *format, va_list va)
 {
   if (log_level <= LL_INFO ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     fprintf(stderr, "%02d:%02d:%02d.%06ld %s: ", now_s->tm_hour, now_s->tm_min,
-	    now_s->tm_sec, now->tv_usec, component);
+	    now_s->tm_sec, now.tv_usec, component);
     vfprintf(stderr, format, va);
     fprintf(stderr, "\n");
     mutex->unlock();
@@ -102,11 +102,12 @@ void
 ConsoleLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
   if ( log_level <= LL_WARN ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_brown, now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
     vfprintf(stderr, format, va);
     fprintf(stderr, "%s\n", std::c_normal);
     mutex->unlock();
@@ -118,11 +119,12 @@ void
 ConsoleLogger::vlog_error(const char *component, const char *format, va_list va)
 {
   if ( log_level <= LL_ERROR ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: ", std::c_red, now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
     vfprintf(stderr, format, va);
     fprintf(stderr, "%s\n", std::c_normal);
     mutex->unlock();
@@ -174,12 +176,13 @@ void
 ConsoleLogger::log_debug(const char *component, Exception &e)
 {
   if (log_level <= LL_DEBUG ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", std::c_darkgray, now_s->tm_hour,
-	    now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(stderr, *i);
       fprintf(stderr, "%s\n", std::c_normal);
     }
@@ -192,12 +195,13 @@ void
 ConsoleLogger::log_info(const char *component, Exception &e)
 {
   if (log_level <= LL_INFO ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(stderr, "%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", now_s->tm_hour,
-	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	      now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(stderr, *i);
       fprintf(stderr, "%s\n", std::c_normal);
     }
@@ -210,12 +214,13 @@ void
 ConsoleLogger::log_warn(const char *component, Exception &e)
 {
   if (log_level <= LL_WARN ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", std::c_brown, now_s->tm_hour,
-	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	      now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(stderr, *i);
       fprintf(stderr, "%s\n", std::c_normal);
     }
@@ -228,12 +233,13 @@ void
 ConsoleLogger::log_error(const char *component, Exception &e)
 {
   if (log_level <= LL_DEBUG ) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
     mutex->lock();
-    gettimeofday(now, NULL);
-    localtime_r(&now->tv_sec, now_s);
+    localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", std::c_red, now_s->tm_hour,
-	      now_s->tm_min, now_s->tm_sec, now->tv_usec, component);
+	      now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(stderr, *i);
       fprintf(stderr, "%s\n", std::c_normal);
     }

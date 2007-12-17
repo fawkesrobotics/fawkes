@@ -41,21 +41,18 @@ class MultiLoggerData
   MultiLoggerData()
   {
     mutex = new Mutex();
-    now = (struct timeval *)malloc(sizeof(struct timeval));
   }
 
   ~MultiLoggerData()
   {
     delete mutex;
     mutex = NULL;
-    free(now);
   }
 
   LockList<Logger *>            loggers;
   LockList<Logger *>::iterator  logit;
   Mutex                        *mutex;
   Thread::CancelState           old_state;
-  struct timeval               *now;
 };
 
 /// @endcond
@@ -164,16 +161,17 @@ MultiLogger::set_loglevel(LogLevel level)
 void
 MultiLogger::log(LogLevel level, const char *component, const char *format, ...)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   va_list va;
   va_start(va, format);
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
     va_list vac;
     va_copy(vac, va);
-    (*data->logit)->vtlog(level, data->now, component, format, vac);
+    (*data->logit)->vtlog(level, &now, component, format, vac);
     va_end(vac);
   }
   va_end(va);
@@ -185,10 +183,11 @@ MultiLogger::log(LogLevel level, const char *component, const char *format, ...)
 void
 MultiLogger::log_debug(const char *component, const char *format, ...)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   printf("MultiLogger::log_debug() called\n");
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   va_list va;
   va_start(va, format);
@@ -207,9 +206,10 @@ MultiLogger::log_debug(const char *component, const char *format, ...)
 void
 MultiLogger::log_info(const char *component, const char *format, ...)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   va_list va;
   va_start(va, format);
@@ -228,9 +228,10 @@ MultiLogger::log_info(const char *component, const char *format, ...)
 void
 MultiLogger::log_warn(const char *component, const char *format, ...)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   va_list va;
   va_start(va, format);
@@ -249,6 +250,8 @@ MultiLogger::log_warn(const char *component, const char *format, ...)
 void
 MultiLogger::log_error(const char *component, const char *format, ...)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
 
@@ -269,9 +272,10 @@ MultiLogger::log_error(const char *component, const char *format, ...)
 void
 MultiLogger::log(LogLevel level, const char *component, Exception &e)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
     (*data->logit)->log(level, component, e);
@@ -284,12 +288,13 @@ MultiLogger::log(LogLevel level, const char *component, Exception &e)
 void
 MultiLogger::log_debug(const char *component, Exception &e)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
-    (*data->logit)->tlog_debug(data->now, component, e);
+    (*data->logit)->tlog_debug(&now, component, e);
   }
 
   Thread::set_cancel_state(data->old_state);
@@ -299,12 +304,13 @@ MultiLogger::log_debug(const char *component, Exception &e)
 void
 MultiLogger::log_info(const char *component, Exception &e)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
-    (*data->logit)->tlog_info(data->now, component, e);
+    (*data->logit)->tlog_info(&now, component, e);
   }
   Thread::set_cancel_state(data->old_state);
   data->mutex->unlock();
@@ -314,12 +320,13 @@ MultiLogger::log_info(const char *component, Exception &e)
 void
 MultiLogger::log_warn(const char *component, Exception &e)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
-    (*data->logit)->tlog_warn(data->now, component, e);
+    (*data->logit)->tlog_warn(&now, component, e);
   }
   Thread::set_cancel_state(data->old_state);
   data->mutex->unlock();
@@ -329,12 +336,13 @@ MultiLogger::log_warn(const char *component, Exception &e)
 void
 MultiLogger::log_error(const char *component, Exception &e)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
-    (*data->logit)->tlog_error(data->now, component, e);
+    (*data->logit)->tlog_error(&now, component, e);
   }
   Thread::set_cancel_state(data->old_state);
   data->mutex->unlock();
@@ -345,9 +353,10 @@ void
 MultiLogger::vlog(LogLevel level,
 		  const char *component, const char *format, va_list va)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
     va_list vac;
@@ -363,14 +372,15 @@ MultiLogger::vlog(LogLevel level,
 void
 MultiLogger::vlog_debug(const char *component, const char *format, va_list va)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
     va_list vac;
     va_copy(vac, va);
-    (*data->logit)->vtlog_debug(data->now, component, format, vac);
+    (*data->logit)->vtlog_debug(&now, component, format, vac);
     va_end(vac);
   }
   Thread::set_cancel_state(data->old_state);
@@ -381,14 +391,15 @@ MultiLogger::vlog_debug(const char *component, const char *format, va_list va)
 void
 MultiLogger::vlog_info(const char *component, const char *format, va_list va)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
     va_list vac;
     va_copy(vac, va);
-    (*data->logit)->vtlog_info(data->now, component, format, vac);
+    (*data->logit)->vtlog_info(&now, component, format, vac);
     va_end(vac);
   }
   Thread::set_cancel_state(data->old_state);
@@ -399,14 +410,15 @@ MultiLogger::vlog_info(const char *component, const char *format, va_list va)
 void
 MultiLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
     va_list vac;
     va_copy(vac, va);
-    (*data->logit)->vtlog_warn(data->now, component, format, vac);
+    (*data->logit)->vtlog_warn(&now, component, format, vac);
     va_end(vac);
   }
   Thread::set_cancel_state(data->old_state);
@@ -417,14 +429,15 @@ MultiLogger::vlog_warn(const char *component, const char *format, va_list va)
 void
 MultiLogger::vlog_error(const char *component, const char *format, va_list va)
 {
+  struct timeval now;
+  gettimeofday(&now, NULL);
   data->mutex->lock();
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
-  gettimeofday(data->now, NULL);
 
   for (data->logit = data->loggers.begin(); data->logit != data->loggers.end(); ++data->logit) {
     va_list vac;
     va_copy(vac, va);
-    (*data->logit)->vtlog_error(data->now, component, format, vac);
+    (*data->logit)->vtlog_error(&now, component, format, vac);
     va_end(vac);
   }
   Thread::set_cancel_state(data->old_state);

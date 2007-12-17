@@ -76,7 +76,6 @@ class FileLogger : public Logger
 			   const char *format, va_list va);
 
  private:
-  struct timeval *now;
   struct tm *now_s;
 
   File       *log_file;
