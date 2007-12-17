@@ -31,7 +31,7 @@
 #include <cams/camera.h>
 #include <cams/cameracontrol.h>
 
-#include <dc1394/control.h>
+#include <dc1394/dc1394.h>
 
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS

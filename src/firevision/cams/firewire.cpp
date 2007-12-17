@@ -104,7 +104,7 @@ FirewireCamera::open()
   dc1394camera_list_t *list;
   dc1394error_t        err;
 
-  if ( dc1394_enumerate_cameras(_dc1394, &list) != DC1394_SUCCESS ) {
+  if ( dc1394_camera_enumerate(_dc1394, &list) != DC1394_SUCCESS ) {
     throw Exception("Could not enumerate cameras");
   }
 
@@ -133,6 +133,19 @@ FirewireCamera::open()
 	throw Exception("Could not find camera with model %s", _model);
       }
     }
+
+    if ( iso_mode_enabled() ) {
+      dc1394_video_set_transmission(_camera, DC1394_OFF);
+    }
+    // These methods would cleanup the mess left behind by other processes,
+    // but as of now (libdc1394 2.0.0 rc9) this is not supported for the Juju stack
+    dc1394_iso_release_bandwidth(_camera, INT_MAX);
+    for (int channel = 0; channel < 64; ++channel) {
+      dc1394_iso_release_channel(_camera, channel);
+    }
+    // This is rude, but for now needed (Juju)...
+    dc1394_reset_bus(_camera);
+
     if (_camera->bmode_capable > 0) {
       dc1394_video_set_operation_mode(_camera, DC1394_OPERATION_MODE_1394B);
     }
@@ -140,15 +153,15 @@ FirewireCamera::open()
          ((err = dc1394_video_set_iso_speed(_camera, _speed)) != DC1394_SUCCESS) ||
          ((err = dc1394_video_set_mode(_camera, _mode)) != DC1394_SUCCESS) ||
          ((err = dc1394_video_set_framerate(_camera, _framerate)) != DC1394_SUCCESS) ) {
-      throw Exception("Setting up the camera failed: %s", dc1394_error_strings[err]);
+      throw Exception("Setting up the camera failed: %s", dc1394_error_get_string(err));
     }
 
     if (_format7_mode_enabled) {
       if ( ((err = dc1394_format7_set_image_size(_camera, _mode, _format7_width, _format7_height)) != DC1394_SUCCESS) ||
            ((err = dc1394_format7_set_image_position(_camera, _mode, _format7_startx, _format7_starty)) != DC1394_SUCCESS) ||
            ((err = dc1394_format7_set_color_coding(_camera, _mode, _format7_coding)) != DC1394_SUCCESS) ||
-           ((err = dc1394_format7_set_byte_per_packet(_camera, _mode, _format7_bpp)) != DC1394_SUCCESS) ) {
-        throw Exception("Could not setup Format7 parameters: %s", dc1394_error_strings[err]);
+           ((err = dc1394_format7_set_packet_size(_camera, _mode, _format7_bpp)) != DC1394_SUCCESS) ) {
+        throw Exception("Could not setup Format7 parameters: %s", dc1394_error_get_string(err));
       }
     }
 
@@ -181,13 +194,13 @@ FirewireCamera::start()
   dc1394error_t err;
   if ( (err = dc1394_capture_setup(_camera, _num_buffers, DC1394_CAPTURE_FLAGS_DEFAULT )) != DC1394_SUCCESS ) {
     dc1394_capture_stop(_camera);
-    throw Exception("FirewireCamera: Could not setup capture (%s)", dc1394_error_strings[err]);
+    throw Exception("FirewireCamera: Could not setup capture (%s)", dc1394_error_get_string(err));
   }
 
   if ( (err = dc1394_video_set_transmission(_camera, DC1394_ON)) != DC1394_SUCCESS) {
     // cout  << cred << "Could not start video transmission" << cnormal << endl;
     dc1394_capture_stop(_camera);
-    throw Exception("FirewireCamera: Could not start ISO transmission (%s)", dc1394_error_strings[err]);
+    throw Exception("FirewireCamera: Could not start ISO transmission (%s)", dc1394_error_get_string(err));
   }
 				
   // Give it some time to be ready
@@ -208,14 +221,14 @@ FirewireCamera::stop()
 
 /** Check if ISO mode is enabled.
  * @return true if isochronous transfer is running, false otherwise.
+ * @exception Exception thrown if the transmission status could not be determined
  */
 bool
 FirewireCamera::iso_mode_enabled()
 {
   dc1394switch_t status;
   if ( dc1394_video_get_transmission(_camera, &status) != DC1394_SUCCESS) {
-    // cout  << cred << "Could not get transmission status" << cnormal << endl;
-    return false;
+    throw Exception("Could not get transmission status");
   } else {
     return (status == DC1394_ON);
   }
@@ -226,7 +239,7 @@ void
 FirewireCamera::print_info()
 {
   if (_opened) {
-    dc1394_print_camera_info( _camera );
+    dc1394_camera_print_info( _camera, stdout );
   }
 }
 
@@ -278,7 +291,7 @@ FirewireCamera::capture()
   if (DC1394_SUCCESS != (err = dc1394_capture_dequeue(_camera, DC1394_CAPTURE_POLICY_WAIT, &_frame))) {
     _valid_frame_received = false;
     throw CaptureException("FireWireCamera(%s): capture failed (%s)",
-			   _model, dc1394_error_strings[err]);
+			   _model, dc1394_error_get_string(err));
   } else {
     _valid_frame_received = true;
   }
@@ -348,7 +361,7 @@ FirewireCamera::pixel_width()
       dc1394error_t err;
       if ((err = dc1394_get_image_size_from_video_mode(_camera, _mode, &width, &height)) != DC1394_SUCCESS) {
 	throw Exception("FirewireCamera(%s): cannot get width (%s)", _model,
-			dc1394_error_strings[err]);
+			dc1394_error_get_string(err));
       }
       return width;
     }
@@ -369,7 +382,7 @@ FirewireCamera::pixel_height()
       dc1394error_t err;
       if ((err = dc1394_get_image_size_from_video_mode(_camera, _mode, &width, &height)) != DC1394_SUCCESS) {
 	throw Exception("FirewireCamera(%s): cannot get width (%s)", _model,
-			dc1394_error_strings[err]);
+			dc1394_error_get_string(err));
       }
       return height;
     }
@@ -483,7 +496,7 @@ FirewireCamera::set_auto_focus(bool enabled)
     _auto_focus = enabled;
   } else {
     throw Exception("FirewireCamera(%s): Setting auto focus failed (%s)", _model,
-		    dc1394_error_strings[err]);
+		    dc1394_error_get_string(err));
   }
 }
 
@@ -805,14 +818,14 @@ FirewireCamera::print_available_fwcams()
   dc1394_t *dc1394 = dc1394_new();
   dc1394camera_list_t *list;
   dc1394error_t        err;
-  if ( (err = dc1394_enumerate_cameras(dc1394, &list)) != DC1394_SUCCESS ) {
-    throw Exception("Could not enumerate cameras: %s", dc1394_error_strings[err]);
+  if ( (err = dc1394_camera_enumerate(dc1394, &list)) != DC1394_SUCCESS ) {
+    throw Exception("Could not enumerate cameras: %s", dc1394_error_get_string(err));
   }
 
   if (list->num > 0) {
     for (unsigned int i = 0; i < list->num; ++i) {
       dc1394camera_t *tmpcam = dc1394_camera_new(dc1394, list->ids[i].guid);
-      dc1394_print_camera_info(tmpcam);
+      dc1394_camera_print_info(tmpcam, stdout);
       dc1394_camera_free(tmpcam);
     }
   } else {
