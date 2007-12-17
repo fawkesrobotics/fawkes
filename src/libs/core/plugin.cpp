@@ -3,8 +3,8 @@
  *  plugin.cpp - Interface for a Fawkes plugin, some method have a base
  *               implementation that can be overridden in special situations.
  *
- *  Generated: Sat Sep 16 17:04:55 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Sep 16 17:04:55 2006
+ *  Copyright  2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -107,14 +107,12 @@
 
 
 /** Constructor.
- * Pass the appropriate plugin type and the name of your plugin to this ctor.
- * @param plugin_type type of the plugin
+ * Pass the name of your plugin to this ctor.
  * @param plugin_name name of the plugin
  */
-Plugin::Plugin(PluginType plugin_type, const char *plugin_name)
+Plugin::Plugin(const char *plugin_name)
   : thread_list(plugin_name)
 {
-  _type = plugin_type;
   _name_alloc = strdup(plugin_name);
   if ( ! _name_alloc ) {
     // We do not want to throw an exception here
@@ -161,15 +159,6 @@ Plugin::threads()
   return thread_list;
 }
 
-
-/** Get the type of the plugin.
- * @return type of the plugin
- */
-Plugin::PluginType
-Plugin::type() const
-{
-  return _type;
-}
 
 /** Get the name of the plugin.
  * @return name of the plugin

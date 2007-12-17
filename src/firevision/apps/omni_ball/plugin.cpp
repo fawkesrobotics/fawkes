@@ -41,7 +41,7 @@
  * Just adds the pipeline thread to the list of threads
  */
 FvOmniBallPlugin::FvOmniBallPlugin()
-  : Plugin(Plugin::VISION, "fvomniball")
+  : Plugin("fvomniball")
 {
   thread_list.push_back( new FvOmniBallPipelineThread() );
 }

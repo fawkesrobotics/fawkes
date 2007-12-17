@@ -40,7 +40,7 @@
  * Just adds the pipeline thread to the list of threads
  */
 FvFrontPlugin::FvFrontPlugin()
-  : Plugin(Plugin::VISION, "fvfront")
+  : Plugin("fvfront")
 {
   thread_list.push_back( new FvFrontPipelineThread() );
 }

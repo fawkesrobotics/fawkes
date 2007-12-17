@@ -38,7 +38,7 @@
 
 /** Constructor. */
 FvRetrieverPlugin::FvRetrieverPlugin()
-  : Plugin(Plugin::VISION, "fvretriever")
+  : Plugin("fvretriever")
 {
   thread_list.push_back(new FvRetrieverThread());
 }

@@ -41,7 +41,7 @@
 
 /** Constructor. */
 FvBasePlugin::FvBasePlugin()
-  : Plugin(Plugin::VISION, "fvbase")
+  : Plugin("fvbase")
 {
   // printf("ExamplePlugin constructor called\n");
   thread_list.push_back(new FvBaseThread());

@@ -38,7 +38,7 @@
 
 /** Constructor. */
 NavigatorPlugin::NavigatorPlugin()
-  : Plugin(Plugin::MOTION, "navigator_plugin")
+  : Plugin("navigator_plugin")
 {
   NavigatorThread *navigator_thread = new NavigatorThread();
 

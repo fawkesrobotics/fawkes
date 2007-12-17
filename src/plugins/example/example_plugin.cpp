@@ -44,7 +44,7 @@
 
 /** Constructor. */
 ExamplePlugin::ExamplePlugin()
-  : Plugin(Plugin::MOTION, "example")
+  : Plugin("example")
 {
   // printf("ExamplePlugin constructor called\n");
   thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,

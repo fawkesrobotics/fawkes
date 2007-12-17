@@ -37,7 +37,7 @@
 
 /** Constructor. */
 KickerPlugin::KickerPlugin()
-  : Plugin(Plugin::MOTION, "kicker_plugin")
+  : Plugin("kicker_plugin")
 {
   thread_list.push_back(new KickerThread());
 }

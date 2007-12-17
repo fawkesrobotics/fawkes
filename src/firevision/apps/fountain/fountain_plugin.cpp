@@ -39,7 +39,7 @@
 
 /** Constructor. */
 FvFountainPlugin::FvFountainPlugin()
-  : Plugin(Plugin::VISION, "fvfountain")
+  : Plugin("fvfountain")
 {
   thread_list.push_back(new FountainThread());
 }

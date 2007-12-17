@@ -40,7 +40,7 @@
 
 /** Constructor. */
 WorldModelPlugin::WorldModelPlugin()
-  : Plugin(Plugin::MOTION, "worldmodel")
+  : Plugin("worldmodel")
 {
   thread_list.push_back(new WorldModelThread());
   thread_list.push_back(new WorldModelNetworkThread());

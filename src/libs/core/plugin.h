@@ -2,8 +2,8 @@
 /***************************************************************************
  *  plugin.h - Interface for a Fawkes plugin
  *
- *  Generated: Wed Aug 23 15:19:13 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Aug 23 15:19:13 2006
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -33,21 +33,10 @@
 class Plugin {
  public:
 
-  /** Type of the plugin */
-  typedef enum {
-    WORLDMODEL,		/**< world model plugin */
-    MOTION,		/**< motion plugin */
-    VISION,		/**< vision plugin */
-    AGENT,		/**< agent plugin */
-    SKILLER		/**< skill plugin */
-  } PluginType;
-
-  Plugin(PluginType plugin_type, const char *plugin_name);
+  Plugin(const char *plugin_name);
   virtual ~Plugin();
 
-  virtual PluginType    type() const;
   virtual const char *  name() const;
-
   ThreadList &  threads();
 
   virtual bool          persistent();
@@ -65,8 +54,6 @@ class Plugin {
  private:
   char       *_name_alloc;
   const char *_name;
-  PluginType  _type;
-
 };
 
 typedef Plugin *  (* PluginFactoryFunc)  (void);
