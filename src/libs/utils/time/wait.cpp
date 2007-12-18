@@ -54,6 +54,7 @@ TimeWait::TimeWait(Clock *clock, long int desired_loop_time)
   __desired_loop_time = desired_loop_time;
   __clock = clock;
   __until = new Time();
+  __now = new Time();
 }
 
 
@@ -61,6 +62,7 @@ TimeWait::TimeWait(Clock *clock, long int desired_loop_time)
 TimeWait::~TimeWait()
 {
   delete __until;
+  delete __now;
 }
 
 
@@ -77,16 +79,15 @@ TimeWait::mark_start()
 void
 TimeWait::wait()
 {
-  Time now;
-  __clock->get_time(&now);
+  __clock->get_time(__now);
   // we want to release run status at least shortly
   usleep(0);
-  long int remaining_usec = (*__until - now).in_usec();
-  //printf("Waiting for %lu usec\n", remaining_usec);
+
+  long int remaining_usec = (*__until - *__now).in_usec();
   while ( remaining_usec > 0 ) {
     usleep(remaining_usec);
-    __clock->get_time(&now);
-    remaining_usec = (*__until - now).in_usec();
+    __clock->get_time(__now);
+    remaining_usec = (*__until - *__now).in_usec();
   }
 }
 

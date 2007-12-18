@@ -45,6 +45,7 @@ class TimeWait {
  private:
   Clock *__clock;
   Time  *__until;
+  Time  *__now;
   long int __desired_loop_time;
 };
 
