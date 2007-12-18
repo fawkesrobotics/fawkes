@@ -36,7 +36,7 @@ class TestPlugin : public Plugin {
  public:
   /** Constructor, prints out info message
    */
-  TestPlugin() : Plugin(MOTION, "TestPlugin")
+  TestPlugin() : Plugin("TestPlugin")
   {
     printf("TestPlugin constructor called\n");
   }

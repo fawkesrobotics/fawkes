@@ -36,6 +36,9 @@ LIBS_qa_utils_liblogger = utils
 OBJS_qa_utils_time = qa_time.o
 LIBS_qa_utils_time = utils
 
+OBJS_qa_utils_timebug = qa_timebug.o
+LIBS_qa_utils_timebug = core utils
+
 OBJS_qa_utils_angle = qa_angle.o
 LIBS_qa_utils_angle = utils
 
@@ -50,6 +53,7 @@ OBJS_all =	$(OBJS_test_plugin)			\
 		$(OBJS_qa_utils_logger)			\
 		$(OBJS_qa_utils_liblogger)		\
 		$(OBJS_qa_utils_time)			\
+		$(OBJS_qa_utils_timebug)		\
 		$(OBJS_qa_utils_angle)
 
 BINS_all =	$(BINDIR)/qa_utils_plugin		\
@@ -62,6 +66,7 @@ BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_logger		\
 		$(BINDIR)/qa_utils_liblogger		\
 		$(BINDIR)/qa_utils_time			\
+		$(BINDIR)/qa_utils_timebug		\
 		$(BINDIR)/qa_utils_angle
 
 PLUGINS_all =	$(PLUGINDIR)/test_plugin.so

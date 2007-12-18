@@ -21,12 +21,10 @@
 
 BASEDIR = ../../..
 
-CFLAGS = -g
-
 ifneq ($(realpath /usr/include/magic.h),)
-HAVE_LIBMAGIC = 1
+  HAVE_LIBMAGIC = 1
 else
-ERROR_TARGETS += error_libmagic
+  ERROR_TARGETS += error_libmagic
 endif
 
 ifneq ($(SRCDIR),)
@@ -42,7 +40,7 @@ OBJS_libutils =	$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(real
 
 OBJS_all = $(OBJS_libutils)
 ifeq ($(HAVE_LIBMAGIC),1)
-LIBS_all  = $(LIBDIR)/libutils.so
+  LIBS_all  = $(LIBDIR)/libutils.so
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

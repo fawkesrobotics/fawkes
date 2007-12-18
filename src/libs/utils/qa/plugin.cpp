@@ -42,7 +42,6 @@ bool
 test_plugin(Plugin *p)
 {	
   cout << "Plugin name: " << p->name() << endl;
-  cout << "Plugin type: " << p->type() << endl;
 
   return true;
 }
