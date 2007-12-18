@@ -35,6 +35,7 @@
 #include <errno.h>
 #include <cstring>
 #include <limits.h>
+#include <cstdlib>
 
 /** @class SharedMemoryHeader <utils/ipc/shm.h>
  * Interface for shared memory header.
@@ -1264,6 +1265,7 @@ SharedMemory::SharedMemoryIterator::~SharedMemoryIterator()
     shmdt(__shm_buf);
     __shm_buf = (void *)-1;
   }
+  if ( __magic_token ) ::free(__magic_token);
 }
 
 
