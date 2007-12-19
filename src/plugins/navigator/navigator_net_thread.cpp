@@ -76,6 +76,7 @@ NavigatorNetworkThread::NavigatorNetworkThread(NavigatorThread *navigator_thread
   motor_interface = NULL;
   navigator_interface = NULL;
   joystick_control = NULL;
+  sending_pause = 0.;
 }
 
 
@@ -162,6 +163,12 @@ NavigatorNetworkThread::init()
       throw;
     }
 
+  sending_pause = config->get_float("/navigator/network/sending_pause");
+  if(sending_pause < 0)
+    {
+      throw Exception("Navigator sending pause is negative");
+    }
+  sending_time = clock->now();
 
   unsigned int port = 0;
   try
@@ -239,6 +246,7 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
       if(u->sub_type_points_and_lines)
         {
           connected_points_and_lines_clients.push_back_locked(msg->clid());
+          logger->log_debug("NavigatorNetworkThread", "Client %u subscribed as receiver of points and lines", connected_control_client);
         }
 
       if(u->sub_type_odometry)
@@ -440,96 +448,104 @@ NavigatorNetworkThread::loop()
     }
   inbound_queue.unlock();
 
-  for(std::list<unsigned int>::iterator iterator = connected_points_and_lines_clients.begin();
-      iterator != connected_points_and_lines_clients.end();
-      iterator++ )
+  //wait some time to save resources
+  if(clock->elapsed(&sending_time) > sending_pause)
     {
-      //send points
-      /*
-      std::list<NPoint *> *points = navigator_thread->get_surface_points();
-      NavigatorNodesListMessage *nodes_list_msg = new NavigatorNodesListMessage(points);
-      fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_NODES, nodes_list_msg);
-      //   logger->log_info("NavigatorNetworkThread", "send points; connected clients: %i", connected_points_and_lines_clients.size());
-      */
-      
-      //send obstacles
-      std::list<NPoint *> *points = navigator_thread->get_surface_points();
-      // std::list<Obstacle *> *obstacles = navigator_thread->get_obstacles();
-      NavigatorObstaclesListMessage *obstacles_list_msg = new NavigatorObstaclesListMessage(points);
-      fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_OBSTACLES_LIST, obstacles_list_msg);
-      //   logger->log_info("NavigatorNetworkThread", "send points; connected clients: %i", connected_points_and_lines_clients.size());
+      sending_time = clock->now();
 
-      //send lines
-      std::list<NLine *> *lines = navigator_thread->get_surface_lines();
-      NavigatorLinesListMessage *lines_list_msg = new NavigatorLinesListMessage(lines);
-      fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_LINES, lines_list_msg);
-      //   logger->log_info("NavigatorNetworkThread", "send lines; connected clients: %i", connected_points_and_lines_clients.size());
-
-      //send path
-      std::list<NPoint *> *path_points = navigator_thread->get_path_points();
-      NavigatorPathListMessage *path_list_msg = new NavigatorPathListMessage(path_points);
-      fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_PATH, path_list_msg);
-
-      //send target
-      NPoint* target = navigator_thread->getTargetPoint();
-      navigator_target_message_t *target_msg= (navigator_target_message_t *)malloc(sizeof(navigator_target_message_t));
-      target_msg->x = target->x;
-      target_msg->y = target->y;
-      fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_TARGET, target_msg, sizeof(navigator_target_message_t));
-      delete target;
-
-      //delete points
-      for(std::list<NPoint *>::iterator point_iterator = points->
-          begin();
-          point_iterator != points->end();
-          point_iterator++)
+      for(std::list<unsigned int>::iterator iterator = connected_points_and_lines_clients.begin();
+          iterator != connected_points_and_lines_clients.end();
+          iterator++ )
         {
-          delete *point_iterator;
-        }
-      points->clear();
 
-      //delete lines
-      for(std::list<NLine *>
-          ::iterator line_iterator = lines->begin();
-          line_iterator != lines->end();
-          line_iterator++)
+          //send points
+          /*
+          std::list<NPoint *> *points = navigator_thread->get_surface_points();
+          NavigatorNodesListMessage *nodes_list_msg = new NavigatorNodesListMessage(points);
+          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_NODES, nodes_list_msg);
+          //   logger->log_info("NavigatorNetworkThread", "send points; connected clients: %i", connected_points_and_lines_clients.size());
+          */
+
+          //send obstacles
+          std::list<NPoint *> *points = navigator_thread->get_surface_points();
+          // std::list<Obstacle *> *obstacles = navigator_thread->get_obstacles();
+          NavigatorObstaclesListMessage *obstacles_list_msg = new NavigatorObstaclesListMessage(points);
+          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_OBSTACLES_LIST, obstacles_list_msg);
+          //   logger->log_info("NavigatorNetworkThread", "send points; connected clients: %i", connected_points_and_lines_clients.size());
+
+          //send lines
+          std::list<NLine *> *lines = navigator_thread->get_surface_lines();
+          NavigatorLinesListMessage *lines_list_msg = new NavigatorLinesListMessage(lines);
+          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_LINES, lines_list_msg);
+          //   logger->log_info("NavigatorNetworkThread", "send lines; connected clients: %i", connected_points_and_lines_clients.size());
+
+          //send path
+          std::list<NPoint *> *path_points = navigator_thread->get_path_points();
+          NavigatorPathListMessage *path_list_msg = new NavigatorPathListMessage(path_points);
+          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_PATH, path_list_msg);
+
+          //send target
+          NPoint* target = navigator_thread->getTargetPoint();
+          navigator_target_message_t *target_msg= (navigator_target_message_t *)malloc(sizeof(navigator_target_message_t));
+          target_msg->x = target->x;
+          target_msg->y = target->y;
+          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_TARGET, target_msg, sizeof(navigator_target_message_t));
+          delete target;
+
+          //delete points
+          for(std::list<NPoint *>::iterator point_iterator = points->
+              begin();
+              point_iterator != points->end();
+              point_iterator++)
+            {
+              delete *point_iterator;
+            }
+          points->clear();
+
+          //delete lines
+          for(std::list<NLine *>
+              ::iterator line_iterator = lines->begin();
+              line_iterator != lines->end();
+              line_iterator++)
+            {
+              delete *line_iterator;
+            }
+          lines->clear();
+
+          //delete path_points
+          for(std::list<NPoint *>
+              ::iterator path_iterator = path_points->begin();
+              path_iterator != path_points->end();
+              path_iterator++)
+            {
+              delete *path_iterator;
+            }
+          path_points->clear();
+        }
+
+
+      for(std::list<unsigned int>::iterator iterator = connected_odometry_clients.begin();
+          iterator != connected_odometry_clients.end();
+          iterator++ )
         {
-          delete *line_iterator;
+          navigator_odometry_message_t *odometry_msg= (navigator_odometry_message_t *)malloc(sizeof(navigator_odometry_message_t));
+
+          odometry_msg->path_length = motor_interface->odometry_path_length();
+          odometry_msg->position_x = motor_interface->odometry_position_x();
+          odometry_msg->position_y = motor_interface->odometry_position_y();
+          odometry_msg->orientation = motor_interface->odometry_orientation();
+          odometry_msg->rpm_left = motor_interface->left_rpm();
+          odometry_msg->rpm_rear = motor_interface->rear_rpm();
+          odometry_msg->rpm_right = motor_interface->right_rpm();
+          odometry_msg->velocity_x = motor_interface->vx();
+          odometry_msg->velocity_y = motor_interface->vy();
+          odometry_msg->velocity_rotation = motor_interface->omega();
+
+
+          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_ODOMETRY, odometry_msg, sizeof(navigator_odometry_message_t));
         }
-      lines->clear();
 
-      //delete path_points
-      for(std::list<NPoint *>
-          ::iterator path_iterator = path_points->begin();
-          path_iterator != path_points->end();
-          path_iterator++)
-        {
-          delete *path_iterator;
-        }
-      path_points->clear();
-    }
-
-
-  for(std::list<unsigned int>::iterator iterator = connected_odometry_clients.begin();
-      iterator != connected_odometry_clients.end();
-      iterator++ )
-    {
-      navigator_odometry_message_t *odometry_msg= (navigator_odometry_message_t *)malloc(sizeof(navigator_odometry_message_t));
-
-      odometry_msg->path_length = motor_interface->odometry_path_length();
-      odometry_msg->position_x = motor_interface->odometry_position_x();
-      odometry_msg->position_y = motor_interface->odometry_position_y();
-      odometry_msg->orientation = motor_interface->odometry_orientation();
-      odometry_msg->rpm_left = motor_interface->left_rpm();
-      odometry_msg->rpm_rear = motor_interface->rear_rpm();
-      odometry_msg->rpm_right = motor_interface->right_rpm();
-      odometry_msg->velocity_x = motor_interface->vx();
-      odometry_msg->velocity_y = motor_interface->vy();
-      odometry_msg->velocity_rotation = motor_interface->omega();
-      
-
-      fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_ODOMETRY, odometry_msg, sizeof(navigator_odometry_message_t));
-    }
+    }//if(send_modulo_counter...
 
   if ( datagram_socket->available() )
     {

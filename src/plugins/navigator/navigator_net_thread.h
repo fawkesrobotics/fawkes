@@ -93,6 +93,9 @@ class NavigatorNetworkThread : public Thread, public LoggingAspect, public Fawke
 
   LockQueue< FawkesNetworkMessage * > inbound_queue;
 
+  float sending_pause;
+  Time sending_time;
+
   DatagramSocket *datagram_socket;
   bool            blocked_by_udp;
   Time            last_udp_msg_time;
