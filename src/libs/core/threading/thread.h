@@ -140,7 +140,6 @@ class Thread {
   Barrier       *__barrier;
 
   ReadWriteLock *__finalize_sync_lock;
-  Mutex         *__finalize_mutex;
 
   bool           __started;
   bool           __cancelled;

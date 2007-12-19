@@ -228,7 +228,6 @@ Thread::__constructor(const char *name, OpMode op_mode)
   __cancelled   = false;
   __delete_on_exit = false;
 
-  __finalize_mutex = new Mutex();
   __finalize_sync_lock = NULL;
   loop_mutex = new Mutex();
   finalize_prepared = false;
@@ -241,17 +240,10 @@ Thread::__constructor(const char *name, OpMode op_mode)
 Thread::~Thread()
 {
   delete __sleep_condition;
-  __sleep_condition = NULL;
   delete __sleep_mutex;
-  __sleep_mutex = NULL;
   delete loop_mutex;
-  loop_mutex = NULL;
-  delete __finalize_mutex;
-  __finalize_mutex = NULL;
   free(__name);
-  __name = NULL;
   delete __notification_listeners;
-  __notification_listeners = NULL;
 }
 
 
@@ -348,10 +340,10 @@ Thread::prepare_finalize()
   if ( finalize_prepared ) {
     throw CannotFinalizeThreadException("prepare_finalize() has already been called");
   }
-  __finalize_mutex->lock();
+  loop_mutex->lock();
   finalize_prepared = true;
-  __finalize_mutex->unlock();
   bool prepared = prepare_finalize_user();
+  loop_mutex->unlock();
   return prepared;
 }
 
@@ -443,9 +435,9 @@ Thread::cancel_finalize()
   if ( ! __started ) {
     throw CannotFinalizeThreadException("Cannot cancel finalize, thread has not been started");
   }
-  __finalize_mutex->lock();
+  loop_mutex->lock();
   finalize_prepared = false;
-  __finalize_mutex->unlock();
+  loop_mutex->unlock();
 }
 
 
@@ -545,8 +537,6 @@ Thread::join()
 
   // Force unlock of these mutexes, otherwise the same bad things as for the sleep
   // mutex above could happen!
-  __finalize_mutex->try_lock();
-  __finalize_mutex->unlock();
   loop_mutex->try_lock();
   loop_mutex->unlock();
 }
@@ -718,16 +708,11 @@ Thread::run()
 
     if ( __finalize_sync_lock )  __finalize_sync_lock->lock_for_read();
 
-    bool run_loop;
-    __finalize_mutex->lock();
-    run_loop = ! finalize_prepared;
-    __finalize_mutex->unlock();
-
-    if ( run_loop ) {
-      loop_mutex->lock();
+    loop_mutex->lock();
+    if ( ! finalize_prepared ) {
       loop();
-      loop_mutex->unlock();
     }
+    loop_mutex->unlock();
 
     if ( __finalize_sync_lock )  __finalize_sync_lock->unlock();
 
