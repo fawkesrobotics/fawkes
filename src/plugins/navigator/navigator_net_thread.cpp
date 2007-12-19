@@ -37,8 +37,6 @@
 #include <interfaces/kicker.h>
 #include <plugins/navigator/navigator_thread.h>
 
-#include <netcomm/socket/datagram.h>
-
 #include <cstdlib>
 #include <unistd.h>
 #include <algorithm>
@@ -69,8 +67,6 @@ NavigatorNetworkThread::NavigatorNetworkThread(NavigatorThread *navigator_thread
 
   last_motor_control_thread_id = 0;
   last_motor_control_thread_name = NULL;
-
-  blocked_by_udp = false;
 
   kicker_interface = NULL;
   motor_interface = NULL;
@@ -170,47 +166,9 @@ NavigatorNetworkThread::init()
     }
   sending_time = clock->now();
 
-  unsigned int port = 0;
-  try
-    {
-      port = config->get_uint("/navigator/network/joystick_port");
-      if ( port > 0xFFFF )
-        {
-          throw Exception("Navigator joystick port out of range");
-        }
-    }
-  catch (Exception &e)
-    {
-      throw;
-    }
-
-  try
-    {
-      datagram_socket = new DatagramSocket(0.1);
-      datagram_socket->bind(port);
-    }
-  catch (Exception &e)
-    {
-      e.append("Could not create navigator joystick socket");
-      throw e;
-    }
 
   // logger->log_debug("NavigatorNetworkThread", "Adding network handler");
   fnethub->add_handler( this );
-}
-
-void
-NavigatorNetworkThread::process_udp_message(void *buf, size_t buflen)
-{
-  fawkes_message_t *fmsg = (fawkes_message_t *)buf;
-  if ( ntohs(fmsg->header.cid) != FAWKES_CID_NAVIGATOR_PLUGIN )
-    {
-      logger->log_warn(name(), "Received message for other component: %u (ignored)", ntohs(fmsg->header.cid));
-      return;
-    }
-
-  FawkesNetworkMessage *m = new FawkesNetworkMessage(*fmsg);
-  inbound_queue.push_locked(m);
 }
 
 
@@ -254,7 +212,7 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
           connected_odometry_clients.push_back_locked(msg->clid());
         }
 
-      if(u->sub_type_motor_control && connected_control_client == 0 && ! blocked_by_udp)
+      if(u->sub_type_motor_control && connected_control_client == 0)
         {
           connected_control_client = msg->clid();
           motor_interface->read();
@@ -274,16 +232,16 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
 
           logger->log_debug("NavigatorNetworkThread", "Client %u subscribed as motor controller", connected_control_client);
         }
-      else if(u->sub_type_navigator_control && connected_control_client == 0 && ! blocked_by_udp)
+      else if(u->sub_type_navigator_control && connected_control_client == 0)
         {
           connected_control_client = msg->clid();
 
           logger->log_debug("NavigatorNetworkThread", "Client %u subscribed as navigator controller", connected_control_client);
         }
-      else if((u->sub_type_motor_control || u->sub_type_navigator_control) && (connected_control_client != 0 || blocked_by_udp) )
+      else if((u->sub_type_motor_control || u->sub_type_navigator_control) && connected_control_client != 0 )
         {
-          logger->log_warn("NavigatorNetworkThread", "Client %u tried to subscribe but there is already another subscriber (%s)",
-                           msg->clid(), blocked_by_udp ? "UDP" : "Fawkes");
+          logger->log_warn("NavigatorNetworkThread", "Client %u tried to subscribe but there is already another subscriber (Fawkes)",
+                           msg->clid());
           fnethub->send(msg->clid(),
                         FAWKES_CID_NAVIGATOR_PLUGIN,
                         NAVIGATOR_MSGTYPE_CONTROL_SUBERR);
@@ -545,52 +503,7 @@ NavigatorNetworkThread::loop()
           fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_ODOMETRY, odometry_msg, sizeof(navigator_odometry_message_t));
         }
 
-    }//if(send_modulo_counter...
-
-  if ( datagram_socket->available() )
-    {
-      // there is data that can be read from the socket
-      udp_client_addrlen = sizeof(udp_client_addr);
-      try
-        {
-          unsigned int i = 0;
-          struct sockaddr_in addr;
-          socklen_t addr_len = sizeof(addr);
-          size_t buflen = 0;
-          while ( (++i < 10) &&
-                  ((buflen = datagram_socket->recv(udp_tmpbuf, sizeof(udp_tmpbuf),
-                                                   (struct sockaddr *)&addr,
-                                                   &addr_len)) > 0) )
-            {
-              if ( connected_control_client == 0 )
-                {
-                  if ( blocked_by_udp)
-                    {
-                      // already received UDP traffic, make sure it came from the very same host!
-                      if ( addr.sin_addr.s_addr == udp_client_addr.sin_addr.s_addr )
-                        {
-                          // accepted, process
-                          process_udp_message(udp_tmpbuf, buflen);
-                        }
-                      else
-                        {
-                          char tmp[INET_ADDRSTRLEN];
-                          inet_ntop(AF_INET, &(addr.sin_addr), tmp, INET_ADDRSTRLEN);
-                          logger->log_warn(name(), "Received UDP message from non-subscribed sender (%s)", tmp);
-                        }
-                    }
-                  blocked_by_udp = true;
-
-                } // else ignored, there is a subscriber on the Fawkes line
-            }
-        }
-      catch (Exception &e)
-        {
-          logger->log_warn(name(), e);
-        }
-    }
-
-  // logger->log_info("NavigatorNetworkThread", "send; connected clients: %i", connected_points_and_lines_clients.size());
+    }//if(clock->elapsed(&sending_time) > sending_pause)
 
 }
 

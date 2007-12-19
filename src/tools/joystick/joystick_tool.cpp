@@ -35,7 +35,6 @@
 #include <netcomm/fawkes/client.h>
 #include <netcomm/fawkes/message.h>
 #include <netcomm/socket/socket.h>
-#include <netcomm/socket/datagram.h>
 #include <utils/system/argparser.h>
 #include <utils/system/console_colors.h>
 
@@ -80,17 +79,9 @@ void JoystickTool::signal_handler(int signal)
 
 /** Contructor.
  * @param host_name the host name of the host to connect to.
- * @param use_udp use UDP for transmitting joystick commands
  */
-JoystickTool::JoystickTool(const char *host_name, bool use_udp)
+JoystickTool::JoystickTool(const char *host_name)
 {
-  /*
-    this->use_udp = use_udp;
-    if ( use_udp ) {
-    socket = new DatagramSocket();
-    socket->connect(host_name, 1910);
-    }
-  */
   instance = this;
   net_client = new FawkesNetworkClient(host_name, 1910);
   sending = false;
@@ -351,22 +342,7 @@ JoystickTool::mainLoop()
 
               FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_JOYSTICK, joy_msg, sizeof(navigator_joystick_message_t));
 
-              /*
-                if ( use_udp ) {
-                const fawkes_message_t &f = msg->fmsg();
-                unsigned int payload_size = msg->payload_size();
-                
-                unsigned char *tmpbuf = (unsigned char *)malloc(sizeof(f.header) + payload_size);
-                memcpy(tmpbuf, &(f.header), sizeof(f.header));
-                memcpy(tmpbuf + sizeof(f.header), f.payload, payload_size);
-                  
-                socket->send(tmpbuf, sizeof(f.header) + payload_size);
-                free(tmpbuf);
-                
-                } else {
-              */
               net_client->enqueue(msg);
-              //}
               msg->unref();
 
               old_forward = joy_msg->forward;
@@ -386,7 +362,7 @@ JoystickTool::mainLoop()
 /** Main function. */
 int main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "r:u");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "r:");
 
   const char *host_name;
 
@@ -399,7 +375,7 @@ int main(int argc, char **argv)
       host_name = "localhost";
     }
 
-  JoystickTool *control = new JoystickTool(host_name, argp->has_arg("u"));
+  JoystickTool *control = new JoystickTool(host_name);
   control->mainLoop();
 
   return 0;

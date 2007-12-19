@@ -48,7 +48,6 @@ class NavigatorInterface;
 class NavigatorThread;
 class KickerInterface;
 class Time;
-class DatagramSocket;
 
 class NavigatorNetworkThread : public Thread, public LoggingAspect, public FawkesNetworkAspect,
                                public BlackBoardAspect, public BlockedTimingAspect, public FawkesNetworkHandler, 
@@ -95,13 +94,6 @@ class NavigatorNetworkThread : public Thread, public LoggingAspect, public Fawke
 
   float sending_pause;
   Time sending_time;
-
-  DatagramSocket *datagram_socket;
-  bool            blocked_by_udp;
-  Time            last_udp_msg_time;
-  struct sockaddr_in  udp_client_addr;
-  socklen_t           udp_client_addrlen;
-  unsigned char   udp_tmpbuf[1000];
 };
 
 
