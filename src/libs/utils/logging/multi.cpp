@@ -186,7 +186,6 @@ MultiLogger::log_debug(const char *component, const char *format, ...)
   struct timeval now;
   gettimeofday(&now, NULL);
   data->mutex->lock();
-  printf("MultiLogger::log_debug() called\n");
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
 
   va_list va;
@@ -468,7 +467,6 @@ void
 MultiLogger::tlog_debug(struct timeval *t, const char *component, const char *format, ...)
 {
   data->mutex->lock();
-  printf("MultiLogger::log_debug() called\n");
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &(data->old_state));
   va_list va;
   va_start(va, format);
