@@ -139,7 +139,11 @@ FawkesNetworkClientThread::recv()
 void
 FawkesNetworkClientThread::loop()
 {
-  
+  if ( ! _alive) {
+    usleep(10000);
+    return;
+  }
+
   short p = 0;
   try {
     p = s->poll(10); // block for up to 10 ms
@@ -152,29 +156,26 @@ FawkesNetworkClientThread::loop()
        (p & Socket::POLL_HUP) ||
        (p & Socket::POLL_RDHUP)) {
     _alive = false;
-    parent->wakeup();
-    exit();
   } else if ( p & Socket::POLL_IN ) {
     // Data can be read
     recv();
   }
 
-  _outbound_mutex->lock();
-  if ( ! outbound_queue->empty() ) {
-    try {
-      FawkesNetworkTransceiver::send(s, outbound_queue);
-      _outbound_mutex->unlock();
-      _outbound_waitcond->wake_all();
-    } catch (ConnectionDiedException &e) {
-      _alive = false;
-      _outbound_mutex->unlock();
-      _outbound_waitcond->wake_all();
-      parent->wakeup();
-      exit();
+  if ( _alive ) {
+    _outbound_mutex->lock();
+    if ( ! outbound_queue->empty() ) {
+      try {
+	FawkesNetworkTransceiver::send(s, outbound_queue);
+      } catch (ConnectionDiedException &e) {
+	_alive = false;
+      }
     }
-  } else {
     _outbound_mutex->unlock();
     _outbound_waitcond->wake_all();
+  }
+
+  if ( ! _alive) {
+    parent->wakeup();
   }
 }
 
