@@ -208,7 +208,6 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread, boo
 	cam->start();
       } catch (Exception &e) {
 	delete cam;
-	delete cap;
 	e.append("Could not open or start camera");
 	throw;
       }
