@@ -35,109 +35,14 @@
 #include <cstdlib>
 #include <cstring>
 
-/** @class NavigatorNodesListMessage plugins/navigator/libnavi/navigator_messages.h
- * This message is for containing the points of the surface of the triangulation.
- */
-
-/** Constructor.
- * @param nodes a list with the nodes for this message
- */
-NavigatorNodesListMessage::NavigatorNodesListMessage(std::list<NPoint *> *nodes)
-{
-  nodes_list = new DynamicBuffer(&(msg.nodes_list));
-
-  std::list<NPoint *>::iterator i;
-  npoint_t np;
-  for ( i = nodes->begin(); i != nodes->end(); ++i )
-    {
-      np.x = (*i)->x;
-      np.y = (*i)->y;
-      nodes_list->append(&np, sizeof(np));
-    }
-}
-
-
-/** Message content constructor.
- * This constructor is meant to be used with FawkesNetworkMessage::msgc().
- * @param component_id component ID
- * @param msg_id message ID
- * @param payload message payload
- * @param payload_size total payload size
- */
-NavigatorNodesListMessage::NavigatorNodesListMessage(unsigned int component_id, unsigned int msg_id,
-    void *payload, size_t payload_size)
-{
-  navigator_nodes_msg_t *tmsg = (navigator_nodes_msg_t *)payload;
-  void *nodes_list_payload = (void *)((size_t)payload + sizeof(msg));
-  nodes_list = new DynamicBuffer(&(tmsg->nodes_list), nodes_list_payload,
-                                 payload_size - sizeof(msg));
-}
-
-
-/** Destructor. */
-NavigatorNodesListMessage::~NavigatorNodesListMessage()
-{
-  delete nodes_list;
-  if (_payload != NULL)
-    {
-      free(_payload);
-      _payload = NULL;
-      _payload_size = 0;
-    }
-}
-
-
-void
-NavigatorNodesListMessage::serialize()
-{
-  _payload_size = sizeof(msg) + nodes_list->buffer_size();
-  _payload = malloc(_payload_size);
-  copy_payload(0, &msg, sizeof(msg));
-  copy_payload(sizeof(msg), nodes_list->buffer(), nodes_list->buffer_size());
-}
-
-
-/** Reset iterator.
- * For incoming messages only.
- */
-void
-NavigatorNodesListMessage::reset_iterator()
-{
-  nodes_list->reset_iterator();
-}
-
-
-/** Check if more list elements are available.
- * For incoming messages only.
- * @return true if there are more elements available, false otherwise.
- */
-bool
-NavigatorNodesListMessage::has_next()
-{
-  return nodes_list->has_next();
-}
-
-
-/** Get next plugin from list.
- * @return next plugin from list. This string has been allocated via strndup, so
- * you have to free it yourself!
- */
-NavigatorNodesListMessage::npoint_t *
-NavigatorNodesListMessage::next()
-{
-  size_t size;
-  void *tmp = nodes_list->next(&size);
-  return (npoint_t *)tmp;
-}
-
-/** @class NavigatorLinesListMessage <navigator/libnavi/navigator_messages.h>
- * This message is for containing the lines of the surface of the triangulation.
+/** @class NavigatorSurfaceMessage <navigator/libnavi/navigator_messages.h>
+ * This message is for containing the lines and points of the surface of the triangulation.
  */
 
 /** Constructor.
  * @param lines a list with the lines for this message 
  */
-NavigatorLinesListMessage::NavigatorLinesListMessage(std::list<NLine *> *lines)
+NavigatorSurfaceMessage::NavigatorSurfaceMessage(std::list<NLine *> *lines)
 {
   lines_list = new DynamicBuffer(&(msg.lines_list));
 
@@ -156,7 +61,7 @@ NavigatorLinesListMessage::NavigatorLinesListMessage(std::list<NLine *> *lines)
           // it's just a point
           nl.width1 = 0.;
         }
-        
+
       Obstacle *op2 = dynamic_cast<Obstacle *>((*i)->p2);
       if ( op2 )
         {
@@ -184,7 +89,7 @@ NavigatorLinesListMessage::NavigatorLinesListMessage(std::list<NLine *> *lines)
  * @param payload message payload
  * @param payload_size total payload size
  */
-NavigatorLinesListMessage::NavigatorLinesListMessage(unsigned int component_id, unsigned int msg_id,
+NavigatorSurfaceMessage::NavigatorSurfaceMessage(unsigned int component_id, unsigned int msg_id,
     void *payload, size_t payload_size)
 {
   navigator_lines_msg_t *tmsg = (navigator_lines_msg_t *)payload;
@@ -195,7 +100,7 @@ NavigatorLinesListMessage::NavigatorLinesListMessage(unsigned int component_id, 
 
 
 /** Destructor. */
-NavigatorLinesListMessage::~NavigatorLinesListMessage()
+NavigatorSurfaceMessage::~NavigatorSurfaceMessage()
 {
   delete lines_list;
   if (_payload != NULL)
@@ -208,7 +113,7 @@ NavigatorLinesListMessage::~NavigatorLinesListMessage()
 
 
 void
-NavigatorLinesListMessage::serialize()
+NavigatorSurfaceMessage::serialize()
 {
   _payload_size = sizeof(msg) + lines_list->buffer_size();
   _payload = malloc(_payload_size);
@@ -221,7 +126,7 @@ NavigatorLinesListMessage::serialize()
  * For incoming messages only.
  */
 void
-NavigatorLinesListMessage::reset_iterator()
+NavigatorSurfaceMessage::reset_iterator()
 {
   lines_list->reset_iterator();
 }
@@ -232,7 +137,7 @@ NavigatorLinesListMessage::reset_iterator()
  * @return true if there are more elements available, false otherwise.
  */
 bool
-NavigatorLinesListMessage::has_next()
+NavigatorSurfaceMessage::has_next()
 {
   return lines_list->has_next();
 }
@@ -242,8 +147,8 @@ NavigatorLinesListMessage::has_next()
  * @return next plugin from list. This string has been allocated via strndup, so
  * you have to free it yourself!
  */
-NavigatorLinesListMessage::nline_t *
-NavigatorLinesListMessage::next()
+NavigatorSurfaceMessage::nline_t *
+NavigatorSurfaceMessage::next()
 {
   size_t size;
   void *tmp = lines_list->next(&size);
@@ -343,128 +248,4 @@ NavigatorPathListMessage::next()
   size_t size;
   void *tmp = path_list->next(&size);
   return (npoint_t *)tmp;
-}
-
-/** @class NavigatorObstacleListMessage plugins/navigator/libnavi/navigator_messages.h
- * This message is for containing the obstacles surrounding the robot.
- */
-
-/** Constructor.
- * @param obstacles a list with the path points for this message
- */
-NavigatorObstaclesListMessage::NavigatorObstaclesListMessage(std::list<NPoint *> *obstacles)
-{
-  obstacles_list = new DynamicBuffer(&(msg.obstacles_list));
-
-  std::list<NPoint *>::const_iterator i;
-  obstacle_t o;
-  point_t p;
-  Obstacle * op;
-  for ( i = obstacles->begin(); i != obstacles->end(); ++i )
-    {
-      op = dynamic_cast<Obstacle *>(*i);
-      if ( op )
-        {
-          // it IS an obstacle
-          o.x = op->x;
-          o.y = op->y;
-          o.width = op->width;
-          obstacles_list->append(&o, sizeof(o));
-        }
-      else
-        {
-          // it's just a point
-          p.x = (*i)->x;
-          p.y = (*i)->y;
-          obstacles_list->append(&p, sizeof(p));
-        }
-    }
-}
-
-
-/** Message content constructor.
- * This constructor is meant to be used with FawkesNetworkMessage::msgc().
- * @param component_id component ID
- * @param msg_id message ID
- * @param payload message payload
- * @param payload_size total payload size
- */
-NavigatorObstaclesListMessage::NavigatorObstaclesListMessage(unsigned int component_id, unsigned int msg_id,
-    void *payload, size_t payload_size)
-{
-  navigator_obstacles_list_msg_t *tmsg = (navigator_obstacles_list_msg_t *)payload;
-  void *obstacles_list_payload = (void *)((size_t)payload + sizeof(msg));
-  obstacles_list = new DynamicBuffer(&(tmsg->obstacles_list), obstacles_list_payload,
-                                     payload_size - sizeof(msg));
-}
-
-
-/** Destructor. */
-NavigatorObstaclesListMessage::~NavigatorObstaclesListMessage()
-{
-  delete obstacles_list;
-  if (_payload != NULL)
-    {
-      free(_payload);
-      _payload = NULL;
-      _payload_size = 0;
-    }
-}
-
-
-void
-NavigatorObstaclesListMessage::serialize()
-{
-  _payload_size = sizeof(msg) + obstacles_list->buffer_size();
-  _payload = malloc(_payload_size);
-  copy_payload(0, &msg, sizeof(msg));
-  copy_payload(sizeof(msg), obstacles_list->buffer(), obstacles_list->buffer_size());
-}
-
-
-/** Reset iterator.
- * For incoming messages only.
- */
-void
-NavigatorObstaclesListMessage::reset_iterator()
-{
-  obstacles_list->reset_iterator();
-}
-
-
-/** Check if more list elements are available.
- * For incoming messages only.
- * @return true if there are more elements available, false otherwise.
- */
-bool
-NavigatorObstaclesListMessage::has_next()
-{
-  return obstacles_list->has_next();
-}
-
-
-/** Get next plugin from list.
- * @return next plugin from list. This string has been allocated via strndup, so
- * you have to free it yourself!
- */
-//NavigatorObstaclesListMessage::obstacle_t *
-NPoint *
-NavigatorObstaclesListMessage::next()
-{
-  size_t size;
-  void *tmp = obstacles_list->next(&size);
-
-  if ( size == sizeof(obstacle_t) )
-    {
-      return new Obstacle(((obstacle_t *)tmp)->width, ((obstacle_t *)tmp)->x, ((obstacle_t *)tmp)->y, 0);
-    }
-  else if ( size == sizeof(point_t) )
-    {
-      return new NPoint(((point_t *)tmp)->x, ((point_t *)tmp)->y);
-    }
-  else
-    {
-      throw Exception("unsupported value");
-    }
-  // return (obstacle_t *)tmp;
 }

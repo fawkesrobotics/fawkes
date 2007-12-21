@@ -40,21 +40,19 @@ class Obstacle;
 #define NAVIGATOR_MSGTYPE_GUI                                   2
 #define NAVIGATOR_MSGTYPE_SUBSCRIBE                             3
 #define NAVIGATOR_MSGTYPE_UNSUBSCRIBE                           4
-#define NAVIGATOR_MSGTYPE_NODES                                 5
-#define NAVIGATOR_MSGTYPE_LINES                                 6
-#define NAVIGATOR_MSGTYPE_TARGET                                7
-#define NAVIGATOR_MSGTYPE_CONTROL_SUBERR                        8
-#define NAVIGATOR_MSGTYPE_VELOCITY                                      9
-#define NAVIGATOR_MSGTYPE_TRANS_ROT                                 10
-#define NAVIGATOR_MSGTYPE_RPM                                 11
-#define NAVIGATOR_MSGTYPE_ORBIT                              12
-#define NAVIGATOR_MSGTYPE_KICK                                          13
-#define NAVIGATOR_MSGTYPE_ODOMETRY                      14
-#define NAVIGATOR_MSGTYPE_RESET_ODOMETRY                      15
-#define NAVIGATOR_MSGTYPE_BALL                      16
-#define NAVIGATOR_MSGTYPE_PATH                     17
-#define NAVIGATOR_MSGTYPE_OBSTACLE                     18
-#define NAVIGATOR_MSGTYPE_OBSTACLES_LIST                     19
+#define NAVIGATOR_MSGTYPE_SURFACE                                 5
+#define NAVIGATOR_MSGTYPE_TARGET                                6
+#define NAVIGATOR_MSGTYPE_CONTROL_SUBERR                        7
+#define NAVIGATOR_MSGTYPE_VELOCITY                                      8
+#define NAVIGATOR_MSGTYPE_TRANS_ROT                                 9
+#define NAVIGATOR_MSGTYPE_RPM                                 10
+#define NAVIGATOR_MSGTYPE_ORBIT                              11
+#define NAVIGATOR_MSGTYPE_KICK                                          12
+#define NAVIGATOR_MSGTYPE_ODOMETRY                      13
+#define NAVIGATOR_MSGTYPE_RESET_ODOMETRY                      14
+#define NAVIGATOR_MSGTYPE_BALL                      15
+#define NAVIGATOR_MSGTYPE_PATH                     16
+#define NAVIGATOR_MSGTYPE_OBSTACLE                     17
 
 /** The message type of the kick messages.
  */
@@ -181,7 +179,7 @@ typedef struct {
 } navigator_nodes_msg_t;
 
 /** Navigator list message.
- * Message type ID is NAVIGATOR_MSGTYPE_LINES.
+ * Message type ID is NAVIGATOR_MSGTYPE_SURFACE.
  */
 typedef struct {
   dynamic_list_t lines_list;    /**< dynamically growing list of lines */
@@ -226,37 +224,13 @@ typedef struct {
 } navigator_unsubscribe_message_t;
 
 
-class NavigatorNodesListMessage : public FawkesNetworkMessageContent
+class NavigatorSurfaceMessage : public FawkesNetworkMessageContent
 {
  public:
-  NavigatorNodesListMessage(std::list<NPoint *> *nodes);
-  NavigatorNodesListMessage(unsigned int component_id, unsigned int msg_id,
+  NavigatorSurfaceMessage(std::list<NLine *> *lines);
+  NavigatorSurfaceMessage(unsigned int component_id, unsigned int msg_id,
                             void *payload, size_t payload_size);
-  virtual ~NavigatorNodesListMessage();
-
-  virtual void serialize();
-
-  typedef struct {
-    float x; /**< x-coordinate */
-    float y; /**< y-coordinate */
-  } npoint_t;
-
-  void        reset_iterator();
-  bool        has_next();
-  npoint_t *  next();
-  
- private:
-  DynamicBuffer     *nodes_list;
-  navigator_nodes_msg_t  msg;
-};
-
-class NavigatorLinesListMessage : public FawkesNetworkMessageContent
-{
- public:
-  NavigatorLinesListMessage(std::list<NLine *> *lines);
-  NavigatorLinesListMessage(unsigned int component_id, unsigned int msg_id,
-                            void *payload, size_t payload_size);
-  virtual ~NavigatorLinesListMessage();
+  virtual ~NavigatorSurfaceMessage();
 
   virtual void serialize();
 
@@ -300,37 +274,6 @@ class NavigatorPathListMessage : public FawkesNetworkMessageContent
  private:
   DynamicBuffer     *path_list;
   navigator_path_msg_t  msg;
-};
-
-class NavigatorObstaclesListMessage : public FawkesNetworkMessageContent
-{
- public:
-  NavigatorObstaclesListMessage(std::list<NPoint *> *points);
-  NavigatorObstaclesListMessage(unsigned int component_id, unsigned int msg_id,
-                            void *payload, size_t payload_size);
-  virtual ~NavigatorObstaclesListMessage();
-
-  virtual void serialize();
-
-  typedef struct {
-    float x; /**< x-coordinate */
-    float y; /**< y-coordinate */
-    float width; /**< width*/
-  } obstacle_t;    
-  
-  typedef struct {
-    float x; /**< x-coordinate */
-    float y; /**< y-coordinate */
-  } point_t; 
-  
-
-  void        reset_iterator();
-  bool        has_next();
-  NPoint *  next();
-  
- private:
-  DynamicBuffer     *obstacles_list;
-  navigator_obstacles_list_msg_t  msg;
 };
 
 

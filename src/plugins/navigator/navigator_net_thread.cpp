@@ -416,53 +416,20 @@ NavigatorNetworkThread::loop()
           iterator++ )
         {
 
-          //send points
-          /*
-          std::list<NPoint *> *points = navigator_thread->get_surface_points();
-          NavigatorNodesListMessage *nodes_list_msg = new NavigatorNodesListMessage(points);
-          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_NODES, nodes_list_msg);
-          //   logger->log_info("NavigatorNetworkThread", "send points; connected clients: %i", connected_points_and_lines_clients.size());
-          */
-
-          //send obstacles
-          std::list<NPoint *> *points = navigator_thread->get_surface_points();
-          // std::list<Obstacle *> *obstacles = navigator_thread->get_obstacles();
-          NavigatorObstaclesListMessage *obstacles_list_msg = new NavigatorObstaclesListMessage(points);
-          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_OBSTACLES_LIST, obstacles_list_msg);
-          //   logger->log_info("NavigatorNetworkThread", "send points; connected clients: %i", connected_points_and_lines_clients.size());
-
-          //send lines
+          //send lines with points and obstacles
           std::list<NLine *> *lines = navigator_thread->get_surface_lines();
-          NavigatorLinesListMessage *lines_list_msg = new NavigatorLinesListMessage(lines);
-          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_LINES, lines_list_msg);
-          //   logger->log_info("NavigatorNetworkThread", "send lines; connected clients: %i", connected_points_and_lines_clients.size());
+          NavigatorSurfaceMessage *surface_msg = new NavigatorSurfaceMessage(lines);
+          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SURFACE, surface_msg);
 
           //send path
           std::list<NPoint *> *path_points = navigator_thread->get_path_points();
           NavigatorPathListMessage *path_list_msg = new NavigatorPathListMessage(path_points);
           fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_PATH, path_list_msg);
 
-          //send target
-          NPoint* target = navigator_thread->getTargetPoint();
-          navigator_target_message_t *target_msg= (navigator_target_message_t *)malloc(sizeof(navigator_target_message_t));
-          target_msg->x = target->x;
-          target_msg->y = target->y;
-          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_TARGET, target_msg, sizeof(navigator_target_message_t));
-          delete target;
-
-          //delete points
-          for(std::list<NPoint *>::iterator point_iterator = points->
-              begin();
-              point_iterator != points->end();
-              point_iterator++)
-            {
-              delete *point_iterator;
-            }
-          points->clear();
-
           //delete lines
           for(std::list<NLine *>
-              ::iterator line_iterator = lines->begin();
+              ::iterator line_iterator = lines->
+                                         begin();
               line_iterator != lines->end();
               line_iterator++)
             {

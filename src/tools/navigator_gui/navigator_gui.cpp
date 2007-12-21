@@ -560,37 +560,9 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
       behold_radio->set_active();
       control_button->set_label("Start Control");
     }
-  else if (NAVIGATOR_MSGTYPE_NODES == msg->msgid() )
+  else if (NAVIGATOR_MSGTYPE_SURFACE == msg->msgid() )
     {
-      NavigatorNodesListMessage *nodes_msg = msg->msgc<NavigatorNodesListMessage>();
-      if ( ! nodes_msg )
-        {
-          printf("Invalid nodes message received\n");
-        }
-
-      //delete points
-      points.lock();
-      for(LockList<NPoint*>::iterator iterator = points.begin();
-          iterator != points.end(); iterator++)
-        {
-          delete *iterator;
-        }
-      points.clear();
-
-      //add points
-      while (nodes_msg->has_next())
-        {
-          NavigatorNodesListMessage::npoint_t *p = nodes_msg->next();
-
-          points.push_back(new NPoint(-p->y, -p->x));
-        }
-      points.unlock();
-
-      delete nodes_msg;
-    }
-  else if (NAVIGATOR_MSGTYPE_LINES == msg->msgid() )
-    {
-      NavigatorLinesListMessage *lines_msg = msg->msgc<NavigatorLinesListMessage>();
+      NavigatorSurfaceMessage *surface_msg = msg->msgc<NavigatorSurfaceMessage>();
 
       //delete lines
       lines.lock();
@@ -602,9 +574,9 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
       lines.clear();
 
       //add lines
-      while (lines_msg->has_next())
+      while (surface_msg->has_next())
         {
-          NavigatorLinesListMessage::nline_t *l = lines_msg->next();
+          NavigatorSurfaceMessage::nline_t *l = surface_msg->next();
           NPoint *p1 = 0;
           NPoint *p2 = 0;
 
@@ -629,7 +601,7 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
         }
       lines.unlock();
 
-      delete lines_msg;
+      delete surface_msg;
     }
   else if (NAVIGATOR_MSGTYPE_PATH == msg->msgid() )
     {
@@ -654,60 +626,6 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
 
       delete path_msg;
     }
-  else if (NAVIGATOR_MSGTYPE_OBSTACLES_LIST == msg->msgid() )
-    {
-      points.lock();
-
-      //delete points
-      for(LockList<NPoint*>::iterator iterator = points.begin();
-          iterator != points.end(); iterator++)
-        {
-          delete *iterator;
-        }
-      points.clear();
-
-      obstacle_points.lock();
-
-      //delete obstacle_points
-      for(LockList<Obstacle*>::iterator iterator = obstacle_points.begin();
-          iterator != obstacle_points.end(); iterator++)
-        {
-          delete *iterator;
-        }
-      obstacle_points.clear();
-
-
-      NavigatorObstaclesListMessage *obstacle_msg = msg->msgc<NavigatorObstaclesListMessage>();
-
-
-      //add obstacle_points
-      while (obstacle_msg->has_next())
-        {
-          NPoint *p = obstacle_msg->next();
-          Obstacle *op = dynamic_cast<Obstacle *>(p);
-          if(op)
-            {
-              obstacle_points.push_back(new Obstacle(op->width, -op->y, -op->x, 0));
-            }
-          else
-            {
-              points.push_back(new NPoint(-p->y, -p->x));
-            }
-        }
-      obstacle_points.unlock();
-      points.unlock();
-
-      delete obstacle_msg;
-    }/*
-  else if (NAVIGATOR_MSGTYPE_TARGET == msg->msgid() && navigator_control)
-    {
-      navigator_target_message_t *target_msg =  (navigator_target_message_t *)msg->payload();
-      target_point_mutex->lock();
-      mouse_point.x = -target_msg->y * zoom_factor;
-      mouse_point.y = -target_msg->x * zoom_factor; //negative, because of the screen coordinates
-      //     std::cout << "mouse_point " << mouse_point.x << ", " << odometry_point.y << std::endl;
-      target_point_mutex->unlock();
-    }*/
   else if (NAVIGATOR_MSGTYPE_ODOMETRY == msg->msgid())
     {
       navigator_odometry_message_t *odometry_msg =  (navigator_odometry_message_t *)msg->payload();
@@ -937,7 +855,7 @@ bool NavigatorGUI::on_idle()
 
   if(connection_is_dead)
     {
- 	  reset_gui();
+      reset_gui();
       queue_draw();
       char str[100];
       strcpy (str,"There is no connection to a Fawkes running at ");
@@ -1323,35 +1241,27 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       //this is also the position of the robot
       context->translate(width / 2., height / 2.);
 
-      //draw the points
-      points.lock();
-      for(LockList<NPoint*>::iterator iterator = points.begin();
-          iterator != points.end(); iterator++)
-        {
-          context->arc((*iterator)->x * zoom_factor, (*iterator)->y * zoom_factor, point_radius, 0.0, 2.0 * M_PI);
-          context->fill_preserve();
-          context->stroke();
-        }
-      points.unlock();
-
-      //draw the obstacle_points
-      obstacle_points.lock();
-      for(LockList<Obstacle*>::iterator iterator = obstacle_points.begin();
-          iterator != obstacle_points.end(); iterator++)
-        {
-          context->arc((*iterator)->x * zoom_factor, (*iterator)->y * zoom_factor, (*iterator)->width / 2. * zoom_factor, 0.0, 2.0 * M_PI);
-          context->fill_preserve();
-          context->stroke();
-        }
-      obstacle_points.unlock();
-
-      //draw the lines
+      //draw the lines, points and obstacles
       lines.lock();
       for(LockList<NLine*>::iterator iterator = lines.begin();
           iterator != lines.end(); iterator++)
         {
           context->move_to((*iterator)->p1->x * zoom_factor, (*iterator)->p1->y * zoom_factor);
           context->line_to((*iterator)->p2->x * zoom_factor, (*iterator)->p2->y * zoom_factor);
+          context->stroke();
+
+          Obstacle *op1 = dynamic_cast<Obstacle *>((*iterator)->p1);
+          if ( op1 )
+            {
+              // it IS an obstacle
+              context->arc(op1->x * zoom_factor, op1->y * zoom_factor, op1->width / 2. * zoom_factor, 0.0, 2.0 * M_PI);
+            }
+          else
+            {
+              // it's just a point
+              context->arc((*iterator)->p1->x * zoom_factor, (*iterator)->p1->y * zoom_factor, point_radius, 0.0, 2.0 * M_PI);
+            }
+          context->fill_preserve();
           context->stroke();
         }
       lines.unlock();
