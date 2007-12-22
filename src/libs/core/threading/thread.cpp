@@ -86,14 +86,20 @@
  * result of just this thread, see method description). Afterwards finalize()
  * may be called (independent of the prepare_finalize() result, see method
  * description). If finalize() is not executed the thread is notified with
- * cancel_finalize().
+ * cancel_finalize(). Before finalize() is called the thread is stopped.
  *
  * The intialization and finalization procedures may be executed deferred and
  * concurrent to the running thread itself. The thread is only started however
- * it init() finished successfully. For the finalization prepare_finalize() and
- * finalize() can be executed in another thread concurrent to the thread that
- * is finalized itself! For this the thread implementation will stop the loop()
- * from being executed. However, the thread will still run, for example it will
+ * it init() finished successfully.
+ *
+ * The call to prepare_finalize() is mutual exclusive with a concurrently running
+ * loop() by default. This means that if the loop() blocks waiting for some event
+ * prepare_finalize() will hang until this event happens. This can be prevented
+ * with set_prepfin_conc_loop() which allows to set that prepare_finalize() and
+ * loop() may be executed concurrently.
+ * 
+ * After prepare_finalize() has been run the thread implementation will stop the
+ * loop() from being executed. However, the thread will still run, for example it will
  * wait for wakeup. This way it can be ensured that other threads will continue
  * to run even this thread is currently not running. An exception is the
  * ThreadList. For this Thread provides special synchronization features by
@@ -101,10 +107,12 @@
  * means that if you have two threads that are woken up at the same time and
  * maybe even synchronize among each other it is guaranteed that both threads
  * will finish the running loop and never enter the next loop.
+ * Before finalize() is called the thread shall be stopped (cancelled and joined).
  *
  * Because the finalization is done deferred and concurrent put all lengthy
  * finalization routines in finalize() and avoid this in the destructor, since
- * a long running destructor will harm the overall performance.
+ * a long running destructor will harm the overall performance while with the
+ * surrounding framework a long-running finalize() is acceptable.
  *
  * Please read the Fawkes documentation about guarantees (FawkesGuarantees in
  * the wiki) for information about the given guarantees. Several of these
@@ -209,6 +217,7 @@ Thread::__constructor(const char *name, OpMode op_mode)
 {
   init_thread_key();
 
+  __prepfin_conc_loop = false;
   __op_mode = op_mode;
   __name   = strdup(name);
   __notification_listeners = new LockList<ThreadNotificationListener *>();
@@ -340,10 +349,10 @@ Thread::prepare_finalize()
   if ( finalize_prepared ) {
     throw CannotFinalizeThreadException("prepare_finalize() has already been called");
   }
-  loop_mutex->lock();
+  if (! __prepfin_conc_loop) loop_mutex->lock();
   finalize_prepared = true;
   bool prepared = prepare_finalize_user();
-  loop_mutex->unlock();
+  if (! __prepfin_conc_loop) loop_mutex->unlock();
   return prepared;
 }
 
@@ -617,6 +626,28 @@ Thread::set_opmode(OpMode op_mode)
     __op_mode = OPMODE_WAITFORWAKEUP;
   }
 }
+
+
+/** Set concurrent execution of prepare_finalize() and loop().
+ * Usually calls to prepare_finalize() and a running loop() are mutually exclusive.
+ * The prepare_finalize() call will wait for the current loop() run to finish before
+ * calling the user implementation. If you have a thread that blocks in its loop for
+ * example in a blocking system call this would lead to a dead-lock if no condition
+ * that makes the loop finish occurs. For this reason this method has been added.
+ * If you set this to true then prepare_finalize() can be executed concurrent to
+ * a running loop() call. If this is critical for parts of loop() you have to
+ * protect the critical sections by yourself. Use this sparsely and be sure you really
+ * know what you are doing. This method is necessary in some situations and powerful
+ * if used wisely. By default a thread will enforce mutual exclusion.
+ * @param concurrent true to allow concurrent execution of prepare_finalize() and loop(),
+ * false to enforce mutual exclusion (the latter being the default)
+ */
+void
+Thread::set_prepfin_conc_loop(bool concurrent)
+{
+  __prepfin_conc_loop = concurrent;
+}
+
 
 /** Get name of thread.
  * This name is mainly used for debugging purposes. Give it a descriptive

@@ -112,6 +112,7 @@ class Thread {
   void test_cancel();
 
   void set_opmode(OpMode op_mode);
+  void set_prepfin_conc_loop(bool concurrent);
 
   virtual void once();
   virtual void loop();
@@ -148,6 +149,7 @@ class Thread {
   char          *__name;
 
   OpMode         __op_mode;
+  bool           __prepfin_conc_loop;
 
   LockList<ThreadNotificationListener *>  *__notification_listeners;
 

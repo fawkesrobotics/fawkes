@@ -718,8 +718,8 @@ ThreadList::force_stop(ThreadFinalizer *finalizer)
 {
   try {
     prepare_finalize(finalizer);
-    finalize(finalizer);
     stop();
+    finalize(finalizer);
   } catch (Exception &e) {
     // ignored
   }
