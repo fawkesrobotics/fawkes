@@ -144,7 +144,7 @@ FirewireCamera::open()
       dc1394_iso_release_channel(_camera, channel);
     }
     // This is rude, but for now needed (Juju)...
-    dc1394_reset_bus(_camera);
+    //dc1394_reset_bus(_camera);
 
     if (_camera->bmode_capable > 0) {
       dc1394_video_set_operation_mode(_camera, DC1394_OPERATION_MODE_1394B);
