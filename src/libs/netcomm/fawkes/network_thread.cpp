@@ -34,7 +34,6 @@
 #include <netcomm/fawkes/message_content.h>
 #include <core/threading/thread_collector.h>
 #include <core/threading/mutex.h>
-#include <core/threading/wait_condition.h>
 
 #include <stdio.h>
 
@@ -53,12 +52,11 @@
  */
 FawkesNetworkThread::FawkesNetworkThread(ThreadCollector *thread_collector,
 					 unsigned int fawkes_port)
-  : Thread("FawkesNetworkThread")
+  : Thread("FawkesNetworkThread", Thread::OPMODE_WAITFORWAKEUP)
 {
   this->thread_collector = thread_collector;
   clients.clear();
   next_client_id = 1;
-  wait_cond = new WaitCondition();
   inbound_messages = new FawkesNetworkMessageQueue();
 
   acceptor_thread = new NetworkAcceptorThread(this, fawkes_port,
@@ -79,7 +77,6 @@ FawkesNetworkThread::~FawkesNetworkThread()
   delete acceptor_thread;
 
   delete inbound_messages;
-  delete wait_cond;
 }
 
 
@@ -179,7 +176,6 @@ FawkesNetworkThread::loop()
   inbound_messages->unlock();
 
   clients.unlock();
-  wait_cond->wait();
 }
 
 
@@ -192,12 +188,6 @@ FawkesNetworkThread::force_send()
     (*cit).second->force_send();
   }
   clients.unlock();
-}
-/** Wakeup this thread. */
-void
-FawkesNetworkThread::wakeup()
-{
-  wait_cond->wake_all();
 }
 
 

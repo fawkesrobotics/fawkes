@@ -52,6 +52,8 @@ NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *h
   __handler = handler;
   __port    = port;
 
+  set_prepfin_conc_loop(true);
+
   try {
     __socket = new StreamSocket();
     __socket->bind(__port);
@@ -77,6 +79,8 @@ NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *h
   __handler = handler;
   __port    = 0;
   __socket  = socket;
+
+  set_prepfin_conc_loop(true);
 
   try {
     __socket->listen();

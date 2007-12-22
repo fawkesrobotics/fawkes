@@ -63,6 +63,7 @@ AvahiThread::AvahiThread()
 
   init_mutex        = new Mutex();
 
+  set_prepfin_conc_loop(true);
   init_mutex->lock();
 }
 
@@ -175,7 +176,6 @@ AvahiThread::loop()
   }
 
   avahi_simple_poll_iterate( simple_poll, -1);
-  usleep(0);
 }
 
 

@@ -35,7 +35,6 @@
 
 class ThreadCollector;
 class Mutex;
-class WaitCondition;
 class FawkesNetworkClientThread;
 class NetworkAcceptorThread;
 class FawkesNetworkHandler;
@@ -74,7 +73,6 @@ class FawkesNetworkThread
 		    FawkesNetworkMessageContent *content);
 
   void add_connection(StreamSocket *s) throw();
-  void wakeup();
   void dispatch(FawkesNetworkMessage *msg);
   void process();
 
@@ -82,7 +80,6 @@ class FawkesNetworkThread
 
  private:
   ThreadCollector       *thread_collector;
-  WaitCondition         *wait_cond;
   unsigned int           next_client_id;
   NetworkAcceptorThread *acceptor_thread;
 
