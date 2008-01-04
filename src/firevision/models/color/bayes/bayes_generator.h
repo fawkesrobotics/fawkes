@@ -28,8 +28,6 @@
 #ifndef __FIREVISION_MODELS_COLOR_BAYES_BAYES_GENERATOR_
 #define __FIREVISION_MODELS_COLOR_BAYES_BAYES_GENERATOR_
 
-#include <fvutils/base/types.h>
-
 #include <models/color/lookuptable_generator.h>
 
 #include <vector>
@@ -37,13 +35,12 @@
 
 class ColorModelLookupTable;
 class BayesHistosToLut;
-class Histogram2D;
 
 class BayesColorLutGenerator : public ColorLutGenerator
 {
 
  public:
-  BayesColorLutGenerator();
+  BayesColorLutGenerator(hint_t fg_object = H_BALL);
 
   virtual void                     setBuffer(unsigned char *buffer,
 					     unsigned int width, unsigned int height);
@@ -57,7 +54,7 @@ class BayesColorLutGenerator : public ColorLutGenerator
   virtual void                     setSelection(std::vector< rectangle_t > region);
 
   virtual bool                     hasHistograms();
-  virtual std::map< std::string, Histogram2D * > *  getHistograms();
+  virtual std::map< hint_t, Histogram2D * > *  getHistograms();
 
   void setMinProbability(float min_prob);
 
@@ -65,11 +62,13 @@ class BayesColorLutGenerator : public ColorLutGenerator
   bool isInRegion(unsigned int x, unsigned int y);
 
 
-  std::map< std::string, Histogram2D * > histos;
-  std::map< std::string, Histogram2D * >::iterator histo_it;
+  std::map< hint_t, Histogram2D * > histos;
+  std::map< hint_t, Histogram2D * >::iterator histo_it;
 
   BayesHistosToLut      *bhtl;
   ColorModelLookupTable *cm;
+
+  hint_t fg_object;
 
   unsigned int lut_width;
   unsigned int lut_height;

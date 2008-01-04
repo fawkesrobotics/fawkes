@@ -4,6 +4,7 @@
  *
  *  Generated: Wed Mar 01 14:14:41 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *             2007       Daniel Beck
  *
  *  $Id$
  *
@@ -37,21 +38,26 @@ using namespace std;
 /** @class BayesColorLutGenerator <models/color/bayes/bayes_generator.h>
  * Color LUT Generator using Bayes method.
  * @author Tim Niemueller
+ * @author Daniel Beck
  */
 
-/** Constructor. */
-BayesColorLutGenerator::BayesColorLutGenerator()
+/** Constructor. 
+ * @param fg_object the type of the foreground object
+ */
+BayesColorLutGenerator::BayesColorLutGenerator(hint_t fg_object)
 {
+  this->fg_object = fg_object;
+
   lut_width  = 256;
   lut_height = 256;
 
   histos.clear();
   image_width = image_height = 0;
 
-  Histogram2D *h_ball = new Histogram2D(lut_width, lut_height);
+  Histogram2D *h_fg = new Histogram2D(lut_width, lut_height);
   // for bg histo we want extra undo for penalty, thus 2
   Histogram2D *h_bg = new Histogram2D(lut_width, lut_height, 2);
-
+  
   /* not yet
   Histogram2D *h_black = new Histogram2D(256, 256);
   Histogram2D *h_green = new Histogram2D(256, 256);
@@ -62,15 +68,17 @@ BayesColorLutGenerator::BayesColorLutGenerator()
 
   // The order you push them into histos is important! It
   // _must_ follow hint_t, you cannot leave histos out!
-  histos["Ball"] = h_ball;
-  histos["Background"] = h_bg;
+  histos[fg_object] = h_fg;
+  histos[H_BACKGROUND] = h_bg;
 
+  /*
   vector< Histogram2D * > histos_v;
   histos_v.clear();
   histos_v.push_back( h_ball );
   histos_v.push_back( h_bg );
+  */
 
-  bhtl = new BayesHistosToLut(histos_v, lut_width, lut_height);
+  bhtl = new BayesHistosToLut(histos, lut_width, lut_height, fg_object);
   cm = bhtl->getColorModel();
 }
 
@@ -158,57 +166,18 @@ BayesColorLutGenerator::consider()
     (*histo_it).second->resetUndo();
   }
 
-  // source u-plane
-  unsigned char *up   = YUV422_PLANAR_U_PLANE(buffer, image_width, image_height);
-  // source v-plane
-  unsigned char *vp   = YUV422_PLANAR_V_PLANE(buffer, image_width, image_height);
-
-  /* update histogram 0
-     (corresponds to the ball,
-     because according to the 
-     indexing in enum-type "hint_t", H_BALL has index 0 */
-  unsigned char *lup = up;
-  unsigned char *lvp = vp;
-  register unsigned char *pU;
-  register unsigned char *pV;
   point_t p;
-  for (rit = region.begin(); rit != region.end(); rit++) {
-    lup = up + ( (*rit).start.y * image_width + (*rit).start.x ) / 2;
-    lvp = vp + ( (*rit).start.y * image_width + (*rit).start.x ) / 2;
-    for (unsigned int h = 0; h < (*rit).extent.h; ++h) {
-      pU = lup;
-      pV = lvp;
-      for (unsigned int r = 0; r < (*rit).extent.w; r++) {
-	p.x = *pU++;
-	p.y = *pV++;
-	*(histos["Ball"]) += p;
-	// test: output (u, v) of ball
-	//cout << "(" << p.x << ", " << p.y << ") is ball color at (" << (*rit).start.x + r << ", " << (*rit).start.y + h << ")." << endl;
-      }
-      lup += image_width / 2;
-      lvp += image_width / 2;
-    }
-  }
 
-  /* update histogram 1
-     (corresponds to the background:
-     H_BACKGROUND has index 1 */
-  lup = up;
-  lvp = vp;
-  for (unsigned int h = 0; h < image_height; ++h) {
-    pU = lup;
-    pV = lvp;
-    for (unsigned int r = 0; r < image_width; ++r) {
-      p.x = *pU++;
-      p.y = *pV++;
-      /* at the moment, background is 
-	 everything that is not in the ball region */
-      if (!isInRegion(r, h)) {
-	*(histos["Background"]) += p;
+  for (unsigned int w = 0; w < image_width; ++w) {
+    for (unsigned int h = 0; h < image_height; ++h) {
+      p.x = YUV422_PLANAR_U_AT(buffer, image_width, image_height, w, h);
+      p.y = YUV422_PLANAR_V_AT(buffer, image_width, image_height, w, h);
+      if (isInRegion(w, h)) {
+	*(histos[fg_object]) += p;
+      }	else {
+	*(histos[H_BACKGROUND]) += p;
       }
     }
-    lup += image_width / 2;
-    lvp += image_width / 2;
   }
 }
 
@@ -265,7 +234,7 @@ BayesColorLutGenerator::hasHistograms()
 /** Get histograms.
  * @return histograms
  */
-std::map< std::string, Histogram2D * > *
+std::map< hint_t, Histogram2D * > *
 BayesColorLutGenerator::getHistograms()
 {
   return &histos;

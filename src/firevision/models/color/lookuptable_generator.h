@@ -29,6 +29,7 @@
 #ifndef __FIREVISION_MODELS_COLOR_LOOKUPTABLE_GENERATOR_
 #define __FIREVISION_MODELS_COLOR_LOOKUPTABLE_GENERATOR_
 
+#include <fvutils/base/roi.h>
 #include <string>
 #include <map>
 
@@ -59,7 +60,7 @@ class ColorLutGenerator
   virtual void                     resetUndo()                                         = 0;
 
   virtual bool                     hasHistograms()                                     = 0;
-  virtual std::map< std::string, Histogram2D *> *  getHistograms()                     = 0;
+  virtual std::map< hint_t, Histogram2D *> *  getHistograms()                          = 0;
 
 };
 

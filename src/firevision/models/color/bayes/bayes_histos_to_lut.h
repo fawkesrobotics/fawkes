@@ -35,7 +35,7 @@
 
 #include <fvutils/base/roi.h>
 
-#include <vector>
+#include <map>
 #include <string>
 
 class Histogram2D;
@@ -44,9 +44,10 @@ class ColorModelLookupTable;
 class BayesHistosToLut
 {
  public:
-  BayesHistosToLut(std::vector< Histogram2D * > histos,
+  BayesHistosToLut(std::map< hint_t, Histogram2D * > histos,
 		   unsigned int w, 
-		   unsigned int h);
+		   unsigned int h,
+		   hint_t fg_object = H_BALL);
   ~BayesHistosToLut();
 
   std::string getName();
@@ -77,12 +78,14 @@ class BayesHistosToLut
   void save(std::string filename);
 
  private:
-  std::vector<Histogram2D*> histograms;
-  std::vector<unsigned int> numberOfOccurrences;
-  std::vector<float>        object_probabilities;
+  std::map<hint_t, Histogram2D*> histograms;
+  std::map<hint_t, unsigned int> numberOfOccurrences;
+  std::map<hint_t, float>        object_probabilities;
   ColorModelLookupTable *lut;
   unsigned int width;
   unsigned int height;
+
+  hint_t fg_object;
 
   float   min_probability;
 

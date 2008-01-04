@@ -445,6 +445,7 @@ ColorModelLookupTable::toImage(unsigned char *yuv422_planar_buffer)
 	break;
 
       case C_BLACK:
+      case C_BACKGROUND:
 	*yp++ =   0;
 	*yp++ =   0;
 	*up++ = 128;
