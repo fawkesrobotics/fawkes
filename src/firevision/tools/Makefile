@@ -20,6 +20,8 @@ include $(BASEDIR)/src/firevision/fvconf.mk
 include $(LIBSRCDIR)/netcomm/netcomm.mk
 include $(BASEDIR)/etc/buildsys/gui.mk
 
+SUBDIRS = firestation
+
 CFLAGS   += $(VISION_CFLAGS)
 LDFLAGS  += $(VISION_LDFLAGS)
 INCDIRS  += $(VISION_INCDIRS)
