@@ -56,7 +56,7 @@ class Histogram2D
   unsigned int   getNumUndos();
 
   void           printToStream(std::ostream &s);
-  void           save(const char * filename);
+  void           save(const char * filename, bool formatted_output = false);
   bool           load(const char * filename);
 
  private:

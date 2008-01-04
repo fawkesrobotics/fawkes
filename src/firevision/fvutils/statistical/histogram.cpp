@@ -183,15 +183,22 @@ Histogram2D::printToStream(ostream &s)
 
 /** Save to file.
  * @param filename file name to save to
+ * @param formatted_output one value per line
  */
 void
-Histogram2D::save(const char *filename) {
+Histogram2D::save(const char *filename, bool formatted_output) {
   std::ofstream file;
   file.open( filename );
 
   for (unsigned int v = 0; v < height; ++v) {
     for (unsigned int u = 0; u < width; ++u) {
-      file << histogram[v * width + u ] << " ";
+      if (formatted_output) {
+	if (0 != histogram[v * width + u ]) {
+	  file << u << " " << v << " " << histogram[v * width + u ] << endl;
+	}
+      } else {
+	file << histogram[v * width + u ] << " ";
+      }
     }
   }
 
@@ -217,7 +224,7 @@ Histogram2D::load(const char *filename) {
       for (unsigned int u = 0; u < width; ++u) {
 	file >> histogram[v * width + u ];
       }
-    } 
+    }
     file.close();
     cout << "Histogram2D: Loaded histogram from file \"" << filename << "\"." << endl;
     return true;
