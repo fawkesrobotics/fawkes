@@ -27,11 +27,11 @@
 #ifndef __NAVIGATOR_NAVIGATOR_H_
 #define __NAVIGATOR_NAVIGATOR_H_
 
-extern "C" 
-{
+extern "C"
+  {
 #include <gts.h>
-}
-#include <vector> 
+  }
+#include <vector>
 #include <list>
 #include <iostream>
 
@@ -41,128 +41,126 @@ extern "C"
 class NPoint;
 class NLine;
 class Pathfinder;
+class Mutex;
 
 
 class Navigator
-{
- public:
+  {
+  public:
 
-  Navigator();
-  ~Navigator();
+    Navigator();
+    ~Navigator();
 
-  std::list<NPoint *>  *get_surface_points();
-  std::list<NLine *> *get_surface_lines();
-  std::list<NPoint *> *get_path_points();
-  std::list<Obstacle *> *get_obstacles();
-  NPoint * getTargetPoint();
- protected:
-  void goTo_cartesian(double x, double y);
-  void goTo_cartesian(double x, double y, double velocity);
-  /*
-    void goTo_degree(double ori, double distance);
-    void goTo_rad(double ori, double distance);
-    void goTo(double ori, double distance, std::vector< Obstacle * >);
-  */
-  void set_odometry_velocity_x(double velocity_x);
-  void set_odometry_velocity_y(double velocity_y);
-  void set_odometry_velocity_rotation(double rotation);
-  void setObstacles(std::vector< Obstacle  >);
-  void add_obstacle(Obstacle obstacle);
+    std::list<NPoint *>  *get_surface_points();
+    std::list<NLine *> *get_surface_lines();
+    std::list<NPoint *> *get_path_points();
+    std::list<Obstacle *> *get_obstacles();
+    NPoint * getTargetPoint();
+  protected:
+    void goTo_cartesian(double x, double y);
+    void goTo_cartesian(double x, double y, double velocity);
+    /*
+      void goTo_degree(double ori, double distance);
+      void goTo_rad(double ori, double distance);
+      void goTo(double ori, double distance, std::vector< Obstacle * >);
+    */
+    void set_odometry_velocity_x(double velocity_x);
+    void set_odometry_velocity_y(double velocity_y);
+    void set_odometry_velocity_rotation(double rotation);
+    void setObstacles(std::vector< Obstacle  >);
+    void add_obstacle(Obstacle obstacle);
 
-  void setVelocity(double velocity);
-  void setVelocityRotation(double velocity_rotation);
-  double getVelocity();
+    void setVelocity(double velocity);
+    void setVelocityRotation(double velocity_rotation);
+    double getVelocity();
 
-  double getVelocityX();
-  double getVelocityY();
-  // double getVelocityRotation();
-  double getOrientation();
+    double getVelocityX();
+    double getVelocityY();
+    // double getVelocityRotation();
+    double getOrientation();
 
-  void setElapsedTime(double elapsedTime);
-  double getElapsedTime();
+    void setElapsedTime(double elapsedTime);
+    double getElapsedTime();
 
-                        
-  void setRoute(std::vector<GtsPoint *> route);
-  void mainLoop();
-   
-   
-  int getCount();
-  std::vector< GtsPoint * > getPath();
-  GtsSurface * getSurface();
-  
-  GtsObstacle * nearestObstacle();
- 
-  GtsPoint * getRobotPoint();
-   
- // int binomialCoefficient(int n, int k);
-  double bernstein(unsigned int i, unsigned int n, double t);
-   
-  //z.B. bei navigator_test beim Routezeichnen
-  std::vector<GtsPoint *>  getRoute();
-    
- private:
-    
-  Pathfinder * pathfinder; 
-   
-  //beinhaltet die Target Punkte, der einzelnen Abschnitte
-  std::vector<GtsPoint*> route;
-   
-  static void getEdges(GtsEdge *edge, GtsFifo * fifo);
 
-  static void getVertexes(GtsVertex *vertex, GtsFifo * fifo);
-   
-  bool running_route;
-    
-  //Abtastbereich der Sensorik
-  double scanning_area_width;
-  double scanning_area_height;
-     
-  double odometry_velocity_x;
-  double odometry_velocity_y;
-  double odometry_velocity_rotation;
-  
-  double robot_width;
-  // GtsPoint * robot_point;
-   
-  //count of the points of the bezier
-  int count;
-  //index of the bezier
-  double t;
-  //beinhaltet die Punkte der Bezier Kurve
-   
-  //set if the smoothController should not control
-  //it avoids orbits
-  //umbenennen in avoid smoothControl
-  bool newDirection;
-   
-  std::vector< GtsPoint * > path;
-  std::vector< Obstacle > map;
-   
-  GTimer * time_emitter;
-  double elapsed_time;
-  double last_time;
-      
-  double last_degree;
-  double current_degree;
-   
-  //cm/sec 
-  double velocity;
-   
-  double velocity_x;
-  double velocity_y;
-   
-  double step_x;
-  double step_y;
-   
-  //degree/sec
-  double velocity_rotation;
-   
-  double orientation;
-   
-  bool running;
-   
-  void destroy_path();
-   
-  double s(double t);
-};
+    void setRoute(std::vector<GtsPoint *> route);
+    void mainLoop();
+
+
+    int getCount();
+
+    // int binomialCoefficient(int n, int k);
+    double bernstein(unsigned int i, unsigned int n, double t);
+
+    //z.B. bei navigator_test beim Routezeichnen
+    std::vector<GtsPoint *>  getRoute();
+
+  private:
+
+    Mutex *surface_mutex;
+    Mutex *path_mutex;
+
+    Pathfinder * pathfinder;
+
+    //beinhaltet die Target Punkte, der einzelnen Abschnitte
+    std::vector<GtsPoint*> route;
+
+    static void getEdges(GtsEdge *edge, GtsFifo * fifo);
+
+    static void getVertexes(GtsVertex *vertex, GtsFifo * fifo);
+
+    bool running_route;
+
+    //Abtastbereich der Sensorik
+    double scanning_area_width;
+    double scanning_area_height;
+
+    double odometry_velocity_x;
+    double odometry_velocity_y;
+    double odometry_velocity_rotation;
+
+    double robot_width;
+    // GtsPoint * robot_point;
+
+    //count of the points of the bezier
+    int count;
+    //index of the bezier
+    double t;
+    //beinhaltet die Punkte der Bezier Kurve
+
+    //set if the smoothController should not control
+    //it avoids orbits
+    //umbenennen in avoid smoothControl
+    bool newDirection;
+
+    std::vector< GtsPoint * > path;
+    std::vector< Obstacle > map;
+
+    GTimer * time_emitter;
+    double elapsed_time;
+    double last_time;
+
+    double last_degree;
+    double current_degree;
+
+    //cm/sec
+    double velocity;
+
+    double velocity_x;
+    double velocity_y;
+
+    double step_x;
+    double step_y;
+
+    //degree/sec
+    double velocity_rotation;
+
+    double orientation;
+
+    bool running;
+
+    void destroy_path();
+
+    double s(double t);
+  };
 #endif

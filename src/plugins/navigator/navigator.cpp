@@ -36,13 +36,12 @@
 #include <utils/math/binomial_coefficient.h>
 #include <utils/math/angle.h>
 #include <geometry/vector.h>
+#include <core/threading/mutex.h>
 
 #include <cmath>
 
 #define FUZZY_POTENTIAL_FIELD
 #define FUZZY_SMOOTHING
-
-#define N_DELAY 100000
 
 /** @class Navigator plugins/navigator/navigator.h
  *   The navigator of fawkes.
@@ -71,10 +70,8 @@ Navigator::Navigator()
   velocity_rotation = 0;
   orientation = 0;
 
-
   //the index of the formula of the bezier curve
   t = 0;
-
 
   //the pathfinder object to get the pathes
   pathfinder = new Pathfinder(robot_width, scanning_area_width, scanning_area_height);
@@ -84,12 +81,15 @@ Navigator::Navigator()
 
   count = (int)path.size();
 
-
   newDirection = false;
-
 
   time_emitter = g_timer_new();
 
+  step_x = 0;
+  step_y = 0;
+
+  surface_mutex = new Mutex();
+  path_mutex = new Mutex();
 }
 
 /** Destructor */
@@ -124,6 +124,8 @@ void Navigator::getVertexes(GtsVertex *vertex, GtsFifo * fifo)
 std::list<NPoint *> *Navigator::get_surface_points()
 {
   std::list<NPoint *> *p_list = new std::list<NPoint *>;
+  surface_mutex->lock();
+
   GtsSurface *surface = pathfinder->getSurface();
   GtsFifo *vertexes = gts_fifo_new();
 
@@ -148,6 +150,8 @@ std::list<NPoint *> *Navigator::get_surface_points()
           p_list->push_back(p);
         }
     }
+
+  surface_mutex->unlock();
   gts_fifo_destroy(vertexes);
   return p_list;
 }
@@ -158,6 +162,8 @@ std::list<NPoint *> *Navigator::get_surface_points()
 std::list<Obstacle *> *Navigator::get_obstacles()
 {
   std::list<Obstacle *> *o_list = new std::list<Obstacle *>;
+  surface_mutex->lock();
+
   GtsSurface *surface = pathfinder->getSurface();
   GtsFifo *vertexes = gts_fifo_new();
 
@@ -172,6 +178,8 @@ std::list<Obstacle *> *Navigator::get_obstacles()
           o_list->push_back(o);
         }
     }
+
+  surface_mutex->unlock();
   gts_fifo_destroy(vertexes);
   return o_list;
 }
@@ -182,6 +190,7 @@ std::list<Obstacle *> *Navigator::get_obstacles()
 std::list<NPoint *> *Navigator::get_path_points()
 {
   std::list<NPoint *> *p_list = new std::list<NPoint *>;
+  path_mutex->lock();
   for(unsigned int i = 0; i < path.size(); i++)
     {
       NPoint *p = new NPoint();
@@ -189,6 +198,7 @@ std::list<NPoint *> *Navigator::get_path_points()
       p->y = path[i]->y;
       p_list->push_back(p);
     }
+  path_mutex->unlock();
   return p_list;
 }
 
@@ -199,6 +209,8 @@ std::list<NPoint *> *Navigator::get_path_points()
 std::list<NLine *> *Navigator::get_surface_lines()
 {
   std::list<NLine *> *lines = new std::list<NLine *>;
+  surface_mutex->lock();
+
   GtsSurface *surface = pathfinder->getSurface();
   GtsFifo *edges = gts_fifo_new ();
   gts_surface_foreach_edge(surface, (GtsFunc) getEdges, edges);
@@ -241,6 +253,7 @@ std::list<NLine *> *Navigator::get_surface_lines()
       delete p2;
     }
 
+  surface_mutex->unlock();
   gts_fifo_destroy(edges);
   return lines;
 }
@@ -386,29 +399,6 @@ int Navigator::getCount()
   return count;
 }
 
-/** Returns the surface of the navigator.
- * @return the surface
- */
-GtsSurface * Navigator::getSurface()
-{
-  return pathfinder->getSurface();
-}
-
-/** Returns the nearest obstacle by the robot.
- * @return the nearest obstacle
- */
-GtsObstacle * Navigator::nearestObstacle()
-{
-  return pathfinder->getNearestGtsObstacle();
-}
-
-/** Returns the current Path of the navigator.
- * @return vector of points of the path
- */
-std::vector< GtsPoint * > Navigator::getPath()
-{
-  return path;
-}
 
 /** Returns the target point of the navigator.
  * @return the target point
@@ -417,39 +407,6 @@ NPoint* Navigator::getTargetPoint()
 {
   return new NPoint(pathfinder->getTargetPoint()->x, pathfinder->getTargetPoint()->y);
 }
-
-/** Returns the robot position.
- * @return point with the position of the robot; default 0, 0
- */
-GtsPoint * Navigator::getRobotPoint()
-{
-  return pathfinder->getRobotPoint();
-}
-
-/* Binomial coefficient for the bezier curve.
- * @param n upper value
- * @param k lower value
- * @return the binomial coefficient of n and k
- *
-int Navigator::binomialCoefficient(int n, int k)
-{
-  int result;
-  if(k == 0)
-    return 1;
-  if(2 * k > n)
-    result = binomialCoefficient(n, n - k);
-  else
-    {
-      result = n;
-      for(int i = 2; i <= k; i++)
-        {
-          result = result * ((n + 1 - i) / i);
-        }
-    }
-  return result;
-}
- 
-*/
 
 /** Bernstein polynomial for the bezier curve.
  * @param i
@@ -553,363 +510,370 @@ void Navigator::destroy_path()
  */
 void Navigator::mainLoop()
 {
-    double current_time = g_timer_elapsed( time_emitter, NULL );
-    elapsed_time = current_time - last_time;
-    last_time = current_time;
+  double current_time = g_timer_elapsed( time_emitter, NULL );
+  elapsed_time = current_time - last_time;
+  last_time = current_time;
 
-    step_x = elapsed_time * velocity_x;
-    step_y = elapsed_time * velocity_y;
+  step_x = elapsed_time * velocity_x;
+  step_y = elapsed_time * velocity_y;
 
-    /*
-    std::cout << "------------------------------------------------route.size() " << route.size()<< std::endl;
-       
-    std::cout << "-------elapsed_time " << elapsed_time << std::endl;
-    std::cout << "-------velocity_y " << velocity_y << std::endl;
-    std::cout << "-------velocity_x " << velocity_x << std::endl;
-    std::cout << "-------step_x " << step_x << std::endl;
-    std::cout << "-------step_y " << step_y << std::endl;
-    */
-
-
-    double sum_x = 0;
-    double sum_y = 0;
-
-    // std::cout << "-------path.size() " << path.size() << std::endl;
-
-    /****************************
-     *  Calculating the Gradient
-     ***************************/
-    double div_x;
-    double div_y;
-    //mit step die Berechnung der Zunahme von t durchfuehren
-    double delta_s = sqrt(pow(step_x, 2.) + pow(step_y, 2.));
-    double f1 = 1/s(t);
-    //   std::cout << "-------f1 " << f1 << std::endl;
-    double f2 = 1/s(t + delta_s * f1);
-    //  std::cout << "-------f2 " << f2 << std::endl;
-    double f3 = 1/s(t + delta_s * f2);
-    //   std::cout << "-------f3 " << f3 << std::endl;
-    double f4 = 1/s(t + delta_s * f3);
-    //   std::cout << "-------f4 " << f4 << std::endl;
-
-    double t_Tn_Sn;
-
-    if(count > 1)
-      t_Tn_Sn = (delta_s/(count-1)) * (f1 + 2*f2 + 2*f3 + f4) / 6;
-    else
-      t_Tn_Sn = (delta_s) * (f1 + 2*f2 + 2*f3 + f4) / 6;
-
-    t = t + t_Tn_Sn;
-    /*
-    std::cout << "-------t " << t << std::endl;   
-    std::cout << "-------t_Tn_Sn " << t_Tn_Sn << std::endl;
-    std::cout << "-------delta_s " << delta_s << std::endl;
-    */
-    /***************************
-     * 
-     * Wenn ein Pfadabschnitt abgefahren wurde, werden fuer den naechsten
-     * Abschnitt wichtige Parameter neu gesetzt
-     * 
-     *****************************/
-    if(t > 1)
-      {
-        t= 0;
-
-        //      std::cout << "-------next Path-------------------------------------------------" << std::endl;
-        step_x = 0;
-        step_y = 0;
-        newDirection = true;
+  /*
+  std::cout << "------------------------------------------------route.size() " << route.size()<< std::endl;
+     
+  std::cout << "-------elapsed_time " << elapsed_time << std::endl;
+  std::cout << "-------velocity_y " << velocity_y << std::endl;
+  std::cout << "-------velocity_x " << velocity_x << std::endl;
+  std::cout << "-------step_x " << step_x << std::endl;
+  std::cout << "-------step_y " << step_y << std::endl;
+  */
 
 
-        //stop at the end of the path
-        if(path.size() == 2) //also es gibt nur ein Stück zwischen zwei Punkten
-          {
-            if(route.size() != 0)  //die route wird abgefahren
-              {
-                if(route.size() == 1) //wir befinden uns auf dem letzten Stück der route
-                  {
-                    velocity = 0;
-                    std::cout << "-------STOP-------------------------------------------------" << std::endl;
-                    gts_object_destroy(GTS_OBJECT(route[0]));
-                    route.clear();
-                  }
-                else //wenn wir irgendwo auf der route sind, nur nicht am Ende
-                  {
-                    gts_object_destroy(GTS_OBJECT(route[0]));
-                    route.erase(route.begin());
-                    GtsPoint *p = route.front();
-                    pathfinder->setTargetPoint(gts_point_new(gts_point_class(), p->x,
-                                               p->y, 0));
-                    gts_object_destroy(GTS_OBJECT(path[path.size() - 1]));
-                    path[path.size() - 1] = gts_point_new(gts_point_class(), p->x, p->y, 0);
-                    /*
-                             std::cout << "route point " << p->x << ", " << p->y << std::endl;
-                             GtsPoint *p1 = pathfinder->getTargetPoint();
-                             std::cout << "target point " << p1->x << ", " << p1->y << std::endl;
-                    */
-                  }
-              }
-            else
-              velocity = 0;
-          }
-      }
-    /*
-    std::cout << "traget-x" << pathfinder->getTargetPoint()->x << std::endl;
-    std::cout << "traget-y" << pathfinder->getTargetPoint()->y << std::endl;
-    */
-    //bezier Kurve fuer Pfadabschnitt berechnen
-    for(int k = 0; k < count - 1; k++)
-      {//Berechnung der Ableitung  an der Stelle t
-        if(k + 1 < (int)path.size() && k < (int)path.size())
-          {
-            sum_x += (path[k + 1]->x - path[k]->x) * bernstein(k, count - 2, t);
-            sum_y += (path[k + 1]->y - path[k]->y) * bernstein(k, count - 2, t);
-            //       std::cout << "-------sum_x " << sum_x << std::endl;
-          }
+  double sum_x = 0;
+  double sum_y = 0;
 
-      }
-    //eigendlich muss die Summe noch mit (count-1) multipliziert werden
-    //spielt aber keine Rolle, da ich ja nur die Richtung brauche
-    div_x = sum_x;// * (count - 1);
-    div_y = sum_y;// * (count - 1);
-    /*
-      std::cout << "-------path.size(): " << path.size() << std::endl;
+  // std::cout << "-------path.size() " << path.size() << std::endl;
 
-      for(int k = 0; k < count; k++)
+  /****************************
+   *  Calculating the Gradient
+   ***************************/
+  double div_x;
+  double div_y;
+  //mit step die Berechnung der Zunahme von t durchfuehren
+  double delta_s = sqrt(pow(step_x, 2.) + pow(step_y, 2.));
+  double f1 = 1/s(t);
+  //   std::cout << "-------f1 " << f1 << std::endl;
+  double f2 = 1/s(t + delta_s * f1);
+  //  std::cout << "-------f2 " << f2 << std::endl;
+  double f3 = 1/s(t + delta_s * f2);
+  //   std::cout << "-------f3 " << f3 << std::endl;
+  double f4 = 1/s(t + delta_s * f3);
+  //   std::cout << "-------f4 " << f4 << std::endl;
+
+  double t_Tn_Sn;
+
+  if(count > 1)
+    t_Tn_Sn = (delta_s/(count-1)) * (f1 + 2*f2 + 2*f3 + f4) / 6;
+  else
+    t_Tn_Sn = (delta_s) * (f1 + 2*f2 + 2*f3 + f4) / 6;
+
+  t = t + t_Tn_Sn;
+  /*
+  std::cout << "-------t " << t << std::endl;   
+  std::cout << "-------t_Tn_Sn " << t_Tn_Sn << std::endl;
+  std::cout << "-------delta_s " << delta_s << std::endl;
+  */
+  /***************************
+   * 
+   * Wenn ein Pfadabschnitt abgefahren wurde, werden fuer den naechsten
+   * Abschnitt wichtige Parameter neu gesetzt
+   * 
+   *****************************/
+  if(t > 1)
+    {
+      t= 0;
+
+      //      std::cout << "-------next Path-------------------------------------------------" << std::endl;
+      step_x = 0;
+      step_y = 0;
+      newDirection = true;
+
+
+      //stop at the end of the path
+      if(path.size() == 2) //also es gibt nur ein Stück zwischen zwei Punkten
         {
-          std::cout << "-------point["<<k<<"]_x: " << path[k]->x << std::endl;
-          std::cout << "-------point["<<k<<"]_y: " << path[k]->y << std::endl;
+          if(route.size() != 0)  //die route wird abgefahren
+            {
+              if(route.size() == 1) //wir befinden uns auf dem letzten Stück der route
+                {
+                  velocity = 0;
+                  std::cout << "-------STOP-------------------------------------------------" << std::endl;
+                  gts_object_destroy(GTS_OBJECT(route[0]));
+                  route.clear();
+                }
+              else //wenn wir irgendwo auf der route sind, nur nicht am Ende
+                {
+                  gts_object_destroy(GTS_OBJECT(route[0]));
+                  route.erase(route.begin());
+                  GtsPoint *p = route.front();
+                  pathfinder->setTargetPoint(gts_point_new(gts_point_class(), p->x,
+                                             p->y, 0));
+                  gts_object_destroy(GTS_OBJECT(path[path.size() - 1]));
+                  path[path.size() - 1] = gts_point_new(gts_point_class(), p->x, p->y, 0);
+                  /*
+                           std::cout << "route point " << p->x << ", " << p->y << std::endl;
+                           GtsPoint *p1 = pathfinder->getTargetPoint();
+                           std::cout << "target point " << p1->x << ", " << p1->y << std::endl;
+                  */
+                }
+            }
+          else
+            velocity = 0;
         }
-      std::cout << "-------div_x " << div_x << std::endl;
-      std::cout << "-------div_y " << div_y << std::endl;
-    */
-    if(sqrt(pow(div_x, 2.) + pow(div_y, 2.)) != 0)
+    }
+  /*
+  std::cout << "traget-x" << pathfinder->getTargetPoint()->x << std::endl;
+  std::cout << "traget-y" << pathfinder->getTargetPoint()->y << std::endl;
+  */
+  //bezier Kurve fuer Pfadabschnitt berechnen
+  for(int k = 0; k < count - 1; k++)
+    {//Berechnung der Ableitung  an der Stelle t
+      if(k + 1 < (int)path.size() && k < (int)path.size())
+        {
+          sum_x += (path[k + 1]->x - path[k]->x) * bernstein(k, count - 2, t);
+          sum_y += (path[k + 1]->y - path[k]->y) * bernstein(k, count - 2, t);
+          //       std::cout << "-------sum_x " << sum_x << std::endl;
+        }
+
+    }
+  //eigendlich muss die Summe noch mit (count-1) multipliziert werden
+  //spielt aber keine Rolle, da ich ja nur die Richtung brauche
+  div_x = sum_x;// * (count - 1);
+  div_y = sum_y;// * (count - 1);
+  /*
+    std::cout << "-------path.size(): " << path.size() << std::endl;
+
+    for(int k = 0; k < count; k++)
       {
+        std::cout << "-------point["<<k<<"]_x: " << path[k]->x << std::endl;
+        std::cout << "-------point["<<k<<"]_y: " << path[k]->y << std::endl;
+      }
+    std::cout << "-------div_x " << div_x << std::endl;
+    std::cout << "-------div_y " << div_y << std::endl;
+  */
+  if(sqrt(pow(div_x, 2.) + pow(div_y, 2.)) != 0)
+    {
 
 #ifdef FUZZY_POTENTIAL_FIELD
 
-        GtsObstacle * nearestObs = pathfinder->getNearestGtsObstacle();
+      GtsObstacle * nearestObs = pathfinder->getNearestGtsObstacle();
 
-        PotentialFieldController *controller = new PotentialFieldController(robot_width); //muss member werden
-        double force;
-        if(nearestObs != NULL)
-          {
-            force = controller->control(gts_point_distance(GTS_POINT (nearestObs), pathfinder->getRobotPoint())
-                                        - robot_width/2. - nearestObs->width/2.);
-            //     std::cout << "-------distance  "  << gts_point_distance(GTS_POINT (nearestObs), pathfinder->getRobotPoint()) - robot_width/2. - nearestObs->width/2. << std::endl;
-            //      std::cout << "-------force " << force << std::endl;
-            div_x += (pathfinder->getRobotPoint()->x - GTS_POINT (nearestObs)->x) * force;
-            div_y += (pathfinder->getRobotPoint()->y - GTS_POINT (nearestObs)->y) * force;
-            //nicht normiert
-          }
-        delete controller;
+      PotentialFieldController *controller = new PotentialFieldController(robot_width); //muss member werden
+      double force;
+      if(nearestObs != NULL)
+        {
+          force = controller->control(gts_point_distance(GTS_POINT (nearestObs), pathfinder->getRobotPoint())
+                                      - robot_width/2. - nearestObs->width/2.);
+          //     std::cout << "-------distance  "  << gts_point_distance(GTS_POINT (nearestObs), pathfinder->getRobotPoint()) - robot_width/2. - nearestObs->width/2. << std::endl;
+          //      std::cout << "-------force " << force << std::endl;
+          div_x += (pathfinder->getRobotPoint()->x - GTS_POINT (nearestObs)->x) * force;
+          div_y += (pathfinder->getRobotPoint()->y - GTS_POINT (nearestObs)->y) * force;
+          //nicht normiert
+        }
+      delete controller;
 #endif //FUZZY_POTENTIAL_FIELD
 #ifdef FUZZY_SMOOTHING
 
-        SmoothingController cont;
-        double grade = 0;
+      SmoothingController cont;
+      double grade = 0;
 
-        if(div_x != 0)
-          current_degree = atan2(div_y, div_x);
-        else
-          current_degree = 0;//müsste je nach dem Vorzeichen von div_y 90° oder -90° sein
+      if(div_x != 0)
+        current_degree = atan2(div_y, div_x);
+      else
+        current_degree = 0;//müsste je nach dem Vorzeichen von div_y 90° oder -90° sein
 
-        //      std::cout << "-------current_degree " << current_degree << std::endl;
-        if(current_degree < 0)
-          current_degree += M_PI * 2;
+      //      std::cout << "-------current_degree " << current_degree << std::endl;
+      if(current_degree < 0)
+        current_degree += M_PI * 2;
 
-        //     std::cout << "-------last_degree" << last_degree << std::endl;
-        //     std::cout << "-------current_degree " << current_degree << std::endl;
-        double difference = last_degree - current_degree;
+      //     std::cout << "-------last_degree" << last_degree << std::endl;
+      //     std::cout << "-------current_degree " << current_degree << std::endl;
+      double difference = last_degree - current_degree;
 
 
 
-        //     std::cout << "-------difference " << difference << std::endl;
-        if(difference > M_PI)
-          difference = -(M_PI * 2 - difference);
-        if(difference < -M_PI)
-          difference = -(-M_PI *2 - difference);
-        //      std::cout << "-------cont " << &(cont) << std::endl;
+      //     std::cout << "-------difference " << difference << std::endl;
+      if(difference > M_PI)
+        difference = -(M_PI * 2 - difference);
+      if(difference < -M_PI)
+        difference = -(-M_PI *2 - difference);
+      //      std::cout << "-------cont " << &(cont) << std::endl;
 
-        //     std::cout << "-------difference " << difference << std::endl;
+      //     std::cout << "-------difference " << difference << std::endl;
 
-        if(!newDirection)
-          grade = cont.control(fabs(difference));
-        else
-          newDirection = false;
+      if(!newDirection)
+        grade = cont.control(fabs(difference));
+      else
+        newDirection = false;
 
-        //    std::cout << "-------difference " << difference << std::endl;
+      //    std::cout << "-------difference " << difference << std::endl;
 
-        //      std::cout << "-------grade " << grade << std::endl;
-        //grade = 1;
-        div_x =  cos(current_degree + difference * grade );
-        div_y =  sin(current_degree + difference * grade);
-        last_degree = current_degree + difference * grade ;
-        //      std::cout << "------- div_x " << div_x  << std::endl;
-        //      std::cout << "------- div_y " << div_y << std::endl;
+      //      std::cout << "-------grade " << grade << std::endl;
+      //grade = 1;
+      div_x =  cos(current_degree + difference * grade );
+      div_y =  sin(current_degree + difference * grade);
+      last_degree = current_degree + difference * grade ;
+      //      std::cout << "------- div_x " << div_x  << std::endl;
+      //      std::cout << "------- div_y " << div_y << std::endl;
 #endif //FUZZY_SMOOTHING
 
-        //set the velocity
-        velocity_x = (div_x * velocity) / sqrt((pow(div_x, 2.) + pow(div_y, 2.)));
-        velocity_y = (div_y * velocity) / sqrt((pow(div_x, 2.) + pow(div_y, 2.)));
-      }
-    else
-      {
-        /*
-         velocity_x = 0.00001;
-         velocity_y = 0.00001;        
-        */
-        velocity_x = 0.0;
-        velocity_y = 0.0;
-      }
+      //set the velocity
+      velocity_x = (div_x * velocity) / sqrt((pow(div_x, 2.) + pow(div_y, 2.)));
+      velocity_y = (div_y * velocity) / sqrt((pow(div_x, 2.) + pow(div_y, 2.)));
+    }
+  else
+    {
+      /*
+       velocity_x = 0.00001;
+       velocity_y = 0.00001;        
+      */
+      velocity_x = 0.0;
+      velocity_y = 0.0;
+    }
 
 
-    /*
-       std::cout << "-------velocity_x " << velocity_x << std::endl;
-       std::cout << "-------velocity_y " << velocity_y << std::endl;
-       std::cout << "-------velocity_rotation " << velocity_rotation << std::endl;
-       std::cout << "-------velocity_rotation * elapsed_time " << velocity_rotation * elapsed_time << std::endl;
-    */
-    orientation += velocity_rotation * elapsed_time;
-    /*
-        for(unsigned int i = 0; i < path.size(); i++)
-          {
-            //       std::cerr << "manipulate path " << path[i] << std::endl;
-            path[i]->x -=  velocity_x * (elapsed_time);
-            path[i]->y -=  velocity_y * (elapsed_time);
-            if(velocity_rotation != 0)
-              {
-                double ori = atan2(path[i]->y, path[i]->x);
-                double radius = sqrt(pow(path[i]->x, 2) + pow(path[i]->y, 2));
-                path[i]->x = radius * cos(ori + velocity_rotation * elapsed_time);
-                path[i]->y = radius * sin(ori + velocity_rotation * elapsed_time);
-              }
-          }*/
+  /*
+     std::cout << "-------velocity_x " << velocity_x << std::endl;
+     std::cout << "-------velocity_y " << velocity_y << std::endl;
+     std::cout << "-------velocity_rotation " << velocity_rotation << std::endl;
+     std::cout << "-------velocity_rotation * elapsed_time " << velocity_rotation * elapsed_time << std::endl;
+  */
+  orientation += velocity_rotation * elapsed_time;
+  /*
+      for(unsigned int i = 0; i < path.size(); i++)
+        {
+          //       std::cerr << "manipulate path " << path[i] << std::endl;
+          path[i]->x -=  velocity_x * (elapsed_time);
+          path[i]->y -=  velocity_y * (elapsed_time);
+          if(velocity_rotation != 0)
+            {
+              double ori = atan2(path[i]->y, path[i]->x);
+              double radius = sqrt(pow(path[i]->x, 2) + pow(path[i]->y, 2));
+              path[i]->x = radius * cos(ori + velocity_rotation * elapsed_time);
+              path[i]->y = radius * sin(ori + velocity_rotation * elapsed_time);
+            }
+        }*/
 
 
-    /*
-     * Calculation of the new Positions of the target and the obstacle 
-     *****************************************************/
+  /*
+   * Calculation of the new Positions of the target and the obstacle 
+   *****************************************************/
 
-    /*
-        for(unsigned int i = 0; i < route.size(); i++)
-          {
-            double ori = atan2(route[i]->y, route[i]->x);
-            route[i]->x -=  odometry_velocity_x * (elapsed_time);// * cos(odometry_orientation);
-            route[i]->y -=  odometry_velocity_y * (elapsed_time);// * sin(odometry_orientation);
-            if(odometry_velocity_rotation != 0)
-              {
-              //  double ori = atan2(route[i]->y, route[i]->x);
-                double radius = sqrt(pow(route[i]->x,2.) + pow(route[i]->y, 2.));
-                route[i]->x = radius * cos(ori + odometry_velocity_rotation * elapsed_time);
-                route[i]->y = radius * sin(ori + odometry_velocity_rotation * elapsed_time);
-              }
-          }
-        */
-    /*
-    std::cout << "-------odometry_velocity_x * elapsed_time " << odometry_velocity_x * elapsed_time << std::endl;
-    std::cout << "-------odometry_velocity_y * elapsed_time " << odometry_velocity_y * elapsed_time << std::endl;
-    std::cout << "-------odometry_velocity_x " << odometry_velocity_x << std::endl;
-    std::cout << "-------odometry_velocity_y " << odometry_velocity_y << std::endl;
-    std::cout << "-------odometry_velocity_rotation " << odometry_velocity_rotation << std::endl;
-    std::cout << "-------odometry_velocity_rotation * elapsed_time " << odometry_velocity_rotation * elapsed_time << std::endl;
+  /*
+      for(unsigned int i = 0; i < route.size(); i++)
+        {
+          double ori = atan2(route[i]->y, route[i]->x);
+          route[i]->x -=  odometry_velocity_x * (elapsed_time);// * cos(odometry_orientation);
+          route[i]->y -=  odometry_velocity_y * (elapsed_time);// * sin(odometry_orientation);
+          if(odometry_velocity_rotation != 0)
+            {
+            //  double ori = atan2(route[i]->y, route[i]->x);
+              double radius = sqrt(pow(route[i]->x,2.) + pow(route[i]->y, 2.));
+              route[i]->x = radius * cos(ori + odometry_velocity_rotation * elapsed_time);
+              route[i]->y = radius * sin(ori + odometry_velocity_rotation * elapsed_time);
+            }
+        }
+      */
+  /*
+  std::cout << "-------odometry_velocity_x * elapsed_time " << odometry_velocity_x * elapsed_time << std::endl;
+  std::cout << "-------odometry_velocity_y * elapsed_time " << odometry_velocity_y * elapsed_time << std::endl;
+  std::cout << "-------odometry_velocity_x " << odometry_velocity_x << std::endl;
+  std::cout << "-------odometry_velocity_y " << odometry_velocity_y << std::endl;
+  std::cout << "-------odometry_velocity_rotation " << odometry_velocity_rotation << std::endl;
+  std::cout << "-------odometry_velocity_rotation * elapsed_time " << odometry_velocity_rotation * elapsed_time << std::endl;
 
-    */
-    //   Vector new_position;
-    Vector bend_vector;
+  */
+  //   Vector new_position;
+  Vector bend_vector;
 
-    double odometry_difference =  sqrt(pow(odometry_velocity_y, 2.) + pow(odometry_velocity_x, 2.)) * elapsed_time;
+  double odometry_difference =  sqrt(pow(odometry_velocity_y, 2.) + pow(odometry_velocity_x, 2.)) * elapsed_time;
 
-    //calculation of the odometry
-    //rotation and tranlation
-    if((odometry_velocity_rotation > 0.000000005 || odometry_velocity_rotation < -0.0000000005) && odometry_difference != 0.)
-      {
-        //recalculation of the arc
-        double turned_angle = odometry_velocity_rotation * elapsed_time;
+  //calculation of the odometry
+  //rotation and tranlation
+  if((odometry_velocity_rotation > 0.000000005 || odometry_velocity_rotation < -0.0000000005) && odometry_difference != 0.)
+    {
+      //recalculation of the arc
+      double turned_angle = odometry_velocity_rotation * elapsed_time;
 
-        double bend_radius = odometry_difference / fabs(turned_angle);
+      double bend_radius = odometry_difference / fabs(turned_angle);
 
-        if(turned_angle < 0)
-          {
-            bend_vector.y(bend_radius * sin(atan2(odometry_velocity_y, odometry_velocity_x) - deg2rad(90)));
-            bend_vector.x(bend_radius * cos(atan2(odometry_velocity_y, odometry_velocity_x) - deg2rad(90)));
-          }
-        else
-          {
-            bend_vector.y(bend_radius * sin(atan2(odometry_velocity_y, odometry_velocity_x) + deg2rad(90)));
-            bend_vector.x(bend_radius * cos(atan2(odometry_velocity_y, odometry_velocity_x) + deg2rad(90)));
-          }
-        bend_vector.z(0.);
-
-        //recalculating the map for the new positions
-        for(unsigned int i = 0; i < map.size(); i++)
-          {//recalculating map
-            Vector obstacle_rotation;
-            obstacle_rotation.x(map[i].x);
-            obstacle_rotation.y(map[i].y);
-            obstacle_rotation.z(0.);
-            obstacle_rotation -= bend_vector;
-            obstacle_rotation.rotate_z(-turned_angle);
-            obstacle_rotation += bend_vector;
-            map[i].x = obstacle_rotation.x();
-            map[i].y = obstacle_rotation.y();
-          }
-        //has to reset the target, since the path will be deleted
-        Vector obstacle_rotation;
-        obstacle_rotation.x(path[path.size() - 1]->x);
-        obstacle_rotation.y(path[path.size() - 1]->y);
-        obstacle_rotation -= bend_vector;
-        obstacle_rotation.rotate_z(-turned_angle);
-        obstacle_rotation += bend_vector;
-        pathfinder->setTargetPoint(gts_point_new(gts_point_class(),
-                                   obstacle_rotation.x(),
-                                   obstacle_rotation.y(), 0));
-      }//rotation without translation
-    else if((odometry_velocity_rotation > 0.000000005 || odometry_velocity_rotation < -0.0000000005) && odometry_difference == 0.)
-      {
-        for(unsigned int i = 0; i < map.size(); i++)
-          {//recalculating map
-            double ori = atan2(map[i].y, map[i].x);
-            double radius = sqrt(pow(map[i].x,2.) + pow(map[i].y, 2.));
-            map[i].x = radius * cos(ori - odometry_velocity_rotation * elapsed_time);
-            map[i].y = radius * sin(ori - odometry_velocity_rotation * elapsed_time);
-          }
-        //has to reset the target, since the path will be deleted
-
-        double ori = atan2(path[path.size() - 1]->y, path[path.size() - 1]->x);
-        double radius = sqrt(pow(path[path.size() - 1]->x,2.) + pow(path[path.size() - 1]->y, 2.));
-        pathfinder->setTargetPoint(gts_point_new(gts_point_class(),
-                                   radius * cos(ori + odometry_velocity_rotation * elapsed_time),
-                                   radius * sin(ori + odometry_velocity_rotation * elapsed_time), 0));
-
-      }
-    else //translation without rotation
-      {
-        for(unsigned int i = 0; i < map.size(); i++)
-          {//recalculating map
-            map[i].x -= odometry_velocity_x * elapsed_time;
-            map[i].y -= odometry_velocity_y * elapsed_time;
-          }
-
-        //has to reset the target, since the path will be deleted
-        pathfinder->setTargetPoint(gts_point_new(gts_point_class(),
-                                   path[path.size() - 1]->x -  elapsed_time * odometry_velocity_x,
-                                   path[path.size() - 1]->y -  elapsed_time * odometry_velocity_y, 0));
-      }
-
-    pathfinder->setObstacles(map);
-
-    t = 0;
-    destroy_path();
-    path = pathfinder->getPath();
-
-    count = (int)path.size();
-    /*
-      if(path[1]->x != 0)
-      current_degree = atan2(path[1]->y , path[1]->x);
+      if(turned_angle < 0)
+        {
+          bend_vector.y(bend_radius * sin(atan2(odometry_velocity_y, odometry_velocity_x) - deg2rad(90)));
+          bend_vector.x(bend_radius * cos(atan2(odometry_velocity_y, odometry_velocity_x) - deg2rad(90)));
+        }
       else
-      current_degree = 0;
-    */
-  
+        {
+          bend_vector.y(bend_radius * sin(atan2(odometry_velocity_y, odometry_velocity_x) + deg2rad(90)));
+          bend_vector.x(bend_radius * cos(atan2(odometry_velocity_y, odometry_velocity_x) + deg2rad(90)));
+        }
+      bend_vector.z(0.);
+
+      //recalculating the map for the new positions
+      for(unsigned int i = 0; i < map.size(); i++)
+        {//recalculating map
+          Vector obstacle_rotation;
+          obstacle_rotation.x(map[i].x);
+          obstacle_rotation.y(map[i].y);
+          obstacle_rotation.z(0.);
+          obstacle_rotation -= bend_vector;
+          obstacle_rotation.rotate_z(-turned_angle);
+          obstacle_rotation += bend_vector;
+          map[i].x = obstacle_rotation.x();
+          map[i].y = obstacle_rotation.y();
+        }
+      //has to reset the target, since the path will be deleted
+      Vector obstacle_rotation;
+      obstacle_rotation.x(path[path.size() - 1]->x);
+      obstacle_rotation.y(path[path.size() - 1]->y);
+      obstacle_rotation -= bend_vector;
+      obstacle_rotation.rotate_z(-turned_angle);
+      obstacle_rotation += bend_vector;
+      pathfinder->setTargetPoint(gts_point_new(gts_point_class(),
+                                 obstacle_rotation.x(),
+                                 obstacle_rotation.y(), 0));
+    }//rotation without translation
+  else if((odometry_velocity_rotation > 0.000000005 || odometry_velocity_rotation < -0.0000000005) && odometry_difference == 0.)
+    {
+      for(unsigned int i = 0; i < map.size(); i++)
+        {//recalculating map
+          double ori = atan2(map[i].y, map[i].x);
+          double radius = sqrt(pow(map[i].x,2.) + pow(map[i].y, 2.));
+          map[i].x = radius * cos(ori - odometry_velocity_rotation * elapsed_time);
+          map[i].y = radius * sin(ori - odometry_velocity_rotation * elapsed_time);
+        }
+      //has to reset the target, since the path will be deleted
+
+      double ori = atan2(path[path.size() - 1]->y, path[path.size() - 1]->x);
+      double radius = sqrt(pow(path[path.size() - 1]->x,2.) + pow(path[path.size() - 1]->y, 2.));
+      pathfinder->setTargetPoint(gts_point_new(gts_point_class(),
+                                 radius * cos(ori + odometry_velocity_rotation * elapsed_time),
+                                 radius * sin(ori + odometry_velocity_rotation * elapsed_time), 0));
+
+    }
+  else //translation without rotation
+    {
+      for(unsigned int i = 0; i < map.size(); i++)
+        {//recalculating map
+          map[i].x -= odometry_velocity_x * elapsed_time;
+          map[i].y -= odometry_velocity_y * elapsed_time;
+        }
+
+      //has to reset the target, since the path will be deleted
+      pathfinder->setTargetPoint(gts_point_new(gts_point_class(),
+                                 path[path.size() - 1]->x -  elapsed_time * odometry_velocity_x,
+                                 path[path.size() - 1]->y -  elapsed_time * odometry_velocity_y, 0));
+    }
+
+  pathfinder->setObstacles(map);
+
+  t = 0;
+
+  path_mutex->lock();
+  destroy_path();
+
+  surface_mutex->lock();
+  path = pathfinder->getPath();
+  surface_mutex->unlock();
+
+  path_mutex->unlock();
+
+  count = (int)path.size();
+  /*
+    if(path[1]->x != 0)
+    current_degree = atan2(path[1]->y , path[1]->x);
+    else
+    current_degree = 0;
+  */
+
 }
 
