@@ -21,6 +21,9 @@ __buildsys_config_mk := 1
 
 ### Debugging related options
 SILENT = @
+ifeq ($(filter uncolored-%,$(MAKECMDGOALS)),)
+COLORED = 1
+endif
 
 ### Build type
 ifneq ($(realpath $(BASEDIR)/etc/buildsys_local/buildtype.mk),)
@@ -69,6 +72,7 @@ ifeq ($(GCC_USE_OPENMP),1)
   LDFLAGS_OPENMP   = -lgomp
 endif
 
+ifeq ($(COLORED),1)
 ### colors, to be used as command, not via echo
 BLACK		= tput setaf 0
 BG_BLACK	= tput setab 0
@@ -114,6 +118,7 @@ TBLUEBG		= \033[44m
 TMAGENTABG	= \033[45m
 TCYANBG		= \033[46m
 TGREYBG		= \033[47m
+endif
 
 ### Check if there are special config files for the chosen compiler
 ifneq ($(realpath $(BASEDIR)/etc/buildsys/$(CC).mk),)

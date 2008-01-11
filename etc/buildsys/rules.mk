@@ -66,6 +66,8 @@ ifeq ($(MAKELEVEL),1)
 endif
 all: presubdirs $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(TARGETS_all) $(EXTRA_ALL) subdirs
 gui: presubdirs $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui) subdirs
+uncolored-all: all
+uncolored-gui: gui
 
 ifneq ($(OBJS_all),)
 # Do not delete .o files to allow for incremental builds
