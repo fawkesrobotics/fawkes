@@ -26,7 +26,7 @@
  */
 
 #include <models/scanlines/star.h>
-
+#include <fvutils/color/yuv.h>
 #include <utils/math/angle.h>
 
 /** @class ScanlineStar <models/scanlines/star.h>
@@ -42,6 +42,9 @@
  * @param center_y y-coordinate of the center point
  * @param num_segments number of segments
  * @param radius_incr number of pixels by which the radius is increased
+ * @param yuv_mask a mask allows to exclude certain regions of the image from
+ *        inspection. More precisely, no scanline points are generated in those
+ *        areas. The ignored regions have to be black, i.e. Y=0, U=127, V=127.
  * @param dead_radius number of pixels around the center that are disregarded
  * @param max_radius maximal radius in number of pixels
  * @param margin margin around every scanline point that does not contain any
@@ -50,36 +53,52 @@
 ScanlineStar::ScanlineStar( unsigned int image_width, unsigned int image_height,
 			    unsigned int center_x, unsigned int center_y,
 			    unsigned int num_segments, unsigned int radius_incr,
+			    unsigned char* yuv_mask,
 			    unsigned int dead_radius, unsigned int max_radius,
-			    unsigned int margin )
+			    unsigned int margin)
 {
   m_image_width = image_width;
   m_image_height = image_height;
-  m_center_x = center_x;
-  m_center_y = center_y;
+  m_center.x = center_x;
+  m_center.y = center_y;
   m_num_segments = num_segments;
   m_radius_incr = radius_incr;
+  m_mask = yuv_mask;
   m_dead_radius = dead_radius;
   m_max_radius = max_radius;
   m_margin = margin;
 
   m_angle_incr = deg2rad( 360.0/m_num_segments );
 
+  m_angle_iter = m_angles.begin();
+  m_radius_iter = m_radii.begin();
+
+  generate_scan_points();
+
   reset();
 }
 
 
+ScanlineStar::~ScanlineStar()
+{
+  std::map<float, Ray*>::iterator rit;
+  for (rit = m_rays.begin(); rit != m_rays.end(); ++rit)
+    {
+      delete rit->second;
+    }
+}
+
 point_t
 ScanlineStar::operator*()
 {
-  return m_current_coord;
+  return m_current_point;
 }
 
 
-point_t*
+;point_t*
 ScanlineStar::operator->()
 {
-  return &m_current_coord;
+  return &m_current_point;
 }
 
 
@@ -87,17 +106,17 @@ point_t*
 ScanlineStar::operator++()
 {
   advance();  
-  return &m_current_coord;
+  return &m_current_point;
 }
 
 
 point_t*
 ScanlineStar::operator++(int)
 {
-  memcpy(&m_tmp_coord, &m_current_coord, sizeof(point_t));
+  memcpy(&m_tmp_point, &m_current_point, sizeof(point_t));
   advance();
 
-  return &m_tmp_coord;
+  return &m_tmp_point;
 }
 
 
@@ -105,65 +124,24 @@ ScanlineStar::operator++(int)
 void
 ScanlineStar::advance()
 {
-  bool ok = false;
-
   if (m_done) { return; }
-  
-  while (!ok)
-    {
-      if ( m_current_radius > m_max_radius )
-	// check whether the maximal radius was exceeded
-	{
-	  m_current_angle += m_angle_incr;
-	  m_current_radius = m_dead_radius;
-	}
 
-      if ( m_current_angle >= deg2rad(359.9) )
-	// stop if we have looked at the whole 360°
+  m_radius_iter++;
+
+  if ( m_radius_iter == m_radii.end() )
+    {
+      m_angle_iter++;
+
+      if ( m_angle_iter == m_angles.end() )
 	{
 	  m_done = true;
-	  ok = true;
+	  return;
 	}
-      else
-	{
-	  // calculate new (potential) scan point
-	  point_t tmp;
-	  tmp.x = m_center_x + (unsigned int)round(sin(m_current_angle) * m_current_radius);
-	  tmp.y = m_center_y + (unsigned int)round(cos(m_current_angle) * m_current_radius);
-	  
-	  if (m_current_angle == 0)
-	    // first ray; no values in last, yet.
-	    {
-	      m_current_coord = tmp;
-	      m_first[m_current_radius] = m_current_coord;
-	      m_last[m_current_radius] = m_current_coord;
-	      ok = true;
-	    }
-	  else
-	    {
-	      // calculate distance to last approved point on that radius
-	      float dist_first;
-	      float dist_last;
-	      int diff_x = tmp.x - m_first[m_current_radius].x;
-	      int diff_y = tmp.y - m_first[m_current_radius].y;
-	      dist_first = sqrt(diff_x * diff_x + diff_y * diff_y);
-	      diff_x = tmp.x - m_last[m_current_radius].x;
-	      diff_y = tmp.y - m_last[m_current_radius].y;
-	      dist_last = sqrt(diff_x * diff_x + diff_y * diff_y);
-	      
-	      if (dist_first > 2 * m_margin && dist_last > 2 * m_margin)
-		// approve point (and add it to last) if dist to last approved point
-		// on the current radius is larger than twice the margin
-		{
-		  m_current_coord = tmp;
-		  m_last[m_current_radius] = m_current_coord;
-		  ok = true;
-		}
-	    }
-	}
-    
-      m_current_radius += m_radius_incr;
+
+      m_radius_iter = m_radii.begin();
     }
+
+  m_current_point = (*m_rays[*m_angle_iter])[*m_radius_iter];
 }
 
 
@@ -178,20 +156,19 @@ void
 ScanlineStar::reset()
 {
   m_done = false;
-  
-  m_current_radius = m_dead_radius;
-  m_current_angle = 0.0f;
 
-  m_current_coord.x = m_center_x + (unsigned int)floor(sin(m_current_angle) * m_current_radius);
-  m_current_coord.y = m_center_y + (unsigned int)floor(cos(m_current_angle) * m_current_radius);
+  m_radius_iter = m_radii.begin();
+  m_angle_iter = m_angles.begin();
+  
+  m_current_point = (m_rays[*m_angle_iter])->begin()->second;
 
   // -- sanity checks --
   // max_radius
   unsigned int dist_x;
   unsigned int dist_y;
   unsigned int min;
-  dist_x = (m_center_x > m_image_width / 2 ) ? (m_image_width - m_center_x) : m_center_x;
-  dist_y = (m_center_y > m_image_height / 2 ) ? (m_image_height - m_center_y) : m_center_y;
+  dist_x = (m_center.x > m_image_width / 2 ) ? (m_image_width - m_center.x) : m_center.x;
+  dist_y = (m_center.y > m_image_height / 2 ) ? (m_image_height - m_center.y) : m_center.y;
   min = dist_x >= dist_y ? dist_y : dist_x;
   if (m_max_radius > min)
     {
@@ -239,8 +216,8 @@ ScanlineStar::setPanTilt(float pan, float tilt)
 void
 ScanlineStar::skip_current_ray()
 {
-  m_current_angle += m_angle_incr;
-  m_current_radius = m_dead_radius;
+  m_radius_iter = m_radii.begin();
+  m_angle_iter++;
 }
 
 
@@ -260,7 +237,7 @@ ScanlineStar::num_segments() const
 unsigned int
 ScanlineStar::current_radius() const
 {
-  return m_current_radius;
+  return *m_radius_iter;
 }
 
 
@@ -270,5 +247,83 @@ ScanlineStar::current_radius() const
 float
 ScanlineStar::current_angle() const
 {
-  return m_current_angle;
+  return *m_angle_iter;
+}
+
+void
+ScanlineStar::generate_scan_points()
+{
+  float angle = 0.0;
+  unsigned int radius = m_dead_radius;
+  Ray* current_ray = new Ray();
+  YUV_t ignore;
+  ignore.Y = 0;
+  ignore.U = 127;
+  ignore.V = 127;
+
+  while (radius <= m_max_radius)
+    {
+      m_radii.push_back(radius);
+      radius += m_radius_incr;
+    }
+
+  radius = m_dead_radius;
+  
+  while (angle < deg2rad(359.9) )
+    {
+      // calculate new (potential) scan point
+      point_t tmp;
+      tmp.x = m_center.x + (unsigned int) round( sin(angle) * radius );
+      tmp.y = m_center.y + (unsigned int) round( cos(angle) * radius );
+
+      YUV_t current;
+      current.Y = YUV422_PLANAR_Y_AT(m_mask, m_image_width, tmp.x, tmp.y);
+      current.U = YUV422_PLANAR_U_AT(m_mask, m_image_width, m_image_height, tmp.x, tmp.y);
+      current.V = YUV422_PLANAR_V_AT(m_mask, m_image_width, m_image_height, tmp.x, tmp.y);
+      
+      if ( ignore.Y != current.Y &&
+	   ignore.U != current.U &&
+	   ignore.V != current.V )
+	{
+	  if (0.0 == angle)
+	    // first ray; no values in last, yet.
+	    {
+	      (*current_ray)[radius] = tmp;
+	      m_previous_ray[radius] = tmp;
+	      m_first_ray[radius] = tmp;
+	    }
+	  
+	  else 
+	    {
+	      // calculate distance to last approved point on that radius
+	      float dist_first;
+	      float dist_last;
+	      int diff_x = tmp.x - m_first_ray[radius].x;
+	      int diff_y = tmp.y - m_first_ray[radius].y;
+	      dist_first = sqrt(diff_x * diff_x + diff_y * diff_y);
+	      diff_x = tmp.x - m_previous_ray[radius].x;
+	      diff_y = tmp.y - m_previous_ray[radius].y;
+	      dist_last = sqrt(diff_x * diff_x + diff_y * diff_y);
+	      
+	      if (dist_first > 2 * m_margin && dist_last > 2 * m_margin)
+		// approve point (and add it to previous) if dist to last approved point
+		// on the current radius is larger than twice the margin
+		{
+		  (*current_ray)[radius] = tmp;
+		  m_previous_ray[radius] = tmp;
+		}
+	    }
+	}
+
+      radius += m_radius_incr;
+
+      if (radius > m_max_radius)
+	{
+	  m_angles.push_back(angle);
+	  m_rays[angle] = current_ray;
+	  current_ray = new Ray();
+	  radius = m_dead_radius;
+	  angle += m_angle_incr;
+	}
+    }
 }

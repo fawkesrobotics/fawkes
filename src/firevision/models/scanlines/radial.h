@@ -28,7 +28,7 @@
 #ifndef __FIREVISION_SCANLINE_RADIAL_H_
 #define __FIREVISION_SCANLINE_RADIAL_H_
 
-#include "models/scanlines/scanlinemodel.h"
+#include <models/scanlines/scanlinemodel.h>
 #include <fvutils/base/types.h>
 
 class ScanlineRadial : public ScanlineModel

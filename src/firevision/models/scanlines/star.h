@@ -29,18 +29,21 @@
 #define __FIREVISION_MODELS_SCANLINES_STAR_H_
 
 #include <models/scanlines/scanlinemodel.h>
+#include <vector>
 #include <map>
 
 class ScanlineStar : public ScanlineModel
 {
  public:
-  ScanlineStar(unsigned int image_widht, unsigned int image_height,
+  ScanlineStar(unsigned int image_width, unsigned int image_height,
 	       unsigned int center_x, unsigned int center_y,
 	       unsigned int num_segments, unsigned int radius_incr,
+	       unsigned char* yuv_mask,
 	       unsigned int dead_radius = 0, unsigned int max_radius = 0,
 	       unsigned int margin = 0);
-  
-  
+
+  virtual ~ScanlineStar();
+    
   point_t operator*();
   point_t* operator->();
   point_t* operator++();
@@ -59,26 +62,34 @@ class ScanlineStar : public ScanlineModel
   float current_angle() const;
 
  private:
+  void generate_scan_points();
+  //  point_t& get_point
+
   unsigned int m_image_width;
   unsigned int m_image_height;
-  unsigned int m_center_x;
-  unsigned int m_center_y;
+  point_t m_center;
   unsigned int m_num_segments;
   unsigned int m_radius_incr;
   unsigned int m_dead_radius;
   unsigned int m_max_radius;
   unsigned int m_margin;
   float m_angle_incr;
+  unsigned char* m_mask;
 
   bool m_done;
 
-  unsigned int m_current_radius;
-  float m_current_angle;
-  point_t m_current_coord;
-  point_t m_tmp_coord;
+  point_t m_current_point;
+  point_t m_tmp_point;
 
-  std::map<unsigned int, point_t> m_first;
-  std::map<unsigned int, point_t> m_last;
+  typedef std::map<unsigned int, point_t> Ray;
+  std::map<float, Ray*> m_rays;
+  std::vector<float> m_angles;
+  std::vector<float>::iterator m_angle_iter;
+  std::vector<unsigned int> m_radii;
+  std::vector<unsigned int>::iterator m_radius_iter;
+
+  Ray m_first_ray;
+  Ray m_previous_ray;
 };
 
 #endif /* __FIREVISION_MODELS_SCANLINES_STAR_H_ */
