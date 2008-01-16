@@ -97,6 +97,7 @@ FvRetrieverThread::finalize()
   vision_master->unregister_thread(this);
   delete cam;
   delete shm;
+  delete __tt;
 }
 
 
