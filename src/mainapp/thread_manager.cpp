@@ -383,8 +383,8 @@ FawkesThreadManager::remove(ThreadList &tl)
     throw CannotFinalizeThreadException(e);
   }
 
-  tl.finalize(finalizer);
   tl.stop();
+  tl.finalize(finalizer);
   for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
     internal_remove_thread(*i, changed);
   }
@@ -473,6 +473,10 @@ FawkesThreadManager::remove(Thread *thread)
 {
   if ( thread == NULL ) return;
 
+  if ( ! (initializer && finalizer) ) {
+    throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
+  }
+
   try {
     if ( ! thread->prepare_finalize() ) {
       thread->cancel_finalize();
@@ -483,9 +487,10 @@ FawkesThreadManager::remove(Thread *thread)
     thread->cancel_finalize();
     throw;
   }
-  thread->finalize();
   thread->cancel();
   thread->join();
+  finalizer->finalize(thread);
+  thread->finalize();
 
   std::list<BlockedTimingAspect::WakeupHook> changed;
   internal_remove_thread(thread, changed);
@@ -561,9 +566,10 @@ FawkesThreadManager::force_remove(Thread *thread)
   } catch (Exception &e) {
     // ignore
   }
-  thread->finalize();
   thread->cancel();
   thread->join();
+  if (finalizer) finalizer->finalize(thread);
+  thread->finalize();
 
   std::list<BlockedTimingAspect::WakeupHook> changed;
   internal_remove_thread(thread, changed);
