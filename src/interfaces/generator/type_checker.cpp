@@ -28,7 +28,7 @@
 #include <interfaces/generator/type_checker.h>
 #include <interfaces/generator/exceptions.h>
 
-/** @class InterfaceDataTypeChecked interfaces/generator/type_checker.h
+/** @class InterfaceDataTypeChecker <interfaces/generator/type_checker.h>
  * Type checker for interface types.
  * This classed is used by the generator to decide if a supplied type is
  * correct and in the case of constants if the supplied value matches the
