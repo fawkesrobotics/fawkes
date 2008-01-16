@@ -60,6 +60,13 @@ class TriclopsStereoProcessorData
 };
 /// @endcond
 
+/** @class TriclopsStereoProcessor <stereo/triclops.h>
+ * Stereo processing using PGR Triclops SDK.
+ * This class uses the Triclops SDK provided by Point Grey Research along with
+ * the Bumblebee2 cameras.
+ * @author Tim Niemueller
+ */
+
 
 /** Constructor.
  * This constructor initializes this triclops wrapper to work on a real camera.

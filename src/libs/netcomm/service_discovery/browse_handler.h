@@ -34,7 +34,7 @@
 #include <string>
 #include <list>
 
-/** @class BrowseHandler netcomm/service_discovery/browse_handler.h
+/** @class ServiceBrowseHandler <netcomm/service_discovery/browse_handler.h>
  * Interface for class that process browse results.
  * Implement this class if you want to browse for services on the network.
  * Then register your handler and it will be informed of services that

@@ -33,6 +33,13 @@
 
 using namespace std;
 
+/** @class BlackBoardSharedMemoryLister <blackboard/shmem_lister.h>
+ * BlackBoard shared memory lister.
+ * Lister that can be used to print infos about BlackBoard shared memory
+ * segments.
+ * @author Tim Niemueller
+ */
+
 /** Constructor */
 BlackBoardSharedMemoryLister::BlackBoardSharedMemoryLister()
 {

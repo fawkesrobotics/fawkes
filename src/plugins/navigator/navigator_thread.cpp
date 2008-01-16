@@ -2,7 +2,7 @@
 /***************************************************************************
  *  navigator_thread.cpp - Navigator Thread
  *
- *  Generated: Thu May 31 18:36:55 2007
+ *  Created: Thu May 31 18:36:55 2007
  *  Copyright  2007  Martin Liebenberg
  *
  *  $Id$
@@ -32,6 +32,12 @@
 
 #include <cmath>
 #include <unistd.h>
+
+/** @class NavigatorThread <plugins/navigator/navigator_thread.h>
+ * Navigator thread.
+ * Navigator functional thread.
+ * @author Martin Liebenberg
+ */
 
 /** Contructor. */
 NavigatorThread::NavigatorThread()

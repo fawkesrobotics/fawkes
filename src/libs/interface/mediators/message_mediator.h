@@ -2,8 +2,8 @@
 /***************************************************************************
  *  message_mediator.h - Fawkes BlackBoard Message Mediator
  *
- *  Generated: Sun Oct 29 17:58:19 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Oct 29 17:58:19 2006
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -31,6 +31,11 @@
 class Interface;
 class Message;
 
+/** Message mediator interface.
+ * The message mediator is used by an interface to communicate messages to the
+ * BlackBoard for dispatching.
+ * @author Tim Niemueller
+ */
 class MessageMediator
 {
  public:

@@ -625,6 +625,12 @@ Exception::begin() throw()
 }
 
 
+/** @class Exception::iterator <core/exception.h>
+ * Message iterator for exceptions.
+ * This iterator allows for iterating over all messages carried by an Exception.
+ * @author Tim Niemueller
+ */
+
 /** Get end iterator for messages.
  * @return end iterator for messages.
  */

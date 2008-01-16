@@ -30,6 +30,11 @@
 
 #include <sys/time.h>
 
+/** TimeSource interface.
+ * This interfaces describes a way to interact with time sources that can be
+ * given to a Clock (for instance for simulation environments).
+ * @author Daniel Beck
+ */
 class TimeSource
 {
  public:

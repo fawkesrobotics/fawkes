@@ -39,21 +39,21 @@
 #include <cmath>
 #include <unistd.h>
 
-/* @class MotorThread plugins/navigator/motor_thread.h
+/** @class MotorThread plugins/navigator/motor_thread.h
  * The thread controlling the motors.
  * It gets some driving commands and calculates the rpms for
  * the wheels. It gets the real rpms from the motor controller as well.
  */
-/* @var MotorThread::forward
+/** @var MotorThread::forward
  * The forward command.
  */
-/* @var MotorThread::sideward
+/** @var MotorThread::sideward
  * The sideward command.
  */
-/* @var MotorThread::rotation
+/** @var MotorThread::rotation
  * The rotation command.
  */
-/* @var MotorThread::orbit_velocity
+/** @var MotorThread::orbit_velocity
  * The orbit_velocity command.
  */
 

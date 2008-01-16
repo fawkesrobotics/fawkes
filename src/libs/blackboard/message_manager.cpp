@@ -2,8 +2,8 @@
 /***************************************************************************
  *  message_manager.cpp - BlackBoard message manager
  *
- *  Generated: Fri Oct 06 11:36:24 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri Oct 06 11:36:24 2006
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -30,6 +30,14 @@
 #include <blackboard/exceptions.h>
 
 #include <utils/logging/liblogger.h>
+
+
+/** @class BlackBoardMessageManager <blackboard/message_manager.h>
+ * BlackBoard message manager.
+ * Transmits messages from reading interface instances to the writer instance
+ * if the interface, if there is any.
+ * @author Tim Niemueller
+ */
 
 /** Constructor.
  * @param im interface manager to query for writer interface

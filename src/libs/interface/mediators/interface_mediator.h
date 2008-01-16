@@ -3,7 +3,7 @@
  *  interface_mediator.h - BlackBoard Interface Mediator
  *
  *  Generated: Tue Oct 17 15:35:45 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -30,6 +30,11 @@
 
 class Interface;
 
+/** Interface mediator interface.
+ * An interface mediator is used by interfaces to communicate events and to query
+ * status information which need interaction with the BlackBoard.
+ * @author Tim Niemueller
+ */
 class InterfaceMediator
 {
  public:

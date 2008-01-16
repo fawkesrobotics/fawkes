@@ -1186,6 +1186,13 @@ SharedMemory::end()
 }
 
 
+/** @class SharedMemory::SharedMemoryIterator <utils/ipc/shm.h>
+ * Shared Memory iterator.
+ * This iterator is used to iterate over shared memory segments which satisfy some
+ * criterion. Use SharedMemory::find() and SharedMemory::list() to get the iterator.
+ * @author Tim Niemueller
+ */
+
 /** Constructor.
  * Constructs invalid iterator.
  */

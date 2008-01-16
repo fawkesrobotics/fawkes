@@ -133,16 +133,19 @@ typedef struct {
   uint32_t  flag_reserved     : 31;	*< reserved for future use 
 */
 
+/** Image request message. */
 typedef struct {
   char image_id[IMAGE_ID_MAX_LENGTH];	/**< image ID */
   uint32_t format   : 8;		/**< requested image format, see FUSE_image_format_t */
   uint32_t reserved : 24;		/**< reserved for future use */
 } FUSE_imagereq_message_t;
 
+/** LUT description message. */
 typedef struct {
   char lut_id[LUT_ID_MAX_LENGTH];	/**< LUT ID */
 } FUSE_lutdesc_message_t;
 
+/** Image info message. */
 typedef struct {
   char      image_id[IMAGE_ID_MAX_LENGTH];	/**< image ID */
   uint32_t  colorspace   : 16;			/**< color space */
@@ -152,6 +155,7 @@ typedef struct {
   uint32_t  buffer_size;			/**< size of following image buffer in bytes */
 } FUSE_imageinfo_t;
 
+/** LUT info message. */
 typedef struct {
   char     lut_id[LUT_ID_MAX_LENGTH];	/**< LUT ID */
   uint32_t width;			/**< width of LUT */

@@ -234,6 +234,7 @@ class NavigatorSurfaceMessage : public FawkesNetworkMessageContent
 
   virtual void serialize();
 
+  /** Navigator line type. */
   typedef struct {
     float x1; /**< x-coordinate of point 1 */
     float y1; /**< y-coordinate of point 1 */
@@ -262,6 +263,7 @@ class NavigatorPathListMessage : public FawkesNetworkMessageContent
 
   virtual void serialize();
 
+  /** Navigator point type. */
   typedef struct {
     float x; /**< x-coordinate */
     float y; /**< y-coordinate */

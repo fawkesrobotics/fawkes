@@ -50,7 +50,7 @@ MessageAlreadyQueuedException::MessageAlreadyQueuedException()
 
 
 
-/** @class MessageQueue interface/message_queue.h
+/** @class MessageQueue <interface/message_queue.h>
  * Message queue used in interfaces.
  * This message queue handles the basic messaging operations. The methods the
  * Interface provides for handling message queues are forwarded to a
@@ -371,6 +371,13 @@ MessageQueue::end()
   return MessageIterator();
 }
 
+
+/** @class MessageQueue::MessageIterator <interface/message_queue.h>
+ * Message iterator.
+ * Use this iterator to iterate over messages in a message queue.
+ * Use MessageQueue::begin() to get the iterator.
+ * @author Tim Niemueller
+ */
 
 /** Constructor
  * @param cur Current element for message list

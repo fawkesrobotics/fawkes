@@ -3,7 +3,7 @@
  *  blackboard.cpp - BlackBoard plugin
  *
  *  Generated: Sat Sep 16 17:11:13 2006 (on train to Cologne)
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -27,6 +27,13 @@
 
 #include <blackboard/blackboard.h>
 #include <blackboard/main_thread.h>
+
+/** @class BlackBoard <blackboard/blackboard.h>
+ * BlackBoard main class.
+ * This class has to be instantiated to create a BlackBoard with exclusive
+ * access. It is the main entry point for the BlackBoard.
+ * @author Tim Niemueller
+ */
 
 /** Constructor. */
 BlackBoard::BlackBoard()
