@@ -118,6 +118,32 @@ TBLUEBG		= \033[44m
 TMAGENTABG	= \033[45m
 TCYANBG		= \033[46m
 TGREYBG		= \033[47m
+else
+BLACK           = : 
+BG_BLACK        = :
+DARKGREY        = :
+LIGHTGREY       = :
+BG_LIGHTGREY    = :
+WHITE           = :
+RED             = :
+BG_RED          = :
+BRIGHTRED       = :
+GREEN           = :
+BG_GREEN        = :
+BRIGHTGREEN     = :
+BROWN           = :
+BG_BROWN        = :
+YELLOW          = :
+BLUE            = :
+BG_BLUE         = :
+BRIGHTBLUE      = :
+PURPLE          = :
+BG_PURPLE       = :
+PINK            = :
+CYAN            = :
+BG_CYAN         = :
+BRIGHTCYAN      = :
+NORMAL          = :
 endif
 
 ### Check if there are special config files for the chosen compiler

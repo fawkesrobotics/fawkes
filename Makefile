@@ -28,6 +28,7 @@ include $(BASEDIR)/etc/buildsys/rules.mk
 apidoc: api.doxygen
 quickdoc: api-quick.doxygen
 tracdoc: api-trac.doxygen
+uncolored-quickdoc: quickdoc
 
 %.doxygen:
 	$(SILENT) echo "--> Building documentation ($@). This may take a while..."
@@ -38,6 +39,7 @@ tracdoc: api-trac.doxygen
 		echo "--> Warnings have been generated:"; \
 		$(NORMAL); \
 		cat warnings.txt; \
+		exit 1; \
 	else \
 		$(GREEN); \
 		echo "--> No warnings. Nice job."; \
