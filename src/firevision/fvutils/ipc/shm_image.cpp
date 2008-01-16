@@ -486,6 +486,7 @@ SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader()
   _width = 0;
   _height = 0;
   _header = NULL;
+  _orig_image_id = NULL;
 }
 
 
@@ -539,6 +540,7 @@ SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader(const SharedMemoryI
 SharedMemoryImageBufferHeader::~SharedMemoryImageBufferHeader()
 {
   if ( _image_id != NULL)  free(_image_id);
+  if ( _orig_image_id != NULL)  free(_orig_image_id);
 }
 
 
