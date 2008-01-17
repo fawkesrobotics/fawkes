@@ -44,6 +44,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   data_size = sizeof(NavigatorInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (NavigatorInterface_data_t *)data_ptr;
+  memset(data_ptr, 0, data_size);
 }
 /** Destructor */
 NavigatorInterface::~NavigatorInterface()

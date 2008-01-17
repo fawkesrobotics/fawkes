@@ -58,6 +58,7 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   data_size = sizeof(ObjectPositionInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (ObjectPositionInterface_data_t *)data_ptr;
+  memset(data_ptr, 0, data_size);
 }
 /** Destructor */
 ObjectPositionInterface::~ObjectPositionInterface()

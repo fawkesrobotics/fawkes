@@ -449,6 +449,7 @@ InterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 	  "  data_size = sizeof(%s_data_t);\n"
 	  "  data_ptr  = malloc(data_size);\n"
 	  "  data      = (%s_data_t *)data_ptr;\n"
+	  "  memset(data_ptr, 0, data_size);\n"
 	  "}\n"
 	  "/** Destructor */\n"
 	  "%s%s::~%s()\n"

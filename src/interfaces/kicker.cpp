@@ -47,6 +47,7 @@ KickerInterface::KickerInterface() : Interface()
   data_size = sizeof(KickerInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (KickerInterface_data_t *)data_ptr;
+  memset(data_ptr, 0, data_size);
 }
 /** Destructor */
 KickerInterface::~KickerInterface()

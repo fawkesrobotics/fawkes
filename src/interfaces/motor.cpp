@@ -58,6 +58,7 @@ MotorInterface::MotorInterface() : Interface()
   data_size = sizeof(MotorInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (MotorInterface_data_t *)data_ptr;
+  memset(data_ptr, 0, data_size);
 }
 /** Destructor */
 MotorInterface::~MotorInterface()

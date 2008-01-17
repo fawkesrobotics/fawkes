@@ -49,6 +49,7 @@ TestInterface::TestInterface() : Interface()
   data_size = sizeof(TestInterface_data_t);
   data_ptr  = malloc(data_size);
   data      = (TestInterface_data_t *)data_ptr;
+  memset(data_ptr, 0, data_size);
 }
 /** Destructor */
 TestInterface::~TestInterface()
