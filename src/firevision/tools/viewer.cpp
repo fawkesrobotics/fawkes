@@ -53,7 +53,8 @@
 void
 print_usage(const char *program_name)
 {
-  printf("Usage: %s [-s shmem_id] [-n host[:port]/image_id] [-f file] [-v] [cam arg string]\n"
+  printf("Usage: %s [-c] [-s shmem_id] [-n host[:port]/image_id] [-f file] [-v] [cam arg string]\n"
+         "  -c             Start in continuous update mode\n"
 	 "  -s shmem_id    Open shared memory image with given ID\n"
 	 "  -n net_string  Open network camera, the camera string is of the form\n"
 	 "                 host[:port]/image_id. You have to specify at least the host\n"
@@ -93,7 +94,7 @@ process_gtk_events()
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hs:f:n:vj");
+  ArgumentParser argp(argc, argv, "hs:f:n:vjc");
 
 #ifdef HAVE_GTKMM
   Gtk::Main gtk_main(argc, argv);
@@ -199,11 +200,15 @@ main(int argc, char **argv)
   unsigned char *unfiltered_buffer = malloc_buffer(YUV422_PLANAR,
 						   cam->pixel_width(), cam->pixel_height());
   bool rectifying = false;
-  bool continuous = false;
+  bool continuous = argp.has_arg("c");
 
   SDL_Event redraw_event;
   redraw_event.type = SDL_KEYUP;
   redraw_event.key.keysym.sym = SDLK_SPACE;
+
+  if ( continuous ) {
+    SDL_PushEvent(&redraw_event);
+  }
 
   bool quit = false;
   while (! quit) {
