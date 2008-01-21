@@ -122,6 +122,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   trans_radio = new Gtk::RadioButton("Trans");
   rot_radio = new Gtk::RadioButton("Rot");
   orbit_radio = new Gtk::RadioButton("Orbit");
+  line_trans_rot_radio = new Gtk::RadioButton("Line-Trans-Rot");
   navigator_radio = new Gtk::RadioButton("Navigator");
 
   obstacle_check = new Gtk::CheckButton("add Obstacles");
@@ -172,6 +173,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   trans_radio->set_group(drive_mode_group);
   rot_radio->set_group(drive_mode_group);
   orbit_radio->set_group(drive_mode_group);
+  line_trans_rot_radio->set_group(drive_mode_group);
   navigator_radio->set_group(drive_mode_group);
 
   trans_rot_radio->set_active();
@@ -276,6 +278,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   bbox_left->pack_start(*trans_radio, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*rot_radio, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*orbit_radio, Gtk::PACK_SHRINK, 4);
+  bbox_left->pack_start(*line_trans_rot_radio, Gtk::PACK_SHRINK, 4);
   bbox_left->pack_start(*send_button, Gtk::PACK_SHRINK, 10);
 
   m_VBox_Main->pack_start(*bbox_top, Gtk::PACK_SHRINK, 4);
@@ -619,7 +622,8 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
       //add path_points
       while (path_msg->has_next())
         {
-          NavigatorPathListMessage::npoint_t *p = path_msg->next();
+          NavigatorPathListMessage::npoint_t *p = path_msg->next(); 
+         // std::cout << "p " << p->x << ", " << p->y << std::endl;        
           path_points.push_back(new NPoint(-p->y, -p->x));
         }
       path_points.unlock();
@@ -790,6 +794,17 @@ bool NavigatorGUI::on_idle()
           navigator_frame->set_sensitive(false);
           send_button->set_sensitive(true);
         }
+      else if(line_trans_rot_radio->get_active())
+        {
+          translation_frame->set_sensitive(true);
+          rotation_frame->set_sensitive(true);
+          rpm_frame->set_sensitive(false);
+          orbit_frame->set_sensitive(false);
+          navigator_frame->set_sensitive(false);
+          send_button->set_sensitive(true);
+          mouse_point.x = 0;
+          mouse_point.y = 0;
+        }
     }
 
   if(navigator_control_radio->get_active())
@@ -807,6 +822,7 @@ bool NavigatorGUI::on_idle()
       trans_radio->set_sensitive(false);
       rot_radio->set_sensitive(false);
       orbit_radio->set_sensitive(false);
+      line_trans_rot_radio->set_sensitive(false);
       navigator_radio->set_sensitive(false);
     }
   else if(motor_control_radio->get_active())
@@ -817,6 +833,7 @@ bool NavigatorGUI::on_idle()
       trans_rot_radio->set_sensitive(true);
       trans_radio->set_sensitive(true);
       rot_radio->set_sensitive(true);
+      line_trans_rot_radio->set_sensitive(true);
       orbit_radio->set_sensitive(true);
     }
   else if(behold_radio->get_active())
@@ -835,6 +852,7 @@ bool NavigatorGUI::on_idle()
       trans_radio->set_sensitive(false);
       rot_radio->set_sensitive(false);
       orbit_radio->set_sensitive(false);
+      line_trans_rot_radio->set_sensitive(false);
       navigator_radio->set_sensitive(false);
     }
 
@@ -944,6 +962,17 @@ void NavigatorGUI::on_send_button_clicked()
       orbit_msg->orbit_center_y = -mouse_point.x;
       orbit_msg->angular_velocity = angular_velocity_entry->get_value();
       FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_ORBIT, orbit_msg, sizeof(navigator_orbit_message_t));
+      net_client->enqueue(msg);
+      msg->unref();
+    }
+  else  if(line_trans_rot_radio->get_active() && motor_control_radio->get_active())
+    {
+      navigator_trans_rot_message_t *line_trans_rot_msg = (navigator_trans_rot_message_t *)calloc(1, sizeof(navigator_trans_rot_message_t));
+      line_trans_rot_msg->type_line_trans_rot = 1;
+      line_trans_rot_msg->forward = xv_entry->get_value();
+      line_trans_rot_msg->sideward = yv_entry->get_value();
+      line_trans_rot_msg->rotation = rotation_entry->get_value();
+      FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_TRANS_ROT, line_trans_rot_msg, sizeof(navigator_trans_rot_message_t));
       net_client->enqueue(msg);
       msg->unref();
     }

@@ -46,6 +46,7 @@ class MotorInterface : public Interface
   static const unsigned int DRIVE_MODE_ROT;
   static const unsigned int DRIVE_MODE_TRANS_ROT;
   static const unsigned int DRIVE_MODE_ORBIT;
+  static const unsigned int DRIVE_MODE_LINE_TRANS_ROT;
 
  private:
   /** Internal data storage, do NOT modify! */
@@ -284,6 +285,32 @@ class MotorInterface : public Interface
     void set_px(const float new_px);
     float py();
     void set_py(const float new_py);
+    float omega();
+    void set_omega(const float new_omega);
+  };
+
+  class LinTransRotMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float vx; /**< Speed for translation in X direction in m/s. */
+      float vy; /**< Speed for translation in Y direction in m/s. */
+      float omega; /**< Rotational speed in rad/s. */
+    } LinTransRotMessage_data_t;
+
+    LinTransRotMessage_data_t *data;
+
+   public:
+    LinTransRotMessage(float ini_vx, float ini_vy, float ini_omega);
+    LinTransRotMessage();
+    ~LinTransRotMessage();
+
+    /* Methods */
+    float vx();
+    void set_vx(const float new_vx);
+    float vy();
+    void set_vy(const float new_vy);
     float omega();
     void set_omega(const float new_omega);
   };

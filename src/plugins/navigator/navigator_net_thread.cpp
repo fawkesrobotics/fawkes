@@ -334,6 +334,14 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
           rmsg->set_omega(u->rotation);
           motor_interface->msgq_enqueue(rmsg);
         }
+       else if(u->type_line_trans_rot)
+        {
+          MotorInterface::LinTransRotMessage* ltrmsg = new  MotorInterface::LinTransRotMessage();
+          ltrmsg->set_vx(u->forward);
+          ltrmsg->set_vy(u->sideward);
+          ltrmsg->set_omega(u->rotation);
+          motor_interface->msgq_enqueue(ltrmsg);
+        }
     }
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_RPM
           && msg->clid() == connected_control_client)

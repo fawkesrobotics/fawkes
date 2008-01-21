@@ -77,7 +77,8 @@ typedef struct {
   uint32_t type_trans_rot:1; /**< This bit states the trans rot motor command. */
   uint32_t type_trans:1; /**< This bit states the trans motor command. */
   uint32_t type_rot:1; /**< This bit states the rot motor command. */
-  uint32_t reserved:29;  /**< Reserved bits for future work. */
+  uint32_t type_line_trans_rot:1; /**< This bit states the lintransrot motor command. */
+  uint32_t reserved:28;  /**< Reserved bits for future work. */
   float forward;        /**< Forward command.*/
   float sideward;       /**< Sideward command.*/ 
   float rotation;       /**< Rotation command.*/

@@ -115,6 +115,7 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::RadioButton* trans_radio;
     Gtk::RadioButton* rot_radio;
     Gtk::RadioButton* orbit_radio;
+    Gtk::RadioButton* line_trans_rot_radio;
     Gtk::RadioButton* navigator_radio;
 
     Gtk::Adjustment *zooming_adjustment;

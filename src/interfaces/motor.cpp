@@ -51,6 +51,8 @@ const unsigned int MotorInterface::DRIVE_MODE_ROT = 3;
 const unsigned int MotorInterface::DRIVE_MODE_TRANS_ROT = 4;
 /** DRIVE_MODE_ORBIT constant */
 const unsigned int MotorInterface::DRIVE_MODE_ORBIT = 5;
+/** DRIVE_MODE_LINE_TRANS_ROT constant */
+const unsigned int MotorInterface::DRIVE_MODE_LINE_TRANS_ROT = 6;
 
 /** Constructor */
 MotorInterface::MotorInterface() : Interface()
@@ -976,6 +978,101 @@ MotorInterface::OrbitMessage::set_omega(const float new_omega)
   data->omega = new_omega;
 }
 
+/** @class MotorInterface::LinTransRotMessage interfaces/motor.h
+ * LinTransRotMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_vx initial value for vx
+ * @param ini_vy initial value for vy
+ * @param ini_omega initial value for omega
+ */
+MotorInterface::LinTransRotMessage::LinTransRotMessage(float ini_vx, float ini_vy, float ini_omega) : Message()
+{
+  data_size = sizeof(LinTransRotMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (LinTransRotMessage_data_t *)data_ptr;
+  data->vx = ini_vx;
+  data->vy = ini_vy;
+  data->omega = ini_omega;
+}
+/** Constructor */
+MotorInterface::LinTransRotMessage::LinTransRotMessage() : Message()
+{
+  data_size = sizeof(LinTransRotMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (LinTransRotMessage_data_t *)data_ptr;
+}
+/** Destructor */
+MotorInterface::LinTransRotMessage::~LinTransRotMessage()
+{
+}
+/* Methods */
+/** Get vx value.
+ * Speed for translation in X direction in m/s.
+ * @return vx value
+ */
+float
+MotorInterface::LinTransRotMessage::vx()
+{
+  return data->vx;
+}
+
+/** Set vx value.
+ * Speed for translation in X direction in m/s.
+ * @param new_vx new vx value
+ */
+void
+MotorInterface::LinTransRotMessage::set_vx(const float new_vx)
+{
+  data->vx = new_vx;
+}
+
+/** Get vy value.
+ * Speed for translation in Y direction in m/s.
+ * @return vy value
+ */
+float
+MotorInterface::LinTransRotMessage::vy()
+{
+  return data->vy;
+}
+
+/** Set vy value.
+ * Speed for translation in Y direction in m/s.
+ * @param new_vy new vy value
+ */
+void
+MotorInterface::LinTransRotMessage::set_vy(const float new_vy)
+{
+  data->vy = new_vy;
+}
+
+/** Get omega value.
+ * Rotational speed in rad/s.
+ * @return omega value
+ */
+float
+MotorInterface::LinTransRotMessage::omega()
+{
+  return data->omega;
+}
+
+/** Set omega value.
+ * Rotational speed in rad/s.
+ * @param new_omega new omega value
+ */
+void
+MotorInterface::LinTransRotMessage::set_omega(const float new_omega)
+{
+  data->omega = new_omega;
+}
+
 /** Check if message is valid an can be queued.
  * @param message Message to check
  */
@@ -1012,6 +1109,10 @@ MotorInterface::messageValid(const Message *message) const
   }
   const OrbitMessage *m7 = dynamic_cast<const OrbitMessage *>(message);
   if ( m7 != NULL ) {
+    return true;
+  }
+  const LinTransRotMessage *m8 = dynamic_cast<const LinTransRotMessage *>(message);
+  if ( m8 != NULL ) {
     return true;
   }
   return false;
