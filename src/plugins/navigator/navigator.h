@@ -30,6 +30,7 @@
 extern "C"
   {
 #include <gts.h>
+
   }
 #include <vector>
 #include <list>
@@ -38,10 +39,12 @@ extern "C"
 #include <plugins/navigator/libnavi/obstacle.h>
 #include <plugins/navigator/gts/gts_obstacle.h>
 
+
 class NPoint;
 class NLine;
 class Pathfinder;
 class Mutex;
+class Configuration;
 
 
 class Navigator
@@ -65,6 +68,7 @@ class Navigator
       void goTo_rad(double ori, double distance);
       void goTo(double ori, double distance, std::vector< Obstacle * >);
     */
+    void set_target_tolerance(float tolerance);
     void set_odometry_velocity_x(double velocity_x);
     void set_odometry_velocity_y(double velocity_y);
     void set_odometry_velocity_rotation(double rotation);
@@ -111,6 +115,8 @@ class Navigator
     static void getVertexes(GtsVertex *vertex, GtsFifo * fifo);
 
     bool running_route;
+
+    float target_tolerance;
 
     //Abtastbereich der Sensorik
     double scanning_area_width;

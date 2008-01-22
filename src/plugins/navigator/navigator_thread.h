@@ -32,6 +32,7 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
+#include <aspect/configurable.h>
 #include <plugins/navigator/navigator.h>
 
 class NavigatorInterface;
@@ -39,7 +40,7 @@ class MotorInterface;
 class ObjectPositionInterface;
 
 class NavigatorThread : public Thread, public BlockedTimingAspect, public LoggingAspect,
-                        public BlackBoardAspect, public Navigator
+                        public BlackBoardAspect, public Navigator, public ConfigurableAspect
 {
  public:
   NavigatorThread();
@@ -55,6 +56,7 @@ class NavigatorThread : public Thread, public BlockedTimingAspect, public Loggin
     
   double old_velocity_x;
   double old_velocity_y;
+  double old_velocity_rotation;
   
   std::list<Interface *> *object_interface_list;
   NavigatorInterface *navigator_interface;

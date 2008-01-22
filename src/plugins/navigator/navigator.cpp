@@ -94,6 +94,8 @@ Navigator::Navigator()
 
   surface_mutex = new Mutex();
   path_mutex = new Mutex();
+  
+  target_tolerance = 0.02;
 }
 
 /** Destructor */
@@ -278,6 +280,14 @@ void Navigator::add_obstacle(Obstacle obstacle)
 {
   map.push_back(obstacle);
   pathfinder->addObstacle(obstacle);
+}
+
+/** Sets the target tolerance.
+ * @param the target tolerance
+ */
+void Navigator::set_target_tolerance(float tolerance)
+{
+  target_tolerance = tolerance;
 }
 
 /** Sets the odometry velocity in x-direction.
@@ -596,35 +606,31 @@ void Navigator::mainLoop()
   std::cout << "-------t_Tn_Sn " << t_Tn_Sn << std::endl;
   std::cout << "-------delta_s " << delta_s << std::endl;
   */
-  /***************************
-   * 
-   * Wenn ein Pfadabschnitt abgefahren wurde, werden fuer den naechsten
-   * Abschnitt wichtige Parameter neu gesetzt
-   * 
-   *****************************/
-  if(t > 1)
+
+  //the end of the current path is reached
+  if(t > 1 || target_tolerance >= gts_point_distance(path[0], path[path.size() -1]))
     {
       t= 0;
 
-      //      std::cout << "-------next Path-------------------------------------------------" << std::endl;
+        //    std::cout << "-------next Path-------------------------------------------------" << std::endl;
       step_x = 0;
       step_y = 0;
       newDirection = true;
 
 
       //stop at the end of the path
-      if(path.size() == 2) //also es gibt nur ein Stück zwischen zwei Punkten
+      if(path.size() == 2) //the robot is on the straight way to the end of the path
         {
-          if(route.size() != 0)  //die route wird abgefahren
+          if(route.size() != 0)  //the robot drives along a route
             {
-              if(route.size() == 1) //wir befinden uns auf dem letzten Stück der route
+              if(route.size() == 1) //the robot is on the last part of the route and at the target
                 {
                   velocity = 0;
-                  std::cout << "-------STOP-------------------------------------------------" << std::endl;
+                 // std::cout << "-------STOP-------------------------------------------------" << std::endl;
                   gts_object_destroy(GTS_OBJECT(route[0]));
                   route.clear();
                 }
-              else //wenn wir irgendwo auf der route sind, nur nicht am Ende
+              else //the robot is not at the target but somewhere on the route
                 {
                   gts_object_destroy(GTS_OBJECT(route[0]));
                   route.erase(route.begin());
@@ -640,10 +646,11 @@ void Navigator::mainLoop()
                   */
                 }
             }
-          else
+          else //the robot is at the target
             velocity = 0;
         }
     }
+    
   /*
   std::cout << "traget-x" << pathfinder->getTargetPoint()->x << std::endl;
   std::cout << "traget-y" << pathfinder->getTargetPoint()->y << std::endl;
@@ -810,8 +817,8 @@ void Navigator::mainLoop()
 
   //  std::cout << "-------odometry_velocity_x * elapsed_time " << odometry_velocity_x * elapsed_time << std::endl;
   //  std::cout << "-------odometry_velocity_y * elapsed_time " << odometry_velocity_y * elapsed_time << std::endl;
-  std::cout << "-------odometry_velocity_x " << odometry_velocity_x << std::endl;
-  std::cout << "-------odometry_velocity_y " << odometry_velocity_y << std::endl;
+//  std::cout << "-------odometry_velocity_x " << odometry_velocity_x << std::endl;
+//  std::cout << "-------odometry_velocity_y " << odometry_velocity_y << std::endl;
   //  std::cout << "-------odometry_velocity_rotation " << odometry_velocity_rotation << std::endl;
   //  std::cout << "-------odometry_velocity_rotation * elapsed_time " << odometry_velocity_rotation * elapsed_time << std::endl;
 

@@ -123,6 +123,9 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     bool start_time;
 
     Clock* clock;
+    
+    double rotations_sum;
+    double last_rotation;
 
     unsigned int logger_modulo_counter;
   };
