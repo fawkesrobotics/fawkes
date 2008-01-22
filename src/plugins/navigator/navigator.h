@@ -59,6 +59,7 @@ class Navigator
   protected:
     void goTo_cartesian(double x, double y);
     void goTo_cartesian(double x, double y, double velocity);
+    void goTo_cartesian_ori(double x, double y, double ori);
     /*
       void goTo_degree(double ori, double distance);
       void goTo_rad(double ori, double distance);
@@ -76,7 +77,7 @@ class Navigator
 
     double getVelocityX();
     double getVelocityY();
-    // double getVelocityRotation();
+    double getVelocityRotation();
     double getOrientation();
 
     void setElapsedTime(double elapsedTime);
@@ -156,6 +157,7 @@ class Navigator
     double velocity_rotation;
 
     double orientation;
+    double desired_orientation;
 
     bool running;
 

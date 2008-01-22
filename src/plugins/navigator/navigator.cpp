@@ -66,9 +66,13 @@ Navigator::Navigator()
   velocity_x = 0;
   velocity_y = 0;
 
+  odometry_velocity_x = 0;
+  odometry_velocity_y = 0;
+
   //the velocity of the rotation of the robot
   velocity_rotation = 0;
   orientation = 0;
+  desired_orientation = 0;
 
   //the index of the formula of the bezier curve
   t = 0;
@@ -317,6 +321,14 @@ void Navigator::setVelocityRotation(double velocity_rotation)
   this->velocity_rotation = velocity_rotation;
 }
 
+/** Returns the velocity of the rotation of the robot.
+ * @return the velocity of the rotation
+ */
+double Navigator::getVelocityRotation()
+{
+  return velocity_rotation;
+}
+
 /** Returns the velocity of the robot.
  * @return the velocity of the robot
  */
@@ -449,6 +461,28 @@ void Navigator::goTo_cartesian(double x, double y)
   goTo_cartesian(x, y, velocity);
 }
 
+/** Sets a target.
+ * @param x the x-coordinate of the target
+ * @param y the y-coordinate of the target
+ * @param ori the desired orientation at the target
+ */
+void Navigator::goTo_cartesian_ori(double x, double y, double ori)
+{
+  goTo_cartesian(x, y, velocity);
+  if(velocity != 0)
+    {
+      velocity_rotation = ori / (sqrt(pow(x, 2) + pow(y, 2)) / velocity);
+    }
+  else
+    {
+      velocity_rotation = ori / 3.;
+    }
+  //desired_orientation and orientation is always positive
+  //the velocity_rotation states the direction
+  desired_orientation = fabs(ori);
+  orientation = 0;
+}
+
 /** Sets a target and a velocity.
  *  The navigator will search a path and will drive along.
  * @param x the x-coordinate of the target
@@ -466,10 +500,10 @@ void Navigator::goTo_cartesian(double x, double y, double velocity)
 
   destroy_path();
   // std::cout << "path.size() " << path.size() << std::endl;
-  for(unsigned int i = 0; i < path.size(); i++)
-    {
-      //   std::cout << "path remains" << path[i]->x << ", " << path[i]->y << std::endl;
-    }
+  /* for(unsigned int i = 0; i < path.size(); i++)
+     {
+          std::cout << "path remains" << path[i]->x << ", " << path[i]->y << std::endl;
+     }*/
   pathfinder->setTarget_cartesian(x, y);
   path = pathfinder->getPath();
 
@@ -727,7 +761,17 @@ void Navigator::mainLoop()
      std::cout << "-------velocity_rotation " << velocity_rotation << std::endl;
      std::cout << "-------velocity_rotation * elapsed_time " << velocity_rotation * elapsed_time << std::endl;
   */
-  orientation += velocity_rotation * elapsed_time;
+
+  //desired_orientation is always positive
+  if(orientation < desired_orientation)
+    {
+      orientation += fabs(velocity_rotation) * elapsed_time;
+    }
+  else
+    {
+      velocity_rotation = 0;
+      orientation = 0;
+    }
   /*
       for(unsigned int i = 0; i < path.size(); i++)
         {
@@ -763,19 +807,20 @@ void Navigator::mainLoop()
             }
         }
       */
-  /*
-  std::cout << "-------odometry_velocity_x * elapsed_time " << odometry_velocity_x * elapsed_time << std::endl;
-  std::cout << "-------odometry_velocity_y * elapsed_time " << odometry_velocity_y * elapsed_time << std::endl;
+
+  //  std::cout << "-------odometry_velocity_x * elapsed_time " << odometry_velocity_x * elapsed_time << std::endl;
+  //  std::cout << "-------odometry_velocity_y * elapsed_time " << odometry_velocity_y * elapsed_time << std::endl;
   std::cout << "-------odometry_velocity_x " << odometry_velocity_x << std::endl;
   std::cout << "-------odometry_velocity_y " << odometry_velocity_y << std::endl;
-  std::cout << "-------odometry_velocity_rotation " << odometry_velocity_rotation << std::endl;
-  std::cout << "-------odometry_velocity_rotation * elapsed_time " << odometry_velocity_rotation * elapsed_time << std::endl;
+  //  std::cout << "-------odometry_velocity_rotation " << odometry_velocity_rotation << std::endl;
+  //  std::cout << "-------odometry_velocity_rotation * elapsed_time " << odometry_velocity_rotation * elapsed_time << std::endl;
 
-  */
+
   //   Vector new_position;
   Vector bend_vector;
 
   double odometry_difference =  sqrt(pow(odometry_velocity_y, 2.) + pow(odometry_velocity_x, 2.)) * elapsed_time;
+  //std::cout << "-------odometry_difference " << odometry_difference << std::endl;
 
   //calculation of the odometry
   //rotation and tranlation
@@ -821,9 +866,21 @@ void Navigator::mainLoop()
       pathfinder->setTargetPoint(gts_point_new(gts_point_class(),
                                  obstacle_rotation.x(),
                                  obstacle_rotation.y(), 0));
+
+      //std::cout << "Navigator >>>> odometry with rotation " << std::endl;
+      //std::cout << "Navigator >>>> turned_angle " << turned_angle << std::endl;
+      //std::cout << "Navigator >>>> rotation_ " << odometry_velocity_rotation << std::endl;
+      //std::cout << "Navigator >>>> bend_radius " << bend_radius << std::endl;
+      //std::cout << "Navigator >>>> bend_vector.length() " << bend_vector.length() << std::endl;
+      //std::cout << "Navigator >>>> odometry_difference " << odometry_difference << std::endl;
+      // std::cout << "Navigator >>>> motor_interface->odometry_orientation() " << motor_interface->odometry_orientation() << std::endl;
+      //   std::cout << "Navigator >>>> old_position.x() " << old_position.x() << std::endl;
+      //   std::cout << "Navigator >>>> old_position.y() " << old_position.y() << std::endl;
+      //std::cout << "Navigator >>>> time_difference " << elapsed_time << std::endl;
     }//rotation without translation
   else if((odometry_velocity_rotation > 0.000000005 || odometry_velocity_rotation < -0.0000000005) && odometry_difference == 0.)
     {
+      //std::cout << "Navigator >>>> rotation without translation" << std::endl;
       for(unsigned int i = 0; i < map.size(); i++)
         {//recalculating map
           double ori = atan2(map[i].y, map[i].x);
@@ -840,8 +897,10 @@ void Navigator::mainLoop()
                                  radius * sin(ori + odometry_velocity_rotation * elapsed_time), 0));
 
     }
-  else //translation without rotation
+  else if(odometry_difference != 0.)//translation without rotation
     {
+
+     // std::cout << "Navigator >>>> translation without rotation " << std::endl;
       for(unsigned int i = 0; i < map.size(); i++)
         {//recalculating map
           map[i].x -= odometry_velocity_x * elapsed_time;
