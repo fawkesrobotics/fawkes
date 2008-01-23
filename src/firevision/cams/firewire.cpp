@@ -1,4 +1,4 @@
-
+ 
 /***************************************************************************
  *  firewire.cpp - Implementation to access FW cam using libdc1394
  *
@@ -346,7 +346,9 @@ FirewireCamera::close()
 void
 FirewireCamera::dispose_buffer()
 {
-  dc1394_capture_enqueue( _camera, _frame );
+  if ( _valid_frame_received ) {
+    dc1394_capture_enqueue( _camera, _frame );
+  }
 }
 
 
