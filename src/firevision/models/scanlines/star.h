@@ -63,6 +63,7 @@ class ScanlineStar : public ScanlineModel
 
  private:
   void generate_scan_points();
+  bool goto_next_valid_point();
   //  point_t& get_point
 
   unsigned int m_image_width;
@@ -83,13 +84,14 @@ class ScanlineStar : public ScanlineModel
 
   typedef std::map<unsigned int, point_t> Ray;
   std::map<float, Ray*> m_rays;
+  Ray::iterator m_ray_iter;
   std::vector<float> m_angles;
   std::vector<float>::iterator m_angle_iter;
   std::vector<unsigned int> m_radii;
   std::vector<unsigned int>::iterator m_radius_iter;
 
-  Ray m_first_ray;
-  Ray m_previous_ray;
+  Ray* m_first_ray;
+  Ray* m_previous_ray;
 };
 
 #endif /* __FIREVISION_MODELS_SCANLINES_STAR_H_ */
