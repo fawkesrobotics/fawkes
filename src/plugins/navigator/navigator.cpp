@@ -283,7 +283,7 @@ void Navigator::add_obstacle(Obstacle obstacle)
 }
 
 /** Sets the target tolerance.
- * @param the target tolerance
+ * @param tolerance the target tolerance
  */
 void Navigator::set_target_tolerance(float tolerance)
 {
