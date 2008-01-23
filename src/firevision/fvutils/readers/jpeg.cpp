@@ -126,7 +126,7 @@ JpegReader::read()
     jpeg_read_scanlines( &cinfo, &row_buffer, 1 );
     convert_line_rgb_to_yuv422planar( row_buffer, buffer,
 				      cinfo.output_width, cinfo.output_height,
-				      0, cinfo.output_scanline );
+				      0, cinfo.output_scanline - 1 );
   }
 
   free( row_buffer );

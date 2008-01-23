@@ -49,7 +49,7 @@ PNMReader::PNMReader(const char* filename)
 
   if ( m_pnmfile == NULL ) 
     {
-      throw Exception("PNMReader::ctro: cannot open PNM file");
+      throw Exception("PNMReader::ctor: cannot open PNM file");
     }
   
   // read header
@@ -68,17 +68,16 @@ PNMReader::PNMReader(const char* filename)
     {
       fgets(line, 80, m_pnmfile);
     }
-  while ( strcmp("#", line) >= 0);
-
+  while ( strncmp("#", line, 1) == 0);
+  
   // width & height
-  fgets(line, 80, m_pnmfile);
   char* tmp = (char*) malloc(10);
   char* token;
   token = strtok(line, " ");
-  if ( atoi(tmp) >= 0 ) { m_img_width = (unsigned int) atoi(token); }
+  if ( atoi(token) >= 0 ) { m_img_width = (unsigned int) atoi(token); }
   else { throw Exception("PNMReader::ctor: could not read out image width"); };
   token = strtok(NULL, " ");
-  if ( atoi(tmp) >= 0 ) { m_img_height = (unsigned int) atoi(token); }
+  if ( atoi(token) >= 0 ) { m_img_height = (unsigned int) atoi(token); }
   else { throw Exception("PNMReader::ctor: could not read out image height"); };
   free(tmp);
 
