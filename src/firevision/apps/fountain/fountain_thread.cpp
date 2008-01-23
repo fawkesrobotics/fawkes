@@ -39,7 +39,7 @@
 
 /** Constructor. */
 FountainThread::FountainThread()
-  : Thread("FountainThread")
+  : Thread("FountainThread", OPMODE_WAITFORWAKEUP)
 {
   __fuse_server = NULL;
   __service = NULL;
@@ -94,4 +94,12 @@ FountainThread::finalize()
   __fuse_server = NULL;
   delete __service;
   __service = NULL;
+}
+
+
+void
+FountainThread::loop()
+{
+  // do nothing, but implement to not exit
+  printf("Sucker Loop\n");
 }

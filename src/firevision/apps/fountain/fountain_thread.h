@@ -51,6 +51,7 @@ class FountainThread
 
   virtual void init();
   virtual void finalize();
+  virtual void loop();
 
  private:
   FuseServer *__fuse_server;
