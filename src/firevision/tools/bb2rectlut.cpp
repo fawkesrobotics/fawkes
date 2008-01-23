@@ -36,6 +36,7 @@
 
 #ifdef HAVE_TRICLOPS_SDK
 #include <stereo/triclops.h>
+#include <errno.h>
 #endif
 
 
