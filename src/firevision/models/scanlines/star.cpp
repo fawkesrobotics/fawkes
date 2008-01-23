@@ -307,7 +307,7 @@ ScanlineStar::generate_scan_points()
 	       ignore.V != current.V )
 	    // not masked
 	    {
-	      if (0 == m_first_ray)
+	      if (0 == m_previous_ray)
 		// first ray; no previous values, yet.
 		{
 		  (*current_ray)[radius] = tmp;
