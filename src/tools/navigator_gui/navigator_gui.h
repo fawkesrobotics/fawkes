@@ -203,6 +203,7 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     void inbound_received(FawkesNetworkMessage *msg) throw();
     void process_navigator_message(FawkesNetworkMessage *msg) throw();
     void process_pluginmanager_message(FawkesNetworkMessage *msg) throw();
+    void prepare_navigator_contact();
     bool navigator_loaded;
     bool connection_is_dead;
     bool connected;

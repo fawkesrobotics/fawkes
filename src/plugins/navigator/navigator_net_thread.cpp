@@ -212,6 +212,11 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
           connected_odometry_clients.push_back_locked(msg->clid());
         }
 
+      if(u->sub_type_ball)
+        {
+          connected_ball_clients.push_back_locked(msg->clid());
+        }
+
       if(u->sub_type_motor_control && connected_control_client == 0)
         {
           connected_control_client = msg->clid();
@@ -261,6 +266,10 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
           else if(u->unsub_type_odometry)
             {
               connected_odometry_clients.remove_locked(msg->clid());
+            }
+          else if(u->unsub_type_ball)
+            {
+              connected_ball_clients.remove_locked(msg->clid());
             }
           else if(u->unsub_type_motor_control)
             {
@@ -334,7 +343,7 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
           rmsg->set_omega(u->rotation);
           motor_interface->msgq_enqueue(rmsg);
         }
-       else if(u->type_line_trans_rot)
+      else if(u->type_line_trans_rot)
         {
           MotorInterface::LinTransRotMessage* ltrmsg = new  MotorInterface::LinTransRotMessage();
           ltrmsg->set_vx(u->forward);
@@ -456,7 +465,20 @@ NavigatorNetworkThread::loop()
           path_points->clear();
         }
 
+      //send ball position
+      for(std::list<unsigned int>::iterator iterator = connected_ball_clients.begin();
+          iterator != connected_ball_clients.end();
+          iterator++ )
+        {
+          navigator_ball_message_t *ball_msg= (navigator_ball_message_t *)malloc(sizeof(navigator_ball_message_t));
+          ball_msg->x = navigator_thread->get_ball_position_x();
+          ball_msg->y = navigator_thread->get_ball_position_y();
 
+          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_BALL, ball_msg, sizeof(navigator_ball_message_t));
+        }
+
+
+      //send odometry data
       for(std::list<unsigned int>::iterator iterator = connected_odometry_clients.begin();
           iterator != connected_odometry_clients.end();
           iterator++ )
@@ -473,7 +495,6 @@ NavigatorNetworkThread::loop()
           odometry_msg->velocity_x = motor_interface->vx();
           odometry_msg->velocity_y = motor_interface->vy();
           odometry_msg->velocity_rotation = motor_interface->omega();
-
 
           fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_ODOMETRY, odometry_msg, sizeof(navigator_odometry_message_t));
         }
@@ -531,6 +552,15 @@ NavigatorNetworkThread::client_disconnected(unsigned int clid)
       connected_odometry_clients.remove(clid);
     }
   connected_odometry_clients.unlock();
+
+  connected_ball_clients.lock();
+  result = find( connected_ball_clients.begin(),
+                 connected_ball_clients.end()  , clid );
+  if(result != connected_ball_clients.end())
+    {
+      connected_ball_clients.remove(clid);
+    }
+  connected_ball_clients.unlock();
 
   if(connected_control_client == clid)
     {

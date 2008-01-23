@@ -37,22 +37,21 @@ class NLine;
 class Obstacle;
 
 #define NAVIGATOR_MSGTYPE_JOYSTICK                      1
-#define NAVIGATOR_MSGTYPE_GUI                                   2
-#define NAVIGATOR_MSGTYPE_SUBSCRIBE                             3
-#define NAVIGATOR_MSGTYPE_UNSUBSCRIBE                           4
-#define NAVIGATOR_MSGTYPE_SURFACE                                 5
-#define NAVIGATOR_MSGTYPE_TARGET                                6
-#define NAVIGATOR_MSGTYPE_CONTROL_SUBERR                        7
-#define NAVIGATOR_MSGTYPE_VELOCITY                                      8
-#define NAVIGATOR_MSGTYPE_TRANS_ROT                                 9
-#define NAVIGATOR_MSGTYPE_RPM                                 10
-#define NAVIGATOR_MSGTYPE_ORBIT                              11
-#define NAVIGATOR_MSGTYPE_KICK                                          12
-#define NAVIGATOR_MSGTYPE_ODOMETRY                      13
-#define NAVIGATOR_MSGTYPE_RESET_ODOMETRY                      14
-#define NAVIGATOR_MSGTYPE_BALL                      15
-#define NAVIGATOR_MSGTYPE_PATH                     16
-#define NAVIGATOR_MSGTYPE_OBSTACLE                     17
+#define NAVIGATOR_MSGTYPE_SUBSCRIBE                             2
+#define NAVIGATOR_MSGTYPE_UNSUBSCRIBE                           3
+#define NAVIGATOR_MSGTYPE_SURFACE                                 4
+#define NAVIGATOR_MSGTYPE_TARGET                                5
+#define NAVIGATOR_MSGTYPE_CONTROL_SUBERR                        6
+#define NAVIGATOR_MSGTYPE_VELOCITY                                      7
+#define NAVIGATOR_MSGTYPE_TRANS_ROT                                 8
+#define NAVIGATOR_MSGTYPE_RPM                                 9
+#define NAVIGATOR_MSGTYPE_ORBIT                              10
+#define NAVIGATOR_MSGTYPE_KICK                                          11
+#define NAVIGATOR_MSGTYPE_ODOMETRY                      12
+#define NAVIGATOR_MSGTYPE_RESET_ODOMETRY                      13
+#define NAVIGATOR_MSGTYPE_BALL                      14
+#define NAVIGATOR_MSGTYPE_PATH                     15
+#define NAVIGATOR_MSGTYPE_OBSTACLE                     16
 
 /** The message type of the kick messages.
  */
@@ -100,29 +99,6 @@ typedef struct {
   float angular_velocity;       /**< The angular velocity of the robot in orbit.*/
 } navigator_orbit_message_t;
 
-/** The message type of the navigator gui tool messages.
- * Message type ID is NAVIGATOR_MSGTYPE_GUI.
- */
-typedef struct {
-  unsigned int numberPoints;  /**< Number of points of the delaunay. */
-  double pointsX[100]; /**< The x-coordinates of the points of the delaunay. */
-  double pointsY[100];  /**< The y-coordinates of the points of the delaunay. */
-  unsigned int numberLines;  /**< Number of lines of the delaunay. */
-  unsigned int lines[100];  /**< index point1 of line1; index point2 of line1; index point1 of line2... */
-  uint32_t control_type_rpm:1; /**< controls the motors directly with RPMs */
-  uint32_t control_type_trans_rot:1; /**< controls the motors directly with trans_rot command */
-  uint32_t control_type_trans:1; /**< controls the motors directly with trans command */
-  uint32_t control_type_rot:1; /**< controls the motors directly with rot command */
-  uint32_t control_type_orbit:1; /**< controls the motors directly with orbit command */
-  uint32_t control_type_navigator:1; /**< controls the robot with the navigator */
-  uint32_t control_type_reset_odometry:1; /**< resets the recalculation of the odometry */
-  uint32_t reserved:25; /**< Reserved bits for future work. */
-  float target_x; /**< The x-coordiante of the target to drive to. */
-  float target_y; /**< The y-coordiante of the target to drive to. */
-  float target_ori; /**< The orientation of the robot at the target. */
-  float velocity; /**< The velocity of the robot. */
-  float target; /**< The target to drive to. */
-} navigator_gui_message_t;
 
 /** The message type to send the odometry to the odometry subscriber.
  * Message type ID is NAVIGATOR_MSGTYPE_ODOMETRY.
@@ -209,7 +185,8 @@ typedef struct {
   uint32_t sub_type_motor_control:1; /**< This bit states the subscribe type motor control. */
   uint32_t sub_type_navigator_control:1; /**< This bit states the subscribe type navigator control. */
   uint32_t sub_type_odometry:1; /**< This bit states the subscribe type odometry. */
-  uint32_t reserved:27;  /**< Reserved bits for future work. */
+  uint32_t sub_type_ball:1; /**< This bit states the subscribe type ball for receivers of the ball position. */
+  uint32_t reserved:26;  /**< Reserved bits for future work. */
 } navigator_subscribe_message_t;
 
 /** The message type for subscribe messages to subscribe messages
@@ -220,8 +197,9 @@ typedef struct {
   uint32_t unsub_type_joystick:1; /**< This bit states the unsubscribe type joystick. */
   uint32_t unsub_type_motor_control:1; /**< This bit states the subscribe type motor control. */
   uint32_t unsub_type_navigator_control:1; /**< This bit states the subscribe type navigator control. */
-  uint32_t unsub_type_odometry:1; /**< This bit states the subscribe type odometry. */
-  uint32_t reserved:27; /**< Reserved bits for future work. */
+  uint32_t unsub_type_odometry:1; /**< This bit states the unsubscribe type odometry. */
+  uint32_t unsub_type_ball:1; /**< This bit states the unsubscribe type ball for receivers of the ball position. */
+  uint32_t reserved:26; /**< Reserved bits for future work. */
 } navigator_unsubscribe_message_t;
 
 

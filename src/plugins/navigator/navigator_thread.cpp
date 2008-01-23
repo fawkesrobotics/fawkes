@@ -29,6 +29,7 @@
 #include <interfaces/navigator.h>
 #include <interfaces/motor.h>
 #include <interfaces/object.h>
+#include <core/threading/mutex.h>
 
 #include <cmath>
 #include <unistd.h>
@@ -48,11 +49,16 @@ NavigatorThread::NavigatorThread()
   old_velocity_x = 0;
   old_velocity_y = 0;
   old_velocity_rotation = 0;
+  ball_position_x = 100000.;
+  ball_position_y = 100000.;
+  ball_mutex = new Mutex();
 }
 
 /** Destructor. */
 NavigatorThread::~NavigatorThread()
-{}
+{
+  delete ball_mutex;
+}
 
 
 void
@@ -182,6 +188,10 @@ NavigatorThread::loop()
       if(object_interface->object_type() == ObjectPositionInterface::BALL && object_interface->is_visible())
         {
           goTo_cartesian(object_interface->relative_x(), object_interface->relative_y());
+          ball_mutex->lock();
+          ball_position_x = object_interface->relative_x();
+          ball_position_y = object_interface->relative_y();
+          ball_mutex->unlock();
           //  logger->log_info("NavigatorThread", "Ball at  %f, %f", object_interface->relative_x(), object_interface->relative_y());
         }
       /*   else
@@ -232,4 +242,30 @@ NavigatorThread::loop()
     }
   */
   //usleep(100000);
+}
+
+/** Returns the x coordinate of the relative ball position.
+ * Is needed by NavigatorNetworkThread, which sends the position to the GUI.
+ * @return x coordinate of the relative ball position
+ */
+double NavigatorThread::get_ball_position_x()
+{
+  double x = 0;
+  ball_mutex->lock();
+  x = ball_position_x;
+  ball_mutex->unlock();
+  return x;
+}
+
+/** Returns the y coordinate of the relative ball position.
+ * Is needed by NavigatorNetworkThread, which sends the position to the GUI.
+ * @return y coordinate of the relative ball position
+ */
+double NavigatorThread::get_ball_position_y()
+{
+  double y = 0;
+  ball_mutex->lock();
+  y = ball_position_y;
+  ball_mutex->unlock();
+  return y;
 }

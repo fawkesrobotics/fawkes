@@ -38,6 +38,7 @@
 class NavigatorInterface;
 class MotorInterface;
 class ObjectPositionInterface;
+class Mutex;
 
 class NavigatorThread : public Thread, public BlockedTimingAspect, public LoggingAspect,
                         public BlackBoardAspect, public Navigator, public ConfigurableAspect
@@ -51,12 +52,20 @@ class NavigatorThread : public Thread, public BlockedTimingAspect, public Loggin
 
   virtual void loop();
   virtual void once();
+  
+  double get_ball_position_x();
+  double get_ball_position_y();
 
  private:
     
   double old_velocity_x;
   double old_velocity_y;
   double old_velocity_rotation;
+  
+  double ball_position_x;
+  double ball_position_y;
+  
+  Mutex *ball_mutex;
   
   std::list<Interface *> *object_interface_list;
   NavigatorInterface *navigator_interface;

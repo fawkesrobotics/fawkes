@@ -622,8 +622,8 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
       //add path_points
       while (path_msg->has_next())
         {
-          NavigatorPathListMessage::npoint_t *p = path_msg->next(); 
-         // std::cout << "p " << p->x << ", " << p->y << std::endl;        
+          NavigatorPathListMessage::npoint_t *p = path_msg->next();
+          // std::cout << "p " << p->x << ", " << p->y << std::endl;
           path_points.push_back(new NPoint(-p->y, -p->x));
         }
       path_points.unlock();
@@ -649,13 +649,34 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
     }
   else if (NAVIGATOR_MSGTYPE_BALL == msg->msgid())
     {
-      std::cout << "Received a ball message." << std::endl;
       navigator_ball_message_t *ball_msg =  (navigator_ball_message_t *)msg->payload();
       ball_point_mutex->lock();
       ball_point.x = -ball_msg->y * zoom_factor;
       ball_point.y = -ball_msg->x * zoom_factor;
       ball_point_mutex->unlock();
     }
+}
+
+/** Prepares the GUI for contact with the navigator.
+ * Sets the statur bar and send a subscribe message to the navigator for receiving gui stuff.
+ */
+void NavigatorGUI::prepare_navigator_contact()
+{
+  std::cerr << "Navigator plugin is loaded." << std::endl;
+  navigator_loaded = true;
+  char * str = new char[100];
+  strcpy(str, "Connected to ");
+  strcat(str, host_name);
+  strcat(str, " and NavigatorPlugin is loaded.");
+  statusbar->push(str, 1);
+  navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
+  sub_msg->sub_type_points_and_lines = 1;
+  sub_msg->sub_type_odometry = 1;
+  sub_msg->sub_type_ball = 1;
+  FawkesNetworkMessage *smsg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN,
+                               NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
+  net_client->enqueue(smsg);
+  smsg->unref();
 }
 
 
@@ -671,7 +692,7 @@ void NavigatorGUI::process_pluginmanager_message(FawkesNetworkMessage *msg) thro
 
       if(strncmp("navigator", u->name, PLUGIN_MSG_NAME_LENGTH) == 0)
         {
-          std::cerr << "Plugin " << u->name << " unloaded." << std::endl;
+          std::cerr << "Plugin " << u->name << " is unloaded." << std::endl;
           statusbar->pop(1);
           reset_gui();
         }
@@ -682,20 +703,7 @@ void NavigatorGUI::process_pluginmanager_message(FawkesNetworkMessage *msg) thro
       plugin_loaded_msg_t *lm= (plugin_loaded_msg_t *)msg->payload();
       if ( strncmp("navigator", lm->name, PLUGIN_MSG_NAME_LENGTH) == 0 )
         {
-          std::cerr << "Navigator plugin loaded." << std::endl;
-          char * str = new char[100];
-          strcpy(str, "Connected to ");
-          strcat(str, host_name);
-          strcat(str, " and NavigatorPlugin is loaded.");
-          statusbar->push(str, 1);
-          navigator_loaded = true;
-          navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
-          sub_msg->sub_type_points_and_lines = 1;
-          sub_msg->sub_type_odometry = 1;
-          FawkesNetworkMessage *smsg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN,
-                                       NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
-          net_client->enqueue(smsg);
-          smsg->unref();
+          prepare_navigator_contact();
         }
     }
   else if (msg->msgid() == MSG_PLUGIN_LOADED_LIST )
@@ -709,21 +717,7 @@ void NavigatorGUI::process_pluginmanager_message(FawkesNetworkMessage *msg) thro
               char *p = plm->next();
               if(strcmp(p, "navigator") == 0)
                 {
-                  std::cerr << "Navigator plugin loaded." << std::endl;
-
-                  char *str = new char[100];
-                  strcpy(str, "Connected to ");
-                  strcat(str, host_name);
-                  strcat(str, " and NavigatorPlugin is loaded.");
-                  statusbar->push(str, 1);
-                  navigator_loaded = true;
-                  navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
-                  sub_msg->sub_type_points_and_lines = 1;
-                  sub_msg->sub_type_odometry = 1;
-                  FawkesNetworkMessage *smsg = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN,
-                                               NAVIGATOR_MSGTYPE_SUBSCRIBE, sub_msg, sizeof(navigator_subscribe_message_t));
-                  net_client->enqueue(smsg);
-                  smsg->unref();
+                  prepare_navigator_contact();
                 }
               free(p);
             }
