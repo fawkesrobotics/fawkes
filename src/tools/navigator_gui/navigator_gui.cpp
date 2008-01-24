@@ -307,9 +307,9 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
 
   odometry_orientation_mutex = new Mutex();
   odometry_point_mutex = new Mutex();
-  target_point_mutex = new Mutex();
   cursor_point_mutex = new Mutex();
   ball_point_mutex = new Mutex();
+  mouse_point_mutex = new Mutex();
 
   point_radius = 5.5;
   robot_radius = 0.25;
@@ -329,6 +329,9 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   //currently not in use
   odometry_orientation = 0.;
   velocity = 0;
+
+  orientating = false;
+  orientation = 0;
 
   set_events(Gdk::BUTTON_PRESS_MASK);
   add_events(Gdk::BUTTON_RELEASE_MASK);
@@ -387,7 +390,11 @@ NavigatorGUI::~NavigatorGUI()
   path_points.clear();
   path_points.unlock();
 
-  delete target_point_mutex;
+  delete mouse_point_mutex;
+  delete odometry_orientation_mutex;
+  delete odometry_point_mutex;
+  delete cursor_point_mutex;
+  delete ball_point_mutex;
 }
 
 void NavigatorGUI::connect()
@@ -1012,10 +1019,10 @@ void NavigatorGUI::on_navigator_control_radio_clicked()
 
       send_stop();
 
-      target_point_mutex->lock();
+      mouse_point_mutex->lock();
       mouse_point.x = 0.;
       mouse_point.y = 0.;
-      target_point_mutex->unlock();
+      mouse_point_mutex->unlock();
     }
 }
 
@@ -1100,39 +1107,26 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
       else if(event->button == 1)
         {
           Gtk::Allocation allocation = get_allocation();
+          if(navigator_control)
+            {
+              orientating = true;
+            }
 
-          target_point_mutex->lock();
+          mouse_point_mutex->lock();
           mouse_point.x = (float) (event->x - allocation.get_width() / 2);
           mouse_point.y = (float) (event->y - allocation.get_height() / 2);
-          target_point_mutex->unlock();
+          mouse_point_mutex->unlock();
 
-          navigator_target_message_t *target_msg= (navigator_target_message_t *)malloc(sizeof(navigator_target_message_t));
-
-          target_msg->x = -mouse_point.y / zoom_factor;
-          target_msg->y = -mouse_point.x / zoom_factor; // negative because mouse_point is in screen coordinates
-          std::cout << "pressed " <<  target_msg->x << ", " <<  target_msg->y << std::endl;
-
-          FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_TARGET, target_msg, sizeof(navigator_target_message_t));
-          net_client->enqueue(msg1);
-          msg1->unref();
-
-          navigator_velocity_message_t *velocity_msg= (navigator_velocity_message_t *)malloc(sizeof(navigator_velocity_message_t));
-
-          navigator_velocity_entry->update();
-          velocity_msg->value = navigator_velocity_entry->get_value();
-          FawkesNetworkMessage *msg2 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_VELOCITY, velocity_msg, sizeof(navigator_velocity_message_t));
-          net_client->enqueue(msg2);
-          msg2->unref();
         }
     }
   else if(motor_control && orbit_radio->get_active())
     {
       Gtk::Allocation allocation = get_allocation();
 
-      target_point_mutex->lock();
+      mouse_point_mutex->lock();
       mouse_point.x = (float) (event->x - allocation.get_width() / 2) / zoom_factor;
       mouse_point.y = (float) (event->y - allocation.get_height() / 2) / zoom_factor;
-      target_point_mutex->unlock();
+      mouse_point_mutex->unlock();
     }
 
   return true;
@@ -1141,6 +1135,29 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
 
 bool NavigatorGUI::on_button_release_event(GdkEventButton* event)
 {
+  orientating = false;
+  if(navigator_control)
+    {
+      navigator_target_message_t *target_msg= (navigator_target_message_t *)malloc(sizeof(navigator_target_message_t));
+
+      target_msg->x = -mouse_point.y / zoom_factor;
+      target_msg->y = -mouse_point.x / zoom_factor; // negative because mouse_point is in screen coordinates
+      target_msg->orientation = orientation;
+      
+      FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_TARGET, target_msg, sizeof(navigator_target_message_t));
+      net_client->enqueue(msg1);
+      msg1->unref();
+
+      navigator_velocity_message_t *velocity_msg= (navigator_velocity_message_t *)malloc(sizeof(navigator_velocity_message_t));
+
+      navigator_velocity_entry->update();
+      velocity_msg->value = navigator_velocity_entry->get_value();
+      FawkesNetworkMessage *msg2 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_VELOCITY, velocity_msg, sizeof(navigator_velocity_message_t));
+      net_client->enqueue(msg2);
+      msg2->unref();
+      
+      orientation = 0;
+    }
   return true;
 }
 
@@ -1152,6 +1169,11 @@ bool NavigatorGUI::on_motion_notify_event(GdkEventMotion* event)
   cursor_point.x = (float) (event->x - allocation.get_width() / 2);
   cursor_point.y = (float) (event->y - allocation.get_height() / 2);
   cursor_point_mutex->unlock();
+
+  if(orientating)
+    {
+      orientation = atan2(mouse_point.y - cursor_point.y, mouse_point.x - cursor_point.x) - M_PI/2.;
+    }
 
   return true;
 }
@@ -1359,9 +1381,9 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
         {
           context->save();
           context->set_source_rgb(1.0, 0.0, 0.0);
-          target_point_mutex->lock();
+          mouse_point_mutex->lock();
           context->arc(mouse_point.x * zoom_factor, mouse_point.y * zoom_factor, point_radius, 0.0, 2.0 * M_PI);
-          target_point_mutex->unlock();
+          mouse_point_mutex->unlock();
           context->fill_preserve();
           context->stroke();
 
@@ -1539,6 +1561,26 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
           layout.clear();
           cursor_point_mutex->unlock();
           context->restore();
+        }
+
+      //draw the orientation at the target
+      if(navigator_control && orientating)
+        {
+          LockList<NPoint*>::iterator iterator = --path_points.end();
+          context->set_line_width(2.5);
+          context->set_line_cap(Cairo::LINE_CAP_ROUND);
+          context->translate(mouse_point.x, mouse_point.y);
+          context->rotate(orientation - M_PI/2.);
+          context->move_to(0, 0);
+          context->line_to(0.2 * zoom_factor, 0);
+          context->stroke();
+
+          if(orientating)
+            {
+              context->arc(0, 0, 5, 0.0, 2.0 * M_PI);
+              context->fill_preserve();
+              context->stroke();
+            }
         }
 
       context.clear();

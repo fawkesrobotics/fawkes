@@ -122,6 +122,7 @@ typedef struct {
 typedef struct {
   float x;  /**< X-coordinate of the target. */
   float y;  /**< Y-coordinate of the target. */
+  float orientation;  /**< Orientation at the target. */
 } navigator_target_message_t;
 
 /** The message type to determine the ball position.

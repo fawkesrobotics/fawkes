@@ -145,7 +145,7 @@ NavigatorThread::loop()
 
       if(motor_interface->controller_thread_id() == current_thread_id())
         {
-          goTo_cartesian/*_ori*/(msg->x(), msg->y());//, M_PI/2);
+          goTo_cartesian_ori(msg->x(), msg->y(), msg->orientation());
         }
       navigator_interface->msgq_pop();
 
@@ -187,7 +187,12 @@ NavigatorThread::loop()
       //  logger->log_info("NavigatorThread", "Ball object_interface->is_visible() %i",object_interface->is_visible());
       if(object_interface->object_type() == ObjectPositionInterface::BALL && object_interface->is_visible())
         {
-          goTo_cartesian(object_interface->relative_x(), object_interface->relative_y());
+          double direction = atan2(object_interface->relative_y(), object_interface->relative_x());
+          double before_ball_x = object_interface->relative_x() + 0.1 * cos(direction + M_PI);
+          double before_ball_y = object_interface->relative_y() + 0.1 * sin(direction + M_PI);
+
+          goTo_cartesian_ori(before_ball_x, before_ball_y, direction);
+
           ball_mutex->lock();
           ball_position_x = object_interface->relative_x();
           ball_position_y = object_interface->relative_y();

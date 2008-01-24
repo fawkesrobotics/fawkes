@@ -300,6 +300,7 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
 
       tmsg->set_x(u->x);
       tmsg->set_y(u->y);
+      tmsg->set_orientation(u->orientation);
 
       navigator_interface->msgq_enqueue(tmsg);
     }

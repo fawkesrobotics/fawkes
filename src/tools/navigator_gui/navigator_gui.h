@@ -191,11 +191,13 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Mutex *odometry_orientation_mutex;
     Mutex *ball_point_mutex;
     Mutex *odometry_point_mutex;
-    Mutex *target_point_mutex;
+    Mutex *mouse_point_mutex;
     Mutex *cursor_point_mutex;
     bool cursor_over_area;
 
     double velocity;
+    bool orientating;
+    double orientation;
 
 
     FawkesNetworkClient *net_client;
