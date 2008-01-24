@@ -979,13 +979,7 @@ void NavigatorGUI::on_send_button_clicked()
     }
   else if(navigator_control_radio->get_active())
     {
-      navigator_velocity_message_t *velocity_msg= (navigator_velocity_message_t *)malloc(sizeof(navigator_velocity_message_t));
-
-      navigator_velocity_entry->update();
-      velocity_msg->value = navigator_velocity_entry->get_value();
-      FawkesNetworkMessage *msg2 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_VELOCITY, velocity_msg, sizeof(navigator_velocity_message_t));
-      net_client->enqueue(msg2);
-      msg2->unref();
+      send_drive_command();
     }
 }
 
@@ -1138,24 +1132,7 @@ bool NavigatorGUI::on_button_release_event(GdkEventButton* event)
   orientating = false;
   if(navigator_control)
     {
-      navigator_target_message_t *target_msg= (navigator_target_message_t *)malloc(sizeof(navigator_target_message_t));
-
-      target_msg->x = -mouse_point.y / zoom_factor;
-      target_msg->y = -mouse_point.x / zoom_factor; // negative because mouse_point is in screen coordinates
-      target_msg->orientation = orientation;
-      
-      FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_TARGET, target_msg, sizeof(navigator_target_message_t));
-      net_client->enqueue(msg1);
-      msg1->unref();
-
-      navigator_velocity_message_t *velocity_msg= (navigator_velocity_message_t *)malloc(sizeof(navigator_velocity_message_t));
-
-      navigator_velocity_entry->update();
-      velocity_msg->value = navigator_velocity_entry->get_value();
-      FawkesNetworkMessage *msg2 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_VELOCITY, velocity_msg, sizeof(navigator_velocity_message_t));
-      net_client->enqueue(msg2);
-      msg2->unref();
-      
+      send_drive_command();
       orientation = 0;
     }
   return true;
@@ -1226,6 +1203,26 @@ void NavigatorGUI::send_stop()
       net_client->enqueue(msg);
       msg->unref();
     }
+}
+
+void NavigatorGUI::send_drive_command()
+{
+  navigator_velocity_message_t *velocity_msg= (navigator_velocity_message_t *)malloc(sizeof(navigator_velocity_message_t));
+
+  navigator_velocity_entry->update();
+  velocity_msg->value = navigator_velocity_entry->get_value();
+  FawkesNetworkMessage *msg2 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_VELOCITY, velocity_msg, sizeof(navigator_velocity_message_t));
+  net_client->enqueue(msg2);
+  msg2->unref();
+
+  navigator_target_message_t *target_msg= (navigator_target_message_t *)malloc(sizeof(navigator_target_message_t));
+
+  target_msg->x = -mouse_point.y / zoom_factor;
+  target_msg->y = -mouse_point.x / zoom_factor; // negative because mouse_point is in screen coordinates
+  target_msg->orientation = orientation;
+  FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_TARGET, target_msg, sizeof(navigator_target_message_t));
+  net_client->enqueue(msg1);
+  msg1->unref();
 }
 
 bool NavigatorGUI::on_expose_event(GdkEventExpose* event)

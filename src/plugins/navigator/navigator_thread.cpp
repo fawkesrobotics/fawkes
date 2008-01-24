@@ -180,8 +180,7 @@ NavigatorThread::loop()
 
       if(motor_interface->controller_thread_id() == current_thread_id())
         {
-          //logger->log_info("NavigatorThread", "set velocity %f", msg->velocity());
-          setVelocity(msg->velocity());
+          set_max_velocity(msg->velocity());
         }
       navigator_interface->msgq_pop();
     }
@@ -227,11 +226,9 @@ NavigatorThread::loop()
         }
       else if(object_interface->object_type() == ObjectPositionInterface::OTHER)
         {
-          if(motor_interface->controller_thread_id() == current_thread_id())
-            {
+            logger->log_info("NavigatorThread", "Object received at  %f, %f", object_interface->relative_x(), object_interface->relative_y());
               Obstacle o(object_interface->extent(), object_interface->relative_x(), object_interface->relative_y(), 0.);
               add_obstacle(o);
-            }
         }
       /*   else
            {

@@ -76,9 +76,8 @@ class Navigator
     void erase_all_obstacles();
     void add_obstacle(Obstacle obstacle);
 
-    void setVelocity(double velocity);
+    void set_max_velocity(double velocity);
     void setVelocityRotation(double velocity_rotation);
-    double getVelocity();
 
     double getVelocityX();
     double getVelocityY();
@@ -105,6 +104,7 @@ class Navigator
 
     Mutex *surface_mutex;
     Mutex *path_mutex;
+    Mutex *velocity_mutex;
 
     Pathfinder * pathfinder;
 
@@ -151,8 +151,9 @@ class Navigator
     double last_degree;
     double current_degree;
 
-    //cm/sec
-    double velocity;
+    //m/sec
+    double current_velocity;
+    double max_velocity;
 
     double velocity_x;
     double velocity_y;

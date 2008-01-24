@@ -60,7 +60,10 @@ Navigator::Navigator()
   robot_width = 0.5;
 
   //the desired velocity of the robot
-  velocity = 0; // m/s
+  current_velocity = 0; // m/s
+  
+  //the maximum velocity
+  max_velocity = 0; // m/s
 
   //the velocities in the x and y direction
   velocity_x = 0;
@@ -94,7 +97,7 @@ Navigator::Navigator()
 
   surface_mutex = new Mutex();
   path_mutex = new Mutex();
-  
+
   target_tolerance = 0.02;
 }
 
@@ -270,14 +273,18 @@ std::list<NLine *> *Navigator::get_surface_lines()
 void Navigator::setObstacles(std::vector< Obstacle > map)
 {
   this->map = map;
+  surface_mutex->lock();
   pathfinder->setObstacles(map);
+  surface_mutex->unlock();
 }
 
 /** Removes all obstacles from the surface.
  */
 void Navigator::erase_all_obstacles()
 {
+  surface_mutex->lock();
   map.clear();
+  surface_mutex->unlock();
 }
 
 /** Adds an obstacle to the pathfinder.
@@ -322,12 +329,12 @@ void Navigator::set_odometry_velocity_rotation(double rotation)
   odometry_velocity_rotation = rotation;
 }
 
-/** Sets the velocity of the robot.
- * @param velocity the velocity value
+/** Sets the maximum velocity of the robot.
+ * @param velocity the maximum velocity
  */
-void Navigator::setVelocity(double velocity)
+void Navigator::set_max_velocity(double velocity)
 {
-  this->velocity = velocity;
+  this->max_velocity = velocity;
 }
 
 /** Sets the velocity of the rotation of the robot.
@@ -346,13 +353,6 @@ double Navigator::getVelocityRotation()
   return velocity_rotation;
 }
 
-/** Returns the velocity of the robot.
- * @return the velocity of the robot
- */
-double Navigator::getVelocity()
-{
-  return velocity;
-}
 
 /** Returns the velocity of the robot in the x-direction.
  * @return the velocity in the x-direction
@@ -475,7 +475,7 @@ double Navigator::s(double t)
  */
 void Navigator::goTo_cartesian(double x, double y)
 {
-  goTo_cartesian(x, y, velocity);
+  goTo_cartesian(x, y, max_velocity);
 }
 
 /** Sets a target.
@@ -485,10 +485,11 @@ void Navigator::goTo_cartesian(double x, double y)
  */
 void Navigator::goTo_cartesian_ori(double x, double y, double ori)
 {
-  goTo_cartesian(x, y, velocity);
-  if(velocity != 0)
+  goTo_cartesian(x, y, max_velocity);
+
+  if(max_velocity > 0)
     {
-      velocity_rotation = ori / (sqrt(pow(x, 2) + pow(y, 2)) / velocity);
+      velocity_rotation = ori / (sqrt(pow(x, 2.) + pow(y, 2.)) / max_velocity);
     }
   else
     {
@@ -512,8 +513,7 @@ void Navigator::goTo_cartesian(double x, double y, double velocity)
   step_y = 0;
   t = 0;
 
-
-  this->velocity = velocity;
+  this->current_velocity = velocity;
 
   destroy_path();
   // std::cout << "path.size() " << path.size() << std::endl;
@@ -522,8 +522,10 @@ void Navigator::goTo_cartesian(double x, double y, double velocity)
           std::cout << "path remains" << path[i]->x << ", " << path[i]->y << std::endl;
      }*/
   pathfinder->setTarget_cartesian(x, y);
+  
+  surface_mutex->lock();
   path = pathfinder->getPath();
-
+  surface_mutex->unlock();
 
   if(path[1]->x != 0)
     current_degree = atan2(path[1]->y , path[1]->x);
@@ -619,7 +621,7 @@ void Navigator::mainLoop()
     {
       t= 0;
 
-        //    std::cout << "-------next Path-------------------------------------------------" << std::endl;
+      //    std::cout << "-------next Path-------------------------------------------------" << std::endl;
       step_x = 0;
       step_y = 0;
       newDirection = true;
@@ -632,8 +634,9 @@ void Navigator::mainLoop()
             {
               if(route.size() == 1) //the robot is on the last part of the route and at the target
                 {
-                  velocity = 0;
-                 // std::cout << "-------STOP-------------------------------------------------" << std::endl;
+
+                  current_velocity = 0;
+                  // std::cout << "-------STOP-------------------------------------------------" << std::endl;
                   gts_object_destroy(GTS_OBJECT(route[0]));
                   route.clear();
                 }
@@ -654,10 +657,12 @@ void Navigator::mainLoop()
                 }
             }
           else //the robot is at the target
-            velocity = 0;
+            {
+              current_velocity = 0;
+            }
         }
     }
-    
+
   /*
   std::cout << "traget-x" << pathfinder->getTargetPoint()->x << std::endl;
   std::cout << "traget-y" << pathfinder->getTargetPoint()->y << std::endl;
@@ -755,8 +760,8 @@ void Navigator::mainLoop()
 #endif //FUZZY_SMOOTHING
 
       //set the velocity
-      velocity_x = (div_x * velocity) / sqrt((pow(div_x, 2.) + pow(div_y, 2.)));
-      velocity_y = (div_y * velocity) / sqrt((pow(div_x, 2.) + pow(div_y, 2.)));
+      velocity_x = (div_x * current_velocity) / sqrt((pow(div_x, 2.) + pow(div_y, 2.)));
+      velocity_y = (div_y * current_velocity) / sqrt((pow(div_x, 2.) + pow(div_y, 2.)));
     }
   else
     {
@@ -775,7 +780,6 @@ void Navigator::mainLoop()
      std::cout << "-------velocity_rotation " << velocity_rotation << std::endl;
      std::cout << "-------velocity_rotation * elapsed_time " << velocity_rotation * elapsed_time << std::endl;
   */
-
   //desired_orientation is always positive
   if(orientation < desired_orientation)
     {
@@ -824,15 +828,14 @@ void Navigator::mainLoop()
 
   //  std::cout << "-------odometry_velocity_x * elapsed_time " << odometry_velocity_x * elapsed_time << std::endl;
   //  std::cout << "-------odometry_velocity_y * elapsed_time " << odometry_velocity_y * elapsed_time << std::endl;
-//  std::cout << "-------odometry_velocity_x " << odometry_velocity_x << std::endl;
-//  std::cout << "-------odometry_velocity_y " << odometry_velocity_y << std::endl;
+  //  std::cout << "-------odometry_velocity_x " << odometry_velocity_x << std::endl;
+  //  std::cout << "-------odometry_velocity_y " << odometry_velocity_y << std::endl;
   //  std::cout << "-------odometry_velocity_rotation " << odometry_velocity_rotation << std::endl;
   //  std::cout << "-------odometry_velocity_rotation * elapsed_time " << odometry_velocity_rotation * elapsed_time << std::endl;
 
 
   //   Vector new_position;
   Vector bend_vector;
-
   double odometry_difference =  sqrt(pow(odometry_velocity_y, 2.) + pow(odometry_velocity_x, 2.)) * elapsed_time;
   //std::cout << "-------odometry_difference " << odometry_difference << std::endl;
 
@@ -914,7 +917,7 @@ void Navigator::mainLoop()
   else if(odometry_difference != 0.)//translation without rotation
     {
 
-     // std::cout << "Navigator >>>> translation without rotation " << std::endl;
+      // std::cout << "Navigator >>>> translation without rotation " << std::endl;
       for(unsigned int i = 0; i < map.size(); i++)
         {//recalculating map
           map[i].x -= odometry_velocity_x * elapsed_time;

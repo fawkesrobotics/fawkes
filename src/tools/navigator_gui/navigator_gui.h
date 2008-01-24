@@ -230,6 +230,7 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     void on_reset_odometry_button_clicked();
     void on_zooming_value_changed();
     void send_stop();
+    void send_drive_command();
     bool navigator_control;
     bool motor_control;
   };
