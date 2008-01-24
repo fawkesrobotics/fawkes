@@ -273,6 +273,13 @@ void Navigator::setObstacles(std::vector< Obstacle > map)
   pathfinder->setObstacles(map);
 }
 
+/** Removes all obstacles from the surface.
+ */
+void Navigator::erase_all_obstacles()
+{
+  map.clear();
+}
+
 /** Adds an obstacle to the pathfinder.
  * @param obstacle an obstacle
  */

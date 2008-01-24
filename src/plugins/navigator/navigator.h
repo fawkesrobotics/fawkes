@@ -73,6 +73,7 @@ class Navigator
     void set_odometry_velocity_y(double velocity_y);
     void set_odometry_velocity_rotation(double rotation);
     void setObstacles(std::vector< Obstacle  >);
+    void erase_all_obstacles();
     void add_obstacle(Obstacle obstacle);
 
     void setVelocity(double velocity);

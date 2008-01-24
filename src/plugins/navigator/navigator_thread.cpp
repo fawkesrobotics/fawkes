@@ -133,6 +133,27 @@ NavigatorThread::once()
 
 
 void
+NavigatorThread::bb_interface_created(const char *type, const char *id) throw()
+{
+  try
+    {
+      if(strcmp( type, "ObjectPositionInterface" ) == 0)
+        {
+          object_interface_list->push_back(interface_manager->open_for_reading (type, id));
+        }
+    }
+  catch (Exception& e)
+    {
+      e.append("%s initialization failed, could not open object interface for reading", name());
+      logger->log_error("NavigatorThread", "Opening interface for reading failed!");
+      logger->log_error("NavigatorThread", e);
+      throw;
+    }
+  logger->log_info("NavigatorThread", "Interface %s of type %s has been created\n", id, type);
+}
+
+
+void
 NavigatorThread::loop()
 {
   motor_interface->read();
@@ -177,7 +198,12 @@ NavigatorThread::loop()
         }
       navigator_interface->msgq_pop();
     }
-
+    
+  //if the vision does not set objects, then the navigator_gui can set obstacles
+  if(!object_interface_list->empty())
+    {
+      erase_all_obstacles();
+    }
   std::list<Interface *>::iterator i;
   for ( i = object_interface_list->begin(); i != object_interface_list->end(); ++i )
     {
@@ -198,6 +224,14 @@ NavigatorThread::loop()
           ball_position_y = object_interface->relative_y();
           ball_mutex->unlock();
           //  logger->log_info("NavigatorThread", "Ball at  %f, %f", object_interface->relative_x(), object_interface->relative_y());
+        }
+      else if(object_interface->object_type() == ObjectPositionInterface::OTHER)
+        {
+          if(motor_interface->controller_thread_id() == current_thread_id())
+            {
+              Obstacle o(object_interface->extent(), object_interface->relative_x(), object_interface->relative_y(), 0.);
+              add_obstacle(o);
+            }
         }
       /*   else
            {
