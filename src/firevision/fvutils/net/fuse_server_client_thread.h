@@ -75,6 +75,7 @@ class FuseServerClientThread : public Thread
   std::map< std::string, SharedMemoryLookupTable * >  __luts;
   std::map< std::string, SharedMemoryLookupTable * >::iterator  __lit;
 
+  bool __alive;
 };
 
 

@@ -72,6 +72,8 @@ FuseServerClientThread::FuseServerClientThread(FuseServer *fuse_server, StreamSo
   greetmsg->version = htonl(FUSE_CURRENT_VERSION);
   __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_GREETING,
 						greetmsg, sizeof(FUSE_greeting_message_t)));
+
+  __alive = true;
 }
 
 
@@ -335,6 +337,11 @@ FuseServerClientThread::process_inbound()
 void
 FuseServerClientThread::loop()
 {
+  if ( ! __alive ) {
+    usleep(10000);
+    return;
+  }
+
   short p = 0;
   try {
     p = __socket->poll(10); // block for up to 10 ms
@@ -347,12 +354,14 @@ FuseServerClientThread::loop()
        (p & Socket::POLL_HUP) ||
        (p & Socket::POLL_RDHUP)) {
     __fuse_server->connection_died(this);
-    exit();
+    __alive = false;
   } else if ( p & Socket::POLL_IN ) {
     // Data can be read
     recv();
     process_inbound();
   }
 
-  send();
+  if ( __alive ) {
+    send();
+  }
 }
