@@ -64,9 +64,9 @@ GtsObstacle*   gts_obstacle_new(GtsObstacleClass *klass,
   GtsObstacle * o;
   
   o = GTS_OBSTACLE (gts_object_new (GTS_OBJECT_CLASS (klass)));
-  o->point.x = x;
-  o->point.y = y;
-  o->point.z = z;
+  o->vertex.p.x = x;
+  o->vertex.p.y = y;
+  o->vertex.p.z = z;
   o->width = width;
 
   return o;

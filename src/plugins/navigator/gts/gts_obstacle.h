@@ -11,18 +11,18 @@ extern "C" {
                                                      gts_obstacle_class ()))
 #define GTS_OBSTACLE(obj)              GTS_OBJECT_CAST (obj,\
                                                      GtsObstacle,\
-                                                     gts_point_class ())
+                                                     gts_vertex_class ())
 #define GTS_OBSTACLE_CLASS(klass)      GTS_OBJECT_CLASS_CAST (klass,\
                                                            GtsObstacleClass,\
                                                            gts_Obstacle_class ())
                                                            
   typedef struct {
-    GtsPointClass parent_class;
+    GtsVertexClass parent_class;
   } GtsObstacleClass;
 
 
   typedef struct {
-    GtsPoint point;
+    GtsVertex vertex;
 
     gdouble width; 
   } GtsObstacle;
