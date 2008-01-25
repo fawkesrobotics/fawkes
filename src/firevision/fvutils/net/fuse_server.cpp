@@ -49,7 +49,7 @@
  * @param collector optional thread collector
  */
 FuseServer::FuseServer(unsigned short int port, ThreadCollector *collector)
-  : Thread("FuseServer")
+  : Thread("FuseServer", Thread::OPMODE_WAITFORWAKEUP)
 {
   __thread_collector = collector;
 
