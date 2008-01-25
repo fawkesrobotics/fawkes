@@ -8,8 +8,8 @@
 /** @struct GtsObstacle
  *  The structure representing a GtsObstacle object. 
  */
- /**  @var GtsObstacle::point
- *  	The point defining the position of this obstacle.
+ /**  @var GtsObstacle::vertex
+ *  	The vertex defining the position of this obstacle.
  */
  /**  @var GtsObstacle::width
  * 	The width of this obstacle.
