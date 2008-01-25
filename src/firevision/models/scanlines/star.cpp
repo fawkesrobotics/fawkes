@@ -71,7 +71,6 @@ ScanlineStar::ScanlineStar( unsigned int image_width, unsigned int image_height,
   m_angle_incr = deg2rad( 360.0/m_num_segments );
 
   m_angle_iter = m_angles.begin();
-  m_radius_iter = m_radii.begin();
 
   m_first_ray = 0;
   m_previous_ray = 0;
@@ -138,23 +137,20 @@ ScanlineStar::advance()
 
   ++m_ray_iter;
 
-  if ( !goto_next_valid_point() )
+  if ( m_rays[*m_angle_iter]->end() == m_ray_iter )
     {
-      m_done = true;
-      return;
+      ++m_angle_iter;
+
+      if ( m_angles.end() == m_angle_iter )
+	{
+	  m_done = true;
+	  return;
+	}
+
+      m_ray_iter = m_rays[*m_angle_iter]->begin();
     }
-
-  /*
-  ++m_radius_iter;
-
-  if ( !goto_next_valid_point() )
-    {
-      m_done = true;
-      return;
-    }
-
-  m_current_point = m_rays[*m_angle_iter]->find(*m_radius_iter)->second;
-  */
+  
+  m_current_point = (*m_ray_iter).second;
 }
 
 
@@ -170,10 +166,9 @@ ScanlineStar::reset()
 {
   m_done = false;
 
-  m_radius_iter = m_radii.begin();
   m_angle_iter = m_angles.begin();
   m_ray_iter = m_rays[*m_angle_iter]->begin();
-  goto_next_valid_point();
+  m_current_point = (*m_ray_iter).second;
 }
 
 
@@ -210,17 +205,18 @@ ScanlineStar::setPanTilt(float pan, float tilt)
 void
 ScanlineStar::skip_current_ray()
 {
+  if (m_done) { return; }
+
   ++m_angle_iter;
 
-  if (m_angles.end() == m_angle_iter)
+  if ( m_angles.end() == m_angle_iter )
     {
       m_done = true;
       return;
     }
 
   m_ray_iter = m_rays[*m_angle_iter]->begin();
-  
-  goto_next_valid_point();
+  m_current_point = (*m_ray_iter).second;
 }
 
 
@@ -240,7 +236,7 @@ ScanlineStar::num_segments() const
 unsigned int
 ScanlineStar::current_radius() const
 {
-  return *m_radius_iter;
+  return (*m_ray_iter).first;
 }
 
 
@@ -257,28 +253,21 @@ void
 ScanlineStar::generate_scan_points()
 {
   float angle = 0.0;
-  unsigned int radius = m_dead_radius;
+  unsigned int radius;
   Ray* current_ray;
-  bool abort_ray = false;
+  bool abort_ray;
   YUV_t ignore;
   ignore.Y = 0;
   ignore.U = 127;
   ignore.V = 127;
 
-  while (radius <= m_max_radius)
-    {
-      m_radii.push_back(radius);
-      radius += m_radius_incr;
-    }
   m_angles.clear();
-
-  radius = m_dead_radius;
 
   while (angle < deg2rad(359.9) )
     {
-      current_ray = new Ray();
       abort_ray = false;
       radius = m_dead_radius;
+      current_ray = new Ray();
 
       while ( !abort_ray )
 	{
@@ -308,7 +297,7 @@ ScanlineStar::generate_scan_points()
 	    // not masked
 	    {
 	      if (0 == m_previous_ray)
-		// first ray; no previous values, yet.
+		// no previous values, yet.
 		{
 		  (*current_ray)[radius] = tmp;
 		  m_first_ray = current_ray;
@@ -321,8 +310,7 @@ ScanlineStar::generate_scan_points()
 		  int diff_x;
 		  int diff_y;
 
-		  Ray::iterator it = m_first_ray->find(radius);
-		  if ( (*m_first_ray).find(radius) != (*m_first_ray).end() )
+		  if ( m_first_ray->find(radius) != m_first_ray->end() )
 		    {
 		      diff_x = tmp.x - (*m_first_ray)[radius].x;
 		      diff_y = tmp.y - (*m_first_ray)[radius].y;
@@ -349,9 +337,18 @@ ScanlineStar::generate_scan_points()
 	  if (radius > m_max_radius) { abort_ray = true; }
 	}
 
-      m_rays[angle] = current_ray;
-      m_previous_ray = current_ray;
-      m_angles.push_back(angle);
+      if ( 0 < current_ray->size() ) 
+	// there are scanpoints on this ray
+	{ 
+	  m_angles.push_back(angle);
+	  m_rays[angle] = current_ray; 
+	  m_previous_ray = current_ray;
+	}
+      else
+	{
+	  delete current_ray;
+	}
+
       angle += m_angle_incr;
     }
 
@@ -366,30 +363,4 @@ ScanlineStar::generate_scan_points()
     }
   printf("Generated %d points in %d rays\n", num_points, num_rays);
   */
-}
-      
-
-/** Proceeds to the next valid point.
- * This method shall be used as follows: in case the current scanline point is
- * valid it does nothing. If it is invalid, it looks for the next valid point.
- * @return returns true if a next valid point could be found, false otherwise
- */
-bool
-ScanlineStar::goto_next_valid_point()
-{
-  if ( m_rays[*m_angle_iter]->end() == m_ray_iter )
-    {
-      ++m_angle_iter;
-
-      if ( m_angles.end() == m_angle_iter)
-	{
-	  return false;
-	}
-
-      m_ray_iter = m_rays[*m_angle_iter]->begin();
-    }
-
-  m_current_point = m_ray_iter->second;
-
-  return true;
 }

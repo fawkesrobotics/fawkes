@@ -63,8 +63,6 @@ class ScanlineStar : public ScanlineModel
 
  private:
   void generate_scan_points();
-  bool goto_next_valid_point();
-  //  point_t& get_point
 
   unsigned int m_image_width;
   unsigned int m_image_height;
@@ -87,8 +85,6 @@ class ScanlineStar : public ScanlineModel
   Ray::iterator m_ray_iter;
   std::vector<float> m_angles;
   std::vector<float>::iterator m_angle_iter;
-  std::vector<unsigned int> m_radii;
-  std::vector<unsigned int>::iterator m_radius_iter;
 
   Ray* m_first_ray;
   Ray* m_previous_ray;
