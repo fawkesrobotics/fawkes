@@ -109,7 +109,7 @@ FuseServerClientThread::send()
       FuseNetworkTransceiver::send(__socket, __outbound_queue);
     } catch (Exception &e) {
       __fuse_server->connection_died(this);
-      exit();
+      __alive = false;
     }
   }
 }
@@ -127,7 +127,7 @@ FuseServerClientThread::recv()
   } catch (ConnectionDiedException &e) {
     __socket->close();
     __fuse_server->connection_died(this);
-    exit();
+    __alive = false;
   }
 }
 
@@ -324,7 +324,7 @@ FuseServerClientThread::process_inbound()
       }
     } catch (Exception &e) {
       __fuse_server->connection_died(this);
-      exit();
+      __alive = false;
     }
 
     m->unref();

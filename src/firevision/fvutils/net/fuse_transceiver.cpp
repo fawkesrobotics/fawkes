@@ -113,8 +113,8 @@ FuseNetworkTransceiver::recv(StreamSocket *s, FuseNetworkMessageQueue *msgq,
     } while ( s->available() && (num_msgs < max_num_msgs) );
   } catch (SocketException &e) {
     msgq->unlock();
-    throw;
-    //throw ConnectionDiedException("Read failed");
+    e.print_trace();
+    throw ConnectionDiedException("Read failed");
   }
   msgq->unlock();
 }

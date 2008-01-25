@@ -73,6 +73,8 @@ class FuseClient : public Thread {
 
   FuseClientHandler       *__handler;
   WaitCondition           *__waitcond;
+
+  bool __alive;
 };
 
 

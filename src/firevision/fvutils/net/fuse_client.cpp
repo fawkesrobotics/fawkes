@@ -36,6 +36,7 @@
 #include <core/threading/wait_condition.h>
 #include <core/exceptions/software.h>
 #include <netcomm/socket/stream.h>
+#include <netcomm/utils/exceptions.h>
 
 #include <cstring>
 #include <netinet/in.h>
@@ -71,6 +72,8 @@ FuseClient::FuseClient(const char *hostname, unsigned short int port,
   __mutex = new Mutex();
   __waitcond = new WaitCondition();
   __socket = new StreamSocket();
+
+  __alive = true;
 }
 
 
@@ -119,6 +122,7 @@ FuseClient::disconnect()
   __mutex->lock();
   delete __socket;
   __socket = new StreamSocket();
+  __alive = false;
   __mutex->unlock();
 }
 
@@ -127,7 +131,14 @@ FuseClient::disconnect()
 void
 FuseClient::send()
 {
-  FuseNetworkTransceiver::send(__socket, __outbound_msgq);
+  try {
+    FuseNetworkTransceiver::send(__socket, __outbound_msgq);
+  } catch (ConnectionDiedException &e) {
+    e.print_trace();
+    __socket->close();
+    __alive = false;
+    throw;
+  }
 }
 
 
@@ -135,8 +146,15 @@ FuseClient::send()
 void
 FuseClient::recv()
 {
-  while ( __socket->available() ) {
-    FuseNetworkTransceiver::recv(__socket, __inbound_msgq);
+  try {
+    while ( __socket->available() ) {
+      FuseNetworkTransceiver::recv(__socket, __inbound_msgq);
+    }
+  } catch (ConnectionDiedException &e) {
+    e.print_trace();
+    __socket->close();
+    __alive = false;
+    throw;
   }
 }
 
@@ -199,6 +217,11 @@ FuseClient::loop()
 {
   __mutex->lock();
 
+  if ( ! __alive ) {
+    usleep(10000);
+    return;
+  }
+
   bool wake = false;
 
   send();
@@ -217,7 +240,7 @@ FuseClient::loop()
       FUSE_greeting_message_t *gm = m->msg<FUSE_greeting_message_t>();
       if ( ntohl(gm->version) != FUSE_CURRENT_VERSION ) {
 	__handler->fuse_invalid_server_version(FUSE_CURRENT_VERSION, ntohl(gm->version));
-	exit();
+	__alive = false;
       } else {
 	__handler->fuse_connection_established();
       }
