@@ -40,7 +40,7 @@
  * @param image_height height of the image
  * @param center_x x-coordinate of the center point
  * @param center_y y-coordinate of the center point
- * @param num_segments number of segments
+ * @param num_rays number of rays
  * @param radius_incr number of pixels by which the radius is increased
  * @param yuv_mask a mask allows to exclude certain regions of the image from
  *        inspection. More precisely, no scanline points are generated in those
@@ -52,7 +52,7 @@
  */
 ScanlineStar::ScanlineStar( unsigned int image_width, unsigned int image_height,
 			    unsigned int center_x, unsigned int center_y,
-			    unsigned int num_segments, unsigned int radius_incr,
+			    unsigned int num_rays, unsigned int radius_incr,
 			    unsigned char* yuv_mask,
 			    unsigned int dead_radius, unsigned int max_radius,
 			    unsigned int margin)
@@ -61,16 +61,14 @@ ScanlineStar::ScanlineStar( unsigned int image_width, unsigned int image_height,
   m_image_height = image_height;
   m_center.x = center_x;
   m_center.y = center_y;
-  m_num_segments = num_segments;
+  m_num_rays = num_rays;
   m_radius_incr = radius_incr;
   m_mask = yuv_mask;
   m_dead_radius = dead_radius;
   m_max_radius = max_radius;
   m_margin = margin;
 
-  m_angle_incr = deg2rad( 360.0/m_num_segments );
-
-  m_angle_iter = m_angles.begin();
+  m_angle_incr = deg2rad( 360.0/m_num_rays );
 
   m_first_ray = 0;
   m_previous_ray = 0;
@@ -135,22 +133,23 @@ ScanlineStar::advance()
 {
   if (m_done) { return; }
 
-  ++m_ray_iter;
+  ++m_point_iter;
 
-  if ( m_rays[*m_angle_iter]->end() == m_ray_iter )
+  if ( (*m_ray_iter).second->end() == m_point_iter )
     {
-      ++m_angle_iter;
+      ++m_ray_iter;
 
-      if ( m_angles.end() == m_angle_iter )
+      if ( m_rays.end() == m_ray_iter )
 	{
 	  m_done = true;
 	  return;
 	}
-
-      m_ray_iter = m_rays[*m_angle_iter]->begin();
+      
+      ++m_ray_index;
+      m_point_iter = (*m_ray_iter).second->begin();
     }
   
-  m_current_point = (*m_ray_iter).second;
+  m_current_point = (*m_point_iter).second;
 }
 
 
@@ -166,9 +165,10 @@ ScanlineStar::reset()
 {
   m_done = false;
 
-  m_angle_iter = m_angles.begin();
-  m_ray_iter = m_rays[*m_angle_iter]->begin();
-  m_current_point = (*m_ray_iter).second;
+  m_ray_index = 0;
+  m_ray_iter = m_rays.begin();
+  m_point_iter = (*m_ray_iter).second->begin();
+  m_current_point = (*m_point_iter).second;
 }
 
 
@@ -207,16 +207,17 @@ ScanlineStar::skip_current_ray()
 {
   if (m_done) { return; }
 
-  ++m_angle_iter;
+  ++m_ray_iter;
 
-  if ( m_angles.end() == m_angle_iter )
+  if ( m_rays.end() == m_ray_iter )
     {
       m_done = true;
       return;
     }
-
-  m_ray_iter = m_rays[*m_angle_iter]->begin();
-  m_current_point = (*m_ray_iter).second;
+  
+  ++m_ray_index;
+  m_point_iter = m_ray_iter->second->begin();
+  m_current_point = (*m_point_iter).second;
 }
 
 
@@ -224,9 +225,19 @@ ScanlineStar::skip_current_ray()
  * @return the number of segments
  */
 unsigned int
-ScanlineStar::num_segments() const
+ScanlineStar::num_rays() const
 {
-  return m_num_segments;
+  return m_num_rays;
+}
+
+
+/** Return the index of the current ray.
+ * @return the index of the current ray
+ */
+unsigned int
+ScanlineStar::ray_index() const
+{
+  return m_ray_index;
 }
 
 
@@ -236,7 +247,7 @@ ScanlineStar::num_segments() const
 unsigned int
 ScanlineStar::current_radius() const
 {
-  return (*m_ray_iter).first;
+  return m_point_iter->first;
 }
 
 
@@ -246,7 +257,7 @@ ScanlineStar::current_radius() const
 float
 ScanlineStar::current_angle() const
 {
-  return *m_angle_iter;
+  return m_ray_iter->first;
 }
 
 void
@@ -260,8 +271,6 @@ ScanlineStar::generate_scan_points()
   ignore.Y = 0;
   ignore.U = 127;
   ignore.V = 127;
-
-  m_angles.clear();
 
   while (angle < deg2rad(359.9) )
     {
@@ -337,10 +346,9 @@ ScanlineStar::generate_scan_points()
 	  if (radius > m_max_radius) { abort_ray = true; }
 	}
 
-      if ( 0 < current_ray->size() ) 
+      if ( !current_ray->empty() ) 
 	// there are scanpoints on this ray
 	{ 
-	  m_angles.push_back(angle);
 	  m_rays[angle] = current_ray; 
 	  m_previous_ray = current_ray;
 	}
@@ -351,6 +359,8 @@ ScanlineStar::generate_scan_points()
 
       angle += m_angle_incr;
     }
+
+  m_num_rays = m_rays.size();
 
   /*
   unsigned int num_rays = m_rays.size();
