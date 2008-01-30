@@ -218,6 +218,7 @@ FuseClient::loop()
   __mutex->lock();
 
   if ( ! __alive ) {
+    __mutex->unlock();
     usleep(10000);
     return;
   }
