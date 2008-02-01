@@ -29,7 +29,7 @@ ifneq ($(HAVE_TRICLOPS_SDK),1)
   WARN_TARGETS += warning_triclops
 endif
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 .PHONY: warning_triclops
 warning_triclops:

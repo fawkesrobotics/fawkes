@@ -12,12 +12,6 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
@@ -29,7 +23,7 @@ ifneq ($(HAVE_GTS),1)
   WARN_TARGETS += warning_gts
 endif
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
 .PHONY: warning_vmc
@@ -47,6 +41,8 @@ ifeq ($(BUILD_NAVIGATOR),1)
   LDFLAGS = $(shell $(PKGCONFIG) --libs gts)
 
   PRESUBDIRS = gts fuzzy libnavi
+
+  $(PLUGINS_all): | presubdirs
 endif
 
 LIBS_navigator = core utils vmc netcomm geometry fuzzy gts_obstacle navigator
@@ -62,3 +58,4 @@ OBJS_navigator = navigator_plugin.o \
 OBJS_all    = $(OBJS_navigator)
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

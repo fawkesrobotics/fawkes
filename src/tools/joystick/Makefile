@@ -23,7 +23,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/navigator/navigator.mk
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 .PHONY: warning_nonavi
 warning_nonavi:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting JoystickTool (navigator not built)$(TNORMAL)"

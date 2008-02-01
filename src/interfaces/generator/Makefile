@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#            Makefile Build System for Fawkes : Interface Generator
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Fri Feb 01 11:37:25 2008
+#   copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -12,20 +12,14 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
-BASEDIR = ../..
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(SRCDIR)/navigator/navigator.mk
-
-PRESUBDIRS = navigator
-# worldmodel example kicker navigator
+BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
+
+CFLAGS += -DINTERFACEDIR=\"$(realpath $(BASEDIR)/src/interfaces)\" \
+          $(shell $(PKGCONFIG) --cflags libxml++-2.6)
+
+include $(SRCDIR)/generator_rules.mk
+include $(BASEDIR)/etc/buildsys/base.mk
 

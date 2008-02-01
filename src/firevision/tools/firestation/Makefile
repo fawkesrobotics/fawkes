@@ -43,7 +43,7 @@ else
   WARN_TARGETS += warning_firestation
 endif
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)

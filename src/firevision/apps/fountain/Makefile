@@ -41,7 +41,7 @@ else
   PLUGINS_all      = $(PLUGINDIR)/fvfountain.so
 endif
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 .PHONY: warning_rcxqt
 warning_rcxqt:

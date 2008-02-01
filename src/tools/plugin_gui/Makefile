@@ -34,7 +34,7 @@ else
   WARN_TARGETS += warning_plugin_gui
 endif
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)

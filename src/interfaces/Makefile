@@ -2,7 +2,7 @@
 #                Makefile Build System for Fawkes : Interfaces lib
 #                            -------------------
 #   Created on Tue Oct 10 17:37:18 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -12,53 +12,15 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
 
 BASEDIR = ../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(SRCDIR)/generator/generator.mk
 
-ifeq ($(PKGCONFIG),)
-  WARN_TARGETS += warning_pkgconfig
-endif
+CFLAGS += -DINTERFACEDIR=\"$(realpath $(BASEDIR)/src/interfaces)\" \
+	$(shell $(PKGCONFIG) --cflags libxml++-2.6)
 
-
-LIBXMLPP = $(shell $(PKGCONFIG) libxml++-2.6; echo $$?)
-ifeq ($(LIBXMLPP),1)
-  WARN_TARGETS += warning_libxmlpp
-else
-CFLAGS += -DINTERFACEDIR=\"$(realpath $(SRCDIR))\" \
-	$(shell pkg-config --cflags libxml++-2.6)
-
-LIBS_interface_generator = core utils
-LDFLAGS_interface_generator = $(shell pkg-config --libs libxml++-2.6)
-OBJS_interface_generator = generator/constant.o		\
-			   generator/enum_constant.o	\
-			   generator/field.o		\
-			   generator/generator.o	\
-			   generator/main.o		\
-			   generator/message.o		\
-			   generator/parser.o		\
-			   generator/type_checker.o
-
-BINS_all = $(BINDIR)/interface_generator
-endif
-
-ifneq ($(SRCDIR),.)
-all: $(WARN_TARGETS)
-.PHONY: warning_pkgconfig
-warning_pkgconfig:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting interface generator$(TNORMAL) (pkg-config not installed)"
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Interfaces cannot be generated$(TNORMAL)"
-.PHONY: warning_libxmlpp
-warning_libxmlpp:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting interface generator$(TNORMAL) (libxml++[-devel] not installed)"
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Interfaces cannot be generated$(TNORMAL)"
-endif
 
 OBJS_interfaces = $(notdir $(patsubst %.xml,%.o,$(wildcard $(SRCDIR)/*.xml)))
 SRCS_interfaces = $(patsubst %.xml,%.cpp,$(wildcard $(SRCDIR)/*.xml))
@@ -70,12 +32,11 @@ OBJS_libinterfaces = $(OBJS_interfaces)
 OBJS_all = $(OBJS_libinterfaces) $(OBJS_interface_generator)
 LIBS_all = $(LIBDIR)/libinterfaces.so
 
-include $(BASEDIR)/etc/buildsys/config.mk
+include $(SRCDIR)/generator/generator_rules.mk
 
+.SECONDARY: $(SRCS_interfaces) $(HDRS_interfaces) $(OBJS_interfaces)
 
-.SECONDARY: $(SRCS_interfaces) $(HDRS_interfaces) $(OBJS_all)
-
-ifneq ($(OBJS_interface_generator),)
+ifneq ($(BUILD_INTERFACE_GENERATOR),)
 $(SRCS_interfaces): $(BINDIR)/interface_generator
 $(SRCS_interfaces): %.cpp: %.xml
 	$(SILENT) echo "$(INDENT_PRINT)--> Generating $(@F) (Interface XML Template)"

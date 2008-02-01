@@ -30,7 +30,7 @@ else
   LIBS_all  = $(LIBDIR)/libconfig.so
 endif
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(ERROR_TARGETS)
 .PHONY: error_sqlite
 error_libcrypto:

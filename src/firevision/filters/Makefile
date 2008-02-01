@@ -26,7 +26,7 @@ LIBS     += $(VISION_LIBS)
 
 # Use . instead of nothing here in this pattern because we already included
 # the config in fvconf.mk and thus SRCDIR is set!
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
   ifeq ($(HAVE_IPP),0)
     # We have no IPP, because of this we have to eliminate many filters
     # OBJS_libfvfilters = $(filter-out morphology/%,$(OBJS_libfvfilters))

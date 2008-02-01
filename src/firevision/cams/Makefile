@@ -79,7 +79,7 @@ LIBS_all = $(LIBDIR)/libfvcams.so
 
 # Use . instead of nothing here in this pattern because we already included
 # the config in fvconf.mk and thus SRCDIR is set!
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
 .PHONY: warning_firewire

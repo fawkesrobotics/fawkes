@@ -27,7 +27,7 @@ CFLAGS = -g
 INCDIRS += $(KICKER_INCDIRS)
 LIBDIRS += $(KICKER_LIBDIRS)
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 .PHONY: print_unsupported
 print_unsupported:
 	$(SILENT)if [ "$(HAVE_IOWKIT)" != "1" ]; then \

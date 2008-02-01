@@ -39,7 +39,7 @@ else
   WARN_TARGETS += warning_nonavi
 endif
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 .PHONY: warning_nonavi
 warning_nonavi:

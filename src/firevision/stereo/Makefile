@@ -37,7 +37,7 @@ endif
 
 # Use . instead of nothing here in this pattern because we already included
 # the config in fvconf.mk and thus SRCDIR is set!
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 warning_triclops:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Triclops SDK support$(TNORMAL) ($(TRICLOPS_SDK_ERR))"

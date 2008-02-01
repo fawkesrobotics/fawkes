@@ -32,7 +32,7 @@ else
   WARN_TARGETS += warning_sdl
 endif
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 warning_sdl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting SDL Widgets$(TNORMAL) (SDL[-devel] not installed)"

@@ -30,7 +30,7 @@ else
   PLUGINS_all = $(PLUGINDIR)/kicker.so
 endif
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
 .PHONY: warning_iowkit

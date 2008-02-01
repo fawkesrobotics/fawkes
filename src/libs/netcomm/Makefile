@@ -37,7 +37,7 @@ else
 endif
 
 
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS) $(ERROR_TARGETS)
 .PHONY: warn_avahi
 warn_avahi:
