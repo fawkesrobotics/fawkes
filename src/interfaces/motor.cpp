@@ -417,7 +417,7 @@ MotorInterface::set_controller_thread_name(const char * new_controller_thread_na
 /** Constructor with initial values.
  * @param ini_motor_state initial value for motor_state
  */
-MotorInterface::SetMotorStateMessage::SetMotorStateMessage(unsigned int ini_motor_state) : Message()
+MotorInterface::SetMotorStateMessage::SetMotorStateMessage(unsigned int ini_motor_state) : Message("SetMotorStateMessage")
 {
   data_size = sizeof(SetMotorStateMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -426,7 +426,7 @@ MotorInterface::SetMotorStateMessage::SetMotorStateMessage(unsigned int ini_moto
   data->motor_state = ini_motor_state;
 }
 /** Constructor */
-MotorInterface::SetMotorStateMessage::SetMotorStateMessage() : Message()
+MotorInterface::SetMotorStateMessage::SetMotorStateMessage() : Message("SetMotorStateMessage")
 {
   data_size = sizeof(SetMotorStateMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -473,7 +473,7 @@ MotorInterface::SetMotorStateMessage::set_motor_state(const unsigned int new_mot
  * @param ini_thread_id initial value for thread_id
  * @param ini_thread_name initial value for thread_name
  */
-MotorInterface::AcquireControlMessage::AcquireControlMessage(unsigned long int ini_thread_id, char * ini_thread_name) : Message()
+MotorInterface::AcquireControlMessage::AcquireControlMessage(unsigned long int ini_thread_id, char * ini_thread_name) : Message("AcquireControlMessage")
 {
   data_size = sizeof(AcquireControlMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -483,7 +483,7 @@ MotorInterface::AcquireControlMessage::AcquireControlMessage(unsigned long int i
   strncpy(data->thread_name, ini_thread_name, 64);
 }
 /** Constructor */
-MotorInterface::AcquireControlMessage::AcquireControlMessage() : Message()
+MotorInterface::AcquireControlMessage::AcquireControlMessage() : Message("AcquireControlMessage")
 {
   data_size = sizeof(AcquireControlMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -557,7 +557,7 @@ MotorInterface::AcquireControlMessage::set_thread_name(const char * new_thread_n
 
 
 /** Constructor */
-MotorInterface::ResetOdometryMessage::ResetOdometryMessage() : Message()
+MotorInterface::ResetOdometryMessage::ResetOdometryMessage() : Message("ResetOdometryMessage")
 {
   data_size = sizeof(ResetOdometryMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -581,7 +581,7 @@ MotorInterface::ResetOdometryMessage::~ResetOdometryMessage()
  * @param ini_front_left initial value for front_left
  * @param ini_rear initial value for rear
  */
-MotorInterface::DriveRPMMessage::DriveRPMMessage(float ini_front_right, float ini_front_left, float ini_rear) : Message()
+MotorInterface::DriveRPMMessage::DriveRPMMessage(float ini_front_right, float ini_front_left, float ini_rear) : Message("DriveRPMMessage")
 {
   data_size = sizeof(DriveRPMMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -592,7 +592,7 @@ MotorInterface::DriveRPMMessage::DriveRPMMessage(float ini_front_right, float in
   data->rear = ini_rear;
 }
 /** Constructor */
-MotorInterface::DriveRPMMessage::DriveRPMMessage() : Message()
+MotorInterface::DriveRPMMessage::DriveRPMMessage() : Message("DriveRPMMessage")
 {
   data_size = sizeof(DriveRPMMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -675,7 +675,7 @@ MotorInterface::DriveRPMMessage::set_rear(const float new_rear)
  * @param ini_vx initial value for vx
  * @param ini_vy initial value for vy
  */
-MotorInterface::TransMessage::TransMessage(float ini_vx, float ini_vy) : Message()
+MotorInterface::TransMessage::TransMessage(float ini_vx, float ini_vy) : Message("TransMessage")
 {
   data_size = sizeof(TransMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -685,7 +685,7 @@ MotorInterface::TransMessage::TransMessage(float ini_vx, float ini_vy) : Message
   data->vy = ini_vy;
 }
 /** Constructor */
-MotorInterface::TransMessage::TransMessage() : Message()
+MotorInterface::TransMessage::TransMessage() : Message("TransMessage")
 {
   data_size = sizeof(TransMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -747,7 +747,7 @@ MotorInterface::TransMessage::set_vy(const float new_vy)
 /** Constructor with initial values.
  * @param ini_omega initial value for omega
  */
-MotorInterface::RotMessage::RotMessage(float ini_omega) : Message()
+MotorInterface::RotMessage::RotMessage(float ini_omega) : Message("RotMessage")
 {
   data_size = sizeof(RotMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -756,7 +756,7 @@ MotorInterface::RotMessage::RotMessage(float ini_omega) : Message()
   data->omega = ini_omega;
 }
 /** Constructor */
-MotorInterface::RotMessage::RotMessage() : Message()
+MotorInterface::RotMessage::RotMessage() : Message("RotMessage")
 {
   data_size = sizeof(RotMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -800,7 +800,7 @@ MotorInterface::RotMessage::set_omega(const float new_omega)
  * @param ini_vy initial value for vy
  * @param ini_omega initial value for omega
  */
-MotorInterface::TransRotMessage::TransRotMessage(float ini_vx, float ini_vy, float ini_omega) : Message()
+MotorInterface::TransRotMessage::TransRotMessage(float ini_vx, float ini_vy, float ini_omega) : Message("TransRotMessage")
 {
   data_size = sizeof(TransRotMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -811,7 +811,7 @@ MotorInterface::TransRotMessage::TransRotMessage(float ini_vx, float ini_vy, flo
   data->omega = ini_omega;
 }
 /** Constructor */
-MotorInterface::TransRotMessage::TransRotMessage() : Message()
+MotorInterface::TransRotMessage::TransRotMessage() : Message("TransRotMessage")
 {
   data_size = sizeof(TransRotMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -895,7 +895,7 @@ MotorInterface::TransRotMessage::set_omega(const float new_omega)
  * @param ini_py initial value for py
  * @param ini_omega initial value for omega
  */
-MotorInterface::OrbitMessage::OrbitMessage(float ini_px, float ini_py, float ini_omega) : Message()
+MotorInterface::OrbitMessage::OrbitMessage(float ini_px, float ini_py, float ini_omega) : Message("OrbitMessage")
 {
   data_size = sizeof(OrbitMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -906,7 +906,7 @@ MotorInterface::OrbitMessage::OrbitMessage(float ini_px, float ini_py, float ini
   data->omega = ini_omega;
 }
 /** Constructor */
-MotorInterface::OrbitMessage::OrbitMessage() : Message()
+MotorInterface::OrbitMessage::OrbitMessage() : Message("OrbitMessage")
 {
   data_size = sizeof(OrbitMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -990,7 +990,7 @@ MotorInterface::OrbitMessage::set_omega(const float new_omega)
  * @param ini_vy initial value for vy
  * @param ini_omega initial value for omega
  */
-MotorInterface::LinTransRotMessage::LinTransRotMessage(float ini_vx, float ini_vy, float ini_omega) : Message()
+MotorInterface::LinTransRotMessage::LinTransRotMessage(float ini_vx, float ini_vy, float ini_omega) : Message("LinTransRotMessage")
 {
   data_size = sizeof(LinTransRotMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1001,7 +1001,7 @@ MotorInterface::LinTransRotMessage::LinTransRotMessage(float ini_vx, float ini_v
   data->omega = ini_omega;
 }
 /** Constructor */
-MotorInterface::LinTransRotMessage::LinTransRotMessage() : Message()
+MotorInterface::LinTransRotMessage::LinTransRotMessage() : Message("LinTransRotMessage")
 {
   data_size = sizeof(LinTransRotMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1077,7 +1077,7 @@ MotorInterface::LinTransRotMessage::set_omega(const float new_omega)
  * @param message Message to check
  */
 bool
-MotorInterface::messageValid(const Message *message) const
+MotorInterface::message_valid(const Message *message) const
 {
   const SetMotorStateMessage *m0 = dynamic_cast<const SetMotorStateMessage *>(message);
   if ( m0 != NULL ) {

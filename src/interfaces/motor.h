@@ -315,7 +315,7 @@ class MotorInterface : public Interface
     void set_omega(const float new_omega);
   };
 
-  virtual bool messageValid(const Message *message) const;
+  virtual bool message_valid(const Message *message) const;
  private:
   MotorInterface();
   ~MotorInterface();

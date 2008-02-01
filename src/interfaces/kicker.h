@@ -143,7 +143,7 @@ class KickerInterface : public Interface
     void set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side);
   };
 
-  virtual bool messageValid(const Message *message) const;
+  virtual bool message_valid(const Message *message) const;
  private:
   KickerInterface();
   ~KickerInterface();

@@ -85,7 +85,7 @@ NavigatorInterface::set_foo(const int new_foo)
  * @param ini_y initial value for y
  * @param ini_orientation initial value for orientation
  */
-NavigatorInterface::TargetMessage::TargetMessage(float ini_x, float ini_y, float ini_orientation) : Message()
+NavigatorInterface::TargetMessage::TargetMessage(float ini_x, float ini_y, float ini_orientation) : Message("TargetMessage")
 {
   data_size = sizeof(TargetMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -96,7 +96,7 @@ NavigatorInterface::TargetMessage::TargetMessage(float ini_x, float ini_y, float
   data->orientation = ini_orientation;
 }
 /** Constructor */
-NavigatorInterface::TargetMessage::TargetMessage() : Message()
+NavigatorInterface::TargetMessage::TargetMessage() : Message("TargetMessage")
 {
   data_size = sizeof(TargetMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -178,7 +178,7 @@ NavigatorInterface::TargetMessage::set_orientation(const float new_orientation)
 /** Constructor with initial values.
  * @param ini_velocity initial value for velocity
  */
-NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage(float ini_velocity) : Message()
+NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage(float ini_velocity) : Message("MaxVelocityMessage")
 {
   data_size = sizeof(MaxVelocityMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -187,7 +187,7 @@ NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage(float ini_velocity) :
   data->velocity = ini_velocity;
 }
 /** Constructor */
-NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage() : Message()
+NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage() : Message("MaxVelocityMessage")
 {
   data_size = sizeof(MaxVelocityMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -231,7 +231,7 @@ NavigatorInterface::MaxVelocityMessage::set_velocity(const float new_velocity)
  * @param ini_y initial value for y
  * @param ini_width initial value for width
  */
-NavigatorInterface::ObstacleMessage::ObstacleMessage(float ini_x, float ini_y, float ini_width) : Message()
+NavigatorInterface::ObstacleMessage::ObstacleMessage(float ini_x, float ini_y, float ini_width) : Message("ObstacleMessage")
 {
   data_size = sizeof(ObstacleMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -242,7 +242,7 @@ NavigatorInterface::ObstacleMessage::ObstacleMessage(float ini_x, float ini_y, f
   data->width = ini_width;
 }
 /** Constructor */
-NavigatorInterface::ObstacleMessage::ObstacleMessage() : Message()
+NavigatorInterface::ObstacleMessage::ObstacleMessage() : Message("ObstacleMessage")
 {
   data_size = sizeof(ObstacleMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -318,7 +318,7 @@ NavigatorInterface::ObstacleMessage::set_width(const float new_width)
  * @param message Message to check
  */
 bool
-NavigatorInterface::messageValid(const Message *message) const
+NavigatorInterface::message_valid(const Message *message) const
 {
   const TargetMessage *m0 = dynamic_cast<const TargetMessage *>(message);
   if ( m0 != NULL ) {

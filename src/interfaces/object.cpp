@@ -731,7 +731,7 @@ ObjectPositionInterface::set_xyz_velocity_covariance(const float * new_xyz_veloc
  * @param message Message to check
  */
 bool
-ObjectPositionInterface::messageValid(const Message *message) const
+ObjectPositionInterface::message_valid(const Message *message) const
 {
   return false;
 }

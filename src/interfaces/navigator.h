@@ -122,7 +122,7 @@ class NavigatorInterface : public Interface
     void set_width(const float new_width);
   };
 
-  virtual bool messageValid(const Message *message) const;
+  virtual bool message_valid(const Message *message) const;
  private:
   NavigatorInterface();
   ~NavigatorInterface();

@@ -127,7 +127,7 @@ class TestInterface : public Interface
     void set_addend(const int new_addend);
   };
 
-  virtual bool messageValid(const Message *message) const;
+  virtual bool message_valid(const Message *message) const;
  private:
   TestInterface();
   ~TestInterface();

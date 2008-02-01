@@ -330,7 +330,7 @@ InterfaceGenerator::write_messages_h(FILE *f)
 
     fprintf(f, "  };\n\n");
   }
-  fprintf(f, "  virtual bool messageValid(const Message *message) const;\n");
+  fprintf(f, "  virtual bool message_valid(const Message *message) const;\n");
 
 }
 
@@ -361,7 +361,7 @@ InterfaceGenerator::write_messages_cpp(FILE *f)
 	  " * @param message Message to check\n"
 	  " */\n"
 	  "bool\n"
-	  "%s::messageValid(const Message *message) const\n"
+	  "%s::message_valid(const Message *message) const\n"
 	  "{\n", class_name.c_str());
   unsigned int n = 0;
   for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
@@ -502,13 +502,13 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
       }
     }
 
-    fprintf(f,") : %s()\n"
+    fprintf(f,") : %s(\"%s\")\n"
 	    "{\n"
 	    "  data_size = sizeof(%s_data_t);\n"
 	    "  data_ptr  = malloc(data_size);\n"
 	    "  memset(data_ptr, 0, data_size);\n"
 	    "  data      = (%s_data_t *)data_ptr;\n",
-	    super_class.c_str(), classname.c_str(), classname.c_str());
+	    super_class.c_str(), classname.c_str(), classname.c_str(), classname.c_str());
     
     for (i = fields.begin(); i != fields.end(); ++i) {
       if ( (*i).getType() == "char" ) {
@@ -526,7 +526,7 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 
   fprintf(f,
 	  "/** Constructor */\n"
-	  "%s%s::%s() : %s()\n"
+	  "%s%s::%s() : %s(\"%s\")\n"
 	  "{\n"
 	  "  data_size = sizeof(%s_data_t);\n"
 	  "  data_ptr  = malloc(data_size);\n"
@@ -538,7 +538,7 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	  "{\n"
 	  "}\n",
 	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str(),
-	  super_class.c_str(), classname.c_str(), classname.c_str(),
+	  super_class.c_str(), classname.c_str(), classname.c_str(), classname.c_str(),
 	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str()
 	  );
 

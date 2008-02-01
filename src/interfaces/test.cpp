@@ -208,7 +208,7 @@ TestInterface::set_test_lint(const long int new_test_lint)
 /** Constructor with initial values.
  * @param ini_test_int initial value for test_int
  */
-TestInterface::SetTestIntMessage::SetTestIntMessage(int ini_test_int) : Message()
+TestInterface::SetTestIntMessage::SetTestIntMessage(int ini_test_int) : Message("SetTestIntMessage")
 {
   data_size = sizeof(SetTestIntMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -217,7 +217,7 @@ TestInterface::SetTestIntMessage::SetTestIntMessage(int ini_test_int) : Message(
   data->test_int = ini_test_int;
 }
 /** Constructor */
-TestInterface::SetTestIntMessage::SetTestIntMessage() : Message()
+TestInterface::SetTestIntMessage::SetTestIntMessage() : Message("SetTestIntMessage")
 {
   data_size = sizeof(SetTestIntMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -259,7 +259,7 @@ TestInterface::SetTestIntMessage::set_test_int(const int new_test_int)
 /** Constructor with initial values.
  * @param ini_test_string initial value for test_string
  */
-TestInterface::SetTestStringMessage::SetTestStringMessage(char * ini_test_string) : Message()
+TestInterface::SetTestStringMessage::SetTestStringMessage(char * ini_test_string) : Message("SetTestStringMessage")
 {
   data_size = sizeof(SetTestStringMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -268,7 +268,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage(char * ini_test_string
   strncpy(data->test_string, ini_test_string, 30);
 }
 /** Constructor */
-TestInterface::SetTestStringMessage::SetTestStringMessage() : Message()
+TestInterface::SetTestStringMessage::SetTestStringMessage() : Message("SetTestStringMessage")
 {
   data_size = sizeof(SetTestStringMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -311,7 +311,7 @@ TestInterface::SetTestStringMessage::set_test_string(const char * new_test_strin
  * @param ini_summand initial value for summand
  * @param ini_addend initial value for addend
  */
-TestInterface::CalculateMessage::CalculateMessage(int ini_summand, int ini_addend) : Message()
+TestInterface::CalculateMessage::CalculateMessage(int ini_summand, int ini_addend) : Message("CalculateMessage")
 {
   data_size = sizeof(CalculateMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -321,7 +321,7 @@ TestInterface::CalculateMessage::CalculateMessage(int ini_summand, int ini_adden
   data->addend = ini_addend;
 }
 /** Constructor */
-TestInterface::CalculateMessage::CalculateMessage() : Message()
+TestInterface::CalculateMessage::CalculateMessage() : Message("CalculateMessage")
 {
   data_size = sizeof(CalculateMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -377,7 +377,7 @@ TestInterface::CalculateMessage::set_addend(const int new_addend)
  * @param message Message to check
  */
 bool
-TestInterface::messageValid(const Message *message) const
+TestInterface::message_valid(const Message *message) const
 {
   const SetTestIntMessage *m0 = dynamic_cast<const SetTestIntMessage *>(message);
   if ( m0 != NULL ) {

@@ -187,7 +187,7 @@ KickerInterface::set_current_intensity(const unsigned int new_current_intensity)
  * @param ini_right initial value for right
  * @param ini_intensity initial value for intensity
  */
-KickerInterface::KickMessage::KickMessage(bool ini_left, bool ini_center, bool ini_right, unsigned int ini_intensity) : Message()
+KickerInterface::KickMessage::KickMessage(bool ini_left, bool ini_center, bool ini_right, unsigned int ini_intensity) : Message("KickMessage")
 {
   data_size = sizeof(KickMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -199,7 +199,7 @@ KickerInterface::KickMessage::KickMessage(bool ini_left, bool ini_center, bool i
   data->intensity = ini_intensity;
 }
 /** Constructor */
-KickerInterface::KickMessage::KickMessage() : Message()
+KickerInterface::KickMessage::KickMessage() : Message("KickMessage")
 {
   data_size = sizeof(KickMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -299,7 +299,7 @@ KickerInterface::KickMessage::set_intensity(const unsigned int new_intensity)
 
 
 /** Constructor */
-KickerInterface::ResetCounterMessage::ResetCounterMessage() : Message()
+KickerInterface::ResetCounterMessage::ResetCounterMessage() : Message("ResetCounterMessage")
 {
   data_size = sizeof(ResetCounterMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -321,7 +321,7 @@ KickerInterface::ResetCounterMessage::~ResetCounterMessage()
 /** Constructor with initial values.
  * @param ini_guide_ball_side initial value for guide_ball_side
  */
-KickerInterface::GuideBallMessage::GuideBallMessage(GuideBallSideEnum ini_guide_ball_side) : Message()
+KickerInterface::GuideBallMessage::GuideBallMessage(GuideBallSideEnum ini_guide_ball_side) : Message("GuideBallMessage")
 {
   data_size = sizeof(GuideBallMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -330,7 +330,7 @@ KickerInterface::GuideBallMessage::GuideBallMessage(GuideBallSideEnum ini_guide_
   data->guide_ball_side = ini_guide_ball_side;
 }
 /** Constructor */
-KickerInterface::GuideBallMessage::GuideBallMessage() : Message()
+KickerInterface::GuideBallMessage::GuideBallMessage() : Message("GuideBallMessage")
 {
   data_size = sizeof(GuideBallMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -366,7 +366,7 @@ KickerInterface::GuideBallMessage::set_guide_ball_side(const GuideBallSideEnum n
  * @param message Message to check
  */
 bool
-KickerInterface::messageValid(const Message *message) const
+KickerInterface::message_valid(const Message *message) const
 {
   const KickMessage *m0 = dynamic_cast<const KickMessage *>(message);
   if ( m0 != NULL ) {
