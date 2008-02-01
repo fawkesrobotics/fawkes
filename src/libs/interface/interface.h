@@ -50,7 +50,7 @@ class InterfaceWriteDeniedException : public Exception
 class InterfaceInvalidMessageException : public Exception
 {
  public:
-  InterfaceInvalidMessageException(const char *msg_type, const char *interface_type);
+  InterfaceInvalidMessageException(const Interface *interface, const Message *message);
 };
 
 class Interface
@@ -73,6 +73,7 @@ class Interface
   void          write();
 
   bool          has_writer() const;
+  unsigned int  num_readers() const;
 
   unsigned int  msgq_enqueue(Message *message);
   void          msgq_remove(Message *message);
@@ -100,7 +101,7 @@ class Interface
 
  protected:
   Interface();
-  virtual bool  messageValid(const Message *message) const = 0;
+  virtual bool  message_valid(const Message *message) const = 0;
 
   void         *data_ptr;
   unsigned int  data_size;

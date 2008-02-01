@@ -52,7 +52,7 @@ class Message : public RefCount
    Failure		/**< an error occured during message processing */
  } MessageStatus;
 
-  Message();
+  Message(const char *type);
   Message(Message *mesg);
   Message(Message &mesg);
   virtual ~Message();
@@ -60,12 +60,13 @@ class Message : public RefCount
   Message &         operator=  (const Message & m);
 
   void              set_status(MessageStatus status);
-  MessageStatus     status();
+  MessageStatus     status() const;
   void              set_sub_status(unsigned int sub_status);
-  unsigned int      sub_status();
-  pthread_t         sender_id();
-  const char *      sender();
-  Interface *       interface();
+  unsigned int      sub_status() const;
+  pthread_t         sender_id() const;
+  const char *      sender() const;
+  Interface *       interface() const;
+  const char *      type() const;
 
  private:
   virtual void *        data();
@@ -81,6 +82,7 @@ class Message : public RefCount
   MessageStatus  _status;
   unsigned int   _substatus;
 
+  char          *_type;
   char          *_sender;
   pthread_t      _sender_id;
 

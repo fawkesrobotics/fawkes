@@ -47,6 +47,13 @@ class InterfaceMediator
    */
   virtual bool exists_writer(const Interface *interface) const           = 0;
 
+  /** Get number of readers.
+   * Get the number of readers that the given interface has.
+   * @param interface interface to check
+   * @return number of readers currently registered for the given interface.
+   */
+  virtual unsigned int num_readers(const Interface *interface) const     = 0;
+
   /** Notify of data change.
    * Notify all subscribers of the given interface of a data change.
    * This also influences logging and sending data over the network so it is

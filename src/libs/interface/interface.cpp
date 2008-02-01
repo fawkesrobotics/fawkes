@@ -40,12 +40,6 @@
  * @ingroup Exceptions
  */
 
-/** @class InterfaceInvalidMessageException interface/interface.h
- * This exception is thrown if a message has been queued in the interface which is
- * not recognized by the interface.
- * @ingroup Exceptions
- */
-
 /** Constructor.
  * @param type type of the interface which caused the exception
  * @param id id of the interface which caused the exception
@@ -58,16 +52,22 @@ InterfaceWriteDeniedException::InterfaceWriteDeniedException(const char *type,
 	 id, type);
 }
 
-/** Constructor.
- * @param msg_type type of the message which caused the exception
- * @param interface_type type of the interface which caused the exception
+/** @class InterfaceInvalidMessageException interface/interface.h
+ * This exception is thrown if a message has been queued in the interface which is
+ * not recognized by the interface.
+ * @ingroup Exceptions
  */
-InterfaceInvalidMessageException::InterfaceInvalidMessageException(const char *msg_type,
-								const char *interface_type)
+
+/** Constructor.
+ * @param interface interface that the invalid message was enqueued to
+ * @param message enqueued message
+ */
+InterfaceInvalidMessageException::InterfaceInvalidMessageException(const Interface *interface,
+								   const Message *message)
   : Exception()
 {
   append("Message of type '%s' cannot be enqueued in interface of type '%s'",
-	 msg_type, interface_type);
+	 message->type(), interface->type());
 }
 
 
@@ -86,7 +86,7 @@ InterfaceInvalidMessageException::InterfaceInvalidMessageException(const char *m
  * Minimal data size to hold data storage.
  */
 
-/** @fn bool Interface::messageValid(const Message *message) const = 0
+/** @fn bool Interface::message_valid(const Message *message) const = 0
  * Check if the message is valid and can be enqueued.
  * @param message The message to check
  * @return true, if the message is valid and may be enqueued, false otherwise
@@ -228,6 +228,32 @@ Interface::has_writer() const
 }
 
 
+/** Get the number of readers.
+ * Use this method to determine how many reading instances of the interface
+ * currently exist. If the current instance is a reading instance it will
+ * be included in the count number. To determine if you are the last man having
+ * this interface you can use the following code:
+ * @code
+ * // for a writing instance:
+ * if ( interface->num_readers == 0 ) {
+ *   // we are the last one to have this interface open
+ * }
+ *
+ * // for a reading instance:
+ * if ( ! interface->has_writer() && (interface->num_readers() == 0) ) {
+ *   // we are the last one to have this interface open
+ * }
+ * @endcode
+ * Note that this can result in a race condition. You have to be registered as
+ * a BlackBoardEventListener to be sure that you are really the last.
+ */
+unsigned int
+Interface::num_readers() const
+{
+  return __interface_mediator->num_readers(this);
+}
+
+
 /** Enqueue message at end of queue.
  * This appends the given message to the queue and transmits the message via the
  * message mediator.
@@ -239,10 +265,14 @@ Interface::has_writer() const
 unsigned int
 Interface::msgq_enqueue(Message *message)
 {
-  message->set_interface(this);
-  unsigned int rv = __message_queue->append(message);
-  __message_mediator->transmit(message);
-  return rv;
+  if ( message_valid(message) ) {
+    message->set_interface(this);
+    unsigned int rv = __message_queue->append(message);
+    __message_mediator->transmit(message);
+    return rv;
+  } else {
+    throw InterfaceInvalidMessageException(this, message);
+  }
 }
 
 

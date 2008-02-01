@@ -58,8 +58,10 @@
  */
 
 
-/** Constructor */
-Message::Message()
+/** Constructor.
+ * @param type string representation of the message type
+ */
+Message::Message(const char *type)
 {
   message_id = 0;
   data_ptr = NULL;
@@ -70,6 +72,7 @@ Message::Message()
   _substatus = 0;
   _sender    = strdup(Thread::current_thread()->name());
   _sender_id = Thread::current_thread_id();
+  _type      = strdup(type);
 }
 
 
@@ -89,6 +92,7 @@ Message::Message(Message &mesg)
   _substatus = 0;
   _sender    = strdup(Thread::current_thread()->name());
   _sender_id = Thread::current_thread_id();
+  _type      = strdup(mesg._type);
 }
 
 
@@ -108,6 +112,7 @@ Message::Message(Message *mesg)
   _substatus = 0;
   _sender    = strdup(Thread::current_thread()->name());
   _sender_id = Thread::current_thread_id();
+  _type      = strdup(mesg->_type);
 }
 
 
@@ -119,6 +124,7 @@ Message::~Message()
     data_ptr = NULL;
   }
   free(_sender);
+  free(_type);
 }
 
 
@@ -176,7 +182,7 @@ Message::set_status(Message::MessageStatus status)
  * @return message status
  */
 Message::MessageStatus
-Message::status()
+Message::status() const
 {
   return _status;
 }
@@ -198,7 +204,7 @@ Message::set_sub_status(unsigned int sub_status)
  * @return sub status
  */
 unsigned int
-Message::sub_status()
+Message::sub_status() const
 {
   return _substatus;
 }
@@ -208,7 +214,7 @@ Message::sub_status()
  * @return name of sending thread
  */
 const char *
-Message::sender()
+Message::sender() const
 {
   return _sender;
 }
@@ -218,7 +224,7 @@ Message::sender()
  * @return name of sending thread.
  */
 pthread_t
-Message::sender_id()
+Message::sender_id() const
 {
   return _sender_id;
 }
@@ -239,7 +245,17 @@ Message::set_interface(Interface *iface)
  * @return transmitting interface, or NULL if message has not been enqueued, yet.
  */
 Interface *
-Message::interface()
+Message::interface() const
 {
   return _transmit_via_iface;
+}
+
+
+/** Get message type.
+ * @return textual representation of the interface type
+ */
+const char *
+Message::type() const
+{
+  return _type;
 }
