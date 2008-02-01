@@ -33,7 +33,8 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
-#include <blackboard/event_listener.h>
+#include <blackboard/interface_listener.h>
+#include <blackboard/interface_observer.h>
 #include <plugins/navigator/navigator.h>
 
 class NavigatorInterface;
@@ -41,9 +42,15 @@ class MotorInterface;
 class ObjectPositionInterface;
 class Mutex;
 
-class NavigatorThread : public Thread, public BlockedTimingAspect, public LoggingAspect,
-                        public BlackBoardAspect, public Navigator, public ConfigurableAspect,
-                        public BlackBoardEventListener
+class NavigatorThread
+: public Thread,
+  public BlockedTimingAspect,
+  public LoggingAspect,
+  public BlackBoardAspect,
+  public ConfigurableAspect,
+  public BlackBoardInterfaceListener,
+  public BlackBoardInterfaceObserver,
+  public Navigator
 {
  public:
   NavigatorThread();
