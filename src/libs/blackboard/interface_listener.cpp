@@ -1,6 +1,6 @@
  
 /***************************************************************************
- *  event_listener.cpp - BlackBoard event listener
+ *  interface_listener.cpp - BlackBoard event listener
  *
  *  Created: Wed Nov 08 10:00:34 2007
  *  Copyright  2007  Tim Niemueller [www.niemueller.de]
@@ -25,17 +25,17 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <blackboard/event_listener.h>
+#include <blackboard/interface_listener.h>
 #include <interface/interface.h>
 
-/** @class BlackBoardEventListener <blackboard/event_listener.h>
- * BlackBoard event listener.
+/** @class BlackBoardInterfaceListener <blackboard/interface_listener.h>
+ * BlackBoard interface listener.
  * Derive this class if you want to be notified of specific BlackBoard 
- * events.
+ * events regarding instances of interfaces.
  *
- * The bb_* methods are called during the appropriate operation. The operation
- * that you carry out in this event handler really has to damn fast, or the
- * performance of the whole system will suffer severely. For this reason use
+ * The bb_interface_* methods are called during the appropriate operation. The
+ * operation that you carry out in this event handler really has to damn fast, or
+ * the performance of the whole system will suffer severely. For this reason use
  * this notification facility only rarely and only register for the appropriate
  * events.
  *
@@ -52,14 +52,12 @@
  * the general idea is that you opened the interface by yourself for reading and
  * thus the deletion will not happen before you close the interface.
  *
- * Here is a simple life cycle of a BlackBoard event listener:
+ * Here is a simple life cycle of a BlackBoard interface listener:
  * First you create your interface that you want to listen for.
- * The protected methods bbel_add_data_interface(), bbel_add_reader_interface(),
- * bbel_add_writer_interface() and bbel_add_interface_create_type() have to
+ * The protected methods bbil_add_data_interface(), bbil_add_reader_interface(),
+ * bbil_add_writer_interface() and bbil_add_interface_create_type() have to
  * be called with the appropriate interfaces <i>before</i> the event handler is
- * actually registered with the interface manager! Also add any interface type
- * that you want to get interface creation/deletion notifications for.
- * After this you register your event handler with the interface manager. From
+ * actually registered with the interface manager! From
  * now on will be called for the all registered events.
  * In the end you unregister the event listener and <i>then</i> close any
  * interface that you had registered before.
@@ -75,69 +73,45 @@
  */
 
 /** Empty constructor. */
-BlackBoardEventListener::BlackBoardEventListener()
+BlackBoardInterfaceListener::BlackBoardInterfaceListener()
 {
 }
 
 /** Destructor. */
-BlackBoardEventListener::~BlackBoardEventListener()
+BlackBoardInterfaceListener::~BlackBoardInterfaceListener()
 {
   char *tmp;
 
-  while ( ! __bbel_data_interfaces.empty() ) {
-    __bbel_ii = __bbel_data_interfaces.begin();
-    tmp = (*__bbel_ii).first;
-    __bbel_data_interfaces.erase(__bbel_ii);
+  while ( ! __bbil_data_interfaces.empty() ) {
+    __bbil_ii = __bbil_data_interfaces.begin();
+    tmp = (*__bbil_ii).first;
+    __bbil_data_interfaces.erase(__bbil_ii);
     free(tmp);
   }
 
-  while ( ! __bbel_reader_interfaces.empty() ) {
-    __bbel_ii = __bbel_reader_interfaces.begin();
-    tmp = (*__bbel_ii).first;
-    __bbel_reader_interfaces.erase(__bbel_ii);
+  while ( ! __bbil_reader_interfaces.empty() ) {
+    __bbil_ii = __bbil_reader_interfaces.begin();
+    tmp = (*__bbil_ii).first;
+    __bbil_reader_interfaces.erase(__bbil_ii);
     free(tmp);
   }
 
-  while ( ! __bbel_writer_interfaces.empty() ) {
-    __bbel_ii = __bbel_writer_interfaces.begin();
-    tmp = (*__bbel_ii).first;
-    __bbel_writer_interfaces.erase(__bbel_ii);
+  while ( ! __bbil_writer_interfaces.empty() ) {
+    __bbil_ii = __bbil_writer_interfaces.begin();
+    tmp = (*__bbil_ii).first;
+    __bbil_writer_interfaces.erase(__bbil_ii);
     free(tmp);
   }
-
-  while ( ! __bbel_interface_create_types.empty() ) {
-    __bbel_iti = __bbel_interface_create_types.begin();
-    tmp = *__bbel_iti;
-    __bbel_interface_create_types.erase(__bbel_iti);
-    free(tmp);
-  }
-
 }
 
 
 /** BlackBoard data changed notification.
  * This is called whenever the data in an interface that you registered for is
  * modified. This happens if a writer calls the Interface::write() method.
- * @param interface interface instance that you supplied to bbel_add_data_interface()
+ * @param interface interface instance that you supplied to bbil_add_data_interface()
  */
 void
-BlackBoardEventListener::bb_data_changed(Interface *interface) throw()
-{
-}
-
-
-/** BlackBoard interface created notification.
- * This is called whenever an interface is created for a type that you registered
- * for.
- * @param type type of the interface. If you want to store this make a copy as it
- * is not guaranteed that the supplied string exists for longer than the duration
- * of the method call
- * @param id ID of the newly created interface. If you want to store this make a
- * copy as it is not guaranteed that the supplied string exists for longer than
- * the duration of the method call
- */
-void
-BlackBoardEventListener::bb_interface_created(const char *type, const char *id ) throw()
+BlackBoardInterfaceListener::bb_interface_data_changed(Interface *interface) throw()
 {
 }
 
@@ -145,10 +119,10 @@ BlackBoardEventListener::bb_interface_created(const char *type, const char *id )
 /** A reading instance has been opened for a watched interface.
  * This is called whenever a reading instance of the interface you are watching
  * is opened.
- * @param interface interface instance that you supplied to bbel_add_reader_interface()
+ * @param interface interface instance that you supplied to bbil_add_reader_interface()
  */
 void
-BlackBoardEventListener::bb_interface_reader_added(Interface *interface) throw()
+BlackBoardInterfaceListener::bb_interface_reader_added(Interface *interface) throw()
 {
 }
 
@@ -156,10 +130,10 @@ BlackBoardEventListener::bb_interface_reader_added(Interface *interface) throw()
 /** A reading instance has been closed for a watched interface.
  * This is called whenever a reading instance of an interface you are watching
  * is closed.
- * @param interface interface instance that you supplied to bbel_add_reader_interface()
+ * @param interface interface instance that you supplied to bbil_add_reader_interface()
  */
 void
-BlackBoardEventListener::bb_interface_reader_removed(Interface *interface) throw()
+BlackBoardInterfaceListener::bb_interface_reader_removed(Interface *interface) throw()
 {
 }
 
@@ -167,10 +141,10 @@ BlackBoardEventListener::bb_interface_reader_removed(Interface *interface) throw
 /** A writing instance has been opened for a watched interface.
  * This is called whenever a writing instance of the interface you are watching
  * is opened.
- * @param interface interface instance that you supplied to bbel_add_writer_interface()
+ * @param interface interface instance that you supplied to bbil_add_writer_interface()
  */
 void
-BlackBoardEventListener::bb_interface_writer_added(Interface *interface) throw()
+BlackBoardInterfaceListener::bb_interface_writer_added(Interface *interface) throw()
 {
 }
 
@@ -178,10 +152,10 @@ BlackBoardEventListener::bb_interface_writer_added(Interface *interface) throw()
 /** A writing instance has been closed for a watched interface.
  * This is called whenever a writing instance of an interface you are watching
  * is closed.
- * @param interface interface instance that you supplied to bbel_add_writer_interface()
+ * @param interface interface instance that you supplied to bbil_add_writer_interface()
  */
 void
-BlackBoardEventListener::bb_interface_writer_removed(Interface *interface) throw()
+BlackBoardInterfaceListener::bb_interface_writer_removed(Interface *interface) throw()
 {
 }
 
@@ -190,12 +164,12 @@ BlackBoardEventListener::bb_interface_writer_removed(Interface *interface) throw
  * @param interface interface to watch for data modifications.
  */
 void
-BlackBoardEventListener::bbel_add_data_interface(Interface *interface)
+BlackBoardInterfaceListener::bbil_add_data_interface(Interface *interface)
 {
-  if ( __bbel_data_interfaces.find((char *)interface->uid()) != __bbel_data_interfaces.end() ) {
+  if ( __bbil_data_interfaces.find((char *)interface->uid()) != __bbil_data_interfaces.end() ) {
     throw Exception("Interface %s already registered (data)", interface->uid());
   }
-  __bbel_data_interfaces[strdup(interface->uid())] = interface;
+  __bbil_data_interfaces[strdup(interface->uid())] = interface;
 }
 
 /** Add an interface to the reader addition/removal watch list.
@@ -205,12 +179,12 @@ BlackBoardEventListener::bbel_add_data_interface(Interface *interface)
  * @param interface interface to watch for addition/removal of readers
  */
 void
-BlackBoardEventListener::bbel_add_reader_interface(Interface *interface)
+BlackBoardInterfaceListener::bbil_add_reader_interface(Interface *interface)
 {
-  if ( __bbel_reader_interfaces.find((char *)interface->uid()) != __bbel_reader_interfaces.end() ) {
+  if ( __bbil_reader_interfaces.find((char *)interface->uid()) != __bbil_reader_interfaces.end() ) {
     throw Exception("Interface %s already registered (reader)", interface->uid());
   }
-  __bbel_reader_interfaces[strdup(interface->uid())] = interface;
+  __bbil_reader_interfaces[strdup(interface->uid())] = interface;
 }
 
 
@@ -221,60 +195,40 @@ BlackBoardEventListener::bbel_add_reader_interface(Interface *interface)
  * @param interface interface to watch for addition/removal of writers
  */
 void
-BlackBoardEventListener::bbel_add_writer_interface(Interface *interface)
+BlackBoardInterfaceListener::bbil_add_writer_interface(Interface *interface)
 {
-  if ( __bbel_writer_interfaces.find((char *)interface->uid()) != __bbel_writer_interfaces.end() ) {
+  if ( __bbil_writer_interfaces.find((char *)interface->uid()) != __bbil_writer_interfaces.end() ) {
     throw Exception("Interface %s already registered (writer)", interface->uid());
   }
-  __bbel_writer_interfaces[strdup(interface->uid())] = interface;
-}
-
-/** Add interface creation type to watch list.
- * With this you add an interface type to the watch list. For any type on this list
- * you will be notified if an interface is created.
- * @param type type to watch
- */
-void
-BlackBoardEventListener::bbel_add_interface_create_type(const char *type) throw()
-{
-  __bbel_interface_create_types.insert(strdup(type));
+  __bbil_writer_interfaces[strdup(interface->uid())] = interface;
 }
 
 
 /** Get data modification watch list.
  * @return data modification watch list
  */
-BlackBoardEventListener::InterfaceLockHashMap *
-BlackBoardEventListener::bbel_data_interfaces() throw()
+BlackBoardInterfaceListener::InterfaceLockHashMap *
+BlackBoardInterfaceListener::bbil_data_interfaces() throw()
 {
-  return &__bbel_data_interfaces;
+  return &__bbil_data_interfaces;
 }
 
 /** Get reader watch list.
  * @return reader watch list
  */
-BlackBoardEventListener::InterfaceLockHashMap *
-BlackBoardEventListener::bbel_reader_interfaces() throw()
+BlackBoardInterfaceListener::InterfaceLockHashMap *
+BlackBoardInterfaceListener::bbil_reader_interfaces() throw()
 {
-  return &__bbel_reader_interfaces;
+  return &__bbil_reader_interfaces;
 }
 
 /** Get writer watch list.
  * @return writer watch list
  */
-BlackBoardEventListener::InterfaceLockHashMap *
-BlackBoardEventListener::bbel_writer_interfaces() throw()
+BlackBoardInterfaceListener::InterfaceLockHashMap *
+BlackBoardInterfaceListener::bbil_writer_interfaces() throw()
 {
-  return &__bbel_writer_interfaces;
-}
-
-/** Get interface type watch list.
- * @return interface type watch list
- */
-BlackBoardEventListener::InterfaceTypeLockHashSet *
-BlackBoardEventListener::bbel_interface_create_types() throw()
-{
-  return &__bbel_interface_create_types;
+  return &__bbil_writer_interfaces;
 }
 
 
@@ -285,13 +239,13 @@ BlackBoardEventListener::bbel_interface_create_types() throw()
  * @return interface instance, NULL if not in list (non-fatal error)
  */
 Interface *
-BlackBoardEventListener::bbel_data_interface(const char *iuid) throw()
+BlackBoardInterfaceListener::bbil_data_interface(const char *iuid) throw()
 {
-  __bbel_data_interfaces.lock();
-  bool found = ((__bbel_ii = __bbel_data_interfaces.find((char *)iuid)) != __bbel_data_interfaces.end());
-  __bbel_data_interfaces.unlock();
+  __bbil_data_interfaces.lock();
+  bool found = ((__bbil_ii = __bbil_data_interfaces.find((char *)iuid)) != __bbil_data_interfaces.end());
+  __bbil_data_interfaces.unlock();
   if ( found ) {
-    return (*__bbel_ii).second;
+    return (*__bbil_ii).second;
   } else {
     return NULL;
   }
@@ -305,13 +259,13 @@ BlackBoardEventListener::bbel_data_interface(const char *iuid) throw()
  * @return interface instance, NULL if not in list (non-fatal error)
  */
 Interface *
-BlackBoardEventListener::bbel_reader_interface(const char *iuid) throw()
+BlackBoardInterfaceListener::bbil_reader_interface(const char *iuid) throw()
 {
-  __bbel_reader_interfaces.lock();
-  bool found = ((__bbel_ii = __bbel_reader_interfaces.find((char *)iuid)) != __bbel_reader_interfaces.end());
-  __bbel_reader_interfaces.unlock();
+  __bbil_reader_interfaces.lock();
+  bool found = ((__bbil_ii = __bbil_reader_interfaces.find((char *)iuid)) != __bbil_reader_interfaces.end());
+  __bbil_reader_interfaces.unlock();
   if ( found ) {
-    return (*__bbel_ii).second;
+    return (*__bbil_ii).second;
   } else {
     return NULL;
   }
@@ -325,13 +279,13 @@ BlackBoardEventListener::bbel_reader_interface(const char *iuid) throw()
  * @return interface instance, NULL if not in list (non-fatal error)
  */
 Interface *
-BlackBoardEventListener::bbel_writer_interface(const char *iuid) throw()
+BlackBoardInterfaceListener::bbil_writer_interface(const char *iuid) throw()
 {
-  __bbel_writer_interfaces.lock();
-  bool found = ((__bbel_ii = __bbel_writer_interfaces.find((char *)iuid)) != __bbel_writer_interfaces.end());
-  __bbel_writer_interfaces.unlock();
+  __bbil_writer_interfaces.lock();
+  bool found = ((__bbil_ii = __bbil_writer_interfaces.find((char *)iuid)) != __bbil_writer_interfaces.end());
+  __bbil_writer_interfaces.unlock();
   if ( found ) {
-    return (*__bbel_ii).second;
+    return (*__bbil_ii).second;
   } else {
     return NULL;
   }

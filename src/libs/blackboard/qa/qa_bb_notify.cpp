@@ -31,7 +31,8 @@
 #include <blackboard/blackboard.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
-#include <blackboard/event_listener.h>
+#include <blackboard/interface_listener.h>
+#include <blackboard/interface_observer.h>
 
 #include <interfaces/test.h>
 
@@ -46,50 +47,59 @@
 
 using namespace std;
 
-class QaBBEventListener : public BlackBoardEventListener
+class QaBBEventListener
+  : public BlackBoardInterfaceListener,
+    public BlackBoardInterfaceObserver
 {
  public:
   QaBBEventListener()
   {
-    bbel_add_interface_create_type("TestInterface");
-  }
-
-  virtual void bb_data_changed(Interface *interface) throw()
-  {
-    printf("BBEL: Data in interface %s has been modified\n", interface->uid());
+    bbio_add_interface_create_type("TestInterface");
+    bbio_add_interface_destroy_type("TestInterface");
   }
 
   virtual void bb_interface_created(const char *type, const char *id) throw()
   {
-    printf("BBEL: Interface %s of type %s has been created\n", id, type);
+    printf("BBIO: Interface %s of type %s has been created\n", id, type);
+  }
+
+  virtual void bb_interface_destroyed(const char *type, const char *id) throw()
+  {
+    printf("BBIO: Interface %s of type %s has been destroyed\n", id, type);
+  }
+
+
+  virtual void bb_interface_data_changed(Interface *interface) throw()
+  {
+    printf("BBIL: Data in interface %s has been modified\n", interface->uid());
   }
 
   virtual void bb_interface_writer_added(Interface *interface) throw()
   {
-    printf("BBEL: Writer has been added to interface %s\n", interface->uid());
+    printf("BBIL: Writer has been added to interface %s\n", interface->uid());
   }
 
   virtual void bb_interface_writer_removed(Interface *interface) throw()
   {
-    printf("BBEL: Writer has been removed from interface %s\n", interface->uid());
+    printf("BBIL: Writer has been removed from interface %s\n", interface->uid());
   }
 
   virtual void bb_interface_reader_added(Interface *interface) throw()
   {
-    printf("BBEL: Reader has been added to interface %s\n", interface->uid());
+    printf("BBIL: Reader has been added to interface %s\n", interface->uid());
   }
 
   virtual void bb_interface_reader_removed(Interface *interface) throw()
   {
-    printf("BBEL: Reader has been removed from interface %s\n", interface->uid());
+    printf("BBIL: Reader has been removed from interface %s\n", interface->uid());
   }
 
   virtual void add_interface(Interface *interface) throw()
   {
-    printf("BBEL: Adding interface %s\n", interface->uid());
-    bbel_add_data_interface(interface);
-    bbel_add_reader_interface(interface);
-    bbel_add_writer_interface(interface);
+    printf("Listener: Adding interface %s\n", interface->uid());
+    bbil_add_data_interface(interface);
+    bbil_add_reader_interface(interface);
+    bbil_add_writer_interface(interface);
   }
 };
 
@@ -112,13 +122,14 @@ main(int argc, char **argv)
   TestInterface *ti_writer_6;
 
   try {
-    cout << "Opening interfaces.. " << flush;
+    cout << "Opening interfaces.. " << endl;
     ti_writer_1 = im->open_for_writing<TestInterface>("SomeID 1");
     ti_writer_2 = im->open_for_writing<TestInterface>("SomeID 2");
 
     qabbel.add_interface(ti_writer_1);
     qabbel.add_interface(ti_writer_2);
-    im->register_listener(&qabbel, BlackBoardInterfaceManager::BBEL_FLAG_ALL);
+    im->register_listener(&qabbel, BlackBoardInterfaceManager::BBIL_FLAG_ALL);
+    im->register_observer(&qabbel, BlackBoardInterfaceManager::BBIO_FLAG_ALL);
 
     ti_writer_3 = im->open_for_writing<TestInterface>("SomeID 3");
     ti_writer_4 = im->open_for_writing<TestInterface>("AnotherID 1");

@@ -31,17 +31,19 @@
 #include <interface/mediators/interface_mediator.h>
 #include <interface/interface.h>
 #include <core/exceptions/software.h>
-#include <typeinfo>
 #include <core/utils/lock_list.h>
 #include <core/utils/lock_map.h>
 #include <core/utils/lock_hashmap.h>
 #include <utils/misc/string_compare.h>
+#include <typeinfo>
+#include <list>
 
-class BlackBoardEventListener;
 class BlackBoardMemoryManager;
 class BlackBoardMessageManager;
 class Mutex;
 class Module;
+class BlackBoardInterfaceListener;
+class BlackBoardInterfaceObserver;
 
 class BlackBoardInterfaceManager : public InterfaceMediator
 {
@@ -61,6 +63,7 @@ class BlackBoardInterfaceManager : public InterfaceMediator
     std::list<InterfaceType *> *  open_all_of_type_for_reading(const char *id_prefix = NULL);
 
   virtual bool exists_writer(const Interface *interface) const;
+  virtual unsigned int num_readers(const Interface *interface) const;
   virtual void notify_of_data_change(const Interface *interface);
 
   template <class InterfaceType>
@@ -70,14 +73,22 @@ class BlackBoardInterfaceManager : public InterfaceMediator
     InterfaceType * open_for_writing(const char *identifier);
 
 
-  static const unsigned int BBEL_FLAG_DATA;
-  static const unsigned int BBEL_FLAG_READER;
-  static const unsigned int BBEL_FLAG_WRITER;
-  static const unsigned int BBEL_FLAG_INTERFACE;
-  static const unsigned int BBEL_FLAG_ALL;
-  void register_listener(BlackBoardEventListener *listener,
-			 unsigned int flags = BBEL_FLAG_DATA);
-  void unregister_listener(BlackBoardEventListener *listener);
+  static const unsigned int BBIL_FLAG_DATA;
+  static const unsigned int BBIL_FLAG_READER;
+  static const unsigned int BBIL_FLAG_WRITER;
+  static const unsigned int BBIL_FLAG_ALL;
+
+  static const unsigned int BBIO_FLAG_CREATED;
+  static const unsigned int BBIO_FLAG_DESTROYED;
+  static const unsigned int BBIO_FLAG_ALL;
+
+  void register_listener(BlackBoardInterfaceListener *listener,
+			 unsigned int flags);
+  void unregister_listener(BlackBoardInterfaceListener *listener);
+
+  void register_observer(BlackBoardInterfaceObserver *observer,
+			 unsigned int flags);
+  void unregister_observer(BlackBoardInterfaceObserver *observer);
 
   const BlackBoardMemoryManager *  memory_manager() const;
 
@@ -96,6 +107,7 @@ class BlackBoardInterfaceManager : public InterfaceMediator
   Interface *  writer_for_mem_serial(unsigned int mem_serial);
 
   void notify_of_interface_created(const char *type, const char *id) throw();
+  void notify_of_interface_destroyed(const char *type, const char *id) throw();
   void notify_of_writer_added(const char *uid) throw();
   void notify_of_writer_removed(const Interface *interface) throw();
   void notify_of_reader_added(const char *uid) throw();
@@ -111,20 +123,29 @@ class BlackBoardInterfaceManager : public InterfaceMediator
   Mutex                        *mutex;
   Module                       *iface_module;
 
-  LockMap< unsigned int, Interface * >       writer_interfaces;
-  LockMap< unsigned int, RefCountRWLock * >  rwlocks;
+  LockMap< unsigned int, Interface * >              writer_interfaces;
+  LockMap< unsigned int, RefCountRWLock * >         rwlocks;
 
-  typedef std::list< BlackBoardEventListener * >           BBelList;
-  typedef LockHashMap< const char *, BBelList,
-    __gnu_cxx::hash<const char *>, StringEquality>  BBelLockHashMap;
+  typedef std::list< BlackBoardInterfaceListener * >  BBilList;
+  typedef LockHashMap< const char *, BBilList,
+    __gnu_cxx::hash<const char *>, StringEquality>    BBilLockHashMap;
 
-  typedef std::list< BlackBoardEventListener * >::iterator BBelListIterator;
-  typedef BBelLockHashMap::iterator BBelLockHashMapIterator;
+  typedef std::list< BlackBoardInterfaceObserver * >  BBioList;
+  typedef LockHashMap< const char *, BBioList,
+    __gnu_cxx::hash<const char *>, StringEquality>    BBioLockHashMap;
 
-  BBelLockHashMap __bbel_interface;
-  BBelLockHashMap __bbel_data;
-  BBelLockHashMap __bbel_reader;
-  BBelLockHashMap __bbel_writer;
+  typedef std::list< BlackBoardInterfaceListener * >::iterator BBilListIterator;
+  typedef BBilLockHashMap::iterator BBilLockHashMapIterator;
+
+  typedef std::list< BlackBoardInterfaceObserver * >::iterator BBioListIterator;
+  typedef BBioLockHashMap::iterator BBioLockHashMapIterator;
+
+  BBilLockHashMap __bbil_data;
+  BBilLockHashMap __bbil_reader;
+  BBilLockHashMap __bbil_writer;
+
+  BBioLockHashMap __bbio_created;
+  BBioLockHashMap __bbio_destroyed;
 
 };
 
