@@ -25,13 +25,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <plugins/example/example_plugin.h>
-#include <plugins/example/thread.h>
-#include <plugins/example/net_thread.h>
-#include <plugins/example/finalize_nettler_thread.h>
-#include <plugins/example/blackboard_thread.h>
+#include <plugins/examples/basics/example_plugin.h>
+#include <plugins/examples/basics/thread.h>
+#include <plugins/examples/basics/net_thread.h>
+#include <plugins/examples/basics/finalize_nettler_thread.h>
+#include <plugins/examples/basics/blackboard_thread.h>
 
-/** @class ExamplePlugin plugins/example/example_plugin.h
+/** @class ExamplePlugin plugins/examples/basics/example_plugin.h
  * Simple example plugin.
  * Creates a few threads for different wakeup hooks that print out messages
  * every 10 iterations.

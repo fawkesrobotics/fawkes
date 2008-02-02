@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  net_thread.h - Fawkes Example Plugin Network Thread
+ *  finalize_nettler_thread.h - Fawkes Example Plugin Finalize Nettler Thread
  *
- *  Generated: Tue May 08 17:48:23 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu May 24 00:32:22 2007
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,32 +25,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __PLUGINS_EXAMPLE_NET_THREAD_H_
-#define __PLUGINS_EXAMPLE_NET_THREAD_H_
+#ifndef __PLUGINS_EXAMPLE_FINALIZE_NETTLER_THREAD_H_
+#define __PLUGINS_EXAMPLE_FINALIZE_NETTLER_THREAD_H_
 
 #include <core/threading/thread.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
-#include <aspect/fawkes_network.h>
-#include <netcomm/fawkes/handler.h>
 
-class ExampleNetworkThread : public Thread, public LoggingAspect, public FawkesNetworkAspect,
-  public FawkesNetworkHandler
+class ExampleFinalizeNettlerThread : public Thread, public LoggingAspect
 {
 
  public:
-  ExampleNetworkThread(const char *name);
-  virtual ~ExampleNetworkThread();
+  ExampleFinalizeNettlerThread(const char *name);
+  virtual ~ExampleFinalizeNettlerThread();
 
   virtual void init();
-  virtual void finalize();
   virtual void loop();
 
-  /* from FawkesNetworkHandler interface */
-  virtual void handle_network_message(FawkesNetworkMessage *msg);
-  virtual void client_connected(unsigned int clid);
-  virtual void client_disconnected(unsigned int clid);
-  virtual void process_after_loop();
+  virtual bool prepare_finalize_user();
+  virtual void finalize();
 
+ private:
+  bool nagged;
 };
 
 

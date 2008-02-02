@@ -2,7 +2,7 @@
 #                 Makefile Build System for Fawkes: Example Plugin
 #                            -------------------
 #   Created on Wed Nov 22 17:05:17 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -12,16 +12,8 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
-BASEDIR = ../../..
-
-CFLAGS = -g
+BASEDIR = ../../../..
 
 LIBS_example = core utils netcomm
 OBJS_example = $(filter-out example_plugin_netping.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))

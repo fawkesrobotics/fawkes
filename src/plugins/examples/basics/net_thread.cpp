@@ -3,7 +3,7 @@
  *  net_thread.cpp - Fawkes Example Plugin Network Thread
  *
  *  Generated: Tue May 08 17:49:56 2006-2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,13 +25,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <plugins/example/net_thread.h>
+#include <plugins/examples/basics/net_thread.h>
 #include <netcomm/fawkes/component_ids.h>
 
 #include <cstdlib>
 #include <unistd.h>
 
-/** @class ExampleNetworkThread plugins/example/net_thread.h
+/** @class ExampleNetworkThread plugins/examples/basics/net_thread.h
  * Network thread of example plugin.
  * @author Tim Niemueller
  */

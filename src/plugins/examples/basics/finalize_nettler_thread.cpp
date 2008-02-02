@@ -3,7 +3,7 @@
  *  finalize_nettler_thread.cpp - Fawkes Example Plugin Finalize Nettler Thread
  *
  *  Created: Thu May 24 00:35:06 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,11 +25,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <plugins/example/finalize_nettler_thread.h>
+#include <plugins/examples/basics/finalize_nettler_thread.h>
 
 #include <unistd.h>
 
-/** @class ExampleFinalizeNettlerThread plugins/example/finalize_nettler_thread.h
+/** @class ExampleFinalizeNettlerThread plugins/examples/basics/finalize_nettler_thread.h
  * Thread of example plugin.
  * This thread does nothing but nagging once on finalize. On the first call to
  * prepare finalize it returns false that it cannot be finalized,

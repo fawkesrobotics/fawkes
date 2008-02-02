@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  thread.h - Fawkes Example Plugin Thread
+ *  ballposlog_plugin.h - Fawkes ball position log plugin for demonstration
  *
- *  Generated: Wed Nov 22 17:06:33 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jan 24 16:58:01 2008
+ *  Copyright  2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,28 +25,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __PLUGINS_EXAMPLE_THREAD_H_
-#define __PLUGINS_EXAMPLE_THREAD_H_
+#ifndef __PLUGINS_BALLPOSLOG_BALLPOSLOG_PLUGIN_H_
+#define __PLUGINS_BALLPOSLOG_BALLPOSLOG_PLUGIN_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
+#include <core/plugin.h>
 
-class ExampleThread : public Thread, public BlockedTimingAspect, public LoggingAspect
+class BallPosLogPlugin : public Plugin
 {
-
  public:
-  ExampleThread(BlockedTimingAspect::WakeupHook hook, const char *name, unsigned int modc);
-  virtual ~ExampleThread();
-
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
-
- private:
-  unsigned int m;
-  unsigned int modc;
+      BallPosLogPlugin();
 };
-
 
 #endif

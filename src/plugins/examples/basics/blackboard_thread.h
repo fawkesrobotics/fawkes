@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  finalize_nettler_thread.h - Fawkes Example Plugin Finalize Nettler Thread
+ *  blackboard_thread.h - Fawkes Example Plugin BlackBoard Thread
  *
- *  Created: Thu May 24 00:32:22 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Jun 20 16:35:47 2007
+ *  Copyright  2007-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,29 +25,33 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __PLUGINS_EXAMPLE_FINALIZE_NETTLER_THREAD_H_
-#define __PLUGINS_EXAMPLE_FINALIZE_NETTLER_THREAD_H_
+#ifndef __PLUGINS_EXAMPLE_BLACKBOARD_THREAD_H_
+#define __PLUGINS_EXAMPLE_BLACKBOARD_THRED_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
+#include <aspect/blackboard.h>
 
-class ExampleFinalizeNettlerThread : public Thread, public LoggingAspect
+class TestInterface;
+
+class ExampleBlackBoardThread
+  : public Thread,
+    public BlockedTimingAspect,
+    public LoggingAspect,
+    public BlackBoardAspect
 {
-
  public:
-  ExampleFinalizeNettlerThread(const char *name);
-  virtual ~ExampleFinalizeNettlerThread();
+  ExampleBlackBoardThread(bool reader);
+  virtual ~ExampleBlackBoardThread();
 
+  virtual void finalize();
   virtual void init();
   virtual void loop();
 
-  virtual bool prepare_finalize_user();
-  virtual void finalize();
-
  private:
-  bool nagged;
+  TestInterface* test_interface;  
+  bool           reader;
 };
-
 
 #endif

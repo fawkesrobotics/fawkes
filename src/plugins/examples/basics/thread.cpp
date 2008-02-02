@@ -3,7 +3,7 @@
  *  thread.cpp - Fawkes Example Plugin Thread
  *
  *  Generated: Wed Nov 22 17:13:57 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,11 +25,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <plugins/example/thread.h>
+#include <plugins/examples/basics/thread.h>
 
 #include <unistd.h>
 
-/** @class ExampleThread plugins/example/thread.h
+/** @class ExampleThread plugins/examples/basics/thread.h
  * Thread of example plugin.
  * @author Tim Niemueller
  */

@@ -3,7 +3,7 @@
  *  blackboard_thread.cpp - Fawkes Example Plugin BlackBoard Thread
  *
  *  Created: Wed Jun 20 16:37:40 2007
- *  Copyright  2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2007-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,11 +25,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <plugins/example/blackboard_thread.h>
+#include <plugins/examples/basics/blackboard_thread.h>
 
 #include <interfaces/test.h>
 
-/** @class ExampleBlackBoardThread <plugins/example/blackboard_thread.h>
+/** @class ExampleBlackBoardThread <plugins/examples/basics/blackboard_thread.h>
  * Simple demonstration for a thread using the BlackBoard.
  *
  * @author Tim Niemueller
@@ -59,7 +59,7 @@ ExampleBlackBoardThread::finalize()
 {
   logger->log_debug(name(), "Closing test interface");
   try {
-    interface_manager->close(test_interface);
+    blackboard->close(test_interface);
   } catch (Exception &e) {
     logger->log_error(name(), "Could not close kicker interface");
     logger->log_error(name(), e);
@@ -76,9 +76,9 @@ ExampleBlackBoardThread::init()
   logger->log_debug(name(), "Opening test interface");
   try {
     if ( reader ) {
-      test_interface = interface_manager->open_for_reading<TestInterface>("Test");
+      test_interface = blackboard->open_for_reading<TestInterface>("Test");
     } else {
-      test_interface = interface_manager->open_for_writing<TestInterface>("Test");
+      test_interface = blackboard->open_for_writing<TestInterface>("Test");
     }
   } catch (Exception& e) {
     e.append("Opening test interface for writing failed");
