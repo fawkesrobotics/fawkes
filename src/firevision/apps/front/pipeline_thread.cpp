@@ -139,7 +139,7 @@ FvFrontPipelineThread::init()
 
   // interface
   try {
-    __ball_interface = interface_manager->open_for_writing<ObjectPositionInterface>("Front");
+    __ball_interface = blackboard->open_for_writing<ObjectPositionInterface>("Front");
     __ball_interface->set_object_type( ObjectPositionInterface::BALL );
   } catch (Exception &e) {
     e.append("Opening ball interface for writing failed");
@@ -234,7 +234,7 @@ FvFrontPipelineThread::finalize()
   delete __camctrl;
 
   try {
-    interface_manager->close(__ball_interface);
+    blackboard->close(__ball_interface);
   } catch (Exception &e) {
     e.append("Closing ball interface failed");
     throw;

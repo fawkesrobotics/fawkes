@@ -110,7 +110,7 @@ FvOmniBallPipelineThread::init()
   // interface
   try
     {
-      ball_interface = interface_manager->open_for_writing<ObjectPositionInterface>("OmniBall");
+      ball_interface = blackboard->open_for_writing<ObjectPositionInterface>("OmniBall");
       ball_interface->set_object_type( ObjectPositionInterface::BALL );
       ball_interface->set_visible(false);
       ball_interface->write();
@@ -136,7 +136,7 @@ FvOmniBallPipelineThread::init()
     {
       delete cam;
       cam = 0;
-      interface_manager->close(ball_interface);
+      blackboard->close(ball_interface);
       e.append("OmniBallPipeline::init() failed since config parameters are missing");
       throw;
     }
@@ -180,7 +180,7 @@ FvOmniBallPipelineThread::finalize()
     {
       ball_interface->set_visible(false);
       ball_interface->write();
-      interface_manager->close(ball_interface);
+      blackboard->close(ball_interface);
     }
   catch (Exception &e)
     {

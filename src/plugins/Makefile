@@ -2,7 +2,7 @@
 #                  Makefile Build System for Fawkes: Plugins
 #                            -------------------
 #   Created on Mon Dec 04 14:54:17 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -12,20 +12,11 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(SRCDIR)/navigator/navigator.mk
 
-PRESUBDIRS = navigator
-# worldmodel example kicker navigator
+SUBDIRS = kicker navigator worldmodel
 
-include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
 

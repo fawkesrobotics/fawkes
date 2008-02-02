@@ -95,7 +95,7 @@ class KickerQAPlugin : public Plugin
 {
  public:
   KickerQAPlugin()
-    : Plugin(Plugin::MOTION, "KickerQAPlugin")
+    : Plugin("KickerQAPlugin")
   {
     thread_list.push_back(new KickerQAThread());
   }

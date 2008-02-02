@@ -190,7 +190,7 @@ MotorThread::init()
     }
   try
     {
-      motor_interface = interface_manager->open_for_writing<MotorInterface>("Motor");
+      motor_interface = blackboard->open_for_writing<MotorInterface>("Motor");
     }
   catch (Exception& e)
     {
@@ -214,7 +214,7 @@ MotorThread::finalize()
 
   try
     {
-      interface_manager->close(motor_interface);
+      blackboard->close(motor_interface);
     }
   catch (Exception& e)
     {

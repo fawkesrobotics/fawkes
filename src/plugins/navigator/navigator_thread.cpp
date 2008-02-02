@@ -66,10 +66,14 @@ NavigatorThread::finalize()
 {
   try
     {
-      interface_manager->close(navigator_interface);
-      interface_manager->close(motor_interface);
+      blackboard->close(navigator_interface);
+      blackboard->close(motor_interface);
+      for (oili = object_interface_list->begin(); oili != object_interface_list->end(); ++oili)
+	{
+	  blackboard->close(*oili);
+	}
       delete object_interface_list;
-      //  interface_manager->close(object_interface);
+      //  blackboard->close(object_interface);
     }
   catch (Exception& e)
     {
@@ -84,7 +88,7 @@ NavigatorThread::init()
 {
   try
     {
-      navigator_interface = interface_manager->open_for_writing<NavigatorInterface>("Navigator");
+      navigator_interface = blackboard->open_for_writing<NavigatorInterface>("Navigator");
     }
   catch (Exception& e)
     {
@@ -96,7 +100,7 @@ NavigatorThread::init()
 
   try
     {
-      motor_interface = interface_manager->open_for_reading<MotorInterface>("Motor");
+      motor_interface = blackboard->open_for_reading<MotorInterface>("Motor");
     }
   catch (Exception& e)
     {
@@ -108,7 +112,7 @@ NavigatorThread::init()
 
   try
     {
-      object_interface_list = interface_manager->open_all_of_type_for_reading("ObjectPositionInterface");
+      object_interface_list = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("WM");
     }
   catch (Exception& e)
     {
@@ -139,7 +143,7 @@ NavigatorThread::bb_interface_created(const char *type, const char *id) throw()
     {
       if(strcmp( type, "ObjectPositionInterface" ) == 0)
         {
-          object_interface_list->push_back(interface_manager->open_for_reading (type, id));
+          object_interface_list->push_back(blackboard->open_for_reading<ObjectPositionInterface>(id));
         }
     }
   catch (Exception& e)
@@ -203,10 +207,9 @@ NavigatorThread::loop()
     {
       erase_all_obstacles();
     }
-  std::list<Interface *>::iterator i;
-  for ( i = object_interface_list->begin(); i != object_interface_list->end(); ++i )
+  for ( oili = object_interface_list->begin(); oili != object_interface_list->end(); ++oili )
     {
-      ObjectPositionInterface *object_interface = (ObjectPositionInterface *) *i;
+      ObjectPositionInterface *object_interface = *oili;
       object_interface->read();
 
       //  logger->log_info("NavigatorThread", "Ball object_interface->is_visible() %i",object_interface->is_visible());

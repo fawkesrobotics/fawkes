@@ -33,7 +33,7 @@
 
 using namespace std;
 
-/** @class WorldModelNetworkThread <plugins/worldmodel/thread.h>
+/** @class WorldModelNetworkThread <plugins/worldmodel/net_thread.h>
  * Network thread of worldmodel plugin.
  * @author Tim Niemueller
  */
@@ -57,10 +57,10 @@ void
 WorldModelNetworkThread::init()
 {
   logger->log_info(name(), "init() called");
-  string multicast_addr;
+  std::string multicast_addr;
   unsigned int port;
-  string encryption_key;
-  string encryption_iv;
+  std::string encryption_key;
+  std::string encryption_iv;
   try {
     multicast_addr = config->get_string("/worldmodel/worldinfo_transceiver/multicast_addr");
     port = config->get_uint("/worldmodel/worldinfo_transceiver/port");
@@ -99,38 +99,38 @@ WorldModelNetworkThread::loop()
 
 void
 WorldModelNetworkThread::pose_rcvd(const char *from_host,
-			    float x, float y, float theta,
-			    float *covariance)
+				   float x, float y, float theta,
+				   float *covariance)
 {
 }
 
 
 void
 WorldModelNetworkThread::velocity_rcvd(const char *from_host, float vel_x,
-				float vel_y, float vel_theta, float *covariance)
+				       float vel_y, float vel_theta, float *covariance)
 {
 }
 
 
 void
 WorldModelNetworkThread::ball_pos_rcvd(const char *from_host,
-				float dist, float pitch, float yaw,
-				float *covariance)
+				       float dist, float pitch, float yaw,
+				       float *covariance)
 {
 }
 
 
 void
 WorldModelNetworkThread::ball_velocity_rcvd(const char *from_host,
-				     float vel_x, float vel_y, float vel_z,
-				     float *covariance)
+					    float vel_x, float vel_y, float vel_z,
+					    float *covariance)
 {
 }
 
 
 void
 WorldModelNetworkThread::opponent_pose_rcvd(const char *from_host,
-				     float distance, float angle,
-				     float *covariance)
+					    float distance, float angle,
+					    float *covariance)
 {
 }

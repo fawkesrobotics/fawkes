@@ -30,6 +30,7 @@
 #include <fvutils/rectification/rectfile.h>
 #include <fvutils/rectification/rectinfo_lut_block.h>
 
+#include <list>
 #include <cstdlib>
 #include <iostream>
 
@@ -84,9 +85,9 @@ main(int argc, char **argv)
   rif->add_rectinfo_block(rlib);
   rif->add_rectinfo_block(rlib2);
 
-  std::list<RectificationInfoBlock *> &blocks = rif->blocks();
+  RectificationInfoFile::RectInfoBlockVector &blocks = rif->blocks();
 
-  for (std::list<RectificationInfoBlock *>::iterator i = blocks.begin(); i != blocks.end(); ++i) {
+  for (RectificationInfoFile::RectInfoBlockVector::iterator i = blocks.begin(); i != blocks.end(); ++i) {
     RectificationLutInfoBlock *rlib = dynamic_cast<RectificationLutInfoBlock *>(*i);
     if ( rlib == NULL ) {
       printf("Got rectification info block of unknown type");
@@ -119,7 +120,7 @@ main(int argc, char **argv)
 
   blocks = rif->blocks();
 
-  for (std::list<RectificationInfoBlock *>::iterator i = blocks.begin(); i != blocks.end(); ++i) {
+  for (RectificationInfoFile::RectInfoBlockVector::iterator i = blocks.begin(); i != blocks.end(); ++i) {
     RectificationLutInfoBlock *rlib = dynamic_cast<RectificationLutInfoBlock *>(*i);
     if ( rlib == NULL ) {
       printf("Got rectification info block of unknown type");

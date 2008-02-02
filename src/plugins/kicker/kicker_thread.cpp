@@ -58,7 +58,7 @@ void
 KickerThread::finalize()
 {
   try {
-    interface_manager->close(kicker_interface);
+    blackboard->close(kicker_interface);
   } catch (Exception &e) {
     logger->log_error(name(), "Could not close kicker interface");
     logger->log_error(name(), e);
@@ -80,7 +80,7 @@ KickerThread::init()
 
   try
     {
-      kicker_interface = interface_manager->open_for_writing<KickerInterface>("Kicker");
+      kicker_interface = blackboard->open_for_writing<KickerInterface>("Kicker");
     }
   catch (Exception& e)
     {

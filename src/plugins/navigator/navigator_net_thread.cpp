@@ -98,9 +98,9 @@ NavigatorNetworkThread::finalize()
 
   try
     {
-      interface_manager->close(motor_interface);
-      interface_manager->close(navigator_interface);
-      interface_manager->close(kicker_interface);
+      blackboard->close(motor_interface);
+      blackboard->close(navigator_interface);
+      blackboard->close(kicker_interface);
     }
   catch (Exception& e)
     {
@@ -115,7 +115,7 @@ NavigatorNetworkThread::init()
 
   try
     {
-      motor_interface = interface_manager->open_for_reading<MotorInterface>("Motor");
+      motor_interface = blackboard->open_for_reading<MotorInterface>("Motor");
     }
   catch (Exception& e)
     {
@@ -127,7 +127,7 @@ NavigatorNetworkThread::init()
 
   try
     {
-      kicker_interface = interface_manager->open_for_reading<KickerInterface>("Kicker");
+      kicker_interface = blackboard->open_for_reading<KickerInterface>("Kicker");
     }
   catch (Exception& e)
     {
@@ -139,7 +139,7 @@ NavigatorNetworkThread::init()
 
   try
     {
-      navigator_interface = interface_manager->open_for_reading<NavigatorInterface>("Navigator");
+      navigator_interface = blackboard->open_for_reading<NavigatorInterface>("Navigator");
     }
   catch (Exception& e)
     {

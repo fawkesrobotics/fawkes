@@ -78,7 +78,8 @@ class NavigatorThread
   
   Mutex *ball_mutex;
   
-  std::list<Interface *> *object_interface_list;
+  std::list<ObjectPositionInterface *> *object_interface_list;
+  std::list<ObjectPositionInterface *>::iterator oili;
   NavigatorInterface *navigator_interface;
   MotorInterface *motor_interface;
   ObjectPositionInterface *object_interface;

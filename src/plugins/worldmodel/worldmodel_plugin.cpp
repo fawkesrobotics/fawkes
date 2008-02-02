@@ -26,7 +26,7 @@
  */
 
 #include <plugins/worldmodel/worldmodel_plugin.h>
-#include <plugins/worldmodel/thread.h>
+#include <plugins/worldmodel/wm_thread.h>
 #include <plugins/worldmodel/net_thread.h>
 
 /** @class WorldModelPlugin plugins/worldmodel/worldmodel_plugin.h
