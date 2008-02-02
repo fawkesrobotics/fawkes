@@ -66,6 +66,8 @@ class BlackBoardMemoryManager
 
   void   check();
 
+  bool   is_master() const;
+
   unsigned int max_free_size() const;
   unsigned int max_allocated_size() const;
 
@@ -122,6 +124,8 @@ class BlackBoardMemoryManager
   ChunkIterator end();
 
  private:
+  bool __master;
+
   chunk_list_t * list_add(chunk_list_t *list, chunk_list_t *addel);
   chunk_list_t * list_remove(chunk_list_t *list, chunk_list_t *rmel);
   chunk_list_t * list_find_ptr(chunk_list_t *list, void *ptr);

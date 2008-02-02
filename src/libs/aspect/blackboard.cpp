@@ -30,15 +30,15 @@
 /** @class BlackBoardAspect aspect/blackboard.h
  * Thread aspect to access to BlackBoard.
  * Give this aspect to your thread to gain access to the BlackBoard.
- * It is guaranteed that if used properly from within plugins that
- * setInterfaceManager() is called before the thread is started.
+ * It is guaranteed that if used properly from within plugins that the
+ * blackboard member has been initialized properly.
  * @ingroup Aspects
  * @author Tim Niemueller
  */
 
 
-/** @var BlackBoardInterfaceManager *  BlackBoardAspect::interface_manager
- * This is the interface manager you can use to interact with the
+/** @var BlackBoard *  BlackBoardAspect::blackboard
+ * This is the BlackBoard instance you can use to interact with the
  * BlackBoard. It is set when the thread starts.
  */
 
@@ -53,10 +53,10 @@ BlackBoardAspect::~BlackBoardAspect()
  * BB.
  * It is guaranteed that this is called for a BlackBoardThread before start
  * is called (when running regularly inside Fawkes).
- * @param im interface manager to use
+ * @param bb BlackBoard to use
  */
 void
-BlackBoardAspect::initBlackBoardAspect(BlackBoardInterfaceManager *im)
+BlackBoardAspect::init_BlackBoardAspect(BlackBoard *bb)
 {
-  interface_manager = im;
+  blackboard = bb;
 }

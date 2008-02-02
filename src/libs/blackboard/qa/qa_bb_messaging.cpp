@@ -28,12 +28,13 @@
 
 /// @cond QA
 
-#include <blackboard/interface_manager.h>
+#include <blackboard/blackboard.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
 
 #include <interfaces/test.h>
 
+#include <core/threading/thread.h>
 #include <core/exceptions/system.h>
 
 #include <signal.h>
@@ -60,17 +61,19 @@ int
 main(int argc, char **argv)
 {
 
+  Thread::init_main();
+
   signal(SIGINT, signal_handler);
 
-  BlackBoardInterfaceManager *im = new BlackBoardInterfaceManager(/* master */  true);
+  BlackBoard *bb = new BlackBoard(/* master */  true);
 
   TestInterface *ti_writer;
   TestInterface *ti_reader;
 
   try {
     cout << "Opening interfaces.. " << flush;
-    ti_writer = im->open_for_writing<TestInterface>("SomeID");
-    ti_reader = im->open_for_reading<TestInterface>("SomeID");
+    ti_writer = bb->open_for_writing<TestInterface>("SomeID");
+    ti_reader = bb->open_for_reading<TestInterface>("SomeID");
     cout << "success" << endl;
   } catch (Exception &e) {
     cout << "failed! Aborting" << endl;
@@ -98,6 +101,8 @@ main(int argc, char **argv)
 	 << TestInterface::TEST_CONSTANT << endl;
   }
 
+  cout << "Harnessing message queues by excessively sending messages" << endl
+       << "Press Ctrl-C to stop testing. No output means everything is fine" << endl;
   while ( ! quit ) {
     int expval = ti_reader->test_int() + 1;
     TestInterface::SetTestIntMessage *m = new TestInterface::SetTestIntMessage(expval);
@@ -140,10 +145,14 @@ main(int argc, char **argv)
     usleep(10);
   }
 
-  im->close(ti_reader);
-  im->close(ti_writer);
+  bb->close(ti_reader);
+  bb->close(ti_writer);
 
-  delete im;
+  delete bb;
+
+  cout << "Tests done" << endl;
+
+  Thread::destroy_main();
 }
 
 

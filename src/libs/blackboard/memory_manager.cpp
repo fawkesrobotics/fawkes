@@ -115,6 +115,7 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
 						 const char *shmem_token)
 {
   this->memsize = memsize;
+  __master = master;
 
   // open shared memory segment, if it exists try to aquire exclusive
   // semaphore, if that fails, throw an exception
@@ -377,6 +378,17 @@ BlackBoardMemoryManager::check()
   if ( mem != memsize ) {
     throw BBInconsistentMemoryException("unmanaged memory found, managed memory size != total memory size");
   }
+}
+
+
+/** Check if this BB memory manager is the master.
+ * @return true if this BB memory manager instance is the master for the BB
+ * shared memory segment, false otherwise
+ */
+bool
+BlackBoardMemoryManager::is_master() const
+{
+  return __master;
 }
 
 

@@ -35,15 +35,17 @@ class Message;
 
 class BlackBoardMessageManager : public MessageMediator
 {
+ friend class BlackBoard;
  public:
-  BlackBoardMessageManager(BlackBoardInterfaceManager *im);
+  BlackBoardMessageManager();
   ~BlackBoardMessageManager();
 
   virtual void transmit(Message *message);
 
  private:
-  BlackBoardInterfaceManager *im;
+  BlackBoardInterfaceManager *__im;
 
+  void set_interface_manager(BlackBoardInterfaceManager *im);
 };
 
 

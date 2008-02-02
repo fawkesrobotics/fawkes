@@ -29,6 +29,10 @@
 #include <blackboard/interface_manager.h>
 #include <blackboard/exceptions.h>
 
+#include <interface/message.h>
+#include <interface/interface.h>
+
+#include <core/exceptions/software.h>
 #include <utils/logging/liblogger.h>
 
 
@@ -39,12 +43,10 @@
  * @author Tim Niemueller
  */
 
-/** Constructor.
- * @param im interface manager to query for writer interface
- */
-BlackBoardMessageManager::BlackBoardMessageManager(BlackBoardInterfaceManager *im)
+/** Constructor. */
+BlackBoardMessageManager::BlackBoardMessageManager()
 {
-  this->im = im;
+  __im = NULL;
 }
 
 
@@ -57,8 +59,11 @@ BlackBoardMessageManager::~BlackBoardMessageManager()
 void
 BlackBoardMessageManager::transmit(Message *message)
 {
+  if ( __im == NULL ) {
+    throw NullPointerException("InterfaceManager has not been set for MessageManager");
+  }
   try {
-    Interface *writer = im->writer_for_mem_serial(message->recipient_interface_mem_serial);
+    Interface *writer = __im->writer_for_mem_serial(message->recipient_interface_mem_serial);
     writer->msgq_append(message);
   } catch (BlackBoardNoWritingInstanceException &e) {
     Interface *iface = message->interface();
@@ -69,4 +74,14 @@ BlackBoardMessageManager::transmit(Message *message)
 			(iface != NULL) ? iface->type() : "unknown");
   }
 
+}
+
+
+/** Set interface manager.
+ * @param im interface manager
+ */
+void
+BlackBoardMessageManager::set_interface_manager(BlackBoardInterfaceManager *im)
+{
+  __im = im;
 }

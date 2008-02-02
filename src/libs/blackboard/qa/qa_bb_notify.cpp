@@ -110,7 +110,6 @@ main(int argc, char **argv)
   LibLogger::init();
 
   BlackBoard *bb = new BlackBoard();
-  BlackBoardInterfaceManager *im = bb->interface_manager();
 
   QaBBEventListener qabbel;
 
@@ -123,18 +122,18 @@ main(int argc, char **argv)
 
   try {
     cout << "Opening interfaces.. " << endl;
-    ti_writer_1 = im->open_for_writing<TestInterface>("SomeID 1");
-    ti_writer_2 = im->open_for_writing<TestInterface>("SomeID 2");
+    ti_writer_1 = bb->open_for_writing<TestInterface>("SomeID 1");
+    ti_writer_2 = bb->open_for_writing<TestInterface>("SomeID 2");
 
     qabbel.add_interface(ti_writer_1);
     qabbel.add_interface(ti_writer_2);
-    im->register_listener(&qabbel, BlackBoardInterfaceManager::BBIL_FLAG_ALL);
-    im->register_observer(&qabbel, BlackBoardInterfaceManager::BBIO_FLAG_ALL);
+    bb->register_listener(&qabbel, BlackBoard::BBIL_FLAG_ALL);
+    bb->register_observer(&qabbel, BlackBoard::BBIO_FLAG_ALL);
 
-    ti_writer_3 = im->open_for_writing<TestInterface>("SomeID 3");
-    ti_writer_4 = im->open_for_writing<TestInterface>("AnotherID 1");
-    ti_writer_5 = im->open_for_writing<TestInterface>("AnotherID 2");
-    ti_writer_6 = im->open_for_writing<TestInterface>("AnotherID 3");
+    ti_writer_3 = bb->open_for_writing<TestInterface>("SomeID 3");
+    ti_writer_4 = bb->open_for_writing<TestInterface>("AnotherID 1");
+    ti_writer_5 = bb->open_for_writing<TestInterface>("AnotherID 2");
+    ti_writer_6 = bb->open_for_writing<TestInterface>("AnotherID 3");
     cout << "success" << endl;
   } catch (Exception &e) {
     cout << "failed! Aborting" << endl;
@@ -142,31 +141,31 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  std::list<TestInterface *> *readers = im->open_all_of_type_for_reading<TestInterface>();
+  std::list<TestInterface *> *readers = bb->open_all_of_type_for_reading<TestInterface>();
   for (std::list<TestInterface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
     printf("Opened reader for interface %s of type %s\n", (*i)->id(), (*i)->type());
-    im->close(*i);
+    bb->close(*i);
   }
   delete readers;
 
   const char* prefix = "Another";
-  readers = im->open_all_of_type_for_reading<TestInterface>(prefix);
+  readers = bb->open_all_of_type_for_reading<TestInterface>(prefix);
   printf("Found %zu interfaces with prefix \"%s\"\n", readers->size(), prefix);
   for (std::list<TestInterface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
     printf("Opened reader for interface %s of type %s\n", (*i)->id(), (*i)->type());
-    im->close(*i);
+    bb->close(*i);
   }
   delete readers;
 
   printf("Removing writer one. This should print a warning.\n");
-  im->close(ti_writer_1);
-  im->unregister_listener(&qabbel);
+  bb->close(ti_writer_1);
+  bb->unregister_listener(&qabbel);
   printf("Removing other writers. No warning should appear.\n");
-  im->close(ti_writer_2);
-  im->close(ti_writer_3);
-  im->close(ti_writer_4);
-  im->close(ti_writer_5);
-  im->close(ti_writer_6);
+  bb->close(ti_writer_2);
+  bb->close(ti_writer_3);
+  bb->close(ti_writer_4);
+  bb->close(ti_writer_5);
+  bb->close(ti_writer_6);
 
   delete bb;
   LibLogger::finalize();

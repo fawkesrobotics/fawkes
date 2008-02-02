@@ -27,7 +27,7 @@
 
 #include <blackboard/interface_manager.h>
 
-#include <blackboard/bbconfig.h>
+#include <blackboard/blackboard.h>
 #include <blackboard/memory_manager.h>
 #include <blackboard/message_manager.h>
 #include <blackboard/exceptions.h>
@@ -41,11 +41,9 @@
 #include <core/threading/refc_rwlock.h>
 #include <core/exceptions/system.h>
 #include <utils/system/dynamic_module/module_dl.h>
-
 #include <utils/logging/liblogger.h>
 
 #include <stdlib.h>
-#include <string>
 
 using namespace std;
 
@@ -54,82 +52,21 @@ using namespace std;
  * This class is used by the BlackBoard to manage interfaces stored in the
  * shared memory.
  *
- * An interface consists of a few blocks. First there is the storage block. This
- * is a chunk of memory in the shared memory segment where the actual data is stored.
- * Then there is the accessor object, an instance of a derivate of the Interface
- * class which is used to access the data in the shared memory segment.
- *
- * The interface manager keeps track of all the allocated interfaces. Events
- * can be triggered if a specific interface changes (like logging the data to
- * a file, sending it over the network or notifying another interface of such
- * a change).
- *
- * It also uses the memory manager to organize the chunks of memory that are used
- * for data storage.
- *
- * Interfaces can only be instantiated through the interface manager. The interface
- * manager instantiates an interface on request and guarantees that the instance
- * is fully initialized and usable. This cannot be guaranteed if instantiating an
- * interface through any other means!
- *
- * Interfaces can be opened for reading or writing, not both! There can be only
- * one writer at a time for any given interface. Interfaces are identified via a
- * type (which denotes the data and its semantics) and an identifier. There may
- * be several interfaces for a given type, but the identifier has to be unique.
- * The identifier is in most cases a well-known string that is used to share data
- * among plugins.
- *
- * Interfaces provide a way to propagate data to the writer via messages. Available
- * messages types depend on the interface type. Only matching messages are accepted
- * and can be queued.
- *
- * The interface manager can operate in two modes. In master mode the manager is
- * responsible for allocating and managing BlackBoard internal data. There must be
- * one and only one active master at any given time.
- * In slave mode the interface manager will contact the master to get serials etc.
- * for new interfaces. The slave mode is not yet fully supported.
- *
- * @see Interface
- * @see Message
- *
  * @author Tim Niemueller
  */
-
-/** Data changed notification flag. */
-const unsigned int BlackBoardInterfaceManager::BBIL_FLAG_DATA      = 1;
-/** Reader added/removed notification flag. */
-const unsigned int BlackBoardInterfaceManager::BBIL_FLAG_READER    = 2;
-/** Writer added/removed notification flag. */
-const unsigned int BlackBoardInterfaceManager::BBIL_FLAG_WRITER    = 4;
-
-/** All interface listener notifications. */
-const unsigned int BlackBoardInterfaceManager::BBIL_FLAG_ALL = 
-  BBIL_FLAG_DATA | BBIL_FLAG_READER | BBIL_FLAG_WRITER;
-
-/** Interface creation notification flag. */
-const unsigned int BlackBoardInterfaceManager::BBIO_FLAG_CREATED   = 1;
-
-/** Interface destruction notification flag. */
-const unsigned int BlackBoardInterfaceManager::BBIO_FLAG_DESTROYED = 2;
-
-/** All interface observer notifications */
-const unsigned int BlackBoardInterfaceManager::BBIO_FLAG_ALL =
-  BBIO_FLAG_CREATED | BBIO_FLAG_DESTROYED;
 
 
 /** Constructor.
  * The shared memory segment is created with data from bbconfig.h.
- * @param bb_master set to true, if this interface manager should be the master.
+ * @param bb_memmgr BlackBoard memory manager to use
+ * @param bb_msgmgr BlackBoard message manager to use
  * @see bbconfig.h
  */
-BlackBoardInterfaceManager::BlackBoardInterfaceManager(bool bb_master)
+BlackBoardInterfaceManager::BlackBoardInterfaceManager(BlackBoardMemoryManager *bb_memmgr,
+						       BlackBoardMessageManager *bb_msgmgr)
 {
-  this->bb_master = bb_master;
-
-  memmgr = new BlackBoardMemoryManager(BLACKBOARD_MEMORY_SIZE,
-				       BLACKBOARD_VERSION,
-				       bb_master,
-				       BLACKBOARD_MAGIC_TOKEN);
+  memmgr = bb_memmgr;
+  msgmgr = bb_msgmgr;
 
   instance_serial = 1;
   mutex = new Mutex();
@@ -143,8 +80,6 @@ BlackBoardInterfaceManager::BlackBoardInterfaceManager(bool bb_master)
     throw;
   }
 
-  msgmgr = new BlackBoardMessageManager(this);
-
   writer_interfaces.clear();
   rwlocks.clear();
 }
@@ -155,25 +90,6 @@ BlackBoardInterfaceManager::~BlackBoardInterfaceManager()
 {
   delete mutex;
   delete iface_module;
-  delete memmgr;
-  delete msgmgr;
-}
-
-
-/** Strip numbers at the beginning of the class type.
- * This has been implemented by observations of C++ class names as returned by GCC's
- * typeid operator.
- * @param type type name to strip
- * @return stripped class type
- */
-char *
-BlackBoardInterfaceManager::strip_class_type(const char *type)
-{
-  string t = type;
-  t = t.substr( t.find_first_not_of("0123456789") );
-  char *rv = new char[t.length() + 1];
-  strcpy(rv, t.c_str());
-  return rv;
 }
 
 
@@ -286,7 +202,7 @@ BlackBoardInterfaceManager::next_mem_serial()
 unsigned int
 BlackBoardInterfaceManager::next_instance_serial()
 {
-  if ( bb_master ) {
+  if ( memmgr->is_master() ) {
     // simple, just increment value and return it
     return instance_serial++;
   } else {
@@ -582,19 +498,6 @@ BlackBoardInterfaceManager::writer_for_mem_serial(unsigned int mem_serial)
 }
 
 
-/** Get memory manager.
- * This returns a pointer to the used memory manager. The return type
- * is declared const. Use this only for debugging purposes to output info about
- * the BlackBoard memory.
- * @return const pointer to memory manager
- */
-const BlackBoardMemoryManager *
-BlackBoardInterfaceManager::memory_manager() const
-{
-  return memmgr;
-}
-
-
 bool
 BlackBoardInterfaceManager::exists_writer(const Interface *interface) const
 {
@@ -620,7 +523,7 @@ void
 BlackBoardInterfaceManager::register_listener(BlackBoardInterfaceListener *listener,
 					      unsigned int flags)
 {
-  if ( flags & BBIL_FLAG_DATA ) {
+  if ( flags & BlackBoard::BBIL_FLAG_DATA ) {
     BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
     BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_data_interfaces();
     __bbil_data.lock();
@@ -629,7 +532,7 @@ BlackBoardInterfaceManager::register_listener(BlackBoardInterfaceListener *liste
     }
     __bbil_data.unlock();
   }
-  if ( flags & BBIL_FLAG_READER ) {
+  if ( flags & BlackBoard::BBIL_FLAG_READER ) {
     BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
     BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_reader_interfaces();
     __bbil_reader.lock();
@@ -638,7 +541,7 @@ BlackBoardInterfaceManager::register_listener(BlackBoardInterfaceListener *liste
     }
     __bbil_reader.unlock();
   }
-  if ( flags & BBIL_FLAG_WRITER ) {
+  if ( flags & BlackBoard::BBIL_FLAG_WRITER ) {
     BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
     BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_writer_interfaces();
     __bbil_writer.lock();
@@ -698,7 +601,7 @@ void
 BlackBoardInterfaceManager::register_observer(BlackBoardInterfaceObserver *observer,
 					      unsigned int flags)
 {
-  if ( flags & BBIO_FLAG_CREATED ) {
+  if ( flags & BlackBoard::BBIO_FLAG_CREATED ) {
     BlackBoardInterfaceObserver::InterfaceTypeLockHashSetIterator i;
     BlackBoardInterfaceObserver::InterfaceTypeLockHashSet *its = observer->bbio_interface_create_types();
     __bbio_created.lock();
@@ -708,7 +611,7 @@ BlackBoardInterfaceManager::register_observer(BlackBoardInterfaceObserver *obser
     __bbio_created.unlock();
   }
 
-  if ( flags & BBIO_FLAG_DESTROYED ) {
+  if ( flags & BlackBoard::BBIO_FLAG_DESTROYED ) {
     BlackBoardInterfaceObserver::InterfaceTypeLockHashSetIterator i;
     BlackBoardInterfaceObserver::InterfaceTypeLockHashSet *its = observer->bbio_interface_destroy_types();
     __bbio_destroyed.lock();

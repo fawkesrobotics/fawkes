@@ -28,17 +28,17 @@
 #ifndef __ASPECT_BLACKBOARD_H_
 #define __ASPECT_BLACKBOARD_H_
 
-#include <blackboard/interface_manager.h>
+#include <blackboard/blackboard.h>
 
 class BlackBoardAspect
 {
  public:
   virtual ~BlackBoardAspect();
 
-  void initBlackBoardAspect(BlackBoardInterfaceManager *im);
+  void init_BlackBoardAspect(BlackBoard *bb);
 
  protected:
-  BlackBoardInterfaceManager *interface_manager;
+  BlackBoard *blackboard;
 };
 
 #endif

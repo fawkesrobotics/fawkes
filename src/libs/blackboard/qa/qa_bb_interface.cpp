@@ -29,7 +29,7 @@
 /// @cond QA
 
 #include <blackboard/memory_manager.h>
-#include <blackboard/interface_manager.h>
+#include <blackboard/blackboard.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
 
@@ -63,16 +63,16 @@ main(int argc, char **argv)
 
   signal(SIGINT, signal_handler);
 
-  BlackBoardInterfaceManager *im = new BlackBoardInterfaceManager(/* master */  true);
-  const BlackBoardMemoryManager *mm = im->memory_manager();
+  BlackBoard *bb = new BlackBoard(/* master */  true);
+  const BlackBoardMemoryManager *mm = bb->memory_manager();
 
   TestInterface *ti_writer;
   TestInterface *ti_reader;
 
   try {
     cout << "Opening interfaces.. " << flush;
-    ti_writer = im->open_for_writing<TestInterface>("SomeID");
-    ti_reader = im->open_for_reading<TestInterface>("SomeID");
+    ti_writer = bb->open_for_writing<TestInterface>("SomeID");
+    ti_reader = bb->open_for_reading<TestInterface>("SomeID");
     cout << "success" << endl;
   } catch (Exception &e) {
     cout << "failed! Aborting" << endl;
@@ -83,7 +83,7 @@ main(int argc, char **argv)
   try {
     cout << "Trying to open second writer.. " << flush;
     TestInterface *ti_writer_two;
-    ti_writer_two = im->open_for_writing<TestInterface>("SomeID");
+    ti_writer_two = bb->open_for_writing<TestInterface>("SomeID");
     cout << "BUG: Detection of second writer did NOT work!" << endl;
     exit(2);
   } catch (BlackBoardWriterActiveException &e) {
@@ -101,9 +101,9 @@ main(int argc, char **argv)
   try {
     cout << "Trying to open third writer.. " << flush;
     TestInterface *ti_writer_three;
-    ti_writer_three = im->open_for_writing<TestInterface>("AnotherID");
+    ti_writer_three = bb->open_for_writing<TestInterface>("AnotherID");
     cout << "No exception as expected, different ID ok!" << endl;
-    im->close(ti_writer_three);
+    bb->close(ti_writer_three);
   } catch (BlackBoardWriterActiveException &e) {
     cout << "BUG: Third writer with different ID detected as another writer!" << endl;
     exit(3);
@@ -132,6 +132,8 @@ main(int argc, char **argv)
 	 << TestInterface::TEST_CONSTANT << endl;
   }
 
+  cout << "Harnessing interface by excessive reading and writing, use Ctrl-C to interrupt" << endl
+       << "If you do not see any output everything is fine" << endl;
   while ( ! quit ) {
     int expval = ti_reader->test_int() + 1;
     //cout << "Writing value " << expval
@@ -157,10 +159,12 @@ main(int argc, char **argv)
     usleep(10);
   }
 
-  im->close(ti_reader);
-  im->close(ti_writer);
+  cout << "Tests done" << endl;
 
-  delete im;
+  bb->close(ti_reader);
+  bb->close(ti_writer);
+
+  delete bb;
 }
 
 

@@ -141,7 +141,7 @@ AspectIniFin::init(Thread *thread)
 
   BlackBoardAspect *blackboard_thread;
   if ( (blackboard_thread = dynamic_cast<BlackBoardAspect *>(thread)) != NULL ) {
-    blackboard_thread->initBlackBoardAspect( __blackboard->interface_manager() );
+    blackboard_thread->init_BlackBoardAspect( __blackboard );
   }
 
   ThreadProducerAspect *thread_producer_thread;
