@@ -118,7 +118,8 @@ $(PRESUBDIRS) $(SUBDIRS):
 	else \
 		echo -e "$(INDENT_PRINT)--> Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"; \
 		$(MAKE) --no-print-directory --no-keep-going -C "$(realpath $(SRCDIR)/$@)" \
-		$(MFLAGS) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)"; \
+		$(MFLAGS) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)" \
+		SRCDIR="$(realpath $(SRCDIR)/$@)"; \
 		if [ "$(MAKECMDGOALS)" != "clean" ]; then \
 			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $@"; \
 		fi \

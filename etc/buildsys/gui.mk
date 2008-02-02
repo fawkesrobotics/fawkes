@@ -60,7 +60,7 @@ ifneq ($(HAVE_GTKMM)$(HAVE_CAIROMM)$(HAVE_GLADEMM),111)
 endif
 
 # Some default warnings that may be used
-ifneq ($(SRCDIR),.)
+ifeq ($(OBJSSUBMAKE),1)
 .PHONY: warning_gtkmm warning_cairomm warning_glademm
 warning_gtkmm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Gtk dependent GUI apps$(TNORMAL) $(ERROR_GTKMM)";
