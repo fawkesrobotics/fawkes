@@ -33,7 +33,7 @@ uncolored-quickdoc: quickdoc
 %.doxygen:
 	$(SILENT) echo "--> Building documentation ($@). This may take a while..."
 	$(SILENT) rm -rf doc/api
-	$(SILENT) $(DOXYGEN) doc/doxygen/$@
+	$(SILENT) $(DOXYGEN) doc/doxygen/$@ >/dev/null 2>&1
 	$(SILENT) if [ "`wc -l warnings.txt | awk '{ print $$1 }'`" != "0" ]; then \
 		$(RED); \
 		echo "--> Warnings have been generated:"; \

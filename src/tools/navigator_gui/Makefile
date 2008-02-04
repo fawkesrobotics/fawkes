@@ -23,7 +23,7 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gui.mk
-include $(BASEDIR)/src/plugins/navigator/navigator.mk
+-include $(BASEDIR)/src/plugins/navigator/navigator.mk
 
 CFLAGS  += $(CFLAGS_GTKMM)
 LDFLAGS += $(LDFLAGS_GTKMM)
@@ -43,7 +43,7 @@ ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 .PHONY: warning_nonavi
 warning_nonavi:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Navigator GUI$(TNORMAL) $(NAVIGATOR_ERROR)$(GUI_ERROR)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Navigator GUI (navigator not built)$(TNORMAL) $(NAVIGATOR_ERROR)$(GUI_ERROR)"
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

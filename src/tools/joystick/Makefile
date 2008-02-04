@@ -21,7 +21,7 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/src/plugins/navigator/navigator.mk
+-include $(BASEDIR)/src/plugins/navigator/navigator.mk
 
 ifeq ($(OBJSSUBMAKE),1)
 .PHONY: warning_nonavi

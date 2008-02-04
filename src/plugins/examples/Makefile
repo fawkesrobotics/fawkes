@@ -1,7 +1,7 @@
 #*****************************************************************************
-#                      Makefile Build System for Fawkes
+#              Makefile Build System for Fawkes: Example Plugins
 #                            -------------------
-#   Created on Wed Sep 06 02:39:46 2006
+#   Created on Mon Feb 04 15:56:07 2008
 #   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
@@ -13,16 +13,11 @@
 #
 #*****************************************************************************
 
-BASEDIR = ..
+BASEDIR = ../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
-SUBDIRS = $(subst $(CURDIR)/,,$(realpath libs interfaces mainapp firevision plugins tools))
+SUBDIRS = basics ballposlog
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
-
-# Explicit dependencies, this is needed to have make bail out if there is any
-# error. This is also necessary for working parallel build (i.e. for dual core)
-interfaces mainapp firevision plugins tools: libs
-mainapp plugins firevision tools: interfaces
-tools: mainapp
 
