@@ -13,11 +13,10 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 SUBDIRS = basics ballposlog
 
-include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
 
