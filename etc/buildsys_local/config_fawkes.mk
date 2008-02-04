@@ -20,3 +20,9 @@ CFLAGS_BASE += -g -Wall -Werror -DBINDIR=\"$(BINDIR)\" \
 		-DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\" \
 		-DCONFDIR=\"$(CONFDIR)\" -DRESDIR=\"$(RESDIR)\"
 
+### Feature checks
+ifneq ($(realpath $(BASEDIR)/src/firevision),)
+  HAVE_FIREVISION=1
+  CFLAGS_BASE += -DHAVE_FIREVISION
+endif
+

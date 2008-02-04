@@ -39,13 +39,15 @@ class Clock;
 class FawkesNetworkHub;
 class Thread;
 class ThreadCollector;
-template <class Provider, class Dependant>
-  class OneToManyDependency;
-class VisionMasterAspect;
-class VisionAspect;
 class NetworkNameResolver;
 class ServicePublisher;
 class ServiceBrowser;
+template <class Provider, class Dependant>
+  class OneToManyDependency;
+#ifdef HAVE_FIREVISION
+class VisionMasterAspect;
+class VisionAspect;
+#endif
 
 class AspectIniFin
 : public ThreadInitializer,
@@ -80,7 +82,9 @@ class AspectIniFin
   ServicePublisher    *__service_publisher;
   ServiceBrowser      *__service_browser;
 
+#ifdef HAVE_FIREVISION
   OneToManyDependency<VisionMasterAspect, VisionAspect> *__vision_dependency;
+#endif
 };
 
 

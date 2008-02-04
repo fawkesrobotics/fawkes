@@ -12,20 +12,18 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
-CFLAGS = -g
-INCDIRS += $(realpath $(BASEDIR)/src/firevision)
+ifeq ($(HAVE_FIREVISION),1)
+  INCDIRS += $(realpath $(BASEDIR)/src/firevision)
+else
+  OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/vision*.cpp))
+endif
 
 LIBS_libaspects = core utils blackboard netcomm config
-OBJS_libaspects = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+OBJS_libaspects = $(patsubst %.cpp,%.o,$(filter-out $(OBJS_FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
 OBJS_all = $(OBJS_libaspects)
 LIBS_all  = $(LIBDIR)/libaspects.so

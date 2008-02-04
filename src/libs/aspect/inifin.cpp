@@ -36,10 +36,12 @@
 #include <aspect/logging.h>
 #include <aspect/clock.h>
 #include <aspect/fawkes_network.h>
-#include <aspect/vision_master.h>
-#include <aspect/vision.h>
 #include <aspect/network.h>
 #include <aspect/thread_producer.h>
+#ifdef HAVE_FIREVISION
+#include <aspect/vision_master.h>
+#include <aspect/vision.h>
+#endif
 
 #include <utils/constraints/dependency_onetomany.h>
 
@@ -77,14 +79,18 @@ AspectIniFin::AspectIniFin(BlackBoard *blackboard,
   __service_publisher = NULL;
   __service_browser   = NULL;
 
+#ifdef HAVE_FIREVISION
   __vision_dependency = new OneToManyDependency<VisionMasterAspect, VisionAspect>();
+#endif
 }
 
 
 /** Destructor. */
 AspectIniFin::~AspectIniFin()
 {
+#ifdef HAVE_FIREVISION
   delete __vision_dependency;
+#endif
 }
 
 
@@ -174,6 +180,7 @@ AspectIniFin::init(Thread *thread)
     fnet_thread->initFawkesNetworkAspect(__fnethub);
   }
 
+#ifdef HAVE_FIREVISION
   VisionMasterAspect *vision_master_thread;
   if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
     try {
@@ -210,6 +217,7 @@ AspectIniFin::init(Thread *thread)
       throw ce;
     }
   }
+#endif /* HAVE_FIREVISION */
 
   NetworkAspect *net_thread;
   if ( (net_thread = dynamic_cast<NetworkAspect *>(thread)) != NULL ) {
@@ -227,6 +235,7 @@ AspectIniFin::init(Thread *thread)
 bool
 AspectIniFin::prepare_finalize(Thread *thread)
 {
+#ifdef HAVE_FIREVISION
   VisionMasterAspect *vision_master_thread;
   if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
     if ( ! __vision_dependency->can_remove(vision_master_thread) ) {
@@ -244,6 +253,7 @@ AspectIniFin::prepare_finalize(Thread *thread)
       return false;
     }
   }
+#endif /* HAVE_FIREVISION */
 
   return true;
 }
@@ -255,6 +265,7 @@ AspectIniFin::prepare_finalize(Thread *thread)
 void
 AspectIniFin::finalize(Thread *thread)
 {
+#ifdef HAVE_FIREVISION
   VisionMasterAspect *vision_master_thread;
   if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
     try {
@@ -271,6 +282,7 @@ AspectIniFin::finalize(Thread *thread)
   if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
     __vision_dependency->remove(vision_thread);
   }
+#endif /* HAVE_FIREVISION */
 }
 
 
