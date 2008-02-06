@@ -3,7 +3,7 @@
  *  retriever_thread.cpp - FireVision Retriever Thread
  *
  *  Created: Tue Jun 26 17:39:11 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -69,7 +69,6 @@ FvRetrieverThread::init()
       throw Exception("Shared memory segment not valid");
     }
   } catch (Exception &e) {
-    vision_master->unregister_thread(this);
     delete cam;
     cam = NULL;
     throw;
