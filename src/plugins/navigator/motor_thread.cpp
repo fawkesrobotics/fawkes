@@ -767,8 +767,8 @@ MotorThread::loop()
                                alpha_, beta_, gamma_);
               alpha_ = beta_ = gamma_ = 0;
             }
-          logger->log_info("MotorThread", "RPM alpha_ : %f, beta_: %f, gamma_: %f",
-                           alpha_, beta_, gamma_);
+//          logger->log_info("MotorThread", "RPM alpha_ : %f, beta_: %f, gamma_: %f",
+//                           alpha_, beta_, gamma_);
         }
       else
         {
