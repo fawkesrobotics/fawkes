@@ -97,6 +97,7 @@ MotorThread::MotorThread()
   start_time = false;
   rotations_sum = 0;
   last_rotation = 0;
+  acceleration_factor = 0.2;
 }
 
 /** Destructor. */
@@ -109,6 +110,7 @@ MotorThread::~MotorThread()
 void
 MotorThread::init()
 {
+  acceleration_factor = config->get_float("/navigator/motor/acceleration_factor");
   correction_x = config->get_float("/navigator/motor/correction_x");
   correction_y = config->get_float("/navigator/motor/correction_y");
   correction_rotation = config->get_float("/navigator/motor/correction_rotation");
@@ -603,10 +605,10 @@ MotorThread::loop()
 
           //          logger->log_info("MotorThread", "LinTransRot: velocity : %f",
           //                               velocity);
-          //          logger->log_info("MotorThread", "LinTransRot: rotation : %f",
-          //                               rotation);
-          //          logger->log_info("MotorThread", "LinTransRot: rotation_change : %f",
-          //                               time_difference);
+//                    logger->log_info("MotorThread", "LinTransRot: rotation : %f",
+//                                         rotation);
+//                    logger->log_info("MotorThread", "LinTransRot: rotation_change : %f",
+//                                         rotation * time_difference);
           //          logger->log_info("MotorThread", "LinTransRot: 2. direction_x : %f, direction_y: %f",
           //                               direction_x, direction_y);
           forward = direction_x * velocity;
@@ -631,7 +633,7 @@ MotorThread::loop()
 
           if(velocity < current_max_velocity)
             {
-              velocity += clock->elapsed(&last_acceleration_time) * 0.2 * translation_rpm_factor; //m/s^2
+              velocity += clock->elapsed(&last_acceleration_time) * acceleration_factor * translation_rpm_factor; //m/s^2
               last_acceleration_time = clock->now();
             }
           else if(velocity >= current_max_velocity)

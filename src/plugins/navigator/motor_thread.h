@@ -45,7 +45,10 @@ namespace VMC
 }
 
 
-class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect,
+class MotorThread
+      : public Thread,
+      public LoggingAspect,
+      public BlackBoardAspect,
       public ConfigurableAspect
   {
   public:
@@ -68,8 +71,8 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     double sideward;
     double rotation;
     double orbit_velocity;
-  //  double point_x;
-  //  double point_y;
+    //  double point_x;
+    //  double point_y;
     double orbit_angular_velocity;
     double alpha;
     double beta;
@@ -100,6 +103,7 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     double old_beta;
     double old_gamma;
 
+    double acceleration_factor;
     double correction_x;
     double correction_y;
     double correction_rotation;
@@ -112,7 +116,7 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     double linear_part;
     int ticks;
     bool stopped;
-    
+
     double translation_rpm_factor;
     double rotation_rpm_factor;
 
@@ -123,7 +127,7 @@ class MotorThread : public Thread, public LoggingAspect, public BlackBoardAspect
     bool start_time;
 
     Clock* clock;
-    
+
     double rotations_sum;
     double last_rotation;
 
