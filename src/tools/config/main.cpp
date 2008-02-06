@@ -368,14 +368,17 @@ main(int argc, char **argv)
     ConfigChangeWatcherTool ccwt(netconf, c);
     ccwt.run();
   } else if (strcmp("list", args[0]) == 0) {
+    printf("Transmitting config from host... ");
+    fflush(stdout);
     try {
       netconf->set_mirror_mode(true);
     } catch (Exception &e) {
       e.print_trace();
       return -1;
     }
-    print_header();
     netconf->lock();
+    printf("done\n");
+    print_header();
     Configuration::ValueIterator *i = netconf->iterator();
     while ( i->next() ) {
       print_line(i);
@@ -385,11 +388,14 @@ main(int argc, char **argv)
   }
 
 
+  printf("Cleaning up... ");
+  fflush(stdout);
   delete netconf;
   c->cancel();
   c->join();
 
   delete c;
+  printf("done\n");
 
   return 0;
 }
