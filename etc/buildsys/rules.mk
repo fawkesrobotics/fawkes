@@ -69,11 +69,13 @@ gui: presubdirs $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui) subdirs
 uncolored-all: all
 uncolored-gui: gui
 
+ifdef OBJS_all
 ifneq ($(OBJS_all),)
 # Do not delete .o files to allow for incremental builds
 .SECONDARY: $(OBJS_all)
 # Whenever the Makefile is modified rebuild everything
 $(OBJS_all): $(SRCDIR)/Makefile
+endif
 else
   ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all)$(LIBS_gui)$(PLUGINS_gui)$(BINS_gui),)
     ifneq ($(DISABLE_OBJS_all_WARNING),1)
