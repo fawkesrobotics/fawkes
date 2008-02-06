@@ -38,6 +38,9 @@ class FvBaseThread;
 class FvAqtVisionThreads;
 class Logger;
 class Clock;
+#ifdef FVBASE_TIMETRACKER
+class TimeTracker;
+#endif
 
 class FvAquisitionThread
 : public Thread
@@ -80,6 +83,16 @@ class FvAquisitionThread
 
   AqtMode                   _mode;
   FvAqtVisionThreads       *_vision_threads;
+
+#ifdef FVBASE_TIMETRACKER
+  TimeTracker *__tt;
+  unsigned int __loop_count;
+  unsigned int __ttc_capture;
+  unsigned int __ttc_lock;
+  unsigned int __ttc_convert;
+  unsigned int __ttc_unlock;
+  unsigned int __ttc_dispose;
+#endif
 };
 
 

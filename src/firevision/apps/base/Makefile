@@ -24,6 +24,10 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
+# to enable time tracking add:
+# CFLAGS += -DFVBASE_TIMETRACKER -DFVBASE_TT_PRINT_INT=100
+# Set the print interval to the number of loops
+
 LIBS_fvbase = core utils fvutils fvcams
 OBJS_fvbase = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 

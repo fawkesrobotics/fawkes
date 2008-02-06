@@ -29,7 +29,10 @@
 #include <apps/base/aqt_vision_threads.h>
 
 #include <core/exceptions/system.h>
+#ifdef FVBASE_TIMETRACKER
 #include <utils/time/clock.h>
+#include <utils/time/tracker.h>
+#endif
 #include <utils/logging/logger.h>
 
 #include <cams/shmem.h>
@@ -81,6 +84,16 @@ FvAquisitionThread::FvAquisitionThread(const char *id,  Camera *camera,
   _buffer_raw  = NULL;
 
   _mode = AqtContinuous;
+
+#ifdef FVBASE_TIMETRACKER
+  __tt = new TimeTracker();
+  __loop_count = 0;
+  __ttc_capture = __tt->add_class("Capture");
+  __ttc_lock    = __tt->add_class("Lock");
+  __ttc_convert = __tt->add_class("Convert");
+  __ttc_unlock  = __tt->add_class("Unlock");
+  __ttc_dispose = __tt->add_class("Dispose");
+#endif
 }
 
 
@@ -185,11 +198,45 @@ FvAquisitionThread::aqtmode()
 void
 FvAquisitionThread::loop()
 {
+#ifdef FVBASE_TIMETRACKER
   try {
-    //_logger->log_debug(name(), "Capture");
+    __tt->ping_start(__ttc_capture);
+    _camera->capture();
+    __tt->ping_end(__ttc_capture);
+    if ( _shm ) {
+      __tt->ping_start(__ttc_lock);
+      _shm->lock_for_write();
+      __tt->ping_end(__ttc_lock);
+      __tt->ping_start(__ttc_convert);
+      convert(_colorspace, YUV422_PLANAR,
+	      _camera->buffer(), _buffer,
+	      _width, _height);
+      __tt->ping_end(__ttc_convert);
+      __tt->ping_start(__ttc_unlock);
+      _shm->unlock();
+      __tt->ping_end(__ttc_unlock);
+    }
+    if ( _shm_raw ) {
+      _shm_raw->lock_for_write();
+      memcpy(_buffer_raw, _camera->buffer(), _camera->buffer_size());
+      _shm_raw->unlock();
+    }
+  } catch (Exception &e) {
+    _logger->log_error(name(), "Cannot convert image data");
+    _logger->log_error(name(), e);
+  }
+  __tt->ping_start(__ttc_dispose);
+  _camera->dispose_buffer();
+  __tt->ping_end(__ttc_dispose);
+
+  if ( (++__loop_count % FVBASE_TT_PRINT_INT) == 0 ) {
+    __tt->print_to_stdout();
+  }
+
+#else // no time tracking
+  try {
     _camera->capture();
     if ( _shm ) {
-      //_logger->log_debug(name(), "Convert");
       _shm->lock_for_write();
       convert(_colorspace, YUV422_PLANAR,
 	      _camera->buffer(), _buffer,
@@ -197,20 +244,16 @@ FvAquisitionThread::loop()
       _shm->unlock();
     }
     if ( _shm_raw ) {
-      //_logger->log_debug(name(), "Copy");
       _shm_raw->lock_for_write();
       memcpy(_buffer_raw, _camera->buffer(), _camera->buffer_size());
       _shm_raw->unlock();
     }
   } catch (Exception &e) {
-    //_logger->log_error(name(), "Cannot convert image data");
     _logger->log_error(name(), e);
   }
   _camera->dispose_buffer();
+#endif
 
-  //_logger->log_debug(name(), "Wake");
   _vision_threads->wakeup_cyclic_threads();
-  //_logger->log_debug(name(), "Wait");
   _vision_threads->wait_cyclic_threads();
-  //_logger->log_debug(name(), "Done");
 }
