@@ -1362,7 +1362,7 @@ SQLiteConfiguration::set_default_string(const char *path,
 void
 SQLiteConfiguration::set_default_string(const char *path, std::string s)
 {
-  set_string(path, s.c_str());
+  set_default_string(path, s.c_str());
 }
 
 
