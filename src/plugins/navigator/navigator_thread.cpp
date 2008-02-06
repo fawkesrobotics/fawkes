@@ -112,7 +112,7 @@ NavigatorThread::init()
 
   try
     {
-      object_interface_list = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("WM");
+      object_interface_list = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>();
     }
   catch (Exception& e)
     {
