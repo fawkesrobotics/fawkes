@@ -132,7 +132,6 @@ FvOmniBallPipelineThread::init()
     }
   catch (Exception &e)
     {
-      vision_master->unregister_thread(this);
       delete cam;
       cam = NULL;
       e.append("Opening ball interface for writing failed");
@@ -164,7 +163,6 @@ FvOmniBallPipelineThread::init()
     }
   catch (Exception& e)
     {
-      vision_master->unregister_thread(this);
       delete cam;
       cam = NULL;
       blackboard->close(ball_interface);
