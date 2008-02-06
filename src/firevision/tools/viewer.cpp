@@ -29,15 +29,23 @@
 #include <core/exceptions/software.h>
 #include <utils/system/argparser.h>
 
-#include <cams/shmem.h>
 #include <cams/factory.h>
+#ifdef HAVE_SHMEM_CAM
+#include <cams/shmem.h>
+#endif
+#ifdef HAVE_NETWORK_CAM
 #include <cams/net.h>
+#endif
+#ifdef HAVE_FILELOADER_CAM
 #include <cams/fileloader.h>
+#endif
 
 #include <fvwidgets/image_display.h>
+#ifdef HAVE_RECTINFO
 #include <fvutils/rectification/rectfile.h>
 #include <fvutils/rectification/rectinfo_block.h>
 #include <filters/rectify.h>
+#endif
 
 #include <cstring>
 #include <cstdio>
@@ -193,6 +201,7 @@ main(int argc, char **argv)
 
   cam->dispose_buffer();
 
+#ifdef HAVE_RECTINFO
   RectificationInfoFile *rectfile = new RectificationInfoFile();
   FilterRectify *rectify_filter = NULL;
   unsigned char *filtered_buffer = malloc_buffer(YUV422_PLANAR,
@@ -200,6 +209,7 @@ main(int argc, char **argv)
   unsigned char *unfiltered_buffer = malloc_buffer(YUV422_PLANAR,
 						   cam->pixel_width(), cam->pixel_height());
   bool rectifying = false;
+#endif
   bool continuous = argp.has_arg("c");
 
   SDL_Event redraw_event;
@@ -221,6 +231,7 @@ main(int argc, char **argv)
       case SDL_KEYUP:
 	if ( event.key.keysym.sym == SDLK_SPACE ) {
 	  cam->capture();
+#ifdef HAVE_RECTINFO
 	  if ( rectifying ) {
 	    convert(cam->colorspace(), YUV422_PLANAR, cam->buffer(), unfiltered_buffer,
 		    cam->pixel_width(), cam->pixel_height());
@@ -230,8 +241,12 @@ main(int argc, char **argv)
 	    rectify_filter->apply();
 	    display->show(YUV422_PLANAR, filtered_buffer);
 	  } else {
+#endif
 	    display->show(cam->colorspace(), cam->buffer());
-	  }
+#ifdef HAVE_RECTINFO
+          }
+#endif
+
 	  cam->dispose_buffer();
 	  if ( continuous ) {
 	    SDL_PushEvent(&redraw_event);
@@ -245,6 +260,7 @@ main(int argc, char **argv)
 	  SDL_PushEvent(&redraw_event);
 	} else if ( event.key.keysym.sym == SDLK_r ) {
 #ifdef HAVE_GTKMM
+#  ifdef HAVE_RECTINFO
 	  if ( rectifying ) {
 	    rectifying = false;
 	  } else {
@@ -322,6 +338,9 @@ main(int argc, char **argv)
 	    rectifying =  (rectify_filter != NULL);
 	  }
 	  SDL_PushEvent(&redraw_event);
+#  else
+        printf("Rectification support not available at compile time\n");
+#  endif
 	}
 #else
 	printf("Rectification support requires gtkmm(-devel) to be installed "
@@ -334,10 +353,12 @@ main(int argc, char **argv)
     }
   }
 
+#ifdef HAVE_RECTINFO
   delete rectfile;
   delete rectify_filter;
   free(filtered_buffer);
   free(unfiltered_buffer);
+#endif
 
   cam->close();
   delete cam;
@@ -345,3 +366,4 @@ main(int argc, char **argv)
 
   return 0;
 }
+

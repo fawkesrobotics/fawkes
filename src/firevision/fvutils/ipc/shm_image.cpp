@@ -31,8 +31,6 @@
 #include <utils/system/console_colors.h>
 #include <utils/ipc/shm_exceptions.h>
 
-#include <fvutils/net/fuse.h>
-
 #include <iostream>
 
 using namespace std;
