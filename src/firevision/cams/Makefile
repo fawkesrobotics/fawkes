@@ -65,13 +65,17 @@ OBJS_libfvcams += shmem.o
 endif
 
 ifneq ($(HAVE_FIREWIRE_CAM),1)
-WARN_TARGETS += warning_firewire
+  ifneq ($(realpath $(SRCDIR)/firewire.cpp),)
+    WARN_TARGETS += warning_firewire
+  endif
 endif
 ifneq ($(HAVE_LEUTRON_CAM),1)
-WARN_TARGETS += warning_leutron
+  ifeq ($(BUILD_TYPE),rcsoftx)
+    WARN_TARGETS += warning_leutron
+  endif
 endif
 ifneq ($(HAVE_LIBJPEG),1)
-WARN_TARGETS += warning_libjpeg
+  WARN_TARGETS += warning_libjpeg
 endif
 
 OBJS_all = $(OBJS_libfvcams)

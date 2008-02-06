@@ -23,10 +23,10 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/firevision/fvconf.mk
 
 ifeq ($(BUILD_TYPE),rcsoftx)
-# Stuff to be built for RCSoftX only
-SUBDIRS += cannikin geegaw fountain
+  # Stuff to be built for RCSoftX only
+  SUBDIRS += cannikin geegaw fountain
 else
-SUBDIRS += base fountain retriever omni_ball 
+  SUBDIRS += $(subst $(CURDIR)/,,$(realpath base fountain retriever omni_ball))
 endif
 
 include $(BASEDIR)/etc/buildsys/rules.mk

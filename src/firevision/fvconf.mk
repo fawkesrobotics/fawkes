@@ -27,7 +27,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L BUMBLEBEE2
 CTRLS=EVID100P DPPTU
 
-VISION_INCDIRS      = $(realpath $(BASEDIR)/src/firevision)
+FVBASEDIR           = $(BASEDIR)/src/firevision
+VISION_INCDIRS      = $(realpath $(FVBASEDIR))
 VISION_CFLAGS       = -g -D__STDC_LIMIT_MACROS
 
 # PTGrey Triclops SDK used for Bumblebee2 stereo processing
@@ -61,8 +62,12 @@ ifneq ($(PKGCONFIG),)
   HAVE_SDL = $(if $(shell $(PKGCONFIG) --exists 'sdl'; echo $${?/1/}),1,0)
 endif
 ifeq ($(HAVE_LIBDC1394),1)
-  HAVE_FIREWIRE_CAM   = 1
-  HAVE_BUMBLEBEE2_CAM = 1
+  ifneq ($(realpath $(FVBASEDIR)/cams/firewire.h),)
+    HAVE_FIREWIRE_CAM   = 1
+    ifneq ($(realpath $(FVBASEDIR)/cams/bumblebee2.h),)
+      HAVE_BUMBLEBEE2_CAM = 1
+    endif
+  endif
   VISION_CAM_LIBS    += $(subst -l,,$(shell $(PKGCONFIG) --libs 'libdc1394-2'))
 endif
 
@@ -94,10 +99,16 @@ else
   endif
 endif
 
+ifneq ($(realpath $(FVBASEDIR)/cams/net.h),)
+  HAVE_NETWORK_CAM    = 1
+endif
+ifneq ($(realpath $(FVBASEDIR)/cams/fileloader.h),)
+  HAVE_FILELOADER_CAM = 1
+endif
+ifneq ($(realpath $(FVBASEDIR)/cams/shmem.h),)
+  HAVE_SHMEM_CAM      = 1
+endif
 HAVE_DPPTU_CTRL     = 0
-HAVE_FILELOADER_CAM = 1
-HAVE_NETWORK_CAM    = 1
-HAVE_SHMEM_CAM      = 1
 HAVE_V4L_CAM        = 0
 
 ### Check for external libraries
@@ -128,6 +139,11 @@ endif
 
 # Set to 1 to build shape models
 HAVE_SHAPE_MODELS = 1
+
+ifneq ($(realpath $(FVBASEDIR)/fvutils/rectification),)
+  HAVE_RECTINFO = 1
+  VISION_CFLAGS += -DHAVE_RECTINFO
+endif
 
 VISION_CFLAGS       += $(foreach CAM,$(CAMS),$(if $(subst 0,,$(HAVE_$(CAM)_CAM)),-DHAVE_$(CAM)_CAM))
 VISION_CFLAGS       += $(foreach CTRL,$(CTRLS),$(if $(subst 0,,$(HAVE_$(CTRL)_CTRL)),-DHAVE_$(CTRL)_CTRL))

@@ -20,13 +20,13 @@ include $(BASEDIR)/src/firevision/fvconf.mk
 include $(LIBSRCDIR)/netcomm/netcomm.mk
 include $(BASEDIR)/etc/buildsys/gui.mk
 
-SUBDIRS = firestation
-
 CFLAGS   += $(VISION_CFLAGS)
 LDFLAGS  += $(VISION_LDFLAGS)
 INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
+
+SUBDIRS = $(subst $(CURDIR)/,,$(realpath firestation))
 
 LIBS_fvshmem = $(VISION_CAM_LIBS) utils fvutils
 OBJS_fvshmem = shmem.o
@@ -69,29 +69,51 @@ OBJS_all = $(OBJS_fvshmem) $(OBJS_fvlistfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
 	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer) \
 	   $(OBJS_fvshowyuv) $(OBJS_fvnet)
-BINS_all = $(BINDIR)/fvshmem $(BINDIR)/fvconverter $(BINDIR)/fvbb2rectlut \
-	   $(BINDIR)/fvnet
+BINS_all = $(BINDIR)/fvshmem
 
+ifneq ($(realpath $(SRCDIR)/net.cpp),)
+  BINS_all += $(BINDIR)/fvnet
+endif
+ifneq ($(realpath $(SRCDIR)/bb2rectlut.cpp),)
+  BINS_all += $(BINDIR)/fvbb2rectlut
+endif
+ifneq ($(realpath $(SRCDIR)/converter.cpp),)
+  BINS_all += $(BINDIR)/fvconverter
+endif
 ifeq ($(HAVE_TRICLOPS_SDK),1)
   BINS_all += $(BINDIR)/fvtricalcdisp
 else
-  WARN_TARGETS += warning_tricalcdisp
-  WARN_TARGETS += warning_bb2rectlut_triclops
+  ifneq ($(realpath $(SRCDIR)/tricalcdisp.cpp),)
+    WARN_TARGETS += warning_tricalcdisp
+  endif
+  ifneq ($(realpath $(SRCDIR)/bb2rectlut.cpp),)
+    WARN_TARGETS += warning_bb2rectlut_triclops
+  endif
 endif
 
 ifeq ($(HAVE_FIREWIRE_CAM),1)
   BINS_all += $(BINDIR)/fvlistfwcams
 else
-  WARN_TARGETS += warning_listfwcams
+  ifneq ($(realpath $(SRCDIR)/listfwcams.cpp),)
+    WARN_TARGETS += warning_listfwcams
+  endif
 endif
 
 ifeq ($(HAVE_BUMBLEBEE2_CAM),1)
   BINS_all += $(BINDIR)/fvbb2gettric $(BINDIR)/fvstereodecoder $(BINDIR)/fvbb2info
 else
-  WARN_TARGETS += warning_bb2gettric
-  WARN_TARGETS += warning_bb2info
-  WARN_TARGETS += warning_stereodecoder
-  WARN_TARGETS += warning_bb2rectlut_bb2
+  ifneq ($(realpath $(SRCDIR)/bb2gettric.cpp),)
+    WARN_TARGETS += warning_bb2gettric
+  endif
+  ifneq ($(realpath $(SRCDIR)/bb2info.cpp),)
+    WARN_TARGETS += warning_bb2info
+  endif
+  ifneq ($(realpath $(SRCDIR)/stereodecoder.cpp),)
+    WARN_TARGETS += warning_stereodecoder
+  endif
+  ifneq ($(realpath $(SRCDIR)/bb2rectlut.cpp),)
+    WARN_TARGETS += warning_bb2rectlut_bb2
+  endif
 endif
 ifeq ($(HAVE_SDL)$(HAVE_GTKMM),11)
   BINS_gui += $(BINDIR)/fvviewer
