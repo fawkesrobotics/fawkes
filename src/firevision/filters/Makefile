@@ -26,16 +26,16 @@ LIBS     += $(VISION_LIBS)
 
 # Use . instead of nothing here in this pattern because we already included
 # the config in fvconf.mk and thus SRCDIR is set!
-ifeq ($(OBJSSUBMAKE),1)
-  ifeq ($(HAVE_IPP),0)
-    # We have no IPP, because of this we have to eliminate many filters
-    # OBJS_libfvfilters = $(filter-out morphology/%,$(OBJS_libfvfilters))
-    IPPI_FILTERS  = $(wildcard $(SRCDIR)/morphology/*.cpp)
-    IPPI_FILTERS += $(shell grep -rl ippi.h $(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))
-  else
-    LIBS_libfvfilters += ippi$(IPP_ARCH) ippcore$(IPP_ARCH) guide
-  endif
+ifeq ($(HAVE_IPP),0)
+  # We have no IPP, because of this we have to eliminate many filters
+  # OBJS_libfvfilters = $(filter-out morphology/%,$(OBJS_libfvfilters))
+  IPPI_FILTERS  = $(wildcard $(SRCDIR)/morphology/*.cpp)
+  IPPI_FILTERS += $(shell grep -rl ippi.h $(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))
+else
+  LIBS_libfvfilters += ippi$(IPP_ARCH) ippcore$(IPP_ARCH) guide
+endif
 
+ifeq ($(OBJSSUBMAKE),1)
 .PHONY: print_unsupported
 print_unsupported:
 	$(SILENT)if [ "$(HAVE_IPP)" != "1" ]; then \
