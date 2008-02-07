@@ -155,6 +155,7 @@ main(int argc, char **argv)
     }
 
     cam = new NetworkCamera(host, port_num, image_id, argp.has_arg("j"));
+    free(net_string);
 #else
     throw Exception("NetworkCamera not available at compile time");
 #endif
