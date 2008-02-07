@@ -224,8 +224,6 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   colorspace_t m_img_cs;
   size_t m_img_size;
 
-  bool m_img_src_ready;
-
   bool m_enable_scaling;
   float m_scale_factor;
 

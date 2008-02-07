@@ -34,7 +34,9 @@
 #include <fvutils/color/yuv.h>
 #include <fvutils/scalers/lossy.h>
 #include <fvutils/writers/jpeg.h>
+#include <fvutils/writers/fvraw.h>
 #include <fvutils/readers/jpeg.h>
+#include <fvutils/readers/fvraw.h>
 
 #include <cams/net.h>
 #include <core/exception.h>
@@ -60,7 +62,6 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_yuv_draw_buffer = 0;
   m_yuv_scaled_buffer = 0;
   m_rgb_scaled_buffer = 0;
-  m_img_src_ready = false;
   m_img_writer = 0;
   m_img_reader = 0;
 
@@ -379,9 +380,6 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 /** Destructor. */
 Firestation::~Firestation()
 {
-  m_avahi_thread->cancel();
-  m_avahi_thread->join();
-
   free(m_yuv_orig_buffer);
   free(m_yuv_draw_buffer);
   free(m_yuv_scaled_buffer);
@@ -409,6 +407,17 @@ Firestation::get_window() const
 void
 Firestation::exit()
 {
+  m_avahi_thread->cancel();
+  m_avahi_thread->join();
+  cout << "exit(): avahi thread terminated" << endl;
+
+  if (SRC_FUSE == m_img_src)
+    {
+      cout << "exit(): closing FUSE camera ... " << flush;
+      m_net_cam->close();
+      cout << "done" << endl;
+    }
+
   m_wnd_main->hide();
 }
 
@@ -416,7 +425,7 @@ Firestation::exit()
 void
 Firestation::save_image()
 {
-  if (!m_img_src_ready)
+  if (m_img_src == SRC_NONE)
     {
       return;
     }
@@ -424,15 +433,16 @@ Firestation::save_image()
   m_fcd_save_image->set_transient_for(*this);
 
   Gtk::FileFilter filter_jpg;
-  filter_jpg.set_name("Jpeg");
+  filter_jpg.set_name("JPEG");
   filter_jpg.add_pattern("*.jpg");
   filter_jpg.add_pattern("*.jpeg");
   m_fcd_save_image->add_filter(filter_jpg);
 
-  Gtk::FileFilter filter_any;
-  filter_any.set_name("Any format");
-  filter_any.add_pattern("*");
-  m_fcd_save_image->add_filter(filter_any);
+  Gtk::FileFilter filter_fvraw;
+  filter_fvraw.set_name("FVRaw");
+  filter_fvraw.add_pattern("*.raw");
+  filter_fvraw.add_pattern("*.fvraw");
+  m_fcd_save_image->add_filter(filter_fvraw);
 
   int result = m_fcd_save_image->run();
 
@@ -440,10 +450,24 @@ Firestation::save_image()
     {
     case(Gtk::RESPONSE_OK):
       {
-	std::string filename = m_fcd_save_image->get_filename();
-	
 	delete m_img_writer;
-	m_img_writer = new JpegWriter();
+
+	Glib::ustring filter_name = m_fcd_save_image->get_filter()->get_name();
+	if ( Glib::ustring("JPEG") == filter_name )
+	  {
+	    m_img_writer = new JpegWriter();
+	  }
+	else if( Glib::ustring("FVRaw") == filter_name )
+	  {
+	    m_img_writer = new FvRawWriter();
+	  }
+	else
+	  {
+	    cout << "save_file(): unknown file format" << endl;
+	    break;
+	  }
+
+	std::string filename = m_fcd_save_image->get_filename();
 	m_img_writer->set_filename( filename.c_str() );
 	m_img_writer->set_dimensions(m_img_width, m_img_height);
 	m_img_writer->set_buffer(m_img_cs, m_yuv_orig_buffer);
@@ -467,7 +491,7 @@ Firestation::save_image()
 void
 Firestation::update_image()
 {
-  if (!m_img_src_ready)
+  if (m_img_src == SRC_NONE)
     {
       return;
     }
@@ -509,16 +533,20 @@ Firestation::update_image()
 void
 Firestation::open_file()
 {
-  m_img_src = SRC_FILE;
-
   m_fcd_open_image->set_transient_for(*this);
   
   Gtk::FileFilter filter_jpg;
-  filter_jpg.set_name("Jpeg");
+  filter_jpg.set_name("JPEG");
   filter_jpg.add_pattern("*.jpg");
   filter_jpg.add_pattern("*.jpeg");
   m_fcd_open_image->add_filter(filter_jpg);
   
+  Gtk::FileFilter filter_fvraw;
+  filter_fvraw.set_name("FVRaw");
+  filter_fvraw.add_pattern("*.raw");
+  filter_fvraw.add_pattern("*.fvraw");
+  m_fcd_open_image->add_filter(filter_fvraw);
+
   int result = m_fcd_open_image->run();
 	
   switch(result)
@@ -529,8 +557,22 @@ Firestation::open_file()
 	unsigned char* tmp_buffer = (unsigned char*) malloc(10000000);
 	std::string filename = m_fcd_open_image->get_filename();
 	
-	// TODO: different file formats
-	m_img_reader = new JpegReader(filename.c_str());
+	Glib::ustring filter_name = m_fcd_open_image->get_filter()->get_name();
+
+	if ( Glib::ustring("JPEG") == filter_name )
+	  {
+	    m_img_reader = new JpegReader( filename.c_str() );
+	  }
+	else if( Glib::ustring("FVRaw") == filter_name )
+	  {
+	    m_img_reader = new FvRawReader( filename.c_str() );
+	  }
+	else
+	  {
+	    cout << "open_file(): unknown file format" << endl;
+	    break;
+	  }
+	
 	m_img_reader->set_buffer(tmp_buffer);
 	m_img_reader->read();
 	
@@ -548,12 +590,12 @@ Firestation::open_file()
 	memcpy(m_yuv_draw_buffer, tmp_buffer, m_img_size);
 	free(tmp_buffer);
 	
-	m_img_src_ready = true;
-	
 	scale_image();
 	draw_image();
 	
 	post_open_img_src();
+
+	m_img_src = SRC_FILE;
 
 	break;
       }
@@ -576,8 +618,6 @@ Firestation::open_file()
 void
 Firestation::open_shm()
 {
-  m_img_src = SRC_SHM;
-
   unsigned int num_buffers = 0;
   SharedMemory::SharedMemoryIterator shmit;
   SharedMemoryImageBufferHeader* h = new SharedMemoryImageBufferHeader;
@@ -635,12 +675,12 @@ Firestation::open_shm()
 		    e.print_trace();
 		  }
 		
-		m_img_src_ready = true;
-
 		scale_image();
 		draw_image();
 		
 		post_open_img_src();
+		
+		m_img_src = SRC_SHM;
 	      }
 	  }
 	else
@@ -665,8 +705,6 @@ Firestation::open_shm()
 void
 Firestation::open_fuse()
 {
-  m_img_src = SRC_FUSE;
-
   Gtk::TreeModel::Children children = m_fuse_tree_store->children();
   if ( 0 == children.size() )
     {
@@ -721,18 +759,19 @@ Firestation::open_fuse()
 		      }
 		    
 		    m_net_cam->dispose_buffer();
+	    
+		    scale_image();
+		    draw_image();
+		    
+		    post_open_img_src();
+
+		    m_img_src = SRC_FUSE;
 		  }
 		catch (Exception& e)
 		  {
+		    m_img_src = SRC_NONE;
 		    e.print_trace();
 		  }
-		
-		m_img_src_ready = true;
-		
-		scale_image();
-		draw_image();
-
-		post_open_img_src();
 	      }
 	  }
 	else
@@ -759,16 +798,15 @@ Firestation::open_fuse()
 void
 Firestation::post_open_img_src()
 {
-  if (m_img_src_ready)
-    {
-      m_tbtn_update->set_sensitive(true);
-      m_tbtn_save->set_sensitive(true);
+  if (m_img_src == SRC_NONE) { return; }
 
-      m_color_tool->initialize( m_img_width, m_img_height,
-				m_yuv_orig_buffer, m_yuv_draw_buffer, ct_get_fg_object() ); 
-
-      draw_segmentation_result();
-    }
+  m_tbtn_update->set_sensitive(true);
+  m_tbtn_save->set_sensitive(true);
+  
+  m_color_tool->initialize( m_img_width, m_img_height,
+			    m_yuv_orig_buffer, m_yuv_draw_buffer, ct_get_fg_object() ); 
+  
+  draw_segmentation_result();
 }
 
 /** Handles the scaling of the displayed image.
@@ -777,7 +815,7 @@ Firestation::post_open_img_src()
 bool
 Firestation::scale_image()
 {
-  if (m_img_src_ready)
+  if (m_img_src != SRC_NONE)
     {
       float scale_factor_width = m_scaled_img_width / (float) m_img_width;
       float scale_factor_height = m_scaled_img_height / (float) m_img_height;
@@ -803,10 +841,7 @@ Firestation::scale_image()
 void
 Firestation::draw_image()
 {
-  if ( ! m_img_src_ready )
-    {
-      return ;
-    }
+  if ( m_img_src == SRC_NONE ) { return; }
 
   LossyScaler scaler;
   scaler.set_original_buffer( m_yuv_draw_buffer );
@@ -923,7 +958,7 @@ Firestation::image_click(GdkEventButton* event)
   switch (m_op_mode)
     {
     case MODE_VIEWER:
-      if (m_img_src_ready)
+      if (m_img_src != SRC_NONE)
 	{
 	  switch( m_img_cs )
 	    {
@@ -1012,7 +1047,7 @@ Firestation::ct_start()
     }
   else
     {
-      if (m_img_src_ready)
+      if (m_img_src != SRC_NONE)
 	{
 	  if ( !m_color_tool->initialized() )
 	    {
@@ -1128,7 +1163,7 @@ Firestation::ct_load_colormap()
 	std::string filename = m_fcd_ct_load_colormap->get_filename();
 	m_color_tool->load_colormap( filename.c_str() );
 	
-	if (m_img_src_ready)
+	if (m_img_src != SRC_NONE)
 	  {
 	    ct_draw_colormaps();
 	    draw_segmentation_result();
@@ -1158,7 +1193,7 @@ Firestation::mc_start()
     }
   else
     {
-      if (m_img_src_ready)
+      if (m_img_src != SRC_NONE)
 	{
 	  m_calib_tool->set_img_dimensions(m_img_width, m_img_height);
 	  m_calib_tool->start();
@@ -1274,14 +1309,14 @@ Firestation::browse_failed( const char* name,
 
 void
 Firestation::service_added( const char* name,
-			      const char* type,
-			      const char* domain,
-			      const char* host_name,
-			      const struct sockaddr* addr,
-			      const socklen_t addr_size,
-			      uint16_t port,
-			      std::list<std::string>& txt,
-			      int flags )
+			    const char* type,
+			    const char* domain,
+			    const char* host_name,
+			    const struct sockaddr* addr,
+			    const socklen_t addr_size,
+			    uint16_t port,
+			    std::list<std::string>& txt,
+			    int flags )
 {
   std::vector<FUSE_imageinfo_t> image_list;
   NetworkCamera cam(host_name, port);
