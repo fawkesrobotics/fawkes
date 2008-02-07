@@ -76,7 +76,8 @@ PluginGuiBackendThread::~PluginGuiBackendThread()
 bool
 PluginGuiBackendThread::connect(const char* host, unsigned short int port)
 {
-  delete m_client;
+  if (m_connected) { disconnect(); }
+
   m_client = new FawkesNetworkClient(host, port);
   m_client->register_handler(this, FAWKES_CID_PLUGINMANAGER);
   try
@@ -127,11 +128,12 @@ PluginGuiBackendThread::disconnect()
     m_client->enqueue(msg);
     msg->unref();			
 
-    m_connected = false;
     m_client->disconnect();
     m_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
     m_client->cancel();
     m_client->join();
+    delete m_client;
+    m_client = 0;
     m_connected = false;
   }
   
@@ -159,6 +161,10 @@ PluginGuiBackendThread::loop()
     {
       m_client->wait(FAWKES_CID_PLUGINMANAGER);
     }
+  else
+    {
+      usleep(10000);
+    }
 
   if (m_connection_died)
     {
@@ -166,6 +172,8 @@ PluginGuiBackendThread::loop()
       m_client->cancel();
       m_client->join();
       m_connection_died = false;
+      delete m_client;
+      m_client = 0;
     }
 }
 
@@ -392,7 +400,6 @@ PluginGuiBackendThread::request_load(const char* plugin_name)
 {
   if (m_connected)
     {
-      //      printf("Requesting loading of plugin %s\n", plugin_name);
       plugin_load_msg_t* m = (plugin_load_msg_t*) calloc(1, sizeof(plugin_load_msg_t));
       strncpy(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
       
@@ -412,7 +419,6 @@ PluginGuiBackendThread::request_unload(const char* plugin_name)
 {
   if (m_connected)
     {
-      //      printf("Requesting unloading of plugin %s\n", plugin_name);
       plugin_unload_msg_t* m = (plugin_unload_msg_t *)calloc(1, sizeof(plugin_unload_msg_t));
       strncpy(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
       
