@@ -28,6 +28,7 @@
 
 #include <tools/plugin_gui/backend_thread.h>
 #include <tools/plugin_gui/plugin_gui.h>
+#include <core/threading/wait_condition.h>
 #include <netcomm/utils/exceptions.h>
 #include <netcomm/fawkes/client.h>
 #include <mainapp/plugin_messages.h>
@@ -57,6 +58,7 @@ PluginGuiBackendThread::PluginGuiBackendThread(PluginGui* gui)
   m_connection_died = false;
   m_gui = gui;
   m_hosts.clear();
+  m_longsleep = new WaitCondition();
 }
 
 /** Desctructor. */
@@ -66,6 +68,7 @@ PluginGuiBackendThread::~PluginGuiBackendThread()
   m_avahi->join();
   disconnect();
   delete m_client;
+  delete m_longsleep;
 }
 
 /** Connect to the host running Fawkes.
@@ -86,7 +89,7 @@ PluginGuiBackendThread::connect(const char* host, unsigned short int port)
       m_client->start();
 
       m_connected = true;
-      
+
       // subscribe for load-/unload messages
       FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 							   MSG_PLUGIN_SUBSCRIBE_WATCH);
@@ -110,7 +113,8 @@ PluginGuiBackendThread::connect(const char* host, unsigned short int port)
       e.print_trace();
       m_connected = false;
     }
-  
+
+  m_longsleep->wake_all();
   return true;
 }
 
@@ -163,7 +167,7 @@ PluginGuiBackendThread::loop()
     }
   else
     {
-      usleep(10000);
+      m_longsleep->wait();
     }
 
   if (m_connection_died)
