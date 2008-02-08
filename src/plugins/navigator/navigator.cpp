@@ -334,6 +334,10 @@ void Navigator::set_odometry_velocity_rotation(double rotation)
  */
 void Navigator::set_max_velocity(double velocity)
 {
+  if(current_velocity > velocity)
+   {
+   	 current_velocity = velocity;
+   }
   this->max_velocity = velocity;
 }
 
