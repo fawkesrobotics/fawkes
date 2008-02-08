@@ -103,12 +103,15 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::Label* yv_label;
     Gtk::Label* angular_velocity_label;
     Gtk::Label* navigator_velocity_label;
+    Gtk::Label* zooming_label;
 
     Gtk::RadioButton* navigator_control_radio;
     Gtk::RadioButton* motor_control_radio;
     Gtk::RadioButton* behold_radio;
 
     Gtk::CheckButton* obstacle_check;
+    Gtk::CheckButton* orientation_check;
+    Gtk::CheckButton* debug_check;
 
     Gtk::RadioButton* rpm_radio;
     Gtk::RadioButton* trans_rot_radio;
@@ -148,6 +151,7 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::ButtonBox* translation_y_label;
     Gtk::ButtonBox* orbit_label_box;
     Gtk::ButtonBox* navigator_label_box;
+    Gtk::ButtonBox* zoom_debug_box;
 
 
     Gtk::Alignment* left_rpm_alignment;

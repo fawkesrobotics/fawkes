@@ -126,6 +126,8 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   navigator_radio = new Gtk::RadioButton("Navigator");
 
   obstacle_check = new Gtk::CheckButton("add Obstacles");
+  orientation_check = new Gtk::CheckButton("orientate");
+  debug_check = new Gtk::CheckButton("Debugging");
 
   right_rpm_label = new Gtk::Label("Right");
   left_rpm_label = new Gtk::Label("Left");
@@ -134,6 +136,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   yv_label = new Gtk::Label("Y");
   angular_velocity_label = new Gtk::Label("Angular Velocity [rad/s]\nSet the orbit center ->>");
   navigator_velocity_label = new Gtk::Label("Maximum Velocity [m/s]");
+  zooming_label = new Gtk::Label("Zoom");
 
   control_button = new Gtk::Button("Start Control");
   stop_button = new Gtk::Button("STOP");
@@ -196,10 +199,14 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   translation_y_label = Gtk::manage( new Gtk::VButtonBox() );
   orbit_label_box = Gtk::manage( new Gtk::VButtonBox() );
   navigator_label_box = Gtk::manage( new Gtk::VButtonBox() );
+  zoom_debug_box = Gtk::manage( new Gtk::VButtonBox() );
+  
+  zoom_debug_box->add(*debug_check);
+  zoom_debug_box->add(*zooming_HScale);
 
   bbox_top = Gtk::manage( new Gtk::HButtonBox(Gtk::BUTTONBOX_SPREAD, 30) );
   bbox_top->set_border_width(5);
-  bbox_top->add(*zooming_HScale);
+  bbox_top->add(*zoom_debug_box);
   bbox_top->add(*stop_button);
   bbox_top->add(*control_VBox);
   bbox_top->add(*reset_odometry_button);
@@ -259,6 +266,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   navigator_label_box->add(*navigator_alignment);
   navigator_label_box->add(*navigator_velocity_entry);
   navigator_label_box->add(*obstacle_check);
+  navigator_label_box->add(*orientation_check);
 
   rpm_frame->add(*rpm_entry_box);
   orbit_frame->add(*orbit_label_box);
@@ -1101,15 +1109,22 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
       else if(event->button == 1)
         {
           Gtk::Allocation allocation = get_allocation();
-          if(navigator_control)
-            {
-              orientating = true;
-            }
 
           mouse_point_mutex->lock();
           mouse_point.x = (float) (event->x - allocation.get_width() / 2);
           mouse_point.y = (float) (event->y - allocation.get_height() / 2);
           mouse_point_mutex->unlock();
+          
+          if(navigator_control && orientation_check->get_active())
+            {
+              orientating = true;
+            }
+          else if(navigator_control)
+            {
+              orientating = false;
+              orientation = 0;
+              send_drive_command();
+            }
 
         }
     }
@@ -1130,7 +1145,7 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
 bool NavigatorGUI::on_button_release_event(GdkEventButton* event)
 {
   orientating = false;
-  if(navigator_control)
+  if(navigator_control && orientation_check->get_active())
     {
       send_drive_command();
       orientation = 0;
@@ -1434,112 +1449,115 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       context->restore();
       odometry_point_mutex->unlock();
 
-      //Debug pathfinder
-      lines.lock();
-      for(LockList<NLine*>::iterator iterator = lines.begin();
-          iterator != lines.end(); iterator++)
+      if(debug_check->get_active())
         {
-
-          gdouble middle_x;
-          gdouble middle_y;
-
-          double obstacle1_radius = 0;
-          double obstacle2_radius = 0;
-
-          Obstacle *ob1 = dynamic_cast<Obstacle *>((*iterator)->p1);
-          if(ob1)
+          //Debug pathfinder
+          lines.lock();
+          for(LockList<NLine*>::iterator iterator = lines.begin();
+              iterator != lines.end(); iterator++)
             {
-              obstacle1_radius = ob1->width / 2.;
+
+              gdouble middle_x;
+              gdouble middle_y;
+
+              double obstacle1_radius = 0;
+              double obstacle2_radius = 0;
+
+              Obstacle *ob1 = dynamic_cast<Obstacle *>((*iterator)->p1);
+              if(ob1)
+                {
+                  obstacle1_radius = ob1->width / 2.;
+                }
+              Obstacle *ob2 = dynamic_cast<Obstacle *>((*iterator)->p2);
+              if(ob2)
+                {
+                  obstacle2_radius = ob2->width / 2.;
+                }
+              double robot_width = 0.5;
+
+              gdouble x1 = (*iterator)->p1->x;
+              gdouble y1 = (*iterator)->p1->y;
+
+              gdouble x2 = (*iterator)->p2->x;
+              gdouble y2 = (*iterator)->p2->y;
+
+              //compute the middle of the edge
+              middle_x = (x1 + x2) / 2.;
+              middle_y = (y1 + y2) / 2.;
+
+              //calculate a direction vector
+
+              //vector from p1 to p2
+              double vector_x = x2 - x1;
+              double vector_y = y2 - y1;
+
+              double norm1 = sqrt(pow(vector_x, 2) + pow(vector_y, 2));
+
+              vector_x /= norm1;
+              vector_y /= norm1;
+
+              //the point in the middle of the passage through obstacle1 and obstacle2
+              NPoint * next_point1 = new NPoint(
+                                       middle_x + (vector_x * (obstacle1_radius - obstacle2_radius)/2),
+                                       middle_y + (vector_y * (obstacle1_radius - obstacle2_radius)/2));
+
+              NPoint * next_point2;
+              NPoint * next_point3;
+
+              double vector_length;
+
+              //if the edge is wide then calculate a new point further left or right of the middle
+              if(distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) > robot_width * 3 + obstacle1_radius + obstacle2_radius)
+                {
+                  vector_length = robot_width; // * 0.8;
+
+                  //a point near by p1
+                  next_point2 = new NPoint(
+                                  x1 + vector_x * (vector_length + obstacle1_radius),
+                                  y1 + vector_y * (vector_length + obstacle1_radius));
+
+                  //a point near by p2
+                  next_point3 = new NPoint(
+                                  x2 - vector_x * (vector_length + obstacle2_radius),
+                                  y2 - vector_y * (vector_length + obstacle2_radius));
+                }
+              else if((distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) <= robot_width * 3)
+                {
+                  next_point2 = next_point3 = next_point1;
+                  //   std::cout << "middle--------------" <<distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p1->y) << " <= " << robot_width * 1.5 << std::endl;
+                }
+              else //if the edge is narrow then calculate a new point near by the middle
+                {
+                  vector_length = (distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) / 3;
+
+                  double vector_add = (obstacle1_radius - obstacle2_radius) / 2;
+
+                  //a point near by the middle, placed toward to p1
+                  next_point2 = new NPoint(
+                                  middle_x - vector_x * (vector_length + vector_add),
+                                  middle_y - vector_y * (vector_length + vector_add));
+
+                  //a point near by the middle, placed toward to p2
+                  next_point3 = new NPoint(
+                                  middle_x + vector_x * (vector_length + vector_add),
+                                  middle_y + vector_y * (vector_length + vector_add));
+                }
+
+              //  std::cout << "distance " << distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) << std::endl;
+
+              context->set_source_rgb(1.0, 0.0, 0.0);
+              context->arc(next_point1->x * zoom_factor, next_point1->y * zoom_factor, 5, 0.0, 2.0 * M_PI);
+              context->fill_preserve();
+              context->stroke();
+              context->arc(next_point2->x * zoom_factor, next_point2->y * zoom_factor, 5, 0.0, 2.0 * M_PI);
+              context->fill_preserve();
+              context->stroke();
+              context->arc(next_point3->x * zoom_factor, next_point3->y * zoom_factor, 5, 0.0, 2.0 * M_PI);
+              context->fill_preserve();
+              context->stroke();
             }
-          Obstacle *ob2 = dynamic_cast<Obstacle *>((*iterator)->p2);
-          if(ob2)
-            {
-              obstacle2_radius = ob2->width / 2.;
-            }
-          double robot_width = 0.5;
-
-          gdouble x1 = (*iterator)->p1->x;
-          gdouble y1 = (*iterator)->p1->y;
-
-          gdouble x2 = (*iterator)->p2->x;
-          gdouble y2 = (*iterator)->p2->y;
-
-          //compute the middle of the edge
-          middle_x = (x1 + x2) / 2.;
-          middle_y = (y1 + y2) / 2.;
-
-          //calculate a direction vector
-
-          //vector from p1 to p2
-          double vector_x = x2 - x1;
-          double vector_y = y2 - y1;
-
-          double norm1 = sqrt(pow(vector_x, 2) + pow(vector_y, 2));
-
-          vector_x /= norm1;
-          vector_y /= norm1;
-
-          //the point in the middle of the passage through obstacle1 and obstacle2
-          NPoint * next_point1 = new NPoint(
-                                   middle_x + (vector_x * (obstacle1_radius - obstacle2_radius)/2),
-                                   middle_y + (vector_y * (obstacle1_radius - obstacle2_radius)/2));
-
-          NPoint * next_point2;
-          NPoint * next_point3;
-
-          double vector_length;
-
-          //if the edge is wide then calculate a new point further left or right of the middle
-          if(distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) > robot_width * 3 + obstacle1_radius + obstacle2_radius)
-            {
-              vector_length = robot_width; // * 0.8;
-
-              //a point near by p1
-              next_point2 = new NPoint(
-                              x1 + vector_x * (vector_length + obstacle1_radius),
-                              y1 + vector_y * (vector_length + obstacle1_radius));
-
-              //a point near by p2
-              next_point3 = new NPoint(
-                              x2 - vector_x * (vector_length + obstacle2_radius),
-                              y2 - vector_y * (vector_length + obstacle2_radius));
-            }
-          else if((distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) <= robot_width * 3)
-            {
-              next_point2 = next_point3 = next_point1;
-              //   std::cout << "middle--------------" <<distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p1->y) << " <= " << robot_width * 1.5 << std::endl;
-            }
-          else //if the edge is narrow then calculate a new point near by the middle
-            {
-              vector_length = (distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) / 3;
-
-              double vector_add = (obstacle1_radius - obstacle2_radius) / 2;
-
-              //a point near by the middle, placed toward to p1
-              next_point2 = new NPoint(
-                              middle_x - vector_x * (vector_length + vector_add),
-                              middle_y - vector_y * (vector_length + vector_add));
-
-              //a point near by the middle, placed toward to p2
-              next_point3 = new NPoint(
-                              middle_x + vector_x * (vector_length + vector_add),
-                              middle_y + vector_y * (vector_length + vector_add));
-            }
-
-          //  std::cout << "distance " << distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) << std::endl;
-
-          context->set_source_rgb(1.0, 0.0, 0.0);
-          context->arc(next_point1->x * zoom_factor, next_point1->y * zoom_factor, 5, 0.0, 2.0 * M_PI);
-          context->fill_preserve();
-          context->stroke();
-          context->arc(next_point2->x * zoom_factor, next_point2->y * zoom_factor, 5, 0.0, 2.0 * M_PI);
-          context->fill_preserve();
-          context->stroke();
-          context->arc(next_point3->x * zoom_factor, next_point3->y * zoom_factor, 5, 0.0, 2.0 * M_PI);
-          context->fill_preserve();
-          context->stroke();
+          lines.unlock();
         }
-      lines.unlock();
 
       //draw the coordinates
       if(cursor_over_area)
