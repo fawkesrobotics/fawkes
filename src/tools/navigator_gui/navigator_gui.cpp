@@ -200,7 +200,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   orbit_label_box = Gtk::manage( new Gtk::VButtonBox() );
   navigator_label_box = Gtk::manage( new Gtk::VButtonBox() );
   zoom_debug_box = Gtk::manage( new Gtk::VButtonBox() );
-  
+
   zoom_debug_box->add(*debug_check);
   zoom_debug_box->add(*zooming_HScale);
 
@@ -1114,7 +1114,7 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
           mouse_point.x = (float) (event->x - allocation.get_width() / 2);
           mouse_point.y = (float) (event->y - allocation.get_height() / 2);
           mouse_point_mutex->unlock();
-          
+
           if(navigator_control && orientation_check->get_active())
             {
               orientating = true;
@@ -1145,10 +1145,15 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
 bool NavigatorGUI::on_button_release_event(GdkEventButton* event)
 {
   orientating = false;
-  if(navigator_control && orientation_check->get_active())
+  
+  //left button
+  if(event->button == 1)
     {
-      send_drive_command();
-      orientation = 0;
+      if(navigator_control && orientation_check->get_active())
+        {
+          send_drive_command();
+          orientation = 0;
+        }
     }
   return true;
 }
@@ -1234,7 +1239,7 @@ void NavigatorGUI::send_drive_command()
 
   target_msg->x = -mouse_point.y / zoom_factor;
   target_msg->y = -mouse_point.x / zoom_factor; // negative because mouse_point is in screen coordinates
-  target_msg->orientation = orientation;
+  target_msg->orientation = -orientation;
   FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_TARGET, target_msg, sizeof(navigator_target_message_t));
   net_client->enqueue(msg1);
   msg1->unref();
