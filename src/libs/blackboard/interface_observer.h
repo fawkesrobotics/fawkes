@@ -48,13 +48,23 @@ class BlackBoardInterfaceObserver
   void bbio_add_interface_destroy_type(const char *type) throw();
 
 
-  /** Type for locked interface type hash sets. */
-  typedef  LockHashSet<char *,  __gnu_cxx::hash<char *>,
-                       StringEquality > InterfaceTypeLockHashSet;
+  /** Type for lockable interface type hash sets. */
+  typedef  LockHashSet<char *,
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+                       std::tr1::hash<char *>,
+#else
+                       __gnu_cxx::hash<char *>,
+#endif
+                       StringEquality >            InterfaceTypeLockHashSet;
 
-  /** Type for iterator of locked interface type hash sets. */
-  typedef  LockHashSet<char *,  __gnu_cxx::hash<char *>,
-                       StringEquality >::iterator InterfaceTypeLockHashSetIterator;
+  /** Type for iterator of lockable interface type hash sets. */
+  typedef  LockHashSet<char *,
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+                       std::tr1::hash<char *>,
+#else
+                       __gnu_cxx::hash<char *>,
+#endif
+                       StringEquality >::iterator  InterfaceTypeLockHashSetIterator;
 
   InterfaceTypeLockHashSet *  bbio_interface_create_types() throw();
   InterfaceTypeLockHashSet *  bbio_interface_destroy_types() throw();

@@ -31,6 +31,8 @@
 #include <utils/system/argparser.h>
 #include <utils/system/signal.h>
 
+#include <cstdlib>
+
 int
 main(int argc, char **argv)
 {

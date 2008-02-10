@@ -29,12 +29,22 @@
 #define __CORE_UTILS_LOCK_HASHSET_H_
 
 #include <core/threading/mutex.h>
-#include <ext/hash_set>
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+#  include <tr1/unordered_set>
+#else
+#  include <ext/hash_set>
+#endif
 
 template <class KeyType,
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+          class HashFunction = std::tr1::hash<KeyType>,
+          class EqualKey     = std::equal_to<KeyType> >
+class LockHashSet : public std::tr1::unordered_set<KeyType, HashFunction, EqualKey>
+#else
           class HashFunction = __gnu_cxx::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType> >
 class LockHashSet : public __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>
+#endif
 {
  public:
   LockHashSet();
@@ -77,7 +87,11 @@ LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet()
  */
 template <class KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet(const LockHashSet<KeyType, HashFunction, EqualKey> &lh)
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+  : std::tr1::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh)
+#else
   : __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>::hash_set(lh)
+#endif
 {
   mutex = new Mutex();
 }
@@ -128,7 +142,7 @@ void
 LockHashSet<KeyType, HashFunction, EqualKey>::insert_locked(const KeyType& x)
 {
   mutex->lock();
-  __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>::insert(x);
+  insert(x);
   mutex->unlock();
 }
 

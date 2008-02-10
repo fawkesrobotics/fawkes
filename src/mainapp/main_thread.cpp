@@ -50,6 +50,7 @@
 #endif
 
 #include <cstdio>
+#include <cstring>
 
 /** @class FawkesMainThread mainapp/main_thread.h
  * Fawkes main thread.

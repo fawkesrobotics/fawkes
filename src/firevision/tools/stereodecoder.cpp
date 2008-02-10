@@ -32,6 +32,7 @@
 
 #include <list>
 #include <string>
+#include <cstdlib>
 
 #include <sys/stat.h>
 #include <sys/types.h>

@@ -19,3 +19,7 @@ endif
 
 BUILD_INTERFACE_GENERATOR=$(HAVE_LIBXMLPP)
 
+ifeq ($(BUILD_INTERFACE_GENERATOR),1)
+  CFLAGS += $(shell $(PKGCONFIG) --cflags libxml++-2.6)
+endif
+

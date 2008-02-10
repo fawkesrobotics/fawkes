@@ -29,6 +29,8 @@
 
 #include <models/scanlines/cornerhorizon.h>
 #include <utils/math/angle.h>
+#include <cstdlib>
+#include <cstring>
 
 const float CornerHorizon::M_PI_HALF = M_PI / 2.f;
 

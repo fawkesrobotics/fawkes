@@ -32,6 +32,7 @@
 #include <blackboard/interface_manager.h>
 
 #include <string>
+#include <cstring>
 
 /** @class BlackBoard <blackboard/blackboard.h>
  * The BlackBoard.

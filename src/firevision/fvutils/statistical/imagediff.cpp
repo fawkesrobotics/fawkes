@@ -28,6 +28,8 @@
 #include <fvutils/statistical/imagediff.h>
 #include <fvutils/color/yuv.h>
 
+#include <cstdlib>
+
 /** @class ImageDiff <fvutils/statistical/imagediff.h>
  * Image difference checker.
  * @author Tim Niemueller

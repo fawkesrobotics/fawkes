@@ -37,6 +37,7 @@
 #include <netcomm/fawkes/component_ids.h>
 #include <netcomm/fawkes/hub.h>
 
+#include <algorithm>
 #include <cstring>
 #include <cstdlib>
 

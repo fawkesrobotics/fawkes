@@ -48,6 +48,8 @@
 
 // for inet_ntop
 #include <arpa/inet.h>
+#include <cstring>
+#include <cstdlib>
 
 /** FireVision Network Tool */
 class FireVisionNetworkTool

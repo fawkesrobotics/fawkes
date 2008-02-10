@@ -35,8 +35,10 @@
 
 #include <cmath>
 #include <string>
+#include <cstring>
 #include <cstdio>
 #include <cerrno>
+#include <cstdlib>
 #include <iostream>
 #include <sys/utsname.h>
 

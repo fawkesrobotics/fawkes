@@ -39,7 +39,7 @@ class SemaphoreSet;
  * pointer to a chunk then the data segment of that chunk can be accessed via
  * (char *)c + sizeof(chunk_list_t).
  */
-typedef struct chunk_list_t {
+struct chunk_list_t {
   chunk_list_t  *next;		/**< offset to next element in list */
   void          *ptr;		/**< pointer to data memory */
   unsigned int   size;		/**< total size of chunk, including overhanging bytes,

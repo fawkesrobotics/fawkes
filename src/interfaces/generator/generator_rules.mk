@@ -45,7 +45,7 @@ all: $(WARN_TARGETS)
   endif
 .PHONY: warning_libxmlpp
 warning_libxmlpp:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting interface generator$(TNORMAL) (libxml++[-devel] not installed) +$(INDENT_PRINT)+ $(INDENT)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting interface generator$(TNORMAL) (libxml++[-devel] not installed)"
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Interfaces cannot be generated$(TNORMAL)"
 endif
 

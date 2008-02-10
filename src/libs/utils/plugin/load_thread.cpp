@@ -36,6 +36,7 @@
 #define _GNU_SOURCE
 #endif
 #include <cstdio>
+#include <cstdlib>
 
 /** @class PluginLoadThread <utils/plugin/load_thread.h>
  * Plugin load thread.

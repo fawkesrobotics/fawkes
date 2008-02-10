@@ -30,10 +30,9 @@
 
 #include <utils/system/console_colors.h>
 
+#include <cstdlib>
 #include <sys/time.h>
 #include <time.h>
-
-using namespace std;
 
 /** @class ConsoleLogger logging/console.h
  * Interface for logging to stderr on console.

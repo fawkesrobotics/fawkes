@@ -34,6 +34,8 @@
 #define _GNU_SOURCE
 #endif
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 /* SQLite statements
  */

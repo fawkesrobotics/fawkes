@@ -26,6 +26,10 @@
  */
 
 #include <utils/system/argparser.h>
+#include <libgen.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 /** @class ArgumentParser utils/system/argparser.h
  * Parse command line arguments.

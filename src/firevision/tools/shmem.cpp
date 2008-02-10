@@ -31,6 +31,7 @@
 #include <fvutils/writers/fvraw.h>
 
 #include <iostream>
+#include <cstring>
 
 using namespace std;
 

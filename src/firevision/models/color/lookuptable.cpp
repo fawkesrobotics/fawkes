@@ -39,6 +39,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <cstring>
+#include <cstdlib>
 
 using namespace std;
 

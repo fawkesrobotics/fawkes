@@ -32,6 +32,9 @@
 #include <mainapp/plugin_list_message.h>
 #include <utils/system/argparser.h>
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 /** @class PluginTool tools/plugin/plugin_tool.h
  * Program to communicate with plugin manager via Fawkes network.

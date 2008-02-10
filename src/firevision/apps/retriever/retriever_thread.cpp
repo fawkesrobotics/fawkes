@@ -31,6 +31,8 @@
 #include <fvutils/ipc/shm_image.h>
 #include <utils/time/tracker.h>
 
+#include <cstring>
+
 /** @class FvRetrieverThread <apps/retriever/retriever_thread.h>
  * FireVision retriever thread.
  * This implements the functionality of the FvRetrieverPlugin.

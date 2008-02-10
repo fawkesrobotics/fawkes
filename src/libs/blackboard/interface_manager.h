@@ -108,11 +108,21 @@ class BlackBoardInterfaceManager : public InterfaceMediator
 
   typedef std::list< BlackBoardInterfaceListener * >  BBilList;
   typedef LockHashMap< const char *, BBilList,
-    __gnu_cxx::hash<const char *>, StringEquality>    BBilLockHashMap;
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+    std::tr1::hash<const char *>,
+#else
+    __gnu_cxx::hash<const char *>,
+#endif
+    StringEquality>                                   BBilLockHashMap;
 
   typedef std::list< BlackBoardInterfaceObserver * >  BBioList;
   typedef LockHashMap< const char *, BBioList,
-    __gnu_cxx::hash<const char *>, StringEquality>    BBioLockHashMap;
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+    std::tr1::hash<const char *>,
+#else
+    __gnu_cxx::hash<const char *>,
+#endif
+    StringEquality>                                   BBioLockHashMap;
 
   typedef std::list< BlackBoardInterfaceListener * >::iterator BBilListIterator;
   typedef BBilLockHashMap::iterator BBilLockHashMapIterator;

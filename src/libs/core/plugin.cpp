@@ -29,6 +29,7 @@
 #include <core/plugin.h>
 #include <core/threading/thread.h>
 #include <cstring>
+#include <cstdlib>
 
 /** @class Plugin core/plugin.h
  * Plugin interface class.

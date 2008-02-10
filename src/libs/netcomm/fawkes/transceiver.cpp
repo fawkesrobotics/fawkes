@@ -32,6 +32,7 @@
 #include <netcomm/utils/exceptions.h>
 
 #include <netinet/in.h>
+#include <cstdlib>
 
 /** @class FawkesNetworkTransceiver netcomm/fawkes/transceiver.h
  * Fawkes Network Transceiver.

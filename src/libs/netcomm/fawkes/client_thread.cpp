@@ -36,6 +36,8 @@
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
 
+#include <unistd.h>
+
 /** @class FawkesNetworkClientThread netcomm/fawkes/client_thread.h
  * Fawkes Network Client Thread.
  * Handles network client traffic

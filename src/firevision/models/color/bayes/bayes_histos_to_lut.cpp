@@ -7,9 +7,9 @@
  *                            that maps from colors to objects
  *
  *  Generated: Mon Jun 27 14:16:52 2005
- *  Copyright  2005  Martin Heracles
- *                   Tim Niemueller [www.niemueller.de]
- *             2007  Daniel Beck
+ *  Copyright  2005       Martin Heracles
+ *             2005-2008  Tim Niemueller [www.niemueller.de]
+ *             2007-2008  Daniel Beck
  *
  *  $Id$
  *
@@ -39,6 +39,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstdlib>
 
 using namespace std;
 

@@ -31,6 +31,8 @@
 #include <utils/system/signal.h>
 
 #include <iostream>
+#include <cstring>
+#include <cstdlib>
 
 /** Tool to watch and output config changes.
  */

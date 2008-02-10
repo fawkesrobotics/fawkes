@@ -31,7 +31,8 @@
 #define _GNU_SOURCE
 #endif
 
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
 
 
 /** @class StringConversions utils/misc/string_conversions.h

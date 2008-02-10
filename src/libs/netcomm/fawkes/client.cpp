@@ -37,6 +37,8 @@
 #include <netcomm/utils/exceptions.h>
 
 #include <list>
+#include <cstring>
+#include <cstdlib>
 
 /** @class HandlerAlreadyRegisteredException netcomm/fawkes/client.h
  * Client handler has already been registered.

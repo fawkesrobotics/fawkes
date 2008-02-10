@@ -30,6 +30,9 @@
 #include <utils/system/console_colors.h>
 
 #include <iostream>
+#include <cstring>
+#include <cstdlib>
+
 using namespace std;
 
 /** @class SharedMemoryLookupTable <fvutils/ipc/shm_lut.h>

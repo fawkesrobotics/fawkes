@@ -44,6 +44,8 @@
 #include <netcomm/utils/exceptions.h>
 
 #include <netinet/in.h>
+#include <cstring>
+#include <cstdlib>
 
 /** @class FuseServerClientThread <fvutils/net/fuse_server_client_thread.h>
  * FUSE Server Client Thread.

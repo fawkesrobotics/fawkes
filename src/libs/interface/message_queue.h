@@ -47,7 +47,7 @@ class MessageQueue
   // define our own list type since std::list is way too fat
   /** Message list, internal only
    */
-  typedef struct msg_list_t {
+  struct msg_list_t {
     msg_list_t    *next;	/**< pointer to next element in list */
     unsigned int   msg_id;	/**< message id */
     Message       *msg;		/**< pointer to message */

@@ -38,6 +38,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <cstdlib>
 
 
 /** @class AvahiBrowser netcomm/dns-sd/avahi_browser.h

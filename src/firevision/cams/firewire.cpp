@@ -31,8 +31,8 @@
 
 #include <cstdlib>
 #include <unistd.h>
-
-#include <string>
+#include <climits>
+#include <cstring>
 
 #include <cams/firewire.h>
 #include <cams/cam_exceptions.h>

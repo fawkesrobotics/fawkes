@@ -36,10 +36,10 @@
 
 #ifdef HAVE_TRICLOPS_SDK
 #include <stereo/triclops.h>
-#include <errno.h>
+#include <cerrno>
 #endif
 
-
+#include <cstdlib>
 #include <cstdio>
 
 void

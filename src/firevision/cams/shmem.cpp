@@ -30,6 +30,9 @@
 #include <fvutils/writers/fvraw.h>
 #include <fvutils/system/camargp.h>
 
+#include <cstring>
+#include <cstdlib>
+
 /** @class SharedMemoryCamera <cams/shmem.h>
  * Shared memory camera.
  * Camera to retrieve images from a shared memory segment.

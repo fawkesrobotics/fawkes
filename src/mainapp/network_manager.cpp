@@ -42,6 +42,8 @@
 #include <netcomm/service_discovery/dummy_service_browser.h>
 #endif
 
+#include <cstdlib>
+
 /** @class FawkesNetworkManager mainapp/network_manager.h
  * Fawkes Network Manager.
  * This class provides a manager for network connections used in Fawkes.

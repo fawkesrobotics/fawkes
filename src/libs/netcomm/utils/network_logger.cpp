@@ -35,6 +35,9 @@
 #include <sys/time.h>
 #include <time.h>
 #include <netinet/in.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 
 
 void

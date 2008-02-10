@@ -34,6 +34,7 @@
 #include <netcomm/fawkes/hub.h>
 #include <config/config.h>
 
+#include <algorithm>
 #include <cstring>
 
 /** @class FawkesConfigManager mainapp/config_manager.h

@@ -30,6 +30,7 @@
 
 #include <utils/misc/string_conversions.h>
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <time.h>

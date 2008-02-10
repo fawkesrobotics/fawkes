@@ -38,6 +38,8 @@
 #include <utils/logging/liblogger.h>
 
 #include <netinet/in.h>
+#include <cstdlib>
+#include <cstring>
 
 
 /** @class WorldInfoException <netcomm/worldinfo/transceiver.h>

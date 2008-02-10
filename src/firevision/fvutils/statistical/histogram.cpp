@@ -30,6 +30,9 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cstdlib>
+#include <algorithm>
+#include <cstring>
 
 using namespace std;
 

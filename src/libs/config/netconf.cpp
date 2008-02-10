@@ -39,6 +39,8 @@
 #define _GNU_SOURCE
 #endif
 #include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 /** @class CannotEnableMirroringException config/netconf.h
  * Thrown if enabling mirror mode failed.

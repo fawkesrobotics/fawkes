@@ -32,6 +32,9 @@
 #include <avahi-common/error.h>
 #include <netinet/in.h>
 #include <utility>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 
 /** @class AvahiResolverHandler <netcomm/dns-sd/avahi_resolver.h>

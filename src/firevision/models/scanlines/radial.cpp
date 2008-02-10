@@ -30,6 +30,7 @@
 #include <utils/system/console_colors.h>
 
 #include <cmath>
+#include <cstring>
 
 /** @class ScanlineRadial <models/scanlines/radial.h>
  * Radial scanlines.

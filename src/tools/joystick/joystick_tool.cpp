@@ -42,6 +42,8 @@
 #include <unistd.h>
 #include <cmath> 
 #include <csignal>
+#include <cstring>
+#include <cstdlib>
 
 /** @class JoystickTool <tools/joystick/joystick_tool.h>
  *   The joystick control for the robots.

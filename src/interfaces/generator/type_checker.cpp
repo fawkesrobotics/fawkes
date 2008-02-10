@@ -27,6 +27,7 @@
 
 #include <interfaces/generator/type_checker.h>
 #include <interfaces/generator/exceptions.h>
+#include <cstdlib>
 
 /** @class InterfaceDataTypeChecker <interfaces/generator/type_checker.h>
  * Type checker for interface types.

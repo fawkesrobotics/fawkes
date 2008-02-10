@@ -27,7 +27,7 @@
 
 #include <models/scanlines/grid.h>
 
-#include <string>
+#include <cstring>
 
 /** @class ScanlineGrid <models/scanlines/grid.h>
  * Scanline Grid.

@@ -32,6 +32,7 @@
 #include <netcomm/utils/exceptions.h>
 
 #include <netinet/in.h>
+#include <cstdlib>
 
 /** @class FuseNetworkTransceiver <fvutils/net/fuse_transceiver.h>
  * FUSE Network Transceiver.

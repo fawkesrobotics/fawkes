@@ -29,13 +29,23 @@
 #define __CORE_UTILS_LOCK_HASHMAP_H_
 
 #include <core/threading/mutex.h>
-#include <ext/hash_map>
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+#  include <tr1/unordered_map>
+#else
+#  include <ext/hash_map>
+#endif
 
 template <class KeyType,
           class ValueType,
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+          class HashFunction = std::tr1::hash<KeyType>,
+          class EqualKey     = std::equal_to<KeyType> >
+class LockHashMap : public std::tr1::unordered_map<KeyType, ValueType, HashFunction, EqualKey>
+#else
           class HashFunction = __gnu_cxx::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType> >
 class LockHashMap : public __gnu_cxx::hash_map<KeyType, ValueType, HashFunction, EqualKey>
+#endif
 {
  public:
   LockHashMap();
@@ -76,7 +86,11 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap()
  */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &lh)
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+  : std::tr1::unordered_map<KeyType, ValueType, HashFunction, EqualKey>::unordered_map(lh)
+#else
   : __gnu_cxx::hash_map<KeyType, ValueType, HashFunction, EqualKey>::hash_map(lh)
+#endif
 {
   mutex = new Mutex();
 }

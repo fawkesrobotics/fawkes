@@ -26,9 +26,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <models/shape/rcd_circle.h>
 #include <cmath>
 #include <sys/time.h>
-#include "models/shape/rcd_circle.h"
+#include <cstdlib>
 
 using namespace std;
 

@@ -36,6 +36,7 @@
 #include <cstdio>
 #include <errno.h>
 #include <netinet/in.h>
+#include <cstdlib>
 
 /** @class RectificationInfoFile <fvutils/rectification/rectfile.h>
  * Rectification Info File.

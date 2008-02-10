@@ -27,6 +27,8 @@
 
 #include <blackboard/interface_listener.h>
 #include <interface/interface.h>
+#include <cstdlib>
+#include <cstring>
 
 /** @class BlackBoardInterfaceListener <blackboard/interface_listener.h>
  * BlackBoard interface listener.

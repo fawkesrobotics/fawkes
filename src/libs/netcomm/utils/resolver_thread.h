@@ -74,8 +74,13 @@ class NetworkNameResolverThread : public Thread
   AvahiResolver        *avahi_resolver;
 #endif
 
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+  LockHashSet<char *, std::tr1::hash<char *>, StringEquality>              namesq;
+  LockHashSet<char *, std::tr1::hash<char *>, StringEquality>::iterator    nqit;
+#else
   LockHashSet<char *, __gnu_cxx::hash<char *>, StringEquality>             namesq;
   LockHashSet<char *, __gnu_cxx::hash<char *>, StringEquality>::iterator   nqit;
+#endif
 
   LockHashMap<uint32_t, std::pair<struct sockaddr *, socklen_t> >             addrq;
   LockHashMap<uint32_t, std::pair<struct sockaddr *, socklen_t> >::iterator   aqit;

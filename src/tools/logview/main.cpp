@@ -33,6 +33,10 @@
 #include <utils/system/signal.h>
 #include <utils/system/argparser.h>
 
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+
 /// @cond INTERNALS
 
 class NetLogConsolePrinter

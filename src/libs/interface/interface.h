@@ -126,7 +126,7 @@ class Interface
   MessageQueue      *__message_queue;
 
 
-  typedef struct imsg_list_t {
+  struct imsg_list_t {
     imsg_list_t  *next;		/**< pointer to next element in list */
     Message       msg;		/**< pointer to message */
   };

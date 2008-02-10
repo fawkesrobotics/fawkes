@@ -33,6 +33,7 @@
 
 #include <cmath>
 #include <unistd.h>
+#include <cstring>
 
 /** @class NavigatorThread <plugins/navigator/navigator_thread.h>
  * Navigator thread.

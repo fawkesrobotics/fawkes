@@ -30,8 +30,8 @@
 #include <sys/types.h>
 #include <inttypes.h>
 #include <cstddef>
-
-#include <string.h>
+#include <cstring>
+#include <cstdlib>
 
 /** @class NetworkService <netcomm/service_discovery/service.h>
  * Representation of a service announced or found via service

@@ -29,6 +29,8 @@
 #include <fvutils/color/yuv.h>
 #include <utils/math/angle.h>
 
+#include <cstring>
+
 /** @class ScanlineStar <models/scanlines/star.h>
  * Star-like arranged scanline points.
  *

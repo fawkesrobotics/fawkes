@@ -57,13 +57,12 @@ class Exception : public std::exception {
   Exception& operator=(const Exception &exc) throw();
 
  protected:
-
-  /** typedef struct for message list */
-  typedef struct message_list_t {
-    message_list_t  *next;   /**< pointer to next element, NULL if last element */
-    char            *msg;    /**< pointer to message, may not be NULL, will be freed
-			      *   in dtor */
-  };
+   /** Internal exception message list */
+   struct message_list_t {
+     message_list_t  *next;   /**< pointer to next element, NULL if last element */
+     char            *msg;    /**< pointer to message, may not be NULL, will be freed
+   			      *   in dtor */
+   };
 
  public:
   class iterator

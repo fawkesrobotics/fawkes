@@ -33,6 +33,8 @@
 #include <models/scanlines/scanlinemodel.h>
 #include <models/color/colormodel.h>
 
+#include <cstdlib>
+
 /** @class SimpleColorClassifier <classifiers/simple.h>
  * Simple classifier.
  */

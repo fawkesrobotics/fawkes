@@ -40,6 +40,8 @@
 
 #include <cstring>
 #include <netinet/in.h>
+#include <cstdlib>
+#include <unistd.h>
 
 /** @class FuseClient <fvutils/net/fuse_client.h>
  * FUSE client.

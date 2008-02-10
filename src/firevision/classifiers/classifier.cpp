@@ -26,6 +26,8 @@
  */
 
 #include <classifiers/classifier.h>
+#include <cstring>
+#include <cstdlib>
 
 /** @class Classifier <classifiers/classifier.h>
  * Classifier to extract regions of interest.

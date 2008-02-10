@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <list>
 #include <arpa/inet.h>
+#include <cstring>
 
 /** @class NavigatorNetworkThread plugins/navigator/navigator_net_thread.h
  * Network thread of the navigator plugin.

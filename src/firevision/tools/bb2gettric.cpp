@@ -27,7 +27,8 @@
 
 #include <cams/bumblebee2.h>
 #include <fvutils/system/camargp.h>
-#include <errno.h>
+#include <cerrno>
+#include <cstdlib>
 
 using namespace std;
 

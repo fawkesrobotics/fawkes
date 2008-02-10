@@ -31,6 +31,8 @@
 #include <core/threading/read_write_lock.h>
 
 #include <string>
+#include <cstring>
+#include <cstdlib>
 
 /** @class ThreadListSealedException <core/threading/thread_list.h>
  * Thread list sealed exception.

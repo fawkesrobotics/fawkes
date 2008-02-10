@@ -40,13 +40,23 @@ class BlackBoardInterfaceListener
  friend class BlackBoardInterfaceManager;
 
  public:
-  /** Type for locked interface hash maps. */
+  /** Type for lockable interface hash maps. */
   typedef  LockHashMap<char *, Interface *,
-                       __gnu_cxx::hash<char *>, StringEquality > InterfaceLockHashMap;
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+                       std::tr1::hash<char *>,
+#else
+                       __gnu_cxx::hash<char *>,
+#endif
+                       StringEquality >            InterfaceLockHashMap;
 
-  /** Type for iterator of locked interface hash maps. */
-  typedef  LockHashMap<char *, Interface *,  __gnu_cxx::hash<char *>,
-                       StringEquality >::iterator InterfaceLockHashMapIterator;
+  /** Type for iterator of lockable interface hash maps. */
+  typedef  LockHashMap<char *, Interface *,
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+                       std::tr1::hash<char *>,
+#else
+                       __gnu_cxx::hash<char *>,
+#endif
+                       StringEquality >::iterator  InterfaceLockHashMapIterator;
 
 
   BlackBoardInterfaceListener();

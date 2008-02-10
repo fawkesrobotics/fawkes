@@ -39,7 +39,7 @@
 
 /** a "slice" is a row of consecutive pixels
    (horizontal) */
-typedef struct ZSlice {
+struct ZSlice {
   int leftX;	/**< left X */
   int rightX;	/**< right X */
   int y;	/**< Y value */
@@ -47,7 +47,7 @@ typedef struct ZSlice {
 
 /** a region is a stack of slices,
    together with the y-position of the slice at the top */
-typedef struct ZRegion {
+struct ZRegion {
   std::vector<ZSlice*> *slices;	/**< slices */
   int topSliceY;		/**< top slice Y */
 };

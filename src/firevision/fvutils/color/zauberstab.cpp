@@ -5,9 +5,9 @@
  *                   maximal, color-contiguous region
  *                   around a seed pixel
  *
- *  Generated: Mon Jul 02 2005
+ *  Created: Mon Jul 02 2005
  *  Copyright  2005       Martin Heracles  <Martin.Heracles@rwth-aachen.de>
- *             2005-2006  Tim Niemueller [www.niemueller.de]
+ *             2005-2008  Tim Niemueller   [www.niemueller.de]
  *
  *  $Id$
  *
@@ -32,6 +32,8 @@
 #include <fvutils/color/zauberstab.h>
 #include <fvutils/color/yuv.h>
 #include <core/macros.h>
+
+#include <cstdlib>
 
 using namespace std;
 

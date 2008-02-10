@@ -3,7 +3,7 @@
  *  config.cpp - Fawkes configuration interface
  *
  *  Created: Mon Dec 18 14:54:23 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -26,6 +26,7 @@
  */
 
 #include <config/config.h>
+#include <cstring>
 
 
 /** @class Configuration config/config.h

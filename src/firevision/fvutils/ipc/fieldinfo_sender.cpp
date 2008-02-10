@@ -31,6 +31,8 @@
 #include <utils/system/console_colors.h>
 #include <utils/ipc/msg.h>
 
+#include <cstring>
+
 /** @class FieldInfoSender <fvutils/ipc/fieldinfo_sender.h>
  * Send field information via IPCMessageQueue.
  * This class can be used to send vision-relevant field information via an

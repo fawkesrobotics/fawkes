@@ -18,9 +18,7 @@ BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(SRCDIR)/generator/generator.mk
 
-CFLAGS += -DINTERFACEDIR=\"$(realpath $(BASEDIR)/src/interfaces)\" \
-	$(shell $(PKGCONFIG) --cflags libxml++-2.6)
-
+CFLAGS += -DINTERFACEDIR=\"$(realpath $(BASEDIR)/src/interfaces)\"
 
 OBJS_interfaces = $(notdir $(patsubst %.xml,%.o,$(wildcard $(SRCDIR)/*.xml)))
 SRCS_interfaces = $(patsubst %.xml,%.cpp,$(wildcard $(SRCDIR)/*.xml))
@@ -36,7 +34,7 @@ include $(SRCDIR)/generator/generator_rules.mk
 
 .SECONDARY: $(SRCS_interfaces) $(HDRS_interfaces) $(OBJS_interfaces)
 
-ifneq ($(BUILD_INTERFACE_GENERATOR),)
+ifeq ($(BUILD_INTERFACE_GENERATOR),1)
 $(SRCS_interfaces): $(BINDIR)/interface_generator
 $(SRCS_interfaces): %.cpp: %.xml
 	$(SILENT) echo "$(INDENT_PRINT)--> Generating $(@F) (Interface XML Template)"

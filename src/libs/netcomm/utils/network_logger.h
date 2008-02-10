@@ -34,6 +34,8 @@
 #include <netcomm/fawkes/handler.h>
 #include <netcomm/fawkes/message_content.h>
 
+#include <stdint.h>
+
 class Mutex;
 class FawkesNetworkHub;
 

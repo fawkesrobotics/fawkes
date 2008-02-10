@@ -30,7 +30,8 @@
 #include <core/exceptions/software.h>
 
 #include <sys/utsname.h>
-#include <string>
+#include <cstring>
+#include <cstdlib>
 
 /** @class HostInfo utils/system/hostinfo.h
  * Host information.

@@ -39,7 +39,7 @@
 #include <fvutils/compression/jpeg_decompressor.h>
 
 #include <netinet/in.h>
-
+#include <cstdlib>
 #include <cstring>
 
 /** @class NetworkCamera <cams/net.h>

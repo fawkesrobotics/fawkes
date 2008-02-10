@@ -43,9 +43,8 @@
 #include <utils/system/dynamic_module/module_dl.h>
 #include <utils/logging/liblogger.h>
 
-#include <stdlib.h>
-
-using namespace std;
+#include <cstdlib>
+#include <cstring>
 
 /** @class BlackBoardInterfaceManager <blackboard/interface_manager.h>
  * BlackBoard interface manager.
