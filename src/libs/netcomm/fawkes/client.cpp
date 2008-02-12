@@ -25,10 +25,6 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <core/threading/mutex.h>
-#include <core/threading/mutex_locker.h>
-#include <core/threading/wait_condition.h>
-
 #include <netcomm/fawkes/client.h>
 #include <netcomm/fawkes/client_handler.h>
 #include <netcomm/fawkes/message_queue.h>
@@ -36,9 +32,15 @@
 #include <netcomm/socket/stream.h>
 #include <netcomm/utils/exceptions.h>
 
+#include <core/threading/thread.h>
+#include <core/threading/mutex.h>
+#include <core/threading/wait_condition.h>
+#include <core/exceptions/system.h>
+
 #include <list>
 #include <cstring>
 #include <cstdlib>
+
 
 /** @class HandlerAlreadyRegisteredException netcomm/fawkes/client.h
  * Client handler has already been registered.
@@ -55,6 +57,174 @@ HandlerAlreadyRegisteredException::HandlerAlreadyRegisteredException()
 }
 
 
+/** Fawkes network client send thread.
+ * Spawned by the FawkesNetworkClient to handle outgoing traffic.
+ *
+ * @ingroup NetComm
+ * @author Tim Niemueller
+ */
+class FawkesNetworkClientSendThread : public Thread
+{
+ public:
+
+  /** Constructor.
+   * @param s client stream socket
+   * @param parent parent FawkesNetworkClient instance
+   */
+  FawkesNetworkClientSendThread(StreamSocket *s, FawkesNetworkClient *parent)
+    : Thread("FawkesNetworkClientSendThread", Thread::OPMODE_WAITFORWAKEUP)
+  {
+    _s = s;
+    _parent = parent;
+    _outbound_msgq = new FawkesNetworkMessageQueue();
+  }
+
+  /** Destructor. */
+  ~FawkesNetworkClientSendThread()
+  {
+    while ( ! _outbound_msgq->empty() ) {
+      FawkesNetworkMessage *m = _outbound_msgq->front();
+      m->unref();
+      _outbound_msgq->pop();
+    }
+    delete _outbound_msgq;
+  }
+
+  virtual void once()
+  {
+    _parent->set_recv_slave_alive();
+  }
+
+  virtual void loop()
+  {
+    if ( ! _parent->connected() )  return;
+
+    if ( ! _outbound_msgq->empty() ) {
+      try {
+	FawkesNetworkTransceiver::send(_s, _outbound_msgq);
+      } catch (ConnectionDiedException &e) {
+	_parent->connection_died();
+      }
+    }
+  }
+
+
+  /** Enqueue message to send.
+   * @param message message to send
+   */
+  void enqueue(FawkesNetworkMessage *message)
+  {
+    message->ref();
+    _outbound_msgq->push_locked(message);
+    wakeup();
+  }
+
+ private:
+  StreamSocket *_s;
+  FawkesNetworkClient *_parent;
+  FawkesNetworkMessageQueue *_outbound_msgq;
+};
+
+
+/**  Fawkes network client receive thread.
+ * Spawned by the FawkesNetworkClient to handle incoming traffic.
+ *
+ * @ingroup NetComm
+ * @author Tim Niemueller
+ */
+class FawkesNetworkClientRecvThread : public Thread
+{
+ public:
+  /** Constructor.
+   * @param s client stream socket
+   * @param parent parent FawkesNetworkClient instance
+   */
+  FawkesNetworkClientRecvThread(StreamSocket *s, FawkesNetworkClient *parent)
+    : Thread("FawkesNetworkClientRecvThread")
+  {
+    _s = s;
+    _parent = parent;
+    inbound_msgq = new FawkesNetworkMessageQueue();
+  }
+
+  /** Destructor. */
+  ~FawkesNetworkClientRecvThread()
+  {
+    while ( ! inbound_msgq->empty() ) {
+      FawkesNetworkMessage *m = inbound_msgq->front();
+      m->unref();
+      inbound_msgq->pop();
+    }
+    delete inbound_msgq;
+  }
+
+  /** Receive and process messages. */
+  void recv()
+  {
+    std::list<unsigned int> wakeup_list;
+
+    try {
+      FawkesNetworkTransceiver::recv(_s, inbound_msgq);
+
+      inbound_msgq->lock();
+      while ( ! inbound_msgq->empty() ) {
+	FawkesNetworkMessage *m = inbound_msgq->front();
+	wakeup_list.push_back(m->cid());
+	_parent->dispatch_message(m);
+	m->unref();
+	inbound_msgq->pop();
+      }
+      inbound_msgq->unlock();
+    
+      wakeup_list.sort();
+      wakeup_list.unique();
+      for (std::list<unsigned int>::iterator i = wakeup_list.begin(); i != wakeup_list.end(); ++i) {
+	_parent->wake_handlers(*i);
+      }
+    } catch (ConnectionDiedException &e) {
+      throw;
+    }
+  }
+
+
+  virtual void once()
+  {
+    _parent->set_recv_slave_alive();
+  }
+
+  virtual void loop()
+  {
+    // just return if not connected
+    if (! _s ) return;
+
+    short p = 0;
+    try {
+      p = _s->poll();
+    } catch (InterruptedException &e) {
+      return;
+    }
+
+    if ( (p & Socket::POLL_ERR) ||
+	 (p & Socket::POLL_HUP) ||
+	 (p & Socket::POLL_RDHUP)) {
+      _parent->connection_died();
+    } else if ( p & Socket::POLL_IN ) {
+      // Data can be read
+      try {
+	recv();
+      } catch (ConnectionDiedException &e) {
+	_parent->connection_died();
+      }
+    }
+  }
+
+ private:
+  StreamSocket *_s;
+  FawkesNetworkClient *_parent;
+  FawkesNetworkMessageQueue *  inbound_msgq;
+};
+
+
 /** @class FawkesNetworkClient netcomm/fawkes/client.h
  * Simple Fawkes network client. Allows access to a remote instance via the
  * network. Encapsulates all needed interaction with the network.
@@ -68,48 +238,33 @@ HandlerAlreadyRegisteredException::HandlerAlreadyRegisteredException()
  * @param port port to connect to.
  */
 FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short int port)
-  : Thread("FawkesNetworkClient")
 {
-  inbound_msgq = new FawkesNetworkMessageQueue();
-  outbound_msgq = new FawkesNetworkMessageQueue();
   this->hostname = strdup(hostname);
   this->port     = port;
 
-  wait_timeout = 10;
-
-  mutex = new Mutex();
   s = NULL;
+  send_slave = NULL;
+  recv_slave = NULL;
+
+  send_slave_alive = false;
+  recv_slave_alive = false;
+
+  slave_status_mutex = new Mutex();
 }
 
 
 /** Destructor. */
 FawkesNetworkClient::~FawkesNetworkClient()
 {
-  inbound_msgq->lock();
-  while ( ! inbound_msgq->empty() ) {
-    FawkesNetworkMessage *m = inbound_msgq->front();
-    m->unref();
-    inbound_msgq->pop();
-  }
-  inbound_msgq->unlock();  
-  delete inbound_msgq;
-
-  outbound_msgq->lock();
-  while ( ! outbound_msgq->empty() ) {
-    FawkesNetworkMessage *m = outbound_msgq->front();
-    m->unref();
-    outbound_msgq->pop();
-  }
-  outbound_msgq->unlock();  
-  delete outbound_msgq;
+  disconnect();
 
   for (std::map<unsigned int, WaitCondition *>::iterator i =  waitconds.begin(); i != waitconds.end(); ++i ) {
     delete (*i).second;
   }
   waitconds.clear();
   delete s;
-  delete mutex;
   free(hostname);
+  delete slave_status_mutex;
 }
 
 
@@ -119,12 +274,29 @@ FawkesNetworkClient::~FawkesNetworkClient()
 void
 FawkesNetworkClient::connect()
 {
-  MutexLocker lock(mutex);
   try {
     s = new StreamSocket();
     s->connect(hostname, port);
+    send_slave = new FawkesNetworkClientSendThread(s, this);
+    send_slave->start();
+    recv_slave = new FawkesNetworkClientRecvThread(s, this);
+    recv_slave->start();
     notify_of_connection_established();
   } catch (SocketException &e) {
+    if ( send_slave ) {
+      send_slave->cancel();
+      send_slave->join();
+      delete send_slave;
+      send_slave = NULL;
+    }
+    if ( recv_slave ) {
+      recv_slave->cancel();
+      recv_slave->join();
+      delete recv_slave;
+      recv_slave = NULL;
+    }
+    send_slave_alive = false;
+    recv_slave_alive = false;
     delete s;
     s = NULL;
     throw;
@@ -136,11 +308,24 @@ FawkesNetworkClient::connect()
 void
 FawkesNetworkClient::disconnect()
 {
-  mutex->lock();
+  if ( ! connected() )  return;
+
+  if ( send_slave ) {
+    send_slave->cancel();
+    send_slave->join();
+    delete send_slave;
+    send_slave = NULL;
+  }
+  if ( recv_slave ) {
+    recv_slave->cancel();
+    recv_slave->join();
+    delete recv_slave;
+    recv_slave = NULL;
+  }
+  send_slave_alive = false;
+  recv_slave_alive = false;
   delete s;
   s = NULL;
-  notify_of_connection_dead();
-  mutex->unlock();
 }
 
 
@@ -150,54 +335,7 @@ FawkesNetworkClient::disconnect()
 void
 FawkesNetworkClient::enqueue(FawkesNetworkMessage *message)
 {
-  message->ref();
-  outbound_msgq->push_locked(message);
-}
-
-
-/** Send queued messages. */
-void
-FawkesNetworkClient::send()
-{
-  FawkesNetworkTransceiver::send(s, outbound_msgq);
-}
-
-
-/** Receive messages. */
-void
-FawkesNetworkClient::recv()
-{
-  FawkesNetworkTransceiver::recv(s, inbound_msgq);
-}
-
-
-/** Set the timeout for incoming data.
- * The thread will poll on the socket for the given time for incoming
- * data. If no data is received it will look at the outbound queue and send
- * all enqueued data and again wait for incoming data.
- * @param wait_timeout new timeout in miliseconds
- */
-void
-FawkesNetworkClient::set_wait_timeout(unsigned int wait_timeout)
-{
-  this->wait_timeout = wait_timeout;
-}
-
-
-/** Sleep for some time.
- * Wait until inbound messages have been receive, the connection dies or the
- * timeout has been reached, whatever comes first. So you sleep at most timeout ms,
- * but short under some circumstances (incoming data or lost connection).
- * @see setWaitTimeout()
- */
-void
-FawkesNetworkClient::sleep()
-{
-  try {
-    s->poll(wait_timeout /* ms timeout */, Socket::POLL_IN);
-  } catch (Exception &e) {
-    // ignored
-  }
+  if (send_slave)  send_slave->enqueue(message);
 }
 
 
@@ -208,17 +346,18 @@ FawkesNetworkClient::sleep()
  * @param component_id component ID to register the handler for.
  */
 void
-FawkesNetworkClient::register_handler(FawkesNetworkClientHandler *handler, unsigned int component_id)
+FawkesNetworkClient::register_handler(FawkesNetworkClientHandler *handler,
+				      unsigned int component_id)
 {
-  mutex->lock();
+  handlers.lock();
   if ( handlers.find(component_id) != handlers.end() ) {
-    mutex->unlock();
+    handlers.unlock();
     throw HandlerAlreadyRegisteredException();
   } else {
     handlers[component_id] = handler;
     waitconds[component_id] = new WaitCondition();
   }
-  mutex->unlock();
+  handlers.unlock();
 }
 
 
@@ -228,7 +367,7 @@ FawkesNetworkClient::register_handler(FawkesNetworkClientHandler *handler, unsig
 void
 FawkesNetworkClient::deregister_handler(unsigned int component_id)
 {
-  mutex->lock();
+  handlers.lock();
   if ( handlers.find(component_id) != handlers.end() ) {
     handlers[component_id]->deregistered();
     handlers.erase(component_id);
@@ -239,9 +378,27 @@ FawkesNetworkClient::deregister_handler(unsigned int component_id)
     wc->wake_all();
     delete wc;
   }
-  mutex->unlock();
+  handlers.unlock();
 }
 
+
+void
+FawkesNetworkClient::dispatch_message(FawkesNetworkMessage *m)
+{
+  unsigned int cid = m->cid();
+  if (handlers.find(cid) != handlers.end()) {
+    handlers[cid]->inbound_received(m);
+  }
+}
+
+
+void
+FawkesNetworkClient::wake_handlers(unsigned int cid)
+{
+  if ( waitconds.find(cid) != waitconds.end() ) {
+    waitconds[cid]->wake_all();
+  }
+}
 
 void
 FawkesNetworkClient::notify_of_connection_dead()
@@ -265,46 +422,35 @@ FawkesNetworkClient::notify_of_connection_established()
   }
 }
 
-/** Thread loop.
- * Sends enqueued messages and reads incoming messages off the network.
- */
+
 void
-FawkesNetworkClient::loop()
+FawkesNetworkClient::connection_died()
 {
-  MutexLocker lock(mutex);
-  std::list<unsigned int> wakeup_list;
+  notify_of_connection_dead();
+}
 
-  // just return if not connected
-  if (! s ) return;
 
-  try {
-    send();
-    sleep();
-    recv();
-  } catch (ConnectionDiedException &cde) {
-    delete s;
-    s = NULL;
-    notify_of_connection_dead();
+void
+FawkesNetworkClient::set_send_slave_alive()
+{
+  slave_status_mutex->lock();
+  send_slave_alive = true;
+  if ( send_slave_alive && recv_slave_alive ) {
+    notify_of_connection_established();
   }
+  slave_status_mutex->unlock();
+}
 
-  inbound_msgq->lock();
-  while ( ! inbound_msgq->empty() ) {
-    FawkesNetworkMessage *m = inbound_msgq->front();
-    unsigned int cid = m->cid();
-    if (handlers.find(cid) != handlers.end()) {
-      handlers[cid]->inbound_received(m);
-      wakeup_list.push_back(cid);
-    }
-    m->unref();
-    inbound_msgq->pop();
-  }
-  inbound_msgq->unlock();
 
-  wakeup_list.sort();
-  wakeup_list.unique();
-  for (std::list<unsigned int>::iterator i = wakeup_list.begin(); i != wakeup_list.end(); ++i) {
-    waitconds[*i]->wake_all();
+void
+FawkesNetworkClient::set_recv_slave_alive()
+{
+  slave_status_mutex->lock();
+  recv_slave_alive = true;
+  if ( send_slave_alive && recv_slave_alive ) {
+    notify_of_connection_established();
   }
+  slave_status_mutex->unlock();
 }
 
 

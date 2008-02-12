@@ -28,6 +28,7 @@
 #include "plugin_tool.h"
 #include <netcomm/fawkes/client.h>
 
+#include <core/threading/thread.h>
 #include <utils/system/argparser.h>
 #include <utils/system/signal.h>
 
@@ -47,11 +48,6 @@ main(int argc, char **argv)
 
   FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
   c->connect();
-  // Not needed, will actually harm the performance, especially on slow network
-  //c->setNoDelay(true);
-
-  // Start thread
-  c->start();
 
   PluginTool *pt = new PluginTool(&argp, c);
   SignalManager::register_handler(SIGINT, pt);
@@ -59,9 +55,7 @@ main(int argc, char **argv)
   SignalManager::finalize();
   delete pt;
 
-  c->cancel();
-  c->join();
-
+  c->disconnect();
   delete c;
 
   Thread::destroy_main();

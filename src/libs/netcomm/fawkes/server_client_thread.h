@@ -32,18 +32,20 @@
 #include <list>
 
 class StreamSocket;
-class FawkesNetworkThread;
+class FawkesNetworkServerThread;
 class FawkesNetworkMessage;
 class FawkesNetworkMessageQueue;
 class WaitCondition;
 class Mutex;
+class FawkesNetworkServerClientSendThread;
 
-class FawkesNetworkClientThread : public Thread
+class FawkesNetworkServerClientThread : public Thread
 {
  public:
-  FawkesNetworkClientThread(StreamSocket *s, FawkesNetworkThread *parent);
-  ~FawkesNetworkClientThread();
+  FawkesNetworkServerClientThread(StreamSocket *s, FawkesNetworkServerThread *parent);
+  ~FawkesNetworkServerClientThread();
 
+  virtual void once();
   virtual void loop();
 
   unsigned int clid() const;
@@ -53,20 +55,19 @@ class FawkesNetworkClientThread : public Thread
   void enqueue(FawkesNetworkMessage *msg);
 
   void force_send();
+  void connection_died();
 
  private:
 
   void recv();
 
-  unsigned int  _clid;
-  bool          _alive;
-  StreamSocket *s;
-  FawkesNetworkThread *parent;
-  FawkesNetworkMessageQueue *outbound_queue;
-  FawkesNetworkMessageQueue *inbound_queue;
-  WaitCondition *_outbound_waitcond;
-  Mutex         *_outbound_mutex;
+  unsigned int                _clid;
+  bool                        _alive;
+  StreamSocket               *_s;
+  FawkesNetworkServerThread  *_parent;
+  FawkesNetworkMessageQueue  *_inbound_queue;
 
+  FawkesNetworkServerClientSendThread  *_send_slave;
 };
 
 #endif

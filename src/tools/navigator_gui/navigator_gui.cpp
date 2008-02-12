@@ -362,9 +362,9 @@ NavigatorGUI::~NavigatorGUI()
 {
   send_stop();
 
+  net_client->disconnect();
   net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
   net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
-  net_client->disconnect();
   delete net_client;
 
   //delete lines
@@ -410,10 +410,9 @@ void NavigatorGUI::connect()
   if(connected)
     {
       connected = false;
+      net_client->disconnect();
       net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
       net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
-      net_client->cancel();
-      net_client->join();
     }
 
   if(net_client != NULL)
@@ -429,8 +428,6 @@ void NavigatorGUI::connect()
     {
       net_client->connect();
       connection_is_dead = false;
-
-      net_client->start();
 
       FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
                                    MSG_PLUGIN_SUBSCRIBE_WATCH);

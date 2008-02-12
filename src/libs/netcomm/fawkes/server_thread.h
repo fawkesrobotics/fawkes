@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  network_thread.h - Thread to manage Fawkes network clients
+ *  server_thread.h - Thread to manage Fawkes network clients
  *
  *  Created: Sun Nov 19 14:27:31 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,8 +25,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __NETCOMM_FAWKES_CLIENT_MANAGER_THREAD_H_
-#define __NETCOMM_FAWKES_CLIENT_MANAGER_THREAD_H_
+#ifndef __NETCOMM_FAWKES_SERVER_THREAD_H_
+#define __NETCOMM_FAWKES_SERVER_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <core/utils/lock_map.h>
@@ -35,22 +35,22 @@
 
 class ThreadCollector;
 class Mutex;
-class FawkesNetworkClientThread;
+class FawkesNetworkServerClientThread;
 class NetworkAcceptorThread;
 class FawkesNetworkHandler;
 class FawkesNetworkMessage;
 class FawkesNetworkMessageQueue;
 class FawkesNetworkMessageContent;
 
-class FawkesNetworkThread
+class FawkesNetworkServerThread
 : public Thread,
   public FawkesNetworkHub,
   public NetworkIncomingConnectionHandler
 {
  public:
-  FawkesNetworkThread(ThreadCollector *thread_collector,
-		      unsigned int fawkes_port);
-  virtual ~FawkesNetworkThread();
+  FawkesNetworkServerThread(ThreadCollector *thread_collector,
+			    unsigned int fawkes_port);
+  virtual ~FawkesNetworkServerThread();
 
   virtual void loop();
 
@@ -88,8 +88,8 @@ class FawkesNetworkThread
   LockMap<unsigned int, FawkesNetworkHandler *>::iterator hit;
 
   // key: client id,     value: client thread
-  LockMap<unsigned int, FawkesNetworkClientThread *> clients;
-  LockMap<unsigned int, FawkesNetworkClientThread *>::iterator cit;
+  LockMap<unsigned int, FawkesNetworkServerClientThread *> clients;
+  LockMap<unsigned int, FawkesNetworkServerClientThread *>::iterator cit;
 
   FawkesNetworkMessageQueue *inbound_messages;
 };

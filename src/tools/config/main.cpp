@@ -48,13 +48,14 @@ class ConfigChangeWatcherTool : public ConfigurationChangeHandler, public Signal
   {
     this->c = c;
     this->config = config;
+    quit = false;
     config->add_change_handler(this);
   }
 
   virtual void handle_signal(int signal)
   {
     config->rem_change_handler(this);
-    c->cancel();
+    quit = true;
   }
 
   virtual void config_tag_changed(const char *new_tag)
@@ -99,12 +100,15 @@ class ConfigChangeWatcherTool : public ConfigurationChangeHandler, public Signal
   void
   run()
   {
-    c->join();
+    while ( ! quit ) {
+      c->wait(FAWKES_CID_CONFIGMANAGER);
+    }
   }
 
  private:
   FawkesNetworkClient *c;
   Configuration *config;
+  bool quit;
 
 };
 
@@ -180,9 +184,6 @@ main(int argc, char **argv)
 
   FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
   c->connect();
-  // Not needed, will actually harm the performance, especially on slow network
-  // c->setNoDelay(true);
-  c->start();
 
   NetworkConfiguration *netconf = new NetworkConfiguration(c);
 
@@ -393,8 +394,7 @@ main(int argc, char **argv)
   printf("Cleaning up... ");
   fflush(stdout);
   delete netconf;
-  c->cancel();
-  c->join();
+  c->disconnect();
 
   delete c;
   printf("done\n");

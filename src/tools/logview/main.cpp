@@ -63,7 +63,6 @@ class NetLogConsolePrinter
 
     client = new FawkesNetworkClient(hostname, port);
     client->connect();
-    client->start();
     client->register_handler(this, FAWKES_CID_NETWORKLOGGER);
 
     client->enqueue(new FawkesNetworkMessage(FAWKES_CID_NETWORKLOGGER,
@@ -117,8 +116,7 @@ class NetLogConsolePrinter
     while ( ! quit ) {
       client->wait(FAWKES_CID_NETWORKLOGGER);
     }
-    client->cancel();
-    client->join();
+    client->disconnect();
   }
 
 

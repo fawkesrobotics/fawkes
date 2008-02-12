@@ -97,7 +97,6 @@ JoystickTool::JoystickTool(const char *host_name)
       std::cerr << "There has to be runnig a fawkes." << std::endl;
       throw;
     }
-  net_client->start();
   net_client->register_handler(this, FAWKES_CID_NAVIGATOR_PLUGIN);
   net_client->register_handler(this, FAWKES_CID_PLUGINMANAGER);
   FawkesNetworkMessage *msg1 = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_SUBSCRIBE_WATCH);

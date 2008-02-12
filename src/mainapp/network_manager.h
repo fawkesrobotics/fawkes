@@ -29,7 +29,7 @@
 #define __FAWKES_NETWORK_MANAGER_H_
 
 class FawkesThreadManager;
-class FawkesNetworkThread;
+class FawkesNetworkServerThread;
 class FawkesNetworkHandler;
 class FawkesNetworkHub;
 class AvahiThread;
@@ -51,14 +51,14 @@ class FawkesNetworkManager
   void process();
 
  private:
-  unsigned short int      fawkes_port;
-  FawkesThreadManager    *thread_manager;
-  FawkesNetworkThread    *fawkes_network_thread;
-  AvahiThread            *avahi_thread;
+  unsigned short int          fawkes_port;
+  FawkesThreadManager        *thread_manager;
+  FawkesNetworkServerThread  *fawkes_network_thread;
+  AvahiThread                *avahi_thread;
 
-  NetworkNameResolver    *_nnresolver;
-  ServicePublisher       *_service_publisher;
-  ServiceBrowser         *_service_browser;
+  NetworkNameResolver        *_nnresolver;
+  ServicePublisher           *_service_publisher;
+  ServiceBrowser             *_service_browser;
 };
 
 #endif

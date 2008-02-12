@@ -28,7 +28,7 @@
 #include <mainapp/network_manager.h>
 
 #include <mainapp/thread_manager.h>
-#include <netcomm/fawkes/network_thread.h>
+#include <netcomm/fawkes/server_thread.h>
 #include <netcomm/fawkes/handler.h>
 #include <netcomm/utils/resolver.h>
 #include <utils/logging/liblogger.h>
@@ -60,7 +60,7 @@ FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
 {
   this->fawkes_port    = fawkes_port;
   this->thread_manager = thread_manager;
-  fawkes_network_thread = new FawkesNetworkThread(thread_manager, fawkes_port);
+  fawkes_network_thread = new FawkesNetworkServerThread(thread_manager, fawkes_port);
   thread_manager->add(fawkes_network_thread);
 #ifdef HAVE_AVAHI
   avahi_thread          = new AvahiThread();

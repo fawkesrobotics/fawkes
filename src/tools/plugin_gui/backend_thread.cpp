@@ -86,7 +86,6 @@ PluginGuiBackendThread::connect(const char* host, unsigned short int port)
   try
     {
       m_client->connect();
-      m_client->start();
 
       m_connected = true;
 
@@ -132,13 +131,12 @@ PluginGuiBackendThread::disconnect()
     m_client->enqueue(msg);
     msg->unref();			
 
+    m_connected = false;
+
     m_client->disconnect();
     m_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
-    m_client->cancel();
-    m_client->join();
     delete m_client;
     m_client = 0;
-    m_connected = false;
   }
   
   m_plugin_status.clear();
@@ -172,9 +170,8 @@ PluginGuiBackendThread::loop()
 
   if (m_connection_died)
     {
+      m_client->disconnect();
       m_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
-      m_client->cancel();
-      m_client->join();
       m_connection_died = false;
       delete m_client;
       m_client = 0;

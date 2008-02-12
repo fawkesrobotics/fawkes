@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  network_thread.cpp - manage Fawkes network connection
+ *  server_thread.cpp - manage Fawkes network connection
  *
- *  Generated: Sun Nov 19 15:08:30 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Nov 19 15:08:30 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,8 +25,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#include <netcomm/fawkes/network_thread.h>
-#include <netcomm/fawkes/client_thread.h>
+#include <netcomm/fawkes/server_thread.h>
+#include <netcomm/fawkes/server_client_thread.h>
 #include <netcomm/utils/acceptor_thread.h>
 #include <netcomm/fawkes/message.h>
 #include <netcomm/fawkes/handler.h>
@@ -35,9 +35,9 @@
 #include <core/threading/thread_collector.h>
 #include <core/threading/mutex.h>
 
-#include <stdio.h>
+#include <cstdio>
 
-/** @class FawkesNetworkThread netcomm/fawkes/network_thread.h
+/** @class FawkesNetworkServerThread <netcomm/fawkes/server_thread.h>
  * Fawkes Network Thread.
  * Maintains a list of clients and reacts on events triggered by the clients.
  * Also runs the acceptor thread.
@@ -50,9 +50,9 @@
  * @param thread_collector thread collector to register new threads with
  * @param fawkes_port port for Fawkes network protocol
  */
-FawkesNetworkThread::FawkesNetworkThread(ThreadCollector *thread_collector,
-					 unsigned int fawkes_port)
-  : Thread("FawkesNetworkThread", Thread::OPMODE_WAITFORWAKEUP)
+FawkesNetworkServerThread::FawkesNetworkServerThread(ThreadCollector *thread_collector,
+						     unsigned int fawkes_port)
+  : Thread("FawkesNetworkServerThread", Thread::OPMODE_WAITFORWAKEUP)
 {
   this->thread_collector = thread_collector;
   clients.clear();
@@ -67,7 +67,7 @@ FawkesNetworkThread::FawkesNetworkThread(ThreadCollector *thread_collector,
 
 
 /** Destructor. */
-FawkesNetworkThread::~FawkesNetworkThread()
+FawkesNetworkServerThread::~FawkesNetworkServerThread()
 {
   for (cit = clients.begin(); cit != clients.end(); ++cit) {
     thread_collector->remove((*cit).second);
@@ -87,9 +87,9 @@ FawkesNetworkThread::~FawkesNetworkThread()
  * @param s socket for new client
  */
 void
-FawkesNetworkThread::add_connection(StreamSocket *s) throw()
+FawkesNetworkServerThread::add_connection(StreamSocket *s) throw()
 {
-  FawkesNetworkClientThread *client = new FawkesNetworkClientThread(s, this);
+  FawkesNetworkServerClientThread *client = new FawkesNetworkServerClientThread(s, this);
 
   client->set_clid(next_client_id);
   thread_collector->add(client);
@@ -109,7 +109,7 @@ FawkesNetworkThread::add_connection(StreamSocket *s) throw()
  * @param handler to add.
  */
 void
-FawkesNetworkThread::add_handler(FawkesNetworkHandler *handler)
+FawkesNetworkServerThread::add_handler(FawkesNetworkHandler *handler)
 {
   handlers.lock();
   if ( handlers.find(handler->id()) != handlers.end()) {
@@ -125,7 +125,7 @@ FawkesNetworkThread::add_handler(FawkesNetworkHandler *handler)
  * @param handler handler to remove
  */
 void
-FawkesNetworkThread::remove_handler(FawkesNetworkHandler *handler)
+FawkesNetworkServerThread::remove_handler(FawkesNetworkHandler *handler)
 {
   handlers.lock();
   if( handlers.find(handler->id()) != handlers.end() ) {
@@ -142,7 +142,7 @@ FawkesNetworkThread::remove_handler(FawkesNetworkHandler *handler)
  * to happen (event emitting threads need to wakeup this thread!).
  */
 void
-FawkesNetworkThread::loop()
+FawkesNetworkServerThread::loop()
 {
   clients.lock();
 
@@ -181,7 +181,7 @@ FawkesNetworkThread::loop()
 
 /** Force sending of all pending messages. */
 void
-FawkesNetworkThread::force_send()
+FawkesNetworkServerThread::force_send()
 {
   clients.lock();
   for (cit = clients.begin(); cit != clients.end(); ++cit) {
@@ -196,7 +196,7 @@ FawkesNetworkThread::force_send()
  * @param msg Message to broadcast
  */
 void
-FawkesNetworkThread::broadcast(FawkesNetworkMessage *msg)
+FawkesNetworkServerThread::broadcast(FawkesNetworkMessage *msg)
 {
   for (cit = clients.begin(); cit != clients.end(); ++cit) {
     if ( (*cit).second->alive() ) {
@@ -215,7 +215,7 @@ FawkesNetworkThread::broadcast(FawkesNetworkMessage *msg)
  * @see FawkesNetworkEmitter::broadcast()
  */
 void
-FawkesNetworkThread::broadcast(unsigned short int component_id, unsigned short int msg_id,
+FawkesNetworkServerThread::broadcast(unsigned short int component_id, unsigned short int msg_id,
 			       void *payload, unsigned int payload_size)
 {
   FawkesNetworkMessage *m = new FawkesNetworkMessage(component_id, msg_id,
@@ -230,7 +230,7 @@ FawkesNetworkThread::broadcast(unsigned short int component_id, unsigned short i
  * @param msg_id message type ID
  */
 void
-FawkesNetworkThread::broadcast(unsigned short int component_id, unsigned short int msg_id)
+FawkesNetworkServerThread::broadcast(unsigned short int component_id, unsigned short int msg_id)
 {
   FawkesNetworkMessage *m = new FawkesNetworkMessage(component_id, msg_id);
   broadcast(m);
@@ -247,7 +247,7 @@ FawkesNetworkThread::broadcast(unsigned short int component_id, unsigned short i
  * @param msg Message to send
  */
 void
-FawkesNetworkThread::send(FawkesNetworkMessage *msg)
+FawkesNetworkServerThread::send(FawkesNetworkMessage *msg)
 {
   unsigned int clid = msg->clid();
   if ( clients.find(clid) != clients.end() ) {
@@ -268,7 +268,7 @@ FawkesNetworkThread::send(FawkesNetworkMessage *msg)
  * @see FawkesNetworkEmitter::broadcast()
  */
 void
-FawkesNetworkThread::send(unsigned int to_clid,
+FawkesNetworkServerThread::send(unsigned int to_clid,
 			  unsigned short int component_id, unsigned short int msg_id,
 			   void *payload, unsigned int payload_size)
 {
@@ -288,7 +288,7 @@ FawkesNetworkThread::send(unsigned int to_clid,
  * @see FawkesNetworkEmitter::broadcast()
  */
 void
-FawkesNetworkThread::send(unsigned int to_clid,
+FawkesNetworkServerThread::send(unsigned int to_clid,
 			  unsigned short int component_id, unsigned short int msg_id,
 			  FawkesNetworkMessageContent *content)
 {
@@ -308,7 +308,7 @@ FawkesNetworkThread::send(unsigned int to_clid,
  * @see FawkesNetworkEmitter::broadcast()
  */
 void
-FawkesNetworkThread::send(unsigned int to_clid,
+FawkesNetworkServerThread::send(unsigned int to_clid,
 			  unsigned short int component_id, unsigned short int msg_id)
 {
   FawkesNetworkMessage *m = new FawkesNetworkMessage(to_clid, component_id, msg_id);
@@ -324,7 +324,7 @@ FawkesNetworkThread::send(unsigned int to_clid,
  * @param msg message to dispatch
  */
 void
-FawkesNetworkThread::dispatch(FawkesNetworkMessage *msg)
+FawkesNetworkServerThread::dispatch(FawkesNetworkMessage *msg)
 {
   msg->ref();
   inbound_messages->push_locked(msg);
@@ -334,7 +334,7 @@ FawkesNetworkThread::dispatch(FawkesNetworkMessage *msg)
 /** Call handler processing methods.
  */
 void
-FawkesNetworkThread::process()
+FawkesNetworkServerThread::process()
 {
   for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
     (*hit).second->process_after_loop();

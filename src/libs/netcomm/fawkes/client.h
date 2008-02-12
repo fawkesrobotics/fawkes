@@ -28,19 +28,19 @@
 #ifndef __NETCOMM_FAWKES_CLIENT_H_
 #define __NETCOMM_FAWKES_CLIENT_H_
 
-#include <core/threading/thread.h>
-#include <core/exception.h>
-
 #include <netcomm/fawkes/message_queue.h>
 #include <netcomm/fawkes/message.h>
 #include <netcomm/fawkes/component_ids.h>
 
-#include <map>
+#include <core/exception.h>
+#include <core/utils/lock_map.h>
 
 class StreamSocket;
 class Mutex;
 class WaitCondition;
 class FawkesNetworkClientHandler;
+class FawkesNetworkClientSendThread;
+class FawkesNetworkClientRecvThread;
 
 class HandlerAlreadyRegisteredException : public Exception
 {
@@ -48,8 +48,10 @@ class HandlerAlreadyRegisteredException : public Exception
   HandlerAlreadyRegisteredException();
 };
 
-class FawkesNetworkClient : public Thread
+class FawkesNetworkClient
 {
+ friend class FawkesNetworkClientSendThread;
+ friend class FawkesNetworkClientRecvThread;
  public:
   FawkesNetworkClient(const char *hostname, unsigned short int port);
   ~FawkesNetworkClient();
@@ -62,39 +64,38 @@ class FawkesNetworkClient : public Thread
   void wait(unsigned int component_id);
   void wake(unsigned int component_id);
 
-  void loop();
-
   void register_handler(FawkesNetworkClientHandler *handler, unsigned int component_id);
   void deregister_handler(unsigned int component_id);
-
-  void set_wait_timeout(unsigned int wait_timeout);
 
   bool connected() const throw();
 
  private:
-  void send();
   void recv();
-  void sleep();
   void notify_of_connection_established();
   void notify_of_connection_dead();
 
-  FawkesNetworkMessageQueue *  inbound_queue();
+  void wake_handlers(unsigned int cid);
+  void dispatch_message(FawkesNetworkMessage *m);
+  void connection_died();
+  void set_send_slave_alive();
+  void set_recv_slave_alive();
 
   char *hostname;
   unsigned short int port;
 
   StreamSocket *s;
-  unsigned int wait_timeout;
 
-  Mutex *mutex;
-
-  FawkesNetworkMessageQueue *  inbound_msgq;
-  FawkesNetworkMessageQueue *  outbound_msgq;
-
-  typedef std::map<unsigned int, FawkesNetworkClientHandler *> HandlerMap;
-  typedef std::map<unsigned int, WaitCondition *> WaitCondMap;
+  typedef LockMap<unsigned int, FawkesNetworkClientHandler *> HandlerMap;
+  typedef LockMap<unsigned int, WaitCondition *> WaitCondMap;
   HandlerMap  handlers;
   WaitCondMap waitconds;
+
+  FawkesNetworkClientRecvThread *recv_slave;
+  FawkesNetworkClientSendThread *send_slave;
+
+  bool recv_slave_alive;
+  bool send_slave_alive;
+  Mutex *slave_status_mutex;
 };
 
 
