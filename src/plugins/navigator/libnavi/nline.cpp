@@ -86,3 +86,10 @@ NLine::NLine(double x1, double y1, double x2, double y2)
   p2 = new NPoint(x2, y2);
 }
 
+
+/** Destructor. */
+NLine::~NLine()
+{
+  delete p1;
+  delete p2;
+}

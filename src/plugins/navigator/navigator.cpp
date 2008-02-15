@@ -596,7 +596,7 @@ void Navigator::mainLoop()
   double div_x;
   double div_y;
   //mit step die Berechnung der Zunahme von t durchfuehren
-  double delta_s = sqrt(pow(step_x, 2.) + pow(step_y, 2.));
+  double delta_s = sqrt(step_x * step_x + step_y * step_y);
   double f1 = 1/s(t);
   //   std::cout << "-------f1 " << f1 << std::endl;
   double f2 = 1/s(t + delta_s * f1);
