@@ -28,8 +28,8 @@
 
 #include <interfaces/motor.h>
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 
 /** @class MotorInterface interfaces/motor.h
  * MotorInterface Fawkes BlackBoard Interface.
@@ -62,6 +62,7 @@ MotorInterface::MotorInterface() : Interface()
   data      = (MotorInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
 }
+
 /** Destructor */
 MotorInterface::~MotorInterface()
 {
@@ -433,10 +434,13 @@ MotorInterface::SetMotorStateMessage::SetMotorStateMessage() : Message("SetMotor
   memset(data_ptr, 0, data_size);
   data      = (SetMotorStateMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 MotorInterface::SetMotorStateMessage::~SetMotorStateMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get motor_state value.
  * 
@@ -490,10 +494,13 @@ MotorInterface::AcquireControlMessage::AcquireControlMessage() : Message("Acquir
   memset(data_ptr, 0, data_size);
   data      = (AcquireControlMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 MotorInterface::AcquireControlMessage::~AcquireControlMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get thread_id value.
  * 
@@ -564,10 +571,13 @@ MotorInterface::ResetOdometryMessage::ResetOdometryMessage() : Message("ResetOdo
   memset(data_ptr, 0, data_size);
   data      = (ResetOdometryMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 MotorInterface::ResetOdometryMessage::~ResetOdometryMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** @class MotorInterface::DriveRPMMessage interfaces/motor.h
  * DriveRPMMessage Fawkes BlackBoard Interface Message.
@@ -599,10 +609,13 @@ MotorInterface::DriveRPMMessage::DriveRPMMessage() : Message("DriveRPMMessage")
   memset(data_ptr, 0, data_size);
   data      = (DriveRPMMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 MotorInterface::DriveRPMMessage::~DriveRPMMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get front_right value.
  * Rotation in RPM of the right front wheel.
@@ -692,10 +705,13 @@ MotorInterface::TransMessage::TransMessage() : Message("TransMessage")
   memset(data_ptr, 0, data_size);
   data      = (TransMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 MotorInterface::TransMessage::~TransMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get vx value.
  * Speed in X direction in m/s.
@@ -763,10 +779,13 @@ MotorInterface::RotMessage::RotMessage() : Message("RotMessage")
   memset(data_ptr, 0, data_size);
   data      = (RotMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 MotorInterface::RotMessage::~RotMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get omega value.
  * Angle rotation in rad/s.
@@ -818,10 +837,13 @@ MotorInterface::TransRotMessage::TransRotMessage() : Message("TransRotMessage")
   memset(data_ptr, 0, data_size);
   data      = (TransRotMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 MotorInterface::TransRotMessage::~TransRotMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get vx value.
  * Speed in X direction in m/s.
@@ -913,10 +935,13 @@ MotorInterface::OrbitMessage::OrbitMessage() : Message("OrbitMessage")
   memset(data_ptr, 0, data_size);
   data      = (OrbitMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 MotorInterface::OrbitMessage::~OrbitMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get px value.
  * Point's X coordinate to orbit.
@@ -1008,10 +1033,13 @@ MotorInterface::LinTransRotMessage::LinTransRotMessage() : Message("LinTransRotM
   memset(data_ptr, 0, data_size);
   data      = (LinTransRotMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 MotorInterface::LinTransRotMessage::~LinTransRotMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get vx value.
  * Speed for translation in X direction in m/s.

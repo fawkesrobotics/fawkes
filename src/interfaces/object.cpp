@@ -28,8 +28,8 @@
 
 #include <interfaces/object.h>
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 
 /** @class ObjectPositionInterface interfaces/object.h
  * ObjectPositionInterface Fawkes BlackBoard Interface.
@@ -60,6 +60,7 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   data      = (ObjectPositionInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
 }
+
 /** Destructor */
 ObjectPositionInterface::~ObjectPositionInterface()
 {

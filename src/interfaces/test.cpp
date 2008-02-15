@@ -28,8 +28,8 @@
 
 #include <interfaces/test.h>
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 
 /** @class TestInterface interfaces/test.h
  * TestInterface Fawkes BlackBoard Interface.
@@ -51,6 +51,7 @@ TestInterface::TestInterface() : Interface()
   data      = (TestInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
 }
+
 /** Destructor */
 TestInterface::~TestInterface()
 {
@@ -224,10 +225,13 @@ TestInterface::SetTestIntMessage::SetTestIntMessage() : Message("SetTestIntMessa
   memset(data_ptr, 0, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 TestInterface::SetTestIntMessage::~SetTestIntMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get test_int value.
  * Test integer
@@ -275,10 +279,13 @@ TestInterface::SetTestStringMessage::SetTestStringMessage() : Message("SetTestSt
   memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 TestInterface::SetTestStringMessage::~SetTestStringMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get test_string value.
  * A test sring
@@ -328,10 +335,13 @@ TestInterface::CalculateMessage::CalculateMessage() : Message("CalculateMessage"
   memset(data_ptr, 0, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 TestInterface::CalculateMessage::~CalculateMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get summand value.
  * Summand

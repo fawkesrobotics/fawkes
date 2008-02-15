@@ -227,8 +227,8 @@ InterfaceGenerator::write_cpp(FILE *f)
   write_header(f, filename_cpp);
   fprintf(f,
 	  "#include <interfaces/%s>\n\n"
-	  "#include <string.h>\n"
-	  "#include <stdlib.h>\n\n"
+	  "#include <cstring>\n"
+	  "#include <cstdlib>\n\n"
 	  "/** @class %s interfaces/%s\n"
 	  " * %s Fawkes BlackBoard Interface.\n"
 	  " * %s\n"
@@ -451,7 +451,7 @@ InterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 	  "  data_ptr  = malloc(data_size);\n"
 	  "  data      = (%s_data_t *)data_ptr;\n"
 	  "  memset(data_ptr, 0, data_size);\n"
-	  "}\n"
+	  "}\n\n"
 	  "/** Destructor */\n"
 	  "%s%s::~%s()\n"
 	  "{\n"
@@ -533,11 +533,12 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	  "  data_ptr  = malloc(data_size);\n"
 	  "  memset(data_ptr, 0, data_size);\n"
 	  "  data      = (%s_data_t *)data_ptr;\n"
-	  "}\n"
+	  "}\n\n"
 	  "/** Destructor */\n"
 	  "%s%s::~%s()\n"
 	  "{\n"
-	  "}\n",
+	  "  free(data_ptr);\n"
+	  "}\n\n",
 	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str(),
 	  super_class.c_str(), classname.c_str(), classname.c_str(), classname.c_str(),
 	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str()

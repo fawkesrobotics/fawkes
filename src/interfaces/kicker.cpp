@@ -28,8 +28,8 @@
 
 #include <interfaces/kicker.h>
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 
 /** @class KickerInterface interfaces/kicker.h
  * KickerInterface Fawkes BlackBoard Interface.
@@ -49,6 +49,7 @@ KickerInterface::KickerInterface() : Interface()
   data      = (KickerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
 }
+
 /** Destructor */
 KickerInterface::~KickerInterface()
 {
@@ -206,10 +207,13 @@ KickerInterface::KickMessage::KickMessage() : Message("KickMessage")
   memset(data_ptr, 0, data_size);
   data      = (KickMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 KickerInterface::KickMessage::~KickMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get left value.
  * True to kick with left kicker.
@@ -306,10 +310,13 @@ KickerInterface::ResetCounterMessage::ResetCounterMessage() : Message("ResetCoun
   memset(data_ptr, 0, data_size);
   data      = (ResetCounterMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 KickerInterface::ResetCounterMessage::~ResetCounterMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** @class KickerInterface::GuideBallMessage interfaces/kicker.h
  * GuideBallMessage Fawkes BlackBoard Interface Message.
@@ -337,10 +344,13 @@ KickerInterface::GuideBallMessage::GuideBallMessage() : Message("GuideBallMessag
   memset(data_ptr, 0, data_size);
   data      = (GuideBallMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 KickerInterface::GuideBallMessage::~GuideBallMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get guide_ball_side value.
  * Side where to guide the ball and erect the arm.

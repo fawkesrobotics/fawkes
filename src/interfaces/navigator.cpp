@@ -28,8 +28,8 @@
 
 #include <interfaces/navigator.h>
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 
 /** @class NavigatorInterface interfaces/navigator.h
  * NavigatorInterface Fawkes BlackBoard Interface.
@@ -46,6 +46,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   data      = (NavigatorInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
 }
+
 /** Destructor */
 NavigatorInterface::~NavigatorInterface()
 {
@@ -103,10 +104,13 @@ NavigatorInterface::TargetMessage::TargetMessage() : Message("TargetMessage")
   memset(data_ptr, 0, data_size);
   data      = (TargetMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 NavigatorInterface::TargetMessage::~TargetMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get x value.
  * X-coordinate of the target, in the robot's coordinate system.
@@ -194,10 +198,13 @@ NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage() : Message("MaxVeloc
   memset(data_ptr, 0, data_size);
   data      = (MaxVelocityMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 NavigatorInterface::MaxVelocityMessage::~MaxVelocityMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get velocity value.
  * Maximum velocity of the robot.
@@ -249,10 +256,13 @@ NavigatorInterface::ObstacleMessage::ObstacleMessage() : Message("ObstacleMessag
   memset(data_ptr, 0, data_size);
   data      = (ObstacleMessage_data_t *)data_ptr;
 }
+
 /** Destructor */
 NavigatorInterface::ObstacleMessage::~ObstacleMessage()
 {
+  free(data_ptr);
 }
+
 /* Methods */
 /** Get x value.
  * X-coordinate of the obstacle.
