@@ -336,6 +336,7 @@ MessageQueue::pop()
 {
   mutex->lock();
   if ( list ) {
+    list->msg->unref();
     remove(list, NULL);
   }
   mutex->unlock();

@@ -119,10 +119,6 @@ Message::Message(Message *mesg)
 /** Destructor. */
 Message::~Message()
 {
-  if ( data_ptr != NULL ) {
-    free(data_ptr);
-    data_ptr = NULL;
-  }
   free(_sender);
   free(_type);
 }
