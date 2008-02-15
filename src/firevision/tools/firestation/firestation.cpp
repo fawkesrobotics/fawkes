@@ -590,12 +590,12 @@ Firestation::open_file()
 	memcpy(m_yuv_draw_buffer, tmp_buffer, m_img_size);
 	free(tmp_buffer);
 	
+	m_img_src = SRC_FILE;
+
 	scale_image();
 	draw_image();
 	
 	post_open_img_src();
-
-	m_img_src = SRC_FILE;
 
 	break;
       }
@@ -675,12 +675,12 @@ Firestation::open_shm()
 		    e.print_trace();
 		  }
 		
+		m_img_src = SRC_SHM;
+		
 		scale_image();
 		draw_image();
 		
 		post_open_img_src();
-		
-		m_img_src = SRC_SHM;
 	      }
 	  }
 	else
@@ -759,13 +759,13 @@ Firestation::open_fuse()
 		      }
 		    
 		    m_net_cam->dispose_buffer();
+
+		    m_img_src = SRC_FUSE;
 	    
 		    scale_image();
 		    draw_image();
 		    
 		    post_open_img_src();
-
-		    m_img_src = SRC_FUSE;
 		  }
 		catch (Exception& e)
 		  {
