@@ -362,10 +362,13 @@ NavigatorGUI::~NavigatorGUI()
 {
   send_stop();
 
-  net_client->disconnect();
-  net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
-  net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
-  delete net_client;
+  if ( net_client )
+    {
+      net_client->disconnect();
+      net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
+      net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
+      delete net_client;
+    }
 
   //delete lines
   lines.lock();
@@ -403,6 +406,8 @@ NavigatorGUI::~NavigatorGUI()
   delete odometry_point_mutex;
   delete cursor_point_mutex;
   delete ball_point_mutex;
+
+  delete win;
 }
 
 void NavigatorGUI::connect()
@@ -410,9 +415,11 @@ void NavigatorGUI::connect()
   if(connected)
     {
       connected = false;
-      net_client->disconnect();
-      net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
-      net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
+      if ( net_client ) {
+	net_client->disconnect();
+	net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
+	net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
+      }
     }
 
   if(net_client != NULL)
@@ -438,11 +445,10 @@ void NavigatorGUI::connect()
       net_client->enqueue(msg2);
       msg2->unref();
 
-      char str[100];
-      strcpy (str,"Connected to ");
-      strcat (str, host_name);
-      strcat (str, ", but the navigator plugin is not loaded.");
+      char *str;
+      asprintf(&str, "Connected to %s, but the navigator plugin is not loaded.", host_name);
       statusbar->push(str, 1);
+      free(str);
     }
   catch (SocketException &e)
     {
@@ -472,9 +478,9 @@ void
 NavigatorGUI::connection_died() throw()
 {
   printf("Connection died\n");
-  statusbar->pop(1);
+  //statusbar->pop(1);
 
-  printf("Connection died2\n");
+  //printf("Connection died2\n");
   //net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
   // net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
   /*
@@ -482,7 +488,7 @@ NavigatorGUI::connection_died() throw()
   net_client->cancel();
   printf("Connection join\n");
   net_client->join();*/
-  printf("Connection is dead\n");
+  //printf("Connection is dead\n");
 
   connection_is_dead = true;
 }
@@ -544,6 +550,9 @@ NavigatorGUI::reset_gui()
     }
   obstacle_points.clear();
   obstacle_points.unlock();
+
+  // Pop message from status bar
+  statusbar->pop(1);
 }
 
 /** Inbound mesage received.
@@ -613,6 +622,8 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
               p2 = new NPoint(-l->y2, -l->x2);
             }
           lines.push_back(new NLine(p1, p2));
+	  delete p1;
+	  delete p2;
         }
       lines.unlock();
 
@@ -676,11 +687,10 @@ void NavigatorGUI::prepare_navigator_contact()
 {
   std::cerr << "Navigator plugin is loaded." << std::endl;
   navigator_loaded = true;
-  char * str = new char[100];
-  strcpy(str, "Connected to ");
-  strcat(str, host_name);
-  strcat(str, " and NavigatorPlugin is loaded.");
+  char * str;
+  asprintf(&str, "Connected to %s and NavigatorPlugin is loaded.", host_name);
   statusbar->push(str, 1);
+  free(str);
   navigator_subscribe_message_t *sub_msg = (navigator_subscribe_message_t *)calloc(1, sizeof(navigator_subscribe_message_t));
   sub_msg->sub_type_points_and_lines = 1;
   sub_msg->sub_type_odometry = 1;
@@ -879,14 +889,20 @@ bool NavigatorGUI::on_idle()
 
   if(connection_is_dead)
     {
+
+      if ( net_client )
+	{
+	  net_client->disconnect();
+	  net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
+	  net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
+	  delete net_client;
+	  net_client = NULL;
+	}
+
       reset_gui();
       queue_draw();
-      char str[100];
-      strcpy (str,"There is no connection to a Fawkes running at ");
-      strcat (str, host_name);
-      strcat (str, ".\nDo you want to retry to connect to ");
-      strcat (str, host_name);
-      strcat (str, "?");
+      char *str;
+      asprintf(&str, "There is no connection to a Fawkes running at %s\nDo you want to retry to connect to %s?", host_name, host_name);
       Gtk::MessageDialog* dialog = new Gtk::MessageDialog((Gtk::Window&)*win, str,
                                    true, Gtk::MESSAGE_QUESTION,
                                    Gtk::BUTTONS_OK_CANCEL, true);
@@ -895,6 +911,7 @@ bool NavigatorGUI::on_idle()
       dialog->set_title("Question");
       int result = dialog->run();
       delete dialog;
+      free(str);
       switch (result)
         {
         case Gtk::RESPONSE_OK:
