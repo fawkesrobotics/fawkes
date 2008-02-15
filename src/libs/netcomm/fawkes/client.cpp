@@ -104,6 +104,7 @@ class FawkesNetworkClientSendThread : public Thread
 	FawkesNetworkTransceiver::send(_s, _outbound_msgq);
       } catch (ConnectionDiedException &e) {
 	_parent->connection_died();
+	exit();
       }
     }
   }
@@ -208,12 +209,14 @@ class FawkesNetworkClientRecvThread : public Thread
 	 (p & Socket::POLL_HUP) ||
 	 (p & Socket::POLL_RDHUP)) {
       _parent->connection_died();
+      exit();
     } else if ( p & Socket::POLL_IN ) {
       // Data can be read
       try {
 	recv();
       } catch (ConnectionDiedException &e) {
 	_parent->connection_died();
+	exit();
       }
     }
   }
