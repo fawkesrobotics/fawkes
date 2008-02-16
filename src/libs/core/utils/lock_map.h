@@ -41,12 +41,13 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
   LockMap(const LockMap<KeyType, ValueType, LessKey> &lm);
   virtual ~LockMap();
 
-  void lock();
-  bool try_lock();
-  void unlock();
+  void     lock();
+  bool     try_lock();
+  void     unlock();
+  Mutex *  mutex() const;
 
  private:
-  Mutex *mutex;
+  Mutex *__mutex;
 
 };
 
@@ -66,7 +67,7 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey>::LockMap()
 {
-  mutex = new Mutex();
+  __mutex = new Mutex();
 }
 
 
@@ -77,7 +78,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey>::LockMap(const LockMap<KeyType, ValueType, LessKey> &lm)
   : std::map<KeyType, ValueType, LessKey>::map(lm)
 {
-  mutex = new Mutex();
+  __mutex = new Mutex();
 }
 
 
@@ -85,7 +86,7 @@ LockMap<KeyType, ValueType, LessKey>::LockMap(const LockMap<KeyType, ValueType, 
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey>::~LockMap()
 {
-  delete mutex;
+  delete __mutex;
 }
 
 
@@ -94,7 +95,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 LockMap<KeyType, ValueType, LessKey>::lock()
 {
-  mutex->lock();
+  __mutex->lock();
 }
 
 
@@ -105,7 +106,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 bool
 LockMap<KeyType, ValueType, LessKey>::try_lock()
 {
-  return mutex->try_lock();
+  return __mutex->try_lock();
 }
 
 
@@ -114,7 +115,20 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 LockMap<KeyType, ValueType, LessKey>::unlock()
 {
-  return mutex->unlock();
+  return __mutex->unlock();
 }
+
+
+/** Get access to the internal mutex.
+ * Can be used with MutexLocker.
+ * @return internal mutex
+ */
+template <typename KeyType, typename ValueType, typename LessKey>
+Mutex *
+LockMap<KeyType, ValueType, LessKey>::mutex() const
+{
+  return __mutex;
+}
+
 
 #endif

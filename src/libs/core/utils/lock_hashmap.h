@@ -52,12 +52,13 @@ class LockHashMap : public __gnu_cxx::hash_map<KeyType, ValueType, HashFunction,
   LockHashMap(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &lh);
   virtual ~LockHashMap();
 
-  void lock();
-  bool try_lock();
-  void unlock();
+  void     lock();
+  bool     try_lock();
+  void     unlock();
+  Mutex *  mutex() const;
 
  private:
-  Mutex *mutex;
+  Mutex *__mutex;
 
 };
 
@@ -77,7 +78,7 @@ class LockHashMap : public __gnu_cxx::hash_map<KeyType, ValueType, HashFunction,
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap()
 {
-  mutex = new Mutex();
+  __mutex = new Mutex();
 }
 
 
@@ -92,7 +93,7 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap(const LockH
   : __gnu_cxx::hash_map<KeyType, ValueType, HashFunction, EqualKey>::hash_map(lh)
 #endif
 {
-  mutex = new Mutex();
+  __mutex = new Mutex();
 }
 
 
@@ -100,7 +101,7 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap(const LockH
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::~LockHashMap()
 {
-  delete mutex;
+  delete __mutex;
 }
 
 
@@ -109,7 +110,7 @@ template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 void
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::lock()
 {
-  mutex->lock();
+  __mutex->lock();
 }
 
 
@@ -120,7 +121,7 @@ template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 bool
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::try_lock()
 {
-  return mutex->try_lock();
+  return __mutex->try_lock();
 }
 
 
@@ -129,7 +130,19 @@ template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 void
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::unlock()
 {
-  return mutex->unlock();
+  return __mutex->unlock();
+}
+
+
+/** Get access to the internal mutex.
+ * Can be used with MutexLocker.
+ * @return internal mutex
+ */
+template <typename KeyType, typename ValueType, class HashFunction, typename EqualKey>
+Mutex *
+LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::mutex() const
+{
+  return __mutex;
 }
 
 #endif

@@ -39,19 +39,20 @@ class LockQueue : public std::queue<Type>
   LockQueue(const LockQueue<Type> &ll);
   virtual ~LockQueue();
 
-  void lock();
-  bool try_lock();
-  void unlock();
+  void     lock();
+  bool     try_lock();
+  void     unlock();
+  Mutex *  mutex() const;
 
-  void push_locked(const Type& x);
-  void pop_locked();
+  void     push_locked(const Type& x);
+  void     pop_locked();
 
   void clear();
 
   // not needed, no change to mutex required (thus "incomplete" BigThree)
   //LockList<Type> &  operator=(const LockList<Type> &ll);
  private:
-  Mutex *mutex;
+  Mutex *__mutex;
 
 };
 
@@ -71,7 +72,7 @@ class LockQueue : public std::queue<Type>
 template <typename Type>
 LockQueue<Type>::LockQueue()
 {
-  mutex = new Mutex();
+  __mutex = new Mutex();
 }
 
 
@@ -82,7 +83,7 @@ template <typename Type>
 LockQueue<Type>::LockQueue(const LockQueue<Type> &ll)
   : std::queue<Type>::queue(ll)
 {
-  mutex = new Mutex();
+  __mutex = new Mutex();
 }
 
 
@@ -90,7 +91,7 @@ LockQueue<Type>::LockQueue(const LockQueue<Type> &ll)
 template <typename Type>
 LockQueue<Type>::~LockQueue()
 {
-  delete mutex;
+  delete __mutex;
 }
 
 
@@ -99,7 +100,7 @@ template <typename Type>
 void
 LockQueue<Type>::lock()
 {
-  mutex->lock();
+  __mutex->lock();
 }
 
 
@@ -110,7 +111,7 @@ template <typename Type>
 bool
 LockQueue<Type>::try_lock()
 {
-  return mutex->try_lock();
+  return __mutex->try_lock();
 }
 
 
@@ -119,7 +120,7 @@ template <typename Type>
 void
 LockQueue<Type>::unlock()
 {
-  return mutex->unlock();
+  return __mutex->unlock();
 }
 
 
@@ -130,9 +131,9 @@ template <typename Type>
 void
 LockQueue<Type>::push_locked(const Type& x)
 {
-  mutex->lock();
+  __mutex->lock();
   std::queue<Type>::push(x);
-  mutex->unlock();
+  __mutex->unlock();
 }
 
 
@@ -142,9 +143,9 @@ template <typename Type>
 void
 LockQueue<Type>::pop_locked()
 {
-  mutex->lock();
+  __mutex->lock();
   std::queue<Type>::pop();
-  mutex->unlock();
+  __mutex->unlock();
 }
 
 /** Clear the queue. */
@@ -152,11 +153,23 @@ template <typename Type>
 void
 LockQueue<Type>::clear()
 {
-  mutex->lock();
+  __mutex->lock();
   while ( ! std::queue<Type>::empty() ) {
     std::queue<Type>::pop();
   }
-  mutex->unlock();
+  __mutex->unlock();
+}
+
+
+/** Get access to the internal mutex.
+ * Can be used with MutexLocker.
+ * @return internal mutex
+ */
+template <typename Type>
+Mutex *
+LockQueue<Type>::mutex() const
+{
+  return __mutex;
 }
 
 #endif

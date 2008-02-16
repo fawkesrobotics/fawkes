@@ -51,14 +51,15 @@ class LockHashSet : public __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>
   LockHashSet(const LockHashSet<KeyType, HashFunction, EqualKey> &lh);
   virtual ~LockHashSet();
 
-  void lock();
-  bool try_lock();
-  void unlock();
+  void     lock();
+  bool     try_lock();
+  void     unlock();
+  Mutex *  mutex() const;
 
-  void insert_locked(const KeyType& x);
+  void     insert_locked(const KeyType& x);
 
  private:
-  Mutex *mutex;
+  Mutex *__mutex;
 
 };
 
@@ -78,7 +79,7 @@ class LockHashSet : public __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>
 template <class KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet()
 {
-  mutex = new Mutex();
+  __mutex = new Mutex();
 }
 
 
@@ -93,7 +94,7 @@ LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet(const LockHashSet<KeyT
   : __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>::hash_set(lh)
 #endif
 {
-  mutex = new Mutex();
+  __mutex = new Mutex();
 }
 
 
@@ -101,7 +102,7 @@ LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet(const LockHashSet<KeyT
 template <class KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey>::~LockHashSet()
 {
-  delete mutex;
+  delete __mutex;
 }
 
 
@@ -110,7 +111,7 @@ template <class KeyType, class HashFunction, class EqualKey>
 void
 LockHashSet<KeyType, HashFunction, EqualKey>::lock()
 {
-  mutex->lock();
+  __mutex->lock();
 }
 
 
@@ -121,7 +122,7 @@ template <class KeyType, class HashFunction, class EqualKey>
 bool
 LockHashSet<KeyType, HashFunction, EqualKey>::try_lock()
 {
-  return mutex->try_lock();
+  return __mutex->try_lock();
 }
 
 
@@ -130,7 +131,7 @@ template <class KeyType, class HashFunction, class EqualKey>
 void
 LockHashSet<KeyType, HashFunction, EqualKey>::unlock()
 {
-  return mutex->unlock();
+  return __mutex->unlock();
 }
 
 
@@ -141,10 +142,21 @@ template <class KeyType, class HashFunction, class EqualKey>
 void
 LockHashSet<KeyType, HashFunction, EqualKey>::insert_locked(const KeyType& x)
 {
-  mutex->lock();
+  __mutex->lock();
   insert(x);
-  mutex->unlock();
+  __mutex->unlock();
 }
 
+
+/** Get access to the internal mutex.
+ * Can be used with MutexLocker.
+ * @return internal mutex
+ */
+template <typename KeyType, class HashFunction, class EqualKey>
+Mutex *
+LockHashSet<KeyType, HashFunction, EqualKey>::mutex() const
+{
+  return __mutex;
+}
 
 #endif

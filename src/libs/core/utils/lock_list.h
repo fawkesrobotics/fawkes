@@ -38,19 +38,19 @@ class LockList : public std::list<Type>
   LockList();
   LockList(const LockList<Type> &ll);
   virtual ~LockList();
+  void     lock();
+  bool     try_lock();
+  void     unlock();
+  Mutex *  mutex() const;
 
-  void lock();
-  bool try_lock();
-  void unlock();
-
-  void push_back_locked(const Type& x);
-  void push_front_locked(const Type& x);
-  void remove_locked(const Type& x);
+  void     push_back_locked(const Type& x);
+  void     push_front_locked(const Type& x);
+  void     remove_locked(const Type& x);
 
   // not needed, no change to mutex required (thus "incomplete" BigThree)
   //LockList<Type> &  operator=(const LockList<Type> &ll);
  private:
-  Mutex *mutex;
+  Mutex *__mutex;
 
 };
 
@@ -70,7 +70,7 @@ class LockList : public std::list<Type>
 template <typename Type>
 LockList<Type>::LockList()
 {
-  mutex = new Mutex();
+  __mutex = new Mutex();
 }
 
 
@@ -81,7 +81,7 @@ template <typename Type>
 LockList<Type>::LockList(const LockList<Type> &ll)
   : std::list<Type>::list(ll)
 {
-  mutex = new Mutex();
+  __mutex = new Mutex();
 }
 
 
@@ -89,7 +89,7 @@ LockList<Type>::LockList(const LockList<Type> &ll)
 template <typename Type>
 LockList<Type>::~LockList()
 {
-  delete mutex;
+  delete __mutex;
 }
 
 
@@ -98,7 +98,7 @@ template <typename Type>
 void
 LockList<Type>::lock()
 {
-  mutex->lock();
+  __mutex->lock();
 }
 
 
@@ -109,7 +109,7 @@ template <typename Type>
 bool
 LockList<Type>::try_lock()
 {
-  return mutex->try_lock();
+  return __mutex->try_lock();
 }
 
 
@@ -118,7 +118,7 @@ template <typename Type>
 void
 LockList<Type>::unlock()
 {
-  return mutex->unlock();
+  return __mutex->unlock();
 }
 
 
@@ -129,9 +129,9 @@ template <typename Type>
 void
 LockList<Type>::push_back_locked(const Type& x)
 {
-  mutex->lock();
+  __mutex->lock();
   std::list<Type>::push_back(x);
-  mutex->unlock();
+  __mutex->unlock();
 }
 
 
@@ -142,9 +142,9 @@ template <typename Type>
 void
 LockList<Type>::push_front_locked(const Type& x)
 {
-  mutex->lock();
+  __mutex->lock();
   std::list<Type>::push_front(x);
-  mutex->unlock();
+  __mutex->unlock();
 }
 
 
@@ -155,9 +155,22 @@ template <typename Type>
 void
 LockList<Type>::remove_locked(const Type& x)
 {
-  mutex->lock();
+  __mutex->lock();
   std::list<Type>::remove(x);
-  mutex->unlock();
+  __mutex->unlock();
 }
+
+
+/** Get access to the internal mutex.
+ * Can be used with MutexLocker.
+ * @return internal mutex
+ */
+template <typename Type>
+Mutex *
+LockList<Type>::mutex() const
+{
+  return __mutex;
+}
+
 
 #endif
