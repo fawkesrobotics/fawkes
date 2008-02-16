@@ -329,14 +329,3 @@ FawkesNetworkServerThread::dispatch(FawkesNetworkMessage *msg)
   msg->ref();
   inbound_messages->push_locked(msg);
 }
-
-
-/** Call handler processing methods.
- */
-void
-FawkesNetworkServerThread::process()
-{
-  for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
-    (*hit).second->process_after_loop();
-  }
-}

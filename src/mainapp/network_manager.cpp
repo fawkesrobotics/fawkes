@@ -138,12 +138,3 @@ FawkesNetworkManager::service_browser()
 {
   return _service_browser;
 }
-
-
-/** Call handler processing methods.
- */
-void
-FawkesNetworkManager::process()
-{
-  fawkes_network_thread->process();
-}

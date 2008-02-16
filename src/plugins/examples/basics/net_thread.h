@@ -49,7 +49,6 @@ class ExampleNetworkThread : public Thread, public LoggingAspect, public FawkesN
   virtual void handle_network_message(FawkesNetworkMessage *msg);
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
-  virtual void process_after_loop();
 
 };
 

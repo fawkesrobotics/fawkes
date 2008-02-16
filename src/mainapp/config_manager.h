@@ -28,6 +28,7 @@
 #ifndef __FAWKES_CONFIG_MANAGER_H_
 #define __FAWKES_CONFIG_MANAGER_H_
 
+#include <core/threading/thread.h>
 #include <netcomm/fawkes/handler.h>
 #include <core/utils/lock_queue.h>
 #include <core/utils/lock_list.h>
@@ -44,7 +45,10 @@ class ThreadManager;
 class FawkesNetworkHub;
 class Mutex;
 
-class FawkesConfigManager : public FawkesNetworkHandler, public ConfigurationChangeHandler
+class FawkesConfigManager
+: public Thread,
+  public FawkesNetworkHandler,
+  public ConfigurationChangeHandler
 {
  public:
   FawkesConfigManager(Configuration *config);
@@ -56,7 +60,7 @@ class FawkesConfigManager : public FawkesNetworkHandler, public ConfigurationCha
   virtual void handle_network_message(FawkesNetworkMessage *msg);
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
-  virtual void process_after_loop();
+  virtual void loop();
 
   /* from ConfigurationChangeHandler interface */
   virtual void config_tag_changed(const char *new_location);

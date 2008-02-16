@@ -587,10 +587,3 @@ NavigatorNetworkThread::client_disconnected(unsigned int clid)
         }
     }
 }
-
-/** Process all network messages that have been received.
- * Nothing to do for example network thread.
- */
-void
-NavigatorNetworkThread::process_after_loop()
-{}

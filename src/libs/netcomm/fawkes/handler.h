@@ -41,7 +41,6 @@ class FawkesNetworkHandler
   virtual void handle_network_message(FawkesNetworkMessage *msg)           = 0;
   virtual void client_connected(unsigned int clid)                         = 0;
   virtual void client_disconnected(unsigned int clid)                      = 0;
-  virtual void process_after_loop()                                        = 0;
 
  private:
   unsigned short int _id;

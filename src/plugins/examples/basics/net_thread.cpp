@@ -83,9 +83,7 @@ ExampleNetworkThread::finalize()
  * Note that in general incoming messages should be parsed and appropriate
  * actions enqueued. Then in the next loop iteration you process these
  * incoming messages. This is the best way to avoid strange behavior and low
- * latencies in network message handling. For this you can use the
- * process_after_loop() method provided by the FawkesNetworkHandler interface.
- * This is called after a full loop has run in Fawkes.
+ * latencies in network message handling.
  *
  * As an example for this see the FawkesConfigManager.
  *
@@ -137,12 +135,4 @@ void
 ExampleNetworkThread::client_disconnected(unsigned int clid)
 {
   logger->log_info("ExamplePlugin", "Client %u disconnected", clid);
-}
-
-/** Process all network messages that have been received.
- * Nothing to do for example network thread.
- */
-void
-ExampleNetworkThread::process_after_loop()
-{
 }

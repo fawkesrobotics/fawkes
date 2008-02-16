@@ -74,7 +74,6 @@ class FawkesNetworkServerThread
 
   void add_connection(StreamSocket *s) throw();
   void dispatch(FawkesNetworkMessage *msg);
-  void process();
 
   void force_send();
 

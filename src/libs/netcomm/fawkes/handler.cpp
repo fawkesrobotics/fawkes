@@ -3,7 +3,7 @@
  *  handler.cpp - Fawkes network traffic handler
  *
  *  Created: Mon Nov 20 15:07:01 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -27,7 +27,7 @@
 
 #include <netcomm/fawkes/handler.h>
 
-/** @class FawkesNetworkHandler netcomm/fawkes/handler.h
+/** @class FawkesNetworkHandler <netcomm/fawkes/handler.h>
  * Network handler abstract base class.
  * This class shall be extended by threads that want to use the Fawkes
  * network connection.
@@ -38,6 +38,9 @@
  *
  * @fn void FawkesNetworkHandler::handle_network_message(FawkesNetworkMessage *msg) = 0
  * Called for incoming messages that are addressed to the correct component ID.
+ * Note that this message should be processed really really fast! A good idea is to enqueue
+ * the message in an inbound queue (remember to ref() it!) and then process it in the next
+ * run of loop() or wakeup a processing thread.
  * @param msg message to handle. If you want to keep this message you have to ref() it!
  * It is guaranteed that the message will not be erased during the handleNetworkMessage()
  * run, but afterwards no guarantee is made. So if you want to store the message internally
@@ -53,11 +56,6 @@
  * is the place to do it. Note that you cannot send any further messages to this client!
  * @param clid client ID of disconnected client
  *
- * @fn void FawkesNetworkHandler::process_after_loop()
- * Executed after main loop.
- * Put all final message processing in this method. It is called when there is time
- * to handle the messages and after the main loop thus that actions here do not
- * interfere with the rest of the program.
  */
 
 /** Constructor.

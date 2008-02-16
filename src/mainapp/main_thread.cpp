@@ -173,8 +173,11 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 				      network_manager->service_publisher(),
 				      network_manager->service_browser() );
 
-  plugin_manager->set_hub( network_manager->hub() );
   config_manager->set_hub( network_manager->hub() );
+  plugin_manager->set_hub( network_manager->hub() );
+
+  config_manager->start();
+  plugin_manager->start();
 
   __time_wait = NULL;
   try {
@@ -227,8 +230,12 @@ FawkesMainThread::destruct()
   multi_logger->remove_logger(network_logger);
   delete network_logger;
 
+  plugin_manager->cancel();
+  plugin_manager->join();
   delete plugin_manager;
   delete blackboard;
+  config_manager->cancel();
+  config_manager->join();
   delete config_manager;
   delete config;
   if ( config_mutable_file != NULL )  free(config_mutable_file);
@@ -344,8 +351,6 @@ FawkesMainThread::loop()
   thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
 
   TIMETRACK_INTER(__ttc_post_loop, __ttc_netproc)
-
-  network_manager->process();
 
   TIMETRACK_END(__ttc_netproc);
   TIMETRACK_END(__ttc_real_loop);

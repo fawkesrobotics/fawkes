@@ -50,7 +50,8 @@
  * setting values
  */
 FawkesConfigManager::FawkesConfigManager(Configuration *config)
-  : FawkesNetworkHandler(FAWKES_CID_CONFIGMANAGER),
+  : Thread("FawkesConfigManager", Thread::OPMODE_WAITFORWAKEUP),
+    FawkesNetworkHandler(FAWKES_CID_CONFIGMANAGER),
     ConfigurationChangeHandler()
 {
   this->config = config;
@@ -161,10 +162,8 @@ FawkesConfigManager::send_value(unsigned int clid, Configuration::ValueIterator 
 
 /** Process all network messages that have been received. */
 void
-FawkesConfigManager::process_after_loop()
+FawkesConfigManager::loop()
 {
-  inbound_queue.lock();
-
   while ( ! inbound_queue.empty() ) {
     FawkesNetworkMessage *msg = inbound_queue.front();
 
@@ -474,10 +473,8 @@ FawkesConfigManager::process_after_loop()
 
 
     msg->unref();
-    inbound_queue.pop();
+    inbound_queue.pop_locked();
   }
-
-  inbound_queue.unlock();
 }
 
 
@@ -490,6 +487,7 @@ FawkesConfigManager::handle_network_message(FawkesNetworkMessage *msg)
 {
   msg->ref();
   inbound_queue.push_locked(msg);
+  wakeup();
 }
 
 

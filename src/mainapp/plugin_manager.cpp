@@ -52,12 +52,23 @@
  * @author Tim Niemueller
  */
 
+/* IMPORANT IMPLEMENTER'S NOTE
+ *
+ * If you are going to work on this code mind the following: it is assumed
+ * that only loop() will pop messages from the inbound queue. Thus the inbound
+ * queue is only locked for this pop operation, not for the whole access time.
+ * This is true as long as messages are only appended from the outside!
+ * This is necessary to ensure that handle_network_message() will not hang
+ * waiting for the queue lock.
+ */
+
 /** Constructor.
  * @param thread_manager thread manager plugin threads will be added to
  * and removed from appropriately.
  */
 FawkesPluginManager::FawkesPluginManager(FawkesThreadManager *thread_manager)
-  : FawkesNetworkHandler(FAWKES_CID_PLUGINMANAGER)
+  : Thread("FawkesPluginManager", Thread::OPMODE_WAITFORWAKEUP),
+    FawkesNetworkHandler(FAWKES_CID_PLUGINMANAGER)
 {
   plugins.clear();
   this->thread_manager = thread_manager;
@@ -208,6 +219,18 @@ FawkesPluginManager::send_load_failure(const char *plugin_name,
   }
 }
 
+
+void
+FawkesPluginManager::send_load_failure(const char *plugin_name,
+				       unsigned int client_id)
+{
+  plugin_load_failed_msg_t *r = (plugin_load_failed_msg_t *)calloc(1, sizeof(plugin_load_failed_msg_t));
+  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+  hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOAD_FAILED,
+	    r, sizeof(plugin_load_failed_msg_t));
+}
+
+
 void
 FawkesPluginManager::send_load_success(const char *plugin_name, unsigned int client_id)
 {
@@ -270,6 +293,18 @@ FawkesPluginManager::send_unload_failure(const char *plugin_name,
 	      r, sizeof(plugin_unload_failed_msg_t));
   }
 }
+
+
+void
+FawkesPluginManager::send_unload_failure(const char *plugin_name,
+					 unsigned int client_id)
+{
+  plugin_unload_failed_msg_t *r = (plugin_unload_failed_msg_t *)calloc(1, sizeof(plugin_unload_failed_msg_t));
+  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+  hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOAD_FAILED,
+	    r, sizeof(plugin_unload_failed_msg_t));
+}
+
 
 void
 FawkesPluginManager::send_unload_success(const char *plugin_name, unsigned int client_id)
@@ -457,13 +492,11 @@ FawkesPluginManager::unload(const char *plugin_type)
 /** Process all network messages that have been received.
  */
 void
-FawkesPluginManager::process_after_loop()
+FawkesPluginManager::loop()
 {
-  check_loaded();
-  check_initialized();
-  check_finalized();
-
-  inbound_queue.lock();
+  //check_loaded();
+  //check_initialized();
+  //check_finalized();
 
   while ( ! inbound_queue.empty() ) {
     FawkesNetworkMessage *msg = inbound_queue.front();
@@ -483,7 +516,14 @@ FawkesPluginManager::process_after_loop()
 	  send_load_success(name, msg->clid());
 	} else {
 	  LibLogger::log_info("FawkesPluginManager", "Requesting deferred loading of %s", name);
-	  request_load(name, msg->clid());
+	  //request_load(name, msg->clid());
+	  try {
+	    load(name);
+	    send_load_success(name, msg->clid());
+	    send_loaded(name);
+	  } catch (Exception &e) {
+	    send_load_failure(name, msg->clid());
+	  }
 	}
       }
       break;
@@ -502,7 +542,14 @@ FawkesPluginManager::process_after_loop()
 	  send_unload_success(name, msg->clid());
 	} else {
 	  LibLogger::log_info("FawkesPluginManager", "Requesting deferred UNloading of %s", name);
-	  request_unload(name, msg->clid());
+	  //request_unload(name, msg->clid());
+	  try {
+	    unload(name);
+	    send_unload_success(name, msg->clid());
+	    send_unloaded(name);
+	  } catch (Exception &e) {
+	    send_unload_failure(name, msg->clid());
+	  }
 	}
       }
       break;
@@ -545,10 +592,8 @@ FawkesPluginManager::process_after_loop()
     }
 
     msg->unref();
-    inbound_queue.pop();
+    inbound_queue.pop_locked();
   }
-
-  inbound_queue.unlock();
 }
 
 
@@ -557,28 +602,13 @@ FawkesPluginManager::handle_network_message(FawkesNetworkMessage *msg)
 {
   msg->ref();
   inbound_queue.push_locked(msg);
+  wakeup();
 }
 
 
 void
 FawkesPluginManager::client_connected(unsigned int clid)
 {
-  // send out messages with all loaded plugins
-  /*
-  plugins_mutex->lock();
-  if ( plugins.size() == 0 ) {
-    hub->send(clid, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_NONE_LOADED);
-  } else {
-    for (pit = plugins.begin(); pit != plugins.end(); ++pit) {
-      plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
-      strncpy(r->name, (*pit).first.c_str(), PLUGIN_MSG_NAME_LENGTH);
-      r->plugin_id = plugin_ids[(*pit).first];
-      hub->send(clid, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED,
-		r, sizeof(plugin_loaded_msg_t));
-    }
-  }
-  plugins_mutex->unlock();
-  */
 }
 
 

@@ -29,6 +29,7 @@
 #define __FAWKES_PLUGIN_MANAGER_H_
 
 #include <netcomm/fawkes/handler.h>
+#include <core/threading/thread.h>
 #include <core/utils/lock_queue.h>
 #include <core/utils/lock_list.h>
 
@@ -44,7 +45,9 @@ class PluginLoader;
 class Mutex;
 class PluginListMessage;
 
-class FawkesPluginManager : public FawkesNetworkHandler
+class FawkesPluginManager
+: public Thread,
+  public FawkesNetworkHandler
 {
  public:
   FawkesPluginManager(FawkesThreadManager *thread_manager);
@@ -55,7 +58,8 @@ class FawkesPluginManager : public FawkesNetworkHandler
   virtual void handle_network_message(FawkesNetworkMessage *msg);
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
-  virtual void process_after_loop();
+
+  virtual void loop();
 
   void load(const char *plugin_type);
   void unload(const char *plugin_type);
@@ -67,10 +71,12 @@ class FawkesPluginManager : public FawkesNetworkHandler
   void request_unload(const char *plugin_name, unsigned int client_id);
   void add_plugin(Plugin *plugin, const char *plugin_name);
   void send_load_failure(const char *plugin_name, std::list<unsigned int> &clients);
+  void send_load_failure(const char *plugin_name, unsigned int client_id);
   void send_load_success(const char *plugin_name, unsigned int client_id);
   void check_loaded();
   void check_initialized();
   void send_unload_failure(const char *plugin_name, std::list<unsigned int> &clients);
+  void send_unload_failure(const char *plugin_name, unsigned int client_id);
   void send_unload_success(const char *plugin_name, unsigned int client_id);
   void check_finalized();
   void add_plugin_deferred(Plugin *plugin, const char *plugin_name);

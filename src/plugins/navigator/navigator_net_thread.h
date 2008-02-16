@@ -66,12 +66,8 @@ class NavigatorNetworkThread : public Thread, public LoggingAspect, public Fawke
   virtual void handle_network_message(FawkesNetworkMessage *msg);
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
-  virtual void process_after_loop();
-
 
  private:
-
-  void process_udp_message(void *buf, size_t buflen);
   void process_network_message(FawkesNetworkMessage *msg);
 
 

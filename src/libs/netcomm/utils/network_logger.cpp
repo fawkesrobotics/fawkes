@@ -419,12 +419,6 @@ NetworkLogger::client_disconnected(unsigned int clid)
 }
 
 
-void
-NetworkLogger::process_after_loop()
-{
-}
-
-
 /** @class NetworkLoggerMessageContent <netcomm/utils/network_logger.h>
  * Message sent over the network with a log message.
  * Contains a buffer with a small header and two null-terminated strings, the first

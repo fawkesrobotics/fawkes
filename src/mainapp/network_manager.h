@@ -48,8 +48,6 @@ class FawkesNetworkManager
   ServicePublisher *     service_publisher();
   ServiceBrowser *       service_browser();
 
-  void process();
-
  private:
   unsigned short int          fawkes_port;
   FawkesThreadManager        *thread_manager;
