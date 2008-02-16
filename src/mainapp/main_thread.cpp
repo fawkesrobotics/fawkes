@@ -230,13 +230,17 @@ FawkesMainThread::destruct()
   multi_logger->remove_logger(network_logger);
   delete network_logger;
 
-  plugin_manager->cancel();
-  plugin_manager->join();
-  delete plugin_manager;
+  if ( plugin_manager ) {
+    plugin_manager->cancel();
+    plugin_manager->join();
+    delete plugin_manager;
+  }
   delete blackboard;
-  config_manager->cancel();
-  config_manager->join();
-  delete config_manager;
+  if (config_manager) {
+    config_manager->cancel();
+    config_manager->join();
+    delete config_manager;
+  }
   delete config;
   if ( config_mutable_file != NULL )  free(config_mutable_file);
   delete hostinfo;
@@ -311,44 +315,44 @@ FawkesMainThread::once()
 void
 FawkesMainThread::loop()
 {
+  if ( ! thread_manager->timed_threads_exist() ) {
+    multi_logger->log_debug("FawkesMainThread", "No threads exist, waiting");
+    thread_manager->wait_for_timed_threads();
+    multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "
+			                        "running main loop now");
+  }
+
   TIMETRACK_START(__ttc_real_loop, __ttc_full_loop, __ttc_pre_loop);
 
   if ( __time_wait ) {
     __time_wait->mark_start();
   }
 
-  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
-  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
+  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
 
   TIMETRACK_INTER(__ttc_pre_loop, __ttc_sensor)
 
-  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
-  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
+  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
 
   TIMETRACK_INTER(__ttc_sensor, __ttc_worldstate)
 
-  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
-  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
+  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
 
   TIMETRACK_INTER(__ttc_worldstate, __ttc_think)
 
-  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_THINK );
-  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_THINK );
+  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK );
 
   TIMETRACK_INTER(__ttc_think, __ttc_skill)
 
-  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_SKILL );
-  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_SKILL );
+  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL );
 
   TIMETRACK_INTER(__ttc_skill, __ttc_act)
 
-  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_ACT );
-  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_ACT );
+  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT );
 
   TIMETRACK_INTER(__ttc_act, __ttc_post_loop)
 
-  thread_manager->wakeup( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
-  thread_manager->wait(   BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
+  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
 
   TIMETRACK_INTER(__ttc_post_loop, __ttc_netproc)
 
@@ -360,7 +364,7 @@ FawkesMainThread::loop()
   if ( __time_wait ) {
     __time_wait->wait();
   } else {
-    usleep(0);
+    yield();
   }
 
   TIMETRACK_END(__ttc_full_loop);

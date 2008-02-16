@@ -33,10 +33,12 @@
 #include <core/exception.h>
 #include <aspect/blocked_timing.h>
 
-#include <map>
+#include <core/utils/lock_map.h>
 #include <list>
 
+class Mutex;
 class Barrier;
+class WaitCondition;
 class ThreadInitializer;
 class ThreadFinalizer;
 
@@ -51,36 +53,34 @@ class FawkesThreadManager : public ThreadCollector
   virtual void add(ThreadList &tl);
   virtual void add(Thread *t);
 
-  virtual void add_deferred(ThreadList &tl);
-  virtual bool deferred_add_done(ThreadList &tl);
-
   virtual void remove(ThreadList &tl);
   virtual void remove(Thread *t);
-
-  virtual void remove_deferred(ThreadList &tl);
-  virtual bool deferred_remove_done(ThreadList &tl);
 
   virtual void force_remove(ThreadList &tl);
   virtual void force_remove(Thread *t);
 
-  void wakeup(BlockedTimingAspect::WakeupHook hook);
-  void wait(BlockedTimingAspect::WakeupHook hook);
+  void wakeup_and_wait(BlockedTimingAspect::WakeupHook hook);
+
+  bool timed_threads_exist() const;
+  void wait_for_timed_threads();
+
 
  private:
-  void internal_add_thread(Thread *t, std::list<BlockedTimingAspect::WakeupHook> &changed);
-  void internal_remove_thread(Thread *t, std::list<BlockedTimingAspect::WakeupHook> &changed);
-  void update_barriers(std::list<BlockedTimingAspect::WakeupHook> &changed);
+  void internal_add_thread(Thread *t);
+  void internal_remove_thread(Thread *t);
+  void update_barrier(BlockedTimingAspect::WakeupHook hook);
 
  private:
   ThreadInitializer *initializer;
   ThreadFinalizer   *finalizer;
 
-  std::map< BlockedTimingAspect::WakeupHook, ThreadList > threads;
-  std::map< BlockedTimingAspect::WakeupHook, ThreadList >::iterator tit;
+  LockMap< BlockedTimingAspect::WakeupHook, ThreadList > threads;
+  LockMap< BlockedTimingAspect::WakeupHook, ThreadList >::iterator tit;
 
   std::map< BlockedTimingAspect::WakeupHook, Barrier * >  barriers;
 
   ThreadList untimed_threads;
+  WaitCondition *wait_for_timed;
 };
 
 #endif

@@ -67,18 +67,11 @@ class FawkesPluginManager
  private:
   PluginListMessage * list_avail();
   PluginListMessage * list_loaded();
-  void request_load(const char *plugin_name, unsigned int client_id);
-  void request_unload(const char *plugin_name, unsigned int client_id);
   void add_plugin(Plugin *plugin, const char *plugin_name);
-  void send_load_failure(const char *plugin_name, std::list<unsigned int> &clients);
   void send_load_failure(const char *plugin_name, unsigned int client_id);
   void send_load_success(const char *plugin_name, unsigned int client_id);
-  void check_loaded();
-  void check_initialized();
-  void send_unload_failure(const char *plugin_name, std::list<unsigned int> &clients);
   void send_unload_failure(const char *plugin_name, unsigned int client_id);
   void send_unload_success(const char *plugin_name, unsigned int client_id);
-  void check_finalized();
   void add_plugin_deferred(Plugin *plugin, const char *plugin_name);
   void send_loaded(const char *plugin_name);
   void send_unloaded(const char *plugin_name);
@@ -91,21 +84,11 @@ class FawkesPluginManager
   Mutex *plugins_mutex;
 
   std::map< std::string, Plugin * > plugins;
-  std::map< std::string, Plugin * > plugins_deferred;
   std::map< std::string, Plugin * >::iterator pit;
   std::map< std::string, Plugin * >::reverse_iterator rpit;
 
   unsigned int next_plugin_id;
   std::map< std::string, unsigned int > plugin_ids;
-  std::map< std::string, unsigned int > plugin_ids_deferred;
-
-  typedef std::list< unsigned int > ClientList;
-  typedef std::map< std::string, ClientList > RequestMap;
-  RequestMap load_requests;
-  RequestMap::iterator lri;
-  RequestMap unload_requests;
-  RequestMap::iterator ulri;
-  ClientList::iterator lrci;
 
   LockQueue< FawkesNetworkMessage * > inbound_queue;
 

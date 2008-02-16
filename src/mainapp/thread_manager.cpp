@@ -28,6 +28,8 @@
 #include <mainapp/thread_manager.h>
 #include <core/threading/thread.h>
 #include <core/threading/barrier.h>
+#include <core/threading/mutex_locker.h>
+#include <core/threading/wait_condition.h>
 #include <core/threading/thread_initializer.h>
 #include <core/threading/thread_finalizer.h>
 #include <core/exceptions/software.h>
@@ -61,6 +63,7 @@ FawkesThreadManager::FawkesThreadManager()
   finalizer   = NULL;
   threads.clear();
   barriers.clear();
+  wait_for_timed = new WaitCondition();
 }
 
 
@@ -80,6 +83,7 @@ FawkesThreadManager::~FawkesThreadManager()
     delete (*bit).second;
   }
   barriers.clear();
+  delete wait_for_timed;
 }
 
 
@@ -102,21 +106,17 @@ FawkesThreadManager::set_inifin(ThreadInitializer *initializer, ThreadFinalizer 
  * @param changed list of changed hooks
  */
 void
-FawkesThreadManager::update_barriers(std::list<BlockedTimingAspect::WakeupHook> &changed)
+FawkesThreadManager::update_barrier(BlockedTimingAspect::WakeupHook hook)
 {
-  changed.sort();
-  changed.unique();
-  for (std::list<BlockedTimingAspect::WakeupHook>::iterator i = changed.begin(); i != changed.end(); ++i) {
-    if ( barriers.find(*i) != barriers.end() ) {
-      delete barriers[*i];
-      if ( threads.find(*i) == threads.end() ) {
-	barriers.erase(*i);
-      }
+  if ( barriers.find(hook) != barriers.end() ) {
+    delete barriers[hook];
+    if ( threads.find(hook) == threads.end() ) {
+      barriers.erase(hook);
     }
+  }
 
-    if ( threads.find(*i) != threads.end() ) {
-      barriers[*i] = new Barrier(threads[*i].size() + 1);
-    }
+  if ( threads.find(hook) != threads.end() ) {
+    barriers[hook] = new Barrier(threads[hook].size() + 1);
   }
 }
 
@@ -131,15 +131,13 @@ FawkesThreadManager::update_barriers(std::list<BlockedTimingAspect::WakeupHook> 
  * @param changed list of changed hooks, appropriate hook is added if necessary
  */
 void
-FawkesThreadManager::internal_remove_thread(Thread *t,
-					    std::list<BlockedTimingAspect::WakeupHook> &changed)
+FawkesThreadManager::internal_remove_thread(Thread *t)
 {
   BlockedTimingAspect *timed_thread;
 
   if ( (timed_thread = dynamic_cast<BlockedTimingAspect *>(t)) != NULL ) {
     // find thread and remove
     BlockedTimingAspect::WakeupHook hook = timed_thread->blockedTimingAspectHook();
-    threads[hook].lock();
     for (ThreadList::iterator j = threads[hook].begin(); j != threads[hook].end(); ++j) {
       if ( *j == t ) {
 	threads[ hook ].erase( j );
@@ -149,8 +147,7 @@ FawkesThreadManager::internal_remove_thread(Thread *t,
     if ( threads[hook].size() == 0 ) {
       threads.erase(hook);
     }
-    changed.push_back(hook);
-    threads[hook].unlock();
+    update_barrier(hook);
   } else {
     untimed_threads.lock();
     for (ThreadList::iterator j = untimed_threads.begin(); j != untimed_threads.end(); ++j) {
@@ -172,15 +169,19 @@ FawkesThreadManager::internal_remove_thread(Thread *t,
  * @param changed list of changed hooks, appropriate hook is added if necessary
  */
 void
-FawkesThreadManager::internal_add_thread(Thread *t,
-					 std::list<BlockedTimingAspect::WakeupHook> &changed)
+FawkesThreadManager::internal_add_thread(Thread *t)
 {
   BlockedTimingAspect *timed_thread;
   if ( (timed_thread = dynamic_cast<BlockedTimingAspect *>(t)) != NULL ) {
-    threads[ timed_thread->blockedTimingAspectHook() ].lock();
-    threads[ timed_thread->blockedTimingAspectHook() ].push_back(t);
-    changed.push_back(timed_thread->blockedTimingAspectHook());
-    threads[ timed_thread->blockedTimingAspectHook() ].unlock();
+    BlockedTimingAspect::WakeupHook hook = timed_thread->blockedTimingAspectHook();
+    threads[hook].lock();
+    threads[hook].push_back(t);
+
+    // Re-create barriers where necessary
+    update_barrier(hook);
+
+    threads[hook].unlock();
+    wait_for_timed->wake_all();
   } else {
     untimed_threads.push_back_locked(t);
   }
@@ -201,8 +202,6 @@ FawkesThreadManager::internal_add_thread(Thread *t,
 void
 FawkesThreadManager::add(ThreadList &tl)
 {
-  std::list<BlockedTimingAspect::WakeupHook> changed;
-
   if ( ! (initializer && finalizer) ) {
     throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
   }
@@ -213,7 +212,6 @@ FawkesThreadManager::add(ThreadList &tl)
   }
 
   tl.lock();
-  changed.clear();
 
   // Try to initialise all threads
   try {
@@ -229,72 +227,11 @@ FawkesThreadManager::add(ThreadList &tl)
 
   // All thread initialized, now add threads to internal structure
   for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
-    internal_add_thread(*i, changed);
+    internal_add_thread(*i);
   }
-
-  // Re-create barriers where necessary
-  update_barriers(changed);
 
   tl.start();
   tl.unlock();
-}
-
-
-/** Add thread from list deferred.
- * This will start the initialization of the threads deferred.
- * The threads are not yet added to the internal structures.
- * @param tl thread list to add deferred
- */
-void
-FawkesThreadManager::add_deferred(ThreadList &tl)
-{
-  if ( ! (initializer && finalizer) ) {
-    throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
-  }
-
-  if ( tl.sealed() ) {
-    throw Exception("Not accepting new threads from list that is not fresh, "
-		    "list '%s' already sealed", tl.name());
-  }
-
-  tl.lock();
-
-  tl.seal();
-  tl.init_deferred(initializer, finalizer);
-}
-
-
-/** Check if deferred add is done.
- * @param tl thread list to check
- * @return true if the deferred add is odone, false otherwise.
- */
-bool
-FawkesThreadManager::deferred_add_done(ThreadList &tl)
-{
-  std::list<BlockedTimingAspect::WakeupHook> changed;
-  changed.clear();
-
-  try {
-    if ( tl.deferred_init_done() ) {
-      // All thread initialized, now add threads to internal structure
-      for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
-	internal_add_thread(*i, changed);
-      }
-
-      // Re-create barriers where necessary
-      update_barriers(changed);
-
-      tl.start();
-      tl.unlock();
-
-      return true;
-    } else {
-      return false;
-    }
-  } catch (Exception &e) {
-    tl.unlock();
-    throw;
-  }
 }
 
 
@@ -325,9 +262,7 @@ FawkesThreadManager::add(Thread *thread)
     throw;
   }
 
-  std::list<BlockedTimingAspect::WakeupHook> changed;
-  internal_add_thread(thread, changed);
-  update_barriers(changed);
+  internal_add_thread(thread);
 
   thread->start();
 }
@@ -350,8 +285,6 @@ FawkesThreadManager::add(Thread *thread)
 void
 FawkesThreadManager::remove(ThreadList &tl)
 {
-  std::list<BlockedTimingAspect::WakeupHook> changed;
-
   if ( ! (initializer && finalizer) ) {
     throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
   }
@@ -363,9 +296,8 @@ FawkesThreadManager::remove(ThreadList &tl)
 				       tl.name());
   }
 
-  changed.clear();
-
   tl.lock();
+  MutexLocker lock(threads.mutex());
 
   try {
     if ( ! tl.prepare_finalize(finalizer) ) {
@@ -386,73 +318,10 @@ FawkesThreadManager::remove(ThreadList &tl)
   tl.stop();
   tl.finalize(finalizer);
   for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
-    internal_remove_thread(*i, changed);
+    internal_remove_thread(*i);
   }
-
-  update_barriers(changed);
 
   tl.unlock();
-}
-
-
-/** Remove the given threads deferred.
- * The thread manager tries to finalize and stop the threads and then removes the
- * threads from the internal structures.
- *
- * The finalization is just started, but not necessarily finished (deferred
- * operation). Use deferred_remove_done() to check for the result.
- *
- * @param tl threads to remove.
- * @exception ThreadListNotSealedException if the given thread lits tl is not
- * sealed the thread manager will refuse to remove it
- */
-void
-FawkesThreadManager::remove_deferred(ThreadList &tl)
-{
-  if ( ! tl.sealed() ) {
-    throw ThreadListNotSealedException("Cannot remove unsealed thread list. "
-				       "Not accepting unsealed list '%s' for removal",
-				       tl.name());
-  }
-
-  tl.lock();
-  tl.finalize_deferred(finalizer);
-}
-
-
-/** Check if deferred removal is done.
- * @param tl thread list to check
- * @return true if deferred removal is done, false otherwise
- */
-bool
-FawkesThreadManager::deferred_remove_done(ThreadList &tl)
-{
-  std::list<BlockedTimingAspect::WakeupHook> changed;
-  changed.clear();
-
-  try {
-    if ( tl.deferred_finalize_done() ) {
-
-      tl.stop();
-
-      // All thread initialized, now add threads to internal structure
-      for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
-	internal_remove_thread(*i, changed);
-      }
-
-      // Re-create barriers where necessary
-      update_barriers(changed);
-
-      tl.unlock();
-
-      return true;
-    } else {
-      return false;
-    }
-  } catch (Exception &e) {
-    tl.unlock();
-    throw;
-  }
 }
 
 
@@ -492,10 +361,7 @@ FawkesThreadManager::remove(Thread *thread)
   finalizer->finalize(thread);
   thread->finalize();
 
-  std::list<BlockedTimingAspect::WakeupHook> changed;
-  internal_remove_thread(thread, changed);
-
-  update_barriers(changed);
+  internal_remove_thread(thread);
 }
 
 
@@ -520,23 +386,18 @@ FawkesThreadManager::remove(Thread *thread)
 void
 FawkesThreadManager::force_remove(ThreadList &tl)
 {
-  std::list<BlockedTimingAspect::WakeupHook> changed;
-
   if ( ! tl.sealed() ) {
     throw ThreadListNotSealedException("Not accepting unsealed list '%s' for removal",
 				       tl.name());
   }
 
-  changed.clear();
-
   tl.lock();
+  MutexLocker lock(threads.mutex());
   tl.force_stop(finalizer);
 
   for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
-    internal_remove_thread(*i, changed);
+    internal_remove_thread(*i);
   }
-
-  update_barriers(changed);
 
   tl.unlock();
 }
@@ -561,6 +422,7 @@ FawkesThreadManager::force_remove(ThreadList &tl)
 void
 FawkesThreadManager::force_remove(Thread *thread)
 {
+  MutexLocker lock(threads.mutex());
   try {
     thread->prepare_finalize();
   } catch (Exception &e) {
@@ -571,32 +433,46 @@ FawkesThreadManager::force_remove(Thread *thread)
   if (finalizer) finalizer->finalize(thread);
   thread->finalize();
 
-  std::list<BlockedTimingAspect::WakeupHook> changed;
-  internal_remove_thread(thread, changed);
-
-  update_barriers(changed);
+  internal_remove_thread(thread);
 }
 
 
-/** Wakeup threads for given hook.
- * @param hook hook for which to wakup threads.
- */
-void
-FawkesThreadManager::wakeup(BlockedTimingAspect::WakeupHook hook)
-{
-  if ( threads.find(hook) != threads.end() ) {
-    threads[hook].wakeup(barriers[hook]);
-  }
-}
-
-
-/** Wait for threads for given hook to complete.
+/** Wakeup thread for given hook and wait for completion.
+ * This will wakeup all threads registered for the given hook. Afterwards
+ * this method will block until all threads finished their loop.
  * @param hook hook for which to wait for
  */
 void
-FawkesThreadManager::wait(BlockedTimingAspect::WakeupHook hook)
+FawkesThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook)
 {
-  if ( barriers.find(hook) != barriers.end() ) {
-    barriers[hook]->wait();
+  MutexLocker lock(threads.mutex());
+  if ( threads.find(hook) != threads.end() ) {
+    threads[hook].lock();
+    threads[hook].wakeup_unlocked(barriers[hook]);
+    if ( barriers.find(hook) != barriers.end() ) {
+      barriers[hook]->wait();
+    }
+    threads[hook].unlock();
   }
+}
+
+
+/** Check if any timed threads exist.
+ * @return true if threads exist that need to be woken up for execution, false
+ * otherwise
+ */
+bool
+FawkesThreadManager::timed_threads_exist() const
+{
+  return (threads.size() > 0);
+}
+
+
+/** Wait for timed threads.
+ * Use this method to wait until a timed that is added to the thread manager.
+ */
+void
+FawkesThreadManager::wait_for_timed_threads()
+{
+  wait_for_timed->wait();
 }
