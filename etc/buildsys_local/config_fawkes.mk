@@ -16,7 +16,11 @@
 #*****************************************************************************
 
 LIBSRCDIR=$(abspath $(BASEDIR)/src/libs)
-CFLAGS_BASE += -g -Wall -Werror -DBINDIR=\"$(BINDIR)\" \
+
+# Add -DDEBUG_THREADING if you run into threading problems like deadlocks.
+# Read FawkesDebugging in the Fawkes Trac Wiki on how to use it
+CFLAGS_BASE +=  -g \
+		-Wall -Werror -DBINDIR=\"$(BINDIR)\" \
 		-DLIBDIR=\"$(LIBDIR)\" -DPLUGINDIR=\"$(PLUGINDIR)\" \
 		-DCONFDIR=\"$(CONFDIR)\" -DRESDIR=\"$(RESDIR)\"
 
