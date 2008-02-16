@@ -79,6 +79,10 @@ void
 Mutex::lock()
 {
   pthread_mutex_lock(&(mutex_data->mutex));
+#ifdef DEBUG_THREADING
+  // do not switch order, lock holder must be protected with this mutex!
+  mutex_data->set_lock_holder();
+#endif
 }
 
 
@@ -102,7 +106,14 @@ Mutex::lock()
 bool
 Mutex::try_lock()
 {
-  return (pthread_mutex_trylock(&(mutex_data->mutex)) == 0);
+  if (pthread_mutex_trylock(&(mutex_data->mutex)) == 0) {
+#ifdef DEBUG_THREADING
+    mutex_data->set_lock_holder();
+#endif
+    return true;
+  } else {
+    return false;
+  }
 }
 
 
@@ -110,5 +121,9 @@ Mutex::try_lock()
 void
 Mutex::unlock()
 {
+#ifdef DEBUG_THREADING
+  mutex_data->unset_lock_holder();
+  // do not switch order, lock holder must be protected with this mutex!
+#endif
   pthread_mutex_unlock(&(mutex_data->mutex));
 }

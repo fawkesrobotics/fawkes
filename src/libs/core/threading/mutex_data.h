@@ -30,13 +30,53 @@
 
 #include <pthread.h>
 
+#ifdef DEBUG_THREADING
+#include <core/threading/thread.h>
+#include <cstring>
+#include <cstdlib>
+#endif
+
 /// @cond INTERNALS
 /** Internal class of Mutexes, do not use directly.
  */
 class MutexData {
  public:
   pthread_mutex_t mutex;
-  
+
+#ifdef DEBUG_THREADING
+  MutexData() {
+    lock_holder = strdup("Not locked");
+  }
+
+  ~MutexData() {
+    if ( lock_holder ) {
+      free(lock_holder);
+    }
+  }
+
+  char *lock_holder;
+
+  void set_lock_holder()
+  {
+    if ( lock_holder ) {
+      free(lock_holder);
+    }
+    Thread *ct = Thread::current_thread();
+    if ( ct ) {
+      lock_holder = strdup(ct->name());
+    } else {
+      lock_holder = strdup("Unknown");
+    }
+  }
+
+  void unset_lock_holder() {
+    if ( lock_holder ) {
+      free(lock_holder);
+    }
+    lock_holder = strdup("Not locked");
+  }
+
+#endif
 };
 /// @endcond
 

@@ -110,6 +110,7 @@ class Thread {
   Thread(const char *name, OpMode op_mode);
   void exit();
   void test_cancel();
+  void yield();
 
   void set_opmode(OpMode op_mode);
   void set_prepfin_conc_loop(bool concurrent);

@@ -530,24 +530,26 @@ Thread::exit()
 void
 Thread::join()
 {
-  void *dont_care;
-  pthread_join(__thread_id, &dont_care);
-  __started = false;
+  if ( __started ) {
+    void *dont_care;
+    pthread_join(__thread_id, &dont_care);
+    __started = false;
 
-  if ( __sleep_mutex != NULL ) {
-    // We HAVE to release this sleep mutex under any circumstances, so we try
-    // to lock it (locking a locked mutex or unlocking and unlocked mutex are undefined)
-    // and then unlock it. This is for example necessary if a thread is cancelled, and
-    // then set_opmode() is called, this would lead to a deadlock if the thread was
-    // cancelled while waiting for the sleep lock (which is very likely)
-    __sleep_mutex->try_lock();
-    __sleep_mutex->unlock();
+    if ( __sleep_mutex != NULL ) {
+      // We HAVE to release this sleep mutex under any circumstances, so we try
+      // to lock it (locking a locked mutex or unlocking and unlocked mutex are undefined)
+      // and then unlock it. This is for example necessary if a thread is cancelled, and
+      // then set_opmode() is called, this would lead to a deadlock if the thread was
+      // cancelled while waiting for the sleep lock (which is very likely)
+      __sleep_mutex->try_lock();
+      __sleep_mutex->unlock();
+    }
+
+    // Force unlock of these mutexes, otherwise the same bad things as for the sleep
+    // mutex above could happen!
+    loop_mutex->try_lock();
+    loop_mutex->unlock();
   }
-
-  // Force unlock of these mutexes, otherwise the same bad things as for the sleep
-  // mutex above could happen!
-  loop_mutex->try_lock();
-  loop_mutex->unlock();
 }
 
 
@@ -711,6 +713,23 @@ Thread::test_cancel()
 }
 
 
+/** Yield the processor to another thread or process.
+ * This will suspend the execution of the current thread in favor of other
+ * threads. The thread will then be re-scheduled for later execution.
+ * Use this method to make sure that other threads get a chance to get the CPU
+ * for example if your thread is waiting for results from other threads.
+ */
+void
+Thread::yield()
+{
+#ifdef __USE_GNU
+  pthread_yield();
+#else
+  usleep(0);
+#endif
+}
+
+
 /** Check if two threads are the same.
  * @param thread Thread to compare this thread to.
  * @return true, if the threads are equal, false otherwise.
@@ -755,7 +774,7 @@ Thread::run()
     if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
       __sleep_condition->wait(__sleep_mutex);
     }
-    usleep(0);
+    yield();
   }
 }
 
