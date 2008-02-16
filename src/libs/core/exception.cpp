@@ -144,7 +144,6 @@
 Exception::Exception(const char *format, ...) throw()
 { 
   messages_mutex = new Mutex();
-  messages_mutex->lock();
 
   _errno = 0;
 
@@ -160,8 +159,6 @@ Exception::Exception(const char *format, ...) throw()
   } else {
     append_nolock("Unnkown Exception");
   }
-
-  messages_mutex->unlock();
 }
 
 
@@ -176,7 +173,6 @@ Exception::Exception(const char *format, ...) throw()
 Exception::Exception(const char *format, va_list va) throw()
 {
   messages_mutex = new Mutex();
-  messages_mutex->lock();
 
   _errno = 0;
 
@@ -189,8 +185,6 @@ Exception::Exception(const char *format, va_list va) throw()
   } else {
     append_nolock("Unnkown Exception");
   }
-
-  messages_mutex->unlock();
 }
 
 /** Constructor.
@@ -205,7 +199,6 @@ Exception::Exception(const char *format, va_list va) throw()
 Exception::Exception(int errno, const char *format, ...) throw()
 {
   messages_mutex = new Mutex();
-  messages_mutex->lock();
 
   _errno = errno;
 
@@ -228,8 +221,6 @@ Exception::Exception(int errno, const char *format, ...) throw()
   } else {
     append_nolock("Exception with errno=%i (%s)", errno, strerror(errno));
   }
-
-  messages_mutex->unlock();
 }
 
 

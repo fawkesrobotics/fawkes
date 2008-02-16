@@ -32,8 +32,10 @@
 
 #ifdef DEBUG_THREADING
 #include <core/threading/thread.h>
+#include <core/exception.h>
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 #endif
 
 /// @cond INTERNALS
@@ -61,11 +63,15 @@ class MutexData {
     if ( lock_holder ) {
       free(lock_holder);
     }
-    Thread *ct = Thread::current_thread();
-    if ( ct ) {
-      lock_holder = strdup(ct->name());
-    } else {
-      lock_holder = strdup("Unknown");
+    try {
+      Thread *ct = Thread::current_thread();
+      if ( ct ) {
+	lock_holder = strdup(ct->name());
+      } else {
+	lock_holder = strdup("Unknown");
+      }
+    } catch (Exception &e) {
+      asprintf(&lock_holder, "Unknown: failed to get thread (%s)", e.what());
     }
   }
 
