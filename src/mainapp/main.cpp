@@ -115,6 +115,8 @@ usage(const char *progname)
 int
 main(int argc, char **argv)
 {
+  Thread::init_main();
+
   ArgumentParser *argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:");
 
   if ( argp->has_arg("h") ) {
@@ -135,8 +137,6 @@ main(int argc, char **argv)
   FawkesMainApp fawkes;
   SignalManager::register_handler(SIGINT, &fawkes);
   SignalManager::register_handler(SIGTERM, &fawkes);
-
-  Thread::init_main();
 
   try {
     fawkes.run(argp);
