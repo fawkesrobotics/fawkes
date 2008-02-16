@@ -404,9 +404,18 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
     }
   else
     {
-      logger->log_error("NavigatorNetworkThread", "Message of invalid type received");
+      if ( msg->clid() != connected_control_client )
+	{
+	  logger->log_warn("NavigatorNetworkThread", "Received message of client %u which is "
+			   "not the controlling client (%u)", msg->clid(),
+			   connected_control_client);
+	}
+      else
+	{
+	  logger->log_error("NavigatorNetworkThread", "Message of invalid type %u received",
+			    msg->msgid());
+	}
     }
-
 }
 
 
