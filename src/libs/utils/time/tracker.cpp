@@ -94,7 +94,7 @@ TimeTracker::~TimeTracker()
  * @param comment comment to set on tracker.
  */
 void
-TimeTracker::reset(string comment)
+TimeTracker::reset(std::string comment)
 {
   tracker_comment = comment;
   for (time_it = times.begin(); time_it != times.end(); ++time_it) {
@@ -116,7 +116,7 @@ TimeTracker::reset(string comment)
  * @param comment optional ping comment.
  */
 void
-TimeTracker::ping(string comment)
+TimeTracker::ping(std::string comment)
 {
   timeval *t = (timeval *)malloc(sizeof(timeval));
   gettimeofday(t, NULL);
@@ -134,7 +134,7 @@ TimeTracker::ping(string comment)
  * class.
  */
 unsigned int
-TimeTracker::add_class(string name)
+TimeTracker::add_class(std::string name)
 {
   classTimes.push_back( new vector< struct timeval * > );
   classNames.push_back( new string(name) );

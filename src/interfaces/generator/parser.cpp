@@ -46,7 +46,7 @@ using namespace xmlpp;
 /** Constructor
  * @param config_filename file name of config (interface template)
  */
-InterfaceParser::InterfaceParser(string config_filename)
+InterfaceParser::InterfaceParser(std::string config_filename)
 {
   dom = new DomParser();
   dom->set_validate();

@@ -172,7 +172,7 @@ Histogram2D::reset()
  * @param s stream
  */
 void
-Histogram2D::printToStream(ostream &s)
+Histogram2D::printToStream(std::ostream &s)
 {
   for (unsigned int v = 0; v < height; ++v) {
     for (unsigned int u = 0; u < width; ++u) {

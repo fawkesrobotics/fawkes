@@ -56,7 +56,7 @@ using namespace std;
  * @param h height of lookup table
  * @param object type of the foreground object
  */
-BayesHistosToLut::BayesHistosToLut(map<hint_t, Histogram2D*> histos,
+BayesHistosToLut::BayesHistosToLut(std::map<hint_t, Histogram2D*> histos,
 				   unsigned int w, 
 				   unsigned int h,
 				   hint_t object)
@@ -449,7 +449,7 @@ BayesHistosToLut::saveLut(char *file)
  * @param filename file name
  */
 void
-BayesHistosToLut::save(string filename)
+BayesHistosToLut::save(std::string filename)
 {
   lut->save( (char *)filename.c_str() );
 }

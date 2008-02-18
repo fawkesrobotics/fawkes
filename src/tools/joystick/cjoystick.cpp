@@ -63,7 +63,7 @@ using namespace std;
  *  Initializes joystick.
  *  @param dev_name device name of the joystick (defaults to /dev/js0)
  */
-CJoystick::CJoystick (const string &dev_name)
+CJoystick::CJoystick (const std::string &dev_name)
 {
   m_Error = 0;
 

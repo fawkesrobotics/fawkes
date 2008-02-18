@@ -143,7 +143,7 @@ RhtXNode::getNodes(std::vector< std::vector< int > > *rv, int min_votes)
  * @param s stream to dump to.
  */
 void
-RhtXNode::dump(ostream& s)
+RhtXNode::dump(std::ostream& s)
 {
   if (left)
     ((RhtXNode*)left)->dump(s);
@@ -272,7 +272,7 @@ RhtYNode::getNodes(std::vector< std::vector< int > > *rv, int min_votes, int x)
  * @param x x
  */
 void
-RhtYNode::dump(ostream& s, int x)
+RhtYNode::dump(std::ostream& s, int x)
 {
   if (left)
     ((RhtYNode*)left)->dump(s, x);
@@ -412,7 +412,7 @@ RhtRNode::getNodes(std::vector< std::vector< int > > *rv, int min_votes, int x, 
  * @param y y
  */
 void
-RhtRNode::dump(ostream& s, int x, int y)
+RhtRNode::dump(std::ostream& s, int x, int y)
 {
   if (left)
     ((RhtRNode*)left)->dump(s, x, y);
@@ -549,7 +549,7 @@ RhtAccumulator::getMax(int &x, int &y, int &r) const
  * @param s stream
  */
 void
-RhtAccumulator::dump(ostream& s)
+RhtAccumulator::dump(std::ostream& s)
 {
   if (root)
     root->dump(s);

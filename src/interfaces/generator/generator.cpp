@@ -53,10 +53,10 @@ using namespace std;
  * @param creation_date user-supplied creation date of interface
  * @param data_comment comment in data block.
  */
-InterfaceGenerator::InterfaceGenerator(string directory, string interface_name,
-				       string config_basename, string author,
-				       string year, string creation_date,
-				       string data_comment)
+InterfaceGenerator::InterfaceGenerator(std::string directory, std::string interface_name,
+				       std::string config_basename, std::string author,
+				       std::string year, std::string creation_date,
+				       std::string data_comment)
 {
   this->dir    = directory;
   if ( dir.find_last_of("/") != (dir.length() - 1) ) {
@@ -144,8 +144,8 @@ InterfaceGenerator::setMessages(const std::vector<InterfaceMessage> &messages)
  * @param fields fields for struct
  */
 void
-InterfaceGenerator::write_struct(FILE *f, string name, string /* indent space */ is,
-				 vector<InterfaceField> fields)
+InterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* indent space */ is,
+				 std::vector<InterfaceField> fields)
 {
 
   stable_sort(fields.begin(), fields.end());
@@ -173,7 +173,7 @@ InterfaceGenerator::write_struct(FILE *f, string name, string /* indent space */
  * @param filename name of file
  */
 void
-InterfaceGenerator::write_header(FILE *f, string filename)
+InterfaceGenerator::write_header(FILE *f, std::string filename)
 {
   fprintf(f, "\n/***************************************************************************\n");
   fprintf(f, " *  %s - Fawkes BlackBoard Interface - %s\n", filename.c_str(), class_name.c_str());
@@ -387,7 +387,7 @@ InterfaceGenerator::write_messages_cpp(FILE *f)
  */
 void
 InterfaceGenerator::write_ctor_dtor_h(FILE *f, std::string /* indent space */ is,
-				      string classname)
+				      std::string classname)
 {
   fprintf(f,
 	  "%s%s();\n"
@@ -405,8 +405,8 @@ InterfaceGenerator::write_ctor_dtor_h(FILE *f, std::string /* indent space */ is
  */
 void
 InterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* indent space */ is,
-					      string classname,
-					      vector<InterfaceField> fields)
+					      std::string classname,
+					      std::vector<InterfaceField> fields)
 {
   vector<InterfaceField>::iterator i;
 
@@ -440,7 +440,7 @@ InterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* indent spa
  */
 void
 InterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
-					string classname, string super_class,
+					std::string classname, std::string super_class,
 					std::string inclusion_prefix)
 {
    fprintf(f,
@@ -473,9 +473,9 @@ InterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
  */
 void
 InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
-						string classname, string super_class,
+						std::string classname, std::string super_class,
 						std::string inclusion_prefix,
-						vector<InterfaceField> fields)
+						std::vector<InterfaceField> fields)
 {
   vector<InterfaceField>::iterator i;
 
@@ -557,7 +557,7 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 void
 InterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
 				      std::string classname,
-				      vector<InterfaceField> fields,
+				      std::vector<InterfaceField> fields,
 				      std::string inclusion_prefix)
 {
   fprintf(f, "/* Methods */\n");
@@ -620,7 +620,7 @@ InterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
  */
 void
 InterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ is,
-				    vector<InterfaceField> fields)
+				    std::vector<InterfaceField> fields)
 {
   fprintf(f, "%s/* Methods */\n", is.c_str());
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {

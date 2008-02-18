@@ -492,8 +492,8 @@ ColorModelLookupTable::toImage(unsigned char *yuv422_planar_buffer)
  * In the format %g is replaced with the hostname.
  * @param format format for the filename
  */
-string
-ColorModelLookupTable::composeFilename(const string format)
+std::string
+ColorModelLookupTable::composeFilename(const std::string format)
 {
   string rv = format;
 

@@ -52,7 +52,7 @@ BulbSampler::BulbSampler( unsigned int image_width,
 			  unsigned int image_height,
 			  unsigned int color_lut_width,
 			  unsigned int color_lut_height,
-			  string lut_file)
+			  std::string lut_file)
 {
   __image_width  = image_width;
   __image_height = image_height;
@@ -109,7 +109,7 @@ BulbSampler::BulbSampler( Bulb *bulb,
 			  unsigned int image_height,
 			  unsigned int color_lut_width,
 			  unsigned int color_lut_height,
-			  string lut_file)
+			  std::string lut_file)
 {
   __image_width = image_width;
   __image_height = image_height;
