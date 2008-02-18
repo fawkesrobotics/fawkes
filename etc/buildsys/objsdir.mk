@@ -29,7 +29,7 @@ MAKETARGET = $(MAKE) --no-print-directory --no-keep-going -C $@ \
 .PHONY: $(OBJDIR)
 $(OBJDIR):
 	+@[ -d $@ ] || mkdir -p $@
-	+@$(MAKETARGET)
+	+@$(MAKETARGET) || exit $$?
 
 % :: $(OBJDIR) ; @:
 
