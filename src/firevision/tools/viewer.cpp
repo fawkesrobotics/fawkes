@@ -265,8 +265,8 @@ main(int argc, char **argv)
 	  if ( rectifying ) {
 	    rectifying = false;
 	  } else {
-	    if ( ! (SDL_GetModState() & KMOD_LSHIFT) &&
-		 ! (SDL_GetModState() & KMOD_RSHIFT) ||
+	    if ( (! (SDL_GetModState() & KMOD_LSHIFT) &&
+		  ! (SDL_GetModState() & KMOD_RSHIFT)) ||
 		 ! rectify_filter ) {
 	      Gtk::FileChooserDialog fcd("Open Rectification Info File");
 

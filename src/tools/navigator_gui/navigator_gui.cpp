@@ -43,6 +43,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <fstream>
+#include <cstring>
 
 #include <gtkmm/main.h>
 #include <gtkmm/window.h>

@@ -36,6 +36,8 @@
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
 
+#include <unistd.h>
+
 /** @class FawkesNetworkServerClientSendThread <netcomm/fawkes/server_client_thread.h>
  * Sending thread for a Fawkes client connected to the server.
  * This thread is spawned for each client connected to the server to handle the

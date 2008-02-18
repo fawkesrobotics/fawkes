@@ -34,6 +34,7 @@
 #include <mainapp/plugin_messages.h>
 #include <mainapp/plugin_list_message.h>
 #include <iostream>
+#include <cstring>
 
 using namespace std;
 

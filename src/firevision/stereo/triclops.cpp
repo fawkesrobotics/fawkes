@@ -39,6 +39,7 @@
 // PGR Triclops SDK
 #include <triclops.h>
 
+#include <cstdlib>
 #include <unistd.h>
 #include <errno.h>
 

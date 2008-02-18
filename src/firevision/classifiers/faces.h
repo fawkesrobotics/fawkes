@@ -30,8 +30,8 @@
 
 #include <classifiers/classifier.h>
 
-typedef struct CvHaarClassifierCascade;
-typedef struct CvMemStorage;
+struct CvHaarClassifierCascade;
+struct CvMemStorage;
 typedef struct _IplImage IplImage;
 
 class FacesClassifier : public Classifier
