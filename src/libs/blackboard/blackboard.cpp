@@ -113,11 +113,11 @@ const unsigned int BlackBoard::BBIO_FLAG_ALL =
  */
 BlackBoard::BlackBoard(bool master)
 {
-  __msgmgr = new BlackBoardMessageManager();
   __memmgr = new BlackBoardMemoryManager(BLACKBOARD_MEMORY_SIZE,
 					 BLACKBOARD_VERSION,
 					 master,
 					 BLACKBOARD_MAGIC_TOKEN);
+  __msgmgr = new BlackBoardMessageManager();
   __im = new BlackBoardInterfaceManager(__memmgr, __msgmgr);
 
   __msgmgr->set_interface_manager(__im);
