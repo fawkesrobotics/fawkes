@@ -29,7 +29,6 @@
 #include <netcomm/utils/resolver.h>
 #ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
-#include <netcomm/dns-sd/avahi_resolver.h>
 #endif
 #include <core/exceptions/system.h>
 
@@ -67,11 +66,7 @@ NetworkNameResolverThread::NetworkNameResolverThread(NetworkNameResolver *resolv
   this->resolver = resolver;
 
 #ifdef HAVE_AVAHI
-  if ( avahi_thread != NULL ) {
-    avahi_resolver = avahi_thread->resolver();
-  } else {
-    avahi_resolver = NULL;
-  }
+  this->avahi_thread = avahi_thread;
 #endif
 
   namesq.clear();
@@ -125,12 +120,12 @@ NetworkNameResolverThread::resolve_name_immediately(const char *name,
   // resolve names in .local domain with Avahi if available
   char *n = (char *)name + strlen(name) - 6; // 6 == strlen(".local")
   char *f = strstr(name, ".local");
-  if ( avahi_resolver && f && (f == n) ) {
-    avahi_resolver->resolve_name(name, this);          
+  if ( avahi_thread && f && (f == n) ) {
+    avahi_thread->resolve_name(name, this);          
   /*
   } else {
-    printf("NOT ordering avahi_resolver lookup\n");
-    if ( ! avahi_resolver ) 
+    printf("NOT ordering avahi_thread lookup\n");
+    if ( ! avahi_thread ) 
       printf("No avahi resolver\n");
     if ( ! f ) {
       printf(".local not found\n");
@@ -186,8 +181,8 @@ NetworkNameResolverThread::resolve_address_immediately(struct sockaddr *addr, so
   }
 
 #ifdef HAVE_AVAHI
-  if ( avahi_resolver ) {
-    avahi_resolver->resolve_address(addr, addr_len, this);
+  if ( avahi_thread ) {
+    avahi_thread->resolve_address(addr, addr_len, this);
   }
 #endif
 

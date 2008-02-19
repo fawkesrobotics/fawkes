@@ -30,11 +30,11 @@
 /** @class ServicePublisher <netcomm/service_discovery/service_publisher.h>
  * Service publisher interface.
  *
- * @fn void ServicePublisher::publish(NetworkService *service) = 0
+ * @fn void ServicePublisher::publish_service(NetworkService *service) = 0
  * Publish service.
  * @param service service to publish
  *
- * @fn void ServicePublisher::unpublish(NetworkService *service) = 0
+ * @fn void ServicePublisher::unpublish_service(NetworkService *service) = 0
  * Revoke service publication.
  * @param service service to revoke
  */

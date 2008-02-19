@@ -61,6 +61,7 @@ class NetworkService
 
   bool                operator==(const NetworkService &s) const;
   bool                operator==(const NetworkService *s) const;
+  bool                operator<(const NetworkService &s) const;
 
  private:
   std::list<std::string> list;

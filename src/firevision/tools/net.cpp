@@ -178,6 +178,7 @@ class FireVisionNetworkTool
 
   virtual void all_for_now()
   {
+    printf("All for now\n");
     __explore_waitcond->wake_all();
   }
 
@@ -312,7 +313,7 @@ class FireVisionNetworkTool
     __avahi_thread = new AvahiThread();
     __avahi_thread->start();
 
-    __avahi_thread->watch("_fountain._tcp", this);
+    __avahi_thread->watch_service("_fountain._tcp", this);
 
     __explore_waitcond->wait();
     delete __explore_waitcond;

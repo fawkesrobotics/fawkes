@@ -46,15 +46,15 @@ DummyServiceBrowser::~DummyServiceBrowser()
 
 
 void
-DummyServiceBrowser::add_handler(const char *service_type,
-				 ServiceBrowseHandler *h)
+DummyServiceBrowser::watch_service(const char *service_type,
+				   ServiceBrowseHandler *h)
 {
 }
 
 
 void
-DummyServiceBrowser::remove_handler(const char *service_type,
-				    ServiceBrowseHandler *h)
+DummyServiceBrowser::unwatch_service(const char *service_type,
+				     ServiceBrowseHandler *h)
 {
 }
 

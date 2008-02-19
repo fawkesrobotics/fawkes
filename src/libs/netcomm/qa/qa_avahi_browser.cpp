@@ -41,7 +41,7 @@ class QAAvahiBrowserMain : public SignalHandler, public ServiceBrowseHandler
   QAAvahiBrowserMain()
   {
     at = new AvahiThread();;
-    at->watch("_fawkes._udp", this);
+    at->watch_service("_fawkes._udp", this);
   }
 
   ~QAAvahiBrowserMain()

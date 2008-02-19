@@ -36,8 +36,8 @@ class ServiceBrowser
  public:
   virtual ~ServiceBrowser();
 
-  virtual void add_handler(const char *service_type, ServiceBrowseHandler *h)       = 0;
-  virtual void remove_handler(const char *service_type, ServiceBrowseHandler *h)    = 0;
+  virtual void watch_service(const char *service_type, ServiceBrowseHandler *h)   = 0;
+  virtual void unwatch_service(const char *service_type, ServiceBrowseHandler *h) = 0;
 };
 
 

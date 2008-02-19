@@ -28,7 +28,7 @@
 /// @cond QA
 
 #include <netcomm/dns-sd/avahi_thread.h>
-#include <netcomm/dns-sd/avahi_resolver.h>
+#include <netcomm/dns-sd/avahi_resolver_handler.h>
 
 #include <core/exception.h>
 #include <utils/system/signal.h>
@@ -44,7 +44,6 @@ class QAAvahiResolverMain : public SignalHandler, public AvahiResolverHandler
   {
     this->argp = argp;
     at = new AvahiThread();
-    ar = at->resolver();
     wait_for_name = false;
     wait_for_addr = false;
   }
@@ -73,14 +72,14 @@ class QAAvahiResolverMain : public SignalHandler, public AvahiResolverHandler
     const char *tmp;
     if ( (tmp = argp->arg("n")) != NULL ) {
       printf("Calling name resolver\n");
-      ar->resolve_name(tmp, this);
+      at->resolve_name(tmp, this);
     }
 
     if ( (tmp = argp->arg("a")) != NULL ) {
       printf("Calling address resolver\n");
       struct sockaddr_in saddr;
       if ( inet_pton(AF_INET, tmp, &(saddr.sin_addr)) >= 0 ) {
-	ar->resolve_address((struct sockaddr *)&saddr, sizeof(saddr), this);
+	at->resolve_address((struct sockaddr *)&saddr, sizeof(saddr), this);
       }
     }
 
@@ -144,7 +143,6 @@ class QAAvahiResolverMain : public SignalHandler, public AvahiResolverHandler
 
  private:
   AvahiThread *at;
-  AvahiResolver *ar;
   ArgumentParser *argp;
 
   bool wait_for_name;

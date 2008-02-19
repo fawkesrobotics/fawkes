@@ -30,13 +30,13 @@
 /** @class ServiceBrowser <netcomm/service_discovery/service_browser.h>
  * Service browser.
  *
- * @fn void ServiceBrowser::add_handler(const char *service_type, ServiceBrowseHandler *h) = 0
+ * @fn void ServiceBrowser::watch_service(const char *service_type, ServiceBrowseHandler *h) = 0
  * Add browse handler for specific service.
  * @param service_type type of service to browse for, implementation dependant.
  * @param h browse handler to add for this service.
  *
- * @fn void ServiceBrowser::remove_handler(const char *service_type, ServiceBrowseHandler *h) = 0
- * remove browse handler for specific service.
+ * @fn void ServiceBrowser::unwatch_service(const char *service_type, ServiceBrowseHandler *h) = 0
+ * Remove browse handler for specific service.
  * @param service_type type of service to browse for, implementation dependant.
  * @param h browse handler to remove for this service.
  */

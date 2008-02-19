@@ -239,3 +239,20 @@ NetworkService::operator==(const NetworkService *s) const
   return ( (strcmp(_name, s->_name) == 0) &&
 	   (strcmp(_type, s->_type) == 0) );
 }
+
+
+/** Less than operator.
+ * @param s reference of service to compare to
+ * @return true, if either the type is less than (according to strcmp) or if types
+ * are equal if the service name is less than the given service's name.
+ */
+bool
+NetworkService::operator<(const NetworkService &s) const
+{
+  int typediff = strcmp(_type, s._type);
+  if ( typediff == 0 ) {
+    return (strcmp(_name, s._name) < 0);
+  } else {
+    return (typediff < 0);
+  }
+}

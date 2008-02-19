@@ -53,7 +53,7 @@ PluginGuiBackendThread::PluginGuiBackendThread(PluginGui* gui)
 {
   m_client = NULL;
   m_avahi = new AvahiThread();
-  m_avahi->watch("_fawkes._tcp", this);
+  m_avahi->watch_service("_fawkes._tcp", this);
   m_avahi->start();
   m_connected = false;
   m_connection_died = false;

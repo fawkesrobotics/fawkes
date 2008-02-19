@@ -44,12 +44,12 @@ DummyServicePublisher::~DummyServicePublisher()
 
 
 void
-DummyServicePublisher::publish(NetworkService *service)
+DummyServicePublisher::publish_service(NetworkService *service)
 {
 }
 
 
 void
-DummyServicePublisher::unpublish(NetworkService *service)
+DummyServicePublisher::unpublish_service(NetworkService *service)
 {
 }

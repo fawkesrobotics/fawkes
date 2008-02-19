@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  qa_avahi_publisher.cpp - QA for AvahiServicePublisher
+ *  avahi_resolver_handler.h - Avahi name resolver
  *
- *  Generated: Tue Nov 07 18:41:46 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Nov 14 14:32:56 2006 (as avahi_resolver.h)
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,53 +25,23 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-/// @cond QA
+#ifndef __NETCOMM_DNSSD_AVAHI_RESOLVER_HANDLER_H_
+#define __NETCOMM_DNSSD_AVAHI_RESOLVER_HANDLER_H_
 
-#include <netcomm/dns-sd/avahi_thread.h>
+#include <sys/socket.h>
 
-#include <utils/system/signal.h>
-
-class QAAvahiPublisherMain : public SignalHandler
+class AvahiResolverHandler
 {
  public:
-  QAAvahiPublisherMain()
-  {
-    NetworkService *as = new NetworkService("Fawkes QA", "_fawkes._udp", 1910);
-    at = new AvahiThread();
-    at->publish_service(as);
-    delete as;
-  }
+  virtual ~AvahiResolverHandler();
+  virtual void resolved_name(char *name,
+			     struct sockaddr *addr, socklen_t addrlen)   = 0;
+  virtual void resolved_address(struct sockaddr_in *addr, socklen_t addrlen,
+				char *name)                              = 0;
 
-  ~QAAvahiPublisherMain()
-  {
-    delete at;
-  }
-
-  void handle_signal(int signum)
-  {
-    at->cancel();
-  }
-
-  void run()
-  {
-    at->start();
-    at->join();
-  }
-
- private:
-  AvahiThread *at;
-
+  virtual void name_resolution_failed(char *name)                        = 0;
+  virtual void address_resolution_failed(struct sockaddr_in *addr,
+					 socklen_t addrlen)              = 0;
 };
 
-int
-main(int argc, char *argv)
-{
-  QAAvahiPublisherMain m;
-  SignalManager::register_handler(SIGINT, &m);
-
-  m.run();
-
-  SignalManager::finalize();
-}
-
-/// @endcond
+#endif

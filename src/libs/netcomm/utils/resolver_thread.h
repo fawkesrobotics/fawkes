@@ -33,9 +33,10 @@
 #include <core/utils/lock_hashmap.h>
 #include <utils/misc/string_compare.h>
 #ifdef HAVE_AVAHI
-#include <netcomm/dns-sd/avahi_resolver.h>
+#include <netcomm/dns-sd/avahi_resolver_handler.h>
 #endif
 #include <sys/socket.h>
+#include <stdint.h>
 #include <cstddef>
 #include <utility>
 
@@ -71,7 +72,7 @@ class NetworkNameResolverThread : public Thread
  private:
   NetworkNameResolver  *resolver;
 #ifdef HAVE_AVAHI
-  AvahiResolver        *avahi_resolver;
+  AvahiThread          *avahi_thread;
 #endif
 
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)

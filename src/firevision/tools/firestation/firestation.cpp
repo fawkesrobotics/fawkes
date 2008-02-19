@@ -373,7 +373,7 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_scaled_img_height = m_evt_image->get_height();
 
   m_avahi_thread = new AvahiThread();
-  m_avahi_thread->watch("_fountain._tcp", this);
+  m_avahi_thread->watch_service("_fountain._tcp", this);
   m_avahi_thread->start();
 }
 

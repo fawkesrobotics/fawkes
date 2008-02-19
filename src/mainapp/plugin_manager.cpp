@@ -301,6 +301,8 @@ FawkesPluginManager::loop()
 	    send_load_success(name, msg->clid());
 	    send_loaded(name);
 	  } catch (Exception &e) {
+	    LibLogger::log_error("FawkesPluginManager", "Failed to load plugin %s", name);
+	    LibLogger::log_error("FawkesPluginManager", e);
 	    send_load_failure(name, msg->clid());
 	  }
 	}
@@ -326,6 +328,8 @@ FawkesPluginManager::loop()
 	    send_unload_success(name, msg->clid());
 	    send_unloaded(name);
 	  } catch (Exception &e) {
+	    LibLogger::log_error("FawkesPluginManager", "Failed to unload plugin %s", name);
+	    LibLogger::log_error("FawkesPluginManager", e);
 	    send_unload_failure(name, msg->clid());
 	  }
 	}

@@ -80,14 +80,14 @@ FountainThread::init()
   std::string sname = "Fountain on ";
   sname += nnresolver->short_hostname();
   __service = new NetworkService(sname.c_str(), "_fountain._tcp", port);
-  service_publisher->publish(__service);
+  service_publisher->publish_service(__service);
 }
 
 
 void
 FountainThread::finalize()
 {
-  service_publisher->unpublish(__service);
+  service_publisher->unpublish_service(__service);
 
   thread_collector->remove(__fuse_server);
   delete __fuse_server;
