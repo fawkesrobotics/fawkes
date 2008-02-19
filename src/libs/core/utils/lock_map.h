@@ -46,6 +46,8 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
   void     unlock();
   Mutex *  mutex() const;
 
+  void     erase_locked(const KeyType &key);
+
  private:
   Mutex *__mutex;
 
@@ -116,6 +118,20 @@ void
 LockMap<KeyType, ValueType, LessKey>::unlock()
 {
   return __mutex->unlock();
+}
+
+
+/** Remove item with lock.
+ * The map is automatically locked and unlocked during the removal.
+ * @param key key of the value to erase
+ */
+template <typename KeyType, typename ValueType, typename LessKey>
+void
+LockMap<KeyType, ValueType, LessKey>::erase_locked(const KeyType &key)
+{
+  __mutex->lock();
+  std::map<KeyType, ValueType, LessKey>::erase(key);
+  __mutex->unlock();
 }
 
 
