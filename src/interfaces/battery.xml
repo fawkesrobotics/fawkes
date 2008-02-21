@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<!-- $Id$ -->
+<interface name="BatteryInterface" author="Daniel Beck" year="2008">
+  <data>
+    <comment>This interface contains status information about the
+    battery. In addition to this it allows to send messages which
+    turn the battery on/off</comment>
+    <field type="unsigned int" name="current">Battery Current [mA]</field>
+    <field type="unsigned int" name="voltage">Battery Voltage [mV]</field>
+    <field type="unsigned int" name="temperature">Battery Temperature [°C]</field>
+  </data>
+  <message name="push_button">
+    <comment>Push the button</comment>
+  </message>
+  <message name="sleep">
+    <comment>Sleep</comment>
+  </message>
+</interface>
