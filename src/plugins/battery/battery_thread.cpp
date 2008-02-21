@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  battery_plugin.cpp - Fawkes Battery Plugin
+ *  battery_plugin.cpp - Fawkes Battery Thread
  *
  *  Generated: Tue Jan 29 13:05:15 2008
  *  Copyright  2008  Daniel Beck
@@ -28,6 +28,8 @@
 #include <plugins/battery/battery_thread.h>
 #include <interfaces/battery.h>
 #include <utils/time/wait.h>
+#include <cstdlib>
+#include <cstring>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -111,7 +113,12 @@ BatteryThread::init()
   options.c_cflag = CS8 | CREAD | CLOCAL | B9600;
   options.c_iflag = IGNBRK;
   options.c_oflag = 0;
-  tcsetattr(m_fd, TCSANOW, &options);
+  int err = tcsetattr(m_fd, TCSANOW, &options);
+  if ( -1 == err )
+    {
+      blackboard->close(m_battery_interface);
+      throw Exception("Configuring serial port failed");
+    }
 
   m_time_wait = new TimeWait(clock, m_interval * 1000000);
 }
@@ -154,13 +161,19 @@ BatteryThread::loop()
  *
  * @return false if something failed, true otherwise
  */
-/*
 bool
 BatteryThread::send_command(unsigned char cmd)
 {
+  unsigned int num_bytes;
+  num_bytes = write(m_fd, &cmd, 1);
+  if ( 1 != num_bytes ) 
+    { 
+      logger->log_warn(name(), "Sending command to battery failed"); 
+      return false;
+    }
+
   return true;
 }
-*/
 
 /** Reads out a specified field an returns the contents as numeric value.
  *
@@ -214,7 +227,7 @@ BatteryThread::read_numeric(unsigned char cmd)
 }
 
 /*
-unsigned int
+char*
 BatteryThread::read_string(unsigned char cmd)
 {
 }

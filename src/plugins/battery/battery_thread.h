@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  battery_plugin.h - Fawkes Battery Plugin
+ *  battery_plugin.h - Fawkes Battery Thread
  *
  *  Generated: Tue Jan 29 11:56:28 2008
  *  Copyright  2008  Daniel Beck
@@ -54,7 +54,9 @@ class BatteryThread : public Thread,
   virtual void loop();
 
  private:
+  bool send_command(unsigned char cmd);
   unsigned int read_numeric(unsigned char cmd);
+  /*  char* read_string(unsigned char cmd); */
 
   BatteryInterface* m_battery_interface;
   TimeWait* m_time_wait;
