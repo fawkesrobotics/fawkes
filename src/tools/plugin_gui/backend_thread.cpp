@@ -31,6 +31,7 @@
 #include <core/threading/wait_condition.h>
 #include <netcomm/utils/exceptions.h>
 #include <netcomm/fawkes/client.h>
+#include <netcomm/dns-sd/avahi_thread.h>
 #include <mainapp/plugin_messages.h>
 #include <mainapp/plugin_list_message.h>
 #include <iostream>
@@ -115,7 +116,7 @@ PluginGuiBackendThread::connect(const char* host, unsigned short int port)
     }
 
   m_longsleep->wake_all();
-  return true;
+  return m_connected;
 }
 
 /** Disconnect. 
@@ -188,7 +189,7 @@ void
 PluginGuiBackendThread::connection_established() throw()
 {
   m_connected = true;
-  m_gui->update_connection();
+  m_gui->signal_update_connection();
 }
 
 void
@@ -198,9 +199,9 @@ PluginGuiBackendThread::connection_died() throw()
     // unexpected loss of connection
     {
       m_connected = false;
-      m_gui->update_connection();
+      m_gui->signal_update_connection();
       m_plugin_status.clear();
-      m_gui->update_list();
+      m_gui->signal_update_list();
       m_connection_died = true;
     }
 }
@@ -291,7 +292,7 @@ PluginGuiBackendThread::inbound_received(FawkesNetworkMessage* msg) throw()
 	    }
 	  free(p);
 	}
-      m_gui->update_list();
+      m_gui->signal_update_list();
       delete plm;
     } 
   else if ( msg->msgid() == MSG_PLUGIN_AVAIL_LIST_FAILED) 
@@ -324,7 +325,7 @@ PluginGuiBackendThread::inbound_received(FawkesNetworkMessage* msg) throw()
 
   if (update)
     {
-      m_gui->update_status();
+      m_gui->signal_update_status();
     }
   
 }
@@ -358,7 +359,7 @@ PluginGuiBackendThread::service_added( const char* name,
 				       int flags )
 {
   m_hosts[name] = host_name;
-  m_gui->update_hosts();
+  m_gui->signal_update_hosts();
 }
 
 void
@@ -367,7 +368,7 @@ PluginGuiBackendThread::service_removed( const char* name,
 					 const char* domain )
 {
   m_hosts.erase(name);
-  m_gui->update_hosts();
+  m_gui->signal_update_hosts();
 }
 
 /** Get status of plugins.

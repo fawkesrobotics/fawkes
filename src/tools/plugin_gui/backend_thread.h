@@ -29,8 +29,6 @@
 #define __TOOLS_PLUGIN_PLUGIN_GUI_BACKEND_THREAD_H_
 
 #include <core/threading/thread.h>
-
-#include <netcomm/dns-sd/avahi_thread.h>
 #include <netcomm/service_discovery/browse_handler.h>
 #include <netcomm/fawkes/client_handler.h>
 
@@ -41,6 +39,7 @@
 class PluginGui;
 class FawkesNetworkClient;
 class WaitCondition;
+class AvahiThread;
 
 class PluginGuiBackendThread : public Thread, 
   public FawkesNetworkClientHandler,
@@ -96,7 +95,7 @@ class PluginGuiBackendThread : public Thread,
   bool m_connected;
   bool m_connection_died;
 
-  WaitCondition *m_longsleep;
+  WaitCondition* m_longsleep;
 };
 
 #endif /* __TOOLS_PLUGIN_PLUGIN_GUI_BACKEND_THREAD_H_ */

@@ -99,6 +99,11 @@ PluginGui::PluginGui(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   cr_loaded = dynamic_cast<Gtk::CellRendererToggle*>(m_trv_plugins->get_column_cell_renderer(1));
   cr_loaded->signal_toggled().connect( sigc::mem_fun(*this, &PluginGui::toggled_status));
 
+  m_signal_update_status.connect( sigc::mem_fun( *this, &PluginGui::update_status) );
+  m_signal_update_list.connect( sigc::mem_fun( *this, &PluginGui::update_list) );
+  m_signal_update_hosts.connect( sigc::mem_fun( *this, &PluginGui::update_hosts) );
+  m_signal_update_connection.connect( sigc::mem_fun( *this, &PluginGui::update_connection) );
+
   m_stb_status->push("Started");
 }
 
@@ -125,12 +130,19 @@ PluginGui::register_backend(PluginGuiBackendThread* backend)
 }
 
 /** Return main window of the application.
- * @ return reference to the main window
+ * @return reference to the main window
  */
 Gtk::Window&
 PluginGui::get_window() const
 {
   return *m_wnd_main;
+}
+
+/** Signal that the status has changed. */
+void
+PluginGui::signal_update_status()
+{
+  m_signal_update_status();
 }
 
 /** Update the plugins' status.
@@ -151,6 +163,15 @@ PluginGui::update_status()
       status = plugin_status[plugin_name.c_str()];
       (*row_iter)[m_plugin_record.m_status] = status;
     }
+
+  m_trv_plugins->queue_draw();  
+}
+
+/** Signal that the list needs an update. */
+void
+PluginGui::signal_update_list()
+{
+  m_signal_update_list();
 }
 
 /** Update the list of available plugins.
@@ -170,6 +191,15 @@ PluginGui::update_list()
       row[m_plugin_record.m_status] = pit->second;
       ++index;
     }
+  
+  m_trv_plugins->queue_draw();
+}
+
+/** Signal that the hosts have changed. */
+void
+PluginGui::signal_update_hosts()
+{
+  m_signal_update_hosts();
 }
 
 /** Update the list of discovered hosts.
@@ -192,6 +222,13 @@ PluginGui::update_hosts()
       row[m_host_record.m_host] = *hit;
       ++index;
     }
+}
+
+/** Signal that the connection status has changed. */
+void
+PluginGui::signal_update_connection()
+{
+  m_signal_update_connection();
 }
 
 /** Update the connection status.

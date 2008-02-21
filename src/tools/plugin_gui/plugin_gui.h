@@ -41,10 +41,10 @@ class PluginGui : public Gtk::Window
 
   Gtk::Window& get_window() const;
 
-  void update_status();
-  void update_list();
-  void update_hosts();
-  void update_connection();
+  void signal_update_status();
+  void signal_update_list();
+  void signal_update_hosts();
+  void signal_update_connection();
 
   void register_backend(PluginGuiBackendThread* backend);
 
@@ -82,12 +82,22 @@ class PluginGui : public Gtk::Window
   void changed_host();
   void toggled_status(const Glib::ustring path);
 
+  void update_status();
+  void update_list();
+  void update_hosts();
+  void update_connection();
+
   // widgets
   Gtk::Window* m_wnd_main;
   Gtk::ComboBoxEntry* m_cbe_hosts;
   Gtk::Button* m_btn_connect;
   Gtk::TreeView* m_trv_plugins;
   Gtk::Statusbar* m_stb_status;
+
+  Glib::Dispatcher m_signal_update_status;
+  Glib::Dispatcher m_signal_update_list;
+  Glib::Dispatcher m_signal_update_hosts;
+  Glib::Dispatcher m_signal_update_connection;
 
   PluginGuiBackendThread* m_backend;
 
