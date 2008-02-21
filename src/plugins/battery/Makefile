@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#                 Makefile Build System for Fawkes: Battery Plugin
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Tue Jan 29 11:59:09 2008
+#   copyright (C) 2008 by Daniel Beck, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -12,11 +12,24 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
+#
+#           $Id$
+# last modified: $Date$
+#            by: $Author$
+#
+#*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-SUBDIRS = battery kicker navigator worldmodel
+CFLAGS = -g
 
-include $(BASEDIR)/etc/buildsys/rules.mk
+LIBS_battery = core utils iowkit
+OBJS_battery = battery_plugin.o	\
+	       battery_thread.o
+
+OBJS_all    = $(OBJS_battery)
+PLUGINS_all = $(PLUGINDIR)/battery.so
+
+include $(BASEDIR)/etc/buildsys/base.mk
 
