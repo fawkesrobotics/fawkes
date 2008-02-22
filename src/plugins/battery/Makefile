@@ -24,7 +24,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 CFLAGS = -g
 
-LIBS_battery = core utils iowkit
+LIBS_battery = core utils
 OBJS_battery = battery_plugin.o	\
 	       battery_thread.o
 
