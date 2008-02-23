@@ -784,6 +784,7 @@ MotorThread::loop()
       last_alpha = alpha;
       last_beta  = beta;
       last_gamma = gamma;
+      usleep(22000);
     }
   double rotation_ = -(alpha_ + beta_ + gamma_) / 3.;
 

@@ -96,7 +96,6 @@ main(int argc, char **argv)
 
   FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
   c->connect();
-  c->start();
 
   ExamplePluginClientNetworkReceiver r;
   c->register_handler(&r, FAWKES_CID_EXAMPLE_PLUGIN);
@@ -128,9 +127,7 @@ main(int argc, char **argv)
   }
 
   c->deregister_handler(FAWKES_CID_EXAMPLE_PLUGIN);
-
-  c->cancel();
-  c->join();
+  c->disconnect();
   delete c;
 
   return 0;
