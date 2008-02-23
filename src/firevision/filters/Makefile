@@ -30,7 +30,10 @@ ifeq ($(HAVE_IPP),0)
   # We have no IPP, because of this we have to eliminate many filters
   # OBJS_libfvfilters = $(filter-out morphology/%,$(OBJS_libfvfilters))
   IPPI_FILTERS  = $(wildcard $(SRCDIR)/morphology/*.cpp)
-  IPPI_FILTERS += $(shell grep -rl ippi.h $(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))
+  ALLFILES=$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))
+  ifneq ($(ALLFILES),)
+    IPPI_FILTERS += $(shell grep -rl ippi.h $(ALLFILES))
+  endif
 else
   LIBS_libfvfilters += ippi$(IPP_ARCH) ippcore$(IPP_ARCH) guide
 endif
