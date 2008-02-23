@@ -516,7 +516,7 @@ AvahiThread::create_pending_browsers()
 {
   __pending_browsers.lock();
   while ( ! __pending_browsers.empty() ) {
-    printf("Creating browser for %s\n", __pending_browsers.front().c_str());
+    //printf("Creating browser for %s\n", __pending_browsers.front().c_str());
     create_browser(__pending_browsers.front().c_str());
     __pending_browsers.pop();
   }
