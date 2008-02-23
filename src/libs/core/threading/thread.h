@@ -137,6 +137,7 @@ class Thread {
 
   pthread_t      __thread_id;
 
+  Mutex         *__prepfin_mutex;
   Mutex         *__sleep_mutex;
   WaitCondition *__sleep_condition;
   Barrier       *__barrier;

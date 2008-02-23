@@ -241,6 +241,7 @@ Thread::__constructor(const char *name, OpMode op_mode)
   loop_mutex = new Mutex();
   finalize_prepared = false;
 
+  __prepfin_mutex = new Mutex();
   
 }
 
@@ -253,6 +254,7 @@ Thread::~Thread()
   delete loop_mutex;
   free(__name);
   delete __notification_listeners;
+  delete __prepfin_mutex;
 }
 
 
@@ -349,10 +351,16 @@ Thread::prepare_finalize()
   if ( finalize_prepared ) {
     throw CannotFinalizeThreadException("prepare_finalize() has already been called");
   }
-  if (! __prepfin_conc_loop) loop_mutex->lock();
+  if (! __prepfin_conc_loop) {
+    __prepfin_mutex->lock();
+    loop_mutex->lock();
+  }
   finalize_prepared = true;
   bool prepared = prepare_finalize_user();
-  if (! __prepfin_conc_loop) loop_mutex->unlock();
+  if (! __prepfin_conc_loop) {
+    loop_mutex->unlock();
+    __prepfin_mutex->unlock();
+  }
   return prepared;
 }
 
@@ -757,6 +765,8 @@ Thread::run()
   forever {
 
     if ( __finalize_sync_lock )  __finalize_sync_lock->lock_for_read();
+
+    __prepfin_mutex->stopby();
 
     loop_mutex->lock();
     if ( ! finalize_prepared ) {

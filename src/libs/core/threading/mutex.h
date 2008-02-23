@@ -43,6 +43,8 @@ class Mutex
   bool try_lock();
   void unlock();
 
+  void stopby();
+
  private:
   MutexData *mutex_data;
 };

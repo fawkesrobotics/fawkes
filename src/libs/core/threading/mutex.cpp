@@ -127,3 +127,20 @@ Mutex::unlock()
 #endif
   pthread_mutex_unlock(&(mutex_data->mutex));
 }
+
+
+/** Shortly stop by at the mutex.
+ * This will just lock and unlock the mutex. It is equivalent to
+ * @code
+ *   mutex->lock();
+ *   mutex->unlock();
+ * @endcode
+ * This can be handy if you have to protect starvation and just have a stop-by
+ * mutex.
+ */
+void
+Mutex::stopby()
+{
+  pthread_mutex_lock(&(mutex_data->mutex));
+  pthread_mutex_unlock(&(mutex_data->mutex));
+}
