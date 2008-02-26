@@ -26,7 +26,7 @@
  */
 
 #ifndef __UTILS_CONSTRAINTS_DEPENDENCY_ONETOMANY_H_
-#define __UTILS_CONSTRAINTS_DEPENDENCY_ONETOMANYH_
+#define __UTILS_CONSTRAINTS_DEPENDENCY_ONETOMANY_H_
 
 #include <utils/constraints/dependency.h>
 

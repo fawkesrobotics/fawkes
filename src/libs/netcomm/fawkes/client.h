@@ -93,6 +93,7 @@ class FawkesNetworkClient
   FawkesNetworkClientRecvThread *recv_slave;
   FawkesNetworkClientSendThread *send_slave;
 
+  bool connection_died_recently;
   bool recv_slave_alive;
   bool send_slave_alive;
   Mutex *slave_status_mutex;

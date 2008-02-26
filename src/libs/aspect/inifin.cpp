@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  aspect_initializer.h - Fawkes Aspect initializer
+ *  inifin.h - Fawkes Aspect initializer/finalizer
  *
  *  Created: Tue Jan 30 13:36:42 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -38,14 +38,16 @@
 #include <aspect/fawkes_network.h>
 #include <aspect/network.h>
 #include <aspect/thread_producer.h>
+#include <aspect/time_source.h>
 #ifdef HAVE_FIREVISION
 #include <aspect/vision_master.h>
 #include <aspect/vision.h>
 #endif
 
 #include <utils/constraints/dependency_onetomany.h>
+#include <utils/constraints/unique.h>
 
-/** @class AspectIniFin aspect/inifin.h
+/** @class AspectIniFin <aspect/inifin.h>
  * Fawkes Aspect Initializer/Finalizer.
  * Initializes certain thread aspects.
  * All aspects defined in the Fawkes tree are supported and properly
@@ -79,6 +81,7 @@ AspectIniFin::AspectIniFin(BlackBoard *blackboard,
   __service_publisher = NULL;
   __service_browser   = NULL;
 
+  __timesource_uc     = new UniquenessConstraint<TimeSource>();
 #ifdef HAVE_FIREVISION
   __vision_dependency = new OneToManyDependency<VisionMasterAspect, VisionAspect>();
 #endif
@@ -88,6 +91,7 @@ AspectIniFin::AspectIniFin(BlackBoard *blackboard,
 /** Destructor. */
 AspectIniFin::~AspectIniFin()
 {
+  delete __timesource_uc;
 #ifdef HAVE_FIREVISION
   delete __vision_dependency;
 #endif
@@ -229,6 +233,18 @@ AspectIniFin::init(Thread *thread)
     net_thread->initNetworkAspect(__nnresolver, __service_publisher, __service_browser);
   }
 
+  TimeSourceAspect *timesource_thread;
+  if ( (timesource_thread = dynamic_cast<TimeSourceAspect *>(thread)) != NULL ) {
+    try {
+      __timesource_uc->add(timesource_thread->get_timesource());
+      __clock->register_ext_timesource(timesource_thread->get_timesource(),
+				       /* make default */ true);
+    } catch (Exception &e) {
+      throw CannotInitializeThreadException("Thread has TimeSourceAspect but there is "
+					    "already another time provider.");
+    }      
+  }
+
 }
 
 
@@ -283,6 +299,18 @@ AspectIniFin::finalize(Thread *thread)
     __vision_dependency->remove(vision_thread);
   }
 #endif /* HAVE_FIREVISION */
+
+  TimeSourceAspect *timesource_thread;
+  if ( (timesource_thread = dynamic_cast<TimeSourceAspect *>(thread)) != NULL ) {
+    try {
+      __clock->remove_ext_timesource(timesource_thread->get_timesource());
+      __timesource_uc->remove(timesource_thread->get_timesource());
+    } catch (Exception &e) {
+      CannotFinalizeThreadException ce("Failed to remove time source");
+      ce.append(e);
+      throw;
+    }
+  }
 }
 
 

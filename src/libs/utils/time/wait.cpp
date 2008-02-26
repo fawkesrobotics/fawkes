@@ -31,7 +31,6 @@
 
 #include <unistd.h>
 #include <cstdlib>
-#include <cstdio>
 
 /** @class TimeWait <utils/time/wait.h>
  * Time wait utility.
@@ -54,6 +53,7 @@ TimeWait::TimeWait(Clock *clock, long int desired_loop_time)
   __desired_loop_time = desired_loop_time;
   __clock = clock;
   __until = new Time();
+  __until_systime = new Time();
   __now = new Time();
 }
 
@@ -62,6 +62,7 @@ TimeWait::TimeWait(Clock *clock, long int desired_loop_time)
 TimeWait::~TimeWait()
 {
   delete __until;
+  delete __until_systime;
   delete __now;
 }
 
@@ -72,6 +73,8 @@ TimeWait::mark_start()
 {
   __clock->get_time(__until);
   *__until += __desired_loop_time;
+  __clock->get_systime(__until_systime);
+  *__until_systime += __desired_loop_time;
 }
 
 
@@ -88,6 +91,25 @@ TimeWait::wait()
     usleep(remaining_usec);
     __clock->get_time(__now);
     remaining_usec = (*__until - *__now).in_usec();
+  }
+}
+
+
+/** Wait until minimum loop time has been reached in real time.
+ * This uses the system time and not an external time source if defined.
+ */
+void
+TimeWait::wait_systime()
+{
+  __clock->get_systime(__now);
+  // we want to release run status at least shortly
+  usleep(0);
+
+  long int remaining_usec = (*__until_systime - *__now).in_usec();
+  while ( remaining_usec > 0 ) {
+    usleep(remaining_usec);
+    __clock->get_systime(__now);
+    remaining_usec = (*__until_systime - *__now).in_usec();
   }
 }
 

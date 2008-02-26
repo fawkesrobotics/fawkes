@@ -3,7 +3,7 @@
  *  inifin.h - Fawkes Aspect initializer/finalizer
  *
  *  Created: Tue Jan 30 13:34:54 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -42,8 +42,11 @@ class ThreadCollector;
 class NetworkNameResolver;
 class ServicePublisher;
 class ServiceBrowser;
+class TimeSource;
 template <class Provider, class Dependant>
   class OneToManyDependency;
+template <class ResourceType>
+  class UniquenessConstraint;
 #ifdef HAVE_FIREVISION
 class VisionMasterAspect;
 class VisionAspect;
@@ -85,6 +88,7 @@ class AspectIniFin
 #ifdef HAVE_FIREVISION
   OneToManyDependency<VisionMasterAspect, VisionAspect> *__vision_dependency;
 #endif
+  UniquenessConstraint<TimeSource> *__timesource_uc;
 };
 
 

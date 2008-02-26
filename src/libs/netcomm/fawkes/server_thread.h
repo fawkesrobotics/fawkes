@@ -48,8 +48,8 @@ class FawkesNetworkServerThread
   public NetworkIncomingConnectionHandler
 {
  public:
-  FawkesNetworkServerThread(ThreadCollector *thread_collector,
-			    unsigned int fawkes_port);
+  FawkesNetworkServerThread(unsigned int fawkes_port,
+			    ThreadCollector *thread_collector = 0);
   virtual ~FawkesNetworkServerThread();
 
   virtual void loop();

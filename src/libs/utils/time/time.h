@@ -98,6 +98,7 @@ class Time
 
   Time & stamp();
 
+  Time   operator+(const float sec) const;
   Time   operator+(const Time& t) const;
   Time   operator-(const Time& t) const;
   float  operator-(const Time* t) const;

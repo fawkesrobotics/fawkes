@@ -109,6 +109,16 @@ class FawkesNetworkClientSendThread : public Thread
     }
   }
 
+  /** Force sending of messages.
+   * All messages are sent out immediately, if loop is not running already anyway.
+   */
+  void force_send()
+  {
+    if ( loop_mutex->try_lock() ) {
+      loop();
+      loop_mutex->unlock();
+    }
+  }
 
   /** Enqueue message to send.
    * @param message message to send
@@ -249,6 +259,7 @@ FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short in
   send_slave = NULL;
   recv_slave = NULL;
 
+  connection_died_recently = false;
   send_slave_alive = false;
   recv_slave_alive = false;
 
@@ -284,6 +295,7 @@ FawkesNetworkClient::connect()
     send_slave->start();
     recv_slave = new FawkesNetworkClientRecvThread(s, this);
     recv_slave->start();
+    connection_died_recently = false;
     notify_of_connection_established();
   } catch (SocketException &e) {
     if ( send_slave ) {
@@ -311,15 +323,18 @@ FawkesNetworkClient::connect()
 void
 FawkesNetworkClient::disconnect()
 {
-  if ( ! connected() )  return;
+  if ( s == NULL ) return;
 
-  if ( send_slave ) {
+  if ( send_slave_alive ) {
+    if ( ! connection_died_recently ) {
+      send_slave->force_send();
+    }
     send_slave->cancel();
     send_slave->join();
     delete send_slave;
     send_slave = NULL;
   }
-  if ( recv_slave ) {
+  if ( recv_slave_alive ) {
     recv_slave->cancel();
     recv_slave->join();
     delete recv_slave;
@@ -429,6 +444,7 @@ FawkesNetworkClient::notify_of_connection_established()
 void
 FawkesNetworkClient::connection_died()
 {
+  connection_died_recently = true;
   notify_of_connection_dead();
 }
 
@@ -491,5 +507,5 @@ FawkesNetworkClient::wake(unsigned int component_id)
 bool
 FawkesNetworkClient::connected() const throw()
 {
-  return (s != NULL);
+  return (! connection_died_recently && (s != NULL));
 }

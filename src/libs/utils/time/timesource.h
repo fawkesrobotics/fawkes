@@ -2,7 +2,7 @@
 /***************************************************************************
  *  timesource.h - A clock's timesource
  *
- *  Generated: Sun June 03 10:58:19 2007
+ *  Created: Sun Jun 03 10:58:19 2007
  *  Copyright  2007  Daniel Beck 
  *
  *  $Id$
@@ -38,8 +38,6 @@
 class TimeSource
 {
  public:
-  /** Constructor. */
-  TimeSource() {}
   /** Destructor. */
   virtual ~TimeSource() {}
 

@@ -2,9 +2,9 @@
 /***************************************************************************
  *  clock.cpp - A central clock
  *
- *  Generated: Sun June 03 00:23:59 2007
- *  Copyright  2007  Daniel Beck 
- *             2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Jun 03 00:23:59 2007
+ *  Copyright  2007       Daniel Beck 
+ *             2007-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -105,12 +105,27 @@ Clock::finalize()
 void
 Clock::register_ext_timesource(TimeSource* ts, bool make_default)
 {
-  delete ext_timesource;
-
   ext_timesource = ts;
 
   if (make_default) {
     ext_default = true;
+  }
+}
+
+
+/** Remove external time source.
+ * If an external timesource is currently set it is removed. The time source
+ * will not be deleted but only the reference to it is removed.
+ * @param ts only remove time source if it equals ts, if NULL remove no matter what.
+ */
+void
+Clock::remove_ext_timesource(TimeSource *ts)
+{
+  if ( (ts == NULL) || (ext_timesource == ts) ) {
+    ext_timesource = NULL;
+    ext_default = false;
+  } else {
+    throw Exception("Time sources do not match. Not removing.");
   }
 }
 

@@ -2,7 +2,7 @@
 /***************************************************************************
  *  clock.h - A central clock
  *
- *  Generated: Sun June 03 00:16:29 2007
+ *  Generated: Sun Jun 03 00:16:29 2007
  *  Copyright  2007  Daniel Beck 
  *             2007  Tim Niemueller [www.niemueller.de]
  *
@@ -54,6 +54,7 @@ class Clock
   bool is_ext_default_timesource() const;
   bool has_ext_timesource() const;
   Time ext_to_realtime(const Time& t);
+  void remove_ext_timesource(TimeSource *ts = 0);
 
   void get_time(struct timeval *tv) const;
   void get_time(struct timeval *tv, TimesourceSelector sel) const;

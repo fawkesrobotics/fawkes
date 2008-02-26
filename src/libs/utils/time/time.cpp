@@ -215,6 +215,31 @@ Time::operator+(const Time& t) const
 }
 
 
+/** Operator that adds times.
+ * @param sec number of seconds to add
+ * @return the sum
+ */
+Time
+Time::operator+(const float sec) const
+{
+  Time ret;
+  time_t sec_only = (time_t)roundf(sec);
+  suseconds_t usec_only = (suseconds_t)roundf((sec - floor(sec)) * 1000000);
+  if ((time.tv_usec + sec_only) > 1000000)
+    {
+      ret.time.tv_usec = time.tv_usec + usec_only - 1000000;
+      ret.time.tv_sec = time.tv_sec + sec_only + 1;
+    }
+  else
+    {
+      ret.time.tv_usec = time.tv_usec + usec_only;
+      ret.time.tv_sec = time.tv_sec + sec_only;
+    }
+
+  return ret;
+}
+
+
 /** Operator that substracts one Time from another.
  * @param t the Time that is substracted
  * @return the difference

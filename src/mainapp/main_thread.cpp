@@ -362,7 +362,7 @@ FawkesMainThread::loop()
   test_cancel();
 
   if ( __time_wait ) {
-    __time_wait->wait();
+    __time_wait->wait_systime();
   } else {
     yield();
   }

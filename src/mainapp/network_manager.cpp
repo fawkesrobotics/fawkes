@@ -58,7 +58,7 @@ FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
 {
   this->fawkes_port    = fawkes_port;
   this->thread_manager = thread_manager;
-  fawkes_network_thread = new FawkesNetworkServerThread(thread_manager, fawkes_port);
+  fawkes_network_thread = new FawkesNetworkServerThread(fawkes_port, thread_manager);
   thread_manager->add(fawkes_network_thread);
 #ifdef HAVE_AVAHI
   avahi_thread          = new AvahiThread();

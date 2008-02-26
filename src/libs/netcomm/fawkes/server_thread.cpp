@@ -50,8 +50,8 @@
  * @param thread_collector thread collector to register new threads with
  * @param fawkes_port port for Fawkes network protocol
  */
-FawkesNetworkServerThread::FawkesNetworkServerThread(ThreadCollector *thread_collector,
-						     unsigned int fawkes_port)
+FawkesNetworkServerThread::FawkesNetworkServerThread(unsigned int fawkes_port,
+						     ThreadCollector *thread_collector)
   : Thread("FawkesNetworkServerThread", Thread::OPMODE_WAITFORWAKEUP)
 {
   this->thread_collector = thread_collector;
@@ -61,8 +61,11 @@ FawkesNetworkServerThread::FawkesNetworkServerThread(ThreadCollector *thread_col
 
   acceptor_thread = new NetworkAcceptorThread(this, fawkes_port,
 					      "FawkesNetworkAcceptorThread");
-  thread_collector->add(acceptor_thread);
-
+  if ( thread_collector ) {
+    thread_collector->add(acceptor_thread);
+  } else {
+    acceptor_thread->start();
+  }
 }
 
 
@@ -70,10 +73,20 @@ FawkesNetworkServerThread::FawkesNetworkServerThread(ThreadCollector *thread_col
 FawkesNetworkServerThread::~FawkesNetworkServerThread()
 {
   for (cit = clients.begin(); cit != clients.end(); ++cit) {
-    thread_collector->remove((*cit).second);
+    if ( thread_collector ) {
+      thread_collector->remove((*cit).second);
+    } else {
+      (*cit).second->cancel();
+      (*cit).second->join();
+    }
     delete (*cit).second;
   }
-  thread_collector->remove(acceptor_thread);
+  if ( thread_collector ) {
+    thread_collector->remove(acceptor_thread);
+  } else {
+    acceptor_thread->cancel();
+    acceptor_thread->join();
+  }
   delete acceptor_thread;
 
   delete inbound_messages;
@@ -92,7 +105,11 @@ FawkesNetworkServerThread::add_connection(StreamSocket *s) throw()
   FawkesNetworkServerClientThread *client = new FawkesNetworkServerClientThread(s, this);
 
   client->set_clid(next_client_id);
-  thread_collector->add(client);
+  if ( thread_collector ) {
+    thread_collector->add(client);
+  } else {
+    client->start();
+  }
   clients.lock();
   clients[next_client_id] = client;
   clients.unlock();
@@ -150,7 +167,12 @@ FawkesNetworkServerThread::loop()
   cit = clients.begin();
   while (cit != clients.end()) {
     if ( ! (*cit).second->alive() ) {
-      thread_collector->remove((*cit).second);
+      if ( thread_collector ) {
+	thread_collector->remove((*cit).second);
+      } else {
+	(*cit).second->cancel();
+	(*cit).second->join();
+      }
       delete (*cit).second;
       unsigned int clid = (*cit).first;
       ++cit;

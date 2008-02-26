@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  wait.h - TimeWait tool
+ *  time_source.h - Time source aspect for Fawkes
  *
- *  Created: Thu Nov 29 17:28:46 2007
- *  Copyright  2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Feb 24 13:29:45 2008
+ *  Copyright  2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -21,34 +21,25 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __UTILS_TIME_WAIT_H_
-#define __UTILS_TIME_WAIT_H_
+#ifndef __ASPECT_TIME_SOURCE_H_
+#define __ASPECT_TIME_SOURCE_H_
 
-class Clock;
-class Time;
+class TimeSource;
 
-class TimeWait {
+class TimeSourceAspect
+{
  public:
-  TimeWait(Clock *clock, long int desired_loop_time);
-  ~TimeWait();
+  TimeSourceAspect(TimeSource *timesource) __attribute__((nonnull));
+  virtual ~TimeSourceAspect();
 
-  void mark_start();
-  void wait();
-  void wait_systime();
-
-  static void wait(long int usec);
-  static void wait_systime(long int usec);
+  TimeSource *  get_timesource() const;
 
  private:
-  Clock *__clock;
-  Time  *__until;
-  Time  *__until_systime;
-  Time  *__now;
-  long int __desired_loop_time;
+  TimeSource *__time_source;
 };
 
 #endif
