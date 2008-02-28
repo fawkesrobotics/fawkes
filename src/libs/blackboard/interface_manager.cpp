@@ -164,7 +164,7 @@ BlackBoardInterfaceManager::find_interface_in_memory(const char *type, const cha
   for ( cit = memmgr->begin(); cit != memmgr->end(); ++cit ) {
     ih = (interface_header_t *)*cit;
     if ( (strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0) &&
-	 (strncmp(ih->id, identifier, __INTERFACE_ID_SIZE) == 0 )
+	 (strncmp(ih->id, identifier, __INTERFACE_ID_SIZE) == 0)
 	 ) {
       // found it!
       return *cit;
@@ -241,6 +241,7 @@ BlackBoardInterfaceManager::create_interface(const char *type, const char *ident
 
   strncpy(ih->type, type, __INTERFACE_TYPE_SIZE);
   strncpy(ih->id, identifier, __INTERFACE_ID_SIZE);
+  memcpy(ih->hash, interface->hash(), __INTERFACE_HASH_SIZE);
 
   ih->refcount           = 0;
   ih->serial             = next_mem_serial();
@@ -278,9 +279,15 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
   if ( ptr != NULL ) {
     // found, instantiate new interface for given memory chunk
     iface = new_interface_instance(type, identifier);
+    ih  = (interface_header_t *)ptr;
+    if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
+	 (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
+      memmgr->unlock();
+      mutex->unlock();
+      throw BlackBoardInterfaceVersionMismatchException();
+    }
     iface->__mem_real_ptr = ptr;
     iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
-    ih  = (interface_header_t *)ptr;
     rwlocks[ih->serial]->ref();
   } else {
     created = true;
@@ -349,6 +356,15 @@ BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type,
       iface->__mem_real_ptr = ptr;
       iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
       ih  = (interface_header_t *)ptr;
+
+      if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
+	   (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
+	delete_interface_instance( iface );
+	memmgr->unlock();
+	mutex->unlock();
+	throw BlackBoardInterfaceVersionMismatchException();
+      }
+
       rwlocks[ih->serial]->ref();
 
       iface->__write_access = false;
@@ -408,6 +424,13 @@ BlackBoardInterfaceManager::open_for_writing(const char *type, const char *ident
       throw BlackBoardWriterActiveException(identifier, type);
     }
     iface = new_interface_instance(type, identifier);
+    if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
+	 (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
+      delete_interface_instance(iface);
+      memmgr->unlock();
+      mutex->unlock();
+      throw BlackBoardInterfaceVersionMismatchException();
+    }
     iface->__mem_real_ptr = ptr;
     iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
     rwlocks[ih->serial]->ref();

@@ -21,7 +21,7 @@
 
 BASEDIR = ../..
 
-SUBDIRS = core utils interface blackboard netcomm config aspect geometry
+SUBDIRS = core utils interface netcomm blackboard config aspect geometry
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
@@ -30,7 +30,7 @@ include $(BASEDIR)/etc/buildsys/rules.mk
 # error. This is also necessary for working parallel build (i.e. for dual core)
 utils: core
 interface: core
-blackboard: core utils interface
+blackboard: core utils interface netcomm
 netcomm: core utils
 config: core netcomm utils
 aspect: core utils blackboard netcomm config

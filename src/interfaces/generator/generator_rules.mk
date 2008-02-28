@@ -22,8 +22,10 @@ ifeq ($(BUILD_INTERFACE_GENERATOR),1)
   endif
 
   LIBS_interface_generator = core utils
-  LDFLAGS_interface_generator = $(shell $(PKGCONFIG) --libs libxml++-2.6)
-  OBJS_interface_generator = $(GENDIR)constant.o		\
+  LDFLAGS_interface_generator = $(shell $(PKGCONFIG) --libs libxml++-2.6) $(LDFLAGS_LIBCRYPTO)
+  CFLAGS += $(CFLAGS_LIBCRYPTO)
+  OBJS_interface_generator = $(GENDIR)constant.o	\
+			     $(GENDIR)digest.o		\
 			     $(GENDIR)enum_constant.o	\
 			     $(GENDIR)field.o		\
 			     $(GENDIR)generator.o	\
@@ -36,7 +38,12 @@ ifeq ($(BUILD_INTERFACE_GENERATOR),1)
   BINS_all = $(BINDIR)/interface_generator
 
 else
-  WARN_TARGETS += warning_libxmlpp
+  ifneq ($(HAVE_LIBXMLPP),1)
+    WARN_TARGETS += warning_libxmlpp
+  endif
+  ifneq ($(HAVE_LIBCRYPTO),1)
+    WARN_TARGETS += warning_openssl
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
@@ -46,6 +53,11 @@ all: $(WARN_TARGETS)
 .PHONY: warning_libxmlpp
 warning_libxmlpp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting interface generator$(TNORMAL) (libxml++[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Interfaces cannot be generated$(TNORMAL)"
+
+.PHONY: warning_openssl
+warning_openssl:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting interface generator$(TNORMAL) (openssl[-devel] not installed)"
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Interfaces cannot be generated$(TNORMAL)"
 endif
 

@@ -81,7 +81,7 @@ main(int argc, char **argv)
   } else {
     cout << endl << "Interfaces:" << endl;
 
-    printf("%sMemSize  Overhang  Type/ID                            Serial  Ref  W/R%s\n"
+    printf("%sMemSize  Overhang  Type/ID/Hash                       Serial  Ref  W/R%s\n"
 	   "------------------------------------------------------------------------\n",
 	   cdarkgray.c_str(), cnormal.c_str());
 
@@ -93,10 +93,15 @@ main(int argc, char **argv)
 	break;
       } else {
 	ih = (interface_header_t *)*cit;
-	printf("%7u  %8u  %sT%s %-32s %6u  %3u  %1d/%-3d\n%18s %sI%s %-32s\n",
+	char tmp_hash[__INTERFACE_HASH_SIZE * 2 + 1];
+	for (size_t s = 0; s < __INTERFACE_HASH_SIZE; ++s) {
+	  snprintf(&tmp_hash[s*2], 3, "%02X", ih->hash[s]);
+	}
+	printf("%7u  %8u  %sT%s %-32s %6u  %3u  %1d/%-3d\n%18s %sI%s %-32s\n%18s %sH%s %-32s\n",
 	       cit.size(), cit.overhang(), clightgray.c_str(), cnormal.c_str(), ih->type,
 	       ih->serial, ih->refcount, ih->flag_writer_active, ih->num_readers,
-	       "", clightgray.c_str(), cnormal.c_str(), ih->id);
+	       "", clightgray.c_str(), cnormal.c_str(), ih->id,
+	       "", clightgray.c_str(), cnormal.c_str(), tmp_hash);
       }
     }
   }

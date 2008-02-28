@@ -27,6 +27,7 @@
 
 #include <interfaces/generator/generator.h>
 #include <interfaces/generator/parser.h>
+#include <interfaces/generator/digest.h>
 #include <interfaces/generator/exceptions.h>
 
 #include <utils/system/argparser.h>
@@ -82,13 +83,17 @@ main(int argc, char **argv)
 	iparse->parse();
 	// iparse->print();
 	
+	InterfaceDigest    *idigest = new InterfaceDigest(*i);
+
 	InterfaceGenerator *igen = new InterfaceGenerator(dir,
 							  iparse->getInterfaceName(),
 							  prefix,
 							  iparse->getInterfaceAuthor(),
 							  iparse->getInterfaceYear(),
 							  iparse->getInterfaceCreationDate(),
-							  iparse->getDataComment()
+							  iparse->getDataComment(),
+							  idigest->get_hash(),
+							  idigest->get_hash_size()
 							  );
 	igen->setConstants( iparse->getConstants() );
 	igen->setEnumConstants( iparse->getEnumConstants() );
@@ -98,6 +103,7 @@ main(int argc, char **argv)
 	igen->generate();
 	delete igen;
 	delete iparse;
+	delete idigest;
       } catch (Exception &e) {
 	cout << "Generating the interface failed." << endl;
 	e.print_trace();

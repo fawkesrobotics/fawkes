@@ -32,9 +32,13 @@
 #include <interface/message_queue.h>
 #include <core/exception.h>
 
-#define __INTERFACE_TYPE_SIZE 32
-#define __INTERFACE_ID_SIZE 32
-//                                            type  ::   id
+#include <cstddef>
+
+#define __INTERFACE_TYPE_SIZE   32
+#define __INTERFACE_ID_SIZE     32
+// We use MD5 as interface hash
+#define __INTERFACE_HASH_SIZE   16
+//  UID is:                                   type  ::   id
 #define __INTERFACE_UID_SIZE __INTERFACE_TYPE_SIZE + 2 + __INTERFACE_ID_SIZE
 
 class RefCountRWLock;
@@ -61,13 +65,16 @@ class Interface
  public:
   virtual ~Interface();
 
-  bool          oftype(const char *interface_type) const;
-  unsigned int  datasize() const;
-  const char *  type() const;
-  const char *  id() const;
-  const char *  uid() const;
-  unsigned int  serial() const;
-  bool          operator== (Interface &comp) const;
+  bool                           oftype(const char *interface_type) const;
+  unsigned int                   datasize() const;
+  const char *                   type() const;
+  const char *                   id() const;
+  const char *                   uid() const;
+  unsigned int                   serial() const;
+  bool                           operator== (Interface &comp) const;
+  const unsigned char *          hash() const;
+  size_t                         hash_size() const;
+  const char *                   hash_printable() const;
 
   void          read();
   void          write();
@@ -103,6 +110,8 @@ class Interface
   Interface();
   virtual bool  message_valid(const Message *message) const = 0;
 
+  void set_hash(unsigned char ihash[__INTERFACE_HASH_SIZE]);
+
   void         *data_ptr;
   unsigned int  data_size;
 
@@ -112,6 +121,9 @@ class Interface
   char               __type[__INTERFACE_TYPE_SIZE + 1];
   char               __id[__INTERFACE_ID_SIZE + 1];
   char               __uid[__INTERFACE_UID_SIZE + 1];
+  unsigned char      __hash[__INTERFACE_HASH_SIZE];
+  char               __hash_printable[__INTERFACE_HASH_SIZE * 2 + 1];
+
   unsigned int       __instance_serial;
 
   void *             __mem_data_ptr;

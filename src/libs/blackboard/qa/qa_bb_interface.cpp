@@ -73,7 +73,9 @@ main(int argc, char **argv)
     cout << "Opening interfaces.. " << flush;
     ti_writer = bb->open_for_writing<TestInterface>("SomeID");
     ti_reader = bb->open_for_reading<TestInterface>("SomeID");
-    cout << "success" << endl;
+    cout << "success, " <<
+            "writer hash=" << ti_writer->hash_printable() <<
+            "  reader hash=" << ti_reader->hash_printable() << endl;
   } catch (Exception &e) {
     cout << "failed! Aborting" << endl;
     e.print_trace();

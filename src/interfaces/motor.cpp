@@ -21,7 +21,6 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.
  */
@@ -61,6 +60,8 @@ MotorInterface::MotorInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (MotorInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  unsigned char tmp_hash[] = {0x3c, 0xd5, 0xa1, 0x4a, 0xdc, 0x89, 0x43, 0x45, 0xaf, 0x9e, 0x87, 0xd2, 0xef, 0x9f, 0xef, 0xe9};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */

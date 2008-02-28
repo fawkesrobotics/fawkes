@@ -21,7 +21,6 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.
  */
@@ -48,6 +47,8 @@ KickerInterface::KickerInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (KickerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  unsigned char tmp_hash[] = {0xa4, 0x72, 0xaf, 0x95, 0xf9, 0xcd, 0x32, 0x8f, 0x1, 0xfa, 0xa1, 0xb7, 0xce, 0xff, 0xec, 0x3a};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */

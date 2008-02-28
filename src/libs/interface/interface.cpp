@@ -31,7 +31,8 @@
 #include <interface/mediators/message_mediator.h>
 #include <core/threading/refc_rwlock.h>
 
-#include <string.h>
+#include <cstring>
+#include <cstdio>
 #include <typeinfo>
 
 /** @class InterfaceWriteDeniedException interface/interface.h
@@ -75,6 +76,13 @@ InterfaceInvalidMessageException::InterfaceInvalidMessageException(const Interfa
  * Base class for all Fawkes BlackBoard interfaces.
  * Never use directly. Use interface generator to create interfaces.
  *
+ * Interfaces are identified by a type and an ID. The type is just a textual
+ * representation of the class name. The ID identifies a specific instance of this
+ * interface type. Additionally each interface has a hash. The hash is an MD5
+ * digest of the XML config file that was fed to the interface generator to
+ * create the interface. It is used to detect incompatible versions of the same
+ * interface type.
+ *
  * @author Tim Niemueller
  */
 
@@ -96,6 +104,7 @@ InterfaceInvalidMessageException::InterfaceInvalidMessageException(const Interfa
 Interface::Interface()
 {
   __write_access = false;
+  memset(__hash_printable, 0, __INTERFACE_HASH_SIZE * 2 + 1);
 }
 
 
@@ -104,6 +113,51 @@ Interface::~Interface()
 {
   __rwlock->unref();
   delete __message_queue;
+}
+
+/** Get interface hash.
+ * The interface is a unique version identifier of an interface. It is the has of
+ * the input XML file during the generation of the interface. It is meant to be used
+ * to ensure that all sides are using the exact same version of an interface.
+ * @return constant byte string containing the hash value of hash_size() length
+ */
+const unsigned char *
+Interface::hash() const
+{
+  return __hash;
+}
+
+
+/** Get printable interface hash.
+ * @return printable version of hash()
+ */
+const char *
+Interface::hash_printable() const
+{
+  return __hash_printable;
+}
+
+
+/** Set hash. Never use directly.
+ * @param ihash interface hash
+ */
+void
+Interface::set_hash(unsigned char ihash[__INTERFACE_HASH_SIZE])
+{
+  memcpy(__hash, ihash, __INTERFACE_HASH_SIZE);
+  for (size_t s = 0; s < __INTERFACE_HASH_SIZE; ++s) {
+    snprintf(&__hash_printable[s*2], 3, "%02X", __hash[s]);
+  }
+}
+
+/** Get size of interface hash.
+ * Returns the size in bytes of the interface hash. This depends on the used hash.
+ * @return size of interface hash string
+ */
+size_t
+Interface::hash_size() const
+{
+  return __INTERFACE_HASH_SIZE;
 }
 
 

@@ -21,7 +21,6 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.
  */
@@ -47,6 +46,8 @@ BatteryInterface::BatteryInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (BatteryInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  unsigned char tmp_hash[] = {0x12, 0x80, 0x3d, 0x25, 0xc5, 0xb4, 0x8e, 0x69, 00, 0xe6, 0xcc, 0xc0, 0x68, 0x17, 0x2f, 0x4};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */

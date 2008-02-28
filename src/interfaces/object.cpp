@@ -21,7 +21,6 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.
  */
@@ -59,6 +58,8 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (ObjectPositionInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  unsigned char tmp_hash[] = {0xc4, 0x5c, 0xbf, 0x74, 0xd, 0xd9, 00, 0x96, 0x48, 0x5f, 0x7c, 0x75, 0x2d, 0x7b, 0xc2, 0xd2};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */

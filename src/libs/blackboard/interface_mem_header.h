@@ -28,12 +28,9 @@
 #ifndef __BLACKBOARD_INTERFACE_MEM_HEADER_H_
 #define __BLACKBOARD_INTERFACE_MEM_HEADER_H_
 
+#include <interface/interface.h>
+
 #include <stdint.h>
-
-#define __INTERFACE_TYPE_SIZE 32
-#define __INTERFACE_ID_SIZE 32
-
-class RefCountRWLock;
 
 /** This struct is used as header for interfaces in memory chunks.
  * This header is stored at the beginning of each allocated memory chunk.
@@ -41,6 +38,7 @@ class RefCountRWLock;
 typedef struct {
   char             type[__INTERFACE_TYPE_SIZE];	/**< interface type */
   char             id[__INTERFACE_ID_SIZE];	/**< interface identifier */
+  unsigned char    hash[__INTERFACE_HASH_SIZE];	/**< interface type version hash */
   uint16_t         flag_writer_active :  1;	/**< 1 if there is a writer, 0 otherwise */
   uint16_t         flag_reserved      : 15;	/**< reserved for future use */
   uint16_t         num_readers;			/**< number of active readers */

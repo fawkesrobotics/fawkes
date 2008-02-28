@@ -21,7 +21,6 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.
  */
@@ -50,6 +49,8 @@ TestInterface::TestInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (TestInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  unsigned char tmp_hash[] = {0xfe, 0x24, 0xd9, 0xef, 0xca, 0x7e, 0x82, 0x65, 0x42, 0xc7, 0xd4, 0x8c, 0xdd, 0xfc, 0xb8, 0x16};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */

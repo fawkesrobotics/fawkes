@@ -102,6 +102,20 @@ class BlackBoardInterfaceNotFoundException : public Exception {
 };
 
 
+/** Thrown if versions do not match.
+ * If the hashes of two interfaces of the very same type do not match they
+ * are incompatible.
+ */
+class BlackBoardInterfaceVersionMismatchException : public Exception {
+ public:
+  /** Constructor. */
+  BlackBoardInterfaceVersionMismatchException()
+    : Exception("Interface versions do not match, need to update and recompile interfaces?")
+  {
+  }
+};
+
+
 /** Thrown if a writer is already active on an interface that writing has
  * been requested for.
  */

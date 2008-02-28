@@ -2,7 +2,7 @@
 #               Makefile Build System for Fawkes : BlackBoard
 #                            -------------------
 #   Created on Wed Oct 04 10:49:27 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -12,17 +12,12 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
 
 BASEDIR = ../../..
 
 CFLAGS = -g
 
-LIBS_libblackboard = core utils interface
+LIBS_libblackboard = core utils interface netcomm
 OBJS_libblackboard = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all =	$(OBJS_libblackboard) $(OBJS_blackboard)

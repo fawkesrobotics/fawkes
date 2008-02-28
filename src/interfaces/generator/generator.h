@@ -43,7 +43,8 @@ class InterfaceGenerator
   InterfaceGenerator(std::string directory, std::string interface_name,
 		     std::string config_basename, std::string author,
 		     std::string year, std::string creation_date,
-		     std::string data_comment);
+		     std::string data_comment,
+		     const unsigned char *hash, size_t hash_size);
   ~InterfaceGenerator();
 
   void setConstants(const std::vector<InterfaceConstant> &constants);
@@ -108,6 +109,9 @@ class InterfaceGenerator
   std::string year;
   std::string creation_date;
   std::string data_comment;
+
+  const unsigned char *hash;
+  size_t hash_size;
 };
 
 

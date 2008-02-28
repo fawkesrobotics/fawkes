@@ -919,6 +919,7 @@ SharedMemory::try_lock_for_write()
       }
     }
     __lock_aquired = true;
+    __write_lock_aquired = true;
     __semset->unlock(WRITE_MUTEX_SEM);
     return true;
   } else {

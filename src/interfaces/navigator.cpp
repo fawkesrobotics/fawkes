@@ -21,7 +21,6 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
  *  along with this program; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.
  */
@@ -45,6 +44,8 @@ NavigatorInterface::NavigatorInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (NavigatorInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  unsigned char tmp_hash[] = {0x46, 0x32, 0x7d, 0x5c, 0xae, 0x61, 0x8a, 0xd8, 0x88, 0x6a, 0xc8, 0xd8, 0xc1, 0xeb, 0x36, 0xb7};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */

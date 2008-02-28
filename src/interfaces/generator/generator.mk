@@ -15,9 +15,21 @@
 
 ifneq ($(PKGCONFIG),)
   HAVE_LIBXMLPP = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
+  HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --exists 'libcrypto'; echo $${?/1/}),1,0)
+  LIBCRYPTO_PKG  := libcrypto
+  CFLAGS_LIBCRYPTO  = $(shell $(PKGCONFIG) --cflags 'libcrypto')
+  LDFLAGS_LIBCRYPTO = $(shell $(PKGCONFIG) --libs 'libcrypto')
+  ifneq ($(HAVE_LIBCRYPTO),1)
+    HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --exists 'openssl'; echo $${?/1/}),1,0)
+    LIBCRYPTO_PKG  := openssl
+    CFLAGS_LIBCRYPTO  = $(shell $(PKGCONFIG) --cflags 'openssl')
+    LDFLAGS_LIBCRYPTO = $(shell $(PKGCONFIG) --libs 'openssl')
+  endif
 endif
 
-BUILD_INTERFACE_GENERATOR=$(HAVE_LIBXMLPP)
+ifeq ($(HAVE_LIBXMLPP)$(HAVE_LIBCRYPTO),11)
+  BUILD_INTERFACE_GENERATOR=1
+endif
 
 ifeq ($(BUILD_INTERFACE_GENERATOR),1)
   CFLAGS += $(shell $(PKGCONFIG) --cflags libxml++-2.6)

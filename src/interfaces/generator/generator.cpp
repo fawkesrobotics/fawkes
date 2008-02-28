@@ -52,11 +52,14 @@ using namespace std;
  * @param year year of copyright
  * @param creation_date user-supplied creation date of interface
  * @param data_comment comment in data block.
+ * @param hash MD5 hash of the config file that was used to generate the interface
+ * @param hash_size size in bytes of hash
  */
 InterfaceGenerator::InterfaceGenerator(std::string directory, std::string interface_name,
 				       std::string config_basename, std::string author,
 				       std::string year, std::string creation_date,
-				       std::string data_comment)
+				       std::string data_comment,
+				       const unsigned char *hash, size_t hash_size)
 {
   this->dir    = directory;
   if ( dir.find_last_of("/") != (dir.length() - 1) ) {
@@ -66,6 +69,8 @@ InterfaceGenerator::InterfaceGenerator(std::string directory, std::string interf
   this->year   = year;
   this->creation_date = creation_date;
   this->data_comment  = data_comment;
+  this->hash = hash;
+  this->hash_size = hash_size;
   filename_cpp = config_basename + ".cpp";
   filename_h   = config_basename + ".h";
   filename_o   = config_basename + ".o";
@@ -200,7 +205,6 @@ InterfaceGenerator::write_header(FILE *f, std::string filename)
   fprintf(f, " *  GNU Library General Public License for more details.\n");
   fprintf(f, " *\n");
   fprintf(f, " *  You should have received a copy of the GNU General Public License\n");
-  fprintf(f, " *  along with this program; if not, write to the Free Software\n");
   fprintf(f, " *  along with this program; if not, write to the Free Software Foundation,\n");
   fprintf(f, " *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.\n");
   fprintf(f, " */\n\n");
@@ -443,22 +447,32 @@ InterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 					std::string classname, std::string super_class,
 					std::string inclusion_prefix)
 {
-   fprintf(f,
+  fprintf(f,
 	  "/** Constructor */\n"
 	  "%s%s::%s() : %s()\n"
 	  "{\n"
 	  "  data_size = sizeof(%s_data_t);\n"
 	  "  data_ptr  = malloc(data_size);\n"
 	  "  data      = (%s_data_t *)data_ptr;\n"
-	  "  memset(data_ptr, 0, data_size);\n"
+	  "  memset(data_ptr, 0, data_size);\n",
+	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str(),
+	  super_class.c_str(), classname.c_str(), classname.c_str());
+
+  
+  fprintf(f, "  unsigned char tmp_hash[] = {");
+  for (size_t st = 0; st < hash_size-1; ++st) {
+    fprintf(f, "%#02x, ", hash[st]);
+  }
+  fprintf(f, "%#02x};\n", hash[hash_size-1]);
+  fprintf(f, "  set_hash(tmp_hash);\n");
+
+  fprintf(f,
 	  "}\n\n"
 	  "/** Destructor */\n"
 	  "%s%s::~%s()\n"
 	  "{\n"
 	  "  free(data_ptr);\n"
 	  "}\n",
-	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str(),
-	  super_class.c_str(), classname.c_str(), classname.c_str(),
 	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str()
 	  );
 }
