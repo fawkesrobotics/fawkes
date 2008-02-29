@@ -134,15 +134,14 @@ InterfaceGenerator::setMessages(const std::vector<InterfaceMessage> &messages)
 
 /** Write optimized struct.
  * Create struct, try align data well, sort fields:
- * 1. unsigned int (w/o bit fields)
- * 2. int (w/o bit fields)
- * 3. unsigned long int (w/o bit fields)
- * 4. long int (w/o bit fields)
+ * 1. unsigned int
+ * 2. int
+ * 3. unsigned long int
+ * 4. long int
  * 5. float
  * 6. double
- * 7. bit fields
- * 8. bool
- * 9. char *
+ * 7. bool
+ * 8. char *
  * @param f file to write to
  * @param name name of struct
  * @param is indentation space
@@ -163,8 +162,6 @@ InterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* inden
     fprintf(f, "%s  %s %s", is.c_str(), (*i).getType().c_str(), (*i).getName().c_str());
     if ( (*i).getLength().length() > 0 ) {
       fprintf(f, "[%s]", (*i).getLength().c_str());
-    } else if ( (*i).getNumBits() > 0 ) {
-      fprintf(f, " : %u", (*i).getNumBits());
     }
     fprintf(f, "; /**< %s */\n", (*i).getComment().c_str());
   }
@@ -240,7 +237,7 @@ InterfaceGenerator::write_cpp(FILE *f)
 	  filename_h.c_str(), class_name.c_str(), filename_h.c_str(),
 	  class_name.c_str(), data_comment.c_str());
   write_constants_cpp(f);
-  write_ctor_dtor_cpp(f, class_name, "Interface", "");
+  write_ctor_dtor_cpp(f, class_name, "Interface", "", data_fields);
   write_methods_cpp(f, class_name, class_name, data_fields, "");
   write_messages_cpp(f);
 
@@ -441,11 +438,13 @@ InterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* indent spa
  * @param classname name of class
  * @param super_class name of base class
  * @param inclusion_prefix Used if class is included in another class.
+ * @param fields fields
  */
 void
 InterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 					std::string classname, std::string super_class,
-					std::string inclusion_prefix)
+					std::string inclusion_prefix,
+					std::vector<InterfaceField> fields)
 {
   fprintf(f,
 	  "/** Constructor */\n"
@@ -458,13 +457,37 @@ InterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 	  inclusion_prefix.c_str(), classname.c_str(), classname.c_str(),
 	  super_class.c_str(), classname.c_str(), classname.c_str());
 
-  
   fprintf(f, "  unsigned char tmp_hash[] = {");
   for (size_t st = 0; st < hash_size-1; ++st) {
     fprintf(f, "%#02x, ", hash[st]);
   }
   fprintf(f, "%#02x};\n", hash[hash_size-1]);
   fprintf(f, "  set_hash(tmp_hash);\n");
+
+  for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
+    if ( (*i).getType() == "bool" ) {
+      fprintf(f, "  add_fieldinfo(Interface::IFT_BOOL, \"%s\", &data->%s);\n",
+	      (*i).getName().c_str(), (*i).getName().c_str());
+    } else if ( (*i).getType() == "int" ) {
+      fprintf(f, "  add_fieldinfo(Interface::IFT_INT, \"%s\", &data->%s);\n",
+	      (*i).getName().c_str(), (*i).getName().c_str());
+    } else if ( (*i).getType() == "unsigned int" ) {
+      fprintf(f, "  add_fieldinfo(Interface::IFT_UINT, \"%s\", &data->%s);\n",
+	      (*i).getName().c_str(), (*i).getName().c_str());
+    } else if ( (*i).getType() == "long int" ) {
+      fprintf(f, "  add_fieldinfo(Interface::IFT_LONGINT, \"%s\", &data->%s);\n",
+	      (*i).getName().c_str(), (*i).getName().c_str());
+    } else if ( (*i).getType() == "unsigned long int" ) {
+      fprintf(f, "  add_fieldinfo(Interface::IFT_LONGUINT, \"%s\", &data->%s);\n",
+	      (*i).getName().c_str(), (*i).getName().c_str());
+    } else if ( (*i).getType() == "float" ) {
+      fprintf(f, "  add_fieldinfo(Interface::IFT_FLOAT, \"%s\", &data->%s);\n",
+	      (*i).getName().c_str(), (*i).getName().c_str());
+    } else if ( (*i).getType() == "string" ) {
+      fprintf(f, "  add_fieldinfo(Interface::IFT_STRING, \"%s\", data->%s);\n",
+	      (*i).getName().c_str(), (*i).getName().c_str());
+    }
+  }
 
   fprintf(f,
 	  "}\n\n"
@@ -607,7 +630,7 @@ InterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
 	    (*i).getName().c_str(), (*i).getName().c_str(),
 	    inclusion_prefix.c_str(), classname.c_str(), (*i).getName().c_str(), (*i).getAccessType().c_str(), (*i).getName().c_str()
 	    );
-    if ( (*i).getType() == "char" ) {
+    if ( ((*i).getType() == "char") && ((*i).getLengthValue() > 0) ) {
       fprintf(f,
 	      "  strncpy(data->%s, new_%s, sizeof(data->%s));\n",
 	      (*i).getName().c_str(), (*i).getName().c_str(), (*i).getName().c_str());
@@ -622,7 +645,6 @@ InterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
 	      (*i).getName().c_str(), (*i).getName().c_str());
     }
     fprintf(f, "}\n\n");
-
   }
 }
 
@@ -677,6 +699,7 @@ InterfaceGenerator::write_h(FILE *f)
   fprintf(f, " private:\n");
 
   write_struct(f, class_name + "_data_t", "  ", data_fields);
+
   fprintf(f, "  %s_data_t *data;\n"
 	  "\n public:\n", class_name.c_str());
 

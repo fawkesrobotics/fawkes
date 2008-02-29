@@ -48,6 +48,9 @@ BatteryInterface::BatteryInterface() : Interface()
   memset(data_ptr, 0, data_size);
   unsigned char tmp_hash[] = {0x12, 0x80, 0x3d, 0x25, 0xc5, 0xb4, 0x8e, 0x69, 00, 0xe6, 0xcc, 0xc0, 0x68, 0x17, 0x2f, 0x4};
   set_hash(tmp_hash);
+  add_fieldinfo(Interface::IFT_UINT, "current", &data->current);
+  add_fieldinfo(Interface::IFT_UINT, "voltage", &data->voltage);
+  add_fieldinfo(Interface::IFT_UINT, "temperature", &data->temperature);
 }
 
 /** Destructor */

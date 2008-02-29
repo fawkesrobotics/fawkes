@@ -52,7 +52,6 @@
 	      name       CDATA  #REQUIRED
 	      flags      CDATA  #IMPLIED
 	      length     CDATA  #IMPLIED
-	      bits       CDATA  #IMPLIED
 	      validfor   CDATA  '5'
 	      default    CDATA  #IMPLIED
 	      datafield  CDATA  #IMPLIED>

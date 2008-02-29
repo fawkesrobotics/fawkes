@@ -106,11 +106,70 @@ class Interface
   MessageQueue::MessageIterator  msgq_begin();
   MessageQueue::MessageIterator  msgq_end();
 
+  /* Introspection */
+
+  /** Interface field type*/
+  typedef enum {
+    IFT_BOOL,		/**< boolean field */
+    IFT_INT,		/**< integer field */
+    IFT_UINT,		/**< unsigned integer field */
+    IFT_LONGINT,	/**< long int field */
+    IFT_LONGUINT,	/**< unsigned long int field */
+    IFT_FLOAT,		/**< float field */
+    IFT_STRING		/**< string field */
+  } interface_fieldtype_t;
+
+  /** Interface field info list */
+  struct interface_fieldinfo_t {
+    interface_fieldtype_t    type;	/**< type of this field */
+    const char              *name;	/**< Name of this field */
+    void                    *value;	/**< Current value of this field */
+    interface_fieldinfo_t   *next;	/**< next field, NULL if last */
+  };
+
+  class FieldIterator
+  {
+    friend class Interface;
+   public:
+    FieldIterator();
+    FieldIterator(const FieldIterator &fit);
+    ~FieldIterator();
+    FieldIterator &        operator++ ();        // prefix
+    FieldIterator          operator++ (int inc); // postfix
+    FieldIterator &        operator+  (unsigned int i);
+    FieldIterator &        operator+= (unsigned int i);
+    bool                   operator== (const FieldIterator & s) const;
+    bool                   operator!= (const FieldIterator & s) const;
+    const void *           operator*  () const;
+    FieldIterator &        operator=  (const FieldIterator & shmit);
+
+    interface_fieldtype_t  get_type() const;
+    const char *           get_name() const;
+    const void *           get_value() const;
+    bool                   get_bool() const;
+    int                    get_int() const;
+    unsigned int           get_uint() const;
+    long int               get_longint() const;
+    unsigned long int      get_longuint() const;
+    float                  get_float() const;
+    const char *           get_string() const;
+
+   protected:
+    FieldIterator(const interface_fieldinfo_t *info_list);
+
+   private:
+    const interface_fieldinfo_t   *__infol;
+  };
+
+  FieldIterator fields();
+  FieldIterator fields_end();
+
  protected:
   Interface();
   virtual bool  message_valid(const Message *message) const = 0;
 
   void set_hash(unsigned char ihash[__INTERFACE_HASH_SIZE]);
+  void add_fieldinfo(interface_fieldtype_t type, const char *name, void *value);
 
   void         *data_ptr;
   unsigned int  data_size;
@@ -137,6 +196,7 @@ class Interface
   MessageMediator   *__message_mediator;
   MessageQueue      *__message_queue;
 
+  interface_fieldinfo_t  *__info_list;
 
   struct imsg_list_t {
     imsg_list_t  *next;		/**< pointer to next element in list */

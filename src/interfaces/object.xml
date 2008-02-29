@@ -26,20 +26,20 @@
       known objects. You may choose not to use this for other application in which case
       the value should be other (which is also the default).
     </comment>
-    <field type="unsigned int" bits="16" name="object_type">
+    <field type="unsigned int" name="object_type">
       Object type, use constants to define
     </field>
-    <field type="unsigned int" bits="1" name="supports_relative">
-      Bit field, 1 if the current interface in general has support for relative position data.
+    <field type="char" name="supports_relative">
+      1 if the current interface in general has support for relative position data.
     </field>
-    <field type="unsigned int" bits="1" name="supports_global">
-      Bit field, 1 if the current interface in general has support for global (world) position data.
+    <field type="char" name="supports_global">
+      1 if the current interface in general has support for global (world) position data.
     </field>
-    <field type="unsigned int" bits="1" name="has_relative">
-      Bit field, 1 if the current interface at the moment has valid relative position data.
+    <field type="char" name="has_relative">
+      1 if the current interface at the moment has valid relative position data.
     </field>
-    <field type="unsigned int" bits="1" name="has_global">
-      Bit field, 1 if the current interface at the moment has valid global (world) position data.
+    <field type="char" name="has_global">
+      1 if the current interface at the moment has valid global (world) position data.
     </field>
     <field type="bool" name="visible">
       True, if object is visible.

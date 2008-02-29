@@ -46,7 +46,6 @@ class InterfaceField
   void setFlags(const std::vector<std::string> &flags);
   void setValidFor(const std::string &validfor);
   void setDefaultValue(const std::string &default_value);
-  void setBits(const std::string &type);
 
   void setAttribute(const std::string &attr_name, const std::string &attr_value);
 
@@ -58,8 +57,6 @@ class InterfaceField
   std::string               getAccessType() const;
   std::string               getLength() const;
   unsigned int              getLengthValue() const;
-  std::string               getBits() const;
-  unsigned int              getNumBits() const;
   std::vector<std::string>  getFlags() const;
   std::string               getValidFor() const;
   std::string               getDefaultValue() const;
@@ -78,13 +75,11 @@ class InterfaceField
   std::string comment;
   std::string length;
   unsigned int length_value;
-  std::string bits;
   std::string validfor;
   std::string default_value;
   std::vector<std::string> flags;
   std::vector<InterfaceEnumConstant> *enum_constants;
 
-  unsigned int bits_val;
 };
 
 #endif

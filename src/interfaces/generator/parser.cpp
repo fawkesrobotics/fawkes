@@ -136,9 +136,6 @@ InterfaceParser::printFields(vector<InterfaceField> &fields)
     if ( (*i).getLength() != "" ) {
       cout << "  length=" << (*i).getLength();
     }
-    if ( (*i).getBits() != "" ) {
-      cout << "  bits=" << (*i).getBits();
-    }
     if ( (*i).getValidFor() != "" ) {
       cout << "  validfor=" << (*i).getValidFor();
     }

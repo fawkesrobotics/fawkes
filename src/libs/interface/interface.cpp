@@ -33,6 +33,7 @@
 
 #include <cstring>
 #include <cstdio>
+#include <cstdlib>
 #include <typeinfo>
 
 /** @class InterfaceWriteDeniedException interface/interface.h
@@ -104,6 +105,8 @@ InterfaceInvalidMessageException::InterfaceInvalidMessageException(const Interfa
 Interface::Interface()
 {
   __write_access = false;
+  __info_list = NULL;
+  memset(__hash, 0, __INTERFACE_HASH_SIZE);
   memset(__hash_printable, 0, __INTERFACE_HASH_SIZE * 2 + 1);
 }
 
@@ -113,6 +116,13 @@ Interface::~Interface()
 {
   __rwlock->unref();
   delete __message_queue;
+  // free info list
+  interface_fieldinfo_t *infol = __info_list;
+  while ( infol ) {
+    __info_list = __info_list->next;
+    free(infol);
+    infol = __info_list;
+  }
 }
 
 /** Get interface hash.
@@ -149,6 +159,39 @@ Interface::set_hash(unsigned char ihash[__INTERFACE_HASH_SIZE])
     snprintf(&__hash_printable[s*2], 3, "%02X", __hash[s]);
   }
 }
+
+
+/** Add an entry to the info list.
+ * Never use directly, use the interface generator instead. The info list
+ * is used for introspection purposes to allow for iterating over all fields
+ * of an interface.
+ * @param type field type
+ * @param name name of the field, this is referenced, not copied
+ * @param value pointer to the value in the data struct
+ */
+void
+Interface::add_fieldinfo(interface_fieldtype_t type, const char *name, void *value)
+{
+  interface_fieldinfo_t *infol = __info_list;
+  interface_fieldinfo_t *newinfo = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
+
+  newinfo->type  = type;
+  newinfo->name  = name;
+  newinfo->value = value;
+  newinfo->next  = NULL;
+
+  if ( infol == NULL ) {
+    // first entry
+    __info_list = newinfo;
+  } else {
+    // append to list
+    while ( infol->next != NULL ) {
+      infol = infol->next;
+    }
+    infol->next = newinfo;
+  }
+}
+
 
 /** Get size of interface hash.
  * Returns the size in bytes of the interface hash. This depends on the used hash.
@@ -515,3 +558,324 @@ Interface::msgq_pop()
  *
  * @relates Interface
  */
+
+
+/** Get iterator over all fields of this interface instance.
+ * @return field iterator pointing to the very first value
+ */
+Interface::FieldIterator
+Interface::fields()
+{
+  return FieldIterator(__info_list);
+}
+
+
+/** Invalid iterator.
+ * @return invalid iterator reprensenting the end.
+ */
+Interface::FieldIterator
+Interface::fields_end()
+{
+  return FieldIterator();
+}
+
+
+/** @class Interface::FieldIterator <interface/interface.h>
+ * Interface field iterator.
+ * This iterator is part of the BlackBoard introspection API. It can be used to
+ * iterate over all available fields and values of an interface without actually
+ * knowing the specific type of the interface.
+ * @author Tim Niemueller
+ */
+
+
+/** Constructor.
+ * Creates an invalid iterator.
+ */
+Interface::FieldIterator::FieldIterator()
+{
+  __infol = NULL;
+}
+
+
+/** Constructor.
+ * This creates an iterator pointing to the given entry of the info list.
+ * @param info_list pointer to info list entry to start from
+ */
+Interface::FieldIterator::FieldIterator(const interface_fieldinfo_t *info_list)
+{
+  __infol = info_list;
+}
+
+
+/** Copy constructor.
+ * @param fit iterator to copy
+ */
+Interface::FieldIterator::FieldIterator(const FieldIterator &fit)
+{
+  __infol = fit.__infol;
+}
+
+
+/** Destructor. */
+Interface::FieldIterator::~FieldIterator()
+{
+}
+
+
+/** Prefix increment.
+ * @return reference to this instance
+ */
+Interface::FieldIterator &
+Interface::FieldIterator::operator++()
+{
+  if ( __infol != NULL ) {
+    __infol = __infol->next;
+  }
+
+  return *this;
+}
+
+
+/** Postfix increment operator.
+ * @param inc ignored
+ * @return instance before advancing to the next shared memory segment
+ */
+Interface::FieldIterator
+Interface::FieldIterator::operator++(int inc)
+{
+  FieldIterator rv(*this);
+  ++(*this);
+  return rv;
+}
+
+
+/** Advance by i steps.
+ * @param i number of (matching) segments to advance.
+ * @return reference to this after advancing
+ */
+Interface::FieldIterator &
+Interface::FieldIterator::operator+(unsigned int i)
+{
+  for (unsigned int j = 0; j < i; ++j) {
+    ++(*this);
+  }
+  return *this;
+}
+
+
+/** Advance by i steps.
+ * @param i number of (matching) segments to advance.
+ * @return reference to this after advancing
+ */
+Interface::FieldIterator &
+Interface::FieldIterator::operator+=(unsigned int i)
+{
+  for (unsigned int j = 0; j < i; ++j) {
+    ++(*this);
+  }
+  return *this;
+}
+
+
+/** Check iterators for equality.
+ * @param fi iterator to compare to
+ * @return true if iterators point to the the same field, false otherwise
+ */
+bool
+Interface::FieldIterator::operator==(const FieldIterator & fi) const
+{
+  return (__infol == fi.__infol);
+}
+
+
+/** Check iterators for inequality.
+ * @param fi iterator to compare to
+ * @return true if iteraters point to the different fields, false otherwise
+ */
+bool
+Interface::FieldIterator::operator!=(const FieldIterator & fi) const
+{
+  return ! (*this == fi);
+}
+
+
+/** Get FieldHeader.
+ * @return shared memory header
+ */
+const void *
+Interface::FieldIterator::operator*() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else {
+    return __infol->value;
+  }
+}
+
+
+/** Make this instance point to the same segment as fi.
+ * @param fi field iterator to compare
+ * @return reference to this instance
+ */
+Interface::FieldIterator &
+Interface::FieldIterator::operator=(const FieldIterator & fi)
+{
+  __infol = fi.__infol;
+
+  return *this;
+}
+
+
+/** Get type of current field.
+ * @return field type
+ */
+Interface::interface_fieldtype_t
+Interface::FieldIterator::get_type() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get type of end element");
+  } else {
+    return __infol->type;
+  }
+}
+
+
+/** Get name of current field.
+ * @return field name
+ */
+const char *
+Interface::FieldIterator::get_name() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get name of end element");
+  } else {
+    return __infol->name;
+  }
+}
+
+
+/** Get value of current field.
+ * @return field value
+ */
+const void *
+Interface::FieldIterator::get_value() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else {
+    return __infol->value;
+  }
+}
+
+
+/** Get value of current field as bool.
+ * @return field value
+ */
+bool
+Interface::FieldIterator::get_bool() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_BOOL ) {
+    throw TypeMismatchException("Requested value is not of type bool");
+  } else {
+    return *((bool *)__infol->value);
+  }
+}
+
+
+/** Get value of current field as integer.
+ * @return field value
+ */
+int
+Interface::FieldIterator::get_int() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_INT ) {
+    throw TypeMismatchException("Requested value is not of type int");
+  } else {
+    return *((int *)__infol->value);
+  }
+}
+
+
+/** Get value of current field as unsigned integer.
+ * @return field value
+ */
+unsigned int
+Interface::FieldIterator::get_uint() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_UINT ) {
+    throw TypeMismatchException("Requested value is not of type unsigned int");
+  } else {
+    return *((unsigned int *)__infol->value);
+  }
+}
+
+
+/** Get value of current field as long integer.
+ * @return field value
+ */
+long int
+Interface::FieldIterator::get_longint() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_LONGINT ) {
+    throw TypeMismatchException("Requested value is not of type long int");
+  } else {
+    return *((long int *)__infol->value);
+  }
+}
+
+
+/** Get value of current field as unsigned long int.
+ * @return field value
+ */
+unsigned long int
+Interface::FieldIterator::get_longuint() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_LONGUINT ) {
+    throw TypeMismatchException("Requested value is not of type unsigned long int");
+  } else {
+    return *((unsigned long int *)__infol->value);
+  }
+}
+
+
+/** Get value of current field as float.
+ * @return field value
+ */
+float
+Interface::FieldIterator::get_float() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_FLOAT ) {
+    throw TypeMismatchException("Requested value is not of type float");
+  } else {
+    return *((float *)__infol->value);
+  }
+}
+
+
+/** Get value of current field as string.
+ * @return field value
+ */
+const char *
+Interface::FieldIterator::get_string() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_STRING ) {
+    throw TypeMismatchException("Requested value is not of type string");
+  } else {
+    return (const char *)__infol->value;
+  }
+}

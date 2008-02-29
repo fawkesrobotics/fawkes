@@ -58,8 +58,30 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (ObjectPositionInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0xc4, 0x5c, 0xbf, 0x74, 0xd, 0xd9, 00, 0x96, 0x48, 0x5f, 0x7c, 0x75, 0x2d, 0x7b, 0xc2, 0xd2};
+  unsigned char tmp_hash[] = {0xea, 0xe5, 0x4a, 0x2, 0x7c, 0x77, 0xe9, 0xa2, 0x82, 0xb, 0x14, 0xe6, 0x58, 0xea, 0x6c, 0xd4};
   set_hash(tmp_hash);
+  add_fieldinfo(Interface::IFT_UINT, "object_type", &data->object_type);
+  add_fieldinfo(Interface::IFT_BOOL, "visible", &data->visible);
+  add_fieldinfo(Interface::IFT_FLOAT, "yaw", &data->yaw);
+  add_fieldinfo(Interface::IFT_FLOAT, "pitch", &data->pitch);
+  add_fieldinfo(Interface::IFT_FLOAT, "distance", &data->distance);
+  add_fieldinfo(Interface::IFT_FLOAT, "dyp_covariance", &data->dyp_covariance);
+  add_fieldinfo(Interface::IFT_FLOAT, "world_x", &data->world_x);
+  add_fieldinfo(Interface::IFT_FLOAT, "world_y", &data->world_y);
+  add_fieldinfo(Interface::IFT_FLOAT, "world_z", &data->world_z);
+  add_fieldinfo(Interface::IFT_FLOAT, "relative_x", &data->relative_x);
+  add_fieldinfo(Interface::IFT_FLOAT, "relative_y", &data->relative_y);
+  add_fieldinfo(Interface::IFT_FLOAT, "relative_z", &data->relative_z);
+  add_fieldinfo(Interface::IFT_FLOAT, "xyz_covariance", &data->xyz_covariance);
+  add_fieldinfo(Interface::IFT_FLOAT, "extent", &data->extent);
+  add_fieldinfo(Interface::IFT_FLOAT, "yaw_velocity", &data->yaw_velocity);
+  add_fieldinfo(Interface::IFT_FLOAT, "pitch_velocity", &data->pitch_velocity);
+  add_fieldinfo(Interface::IFT_FLOAT, "distance_velocity", &data->distance_velocity);
+  add_fieldinfo(Interface::IFT_FLOAT, "dyp_velocity_covariance", &data->dyp_velocity_covariance);
+  add_fieldinfo(Interface::IFT_FLOAT, "world_x_velocity", &data->world_x_velocity);
+  add_fieldinfo(Interface::IFT_FLOAT, "world_y_velocity", &data->world_y_velocity);
+  add_fieldinfo(Interface::IFT_FLOAT, "world_z_velocity", &data->world_z_velocity);
+  add_fieldinfo(Interface::IFT_FLOAT, "xyz_velocity_covariance", &data->xyz_velocity_covariance);
 }
 
 /** Destructor */
@@ -94,11 +116,11 @@ ObjectPositionInterface::set_object_type(const unsigned int new_object_type)
 
 /** Get supports_relative value.
  * 
-      Bit field, 1 if the current interface in general has support for relative position data.
+      1 if the current interface in general has support for relative position data.
     
  * @return supports_relative value
  */
-unsigned int
+char
 ObjectPositionInterface::supports_relative()
 {
   return data->supports_relative;
@@ -106,23 +128,23 @@ ObjectPositionInterface::supports_relative()
 
 /** Set supports_relative value.
  * 
-      Bit field, 1 if the current interface in general has support for relative position data.
+      1 if the current interface in general has support for relative position data.
     
  * @param new_supports_relative new supports_relative value
  */
 void
-ObjectPositionInterface::set_supports_relative(const unsigned int new_supports_relative)
+ObjectPositionInterface::set_supports_relative(const char new_supports_relative)
 {
   data->supports_relative = new_supports_relative;
 }
 
 /** Get supports_global value.
  * 
-      Bit field, 1 if the current interface in general has support for global (world) position data.
+      1 if the current interface in general has support for global (world) position data.
     
  * @return supports_global value
  */
-unsigned int
+char
 ObjectPositionInterface::supports_global()
 {
   return data->supports_global;
@@ -130,23 +152,23 @@ ObjectPositionInterface::supports_global()
 
 /** Set supports_global value.
  * 
-      Bit field, 1 if the current interface in general has support for global (world) position data.
+      1 if the current interface in general has support for global (world) position data.
     
  * @param new_supports_global new supports_global value
  */
 void
-ObjectPositionInterface::set_supports_global(const unsigned int new_supports_global)
+ObjectPositionInterface::set_supports_global(const char new_supports_global)
 {
   data->supports_global = new_supports_global;
 }
 
 /** Get has_relative value.
  * 
-      Bit field, 1 if the current interface at the moment has valid relative position data.
+      1 if the current interface at the moment has valid relative position data.
     
  * @return has_relative value
  */
-unsigned int
+char
 ObjectPositionInterface::has_relative()
 {
   return data->has_relative;
@@ -154,23 +176,23 @@ ObjectPositionInterface::has_relative()
 
 /** Set has_relative value.
  * 
-      Bit field, 1 if the current interface at the moment has valid relative position data.
+      1 if the current interface at the moment has valid relative position data.
     
  * @param new_has_relative new has_relative value
  */
 void
-ObjectPositionInterface::set_has_relative(const unsigned int new_has_relative)
+ObjectPositionInterface::set_has_relative(const char new_has_relative)
 {
   data->has_relative = new_has_relative;
 }
 
 /** Get has_global value.
  * 
-      Bit field, 1 if the current interface at the moment has valid global (world) position data.
+      1 if the current interface at the moment has valid global (world) position data.
     
  * @return has_global value
  */
-unsigned int
+char
 ObjectPositionInterface::has_global()
 {
   return data->has_global;
@@ -178,12 +200,12 @@ ObjectPositionInterface::has_global()
 
 /** Set has_global value.
  * 
-      Bit field, 1 if the current interface at the moment has valid global (world) position data.
+      1 if the current interface at the moment has valid global (world) position data.
     
  * @param new_has_global new has_global value
  */
 void
-ObjectPositionInterface::set_has_global(const unsigned int new_has_global)
+ObjectPositionInterface::set_has_global(const char new_has_global)
 {
   data->has_global = new_has_global;
 }

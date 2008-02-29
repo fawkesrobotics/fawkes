@@ -49,8 +49,14 @@ TestInterface::TestInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (TestInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0xfe, 0x24, 0xd9, 0xef, 0xca, 0x7e, 0x82, 0x65, 0x42, 0xc7, 0xd4, 0x8c, 0xdd, 0xfc, 0xb8, 0x16};
+  unsigned char tmp_hash[] = {0xf4, 0xc0, 0xcc, 0x7d, 0xb8, 0x28, 0x73, 0x59, 0x7d, 0x63, 0xc0, 0x90, 0xc, 0x6b, 0xcd, 0x4f};
   set_hash(tmp_hash);
+  add_fieldinfo(Interface::IFT_BOOL, "test_bool", &data->test_bool);
+  add_fieldinfo(Interface::IFT_INT, "test_int", &data->test_int);
+  add_fieldinfo(Interface::IFT_INT, "result", &data->result);
+  add_fieldinfo(Interface::IFT_UINT, "test_uint", &data->test_uint);
+  add_fieldinfo(Interface::IFT_LONGUINT, "test_ulint", &data->test_ulint);
+  add_fieldinfo(Interface::IFT_LONGINT, "test_lint", &data->test_lint);
 }
 
 /** Destructor */
@@ -59,6 +65,26 @@ TestInterface::~TestInterface()
   free(data_ptr);
 }
 /* Methods */
+/** Get test_bool value.
+ * Test Bool
+ * @return test_bool value
+ */
+bool
+TestInterface::is_test_bool()
+{
+  return data->test_bool;
+}
+
+/** Set test_bool value.
+ * Test Bool
+ * @param new_test_bool new test_bool value
+ */
+void
+TestInterface::set_test_bool(const bool new_test_bool)
+{
+  data->test_bool = new_test_bool;
+}
+
 /** Get test_int value.
  * Test integer
  * @return test_int value
@@ -83,7 +109,7 @@ TestInterface::set_test_int(const int new_test_int)
  * Flags spit down by the writer
  * @return _flags value
  */
-unsigned int
+char
 TestInterface::_flags()
 {
   return data->_flags;
@@ -94,7 +120,7 @@ TestInterface::_flags()
  * @param new__flags new _flags value
  */
 void
-TestInterface::set__flags(const unsigned int new__flags)
+TestInterface::set__flags(const char new__flags)
 {
   data->_flags = new__flags;
 }

@@ -31,7 +31,7 @@
   </constants>
   <data>
     <comment>This are the actual RPMs of the motors taken from the VMC.</comment>
-    <field type="unsigned int" name="motor_state" bits="1">
+    <field type="unsigned int" name="motor_state">
       The current state of the motor.
     </field>
     <field type="unsigned int" name="drive_mode">

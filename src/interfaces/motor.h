@@ -50,6 +50,9 @@ class MotorInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
+    unsigned int motor_state; /**< 
+      The current state of the motor.
+     */
     unsigned int drive_mode; /**< 
       The current drive mode of the motor.
      */
@@ -86,9 +89,6 @@ class MotorInterface : public Interface
      */
     float omega; /**< 
       Rotation speed of the robot in rad/s.
-     */
-    unsigned int motor_state : 1; /**< 
-      The current state of the motor.
      */
     char controller_thread_name[64]; /**< 
      The name of the controlling thread.

@@ -60,8 +60,21 @@ MotorInterface::MotorInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (MotorInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0x3c, 0xd5, 0xa1, 0x4a, 0xdc, 0x89, 0x43, 0x45, 0xaf, 0x9e, 0x87, 0xd2, 0xef, 0x9f, 0xef, 0xe9};
+  unsigned char tmp_hash[] = {0x7e, 0x8e, 0x4d, 0xec, 0xf6, 0xc, 0x92, 0x42, 0x4, 0x7c, 0xab, 0xee, 0x1f, 0x7a, 0xfe, 0x8e};
   set_hash(tmp_hash);
+  add_fieldinfo(Interface::IFT_UINT, "motor_state", &data->motor_state);
+  add_fieldinfo(Interface::IFT_UINT, "drive_mode", &data->drive_mode);
+  add_fieldinfo(Interface::IFT_INT, "right_rpm", &data->right_rpm);
+  add_fieldinfo(Interface::IFT_INT, "rear_rpm", &data->rear_rpm);
+  add_fieldinfo(Interface::IFT_INT, "left_rpm", &data->left_rpm);
+  add_fieldinfo(Interface::IFT_FLOAT, "odometry_path_length", &data->odometry_path_length);
+  add_fieldinfo(Interface::IFT_FLOAT, "odometry_position_x", &data->odometry_position_x);
+  add_fieldinfo(Interface::IFT_FLOAT, "odometry_position_y", &data->odometry_position_y);
+  add_fieldinfo(Interface::IFT_FLOAT, "odometry_orientation", &data->odometry_orientation);
+  add_fieldinfo(Interface::IFT_FLOAT, "vx", &data->vx);
+  add_fieldinfo(Interface::IFT_FLOAT, "vy", &data->vy);
+  add_fieldinfo(Interface::IFT_FLOAT, "omega", &data->omega);
+  add_fieldinfo(Interface::IFT_LONGUINT, "controller_thread_id", &data->controller_thread_id);
 }
 
 /** Destructor */

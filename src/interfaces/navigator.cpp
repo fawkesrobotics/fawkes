@@ -46,6 +46,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   memset(data_ptr, 0, data_size);
   unsigned char tmp_hash[] = {0x46, 0x32, 0x7d, 0x5c, 0xae, 0x61, 0x8a, 0xd8, 0x88, 0x6a, 0xc8, 0xd8, 0xc1, 0xeb, 0x36, 0xb7};
   set_hash(tmp_hash);
+  add_fieldinfo(Interface::IFT_INT, "foo", &data->foo);
 }
 
 /** Destructor */

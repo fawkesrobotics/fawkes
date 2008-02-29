@@ -55,7 +55,8 @@ class TestInterface : public Interface
     int result; /**< Result of operation add operation from Calculate message. */
     unsigned long int test_ulint; /**< Test unsigned long int */
     long int test_lint; /**< Test long int */
-    unsigned int _flags : 8; /**< Flags spit down by the writer */
+    bool test_bool; /**< Test Bool */
+    char _flags; /**< Flags spit down by the writer */
     char test_string[30]; /**< A test sring */
   } TestInterface_data_t;
 
@@ -133,10 +134,12 @@ class TestInterface : public Interface
 
  public:
   /* Methods */
+  bool is_test_bool();
+  void set_test_bool(const bool new_test_bool);
   int test_int();
   void set_test_int(const int new_test_int);
-  unsigned int _flags();
-  void set__flags(const unsigned int new__flags);
+  char _flags();
+  void set__flags(const char new__flags);
   char * test_string();
   void set_test_string(const char * new_test_string);
   int result();
