@@ -179,6 +179,8 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   config_manager->start();
   plugin_manager->start();
 
+  blackboard->start_nethandler(network_manager->hub());
+
   __time_wait = NULL;
   try {
     unsigned int min_loop_time = config->get_uint("/fawkes/mainapp/min_loop_time");

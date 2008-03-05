@@ -41,7 +41,6 @@
 #include <string>
 #include <utility>
 
-class ThreadManager;
 class FawkesNetworkHub;
 class Mutex;
 

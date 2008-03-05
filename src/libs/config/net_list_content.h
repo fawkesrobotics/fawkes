@@ -2,7 +2,7 @@
 /***************************************************************************
  *  net_list_content.h - Fawkes Network Config List Message
  *
- *  Created: Dec Fri 07 14:52:59 2007
+ *  Created: Fri Dec 07 14:52:59 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
