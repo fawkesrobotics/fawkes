@@ -29,6 +29,7 @@
 /// @cond QA
 
 #include <blackboard/blackboard.h>
+#include <blackboard/remote.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
 #include <blackboard/interface_listener.h>
@@ -109,7 +110,8 @@ main(int argc, char **argv)
 {
   LibLogger::init();
 
-  BlackBoard *bb = new BlackBoard();
+  RemoteBlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
+  //BlackBoard *bb = new BlackBoard();
 
   QaBBEventListener qabbel;
 
@@ -141,12 +143,17 @@ main(int argc, char **argv)
     exit(1);
   }
 
+  usleep(100000);
+
   std::list<TestInterface *> *readers = bb->open_all_of_type_for_reading<TestInterface>();
+  usleep(100000);
   for (std::list<TestInterface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
     printf("Opened reader for interface %s of type %s\n", (*i)->id(), (*i)->type());
     bb->close(*i);
   }
   delete readers;
+
+  usleep(100000);
 
   const char* prefix = "Another";
   readers = bb->open_all_of_type_for_reading<TestInterface>(prefix);
@@ -157,15 +164,22 @@ main(int argc, char **argv)
   }
   delete readers;
 
+  usleep(100000);
+
   printf("Removing writer one. This should print a warning.\n");
   bb->close(ti_writer_1);
   bb->unregister_listener(&qabbel);
+
+  usleep(100000);
+
   printf("Removing other writers. No warning should appear.\n");
   bb->close(ti_writer_2);
   bb->close(ti_writer_3);
   bb->close(ti_writer_4);
   bb->close(ti_writer_5);
   bb->close(ti_writer_6);
+
+  usleep(100000);
 
   delete bb;
   LibLogger::finalize();

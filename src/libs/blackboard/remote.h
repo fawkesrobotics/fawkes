@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  blackboard.h - BlackBoard plugin
+ *  remote.h - Remote BlackBoard using the Fawkes network protocol
  *
- *  Generated: Sat Sep 16 17:09:15 2006 (on train to Cologne)
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Mar 03 10:52:28 2008
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,37 +25,37 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __BLACKBOARD_BLACKBOARD_H_
-#define __BLACKBOARD_BLACKBOARD_H_
+#ifndef __BLACKBOARD_REMOTE_H_
+#define __BLACKBOARD_REMOTE_H_
 
-#include <list>
-#include <typeinfo>
-#include <core/exceptions/software.h>
+#include <blackboard/blackboard.h>
+#include <netcomm/fawkes/client_handler.h>
+#include <core/utils/lock_map.h>
 
-class BlackBoardInterfaceManager;
-class BlackBoardMemoryManager;
-class BlackBoardMessageManager;
-class BlackBoardNetworkHandler;
-class Interface;
-class InterfaceInfoList;
-class BlackBoardInterfaceListener;
-class BlackBoardInterfaceObserver;
-class FawkesNetworkHub;
+class FawkesNetworkClient;
+class FawkesNetworkMessage;
+class Mutex;
 
-class BlackBoard
+class BlackBoardInstanceFactory;
+class BlackBoardNotifier;
+class BlackBoardInterfaceProxy;
+
+class RemoteBlackBoard : public FawkesNetworkClientHandler
 {
  public:
-  BlackBoard(bool master = true);
-  ~BlackBoard();
+  RemoteBlackBoard(FawkesNetworkClient *client);
+  RemoteBlackBoard(const char *hostname, unsigned short int port);
+  virtual ~RemoteBlackBoard();
 
   Interface *  open_for_reading(const char *interface_type, const char *identifier);
   Interface *  open_for_writing(const char *interface_type, const char *identifier);
   void         close(Interface *interface);
 
-  InterfaceInfoList *  list_all() const;
+  InterfaceInfoList *  list_all();
 
   std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type,
 							 const char *id_prefix = NULL);
+
   template <class InterfaceType>
     std::list<InterfaceType *> *  open_all_of_type_for_reading(const char *id_prefix = NULL);
 
@@ -66,37 +66,36 @@ class BlackBoard
     InterfaceType * open_for_writing(const char *identifier);
 
 
-  static const unsigned int BBIL_FLAG_DATA;
-  static const unsigned int BBIL_FLAG_READER;
-  static const unsigned int BBIL_FLAG_WRITER;
-  static const unsigned int BBIL_FLAG_ALL;
-
-  static const unsigned int BBIO_FLAG_CREATED;
-  static const unsigned int BBIO_FLAG_DESTROYED;
-  static const unsigned int BBIO_FLAG_ALL;
-
-  void register_listener(BlackBoardInterfaceListener *listener,
-			 unsigned int flags);
+  void register_listener(BlackBoardInterfaceListener *listener, unsigned int flags);
   void unregister_listener(BlackBoardInterfaceListener *listener);
 
-  void register_observer(BlackBoardInterfaceObserver *observer,
-			 unsigned int flags);
+  void register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags);
   void unregister_observer(BlackBoardInterfaceObserver *observer);
 
-  void start_nethandler(FawkesNetworkHub *hub);
 
-  /* for debugging only */
-  const BlackBoardMemoryManager * memory_manager() const;
+  /* for FawkesNetworkClientHandler */
+  virtual void          deregistered() throw();
+  virtual void          inbound_received(FawkesNetworkMessage *msg) throw();
+  virtual void          connection_died() throw();
+  virtual void          connection_established() throw();
 
-  static char * strip_class_type(const char *type);
+
+  /* extensions for RemoteBlackBoard */
+
+ private: /* methods */
+  Interface * open_interface(const char *type, const char *identifier, bool writer);
+
 
  private: /* members */
-  BlackBoardInterfaceManager *__im;
-  BlackBoardMemoryManager    *__memmgr;
-  BlackBoardMessageManager   *__msgmgr;
-  BlackBoardNetworkHandler   *__nethandler;
+  Mutex *__mutex;
+  FawkesNetworkClient  *__fnc;
+  bool                  __fnc_owner;
+  FawkesNetworkMessage *__m;
+  BlackBoardNotifier   *__notifier;
+  BlackBoardInstanceFactory *__instance_factory;
+  LockMap<unsigned int, BlackBoardInterfaceProxy *> __proxies;
+  LockMap<unsigned int, BlackBoardInterfaceProxy *>::iterator __pit;
 };
-
 
 /** Get interface of given type.
  * This will open a new interface for reading just like the non-template version of
@@ -112,9 +111,10 @@ class BlackBoard
  */
 template <class InterfaceType>
 InterfaceType *
-BlackBoard::open_for_reading(const char *identifier)
+RemoteBlackBoard::open_for_reading(const char *identifier)
 {
   char *type_name = BlackBoard::strip_class_type(typeid(InterfaceType).name());
+  printf("0 ofr %s::%s\n", type_name, identifier);
   InterfaceType *interface = dynamic_cast<InterfaceType *>(open_for_reading(type_name, identifier));
   delete[] type_name;
   if ( interface == 0 ) {
@@ -135,7 +135,7 @@ BlackBoard::open_for_reading(const char *identifier)
  */
 template <class InterfaceType>
 std::list<InterfaceType *> *
-BlackBoard::open_all_of_type_for_reading(const char *id_prefix)
+RemoteBlackBoard::open_all_of_type_for_reading(const char *id_prefix)
 {
   char *type_name = BlackBoard::strip_class_type(typeid(InterfaceType).name());
   std::list<Interface *> *il = open_all_of_type_for_reading(type_name, id_prefix);
@@ -176,7 +176,7 @@ BlackBoard::open_all_of_type_for_reading(const char *id_prefix)
  */
 template <class InterfaceType>
 InterfaceType *
-BlackBoard::open_for_writing(const char *identifier)
+RemoteBlackBoard::open_for_writing(const char *identifier)
 {
   char *type_name = BlackBoard::strip_class_type(typeid(InterfaceType).name());
   InterfaceType *interface;

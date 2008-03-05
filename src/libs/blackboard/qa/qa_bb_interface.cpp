@@ -116,7 +116,7 @@ main(int argc, char **argv)
 
   cout << "Writing initial value ("
        << TestInterface::TEST_CONSTANT << ") into interface as TestInt" << endl;
-  ti_writer->set_test_int( 5 );
+  ti_writer->set_test_int( TestInterface::TEST_CONSTANT );
   try {
     ti_writer->write();
   } catch (InterfaceWriteDeniedException &e) {

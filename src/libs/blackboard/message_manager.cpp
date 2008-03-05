@@ -56,7 +56,7 @@ BlackBoardMessageManager::~BlackBoardMessageManager()
 }
 
 
-void
+unsigned int
 BlackBoardMessageManager::transmit(Message *message)
 {
   if ( __im == NULL ) {
@@ -64,7 +64,7 @@ BlackBoardMessageManager::transmit(Message *message)
   }
   try {
     Interface *writer = __im->writer_for_mem_serial(message->recipient_interface_mem_serial);
-    writer->msgq_append(message);
+    return writer->msgq_append(message);
   } catch (BlackBoardNoWritingInstanceException &e) {
     Interface *iface = message->interface();
     LibLogger::log_warn("BlackBoardMessageManager", "Cannot transmit message from sender %s "
@@ -72,8 +72,8 @@ BlackBoardMessageManager::transmit(Message *message)
 			                            "instance exists!",
 			message->sender(), (iface != NULL) ? iface->id() : "Unknown",
 			(iface != NULL) ? iface->type() : "unknown");
+    return 0;
   }
-
 }
 
 

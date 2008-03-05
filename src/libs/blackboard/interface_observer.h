@@ -34,7 +34,7 @@
 class BlackBoardInterfaceObserver
 {
 
- friend class BlackBoardInterfaceManager;
+ friend class BlackBoardNotifier;
 
  public:
   BlackBoardInterfaceObserver();

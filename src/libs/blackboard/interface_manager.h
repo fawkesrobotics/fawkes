@@ -2,8 +2,8 @@
 /***************************************************************************
  *  interface_manager.h - BlackBoard interface manager
  *
- *  Generated: Mon Oct 09 19:05:46 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Oct 09 19:05:46 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -30,20 +30,20 @@
 
 #include <interface/mediators/interface_mediator.h>
 
-#include <core/utils/lock_list.h>
 #include <core/utils/lock_map.h>
-#include <core/utils/lock_hashmap.h>
 #include <utils/misc/string_compare.h>
 
 #include <list>
 
 class Interface;
+class InterfaceInfoList;
 class BlackBoardMemoryManager;
 class BlackBoardMessageManager;
 class Mutex;
-class Module;
+class BlackBoardInstanceFactory;
 class BlackBoardInterfaceListener;
 class BlackBoardInterfaceObserver;
+class BlackBoardNotifier;
 class RefCountRWLock;
 
 class BlackBoardInterfaceManager : public InterfaceMediator
@@ -59,14 +59,15 @@ class BlackBoardInterfaceManager : public InterfaceMediator
   Interface *  open_for_writing(const char *interface_type, const char *identifier);
   void         close(Interface *interface);
 
+  InterfaceInfoList *  list_all() const;
+
   std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type,
 							 const char *id_prefix = NULL);
-  void register_listener(BlackBoardInterfaceListener *listener,
-			 unsigned int flags);
+
+  void register_listener(BlackBoardInterfaceListener *listener, unsigned int flags);
   void unregister_listener(BlackBoardInterfaceListener *listener);
 
-  void register_observer(BlackBoardInterfaceObserver *observer,
-			 unsigned int flags);
+  void register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags);
   void unregister_observer(BlackBoardInterfaceObserver *observer);
 
   /* InterfaceMediator methods */
@@ -88,55 +89,17 @@ class BlackBoardInterfaceManager : public InterfaceMediator
 
   Interface *  writer_for_mem_serial(unsigned int mem_serial);
 
-  void notify_of_interface_created(const char *type, const char *id) throw();
-  void notify_of_interface_destroyed(const char *type, const char *id) throw();
-  void notify_of_writer_added(const char *uid) throw();
-  void notify_of_writer_removed(const Interface *interface) throw();
-  void notify_of_reader_added(const char *uid) throw();
-  void notify_of_reader_removed(const Interface *interface) throw();
-
  private:
   unsigned int                  instance_serial;
 
   BlackBoardMemoryManager      *memmgr;
   BlackBoardMessageManager     *msgmgr;
   Mutex                        *mutex;
-  Module                       *iface_module;
+  BlackBoardInstanceFactory    *instance_factory;
+  BlackBoardNotifier           *notifier;
 
   LockMap< unsigned int, Interface * >              writer_interfaces;
   LockMap< unsigned int, RefCountRWLock * >         rwlocks;
-
-  typedef std::list< BlackBoardInterfaceListener * >  BBilList;
-  typedef LockHashMap< const char *, BBilList,
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
-    std::tr1::hash<const char *>,
-#else
-    __gnu_cxx::hash<const char *>,
-#endif
-    StringEquality>                                   BBilLockHashMap;
-
-  typedef std::list< BlackBoardInterfaceObserver * >  BBioList;
-  typedef LockHashMap< const char *, BBioList,
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
-    std::tr1::hash<const char *>,
-#else
-    __gnu_cxx::hash<const char *>,
-#endif
-    StringEquality>                                   BBioLockHashMap;
-
-  typedef std::list< BlackBoardInterfaceListener * >::iterator BBilListIterator;
-  typedef BBilLockHashMap::iterator BBilLockHashMapIterator;
-
-  typedef std::list< BlackBoardInterfaceObserver * >::iterator BBioListIterator;
-  typedef BBioLockHashMap::iterator BBioLockHashMapIterator;
-
-  BBilLockHashMap __bbil_data;
-  BBilLockHashMap __bbil_reader;
-  BBilLockHashMap __bbil_writer;
-
-  BBioLockHashMap __bbio_created;
-  BBioLockHashMap __bbio_destroyed;
-
 };
 
 #endif

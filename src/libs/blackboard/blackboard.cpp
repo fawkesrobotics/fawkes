@@ -30,6 +30,7 @@
 #include <blackboard/message_manager.h>
 #include <blackboard/memory_manager.h>
 #include <blackboard/interface_manager.h>
+#include <blackboard/network_handler.h>
 
 #include <string>
 #include <cstring>
@@ -121,12 +122,19 @@ BlackBoard::BlackBoard(bool master)
   __im = new BlackBoardInterfaceManager(__memmgr, __msgmgr);
 
   __msgmgr->set_interface_manager(__im);
+
+  __nethandler = NULL;
 }
 
 
 /** Destructor. */
 BlackBoard::~BlackBoard()
 {
+  if ( __nethandler ) {
+    __nethandler->cancel();
+    __nethandler->join();
+    delete __nethandler;
+  }
   delete __im;
   delete __msgmgr;
   delete __memmgr;
@@ -206,6 +214,16 @@ BlackBoard::close(Interface *interface)
 }
 
 
+/** Get list of interfaces.
+ * @return list of interfaces
+ */
+InterfaceInfoList *
+BlackBoard::list_all() const
+{
+  return __im->list_all();
+}
+
+
 /** Register BB event listener.
  * @param listener BlackBoard event listener to register
  * @param flags an or'ed combination of BBIL_FLAG_DATA, BBIL_FLAG_READER, BBIL_FLAG_WRITER
@@ -265,6 +283,21 @@ const BlackBoardMemoryManager *
 BlackBoard::memory_manager() const
 {
   return __memmgr;
+}
+
+
+/** Start network handler.
+ * This will start the network handler thread and register it with the given hub.
+ * @param hub hub to use and to register with
+ */
+void
+BlackBoard::start_nethandler(FawkesNetworkHub *hub)
+{
+  if ( __nethandler ) {
+    throw Exception("BlackBoardNetworkHandler already started");
+  }
+  __nethandler = new BlackBoardNetworkHandler(this, hub);
+  __nethandler->start();
 }
 
 

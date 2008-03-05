@@ -2,8 +2,8 @@
 /***************************************************************************
  *  interface_manager.cpp - BlackBoard interface manager
  *
- *  Generated: Mon Oct 09 19:08:29 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Oct 09 19:08:29 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -34,8 +34,11 @@
 #include <blackboard/interface_mem_header.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
+#include <blackboard/instance_factory.h>
+#include <blackboard/notifier.h>
 
 #include <interface/interface.h>
+#include <interface/interface_info.h>
 
 #include <core/threading/mutex.h>
 #include <core/threading/refc_rwlock.h>
@@ -68,16 +71,9 @@ BlackBoardInterfaceManager::BlackBoardInterfaceManager(BlackBoardMemoryManager *
   msgmgr = bb_msgmgr;
 
   instance_serial = 1;
+  instance_factory = new BlackBoardInstanceFactory();
+  notifier = new BlackBoardNotifier();
   mutex = new Mutex();
-  try {
-    iface_module = new ModuleDL( LIBDIR"/libinterfaces.so" );
-    iface_module->open();
-  } catch (Exception &e) {
-    e.append("BlackBoardInterfaceManager cannot open interface module");
-    delete mutex;
-    delete iface_module;
-    throw;
-  }
 
   writer_interfaces.clear();
   rwlocks.clear();
@@ -88,7 +84,8 @@ BlackBoardInterfaceManager::BlackBoardInterfaceManager(BlackBoardMemoryManager *
 BlackBoardInterfaceManager::~BlackBoardInterfaceManager()
 {
   delete mutex;
-  delete iface_module;
+  delete instance_factory;
+  delete notifier;
 }
 
 
@@ -105,25 +102,10 @@ BlackBoardInterfaceManager::~BlackBoardInterfaceManager()
 Interface *
 BlackBoardInterfaceManager::new_interface_instance(const char *type, const char *identifier)
 {
-  char *generator_name = (char *)malloc(strlen("new") + strlen(type) + 1);
-  sprintf(generator_name, "new%s", type);
-  if ( ! iface_module->hasSymbol(generator_name) ) {
-    free(generator_name);
-    throw BlackBoardInterfaceNotFoundException(type);
-  }
+  Interface *iface = instance_factory->new_interface_instance(type, identifier);
 
-  InterfaceFactoryFunc iff = (InterfaceFactoryFunc)iface_module->getSymbol(generator_name);
-
-  Interface *iface = iff();
-
-  iface->__instance_serial = next_instance_serial();
-  strncpy(iface->__type, type, __INTERFACE_TYPE_SIZE);
-  strncpy(iface->__id, identifier, __INTERFACE_ID_SIZE);
-  snprintf(iface->__uid, __INTERFACE_UID_SIZE, "%s::%s", type, identifier);
-  iface->__interface_mediator = this;
-  iface->__message_mediator   = msgmgr;
-
-  free(generator_name);
+  iface->set_instance_serial(next_instance_serial());
+  iface->set_mediators(this, msgmgr);
   return iface;
 }
 
@@ -138,16 +120,7 @@ BlackBoardInterfaceManager::new_interface_instance(const char *type, const char 
 void
 BlackBoardInterfaceManager::delete_interface_instance(Interface *interface)
 {
-  char *destroyer_name = (char *)malloc(strlen("delete") + strlen(interface->__type) + 1);
-  sprintf(destroyer_name, "delete%s", interface->__type);
-  if ( ! iface_module->hasSymbol(destroyer_name) ) {
-    free(destroyer_name);
-    throw BlackBoardInterfaceNotFoundException(interface->__type);
-  }
-
-  InterfaceDestroyFunc idf = (InterfaceDestroyFunc)iface_module->getSymbol(destroyer_name);
-  idf(interface);
-  free(destroyer_name);
+  instance_factory->delete_interface_instance(interface);
 }
 
 
@@ -249,8 +222,7 @@ BlackBoardInterfaceManager::create_interface(const char *type, const char *ident
   ih->num_readers        = 0;
   rwlocks[ih->serial] = new RefCountRWLock();
 
-  interface->__mem_real_ptr  = ptr;
-  interface->__mem_data_ptr  = (char *)ptr + sizeof(interface_header_t);
+  interface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
 }
 
 
@@ -286,8 +258,7 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
       mutex->unlock();
       throw BlackBoardInterfaceVersionMismatchException();
     }
-    iface->__mem_real_ptr = ptr;
-    iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
+    iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
     rwlocks[ih->serial]->ref();
   } else {
     created = true;
@@ -295,10 +266,7 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
     ih  = (interface_header_t *)ptr;
   }
 
-  iface->__write_access = false;
-  iface->__rwlock = rwlocks[ih->serial];
-  iface->__mem_serial = ih->serial;
-  iface->__message_queue = new MessageQueue(iface->__mem_serial, iface->__instance_serial);
+  iface->set_readwrite(false, rwlocks[ih->serial]);
   ih->refcount++;
   ih->num_readers++;
 
@@ -306,9 +274,9 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
   mutex->unlock();
 
   if ( created ) {
-    notify_of_interface_created(type, identifier);
+    notifier->notify_of_interface_created(type, identifier);
   }
-  notify_of_reader_added(iface->uid());
+  notifier->notify_of_reader_added(iface->uid());
 
   return iface;
 }
@@ -353,9 +321,7 @@ BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type,
       // open 
       void *ptr = *cit;
       iface = new_interface_instance(ih->type, ih->id);
-      iface->__mem_real_ptr = ptr;
-      iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
-      ih  = (interface_header_t *)ptr;
+      iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
 
       if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
 	   (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
@@ -367,10 +333,7 @@ BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type,
 
       rwlocks[ih->serial]->ref();
 
-      iface->__write_access = false;
-      iface->__rwlock = rwlocks[ih->serial];
-      iface->__mem_serial = ih->serial;
-      iface->__message_queue = new MessageQueue(iface->__mem_serial, iface->__instance_serial);
+      iface->set_readwrite(false, rwlocks[ih->serial]);
       ih->refcount++;
       ih->num_readers++;
 
@@ -382,7 +345,7 @@ BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type,
   memmgr->unlock();
 
   for (std::list<Interface *>::iterator j = rv->begin(); j != rv->end(); ++j) {
-    notify_of_reader_added((*j)->uid());
+    notifier->notify_of_reader_added((*j)->uid());
   }
 
   return rv;
@@ -431,8 +394,7 @@ BlackBoardInterfaceManager::open_for_writing(const char *type, const char *ident
       mutex->unlock();
       throw BlackBoardInterfaceVersionMismatchException();
     }
-    iface->__mem_real_ptr = ptr;
-    iface->__mem_data_ptr = (char *)ptr + sizeof(interface_header_t);
+    iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
     rwlocks[ih->serial]->ref();
   } else {
     created = true;
@@ -440,22 +402,19 @@ BlackBoardInterfaceManager::open_for_writing(const char *type, const char *ident
     ih = (interface_header_t *)ptr;
   }
 
-  iface->__write_access = true;
-  iface->__rwlock  = rwlocks[ih->serial];
-  iface->__mem_serial = ih->serial;
-  iface->__message_queue = new MessageQueue(iface->__mem_serial, iface->__instance_serial);
+  iface->set_readwrite(true, rwlocks[ih->serial]);
   ih->flag_writer_active = 1;
   ih->refcount++;
 
   memmgr->unlock();
-  writer_interfaces[iface->__mem_serial] = iface;
+  writer_interfaces[ih->serial] = iface;
 
   mutex->unlock();
 
   if ( created ) {
-    notify_of_interface_created(type, identifier);
+    notifier->notify_of_interface_created(type, identifier);
   }
-  notify_of_writer_added(iface->uid());
+  notifier->notify_of_writer_added(iface->uid());
 
   return iface;
 }
@@ -489,17 +448,41 @@ BlackBoardInterfaceManager::close(Interface *interface)
 
   mutex->unlock();
   if (killed_writer) {
-    notify_of_writer_removed(interface);
+    notifier->notify_of_writer_removed(interface);
   } else {
-    notify_of_reader_removed(interface);
+    notifier->notify_of_reader_removed(interface);
   }
   if ( destroyed ) {
-    notify_of_interface_destroyed(interface->__type, interface->__id);
+    notifier->notify_of_interface_destroyed(interface->__type, interface->__id);
   }
 
   mutex->lock();
   delete_interface_instance( interface );
   mutex->unlock();
+}
+
+
+/** Get a list of interfaces.
+ * @return list of currently existing interfaces. List may be outdated on
+ * return since there maybe concurrent actions.
+ */
+InterfaceInfoList *
+BlackBoardInterfaceManager::list_all() const
+{
+  InterfaceInfoList *infl = new InterfaceInfoList();
+
+  memmgr->lock();
+  interface_header_t *ih;
+  BlackBoardMemoryManager::ChunkIterator cit;
+  for ( cit = memmgr->begin(); cit != memmgr->end(); ++cit ) {
+    ih = (interface_header_t *)*cit;
+    infl->append(ih->type, ih->id, ih->hash, ih->serial,
+		 ih->flag_writer_active, ih->num_readers);
+  }
+
+  memmgr->unlock();
+
+  return infl;
 }
 
 
@@ -517,6 +500,13 @@ BlackBoardInterfaceManager::writer_for_mem_serial(unsigned int mem_serial)
   } else {
     throw BlackBoardNoWritingInstanceException();
   }
+}
+
+
+void
+BlackBoardInterfaceManager::notify_of_data_change(const Interface *interface)
+{
+  notifier->notify_of_data_change(interface);
 }
 
 
@@ -545,33 +535,7 @@ void
 BlackBoardInterfaceManager::register_listener(BlackBoardInterfaceListener *listener,
 					      unsigned int flags)
 {
-  if ( flags & BlackBoard::BBIL_FLAG_DATA ) {
-    BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
-    BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_data_interfaces();
-    __bbil_data.lock();
-    for (i = im->begin(); i != im->end(); ++i) {
-      __bbil_data[(*i).first].push_back(listener);
-    }
-    __bbil_data.unlock();
-  }
-  if ( flags & BlackBoard::BBIL_FLAG_READER ) {
-    BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
-    BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_reader_interfaces();
-    __bbil_reader.lock();
-    for (i = im->begin(); i != im->end(); ++i) {
-      __bbil_reader[(*i).first].push_back(listener);
-    }
-    __bbil_reader.unlock();
-  }
-  if ( flags & BlackBoard::BBIL_FLAG_WRITER ) {
-    BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
-    BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_writer_interfaces();
-    __bbil_writer.lock();
-    for (i = im->begin(); i != im->end(); ++i) {
-      __bbil_writer[(*i).first].push_back(listener);
-    }
-    __bbil_writer.unlock();
-  }
+  notifier->register_listener(listener, flags);
 }
 
 /** Unregister BB interface listener.
@@ -582,36 +546,7 @@ BlackBoardInterfaceManager::register_listener(BlackBoardInterfaceListener *liste
 void
 BlackBoardInterfaceManager::unregister_listener(BlackBoardInterfaceListener *listener)
 {
-  for (BBilLockHashMapIterator i = __bbil_data.begin(); i != __bbil_data.end(); ++i) {
-    BBilListIterator j = (*i).second.begin();
-    while (j != (*i).second.end()) {
-      if ( *j == listener ) {
-	j = (*i).second.erase(j);
-      } else {
-	++j;
-      }
-    }
-  }
-  for (BBilLockHashMapIterator i = __bbil_reader.begin(); i != __bbil_reader.end(); ++i) {
-    BBilListIterator j = (*i).second.begin();
-    while (j != (*i).second.end()) {
-      if ( *j == listener ) {
-	j = (*i).second.erase(j);
-      } else {
-	++j;
-      }
-    }
-  }
-  for (BBilLockHashMapIterator i = __bbil_writer.begin(); i != __bbil_writer.end(); ++i) {
-    BBilListIterator j = (*i).second.begin();
-    while (j != (*i).second.end()) {
-      if ( *j == listener ) {
-	j = (*i).second.erase(j);
-      } else {
-	++j;
-      }
-    }
-  }
+  notifier->unregister_listener(listener);
 }
 
 
@@ -623,25 +558,7 @@ void
 BlackBoardInterfaceManager::register_observer(BlackBoardInterfaceObserver *observer,
 					      unsigned int flags)
 {
-  if ( flags & BlackBoard::BBIO_FLAG_CREATED ) {
-    BlackBoardInterfaceObserver::InterfaceTypeLockHashSetIterator i;
-    BlackBoardInterfaceObserver::InterfaceTypeLockHashSet *its = observer->bbio_interface_create_types();
-    __bbio_created.lock();
-    for (i = its->begin(); i != its->end(); ++i) {
-      __bbio_created[*i].push_back(observer);
-    }
-    __bbio_created.unlock();
-  }
-
-  if ( flags & BlackBoard::BBIO_FLAG_DESTROYED ) {
-    BlackBoardInterfaceObserver::InterfaceTypeLockHashSetIterator i;
-    BlackBoardInterfaceObserver::InterfaceTypeLockHashSet *its = observer->bbio_interface_destroy_types();
-    __bbio_destroyed.lock();
-    for (i = its->begin(); i != its->end(); ++i) {
-      __bbio_destroyed[*i].push_back(observer);
-    }
-    __bbio_destroyed.unlock();
-  }
+  notifier->register_observer(observer, flags);
 }
 
 
@@ -653,216 +570,5 @@ BlackBoardInterfaceManager::register_observer(BlackBoardInterfaceObserver *obser
 void
 BlackBoardInterfaceManager::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
-  for (BBioLockHashMapIterator i = __bbio_created.begin(); i != __bbio_created.end(); ++i) {
-    BBioListIterator j = (*i).second.begin();
-    while (j != (*i).second.end()) {
-      if ( *j == observer ) {
-	j = (*i).second.erase(j);
-      } else {
-	++j;
-      }
-    }
-  }
-
-  for (BBioLockHashMapIterator i = __bbio_destroyed.begin(); i != __bbio_destroyed.end(); ++i) {
-    BBioListIterator j = (*i).second.begin();
-    while (j != (*i).second.end()) {
-      if ( *j == observer ) {
-	j = (*i).second.erase(j);
-      } else {
-	++j;
-      }
-    }
-  }
-}
-
-/** Notify that an interface has been created.
- * @param type type of the interface
- * @param id ID of the interface
- */
-void
-BlackBoardInterfaceManager::notify_of_interface_created(const char *type, const char *id) throw()
-{
-  BBioLockHashMapIterator lhmi;
-  BBioListIterator i, l;
-  __bbio_created.lock();
-  if ( (lhmi = __bbio_created.find(type)) != __bbio_created.end() ) {
-    BBioList &list = (*lhmi).second;
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceObserver *bbio = (*i);
-      bbio->bb_interface_created(type, id);
-    }
-  }
-  __bbio_created.unlock();
-}
-
-
-/** Notify that an interface has been destroyed.
- * @param type type of the interface
- * @param id ID of the interface
- */
-void
-BlackBoardInterfaceManager::notify_of_interface_destroyed(const char *type, const char *id) throw()
-{
-  BBioLockHashMapIterator lhmi;
-  BBioListIterator i, l;
-  __bbio_destroyed.lock();
-  if ( (lhmi = __bbio_destroyed.find(type)) != __bbio_destroyed.end() ) {
-    BBioList &list = (*lhmi).second;
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceObserver *bbio = (*i);
-      bbio->bb_interface_destroyed(type, id);
-    }
-  }
-  __bbio_destroyed.unlock();
-}
-
-
-/** Notify that writer has been added.
- * @param uid UID of interface
- */
-void
-BlackBoardInterfaceManager::notify_of_writer_added(const char *uid) throw()
-{
-  BBilLockHashMapIterator lhmi;
-  BBilListIterator i, l;
-  if ( (lhmi = __bbil_writer.find(uid)) != __bbil_writer.end() ) {
-    BBilList &list = (*lhmi).second;
-    __bbil_writer.lock();
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceListener *bbil = (*i);
-      Interface *bbil_iface = bbil->bbil_writer_interface(uid);
-      if (bbil_iface != NULL ) {
-	bbil->bb_interface_writer_added(bbil_iface);
-      } else {
-	LibLogger::log_warn("BlackBoardInterfaceManager", "BBIL registered for writer "
-			    "events (open) for '%s' but has no such interface", uid);
-      }
-    }
-    __bbil_writer.unlock();
-  }
-}
-
-
-/** Notify that writer has been removed.
- * @param uid UID of interface
- */
-void
-BlackBoardInterfaceManager::notify_of_writer_removed(const Interface *interface) throw()
-{
-  BBilLockHashMapIterator lhmi;
-  BBilListIterator i, l;
-  __bbil_writer.lock();
-  const char *uid = interface->uid();
-  if ( (lhmi = __bbil_writer.find(uid)) != __bbil_writer.end() ) {
-    BBilList &list = (*lhmi).second;
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceListener *bbil = (*i);
-      Interface *bbil_iface = bbil->bbil_writer_interface(uid);
-      if (bbil_iface != NULL ) {
-	if ( bbil_iface->serial() == interface->serial() ) {
-	  LibLogger::log_warn("BlackBoardInterfaceManager", "Interface instance (writing) "
-			      "for %s removed, but interface instance still in BBIL, this "
-			      "will lead to a fatal problem shortly", uid);
-	} else {
-	  bbil->bb_interface_writer_removed(bbil_iface);
-	}
-      } else {
-	LibLogger::log_warn("BlackBoardInterfaceManager", "BBIL registered for writer "
-			    "events (close) for '%s' but has no such interface", uid);
-      }
-    }
-  }
-  __bbil_writer.unlock();
-}
-
-
-/** Notify that reader has been added.
- * @param uid UID of interface
- */
-void
-BlackBoardInterfaceManager::notify_of_reader_added(const char *uid) throw()
-{
-  BBilLockHashMapIterator lhmi;
-  BBilListIterator i, l;
-  __bbil_reader.lock();
-  if ( (lhmi = __bbil_reader.find(uid)) != __bbil_reader.end() ) {
-    BBilList &list = (*lhmi).second;
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceListener *bbil = (*i);
-      Interface *bbil_iface = bbil->bbil_reader_interface(uid);
-      if (bbil_iface != NULL ) {
-	bbil->bb_interface_reader_added(bbil_iface);
-      } else {
-	LibLogger::log_warn("BlackBoardInterfaceManager", "BBIL registered for reader "
-			    "events (open) for '%s' but has no such interface", uid);
-      }
-    }
-  }
-  __bbil_reader.unlock();
-}
-
-
-/** Notify that reader has been removed.
- * @param uid UID of interface
- */
-void
-BlackBoardInterfaceManager::notify_of_reader_removed(const Interface *interface) throw()
-{
-  BBilLockHashMapIterator lhmi;
-  BBilListIterator i, l;
-  const char *uid = interface->uid();
-  if ( (lhmi = __bbil_reader.find(uid)) != __bbil_reader.end() ) {
-    BBilList &list = (*lhmi).second;
-    __bbil_reader.lock();
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceListener *bbil = (*i);
-      Interface *bbil_iface = bbil->bbil_reader_interface(uid);
-      if (bbil_iface != NULL ) {
-	if ( bbil_iface->serial() == interface->serial() ) {
-	  LibLogger::log_warn("BlackBoardInterfaceManager", "Interface instance (reading) "
-			      "for %s removed, but interface instance still in BBIL, this "
-			      "will lead to a fatal problem shortly", uid);
-	} else {
-	  bbil->bb_interface_reader_removed(bbil_iface);
-	}
-      } else {
-	LibLogger::log_warn("BlackBoardInterfaceManager", "BBIL registered for reader "
-			    "events (close) for '%s' but has no such interface", uid);
-      }
-    }
-    __bbil_reader.unlock();
-  }
-}
-
-
-/** Notify of data change.
- * Notify all subscribers of the given interface of a data change.
- * This also influences logging and sending data over the network so it is
- * mandatory to call this function! The interface base class write method does
- * that for you.
- * @param interface interface whose subscribers to notify
- * @see Interface::write()
- */
-void
-BlackBoardInterfaceManager::notify_of_data_change(const Interface *interface)
-{
-  BBilLockHashMapIterator lhmi;
-  BBilListIterator i, l;
-  const char *uid = interface->uid();
-  if ( (lhmi = __bbil_data.find(uid)) != __bbil_data.end() ) {
-    BBilList &list = (*lhmi).second;
-    __bbil_data.lock();
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceListener *bbil = (*i);
-      Interface *bbil_iface = bbil->bbil_data_interface(uid);
-      if (bbil_iface != NULL ) {
-	bbil->bb_interface_data_changed(bbil_iface);
-      } else {
-	LibLogger::log_warn("BlackBoardInterfaceManager", "BBIL registered for data change "
-			    "events for '%s' but has no such interface", uid);
-      }
-    }
-    __bbil_data.unlock();
-  }
+  notifier->unregister_observer(observer);
 }

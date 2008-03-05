@@ -107,8 +107,6 @@ main(int argc, char **argv)
     int expval = ti_reader->test_int() + 1;
     TestInterface::SetTestIntMessage *m = new TestInterface::SetTestIntMessage(expval);
     ti_reader->msgq_enqueue(m);
-    // reader does not care about result
-    ti_reader->msgq_flush();
 
     if ( ti_writer->msgq_size() > 1 ) {
       cout << "Error, more than one message! flushing." << endl;

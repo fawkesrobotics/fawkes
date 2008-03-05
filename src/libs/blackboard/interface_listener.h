@@ -36,8 +36,7 @@ class Interface;
 
 class BlackBoardInterfaceListener
 {
-
- friend class BlackBoardInterfaceManager;
+ friend class BlackBoardNotifier;
 
  public:
   /** Type for lockable interface hash maps. */

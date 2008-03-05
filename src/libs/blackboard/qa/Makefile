@@ -38,17 +38,27 @@ OBJS_qa_bb_openall = qa_bb_openall.o
 LIBS_qa_bb_notify = core utils interfaces blackboard
 OBJS_qa_bb_notify = qa_bb_notify.o
 
+LIBS_qa_bb_listall = core utils interfaces blackboard
+OBJS_qa_bb_listall = qa_bb_listall.o
+
+LIBS_qa_bb_remote = core utils interfaces blackboard
+OBJS_qa_bb_remote = qa_bb_remote.o
+
 OBJS_all =	$(OBJS_qa_bb_memmgr) 		\
 		$(OBJS_qa_bb_interface)		\
 		$(OBJS_qa_bb_messaging)		\
 		$(OBJS_qa_bb_openall)		\
-		$(OBJS_qa_bb_notify)
+		$(OBJS_qa_bb_notify)		\
+		$(OBJS_qa_bb_listall)		\
+		$(OBJS_qa_bb_remote)
 
 BINS_all =	$(BINDIR)/qa_bb_memmgr		\
 		$(BINDIR)/qa_bb_interface	\
 		$(BINDIR)/qa_bb_messaging	\
 		$(BINDIR)/qa_bb_openall		\
-		$(BINDIR)/qa_bb_notify
+		$(BINDIR)/qa_bb_notify		\
+		$(BINDIR)/qa_bb_listall		\
+		$(BINDIR)/qa_bb_remote
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
