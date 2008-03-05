@@ -23,7 +23,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_libinterface = core
-OBJS_libinterface = interface.o message.o message_queue.o
+OBJS_libinterface = interface.o interface_info.o message.o message_queue.o
 
 OBJS_all = $(OBJS_libinterface)
 LIBS_all = $(LIBDIR)/libinterface.so

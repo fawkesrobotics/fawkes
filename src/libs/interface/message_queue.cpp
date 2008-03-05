@@ -59,16 +59,9 @@ MessageAlreadyQueuedException::MessageAlreadyQueuedException()
  */
 
 
-/** Constructor.
- * @param interface_mem_serial mem serial of interface this message queue belongs to
- * @param interface_instance_serial instance serial of interface this message queue belongs to
- */
-MessageQueue::MessageQueue(unsigned int interface_mem_serial,
-			   unsigned int interface_instance_serial)
+/** Constructor. */
+MessageQueue::MessageQueue()
 {
-  this->interface_mem_serial = interface_mem_serial;
-  this->interface_instance_serial = interface_instance_serial;
-
   list = NULL;
   end_el = NULL;
   next_msg_id = 1;
@@ -118,25 +111,21 @@ MessageQueue::append(Message *msg)
     throw MessageAlreadyQueuedException();
   }
   mutex->lock();
-  unsigned int new_msg_id = 0;
+  unsigned int new_msg_id = next_msg_id++;
   msg->ref();
-  msg->recipient_interface_mem_serial = interface_mem_serial;
-  msg->sender_interface_instance_serial = interface_instance_serial;
   if ( list == NULL ) {
     list = (msg_list_t *)malloc(sizeof(msg_list_t));
     list->next = NULL;
     list->msg = msg;
-    list->msg_id = next_msg_id++;
+    list->msg_id = new_msg_id;
     end_el = list;
-    new_msg_id = list->msg_id;
   } else {
     msg_list_t *l = (msg_list_t *)malloc(sizeof(msg_list_t));
     l->next = NULL;
     l->msg = msg;
-    l->msg_id = next_msg_id++;
+    l->msg_id = new_msg_id;
     end_el->next = l;
     end_el = l;
-    new_msg_id = l->msg_id;
   }
 
   mutex->unlock();
@@ -167,8 +156,6 @@ MessageQueue::insert_after(const MessageIterator &it, Message *msg)
     throw MessageAlreadyQueuedException();
   }
   msg->ref();
-  msg->recipient_interface_mem_serial = interface_mem_serial;
-  msg->sender_interface_instance_serial = interface_instance_serial;
   msg_list_t *l = (msg_list_t *)malloc(sizeof(msg_list_t));
   l->next = it.cur->next;
   l->msg = msg;

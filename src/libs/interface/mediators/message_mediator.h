@@ -44,8 +44,10 @@ class MessageMediator
 
   /** Transmit message.
    * @param message message to transmit.
+   * @return message id for this message unique on the writing instance. The ID is
+   * zero if there was no writing instance for this message.
    */
-  virtual void transmit(Message *message)                              = 0;
+  virtual unsigned int transmit(Message *message)                        = 0;
 
 };
 

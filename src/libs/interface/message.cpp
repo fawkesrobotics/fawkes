@@ -234,6 +234,7 @@ void
 Message::set_interface(Interface *iface)
 {
   _transmit_via_iface = iface;
+  recipient_interface_mem_serial = iface->mem_serial();
 }
 
 

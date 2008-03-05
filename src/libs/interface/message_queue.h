@@ -54,8 +54,7 @@ class MessageQueue
   };
 
  public:
-  MessageQueue(unsigned int interface_mem_serial,
-	       unsigned int interface_instance_serial);
+  MessageQueue();
   virtual ~MessageQueue();
 
   class MessageIterator
@@ -117,9 +116,6 @@ class MessageQueue
   msg_list_t  *end_el;
   Mutex       *mutex;
   unsigned int next_msg_id;
-
-  unsigned int interface_mem_serial;
-  unsigned int interface_instance_serial;
 };
 
 

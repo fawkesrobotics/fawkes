@@ -48,7 +48,13 @@ class MessageMediator;
 class InterfaceWriteDeniedException : public Exception
 {
  public:
-  InterfaceWriteDeniedException(const char *type, const char *id);
+  InterfaceWriteDeniedException(const char *type, const char *id, const char *msg);
+};
+
+class InterfaceMessageEnqueueException : public Exception
+{
+ public:
+  InterfaceMessageEnqueueException(const char *type, const char *id);
 };
 
 class InterfaceInvalidMessageException : public Exception
@@ -60,21 +66,28 @@ class InterfaceInvalidMessageException : public Exception
 class Interface
 {
  friend class BlackBoardInterfaceManager;
+ friend class BlackBoardInstanceFactory;
  friend class BlackBoardMessageManager;
+ friend class BlackBoardInterfaceProxy;
 
  public:
   virtual ~Interface();
 
   bool                           oftype(const char *interface_type) const;
+  const void *                   datachunk() const;
   unsigned int                   datasize() const;
   const char *                   type() const;
   const char *                   id() const;
   const char *                   uid() const;
   unsigned int                   serial() const;
+  unsigned int                   mem_serial() const;
   bool                           operator== (Interface &comp) const;
   const unsigned char *          hash() const;
   size_t                         hash_size() const;
   const char *                   hash_printable() const;
+  bool                           is_writer() const;
+
+  void                           set_from_chunk(void *chunk);
 
   void          read();
   void          write();
@@ -176,6 +189,12 @@ class Interface
 
  private:
   unsigned int       msgq_append(Message *message);
+  void               set_type_id(const char *type, const char *id);
+  void               set_instance_serial(unsigned int instance_serial);
+  void               set_mediators(InterfaceMediator *iface_mediator,
+				   MessageMediator *msg_mediator);
+  void               set_memory(unsigned int serial, void *real_ptr, void *data_ptr);
+  void               set_readwrite(bool write_access, RefCountRWLock *rwlock);
 
   char               __type[__INTERFACE_TYPE_SIZE + 1];
   char               __id[__INTERFACE_ID_SIZE + 1];

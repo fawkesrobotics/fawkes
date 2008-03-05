@@ -25,11 +25,13 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __MESSAGE_H_
-#define __MESSAGE_H_
+#ifndef __INTERFACE_MESSAGE_H_
+#define __INTERFACE_MESSAGE_H_
 
 #include <core/utils/refcount.h>
 #include <sys/types.h>
+
+#define __INTERFACE_MESSAGE_TYPE_SIZE 32
 
 class Mutex;
 class Interface;
