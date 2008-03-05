@@ -40,6 +40,7 @@
 #include <list>
 #include <cstring>
 #include <cstdlib>
+#include <unistd.h>
 
 
 /** @class HandlerAlreadyRegisteredException netcomm/fawkes/client.h

@@ -28,6 +28,7 @@
 #include <interface/interface_info.h>
 #include <interface/interface.h>
 
+#include <cstdlib>
 #include <cstring>
 
 /** @class InterfaceInfo <interface/interface_info.h>

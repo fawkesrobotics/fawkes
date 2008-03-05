@@ -39,6 +39,9 @@
 #include <netcomm/fawkes/component_ids.h>
 #include <netcomm/fawkes/hub.h>
 
+#include <cstdlib>
+#include <cstring>
+
 /** @class BlackBoardNetworkHandler <blackboard/network_handler.h>
  * BlackBoard Network Handler.
  * This class provides a network handler that can be registered with the

@@ -114,7 +114,6 @@ InterfaceType *
 RemoteBlackBoard::open_for_reading(const char *identifier)
 {
   char *type_name = BlackBoard::strip_class_type(typeid(InterfaceType).name());
-  printf("0 ofr %s::%s\n", type_name, identifier);
   InterfaceType *interface = dynamic_cast<InterfaceType *>(open_for_reading(type_name, identifier));
   delete[] type_name;
   if ( interface == 0 ) {

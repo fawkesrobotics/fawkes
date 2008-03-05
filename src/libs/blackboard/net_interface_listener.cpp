@@ -35,6 +35,9 @@
 #include <netcomm/fawkes/message.h>
 #include <netcomm/fawkes/component_ids.h>
 
+#include <cstdlib>
+#include <cstring>
+
 /** @class BlackBoardNetHandlerInterfaceListener <blackboard/net_interface_listener.h>
  * Interface listener for network handler.
  * This class is used by the BlackBoardNetworkHandler to track interface changes and
