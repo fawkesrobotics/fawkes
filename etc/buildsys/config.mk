@@ -31,7 +31,7 @@ ifneq ($(realpath $(BASEDIR)/etc/buildsys_local/buildtype.mk),)
 else
   BUILD_TYPE = fawkes
 endif
-ARCH=$(shell arch)
+ARCH=$(shell uname -m)
 
 ### Directories
 SRCDIR ?= .
@@ -50,6 +50,15 @@ CC = gcc
 MOC = $(QTDIR)/bin/moc
 DOXYGEN = doxygen
 PKGCONFIG = $(shell which pkg-config)
+ifneq ($(wildcard /bin/bash),)
+  SHELL = /bin/bash
+else
+  ifneq ($(wildcard /usr/local/bin/bash),)
+    SHELL = /usr/local/bin/bash
+  else
+    $(error Only bash is supported as shell, but it cannot be found.)
+  endif
+endif
 
 ### GCC version information, currently unused and thus commented out
 #ifeq ($(CC),gcc)

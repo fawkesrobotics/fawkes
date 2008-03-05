@@ -151,7 +151,9 @@ yuv422packed_to_yuv422planar(unsigned char *packed, unsigned char *planar,
   u = planar + wh;
   v = u + wh2;
 
+#ifdef _OPENMP
   #pragma omp parallel for firstprivate(wh2) private(i, iy, iiy) shared(y, u, v, packed) schedule(static)
+#endif
   for (i = 0; i < wh2; ++i) {
     iy  = i << 1;
     iiy = iy << 1;

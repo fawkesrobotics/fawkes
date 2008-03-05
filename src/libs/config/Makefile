@@ -33,7 +33,7 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(ERROR_TARGETS)
 .PHONY: error_sqlite
-error_libcrypto:
+error_sqlite:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)libconfig cannot be built$(TNORMAL) (SQLite 3 not installed)"
 	$(SILENT)exit 1
 endif
