@@ -92,7 +92,7 @@ class FawkesNetworkClientSendThread : public Thread
 
   virtual void once()
   {
-    _parent->set_recv_slave_alive();
+    _parent->set_send_slave_alive();
   }
 
   virtual void loop()
@@ -328,6 +328,8 @@ FawkesNetworkClient::disconnect()
   if ( send_slave_alive ) {
     if ( ! connection_died_recently ) {
       send_slave->force_send();
+      // Give other side some time to read the messages just sent
+      usleep(100000);
     }
     send_slave->cancel();
     send_slave->join();
