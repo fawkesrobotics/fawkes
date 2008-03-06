@@ -73,27 +73,30 @@ class Interface
  public:
   virtual ~Interface();
 
-  bool                           oftype(const char *interface_type) const;
-  const void *                   datachunk() const;
-  unsigned int                   datasize() const;
-  const char *                   type() const;
-  const char *                   id() const;
-  const char *                   uid() const;
-  unsigned int                   serial() const;
-  unsigned int                   mem_serial() const;
-  bool                           operator== (Interface &comp) const;
-  const unsigned char *          hash() const;
-  size_t                         hash_size() const;
-  const char *                   hash_printable() const;
-  bool                           is_writer() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  size_t                  hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
 
-  void                           set_from_chunk(void *chunk);
+  void                    set_from_chunk(void *chunk);
+
+  virtual Message *       create_message(const char *type) const = 0;
 
   void          read();
   void          write();
 
   bool          has_writer() const;
   unsigned int  num_readers() const;
+
 
   unsigned int  msgq_enqueue(Message *message);
   void          msgq_remove(Message *message);

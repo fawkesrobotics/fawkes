@@ -374,6 +374,11 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m) throw()
       if ( __proxies.find(*serial) != __proxies.end() ) {
 	__proxies[*serial]->process_data_changed(m);
       }
+    } else if (msgid == MSG_BB_INTERFACE_MESSAGE) {
+      unsigned int *serial = (unsigned int *)m->payload();
+      if ( __proxies.find(*serial) != __proxies.end() ) {
+	__proxies[*serial]->process_interface_message(m);
+      }
     } else if (msgid == MSG_BB_READER_ADDED) {
       unsigned int *serial = (unsigned int *)m->payload();
       if ( __proxies.find(*serial) != __proxies.end() ) {

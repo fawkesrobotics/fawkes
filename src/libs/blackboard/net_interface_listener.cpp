@@ -37,6 +37,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 /** @class BlackBoardNetHandlerInterfaceListener <blackboard/net_interface_listener.h>
  * Interface listener for network handler.
@@ -59,6 +60,9 @@ BlackBoardNetHandlerInterfaceListener::BlackBoardNetHandlerInterfaceListener(Bla
   bbil_add_data_interface(interface);
   bbil_add_reader_interface(interface);
   bbil_add_writer_interface(interface);
+  if ( interface->is_writer() ) {
+    bbil_add_message_interface(interface);
+  }
 
   __blackboard = blackboard;
   __interface = interface;
@@ -91,6 +95,27 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *inte
 	 interface->datasize());
 
   __fnh->send(__clid, FAWKES_CID_BLACKBOARD, MSG_BB_DATA_CHANGED, payload, payload_size);
+}
+
+
+bool
+BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *interface,
+								     Message *message) throw()
+{
+  // send out interface message
+  size_t payload_size = sizeof(bb_imessage_msg_t) + message->datasize();
+  void *payload = calloc(1, payload_size);
+  bb_imessage_msg_t *dm = (bb_imessage_msg_t *)payload;
+  dm->serial = interface->serial();
+  strncpy(dm->msg_type, message->type(), __INTERFACE_MESSAGE_TYPE_SIZE);
+  dm->data_size = message->datasize();
+  memcpy((char *)payload + sizeof(bb_imessage_msg_t), message->datachunk(),
+	 message->datasize());
+
+  __fnh->send(__clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_MESSAGE, payload, payload_size);
+
+  // do not enqueue, we are fine with just sending
+  return false;
 }
 
 

@@ -67,14 +67,14 @@ BlackBoardNotifier::~BlackBoardNotifier()
  */
 void
 BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
-					      unsigned int flags)
+				      unsigned int flags)
 {
   if ( flags & BlackBoard::BBIL_FLAG_DATA ) {
     BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
     BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_data_interfaces();
     __bbil_data.lock();
     for (i = im->begin(); i != im->end(); ++i) {
-      __bbil_data[(*i).first].push_back(listener);
+      __bbil_data[i->first].push_back(listener);
     }
     __bbil_data.unlock();
   }
@@ -83,7 +83,9 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
     BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_message_interfaces();
     __bbil_messages.lock();
     for (i = im->begin(); i != im->end(); ++i) {
-      __bbil_messages[(*i).first].push_back(listener);
+      if ( i->second->is_writer() ) {
+	__bbil_messages[i->first].push_back(listener);
+      }
     }
     __bbil_messages.unlock();
   }
@@ -92,7 +94,7 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
     BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_reader_interfaces();
     __bbil_reader.lock();
     for (i = im->begin(); i != im->end(); ++i) {
-      __bbil_reader[(*i).first].push_back(listener);
+      __bbil_reader[i->first].push_back(listener);
     }
     __bbil_reader.unlock();
   }
@@ -101,7 +103,7 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
     BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_writer_interfaces();
     __bbil_writer.lock();
     for (i = im->begin(); i != im->end(); ++i) {
-      __bbil_writer[(*i).first].push_back(listener);
+      __bbil_writer[i->first].push_back(listener);
     }
     __bbil_writer.unlock();
   }
@@ -117,10 +119,10 @@ BlackBoardNotifier::unregister_listener(BlackBoardInterfaceListener *listener)
 {
   __bbil_data.lock();
   for (BBilLockMapIterator i = __bbil_data.begin(); i != __bbil_data.end(); ++i) {
-    BBilListIterator j = (*i).second.begin();
-    while (j != (*i).second.end()) {
+    BBilListIterator j = i->second.begin();
+    while (j != i->second.end()) {
       if ( *j == listener ) {
-	j = (*i).second.erase(j);
+	j = i->second.erase(j);
 	if ( i->second.empty() ) {
 	  __bbil_data.erase(i);
 	  break;
@@ -134,10 +136,10 @@ BlackBoardNotifier::unregister_listener(BlackBoardInterfaceListener *listener)
 
   __bbil_messages.lock();
   for (BBilLockMapIterator i = __bbil_messages.begin(); i != __bbil_messages.end(); ++i) {
-    BBilListIterator j = (*i).second.begin();
-    while (j != (*i).second.end()) {
+    BBilListIterator j = i->second.begin();
+    while (j != i->second.end()) {
       if ( *j == listener ) {
-	j = (*i).second.erase(j);
+	j = i->second.erase(j);
 	if ( i->second.empty() ) {
 	  __bbil_messages.erase(i);
 	  break;
@@ -151,10 +153,10 @@ BlackBoardNotifier::unregister_listener(BlackBoardInterfaceListener *listener)
 
   __bbil_reader.lock();
   for (BBilLockMapIterator i = __bbil_reader.begin(); i != __bbil_reader.end(); ++i) {
-    BBilListIterator j = (*i).second.begin();
-    while (j != (*i).second.end()) {
+    BBilListIterator j = i->second.begin();
+    while (j != i->second.end()) {
       if ( *j == listener ) {
-	j = (*i).second.erase(j);
+	j = i->second.erase(j);
 	if ( i->second.empty() ) {
 	  __bbil_reader.erase(i);
 	  break;
@@ -168,10 +170,10 @@ BlackBoardNotifier::unregister_listener(BlackBoardInterfaceListener *listener)
 
   __bbil_writer.lock();
   for (BBilLockMapIterator i = __bbil_writer.begin(); i != __bbil_writer.end(); ++i) {
-    BBilListIterator j = (*i).second.begin();
-    while (j != (*i).second.end()) {
+    BBilListIterator j = i->second.begin();
+    while (j != i->second.end()) {
       if ( *j == listener ) {
-	j = (*i).second.erase(j);
+	j = i->second.erase(j);
 	if ( i->second.empty() ) {
 	  __bbil_writer.erase(i);
 	  break;
@@ -225,10 +227,10 @@ BlackBoardNotifier::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
   __bbio_created.lock();
   for (BBioLockMapIterator i = __bbio_created.begin(); i != __bbio_created.end(); ++i) {
-    BBioListIterator j = (*i).second.begin();
-    while (j != (*i).second.end()) {
+    BBioListIterator j = i->second.begin();
+    while (j != i->second.end()) {
       if ( *j == observer ) {
-	j = (*i).second.erase(j);
+	j = i->second.erase(j);
 	if ( i->second.empty() ) {
 	  __bbio_created.erase(i);
 	  break;
@@ -242,10 +244,10 @@ BlackBoardNotifier::unregister_observer(BlackBoardInterfaceObserver *observer)
 
   __bbio_destroyed.lock();
   for (BBioLockMapIterator i = __bbio_destroyed.begin(); i != __bbio_destroyed.end(); ++i) {
-    BBioListIterator j = (*i).second.begin();
-    while (j != (*i).second.end()) {
+    BBioListIterator j = i->second.begin();
+    while (j != i->second.end()) {
       if ( *j == observer ) {
-	j = (*i).second.erase(j);
+	j = i->second.erase(j);
 	if ( i->second.empty() ) {
 	  __bbio_destroyed.erase(i);
 	  break;

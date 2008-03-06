@@ -128,8 +128,8 @@ Message::~Message()
  * Avoid usage.
  * @return pointer to internal data
  */
-void *
-Message::data()
+const void *
+Message::datachunk() const
 {
   return data_ptr;
 }
@@ -139,9 +139,21 @@ Message::data()
  * @return size in bytes of data
  */
 unsigned int
-Message::datasize()
+Message::datasize() const
 {
   return data_size;
+}
+
+
+/** Set from raw data chunk.
+ * This sets the internal storage to the given chunk. The chunk must be exactly
+ * of the size returned by datasize().
+ * @param chunk chunk containing the data exactly of the size returned by datasize()
+ */
+void
+Message::set_from_chunk(const void *chunk)
+{
+  memcpy(data_ptr, chunk, data_size);
 }
 
 

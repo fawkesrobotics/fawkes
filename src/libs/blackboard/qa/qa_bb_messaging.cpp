@@ -29,6 +29,7 @@
 /// @cond QA
 
 #include <blackboard/blackboard.h>
+#include <blackboard/remote.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
 
@@ -65,7 +66,8 @@ main(int argc, char **argv)
 
   signal(SIGINT, signal_handler);
 
-  BlackBoard *bb = new BlackBoard(/* master */  true);
+  //BlackBoard *bb = new BlackBoard(/* master */  true);
+  RemoteBlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
 
   TestInterface *ti_writer;
   TestInterface *ti_reader;
@@ -113,31 +115,39 @@ main(int argc, char **argv)
       ti_writer->msgq_flush();
     }
 
-    if ( ti_writer->msgq_first_is<TestInterface::SetTestStringMessage>() ) {
-      cout << "Message improperly detected to be a SetTestStringMessage" << endl;
-    }
-    if ( ti_writer->msgq_first_is<TestInterface::SetTestIntMessage>() ) {
-      TestInterface::SetTestIntMessage *m2 = ti_writer->msgq_first<TestInterface::SetTestIntMessage>();
-      ti_writer->set_test_int( m2->test_int() );
-      try {
-	ti_writer->write();
-      } catch (InterfaceWriteDeniedException &e) {
-	cout << "BUG: caught write denied exception" << endl;
-	e.print_trace();
-      }
-      ti_writer->msgq_pop();
-    } else {
-      cout << "Illegal message type received" << endl;
-    }
+    usleep(100000);
 
-    //cout << "Reading value from reader interface.. " << flush;
-    ti_reader->read();
-    int val = ti_reader->test_int();
-    if ( val == expval ) {
-      //cout << " success, value is " << ti_reader->test_int() << " as expected" << endl;
+    if ( ti_writer->msgq_first() != NULL ) {
+      if ( ti_writer->msgq_first_is<TestInterface::SetTestStringMessage>() ) {
+	cout << "Message improperly detected to be a SetTestStringMessage" << endl;
+      }
+      if ( ti_writer->msgq_first_is<TestInterface::SetTestIntMessage>() ) {
+	TestInterface::SetTestIntMessage *m2 = ti_writer->msgq_first<TestInterface::SetTestIntMessage>();
+	ti_writer->set_test_int( m2->test_int() );
+	try {
+	  ti_writer->write();
+	} catch (InterfaceWriteDeniedException &e) {
+	  cout << "BUG: caught write denied exception" << endl;
+	  e.print_trace();
+	}
+	ti_writer->msgq_pop();
+      } else {
+	cout << "Illegal message '" << ti_writer->msgq_first()->type() << "' type received" << endl;
+      }
+
+      usleep(100000);
+
+      //cout << "Reading value from reader interface.. " << flush;
+      ti_reader->read();
+      int val = ti_reader->test_int();
+      if ( val == expval ) {
+	//cout << " success, value is " << ti_reader->test_int() << " as expected" << endl;
+      } else {
+	cout << " failure, value is " << ti_reader->test_int() << ", expected "
+	     << expval << endl;
+      }
     } else {
-      cout << " failure, value is " << ti_reader->test_int() << ", expected "
-      	   << expval << endl;
+      printf("No message in queue, if network test this means the message was dropped\n");
     }
 
     usleep(10);

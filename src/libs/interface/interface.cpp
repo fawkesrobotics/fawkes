@@ -118,6 +118,15 @@ InterfaceInvalidMessageException::InterfaceInvalidMessageException(const Interfa
  * Check if the message is valid and can be enqueued.
  * @param message The message to check
  * @return true, if the message is valid and may be enqueued, false otherwise
+ *
+ * @fn bool Interface::create_message(const char *type) const = 0
+ * Create message based on type name.
+ * This will create a new message of the given type. The type must be given without
+ * the InterfaceName:: prefix but just the plain class name of the message.
+ * @param type message type
+ * @return message of the given type, empty
+ * @exception UnknownTypeException thrown if this interface cannot create a message
+ * of the given type.
  */
 
 /** Constructor */

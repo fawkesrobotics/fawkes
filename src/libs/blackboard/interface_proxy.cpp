@@ -140,6 +140,54 @@ BlackBoardInterfaceProxy::process_data_changed(FawkesNetworkMessage *msg)
 }
 
 
+/** Process MSG_BB_INTERFACE message.
+ * @param msg message to process.
+ */
+void
+BlackBoardInterfaceProxy::process_interface_message(FawkesNetworkMessage *msg)
+{
+  if ( msg->msgid() != MSG_BB_INTERFACE_MESSAGE ) {
+    LibLogger::log_error("BlackBoardInterfaceProxy", "Expected interface BB message, but "
+			 "received message of type %u, ignoring.", msg->msgid());
+    return;
+  }
+
+  void *payload = msg->payload();
+  bb_imessage_msg_t *mm = (bb_imessage_msg_t *)payload;
+  if ( mm->serial != __instance_serial ) {
+    LibLogger::log_error("BlackBoardInterfaceProxy", "Serial mismatch (msg), expected %u, "
+			 "but got %u, ignoring.", __instance_serial, mm->serial);
+    return;
+  }
+
+  if ( ! __interface->is_writer() ) {
+    LibLogger::log_error("BlackBoardInterfaceProxy", "Received interface message, but this"
+			 "is a reading instance (%s), ignoring.", __interface->uid());
+    return;
+  }
+
+  try {
+    Message *im = __interface->create_message(mm->msg_type);
+
+    if ( mm->data_size != im->datasize() ) {
+      LibLogger::log_error("BlackBoardInterfaceProxy", "Message data size mismatch, expected "
+			   "%zu, but got %zu, ignoring.", __data_size, mm->data_size);
+      delete im;
+      return;
+    }
+
+    im->set_from_chunk((char *)payload + sizeof(bb_imessage_msg_t));
+
+    if ( __notifier->notify_of_message_received(__interface, im) ) {
+      __interface->msgq_append(im);
+    }
+  } catch (Exception &e) {
+    e.append("Failed to enqueue interface message for %s, ignoring", __interface->uid());
+    LibLogger::log_error("BlackBoardInterfaceProxy", e);
+  }
+}
+
+
 /** Reader has been added. */
 void
 BlackBoardInterfaceProxy::reader_added()
@@ -221,5 +269,21 @@ BlackBoardInterfaceProxy::notify_of_data_change(const Interface *interface)
 unsigned int
 BlackBoardInterfaceProxy::transmit(Message *message)
 {
+  // send out interface message
+  size_t payload_size = sizeof(bb_imessage_msg_t) + message->datasize();
+  void *payload = calloc(1, payload_size);
+  bb_imessage_msg_t *dm = (bb_imessage_msg_t *)payload;
+  dm->serial = __interface->serial();
+  strncpy(dm->msg_type, message->type(), __INTERFACE_MESSAGE_TYPE_SIZE);
+  dm->data_size = message->datasize();
+  memcpy((char *)payload + sizeof(bb_imessage_msg_t), message->datachunk(),
+	 message->datasize());
+
+  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(__clid, FAWKES_CID_BLACKBOARD,
+							MSG_BB_INTERFACE_MESSAGE,
+							payload, payload_size);
+  __fnc->enqueue(omsg);
+  omsg->unref();
+
   return 0;
 }

@@ -223,6 +223,42 @@ BlackBoardNetworkHandler::loop()
       }
       break;
 
+    case MSG_BB_INTERFACE_MESSAGE:
+      {
+	void *payload = msg->payload();
+	bb_imessage_msg_t *mm = (bb_imessage_msg_t *)payload;
+	if ( __interfaces.find(mm->serial) != __interfaces.end() ) {
+
+	  if ( ! __interfaces[mm->serial]->is_writer() ) {
+	    try {
+	      Message *ifm = __interfaces[mm->serial]->create_message(mm->msg_type);
+
+	      if ( mm->data_size != ifm->datasize() ) {
+		LibLogger::log_error("BlackBoardInterfaceProxy", "MESSAGE: Data size mismatch, "
+				     "expected %zu, but got %zu, ignoring.",
+				     ifm->datasize(), mm->data_size);
+	      } else {
+		ifm->set_from_chunk((char *)payload + sizeof(bb_imessage_msg_t));
+
+		__interfaces[mm->serial]->msgq_enqueue(ifm);
+
+	      }
+	    } catch (Exception &e) {
+	      LibLogger::log_error("BlackBoardInterfaceProxy", "MESSAGE: Could not create "
+				   "interface message, ignoring.");
+	      LibLogger::log_error("BlackBoardInterfaceProxy", e);
+	    }
+	  } else {
+	    LibLogger::log_error("BlackBoardInterfaceProxy", "MESSAGE: Received message "
+				 "notification, but for a writing instance, ignoring.");
+	  }
+	} else {
+	  LibLogger::log_error("BlackBoardInterfaceProxy", "DATA_CHANGED: Interface with "
+			       "serial %u not found, ignoring.", mm->serial);
+	}
+      }
+      break;
+
     default:
       LibLogger::log_warn("BlackBoardNetworkHandler", "Unknown message of type %u "
 			  "received", msg->msgid());

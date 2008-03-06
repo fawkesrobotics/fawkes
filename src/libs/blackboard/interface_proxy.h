@@ -49,6 +49,7 @@ class BlackBoardInterfaceProxy
   ~BlackBoardInterfaceProxy();
 
   void process_data_changed(FawkesNetworkMessage *msg);
+  void process_interface_message(FawkesNetworkMessage *msg);
   void reader_added();
   void reader_removed();
   void writer_added();

@@ -70,9 +70,12 @@ class Message : public RefCount
   Interface *       interface() const;
   const char *      type() const;
 
+  const void *      datachunk() const;
+  unsigned int      datasize() const;
+
+  void              set_from_chunk(const void *chunk);
+
  private:
-  virtual void *        data();
-  virtual unsigned int  datasize();
 
   void                  set_interface(Interface *iface);
 
