@@ -133,6 +133,8 @@ class TestInterface : public Interface
   ~TestInterface();
 
  public:
+  virtual Message * create_message(const char *type) const;
+
   /* Methods */
   bool is_test_bool();
   void set_test_bool(const bool new_test_bool);

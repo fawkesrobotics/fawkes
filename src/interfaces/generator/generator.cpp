@@ -228,6 +228,7 @@ InterfaceGenerator::write_cpp(FILE *f)
   write_header(f, filename_cpp);
   fprintf(f,
 	  "#include <interfaces/%s>\n\n"
+	  "#include <core/exceptions/software.h>\n\n"
 	  "#include <cstring>\n"
 	  "#include <cstdlib>\n\n"
 	  "/** @class %s interfaces/%s\n"
@@ -239,6 +240,7 @@ InterfaceGenerator::write_cpp(FILE *f)
   write_constants_cpp(f);
   write_ctor_dtor_cpp(f, class_name, "Interface", "", data_fields);
   write_methods_cpp(f, class_name, class_name, data_fields, "");
+  write_create_message_method_cpp(f);
   write_messages_cpp(f);
 
   write_management_funcs_cpp(f);
@@ -359,7 +361,7 @@ InterfaceGenerator::write_messages_cpp(FILE *f)
 
   }
   fprintf(f,
-	  "/** Check if message is valid an can be queued.\n"
+	  "/** Check if message is valid and can be enqueued.\n"
 	  " * @param message Message to check\n"
 	  " */\n"
 	  "bool\n"
@@ -378,6 +380,42 @@ InterfaceGenerator::write_messages_cpp(FILE *f)
   fprintf(f,
 	  "  return false;\n"
 	  "}\n\n");
+}
+
+
+/** Write create_message() method to cpp file.
+ * @param f file to write to
+ */
+void
+InterfaceGenerator::write_create_message_method_cpp(FILE *f)
+{
+  fprintf(f, "/* =========== message create =========== */\n");
+  fprintf(f,
+	  "Message *\n"
+	  "%s::create_message(const char *type) const\n"
+	  "{\n", class_name.c_str());
+
+  bool first = true;
+  for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
+    fprintf(f,
+	    "  %sif ( strncmp(\"%s\", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {\n"
+	    "    return new %s();\n",
+	    first ? "" : "} else ", i->getName().c_str(), i->getName().c_str());
+    first = false;
+  }
+  if (first) {
+    fprintf(f,
+	    "  throw UnknownTypeException(\"The given type '%%s' does not match any known \"\n"
+	    "                             \"message type for this interface type.\", type);\n"
+	    "}\n\n\n");
+  } else {
+    fprintf(f,
+	    "  } else {\n"
+	    "    throw UnknownTypeException(\"The given type '%%s' does not match any known \"\n"
+	    "                               \"message type for this interface type.\", type);\n"
+	    "  }\n"
+	    "}\n\n\n");
+  }
 }
 
 
@@ -707,6 +745,7 @@ InterfaceGenerator::write_h(FILE *f)
   fprintf(f, " private:\n");
   write_ctor_dtor_h(f, "  ", class_name);
   fprintf(f, " public:\n");
+  fprintf(f, "  virtual Message * create_message(const char *type) const;\n\n");
   write_methods_h(f, "  ", data_fields);
   fprintf(f, "\n};\n\n#endif\n");
 }

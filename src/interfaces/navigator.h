@@ -127,6 +127,8 @@ class NavigatorInterface : public Interface
   ~NavigatorInterface();
 
  public:
+  virtual Message * create_message(const char *type) const;
+
   /* Methods */
   int foo();
   void set_foo(const int new_foo);

@@ -27,6 +27,8 @@
 
 #include <interfaces/kicker.h>
 
+#include <core/exceptions/software.h>
+
 #include <cstring>
 #include <cstdlib>
 
@@ -178,6 +180,23 @@ KickerInterface::set_current_intensity(const unsigned int new_current_intensity)
 {
   data->current_intensity = new_current_intensity;
 }
+
+/* =========== message create =========== */
+Message *
+KickerInterface::create_message(const char *type) const
+{
+  if ( strncmp("KickMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new KickMessage();
+  } else if ( strncmp("ResetCounterMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new ResetCounterMessage();
+  } else if ( strncmp("GuideBallMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new GuideBallMessage();
+  } else {
+    throw UnknownTypeException("The given type '%s' does not match any known "
+                               "message type for this interface type.", type);
+  }
+}
+
 
 /* =========== messages =========== */
 /** @class KickerInterface::KickMessage interfaces/kicker.h
@@ -377,7 +396,7 @@ KickerInterface::GuideBallMessage::set_guide_ball_side(const GuideBallSideEnum n
   data->guide_ball_side = new_guide_ball_side;
 }
 
-/** Check if message is valid an can be queued.
+/** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
 bool

@@ -148,6 +148,8 @@ class KickerInterface : public Interface
   ~KickerInterface();
 
  public:
+  virtual Message * create_message(const char *type) const;
+
   /* Methods */
   int num_kicks_left();
   void set_num_kicks_left(const int new_num_kicks_left);

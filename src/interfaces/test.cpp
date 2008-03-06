@@ -27,6 +27,8 @@
 
 #include <interfaces/test.h>
 
+#include <core/exceptions/software.h>
+
 #include <cstring>
 #include <cstdlib>
 
@@ -225,6 +227,23 @@ TestInterface::set_test_lint(const long int new_test_lint)
   data->test_lint = new_test_lint;
 }
 
+/* =========== message create =========== */
+Message *
+TestInterface::create_message(const char *type) const
+{
+  if ( strncmp("SetTestIntMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetTestIntMessage();
+  } else if ( strncmp("SetTestStringMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetTestStringMessage();
+  } else if ( strncmp("CalculateMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new CalculateMessage();
+  } else {
+    throw UnknownTypeException("The given type '%s' does not match any known "
+                               "message type for this interface type.", type);
+  }
+}
+
+
 /* =========== messages =========== */
 /** @class TestInterface::SetTestIntMessage interfaces/test.h
  * SetTestIntMessage Fawkes BlackBoard Interface Message.
@@ -410,7 +429,7 @@ TestInterface::CalculateMessage::set_addend(const int new_addend)
   data->addend = new_addend;
 }
 
-/** Check if message is valid an can be queued.
+/** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
 bool

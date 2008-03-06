@@ -27,6 +27,8 @@
 
 #include <interfaces/object.h>
 
+#include <core/exceptions/software.h>
+
 #include <cstring>
 #include <cstdlib>
 
@@ -750,8 +752,17 @@ ObjectPositionInterface::set_xyz_velocity_covariance(const float * new_xyz_veloc
   memcpy(data->xyz_velocity_covariance, new_xyz_velocity_covariance, sizeof(float) * 9);
 }
 
+/* =========== message create =========== */
+Message *
+ObjectPositionInterface::create_message(const char *type) const
+{
+  throw UnknownTypeException("The given type '%s' does not match any known "
+                             "message type for this interface type.", type);
+}
+
+
 /* =========== messages =========== */
-/** Check if message is valid an can be queued.
+/** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
 bool

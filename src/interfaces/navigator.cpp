@@ -27,6 +27,8 @@
 
 #include <interfaces/navigator.h>
 
+#include <core/exceptions/software.h>
+
 #include <cstring>
 #include <cstdlib>
 
@@ -74,6 +76,23 @@ NavigatorInterface::set_foo(const int new_foo)
 {
   data->foo = new_foo;
 }
+
+/* =========== message create =========== */
+Message *
+NavigatorInterface::create_message(const char *type) const
+{
+  if ( strncmp("TargetMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new TargetMessage();
+  } else if ( strncmp("MaxVelocityMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new MaxVelocityMessage();
+  } else if ( strncmp("ObstacleMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new ObstacleMessage();
+  } else {
+    throw UnknownTypeException("The given type '%s' does not match any known "
+                               "message type for this interface type.", type);
+  }
+}
+
 
 /* =========== messages =========== */
 /** @class NavigatorInterface::TargetMessage interfaces/navigator.h
@@ -326,7 +345,7 @@ NavigatorInterface::ObstacleMessage::set_width(const float new_width)
   data->width = new_width;
 }
 
-/** Check if message is valid an can be queued.
+/** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
 bool

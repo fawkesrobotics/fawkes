@@ -60,6 +60,7 @@ class InterfaceGenerator
   void write_constants_h(FILE *f);
 
   void write_messages_cpp(FILE *f);
+  void write_create_message_method_cpp(FILE *f);
   void write_messages_h(FILE *f);
   void write_ctor_dtor_h(FILE *f,  std::string /* indent space */ is,
 			 std::string classname);

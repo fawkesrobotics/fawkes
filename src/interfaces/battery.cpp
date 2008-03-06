@@ -27,6 +27,8 @@
 
 #include <interfaces/battery.h>
 
+#include <core/exceptions/software.h>
+
 #include <cstring>
 #include <cstdlib>
 
@@ -119,6 +121,21 @@ BatteryInterface::set_temperature(const unsigned int new_temperature)
   data->temperature = new_temperature;
 }
 
+/* =========== message create =========== */
+Message *
+BatteryInterface::create_message(const char *type) const
+{
+  if ( strncmp("push_buttonMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new push_buttonMessage();
+  } else if ( strncmp("sleepMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new sleepMessage();
+  } else {
+    throw UnknownTypeException("The given type '%s' does not match any known "
+                               "message type for this interface type.", type);
+  }
+}
+
+
 /* =========== messages =========== */
 /** @class BatteryInterface::push_buttonMessage interfaces/battery.h
  * push_buttonMessage Fawkes BlackBoard Interface Message.
@@ -166,7 +183,7 @@ BatteryInterface::sleepMessage::~sleepMessage()
 }
 
 /* Methods */
-/** Check if message is valid an can be queued.
+/** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
 bool

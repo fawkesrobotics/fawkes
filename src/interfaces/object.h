@@ -154,6 +154,8 @@ class ObjectPositionInterface : public Interface
   ~ObjectPositionInterface();
 
  public:
+  virtual Message * create_message(const char *type) const;
+
   /* Methods */
   unsigned int object_type();
   void set_object_type(const unsigned int new_object_type);

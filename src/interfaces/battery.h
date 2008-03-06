@@ -89,6 +89,8 @@ class BatteryInterface : public Interface
   ~BatteryInterface();
 
  public:
+  virtual Message * create_message(const char *type) const;
+
   /* Methods */
   unsigned int current();
   void set_current(const unsigned int new_current);

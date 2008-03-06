@@ -27,6 +27,8 @@
 
 #include <interfaces/motor.h>
 
+#include <core/exceptions/software.h>
+
 #include <cstring>
 #include <cstdlib>
 
@@ -420,6 +422,35 @@ MotorInterface::set_controller_thread_name(const char * new_controller_thread_na
 {
   strncpy(data->controller_thread_name, new_controller_thread_name, sizeof(data->controller_thread_name));
 }
+
+/* =========== message create =========== */
+Message *
+MotorInterface::create_message(const char *type) const
+{
+  if ( strncmp("SetMotorStateMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetMotorStateMessage();
+  } else if ( strncmp("AcquireControlMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new AcquireControlMessage();
+  } else if ( strncmp("ResetOdometryMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new ResetOdometryMessage();
+  } else if ( strncmp("DriveRPMMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new DriveRPMMessage();
+  } else if ( strncmp("TransMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new TransMessage();
+  } else if ( strncmp("RotMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new RotMessage();
+  } else if ( strncmp("TransRotMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new TransRotMessage();
+  } else if ( strncmp("OrbitMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new OrbitMessage();
+  } else if ( strncmp("LinTransRotMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new LinTransRotMessage();
+  } else {
+    throw UnknownTypeException("The given type '%s' does not match any known "
+                               "message type for this interface type.", type);
+  }
+}
+
 
 /* =========== messages =========== */
 /** @class MotorInterface::SetMotorStateMessage interfaces/motor.h
@@ -1115,7 +1146,7 @@ MotorInterface::LinTransRotMessage::set_omega(const float new_omega)
   data->omega = new_omega;
 }
 
-/** Check if message is valid an can be queued.
+/** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
 bool

@@ -320,6 +320,8 @@ class MotorInterface : public Interface
   ~MotorInterface();
 
  public:
+  virtual Message * create_message(const char *type) const;
+
   /* Methods */
   unsigned int motor_state();
   void set_motor_state(const unsigned int new_motor_state);
