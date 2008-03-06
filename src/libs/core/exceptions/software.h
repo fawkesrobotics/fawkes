@@ -48,6 +48,12 @@ class TypeMismatchException : public Exception {
 };
 
 
+class UnknownTypeException : public Exception {
+ public:
+  UnknownTypeException(const char *format, ...) throw();
+};
+
+
 class DestructionInProgressException : public Exception {
  public:
   DestructionInProgressException(const char *msg) throw();

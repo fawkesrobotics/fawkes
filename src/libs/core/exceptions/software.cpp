@@ -76,6 +76,24 @@ TypeMismatchException::TypeMismatchException(const char *format, ...) throw()
 }
 
 
+/** @class UnknownTypeException <core/exceptions/software.h>
+ * Unknown type.
+ * Throw this exception if you get an unknown type.
+ * @ingroup Exceptions
+ */
+/** Constructor
+ * @param format message format
+ */
+UnknownTypeException::UnknownTypeException(const char *format, ...) throw()
+  : Exception()
+{
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
+}
+
+
 /** @class DestructionInProgressException <core/exceptions/software.h>
  * Delete in progress.
  * Throw this exception if someone tried to access an object that is currently being
