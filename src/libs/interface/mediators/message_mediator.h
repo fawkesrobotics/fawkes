@@ -45,7 +45,9 @@ class MessageMediator
   /** Transmit message.
    * @param message message to transmit.
    * @return message id for this message unique on the writing instance. The ID is
-   * zero if there was no writing instance for this message.
+   * zero if the message was not enqueued because the receiver directly processed it.
+   * @exception BlackBoardNoWritingInstanceException thrown if there is no writing
+   *instance for the transmitting interface
    */
   virtual unsigned int transmit(Message *message)                        = 0;
 

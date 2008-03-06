@@ -37,6 +37,7 @@
 
 #include <interfaces/test.h>
 
+#include <core/threading/thread.h>
 #include <core/exceptions/system.h>
 #include <utils/logging/liblogger.h>
 
@@ -75,6 +76,14 @@ class QaBBEventListener
     printf("BBIL: Data in interface %s has been modified\n", interface->uid());
   }
 
+  virtual bool bb_interface_message_received(Interface *interface, Message *message) throw()
+  {
+    printf("BBIL: Message of type %s for interface %s has been received\n",
+	   message->type(), interface->uid());
+    // do not enqueue, then we do not have to flush it
+    return false;
+  }
+
   virtual void bb_interface_writer_added(Interface *interface) throw()
   {
     printf("BBIL: Writer has been added to interface %s\n", interface->uid());
@@ -99,6 +108,19 @@ class QaBBEventListener
   {
     printf("Listener: Adding interface %s\n", interface->uid());
     bbil_add_data_interface(interface);
+    try {
+      if ( ! interface->is_writer() ) {
+	printf("Trying to add non-writing instance as message listener, this will fail\n");
+      }
+      bbil_add_message_interface(interface);
+      if ( ! interface->is_writer() ) {
+	printf("Did not fail!? BUG!\n");
+      }
+    } catch (Exception &e) {
+      if ( ! interface->is_writer() ) {
+	printf("Failed as expected (%s). Good.\n", e.what());
+      }
+    }
     bbil_add_reader_interface(interface);
     bbil_add_writer_interface(interface);
   }
@@ -109,9 +131,10 @@ int
 main(int argc, char **argv)
 {
   LibLogger::init();
+  Thread::init_main();
 
-  RemoteBlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
-  //BlackBoard *bb = new BlackBoard();
+  //RemoteBlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
+  BlackBoard *bb = new BlackBoard();
 
   QaBBEventListener qabbel;
 
@@ -122,13 +145,19 @@ main(int argc, char **argv)
   TestInterface *ti_writer_5;
   TestInterface *ti_writer_6;
 
+  TestInterface *ti_reader_1;
+  TestInterface *ti_reader_2;
+
   try {
     cout << "Opening interfaces.. " << endl;
     ti_writer_1 = bb->open_for_writing<TestInterface>("SomeID 1");
+    ti_reader_1 = bb->open_for_reading<TestInterface>("SomeID 1");
     ti_writer_2 = bb->open_for_writing<TestInterface>("SomeID 2");
+    ti_reader_2 = bb->open_for_reading<TestInterface>("SomeID reader 1");
 
     qabbel.add_interface(ti_writer_1);
     qabbel.add_interface(ti_writer_2);
+    qabbel.add_interface(ti_reader_2);
     bb->register_listener(&qabbel, BlackBoard::BBIL_FLAG_ALL);
     bb->register_observer(&qabbel, BlackBoard::BBIO_FLAG_ALL);
 
@@ -166,22 +195,30 @@ main(int argc, char **argv)
 
   usleep(100000);
 
-  printf("Removing writer one. This should print a warning.\n");
-  bb->close(ti_writer_1);
-  bb->unregister_listener(&qabbel);
+  printf("Sending a message to test message received event\n");
+  TestInterface::SetTestIntMessage *m = new TestInterface::SetTestIntMessage(27);
+  unsigned int msg_id = ti_reader_1->msgq_enqueue(m);
+  printf("Message ID = %u, enqueued messages: %u\n", msg_id, ti_writer_1->msgq_size());
+  
 
+  bb->unregister_listener(&qabbel);
   usleep(100000);
 
   printf("Removing other writers. No warning should appear.\n");
+  bb->close(ti_writer_1);
   bb->close(ti_writer_2);
   bb->close(ti_writer_3);
   bb->close(ti_writer_4);
   bb->close(ti_writer_5);
   bb->close(ti_writer_6);
 
+  bb->close(ti_reader_1);
+  bb->close(ti_reader_2);
+
   usleep(100000);
 
   delete bb;
+  Thread::destroy_main();
   LibLogger::finalize();
 }
 

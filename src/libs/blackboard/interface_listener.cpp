@@ -118,6 +118,31 @@ BlackBoardInterfaceListener::bb_interface_data_changed(Interface *interface) thr
 }
 
 
+/** BlackBoard message received notification.
+ * This is called whenever a message is received for this interface. This method is
+ * only called for writing instances of an interface, never on reading instances.
+ * If you have processed the message already, you can order that the message is not
+ * enqueued by returning false. Returning true will enqueue the message as usual.
+ * You should only do very (very!) quick tasks directly in this method, as it is
+ * out of the regular thread context and can harm performance of other plugins and
+ * the system as a whole. Note that if you decide to return false the message is
+ * not referenced. If you want to keep it longer you have to ref() it by yourself.
+ * An example where this would really make sense is a "STOP" message for the motor,
+ * which needs to be processed ASAP and maybe even waiting a couple of miliseconds
+ * for the next cycle is not acceptable.
+ * @param interface interface instance that you supplied to bbil_add_message_interface()
+ * @param message the message that was sent
+ * @return true to get the message enqueued afterwards as usual, false to prevent
+ * queuing of the message.
+ */
+bool
+BlackBoardInterfaceListener::bb_interface_message_received(Interface *interface,
+							   Message *message) throw()
+{
+  return true;
+}
+
+
 /** A reading instance has been opened for a watched interface.
  * This is called whenever a reading instance of the interface you are watching
  * is opened.
@@ -174,6 +199,22 @@ BlackBoardInterfaceListener::bbil_add_data_interface(Interface *interface)
   __bbil_data_interfaces[strdup(interface->uid())] = interface;
 }
 
+/** Add an interface to the message received watch list.
+ * @param interface interface to watch for messages
+ */
+void
+BlackBoardInterfaceListener::bbil_add_message_interface(Interface *interface)
+{
+  if ( ! interface->is_writer() ) {
+    throw Exception("Message received events can only be watched by writing instances");
+  }
+  if ( __bbil_message_interfaces.find((char *)interface->uid()) != __bbil_message_interfaces.end() ) {
+    throw Exception("Interface %s already registered (message)", interface->uid());
+  }
+  __bbil_message_interfaces[strdup(interface->uid())] = interface;
+}
+
+
 /** Add an interface to the reader addition/removal watch list.
  * This method does not mean that you add interfaces that you opened for reading
  * but that you add an interface that you want to be informed for when reader
@@ -215,6 +256,15 @@ BlackBoardInterfaceListener::bbil_data_interfaces() throw()
   return &__bbil_data_interfaces;
 }
 
+/** Get message received watch list.
+ * @return message received watch list
+ */
+BlackBoardInterfaceListener::InterfaceLockHashMap *
+BlackBoardInterfaceListener::bbil_message_interfaces() throw()
+{
+  return &__bbil_message_interfaces;
+}
+
 /** Get reader watch list.
  * @return reader watch list
  */
@@ -246,6 +296,26 @@ BlackBoardInterfaceListener::bbil_data_interface(const char *iuid) throw()
   __bbil_data_interfaces.lock();
   bool found = ((__bbil_ii = __bbil_data_interfaces.find((char *)iuid)) != __bbil_data_interfaces.end());
   __bbil_data_interfaces.unlock();
+  if ( found ) {
+    return (*__bbil_ii).second;
+  } else {
+    return NULL;
+  }
+}
+
+
+/** Get interface instance for given UID.
+ * A message received notification is about to be triggered. For this the
+ * interface instance that has been added to the event listener is determined.
+ * @param iuid interface unique ID
+ * @return interface instance, NULL if not in list (non-fatal error)
+ */
+Interface *
+BlackBoardInterfaceListener::bbil_message_interface(const char *iuid) throw()
+{
+  __bbil_writer_interfaces.lock();
+  bool found = ((__bbil_ii = __bbil_writer_interfaces.find((char *)iuid)) != __bbil_writer_interfaces.end());
+  __bbil_writer_interfaces.unlock();
   if ( found ) {
     return (*__bbil_ii).second;
   } else {

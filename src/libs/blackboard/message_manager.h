@@ -31,19 +31,21 @@
 #include <interface/mediators/message_mediator.h>
 
 class BlackBoardInterfaceManager;
+class BlackBoardNotifier;
 class Message;
 
 class BlackBoardMessageManager : public MessageMediator
 {
  friend class BlackBoard;
  public:
-  BlackBoardMessageManager();
+  BlackBoardMessageManager(BlackBoardNotifier *notifier);
   ~BlackBoardMessageManager();
 
   virtual unsigned int transmit(Message *message);
 
  private:
   BlackBoardInterfaceManager *__im;
+  BlackBoardNotifier         *__notifier;
 
   void set_interface_manager(BlackBoardInterfaceManager *im);
 };

@@ -62,17 +62,19 @@
  * The shared memory segment is created with data from bbconfig.h.
  * @param bb_memmgr BlackBoard memory manager to use
  * @param bb_msgmgr BlackBoard message manager to use
+ * @param bb_notifier BlackBoard notifier to all for events
  * @see bbconfig.h
  */
 BlackBoardInterfaceManager::BlackBoardInterfaceManager(BlackBoardMemoryManager *bb_memmgr,
-						       BlackBoardMessageManager *bb_msgmgr)
+						       BlackBoardMessageManager *bb_msgmgr,
+						       BlackBoardNotifier *bb_notifier)
 {
   memmgr = bb_memmgr;
   msgmgr = bb_msgmgr;
+  notifier = bb_notifier;
 
   instance_serial = 1;
   instance_factory = new BlackBoardInstanceFactory();
-  notifier = new BlackBoardNotifier();
   mutex = new Mutex();
 
   writer_interfaces.clear();
@@ -85,7 +87,6 @@ BlackBoardInterfaceManager::~BlackBoardInterfaceManager()
 {
   delete mutex;
   delete instance_factory;
-  delete notifier;
 }
 
 
@@ -522,53 +523,4 @@ BlackBoardInterfaceManager::num_readers(const Interface *interface) const
 {
   const interface_header_t *ih = (interface_header_t *)interface->__mem_real_ptr;
   return ih->num_readers;
-}
-
-
-/** Register BB event listener.
- * @param listener BlackBoard event listener to register
- * @param flags an or'ed combination of BBIL_FLAG_DATA, BBIL_FLAG_READER, BBIL_FLAG_WRITER
- * and BBIL_FLAG_INTERFACE. Only for the given types the event listener is registered.
- * BBIL_FLAG_ALL can be supplied to register for all events.
- */
-void
-BlackBoardInterfaceManager::register_listener(BlackBoardInterfaceListener *listener,
-					      unsigned int flags)
-{
-  notifier->register_listener(listener, flags);
-}
-
-/** Unregister BB interface listener.
- * This will remove the given BlackBoard interface listener from any event that it was
- * previously registered for.
- * @param listener BlackBoard event listener to remove
- */
-void
-BlackBoardInterfaceManager::unregister_listener(BlackBoardInterfaceListener *listener)
-{
-  notifier->unregister_listener(listener);
-}
-
-
-/** Register BB interface observer.
- * @param observer BlackBoard interface observer to register
- * @param flags an or'ed combination of BBIO_FLAG_CREATED, BBIO_FLAG_DESTROYED
- */
-void
-BlackBoardInterfaceManager::register_observer(BlackBoardInterfaceObserver *observer,
-					      unsigned int flags)
-{
-  notifier->register_observer(observer, flags);
-}
-
-
-/** Unregister BB interface observer.
- * This will remove the given BlackBoard event listener from any event that it was
- * previously registered for.
- * @param observer BlackBoard event listener to remove
- */
-void
-BlackBoardInterfaceManager::unregister_observer(BlackBoardInterfaceObserver *observer)
-{
-  notifier->unregister_observer(observer);
 }

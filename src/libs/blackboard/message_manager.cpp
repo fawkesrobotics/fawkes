@@ -27,6 +27,7 @@
 
 #include <blackboard/message_manager.h>
 #include <blackboard/interface_manager.h>
+#include <blackboard/notifier.h>
 #include <blackboard/exceptions.h>
 
 #include <interface/message.h>
@@ -43,10 +44,13 @@
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-BlackBoardMessageManager::BlackBoardMessageManager()
+/** Constructor.
+ * @param notifier BlackBoard notifier to all for events
+ */
+BlackBoardMessageManager::BlackBoardMessageManager(BlackBoardNotifier *notifier)
 {
   __im = NULL;
+  __notifier = notifier;
 }
 
 
@@ -64,7 +68,11 @@ BlackBoardMessageManager::transmit(Message *message)
   }
   try {
     Interface *writer = __im->writer_for_mem_serial(message->recipient_interface_mem_serial);
-    return writer->msgq_append(message);
+    if ( __notifier->notify_of_message_received(writer, message) ) {
+      return writer->msgq_append(message);
+    } else {
+      return 0;
+    }
   } catch (BlackBoardNoWritingInstanceException &e) {
     Interface *iface = message->interface();
     LibLogger::log_warn("BlackBoardMessageManager", "Cannot transmit message from sender %s "
@@ -72,7 +80,7 @@ BlackBoardMessageManager::transmit(Message *message)
 			                            "instance exists!",
 			message->sender(), (iface != NULL) ? iface->id() : "Unknown",
 			(iface != NULL) ? iface->type() : "unknown");
-    return 0;
+    throw;
   }
 }
 

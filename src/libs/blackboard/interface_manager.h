@@ -52,7 +52,8 @@ class BlackBoardInterfaceManager : public InterfaceMediator
  public:
 
   BlackBoardInterfaceManager(BlackBoardMemoryManager *bb_memmgr,
-			     BlackBoardMessageManager *bb_msgmgr);
+			     BlackBoardMessageManager *bb_msgmgr,
+			     BlackBoardNotifier *bb_notifier);
   virtual ~BlackBoardInterfaceManager();
 
   Interface *  open_for_reading(const char *interface_type, const char *identifier);
@@ -63,12 +64,6 @@ class BlackBoardInterfaceManager : public InterfaceMediator
 
   std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type,
 							 const char *id_prefix = NULL);
-
-  void register_listener(BlackBoardInterfaceListener *listener, unsigned int flags);
-  void unregister_listener(BlackBoardInterfaceListener *listener);
-
-  void register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags);
-  void unregister_observer(BlackBoardInterfaceObserver *observer);
 
   /* InterfaceMediator methods */
   virtual bool exists_writer(const Interface *interface) const;

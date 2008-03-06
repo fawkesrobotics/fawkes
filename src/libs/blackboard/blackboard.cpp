@@ -31,6 +31,7 @@
 #include <blackboard/memory_manager.h>
 #include <blackboard/interface_manager.h>
 #include <blackboard/network_handler.h>
+#include <blackboard/notifier.h>
 
 #include <string>
 #include <cstring>
@@ -88,14 +89,16 @@
 
 /** Data changed notification flag. */
 const unsigned int BlackBoard::BBIL_FLAG_DATA      = 1;
+/** Message received notification flag. */
+const unsigned int BlackBoard::BBIL_FLAG_MESSAGES  = 2;
 /** Reader added/removed notification flag. */
-const unsigned int BlackBoard::BBIL_FLAG_READER    = 2;
+const unsigned int BlackBoard::BBIL_FLAG_READER    = 4;
 /** Writer added/removed notification flag. */
-const unsigned int BlackBoard::BBIL_FLAG_WRITER    = 4;
+const unsigned int BlackBoard::BBIL_FLAG_WRITER    = 8;
 
 /** All interface listener notifications. */
 const unsigned int BlackBoard::BBIL_FLAG_ALL = 
-  BBIL_FLAG_DATA | BBIL_FLAG_READER | BBIL_FLAG_WRITER;
+  BBIL_FLAG_DATA | BBIL_FLAG_MESSAGES | BBIL_FLAG_READER | BBIL_FLAG_WRITER;
 
 /** Interface creation notification flag. */
 const unsigned int BlackBoard::BBIO_FLAG_CREATED   = 1;
@@ -118,8 +121,10 @@ BlackBoard::BlackBoard(bool master)
 					 BLACKBOARD_VERSION,
 					 master,
 					 BLACKBOARD_MAGIC_TOKEN);
-  __msgmgr = new BlackBoardMessageManager();
-  __im = new BlackBoardInterfaceManager(__memmgr, __msgmgr);
+
+  __notifier = new BlackBoardNotifier();
+  __msgmgr = new BlackBoardMessageManager(__notifier);
+  __im = new BlackBoardInterfaceManager(__memmgr, __msgmgr, __notifier);
 
   __msgmgr->set_interface_manager(__im);
 
@@ -138,6 +143,7 @@ BlackBoard::~BlackBoard()
   delete __im;
   delete __msgmgr;
   delete __memmgr;
+  delete __notifier;
 }
 
 
@@ -233,7 +239,7 @@ BlackBoard::list_all() const
 void
 BlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsigned int flags)
 {
-  __im->register_listener(listener, flags);
+  __notifier->register_listener(listener, flags);
 }
 
 
@@ -245,7 +251,7 @@ BlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsigned in
 void
 BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 {
-  __im->unregister_listener(listener);
+  __notifier->unregister_listener(listener);
 }
 
 
@@ -256,7 +262,7 @@ BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 void
 BlackBoard::register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags)
 {
-  __im->register_observer(observer, flags);
+  __notifier->register_observer(observer, flags);
 }
 
 
@@ -268,7 +274,7 @@ BlackBoard::register_observer(BlackBoardInterfaceObserver *observer, unsigned in
 void
 BlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
-  __im->unregister_observer(observer);
+  __notifier->unregister_observer(observer);
 }
 
 

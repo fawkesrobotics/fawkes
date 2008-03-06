@@ -33,6 +33,7 @@
 #include <utils/misc/string_compare.h>
 
 class Interface;
+class Message;
 
 class BlackBoardInterfaceListener
 {
@@ -62,6 +63,7 @@ class BlackBoardInterfaceListener
   virtual ~BlackBoardInterfaceListener();
 
   virtual void bb_interface_data_changed(Interface *interface) throw();
+  virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
   virtual void bb_interface_writer_added(Interface *interface) throw();
   virtual void bb_interface_writer_removed(Interface *interface) throw();
   virtual void bb_interface_reader_added(Interface *interface) throw();
@@ -69,19 +71,23 @@ class BlackBoardInterfaceListener
 
  protected:
   void bbil_add_data_interface(Interface *interface);
+  void bbil_add_message_interface(Interface *interface);
   void bbil_add_reader_interface(Interface *interface);
   void bbil_add_writer_interface(Interface *interface);
 
   InterfaceLockHashMap *      bbil_data_interfaces() throw();
+  InterfaceLockHashMap *      bbil_message_interfaces() throw();
   InterfaceLockHashMap *      bbil_reader_interfaces() throw();
   InterfaceLockHashMap *      bbil_writer_interfaces() throw();
 
   Interface * bbil_data_interface(const char *iuid) throw();
+  Interface * bbil_message_interface(const char *iuid) throw();
   Interface * bbil_reader_interface(const char *iuid) throw();
   Interface * bbil_writer_interface(const char *iuid) throw();
 
  private:
   InterfaceLockHashMap       __bbil_data_interfaces;
+  InterfaceLockHashMap       __bbil_message_interfaces;
   InterfaceLockHashMap       __bbil_reader_interfaces;
   InterfaceLockHashMap       __bbil_writer_interfaces;
 

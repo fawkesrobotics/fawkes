@@ -34,6 +34,7 @@
 #include <string>
 
 class Interface;
+class Message;
 class BlackBoardInterfaceListener;
 class BlackBoardInterfaceObserver;
 
@@ -50,6 +51,7 @@ class BlackBoardNotifier
   void unregister_observer(BlackBoardInterfaceObserver *observer);
 
   void notify_of_data_change(const Interface *interface);
+  bool notify_of_message_received(const Interface *interface, Message *message);
   void notify_of_interface_created(const char *type, const char *id) throw();
   void notify_of_interface_destroyed(const char *type, const char *id) throw();
   void notify_of_writer_added(const char *uid) throw();
@@ -71,6 +73,7 @@ class BlackBoardNotifier
   typedef BBioLockMap::iterator BBioLockMapIterator;
 
   BBilLockMap __bbil_data;
+  BBilLockMap __bbil_messages;
   BBilLockMap __bbil_reader;
   BBilLockMap __bbil_writer;
 

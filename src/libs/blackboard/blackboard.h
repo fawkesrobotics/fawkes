@@ -36,6 +36,7 @@ class BlackBoardInterfaceManager;
 class BlackBoardMemoryManager;
 class BlackBoardMessageManager;
 class BlackBoardNetworkHandler;
+class BlackBoardNotifier;
 class Interface;
 class InterfaceInfoList;
 class BlackBoardInterfaceListener;
@@ -67,6 +68,7 @@ class BlackBoard
 
 
   static const unsigned int BBIL_FLAG_DATA;
+  static const unsigned int BBIL_FLAG_MESSAGES;
   static const unsigned int BBIL_FLAG_READER;
   static const unsigned int BBIL_FLAG_WRITER;
   static const unsigned int BBIL_FLAG_ALL;
@@ -95,6 +97,7 @@ class BlackBoard
   BlackBoardMemoryManager    *__memmgr;
   BlackBoardMessageManager   *__msgmgr;
   BlackBoardNetworkHandler   *__nethandler;
+  BlackBoardNotifier         *__notifier;
 };
 
 

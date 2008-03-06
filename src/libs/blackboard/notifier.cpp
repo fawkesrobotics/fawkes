@@ -78,6 +78,15 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
     }
     __bbil_data.unlock();
   }
+  if ( flags & BlackBoard::BBIL_FLAG_MESSAGES ) {
+    BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
+    BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_message_interfaces();
+    __bbil_messages.lock();
+    for (i = im->begin(); i != im->end(); ++i) {
+      __bbil_messages[(*i).first].push_back(listener);
+    }
+    __bbil_messages.unlock();
+  }
   if ( flags & BlackBoard::BBIL_FLAG_READER ) {
     BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
     BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_reader_interfaces();
@@ -122,6 +131,23 @@ BlackBoardNotifier::unregister_listener(BlackBoardInterfaceListener *listener)
     }
   }
   __bbil_data.unlock();
+
+  __bbil_messages.lock();
+  for (BBilLockMapIterator i = __bbil_messages.begin(); i != __bbil_messages.end(); ++i) {
+    BBilListIterator j = (*i).second.begin();
+    while (j != (*i).second.end()) {
+      if ( *j == listener ) {
+	j = (*i).second.erase(j);
+	if ( i->second.empty() ) {
+	  __bbil_messages.erase(i);
+	  break;
+	}
+      } else {
+	++j;
+      }
+    }
+  }
+  __bbil_messages.unlock();
 
   __bbil_reader.lock();
   for (BBilLockMapIterator i = __bbil_reader.begin(); i != __bbil_reader.end(); ++i) {
@@ -276,6 +302,7 @@ BlackBoardNotifier::notify_of_interface_destroyed(const char *type, const char *
 
 /** Notify that writer has been added.
  * @param uid UID of interface
+ * @see BlackBoardInterfaceListener::bb_interface_writer_added()
  */
 void
 BlackBoardNotifier::notify_of_writer_added(const char *uid) throw()
@@ -302,6 +329,7 @@ BlackBoardNotifier::notify_of_writer_added(const char *uid) throw()
 
 /** Notify that writer has been removed.
  * @param interface interface for which the writer has been removed
+ * @see BlackBoardInterfaceListener::bb_interface_writer_removed()
  */
 void
 BlackBoardNotifier::notify_of_writer_removed(const Interface *interface) throw()
@@ -329,6 +357,7 @@ BlackBoardNotifier::notify_of_writer_removed(const Interface *interface) throw()
 
 /** Notify that reader has been added.
  * @param uid UID of interface
+ * @see BlackBoardInterfaceListener::bb_interface_reader_added()
  */
 void
 BlackBoardNotifier::notify_of_reader_added(const char *uid) throw()
@@ -355,6 +384,7 @@ BlackBoardNotifier::notify_of_reader_added(const char *uid) throw()
 
 /** Notify that reader has been removed.
  * @param interface interface for which the reader has been removed
+ * @see BlackBoardInterfaceListener::bb_interface_reader_removed()
  */
 void
 BlackBoardNotifier::notify_of_reader_removed(const Interface *interface) throw()
@@ -387,6 +417,7 @@ BlackBoardNotifier::notify_of_reader_removed(const Interface *interface) throw()
  * that for you.
  * @param interface interface whose subscribers to notify
  * @see Interface::write()
+ * @see BlackBoardInterfaceListener::bb_interface_data_changed()
  */
 void
 BlackBoardNotifier::notify_of_data_change(const Interface *interface)
@@ -409,4 +440,44 @@ BlackBoardNotifier::notify_of_data_change(const Interface *interface)
     }
     __bbil_data.unlock();
   }
+}
+
+
+/** Notify of message received
+ * Notify all subscribers of the given interface of an incoming message
+ * This also influences logging and sending data over the network so it is
+ * mandatory to call this function! The interface base class write method does
+ * that for you.
+ * @param interface interface whose subscribers to notify
+ * @param message message which is being received
+ * @return true if any of the listeners did return true, false if none returned
+ * true at all.
+ * @see BlackBoardInterfaceListener::bb_interface_message_received()
+ */
+bool
+BlackBoardNotifier::notify_of_message_received(const Interface *interface, Message *message)
+{
+  BBilLockMapIterator lhmi;
+  BBilListIterator i, l;
+  bool rv = __bbil_messages.empty();
+  const char *uid = interface->uid();
+  if ( (lhmi = __bbil_messages.find(uid)) != __bbil_messages.end() ) {
+    BBilList &list = (*lhmi).second;
+    __bbil_messages.lock();
+    for (i = list.begin(); i != list.end(); ++i) {
+      BlackBoardInterfaceListener *bbil = (*i);
+      Interface *bbil_iface = bbil->bbil_message_interface(uid);
+      if (bbil_iface != NULL ) {
+	if ( bbil->bb_interface_message_received(bbil_iface, message) ) {
+	  rv = true;
+	}
+      } else {
+	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for message received "
+			    "events for '%s' but has no such interface", uid);
+      }
+    }
+    __bbil_messages.unlock();
+  }
+
+  return rv;
 }
