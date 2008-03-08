@@ -35,7 +35,7 @@ error_libmagic:
 	$(SILENT)exit 1
 endif
 
-LIBS_libutils = stdc++ dl core magic
+LIBS_libutils = stdc++ core magic $(if $(filter Linux,$(OS)),dl)
 OBJS_libutils =	$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 
 OBJS_all = $(OBJS_libutils)

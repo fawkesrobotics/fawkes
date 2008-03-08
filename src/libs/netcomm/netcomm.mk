@@ -29,7 +29,8 @@ ifneq ($(PKGCONFIG),)
   endif
 endif
 ifeq ($(HAVE_AVAHI),1)
-  CFLAGS += -DHAVE_AVAHI
+  CFLAGS_AVAHI  = -DHAVE_AVAHI $(shell $(PKGCONFIG) --cflags avahi-client)
+  LDFLAGS_AVAHI = $(shell $(PKGCONFIG) --libs avahi-client)
 endif
 ifeq ($(HAVE_LIBCRYPTO),1)
   CFLAGS += -DHAVE_LIBCRYPTO

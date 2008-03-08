@@ -26,8 +26,8 @@ ifneq ($(HAVE_AVAHI),1)
   WARN_TARGETS += warn_avahi
   OMIT_OBJECTS += dns-sd/%
 else
-  CFLAGS += $(shell $(PKGCONFIG) --cflags avahi-client)
-  LDFLAGS_libnetcomm += $(shell pkg-config --libs avahi-client)
+  CFLAGS += $(CFLAGS_AVAHI)
+  LDFLAGS_libnetcomm += $(LDFLAGS_AVAHI)
 endif
 ifneq ($(HAVE_LIBCRYPTO),1)
   ERROR_TARGETS += error_libcrypto

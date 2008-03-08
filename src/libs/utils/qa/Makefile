@@ -59,7 +59,6 @@ OBJS_all =	$(OBJS_test_plugin)			\
 BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_ipc_shmem		\
 		$(BINDIR)/qa_utils_ipc_shmem_lock	\
-		$(BINDIR)/qa_utils_ipc_shmem_lowlevel	\
 		$(BINDIR)/qa_utils_ipc_msg		\
 		$(BINDIR)/qa_utils_ipc_semset		\
 		$(BINDIR)/qa_utils_hostinfo		\
@@ -68,6 +67,10 @@ BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_time			\
 		$(BINDIR)/qa_utils_timebug		\
 		$(BINDIR)/qa_utils_angle
+
+ifeq ($(OS),Linux)
+  BINS_all += $(BINDIR)/qa_utils_ipc_shmem_lowlevel
+endif
 
 PLUGINS_all =	$(PLUGINDIR)/test_plugin.so
 

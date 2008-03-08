@@ -30,13 +30,12 @@
 #define __UTILS_SYSTEM_FILE_H_
 
 #include <core/exception.h>
+#include <cstdio>
 
 class UnableToOpenFileException : public Exception {
  public:
   UnableToOpenFileException(const char *filename, int error);
 };
-
-typedef struct _IO_FILE FILE;
 
 class File {
  public:

@@ -36,6 +36,7 @@
 
 #include <cstdio>
 #include <arpa/inet.h>
+#include <netinet/in.h>
 
 class QAAvahiResolverMain : public SignalHandler, public AvahiResolverHandler
 {

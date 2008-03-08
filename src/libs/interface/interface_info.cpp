@@ -30,6 +30,9 @@
 
 #include <cstdlib>
 #include <cstring>
+#ifdef __FreeBSD__
+#  include <strfunc.h>
+#endif
 
 /** @class InterfaceInfo <interface/interface_info.h>
  * Interface info.

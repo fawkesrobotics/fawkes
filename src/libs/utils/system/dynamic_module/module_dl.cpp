@@ -112,7 +112,7 @@ ModuleDL::open()
       handle = dlopen(full_filename.c_str(), tflags);
 
       if ( NULL == handle) {
-	char *err = dlerror();
+	const char *err = dlerror();
 	if ( NULL == err ) {
 	  throw ModuleOpenException("dlopen failed with an unknown error");
 	} else {

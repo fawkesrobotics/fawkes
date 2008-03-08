@@ -46,6 +46,7 @@ class SemaphoreSetData
   int     num_sems;
 };
 
+#ifdef _SEM_SEMUN_UNDEFINED
 union semun
 {
   int val;                   /* value for SETVAL */
@@ -53,6 +54,7 @@ union semun
   unsigned short int *array; /* array for GETALL & SETALL */
   struct seminfo *__buf;     /* buffer for IPC_INFO */
 };
+#endif
 
 /// @endcond
 

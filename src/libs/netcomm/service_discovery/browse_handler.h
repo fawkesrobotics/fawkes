@@ -29,6 +29,7 @@
 #define __NETCOMM_SERVICE_DISCOVERY_BROWSE_HANDLER_H_
 
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <stdint.h>
 
 #include <string>

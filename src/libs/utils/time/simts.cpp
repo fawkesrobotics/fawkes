@@ -41,6 +41,7 @@
  * @author Tim Niemueller
  */
 
+/** Constructor. */
 SimulatorTimeSource::SimulatorTimeSource()
 {
   clock = Clock::instance();
@@ -49,6 +50,7 @@ SimulatorTimeSource::SimulatorTimeSource()
   current_simtime = start_time;
 }
 
+/** Destructor. */
 SimulatorTimeSource::~SimulatorTimeSource()
 {
 }

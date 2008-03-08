@@ -957,21 +957,23 @@ SharedMemory::unlock()
 /** Check if a segment has been destroyed.
  * Check for a shared memory segment of the given ID.
  * @param shm_id ID of the shared memory segment.
- * @return true, if the shared memory segment was destroyed, false otherwise.
- * @exception ShmDoesNotExistException No shared memory segment exists for
- *                                     the given ID.
+ * @return true, if the shared memory segment is marked as destroyed or
+ * does not exist at all, false otherwise.
  */
 bool
 SharedMemory::is_destroyed(int shm_id)
 {
   struct shmid_ds  shm_segment;
-  struct ipc_perm *perm = &shm_segment.shm_perm;
 
   if (shmctl(shm_id, IPC_STAT, &shm_segment ) == -1) {
-    throw ShmDoesNotExistException();
-    return false;
+    return true;
   } else {
+#ifdef __USEMISC
+    struct ipc_perm *perm = &shm_segment.shm_perm;
     return (perm->mode & SHM_DEST);
+#else
+    return false;
+#endif
   }
 }
 
@@ -984,6 +986,7 @@ SharedMemory::is_destroyed(int shm_id)
 bool
 SharedMemory::is_swapable(int shm_id)
 {
+#ifdef __USE_MISC
   struct shmid_ds  shm_segment;
   struct ipc_perm *perm = &shm_segment.shm_perm;
 
@@ -992,6 +995,9 @@ SharedMemory::is_swapable(int shm_id)
   } else {
     return ! (perm->mode & SHM_LOCKED);
   }
+#else
+  return true;
+#endif
 }
 
 

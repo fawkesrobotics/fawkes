@@ -44,17 +44,22 @@
 #include <stdlib.h>
 // include <linux/in.h>
 #include <netinet/in.h>
+#include <netinet/in_systm.h>
 #include <netinet/ip.h> 
 #include <poll.h>
 
-// Until this is integrated from linux/in.h to netinet/in.h
-#ifdef __linux
-  #ifndef IP_MTU
-    #define IP_MTU 14
-  #endif
-#endif  // __linux
+#include <cstdio>
 
-#include <stdio.h>
+// Until this is integrated from linux/in.h to netinet/in.h
+#ifdef __linux__
+#  ifndef IP_MTU
+#    define IP_MTU 14
+#  endif
+#endif  // __linux__
+#ifdef __FreeBSD__
+#  include <net/if.h>
+#  include <sys/ioctl.h>
+#endif
 
 /** @class SocketException netcomm/socket/socket.h
  * Socket exception.
@@ -694,9 +699,11 @@ Socket::listening()
 unsigned int
 Socket::mtu()
 {
+  int m = 0;
+
   if ( sock_fd == -1 ) throw SocketException("Cannot get MTU of disconnected socket");
 
-  int m = 0;
+#ifdef __linux__
   unsigned int len = sizeof(m);
   if ( getsockopt(sock_fd, IPPROTO_IP, IP_MTU, &m, &len) == -1 ) {
     throw SocketException("Socket::mtu(): getsockopt failed", errno);
@@ -705,6 +712,11 @@ Socket::mtu()
   if ( m < 0 ) {
     throw SocketException("MTU < 0");
   }
+#elif defined __FreeBSD__
+  struct ifreq ifr;
+  if (ioctl(sock_fd, SIOCGIFMTU, &ifr) != -1)
+    m = ifr.ifr_mtu;
+#endif
 
   return m;
 }

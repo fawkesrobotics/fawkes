@@ -370,7 +370,11 @@ Time::str()
   // heuristic to distinguish times and time ranges
   if (1000000000 < time.tv_sec) {
     localtime_r( &(time.tv_sec), &time_tm );
+#ifdef __FreeBSD__
+    snprintf(timestr, sizeof(timestr), "%i:%li", time.tv_sec, time.tv_usec);
+#else
     snprintf(timestr, sizeof(timestr), "%li:%li", time.tv_sec, time.tv_usec);
+#endif
   } else {
     gmtime_r( &(time.tv_sec), &time_tm );
     asctime_r(&time_tm, timestr);
@@ -391,7 +395,11 @@ Time::str_r(char *s)
   // heuristic to distinguish times and time ranges
   if (1000000000 < time.tv_sec) {
     localtime_r( &(time.tv_sec), &time_tm );
+#ifdef __FreeBSD__ 
+    snprintf(s, sizeof(timestr), "%i:%li", time.tv_sec, time.tv_usec);
+#else
     snprintf(s, sizeof(timestr), "%li:%li", time.tv_sec, time.tv_usec);
+#endif
   } else {
     gmtime_r( &(time.tv_sec), &time_tm );
     asctime_r(&time_tm, s);
