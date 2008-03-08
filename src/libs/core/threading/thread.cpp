@@ -37,12 +37,12 @@
 #include <core/utils/lock_list.h>
 
 #include <pthread.h>
-#include <limits.h>
+#include <climits>
 #include <unistd.h>
 #include <cstring>
 #include <cstdlib>
-#include <errno.h>
-#include <signal.h>
+#include <cerrno>
+#include <csignal>
 
 /** @def forever
  * Shortcut for "while (1)".
@@ -225,7 +225,6 @@ Thread::__constructor(const char *name, OpMode op_mode)
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
     __sleep_condition = new WaitCondition();
     __sleep_mutex = new Mutex();
-    __sleep_mutex->lock();
   } else {
     __sleep_condition = NULL;
     __sleep_mutex = NULL;
@@ -242,7 +241,8 @@ Thread::__constructor(const char *name, OpMode op_mode)
   finalize_prepared = false;
 
   __prepfin_mutex = new Mutex();
-  
+  __startup_barrier = new Barrier(2);
+
 }
 
 
@@ -255,6 +255,7 @@ Thread::~Thread()
   free(__name);
   delete __notification_listeners;
   delete __prepfin_mutex;
+  delete __startup_barrier;
 }
 
 
@@ -479,6 +480,17 @@ Thread::start()
     // An error occured
     throw Exception("Could not start thread", err);
   }
+
+  __startup_barrier->wait();
+}
+
+
+void
+Thread::lock_sleep_mutex()
+{
+  if (__sleep_mutex) {
+    __sleep_mutex->lock();
+  }
 }
 
 
@@ -498,8 +510,14 @@ Thread::entry(void *pthis)
   // Set thread instance as TSD
   set_tsd_thread_instance(t);
 
+  // lock sleep mutex, needed such that thread waits for initial wakeup
+  t->lock_sleep_mutex();
+
   // Notify listeners that this thread started
   t->notify_of_startup();
+
+  // Thread is started now, thread that called start() will continue
+  t->__startup_barrier->wait();
 
   // Run thread
   t->once();
@@ -631,7 +649,6 @@ Thread::set_opmode(OpMode op_mode)
   } else if ( (__op_mode == OPMODE_CONTINUOUS) &&
 	      (op_mode == OPMODE_WAITFORWAKEUP) ) {
     __sleep_mutex = new Mutex();
-    __sleep_mutex->lock();
     __sleep_condition = new WaitCondition();
     __op_mode = OPMODE_WAITFORWAKEUP;
   }

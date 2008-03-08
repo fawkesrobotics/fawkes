@@ -28,8 +28,10 @@
 #include <core/threading/wait_condition.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_data.h>
+#include <core/exception.h>
 
 #include <pthread.h>
+#include <cerrno>
 
 /// @cond INTERNALS
 class WaitConditionData
@@ -118,14 +120,22 @@ WaitCondition::~WaitCondition()
 bool
 WaitCondition::wait(Mutex *mutex, unsigned int timeout_sec, unsigned int timeout_nanosec)
 {
+  int err = 0;
   if ( (timeout_sec > 0) || (timeout_nanosec > 0) ) {
     struct timespec ts = { timeout_sec, timeout_nanosec };
-    int err = pthread_cond_timedwait( &(cond_data->cond), &(mutex->mutex_data->mutex), &ts );
-    if ( err != 0 ) return false;
+    err = pthread_cond_timedwait( &(cond_data->cond), &(mutex->mutex_data->mutex), &ts );
   } else {
-    pthread_cond_wait( &(cond_data->cond), &(mutex->mutex_data->mutex) );
+    err = pthread_cond_wait( &(cond_data->cond), &(mutex->mutex_data->mutex) );
   }
-  return true;
+
+  if ( err == ETIMEDOUT ) {
+    return false;
+  } else if ( err != 0 ) {
+    // some other error happened, a "real" error
+    throw Exception(err, "Waiting for wait condition failed");
+  } else {
+    return true;
+  }
 }
 
 
@@ -152,7 +162,8 @@ WaitCondition::wait(unsigned int timeout_sec, unsigned int timeout_nanosec)
     int err = pthread_cond_timedwait( &(cond_data->cond), &(mutex.mutex_data->mutex), &ts );
     if ( err != 0 ) return false;
   } else {
-    pthread_cond_wait( &(cond_data->cond), &(mutex.mutex_data->mutex) );
+    int err = pthread_cond_wait( &(cond_data->cond), &(mutex.mutex_data->mutex) );
+    if ( err != 0 ) return false;
   }
   mutex.unlock();
   return true;

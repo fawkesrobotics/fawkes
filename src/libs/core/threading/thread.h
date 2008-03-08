@@ -131,12 +131,14 @@ class Thread {
   void set_finalize_sync_lock(ReadWriteLock *lock);
   void notify_of_failed_init();
   void notify_of_startup();
+  void lock_sleep_mutex();
 
   static void init_thread_key();
   static void set_tsd_thread_instance(Thread *t);
 
   pthread_t      __thread_id;
 
+  Barrier       *__startup_barrier;
   Mutex         *__prepfin_mutex;
   Mutex         *__sleep_mutex;
   WaitCondition *__sleep_condition;

@@ -62,6 +62,7 @@ ReadWriteLock::ReadWriteLock(ReadWriteLockPolicy policy)
 {
   rwlock_data = new ReadWriteLockData();
 
+#if defined __USE_UNIX98 || defined __USE_XOPEN2K
   pthread_rwlockattr_t attr;
   pthread_rwlockattr_init( &attr );
 
@@ -75,6 +76,9 @@ ReadWriteLock::ReadWriteLock(ReadWriteLockPolicy policy)
   }
 
   pthread_rwlock_init( &(rwlock_data->rwlock), &attr );
+#else
+  pthread_rwlock_init( &(rwlock_data->rwlock), NULL );
+#endif
 }
 
 

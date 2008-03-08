@@ -27,6 +27,8 @@
 
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_data.h>
+#include <core/threading/thread.h>
+#include <core/exception.h>
 
 #include <pthread.h>
 
@@ -78,7 +80,10 @@ Mutex::~Mutex()
 void
 Mutex::lock()
 {
-  pthread_mutex_lock(&(mutex_data->mutex));
+  int err = 0;
+  if ( (err = pthread_mutex_lock(&(mutex_data->mutex))) != 0 ) {
+    throw Exception(err, "Failed to aquire lock for thread %s", Thread::current_thread()->name());
+  }
 #ifdef DEBUG_THREADING
   // do not switch order, lock holder must be protected with this mutex!
   mutex_data->set_lock_holder();
