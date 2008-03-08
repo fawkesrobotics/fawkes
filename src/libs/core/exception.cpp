@@ -213,7 +213,6 @@ Exception::Exception(int errno, const char *format, ...) throw()
     if ( asprintf(&ext_format, "%s (errno: %i, %s)", format, errno, strerror(errno)) == -1 ) {
       append_nolock_va(format, arg);
     } else {
-      append_nolock("Exception with errno=%i (%s)", errno, strerror(errno));
       append_nolock_va(ext_format, arg);
       free(ext_format);
     }
