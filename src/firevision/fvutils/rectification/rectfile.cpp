@@ -37,6 +37,9 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <cstdlib>
+#ifdef __FreeBSD__
+#  include <strfunc.h>
+#endif
 
 /** @class RectificationInfoFile <fvutils/rectification/rectfile.h>
  * Rectification Info File.

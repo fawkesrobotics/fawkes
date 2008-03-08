@@ -28,9 +28,15 @@ ifeq ($(HAVE_OPENCV),1)
   CFLAGS  += $(CFLAGS_OPENCV)
   LDFLAGS += $(LDFLAGS_OPENCV)
 else
+  WARN_TARGETS += warning_opencv
   FILTER_OUT += faces.cpp
 endif
-  
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+warning_opencv:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting face detector$(TNORMAL) (OpenCV not installed)"
+endif
 
 OBJS_libfvclassifiers := $(patsubst %.cpp,%.o,$(filter-out $(FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 LIBS_libfvclassifiers := fvutils

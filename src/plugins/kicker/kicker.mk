@@ -26,7 +26,7 @@
 #KICKER_LIBDIRS += $(IOWKIT_SDK)/lib
 
 # Check whether IowKit is installed
-ifneq ($(realpath /usr/include/iowkit.h),)
+ifneq ($(wildcard /usr/include/iowkit.h),)
   HAVE_IOWKIT = 1
 endif
 

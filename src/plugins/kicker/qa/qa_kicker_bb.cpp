@@ -47,7 +47,7 @@ class KickerQAThread : public Thread, public BlackBoardAspect, public LoggingAsp
   init()
   {
     try  {
-	kicker_interface = interface_manager->open_for_reading<KickerInterface>("Kicker");
+	kicker_interface = blackboard->open_for_reading<KickerInterface>("Kicker");
     } catch (Exception& e) {
       e.append("%s initialization failed, could not open kicker interface for reading", name());
       logger->log_error("NavigatorNetworkThread", "Opening interface for reading failed!");
@@ -60,7 +60,7 @@ class KickerQAThread : public Thread, public BlackBoardAspect, public LoggingAsp
   finalize()
   {
     try {
-      interface_manager->close(kicker_interface);
+      blackboard->close(kicker_interface);
     } catch (Exception& e) {
       logger->log_error("NavigatorNetworkThread", "Closing kicker interface failed!");
       logger->log_error("NavigatorNetworkThread", e);

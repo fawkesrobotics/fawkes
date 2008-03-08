@@ -34,7 +34,7 @@ VISION_CFLAGS       = -g -D__STDC_LIMIT_MACROS
 # PTGrey Triclops SDK used for Bumblebee2 stereo processing
 TRICLOPS_SDK=/opt/Triclops3.2.0.8-FC3
 
-ifneq ($(realpath /usr/include/lvsds),)
+ifneq ($(wildcard /usr/include/lvsds),)
 HAVE_LEUTRON_CAM    = 1
 HAVE_VISCA_CTRL     = 1
 VISION_LIBDIRs     += /usr/lib/lvsds
@@ -46,13 +46,13 @@ HAVE_EVID100P_CTRL  = 1
 endif
 
 # check for JPEG lib
-ifneq ($(realpath /usr/include/jpeglib.h),)
+ifneq ($(wildcard /usr/include/jpeglib.h /usr/local/include/jpeglib.h),)
   HAVE_LIBJPEG   = 1
   VISION_CFLAGS += -DHAVE_LIBJPEG
 endif
 
 # check for PNG lib
-ifneq ($(realpath /usr/include/png.h),)
+ifneq ($(wildcard /usr/include/png.h /usr/local/include/png.h),)
   HAVE_LIBPNG    = 1
   VISION_CFLAGS += -DHAVE_PNG
 endif
@@ -62,9 +62,9 @@ ifneq ($(PKGCONFIG),)
   HAVE_SDL = $(if $(shell $(PKGCONFIG) --exists 'sdl'; echo $${?/1/}),1,0)
 endif
 ifeq ($(HAVE_LIBDC1394),1)
-  ifneq ($(realpath $(FVBASEDIR)/cams/firewire.h),)
+  ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/firewire.h)),)
     HAVE_FIREWIRE_CAM   = 1
-    ifneq ($(realpath $(FVBASEDIR)/cams/bumblebee2.h),)
+    ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/bumblebee2.h)),)
       HAVE_BUMBLEBEE2_CAM = 1
     endif
   endif
@@ -83,8 +83,8 @@ else
   ifneq ($(HAVE_BUMBLEBEE2_CAM),1)
     TRICLOPS_SDK_ERR="Bumblebee2 camera not available"
   else
-    ifneq ($(realpath $(TRICLOPS_SDK)/include/triclops.h),)
-      ifneq ($(realpath $(TRICLOPS_SDK)/lib/libtriclops.so),)
+    ifneq ($(wildcard $(realpath $(TRICLOPS_SDK)/include/triclops.h)),)
+      ifneq ($(wildcard $(realpath $(TRICLOPS_SDK)/lib/libtriclops.so)),)
         HAVE_TRICLOPS_SDK = 1
         TRICLOPS_SDK_INCDIRS += $(TRICLOPS_SDK)/include
         TRICLOPS_SDK_LIBDIRS += $(TRICLOPS_SDK)/lib
@@ -99,13 +99,13 @@ else
   endif
 endif
 
-ifneq ($(realpath $(FVBASEDIR)/cams/net.h),)
+ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/net.h)),)
   HAVE_NETWORK_CAM    = 1
 endif
-ifneq ($(realpath $(FVBASEDIR)/cams/fileloader.h),)
+ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/fileloader.h)),)
   HAVE_FILELOADER_CAM = 1
 endif
-ifneq ($(realpath $(FVBASEDIR)/cams/shmem.h),)
+ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/shmem.h)),)
   HAVE_SHMEM_CAM      = 1
 endif
 HAVE_DPPTU_CTRL     = 0
@@ -114,7 +114,7 @@ HAVE_V4L_CAM        = 0
 ### Check for external libraries
 IPP_DIR  = /opt/intel/ipp
 HAVE_IPP = 0
-ifneq ($(realpath $(IPP_DIR)),)
+ifneq ($(wildcard $(realpath $(IPP_DIR))),)
   # Check versions, use first one found
   IPP_VERSION = $(firstword $(shell ls $(IPP_DIR)))
   # We at least have a IPP, check if it matches our system
@@ -123,7 +123,7 @@ ifneq ($(realpath $(IPP_DIR)),)
     INTEL_ARCH = em64t
     IPP_ARCH   = em64t
   endif
-  ifneq ($(realpath $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/include/ipp.h),)
+  ifneq ($(wildcard $(realpath $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/include/ipp.h)),)
     HAVE_IPP = 1
     VISION_CFLAGS  += -DHAVE_IPP
     VISION_LIBDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/sharedlib
@@ -140,7 +140,7 @@ endif
 # Set to 1 to build shape models
 HAVE_SHAPE_MODELS = 1
 
-ifneq ($(realpath $(FVBASEDIR)/fvutils/rectification),)
+ifneq ($(wildcard $(realpath $(FVBASEDIR)/fvutils/rectification)),)
   HAVE_RECTINFO = 1
   VISION_CFLAGS += -DHAVE_RECTINFO
 endif

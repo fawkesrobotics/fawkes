@@ -27,6 +27,9 @@ LIBS_example_mutex_count = stdc++ core
 OBJS_example_mutex_sync = example_mutex_sync.o
 LIBS_example_mutex_sync = stdc++ core
 
+OBJS_example_waitcond = example_waitcond.o
+LIBS_example_waitcond = stdc++ core
+
 OBJS_example_waitcond_serialize = example_waitcond_serialize.o
 LIBS_example_waitcond_serialize = stdc++ core
 
@@ -46,6 +49,7 @@ LIBS_example_refcount = stdc++ core
 OBJS_all =	$(OBJS_example_mutex_count)	\
 		$(OBJS_example_mutex_sync)	\
 		$(OBJS_example_wait_condition)	\
+		$(OBJS_example_waitcond)	\
 		$(OBJS_example_waitcond_serialize)	\
 		$(OBJS_example_rwlock)		\
 		$(OBJS_example_barrier)		\
@@ -53,6 +57,7 @@ OBJS_all =	$(OBJS_example_mutex_count)	\
 		$(OBJS_example_refcount)
 
 BINS_all =	$(BINDIR)/example_mutex_count		\
+		$(BINDIR)/example_waitcond		\
 		$(BINDIR)/example_waitcond_serialize	\
 		$(BINDIR)/example_rwlock		\
 		$(BINDIR)/example_barrier		\

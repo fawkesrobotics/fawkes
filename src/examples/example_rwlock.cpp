@@ -56,9 +56,9 @@ class ExampleRWLockWriterThread : public Thread
    */
   virtual void loop()
   {
-    if ( ! rwlock->tryLockForWrite() ) {
+    if ( ! rwlock->try_lock_for_write() ) {
       cout << "Writer: Readers on lock, waiting for release" << endl;
-      rwlock->lockForWrite();
+      rwlock->lock_for_write();
       // aquired the lock
     }
     cout << "Writer: aquired lock" << endl;
@@ -93,9 +93,9 @@ class ExampleRWLockReaderThread : public Thread
 
   virtual void loop()
   {
-    if ( ! rwlock->tryLockForRead() ) {
+    if ( ! rwlock->try_lock_for_read() ) {
       cout << "Reader (" << pp << "): Writer on lock, waiting for release" << endl;
-      rwlock->lockForRead();
+      rwlock->lock_for_read();
     }
     cout << "Reader (" << pp << "): aquired lock" << endl;
     cout << "Reader (" << pp << "): val=" << *val << endl;

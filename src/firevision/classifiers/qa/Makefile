@@ -30,7 +30,10 @@ CFLAGS_qa_facesclassifier += $(CFLAGS_SDL)
 LDFLAGS_fv_qa_facesclassifier += $(LDFLAGS_SDL)
 
 OBJS_all = $(OBJS_fv_qa_facesclassifier)
-BINS_all = $(BINDIR)/fv_qa_facesclassifier
+
+ifeq ($(HAVE_OPENCV),1)
+  BINS_all = $(BINDIR)/fv_qa_facesclassifier
+endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

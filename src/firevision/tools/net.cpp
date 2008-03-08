@@ -48,6 +48,7 @@
 
 // for inet_ntop
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #include <cstring>
 #include <cstdlib>
 

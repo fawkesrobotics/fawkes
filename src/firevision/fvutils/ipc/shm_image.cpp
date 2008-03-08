@@ -34,6 +34,9 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+#ifdef __FreeBSD__
+#  include <strfunc.h>
+#endif
 
 using namespace std;
 

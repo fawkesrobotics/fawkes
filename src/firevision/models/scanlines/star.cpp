@@ -88,6 +88,7 @@ ScanlineStar::ScanlineStar( unsigned int image_width, unsigned int image_height,
 }
 
 
+/** Destructor. */
 ScanlineStar::~ScanlineStar()
 {
   std::map<float, Ray*>::iterator rit;

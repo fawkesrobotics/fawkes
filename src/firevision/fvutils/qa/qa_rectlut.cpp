@@ -49,7 +49,7 @@ main(int argc, char **argv)
     s = argv[1];
   }
 
-  RectificationInfoFile *rif = new RectificationInfoFile(0xDEADBEEFDEADBEEF, "No real camera");
+  RectificationInfoFile *rif = new RectificationInfoFile(0xDEADBEEF, "No real camera");
 
   RectificationLutInfoBlock *rlib = new RectificationLutInfoBlock(WIDTH, HEIGHT,
 								  FIREVISION_RECTINFO_CAMERA_MAIN);
