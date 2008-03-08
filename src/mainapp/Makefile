@@ -26,6 +26,12 @@ include $(BASEDIR)/src/libs/netcomm/netcomm.mk
 # Add to enable TimeTracker support in Fawkes main application
 #CFLAGS += -DUSE_TIMETRACKER
 
+# We need Avahi CFLAGS because of includes in Avahi source, on BSD this is
+# in /usr/local/include and thus it needs extra flags
+ifeq ($(HAVE_AVAHI),1)
+  CFLAGS += $(CFLAGS_AVAHI)
+endif
+
 LIBS_libfawkesmainappmsgs = core utils netcomm
 OBJS_libfawkesmainappmsgs = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*_message.cpp)))))
 

@@ -26,12 +26,13 @@ COLORED = 1
 endif
 
 ### Build type
-ifneq ($(realpath $(BASEDIR)/etc/buildsys_local/buildtype.mk),)
+ifneq ($(wildcard $(realpath $(BASEDIR)/etc/buildsys_local/buildtype.mk)),)
   include $(realpath $(BASEDIR)/etc/buildsys_local/buildtype.mk)
 else
   BUILD_TYPE = fawkes
 endif
 ARCH=$(shell uname -m)
+OS=$(shell uname -s)
 
 ### Directories
 SRCDIR ?= .
@@ -77,8 +78,12 @@ CFLAGS_BASE      = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP)
 LDFLAGS_BASE     = -L$(LIBDIR) $(LDFLAGS_OPENMP)
 LDFLAGS_SHARED   = -shared
 ifeq ($(GCC_USE_OPENMP),1)
-  CFLAGS_OPENMP    = -fopenmp
-  LDFLAGS_OPENMP   = -lgomp
+  CFLAGS_OPENMP  = -fopenmp
+  LDFLAGS_OPENMP = -lgomp
+endif
+ifeq ($(OS),FreeBSD)
+DEFAULT_INCLUDES += -I/usr/local/include
+LDFLAGS_BASE     += -L/usr/local/lib -lpthread -lstrfunc
 endif
 
 ifeq ($(COLORED),1)
@@ -156,22 +161,22 @@ NORMAL          = :
 endif
 
 ### Check if there are special config files for the chosen compiler
-ifneq ($(realpath $(BASEDIR)/etc/buildsys/$(CC).mk),)
+ifneq ($(wildcard $(realpath $(BASEDIR)/etc/buildsys/$(CC).mk)),)
   include $(BASEDIR)/etc/buildsys/$(CC).mk
 endif
 
 ### Check if there is a build-type specific configuration
-ifneq ($(realpath $(BASEDIR)/etc/buildsys_local/config_$(BUILD_TYPE).mk),)
+ifneq ($(wildcard $(realpath $(BASEDIR)/etc/buildsys_local/config_$(BUILD_TYPE).mk)),)
   include $(BASEDIR)/etc/buildsys_local/config_$(BUILD_TYPE).mk
 endif
 
 ### Check if there is a local config for this directory
 ifneq ($(SRCDIR),.)
-  ifneq ($(realpath $(SRCDIR)/$(notdir $(SRCDIR)).mk),)
+  ifneq ($(wildcard $(realpath $(SRCDIR)/$(notdir $(SRCDIR)).mk)),)
     include $(SRCDIR)/$(notdir $(SRCDIR)).mk
   endif
 else
-  ifneq ($(realpath $(notdir $(CURDIR)).mk),)
+  ifneq ($(wildcard $(realpath $(notdir $(CURDIR)).mk)),)
     include $(notdir $(CURDIR)).mk
   endif
 endif

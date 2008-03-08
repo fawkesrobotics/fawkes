@@ -225,12 +225,13 @@ FawkesThreadManager::add(ThreadList &tl)
 
   tl.seal();
 
+  tl.start();
+
   // All thread initialized, now add threads to internal structure
   for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
     internal_add_thread(*i);
   }
 
-  tl.start();
   tl.unlock();
 }
 
@@ -262,9 +263,8 @@ FawkesThreadManager::add(Thread *thread)
     throw;
   }
 
-  internal_add_thread(thread);
-
   thread->start();
+  internal_add_thread(thread);
 }
 
 
