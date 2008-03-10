@@ -31,6 +31,8 @@
 
 #include <fvutils/base/types.h>
 
+#include <map>
+
 class Bulb;
 class BulbSampler;
 
@@ -63,6 +65,8 @@ class BulbGenerator {
   Bulb *  getResult();
 
  private:
+  float world_distance(float dist_in_image);
+
   unsigned int width;
   unsigned int height;
 
@@ -77,6 +81,8 @@ class BulbGenerator {
   polar_coord_t                 *data_lut;
   polar_coord_t                 *res_lut;
 
+  std::map<float, float> distance_table;
+  float max_dist;
 };
 
 

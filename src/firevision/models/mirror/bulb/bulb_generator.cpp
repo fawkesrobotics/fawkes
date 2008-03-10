@@ -5,6 +5,7 @@
  *  Generated: Thu Mar 23 20:40:27 2006
  *  Copyright  2005-2006 Tim Niemueller [www.niemueller.de]
  *             2005      Martin Heracles
+ *             2008      Daniel Beck
  *
  *  $Id$
  *
@@ -32,6 +33,7 @@
 
 #include <utils/math/angle.h>
 
+#include <cstdlib>
 #include <cmath>
 #include <list>
 #include <utility>
@@ -44,6 +46,7 @@ using namespace std;
  * mirror lookup table.
  * @author Martin Herakles
  * @author Tim Niemueller
+ * @author Daniel Beck
  */
 
 /** Constructor.
@@ -83,378 +86,42 @@ BulbGenerator::generate()
 
   unsigned int totalNrOfPixels = width * height;
   unsigned int nrOfProcessedPixels = 0;
-  unsigned int num_non_zero_values = 0;
 
   handler->setTotalSteps(totalNrOfPixels);
+  
+  max_dist = 0.0f;
+  distance_table.clear();
 
-  /* initialization of sector points
-     (For each of the four "Quadranten" of the "local coordinate system" with origin (r, phi),
-     the sample point closest to point (r, phi) is called a sector point of (r, phi). ) */
-  float r_1, phi_1;
-  float r_2, phi_2;
-  float r_3, phi_3;
-  float r_4, phi_4;
-  bool sector_valid = false;
-  r_1 = r_2 = r_3 = r_4 = 0.0;
-  phi_1 = phi_2 = phi_3 = phi_4 = 0.0;
-
-  // sector points (cartesian coordinates)
-  unsigned int u_1 = 0;
-  unsigned int v_1 = 0;
-  float dist_1_minimal = 100000.0;
-  unsigned int u_2 = 0;
-  unsigned int v_2 = 0;
-  float dist_2_minimal = 100000.0;
-  unsigned int u_3 = 0;
-  unsigned int v_3 = 0;
-  float dist_3_minimal = 100000.0;
-  unsigned int u_4 = 0;
-  unsigned int v_4 = 0;
-  float dist_4_minimal = 100000.0;
-
-  list< pair< cart_coord_t, polar_coord_t > > data_points;
-  list< pair< cart_coord_t, polar_coord_t > >::iterator dpi;
-
+  // enter trained distances in distance table
+  printf("entering trained distances in distance table\n");
   for (unsigned int y = 0; y < height; ++y) {
     for (unsigned int x = 0; x < width; ++x) {
       if ( data->isNonZero(x, y) ) {
-	cart_coord_t  c;
-	c.x = x;
-	c.y = y;
-	polar_coord_t p;
-	p.r   = data->getDistanceInImage( x, y, center_x, center_y );
-	p.phi = data->getAngle(x, y);
-	data_points.push_back( pair<cart_coord_t, polar_coord_t>(c, p) );
+	float image_dist = (float) rint( data->getDistanceInImage(x, y, center_x, center_y) * 10 ) / 10.0f;
+	if (image_dist > max_dist)
+	  { max_dist = image_dist; }	    
+	polar_coord_t p = data->getWorldPointRelative(x, y);
+	distance_table[image_dist] = p.r;
       }
     }
   }
+  distance_table[0] = 0.01f;
 
-
-  // interpolation
-  float dist = 0.0;
+  // interpolate all other
   for (unsigned int y = 0; y < height; ++y) {
     for (unsigned int x = 0; x < width; ++x) {
-      dist = data->getDistanceInImage( x, y, center_x, center_y );
-      if ( ! data->isNonZero(x, y) &&
-	   dist <= data->distance_max    &&
-	   dist >= data->distance_min       ) {	
-	/* non-sample point, 
-	   and within the (distance_min, distance_max) interval
-	   ---> has to be interpolated */
+      float dist = world_distance( data->getDistanceInImage(x, y, center_x, center_y) );
+      if (dist < 0)
+	{ continue; }
+      float phi = atan2f( float(x) - float(center_x), float(center_y) - float(y) );				   
+      result->setWorldPoint(x, y, dist, phi);
 
-	// convert (x, y) to polar coordinates (r, phi)
-	float r = sqrt( (float(x) - center_x) *
-			(float(x) - center_x)   +
-			(float(y) - center_y) *
-			(float(y) - center_y)     );
-	float phi =  data->getAngle(x, y);
-
-	// if point is outside of old sector...
-	if ( ! (r >= r_1 &&
-		r <= r_2 &&
-		phi >= phi_1 &&
-		phi >= phi_2 &&
-		r >= r_3 &&
-		r <= r_4 &&
-		phi <= phi_3 &&
-		phi <= phi_4   ) ) {
-	  // ...find the correct sector
-
-	  // reset sector point data
-	  // (but keep the r and phi sector point data)
-	  sector_valid = false;
-	  u_1 = 0;
-	  v_1 = 0;
-	  dist_1_minimal = 100000.0;
-	  u_2 = 0;
-	  v_2 = 0;
-	  dist_2_minimal = 100000.0;
-	  u_3 = 0;
-	  v_3 = 0;
-	  dist_3_minimal = 100000.0;
-	  u_4 = 0;
-	  v_4 = 0;
-	  dist_4_minimal = 100000.0;
-	  
-	  for (dpi = data_points.begin(); ! sector_valid && (dpi != data_points.end()); ++dpi) {
-	    unsigned int u = (*dpi).first.x;
-	    unsigned int v = (*dpi).first.y;
-		
-	    // convert to polar coordinates (r_sample, phi_sample)
-	    float r_sample = sqrt( (float(u) - center_x) *
-				   (float(u) - center_x)   +
-				   (float(v) - center_y) *
-				   (float(v) - center_y)     );
-	    float phi_sample = data->getAngle(u, v);
-		
-	    // calculate distance between (r_sample, phi_sample) and (r, phi)
-	    dist = sqrt( (fabs(float(x)) - fabs(float(u))) *
-			 (fabs(float(x)) - fabs(float(u)))   +
-			 (fabs(float(y)) - fabs(float(v))) *
-			 (fabs(float(y)) - fabs(float(v)))     );
-
-	    // update sector points
-	    if (dist < dist_1_minimal && 
-		phi_sample <= phi &&
-		r_sample <= r) {
-	      dist_1_minimal = dist;
-	      u_1 = u;
-	      v_1 = v;
-	      //cout << "found 1 at (" << u << "," << v << ")" << endl;
-	    } else if (dist < dist_2_minimal && 
-		       phi_sample <= phi &&
-		       r_sample > r) {
-	      dist_2_minimal = dist;
-	      u_2 = u;
-	      v_2 = v;
-	      //cout << "found 2 at (" << u << "," << v << ")" << endl;
-	    } else if (dist < dist_3_minimal && 
-		       phi_sample > phi &&
-		       r_sample <= r) {
-	      dist_3_minimal = dist;
-	      u_3 = u;
-	      v_3 = v;
-	      //cout << "found 3 at (" << u << "," << v << ")" << endl;
-	    } else if (dist < dist_4_minimal && 
-		       phi_sample > phi &&
-		       r_sample > r) {
-	      dist_4_minimal = dist;
-	      u_4 = u;
-	      v_4 = v;
-	      //cout << "found 4 at (" << u << "," << v << ")" << endl;
-	    }
-	  }
-
-	  if (dist_1_minimal < 100000.0 &&
-	      dist_2_minimal < 100000.0 &&
-	      dist_3_minimal < 100000.0 &&
-	      dist_4_minimal < 100000.0) {	
-	    // all four sector points have been found
-	    
-	    // convert to polar coordinates
-	    r_1 = sqrt( (float(u_1) - center_x) *
-			(float(u_1) - center_x)   +
-			(float(v_1) - center_y) *
-			(float(v_1) - center_y)     );
-	    phi_1 = data->getAngle(u_1, v_1);
-	    r_2   = sqrt( (float(u_2) - center_x) *
-			  (float(u_2) - center_x)   +
-			  (float(v_2) - center_y) *
-			  (float(v_2) - center_y)     );
-	    phi_2 = data->getAngle(u_2, v_2);
-	    r_3   = sqrt( (float(u_3) - center_x) *
-			  (float(u_3) - center_x)   +
-			  (float(v_3) - center_y) *
-			  (float(v_3) - center_y)     );
-	    phi_3 = data->getAngle(u_3, v_3);
-	    r_4   = sqrt( (float(u_4) - center_x) *
-			  (float(u_4) - center_x)   +
-			  (float(v_4) - center_y) *
-			  (float(v_4) - center_y)     );
-	    phi_4 = data->getAngle(u_4, v_4);
-	    
-	    sector_valid = true;
-          }
-
-	} // end if point is outside of old sector
-	
-
-	if (! sector_valid &&
-	    ( (phi < -M_PI/2) ||
-	      (phi > M_PI/2) )
-	    ) {
-	  // sector could not be found, give it another try in the
-	  // interval (-M_PI/2, M_PI/2)
-	  // EvilHack(TiM).
-	  // This is needed to work around Martin's bullshit of blind region
-
-	  for (dpi = data_points.begin(); ! sector_valid && (dpi != data_points.end()); ++dpi) {
-	    unsigned int u = (*dpi).first.x;
-	   unsigned int v = (*dpi).first.y;
-		
-	    // convert to polar coordinates (r_sample, phi_sample)
-	    float phi_sample = normalize_rad( data->getAngle(u, v) );
-
-	    if ( (phi_sample >= (M_PI * 3/2)) ||
-		 (phi_sample <= M_PI/2) ) {
-	      // not in interesting region
-	      continue;
-	    }
-
-	    float normal_phi = normalize_rad( phi );
-	    float r_sample = sqrt( (float(u) - center_x) *
-				   (float(u) - center_x)   +
-				   (float(v) - center_y) *
-				   (float(v) - center_y)     );
-
-	    // calculate distance between (r_sample, phi_sample) and (r, phi)
-	    dist = sqrt( (fabs(float(x)) - fabs(float(u))) *
-			 (fabs(float(x)) - fabs(float(u)))   +
-			 (fabs(float(y)) - fabs(float(v))) *
-			 (fabs(float(y)) - fabs(float(v)))     );
-
-
-	    // update sector points
-	    if (dist < dist_1_minimal && 
-		phi_sample <= normal_phi &&
-		r_sample <= r) {
-	      dist_1_minimal = dist;
-	      u_1 = u;
-	      v_1 = v;
-	      //cout << "found 1 at (" << u << "," << v << ")" << endl;
-	    } else if (dist < dist_2_minimal && 
-		       phi_sample <= normal_phi &&
-		       r_sample > r) {
-	      dist_2_minimal = dist;
-	      u_2 = u;
-	      v_2 = v;
-	      //cout << "found 2 at (" << u << "," << v << ")" << endl;
-	    } else if (dist < dist_3_minimal && 
-		       phi_sample > normal_phi &&
-		       r_sample <= r) {
-	      dist_3_minimal = dist;
-	      u_3 = u;
-	      v_3 = v;
-	      //cout << "found 3 at (" << u << "," << v << ")" << endl;
-	    } else if (dist < dist_4_minimal && 
-		       phi_sample > normal_phi &&
-		       r_sample > r) {
-	      dist_4_minimal = dist;
-	      u_4 = u;
-	      v_4 = v;
-	      //cout << "found 4 at (" << u << "," << v << ")" << endl;
-	    }
-	  }
-
-	  if (dist_1_minimal < 100000.0 &&
-	      dist_2_minimal < 100000.0 &&
-	      dist_3_minimal < 100000.0 &&
-	      dist_4_minimal < 100000.0) {	
-	    // all four sector points have been found
-	    
-	    // convert to polar coordinates
-	    r_1 = sqrt( (float(u_1) - center_x) *
-			(float(u_1) - center_x)   +
-			(float(v_1) - center_y) *
-			(float(v_1) - center_y)     );
-	    phi_1 = data->getAngle(u_1, v_1);
-	    r_2   = sqrt( (float(u_2) - center_x) *
-			  (float(u_2) - center_x)   +
-			  (float(v_2) - center_y) *
-			  (float(v_2) - center_y)     );
-	    phi_2 = data->getAngle(u_2, v_2);
-	    r_3   = sqrt( (float(u_3) - center_x) *
-			  (float(u_3) - center_x)   +
-			  (float(v_3) - center_y) *
-			  (float(v_3) - center_y)     );
-	    phi_3 = data->getAngle(u_3, v_3);
-	    r_4   = sqrt( (float(u_4) - center_x) *
-			  (float(u_4) - center_x)   +
-			  (float(v_4) - center_y) *
-			  (float(v_4) - center_y)     );
-	    phi_4 = data->getAngle(u_4, v_4);
-	    
-	    sector_valid = true;
-          }
-
-	}
-
-	if (sector_valid) {
-	  // interpolate radius:
-	  float r_1_2_interpolated = data_lut[v_1 * width + u_1].r +
-	    ( (data_lut[v_2 * width + u_2].r - data_lut[v_1 * width + u_1].r) / (r_2 - r_1) )
-	    * (r - r_1);
-	  float r_3_4_interpolated = data_lut[v_3 * width + u_3].r +
-	    ( (data_lut[v_4 * width + u_4].r - data_lut[v_3 * width + u_3].r) / (r_4 - r_3) )
-	    * (r - r_3);
-
-	  // calculate average angle of first and second sector point
-	  // float phi_avg_1_2 = (phi_1 + phi_2) / 2.0;
-	  // calculate average angle of third and fourth sector point
-	  // float phi_avg_3_4 = (phi_3 + phi_4) / 2.0;
-
-	  float r_interpolated = (r_1_2_interpolated + r_3_4_interpolated) / 2.0;
-	  /*
-	    ( (r_3_4_interpolated - 
-	       r_1_2_interpolated   ) / 
-	      (phi_avg_3_4 - phi_avg_1_2) ) *
-	    (phi - phi_avg_1_2);
-	  */
-
-	  // for simplicity, do not really interpolate angle;
-	  // assume that bulb is "rotationssymmetrisch"
-	  float phi_interpolated = data->getAngle( x, y );
-
-	  /*
-	  // interpolate angle:
-	  float phi_1_3_interpolated = 
-	    this->lut[u_1][v_1].phi +
-	    ( (this->lut[u_3][v_3].phi -
-	       this->lut[u_1][v_1].phi   ) / 
-	      (phi_3 - phi_1)                ) *
-	    (phi - phi_1);
-
-	  float phi_2_4_interpolated = 
-	    this->lut[u_2][v_2].phi +
-	    ( (this->lut[u_4][v_4].phi -
-	       this->lut[u_2][v_2].phi   ) / 
-	      (phi_4 - phi_2)                ) *
-	    (phi - phi_2);
-
-	  // calculate average radius of first and third sector point
-	  float r_avg_1_3 = (r_1 + r_3) / 2.0;
-	  // calculate average radius of second and fourth sector point
-	  float r_avg_2_4 = (r_2 + r_4) / 2.0;
-
-	  float phi_interpolated = 
-	    phi_1_3_interpolated +
-	    ( (phi_2_4_interpolated - 
-	       phi_1_3_interpolated   ) / 
-	      (r_avg_2_4 -
-	       r_avg_1_3   )              ) *
-	    (r - r_avg_1_3);
-	  */
-
-	  // write interpolated values to lutCopy at (x, y)
-	  res_lut[y * width + x].r   = r_interpolated;
-	  res_lut[y * width + x].phi = phi_interpolated;
-
-	  //cout << "setting res_lut[" << y * width + x << "/" << x << "," << y
-	  //     << "] = (" << r_interpolated << "," << phi_interpolated << ")" << endl;
-
-	  ++num_non_zero_values;
-	  
-	} else { // end if sector valid
-	  // cout << "sector invalid" << endl;
-	  /*
-	  if ( phi > M_PI-0.1 ||
-	       phi < -M_PI+0.1 ) {
-	    cout << "is: r=" << r << "  phi=" << phi << endl;
-	    cout << "u_1=" << u_1 << "  v_1=" << v_1 << "  dist_1_minimal=" << dist_1_minimal << endl;
-	    cout << "u_2=" << u_2 << "  v_2=" << v_2 << "  dist_2_minimal=" << dist_2_minimal << endl;
-	    cout << "u_3=" << u_3 << "  v_3=" << v_3 << "  dist_3_minimal=" << dist_3_minimal << endl;
-	    cout << "u_4=" << u_4 << "  v_4=" << v_4 << "  dist_4_minimal=" << dist_4_minimal << endl;
-	  }
-	  */
-	}
-	
-      } else { // end if to be interpolated
-	//cout << "no need to interpolate pixel (" << x << "," << y << ")" << endl;
-      }
-      
       // whether interpolated or not, count this pixel as processed
       ++nrOfProcessedPixels;
-      
-    } // end inner for
-    
+    }
     handler->setProgress(nrOfProcessedPixels);
-
-  } // end outer for 
-
+  }
   handler->finished();
-
-  // cout << "Number of non-zero values: " << num_non_zero_values << endl;
-
 }
 
 
@@ -465,4 +132,50 @@ Bulb *
 BulbGenerator::getResult()
 {
   return result;
+}
+
+
+float
+BulbGenerator::world_distance(float dist_in_image)
+{
+  if ( distance_table.size() == 0)
+    {
+      printf("No values in distance table\n");
+      return -1.0f;
+    }
+
+  float image_dist = (float) rint(dist_in_image * 10) / 10.0f;
+
+  if (image_dist > max_dist)
+    { return -1.0f; }
+
+  if ( distance_table.find(image_dist) != distance_table.end() ) 
+    { return distance_table[image_dist]; }
+
+  std::map<float, float>::iterator lower, upper;
+
+  lower = distance_table.lower_bound(image_dist);
+  if ( lower != distance_table.begin() )
+    { --lower; }
+  else
+    { printf("lower not found\n"); }
+
+  upper = distance_table.upper_bound(image_dist);
+
+  float world_dist;
+  if (lower != distance_table.end() &&
+      upper != distance_table.end() )
+    {
+      float factor;
+      factor = (image_dist - lower->first) / (float)(upper->first - lower->first);
+      world_dist =  factor * upper->second + ( 1.0 - factor ) * lower->second;
+      
+      distance_table[image_dist] = world_dist;
+    }
+  else
+    {
+      printf("upper/lower not found\n");
+    }
+
+  return world_dist;
 }
