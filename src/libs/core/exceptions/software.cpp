@@ -229,3 +229,22 @@ AccessViolationException::AccessViolationException(const char *msg) throw()
   :  Exception("Access Violation: %s", msg)
 {
 }
+
+
+/** @class SyntaxErrorException <core/exceptions/software.h>
+ * Syntax error.
+ * Throw this exception if a syntax error happened, for example in interpreted
+ * code or a configuration file.
+ * @ingroup Exceptions
+ */
+/** Constructor
+ * @param format message format
+ */
+SyntaxErrorException::SyntaxErrorException(const char *format, ...) throw()
+  : Exception()
+{
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
+}

@@ -97,4 +97,11 @@ class AccessViolationException : public Exception {
   AccessViolationException(const char *msg) throw();
 };
 
+
+class SyntaxErrorException : public Exception {
+ public:
+  SyntaxErrorException(const char *format, ...) throw();
+};
+
+
 #endif
