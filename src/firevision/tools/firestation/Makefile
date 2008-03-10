@@ -20,10 +20,9 @@
 
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/gui.mk
-#include $(BASEDIR)/src/firevision/fvconf.mk
-#include $(BASEDIR)/src/firevision/tools/image_viewer/gtkconf.mk
+include $(BASEDIR)/src/libs/netcomm/netcomm.mk
 
-CFLAGS   = $(VISION_CFLAGS) -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
+CFLAGS   = $(VISION_CFLAGS)
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS  = $(VISION_LDFLAGS) $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 INCDIRS  = $(VISION_INCDIRS)
@@ -37,18 +36,24 @@ OBJS_firestation = color_train.o	\
 		   main.o
 OBJS_all += $(OBJS_firestation)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
+ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(HAVE_AVAHI),111)
   BINS_gui += $(BINDIR)/firestation
 else
-  WARN_TARGETS += warning_firestation
+  ifneq ($(HAVE_AVAHI),1)
+    WARN_TARGETS += warning_avahi
+  else
+    WARN_TARGETS += warning_guilibs
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
-warning_firestation:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building shm_image_viewer$(TNORMAL) ($(GTK_CONF_ERR) not installed)";
+warning_guilibs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building firestation$(TNORMAL) ($(GTK_CONF_ERR) not installed)";
+warning_avahi:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building firestation$(TNORMAL) (Avahi not installed)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

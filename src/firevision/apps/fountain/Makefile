@@ -35,6 +35,8 @@ ifeq ($(BUILD_TYPE),rcsoftx)
     LIBS_fvfountain += pthread rutils
     INCDIRS         += $(QTDIR)/include
     BINS_all         = $(BINDIR)/fvfountain
+    CFLAGS          += $(CFLAGS_AVAHI)
+    LDFLAGS         += $(LDFLAGS_AVAHI)
   endif
 else
   OBJS_fvfountain  = fountain_thread.o fountain_plugin.o
