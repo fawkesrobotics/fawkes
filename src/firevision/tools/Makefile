@@ -20,8 +20,8 @@ include $(BASEDIR)/src/firevision/fvconf.mk
 include $(LIBSRCDIR)/netcomm/netcomm.mk
 include $(BASEDIR)/etc/buildsys/gui.mk
 
-CFLAGS   += $(VISION_CFLAGS)
-LDFLAGS  += $(VISION_LDFLAGS)
+CFLAGS   += $(VISION_CFLAGS) $(CFLAGS_AVAHI)
+LDFLAGS  += $(VISION_LDFLAGS) $(LDFLAGS_AVAHI)
 INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
