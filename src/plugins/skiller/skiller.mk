@@ -1,8 +1,10 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#            Makefile Build System for Fawkes: Skiller Plugin
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
+#   Created on Mon Mar 10 11:12:14 2008
 #   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -13,10 +15,16 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
-include $(BASEDIR)/etc/buildsys/config.mk
+SKILLDIR = $(abspath $(BASEDIR)/src/plugins/skiller/skills)
+LUA_MINVERSION = 5.1
 
-SUBDIRS = battery kicker navigator worldmodel skiller
+# Check for Lua (Fedora packages lua and lua-devel)
+ifneq ($(PKGCONFIG),)
+  HAVE_LUA = $(if $(shell $(PKGCONFIG) --atleast-version $(LUA_MINVERSION) 'lua'; echo $${?/1/}),1,0)
+endif
 
-include $(BASEDIR)/etc/buildsys/rules.mk
+ifeq ($(HAVE_LUA),1)
+  CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags 'lua')
+  LDFLAGS_LUA = $(shell $(PKGCONFIG) --libs 'lua')
+endif
 
