@@ -1022,7 +1022,7 @@ Thread::current_thread_id()
  * called.
  * Note that only if the main application ensures to call init_main() it can be guaranteed
  * that this value is not NULL.
- * @return ID of thread context
+ * @return Thread instance of the current thread
  * @exception Exception thrown if this method is called before either init_main() is
  * called or any one thread has been started.
  */
@@ -1031,6 +1031,22 @@ Thread::current_thread()
 {
   if ( THREAD_KEY == PTHREAD_KEYS_MAX ) {
     throw Exception("No thread has been initialized");
+  }
+  return (Thread *)pthread_getspecific(THREAD_KEY);
+}
+
+
+/** Similar to current_thread, but does never throw an exception.
+ * This is a convenience method doing the same as current_thread(), but it never ever
+ * throws an exception, rather it returns NULL in case of an error. This is necessary
+ * if run from a C context.
+ * @return Thread instance of the current thread
+ */
+Thread *
+Thread::current_thread_noexc() throw()
+{
+  if ( THREAD_KEY == PTHREAD_KEYS_MAX ) {
+    return 0;
   }
   return (Thread *)pthread_getspecific(THREAD_KEY);
 }

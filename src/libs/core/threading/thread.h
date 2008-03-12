@@ -93,6 +93,7 @@ class Thread {
   bool          detached() const;
 
   static Thread *  current_thread();
+  static Thread *  current_thread_noexc() throw();
   static pthread_t current_thread_id();
 
   static void      init_main();
