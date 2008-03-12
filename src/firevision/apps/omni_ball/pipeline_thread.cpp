@@ -43,6 +43,7 @@
 #include <classifiers/simple.h>
 #include <cams/camera.h>
 #include <interfaces/object.h>
+#include <utils/system/hostinfo.h>
 
 #include <stdlib.h>
 #include <cstdio>
@@ -73,6 +74,8 @@ FvOmniBallPipelineThread::FvOmniBallPipelineThread()
   ball_interface = NULL;
 
   cspace_to = YUV422_PLANAR;
+
+  cfgfile_prefix = strdup(FVCONFDIR);
 }
 
 
@@ -94,27 +97,40 @@ FvOmniBallPipelineThread::~FvOmniBallPipelineThread()
 void
 FvOmniBallPipelineThread::init()
 {
-  // -- config --
-  // camera, mirror and color model
-  string camera;
-  string mirror_file;
-  string colormap_file;
+  char* camera;
+  char* mirror_file;
+  char* colormap_file;
+
+  // camera, colormap
   try
     {
-      camera = config->get_string("/firevision/omni/camera");
-      mirror_file = config->get_string("/firevision/omni/mirror");
-      colormap_file = config->get_string("/firevision/omni/ball/colormap");
+      camera = strdup( (config->get_string("/firevision/omni/camera")).c_str() );
+      asprintf(&colormap_file, "%s/%s", cfgfile_prefix, 
+	       (config->get_string("/firevision/omni/ball/colormap")).c_str() );
     }
   catch (Exception &e)
     {
       e.append("OmniBallPipeline::init() failed since config parameters are missing");
       throw;
     }
+  
+  // mirror
+  try
+    {
+      asprintf(&mirror_file, "%s/%s", cfgfile_prefix, 
+	       (config->get_string("/firevision/omni/mirror")).c_str() );
+    }
+  catch (Exception &e)
+    {
+      logger->log_warn(name(), "No mirror specified in config. Using default.");
+      HostInfo hi;
+      asprintf(&mirror_file, "%s/%s.mirror", cfgfile_prefix, hi.short_name());
+    }
 
   // camera
   try 
     {
-      cam = vision_master->register_for_camera( camera.c_str(), this );
+      cam = vision_master->register_for_camera( camera, this );
     } 
   catch (Exception& e) 
     {
@@ -137,49 +153,66 @@ FvOmniBallPipelineThread::init()
       e.append("Opening ball interface for writing failed");
       throw;
     }
-
-  string mirror_calib_path = string(CONFDIR) + "/firevision/mirror/" + mirror_file;
-  mirror = new Bulb( mirror_calib_path.c_str(), "omni-ball-bulb",
-		     true /* destroy on delete */ );
-
-  string colormap_path = string(CONFDIR) + "/firevision/colormaps/" + colormap_file;
-  cm = new ColorModelLookupTable(colormap_path.c_str(), 256 /* lut_width */, 256 /* lut_height */,
-				 "omni-ball-colormap", true /* destroy on delete */ );
   
   // image properties
   img_width = cam->pixel_width();
   img_height = cam->pixel_height();
   cspace_from = cam->colorspace();
-  
+
   buffer_size = colorspace_buffer_size(cspace_to, img_width, img_height);
+
+  // other stuff that might throw an exception
   try
     {
+      // mirror calibration
+      mirror = new Bulb( mirror_file, "omni-ball-mirror",
+			 true /* destroy on delete */ );
+      free(mirror_file);
+      mirror_file = NULL;
+      
+      // colormodel
+      cm = new ColorModelLookupTable(colormap_file, 
+				     256 /* lut_width */, 256 /* lut_height */,
+				     "omni-ball-colormap", 
+				     true /* destroy on delete */ );
+      
+      // SHM image buffer
       shm_buffer = new SharedMemoryImageBuffer("omni-ball-processed", cspace_to,
 					       img_width, img_height);
       if (! shm_buffer->is_valid() )
-	{
-	  throw Exception("Shared memeor segment not valid");
-	}
+	{ throw Exception("Shared memory segment not valid"); }
+
+      buffer = shm_buffer->buffer();
     }
   catch (Exception& e)
     {
-      delete cam;
-      cam = NULL;
+      free(mirror_file);
+      delete mirror;
+      mirror = NULL;
+      delete cm;
+      cm = NULL;
+      delete shm_buffer;
+      shm_buffer = NULL;
       blackboard->close(ball_interface);
       ball_interface = NULL;
+      delete cam;
+      cam = NULL;
       throw;
     }
-  buffer = shm_buffer->buffer();
-  
-  
+
   // scanline model
   scanline = new ScanlineGrid( img_width, img_height, 5, 5 );
   
   // position model
   rel_pos = new OmniRelative(mirror);
-
+  
   // classifier
   classifier = new SimpleColorClassifier(scanline, cm, 0, 30);
+
+  // cleanup
+  free(camera);
+  free(mirror_file);
+  free(colormap_file);
 }
 
 

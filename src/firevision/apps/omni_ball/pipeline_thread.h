@@ -93,6 +93,8 @@ class FvOmniBallPipelineThread
 
   std::list< ROI > *rois;
   std::list< ROI >::iterator r;
+
+  char* cfgfile_prefix;
 };
 
 #endif /* __FIREVISION_APPS_OMNI_BALL_PIPELINE_THREAD_H_ */
