@@ -167,6 +167,9 @@ FirewireCamera::open()
 
     set_auto_focus(_auto_focus);
     set_auto_shutter(_auto_shutter);
+    if ( !_auto_shutter ) {
+      set_shutter(_shutter);
+    }
     set_auto_white_balance(_auto_white_balance);
     if ( ! _auto_white_balance &&
 	 (_white_balance_ub != 0xFFFFFFFF) &&
@@ -580,6 +583,32 @@ FirewireCamera::auto_shutter()
 }
 
 
+/** Set shutter value.
+ * @param shutter shutter value
+ */
+void
+FirewireCamera::set_shutter(unsigned int shutter)
+{
+  if ( dc1394_feature_set_value(_camera, DC1394_FEATURE_SHUTTER, shutter) != DC1394_SUCCESS ) {
+    throw Exception("Failed to set shutter to %d", shutter);
+  }
+}
+
+
+/** Get shutter value.
+ * @param shutter shutter value
+ */
+unsigned int
+FirewireCamera::shutter()
+{
+  if ( dc1394_feature_get_value(_camera, DC1394_FEATURE_SHUTTER, &_shutter) != DC1394_SUCCESS ) {
+    throw Exception("Failed to retrieve shutter value");
+  }
+  
+  return _shutter;
+}
+
+
 /** Set status of auto white balance.
  * @param enabled true to enable auto white balance, false to disable.
  */
@@ -611,9 +640,12 @@ FirewireCamera::auto_white_balance()
 void
 FirewireCamera::white_balance(unsigned int *ub, unsigned int *vr)
 {
-  if ( dc1394_feature_whitebalance_get_value(_camera, ub, vr) != DC1394_SUCCESS ) {
+  if ( dc1394_feature_whitebalance_get_value(_camera, &_white_balance_ub, &_white_balance_vr) != DC1394_SUCCESS ) {
     throw Exception("Failed to retrieve white balance values");
   }
+
+  *ub = _white_balance_ub;
+  *vr = _white_balance_vr;
 }
 
 
@@ -625,7 +657,7 @@ void
 FirewireCamera::set_white_balance(unsigned int ub, unsigned int vr)
 {
   if ( dc1394_feature_whitebalance_set_value(_camera, ub, vr) != DC1394_SUCCESS ) {
-    throw Exception("Failed to retrieve white balance values");
+    throw Exception("Failed to set white balance to ub=%d vr=%d", ub, vr);
   }
 }
 
@@ -805,6 +837,18 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
     string s = cap->get("shutter");
     if ( s == "auto" ) {
       _auto_shutter = true;
+    }
+    else {
+      char *endptr;
+      long int tmp = strtol(s.c_str(), &endptr, 10);
+      if ( endptr[0] != '\0' ) {
+	throw TypeMismatchException("Shutter value is invalid. "
+				    "String to int conversion failed");
+      } else if ( tmp < 0 ) {
+	throw OutOfBoundsException("Shutter value < 0", tmp, 0, 0xFFFFFFFF);
+      }
+      _auto_shutter = false;
+      _shutter = tmp;
     }
   }
 }

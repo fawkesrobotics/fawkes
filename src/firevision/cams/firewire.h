@@ -86,6 +86,9 @@ class FirewireCamera : public Camera, public CameraControl
 
   virtual bool           auto_shutter();
   virtual void           set_auto_shutter(bool enabled);
+  
+  virtual unsigned int   shutter();
+  virtual void           set_shutter(unsigned int shutter);
 
   virtual bool           auto_white_balance();
   virtual void           set_auto_white_balance(bool enabled);
@@ -145,6 +148,9 @@ class FirewireCamera : public Camera, public CameraControl
   unsigned int                   _white_balance_ub;
   /** White balance V/R value */
   unsigned int                   _white_balance_vr;
+
+  /** Shutter value */
+  unsigned int                   _shutter;
 
   /** Camera model, used in open to identify the camera, if empty first found camera is used */
   char *_model;
