@@ -30,6 +30,8 @@
 #include <cams/camera.h>
 #include <fvutils/ipc/shm_image.h>
 #include <utils/time/tracker.h>
+#include <fvutils/writers/seq_writer.h>
+#include <fvutils/writers/jpeg.h>
 
 #include <cstring>
 
@@ -44,6 +46,7 @@ FvRetrieverThread::FvRetrieverThread()
   : Thread("FvRetrieverThread", Thread::OPMODE_WAITFORWAKEUP),
     VisionAspect(VisionAspect::CYCLIC)
 {
+  seq_writer = NULL;
 }
 
 
@@ -76,6 +79,25 @@ FvRetrieverThread::init()
     throw;
   }
 
+  seq_writer = NULL;
+  try {
+    if ( config->get_bool("/firevision/retriever/save_images") ) {
+      Writer* writer = new JpegWriter();
+      seq_writer = new SeqWriter(writer);
+      std::string save_path;
+      try {
+	save_path = config->get_string("/firevision/retriever/save_path");
+      } catch (Exception &e) {
+	save_path = ("recorded_images");
+      }
+      seq_writer->set_path( save_path.c_str() );
+      seq_writer->set_dimensions( cam->pixel_width(), cam->pixel_height() );
+      seq_writer->set_colorspace( cam->colorspace() );
+    }
+  } catch (Exception &e) {
+    // ignored, not critical
+  }
+
   __tt = NULL;
   try {
     if ( config->get_bool("/firevision/retriever/use_time_tracker") ) {
@@ -98,6 +120,7 @@ FvRetrieverThread::finalize()
   vision_master->unregister_thread(this);
   delete cam;
   delete shm;
+  delete seq_writer;
   delete __tt;
 }
 
@@ -126,5 +149,9 @@ FvRetrieverThread::loop()
     cam->capture();
     memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
     cam->dispose_buffer();
+  }
+
+  if (seq_writer) {
+    seq_writer->write( shm->buffer() );
   }
 }

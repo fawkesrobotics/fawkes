@@ -36,6 +36,7 @@
 
 class Camera;
 class SharedMemoryImageBuffer;
+class SeqWriter;
 class TimeTracker;
 
 class FvRetrieverThread
@@ -55,6 +56,7 @@ class FvRetrieverThread
  private:
   Camera *cam;
   SharedMemoryImageBuffer *shm;
+  SeqWriter *seq_writer;
   TimeTracker *__tt;
   unsigned int __loop_count;
   unsigned int __ttc_capture;
