@@ -70,8 +70,14 @@ Message::Message(const char *type)
   recipient_interface_mem_serial = 0;
   _status    = Undefined;
   _substatus = 0;
-  _sender    = strdup(Thread::current_thread()->name());
-  _sender_id = Thread::current_thread_id();
+  Thread *t = Thread::current_thread_noexc();
+  if ( t ) {
+    _sender    = strdup(t->name());
+    _sender_id = t->thread_id();
+  } else {
+    _sender    = strdup("Unknown");
+    _sender_id = 0;
+  }
   _type      = strdup(type);
 }
 
@@ -90,8 +96,14 @@ Message::Message(Message &mesg)
   memcpy(data_ptr, mesg.data_ptr, data_size);
   _status    = Undefined;
   _substatus = 0;
-  _sender    = strdup(Thread::current_thread()->name());
-  _sender_id = Thread::current_thread_id();
+  Thread *t = Thread::current_thread_noexc();
+  if ( t ) {
+    _sender    = strdup(t->name());
+    _sender_id = t->thread_id();
+  } else {
+    _sender    = strdup("Unknown");
+    _sender_id = 0;
+  }
   _type      = strdup(mesg._type);
 }
 
@@ -110,8 +122,14 @@ Message::Message(Message *mesg)
   memcpy(data_ptr, mesg->data_ptr, data_size);
   _status    = Undefined;
   _substatus = 0;
-  _sender    = strdup(Thread::current_thread()->name());
-  _sender_id = Thread::current_thread_id();
+  Thread *t = Thread::current_thread_noexc();
+  if ( t ) {
+    _sender    = strdup(t->name());
+    _sender_id = t->thread_id();
+  } else {
+    _sender    = strdup("Unknown");
+    _sender_id = 0;
+  }
   _type      = strdup(mesg->_type);
 }
 
