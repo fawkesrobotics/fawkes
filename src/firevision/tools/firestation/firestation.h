@@ -153,6 +153,7 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   Gtk::Dialog* m_dlg_open_shm;
   Gtk::Dialog* m_dlg_open_fuse;
   Gtk::CheckButton* m_ckb_fuse_jpeg;
+  Gtk::CheckButton* m_ckb_cont_trans;
   Gtk::FileChooserDialog* m_fcd_open_image;
   Gtk::FileChooserDialog* m_fcd_save_image;
   Gtk::ToolButton* m_tbtn_exit;

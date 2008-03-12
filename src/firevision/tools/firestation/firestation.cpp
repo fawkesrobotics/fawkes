@@ -106,6 +106,12 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
     {
       throw std::runtime_error("Couldn't find stbStatus.");
     }
+
+  ref_xml->get_widget("ckbContTrans", m_ckb_cont_trans);
+  if ( !m_ckb_cont_trans )
+    {
+      throw std::runtime_error("Couldn't find ckbContTrans.");
+    }
   // ----------------------------------------------------------------
 
 
@@ -160,12 +166,25 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
     {
       throw std::runtime_error("Couldn't find fcdOpenImage.");
     }
+  Gtk::FileFilter* filter_jpg = new Gtk::FileFilter();
+  filter_jpg->set_name("JPEG");
+  filter_jpg->add_pattern("*.jpg");
+  filter_jpg->add_pattern("*.jpeg");
+  m_fcd_open_image->add_filter(*filter_jpg);
+
+  Gtk::FileFilter* filter_fvraw = new Gtk::FileFilter();
+  filter_fvraw->set_name("FVRaw");
+  filter_fvraw->add_pattern("*.raw");
+  filter_fvraw->add_pattern("*.fvraw");
+  m_fcd_open_image->add_filter(*filter_fvraw);
 
   ref_xml->get_widget("fcdSaveImage", m_fcd_save_image);
   if ( !m_fcd_save_image )
     {
       throw std::runtime_error("Couldn't find fcdSaveImage.");
     }
+  m_fcd_save_image->add_filter(*filter_jpg);
+  m_fcd_save_image->add_filter(*filter_fvraw);
 
   ref_xml->get_widget("dlgOpenShm", m_dlg_open_shm);
   if (!m_dlg_open_shm)
@@ -432,18 +451,6 @@ Firestation::save_image()
 
   m_fcd_save_image->set_transient_for(*this);
 
-  Gtk::FileFilter filter_jpg;
-  filter_jpg.set_name("JPEG");
-  filter_jpg.add_pattern("*.jpg");
-  filter_jpg.add_pattern("*.jpeg");
-  m_fcd_save_image->add_filter(filter_jpg);
-
-  Gtk::FileFilter filter_fvraw;
-  filter_fvraw.set_name("FVRaw");
-  filter_fvraw.add_pattern("*.raw");
-  filter_fvraw.add_pattern("*.fvraw");
-  m_fcd_save_image->add_filter(filter_fvraw);
-
   int result = m_fcd_save_image->run();
 
   switch(result) 
@@ -535,18 +542,6 @@ Firestation::open_file()
 {
   m_fcd_open_image->set_transient_for(*this);
   
-  Gtk::FileFilter filter_jpg;
-  filter_jpg.set_name("JPEG");
-  filter_jpg.add_pattern("*.jpg");
-  filter_jpg.add_pattern("*.jpeg");
-  m_fcd_open_image->add_filter(filter_jpg);
-  
-  Gtk::FileFilter filter_fvraw;
-  filter_fvraw.set_name("FVRaw");
-  filter_fvraw.add_pattern("*.raw");
-  filter_fvraw.add_pattern("*.fvraw");
-  m_fcd_open_image->add_filter(filter_fvraw);
-
   int result = m_fcd_open_image->run();
 	
   switch(result)
