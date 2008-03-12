@@ -198,8 +198,8 @@ FvAquisitionThread::aqtmode()
 void
 FvAquisitionThread::loop()
 {
-  Thread::CancelState old_cancel_state;
   // We disable cancelling here to avoid problems with the write lock
+  Thread::CancelState old_cancel_state;
   set_cancel_state(Thread::CANCEL_DISABLED, &old_cancel_state);
 
 #ifdef FVBASE_TIMETRACKER

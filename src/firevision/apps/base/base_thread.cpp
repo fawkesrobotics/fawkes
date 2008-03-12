@@ -140,6 +140,7 @@ FvBaseThread::loop()
 	stit->second->join();
 	stit->second->set_aqtmode(FvAquisitionThread::AqtCyclic);
 	stit->second->start();
+	stit->second->cancel_finalize();
       }
     } else if (stit->second->aqtmode() != FvAquisitionThread::AqtContinuous ) {
       logger->log_info(name(), "Switching aquisition thread %s to continuous mode",
@@ -149,6 +150,7 @@ FvBaseThread::loop()
       stit->second->join();
       stit->second->set_aqtmode(FvAquisitionThread::AqtContinuous);
       stit->second->start();
+      stit->second->cancel_finalize();
     }
 
     started_threads.erase( stit++ );
@@ -289,6 +291,7 @@ FvBaseThread::unregister_thread(Thread *thread)
       ait->second->join();
       ait->second->set_aqtmode(FvAquisitionThread::AqtContinuous);
       ait->second->start();
+      ait->second->cancel_finalize();
     }
   }
   // Recreate as necessary after _removing_ threads
