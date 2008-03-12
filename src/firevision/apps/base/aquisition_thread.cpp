@@ -198,6 +198,10 @@ FvAquisitionThread::aqtmode()
 void
 FvAquisitionThread::loop()
 {
+  Thread::CancelState old_cancel_state;
+  // We disable cancelling here to avoid problems with the write lock
+  set_cancel_state(Thread::CANCEL_DISABLED, &old_cancel_state);
+
 #ifdef FVBASE_TIMETRACKER
   try {
     __tt->ping_start(__ttc_capture);
@@ -256,4 +260,7 @@ FvAquisitionThread::loop()
 
   _vision_threads->wakeup_cyclic_threads();
   _vision_threads->wait_cyclic_threads();
+
+  // reset to the original cancel state, cancelling is now safe
+  set_cancel_state(old_cancel_state);
 }
