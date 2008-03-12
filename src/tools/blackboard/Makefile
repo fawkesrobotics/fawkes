@@ -1,5 +1,5 @@
 #*****************************************************************************
-#              Makefile Build System for Fawkes : BlackBoard QA
+#            Makefile Build System for Fawkes : BlackBoard Tools
 #                            -------------------
 #   Created on Thu Oct 05 14:14:14 2006
 #   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
@@ -14,8 +14,6 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-
-CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\"
 
 LIBS_bb_cleanup = core utils blackboard
 OBJS_bb_cleanup = bb_cleanup.o

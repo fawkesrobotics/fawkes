@@ -2,7 +2,9 @@
 #                 Makefile Build System for Fawkes: Aspects
 #                            -------------------
 #   Created on Thu Jan 11 16:41:34 2007
-#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #

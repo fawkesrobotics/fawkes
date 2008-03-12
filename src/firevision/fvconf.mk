@@ -30,7 +30,7 @@ CTRLS=EVID100P DPPTU
 FVBASEDIR           = $(BASEDIR)/src/firevision
 FVCONFDIR           = $(CONFDIR)/firevision
 VISION_INCDIRS      = $(realpath $(FVBASEDIR))
-VISION_CFLAGS       = -g -D__STDC_LIMIT_MACROS -DFVCONFDIR=\"$(FVCONFDIR)\"
+VISION_CFLAGS       = -D__STDC_LIMIT_MACROS -DFVCONFDIR=\"$(FVCONFDIR)\"
 
 # PTGrey Triclops SDK used for Bumblebee2 stereo processing
 TRICLOPS_SDK=/opt/Triclops3.2.0.8-FC3

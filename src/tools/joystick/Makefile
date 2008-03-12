@@ -2,7 +2,9 @@
 #            Makefile Build System for Fawkes : Joystick Control
 #                            -------------------
 #   Created on Sat Jun 02 17:38:55 2007
-#   copyright (C) 2007 by Martin Liebenberg, AllemaniACs RoboCup Team
+#   Copyright (C) 2007 by Martin Liebenberg, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -12,11 +14,6 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id:Makefile 419 2007-11-08 09:45:51Z liebenberg $
-# last modified: $Date:2007-11-08 10:45:51 +0100 (Do, 08 Nov 2007) $
-#            by: $Author:liebenberg $
-#
 
 BASEDIR = ../../..
 

@@ -4,6 +4,8 @@
 #   Created on Wed Oct 04 10:49:27 2006
 #   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
+#   $Id$
+#
 #*****************************************************************************
 #
 #   This program is free software; you can redistribute it and/or modify
@@ -14,8 +16,6 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-
-CFLAGS = -g
 
 LIBS_libblackboard = core utils interface netcomm
 OBJS_libblackboard = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))

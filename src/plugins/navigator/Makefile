@@ -2,7 +2,9 @@
 #                 Makefile Build System for Fawkes: Navigator Plugin
 #                            -------------------
 #   Created on Tue May 29 18:41:17 2007
-#   copyright (C) 2007 by Martin Liebenberg, AllemaniACs RoboCup Team
+#   Copyright (C) 2007 by Martin Liebenberg, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #

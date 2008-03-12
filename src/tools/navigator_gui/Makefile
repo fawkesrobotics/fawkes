@@ -2,7 +2,9 @@
 #                 Makefile Build System for Fawkes: Navigator GUI
 #                            -------------------
 #   Created on Tue May 29 20:00:00 2007
-#   copyright (C) 2007 by Martin Liebenberg, AllemaniACs RoboCup Team
+#   Copyright (C) 2007 by Martin Liebenberg, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -10,12 +12,6 @@
 #   it under the terms of the GNU General Public License as published by
 #   the Free Software Foundation; either version 2 of the License, or
 #   (at your option) any later version.
-#
-#*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
 #
 #*****************************************************************************
 

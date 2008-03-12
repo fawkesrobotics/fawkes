@@ -2,7 +2,9 @@
 #                 Makefile Build System for Fawkes: Kicker Plugin
 #                            -------------------
 #   Created on Mon May 15 11:06:17 2007
-#   copyright (C) 2007 by Daniel Beck, AllemaniACs RoboCup Team
+#   Copyright (C) 2007 by Daniel Beck, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -12,17 +14,9 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-
-CFLAGS = -g
 
 ifneq ($(HAVE_IOWKIT),1)
   WARN_TARGETS += warning_iowkit
