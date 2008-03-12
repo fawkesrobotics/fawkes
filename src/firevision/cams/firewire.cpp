@@ -596,7 +596,7 @@ FirewireCamera::set_shutter(unsigned int shutter)
 
 
 /** Get shutter value.
- * @param shutter shutter value
+ * @return the current shutter value
  */
 unsigned int
 FirewireCamera::shutter()
