@@ -30,6 +30,8 @@
 #include <core/threading/barrier.h>
 #include <interfaces/object.h>
 
+#include <cstring>
+
 /** @class SkillerLiaisonThread <plugins/skiller/liaison_thread.h>
  * Skiller Liaison Thread.
  * This threads connects the skill module to the Fawkes main loop. It gathers
