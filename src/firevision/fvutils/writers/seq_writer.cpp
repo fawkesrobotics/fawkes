@@ -35,6 +35,8 @@
 
 /** @class SeqWriter <fvutils/writers/seq_writer.h>
  * Writes a sequence of images to disk.
+ *
+ * @author Daniel Beck
  */
 
 /** Constructor.
@@ -48,8 +50,8 @@ SeqWriter::SeqWriter(Writer* writer)
 
   cspace = CS_UNKNOWN;
 
-  filename = strdup("");
-  img_path = strdup("");
+  filename = 0;
+  img_path = 0;
 }
 
 
@@ -107,7 +109,7 @@ void SeqWriter::set_colorspace(colorspace_t _cspace)
  */
 void SeqWriter::write(unsigned char *buffer)
 {
-  frame_number++;
+  ++frame_number;
   char* fn;
 
   time_t now = time(NULL);
@@ -115,31 +117,22 @@ void SeqWriter::write(unsigned char *buffer)
   char timestring[30];
   strftime(timestring, 30, "%Y%m%d-%H%M%S", t);
   
-  if (strcmp(filename, "") != 0)
+  if (filename == 0)
     {
       // filename: YYYYMMDD-hhmmss_index.ext
-      fn = (char*) malloc( strlen(img_path) + strlen(timestring) + 10 );
-      if (strcmp(img_path, "") != 0)
-	{
-	  sprintf(fn, "%s/%s_%04u", img_path, timestring, frame_number);
-	}
+      if (img_path == 0)
+	{ asprintf(&fn, "%s/%s_%04u", img_path, timestring, frame_number); }
       else
-	{
-	  sprintf(fn, "%s_%04u", timestring, frame_number);
-	}
-    }
+	{ asprintf(&fn, "%s_%04u", timestring, frame_number); }
+    }	
   else
     {
       // filename: YYYYMMDD-hhmmss_name_index.ext
       fn = (char*) malloc( strlen(img_path) + strlen(timestring) + strlen(filename) + 10 );
-      if (strcmp(img_path, "") != 0)
-	{
-	  sprintf(fn, "%s/%s_%s_%04u", img_path, timestring, filename, frame_number);
-	}
+      if (img_path == 0)
+	{ asprintf(&fn, "%s/%s_%s_%04u", img_path, timestring, filename, frame_number); }
       else
-	{
-	  sprintf(fn, "%s_%s_%04u", timestring, filename, frame_number);
-	}
+	{ asprintf(&fn, "%s_%s_%04u", timestring, filename, frame_number); }
     }
 
   writer->set_filename(fn);

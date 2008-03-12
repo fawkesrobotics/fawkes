@@ -29,8 +29,9 @@
 
 #include <core/exception.h>
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 
 /** @class Writer <fvutils/writers/writer.h>
  * Interface to write images.
@@ -115,10 +116,7 @@ Writer::set_filename(const char *filename)
       throw Exception("Extension not set");
     }
 
-    this->filename = (char *) malloc( strlen(basename) + strlen(extension) + 1 );
-    strcpy(this->filename, basename);
-    strcat(this->filename, ".");
-    strcat(this->filename, extension);
+    asprintf(&(this->filename), "%s.%s", basename, extension);
   }
 }
 
