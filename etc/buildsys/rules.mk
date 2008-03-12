@@ -164,20 +164,20 @@ moc_%.cpp: %.h
 	$(SILENT) $(MOC) $(MOC_FLAGS) -p "../$(subst ..,__,$(@D))" $< -o $(subst ..,__,$@)
 
 .SECONDEXPANSION:
-$(BINDIR)/%: $$(OBJS_$$(notdir $$*))
+$(BINDIR)/%: $$(OBJS_$$(subst /,_,$$*))
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$(notdir $*)) \
-	$(addprefix -l,$(LIBS_$(notdir $*))) $(addprefix -l,$(LIBS)) \
-	$(addprefix -L,$(LIBDIRS_$(notdir $*))) $(addprefix -L,$(LIBDIRS)) \
+	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
+	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
+	$(addprefix -L,$(LIBDIRS_$(subst /,_,$*))) $(addprefix -L,$(LIBDIRS)) \
 	-o $@ $(subst ..,__,$^)
 
-$(LIBDIR)/%.so: $$(OBJS_$$(notdir $$*))
+$(LIBDIR)/%.so: $$(OBJS_$$(subst /,_,$$*))
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$(notdir $*)) \
-	$(addprefix -l,$(LIBS_$(notdir $*))) $(addprefix -l,$(LIBS)) \
-	$(addprefix -L,$(LIBDIRS_$(notdir $*))) $(addprefix -L,$(LIBDIRS)) \
+	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$(subst /,_,$*)) \
+	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
+	$(addprefix -L,$(LIBDIRS_$(subst /,_,$*))) $(addprefix -L,$(LIBDIRS)) \
 	-o $@ $(subst ..,__,$^)
 
 
