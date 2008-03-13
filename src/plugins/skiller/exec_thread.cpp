@@ -43,6 +43,7 @@ extern "C" {
 }
 
 #include <string>
+#include <cstring>
 #include <cerrno>
 #ifdef HAVE_INOTIFY
 #  include <sys/inotify.h>
