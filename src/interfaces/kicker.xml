@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
-<!-- $Id$ -->
 <interface name="KickerInterface" author="Daniel Beck" year="2007">
   <constants>
     <enum name="GuideBallSideEnum">

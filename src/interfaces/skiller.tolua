@@ -1,0 +1,25 @@
+$#include <interfaces/skiller.h>
+class SkillerInterface : public Interface
+{
+
+  class CallSkillMessage : public Message
+  {
+    CallSkillMessage(char * ini_skill_string);
+    CallSkillMessage();
+    ~CallSkillMessage();
+
+    char * skill_string();
+    void set_skill_string(const char * new_skill_string);
+  };
+
+  class RestartInterpreterMessage : public Message
+  {
+    RestartInterpreterMessage();
+    ~RestartInterpreterMessage();
+
+  };
+
+  char * skill_string();
+  void set_skill_string(const char * new_skill_string);
+
+};

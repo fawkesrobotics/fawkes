@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
-<!-- $Id$ -->
 <interface name="ObjectPositionInterface" author="Tim Niemueller" year="2007">
   <constants>
     <!-- Note that the type constants are saved in a 16 bit wide unsigned int and thus have

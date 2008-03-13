@@ -18,6 +18,7 @@ TOLUA_API int  tolua_interfaces_open (lua_State* tolua_S);
 #include <interfaces/motor.h>
 #include <interfaces/navigator.h>
 #include <interfaces/object.h>
+#include <interfaces/skiller.h>
 #include <interfaces/test.h>
 
 /* function to release collected object via destructor */
@@ -47,6 +48,13 @@ static int tolua_collect_MotorInterface__RotMessage (lua_State* tolua_S)
 static int tolua_collect_KickerInterface__KickMessage (lua_State* tolua_S)
 {
  KickerInterface::KickMessage* self = (KickerInterface::KickMessage*) tolua_tousertype(tolua_S,1,0);
+	delete self;
+	return 0;
+}
+
+static int tolua_collect_SkillerInterface__CallSkillMessage (lua_State* tolua_S)
+{
+ SkillerInterface::CallSkillMessage* self = (SkillerInterface::CallSkillMessage*) tolua_tousertype(tolua_S,1,0);
 	delete self;
 	return 0;
 }
@@ -114,6 +122,13 @@ static int tolua_collect_TestInterface__SetTestIntMessage (lua_State* tolua_S)
 	return 0;
 }
 
+static int tolua_collect_SkillerInterface__RestartInterpreterMessage (lua_State* tolua_S)
+{
+ SkillerInterface::RestartInterpreterMessage* self = (SkillerInterface::RestartInterpreterMessage*) tolua_tousertype(tolua_S,1,0);
+	delete self;
+	return 0;
+}
+
 static int tolua_collect_MotorInterface__TransRotMessage (lua_State* tolua_S)
 {
  MotorInterface::TransRotMessage* self = (MotorInterface::TransRotMessage*) tolua_tousertype(tolua_S,1,0);
@@ -169,18 +184,21 @@ static int tolua_collect_MotorInterface__LinTransRotMessage (lua_State* tolua_S)
 static void tolua_reg_types (lua_State* tolua_S)
 {
  tolua_usertype(tolua_S,"NavigatorInterface::ObstacleMessage");
- tolua_usertype(tolua_S,"ObjectPositionInterface");
- tolua_usertype(tolua_S,"KickerInterface");
  tolua_usertype(tolua_S,"TestInterface::CalculateMessage");
+ tolua_usertype(tolua_S,"TestInterface::SetTestStringMessage");
+ tolua_usertype(tolua_S,"ObjectPositionInterface");
+ tolua_usertype(tolua_S,"TestInterface::SetTestIntMessage");
+ tolua_usertype(tolua_S,"KickerInterface");
+ tolua_usertype(tolua_S,"SkillerInterface::RestartInterpreterMessage");
  tolua_usertype(tolua_S,"MotorInterface::RotMessage");
  tolua_usertype(tolua_S,"KickerInterface::KickMessage");
- tolua_usertype(tolua_S,"TestInterface::SetTestStringMessage");
+ tolua_usertype(tolua_S,"SkillerInterface::CallSkillMessage");
  tolua_usertype(tolua_S,"TestInterface");
  tolua_usertype(tolua_S,"KickerInterface::GuideBallMessage");
  tolua_usertype(tolua_S,"BatteryInterface::PushButtonMessage");
  tolua_usertype(tolua_S,"MotorInterface::SetMotorStateMessage");
  tolua_usertype(tolua_S,"Interface");
- tolua_usertype(tolua_S,"TestInterface::SetTestIntMessage");
+ tolua_usertype(tolua_S,"SkillerInterface");
  tolua_usertype(tolua_S,"NavigatorInterface::MaxVelocityMessage");
  tolua_usertype(tolua_S,"NavigatorInterface::TargetMessage");
  tolua_usertype(tolua_S,"MotorInterface::TransMessage");
@@ -7608,6 +7626,356 @@ static int tolua_interfaces_ObjectPositionInterface_set_xyz_velocity_covariance0
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: new of class  CallSkillMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_CallSkillMessage_new00
+static int tolua_interfaces_SkillerInterface_CallSkillMessage_new00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"SkillerInterface::CallSkillMessage",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  char* ini_skill_string = ((char*)  tolua_tostring(tolua_S,2,0));
+  {
+   SkillerInterface::CallSkillMessage* tolua_ret = (SkillerInterface::CallSkillMessage*)  new SkillerInterface::CallSkillMessage(ini_skill_string);
+   tolua_pushusertype(tolua_S,(void*)tolua_ret,"SkillerInterface::CallSkillMessage");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'new'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: new_local of class  CallSkillMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_CallSkillMessage_new00_local
+static int tolua_interfaces_SkillerInterface_CallSkillMessage_new00_local(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"SkillerInterface::CallSkillMessage",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  char* ini_skill_string = ((char*)  tolua_tostring(tolua_S,2,0));
+  {
+   SkillerInterface::CallSkillMessage* tolua_ret = (SkillerInterface::CallSkillMessage*)  new SkillerInterface::CallSkillMessage(ini_skill_string);
+   tolua_pushusertype_and_takeownership(tolua_S,(void *)tolua_ret,"SkillerInterface::CallSkillMessage");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'new'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: new of class  CallSkillMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_CallSkillMessage_new01
+static int tolua_interfaces_SkillerInterface_CallSkillMessage_new01(lua_State* tolua_S)
+{
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"SkillerInterface::CallSkillMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+ {
+  {
+   SkillerInterface::CallSkillMessage* tolua_ret = (SkillerInterface::CallSkillMessage*)  new SkillerInterface::CallSkillMessage();
+   tolua_pushusertype(tolua_S,(void*)tolua_ret,"SkillerInterface::CallSkillMessage");
+  }
+ }
+ return 1;
+tolua_lerror:
+ return tolua_interfaces_SkillerInterface_CallSkillMessage_new00(tolua_S);
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: new_local of class  CallSkillMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_CallSkillMessage_new01_local
+static int tolua_interfaces_SkillerInterface_CallSkillMessage_new01_local(lua_State* tolua_S)
+{
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"SkillerInterface::CallSkillMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+ {
+  {
+   SkillerInterface::CallSkillMessage* tolua_ret = (SkillerInterface::CallSkillMessage*)  new SkillerInterface::CallSkillMessage();
+   tolua_pushusertype_and_takeownership(tolua_S,(void *)tolua_ret,"SkillerInterface::CallSkillMessage");
+  }
+ }
+ return 1;
+tolua_lerror:
+ return tolua_interfaces_SkillerInterface_CallSkillMessage_new00_local(tolua_S);
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: delete of class  CallSkillMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_CallSkillMessage_delete00
+static int tolua_interfaces_SkillerInterface_CallSkillMessage_delete00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"SkillerInterface::CallSkillMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  SkillerInterface::CallSkillMessage* self = (SkillerInterface::CallSkillMessage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'delete'",NULL);
+#endif
+  delete self;
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'delete'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: skill_string of class  CallSkillMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_CallSkillMessage_skill_string00
+static int tolua_interfaces_SkillerInterface_CallSkillMessage_skill_string00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"SkillerInterface::CallSkillMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  SkillerInterface::CallSkillMessage* self = (SkillerInterface::CallSkillMessage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'skill_string'",NULL);
+#endif
+  {
+   char* tolua_ret = (char*)  self->skill_string();
+   tolua_pushstring(tolua_S,(const char*)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'skill_string'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_skill_string of class  CallSkillMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_CallSkillMessage_set_skill_string00
+static int tolua_interfaces_SkillerInterface_CallSkillMessage_set_skill_string00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"SkillerInterface::CallSkillMessage",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  SkillerInterface::CallSkillMessage* self = (SkillerInterface::CallSkillMessage*)  tolua_tousertype(tolua_S,1,0);
+  const char* new_skill_string = ((const char*)  tolua_tostring(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_skill_string'",NULL);
+#endif
+  {
+   self->set_skill_string(new_skill_string);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_skill_string'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: new of class  RestartInterpreterMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_RestartInterpreterMessage_new00
+static int tolua_interfaces_SkillerInterface_RestartInterpreterMessage_new00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"SkillerInterface::RestartInterpreterMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   SkillerInterface::RestartInterpreterMessage* tolua_ret = (SkillerInterface::RestartInterpreterMessage*)  new SkillerInterface::RestartInterpreterMessage();
+   tolua_pushusertype(tolua_S,(void*)tolua_ret,"SkillerInterface::RestartInterpreterMessage");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'new'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: new_local of class  RestartInterpreterMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_RestartInterpreterMessage_new00_local
+static int tolua_interfaces_SkillerInterface_RestartInterpreterMessage_new00_local(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"SkillerInterface::RestartInterpreterMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   SkillerInterface::RestartInterpreterMessage* tolua_ret = (SkillerInterface::RestartInterpreterMessage*)  new SkillerInterface::RestartInterpreterMessage();
+   tolua_pushusertype_and_takeownership(tolua_S,(void *)tolua_ret,"SkillerInterface::RestartInterpreterMessage");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'new'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: delete of class  RestartInterpreterMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_RestartInterpreterMessage_delete00
+static int tolua_interfaces_SkillerInterface_RestartInterpreterMessage_delete00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"SkillerInterface::RestartInterpreterMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  SkillerInterface::RestartInterpreterMessage* self = (SkillerInterface::RestartInterpreterMessage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'delete'",NULL);
+#endif
+  delete self;
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'delete'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: skill_string of class  SkillerInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_skill_string00
+static int tolua_interfaces_SkillerInterface_skill_string00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"SkillerInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  SkillerInterface* self = (SkillerInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'skill_string'",NULL);
+#endif
+  {
+   char* tolua_ret = (char*)  self->skill_string();
+   tolua_pushstring(tolua_S,(const char*)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'skill_string'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_skill_string of class  SkillerInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_set_skill_string00
+static int tolua_interfaces_SkillerInterface_set_skill_string00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"SkillerInterface",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  SkillerInterface* self = (SkillerInterface*)  tolua_tousertype(tolua_S,1,0);
+  const char* new_skill_string = ((const char*)  tolua_tostring(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_skill_string'",NULL);
+#endif
+  {
+   self->set_skill_string(new_skill_string);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_skill_string'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* get function: TEST_CONSTANT of class  TestInterface */
 #ifndef TOLUA_DISABLE_tolua_get_TestInterface_TEST_CONSTANT
 static int tolua_get_TestInterface_TEST_CONSTANT(lua_State* tolua_S)
@@ -9234,6 +9602,38 @@ TOLUA_API int tolua_interfaces_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_world_z_velocity",tolua_interfaces_ObjectPositionInterface_set_world_z_velocity00);
    tolua_function(tolua_S,"xyz_velocity_covariance",tolua_interfaces_ObjectPositionInterface_xyz_velocity_covariance00);
    tolua_function(tolua_S,"set_xyz_velocity_covariance",tolua_interfaces_ObjectPositionInterface_set_xyz_velocity_covariance00);
+  tolua_endmodule(tolua_S);
+  tolua_cclass(tolua_S,"SkillerInterface","SkillerInterface","Interface",NULL);
+  tolua_beginmodule(tolua_S,"SkillerInterface");
+   #ifdef __cplusplus
+   tolua_cclass(tolua_S,"CallSkillMessage","SkillerInterface::CallSkillMessage","Message",tolua_collect_SkillerInterface__CallSkillMessage);
+   #else
+   tolua_cclass(tolua_S,"CallSkillMessage","SkillerInterface::CallSkillMessage","Message",NULL);
+   #endif
+   tolua_beginmodule(tolua_S,"CallSkillMessage");
+    tolua_function(tolua_S,"new",tolua_interfaces_SkillerInterface_CallSkillMessage_new00);
+    tolua_function(tolua_S,"new_local",tolua_interfaces_SkillerInterface_CallSkillMessage_new00_local);
+    tolua_function(tolua_S,".call",tolua_interfaces_SkillerInterface_CallSkillMessage_new00_local);
+    tolua_function(tolua_S,"new",tolua_interfaces_SkillerInterface_CallSkillMessage_new01);
+    tolua_function(tolua_S,"new_local",tolua_interfaces_SkillerInterface_CallSkillMessage_new01_local);
+    tolua_function(tolua_S,".call",tolua_interfaces_SkillerInterface_CallSkillMessage_new01_local);
+    tolua_function(tolua_S,"delete",tolua_interfaces_SkillerInterface_CallSkillMessage_delete00);
+    tolua_function(tolua_S,"skill_string",tolua_interfaces_SkillerInterface_CallSkillMessage_skill_string00);
+    tolua_function(tolua_S,"set_skill_string",tolua_interfaces_SkillerInterface_CallSkillMessage_set_skill_string00);
+   tolua_endmodule(tolua_S);
+   #ifdef __cplusplus
+   tolua_cclass(tolua_S,"RestartInterpreterMessage","SkillerInterface::RestartInterpreterMessage","Message",tolua_collect_SkillerInterface__RestartInterpreterMessage);
+   #else
+   tolua_cclass(tolua_S,"RestartInterpreterMessage","SkillerInterface::RestartInterpreterMessage","Message",NULL);
+   #endif
+   tolua_beginmodule(tolua_S,"RestartInterpreterMessage");
+    tolua_function(tolua_S,"new",tolua_interfaces_SkillerInterface_RestartInterpreterMessage_new00);
+    tolua_function(tolua_S,"new_local",tolua_interfaces_SkillerInterface_RestartInterpreterMessage_new00_local);
+    tolua_function(tolua_S,".call",tolua_interfaces_SkillerInterface_RestartInterpreterMessage_new00_local);
+    tolua_function(tolua_S,"delete",tolua_interfaces_SkillerInterface_RestartInterpreterMessage_delete00);
+   tolua_endmodule(tolua_S);
+   tolua_function(tolua_S,"skill_string",tolua_interfaces_SkillerInterface_skill_string00);
+   tolua_function(tolua_S,"set_skill_string",tolua_interfaces_SkillerInterface_set_skill_string00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"TestInterface","TestInterface","Interface",NULL);
   tolua_beginmodule(tolua_S,"TestInterface");

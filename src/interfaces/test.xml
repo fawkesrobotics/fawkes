@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
-<!-- $Id$ -->
 <interface name="TestInterface" author="Tim Niemueller" year="2006-2007">
   <constants>
     <constant type="int" value="5" name="TEST_CONSTANT">Just a test constant</constant>

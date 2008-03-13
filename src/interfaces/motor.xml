@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
-<!-- $Id$ -->
 <interface name="MotorInterface" author="Martin Liebenberg, Tim Niemueller" year="2007">
   <constants>
     <constant type="unsigned int" name="MOTOR_ENABLED" value="0">
