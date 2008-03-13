@@ -40,7 +40,7 @@ error_sqlite:
 endif
 
 LIBS_libconfig = stdc++ core utils netcomm
-OBJS_libconfig = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+OBJS_libconfig =$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
 CFLAGS_config_tolua = -Wno-unused-function
 TOLUA_config = $(wildcard $(SRCDIR)/*.tolua)
@@ -49,7 +49,7 @@ OBJS_lua_config = config_tolua.o
 
 OBJS_all = $(OBJS_libconfig) $(OBJS_lua_config)
 
-$(LIBDIR)/lua/config.so: $(LIBDIR)/libconfig.so
+$(LIBDIR)/lua/config.so: | $(LIBDIR)/libconfig.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

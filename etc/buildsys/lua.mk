@@ -38,7 +38,7 @@ ifeq ($(HAVE_LUA),1)
 %_tolua.cpp: $$(TOLUA_$$(subst /,_,$$*))
 	$(SILENT) echo "$(INDENT_PRINT)--- Generating Lua package C++ file $(@F)"
 	$(SILENT)cat $(filter %.tolua,$^) | $(TOLUAPP) -n $(notdir $*) | \
-	sed -e 's/^\(.*Generated automatically .*\) on/\1/' | \
+	sed -e 's/^\(.*Generated automatically .*\) on .*$$/\1/' | \
 	awk '/^#if defined/ { f=1 }; f { t = t "\n" $$0 }; !f {print}; f && /^#endif/ {print "extern \"C\" {" t "\n}\n"; f=0}' \
 	> $@
 

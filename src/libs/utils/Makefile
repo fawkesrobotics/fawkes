@@ -32,7 +32,7 @@ TOLUA_utils = $(wildcard $(SRCDIR)/*.tolua $(SRCDIR)/*/*.tolua $(SRCDIR)/*/*/*.t
 LIBS_lua_utils = core utils tolua++
 OBJS_lua_utils = utils_tolua.o
 
-OBJS_all = $(OBJS_libutils) $(SRCDIR)/utils_tolua.cpp
+OBJS_all = $(OBJS_libutils) $(OBJS_lua_utils)
 ifeq ($(HAVE_LIBMAGIC),1)
   LIBS_all  = $(LIBDIR)/libutils.so
   ifeq ($(HAVE_TOLUA),1)
@@ -51,7 +51,7 @@ error_libmagic:
 	$(SILENT)exit 1
 endif
 
-$(LIBDIR)/lua/utils.so: $(LIBDIR)/libutils.so
+$(LIBDIR)/lua/utils.so: | $(LIBDIR)/libutils.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

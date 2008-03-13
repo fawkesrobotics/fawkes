@@ -37,7 +37,7 @@ else
   all: warning_tolua_wrapper
 endif
 
-$(LIBDIR)/lua/interface.so: $(LIBDIR)/libinterface.so
+$(LIBDIR)/lua/interface.so: | $(LIBDIR)/libinterface.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

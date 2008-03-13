@@ -46,7 +46,7 @@ endif
 
 include $(SRCDIR)/generator/generator_rules.mk
 
-$(LIBDIR)/lua/interfaces.so: $(LIBDIR)/libinterfaces.so
+$(LIBDIR)/lua/interfaces.so: | $(LIBDIR)/libinterfaces.so
 
 .SECONDARY: $(SRCS_interfaces) $(HDRS_interfaces) $(OBJS_interfaces) \
 	$(TOLUA_interfaces) $(SRCDIR)/interfaces_tolua.cpp \
