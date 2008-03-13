@@ -16,6 +16,7 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/lua.mk
 
 ifneq ($(realpath /usr/include/magic.h),)
   HAVE_LIBMAGIC = 1
@@ -23,21 +24,34 @@ else
   ERROR_TARGETS += error_libmagic
 endif
 
-ifneq ($(SRCDIR),)
-all: $(ERROR_TARGETS)
+LIBS_libutils = stdc++ core magic $(if $(filter Linux,$(OS)),dl)
+OBJS_libutils =	$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
+
+CFLAGS_utils_tolua = -Wno-unused-function
+TOLUA_utils = $(wildcard $(SRCDIR)/*.tolua $(SRCDIR)/*/*.tolua $(SRCDIR)/*/*/*.tolua)
+LIBS_lua_utils = core utils tolua++
+OBJS_lua_utils = utils_tolua.o
+
+OBJS_all = $(OBJS_libutils) $(SRCDIR)/utils_tolua.cpp
+ifeq ($(HAVE_LIBMAGIC),1)
+  LIBS_all  = $(LIBDIR)/libutils.so
+  ifeq ($(HAVE_TOLUA),1)
+    LIBS_all += $(LIBDIR)/lua/utils.so
+    TARGETS_all += $(SRCDIR)/utils_tolua.cpp
+  else
+    WARN_TARGETS += warning_tolua_wrapper
+  endif
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(ERROR_TARGETS) $(WARN_TARGETS)
 .PHONY: error_libmagic
 error_libmagic:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Utils cannot be built$(TNORMAL) (install file-devel)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Utils cannot be built$(TNORMAL) (file-devel not installed)"
 	$(SILENT)exit 1
 endif
 
-LIBS_libutils = stdc++ core magic $(if $(filter Linux,$(OS)),dl)
-OBJS_libutils =	$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
-
-OBJS_all = $(OBJS_libutils)
-ifeq ($(HAVE_LIBMAGIC),1)
-  LIBS_all  = $(LIBDIR)/libutils.so
-endif
+$(LIBDIR)/lua/utils.so: $(LIBDIR)/libutils.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
