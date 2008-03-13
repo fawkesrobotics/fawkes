@@ -40,6 +40,9 @@ extern "C" {
 
 #include <string>
 
+class SkillerLiaisonThread;
+class ComponentLogger;
+
 class SkillerExecutionThread
 : public Thread,
   public BlockedTimingAspect,
@@ -48,15 +51,18 @@ class SkillerExecutionThread
   public ClockAspect
 {
  public:
-  SkillerExecutionThread(Barrier *liaison_exec_barrier);
+  SkillerExecutionThread(Barrier *liaison_exec_barrier, SkillerLiaisonThread *slt);
   virtual ~SkillerExecutionThread();
 
   virtual void init();
+  virtual void once();
   virtual void loop();
   virtual void finalize();
 
  private:
   Barrier *__liaison_exec_barrier;
+  SkillerLiaisonThread *__slt;
+  ComponentLogger *__clog;
 
   lua_State *L;
   int err;

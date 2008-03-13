@@ -15,17 +15,22 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/etc/buildsys/lua.mk
 
 CFLAGS  += -DSKILLDIR=\"$(SKILLDIR)\" $(CFLAGS_LUA)
 LDFLAGS += $(LDFLAGS_LUA)
 
-LIBS_skiller = core utils netcomm
+LIBS_skiller = core utils netcomm tolua++
 OBJS_skiller = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_skiller)
 
 ifeq ($(HAVE_LUA),1)
-  PLUGINS_all = $(PLUGINDIR)/skiller.so
+  ifeq ($(HAVE_TOLUA),1)
+    PLUGINS_all = $(PLUGINDIR)/skiller.so
+  else
+    WARN_TARGETS += warning_tolua
+  endif
 else
   WARN_TARGETS += warning_lua
 endif
@@ -33,9 +38,12 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_lua
+.PHONY: warning_lua warning_tolua
 warning_lua:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Skiller Plugin$(TNORMAL) (install Lua >= $(LUA_MINVERSION))"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Skiller Plugin$(TNORMAL) (Lua >= $(LUA_MINVERSION) not installed)"
+
+warning_tolua:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Skiller Plugin$(TNORMAL) (tolua++[-devel] not installed)"
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

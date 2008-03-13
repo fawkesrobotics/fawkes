@@ -67,6 +67,7 @@ SkillerLiaisonThread::init_failure_cleanup()
 {
   try {
     if ( wm_ball_interface )  blackboard->close(wm_ball_interface);
+    if ( wm_ball_interface_w )  blackboard->close(wm_ball_interface_w);
   } catch (...) {
     // we really screwed up, can't do anything about it, ignore error, logger is
     // initialized since this method is only called from init() which is only called if
@@ -84,8 +85,9 @@ SkillerLiaisonThread::init()
   wm_pose_interface      = NULL;
 
   try {
-    wm_ball_interface = blackboard->open_for_writing<ObjectPositionInterface>("WM Ball");
-    wm_pose_interface = blackboard->open_for_writing<ObjectPositionInterface>("WM Pose");
+    wm_ball_interface = blackboard->open_for_reading<ObjectPositionInterface>("WM Ball");
+    wm_ball_interface_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Ball");
+    wm_pose_interface = blackboard->open_for_reading<ObjectPositionInterface>("WM Pose");
     std::list<ObjectPositionInterface *> *obs_lst = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("WM Obstacles");
     for (std::list<ObjectPositionInterface *>::iterator i = obs_lst->begin(); i != obs_lst->end(); ++i) {
       wm_obstacles.push_back(*i);
@@ -132,6 +134,10 @@ SkillerLiaisonThread::bb_interface_created(const char *type, const char *id) thr
 void
 SkillerLiaisonThread::loop()
 {
+  wm_ball_interface_w->read();
+  wm_ball_interface_w->set_world_x(wm_ball_interface_w->world_x() + 1);
+  wm_ball_interface_w->write();
+
   wm_ball_interface->read();
   wm_pose_interface->read();
   wm_obstacles.lock();

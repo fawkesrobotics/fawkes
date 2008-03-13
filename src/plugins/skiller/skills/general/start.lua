@@ -1,8 +1,10 @@
 
 ----------------------------------------------------------------------------
---  init.lua - skiller Lua initialization code
+--  start.lua - skiller Lua start code
+--              executed when exec thread is running, but before skills are
+--              executed. Only run if initialization was successful.
 --
---  Created: Mon Mar 10 17:00:35 2008
+--  Created: Thu Mar 13 11:24:40 2008
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
@@ -23,12 +25,28 @@
 --  along with this program; if not, write to the Free Software Foundation,
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
 
+-- Can be used to debug component path
+--[[
+print(package.path);
+print(package.cpath);
+--]]
 
--- SKILLDIR is set by skiller before loading init.lua
-package.path  = package.path .. ";" .. SKILLDIR .. "/?.lua";
-package.cpath = package.cpath .. ";" .. LIBDIR .. "/lua/?.so";
 
-require("utils");
-require("config");
-require("interface");
-require("interfaces");
+--[[ lists whole config
+v = config:iterator();
+while ( v:next() ) do
+   if ( v:is_float() ) then
+      print(v:path(), "[float]", v:get_float());
+   elseif ( v:is_uint() ) then
+      print(v:path(), "[uint]", v:get_uint());
+   elseif ( v:is_int() ) then
+      print(v:path(), "[int]", v:get_int());
+   elseif ( v:is_bool() ) then
+      print(v:path(), "[bool]", v:get_bool());
+   elseif ( v:is_string() ) then
+      print(v:path(), "[string]", v:get_string());
+   end
+end
+--]]
+
+logger:log_debug("Lua startup completed");
