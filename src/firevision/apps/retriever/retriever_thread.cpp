@@ -82,14 +82,16 @@ FvRetrieverThread::init()
   seq_writer = NULL;
   try {
     if ( config->get_bool("/firevision/retriever/save_images") ) {
+      logger->log_info(name(), "Writing images to disk");
       Writer* writer = new JpegWriter();
       seq_writer = new SeqWriter(writer);
       std::string save_path;
-      try {
-	save_path = config->get_string("/firevision/retriever/save_path");
-      } catch (Exception &e) {
-	save_path = ("recorded_images");
-      }
+       try {
+ 	save_path = config->get_string("/firevision/retriever/save_path");
+       } catch (Exception &e) {
+	 save_path = ("recorded_images");
+	 logger->log_info(name(), "No save path specified. Using './%s'", save_path.c_str());
+       }
       seq_writer->set_path( save_path.c_str() );
       seq_writer->set_dimensions( cam->pixel_width(), cam->pixel_height() );
       seq_writer->set_colorspace( cam->colorspace() );
