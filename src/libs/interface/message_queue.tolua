@@ -1,0 +1,67 @@
+
+/***************************************************************************
+ *  message_queue.tolua - Interface message queue - toLua++ template file
+ *
+ *  Created: Wed Mar 12 23:00:00 2008
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
+ */
+
+$#include <interface/message_queue.h>
+
+class MessageQueue
+{
+  MessageQueue();
+  virtual ~MessageQueue();
+
+  class MessageIterator
+  {
+    MessageIterator();
+    MessageIterator(const MessageIterator &it);
+    MessageIterator & operator+  (unsigned int i);
+    bool              operator== (const MessageIterator & c) const;
+    Message *         operator*  () const;
+
+    unsigned int      id() const;
+  };
+
+  unsigned int append(Message *msg);
+  void         remove(const Message *msg);
+  void         remove(const unsigned int msg_id);
+  unsigned int insert_after(const MessageIterator &it, Message *msg);
+
+  unsigned int size() const;
+
+  void         flush();
+  bool         empty() const;
+
+  void         lock();
+  bool         try_lock();
+  void         unlock();
+
+  Message *    first();
+  void         pop();
+
+  MessageIterator begin();
+  MessageIterator end();
+
+};
+
