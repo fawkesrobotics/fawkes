@@ -39,10 +39,10 @@ class SeqWriter {
   ~SeqWriter();
 
   void set_path(const char* img_path);
-  void set_filename(const char* file_name);
+  void set_filename(const char* filename);
 
   void set_dimensions(unsigned int width, unsigned int height);
-  void set_colorspace(colorspace_t _cspace);
+  void set_colorspace(colorspace_t cspace);
 
   void write(unsigned char* buffer);
 

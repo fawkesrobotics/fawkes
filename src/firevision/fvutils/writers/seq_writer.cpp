@@ -30,6 +30,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #include <cstdio>
 
@@ -73,12 +74,13 @@ void SeqWriter::set_path(const char* img_path)
 {
   free(this->img_path);
   this->img_path = strdup(img_path);
+  printf("SeqWriter: img path set to %s\n", this->img_path);
 }
 
 /** Set a (base-) filename.
  * If a filename is set the name of the files will look like this:
  * filename_index.ext .
- * @param filename the (base-) filename
+ * @param base_fn the base-filename
  */
 void SeqWriter::set_filename(const char* filename)
 {
@@ -98,9 +100,9 @@ void SeqWriter::set_dimensions(unsigned int width, unsigned int height)
 /** Set the colorspace of the image.
  * @param _cspace the colospace
  */
-void SeqWriter::set_colorspace(colorspace_t _cspace)
+void SeqWriter::set_colorspace(colorspace_t cspace)
 {
-  cspace = _cspace;
+  this->cspace = cspace;
 }
 
 /** Write a single image to disk.
@@ -113,26 +115,32 @@ void SeqWriter::write(unsigned char *buffer)
   char* fn;
 
   time_t now = time(NULL);
-  struct tm *t = localtime(&now);
-  char timestring[30];
-  strftime(timestring, 30, "%Y%m%d-%H%M%S", t);
+  struct tm now_tm;
+  struct timeval now_tv;
+
+  gettimeofday(&now_tv, NULL);
+  localtime_r(&now, &now_tm);
+
+  char* timestring;
+  asprintf(&timestring, "%04d%02d%02d_%02d%02d%02d_%06ld", now_tm.tm_year + 1900, 
+	   now_tm.tm_mon + 1, now_tm.tm_mday, now_tm.tm_hour, now_tm.tm_min, 
+	   now_tm.tm_sec, now_tv.tv_usec);
   
-  if (filename == 0)
+  if (filename)
     {
-      // filename: YYYYMMDD-hhmmss_index.ext
-      if (img_path == 0)
-	{ asprintf(&fn, "%s/%s_%04u", img_path, timestring, frame_number); }
+      // filename: YYYYMMDD-hhmmss_uuuuuu_name_index.ext
+      if (img_path)
+	{ asprintf(&fn, "%s/%s_%s-%04u", img_path, timestring, filename, frame_number); }
       else
-	{ asprintf(&fn, "%s_%04u", timestring, frame_number); }
+	{ asprintf(&fn, "%s_%s-%04u", timestring, filename, frame_number); }
     }	
   else
     {
-      // filename: YYYYMMDD-hhmmss_name_index.ext
-      fn = (char*) malloc( strlen(img_path) + strlen(timestring) + strlen(filename) + 10 );
-      if (img_path == 0)
-	{ asprintf(&fn, "%s/%s_%s_%04u", img_path, timestring, filename, frame_number); }
+      // filename: YYYYMMDD-hhmmss_uuuuuu_index.ext
+      if (img_path)
+	{ asprintf(&fn, "%s/%s-%04u", img_path, timestring, frame_number); }
       else
-	{ asprintf(&fn, "%s_%s_%04u", timestring, filename, frame_number); }
+	{ asprintf(&fn, "%s-%04u", timestring, frame_number); }
     }
 
   writer->set_filename(fn);
