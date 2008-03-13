@@ -1,10 +1,8 @@
 
 ----------------------------------------------------------------------------
---  start.lua - skiller Lua start code
---              executed when exec thread is running, but before skills are
---              executed. Only run if initialization was successful.
+--  utils.lua - General skiller Lua utils
 --
---  Created: Thu Mar 13 11:24:40 2008
+--  Created: Thu Mar 13 16:31:29 2008
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
@@ -25,30 +23,30 @@
 --  along with this program; if not, write to the Free Software Foundation,
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
 
--- Can be used to debug component path
---[[
-print(package.path);
-print(package.cpath);
---]]
+-- store reference to global environment
+local __G = _G;
+-- these functions we need to register all the others
+local pairs = pairs;
+local type  = type;
 
+module("general.utils");
 
---[[ lists whole config
-v = config:iterator();
-while ( v:next() ) do
-   if ( v:is_float() ) then
-      print(v:path(), "[float]", v:get_float());
-   elseif ( v:is_uint() ) then
-      print(v:path(), "[uint]", v:get_uint());
-   elseif ( v:is_int() ) then
-      print(v:path(), "[int]", v:get_int());
-   elseif ( v:is_bool() ) then
-      print(v:path(), "[bool]", v:get_bool());
-   elseif ( v:is_string() ) then
-      print(v:path(), "[string]", v:get_string());
+-- we want all functions here, basically what register_global_funcs does for others
+for k,v in pairs(__G) do
+   if type(v) == "function" then
+      _M[k] = v;
    end
 end
---]]
 
-require("midsize")
 
-logger:log_debug("Lua startup completed");
+function register_global_funcs(m)
+   for k,v in pairs(__G) do
+      if type(v) == "function" then
+	 m[k] = v;
+      end
+   end
+end
+
+function module_init(m)
+   register_global_funcs(m);
+end

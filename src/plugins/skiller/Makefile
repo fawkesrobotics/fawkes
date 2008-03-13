@@ -17,7 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/lua.mk
 
-CFLAGS  += -DSKILLDIR=\"$(SKILLDIR)\" $(CFLAGS_LUA)
+CFLAGS  += -DSKILLDIR=\"$(SKILLDIR)\" $(CFLAGS_LUA) $(if $(HAVE_INOTIFY),-DHAVE_INOTIFY)
 LDFLAGS += $(LDFLAGS_LUA)
 
 LIBS_skiller = core utils netcomm tolua++

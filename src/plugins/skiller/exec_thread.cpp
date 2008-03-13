@@ -30,6 +30,7 @@
 
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
+#include <core/threading/mutex.h>
 #include <core/threading/barrier.h>
 #include <utils/logging/component.h>
 
@@ -42,6 +43,11 @@ extern "C" {
 }
 
 #include <string>
+#include <cerrno>
+#ifdef HAVE_INOTIFY
+#  include <sys/inotify.h>
+#  include <poll.h>
+#endif
 
 #define INIT_FILE SKILLDIR"/general/init.lua"
 #define START_FILE SKILLDIR"/general/start.lua"
@@ -68,6 +74,7 @@ SkillerExecutionThread::SkillerExecutionThread(Barrier *liaison_exec_barrier,
 {
   __liaison_exec_barrier = liaison_exec_barrier;
   __slt = slt;
+  __L = NULL;
 }
 
 
@@ -78,124 +85,119 @@ SkillerExecutionThread::~SkillerExecutionThread()
 
 
 void
-SkillerExecutionThread::init()
+SkillerExecutionThread::init_lua()
 {
-  __clog = new ComponentLogger(logger, "SkillerLua");
+  lua_State *tL = luaL_newstate();
+  luaL_openlibs(tL);
 
-  L = luaL_newstate();
-  luaL_openlibs(L);
-
-  lua_pushstring(L, SKILLDIR);  lua_setglobal(L, "SKILLDIR");
-  lua_pushstring(L, LIBDIR);    lua_setglobal(L, "LIBDIR");
+  lua_pushstring(tL, SKILLDIR);  lua_setglobal(tL, "SKILLDIR");
+  lua_pushstring(tL, LIBDIR);    lua_setglobal(tL, "LIBDIR");
 
   // Load initialization code
-  if ( (err = luaL_loadfile(L, INIT_FILE)) != 0) {
-    errmsg = lua_tostring(L, -1);
-    lua_pop(L, 1);
-    lua_close(L);
-    switch (err) {
+  if ( (__err = luaL_loadfile(tL, INIT_FILE)) != 0) {
+    __errmsg = lua_tostring(tL, -1);
+    lua_pop(tL, 1);
+    lua_close(tL);
+    switch (__err) {
     case LUA_ERRSYNTAX:
-      throw SyntaxErrorException("Lua syntax error: %s", errmsg.c_str());
+      throw SyntaxErrorException("Lua syntax error: %s", __errmsg.c_str());
 
     case LUA_ERRMEM:
       throw OutOfMemoryException("Could not load Lua init file");
 
     case LUA_ERRFILE:
-      throw CouldNotOpenFileException(INIT_FILE, errmsg.c_str());
+      throw CouldNotOpenFileException(INIT_FILE, __errmsg.c_str());
     }
   }
 
-  if ( (err = lua_pcall(L, 0, 0, 0)) != 0 ) {
+  if ( (__err = lua_pcall(tL, 0, 0, 0)) != 0 ) {
     // There was an error while executing the initialization file
-    errmsg = lua_tostring(L, -1);
-    lua_pop(L, 1);
-    lua_close(L);
-    switch (err) {
+    __errmsg = lua_tostring(tL, -1);
+    lua_pop(tL, 1);
+    lua_close(tL);
+    switch (__err) {
     case LUA_ERRRUN:
-      throw Exception("Lua runtime error: %s", errmsg.c_str());
+      throw Exception("Lua runtime error: %s", __errmsg.c_str());
 
     case LUA_ERRMEM:
       throw OutOfMemoryException("Could not execute Lua init file");
 
     case LUA_ERRERR:
-      throw Exception("Failed to execute error handler during error: %s", errmsg.c_str());
+      throw Exception("Failed to execute error handler during error: %s", __errmsg.c_str());
     }
   }
 
   // Export some utilities to Lua
-  // NOTE: all the (Lua) types that you use here must have been declared before, probably
+  // NOTE: all the (tLua) types that you use here must have been declared before, probably
   // by having an appropriate require clause for a wrapper in init.lua!
-  tolua_pushusertype(L, config, "Configuration");
-  lua_setglobal(L, "config");
+  tolua_pushusertype(tL, config, "Configuration");
+  lua_setglobal(tL, "config");
 
-  tolua_pushusertype(L, __clog, "ComponentLogger");
-  lua_setglobal(L, "logger");
+  tolua_pushusertype(tL, __clog, "ComponentLogger");
+  lua_setglobal(tL, "logger");
 
-  tolua_pushusertype(L, clock, "Clock");
-  lua_setglobal(L, "clock");
+  tolua_pushusertype(tL, clock, "Clock");
+  lua_setglobal(tL, "clock");
 
-  // initial loading of all skills
+  // Make sure Lua is not currently being executed
+  __lua_mutex->lock();
+  if ( __L != NULL ) {
+    lua_close(__L);
+  }
+  __L = tL;
+  __lua_mutex->unlock();
 }
 
 
 void
-SkillerExecutionThread::finalize()
-{
-  lua_close(L);
-  delete __clog;
-  __clog = NULL;
-}
-
-
-void
-SkillerExecutionThread::once()
+SkillerExecutionThread::start_lua()
 {
   // Get interfaces from liaison thread
-  tolua_pushusertype(L, __slt->wm_ball_interface, __slt->wm_ball_interface->type());
-  lua_setglobal(L, "wm_ball_interface");
+  tolua_pushusertype(__L, __slt->wm_ball_interface, __slt->wm_ball_interface->type());
+  lua_setglobal(__L, "wm_ball_interface");
 
 
   // Load start code
-  if ( (err = luaL_loadfile(L, START_FILE)) != 0) {
-    errmsg = lua_tostring(L, -1);
-    lua_pop(L, 1);
-    switch (err) {
+  if ( (__err = luaL_loadfile(__L, START_FILE)) != 0) {
+    __errmsg = lua_tostring(__L, -1);
+    lua_pop(__L, 1);
+    switch (__err) {
     case LUA_ERRSYNTAX:
-      __clog->log_debug("Lua syntax error: %s", errmsg.c_str());
+      logger->log_debug("SkillerExecutionThread", "Lua syntax error: %s", __errmsg.c_str());
       break;
 
     case LUA_ERRMEM:
-      __clog->log_debug("Lua: Out of memory, cannot load start file");
+      logger->log_debug("SkillerExecutionThread", "Lua: Out of memory, cannot load start file");
       break;
 
     case LUA_ERRFILE:
-      __clog->log_debug("Lua: could not open start file (%s)", errmsg.c_str());
+      logger->log_debug("SkillerExecutionThread", "Lua: could not open start file (%s)", __errmsg.c_str());
       break;
 
     default:
-      __clog->log_debug("Lua: unknown error occured (%s)", errmsg.c_str());
+      logger->log_debug("SkillerExecutionThread", "Lua: unknown error occured (%s)", __errmsg.c_str());
       break;
     }
   } else {
-    if ( (err = lua_pcall(L, 0, 0, 0)) != 0 ) {
+    if ( (__err = lua_pcall(__L, 0, 0, 0)) != 0 ) {
       // There was an error while executing the initialization file
-      errmsg = lua_tostring(L, -1);
-      lua_pop(L, 1);
-      switch (err) {
+      __errmsg = lua_tostring(__L, -1);
+      lua_pop(__L, 1);
+      switch (__err) {
       case LUA_ERRRUN:
-	__clog->log_debug("Lua runtime error: %s", errmsg.c_str());
+	logger->log_debug("SkillerExecutionThread", "Lua runtime error: %s", __errmsg.c_str());
 	break;
 	
       case LUA_ERRMEM:
-	__clog->log_debug("Lua: Out of memory, cannot execute start file");
+	logger->log_debug("SkillerExecutionThread", "Lua: Out of memory, cannot execute start file");
 	break;
 
       case LUA_ERRERR:
-	__clog->log_debug("Lua: Execution failed, error handled failed as well (%s)", errmsg.c_str());
+	logger->log_debug("SkillerExecutionThread", "Lua: Execution failed, error handled failed as well (%s)", __errmsg.c_str());
 	break;
 
       default:
-	__clog->log_debug("Lua: unknown error occured (%s)", errmsg.c_str());
+	logger->log_debug("SkillerExecutionThread", "Lua: unknown error occured (%s)", __errmsg.c_str());
 	break;
       }
     }
@@ -204,10 +206,175 @@ SkillerExecutionThread::once()
 
 
 void
+SkillerExecutionThread::restart_lua()
+{
+  try {
+    init_lua();
+    start_lua();
+  } catch (Exception &e) {
+    logger->log_error("SkillerExecutionThread", "Failed to restart Lua, exception follows");
+    logger->log_error("SkillerExecutionThread", e);
+  }
+}
+
+
+void
+SkillerExecutionThread::init_inotify()
+{
+#ifdef HAVE_INOTIFY
+  if ( (__inotify_fd = inotify_init()) == -1 ) {
+    throw Exception(errno, "Failed to initialize inotify");
+  }
+
+  int regerr = 0;
+  if ( (regerr = regcomp(&__inotify_regex, "^[^.].*\\.lua$", REG_EXTENDED)) != 0 ) {
+    char errtmp[1024];
+    regerror(regerr, &__inotify_regex, errtmp, sizeof(errtmp));
+    regfree(&__inotify_regex);
+    throw Exception("Failed to compile lua file regex: %s", errtmp);
+  }
+
+  // from http://www.linuxjournal.com/article/8478
+  __inotify_bufsize = 1024 * (sizeof(struct inotify_event) + 16);
+  __inotify_buf     = (char *)malloc(__inotify_bufsize);
+
+  logger->log_debug("SkillerExecutionThread", "Adding watch for %s", SKILLDIR);
+  uint32_t mask = IN_MODIFY | IN_MOVE | IN_CREATE | IN_DELETE;
+  if ( (__inotify_skilldir_watch = inotify_add_watch(__inotify_fd, SKILLDIR, mask)) == -1) {
+    close(__inotify_fd);
+    throw Exception(errno, "Failed to add inotify watch for skilldir %s", SKILLDIR);
+  }
+
+#else
+  logger->log_warn("SkillerExecutionThread", "inotify support not available, auto-reload "
+		   "not available.");
+#endif
+}
+
+
+void
+SkillerExecutionThread::proc_inotify()
+{
+#ifdef HAVE_INOTIFY
+  bool need_restart = false;
+
+  // Check for inotify events
+  pollfd ipfd;
+  ipfd.fd = __inotify_fd;
+  ipfd.events = POLLIN;
+  ipfd.revents = 0;
+  int prv = poll(&ipfd, 1, 0);
+  if ( prv == -1 ) {
+    logger->log_error("SkillerExecutionThread", "inotify poll failed: %s (%i)",
+		      strerror(errno), errno);
+  } else while ( prv > 0 ) {
+    // Our fd has an event, we can read
+    if ( ipfd.revents & POLLERR ) {      
+      logger->log_error("SkillerExecutionThread", "inotify poll error");
+    } else {
+      // must be POLLIN
+      int bytes = 0, i = 0;
+      if ((bytes = read(__inotify_fd, __inotify_buf, __inotify_bufsize)) != -1) {
+	while (i < bytes) {
+	  struct inotify_event *event = (struct inotify_event *) &__inotify_buf[i];
+
+	  if ( regexec(&__inotify_regex, event->name, 0, NULL, 0) == 0 ) {
+	    // it is a *.lua file
+
+	    if (event->mask & IN_MODIFY) {
+	      logger->log_debug("SkillerExecutionThread", "File %s has been modified", event->name);
+	    }
+	    if (event->mask & IN_MOVE) {
+	      logger->log_debug("SkillerExecutionThread", "File %s has been moved", event->name);
+	    }
+	    if (event->mask & IN_CREATE) {
+	      logger->log_debug("SkillerExecutionThread", "File %s has been created", event->name);
+	    }
+	    if (event->mask & IN_DELETE) {
+	      logger->log_debug("SkillerExecutionThread", "File %s has been deleted", event->name);
+	    }
+
+	    need_restart = true;
+	  }
+
+	  i += sizeof(struct inotify_event) + event->len;
+	}
+      } else {
+	logger->log_error("SkillerExecutionThread", "inotify failed to read any bytes");
+      }
+    }
+
+    prv = poll(&ipfd, 1, 0);
+  }
+
+  if ( need_restart ) {
+    logger->log_info("SkillerExecutionThread", "inotify event triggers Lua restart");
+    restart_lua();
+  }
+
+#else
+  logger->log_error("SkillerExecutionThread", "inotify support not available, but "
+		   "proc_inotify() was called. Ignoring.");
+#endif
+}
+
+
+void
+SkillerExecutionThread::init()
+{
+  init_inotify();
+
+  __clog = new ComponentLogger(logger, "SkillerLua");
+  __lua_mutex = new Mutex();
+
+  try {
+    init_lua();
+  } catch (Exception &e) {
+    delete __clog;
+    delete __lua_mutex;
+#ifdef HAVE_INOTIFY
+    close(__inotify_fd);
+#endif
+    throw;
+  }
+}
+
+
+void
+SkillerExecutionThread::finalize()
+{
+  lua_close(__L);
+  delete __clog;
+  __clog = NULL;
+  delete __lua_mutex;
+  __lua_mutex = NULL;
+#ifdef HAVE_INOTIFY
+  inotify_rm_watch(__inotify_fd, __inotify_skilldir_watch);
+  close(__inotify_fd);
+  free(__inotify_buf);
+  regfree(&__inotify_regex);
+#endif
+}
+
+
+void
+SkillerExecutionThread::once()
+{
+  start_lua();
+}
+
+
+void
 SkillerExecutionThread::loop()
 {
+#ifdef HAVE_INOTIFY
+  proc_inotify();
+#endif
+
   __liaison_exec_barrier->wait();
 
-  //luaL_dostring(L, "print(\"Ball X: \" .. wm_ball_interface:world_x());");
-  // lua_pcall(L, 0, 0, 0);
+  __lua_mutex->lock();
+  //luaL_dostring(__L, "print(\"Ball X: \" .. wm_ball_interface:world_x());");
+  // lua_pcall(__L, 0, 0, 0);
+  __lua_mutex->unlock();
 }

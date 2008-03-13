@@ -17,3 +17,7 @@
 
 SKILLDIR = $(abspath $(BASEDIR)/src/plugins/skiller/skills)
 
+ifneq ($(wildcard /usr/include/sys/inotify.h),)
+  HAVE_INOTIFY=1
+endif
+

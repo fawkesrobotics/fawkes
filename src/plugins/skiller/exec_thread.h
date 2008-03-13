@@ -39,9 +39,12 @@ extern "C" {
 }
 
 #include <string>
+#include <cstdlib>
+#include <regex.h>
 
 class SkillerLiaisonThread;
 class ComponentLogger;
+class Mutex;
 
 class SkillerExecutionThread
 : public Thread,
@@ -59,14 +62,30 @@ class SkillerExecutionThread
   virtual void loop();
   virtual void finalize();
 
- private:
+ private: /* methods */
+  void init_lua();
+  void start_lua();
+  void restart_lua();
+  void init_inotify();
+  void proc_inotify();
+
+ private: /* members */
   Barrier *__liaison_exec_barrier;
   SkillerLiaisonThread *__slt;
   ComponentLogger *__clog;
 
-  lua_State *L;
-  int err;
-  std::string errmsg;
+  lua_State *__L;
+  int __err;
+  std::string __errmsg;
+  Mutex *__lua_mutex;
+
+#ifdef HAVE_INOTIFY
+  int     __inotify_fd;
+  int     __inotify_skilldir_watch;
+  char   *__inotify_buf;
+  size_t  __inotify_bufsize;
+  regex_t __inotify_regex;
+#endif
 };
 
 #endif

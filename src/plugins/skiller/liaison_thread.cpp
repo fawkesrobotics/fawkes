@@ -110,6 +110,7 @@ void
 SkillerLiaisonThread::finalize()
 {
   blackboard->close(wm_ball_interface);
+  blackboard->close(wm_ball_interface_w);
   blackboard->close(wm_pose_interface);
 }
 
