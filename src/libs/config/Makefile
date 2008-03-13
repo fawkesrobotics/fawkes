@@ -17,6 +17,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/etc/buildsys/lua.mk
 
 ifneq ($(HAVE_SQLITE),1)
   ERROR_TARGETS += error_sqlite
@@ -24,6 +25,10 @@ else
   CFLAGS += $(shell $(PKGCONFIG) --cflags sqlite3)
   LDFLAGS_libconfig = $(shell $(PKGCONFIG) --libs sqlite3)
   LIBS_all  = $(LIBDIR)/libconfig.so
+  ifeq ($(HAVE_TOLUA),1)
+    LIBS_all += $(LIBDIR)/lua/config.so
+    TARGETS_all += $(SRCDIR)/config_tolua.cpp
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
@@ -34,11 +39,17 @@ error_sqlite:
 	$(SILENT)exit 1
 endif
 
-
 LIBS_libconfig = stdc++ core utils netcomm
 OBJS_libconfig = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all = $(OBJS_libconfig)
+CFLAGS_config_tolua = -Wno-unused-function
+TOLUA_config = $(wildcard $(SRCDIR)/*.tolua)
+LIBS_lua_config = core config tolua++
+OBJS_lua_config = config_tolua.o
+
+OBJS_all = $(OBJS_libconfig) $(OBJS_lua_config)
+
+$(LIBDIR)/lua/config.so: $(LIBDIR)/libconfig.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
