@@ -25,7 +25,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <interfaces/generator/generator.h>
+#include <interfaces/generator/cpp_generator.h>
+#include <interfaces/generator/tolua_generator.h>
 #include <interfaces/generator/parser.h>
 #include <interfaces/generator/digest.h>
 #include <interfaces/generator/exceptions.h>
@@ -85,23 +86,42 @@ main(int argc, char **argv)
 	
 	InterfaceDigest    *idigest = new InterfaceDigest(*i);
 
-	InterfaceGenerator *igen = new InterfaceGenerator(dir,
-							  iparse->getInterfaceName(),
-							  prefix,
-							  iparse->getInterfaceAuthor(),
-							  iparse->getInterfaceYear(),
-							  iparse->getInterfaceCreationDate(),
-							  iparse->getDataComment(),
-							  idigest->get_hash(),
-							  idigest->get_hash_size()
-							  );
-	igen->setConstants( iparse->getConstants() );
-	igen->setEnumConstants( iparse->getEnumConstants() );
-	igen->setDataFields( iparse->getDataFields() );
-	igen->setMessages( iparse->getMessages() );
+	CppInterfaceGenerator *cppigen = new CppInterfaceGenerator(dir,
+								   iparse->getInterfaceName(),
+								   prefix,
+								   iparse->getInterfaceAuthor(),
+								   iparse->getInterfaceYear(),
+								   iparse->getInterfaceCreationDate(),
+								   iparse->getDataComment(),
+								   idigest->get_hash(),
+								   idigest->get_hash_size(),
+								   iparse->getConstants(),
+								   iparse->getEnumConstants(),
+								   iparse->getDataFields(),
+								   iparse->getMessages()
+								   );
 
-	igen->generate();
-	delete igen;
+	ToLuaInterfaceGenerator *toluaigen = new ToLuaInterfaceGenerator(dir,
+									 iparse->getInterfaceName(),
+									 prefix,
+									 iparse->getInterfaceAuthor(),
+									 iparse->getInterfaceYear(),
+									 iparse->getInterfaceCreationDate(),
+									 iparse->getDataComment(),
+									 idigest->get_hash(),
+									 idigest->get_hash_size(),
+									 iparse->getConstants(),
+									 iparse->getEnumConstants(),
+									 iparse->getDataFields(),
+									 iparse->getMessages()
+									 );
+
+	cppigen->generate();
+	toluaigen->generate();
+
+	delete cppigen;
+	delete toluaigen;
+
 	delete iparse;
 	delete idigest;
       } catch (Exception &e) {

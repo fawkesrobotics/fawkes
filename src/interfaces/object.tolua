@@ -1,0 +1,62 @@
+$#include <interfaces/object.h>
+class ObjectPositionInterface : public Interface
+{
+  static const unsigned int OTHER;
+  static const unsigned int BALL;
+  static const unsigned int OPPONENT;
+  static const unsigned int TEAMMEMBER;
+
+  unsigned int object_type();
+  void set_object_type(const unsigned int new_object_type);
+  char supports_relative();
+  void set_supports_relative(const char new_supports_relative);
+  char supports_global();
+  void set_supports_global(const char new_supports_global);
+  char has_relative();
+  void set_has_relative(const char new_has_relative);
+  char has_global();
+  void set_has_global(const char new_has_global);
+  bool is_visible();
+  void set_visible(const bool new_visible);
+  float yaw();
+  void set_yaw(const float new_yaw);
+  float pitch();
+  void set_pitch(const float new_pitch);
+  float distance();
+  void set_distance(const float new_distance);
+  float * dyp_covariance();
+  void set_dyp_covariance(const float * new_dyp_covariance);
+  float world_x();
+  void set_world_x(const float new_world_x);
+  float world_y();
+  void set_world_y(const float new_world_y);
+  float world_z();
+  void set_world_z(const float new_world_z);
+  float relative_x();
+  void set_relative_x(const float new_relative_x);
+  float relative_y();
+  void set_relative_y(const float new_relative_y);
+  float relative_z();
+  void set_relative_z(const float new_relative_z);
+  float * xyz_covariance();
+  void set_xyz_covariance(const float * new_xyz_covariance);
+  float extent();
+  void set_extent(const float new_extent);
+  float yaw_velocity();
+  void set_yaw_velocity(const float new_yaw_velocity);
+  float pitch_velocity();
+  void set_pitch_velocity(const float new_pitch_velocity);
+  float distance_velocity();
+  void set_distance_velocity(const float new_distance_velocity);
+  float * dyp_velocity_covariance();
+  void set_dyp_velocity_covariance(const float * new_dyp_velocity_covariance);
+  float world_x_velocity();
+  void set_world_x_velocity(const float new_world_x_velocity);
+  float world_y_velocity();
+  void set_world_y_velocity(const float new_world_y_velocity);
+  float world_z_velocity();
+  void set_world_z_velocity(const float new_world_z_velocity);
+  float * xyz_velocity_covariance();
+  void set_xyz_velocity_covariance(const float * new_xyz_velocity_covariance);
+
+};

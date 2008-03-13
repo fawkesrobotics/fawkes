@@ -1,0 +1,54 @@
+$#include <interfaces/kicker.h>
+class KickerInterface : public Interface
+{
+
+  typedef enum {
+    GUIDE_BALL_LEFT,
+    GUIDE_BALL_RIGHT
+  } GuideBallSideEnum;
+
+  class KickMessage : public Message
+  {
+    KickMessage(bool ini_left, bool ini_center, bool ini_right, unsigned int ini_intensity);
+    KickMessage();
+    ~KickMessage();
+
+    bool is_left();
+    void set_left(const bool new_left);
+    bool is_center();
+    void set_center(const bool new_center);
+    bool is_right();
+    void set_right(const bool new_right);
+    unsigned int intensity();
+    void set_intensity(const unsigned int new_intensity);
+  };
+
+  class ResetCounterMessage : public Message
+  {
+    ResetCounterMessage();
+    ~ResetCounterMessage();
+
+  };
+
+  class GuideBallMessage : public Message
+  {
+    GuideBallMessage(GuideBallSideEnum ini_guide_ball_side);
+    GuideBallMessage();
+    ~GuideBallMessage();
+
+    GuideBallSideEnum guide_ball_side();
+    void set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side);
+  };
+
+  int num_kicks_left();
+  void set_num_kicks_left(const int new_num_kicks_left);
+  int num_kicks_center();
+  void set_num_kicks_center(const int new_num_kicks_center);
+  int num_kicks_right();
+  void set_num_kicks_right(const int new_num_kicks_right);
+  GuideBallSideEnum guide_ball_side();
+  void set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side);
+  unsigned int current_intensity();
+  void set_current_intensity(const unsigned int new_current_intensity);
+
+};

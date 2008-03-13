@@ -1,0 +1,26 @@
+$#include <interfaces/battery.h>
+class BatteryInterface : public Interface
+{
+
+  class PushButtonMessage : public Message
+  {
+    PushButtonMessage();
+    ~PushButtonMessage();
+
+  };
+
+  class SleepMessage : public Message
+  {
+    SleepMessage();
+    ~SleepMessage();
+
+  };
+
+  unsigned int current();
+  void set_current(const unsigned int new_current);
+  unsigned int voltage();
+  void set_voltage(const unsigned int new_voltage);
+  unsigned int temperature();
+  void set_temperature(const unsigned int new_temperature);
+
+};

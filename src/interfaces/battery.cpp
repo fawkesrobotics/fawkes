@@ -48,7 +48,7 @@ BatteryInterface::BatteryInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (BatteryInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0x12, 0x80, 0x3d, 0x25, 0xc5, 0xb4, 0x8e, 0x69, 00, 0xe6, 0xcc, 0xc0, 0x68, 0x17, 0x2f, 0x4};
+  unsigned char tmp_hash[] = {0x48, 0x47, 0x2c, 0xfb, 0x34, 0x3d, 0xf8, 0xe1, 0x33, 0xec, 0x21, 0x8, 0x9, 0x4d, 0xa9, 0x6c};
   set_hash(tmp_hash);
   add_fieldinfo(Interface::IFT_UINT, "current", &data->current);
   add_fieldinfo(Interface::IFT_UINT, "voltage", &data->voltage);
@@ -125,10 +125,10 @@ BatteryInterface::set_temperature(const unsigned int new_temperature)
 Message *
 BatteryInterface::create_message(const char *type) const
 {
-  if ( strncmp("push_buttonMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new push_buttonMessage();
-  } else if ( strncmp("sleepMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new sleepMessage();
+  if ( strncmp("PushButtonMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new PushButtonMessage();
+  } else if ( strncmp("SleepMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SleepMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -137,47 +137,47 @@ BatteryInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class BatteryInterface::push_buttonMessage interfaces/battery.h
- * push_buttonMessage Fawkes BlackBoard Interface Message.
+/** @class BatteryInterface::PushButtonMessage interfaces/battery.h
+ * PushButtonMessage Fawkes BlackBoard Interface Message.
  * 
     
  */
 
 
 /** Constructor */
-BatteryInterface::push_buttonMessage::push_buttonMessage() : Message("push_buttonMessage")
+BatteryInterface::PushButtonMessage::PushButtonMessage() : Message("PushButtonMessage")
 {
-  data_size = sizeof(push_buttonMessage_data_t);
+  data_size = sizeof(PushButtonMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (push_buttonMessage_data_t *)data_ptr;
+  data      = (PushButtonMessage_data_t *)data_ptr;
 }
 
 /** Destructor */
-BatteryInterface::push_buttonMessage::~push_buttonMessage()
+BatteryInterface::PushButtonMessage::~PushButtonMessage()
 {
   free(data_ptr);
 }
 
 /* Methods */
-/** @class BatteryInterface::sleepMessage interfaces/battery.h
- * sleepMessage Fawkes BlackBoard Interface Message.
+/** @class BatteryInterface::SleepMessage interfaces/battery.h
+ * SleepMessage Fawkes BlackBoard Interface Message.
  * 
     
  */
 
 
 /** Constructor */
-BatteryInterface::sleepMessage::sleepMessage() : Message("sleepMessage")
+BatteryInterface::SleepMessage::SleepMessage() : Message("SleepMessage")
 {
-  data_size = sizeof(sleepMessage_data_t);
+  data_size = sizeof(SleepMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (sleepMessage_data_t *)data_ptr;
+  data      = (SleepMessage_data_t *)data_ptr;
 }
 
 /** Destructor */
-BatteryInterface::sleepMessage::~sleepMessage()
+BatteryInterface::SleepMessage::~SleepMessage()
 {
   free(data_ptr);
 }
@@ -189,11 +189,11 @@ BatteryInterface::sleepMessage::~sleepMessage()
 bool
 BatteryInterface::message_valid(const Message *message) const
 {
-  const push_buttonMessage *m0 = dynamic_cast<const push_buttonMessage *>(message);
+  const PushButtonMessage *m0 = dynamic_cast<const PushButtonMessage *>(message);
   if ( m0 != NULL ) {
     return true;
   }
-  const sleepMessage *m1 = dynamic_cast<const sleepMessage *>(message);
+  const SleepMessage *m1 = dynamic_cast<const SleepMessage *>(message);
   if ( m1 != NULL ) {
     return true;
   }

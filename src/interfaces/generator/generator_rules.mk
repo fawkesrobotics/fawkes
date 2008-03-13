@@ -25,13 +25,14 @@ ifeq ($(BUILD_INTERFACE_GENERATOR),1)
   LDFLAGS_interface_generator = $(shell $(PKGCONFIG) --libs libxml++-2.6) $(LDFLAGS_LIBCRYPTO)
   CFLAGS += $(CFLAGS_LIBCRYPTO)
   OBJS_interface_generator = $(GENDIR)constant.o	\
+			     $(GENDIR)cpp_generator.o	\
 			     $(GENDIR)digest.o		\
 			     $(GENDIR)enum_constant.o	\
 			     $(GENDIR)field.o		\
-			     $(GENDIR)generator.o	\
 			     $(GENDIR)main.o		\
 			     $(GENDIR)message.o		\
 			     $(GENDIR)parser.o		\
+			     $(GENDIR)tolua_generator.o	\
 			     $(GENDIR)type_checker.o
 
   OBJS_all = $(OBJS_interface_generator)

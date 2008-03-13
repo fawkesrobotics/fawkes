@@ -1,0 +1,149 @@
+$#include <interfaces/motor.h>
+class MotorInterface : public Interface
+{
+  static const unsigned int MOTOR_ENABLED;
+  static const unsigned int MOTOR_DISABLED;
+  static const unsigned int DRIVE_MODE_RPM;
+  static const unsigned int DRIVE_MODE_TRANS;
+  static const unsigned int DRIVE_MODE_ROT;
+  static const unsigned int DRIVE_MODE_TRANS_ROT;
+  static const unsigned int DRIVE_MODE_ORBIT;
+  static const unsigned int DRIVE_MODE_LINE_TRANS_ROT;
+
+  class SetMotorStateMessage : public Message
+  {
+    SetMotorStateMessage(unsigned int ini_motor_state);
+    SetMotorStateMessage();
+    ~SetMotorStateMessage();
+
+    unsigned int motor_state();
+    void set_motor_state(const unsigned int new_motor_state);
+  };
+
+  class AcquireControlMessage : public Message
+  {
+    AcquireControlMessage(unsigned long int ini_thread_id, char * ini_thread_name);
+    AcquireControlMessage();
+    ~AcquireControlMessage();
+
+    unsigned long int thread_id();
+    void set_thread_id(const unsigned long int new_thread_id);
+    char * thread_name();
+    void set_thread_name(const char * new_thread_name);
+  };
+
+  class ResetOdometryMessage : public Message
+  {
+    ResetOdometryMessage();
+    ~ResetOdometryMessage();
+
+  };
+
+  class DriveRPMMessage : public Message
+  {
+    DriveRPMMessage(float ini_front_right, float ini_front_left, float ini_rear);
+    DriveRPMMessage();
+    ~DriveRPMMessage();
+
+    float front_right();
+    void set_front_right(const float new_front_right);
+    float front_left();
+    void set_front_left(const float new_front_left);
+    float rear();
+    void set_rear(const float new_rear);
+  };
+
+  class TransMessage : public Message
+  {
+    TransMessage(float ini_vx, float ini_vy);
+    TransMessage();
+    ~TransMessage();
+
+    float vx();
+    void set_vx(const float new_vx);
+    float vy();
+    void set_vy(const float new_vy);
+  };
+
+  class RotMessage : public Message
+  {
+    RotMessage(float ini_omega);
+    RotMessage();
+    ~RotMessage();
+
+    float omega();
+    void set_omega(const float new_omega);
+  };
+
+  class TransRotMessage : public Message
+  {
+    TransRotMessage(float ini_vx, float ini_vy, float ini_omega);
+    TransRotMessage();
+    ~TransRotMessage();
+
+    float vx();
+    void set_vx(const float new_vx);
+    float vy();
+    void set_vy(const float new_vy);
+    float omega();
+    void set_omega(const float new_omega);
+  };
+
+  class OrbitMessage : public Message
+  {
+    OrbitMessage(float ini_px, float ini_py, float ini_omega);
+    OrbitMessage();
+    ~OrbitMessage();
+
+    float px();
+    void set_px(const float new_px);
+    float py();
+    void set_py(const float new_py);
+    float omega();
+    void set_omega(const float new_omega);
+  };
+
+  class LinTransRotMessage : public Message
+  {
+    LinTransRotMessage(float ini_vx, float ini_vy, float ini_omega);
+    LinTransRotMessage();
+    ~LinTransRotMessage();
+
+    float vx();
+    void set_vx(const float new_vx);
+    float vy();
+    void set_vy(const float new_vy);
+    float omega();
+    void set_omega(const float new_omega);
+  };
+
+  unsigned int motor_state();
+  void set_motor_state(const unsigned int new_motor_state);
+  unsigned int drive_mode();
+  void set_drive_mode(const unsigned int new_drive_mode);
+  int right_rpm();
+  void set_right_rpm(const int new_right_rpm);
+  int rear_rpm();
+  void set_rear_rpm(const int new_rear_rpm);
+  int left_rpm();
+  void set_left_rpm(const int new_left_rpm);
+  float odometry_path_length();
+  void set_odometry_path_length(const float new_odometry_path_length);
+  float odometry_position_x();
+  void set_odometry_position_x(const float new_odometry_position_x);
+  float odometry_position_y();
+  void set_odometry_position_y(const float new_odometry_position_y);
+  float odometry_orientation();
+  void set_odometry_orientation(const float new_odometry_orientation);
+  float vx();
+  void set_vx(const float new_vx);
+  float vy();
+  void set_vy(const float new_vy);
+  float omega();
+  void set_omega(const float new_omega);
+  unsigned long int controller_thread_id();
+  void set_controller_thread_id(const unsigned long int new_controller_thread_id);
+  char * controller_thread_name();
+  void set_controller_thread_name(const char * new_controller_thread_name);
+
+};

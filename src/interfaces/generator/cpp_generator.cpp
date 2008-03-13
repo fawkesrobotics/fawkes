@@ -1,9 +1,9 @@
  
 /***************************************************************************
- *  generator.cpp - Interface generator
+ *  cpp_generator.cpp - C++ Interface generator
  *
- *  Generated: Thu Oct 12 02:01:27 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Oct 12 02:01:27 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,7 +25,7 @@
  *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.
  */
 
-#include <interfaces/generator/generator.h>
+#include <interfaces/generator/cpp_generator.h>
 #include <interfaces/generator/exceptions.h>
 
 #include <utils/misc/string_conversions.h>
@@ -39,7 +39,7 @@
 using namespace std;
 
 
-/** @class InterfaceGenerator interfaces/generator/generator.h
+/** @class CppInterfaceGenerator <interfaces/generator/cpp_generator.h>
  * Generator that transforms input from the InterfaceParser into valid
  * C++ classes.
  */
@@ -54,12 +54,21 @@ using namespace std;
  * @param data_comment comment in data block.
  * @param hash MD5 hash of the config file that was used to generate the interface
  * @param hash_size size in bytes of hash
+ * @param constants constants
+ * @param enum_constants constants defined as an enum
+ * @param data_fields data fields of the interface
+ * @param messages messages defined in the interface
  */
-InterfaceGenerator::InterfaceGenerator(std::string directory, std::string interface_name,
-				       std::string config_basename, std::string author,
-				       std::string year, std::string creation_date,
-				       std::string data_comment,
-				       const unsigned char *hash, size_t hash_size)
+CppInterfaceGenerator::CppInterfaceGenerator(std::string directory, std::string interface_name,
+					     std::string config_basename, std::string author,
+					     std::string year, std::string creation_date,
+					     std::string data_comment,
+					     const unsigned char *hash, size_t hash_size,
+					     const std::vector<InterfaceConstant> &constants,
+					     const std::vector<InterfaceEnumConstant> &enum_constants,
+					     const std::vector<InterfaceField> &data_fields,
+					     const std::vector<InterfaceMessage> &messages
+					     )
 {
   this->dir    = directory;
   if ( dir.find_last_of("/") != (dir.length() - 1) ) {
@@ -71,6 +80,11 @@ InterfaceGenerator::InterfaceGenerator(std::string directory, std::string interf
   this->data_comment  = data_comment;
   this->hash = hash;
   this->hash_size = hash_size;
+  this->constants = constants;
+  this->enum_constants = enum_constants;
+  this->data_fields = data_fields;
+  this->messages = messages;
+
   filename_cpp = config_basename + ".cpp";
   filename_h   = config_basename + ".h";
   filename_o   = config_basename + ".o";
@@ -87,49 +101,10 @@ InterfaceGenerator::InterfaceGenerator(std::string directory, std::string interf
 
 
 /** Destructor */
-InterfaceGenerator::~InterfaceGenerator()
+CppInterfaceGenerator::~CppInterfaceGenerator()
 {
 }
 
-
-/** Set constants.
- * @param constants parsed constants.
- */
-void
-InterfaceGenerator::setConstants(const std::vector<InterfaceConstant> &constants)
-{
-  this->constants = constants;
-}
-
-
-/** Set enum constants.
- * @param enum_constants parsed enum constants
- */
-void
-InterfaceGenerator::setEnumConstants(const std::vector<InterfaceEnumConstant> &enum_constants)
-{
-  this->enum_constants = enum_constants;
-}
-
-
-/** Set data fields.
- * @param data_fields parsed data fields.
- */
-void
-InterfaceGenerator::setDataFields(const std::vector<InterfaceField> &data_fields)
-{
-  this->data_fields = data_fields;
-}
-
-
-/** Set messages.
- * @param messages parsed messages.
- */
-void
-InterfaceGenerator::setMessages(const std::vector<InterfaceMessage> &messages)
-{
-  this->messages = messages;
-}
 
 
 /** Write optimized struct.
@@ -148,8 +123,8 @@ InterfaceGenerator::setMessages(const std::vector<InterfaceMessage> &messages)
  * @param fields fields for struct
  */
 void
-InterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* indent space */ is,
-				 std::vector<InterfaceField> fields)
+CppInterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* indent space */ is,
+				    std::vector<InterfaceField> fields)
 {
 
   stable_sort(fields.begin(), fields.end());
@@ -175,7 +150,7 @@ InterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* inden
  * @param filename name of file
  */
 void
-InterfaceGenerator::write_header(FILE *f, std::string filename)
+CppInterfaceGenerator::write_header(FILE *f, std::string filename)
 {
   fprintf(f, "\n/***************************************************************************\n");
   fprintf(f, " *  %s - Fawkes BlackBoard Interface - %s\n", filename.c_str(), class_name.c_str());
@@ -212,7 +187,7 @@ InterfaceGenerator::write_header(FILE *f, std::string filename)
  * @param f file to write to
  */
 void
-InterfaceGenerator::write_deflector(FILE *f)
+CppInterfaceGenerator::write_deflector(FILE *f)
 {
   fprintf(f, "#ifndef %s\n", deflector.c_str());
   fprintf(f, "#define %s\n\n", deflector.c_str());
@@ -223,7 +198,7 @@ InterfaceGenerator::write_deflector(FILE *f)
  * @param f file to write to
  */
 void
-InterfaceGenerator::write_cpp(FILE *f)
+CppInterfaceGenerator::write_cpp(FILE *f)
 {
   write_header(f, filename_cpp);
   fprintf(f,
@@ -251,7 +226,7 @@ InterfaceGenerator::write_cpp(FILE *f)
  * @param f file to write to
  */
 void
-InterfaceGenerator::write_management_funcs_cpp(FILE *f)
+CppInterfaceGenerator::write_management_funcs_cpp(FILE *f)
 {
   fprintf(f,
 	  "/// @cond INTERNALS\n"
@@ -265,7 +240,7 @@ InterfaceGenerator::write_management_funcs_cpp(FILE *f)
  * @param f file to write to
  */
 void
-InterfaceGenerator::write_constants_cpp(FILE *f)
+CppInterfaceGenerator::write_constants_cpp(FILE *f)
 {
   for ( vector<InterfaceConstant>::iterator i = constants.begin(); i != constants.end(); ++i) {
     fprintf(f,
@@ -283,7 +258,7 @@ InterfaceGenerator::write_constants_cpp(FILE *f)
  * @param f file to write to
  */
 void
-InterfaceGenerator::write_constants_h(FILE *f)
+CppInterfaceGenerator::write_constants_h(FILE *f)
 {
   fprintf(f, "  /* constants */\n");
   for ( vector<InterfaceConstant>::iterator i = constants.begin(); i != constants.end(); ++i) {
@@ -316,13 +291,13 @@ InterfaceGenerator::write_constants_h(FILE *f)
  * @param f file to write to
  */
 void
-InterfaceGenerator::write_messages_h(FILE *f)
+CppInterfaceGenerator::write_messages_h(FILE *f)
 {
   fprintf(f, "  /* messages */\n");
   for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
     fprintf(f, "  class %s : public Message\n"
-               "  {\n"
-	       "   private:\n", (*i).getName().c_str());
+	    "  {\n"
+	    "   private:\n", (*i).getName().c_str());
     write_struct(f, (*i).getName() + "_data_t", "    ", (*i).getFields());
     fprintf(f,
 	    "    %s_data_t *data;\n\n",
@@ -343,7 +318,7 @@ InterfaceGenerator::write_messages_h(FILE *f)
  * @param f file to write to
  */
 void
-InterfaceGenerator::write_messages_cpp(FILE *f)
+CppInterfaceGenerator::write_messages_cpp(FILE *f)
 {
   fprintf(f, "/* =========== messages =========== */\n");
   for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
@@ -387,7 +362,7 @@ InterfaceGenerator::write_messages_cpp(FILE *f)
  * @param f file to write to
  */
 void
-InterfaceGenerator::write_create_message_method_cpp(FILE *f)
+CppInterfaceGenerator::write_create_message_method_cpp(FILE *f)
 {
   fprintf(f, "/* =========== message create =========== */\n");
   fprintf(f,
@@ -425,8 +400,8 @@ InterfaceGenerator::write_create_message_method_cpp(FILE *f)
  * @param classname name of class
  */
 void
-InterfaceGenerator::write_ctor_dtor_h(FILE *f, std::string /* indent space */ is,
-				      std::string classname)
+CppInterfaceGenerator::write_ctor_dtor_h(FILE *f, std::string /* indent space */ is,
+					 std::string classname)
 {
   fprintf(f,
 	  "%s%s();\n"
@@ -443,9 +418,9 @@ InterfaceGenerator::write_ctor_dtor_h(FILE *f, std::string /* indent space */ is
  * @param fields vector of data fields of message
  */
 void
-InterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* indent space */ is,
-					      std::string classname,
-					      std::vector<InterfaceField> fields)
+CppInterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* indent space */ is,
+						 std::string classname,
+						 std::vector<InterfaceField> fields)
 {
   vector<InterfaceField>::iterator i;
 
@@ -479,10 +454,10 @@ InterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* indent spa
  * @param fields fields
  */
 void
-InterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
-					std::string classname, std::string super_class,
-					std::string inclusion_prefix,
-					std::vector<InterfaceField> fields)
+CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
+					   std::string classname, std::string super_class,
+					   std::string inclusion_prefix,
+					   std::vector<InterfaceField> fields)
 {
   fprintf(f,
 	  "/** Constructor */\n"
@@ -547,10 +522,10 @@ InterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
  * @param fields vector of data fields of message
  */
 void
-InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
-						std::string classname, std::string super_class,
-						std::string inclusion_prefix,
-						std::vector<InterfaceField> fields)
+CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
+						   std::string classname, std::string super_class,
+						   std::string inclusion_prefix,
+						   std::vector<InterfaceField> fields)
 {
   vector<InterfaceField>::iterator i;
 
@@ -630,10 +605,10 @@ InterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
  * @param inclusion_prefix used if class is included in another class.
  */
 void
-InterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
-				      std::string classname,
-				      std::vector<InterfaceField> fields,
-				      std::string inclusion_prefix)
+CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
+					 std::string classname,
+					 std::vector<InterfaceField> fields,
+					 std::string inclusion_prefix)
 {
   fprintf(f, "/* Methods */\n");
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
@@ -693,8 +668,8 @@ InterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
  * @param fields fields to write accessor methods for.
  */
 void
-InterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ is,
-				    std::vector<InterfaceField> fields)
+CppInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ is,
+				       std::vector<InterfaceField> fields)
 {
   fprintf(f, "%s/* Methods */\n", is.c_str());
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
@@ -715,7 +690,7 @@ InterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ is,
  * @param f file to write to
  */
 void
-InterfaceGenerator::write_h(FILE *f)
+CppInterfaceGenerator::write_h(FILE *f)
 {
   write_header(f, filename_h);
   write_deflector(f);
@@ -754,7 +729,7 @@ InterfaceGenerator::write_h(FILE *f)
 /** Generator cpp and h files.
  */
 void
-InterfaceGenerator::generate()
+CppInterfaceGenerator::generate()
 {
   char timestring[26]; // 26 is mentioned in man asctime_r
   struct tm timestruct;

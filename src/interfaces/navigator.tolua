@@ -1,0 +1,46 @@
+$#include <interfaces/navigator.h>
+class NavigatorInterface : public Interface
+{
+
+  class TargetMessage : public Message
+  {
+    TargetMessage(float ini_x, float ini_y, float ini_orientation);
+    TargetMessage();
+    ~TargetMessage();
+
+    float x();
+    void set_x(const float new_x);
+    float y();
+    void set_y(const float new_y);
+    float orientation();
+    void set_orientation(const float new_orientation);
+  };
+
+  class MaxVelocityMessage : public Message
+  {
+    MaxVelocityMessage(float ini_velocity);
+    MaxVelocityMessage();
+    ~MaxVelocityMessage();
+
+    float velocity();
+    void set_velocity(const float new_velocity);
+  };
+
+  class ObstacleMessage : public Message
+  {
+    ObstacleMessage(float ini_x, float ini_y, float ini_width);
+    ObstacleMessage();
+    ~ObstacleMessage();
+
+    float x();
+    void set_x(const float new_x);
+    float y();
+    void set_y(const float new_y);
+    float width();
+    void set_width(const float new_width);
+  };
+
+  int foo();
+  void set_foo(const int new_foo);
+
+};

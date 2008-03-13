@@ -1,9 +1,9 @@
  
 /***************************************************************************
- *  generator.h - Interface generator
+ *  cpp_generator.h - C++ Interface generator
  *
- *  Generated: Thu Oct 12 01:59:02 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Oct 12 01:59:02 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,8 +25,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __INTERFACES_GENERATOR_GENERATOR_H_
-#define __INTERFACES_GENERATOR_GENERATOR_H_
+#ifndef __INTERFACES_GENERATOR_CPP_GENERATOR_H_
+#define __INTERFACES_GENERATOR_CPP_GENERATOR_H_
 
 #include <interfaces/generator/field.h>
 #include <interfaces/generator/constant.h>
@@ -37,21 +37,20 @@
 #include <string>
 #include <stdio.h>
 
-class InterfaceGenerator
+class CppInterfaceGenerator
 {
  public:
-  InterfaceGenerator(std::string directory, std::string interface_name,
-		     std::string config_basename, std::string author,
-		     std::string year, std::string creation_date,
-		     std::string data_comment,
-		     const unsigned char *hash, size_t hash_size);
-  ~InterfaceGenerator();
-
-  void setConstants(const std::vector<InterfaceConstant> &constants);
-  void setEnumConstants(const std::vector<InterfaceEnumConstant> &enum_constants);
-  void setDataFields(const std::vector<InterfaceField> &data_fields);
-  void setMessages(const std::vector<InterfaceMessage> &messages);
-
+  CppInterfaceGenerator(std::string directory, std::string interface_name,
+			std::string config_basename, std::string author,
+			std::string year, std::string creation_date,
+			std::string data_comment,
+			const unsigned char *hash, size_t hash_size,
+			const std::vector<InterfaceConstant> &constants,
+			const std::vector<InterfaceEnumConstant> &enum_constants,
+			const std::vector<InterfaceField> &data_fields,
+			const std::vector<InterfaceMessage> &messages
+			);
+  ~CppInterfaceGenerator();
 
   void write_h(FILE *f);
   void write_cpp(FILE *f);

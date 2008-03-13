@@ -10,10 +10,10 @@
     <field type="unsigned int" name="voltage">Battery Voltage [mV]</field>
     <field type="unsigned int" name="temperature">Battery Temperature [°C]</field>
   </data>
-  <message name="push_button">
+  <message name="PushButton">
     <comment>Push the button</comment>
   </message>
-  <message name="sleep">
+  <message name="Sleep">
     <comment>Sleep</comment>
   </message>
 </interface>

@@ -1,0 +1,61 @@
+$#include <interfaces/test.h>
+class TestInterface : public Interface
+{
+  static const int TEST_CONSTANT;
+  static const float TEST_FLOAT_CONSTANT;
+
+  typedef enum {
+    TEST_ENUM_1,
+    TEST_ENUM_2
+  } TestEnum;
+
+  class SetTestIntMessage : public Message
+  {
+    SetTestIntMessage(int ini_test_int);
+    SetTestIntMessage();
+    ~SetTestIntMessage();
+
+    int test_int();
+    void set_test_int(const int new_test_int);
+  };
+
+  class SetTestStringMessage : public Message
+  {
+    SetTestStringMessage(char * ini_test_string);
+    SetTestStringMessage();
+    ~SetTestStringMessage();
+
+    char * test_string();
+    void set_test_string(const char * new_test_string);
+  };
+
+  class CalculateMessage : public Message
+  {
+    CalculateMessage(int ini_summand, int ini_addend);
+    CalculateMessage();
+    ~CalculateMessage();
+
+    int summand();
+    void set_summand(const int new_summand);
+    int addend();
+    void set_addend(const int new_addend);
+  };
+
+  bool is_test_bool();
+  void set_test_bool(const bool new_test_bool);
+  int test_int();
+  void set_test_int(const int new_test_int);
+  char _flags();
+  void set__flags(const char new__flags);
+  char * test_string();
+  void set_test_string(const char * new_test_string);
+  int result();
+  void set_result(const int new_result);
+  unsigned int test_uint();
+  void set_test_uint(const unsigned int new_test_uint);
+  unsigned long int test_ulint();
+  void set_test_ulint(const unsigned long int new_test_ulint);
+  long int test_lint();
+  void set_test_lint(const long int new_test_lint);
+
+};
