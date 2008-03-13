@@ -80,7 +80,7 @@ void SeqWriter::set_path(const char* img_path)
 /** Set a (base-) filename.
  * If a filename is set the name of the files will look like this:
  * filename_index.ext .
- * @param base_fn the base-filename
+ * @param filename the (base-) filename
  */
 void SeqWriter::set_filename(const char* filename)
 {
@@ -98,7 +98,7 @@ void SeqWriter::set_dimensions(unsigned int width, unsigned int height)
 }
 
 /** Set the colorspace of the image.
- * @param _cspace the colospace
+ * @param cspace the colospace
  */
 void SeqWriter::set_colorspace(colorspace_t cspace)
 {
