@@ -2,7 +2,9 @@
 #                 Makefile Build System for Fawkes: Battery Plugin
 #                            -------------------
 #   Created on Tue Jan 29 11:59:09 2008
-#   copyright (C) 2008 by Daniel Beck, AllemaniACs RoboCup Team
+#   Copyright (C) 2008 by Daniel Beck, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -12,17 +14,9 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-
-CFLAGS = -g
 
 LIBS_battery = core utils
 OBJS_battery = battery_plugin.o	\

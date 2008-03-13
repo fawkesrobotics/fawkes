@@ -144,6 +144,8 @@ BatteryThread::loop()
   temperature = read_numeric(0x1f);
   m_battery_interface->set_temperature(temperature);
 
+  // blackboard
+  m_battery_interface->msgq_flush();
   m_battery_interface->write();
 
   logger->log_debug(name(), "Current=%d  Voltage=%d  Temperature=%d",
