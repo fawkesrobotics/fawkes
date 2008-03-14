@@ -47,7 +47,11 @@ extern "C" {
 #include <cerrno>
 #ifdef HAVE_INOTIFY
 #  include <sys/inotify.h>
+#  include <sys/types.h>
+#  include <sys/stat.h>
 #  include <poll.h>
+#  include <dirent.h>
+#  include <unistd.h>
 #endif
 
 #define INIT_FILE SKILLDIR"/general/init.lua"
@@ -76,6 +80,9 @@ SkillerExecutionThread::SkillerExecutionThread(Barrier *liaison_exec_barrier,
   __liaison_exec_barrier = liaison_exec_barrier;
   __slt = slt;
   __L = NULL;
+#ifdef HAVE_INOTIFY
+  __inotify_buf = NULL;
+#endif
 }
 
 
@@ -220,6 +227,50 @@ SkillerExecutionThread::restart_lua()
 
 
 void
+SkillerExecutionThread::inotify_watch_dir(std::string dir)
+{
+#ifdef HAVE_INOTIFY
+  DIR *d = opendir(dir.c_str());
+  if ( d == NULL ) {
+    throw Exception(errno, "Failed to open dir %s", dir.c_str());
+  }
+
+  uint32_t mask = IN_MODIFY | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF;
+  int iw;
+
+  logger->log_debug("SkillerExecutionThread", "Adding watch for %s", dir.c_str());
+  if ( (iw = inotify_add_watch(__inotify_fd, dir.c_str(), mask)) >= 0) {
+    __inotify_watches[iw] = dir;
+
+    dirent de, *res;
+    while ( (readdir_r(d, &de, &res) == 0) && (res != NULL) ) {
+      std::string fp = dir + "/" + de.d_name;
+      struct stat st;
+      if ( stat(fp.c_str(), &st) == 0 ) {
+	if ( (de.d_name[0] != '.') && S_ISDIR(st.st_mode) ) {
+	  try {
+	    inotify_watch_dir(fp);
+	  } catch (Exception &e) {
+	    closedir(d);
+	    throw;
+	  }
+	//} else {
+	  //logger->log_debug("SkillerExecutionThread", "Skipping file %s", fp.c_str());	  
+	}
+      } else {
+	logger->log_debug("SkillerExecutionThread", "Skipping watch on %s, cannot stat (%s)", fp.c_str(),
+			  strerror(errno));
+      }
+    }
+  } else {
+    throw Exception("SkillerExecutionThread", "Cannot add watch for %s", dir.c_str());
+  }
+
+  closedir(d);
+#endif
+}
+
+void
 SkillerExecutionThread::init_inotify()
 {
 #ifdef HAVE_INOTIFY
@@ -231,7 +282,7 @@ SkillerExecutionThread::init_inotify()
   if ( (regerr = regcomp(&__inotify_regex, "^[^.].*\\.lua$", REG_EXTENDED)) != 0 ) {
     char errtmp[1024];
     regerror(regerr, &__inotify_regex, errtmp, sizeof(errtmp));
-    regfree(&__inotify_regex);
+    close_inotify();
     throw Exception("Failed to compile lua file regex: %s", errtmp);
   }
 
@@ -239,16 +290,32 @@ SkillerExecutionThread::init_inotify()
   __inotify_bufsize = 1024 * (sizeof(struct inotify_event) + 16);
   __inotify_buf     = (char *)malloc(__inotify_bufsize);
 
-  logger->log_debug("SkillerExecutionThread", "Adding watch for %s", SKILLDIR);
-  uint32_t mask = IN_MODIFY | IN_MOVE | IN_CREATE | IN_DELETE;
-  if ( (__inotify_skilldir_watch = inotify_add_watch(__inotify_fd, SKILLDIR, mask)) == -1) {
-    close(__inotify_fd);
-    throw Exception(errno, "Failed to add inotify watch for skilldir %s", SKILLDIR);
+  try {
+    inotify_watch_dir(SKILLDIR);
+  } catch (Exception &e) {
+    close_inotify();
   }
 
 #else
   logger->log_warn("SkillerExecutionThread", "inotify support not available, auto-reload "
-		   "not available.");
+		   "disabled.");
+#endif
+}
+
+
+void
+SkillerExecutionThread::close_inotify()
+{
+#ifdef HAVE_INOTIFY
+  for (__inotify_wit = __inotify_watches.begin(); __inotify_wit != __inotify_watches.end(); ++__inotify_wit) {
+    inotify_rm_watch(__inotify_fd, __inotify_wit->first);
+  }
+  close(__inotify_fd);
+  if ( __inotify_buf ) {
+    free(__inotify_buf);
+    __inotify_buf = NULL;
+  }
+  regfree(&__inotify_regex);
 #endif
 }
 
@@ -279,20 +346,38 @@ SkillerExecutionThread::proc_inotify()
 	while (i < bytes) {
 	  struct inotify_event *event = (struct inotify_event *) &__inotify_buf[i];
 
-	  if ( regexec(&__inotify_regex, event->name, 0, NULL, 0) == 0 ) {
-	    // it is a *.lua file
+	  if ( (regexec(&__inotify_regex, event->name, 0, NULL, 0) == 0) ||
+	       (event->mask & IN_ISDIR) ) {
+	    // it is a directory or a *.lua file
 
+	    if (event->mask & IN_DELETE_SELF) {
+	      logger->log_debug("SkillerExecutionThread", "Watched %s has been deleted", event->name);
+	      __inotify_watches.erase(event->wd);
+	      inotify_rm_watch(__inotify_fd, event->wd);
+	    }
 	    if (event->mask & IN_MODIFY) {
-	      logger->log_debug("SkillerExecutionThread", "File %s has been modified", event->name);
+	      logger->log_debug("SkillerExecutionThread", "%s has been modified", event->name);
 	    }
 	    if (event->mask & IN_MOVE) {
-	      logger->log_debug("SkillerExecutionThread", "File %s has been moved", event->name);
-	    }
-	    if (event->mask & IN_CREATE) {
-	      logger->log_debug("SkillerExecutionThread", "File %s has been created", event->name);
+	      logger->log_debug("SkillerExecutionThread", "%s has been moved", event->name);
 	    }
 	    if (event->mask & IN_DELETE) {
-	      logger->log_debug("SkillerExecutionThread", "File %s has been deleted", event->name);
+	      logger->log_debug("SkillerExecutionThread", "%s has been deleted", event->name);
+	    }
+	    if (event->mask & IN_CREATE) {
+	      logger->log_debug("SkillerExecutionThread", "%s has been created", event->name);
+	      // Check if it is a directory, if it is, watch it
+	      std::string fp = __inotify_watches[event->wd] + "/" + event->name;
+	      if (  (event->mask & IN_ISDIR) && (event->name[0] != '.') ) {
+		try {
+		  inotify_watch_dir(fp);
+		} catch (Exception &e) {
+		  logger->log_warn("SkillerExecutionThread", "Adding watch for %s failed, ignoring.", fp.c_str());
+		  logger->log_warn("SkillerExecutionThread", e);
+		}
+	      } else {
+		logger->log_debug("SkillerExecutionThread", "Ignoring non-dir %s", event->name);
+	      }
 	    }
 
 	    need_restart = true;
@@ -334,7 +419,7 @@ SkillerExecutionThread::init()
     delete __clog;
     delete __lua_mutex;
 #ifdef HAVE_INOTIFY
-    close(__inotify_fd);
+    close_inotify();
 #endif
     throw;
   }
@@ -350,10 +435,7 @@ SkillerExecutionThread::finalize()
   delete __lua_mutex;
   __lua_mutex = NULL;
 #ifdef HAVE_INOTIFY
-  inotify_rm_watch(__inotify_fd, __inotify_skilldir_watch);
-  close(__inotify_fd);
-  free(__inotify_buf);
-  regfree(&__inotify_regex);
+  close_inotify();
 #endif
 }
 

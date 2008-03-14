@@ -68,6 +68,8 @@ class SkillerExecutionThread
   void restart_lua();
   void init_inotify();
   void proc_inotify();
+  void close_inotify();
+  void inotify_watch_dir(std::string dir);
 
  private: /* members */
   Barrier *__liaison_exec_barrier;
@@ -81,10 +83,11 @@ class SkillerExecutionThread
 
 #ifdef HAVE_INOTIFY
   int     __inotify_fd;
-  int     __inotify_skilldir_watch;
   char   *__inotify_buf;
   size_t  __inotify_bufsize;
   regex_t __inotify_regex;
+  std::map<int, std::string> __inotify_watches;
+  std::map<int, std::string>::iterator __inotify_wit;
 #endif
 };
 
