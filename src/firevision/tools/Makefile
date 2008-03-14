@@ -26,7 +26,7 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-SUBDIRS = $(subst $(SRCDIR)/,,$(realpath $(SRCDIR)/firestation))
+SUBDIRS = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/firestation))
 
 LIBS_fvshmem = $(VISION_CAM_LIBS) utils fvutils
 OBJS_fvshmem = shmem.o
