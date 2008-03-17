@@ -43,9 +43,9 @@ class ColorLutGenerator
 
   virtual ~ColorLutGenerator();
 
-  virtual void                     setBuffer(unsigned char *buffer,
-					     unsigned int width, unsigned int height)  = 0;
-  virtual ColorModelLookupTable *  getCurrent()                                        = 0;
+  virtual void                     set_buffer(unsigned char *buffer,
+					      unsigned int width, unsigned int height) = 0;
+  virtual ColorModelLookupTable *  get_current()                                       = 0;
 
   /** Considers the given buffer and extracts the needed information
    */
@@ -57,11 +57,10 @@ class ColorLutGenerator
   virtual void                     calc()                                              = 0;
   virtual void                     undo()                                              = 0;
   virtual void                     reset()                                             = 0;
-  virtual void                     resetUndo()                                         = 0;
+  virtual void                     reset_undo()                                        = 0;
 
-  virtual bool                     hasHistograms()                                     = 0;
-  virtual std::map< hint_t, Histogram *> *  getHistograms()                          = 0;
-
+  virtual bool                     has_histograms()                                    = 0;
+  virtual std::map< hint_t, Histogram *> *  get_histograms()                           = 0;
 };
 
 

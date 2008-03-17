@@ -189,9 +189,9 @@ ColorTrainTool::add()
 {
   if (m_data_available)
     {
-      m_generator->resetUndo();
-      m_generator->setBuffer(m_buffer, m_img_width, m_img_height);
-      m_generator->setSelection( m_zauberstab->getSelection() );
+      m_generator->reset_undo();
+      m_generator->set_buffer(m_buffer, m_img_width, m_img_height);
+      m_generator->set_selection( m_zauberstab->getSelection() );
       m_generator->consider();
       m_generator->calc();
       m_data_available = false;
@@ -234,7 +234,7 @@ ColorTrainTool::perform_segmentation()
   Drawer* d = new Drawer();
   d->setBuffer(m_seg_buffer, m_img_width, m_img_height);
   
-  ColorModelLookupTable* cm = m_generator->getCurrent();
+  ColorModelLookupTable* cm = m_generator->get_current();
   
   for (unsigned int w = 0; w < m_img_width; ++w)
     {
@@ -269,7 +269,7 @@ ColorTrainTool::perform_segmentation()
 void
 ColorTrainTool::save_histos()
 {
-  std::map<hint_t, Histogram*>* histos = m_generator->getHistograms();
+  std::map<hint_t, Histogram*>* histos = m_generator->get_histograms();
   std::map<hint_t, Histogram*>::iterator hit;
   for (hit = histos->begin(); hit != histos->end(); ++hit)
     {
@@ -304,7 +304,7 @@ ColorTrainTool::save_colormap(const char* filename)
 {
   if (m_generator)
     {
-      ColorModelLookupTable* lut = m_generator->getCurrent();
+      ColorModelLookupTable* lut = m_generator->get_current();
       lut->save(filename);
     }
 }
@@ -321,7 +321,7 @@ ColorTrainTool::load_colormap(const char* filename)
       return;
     }
 
-  ColorModelLookupTable* lut = m_generator->getCurrent();
+  ColorModelLookupTable* lut = m_generator->get_current();
   lut->load(filename);
 }
 
@@ -346,8 +346,8 @@ ColorTrainTool::colormap_rgb(unsigned int* width, unsigned int* height)
 
   unsigned char* lut_buffer = (unsigned char*) malloc( colorspace_buffer_size(YUV422_PLANAR, lut_width, lut_height) );
 
-  ColorModelLookupTable* lut = m_generator->getCurrent();
-  lut->toImage(lut_buffer);
+  ColorModelLookupTable* lut = m_generator->get_current();
+  lut->to_image(lut_buffer);
 
   float scale_width = target_width / (float) lut_width;
   float scale_height = target_height / (float) lut_height;

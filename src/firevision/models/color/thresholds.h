@@ -90,8 +90,8 @@ class ColorModelThresholds : public ColorModel
 			  unsigned int u,
 			  unsigned int v) const;
 
-  const char *  getName();
-  void          printThresholds();
+  const char *  get_name();
+  void          print_thresholds();
 
 };
 

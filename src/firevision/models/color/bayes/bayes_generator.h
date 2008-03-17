@@ -42,19 +42,19 @@ class BayesColorLutGenerator : public ColorLutGenerator
  public:
   BayesColorLutGenerator(hint_t fg_object = H_BALL);
 
-  virtual void                     setBuffer(unsigned char *buffer,
+  virtual void                     set_buffer(unsigned char *buffer,
 					     unsigned int width, unsigned int height);
-  virtual ColorModelLookupTable *  getCurrent();
+  virtual ColorModelLookupTable *  get_current();
   virtual void                     consider();
   virtual void                     calc();
   virtual void                     undo();
   virtual void                     reset();
-  virtual void                     resetUndo();
+  virtual void                     reset_undo();
 
-  virtual void                     setSelection(std::vector< rectangle_t > region);
+  virtual void                     set_selection(std::vector< rectangle_t > region);
 
-  virtual bool                     hasHistograms();
-  virtual std::map< hint_t, Histogram * > *  getHistograms();
+  virtual bool                     has_histograms();
+  virtual std::map< hint_t, Histogram * > *  get_histograms();
 
   void setMinProbability(float min_prob);
 

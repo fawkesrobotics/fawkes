@@ -41,6 +41,7 @@ typedef struct {
   char      lut_id[LUT_ID_MAX_LENGTH];		/**< LUT ID */
   uint32_t  width;		/**< LUT width */
   uint32_t  height;		/**< LUT height */
+  uint32_t  depth;              /**< LUT depth */
   uint32_t  bytes_per_cell;	/**< Bytes per cell */
 } SharedMemoryLookupTable_header_t;
 
@@ -51,6 +52,11 @@ class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
   SharedMemoryLookupTableHeader(const char *lut_id,
 				unsigned int width,
 				unsigned int height,
+				unsigned int bytes_per_cell);
+  SharedMemoryLookupTableHeader(const char *lut_id,
+				unsigned int width,
+				unsigned int height,
+				unsigned int depth,
 				unsigned int bytes_per_cell);
   SharedMemoryLookupTableHeader(const SharedMemoryLookupTableHeader *h);
   virtual ~SharedMemoryLookupTableHeader();
@@ -71,6 +77,7 @@ class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
   void          set_lut_id(const char *lut_id);
   unsigned int  width() const;
   unsigned int  height() const;
+  unsigned int  depth() const;
   unsigned int  bytes_per_cell() const;
 
   SharedMemoryLookupTable_header_t * raw_header();
@@ -81,6 +88,7 @@ class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
   char          *__lut_id;
   unsigned int   __width;
   unsigned int   __height;
+  unsigned int   __depth;
   unsigned int   __bytes_per_cell;
 };
 
@@ -103,8 +111,10 @@ class SharedMemoryLookupTable : public SharedMemory
 {
 
  public:
+
   SharedMemoryLookupTable( const char *lut_id,
 			   unsigned int width, unsigned int height,
+			   unsigned int depth = 1,
 			   unsigned int bytes_per_cell = 1
 			   );
   SharedMemoryLookupTable(const char *lut_id , bool is_read_only = true);
@@ -115,6 +125,7 @@ class SharedMemoryLookupTable : public SharedMemory
   unsigned char *  buffer() const;
   unsigned int     width() const;
   unsigned int     height() const;
+  unsigned int     depth() const;
   unsigned int     bytes_per_cell() const;
 
   static void      list();
@@ -124,7 +135,7 @@ class SharedMemoryLookupTable : public SharedMemory
 
  private:
   void constructor(const char *lut_id,
-		   unsigned int width, unsigned int height,
+		   unsigned int width, unsigned int height, unsigned int depth,
 		   unsigned int bytes_per_cell,
 		   bool is_read_only);
 
@@ -134,6 +145,7 @@ class SharedMemoryLookupTable : public SharedMemory
   char          *__lut_id;
   unsigned int   __width;
   unsigned int   __height;
+  unsigned int   __depth;
   unsigned int   __bytes_per_cell;
 
 };

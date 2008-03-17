@@ -38,20 +38,31 @@ class ColorModelLookupTable : public ColorModel
 {
  public:
 
-  ColorModelLookupTable(unsigned int width, unsigned int height);
-  ColorModelLookupTable(const char *file, unsigned int width, unsigned int height);
+  ColorModelLookupTable(unsigned int width, unsigned int height, unsigned int depth = 1);
+  ColorModelLookupTable(const char *file, unsigned int width, unsigned int height,
+			unsigned int depth = 1);
+
   ColorModelLookupTable(unsigned int width, unsigned int height,
 			const char *lut_id, bool destroy_on_free = false);
+  ColorModelLookupTable(unsigned int width, unsigned int height, unsigned int depth,
+			const char *lut_id, bool destroy_on_free = false);
+
   ColorModelLookupTable(const char *file, unsigned int width, unsigned int height,
 			const char *lut_id, bool destroy_on_free = false);
+  ColorModelLookupTable(const char *file, unsigned int width, unsigned int height, 
+			unsigned int depth, const char *lut_id, bool destroy_on_free = false);
 
   virtual ~ColorModelLookupTable();
 
   color_t       determine(unsigned int y,
 			  unsigned int u,
-			  unsigned int v ) const;
+			  unsigned int v) const;
 
-  const char *  getName();
+  color_t       determine_cr(unsigned int y,
+			     unsigned int u,
+			     unsigned int v) const;
+
+  const char *  get_name();
   void          load(const char *file);
 
   void          save(const char *file);
@@ -59,29 +70,24 @@ class ColorModelLookupTable : public ColorModel
   void          set(unsigned int y,
 		    unsigned int u,
 		    unsigned int v,
-		    color_t      c );
-
+		    color_t c,
+		    bool full_range = true);
+  
   void          reset();
 
   void          set(unsigned char *buffer);
 
+  void          set_range(unsigned int x_max, unsigned int y_max, unsigned int z_max);
+  
   unsigned int  size();
-  void          toImage(unsigned char *yuv422_planar_buffer);
+  void          to_image(unsigned char *yuv422_planar_buffer);
 
-  /** Get the raw lut buffer
-   * this should only be used if absolutely necessary, the buffer will persist
-   * as long as this instance exists.
-   * @return the raw buffer, aligned as height consecutive lines of
-   *         size width * bytes_per_cell which consist of width number of cells which
-   *         are each bytes_per_cell wide and consecutive
-   *      
-   */
-  unsigned char *  getBuffer();
+  unsigned char *  get_buffer();
 
   ColorModelLookupTable &  operator+=(const ColorModelLookupTable & cmlt);
   ColorModelLookupTable &  operator+=(const char *filename);
 
-  static std::string composeFilename(const std::string format);
+  static std::string compose_filename(const std::string format);
 
  private:
 
@@ -95,10 +101,14 @@ class ColorModelLookupTable : public ColorModel
 
   unsigned int width;
   unsigned int height;
+  unsigned int depth;
   unsigned int bytes_per_sample;
 
   SharedMemoryLookupTable *shm_lut;
 
+  unsigned int x_max;
+  unsigned int y_max;
+  unsigned int z_max;
 };
 
 

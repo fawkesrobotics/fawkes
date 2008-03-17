@@ -90,8 +90,8 @@ BayesColorLutGenerator::BayesColorLutGenerator(hint_t fg_object)
  * @param height image height
  */
 void
-BayesColorLutGenerator::setBuffer(unsigned char *buffer,
-				  unsigned int width, unsigned int height)
+BayesColorLutGenerator::set_buffer(unsigned char *buffer,
+				   unsigned int width, unsigned int height)
 {
   this->buffer = buffer;
   image_width = width;
@@ -103,7 +103,7 @@ BayesColorLutGenerator::setBuffer(unsigned char *buffer,
  * @return current color model
  */
 ColorModelLookupTable *
-BayesColorLutGenerator::getCurrent()
+BayesColorLutGenerator::get_current()
 {
   return cm;
 }
@@ -136,7 +136,7 @@ BayesColorLutGenerator::isInRegion(unsigned int x, unsigned int y) {
  * @param region selected region.
  */
 void
-BayesColorLutGenerator::setSelection(vector< rectangle_t > region)
+BayesColorLutGenerator::set_selection(vector< rectangle_t > region)
 {
   this->region = region;
 }
@@ -214,7 +214,7 @@ BayesColorLutGenerator::reset()
 
 /** Reset undo. */
 void
-BayesColorLutGenerator::resetUndo()
+BayesColorLutGenerator::reset_undo()
 {
   for (histo_it = histos.begin(); histo_it != histos.end(); ++histo_it) {
     (*histo_it).second->reset_undo();
@@ -226,7 +226,7 @@ BayesColorLutGenerator::resetUndo()
  * @return true
  */
 bool
-BayesColorLutGenerator::hasHistograms()
+BayesColorLutGenerator::has_histograms()
 {
   return true;
 }
@@ -236,7 +236,7 @@ BayesColorLutGenerator::hasHistograms()
  * @return histograms
  */
 std::map< hint_t, Histogram * > *
-BayesColorLutGenerator::getHistograms()
+BayesColorLutGenerator::get_histograms()
 {
   return &histos;
 }

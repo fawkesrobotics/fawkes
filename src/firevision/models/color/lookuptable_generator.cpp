@@ -33,14 +33,14 @@
 /** @class ColorLutGenerator <models/color/lookuptable_generator.h>
  * Interface for color LUT generators.
  *
- * @fn void ColorLutGenerator::setBuffer(unsigned char *buffer, unsigned int width, unsigned int height)
+ * @fn void ColorLutGenerator::set_buffer(unsigned char *buffer, unsigned int width, unsigned int height)
  * Set image buffer.
  * Set the image buffer that is to be considered next.
  * @param buffer image buffer (YUV422 planar format assumed)
  * @param width width of image in pixels
  * @param height height of image in pixels
  *
- * @fn ColorModelLookupTable *  ColorLutGenerator::getCurrent()
+ * @fn ColorModelLookupTable *  ColorLutGenerator::get_current()
  * Get the current LUT.
  * With this method you can access the current LUT. This is useful to display the
  * current results as "what would happen if we'd use this LUT?".
@@ -65,15 +65,15 @@
  * This throws away all results accumulated up to now and starts from scratch
  * with the generation process.
  *
- * @fn void ColorLutGenerator::resetUndo()
+ * @fn void ColorLutGenerator::reset_undo()
  * Reset undo buffer.
  * This throws away all undo information and starts a new undo buffer.
  *
- * @fn bool ColorLutGenerator::hasHistograms()
+ * @fn bool ColorLutGenerator::has_histograms()
  * Check if this generator has histograms.
  * @return true, if this generator has histograms, false otherwise
  * 
- * @fn std::map< std::string, Histogram *> *  ColorLutGenerator::getHistograms()
+ * @fn std::map< std::string, Histogram *> *  ColorLutGenerator::get_histograms()
  * Get histograms.
  * @return a map of histograms, if any.
  *

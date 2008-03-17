@@ -77,7 +77,7 @@ ColorModelThresholds::determine(unsigned int y,
 }
 
 const char *
-ColorModelThresholds::getName()
+ColorModelThresholds::get_name()
 {
   return "ColorModelThresholds";
 }
@@ -86,7 +86,7 @@ ColorModelThresholds::getName()
 /** Print the thresholds to stdout.
  */
 void
-ColorModelThresholds::printThresholds()
+ColorModelThresholds::print_thresholds()
 {
   cout << "ColorModelThresholds" << endl
        << "==========================================================" << endl

@@ -41,6 +41,7 @@
 #include <errno.h>
 #include <cstring>
 #include <cstdlib>
+#include <cmath>
 
 using namespace std;
 
@@ -60,15 +61,22 @@ using namespace std;
 /** Create a lookup table with given dimensions _not_ using shared memory.
  * @param width width of lookup table
  * @param height height of lookup table
+ * @param depth depth of the lookup table
  */
-ColorModelLookupTable::ColorModelLookupTable(unsigned int width, unsigned int height)
+ColorModelLookupTable::ColorModelLookupTable(unsigned int width, unsigned int height,
+					     unsigned int depth)
 {
   this->width            = width;
   this->height           = height;
+  this->depth            = depth;
   this->lut_id           = NULL;
   this->destroy_on_free  = false;
 
   create();
+
+  x_max = 256;
+  y_max = 256;
+  z_max = 256;
 }
 
 /** Create a lookup table with given dimensions _not_ using shared memory, load contents
@@ -76,17 +84,24 @@ ColorModelLookupTable::ColorModelLookupTable(unsigned int width, unsigned int he
  * @param file name of the file to load from
  * @param width width of lookup table
  * @param height height of lookup table
+ * @param depth depth of the lookup table
  */
 ColorModelLookupTable::ColorModelLookupTable(const char *file,
-					     unsigned int width, unsigned int height)
+					     unsigned int width, unsigned int height,
+					     unsigned int depth)
 {
   this->width            = width;
   this->height           = height;
+  this->depth            = depth;
   this->lut_id           = NULL;
   this->destroy_on_free  = false;
 
   create();
   load(file);
+
+  x_max = 256;
+  y_max = 256;
+  z_max = 256;
 }
 
 
@@ -101,10 +116,40 @@ ColorModelLookupTable::ColorModelLookupTable(unsigned int width, unsigned int he
 {
   this->width            = width;
   this->height           = height;
+  this->depth            = 1;
   this->lut_id           = strdup(lut_id);
   this->destroy_on_free  = destroy_on_free;
 
   create();
+
+  x_max = 256;
+  y_max = 256;
+  z_max = 256;
+}
+
+
+/** Create a lookup table with given dimensions using shared memory
+ * @param width width of lookup table
+ * @param height height of lookup table
+ * @param depth depth of the lookup table
+ * @param lut_id ID of the LUT in shared memory
+ * @param destroy_on_free true to destroy lookup table in shmem on delete
+ */
+ColorModelLookupTable::ColorModelLookupTable(unsigned int width, unsigned int height,
+					     unsigned int depth,
+					     const char *lut_id, bool destroy_on_free)
+{
+  this->width            = width;
+  this->height           = height;
+  this->depth            = depth;
+  this->lut_id           = strdup(lut_id);
+  this->destroy_on_free  = destroy_on_free;
+
+  create();
+
+  x_max = 256;
+  y_max = 256;
+  z_max = 256;
 }
 
 
@@ -122,11 +167,45 @@ ColorModelLookupTable::ColorModelLookupTable(const char *file,
 {
   this->width            = width;
   this->height           = height;
+  this->depth            = 1;
   this->lut_id           = strdup(lut_id);
   this->destroy_on_free  = destroy_on_free;
 
   create();
   load(file);
+
+  x_max = 256;
+  y_max = 256;
+  z_max = 256;
+}
+
+
+/** Create a lookup table with given dimensions using shared memory, load contents
+ * from file
+ * @param file name of the file to load from
+ * @param width width of lookup table
+ * @param height height of lookup table
+ * @param depth depth of the lookup table
+ * @param lut_id ID of the LUT in shared memory, use a constant from utils/shm_registry.h
+ * @param destroy_on_free true to destroy lookup table in shmem on delete
+ */
+ColorModelLookupTable::ColorModelLookupTable(const char *file,
+					     unsigned int width, unsigned int height,
+					     unsigned int depth,
+					     const char *lut_id, bool destroy_on_free)
+{
+  this->width            = width;
+  this->height           = height;
+  this->depth            = depth;
+  this->lut_id           = strdup(lut_id);
+  this->destroy_on_free  = destroy_on_free;
+
+  create();
+  load(file);
+
+  x_max = 256;
+  y_max = 256;
+  z_max = 256;
 }
 
 
@@ -138,12 +217,12 @@ ColorModelLookupTable::create()
   bytes_per_sample = 1;
 
   if ( lut_id != NULL ) {
-    shm_lut   = new SharedMemoryLookupTable( lut_id, width, height, bytes_per_sample);
+    shm_lut   = new SharedMemoryLookupTable( lut_id, width, height, depth, bytes_per_sample);
     shm_lut->set_destroy_on_delete( destroy_on_free );
     lut       = shm_lut->buffer();
     lut_bytes = shm_lut->data_size();
   } else {
-    lut_bytes = width * height * bytes_per_sample;
+    lut_bytes = width * height * depth * bytes_per_sample;
     lut = (unsigned char *)malloc( lut_bytes );
   }
   memset(lut, C_OTHER, lut_bytes);
@@ -232,6 +311,23 @@ ColorModelLookupTable::reset()
 }
 
 
+/** Set the maximal input value for the three dimensions.
+ * For a YUV lookup table this would be 256 for all dimensions.
+ * @param x_max the maximal value in the 1st dimension
+ * @param y_max the maximal value in the 2nd dimension
+ * @param z_max the maximal value in the 3rd dimension
+ */
+void
+ColorModelLookupTable::set_range(unsigned int x_max, 
+				 unsigned int y_max, 
+				 unsigned int z_max)
+{
+  this->x_max = x_max;
+  this->y_max = y_max;
+  this->z_max = z_max;
+}
+
+
 /** Destructor. */
 ColorModelLookupTable::~ColorModelLookupTable()
 {
@@ -248,34 +344,86 @@ ColorModelLookupTable::~ColorModelLookupTable()
 
 
 color_t
-ColorModelLookupTable::determine(unsigned int y,
-				 unsigned int u,
-				 unsigned int v ) const
+ColorModelLookupTable::determine(unsigned int x,
+				 unsigned int y,
+				 unsigned int z) const
 {
-  return (color_t) *(lut + (v * width * bytes_per_sample) + (u * bytes_per_sample));
+  unsigned int x_index;
+  unsigned int y_index;
+  unsigned int z_index;
+
+  x_index = (unsigned int)( x / float(x_max) * float(width) );
+  y_index = (unsigned int)( y / float(y_max) * float(height) );
+  z_index = (unsigned int)( z / float(z_max) * float(depth) );
+
+  return determine_cr(x_index, y_index, z_index);
+}
+
+
+/** Similiar to determine() but assumes that the x, y, z values
+ * are in the range 0 <= x < lut_width, etc.
+ * The suffix 'cr' stands for compressed range.
+ * @param x the x coordinate
+ * @param y the y coordinate
+ * @param z the z coordinate
+ */
+color_t
+ColorModelLookupTable::determine_cr(unsigned int x,
+				    unsigned int y,
+				    unsigned int z) const
+{
+  if ( x >= width || y >= height || z >= depth ) {
+    throw Exception("LookupTable::determine: height=%d, width=%d, or depth=%d out of bounds", x, y, z);
+  }
+
+  return (color_t) *(lut + (x * height * depth * bytes_per_sample) + 
+		     (y * depth * bytes_per_sample) + (z * bytes_per_sample));
 }
 
 
 const char *
-ColorModelLookupTable::getName()
+ColorModelLookupTable::get_name()
 {
   return "ColorModelLookupTable";
 }
 
 
 /** Set the appropriate value.
+ * @param x x value of entry to set
  * @param y y value of entry to set
- * @param u u value of entry to set
- * @param v v value of entry to set
+ * @param z z value of entry to set
  * @param c color class to set this entry to
+ * @param full_range if true, the x, y, z are assumed to be in the interval
+ * 0 <= x < max_x, etc. if false they are assumed to be in the interval
+ * 0 <= x < lut_width, etc.
  */
 void
-ColorModelLookupTable::set(unsigned int y,
-			   unsigned int u,
-			   unsigned int v,
-			   color_t      c )
+ColorModelLookupTable::set(unsigned int x,
+			   unsigned int y,
+			   unsigned int z,
+			   color_t      c,
+			   bool full_range)
 {
-  *(lut + (v * width * bytes_per_sample) + (u * bytes_per_sample)) = c;
+  unsigned int x_index;
+  unsigned int y_index;
+  unsigned int z_index;
+
+  if (full_range) {
+    x_index = (unsigned int)( x / float(x_max) * float(width) );
+    y_index = (unsigned int)( y / float(y_max) * float(height) );
+    z_index = (unsigned int)( z / float(z_max) * float(depth) );
+  } else {
+    x_index = x;
+    y_index = y;
+    z_index = z;
+  }
+
+  if ( x_index >= width || y_index >= height || z_index >= depth ) {
+    throw OutOfBoundsException("Lookuptable::set: height, width, or depth out of bounds");
+  }
+  
+  *( lut + (x_index * height * depth * bytes_per_sample) 
+     + (y_index * depth * bytes_per_sample) + (z_index * bytes_per_sample) ) = c;
 }
 
 
@@ -297,11 +445,16 @@ ColorModelLookupTable::size()
   return lut_bytes;
 }
 
-
-/** Get LUT buffer.
- * @return buffer */
+/** Get the raw lut buffer
+ * this should only be used if absolutely necessary, the buffer will persist
+ * as long as this instance exists.
+ * @return the raw buffer, aligned as height consecutive lines of
+ *         size width * bytes_per_cell which consist of width number of cells which
+ *         are each bytes_per_cell wide and consecutive
+ *      
+ */
 unsigned char *
-ColorModelLookupTable::getBuffer()
+ColorModelLookupTable::get_buffer()
 {
   return lut;
 }
@@ -320,14 +473,14 @@ ColorModelLookupTable::getBuffer()
 ColorModelLookupTable &
 ColorModelLookupTable::operator+=(const ColorModelLookupTable &cmlt)
 {
-  if ( (width != cmlt.width) || (height != cmlt.height) ) {
+  if ( (width != cmlt.width) || (height != cmlt.height) || (depth != cmlt.depth) ) {
     throw TypeMismatchException("Colormaps are of different sizes");
   }
 
   unsigned char *this_lut = lut;
   unsigned char *other_lut = cmlt.lut;
 
-  for (unsigned int i = 0; i < width * height; ++i) {
+  for (unsigned int i = 0; i < width * height * depth; ++i) {
     if ( (*this_lut == C_OTHER) || (*this_lut == C_BACKGROUND) ) {
       // can be overridden
       if ( (*other_lut != C_OTHER) && (*other_lut != C_BACKGROUND) ) {
@@ -367,7 +520,7 @@ ColorModelLookupTable::operator+=(const char *file)
   unsigned char *this_lut = lut;
   unsigned char *other_lut = tmp;
 
-  for (unsigned int i = 0; i < width * height; ++i) {
+  for (unsigned int i = 0; i < width * height * depth; ++i) {
     if ( (*this_lut == C_OTHER) || (*this_lut == C_BACKGROUND) ) {
       // can be overridden
       if ( (*other_lut != C_OTHER) && (*other_lut != C_BACKGROUND) ) {
@@ -388,20 +541,26 @@ ColorModelLookupTable::operator+=(const char *file)
 /** Create image from LUT.
  * Create image from LUT, useful for debugging and analysing.
  * @param yuv422_planar_buffer contains the image upon return, must be initialized
- * with the appropriate size before.
+ * with the appropriate size beore.
  */
 void
-ColorModelLookupTable::toImage(unsigned char *yuv422_planar_buffer)
+ColorModelLookupTable::to_image(unsigned char *yuv422_planar_buffer)
 {
+  unsigned int y_plane = width / 2;
+
+  if (y_plane >= width) {
+    throw OutOfBoundsException("LookupTable::to_image: y_plane");
+  }
+
   unsigned char *yp = yuv422_planar_buffer;
   unsigned char *up = YUV422_PLANAR_U_PLANE(yuv422_planar_buffer, 512, 512);
   unsigned char *vp = YUV422_PLANAR_V_PLANE(yuv422_planar_buffer, 512, 512);
 
   color_t c;
-  for (unsigned int v = height; v > 0 ; --v) {
-    for (unsigned int u = 0; u < width; ++u) {
+  for (unsigned int v = depth; v > 0 ; --v) {
+    for (unsigned int u = 0; u < height; ++u) {
 
-      c = determine(128, u, v-1);
+      c = determine_cr(y_plane, u, v-1);
 
       switch (c) {
       case C_ORANGE:
@@ -493,7 +652,7 @@ ColorModelLookupTable::toImage(unsigned char *yuv422_planar_buffer)
  * @param format format for the filename
  */
 std::string
-ColorModelLookupTable::composeFilename(const std::string format)
+ColorModelLookupTable::compose_filename(const std::string format)
 {
   string rv = format;
 

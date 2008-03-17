@@ -39,7 +39,7 @@
  * @param u U value
  * @param v V value
  *
- * @fn const char * ColorModel::getName()
+ * @fn const char * ColorModel::get_name()
  * Get name of color model.
  * @return name of color model.
  *
