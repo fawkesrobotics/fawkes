@@ -35,8 +35,6 @@
 #include <fvutils/statistical/histogram.h>
 #include <models/color/lookuptable.h>
 
-// include <utils/utils.h>
-
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -54,20 +52,25 @@ using namespace std;
  * @param histos histograms
  * @param w width of lookup table
  * @param h height of lookup table
+ * @param d depth of lookup table
  * @param object type of the foreground object
  */
-BayesHistosToLut::BayesHistosToLut(std::map<hint_t, Histogram*> histos,
+BayesHistosToLut::BayesHistosToLut(std::map<hint_t, Histogram*> &histos,
 				   unsigned int w, 
 				   unsigned int h,
-				   hint_t object)
+				   unsigned int d,
+				   hint_t object) :
+  histograms(histos)
 {
-  width = w;
+  width  = w;
   height = h;
-  fg_object = object;
-  histograms = histos;
+  depth  = d;
+
+  fg_object  = object;
+  //  histograms = histos;
 
   // no as shmem segment
-  lut = new ColorModelLookupTable(width, height);
+  lut = new ColorModelLookupTable(width, height, depth);
 
   min_probability = 0.3;
   min_prob_ball = 0.0;
@@ -160,7 +163,29 @@ BayesHistosToLut::getAPrioriProb(unsigned int u,
 				 unsigned int v,
 				 hint_t object)
 {
-  return ( float(histograms[object]->get_value(u, v)) / float(numberOfOccurrences[object]) );
+  unsigned int sum = 0;
+  for (unsigned int y = 0; y < width; ++y) {
+    sum += histograms[object]->get_value(y, u, v);
+  }
+
+  return ( float(sum) / float(numberOfOccurrences[object]) );
+}
+
+/** P(u, v| object).
+ * Get a-priori probability.
+ * @param y YUV Y-value
+ * @param u YUV U-value
+ * @param v YUV V-value
+ * @param object object.
+ * @return probability
+ */
+float
+BayesHistosToLut::getAPrioriProb(unsigned int y,
+				 unsigned int u,
+				 unsigned int v,
+				 hint_t object)
+{
+  return ( float(histograms[object]->get_value(y, u, v)) / float(numberOfOccurrences[object]) );
 }
 
 /** P(object| u, v).
@@ -190,6 +215,35 @@ BayesHistosToLut::getAPosterioriProb(hint_t object,
     return 0;
 }
 
+/** P(object| u, v).
+ * Get a-posteriori probability.
+ * @param object objcet
+ * @param y YUV Y-value
+ * @param u YUV U-value
+ * @param v YUV V-value
+ */
+float
+BayesHistosToLut::getAPosterioriProb(hint_t object,
+				     unsigned int y,
+				     unsigned int u,
+				     unsigned int v)
+{
+  /* calculate "nenner" for bayes-formula,
+     i.e. sum up the probabilities P(u, v| object) * P(object)
+     over all objects */
+  float sumOfProbabilities = 0.0;
+  map<hint_t, Histogram*>::iterator hit;
+  for (hit = histograms.begin(); hit != histograms.end(); hit++) {
+    sumOfProbabilities += ( getAPrioriProb(y, u, v, (hint_t)hit->first) * getObjectProb((hint_t)hit->first) );
+  }
+
+  if (sumOfProbabilities != 0) {
+    return getAPrioriProb(y, u, v, object) * getObjectProb(object) / sumOfProbabilities;
+  }
+  else
+    return 0;
+}
+
 /** Get most likely object.
  * @param u YUV U-value
  * @param v YUV V-value
@@ -199,6 +253,8 @@ hint_t
 BayesHistosToLut::getMostLikelyObject(unsigned int u,
 				      unsigned int v)
 {
+  // TODO sum over all y-values
+
   hint_t mostLikelyObject = H_UNKNOWN;
   float probOfMostLikelyObject = 0.0;
   map<hint_t, Histogram*>::iterator hit;
@@ -219,6 +275,36 @@ BayesHistosToLut::getMostLikelyObject(unsigned int u,
   }
 }
 
+/** Get most likely object.
+ * @param y YUV Y-value
+ * @param u YUV U-value
+ * @param v YUV V-value
+ * @return most likely object for this color
+ */
+hint_t
+BayesHistosToLut::getMostLikelyObject(unsigned int y,
+				      unsigned int u,
+				      unsigned int v)
+{
+  hint_t mostLikelyObject = H_UNKNOWN;
+  float probOfMostLikelyObject = 0.0;
+  map<hint_t, Histogram*>::iterator hit;
+  for (hit = histograms.begin(); hit != histograms.end(); hit++) {
+    float tmp = getAPosterioriProb((hint_t)hit->first, y, u, v);
+    
+    if (tmp > probOfMostLikelyObject) {
+      probOfMostLikelyObject = tmp;
+      mostLikelyObject = (hint_t)hit->first;
+    }
+  }
+  
+  if (probOfMostLikelyObject > min_probability) {
+    return mostLikelyObject;
+  }
+  else {
+    return H_UNKNOWN;
+  }
+}
 
 /** Calculate all LUT colors. */
 void
@@ -229,11 +315,13 @@ BayesHistosToLut::calculateLutAllColors()
   map<hint_t, Histogram*>::iterator hit;
   for (hit = histograms.begin(); hit != histograms.end(); hit++) {
     unsigned int total = 0;
-    for (unsigned int v = 0; v < height; ++v) {
-      for (unsigned int u = 0; u < width; ++u) {
-	unsigned int tmp = ((Histogram*)(hit->second))->get_value(u, v);
-	if (tmp > 0)
-	  total += tmp;
+    for (unsigned int v = 0; v < depth; ++v) {
+      for (unsigned int u = 0; u < height; ++u) {
+	for (unsigned int y = 0; y < width; ++y) {
+	  unsigned int tmp = ((Histogram*)(hit->second))->get_value(y, u, v);
+	  if (tmp > 0)
+	    total += tmp;
+	}
       }
     }
     numberOfOccurrences[ (hint_t)hit->first ] = total;
@@ -250,58 +338,60 @@ BayesHistosToLut::calculateLutAllColors()
   hint_t   color_with_highest_prob;
   float    highest_prob;
   float    current_prob;
-  for (unsigned int v = 0; v < height; v++) {
-    for (unsigned int u = 0; u < width; u++) {
+  for (unsigned int v = 0; v < depth; ++v) {
+    for (unsigned int u = 0; u < height; ++u) {
+      for (unsigned int y = 0; y < width; ++y) {
 
-      // find most probable color for (u, v)
-      highest_prob = 0.0;
-      color_with_highest_prob = H_UNKNOWN; // ...maybe it is better to have default = H_BACKGROUND...
-      map<hint_t, Histogram*>::iterator hit;
-      for (hit = histograms.begin(); hit != histograms.end(); hit++) {
-	// if current histogram is not empty...
-	if (numberOfOccurrences[ (hint_t)hit->first ] > 0) {
-	  current_prob = float( hit->second->get_value(u, v) ) / float( numberOfOccurrences[ hit->first ] );
-	  // if current histogram has higher probability for color (u, v),
-	  // _and_ is above min_prob-threshold...
-	  if ( current_prob > highest_prob &&
-	       current_prob > min_probability ) {
-	    // ...update color information
-	    highest_prob = current_prob;
-	    color_with_highest_prob = hit->first;
+	// find most probable color for (u, v)
+	highest_prob = 0.0;
+	color_with_highest_prob = H_UNKNOWN; // ...maybe it is better to have default = H_BACKGROUND...
+	map<hint_t, Histogram*>::iterator hit;
+	for (hit = histograms.begin(); hit != histograms.end(); hit++) {
+	  // if current histogram is not empty...
+	  if (numberOfOccurrences[ (hint_t)hit->first ] > 0) {
+	    current_prob = float( hit->second->get_value(y, u, v) ) / float( numberOfOccurrences[ hit->first ] );
+	    // if current histogram has higher probability for color (u, v),
+	    // _and_ is above min_prob-threshold...
+	    if ( current_prob > highest_prob &&
+		 current_prob > min_probability ) {
+	      // ...update color information
+	      highest_prob = current_prob;
+	      color_with_highest_prob = hit->first;
+	    }
 	  }
 	}
-      }
 
-      // set lut value for color (u, v) to most probable color
-      switch( color_with_highest_prob ) {
-      case H_BALL:
-	lut->set(128, u, v, C_ORANGE);
-	break;
-      case H_BACKGROUND:
-	lut->set(128, u, v, C_BACKGROUND);
-	break;
-      case H_ROBOT:
-	lut->set(128, u, v, C_BLACK);
-	break;
-      case H_FIELD:
-	lut->set(128, u, v, C_GREEN);
-	break;
-      case H_GOAL_BLUE:
-	lut->set(128, u, v, C_BLUE);
-	break;
-      case H_GOAL_YELLOW:
-	lut->set(128, u, v, C_YELLOW);
-	break;
-      case H_LINE:
-	lut->set(128, u, v, C_WHITE);
-	break;
-      case H_UNKNOWN:
-	lut->set(128, u, v, C_OTHER);
-	break;
-      default:
-	cout << "(BayesHistosToLut::calculateLutAllColors): Invalid object." << endl;
-	exit(-1);
-	break;
+	// set lut value for color (u, v) to most probable color
+	switch( color_with_highest_prob ) {
+	case H_BALL:
+	  lut->set(y, u, v, C_ORANGE);
+	  break;
+	case H_BACKGROUND:
+	  lut->set(y, u, v, C_BACKGROUND);
+	  break;
+	case H_ROBOT:
+	  lut->set(y, u, v, C_BLACK);
+	  break;
+	case H_FIELD:
+	  lut->set(y, u, v, C_GREEN);
+	  break;
+	case H_GOAL_BLUE:
+	  lut->set(y, u, v, C_BLUE);
+	  break;
+	case H_GOAL_YELLOW:
+	  lut->set(y, u, v, C_YELLOW);
+	  break;
+	case H_LINE:
+	  lut->set(y, u, v, C_WHITE);
+	  break;
+	case H_UNKNOWN:
+	  lut->set(y, u, v, C_OTHER);
+	  break;
+	default:
+	  cout << "(BayesHistosToLut::calculateLutAllColors): Invalid object." << endl;
+	  exit(-1);
+	  break;
+	}
       }
     }
   }
@@ -327,22 +417,24 @@ BayesHistosToLut::calculateLutValues( bool penalty )
       // No undo available for us
       cout << "Histogram::calculateLutValues: There are not enough undos possible for background histogram, not penalizing" << endl;
     } else {
-
       unsigned int bg_median  = histo_bg->get_median();
       unsigned int bg_average = histo_bg->get_average();
-      unsigned int bg_val = 0;
+       unsigned int bg_val = 0;
 
       old_undo = histo_bg->switch_undo( 1 );
 
       cout << "Histogram: Setting low bg vals to median. median=" << bg_median
 	   << "  avg=" << bg_average << endl;
 
-      for (unsigned int v = 0; v < height; ++v) {
-	for (unsigned int u = 0; u < width; ++u) {
-	  if ( histo_fg->get_value( u, v ) == 0 ) {
-	    bg_val = histo_bg->get_value( u, v );
-	    if (bg_val < bg_average) {
-	      histo_bg->set_value( u, v, bg_average );
+      for (unsigned int v = 0; v < depth; ++v) {
+	for (unsigned int u = 0; u < height; ++u) {
+	  for (unsigned int y = 0; y < width; ++y) {
+
+	    if ( histo_fg->get_value(y, u, v) == 0 ) {
+	      bg_val = histo_bg->get_value(y, u, v);
+	      if (bg_val < bg_average) {
+		histo_bg->set_value(y, u, v, bg_average);
+	      }
 	    }
 	  }
 	}
@@ -357,11 +449,13 @@ BayesHistosToLut::calculateLutValues( bool penalty )
   map<hint_t, Histogram*>::iterator hit;
   for (hit = histograms.begin(); hit != histograms.end(); hit++) {
     unsigned int total = 0;
-    for (unsigned int v = 0; v < height; ++v) {
-      for (unsigned int u = 0; u < width; ++u) {
-	unsigned int tmp = hit->second->get_value(u, v);
-	if (tmp > 0)
-	  total += tmp;
+    for (unsigned int v = 0; v < depth; ++v) {
+      for (unsigned int u = 0; u < height; ++u) {
+	for (unsigned int y = 0; y < width; ++y) {
+	  unsigned int tmp = hit->second->get_value(y, u, v);
+	  if (tmp > 0)
+	    total += tmp;
+	}
       }
     }
     numberOfOccurrences[hit->first] = total;
@@ -378,41 +472,62 @@ BayesHistosToLut::calculateLutValues( bool penalty )
   for (hit = histograms.begin(); hit != histograms.end(); hit++) {
     object_probabilities[hit->first] = (float)hit->second->get_sum() / (float)total_count;
 
-    //    cout << "Setting probability for histogram " << hit->first << " to "
-    //	 << object_probabilities[hit->first] << endl;
+    //     cout << "Setting a-priori probability for histogram " << hit->first << " to "
+    // 	 << object_probabilities[hit->first] << endl;
   }
 
 
-  for (unsigned int v = 0; v < height; v++) {
-    for (unsigned int u = 0; u < width; u++) {
-      hint_t mostLikelyObject = getMostLikelyObject(u, v);
+  unsigned int count_ball       = 0;
+  unsigned int count_field      = 0;
+  unsigned int count_line       = 0;
+  unsigned int count_background = 0;
+  unsigned int count_unknown    = 0;
+  
+  lut->reset();
 
-      switch(mostLikelyObject) {
-      case H_BALL:
-	lut->set(128, u, v, C_ORANGE);
-	break;
-      case H_BACKGROUND:
-	lut->set(128, u, v, C_BACKGROUND);
-	break;
-      case H_FIELD:
-	lut->set(128, u, v, C_GREEN);
-	break;
-      case H_GOAL_BLUE:
-	lut->set(128, u, v, C_BLUE);
-	break;
-      case H_GOAL_YELLOW:
-	lut->set(128, u, v, C_YELLOW);
-	break;
-      case H_UNKNOWN:
-	lut->set(128, u, v, C_OTHER);
-	break;
-      default:
-	cout << "(BayesHistosToLut::calculateLutValues): Invalid object." << endl;
-	exit(-1);
-	break;
+  for (unsigned int y = 0; y < width; ++y) {
+    for (unsigned int u = 0; u < height; ++u) {
+      for (unsigned int v = 0; v < depth; ++v) {
+	hint_t mostLikelyObject = getMostLikelyObject(y, u, v);
+
+	switch(mostLikelyObject) {
+	case H_BALL:
+	  count_ball++;
+	  lut->set(y, u, v, C_ORANGE, false);
+	  break;
+	case H_BACKGROUND:
+	  count_background++;
+	  lut->set(y, u, v, C_BACKGROUND, false);
+	  break;
+	case H_FIELD:
+	  count_field++;
+	  lut->set(y, u, v, C_GREEN, false);
+	  break;
+	case H_GOAL_BLUE:
+	  lut->set(y, u, v, C_BLUE, false);
+	  break;
+	case H_GOAL_YELLOW:
+	  lut->set(y, u, v, C_YELLOW, false);
+	  break;
+	case H_LINE:
+	  count_line++;
+	  lut->set(y, u, v, C_WHITE, false);
+	  break;
+	case H_UNKNOWN:
+	  count_unknown++;
+	  lut->set(y, u, v, C_OTHER, false);
+	  break;
+	default:
+	  cout << "(BayesHistosToLut::calculateLutValues): Invalid object." << endl;
+	  exit(-1);
+	  break;
+	}
       }
     }
   }
+
+  printf("ball: %d  field: %d  line: %d  background: %d  unknown: %d\n", count_ball, 
+	 count_field, count_line, count_background, count_unknown);
 
   if ( penalty ) {
     Histogram *histo_bg   = histograms.at( H_BACKGROUND );

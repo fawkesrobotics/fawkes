@@ -44,23 +44,38 @@ class ColorModelLookupTable;
 class BayesHistosToLut
 {
  public:
-  BayesHistosToLut(std::map< hint_t, Histogram * > histos,
+  BayesHistosToLut(std::map< hint_t, Histogram * > &histos,
 		   unsigned int w, 
 		   unsigned int h,
-		   hint_t fg_object = H_BALL);
+		   unsigned int d = 1,
+		   hint_t fg_object = H_UNKNOWN);
   ~BayesHistosToLut();
 
   std::string getName();
-
+  
   float getObjectProb(hint_t object);
-  float getAPrioriProb(unsigned int u,
-		       unsigned int v,
-		       hint_t object);
-  float getAPosterioriProb(hint_t object,
-			   unsigned int u, 
-			   unsigned int v);
-  hint_t getMostLikelyObject(unsigned int u,
-			     unsigned int v);
+
+  float getAPrioriProb( unsigned int u,
+			unsigned int v,
+			hint_t object );
+  float getAPrioriProb( unsigned int y,
+			unsigned int u,
+			unsigned int v,
+			hint_t object );
+
+  float getAPosterioriProb( hint_t object,
+			    unsigned int u, 
+			    unsigned int v );
+  float getAPosterioriProb( hint_t object,
+			    unsigned int y,
+			    unsigned int u, 
+			    unsigned int v );
+
+  hint_t getMostLikelyObject( unsigned int u,
+			      unsigned int v );
+  hint_t getMostLikelyObject( unsigned int y,
+			      unsigned int u,
+			      unsigned int v );
 
   void setMinProbability( float min_prob );
   void setMinProbForColor( float min_prob, hint_t hint );
@@ -78,12 +93,14 @@ class BayesHistosToLut
   void save(std::string filename);
 
  private:
-  std::map<hint_t, Histogram*> histograms;
+  std::map<hint_t, Histogram*>  &histograms;
   std::map<hint_t, unsigned int> numberOfOccurrences;
   std::map<hint_t, float>        object_probabilities;
+
   ColorModelLookupTable *lut;
   unsigned int width;
   unsigned int height;
+  unsigned int depth; 
 
   hint_t fg_object;
 

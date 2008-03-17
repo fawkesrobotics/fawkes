@@ -40,10 +40,15 @@ class BayesColorLutGenerator : public ColorLutGenerator
 {
 
  public:
-  BayesColorLutGenerator(hint_t fg_object = H_BALL);
+  BayesColorLutGenerator( unsigned int lut_width = 1, 
+			  unsigned int lut_height = 256,
+			  unsigned int lut_depth = 256,
+			  hint_t fg_object = H_UNKNOWN);
+  ~BayesColorLutGenerator();
 
+  virtual void                     set_fg_object(hint_t object);
   virtual void                     set_buffer(unsigned char *buffer,
-					     unsigned int width, unsigned int height);
+					      unsigned int width, unsigned int height);
   virtual ColorModelLookupTable *  get_current();
   virtual void                     consider();
   virtual void                     calc();
@@ -56,12 +61,14 @@ class BayesColorLutGenerator : public ColorLutGenerator
   virtual bool                     has_histograms();
   virtual std::map< hint_t, Histogram * > *  get_histograms();
 
-  void setMinProbability(float min_prob);
+  void set_min_probability(float min_prob);
 
  private:
-  bool isInRegion(unsigned int x, unsigned int y);
+  bool is_in_region(unsigned int x, unsigned int y);
+  void normalize_histos();
 
-
+  std::map< hint_t, Histogram * > fg_histos;
+  std::map< hint_t, Histogram * > bg_histos;
   std::map< hint_t, Histogram * > histos;
   std::map< hint_t, Histogram * >::iterator histo_it;
 
@@ -81,6 +88,7 @@ class BayesColorLutGenerator : public ColorLutGenerator
   std::vector< rectangle_t >  region;
   std::vector< rectangle_t >::iterator  rit;
 
+  bool *selection_mask;
 };
 
 #endif

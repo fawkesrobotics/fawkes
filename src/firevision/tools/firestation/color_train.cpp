@@ -465,7 +465,7 @@ ColorTrainTool::set_threshold_sh(Gtk::ScrollType scroll, double value)
 void
 ColorTrainTool::set_min_prob(float min_prob)
 {
-  m_generator->setMinProbability(min_prob);
+  m_generator->set_min_probability(min_prob);
 }
 
 /** Signal handler to set the minimal probability.
