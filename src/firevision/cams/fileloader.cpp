@@ -1,9 +1,11 @@
+
 /***************************************************************************
- *  firewire.cpp - Implementation to access FW cam using libdc1394 and
- *                 libraw1394
+ *  fileloader.cpp - A camera which obtains its images from a single image
+ *                   file or from several image files in a directory
  *
  *  Generated: Tue Feb 22 13:28:08 2005
  *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *             2008       Daniel Beck
  *
  *  $Id$
  *
@@ -41,13 +43,32 @@
 #include <cstdlib>
 #include <cstdio>
 
+#include <sys/types.h>
+#include <dirent.h>
+
 /** @class FileLoader <cams/fileloader.h>
  * Load images from files.
  * The file loader tries to determine the image format of the given image using
  * the the file type utility. Currently it recognizes JPEG and FvRaw image files.
  *
  * @author Tim Niemueller
+ * @author Daniel Beck
  */
+
+
+char* FileLoader::extension = NULL;
+
+int file_select(const struct dirent* ent)
+{
+  // NOTE: this only checks whether the filename contains the
+  // extension and not whether it ends with it.
+  if ( NULL != strstr(ent->d_name, FileLoader::extension) ) { 
+    return 1; 
+  }
+
+  return 0;
+}
+
 
 /** Constructor.
  * @param filename name of file to open, full path or relative to working directory
@@ -71,11 +92,25 @@ FileLoader::FileLoader(const char *filename)
  */
 FileLoader::FileLoader(const CameraArgumentParser *cap)
 {
+  filename = NULL;
+  dirname = NULL;
+
   if ( cap->has("file") ) {
     this->filename = strdup(cap->get("file").c_str());
+  } else if ( cap->has("dir") ) {
+    this->dirname = strdup( cap->get("dir").c_str() );
+    if ( cap->has("extension") ) {
+      this->extension = strdup( cap->get("extension").c_str() );
+    } else {
+      this->extension = strdup("jpg");
+    }
   } else {
-    throw MissingParameterException("Parameter file is missing.");
+    throw MissingParameterException("Neither parameter file nor parameter directory are present");
   }
+
+  file_list = NULL;
+  num_files = 0;
+  cur_file = 0;
   width = height = 0;
   file_buffer = NULL;
   this->cspace = CS_UNKNOWN;
@@ -108,6 +143,12 @@ FileLoader::FileLoader(colorspace_t cspace, const char *filename,
 /** Destructor. */
 FileLoader::~FileLoader()
 {
+  for (int i = 0; i < num_files; ++i) {
+    free(file_list[i]);
+  }
+  free(file_list);
+  free(dirname);
+  free(extension);
   free(filename);
 }
 
@@ -117,60 +158,11 @@ FileLoader::open()
 {
   if (opened) return;
 
-  std::string ft = fv_filetype_file( filename );
-
-
-  if ( FvRawReader::is_FvRaw(filename) ) {
-    FvRawReader *fvrr = new FvRawReader( filename );
-    cspace = fvrr->colorspace();
-    width  = fvrr->pixel_width();
-    height = fvrr->pixel_height();
-    _buffer_size = colorspace_buffer_size( cspace, width, height );
-    file_buffer = (unsigned char*)malloc(_buffer_size);
-    fvrr->set_buffer( file_buffer );
-    try {
-      fvrr->read();
-    } catch (Exception &e) {
-      delete fvrr;
-      e.append("FileLoader::open() failed");
-      throw;
-    }
-    delete fvrr;
-
-#ifdef HAVE_LIBJPEG
-  } else if ( ft.find( "JPEG" ) != std::string::npos ) {
-    JpegReader *jr = new JpegReader( filename );
-    cspace = jr->colorspace();
-    width  = jr->pixel_width();
-    height = jr->pixel_height();
-    _buffer_size = colorspace_buffer_size( cspace, width, height );
-    file_buffer = (unsigned char*)malloc(_buffer_size);
-    jr->set_buffer( file_buffer );
-    try {
-      jr->read();
-    } catch (Exception &e) {
-      delete jr;
-      e.append("FileLoader::open() failed");
-      throw;
-    }
-    delete jr;
-#endif
-
-  } else {
-    _buffer_size = colorspace_buffer_size( cspace, width, height );
-
-    if (_buffer_size > 0) {
-      FILE *f;
-      f = fopen( filename, "rb" );
-      file_buffer = (unsigned char*)malloc(_buffer_size);
-      if (fread(file_buffer, _buffer_size, 1, f) != 1) {
-	// cout << "FileLoader: Could not read data." << endl;
-	fclose(f);
-	throw Exception("Could not read data");
-      }
-      fclose(f);
-    } else {
-      throw Exception("Invalid color space (buffer size is 0)");
+  if (dirname) {
+    num_files = scandir(dirname, &file_list, file_select, alphasort);
+    
+    if ( -1 == num_files ) {
+      throw Exception("Error while scanning directory %s", dirname);
     }
   }
 
@@ -206,6 +198,81 @@ FileLoader::print_info()
 void
 FileLoader::capture()
 {
+  if (file_buffer) {
+    free(file_buffer);
+  }
+
+  char *fn;
+  if (0 != num_files) {
+    asprintf(&fn, "%s/%s", dirname, file_list[cur_file]->d_name);
+  } else {
+    fn = strdup(filename);
+  }
+
+  std::string ft = fv_filetype_file( fn );
+
+
+  if ( FvRawReader::is_FvRaw(fn) ) {
+    FvRawReader *fvrr = new FvRawReader( fn );
+    cspace = fvrr->colorspace();
+    width  = fvrr->pixel_width();
+    height = fvrr->pixel_height();
+    _buffer_size = colorspace_buffer_size( cspace, width, height );
+    file_buffer = (unsigned char*)malloc(_buffer_size);
+    fvrr->set_buffer( file_buffer );
+    try {
+      fvrr->read();
+    } catch (Exception &e) {
+      delete fvrr;
+      e.append("FileLoader::open() failed");
+      throw;
+    }
+    delete fvrr;
+
+#ifdef HAVE_LIBJPEG
+  } else if ( ft.find( "JPEG" ) != std::string::npos ) {
+    JpegReader *jr = new JpegReader( fn );
+    cspace = jr->colorspace();
+    width  = jr->pixel_width();
+    height = jr->pixel_height();
+    _buffer_size = colorspace_buffer_size( cspace, width, height );
+    file_buffer = (unsigned char*)malloc(_buffer_size);
+    jr->set_buffer( file_buffer );
+    try {
+      jr->read();
+    } catch (Exception &e) {
+      delete jr;
+      e.append("FileLoader::open() failed");
+      throw;
+    }
+    delete jr;
+#endif
+
+  } else {
+    _buffer_size = colorspace_buffer_size( cspace, width, height );
+
+    if (_buffer_size > 0) {
+      FILE *f;
+      f = fopen( fn, "rb" );
+      file_buffer = (unsigned char*)malloc(_buffer_size);
+      if (fread(file_buffer, _buffer_size, 1, f) != 1) {
+	// cout << "FileLoader: Could not read data." << endl;
+	fclose(f);
+	throw Exception("Could not read data");
+      }
+      fclose(f);
+    } else {
+      throw Exception("Invalid color space (buffer size is 0)");
+    }
+  }
+
+  free(fn);
+
+  if (0 != num_files) {
+    if (++cur_file == num_files) {
+      cur_file = 0;
+    }
+  }
 }
 
 

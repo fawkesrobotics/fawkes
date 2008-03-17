@@ -1,9 +1,11 @@
 
 /***************************************************************************
- *  fireloader.h - This header defines a dummy file loader camera
+ *  fileloader.h - A camera which obtains its images from a single image
+ *                 file or from several image files in a directory
  *
  *  Generated: Tue Mar  2 12:26:44 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *             2008       Daniel Beck
  *
  *  $Id$
  *
@@ -34,7 +36,8 @@ class CameraArgumentParser;
 
 class FileLoader : public Camera
 {
-
+  friend int file_select(const struct dirent*);
+  
  public:
 
   FileLoader(const char *filename);
@@ -76,6 +79,11 @@ class FileLoader : public Camera
   unsigned int height;
   colorspace_t cspace;
   char *filename;
+  char *dirname;
+  static char *extension;
+  int num_files;
+  int cur_file;
+  struct dirent **file_list;
 };
 
 #endif
