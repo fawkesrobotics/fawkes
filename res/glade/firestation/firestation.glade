@@ -51,6 +51,22 @@
 	  </child>
 
 	  <child>
+	    <widget class="GtkToolButton" id="tbtnOpenFolder">
+	      <property name="visible">True</property>
+	      <property name="label" translatable="yes">Open Folder</property>
+	      <property name="use_underline">True</property>
+	      <property name="stock_id">gtk-directory</property>
+	      <property name="visible_horizontal">True</property>
+	      <property name="visible_vertical">True</property>
+	      <property name="is_important">False</property>
+	    </widget>
+	    <packing>
+	      <property name="expand">False</property>
+	      <property name="homogeneous">True</property>
+	    </packing>
+	  </child>
+
+	  <child>
 	    <widget class="GtkToolButton" id="tbtnOpenShm">
 	      <property name="visible">True</property>
 	      <property name="label" translatable="yes">Open SHM</property>
@@ -83,17 +99,11 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkToolItem" id="toolitem1">
+	    <widget class="GtkSeparatorToolItem" id="separatortoolitem3">
 	      <property name="visible">True</property>
+	      <property name="draw">True</property>
 	      <property name="visible_horizontal">True</property>
 	      <property name="visible_vertical">True</property>
-	      <property name="is_important">False</property>
-
-	      <child>
-		<widget class="GtkVSeparator" id="vseparator1">
-		  <property name="visible">True</property>
-		</widget>
-	      </child>
 	    </widget>
 	    <packing>
 	      <property name="expand">False</property>
@@ -467,7 +477,7 @@
 			    <widget class="GtkCheckButton" id="ckbContTrans">
 			      <property name="visible">True</property>
 			      <property name="can_focus">True</property>
-			      <property name="label" translatable="yes">Enable continuous image transfer</property>
+			      <property name="label" translatable="yes">Enable</property>
 			      <property name="use_underline">True</property>
 			      <property name="relief">GTK_RELIEF_NORMAL</property>
 			      <property name="focus_on_click">True</property>
