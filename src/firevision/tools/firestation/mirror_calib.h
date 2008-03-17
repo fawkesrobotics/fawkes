@@ -65,6 +65,9 @@ class MirrorCalibTool : public BulbGeneratorProgressHandler
   unsigned int m_img_width;
   unsigned int m_img_height;
 
+  unsigned int m_center_x;
+  unsigned int m_center_y;
+
   unsigned int m_next_x;
   unsigned int m_next_y;
   unsigned int m_next_ori;

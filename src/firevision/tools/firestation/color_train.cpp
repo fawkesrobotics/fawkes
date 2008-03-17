@@ -89,9 +89,9 @@ ColorTrainTool::ColorTrainTool(unsigned int width, unsigned int height,
 ColorTrainTool::~ColorTrainTool()
 {
   free(m_lut_rgb_buffer);
+  free(m_seg_buffer);
   delete m_zauberstab;
   delete m_generator;
-  delete m_seg_buffer;
 }
 
 /** Initializer routine.
@@ -133,7 +133,7 @@ ColorTrainTool::initialize(unsigned int width, unsigned int height,
 
   if ( !m_generator)
     {
-      m_generator = new BayesColorLutGenerator(m_fg_object);
+      m_generator = new BayesColorLutGenerator(8, 256, 256);
     }
 
   m_data_available = false;
@@ -249,28 +249,36 @@ ColorTrainTool::perform_segmentation()
 	  if (C_GREEN == result)
 	    {
 	      d->setColor(240, 0, 0);
-	      d->colorPoint(w, h);
 	    }
 	  else if (C_ORANGE == result)
 	    {
-	      d->setColor(160, 0, 255);
-	      d->colorPoint(w, h);
+	      d->setColor(127, 30, 230);
+	    }
+	  else if (C_BACKGROUND == result)
+	    {
+	      d->setColor(50, 127, 127);
+	    }
+	  else if (C_WHITE == result)
+	    {
+	      d->setColor(255, 128, 128);
 	    }
 	  else
 	    {
-	      d->setColor(127, 127, 127);
-	      d->colorPoint(w, h);
+	      d->setColor(127, 255, 255);
 	    }
+
+	  d->colorPoint(w, h);
 	}
     }
 }
 
 /** Save histograms to disk. */
 void
-ColorTrainTool::save_histos()
+ColorTrainTool::save_histograms()
 {
   std::map<hint_t, Histogram*>* histos = m_generator->get_histograms();
   std::map<hint_t, Histogram*>::iterator hit;
+
   for (hit = histos->begin(); hit != histos->end(); ++hit)
     {
       char* filename;
@@ -294,6 +302,15 @@ ColorTrainTool::save_histos()
       hit->second->save(filename, true);
       free(filename);
     }
+}
+
+/** Load histograms from a file.
+ * @param filename the name of the file containing the histogram
+ */
+void
+ColorTrainTool::load_histogram(const char* filename)
+{
+  // TODO
 }
 
 /** Save colormap to a file.
@@ -433,8 +450,7 @@ ColorTrainTool::set_fg_object(hint_t object)
 
   m_fg_object = object;
 
-  delete m_generator;
-  m_generator = new BayesColorLutGenerator(m_fg_object);
+  m_generator->set_fg_object(m_fg_object);
 }
 
 /** Sets the threshold for the magic wand selection.

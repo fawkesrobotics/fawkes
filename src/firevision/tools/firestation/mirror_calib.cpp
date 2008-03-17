@@ -39,7 +39,8 @@
 
 using namespace std;
 
-float MirrorCalibTool::m_sample_dist[] = {0.5, 1.0, 2.0, 3.0, 4.0};
+float MirrorCalibTool::m_sample_dist[] = {0.5, 1.0, 1.5, 2.0, 2.5, 
+					  3.0, 3.5, 4.0, 4.5, 5.0};
 float MirrorCalibTool::m_sample_ori[]  = {0.0, deg2rad(45.0),
 					  deg2rad(90.0), deg2rad(135.0),
 					  deg2rad(180.0),deg2rad(225.0),
@@ -55,7 +56,7 @@ MirrorCalibTool::MirrorCalibTool()
   m_img_width = 0;
   m_img_height = 0;
 
-  m_num_dists = 5 /*num_dists*/;
+  m_num_dists = 10 /*num_dists*/;
   m_num_oris = 8 /*num_oris*/;
 
   m_sample_step = 0;
@@ -109,6 +110,8 @@ MirrorCalibTool::start()
 
   m_sampler = new BulbSampler(m_img_width, m_img_height);
   m_next_sample_point = Point(0.0, 0.0, 0.0);
+
+  cout << "Define center" << endl;
 }
 
 /** Aborts the calibration process. */
@@ -130,74 +133,48 @@ MirrorCalibTool::step(unsigned int x, unsigned int y)
   if (m_sample_step == 0)
     {
       m_sampler->setCenter(x, y);
+      m_center_x = x;
+      m_center_y = y;
       cout << "Center set to (" << x << ", " << y << ")" << endl;
-      cout << "Define forward direction" << endl;
-      m_next_sample_point = Point(1.0, 0.0, 0.0);
       m_sample_step++;
+      m_sampler->calculateOmniOrientation(x, y-100);
     }
   else if (m_sample_step == 1)
     {
-      m_sampler->calculateOmniOrientation(x, y);
-      cout << "Forward pixel (" << x << ", " << y << ")" << endl;
-      float dist = m_sample_dist[m_sample_dist_step];
-      float ori = m_sample_ori[m_sample_ori_step];
-      m_next_sample_point = Point(dist, 0.0, 0.0);
-      m_next_sample_point.rotate_z(ori);
-      m_step_two = true;
-      m_sample_step++;
-    }
-  else if (m_sample_step == 2)
-    {
-      if (m_sample_ori_step < m_num_oris)
+      if (m_sample_dist_step < m_num_dists)
 	{
-	  if (m_sample_dist_step < m_num_dists)
+	  float dist = m_sample_dist[m_sample_dist_step];
+	  m_next_sample_point = Point(0.0, dist, 0.0);
+	  float phi = atan2f( float(x) - float(m_center_x), 
+			      float(m_center_y) - float(y) );
+	  cout << "phi: " << phi << endl;
+	  m_next_sample_point.rotate_z(phi);
+	  cout << "Next sample dist  : " << dist << endl;
+	  cout << "Next sample ori   : " << rad2deg(phi) << endl;
+	  cout << "Next sample point : " << m_next_sample_point.x() 
+	       << ", " << m_next_sample_point.y() << endl;
+
+	  m_sampler->setBallPosition(m_next_sample_point.x(), m_next_sample_point.y());
+	  try
 	    {
-	      m_sampler->setBallPosition(m_next_sample_point.x(), m_next_sample_point.y());
-	      try
-		{
-		  m_sampler->consider(x, y, 0.0, 0.0, 0.0);
-		}
-	      catch (Exception &e)
-		{
-		  e.print_trace();
-		}
-
-	      m_sample_dist_step++;
-	      if (m_sample_dist_step == m_num_dists)
-		{
-		  m_sample_ori_step++;
-		  m_sample_dist_step = 0;
-		}
-
-	      if (m_sample_ori_step < m_num_oris)
-		{
-		  float dist = m_sample_dist[m_sample_dist_step];
-		  float ori = m_sample_ori[m_sample_ori_step];
-		  cout << m_sample_ori_step << ":" << m_sample_dist_step 
-		       << ": Calibrating relative position (" 
-		       << dist << ", " << ori << ")" << endl;
-		  m_next_sample_point = Point(dist, 0.0, 0.0);
-		  m_next_sample_point.rotate_z(ori);
-		  cout << "Next sampling point (" << m_next_sample_point.x() << ", " << m_next_sample_point.y() << ")" << endl;
-		}
-	      else
-		{
-		  m_step_two = false;
-		}
+	      m_sampler->consider(x, y, 0.0, 0.0, 0.0);
 	    }
+	  catch (Exception &e)
+	    {
+	      e.print_trace();
+	    }
+
+	  ++m_sample_dist_step;
 	}
       else
 	{
-	  m_sample_step++;
+	  cout << "Generating bulb" << endl;
+	  m_generator = new BulbGenerator(m_sampler, this);
+	  m_generator->generate();
+	  m_calib_done = true;
+	  cout << "Calibration done" << endl;
+	  ++m_sample_step;
 	}
-    }
-  else if (m_sample_step == 3)
-    {
-      cout << "Generating bulb" << endl;
-      m_generator = new BulbGenerator(m_sampler, this);
-      m_generator->generate();
-      m_calib_done = true;
-      cout << "Calibration done" << endl;
     }
 }
 

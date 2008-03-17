@@ -35,11 +35,10 @@
 #include <netcomm/dns-sd/avahi_thread.h>
 #include <netcomm/service_discovery/browse_handler.h>
 
+class Camera;
 class SharedMemoryImageBuffer;
-class NetworkCamera;
 class ShmImageLister;
 class Writer;
-class Reader;
 class MirrorCalibTool;
 class ColorTrainTool;
 
@@ -126,8 +125,10 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   void exit();
   void update_image();
   void open_file();
+  void open_folder();
   void open_shm();
   void open_fuse();
+  void pre_open_img_src();
   void post_open_img_src();
 
   bool image_click(GdkEventButton*);
@@ -148,6 +149,8 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   void mc_save();
   void mc_load();
 
+  Glib::Dispatcher m_signal_update_image;
+
   // widgets
   Gtk::Window* m_wnd_main;
   Gtk::Dialog* m_dlg_open_shm;
@@ -156,12 +159,13 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   Gtk::CheckButton* m_ckb_cont_trans;
   Gtk::FileChooserDialog* m_fcd_open_image;
   Gtk::FileChooserDialog* m_fcd_save_image;
-  Gtk::ToolButton* m_tbtn_exit;
-  Gtk::ToolButton* m_tbtn_update;
-  Gtk::ToolButton* m_tbtn_save;
   Gtk::ToolButton* m_tbtn_open_file;
+  Gtk::ToolButton* m_tbtn_open_folder;
   Gtk::ToolButton* m_tbtn_open_shm;
   Gtk::ToolButton* m_tbtn_open_fuse;
+  Gtk::ToolButton* m_tbtn_update;
+  Gtk::ToolButton* m_tbtn_save;
+  Gtk::ToolButton* m_tbtn_exit;
   Gtk::Image* m_img_image;
   Gtk::EventBox* m_evt_image;
   Gtk::TreeView* m_trv_shm_image_ids;
@@ -204,8 +208,7 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   Glib::RefPtr<Gtk::TreeStore> m_fuse_tree_store;
 
   SharedMemoryImageBuffer* m_shm_buffer;
-  NetworkCamera* m_net_cam;
-  Reader* m_img_reader;
+  Camera* m_camera;
   Writer* m_img_writer;
 
   ImageSource m_img_src;

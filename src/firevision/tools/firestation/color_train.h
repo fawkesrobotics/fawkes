@@ -51,7 +51,8 @@ class ColorTrainTool
 
   void perform_segmentation();
 
-  void save_histos();
+  void save_histograms();
+  void load_histogram(const char* filename);
   void save_colormap(const char* filename);
   void load_colormap(const char* filename);
 
