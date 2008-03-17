@@ -73,7 +73,7 @@
  * Check if this generator has histograms.
  * @return true, if this generator has histograms, false otherwise
  * 
- * @fn std::map< std::string, Histogram2D *> *  ColorLutGenerator::getHistograms()
+ * @fn std::map< std::string, Histogram *> *  ColorLutGenerator::getHistograms()
  * Get histograms.
  * @return a map of histograms, if any.
  *

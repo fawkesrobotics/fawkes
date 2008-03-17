@@ -269,8 +269,8 @@ ColorTrainTool::perform_segmentation()
 void
 ColorTrainTool::save_histos()
 {
-  std::map<hint_t, Histogram2D*>* histos = m_generator->getHistograms();
-  std::map<hint_t, Histogram2D*>::iterator hit;
+  std::map<hint_t, Histogram*>* histos = m_generator->getHistograms();
+  std::map<hint_t, Histogram*>::iterator hit;
   for (hit = histos->begin(); hit != histos->end(); ++hit)
     {
       char* filename;

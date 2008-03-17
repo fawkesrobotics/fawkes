@@ -50,20 +50,21 @@ BayesColorLutGenerator::BayesColorLutGenerator(hint_t fg_object)
 
   lut_width  = 256;
   lut_height = 256;
+  lut_depth  =   1;
 
   histos.clear();
   image_width = image_height = 0;
 
-  Histogram2D *h_fg = new Histogram2D(lut_width, lut_height);
+  Histogram *h_fg = new Histogram(lut_width, lut_height);
   // for bg histo we want extra undo for penalty, thus 2
-  Histogram2D *h_bg = new Histogram2D(lut_width, lut_height, 2);
+  Histogram *h_bg = new Histogram(lut_width, lut_height, lut_depth, 2);
   
   /* not yet
-  Histogram2D *h_black = new Histogram2D(256, 256);
-  Histogram2D *h_green = new Histogram2D(256, 256);
-  Histogram2D *h_yellow = new Histogram2D(256, 256);
-  Histogram2D *h_blue = new Histogram2D(256, 256);
-  Histogram2D *h_white = new Histogram2D(256, 256);
+  Histogram *h_black = new Histogram(256, 256);
+  Histogram *h_green = new Histogram(256, 256);
+  Histogram *h_yellow = new Histogram(256, 256);
+  Histogram *h_blue = new Histogram(256, 256);
+  Histogram *h_white = new Histogram(256, 256);
   */
 
   // The order you push them into histos is important! It
@@ -72,7 +73,7 @@ BayesColorLutGenerator::BayesColorLutGenerator(hint_t fg_object)
   histos[H_BACKGROUND] = h_bg;
 
   /*
-  vector< Histogram2D * > histos_v;
+  vector< Histogram * > histos_v;
   histos_v.clear();
   histos_v.push_back( h_ball );
   histos_v.push_back( h_bg );
@@ -163,7 +164,7 @@ BayesColorLutGenerator::consider()
   }
 
   for (histo_it = histos.begin(); histo_it != histos.end(); ++histo_it) {
-    (*histo_it).second->resetUndo();
+    (*histo_it).second->reset_undo();
   }
 
   point_t p;
@@ -216,7 +217,7 @@ void
 BayesColorLutGenerator::resetUndo()
 {
   for (histo_it = histos.begin(); histo_it != histos.end(); ++histo_it) {
-    (*histo_it).second->resetUndo();
+    (*histo_it).second->reset_undo();
   }
 }
 
@@ -234,7 +235,7 @@ BayesColorLutGenerator::hasHistograms()
 /** Get histograms.
  * @return histograms
  */
-std::map< hint_t, Histogram2D * > *
+std::map< hint_t, Histogram * > *
 BayesColorLutGenerator::getHistograms()
 {
   return &histos;

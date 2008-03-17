@@ -38,13 +38,13 @@
 #include <map>
 #include <string>
 
-class Histogram2D;
+class Histogram;
 class ColorModelLookupTable;
 
 class BayesHistosToLut
 {
  public:
-  BayesHistosToLut(std::map< hint_t, Histogram2D * > histos,
+  BayesHistosToLut(std::map< hint_t, Histogram * > histos,
 		   unsigned int w, 
 		   unsigned int h,
 		   hint_t fg_object = H_BALL);
@@ -78,7 +78,7 @@ class BayesHistosToLut
   void save(std::string filename);
 
  private:
-  std::map<hint_t, Histogram2D*> histograms;
+  std::map<hint_t, Histogram*> histograms;
   std::map<hint_t, unsigned int> numberOfOccurrences;
   std::map<hint_t, float>        object_probabilities;
   ColorModelLookupTable *lut;

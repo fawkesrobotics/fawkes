@@ -56,7 +56,7 @@ using namespace std;
  * @param h height of lookup table
  * @param object type of the foreground object
  */
-BayesHistosToLut::BayesHistosToLut(std::map<hint_t, Histogram2D*> histos,
+BayesHistosToLut::BayesHistosToLut(std::map<hint_t, Histogram*> histos,
 				   unsigned int w, 
 				   unsigned int h,
 				   hint_t object)
@@ -160,7 +160,7 @@ BayesHistosToLut::getAPrioriProb(unsigned int u,
 				 unsigned int v,
 				 hint_t object)
 {
-  return ( float(histograms[object]->getValue(u, v)) / float(numberOfOccurrences[object]) );
+  return ( float(histograms[object]->get_value(u, v)) / float(numberOfOccurrences[object]) );
 }
 
 /** P(object| u, v).
@@ -178,7 +178,7 @@ BayesHistosToLut::getAPosterioriProb(hint_t object,
      i.e. sum up the probabilities P(u, v| object) * P(object)
      over all objects */
   float sumOfProbabilities = 0.0;
-  map<hint_t, Histogram2D*>::iterator hit;
+  map<hint_t, Histogram*>::iterator hit;
   for (hit = histograms.begin(); hit != histograms.end(); hit++) {
     sumOfProbabilities += ( getAPrioriProb(u, v, (hint_t)hit->first) * getObjectProb((hint_t)hit->first) );
   }
@@ -201,7 +201,7 @@ BayesHistosToLut::getMostLikelyObject(unsigned int u,
 {
   hint_t mostLikelyObject = H_UNKNOWN;
   float probOfMostLikelyObject = 0.0;
-  map<hint_t, Histogram2D*>::iterator hit;
+  map<hint_t, Histogram*>::iterator hit;
   for (hit = histograms.begin(); hit != histograms.end(); hit++) {
     float tmp = getAPosterioriProb((hint_t)hit->first, u, v);
     
@@ -226,12 +226,12 @@ BayesHistosToLut::calculateLutAllColors()
 {
   // for each histogram, sum up all of its entries
   //  numberOfOccurrences.resize( histograms.size() );
-  map<hint_t, Histogram2D*>::iterator hit;
+  map<hint_t, Histogram*>::iterator hit;
   for (hit = histograms.begin(); hit != histograms.end(); hit++) {
     unsigned int total = 0;
     for (unsigned int v = 0; v < height; ++v) {
       for (unsigned int u = 0; u < width; ++u) {
-	unsigned int tmp = ((Histogram2D*)(hit->second))->getValue(u, v);
+	unsigned int tmp = ((Histogram*)(hit->second))->get_value(u, v);
 	if (tmp > 0)
 	  total += tmp;
       }
@@ -256,11 +256,11 @@ BayesHistosToLut::calculateLutAllColors()
       // find most probable color for (u, v)
       highest_prob = 0.0;
       color_with_highest_prob = H_UNKNOWN; // ...maybe it is better to have default = H_BACKGROUND...
-      map<hint_t, Histogram2D*>::iterator hit;
+      map<hint_t, Histogram*>::iterator hit;
       for (hit = histograms.begin(); hit != histograms.end(); hit++) {
 	// if current histogram is not empty...
 	if (numberOfOccurrences[ (hint_t)hit->first ] > 0) {
-	  current_prob = float( hit->second->getValue(u, v) ) / float( numberOfOccurrences[ hit->first ] );
+	  current_prob = float( hit->second->get_value(u, v) ) / float( numberOfOccurrences[ hit->first ] );
 	  // if current histogram has higher probability for color (u, v),
 	  // _and_ is above min_prob-threshold...
 	  if ( current_prob > highest_prob &&
@@ -320,29 +320,29 @@ BayesHistosToLut::calculateLutValues( bool penalty )
 
   if ( penalty ) {
     // We penalize all values, that have NOT been classified as ball
-    Histogram2D *histo_fg = histograms[fg_object];
-    Histogram2D *histo_bg = histograms[H_BACKGROUND];
+    Histogram *histo_fg = histograms[fg_object];
+    Histogram *histo_bg = histograms[H_BACKGROUND];
 
-    if ( histo_bg->getNumUndos() < 2 ) {
+    if ( histo_bg->get_num_undos() < 2 ) {
       // No undo available for us
-      cout << "Histogram2D::calculateLutValues: There are not enough undos possible for background histogram, not penalizing" << endl;
+      cout << "Histogram::calculateLutValues: There are not enough undos possible for background histogram, not penalizing" << endl;
     } else {
 
-      unsigned int bg_median  = histo_bg->getMedian();
-      unsigned int bg_average = histo_bg->getAverage();
+      unsigned int bg_median  = histo_bg->get_median();
+      unsigned int bg_average = histo_bg->get_average();
       unsigned int bg_val = 0;
 
-      old_undo = histo_bg->switchUndo( 1 );
+      old_undo = histo_bg->switch_undo( 1 );
 
-      cout << "Histogram2D: Setting low bg vals to median. median=" << bg_median
+      cout << "Histogram: Setting low bg vals to median. median=" << bg_median
 	   << "  avg=" << bg_average << endl;
 
       for (unsigned int v = 0; v < height; ++v) {
 	for (unsigned int u = 0; u < width; ++u) {
-	  if ( histo_fg->getValue( u, v ) == 0 ) {
-	    bg_val = histo_bg->getValue( u, v );
+	  if ( histo_fg->get_value( u, v ) == 0 ) {
+	    bg_val = histo_bg->get_value( u, v );
 	    if (bg_val < bg_average) {
-	      histo_bg->setValue( u, v, bg_average );
+	      histo_bg->set_value( u, v, bg_average );
 	    }
 	  }
 	}
@@ -354,12 +354,12 @@ BayesHistosToLut::calculateLutValues( bool penalty )
      how many non-zero values its histogram has in total */
   //  numberOfOccurrences.resize(histograms.size());
 
-  map<hint_t, Histogram2D*>::iterator hit;
+  map<hint_t, Histogram*>::iterator hit;
   for (hit = histograms.begin(); hit != histograms.end(); hit++) {
     unsigned int total = 0;
     for (unsigned int v = 0; v < height; ++v) {
       for (unsigned int u = 0; u < width; ++u) {
-	unsigned int tmp = hit->second->getValue(u, v);
+	unsigned int tmp = hit->second->get_value(u, v);
 	if (tmp > 0)
 	  total += tmp;
       }
@@ -370,13 +370,13 @@ BayesHistosToLut::calculateLutValues( bool penalty )
 
   unsigned int total_count = 0;
   for (hit = histograms.begin(); hit != histograms.end(); hit++) {
-    total_count += hit->second->getSum();
+    total_count += hit->second->get_sum();
   }
   //  cout << "Total count: " << total_count << endl;
 
   // Calculate overall object probabilities
   for (hit = histograms.begin(); hit != histograms.end(); hit++) {
-    object_probabilities[hit->first] = (float)hit->second->getSum() / (float)total_count;
+    object_probabilities[hit->first] = (float)hit->second->get_sum() / (float)total_count;
 
     //    cout << "Setting probability for histogram " << hit->first << " to "
     //	 << object_probabilities[hit->first] << endl;
@@ -415,10 +415,10 @@ BayesHistosToLut::calculateLutValues( bool penalty )
   }
 
   if ( penalty ) {
-    Histogram2D *histo_bg   = histograms.at( H_BACKGROUND );
-    if ( histo_bg->getNumUndos() >= 2 ) {
+    Histogram *histo_bg   = histograms.at( H_BACKGROUND );
+    if ( histo_bg->get_num_undos() >= 2 ) {
       histo_bg->undo();
-      histo_bg->switchUndo( old_undo );
+      histo_bg->switch_undo( old_undo );
     }
   }
 

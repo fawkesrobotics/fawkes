@@ -34,7 +34,7 @@
 #include <map>
 
 class ColorModelLookupTable;
-class Histogram2D;
+class Histogram;
 
 class ColorLutGenerator
 {
@@ -60,7 +60,7 @@ class ColorLutGenerator
   virtual void                     resetUndo()                                         = 0;
 
   virtual bool                     hasHistograms()                                     = 0;
-  virtual std::map< hint_t, Histogram2D *> *  getHistograms()                          = 0;
+  virtual std::map< hint_t, Histogram *> *  getHistograms()                          = 0;
 
 };
 

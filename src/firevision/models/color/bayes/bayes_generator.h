@@ -54,7 +54,7 @@ class BayesColorLutGenerator : public ColorLutGenerator
   virtual void                     setSelection(std::vector< rectangle_t > region);
 
   virtual bool                     hasHistograms();
-  virtual std::map< hint_t, Histogram2D * > *  getHistograms();
+  virtual std::map< hint_t, Histogram * > *  getHistograms();
 
   void setMinProbability(float min_prob);
 
@@ -62,8 +62,8 @@ class BayesColorLutGenerator : public ColorLutGenerator
   bool isInRegion(unsigned int x, unsigned int y);
 
 
-  std::map< hint_t, Histogram2D * > histos;
-  std::map< hint_t, Histogram2D * >::iterator histo_it;
+  std::map< hint_t, Histogram * > histos;
+  std::map< hint_t, Histogram * >::iterator histo_it;
 
   BayesHistosToLut      *bhtl;
   ColorModelLookupTable *cm;
@@ -72,6 +72,7 @@ class BayesColorLutGenerator : public ColorLutGenerator
 
   unsigned int lut_width;
   unsigned int lut_height;
+  unsigned int lut_depth;
 
   unsigned int image_width;
   unsigned int image_height;

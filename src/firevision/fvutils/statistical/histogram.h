@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  histogram.h - Header for 2D histograms
+ *  histogram.h - Header for histograms
  *
  *  Generated: Tue Jun 14 11:09:27 2005
  *  Copyright  2005  Tim Niemueller [www.niemueller.de]
@@ -31,37 +31,45 @@
 #include <fvutils/base/types.h>
 #include <iostream>
 
-class Histogram2D
+class Histogram
 {
-
  public:
-  Histogram2D(unsigned int width, unsigned int height, unsigned int num_undos = 1);
-  ~Histogram2D();
+  Histogram(unsigned int width, unsigned int height,
+	    unsigned int depth = 1, unsigned int num_undos = 1);
+  ~Histogram();
 
   void           operator+=(point_t *p);
   void           operator+=(point_t  p);
 
-  unsigned int * getHistogram();
-  unsigned int   getValue(unsigned int x, unsigned int y);
-  void           setValue(unsigned int x, unsigned int y, unsigned int value);
+  unsigned int * get_histogram();
+  unsigned int   get_value(unsigned int x, unsigned int y);
+  unsigned int   get_value(unsigned int x, unsigned int y, unsigned int z);
+  void           set_value(unsigned int x, unsigned int y, unsigned int value);
+  void           set_value(unsigned int x, unsigned int y, unsigned int z, unsigned int value);
+  void           inc_value(unsigned int x, unsigned int y, unsigned int z = 0);
+  void           add(unsigned int x, unsigned int y, unsigned int z, unsigned int value);
+  void           sub(unsigned int x, unsigned int y, unsigned int z, unsigned int value);
   void           reset();
-  unsigned int   getMedian();
-  unsigned int   getAverage();
+  unsigned int   get_median();
+  unsigned int   get_average();
 
-  unsigned int   getSum() const;
+  unsigned int   get_sum() const;
 
-  void           resetUndo();
+  void           reset_undo();
   void           undo();
-  unsigned int   switchUndo( unsigned int undo_id );
-  unsigned int   getNumUndos();
+  unsigned int   switch_undo( unsigned int undo_id );
+  unsigned int   get_num_undos();
 
-  void           printToStream(std::ostream &s);
+  void           print_to_stream(std::ostream &s);
   void           save(const char * filename, bool formatted_output = false);
   bool           load(const char * filename);
 
  private:
   unsigned int  width;
   unsigned int  height;
+  unsigned int  depth;
+  unsigned int  dimension;
+  unsigned int  histogram_size;
   unsigned int *histogram;
   unsigned int  number_of_values;
 
@@ -69,7 +77,6 @@ class Histogram2D
   unsigned int  *undo_num_vals;
   unsigned int   undo_num;
   unsigned int   undo_current;
-
 };
 
 
