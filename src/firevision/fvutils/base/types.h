@@ -83,7 +83,7 @@ typedef enum {
   ORI_CROSS,		/**< cross */
   ORI_DEG_0,		/**< 0 degrees */
   ORI_DEG_45,		/**< 45 degrees */
-  ORI_DEG_90,		/**<90 degrees */
+  ORI_DEG_90,		/**< 90 degrees */
   ORI_DEG_135,		/**< 135 degrees */
   ORI_DEG_180,		/**< 180 degrees */
   ORI_DEG_225,		/**< 225 degrees */

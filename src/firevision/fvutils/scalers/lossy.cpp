@@ -66,6 +66,15 @@ LossyScaler::set_scale_factor(float factor)
   } else {
     scale_factor = factor;
   }
+
+  if (orig_width != 0) {
+    scal_width = (unsigned int) ceil(orig_width * scale_factor);
+    scal_width += (scal_width % 2);
+  }
+  if (orig_height != 0) {
+    scal_height = (unsigned int) ceil(orig_width * scale_factor);
+    scal_height += (scal_width % 2);
+  }
 }
 
 
@@ -84,6 +93,18 @@ LossyScaler::set_scaled_dimensions(unsigned int width,
 {
   scal_width  = width;
   scal_height = height;
+  
+  float scale_factor_width;
+  float scale_factor_height;
+
+  if (orig_width != 0) {
+    scale_factor_width = scal_width / float(orig_width);
+  }
+  if (orig_height != 0) {
+    scale_factor_height = scal_height / float(orig_height);
+  }
+
+  scale_factor = (scale_factor_width > scale_factor_height) ? scale_factor_width : scale_factor_height;
 }
 
 
@@ -104,25 +125,20 @@ LossyScaler::set_scaled_buffer(unsigned char *buffer)
 unsigned int
 LossyScaler::needed_scaled_width()
 {
-  // to be dividable by 2, needed for YUV for simplicity
-  unsigned int w = (unsigned int)ceil( orig_width * scale_factor );
-  return ( w + (w % 2) );
+  return scal_width;
 }
 
 
 unsigned int
 LossyScaler::needed_scaled_height()
 {
-  // to be dividable by 2, needed for YUV for simplicity
-  unsigned int h = (unsigned int)ceil( orig_height * scale_factor );
-  return ( h + (h % 2) );
+  return scal_width;
 }
 
 
 void
 LossyScaler::scale()
 {
-
   if ( orig_width  == 0 ) return;
   if ( orig_height == 0 ) return;
   if ( scal_width  == 0 ) return;

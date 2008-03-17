@@ -330,6 +330,7 @@ Drawer::colorPoint(unsigned int x, unsigned int y)
   unsigned char *up = YUV422_PLANAR_U_PLANE(buffer, width, height);
   unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer, width, height);
 
+  buffer[ y * width + x ]   = color[0];
   up[ (y * width + x) / 2 ] = color[1];
   vp[ (y * width + x) / 2 ] = color[2];
 }
