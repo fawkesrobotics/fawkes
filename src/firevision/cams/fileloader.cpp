@@ -55,20 +55,20 @@
  * @author Daniel Beck
  */
 
-
 char* FileLoader::extension = NULL;
 
 int file_select(const struct dirent* ent)
 {
+  if ( !FileLoader::extension ) { return 1; }
+
   // NOTE: this only checks whether the filename contains the
   // extension and not whether it ends with it.
-  if ( NULL != strstr(ent->d_name, FileLoader::extension) ) { 
+  if ( NULL != strstr(ent->d_name, FileLoader::extension) ) {
     return 1; 
   }
 
   return 0;
 }
-
 
 /** Constructor.
  * @param filename name of file to open, full path or relative to working directory
@@ -76,10 +76,15 @@ int file_select(const struct dirent* ent)
 FileLoader::FileLoader(const char *filename)
 {
   this->filename = strdup(filename);
+  this->dirname = NULL;
+  this->extension = NULL;
+  this->file_list = NULL;
+  num_files = 0;
+  cur_file = 0;
+  opened = started = false;
   width = height = 0;
   file_buffer = NULL;
   this->cspace = CS_UNKNOWN;
-  opened = started = false;
 }
 
 
@@ -87,6 +92,8 @@ FileLoader::FileLoader(const char *filename)
  * Initialize with the parameters from the given camera argument parser. The following
  * parameters are supported:
  * - file=FILENAME: open the given file
+ * - dir=DIRECTORY: sequentially open files in this directory
+ * - ext=EXTENSION: only open files with this extension
  *
  * @param cap camera argument parser
  */
@@ -99,10 +106,8 @@ FileLoader::FileLoader(const CameraArgumentParser *cap)
     this->filename = strdup(cap->get("file").c_str());
   } else if ( cap->has("dir") ) {
     this->dirname = strdup( cap->get("dir").c_str() );
-    if ( cap->has("extension") ) {
-      this->extension = strdup( cap->get("extension").c_str() );
-    } else {
-      this->extension = strdup("jpg");
+    if ( cap->has("ext") ) {
+      this->extension = strdup( cap->get("ext").c_str() );
     }
   } else {
     throw MissingParameterException("Neither parameter file nor parameter directory are present");
@@ -136,6 +141,11 @@ FileLoader::FileLoader(colorspace_t cspace, const char *filename,
   this->width = width;
   this->height = height;
   this->filename = strdup(filename);
+  this->dirname = NULL;
+  this->extension = NULL;
+  this->file_list = NULL;
+  num_files = 0;
+  cur_file = 0;
   file_buffer = NULL;
 }
 
