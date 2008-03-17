@@ -60,7 +60,6 @@ BayesColorLutGenerator::BayesColorLutGenerator( unsigned int lut_width,
   this->lut_depth  = lut_depth;
 
   set_fg_object(fg_object);
-  lut_depth  =   1;
 
   histos.clear();
   fg_histos.clear();
