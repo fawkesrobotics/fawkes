@@ -69,8 +69,10 @@ class Vector : public GeomPrim
   Vector& operator-=(const Vector& v);
   Vector operator*(const float& f) const;
   Vector& operator*=(const float& f);
+  float operator*(const Vector& v) const;
   Vector operator%(const Vector& v) const;
   Vector& operator%=(const Vector& v);
+  float operator<(Vector& v);
 
  private:
   float mLength;

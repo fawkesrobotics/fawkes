@@ -118,7 +118,7 @@ Vector::length()
       t += y() * y();
       t += z() * z();
 
-      return sqrt(t);
+      mLength = sqrt(t);
     }
 
   return mLength;
@@ -373,7 +373,7 @@ Vector::operator-=(const Vector& v)
 }
 
 
-/**Scalar multiplikation.
+/**Multiplikation with a scalar.
  * @param f the scalar
  * @return the resulting vector
  */
@@ -390,7 +390,7 @@ Vector::operator*(const float& f) const
 }
 
 
-/**In-place scalar multiplikation.
+/**In-place multiplikation with a scalar.
  * @param f the scalar
  * @return a reference to thre resulting vector (this)
  */
@@ -402,6 +402,21 @@ Vector::operator*=(const float& f)
   return *this;
 }
 
+/**Scalar product.
+ * @param v the the other vector
+ * @return float the scalar product
+ */
+float
+Vector::operator*(const Vector& v) const
+{
+  float result;
+
+  result  = x() * v.x();
+  result += y() * v.y();
+  result += z() + v.z();
+
+  return result;
+}
 
 /**Cross-product.
  * @param v the lhs vector
@@ -422,7 +437,7 @@ Vector::operator%(const Vector& v) const
 
 /**In-place cross-product.
  * @param v the lhs vector
- * @return a reference to the resulting vector (this=
+ * @return a reference to the resulting vector (this)
  */
 Vector&
 Vector::operator%=(const Vector& v)
@@ -430,4 +445,15 @@ Vector::operator%=(const Vector& v)
   *this = *this % v;
 
   return *this;
+}
+
+
+/**Angle between two vectors.
+ * @param v the other vector
+ * @return the angle in radians
+ */
+float
+Vector::operator<(Vector& v)
+{
+  return acos( (*this) * v / (length() * v.length()) );
 }
