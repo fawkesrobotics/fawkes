@@ -66,8 +66,8 @@ NavigatorNetworkThread::NavigatorNetworkThread(NavigatorThread *navigator_thread
   connected_control_client = 0;
   logger_modulo_counter = 0;
 
-  last_motor_control_thread_id = 0;
-  last_motor_control_thread_name = NULL;
+  last_motor_controller = 0;
+  last_motor_controller_thread_name = NULL;
 
   kicker_interface = NULL;
   motor_interface = NULL;
@@ -80,9 +80,9 @@ NavigatorNetworkThread::NavigatorNetworkThread(NavigatorThread *navigator_thread
 /** Destructor. */
 NavigatorNetworkThread::~NavigatorNetworkThread()
 {
-  if ( last_motor_control_thread_name != NULL )
+  if ( last_motor_controller_thread_name != NULL )
     {
-      free( last_motor_control_thread_name );
+      free( last_motor_controller_thread_name );
     }
 }
 
@@ -182,15 +182,15 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
         {
           navigator_joystick_message_t *u = (navigator_joystick_message_t *)msg->payload();
 
-          if ( motor_interface->controller_thread_id() == thread_id() )
+          if ( motor_interface->controller() == navigator_interface->serial() )
             {
               joystick_control->enqueueCommand(u->forward, u->sideward, u->rotation, u->speed);
             }
           else
             {
-              logger->log_warn("NavigatorNetworkThread", "Thread %s (%lu) stole our motor control!",
+              logger->log_warn("NavigatorNetworkThread", "Thread %s (%l) stole our motor control!",
                                motor_interface->controller_thread_name(),
-                               motor_interface->controller_thread_id());
+                               motor_interface->controller());
             }
         }
       else
@@ -222,18 +222,16 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
         {
           connected_control_client = msg->clid();
           motor_interface->read();
-          last_motor_control_thread_id = motor_interface->controller_thread_id();
+          last_motor_controller = motor_interface->controller();
           // this needs to be a strncpy, but currently the interfaces do not provide enough
           // functionality
-          if ( last_motor_control_thread_name != NULL )
+          if ( last_motor_controller_thread_name != NULL )
             {
-              free(last_motor_control_thread_name);
+              free(last_motor_controller_thread_name);
             }
-          last_motor_control_thread_name = strdup(motor_interface->controller_thread_name());
+          last_motor_controller_thread_name = strdup(motor_interface->controller_thread_name());
 
           MotorInterface::AcquireControlMessage* acmsg = new MotorInterface::AcquireControlMessage();
-          acmsg->set_thread_id(thread_id());
-          acmsg->set_thread_name(name());
           motor_interface->msgq_enqueue(acmsg);
 
           logger->log_debug("NavigatorNetworkThread", "Client %u subscribed as motor controller", connected_control_client);
@@ -276,10 +274,10 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
             {
               connected_control_client = 0;
               MotorInterface::AcquireControlMessage* acmsg = new  MotorInterface::AcquireControlMessage();
-              acmsg->set_thread_id(last_motor_control_thread_id);
-              acmsg->set_thread_name(last_motor_control_thread_name);
+              acmsg->set_controller(last_motor_controller);
+              acmsg->set_controller_thread_name(last_motor_controller_thread_name);
               motor_interface->msgq_enqueue(acmsg);
-              last_motor_control_thread_id = 0;
+              last_motor_controller = 0;
             }
           else if(u->unsub_type_navigator_control)
             {
@@ -587,11 +585,11 @@ NavigatorNetworkThread::client_disconnected(unsigned int clid)
           motor_interface->msgq_enqueue(msg2);
       */
       logger->log_debug("NavigatorNetworkThread", "Client %u unsubscribed as controller", clid);
-      if(last_motor_control_thread_id != 0)
+      if(last_motor_controller != 0)
         {
           MotorInterface::AcquireControlMessage* msg = new  MotorInterface::AcquireControlMessage();
-          msg->set_thread_id(last_motor_control_thread_id);
-          msg->set_thread_name(last_motor_control_thread_name);
+          msg->set_controller(last_motor_controller);
+          msg->set_controller_thread_name(last_motor_controller_thread_name);
           motor_interface->msgq_enqueue(msg);
         }
     }

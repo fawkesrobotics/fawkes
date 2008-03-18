@@ -169,7 +169,7 @@ NavigatorThread::loop()
 
       logger->log_info("NavigatorThread", "target message received %f, %f", msg->x(), msg->y());
 
-      if(motor_interface->controller_thread_id() == current_thread_id())
+      if(motor_interface->controller() == navigator_interface->serial())
         {
           goTo_cartesian_ori(msg->x(), msg->y(), msg->orientation());
         }
@@ -181,9 +181,8 @@ NavigatorThread::loop()
       NavigatorInterface::MaxVelocityMessage* msg = navigator_interface->msgq_first<NavigatorInterface::MaxVelocityMessage>();
 
       logger->log_info("NavigatorThread", "velocity message received %f", msg->velocity());
-      // logger->log_info("NavigatorThread", "motor_interface->controller_thread_id() %i == %i current_thread_id()", motor_interface->controller_thread_id() ,  current_thread_id() );
 
-      if(motor_interface->controller_thread_id() == current_thread_id())
+      if(motor_interface->controller() == navigator_interface->serial())
         {
           set_max_velocity(msg->velocity());
         }
@@ -195,7 +194,7 @@ NavigatorThread::loop()
 
       logger->log_info("NavigatorThread", "obstacle message received");
 
-      if(motor_interface->controller_thread_id() == current_thread_id())
+      if(motor_interface->controller() == navigator_interface->serial())
         {
           Obstacle o(msg->width(), msg->x(), msg->y(), 0.);
           add_obstacle(o);
@@ -256,7 +255,7 @@ NavigatorThread::loop()
   mainLoop();
 
 
-  if(motor_interface->controller_thread_id() == current_thread_id())
+  if(motor_interface->controller() == navigator_interface->serial())
     {
       double vx = getVelocityX();
       double vy = getVelocityY();
@@ -275,12 +274,6 @@ NavigatorThread::loop()
           //  logger->log_info("NavigatorThread", "send x = %f, y = %f", getVelocityX(), getVelocityY());
         }
     }
-  /*
-  if((++logger_modulo_counter %= 10) == 0)
-    {
-      logger->log_info("NavigatorThread", "NavigatorThread called: %lu, %lu", motor_interface->getControllerID(), this->current_thread_id());
-    }
-  */
   //usleep(100000);
 }
 

@@ -250,27 +250,27 @@ MotorThread::loop()
         {
           MotorInterface::AcquireControlMessage* msg = motor_interface->msgq_first<MotorInterface::AcquireControlMessage>();
 
-          if ( msg->thread_id() == 0 )
+          if ( msg->controller() == 0 )
             {
-              motor_interface->set_controller_thread_id(msg->sender_id());
-              motor_interface->set_controller_thread_name(msg->sender());
+              motor_interface->set_controller(msg->sender_id());
+              motor_interface->set_controller_thread_name(msg->sender_thread_name());
             }
           else
             {
-              motor_interface->set_controller_thread_id(msg->thread_id());
-              motor_interface->set_controller_thread_name(msg->thread_name());
+              motor_interface->set_controller(msg->controller());
+              motor_interface->set_controller_thread_name(msg->controller_thread_name());
             }
           motor_interface->write();
 
-          logger->log_debug(name(), "Thread %s (%lu) acquired motor control",
+          logger->log_debug(name(), "Thread %s (%u) acquired motor control",
                             motor_interface->controller_thread_name(),
-                            motor_interface->controller_thread_id());
+                            motor_interface->controller());
         }
       else if ( motor_interface->msgq_first_is<MotorInterface::DriveRPMMessage>() )
         {
           MotorInterface::DriveRPMMessage* msg = motor_interface->msgq_first<MotorInterface::DriveRPMMessage>();
 
-          if ( msg->sender_id() == motor_interface->controller_thread_id() )
+          if ( msg->sender_id() == motor_interface->controller() )
             {
               alpha = msg->front_right();
               beta = msg->rear();
@@ -282,18 +282,18 @@ MotorThread::loop()
             }
           else
             {
-              logger->log_warn(name(), "Warning, received DriveRPMMessage of thread %s (%lu), "
-                               "but the motor is currently controlled by thread %s (%lu)",
-                               msg->sender(), msg->sender_id(),
+              logger->log_warn(name(), "Warning, received DriveRPMMessage of thread %s (%u), "
+                               "but the motor is currently controlled by thread %s (%u)",
+                               msg->sender_thread_name(), msg->sender_id(),
                                motor_interface->controller_thread_name(),
-                               motor_interface->controller_thread_id());
+                               motor_interface->controller());
             }
         }
       else if ( motor_interface->msgq_first_is<MotorInterface::TransRotMessage>() )
         {
           MotorInterface::TransRotMessage* msg = motor_interface->msgq_first<MotorInterface::TransRotMessage>();
 
-          if ( msg->sender_id() == motor_interface->controller_thread_id() )
+          if ( msg->sender_id() == motor_interface->controller() )
             {
               //correction_factor * RPM for m/s * gear_factor
               forward = msg->vx() * translation_rpm_factor;
@@ -328,18 +328,18 @@ MotorThread::loop()
             }
           else
             {
-              logger->log_warn(name(), "Warning, received TransRotMessage of thread %s (%lu), "
-                               "but the motor is currently controlled by thread %s (%lu)",
-                               msg->sender(), msg->sender_id(),
+              logger->log_warn(name(), "Warning, received TransRotMessage of thread %s (%u), "
+                               "but the motor is currently controlled by thread %s (%u)",
+                               msg->sender_thread_name(), msg->sender_id(),
                                motor_interface->controller_thread_name(),
-                               motor_interface->controller_thread_id());
+                               motor_interface->controller());
             }
         }
       else if ( motor_interface->msgq_first_is<MotorInterface::TransMessage>() )
         {
           MotorInterface::TransMessage* msg = motor_interface->msgq_first<MotorInterface::TransMessage>();
 
-          if ( msg->sender_id() == motor_interface->controller_thread_id() )
+          if ( msg->sender_id() == motor_interface->controller() )
             {
               //correction_factor * RPM for m/s * gear_factor
               forward = msg->vx() * translation_rpm_factor;
@@ -366,18 +366,18 @@ MotorThread::loop()
             }
           else
             {
-              logger->log_warn(name(), "Warning, received TransMessage of thread %s (%lu), "
-                               "but the motor is currently controlled by thread %s (%lu)",
-                               msg->sender(), msg->sender_id(),
+              logger->log_warn(name(), "Warning, received TransMessage of thread %s (%u), "
+                               "but the motor is currently controlled by thread %s (%u)",
+                               msg->sender_thread_name(), msg->sender_id(),
                                motor_interface->controller_thread_name(),
-                               motor_interface->controller_thread_id());
+                               motor_interface->controller());
             }
         }
       else if ( motor_interface->msgq_first_is<MotorInterface::RotMessage>() )
         {
           MotorInterface::RotMessage* msg = motor_interface->msgq_first<MotorInterface::RotMessage>();
 
-          if ( msg->sender_id() == motor_interface->controller_thread_id() )
+          if ( msg->sender_id() == motor_interface->controller() )
             {
               //correction_factor * RPM for m/s * gear_factor
               rotation = msg->omega() * rotation_rpm_factor;
@@ -400,18 +400,18 @@ MotorThread::loop()
             }
           else
             {
-              logger->log_warn(name(), "Warning, received RotMessage of thread %s (%lu), "
-                               "but the motor is currently controlled by thread %s (%lu)",
-                               msg->sender(), msg->sender_id(),
+              logger->log_warn(name(), "Warning, received RotMessage of thread %s (%u), "
+                               "but the motor is currently controlled by thread %s (%u)",
+                               msg->sender_thread_name(), msg->sender_id(),
                                motor_interface->controller_thread_name(),
-                               motor_interface->controller_thread_id());
+                               motor_interface->controller());
             }
         }
       else if ( motor_interface->msgq_first_is<MotorInterface::OrbitMessage>() )
         {
           MotorInterface::OrbitMessage* msg = motor_interface->msgq_first<MotorInterface::OrbitMessage>();
 
-          if ( msg->sender_id() == motor_interface->controller_thread_id() )
+          if ( msg->sender_id() == motor_interface->controller() )
             {
               orbit_center.x(msg->px());
               orbit_center.y(msg->py());
@@ -461,7 +461,7 @@ MotorThread::loop()
         {
           MotorInterface::LinTransRotMessage* msg = motor_interface->msgq_first<MotorInterface::LinTransRotMessage>();
 
-          if ( msg->sender_id() == motor_interface->controller_thread_id() )
+          if ( msg->sender_id() == motor_interface->controller() )
             {
               forward = msg->vx() * translation_rpm_factor;
               sideward = msg->vy() * translation_rpm_factor;
@@ -506,7 +506,7 @@ MotorThread::loop()
         }
       else
         {
-          logger->log_error("MotorThread", "Message of invalid type received from %s", motor_interface->msgq_first()->sender());
+          logger->log_error("MotorThread", "Message of invalid type received from %s", motor_interface->msgq_first()->sender_thread_name());
         }
 
       motor_interface->msgq_pop();

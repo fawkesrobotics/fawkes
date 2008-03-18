@@ -82,8 +82,8 @@ class NavigatorNetworkThread : public Thread, public LoggingAspect, public Fawke
   LockList<unsigned int> connected_odometry_clients;
   LockList<unsigned int> connected_ball_clients;
   
-  unsigned long int last_motor_control_thread_id;
-  char *            last_motor_control_thread_name;
+  unsigned long int last_motor_controller;
+  char *            last_motor_controller_thread_name;
     
   unsigned int logger_modulo_counter;
 
