@@ -50,10 +50,10 @@ class BlackBoardInterfaceProxy
 
   void process_data_changed(FawkesNetworkMessage *msg);
   void process_interface_message(FawkesNetworkMessage *msg);
-  void reader_added();
-  void reader_removed();
-  void writer_added();
-  void writer_removed();
+  void reader_added(unsigned int event_serial);
+  void reader_removed(unsigned int event_serial);
+  void writer_added(unsigned int event_serial);
+  void writer_removed(unsigned int event_serial);
 
   unsigned int serial();
 

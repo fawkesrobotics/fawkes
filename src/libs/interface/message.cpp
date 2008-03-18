@@ -41,8 +41,9 @@
  * Do not use directly, but instead use the interface generator to generate
  * an interface with accompanying messages.
  *
- * The sender ID of the message is automatically determined from the thread
- * that creates the message.
+ * The sender ID of the message is automatically determined and is the instance
+ * serial of the interface where the message was enqueued using
+ * Interface::msgq_enqueue().
  *
  * @author Tim Niemueller
  */
@@ -72,12 +73,11 @@ Message::Message(const char *type)
   _substatus = 0;
   Thread *t = Thread::current_thread_noexc();
   if ( t ) {
-    _sender    = strdup(t->name());
-    _sender_id = t->thread_id();
+    _sender_thread_name = strdup(t->name());
   } else {
-    _sender    = strdup("Unknown");
-    _sender_id = 0;
+    _sender_thread_name    = strdup("Unknown");
   }
+  _sender_id = 0;
   _type      = strdup(type);
 }
 
@@ -98,12 +98,11 @@ Message::Message(Message &mesg)
   _substatus = 0;
   Thread *t = Thread::current_thread_noexc();
   if ( t ) {
-    _sender    = strdup(t->name());
-    _sender_id = t->thread_id();
+    _sender_thread_name = strdup(t->name());
   } else {
-    _sender    = strdup("Unknown");
-    _sender_id = 0;
+    _sender_thread_name    = strdup("Unknown");
   }
+  _sender_id = 0;
   _type      = strdup(mesg._type);
 }
 
@@ -124,12 +123,11 @@ Message::Message(Message *mesg)
   _substatus = 0;
   Thread *t = Thread::current_thread_noexc();
   if ( t ) {
-    _sender    = strdup(t->name());
-    _sender_id = t->thread_id();
+    _sender_thread_name    = strdup(t->name());
   } else {
-    _sender    = strdup("Unknown");
-    _sender_id = 0;
+    _sender_thread_name    = strdup("Unknown");
   }
+  _sender_id = 0;
   _type      = strdup(mesg->_type);
 }
 
@@ -137,7 +135,7 @@ Message::Message(Message *mesg)
 /** Destructor. */
 Message::~Message()
 {
-  free(_sender);
+  free(_sender_thread_name);
   free(_type);
 }
 
@@ -240,16 +238,16 @@ Message::sub_status() const
  * @return name of sending thread
  */
 const char *
-Message::sender() const
+Message::sender_thread_name() const
 {
-  return _sender;
+  return _sender_thread_name;
 }
 
 
 /** Get ID of sender.
  * @return name of sending thread.
  */
-pthread_t
+unsigned int
 Message::sender_id() const
 {
   return _sender_id;
@@ -264,6 +262,7 @@ void
 Message::set_interface(Interface *iface)
 {
   _transmit_via_iface = iface;
+  _sender_id = iface->serial();
   recipient_interface_mem_serial = iface->mem_serial();
 }
 

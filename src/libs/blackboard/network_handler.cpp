@@ -345,6 +345,10 @@ BlackBoardNetworkHandler::client_disconnected(unsigned int clid)
   if ( __client_interfaces.find(clid) != __client_interfaces.end() ) {
     // Close all interfaces
     for ( __ciit = __client_interfaces[clid].begin(); __ciit != __client_interfaces[clid].end(); ++__ciit) {
+      LibLogger::log_debug("BlackBoardNetworkHandler", "Closing interface %s::%s of remote "
+			   "%u (client disconnected)",
+			   (*__ciit)->type(), (*__ciit)->id(), clid);
+
       unsigned int serial = (*__ciit)->serial();
       __serial_to_clid.erase(serial);
       __interfaces.erase(serial);

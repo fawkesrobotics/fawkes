@@ -41,7 +41,7 @@
 /** @class BlackBoardNotifier <blackboard/notifier.h>
  * BlackBoard notifier.
  * This class is used by the BlackBoard to notify listeners and observers
- * of changes.
+ * of changes. 
  *
  * @author Tim Niemueller
  */
@@ -303,14 +303,18 @@ BlackBoardNotifier::notify_of_interface_destroyed(const char *type, const char *
 
 
 /** Notify that writer has been added.
- * @param uid UID of interface
+ * @param interface the interface for which the event happened. It is not necessarily the
+ * instance which caused the event, but it must have the same mem serial.
+ * @param event_instance_serial the instance serial of the interface that caused the event
  * @see BlackBoardInterfaceListener::bb_interface_writer_added()
  */
 void
-BlackBoardNotifier::notify_of_writer_added(const char *uid) throw()
+BlackBoardNotifier::notify_of_writer_added(const Interface *interface,
+					   unsigned int event_instance_serial) throw()
 {
   BBilLockMapIterator lhmi;
   BBilListIterator i, l;
+  const char *uid = interface->uid();
   if ( (lhmi = __bbil_writer.find(uid)) != __bbil_writer.end() ) {
     BBilList &list = (*lhmi).second;
     __bbil_writer.lock();
@@ -318,7 +322,7 @@ BlackBoardNotifier::notify_of_writer_added(const char *uid) throw()
       BlackBoardInterfaceListener *bbil = (*i);
       Interface *bbil_iface = bbil->bbil_writer_interface(uid);
       if (bbil_iface != NULL ) {
-	bbil->bb_interface_writer_added(bbil_iface);
+	bbil->bb_interface_writer_added(bbil_iface, event_instance_serial);
       } else {
 	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for writer "
 			    "events (open) for '%s' but has no such interface", uid);
@@ -331,10 +335,12 @@ BlackBoardNotifier::notify_of_writer_added(const char *uid) throw()
 
 /** Notify that writer has been removed.
  * @param interface interface for which the writer has been removed
+ * @param event_instance_serial instance serial of the interface that caused the event
  * @see BlackBoardInterfaceListener::bb_interface_writer_removed()
  */
 void
-BlackBoardNotifier::notify_of_writer_removed(const Interface *interface) throw()
+BlackBoardNotifier::notify_of_writer_removed(const Interface *interface,
+					     unsigned int event_instance_serial) throw()
 {
   BBilLockMapIterator lhmi;
   BBilListIterator i, l;
@@ -346,7 +352,7 @@ BlackBoardNotifier::notify_of_writer_removed(const Interface *interface) throw()
       BlackBoardInterfaceListener *bbil = (*i);
       Interface *bbil_iface = bbil->bbil_writer_interface(uid);
       if (bbil_iface != NULL ) {
-	bbil->bb_interface_writer_removed(bbil_iface);
+	bbil->bb_interface_writer_removed(bbil_iface, event_instance_serial);
       } else {
 	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for writer "
 			    "events (close) for '%s' but has no such interface", uid);
@@ -358,22 +364,25 @@ BlackBoardNotifier::notify_of_writer_removed(const Interface *interface) throw()
 
 
 /** Notify that reader has been added.
- * @param uid UID of interface
+ * @param interface interface for which the reader has been added
+ * @param event_instance_serial instance serial of the interface that caused the event
  * @see BlackBoardInterfaceListener::bb_interface_reader_added()
  */
 void
-BlackBoardNotifier::notify_of_reader_added(const char *uid) throw()
+BlackBoardNotifier::notify_of_reader_added(const Interface *interface,
+					   unsigned int event_instance_serial) throw()
 {
   BBilLockMapIterator lhmi;
   BBilListIterator i, l;
   __bbil_reader.lock();
+  const char *uid = interface->uid();
   if ( (lhmi = __bbil_reader.find(uid)) != __bbil_reader.end() ) {
     BBilList &list = (*lhmi).second;
     for (i = list.begin(); i != list.end(); ++i) {
       BlackBoardInterfaceListener *bbil = (*i);
       Interface *bbil_iface = bbil->bbil_reader_interface(uid);
       if (bbil_iface != NULL ) {
-	bbil->bb_interface_reader_added(bbil_iface);
+	bbil->bb_interface_reader_added(bbil_iface, event_instance_serial);
       } else {
 	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for reader "
 			    "events (open) for '%s' but has no such interface", uid);
@@ -386,10 +395,12 @@ BlackBoardNotifier::notify_of_reader_added(const char *uid) throw()
 
 /** Notify that reader has been removed.
  * @param interface interface for which the reader has been removed
+ * @param event_instance_serial instance serial of the interface that caused the event
  * @see BlackBoardInterfaceListener::bb_interface_reader_removed()
  */
 void
-BlackBoardNotifier::notify_of_reader_removed(const Interface *interface) throw()
+BlackBoardNotifier::notify_of_reader_removed(const Interface *interface,
+					     unsigned int event_instance_serial) throw()
 {
   BBilLockMapIterator lhmi;
   BBilListIterator i, l;
@@ -401,7 +412,7 @@ BlackBoardNotifier::notify_of_reader_removed(const Interface *interface) throw()
       BlackBoardInterfaceListener *bbil = (*i);
       Interface *bbil_iface = bbil->bbil_reader_interface(uid);
       if (bbil_iface != NULL ) {
-	bbil->bb_interface_reader_removed(bbil_iface);
+	bbil->bb_interface_reader_removed(bbil_iface, event_instance_serial);
       } else {
 	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for reader "
 			    "events (close) for '%s' but has no such interface", uid);

@@ -54,10 +54,14 @@ class BlackBoardNotifier
   bool notify_of_message_received(const Interface *interface, Message *message);
   void notify_of_interface_created(const char *type, const char *id) throw();
   void notify_of_interface_destroyed(const char *type, const char *id) throw();
-  void notify_of_writer_added(const char *uid) throw();
-  void notify_of_writer_removed(const Interface *interface) throw();
-  void notify_of_reader_added(const char *uid) throw();
-  void notify_of_reader_removed(const Interface *interface) throw();
+  void notify_of_writer_added(const Interface *interface,
+			      unsigned int event_instance_serial) throw();
+  void notify_of_writer_removed(const Interface *interface,
+				unsigned int event_instance_serial) throw();
+  void notify_of_reader_added(const Interface *interface,
+			      unsigned int event_instance_serial) throw();
+  void notify_of_reader_removed(const Interface *interface,
+				unsigned int event_instance_serial) throw();
 
  private:
   typedef std::list< BlackBoardInterfaceListener * >  BBilList;

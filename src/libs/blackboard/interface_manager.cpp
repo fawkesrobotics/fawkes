@@ -277,7 +277,7 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
   if ( created ) {
     notifier->notify_of_interface_created(type, identifier);
   }
-  notifier->notify_of_reader_added(iface->uid());
+  notifier->notify_of_reader_added(iface, iface->serial());
 
   return iface;
 }
@@ -346,7 +346,7 @@ BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type,
   memmgr->unlock();
 
   for (std::list<Interface *>::iterator j = rv->begin(); j != rv->end(); ++j) {
-    notifier->notify_of_reader_added((*j)->uid());
+    notifier->notify_of_reader_added(*j, (*j)->serial());
   }
 
   return rv;
@@ -415,7 +415,7 @@ BlackBoardInterfaceManager::open_for_writing(const char *type, const char *ident
   if ( created ) {
     notifier->notify_of_interface_created(type, identifier);
   }
-  notifier->notify_of_writer_added(iface->uid());
+  notifier->notify_of_writer_added(iface, iface->serial());
 
   return iface;
 }
@@ -449,9 +449,9 @@ BlackBoardInterfaceManager::close(Interface *interface)
 
   mutex->unlock();
   if (killed_writer) {
-    notifier->notify_of_writer_removed(interface);
+    notifier->notify_of_writer_removed(interface, interface->serial());
   } else {
-    notifier->notify_of_reader_removed(interface);
+    notifier->notify_of_reader_removed(interface, interface->serial());
   }
   if ( destroyed ) {
     notifier->notify_of_interface_destroyed(interface->__type, interface->__id);

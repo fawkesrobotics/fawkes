@@ -99,6 +99,17 @@ typedef struct {
 } bb_iserial_msg_t;
 
 
+/** Message to identify an two interface instances.
+ * This message is used for MSG_BB_READER_ADDED, MSG_BB_READER_REMOVED,
+ * MSG_BB_WRITER_ADDED, and MSG_BB_READER_REMOVED.
+ */
+typedef struct {
+  uint32_t  serial;		/**< instance serial to unique identify own instance */
+  uint32_t  event_serial;	/**< instance serial to unique identify instance that
+				 * caused the event. */
+} bb_ieventserial_msg_t;
+
+
 /** Interface open success
  * The serial denotes a unique instance of an interface within the (remote)
  * BlackBoard.

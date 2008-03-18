@@ -64,10 +64,14 @@ class BlackBoardInterfaceListener
 
   virtual void bb_interface_data_changed(Interface *interface) throw();
   virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
-  virtual void bb_interface_writer_added(Interface *interface) throw();
-  virtual void bb_interface_writer_removed(Interface *interface) throw();
-  virtual void bb_interface_reader_added(Interface *interface) throw();
-  virtual void bb_interface_reader_removed(Interface *interface) throw();
+  virtual void bb_interface_writer_added(Interface *interface,
+					 unsigned int instance_serial) throw();
+  virtual void bb_interface_writer_removed(Interface *interface,
+					   unsigned int instance_serial) throw();
+  virtual void bb_interface_reader_added(Interface *interface,
+					 unsigned int instance_serial) throw();
+  virtual void bb_interface_reader_removed(Interface *interface,
+					   unsigned int instance_serial) throw();
 
  protected:
   void bbil_add_data_interface(Interface *interface);

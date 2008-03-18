@@ -20,13 +20,6 @@ TOLUA_API int  tolua_interface_open (lua_State* tolua_S);
 /* function to release collected object via destructor */
 #ifdef __cplusplus
 
-static int tolua_collect_pthread_t (lua_State* tolua_S)
-{
- pthread_t* self = (pthread_t*) tolua_tousertype(tolua_S,1,0);
-	delete self;
-	return 0;
-}
-
 static int tolua_collect_Message (lua_State* tolua_S)
 {
  Message* self = (Message*) tolua_tousertype(tolua_S,1,0);
@@ -61,7 +54,6 @@ static int tolua_collect_size_t (lua_State* tolua_S)
 static void tolua_reg_types (lua_State* tolua_S)
 {
  tolua_usertype(tolua_S,"Message");
- tolua_usertype(tolua_S,"pthread_t");
  tolua_usertype(tolua_S,"size_t");
  tolua_usertype(tolua_S,"MessageQueue::MessageIterator");
  tolua_usertype(tolua_S,"MessageQueue");
@@ -2132,16 +2124,8 @@ static int tolua_interface_Message_sender_id00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'sender_id'",NULL);
 #endif
   {
-   pthread_t tolua_ret = (pthread_t)  self->sender_id();
-   {
-#ifdef __cplusplus
-    void* tolua_obj = new pthread_t(tolua_ret);
-    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"pthread_t");
-#else
-    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(pthread_t));
-    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"pthread_t");
-#endif
-   }
+   unsigned int tolua_ret = (unsigned int)  self->sender_id();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
@@ -2153,9 +2137,9 @@ static int tolua_interface_Message_sender_id00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: sender of class  Message */
-#ifndef TOLUA_DISABLE_tolua_interface_Message_sender00
-static int tolua_interface_Message_sender00(lua_State* tolua_S)
+/* method: sender_thread_name of class  Message */
+#ifndef TOLUA_DISABLE_tolua_interface_Message_sender_thread_name00
+static int tolua_interface_Message_sender_thread_name00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -2169,17 +2153,17 @@ static int tolua_interface_Message_sender00(lua_State* tolua_S)
  {
   const Message* self = (const Message*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'sender'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'sender_thread_name'",NULL);
 #endif
   {
-   const char* tolua_ret = (const char*)  self->sender();
+   const char* tolua_ret = (const char*)  self->sender_thread_name();
    tolua_pushstring(tolua_S,(const char*)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'sender'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'sender_thread_name'.",&tolua_err);
  return 0;
 #endif
 }
@@ -2547,7 +2531,7 @@ TOLUA_API int tolua_interface_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_sub_status",tolua_interface_Message_set_sub_status00);
    tolua_function(tolua_S,"sub_status",tolua_interface_Message_sub_status00);
    tolua_function(tolua_S,"sender_id",tolua_interface_Message_sender_id00);
-   tolua_function(tolua_S,"sender",tolua_interface_Message_sender00);
+   tolua_function(tolua_S,"sender_thread_name",tolua_interface_Message_sender_thread_name00);
    tolua_function(tolua_S,"interface",tolua_interface_Message_interface00);
    tolua_function(tolua_S,"type",tolua_interface_Message_type00);
    tolua_function(tolua_S,"datachunk",tolua_interface_Message_datachunk00);

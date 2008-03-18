@@ -252,6 +252,8 @@ RemoteBlackBoard::open_all_of_type_for_reading(const char *type, const char *id_
 void
 RemoteBlackBoard::close(Interface *interface)
 {
+  if ( interface == NULL )  return;
+
   unsigned int serial = interface->serial();
 
   if ( __proxies.find(serial) != __proxies.end() ) {
@@ -259,14 +261,17 @@ RemoteBlackBoard::close(Interface *interface)
     __proxies.erase(serial);
   }
 
-  bb_iserial_msg_t *sm = (bb_iserial_msg_t *)calloc(1, sizeof(bb_iserial_msg_t));
-  sm->serial = interface->serial();
+  if ( __fnc->connected() ) {
+    // We cannot "officially" close it, if we are disconnected it cannot be used anyway
+    bb_iserial_msg_t *sm = (bb_iserial_msg_t *)calloc(1, sizeof(bb_iserial_msg_t));
+    sm->serial = interface->serial();
 
-  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD,
-							MSG_BB_CLOSE,
-							sm, sizeof(bb_iserial_msg_t));
-  __fnc->enqueue(omsg);
-  omsg->unref();
+    FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD,
+							  MSG_BB_CLOSE,
+							  sm, sizeof(bb_iserial_msg_t));
+    __fnc->enqueue(omsg);
+    omsg->unref();
+  }
 
   __instance_factory->delete_interface_instance(interface);
 }
@@ -369,39 +374,43 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m) throw()
 {
   if ( m->cid() == FAWKES_CID_BLACKBOARD ) {
     unsigned int msgid = m->msgid();
-    if ( msgid == MSG_BB_DATA_CHANGED ) {
-      unsigned int *serial = (unsigned int *)m->payload();
-      if ( __proxies.find(*serial) != __proxies.end() ) {
-	__proxies[*serial]->process_data_changed(m);
+    try {
+      if ( msgid == MSG_BB_DATA_CHANGED ) {
+	unsigned int *serial = (unsigned int *)m->payload();
+	if ( __proxies.find(*serial) != __proxies.end() ) {
+	  __proxies[*serial]->process_data_changed(m);
+	}
+      } else if (msgid == MSG_BB_INTERFACE_MESSAGE) {
+	unsigned int *serial = (unsigned int *)m->payload();
+	if ( __proxies.find(*serial) != __proxies.end() ) {
+	  __proxies[*serial]->process_interface_message(m);
+	}
+      } else if (msgid == MSG_BB_READER_ADDED) {
+	bb_ieventserial_msg_t *esm = m->msg<bb_ieventserial_msg_t>();
+	if ( __proxies.find(esm->serial) != __proxies.end() ) {
+	  __proxies[esm->serial]->reader_added(esm->event_serial);
+	}
+      } else if (msgid == MSG_BB_READER_REMOVED) {
+	bb_ieventserial_msg_t *esm = m->msg<bb_ieventserial_msg_t>();
+	if ( __proxies.find(esm->serial) != __proxies.end() ) {
+	  __proxies[esm->serial]->reader_removed(esm->event_serial);
+	}
+      } else if (msgid == MSG_BB_WRITER_ADDED) {
+	bb_ieventserial_msg_t *esm = m->msg<bb_ieventserial_msg_t>();
+	if ( __proxies.find(esm->serial) != __proxies.end() ) {
+	  __proxies[esm->serial]->writer_added(esm->event_serial);
+	}
+      } else if (msgid == MSG_BB_WRITER_REMOVED) {
+	bb_ieventserial_msg_t *esm = m->msg<bb_ieventserial_msg_t>();
+	if ( __proxies.find(esm->serial) != __proxies.end() ) {
+	  __proxies[esm->serial]->writer_removed(esm->event_serial);
+	}
+      } else {
+	__m = m;
+	__m->ref();
       }
-    } else if (msgid == MSG_BB_INTERFACE_MESSAGE) {
-      unsigned int *serial = (unsigned int *)m->payload();
-      if ( __proxies.find(*serial) != __proxies.end() ) {
-	__proxies[*serial]->process_interface_message(m);
-      }
-    } else if (msgid == MSG_BB_READER_ADDED) {
-      unsigned int *serial = (unsigned int *)m->payload();
-      if ( __proxies.find(*serial) != __proxies.end() ) {
-	__proxies[*serial]->reader_added();
-      }
-    } else if (msgid == MSG_BB_READER_REMOVED) {
-      unsigned int *serial = (unsigned int *)m->payload();
-      if ( __proxies.find(*serial) != __proxies.end() ) {
-	__proxies[*serial]->reader_removed();
-      }
-    } else if (msgid == MSG_BB_WRITER_ADDED) {
-      unsigned int *serial = (unsigned int *)m->payload();
-      if ( __proxies.find(*serial) != __proxies.end() ) {
-	__proxies[*serial]->writer_added();
-      }
-    } else if (msgid == MSG_BB_WRITER_REMOVED) {
-      unsigned int *serial = (unsigned int *)m->payload();
-      if ( __proxies.find(*serial) != __proxies.end() ) {
-	__proxies[*serial]->writer_removed();
-      }
-    } else {
-      __m = m;
-      __m->ref();
+    } catch (Exception &e) {
+      // Bam, you're dead. Ok, not now, we just ignore that this shit happened...
     }
   }
 }

@@ -45,8 +45,8 @@ class Message : public RefCount
   MessageStatus     status() const;
   void              set_sub_status(unsigned int sub_status);
   unsigned int      sub_status() const;
-  pthread_t         sender_id() const;
-  const char *      sender() const;
+  unsigned int      sender_id() const;
+  const char *      sender_thread_name() const;
   Interface *       interface() const;
   const char *      type() const;
 

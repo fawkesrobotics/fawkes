@@ -29,7 +29,6 @@
 #define __INTERFACE_MESSAGE_H_
 
 #include <core/utils/refcount.h>
-#include <sys/types.h>
 
 #define __INTERFACE_MESSAGE_TYPE_SIZE 32
 
@@ -65,8 +64,8 @@ class Message : public RefCount
   MessageStatus     status() const;
   void              set_sub_status(unsigned int sub_status);
   unsigned int      sub_status() const;
-  pthread_t         sender_id() const;
-  const char *      sender() const;
+  unsigned int      sender_id() const;
+  const char *      sender_thread_name() const;
   Interface *       interface() const;
   const char *      type() const;
 
@@ -88,8 +87,8 @@ class Message : public RefCount
   unsigned int   _substatus;
 
   char          *_type;
-  char          *_sender;
-  pthread_t      _sender_id;
+  char          *_sender_thread_name;
+  unsigned int   _sender_id;
 
   Interface     *_transmit_via_iface;
 

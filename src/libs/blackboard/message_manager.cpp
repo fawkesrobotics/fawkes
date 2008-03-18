@@ -78,7 +78,8 @@ BlackBoardMessageManager::transmit(Message *message)
     LibLogger::log_warn("BlackBoardMessageManager", "Cannot transmit message from sender %s "
 			                            "via interface %s (type %s), no writing "
 			                            "instance exists!",
-			message->sender(), (iface != NULL) ? iface->id() : "Unknown",
+			message->sender_thread_name(),
+			(iface != NULL) ? iface->id() : "Unknown",
 			(iface != NULL) ? iface->type() : "unknown");
     throw;
   }

@@ -120,38 +120,45 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *
 
 
 void
-BlackBoardNetHandlerInterfaceListener::send_serial(Interface *interface, unsigned int msg_id)
+BlackBoardNetHandlerInterfaceListener::send_event_serial(Interface *interface,
+							 unsigned int msg_id,
+							 unsigned int event_serial)
 {
-  bb_iserial_msg_t *sm = (bb_iserial_msg_t *)malloc(sizeof(bb_iserial_msg_t));
-  sm->serial = interface->serial();
+  bb_ieventserial_msg_t *esm = (bb_ieventserial_msg_t *)malloc(sizeof(bb_ieventserial_msg_t));
+  esm->serial       = interface->serial();
+  esm->event_serial = event_serial;
 
-  __fnh->send(__clid, FAWKES_CID_BLACKBOARD, msg_id, sm, sizeof(bb_iserial_msg_t));  
+  __fnh->send(__clid, FAWKES_CID_BLACKBOARD, msg_id, esm, sizeof(bb_ieventserial_msg_t));  
 }
 
 
 void
-BlackBoardNetHandlerInterfaceListener::bb_interface_writer_added(Interface *interface) throw()
+BlackBoardNetHandlerInterfaceListener::bb_interface_writer_added(Interface *interface,
+								 unsigned int instance_serial) throw()
 {
-  send_serial(interface, MSG_BB_WRITER_ADDED);
+  send_event_serial(interface, MSG_BB_WRITER_ADDED, instance_serial);
 }
 
 
 void
-BlackBoardNetHandlerInterfaceListener::bb_interface_writer_removed(Interface *interface) throw()
+BlackBoardNetHandlerInterfaceListener::bb_interface_writer_removed(Interface *interface,
+								   unsigned int instance_serial) throw()
 {
-  send_serial(interface, MSG_BB_WRITER_REMOVED);
+  send_event_serial(interface, MSG_BB_WRITER_REMOVED, instance_serial);
 }
 
 
 void
-BlackBoardNetHandlerInterfaceListener::bb_interface_reader_added(Interface *interface) throw()
+BlackBoardNetHandlerInterfaceListener::bb_interface_reader_added(Interface *interface,
+								 unsigned int instance_serial) throw()
 {
-  send_serial(interface, MSG_BB_READER_ADDED);
+  send_event_serial(interface, MSG_BB_READER_ADDED, instance_serial);
 }
 
 
 void
-BlackBoardNetHandlerInterfaceListener::bb_interface_reader_removed(Interface *interface) throw()
+BlackBoardNetHandlerInterfaceListener::bb_interface_reader_removed(Interface *interface,
+								   unsigned int instance_serial) throw()
 {
-  send_serial(interface, MSG_BB_READER_REMOVED);
+  send_event_serial(interface, MSG_BB_READER_REMOVED, instance_serial);
 }

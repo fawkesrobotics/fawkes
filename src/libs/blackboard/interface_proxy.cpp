@@ -188,38 +188,46 @@ BlackBoardInterfaceProxy::process_interface_message(FawkesNetworkMessage *msg)
 }
 
 
-/** Reader has been added. */
+/** Reader has been added.
+ * @param event_serial instance serial of the interface that caused the event
+ */
 void
-BlackBoardInterfaceProxy::reader_added()
+BlackBoardInterfaceProxy::reader_added(unsigned int event_serial)
 {
   ++__num_readers;
-  __notifier->notify_of_reader_added(__interface->uid());
+  __notifier->notify_of_reader_added(__interface, event_serial);
 }
 
-/** Reader has been removed. */
+/** Reader has been removed.
+ * @param event_serial instance serial of the interface that caused the event
+ */
 void
-BlackBoardInterfaceProxy::reader_removed()
+BlackBoardInterfaceProxy::reader_removed(unsigned int event_serial)
 {
   if ( __num_readers > 0 ) {
     --__num_readers;
   }
-  __notifier->notify_of_reader_removed(__interface);
+  __notifier->notify_of_reader_removed(__interface, event_serial);
 }
 
-/** Writer has been added. */
+/** Writer has been added.
+ * @param event_serial instance serial of the interface that caused the event
+ */
 void
-BlackBoardInterfaceProxy::writer_added()
+BlackBoardInterfaceProxy::writer_added(unsigned int event_serial)
 {
   __has_writer = true;
-  __notifier->notify_of_writer_added(__interface->uid());
+  __notifier->notify_of_writer_added(__interface, event_serial);
 }
 
-/** Writer has been removed. */
+/** Writer has been removed.
+ * @param event_serial instance serial of the interface that caused the event
+ */
 void
-BlackBoardInterfaceProxy::writer_removed()
+BlackBoardInterfaceProxy::writer_removed(unsigned int event_serial)
 {
   __has_writer = false;
-  __notifier->notify_of_writer_removed(__interface);
+  __notifier->notify_of_writer_removed(__interface, event_serial);
 }
 
 
