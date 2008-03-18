@@ -3,7 +3,8 @@
  *  dynamic_buffer.h - A dynamic buffer
  *
  *  Created: Fri Jun 01 13:28:02 2007
- *  Copyright  2007  Daniel Beck
+ *  Copyright  2007-2008  Tim Niemueller [www.niemueller.de]
+ *             2007       Daniel Beck
  *
  *  $Id$
  *

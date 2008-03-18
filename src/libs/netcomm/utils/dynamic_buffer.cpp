@@ -3,7 +3,8 @@
  *  dynamic_buffer.cpp - A dynamic buffer
  *
  *  Created: Fri Jun 01 13:28:46 2007
- *  Copyright  2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2007-2008  Tim Niemueller [www.niemueller.de]
+ *             2007       Daniel Beck
  *
  *  $Id$
  *

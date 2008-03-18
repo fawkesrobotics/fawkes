@@ -297,7 +297,6 @@ FawkesNetworkClient::connect()
     recv_slave = new FawkesNetworkClientRecvThread(s, this);
     recv_slave->start();
     connection_died_recently = false;
-    notify_of_connection_established();
   } catch (SocketException &e) {
     if ( send_slave ) {
       send_slave->cancel();
