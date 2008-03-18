@@ -17,6 +17,7 @@ class TestInterface : public Interface
 
     int test_int();
     void set_test_int(const int new_test_int);
+    size_t maxlenof_test_int() const;
   };
 
   class SetTestStringMessage : public Message
@@ -27,6 +28,7 @@ class TestInterface : public Interface
 
     char * test_string();
     void set_test_string(const char * new_test_string);
+    size_t maxlenof_test_string() const;
   };
 
   class CalculateMessage : public Message
@@ -37,25 +39,35 @@ class TestInterface : public Interface
 
     int summand();
     void set_summand(const int new_summand);
+    size_t maxlenof_summand() const;
     int addend();
     void set_addend(const int new_addend);
+    size_t maxlenof_addend() const;
   };
 
   bool is_test_bool();
   void set_test_bool(const bool new_test_bool);
+  size_t maxlenof_test_bool() const;
   int test_int();
   void set_test_int(const int new_test_int);
+  size_t maxlenof_test_int() const;
   char _flags();
   void set__flags(const char new__flags);
+  size_t maxlenof__flags() const;
   char * test_string();
   void set_test_string(const char * new_test_string);
+  size_t maxlenof_test_string() const;
   int result();
   void set_result(const int new_result);
+  size_t maxlenof_result() const;
   unsigned int test_uint();
   void set_test_uint(const unsigned int new_test_uint);
+  size_t maxlenof_test_uint() const;
   unsigned long int test_ulint();
   void set_test_ulint(const unsigned long int new_test_ulint);
+  size_t maxlenof_test_ulint() const;
   long int test_lint();
   void set_test_lint(const long int new_test_lint);
+  size_t maxlenof_test_lint() const;
 
 };

@@ -62,17 +62,20 @@ class NavigatorInterface : public Interface
     TargetMessage_data_t *data;
 
    public:
-    TargetMessage(float ini_x, float ini_y, float ini_orientation);
+    TargetMessage(const float ini_x, const float ini_y, const float ini_orientation);
     TargetMessage();
     ~TargetMessage();
 
     /* Methods */
     float x();
     void set_x(const float new_x);
+    size_t maxlenof_x() const;
     float y();
     void set_y(const float new_y);
+    size_t maxlenof_y() const;
     float orientation();
     void set_orientation(const float new_orientation);
+    size_t maxlenof_orientation() const;
   };
 
   class MaxVelocityMessage : public Message
@@ -86,13 +89,14 @@ class NavigatorInterface : public Interface
     MaxVelocityMessage_data_t *data;
 
    public:
-    MaxVelocityMessage(float ini_velocity);
+    MaxVelocityMessage(const float ini_velocity);
     MaxVelocityMessage();
     ~MaxVelocityMessage();
 
     /* Methods */
     float velocity();
     void set_velocity(const float new_velocity);
+    size_t maxlenof_velocity() const;
   };
 
   class ObstacleMessage : public Message
@@ -108,17 +112,20 @@ class NavigatorInterface : public Interface
     ObstacleMessage_data_t *data;
 
    public:
-    ObstacleMessage(float ini_x, float ini_y, float ini_width);
+    ObstacleMessage(const float ini_x, const float ini_y, const float ini_width);
     ObstacleMessage();
     ~ObstacleMessage();
 
     /* Methods */
     float x();
     void set_x(const float new_x);
+    size_t maxlenof_x() const;
     float y();
     void set_y(const float new_y);
+    size_t maxlenof_y() const;
     float width();
     void set_width(const float new_width);
+    size_t maxlenof_width() const;
   };
 
   virtual bool message_valid(const Message *message) const;
@@ -132,6 +139,7 @@ class NavigatorInterface : public Interface
   /* Methods */
   int foo();
   void set_foo(const int new_foo);
+  size_t maxlenof_foo() const;
 
 };
 

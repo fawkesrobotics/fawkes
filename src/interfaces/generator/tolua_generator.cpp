@@ -253,12 +253,14 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
     fprintf(f,
 	    "%s%s %s%s();\n"
-	    "%svoid set_%s(const %s new_%s);\n",
+	    "%svoid set_%s(const %s new_%s);\n"
+	    "%ssize_t maxlenof_%s() const;\n",
 	    is.c_str(), (*i).getAccessType().c_str(),
 	    ( ((*i).getType() == "bool" ) ? "is_" : ""),
 	    (*i).getName().c_str(),
 	    is.c_str(), (*i).getName().c_str(),
-	    (*i).getAccessType().c_str(), (*i).getName().c_str()
+	    (*i).getAccessType().c_str(), (*i).getName().c_str(),
+	    is.c_str(), (*i).getName().c_str()
 	    );
   }
 }

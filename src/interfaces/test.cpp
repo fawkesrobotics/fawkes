@@ -77,6 +77,16 @@ TestInterface::is_test_bool()
   return data->test_bool;
 }
 
+/** Get maximum length of test_bool value.
+ * @return length of test_bool value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::maxlenof_test_bool() const
+{
+  return 1;
+}
+
 /** Set test_bool value.
  * Test Bool
  * @param new_test_bool new test_bool value
@@ -95,6 +105,16 @@ int
 TestInterface::test_int()
 {
   return data->test_int;
+}
+
+/** Get maximum length of test_int value.
+ * @return length of test_int value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::maxlenof_test_int() const
+{
+  return 1;
 }
 
 /** Set test_int value.
@@ -117,6 +137,16 @@ TestInterface::_flags()
   return data->_flags;
 }
 
+/** Get maximum length of _flags value.
+ * @return length of _flags value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::maxlenof__flags() const
+{
+  return 1;
+}
+
 /** Set _flags value.
  * Flags spit down by the writer
  * @param new__flags new _flags value
@@ -135,6 +165,16 @@ char *
 TestInterface::test_string()
 {
   return data->test_string;
+}
+
+/** Get maximum length of test_string value.
+ * @return length of test_string value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::maxlenof_test_string() const
+{
+  return 30;
 }
 
 /** Set test_string value.
@@ -157,6 +197,16 @@ TestInterface::result()
   return data->result;
 }
 
+/** Get maximum length of result value.
+ * @return length of result value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::maxlenof_result() const
+{
+  return 1;
+}
+
 /** Set result value.
  * Result of operation add operation from Calculate message.
  * @param new_result new result value
@@ -175,6 +225,16 @@ unsigned int
 TestInterface::test_uint()
 {
   return data->test_uint;
+}
+
+/** Get maximum length of test_uint value.
+ * @return length of test_uint value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::maxlenof_test_uint() const
+{
+  return 1;
 }
 
 /** Set test_uint value.
@@ -197,6 +257,16 @@ TestInterface::test_ulint()
   return data->test_ulint;
 }
 
+/** Get maximum length of test_ulint value.
+ * @return length of test_ulint value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::maxlenof_test_ulint() const
+{
+  return 1;
+}
+
 /** Set test_ulint value.
  * Test unsigned long int
  * @param new_test_ulint new test_ulint value
@@ -215,6 +285,16 @@ long int
 TestInterface::test_lint()
 {
   return data->test_lint;
+}
+
+/** Get maximum length of test_lint value.
+ * @return length of test_lint value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::maxlenof_test_lint() const
+{
+  return 1;
 }
 
 /** Set test_lint value.
@@ -255,7 +335,7 @@ TestInterface::create_message(const char *type) const
 /** Constructor with initial values.
  * @param ini_test_int initial value for test_int
  */
-TestInterface::SetTestIntMessage::SetTestIntMessage(int ini_test_int) : Message("SetTestIntMessage")
+TestInterface::SetTestIntMessage::SetTestIntMessage(const int ini_test_int) : Message("SetTestIntMessage")
 {
   data_size = sizeof(SetTestIntMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -289,6 +369,16 @@ TestInterface::SetTestIntMessage::test_int()
   return data->test_int;
 }
 
+/** Get maximum length of test_int value.
+ * @return length of test_int value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::SetTestIntMessage::maxlenof_test_int() const
+{
+  return 1;
+}
+
 /** Set test_int value.
  * Test integer
  * @param new_test_int new test_int value
@@ -309,7 +399,7 @@ TestInterface::SetTestIntMessage::set_test_int(const int new_test_int)
 /** Constructor with initial values.
  * @param ini_test_string initial value for test_string
  */
-TestInterface::SetTestStringMessage::SetTestStringMessage(char * ini_test_string) : Message("SetTestStringMessage")
+TestInterface::SetTestStringMessage::SetTestStringMessage(const char * ini_test_string) : Message("SetTestStringMessage")
 {
   data_size = sizeof(SetTestStringMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -343,6 +433,16 @@ TestInterface::SetTestStringMessage::test_string()
   return data->test_string;
 }
 
+/** Get maximum length of test_string value.
+ * @return length of test_string value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::SetTestStringMessage::maxlenof_test_string() const
+{
+  return 30;
+}
+
 /** Set test_string value.
  * A test sring
  * @param new_test_string new test_string value
@@ -364,7 +464,7 @@ TestInterface::SetTestStringMessage::set_test_string(const char * new_test_strin
  * @param ini_summand initial value for summand
  * @param ini_addend initial value for addend
  */
-TestInterface::CalculateMessage::CalculateMessage(int ini_summand, int ini_addend) : Message("CalculateMessage")
+TestInterface::CalculateMessage::CalculateMessage(const int ini_summand, const int ini_addend) : Message("CalculateMessage")
 {
   data_size = sizeof(CalculateMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -399,6 +499,16 @@ TestInterface::CalculateMessage::summand()
   return data->summand;
 }
 
+/** Get maximum length of summand value.
+ * @return length of summand value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::CalculateMessage::maxlenof_summand() const
+{
+  return 1;
+}
+
 /** Set summand value.
  * Summand
  * @param new_summand new summand value
@@ -417,6 +527,16 @@ int
 TestInterface::CalculateMessage::addend()
 {
   return data->addend;
+}
+
+/** Get maximum length of addend value.
+ * @return length of addend value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TestInterface::CalculateMessage::maxlenof_addend() const
+{
+  return 1;
 }
 
 /** Set addend value.

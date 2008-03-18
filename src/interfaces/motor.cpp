@@ -62,7 +62,7 @@ MotorInterface::MotorInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (MotorInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0x3a, 0xc0, 0x24, 0xbe, 0xae, 0xca, 0x63, 0xa9, 0x22, 0xc7, 0x9, 0xdc, 0x30, 0x50, 0xae, 0x2c};
+  unsigned char tmp_hash[] = {0x32, 0xf7, 0xef, 0x43, 0xe8, 0x78, 0x43, 0x17, 0x55, 0xbb, 0xb9, 0xbf, 0x48, 0x72, 0x21, 0x94};
   set_hash(tmp_hash);
   add_fieldinfo(Interface::IFT_UINT, "motor_state", &data->motor_state);
   add_fieldinfo(Interface::IFT_UINT, "drive_mode", &data->drive_mode);
@@ -76,7 +76,7 @@ MotorInterface::MotorInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "vx", &data->vx);
   add_fieldinfo(Interface::IFT_FLOAT, "vy", &data->vy);
   add_fieldinfo(Interface::IFT_FLOAT, "omega", &data->omega);
-  add_fieldinfo(Interface::IFT_LONGUINT, "controller_thread_id", &data->controller_thread_id);
+  add_fieldinfo(Interface::IFT_UINT, "controller", &data->controller);
 }
 
 /** Destructor */
@@ -95,6 +95,16 @@ unsigned int
 MotorInterface::motor_state()
 {
   return data->motor_state;
+}
+
+/** Get maximum length of motor_state value.
+ * @return length of motor_state value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_motor_state() const
+{
+  return 1;
 }
 
 /** Set motor_state value.
@@ -121,6 +131,16 @@ MotorInterface::drive_mode()
   return data->drive_mode;
 }
 
+/** Get maximum length of drive_mode value.
+ * @return length of drive_mode value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_drive_mode() const
+{
+  return 1;
+}
+
 /** Set drive_mode value.
  * 
       The current drive mode of the motor.
@@ -143,6 +163,16 @@ int
 MotorInterface::right_rpm()
 {
   return data->right_rpm;
+}
+
+/** Get maximum length of right_rpm value.
+ * @return length of right_rpm value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_right_rpm() const
+{
+  return 1;
 }
 
 /** Set right_rpm value.
@@ -169,6 +199,16 @@ MotorInterface::rear_rpm()
   return data->rear_rpm;
 }
 
+/** Get maximum length of rear_rpm value.
+ * @return length of rear_rpm value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_rear_rpm() const
+{
+  return 1;
+}
+
 /** Set rear_rpm value.
  * 
       RPM of motor on the rear of the robot.
@@ -191,6 +231,16 @@ int
 MotorInterface::left_rpm()
 {
   return data->left_rpm;
+}
+
+/** Get maximum length of left_rpm value.
+ * @return length of left_rpm value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_left_rpm() const
+{
+  return 1;
 }
 
 /** Set left_rpm value.
@@ -217,6 +267,16 @@ MotorInterface::odometry_path_length()
   return data->odometry_path_length;
 }
 
+/** Get maximum length of odometry_path_length value.
+ * @return length of odometry_path_length value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_odometry_path_length() const
+{
+  return 1;
+}
+
 /** Set odometry_path_length value.
  * 
       The actual length of the robot's trajectory since the last ResetOdometry.
@@ -239,6 +299,16 @@ float
 MotorInterface::odometry_position_x()
 {
   return data->odometry_position_x;
+}
+
+/** Get maximum length of odometry_position_x value.
+ * @return length of odometry_position_x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_odometry_position_x() const
+{
+  return 1;
 }
 
 /** Set odometry_position_x value.
@@ -265,6 +335,16 @@ MotorInterface::odometry_position_y()
   return data->odometry_position_y;
 }
 
+/** Get maximum length of odometry_position_y value.
+ * @return length of odometry_position_y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_odometry_position_y() const
+{
+  return 1;
+}
+
 /** Set odometry_position_y value.
  * 
       The actual position of the robot relative to the position at the last ResetOdometry.
@@ -287,6 +367,16 @@ float
 MotorInterface::odometry_orientation()
 {
   return data->odometry_orientation;
+}
+
+/** Get maximum length of odometry_orientation value.
+ * @return length of odometry_orientation value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_odometry_orientation() const
+{
+  return 1;
 }
 
 /** Set odometry_orientation value.
@@ -313,6 +403,16 @@ MotorInterface::vx()
   return data->vx;
 }
 
+/** Get maximum length of vx value.
+ * @return length of vx value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_vx() const
+{
+  return 1;
+}
+
 /** Set vx value.
  * 
       VX of the robot in m/s. Forward.
@@ -335,6 +435,16 @@ float
 MotorInterface::vy()
 {
   return data->vy;
+}
+
+/** Get maximum length of vy value.
+ * @return length of vy value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_vy() const
+{
+  return 1;
 }
 
 /** Set vy value.
@@ -361,6 +471,16 @@ MotorInterface::omega()
   return data->omega;
 }
 
+/** Get maximum length of omega value.
+ * @return length of omega value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_omega() const
+{
+  return 1;
+}
+
 /** Set omega value.
  * 
       Rotation speed of the robot in rad/s.
@@ -373,35 +493,47 @@ MotorInterface::set_omega(const float new_omega)
   data->omega = new_omega;
 }
 
-/** Get controller_thread_id value.
+/** Get controller value.
  * 
-     The ID of the controlling thread.
-     Only from this thread command messages are accepted.
+     The ID of the controller. The controller ID is the instance serial of the sending
+     interface. Only from this interface instance command messages are accepted.
     
- * @return controller_thread_id value
+ * @return controller value
  */
-unsigned long int
-MotorInterface::controller_thread_id()
+unsigned int
+MotorInterface::controller()
 {
-  return data->controller_thread_id;
+  return data->controller;
 }
 
-/** Set controller_thread_id value.
+/** Get maximum length of controller value.
+ * @return length of controller value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_controller() const
+{
+  return 1;
+}
+
+/** Set controller value.
  * 
-     The ID of the controlling thread.
-     Only from this thread command messages are accepted.
+     The ID of the controller. The controller ID is the instance serial of the sending
+     interface. Only from this interface instance command messages are accepted.
     
- * @param new_controller_thread_id new controller_thread_id value
+ * @param new_controller new controller value
  */
 void
-MotorInterface::set_controller_thread_id(const unsigned long int new_controller_thread_id)
+MotorInterface::set_controller(const unsigned int new_controller)
 {
-  data->controller_thread_id = new_controller_thread_id;
+  data->controller = new_controller;
 }
 
 /** Get controller_thread_name value.
  * 
-     The name of the controlling thread.
+     The name of the controlling thread, for easier debugging. This is informative only
+     and actually two threads may share an interface instance (although this should be
+     avoided since the interface locking has to be reproduced for these threads then).
   
  * @return controller_thread_name value
  */
@@ -411,9 +543,21 @@ MotorInterface::controller_thread_name()
   return data->controller_thread_name;
 }
 
+/** Get maximum length of controller_thread_name value.
+ * @return length of controller_thread_name value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::maxlenof_controller_thread_name() const
+{
+  return 64;
+}
+
 /** Set controller_thread_name value.
  * 
-     The name of the controlling thread.
+     The name of the controlling thread, for easier debugging. This is informative only
+     and actually two threads may share an interface instance (although this should be
+     avoided since the interface locking has to be reproduced for these threads then).
   
  * @param new_controller_thread_name new controller_thread_name value
  */
@@ -463,7 +607,7 @@ MotorInterface::create_message(const char *type) const
 /** Constructor with initial values.
  * @param ini_motor_state initial value for motor_state
  */
-MotorInterface::SetMotorStateMessage::SetMotorStateMessage(unsigned int ini_motor_state) : Message("SetMotorStateMessage")
+MotorInterface::SetMotorStateMessage::SetMotorStateMessage(const unsigned int ini_motor_state) : Message("SetMotorStateMessage")
 {
   data_size = sizeof(SetMotorStateMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -499,6 +643,16 @@ MotorInterface::SetMotorStateMessage::motor_state()
   return data->motor_state;
 }
 
+/** Get maximum length of motor_state value.
+ * @return length of motor_state value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::SetMotorStateMessage::maxlenof_motor_state() const
+{
+  return 1;
+}
+
 /** Set motor_state value.
  * 
       The new motor state to set. Use the MOTOR_* constants.
@@ -519,17 +673,17 @@ MotorInterface::SetMotorStateMessage::set_motor_state(const unsigned int new_mot
 
 
 /** Constructor with initial values.
- * @param ini_thread_id initial value for thread_id
- * @param ini_thread_name initial value for thread_name
+ * @param ini_controller initial value for controller
+ * @param ini_controller_thread_name initial value for controller_thread_name
  */
-MotorInterface::AcquireControlMessage::AcquireControlMessage(unsigned long int ini_thread_id, char * ini_thread_name) : Message("AcquireControlMessage")
+MotorInterface::AcquireControlMessage::AcquireControlMessage(const unsigned int ini_controller, const char * ini_controller_thread_name) : Message("AcquireControlMessage")
 {
   data_size = sizeof(AcquireControlMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AcquireControlMessage_data_t *)data_ptr;
-  data->thread_id = ini_thread_id;
-  strncpy(data->thread_name, ini_thread_name, 64);
+  data->controller = ini_controller;
+  strncpy(data->controller_thread_name, ini_controller_thread_name, 64);
 }
 /** Constructor */
 MotorInterface::AcquireControlMessage::AcquireControlMessage() : Message("AcquireControlMessage")
@@ -547,58 +701,78 @@ MotorInterface::AcquireControlMessage::~AcquireControlMessage()
 }
 
 /* Methods */
-/** Get thread_id value.
+/** Get controller value.
  * 
-      The thread ID of the thread which is allowed to control the motors.
-      Set to zero to use the data of the current thread (the message is zeroed at
-      creation automatically, so if you do not set anything the sending thread
-      aquires the control.
+     The ID of the controller. The controller ID is the instance serial of the sending
+     interface. Only from this interface instance command messages are accepted.
     
- * @return thread_id value
+ * @return controller value
  */
-unsigned long int
-MotorInterface::AcquireControlMessage::thread_id()
+unsigned int
+MotorInterface::AcquireControlMessage::controller()
 {
-  return data->thread_id;
+  return data->controller;
 }
 
-/** Set thread_id value.
+/** Get maximum length of controller value.
+ * @return length of controller value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::AcquireControlMessage::maxlenof_controller() const
+{
+  return 1;
+}
+
+/** Set controller value.
  * 
-      The thread ID of the thread which is allowed to control the motors.
-      Set to zero to use the data of the current thread (the message is zeroed at
-      creation automatically, so if you do not set anything the sending thread
-      aquires the control.
+     The ID of the controller. The controller ID is the instance serial of the sending
+     interface. Only from this interface instance command messages are accepted.
     
- * @param new_thread_id new thread_id value
+ * @param new_controller new controller value
  */
 void
-MotorInterface::AcquireControlMessage::set_thread_id(const unsigned long int new_thread_id)
+MotorInterface::AcquireControlMessage::set_controller(const unsigned int new_controller)
 {
-  data->thread_id = new_thread_id;
+  data->controller = new_controller;
 }
 
-/** Get thread_name value.
+/** Get controller_thread_name value.
  * 
-      The thread name of the aquiring thread.
-    
- * @return thread_name value
+     The name of the controlling thread, for easier debugging. This is informative only
+     and actually two threads may share an interface instance (although this should be
+     avoided since the interface locking has to be reproduced for these threads then).
+  
+ * @return controller_thread_name value
  */
 char *
-MotorInterface::AcquireControlMessage::thread_name()
+MotorInterface::AcquireControlMessage::controller_thread_name()
 {
-  return data->thread_name;
+  return data->controller_thread_name;
 }
 
-/** Set thread_name value.
+/** Get maximum length of controller_thread_name value.
+ * @return length of controller_thread_name value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::AcquireControlMessage::maxlenof_controller_thread_name() const
+{
+  return 64;
+}
+
+/** Set controller_thread_name value.
  * 
-      The thread name of the aquiring thread.
-    
- * @param new_thread_name new thread_name value
+     The name of the controlling thread, for easier debugging. This is informative only
+     and actually two threads may share an interface instance (although this should be
+     avoided since the interface locking has to be reproduced for these threads then).
+  
+ * @param new_controller_thread_name new controller_thread_name value
  */
 void
-MotorInterface::AcquireControlMessage::set_thread_name(const char * new_thread_name)
+MotorInterface::AcquireControlMessage::set_controller_thread_name(const char * new_controller_thread_name)
 {
-  strncpy(data->thread_name, new_thread_name, sizeof(data->thread_name));
+  strncpy(data->controller_thread_name, new_controller_thread_name, sizeof(data->controller_thread_name));
 }
 
 /** @class MotorInterface::ResetOdometryMessage interfaces/motor.h
@@ -636,7 +810,7 @@ MotorInterface::ResetOdometryMessage::~ResetOdometryMessage()
  * @param ini_front_left initial value for front_left
  * @param ini_rear initial value for rear
  */
-MotorInterface::DriveRPMMessage::DriveRPMMessage(float ini_front_right, float ini_front_left, float ini_rear) : Message("DriveRPMMessage")
+MotorInterface::DriveRPMMessage::DriveRPMMessage(const float ini_front_right, const float ini_front_left, const float ini_rear) : Message("DriveRPMMessage")
 {
   data_size = sizeof(DriveRPMMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -672,6 +846,16 @@ MotorInterface::DriveRPMMessage::front_right()
   return data->front_right;
 }
 
+/** Get maximum length of front_right value.
+ * @return length of front_right value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::DriveRPMMessage::maxlenof_front_right() const
+{
+  return 1;
+}
+
 /** Set front_right value.
  * Rotation in RPM of the right front wheel.
  * @param new_front_right new front_right value
@@ -692,6 +876,16 @@ MotorInterface::DriveRPMMessage::front_left()
   return data->front_left;
 }
 
+/** Get maximum length of front_left value.
+ * @return length of front_left value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::DriveRPMMessage::maxlenof_front_left() const
+{
+  return 1;
+}
+
 /** Set front_left value.
  * Rotation in RPM of the left front wheel.
  * @param new_front_left new front_left value
@@ -710,6 +904,16 @@ float
 MotorInterface::DriveRPMMessage::rear()
 {
   return data->rear;
+}
+
+/** Get maximum length of rear value.
+ * @return length of rear value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::DriveRPMMessage::maxlenof_rear() const
+{
+  return 1;
 }
 
 /** Set rear value.
@@ -733,7 +937,7 @@ MotorInterface::DriveRPMMessage::set_rear(const float new_rear)
  * @param ini_vx initial value for vx
  * @param ini_vy initial value for vy
  */
-MotorInterface::TransMessage::TransMessage(float ini_vx, float ini_vy) : Message("TransMessage")
+MotorInterface::TransMessage::TransMessage(const float ini_vx, const float ini_vy) : Message("TransMessage")
 {
   data_size = sizeof(TransMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -768,6 +972,16 @@ MotorInterface::TransMessage::vx()
   return data->vx;
 }
 
+/** Get maximum length of vx value.
+ * @return length of vx value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::TransMessage::maxlenof_vx() const
+{
+  return 1;
+}
+
 /** Set vx value.
  * Speed in X direction in m/s.
  * @param new_vx new vx value
@@ -786,6 +1000,16 @@ float
 MotorInterface::TransMessage::vy()
 {
   return data->vy;
+}
+
+/** Get maximum length of vy value.
+ * @return length of vy value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::TransMessage::maxlenof_vy() const
+{
+  return 1;
 }
 
 /** Set vy value.
@@ -808,7 +1032,7 @@ MotorInterface::TransMessage::set_vy(const float new_vy)
 /** Constructor with initial values.
  * @param ini_omega initial value for omega
  */
-MotorInterface::RotMessage::RotMessage(float ini_omega) : Message("RotMessage")
+MotorInterface::RotMessage::RotMessage(const float ini_omega) : Message("RotMessage")
 {
   data_size = sizeof(RotMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -842,6 +1066,16 @@ MotorInterface::RotMessage::omega()
   return data->omega;
 }
 
+/** Get maximum length of omega value.
+ * @return length of omega value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::RotMessage::maxlenof_omega() const
+{
+  return 1;
+}
+
 /** Set omega value.
  * Angle rotation in rad/s.
  * @param new_omega new omega value
@@ -864,7 +1098,7 @@ MotorInterface::RotMessage::set_omega(const float new_omega)
  * @param ini_vy initial value for vy
  * @param ini_omega initial value for omega
  */
-MotorInterface::TransRotMessage::TransRotMessage(float ini_vx, float ini_vy, float ini_omega) : Message("TransRotMessage")
+MotorInterface::TransRotMessage::TransRotMessage(const float ini_vx, const float ini_vy, const float ini_omega) : Message("TransRotMessage")
 {
   data_size = sizeof(TransRotMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -900,6 +1134,16 @@ MotorInterface::TransRotMessage::vx()
   return data->vx;
 }
 
+/** Get maximum length of vx value.
+ * @return length of vx value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::TransRotMessage::maxlenof_vx() const
+{
+  return 1;
+}
+
 /** Set vx value.
  * Speed in X direction in m/s.
  * @param new_vx new vx value
@@ -920,6 +1164,16 @@ MotorInterface::TransRotMessage::vy()
   return data->vy;
 }
 
+/** Get maximum length of vy value.
+ * @return length of vy value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::TransRotMessage::maxlenof_vy() const
+{
+  return 1;
+}
+
 /** Set vy value.
  * Speed in Y direction in m/s.
  * @param new_vy new vy value
@@ -938,6 +1192,16 @@ float
 MotorInterface::TransRotMessage::omega()
 {
   return data->omega;
+}
+
+/** Get maximum length of omega value.
+ * @return length of omega value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::TransRotMessage::maxlenof_omega() const
+{
+  return 1;
 }
 
 /** Set omega value.
@@ -962,7 +1226,7 @@ MotorInterface::TransRotMessage::set_omega(const float new_omega)
  * @param ini_py initial value for py
  * @param ini_omega initial value for omega
  */
-MotorInterface::OrbitMessage::OrbitMessage(float ini_px, float ini_py, float ini_omega) : Message("OrbitMessage")
+MotorInterface::OrbitMessage::OrbitMessage(const float ini_px, const float ini_py, const float ini_omega) : Message("OrbitMessage")
 {
   data_size = sizeof(OrbitMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -998,6 +1262,16 @@ MotorInterface::OrbitMessage::px()
   return data->px;
 }
 
+/** Get maximum length of px value.
+ * @return length of px value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::OrbitMessage::maxlenof_px() const
+{
+  return 1;
+}
+
 /** Set px value.
  * Point's X coordinate to orbit.
  * @param new_px new px value
@@ -1018,6 +1292,16 @@ MotorInterface::OrbitMessage::py()
   return data->py;
 }
 
+/** Get maximum length of py value.
+ * @return length of py value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::OrbitMessage::maxlenof_py() const
+{
+  return 1;
+}
+
 /** Set py value.
  * Point's Y coordinate to orbit.
  * @param new_py new py value
@@ -1036,6 +1320,16 @@ float
 MotorInterface::OrbitMessage::omega()
 {
   return data->omega;
+}
+
+/** Get maximum length of omega value.
+ * @return length of omega value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::OrbitMessage::maxlenof_omega() const
+{
+  return 1;
 }
 
 /** Set omega value.
@@ -1060,7 +1354,7 @@ MotorInterface::OrbitMessage::set_omega(const float new_omega)
  * @param ini_vy initial value for vy
  * @param ini_omega initial value for omega
  */
-MotorInterface::LinTransRotMessage::LinTransRotMessage(float ini_vx, float ini_vy, float ini_omega) : Message("LinTransRotMessage")
+MotorInterface::LinTransRotMessage::LinTransRotMessage(const float ini_vx, const float ini_vy, const float ini_omega) : Message("LinTransRotMessage")
 {
   data_size = sizeof(LinTransRotMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1096,6 +1390,16 @@ MotorInterface::LinTransRotMessage::vx()
   return data->vx;
 }
 
+/** Get maximum length of vx value.
+ * @return length of vx value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::LinTransRotMessage::maxlenof_vx() const
+{
+  return 1;
+}
+
 /** Set vx value.
  * Speed for translation in X direction in m/s.
  * @param new_vx new vx value
@@ -1116,6 +1420,16 @@ MotorInterface::LinTransRotMessage::vy()
   return data->vy;
 }
 
+/** Get maximum length of vy value.
+ * @return length of vy value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::LinTransRotMessage::maxlenof_vy() const
+{
+  return 1;
+}
+
 /** Set vy value.
  * Speed for translation in Y direction in m/s.
  * @param new_vy new vy value
@@ -1134,6 +1448,16 @@ float
 MotorInterface::LinTransRotMessage::omega()
 {
   return data->omega;
+}
+
+/** Get maximum length of omega value.
+ * @return length of omega value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::LinTransRotMessage::maxlenof_omega() const
+{
+  return 1;
 }
 
 /** Set omega value.

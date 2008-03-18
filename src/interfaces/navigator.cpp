@@ -67,6 +67,16 @@ NavigatorInterface::foo()
   return data->foo;
 }
 
+/** Get maximum length of foo value.
+ * @return length of foo value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_foo() const
+{
+  return 1;
+}
+
 /** Set foo value.
  * Foo
  * @param new_foo new foo value
@@ -107,7 +117,7 @@ NavigatorInterface::create_message(const char *type) const
  * @param ini_y initial value for y
  * @param ini_orientation initial value for orientation
  */
-NavigatorInterface::TargetMessage::TargetMessage(float ini_x, float ini_y, float ini_orientation) : Message("TargetMessage")
+NavigatorInterface::TargetMessage::TargetMessage(const float ini_x, const float ini_y, const float ini_orientation) : Message("TargetMessage")
 {
   data_size = sizeof(TargetMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -143,6 +153,16 @@ NavigatorInterface::TargetMessage::x()
   return data->x;
 }
 
+/** Get maximum length of x value.
+ * @return length of x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::TargetMessage::maxlenof_x() const
+{
+  return 1;
+}
+
 /** Set x value.
  * X-coordinate of the target, in the robot's coordinate system.
  * @param new_x new x value
@@ -161,6 +181,16 @@ float
 NavigatorInterface::TargetMessage::y()
 {
   return data->y;
+}
+
+/** Get maximum length of y value.
+ * @return length of y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::TargetMessage::maxlenof_y() const
+{
+  return 1;
 }
 
 /** Set y value.
@@ -183,6 +213,16 @@ NavigatorInterface::TargetMessage::orientation()
   return data->orientation;
 }
 
+/** Get maximum length of orientation value.
+ * @return length of orientation value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::TargetMessage::maxlenof_orientation() const
+{
+  return 1;
+}
+
 /** Set orientation value.
  * The orientation of the robot at the target.
  * @param new_orientation new orientation value
@@ -203,7 +243,7 @@ NavigatorInterface::TargetMessage::set_orientation(const float new_orientation)
 /** Constructor with initial values.
  * @param ini_velocity initial value for velocity
  */
-NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage(float ini_velocity) : Message("MaxVelocityMessage")
+NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage(const float ini_velocity) : Message("MaxVelocityMessage")
 {
   data_size = sizeof(MaxVelocityMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -237,6 +277,16 @@ NavigatorInterface::MaxVelocityMessage::velocity()
   return data->velocity;
 }
 
+/** Get maximum length of velocity value.
+ * @return length of velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::MaxVelocityMessage::maxlenof_velocity() const
+{
+  return 1;
+}
+
 /** Set velocity value.
  * Maximum velocity of the robot.
  * @param new_velocity new velocity value
@@ -259,7 +309,7 @@ NavigatorInterface::MaxVelocityMessage::set_velocity(const float new_velocity)
  * @param ini_y initial value for y
  * @param ini_width initial value for width
  */
-NavigatorInterface::ObstacleMessage::ObstacleMessage(float ini_x, float ini_y, float ini_width) : Message("ObstacleMessage")
+NavigatorInterface::ObstacleMessage::ObstacleMessage(const float ini_x, const float ini_y, const float ini_width) : Message("ObstacleMessage")
 {
   data_size = sizeof(ObstacleMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -295,6 +345,16 @@ NavigatorInterface::ObstacleMessage::x()
   return data->x;
 }
 
+/** Get maximum length of x value.
+ * @return length of x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::ObstacleMessage::maxlenof_x() const
+{
+  return 1;
+}
+
 /** Set x value.
  * X-coordinate of the obstacle.
  * @param new_x new x value
@@ -315,6 +375,16 @@ NavigatorInterface::ObstacleMessage::y()
   return data->y;
 }
 
+/** Get maximum length of y value.
+ * @return length of y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::ObstacleMessage::maxlenof_y() const
+{
+  return 1;
+}
+
 /** Set y value.
  * Y-coordinate of the obstacle.
  * @param new_y new y value
@@ -333,6 +403,16 @@ float
 NavigatorInterface::ObstacleMessage::width()
 {
   return data->width;
+}
+
+/** Get maximum length of width value.
+ * @return length of width value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::ObstacleMessage::maxlenof_width() const
+{
+  return 1;
 }
 
 /** Set width value.

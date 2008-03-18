@@ -94,10 +94,13 @@ class BatteryInterface : public Interface
   /* Methods */
   unsigned int current();
   void set_current(const unsigned int new_current);
+  size_t maxlenof_current() const;
   unsigned int voltage();
   void set_voltage(const unsigned int new_voltage);
+  size_t maxlenof_voltage() const;
   unsigned int temperature();
   void set_temperature(const unsigned int new_temperature);
+  size_t maxlenof_temperature() const;
 
 };
 

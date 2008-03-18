@@ -75,6 +75,16 @@ KickerInterface::num_kicks_left()
   return data->num_kicks_left;
 }
 
+/** Get maximum length of num_kicks_left value.
+ * @return length of num_kicks_left value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KickerInterface::maxlenof_num_kicks_left() const
+{
+  return 1;
+}
+
 /** Set num_kicks_left value.
  * 
       Number of Left-Kicks
@@ -97,6 +107,16 @@ int
 KickerInterface::num_kicks_center()
 {
   return data->num_kicks_center;
+}
+
+/** Get maximum length of num_kicks_center value.
+ * @return length of num_kicks_center value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KickerInterface::maxlenof_num_kicks_center() const
+{
+  return 1;
 }
 
 /** Set num_kicks_center value.
@@ -123,6 +143,16 @@ KickerInterface::num_kicks_right()
   return data->num_kicks_right;
 }
 
+/** Get maximum length of num_kicks_right value.
+ * @return length of num_kicks_right value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KickerInterface::maxlenof_num_kicks_right() const
+{
+  return 1;
+}
+
 /** Set num_kicks_right value.
  * 
       Number of Right-Kicks
@@ -146,6 +176,16 @@ KickerInterface::guide_ball_side()
   return data->guide_ball_side;
 }
 
+/** Get maximum length of guide_ball_side value.
+ * @return length of guide_ball_side value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KickerInterface::maxlenof_guide_ball_side() const
+{
+  return 1;
+}
+
 /** Set guide_ball_side value.
  * Side where the ball
       guidance arm is currently erected.
@@ -167,6 +207,16 @@ unsigned int
 KickerInterface::current_intensity()
 {
   return data->current_intensity;
+}
+
+/** Get maximum length of current_intensity value.
+ * @return length of current_intensity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KickerInterface::maxlenof_current_intensity() const
+{
+  return 1;
 }
 
 /** Set current_intensity value.
@@ -212,7 +262,7 @@ KickerInterface::create_message(const char *type) const
  * @param ini_right initial value for right
  * @param ini_intensity initial value for intensity
  */
-KickerInterface::KickMessage::KickMessage(bool ini_left, bool ini_center, bool ini_right, unsigned int ini_intensity) : Message("KickMessage")
+KickerInterface::KickMessage::KickMessage(const bool ini_left, const bool ini_center, const bool ini_right, const unsigned int ini_intensity) : Message("KickMessage")
 {
   data_size = sizeof(KickMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -249,6 +299,16 @@ KickerInterface::KickMessage::is_left()
   return data->left;
 }
 
+/** Get maximum length of left value.
+ * @return length of left value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KickerInterface::KickMessage::maxlenof_left() const
+{
+  return 1;
+}
+
 /** Set left value.
  * True to kick with left kicker.
  * @param new_left new left value
@@ -267,6 +327,16 @@ bool
 KickerInterface::KickMessage::is_center()
 {
   return data->center;
+}
+
+/** Get maximum length of center value.
+ * @return length of center value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KickerInterface::KickMessage::maxlenof_center() const
+{
+  return 1;
 }
 
 /** Set center value.
@@ -289,6 +359,16 @@ KickerInterface::KickMessage::is_right()
   return data->right;
 }
 
+/** Get maximum length of right value.
+ * @return length of right value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KickerInterface::KickMessage::maxlenof_right() const
+{
+  return 1;
+}
+
 /** Set right value.
  * True to kick with right kicker.
  * @param new_right new right value
@@ -307,6 +387,16 @@ unsigned int
 KickerInterface::KickMessage::intensity()
 {
   return data->intensity;
+}
+
+/** Get maximum length of intensity value.
+ * @return length of intensity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KickerInterface::KickMessage::maxlenof_intensity() const
+{
+  return 1;
 }
 
 /** Set intensity value.
@@ -352,7 +442,7 @@ KickerInterface::ResetCounterMessage::~ResetCounterMessage()
 /** Constructor with initial values.
  * @param ini_guide_ball_side initial value for guide_ball_side
  */
-KickerInterface::GuideBallMessage::GuideBallMessage(GuideBallSideEnum ini_guide_ball_side) : Message("GuideBallMessage")
+KickerInterface::GuideBallMessage::GuideBallMessage(const GuideBallSideEnum ini_guide_ball_side) : Message("GuideBallMessage")
 {
   data_size = sizeof(GuideBallMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -384,6 +474,16 @@ KickerInterface::GuideBallSideEnum
 KickerInterface::GuideBallMessage::guide_ball_side()
 {
   return data->guide_ball_side;
+}
+
+/** Get maximum length of guide_ball_side value.
+ * @return length of guide_ball_side value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+KickerInterface::GuideBallMessage::maxlenof_guide_ball_side() const
+{
+  return 1;
 }
 
 /** Set guide_ball_side value.

@@ -91,19 +91,23 @@ class KickerInterface : public Interface
     KickMessage_data_t *data;
 
    public:
-    KickMessage(bool ini_left, bool ini_center, bool ini_right, unsigned int ini_intensity);
+    KickMessage(const bool ini_left, const bool ini_center, const bool ini_right, const unsigned int ini_intensity);
     KickMessage();
     ~KickMessage();
 
     /* Methods */
     bool is_left();
     void set_left(const bool new_left);
+    size_t maxlenof_left() const;
     bool is_center();
     void set_center(const bool new_center);
+    size_t maxlenof_center() const;
     bool is_right();
     void set_right(const bool new_right);
+    size_t maxlenof_right() const;
     unsigned int intensity();
     void set_intensity(const unsigned int new_intensity);
+    size_t maxlenof_intensity() const;
   };
 
   class ResetCounterMessage : public Message
@@ -133,13 +137,14 @@ class KickerInterface : public Interface
     GuideBallMessage_data_t *data;
 
    public:
-    GuideBallMessage(GuideBallSideEnum ini_guide_ball_side);
+    GuideBallMessage(const GuideBallSideEnum ini_guide_ball_side);
     GuideBallMessage();
     ~GuideBallMessage();
 
     /* Methods */
     GuideBallSideEnum guide_ball_side();
     void set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side);
+    size_t maxlenof_guide_ball_side() const;
   };
 
   virtual bool message_valid(const Message *message) const;
@@ -153,14 +158,19 @@ class KickerInterface : public Interface
   /* Methods */
   int num_kicks_left();
   void set_num_kicks_left(const int new_num_kicks_left);
+  size_t maxlenof_num_kicks_left() const;
   int num_kicks_center();
   void set_num_kicks_center(const int new_num_kicks_center);
+  size_t maxlenof_num_kicks_center() const;
   int num_kicks_right();
   void set_num_kicks_right(const int new_num_kicks_right);
+  size_t maxlenof_num_kicks_right() const;
   GuideBallSideEnum guide_ball_side();
   void set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side);
+  size_t maxlenof_guide_ball_side() const;
   unsigned int current_intensity();
   void set_current_intensity(const unsigned int new_current_intensity);
+  size_t maxlenof_current_intensity() const;
 
 };
 

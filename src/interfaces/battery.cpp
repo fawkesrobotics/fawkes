@@ -71,6 +71,16 @@ BatteryInterface::current()
   return data->current;
 }
 
+/** Get maximum length of current value.
+ * @return length of current value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+BatteryInterface::maxlenof_current() const
+{
+  return 1;
+}
+
 /** Set current value.
  * Battery Current [mA]
  * @param new_current new current value
@@ -91,6 +101,16 @@ BatteryInterface::voltage()
   return data->voltage;
 }
 
+/** Get maximum length of voltage value.
+ * @return length of voltage value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+BatteryInterface::maxlenof_voltage() const
+{
+  return 1;
+}
+
 /** Set voltage value.
  * Battery Voltage [mV]
  * @param new_voltage new voltage value
@@ -109,6 +129,16 @@ unsigned int
 BatteryInterface::temperature()
 {
   return data->temperature;
+}
+
+/** Get maximum length of temperature value.
+ * @return length of temperature value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+BatteryInterface::maxlenof_temperature() const
+{
+  return 1;
 }
 
 /** Set temperature value.

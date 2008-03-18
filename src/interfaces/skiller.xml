@@ -12,13 +12,36 @@
       Currently executed skill string, at least the first 1023 bytes of it.
       Must be properly null-terminated.
     </field>
+    <field type="unsigned int" name="exclusive_controller">
+      Instance serial of the exclusive controller of the skiller. If this does not
+      carry your instance serial your exec messages will be ignored. Aquire control with
+      the AquireControlMessage. Make sure you release control before exiting.
+    </field>
+    <field type="bool" name="final">
+      True if the execution of the current skill_string is final. False otherwise.
+    </field>
   </data>
-  <message name="CallSkill">
+  <message name="ExecSkill">
     <comment>Sets the skill string and orders execution of this skill string.</comment>
+    <ref>skill_string</ref>
+  </message>
+  <message name="ExecSkillContinuous">
+    <comment>Executes the given skill exactly continuously until a new skill is set
+      or a StopExec message is received.</comment>
     <ref>skill_string</ref>
   </message>
   <message name="RestartInterpreter">
     <comment>Restart the Lua interpreter.</comment>
+  </message>
+  <message name="StopExec">
+    <comment>Stops the execution of a continuous skill.</comment>
+  </message>
+  <message name="AcquireControl">
+    <comment>Aquires exclusive control over the skiller. The used ID is the
+      instance serial of the interface where this message was enqueued.</comment>
+  </message>
+  <message name="ReleaseControl">
+    <comment>Releases previously aquired exclusive control.</comment>
   </message>
 </interface>
 

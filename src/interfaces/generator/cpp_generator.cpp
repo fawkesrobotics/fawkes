@@ -430,7 +430,7 @@ CppInterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* indent 
 
     i = fields.begin();
     while (i != fields.end()) {
-      fprintf(f, "%s ini_%s",
+      fprintf(f, "const %s ini_%s",
 	      (*i).getAccessType().c_str(), (*i).getName().c_str());
       ++i;
       if ( i != fields.end() ) {
@@ -545,7 +545,7 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 
     i = fields.begin();
     while (i != fields.end()) {
-      fprintf(f, "%s ini_%s",
+      fprintf(f, "const %s ini_%s",
 	      (*i).getAccessType().c_str(), (*i).getName().c_str());
       ++i;
       if ( i != fields.end() ) {
@@ -631,6 +631,20 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	    (*i).getName().c_str() );
 
     fprintf(f,
+	    "/** Get maximum length of %s value.\n"
+	    " * @return length of %s value, can be length of the array or number of \n"
+	    " * maximum number of characters for a string\n"
+	    " */\n"
+	    "size_t\n"
+	    "%s%s::maxlenof_%s() const\n"
+	    "{\n"
+	    "  return %s;\n"
+	    "}\n\n",
+	    i->getName().c_str(), i->getName().c_str(), inclusion_prefix.c_str(),
+	    classname.c_str(), i->getName().c_str(),
+	    i->getLengthValue() > 0 ? i->getLength().c_str() : "1" );
+
+    fprintf(f,
 	    "/** Set %s value.\n"
 	    " * %s\n"
 	    " * @param new_%s new %s value\n"
@@ -675,12 +689,14 @@ CppInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ i
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
     fprintf(f,
 	    "%s%s %s%s();\n"
-	    "%svoid set_%s(const %s new_%s);\n",
+	    "%svoid set_%s(const %s new_%s);\n"
+	    "%ssize_t maxlenof_%s() const;\n",
 	    is.c_str(), (*i).getAccessType().c_str(),
 	    ( ((*i).getType() == "bool" ) ? "is_" : ""),
 	    (*i).getName().c_str(),
 	    is.c_str(), (*i).getName().c_str(),
-	    (*i).getAccessType().c_str(), (*i).getName().c_str()
+	    i->getAccessType().c_str(), i->getName().c_str(),
+	    is.c_str(), i->getName().c_str()
 	    );
   }
 }

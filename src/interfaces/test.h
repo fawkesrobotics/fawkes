@@ -75,13 +75,14 @@ class TestInterface : public Interface
     SetTestIntMessage_data_t *data;
 
    public:
-    SetTestIntMessage(int ini_test_int);
+    SetTestIntMessage(const int ini_test_int);
     SetTestIntMessage();
     ~SetTestIntMessage();
 
     /* Methods */
     int test_int();
     void set_test_int(const int new_test_int);
+    size_t maxlenof_test_int() const;
   };
 
   class SetTestStringMessage : public Message
@@ -95,13 +96,14 @@ class TestInterface : public Interface
     SetTestStringMessage_data_t *data;
 
    public:
-    SetTestStringMessage(char * ini_test_string);
+    SetTestStringMessage(const char * ini_test_string);
     SetTestStringMessage();
     ~SetTestStringMessage();
 
     /* Methods */
     char * test_string();
     void set_test_string(const char * new_test_string);
+    size_t maxlenof_test_string() const;
   };
 
   class CalculateMessage : public Message
@@ -116,15 +118,17 @@ class TestInterface : public Interface
     CalculateMessage_data_t *data;
 
    public:
-    CalculateMessage(int ini_summand, int ini_addend);
+    CalculateMessage(const int ini_summand, const int ini_addend);
     CalculateMessage();
     ~CalculateMessage();
 
     /* Methods */
     int summand();
     void set_summand(const int new_summand);
+    size_t maxlenof_summand() const;
     int addend();
     void set_addend(const int new_addend);
+    size_t maxlenof_addend() const;
   };
 
   virtual bool message_valid(const Message *message) const;
@@ -138,20 +142,28 @@ class TestInterface : public Interface
   /* Methods */
   bool is_test_bool();
   void set_test_bool(const bool new_test_bool);
+  size_t maxlenof_test_bool() const;
   int test_int();
   void set_test_int(const int new_test_int);
+  size_t maxlenof_test_int() const;
   char _flags();
   void set__flags(const char new__flags);
+  size_t maxlenof__flags() const;
   char * test_string();
   void set_test_string(const char * new_test_string);
+  size_t maxlenof_test_string() const;
   int result();
   void set_result(const int new_result);
+  size_t maxlenof_result() const;
   unsigned int test_uint();
   void set_test_uint(const unsigned int new_test_uint);
+  size_t maxlenof_test_uint() const;
   unsigned long int test_ulint();
   void set_test_ulint(const unsigned long int new_test_ulint);
+  size_t maxlenof_test_ulint() const;
   long int test_lint();
   void set_test_lint(const long int new_test_lint);
+  size_t maxlenof_test_lint() const;
 
 };
 

@@ -18,18 +18,21 @@ class MotorInterface : public Interface
 
     unsigned int motor_state();
     void set_motor_state(const unsigned int new_motor_state);
+    size_t maxlenof_motor_state() const;
   };
 
   class AcquireControlMessage : public Message
   {
-    AcquireControlMessage(unsigned long int ini_thread_id, char * ini_thread_name);
+    AcquireControlMessage(unsigned int ini_controller, char * ini_controller_thread_name);
     AcquireControlMessage();
     ~AcquireControlMessage();
 
-    unsigned long int thread_id();
-    void set_thread_id(const unsigned long int new_thread_id);
-    char * thread_name();
-    void set_thread_name(const char * new_thread_name);
+    unsigned int controller();
+    void set_controller(const unsigned int new_controller);
+    size_t maxlenof_controller() const;
+    char * controller_thread_name();
+    void set_controller_thread_name(const char * new_controller_thread_name);
+    size_t maxlenof_controller_thread_name() const;
   };
 
   class ResetOdometryMessage : public Message
@@ -47,10 +50,13 @@ class MotorInterface : public Interface
 
     float front_right();
     void set_front_right(const float new_front_right);
+    size_t maxlenof_front_right() const;
     float front_left();
     void set_front_left(const float new_front_left);
+    size_t maxlenof_front_left() const;
     float rear();
     void set_rear(const float new_rear);
+    size_t maxlenof_rear() const;
   };
 
   class TransMessage : public Message
@@ -61,8 +67,10 @@ class MotorInterface : public Interface
 
     float vx();
     void set_vx(const float new_vx);
+    size_t maxlenof_vx() const;
     float vy();
     void set_vy(const float new_vy);
+    size_t maxlenof_vy() const;
   };
 
   class RotMessage : public Message
@@ -73,6 +81,7 @@ class MotorInterface : public Interface
 
     float omega();
     void set_omega(const float new_omega);
+    size_t maxlenof_omega() const;
   };
 
   class TransRotMessage : public Message
@@ -83,10 +92,13 @@ class MotorInterface : public Interface
 
     float vx();
     void set_vx(const float new_vx);
+    size_t maxlenof_vx() const;
     float vy();
     void set_vy(const float new_vy);
+    size_t maxlenof_vy() const;
     float omega();
     void set_omega(const float new_omega);
+    size_t maxlenof_omega() const;
   };
 
   class OrbitMessage : public Message
@@ -97,10 +109,13 @@ class MotorInterface : public Interface
 
     float px();
     void set_px(const float new_px);
+    size_t maxlenof_px() const;
     float py();
     void set_py(const float new_py);
+    size_t maxlenof_py() const;
     float omega();
     void set_omega(const float new_omega);
+    size_t maxlenof_omega() const;
   };
 
   class LinTransRotMessage : public Message
@@ -111,39 +126,56 @@ class MotorInterface : public Interface
 
     float vx();
     void set_vx(const float new_vx);
+    size_t maxlenof_vx() const;
     float vy();
     void set_vy(const float new_vy);
+    size_t maxlenof_vy() const;
     float omega();
     void set_omega(const float new_omega);
+    size_t maxlenof_omega() const;
   };
 
   unsigned int motor_state();
   void set_motor_state(const unsigned int new_motor_state);
+  size_t maxlenof_motor_state() const;
   unsigned int drive_mode();
   void set_drive_mode(const unsigned int new_drive_mode);
+  size_t maxlenof_drive_mode() const;
   int right_rpm();
   void set_right_rpm(const int new_right_rpm);
+  size_t maxlenof_right_rpm() const;
   int rear_rpm();
   void set_rear_rpm(const int new_rear_rpm);
+  size_t maxlenof_rear_rpm() const;
   int left_rpm();
   void set_left_rpm(const int new_left_rpm);
+  size_t maxlenof_left_rpm() const;
   float odometry_path_length();
   void set_odometry_path_length(const float new_odometry_path_length);
+  size_t maxlenof_odometry_path_length() const;
   float odometry_position_x();
   void set_odometry_position_x(const float new_odometry_position_x);
+  size_t maxlenof_odometry_position_x() const;
   float odometry_position_y();
   void set_odometry_position_y(const float new_odometry_position_y);
+  size_t maxlenof_odometry_position_y() const;
   float odometry_orientation();
   void set_odometry_orientation(const float new_odometry_orientation);
+  size_t maxlenof_odometry_orientation() const;
   float vx();
   void set_vx(const float new_vx);
+  size_t maxlenof_vx() const;
   float vy();
   void set_vy(const float new_vy);
+  size_t maxlenof_vy() const;
   float omega();
   void set_omega(const float new_omega);
-  unsigned long int controller_thread_id();
-  void set_controller_thread_id(const unsigned long int new_controller_thread_id);
+  size_t maxlenof_omega() const;
+  unsigned int controller();
+  void set_controller(const unsigned int new_controller);
+  size_t maxlenof_controller() const;
   char * controller_thread_name();
   void set_controller_thread_name(const char * new_controller_thread_name);
+  size_t maxlenof_controller_thread_name() const;
 
 };

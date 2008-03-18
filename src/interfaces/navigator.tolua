@@ -10,10 +10,13 @@ class NavigatorInterface : public Interface
 
     float x();
     void set_x(const float new_x);
+    size_t maxlenof_x() const;
     float y();
     void set_y(const float new_y);
+    size_t maxlenof_y() const;
     float orientation();
     void set_orientation(const float new_orientation);
+    size_t maxlenof_orientation() const;
   };
 
   class MaxVelocityMessage : public Message
@@ -24,6 +27,7 @@ class NavigatorInterface : public Interface
 
     float velocity();
     void set_velocity(const float new_velocity);
+    size_t maxlenof_velocity() const;
   };
 
   class ObstacleMessage : public Message
@@ -34,13 +38,17 @@ class NavigatorInterface : public Interface
 
     float x();
     void set_x(const float new_x);
+    size_t maxlenof_x() const;
     float y();
     void set_y(const float new_y);
+    size_t maxlenof_y() const;
     float width();
     void set_width(const float new_width);
+    size_t maxlenof_width() const;
   };
 
   int foo();
   void set_foo(const int new_foo);
+  size_t maxlenof_foo() const;
 
 };

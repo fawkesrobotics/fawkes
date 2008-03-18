@@ -42,9 +42,17 @@ class SkillerInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
+    unsigned int exclusive_controller; /**< 
+      Instance serial of the exclusive controller of the skiller. If this does not
+      carry your instance serial your exec messages will be ignored. Aquire control with
+      the AquireControlMessage. Make sure you release control before exiting.
+     */
     char skill_string[1024]; /**< 
       Currently executed skill string, at least the first 1023 bytes of it.
       Must be properly null-terminated.
+     */
+    bool final; /**< 
+      True if the execution of the current skill_string is final. False otherwise.
      */
   } SkillerInterface_data_t;
 
@@ -52,7 +60,7 @@ class SkillerInterface : public Interface
 
  public:
   /* messages */
-  class CallSkillMessage : public Message
+  class ExecSkillMessage : public Message
   {
    private:
     /** Internal data storage, do NOT modify! */
@@ -61,18 +69,43 @@ class SkillerInterface : public Interface
       Currently executed skill string, at least the first 1023 bytes of it.
       Must be properly null-terminated.
      */
-    } CallSkillMessage_data_t;
+    } ExecSkillMessage_data_t;
 
-    CallSkillMessage_data_t *data;
+    ExecSkillMessage_data_t *data;
 
    public:
-    CallSkillMessage(char * ini_skill_string);
-    CallSkillMessage();
-    ~CallSkillMessage();
+    ExecSkillMessage(const char * ini_skill_string);
+    ExecSkillMessage();
+    ~ExecSkillMessage();
 
     /* Methods */
     char * skill_string();
     void set_skill_string(const char * new_skill_string);
+    size_t maxlenof_skill_string() const;
+  };
+
+  class ExecSkillContinuousMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      char skill_string[1024]; /**< 
+      Currently executed skill string, at least the first 1023 bytes of it.
+      Must be properly null-terminated.
+     */
+    } ExecSkillContinuousMessage_data_t;
+
+    ExecSkillContinuousMessage_data_t *data;
+
+   public:
+    ExecSkillContinuousMessage(const char * ini_skill_string);
+    ExecSkillContinuousMessage();
+    ~ExecSkillContinuousMessage();
+
+    /* Methods */
+    char * skill_string();
+    void set_skill_string(const char * new_skill_string);
+    size_t maxlenof_skill_string() const;
   };
 
   class RestartInterpreterMessage : public Message
@@ -91,6 +124,54 @@ class SkillerInterface : public Interface
     /* Methods */
   };
 
+  class StopExecMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+    } StopExecMessage_data_t;
+
+    StopExecMessage_data_t *data;
+
+   public:
+    StopExecMessage();
+    ~StopExecMessage();
+
+    /* Methods */
+  };
+
+  class AcquireControlMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+    } AcquireControlMessage_data_t;
+
+    AcquireControlMessage_data_t *data;
+
+   public:
+    AcquireControlMessage();
+    ~AcquireControlMessage();
+
+    /* Methods */
+  };
+
+  class ReleaseControlMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+    } ReleaseControlMessage_data_t;
+
+    ReleaseControlMessage_data_t *data;
+
+   public:
+    ReleaseControlMessage();
+    ~ReleaseControlMessage();
+
+    /* Methods */
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   SkillerInterface();
@@ -102,6 +183,13 @@ class SkillerInterface : public Interface
   /* Methods */
   char * skill_string();
   void set_skill_string(const char * new_skill_string);
+  size_t maxlenof_skill_string() const;
+  unsigned int exclusive_controller();
+  void set_exclusive_controller(const unsigned int new_exclusive_controller);
+  size_t maxlenof_exclusive_controller() const;
+  bool is_final();
+  void set_final(const bool new_final);
+  size_t maxlenof_final() const;
 
 };
 

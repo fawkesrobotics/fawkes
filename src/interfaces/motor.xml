@@ -66,12 +66,14 @@
     <field type="float" name="omega">
       Rotation speed of the robot in rad/s.
     </field>
-    <field type="unsigned long int" name="controller_thread_id">
-     The ID of the controlling thread.
-     Only from this thread command messages are accepted.
+    <field type="unsigned int" name="controller">
+     The ID of the controller. The controller ID is the instance serial of the sending
+     interface. Only from this interface instance command messages are accepted.
     </field>
     <field type="char" length="64" name="controller_thread_name">
-     The name of the controlling thread.
+     The name of the controlling thread, for easier debugging. This is informative only
+     and actually two threads may share an interface instance (although this should be
+     avoided since the interface locking has to be reproduced for these threads then).
   </field>
   </data>
   <message name="SetMotorState">
@@ -83,15 +85,8 @@
   <message name="AcquireControl">
     <comment>This allows any thread to aquire the control over the motor thread.
       Use with extreme care!</comment>
-    <field type="unsigned long int" name="thread_id">
-      The thread ID of the thread which is allowed to control the motors.
-      Set to zero to use the data of the current thread (the message is zeroed at
-      creation automatically, so if you do not set anything the sending thread
-      aquires the control.
-    </field>
-    <field type="char" length="64" name="thread_name">
-      The thread name of the aquiring thread.
-    </field>
+    <ref>controller</ref>
+    <ref>controller_thread_name</ref>
   </message>
   <message name="ResetOdometry">
     <comment>Resets the the odometry. It sets OdometryDistance, OdometryPositionX, 

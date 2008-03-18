@@ -2,14 +2,26 @@ $#include <interfaces/skiller.h>
 class SkillerInterface : public Interface
 {
 
-  class CallSkillMessage : public Message
+  class ExecSkillMessage : public Message
   {
-    CallSkillMessage(char * ini_skill_string);
-    CallSkillMessage();
-    ~CallSkillMessage();
+    ExecSkillMessage(char * ini_skill_string);
+    ExecSkillMessage();
+    ~ExecSkillMessage();
 
     char * skill_string();
     void set_skill_string(const char * new_skill_string);
+    size_t maxlenof_skill_string() const;
+  };
+
+  class ExecSkillContinuousMessage : public Message
+  {
+    ExecSkillContinuousMessage(char * ini_skill_string);
+    ExecSkillContinuousMessage();
+    ~ExecSkillContinuousMessage();
+
+    char * skill_string();
+    void set_skill_string(const char * new_skill_string);
+    size_t maxlenof_skill_string() const;
   };
 
   class RestartInterpreterMessage : public Message
@@ -19,7 +31,35 @@ class SkillerInterface : public Interface
 
   };
 
+  class StopExecMessage : public Message
+  {
+    StopExecMessage();
+    ~StopExecMessage();
+
+  };
+
+  class AcquireControlMessage : public Message
+  {
+    AcquireControlMessage();
+    ~AcquireControlMessage();
+
+  };
+
+  class ReleaseControlMessage : public Message
+  {
+    ReleaseControlMessage();
+    ~ReleaseControlMessage();
+
+  };
+
   char * skill_string();
   void set_skill_string(const char * new_skill_string);
+  size_t maxlenof_skill_string() const;
+  unsigned int exclusive_controller();
+  void set_exclusive_controller(const unsigned int new_exclusive_controller);
+  size_t maxlenof_exclusive_controller() const;
+  bool is_final();
+  void set_final(const bool new_final);
+  size_t maxlenof_final() const;
 
 };

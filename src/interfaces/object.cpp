@@ -104,6 +104,16 @@ ObjectPositionInterface::object_type()
   return data->object_type;
 }
 
+/** Get maximum length of object_type value.
+ * @return length of object_type value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_object_type() const
+{
+  return 1;
+}
+
 /** Set object_type value.
  * 
       Object type, use constants to define
@@ -126,6 +136,16 @@ char
 ObjectPositionInterface::supports_relative()
 {
   return data->supports_relative;
+}
+
+/** Get maximum length of supports_relative value.
+ * @return length of supports_relative value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_supports_relative() const
+{
+  return 1;
 }
 
 /** Set supports_relative value.
@@ -152,6 +172,16 @@ ObjectPositionInterface::supports_global()
   return data->supports_global;
 }
 
+/** Get maximum length of supports_global value.
+ * @return length of supports_global value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_supports_global() const
+{
+  return 1;
+}
+
 /** Set supports_global value.
  * 
       1 if the current interface in general has support for global (world) position data.
@@ -174,6 +204,16 @@ char
 ObjectPositionInterface::has_relative()
 {
   return data->has_relative;
+}
+
+/** Get maximum length of has_relative value.
+ * @return length of has_relative value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_has_relative() const
+{
+  return 1;
 }
 
 /** Set has_relative value.
@@ -200,6 +240,16 @@ ObjectPositionInterface::has_global()
   return data->has_global;
 }
 
+/** Get maximum length of has_global value.
+ * @return length of has_global value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_has_global() const
+{
+  return 1;
+}
+
 /** Set has_global value.
  * 
       1 if the current interface at the moment has valid global (world) position data.
@@ -222,6 +272,16 @@ bool
 ObjectPositionInterface::is_visible()
 {
   return data->visible;
+}
+
+/** Get maximum length of visible value.
+ * @return length of visible value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_visible() const
+{
+  return 1;
 }
 
 /** Set visible value.
@@ -247,6 +307,16 @@ float
 ObjectPositionInterface::yaw()
 {
   return data->yaw;
+}
+
+/** Get maximum length of yaw value.
+ * @return length of yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_yaw() const
+{
+  return 1;
 }
 
 /** Set yaw value.
@@ -276,6 +346,16 @@ ObjectPositionInterface::pitch()
   return data->pitch;
 }
 
+/** Get maximum length of pitch value.
+ * @return length of pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_pitch() const
+{
+  return 1;
+}
+
 /** Set pitch value.
  * 
       Angle between the robot's center position on the ground plane and the middle point
@@ -303,6 +383,16 @@ ObjectPositionInterface::distance()
   return data->distance;
 }
 
+/** Get maximum length of distance value.
+ * @return length of distance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_distance() const
+{
+  return 1;
+}
+
 /** Set distance value.
  * 
       Distance from the robot to the object on the ground plane. The distance is given
@@ -328,6 +418,16 @@ float *
 ObjectPositionInterface::dyp_covariance()
 {
   return data->dyp_covariance;
+}
+
+/** Get maximum length of dyp_covariance value.
+ * @return length of dyp_covariance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_dyp_covariance() const
+{
+  return 9;
 }
 
 /** Set dyp_covariance value.
@@ -358,6 +458,16 @@ ObjectPositionInterface::world_x()
   return data->world_x;
 }
 
+/** Get maximum length of world_x value.
+ * @return length of world_x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_world_x() const
+{
+  return 1;
+}
+
 /** Set world_x value.
  * 
       This is the X coordinate in the cartesian right-handed world coordinate system.
@@ -384,6 +494,16 @@ float
 ObjectPositionInterface::world_y()
 {
   return data->world_y;
+}
+
+/** Get maximum length of world_y value.
+ * @return length of world_y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_world_y() const
+{
+  return 1;
 }
 
 /** Set world_y value.
@@ -414,6 +534,16 @@ ObjectPositionInterface::world_z()
   return data->world_z;
 }
 
+/** Get maximum length of world_z value.
+ * @return length of world_z value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_world_z() const
+{
+  return 1;
+}
+
 /** Set world_z value.
  * 
       This is the Z coordinate in the cartesian right-handed world coordinate system.
@@ -440,6 +570,16 @@ ObjectPositionInterface::relative_x()
   return data->relative_x;
 }
 
+/** Get maximum length of relative_x value.
+ * @return length of relative_x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_relative_x() const
+{
+  return 1;
+}
+
 /** Set relative_x value.
  * 
       This is the X coordinate in the cartesian right-handed robot coordinate system.
@@ -464,6 +604,16 @@ ObjectPositionInterface::relative_y()
   return data->relative_y;
 }
 
+/** Get maximum length of relative_y value.
+ * @return length of relative_y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_relative_y() const
+{
+  return 1;
+}
+
 /** Set relative_y value.
  * 
       This is the Y coordinate in the cartesian right-handed robot coordinate system.
@@ -486,6 +636,16 @@ float
 ObjectPositionInterface::relative_z()
 {
   return data->relative_z;
+}
+
+/** Get maximum length of relative_z value.
+ * @return length of relative_z value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_relative_z() const
+{
+  return 1;
 }
 
 /** Set relative_z value.
@@ -514,6 +674,16 @@ ObjectPositionInterface::xyz_covariance()
   return data->xyz_covariance;
 }
 
+/** Get maximum length of xyz_covariance value.
+ * @return length of xyz_covariance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_xyz_covariance() const
+{
+  return 9;
+}
+
 /** Set xyz_covariance value.
  * 
       Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
@@ -540,6 +710,16 @@ ObjectPositionInterface::extent()
   return data->extent;
 }
 
+/** Get maximum length of extent value.
+ * @return length of extent value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_extent() const
+{
+  return 1;
+}
+
 /** Set extent value.
  * 
       Extent of the seen object.
@@ -562,6 +742,16 @@ float
 ObjectPositionInterface::yaw_velocity()
 {
   return data->yaw_velocity;
+}
+
+/** Get maximum length of yaw_velocity value.
+ * @return length of yaw_velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_yaw_velocity() const
+{
+  return 1;
 }
 
 /** Set yaw_velocity value.
@@ -588,6 +778,16 @@ ObjectPositionInterface::pitch_velocity()
   return data->pitch_velocity;
 }
 
+/** Get maximum length of pitch_velocity value.
+ * @return length of pitch_velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_pitch_velocity() const
+{
+  return 1;
+}
+
 /** Set pitch_velocity value.
  * 
       Gives the velocity of the object for pitch in radians per second.
@@ -610,6 +810,16 @@ float
 ObjectPositionInterface::distance_velocity()
 {
   return data->distance_velocity;
+}
+
+/** Get maximum length of distance_velocity value.
+ * @return length of distance_velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_distance_velocity() const
+{
+  return 1;
 }
 
 /** Set distance_velocity value.
@@ -638,6 +848,16 @@ ObjectPositionInterface::dyp_velocity_covariance()
   return data->dyp_velocity_covariance;
 }
 
+/** Get maximum length of dyp_velocity_covariance value.
+ * @return length of dyp_velocity_covariance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_dyp_velocity_covariance() const
+{
+  return 9;
+}
+
 /** Set dyp_velocity_covariance value.
  * 
       Covariance of Distance/Yaw/Pitch velocityvalues. This is a 3x3 matrix ordered line by
@@ -664,6 +884,16 @@ ObjectPositionInterface::world_x_velocity()
   return data->world_x_velocity;
 }
 
+/** Get maximum length of world_x_velocity value.
+ * @return length of world_x_velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_world_x_velocity() const
+{
+  return 1;
+}
+
 /** Set world_x_velocity value.
  * 
       Velocity of object in the world coordinate system in X-direction in meter per second.
@@ -686,6 +916,16 @@ float
 ObjectPositionInterface::world_y_velocity()
 {
   return data->world_y_velocity;
+}
+
+/** Get maximum length of world_y_velocity value.
+ * @return length of world_y_velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_world_y_velocity() const
+{
+  return 1;
 }
 
 /** Set world_y_velocity value.
@@ -712,6 +952,16 @@ ObjectPositionInterface::world_z_velocity()
   return data->world_z_velocity;
 }
 
+/** Get maximum length of world_z_velocity value.
+ * @return length of world_z_velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_world_z_velocity() const
+{
+  return 1;
+}
+
 /** Set world_z_velocity value.
  * 
       Velocity of object in the world coordinate system in Z-direction in meter per second.
@@ -736,6 +986,16 @@ float *
 ObjectPositionInterface::xyz_velocity_covariance()
 {
   return data->xyz_velocity_covariance;
+}
+
+/** Get maximum length of xyz_velocity_covariance value.
+ * @return length of xyz_velocity_covariance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_xyz_velocity_covariance() const
+{
+  return 9;
 }
 
 /** Set xyz_velocity_covariance value.
