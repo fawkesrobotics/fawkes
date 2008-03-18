@@ -81,6 +81,8 @@ class SkillerExecutionThread
   std::string __errmsg;
   Mutex *__lua_mutex;
 
+  unsigned int __excl_ctrl;
+
 #ifdef HAVE_INOTIFY
   int     __inotify_fd;
   char   *__inotify_buf;

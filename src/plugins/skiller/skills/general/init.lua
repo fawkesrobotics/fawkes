@@ -28,7 +28,11 @@
 package.path  = package.path .. ";" .. SKILLDIR .. "/?.lua";
 package.cpath = package.cpath .. ";" .. LIBDIR .. "/lua/?.so";
 
+-- Include C/C++ compat packages
 require("utils");
 require("config");
 require("interface");
 require("interfaces");
+
+-- Base package extensions
+require("general.stringext");

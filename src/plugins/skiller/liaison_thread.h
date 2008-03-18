@@ -40,6 +40,7 @@
 
 class Barrier;
 class ObjectPositionInterface;
+class SkillerInterface;
 
 class SkillerLiaisonThread
 : public Thread,
@@ -68,9 +69,10 @@ class SkillerLiaisonThread
  private:
   Barrier *__liaison_exec_barrier;
 
-  ObjectPositionInterface *wm_ball_interface_w;
-  ObjectPositionInterface *wm_ball_interface;
-  ObjectPositionInterface *wm_pose_interface;
+  SkillerInterface *skiller;
+  ObjectPositionInterface *wm_ball_w;
+  ObjectPositionInterface *wm_ball;
+  ObjectPositionInterface *wm_pose;
 
   LockList<ObjectPositionInterface *>  wm_obstacles;
   LockList<ObjectPositionInterface *>::iterator  wm_obs_it;

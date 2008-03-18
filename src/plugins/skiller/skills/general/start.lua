@@ -31,7 +31,6 @@ print(package.path);
 print(package.cpath);
 --]]
 
-
 --[[ lists whole config
 v = config:iterator();
 while ( v:next() ) do
@@ -48,6 +47,9 @@ while ( v:next() ) do
    end
 end
 --]]
+
+require("general.utils");
+require("general.skillenv");
 
 require("midsize")
 

@@ -35,6 +35,7 @@
 #include <utils/logging/component.h>
 
 #include <interfaces/object.h>
+#include <interfaces/skiller.h>
 
 extern "C" {
 #include <lauxlib.h>
@@ -161,8 +162,8 @@ void
 SkillerExecutionThread::start_lua()
 {
   // Get interfaces from liaison thread
-  tolua_pushusertype(__L, __slt->wm_ball_interface, __slt->wm_ball_interface->type());
-  lua_setglobal(__L, "wm_ball_interface");
+  tolua_pushusertype(__L, __slt->wm_ball, __slt->wm_ball->type());
+  lua_setglobal(__L, "wm_ball");
 
 
   // Load start code
@@ -408,6 +409,8 @@ SkillerExecutionThread::proc_inotify()
 void
 SkillerExecutionThread::init()
 {
+  __excl_ctrl = 0;
+
   init_inotify();
 
   __clog = new ComponentLogger(logger, "SkillerLua");
@@ -456,8 +459,96 @@ SkillerExecutionThread::loop()
 
   __liaison_exec_barrier->wait();
 
-  __lua_mutex->lock();
-  //luaL_dostring(__L, "print(\"Ball X: \" .. wm_ball_interface:world_x());");
-  // lua_pcall(__L, 0, 0, 0);
-  __lua_mutex->unlock();
+  // Current skill string
+  std::string curss = "";
+
+  if ( ! __slt->skiller->msgq_empty() ) {
+    if ( __slt->skiller->msgq_first_is<SkillerInterface::AcquireControlMessage>() ) {
+      Message *m = __slt->skiller->msgq_first();
+      if ( __excl_ctrl == 0 ) {
+	logger->log_debug("SkillerExecutionThread", "%s is new exclusive controller",
+			  m->sender_thread_name());
+	__excl_ctrl = m->sender_id();
+      } else {
+	logger->log_warn("SkillerExecutionThread", "%s tried to acquire exclusive control, "
+			 "but another controller exists already", m->sender_thread_name());
+      }
+
+      __slt->skiller->msgq_pop();
+    } else if ( __slt->skiller->msgq_first_is<SkillerInterface::ReleaseControlMessage>() ) {
+      Message *m = __slt->skiller->msgq_first();
+      if ( __excl_ctrl == m->sender_id() ) {
+	logger->log_debug("SkillerExecutionThread", "%s releases exclusive control",
+			  m->sender_thread_name());
+	__excl_ctrl = 0;
+      } else {
+	logger->log_warn("SkillerExecutionThread", "%s tried to release exclusive control, "
+			 "it's not the controller", m->sender_thread_name());
+      }
+      __slt->skiller->msgq_pop();
+    } else if ( __slt->skiller->msgq_first_is<SkillerInterface::ExecSkillMessage>() ) {
+      SkillerInterface::ExecSkillMessage *m = __slt->skiller->msgq_first<SkillerInterface::ExecSkillMessage>();
+
+      if ( m->sender_id() == __excl_ctrl ) {
+	if ( curss != "" ) {
+	  logger->log_warn("SkillerExecutionThread", "More than one skill string enqueued, "
+			   "ignoring successive string (%s).", m->skill_string());
+	} else {	  
+	  logger->log_debug("SkillerExecutionThread", "%s wants me to execute %s",
+			    m->sender_thread_name(), m->skill_string());
+
+	  curss = m->skill_string();
+	}
+      } else {
+	logger->log_debug("SkillerExecutionThread", "%s tries to exec while not controller",
+			  m->sender_thread_name());
+      }
+
+      __slt->skiller->msgq_pop();
+    }
+  }
+
+  if ( curss != "" ) {
+    __lua_mutex->lock();
+    if ( (__err = luaL_loadstring(__L, curss.c_str())) != 0 ) {// sksf (skill string function)
+      __errmsg = lua_tostring(__L, -1);
+      lua_pop(__L, 1);
+      switch (__err) {
+      case LUA_ERRSYNTAX:
+	logger->log_error("SkillerExecutionThread", "Lua syntax error: %s", __errmsg.c_str());
+	break;
+
+      case LUA_ERRMEM:
+	logger->log_error("SkillerExecutionThread", "Lua ran out of memory");
+	break;
+
+      }
+    } else {
+      luaL_dostring(__L, "return general.skillenv.gensandbox()");  // sksf sandbox
+      lua_setfenv(__L, -2);                                      // sksf
+
+      if ( (__err = lua_pcall(__L, 0, 0, 0)) != 0 ) { // execute skill string
+	// There was an error while executing the initialization file
+	__errmsg = lua_tostring(__L, -1);
+	lua_pop(__L, 1);
+	switch (__err) {
+	case LUA_ERRRUN:
+	  logger->log_error("SkillerExecutionThread", "Lua runtime error: %s", __errmsg.c_str());
+	  break;
+
+	case LUA_ERRMEM:
+	  logger->log_error("SkillerExecutionThread", "Lua ran out of memory");
+	  break;
+
+	case LUA_ERRERR:
+	  logger->log_error("SkillerExecutionThread", "Lua runtime error and error function failed: %s", __errmsg.c_str());
+	  break;
+	}
+      } else {
+	
+
+      }
+    }
+    __lua_mutex->unlock();
+  }
 }

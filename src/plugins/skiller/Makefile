@@ -17,6 +17,8 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/lua.mk
 
+SUBDIRS = consoletool
+
 CFLAGS  += -DSKILLDIR=\"$(SKILLDIR)\" $(CFLAGS_LUA) $(if $(HAVE_INOTIFY),-DHAVE_INOTIFY)
 LDFLAGS += $(LDFLAGS_LUA)
 
