@@ -33,6 +33,7 @@
 #include <filters/roidraw.h>
 #include <fvwidgets/image_display.h>
 
+#include <cstdlib>
 #include <cstdio>
 
 int

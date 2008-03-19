@@ -39,7 +39,8 @@
 #include <netcomm/fawkes/client.h>
 
 #include <signal.h>
-#include <unistd.h>
+#include <cstdlib>
+#include <cstring>
 
 #include <iostream>
 #include <vector>

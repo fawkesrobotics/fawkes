@@ -37,6 +37,7 @@
 #include <utils/system/argparser.h>
 
 #include <netdb.h>
+#include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <iostream>

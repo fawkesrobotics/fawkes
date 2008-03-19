@@ -105,7 +105,7 @@ class QAAvahiBrowserMain : public SignalHandler, public ServiceBrowseHandler
 };
 
 int
-main(int argc, char *argv)
+main(int argc, char **argv)
 {
   try {
 

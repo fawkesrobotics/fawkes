@@ -35,6 +35,7 @@
 #include <utils/system/argparser.h>
 
 #include <cstdio>
+#include <cstdlib>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 

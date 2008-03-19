@@ -64,7 +64,7 @@ class QAAvahiPublisherMain : public SignalHandler
 };
 
 int
-main(int argc, char *argv)
+main(int argc, char **argv)
 {
   QAAvahiPublisherMain m;
   SignalManager::register_handler(SIGINT, &m);

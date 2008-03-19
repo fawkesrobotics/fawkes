@@ -35,7 +35,7 @@
 #include <core/exceptions/system.h>
 
 #include <signal.h>
-#include <unistd.h>
+#include <cstdlib>
 
 #include <iostream>
 #include <vector>

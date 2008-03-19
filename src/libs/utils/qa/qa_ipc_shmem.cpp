@@ -31,8 +31,8 @@
 #include <utils/ipc/shm.h>
 #include <utils/ipc/shm_exceptions.h>
 
-#include <string.h>
-#include <unistd.h>
+#include <cstring>
+#include <cstdlib>
 #include <signal.h>
 #include <iostream>
 

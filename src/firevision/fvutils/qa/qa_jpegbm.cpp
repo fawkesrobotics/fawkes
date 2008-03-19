@@ -34,6 +34,8 @@
 
 #include <iostream>
 
+#include <cstdlib>
+
 using namespace std;
 
 #define IMAGE_WIDTH   500

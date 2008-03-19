@@ -38,7 +38,8 @@
 #include <core/exceptions/system.h>
 
 #include <signal.h>
-#include <unistd.h>
+#include <cstdlib>
+#include <cstring>
 
 #include <iostream>
 #include <vector>

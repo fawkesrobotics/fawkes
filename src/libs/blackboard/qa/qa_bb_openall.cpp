@@ -38,7 +38,7 @@
 #include <utils/logging/liblogger.h>
 
 #include <signal.h>
-#include <unistd.h>
+#include <cstdlib>
 
 #include <iostream>
 #include <vector>

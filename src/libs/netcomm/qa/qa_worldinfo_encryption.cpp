@@ -30,7 +30,9 @@
 #include <netcomm/worldinfo/encrypt.h>
 #include <netcomm/worldinfo/decrypt.h>
 
+#include <cstdlib>
 #include <cstddef>
+#include <cstring>
 #include <iostream>
 
 using namespace std;

@@ -31,6 +31,7 @@
 #include <utils/system/signal.h>
 
 #include <cstdio>
+#include <cstdlib>
 
 /** Example Plugin network ping tool
  * Small class that waits for a reply of the example plugin after a short

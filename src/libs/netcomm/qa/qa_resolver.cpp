@@ -38,7 +38,7 @@
 #include <arpa/inet.h>
 #include <cstdio>
 #include <cstdlib>
-
+#include <cstring>
 
 class ResolverQAMain : public SignalHandler
 {
