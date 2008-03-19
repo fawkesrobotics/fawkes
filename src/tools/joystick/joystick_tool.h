@@ -46,10 +46,11 @@ class JoystickTool : public FawkesNetworkClientHandler
   static void signal_handler(int signal);
  private:
         
-  virtual void deregistered() throw();
-  virtual void inbound_received(FawkesNetworkMessage *m) throw();
-  virtual void connection_established() throw();
-  virtual void connection_died() throw();
+  virtual void deregistered(unsigned int id) throw();
+  virtual void inbound_received(FawkesNetworkMessage *m,
+				unsigned int id) throw();
+  virtual void connection_established(unsigned int id) throw();
+  virtual void connection_died(unsigned int id) throw();
   bool sending;
 
   FawkesNetworkClient *net_client;

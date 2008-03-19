@@ -848,15 +848,17 @@ NetworkConfiguration::erase_default(const char *path)
 
 /** We are no longer registered in Fawkes network client.
  * Ignored.
+ * @param id the id of the calling client
  */
 void
-NetworkConfiguration::deregistered() throw()
+NetworkConfiguration::deregistered(unsigned int id) throw()
 {
 }
 
 
 void
-NetworkConfiguration::inbound_received(FawkesNetworkMessage *m) throw()
+NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
+				       unsigned int id) throw()
 {
   if ( m->cid() == FAWKES_CID_CONFIGMANAGER ) {
 
@@ -1021,7 +1023,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m) throw()
 
 
 void
-NetworkConfiguration::connection_died() throw()
+NetworkConfiguration::connection_died(unsigned int id) throw()
 {
   __connected = false;
   __mirror_mode_before_connection_dead = __mirror_mode;
@@ -1030,7 +1032,7 @@ NetworkConfiguration::connection_died() throw()
 
 
 void
-NetworkConfiguration::connection_established() throw()
+NetworkConfiguration::connection_established(unsigned int id) throw()
 {
   __connected = true;
   set_mirror_mode(__mirror_mode_before_connection_dead);

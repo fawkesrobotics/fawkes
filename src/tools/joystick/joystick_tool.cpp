@@ -129,21 +129,21 @@ JoystickTool::~JoystickTool()
 
 /** The handler got deregistered. */
 void
-JoystickTool::deregistered() throw()
+JoystickTool::deregistered(unsigned int id) throw()
 {
   printf("Got deregistered\n");
   quit = true;
 }
 
 void
-JoystickTool::connection_established() throw()
+JoystickTool::connection_established(unsigned int id) throw()
 {
   printf("Connection established\n");
 }
 
 
 void
-JoystickTool::connection_died() throw()
+JoystickTool::connection_died(unsigned int id) throw()
 {
   printf("Connection died\n");
   quit = true;
@@ -155,7 +155,8 @@ JoystickTool::connection_died() throw()
  * @param m message
  */
 void
-JoystickTool::inbound_received(FawkesNetworkMessage *msg) throw()
+JoystickTool::inbound_received(FawkesNetworkMessage *msg,
+			       unsigned int id) throw()
 {
   //    std::cerr << "receive message of type %i" << msg->msgid() << std::endl;
   if(msg->msgid() == NAVIGATOR_MSGTYPE_CONTROL_SUBERR)

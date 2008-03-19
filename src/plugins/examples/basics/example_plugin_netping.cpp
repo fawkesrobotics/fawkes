@@ -45,8 +45,10 @@ class ExamplePluginClientNetworkReceiver : public FawkesNetworkClientHandler
     quit = false;
   }
 
-  /** The handler got deregistered. */
-  virtual void deregistered() throw()
+  /** The handler got deregistered.
+   * @param id the id of the calling client
+   */
+  virtual void deregistered(unsigned int id) throw()
   {
     printf("Got deregistered\n");
     quit = true;
@@ -54,8 +56,10 @@ class ExamplePluginClientNetworkReceiver : public FawkesNetworkClientHandler
 
   /** Inbound mesage received.
    * @param m message
+   * @param id the id of the calling thread
    */
-  virtual void inbound_received(FawkesNetworkMessage *m) throw()
+  virtual void inbound_received(FawkesNetworkMessage *m,
+				unsigned int id) throw()
   {
     if ( m->payload_size() == sizeof(unsigned int) ) {
       unsigned int *u = (unsigned int *)m->payload();
@@ -66,14 +70,14 @@ class ExamplePluginClientNetworkReceiver : public FawkesNetworkClientHandler
     quit = true;
   }
 
-  virtual void connection_died() throw()
+  virtual void connection_died(unsigned int id) throw()
   {
     printf("Connection died.\n");
     quit = true;
   }
 
 
-  virtual void connection_established() throw()
+  virtual void connection_established(unsigned int id) throw()
   {
     printf("Connection established\n");
   }

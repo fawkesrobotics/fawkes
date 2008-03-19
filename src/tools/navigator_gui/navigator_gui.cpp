@@ -462,13 +462,13 @@ void NavigatorGUI::connect()
 
 
 void
-NavigatorGUI::deregistered() throw()
+NavigatorGUI::deregistered(unsigned int id) throw()
 {
   printf("Got deregistered\n");
 }
 
 void
-NavigatorGUI::connection_established() throw()
+NavigatorGUI::connection_established(unsigned int id) throw()
 {
   printf("Connection established\n");
   connected = true;
@@ -476,7 +476,7 @@ NavigatorGUI::connection_established() throw()
 
 
 void
-NavigatorGUI::connection_died() throw()
+NavigatorGUI::connection_died(unsigned int id) throw()
 {
   printf("Connection died\n");
   //statusbar->pop(1);
@@ -560,7 +560,8 @@ NavigatorGUI::reset_gui()
  * @param m message
  */
 void
-NavigatorGUI::inbound_received(FawkesNetworkMessage *msg) throw()
+NavigatorGUI::inbound_received(FawkesNetworkMessage *msg,
+			       unsigned int id) throw()
 {
   if(msg->cid() == FAWKES_CID_NAVIGATOR_PLUGIN)
     {

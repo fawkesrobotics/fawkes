@@ -53,7 +53,9 @@ class FawkesNetworkClient
  friend class FawkesNetworkClientSendThread;
  friend class FawkesNetworkClientRecvThread;
  public:
-  FawkesNetworkClient(const char *hostname, unsigned short int port);
+ FawkesNetworkClient(const char *hostname, unsigned short int port);
+ FawkesNetworkClient(unsigned int id, const char *hostname, 
+		     unsigned short int port);
   ~FawkesNetworkClient();
 
   void connect();
@@ -69,6 +71,8 @@ class FawkesNetworkClient
 
   bool connected() const throw();
 
+  bool has_id() const;
+  unsigned int id() const;
  private:
   void recv();
   void notify_of_connection_established();
@@ -97,6 +101,8 @@ class FawkesNetworkClient
   bool recv_slave_alive;
   bool send_slave_alive;
   Mutex *slave_status_mutex;
+  bool _has_id;
+  unsigned int _id;
 };
 
 

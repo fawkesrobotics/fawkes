@@ -175,17 +175,18 @@ class SkillShellThread : public Thread, public FawkesNetworkClientHandler
   }
 
   
-  virtual void deregistered() throw()
+  virtual void deregistered(unsigned int id) throw()
   {
   }
 
 
-  virtual void inbound_received(FawkesNetworkMessage *m) throw()
+  virtual void inbound_received(FawkesNetworkMessage *m,
+				unsigned int id) throw()
   {
   }
 
 
-  virtual void connection_died() throw()
+  virtual void connection_died(unsigned int id) throw()
   {
     prompt = "-# ";
 
@@ -202,7 +203,7 @@ class SkillShellThread : public Thread, public FawkesNetworkClientHandler
   }
 
 
-  virtual void connection_established() throw()
+  virtual void connection_established(unsigned int id) throw()
   {
     printf("Connection established\n");
     just_connected = true;

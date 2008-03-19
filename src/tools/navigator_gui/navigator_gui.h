@@ -205,8 +205,9 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
 
 
     FawkesNetworkClient *net_client;
-    void deregistered() throw();
-    void inbound_received(FawkesNetworkMessage *msg) throw();
+    void deregistered(unsigned int id) throw();
+    void inbound_received(FawkesNetworkMessage *msg,
+			  unsigned int id) throw();
     void process_navigator_message(FawkesNetworkMessage *msg) throw();
     void process_pluginmanager_message(FawkesNetworkMessage *msg) throw();
     void prepare_navigator_contact();
@@ -214,8 +215,8 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     bool connection_is_dead;
     bool connected;
 
-    void connection_established() throw();
-    void connection_died() throw();
+    void connection_established(unsigned int id) throw();
+    void connection_died(unsigned int id) throw();
     void reset_gui();
     void connect();
 

@@ -362,15 +362,17 @@ RemoteBlackBoard::list_all()
 
 /** We are no longer registered in Fawkes network client.
  * Ignored.
+ * @param id the id of the calling client
  */
 void
-RemoteBlackBoard::deregistered() throw()
+RemoteBlackBoard::deregistered(unsigned int id) throw()
 {
 }
 
 
 void
-RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m) throw()
+RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m,
+				   unsigned int id) throw()
 {
   if ( m->cid() == FAWKES_CID_BLACKBOARD ) {
     unsigned int msgid = m->msgid();
@@ -417,12 +419,12 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m) throw()
 
 
 void
-RemoteBlackBoard::connection_died() throw()
+RemoteBlackBoard::connection_died(unsigned int id) throw()
 {
 }
 
 
 void
-RemoteBlackBoard::connection_established() throw()
+RemoteBlackBoard::connection_established(unsigned int id) throw()
 {
 }

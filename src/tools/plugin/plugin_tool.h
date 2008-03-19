@@ -60,10 +60,11 @@ class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
   void watch();
   void list_avail();
 
-  virtual void deregistered() throw();
-  virtual void inbound_received(FawkesNetworkMessage *msg) throw();
-  virtual void connection_died() throw();
-  virtual void connection_established() throw();
+  virtual void deregistered(unsigned int id) throw();
+  virtual void inbound_received(FawkesNetworkMessage *msg,
+				unsigned int id) throw();
+  virtual void connection_died(unsigned int id) throw();
+  virtual void connection_established(unsigned int id) throw();
 
  private:
   typedef enum {

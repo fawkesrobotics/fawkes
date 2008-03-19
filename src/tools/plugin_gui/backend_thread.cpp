@@ -181,19 +181,19 @@ PluginGuiBackendThread::loop()
 }
 
 void
-PluginGuiBackendThread::deregistered() throw()
+PluginGuiBackendThread::deregistered(unsigned int id) throw()
 {
 }
 
 void
-PluginGuiBackendThread::connection_established() throw()
+PluginGuiBackendThread::connection_established(unsigned int id) throw()
 {
   m_connected = true;
   m_gui->signal_update_connection();
 }
 
 void
-PluginGuiBackendThread::connection_died() throw()
+PluginGuiBackendThread::connection_died(unsigned int id) throw()
 {
   if (m_connected)
     // unexpected loss of connection
@@ -207,7 +207,8 @@ PluginGuiBackendThread::connection_died() throw()
 }
 
 void
-PluginGuiBackendThread::inbound_received(FawkesNetworkMessage* msg) throw()
+PluginGuiBackendThread::inbound_received(FawkesNetworkMessage* msg,
+					 unsigned int id) throw()
 {
   bool update = false;
   

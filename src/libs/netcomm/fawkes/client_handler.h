@@ -35,10 +35,11 @@ class FawkesNetworkClientHandler
  public:
   virtual ~FawkesNetworkClientHandler();
 
-  virtual void deregistered() throw()                                     = 0;
-  virtual void inbound_received(FawkesNetworkMessage *m) throw()          = 0;
-  virtual void connection_died() throw()                                  = 0;
-  virtual void connection_established() throw()                           = 0;
+  virtual void deregistered(unsigned int id) throw()                      = 0;
+  virtual void inbound_received(FawkesNetworkMessage *m,
+				unsigned int id) throw()                  = 0;
+  virtual void connection_died(unsigned int id) throw()                   = 0;
+  virtual void connection_established(unsigned int id) throw()            = 0;
 
 };
 

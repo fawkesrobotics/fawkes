@@ -56,10 +56,11 @@ class PluginGuiBackendThread : public Thread,
   void loop();
 
   // client handler
-  void deregistered() throw();
-  void connection_died() throw();
-  void connection_established() throw();
-  void inbound_received(FawkesNetworkMessage* m) throw();
+  void deregistered(unsigned int id) throw();
+  void connection_died(unsigned int id) throw();
+  void connection_established(unsigned int id) throw();
+  void inbound_received(FawkesNetworkMessage* m,
+			unsigned int id) throw();
 
   // service browser handler
   void all_for_now();

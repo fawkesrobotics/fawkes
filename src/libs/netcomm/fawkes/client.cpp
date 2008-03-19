@@ -265,6 +265,35 @@ FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short in
   recv_slave_alive = false;
 
   slave_status_mutex = new Mutex();
+
+  _id     = 0;
+  _has_id = false;
+}
+
+
+/** Constructor.
+ * @param id id of the client.
+ * @param hostname remote host to connect to.
+ * @param port port to connect to.
+ */
+FawkesNetworkClient::FawkesNetworkClient(unsigned int id, const char *hostname,
+					 unsigned short int port)
+{
+  this->hostname = strdup(hostname);
+  this->port     = port;
+
+  s = NULL;
+  send_slave = NULL;
+  recv_slave = NULL;
+
+  connection_died_recently = false;
+  send_slave_alive = false;
+  recv_slave_alive = false;
+
+  slave_status_mutex = new Mutex();
+
+  _id     = id;
+  _has_id = true;
 }
 
 
@@ -389,7 +418,7 @@ FawkesNetworkClient::deregister_handler(unsigned int component_id)
 {
   handlers.lock();
   if ( handlers.find(component_id) != handlers.end() ) {
-    handlers[component_id]->deregistered();
+    handlers[component_id]->deregistered(_id);
     handlers.erase(component_id);
   }
   if ( waitconds.find(component_id) != waitconds.end() ) {
@@ -407,7 +436,7 @@ FawkesNetworkClient::dispatch_message(FawkesNetworkMessage *m)
 {
   unsigned int cid = m->cid();
   if (handlers.find(cid) != handlers.end()) {
-    handlers[cid]->inbound_received(m);
+    handlers[cid]->inbound_received(m, _id);
   }
 }
 
@@ -424,7 +453,7 @@ void
 FawkesNetworkClient::notify_of_connection_dead()
 {
   for ( HandlerMap::iterator i = handlers.begin(); i != handlers.end(); ++i ) {
-    (*i).second->connection_died();
+    (*i).second->connection_died(_id);
   }
   for ( WaitCondMap::iterator j = waitconds.begin(); j != waitconds.end(); ++j) {
     (*j).second->wake_all();
@@ -435,7 +464,7 @@ void
 FawkesNetworkClient::notify_of_connection_established()
 {
   for ( HandlerMap::iterator i = handlers.begin(); i != handlers.end(); ++i ) {
-    (*i).second->connection_established();
+    (*i).second->connection_established(_id);
   }
   for ( WaitCondMap::iterator j = waitconds.begin(); j != waitconds.end(); ++j) {
     (*j).second->wake_all();
@@ -510,4 +539,28 @@ bool
 FawkesNetworkClient::connected() const throw()
 {
   return (! connection_died_recently && (s != NULL));
+}
+
+
+/** Check whether the client has an id.
+ * @return true if client has an ID
+ */
+bool
+FawkesNetworkClient::has_id() const
+{
+  return _has_id;
+}
+
+
+/** Get the client's ID.
+ * @return the ID
+ */
+unsigned int
+FawkesNetworkClient::id() const
+{
+  if ( !_has_id ) {
+    throw Exception("Trying to get the ID of a client that has no ID");
+  }
+
+  return _id;
 }

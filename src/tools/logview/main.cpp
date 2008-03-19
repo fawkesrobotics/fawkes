@@ -81,7 +81,8 @@ class NetLogConsolePrinter
     client->wake(FAWKES_CID_NETWORKLOGGER);
   }
 
-  virtual void inbound_received(FawkesNetworkMessage *m) throw()
+  virtual void inbound_received(FawkesNetworkMessage *m,
+				unsigned int id) throw()
   {
     if ( (m->cid() == FAWKES_CID_NETWORKLOGGER) &&
 	 (m->msgid() == NetworkLogger::MSGTYPE_LOGMESSAGE) ) {
@@ -93,20 +94,20 @@ class NetLogConsolePrinter
     }
   }
 
-  virtual void deregistered() throw()
+  virtual void deregistered(unsigned int id) throw()
   {
     quit = true;
   }
 
 
-  virtual void connection_died() throw()
+  virtual void connection_died(unsigned int id) throw()
   {
     printf("Connection to host died. Aborting.\n");
     quit = true;
   }
 
 
-  virtual void connection_established() throw()
+  virtual void connection_established(unsigned int id) throw()
   {
   }
 
