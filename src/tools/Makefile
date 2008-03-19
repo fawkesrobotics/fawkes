@@ -21,7 +21,8 @@
 
 BASEDIR = ../..
 
-SUBDIRS = blackboard plugin logview config joystick plugin_gui navigator_gui
+SUBDIRS = blackboard plugin logview config joystick plugin_gui \
+	  navigator_gui netlog_monitor
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
