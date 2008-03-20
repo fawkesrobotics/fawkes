@@ -176,6 +176,7 @@ FileLoader::open()
     }
   }
 
+  read_file();
   opened = true;
 }
 
@@ -208,77 +209,13 @@ FileLoader::print_info()
 void
 FileLoader::capture()
 {
-  if (file_buffer) {
-    free(file_buffer);
-  }
-
-  char *fn;
   if (0 != num_files) {
-    asprintf(&fn, "%s/%s", dirname, file_list[cur_file]->d_name);
-  } else {
-    fn = strdup(filename);
-  }
-
-  std::string ft = fv_filetype_file( fn );
-
-
-  if ( FvRawReader::is_FvRaw(fn) ) {
-    FvRawReader *fvrr = new FvRawReader( fn );
-    cspace = fvrr->colorspace();
-    width  = fvrr->pixel_width();
-    height = fvrr->pixel_height();
-    _buffer_size = colorspace_buffer_size( cspace, width, height );
-    file_buffer = (unsigned char*)malloc(_buffer_size);
-    fvrr->set_buffer( file_buffer );
-    try {
-      fvrr->read();
-    } catch (Exception &e) {
-      delete fvrr;
-      e.append("FileLoader::open() failed");
-      throw;
+    if (file_buffer) {
+      free(file_buffer);
     }
-    delete fvrr;
 
-#ifdef HAVE_LIBJPEG
-  } else if ( ft.find( "JPEG" ) != std::string::npos ) {
-    JpegReader *jr = new JpegReader( fn );
-    cspace = jr->colorspace();
-    width  = jr->pixel_width();
-    height = jr->pixel_height();
-    _buffer_size = colorspace_buffer_size( cspace, width, height );
-    file_buffer = (unsigned char*)malloc(_buffer_size);
-    jr->set_buffer( file_buffer );
-    try {
-      jr->read();
-    } catch (Exception &e) {
-      delete jr;
-      e.append("FileLoader::open() failed");
-      throw;
-    }
-    delete jr;
-#endif
+    read_file();
 
-  } else {
-    _buffer_size = colorspace_buffer_size( cspace, width, height );
-
-    if (_buffer_size > 0) {
-      FILE *f;
-      f = fopen( fn, "rb" );
-      file_buffer = (unsigned char*)malloc(_buffer_size);
-      if (fread(file_buffer, _buffer_size, 1, f) != 1) {
-	// cout << "FileLoader: Could not read data." << endl;
-	fclose(f);
-	throw Exception("Could not read data");
-      }
-      fclose(f);
-    } else {
-      throw Exception("Invalid color space (buffer size is 0)");
-    }
-  }
-
-  free(fn);
-
-  if (0 != num_files) {
     if (++cur_file == num_files) {
       cur_file = 0;
     }
@@ -384,5 +321,74 @@ void
 FileLoader::set_pixel_height(unsigned int h)
 {
   height = h;
+}
+
+void
+FileLoader::read_file()
+{
+  char* fn;
+  if (0 != num_files) {
+    asprintf(&fn, "%s/%s", dirname, file_list[cur_file]->d_name);
+  } else {
+    fn = strdup(filename);
+  }
+
+  std::string ft = fv_filetype_file( fn );
+
+  if ( FvRawReader::is_FvRaw(fn) ) {
+    FvRawReader *fvrr = new FvRawReader( fn );
+    cspace = fvrr->colorspace();
+    width  = fvrr->pixel_width();
+    height = fvrr->pixel_height();
+    _buffer_size = colorspace_buffer_size( cspace, width, height );
+    file_buffer = (unsigned char*)malloc(_buffer_size);
+    fvrr->set_buffer( file_buffer );
+    try {
+      fvrr->read();
+    } catch (Exception &e) {
+      delete fvrr;
+      e.append("FileLoader::open() failed");
+      throw;
+    }
+    delete fvrr;
+
+#ifdef HAVE_LIBJPEG
+  } else if ( ft.find( "JPEG" ) != std::string::npos ) {
+    JpegReader *jr = new JpegReader( fn );
+    cspace = jr->colorspace();
+    width  = jr->pixel_width();
+    height = jr->pixel_height();
+    _buffer_size = colorspace_buffer_size( cspace, width, height );
+    file_buffer = (unsigned char*)malloc(_buffer_size);
+    jr->set_buffer( file_buffer );
+    try {
+      jr->read();
+    } catch (Exception &e) {
+      delete jr;
+      e.append("FileLoader::open() failed");
+      throw;
+    }
+    delete jr;
+#endif
+
+  } else {
+    _buffer_size = colorspace_buffer_size( cspace, width, height );
+
+    if (_buffer_size > 0) {
+      FILE *f;
+      f = fopen( fn, "rb" );
+      file_buffer = (unsigned char*)malloc(_buffer_size);
+      if (fread(file_buffer, _buffer_size, 1, f) != 1) {
+	// cout << "FileLoader: Could not read data." << endl;
+	fclose(f);
+	throw Exception("Could not read data");
+      }
+      fclose(f);
+    } else {
+      throw Exception("Invalid color space (buffer size is 0)");
+    }
+  }
+
+  free(fn);
 }
 

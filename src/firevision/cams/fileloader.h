@@ -71,6 +71,8 @@ class FileLoader : public Camera
   void                     set_pixel_height(unsigned int h);
 
  private:
+  void                     read_file();
+
   bool started;
   bool opened;
   unsigned char* file_buffer;
