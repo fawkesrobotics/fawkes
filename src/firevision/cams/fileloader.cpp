@@ -57,7 +57,11 @@
 
 char* FileLoader::extension = NULL;
 
+#if defined(__GLIBC__)
 int file_select(const struct dirent* ent)
+#else
+int file_select(struct dirent *ent)
+#endif
 {
   if ( !FileLoader::extension ) { return 1; }
 

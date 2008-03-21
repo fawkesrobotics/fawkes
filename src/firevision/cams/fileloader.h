@@ -36,8 +36,12 @@ class CameraArgumentParser;
 
 class FileLoader : public Camera
 {
+#if defined(__GLIBC__)
   friend int file_select(const struct dirent*);
-  
+#else
+  friend int file_select(struct dirent*);
+#endif
+
  public:
 
   FileLoader(const char *filename);
