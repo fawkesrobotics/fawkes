@@ -27,7 +27,6 @@
 
 #include <tools/firestation/firestation.h>
 #include <tools/firestation/mirror_calib.h>
-#include <tools/firestation/color_train.h>
 #include <tools/firestation/color_train_widget.h>
 #include <tools/firestation/fuse_transfer_widget.h>
 
