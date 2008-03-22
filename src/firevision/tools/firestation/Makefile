@@ -30,9 +30,11 @@ LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
 LIBS_firestation = utils fvutils fvmodels fvclassifiers geometry fvcams
-OBJS_firestation = color_train.o	\
-		   mirror_calib.o	\
-	           firestation.o	\
+OBJS_firestation = color_train_widget.o         \
+		   mirror_calib.o		\
+		   fuse_transfer_widget.o	\
+		   lut_viewer_widget.o		\
+	           firestation.o		\
 		   main.o
 OBJS_all += $(OBJS_firestation)
 

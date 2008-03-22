@@ -41,6 +41,8 @@ class ShmImageLister;
 class Writer;
 class MirrorCalibTool;
 class ColorTrainTool;
+class ColorTrainWidget;
+class FuseTransferWidget;
 
 class Firestation : public Gtk::Window, public ServiceBrowseHandler
 {
@@ -121,6 +123,9 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
     MODE_MIRROR_CALIB_EVAL
   } OpMode;
 
+  Gtk::Widget* get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
+			   const char* widget_name) const;
+
   void save_image();
   void exit();
   void update_image();
@@ -135,15 +140,10 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   void resize_image(Gtk::Allocation& allocation);
   bool scale_image();
   void draw_image();
-  void draw_segmentation_result();
 
   void ct_start();
-  void ct_unselect();
-  void ct_add();
-  void ct_save_colormap();
-  void ct_load_colormap();
   hint_t ct_get_fg_object();
-  void ct_draw_colormaps();
+  void ct_object_changed();
 
   void mc_start();
   void mc_save();
@@ -176,18 +176,7 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   Gtk::RadioButton* m_rbt_ct_ball;
   Gtk::RadioButton* m_rbt_ct_field;
   Gtk::RadioButton* m_rbt_ct_lines;
-  Gtk::HScale* m_scl_ct_threshold;
-  Gtk::HScale* m_scl_ct_minprob;
   Gtk::Button* m_btn_ct_start;
-  Gtk::Button* m_btn_ct_unselect;
-  Gtk::Button* m_btn_ct_add;
-  Gtk::Button* m_btn_ct_save_histos;
-  Gtk::Button* m_btn_ct_save_colormap;
-  Gtk::Button* m_btn_ct_load_colormap;
-  Gtk::Window* m_wnd_ct_colormap;
-  Gtk::Image* m_img_ct_segmentation;
-  Gtk::Image* m_img_ct_colormap_local;
-  Gtk::Image* m_img_ct_colormap_remote;
   Gtk::FileChooserDialog* m_fcd_ct_save_colormap;
   Gtk::FileChooserDialog* m_fcd_ct_load_colormap;
 
@@ -200,6 +189,7 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   Gtk::Entry* m_ent_mc_dist;
   Gtk::Entry* m_ent_mc_ori;
   
+  Glib::Dispatcher m_update_img;
 
   ShmColumnRecord m_shm_columns;
   Glib::RefPtr<Gtk::ListStore> m_shm_list_store;
@@ -231,8 +221,9 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   bool m_enable_scaling;
   float m_scale_factor;
 
-  ColorTrainTool* m_color_tool;
   MirrorCalibTool* m_calib_tool;
+  ColorTrainWidget* m_ctw;
+  FuseTransferWidget* m_ftw;
 
   AvahiThread* m_avahi_thread;
 };

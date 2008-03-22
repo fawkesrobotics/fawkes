@@ -28,6 +28,8 @@
 #include <tools/firestation/firestation.h>
 #include <tools/firestation/mirror_calib.h>
 #include <tools/firestation/color_train.h>
+#include <tools/firestation/color_train_widget.h>
+#include <tools/firestation/fuse_transfer_widget.h>
 
 #include <cams/fileloader.h>
 #include <cams/shmem.h>
@@ -67,12 +69,13 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_img_writer = 0;
 
   m_calib_tool = new MirrorCalibTool();
-  m_color_tool = new ColorTrainTool();
 
   m_camera = 0;
 
   m_img_src = SRC_NONE;
   m_op_mode = MODE_VIEWER;
+
+  m_update_img.connect( sigc::mem_fun(*this, &Firestation::draw_image) );
 
   // --- main window ------------------------------------------------
   ref_xml->get_widget("wndMain", m_wnd_main);
@@ -237,116 +240,54 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   // ----------------------------------------------------------------
 
 
-  // --- color training ---------------------------------------------
-  ref_xml->get_widget("rbtCtBall", m_rbt_ct_ball);
-  if ( !m_rbt_ct_ball)
-    {
-      throw std::runtime_error("Couldn't find rbtCtBall.");
-    }
+  // --- color train widget -----------------------------------------
+  m_rbt_ct_ball = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtBall") );
+  m_rbt_ct_field = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtField") );
+  m_rbt_ct_lines = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtLines") );
+  m_rbt_ct_ball->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_object_changed) );
+  m_rbt_ct_field->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_object_changed) );
+  m_rbt_ct_lines->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_object_changed) );
 
-  ref_xml->get_widget("rbtCtField", m_rbt_ct_field);
-  if ( !m_rbt_ct_field)
-    {
-      throw std::runtime_error("Couldn't find rbtCtField.");
-    }
-
-  ref_xml->get_widget("rbtCtLines", m_rbt_ct_lines);
-  if ( !m_rbt_ct_lines)
-    {
-      throw std::runtime_error("Couldn't find rbtCtLines.");
-    }
-
-  ref_xml->get_widget("btnCtUnselect", m_btn_ct_unselect);
-  if ( !m_btn_ct_unselect )
-    {
-      throw std::runtime_error("Couldn't find btnCtUnselect.");
-    }
-  m_btn_ct_unselect->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_unselect) );
-
-  ref_xml->get_widget("btnCtAdd", m_btn_ct_add);
-  if ( !m_btn_ct_add )
-    {
-      throw std::runtime_error("Couldn't find btnCtAdd.");
-    }
-  m_btn_ct_add->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_add) );
-  
-  ref_xml->get_widget("btnCtStart", m_btn_ct_start);
-  if ( !m_btn_ct_start )
-    {
-      throw std::runtime_error("Couldn't find btnCtStart.");
-    }
+  m_btn_ct_start = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtStart") );
   m_btn_ct_start->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_start) );
   
-  ref_xml->get_widget("btnCtSaveHistos", m_btn_ct_save_histos);
-  if ( !m_btn_ct_save_histos )
-    {
-      throw std::runtime_error("Couldn't find btnCtSaveHistos.");
-    }
-  m_btn_ct_save_histos->signal_clicked().connect( sigc::mem_fun(*m_color_tool, &ColorTrainTool::save_histograms) );
-  
-  ref_xml->get_widget("sclCtThreshold", m_scl_ct_threshold);
-  if ( !m_scl_ct_threshold )
-    {
-      throw std::runtime_error("Couldn't find sclCtThreshold.");
-    }
-  m_scl_ct_threshold->signal_change_value().connect( sigc::mem_fun(*m_color_tool, &ColorTrainTool::set_threshold_sh) );
-  
-  ref_xml->get_widget("sclCtMinProb", m_scl_ct_minprob);
-  if ( !m_scl_ct_minprob )
-    {
-      throw std::runtime_error("Couldn't find sclCtMinProb.");
-    }
-  m_scl_ct_minprob->signal_change_value().connect( sigc::mem_fun(*m_color_tool, &ColorTrainTool::set_min_prob_sh) );
-  
-  ref_xml->get_widget("wndCtColorMap", m_wnd_ct_colormap);
-  if ( !m_wnd_ct_colormap )
-    {
-      throw std::runtime_error("Couldn't find wndCtColorMap.");
-    }
-  
-  ref_xml->get_widget("imgCtSegmentation", m_img_ct_segmentation);
-  if ( !m_img_ct_segmentation )
-    {
-      throw std::runtime_error("Couldn't find imgCtSegmentation.");
-    }
+  m_ctw = new ColorTrainWidget(this);
+  m_ctw->set_update_img_signal(&m_update_img);
 
-  ref_xml->get_widget("imgCtColormapLocal", m_img_ct_colormap_local);
-  if ( !m_img_ct_colormap_local )
-    {
-      throw std::runtime_error("Couldn't find imgCtColormapLocal.");
-    }
-  
-  ref_xml->get_widget("imgCtColormapRemote", m_img_ct_colormap_remote);
-  if ( !m_img_ct_colormap_remote )
-    {
-      throw std::runtime_error("Couldn't find imgCtColormapRemote.");
-    }
-  
-  ref_xml->get_widget("fcdCtSaveColormap", m_fcd_ct_save_colormap);
-  if ( !m_fcd_ct_save_colormap)
-    {
-      throw std::runtime_error("Couldn't find fcdCtSaveColormap.");
-    }
-  
-  ref_xml->get_widget("btnCtSaveColormap", m_btn_ct_save_colormap);
-  if ( ! m_btn_ct_save_colormap )
-    {
-      throw std::runtime_error("Couldn't find btnCtSaveColormap.");
-    }
-  m_btn_ct_save_colormap->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_save_colormap) );
+  Gtk::Button* btn;
+  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtUnselect") );
+  m_ctw->set_reset_selection_btn(btn);
 
-  ref_xml->get_widget("fcdCtLoadColormap", m_fcd_ct_load_colormap);
-  if ( !m_fcd_ct_load_colormap)
-    {
-      throw std::runtime_error("Couldn't find fcdCtLoadColormap.");
-    }
+  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtAdd") );
+  m_ctw->set_add_to_lut_btn(btn);
 
-  ref_xml->get_widget("btnCtLoadColormap", m_btn_ct_load_colormap);
-  if ( ! m_btn_ct_load_colormap )
-    {
-      throw std::runtime_error("Couldn't find btnCtLoadColormap.");
-    }
-  m_btn_ct_load_colormap->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_load_colormap) );
+  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtSaveHistos") );
+  m_ctw->set_save_histos_btn(btn);
+
+  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtSaveColormap") );
+  m_ctw->set_save_lut_btn(btn);
+
+  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtLoadColormap") );
+  m_ctw->set_load_lut_btn(btn);
+
+  Gtk::Scale* scl;
+  scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclCtThreshold") );
+  m_ctw->set_threshold_scl(scl);
+
+  scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclCtMinProb") );
+  m_ctw->set_min_prob_scl(scl);
+
+  Gtk::Image* img;
+  img = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgCtSegmentation") );
+  m_ctw->set_segmentation_img(img);
+
+  img = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgCtColormap") );
+  m_ctw->set_lut_img(img);
+
+  Gtk::FileChooserDialog* fcd;
+  fcd = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdCtFilechooser") );
+  m_ctw->set_filechooser_dlg(fcd);
+
   // ----------------------------------------------------------------
 
 
@@ -397,6 +338,20 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
     }
   // ----------------------------------------------------------------
 
+  // --- fuse transfer widget ---------------------------------------
+  m_ftw = new FuseTransferWidget();
+  m_ftw->set_current_lut( m_ctw->get_lut() );
+
+  Gtk::TreeView* trv = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvFuseRemoteLuts") );
+  m_ftw->set_remote_lut_list_trv(trv);
+  trv = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvFuseLocalLuts") );
+  m_ftw->set_local_lut_list_trv(trv);
+  img = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgFuseLocal") );
+  m_ftw->set_local_img(img);
+  img = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgFuseRemote") );
+  m_ftw->set_remote_img(img);
+  // ----------------------------------------------------------------
+
   m_signal_update_image.connect( sigc::mem_fun(*this, &Firestation::update_image) );
 
   m_scaled_img_width = m_evt_image->get_width();
@@ -419,8 +374,26 @@ Firestation::~Firestation()
   delete m_img_writer;
 
   delete m_calib_tool;
-  delete m_color_tool;
+  delete m_ctw;
+  delete m_ftw;
   delete m_avahi_thread;
+}
+
+Gtk::Widget*
+Firestation::get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
+			const char* widget_name) const
+{
+  Gtk::Widget* widget;
+  ref_xml->get_widget(widget_name, widget);
+  if ( !widget )
+    { 
+      std::string err_str = "Couldn't find widget ";
+      err_str += std::string(widget_name);
+      err_str += ".";
+      throw runtime_error(err_str);
+    }
+
+  return widget;
 }
 
 /** Returns reference to main window.
@@ -518,10 +491,7 @@ Firestation::update_image()
   scale_image();
   draw_image();
 
-//   draw_segmentation_result();
-
-//   if ( m_ckb_cont_trans->get_active() )
-//     { m_signal_update_image(); }
+  m_ctw->draw_segmentation_result();
 }
 
 /** Reads in an image from a file. */
@@ -812,15 +782,9 @@ Firestation::post_open_img_src()
   scale_image();
   draw_image();
 	
-  
-//   if (m_color_tool->initialized() )
-//     {
-//       draw_segmentation_result();
-//     }
-//   m_color_tool->initialize( m_img_width, m_img_height,
-//  			    m_yuv_orig_buffer, m_yuv_draw_buffer, ct_get_fg_object() ); 
-  
-//   draw_segmentation_result();
+  m_ctw->set_src_buffer(m_yuv_orig_buffer, m_img_width, m_img_height);
+  m_ctw->set_draw_buffer(m_yuv_draw_buffer);
+  m_ctw->draw_segmentation_result();
 }
 
 /** Handles the scaling of the displayed image.
@@ -905,48 +869,6 @@ Firestation::resize_image(Gtk::Allocation& allocation)
     } 
 }
 
-void
-Firestation::draw_segmentation_result()
-{
-  if ( !m_color_tool->initialized() )
-    { return; }
-
-  m_color_tool->perform_segmentation();
-
-  LossyScaler scaler;
-  scaler.set_original_buffer( m_color_tool->seg_buffer() );
-  scaler.set_original_dimensions(m_img_width, m_img_height);
-  scaler.set_scaled_dimensions(200, 200);  /* TODO */
-  unsigned int scaled_width = scaler.needed_scaled_width();
-  unsigned int scaled_height = scaler.needed_scaled_height();
-  
-  unsigned char* scaled_buffer = (unsigned char*) malloc( colorspace_buffer_size( m_img_cs,
-										  scaled_width,
-										  scaled_height ) );
-  scaler.set_scaled_buffer(scaled_buffer);
-  scaler.scale();
-
-  unsigned char* rgb_buffer = (unsigned char*) malloc( colorspace_buffer_size( RGB,
-									       scaled_width,
-									       scaled_height ) );
-  
-  convert( m_img_cs, RGB,
-	   scaled_buffer, rgb_buffer,
-	   scaled_width, scaled_height);
-  
-  free(scaled_buffer);
-  
-  Glib::RefPtr<Gdk::Pixbuf> image = Gdk::Pixbuf::create_from_data( rgb_buffer,
-								   Gdk::COLORSPACE_RGB,
-								   false,
-								   8,
-								   scaled_width,
-								   scaled_height,
-								   3 * scaled_width );
-  
-  m_img_ct_segmentation->set(image);
-}
-
 /** Handles mouse clicks in the image area.
  * @param event a Gtk event
  * @return true if signal was handled
@@ -988,8 +910,8 @@ Firestation::image_click(GdkEventButton* event)
       break;
 
     case MODE_COLOR_TRAIN:
-      m_color_tool->step( (unsigned int) rint(event->x / m_scale_factor),
-			  (unsigned int) rint(event->y / m_scale_factor) );
+      m_ctw->click( (unsigned int) rint(event->x / m_scale_factor),
+		    (unsigned int) rint(event->y / m_scale_factor) );
       draw_image();
      break;
 
@@ -1054,67 +976,13 @@ Firestation::ct_start()
     {
       if (m_img_src != SRC_NONE)
 	{
-	  if ( !m_color_tool->initialized() )
-	    {
-	      m_color_tool->initialize( m_img_width, m_img_height,
-					m_yuv_orig_buffer, m_yuv_draw_buffer,
-					ct_get_fg_object() );
-	    }
-	  m_color_tool->set_fg_object( ct_get_fg_object() );
-
-	  m_color_tool->set_threshold((unsigned int) rint(m_scl_ct_threshold->get_value()));
-	  m_color_tool->set_min_prob((float) m_scl_ct_minprob->get_value());
+	  m_ctw->set_fg_object( ct_get_fg_object() );
 	  
 	  m_op_mode = MODE_COLOR_TRAIN;
 
 	  m_stb_status->push("Entering color training mode");
 	}
     }
-}
-
-/** Reset the selection of the magic wand. */
-void
-Firestation::ct_unselect()
-{
-  m_color_tool->unselect();
-  draw_image();
-}
-
-/** Add magic wand selection to colormap. */
-void
-Firestation::ct_add()
-{
-  m_color_tool->set_fg_object( ct_get_fg_object() );
-  m_color_tool->add();
-  ct_draw_colormaps();
-  draw_segmentation_result();
-}
-
-/** Save the current colormap to disk. */
-void
-Firestation::ct_save_colormap()
-{
-  m_fcd_ct_save_colormap->set_transient_for(*this);
-
-  int result = m_fcd_ct_save_colormap->run();
-
-  switch(result) 
-    {
-    case(Gtk::RESPONSE_OK):
-      {
-	std::string filename = m_fcd_ct_save_colormap->get_filename();
-	m_color_tool->save_colormap( filename.c_str() );
-	break;
-      }
-
-    case(Gtk::RESPONSE_CANCEL):
-      break;
-
-    default:
-      break;
-    }
-  
-  m_fcd_ct_save_colormap->hide();
 }
 
 hint_t
@@ -1134,58 +1002,30 @@ Firestation::ct_get_fg_object()
     }
   else
     {
+      printf("ct_get_fg_object(): UNKNOWN\n");
       return H_UNKNOWN;
     }
 }
 
 void
-Firestation::ct_draw_colormaps()
+Firestation::ct_object_changed()
 {
-  unsigned int width = 128;  /* TODO */
-  unsigned int height = 128;  /* TODO */
-  unsigned char* buffer = m_color_tool->colormap_rgb(&width, &height);
-  //  printf("colormap dimensions %d x %d\n", width, height);
-
-  Glib::RefPtr<Gdk::Pixbuf> image = Gdk::Pixbuf::create_from_data( buffer,
-								   Gdk::COLORSPACE_RGB,
-								   false,
-								   8,
-								   width, height,
-								   3 * width );
-  m_img_ct_colormap_local->set(image);
-}
-
-void
-Firestation::ct_load_colormap()
-{
-  m_fcd_ct_load_colormap->set_transient_for(*this);
-
-  int result = m_fcd_ct_load_colormap->run();
-
-  switch(result)
+  if ( m_rbt_ct_ball->get_active() )
     {
-    case (Gtk::RESPONSE_OK):
-      {
-	std::string filename = m_fcd_ct_load_colormap->get_filename();
-	m_color_tool->load_colormap( filename.c_str() );
-	
-	if (m_img_src != SRC_NONE)
-	  {
-	    ct_draw_colormaps();
-	    draw_segmentation_result();
-	  }
-
-	break;
-      }
-
-    case (Gtk::RESPONSE_CANCEL):
-      break;
-
-    default:
-      break;
+      m_ctw->set_fg_object(H_BALL);
     }
-
-  m_fcd_ct_load_colormap->hide();
+  else if ( m_rbt_ct_field->get_active() )
+    {
+      m_ctw->set_fg_object(H_FIELD);
+    }
+  else if ( m_rbt_ct_lines->get_active() )
+    {
+      m_ctw->set_fg_object(H_LINE);
+    }
+  else
+    {
+      printf("ct_object_changed(): UNKNOWN\n");
+    }
 }
 
 /** Start the mirror calibration process. */
@@ -1355,12 +1195,14 @@ Firestation::service_added( const char* name,
       childrow[m_fuse_columns.m_image_height] = fit->height;
       childrow[m_fuse_columns.m_image_colorspace] = Glib::ustring( colorspace_to_string((colorspace_t) fit->colorspace) );
     }
+
+  m_ftw->add_fountain_service(name, host_name, port);
 }
 
 void
 Firestation::service_removed( const char* name,
-				const char* type,
-				const char* domain )
+			      const char* type,
+			      const char* domain )
 {
   Gtk::TreeModel::Children children = m_fuse_tree_store->children();
   Gtk::TreeModel::iterator rit;
@@ -1377,4 +1219,6 @@ Firestation::service_removed( const char* name,
 	  m_fuse_tree_store->erase(rit);
 	}
     }
+
+  m_ftw->remove_fountain_service(name);
 }
