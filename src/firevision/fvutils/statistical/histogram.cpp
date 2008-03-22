@@ -91,6 +91,7 @@ Histogram::~Histogram()
     free(undo_overlay[i]);
   }
   free(undo_overlay);
+  free(undo_num_vals);
 }
 
 
