@@ -224,10 +224,10 @@ FawkesThreadManager::add(ThreadList &tl)
   }
 
   tl.seal();
-
   tl.start();
 
   // All thread initialized, now add threads to internal structure
+  MutexLocker lock(threads.mutex());
   for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
     internal_add_thread(*i);
   }
@@ -264,6 +264,7 @@ FawkesThreadManager::add(Thread *thread)
   }
 
   thread->start();
+  MutexLocker lock(threads.mutex());
   internal_add_thread(thread);
 }
 
@@ -317,6 +318,7 @@ FawkesThreadManager::remove(ThreadList &tl)
 
   tl.stop();
   tl.finalize(finalizer);
+
   for (ThreadList::iterator i = tl.begin(); i != tl.end(); ++i) {
     internal_remove_thread(*i);
   }
@@ -346,6 +348,7 @@ FawkesThreadManager::remove(Thread *thread)
     throw NullPointerException("FawkesThreadManager: initializer/finalizer not set");
   }
 
+  MutexLocker lock(threads.mutex());
   try {
     if ( ! thread->prepare_finalize() ) {
       thread->cancel_finalize();
@@ -356,6 +359,7 @@ FawkesThreadManager::remove(Thread *thread)
     thread->cancel_finalize();
     throw;
   }
+
   thread->cancel();
   thread->join();
   finalizer->finalize(thread);
@@ -428,6 +432,7 @@ FawkesThreadManager::force_remove(Thread *thread)
   } catch (Exception &e) {
     // ignore
   }
+
   thread->cancel();
   thread->join();
   if (finalizer) finalizer->finalize(thread);
