@@ -32,10 +32,23 @@
  * @ingroup Exceptions
  */
 /** Constructor
- * @param msg optional extra message, appended to exception, base message "Out of memory"
+ * @param format message format string
  */
-OutOfMemoryException::OutOfMemoryException(const char *msg) throw()
-  : Exception("Out of memory: %s", msg)
+OutOfMemoryException::OutOfMemoryException(const char *format, ...) throw()
+  : Exception()
+{
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
+}
+
+
+/** Constructor.
+ * Message simply is "Out of memory"
+ */
+OutOfMemoryException::OutOfMemoryException() throw()
+  : Exception("Out of memory")
 {
 }
 

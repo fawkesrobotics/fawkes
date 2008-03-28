@@ -32,7 +32,8 @@
 
 class OutOfMemoryException : public Exception {
  public:
-  OutOfMemoryException(const char *msg = "") throw();
+  OutOfMemoryException(const char *format, ...) throw();
+  OutOfMemoryException() throw();
 };
 
 
