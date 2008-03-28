@@ -49,8 +49,8 @@ RectificationLutInfoBlock::RectificationLutInfoBlock(uint16_t width,
 			   sizeof(rectinfo_lut_16x16_block_header_t) +
 			   (width * height * sizeof(rectinfo_lut_16x16_entry_t)))
 {
-  _lut_block_header = (rectinfo_lut_16x16_block_header_t *)_block_data;
-  _lut_data         = (rectinfo_lut_16x16_entry_t *)((char *)_block_data +
+  _lut_block_header = (rectinfo_lut_16x16_block_header_t *)_data;
+  _lut_data         = (rectinfo_lut_16x16_entry_t *)((char *)_data +
 						     sizeof(rectinfo_lut_16x16_block_header_t));
 
   _lut_block_header->width  = width;
@@ -58,28 +58,17 @@ RectificationLutInfoBlock::RectificationLutInfoBlock(uint16_t width,
 }
 
 
-/** Read constructor.
- * @param chunk memory chunk
- * @param chunk_size chunk size
+/** Copy Constructor.
+ * It is assumed that the block actually is a rectification LUT info block. Check that
+ * before calling this method.
+ * @param block block to copy
  */
-RectificationLutInfoBlock::RectificationLutInfoBlock(void *chunk, size_t chunk_size)
-  : RectificationInfoBlock(chunk, chunk_size)
+RectificationLutInfoBlock::RectificationLutInfoBlock(FireVisionDataFileBlock *block)
+  : RectificationInfoBlock(block)
 {
-  _lut_block_header = (rectinfo_lut_16x16_block_header_t *)_block_data;
-  _lut_data         = (rectinfo_lut_16x16_entry_t *)((char *)_block_data +
+  _lut_block_header = (rectinfo_lut_16x16_block_header_t *)_data;
+  _lut_data         = (rectinfo_lut_16x16_entry_t *)((char *)_data +
 						     sizeof(rectinfo_lut_16x16_block_header_t));
-
-  if ( chunk_size != (sizeof(rectinfo_block_header_t) +
-		      sizeof(rectinfo_lut_16x16_block_header_t) +
-		      (_lut_block_header->width * _lut_block_header->height
-		       * sizeof(rectinfo_lut_16x16_entry_t))) ) {
-    throw Exception("RectLUT info block is not of expected size (1)");
-  }
-  if ( _block_header->size != sizeof(rectinfo_lut_16x16_block_header_t) +
-                              (_lut_block_header->width * _lut_block_header->height *
-			       sizeof(rectinfo_lut_16x16_entry_t)) ) {
-    throw Exception("RectLUT info block is not of expected size (2)");
-  }
 }
 
 

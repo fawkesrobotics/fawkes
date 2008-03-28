@@ -29,32 +29,21 @@
 #define __FIREVISION_FVUTILS_RECTIFICATION_RECTINFO_BLOCK_H_
 
 #include <fvutils/rectification/rectinfo.h>
+#include <fvutils/fileformat/fvfile_block.h>
 #include <sys/types.h>
 
-class RectificationInfoBlock
+class RectificationInfoBlock : public FireVisionDataFileBlock
 {
  public:
   RectificationInfoBlock(uint8_t block_type, uint8_t camera, size_t block_size);
-  RectificationInfoBlock();
-  RectificationInfoBlock(void *chunk, size_t chunk_size);
+  RectificationInfoBlock(FireVisionDataFileBlock *block);
   virtual ~RectificationInfoBlock();
 
-  virtual void *       block_memptr() const;
-  virtual size_t       block_size() const;
-
-  uint8_t  type() const;
   uint8_t  camera() const;
-  uint32_t size() const;
 
   virtual void mapping(uint16_t x, uint16_t y, uint16_t *to_x, uint16_t *to_y) = 0;
 
  protected:
-  void * _block_chunk;
-  void * _block_data;
-  size_t _block_size;
-
-  bool   _free_block_chunk;
-
   rectinfo_block_header_t  *_block_header;
 };
 

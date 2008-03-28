@@ -36,13 +36,15 @@
 #include <stdint.h>
 
 #define FIREVISION_RECTINFO_MAGIC  0xFF03
-#define FIREVISION_RECTINFO_CURVER 1
+#define FIREVISION_RECTINFO_CURVER 2
 
 #define FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH  32
 
 /** Header for a rectification information file (rectinfo).
  * The header defines the basic parameters needed to correctly interpret the
  * following rectification file data.
+ *
+ * It defines a content specific header for the FireVision data file format (fvff).
  *
  * The header defines a magic by which a rectinfo can be identified. This is
  * always FF03 (exactly in that order, no matter on the host systems endianess,
@@ -51,9 +53,7 @@
  * the header or the file data format changes. The file defines the endianess of the
  * supplied data, which is important since the mapping in general has to be stored
  * at least to 2-byte-sized data fields. There are several reserved bits that may
- * be used later to store flags. The field num_blocks define how many info blocks there
- * are in this file. This depends on the used camera. For instance stereo cameras
- * in general need two rectification info blocks, one for each of the lenses.
+ * be used later to store flags.
  *
  * The header also carries a globally unique ID of the camera. This allows for checking
  * if the file is used for the correct camera. This should be an EUI-64 number supplied
@@ -86,11 +86,6 @@
  * mapping consists of two uint16_t values.
  */
 typedef struct _rectinfo_header_t {
-  uint16_t magic;		/**< magic token, has to be 0xFF03 (literally) */
-  uint16_t version    :  4;	/**< version of the data file, this header defines version 1 */
-  uint16_t endianess  :  1;	/**< endianess of the file, 0 means little endian, 1 means big endian */
-  uint16_t reserved   :  3;	/**< reserved for future use */
-  uint16_t num_blocks :  8;	/**< number of rectification info blocks in this file */
   uint64_t guid;		/**< GUID of camera */
   char     camera_model[FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH]; /**< camera model */
 } rectinfo_header_t;
@@ -113,10 +108,8 @@ typedef struct _rectinfo_header_t {
  * for this kind of IDs.
  */
 typedef struct _rectinfo_block_header_t {
-  uint32_t type       :  8;	/**< type of the following data. */
   uint32_t camera     :  8;	/**< camera, as specified per rectinfo_camera_t */
-  uint32_t reserved   : 16;	/**< reserved for future use */
-  uint32_t size;		/**< size in bytes of info block */
+  uint32_t reserved   : 24;	/**< reserved for future use */
 } rectinfo_block_header_t;
 
 

@@ -887,15 +887,18 @@ TriclopsStereoProcessor::verify_rectification_lut(const char *lut_file)
   }
 
   if ( rif->num_blocks() != 2 ) {
+    printf("Insufficient blocks, we only have %zu\n", rif->num_blocks());
     return false;
   }
 
   bool left_ok = false;
   bool right_ok = false;
 
-  RectificationInfoFile::RectInfoBlockVector &blocks = rif->blocks();
+  RectificationInfoFile::RectInfoBlockVector blocks = rif->rectinfo_blocks();
+  printf("We have %zu blocks\n", blocks.size());
   RectificationInfoFile::RectInfoBlockVector::const_iterator i;
   for (i = blocks.begin(); (i != blocks.end() && ! (left_ok && right_ok)); ++i) {
+    printf("Veryfying block\n");
     RectificationInfoBlock *rib = *i;
 
     if ( (rib->camera() != FIREVISION_RECTINFO_CAMERA_LEFT) &&
@@ -928,6 +931,7 @@ TriclopsStereoProcessor::verify_rectification_lut(const char *lut_file)
 	  }
 	  rlib->mapping(w, h, &rx, &ry);
 	  if ( (rx != (int)roundf(col)) || (ry != (int)roundf(row)) ) {
+            printf("Value at (%x,%u) not ok\n", rx, ry);
 	    lut_ok = false;
 	    break;
 	  }

@@ -85,7 +85,7 @@ main(int argc, char **argv)
   rif->add_rectinfo_block(rlib);
   rif->add_rectinfo_block(rlib2);
 
-  RectificationInfoFile::RectInfoBlockVector &blocks = rif->blocks();
+  RectificationInfoFile::RectInfoBlockVector blocks = rif->rectinfo_blocks();
 
   for (RectificationInfoFile::RectInfoBlockVector::iterator i = blocks.begin(); i != blocks.end(); ++i) {
     RectificationLutInfoBlock *rlib = dynamic_cast<RectificationLutInfoBlock *>(*i);
@@ -94,8 +94,8 @@ main(int argc, char **argv)
       continue;
     }
 
-    printf("LUT:  type: %u  camera: %u  size: %u\n",
-	   rlib->type(), rlib->camera(), rlib->size());
+    printf("LUT:  type: %u  camera: %u  size: %zu\n",
+	   rlib->type(), rlib->camera(), rlib->block_size());
 
     cout << "Looking for non-zero mappings" << endl;
     uint16_t x, y, to_x, to_y;
@@ -118,7 +118,7 @@ main(int argc, char **argv)
   cout << "Reading from " << s << endl;
   rif->read(s);
 
-  blocks = rif->blocks();
+  blocks = rif->rectinfo_blocks();
 
   for (RectificationInfoFile::RectInfoBlockVector::iterator i = blocks.begin(); i != blocks.end(); ++i) {
     RectificationLutInfoBlock *rlib = dynamic_cast<RectificationLutInfoBlock *>(*i);
@@ -128,8 +128,8 @@ main(int argc, char **argv)
 
     }
 
-    printf("LUT:  type: %u  camera: %u  size: %u\n",
-	   rlib->type(), rlib->camera(), rlib->size());
+    printf("LUT:  type: %u  camera: %u  size: %zu\n",
+	   rlib->type(), rlib->camera(), rlib->block_size());
 
     cout << "Looking for non-zero mappings" << endl;
     uint16_t x, y, to_x, to_y;

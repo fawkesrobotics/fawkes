@@ -304,7 +304,7 @@ main(int argc, char **argv)
 		  label.show();
 		  cboxt.show();
 
-		  RectificationInfoFile::RectInfoBlockVector & blocks = rectfile->blocks();
+		  RectificationInfoFile::RectInfoBlockVector blocks = rectfile->rectinfo_blocks();
 		  for (RectificationInfoFile::RectInfoBlockVector::iterator b = blocks.begin(); b != blocks.end(); ++b) {
 		    Glib::ustring us = rectinfo_camera_strings[(*b)->camera()];
 		    us += Glib::ustring(" (") + rectinfo_type_strings[(*b)->type()] + ")";

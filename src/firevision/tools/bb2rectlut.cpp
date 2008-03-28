@@ -54,7 +54,7 @@ print_usage(ArgumentParser *argp)
 	 "       attached camera\n"
 	 "  -d   deep verifiction of rectification LUT, compares the identification\n"
 	 "       info stored in the file with the first currently attached camera. It\n"
-	 "       also verify each single mapping on equality.\n"
+	 "       also verifies each single mapping on equality.\n"
 	 "  -i   print info about rectification LUT file\n\n"
 	 );
   exit(1);
@@ -236,12 +236,12 @@ print_info(ArgumentParser *argp)
     RectificationInfoFile *rif = new RectificationInfoFile();
     try {
       rif->read(lut_file);
-      RectificationInfoFile::RectInfoBlockVector &blocks = rif->blocks();
+      RectificationInfoFile::RectInfoBlockVector blocks = rif->rectinfo_blocks();
 
       printf("File:         %s\n"
 	     "Version:      %u\n"
 	     "Endianess:    %s\n"
-	     "Num Blocks:   %u/%zu (header/read)\n"
+	     "Num Blocks:   %zu/%zu (header/read)\n"
 #if __WORDSIZE == 64
 	     "GUID:         0x%016lX\n"
 #else
@@ -261,11 +261,11 @@ print_info(ArgumentParser *argp)
 	printf("\nRectInfo Block No. %u\n"
 	       "Type:       %s\n"
 	       "Camera:     %s\n"
-	       "Size:       %u\n",
+	       "Size:       %zu\n",
 	       u++,
 	       rectinfo_type_strings[rib->type()],
 	       rectinfo_camera_strings[rib->camera()],
-	       rib->size());
+	       rib->block_size());
 
 	switch (rib->type()) {
 	case FIREVISION_RECTINFO_TYPE_LUT_16x16:

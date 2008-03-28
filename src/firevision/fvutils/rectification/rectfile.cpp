@@ -60,13 +60,17 @@
  * @param model String with the model name of the camera
  */
 RectificationInfoFile::RectificationInfoFile(uint64_t cam_guid, const char *model)
+  : FireVisionDataFile(FIREVISION_RECTINFO_MAGIC, FIREVISION_RECTINFO_CURVER)
 {
-  _header = new rectinfo_header_t;
+  _spec_header      = calloc(1, sizeof(rectinfo_header_t));
+  _spec_header_size = sizeof(rectinfo_header_t);
+  _header = (rectinfo_header_t *)_spec_header;
 
   _cam_guid = cam_guid;
   _model = strdup(model);
 
-  clear();
+  strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH);
+  _header->guid = _cam_guid;
 }
 
 
@@ -75,65 +79,25 @@ RectificationInfoFile::RectificationInfoFile(uint64_t cam_guid, const char *mode
  * is invalid for writing.
  */
 RectificationInfoFile::RectificationInfoFile()
+  : FireVisionDataFile(FIREVISION_RECTINFO_MAGIC, FIREVISION_RECTINFO_CURVER)
 {
-  _header = new rectinfo_header_t;
+  _spec_header      = calloc(1, sizeof(rectinfo_header_t));
+  _spec_header_size = sizeof(rectinfo_header_t);
+  _header = (rectinfo_header_t *)_spec_header;
 
   _cam_guid = 0;
   _model = strdup("");
 
-  clear();
+  strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH);
+  _header->guid = _cam_guid;
 }
 
 
 /** Destructor. */
 RectificationInfoFile::~RectificationInfoFile()
 {
-  for (ibi = info_blocks.begin(); ibi != info_blocks.end(); ++ibi) {
-    delete *ibi;
-  }
-  info_blocks.clear();
-  delete _header;  
-  if (_model != NULL)  free(_model);
-}
-
-
-/** Get the version of the file.
- * @return version of the file (or the current supported version if no file was loaded)
- */
-unsigned int
-RectificationInfoFile::version()
-{
-  return _header->version;
-}
-
-
-/** Check if data is encoded as big endian.
- * @return true if data is encoded as big endian, false otherwise
- */
-bool
-RectificationInfoFile::is_big_endian()
-{
-  return (_header->endianess == 1);
-}
-
-
-/** Check if data is encoded as little endian.
- * @return true if data is encoded as little endian, false otherwise
- */
-bool
-RectificationInfoFile::is_little_endian()
-{
-  return (_header->endianess == 0);
-}
-
-
-/** Get the number of available info blocks.
- * @return number of available info blocks
- */
-unsigned int
-RectificationInfoFile::num_blocks()
-{
-  return _header->num_blocks;
+  free(_header);
+  free(_model);
 }
 
 
@@ -165,148 +129,48 @@ RectificationInfoFile::model()
 void
 RectificationInfoFile::add_rectinfo_block(RectificationInfoBlock *block)
 {
-  _header->num_blocks++;
-  info_blocks.push_back(block);
-}
-
-
-/** Clear internal structures.
- * This resets the internal header. It will also delete all rectification information
- * blocks.
- */
-void
-RectificationInfoFile::clear()
-{
-  for (ibi = info_blocks.begin(); ibi != info_blocks.end(); ++ibi) {
-    delete *ibi;
-  }
-  info_blocks.clear();
-
-  memset(_header, 0, sizeof(rectinfo_header_t));
-
-  _header->magic   = htons(FIREVISION_RECTINFO_MAGIC);
-  _header->version = FIREVISION_RECTINFO_CURVER;
-  _header->num_blocks = 0;
-#if __BYTE_ORDER == __BIG_ENDIAN
-  _header->endianess = 1;
-#else
-  _header->endianess = 0;
-#endif
-  _header->guid = _cam_guid;
+  add_block(block);
 }
 
 
 /** Get all rectification info blocks.
  * @return reference to internal vector of rectinfo blocks.
  */
-RectificationInfoFile::RectInfoBlockVector &
-RectificationInfoFile::blocks()
+RectificationInfoFile::RectInfoBlockVector
+RectificationInfoFile::rectinfo_blocks()
 {
-  return info_blocks;
+  FireVisionDataFile::BlockList &b = blocks();
+  printf("Processing blocks: %zu\n", b.size());
+  RectInfoBlockVector rv;
+  for (std::list<FireVisionDataFileBlock *>::iterator i = b.begin(); i != b.end(); ++i) {
+    printf("Processing block\n");
+    if ((*i)->type() == FIREVISION_RECTINFO_TYPE_LUT_16x16) {
+      RectificationLutInfoBlock *libl = new RectificationLutInfoBlock(*i);
+      rv.push_back(libl);
+    }
+  }
+
+  return rv;
 }
 
 
-/** Write file.
- * @param file_name file to write to
- */
 void
-RectificationInfoFile::write(const char *file_name)
+RectificationInfoFile::read(const char *filename)
 {
-  FILE *f = fopen(file_name, "w");
-  if ( f == NULL ) {
-    throw CouldNotOpenFileException(file_name, errno, "Could not open rectlut file "
-				                      "for writing");
-  }
+  FireVisionDataFile::read(filename);
 
-  // Just to be safe
-  _header->num_blocks = info_blocks.size();
-  strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH);
+  _header = (rectinfo_header_t *)_spec_header;
 
-  if ( fwrite(_header, sizeof(rectinfo_header_t), 1, f) != 1 ) {
-    fclose(f);
-    throw FileWriteException(file_name, errno, "Writing rectlut header failed");
-  }
-
-  for (ibi = info_blocks.begin(); ibi != info_blocks.end(); ++ibi) {
-    // write this info block
-    if ( fwrite((*ibi)->block_memptr(), (*ibi)->block_size(), 1, f) != 1 ) {
-      fclose(f);
-      throw FileWriteException(file_name, errno, "Failed to write info block");
-    }
-  }
-
-  fclose(f);
+  if (_model) free(_model);
+  _model    = strndup(_header->camera_model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH);
+  _cam_guid = _header->guid;
 }
 
 
-/** Read file.
- * @param file_name file to read from
- */
-void
-RectificationInfoFile::read(const char *file_name)
+RectificationInfoFile::RectInfoBlockVector::~RectInfoBlockVector()
 {
-  FILE *f = fopen(file_name, "r");
-  if ( f == NULL ) {
-    throw CouldNotOpenFileException(file_name, errno, "Could not open rectlut file "
-				                      "for reading");
+  for (iterator i = begin(); i != end(); ++i) {
+    delete *i;
   }
-
-  clear();
-
-  if ( fread(_header, sizeof(rectinfo_header_t), 1, f) != 1) {
-    fclose(f);
-    throw FileReadException(file_name, errno, "Reading rectlut header failed");
-  }
-
-  if ( _header->magic != htons(FIREVISION_RECTINFO_MAGIC) ) {
-    fclose(f);
-    throw Exception("Unknown magic in rectinfo file");
-  }
-
-  if ( _header->version != FIREVISION_RECTINFO_CURVER ) {
-    fclose(f);
-    throw Exception("Unsupported version of rectinfo file");
-  }
-
-  if ( _model != NULL )  free(_model);
-  _model = strndup(_header->camera_model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH);
-
-  if ( _header->endianess ==
-#if __BYTE_ORDER == __BIG_ENDIAN
-       0
-#else
-       1
-#endif
-       ) {
-    fclose(f);
-    throw Exception("Rectification information cannot be translated for endiannes by now");
-  }
-
-  for (uint8_t b = 0; b < _header->num_blocks && !feof(f); ++b) {
-    rectinfo_block_header_t bh;
-    if ( fread(&bh, sizeof(bh), 1, f) != 1 ) {
-      fclose(f);
-      throw FileReadException(file_name, errno,
-			      "Could not read block info header while there should be one");
-    }
-    if ( bh.type == FIREVISION_RECTINFO_TYPE_LUT_16x16 ) {
-      // read LUT
-      void * chunk = malloc(sizeof(bh) + bh.size);
-      memset(chunk, 0, sizeof(bh) + bh.size);
-      memcpy(chunk, &bh, sizeof(bh));
-      void *block_chunk = (char *)chunk + sizeof(bh);
-      if ( fread(block_chunk, bh.size, 1, f) != 1 ) {
-	fclose(f);
-	free(chunk);
-	throw FileReadException(file_name, errno, "RectLUT: short read");
-      }
-      RectificationLutInfoBlock *rlib = new RectificationLutInfoBlock(chunk, sizeof(bh) + bh.size);
-      info_blocks.push_back(rlib);
-    } else {
-      fclose(f);
-      throw Exception("Unsupported file format (unknown block type %u)", bh.type);
-    }
-  }
-
-  fclose(f);
 }
+

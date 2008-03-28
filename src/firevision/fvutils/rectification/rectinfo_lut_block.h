@@ -35,7 +35,7 @@ class RectificationLutInfoBlock : public RectificationInfoBlock
  public:
   RectificationLutInfoBlock(uint16_t width, uint16_t height,
 			    uint8_t camera);
-  RectificationLutInfoBlock(void *chunk, size_t chunk_size);
+  RectificationLutInfoBlock(FireVisionDataFileBlock *block);
 
   void set_mapping(uint16_t x, uint16_t y,
 		   uint16_t to_x, uint16_t to_y);

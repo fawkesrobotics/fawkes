@@ -29,11 +29,12 @@
 #define __FIREVISION_FVUTILS_RECTIFICATION_RECTFILE_H_
 
 #include <fvutils/rectification/rectinfo.h>
+#include <fvutils/fileformat/fvfile.h>
 #include <vector>
 
 class RectificationInfoBlock;
 
-class RectificationInfoFile
+class RectificationInfoFile : public FireVisionDataFile
 {
  public:
   RectificationInfoFile();
@@ -44,30 +45,25 @@ class RectificationInfoFile
    * For instance use RectificationInfoFile::RectInfoBlockVector::iterator as
    * iterator to go through the blocks returned by blocks().
    */
-  typedef std::vector<RectificationInfoBlock *> RectInfoBlockVector;
+  class RectInfoBlockVector : public std::vector<RectificationInfoBlock *>
+  {
+    public:
+     ~RectInfoBlockVector();
+  };
 
-  unsigned int  version();
   uint64_t      guid();
   const char *  model();
-  bool          is_big_endian();
-  bool          is_little_endian();
-
-  unsigned int  num_blocks();
 
   void add_rectinfo_block(RectificationInfoBlock *block);
-  void write(const char *file_name);
-  void read(const char *file_name);
-  void clear();
 
-  RectInfoBlockVector &  blocks();
+  RectInfoBlockVector  rectinfo_blocks();
+
+  virtual void read(const char *filename);
 
  private:
   rectinfo_header_t  *_header;
   uint64_t            _cam_guid;
   char               *_model;
-
-  RectInfoBlockVector            info_blocks;
-  RectInfoBlockVector::iterator  ibi;
 };
 
 #endif

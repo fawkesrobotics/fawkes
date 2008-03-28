@@ -42,6 +42,13 @@
  * @author Tim Niemueller
  */
 
+/** @var RectificationInfoBlock::_block_header
+ * Rectification block header.
+ * This is a pointer to the content-specific block header for rectification info blocks.
+ */
+
+
+
 /** @fn void RectificationInfoBlock::mapping(uint16_t x, uint16_t y, uint16_t *to_x, uint16_t *to_y) = 0
  * Get mapping (to_x, to_y) for (x, y).
  * This can be used as a general method to access the RectificationInfoBlock mapping.
@@ -53,39 +60,6 @@
  * @param to_x Upon return contains the X pixel coordinate of the unrectified image
  * @param to_y Upon return contains the Y pixel coordinate of the unrectified image
  */
-
-/** @var void * RectificationInfoBlock::_block_chunk
- * Pointer to the internal memory. This points to the raw memory chunk where
- * all data is stored (type agnostic header, type specific header, data).
- */
-/** @var void * RectificationInfoBlock::_block_data
- * Pointer to the data part of the chunk.
- */
-/** @var size_t RectificationInfoBlock::_block_size
- * Total size of _block_chunk, includes type agnostic header, type specific
- * header and data.
- */
-/** @var bool RectificationInfoBlock::_free_block_chunk
- * If true the memory chunk is freed using the standard C free() function,
- * otherwise it is left untouched on destruction.
- */
-/** @var rectinfo_block_header_t RectificationInfoBlock::_block_header
- * Pointer to type agnostic block header.
- */
-
-/** Basic constructor.
- * Use this constructor if you want to maintain everything regarding the memory
- * *and* the block header by yourself. Only use this rarely and think your
- * scenario through twice before going along this road.
- */
-RectificationInfoBlock::RectificationInfoBlock()
-{
-  _block_chunk      = NULL;
-  _block_size       = 0;
-  _block_header     = NULL;
-  _block_data       = NULL;
-  _free_block_chunk = false;
-}
 
 
 /** Recommended constructor.
@@ -103,49 +77,28 @@ RectificationInfoBlock::RectificationInfoBlock()
 RectificationInfoBlock::RectificationInfoBlock(uint8_t block_type,
 					       uint8_t camera,
 					       size_t block_data_size)
+  : FireVisionDataFileBlock(block_type, block_data_size, sizeof(rectinfo_block_header_t))
 {
-  _block_size = block_data_size + sizeof(rectinfo_block_header_t);
-
-  if ( _block_size > UINT32_MAX ) {
+  if ( _data_size > UINT32_MAX ) {
     throw OutOfBoundsException("RectInfoBlock: block_data_size is too large",
 			       block_data_size, 0, UINT32_MAX);
   }
 
-  _block_chunk = malloc(_block_size);
-  if ( ! _block_chunk) {
-    throw OutOfMemoryException("Cannot allocate memory for rectinfo block");
-  }
-  _free_block_chunk = true;
-
-  memset(_block_chunk, 0, _block_size);
-
-  _block_header = (rectinfo_block_header_t *)_block_chunk;
-  _block_data   = (char *)_block_chunk + sizeof(rectinfo_block_header_t);
-
-  _block_header->type   = block_type;
+  _block_header = (rectinfo_block_header_t *)_spec_header;
   _block_header->camera = camera;
-  _block_header->size   = block_data_size;
 }
 
 
-/** Read constructor.
- * This constructor uses the given memory chunk. It takes the ownership of this
- * chunk. This constructor is meant to be used if data is read. Obey it for your
- * own implementation of a block format!
- * @param chunk memory chunk, has to include the type agnostic block header and
- * any type specific headers and data.
- * @param chunk_size size of the chunk. Has to include the size of the type
- * agnostic block header, the type specific header and the data
+/** Copy constructor.
+ * Copies data from the given FireVisionDataFileBlock. It is assumed that this
+ * actually is a rectification info block, check that before calling this
+ * method.
+ * @param block FireVision data file block
  */
-RectificationInfoBlock::RectificationInfoBlock(void * chunk,
-					       size_t chunk_size)
+RectificationInfoBlock::RectificationInfoBlock(FireVisionDataFileBlock *block)
+  : FireVisionDataFileBlock(block)
 {
-  _block_size  = chunk_size;
-  _block_chunk = chunk;
-  _free_block_chunk = true;
-
-  _block_header = (rectinfo_block_header_t *)_block_chunk;
-  _block_data   = (char *)_block_chunk + sizeof(rectinfo_block_header_t);
+  _block_header = (rectinfo_block_header_t *)_spec_header;
 }
 
 
@@ -154,54 +107,9 @@ RectificationInfoBlock::RectificationInfoBlock(void * chunk,
  */
 RectificationInfoBlock::~RectificationInfoBlock()
 {
-  if ( _free_block_chunk ) {
-    if ( _block_chunk != NULL ) {
-      free(_block_chunk);
-    }
-  }
-  _block_chunk  = NULL;
-  _block_size   = 0;
-  _block_data   = NULL;
   _block_header = NULL;
 }
 
-
-/** Get pointer to memory chunk.
- * @return pointer to internal memory chunk. This chunk has to include
- * the type agnostic header, the (optional) type specific header and
- * the data size.
- */
-void *
-RectificationInfoBlock::block_memptr() const
-{
-  return _block_chunk;
-}
-
-
-/** Get chunk size.
- * @return size of internal memory chunk. This chunk has to include
- * the type agnostic header, the (optional) type specific header and
- * the data size.
- */
-size_t
-RectificationInfoBlock::block_size() const
-{
-  return _block_size;
-}
-
-
-/** Get block type.
- * @return block type
- * @see rectinfo_block_header_t
- */
-uint8_t
-RectificationInfoBlock::type() const
-{
-  if ( _block_header == NULL ) {
-    throw NullPointerException("No memory chunk loaded for rectinfo block");
-  }
-  return _block_header->type;
-}
 
 /** Get block camera identifier.
  * @return camera identifier
@@ -214,18 +122,4 @@ RectificationInfoBlock::camera() const
     throw NullPointerException("No memory chunk loaded for rectinfo block");
   }
   return _block_header->camera;
-}
-
-
-/** Get block size.
- * @return block size
- * @see rectinfo_block_header_t
- */
-uint32_t
-RectificationInfoBlock::size() const
-{
-  if ( _block_header == NULL ) {
-    throw NullPointerException("No memory chunk loaded for rectinfo block");
-  }
-  return _block_header->size;
 }
