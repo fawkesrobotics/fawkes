@@ -30,6 +30,7 @@
 #include <core/exceptions/system.h>
 
 #include <cstring>
+#include <cstdio>
 #include <cerrno>
 #include <netinet/in.h>
 #include <sys/time.h>
