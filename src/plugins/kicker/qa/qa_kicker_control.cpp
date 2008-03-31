@@ -49,6 +49,7 @@ main(int argc, char* argv[])
   signal(SIGINT, signal_handler);
 
   KickerControl kicker_control;
+  kicker_control.open();
 
   cout << endl;
   cout << "set_intensity()" << endl;

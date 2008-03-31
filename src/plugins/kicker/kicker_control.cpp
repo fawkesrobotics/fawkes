@@ -74,6 +74,7 @@ KickerControl::open()
       else
 	{
 	  opened = true;
+	  _guidance_right = true;
 	  set_intensity(0, true);
 	  kick(false, false, false);
 	  reset_counter();
