@@ -60,8 +60,6 @@ BayesColormapGenerator::BayesColormapGenerator(unsigned int lut_depth,	hint_t fg
   fg_histos.clear();
   bg_histos.clear();
 
-  histos[H_BACKGROUND] = new Histogram(lut_width, lut_height, lut_depth, 2);
-
   image_width = image_height = 0;
   selection_mask = 0;
 
@@ -99,14 +97,12 @@ BayesColormapGenerator::set_fg_object(hint_t object)
     { return; }
 
   if ( fg_histos.find(object) == fg_histos.end() ) {
-    //    printf("Adding histos for object type %d\n", object);
     fg_histos[object] = new Histogram(lut_width, lut_height, lut_depth);
     bg_histos[object] = new Histogram(lut_width, lut_height, lut_depth, 2);
     histos[object] = new Histogram(lut_width, lut_height, lut_depth);
   }
 
   fg_object = object;
-  //  printf("Active object type is %d\n", fg_object);
 }
 
 
@@ -335,8 +331,9 @@ void
 BayesColormapGenerator::normalize_histos()
 {
   for (histo_it = histos.begin(); histo_it != histos.end(); ++histo_it) {
-    histo_it->second->reset();
+    delete histo_it->second;
   }
+  histos.clear();
 
   unsigned int fg_size = 0;
   unsigned int hval;
@@ -354,9 +351,17 @@ BayesColormapGenerator::normalize_histos()
       
       Histogram *fg = fg_histos[cur_object];
       Histogram *bg = bg_histos[cur_object];
-      Histogram *h  = histos[cur_object];
 
-      norm_factor = norm_size / float(fg->get_sum() + bg->get_sum());
+      unsigned int fg_sum = fg->get_sum();
+      unsigned int bg_sum = bg->get_sum();
+
+      if ( (fg_sum + bg_sum) == 0 )
+	{ continue; }
+
+      Histogram *h  = new Histogram(lut_width, lut_height, lut_depth);
+      histos[cur_object] = h;
+
+      norm_factor = norm_size / float(fg_sum + bg_sum);
 
       for (unsigned int x = 0; x < lut_width; ++x) {
 	for (unsigned int y = 0; y < lut_height; ++y) {
@@ -367,9 +372,7 @@ BayesColormapGenerator::normalize_histos()
 	}
       }
 
-      fg_size += fg->get_sum();
-
-      //      printf("[%d] normalized size=%d\n", cur_object, fg->get_sum());
+      fg_size += h->get_sum();
     }
 
   // compute overall background histogram
@@ -377,11 +380,19 @@ BayesColormapGenerator::normalize_histos()
     {
       hint_t cur_object = histo_it->first;
 
-      Histogram *fg  = fg_histos[cur_object];
-      Histogram *bg  = bg_histos[cur_object];
-      Histogram *h   = histos[H_BACKGROUND];
+      Histogram *fg = fg_histos[cur_object];
+      Histogram *bg = bg_histos[cur_object];
 
-      norm_factor = norm_size / float(fg->get_sum() + bg->get_sum());
+      unsigned int fg_sum = fg->get_sum();
+      unsigned int bg_sum = bg->get_sum();
+
+      if ( (fg_sum + bg_sum) == 0 )
+	{ continue; }
+
+      Histogram *h = new Histogram(lut_width, lut_height, lut_depth);
+      histos[H_BACKGROUND] = h;
+
+      norm_factor = norm_size / float(fg_sum + bg_sum);
 
       for (unsigned int x = 0; x < lut_width; ++x) {
 	for (unsigned int y = 0; y < lut_height; ++y) {
@@ -404,8 +415,6 @@ BayesColormapGenerator::normalize_histos()
       }
     }
   
-  //  printf("overall fg size=%d  bg size=%d\n", fg_size, histos[H_BACKGROUND]->get_sum() );
-	    
   // normalize overall background histogram
   Histogram* h = histos[H_BACKGROUND];
   norm_factor = (norm_size - fg_size) / float( h->get_sum() );
@@ -418,6 +427,4 @@ BayesColormapGenerator::normalize_histos()
       }
     }
   }  
-  
-  //  printf("overall fg size=%d  bg size=%d\n", fg_size, histos[H_BACKGROUND]->get_sum() );
 }
