@@ -107,12 +107,12 @@ MessageQueue::flush()
 unsigned int
 MessageQueue::append(Message *msg)
 {
-  if ( msg->message_id != 0 ) {
+  if ( msg->id() != 0 ) {
     throw MessageAlreadyQueuedException();
   }
   mutex->lock();
   unsigned int new_msg_id = next_msg_id++;
-  msg->ref();
+  msg->set_id(new_msg_id);
   if ( list == NULL ) {
     list = (msg_list_t *)malloc(sizeof(msg_list_t));
     list->next = NULL;
@@ -152,14 +152,15 @@ MessageQueue::insert_after(const MessageIterator &it, Message *msg)
   if ( it.cur == NULL ) {
     throw NullPointerException("Cannot append message at end element.");
   }
-  if ( msg->message_id != 0 ) {
+  if ( msg->id() != 0 ) {
     throw MessageAlreadyQueuedException();
   }
-  msg->ref();
+  unsigned int new_msg_id = next_msg_id++;
+  msg->set_id(new_msg_id);
   msg_list_t *l = (msg_list_t *)malloc(sizeof(msg_list_t));
   l->next = it.cur->next;
   l->msg = msg;
-  l->msg_id = next_msg_id++;
+  l->msg_id = new_msg_id;
   it.cur->next = l;
   if ( l->next == NULL ) {
     end_el = l;
@@ -323,7 +324,6 @@ MessageQueue::pop()
 {
   mutex->lock();
   if ( list ) {
-    list->msg->unref();
     remove(list, NULL);
   }
   mutex->unlock();

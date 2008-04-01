@@ -497,7 +497,7 @@ Interface::num_readers() const
 /** Enqueue message at end of queue.
  * This appends the given message to the queue and transmits the message via the
  * message mediator. The message is afterwards owned by the other side and will be
- * unrefed and free as soon as it has been processed. If you want to keep this
+ * unrefed and freed as soon as it has been processed. If you want to keep this
  * message to read a feedback status you have to reference it _before_ enqueuing
  * it!
  * This can only be called on a reading interface instance.
@@ -515,7 +515,12 @@ Interface::msgq_enqueue(Message *message)
   
   if ( message_valid(message) ) {
     message->set_interface(this);
-    return __message_mediator->transmit(message);
+    unsigned int msgid = __message_mediator->transmit(message);
+    if ( msgid == 0 ) {
+      // Message has been processed immediately
+      message->unref();
+    }
+    return msgid;
   } else {
     throw InterfaceInvalidMessageException(this, message);
   }

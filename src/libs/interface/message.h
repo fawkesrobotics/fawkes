@@ -39,7 +39,6 @@ class Message : public RefCount
 {
  friend class Interface;
  friend class MessageQueue;
- friend class BlackBoardMessageManager;
  public:
  /** Message status.
   * A message has a processing status. This status can have one of the following
@@ -60,6 +59,7 @@ class Message : public RefCount
 
   Message &         operator=  (const Message & m);
 
+  unsigned int      id() const;
   void              set_status(MessageStatus status);
   MessageStatus     status() const;
   void              set_sub_status(unsigned int sub_status);
@@ -74,11 +74,14 @@ class Message : public RefCount
 
   void              set_from_chunk(const void *chunk);
 
+  unsigned int      recipient() const;
+
  private:
 
-  void                  set_interface(Interface *iface);
+  void              set_interface(Interface *iface);
+  void              set_id(unsigned int message_id);
 
-  unsigned int  message_id;
+  unsigned int  __message_id;
 
   unsigned int  recipient_interface_mem_serial;  
   unsigned int  sender_interface_instance_serial;  

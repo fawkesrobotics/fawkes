@@ -67,7 +67,7 @@ BlackBoardMessageManager::transmit(Message *message)
     throw NullPointerException("InterfaceManager has not been set for MessageManager");
   }
   try {
-    Interface *writer = __im->writer_for_mem_serial(message->recipient_interface_mem_serial);
+    Interface *writer = __im->writer_for_mem_serial(message->recipient());
     if ( __notifier->notify_of_message_received(writer, message) ) {
       return writer->msgq_append(message);
     } else {

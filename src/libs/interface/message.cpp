@@ -64,7 +64,7 @@
  */
 Message::Message(const char *type)
 {
-  message_id = 0;
+  __message_id = 0;
   data_ptr = NULL;
   _transmit_via_iface = NULL;
   sender_interface_instance_serial = 0;
@@ -87,7 +87,7 @@ Message::Message(const char *type)
  */
 Message::Message(Message &mesg)
 {
-  message_id = 0;
+  __message_id = 0;
   _transmit_via_iface = NULL;
   sender_interface_instance_serial = 0;
   recipient_interface_mem_serial = 0;
@@ -112,7 +112,7 @@ Message::Message(Message &mesg)
  */
 Message::Message(Message *mesg)
 {
-  message_id = 0;
+  __message_id = 0;
   _transmit_via_iface = NULL;
   sender_interface_instance_serial = 0;
   recipient_interface_mem_serial = 0;
@@ -139,6 +139,35 @@ Message::~Message()
   free(_type);
 }
 
+
+/** Get message ID.
+ * @return message ID.
+ */
+unsigned int
+Message::id() const
+{
+  return __message_id;
+}
+
+
+/** Set message ID.
+ * @param message_id message ID
+ */
+void
+Message::set_id(unsigned int message_id)
+{
+  __message_id = message_id;
+}
+
+
+/** Get recipient memory serial.
+ * @return Interface memory serial of the recipient interface.
+ */
+unsigned int
+Message::recipient() const
+{
+  return recipient_interface_mem_serial;
+}
 
 /** Get pointer to data.
  * Avoid usage.
