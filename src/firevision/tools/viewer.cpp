@@ -304,8 +304,8 @@ main(int argc, char **argv)
 		  label.show();
 		  cboxt.show();
 
-		  RectificationInfoFile::RectInfoBlockVector blocks = rectfile->rectinfo_blocks();
-		  for (RectificationInfoFile::RectInfoBlockVector::iterator b = blocks.begin(); b != blocks.end(); ++b) {
+		  RectificationInfoFile::RectInfoBlockVector *blocks = rectfile->rectinfo_blocks();
+		  for (RectificationInfoFile::RectInfoBlockVector::iterator b = blocks->begin(); b != blocks->end(); ++b) {
 		    Glib::ustring us = rectinfo_camera_strings[(*b)->camera()];
 		    us += Glib::ustring(" (") + rectinfo_type_strings[(*b)->type()] + ")";
 		  cboxt.append_text(us);
@@ -320,7 +320,13 @@ main(int argc, char **argv)
 		  dialog.hide();
 		  process_gtk_events();
 		
-		  RectificationInfoBlock *chosen_block = blocks[cboxt.get_active_row_number()];
+		  RectificationInfoBlock *chosen_block = (*blocks)[cboxt.get_active_row_number()];
+		  RectificationInfoFile::RectInfoBlockVector::iterator bi = blocks->begin();
+		  for(int i = 1; i < cboxt.get_active_row_number(); ++i) {
+		    ++bi;
+		  }
+		  blocks->erase(bi); // needs to be erased because otherwise it would be deleted by following delete
+		  delete blocks;
 
 		  delete rectify_filter;
 		  rectify_filter = new FilterRectify(chosen_block);

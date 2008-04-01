@@ -96,7 +96,6 @@ RectificationInfoFile::RectificationInfoFile()
 /** Destructor. */
 RectificationInfoFile::~RectificationInfoFile()
 {
-  free(_header);
   free(_model);
 }
 
@@ -136,17 +135,18 @@ RectificationInfoFile::add_rectinfo_block(RectificationInfoBlock *block)
 /** Get all rectification info blocks.
  * @return reference to internal vector of rectinfo blocks.
  */
-RectificationInfoFile::RectInfoBlockVector
+RectificationInfoFile::RectInfoBlockVector *
 RectificationInfoFile::rectinfo_blocks()
 {
   FireVisionDataFile::BlockList &b = blocks();
   printf("Processing blocks: %zu\n", b.size());
-  RectInfoBlockVector rv;
+  RectInfoBlockVector *rv = new RectInfoBlockVector();
   for (std::list<FireVisionDataFileBlock *>::iterator i = b.begin(); i != b.end(); ++i) {
     printf("Processing block\n");
     if ((*i)->type() == FIREVISION_RECTINFO_TYPE_LUT_16x16) {
+      printf("Pushing lut block\n");
       RectificationLutInfoBlock *libl = new RectificationLutInfoBlock(*i);
-      rv.push_back(libl);
+      rv->push_back(libl);
     }
   }
 

@@ -202,9 +202,8 @@ FvOmniFieldPipelineThread::init()
   // color model
   logger->log_debug(name(), "Creating colormodel from colormap %s", colormodel_file);
   m_colormodel = new ColorModelLookupTable( colormodel_file,
-				256 /* lut_width */, 256 /* lut_height */,
-				"omni-field-colormap",
-				true /* destroy on delete */ );
+					    "omni-field-colormap",
+					    true /* destroy on delete */ );
   free(colormodel_file);
 
   // interfaces

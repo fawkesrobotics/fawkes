@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  lut_viewer_widget.cpp - Viwer widget for lookup tables
+ *  lut_viewer_widget.cpp - Viewer widget for lookup tables
  *
  *  Created: Thu Mar 20 19:08:04 2008
  *  Copyright  2008  Daniel Beck
@@ -39,7 +39,7 @@
 /** Constructor. */
 LutViewerWidget::LutViewerWidget()
 {
-  m_lut = 0;
+  m_cm = 0;
   m_img_lut = 0;
   m_lut_img_buf = 0;
 }
@@ -50,15 +50,13 @@ LutViewerWidget::~LutViewerWidget()
   free(m_lut_img_buf);
 }
 
-/** Set the LUT to display.
- * @param lut the LUT
+/** Set the colormap to display.
+ * @param cm colormap
  */
 void
-LutViewerWidget::set_lut(ColorModelLookupTable* lut)
+LutViewerWidget::set_colormap(YuvColormap *cm)
 {
-  m_lut = lut;
-  m_lut_width = 512;
-  m_lut_height = 512;
+  m_cm = cm;
 }
 
 /** Set the image to render into.
@@ -74,11 +72,11 @@ LutViewerWidget::set_lut_img(Gtk::Image* img)
 void
 LutViewerWidget::draw()
 {
-  if (m_lut == 0 || m_img_lut == 0)
+  if (m_cm == 0 || m_img_lut == 0)
     { return; }
 
-  unsigned char* lut_buffer = (unsigned char*) malloc( colorspace_buffer_size(YUV422_PLANAR, m_lut_width, m_lut_height) );
-  m_lut->to_image(lut_buffer);
+  unsigned char* lut_buffer = (unsigned char*) malloc( colorspace_buffer_size(YUV422_PLANAR, m_cm->width() * 2, m_cm->height() * 2) );
+  m_cm->to_image(lut_buffer);
 
   unsigned int img_width = (unsigned int) m_img_lut->get_width();
   unsigned int img_height = (unsigned int) m_img_lut->get_height();
@@ -89,7 +87,7 @@ LutViewerWidget::draw()
   // scale
   LossyScaler scaler;
   scaler.set_original_buffer(lut_buffer);
-  scaler.set_original_dimensions(m_lut_width, m_lut_height);
+  scaler.set_original_dimensions(m_cm->width() * 2, m_cm->height() * 2);
   scaler.set_scaled_dimensions(img_width, img_height);
   unsigned char* scaled_lut_buffer = (unsigned char*) malloc( colorspace_buffer_size(YUV422_PLANAR, img_width, img_height) );
   scaler.set_scaled_buffer(scaled_lut_buffer);

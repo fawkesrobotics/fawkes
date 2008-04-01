@@ -56,7 +56,7 @@ class RectificationInfoFile : public FireVisionDataFile
 
   void add_rectinfo_block(RectificationInfoBlock *block);
 
-  RectInfoBlockVector  rectinfo_blocks();
+  RectInfoBlockVector *  rectinfo_blocks();
 
   virtual void read(const char *filename);
 

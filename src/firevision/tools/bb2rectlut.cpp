@@ -236,7 +236,7 @@ print_info(ArgumentParser *argp)
     RectificationInfoFile *rif = new RectificationInfoFile();
     try {
       rif->read(lut_file);
-      RectificationInfoFile::RectInfoBlockVector blocks = rif->rectinfo_blocks();
+      RectificationInfoFile::RectInfoBlockVector *blocks = rif->rectinfo_blocks();
 
       printf("File:         %s\n"
 	     "Version:      %u\n"
@@ -250,12 +250,12 @@ print_info(ArgumentParser *argp)
 	     "Camera Model: %s\n",
 	     lut_file, rif->version(),
 	     rif->is_little_endian() ? "little endian" : "big endian",
-	     rif->num_blocks(), blocks.size(),
+	     rif->num_blocks(), blocks->size(),
 	     rif->guid(), rif->model());
 
       unsigned int u = 1;
       RectificationInfoFile::RectInfoBlockVector::const_iterator b;
-      for (b = blocks.begin(); b != blocks.end(); ++b) {
+      for (b = blocks->begin(); b != blocks->end(); ++b) {
 	RectificationInfoBlock *rib = *b;
 
 	printf("\nRectInfo Block No. %u\n"
@@ -286,6 +286,7 @@ print_info(ArgumentParser *argp)
 	}
       }
 
+      delete blocks;
     } catch (Exception &e) {
       fprintf(stderr, "Failed to read lut file %s\n", lut_file);
       e.print_trace();

@@ -29,89 +29,37 @@
 #define __FIREVISION_MODELS_COLOR_LOOKUPTABLE_H_
 
 #include <models/color/colormodel.h>
-#include <string>
-#include <sys/types.h>
 
-class SharedMemoryLookupTable;
+#include <fvutils/colormap/yuvcm.h>
 
 class ColorModelLookupTable : public ColorModel
 {
  public:
 
-  ColorModelLookupTable(unsigned int width, unsigned int height, unsigned int depth = 1);
-  ColorModelLookupTable(const char *file, unsigned int width, unsigned int height,
-			unsigned int depth = 1);
-
-  ColorModelLookupTable(unsigned int width, unsigned int height,
-			const char *lut_id, bool destroy_on_free = false);
-  ColorModelLookupTable(unsigned int width, unsigned int height, unsigned int depth,
-			const char *lut_id, bool destroy_on_free = false);
-
-  ColorModelLookupTable(const char *file, unsigned int width, unsigned int height,
-			const char *lut_id, bool destroy_on_free = false);
-  ColorModelLookupTable(const char *file, unsigned int width, unsigned int height, 
-			unsigned int depth, const char *lut_id, bool destroy_on_free = false);
+  ColorModelLookupTable(YuvColormap *colormap);
+  ColorModelLookupTable(const char *file);
+  ColorModelLookupTable(const char *file, const char *lut_id, bool destroy_on_free = false);
+  ColorModelLookupTable(unsigned int depth, const char *lut_id, bool destroy_on_free);
+  ColorModelLookupTable(const char *lut_id, bool destroy_on_free);
 
   virtual ~ColorModelLookupTable();
 
-  color_t       determine(unsigned int y,
-			  unsigned int u,
-			  unsigned int v) const;
+  virtual color_t determine(unsigned int y, unsigned int u, unsigned int v) const;
 
-  color_t       determine_cr(unsigned int y,
-			     unsigned int u,
-			     unsigned int v) const;
+  const char *   get_name();
+  YuvColormap *  get_colormap() const;
 
-  const char *  get_name();
-  void          load(const char *file);
-
-  void          save(const char *file);
-
-  void          set(unsigned int y,
-		    unsigned int u,
-		    unsigned int v,
-		    color_t c,
-		    bool full_range = true);
-  
-  void          reset();
-
-  void          set(unsigned char *buffer);
-
-  void          set_range(unsigned int x_max, unsigned int y_max, unsigned int z_max);
-  
-  unsigned int  size();
-  void          to_image(unsigned char *yuv422_planar_buffer);
-
-  unsigned char *  get_buffer();
-
-  ColorModelLookupTable &  operator+=(const ColorModelLookupTable & cmlt);
-  ColorModelLookupTable &  operator+=(const char *filename);
-
-  static std::string compose_filename(const std::string format);
+  void load(const char *filename);
 
  private:
-
-  void create();
-  void load_to_buffer(const char *file, unsigned char *buffer, off_t buffer_size);
-
-  char          *lut_id;
-  unsigned char *lut;
-  unsigned int   lut_bytes;
-  bool           destroy_on_free;
-
-  unsigned int width;
-  unsigned int height;
-  unsigned int depth;
-  unsigned int bytes_per_sample;
-
-  SharedMemoryLookupTable *shm_lut;
-
-  unsigned int x_max;
-  unsigned int y_max;
-  unsigned int z_max;
+  YuvColormap *__colormap;
 };
 
 
-
+inline color_t
+ColorModelLookupTable::determine(unsigned int y, unsigned int u, unsigned int v) const
+{
+  return __colormap->determine(y, u, v);
+}
 
 #endif

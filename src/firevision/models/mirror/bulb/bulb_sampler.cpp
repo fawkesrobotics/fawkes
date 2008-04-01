@@ -44,14 +44,10 @@ using namespace std;
 /** Constructor.
  * @param image_width width of camera images
  * @param image_height height of camera images
- * @param color_lut_width width of color LUT
- * @param color_lut_height height of color LUT
  * @param lut_file COlor lut file that is loaded
  */
 BulbSampler::BulbSampler( unsigned int image_width,
 			  unsigned int image_height,
-			  unsigned int color_lut_width,
-			  unsigned int color_lut_height,
 			  std::string lut_file)
 {
   __image_width  = image_width;
@@ -60,8 +56,7 @@ BulbSampler::BulbSampler( unsigned int image_width,
   bulb    = new Bulb( __image_width, __image_height );
 
   try {
-    colorLut   = new ColorModelLookupTable ( (char *)lut_file.c_str(), 
-  					   color_lut_width, color_lut_height );
+    colorLut   = new ColorModelLookupTable ( (char *)lut_file.c_str() );
   } catch (Exception &e) {
     throw;
   }
@@ -100,31 +95,25 @@ BulbSampler::BulbSampler( unsigned int image_width,
  * @param bulb bulb mirror model
  * @param image_width width of camera images
  * @param image_height height of camera images
- * @param color_lut_width width of color LUT
- * @param color_lut_height height of color LUT
  * @param lut_file colormap file name
  */
 BulbSampler::BulbSampler( Bulb *bulb,
 			  unsigned int image_width,
 			  unsigned int image_height,
-			  unsigned int color_lut_width,
-			  unsigned int color_lut_height,
 			  std::string lut_file)
 {
   __image_width = image_width;
   __image_height = image_height;
   this->bulb = bulb;
 
-  colorLut   = new ColorModelLookupTable ( (char *)lut_file.c_str(), 
-					   color_lut_width, color_lut_height );
+  colorLut   = new ColorModelLookupTable ( (char *)lut_file.c_str() );
 
   radial     = new ScanlineRadial( image_width  , image_height, 
 				   image_width/2, image_height/2,
 				   5, 5,
 				   10                              );
 
-  classifier = new SimpleColorClassifier( radial,  colorLut,
-					  /* min num points */ 0);
+  classifier = new SimpleColorClassifier( radial,  colorLut, /* min num points */ 0);
 
 }
 

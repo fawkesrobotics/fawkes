@@ -88,6 +88,9 @@ void yuv411packed_to_rgb_plainc(unsigned char *YUV, unsigned char *RGB,
 void yuv422planar_to_rgb_plainc(unsigned char *planar, unsigned char *RGB,
 				unsigned int width, unsigned int height);
 
+void yuv422packed_to_rgb_plainc(unsigned char *planar, unsigned char *RGB,
+				unsigned int width, unsigned int height);
+
 void yuv422planar_to_bgr_plainc(unsigned char *planar, unsigned char *BGR,
 				unsigned int width, unsigned int height);
 

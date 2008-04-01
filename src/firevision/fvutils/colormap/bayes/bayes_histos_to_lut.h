@@ -6,9 +6,10 @@
  *                          generates all the values for a lookup-table
  *                          that maps from colors to objects
  *
- *  Generated: Mon Jun 27 14:16:52 2005
- *  Copyright  2005  Martin Heracles
- *                   Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jun 27 14:16:52 2005
+ *  Copyright  2005       Martin Heracles
+ *             2005-2008  Tim Niemueller [www.niemueller.de]
+ *             2007-2008  Daniel Beck
  *
  *  $Id$
  *
@@ -30,8 +31,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __FIREVISION_COLORMODEL_BAYES_HISTOS2LUT_H_
-#define __FIREVISION_COLORMODEL_BAYES_HISTOS2LUT_H_
+#ifndef __FIREVISION_COLORMODEL_BAYES_HISTOS_TO_LUT_H_
+#define __FIREVISION_COLORMODEL_BAYES_HISTOS_TO_LUT_H_
 
 #include <fvutils/base/roi.h>
 
@@ -39,14 +40,12 @@
 #include <string>
 
 class Histogram;
-class ColorModelLookupTable;
+class YuvColormap;
 
 class BayesHistosToLut
 {
  public:
   BayesHistosToLut(std::map< hint_t, Histogram * > &histos,
-		   unsigned int w, 
-		   unsigned int h,
 		   unsigned int d = 1,
 		   hint_t fg_object = H_UNKNOWN);
   ~BayesHistosToLut();
@@ -80,7 +79,7 @@ class BayesHistosToLut
   void setMinProbability( float min_prob );
   void setMinProbForColor( float min_prob, hint_t hint );
 
-  ColorModelLookupTable * getColorModel();
+  YuvColormap * get_colormap();
 
   /* method "calculateLutValues" calculates lut values
      following the bayesian approach */
@@ -97,7 +96,7 @@ class BayesHistosToLut
   std::map<hint_t, unsigned int> numberOfOccurrences;
   std::map<hint_t, float>        object_probabilities;
 
-  ColorModelLookupTable *lut;
+  YuvColormap *lut;
   unsigned int width;
   unsigned int height;
   unsigned int depth; 

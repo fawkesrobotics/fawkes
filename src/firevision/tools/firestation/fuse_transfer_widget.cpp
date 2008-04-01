@@ -146,7 +146,7 @@ FuseTransferWidget::remove_fountain_service(const char* name)
  * @param lut the LUT
  */
 void
-FuseTransferWidget::set_current_lut(ColorModelLookupTable* lut)
+FuseTransferWidget::set_current_lut(YuvColormap* lut)
 {
   m_current_lut = lut;
 
@@ -334,7 +334,7 @@ FuseTransferWidget::local_lut_selected()
       // TODO
     }
 
-  m_local_lut_viewer->set_lut(m_local_lut);
+  m_local_lut_viewer->set_colormap(m_local_lut);
   update_local_lut();
 }
 
@@ -423,21 +423,19 @@ FuseTransferWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
     case FUSE_MT_LUT:
       try
 	{
-	  FuseLutContent* lut_content = m->msgc<FuseLutContent>();
+	  //FuseLutContent* lut_content = m->msgc<FuseLutContent>();
 	  
 	  if (m_remote_lut)
 	    { delete m_remote_lut; }
 
-	  unsigned int width = lut_content->width();
-	  unsigned int height = lut_content->height();
 	  //unsigned int depth = lut_content->depth();
-	  m_remote_lut = new ColorModelLookupTable(width, height, /*depth,*/ true);
+	  m_remote_lut = new YuvColormap();
 	}
       catch (Exception& e)
 	{
 	  e.print_trace();
 	}
-      m_remote_lut_viewer->set_lut(m_remote_lut);
+      m_remote_lut_viewer->set_colormap(m_remote_lut);
       m_signal_update_remote_lut();
 
       m_delete_clients.push_locked(m_cur_client.client);

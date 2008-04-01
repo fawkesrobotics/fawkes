@@ -85,9 +85,9 @@ main(int argc, char **argv)
   rif->add_rectinfo_block(rlib);
   rif->add_rectinfo_block(rlib2);
 
-  RectificationInfoFile::RectInfoBlockVector blocks = rif->rectinfo_blocks();
+  RectificationInfoFile::RectInfoBlockVector *blocks = rif->rectinfo_blocks();
 
-  for (RectificationInfoFile::RectInfoBlockVector::iterator i = blocks.begin(); i != blocks.end(); ++i) {
+  for (RectificationInfoFile::RectInfoBlockVector::iterator i = blocks->begin(); i != blocks->end(); ++i) {
     RectificationLutInfoBlock *rlib = dynamic_cast<RectificationLutInfoBlock *>(*i);
     if ( rlib == NULL ) {
       printf("Got rectification info block of unknown type");
@@ -109,6 +109,8 @@ main(int argc, char **argv)
       }
     }
   }
+
+  delete blocks;
 
   cout << "Writing to " << s << endl;
   rif->write(s);
@@ -120,7 +122,7 @@ main(int argc, char **argv)
 
   blocks = rif->rectinfo_blocks();
 
-  for (RectificationInfoFile::RectInfoBlockVector::iterator i = blocks.begin(); i != blocks.end(); ++i) {
+  for (RectificationInfoFile::RectInfoBlockVector::iterator i = blocks->begin(); i != blocks->end(); ++i) {
     RectificationLutInfoBlock *rlib = dynamic_cast<RectificationLutInfoBlock *>(*i);
     if ( rlib == NULL ) {
       printf("Got rectification info block of unknown type");
@@ -143,6 +145,8 @@ main(int argc, char **argv)
       }
     }
   }
+
+  delete blocks;
 
   delete rif;
   return 0;

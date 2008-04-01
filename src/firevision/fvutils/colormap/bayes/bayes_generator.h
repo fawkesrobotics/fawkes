@@ -1,9 +1,9 @@
 
 /**************************************************************************
- *  bayes_generator.h - generator for lookuptables using a bayesian method
+ *  bayes_generator.h - generator for colormap using a bayesian method
  *
- *  Generated: Wed Mar 01 14:00:41 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Mar 01 14:00:41 2006
+ *  Copyright  2005-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -28,28 +28,26 @@
 #ifndef __FIREVISION_MODELS_COLOR_BAYES_BAYES_GENERATOR_
 #define __FIREVISION_MODELS_COLOR_BAYES_BAYES_GENERATOR_
 
-#include <models/color/lookuptable_generator.h>
+#include <fvutils/colormap/generator.h>
 
 #include <vector>
 #include <map>
 
-class ColorModelLookupTable;
+class YuvColormap;
 class BayesHistosToLut;
 
-class BayesColorLutGenerator : public ColorLutGenerator
+class BayesColormapGenerator : public ColormapGenerator
 {
 
  public:
-  BayesColorLutGenerator( unsigned int lut_width = 1, 
-			  unsigned int lut_height = 256,
-			  unsigned int lut_depth = 256,
+  BayesColormapGenerator( unsigned int lut_depth = 1,
 			  hint_t fg_object = H_UNKNOWN);
-  ~BayesColorLutGenerator();
+  ~BayesColormapGenerator();
 
   virtual void                     set_fg_object(hint_t object);
   virtual void                     set_buffer(unsigned char *buffer,
 					      unsigned int width, unsigned int height);
-  virtual ColorModelLookupTable *  get_current();
+  virtual YuvColormap *            get_current();
   virtual void                     consider();
   virtual void                     calc();
   virtual void                     undo();
@@ -73,7 +71,7 @@ class BayesColorLutGenerator : public ColorLutGenerator
   std::map< hint_t, Histogram * >::iterator histo_it;
 
   BayesHistosToLut      *bhtl;
-  ColorModelLookupTable *cm;
+  YuvColormap           *cm;
 
   hint_t fg_object;
 

@@ -26,54 +26,52 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <models/color/lookuptable_generator.h>
-#include <models/color/lookuptable.h>
-#include <fvutils/statistical/histogram.h>
+#include <fvutils/colormap/generator.h>
 
-/** @class ColorLutGenerator <models/color/lookuptable_generator.h>
- * Interface for color LUT generators.
+/** @class ColormapGenerator <fvutils/colormap/generator.h>
+ * Interface for colormap generators.
  *
- * @fn void ColorLutGenerator::set_buffer(unsigned char *buffer, unsigned int width, unsigned int height)
+ * @fn void ColormapGenerator::set_buffer(unsigned char *buffer, unsigned int width, unsigned int height)
  * Set image buffer.
  * Set the image buffer that is to be considered next.
  * @param buffer image buffer (YUV422 planar format assumed)
  * @param width width of image in pixels
  * @param height height of image in pixels
  *
- * @fn ColorModelLookupTable *  ColorLutGenerator::get_current()
- * Get the current LUT.
+ * @fn Colormap *  ColormapGenerator::get_current()
+ * Get the current colormap.
  * With this method you can access the current LUT. This is useful to display the
  * current results as "what would happen if we'd use this LUT?".
  * @return current colormap
  *
- * @fn void ColorLutGenerator::consider()
+ * @fn void ColormapGenerator::consider()
  * Considers the given buffer and extracts the needed information.
  * @see setBuffer()
  *
- * @fn void ColorLutGenerator::calc()
+ * @fn void ColormapGenerator::calc()
  * Calculate LUT.
  * Does the calculation of the lookup table without extracting any further information
  * from the given buffer.
  *
- * @fn void ColorLutGenerator::undo()
+ * @fn void ColormapGenerator::undo()
  * Undo last calls to consider().
  * This will eliminate all calls to consider() since the last call to
  * resetUndo(), reset() or object generation.
  *
- * @fn void ColorLutGenerator::reset()
+ * @fn void ColormapGenerator::reset()
  * Reset the generator.
  * This throws away all results accumulated up to now and starts from scratch
  * with the generation process.
  *
- * @fn void ColorLutGenerator::reset_undo()
+ * @fn void ColormapGenerator::reset_undo()
  * Reset undo buffer.
  * This throws away all undo information and starts a new undo buffer.
  *
- * @fn bool ColorLutGenerator::has_histograms()
+ * @fn bool ColormapGenerator::has_histograms()
  * Check if this generator has histograms.
  * @return true, if this generator has histograms, false otherwise
  * 
- * @fn std::map< std::string, Histogram *> *  ColorLutGenerator::get_histograms()
+ * @fn std::map< std::string, Histogram *> *  ColormapGenerator::get_histograms()
  * Get histograms.
  * @return a map of histograms, if any.
  *
@@ -81,6 +79,6 @@
 
 
 /** Virtual empty destructor. */
-ColorLutGenerator::~ColorLutGenerator()
+ColormapGenerator::~ColormapGenerator()
 {
 }

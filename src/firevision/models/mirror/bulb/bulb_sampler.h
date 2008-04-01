@@ -44,15 +44,11 @@ class BulbSampler {
 
   BulbSampler( unsigned int image_width,
 	       unsigned int image_height,
-	       unsigned int lut_width,
-	       unsigned int lut_height,
 	       std::string lut_file);
 
   BulbSampler( Bulb *bulb,
 	       unsigned int image_width,
 	       unsigned int image_height,
-	       unsigned int lut_width,
-	       unsigned int lut_height,
 	       std::string lut_file);
 
   ~BulbSampler();

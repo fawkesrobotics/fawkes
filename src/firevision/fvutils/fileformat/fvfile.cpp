@@ -110,8 +110,13 @@ FireVisionDataFile::FireVisionDataFile(unsigned short int magic_token,
 /** Destructor. */
 FireVisionDataFile::~FireVisionDataFile()
 {
+  clear();
+
   free(__header);
   free(__comment);
+  if ( _spec_header ) {
+    free(_spec_header);
+  }
 }
 
 
@@ -251,21 +256,23 @@ FireVisionDataFile::write(const char *file_name)
   __header->created_usec = t.tv_usec;
   __header->spec_head_size = _spec_header_size;
 
-  printf("Writing %zu bytes for header\n", sizeof(fvff_header_t));
+  //printf("Writing %zu bytes for header\n", sizeof(fvff_header_t));
   if ( fwrite(__header, sizeof(fvff_header_t), 1, f) != 1 ) {
     fclose(f);
     throw FileWriteException(file_name, errno, "Writing fvff header failed");
   }
 
-  printf("Writing %zu bytes for spec header\n", _spec_header_size);
-  if ( fwrite(_spec_header, _spec_header_size, 1, f) != 1 ) {
-    fclose(f);
-    throw FileWriteException(file_name, errno, "Writing content specific header failed");
+  if ( _spec_header_size > 0 ) {
+    //printf("Writing %zu bytes for spec header\n", _spec_header_size);
+    if ( fwrite(_spec_header, _spec_header_size, 1, f) != 1 ) {
+      fclose(f);
+      throw FileWriteException(file_name, errno, "Writing content specific header failed");
+    }
   }
 
   for (__bi = __blocks.begin(); __bi != __blocks.end(); ++__bi) {
     // write this info block
-    printf("Writing %zu bytes for block\n", (*__bi)->block_size());
+    //printf("Writing %zu bytes for block\n", (*__bi)->block_size());
     if ( fwrite((*__bi)->block_memptr(), (*__bi)->block_size(), 1, f) != 1 ) {
       fclose(f);
       throw FileWriteException(file_name, errno, "Failed to write info block");
@@ -290,7 +297,7 @@ FireVisionDataFile::read(const char *file_name)
 
   clear();
 
-  printf("Reading %zu bytes for header\n", sizeof(fvff_header_t));
+  //printf("Reading %zu bytes for header\n", sizeof(fvff_header_t));
   if ( fread(__header, sizeof(fvff_header_t), 1, f) != 1) {
     fclose(f);
     throw FileReadException(file_name, errno, "Reading rectlut header failed");
@@ -330,16 +337,18 @@ FireVisionDataFile::read(const char *file_name)
     throw OutOfMemoryException("Cannot alloate memory for content specific header");
   }
 
-  printf("Reading %u bytes for spec header\n", __header->spec_head_size);
-  if ( fread(_spec_header, __header->spec_head_size, 1, f) != 1) {
-    fclose(f);
-    throw FileReadException(file_name, errno, "Reading content specific header failed");
+  if ( __header->spec_head_size > 0 ) {
+    //printf("Reading %u bytes for spec header\n", __header->spec_head_size);
+    if ( fread(_spec_header, __header->spec_head_size, 1, f) != 1) {
+      fclose(f);
+      throw FileReadException(file_name, errno, "Reading content specific header failed");
+    }
   }
 
-  printf("Reading %u blocks\n", __header->num_blocks);
+  //printf("Reading %u blocks\n", __header->num_blocks);
   for (uint8_t b = 0; b < __header->num_blocks && !feof(f); ++b) {
     fvff_block_header_t bh;
-    printf("Reading %zu bytes for block header\n", sizeof(bh));
+    //printf("Reading %zu bytes for block header\n", sizeof(bh));
     if ( fread(&bh, sizeof(bh), 1, f) != 1 ) {
       fclose(f);
       throw FileReadException(file_name, errno,
@@ -349,13 +358,13 @@ FireVisionDataFile::read(const char *file_name)
 
     if ( bh.spec_head_size > 0 ) {
       // Read specific header
-      spec_header = calloc(1, bh.spec_head_size);
+      spec_header = malloc(bh.spec_head_size);
       if ( ! spec_header ) {
 	throw OutOfMemoryException("Could not allocate %u bytes for content specific header",
 				   bh.spec_head_size);
       }
 
-      printf("Reading %u bytes for block spec header\n", bh.spec_head_size);
+      //printf("Reading %u bytes for block spec header\n", bh.spec_head_size);
       if ( fread(spec_header, bh.spec_head_size, 1, f) != 1 ) {
 	fclose(f);
 	free(spec_header);
@@ -367,8 +376,9 @@ FireVisionDataFile::read(const char *file_name)
     FireVisionDataFileBlock *block = new FireVisionDataFileBlock(bh.type, bh.size,
 								 spec_header, bh.spec_head_size);
 
+    free(spec_header);
 
-    printf("Reading %u bytes for block data\n", bh.size);
+    //printf("Reading %u bytes for block data\n", bh.size);
     if ( fread(block->data_ptr(), bh.size, 1, f) != 1 ) {
       fclose(f);
       delete block;

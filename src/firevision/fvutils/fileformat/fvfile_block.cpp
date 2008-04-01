@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  fvfile_block.h - FireVision file block
+ *  fvfile_block.cpp - FireVision file block
  *
  *  Created: Fri Mar 28 11:52:45 2008
  *  Copyright  2008  Tim Niemueller [www.niemueller.de]
@@ -181,7 +181,7 @@ FireVisionDataFileBlock::~FireVisionDataFileBlock()
  * @return block type ID, content specific
  */
 unsigned int
-FireVisionDataFileBlock::type()
+FireVisionDataFileBlock::type() const
 {
   return __block_header->type;
 }
@@ -191,7 +191,7 @@ FireVisionDataFileBlock::type()
  * @return pointer to whole block, including headers
  */
 void *
-FireVisionDataFileBlock::block_memptr()
+FireVisionDataFileBlock::block_memptr() const
 {
   return __block_memptr;
 }
@@ -201,7 +201,7 @@ FireVisionDataFileBlock::block_memptr()
  * @return size of blocks in bytes.
  */
 size_t
-FireVisionDataFileBlock::block_size()
+FireVisionDataFileBlock::block_size() const
 {
   return __block_size;
 }
@@ -211,7 +211,17 @@ FireVisionDataFileBlock::block_size()
  * @return pointer to the data segment of the block
  */
 void *
-FireVisionDataFileBlock::data_ptr()
+FireVisionDataFileBlock::data_ptr() const
 {
   return _data;
+}
+
+
+/** Size of data chunk.
+ * @return size of data in bytes.
+ */
+size_t
+FireVisionDataFileBlock::data_size() const
+{
+  return _data_size;
 }

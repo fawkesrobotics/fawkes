@@ -36,7 +36,7 @@
 #include <string>
 
 class FuseClient;
-class ColorModelLookupTable;
+class YuvColormap;
 class LutViewerWidget;
 
 class FuseTransferWidget : FuseClientHandler
@@ -50,7 +50,7 @@ class FuseTransferWidget : FuseClientHandler
 			     uint16_t port );
   void remove_fountain_service(const char* name);
 
-  void set_current_lut(ColorModelLookupTable* lut);
+  void set_current_lut(YuvColormap* lut);
 
   void set_upload_btn(Gtk::Button* btn_upload);
   void set_download_btn(Gtk::Button* btn_download);
@@ -137,9 +137,9 @@ class FuseTransferWidget : FuseClientHandler
   Glib::RefPtr<Gtk::ListStore> m_local_lut_list;
   LutRecord m_lut_record;
 
-  ColorModelLookupTable* m_current_lut;
-  ColorModelLookupTable* m_local_lut;
-  ColorModelLookupTable* m_remote_lut;
+  YuvColormap* m_current_lut;
+  YuvColormap* m_local_lut;
+  YuvColormap* m_remote_lut;
 };
 
 #endif /* __FIREVISION_TOOLS_IMAGE_VIEWER_MIRROR_CALIB_H_ */

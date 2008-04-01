@@ -31,9 +31,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <models/color/bayes/bayes_histos_to_lut.h>
+#include <fvutils/colormap/bayes/bayes_histos_to_lut.h>
 #include <fvutils/statistical/histogram.h>
-#include <models/color/lookuptable.h>
+#include <fvutils/colormap/yuvcm.h>
+#include <fvutils/colormap/cmfile.h>
 
 #include <iostream>
 #include <string>
@@ -41,8 +42,9 @@
 
 using namespace std;
 
-/** @class BayesHistosToLut <models/color/bayes/bayes_histos_to_lut.h>
+/** @class BayesHistosToLut <fvutils/colormap/bayes/bayes_histos_to_lut.h>
  * LUT generation by using Bayesian method on histograms.
+ * Generates a YUV colormap.
  * @author Martin Herakles.
  * @author Tim Niemueller
  * @author Daniel Beck
@@ -50,27 +52,22 @@ using namespace std;
 
 /** Constructor.
  * @param histos histograms
- * @param w width of lookup table
- * @param h height of lookup table
  * @param d depth of lookup table
  * @param object type of the foreground object
  */
 BayesHistosToLut::BayesHistosToLut(std::map<hint_t, Histogram*> &histos,
-				   unsigned int w, 
-				   unsigned int h,
-				   unsigned int d,
-				   hint_t object) :
-  histograms(histos)
+				   unsigned int d, hint_t object)
+  : histograms(histos)
 {
-  width  = w;
-  height = h;
+  width  = 256;
+  height = 256;
   depth  = d;
 
   fg_object  = object;
   //  histograms = histos;
 
   // no as shmem segment
-  lut = new ColorModelLookupTable(width, height, depth);
+  lut = new YuvColormap(depth);
 
   min_probability = 0.3;
   min_prob_ball = 0.0;
@@ -493,29 +490,29 @@ BayesHistosToLut::calculateLutValues( bool penalty )
 	switch(mostLikelyObject) {
 	case H_BALL:
 	  count_ball++;
-	  lut->set(y, u, v, C_ORANGE, false);
+	  lut->set(y, u, v, C_ORANGE);
 	  break;
 	case H_BACKGROUND:
 	  count_background++;
-	  lut->set(y, u, v, C_BACKGROUND, false);
+	  lut->set(y, u, v, C_BACKGROUND);
 	  break;
 	case H_FIELD:
 	  count_field++;
-	  lut->set(y, u, v, C_GREEN, false);
+	  lut->set(y, u, v, C_GREEN);
 	  break;
 	case H_GOAL_BLUE:
-	  lut->set(y, u, v, C_BLUE, false);
+	  lut->set(y, u, v, C_BLUE);
 	  break;
 	case H_GOAL_YELLOW:
-	  lut->set(y, u, v, C_YELLOW, false);
+	  lut->set(y, u, v, C_YELLOW);
 	  break;
 	case H_LINE:
 	  count_line++;
-	  lut->set(y, u, v, C_WHITE, false);
+	  lut->set(y, u, v, C_WHITE);
 	  break;
 	case H_UNKNOWN:
 	  count_unknown++;
-	  lut->set(y, u, v, C_OTHER, false);
+	  lut->set(y, u, v, C_OTHER);
 	  break;
 	default:
 	  cout << "(BayesHistosToLut::calculateLutValues): Invalid object." << endl;
@@ -557,7 +554,9 @@ BayesHistosToLut::calculateLutValues( bool penalty )
 void
 BayesHistosToLut::saveLut(char *file)
 {
-  lut->save(file);
+  ColormapFile cmf;
+  cmf.add_colormap(lut);
+  cmf.write(file);
 }
 
 /** Save LUT to file.
@@ -566,7 +565,9 @@ BayesHistosToLut::saveLut(char *file)
 void
 BayesHistosToLut::save(std::string filename)
 {
-  lut->save( (char *)filename.c_str() );
+  ColormapFile cmf;
+  cmf.add_colormap(lut);
+  cmf.write(filename.c_str());
 }
 
 
@@ -615,8 +616,8 @@ BayesHistosToLut::setMinProbForColor( float min_prob, hint_t hint ) {
 /** Get generated color model.
  * @return generated color model
  */
-ColorModelLookupTable *
-BayesHistosToLut::getColorModel()
+YuvColormap *
+BayesHistosToLut::get_colormap()
 {
   return lut;
 }

@@ -339,7 +339,7 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
   // --- fuse transfer widget ---------------------------------------
   m_ftw = new FuseTransferWidget();
-  m_ftw->set_current_lut( m_ctw->get_lut() );
+  m_ftw->set_current_lut( m_ctw->get_colormap() );
 
   Gtk::TreeView* trv = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvFuseRemoteLuts") );
   m_ftw->set_remote_lut_list_trv(trv);

@@ -894,10 +894,10 @@ TriclopsStereoProcessor::verify_rectification_lut(const char *lut_file)
   bool left_ok = false;
   bool right_ok = false;
 
-  RectificationInfoFile::RectInfoBlockVector blocks = rif->rectinfo_blocks();
-  printf("We have %zu blocks\n", blocks.size());
+  RectificationInfoFile::RectInfoBlockVector *blocks = rif->rectinfo_blocks();
+  printf("We have %zu blocks\n", blocks->size());
   RectificationInfoFile::RectInfoBlockVector::const_iterator i;
-  for (i = blocks.begin(); (i != blocks.end() && ! (left_ok && right_ok)); ++i) {
+  for (i = blocks->begin(); (i != blocks->end() && ! (left_ok && right_ok)); ++i) {
     printf("Veryfying block\n");
     RectificationInfoBlock *rib = *i;
 
@@ -947,9 +947,8 @@ TriclopsStereoProcessor::verify_rectification_lut(const char *lut_file)
       }
     }
   }
+  delete blocks;
 
   delete rif;
   return (left_ok && right_ok);
 }
-
-

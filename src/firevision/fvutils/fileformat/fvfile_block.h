@@ -42,10 +42,11 @@ class FireVisionDataFileBlock
   FireVisionDataFileBlock(FireVisionDataFileBlock *block);
   virtual ~FireVisionDataFileBlock();
 
-  unsigned int  type();
-  void *        block_memptr();
-  size_t        block_size();
-  void *        data_ptr();
+  unsigned int  type() const;
+  void *        block_memptr() const;
+  size_t        block_size() const;
+  void *        data_ptr() const;
+  size_t        data_size() const;
 
  protected:
   void set_spec_header(void *spec_header, size_t spec_header_size);

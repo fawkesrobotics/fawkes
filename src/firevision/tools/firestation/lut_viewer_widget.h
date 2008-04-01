@@ -30,7 +30,7 @@
 
 #include <gtkmm.h>
 
-class ColorModelLookupTable;
+class YuvColormap;
 
 class LutViewerWidget
 {
@@ -38,15 +38,13 @@ class LutViewerWidget
   LutViewerWidget();
   ~LutViewerWidget();
 
-  void set_lut(ColorModelLookupTable* lut);
+  void set_colormap(YuvColormap* cm);
   void set_lut_img(Gtk::Image* img);
 
   void draw();
 
  private:
-  ColorModelLookupTable* m_lut;
-  unsigned int m_lut_width;
-  unsigned int m_lut_height;
+  YuvColormap* m_cm;
 
   Gtk::Image* m_img_lut;
   unsigned char* m_lut_img_buf;

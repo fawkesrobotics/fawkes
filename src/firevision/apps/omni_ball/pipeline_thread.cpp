@@ -172,7 +172,6 @@ FvOmniBallPipelineThread::init()
       
       // colormodel
       cm = new ColorModelLookupTable(colormap_file, 
-				     256 /* lut_width */, 256 /* lut_height */,
 				     "omni-ball-colormap", 
 				     true /* destroy on delete */ );
       

@@ -1,8 +1,8 @@
 
 /**************************************************************************
- *  bayes_generator.cpp - generator for lookuptables using a bayesian method
+ *  bayes_generator.cpp - generator for colormaps using a bayesian method
  *
- *  Generated: Wed Mar 01 14:14:41 2006
+ *  Created: Wed Mar 01 14:14:41 2006
  *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
  *             2007-2008  Daniel Beck
  *
@@ -26,37 +26,32 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <models/color/bayes/bayes_generator.h>
+#include <fvutils/colormap/bayes/bayes_generator.h>
 
 #include <fvutils/color/yuv.h>
 #include <fvutils/statistical/histogram.h>
-#include <models/color/lookuptable.h>
-#include <models/color/bayes/bayes_histos_to_lut.h>
+#include <fvutils/colormap/yuvcm.h>
+#include <fvutils/colormap/bayes/bayes_histos_to_lut.h>
 #include <core/exception.h>
 
 #include <cmath>
 
 using namespace std;
 
-/** @class BayesColorLutGenerator <models/color/bayes/bayes_generator.h>
- * Color LUT Generator using Bayes method.
+/** @class BayesColormapGenerator <fvutils/colormap/bayes/bayes_generator.h>
+ * Colormap Generator using Bayes method.
  * @author Tim Niemueller
  * @author Daniel Beck
  */
 
 /** Constructor. 
- * @param lut_width the width of the lookup table
- * @param lut_height the height of the lookup table
  * @param lut_depth the depth of the lookup table
  * @param fg_object the type of a foreground object
  */
-BayesColorLutGenerator::BayesColorLutGenerator( unsigned int lut_width,
-						unsigned int lut_height,
-						unsigned int lut_depth,
-						hint_t fg_object)
+BayesColormapGenerator::BayesColormapGenerator(unsigned int lut_depth,	hint_t fg_object)
 {
-  this->lut_width  = lut_width;
-  this->lut_height = lut_height;
+  this->lut_width  = 256;
+  this->lut_height = 256;
   this->lut_depth  = lut_depth;
 
   set_fg_object(fg_object);
@@ -70,13 +65,13 @@ BayesColorLutGenerator::BayesColorLutGenerator( unsigned int lut_width,
   image_width = image_height = 0;
   selection_mask = 0;
 
-  bhtl = new BayesHistosToLut(histos, lut_width, lut_height, lut_depth, fg_object);
-  cm = bhtl->getColorModel();
+  bhtl = new BayesHistosToLut(histos, lut_depth, fg_object);
+  cm = bhtl->get_colormap();
 }
 
 
 /** Destructor. */
-BayesColorLutGenerator::~BayesColorLutGenerator()
+BayesColormapGenerator::~BayesColormapGenerator()
 {
   for (histo_it = fg_histos.begin(); histo_it != fg_histos.end(); ++histo_it) {
     delete histo_it->second;
@@ -98,7 +93,7 @@ BayesColorLutGenerator::~BayesColorLutGenerator()
  * @param object the new foreground object
  */
 void
-BayesColorLutGenerator::set_fg_object(hint_t object)
+BayesColormapGenerator::set_fg_object(hint_t object)
 {
   if (H_UNKNOWN == object)
     { return; }
@@ -121,7 +116,7 @@ BayesColorLutGenerator::set_fg_object(hint_t object)
  * @param height image height
  */
 void
-BayesColorLutGenerator::set_buffer(unsigned char *buffer,
+BayesColormapGenerator::set_buffer(unsigned char *buffer,
 				   unsigned int width, unsigned int height)
 {
   this->buffer = buffer;
@@ -139,8 +134,8 @@ BayesColorLutGenerator::set_buffer(unsigned char *buffer,
 /** Get current color model.
  * @return current color model
  */
-ColorModelLookupTable *
-BayesColorLutGenerator::get_current()
+YuvColormap *
+BayesColormapGenerator::get_current()
 {
   return cm;
 }
@@ -152,7 +147,7 @@ BayesColorLutGenerator::get_current()
  * @return true if pixel is in region, false otherwise
  */
 bool
-BayesColorLutGenerator::is_in_region(unsigned int x, unsigned int y) 
+BayesColormapGenerator::is_in_region(unsigned int x, unsigned int y) 
 {
   return selection_mask[image_width * y + x];
 }
@@ -162,7 +157,7 @@ BayesColorLutGenerator::is_in_region(unsigned int x, unsigned int y)
  * @param region selected region.
  */
 void
-BayesColorLutGenerator::set_selection(vector< rectangle_t > region)
+BayesColormapGenerator::set_selection(vector< rectangle_t > region)
 {
   this->region = region;
 
@@ -191,7 +186,7 @@ BayesColorLutGenerator::set_selection(vector< rectangle_t > region)
  * @see BayesHistosToLut::setMinProbability()
  */
 void
-BayesColorLutGenerator::set_min_probability(float min_prob)
+BayesColormapGenerator::set_min_probability(float min_prob)
 {
   bhtl->setMinProbability( min_prob );
 }
@@ -199,7 +194,7 @@ BayesColorLutGenerator::set_min_probability(float min_prob)
 
 /** Consider current image. */
 void
-BayesColorLutGenerator::consider()
+BayesColormapGenerator::consider()
 {
 
   if (region.size() == 0) {
@@ -248,7 +243,7 @@ BayesColorLutGenerator::consider()
 
 /** Calculate. */
 void
-BayesColorLutGenerator::calc()
+BayesColormapGenerator::calc()
 {
   normalize_histos();
   bhtl->calculateLutValues( false /* no penalty*/ );
@@ -257,7 +252,7 @@ BayesColorLutGenerator::calc()
 
 /** Undo last inclusion. */
 void
-BayesColorLutGenerator::undo()
+BayesColormapGenerator::undo()
 {
   for (histo_it = fg_histos.begin(); histo_it != fg_histos.end(); ++histo_it) {
     (*histo_it).second->undo();
@@ -275,7 +270,7 @@ BayesColorLutGenerator::undo()
 
 /** Reset color model. */
 void
-BayesColorLutGenerator::reset()
+BayesColormapGenerator::reset()
 {
   for (histo_it = histos.begin(); histo_it != histos.end(); ++histo_it) {
     (*histo_it).second->reset();
@@ -299,7 +294,7 @@ BayesColorLutGenerator::reset()
 
 /** Reset undo. */
 void
-BayesColorLutGenerator::reset_undo()
+BayesColormapGenerator::reset_undo()
 {
   for (histo_it = histos.begin(); histo_it != histos.end(); ++histo_it) {
     (*histo_it).second->reset_undo();
@@ -319,7 +314,7 @@ BayesColorLutGenerator::reset_undo()
  * @return true
  */
 bool
-BayesColorLutGenerator::has_histograms()
+BayesColormapGenerator::has_histograms()
 {
   return true;
 }
@@ -329,7 +324,7 @@ BayesColorLutGenerator::has_histograms()
  * @return histograms
  */
 std::map< hint_t, Histogram * > *
-BayesColorLutGenerator::get_histograms()
+BayesColormapGenerator::get_histograms()
 {
   return &histos;
 }
@@ -337,12 +332,11 @@ BayesColorLutGenerator::get_histograms()
 
 /** Normalize histograms and compute overall background histogram. */
 void
-BayesColorLutGenerator::normalize_histos()
+BayesColormapGenerator::normalize_histos()
 {
-  for (histo_it = histos.begin(); histo_it != histos.end(); ++histo_it)
-    {
-      histo_it->second->reset();
-    }
+  for (histo_it = histos.begin(); histo_it != histos.end(); ++histo_it) {
+    histo_it->second->reset();
+  }
 
   unsigned int fg_size = 0;
   unsigned int hval;

@@ -33,8 +33,11 @@
 #include <fvutils/color/conversions.h>
 #include <fvutils/draw/drawer.h>
 #include <fvutils/scalers/lossy.h>
-#include <models/color/bayes/bayes_generator.h>
-#include <models/color/lookuptable.h>
+#include <fvutils/colormap/bayes/bayes_generator.h>
+#include <fvutils/colormap/yuvcm.h>
+#include <fvutils/colormap/cmfile.h>
+
+#include <core/exceptions/software.h>
 
 /** @class ColorTrainWidget tools/firestation/color_train_widget.h
  * This widget implements the complete color training process.
@@ -47,14 +50,12 @@
  */
 ColorTrainWidget::ColorTrainWidget(Gtk::Window* parent)
 {
-  m_lut_width = 8;
-  m_lut_height = 256;
-  m_lut_depth = 256;
+  m_lut_depth = 8;
 
-  m_generator = new BayesColorLutGenerator(m_lut_width, m_lut_height, m_lut_depth);
+  m_generator = new BayesColormapGenerator(m_lut_depth);
   m_zauberstab = new Zauberstab();
   m_lvw = new LutViewerWidget();
-  m_lvw->set_lut( m_generator->get_current() );
+  m_lvw->set_colormap( m_generator->get_current() );
 
   m_src_buffer = 0;
   m_draw_buffer = 0;
@@ -177,22 +178,18 @@ ColorTrainWidget::reset_selection()
     { m_update_img->emit(); }
 }
 
-/** Set the dimensions of the LUT that is generated.
+/** Set the depth of the LUT that is generated.
  * Note: this invalidates the pointer returned by get_lut().
- * @param lut_width the width of the LUT
- * @param lut_height the height of the LUT
  * @param lut_depth the depth of the LUT
  */
 void
-ColorTrainWidget::set_lut_dim(unsigned int lut_width, unsigned int lut_height, unsigned int lut_depth)
+ColorTrainWidget::set_lut_depth(unsigned int lut_depth)
 {
-  m_lut_width = lut_width;
-  m_lut_height = lut_height;
   m_lut_depth = lut_depth;
   
   delete m_generator;
-  m_generator = new BayesColorLutGenerator(m_lut_width, m_lut_height, m_lut_depth);
-  m_lvw->set_lut( m_generator->get_current() );
+  m_generator = new BayesColormapGenerator(m_lut_depth);
+  m_lvw->set_colormap( m_generator->get_current() );
 }
 
 /** Set the button to reset the selection.
@@ -388,9 +385,18 @@ ColorTrainWidget::load_lut()
      case (Gtk::RESPONSE_OK):
        {
 	 std::string filename = m_fcd_filechooser->get_filename();
-	 ColorModelLookupTable* lut = m_generator->get_current();
-	 lut->load( filename.c_str() );
-	
+	 ColormapFile cmf;
+	 cmf.read(filename.c_str());
+	 Colormap *tcm = cmf.get_colormap();
+	 YuvColormap *tycm = dynamic_cast<YuvColormap *>(tcm);
+	 if ( ! tycm ) {
+	   delete tcm;
+	   throw TypeMismatchException("File does not contain a YUV colormap");
+	 }
+	 YuvColormap *current = m_generator->get_current();
+	 *current = *tycm;
+	 delete tcm;
+
 	 m_lvw->draw();
 	 draw_segmentation_result();
  	break;
@@ -425,9 +431,9 @@ ColorTrainWidget::save_lut()
     case(Gtk::RESPONSE_OK):
       {
         std::string filename = m_fcd_filechooser->get_filename();
-	ColorModelLookupTable* lut = m_generator->get_current();
-	lut->save( filename.c_str() );
-
+	ColormapFile cmf;
+	cmf.add_colormap(m_generator->get_current());
+	cmf.write( filename.c_str() );
         break;
       }
 
@@ -444,8 +450,8 @@ ColorTrainWidget::save_lut()
 /** Get the current LUT.
  * @return the current LUT
  */
-ColorModelLookupTable*
-ColorTrainWidget::get_lut() const
+YuvColormap *
+ColorTrainWidget::get_colormap() const
 {
   return m_generator->get_current();
 }
@@ -482,7 +488,7 @@ ColorTrainWidget::draw_segmentation_result()
   Drawer* d = new Drawer();
   d->setBuffer(seg_buffer, m_img_width, m_img_height);
   
-  ColorModelLookupTable* cm = m_generator->get_current();
+  YuvColormap* cm = m_generator->get_current();
   
   for (unsigned int w = 0; w < m_img_width; ++w)
     {

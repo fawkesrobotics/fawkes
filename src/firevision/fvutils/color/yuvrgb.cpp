@@ -84,7 +84,6 @@ yuv411packed_to_rgb_plainc(unsigned char *YUV, unsigned char *RGB,
 }
 
 
-
 /** YUV to RGB Conversion
  * B = 1.164(Y - 16)                  + 2.018(U - 128)
  * G = 1.164(Y - 16) - 0.813(V - 128) - 0.391(U - 128)
@@ -137,6 +136,46 @@ yuv422planar_to_rgb_plainc(unsigned char *planar, unsigned char *RGB, unsigned i
   }
 }
 
+
+
+/** YUV to RGB Conversion
+ * B = 1.164(Y - 16)                  + 2.018(U - 128)
+ * G = 1.164(Y - 16) - 0.813(V - 128) - 0.391(U - 128)
+ * R = 1.164(Y - 16) + 1.596(V - 128)
+ *
+ * Values have to be clamped to keep them in the [0-255] range.
+ * Rumour has it that the valid range is actually a subset of [0-255] (fourcc.org mentions an RGB range
+ * of [16-235] mentioned) but clamping the values into [0-255] seems to produce acceptable results.
+ * @param YUV unsigned char array that contains the pixels, 4 pixels in 8 byte macro pixel, line after
+ *            line
+ * @param RGB where the RGB output will be written to, will have pixel after pixel, 3 bytes per pixel
+ *            (thus this is a 24bit RGB with one byte per color) line by line.
+ * @param width Width of the image contained in the YUV buffer
+ * @param height Height of the image contained in the YUV buffer
+ */
+void
+yuv422packed_to_rgb_plainc(unsigned char *YUV, unsigned char *RGB,
+			   unsigned int width, unsigned int height)
+{
+  register int y0, y1, u, v;
+  register unsigned int i = 0;
+  while (i < (width * height)/2) {
+    u  = YUV[i++] - 128;
+    y0 = YUV[i++] -  16;
+    v  = YUV[i++] - 128;
+    y1 = YUV[i++] -  16;
+    
+    // Set red, green and blue bytes for pixel 0
+    *RGB++ = clip( (76284 * y0 + 104595 * v             ) >> 16 );
+    *RGB++ = clip( (76284 * y0 -  25625 * u - 53281 * v ) >> 16 );
+    *RGB++ = clip( (76284 * y0 + 132252 * u             ) >> 16 );
+    
+    // Set red, green and blue bytes for pixel 1
+    *RGB++ = clip( (76284 * y1 + 104595 * v             ) >> 16 );
+    *RGB++ = clip( (76284 * y1 -  25625 * u - 53281 * v ) >> 16 );
+    *RGB++ = clip( (76284 * y1 + 132252 * u             ) >> 16 );
+  }
+}
 
 /** Convert YUV422 planar to BGR.
  * Use formula in aforementioned function.

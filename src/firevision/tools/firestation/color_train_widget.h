@@ -34,9 +34,9 @@
 #include <gtkmm.h>
 
 class LutViewerWidget;
-class BayesColorLutGenerator;
+class BayesColormapGenerator;
 class Zauberstab;
-class ColorModelLookupTable;
+class YuvColormap;
 
 class ColorTrainWidget
 {
@@ -57,12 +57,12 @@ class ColorTrainWidget
   void load_histogram();
   void save_histogram();
 
-  void set_lut_dim(unsigned int width, unsigned int height, unsigned int depth = 0);
+  void set_lut_depth(unsigned int depth = 0);
   void add_to_lut();
   void reset_lut();
   void load_lut();
   void save_lut();
-  ColorModelLookupTable* get_lut() const;
+  YuvColormap* get_colormap() const;
 
   void draw_segmentation_result();
 
@@ -85,7 +85,7 @@ class ColorTrainWidget
   bool set_threshold(Gtk::ScrollType scroll, double value);
   bool set_min_prob(Gtk::ScrollType scroll, double value);
 
-  BayesColorLutGenerator* m_generator;
+  BayesColormapGenerator* m_generator;
   Zauberstab* m_zauberstab;
   LutViewerWidget* m_lvw;
   
@@ -99,8 +99,6 @@ class ColorTrainWidget
   colorspace_t m_img_cs;
   float m_img_ratio;
 
-  unsigned int m_lut_width;
-  unsigned int m_lut_height;
   unsigned int m_lut_depth;
 
   Gtk::Window* m_wnd_parent;
