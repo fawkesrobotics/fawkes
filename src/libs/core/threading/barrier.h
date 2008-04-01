@@ -2,8 +2,8 @@
 /***************************************************************************
  *  barrier.h - Barrier
  *
- *  Generated: Thu Sep 15 00:31:50 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Sep 15 00:31:50 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *

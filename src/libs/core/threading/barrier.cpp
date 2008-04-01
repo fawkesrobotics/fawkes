@@ -2,8 +2,8 @@
 /***************************************************************************
  *  barrier.cpp - Barrier
  *
- *  Generated: Thu Sep 15 00:33:13 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Sep 15 00:33:13 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -28,12 +28,28 @@
 #include <core/threading/barrier.h>
 
 #include <pthread.h>
+#include <unistd.h>
+
+// cf. http://people.redhat.com/drepper/posix-option-groups.html
+#if defined(_POSIX_BARRIERS) && (_POSIX_BARRIERS - 200112L) >= 0
+#  define USE_POSIX_BARRIERS
+#else
+#  undef USE_POSIX_BARRIERS
+#  include <core/threading/mutex.h>
+#  include <core/threading/wait_condition.h>
+#endif
 
 /// @cond INTERNALS
 class BarrierData
 {
  public:
+#ifdef USE_POSIX_BARRIERS
   pthread_barrier_t barrier;
+#else
+  unsigned int  threads_left;
+  Mutex         mutex;
+  WaitCondition waitcond;
+#endif
 };
 /// @endcond
 
@@ -76,6 +92,16 @@ class BarrierData
  * reset automatically and can be re-used with the same amount of barrier
  * waiters.
  *
+ * The implementation of Barrier takes into account that PThread barriers are
+ * optional in POSIX. If barriers are not available they are emulated using a
+ * wait condition. Note however that on systems that do have both, barriers and
+ * wait conditions it has been observed that in a typical barrier scenario the
+ * POSIX barriers perform much better in many situations than a wait condition
+ * (processes tend to be rescheduled immediately if a barrier is reached, while
+ * with a wait condition they are rescheduled with lower priority and thus they
+ * delay may increase on a loaded system). Because of this on systems without
+ * real POSIX barriers the performance may be not as good as is expected.
+ *
  * @ingroup Threading
  * @author Tim Niemueller
  */
@@ -88,14 +114,20 @@ Barrier::Barrier(unsigned int count)
 {
   _count = count;
   barrier_data = new BarrierData();
+#ifdef USE_POSIX_BARRIERS
   pthread_barrier_init( &(barrier_data->barrier), NULL, count );
+#else
+  barrier_data->threads_left = count;
+#endif
 }
 
 
 /** Destructor */
 Barrier::~Barrier()
 {
+#ifdef USE_POSIX_BARRIERS
   pthread_barrier_destroy( &(barrier_data->barrier) );
+#endif
   delete barrier_data;
 }
 
@@ -107,7 +139,21 @@ Barrier::~Barrier()
 void
 Barrier::wait()
 {
+#ifdef USE_POSIX_BARRIERS
   pthread_barrier_wait( &(barrier_data->barrier) );
+#else
+  barrier_data->mutex.lock();
+
+  if ( --barrier_data->threads_left == 0 ) {
+    barrier_data->threads_left = _count;
+    barrier_data->mutex.unlock();
+    barrier_data->waitcond.wake_all();
+  } else {
+    barrier_data->waitcond.wait(&(barrier_data->mutex));
+    barrier_data->mutex.unlock();
+  }
+
+#endif
 }
 
 
