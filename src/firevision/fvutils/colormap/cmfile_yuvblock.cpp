@@ -30,6 +30,7 @@
 #include <fvutils/colormap/yuvcm.h>
 
 #include <core/exceptions/software.h>
+#include <cstring>
 
 /** @class ColormapFileYuvBlock <fvutils/colormap/cmfile_yuvblock.h>
  * YUV block for colormap file.
