@@ -154,7 +154,8 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     config_manager     = new FawkesConfigManager(config);
     blackboard         = new BlackBoard();
     thread_manager     = new FawkesThreadManager();
-    thread_inifin      = new FawkesThreadIniFin(blackboard, thread_manager,
+    thread_inifin      = new FawkesThreadIniFin(blackboard,
+						thread_manager->aspect_collector(),
 						config, multi_logger, clock);
     thread_manager->set_inifin(thread_inifin, thread_inifin);
     plugin_manager     = new FawkesPluginManager(thread_manager);

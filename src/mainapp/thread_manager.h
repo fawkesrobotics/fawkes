@@ -37,7 +37,6 @@
 #include <list>
 
 class Mutex;
-class Barrier;
 class WaitCondition;
 class ThreadInitializer;
 class ThreadFinalizer;
@@ -50,11 +49,25 @@ class FawkesThreadManager : public ThreadCollector
 
   void set_inifin(ThreadInitializer *initializer, ThreadFinalizer *finalizer);
 
-  virtual void add(ThreadList &tl);
-  virtual void add(Thread *t);
+  virtual void add(ThreadList &tl)
+  {
+    add_maybelocked(tl, /* lock */ true);
+  }
 
-  virtual void remove(ThreadList &tl);
-  virtual void remove(Thread *t);
+  virtual void add(Thread *t)
+  {
+    add_maybelocked(t, /* lock */ true);
+  }
+
+  virtual void remove(ThreadList &tl)
+  {
+    remove_maybelocked(tl, /* lock */ true);
+  }
+
+  virtual void remove(Thread *t)
+  {
+    remove_maybelocked(t, /* lock */ true);
+  }
 
   virtual void force_remove(ThreadList &tl);
   virtual void force_remove(Thread *t);
@@ -64,11 +77,30 @@ class FawkesThreadManager : public ThreadCollector
   bool timed_threads_exist() const;
   void wait_for_timed_threads();
 
+  ThreadCollector *  aspect_collector() const;
 
  private:
   void internal_add_thread(Thread *t);
   void internal_remove_thread(Thread *t);
-  void update_barrier(BlockedTimingAspect::WakeupHook hook);
+  void add_maybelocked(ThreadList &tl, bool lock);
+  void add_maybelocked(Thread *t, bool lock);
+  void remove_maybelocked(ThreadList &tl, bool lock);
+  void remove_maybelocked(Thread *t, bool lock);
+
+  class FawkesThreadManagerAspectCollector : public ThreadCollector
+  {
+   public:
+    FawkesThreadManagerAspectCollector(FawkesThreadManager *parent_manager);
+
+    virtual void add(ThreadList &tl);
+    virtual void add(Thread *t);
+
+    virtual void remove(ThreadList &tl);
+    virtual void remove(Thread *t);
+
+   private:
+    FawkesThreadManager *__parent_manager;
+  };
 
  private:
   ThreadInitializer *initializer;
@@ -77,10 +109,10 @@ class FawkesThreadManager : public ThreadCollector
   LockMap< BlockedTimingAspect::WakeupHook, ThreadList > threads;
   LockMap< BlockedTimingAspect::WakeupHook, ThreadList >::iterator tit;
 
-  std::map< BlockedTimingAspect::WakeupHook, Barrier * >  barriers;
-
   ThreadList untimed_threads;
-  WaitCondition *wait_for_timed;
+  WaitCondition *waitcond_timedthreads;
+
+  FawkesThreadManagerAspectCollector *__aspect_collector;
 };
 
 #endif
