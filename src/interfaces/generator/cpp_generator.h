@@ -72,6 +72,9 @@ class CppInterfaceGenerator
   void write_message_ctor_dtor_cpp(FILE *f, std::string classname, std::string super_class,
 				   std::string inclusion_prefix,
 				   std::vector<InterfaceField> fields);
+  void write_message_clone_method_h(FILE *f, std::string is);
+  void write_message_clone_method_cpp(FILE *f, std::string classname);
+
 
   void write_methods_h(FILE *f,
 		       std::string /* indent space */ is,
