@@ -33,14 +33,15 @@ class Mutex;
 class MutexLocker
 {
  public:
-  MutexLocker(Mutex *mutex);
+  MutexLocker(Mutex *mutex, bool initially_lock = true);
   ~MutexLocker();
 
   void relock();
   void unlock();
 
  private:
-  Mutex *mutex;
+  bool   __locked;
+  Mutex *__mutex;
 };
 
 

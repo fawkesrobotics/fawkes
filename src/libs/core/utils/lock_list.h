@@ -38,10 +38,10 @@ class LockList : public std::list<Type>
   LockList();
   LockList(const LockList<Type> &ll);
   virtual ~LockList();
-  void     lock();
-  bool     try_lock();
-  void     unlock();
-  Mutex *  mutex() const;
+  virtual void  lock();
+  virtual bool  try_lock();
+  virtual void  unlock();
+  Mutex *       mutex() const;
 
   void     push_back_locked(const Type& x);
   void     push_front_locked(const Type& x);

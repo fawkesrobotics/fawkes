@@ -87,18 +87,23 @@
 
 /** Constructor.
  * @param mutex Mutex to lock/unlock appropriately.
+ * @param initially_lock true to lock the mutex in the constructor, false to not lock
  */
-MutexLocker::MutexLocker(Mutex *mutex)
+MutexLocker::MutexLocker(Mutex *mutex, bool initially_lock)
 {
-  this->mutex = mutex;
-  mutex->lock();
+  __mutex = mutex;
+  if ( initially_lock ) {
+    __mutex->lock();
+  }
+  __locked = initially_lock;
 }
 
 /** Destructor */
 MutexLocker::~MutexLocker()
 {
-  mutex->try_lock();
-  mutex->unlock();
+  if ( __locked ) {
+    __mutex->unlock();
+  }
 }
 
 
@@ -108,7 +113,8 @@ MutexLocker::~MutexLocker()
 void
 MutexLocker::relock()
 {
-  mutex->lock();
+  __mutex->lock();
+  __locked = true;
 }
 
 
@@ -116,5 +122,6 @@ MutexLocker::relock()
 void
 MutexLocker::unlock()
 {
-  mutex->unlock();
+  __locked = false;
+  __mutex->unlock();
 }

@@ -28,7 +28,9 @@
 #include <core/threading/thread_list.h>
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
+#include <core/threading/barrier.h>
 #include <core/threading/read_write_lock.h>
+#include <core/exceptions/software.h>
 
 #include <string>
 #include <cstring>
@@ -74,173 +76,6 @@ ThreadListNotSealedException::ThreadListNotSealedException(const char *format, .
   va_end(va);
 }
 
-
-/** @class ThreadListManagementThread <core/threading/thread_list.h>
- * Thread for deferred concurrent management tasks of a thread list.
- * Used internally by ThreadList.
- * @author Tim Niemueller
- */
-
-/** Constructor.
- * @param name thread name
- * @param tl thread list to initialize
- * @param e exception to append messages to
- */
-ThreadListManagementThread::ThreadListManagementThread(const char *name,
-						       ThreadList *tl, Exception *e)
-  : Thread(name)
-{
-  this->tl = tl;
-  this->e  = e;
-  _success = false;
-  _finished = false;
-}
-
-/** Destructor.
- * Destroys exception!
- */
-ThreadListManagementThread::~ThreadListManagementThread()
-{
-  delete e;
-}
-
-/** Check if task is finished.
- * @return true if initialization is finished, false otherwise.
- */
-bool
-ThreadListManagementThread::finished()
-{
-  return _finished;
-}
-
-
-/** Check if initialization was successful.
- * @return true if successful, false otherwise.
- */
-bool
-ThreadListManagementThread::success()
-{
-  return (_finished && _success);
-}
-
-
-/** Throw exception. */
-void
-ThreadListManagementThread::throw_exception()
-{
-  throw *e;
-}
-
-
-/** @class ThreadListInitThread <core/threading/thread_list.h>
- * Thread for concurrent initialisation of a thread.
- * Used internally by ThreadList.
- * @author Tim Niemueller
- */
-
-/** Constructor.
- * @param tl thread list to initialize
- * @param initializer initializer to use to initialize threads
- * @param finalizer finalizer to use to finalize threads that have been successfully
- * initialized before one thread failed.
- */
-ThreadListInitThread::ThreadListInitThread(ThreadList *tl, ThreadInitializer *initializer,
-					   ThreadFinalizer *finalizer)
-  : ThreadListManagementThread((std::string("ThreadListInitThread::") + tl->name()).c_str(),
-			       tl, new CannotInitializeThreadException("Deferred thread initialization failed"))
-{
-  this->initializer = initializer;
-  this->finalizer   = finalizer;
-}
-
-
-void
-ThreadListInitThread::loop()
-{
-  _success = true;
-  ThreadList initialized_threads;
-  for (ThreadList::iterator i = tl->begin(); i != tl->end(); ++i) {
-    try {
-      initializer->init(*i);
-      (*i)->init();
-      initialized_threads.push_back(*i);
-    } catch (CannotInitializeThreadException &ex) {
-      e->append("Initializing thread in list '%s' failed", tl->name());
-      e->append(ex);
-      _success = false;
-      break;
-    } catch (Exception &ex) {
-      e->append("Could not initialize thread '%s'", (*i)->name());
-      e->append(ex);
-      _success = false;
-      break;
-    } catch (...) {
-      e->append("Could not initialize thread '%s': unknown exception caught", (*i)->name());
-      _success = false;
-      break;
-    }
-  }
-
-  if ( ! _success ) {
-    // finalize initialized threads
-    try {
-      initialized_threads.finalize(finalizer);
-    } catch (Exception &ee) {
-      e->append(ee);
-    }
-  }
-
-  _finished = true;
-  exit();
-}
-
-
-/** @class ThreadListFinalizerThread <core/threading/thread_list.h>
- * Thread for deferred concurrent finalization of a thread.
- * Used internally by ThreadList.
- * @author Tim Niemueller
- */
-
-/** Constructor.
- * @param tl thread list to finalize
- * @param finalizer finalizer to use to finalize threads
- */
-ThreadListFinalizerThread::ThreadListFinalizerThread(ThreadList *tl,
-						 ThreadFinalizer *finalizer)
-  : ThreadListManagementThread((std::string("ThreadListFinalizerThread::") + tl->name()).c_str(),
-			       tl, new CannotInitializeThreadException("Deferred thread finalization failed"))
-{
-  this->finalizer = finalizer;
-}
-
-
-void
-ThreadListFinalizerThread::loop()
-{
-  try {
-    if ( ! tl->prepare_finalize(finalizer) ) {
-      tl->cancel_finalize();
-      e->append("ThreadList '%s' cannot be prepared for finalization", tl->name());
-    } else {
-      tl->finalize(finalizer);
-      _success = true;
-    }
-  } catch (CannotFinalizeThreadException &ex) {
-    e->append("Finalizing thread in list '%s' failed", tl->name());
-    e->append(ex);
-    } catch (Exception &ex) {
-    e->append("Could not finalize thread list '%s'", tl->name());
-    e->append(ex);
-  } catch (...) {
-    e->append("Could not finalize thread list '%s': unknown exception caught", tl->name());
-  }
-
-  _finished = true;
-  exit();
-}
-
-
-
 /** @class ThreadList core/threading/thread_list.h
  * List of threads.
  * This is a list of threads derived from stl::list. It features special
@@ -256,12 +91,32 @@ ThreadListFinalizerThread::loop()
  */
 ThreadList::ThreadList(const char *tlname)
 {
-  _init_thread = NULL;
-  _fin_thread = NULL;
   _name = strdup(tlname);
   _sealed = false;
   _finalize_mutex = new Mutex();
   _sync_lock = new ReadWriteLock();
+  _wnw_barrier = NULL;
+  clear();
+}
+
+
+/** Constructor.
+ * @param maintain_barrier if true, an internal barrier is maintained during add and
+ * remove operations such that wakeup_and_wait() can be used.
+ * @param tlname optional name which is used for better readable error
+ * messages.
+ */
+ThreadList::ThreadList(bool maintain_barrier, const char *tlname)
+{
+  _name = strdup(tlname);
+  _sealed = false;
+  _finalize_mutex = new Mutex();
+  _sync_lock = new ReadWriteLock();
+  if ( maintain_barrier ) {
+    _wnw_barrier = new Barrier(1);
+  } else {
+    _wnw_barrier = NULL;
+  }
   clear();
 }
 
@@ -272,31 +127,25 @@ ThreadList::ThreadList(const char *tlname)
 ThreadList::ThreadList(const ThreadList &tl)
   : LockList<Thread *>(tl)
 {
-  _init_thread = NULL;
-  _fin_thread = NULL;
   _name = strdup(tl._name);
   _sealed = tl._sealed;
   _finalize_mutex = new Mutex();
   _sync_lock = new ReadWriteLock();
+  if ( tl._wnw_barrier != NULL ) {
+    _wnw_barrier = new Barrier(1);
+  } else {
+    _wnw_barrier = NULL;
+  }
 }
 
 
 /** Destructor. */
 ThreadList::~ThreadList()
 {
-  if ( _init_thread != NULL ) {
-    _init_thread->cancel();
-    _init_thread->join();
-    delete _init_thread;
-  }
-  if ( _fin_thread != NULL ) {
-    _fin_thread->cancel();
-    _fin_thread->join();
-    delete _fin_thread;
-  }
   free(_name);
   delete _sync_lock;
   delete _finalize_mutex;
+  delete _wnw_barrier;
 }
 
 
@@ -313,7 +162,7 @@ ThreadList::wakeup()
 
 
 /** Wakeup all threads in list.
- * This method wakes up all thread without aquiring the lock first.
+ * This method wakes up all thread without acquiring the lock first.
  * This method must only be used if the thread list is locked otherwise!
  */
 void
@@ -350,6 +199,47 @@ ThreadList::wakeup_unlocked(Barrier *barrier)
   for (iterator i = begin(); i != end(); ++i) {
     (*i)->wakeup(barrier);
   }
+}
+
+
+/** Wakeup threads and wait for them to finish.
+ * This assumes that all threads are in wait-for-wakeup mode. The threads are woken
+ * up with an internally maintained barrier. The method will return when all threads
+ * have finished one loop() iteration.
+ * @exception NullPointerException thrown, if no internal barrier is maintained. Make sure
+ * you use the proper constructor.
+ */
+void
+ThreadList::wakeup_and_wait()
+{
+  if ( ! _wnw_barrier ) {
+    throw NullPointerException("ThreadList::wakeup_and_wait() can only be called if "
+			       "barrier is maintained");
+  }
+  lock();
+  wakeup_unlocked(_wnw_barrier);
+  _wnw_barrier->wait();
+  unlock();
+}
+
+
+/** Set if this thread list should maintain a barrier.
+ * This operation does an implicit locking of the list.
+ * @param maintain_barrier true to maintain an internal barrier, false to disable it.
+ */
+void
+ThreadList::set_maintain_barrier(bool maintain_barrier)
+{
+  lock();
+  if ( maintain_barrier ) {
+    if ( ! _wnw_barrier ) {
+      _wnw_barrier = new Barrier(size() + 1);
+    }
+  } else {
+    delete _wnw_barrier;
+    _wnw_barrier = NULL;
+  }
+  unlock();
 }
 
 
@@ -398,74 +288,6 @@ ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
   if ( ! success ) {
     initialized_threads.finalize(finalizer);
     throw cite;
-  }
-}
-
-
-/** Initialize threads deferred.
- * The threads are being initialized.
- * This operation is carried out unlocked. Lock it from the outside if needed.
- * This is done because it is likely that this will be chained with other
- * actions that require locking, thus you can lock the whole operation.
- * The initialization is executed deferred in a separate thread. Use
- * deferred_init_done() to check if initialization has finished.
- * @param initializer thread initializer to use
- * @param finalizer finalizer to use to finalize threads that have been successfully
- * initialized before one thread failed.
- * @exception CannotInitializeThreadException thrown if a deferred init is
- * already running.
- */
-void
-ThreadList::init_deferred(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
-{
-  if (_init_thread != NULL ) {
-    throw CannotInitializeThreadException("Initializer thread already running");
-  }
-
-  _init_thread = new ThreadListInitThread(this, initializer, finalizer);
-  _init_thread->start();
-}
-
-
-/** Check if deferred init is done.
- * This will return true, if the initialization finished successfully,
- * it will return false, if the initialization is still running and it will
- * throw an exception if the initialization is done but failed or if it was
- * never started at all.
- * @return true, if the initialization finished successfully,
- * it will return false, if the initialization is still running
- * @exception CannotInitializeThreadException thrown if the initialization
- * is done but failed or if it was not initiated at all
- */
-bool
-ThreadList::deferred_init_done()
-{
-  if ( _init_thread == NULL ) {
-    throw CannotInitializeThreadException("No deferred intialization running");
-  }
-
-  if ( _init_thread->finished() ) {
-    _init_thread->join();
-    if ( _init_thread->success() ) {
-      delete _init_thread;
-      _init_thread = NULL;
-      return true;
-    } else {
-      try {
-	notify_of_failed_init();
-	_init_thread->throw_exception();
-	delete _init_thread;
-	_init_thread = NULL;
-	return true;
-      } catch (Exception &e) {
-	notify_of_failed_init();
-	delete _init_thread;
-	_init_thread = NULL;
-	throw;
-      }
-    }
-  } else {
-    return false;
   }
 }
 
@@ -651,65 +473,6 @@ ThreadList::cancel_finalize()
 }
 
 
-/** Finalize and stop deferred and concurrent.
- * This will start a worker thread that will try to finalize and stop all threads
- * of this list. This will not enforce finalization. It is tried to prepare all
- * threads for finalization. If that succeeds the threads are finalized and stopped.
- * @param finalizer thread finalizer to use to finalize the threads.
- */
-void
-ThreadList::finalize_deferred(ThreadFinalizer *finalizer)
-{
-  if (_fin_thread != NULL ) {
-    throw CannotFinalizeThreadException("Finalizer thread already running");
-  }
-
-  _fin_thread = new ThreadListFinalizerThread(this, finalizer);
-  _fin_thread->start();
-}
-
-
-/** Check if deferred finalization and stop is done.
- * This will return true, if the finalization finished successfully,
- * it will return false, if the finalization is still running and it will
- * throw an exception if the finalization is done but failed or if it was
- * never started at all.
- * @return true, if the finalization finished successfully,
- * it will return false, if the finalization is still running
- * @exception CannotFinalizeThreadException thrown if the finalization
- * is done but failed or if it was not initiated at all
- */
-bool
-ThreadList::deferred_finalize_done()
-{
-  if ( _fin_thread == NULL ) {
-    throw CannotFinalizeThreadException("No deferred finalization running");
-  }
-
-  if ( _fin_thread->finished() ) {
-    _fin_thread->join();
-    if ( _fin_thread->success() ) {
-      delete _fin_thread;
-      _fin_thread = NULL;
-      return true;
-    } else {
-      try {
-	_fin_thread->throw_exception();
-	delete _fin_thread;
-	_fin_thread = NULL;
-	return true;
-      } catch (Exception e) {
-	delete _fin_thread;
-	_fin_thread = NULL;
-	throw;
-      }
-    }
-  } else {
-    return false;
-  }
-}
-
-
 /** Force stop of all threads.
  * This will call prepare_finalize(), finalize(), cancel() and join() on the
  * list without caring about the return values in the prepare_finalize() step.
@@ -737,6 +500,21 @@ const char *
 ThreadList::name()
 {
   return _name;
+}
+
+
+/** Set name of thread.
+ * Use parameters similar to printf().
+ * @param format format string
+ */
+void
+ThreadList::set_name(const char *format, ...)
+{
+  va_list va;
+  va_start(va, format);
+  free(_name);
+  vasprintf(&_name, format, va);
+  va_end(va);
 }
 
 
@@ -772,12 +550,17 @@ ThreadList::push_front(Thread *thread)
   if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
     thread->set_finalize_sync_lock(_sync_lock);
   LockList<Thread *>::push_front(thread);
+
+  if ( _wnw_barrier)  update_barrier();
 }
 
 
 /** Add thread to the front with lock protection.
  * Add thread to the beginning of the list. The operation is protected
  * by the thread list lock.
+ * The operation will succeed without blocking even
+ * if the list is currently locked. It will push the thread to an internal temporary
+ * list and will add the thread finally when the list is unlocked.
  * @param thread thread to add
  */
 void
@@ -785,9 +568,13 @@ ThreadList::push_front_locked(Thread *thread)
 {
   if ( _sealed ) throw ThreadListSealedException("push_front_locked");
 
+  lock();
   if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
     thread->set_finalize_sync_lock(_sync_lock);
-  LockList<Thread *>::push_front_locked(thread);
+  LockList<Thread *>::push_front(thread);
+  
+  if ( _wnw_barrier)  update_barrier();
+  unlock();
 }
 
 
@@ -803,12 +590,17 @@ ThreadList::push_back(Thread *thread)
   if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
     thread->set_finalize_sync_lock(_sync_lock);
   LockList<Thread *>::push_back(thread);
+
+  if ( _wnw_barrier)  update_barrier();
 }
 
 
 /** Add thread to the end with lock protection.
  * Add thread to the end of the list. The operation is protected
  * by the thread list lock.
+ * The operation will succeed without blocking even
+ * if the list is currently locked. It will push the thread to an internal temporary
+ * list and will add the thread finally when the list is unlocked.
  * @param thread thread to add
  */
 void
@@ -818,7 +610,11 @@ ThreadList::push_back_locked(Thread *thread)
 
   if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
     thread->set_finalize_sync_lock(_sync_lock);
-  LockList<Thread *>::push_back_locked(thread);
+
+  lock();
+  LockList<Thread *>::push_back(thread);
+  if ( _wnw_barrier)  update_barrier();
+  unlock();
 }
 
 
@@ -831,6 +627,7 @@ ThreadList::clear()
   if ( _sealed ) throw ThreadListSealedException("clear");
 
   LockList<Thread *>::clear();
+  if ( _wnw_barrier)  update_barrier();
 }
 
 
@@ -845,6 +642,8 @@ ThreadList::remove(Thread *thread)
   if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
     thread->set_finalize_sync_lock(NULL);
   LockList<Thread *>::remove(thread);
+
+  if ( _wnw_barrier)  update_barrier();
 }
 
 
@@ -858,7 +657,11 @@ ThreadList::remove_locked(Thread *thread)
 
   if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
     thread->set_finalize_sync_lock(NULL);
-  LockList<Thread *>::remove_locked(thread);
+
+  lock();
+  LockList<Thread *>::remove(thread);
+  if ( _wnw_barrier)  update_barrier();
+  unlock();
 }
 
 
@@ -871,6 +674,8 @@ ThreadList::pop_front()
   if (front()->opmode() != Thread::OPMODE_CONTINUOUS )
     front()->set_finalize_sync_lock(NULL);
   LockList<Thread *>::pop_front();
+
+  if ( _wnw_barrier)  update_barrier();
 }
 
 
@@ -883,6 +688,8 @@ ThreadList::pop_back()
   if (back()->opmode() != Thread::OPMODE_CONTINUOUS )
     back()->set_finalize_sync_lock(NULL);
   LockList<Thread *>::pop_back();
+
+  if ( _wnw_barrier)  update_barrier();
 }
 
 
@@ -897,7 +704,19 @@ ThreadList::erase(iterator pos)
 
   if ((*pos)->opmode() != Thread::OPMODE_CONTINUOUS )
     (*pos)->set_finalize_sync_lock(NULL);
-  return LockList<Thread *>::erase(pos);
+  ThreadList::iterator rv = LockList<Thread *>::erase(pos);
+
+  if ( _wnw_barrier)  update_barrier();
+  return rv;
+}
+
+
+/** Update internal barrier. */
+void
+ThreadList::update_barrier()
+{
+  delete _wnw_barrier;
+  _wnw_barrier = new Barrier(size() + 1);
 }
 
 
