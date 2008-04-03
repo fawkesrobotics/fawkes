@@ -59,16 +59,20 @@ class BayesColormapGenerator : public ColormapGenerator
   virtual bool                     has_histograms();
   virtual std::map< hint_t, Histogram * > *  get_histograms();
 
+  virtual void                     load_histograms(const char *filename);
+  virtual void                     save_histograms(const char *filename);
+
   void set_min_probability(float min_prob);
 
  private:
   bool is_in_region(unsigned int x, unsigned int y);
   void normalize_histos();
 
-  std::map< hint_t, Histogram * > fg_histos;
-  std::map< hint_t, Histogram * > bg_histos;
-  std::map< hint_t, Histogram * > histos;
-  std::map< hint_t, Histogram * >::iterator histo_it;
+  typedef std::map< hint_t, Histogram * > HistogramMap;
+  HistogramMap fg_histos;
+  HistogramMap bg_histos;
+  HistogramMap histos;
+  HistogramMap::iterator histo_it;
 
   BayesHistosToLut      *bhtl;
   YuvColormap           *cm;
@@ -81,6 +85,8 @@ class BayesColormapGenerator : public ColormapGenerator
 
   unsigned int image_width;
   unsigned int image_height;
+
+  unsigned int norm_size;
 
   unsigned char *buffer;
   std::vector< rectangle_t >  region;

@@ -27,6 +27,8 @@
  */
 
 #include <fvutils/colormap/bayes/bayes_generator.h>
+#include <fvutils/statistical/histogram_file.h>
+#include <fvutils/statistical/histogram_block.h>
 
 #include <fvutils/color/yuv.h>
 #include <fvutils/statistical/histogram.h>
@@ -124,6 +126,8 @@ BayesColormapGenerator::set_buffer(unsigned char *buffer,
   for (unsigned int i = 0; i < image_width * image_height; ++i) {
     selection_mask[i] = false;
   }
+
+  norm_size = image_width * image_height;
 }
 
 
@@ -326,6 +330,140 @@ BayesColormapGenerator::get_histograms()
 }
 
 
+/** Load histogram from a file.
+ * @param filename the filename
+ */
+void
+BayesColormapGenerator::load_histograms(const char *filename)
+{
+  HistogramFile histogram_file;
+  histogram_file.set_owns_blocks(false);
+  histogram_file.read(filename);
+
+  HistogramFile::HistogramBlockList histogram_list = histogram_file.histogram_blocks();
+  HistogramFile::HistogramBlockList::iterator lit;
+
+  for (histo_it = fg_histos.begin(); histo_it != fg_histos.end(); ++histo_it) {
+    delete histo_it->second;
+  }
+  for (histo_it = bg_histos.begin(); histo_it != bg_histos.end(); ++histo_it) {
+    delete histo_it->second;
+  }
+  for (histo_it = histos.begin(); histo_it != histos.end(); ++histo_it) {
+    delete histo_it->second;
+  }
+  fg_histos.clear();
+  bg_histos.clear();
+  histos.clear();
+
+  // search background histogram block
+  HistogramBlock* bg_histogram_block = NULL;
+  for (lit = histogram_list.begin(); lit != histogram_list.end(); ++lit)
+    {
+      if ( (*lit)->object_type() == H_BACKGROUND )
+	{
+	  bg_histogram_block = *lit;
+	  lut_width  = bg_histogram_block->width();
+	  lut_height = bg_histogram_block->height();
+	  lut_depth  = bg_histogram_block->depth();
+
+	  break;
+	}
+    }
+
+  if ( !bg_histogram_block )
+    {
+      throw Exception("Histograms file does not contain a background histogram");
+    }
+
+  // read in foreground histograms
+  norm_size = 0;
+  for (lit = histogram_list.begin(); lit != histogram_list.end(); ++lit)
+    {
+      hint_t cur_object = (*lit)->object_type();
+
+      if (cur_object == H_BACKGROUND)
+	{ continue; }
+
+      fg_histos[cur_object] = new Histogram(*lit);
+      bg_histos[cur_object] = new Histogram(bg_histogram_block);
+
+      norm_size += fg_histos[cur_object]->get_sum();
+    }
+
+  norm_size += bg_histos.begin()->second->get_sum();
+
+  // reconstruct background histograms
+  HistogramMap::iterator hit;
+  for (histo_it = bg_histos.begin(); histo_it != bg_histos.end(); ++histo_it) {
+    hint_t cur_object = histo_it->first;
+    
+    for (hit = fg_histos.begin(); hit != fg_histos.end(); ++hit) {
+      if (cur_object == hit->first)
+	{ continue; }
+      
+      for (unsigned int x = 0; x < lut_width; ++x) {
+	for (unsigned int y = 0; y < lut_height; ++y) {
+	  for (unsigned int z = 0; z < lut_depth; ++z) {
+	    unsigned int val = hit->second->get_value(x, y, z);
+	    histo_it->second->add(x, y, z, val);
+	  }
+	}
+      }
+    }
+  }
+
+  // normalize background histograms
+  for (histo_it = bg_histos.begin(); histo_it != bg_histos.end(); ++histo_it) {
+    hint_t cur_object = histo_it->first;
+    float factor = ( norm_size - fg_histos[cur_object]->get_sum() ) / float( histo_it->second->get_sum() );
+    
+    if (factor == 1.0)
+      { continue; }
+
+    for (unsigned int x = 0; x < lut_width; ++x) {
+      for (unsigned int y = 0; y < lut_height; ++y) {
+	for (unsigned int z = 0; z < lut_depth; ++z) {
+	  unsigned int cur_val = histo_it->second->get_value(x, y, z);
+	  unsigned int new_val = (unsigned int) rint(factor * cur_val);
+	  histo_it->second->set_value(x, y, z, new_val);
+	}
+      }
+    }
+  }
+
+  delete bhtl;
+  bhtl = new BayesHistosToLut(histos, lut_depth);
+  cm = bhtl->get_colormap();
+
+  // re-compute colormap
+  calc();
+}
+
+
+/** Save histograms to a file.
+ * @param filename the filename
+ */
+void
+BayesColormapGenerator::save_histograms(const char *filename)
+{
+  HistogramFile histogram_file;
+  histogram_file.set_owns_blocks(false);
+  HistogramBlock *histogram_block;
+
+  normalize_histos();
+
+  for (histo_it = histos.begin(); histo_it != histos.end(); ++histo_it)
+    {
+      histogram_block = histo_it->second->get_histogram_block();
+      histogram_block->set_object_type( histo_it->first );
+      histogram_file.add_histogram_block(histogram_block);
+    }
+
+  histogram_file.write(filename);
+}
+
+
 /** Normalize histograms and compute overall background histogram. */
 void
 BayesColormapGenerator::normalize_histos()
@@ -338,7 +476,6 @@ BayesColormapGenerator::normalize_histos()
   unsigned int fg_size = 0;
   unsigned int hval;
   float norm_factor;
-  unsigned int norm_size = image_width * image_height;
 
   // generate normalized fg histograms
   for (histo_it = fg_histos.begin(); histo_it != fg_histos.end(); ++histo_it)
@@ -426,5 +563,5 @@ BayesColormapGenerator::normalize_histos()
  	h->set_value(x, y, z, hval);
       }
     }
-  }  
+  }
 }
