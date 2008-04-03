@@ -26,6 +26,12 @@ include $(BASEDIR)/src/libs/netcomm/netcomm.mk
 # Add to enable TimeTracker support in Fawkes main application
 #CFLAGS += -DUSE_TIMETRACKER
 
+# Uncomment the following lines to link the main app against all plugins. This
+# makes debugging easier, use it if you see ??? in gdb or valgrind
+#LDFLAGS += -Wl,-R$(PLUGINDIR) -L$(PLUGINDIR) \
+#	   $(patsubst %,-l:%,$(subst $(abspath $(PLUGINDIR))/,,$(wildcard $(PLUGINDIR)/*.so))) \
+#	   -lpthread
+
 # We need Avahi CFLAGS because of includes in Avahi source, on BSD this is
 # in /usr/local/include and thus it needs extra flags
 ifeq ($(HAVE_AVAHI),1)
