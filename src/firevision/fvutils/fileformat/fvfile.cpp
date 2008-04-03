@@ -56,6 +56,7 @@
  * - FF01: colormaps
  * - FF02: generic lookup tables
  * - FF03: rectification information
+ * - FF04: histograms
  *
  * We assume large chunks of data that is saved most efficiently in a proprietary
  * binary format that can be read and written quickly and mimics the layout of the
@@ -103,6 +104,8 @@ FireVisionDataFile::FireVisionDataFile(unsigned short int magic_token,
   _spec_header = NULL;
   _spec_header_size = 0;
 
+  __owns_blocks = true;
+
   clear();
 }
 
@@ -126,9 +129,12 @@ FireVisionDataFile::~FireVisionDataFile()
 void
 FireVisionDataFile::clear()
 {
-  for (__bi = __blocks.begin(); __bi != __blocks.end(); ++__bi) {
-    delete *__bi;
+  if (__owns_blocks) {
+    for (__bi = __blocks.begin(); __bi != __blocks.end(); ++__bi) {
+      delete *__bi;
+    }
   }
+
   __blocks.clear();
   memset(__header, 0, sizeof(fvff_header_t));
 
@@ -204,6 +210,18 @@ FireVisionDataFile::set_comment(const char *comment)
   free(__comment);
   __comment = strndup(comment, FVFF_COMMENT_SIZE);
   strncpy(__header->comment, comment, FVFF_COMMENT_SIZE);
+}
+
+
+/** Lets the file take over the ownership and give up the ownership of the blocks, 
+ * respectively. By default, the file is the owner of the blocks. If a file owns
+ * the blocks they will be deleted in the files destructor.
+ * @param owns_blocks if true file owns the blocks
+ */
+void
+FireVisionDataFile::set_owns_blocks(bool owns_blocks)
+{
+  __owns_blocks = owns_blocks;
 }
 
 
@@ -300,7 +318,7 @@ FireVisionDataFile::read(const char *file_name)
   //printf("Reading %zu bytes for header\n", sizeof(fvff_header_t));
   if ( fread(__header, sizeof(fvff_header_t), 1, f) != 1) {
     fclose(f);
-    throw FileReadException(file_name, errno, "Reading rectlut header failed");
+    throw FileReadException(file_name, errno, "Reading header failed");
   }
 
   if ( __header->magic_token != htons(__magic_token) ) {

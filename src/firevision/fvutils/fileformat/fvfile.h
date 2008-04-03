@@ -48,6 +48,8 @@ class FireVisionDataFile
   const char *  get_comment() const;
   void          set_comment(const char *comment);
 
+  void          set_owns_blocks(bool owns_blocks);
+
   void add_block(FireVisionDataFileBlock *block);
   void clear();
 
@@ -71,6 +73,8 @@ class FireVisionDataFile
   unsigned int  __version;
 
   char *        __comment;
+
+  bool          __owns_blocks;
 };
 
 
