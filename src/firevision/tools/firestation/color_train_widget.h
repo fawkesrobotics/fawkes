@@ -54,8 +54,8 @@ class ColorTrainWidget
   void click(unsigned int x, unsigned int y);
   void reset_selection();
   
-  void load_histogram();
-  void save_histogram();
+  void load_histograms();
+  void save_histograms();
 
   void set_lut_depth(unsigned int depth = 0);
   void add_to_lut();

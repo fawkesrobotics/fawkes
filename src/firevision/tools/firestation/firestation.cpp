@@ -263,6 +263,9 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtSaveHistos") );
   m_ctw->set_save_histos_btn(btn);
 
+  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtLoadHistos") );
+  m_ctw->set_load_histos_btn(btn);
+ 
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtSaveColormap") );
   m_ctw->set_save_lut_btn(btn);
 

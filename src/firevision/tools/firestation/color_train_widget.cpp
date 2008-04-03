@@ -229,7 +229,7 @@ void
 ColorTrainWidget::set_load_histos_btn(Gtk::Button* btn)
 {
   m_btn_load_histos = btn;
-  m_btn_load_histos->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::load_histogram) );
+  m_btn_load_histos->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::load_histograms) );
 }
 
 /** Set the buffon to open a dialog to save histograms.
@@ -239,7 +239,7 @@ void
 ColorTrainWidget::set_save_histos_btn(Gtk::Button* btn)
 {
   m_btn_save_histos = btn;
-  m_btn_save_histos->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::save_histogram) );
+  m_btn_save_histos->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::save_histograms) );
 }
 
 /** Set the buffon to open a dialog to load a LUT.
@@ -321,16 +321,71 @@ ColorTrainWidget::set_update_img_signal(Glib::Dispatcher* update_img)
 
 /** Open a dialog to load a histogram. */
 void
-ColorTrainWidget::load_histogram()
+ColorTrainWidget::load_histograms()
 {
-  // TODO
+  if ( !m_fcd_filechooser )
+    { return; }
+
+  m_fcd_filechooser->set_title("Load histograms");
+  m_fcd_filechooser->set_action(Gtk::FILE_CHOOSER_ACTION_OPEN);
+  
+  m_fcd_filechooser->set_transient_for(*m_wnd_parent);
+
+  int result = m_fcd_filechooser->run();
+
+   switch(result)
+     {
+     case (Gtk::RESPONSE_OK):
+       {
+	 std::string filename = m_fcd_filechooser->get_filename();
+	 m_generator->load_histograms( filename.c_str() );
+
+	 m_lvw->draw();
+	 // draw_segmentation_result();
+ 	break;
+       }
+
+     case (Gtk::RESPONSE_CANCEL):
+       break;
+
+     default:
+       break;
+     }
+
+   m_fcd_filechooser->hide();
 }
 
 /** Open a dialog to save a histogram. */
 void
-ColorTrainWidget::save_histogram()
+ColorTrainWidget::save_histograms()
 {
-  // TODO
+  if ( !m_fcd_filechooser )
+    { return; }
+
+  m_fcd_filechooser->set_title("Save histograms");
+  m_fcd_filechooser->set_action(Gtk::FILE_CHOOSER_ACTION_SAVE);
+  
+  m_fcd_filechooser->set_transient_for(*m_wnd_parent);
+
+  int result = m_fcd_filechooser->run();
+
+   switch(result)
+     {
+     case (Gtk::RESPONSE_OK):
+       {
+	 std::string filename = m_fcd_filechooser->get_filename();
+	 m_generator->save_histograms( filename.c_str() );
+	 break;
+       }
+
+     case (Gtk::RESPONSE_CANCEL):
+       break;
+       
+     default:
+       break;
+     }
+   
+   m_fcd_filechooser->hide();
 }
 
 /** Generate a new LUT by adding the current histograms. */
@@ -479,7 +534,7 @@ ColorTrainWidget::set_min_prob(Gtk::ScrollType scroll, double value)
 void
 ColorTrainWidget::draw_segmentation_result()
 {
-  if ( !m_src_buffer && !m_img_segmentation ) 
+  if ( !m_src_buffer || !m_img_segmentation ) 
     { return; }
 
   unsigned char* seg_buffer = (unsigned char*) malloc(m_img_size);
