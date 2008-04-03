@@ -55,7 +55,7 @@ endif
 # check for PNG lib
 ifneq ($(wildcard /usr/include/png.h /usr/local/include/png.h),)
   HAVE_LIBPNG    = 1
-  VISION_CFLAGS += -DHAVE_PNG
+  VISION_CFLAGS += -DHAVE_LIBPNG
 endif
 
 ifneq ($(PKGCONFIG),)

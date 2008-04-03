@@ -38,6 +38,9 @@
 #ifdef HAVE_LIBJPEG
 #include <fvutils/readers/jpeg.h>
 #endif
+#ifdef HAVE_LIBPNG
+#include <fvutils/readers/png.h>
+#endif
 
 #include <cstring>
 #include <cstdlib>
@@ -373,6 +376,25 @@ FileLoader::read_file()
       throw;
     }
     delete jr;
+#endif
+
+#ifdef HAVE_LIBPNG
+  } else if ( ft.find( "PNG" ) != std::string::npos ) {
+    PNGReader *pr = new PNGReader( fn );
+    cspace = pr->colorspace();
+    width  = pr->pixel_width();
+    height = pr->pixel_height();
+    _buffer_size = colorspace_buffer_size( cspace, width, height );
+    file_buffer = (unsigned char*)malloc(_buffer_size);
+    pr->set_buffer( file_buffer );
+    try {
+      pr->read();
+    } catch (Exception &e) {
+      delete pr;
+      e.append("FileLoader::open() failed for PNG");
+      throw;
+    }
+    delete pr;
 #endif
 
   } else {
