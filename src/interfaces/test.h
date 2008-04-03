@@ -79,10 +79,12 @@ class TestInterface : public Interface
     SetTestIntMessage();
     ~SetTestIntMessage();
 
+    SetTestIntMessage(const SetTestIntMessage *m);
     /* Methods */
     int test_int();
     void set_test_int(const int new_test_int);
     size_t maxlenof_test_int() const;
+    virtual Message * clone() const;
   };
 
   class SetTestStringMessage : public Message
@@ -100,10 +102,12 @@ class TestInterface : public Interface
     SetTestStringMessage();
     ~SetTestStringMessage();
 
+    SetTestStringMessage(const SetTestStringMessage *m);
     /* Methods */
     char * test_string();
     void set_test_string(const char * new_test_string);
     size_t maxlenof_test_string() const;
+    virtual Message * clone() const;
   };
 
   class CalculateMessage : public Message
@@ -122,6 +126,7 @@ class TestInterface : public Interface
     CalculateMessage();
     ~CalculateMessage();
 
+    CalculateMessage(const CalculateMessage *m);
     /* Methods */
     int summand();
     void set_summand(const int new_summand);
@@ -129,6 +134,7 @@ class TestInterface : public Interface
     int addend();
     void set_addend(const int new_addend);
     size_t maxlenof_addend() const;
+    virtual Message * clone() const;
   };
 
   virtual bool message_valid(const Message *message) const;

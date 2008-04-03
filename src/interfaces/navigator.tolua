@@ -2,11 +2,11 @@ $#include <interfaces/navigator.h>
 class NavigatorInterface : public Interface
 {
 
-  class TargetMessage : public Message
+  class CartesianGotoMessage : public Message
   {
-    TargetMessage(float ini_x, float ini_y, float ini_orientation);
-    TargetMessage();
-    ~TargetMessage();
+    CartesianGotoMessage(float ini_x, float ini_y, float ini_orientation);
+    CartesianGotoMessage();
+    ~CartesianGotoMessage();
 
     float x();
     void set_x(const float new_x);
@@ -14,6 +14,23 @@ class NavigatorInterface : public Interface
     float y();
     void set_y(const float new_y);
     size_t maxlenof_y() const;
+    float orientation();
+    void set_orientation(const float new_orientation);
+    size_t maxlenof_orientation() const;
+  };
+
+  class PolarGotoMessage : public Message
+  {
+    PolarGotoMessage(float ini_phi, float ini_dist, float ini_orientation);
+    PolarGotoMessage();
+    ~PolarGotoMessage();
+
+    float phi();
+    void set_phi(const float new_phi);
+    size_t maxlenof_phi() const;
+    float dist();
+    void set_dist(const float new_dist);
+    size_t maxlenof_dist() const;
     float orientation();
     void set_orientation(const float new_orientation);
     size_t maxlenof_orientation() const;
@@ -47,8 +64,33 @@ class NavigatorInterface : public Interface
     size_t maxlenof_width() const;
   };
 
-  int foo();
-  void set_foo(const int new_foo);
-  size_t maxlenof_foo() const;
+  class ResetOdometryMessage : public Message
+  {
+    ResetOdometryMessage();
+    ~ResetOdometryMessage();
+
+  };
+
+  float x();
+  void set_x(const float new_x);
+  size_t maxlenof_x() const;
+  float y();
+  void set_y(const float new_y);
+  size_t maxlenof_y() const;
+  float dest_x();
+  void set_dest_x(const float new_dest_x);
+  size_t maxlenof_dest_x() const;
+  float dest_y();
+  void set_dest_y(const float new_dest_y);
+  size_t maxlenof_dest_y() const;
+  float dest_dist();
+  void set_dest_dist(const float new_dest_dist);
+  size_t maxlenof_dest_dist() const;
+  unsigned int msgid();
+  void set_msgid(const unsigned int new_msgid);
+  size_t maxlenof_msgid() const;
+  bool is_final();
+  void set_final(const bool new_final);
+  size_t maxlenof_final() const;
 
 };

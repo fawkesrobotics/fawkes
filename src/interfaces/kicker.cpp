@@ -49,12 +49,12 @@ KickerInterface::KickerInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (KickerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0xdc, 0xe9, 0x59, 0xc4, 0xc2, 0xd9, 0x46, 0x62, 0xd7, 0x78, 0x52, 0xb0, 0x6f, 0xb, 0x2c, 0x76};
-  set_hash(tmp_hash);
   add_fieldinfo(Interface::IFT_INT, "num_kicks_left", &data->num_kicks_left);
   add_fieldinfo(Interface::IFT_INT, "num_kicks_center", &data->num_kicks_center);
   add_fieldinfo(Interface::IFT_INT, "num_kicks_right", &data->num_kicks_right);
   add_fieldinfo(Interface::IFT_UINT, "current_intensity", &data->current_intensity);
+  unsigned char tmp_hash[] = {0xdc, 0xe9, 0x59, 0xc4, 0xc2, 0xd9, 0x46, 0x62, 0xd7, 0x78, 0x52, 0xb0, 0x6f, 0xb, 0x2c, 0x76};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */
@@ -288,6 +288,17 @@ KickerInterface::KickMessage::~KickMessage()
   free(data_ptr);
 }
 
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KickerInterface::KickMessage::KickMessage(const KickMessage *m) : Message("KickMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (KickMessage_data_t *)data_ptr;
+}
+
 /* Methods */
 /** Get left value.
  * True to kick with left kicker.
@@ -409,6 +420,16 @@ KickerInterface::KickMessage::set_intensity(const unsigned int new_intensity)
   data->intensity = new_intensity;
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KickerInterface::KickMessage::clone() const
+{
+  return new KickerInterface::KickMessage(this);
+}
 /** @class KickerInterface::ResetCounterMessage interfaces/kicker.h
  * ResetCounterMessage Fawkes BlackBoard Interface Message.
  * 
@@ -419,19 +440,35 @@ KickerInterface::KickMessage::set_intensity(const unsigned int new_intensity)
 /** Constructor */
 KickerInterface::ResetCounterMessage::ResetCounterMessage() : Message("ResetCounterMessage")
 {
-  data_size = sizeof(ResetCounterMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (ResetCounterMessage_data_t *)data_ptr;
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /** Destructor */
 KickerInterface::ResetCounterMessage::~ResetCounterMessage()
 {
-  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KickerInterface::ResetCounterMessage::ResetCounterMessage(const ResetCounterMessage *m) : Message("ResetCounterMessage")
+{
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KickerInterface::ResetCounterMessage::clone() const
+{
+  return new KickerInterface::ResetCounterMessage(this);
+}
 /** @class KickerInterface::GuideBallMessage interfaces/kicker.h
  * GuideBallMessage Fawkes BlackBoard Interface Message.
  * 
@@ -465,6 +502,17 @@ KickerInterface::GuideBallMessage::~GuideBallMessage()
   free(data_ptr);
 }
 
+/** Copy constructor.
+ * @param m message to copy from
+ */
+KickerInterface::GuideBallMessage::GuideBallMessage(const GuideBallMessage *m) : Message("GuideBallMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (GuideBallMessage_data_t *)data_ptr;
+}
+
 /* Methods */
 /** Get guide_ball_side value.
  * Side where to guide the ball and erect the arm.
@@ -496,6 +544,16 @@ KickerInterface::GuideBallMessage::set_guide_ball_side(const GuideBallSideEnum n
   data->guide_ball_side = new_guide_ball_side;
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+KickerInterface::GuideBallMessage::clone() const
+{
+  return new KickerInterface::GuideBallMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */

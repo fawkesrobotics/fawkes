@@ -2,13 +2,43 @@
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <interface name="NavigatorInterface" author="Martin Liebenberg" year="2007">
   <data>
-    <comment>Foobar</comment>
-    <field type="int" name="foo">Foo</field>
+    <comment>
+      The navigator interface is used by the navigator to export information about
+      the current status of the navigator and to define all messages by which the navigator
+      can be instructed.
+
+      There are three coordinate systems, the robot system which is a right-handed cartesian
+      coordinate system with the robot in its origin, X axis pointing forward, Y pointing to
+      the left and Z pointing upwards. The second coordinate system is the so-called
+      navigator system. It is a coordinate system similar to the robot system, but the
+      origin is defined on the initialization of the navigator. The last system is the
+      odometry system. It is again a similar system, but the origin is reset from time
+      to time and the robot's position in this system gives the odometry deltas.
+    </comment>
+
+    <field type="float" name="x">Current X-coordinate in the navigator coordinate system.</field>
+    <field type="float" name="y">Current Y-coordinate in the navigator coordinate system.</field>
+
+    <field type="float" name="dest_x">X-coordinate of the current destination, or 0.0 if no target has been set.</field>
+    <field type="float" name="dest_y">Y-coordinate of the current destination, or 0.0 if no target has been set.</field>
+
+    <field type="float" name="dest_dist">Distance to destination in m.</field>
+
+    <field type="unsigned int" name="msgid">The ID of the message that is currently being
+      processed, or 0 if no message is being processed.</field>
+    <field type="bool" name="final">True, if the last goto command has been finished,
+      false if it is still running</field>
   </data>
-  <message name="Target">
+  <message name="CartesianGoto">
     <comment>States the next target to navigate to.</comment>
     <field type="float" name="x">X-coordinate of the target, in the robot's coordinate system.</field>
     <field type="float" name="y">Y-coordinate of the target, in the robot's coordinate system.</field>
+    <field type="float" name="orientation">The orientation of the robot at the target.</field>
+  </message>
+  <message name="PolarGoto">
+    <comment>States the next target to navigate to.</comment>
+    <field type="float" name="phi">Angle between the robot's front and the target.</field>
+    <field type="float" name="dist">Distance to the target.</field>
     <field type="float" name="orientation">The orientation of the robot at the target.</field>
   </message>
   <message name="MaxVelocity">
@@ -20,5 +50,8 @@
     <field type="float" name="x">X-coordinate of the obstacle.</field>
     <field type="float" name="y">Y-coordinate of the obstacle.</field>
     <field type="float" name="width">Width of the obstacle.</field>
+  </message>
+  <message name="ResetOdometry">
+    <comment>Resets the origin of the odometry system</comment>
   </message>
 </interface>

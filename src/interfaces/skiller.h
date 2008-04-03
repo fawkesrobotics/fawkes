@@ -39,6 +39,16 @@ class SkillerInterface : public Interface
  public:
   /* constants */
 
+  /** 
+	This determines the current status of skill execution.
+       */
+  typedef enum {
+    S_INACTIVE /**< No skill is running. */,
+    S_FINAL /**< The skill string has been successfully processed. */,
+    S_RUNNING /**< The execution is still running. */,
+    S_FAILED /**< The execution failed and cannot succeed anymore. */
+  } SkillStatusEnum;
+
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
@@ -51,8 +61,12 @@ class SkillerInterface : public Interface
       Currently executed skill string, at least the first 1023 bytes of it.
       Must be properly null-terminated.
      */
-    bool final; /**< 
-      True if the execution of the current skill_string is final. False otherwise.
+    SkillStatusEnum status; /**< 
+      The status of the current skill execution.
+     */
+    bool continuous; /**< 
+      True if continuous execution is in progress, false if no skill string is executed
+      at all or it is executed one-shot with ExecSkillMessage.
      */
   } SkillerInterface_data_t;
 
@@ -78,10 +92,12 @@ class SkillerInterface : public Interface
     ExecSkillMessage();
     ~ExecSkillMessage();
 
+    ExecSkillMessage(const ExecSkillMessage *m);
     /* Methods */
     char * skill_string();
     void set_skill_string(const char * new_skill_string);
     size_t maxlenof_skill_string() const;
+    virtual Message * clone() const;
   };
 
   class ExecSkillContinuousMessage : public Message
@@ -102,74 +118,56 @@ class SkillerInterface : public Interface
     ExecSkillContinuousMessage();
     ~ExecSkillContinuousMessage();
 
+    ExecSkillContinuousMessage(const ExecSkillContinuousMessage *m);
     /* Methods */
     char * skill_string();
     void set_skill_string(const char * new_skill_string);
     size_t maxlenof_skill_string() const;
+    virtual Message * clone() const;
   };
 
   class RestartInterpreterMessage : public Message
   {
-   private:
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-    } RestartInterpreterMessage_data_t;
-
-    RestartInterpreterMessage_data_t *data;
-
    public:
     RestartInterpreterMessage();
     ~RestartInterpreterMessage();
 
+    RestartInterpreterMessage(const RestartInterpreterMessage *m);
     /* Methods */
+    virtual Message * clone() const;
   };
 
   class StopExecMessage : public Message
   {
-   private:
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-    } StopExecMessage_data_t;
-
-    StopExecMessage_data_t *data;
-
    public:
     StopExecMessage();
     ~StopExecMessage();
 
+    StopExecMessage(const StopExecMessage *m);
     /* Methods */
+    virtual Message * clone() const;
   };
 
   class AcquireControlMessage : public Message
   {
-   private:
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-    } AcquireControlMessage_data_t;
-
-    AcquireControlMessage_data_t *data;
-
    public:
     AcquireControlMessage();
     ~AcquireControlMessage();
 
+    AcquireControlMessage(const AcquireControlMessage *m);
     /* Methods */
+    virtual Message * clone() const;
   };
 
   class ReleaseControlMessage : public Message
   {
-   private:
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-    } ReleaseControlMessage_data_t;
-
-    ReleaseControlMessage_data_t *data;
-
    public:
     ReleaseControlMessage();
     ~ReleaseControlMessage();
 
+    ReleaseControlMessage(const ReleaseControlMessage *m);
     /* Methods */
+    virtual Message * clone() const;
   };
 
   virtual bool message_valid(const Message *message) const;
@@ -187,9 +185,12 @@ class SkillerInterface : public Interface
   unsigned int exclusive_controller();
   void set_exclusive_controller(const unsigned int new_exclusive_controller);
   size_t maxlenof_exclusive_controller() const;
-  bool is_final();
-  void set_final(const bool new_final);
-  size_t maxlenof_final() const;
+  SkillStatusEnum status();
+  void set_status(const SkillStatusEnum new_status);
+  size_t maxlenof_status() const;
+  bool is_continuous();
+  void set_continuous(const bool new_continuous);
+  size_t maxlenof_continuous() const;
 
 };
 

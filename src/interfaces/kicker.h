@@ -95,6 +95,7 @@ class KickerInterface : public Interface
     KickMessage();
     ~KickMessage();
 
+    KickMessage(const KickMessage *m);
     /* Methods */
     bool is_left();
     void set_left(const bool new_left);
@@ -108,22 +109,18 @@ class KickerInterface : public Interface
     unsigned int intensity();
     void set_intensity(const unsigned int new_intensity);
     size_t maxlenof_intensity() const;
+    virtual Message * clone() const;
   };
 
   class ResetCounterMessage : public Message
   {
-   private:
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-    } ResetCounterMessage_data_t;
-
-    ResetCounterMessage_data_t *data;
-
    public:
     ResetCounterMessage();
     ~ResetCounterMessage();
 
+    ResetCounterMessage(const ResetCounterMessage *m);
     /* Methods */
+    virtual Message * clone() const;
   };
 
   class GuideBallMessage : public Message
@@ -141,10 +138,12 @@ class KickerInterface : public Interface
     GuideBallMessage();
     ~GuideBallMessage();
 
+    GuideBallMessage(const GuideBallMessage *m);
     /* Methods */
     GuideBallSideEnum guide_ball_side();
     void set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side);
     size_t maxlenof_guide_ball_side() const;
+    virtual Message * clone() const;
   };
 
   virtual bool message_valid(const Message *message) const;

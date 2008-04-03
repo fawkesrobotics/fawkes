@@ -51,14 +51,14 @@ TestInterface::TestInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (TestInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0x2b, 0xa5, 0x54, 0xfd, 0xe4, 0x89, 0xa0, 0x5, 0xa7, 0x52, 0x19, 0x2e, 0x43, 0x96, 0x11, 0x82};
-  set_hash(tmp_hash);
   add_fieldinfo(Interface::IFT_BOOL, "test_bool", &data->test_bool);
   add_fieldinfo(Interface::IFT_INT, "test_int", &data->test_int);
   add_fieldinfo(Interface::IFT_INT, "result", &data->result);
   add_fieldinfo(Interface::IFT_UINT, "test_uint", &data->test_uint);
   add_fieldinfo(Interface::IFT_LONGUINT, "test_ulint", &data->test_ulint);
   add_fieldinfo(Interface::IFT_LONGINT, "test_lint", &data->test_lint);
+  unsigned char tmp_hash[] = {0x2b, 0xa5, 0x54, 0xfd, 0xe4, 0x89, 0xa0, 0x5, 0xa7, 0x52, 0x19, 0x2e, 0x43, 0x96, 0x11, 0x82};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */
@@ -358,6 +358,17 @@ TestInterface::SetTestIntMessage::~SetTestIntMessage()
   free(data_ptr);
 }
 
+/** Copy constructor.
+ * @param m message to copy from
+ */
+TestInterface::SetTestIntMessage::SetTestIntMessage(const SetTestIntMessage *m) : Message("SetTestIntMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetTestIntMessage_data_t *)data_ptr;
+}
+
 /* Methods */
 /** Get test_int value.
  * Test integer
@@ -389,6 +400,16 @@ TestInterface::SetTestIntMessage::set_test_int(const int new_test_int)
   data->test_int = new_test_int;
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+TestInterface::SetTestIntMessage::clone() const
+{
+  return new TestInterface::SetTestIntMessage(this);
+}
 /** @class TestInterface::SetTestStringMessage interfaces/test.h
  * SetTestStringMessage Fawkes BlackBoard Interface Message.
  * 
@@ -422,6 +443,17 @@ TestInterface::SetTestStringMessage::~SetTestStringMessage()
   free(data_ptr);
 }
 
+/** Copy constructor.
+ * @param m message to copy from
+ */
+TestInterface::SetTestStringMessage::SetTestStringMessage(const SetTestStringMessage *m) : Message("SetTestStringMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetTestStringMessage_data_t *)data_ptr;
+}
+
 /* Methods */
 /** Get test_string value.
  * A test sring
@@ -453,6 +485,16 @@ TestInterface::SetTestStringMessage::set_test_string(const char * new_test_strin
   strncpy(data->test_string, new_test_string, sizeof(data->test_string));
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+TestInterface::SetTestStringMessage::clone() const
+{
+  return new TestInterface::SetTestStringMessage(this);
+}
 /** @class TestInterface::CalculateMessage interfaces/test.h
  * CalculateMessage Fawkes BlackBoard Interface Message.
  * 
@@ -486,6 +528,17 @@ TestInterface::CalculateMessage::CalculateMessage() : Message("CalculateMessage"
 TestInterface::CalculateMessage::~CalculateMessage()
 {
   free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+TestInterface::CalculateMessage::CalculateMessage(const CalculateMessage *m) : Message("CalculateMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (CalculateMessage_data_t *)data_ptr;
 }
 
 /* Methods */
@@ -549,6 +602,16 @@ TestInterface::CalculateMessage::set_addend(const int new_addend)
   data->addend = new_addend;
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+TestInterface::CalculateMessage::clone() const
+{
+  return new TestInterface::CalculateMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */

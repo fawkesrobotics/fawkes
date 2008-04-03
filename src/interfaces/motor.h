@@ -118,10 +118,12 @@ class MotorInterface : public Interface
     SetMotorStateMessage();
     ~SetMotorStateMessage();
 
+    SetMotorStateMessage(const SetMotorStateMessage *m);
     /* Methods */
     unsigned int motor_state();
     void set_motor_state(const unsigned int new_motor_state);
     size_t maxlenof_motor_state() const;
+    virtual Message * clone() const;
   };
 
   class AcquireControlMessage : public Message
@@ -147,6 +149,7 @@ class MotorInterface : public Interface
     AcquireControlMessage();
     ~AcquireControlMessage();
 
+    AcquireControlMessage(const AcquireControlMessage *m);
     /* Methods */
     unsigned int controller();
     void set_controller(const unsigned int new_controller);
@@ -154,22 +157,18 @@ class MotorInterface : public Interface
     char * controller_thread_name();
     void set_controller_thread_name(const char * new_controller_thread_name);
     size_t maxlenof_controller_thread_name() const;
+    virtual Message * clone() const;
   };
 
   class ResetOdometryMessage : public Message
   {
-   private:
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-    } ResetOdometryMessage_data_t;
-
-    ResetOdometryMessage_data_t *data;
-
    public:
     ResetOdometryMessage();
     ~ResetOdometryMessage();
 
+    ResetOdometryMessage(const ResetOdometryMessage *m);
     /* Methods */
+    virtual Message * clone() const;
   };
 
   class DriveRPMMessage : public Message
@@ -189,6 +188,7 @@ class MotorInterface : public Interface
     DriveRPMMessage();
     ~DriveRPMMessage();
 
+    DriveRPMMessage(const DriveRPMMessage *m);
     /* Methods */
     float front_right();
     void set_front_right(const float new_front_right);
@@ -199,6 +199,7 @@ class MotorInterface : public Interface
     float rear();
     void set_rear(const float new_rear);
     size_t maxlenof_rear() const;
+    virtual Message * clone() const;
   };
 
   class TransMessage : public Message
@@ -217,6 +218,7 @@ class MotorInterface : public Interface
     TransMessage();
     ~TransMessage();
 
+    TransMessage(const TransMessage *m);
     /* Methods */
     float vx();
     void set_vx(const float new_vx);
@@ -224,6 +226,7 @@ class MotorInterface : public Interface
     float vy();
     void set_vy(const float new_vy);
     size_t maxlenof_vy() const;
+    virtual Message * clone() const;
   };
 
   class RotMessage : public Message
@@ -241,10 +244,12 @@ class MotorInterface : public Interface
     RotMessage();
     ~RotMessage();
 
+    RotMessage(const RotMessage *m);
     /* Methods */
     float omega();
     void set_omega(const float new_omega);
     size_t maxlenof_omega() const;
+    virtual Message * clone() const;
   };
 
   class TransRotMessage : public Message
@@ -264,6 +269,7 @@ class MotorInterface : public Interface
     TransRotMessage();
     ~TransRotMessage();
 
+    TransRotMessage(const TransRotMessage *m);
     /* Methods */
     float vx();
     void set_vx(const float new_vx);
@@ -274,6 +280,7 @@ class MotorInterface : public Interface
     float omega();
     void set_omega(const float new_omega);
     size_t maxlenof_omega() const;
+    virtual Message * clone() const;
   };
 
   class OrbitMessage : public Message
@@ -293,6 +300,7 @@ class MotorInterface : public Interface
     OrbitMessage();
     ~OrbitMessage();
 
+    OrbitMessage(const OrbitMessage *m);
     /* Methods */
     float px();
     void set_px(const float new_px);
@@ -303,6 +311,7 @@ class MotorInterface : public Interface
     float omega();
     void set_omega(const float new_omega);
     size_t maxlenof_omega() const;
+    virtual Message * clone() const;
   };
 
   class LinTransRotMessage : public Message
@@ -322,6 +331,7 @@ class MotorInterface : public Interface
     LinTransRotMessage();
     ~LinTransRotMessage();
 
+    LinTransRotMessage(const LinTransRotMessage *m);
     /* Methods */
     float vx();
     void set_vx(const float new_vx);
@@ -332,6 +342,7 @@ class MotorInterface : public Interface
     float omega();
     void set_omega(const float new_omega);
     size_t maxlenof_omega() const;
+    virtual Message * clone() const;
   };
 
   virtual bool message_valid(const Message *message) const;

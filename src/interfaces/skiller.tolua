@@ -2,6 +2,13 @@ $#include <interfaces/skiller.h>
 class SkillerInterface : public Interface
 {
 
+  typedef enum {
+    S_INACTIVE,
+    S_FINAL,
+    S_RUNNING,
+    S_FAILED
+  } SkillStatusEnum;
+
   class ExecSkillMessage : public Message
   {
     ExecSkillMessage(char * ini_skill_string);
@@ -58,8 +65,11 @@ class SkillerInterface : public Interface
   unsigned int exclusive_controller();
   void set_exclusive_controller(const unsigned int new_exclusive_controller);
   size_t maxlenof_exclusive_controller() const;
-  bool is_final();
-  void set_final(const bool new_final);
-  size_t maxlenof_final() const;
+  SkillStatusEnum status();
+  void set_status(const SkillStatusEnum new_status);
+  size_t maxlenof_status() const;
+  bool is_continuous();
+  void set_continuous(const bool new_continuous);
+  size_t maxlenof_continuous() const;
 
 };

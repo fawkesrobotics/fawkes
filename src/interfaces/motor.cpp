@@ -62,8 +62,6 @@ MotorInterface::MotorInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (MotorInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0x32, 0xf7, 0xef, 0x43, 0xe8, 0x78, 0x43, 0x17, 0x55, 0xbb, 0xb9, 0xbf, 0x48, 0x72, 0x21, 0x94};
-  set_hash(tmp_hash);
   add_fieldinfo(Interface::IFT_UINT, "motor_state", &data->motor_state);
   add_fieldinfo(Interface::IFT_UINT, "drive_mode", &data->drive_mode);
   add_fieldinfo(Interface::IFT_INT, "right_rpm", &data->right_rpm);
@@ -77,6 +75,8 @@ MotorInterface::MotorInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "vy", &data->vy);
   add_fieldinfo(Interface::IFT_FLOAT, "omega", &data->omega);
   add_fieldinfo(Interface::IFT_UINT, "controller", &data->controller);
+  unsigned char tmp_hash[] = {0x32, 0xf7, 0xef, 0x43, 0xe8, 0x78, 0x43, 0x17, 0x55, 0xbb, 0xb9, 0xbf, 0x48, 0x72, 0x21, 0x94};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */
@@ -630,6 +630,17 @@ MotorInterface::SetMotorStateMessage::~SetMotorStateMessage()
   free(data_ptr);
 }
 
+/** Copy constructor.
+ * @param m message to copy from
+ */
+MotorInterface::SetMotorStateMessage::SetMotorStateMessage(const SetMotorStateMessage *m) : Message("SetMotorStateMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetMotorStateMessage_data_t *)data_ptr;
+}
+
 /* Methods */
 /** Get motor_state value.
  * 
@@ -665,6 +676,16 @@ MotorInterface::SetMotorStateMessage::set_motor_state(const unsigned int new_mot
   data->motor_state = new_motor_state;
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+MotorInterface::SetMotorStateMessage::clone() const
+{
+  return new MotorInterface::SetMotorStateMessage(this);
+}
 /** @class MotorInterface::AcquireControlMessage interfaces/motor.h
  * AcquireControlMessage Fawkes BlackBoard Interface Message.
  * 
@@ -698,6 +719,17 @@ MotorInterface::AcquireControlMessage::AcquireControlMessage() : Message("Acquir
 MotorInterface::AcquireControlMessage::~AcquireControlMessage()
 {
   free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+MotorInterface::AcquireControlMessage::AcquireControlMessage(const AcquireControlMessage *m) : Message("AcquireControlMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (AcquireControlMessage_data_t *)data_ptr;
 }
 
 /* Methods */
@@ -775,6 +807,16 @@ MotorInterface::AcquireControlMessage::set_controller_thread_name(const char * n
   strncpy(data->controller_thread_name, new_controller_thread_name, sizeof(data->controller_thread_name));
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+MotorInterface::AcquireControlMessage::clone() const
+{
+  return new MotorInterface::AcquireControlMessage(this);
+}
 /** @class MotorInterface::ResetOdometryMessage interfaces/motor.h
  * ResetOdometryMessage Fawkes BlackBoard Interface Message.
  * 
@@ -785,19 +827,35 @@ MotorInterface::AcquireControlMessage::set_controller_thread_name(const char * n
 /** Constructor */
 MotorInterface::ResetOdometryMessage::ResetOdometryMessage() : Message("ResetOdometryMessage")
 {
-  data_size = sizeof(ResetOdometryMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (ResetOdometryMessage_data_t *)data_ptr;
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /** Destructor */
 MotorInterface::ResetOdometryMessage::~ResetOdometryMessage()
 {
-  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+MotorInterface::ResetOdometryMessage::ResetOdometryMessage(const ResetOdometryMessage *m) : Message("ResetOdometryMessage")
+{
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+MotorInterface::ResetOdometryMessage::clone() const
+{
+  return new MotorInterface::ResetOdometryMessage(this);
+}
 /** @class MotorInterface::DriveRPMMessage interfaces/motor.h
  * DriveRPMMessage Fawkes BlackBoard Interface Message.
  * 
@@ -833,6 +891,17 @@ MotorInterface::DriveRPMMessage::DriveRPMMessage() : Message("DriveRPMMessage")
 MotorInterface::DriveRPMMessage::~DriveRPMMessage()
 {
   free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+MotorInterface::DriveRPMMessage::DriveRPMMessage(const DriveRPMMessage *m) : Message("DriveRPMMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (DriveRPMMessage_data_t *)data_ptr;
 }
 
 /* Methods */
@@ -926,6 +995,16 @@ MotorInterface::DriveRPMMessage::set_rear(const float new_rear)
   data->rear = new_rear;
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+MotorInterface::DriveRPMMessage::clone() const
+{
+  return new MotorInterface::DriveRPMMessage(this);
+}
 /** @class MotorInterface::TransMessage interfaces/motor.h
  * TransMessage Fawkes BlackBoard Interface Message.
  * 
@@ -959,6 +1038,17 @@ MotorInterface::TransMessage::TransMessage() : Message("TransMessage")
 MotorInterface::TransMessage::~TransMessage()
 {
   free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+MotorInterface::TransMessage::TransMessage(const TransMessage *m) : Message("TransMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (TransMessage_data_t *)data_ptr;
 }
 
 /* Methods */
@@ -1022,6 +1112,16 @@ MotorInterface::TransMessage::set_vy(const float new_vy)
   data->vy = new_vy;
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+MotorInterface::TransMessage::clone() const
+{
+  return new MotorInterface::TransMessage(this);
+}
 /** @class MotorInterface::RotMessage interfaces/motor.h
  * RotMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1055,6 +1155,17 @@ MotorInterface::RotMessage::~RotMessage()
   free(data_ptr);
 }
 
+/** Copy constructor.
+ * @param m message to copy from
+ */
+MotorInterface::RotMessage::RotMessage(const RotMessage *m) : Message("RotMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (RotMessage_data_t *)data_ptr;
+}
+
 /* Methods */
 /** Get omega value.
  * Angle rotation in rad/s.
@@ -1086,6 +1197,16 @@ MotorInterface::RotMessage::set_omega(const float new_omega)
   data->omega = new_omega;
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+MotorInterface::RotMessage::clone() const
+{
+  return new MotorInterface::RotMessage(this);
+}
 /** @class MotorInterface::TransRotMessage interfaces/motor.h
  * TransRotMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1121,6 +1242,17 @@ MotorInterface::TransRotMessage::TransRotMessage() : Message("TransRotMessage")
 MotorInterface::TransRotMessage::~TransRotMessage()
 {
   free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+MotorInterface::TransRotMessage::TransRotMessage(const TransRotMessage *m) : Message("TransRotMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (TransRotMessage_data_t *)data_ptr;
 }
 
 /* Methods */
@@ -1214,6 +1346,16 @@ MotorInterface::TransRotMessage::set_omega(const float new_omega)
   data->omega = new_omega;
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+MotorInterface::TransRotMessage::clone() const
+{
+  return new MotorInterface::TransRotMessage(this);
+}
 /** @class MotorInterface::OrbitMessage interfaces/motor.h
  * OrbitMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1249,6 +1391,17 @@ MotorInterface::OrbitMessage::OrbitMessage() : Message("OrbitMessage")
 MotorInterface::OrbitMessage::~OrbitMessage()
 {
   free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+MotorInterface::OrbitMessage::OrbitMessage(const OrbitMessage *m) : Message("OrbitMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (OrbitMessage_data_t *)data_ptr;
 }
 
 /* Methods */
@@ -1342,6 +1495,16 @@ MotorInterface::OrbitMessage::set_omega(const float new_omega)
   data->omega = new_omega;
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+MotorInterface::OrbitMessage::clone() const
+{
+  return new MotorInterface::OrbitMessage(this);
+}
 /** @class MotorInterface::LinTransRotMessage interfaces/motor.h
  * LinTransRotMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1377,6 +1540,17 @@ MotorInterface::LinTransRotMessage::LinTransRotMessage() : Message("LinTransRotM
 MotorInterface::LinTransRotMessage::~LinTransRotMessage()
 {
   free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+MotorInterface::LinTransRotMessage::LinTransRotMessage(const LinTransRotMessage *m) : Message("LinTransRotMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (LinTransRotMessage_data_t *)data_ptr;
 }
 
 /* Methods */
@@ -1470,6 +1644,16 @@ MotorInterface::LinTransRotMessage::set_omega(const float new_omega)
   data->omega = new_omega;
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+MotorInterface::LinTransRotMessage::clone() const
+{
+  return new MotorInterface::LinTransRotMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */

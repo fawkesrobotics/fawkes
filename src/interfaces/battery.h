@@ -53,34 +53,24 @@ class BatteryInterface : public Interface
   /* messages */
   class PushButtonMessage : public Message
   {
-   private:
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-    } PushButtonMessage_data_t;
-
-    PushButtonMessage_data_t *data;
-
    public:
     PushButtonMessage();
     ~PushButtonMessage();
 
+    PushButtonMessage(const PushButtonMessage *m);
     /* Methods */
+    virtual Message * clone() const;
   };
 
   class SleepMessage : public Message
   {
-   private:
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-    } SleepMessage_data_t;
-
-    SleepMessage_data_t *data;
-
    public:
     SleepMessage();
     ~SleepMessage();
 
+    SleepMessage(const SleepMessage *m);
     /* Methods */
+    virtual Message * clone() const;
   };
 
   virtual bool message_valid(const Message *message) const;

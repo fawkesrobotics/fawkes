@@ -60,8 +60,6 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (ObjectPositionInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0xe6, 0xb, 0xa2, 0xdd, 0xf8, 0x37, 0xbb, 0xb4, 0xab, 0x4c, 0xf2, 0xf9, 0xf0, 0x59, 0x4, 0x78};
-  set_hash(tmp_hash);
   add_fieldinfo(Interface::IFT_UINT, "object_type", &data->object_type);
   add_fieldinfo(Interface::IFT_BOOL, "visible", &data->visible);
   add_fieldinfo(Interface::IFT_FLOAT, "yaw", &data->yaw);
@@ -84,6 +82,8 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "world_y_velocity", &data->world_y_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "world_z_velocity", &data->world_z_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "xyz_velocity_covariance", &data->xyz_velocity_covariance);
+  unsigned char tmp_hash[] = {0xe6, 0xb, 0xa2, 0xdd, 0xf8, 0x37, 0xbb, 0xb4, 0xab, 0x4c, 0xf2, 0xf9, 0xf0, 0x59, 0x4, 0x78};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */

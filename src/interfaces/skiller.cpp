@@ -51,10 +51,10 @@ SkillerInterface::SkillerInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (SkillerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0xa5, 0x91, 0x13, 0xe7, 0x9d, 0xc4, 0x85, 0x4c, 0x5, 0x67, 0x82, 0x7f, 0x19, 0xa0, 0x75, 0x14};
-  set_hash(tmp_hash);
   add_fieldinfo(Interface::IFT_UINT, "exclusive_controller", &data->exclusive_controller);
-  add_fieldinfo(Interface::IFT_BOOL, "final", &data->final);
+  add_fieldinfo(Interface::IFT_BOOL, "continuous", &data->continuous);
+  unsigned char tmp_hash[] = {0x7b, 0xe3, 0xf0, 0xfe, 0x60, 0x4d, 0x22, 0x40, 0x7f, 0x8e, 0x7e, 0x1d, 0x92, 0x9c, 0x83, 0x4c};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */
@@ -137,38 +137,74 @@ SkillerInterface::set_exclusive_controller(const unsigned int new_exclusive_cont
   data->exclusive_controller = new_exclusive_controller;
 }
 
-/** Get final value.
+/** Get status value.
  * 
-      True if the execution of the current skill_string is final. False otherwise.
+      The status of the current skill execution.
     
- * @return final value
+ * @return status value
  */
-bool
-SkillerInterface::is_final()
+SkillerInterface::SkillStatusEnum
+SkillerInterface::status()
 {
-  return data->final;
+  return data->status;
 }
 
-/** Get maximum length of final value.
- * @return length of final value, can be length of the array or number of 
+/** Get maximum length of status value.
+ * @return length of status value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-SkillerInterface::maxlenof_final() const
+SkillerInterface::maxlenof_status() const
 {
   return 1;
 }
 
-/** Set final value.
+/** Set status value.
  * 
-      True if the execution of the current skill_string is final. False otherwise.
+      The status of the current skill execution.
     
- * @param new_final new final value
+ * @param new_status new status value
  */
 void
-SkillerInterface::set_final(const bool new_final)
+SkillerInterface::set_status(const SkillStatusEnum new_status)
 {
-  data->final = new_final;
+  data->status = new_status;
+}
+
+/** Get continuous value.
+ * 
+      True if continuous execution is in progress, false if no skill string is executed
+      at all or it is executed one-shot with ExecSkillMessage.
+    
+ * @return continuous value
+ */
+bool
+SkillerInterface::is_continuous()
+{
+  return data->continuous;
+}
+
+/** Get maximum length of continuous value.
+ * @return length of continuous value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SkillerInterface::maxlenof_continuous() const
+{
+  return 1;
+}
+
+/** Set continuous value.
+ * 
+      True if continuous execution is in progress, false if no skill string is executed
+      at all or it is executed one-shot with ExecSkillMessage.
+    
+ * @param new_continuous new continuous value
+ */
+void
+SkillerInterface::set_continuous(const bool new_continuous)
+{
+  data->continuous = new_continuous;
 }
 
 /* =========== message create =========== */
@@ -228,6 +264,17 @@ SkillerInterface::ExecSkillMessage::~ExecSkillMessage()
   free(data_ptr);
 }
 
+/** Copy constructor.
+ * @param m message to copy from
+ */
+SkillerInterface::ExecSkillMessage::ExecSkillMessage(const ExecSkillMessage *m) : Message("ExecSkillMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ExecSkillMessage_data_t *)data_ptr;
+}
+
 /* Methods */
 /** Get skill_string value.
  * 
@@ -265,6 +312,16 @@ SkillerInterface::ExecSkillMessage::set_skill_string(const char * new_skill_stri
   strncpy(data->skill_string, new_skill_string, sizeof(data->skill_string));
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+SkillerInterface::ExecSkillMessage::clone() const
+{
+  return new SkillerInterface::ExecSkillMessage(this);
+}
 /** @class SkillerInterface::ExecSkillContinuousMessage interfaces/skiller.h
  * ExecSkillContinuousMessage Fawkes BlackBoard Interface Message.
  * 
@@ -296,6 +353,17 @@ SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage() : Mes
 SkillerInterface::ExecSkillContinuousMessage::~ExecSkillContinuousMessage()
 {
   free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage(const ExecSkillContinuousMessage *m) : Message("ExecSkillContinuousMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
 }
 
 /* Methods */
@@ -335,6 +403,16 @@ SkillerInterface::ExecSkillContinuousMessage::set_skill_string(const char * new_
   strncpy(data->skill_string, new_skill_string, sizeof(data->skill_string));
 }
 
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+SkillerInterface::ExecSkillContinuousMessage::clone() const
+{
+  return new SkillerInterface::ExecSkillContinuousMessage(this);
+}
 /** @class SkillerInterface::RestartInterpreterMessage interfaces/skiller.h
  * RestartInterpreterMessage Fawkes BlackBoard Interface Message.
  * 
@@ -345,19 +423,35 @@ SkillerInterface::ExecSkillContinuousMessage::set_skill_string(const char * new_
 /** Constructor */
 SkillerInterface::RestartInterpreterMessage::RestartInterpreterMessage() : Message("RestartInterpreterMessage")
 {
-  data_size = sizeof(RestartInterpreterMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (RestartInterpreterMessage_data_t *)data_ptr;
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /** Destructor */
 SkillerInterface::RestartInterpreterMessage::~RestartInterpreterMessage()
 {
-  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+SkillerInterface::RestartInterpreterMessage::RestartInterpreterMessage(const RestartInterpreterMessage *m) : Message("RestartInterpreterMessage")
+{
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+SkillerInterface::RestartInterpreterMessage::clone() const
+{
+  return new SkillerInterface::RestartInterpreterMessage(this);
+}
 /** @class SkillerInterface::StopExecMessage interfaces/skiller.h
  * StopExecMessage Fawkes BlackBoard Interface Message.
  * 
@@ -368,19 +462,35 @@ SkillerInterface::RestartInterpreterMessage::~RestartInterpreterMessage()
 /** Constructor */
 SkillerInterface::StopExecMessage::StopExecMessage() : Message("StopExecMessage")
 {
-  data_size = sizeof(StopExecMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (StopExecMessage_data_t *)data_ptr;
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /** Destructor */
 SkillerInterface::StopExecMessage::~StopExecMessage()
 {
-  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+SkillerInterface::StopExecMessage::StopExecMessage(const StopExecMessage *m) : Message("StopExecMessage")
+{
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+SkillerInterface::StopExecMessage::clone() const
+{
+  return new SkillerInterface::StopExecMessage(this);
+}
 /** @class SkillerInterface::AcquireControlMessage interfaces/skiller.h
  * AcquireControlMessage Fawkes BlackBoard Interface Message.
  * 
@@ -391,19 +501,35 @@ SkillerInterface::StopExecMessage::~StopExecMessage()
 /** Constructor */
 SkillerInterface::AcquireControlMessage::AcquireControlMessage() : Message("AcquireControlMessage")
 {
-  data_size = sizeof(AcquireControlMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (AcquireControlMessage_data_t *)data_ptr;
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /** Destructor */
 SkillerInterface::AcquireControlMessage::~AcquireControlMessage()
 {
-  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+SkillerInterface::AcquireControlMessage::AcquireControlMessage(const AcquireControlMessage *m) : Message("AcquireControlMessage")
+{
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+SkillerInterface::AcquireControlMessage::clone() const
+{
+  return new SkillerInterface::AcquireControlMessage(this);
+}
 /** @class SkillerInterface::ReleaseControlMessage interfaces/skiller.h
  * ReleaseControlMessage Fawkes BlackBoard Interface Message.
  * 
@@ -414,19 +540,35 @@ SkillerInterface::AcquireControlMessage::~AcquireControlMessage()
 /** Constructor */
 SkillerInterface::ReleaseControlMessage::ReleaseControlMessage() : Message("ReleaseControlMessage")
 {
-  data_size = sizeof(ReleaseControlMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (ReleaseControlMessage_data_t *)data_ptr;
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /** Destructor */
 SkillerInterface::ReleaseControlMessage::~ReleaseControlMessage()
 {
-  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+SkillerInterface::ReleaseControlMessage::ReleaseControlMessage(const ReleaseControlMessage *m) : Message("ReleaseControlMessage")
+{
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+SkillerInterface::ReleaseControlMessage::clone() const
+{
+  return new SkillerInterface::ReleaseControlMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */

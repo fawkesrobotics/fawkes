@@ -31,16 +31,30 @@ static int tolua_collect_NavigatorInterface__ObstacleMessage (lua_State* tolua_S
 	return 0;
 }
 
-static int tolua_collect_SkillerInterface__ExecSkillMessage (lua_State* tolua_S)
+static int tolua_collect_TestInterface__CalculateMessage (lua_State* tolua_S)
 {
- SkillerInterface::ExecSkillMessage* self = (SkillerInterface::ExecSkillMessage*) tolua_tousertype(tolua_S,1,0);
+ TestInterface::CalculateMessage* self = (TestInterface::CalculateMessage*) tolua_tousertype(tolua_S,1,0);
 	delete self;
 	return 0;
 }
 
-static int tolua_collect_TestInterface__CalculateMessage (lua_State* tolua_S)
+static int tolua_collect_SkillerInterface__RestartInterpreterMessage (lua_State* tolua_S)
 {
- TestInterface::CalculateMessage* self = (TestInterface::CalculateMessage*) tolua_tousertype(tolua_S,1,0);
+ SkillerInterface::RestartInterpreterMessage* self = (SkillerInterface::RestartInterpreterMessage*) tolua_tousertype(tolua_S,1,0);
+	delete self;
+	return 0;
+}
+
+static int tolua_collect_NavigatorInterface__CartesianGotoMessage (lua_State* tolua_S)
+{
+ NavigatorInterface::CartesianGotoMessage* self = (NavigatorInterface::CartesianGotoMessage*) tolua_tousertype(tolua_S,1,0);
+	delete self;
+	return 0;
+}
+
+static int tolua_collect_NavigatorInterface__PolarGotoMessage (lua_State* tolua_S)
+{
+ NavigatorInterface::PolarGotoMessage* self = (NavigatorInterface::PolarGotoMessage*) tolua_tousertype(tolua_S,1,0);
 	delete self;
 	return 0;
 }
@@ -59,16 +73,16 @@ static int tolua_collect_KickerInterface__KickMessage (lua_State* tolua_S)
 	return 0;
 }
 
-static int tolua_collect_SkillerInterface__ReleaseControlMessage (lua_State* tolua_S)
+static int tolua_collect_TestInterface__SetTestIntMessage (lua_State* tolua_S)
 {
- SkillerInterface::ReleaseControlMessage* self = (SkillerInterface::ReleaseControlMessage*) tolua_tousertype(tolua_S,1,0);
+ TestInterface::SetTestIntMessage* self = (TestInterface::SetTestIntMessage*) tolua_tousertype(tolua_S,1,0);
 	delete self;
 	return 0;
 }
 
-static int tolua_collect_TestInterface__SetTestIntMessage (lua_State* tolua_S)
+static int tolua_collect_SkillerInterface__ReleaseControlMessage (lua_State* tolua_S)
 {
- TestInterface::SetTestIntMessage* self = (TestInterface::SetTestIntMessage*) tolua_tousertype(tolua_S,1,0);
+ SkillerInterface::ReleaseControlMessage* self = (SkillerInterface::ReleaseControlMessage*) tolua_tousertype(tolua_S,1,0);
 	delete self;
 	return 0;
 }
@@ -115,9 +129,9 @@ static int tolua_collect_SkillerInterface__AcquireControlMessage (lua_State* tol
 	return 0;
 }
 
-static int tolua_collect_SkillerInterface__RestartInterpreterMessage (lua_State* tolua_S)
+static int tolua_collect_SkillerInterface__ExecSkillContinuousMessage (lua_State* tolua_S)
 {
- SkillerInterface::RestartInterpreterMessage* self = (SkillerInterface::RestartInterpreterMessage*) tolua_tousertype(tolua_S,1,0);
+ SkillerInterface::ExecSkillContinuousMessage* self = (SkillerInterface::ExecSkillContinuousMessage*) tolua_tousertype(tolua_S,1,0);
 	delete self;
 	return 0;
 }
@@ -157,9 +171,9 @@ static int tolua_collect_size_t (lua_State* tolua_S)
 	return 0;
 }
 
-static int tolua_collect_SkillerInterface__ExecSkillContinuousMessage (lua_State* tolua_S)
+static int tolua_collect_SkillerInterface__ExecSkillMessage (lua_State* tolua_S)
 {
- SkillerInterface::ExecSkillContinuousMessage* self = (SkillerInterface::ExecSkillContinuousMessage*) tolua_tousertype(tolua_S,1,0);
+ SkillerInterface::ExecSkillMessage* self = (SkillerInterface::ExecSkillMessage*) tolua_tousertype(tolua_S,1,0);
 	delete self;
 	return 0;
 }
@@ -171,16 +185,16 @@ static int tolua_collect_MotorInterface__TransRotMessage (lua_State* tolua_S)
 	return 0;
 }
 
-static int tolua_collect_NavigatorInterface__MaxVelocityMessage (lua_State* tolua_S)
+static int tolua_collect_NavigatorInterface__ResetOdometryMessage (lua_State* tolua_S)
 {
- NavigatorInterface::MaxVelocityMessage* self = (NavigatorInterface::MaxVelocityMessage*) tolua_tousertype(tolua_S,1,0);
+ NavigatorInterface::ResetOdometryMessage* self = (NavigatorInterface::ResetOdometryMessage*) tolua_tousertype(tolua_S,1,0);
 	delete self;
 	return 0;
 }
 
-static int tolua_collect_NavigatorInterface__TargetMessage (lua_State* tolua_S)
+static int tolua_collect_NavigatorInterface__MaxVelocityMessage (lua_State* tolua_S)
 {
- NavigatorInterface::TargetMessage* self = (NavigatorInterface::TargetMessage*) tolua_tousertype(tolua_S,1,0);
+ NavigatorInterface::MaxVelocityMessage* self = (NavigatorInterface::MaxVelocityMessage*) tolua_tousertype(tolua_S,1,0);
 	delete self;
 	return 0;
 }
@@ -220,7 +234,8 @@ static void tolua_reg_types (lua_State* tolua_S)
 {
  tolua_usertype(tolua_S,"NavigatorInterface::ObstacleMessage");
  tolua_usertype(tolua_S,"ObjectPositionInterface");
- tolua_usertype(tolua_S,"KickerInterface");
+ tolua_usertype(tolua_S,"NavigatorInterface::CartesianGotoMessage");
+ tolua_usertype(tolua_S,"NavigatorInterface::PolarGotoMessage");
  tolua_usertype(tolua_S,"KickerInterface::KickMessage");
  tolua_usertype(tolua_S,"TestInterface");
  tolua_usertype(tolua_S,"KickerInterface::GuideBallMessage");
@@ -235,21 +250,22 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"BatteryInterface");
  tolua_usertype(tolua_S,"SkillerInterface");
  tolua_usertype(tolua_S,"TestInterface::CalculateMessage");
+ tolua_usertype(tolua_S,"TestInterface::SetTestStringMessage");
  tolua_usertype(tolua_S,"BatteryInterface::PushButtonMessage");
  tolua_usertype(tolua_S,"MotorInterface::SetMotorStateMessage");
- tolua_usertype(tolua_S,"TestInterface::SetTestStringMessage");
  tolua_usertype(tolua_S,"TestInterface::SetTestIntMessage");
+ tolua_usertype(tolua_S,"SkillerInterface::ExecSkillMessage");
  tolua_usertype(tolua_S,"SkillerInterface::AcquireControlMessage");
- tolua_usertype(tolua_S,"NavigatorInterface::TargetMessage");
+ tolua_usertype(tolua_S,"SkillerInterface::ExecSkillContinuousMessage");
  tolua_usertype(tolua_S,"NavigatorInterface::MaxVelocityMessage");
  tolua_usertype(tolua_S,"BatteryInterface::SleepMessage");
  tolua_usertype(tolua_S,"SkillerInterface::RestartInterpreterMessage");
  tolua_usertype(tolua_S,"MotorInterface::OrbitMessage");
- tolua_usertype(tolua_S,"SkillerInterface::ExecSkillContinuousMessage");
+ tolua_usertype(tolua_S,"KickerInterface");
  tolua_usertype(tolua_S,"Message");
  tolua_usertype(tolua_S,"MotorInterface::TransRotMessage");
  tolua_usertype(tolua_S,"MotorInterface::RotMessage");
- tolua_usertype(tolua_S,"SkillerInterface::ExecSkillMessage");
+ tolua_usertype(tolua_S,"NavigatorInterface::ResetOdometryMessage");
  tolua_usertype(tolua_S,"MotorInterface::DriveRPMMessage");
  tolua_usertype(tolua_S,"MotorInterface::ResetOdometryMessage");
  tolua_usertype(tolua_S,"KickerInterface::ResetCounterMessage");
@@ -6795,14 +6811,14 @@ static int tolua_interfaces_MotorInterface_maxlenof_controller_thread_name00(lua
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: new of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_new00
-static int tolua_interfaces_NavigatorInterface_TargetMessage_new00(lua_State* tolua_S)
+/* method: new of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new00
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertable(tolua_S,1,"NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertable(tolua_S,1,"NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
@@ -6816,8 +6832,8 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_new00(lua_State* to
   float ini_y = ((float)  tolua_tonumber(tolua_S,3,0));
   float ini_orientation = ((float)  tolua_tonumber(tolua_S,4,0));
   {
-   NavigatorInterface::TargetMessage* tolua_ret = (NavigatorInterface::TargetMessage*)  new NavigatorInterface::TargetMessage(ini_x,ini_y,ini_orientation);
-   tolua_pushusertype(tolua_S,(void*)tolua_ret,"NavigatorInterface::TargetMessage");
+   NavigatorInterface::CartesianGotoMessage* tolua_ret = (NavigatorInterface::CartesianGotoMessage*)  new NavigatorInterface::CartesianGotoMessage(ini_x,ini_y,ini_orientation);
+   tolua_pushusertype(tolua_S,(void*)tolua_ret,"NavigatorInterface::CartesianGotoMessage");
   }
  }
  return 1;
@@ -6829,14 +6845,14 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_new00(lua_State* to
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: new_local of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_new00_local
-static int tolua_interfaces_NavigatorInterface_TargetMessage_new00_local(lua_State* tolua_S)
+/* method: new_local of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new00_local
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new00_local(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertable(tolua_S,1,"NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertable(tolua_S,1,"NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
@@ -6850,8 +6866,8 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_new00_local(lua_Sta
   float ini_y = ((float)  tolua_tonumber(tolua_S,3,0));
   float ini_orientation = ((float)  tolua_tonumber(tolua_S,4,0));
   {
-   NavigatorInterface::TargetMessage* tolua_ret = (NavigatorInterface::TargetMessage*)  new NavigatorInterface::TargetMessage(ini_x,ini_y,ini_orientation);
-   tolua_pushusertype_and_takeownership(tolua_S,(void *)tolua_ret,"NavigatorInterface::TargetMessage");
+   NavigatorInterface::CartesianGotoMessage* tolua_ret = (NavigatorInterface::CartesianGotoMessage*)  new NavigatorInterface::CartesianGotoMessage(ini_x,ini_y,ini_orientation);
+   tolua_pushusertype_and_takeownership(tolua_S,(void *)tolua_ret,"NavigatorInterface::CartesianGotoMessage");
   }
  }
  return 1;
@@ -6863,67 +6879,67 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_new00_local(lua_Sta
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: new of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_new01
-static int tolua_interfaces_NavigatorInterface_TargetMessage_new01(lua_State* tolua_S)
+/* method: new of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new01
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new01(lua_State* tolua_S)
 {
  tolua_Error tolua_err;
  if (
-     !tolua_isusertable(tolua_S,1,"NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertable(tolua_S,1,"NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
  {
   {
-   NavigatorInterface::TargetMessage* tolua_ret = (NavigatorInterface::TargetMessage*)  new NavigatorInterface::TargetMessage();
-   tolua_pushusertype(tolua_S,(void*)tolua_ret,"NavigatorInterface::TargetMessage");
+   NavigatorInterface::CartesianGotoMessage* tolua_ret = (NavigatorInterface::CartesianGotoMessage*)  new NavigatorInterface::CartesianGotoMessage();
+   tolua_pushusertype(tolua_S,(void*)tolua_ret,"NavigatorInterface::CartesianGotoMessage");
   }
  }
  return 1;
 tolua_lerror:
- return tolua_interfaces_NavigatorInterface_TargetMessage_new00(tolua_S);
+ return tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new00(tolua_S);
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: new_local of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_new01_local
-static int tolua_interfaces_NavigatorInterface_TargetMessage_new01_local(lua_State* tolua_S)
+/* method: new_local of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new01_local
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new01_local(lua_State* tolua_S)
 {
  tolua_Error tolua_err;
  if (
-     !tolua_isusertable(tolua_S,1,"NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertable(tolua_S,1,"NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
  {
   {
-   NavigatorInterface::TargetMessage* tolua_ret = (NavigatorInterface::TargetMessage*)  new NavigatorInterface::TargetMessage();
-   tolua_pushusertype_and_takeownership(tolua_S,(void *)tolua_ret,"NavigatorInterface::TargetMessage");
+   NavigatorInterface::CartesianGotoMessage* tolua_ret = (NavigatorInterface::CartesianGotoMessage*)  new NavigatorInterface::CartesianGotoMessage();
+   tolua_pushusertype_and_takeownership(tolua_S,(void *)tolua_ret,"NavigatorInterface::CartesianGotoMessage");
   }
  }
  return 1;
 tolua_lerror:
- return tolua_interfaces_NavigatorInterface_TargetMessage_new00_local(tolua_S);
+ return tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new00_local(tolua_S);
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: delete of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_delete00
-static int tolua_interfaces_NavigatorInterface_TargetMessage_delete00(lua_State* tolua_S)
+/* method: delete of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_delete00
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_delete00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  NavigatorInterface::TargetMessage* self = (NavigatorInterface::TargetMessage*)  tolua_tousertype(tolua_S,1,0);
+  NavigatorInterface::CartesianGotoMessage* self = (NavigatorInterface::CartesianGotoMessage*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'delete'",NULL);
 #endif
@@ -6938,21 +6954,21 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_delete00(lua_State*
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: x of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_x00
-static int tolua_interfaces_NavigatorInterface_TargetMessage_x00(lua_State* tolua_S)
+/* method: x of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_x00
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_x00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  NavigatorInterface::TargetMessage* self = (NavigatorInterface::TargetMessage*)  tolua_tousertype(tolua_S,1,0);
+  NavigatorInterface::CartesianGotoMessage* self = (NavigatorInterface::CartesianGotoMessage*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'x'",NULL);
 #endif
@@ -6970,14 +6986,14 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_x00(lua_State* tolu
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_x of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_set_x00
-static int tolua_interfaces_NavigatorInterface_TargetMessage_set_x00(lua_State* tolua_S)
+/* method: set_x of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_set_x00
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_set_x00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
@@ -6985,7 +7001,7 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_set_x00(lua_State* 
  else
 #endif
  {
-  NavigatorInterface::TargetMessage* self = (NavigatorInterface::TargetMessage*)  tolua_tousertype(tolua_S,1,0);
+  NavigatorInterface::CartesianGotoMessage* self = (NavigatorInterface::CartesianGotoMessage*)  tolua_tousertype(tolua_S,1,0);
   const float new_x = ((const float)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_x'",NULL);
@@ -7003,21 +7019,21 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_set_x00(lua_State* 
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: maxlenof_x of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_maxlenof_x00
-static int tolua_interfaces_NavigatorInterface_TargetMessage_maxlenof_x00(lua_State* tolua_S)
+/* method: maxlenof_x of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_maxlenof_x00
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_maxlenof_x00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"const NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  const NavigatorInterface::TargetMessage* self = (const NavigatorInterface::TargetMessage*)  tolua_tousertype(tolua_S,1,0);
+  const NavigatorInterface::CartesianGotoMessage* self = (const NavigatorInterface::CartesianGotoMessage*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_x'",NULL);
 #endif
@@ -7043,21 +7059,21 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_maxlenof_x00(lua_St
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: y of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_y00
-static int tolua_interfaces_NavigatorInterface_TargetMessage_y00(lua_State* tolua_S)
+/* method: y of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_y00
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_y00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  NavigatorInterface::TargetMessage* self = (NavigatorInterface::TargetMessage*)  tolua_tousertype(tolua_S,1,0);
+  NavigatorInterface::CartesianGotoMessage* self = (NavigatorInterface::CartesianGotoMessage*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'y'",NULL);
 #endif
@@ -7075,14 +7091,14 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_y00(lua_State* tolu
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_y of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_set_y00
-static int tolua_interfaces_NavigatorInterface_TargetMessage_set_y00(lua_State* tolua_S)
+/* method: set_y of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_set_y00
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_set_y00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
@@ -7090,7 +7106,7 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_set_y00(lua_State* 
  else
 #endif
  {
-  NavigatorInterface::TargetMessage* self = (NavigatorInterface::TargetMessage*)  tolua_tousertype(tolua_S,1,0);
+  NavigatorInterface::CartesianGotoMessage* self = (NavigatorInterface::CartesianGotoMessage*)  tolua_tousertype(tolua_S,1,0);
   const float new_y = ((const float)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_y'",NULL);
@@ -7108,21 +7124,21 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_set_y00(lua_State* 
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: maxlenof_y of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_maxlenof_y00
-static int tolua_interfaces_NavigatorInterface_TargetMessage_maxlenof_y00(lua_State* tolua_S)
+/* method: maxlenof_y of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_maxlenof_y00
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_maxlenof_y00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"const NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  const NavigatorInterface::TargetMessage* self = (const NavigatorInterface::TargetMessage*)  tolua_tousertype(tolua_S,1,0);
+  const NavigatorInterface::CartesianGotoMessage* self = (const NavigatorInterface::CartesianGotoMessage*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_y'",NULL);
 #endif
@@ -7148,21 +7164,21 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_maxlenof_y00(lua_St
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: orientation of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_orientation00
-static int tolua_interfaces_NavigatorInterface_TargetMessage_orientation00(lua_State* tolua_S)
+/* method: orientation of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_orientation00
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_orientation00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  NavigatorInterface::TargetMessage* self = (NavigatorInterface::TargetMessage*)  tolua_tousertype(tolua_S,1,0);
+  NavigatorInterface::CartesianGotoMessage* self = (NavigatorInterface::CartesianGotoMessage*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'orientation'",NULL);
 #endif
@@ -7180,14 +7196,14 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_orientation00(lua_S
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_orientation of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_set_orientation00
-static int tolua_interfaces_NavigatorInterface_TargetMessage_set_orientation00(lua_State* tolua_S)
+/* method: set_orientation of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_set_orientation00
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_set_orientation00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
@@ -7195,7 +7211,7 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_set_orientation00(l
  else
 #endif
  {
-  NavigatorInterface::TargetMessage* self = (NavigatorInterface::TargetMessage*)  tolua_tousertype(tolua_S,1,0);
+  NavigatorInterface::CartesianGotoMessage* self = (NavigatorInterface::CartesianGotoMessage*)  tolua_tousertype(tolua_S,1,0);
   const float new_orientation = ((const float)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_orientation'",NULL);
@@ -7213,21 +7229,479 @@ static int tolua_interfaces_NavigatorInterface_TargetMessage_set_orientation00(l
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: maxlenof_orientation of class  TargetMessage */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_TargetMessage_maxlenof_orientation00
-static int tolua_interfaces_NavigatorInterface_TargetMessage_maxlenof_orientation00(lua_State* tolua_S)
+/* method: maxlenof_orientation of class  CartesianGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_CartesianGotoMessage_maxlenof_orientation00
+static int tolua_interfaces_NavigatorInterface_CartesianGotoMessage_maxlenof_orientation00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"const NavigatorInterface::TargetMessage",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface::CartesianGotoMessage",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  const NavigatorInterface::TargetMessage* self = (const NavigatorInterface::TargetMessage*)  tolua_tousertype(tolua_S,1,0);
+  const NavigatorInterface::CartesianGotoMessage* self = (const NavigatorInterface::CartesianGotoMessage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_orientation'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_orientation();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_orientation'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: new of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_new00
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_new00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  float ini_phi = ((float)  tolua_tonumber(tolua_S,2,0));
+  float ini_dist = ((float)  tolua_tonumber(tolua_S,3,0));
+  float ini_orientation = ((float)  tolua_tonumber(tolua_S,4,0));
+  {
+   NavigatorInterface::PolarGotoMessage* tolua_ret = (NavigatorInterface::PolarGotoMessage*)  new NavigatorInterface::PolarGotoMessage(ini_phi,ini_dist,ini_orientation);
+   tolua_pushusertype(tolua_S,(void*)tolua_ret,"NavigatorInterface::PolarGotoMessage");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'new'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: new_local of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_new00_local
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_new00_local(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  float ini_phi = ((float)  tolua_tonumber(tolua_S,2,0));
+  float ini_dist = ((float)  tolua_tonumber(tolua_S,3,0));
+  float ini_orientation = ((float)  tolua_tonumber(tolua_S,4,0));
+  {
+   NavigatorInterface::PolarGotoMessage* tolua_ret = (NavigatorInterface::PolarGotoMessage*)  new NavigatorInterface::PolarGotoMessage(ini_phi,ini_dist,ini_orientation);
+   tolua_pushusertype_and_takeownership(tolua_S,(void *)tolua_ret,"NavigatorInterface::PolarGotoMessage");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'new'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: new of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_new01
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_new01(lua_State* tolua_S)
+{
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+ {
+  {
+   NavigatorInterface::PolarGotoMessage* tolua_ret = (NavigatorInterface::PolarGotoMessage*)  new NavigatorInterface::PolarGotoMessage();
+   tolua_pushusertype(tolua_S,(void*)tolua_ret,"NavigatorInterface::PolarGotoMessage");
+  }
+ }
+ return 1;
+tolua_lerror:
+ return tolua_interfaces_NavigatorInterface_PolarGotoMessage_new00(tolua_S);
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: new_local of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_new01_local
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_new01_local(lua_State* tolua_S)
+{
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+ {
+  {
+   NavigatorInterface::PolarGotoMessage* tolua_ret = (NavigatorInterface::PolarGotoMessage*)  new NavigatorInterface::PolarGotoMessage();
+   tolua_pushusertype_and_takeownership(tolua_S,(void *)tolua_ret,"NavigatorInterface::PolarGotoMessage");
+  }
+ }
+ return 1;
+tolua_lerror:
+ return tolua_interfaces_NavigatorInterface_PolarGotoMessage_new00_local(tolua_S);
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: delete of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_delete00
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_delete00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface::PolarGotoMessage* self = (NavigatorInterface::PolarGotoMessage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'delete'",NULL);
+#endif
+  delete self;
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'delete'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: phi of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_phi00
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_phi00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface::PolarGotoMessage* self = (NavigatorInterface::PolarGotoMessage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'phi'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->phi();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'phi'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_phi of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_set_phi00
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_set_phi00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface::PolarGotoMessage* self = (NavigatorInterface::PolarGotoMessage*)  tolua_tousertype(tolua_S,1,0);
+  const float new_phi = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_phi'",NULL);
+#endif
+  {
+   self->set_phi(new_phi);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_phi'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_phi of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_maxlenof_phi00
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_maxlenof_phi00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const NavigatorInterface::PolarGotoMessage* self = (const NavigatorInterface::PolarGotoMessage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_phi'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_phi();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_phi'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: dist of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_dist00
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_dist00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface::PolarGotoMessage* self = (NavigatorInterface::PolarGotoMessage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'dist'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->dist();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'dist'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_dist of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_set_dist00
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_set_dist00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface::PolarGotoMessage* self = (NavigatorInterface::PolarGotoMessage*)  tolua_tousertype(tolua_S,1,0);
+  const float new_dist = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_dist'",NULL);
+#endif
+  {
+   self->set_dist(new_dist);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_dist'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_dist of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_maxlenof_dist00
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_maxlenof_dist00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const NavigatorInterface::PolarGotoMessage* self = (const NavigatorInterface::PolarGotoMessage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_dist'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_dist();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_dist'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: orientation of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_orientation00
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_orientation00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface::PolarGotoMessage* self = (NavigatorInterface::PolarGotoMessage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'orientation'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->orientation();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'orientation'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_orientation of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_set_orientation00
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_set_orientation00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface::PolarGotoMessage* self = (NavigatorInterface::PolarGotoMessage*)  tolua_tousertype(tolua_S,1,0);
+  const float new_orientation = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_orientation'",NULL);
+#endif
+  {
+   self->set_orientation(new_orientation);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_orientation'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_orientation of class  PolarGotoMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_PolarGotoMessage_maxlenof_orientation00
+static int tolua_interfaces_NavigatorInterface_PolarGotoMessage_maxlenof_orientation00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface::PolarGotoMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const NavigatorInterface::PolarGotoMessage* self = (const NavigatorInterface::PolarGotoMessage*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_orientation'",NULL);
 #endif
@@ -7951,9 +8425,94 @@ static int tolua_interfaces_NavigatorInterface_ObstacleMessage_maxlenof_width00(
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: foo of class  NavigatorInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_foo00
-static int tolua_interfaces_NavigatorInterface_foo00(lua_State* tolua_S)
+/* method: new of class  ResetOdometryMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_ResetOdometryMessage_new00
+static int tolua_interfaces_NavigatorInterface_ResetOdometryMessage_new00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"NavigatorInterface::ResetOdometryMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   NavigatorInterface::ResetOdometryMessage* tolua_ret = (NavigatorInterface::ResetOdometryMessage*)  new NavigatorInterface::ResetOdometryMessage();
+   tolua_pushusertype(tolua_S,(void*)tolua_ret,"NavigatorInterface::ResetOdometryMessage");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'new'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: new_local of class  ResetOdometryMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_ResetOdometryMessage_new00_local
+static int tolua_interfaces_NavigatorInterface_ResetOdometryMessage_new00_local(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"NavigatorInterface::ResetOdometryMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   NavigatorInterface::ResetOdometryMessage* tolua_ret = (NavigatorInterface::ResetOdometryMessage*)  new NavigatorInterface::ResetOdometryMessage();
+   tolua_pushusertype_and_takeownership(tolua_S,(void *)tolua_ret,"NavigatorInterface::ResetOdometryMessage");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'new'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: delete of class  ResetOdometryMessage */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_ResetOdometryMessage_delete00
+static int tolua_interfaces_NavigatorInterface_ResetOdometryMessage_delete00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface::ResetOdometryMessage",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface::ResetOdometryMessage* self = (NavigatorInterface::ResetOdometryMessage*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'delete'",NULL);
+#endif
+  delete self;
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'delete'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: x of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_x00
+static int tolua_interfaces_NavigatorInterface_x00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -7967,25 +8526,25 @@ static int tolua_interfaces_NavigatorInterface_foo00(lua_State* tolua_S)
  {
   NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'foo'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'x'",NULL);
 #endif
   {
-   int tolua_ret = (int)  self->foo();
+   float tolua_ret = (float)  self->x();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'foo'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'x'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_foo of class  NavigatorInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_set_foo00
-static int tolua_interfaces_NavigatorInterface_set_foo00(lua_State* tolua_S)
+/* method: set_x of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_set_x00
+static int tolua_interfaces_NavigatorInterface_set_x00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -7999,26 +8558,26 @@ static int tolua_interfaces_NavigatorInterface_set_foo00(lua_State* tolua_S)
 #endif
  {
   NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
-  const int new_foo = ((const int)  tolua_tonumber(tolua_S,2,0));
+  const float new_x = ((const float)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_foo'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_x'",NULL);
 #endif
   {
-   self->set_foo(new_foo);
+   self->set_x(new_x);
   }
  }
  return 0;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_foo'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'set_x'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: maxlenof_foo of class  NavigatorInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_maxlenof_foo00
-static int tolua_interfaces_NavigatorInterface_maxlenof_foo00(lua_State* tolua_S)
+/* method: maxlenof_x of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_maxlenof_x00
+static int tolua_interfaces_NavigatorInterface_maxlenof_x00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -8032,10 +8591,10 @@ static int tolua_interfaces_NavigatorInterface_maxlenof_foo00(lua_State* tolua_S
  {
   const NavigatorInterface* self = (const NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_foo'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_x'",NULL);
 #endif
   {
-   size_t tolua_ret = (size_t)  self->maxlenof_foo();
+   size_t tolua_ret = (size_t)  self->maxlenof_x();
    {
 #ifdef __cplusplus
     void* tolua_obj = new size_t(tolua_ret);
@@ -8050,7 +8609,637 @@ static int tolua_interfaces_NavigatorInterface_maxlenof_foo00(lua_State* tolua_S
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'maxlenof_foo'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_x'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: y of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_y00
+static int tolua_interfaces_NavigatorInterface_y00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'y'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->y();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'y'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_y of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_set_y00
+static int tolua_interfaces_NavigatorInterface_set_y00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+  const float new_y = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_y'",NULL);
+#endif
+  {
+   self->set_y(new_y);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_y'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_y of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_maxlenof_y00
+static int tolua_interfaces_NavigatorInterface_maxlenof_y00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const NavigatorInterface* self = (const NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_y'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_y();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_y'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: dest_x of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_dest_x00
+static int tolua_interfaces_NavigatorInterface_dest_x00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'dest_x'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->dest_x();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'dest_x'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_dest_x of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_set_dest_x00
+static int tolua_interfaces_NavigatorInterface_set_dest_x00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+  const float new_dest_x = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_dest_x'",NULL);
+#endif
+  {
+   self->set_dest_x(new_dest_x);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_dest_x'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_dest_x of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_maxlenof_dest_x00
+static int tolua_interfaces_NavigatorInterface_maxlenof_dest_x00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const NavigatorInterface* self = (const NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_dest_x'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_dest_x();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_dest_x'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: dest_y of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_dest_y00
+static int tolua_interfaces_NavigatorInterface_dest_y00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'dest_y'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->dest_y();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'dest_y'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_dest_y of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_set_dest_y00
+static int tolua_interfaces_NavigatorInterface_set_dest_y00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+  const float new_dest_y = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_dest_y'",NULL);
+#endif
+  {
+   self->set_dest_y(new_dest_y);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_dest_y'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_dest_y of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_maxlenof_dest_y00
+static int tolua_interfaces_NavigatorInterface_maxlenof_dest_y00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const NavigatorInterface* self = (const NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_dest_y'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_dest_y();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_dest_y'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: dest_dist of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_dest_dist00
+static int tolua_interfaces_NavigatorInterface_dest_dist00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'dest_dist'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->dest_dist();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'dest_dist'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_dest_dist of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_set_dest_dist00
+static int tolua_interfaces_NavigatorInterface_set_dest_dist00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+  const float new_dest_dist = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_dest_dist'",NULL);
+#endif
+  {
+   self->set_dest_dist(new_dest_dist);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_dest_dist'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_dest_dist of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_maxlenof_dest_dist00
+static int tolua_interfaces_NavigatorInterface_maxlenof_dest_dist00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const NavigatorInterface* self = (const NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_dest_dist'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_dest_dist();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_dest_dist'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: msgid of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_msgid00
+static int tolua_interfaces_NavigatorInterface_msgid00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'msgid'",NULL);
+#endif
+  {
+   unsigned int tolua_ret = (unsigned int)  self->msgid();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'msgid'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_msgid of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_set_msgid00
+static int tolua_interfaces_NavigatorInterface_set_msgid00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+  unsigned const int new_msgid = ((unsigned const int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_msgid'",NULL);
+#endif
+  {
+   self->set_msgid(new_msgid);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_msgid'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_msgid of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_maxlenof_msgid00
+static int tolua_interfaces_NavigatorInterface_maxlenof_msgid00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const NavigatorInterface* self = (const NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_msgid'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_msgid();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_msgid'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: is_final of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_is_final00
+static int tolua_interfaces_NavigatorInterface_is_final00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'is_final'",NULL);
+#endif
+  {
+   bool tolua_ret = (bool)  self->is_final();
+   tolua_pushboolean(tolua_S,(bool)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'is_final'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_final of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_set_final00
+static int tolua_interfaces_NavigatorInterface_set_final00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"NavigatorInterface",0,&tolua_err) ||
+     !tolua_isboolean(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  NavigatorInterface* self = (NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+  const bool new_final = ((const bool)  tolua_toboolean(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_final'",NULL);
+#endif
+  {
+   self->set_final(new_final);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_final'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_final of class  NavigatorInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_NavigatorInterface_maxlenof_final00
+static int tolua_interfaces_NavigatorInterface_maxlenof_final00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const NavigatorInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const NavigatorInterface* self = (const NavigatorInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_final'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_final();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_final'.",&tolua_err);
  return 0;
 #endif
 }
@@ -11856,9 +13045,9 @@ static int tolua_interfaces_SkillerInterface_maxlenof_exclusive_controller00(lua
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: is_final of class  SkillerInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_is_final00
-static int tolua_interfaces_SkillerInterface_is_final00(lua_State* tolua_S)
+/* method: status of class  SkillerInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_status00
+static int tolua_interfaces_SkillerInterface_status00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11872,31 +13061,31 @@ static int tolua_interfaces_SkillerInterface_is_final00(lua_State* tolua_S)
  {
   SkillerInterface* self = (SkillerInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'is_final'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'status'",NULL);
 #endif
   {
-   bool tolua_ret = (bool)  self->is_final();
-   tolua_pushboolean(tolua_S,(bool)tolua_ret);
+   SkillerInterface::SkillStatusEnum tolua_ret = (SkillerInterface::SkillStatusEnum)  self->status();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'is_final'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'status'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_final of class  SkillerInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_set_final00
-static int tolua_interfaces_SkillerInterface_set_final00(lua_State* tolua_S)
+/* method: set_status of class  SkillerInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_set_status00
+static int tolua_interfaces_SkillerInterface_set_status00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"SkillerInterface",0,&tolua_err) ||
-     !tolua_isboolean(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
   goto tolua_lerror;
@@ -11904,26 +13093,26 @@ static int tolua_interfaces_SkillerInterface_set_final00(lua_State* tolua_S)
 #endif
  {
   SkillerInterface* self = (SkillerInterface*)  tolua_tousertype(tolua_S,1,0);
-  const bool new_final = ((const bool)  tolua_toboolean(tolua_S,2,0));
+  const SkillerInterface::SkillStatusEnum new_status = ((const SkillerInterface::SkillStatusEnum)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_final'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_status'",NULL);
 #endif
   {
-   self->set_final(new_final);
+   self->set_status(new_status);
   }
  }
  return 0;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_final'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'set_status'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: maxlenof_final of class  SkillerInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_maxlenof_final00
-static int tolua_interfaces_SkillerInterface_maxlenof_final00(lua_State* tolua_S)
+/* method: maxlenof_status of class  SkillerInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_maxlenof_status00
+static int tolua_interfaces_SkillerInterface_maxlenof_status00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11937,10 +13126,10 @@ static int tolua_interfaces_SkillerInterface_maxlenof_final00(lua_State* tolua_S
  {
   const SkillerInterface* self = (const SkillerInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_final'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_status'",NULL);
 #endif
   {
-   size_t tolua_ret = (size_t)  self->maxlenof_final();
+   size_t tolua_ret = (size_t)  self->maxlenof_status();
    {
 #ifdef __cplusplus
     void* tolua_obj = new size_t(tolua_ret);
@@ -11955,7 +13144,112 @@ static int tolua_interfaces_SkillerInterface_maxlenof_final00(lua_State* tolua_S
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'maxlenof_final'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_status'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: is_continuous of class  SkillerInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_is_continuous00
+static int tolua_interfaces_SkillerInterface_is_continuous00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"SkillerInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  SkillerInterface* self = (SkillerInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'is_continuous'",NULL);
+#endif
+  {
+   bool tolua_ret = (bool)  self->is_continuous();
+   tolua_pushboolean(tolua_S,(bool)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'is_continuous'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_continuous of class  SkillerInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_set_continuous00
+static int tolua_interfaces_SkillerInterface_set_continuous00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"SkillerInterface",0,&tolua_err) ||
+     !tolua_isboolean(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  SkillerInterface* self = (SkillerInterface*)  tolua_tousertype(tolua_S,1,0);
+  const bool new_continuous = ((const bool)  tolua_toboolean(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_continuous'",NULL);
+#endif
+  {
+   self->set_continuous(new_continuous);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_continuous'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_continuous of class  SkillerInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_SkillerInterface_maxlenof_continuous00
+static int tolua_interfaces_SkillerInterface_maxlenof_continuous00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const SkillerInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const SkillerInterface* self = (const SkillerInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_continuous'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_continuous();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_continuous'.",&tolua_err);
  return 0;
 #endif
 }
@@ -13996,27 +15290,50 @@ TOLUA_API int tolua_interfaces_open (lua_State* tolua_S)
   tolua_cclass(tolua_S,"NavigatorInterface","NavigatorInterface","Interface",NULL);
   tolua_beginmodule(tolua_S,"NavigatorInterface");
    #ifdef __cplusplus
-   tolua_cclass(tolua_S,"TargetMessage","NavigatorInterface::TargetMessage","Message",tolua_collect_NavigatorInterface__TargetMessage);
+   tolua_cclass(tolua_S,"CartesianGotoMessage","NavigatorInterface::CartesianGotoMessage","Message",tolua_collect_NavigatorInterface__CartesianGotoMessage);
    #else
-   tolua_cclass(tolua_S,"TargetMessage","NavigatorInterface::TargetMessage","Message",NULL);
+   tolua_cclass(tolua_S,"CartesianGotoMessage","NavigatorInterface::CartesianGotoMessage","Message",NULL);
    #endif
-   tolua_beginmodule(tolua_S,"TargetMessage");
-    tolua_function(tolua_S,"new",tolua_interfaces_NavigatorInterface_TargetMessage_new00);
-    tolua_function(tolua_S,"new_local",tolua_interfaces_NavigatorInterface_TargetMessage_new00_local);
-    tolua_function(tolua_S,".call",tolua_interfaces_NavigatorInterface_TargetMessage_new00_local);
-    tolua_function(tolua_S,"new",tolua_interfaces_NavigatorInterface_TargetMessage_new01);
-    tolua_function(tolua_S,"new_local",tolua_interfaces_NavigatorInterface_TargetMessage_new01_local);
-    tolua_function(tolua_S,".call",tolua_interfaces_NavigatorInterface_TargetMessage_new01_local);
-    tolua_function(tolua_S,"delete",tolua_interfaces_NavigatorInterface_TargetMessage_delete00);
-    tolua_function(tolua_S,"x",tolua_interfaces_NavigatorInterface_TargetMessage_x00);
-    tolua_function(tolua_S,"set_x",tolua_interfaces_NavigatorInterface_TargetMessage_set_x00);
-    tolua_function(tolua_S,"maxlenof_x",tolua_interfaces_NavigatorInterface_TargetMessage_maxlenof_x00);
-    tolua_function(tolua_S,"y",tolua_interfaces_NavigatorInterface_TargetMessage_y00);
-    tolua_function(tolua_S,"set_y",tolua_interfaces_NavigatorInterface_TargetMessage_set_y00);
-    tolua_function(tolua_S,"maxlenof_y",tolua_interfaces_NavigatorInterface_TargetMessage_maxlenof_y00);
-    tolua_function(tolua_S,"orientation",tolua_interfaces_NavigatorInterface_TargetMessage_orientation00);
-    tolua_function(tolua_S,"set_orientation",tolua_interfaces_NavigatorInterface_TargetMessage_set_orientation00);
-    tolua_function(tolua_S,"maxlenof_orientation",tolua_interfaces_NavigatorInterface_TargetMessage_maxlenof_orientation00);
+   tolua_beginmodule(tolua_S,"CartesianGotoMessage");
+    tolua_function(tolua_S,"new",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new00);
+    tolua_function(tolua_S,"new_local",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new00_local);
+    tolua_function(tolua_S,".call",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new00_local);
+    tolua_function(tolua_S,"new",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new01);
+    tolua_function(tolua_S,"new_local",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new01_local);
+    tolua_function(tolua_S,".call",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_new01_local);
+    tolua_function(tolua_S,"delete",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_delete00);
+    tolua_function(tolua_S,"x",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_x00);
+    tolua_function(tolua_S,"set_x",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_set_x00);
+    tolua_function(tolua_S,"maxlenof_x",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_maxlenof_x00);
+    tolua_function(tolua_S,"y",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_y00);
+    tolua_function(tolua_S,"set_y",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_set_y00);
+    tolua_function(tolua_S,"maxlenof_y",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_maxlenof_y00);
+    tolua_function(tolua_S,"orientation",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_orientation00);
+    tolua_function(tolua_S,"set_orientation",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_set_orientation00);
+    tolua_function(tolua_S,"maxlenof_orientation",tolua_interfaces_NavigatorInterface_CartesianGotoMessage_maxlenof_orientation00);
+   tolua_endmodule(tolua_S);
+   #ifdef __cplusplus
+   tolua_cclass(tolua_S,"PolarGotoMessage","NavigatorInterface::PolarGotoMessage","Message",tolua_collect_NavigatorInterface__PolarGotoMessage);
+   #else
+   tolua_cclass(tolua_S,"PolarGotoMessage","NavigatorInterface::PolarGotoMessage","Message",NULL);
+   #endif
+   tolua_beginmodule(tolua_S,"PolarGotoMessage");
+    tolua_function(tolua_S,"new",tolua_interfaces_NavigatorInterface_PolarGotoMessage_new00);
+    tolua_function(tolua_S,"new_local",tolua_interfaces_NavigatorInterface_PolarGotoMessage_new00_local);
+    tolua_function(tolua_S,".call",tolua_interfaces_NavigatorInterface_PolarGotoMessage_new00_local);
+    tolua_function(tolua_S,"new",tolua_interfaces_NavigatorInterface_PolarGotoMessage_new01);
+    tolua_function(tolua_S,"new_local",tolua_interfaces_NavigatorInterface_PolarGotoMessage_new01_local);
+    tolua_function(tolua_S,".call",tolua_interfaces_NavigatorInterface_PolarGotoMessage_new01_local);
+    tolua_function(tolua_S,"delete",tolua_interfaces_NavigatorInterface_PolarGotoMessage_delete00);
+    tolua_function(tolua_S,"phi",tolua_interfaces_NavigatorInterface_PolarGotoMessage_phi00);
+    tolua_function(tolua_S,"set_phi",tolua_interfaces_NavigatorInterface_PolarGotoMessage_set_phi00);
+    tolua_function(tolua_S,"maxlenof_phi",tolua_interfaces_NavigatorInterface_PolarGotoMessage_maxlenof_phi00);
+    tolua_function(tolua_S,"dist",tolua_interfaces_NavigatorInterface_PolarGotoMessage_dist00);
+    tolua_function(tolua_S,"set_dist",tolua_interfaces_NavigatorInterface_PolarGotoMessage_set_dist00);
+    tolua_function(tolua_S,"maxlenof_dist",tolua_interfaces_NavigatorInterface_PolarGotoMessage_maxlenof_dist00);
+    tolua_function(tolua_S,"orientation",tolua_interfaces_NavigatorInterface_PolarGotoMessage_orientation00);
+    tolua_function(tolua_S,"set_orientation",tolua_interfaces_NavigatorInterface_PolarGotoMessage_set_orientation00);
+    tolua_function(tolua_S,"maxlenof_orientation",tolua_interfaces_NavigatorInterface_PolarGotoMessage_maxlenof_orientation00);
    tolua_endmodule(tolua_S);
    #ifdef __cplusplus
    tolua_cclass(tolua_S,"MaxVelocityMessage","NavigatorInterface::MaxVelocityMessage","Message",tolua_collect_NavigatorInterface__MaxVelocityMessage);
@@ -14058,9 +15375,38 @@ TOLUA_API int tolua_interfaces_open (lua_State* tolua_S)
     tolua_function(tolua_S,"set_width",tolua_interfaces_NavigatorInterface_ObstacleMessage_set_width00);
     tolua_function(tolua_S,"maxlenof_width",tolua_interfaces_NavigatorInterface_ObstacleMessage_maxlenof_width00);
    tolua_endmodule(tolua_S);
-   tolua_function(tolua_S,"foo",tolua_interfaces_NavigatorInterface_foo00);
-   tolua_function(tolua_S,"set_foo",tolua_interfaces_NavigatorInterface_set_foo00);
-   tolua_function(tolua_S,"maxlenof_foo",tolua_interfaces_NavigatorInterface_maxlenof_foo00);
+   #ifdef __cplusplus
+   tolua_cclass(tolua_S,"ResetOdometryMessage","NavigatorInterface::ResetOdometryMessage","Message",tolua_collect_NavigatorInterface__ResetOdometryMessage);
+   #else
+   tolua_cclass(tolua_S,"ResetOdometryMessage","NavigatorInterface::ResetOdometryMessage","Message",NULL);
+   #endif
+   tolua_beginmodule(tolua_S,"ResetOdometryMessage");
+    tolua_function(tolua_S,"new",tolua_interfaces_NavigatorInterface_ResetOdometryMessage_new00);
+    tolua_function(tolua_S,"new_local",tolua_interfaces_NavigatorInterface_ResetOdometryMessage_new00_local);
+    tolua_function(tolua_S,".call",tolua_interfaces_NavigatorInterface_ResetOdometryMessage_new00_local);
+    tolua_function(tolua_S,"delete",tolua_interfaces_NavigatorInterface_ResetOdometryMessage_delete00);
+   tolua_endmodule(tolua_S);
+   tolua_function(tolua_S,"x",tolua_interfaces_NavigatorInterface_x00);
+   tolua_function(tolua_S,"set_x",tolua_interfaces_NavigatorInterface_set_x00);
+   tolua_function(tolua_S,"maxlenof_x",tolua_interfaces_NavigatorInterface_maxlenof_x00);
+   tolua_function(tolua_S,"y",tolua_interfaces_NavigatorInterface_y00);
+   tolua_function(tolua_S,"set_y",tolua_interfaces_NavigatorInterface_set_y00);
+   tolua_function(tolua_S,"maxlenof_y",tolua_interfaces_NavigatorInterface_maxlenof_y00);
+   tolua_function(tolua_S,"dest_x",tolua_interfaces_NavigatorInterface_dest_x00);
+   tolua_function(tolua_S,"set_dest_x",tolua_interfaces_NavigatorInterface_set_dest_x00);
+   tolua_function(tolua_S,"maxlenof_dest_x",tolua_interfaces_NavigatorInterface_maxlenof_dest_x00);
+   tolua_function(tolua_S,"dest_y",tolua_interfaces_NavigatorInterface_dest_y00);
+   tolua_function(tolua_S,"set_dest_y",tolua_interfaces_NavigatorInterface_set_dest_y00);
+   tolua_function(tolua_S,"maxlenof_dest_y",tolua_interfaces_NavigatorInterface_maxlenof_dest_y00);
+   tolua_function(tolua_S,"dest_dist",tolua_interfaces_NavigatorInterface_dest_dist00);
+   tolua_function(tolua_S,"set_dest_dist",tolua_interfaces_NavigatorInterface_set_dest_dist00);
+   tolua_function(tolua_S,"maxlenof_dest_dist",tolua_interfaces_NavigatorInterface_maxlenof_dest_dist00);
+   tolua_function(tolua_S,"msgid",tolua_interfaces_NavigatorInterface_msgid00);
+   tolua_function(tolua_S,"set_msgid",tolua_interfaces_NavigatorInterface_set_msgid00);
+   tolua_function(tolua_S,"maxlenof_msgid",tolua_interfaces_NavigatorInterface_maxlenof_msgid00);
+   tolua_function(tolua_S,"is_final",tolua_interfaces_NavigatorInterface_is_final00);
+   tolua_function(tolua_S,"set_final",tolua_interfaces_NavigatorInterface_set_final00);
+   tolua_function(tolua_S,"maxlenof_final",tolua_interfaces_NavigatorInterface_maxlenof_final00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"ObjectPositionInterface","ObjectPositionInterface","Interface",NULL);
   tolua_beginmodule(tolua_S,"ObjectPositionInterface");
@@ -14149,6 +15495,10 @@ TOLUA_API int tolua_interfaces_open (lua_State* tolua_S)
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"SkillerInterface","SkillerInterface","Interface",NULL);
   tolua_beginmodule(tolua_S,"SkillerInterface");
+   tolua_constant(tolua_S,"S_INACTIVE",SkillerInterface::S_INACTIVE);
+   tolua_constant(tolua_S,"S_FINAL",SkillerInterface::S_FINAL);
+   tolua_constant(tolua_S,"S_RUNNING",SkillerInterface::S_RUNNING);
+   tolua_constant(tolua_S,"S_FAILED",SkillerInterface::S_FAILED);
    #ifdef __cplusplus
    tolua_cclass(tolua_S,"ExecSkillMessage","SkillerInterface::ExecSkillMessage","Message",tolua_collect_SkillerInterface__ExecSkillMessage);
    #else
@@ -14233,9 +15583,12 @@ TOLUA_API int tolua_interfaces_open (lua_State* tolua_S)
    tolua_function(tolua_S,"exclusive_controller",tolua_interfaces_SkillerInterface_exclusive_controller00);
    tolua_function(tolua_S,"set_exclusive_controller",tolua_interfaces_SkillerInterface_set_exclusive_controller00);
    tolua_function(tolua_S,"maxlenof_exclusive_controller",tolua_interfaces_SkillerInterface_maxlenof_exclusive_controller00);
-   tolua_function(tolua_S,"is_final",tolua_interfaces_SkillerInterface_is_final00);
-   tolua_function(tolua_S,"set_final",tolua_interfaces_SkillerInterface_set_final00);
-   tolua_function(tolua_S,"maxlenof_final",tolua_interfaces_SkillerInterface_maxlenof_final00);
+   tolua_function(tolua_S,"status",tolua_interfaces_SkillerInterface_status00);
+   tolua_function(tolua_S,"set_status",tolua_interfaces_SkillerInterface_set_status00);
+   tolua_function(tolua_S,"maxlenof_status",tolua_interfaces_SkillerInterface_maxlenof_status00);
+   tolua_function(tolua_S,"is_continuous",tolua_interfaces_SkillerInterface_is_continuous00);
+   tolua_function(tolua_S,"set_continuous",tolua_interfaces_SkillerInterface_set_continuous00);
+   tolua_function(tolua_S,"maxlenof_continuous",tolua_interfaces_SkillerInterface_maxlenof_continuous00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"TestInterface","TestInterface","Interface",NULL);
   tolua_beginmodule(tolua_S,"TestInterface");

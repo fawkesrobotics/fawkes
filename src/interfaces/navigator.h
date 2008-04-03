@@ -42,14 +42,22 @@ class NavigatorInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
-    int foo; /**< Foo */
+    unsigned int msgid; /**< The ID of the message that is currently being
+      processed, or 0 if no message is being processed. */
+    float x; /**< Current X-coordinate in the navigator coordinate system. */
+    float y; /**< Current Y-coordinate in the navigator coordinate system. */
+    float dest_x; /**< X-coordinate of the current destination, or 0.0 if no target has been set. */
+    float dest_y; /**< Y-coordinate of the current destination, or 0.0 if no target has been set. */
+    float dest_dist; /**< Distance to destination in m. */
+    bool final; /**< True, if the last goto command has been finished,
+      false if it is still running */
   } NavigatorInterface_data_t;
 
   NavigatorInterface_data_t *data;
 
  public:
   /* messages */
-  class TargetMessage : public Message
+  class CartesianGotoMessage : public Message
   {
    private:
     /** Internal data storage, do NOT modify! */
@@ -57,15 +65,16 @@ class NavigatorInterface : public Interface
       float x; /**< X-coordinate of the target, in the robot's coordinate system. */
       float y; /**< Y-coordinate of the target, in the robot's coordinate system. */
       float orientation; /**< The orientation of the robot at the target. */
-    } TargetMessage_data_t;
+    } CartesianGotoMessage_data_t;
 
-    TargetMessage_data_t *data;
+    CartesianGotoMessage_data_t *data;
 
    public:
-    TargetMessage(const float ini_x, const float ini_y, const float ini_orientation);
-    TargetMessage();
-    ~TargetMessage();
+    CartesianGotoMessage(const float ini_x, const float ini_y, const float ini_orientation);
+    CartesianGotoMessage();
+    ~CartesianGotoMessage();
 
+    CartesianGotoMessage(const CartesianGotoMessage *m);
     /* Methods */
     float x();
     void set_x(const float new_x);
@@ -76,6 +85,38 @@ class NavigatorInterface : public Interface
     float orientation();
     void set_orientation(const float new_orientation);
     size_t maxlenof_orientation() const;
+    virtual Message * clone() const;
+  };
+
+  class PolarGotoMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float phi; /**< Angle between the robot's front and the target. */
+      float dist; /**< Distance to the target. */
+      float orientation; /**< The orientation of the robot at the target. */
+    } PolarGotoMessage_data_t;
+
+    PolarGotoMessage_data_t *data;
+
+   public:
+    PolarGotoMessage(const float ini_phi, const float ini_dist, const float ini_orientation);
+    PolarGotoMessage();
+    ~PolarGotoMessage();
+
+    PolarGotoMessage(const PolarGotoMessage *m);
+    /* Methods */
+    float phi();
+    void set_phi(const float new_phi);
+    size_t maxlenof_phi() const;
+    float dist();
+    void set_dist(const float new_dist);
+    size_t maxlenof_dist() const;
+    float orientation();
+    void set_orientation(const float new_orientation);
+    size_t maxlenof_orientation() const;
+    virtual Message * clone() const;
   };
 
   class MaxVelocityMessage : public Message
@@ -93,10 +134,12 @@ class NavigatorInterface : public Interface
     MaxVelocityMessage();
     ~MaxVelocityMessage();
 
+    MaxVelocityMessage(const MaxVelocityMessage *m);
     /* Methods */
     float velocity();
     void set_velocity(const float new_velocity);
     size_t maxlenof_velocity() const;
+    virtual Message * clone() const;
   };
 
   class ObstacleMessage : public Message
@@ -116,6 +159,7 @@ class NavigatorInterface : public Interface
     ObstacleMessage();
     ~ObstacleMessage();
 
+    ObstacleMessage(const ObstacleMessage *m);
     /* Methods */
     float x();
     void set_x(const float new_x);
@@ -126,6 +170,18 @@ class NavigatorInterface : public Interface
     float width();
     void set_width(const float new_width);
     size_t maxlenof_width() const;
+    virtual Message * clone() const;
+  };
+
+  class ResetOdometryMessage : public Message
+  {
+   public:
+    ResetOdometryMessage();
+    ~ResetOdometryMessage();
+
+    ResetOdometryMessage(const ResetOdometryMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
   };
 
   virtual bool message_valid(const Message *message) const;
@@ -137,9 +193,27 @@ class NavigatorInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   /* Methods */
-  int foo();
-  void set_foo(const int new_foo);
-  size_t maxlenof_foo() const;
+  float x();
+  void set_x(const float new_x);
+  size_t maxlenof_x() const;
+  float y();
+  void set_y(const float new_y);
+  size_t maxlenof_y() const;
+  float dest_x();
+  void set_dest_x(const float new_dest_x);
+  size_t maxlenof_dest_x() const;
+  float dest_y();
+  void set_dest_y(const float new_dest_y);
+  size_t maxlenof_dest_y() const;
+  float dest_dist();
+  void set_dest_dist(const float new_dest_dist);
+  size_t maxlenof_dest_dist() const;
+  unsigned int msgid();
+  void set_msgid(const unsigned int new_msgid);
+  size_t maxlenof_msgid() const;
+  bool is_final();
+  void set_final(const bool new_final);
+  size_t maxlenof_final() const;
 
 };
 

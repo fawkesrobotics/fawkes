@@ -48,11 +48,11 @@ BatteryInterface::BatteryInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (BatteryInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0x1b, 0x21, 0x6b, 0x87, 0xfd, 0x51, 0x4c, 0xf1, 0xec, 0x82, 0xb4, 0xa3, 0x6f, 0xbf, 0x7e, 0x25};
-  set_hash(tmp_hash);
   add_fieldinfo(Interface::IFT_UINT, "current", &data->current);
   add_fieldinfo(Interface::IFT_UINT, "voltage", &data->voltage);
   add_fieldinfo(Interface::IFT_UINT, "temperature", &data->temperature);
+  unsigned char tmp_hash[] = {0x1b, 0x21, 0x6b, 0x87, 0xfd, 0x51, 0x4c, 0xf1, 0xec, 0x82, 0xb4, 0xa3, 0x6f, 0xbf, 0x7e, 0x25};
+  set_hash(tmp_hash);
 }
 
 /** Destructor */
@@ -177,19 +177,35 @@ BatteryInterface::create_message(const char *type) const
 /** Constructor */
 BatteryInterface::PushButtonMessage::PushButtonMessage() : Message("PushButtonMessage")
 {
-  data_size = sizeof(PushButtonMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (PushButtonMessage_data_t *)data_ptr;
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /** Destructor */
 BatteryInterface::PushButtonMessage::~PushButtonMessage()
 {
-  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+BatteryInterface::PushButtonMessage::PushButtonMessage(const PushButtonMessage *m) : Message("PushButtonMessage")
+{
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+BatteryInterface::PushButtonMessage::clone() const
+{
+  return new BatteryInterface::PushButtonMessage(this);
+}
 /** @class BatteryInterface::SleepMessage interfaces/battery.h
  * SleepMessage Fawkes BlackBoard Interface Message.
  * 
@@ -200,19 +216,35 @@ BatteryInterface::PushButtonMessage::~PushButtonMessage()
 /** Constructor */
 BatteryInterface::SleepMessage::SleepMessage() : Message("SleepMessage")
 {
-  data_size = sizeof(SleepMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (SleepMessage_data_t *)data_ptr;
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /** Destructor */
 BatteryInterface::SleepMessage::~SleepMessage()
 {
-  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+BatteryInterface::SleepMessage::SleepMessage(const SleepMessage *m) : Message("SleepMessage")
+{
+  data_size = 0;
+  data_ptr  = NULL;
 }
 
 /* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+BatteryInterface::SleepMessage::clone() const
+{
+  return new BatteryInterface::SleepMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
