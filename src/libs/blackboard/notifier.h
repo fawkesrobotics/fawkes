@@ -76,6 +76,9 @@ class BlackBoardNotifier
   typedef std::list< BlackBoardInterfaceObserver * >::iterator BBioListIterator;
   typedef BBioLockMap::iterator BBioLockMapIterator;
 
+  void remove_listener(BBilLockMap &ifmap, BlackBoardInterfaceListener *listener);
+  void remove_observer(BBioLockMap &iomap, BlackBoardInterfaceObserver *observer);
+
   BBilLockMap __bbil_data;
   BBilLockMap __bbil_messages;
   BBilLockMap __bbil_reader;

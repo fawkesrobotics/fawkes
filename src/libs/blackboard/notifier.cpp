@@ -109,6 +109,38 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
   }
 }
 
+
+/** Remove listener from map.
+ * @param ilmap interface listener map to remove the listener from
+ * @param listener listener to remove
+ */
+void
+BlackBoardNotifier::remove_listener(BBilLockMap &ilmap, BlackBoardInterfaceListener *listener)
+{
+  BBilLockMapIterator i, tmp;
+
+  ilmap.lock();
+  i = ilmap.begin();;
+  while (i != ilmap.end()) {
+    BBilListIterator j = i->second.begin();
+    while (j != i->second.end()) {
+      if ( *j == listener ) {
+	j = i->second.erase(j);
+      } else {
+	++j;
+      }
+    }
+    if ( i->second.empty() ) {
+      tmp = i;
+      ++i;
+      ilmap.erase(tmp);
+    } else {
+      ++i;
+    }
+  }
+  ilmap.unlock();
+}
+
 /** Unregister BB interface listener.
  * This will remove the given BlackBoard interface listener from any event that it was
  * previously registered for.
@@ -117,73 +149,10 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
 void
 BlackBoardNotifier::unregister_listener(BlackBoardInterfaceListener *listener)
 {
-  __bbil_data.lock();
-  for (BBilLockMapIterator i = __bbil_data.begin(); i != __bbil_data.end(); ++i) {
-    BBilListIterator j = i->second.begin();
-    while (j != i->second.end()) {
-      if ( *j == listener ) {
-	j = i->second.erase(j);
-	if ( i->second.empty() ) {
-	  __bbil_data.erase(i);
-	  break;
-	}
-      } else {
-	++j;
-      }
-    }
-  }
-  __bbil_data.unlock();
-
-  __bbil_messages.lock();
-  for (BBilLockMapIterator i = __bbil_messages.begin(); i != __bbil_messages.end(); ++i) {
-    BBilListIterator j = i->second.begin();
-    while (j != i->second.end()) {
-      if ( *j == listener ) {
-	j = i->second.erase(j);
-	if ( i->second.empty() ) {
-	  __bbil_messages.erase(i);
-	  break;
-	}
-      } else {
-	++j;
-      }
-    }
-  }
-  __bbil_messages.unlock();
-
-  __bbil_reader.lock();
-  for (BBilLockMapIterator i = __bbil_reader.begin(); i != __bbil_reader.end(); ++i) {
-    BBilListIterator j = i->second.begin();
-    while (j != i->second.end()) {
-      if ( *j == listener ) {
-	j = i->second.erase(j);
-	if ( i->second.empty() ) {
-	  __bbil_reader.erase(i);
-	  break;
-	}
-      } else {
-	++j;
-      }
-    }
-  }
-  __bbil_reader.unlock();
-
-  __bbil_writer.lock();
-  for (BBilLockMapIterator i = __bbil_writer.begin(); i != __bbil_writer.end(); ++i) {
-    BBilListIterator j = i->second.begin();
-    while (j != i->second.end()) {
-      if ( *j == listener ) {
-	j = i->second.erase(j);
-	if ( i->second.empty() ) {
-	  __bbil_writer.erase(i);
-	  break;
-	}
-      } else {
-	++j;
-      }
-    }
-  }
-  __bbil_writer.unlock();
+  remove_listener(__bbil_data, listener);
+  remove_listener(__bbil_messages, listener);
+  remove_listener(__bbil_reader, listener);
+  remove_listener(__bbil_writer, listener);
 }
 
 
@@ -217,6 +186,37 @@ BlackBoardNotifier::register_observer(BlackBoardInterfaceObserver *observer,
 }
 
 
+/** Remove observer from map.
+ * @param iomap interface observer map to remove the observer from
+ * @param observer observer to remove
+ */
+void
+BlackBoardNotifier::remove_observer(BBioLockMap &iomap, BlackBoardInterfaceObserver *observer)
+{
+  BBioLockMapIterator i, tmp;
+
+  iomap.lock();
+  i = iomap.begin();;
+  while (i != iomap.end()) {
+    BBioListIterator j = i->second.begin();
+    while (j != i->second.end()) {
+      if ( *j == observer ) {
+	j = i->second.erase(j);
+      } else {
+	++j;
+      }
+    }
+    if ( i->second.empty() ) {
+      tmp = i;
+      ++i;
+      iomap.erase(tmp);
+    } else {
+      ++i;
+    }
+  }
+  iomap.unlock();
+}
+
 /** Unregister BB interface observer.
  * This will remove the given BlackBoard event listener from any event that it was
  * previously registered for.
@@ -225,39 +225,8 @@ BlackBoardNotifier::register_observer(BlackBoardInterfaceObserver *observer,
 void
 BlackBoardNotifier::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
-  __bbio_created.lock();
-  for (BBioLockMapIterator i = __bbio_created.begin(); i != __bbio_created.end(); ++i) {
-    BBioListIterator j = i->second.begin();
-    while (j != i->second.end()) {
-      if ( *j == observer ) {
-	j = i->second.erase(j);
-	if ( i->second.empty() ) {
-	  __bbio_created.erase(i);
-	  break;
-	}
-      } else {
-	++j;
-      }
-    }
-  }
-  __bbio_created.unlock();
-
-  __bbio_destroyed.lock();
-  for (BBioLockMapIterator i = __bbio_destroyed.begin(); i != __bbio_destroyed.end(); ++i) {
-    BBioListIterator j = i->second.begin();
-    while (j != i->second.end()) {
-      if ( *j == observer ) {
-	j = i->second.erase(j);
-	if ( i->second.empty() ) {
-	  __bbio_destroyed.erase(i);
-	  break;
-	}
-      } else {
-	++j;
-      }
-    }
-  }
-  __bbio_destroyed.unlock();
+  remove_observer(__bbio_created, observer);
+  remove_observer(__bbio_destroyed, observer);
 }
 
 /** Notify that an interface has been created.
