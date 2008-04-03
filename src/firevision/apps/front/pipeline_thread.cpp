@@ -196,7 +196,6 @@ FvFrontPipelineThread::init()
 
 
   __cm = new ColorModelLookupTable(__cfg_colormap.c_str(),
-				   __cfg_colormap_width, __cfg_colormap_height,
 				   "front-colormap", /* destroy on delete */ true);
 
   __classifier = new SimpleColorClassifier(__scanlines, __cm);
