@@ -31,17 +31,22 @@
 #include <fvutils/base/types.h>
 #include <iostream>
 
+class HistogramBlock;
+
 class Histogram
 {
  public:
   Histogram(unsigned int width, unsigned int height,
 	    unsigned int depth = 1, unsigned int num_undos = 1);
+  Histogram(HistogramBlock* histogram_block);
   ~Histogram();
 
   void           operator+=(point_t *p);
   void           operator+=(point_t  p);
 
   unsigned int * get_histogram();
+  HistogramBlock* get_histogram_block();
+  void           get_dimensions(unsigned int& width, unsigned int& height, unsigned int& depth);
   unsigned int   get_value(unsigned int x, unsigned int y);
   unsigned int   get_value(unsigned int x, unsigned int y, unsigned int z);
   void           set_value(unsigned int x, unsigned int y, unsigned int value);
@@ -70,7 +75,8 @@ class Histogram
   unsigned int  depth;
   unsigned int  dimension;
   unsigned int  histogram_size;
-  unsigned int *histogram;
+  unsigned int* histogram;
+  HistogramBlock *histogram_block;
   unsigned int  number_of_values;
 
   unsigned int **undo_overlay;

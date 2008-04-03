@@ -27,6 +27,9 @@
  */
 
 #include <fvutils/statistical/histogram.h>
+#include <fvutils/statistical/histogram_file.h>
+#include <fvutils/statistical/histogram_block.h>
+
 #include <core/exceptions/software.h>
 
 #include <iostream>
@@ -69,24 +72,58 @@ Histogram::Histogram(unsigned int width, unsigned int height,
     dimension = 3;
   }
 
+  histogram_block = new HistogramBlock(FIREVISION_HISTOGRAM_TYPE_32, H_UNKNOWN,
+				       width, height, depth);
+  histogram = (unsigned int*) histogram_block->data_ptr();
+
   histogram_size = width * height * depth * sizeof(unsigned int);
 
-  histogram    = (unsigned int *)malloc(histogram_size);
-  undo_overlay = (unsigned int **)malloc(num_undos * sizeof(unsigned int *));
-  for (unsigned int i = 0; i < num_undos; ++i) {
+  undo_overlay = (unsigned int **)malloc(undo_num * sizeof(unsigned int *));
+  for (unsigned int i = 0; i < undo_num; ++i) {
     undo_overlay[i] = (unsigned int *)malloc(histogram_size);
   }
 
-  undo_num_vals = (unsigned int *)malloc(num_undos * sizeof(unsigned int));
+  undo_num_vals = (unsigned int *)malloc(undo_num * sizeof(unsigned int));
 
   reset();
+}
+
+
+/** Constructor. 
+ * @param block construct a histogram from the given histogram block
+ */
+Histogram::Histogram(HistogramBlock* block)
+{
+  width = block->width();
+  height = block->height();
+  depth = block->depth();
+
+  if (depth == 1) {
+    dimension = 2;
+  } else {
+    dimension = 3;
+  }
+  
+  undo_num = 1;
+  undo_current = 0;
+
+  histogram_block = block;
+  histogram = (unsigned int*) histogram_block->data_ptr();
+  histogram_size = width * height * depth * sizeof(unsigned int);
+
+  undo_overlay = (unsigned int **)malloc(undo_num * sizeof(unsigned int *));
+  for (unsigned int i = 0; i < undo_num; ++i) {
+    undo_overlay[i] = (unsigned int *)malloc(histogram_size);
+  }
+
+  undo_num_vals = (unsigned int *)malloc(undo_num * sizeof(unsigned int));
 }
 
 
 /** Destructor. */
 Histogram::~Histogram()
 {
-  free(histogram);
+  delete histogram_block;
   for (unsigned int i = 0; i < undo_num; ++i) {
     free(undo_overlay[i]);
   }
@@ -149,6 +186,30 @@ Histogram::get_histogram()
 }
 
 
+/** Obtain the histogram block of this histogram.
+ * @return pointer to the histogram block
+ */
+HistogramBlock *
+Histogram::get_histogram_block()
+{
+  return histogram_block;
+}
+
+
+/** Obtain dimensions of the histogram.
+ * @param width reference to the variable where the width is stored
+ * @param height reference to the variable where the height is stored
+ * @param depth reference to the variable where the depth is stored
+ */
+void
+Histogram::get_dimensions(unsigned int& width, unsigned int& height, unsigned int& depth)
+{
+  width = this->width;
+  height = this->height;
+  depth = this->depth;
+}
+
+
 /** Get value from histogram.
  * @param x x coordinate in histogram plane
  * @param y y coordinate in histogram plane
@@ -156,15 +217,7 @@ Histogram::get_histogram()
 unsigned int
 Histogram::get_value(unsigned int x, unsigned int y)
 {
-  if ( dimension != 2 ) {
-    throw Exception("Histogram::get_value: trying to access 2-dim value in 3-dim histogram");
-  }
-
-  if ( x >= width || y >= height) {
-    throw Exception("Histogram::get_value: x=%d, or y=%d", x, y);
-  }
-
-  return histogram[y * width + x];
+  return histogram_block->get_value(x, y);
 }
 
 
@@ -176,15 +229,7 @@ Histogram::get_value(unsigned int x, unsigned int y)
 unsigned int
 Histogram::get_value(unsigned int x, unsigned int y, unsigned int z)
 {
-  if ( dimension != 3 ) {
-    throw Exception("Histogram::get_value: trying to access 3-dim value in 2-dim histogram");
-  }
-
-  if ( x >= width || y >= height || z >= depth) {
-    throw Exception("Histogram::get_value: x=%d, y=%d, or z=%d", x, y, z);
-  }
-
-  return histogram[z * width * height + y * width + x];
+  return histogram_block->get_value(x, y, z);
 }
 
 
@@ -196,28 +241,21 @@ Histogram::get_value(unsigned int x, unsigned int y, unsigned int z)
 void
 Histogram::set_value(unsigned int x, unsigned int y, unsigned int value) 
 {
-  if ( x >= width || y >= height) {
-    throw OutOfBoundsException("Histogram::set_value(x, y, v): width, height, or depth out of range");
-  }
+  unsigned int old_value = histogram_block->get_value(x, y);
+  histogram_block->set_value(x, y, value);
+  number_of_values += value - old_value;
 
-  if ( dimension != 2 ) {
-    printf("Histogram::set_value(x, y, val): this is a 3-dimensional histogram");
-    return;
-  }
-
-  unsigned int oldValue = histogram[ y * width + x ];
-  histogram[ y * width + x ] = value;
-  number_of_values += value - oldValue;
-  if ( value > oldValue ) {
+  unsigned int index = y * width + x;
+  if ( value > old_value ) {
     // The value got incremented, add to overlay
-    undo_overlay[undo_current][y * width + x] += value - oldValue;
+    undo_overlay[undo_current][index] += value - old_value;
   } else {
-    if ( (oldValue - value) < undo_overlay[undo_current][y * width + x] ) {
-      undo_overlay[undo_current][y * width + x] -= (oldValue - value);
+    if ( (old_value - value) < undo_overlay[undo_current][index] ) {
+      undo_overlay[undo_current][index] -= (old_value - value);
     } else {
       // We cannot handle values smaller than the original value, this is
       // due to choosing unsigned int as datatype, right now this should suffice
-      undo_overlay[undo_current][y * width + x] = 0;
+      undo_overlay[undo_current][index] = 0;
     }
   }
 }
@@ -232,20 +270,17 @@ Histogram::set_value(unsigned int x, unsigned int y, unsigned int value)
 void
 Histogram::set_value(unsigned int x, unsigned int y, unsigned int z, unsigned int value) 
 {  
-  if ( x >= width || y >= height || z >= depth) {
-    throw OutOfBoundsException("Histogram::set_value(x, y, z, v): width, height, or depth out of range");
-  }
+  unsigned int old_value = histogram_block->get_value(x, y, z);
+  histogram_block->set_value(x, y, z, value);
 
+  number_of_values += value - old_value;
   unsigned int index = z * width * height + y * width + x;
-  unsigned int oldValue = histogram[index];
-  histogram[index] = value;
-  number_of_values += value - oldValue;
-  if ( value > oldValue ) {
+  if ( value > old_value ) {
     // The value got incremented, add to overlay
-    undo_overlay[undo_current][index] += value - oldValue;
+    undo_overlay[undo_current][index] += value - old_value;
   } else {
-    if ( (oldValue - value) < undo_overlay[undo_current][index] ) {
-      undo_overlay[undo_current][index] -= (oldValue - value);
+    if ( (old_value - value) < undo_overlay[undo_current][index] ) {
+      undo_overlay[undo_current][index] -= (old_value - value);
     } else {
       // We cannot handle values smaller than the original value, this is
       // due to choosing unsigned int as datatype, right now this should suffice
@@ -263,12 +298,12 @@ Histogram::set_value(unsigned int x, unsigned int y, unsigned int z, unsigned in
 void
 Histogram::inc_value(unsigned int x, unsigned int y, unsigned int z)
 {
-  if ( x >= width || y >= height || z >= depth) {
-    throw OutOfBoundsException("Histogram::inc_value(): width, height, or depth out of range");
-  }
+  unsigned int old_value = histogram_block->get_value(x, y, z);
+  histogram_block->set_value(x, y, z, ++old_value);
+
+  ++number_of_values;
   
   unsigned int index = z * width * height + y * width + x;
-  histogram[index]++;
   undo_overlay[undo_current][index] = 1;
 }
 
@@ -282,12 +317,13 @@ Histogram::inc_value(unsigned int x, unsigned int y, unsigned int z)
 void
 Histogram::add(unsigned int x, unsigned int y, unsigned int z, unsigned int value)
 {
-  if ( x >= width || y >= height || z >= depth) {
-    throw OutOfBoundsException("Histogram::inc_value(): width, height, or depth out of range");
-  }
+  unsigned int cur_value = histogram_block->get_value(x, y, z);
+  histogram_block->set_value(x, y, z, cur_value + value);
 
-  unsigned int cur_val = get_value(x, y, z);
-  set_value(x, y, z, cur_val + value);
+  number_of_values += value;
+
+  unsigned int index = z * width * height + y * width + x;
+  undo_overlay[undo_current][index] = value;
 }
 
 
@@ -300,16 +336,24 @@ Histogram::add(unsigned int x, unsigned int y, unsigned int z, unsigned int valu
 void
 Histogram::sub(unsigned int x, unsigned int y, unsigned int z, unsigned int value)
 {
-  if ( x >= width || y >= height || z >= depth) {
-    throw OutOfBoundsException("Histogram::inc_value(): width, height, or depth out of range");
-  }
-
-  unsigned int cur_val = get_value(x, y, z);
-  if (value < cur_val) {
-    set_value(x, y, z, cur_val - value);
+  unsigned int cur_value = histogram_block->get_value(x, y, z);
+  if (value < cur_value) {
+    set_value(x, y, z, cur_value - value);
   } else {
     set_value(x, y, z, 0);
   }
+
+  number_of_values -= value;
+
+  unsigned int index = z * width * height + y * width + x;
+  if ( value < undo_overlay[undo_current][index] )
+    {
+      undo_overlay[undo_current][index] -= value;
+    }
+  else
+    {
+      undo_overlay[undo_current][index] = 0;
+    }
 }
 
 
@@ -317,7 +361,8 @@ Histogram::sub(unsigned int x, unsigned int y, unsigned int z, unsigned int valu
 void
 Histogram::reset()
 {
-  memset(histogram, 0, histogram_size);
+  histogram_block->reset();
+  //  memset(histogram, 0, histogram_size);
   number_of_values = 0;
   for (unsigned int i = 0; i < undo_num; ++i) {
     switch_undo( i );
@@ -336,7 +381,8 @@ Histogram::print_to_stream(std::ostream &s)
   for (unsigned int z = 0; z < depth; ++z) {
     for (unsigned int y = 0; y < height; ++y) {
       for (unsigned int x = 0; x < width; ++x) {
-	cout << histogram[z * width * height + y * width + x] << " ";
+// 	cout << histogram[z * width * height + y * width + x] << " ";
+	cout << histogram_block->get_value(x, y, z) << " ";
       }
     }
     cout << endl;
@@ -350,25 +396,13 @@ Histogram::print_to_stream(std::ostream &s)
  * @param formatted_output one value per line
  */
 void
-Histogram::save(const char *filename, bool formatted_output) {
-  std::ofstream file;
-  file.open( filename );
+Histogram::save(const char *filename, bool formatted_output) 
+{
+  HistogramFile histogram_file;
+  histogram_file.set_owns_blocks(false);
+  histogram_file.add_histogram_block(histogram_block);
+  histogram_file.write(filename);
 
-  for (unsigned int z = 0; z < depth; ++z) {
-    for (unsigned int y = 0; y < height; ++y) {
-      for (unsigned int x = 0; x < width; ++x) {
-	if (formatted_output) {
-	  if (0 != histogram[z * width * height + y * width + x]) {
-	    file << z << " " << y << " " << x << " " << histogram[z * width * height + y * width + x] << endl;
-	  }
-	} else {
-	  file << histogram[z * width * height + y * width + x] << " ";
-	}
-      }
-    }
-  }
-
-  file.close();
   cout << "Histogram: Saved histogram in file \"" << filename << "\"." << endl;
 }
 
@@ -377,26 +411,32 @@ Histogram::save(const char *filename, bool formatted_output) {
  * @param filename file name to read from
  */
 bool
-Histogram::load(const char *filename) {
-  std::ifstream file;
-  file.open( filename );
+Histogram::load(const char *filename) 
+{
+  HistogramFile histogram_file;
+  histogram_file.read(filename);
 
-  if (!file) {
-    cout << "Histogram: Could not load histogram from file\"" << filename << "\"." << endl;
-    return false;
-  }
-  else {
-    for (unsigned int z = 0; z < depth; ++z) {
-      for (unsigned int y = 0; y < height; ++y) {
-	for (unsigned int x = 0; x < width; ++x) {
-	  file >> histogram[z * width * height + y * width + x];
-	}
-      }
+  if ( histogram_file.num_blocks() != 1 )
+    {
+      printf("load() aborted: file contains more than one histogram");
+      return false;
     }
-    file.close();
-    cout << "Histogram: Loaded histogram from file \"" << filename << "\"." << endl;
-    return true;
+
+  histogram_block = (HistogramBlock*) histogram_file.blocks().front();
+  histogram = (unsigned int*) histogram_block->data_ptr();
+  histogram_size = width * height * depth * sizeof(unsigned int);
+
+  for (unsigned int i = 0; i < undo_num; ++i) {
+    free(undo_overlay[i]);
   }
+  free(undo_overlay);
+
+  undo_overlay = (unsigned int **)malloc(undo_num * sizeof(unsigned int *));
+  for (unsigned int i = 0; i < undo_num; ++i) {
+    undo_overlay[i] = (unsigned int *)malloc(histogram_size);
+  }
+
+  return true;
 }
 
 
@@ -467,9 +507,7 @@ Histogram::get_median()
   for (unsigned int z = 0; z < depth; ++z) {
     for (unsigned int y = 0; y < height; ++y) {
       for (unsigned int x = 0; x < width; ++x) {
-	if ( histogram[z * width * height + y * width + x] > 0 ) {
-	  values->push_back( histogram[z * width * height + y * width + x ] );
-	}
+	values->push_back( histogram_block->get_value(x, y, z) );
       }
     }
   }
@@ -496,7 +534,7 @@ Histogram::get_average()
     for (unsigned int y = 0; y < height; ++y) {
       for (unsigned int x = 0; x < width; ++x) {
 	if ( histogram[z * width * height + y * width + x ] ) {
-	  sum += histogram[z * width * height + y * width + x ];
+	  sum += histogram_block->get_value(x, y, z);
 	  num++;
 	}
       }
@@ -518,7 +556,7 @@ Histogram::get_sum() const
     for (unsigned int y = 0; y < height; ++y) {
       for (unsigned int x = 0; x < width; ++x) {
 	if ( histogram[z * width * height + y * width + x ] ) {
-	  sum += histogram[z * width * height + y * width + x ];
+	  sum += histogram_block->get_value(x, y, z);
 	}
       }
     }
