@@ -99,6 +99,7 @@ class Interface
 
 
   unsigned int  msgq_enqueue(Message *message);
+  unsigned int  msgq_enqueue_copy(Message *message);
   void          msgq_remove(Message *message);
   void          msgq_remove(unsigned int message_id);
   unsigned int  msgq_size();
@@ -219,12 +220,6 @@ class Interface
   MessageQueue      *__message_queue;
 
   interface_fieldinfo_t  *__info_list;
-
-  struct imsg_list_t {
-    imsg_list_t  *next;		/**< pointer to next element in list */
-    Message       msg;		/**< pointer to message */
-  };
-
 };
 
 

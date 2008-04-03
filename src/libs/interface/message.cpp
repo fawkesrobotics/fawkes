@@ -85,7 +85,7 @@ Message::Message(const char *type)
 /** Copy constructor.
  * @param mesg Message to copy.
  */
-Message::Message(Message &mesg)
+Message::Message(const Message &mesg)
 {
   __message_id = 0;
   _transmit_via_iface = NULL;
@@ -110,7 +110,7 @@ Message::Message(Message &mesg)
 /** Copy constructor.
  * @param mesg Message to copy.
  */
-Message::Message(Message *mesg)
+Message::Message(const Message *mesg)
 {
   __message_id = 0;
   _transmit_via_iface = NULL;
@@ -313,4 +313,14 @@ const char *
 Message::type() const
 {
   return _type;
+}
+
+
+/** Clone this message.
+ * Shall be implemented by every sub-class to return a message of proper type.
+ */
+Message *
+Message::clone() const
+{
+  return new Message(this);
 }

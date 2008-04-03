@@ -682,9 +682,9 @@ static int tolua_interface_Interface_num_readers00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: msgq_enqueue of class  Interface */
-#ifndef TOLUA_DISABLE_tolua_interface_Interface_msgq_enqueue00
-static int tolua_interface_Interface_msgq_enqueue00(lua_State* tolua_S)
+/* method: msgq_enqueue_copy of class  Interface */
+#ifndef TOLUA_DISABLE_tolua_interface_Interface_msgq_enqueue_copy00
+static int tolua_interface_Interface_msgq_enqueue_copy00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -700,17 +700,17 @@ static int tolua_interface_Interface_msgq_enqueue00(lua_State* tolua_S)
   Interface* self = (Interface*)  tolua_tousertype(tolua_S,1,0);
   Message* message = ((Message*)  tolua_tousertype(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'msgq_enqueue'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'msgq_enqueue_copy'",NULL);
 #endif
   {
-   unsigned int tolua_ret = (unsigned int)  self->msgq_enqueue(message);
+   unsigned int tolua_ret = (unsigned int)  self->msgq_enqueue_copy(message);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'msgq_enqueue'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'msgq_enqueue_copy'.",&tolua_err);
  return 0;
 #endif
 }
@@ -2452,7 +2452,7 @@ TOLUA_API int tolua_interface_open (lua_State* tolua_S)
    tolua_function(tolua_S,"write",tolua_interface_Interface_write00);
    tolua_function(tolua_S,"has_writer",tolua_interface_Interface_has_writer00);
    tolua_function(tolua_S,"num_readers",tolua_interface_Interface_num_readers00);
-   tolua_function(tolua_S,"msgq_enqueue",tolua_interface_Interface_msgq_enqueue00);
+   tolua_function(tolua_S,"msgq_enqueue_copy",tolua_interface_Interface_msgq_enqueue_copy00);
    tolua_function(tolua_S,"msgq_remove",tolua_interface_Interface_msgq_remove00);
    tolua_function(tolua_S,"msgq_remove",tolua_interface_Interface_msgq_remove01);
    tolua_function(tolua_S,"msgq_size",tolua_interface_Interface_msgq_size00);

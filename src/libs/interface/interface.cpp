@@ -527,6 +527,45 @@ Interface::msgq_enqueue(Message *message)
 }
 
 
+/** Enqueue copy of message at end of queue.
+ * This method creates a copy of the message and enqueues it. Note that this way
+ * you cannot receive status message in the message, because the other side will not
+ * use your message instance but a copy instead.
+ *
+ * This is particularly useful if you call from an environment with automatic garbage
+ * collection that does not honor the referencing feature of message but rather just
+ * deletes it.
+ * This can only be called on a reading interface instance.
+ * @param message Message to enqueue.
+ * @return message id after message has been queued
+ * @exception MessageAlreadyQueuedException thrown if the message has already been
+ * enqueued to an interface.
+ */
+unsigned int
+Interface::msgq_enqueue_copy(Message *message)
+{
+  if ( __write_access ) {
+    throw InterfaceMessageEnqueueException(__type, __id);
+  }
+  if ( message == NULL ) {
+    throw NullPointerException("Message may not be NULL");
+  }
+  
+  if ( message_valid(message) ) {
+    Message *mcopy = message->clone();
+    mcopy->set_interface(this);
+    unsigned int msgid = __message_mediator->transmit(mcopy);
+    if ( msgid == 0 ) {
+      // Message has been processed immediately
+      mcopy->unref();
+    }
+    return msgid;
+  } else {
+    throw InterfaceInvalidMessageException(this, message);
+  }
+}
+
+
 /** Enqueue message.
  * This will enqueue the message without transmitting it via the message mediator.
  * This can only be called on a writing interface instance.

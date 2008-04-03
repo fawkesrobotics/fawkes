@@ -53,8 +53,8 @@ class Message : public RefCount
  } MessageStatus;
 
   Message(const char *type);
-  Message(Message *mesg);
-  Message(Message &mesg);
+  Message(const Message *mesg);
+  Message(const Message &mesg);
   virtual ~Message();
 
   Message &         operator=  (const Message & m);
@@ -75,6 +75,8 @@ class Message : public RefCount
   void              set_from_chunk(const void *chunk);
 
   unsigned int      recipient() const;
+
+  virtual Message * clone() const;
 
  private:
 

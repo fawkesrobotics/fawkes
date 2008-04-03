@@ -54,7 +54,7 @@ class Interface
   unsigned int  num_readers() const;
 
 
-  unsigned int  msgq_enqueue(Message *message);
+  unsigned int  msgq_enqueue_copy(Message *message);
   void          msgq_remove(Message *message);
   void          msgq_remove(unsigned int message_id);
   unsigned int  msgq_size();
