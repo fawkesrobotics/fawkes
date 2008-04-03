@@ -85,6 +85,11 @@ FuseServerClientThread::~FuseServerClientThread()
   delete __socket;
   delete __jpeg_compressor;
 
+  for (__bit = __buffers.begin(); __bit != __buffers.end(); ++__bit) {
+    delete __bit->second;
+  }
+  __buffers.clear();
+
   while ( ! __inbound_queue->empty() ) {
     FuseNetworkMessage *m = __inbound_queue->front();
     m->unref();

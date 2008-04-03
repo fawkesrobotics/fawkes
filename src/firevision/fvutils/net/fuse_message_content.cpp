@@ -29,6 +29,7 @@
 #include <core/exceptions/software.h>
 
 #include <cstring>
+#include <cstdlib>
 
 /** @class FuseMessageContent <fvutils/net/fuse_message_content.h>
  * FUSE message content.
@@ -108,4 +109,14 @@ FuseMessageContent::copy_payload(size_t offset, void *buf, size_t len)
 {
   void *tmp = (void *)((size_t)_payload + offset);
   memcpy(tmp, buf, len);
+}
+
+
+/** Free message payload. */
+void
+FuseMessageContent::free_payload()
+{
+  if ( _payload )  free(_payload);
+  _payload = NULL;
+  _payload_size = 0;
 }

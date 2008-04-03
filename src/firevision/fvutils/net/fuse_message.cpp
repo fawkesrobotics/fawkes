@@ -122,6 +122,7 @@ FuseNetworkMessage::~FuseNetworkMessage()
       _msg.payload = NULL;
     }
   } else {
+    __content->free_payload();
     delete __content;
   }
 }

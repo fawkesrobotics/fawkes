@@ -40,6 +40,8 @@ class FuseMessageContent
   virtual void * payload() const;
   virtual size_t payload_size() const;
 
+  void free_payload();
+
  protected:
   void copy_payload(size_t offset, void *buf, size_t len);
 
