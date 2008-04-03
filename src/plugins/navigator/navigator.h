@@ -60,9 +60,10 @@ class Navigator
     std::list<Obstacle *> *get_obstacles();
     NPoint * getTargetPoint();
   protected:
-    void goTo_cartesian(double x, double y);
-    void goTo_cartesian(double x, double y, double velocity);
-    void goTo_cartesian_ori(double x, double y, double ori);
+    void goto_cartesian(double x, double y);
+    void goto_cartesian(double x, double y, double velocity);
+    void goto_cartesian_ori(double x, double y, double ori);
+    void goto_polar_ori(float phi, float dist, float ori);
     /*
       void goTo_degree(double ori, double distance);
       void goTo_rad(double ori, double distance);
@@ -72,33 +73,35 @@ class Navigator
     void set_odometry_velocity_x(double velocity_x);
     void set_odometry_velocity_y(double velocity_y);
     void set_odometry_velocity_rotation(double rotation);
-    void setObstacles(std::vector< Obstacle  >);
+    void set_obstacles(std::vector< Obstacle  >);
     void erase_all_obstacles();
     void add_obstacle(Obstacle obstacle);
 
     void set_max_velocity(double velocity);
-    void setVelocityRotation(double velocity_rotation);
+    void set_velocity_rotation(double velocity_rotation);
 
-    double getVelocityX();
-    double getVelocityY();
-    double getVelocityRotation();
-    double getOrientation();
+    double get_velocity_x();
+    double get_velocity_y();
+    double get_velocity_rotation();
+    double get_orientation();
 
-    void setElapsedTime(double elapsedTime);
-    double getElapsedTime();
+    void set_route(std::vector<GtsPoint *> route);
+    void main_loop();
 
-
-    void setRoute(std::vector<GtsPoint *> route);
-    void mainLoop();
-
-
-    int getCount();
 
     // int binomialCoefficient(int n, int k);
     double bernstein(unsigned int i, unsigned int n, double t);
 
     //z.B. bei navigator_test beim Routezeichnen
-    std::vector<GtsPoint *>  getRoute();
+    std::vector<GtsPoint *>  get_route();
+
+  protected: /* members */
+    /** Destination X coordinate */
+    double dest_x;
+    /** Destination Y coordinate */
+    double dest_y;
+    /** Orientation at destination */
+    double dest_ori;
 
   private:
 
@@ -111,9 +114,9 @@ class Navigator
     //beinhaltet die Target Punkte, der einzelnen Abschnitte
     std::vector<GtsPoint*> route;
 
-    static void getEdges(GtsEdge *edge, GtsFifo * fifo);
+    static void get_edges(GtsEdge *edge, GtsFifo * fifo);
 
-    static void getVertexes(GtsVertex *vertex, GtsFifo * fifo);
+    static void get_vertexes(GtsVertex *vertex, GtsFifo * fifo);
 
     bool running_route;
 
@@ -139,7 +142,7 @@ class Navigator
     //set if the smoothController should not control
     //it avoids orbits
     //umbenennen in avoid smoothControl
-    bool newDirection;
+    bool new_direction;
 
     std::vector< GtsPoint * > path;
     std::vector< Obstacle > map;

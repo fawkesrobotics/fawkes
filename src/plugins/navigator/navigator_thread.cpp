@@ -163,15 +163,36 @@ NavigatorThread::loop()
 {
   motor_interface->read();
 
-  if ( navigator_interface->msgq_first_is<NavigatorInterface::TargetMessage>() )
+  if ( navigator_interface->msgq_first_is<NavigatorInterface::CartesianGotoMessage>() )
     {
-      NavigatorInterface::TargetMessage* msg = navigator_interface->msgq_first<NavigatorInterface::TargetMessage>();
+      NavigatorInterface::CartesianGotoMessage* msg = navigator_interface->msgq_first<NavigatorInterface::CartesianGotoMessage>();
 
-      logger->log_info("NavigatorThread", "target message received %f, %f", msg->x(), msg->y());
+      logger->log_info("NavigatorThread", "Cartesian goto message received (x,y) = (%f,%f)", msg->x(), msg->y());
 
-      if(motor_interface->controller() == navigator_interface->serial())
+      if(motor_interface->controller() == motor_interface->serial())
         {
-          goTo_cartesian_ori(msg->x(), msg->y(), msg->orientation());
+          goto_cartesian_ori(msg->x(), msg->y(), msg->orientation());
+	  navigator_interface->set_dest_x(dest_x);
+	  navigator_interface->set_dest_y(dest_y);
+	  navigator_interface->set_msgid(msg->id());
+	  navigator_interface->set_final(false);
+        }
+      navigator_interface->msgq_pop();
+
+    }
+  else if ( navigator_interface->msgq_first_is<NavigatorInterface::PolarGotoMessage>() )
+    {
+      NavigatorInterface::PolarGotoMessage* msg = navigator_interface->msgq_first<NavigatorInterface::PolarGotoMessage>();
+
+      logger->log_info("NavigatorThread", "Polar goto message received (phi,dist) = (%f,%f)", msg->phi(), msg->dist());
+
+      if(motor_interface->controller() == motor_interface->serial())
+        {
+          goto_polar_ori(msg->phi(), msg->dist(), msg->orientation());
+	  navigator_interface->set_dest_x(dest_x);
+	  navigator_interface->set_dest_y(dest_y);
+	  navigator_interface->set_msgid(msg->id());
+	  navigator_interface->set_final(false);
         }
       navigator_interface->msgq_pop();
 
@@ -182,7 +203,7 @@ NavigatorThread::loop()
 
       logger->log_info("NavigatorThread", "velocity message received %f", msg->velocity());
 
-      if(motor_interface->controller() == navigator_interface->serial())
+      if(motor_interface->controller() == motor_interface->serial())
         {
           set_max_velocity(msg->velocity());
         }
@@ -194,7 +215,7 @@ NavigatorThread::loop()
 
       logger->log_info("NavigatorThread", "obstacle message received");
 
-      if(motor_interface->controller() == navigator_interface->serial())
+      if(motor_interface->controller() == motor_interface->serial())
         {
           Obstacle o(msg->width(), msg->x(), msg->y(), 0.);
           add_obstacle(o);
@@ -213,26 +234,31 @@ NavigatorThread::loop()
       object_interface->read();
 
       //  logger->log_info("NavigatorThread", "Ball object_interface->is_visible() %i",object_interface->is_visible());
-      if(object_interface->object_type() == ObjectPositionInterface::BALL && object_interface->is_visible())
-        {
-          double direction = atan2(object_interface->relative_y(), object_interface->relative_x());
-          double before_ball_x = object_interface->relative_x() + 0.1 * cos(direction + M_PI);
-          double before_ball_y = object_interface->relative_y() + 0.1 * sin(direction + M_PI);
+      if ( object_interface->is_visible() )
+	{
+	  if(object_interface->object_type() == ObjectPositionInterface::BALL)
+	    {
+	      double direction = atan2(object_interface->relative_y(), object_interface->relative_x());
+	      double before_ball_x = object_interface->relative_x() + 0.1 * cos(direction + M_PI);
+	      double before_ball_y = object_interface->relative_y() + 0.1 * sin(direction + M_PI);
 
-          goTo_cartesian_ori(before_ball_x, before_ball_y, direction);
+	      goto_cartesian_ori(before_ball_x, before_ball_y, direction);
 
-          ball_mutex->lock();
-          ball_position_x = object_interface->relative_x();
-          ball_position_y = object_interface->relative_y();
-          ball_mutex->unlock();
-          //  logger->log_info("NavigatorThread", "Ball at  %f, %f", object_interface->relative_x(), object_interface->relative_y());
-        }
-      else if(object_interface->object_type() == ObjectPositionInterface::OTHER)
-        {
-            logger->log_info("NavigatorThread", "Object received at  %f, %f", object_interface->relative_x(), object_interface->relative_y());
+	      ball_mutex->lock();
+	      ball_position_x = object_interface->relative_x();
+	      ball_position_y = object_interface->relative_y();
+	      ball_mutex->unlock();
+	      //  logger->log_info("NavigatorThread", "Ball at  %f, %f", object_interface->relative_x(), object_interface->relative_y());
+	    }
+	  else if(object_interface->object_type() == ObjectPositionInterface::OTHER)
+	    {
+	      logger->log_info("NavigatorThread", "Object received at  %f, %f (interface %s)",
+			       object_interface->relative_x(), object_interface->relative_y(),
+			       object_interface->id());
               Obstacle o(object_interface->extent(), object_interface->relative_x(), object_interface->relative_y(), 0.);
               add_obstacle(o);
-        }
+	    }
+	}
       /*   else
            {
              float distance = object_interface->distance();
@@ -252,14 +278,14 @@ NavigatorThread::loop()
 
 
   //from navigator
-  mainLoop();
+  main_loop();
 
 
-  if(motor_interface->controller() == navigator_interface->serial())
+  if(motor_interface->controller() == motor_interface->serial())
     {
-      double vx = getVelocityX();
-      double vy = getVelocityY();
-      double rotation = getVelocityRotation();
+      double vx = get_velocity_x();
+      double vy = get_velocity_y();
+      double rotation = get_velocity_rotation();
 
       if(old_velocity_x != vx || old_velocity_y != vy
           || old_velocity_rotation != rotation)

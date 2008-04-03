@@ -295,12 +295,7 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
       logger->log_info("NavigatorNetworkThread", "Message of type target message received");
       navigator_target_message_t *u = (navigator_target_message_t *)msg->payload();
 
-      NavigatorInterface::TargetMessage* tmsg = new  NavigatorInterface::TargetMessage();
-
-      tmsg->set_x(u->x);
-      tmsg->set_y(u->y);
-      tmsg->set_orientation(u->orientation);
-
+      NavigatorInterface::CartesianGotoMessage* tmsg = new NavigatorInterface::CartesianGotoMessage(u->x, u->y, u->orientation);
       navigator_interface->msgq_enqueue(tmsg);
     }
   else if(msg->msgid() == NAVIGATOR_MSGTYPE_VELOCITY

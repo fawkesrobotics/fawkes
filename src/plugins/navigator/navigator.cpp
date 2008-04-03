@@ -1,7 +1,8 @@
+
 /***************************************************************************
- *  navigator.h - The navigator of fawkes
+ *  navigator.h - The navigator of Fawkes
  *
- *  Generated: Tue Jun 05 13:50:17 2007
+ *  Created: Tue Jun 05 13:50:17 2007
  *  Copyright  2007  Martin Liebenberg
  *
  *  $Id$
@@ -75,7 +76,8 @@ Navigator::Navigator()
   //the velocity of the rotation of the robot
   velocity_rotation = 0;
   orientation = 0;
-  desired_orientation = 0;
+
+  dest_x = dest_y = dest_ori = 0.f;
 
   //the index of the formula of the bezier curve
   t = 0;
@@ -88,7 +90,7 @@ Navigator::Navigator()
 
   count = (int)path.size();
 
-  newDirection = false;
+  new_direction = false;
 
   time_emitter = g_timer_new();
 
@@ -112,7 +114,8 @@ Navigator::~Navigator()
  * @param edge the pushed edge
  * @param fifo the GTS fifo with the edges
  */
-void Navigator::getEdges(GtsEdge *edge, GtsFifo * fifo)
+void
+Navigator::get_edges(GtsEdge *edge, GtsFifo * fifo)
 {
   gts_fifo_push(fifo, edge);
 }
@@ -122,7 +125,8 @@ void Navigator::getEdges(GtsEdge *edge, GtsFifo * fifo)
  * @param vertex the pushed vertex
  * @param fifo the GTS fifo with the vertexes
  */
-void Navigator::getVertexes(GtsVertex *vertex, GtsFifo * fifo)
+void
+Navigator::get_vertexes(GtsVertex *vertex, GtsFifo * fifo)
 {
   gts_fifo_push(fifo, GTS_OBJECT(vertex));
 }
@@ -130,7 +134,8 @@ void Navigator::getVertexes(GtsVertex *vertex, GtsFifo * fifo)
 /** Gets the points of the surface of the triangulation.
  * @return a list of all points of the surface.
  */
-std::list<NPoint *> *Navigator::get_surface_points()
+std::list<NPoint *> *
+Navigator::get_surface_points()
 {
   std::list<NPoint *> *p_list = new std::list<NPoint *>;
   surface_mutex->lock();
@@ -138,7 +143,7 @@ std::list<NPoint *> *Navigator::get_surface_points()
   GtsSurface *surface = pathfinder->getSurface();
   GtsFifo *vertexes = gts_fifo_new();
 
-  gts_surface_foreach_vertex(surface, (GtsFunc) getVertexes, vertexes);
+  gts_surface_foreach_vertex(surface, (GtsFunc) get_vertexes, vertexes);
 
   while(!gts_fifo_is_empty(vertexes))
     {
@@ -168,7 +173,8 @@ std::list<NPoint *> *Navigator::get_surface_points()
 /** Gets the obstacles within the scan area.
  * @return a list of all obstacles.
  */
-std::list<Obstacle *> *Navigator::get_obstacles()
+std::list<Obstacle *> *
+Navigator::get_obstacles()
 {
   std::list<Obstacle *> *o_list = new std::list<Obstacle *>;
   surface_mutex->lock();
@@ -176,7 +182,7 @@ std::list<Obstacle *> *Navigator::get_obstacles()
   GtsSurface *surface = pathfinder->getSurface();
   GtsFifo *vertexes = gts_fifo_new();
 
-  gts_surface_foreach_vertex(surface, (GtsFunc) getVertexes, vertexes);
+  gts_surface_foreach_vertex(surface, (GtsFunc) get_vertexes, vertexes);
 
   while(!gts_fifo_is_empty(vertexes))
     {
@@ -196,7 +202,8 @@ std::list<Obstacle *> *Navigator::get_obstacles()
 /** Gets the points of the path.
  * @return a list of all points of the path.
  */
-std::list<NPoint *> *Navigator::get_path_points()
+std::list<NPoint *> *
+Navigator::get_path_points()
 {
   std::list<NPoint *> *p_list = new std::list<NPoint *>;
   path_mutex->lock();
@@ -215,14 +222,15 @@ std::list<NPoint *> *Navigator::get_path_points()
 /** Gets the lines of the surface of the triangulation.
  * @return a list of all lines of the surface.
  */
-std::list<NLine *> *Navigator::get_surface_lines()
+std::list<NLine *> *
+Navigator::get_surface_lines()
 {
   std::list<NLine *> *lines = new std::list<NLine *>;
   surface_mutex->lock();
 
   GtsSurface *surface = pathfinder->getSurface();
   GtsFifo *edges = gts_fifo_new ();
-  gts_surface_foreach_edge(surface, (GtsFunc) getEdges, edges);
+  gts_surface_foreach_edge(surface, (GtsFunc) get_edges, edges);
 
   while(!gts_fifo_is_empty(edges))
     {
@@ -270,7 +278,8 @@ std::list<NLine *> *Navigator::get_surface_lines()
 /** Sets the recognized obstacles to the navigator.
  * @param map a vector of obstacles
  */
-void Navigator::setObstacles(std::vector< Obstacle > map)
+void
+Navigator::set_obstacles(std::vector< Obstacle > map)
 {
   this->map = map;
   surface_mutex->lock();
@@ -280,7 +289,8 @@ void Navigator::setObstacles(std::vector< Obstacle > map)
 
 /** Removes all obstacles from the surface.
  */
-void Navigator::erase_all_obstacles()
+void
+Navigator::erase_all_obstacles()
 {
   surface_mutex->lock();
   map.clear();
@@ -290,7 +300,8 @@ void Navigator::erase_all_obstacles()
 /** Adds an obstacle to the pathfinder.
  * @param obstacle an obstacle
  */
-void Navigator::add_obstacle(Obstacle obstacle)
+void
+Navigator::add_obstacle(Obstacle obstacle)
 {
   map.push_back(obstacle);
   pathfinder->addObstacle(obstacle);
@@ -299,7 +310,8 @@ void Navigator::add_obstacle(Obstacle obstacle)
 /** Sets the target tolerance.
  * @param tolerance the target tolerance
  */
-void Navigator::set_target_tolerance(float tolerance)
+void
+Navigator::set_target_tolerance(float tolerance)
 {
   target_tolerance = tolerance;
 }
@@ -307,7 +319,8 @@ void Navigator::set_target_tolerance(float tolerance)
 /** Sets the odometry velocity in x-direction.
  * @param velocity_x the velocity x
  */
-void Navigator::set_odometry_velocity_x(double velocity_x)
+void
+Navigator::set_odometry_velocity_x(double velocity_x)
 {
   odometry_velocity_x = velocity_x;
 }
@@ -324,7 +337,8 @@ void Navigator::set_odometry_velocity_y(double velocity_y)
 /** Sets the odometry rotation velocity.
  * @param rotation rotation velocity
  */
-void Navigator::set_odometry_velocity_rotation(double rotation)
+void
+Navigator::set_odometry_velocity_rotation(double rotation)
 {
   odometry_velocity_rotation = rotation;
 }
@@ -332,7 +346,8 @@ void Navigator::set_odometry_velocity_rotation(double rotation)
 /** Sets the maximum velocity of the robot.
  * @param velocity the maximum velocity
  */
-void Navigator::set_max_velocity(double velocity)
+void
+Navigator::set_max_velocity(double velocity)
 {
   if(current_velocity > velocity)
    {
@@ -344,7 +359,8 @@ void Navigator::set_max_velocity(double velocity)
 /** Sets the velocity of the rotation of the robot.
  * @param velocity_rotation the velocity of the rotation
  */
-void Navigator::setVelocityRotation(double velocity_rotation)
+void
+Navigator::set_velocity_rotation(double velocity_rotation)
 {
   this->velocity_rotation = velocity_rotation;
 }
@@ -352,7 +368,8 @@ void Navigator::setVelocityRotation(double velocity_rotation)
 /** Returns the velocity of the rotation of the robot.
  * @return the velocity of the rotation
  */
-double Navigator::getVelocityRotation()
+double
+Navigator::get_velocity_rotation()
 {
   return velocity_rotation;
 }
@@ -361,7 +378,8 @@ double Navigator::getVelocityRotation()
 /** Returns the velocity of the robot in the x-direction.
  * @return the velocity in the x-direction
  */
-double Navigator::getVelocityX()
+double
+Navigator::get_velocity_x()
 {
   return velocity_x;
 }
@@ -369,7 +387,8 @@ double Navigator::getVelocityX()
 /** Returns the velocity of the robot in the y-direction.
  * @return the velocity in the y-direction
  */
-double Navigator::getVelocityY()
+double
+Navigator::get_velocity_y()
 {
   return velocity_y;
 }
@@ -378,7 +397,8 @@ double Navigator::getVelocityY()
 /** Returns the orientation of the robot.
  * @return the orientation of the robot
  */
-double Navigator::getOrientation()
+double
+Navigator::get_orientation()
 {
   return orientation;
 }
@@ -386,7 +406,8 @@ double Navigator::getOrientation()
 /** Sets a list of targets for a route.
  * @param route a vector of target-points
  */
-void Navigator::setRoute(std::vector<GtsPoint*> route)
+void
+Navigator::set_route(std::vector<GtsPoint*> route)
 {
   if(route.size() > 0)
     {
@@ -402,41 +423,17 @@ void Navigator::setRoute(std::vector<GtsPoint*> route)
 /** Returns the current route of the navigator.
  * @return a vector of target points
  */
-std::vector<GtsPoint *> Navigator::getRoute()
+std::vector<GtsPoint *>
+Navigator::get_route()
 {
   return route;
 }
 
-/** Sets the time which elapsed since the last calling of the main Loop.
- * Deprecated.
- * @param elapsedTime 
- */
-void Navigator::setElapsedTime(double elapsedTime)
-{
-  elapsed_time = elapsedTime;
-}
-
-/** Deprecated.
- * @return 
- */
-double Navigator::getElapsedTime()
-{
-  return elapsed_time;
-}
-
-/** Deprecated.
- * @return
- */
-int Navigator::getCount()
-{
-  return count;
-}
-
-
 /** Returns the target point of the navigator.
  * @return the target point
  */
-NPoint* Navigator::getTargetPoint()
+NPoint *
+Navigator::getTargetPoint()
 {
   return new NPoint(pathfinder->getTargetPoint()->x, pathfinder->getTargetPoint()->y);
 }
@@ -447,7 +444,8 @@ NPoint* Navigator::getTargetPoint()
  * @param t
  * @return the value of the bernstein polynomial
  */
-double Navigator::bernstein(unsigned int i, unsigned int n, double t)
+double
+Navigator::bernstein(unsigned int i, unsigned int n, double t)
 {
   return BinomialCoefficient::binoc(n, i) * pow(t, (int)i) * pow(1. - t, (int)(n - i));
 }
@@ -457,7 +455,8 @@ double Navigator::bernstein(unsigned int i, unsigned int n, double t)
  * @param t
  * @return s
  */
-double Navigator::s(double t)
+double
+Navigator::s(double t)
 {
   double sum_x = 0;
   double sum_y = 0;
@@ -477,9 +476,10 @@ double Navigator::s(double t)
  * @param x the x-coordinate of the target
  * @param y the y-coordinate of the target
  */
-void Navigator::goTo_cartesian(double x, double y)
+void
+Navigator::goto_cartesian(double x, double y)
 {
-  goTo_cartesian(x, y, max_velocity);
+  goto_cartesian(x, y, max_velocity);
 }
 
 /** Sets a target.
@@ -487,9 +487,10 @@ void Navigator::goTo_cartesian(double x, double y)
  * @param y the y-coordinate of the target
  * @param ori the desired orientation at the target
  */
-void Navigator::goTo_cartesian_ori(double x, double y, double ori)
+void
+Navigator::goto_cartesian_ori(double x, double y, double ori)
 {
-  goTo_cartesian(x, y, max_velocity);
+  goto_cartesian(x, y, max_velocity);
 
   if(max_velocity > 0)
     {
@@ -499,11 +500,27 @@ void Navigator::goTo_cartesian_ori(double x, double y, double ori)
     {
       velocity_rotation = ori / 3.;
     }
-  //desired_orientation and orientation is always positive
+  //dest_ori and orientation is always positive
   //the velocity_rotation states the direction
-  desired_orientation = fabs(ori);
+  dest_ori = fabs(ori);
   orientation = 0;
 }
+
+
+/** Sets a target from polar coordinates.
+ * @param phi the angle to the target looking forward
+ * @param dist distance to the target
+ * @param ori the desired orientation at the target
+ */
+void
+Navigator::goto_polar_ori(float phi, float dist, float ori)
+{
+  double x = dist * cos(phi);
+  double y = dist * sin(phi);
+
+  goto_cartesian_ori(x, y, ori);
+}
+
 
 /** Sets a target and a velocity.
  *  The navigator will search a path and will drive along.
@@ -511,11 +528,16 @@ void Navigator::goTo_cartesian_ori(double x, double y, double ori)
  * @param y the y-coordinate of the target
  * @param velocity the velocity of the robot
  */
-void Navigator::goTo_cartesian(double x, double y, double velocity)
+void
+Navigator::goto_cartesian(double x, double y, double velocity)
 {
   step_x = 0;
   step_y = 0;
   t = 0;
+
+  dest_ori = 0;
+  dest_x = x;
+  dest_y = y;
 
   this->current_velocity = velocity;
 
@@ -536,13 +558,14 @@ void Navigator::goTo_cartesian(double x, double y, double velocity)
   else
     current_degree = 0;
 
-  newDirection = true;
+  new_direction = true;
 
 }
 
 /** Destroys the current path.
  */
-void Navigator::destroy_path()
+void
+Navigator::destroy_path()
 {
 
   for(unsigned int i = 0; i < path.size(); i++)
@@ -565,7 +588,8 @@ void Navigator::destroy_path()
 /** The main loop in which the main calculations for the valocities are placed.
  * It is called from the navigator thread loop.
  */
-void Navigator::mainLoop()
+void
+Navigator::main_loop()
 {
   double current_time = g_timer_elapsed( time_emitter, NULL );
   elapsed_time = current_time - last_time;
@@ -628,7 +652,7 @@ void Navigator::mainLoop()
       //    std::cout << "-------next Path-------------------------------------------------" << std::endl;
       step_x = 0;
       step_y = 0;
-      newDirection = true;
+      new_direction = true;
 
 
       //stop at the end of the path
@@ -747,10 +771,10 @@ void Navigator::mainLoop()
 
       //     std::cout << "-------difference " << difference << std::endl;
 
-      if(!newDirection)
+      if(!new_direction)
         grade = cont.control(fabs(difference));
       else
-        newDirection = false;
+        new_direction = false;
 
       //    std::cout << "-------difference " << difference << std::endl;
 
@@ -784,8 +808,8 @@ void Navigator::mainLoop()
      std::cout << "-------velocity_rotation " << velocity_rotation << std::endl;
      std::cout << "-------velocity_rotation * elapsed_time " << velocity_rotation * elapsed_time << std::endl;
   */
-  //desired_orientation is always positive
-  if(orientation < desired_orientation)
+  //dest_ori is always positive
+  if(orientation < dest_ori)
     {
       orientation += fabs(velocity_rotation) * elapsed_time;
     }
