@@ -35,6 +35,7 @@
 #  include <dirent.h>
 #  include <unistd.h>
 #  include <cerrno>
+#  include <cstring>
 #endif
 
 void

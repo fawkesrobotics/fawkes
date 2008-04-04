@@ -42,7 +42,6 @@
 #include <tolua++.h>
 
 #include <string>
-#include <cstring>
 
 #define INIT_FILE  SKILLDIR"/general/init.lua"
 #define START_FILE SKILLDIR"/general/start.lua"
