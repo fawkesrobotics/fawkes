@@ -54,24 +54,14 @@ class SurfClassifier : public Classifier
  public:
   SurfClassifier(const char * features_file,
 		 unsigned int pixel_width, unsigned int pixel_height,
-		 // Initial sampling step (default 2)
 		 int samplingStep = 2,
-		 // Number of analysed octaves (default 4)
 		 int octaves = 4,
-		 // Blob response treshold
 		 double thres = 4.0,
-		 // Set this flag "true" to double the image size
 		 bool doubleImageSize = false,
-		 // Initial lobe size, default 3 and 5 (with double image size)
 		 int initLobe = 3,
-		 // Upright SURF or rotation invaraiant
 		 bool upright = false,
-		 // If the extended flag is turned on, SURF 128 is used
 		 bool extended = false,
-		 // Spatial size of the descriptor window (default 4)
-		 int indexSize = 4,
-		 // flags
-		 int flags = 0);
+		 int indexSize = 4);
   
   virtual ~SurfClassifier(); 
   
@@ -94,9 +84,6 @@ class SurfClassifier : public Classifier
   surf::Image *__image;
   std::vector< surf::Ipoint > __img_features;
   int __img_num_features;
-
-  // c'tor parameters
-  int __flags;
 
   // Initial sampling step (default 2)
   int __samplingStep;

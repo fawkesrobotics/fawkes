@@ -51,7 +51,7 @@ extern "C" {
 #include <opencv/cxcore.h>
 #include <opencv/highgui.h>
 
-/** @class FeatureClassifier <classifiers/features.h>
+/** @class FeatureClassifier <classifiers/feature.h>
  * Feature classifier.
  *
  * This class provides a classifier that uses OpenCV to detect objects in a given
@@ -65,7 +65,7 @@ extern "C" {
  */
 
 /** Constructor.
- * @param features_files list of feature-files to use
+ * @param object_file file that contains the object to detect
  * @param pixel_width width of images that will be processed
  * @param pixel_height height of images that will be processed
  * @param kdtree_bbf_max_nn_chks maximum number of keypoint NN candidates to check during BBF search

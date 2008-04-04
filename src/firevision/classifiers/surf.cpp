@@ -62,21 +62,25 @@
  */
 
 /** Constructor.
- * @param features_files list of feature-files to use
+ * @param object_file file that contains an image of the object to detect
  * @param pixel_width width of images that will be processed
  * @param pixel_height height of images that will be processed
- * @param flags flags, not used yet.
+ * @param samplingStep Initial sampling step
+ * @param octaves Number of analysed octaves
+ * @param thres Blob response treshold
+ * @param doubleImageSize true to double the image size, false to keep original
+ * @param initLobe Initial lobe size, default 3 and 5 (with double image size)
+ * @param upright rotation invariance (fasle) or upright (true)
+ * @param extended true to use the extended descriptor (SURF 128)
+ * @param indexSize Spatial size of the descriptor window (default 4)
  */
 SurfClassifier::SurfClassifier( const char * object_file,
 				unsigned int pixel_width, unsigned int pixel_height,
 				int samplingStep, int octaves, double thres, 
 				bool doubleImageSize, int initLobe, 
-				bool upright, bool extended, int indexSize,
-				int flags)
+				bool upright, bool extended, int indexSize)
   : Classifier("SurfClassifier")
 {
-  __flags = flags;
-
   // params for FastHessian
   __samplingStep = samplingStep;
   __octaves = octaves;
