@@ -38,7 +38,7 @@ ifeq ($(HAVE_SIFT),1)
 else
   # SIFT is considered truely optional, no warning
   #WARN_TARGETS += warning_sift
-  FILTER_OUT += features.cpp
+  FILTER_OUT += feature.cpp
 endif
 
 ifeq ($(HAVE_SURF),1)
