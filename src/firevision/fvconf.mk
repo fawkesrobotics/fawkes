@@ -138,6 +138,22 @@ ifeq ($(HAVE_OPENCV),1)
   LDFLAGS_OPENCV = $(shell $(PKGCONFIG) --libs 'opencv')
 endif
 
+## check for SIFT-support (patent-encumbered!)
+SIFT_DIR = $(FVBASEDIR)/sift
+ifneq ($(wildcard $(realpath $(SIFT_DIR))),)
+  HAVE_SIFT = 1
+  LIBS_SIFT = feat
+  CFLAGS_SIFT = -DHAVE_SIFT
+endif
+
+## check for SURF-support (patent-encumbered!)
+SURF_DIR = $(FVBASEDIR)/surf
+ifneq ($(wildcard $(realpath $(SURF_DIR))),)
+  HAVE_SURF = 1
+  LIBS_SURF = Surf
+  CFLAGS_SURF = -DHAVE_SURF
+endif
+
 # Set to 1 to build shape models
 HAVE_SHAPE_MODELS = 1
 
@@ -152,7 +168,7 @@ VISION_CFLAGS       += $(foreach CTRL,$(CTRLS),$(if $(subst 0,,$(HAVE_$(CTRL)_CT
 ifeq ($(MAKECMDGOALS),printconf)
 VISION_CAM_PRINT     = $(foreach CAM,$(CAMS),$(CAM): $(if $(subst 0,,$(HAVE_$(CAM)_CAM)),"yes","no")\n)
 VISION_CTRL_PRINT    = $(foreach CTRL,$(CTRLS),$(CTRL): $(if $(subst 0,,$(HAVE_$(CTRL)_CTRL)),"yes","no")\n)
-VISION_LIBS_PRINT    = $(foreach DLIB,LIBJPEG LIBPNG LIBDC1394 SDL TRICLOPS_SDK IPP OPENCV SHAPE_MODELS,$(DLIB): $(if $(subst 0,,$(HAVE_$(DLIB))),"yes","no")\n)
+VISION_LIBS_PRINT    = $(foreach DLIB,LIBJPEG LIBPNG LIBDC1394 SDL TRICLOPS_SDK IPP OPENCV SHAPE_MODELS SIFT SURF,$(DLIB): $(if $(subst 0,,$(HAVE_$(DLIB))),"yes","no")\n)
 printconf:
 	$(SILENT)echo "Cameras:"
 	$(SILENT)echo -e " $(VISION_CAM_PRINT)"
