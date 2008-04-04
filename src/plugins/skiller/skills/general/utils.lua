@@ -39,42 +39,42 @@ end
 require("general.stringext");
 
 
--- Write to log with log level debug.
+--- Write to log with log level debug.
 -- @param ... Anything, will be converted to string
 function print_debug(...)
    logger:log_debug(string.join(" ", {...}));
 end
 
 
--- Write to log with log level info.
+--- Write to log with log level info.
 -- @param ... Anything, will be converted to string
 function print_info(...)
    logger:log_info(string.join(" ", {...}));
 end
 
 
--- Write to log with log level warn.
+--- Write to log with log level warn.
 -- @param ... Anything, will be converted to string
 function print_warn(...)
    logger:log_warn(string.join(" ", {...}));
 end
 
 
--- Write to log with log level error.
+--- Write to log with log level error.
 -- @param ... Anything, will be converted to string
 function print_error(...)
    logger:log_error(string.join(" ", {...}));
 end
 
 
--- Print formatted string.
+--- Print formatted string.
 -- Uses string.format to format the string and print_info to print it.
 -- @param format format of the string
 function printf(format, ...)
    logger:log_info(string.format(format, ...));
 end
 
--- Registers global functions for module.
+--- Registers global functions for module.
 -- @param m module
 function register_global_funcs(m)
    for k,v in pairs(_G) do
@@ -85,7 +85,7 @@ function register_global_funcs(m)
 end
 
 
--- Register print functions for module.
+--- Register print functions for module.
 -- @param m module
 function register_print_funcs(m)
    m.print_debug = print_debug;
@@ -97,7 +97,7 @@ function register_print_funcs(m)
 end
 
 
--- Initializes a module and references everything from the global environment.
+--- Initializes a module and references everything from the global environment.
 -- @param m module that contains a skill
 function register_all(m)
    for k,v in pairs(_G) do
@@ -107,7 +107,7 @@ function register_all(m)
 end
 
 
--- Initializes a skill module.
+--- Initializes a skill module.
 -- @param m module that contains a skill
 function module_init(m)
    register_global_funcs(m);

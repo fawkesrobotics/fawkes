@@ -9,20 +9,18 @@
  *
  ****************************************************************************/
 
-/*
- *  This program is free software; you can redistribute it and/or modify
+/*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE file mentioned below for details).
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software Foundation,
- *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.
+ *  You can read the full text in the LICENSE file in the doc directory. 
  */
 
 #include <interfaces/generator/cpp_generator.h>
@@ -168,20 +166,18 @@ CppInterfaceGenerator::write_header(FILE *f, std::string filename)
   fprintf(f, " *  $Id$\n");
   fprintf(f, " *\n");
   fprintf(f, " ****************************************************************************/\n\n");
-  fprintf(f, "/*\n");
-  fprintf(f, " *  This program is free software; you can redistribute it and/or modify\n");
+  fprintf(f, "/*  This program is free software; you can redistribute it and/or modify\n");
   fprintf(f, " *  it under the terms of the GNU General Public License as published by\n");
   fprintf(f, " *  the Free Software Foundation; either version 2 of the License, or\n");
-  fprintf(f, " *  (at your option) any later version.\n");
+  fprintf(f, " *  (at your option) any later version. A runtime exception applies to\n");
+  fprintf(f, " *  this software (see LICENSE file mentioned below for details).\n");
   fprintf(f, " *\n");
   fprintf(f, " *  This program is distributed in the hope that it will be useful,\n");
   fprintf(f, " *  but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
   fprintf(f, " *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n");
   fprintf(f, " *  GNU Library General Public License for more details.\n");
   fprintf(f, " *\n");
-  fprintf(f, " *  You should have received a copy of the GNU General Public License\n");
-  fprintf(f, " *  along with this program; if not, write to the Free Software Foundation,\n");
-  fprintf(f, " *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.\n");
+  fprintf(f, " *  You can read the full text in the LICENSE file in the doc directory.\n");
   fprintf(f, " */\n\n");
 }
 
