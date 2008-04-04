@@ -231,7 +231,7 @@ NavigatorThread::loop()
     {
       ObjectPositionInterface *object_interface = *oili;
       object_interface->read();
-
+      
       if ( object_interface->is_visible() )
         {
           if(object_interface->object_type() == ObjectPositionInterface::BALL)
@@ -239,9 +239,9 @@ NavigatorThread::loop()
               double direction = atan2(object_interface->relative_y(), object_interface->relative_x());
               double before_ball_x = object_interface->relative_x() + 0.1 * cos(direction + M_PI);
               double before_ball_y = object_interface->relative_y() + 0.1 * sin(direction + M_PI);
-
+	      
               goto_cartesian_ori(before_ball_x, before_ball_y, direction);
-
+	      
               ball_mutex->lock();
               ball_position_x = object_interface->relative_x();
               ball_position_y = object_interface->relative_y();
@@ -258,36 +258,36 @@ NavigatorThread::loop()
         }
     }
 
-      set_odometry_velocity_x(motor_interface->vx());
-      set_odometry_velocity_y(motor_interface->vy());
-      set_odometry_velocity_rotation(motor_interface->omega());
+  set_odometry_velocity_x(motor_interface->vx());
+  set_odometry_velocity_y(motor_interface->vy());
+  set_odometry_velocity_rotation(motor_interface->omega());
 
-      //from navigator
-      main_loop();
+  //from navigator
+  main_loop();
 
-      if(motor_interface->controller() == navigator_interface->serial())
-        {
-          double vx = get_velocity_x();
-          double vy = get_velocity_y();
-          double rotation = get_velocity_rotation();
-
-          if(old_velocity_x != vx || old_velocity_y != vy
-              || old_velocity_rotation != rotation)
-            {
-              old_velocity_x = vx;
-              old_velocity_y = vy;
-              old_velocity_rotation = rotation;
-              MotorInterface::LinTransRotMessage* motor_msg = new  MotorInterface::LinTransRotMessage(vx, vy, rotation);
-              motor_interface->msgq_enqueue(motor_msg);
-            }
-        }
+  if(motor_interface->controller() == motor_interface->serial())
+    {
+      double vx = get_velocity_x();
+      double vy = get_velocity_y();
+      double rotation = get_velocity_rotation();
+      
+      if(old_velocity_x != vx || old_velocity_y != vy || old_velocity_rotation != rotation)
+	{
+	  old_velocity_x = vx;
+	  old_velocity_y = vy;
+	  old_velocity_rotation = rotation;
+	  MotorInterface::LinTransRotMessage* motor_msg = new  MotorInterface::LinTransRotMessage(vx, vy, rotation);
+	  motor_interface->msgq_enqueue(motor_msg);
+	}
+    }
 }
 
 /** Returns the x coordinate of the relative ball position.
  * Is needed by NavigatorNetworkThread, which sends the position to the GUI.
  * @return x coordinate of the relative ball position
  */
-double NavigatorThread::get_ball_position_x()
+double
+NavigatorThread::get_ball_position_x()
 {
   double x = 0;
   ball_mutex->lock();
@@ -300,7 +300,8 @@ double NavigatorThread::get_ball_position_x()
  * Is needed by NavigatorNetworkThread, which sends the position to the GUI.
  * @return y coordinate of the relative ball position
  */
-double NavigatorThread::get_ball_position_y()
+double
+NavigatorThread::get_ball_position_y()
 {
   double y = 0;
   ball_mutex->lock();

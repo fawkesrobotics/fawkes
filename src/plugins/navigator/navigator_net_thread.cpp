@@ -181,7 +181,7 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
         {
           navigator_joystick_message_t *u = (navigator_joystick_message_t *)msg->payload();
 
-          if ( motor_interface->controller() == navigator_interface->serial() )
+          if ( motor_interface->controller() == motor_interface->serial() )
             {
               joystick_control->enqueueCommand(u->forward, u->sideward, u->rotation, u->speed);
             }
