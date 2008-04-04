@@ -45,9 +45,11 @@ SkillerPlugin::SkillerPlugin()
   : Plugin("skiller")
 {
   __liaison_exec_barrier = new Barrier(2);
-  SkillerLiaisonThread *slt = new SkillerLiaisonThread(__liaison_exec_barrier);
+  SkillerLiaisonThread *slt   = new SkillerLiaisonThread(__liaison_exec_barrier);
+  SkillerExecutionThread *set =  new SkillerExecutionThread(__liaison_exec_barrier, slt);
+  slt->set_execthread(set);
   thread_list.push_back(slt);
-  thread_list.push_back(new SkillerExecutionThread(__liaison_exec_barrier, slt));
+  thread_list.push_back(set);
 }
 
 

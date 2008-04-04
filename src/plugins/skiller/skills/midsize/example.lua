@@ -23,17 +23,15 @@
 --  along with this program; if not, write to the Free Software Foundation,
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
 
-require("general.utils")
-require("general.skillenv");
 require("midsize")
-module("midsize.example", general.utils.module_init, midsize.module_init)
+module("midsize.example", midsize.module_init)
 
 function example(arg)
-   local final = false;
-   local rets  = "foo";
+   local status = S_RUNNING;
+   local rets   = "foo";
 
    if ( arg ~= nil ) then
-      final = true;
+      status = S_FINAL;
       if ( type(arg) == "string" ) then
 	 rets = arg;
       end
@@ -42,12 +40,18 @@ function example(arg)
    end
 
    print("Example skill has been executed");
-   return final, rets;
+   return status, rets;
 end
 
+function example_reset()
+   print_debug("Example skill reset called");
+end
 
-skill_doc = [[Simple example skill.
+example_skill_doc = [[Simple example skill.
 This skill does nothing meaningful, it is just here to show you what
 you can do.]]
-   
-register_skill("example", example, skill_doc);
+
+register_skill{name       = "example",
+	       func       = example,
+	       reset_func = example_reset,
+	       doc        = example_skill_doc};

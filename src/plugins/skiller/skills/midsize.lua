@@ -25,11 +25,19 @@
 
 local require = require;
 
-module("midsize");
+require("general.utils")
+require("general.skillenv");
+
+module("midsize", general.utils.register_all);
 
 function module_init(m)
+   general.utils.module_init(m);
+   general.skillenv.module_init(m);
+
    m.midsize = _M;
 end
 
 -- Require all mid-size skills
 require("midsize.example");
+require("midsize.relgoto");
+require("midsize.goto");

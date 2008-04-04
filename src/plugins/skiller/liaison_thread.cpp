@@ -26,10 +26,12 @@
  */
 
 #include <plugins/skiller/liaison_thread.h>
+#include <plugins/skiller/exec_thread.h>
 
 #include <core/threading/barrier.h>
 #include <interfaces/object.h>
 #include <interfaces/skiller.h>
+#include <interfaces/navigator.h>
 
 #include <cstring>
 
@@ -59,6 +61,16 @@ SkillerLiaisonThread::~SkillerLiaisonThread()
 }
 
 
+/** Set execution thread.
+ * @param set skiller execution thread
+ */
+void
+SkillerLiaisonThread::set_execthread(SkillerExecutionThread *set)
+{
+  __exec_thread = set;
+}
+
+
 /** Clean up when init failed.
  * You may only call this from init(). Never ever call it from anywhere
  * else!
@@ -67,10 +79,12 @@ void
 SkillerLiaisonThread::init_failure_cleanup()
 {
   try {
-    if ( skiller )  blackboard->close(skiller);
-    if ( wm_ball )  blackboard->close(wm_ball);
-    if ( wm_pose )  blackboard->close(wm_pose);
+    if ( skiller )    blackboard->close(skiller);
+    if ( wm_ball )    blackboard->close(wm_ball);
+    if ( wm_pose )    blackboard->close(wm_pose);
     if ( wm_ball_w )  blackboard->close(wm_ball_w);
+    if ( navigator )  blackboard->close(navigator);
+    if ( wm_pose_w )  blackboard->close(wm_pose_w);
   } catch (...) {
     // we really screwed up, can't do anything about it, ignore error, logger is
     // initialized since this method is only called from init() which is only called if
@@ -86,12 +100,17 @@ SkillerLiaisonThread::init()
 {
   wm_ball      = NULL;
   wm_pose      = NULL;
+  navigator    = NULL;
+  wm_ball_w    = NULL;
+  wm_pose_w    = NULL;
 
   try {
-    skiller = blackboard->open_for_writing<SkillerInterface>("Skiller");
-    wm_ball = blackboard->open_for_reading<ObjectPositionInterface>("WM Ball");
+    skiller   = blackboard->open_for_writing<SkillerInterface>("Skiller");
+    wm_ball   = blackboard->open_for_reading<ObjectPositionInterface>("WM Ball");
     wm_ball_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Ball");
-    wm_pose = blackboard->open_for_reading<ObjectPositionInterface>("WM Pose");
+    wm_pose   = blackboard->open_for_reading<ObjectPositionInterface>("WM Pose");
+    wm_pose_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Pose");
+    navigator = blackboard->open_for_reading<NavigatorInterface>("Navigator");
     std::list<ObjectPositionInterface *> *obs_lst = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("WM Obstacles");
     for (std::list<ObjectPositionInterface *>::iterator i = obs_lst->begin(); i != obs_lst->end(); ++i) {
       wm_obstacles.push_back(*i);
@@ -107,16 +126,24 @@ SkillerLiaisonThread::init()
   // running, we only open newly created ones. We have memory an do not want
   // "oscillating" open/close loops
   blackboard->register_observer(this, BlackBoard::BBIO_FLAG_CREATED);
+
+  // We want to know if our reader leaves and closes the interface
+  bbil_add_reader_interface(skiller);
+  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_READER);
 }
 
 
 void
 SkillerLiaisonThread::finalize()
 {
+  blackboard->unregister_listener(this);
+
   blackboard->close(skiller);
   blackboard->close(wm_ball);
   blackboard->close(wm_ball_w);
   blackboard->close(wm_pose);
+  blackboard->close(wm_pose_w);
+  blackboard->close(navigator);
 }
 
 
@@ -138,14 +165,30 @@ SkillerLiaisonThread::bb_interface_created(const char *type, const char *id) thr
 
 
 void
+SkillerLiaisonThread::bb_interface_reader_removed(Interface *interface,
+						  unsigned int instance_serial) throw()
+{
+  __exec_thread->skiller_reader_removed(instance_serial);
+}
+
+
+void
 SkillerLiaisonThread::loop()
 {
-  wm_ball_w->read();
   wm_ball_w->set_world_x(wm_ball_w->world_x() + 1);
+  wm_ball_w->set_visible(false);
   wm_ball_w->write();
+
+  /* Can be used for debugging if worldmodel/localization is not available
+  wm_pose_w->set_world_x(wm_pose_w->world_x() + 0.1);
+  wm_pose_w->set_world_y(wm_pose_w->world_y() + 0.1);
+  wm_pose_w->write();
+  */
 
   wm_ball->read();
   wm_pose->read();
+  navigator->read();
+
   wm_obstacles.lock();
   for (wm_obs_it = wm_obstacles.begin(); wm_obs_it != wm_obstacles.end(); ++wm_obs_it) {
     (*wm_obs_it)->read();

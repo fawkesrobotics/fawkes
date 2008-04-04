@@ -36,26 +36,15 @@
 
 #include <interfaces/object.h>
 #include <interfaces/skiller.h>
+#include <interfaces/navigator.h>
 
-extern "C" {
-#include <lauxlib.h>
-#include <lualib.h>
+#include <lua.hpp>
 #include <tolua++.h>
-}
 
 #include <string>
 #include <cstring>
-#include <cerrno>
-#ifdef HAVE_INOTIFY
-#  include <sys/inotify.h>
-#  include <sys/types.h>
-#  include <sys/stat.h>
-#  include <poll.h>
-#  include <dirent.h>
-#  include <unistd.h>
-#endif
 
-#define INIT_FILE SKILLDIR"/general/init.lua"
+#define INIT_FILE  SKILLDIR"/general/init.lua"
 #define START_FILE SKILLDIR"/general/start.lua"
 
 using namespace std;
@@ -81,6 +70,9 @@ SkillerExecutionThread::SkillerExecutionThread(Barrier *liaison_exec_barrier,
   __liaison_exec_barrier = liaison_exec_barrier;
   __slt = slt;
   __L = NULL;
+
+  __continuous_run = false;
+
 #ifdef HAVE_INOTIFY
   __inotify_buf = NULL;
 #endif
@@ -99,8 +91,10 @@ SkillerExecutionThread::init_lua()
   lua_State *tL = luaL_newstate();
   luaL_openlibs(tL);
 
-  lua_pushstring(tL, SKILLDIR);  lua_setglobal(tL, "SKILLDIR");
-  lua_pushstring(tL, LIBDIR);    lua_setglobal(tL, "LIBDIR");
+  lua_pushstring(tL, SKILLDIR);                  lua_setglobal(tL, "SKILLDIR");
+  lua_pushstring(tL, LIBDIR);                    lua_setglobal(tL, "LIBDIR");
+
+  lua_pushstring(tL, __cfg_skillspace.c_str());  lua_setglobal(tL, "SKILLSPACE");
 
   // Load initialization code
   if ( (__err = luaL_loadfile(tL, INIT_FILE)) != 0) {
@@ -154,6 +148,9 @@ SkillerExecutionThread::init_lua()
     lua_close(__L);
   }
   __L = tL;
+
+  __continuous_run = false;
+
   __lua_mutex->unlock();
 }
 
@@ -165,6 +162,11 @@ SkillerExecutionThread::start_lua()
   tolua_pushusertype(__L, __slt->wm_ball, __slt->wm_ball->type());
   lua_setglobal(__L, "wm_ball");
 
+  tolua_pushusertype(__L, __slt->wm_pose, __slt->wm_pose->type());
+  lua_setglobal(__L, "wm_pose");
+
+  tolua_pushusertype(__L, __slt->navigator, __slt->navigator->type());
+  lua_setglobal(__L, "navigator");
 
   // Load start code
   if ( (__err = luaL_loadfile(__L, START_FILE)) != 0) {
@@ -227,189 +229,61 @@ SkillerExecutionThread::restart_lua()
 }
 
 
+/** Determines the skill status and writes it to the BB.
+ * This method assumes that it is called from within loop() and lua_mutex is locked.
+ * @param curss current skill string
+ */
 void
-SkillerExecutionThread::inotify_watch_dir(std::string dir)
+SkillerExecutionThread::publish_skill_status(std::string &curss)
 {
-#ifdef HAVE_INOTIFY
-  DIR *d = opendir(dir.c_str());
-  if ( d == NULL ) {
-    throw Exception(errno, "Failed to open dir %s", dir.c_str());
-  }
+  __slt->skiller->set_skill_string(curss.c_str());
+  __slt->skiller->set_continuous(__continuous_run);
 
-  uint32_t mask = IN_MODIFY | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF;
-  int iw;
+  const char *sst = "Unknown";
+  LUA_INTEGER running = 0, final = 0, failed = 0;
 
-  logger->log_debug("SkillerExecutionThread", "Adding watch for %s", dir.c_str());
-  if ( (iw = inotify_add_watch(__inotify_fd, dir.c_str(), mask)) >= 0) {
-    __inotify_watches[iw] = dir;
-
-    dirent de, *res;
-    while ( (readdir_r(d, &de, &res) == 0) && (res != NULL) ) {
-      std::string fp = dir + "/" + de.d_name;
-      struct stat st;
-      if ( stat(fp.c_str(), &st) == 0 ) {
-	if ( (de.d_name[0] != '.') && S_ISDIR(st.st_mode) ) {
-	  try {
-	    inotify_watch_dir(fp);
-	  } catch (Exception &e) {
-	    closedir(d);
-	    throw;
-	  }
-	//} else {
-	  //logger->log_debug("SkillerExecutionThread", "Skipping file %s", fp.c_str());	  
-	}
-      } else {
-	logger->log_debug("SkillerExecutionThread", "Skipping watch on %s, cannot stat (%s)", fp.c_str(),
-			  strerror(errno));
-      }
-    }
+  if ( luaL_dostring(__L, "return general.skillenv.get_status()") != 0 ) {
+    __errmsg = lua_tostring(__L, -1);
+    logger->log_error("SkillerExecutionThread", "Failed to get skill status: %s", __errmsg.c_str());
   } else {
-    throw Exception("SkillerExecutionThread", "Cannot add watch for %s", dir.c_str());
-  }
+    running = lua_tointeger(__L, -3);
+    final   = lua_tointeger(__L, -2);
+    failed  = lua_tointeger(__L, -1);
 
-  closedir(d);
-#endif
-}
-
-void
-SkillerExecutionThread::init_inotify()
-{
-#ifdef HAVE_INOTIFY
-  if ( (__inotify_fd = inotify_init()) == -1 ) {
-    throw Exception(errno, "Failed to initialize inotify");
-  }
-
-  int regerr = 0;
-  if ( (regerr = regcomp(&__inotify_regex, "^[^.].*\\.lua$", REG_EXTENDED)) != 0 ) {
-    char errtmp[1024];
-    regerror(regerr, &__inotify_regex, errtmp, sizeof(errtmp));
-    close_inotify();
-    throw Exception("Failed to compile lua file regex: %s", errtmp);
-  }
-
-  // from http://www.linuxjournal.com/article/8478
-  __inotify_bufsize = 1024 * (sizeof(struct inotify_event) + 16);
-  __inotify_buf     = (char *)malloc(__inotify_bufsize);
-
-  try {
-    inotify_watch_dir(SKILLDIR);
-  } catch (Exception &e) {
-    close_inotify();
-  }
-
-#else
-  logger->log_warn("SkillerExecutionThread", "inotify support not available, auto-reload "
-		   "disabled.");
-#endif
-}
-
-
-void
-SkillerExecutionThread::close_inotify()
-{
-#ifdef HAVE_INOTIFY
-  for (__inotify_wit = __inotify_watches.begin(); __inotify_wit != __inotify_watches.end(); ++__inotify_wit) {
-    inotify_rm_watch(__inotify_fd, __inotify_wit->first);
-  }
-  close(__inotify_fd);
-  if ( __inotify_buf ) {
-    free(__inotify_buf);
-    __inotify_buf = NULL;
-  }
-  regfree(&__inotify_regex);
-#endif
-}
-
-
-void
-SkillerExecutionThread::proc_inotify()
-{
-#ifdef HAVE_INOTIFY
-  bool need_restart = false;
-
-  // Check for inotify events
-  pollfd ipfd;
-  ipfd.fd = __inotify_fd;
-  ipfd.events = POLLIN;
-  ipfd.revents = 0;
-  int prv = poll(&ipfd, 1, 0);
-  if ( prv == -1 ) {
-    logger->log_error("SkillerExecutionThread", "inotify poll failed: %s (%i)",
-		      strerror(errno), errno);
-  } else while ( prv > 0 ) {
-    // Our fd has an event, we can read
-    if ( ipfd.revents & POLLERR ) {      
-      logger->log_error("SkillerExecutionThread", "inotify poll error");
+    if ( failed > 0 ) {
+      sst = "S_FAILED";
+      __slt->skiller->set_status(SkillerInterface::S_FAILED);
+    } else if ( (final > 0) && (running == 0) ) {
+      sst = "S_FINAL";
+      __slt->skiller->set_status(SkillerInterface::S_FINAL);
+    } else if ( running > 0 ) {
+      sst = "S_RUNNING";
+      __slt->skiller->set_status(SkillerInterface::S_RUNNING);
     } else {
-      // must be POLLIN
-      int bytes = 0, i = 0;
-      if ((bytes = read(__inotify_fd, __inotify_buf, __inotify_bufsize)) != -1) {
-	while (i < bytes) {
-	  struct inotify_event *event = (struct inotify_event *) &__inotify_buf[i];
-
-	  if ( (regexec(&__inotify_regex, event->name, 0, NULL, 0) == 0) ||
-	       (event->mask & IN_ISDIR) ) {
-	    // it is a directory or a *.lua file
-
-	    if (event->mask & IN_DELETE_SELF) {
-	      logger->log_debug("SkillerExecutionThread", "Watched %s has been deleted", event->name);
-	      __inotify_watches.erase(event->wd);
-	      inotify_rm_watch(__inotify_fd, event->wd);
-	    }
-	    if (event->mask & IN_MODIFY) {
-	      logger->log_debug("SkillerExecutionThread", "%s has been modified", event->name);
-	    }
-	    if (event->mask & IN_MOVE) {
-	      logger->log_debug("SkillerExecutionThread", "%s has been moved", event->name);
-	    }
-	    if (event->mask & IN_DELETE) {
-	      logger->log_debug("SkillerExecutionThread", "%s has been deleted", event->name);
-	    }
-	    if (event->mask & IN_CREATE) {
-	      logger->log_debug("SkillerExecutionThread", "%s has been created", event->name);
-	      // Check if it is a directory, if it is, watch it
-	      std::string fp = __inotify_watches[event->wd] + "/" + event->name;
-	      if (  (event->mask & IN_ISDIR) && (event->name[0] != '.') ) {
-		try {
-		  inotify_watch_dir(fp);
-		} catch (Exception &e) {
-		  logger->log_warn("SkillerExecutionThread", "Adding watch for %s failed, ignoring.", fp.c_str());
-		  logger->log_warn("SkillerExecutionThread", e);
-		}
-	      } else {
-		logger->log_debug("SkillerExecutionThread", "Ignoring non-dir %s", event->name);
-	      }
-	    }
-
-	    need_restart = true;
-	  }
-
-	  i += sizeof(struct inotify_event) + event->len;
-	}
-      } else {
-	logger->log_error("SkillerExecutionThread", "inotify failed to read any bytes");
-      }
+      // all zero
+      sst = "S_INACTIVE";
+      __slt->skiller->set_status(SkillerInterface::S_INACTIVE);
     }
-
-    prv = poll(&ipfd, 1, 0);
   }
 
-  if ( need_restart ) {
-    logger->log_info("SkillerExecutionThread", "inotify event triggers Lua restart");
-    restart_lua();
-  }
+  logger->log_debug("SkillerExecutionThread", "Status is %s "
+		    "(running %i, final: %i, failed: %i)",
+		    sst, running, final, failed);
 
-#else
-  logger->log_error("SkillerExecutionThread", "inotify support not available, but "
-		   "proc_inotify() was called. Ignoring.");
-#endif
+  __slt->skiller->write();
 }
 
 
 void
 SkillerExecutionThread::init()
 {
-  __excl_ctrl = 0;
+  try {
+    __cfg_skillspace  = config->get_string("/skiller/skillspace");
+    __cfg_watch_files = config->get_bool("/skiller/watch_files");
+  } catch (Exception &e) {
+    e.append("Insufficient configuration for Skiller");
+    throw;
+  }
 
   init_inotify();
 
@@ -426,6 +300,8 @@ SkillerExecutionThread::init()
 #endif
     throw;
   }
+
+  logger->log_debug("SkillerExecutionThread", "Skill space: %s", __cfg_skillspace.c_str());
 }
 
 
@@ -450,6 +326,20 @@ SkillerExecutionThread::once()
 }
 
 
+/** Called when reader has been removed from skiller interface.
+ * @param instance_serial instance serial of the interface that triggered the event.
+ */
+void
+SkillerExecutionThread::skiller_reader_removed(unsigned int instance_serial)
+{
+  if ( instance_serial == __slt->skiller->exclusive_controller() ) {
+    logger->log_debug("SkillerExecutionThread", "Controlling interface instance was closed, "
+		      "revoking exclusive control");
+    __slt->skiller->set_exclusive_controller(0);
+    __slt->skiller->write();
+  }
+}
+
 void
 SkillerExecutionThread::loop()
 {
@@ -462,41 +352,54 @@ SkillerExecutionThread::loop()
   // Current skill string
   std::string curss = "";
 
-  if ( ! __slt->skiller->msgq_empty() ) {
+  unsigned int excl_ctrl  = __slt->skiller->exclusive_controller();
+
+  bool        continuous_reset = false;
+
+  while ( ! __slt->skiller->msgq_empty() ) {
     if ( __slt->skiller->msgq_first_is<SkillerInterface::AcquireControlMessage>() ) {
       Message *m = __slt->skiller->msgq_first();
-      if ( __excl_ctrl == 0 ) {
+      if ( excl_ctrl == 0 ) {
 	logger->log_debug("SkillerExecutionThread", "%s is new exclusive controller",
 			  m->sender_thread_name());
-	__excl_ctrl = m->sender_id();
+	__slt->skiller->set_exclusive_controller(m->sender_id());
+	excl_ctrl = m->sender_id();
       } else {
 	logger->log_warn("SkillerExecutionThread", "%s tried to acquire exclusive control, "
 			 "but another controller exists already", m->sender_thread_name());
       }
 
-      __slt->skiller->msgq_pop();
     } else if ( __slt->skiller->msgq_first_is<SkillerInterface::ReleaseControlMessage>() ) {
       Message *m = __slt->skiller->msgq_first();
-      if ( __excl_ctrl == m->sender_id() ) {
+      if ( excl_ctrl == m->sender_id() ) {
 	logger->log_debug("SkillerExecutionThread", "%s releases exclusive control",
 			  m->sender_thread_name());
-	__excl_ctrl = 0;
+
+	if ( __continuous_run ) {
+	  __continuous_run = false;
+	  continuous_reset = true;
+	}
+	__slt->skiller->set_exclusive_controller(0);
+	excl_ctrl = 0;
       } else {
 	logger->log_warn("SkillerExecutionThread", "%s tried to release exclusive control, "
 			 "it's not the controller", m->sender_thread_name());
       }
-      __slt->skiller->msgq_pop();
     } else if ( __slt->skiller->msgq_first_is<SkillerInterface::ExecSkillMessage>() ) {
       SkillerInterface::ExecSkillMessage *m = __slt->skiller->msgq_first<SkillerInterface::ExecSkillMessage>();
 
-      if ( m->sender_id() == __excl_ctrl ) {
+      if ( m->sender_id() == excl_ctrl ) {
 	if ( curss != "" ) {
 	  logger->log_warn("SkillerExecutionThread", "More than one skill string enqueued, "
 			   "ignoring successive string (%s).", m->skill_string());
 	} else {	  
-	  logger->log_debug("SkillerExecutionThread", "%s wants me to execute %s",
+	  logger->log_debug("SkillerExecutionThread", "%s wants me to execute '%s'",
 			    m->sender_thread_name(), m->skill_string());
 
+	  if ( __continuous_run ) {
+	    __continuous_run = false;
+	    continuous_reset = true;
+	  }
 	  curss = m->skill_string();
 	}
       } else {
@@ -504,12 +407,67 @@ SkillerExecutionThread::loop()
 			  m->sender_thread_name());
       }
 
-      __slt->skiller->msgq_pop();
+    } else if ( __slt->skiller->msgq_first_is<SkillerInterface::ExecSkillContinuousMessage>() ) {
+      SkillerInterface::ExecSkillContinuousMessage *m = __slt->skiller->msgq_first<SkillerInterface::ExecSkillContinuousMessage>();
+
+      if ( m->sender_id() == excl_ctrl ) {
+	if ( curss != "" ) {
+	  logger->log_warn("SkillerExecutionThread", "More than one skill string enqueued, "
+			   "ignoring successive string (%s).", m->skill_string());
+	} else {	  
+	  logger->log_debug("SkillerExecutionThread", "%s wants me to execute '%s'",
+			    m->sender_thread_name(), m->skill_string());
+
+	  curss = m->skill_string();
+	  continuous_reset = __continuous_run; // reset if cont exec was in progress
+	  __continuous_run = true;
+	}
+      } else {
+	logger->log_debug("SkillerExecutionThread", "%s tries to exec while not controller",
+			  m->sender_thread_name());
+      }
+
+    } else if ( __slt->skiller->msgq_first_is<SkillerInterface::StopExecMessage>() ) {
+      SkillerInterface::StopExecMessage *m = __slt->skiller->msgq_first<SkillerInterface::StopExecMessage>();
+
+      if ( m->sender_id() == excl_ctrl ) {
+	logger->log_debug("SkillerExecutionThread", "Stopping continuous execution");
+	if ( __continuous_run ) {
+	  __continuous_run = false;
+	  continuous_reset = true;
+	}
+      } else {
+	logger->log_debug("SkillerExecutionThread", "%s tries to stop exec while not controller",
+			  m->sender_thread_name());
+      }
+    } else {
+      logger->log_warn("SkillerExecutionThread", "Unhandled message of type %s in "
+		       "skiller interface", __slt->skiller->msgq_first()->type());
     }
+
+    __slt->skiller->msgq_pop();
+  }
+
+  if ( __continuous_run && (curss == "") ) {
+    curss = __slt->skiller->skill_string();
+  }
+
+  __lua_mutex->lock();
+  if ( continuous_reset ) {
+    logger->log_debug("SkillerExecutionThread", "Continuous reset forced");
+    luaL_dostring(__L, "general.skillenv.reset_all()");
   }
 
   if ( curss != "" ) {
-    __lua_mutex->lock();
+    // We've got something to execute
+
+    // we're in continuous mode, reset status for this new loop
+    if ( __continuous_run && ! continuous_reset) {
+      // was continuous execution, status has to be cleaned up anyway
+      logger->log_debug("SkillerExecutionThread", "Resetting skill status in continuous mode");
+      luaL_dostring(__L, "general.skillenv.reset_status()");
+    }
+
     if ( (__err = luaL_loadstring(__L, curss.c_str())) != 0 ) {// sksf (skill string function)
       __errmsg = lua_tostring(__L, -1);
       lua_pop(__L, 1);
@@ -525,7 +483,7 @@ SkillerExecutionThread::loop()
       }
     } else {
       luaL_dostring(__L, "return general.skillenv.gensandbox()");  // sksf sandbox
-      lua_setfenv(__L, -2);                                      // sksf
+      lua_setfenv(__L, -2);                                        // sksf
 
       if ( (__err = lua_pcall(__L, 0, 0, 0)) != 0 ) { // execute skill string
 	// There was an error while executing the initialization file
@@ -544,11 +502,16 @@ SkillerExecutionThread::loop()
 	  logger->log_error("SkillerExecutionThread", "Lua runtime error and error function failed: %s", __errmsg.c_str());
 	  break;
 	}
-      } else {
-	
+      }
 
+      publish_skill_status(curss);
+
+      if ( ! __continuous_run ) {
+	// was one-shot execution, cleanup
+	logger->log_debug("SkillerExecutionThread", "Resetting skills");
+	luaL_dostring(__L, "general.skillenv.reset_all()");
       }
     }
-    __lua_mutex->unlock();
-  }
+  } // end if (curss != "")
+  __lua_mutex->unlock();
 }

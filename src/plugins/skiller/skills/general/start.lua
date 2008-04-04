@@ -51,6 +51,6 @@ end
 require("general.utils");
 require("general.skillenv");
 
-require("midsize")
+require(SKILLSPACE)
 
 logger:log_debug("Lua startup completed");

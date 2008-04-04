@@ -62,6 +62,8 @@ class SkillerExecutionThread
   virtual void loop();
   virtual void finalize();
 
+  void skiller_reader_removed(unsigned int instance_serial);
+
  private: /* methods */
   void init_lua();
   void start_lua();
@@ -70,6 +72,7 @@ class SkillerExecutionThread
   void proc_inotify();
   void close_inotify();
   void inotify_watch_dir(std::string dir);
+  void publish_skill_status(std::string &curss);
 
  private: /* members */
   Barrier *__liaison_exec_barrier;
@@ -81,7 +84,12 @@ class SkillerExecutionThread
   std::string __errmsg;
   Mutex *__lua_mutex;
 
-  unsigned int __excl_ctrl;
+  bool        __continuous_run;
+  bool        __continuous_rst;
+
+  // config values
+  std::string __cfg_skillspace;
+  bool        __cfg_watch_files;
 
 #ifdef HAVE_INOTIFY
   int     __inotify_fd;

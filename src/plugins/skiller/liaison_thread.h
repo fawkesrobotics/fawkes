@@ -37,10 +37,13 @@
 
 #include <core/utils/lock_list.h>
 #include <blackboard/interface_observer.h>
+#include <blackboard/interface_listener.h>
 
 class Barrier;
 class ObjectPositionInterface;
+class NavigatorInterface;
 class SkillerInterface;
+class SkillerExecutionThread;
 
 class SkillerLiaisonThread
 : public Thread,
@@ -49,7 +52,8 @@ class SkillerLiaisonThread
   public ConfigurableAspect,
   public BlackBoardAspect,
   public ClockAspect,
-  public BlackBoardInterfaceObserver
+  public BlackBoardInterfaceObserver,
+  public BlackBoardInterfaceListener
 {
  friend class SkillerExecutionThread;
  public:
@@ -63,16 +67,24 @@ class SkillerLiaisonThread
   /* BlackBoardInterfaceObserver */
   virtual void bb_interface_created(const char *type, const char *id) throw();
 
+  /* BlackBoardInterfaceListener */
+  void bb_interface_reader_removed(Interface *interface, unsigned int instance_serial) throw();
+
+  void set_execthread(SkillerExecutionThread *set);
+
  private:
   void init_failure_cleanup();
 
  private:
   Barrier *__liaison_exec_barrier;
+  SkillerExecutionThread *__exec_thread;
 
   SkillerInterface *skiller;
   ObjectPositionInterface *wm_ball_w;
   ObjectPositionInterface *wm_ball;
   ObjectPositionInterface *wm_pose;
+  ObjectPositionInterface *wm_pose_w;
+  NavigatorInterface      *navigator;
 
   LockList<ObjectPositionInterface *>  wm_obstacles;
   LockList<ObjectPositionInterface *>::iterator  wm_obs_it;

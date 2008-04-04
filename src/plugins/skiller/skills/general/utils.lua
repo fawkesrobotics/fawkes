@@ -67,6 +67,13 @@ function print_error(...)
 end
 
 
+-- Print formatted string.
+-- Uses string.format to format the string and print_info to print it.
+-- @param format format of the string
+function printf(format, ...)
+   logger:log_info(string.format(format, ...));
+end
+
 -- Registers global functions for module.
 -- @param m module
 function register_global_funcs(m)
@@ -86,6 +93,7 @@ function register_print_funcs(m)
    m.print_warn  = print_warn;
    m.print_error = print_error;
    m.print       = print_info;
+   m.printf      = printf;
 end
 
 
@@ -95,6 +103,7 @@ function register_all(m)
    for k,v in pairs(_G) do
       m[k] = v;
    end
+   register_print_funcs(m)
 end
 
 
