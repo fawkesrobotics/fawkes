@@ -79,88 +79,90 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   win->set_title("Navigator GUI");
   win->resize(990, 700);
 
+  m_VBox_Main = Gtk::manage( new Gtk::VBox());
+  m_HBox_Left = Gtk::manage( new Gtk::HBox());
 
-  m_VBox_Main = new Gtk::VBox();
-  m_HBox_Left = new Gtk::HBox();
-
-  right_rpm_entry = new Gtk::SpinButton(1.0, 2);
+  right_rpm_entry = Gtk::manage( new Gtk::SpinButton(1.0, 2));
   right_rpm_entry->set_range(-5000.0, 5000.0);
   right_rpm_entry->set_increments(1.0, 10.0);
   right_rpm_entry->set_width_chars(5);
-  left_rpm_entry = new Gtk::SpinButton(1.0, 2);
+  left_rpm_entry = Gtk::manage( new Gtk::SpinButton(1.0, 2));
   left_rpm_entry->set_range(-5000.0, 5000.0);
   left_rpm_entry->set_increments(1.0, 10.0);
   left_rpm_entry->set_width_chars(5);
-  center_rpm_entry = new Gtk::SpinButton(1.0, 2);
+  center_rpm_entry = Gtk::manage( new Gtk::SpinButton(1.0, 2));
   center_rpm_entry->set_range(-5000.0, 5000.0);
   center_rpm_entry->set_increments(1.0, 10.0);
   center_rpm_entry->set_width_chars(5);
-  xv_entry = new Gtk::SpinButton(0.005, 2);
+  xv_entry = Gtk::manage( new Gtk::SpinButton(0.005, 2));
   xv_entry->set_range(-5.0, 5.0);
   xv_entry->set_increments(0.01, 0.1);
   xv_entry->set_width_chars(5);
-  yv_entry = new Gtk::SpinButton(0.005, 2);
+  yv_entry = Gtk::manage( new Gtk::SpinButton(0.005, 2));
   yv_entry->set_range(-5.0, 5.0);
   yv_entry->set_increments(0.01, 0.1);
   yv_entry->set_width_chars(5);
-  rotation_entry = new Gtk::SpinButton(0.005, 2);
+  rotation_entry = Gtk::manage( new Gtk::SpinButton(0.005, 2));
   rotation_entry->set_range(-6.3, 6.3);
   rotation_entry->set_increments(0.01, 0.1);
   rotation_entry->set_width_chars(5);
-  angular_velocity_entry = new Gtk::SpinButton(0.005, 2);
+  angular_velocity_entry = Gtk::manage( new Gtk::SpinButton(0.005, 2));
   angular_velocity_entry->set_range(-6.3, 6.3);
   angular_velocity_entry->set_increments(0.01, 0.1);
-  navigator_velocity_entry = new Gtk::SpinButton(0.005, 2);
+  navigator_velocity_entry = Gtk::manage( new Gtk::SpinButton(0.005, 2));
   navigator_velocity_entry->set_range(0, 5.0);
   navigator_velocity_entry->set_increments(0.01, 0.1);
 
-  navigator_control_radio = new Gtk::RadioButton("Navigator Control");
-  motor_control_radio = new Gtk::RadioButton("Motor Control");
-  behold_radio = new Gtk::RadioButton("Behold");
+  navigator_control_radio = Gtk::manage( new Gtk::RadioButton("Navigator Control"));
+  motor_control_radio = Gtk::manage( new Gtk::RadioButton("Motor Control"));
+  behold_radio = Gtk::manage( new Gtk::RadioButton("Behold"));
 
-  rpm_radio = new Gtk::RadioButton("RPM");
-  trans_rot_radio = new Gtk::RadioButton("Trans-Rot");
-  trans_radio = new Gtk::RadioButton("Trans");
-  rot_radio = new Gtk::RadioButton("Rot");
-  orbit_radio = new Gtk::RadioButton("Orbit");
-  line_trans_rot_radio = new Gtk::RadioButton("Line-Trans-Rot");
-  navigator_radio = new Gtk::RadioButton("Navigator");
+  rpm_radio = Gtk::manage( new Gtk::RadioButton("RPM"));
+  trans_rot_radio = Gtk::manage( new Gtk::RadioButton("Trans-Rot"));
+  trans_radio = Gtk::manage( new Gtk::RadioButton("Trans"));
+  rot_radio = Gtk::manage( new Gtk::RadioButton("Rot"));
+  orbit_radio = Gtk::manage( new Gtk::RadioButton("Orbit"));
+  line_trans_rot_radio = Gtk::manage( new Gtk::RadioButton("Line-Trans-Rot"));
+  navigator_radio = Gtk::manage( new Gtk::RadioButton("Navigator"));
 
-  obstacle_check = new Gtk::CheckButton("add Obstacles");
-  orientation_check = new Gtk::CheckButton("orientate");
-  debug_check = new Gtk::CheckButton("Debugging");
+  obstacle_check = Gtk::manage( new Gtk::CheckButton("add Obstacles (center button)"));
+  orientation_check = Gtk::manage( new Gtk::CheckButton("orientate (hold left button)"));
+  debug_check = Gtk::manage( new Gtk::CheckButton("show debugging info"));
+  odometry_check = Gtk::manage( new Gtk::CheckButton("show odometry"));
+  odometry_check->set_active();
 
-  right_rpm_label = new Gtk::Label("Right");
-  left_rpm_label = new Gtk::Label("Left");
-  center_rpm_label = new Gtk::Label("Rear");
-  xv_label = new Gtk::Label("X");
-  yv_label = new Gtk::Label("Y");
-  angular_velocity_label = new Gtk::Label("Angular Velocity [rad/s]\nSet the orbit center ->>");
-  navigator_velocity_label = new Gtk::Label("Maximum Velocity [m/s]");
-  zooming_label = new Gtk::Label("Zoom");
+  right_rpm_label = Gtk::manage( new Gtk::Label("Right"));
+  left_rpm_label = Gtk::manage( new Gtk::Label("Left"));
+  center_rpm_label = Gtk::manage( new Gtk::Label("Rear"));
+  xv_label = Gtk::manage( new Gtk::Label("X"));
+  yv_label = Gtk::manage( new Gtk::Label("Y"));
+  angular_velocity_label = Gtk::manage( new Gtk::Label("Angular Velocity [rad/s]\nSet the orbit center with left button"));
+  navigator_velocity_label = Gtk::manage( new Gtk::Label("Maximum Velocity [m/s]"));
+  zooming_label = Gtk::manage( new Gtk::Label("Zoom"));
 
-  control_button = new Gtk::Button("Start Control");
-  stop_button = new Gtk::Button("STOP");
+  control_button = Gtk::manage( new Gtk::Button("Start Control"));
+  stop_button = Gtk::manage( new Gtk::Button("STOP"));
   stop_button->modify_bg(Gtk::STATE_NORMAL, Gdk::Color("red"));
   stop_button->modify_bg(Gtk::STATE_ACTIVE , Gdk::Color("red"));
   stop_button->modify_bg(Gtk::STATE_PRELIGHT , Gdk::Color("red"));
   stop_button->modify_bg(Gtk::STATE_SELECTED , Gdk::Color("red"));
   stop_button->modify_bg(Gtk::STATE_INSENSITIVE , Gdk::Color("red"));
-  send_button = new Gtk::Button("Send Command");
-  reset_odometry_button = new Gtk::Button("Reset Odometry");
+  send_button = Gtk::manage( new Gtk::Button("Send Command"));
+  reset_odometry_button = Gtk::manage( new Gtk::Button("Reset Odometry"));
   navigator_control = false;
   motor_control = false;
   cursor_over_area = false;
   navigator_loaded = true;
   connected = false;
+  connection_is_dead = true;
 
-  zooming_adjustment = new Gtk::Adjustment(0.0, -99.9, 100.0);
-  zooming_HScale = new Gtk::HScale(*zooming_adjustment);
+  zooming_adjustment = Gtk::manage( new Gtk::Adjustment(0.0, -99.9, 100.0));
+  zooming_HScale = Gtk::manage( new Gtk::HScale(*zooming_adjustment));
   zooming_HScale->set_size_request (200, -1);
 
   bbox_top = 0;
-  bbox_left = new Gtk::VBox();
-  control_VBox = new Gtk::VBox();
+  bbox_left = Gtk::manage( new Gtk::VBox());
+  control_VBox = Gtk::manage( new Gtk::VBox());
 
 
   control_group = navigator_control_radio->get_group();
@@ -182,16 +184,16 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
 
   trans_rot_radio->set_active();
 
-  rpm_frame = new Gtk::Frame("RPMs");
-  translation_frame = new Gtk::Frame("Translation [m/s]");
-  rotation_frame = new Gtk::Frame("Rotation [rad/s]");
-  orbit_frame = new Gtk::Frame("Orbit");
-  navigator_frame = new Gtk::Frame("Navigator");
-  status_frame = new Gtk::Frame();
+  rpm_frame =Gtk::manage(  new Gtk::Frame("RPMs"));
+  translation_frame = Gtk::manage( new Gtk::Frame("Translation [m/s]"));
+  rotation_frame = Gtk::manage( new Gtk::Frame("Rotation [rad/s]"));
+  orbit_frame = Gtk::manage( new Gtk::Frame("Orbit"));
+  navigator_frame = Gtk::manage( new Gtk::Frame("Navigator"));
+  status_frame = Gtk::manage( new Gtk::Frame());
 
 
-  rpm_entry_box = Gtk::manage( new Gtk::HButtonBox() );
-  trans_rot_entry_box = new Gtk::HBox();
+  rpm_entry_box = Gtk::manage(  new Gtk::HButtonBox());
+  trans_rot_entry_box = Gtk::manage( new Gtk::HBox());
 
   rpm_label_box1 = Gtk::manage( new Gtk::VButtonBox() );
   rpm_label_box2 = Gtk::manage( new Gtk::VButtonBox() );
@@ -203,6 +205,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   zoom_debug_box = Gtk::manage( new Gtk::VButtonBox() );
 
   zoom_debug_box->add(*debug_check);
+  zoom_debug_box->add(*odometry_check);
   zoom_debug_box->add(*zooming_HScale);
 
   bbox_top = Gtk::manage( new Gtk::HButtonBox(Gtk::BUTTONBOX_SPREAD, 30) );
@@ -212,17 +215,17 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   bbox_top->add(*control_VBox);
   bbox_top->add(*reset_odometry_button);
 
-  left_rpm_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
-  center_rpm_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
-  right_rpm_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
+  left_rpm_alignment = Gtk::manage( new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0));
+  center_rpm_alignment = Gtk::manage( new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0));
+  right_rpm_alignment = Gtk::manage( new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0));
 
-  x_translation_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
-  y_translation_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
-  rotation_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_BOTTOM, 0.0, 0.0);
-  rotation_frame_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 1.0);
+  x_translation_alignment = Gtk::manage( new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0));
+  y_translation_alignment = Gtk::manage( new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0));
+  rotation_alignment = Gtk::manage( new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_BOTTOM, 0.0, 0.0));
+  rotation_frame_alignment = Gtk::manage( new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 1.0));
 
-  orbit_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
-  navigator_alignment = new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0);
+  orbit_alignment = Gtk::manage( new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0));
+  navigator_alignment = Gtk::manage( new Gtk::Alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, 0.0, 0.0));
   left_rpm_alignment->add(*left_rpm_label);
   center_rpm_alignment->add(*center_rpm_label);
   right_rpm_alignment->add(*right_rpm_label);
@@ -245,7 +248,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   rpm_label_box3->add(*right_rpm_entry);
   rpm_entry_box->add(*rpm_label_box3);
 
-  translation_HBox = new Gtk::HBox(true, 5);
+  translation_HBox = Gtk::manage( new Gtk::HBox(true, 5));
   translation_x_label->add(*x_translation_alignment);
   translation_x_label->add(*xv_entry);
   translation_HBox->add(*translation_x_label);
@@ -273,7 +276,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   orbit_frame->add(*orbit_label_box);
   navigator_frame->add(*navigator_label_box);
 
-  statusbar = new Gtk::Statusbar();
+  statusbar = Gtk::manage( new Gtk::Statusbar());
   statusbar->push("Not connected.", 0);
   statusbar->set_has_resize_grip(false);
   status_frame->add(*statusbar);
@@ -313,6 +316,8 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
                                          &NavigatorGUI::on_send_button_clicked) );
   reset_odometry_button->signal_clicked().connect( sigc::mem_fun(*this,
       &NavigatorGUI::on_reset_odometry_button_clicked) );
+  this->signal_scroll_event().connect(sigc::mem_fun(*this,
+                                      &NavigatorGUI::on_scroll_event));
 
   odometry_orientation_mutex = new Mutex();
   odometry_point_mutex = new Mutex();
@@ -320,7 +325,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   ball_point_mutex = new Mutex();
   mouse_point_mutex = new Mutex();
 
-  point_radius = 5.5;
+  point_radius = 0.1;
   robot_radius = 0.25;
 
   //the points in screen coordinates
@@ -334,10 +339,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   mouse_point.y = 0.;
 
   odometry_direction = 0.;
-
-  //currently not in use
-  odometry_orientation = 0.;
-  velocity = 0;
+  odometry_velocity = 0;
 
   orientating = false;
   orientation = 0;
@@ -347,6 +349,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   add_events(Gdk::POINTER_MOTION_MASK);
   add_events(Gdk::LEAVE_NOTIFY_MASK);
   add_events(Gdk::ENTER_NOTIFY_MASK);
+  add_events(Gdk::SCROLL_MASK);
 
   Glib::signal_idle().connect( sigc::mem_fun(*this, &NavigatorGUI::on_idle) );
 
@@ -361,16 +364,24 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
 /** Decunstructor. */
 NavigatorGUI::~NavigatorGUI()
 {
-  send_stop();
+  //send_stop();
+  //here something goes wrong
+  printf("dst\n");
 
   if ( net_client )
     {
+
+      printf("dst in\n");
       net_client->disconnect();
+      printf("dst in  2 \n");
       net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
+      printf("dst in  3\n");
       net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
+      printf("dst in  4\n");
       delete net_client;
     }
 
+  printf("dst2\n");
   //delete lines
   lines.lock();
   for(LockList<NLine*>::iterator iterator = lines.begin();
@@ -416,11 +427,12 @@ void NavigatorGUI::connect()
   if(connected)
     {
       connected = false;
-      if ( net_client ) {
-	net_client->disconnect();
-	net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
-	net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
-      }
+      if ( net_client )
+        {
+          net_client->disconnect();
+          net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
+          net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
+        }
     }
 
   if(net_client != NULL)
@@ -447,7 +459,7 @@ void NavigatorGUI::connect()
       msg2->unref();
 
       char *str;
-      asprintf(&str, "Connected to %s, but the navigator plugin is not loaded.", host_name);
+      asprintf(&str, "Connected to %s, but the navigator plugin is not loaded!!!!!!!!!!! <-------------------", host_name);
       statusbar->push(str, 1);
       free(str);
     }
@@ -501,7 +513,6 @@ void
 NavigatorGUI::reset_gui()
 {
   odometry_direction = 0.;
-  odometry_orientation = 0.;
   odometry_point.x = 0.;
   odometry_point.y = 0.;
   mouse_point.x = 0.;
@@ -543,14 +554,14 @@ NavigatorGUI::reset_gui()
   path_points.unlock();
 
   //delete obstacle_points
-  obstacle_points.lock();
-  for(LockList<Obstacle*>::iterator iterator = obstacle_points.begin();
-      iterator != obstacle_points.end(); iterator++)
+  obstacles.lock();
+  for(LockList<Obstacle*>::iterator iterator = obstacles.begin();
+      iterator != obstacles.end(); iterator++)
     {
       delete *iterator;
     }
-  obstacle_points.clear();
-  obstacle_points.unlock();
+  obstacles.clear();
+  obstacles.unlock();
 
   // Pop message from status bar
   statusbar->pop(1);
@@ -561,7 +572,7 @@ NavigatorGUI::reset_gui()
  */
 void
 NavigatorGUI::inbound_received(FawkesNetworkMessage *msg,
-			       unsigned int id) throw()
+                               unsigned int id) throw()
 {
   if(msg->cid() == FAWKES_CID_NAVIGATOR_PLUGIN)
     {
@@ -586,9 +597,9 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
       behold_radio->set_active();
       control_button->set_label("Start Control");
     }
-  else if (NAVIGATOR_MSGTYPE_SURFACE == msg->msgid() )
+  else if (NAVIGATOR_MSGTYPE_LINES == msg->msgid() )
     {
-      NavigatorSurfaceMessage *surface_msg = msg->msgc<NavigatorSurfaceMessage>();
+      NavigatorLinesListMessage *lines_msg = msg->msgc<NavigatorLinesListMessage>();
 
       //delete lines
       lines.lock();
@@ -600,36 +611,41 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
       lines.clear();
 
       //add lines
-      while (surface_msg->has_next())
+      while (lines_msg->has_next())
         {
-          NavigatorSurfaceMessage::nline_t *l = surface_msg->next();
-          NPoint *p1 = 0;
-          NPoint *p2 = 0;
-
-          if ( l->width1 != 0. )
-            {
-              p1 = new Obstacle(l->width1, -l->y1, -l->x1, 0);
-            }
-          else
-            {
-              p1 = new NPoint(-l->y1, -l->x1);
-            }
-
-          if ( l->width2 != 0. )
-            {
-              p2 = new Obstacle(l->width2, -l->y2, -l->x2, 0);
-            }
-          else
-            {
-              p2 = new NPoint(-l->y2, -l->x2);
-            }
+          NavigatorLinesListMessage::nline_t *l = lines_msg->next();
+          NPoint *p1 = new NPoint(-l->y1, -l->x1);
+          NPoint *p2 = new NPoint(-l->y2, -l->x2);
           lines.push_back(new NLine(p1, p2));
-	  delete p1;
-	  delete p2;
+          delete p1;
+          delete p2;
         }
       lines.unlock();
 
-      delete surface_msg;
+      delete lines_msg;
+    }
+  else if (NAVIGATOR_MSGTYPE_OBSTACLES == msg->msgid() )
+    {
+      NavigatorObstaclesListMessage *obstacles_msg = msg->msgc<NavigatorObstaclesListMessage>();
+
+      //delete obstacles
+      obstacles.lock();
+      for(LockList<Obstacle*>::iterator iterator = obstacles.begin();
+          iterator != obstacles.end(); iterator++)
+        {
+          delete *iterator;
+        }
+      obstacles.clear();
+
+      //add obstacles
+      while (obstacles_msg->has_next())
+        {
+          NavigatorObstaclesListMessage::obstacle_t *l = obstacles_msg->next();
+          obstacles.push_back(new Obstacle(l->width, -l->y, -l->x, 0));
+        }
+      obstacles.unlock();
+
+      delete obstacles_msg;
     }
   else if (NAVIGATOR_MSGTYPE_PATH == msg->msgid() )
     {
@@ -670,6 +686,8 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
         {
           odometry_direction = -atan2(odometry_msg->velocity_y, odometry_msg->velocity_x);
         }
+      odometry_velocity = sqrt(odometry_msg->velocity_y * odometry_msg->velocity_y
+                               + odometry_msg->velocity_x * odometry_msg->velocity_x);
       odometry_point_mutex->unlock();
     }
   else if (NAVIGATOR_MSGTYPE_BALL == msg->msgid())
@@ -893,13 +911,13 @@ bool NavigatorGUI::on_idle()
     {
 
       if ( net_client )
-	{
-	  net_client->disconnect();
-	  net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
-	  net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
-	  delete net_client;
-	  net_client = NULL;
-	}
+        {
+          net_client->disconnect();
+          net_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
+          net_client->deregister_handler(FAWKES_CID_NAVIGATOR_PLUGIN);
+          delete net_client;
+          net_client = NULL;
+        }
 
       reset_gui();
       queue_draw();
@@ -1157,11 +1175,24 @@ bool NavigatorGUI::on_button_press_event(GdkEventButton* event)
   return true;
 }
 
+bool NavigatorGUI::on_scroll_event(GdkEventScroll* event)
+{
+  if (event->direction == GDK_SCROLL_UP && zooming_adjustment->get_upper () > zoom_factor - 100)
+    {
+      zoom_factor += 6;
+    }
+  else if (event->direction == GDK_SCROLL_DOWN && zooming_adjustment->get_lower () < zoom_factor - 100)
+    {
+      zoom_factor -= 6;
+    }
+  zooming_adjustment->set_value(zoom_factor - 100);
+  return true;
+}
 
 bool NavigatorGUI::on_button_release_event(GdkEventButton* event)
 {
   orientating = false;
-  
+
   //left button
   if(event->button == 1)
     {
@@ -1219,6 +1250,7 @@ void NavigatorGUI::send_stop()
 {
   if(navigator_control)
     {
+      printf("send\n");
       navigator_velocity_message_t *velocity_msg= (navigator_velocity_message_t *)malloc(sizeof(navigator_velocity_message_t));
 
       velocity_msg->value = 0;
@@ -1231,6 +1263,7 @@ void NavigatorGUI::send_stop()
     }
   else if(motor_control)
     {
+      printf("send\n");
       navigator_rpm_message_t *rpm_msg = (navigator_rpm_message_t *)malloc(sizeof(navigator_rpm_message_t));
       rpm_msg->right = 0.;
       rpm_msg->rear = 0.;
@@ -1319,7 +1352,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       //this is also the position of the robot
       context->translate(width / 2., height / 2.);
 
-      //draw the lines, points and obstacles
+      //draw the lines
       lines.lock();
       for(LockList<NLine*>::iterator iterator = lines.begin();
           iterator != lines.end(); iterator++)
@@ -1327,22 +1360,21 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
           context->move_to((*iterator)->p1->x * zoom_factor, (*iterator)->p1->y * zoom_factor);
           context->line_to((*iterator)->p2->x * zoom_factor, (*iterator)->p2->y * zoom_factor);
           context->stroke();
+        }
+      lines.unlock();
 
-          Obstacle *op1 = dynamic_cast<Obstacle *>((*iterator)->p1);
-          if ( op1 )
-            {
-              // it IS an obstacle
-              context->arc(op1->x * zoom_factor, op1->y * zoom_factor, op1->width / 2. * zoom_factor, 0.0, 2.0 * M_PI);
-            }
-          else
-            {
-              // it's just a point
-              context->arc((*iterator)->p1->x * zoom_factor, (*iterator)->p1->y * zoom_factor, point_radius, 0.0, 2.0 * M_PI);
-            }
+      //draw the obstacles
+      obstacles.lock();
+      for(LockList<Obstacle*>::iterator iterator = obstacles.begin();
+          iterator != obstacles.end(); iterator++)
+        {
+          context->arc((*iterator)->x * zoom_factor, (*iterator)->y * zoom_factor, (*iterator)->width / 2. * zoom_factor, 0.0, 2.0 * M_PI);
           context->fill_preserve();
           context->stroke();
         }
-      lines.unlock();
+      obstacles.unlock();
+
+
 
       //draw the robot
       context->arc(0, 0, robot_radius * zoom_factor, 0.0, 2.0 * M_PI);
@@ -1350,11 +1382,12 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       context->stroke();
 
       //draw the path
+      path_points.lock();
+      std::vector<NPoint*> path;
       context->save();
       context->set_source_rgb(1.0, 0.0, 0.0);
       NPoint* previous_point = 0;
-      std::vector<NPoint*> path;//for drawing the bezier curve
-      path_points.lock();
+
       for(LockList<NPoint*>::iterator iterator = path_points.begin();
           iterator != path_points.end(); iterator++)
         {
@@ -1373,40 +1406,135 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       context->restore();
 
       //draw the bezier curve
-      int bezier_points_count = path.size();//the number of control points
-      unsigned int i;
-      //one bezier curve per bezier_points_count path_points
-      for(i = 0; i + bezier_points_count - 1 < path.size(); i += bezier_points_count - 1)
+      //  int bezier_points_count = path.size();//the number of control points
+      //calculate the auxiliary control points for the cubic bezier spline
+
+      std::list<std::list<NPoint>*> bezier_curves;
+      NPoint p0, p1, p2, p3;
+      std::vector<NPoint*>::iterator iter;
+      for( iter = path.begin(); iter != path.end(); iter++ )
         {
-          double distance = 100;// fabs(path[i]->y - path[i+bezier_points_count-1]->y) * 50;
-
-          //draw the bezier for two directions
-          for(int m = 0; m < 2; m++)
+          std::list<NPoint>* control_points = new std::list<NPoint>();
+          if(++iter == path.end())
             {
-              if(m == 1)
-                {
-                  distance =  fabs(path[i]->x - path[i+bezier_points_count-1]->x) * 50;
-                }
-              for( int j = 0; j < distance; j++)
-                {
-                  double sum_x = 0;
-                  double sum_y = 0;
-                  for(int k = 0; k < bezier_points_count; k++)
-                    {
-                      // i = k
-                      // n = bezier_points_count - 1
-                      // t = j/distance
-                      // sum^n i = 0 ( P * binoc(n, i) * pow(t, i) * pow(1. - t, n - i));
-                      sum_x += path[i+k]->x * BinomialCoefficient::binoc(bezier_points_count - 1, k) * pow(j/distance, k) * pow((1. - (j/distance)), ((bezier_points_count - 1) - k));
-                      sum_y += path[i+k]->y * BinomialCoefficient::binoc(bezier_points_count - 1, k) * pow(j/distance, k) * pow((1. - (j/distance)), ((bezier_points_count - 1) - k));
-                    }
-                  context->arc(sum_x * zoom_factor, sum_y * zoom_factor, 2, 0.0, 2.0 * M_PI);
-                  context->fill_preserve();
-                  context->stroke();
-                }
+              p3 = **--iter;
+              control_points->push_back(p0);
+              control_points->push_back(p1);
+              control_points->push_back(p2);
+              control_points->push_back(p3);
+              //      context->save();
+              //      context->set_source_rgb(1.0, 0.0, 0.0);
+              //      context->arc(p0.x * zoom_factor, p0.y * zoom_factor, 0.03 * zoom_factor, 0.0, 2.0 * M_PI);
+              //      context->fill_preserve();
+              //      context->stroke();
+              //      context->arc(p1.x * zoom_factor, p1.y * zoom_factor, 0.03 * zoom_factor, 0.0, 2.0 * M_PI);
+              //      context->fill_preserve();
+              //      context->stroke();
+              //      context->arc(p2.x * zoom_factor, p2.y * zoom_factor, 0.03 * zoom_factor, 0.0, 2.0 * M_PI);
+              //      context->fill_preserve();
+              //      context->stroke();
+              //      context->arc(p3.x * zoom_factor, p3.y * zoom_factor, 0.03 * zoom_factor, 0.0, 2.0 * M_PI);
+              //      context->fill_preserve();
+              //      context->stroke();
+              //      context->restore();
+              bezier_curves.push_back(control_points);
+              break;
             }
+          NPoint next_control_point = **iter--;
+          NPoint current_control_point = **iter;
+          NPoint next_p1 = current_control_point + ((next_control_point - current_control_point) * (1/3.));
+          if(iter == path.begin())
+            {
+              p0 = **iter;
+            }
+          else
+            {
+              p3 = p2 + ((next_p1 - p2) * 0.5); //*--((*--(bezier_curves.end()))->end()));
+              control_points->push_back(p0);
+              control_points->push_back(p1);
+              control_points->push_back(p2);
+              control_points->push_back(p3);
+              //      context->save();
+              //      context->set_source_rgb(1.0, 0.0, 0.0);
+              //      context->arc(p0.x * zoom_factor, p0.y * zoom_factor, 0.03 * zoom_factor, 0.0, 2.0 * M_PI);
+              //      context->fill_preserve();
+              //      context->stroke();
+              //      context->arc(p1.x * zoom_factor, p1.y * zoom_factor, 0.03 * zoom_factor, 0.0, 2.0 * M_PI);
+              //      context->fill_preserve();
+              //      context->stroke();
+              //      context->arc(p2.x * zoom_factor, p2.y * zoom_factor, 0.03 * zoom_factor, 0.0, 2.0 * M_PI);
+              //      context->fill_preserve();
+              //      context->stroke();
+              //      context->arc(p3.x * zoom_factor, p3.y * zoom_factor, 0.03 * zoom_factor, 0.0, 2.0 * M_PI);
+              //      context->fill_preserve();
+              //      context->stroke();
+              //      context->restore();
+              bezier_curves.push_back(control_points);
+              p0 = p3;
+            }
+          p1 = next_p1;
+          p2 = p1 + (p1 - **iter);
 
+          //NPoint* p = *(control_points->begin()) + (*(*(++iter) - *(control_points->begin())) * (1/3.));
+          //p = NULL;
+          //iter--;
         }
+
+      std::list<std::list<NPoint>*>::iterator curve_iter;
+      for( curve_iter = bezier_curves.begin(); curve_iter != bezier_curves.end(); curve_iter++ )
+        {
+          std::list<NPoint>::iterator iter;
+          iter = (*curve_iter)->begin();
+          NPoint p0 = *iter++;
+          NPoint p1 = *iter++;
+          NPoint p2 = *iter++;
+          NPoint p3= *iter;
+          NPoint p;
+          //it just draws at every percent of the curve a point
+          for(int i = 0; i <= 100; i++)
+            {
+              double t = i / 100.;
+              p = p0 * ((1 - t) * (1 - t) *(1 - t)) + p1 * (3 * t * (1 - t) * (1 - t)) + p2 * (3 * t * t * (1 - t)) + p3 * (t * t * t);
+
+              context->arc(p.x * zoom_factor, p.y * zoom_factor, 0.02 * zoom_factor, 0.0, 2.0 * M_PI);
+              context->fill_preserve();
+              context->stroke();
+            }
+        }
+      //the old curve
+      //      unsigned int i;
+      //      //one bezier curve per bezier_points_count path_points
+      //      for(i = 0; i + bezier_points_count - 1 < path.size(); i += bezier_points_count - 1)
+      //        {
+      //          double distance = 100;// fabs(path[i]->y - path[i+bezier_points_count-1]->y) * 50;
+      //
+      //          //draw the bezier for two directions
+      //          for(int m = 0; m < 2; m++)
+      //            {
+      //              if(m == 1)
+      //                {
+      //                  distance =  fabs(path[i]->x - path[i+bezier_points_count-1]->x) * 50;
+      //                }
+      //              for( int j = 0; j < distance; j++)
+      //                {
+      //                  double sum_x = 0;
+      //                  double sum_y = 0;
+      //                  for(int k = 0; k < bezier_points_count; k++)
+      //                    {
+      //                      // i = k
+      //                      // n = bezier_points_count - 1
+      //                      // t = j/distance
+      //                      // sum^n i = 0 ( P * binoc(n, i) * pow(t, i) * pow(1. - t, n - i));
+      //                      sum_x += path[i+k]->x * BinomialCoefficient::binoc(bezier_points_count - 1, k) * pow(j/distance, k) * pow((1. - (j/distance)), ((bezier_points_count - 1) - k));
+      //                      sum_y += path[i+k]->y * BinomialCoefficient::binoc(bezier_points_count - 1, k) * pow(j/distance, k) * pow((1. - (j/distance)), ((bezier_points_count - 1) - k));
+      //                    }
+      //                  context->arc(sum_x * zoom_factor, sum_y * zoom_factor, 2, 0.0, 2.0 * M_PI);
+      //                  context->fill_preserve();
+      //                  context->stroke();
+      //                }
+      //            }
+      //
+      //        }
       path_points.unlock();
 
       //draw the orbit center
@@ -1437,38 +1565,41 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
       context->fill_preserve();
       context->stroke();
 
-      //draw the odometry point
-      odometry_point_mutex->lock();
-      context->save();
-      context->set_source_rgb(0.0, 0.0, 1.0);
-      context->arc(odometry_point.x * zoom_factor, odometry_point.y * zoom_factor, point_radius, 0.0, 2.0 * M_PI);
-      context->fill_preserve();
-      context->stroke();
+      if(odometry_check->get_active())
+        {
+          //draw the odometry point
+          odometry_point_mutex->lock();
+          context->save();
+          context->set_source_rgb(0.0, 0.0, 1.0);
+          context->arc(odometry_point.x * zoom_factor, odometry_point.y * zoom_factor, point_radius * zoom_factor, 0.0, 2.0 * M_PI);
+          context->fill_preserve();
+          context->stroke();
 
-      //draw the odometry orientation
-      context->set_line_width(2.5);
-      odometry_orientation_mutex->lock();
-      context->rotate(odometry_direction);
-      odometry_orientation_mutex->unlock();
-      context->set_line_cap(Cairo::LINE_CAP_ROUND);
-      context->move_to(0.,0.);
-      context->line_to(0., -40.);
-      context->stroke();
+          //draw the odometry orientation
+          context->set_line_width(2.5);
+          odometry_orientation_mutex->lock();
+          context->rotate(odometry_direction);
+          odometry_orientation_mutex->unlock();
+          context->set_line_cap(Cairo::LINE_CAP_ROUND);
+          context->move_to(0.,0.);
+          context->line_to(0., -0.4 * zoom_factor);
+          context->stroke();
 
-      //draw odometry coordinates
-      layout = Pango::Layout::create (create_pango_context ());
-      char print_string[100];
-      sprintf(print_string, "%.2f, %.2f", -odometry_point.y, -odometry_point.x);
-      layout->set_text(print_string);
+          //draw odometry coordinates
+          layout = Pango::Layout::create (create_pango_context ());
+          char print_string[100];
+          sprintf(print_string, "%.2f, %.2f \t\t\t velocity: %.2f", -odometry_point.y, -odometry_point.x, odometry_velocity);
+          layout->set_text(print_string);
 
-      Glib::RefPtr<Gdk::GC> gc_odometry = Gdk::GC::create(window);
-      Gdk::Color color("blue");
-      gc_odometry->set_rgb_fg_color(color);
-      window->draw_layout(gc_odometry, (int) 300, (int) 20, layout);
-      layout.clear();
+          Glib::RefPtr<Gdk::GC> gc_odometry = Gdk::GC::create(window);
+          Gdk::Color color("blue");
+          gc_odometry->set_rgb_fg_color(color);
+          window->draw_layout(gc_odometry, (int) 300, (int) 20, layout);
+          layout.clear();
 
-      context->restore();
-      odometry_point_mutex->unlock();
+          context->restore();
+          odometry_point_mutex->unlock();
+        }
 
       if(debug_check->get_active())
         {
@@ -1494,7 +1625,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
                 {
                   obstacle2_radius = ob2->width / 2.;
                 }
-              double robot_width = 0.5;
+              //              double robot_width = 0.5;
 
               gdouble x1 = (*iterator)->p1->x;
               gdouble y1 = (*iterator)->p1->y;
@@ -1522,60 +1653,60 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
                                        middle_x + (vector_x * (obstacle1_radius - obstacle2_radius)/2),
                                        middle_y + (vector_y * (obstacle1_radius - obstacle2_radius)/2));
 
-              NPoint * next_point2;
-              NPoint * next_point3;
-
-              double vector_length;
-
-              //if the edge is wide then calculate a new point further left or right of the middle
-              if(distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) > robot_width * 3 + obstacle1_radius + obstacle2_radius)
-                {
-                  vector_length = robot_width; // * 0.8;
-
-                  //a point near by p1
-                  next_point2 = new NPoint(
-                                  x1 + vector_x * (vector_length + obstacle1_radius),
-                                  y1 + vector_y * (vector_length + obstacle1_radius));
-
-                  //a point near by p2
-                  next_point3 = new NPoint(
-                                  x2 - vector_x * (vector_length + obstacle2_radius),
-                                  y2 - vector_y * (vector_length + obstacle2_radius));
-                }
-              else if((distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) <= robot_width * 3)
-                {
-                  next_point2 = next_point3 = next_point1;
-                  //   std::cout << "middle--------------" <<distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p1->y) << " <= " << robot_width * 1.5 << std::endl;
-                }
-              else //if the edge is narrow then calculate a new point near by the middle
-                {
-                  vector_length = (distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) / 3;
-
-                  double vector_add = (obstacle1_radius - obstacle2_radius) / 2;
-
-                  //a point near by the middle, placed toward to p1
-                  next_point2 = new NPoint(
-                                  middle_x - vector_x * (vector_length + vector_add),
-                                  middle_y - vector_y * (vector_length + vector_add));
-
-                  //a point near by the middle, placed toward to p2
-                  next_point3 = new NPoint(
-                                  middle_x + vector_x * (vector_length + vector_add),
-                                  middle_y + vector_y * (vector_length + vector_add));
-                }
+              //              NPoint * next_point2;
+              //              NPoint * next_point3;
+              //
+              //              double vector_length;
+              //
+              //              //if the edge is wide then calculate a new point further left or right of the middle
+              //              if(distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) > robot_width * 3 + obstacle1_radius + obstacle2_radius)
+              //                {
+              //                  vector_length = robot_width; // * 0.8;
+              //
+              //                  //a point near by p1
+              //                  next_point2 = new NPoint(
+              //                                  x1 + vector_x * (vector_length + obstacle1_radius),
+              //                                  y1 + vector_y * (vector_length + obstacle1_radius));
+              //
+              //                  //a point near by p2
+              //                  next_point3 = new NPoint(
+              //                                  x2 - vector_x * (vector_length + obstacle2_radius),
+              //                                  y2 - vector_y * (vector_length + obstacle2_radius));
+              //                }
+              //              else if((distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) <= robot_width * 3)
+              //                {
+              //                  next_point2 = next_point3 = next_point1;
+              //                  //   std::cout << "middle--------------" <<distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p1->y) << " <= " << robot_width * 1.5 << std::endl;
+              //                }
+              //              else //if the edge is narrow then calculate a new point near by the middle
+              //                {
+              //                  vector_length = (distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) - obstacle1_radius - obstacle2_radius) / 3;
+              //
+              //                  double vector_add = (obstacle1_radius - obstacle2_radius) / 2;
+              //
+              //                  //a point near by the middle, placed toward to p1
+              //                  next_point2 = new NPoint(
+              //                                  middle_x - vector_x * (vector_length + vector_add),
+              //                                  middle_y - vector_y * (vector_length + vector_add));
+              //
+              //                  //a point near by the middle, placed toward to p2
+              //                  next_point3 = new NPoint(
+              //                                  middle_x + vector_x * (vector_length + vector_add),
+              //                                  middle_y + vector_y * (vector_length + vector_add));
+              //                }
 
               //  std::cout << "distance " << distance((*iterator)->p1->x, (*iterator)->p1->y, (*iterator)->p2->x, (*iterator)->p2->y) << std::endl;
 
               context->set_source_rgb(1.0, 0.0, 0.0);
-              context->arc(next_point1->x * zoom_factor, next_point1->y * zoom_factor, 5, 0.0, 2.0 * M_PI);
+              context->arc(next_point1->x * zoom_factor, next_point1->y * zoom_factor, 0.05  * zoom_factor, 0.0, 2.0 * M_PI);
               context->fill_preserve();
               context->stroke();
-              context->arc(next_point2->x * zoom_factor, next_point2->y * zoom_factor, 5, 0.0, 2.0 * M_PI);
-              context->fill_preserve();
-              context->stroke();
-              context->arc(next_point3->x * zoom_factor, next_point3->y * zoom_factor, 5, 0.0, 2.0 * M_PI);
-              context->fill_preserve();
-              context->stroke();
+              //              context->arc(next_point2->x * zoom_factor, next_point2->y * zoom_factor, 5, 0.0, 2.0 * M_PI);
+              //              context->fill_preserve();
+              //              context->stroke();
+              //              context->arc(next_point3->x * zoom_factor, next_point3->y * zoom_factor, 5, 0.0, 2.0 * M_PI);
+              //              context->fill_preserve();
+              //              context->stroke();
             }
           lines.unlock();
         }

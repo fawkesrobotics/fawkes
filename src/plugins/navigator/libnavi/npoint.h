@@ -32,11 +32,17 @@ class NPoint
 {
  public:
   NPoint();
+  virtual ~NPoint();
       
   NPoint(double x, double y);
          
   NPoint &operator=(const NPoint &p);
-  virtual ~NPoint();
+  NPoint operator+(const NPoint& p) const;
+  NPoint& operator+=(const NPoint& p);
+  NPoint operator-(const NPoint& p) const;
+  NPoint& operator-=(const NPoint& p);
+  NPoint operator*(const float& f) const;
+  NPoint& operator*=(const float& f);
          
   bool operator==(const NPoint &p);
          

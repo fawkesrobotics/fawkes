@@ -28,74 +28,88 @@
 #define __NAVIGATOR_PATHFINDER_H_
 
 extern "C"
-{
+  {
 #include <gts.h>
-}
+  }
 
 #include <vector>
+#include <map>
 #include <math.h>
 
-#include "gts/gts_obstacle.h"
+#include <plugins/navigator/gts/gts_obstacle.h>
 #include <plugins/navigator/libnavi/obstacle.h>
 
-using namespace std;
-
+class Mutex;
 
 class Pathfinder
-{
- public:
-  Pathfinder();
-  Pathfinder(double robot_width, double scanning_area_width, double scanning_area_height);
-  ~Pathfinder();
-        
-  void setTarget(double distance, double direction_rad);
-  void setTargetPoint(GtsPoint * target_point);
-  void setTargetPolar(double distance, double direction_degree);
-  void setTarget_cartesian(double x, double y);
-        
-  void setObstacles(std::vector< Obstacle > obstacles);
-  void addObstacle(Obstacle obstacle);
+  {
+  public:
+    Pathfinder();
+    Pathfinder(double robot_width, double scanning_area_width, double scanning_area_height);
+    ~Pathfinder();
 
-  std::vector< GtsPoint * > getPath();
-        
-        
-  //Obstacle * getNearestGtsObstacle();
-  GtsPoint * getNearestPoint();
-  GtsObstacle * getNearestGtsObstacle();
-  GtsSurface * getSurface();
-  GtsPoint * getRobotPoint();
-  GtsPoint * getTargetPoint();
+    void set_target(double x, double y);
 
- private:
-        
-  std::vector< Obstacle > map;
+    void set_obstacles(std::vector< Obstacle > obstacles);
+    void add_obstacle(Obstacle obstacle);
 
+    std::vector< GtsPoint * > get_path();
 
-  double scanning_area_width;
-  double scanning_area_height;
+    Obstacle* get_nearest_obstacle();
+    GtsSurface * get_surface();
+    GtsPoint * get_robot_point();
+    GtsPoint * get_target_point();
+    bool out_of_area(double x, double y);
 
-  
-  GtsSurface * surface;
-   
-  GtsPoint * robot_point;
-  GtsPoint * target_point;
-   
-  double robot_width;
-  
-  std::vector< GtsObstacle *> obstacles;  
-  
-  void initSurface();
-        
-  //after the deletion of the surface, we have to regain the obstacles
-  void regainObstacles();
-  
-  void calculateDelaunay();
-  void delaunay(GtsSurface * surface, std::vector< GtsObstacle *> obstacles);
- 
-  static void getVertexes(GtsVertex *vertex, GtsFifo * fifo);
- 
-  bool test_straight_ahead();
-  bool out_of_area(double x, double y);
-};
+  private:
+    GtsVertex* v0;
+    GtsVertex* v1;
+    GtsVertex* v2;
+    GtsVertex* v3;
+
+    GtsEdge*  e0;
+    GtsEdge*  e1;
+    GtsEdge*  e2;
+    GtsEdge*  e3;
+    GtsEdge*  e4;
+
+    std::vector< Obstacle > map;
+
+    double scanning_area_width;
+    double scanning_area_height;
+
+    GtsSurface * surface;
+
+    GtsPoint * robot_point;
+    GtsPoint * target_point;
+    GtsFace* start_face;
+
+    float robot_width;
+    float minimum_distance;
+
+    //maybe it's needless
+    Mutex* surface_mutex;
+
+    std::vector< GtsObstacle *> obstacles;
+
+    void init_surface();
+
+    //after the deletion of the surface, we have to regain the obstacles
+    void regain_obstacles();
+
+    void calculate_delaunay();
+    void delaunay(GtsSurface * surface, std::vector< GtsObstacle *> obstacles);
+    void find_bisector(GtsVertex* current_vertex, std::map<GtsVertex*, GtsVertex*>* map);
+
+    static void get_vertexes(GtsVertex *vertex, GtsFifo * fifo);
+    static void remove_face(GtsFace *face, GtsEdge* edge);
+    double p_sgn(double x);
+    bool test_straight_ahead();
+    bool is_in_rectangle(double point_x, double point_y,
+                         double vertex1_x, double vertex1_y,
+                         double vertex2_x, double vertex2_y,
+                         double vertex3_x, double vertex3_y,
+                         double vertex4_x, double vertex4_y);
+  };
 
 #endif

@@ -113,7 +113,6 @@ NavigatorNetworkThread::finalize()
 void
 NavigatorNetworkThread::init()
 {
-
   try
     {
       motor_interface = blackboard->open_for_reading<MotorInterface>("Motor");
@@ -398,16 +397,16 @@ NavigatorNetworkThread::process_network_message(FawkesNetworkMessage *msg)
   else
     {
       if ( msg->clid() != connected_control_client )
-	{
-	  logger->log_warn("NavigatorNetworkThread", "Received message of client %u which is "
-			   "not the controlling client (%u)", msg->clid(),
-			   connected_control_client);
-	}
+        {
+          logger->log_warn("NavigatorNetworkThread", "Received message of client %u which is "
+                           "not the controlling client (%u)", msg->clid(),
+                           connected_control_client);
+        }
       else
-	{
-	  logger->log_error("NavigatorNetworkThread", "Message of invalid type %u received",
-			    msg->msgid());
-	}
+        {
+          logger->log_error("NavigatorNetworkThread", "Message of invalid type %u received",
+                            msg->msgid());
+        }
     }
 }
 
@@ -437,10 +436,15 @@ NavigatorNetworkThread::loop()
           iterator++ )
         {
 
-          //send lines with points and obstacles
+          //send lines
           std::list<NLine *> *lines = navigator_thread->get_surface_lines();
-          NavigatorSurfaceMessage *surface_msg = new NavigatorSurfaceMessage(lines);
-          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_SURFACE, surface_msg);
+          NavigatorLinesListMessage *lines_msg = new NavigatorLinesListMessage(lines);
+          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_LINES, lines_msg);
+
+          //send obstacles
+          std::list<Obstacle *> *obstacles = navigator_thread->get_obstacles();
+          NavigatorObstaclesListMessage *obstacles_msg = new NavigatorObstaclesListMessage(obstacles);
+          fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_OBSTACLES, obstacles_msg);
 
           //send path
           std::list<NPoint *> *path_points = navigator_thread->get_path_points();
@@ -480,7 +484,6 @@ NavigatorNetworkThread::loop()
 
           fnethub->send(*iterator, FAWKES_CID_NAVIGATOR_PLUGIN, NAVIGATOR_MSGTYPE_BALL, ball_msg, sizeof(navigator_ball_message_t));
         }
-
 
       //send odometry data
       for(std::list<unsigned int>::iterator iterator = connected_odometry_clients.begin();

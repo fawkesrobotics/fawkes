@@ -35,14 +35,15 @@
 #include <cstdlib>
 #include <cstring>
 
-/** @class NavigatorSurfaceMessage <navigator/libnavi/navigator_messages.h>
- * This message is for containing the lines and points of the surface of the triangulation.
+
+/** @class NavigatorLinesListMessage <navigator/libnavi/navigator_messages.h>
+ * This message is for containing the lines of the surface of the triangulation.
  */
 
 /** Constructor.
  * @param lines a list with the lines for this message 
  */
-NavigatorSurfaceMessage::NavigatorSurfaceMessage(std::list<NLine *> *lines)
+NavigatorLinesListMessage::NavigatorLinesListMessage(std::list<NLine *> *lines)
 {
   lines_list = new DynamicBuffer(&(msg.lines_list));
 
@@ -50,29 +51,6 @@ NavigatorSurfaceMessage::NavigatorSurfaceMessage(std::list<NLine *> *lines)
   nline_t nl;
   for ( i = lines->begin(); i != lines->end(); ++i )
     {
-      Obstacle *op1 = dynamic_cast<Obstacle *>((*i)->p1);
-      if ( op1 )
-        {
-          // it IS an obstacle
-          nl.width1 = op1->width;
-        }
-      else
-        {
-          // it's just a point
-          nl.width1 = 0.;
-        }
-
-      Obstacle *op2 = dynamic_cast<Obstacle *>((*i)->p2);
-      if ( op2 )
-        {
-          // it IS an obstacle
-          nl.width2 = op2->width;
-        }
-      else
-        {
-          // it's just a point
-          nl.width2 = 0.;
-        }
       nl.x1 = (*i)->p1->x;
       nl.y1 = (*i)->p1->y;
       nl.x2 = (*i)->p2->x;
@@ -89,7 +67,7 @@ NavigatorSurfaceMessage::NavigatorSurfaceMessage(std::list<NLine *> *lines)
  * @param payload message payload
  * @param payload_size total payload size
  */
-NavigatorSurfaceMessage::NavigatorSurfaceMessage(unsigned int component_id, unsigned int msg_id,
+NavigatorLinesListMessage::NavigatorLinesListMessage(unsigned int component_id, unsigned int msg_id,
     void *payload, size_t payload_size)
 {
   navigator_lines_msg_t *tmsg = (navigator_lines_msg_t *)payload;
@@ -100,7 +78,7 @@ NavigatorSurfaceMessage::NavigatorSurfaceMessage(unsigned int component_id, unsi
 
 
 /** Destructor. */
-NavigatorSurfaceMessage::~NavigatorSurfaceMessage()
+NavigatorLinesListMessage::~NavigatorLinesListMessage()
 {
   delete lines_list;
   if (_payload != NULL)
@@ -113,7 +91,7 @@ NavigatorSurfaceMessage::~NavigatorSurfaceMessage()
 
 
 void
-NavigatorSurfaceMessage::serialize()
+NavigatorLinesListMessage::serialize()
 {
   _payload_size = sizeof(msg) + lines_list->buffer_size();
   _payload = malloc(_payload_size);
@@ -126,7 +104,7 @@ NavigatorSurfaceMessage::serialize()
  * For incoming messages only.
  */
 void
-NavigatorSurfaceMessage::reset_iterator()
+NavigatorLinesListMessage::reset_iterator()
 {
   lines_list->reset_iterator();
 }
@@ -137,7 +115,7 @@ NavigatorSurfaceMessage::reset_iterator()
  * @return true if there are more elements available, false otherwise.
  */
 bool
-NavigatorSurfaceMessage::has_next()
+NavigatorLinesListMessage::has_next()
 {
   return lines_list->has_next();
 }
@@ -147,12 +125,108 @@ NavigatorSurfaceMessage::has_next()
  * @return next plugin from list. This string has been allocated via strndup, so
  * you have to free it yourself!
  */
-NavigatorSurfaceMessage::nline_t *
-NavigatorSurfaceMessage::next()
+NavigatorLinesListMessage::nline_t *
+NavigatorLinesListMessage::next()
 {
   size_t size;
   void *tmp = lines_list->next(&size);
   return (nline_t *)tmp;
+}
+
+/** @class NavigatorObstaclesListMessage plugins/navigator/libnavi/navigator_messages.h
+ * This message is for containing the obstacles maintained by the navigator.
+ */
+
+/** Constructor.
+ * @param obstacles a list with the obstacles for this message
+ */
+NavigatorObstaclesListMessage::NavigatorObstaclesListMessage(std::list<Obstacle *> *obstacles)
+{
+  obstacle_list = new DynamicBuffer(&(msg.obstacle_list));
+
+  std::list<Obstacle *>::iterator i;
+  obstacle_t o;
+  for ( i = obstacles->begin(); i != obstacles->end(); ++i )
+    {
+      o.x = (*i)->x;
+      o.y = (*i)->y;
+      o.width =  (*i)->width;
+      obstacle_list->append(&o, sizeof(o));
+    }
+}
+
+
+/** Message content constructor.
+ * This constructor is meant to be used with FawkesNetworkMessage::msgc().
+ * @param component_id component ID
+ * @param msg_id message ID
+ * @param payload message payload
+ * @param payload_size total payload size
+ */
+NavigatorObstaclesListMessage::NavigatorObstaclesListMessage(unsigned int component_id, unsigned int msg_id,
+    void *payload, size_t payload_size)
+{
+  navigator_obstacles_msg_t *tmsg = (navigator_obstacles_msg_t *)payload;
+  void *obstacle_list_payload = (void *)((size_t)payload + sizeof(msg));
+  obstacle_list = new DynamicBuffer(&(tmsg->obstacle_list), obstacle_list_payload,
+                                payload_size - sizeof(msg));
+}
+
+
+/** Destructor. */
+NavigatorObstaclesListMessage::~NavigatorObstaclesListMessage()
+{
+  delete obstacle_list;
+  if (_payload != NULL)
+    {
+      free(_payload);
+      _payload = NULL;
+      _payload_size = 0;
+    }
+}
+
+
+void
+NavigatorObstaclesListMessage::serialize()
+{
+  _payload_size = sizeof(msg) + obstacle_list->buffer_size();
+  _payload = malloc(_payload_size);
+  copy_payload(0, &msg, sizeof(msg));
+  copy_payload(sizeof(msg), obstacle_list->buffer(), obstacle_list->buffer_size());
+}
+
+
+/** Reset iterator.
+ * For incoming messages only.
+ */
+void
+NavigatorObstaclesListMessage::reset_iterator()
+{
+  obstacle_list->reset_iterator();
+}
+
+
+/** Check if more list elements are available.
+ * For incoming messages only.
+ * @return true if there are more elements available, false otherwise.
+ */
+bool
+NavigatorObstaclesListMessage::has_next()
+{
+  return obstacle_list->has_next();
+}
+
+
+/** Get next plugin from list.
+ * @return next plugin from list. This string has been allocated via strndup, so
+ * you have to free it yourself!
+ */
+NavigatorObstaclesListMessage::obstacle_t *
+NavigatorObstaclesListMessage::next()
+{
+  size_t size;
+  void *tmp = obstacle_list->next(&size);
+  return (obstacle_t *)tmp;
 }
 
 /** @class NavigatorPathListMessage plugins/navigator/libnavi/navigator_messages.h

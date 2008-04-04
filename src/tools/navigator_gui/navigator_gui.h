@@ -62,12 +62,12 @@ namespace Gtk
   class Alignment;
   class RefPtr;
   class Statusbar;
-}
+ }
 
 namespace Pango
   {
-  class Layout;
-}
+   class Layout;
+  }
 
 class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
   {
@@ -112,6 +112,7 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::CheckButton* obstacle_check;
     Gtk::CheckButton* orientation_check;
     Gtk::CheckButton* debug_check;
+    Gtk::CheckButton* odometry_check;
 
     Gtk::RadioButton* rpm_radio;
     Gtk::RadioButton* trans_rot_radio;
@@ -129,7 +130,6 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::VBox* bbox_left;
     Gtk::VBox* control_VBox;
     Gtk::HBox* translation_HBox;
-
 
     Gtk::RadioButton::Group control_group;
 
@@ -152,7 +152,6 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Gtk::ButtonBox* orbit_label_box;
     Gtk::ButtonBox* navigator_label_box;
     Gtk::ButtonBox* zoom_debug_box;
-
 
     Gtk::Alignment* left_rpm_alignment;
     Gtk::Alignment* center_rpm_alignment;
@@ -184,13 +183,12 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     NPoint odometry_point;
     NPoint mouse_point;
     NPoint cursor_point;
-    double odometry_orientation;
     double odometry_direction;
 
     LockList<NPoint*> points;
     LockList<NLine*> lines;
     LockList<NPoint*> path_points;
-    LockList<Obstacle*> obstacle_points;
+    LockList<Obstacle*> obstacles;
 
     Mutex *odometry_orientation_mutex;
     Mutex *ball_point_mutex;
@@ -199,10 +197,9 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     Mutex *cursor_point_mutex;
     bool cursor_over_area;
 
-    double velocity;
+    double odometry_velocity;
     bool orientating;
     double orientation;
-
 
     FawkesNetworkClient *net_client;
     void deregistered(unsigned int id) throw();
@@ -223,6 +220,7 @@ class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
     bool on_idle();
     bool on_expose_event(GdkEventExpose* event);
     bool on_button_press_event(GdkEventButton* event);
+    bool on_scroll_event(GdkEventScroll* event);
     bool on_button_release_event(GdkEventButton* event);
     bool on_motion_notify_event(GdkEventMotion* event);
     bool on_leave_notify_event(GdkEventCrossing* event);

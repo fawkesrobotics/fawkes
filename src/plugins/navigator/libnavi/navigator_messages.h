@@ -36,22 +36,24 @@ class NPoint;
 class NLine;
 class Obstacle;
 
-#define NAVIGATOR_MSGTYPE_JOYSTICK                      1
-#define NAVIGATOR_MSGTYPE_SUBSCRIBE                             2
-#define NAVIGATOR_MSGTYPE_UNSUBSCRIBE                           3
-#define NAVIGATOR_MSGTYPE_SURFACE                                 4
-#define NAVIGATOR_MSGTYPE_TARGET                                5
-#define NAVIGATOR_MSGTYPE_CONTROL_SUBERR                        6
-#define NAVIGATOR_MSGTYPE_VELOCITY                                      7
-#define NAVIGATOR_MSGTYPE_TRANS_ROT                                 8
-#define NAVIGATOR_MSGTYPE_RPM                                 9
-#define NAVIGATOR_MSGTYPE_ORBIT                              10
-#define NAVIGATOR_MSGTYPE_KICK                                          11
-#define NAVIGATOR_MSGTYPE_ODOMETRY                      12
-#define NAVIGATOR_MSGTYPE_RESET_ODOMETRY                      13
-#define NAVIGATOR_MSGTYPE_BALL                      14
-#define NAVIGATOR_MSGTYPE_PATH                     15
-#define NAVIGATOR_MSGTYPE_OBSTACLE                     16
+#define NAVIGATOR_MSGTYPE_JOYSTICK						1
+#define NAVIGATOR_MSGTYPE_SUBSCRIBE					2
+#define NAVIGATOR_MSGTYPE_UNSUBSCRIBE				3
+//#define NAVIGATOR_MSGTYPE_SURFACE						4
+#define NAVIGATOR_MSGTYPE_LINES							4
+#define NAVIGATOR_MSGTYPE_OBSTACLES					5
+#define NAVIGATOR_MSGTYPE_TARGET							6
+#define NAVIGATOR_MSGTYPE_CONTROL_SUBERR			7
+#define NAVIGATOR_MSGTYPE_VELOCITY						8
+#define NAVIGATOR_MSGTYPE_TRANS_ROT					9
+#define NAVIGATOR_MSGTYPE_RPM								10
+#define NAVIGATOR_MSGTYPE_ORBIT							11
+#define NAVIGATOR_MSGTYPE_KICK								12
+#define NAVIGATOR_MSGTYPE_ODOMETRY					13
+#define NAVIGATOR_MSGTYPE_RESET_ODOMETRY			14
+#define NAVIGATOR_MSGTYPE_BALL								15
+#define NAVIGATOR_MSGTYPE_PATH								16
+#define NAVIGATOR_MSGTYPE_OBSTACLE						17
 
 /** The message type of the kick messages.
  */
@@ -157,7 +159,7 @@ typedef struct {
 } navigator_nodes_msg_t;
 
 /** Navigator list message.
- * Message type ID is NAVIGATOR_MSGTYPE_SURFACE.
+ * Message type ID is NAVIGATOR_MSGTYPE_LINES.
  */
 typedef struct {
   dynamic_list_t lines_list;    /**< dynamically growing list of lines */
@@ -171,11 +173,11 @@ typedef struct {
 } navigator_path_msg_t;
 
 /** The message type to determine the obstacles.
- * Message type ID is NAVIGATOR_MSGTYPE_OBSTACLES_LIST.
+ * Message type ID is NAVIGATOR_MSGTYPE_OBSTACLES.
  */
 typedef struct {
-  dynamic_list_t obstacles_list;   /**< dynamically growing list of obstacles */
-} navigator_obstacles_list_msg_t;
+  dynamic_list_t obstacle_list;   /**< dynamically growing list of obstacles */
+} navigator_obstacles_msg_t;
 
 /** The message type for subscribe messages to subscribe messages
  *   from the navigator network thread.
@@ -204,13 +206,42 @@ typedef struct {
 } navigator_unsubscribe_message_t;
 
 
-class NavigatorSurfaceMessage : public FawkesNetworkMessageContent
+//class NavigatorSurfaceMessage : public FawkesNetworkMessageContent
+//{
+// public:
+//  NavigatorSurfaceMessage(std::list<NLine *> *lines);
+//  NavigatorSurfaceMessage(unsigned int component_id, unsigned int msg_id,
+//                            void *payload, size_t payload_size);
+//  virtual ~NavigatorSurfaceMessage();
+//
+//  virtual void serialize();
+//
+//  /** Navigator line type. */
+//  typedef struct {
+//    float x1; /**< x-coordinate of point 1 */
+//    float y1; /**< y-coordinate of point 1 */
+//    float width1; /**< width of the obstacle1, 0 if point 1 is not an obstacle */
+//    float x2; /**< x-coordinate of point 2 */
+//    float y2; /**< y-coordinate of point 2 */
+//    float width2; /**< width of the obstacle2, 0 if point 2 is not an obstacle */
+//  } nline_t;
+//
+//  void        reset_iterator();
+//  bool        has_next();
+//  nline_t *  next();
+//  
+// private:
+//  DynamicBuffer     *lines_list;
+//  navigator_lines_msg_t  msg;
+//};
+
+class NavigatorLinesListMessage : public FawkesNetworkMessageContent
 {
  public:
-  NavigatorSurfaceMessage(std::list<NLine *> *lines);
-  NavigatorSurfaceMessage(unsigned int component_id, unsigned int msg_id,
+  NavigatorLinesListMessage(std::list<NLine *> *lines);
+  NavigatorLinesListMessage(unsigned int component_id, unsigned int msg_id,
                             void *payload, size_t payload_size);
-  virtual ~NavigatorSurfaceMessage();
+  virtual ~NavigatorLinesListMessage();
 
   virtual void serialize();
 
@@ -218,10 +249,8 @@ class NavigatorSurfaceMessage : public FawkesNetworkMessageContent
   typedef struct {
     float x1; /**< x-coordinate of point 1 */
     float y1; /**< y-coordinate of point 1 */
-    float width1; /**< width of the obstacle1, 0 if point 1 is not an obstacle */
     float x2; /**< x-coordinate of point 2 */
     float y2; /**< y-coordinate of point 2 */
-    float width2; /**< width of the obstacle2, 0 if point 2 is not an obstacle */
   } nline_t;
 
   void        reset_iterator();
@@ -231,6 +260,32 @@ class NavigatorSurfaceMessage : public FawkesNetworkMessageContent
  private:
   DynamicBuffer     *lines_list;
   navigator_lines_msg_t  msg;
+};
+
+class NavigatorObstaclesListMessage : public FawkesNetworkMessageContent
+{
+ public:
+  NavigatorObstaclesListMessage(std::list<Obstacle *> *obstacles);
+  NavigatorObstaclesListMessage(unsigned int component_id, unsigned int msg_id,
+                            void *payload, size_t payload_size);
+  virtual ~NavigatorObstaclesListMessage();
+
+  virtual void serialize();
+
+/** Navigator obstacle type. */
+typedef struct {
+  float x;  /**< X-coordinate of the obstacle. */
+  float y;  /**< Y-coordinate of the obstacle. */
+  float width;  /**< width of the obstacle. */
+} obstacle_t;
+
+  void        reset_iterator();
+  bool        has_next();
+  obstacle_t *  next();
+  
+ private:
+  DynamicBuffer     *obstacle_list;
+  navigator_obstacles_msg_t  msg;
 };
 
 class NavigatorPathListMessage : public FawkesNetworkMessageContent

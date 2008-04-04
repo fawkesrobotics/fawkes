@@ -58,17 +58,12 @@ class Navigator
     std::list<NLine *> *get_surface_lines();
     std::list<NPoint *> *get_path_points();
     std::list<Obstacle *> *get_obstacles();
-    NPoint * getTargetPoint();
+    NPoint * get_target_point();
   protected:
     void goto_cartesian(double x, double y);
     void goto_cartesian(double x, double y, double velocity);
     void goto_cartesian_ori(double x, double y, double ori);
     void goto_polar_ori(float phi, float dist, float ori);
-    /*
-      void goTo_degree(double ori, double distance);
-      void goTo_rad(double ori, double distance);
-      void goTo(double ori, double distance, std::vector< Obstacle * >);
-    */
     void set_target_tolerance(float tolerance);
     void set_odometry_velocity_x(double velocity_x);
     void set_odometry_velocity_y(double velocity_y);
@@ -88,11 +83,8 @@ class Navigator
     void set_route(std::vector<GtsPoint *> route);
     void main_loop();
 
-
-    // int binomialCoefficient(int n, int k);
     double bernstein(unsigned int i, unsigned int n, double t);
 
-    //z.B. bei navigator_test beim Routezeichnen
     std::vector<GtsPoint *>  get_route();
 
   protected: /* members */
@@ -104,14 +96,14 @@ class Navigator
     double dest_ori;
 
   private:
-
+	//maybe needless
     Mutex *surface_mutex;
     Mutex *path_mutex;
     Mutex *velocity_mutex;
 
     Pathfinder * pathfinder;
 
-    //beinhaltet die Target Punkte, der einzelnen Abschnitte
+    //contains several pathes
     std::vector<GtsPoint*> route;
 
     static void get_edges(GtsEdge *edge, GtsFifo * fifo);
@@ -122,7 +114,6 @@ class Navigator
 
     float target_tolerance;
 
-    //Abtastbereich der Sensorik
     double scanning_area_width;
     double scanning_area_height;
 
@@ -131,17 +122,14 @@ class Navigator
     double odometry_velocity_rotation;
 
     double robot_width;
-    // GtsPoint * robot_point;
 
     //count of the points of the bezier
     int count;
-    //index of the bezier
+    //parameter of the bezier
     double t;
-    //beinhaltet die Punkte der Bezier Kurve
 
     //set if the smoothController should not control
     //it avoids orbits
-    //umbenennen in avoid smoothControl
     bool new_direction;
 
     std::vector< GtsPoint * > path;

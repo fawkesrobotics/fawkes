@@ -71,6 +71,93 @@ NPoint &NPoint::operator=(const NPoint &p)
   this->y = p.y; 
   return *this;
 }
+
+/**Addition operator.
+ * Adds two points.
+ * @param p the rhs point
+ * @return the resulting point
+ */
+NPoint
+NPoint::operator+(const NPoint& p) const
+{
+  NPoint result;
+
+  result.x = x + p.x;
+  result.y = y + p.y;
+
+  return result;
+}
+
+
+/**Add-assign operator.
+ * @param p the lhs point
+ * @return a reference to the resulting point (this)
+ */
+NPoint&
+NPoint::operator+=(const NPoint& p)
+{
+  *this = *this + p;
+
+  return *this;
+}
+
+
+/** Substraction operator.
+ * @param p the lhs point
+ * @return the resulting point
+ */
+NPoint
+NPoint::operator-(const NPoint& p) const
+{
+  NPoint result;
+
+  result.x = x - p.x;
+  result.y = y - p.y;
+
+  return result;
+}
+
+/**Scalar multiplikation.
+ * @param f the scalar
+ * @return the resulting point
+ */
+NPoint
+NPoint::operator*(const float& f) const
+{
+  NPoint result;
+
+  result.x = x * f;
+  result.y = y * f;
+
+  return result;
+}
+
+
+/**In-place scalar multiplikation.
+ * @param f the scalar
+ * @return a reference to thre resulting point (this)
+ */
+NPoint&
+NPoint::operator*=(const float& f)
+{
+  *this = *this * f;
+
+  return *this;
+}
+
+
+/** Sub-assign operator.
+ * @param p the lhs point
+ * @return a reference to the resulting point (this)
+ */
+NPoint&
+NPoint::operator-=(const NPoint& p)
+{
+  *this = *this - p;
+
+  return *this;
+}
+
          
 /** Comparison operator.
  * @param p the point to compare
