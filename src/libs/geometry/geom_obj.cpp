@@ -90,7 +90,6 @@ GeomObj&
 GeomObj::_apply_transform(const HomTransform& t)
 {
   mToRefCS *= t;
-  cout << mToRefCS << endl;
   mChanged = true;
 
   return *this;
@@ -105,7 +104,6 @@ GeomObj&
 GeomObj::_apply_transform_ref(const HomTransform& t)
 {
   mToRefCS = t * mToRefCS;
-  cout << mToRefCS << endl;
   mChanged = true;
 
   return *this;
@@ -223,7 +221,7 @@ GeomObj::_rotate_z_ref(float angle)
 GeomObj&
 GeomObj::_trans(float trans_x, float trans_y, float trans_z)
 {
-  mRefPoint.trans(trans_x, trans_y, trans_z);
+  mRefPoint.move(trans_x, trans_y, trans_z);
 
   mChanged = true;
 

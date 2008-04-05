@@ -47,7 +47,7 @@
  * @param v a vector that lies on the line
  */
 Line::Line(const HomPoint& p, const HomVector& v)
-  : GeomObj(HomTransform().id(), HomPoint(0.0, 0.0, 0.0))
+  : GeomObj(HomTransform().reset(), HomPoint(0.0, 0.0, 0.0))
 {
   mBasePoint = p;
   mDirection = v;
@@ -78,7 +78,7 @@ Line::Line(const HomPoint& p, const HomVector& v)
  * @param p2 another point that lies on the line
  */
 Line::Line(const HomPoint& p1, const HomPoint& p2)
-  : GeomObj(HomTransform().id(), HomPoint(0.0, 0.0, 0.0))
+  : GeomObj(HomTransform().reset(), HomPoint(0.0, 0.0, 0.0))
 {
   mBasePoint = p1;
   mDirection = p2 - p1;

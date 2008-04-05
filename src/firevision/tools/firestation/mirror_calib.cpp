@@ -32,6 +32,8 @@
 #include <utils/math/angle.h>
 #include <geometry/hom_point.h>
 
+#include <iostream>
+
 /** @class MirrorCalibTool tools/firestation/mirror_calib.h
  * This class encapsulates the routines necessary for interactive mirror
  * calibration.
