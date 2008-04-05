@@ -31,7 +31,7 @@
 #include <utils/math/angle.h>
 #include <utils/time/clock.h>
 #include <utils/time/watch.h>
-#include <geometry/vector.h>
+#include <geometry/hom_vector.h>
 
 #include <vmc/LayerClasses/CvmcAPI.h>
 #include <vmc/SupportClasses/Enums.h>
@@ -540,7 +540,7 @@ MotorThread::loop()
           //calculate the tangent to the orbit passing through the actual position
           if(orbit_direction.length() != 0)
             {
-              Vector old_direction = orbit_direction;
+              HomVector old_direction = orbit_direction;
               orbit_direction = orbit_center - orbit_position;
               double alpha = 0;
               // logger->log_info("MotorThread", " orbit_direction.length() %f ", orbit_direction.length());
@@ -815,9 +815,9 @@ MotorThread::loop()
 
   odometry_distance += odometry_difference;
 
-  Vector new_position;
-  Vector old_position;
-  Vector bend_vector;
+  HomVector new_position;
+  HomVector old_position;
+  HomVector bend_vector;
 
   old_position.x(motor_interface->odometry_position_x());
   old_position.y(motor_interface->odometry_position_y());

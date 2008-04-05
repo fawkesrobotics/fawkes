@@ -29,7 +29,7 @@
 #define __FIREVISION_TOOLS_IMAGE_VIEWER_MIRROR_CALIB_H_
 
 #include <models/mirror/bulb/bulb_generator.h>
-#include <geometry/point.h>
+#include <geometry/hom_point.h>
 
 class Bulb;
 class BulbSampler;
@@ -81,7 +81,7 @@ class MirrorCalibTool : public BulbGeneratorProgressHandler
   unsigned int m_num_dists;
   unsigned int m_num_oris;
 
-  Point m_next_sample_point;
+  HomPoint m_next_sample_point;
 
   bool m_calib_done;
   bool m_step_two;

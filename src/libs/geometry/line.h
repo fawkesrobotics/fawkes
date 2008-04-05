@@ -31,13 +31,13 @@
 class Line : public GeomObj
 {
  public:
-  Line(const Point& p, const Vector& v);
-  Line(const Point& p1, const Point& p2);
+  Line(const HomPoint& p, const HomVector& v);
+  Line(const HomPoint& p1, const HomPoint& p2);
   
   virtual ~Line();
 
-  Line& apply_transform(const Transform& t);
-  Line& apply_transform_ref(const Transform& t);
+  Line& apply_transform(const HomTransform& t);
+  Line& apply_transform_ref(const HomTransform& t);
 
   Line& trans(float trans_x, float trans_y, float trans_z);
   Line& trans_ref(float trans_x, float trans_y, float trans_z);
@@ -51,11 +51,11 @@ class Line : public GeomObj
   Line& rotate_z(float angle);
   Line& rotate_z_ref(float angle);
 
-  //  Line& rotate_x_ref(float angle, const Point& p);
+  //  Line& rotate_x_ref(float angle, const HomPoint& p);
   
  private:
-  Point mBasePoint;
-  Vector mDirection;
+  HomPoint mBasePoint;
+  HomVector mDirection;
 };
 
 #endif /* __LINE_H_ */

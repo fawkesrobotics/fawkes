@@ -33,7 +33,7 @@
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 #include <utils/time/time.h>
-#include <geometry/vector.h>
+#include <geometry/hom_vector.h>
 
 class MotorInterface;
 class NavigatorThread;
@@ -89,9 +89,9 @@ class MotorThread
     double odometry_distance;
     double orbit_direction_x;
     double orbit_direction_y;
-    Vector orbit_direction;
-    Vector orbit_center;
-    Vector orbit_position;
+    HomVector orbit_direction;
+    HomVector orbit_center;
+    HomVector orbit_position;
     double orbit_radius;
     double orbit_sign;
     // double orbit_rotation_velocity;

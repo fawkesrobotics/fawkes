@@ -23,8 +23,8 @@
  *  You can read the full text in the LICENSE file in the doc directory. 
  */
 
-#include <geometry/transform.h>
-#include <geometry/vector.h>
+#include <geometry/hom_transform.h>
+#include <geometry/hom_vector.h>
 #include <geometry/geom_prim.h>
 #include <core/exception.h>
 
@@ -33,17 +33,17 @@
 using namespace std;
 
 
-/** @class Transform libs/geometry/transform.h
+/** @class HomTransform libs/geometry/hom_transform.h
  * This class describes a homogeneous transformation.
  */
 
-/** @var Transform::mMatrix
+/** @var HomTransform::mMatrix
  * The 4x4 matrix defining the transform.
  */
 
 
 /**Constructor. */
-Transform::Transform() : mMatrix(4, 4)
+HomTransform::HomTransform() : mMatrix(4, 4)
 {
   mMatrix.id();
 }
@@ -56,7 +56,7 @@ Transform::Transform() : mMatrix(4, 4)
  * @param trans_y transformation along the y-axis (after rotation)
  * @param trans_z transformation along the z-axis (after rotation)
  */
-Transform::Transform( float alpha,
+HomTransform::HomTransform( float alpha,
 		      float beta,
 		      float gamma,
 		      float trans_x,
@@ -72,9 +72,9 @@ Transform::Transform( float alpha,
 
 
 /**Constructor 
- * @param m a Matrix from which a Transform is constructed
+ * @param m a Matrix from which a HomTransform is constructed
  */
-Transform::Transform(const Matrix& m)
+HomTransform::HomTransform(const Matrix& m)
   : mMatrix(m)
 {
   unsigned int rows, cols;
@@ -82,9 +82,9 @@ Transform::Transform(const Matrix& m)
 
   if ( rows != 4 || cols != 4 )
     {
-      cout << "Can't construct a Transform from a " 
+      cout << "Can't construct a HomTransform from a " 
 	   << rows << " x " << cols << " matrix." << endl;
-      Exception e("Transform::ctor(...)");
+      Exception e("HomTransform::ctor(...)");
       throw e;
     }
   else
@@ -94,7 +94,7 @@ Transform::Transform(const Matrix& m)
 }
 
 /**Destructor */
-Transform::~Transform()
+HomTransform::~HomTransform()
 {
 }
 
@@ -103,7 +103,7 @@ Transform::~Transform()
  * @return the trans matrix
  */
 Matrix
-Transform::get_homtransmat() const
+HomTransform::get_homtransmat() const
 {
   return mMatrix;
 }
@@ -113,7 +113,7 @@ Transform::get_homtransmat() const
  * @return the rotation matrix
  */
 Matrix
-Transform::get_rotmat() const
+HomTransform::get_rotmat() const
 {
   Matrix m = mMatrix.submatrix(1, 1, 3, 3);
 
@@ -125,7 +125,7 @@ Transform::get_rotmat() const
  * @return a translation (vector)
  */
 Matrix
-Transform::get_trans() const
+HomTransform::get_trans() const
 {
   Matrix m = mMatrix.submatrix(1, 4, 3, 1);
 
@@ -135,8 +135,8 @@ Transform::get_trans() const
 
 /**Reset the transform.
  */
-Transform&
-Transform::id()
+HomTransform&
+HomTransform::id()
 {
   mMatrix.id();
 
@@ -148,7 +148,7 @@ Transform::id()
  * @param angle the angle
  */
 void
-Transform::rotate_x(float angle)
+HomTransform::rotate_x(float angle)
 {
   Matrix m(3, 3);
   m.id();
@@ -169,7 +169,7 @@ Transform::rotate_x(float angle)
  * @param angle the angle
  */
 void
-Transform::rotate_y(float angle)
+HomTransform::rotate_y(float angle)
 {
   Matrix m(3, 3);
   m.id();
@@ -190,7 +190,7 @@ Transform::rotate_y(float angle)
  * @param angle the angle
  */
 void
-Transform::rotate_z(float angle)
+HomTransform::rotate_z(float angle)
 {
   Matrix m(3, 3);
   m.id();
@@ -213,11 +213,11 @@ Transform::rotate_z(float angle)
  * @param gamma
  */
 void
-Transform::rotate_euler( float alpha,
+HomTransform::rotate_euler( float alpha,
 			 float beta,
 			 float gamma )
 {
-  Transform t_alpha, t_beta, t_gamma;
+  HomTransform t_alpha, t_beta, t_gamma;
 
   t_alpha.rotate_z(alpha);
   t_beta.rotate_y(beta);
@@ -233,11 +233,11 @@ Transform::rotate_euler( float alpha,
  * @param yaw
  */
 void
-Transform::rotate_rpy( float roll,
+HomTransform::rotate_rpy( float roll,
 		       float pitch,
 		       float yaw )
 {
-  Transform t_roll, t_pitch, t_yaw;
+  HomTransform t_roll, t_pitch, t_yaw;
 
   t_roll.rotate_z(roll);
   t_pitch.rotate_y(pitch);
@@ -253,7 +253,7 @@ Transform::rotate_rpy( float roll,
  * @param trans_z translation along the y-axis
  */
 void
-Transform::trans(float trans_x,
+HomTransform::trans(float trans_x,
 		 float trans_y,
 		 float trans_z)
 {
@@ -266,8 +266,8 @@ Transform::trans(float trans_x,
 /**Inverses the transform.
  * @return a reference to itself
  */
-Transform&
-Transform::inverse()
+HomTransform&
+HomTransform::inverse()
 {
   Matrix rot = get_rotmat();
   rot.transpose();
@@ -285,10 +285,10 @@ Transform::inverse()
 /**Returns the inverse of the transform
  * @return the inversed transform
  */
-Transform
-Transform::get_inverse() const
+HomTransform
+HomTransform::get_inverse() const
 {
-  Transform t = *this;
+  HomTransform t = *this;
 
   t.inverse();
 
@@ -300,8 +300,8 @@ Transform::get_inverse() const
  * @param t the rhs operand
  * @return a reference to the result (this) 
  */
-Transform&
-Transform::operator=(const Transform& t)
+HomTransform&
+HomTransform::operator=(const HomTransform& t)
 {
   mMatrix = t.mMatrix;
 
@@ -313,10 +313,10 @@ Transform::operator=(const Transform& t)
  * @param t the other transform
  * @return the resulting transform
  */
-Transform
-Transform::operator*(const Transform& t) const
+HomTransform
+HomTransform::operator*(const HomTransform& t) const
 {
-  Transform result;
+  HomTransform result;
 
   result.mMatrix = mMatrix * t.mMatrix;
 
@@ -328,8 +328,8 @@ Transform::operator*(const Transform& t) const
  * @param t the other transform
  * @return a reference to the result (this)
  */
-Transform&
-Transform::operator*=(const Transform& t)
+HomTransform&
+HomTransform::operator*=(const HomTransform& t)
 {
   *this = *this * t;
 
@@ -342,7 +342,7 @@ Transform::operator*=(const Transform& t)
  * @return the transfromed GeomPrim
  */
 GeomPrim
-Transform::operator*(const GeomPrim& g) const
+HomTransform::operator*(const GeomPrim& g) const
 {
   GeomPrim result = g;
 
@@ -357,7 +357,7 @@ Transform::operator*(const GeomPrim& g) const
  * @return true if the transforms are euqal
  */
 bool
-Transform::operator==(const Transform& t) const
+HomTransform::operator==(const HomTransform& t) const
 {
   if (mMatrix == t.mMatrix)
     {
@@ -375,7 +375,7 @@ Transform::operator==(const Transform& t) const
  * @param gamma
  */
 void
-Transform::rotmat2euler( const Matrix& m,
+HomTransform::rotmat2euler( const Matrix& m,
 			 float& alpha,
 			 float& beta,
 			 float& gamma) const
@@ -388,7 +388,7 @@ Transform::rotmat2euler( const Matrix& m,
  * @param ostr the output stream
  */
 void
-Transform::print_to_stream(std::ostream& ostr) const
+HomTransform::print_to_stream(std::ostream& ostr) const
 {
 //   float alpha, beta, gamma;
 //   rotmat2euler(mMatrix, alpha, beta, gamma);
@@ -403,7 +403,7 @@ Transform::print_to_stream(std::ostream& ostr) const
 }
 
 
-std::ostream& operator<<(std::ostream& ostr, const Transform& t)
+std::ostream& operator<<(std::ostream& ostr, const HomTransform& t)
 {
   t.print_to_stream(ostr);
 

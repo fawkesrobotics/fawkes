@@ -23,8 +23,8 @@
  *  You can read the full text in the LICENSE file in the doc directory. 
  */
 
-#include <geometry/vector.h>
-#include <geometry/transform.h>
+#include <geometry/hom_vector.h>
+#include <geometry/hom_transform.h>
 #include <core/exception.h>
 
 #include <math.h>
@@ -33,15 +33,15 @@ using namespace std;
 
 
 
-/** @class Vector libs/geometry/vector.h
+/** @class HomVector libs/geometry/hom_vector.h
  * A (homogeneous) vector.
  */
 
-/** @var Vector::mLength
+/** @var HomVector::mLength
  * The length of the vector.
  */
 
-/** @var Vector::mChanged
+/** @var HomVector::mChanged
  * Indicates whether the vector was changed and the length possibly
  * needs to be recomputed.
  */
@@ -52,7 +52,7 @@ using namespace std;
  * @param yval the y-coordinate
  * @param zval the z-coordinate
  */
-Vector::Vector(float xval, float yval, float zval)
+HomVector::HomVector(float xval, float yval, float zval)
   : GeomPrim(xval, yval, zval)
 {
   mElements(4,1) = 0.0;
@@ -65,12 +65,12 @@ Vector::Vector(float xval, float yval, float zval)
 /**Constructor.
  * @param m a Matrix
  */
-Vector::Vector(const Matrix& m)
+HomVector::HomVector(const Matrix& m)
   : GeomPrim(m)
 {
   if (mElements(4,1) != 0)
     {
-      cout << "Can't construct a Vector from the given Matrix object since the 4th element is not equal to 0.0." << endl;
+      cout << "Can't construct a HomVector from the given Matrix object since the 4th element is not equal to 0.0." << endl;
       Exception e("Vector::ctor(...)");
       throw e;
     }
@@ -83,12 +83,12 @@ Vector::Vector(const Matrix& m)
 /**Constructor.
  * @param g a GeomPrim
  */
-Vector::Vector(const GeomPrim& g)
+HomVector::HomVector(const GeomPrim& g)
   : GeomPrim(g)
 {
   if (mElements(4,1) != 0)
     {
-      cout << "Can't construct a Vector from the given Matrix object since the 4th element is not equal to 0.0." << endl;
+      cout << "Can't construct a HomVector from the given Matrix object since the 4th element is not equal to 0.0." << endl;
       Exception e("Vector::ctor(...)");
       throw e;
     }
@@ -98,7 +98,7 @@ Vector::Vector(const GeomPrim& g)
 }
 
 /**Destructor */
-Vector::~Vector()
+HomVector::~HomVector()
 {
 }
 
@@ -107,7 +107,7 @@ Vector::~Vector()
  * @return the length
  */
 float
-Vector::length()
+HomVector::length()
 {
   if (mChanged)
     {
@@ -127,7 +127,7 @@ Vector::length()
  * @return the value
  */
 float
-Vector::x() const
+HomVector::x() const
 {
   return GeomPrim::_x();
 }
@@ -137,7 +137,7 @@ Vector::x() const
  * @return a reference to the x-element
  */
 float&
-Vector::x()
+HomVector::x()
 {
   return GeomPrim::_x();
 }
@@ -147,7 +147,7 @@ Vector::x()
  * @param x the new x value
  */
 void
-Vector::x(float x)
+HomVector::x(float x)
 {
   GeomPrim::_x(x);
 }
@@ -157,7 +157,7 @@ Vector::x(float x)
  * @return the value
  */
 float
-Vector::y() const
+HomVector::y() const
 {
   return GeomPrim::_y();
 }
@@ -167,7 +167,7 @@ Vector::y() const
  * @return a reference to the y-element
  */
 float&
-Vector::y()
+HomVector::y()
 {
   return GeomPrim::_y();
 }
@@ -177,7 +177,7 @@ Vector::y()
  * @param y the new y value
  */
 void
-Vector::y(float y)
+HomVector::y(float y)
 {
   GeomPrim::_y(y);
 }
@@ -187,7 +187,7 @@ Vector::y(float y)
  * @return the value
  */
 float
-Vector::z() const
+HomVector::z() const
 {
   return GeomPrim::_z();
 }
@@ -197,7 +197,7 @@ Vector::z() const
  * @return a reference to the z-element
  */
 float&
-Vector::z()
+HomVector::z()
 {
   return GeomPrim::_z();
 }
@@ -207,7 +207,7 @@ Vector::z()
  * @param z the new z value
  */
 void
-Vector::z(float z)
+HomVector::z(float z)
 {
   GeomPrim::_z(z);
 }
@@ -217,7 +217,7 @@ Vector::z(float z)
  * @param t a reference to the transform
  */
 void
-Vector::apply_transform(const Transform& t)
+HomVector::apply_transform(const HomTransform& t)
 {
   _apply_transform(t);
   mChanged = true;
@@ -228,7 +228,7 @@ Vector::apply_transform(const Transform& t)
  * @param angle the angle
  */
 void
-Vector::rotate_x(float angle)
+HomVector::rotate_x(float angle)
 {
   _rotate_x(angle);
 }
@@ -238,7 +238,7 @@ Vector::rotate_x(float angle)
  * @param angle the angle
  */
 void
-Vector::rotate_y(float angle)
+HomVector::rotate_y(float angle)
 {
   _rotate_y(angle);
 }
@@ -248,7 +248,7 @@ Vector::rotate_y(float angle)
  * @param angle the angle
  */
 void
-Vector::rotate_z(float angle)
+HomVector::rotate_z(float angle)
 {
   _rotate_z(angle);
 }
@@ -261,7 +261,7 @@ Vector::rotate_z(float angle)
  * @param scale_z scale factor along the z-axis
  */
 void
-Vector::scale(float scale_x, float scale_y, float scale_z)
+HomVector::scale(float scale_x, float scale_y, float scale_z)
 {
   x() *= scale_x;
   y() *= scale_y;
@@ -273,7 +273,7 @@ Vector::scale(float scale_x, float scale_y, float scale_z)
  * @param l the scaling factor
  */
 void
-Vector::scale_length(float l)
+HomVector::scale_length(float l)
 {
   scale(l, l, l);
 }
@@ -282,8 +282,8 @@ Vector::scale_length(float l)
 /**Brings the vector to unit-length.
  * @return a reference to itself
  */
-Vector&
-Vector::unit()
+HomVector&
+HomVector::unit()
 {
   float len = length();
 
@@ -299,8 +299,8 @@ Vector::unit()
  * @param v the rhs vector
  * @return a reference of the lhs vector (this)
  */
-Vector&
-Vector::operator=(const Vector& v)
+HomVector&
+HomVector::operator=(const HomVector& v)
 {
   GeomPrim::operator=(v);
   mLength = v.mLength;
@@ -315,10 +315,10 @@ Vector::operator=(const Vector& v)
  * @param v the rhs vector
  * @return the resulting vector
  */
-Vector
-Vector::operator+(const Vector& v) const
+HomVector
+HomVector::operator+(const HomVector& v) const
 {
-  Vector result;
+  HomVector result;
 
   result.x() = x() + v.x();
   result.y() = y() + v.y();
@@ -332,8 +332,8 @@ Vector::operator+(const Vector& v) const
  * @param v the lhs vector
  * @return a reference to the resulting vector (this)
  */
-Vector&
-Vector::operator+=(const Vector& v)
+HomVector&
+HomVector::operator+=(const HomVector& v)
 {
   *this = *this + v;
 
@@ -345,10 +345,10 @@ Vector::operator+=(const Vector& v)
  * @param v the lhs vector
  * @return the resulting vector
  */
-Vector
-Vector::operator-(const Vector& v) const
+HomVector
+HomVector::operator-(const HomVector& v) const
 {
-  Vector result;
+  HomVector result;
 
   result.x() = x() - v.x();
   result.y() = y() - v.y();
@@ -362,8 +362,8 @@ Vector::operator-(const Vector& v) const
  * @param v the lhs vector
  * @return a reference to the resulting vector (this)
  */
-Vector&
-Vector::operator-=(const Vector& v)
+HomVector&
+HomVector::operator-=(const HomVector& v)
 {
   *this = *this - v;
 
@@ -375,10 +375,10 @@ Vector::operator-=(const Vector& v)
  * @param f the scalar
  * @return the resulting vector
  */
-Vector
-Vector::operator*(const float& f) const
+HomVector
+HomVector::operator*(const float& f) const
 {
-  Vector result;
+  HomVector result;
 
   result.x() = x() * f;
   result.y() = y() * f;
@@ -392,8 +392,8 @@ Vector::operator*(const float& f) const
  * @param f the scalar
  * @return a reference to thre resulting vector (this)
  */
-Vector&
-Vector::operator*=(const float& f)
+HomVector&
+HomVector::operator*=(const float& f)
 {
   *this = *this * f;
 
@@ -405,7 +405,7 @@ Vector::operator*=(const float& f)
  * @return float the scalar product
  */
 float
-Vector::operator*(const Vector& v) const
+HomVector::operator*(const HomVector& v) const
 {
   float result;
 
@@ -420,10 +420,10 @@ Vector::operator*(const Vector& v) const
  * @param v the lhs vector
  * @return the cross-product
  */
-Vector
-Vector::operator%(const Vector& v) const
+HomVector
+HomVector::operator%(const HomVector& v) const
 {
-  Vector result;
+  HomVector result;
 
   result.x() = y() * v.z() - z() * v.y(); 
   result.y() = z() * v.x() - x() * v.z();
@@ -437,8 +437,8 @@ Vector::operator%(const Vector& v) const
  * @param v the lhs vector
  * @return a reference to the resulting vector (this)
  */
-Vector&
-Vector::operator%=(const Vector& v)
+HomVector&
+HomVector::operator%=(const HomVector& v)
 {
   *this = *this % v;
 
@@ -451,7 +451,7 @@ Vector::operator%=(const Vector& v)
  * @return the angle in radians
  */
 float
-Vector::operator<(Vector& v)
+HomVector::operator<(HomVector& v)
 {
   return acos( (*this) * v / (length() * v.length()) );
 }

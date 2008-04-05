@@ -36,7 +36,7 @@
 #include <plugins/navigator/libnavi/nline.h>
 #include <utils/math/binomial_coefficient.h>
 #include <utils/math/angle.h>
-#include <geometry/vector.h>
+#include <geometry/hom_vector.h>
 #include <core/threading/mutex.h>
 
 #include <cmath>
@@ -719,7 +719,7 @@ Navigator::main_loop()
       orientation = 0;
     }
 
-  Vector bend_vector;
+  HomVector bend_vector;
   double odometry_difference =  sqrt(pow(odometry_velocity_y, 2.) + pow(odometry_velocity_x, 2.)) * elapsed_time;
 
   //calculation of the odometry
@@ -746,7 +746,7 @@ Navigator::main_loop()
       //recalculating the map for the new positions
       for(unsigned int i = 0; i < map.size(); i++)
         {//recalculating map
-          Vector obstacle_rotation;
+          HomVector obstacle_rotation;
           obstacle_rotation.x(map[i].x);
           obstacle_rotation.y(map[i].y);
           obstacle_rotation.z(0.);
@@ -757,7 +757,7 @@ Navigator::main_loop()
           map[i].y = obstacle_rotation.y();
         }
       //has to reset the target, since the path will be deleted
-      Vector obstacle_rotation;
+      HomVector obstacle_rotation;
       obstacle_rotation.x(path[path.size() - 1]->x);
       obstacle_rotation.y(path[path.size() - 1]->y);
       obstacle_rotation -= bend_vector;

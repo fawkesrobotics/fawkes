@@ -30,7 +30,7 @@
 #include <models/mirror/bulb/bulb_sampler.h>
 #include <core/exception.h>
 #include <utils/math/angle.h>
-#include <geometry/point.h>
+#include <geometry/hom_point.h>
 
 /** @class MirrorCalibTool tools/firestation/mirror_calib.h
  * This class encapsulates the routines necessary for interactive mirror
@@ -109,7 +109,7 @@ MirrorCalibTool::start()
   m_step_two = false;
 
   m_sampler = new BulbSampler(m_img_width, m_img_height);
-  m_next_sample_point = Point(0.0, 0.0, 0.0);
+  m_next_sample_point = HomPoint(0.0, 0.0, 0.0);
 
   cout << "Define center" << endl;
 }
@@ -144,7 +144,7 @@ MirrorCalibTool::step(unsigned int x, unsigned int y)
       if (m_sample_dist_step < m_num_dists)
 	{
 	  float dist = m_sample_dist[m_sample_dist_step];
-	  m_next_sample_point = Point(0.0, dist, 0.0);
+	  m_next_sample_point = HomPoint(0.0, dist, 0.0);
 	  float phi = atan2f( float(x) - float(m_center_x), 
 			      float(m_center_y) - float(y) );
 	  cout << "phi: " << phi << endl;

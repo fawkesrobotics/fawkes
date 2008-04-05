@@ -24,7 +24,7 @@
  */
 
 #include <geometry/geom_prim.h>
-#include <geometry/transform.h>
+#include <geometry/hom_transform.h>
 #include <core/exception.h>
 
 using namespace std;
@@ -171,7 +171,7 @@ GeomPrim::_z(float z)
  * @param t a reference to the transform
  */
 void
-GeomPrim::_apply_transform(const Transform& t)
+GeomPrim::_apply_transform(const HomTransform& t)
 {
   mElements = t.get_homtransmat() * mElements;
 }
@@ -183,7 +183,7 @@ GeomPrim::_apply_transform(const Transform& t)
 void
 GeomPrim::_rotate_x(float angle)
 {
-  Transform t;
+  HomTransform t;
   t.rotate_x(angle);
   _apply_transform(t);
 }
@@ -195,7 +195,7 @@ GeomPrim::_rotate_x(float angle)
 void
 GeomPrim::_rotate_y(float angle)
 {
-  Transform t;
+  HomTransform t;
   t.rotate_y(angle);
   _apply_transform(t);
 }
@@ -207,7 +207,7 @@ GeomPrim::_rotate_y(float angle)
 void
 GeomPrim::_rotate_z(float angle)
 {
-  Transform t;
+  HomTransform t;
   t.rotate_z(angle);
   _apply_transform(t);
 }

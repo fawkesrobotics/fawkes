@@ -28,15 +28,15 @@
 
 #include <geometry/geom_prim.h>
 
-class Vector;
+class HomVector;
 
-class Point : public GeomPrim
+class HomPoint : public GeomPrim
 {
  public:
-  Point(float x = 0.0, float y = 0.0, float z = 0.0);
-  Point(const Matrix& m);
-  Point(const GeomPrim& g);
-  virtual ~Point();
+  HomPoint(float x = 0.0, float y = 0.0, float z = 0.0);
+  HomPoint(const Matrix& m);
+  HomPoint(const GeomPrim& g);
+  virtual ~HomPoint();
 
   float  x() const;
   float& x();
@@ -50,7 +50,7 @@ class Point : public GeomPrim
   float& z();
   void   z(float z);
 
-  void apply_transform(const Transform& t);
+  void apply_transform(const HomTransform& t);
 
   void rotate_x(float angle);
   void rotate_y(float angle);
@@ -59,10 +59,10 @@ class Point : public GeomPrim
   void trans(float trans_x, float trans_y, float trans_z);
   void move_to(float x, float y, float z);
 
-  Point& operator=(const Point& p);
-  Point operator+(const Vector& v);
-  Point& operator+=(const Vector& p);
-  Vector operator-(const Point& p) const;
+  HomPoint& operator=(const HomPoint& p);
+  HomPoint operator+(const HomVector& v);
+  HomPoint& operator+=(const HomVector& p);
+  HomVector operator-(const HomPoint& p) const;
 };
 
 #endif /* __POINT_H_ */

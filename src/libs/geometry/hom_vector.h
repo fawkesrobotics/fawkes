@@ -29,13 +29,13 @@
 #include <geometry/geom_prim.h>
 #include <iostream>
 
-class Vector : public GeomPrim
+class HomVector : public GeomPrim
 {
  public:
-  Vector(float x = 0.0, float y = 0.0, float z = 0.0);
-  Vector(const Matrix& m);
-  Vector(const GeomPrim& g);
-  virtual ~Vector();
+  HomVector(float x = 0.0, float y = 0.0, float z = 0.0);
+  HomVector(const Matrix& m);
+  HomVector(const GeomPrim& g);
+  virtual ~HomVector();
 
   float length();
 
@@ -51,26 +51,26 @@ class Vector : public GeomPrim
   float& z();
   void   z(float z);
 
-  void apply_transform(const Transform& t);
+  void apply_transform(const HomTransform& t);
 
   void rotate_x(float angle);
   void rotate_y(float angle);
   void rotate_z(float angle);
   void scale(float x, float y, float z);
   void scale_length(float l);
-  Vector& unit();
+  HomVector& unit();
 
-  Vector& operator=(const Vector& v);
-  Vector operator+(const Vector& v) const;
-  Vector& operator+=(const Vector& v);
-  Vector operator-(const Vector& v) const;
-  Vector& operator-=(const Vector& v);
-  Vector operator*(const float& f) const;
-  Vector& operator*=(const float& f);
-  float operator*(const Vector& v) const;
-  Vector operator%(const Vector& v) const;
-  Vector& operator%=(const Vector& v);
-  float operator<(Vector& v);
+  HomVector& operator=(const HomVector& v);
+  HomVector operator+(const HomVector& v) const;
+  HomVector& operator+=(const HomVector& v);
+  HomVector operator-(const HomVector& v) const;
+  HomVector& operator-=(const HomVector& v);
+  HomVector operator*(const float& f) const;
+  HomVector& operator*=(const float& f);
+  float operator*(const HomVector& v) const;
+  HomVector operator%(const HomVector& v) const;
+  HomVector& operator%=(const HomVector& v);
+  float operator<(HomVector& v);
 
  private:
   float mLength;

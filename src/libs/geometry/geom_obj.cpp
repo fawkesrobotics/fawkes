@@ -24,7 +24,7 @@
  */
 
 #include <geometry/geom_obj.h>
-#include <geometry/transform.h>
+#include <geometry/hom_transform.h>
 
 using namespace std;
 
@@ -67,7 +67,7 @@ using namespace std;
  * @param t the transform to the reference CS
  * @param ref_point the reference point of the object
  */
-GeomObj::GeomObj(const Transform& t, const Point& ref_point)
+GeomObj::GeomObj(const HomTransform& t, const HomPoint& ref_point)
 {
   mToRefCS = t;
   mRefPoint = ref_point;
@@ -87,7 +87,7 @@ GeomObj::~GeomObj()
  * @return a reference to *this
  */
 GeomObj&
-GeomObj::_apply_transform(const Transform& t)
+GeomObj::_apply_transform(const HomTransform& t)
 {
   mToRefCS *= t;
   cout << mToRefCS << endl;
@@ -102,7 +102,7 @@ GeomObj::_apply_transform(const Transform& t)
  * @return a reference to *this
  */
 GeomObj&
-GeomObj::_apply_transform_ref(const Transform& t)
+GeomObj::_apply_transform_ref(const HomTransform& t)
 {
   mToRefCS = t * mToRefCS;
   cout << mToRefCS << endl;
@@ -119,7 +119,7 @@ GeomObj::_apply_transform_ref(const Transform& t)
 GeomObj&
 GeomObj::_rotate_x(float angle)
 {
-  Transform t;
+  HomTransform t;
   t.rotate_x(angle);
   mToRefCS *= t;
 
@@ -136,7 +136,7 @@ GeomObj::_rotate_x(float angle)
 GeomObj&
 GeomObj::_rotate_y(float angle)
 {
-  Transform t;
+  HomTransform t;
   t.rotate_y(angle);
   mToRefCS *= t;
 
@@ -153,7 +153,7 @@ GeomObj::_rotate_y(float angle)
 GeomObj&
 GeomObj::_rotate_z(float angle)
 {
-  Transform t;
+  HomTransform t;
   t.rotate_z(angle);
   mToRefCS *= t;
 
@@ -170,7 +170,7 @@ GeomObj::_rotate_z(float angle)
 GeomObj&
 GeomObj::_rotate_x_ref(float angle)
 {
-  Transform t;
+  HomTransform t;
   t.rotate_x(angle);
   mToRefCS = t * mToRefCS;
 
@@ -187,7 +187,7 @@ GeomObj::_rotate_x_ref(float angle)
 GeomObj&
 GeomObj::_rotate_y_ref(float angle)
 {
-  Transform t;
+  HomTransform t;
   t.rotate_y(angle);
   mToRefCS = t * mToRefCS;
 
@@ -204,7 +204,7 @@ GeomObj::_rotate_y_ref(float angle)
 GeomObj&
 GeomObj::_rotate_z_ref(float angle)
 {
-  Transform t;
+  HomTransform t;
   t.rotate_z(angle);
   mToRefCS = t * mToRefCS;
 
@@ -240,7 +240,7 @@ GeomObj::_trans(float trans_x, float trans_y, float trans_z)
 GeomObj&
 GeomObj::_trans_ref(float trans_x, float trans_y, float trans_z)
 {
-  Transform t;
+  HomTransform t;
   t.trans(trans_x, trans_y, trans_z);
   mToRefCS = mToRefCS * t;
   mChanged = true;
@@ -252,7 +252,7 @@ GeomObj::_trans_ref(float trans_x, float trans_y, float trans_z)
 /**Returns the reference point wrt. the reference CS.
  * @return the reference point
  */
-Point
+HomPoint
 GeomObj::_get_refpoint_ref() const
 {
   return mToRefCS * mRefPoint;
@@ -262,7 +262,7 @@ GeomObj::_get_refpoint_ref() const
 /**Returns all the object's vector wrt. the local CS.
  * @return a list of vectors
  */
-vector<Vector>
+vector<HomVector>
 GeomObj::_get_vectors_local() const
 {
   return mVectorsLocal;
@@ -272,17 +272,17 @@ GeomObj::_get_vectors_local() const
 /**Returns all the object's vectors wrt. the reference CS.
  * @return a list of vectors
  */
-vector<Vector>
+vector<HomVector>
 GeomObj::_get_vectors_ref()
 {
   if (mChanged)
     {
       mVectorsRef.clear();
 
-      vector<Vector>::iterator iter;
+      vector<HomVector>::iterator iter;
       for (iter = mVectorsLocal.begin(); iter != mVectorsLocal.end(); iter++)
 	{
-	  Vector v;
+	  HomVector v;
 	  v = mToRefCS * (*iter);
 	  mVectorsRef.push_back(v);
 	}

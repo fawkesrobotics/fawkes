@@ -26,9 +26,9 @@
 #ifndef __GEOM_OBJ_H_
 #define __GEOM_OBJ_H_
 
-#include <geometry/point.h>
-#include <geometry/vector.h>
-#include <geometry/transform.h>
+#include <geometry/hom_point.h>
+#include <geometry/hom_vector.h>
+#include <geometry/hom_transform.h>
 
 #include <vector>
 
@@ -38,10 +38,10 @@ class GeomObj
   virtual ~GeomObj();
 
  protected:
-  GeomObj(const Transform& t, const Point& ref_point);
+  GeomObj(const HomTransform& t, const HomPoint& ref_point);
 
-  GeomObj& _apply_transform(const Transform& t);
-  GeomObj& _apply_transform_ref(const Transform& t);
+  GeomObj& _apply_transform(const HomTransform& t);
+  GeomObj& _apply_transform_ref(const HomTransform& t);
 
   GeomObj& _rotate_x(float angle);
   GeomObj& _rotate_y(float angle);
@@ -54,15 +54,15 @@ class GeomObj
   GeomObj& _trans(float x, float y, float z);
   GeomObj& _trans_ref(float x, float y, float z);
 
-  Point _get_refpoint_ref() const;
+  HomPoint _get_refpoint_ref() const;
   
-  std::vector<Vector> _get_vectors_local() const;
-  std::vector<Vector> _get_vectors_ref();
+  std::vector<HomVector> _get_vectors_local() const;
+  std::vector<HomVector> _get_vectors_ref();
 
-  Transform mToRefCS;
-  Point mRefPoint;
-  std::vector<Vector> mVectorsLocal;
-  std::vector<Vector> mVectorsRef;
+  HomTransform mToRefCS;
+  HomPoint mRefPoint;
+  std::vector<HomVector> mVectorsLocal;
+  std::vector<HomVector> mVectorsRef;
 
   bool mChanged;
 };

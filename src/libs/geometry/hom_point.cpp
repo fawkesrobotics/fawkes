@@ -23,14 +23,14 @@
  *  You can read the full text in the LICENSE file in the doc directory. 
  */
 
-#include <geometry/point.h>
-#include <geometry/vector.h>
+#include <geometry/hom_point.h>
+#include <geometry/hom_vector.h>
 #include <core/exception.h>
 
 using namespace std;
 
 
-/** @class Point libs/geometry/point.h
+/** @class HomPoint libs/geometry/hom_point.h
  * A (homogeneous) point.
  */
 
@@ -40,7 +40,7 @@ using namespace std;
  * @param yval the y-coordinate
  * @param zval the z-coordinate
  */
-Point::Point(float xval, float yval, float zval)
+HomPoint::HomPoint(float xval, float yval, float zval)
   : GeomPrim(xval, yval, zval)
 {
   mElements(4,1) = 1.0;
@@ -50,7 +50,7 @@ Point::Point(float xval, float yval, float zval)
 /**Constructor.
  * @param m a Matrix
  */
-Point::Point(const Matrix& m)
+HomPoint::HomPoint(const Matrix& m)
   : GeomPrim(m)
 {
   if (mElements(4,1) != 1.0)
@@ -65,7 +65,7 @@ Point::Point(const Matrix& m)
 /**Constructor.
  * @param g a GeomPrim
  */
-Point::Point(const GeomPrim& g)
+HomPoint::HomPoint(const GeomPrim& g)
   : GeomPrim(g)
 {
   if (mElements(4,1) != 1)
@@ -77,7 +77,7 @@ Point::Point(const GeomPrim& g)
 }
 
 /**Destructor */
-Point::~Point()
+HomPoint::~HomPoint()
 {
 }
 
@@ -86,7 +86,7 @@ Point::~Point()
  * @return the value
  */
 float
-Point::x() const
+HomPoint::x() const
 {
   return _x();
 }
@@ -96,7 +96,7 @@ Point::x() const
  * @return a reference to the x-element
  */
 float&
-Point::x()
+HomPoint::x()
 {
   return _x();
 }
@@ -106,7 +106,7 @@ Point::x()
  * @param x the new x value
  */
 void
-Point::x(float x)
+HomPoint::x(float x)
 {
   _x(x);
 }
@@ -116,7 +116,7 @@ Point::x(float x)
  * @return the value
  */
 float
-Point::y() const
+HomPoint::y() const
 {
   return _y();
 }
@@ -126,7 +126,7 @@ Point::y() const
  * @return a reference to the y-element
  */
 float&
-Point::y()
+HomPoint::y()
 {
   return _y();
 }
@@ -136,7 +136,7 @@ Point::y()
  * @param y the new y value
  */
 void
-Point::y(float y)
+HomPoint::y(float y)
 {
   _y(y);
 }
@@ -146,7 +146,7 @@ Point::y(float y)
  * @return the value
  */
 float
-Point::z() const
+HomPoint::z() const
 {
   return _z();
 }
@@ -156,7 +156,7 @@ Point::z() const
  * @return a reference to the z-element
  */
 float&
-Point::z()
+HomPoint::z()
 {
   return _z();
 }
@@ -166,7 +166,7 @@ Point::z()
  * @param z the new z value
  */
 void
-Point::z(float z)
+HomPoint::z(float z)
 {
   _z(z);
 }
@@ -176,7 +176,7 @@ Point::z(float z)
  * @param t a reference to the transform
  */
 void
-Point::apply_transform(const Transform& t)
+HomPoint::apply_transform(const HomTransform& t)
 {
   _apply_transform(t);
 }
@@ -186,7 +186,7 @@ Point::apply_transform(const Transform& t)
  * @param angle the angle
  */
 void
-Point::rotate_x(float angle)
+HomPoint::rotate_x(float angle)
 {
   _rotate_x(angle);
 }
@@ -196,7 +196,7 @@ Point::rotate_x(float angle)
  * @param angle the angle
  */
 void
-Point::rotate_y(float angle)
+HomPoint::rotate_y(float angle)
 {
   _rotate_y(angle);
 }
@@ -206,7 +206,7 @@ Point::rotate_y(float angle)
  * @param angle the angle
  */
 void
-Point::rotate_z(float angle)
+HomPoint::rotate_z(float angle)
 {
   _rotate_z(angle);
 }
@@ -218,7 +218,7 @@ Point::rotate_z(float angle)
  * @param trans_z translation along the z-axis
  */
 void
-Point::trans(float trans_x, float trans_y, float trans_z)
+HomPoint::trans(float trans_x, float trans_y, float trans_z)
 {
   x() += trans_x;
   y() += trans_y;
@@ -232,7 +232,7 @@ Point::trans(float trans_x, float trans_y, float trans_z)
  * @param zval the new z-coordinate
  */
 void
-Point::move_to(float xval, float yval, float zval)
+HomPoint::move_to(float xval, float yval, float zval)
 {
   x() = xval;
   y() = yval;
@@ -244,8 +244,8 @@ Point::move_to(float xval, float yval, float zval)
  * @param p the rhs point
  * @return a reference of the lhs point (this)
  */
-Point&
-Point::operator=(const Point& p)
+HomPoint&
+HomPoint::operator=(const HomPoint& p)
 {
   GeomPrim::operator=(p);
 
@@ -257,10 +257,10 @@ Point::operator=(const Point& p)
  * @param v the rhs vector
  * @return the resulting point
  */
-Point
-Point::operator+(const Vector& v)
+HomPoint
+HomPoint::operator+(const HomVector& v)
 {
-  Point result;
+  HomPoint result;
 
   result.x() = x() + v.x();
   result.y() = y() + v.y();
@@ -274,8 +274,8 @@ Point::operator+(const Vector& v)
  * @param v the rhs vector
  * @return a reference to the resulting point (this)
  */
-Point&
-Point::operator+=(const Vector& v)
+HomPoint&
+HomPoint::operator+=(const HomVector& v)
 {
   *this = *this + v;
 
@@ -287,11 +287,11 @@ Point::operator+=(const Vector& v)
  * @param p the rhs point
  * @return the difference vector
  */
-Vector
-Point::operator-(const Point& p) const
+HomVector
+HomPoint::operator-(const HomPoint& p) const
 {
-  Vector v1(mElements);
-  Vector v2(p.mElements);
+  HomVector v1(mElements);
+  HomVector v2(p.mElements);
   
   return v1 - v2;
 }

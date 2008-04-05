@@ -31,28 +31,28 @@
 class Vector;
 class GeomPrim;
 
-class Transform
+class HomTransform
 {
-  friend std::ostream& operator<<(std::ostream& ostr, const Transform& t);
+  friend std::ostream& operator<<(std::ostream& ostr, const HomTransform& t);
 
  public:
-  Transform();
-  Transform( float alpha,
-	     float beta,
-	     float gamma,
-	     float trans_x = 0.0,
-	     float trans_y = 0.0,
-	     float trans_z = 0.0 );
+  HomTransform();
+  HomTransform( float alpha,
+		float beta,
+		float gamma,
+		float trans_x = 0.0,
+		float trans_y = 0.0,
+		float trans_z = 0.0 );
 
-  Transform(const Matrix& m);
+  HomTransform(const Matrix& m);
 
-  virtual ~Transform();
+  virtual ~HomTransform();
 
   Matrix get_homtransmat() const;
   Matrix get_rotmat() const;
   Matrix get_trans() const;
 
-  Transform& id();
+  HomTransform& id();
 
   void rotate_x(float angle);
   void rotate_y(float angle);
@@ -70,14 +70,14 @@ class Transform
 	      float trans_y,
 	      float trans_z );
 
-  Transform& inverse();
-  Transform get_inverse() const;
+  HomTransform& inverse();
+  HomTransform get_inverse() const;
 
-  Transform& operator=(const Transform& t);
-  Transform operator*(const Transform& t) const;
-  Transform& operator*=(const Transform& t);
+  HomTransform& operator=(const HomTransform& t);
+  HomTransform operator*(const HomTransform& t) const;
+  HomTransform& operator*=(const HomTransform& t);
   GeomPrim operator*(const GeomPrim& g) const;
-  bool operator==(const Transform& t) const;
+  bool operator==(const HomTransform& t) const;
 
   void print_to_stream(std::ostream& ostr) const;
 

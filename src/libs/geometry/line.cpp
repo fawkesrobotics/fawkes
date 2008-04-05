@@ -46,8 +46,8 @@
  * @param p a point on the line ("Aufpunkt")
  * @param v a vector that lies on the line
  */
-Line::Line(const Point& p, const Vector& v)
-  : GeomObj(Transform().id(), Point(0.0, 0.0, 0.0))
+Line::Line(const HomPoint& p, const HomVector& v)
+  : GeomObj(HomTransform().id(), HomPoint(0.0, 0.0, 0.0))
 {
   mBasePoint = p;
   mDirection = v;
@@ -58,7 +58,7 @@ Line::Line(const Point& p, const Vector& v)
   float z_angle = atan( mDirection.y() / mDirection.x() );
   // project the direction vector in the xy-plane and calculate
   // the angle between itself and the projected vector
-  Vector direction_xy = mDirection;
+  HomVector direction_xy = mDirection;
   direction_xy.z() = 0.0;
   float y_angle = -atan( mDirection.z() / direction_xy.length() );
 
@@ -77,8 +77,8 @@ Line::Line(const Point& p, const Vector& v)
  * @param p1 one point that lies on the line
  * @param p2 another point that lies on the line
  */
-Line::Line(const Point& p1, const Point& p2)
-  : GeomObj(Transform().id(), Point(0.0, 0.0, 0.0))
+Line::Line(const HomPoint& p1, const HomPoint& p2)
+  : GeomObj(HomTransform().id(), HomPoint(0.0, 0.0, 0.0))
 {
   mBasePoint = p1;
   mDirection = p2 - p1;
@@ -89,7 +89,7 @@ Line::Line(const Point& p1, const Point& p2)
   float z_angle = atan( mDirection.y() / mDirection.x() );
   // project the direction vector in the xy-plane and calculate
   // the angle between itself and the projected vector
-  Vector direction_xy = mDirection;
+  HomVector direction_xy = mDirection;
   direction_xy.z() = 0.0;
   float y_angle = -atan( mDirection.z() / direction_xy.length() );
 
@@ -115,7 +115,7 @@ Line::~Line()
  * @return a reference to itself
  */
 Line&
-Line::apply_transform(const Transform& t)
+Line::apply_transform(const HomTransform& t)
 {
   _apply_transform(t);
 
@@ -128,7 +128,7 @@ Line::apply_transform(const Transform& t)
  * @return a reference to itself
  */
 Line&
-Line::apply_transform_ref(const Transform& t)
+Line::apply_transform_ref(const HomTransform& t)
 {
   _apply_transform_ref(t);
 

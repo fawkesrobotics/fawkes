@@ -29,11 +29,11 @@
 #include <geometry/matrix.h>
 #include <iostream>
 
-class Transform;
+class HomTransform;
 
 class GeomPrim
 {
-  friend class Transform;
+  friend class HomTransform;
   friend std::ostream& operator<<(std::ostream& ostr, const GeomPrim& g);
 
  public:
@@ -55,7 +55,7 @@ class GeomPrim
   float& _z();
   void   _z(float z);
 
-  void _apply_transform(const Transform& t);
+  void _apply_transform(const HomTransform& t);
 
   void _rotate_x(float angle);
   void _rotate_y(float angle);
