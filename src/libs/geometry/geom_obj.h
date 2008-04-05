@@ -23,8 +23,8 @@
  *  You can read the full text in the LICENSE file in the doc directory. 
  */
 
-#ifndef __GEOM_OBJ_H_
-#define __GEOM_OBJ_H_
+#ifndef __GEOMETRY_GEOM_OBJ_H_
+#define __GEOMETRY_GEOM_OBJ_H_
 
 #include <geometry/hom_point.h>
 #include <geometry/hom_vector.h>
@@ -67,4 +67,4 @@ class GeomObj
   bool mChanged;
 };
 
-#endif /* __GEOM_OBJ_H_ */
+#endif /* __GEOMETRY_GEOM_OBJ_H_ */
