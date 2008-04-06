@@ -23,7 +23,7 @@
  *  You can read the full text in the LICENSE file in the doc directory. 
  */
 
-#include <utils/robot_motion/omni_motion_model.h>
+#include <plugins/navigator/robot_motion/omni_motion_model.h>
 #include <geometry/vector.h>
 #include <geometry/hom_point.h>
 #include <geometry/hom_vector.h>
@@ -32,7 +32,7 @@
 #include <cstdio>
 #include <cstring>
 
-/** @class OmniMotionModel utils/robot_motion/omni_motion_model.h
+/** @class OmniMotionModel plugins/navigator/robot_motion/omni_motion_model.h
  * A motion model for a three-wheeled omni-drive robot. It is assumed that the wheels are
  * mounted at angles -60° (front right), 180° (rear), and 60° (left), all with the same
  * distance to the center of the robot.
@@ -221,7 +221,7 @@ OmniMotionModel::pose_to_rpm(float* pose, long diff_msec)
   float r = 0.5 * s * 1.0 / sin( p[2] / 2.0 ); 
   float l = r * p[2];
 
-  printf("l=%.2f  phi=%.2f  r=%.2f  s=%.2f\n", l, p[2], r, s);
+  //printf("l=%.2f  phi=%.2f  r=%.2f  s=%.2f\n", l, p[2], r, s);
   
   HomVector v( p[0], p[1] );
   v.set_length(l);

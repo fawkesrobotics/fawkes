@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Libraries
+#              Makefile Build System for Fawkes : Geometry QA
 #                            -------------------
-#   Created on Tue Nov 07 16:12:59 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Sun April 06 16:37:44 2008
+#   copyright (C) 2008 by Daniel Beck, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -19,20 +19,13 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../../../..
 
-SUBDIRS = core utils interface netcomm blackboard config aspect geometry
+OBJS_qa_omni_motion_model = qa_omni_motion_model.o
+LIBS_qa_omni_motion_model = robotmotion
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
+OBJS_all =	$(OBJS_qa_omni_motion_model)
 
-# Explicit dependencies, this is needed to have make bail out if there is any
-# error. This is also necessary for working parallel build (i.e. for dual core)
-utils: core 
-interface: core
-blackboard: core utils interface netcomm
-netcomm: core utils
-config: core netcomm utils
-aspect: core utils blackboard netcomm config
-geometry: core
+BINS_all =	$(BINDIR)/qa_omni_motion_model
 
+include $(BASEDIR)/etc/buildsys/base.mk

@@ -26,7 +26,7 @@
 #ifndef __UTILS_ROBOT_MOTION_OMNI_MOTION_MODEL_H_
 #define __UTILS_ROBOT_MOTION_OMNI_MOTION_MODEL_H_
 
-#include <utils/robot_motion/motion_model.h>
+#include <plugins/navigator/robot_motion/motion_model.h>
 #include <geometry/matrix.h>
 
 class OmniMotionModel : public MotionModel

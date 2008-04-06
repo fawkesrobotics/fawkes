@@ -23,12 +23,12 @@
  *  You can read the full text in the LICENSE file in the doc directory. 
  */
 
-#include <utils/robot_motion/motion_model.h>
+#include <plugins/navigator/robot_motion/motion_model.h>
 
 #include <cstdlib>
 #include <cstring>
 
-/** @class MotionModel utils/robot_motion/motion_model.h
+/** @class MotionModel plugins/navigator/robot_motion/motion_model.h
  * A base class for motion models. Most of the methods are protected since it is intended
  * that better interface methods are provided by derived classes.
  * @author Daniel Beck

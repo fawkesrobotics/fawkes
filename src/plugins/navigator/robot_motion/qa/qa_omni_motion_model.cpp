@@ -27,7 +27,7 @@
 
 /// @cond QA
 
-#include <utils/robot_motion/omni_motion_model.h>
+#include <plugins/navigator/robot_motion/omni_motion_model.h>
 
 #include <cstdio>
 #include <cmath>
