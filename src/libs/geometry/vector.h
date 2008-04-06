@@ -30,6 +30,7 @@ class Vector
 {
  public:
   Vector(unsigned int size = 3, float* elems = 0, bool manage_memory = true);
+  Vector(const Vector& v);
   ~Vector();
 
   unsigned int size() const;

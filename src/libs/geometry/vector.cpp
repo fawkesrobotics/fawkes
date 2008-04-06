@@ -65,11 +65,28 @@ Vector::Vector(unsigned int size, float* data, bool manage_memory)
     }
 }
 
+/** Copy constructor.
+ * @param v another Vector
+ */
+Vector::Vector(const Vector& v)
+{
+  m_size = v.m_size;
+  m_manage_memory = true;
+  m_data = new float[m_size];
+
+  for (unsigned int i = 0; i < m_size; ++i)
+    { 
+      m_data[i] = v.m_data[i];
+    }
+}
+
 /** Destructor. */
 Vector::~Vector()
 {
   if (m_manage_memory)
-    { delete[] m_data; }
+    {
+      delete[] m_data; 
+    }
 }
 
 /** Get the number of elements.
@@ -343,10 +360,12 @@ Vector::operator=(const Vector& v)
 {
   if (m_size != v.m_size)
     { 
+      if (m_manage_memory)
+	{ delete[] m_data; }
+
       m_size = v.m_size;
       m_manage_memory = true;
-      
-      delete[] m_data;
+
       m_data = new float[m_size];
     }
 

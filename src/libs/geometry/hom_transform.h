@@ -35,6 +35,7 @@ class HomTransform
 {
  public:
   HomTransform();
+  HomTransform(const Matrix& m);
   ~HomTransform();
 
   HomTransform& reset();

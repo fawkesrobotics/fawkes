@@ -84,9 +84,12 @@ HomVector&
 HomVector::set_length(float length)
 {
   float cur_len = this->length();
-  x() = x() / cur_len * length;
-  y() = y() / cur_len * length;
-  z() = z() / cur_len * length;
+  if (cur_len != 0.0)
+    {
+      x() = x() / cur_len * length;
+      y() = y() / cur_len * length;
+      z() = z() / cur_len * length;
+    }
 
   return *this;
 }

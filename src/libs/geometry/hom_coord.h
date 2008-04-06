@@ -33,6 +33,8 @@ class HomCoord
  public:
   friend class HomTransform;
 
+  HomCoord(const HomCoord& c);
+
   virtual ~HomCoord();
 
   virtual float  x() const;

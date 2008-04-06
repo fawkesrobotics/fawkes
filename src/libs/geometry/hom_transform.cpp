@@ -44,6 +44,15 @@ HomTransform::HomTransform()
   m_matrix->id();
 }
 
+/** Copy constructor.
+ * @param m a Matrix
+ */
+HomTransform::HomTransform(const Matrix& m)
+{
+  m_matrix = new Matrix(4, 4);
+  (*m_matrix) = m;
+}
+
 /** Destructor */
 HomTransform::~HomTransform()
 {
@@ -183,8 +192,10 @@ HomTransform::operator=(const HomTransform& t)
 HomTransform
 HomTransform::operator*(const HomTransform& t) const
 {
-  HomTransform result;
-  return result;
+  Matrix m(4, 4);
+  m = (*m_matrix) * (*t.m_matrix);
+
+  return HomTransform(m);
 }
 
 /** Multiplication-assignment operator.
@@ -218,10 +229,8 @@ HomTransform::operator==(const HomTransform& t) const
 HomCoord
 HomTransform::operator*(const HomCoord& h) const
 {
-  Vector t(4);
-  t = (*m_matrix) * (*h.m_vector);
-  HomCoord result;
-  (*result.m_vector) = t;
+  Vector v(4);
+  v = (*m_matrix) * (*h.m_vector);
   
-  return result;
+  return HomCoord(v);
 }

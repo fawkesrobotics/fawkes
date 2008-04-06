@@ -27,6 +27,8 @@
 #include <geometry/hom_transform.h>
 #include <geometry/vector.h>
 
+#include <cstdio>
+
 /** @class HomCoord geometry/hom_coord.h
  * Base class for homogeneous primitives (vector and point).
  * @author Daniel Beck
@@ -49,6 +51,15 @@ HomCoord::HomCoord(float x, float y, float z, float w)
   m_vector->set(1, y);
   m_vector->set(2, z);
   m_vector->set(3, w);
+}
+
+/** Copy constructor.
+ * @param c another HomCoord
+ */
+HomCoord::HomCoord(const HomCoord& c)
+{
+  m_vector = new Vector(4);
+  (*m_vector) = (*c.m_vector);
 }
 
 /** Constructor.
