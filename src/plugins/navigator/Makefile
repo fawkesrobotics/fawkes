@@ -42,7 +42,7 @@ ifeq ($(BUILD_NAVIGATOR),1)
   CFLAGS  = $(shell $(PKGCONFIG) --cflags gts)
   LDFLAGS = $(shell $(PKGCONFIG) --libs gts)
 
-  PRESUBDIRS = gts fuzzy libnavi
+  PRESUBDIRS = gts fuzzy libnavi robot_motion
 
   $(PLUGINS_all): | presubdirs
 endif
