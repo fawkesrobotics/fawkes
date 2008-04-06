@@ -9,20 +9,18 @@
  *
  ****************************************************************************/
 
-/*
- *  This program is free software; you can redistribute it and/or modify
+/*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE file mentioned below for details).
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  You can read the full text in the LICENSE file in the doc directory. 
  */
 
 #include <utils/robot_motion/omni_motion_model.h>
@@ -31,6 +29,8 @@
 #include <geometry/hom_vector.h>
 
 #include <cmath>
+#include <cstdio>
+#include <cstring>
 
 /** @class OmniMotionModel utils/robot_motion/omni_motion_model.h
  * A motion model for a three-wheeled omni-drive robot. It is assumed that the wheels are
@@ -68,6 +68,8 @@ OmniMotionModel::OmniMotionModel(float radius, float wheel_radius, float gear_re
   m_omni_model /= m_gear_reduction;
 
   m_omni_model_inverse = m_omni_model.get_inverse();
+
+  m_total_rotation = 0.0;
 }
 
 /** Destructor. */
@@ -112,13 +114,20 @@ void
 OmniMotionModel::pose_to_rpm(float dx, float dy, float dphi, float diff_sec,
 			     float& rpm_right, float& rpm_rear, float& rpm_left)
 {
-  Vector pose(3);
-  pose[0] = dx;
-  pose[1] = dy;
-  pose[2] = dphi;
-
-  pose_to_rpm( pose.data_ptr(), (long) rint(diff_sec * 1000) );
-
+  if ( (dx == 0.0 && dy == 0.0 && dphi == 0.0) || (diff_sec == 0.0) )
+    { 
+      bzero( m_motor_rpm_cmds, m_control_dimensions * sizeof(float) );
+    }
+  else
+    {
+      Vector pose(3);
+      pose[0] = dx;
+      pose[1] = dy;
+      pose[2] = dphi;
+      
+      pose_to_rpm( pose.data_ptr(), (long) rint(diff_sec * 1000) );
+    }
+      
   rpm_right = m_motor_rpm_cmds[0];
   rpm_rear  = m_motor_rpm_cmds[1];
   rpm_left  = m_motor_rpm_cmds[2];
@@ -139,7 +148,7 @@ OmniMotionModel::update_odometry(float rot_right, float rot_rear, float rot_left
   odom[1] = rot_rear;
   odom[2] = rot_left;
   long diff_msec = (long) rint(diff_sec * 1000);
-  
+
   update_odometry(odom.data_ptr(), diff_msec);
 }
   
@@ -188,6 +197,13 @@ OmniMotionModel::get_actual_velocities(float& vx, float& vy, float& omega)
 }
 
 void
+OmniMotionModel::reset_odometry()
+{
+  m_total_rotation = 0.0;
+  MotionModel::reset_odometry();
+}
+
+void
 OmniMotionModel::velocities_to_rpm(float* velocities)
 {
   Vector velocities_vector(m_motion_dimensions, velocities);
@@ -205,6 +221,8 @@ OmniMotionModel::pose_to_rpm(float* pose, long diff_msec)
   float r = 0.5 * s * 1.0 / sin( p[2] / 2.0 ); 
   float l = r * p[2];
 
+  printf("l=%.2f  phi=%.2f  r=%.2f  s=%.2f\n", l, p[2], r, s);
+  
   HomVector v( p[0], p[1] );
   v.set_length(l);
   float angle = acos( sin( p[2] ) * r / s);
@@ -229,26 +247,37 @@ OmniMotionModel::update_odometry(float* odom_diff, long diff_msec)
   Vector velocity(m_motion_dimensions, m_actual_velocities, false);
   velocity = m_omni_model_inverse * odom;
   velocity /= diff_msec / 1000.0;
-  
-  Vector motion(m_motion_dimensions, m_last_movement, false);
-  float l   = sqrt( velocity[0] * velocity[0] + velocity[1] * velocity[1] );
-  float phi = velocity[2];
-  float r   = l / phi;
-  float s   = 2.0 * r * sin( 0.5 * phi );
-  //  printf("l=%.2f  phi=%.2f  r=%.2f  s=%.2f\n", l, phi, r, s);
-  
-  HomVector dest(velocity[0], velocity[1]);
-  dest.set_length(s);
-  float angle = acos( sin(phi) * r / s);
-  angle *= (phi < 0) ? -1.0 : 1.0; 
-  dest.rotate_z( angle );
-  //  printf("angle=%.f  dest=(%.2f, %.2f)\n", angle, dest.x(), dest.y());
+  //velocity.print_info("v");
 
-  motion[0] = dest.x();
-  motion[1] = dest.y();
-  motion[2] = phi;
+  Vector motion(m_motion_dimensions, m_last_movement, false);
+  motion[0] = velocity[0] * diff_msec / 1000.0;
+  motion[1] = velocity[1] * diff_msec / 1000.0;
+  motion[2] = velocity[2] * diff_msec / 1000.0;
+  //motion.print_info("m");
+  
+  float l   = sqrt( motion[0] * motion[0] + motion[1] * motion[1] );
+  float phi = motion[2];
+  float r   = fabs( (phi != 0.0) ? l / phi : 0.0 );
+  float s   = 2.0 * r * sin( 0.5 * fabs(phi) );
+  //printf("l=%.6f  phi=%.6f  r=%.6f  s=%.6f\n", l, phi, r, s);
+  
+  HomVector trans(motion[0], motion[1]);
+  if (r != 0.0)
+    {
+      trans.set_length(s);
+      float angle = (s != 0.0) ? acos( sin(phi) * r / s) : 0.0;
+      angle *= (phi < 0) ? -1.0 : 1.0; 
+      trans.rotate_z( angle );
+      motion[0] = trans.x();
+      motion[1] = trans.y();
+      //printf("angle=%.2f  dest=(%.6f, %.6f)\n", angle, motion.x(), motion.y());
+    }
+  //printf("dest=(%.6f, %.6f)\n", motion.x(), motion.y());
 
   Vector pose(m_motion_dimensions, m_odometric_pose, false);
-  for ( unsigned int i = 0; i < m_motion_dimensions; ++i)
-    { pose[i] += motion[i]; }
+  trans.rotate_z(m_total_rotation);
+  pose[0] += trans.x();
+  pose[1] += trans.y();
+  pose[2] += phi;
+  m_total_rotation += phi;
 }

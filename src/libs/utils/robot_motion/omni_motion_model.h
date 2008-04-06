@@ -9,20 +9,18 @@
  *
  ****************************************************************************/
 
-/*
- *  This program is free software; you can redistribute it and/or modify
+/*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE file mentioned below for details).
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  You can read the full text in the LICENSE file in the doc directory. 
  */
 
 #ifndef __UTILS_ROBOT_MOTION_OMNI_MOTION_MODEL_H_
@@ -49,6 +47,8 @@ class OmniMotionModel : public MotionModel
   void get_odom_diff(float& dx, float& dy, float& dphi);
   void get_actual_velocities(float& vx, float& vy, float& omega);
 
+  void reset_odometry();
+
  protected:
   void velocities_to_rpm(float* motion);
   void pose_to_rpm(float* pose, long diff_msec); 
@@ -61,6 +61,8 @@ class OmniMotionModel : public MotionModel
   float m_radius;
   float m_wheel_radius;
   float m_gear_reduction;
+
+  float m_total_rotation;
 };
 
 #endif /* __UTILS_ROBOT_MOTION_OMNI_MOTION_MODEL_H_ */
