@@ -116,4 +116,5 @@ the navigator started processing another goto message.
 register_skill{name       = "goto",
 	       func       = goto,
 	       reset_func = goto_reset,
-	       doc        = goto_skill_doc};
+	       doc        = goto_skill_doc
+	      };

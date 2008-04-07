@@ -32,15 +32,13 @@ local DEFAULT_MARGIN = 0.2;
 -- skill state variables
 local msgid = 0;
 
--- Check status of goto.
+--- Check status of goto.
 -- @param margin the radius of a circle around the destination point,
 -- if the robot is within that circle the goto is considered final.
 function relgoto_checkstatus(margin)
    assert(margin, "Invalid margin supplied");
 
-   print("Relgoto check status");
-
-   if msg == nil then -- we did not yet enqueue a goto message
+   if msgid == 0 then -- we did not yet enqueue a goto message
       return S_RUNNING;
    elseif msgid == navigator:msgid() then
       if dest_dist < margin then
@@ -54,7 +52,8 @@ function relgoto_checkstatus(margin)
 end
 
 
--- parameter parsing to support different call styles
+--- Parameter parsing to support different call styles.
+-- @param ... see skill documentation about supported call styles.
 function relgoto_parseparams(...)
    local x, y, ori, phi, dist, margin;
 
@@ -91,13 +90,15 @@ function relgoto_parseparams(...)
 end
 
 
+--- Relative goto reset.
 function relgoto_reset()
-   msg = nil;
    msgid = 0;
-   print("Relgoto reset");
 end
 
 
+--- Goto skill.
+-- See skill documentation for info.
+-- @param ... see skill documentation about supported call styles
 function relgoto(...)
    local x, y, ori, phi, dist, margin = relgoto_parseparams(...);
 
@@ -167,4 +168,6 @@ the navigator started processing another goto message.
 
 register_skill{name       = "relgoto",
 	       func       = relgoto,
-	       doc        = relgoto_skill_doc};
+	       reset_func = relgoto_reset,
+	       doc        = relgoto_skill_doc
+	      };

@@ -41,3 +41,4 @@ end
 require("midsize.example");
 require("midsize.relgoto");
 require("midsize.goto");
+require("midsize.intercept");
