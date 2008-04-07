@@ -29,6 +29,7 @@ CTRLS=EVID100P DPPTU
 
 FVBASEDIR           = $(BASEDIR)/src/firevision
 FVCONFDIR           = $(CONFDIR)/firevision
+FVEXTLIBDIR         = $(FVBASEDIR)/extlib
 VISION_INCDIRS      = $(realpath $(FVBASEDIR))
 VISION_CFLAGS       = -D__STDC_LIMIT_MACROS -DFVCONFDIR=\"$(FVCONFDIR)\"
 

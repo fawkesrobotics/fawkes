@@ -13,14 +13,14 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version. A runtime exception applies to
- *  this software (see LICENSE file mentioned below for details).
+ *  this software (see LICENSE.GPL file mentioned below for details).
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
  *
- *  You can read the full text in the LICENSE file in the doc directory. 
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
 #include <interfaces/generator/cpp_generator.h>
@@ -153,32 +153,36 @@ CppInterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* in
 void
 CppInterfaceGenerator::write_header(FILE *f, std::string filename)
 {
-  fprintf(f, "\n/***************************************************************************\n");
-  fprintf(f, " *  %s - Fawkes BlackBoard Interface - %s\n", filename.c_str(), class_name.c_str());
-  fprintf(f, " *\n");
-  if ( creation_date.length() > 0 ) {
-    fprintf(f, " *  Interface created: %s\n", creation_date.c_str());
-  }
-  fprintf(f, " *  Templated created:   Thu Oct 12 10:49:19 2006\n");
-  fprintf(f, " *  Copyright  %s  %s\n", year.c_str(),
-	  ((author.length() > 0) ? author.c_str() : "AllemaniACs RoboCup Team") );
-  fprintf(f, " *\n");
-  fprintf(f, " *  $Id$\n");
-  fprintf(f, " *\n");
-  fprintf(f, " ****************************************************************************/\n\n");
-  fprintf(f, "/*  This program is free software; you can redistribute it and/or modify\n");
-  fprintf(f, " *  it under the terms of the GNU General Public License as published by\n");
-  fprintf(f, " *  the Free Software Foundation; either version 2 of the License, or\n");
-  fprintf(f, " *  (at your option) any later version. A runtime exception applies to\n");
-  fprintf(f, " *  this software (see LICENSE file mentioned below for details).\n");
-  fprintf(f, " *\n");
-  fprintf(f, " *  This program is distributed in the hope that it will be useful,\n");
-  fprintf(f, " *  but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
-  fprintf(f, " *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n");
-  fprintf(f, " *  GNU Library General Public License for more details.\n");
-  fprintf(f, " *\n");
-  fprintf(f, " *  You can read the full text in the LICENSE file in the doc directory.\n");
-  fprintf(f, " */\n\n");
+  fprintf(f,
+	  "\n/***************************************************************************\n"
+	  " *  %s - Fawkes BlackBoard Interface - %s\n"
+	  " *\n"
+	  "%s%s%s"
+	  " *  Templated created:   Thu Oct 12 10:49:19 2006\n"
+	  " *  Copyright  %s  %s\n"
+	  " *\n"
+	  " *  $Id$\n"
+	  " *\n"
+	  " ****************************************************************************/\n\n"
+	  "/*  This program is free software; you can redistribute it and/or modify\n"
+	  " *  it under the terms of the GNU General Public License as published by\n"
+	  " *  the Free Software Foundation; either version 2 of the License, or\n"
+	  " *  (at your option) any later version. A runtime exception applies to\n"
+	  " *  this software (see LICENSE.GPL_WRE file mentioned below for details).\n"
+	  " *\n"
+	  " *  This program is distributed in the hope that it will be useful,\n"
+	  " *  but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+	  " *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+	  " *  GNU Library General Public License for more details.\n"
+	  " *\n"
+	  " *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.\n"
+	  " */\n\n",
+	  filename.c_str(), class_name.c_str(),
+	  (creation_date.length() > 0 ) ? " *  Interface created: " : "",
+	  (creation_date.length() > 0 ) ? creation_date.c_str() : "",
+	  (creation_date.length() > 0 ) ? "\n" : "",
+	  year.c_str(), (author.length() > 0) ? author.c_str() : "AllemaniACs RoboCup Team"
+	  );
 }
 
 
