@@ -35,26 +35,26 @@ class RelativePositionModel
  public:
   virtual ~RelativePositionModel();
 
-  virtual const char *  getName(void) const		            = 0;
-  virtual void		setRadius(float r)		            = 0;
-  virtual void		setCenter(float x, float y)	            = 0;
-  virtual void		setCenter(const center_in_roi_t& c)         = 0;
+  virtual const char *  get_name(void) const		            = 0;
+  virtual void		set_radius(float r)		            = 0;
+  virtual void		set_center(float x, float y)	            = 0;
+  virtual void		set_center(const center_in_roi_t& c)        = 0;
 
-  virtual void		setPanTilt(float pan, float tilt)           = 0;
-  virtual void		getPanTilt(float *pan, float *tilt) const   = 0;
+  virtual void		set_pan_tilt(float pan, float tilt)         = 0;
+  virtual void		get_pan_tilt(float *pan, float *tilt) const = 0;
 
   virtual void          calc()                                      = 0;
   virtual void          calc_unfiltered()                           = 0;
 
   virtual void          reset()                                     = 0;
 
-  virtual float		getDistance() const		            = 0;
-  virtual float		getBearing() const	  	            = 0;
-  virtual float		getSlope() const                            = 0;
-  virtual float		getX() const			            = 0;
-  virtual float		getY() const			            = 0;
+  virtual float		get_distance() const		            = 0;
+  virtual float		get_bearing() const	  	            = 0;
+  virtual float		get_slope() const                           = 0;
+  virtual float		get_x() const			            = 0;
+  virtual float		get_y() const			            = 0;
 
-  virtual bool          isPosValid() const                          = 0;
+  virtual bool          is_pos_valid() const                        = 0;
 
 };
 

@@ -253,14 +253,14 @@ ScanlineBeams::reset()
 }
 
 const char *
-ScanlineBeams::getName()
+ScanlineBeams::get_name()
 {
   return "ScanlineModel::Beams";
 }
 
 
 unsigned int
-ScanlineBeams::getMargin()
+ScanlineBeams::get_margin()
 {
   return offset_y;
 }

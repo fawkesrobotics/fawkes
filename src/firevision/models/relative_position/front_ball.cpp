@@ -1,8 +1,9 @@
 
 /***************************************************************************
- *  ballrelative.cpp - Implementation of the relative ball position model
+ *  front_ball.cpp - Implementation of the relative ball position model for
+ *                   the front vision
  *
- *  Generated: Fri Jun 03 22:56:22 2005
+ *  Created: Fri Jun 03 22:56:22 2005
  *  Copyright  2005       Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *             2005-2006  Tim Niemueller [www.niemueller.de]
  *             2005       Martin Heracles <Martin.Heracles@rwth-aachen.de>
@@ -27,13 +28,13 @@
 
 #include <cmath>
 #include <iostream>
-#include <models/relative_position/ballrelative.h>
+#include <models/relative_position/front_ball.h>
 #include <utils/math/angle.h>
 
 using namespace std;
 
-/** @class BallRelative <models/relative_position/ballrelative.h>
- * Relative ball position model.
+/** @class FrontBallRelativePos <models/relative_position/front_ball.h>
+ * Relative ball position model for front vision.
  */
 
 /** Constructor.
@@ -47,16 +48,16 @@ using namespace std;
  * @param vertical_angle vertical viewing angle (in degree)
  * @param ball_circumference ball circumference
  */
-BallRelative::BallRelative(unsigned int image_width,
-			   unsigned int image_height,
-			   float camera_height,
-			   float camera_offset_x,
-			   float camera_offset_y,
-			   float camera_ori,
-			   float horizontal_angle,
-			   float vertical_angle,
-			   float ball_circumference
-			   )
+FrontBallRelativePos::FrontBallRelativePos(unsigned int image_width,
+					   unsigned int image_height,
+					   float camera_height,
+					   float camera_offset_x,
+					   float camera_offset_y,
+					   float camera_ori,
+					   float horizontal_angle,
+					   float vertical_angle,
+					   float ball_circumference
+					   )
 {
 
   this->image_width        = image_width;
@@ -110,42 +111,42 @@ BallRelative::BallRelative(unsigned int image_width,
 
 
 float
-BallRelative::getDistance() const 
+FrontBallRelativePos::get_distance() const 
 {
   return distance_ball_motor;
 }
 
 
 float
-BallRelative::getBearing(void) const
+FrontBallRelativePos::get_bearing(void) const
 {
   return bearing;
 }
 
 
 float
-BallRelative::getSlope() const
+FrontBallRelativePos::get_slope() const
 {
   return slope;
 }
 
 
 float
-BallRelative::getY(void) const
+FrontBallRelativePos::get_y(void) const
 {
   return ball_y;
 }
 
 
 float
-BallRelative::getX(void) const
+FrontBallRelativePos::get_x(void) const
 {
   return ball_x;
 }
 
 
 void
-BallRelative::setCenter(float x, float y)
+FrontBallRelativePos::set_center(float x, float y)
 {
   m_cirtCenter.x = x;
   m_cirtCenter.y = y;
@@ -153,7 +154,7 @@ BallRelative::setCenter(float x, float y)
 
 
 void
-BallRelative::setCenter(const center_in_roi_t& c)
+FrontBallRelativePos::set_center(const center_in_roi_t& c)
 {
   m_cirtCenter.x = c.x;
   m_cirtCenter.y = c.y;
@@ -161,7 +162,7 @@ BallRelative::setCenter(const center_in_roi_t& c)
 
 
 void
-BallRelative::setRadius(float r)
+FrontBallRelativePos::set_radius(float r)
 {
   m_fRadius = r;
 }
@@ -171,14 +172,14 @@ BallRelative::setRadius(float r)
  * @return ball radius
  */
 float
-BallRelative::getRadius() const
+FrontBallRelativePos::get_radius() const
 {
   return m_fRadius;
 }
 
 
 void
-BallRelative::setPanTilt(float pan, float tilt)
+FrontBallRelativePos::set_pan_tilt(float pan, float tilt)
 {
   m_fPan = pan;
   m_fTilt = tilt;
@@ -186,7 +187,7 @@ BallRelative::setPanTilt(float pan, float tilt)
 
 
 void
-BallRelative::getPanTilt(float *pan, float *tilt) const
+FrontBallRelativePos::get_pan_tilt(float *pan, float *tilt) const
 {
   *pan  = m_fPan;
   *tilt = m_fTilt;
@@ -194,9 +195,9 @@ BallRelative::getPanTilt(float *pan, float *tilt) const
 
 
 const char *
-BallRelative::getName() const
+FrontBallRelativePos::get_name() const
 {
-  return "BallRelative";
+  return "FrontBallRelativePos";
 }
 
 
@@ -204,7 +205,7 @@ BallRelative::getName() const
  * @param angle_deg horizontal viewing angle in degree
  */
 void
-BallRelative::setHorizontalAngle(float angle_deg)
+FrontBallRelativePos::set_horizontal_angle(float angle_deg)
 {
   horizontal_angle = deg2rad( angle_deg );
 }
@@ -214,21 +215,21 @@ BallRelative::setHorizontalAngle(float angle_deg)
  * @param angle_deg horizontal viewing angle in degree
  */
 void
-BallRelative::setVerticalAngle(float angle_deg)
+FrontBallRelativePos::set_vertical_angle(float angle_deg)
 {
   vertical_angle = deg2rad( angle_deg );
 }
 
 
 void
-BallRelative::reset()
+FrontBallRelativePos::reset()
 {
   last_available = false;
   //kalman_filter->reset();
 }
 
 void
-BallRelative::calc()
+FrontBallRelativePos::calc()
 {
 
   /*
@@ -273,14 +274,14 @@ BallRelative::calc()
 
 
 bool
-BallRelative::isPosValid() const
+FrontBallRelativePos::is_pos_valid() const
 {
   return true;
 }
 
 
 void
-BallRelative::calc_unfiltered()
+FrontBallRelativePos::calc_unfiltered()
 {
 
   float tmp = m_fBallRadius / sin(m_fRadius * m_fPanRadPerPixel);
@@ -309,7 +310,7 @@ BallRelative::calc_unfiltered()
 
 /*
 void
-BallRelative::applyKalmanFilter()
+FrontBallRelativePos::applyKalmanFilter()
 {
 
   kalman_filter->setMeasurementCovariance( var_meas_x, var_meas_y );

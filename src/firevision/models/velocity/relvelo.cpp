@@ -201,9 +201,9 @@ VelocityFromRelative::calc()
   */
 
   // Gather needed data
-  cur_ball_x = relative_pos_model->getX();
-  cur_ball_y = relative_pos_model->getY();
-  cur_ball_dist = relative_pos_model->getDistance();
+  cur_ball_x = relative_pos_model->get_x();
+  cur_ball_y = relative_pos_model->get_y();
+  cur_ball_dist = relative_pos_model->get_distance();
 
   if ( isnan(cur_ball_x) || isinf(cur_ball_x) ||
        isnan(cur_ball_y) || isinf(cur_ball_y) ||

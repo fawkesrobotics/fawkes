@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  ballrelative.h - A simple implementation of the relative position model
- *                   for the ball
+ *  front_ball.h - A simple implementation of the relative position model
+ *                 for the ball in the front vision
  *
- *  Generated: Fri Jun 03 22:56:22 2005
+ *  Created: Fri Jun 03 22:56:22 2005
  *  Copyright  2005  Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *                   Tim Niemueller [www.niemueller.de]
  *                   Martin Heracles <Martin.Heracles@rwth-aachen.de>
@@ -26,52 +26,47 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_RELATIVE_BALLRELATIVE_H_
-#define __FIREVISION_MODELS_RELATIVE_BALLRELATIVE_H_
+#ifndef __FIREVISION_MODELS_RELATIVE_FRONT_BALL_H_
+#define __FIREVISION_MODELS_RELATIVE_FRONT_BALL_H_
 
 #include <models/relative_position/relativepositionmodel.h>
 
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
 
-class BallRelative : public RelativePositionModel
+class FrontBallRelativePos : public RelativePositionModel
 {
  public:
-  BallRelative(unsigned int image_width, unsigned int image_height,
-	       float camera_height,
-	       float camera_offset_x,
-	       float camera_offset_y,
-	       float camera_ori,
-	       float horizontal_angle,
-	       float vertical_angle,
-	       float ball_circumference
-	       );
+  FrontBallRelativePos(unsigned int image_width, unsigned int image_height,
+		       float camera_height,
+		       float camera_offset_x, float camera_offset_y,
+		       float camera_ori,
+		       float horizontal_angle, float vertical_angle,
+		       float ball_circumference
+		       );
 
-  virtual const char *	getName() const;
-  virtual void		setRadius(float r);
-  virtual void		setCenter(float x, float y);
-  virtual void		setCenter(const center_in_roi_t& c);
+  virtual const char *	get_name() const;
+  virtual void		set_radius(float r);
+  virtual void		set_center(float x, float y);
+  virtual void		set_center(const center_in_roi_t& c);
 
-  virtual void		setPanTilt(float pan = 0.0f, float tilt = 0.0f);
-  virtual void          getPanTilt(float *pan, float *tilt) const;
+  virtual void		set_pan_tilt(float pan = 0.0f, float tilt = 0.0f);
+  virtual void          get_pan_tilt(float *pan, float *tilt) const;
 
-  virtual void          setHorizontalAngle(float angle_deg);
-  virtual void          setVerticalAngle(float angle_deg);
+  virtual void          set_horizontal_angle(float angle_deg);
+  virtual void          set_vertical_angle(float angle_deg);
 
-  virtual float		getDistance() const;
-
-  virtual float		getX() const;
-
-  virtual float		getY() const;
-
-  virtual float		getBearing() const;
-  virtual float		getSlope() const;
-  virtual float         getRadius() const;
+  virtual float		get_distance() const;
+  virtual float		get_x() const;
+  virtual float		get_y() const;
+  virtual float		get_bearing() const;
+  virtual float		get_slope() const;
+  virtual float         get_radius() const;
 
   virtual void          calc();
   virtual void          calc_unfiltered();
   virtual void          reset();
 
-  virtual bool          isPosValid() const;
+  virtual bool          is_pos_valid() const;
 
 private:
   float                 DEFAULT_X_VARIANCE;

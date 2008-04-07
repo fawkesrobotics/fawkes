@@ -55,11 +55,11 @@ class CornerHorizon : public ScanlineModel
 
   bool          finished();
   void          reset();
-  const char *  getName();
-  unsigned int  getMargin();
+  const char *  get_name();
+  unsigned int  get_margin();
 
-  void setRobotPose(float x, float y, float ori);
-  void setPanTilt(float pan, float tilt);
+  void set_robot_pose(float x, float y, float ori);
+  void set_pan_tilt(float pan, float tilt);
 
   unsigned int getHorizon();
 

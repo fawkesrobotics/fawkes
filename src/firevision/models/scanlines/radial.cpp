@@ -279,14 +279,14 @@ ScanlineRadial::reset()
 }
 
 const char *
-ScanlineRadial::getName()
+ScanlineRadial::get_name()
 {
   return "ScanlineModel::Radial";
 }
 
 
 unsigned int
-ScanlineRadial::getMargin()
+ScanlineRadial::get_margin()
 {
   return radius_increment;
 }

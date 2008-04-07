@@ -2,8 +2,8 @@
 /***************************************************************************
  *  omni_global.h - Global position model that operating on a MirrorModel
  *
- *  Generated: Thu Mar 23 22:30:28 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Mar 23 22:30:28 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -36,15 +36,15 @@ class OmniGlobal : public GlobalPositionModel
   // constructor
   OmniGlobal(MirrorModel *mirror_model);
 
-  virtual void		setRobotPosition(float x, float y, float ori);
-  virtual void          setPositionInImage(unsigned int x, unsigned int y);
+  virtual void		set_robot_position(float x, float y, float ori);
+  virtual void          set_position_in_image(unsigned int x, unsigned int y);
 
-  virtual float		getX() const;
-  virtual float		getY() const;
+  virtual float		get_x() const;
+  virtual float		get_y() const;
 
   virtual void          calc();
 
-  virtual bool          isPosValid() const;
+  virtual bool          is_pos_valid() const;
 
 private:
   float	                pose_x;

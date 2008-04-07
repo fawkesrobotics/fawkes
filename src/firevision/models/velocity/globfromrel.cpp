@@ -165,7 +165,7 @@ VelocityGlobalFromRelative::calc()
   relative_velocity->getVelocity( &rel_vel_x, &rel_vel_y );
   sin_ori   = sin( robot_ori );
   cos_ori   = cos( robot_ori );
-  rel_dist  = relative_position->getDistance();
+  rel_dist  = relative_position->get_distance();
 
   velocity_x = rel_vel_x * cos_ori - rel_vel_y * sin_ori;
   velocity_y = rel_vel_x * sin_ori + rel_vel_y * cos_ori;

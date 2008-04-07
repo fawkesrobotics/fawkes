@@ -48,8 +48,8 @@ class SharedMemoryImageBuffer;
 class ObjectPositionInterface;
 class CameraControl;
 class Shrinker;
-class BallRelative;
-class BallGlobal;
+class FrontBallRelativePos;
+class GlobalFromRelativePos;
 class FilterHVSearch;
 class ShapeModel;
 
@@ -89,8 +89,8 @@ class FvFrontPipelineThread
   ScanlineModel            *__scanlines;
   ColorModel               *__cm;
   ShapeModel               *__circle_model;
-  BallRelative             *__ball_rel;
-  BallGlobal               *__ball_glob;
+  FrontBallRelativePos     *__ball_rel;
+  GlobalFromRelativePos    *__ball_glob;
   SimpleColorClassifier    *__classifier;
   Shrinker                 *__shrinker;
 

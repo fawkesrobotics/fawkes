@@ -28,22 +28,22 @@
  * Global Position Model Interface.
  * This interface defines the API for global position models.
  *
- * @fn void GlobalPositionModel::setRobotPosition(float x, float y, float ori)
+ * @fn void GlobalPositionModel::set_robot_position(float x, float y, float ori)
  * Set the global position of the object.
  * @param x x coordinate of position
  * @param y y coordinate of position
  * @param ori orientation of robot
  *
- * @fn void GlobalPositionModel::setPositionInImage(unsigned int x, unsigned int y)
+ * @fn void GlobalPositionModel::set_position_in_image(unsigned int x, unsigned int y)
  * Set the position of the object as recognized in the image.
  * @param x x coordinate in pixels
  * @param y y coordinate in pixels
  *
- * @fn float GlobalPositionModel::getX() const
+ * @fn float GlobalPositionModel::get_x() const
  * Get global x coordinate of object.
  * @return x coordinate of object
  *
- * @fn float GlobalPositionModel::getY() const
+ * @fn float GlobalPositionModel::get_y() const
  * Get global y coordinate of object.
  * @return y coordinate of object
  *
@@ -52,7 +52,7 @@
  * From the data set via setRobotPosition() or setPositionInImage() calculate the
  * objects global position.
  *
- * @fn bool GlobalPositionModel::isPosValid() const
+ * @fn bool GlobalPositionModel::is_pos_valid() const
  * Check if the position is valid.
  * @return true, if the calculated position is valid, false otherwise
  *

@@ -47,11 +47,11 @@ class ScanlineRadial : public ScanlineModel
 
   bool          finished();
   void          reset();
-  const char *  getName();
-  unsigned int  getMargin();
+  const char *  get_name();
+  unsigned int  get_margin();
 
-  virtual void  setRobotPose(float x, float y, float ori) {}
-  virtual void  setPanTilt(float pan, float tilt) {}
+  virtual void  set_robot_pose(float x, float y, float ori) {}
+  virtual void  set_pan_tilt(float pan, float tilt) {}
 
   void set_center(unsigned int center_x, unsigned int center_y);
   void set_radius(unsigned int dead_radius, unsigned int max_radius);

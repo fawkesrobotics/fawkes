@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  ballglobal.h - A simple implementation of the global position model for
+ *  globfromrel.h - A simple implementation of the global position model for
  *                 a ball
  *
- *  Generated: Fri Jun 03 22:56:22 2005
+ *  Created: Fri Jun 03 22:56:22 2005
  *  Copyright  2005  Hu Yuxiao <Yuxiao.Hu@rwth-aachen.de>
  *                   Tim Niemueller [www.niemueller.de]
  *
@@ -25,25 +25,25 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
                                                                                 
-#ifndef __FIREVISION_MODELS_GLOBAL_POSITION_BALL_H_
-#define __FIREVISION_MODELS_GLOBAL_POSITION_BALL_H_
+#ifndef __FIREVISION_MODELS_GLOBAL_POSITION_GLOBFROMREL_H_
+#define __FIREVISION_MODELS_GLOBAL_POSITION_GLOBFROMREL_H_
 
 #include <models/global_position/globalpositionmodel.h>
 
 class RelativePositionModel;
 
-class BallGlobal : public GlobalPositionModel
+class GlobalFromRelativePos : public GlobalPositionModel
 {
  public:
-  BallGlobal(RelativePositionModel* model);
-  virtual void	setRobotPosition(float x, float y, float ori);
-  virtual void  setPositionInImage(unsigned int x, unsigned int y);
-  virtual float	getX(void) const;
-  virtual float	getY(void) const;
+  GlobalFromRelativePos(RelativePositionModel* model);
+  virtual void	set_robot_position(float x, float y, float ori);
+  virtual void  set_position_in_image(unsigned int x, unsigned int y);
+  virtual float	get_x(void) const;
+  virtual float	get_y(void) const;
 
   virtual void  calc();
 
-  virtual bool  isPosValid() const;
+  virtual bool  is_pos_valid() const;
 
  private:
   RelativePositionModel *m_pRelaModel;

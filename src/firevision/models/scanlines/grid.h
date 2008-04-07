@@ -44,11 +44,11 @@ class ScanlineGrid : public ScanlineModel
 
   bool          finished();
   void          reset();
-  const char *  getName();
-  unsigned int  getMargin();
+  const char *  get_name();
+  unsigned int  get_margin();
 
-  virtual void  setRobotPose(float x, float y, float ori);
-  virtual void  setPanTilt(float pan, float tilt);
+  virtual void  set_robot_pose(float x, float y, float ori);
+  virtual void  set_pan_tilt(float pan, float tilt);
 
   void setDimensions(unsigned int width, unsigned int height);
   void setOffset(unsigned int offset_x, unsigned int offset_y);

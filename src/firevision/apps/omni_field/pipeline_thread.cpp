@@ -334,15 +334,15 @@ FvOmniFieldPipelineThread::loop()
 	  unsigned int cur_y = cur_point.y;
 	  
 	  // determine relative world coordinates
-	  m_rel_pos->setCenter(cur_x, cur_y);
+	  m_rel_pos->set_center(cur_x, cur_y);
 	  m_rel_pos->calc_unfiltered();
 	  
 	  index = m_scanline_model->ray_index();
 	  
 	  // check distance (necessary to avoid obstacles at the robot's own
 	  // position which might happen with the current mirror model)
-	  float x = m_rel_pos->getX();
-	  float y = m_rel_pos->getY();
+	  float x = m_rel_pos->get_x();
+	  float y = m_rel_pos->get_y();
 	  float dist = sqrt(x*x + y*y);
 
 	  if (dist >= 0.3)
@@ -350,8 +350,8 @@ FvOmniFieldPipelineThread::loop()
 	      // write data to interface
 	      m_obstacle_interfaces[index]->set_visible( true );
 	      m_obstacle_interfaces[index]->set_extent( 0.1 );
-	      m_obstacle_interfaces[index]->set_relative_x( m_rel_pos->getX() );
-	      m_obstacle_interfaces[index]->set_relative_y( -m_rel_pos->getY() );
+	      m_obstacle_interfaces[index]->set_relative_x( m_rel_pos->get_x() );
+	      m_obstacle_interfaces[index]->set_relative_y( -m_rel_pos->get_y() );
 	      m_obstacle_interfaces[index]->write();
 	    }
 	  

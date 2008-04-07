@@ -41,30 +41,30 @@ class BoxRelative : public RelativePositionModel
 	      float horizontal_angle, float vertical_angle
 	      );
 
-  virtual const char *	getName() const;
-  virtual void		setCenter(float x, float y);
-  virtual void		setCenter(const center_in_roi_t& c);
-  virtual void          setRadius(float r);
+  virtual const char *	get_name() const;
+  virtual void		set_center(float x, float y);
+  virtual void		set_center(const center_in_roi_t& c);
+  virtual void          set_radius(float r);
 
-  virtual void		setPanTilt(float pan = 0.0f, float tilt = 0.0f);
-  virtual void          getPanTilt(float *pan, float *tilt) const;
+  virtual void		set_pan_tilt(float pan = 0.0f, float tilt = 0.0f);
+  virtual void          get_pan_tilt(float *pan, float *tilt) const;
 
-  virtual void          setHorizontalAngle(float angle_deg);
-  virtual void          setVerticalAngle(float angle_deg);
+  virtual void          set_horizontal_angle(float angle_deg);
+  virtual void          set_vertical_angle(float angle_deg);
 
-  virtual float		getDistance() const;
+  virtual float		get_distance() const;
 
-  virtual float		getX() const;
-  virtual float		getY() const;
+  virtual float		get_x() const;
+  virtual float		get_y() const;
 
-  virtual float		getBearing() const;
-  virtual float		getSlope() const;
+  virtual float		get_bearing() const;
+  virtual float		get_slope() const;
 
   virtual void          calc();
   virtual void          calc_unfiltered();
   virtual void          reset();
 
-  virtual bool          isPosValid() const;
+  virtual bool          is_pos_valid() const;
 
 private:
   float                 DEFAULT_X_VARIANCE;

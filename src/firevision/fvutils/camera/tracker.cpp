@@ -89,8 +89,8 @@ void
 CameraTracker::calc()
 {
   if (mode == MODE_MODEL) {
-    new_pan  = rpm->getBearing() - camera_orientation;
-    new_tilt = rpm->getSlope();
+    new_pan  = rpm->get_bearing() - camera_orientation;
+    new_tilt = rpm->get_slope();
   } else if (mode == MODE_WORLD) {
 
     float w_r_x = world_x - robot_x;
@@ -132,7 +132,7 @@ CameraTracker::calc()
  * @return new optimal pan value
  */
 float
-CameraTracker::getNewPan()
+CameraTracker::get_new_pan()
 {
   return new_pan;
 }
@@ -142,7 +142,7 @@ CameraTracker::getNewPan()
  * @return new optimal tilt value
  */
 float
-CameraTracker::getNewTilt()
+CameraTracker::get_new_tilt()
 {
   return new_tilt;
 }
@@ -153,7 +153,7 @@ CameraTracker::getNewTilt()
  * @exception Exception thrown, if mode is neither MODE_WORLD nor MODE_MODEL
  */
 void
-CameraTracker::setMode(unsigned int mode)
+CameraTracker::set_mode(unsigned int mode)
 {
   if ( (mode == MODE_WORLD) || (mode == MODE_MODEL)) {
     this->mode = mode;
@@ -168,7 +168,7 @@ CameraTracker::setMode(unsigned int mode)
  * @param rpm new relative position model
  */
 void
-CameraTracker::setRelativePositionModel(RelativePositionModel *rpm)
+CameraTracker::set_relative_position_model(RelativePositionModel *rpm)
 {
   this->rpm = rpm;
 }
@@ -181,7 +181,7 @@ CameraTracker::setRelativePositionModel(RelativePositionModel *rpm)
  * @param ori new orientation
  */
 void
-CameraTracker::setRobotPosition(float x, float y, float ori)
+CameraTracker::set_robot_position(float x, float y, float ori)
 {
   robot_x   = x;
   robot_y   = y;
@@ -197,7 +197,7 @@ CameraTracker::setRobotPosition(float x, float y, float ori)
  * @param y y coordinate to track
  */
 void
-CameraTracker::setWorldPoint(float x, float y)
+CameraTracker::set_world_point(float x, float y)
 {
   world_x = x;
   world_y = y;

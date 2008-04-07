@@ -158,8 +158,8 @@ VelocityFromGlobal::calc()
 {
 
   // Gather needed data
-  current_x = global_pos_model->getX();
-  current_y = global_pos_model->getY();
+  current_x = global_pos_model->get_x();
+  current_y = global_pos_model->get_y();
 
   last_x.push_back( current_x );
   last_y.push_back( current_y );

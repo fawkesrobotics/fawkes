@@ -104,21 +104,21 @@ BoxRelative::BoxRelative(unsigned int image_width,
  * @return 0
  */
 float
-BoxRelative::getDistance() const 
+BoxRelative::get_distance() const 
 {
   return distance_box_motor;
 }
 
 
 float
-BoxRelative::getBearing(void) const
+BoxRelative::get_bearing(void) const
 {
   return bearing;
 }
 
 
 float
-BoxRelative::getSlope() const
+BoxRelative::get_slope() const
 {
   return slope;
 }
@@ -129,7 +129,7 @@ BoxRelative::getSlope() const
  * @return 0
  */
 float
-BoxRelative::getY(void) const
+BoxRelative::get_y(void) const
 {
   return box_y;
 }
@@ -140,19 +140,19 @@ BoxRelative::getY(void) const
  * @return 0
  */
 float
-BoxRelative::getX(void) const
+BoxRelative::get_x(void) const
 {
   return box_x;
 }
 
 void
-BoxRelative::setRadius(float r)
+BoxRelative::set_radius(float r)
 {
 }
 
 
 void
-BoxRelative::setCenter(float x, float y)
+BoxRelative::set_center(float x, float y)
 {
   center.x = x;
   center.y = y;
@@ -160,7 +160,7 @@ BoxRelative::setCenter(float x, float y)
 
 
 void
-BoxRelative::setCenter(const center_in_roi_t& c)
+BoxRelative::set_center(const center_in_roi_t& c)
 {
   center.x = c.x;
   center.y = c.y;
@@ -168,7 +168,7 @@ BoxRelative::setCenter(const center_in_roi_t& c)
 
 
 void
-BoxRelative::setPanTilt(float pan, float tilt)
+BoxRelative::set_pan_tilt(float pan, float tilt)
 {
   this->pan  = pan;
   this->tilt = tilt;
@@ -176,7 +176,7 @@ BoxRelative::setPanTilt(float pan, float tilt)
 
 
 void
-BoxRelative::getPanTilt(float *pan, float *tilt) const
+BoxRelative::get_pan_tilt(float *pan, float *tilt) const
 {
   *pan  = this->pan;
   *tilt = this->tilt;
@@ -184,7 +184,7 @@ BoxRelative::getPanTilt(float *pan, float *tilt) const
 
 
 const char *
-BoxRelative::getName() const
+BoxRelative::get_name() const
 {
   return "BoxRelative";
 }
@@ -194,7 +194,7 @@ BoxRelative::getName() const
  * @param angle_deg horizontal viewing angle in degrees
  */
 void
-BoxRelative::setHorizontalAngle(float angle_deg)
+BoxRelative::set_horizontal_angle(float angle_deg)
 {
   horizontal_angle = deg2rad( angle_deg );
 }
@@ -204,7 +204,7 @@ BoxRelative::setHorizontalAngle(float angle_deg)
  * @param angle_deg vertical viewing angle in degrees
  */
 void
-BoxRelative::setVerticalAngle(float angle_deg)
+BoxRelative::set_vertical_angle(float angle_deg)
 {
   vertical_angle = deg2rad( angle_deg );
 }
@@ -244,7 +244,7 @@ BoxRelative::calc()
 
 
 bool
-BoxRelative::isPosValid() const
+BoxRelative::is_pos_valid() const
 {
   return true;
 }

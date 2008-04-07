@@ -3,8 +3,8 @@
  *  omni_relative.cpp - Implementation of the relative ball model
  *                      for the omni cam
  *
- *  Generated: Thu Mar 23 22:00:15 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Mar 23 22:00:15 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -43,7 +43,7 @@ OmniGlobal::OmniGlobal(MirrorModel *mirror_model)
 
 
 void
-OmniGlobal::setPositionInImage(unsigned int x, unsigned int y)
+OmniGlobal::set_position_in_image(unsigned int x, unsigned int y)
 {
   image_x = x;
   image_y = y;
@@ -51,7 +51,7 @@ OmniGlobal::setPositionInImage(unsigned int x, unsigned int y)
 
 
 void
-OmniGlobal::setRobotPosition(float x, float y, float ori)
+OmniGlobal::set_robot_position(float x, float y, float ori)
 {
   pose_x   = x;
   pose_y   = y;
@@ -60,14 +60,14 @@ OmniGlobal::setRobotPosition(float x, float y, float ori)
 
 
 float
-OmniGlobal::getY(void) const
+OmniGlobal::get_y(void) const
 {
   return ball_y;
 }
 
 
 float
-OmniGlobal::getX(void) const
+OmniGlobal::get_x(void) const
 {
   return ball_x;
 }
@@ -88,7 +88,7 @@ OmniGlobal::calc()
 
 
 bool
-OmniGlobal::isPosValid() const
+OmniGlobal::is_pos_valid() const
 {
   return mirror_model->isValidPoint( image_x, image_y );
 }

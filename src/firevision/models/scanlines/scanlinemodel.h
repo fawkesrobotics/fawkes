@@ -89,7 +89,7 @@ class ScanlineModel
   /** Get name of scanline model.
    * @return name of scanline model.
    */
-  virtual const char *  getName()                                      = 0;
+  virtual const char *  get_name()                                     = 0;
 
 
   /** Get margin around points.
@@ -99,7 +99,7 @@ class ScanlineModel
    * returned in a full iteration.
    * @return margin around a point.
    */
-  virtual unsigned int  getMargin()                                    = 0;
+  virtual unsigned int  get_margin()                                   = 0;
 
   /** Set the robot's pose.
    * @param x robot's x coordinate on field in meters
@@ -107,13 +107,13 @@ class ScanlineModel
    * @param ori robot's orientation. Looking towards the opponent goal is zero
    * rad, with positive values pointing to the right, negative to the left.
    */
-  virtual void          setRobotPose(float x, float y, float ori)      = 0;
+  virtual void          set_robot_pose(float x, float y, float ori)    = 0;
 
   /** Set camera's pan/tilt values.
    * @param pan camera's current pan
    * @param tilt camera's current tilt
    */
-  virtual void          setPanTilt(float pan, float tilt)              = 0;
+  virtual void          set_pan_tilt(float pan, float tilt)            = 0;
 
 };
 

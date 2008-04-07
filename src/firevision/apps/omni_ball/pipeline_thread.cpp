@@ -275,12 +275,12 @@ FvOmniBallPipelineThread::loop()
 	      // calculate mass point of ball
 	      classifier->get_mass_point_of_ball( &(*r), &mass_point );
 	      // update ball position
-	      rel_pos->setCenter( mass_point.x, mass_point.y );
+	      rel_pos->set_center( mass_point.x, mass_point.y );
 	      rel_pos->calc_unfiltered();
 	      
-	      if (rel_pos->getDistance() < min_dist) 
+	      if (rel_pos->get_distance() < min_dist) 
 		{
-		  min_dist = rel_pos->getDistance();
+		  min_dist = rel_pos->get_distance();
 		  ball_image_x = mass_point.x;
 		  ball_image_y = mass_point.y;
 		  winner_roi = r;
@@ -290,9 +290,9 @@ FvOmniBallPipelineThread::loop()
 
     if ( ball_visible ) 
       {
-	rel_pos->setCenter( ball_image_x, ball_image_y );
+	rel_pos->set_center( ball_image_x, ball_image_y );
 
-	if ( rel_pos->isPosValid() ) { rel_pos->calc(); } 
+	if ( rel_pos->is_pos_valid() ) { rel_pos->calc(); } 
 	else { ball_visible = false; }
       }
     
@@ -321,10 +321,10 @@ FvOmniBallPipelineThread::loop()
   if (ball_visible)
     {
       ball_interface->set_visible(true);
-      ball_interface->set_relative_x( rel_pos->getX() );
-      ball_interface->set_relative_y( rel_pos->getY() );
-      ball_interface->set_distance( rel_pos->getDistance() );
-      ball_interface->set_yaw( rel_pos->getBearing() );
+      ball_interface->set_relative_x( rel_pos->get_x() );
+      ball_interface->set_relative_y( rel_pos->get_y() );
+      ball_interface->set_distance( rel_pos->get_distance() );
+      ball_interface->set_yaw( rel_pos->get_bearing() );
     }
   else { ball_interface->set_visible(false); }
 

@@ -176,7 +176,7 @@ SimpleColorClassifier::classify()
 	}
 	if (! ok) {
 	  for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-	    if ( (*roi_it).neighbours(x, y, scanline_model->getMargin()) ) {
+	    if ( (*roi_it).neighbours(x, y, scanline_model->get_margin()) ) {
 	      // ROI is neighbour of this point, extend region
 	      (*roi_it).extend(x, y);
 	      ok = true;
@@ -243,7 +243,7 @@ SimpleColorClassifier::classify()
     ++roi_it2;
 
     while ( roi_it2 != rv->end() ) {
-      if (roi_it->neighbours(&(*roi_it2), scanline_model->getMargin())) {
+      if (roi_it->neighbours(&(*roi_it2), scanline_model->get_margin())) {
 	*roi_it += *roi_it2;
 	roi_it2 = rv->erase(roi_it2);
       } else {

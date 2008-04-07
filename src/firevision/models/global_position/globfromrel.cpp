@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  ballglobal.cpp - Implementation of the global ball position model
+ *  globfromrel.cpp - Implementation of the global ball position model
  *
- *  Generated: Fri Jun 03 22:56:22 2005
+ *  Created: Fri Jun 03 22:56:22 2005
  *  Copyright  2005       Hu Yuxiao      <Yuxiao.Hu@rwth-aachen.de>
  *             2005-2006  Tim Niemueller [www.niemueller.de]
  *             2005       Martin Heracles <Martin.Heracles@rwth-aachen.de>
@@ -26,10 +26,10 @@
  */
 
 #include <cmath>
-#include <models/global_position/ballglobal.h>
-#include <models/relative_position/ballrelative.h>
+#include <models/global_position/globfromrel.h>
+#include <models/relative_position/relativepositionmodel.h>
 
-/** @class BallGlobal <models/global_position/ballglobal.h>
+/** @class GlobalFromRelativePos <models/global_position/globfromrel.h>
  * Calculate global ball position based on a relative position model.
  * The relative position model must of course be tied to the ball.
  */
@@ -37,7 +37,7 @@
 /** Constructor.
  * @param model relative position model for the ball.
  */
-BallGlobal::BallGlobal(RelativePositionModel* model)
+GlobalFromRelativePos::GlobalFromRelativePos(RelativePositionModel* model)
 {
   m_pRelaModel	= model;
   m_fPosX       = 0.0f;
@@ -47,7 +47,7 @@ BallGlobal::BallGlobal(RelativePositionModel* model)
 
 
 void
-BallGlobal::setRobotPosition(float x, float y, float ori)
+GlobalFromRelativePos::set_robot_position(float x, float y, float ori)
 {
   m_fPosX = x;
   m_fPosY = y;
@@ -56,26 +56,26 @@ BallGlobal::setRobotPosition(float x, float y, float ori)
 
 
 void
-BallGlobal::setPositionInImage(unsigned int x, unsigned int y)
+GlobalFromRelativePos::set_position_in_image(unsigned int x, unsigned int y)
 {
 }
 
 
 void
-BallGlobal::calc()
+GlobalFromRelativePos::calc()
 {
 }
 
 
 bool
-BallGlobal::isPosValid() const
+GlobalFromRelativePos::is_pos_valid() const
 {
-  return m_pRelaModel->isPosValid();
+  return m_pRelaModel->is_pos_valid();
 }
 
 
 float
-BallGlobal::getX() const
+GlobalFromRelativePos::get_x() const
 {
   /*
   cout << " DETAILS of \"getX()\"" << endl
@@ -90,14 +90,14 @@ BallGlobal::getX() const
        << "       " << m_pRelaModel->getY() * sin(m_fPhi) << ")   ) + " << m_fPosX << endl 
        << "  ---> " << (m_pRelaModel->getX() * cos(m_fPhi) - m_pRelaModel->getY() * sin(m_fPhi)) + m_fPosX << flush;
   */
-  return (   m_pRelaModel->getX() * cos(m_fPhi)
-	   - m_pRelaModel->getY() * sin(m_fPhi) )
+  return (   m_pRelaModel->get_x() * cos(m_fPhi)
+	   - m_pRelaModel->get_y() * sin(m_fPhi) )
          + m_fPosX;
 }
 
 
 float
-BallGlobal::getY() const
+GlobalFromRelativePos::get_y() const
 {
   /*
   cout << " DETAILS of \"getY()\"" << endl
@@ -112,7 +112,7 @@ BallGlobal::getY() const
        << "       " << m_pRelaModel->getY() * cos(m_fPhi) << ")   ) + " << m_fPosY << endl 
        << "  ---> " << (m_pRelaModel->getX() * sin(m_fPhi) + m_pRelaModel->getY() * cos(m_fPhi)) + m_fPosY << flush;
   */
-  return (   m_pRelaModel->getX() * sin(m_fPhi)
-	   + m_pRelaModel->getY() * cos(m_fPhi) )
+  return (   m_pRelaModel->get_x() * sin(m_fPhi)
+	   + m_pRelaModel->get_y() * cos(m_fPhi) )
          + m_fPosY;
 }

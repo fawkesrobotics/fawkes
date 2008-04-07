@@ -103,28 +103,28 @@ ScanlineGrid::reset()
 }
 
 const char *
-ScanlineGrid::getName()
+ScanlineGrid::get_name()
 {
   return "ScanlineModel::Grid";
 }
 
 
 unsigned int
-ScanlineGrid::getMargin()
+ScanlineGrid::get_margin()
 {
   return (offset_x > offset_y) ? offset_x : offset_y;
 }
 
 
 void
-ScanlineGrid::setRobotPose(float x, float y, float ori)
+ScanlineGrid::set_robot_pose(float x, float y, float ori)
 {
   // ignored
 }
 
 
 void
-ScanlineGrid::setPanTilt(float pan, float tilt)
+ScanlineGrid::set_pan_tilt(float pan, float tilt)
 {
   // ignored
 }

@@ -69,42 +69,42 @@ OmniRelative::OmniRelative(MirrorModel *mirror_model)
 
 
 float
-OmniRelative::getDistance() const 
+OmniRelative::get_distance() const 
 {
   return distance_ball_motor;
 }
 
 
 float
-OmniRelative::getBearing(void) const
+OmniRelative::get_bearing(void) const
 {
   return bearing;
 }
 
 
 float
-OmniRelative::getSlope() const
+OmniRelative::get_slope() const
 {
   return slope;
 }
 
 
 float
-OmniRelative::getY(void) const
+OmniRelative::get_y(void) const
 {
   return ball_y;
 }
 
 
 float
-OmniRelative::getX(void) const
+OmniRelative::get_x(void) const
 {
   return ball_x;
 }
 
 
 void
-OmniRelative::setCenter(float x, float y)
+OmniRelative::set_center(float x, float y)
 {
   image_x = (unsigned int)roundf(x);
   image_y = (unsigned int)roundf(y);
@@ -112,13 +112,13 @@ OmniRelative::setCenter(float x, float y)
 
 
 void
-OmniRelative::setCenter(const center_in_roi_t& c)
+OmniRelative::set_center(const center_in_roi_t& c)
 {
 }
 
 
 void
-OmniRelative::setRadius(float r)
+OmniRelative::set_radius(float r)
 {
 }
 
@@ -127,26 +127,26 @@ OmniRelative::setRadius(float r)
  * @return always 0
  */
 float
-OmniRelative::getRadius() const
+OmniRelative::get_radius() const
 {
   return 0;
 }
 
 
 void
-OmniRelative::setPanTilt(float pan, float tilt)
+OmniRelative::set_pan_tilt(float pan, float tilt)
 {
 }
 
 
 void
-OmniRelative::getPanTilt(float *pan, float *tilt) const
+OmniRelative::get_pan_tilt(float *pan, float *tilt) const
 {
 }
 
 
 const char *
-OmniRelative::getName() const
+OmniRelative::get_name() const
 {
   return "OmniRelative";
 }
@@ -182,7 +182,7 @@ OmniRelative::calc()
 
 
 bool
-OmniRelative::isPosValid() const
+OmniRelative::is_pos_valid() const
 {
   return mirror_model->isValidPoint( image_x, image_y );
 }

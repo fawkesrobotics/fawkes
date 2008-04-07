@@ -174,28 +174,28 @@ ScanlineStar::reset()
 
 
 const char*
-ScanlineStar::getName()
+ScanlineStar::get_name()
 {
   return "ScanlineModel::Star";
 }
 
 
 unsigned int
-ScanlineStar::getMargin()
+ScanlineStar::get_margin()
 {
   return m_margin;
 }
 
 
 void
-ScanlineStar::setRobotPose(float x, float y, float ori)
+ScanlineStar::set_robot_pose(float x, float y, float ori)
 {
   // ignored
 }
 
 
 void
-ScanlineStar::setPanTilt(float pan, float tilt)
+ScanlineStar::set_pan_tilt(float pan, float tilt)
 {
   // ignored
 }

@@ -50,10 +50,10 @@ class ScanlineStar : public ScanlineModel
   void advance();
   bool finished();
   void reset();
-  const char* getName();
-  unsigned int getMargin();
-  void setRobotPose(float x, float y, float ori);
-  void setPanTilt(float pan, float tilt);
+  const char* get_name();
+  unsigned int get_margin();
+  void set_robot_pose(float x, float y, float ori);
+  void set_pan_tilt(float pan, float tilt);
   void skip_current_ray();
   unsigned int num_rays() const;
   unsigned int ray_index() const;

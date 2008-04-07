@@ -244,16 +244,16 @@ CornerHorizon::reset()
 
 
 const char *
-CornerHorizon::getName()
+CornerHorizon::get_name()
 {
   return "ScanlineModel::CornerHorizon";
 }
 
 
 unsigned int
-CornerHorizon::getMargin()
+CornerHorizon::get_margin()
 {
-  return model->getMargin();
+  return model->get_margin();
 }
 
 
@@ -268,7 +268,7 @@ CornerHorizon::getHorizon()
 
 
 void
-CornerHorizon::setRobotPose(float x, float y, float ori)
+CornerHorizon::set_robot_pose(float x, float y, float ori)
 {
   pose_x = x;
   pose_y = y;
@@ -277,7 +277,7 @@ CornerHorizon::setRobotPose(float x, float y, float ori)
 
 
 void
-CornerHorizon::setPanTilt(float pan, float tilt)
+CornerHorizon::set_pan_tilt(float pan, float tilt)
 {
   this->pan  = pan;
   this->tilt = tilt;

@@ -39,13 +39,13 @@ class CameraTracker {
 
   void  calc();
 
-  float getNewPan();
-  float getNewTilt();
+  float get_new_pan();
+  float get_new_tilt();
 
-  void  setMode(unsigned int mode);
-  void  setRelativePositionModel(RelativePositionModel *rpm);
-  void  setRobotPosition(float x, float y, float ori);
-  void  setWorldPoint(float x, float y);
+  void  set_mode(unsigned int mode);
+  void  set_relative_position_model(RelativePositionModel *rpm);
+  void  set_robot_position(float x, float y, float ori);
+  void  set_world_point(float x, float y);
 
   static const unsigned int MODE_MODEL;
   static const unsigned int MODE_WORLD;

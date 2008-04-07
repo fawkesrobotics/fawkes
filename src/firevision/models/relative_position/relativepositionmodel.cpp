@@ -30,32 +30,32 @@
  * Relative Position Model Interface.
  * This interfaces defines a relative position model.
  *
- * @fn const char * RelativePositionModel::getName() const
+ * @fn const char * RelativePositionModel::get_name() const
  * Get name of relative position model.
  * @return name of relative position model
  *
- * @fn void RelativePositionModel::setRadius(float r)
+ * @fn void RelativePositionModel::set_radius(float r)
  * Set radius of a found circle.
  * This is especially used for ball position implementations.
  * @param r radius
  *
- * @fn void RelativePositionModel::setCenter(float x, float y)
+ * @fn void RelativePositionModel::set_center(float x, float y)
  * Set center of a found circle.
  * This is especially used for ball position implementations.
  * @param x x position in image (pixels)
  * @param y y position in image (pixels)
  *
- * @fn void RelativePositionModel::setCenter(const center_in_roi_t& c)
+ * @fn void RelativePositionModel::set_center(const center_in_roi_t& c)
  * Set center of a found circle.
  * This is especially used for ball position implementations.
  * @param c center
  *
- * @fn void RelativePositionModel::setPanTilt(float pan, float tilt)
+ * @fn void RelativePositionModel::set_pan_tilt(float pan, float tilt)
  * Set camera pan and tilt.
  * @param pan pan value (rad)
  * @param tilt tilt value (rad)
  *
- * @fn void RelativePositionModel::getPanTilt(float *pan, float *tilt) const
+ * @fn void RelativePositionModel::get_pan_tilt(float *pan, float *tilt) const
  * Get camera pan tilt.
  * @param pan contains pan value (rad) upon return
  * @param tilt contains tilt value (rad) upon return
@@ -73,27 +73,27 @@
  * Reset all data.
  * This must be called if the object is not visible.
  *
- * @fn float RelativePositionModel::getDistance() const
+ * @fn float RelativePositionModel::get_distance() const
  * Get distance to object.
  * @return distance to object in meters.
  *
- * @fn float RelativePositionModel::getBearing() const
+ * @fn float RelativePositionModel::get_bearing() const
  * Get bearing (horizontal angle) to object.
  * @return bearing in rad
  *
- * @fn float RelativePositionModel::getSlope() const
+ * @fn float RelativePositionModel::get_slope() const
  * Get slope (vertical angle) to object.
  * @return slope in rad
  *
- * @fn float RelativePositionModel::getX() const
+ * @fn float RelativePositionModel::get_x() const
  * Get relative X coordinate of object.
  * @return relative X coordinate in local metric cartesian coordinate system
  *
- * @fn float RelativePositionModel::getY() const
+ * @fn float RelativePositionModel::get_y() const
  * Get relative Y coordinate of object.
  * @return relative Y coordinate in local metric cartesian coordinate system
  *
- * @fn bool RelativePositionModel::isPosValid() const
+ * @fn bool RelativePositionModel::is_pos_valid() const
  * Check if position is valid.
  * @return true, if the calculated position is valid, false otherwise
  *

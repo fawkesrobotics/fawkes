@@ -40,8 +40,8 @@
 #include <models/scanlines/grid.h>
 #include <models/scanlines/cornerhorizon.h>
 #include <models/shape/rcd_circle.h>
-#include <models/relative_position/ballrelative.h>
-#include <models/global_position/ballglobal.h>
+#include <models/relative_position/front_ball.h>
+#include <models/global_position/globfromrel.h>
 #include <models/color/lookuptable.h>
 #include <filters/hv_search.h>
 
@@ -185,12 +185,13 @@ FvFrontPipelineThread::init()
 
 
   // Position models for ball
-  __ball_rel = new BallRelative(__img_width, __img_height,
-				__cfg_cam_height, __cfg_cam_offset_x, __cfg_cam_offset_y,
-				__cfg_cam_pan, __cfg_cam_hor_va, __cfg_cam_ver_va,
-				__cfg_ball_circumfer);
-  
-  __ball_glob = new BallGlobal( __ball_rel );
+  __ball_rel = new FrontBallRelativePos(__img_width, __img_height,
+					__cfg_cam_height,
+					__cfg_cam_offset_x, __cfg_cam_offset_y,
+					__cfg_cam_pan, __cfg_cam_hor_va, __cfg_cam_ver_va,
+					__cfg_ball_circumfer);
+
+  __ball_glob = new GlobalFromRelativePos( __ball_rel );
 
 
   __cm = new ColorModelLookupTable(__cfg_colormap.c_str(),
@@ -258,10 +259,10 @@ FvFrontPipelineThread::detect_ball_and_update_models( ROI *roi )
 			circle->center.x, circle->center.y, circle->radius, circle->count);
     }
 
-    __ball_rel->setRadius( circle->radius );
+    __ball_rel->set_radius( circle->radius );
     // note that BallRelative requires the circle-center wrt image, not wrt roi
-    __ball_rel->setCenter(int(circle->center.x + (roi)->start.x),
-			  int(circle->center.y + (roi)->start.y) );
+    __ball_rel->set_center(int(circle->center.x + (roi)->start.x),
+			   int(circle->center.y + (roi)->start.y) );
 
     __shm_buffer->set_circle_found(true);
     __shm_buffer->set_roi(roi->start.x, roi->start.y, roi->width, roi->height);
@@ -292,7 +293,7 @@ FvFrontPipelineThread::fetch_pantilt_and_update_models()
   float tilt = 0.f;
 
   // camctrl->getPanTiltRad(&pan, &tilt);
-  __ball_rel->setPanTilt(pan, tilt);
+  __ball_rel->set_pan_tilt(pan, tilt);
   __scanlines->setPanTilt(pan, tilt);
   /*
   // Maybe needed for more sophisticated models
@@ -376,18 +377,18 @@ FvFrontPipelineThread::loop()
 	if ( __generate_output ) {
 	  __ball_rel->calc_unfiltered();
 	  logger->log_debug(name(), "RelPosU: X: %f  Y: %f  Dist: %f  Bearing: %f",
-			    __ball_rel->getX(), __ball_rel->getY(),
-			    __ball_rel->getDistance(), __ball_rel->getBearing());
+			    __ball_rel->get_x(), __ball_rel->get_y(),
+			    __ball_rel->get_distance(), __ball_rel->get_bearing());
 	}
 
 	__ball_rel->calc();
 	
 	if ( __generate_output ) {
 	  logger->log_debug(name(), "RelPos: X: %f  Y: %f  Dist: %f  Bearing: %f",
-			    __ball_rel->getX(), __ball_rel->getY(),
-			    __ball_rel->getDistance(), __ball_rel->getBearing());
+			    __ball_rel->get_x(), __ball_rel->get_y(),
+			    __ball_rel->get_distance(), __ball_rel->get_bearing());
 	  logger->log_debug(name(), "GlobPos: X: %f  Y: %f",
-			    __ball_glob->getX(), __ball_glob->getY());
+			    __ball_glob->get_x(), __ball_glob->get_y());
 	}
 
 	// we only process a single ROI for time constraint reasons
@@ -400,10 +401,10 @@ FvFrontPipelineThread::loop()
   // write data to interface
   if (__ball_visible) {
     __ball_interface->set_visible(true);
-    __ball_interface->set_relative_x( __ball_rel->getX() );
-    __ball_interface->set_relative_y( __ball_rel->getY() );
-    __ball_interface->set_distance( __ball_rel->getDistance() );
-    __ball_interface->set_yaw( __ball_rel->getBearing() );
+    __ball_interface->set_relative_x( __ball_rel->get_x() );
+    __ball_interface->set_relative_y( __ball_rel->get_y() );
+    __ball_interface->set_distance( __ball_rel->get_distance() );
+    __ball_interface->set_yaw( __ball_rel->get_bearing() );
   } else {
     __ball_interface->set_visible(false);
   }
