@@ -153,7 +153,7 @@ SURF_DIR = $(FVBASEDIR)/extlib/surf
 ifneq ($(wildcard $(realpath $(SURF_DIR))),)
   ifneq ($(ARCH),x86_64)
     HAVE_SURF = 1
-    LIBS_SURF = Surf
+    LIBS_SURF = surf
     CFLAGS_SURF = -DHAVE_SURF -I$(FVBASEDIR)/extlib
   endif
 endif

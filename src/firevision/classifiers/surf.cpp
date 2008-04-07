@@ -216,9 +216,6 @@ SurfClassifier::classify()
   int x_max = 0;
   int y_max = 0;
 
-  double d0, d1;// = 0.0;
-  int k, i, m = 0;
-
   //#ifdef SURF_TIMETRACKER
   __tt->ping_start(__ttc_imgconv);
   //#endif
