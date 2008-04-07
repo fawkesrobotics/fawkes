@@ -34,16 +34,16 @@ endif
 
 ifeq ($(HAVE_SIFT),1)
   CFLAGS += $(CFLAGS_SIFT)
-  CLASSIFIER_EXTRA_LIBS += feat
+  CLASSIFIER_EXTRA_LIBS += $(LIBS_SIFT)
 else
   # SIFT is considered truely optional, no warning
   #WARN_TARGETS += warning_sift
-  FILTER_OUT += feature.cpp
+  FILTER_OUT += sift.cpp
 endif
 
 ifeq ($(HAVE_SURF),1)
   CFLAGS += $(CFLAGS_SURF)
-  CLASSIFIER_EXTRA_LIBS += Surf
+  CLASSIFIER_EXTRA_LIBS += $(LIBS_SURF)
 else
   # SIFT is considered truely optional, no warning
   #WARN_TARGETS += warning_surf

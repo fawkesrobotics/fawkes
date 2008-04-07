@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  qa_featureclassifier.cpp - QA for feature classifier
+ *  qa_siftclassifier.cpp - QA for SIFT classifier
  *
  *  Generated: Wed March 15 16:00:00 2008
  *  Copyright 2008 Stefan Schiffer [stefanschiffer.de]
@@ -31,7 +31,7 @@
 #include <filters/roidraw.h>
 //#include <fvwidgets/image_display.h>
 
-#include <classifiers/feature.h>
+#include <classifiers/sift.h>
 
 #include <opencv/cv.h>
 #include <opencv/cxcore.h>
@@ -51,13 +51,13 @@ main(int argc, char **argv)
   const char *scene_file = argv[2];
 
 
-  printf("QAFeatureClassifier: creating cvImages for object and scene\n");
+  printf("QASiftClassifier: creating cvImages for object and scene\n");
   IplImage * obj_img = cvLoadImage( object_file, 1 );
   IplImage * scn_img = cvLoadImage( scene_file, 1 );
   //IplImage * stacked = stack_imgs( obj_img, scn_img );
 
 
-  printf("QAFeatureClassifier: Load scene as image\n");
+  printf("QASiftClassifier: Load scene as image\n");
   //JpegReader *reader = new JpegReader(scene_file);
   PNGReader *reader = new PNGReader(scene_file);
   unsigned char *buffer = malloc_buffer(YUV422_PLANAR,
@@ -66,16 +66,16 @@ main(int argc, char **argv)
   reader->set_buffer(buffer);
   reader->read();
 
-  printf("QAFeatureClassifier: Instantiate FeatureClassifier\n");
-  FeatureClassifier *classifier = new FeatureClassifier(object_file, 
-							reader->pixel_width(), reader->pixel_height());
+  printf("QASiftClassifier: Instantiate SiftClassifier\n");
+  SiftClassifier *classifier = new SiftClassifier(object_file, 
+						  reader->pixel_width(), reader->pixel_height());
 
   classifier->set_src_buffer(buffer, reader->pixel_width(), reader->pixel_height());
 
-  printf("QAFeatureClassifier: classify ...\n");
+  printf("QASiftClassifier: classify ...\n");
   std::list< ROI > *rois = classifier->classify();
 
-  printf("QAFeatureClassifier: filterROI\n");
+  printf("QASiftClassifier: filterROI\n");
   FilterROIDraw *roi_draw = new FilterROIDraw();
   for (std::list< ROI >::iterator i = rois->begin(); i != rois->end(); ++i) {
     printf("ROI: start (%u, %u)  extent %u x %u\n", 
@@ -85,7 +85,7 @@ main(int argc, char **argv)
     roi_draw->apply();
   }
 
-  printf("QAFeatureClassifier: draw ROIs in cvWindow\n");
+  printf("QASiftClassifier: draw ROIs in cvWindow\n");
   for (std::list< ROI >::iterator i = rois->begin(); i != rois->end(); ++i) {
     if( (*i).height == 11 && (*i).width == 11 ) {
       cvRectangle( scn_img, 

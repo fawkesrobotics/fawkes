@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  feature.h - Feature-based classifier using OpenCV structures
+ *  sift.h - Feature-based classifier using OpenCV structures
  *
  *  Created: Mon Mar 15 15:47:11 2008
  *  Copyright 2008 Stefan Schiffer [stefanschiffer.de]
@@ -23,11 +23,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CLASSIFIERS_FEATURES_H_
-#define __FIREVISION_CLASSIFIERS_FEATURES_H_
+#ifndef __FIREVISION_CLASSIFIERS_SIFT_H_
+#define __FIREVISION_CLASSIFIERS_SIFT_H_
 
 #ifndef HAVE_SIFT
-#  error SIFT not available, you may not use the FeatureClassifier
+#  error SIFT not available, you may not use the SiftClassifier
 #endif
 
 #include <classifiers/classifier.h>
@@ -41,14 +41,14 @@ typedef struct _IplImage IplImage;
 
 struct feature;
 
-class FeatureClassifier : public Classifier
+class SiftClassifier : public Classifier
 {
  public:
-  FeatureClassifier(const char * features_file,
+  SiftClassifier(const char * features_file,
 		    unsigned int pixel_width, unsigned int pixel_height,
 		    int kdtree_bbf_max_nn_chks = 200, float nn_sq_dist_ratio_thr = 0.49, int flags = 0);
   
-  virtual ~FeatureClassifier(); 
+  virtual ~SiftClassifier(); 
   
   virtual std::list< ROI > * classify();
   

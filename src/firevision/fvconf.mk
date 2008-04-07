@@ -128,6 +128,7 @@ ifneq ($(wildcard $(realpath $(IPP_DIR))),)
   ifneq ($(wildcard $(realpath $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/include/ipp.h)),)
     HAVE_IPP = 1
     VISION_CFLAGS  += -DHAVE_IPP
+    VISION_LIBS    += pthread
     VISION_LIBDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/sharedlib
     VISION_INCDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/include
   endif
@@ -140,19 +141,21 @@ ifeq ($(HAVE_OPENCV),1)
 endif
 
 ## check for SIFT-support (patent-encumbered!)
-SIFT_DIR = $(FVBASEDIR)/sift
+SIFT_DIR = $(FVBASEDIR)/extlib/sift
 ifneq ($(wildcard $(realpath $(SIFT_DIR))),)
   HAVE_SIFT = 1
-  LIBS_SIFT = feat
-  CFLAGS_SIFT = -DHAVE_SIFT
+  LIBS_SIFT = sift
+  CFLAGS_SIFT = -DHAVE_SIFT -I$(SIFT_DIR)/include
 endif
 
 ## check for SURF-support (patent-encumbered!)
-SURF_DIR = $(FVBASEDIR)/surf
+SURF_DIR = $(FVBASEDIR)/extlib/surf
 ifneq ($(wildcard $(realpath $(SURF_DIR))),)
-  HAVE_SURF = 1
-  LIBS_SURF = Surf
-  CFLAGS_SURF = -DHAVE_SURF
+  ifneq ($(ARCH),x86_64)
+    HAVE_SURF = 1
+    LIBS_SURF = Surf
+    CFLAGS_SURF = -DHAVE_SURF -I$(FVBASEDIR)/extlib
+  endif
 endif
 
 # Set to 1 to build shape models

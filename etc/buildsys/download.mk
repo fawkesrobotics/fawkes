@@ -32,7 +32,7 @@ else \
 	if [ -z "$(URLS_$(patsubst download-%,%,$@))" ]; then \
 		echo -e "$(INDENT_PRINT)--> $(TRED)Cannot download files$(TNORMAL) (no URLs given)"; \
 	else \
-		for u in "$(URLS_$(patsubst download-%,%,$@))"; do \
+		for u in $(URLS_$(patsubst download-%,%,$@)); do \
 			echo -e "$(INDENT_PRINT)--> Downloading $$u using $(notdir $(DOWNLOAD_APP))"; \
 			if ! $(DOWNLOAD_APP) $(DOWNLOAD_APP_PARAMS_$(notdir $(DOWNLOAD_APP))) "$$u"; then \
 				echo -e "$(INDENT_PRINT)--> $(TRED)Download of $$u failed$(TNORMAL)"; \

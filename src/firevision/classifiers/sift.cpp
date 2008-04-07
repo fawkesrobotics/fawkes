@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  feature.cpp - Feature-based classifier using OpenCV structures
+ *  sift.cpp - Feature-based classifier using OpenCV structures
  *
  *  Created: Mon Mar 15 15:47:11 2008
  *  Copyright 2008 Stefan Schiffer [stefanschiffer.de]
@@ -26,18 +26,18 @@
 #include <iostream>
 #include <vector>
 
-#include <classifiers/feature.h>
-//#ifdef FEAT_TIMETRACKER
+#include <classifiers/sift.h>
+//#ifdef SIFT_TIMETRACKER
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
 //#endif
 
 extern "C" {
-#include <sift/include/sift.h>
-#include <sift/include/imgfeatures.h>
-#include <sift/include/kdtree.h>
-#include <sift/include/utils.h>
-#include <sift/include/xform.h>
+#include <sift/sift.h>
+#include <sift/imgfeatures.h>
+#include <sift/kdtree.h>
+#include <sift/utils.h>
+#include <sift/xform.h>
 }
 
 #include <core/exception.h>
@@ -49,12 +49,12 @@ extern "C" {
 #include <opencv/cxcore.h>
 #include <opencv/highgui.h>
 
-/** @class FeatureClassifier <classifiers/feature.h>
- * Feature classifier.
+/** @class SiftClassifier <classifiers/sift.h>
+ * SIFT classifier.
  *
  * This class provides a classifier that uses OpenCV to detect objects in a given
- * image by matching features. The objects are reported back as regions of interest. 
- * Each ROI contains an object.
+ * image by matching features using SIFT. The objects are reported back as regions
+ * of interest.  Each ROI contains an object.
  *
  * This code is based on the sift package provided by Rob Hess.
  * at http://web.engr.oregonstate.edu/~hess/
@@ -70,17 +70,17 @@ extern "C" {
  * @param nn_sq_dist_ratio_thr threshold on squared ratio of distances between NN and 2nd NN
  * @param flags flags, not used yet.
  */
-FeatureClassifier::FeatureClassifier( const char * object_file,
+SiftClassifier::SiftClassifier( const char * object_file,
 				      unsigned int pixel_width, unsigned int pixel_height,
 				      int kdtree_bbf_max_nn_chks, float nn_sq_dist_ratio_thr, int flags)
-  : Classifier("FeatureClassifier")
+  : Classifier("SiftClassifier")
 {
   __kdtree_bbf_max_nn_chks = kdtree_bbf_max_nn_chks;
   __nn_sq_dist_ratio_thr = nn_sq_dist_ratio_thr;
   __flags = flags;
 
 
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt = new TimeTracker();
   __loop_count = 0;
   __ttc_objconv = __tt->add_class("ObjectConvert");
@@ -91,18 +91,18 @@ FeatureClassifier::FeatureClassifier( const char * object_file,
   __ttc_roimerg = __tt->add_class("MergeROIs");
   //#endif
 
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_start(__ttc_objconv);
   //#endif
   __obj_img = cvLoadImage( object_file, 1 );
   if ( ! __obj_img ) {
     throw Exception("Could not load object file");
   }
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_end(__ttc_objconv);
   //#endif
 
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_start(__ttc_objfeat);
   //#endif
   __obj_num_features = 0;
@@ -110,9 +110,9 @@ FeatureClassifier::FeatureClassifier( const char * object_file,
   if ( ! __obj_num_features > 0 ) {
     throw Exception("Could not compute object features");
   }
-  std::cout << "FeatureClassifier(classify): computed '" << __obj_num_features << "' features from object" << std::endl;
+  std::cout << "SiftClassifier(classify): computed '" << __obj_num_features << "' features from object" << std::endl;
   //cvReleaseImage(&__obj_img);
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_end(__ttc_objfeat);
   //#endif
 
@@ -123,7 +123,7 @@ FeatureClassifier::FeatureClassifier( const char * object_file,
 
 
 /** Destructor. */
-FeatureClassifier::~FeatureClassifier()
+SiftClassifier::~SiftClassifier()
 {
   //
   cvReleaseImage(&__obj_img);
@@ -132,9 +132,9 @@ FeatureClassifier::~FeatureClassifier()
 
 
 std::list< ROI > *
-FeatureClassifier::classify()
+SiftClassifier::classify()
 {
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_start(0);
   //#endif
 
@@ -144,7 +144,7 @@ FeatureClassifier::classify()
   struct feature * feat;
   struct feature** nbrs;
   struct kd_node* kd_root;
-  CvPoint pt1, pt2, pt3;
+  CvPoint pt1, pt2;
 
   // for ROI calculation
   CvPoint ftpt;
@@ -156,37 +156,37 @@ FeatureClassifier::classify()
   int y_max = 0;
 
   double d0, d1;// = 0.0;
-  int k, i, m = 0;
+  int k, m = 0;
 
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_start(__ttc_imgconv);
   //#endif
-  //std::cout << "FeatureClassifier(classify): convert frame to IplImage" << std::endl;
+  //std::cout << "SiftClassifier(classify): convert frame to IplImage" << std::endl;
   convert(YUV422_PLANAR, BGR, _src, (unsigned char *)__image->imageData, _width, _height);
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_end(__ttc_imgconv);
   //#endif
 
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_start(__ttc_imgfeat);
   //#endif
-  //std::cout << "FeatureClassifier(classify): compute features on current frame " << std::endl;
+  //std::cout << "SiftClassifier(classify): compute features on current frame " << std::endl;
   int num_img_ft = sift_features( __image, &__img_features );
   kd_root = kdtree_build( __img_features, num_img_ft );
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_end(__ttc_imgfeat);
   //#endif
 
   if( ! kd_root ) {
-    std::cerr << "FeatureClassifier(classify): KD-Root NULL!" << std::endl;
+    std::cerr << "SiftClassifier(classify): KD-Root NULL!" << std::endl;
   }
 
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_start(__ttc_matchin);
   //#endif
-  std::cout << "FeatureClassifier(classify): matching ..." << std::endl;
-  for( unsigned int i = 0; i < __obj_num_features; ++i ) {
-    //std::cout << "FeatureClassifier(classify): ... feature '" << i << "'" << std::endl;
+  std::cout << "SiftClassifier(classify): matching ..." << std::endl;
+  for( int i = 0; i < __obj_num_features; ++i ) {
+    //std::cout << "SiftClassifier(classify): ... feature '" << i << "'" << std::endl;
     feat = __obj_features + i;
     k = kdtree_bbf_knn( kd_root, feat, 2, &nbrs, __kdtree_bbf_max_nn_chks );
     if( k == 2 )
@@ -209,18 +209,18 @@ FeatureClassifier::classify()
        }
      free( nbrs );
   }
-  std::cout << "FeatureClassifier(classify): found '" << m << "' matches" << std::endl;
+  std::cout << "SiftClassifier(classify): found '" << m << "' matches" << std::endl;
   kdtree_release( kd_root );
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_end(__ttc_matchin);
   //#endif
 
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_start(__ttc_roimerg);
   //#endif
-  std::cout << "FeatureClassifier(classify): computing ROI" << std::endl;
+  std::cout << "SiftClassifier(classify): computing ROI" << std::endl;
   //for ( int i = 0; i < m; ++i) {
-  for ( int i = 0; i < ftlist.size(); ++i) {
+  for ( std::vector< CvPoint >::size_type i = 0; i < ftlist.size(); ++i) {
     if( ftlist[i].x < x_min )
       x_min = ftlist[i].x;
     if( ftlist[i].y < y_min )
@@ -234,18 +234,18 @@ FeatureClassifier::classify()
     ROI r(x_min, y_min, x_max-x_min, y_max-y_min, _width, _height);
     rv->push_back(r);
   }
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_end(__ttc_roimerg);
   //#endif
 
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->ping_end(0);
   //#endif
 
-  //#ifdef FEAT_TIMETRACKER
+  //#ifdef SIFT_TIMETRACKER
   __tt->print_to_stdout();
   //#endif
 
-  std::cout << "FeatureClassifier(classify): done ... returning '" << rv->size() << "' ROIs." << std::endl;
+  std::cout << "SiftClassifier(classify): done ... returning '" << rv->size() << "' ROIs." << std::endl;
   return rv;
 }

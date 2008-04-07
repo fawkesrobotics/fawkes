@@ -29,27 +29,25 @@ LIBS_fv_qa_facesclassifier := fvclassifiers fvutils fvwidgets fvfilters
 CFLAGS_qa_facesclassifier += $(CFLAGS_SDL)
 LDFLAGS_fv_qa_facesclassifier += $(LDFLAGS_SDL)
 
-OBJS_fv_qa_featureclassifier := qa_featureclassifier.o
-LIBS_fv_qa_featureclassifier := fvclassifiers fvutils fvwidgets fvfilters feat
-CFLAGS_qa_featureclassifier += $(CFLAGS_SIFT)
+OBJS_fv_qa_siftclassifier := qa_siftclassifier.o
+LIBS_fv_qa_siftclassifier := fvclassifiers fvutils fvwidgets fvfilters $(LIBS_SIFT)
+CFLAGS_qa_siftclassifier += $(CFLAGS_SIFT)
 
 OBJS_fv_qa_surfclassifier := qa_surfclassifier.o
-LIBS_fv_qa_surfclassifier := fvclassifiers fvutils fvwidgets fvfilters Surf
+LIBS_fv_qa_surfclassifier := fvclassifiers fvutils fvwidgets fvfilters $(LIBS_SURF)
 CFLAGS_qa_surfclassifier += $(CFLAGS_SURF)
 
-OBJS_all = $(OBJS_fv_qa_facesclassifier) $(OBJS_fv_qa_featureclassifier) $(OBJS_fv_qa_surfclassifier)
+OBJS_all = $(OBJS_fv_qa_facesclassifier) $(OBJS_fv_qa_siftclassifier) $(OBJS_fv_qa_surfclassifier)
 
 ifeq ($(HAVE_OPENCV),1)
   BINS_all = $(BINDIR)/fv_qa_facesclassifier
 endif
 
 ifeq ($(HAVE_SIFT),1)
-  OBJS_all += $(OBJS_fv_qa_featureclassifier)
-  BINS_all += $(BINDIR)/fv_qa_featureclassifier
+  BINS_all += $(BINDIR)/fv_qa_siftclassifier
 endif
 
 ifeq ($(HAVE_SURF),1)
-  OBJS_all += $(OBJS_fv_qa_surfclassifier)
   BINS_all += $(BINDIR)/fv_qa_surfclassifier
 endif
 
