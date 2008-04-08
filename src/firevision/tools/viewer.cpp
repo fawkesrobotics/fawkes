@@ -193,12 +193,7 @@ main(int argc, char **argv)
 	   colorspace_buffer_size(cam->colorspace(), cam->pixel_width(), cam->pixel_height()));
   }
 
-  cam->capture();
-
   ImageDisplay *display = new ImageDisplay(cam->pixel_width(), cam->pixel_height());
-  display->show(cam->colorspace(), cam->buffer());
-
-  cam->dispose_buffer();
 
 #ifdef HAVE_RECTINFO
   RectificationInfoFile *rectfile = new RectificationInfoFile();
@@ -215,9 +210,7 @@ main(int argc, char **argv)
   redraw_event.type = SDL_KEYUP;
   redraw_event.key.keysym.sym = SDLK_SPACE;
 
-  if ( continuous ) {
-    SDL_PushEvent(&redraw_event);
-  }
+  SDL_PushEvent(&redraw_event);
 
   bool quit = false;
   while (! quit) {
@@ -229,24 +222,29 @@ main(int argc, char **argv)
 	break;
       case SDL_KEYUP:
 	if ( event.key.keysym.sym == SDLK_SPACE ) {
+	  usleep(100);
 	  cam->capture();
+          if (cam->buffer() != NULL ) {
 #ifdef HAVE_RECTINFO
-	  if ( rectifying ) {
-	    convert(cam->colorspace(), YUV422_PLANAR, cam->buffer(), unfiltered_buffer,
-		    cam->pixel_width(), cam->pixel_height());
-	    ROI *fir = ROI::full_image(cam->pixel_width(), cam->pixel_height());
-	    rectify_filter->set_src_buffer(unfiltered_buffer, fir);
-	    rectify_filter->set_dst_buffer(filtered_buffer, fir);
-	    rectify_filter->apply();
-	    display->show(YUV422_PLANAR, filtered_buffer);
-	  } else {
+	    if ( rectifying ) {
+	      convert(cam->colorspace(), YUV422_PLANAR, cam->buffer(), unfiltered_buffer,
+		      cam->pixel_width(), cam->pixel_height());
+	      ROI *fir = ROI::full_image(cam->pixel_width(), cam->pixel_height());
+	      rectify_filter->set_src_buffer(unfiltered_buffer, fir);
+	      rectify_filter->set_dst_buffer(filtered_buffer, fir);
+	      rectify_filter->apply();
+	      display->show(YUV422_PLANAR, filtered_buffer);
+	    } else {
 #endif
-	    display->show(cam->colorspace(), cam->buffer());
+	      display->show(cam->colorspace(), cam->buffer());
 #ifdef HAVE_RECTINFO
-          }
+	    }
 #endif
 
-	  cam->dispose_buffer();
+	    cam->dispose_buffer();
+          } else {
+            printf("No valid frame received\n");
+          }
 	  if ( continuous ) {
 	    SDL_PushEvent(&redraw_event);
 	  }
