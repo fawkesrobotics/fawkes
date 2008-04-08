@@ -69,6 +69,12 @@ FirewireCamera::FirewireCamera(dc1394framerate_t framerate,
   _framerate = framerate;
   _white_balance_ub = 0xFFFFFFFF;
   _white_balance_vr = 0xFFFFFFFF;
+  _format7_mode_enabled = false;
+  _format7_width = _format7_height = _format7_startx = _format7_starty = 0;
+  _format7_bpp = 4096;
+  _model = strdup("any");
+  _do_set_shutter = false;
+  _do_set_white_balance = false;
 
   _dc1394 = NULL;
   _camera = NULL;
@@ -77,8 +83,6 @@ FirewireCamera::FirewireCamera(dc1394framerate_t framerate,
     // cerr  << "When in mode YUV422 @ 640x480 with more than 15 fps. Setting framerate to 15fps." << endl;
     _framerate = DC1394_FRAMERATE_15;
   }
-
-  _model = NULL;
 }
 
 
@@ -165,13 +169,14 @@ FirewireCamera::open()
 
     set_auto_focus(_auto_focus);
     set_auto_shutter(_auto_shutter);
-    if ( !_auto_shutter ) {
+    if ( !_auto_shutter && _do_set_shutter ) {
       set_shutter(_shutter);
     }
     set_auto_white_balance(_auto_white_balance);
     if ( ! _auto_white_balance &&
 	 (_white_balance_ub != 0xFFFFFFFF) &&
-	 (_white_balance_vr != 0xFFFFFFFF)) {
+	 (_white_balance_vr != 0xFFFFFFFF) &&
+	 _do_set_white_balance ) {
       set_white_balance(_white_balance_ub, _white_balance_vr);
     }
 
@@ -242,6 +247,18 @@ FirewireCamera::print_info()
   if (_opened) {
     dc1394_camera_print_info( _camera, stdout );
   }
+
+  printf("Parameters:\n"
+	 "valid frame received: %i\n"
+	 "auto focus: %i\n"
+	 "auto shutter: %i  (shutter value: %u)\n"
+	 "auto white balance: %i  (white balance value %u/%u)\n"
+	 "do set shutter: %i   do set white balance: %i\n",
+	 _valid_frame_received,_auto_focus,
+	 _auto_shutter, _shutter,
+	 _auto_white_balance, _white_balance_ub, _white_balance_vr,
+	 _do_set_shutter = false, _do_set_white_balance = false
+	 );
 }
 
 
@@ -294,7 +311,7 @@ FirewireCamera::capture()
     throw CaptureException("FireWireCamera(%s): capture failed (%s)",
 			   _model, dc1394_error_get_string(err));
   } else {
-    _valid_frame_received = true;
+    _valid_frame_received = (_frame != NULL);
   }
 }
 
@@ -706,17 +723,21 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   _auto_white_balance = false;
   _white_balance_ub = 0xFFFFFFFF;
   _white_balance_vr = 0xFFFFFFFF;
+  _do_set_shutter = false;
+  _do_set_white_balance = false;
 
   // Defaults
   _mode = DC1394_VIDEO_MODE_640x480_YUV422;
   _speed = DC1394_ISO_SPEED_400;
-  _framerate = DC1394_FRAMERATE_30;
+  _framerate = DC1394_FRAMERATE_15;
   _camera = NULL;
   _dc1394 = NULL;
   _format7_mode_enabled = false;
   _format7_width = _format7_height = _format7_startx = _format7_starty = 0;
   _format7_bpp = 4096;
   _model = strdup(cap->cam_id().c_str());
+  _num_buffers = 8;
+  _shutter = 0;
 
   if ( cap->has("mode") ) {
     string m = cap->get("mode");
@@ -780,8 +801,6 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   }
   if ( cap->has("nbufs") ) {
     _num_buffers = atoi(cap->get("nbufs").c_str());
-  } else {
-    _num_buffers = 4;
   }
   if ( cap->has("width") ) {
     _format7_width = atoi(cap->get("width").c_str());
@@ -829,6 +848,7 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
       _auto_white_balance = false;
       _white_balance_ub = ub_i;
       _white_balance_vr = vr_i;
+      _do_set_white_balance = true;
     }
   }
   if ( cap->has("shutter") ) {
@@ -847,6 +867,7 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
       }
       _auto_shutter = false;
       _shutter = tmp;
+      _do_set_shutter = true;
     }
   }
 }

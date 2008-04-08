@@ -114,6 +114,10 @@ class FirewireCamera : public Camera, public CameraControl
   bool _auto_white_balance;
   /** true, if a valid frame has been received, false otherwise */
   bool _valid_frame_received;
+  /** true if the shutter should actually be set, false otherwise */
+  bool _do_set_shutter;
+  /** true if the white balance should actually be set, false otherwise */
+  bool _do_set_white_balance;
 
   /** DC1394 main context */
   dc1394_t                      *_dc1394;
