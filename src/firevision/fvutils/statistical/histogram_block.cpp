@@ -139,14 +139,14 @@ HistogramBlock::set_value(uint16_t x, uint16_t y, uint32_t val)
 
   if (x >= _block_header->width)
     { 
-      throw OutOfBoundsException("Given x value is too large", 
+      throw OutOfBoundsException("Given x value is too large (set_value, 2)", 
 				 float(x), 0.0f, float(_block_header->width));
     }
 
   if (y >= _block_header->height)
     {
-      throw OutOfBoundsException("Given y value is too large", 
-				 float(y), 0.0f, float(_block_header->width));
+      throw OutOfBoundsException("Given y value is too large (set_value, 2)", 
+				 float(y), 0.0f, float(_block_header->height));
     }
 
   _histogram_data[y * _block_header->width + x] = val;
@@ -163,20 +163,20 @@ HistogramBlock::set_value(uint16_t x, uint16_t y, uint16_t z, uint32_t val)
 {
   if ( x >= _block_header->width)
     {
-      throw OutOfBoundsException("Given x value is too large", 
+      throw OutOfBoundsException("Given x value is too large (set_value, 3)", 
 				 float(x), 0.0f, float(_block_header->width));
     }
 
   if ( y >= _block_header->height)
     {
-      throw OutOfBoundsException("Given y value is too large", 
-				 float(y), 0.0f, float(_block_header->width));
+      throw OutOfBoundsException("Given y value is too large (set_value, 3)", 
+				 float(y), 0.0f, float(_block_header->height));
     }
 
   if ( z >= _block_header->depth)
     {
-      throw OutOfBoundsException("Given z value is too large", 
-				 float(z), 0.0f, float(_block_header->width));
+      throw OutOfBoundsException("Given z value is too large (set_value, 3)", 
+				 float(z), 0.0f, float(_block_header->depth));
     }
 
   _histogram_data[z * _block_header->width * _block_header->height + y * _block_header->width + x] = val;
@@ -195,14 +195,14 @@ HistogramBlock::get_value(uint16_t x, uint16_t y)
 
   if ( x >= _block_header->width)
     {
-      throw OutOfBoundsException("Given x value is too large", 
+      throw OutOfBoundsException("Given x value is too large (get_value, 2)", 
 				 float(x), 0.0f, float(_block_header->width));
     }
 
   if ( y >= _block_header->height)
     {
-      throw OutOfBoundsException("Given y value is too large", 
-				 float(y), 0.0f, float(_block_header->width));
+      throw OutOfBoundsException("Given y value is too large (get_value, 2)", 
+				 float(y), 0.0f, float(_block_header->height));
     }
 
   return _histogram_data[y * _block_header->width + x];
@@ -219,20 +219,20 @@ HistogramBlock::get_value(uint16_t x, uint16_t y, uint16_t z)
 {
   if ( x >= _block_header->width)
     {
-      throw OutOfBoundsException("Given x value is too large", 
-				 float(x), 0.0f, float(_block_header->width));
+      throw OutOfBoundsException("Given x value is too large (get_value, 3)", 
+				 float(x), 0.0f, _block_header->width - 1);
     }
 
   if ( y >= _block_header->height)
     {
-      throw OutOfBoundsException("Given y value is too large", 
-				 float(y), 0.0f, float(_block_header->width));
+      throw OutOfBoundsException("Given y value is too large (get_value, 3)", 
+				 float(y), 0.0f, _block_header->height - 1);
     }
 
   if ( z >= _block_header->depth)
     {
-      throw OutOfBoundsException("Given z value is too large", 
-				 float(z), 0.0f, float(_block_header->width));
+      throw OutOfBoundsException("Given z value is too large (get_value, 3)", 
+				 float(z), 0.0f, _block_header->depth - 1);
     }
 
   return _histogram_data[z * _block_header->width * _block_header->height + y * _block_header->width + x];

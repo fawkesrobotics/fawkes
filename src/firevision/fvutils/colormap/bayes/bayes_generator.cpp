@@ -219,18 +219,12 @@ BayesColormapGenerator::consider()
       u = YUV422_PLANAR_U_AT(buffer, image_width, image_height, w, h);
       v = YUV422_PLANAR_V_AT(buffer, image_width, image_height, w, h);
 
-      unsigned int y_index;
-      unsigned int u_index;
-      unsigned int v_index;
-      
-      y_index = (unsigned int)( y / 256.0f * float(lut_width) );
-      u_index = (unsigned int)( u / 256.0f * float(lut_height) );
-      v_index = (unsigned int)( v / 256.0f * float(lut_depth) );
-      
+      unsigned int y_index = (unsigned int)( y / 256.0f * float(lut_depth) );
+
       if ( is_in_region(w, h) ) {
-	fg_histos[fg_object]->inc_value(y_index, u_index, v_index);
+	fg_histos[fg_object]->inc_value(u, v, y_index );
       }	else {
-	bg_histos[fg_object]->inc_value(y_index, u_index, v_index);
+	bg_histos[fg_object]->inc_value(u, v, y_index );
       }
     }
     cout << "." << flush;

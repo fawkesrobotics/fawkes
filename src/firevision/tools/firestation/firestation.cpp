@@ -69,6 +69,8 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
   m_camera = 0;
 
+  m_shm_buffer = 0;
+
   m_img_src = SRC_NONE;
   m_op_mode = MODE_VIEWER;
 

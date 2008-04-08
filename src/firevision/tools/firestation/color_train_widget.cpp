@@ -48,7 +48,7 @@
  */
 ColorTrainWidget::ColorTrainWidget(Gtk::Window* parent)
 {
-  m_lut_depth = 8;
+  m_lut_depth = 1;
 
   m_generator = new BayesColormapGenerator(m_lut_depth);
   m_zauberstab = new Zauberstab();
