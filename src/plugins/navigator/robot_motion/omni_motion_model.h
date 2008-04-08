@@ -32,7 +32,8 @@
 class OmniMotionModel : public MotionModel
 {
  public:
-  OmniMotionModel(float radius, float wheel_radius, float gear_reduction);
+  OmniMotionModel(float radius, float wheel_radius, float gear_reduction,
+		  bool reverse_rotation = false);
   virtual ~OmniMotionModel();
 
   void velocities_to_rpm(float vx, float vy, float omega,
@@ -61,6 +62,7 @@ class OmniMotionModel : public MotionModel
   float m_radius;
   float m_wheel_radius;
   float m_gear_reduction;
+  bool  m_reverse_rotation;
 
   float m_total_rotation;
 };

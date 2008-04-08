@@ -24,8 +24,13 @@ BASEDIR = ../../../../..
 OBJS_qa_omni_motion_model = qa_omni_motion_model.o
 LIBS_qa_omni_motion_model = robotmotion
 
-OBJS_all =	$(OBJS_qa_omni_motion_model)
+OBJS_qa_lvc = qa_lvc.o
+LIBS_qa_lvc = robotmotion
 
-BINS_all =	$(BINDIR)/qa_omni_motion_model
+OBJS_all =	$(OBJS_qa_omni_motion_model)	\
+		$(OBJS_qa_lvc)
+
+BINS_all =	$(BINDIR)/qa_omni_motion_model	\
+		$(BINDIR)/qa_lvc
 
 include $(BASEDIR)/etc/buildsys/base.mk

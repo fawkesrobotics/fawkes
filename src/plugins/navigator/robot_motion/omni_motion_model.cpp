@@ -44,8 +44,11 @@
  * @param wheel_radius the radius of the wheels
  * @param gear_reduction the gear reduction factor. The shaft rotations of the motor have
  *                       to be multiplied with this factor to obtain the wheel rotaions. 
+ * @param reverse_rotation set this to true if the gear inverses the direction of rotation
+ *        of the wheel
  */
-OmniMotionModel::OmniMotionModel(float radius, float wheel_radius, float gear_reduction)
+OmniMotionModel::OmniMotionModel(float radius, float wheel_radius, 
+				 float gear_reduction, bool reverse_rotation)
   : MotionModel(3, 3),
     m_omni_model(3, 3),
     m_omni_model_inverse(3, 3)
@@ -53,6 +56,7 @@ OmniMotionModel::OmniMotionModel(float radius, float wheel_radius, float gear_re
   m_radius = radius;
   m_wheel_radius = wheel_radius;
   m_gear_reduction = gear_reduction;
+  m_reverse_rotation = reverse_rotation;
 
   m_omni_model(0, 0) = 2.0 / sqrt(3.0); // == cos(30°)
   m_omni_model(0, 1) = 0.5;
@@ -66,6 +70,9 @@ OmniMotionModel::OmniMotionModel(float radius, float wheel_radius, float gear_re
   
   m_omni_model /= ( m_wheel_radius / 1000 * 2.0 * M_PI );
   m_omni_model /= m_gear_reduction;
+
+  if (m_reverse_rotation)
+    { m_omni_model *= -1.0; }
 
   m_omni_model_inverse = m_omni_model.get_inverse();
 
@@ -257,27 +264,36 @@ OmniMotionModel::update_odometry(float* odom_diff, long diff_msec)
   
   float l   = sqrt( motion[0] * motion[0] + motion[1] * motion[1] );
   float phi = motion[2];
-  float r   = fabs( (phi != 0.0) ? l / phi : 0.0 );
+  float r   = fabs( (phi > 1e-6) ? l / phi : 0.0 );
   float s   = 2.0 * r * sin( 0.5 * fabs(phi) );
   //printf("l=%.6f  phi=%.6f  r=%.6f  s=%.6f\n", l, phi, r, s);
   
   HomVector trans(motion[0], motion[1]);
-  if (r != 0.0)
+  if (s != 0.0)
     {
       trans.set_length(s);
-      float angle = (s != 0.0) ? acos( sin(phi) * r / s) : 0.0;
+      float t = sin(phi) * r / s;
+      float angle;
+      if ( t < 0.0 )
+	{ angle = M_PI; }
+      else if ( t > 1.0 )
+	{ angle = 0.0;}
+      else
+	{ angle = acos(t); }
       angle *= (phi < 0) ? -1.0 : 1.0; 
       trans.rotate_z( angle );
       motion[0] = trans.x();
       motion[1] = trans.y();
-      //printf("angle=%.2f  dest=(%.6f, %.6f)\n", angle, motion.x(), motion.y());
+      //printf("angle=%.2f  trans=(%.6f, %.6f)\n", angle, trans.x(), trans.y());
     }
-  //printf("dest=(%.6f, %.6f)\n", motion.x(), motion.y());
+  //   else
+  //     { printf("trans=(%.6f, %.6f)\n", trans.x(), trans.y()); }
 
   Vector pose(m_motion_dimensions, m_odometric_pose, false);
   trans.rotate_z(m_total_rotation);
   pose[0] += trans.x();
   pose[1] += trans.y();
   pose[2] += phi;
+
   m_total_rotation += phi;
 }
