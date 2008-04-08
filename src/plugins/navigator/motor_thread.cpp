@@ -4,6 +4,7 @@
  *
  *  Generated: Son Jun 03 00:07:33 2007
  *  Copyright  2007  Martin Liebenberg
+ *             2008  Daniel Beck
  *
  *  $Id$
  *
@@ -23,12 +24,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-
 #include <plugins/navigator/motor_thread.h>
+#include <plugins/navigator/robot_motion/omni_motion_model.h>
+#include <plugins/navigator/robot_motion/linear_velocity_controller.h>
 #include <interfaces/motor.h>
-#include <utils/math/angle.h>
-#include <utils/time/clock.h>
-#include <utils/time/watch.h>
 #include <geometry/hom_vector.h>
 
 #include <vmc/LayerClasses/CvmcAPI.h>
@@ -41,66 +40,42 @@
  * The thread controlling the motors.
  * It gets some driving commands and calculates the rpms for
  * the wheels. It gets the real rpms from the motor controller as well.
- */
-/** @var MotorThread::forward
- * The forward command.
- */
-/** @var MotorThread::sideward
- * The sideward command.
- */
-/** @var MotorThread::rotation
- * The rotation command.
- */
-/** @var MotorThread::orbit_velocity
- * The orbit_velocity command.
+ * @author Martin Liebenberg
+ * @author Daniel Beck
  */
 
 /** Constructor. */
 MotorThread::MotorThread()
-    : Thread("MotorThread", Thread::OPMODE_CONTINUOUS)
+  : Thread("MotorThread", Thread::OPMODE_CONTINUOUS)
 {
-  apiObject = 0;
+  vmc_api = 0;
   motor_interface = 0;
-  forward = 0;
-  sideward = 0;
-  rotation = 0;
-  orbit_velocity = 0;
-  orbit_radius = 0;
-  orbit_sign = 1;
-  orbit_angular_velocity = 0;
-  alpha = 0;
-  beta = 0;
-  gamma = 0;
-  alpha_ = 0;
-  beta_ = 0;
-  gamma_ = 0;
-  last_alpha_rotations = 0;
-  last_beta_rotations = 0;
-  last_gamma_rotations = 0;
-  last_alpha = 0;
-  last_beta = 0;
-  last_gamma = 0;
-  odometry_distance = 0;
-  logger_modulo_counter = 0;
-  old_alpha = old_beta = old_gamma = 0.f;
-  orbit_direction_x = 0;
-  orbit_direction_y = 0;
-  last_velocity = 0;
-  current_max_velocity = 0;
-  current_velocity = 0;
-  time_difference = 0;
-  // orbit_rotation_velocity = 0;
-  clock = Clock::instance();
-  stopped = true;
-  start_time = false;
-  rotations_sum = 0;
-  last_rotation = 0;
-  acceleration_factor = 0.2;
+
+  no_vmc = true;
+  first_loop = true;
+
+  // desired velocities
+  vx_des    = 0.0;
+  vy_des    = 0.0;
+  omega_des = 0.0;
+
+  // actual velocities
+  vx_act    = 0.0;
+  vy_act    = 0.0;
+  omega_act = 0.0;
+
+  // odometric movement in last step
+  odo_delta_x   = 0.0;
+  odo_delta_y   = 0.0;
+  odo_delta_phi = 0.0;
+
+  loop_time = 22000;
 }
 
 /** Destructor. */
 MotorThread::~MotorThread()
-{}
+{
+}
 
 /** Initialize thread.
  * Here, the motor interface is opened.
@@ -108,143 +83,202 @@ MotorThread::~MotorThread()
 void
 MotorThread::init()
 {
-  acceleration_factor = config->get_float("/navigator/motor/acceleration_factor");
-  correction_x = config->get_float("/navigator/motor/correction_x");
-  correction_y = config->get_float("/navigator/motor/correction_y");
-  correction_rotation = config->get_float("/navigator/motor/correction_rotation");
-  correction_translation = config->get_float("/navigator/motor/correction_translation");
-  gear_reduction = config->get_float("/navigator/motor/gear_reduction");
-  wheel_radius = config->get_float("/navigator/motor/wheel_radius");
-  radius = config->get_float("/navigator/motor/radius");
-  differential_part = config->get_float("/navigator/motor/vmc/differential_part");
-  integral_part = config->get_float("/navigator/motor/vmc/integral_part");
-  linear_part = config->get_float("/navigator/motor/vmc/linear_part");
-  ticks = config->get_int("/navigator/motor/vmc/ticks");
+  // get config values
+  try
+    {
+      acceleration_factor = config->get_float("/navigator/motor/acceleration_factor");
+      correction_x = config->get_float("/navigator/motor/correction_x");
+      correction_y = config->get_float("/navigator/motor/correction_y");
+      correction_rotation = config->get_float("/navigator/motor/correction_rotation");
+      correction_translation = config->get_float("/navigator/motor/correction_translation");
+      gear_reduction = 1 / config->get_float("/navigator/motor/gear_reduction");
+      wheel_radius = 1000.0 * config->get_float("/navigator/motor/wheel_radius");
+      radius = 1000.0 * config->get_float("/navigator/motor/radius");
+      differential_part = config->get_float("/navigator/motor/vmc/differential_part");
+      integral_part = config->get_float("/navigator/motor/vmc/integral_part");
+      linear_part = config->get_float("/navigator/motor/vmc/linear_part");
+      ticks = config->get_int("/navigator/motor/vmc/ticks");
+    }
+  catch (Exception& e)
+    {
+      e.append("MotorThread::init() failed since config parameters are missing");
+      throw;
+    }
 
-  //calculate a factor for the rpms to obtain m/s
-  translation_rpm_factor = /*correction_translation * */ gear_reduction * (1 / (wheel_radius * 2 * M_PI)  ) * 60;
-  rotation_rpm_factor = radius * gear_reduction * (1 / (wheel_radius * 2 * M_PI)  ) * 60;
+  try
+    {
+      vmc_port = strdup( config->get_string("/navigator/motor/vmc/port").c_str() );
+    }
+  catch (Exception& e)
+    {
+      logger->log_info(name(), "No VMC port specified. Assuming '/dev/ttyS0'");
+      vmc_port = strdup("/dev/ttyS0");
+    }
 
-  if(config->exists("/navigator/motor/no_vmc"))
+  if( config->exists("/navigator/motor/no_vmc") )
     {
       no_vmc = config->get_bool("/navigator/motor/no_vmc");
+      logger->log_info(name(), "Running in simulation mode");
     }
   else
     {
       no_vmc = false;
     }
 
-  if(!no_vmc)
+  // setup VMC
+  if( !no_vmc )
     {
-      apiObject = new VMC::CvmcAPI();
+      vmc_api = new VMC::CvmcAPI();
+      vmc_api->selectHardwareAdapter(VMC::RS232);
 
-      apiObject->selectHardwareAdapter(VMC::RS232);
-      if ( ! apiObject->selectDevice("/dev/ttyS0") )
+      if ( !vmc_api->selectDevice(vmc_port) )
         {
           throw Exception("MotorThread failed to open serial device VMC");
         }
 
       usleep(15000);
-      apiObject->useVMC().Motor[0].EncoderTicks.Set(ticks);
+      vmc_api->useVMC().Motor[0].EncoderTicks.Set(ticks);
       usleep(15000);
-      apiObject->useVMC().Motor[1].EncoderTicks.Set(ticks);
+      vmc_api->useVMC().Motor[1].EncoderTicks.Set(ticks);
       usleep(15000);
-      apiObject->useVMC().Motor[2].EncoderTicks.Set(ticks);
+      vmc_api->useVMC().Motor[2].EncoderTicks.Set(ticks);
       usleep(15000);
-      apiObject->useVMC().Motor[0].VelocityControllerIntegralPart.Set(integral_part);
+      vmc_api->useVMC().Motor[0].VelocityControllerIntegralPart.Set(integral_part);
       usleep(15000);
-      apiObject->useVMC().Motor[1].VelocityControllerIntegralPart.Set(integral_part);
+      vmc_api->useVMC().Motor[1].VelocityControllerIntegralPart.Set(integral_part);
       usleep(15000);
-      apiObject->useVMC().Motor[2].VelocityControllerIntegralPart.Set(integral_part);
+      vmc_api->useVMC().Motor[2].VelocityControllerIntegralPart.Set(integral_part);
       usleep(15000);
-      apiObject->useVMC().Motor[0].VelocityControllerDifferentialPart.Set(differential_part);
+      vmc_api->useVMC().Motor[0].VelocityControllerDifferentialPart.Set(differential_part);
       usleep(15000);
-      apiObject->useVMC().Motor[1].VelocityControllerDifferentialPart.Set(differential_part);
+      vmc_api->useVMC().Motor[1].VelocityControllerDifferentialPart.Set(differential_part);
       usleep(15000);
-      apiObject->useVMC().Motor[2].VelocityControllerDifferentialPart.Set(differential_part);
+      vmc_api->useVMC().Motor[2].VelocityControllerDifferentialPart.Set(differential_part);
       usleep(15000);
-      apiObject->useVMC().Motor[0].VelocityControllerLinearPart.Set(linear_part);
+      vmc_api->useVMC().Motor[0].VelocityControllerLinearPart.Set(linear_part);
       usleep(15000);
-      apiObject->useVMC().Motor[1].VelocityControllerLinearPart.Set(linear_part);
+      vmc_api->useVMC().Motor[1].VelocityControllerLinearPart.Set(linear_part);
       usleep(15000);
-      apiObject->useVMC().Motor[2].VelocityControllerLinearPart.Set(linear_part);
+      vmc_api->useVMC().Motor[2].VelocityControllerLinearPart.Set(linear_part);
       usleep(15000);
 
       //to guarantee that the rotations are set
-      logger->log_debug("MotorThread", "Wait for reply from the VMC.");
-      while(0. == apiObject->useVMC().Motor[0].AbsolutRotations.getValue()
-            && 0. == apiObject->useVMC().Motor[1].AbsolutRotations.getValue()
-            && 0. == apiObject->useVMC().Motor[2].AbsolutRotations.getValue())
+      logger->log_debug(name(), "Wait for reply from the VMC.");
+      while( 0.0 == vmc_api->useVMC().Motor[0].AbsolutRotations.getValue() &&
+	     0.0 == vmc_api->useVMC().Motor[1].AbsolutRotations.getValue() &&
+	     0.0 == vmc_api->useVMC().Motor[2].AbsolutRotations.getValue() )
         {
-          apiObject->useVMC().MotorRPMs.Set(10, 10, 10);
+          vmc_api->useVMC().MotorRPMs.Set(10, 10, 10);
           usleep(15000);
         }
-      logger->log_debug("MotorThread", "Got the reply from the VMC.");
+      logger->log_debug(name(), "Got the reply from the VMC.");
 
-      apiObject->useVMC().MotorRPMs.Set(0, 0, 0);
+      vmc_api->useVMC().MotorRPMs.Set(0, 0, 0);
       usleep(15000);
 
-      last_alpha_rotations = apiObject->useVMC().Motor[0].AbsolutRotations.getValue();
-      last_beta_rotations = apiObject->useVMC().Motor[1].AbsolutRotations.getValue();
-      last_gamma_rotations = apiObject->useVMC().Motor[2].AbsolutRotations.getValue();
+      // automatically update the actual RPMs after every command
+      vmc_api->configRequestMessage(3, false);
+      vmc_api->configRequestMessage(0, true);
     }
+
+  // open blackboard interface
   try
     {
       motor_interface = blackboard->open_for_writing<MotorInterface>("Motor");
     }
   catch (Exception& e)
     {
-      logger->log_error("MotorThread", "Opening interface failed!");
-      logger->log_error("MotorThread", e);
+      logger->log_error(name(), "Opening interface failed!");
+      logger->log_error(name(), e);
       throw;
     }
+
   motor_interface->set_motor_state(MotorInterface::MOTOR_ENABLED);
   motor_interface->set_drive_mode(0);
-  motor_interface->set_odometry_path_length(0);
-  motor_interface->set_odometry_position_x(0);
-  motor_interface->set_odometry_position_y(0);
-  motor_interface->set_odometry_orientation(0);
+  motor_interface->set_odometry_path_length(0.0);
+  motor_interface->set_odometry_position_x(0.0);
+  motor_interface->set_odometry_position_y(0.0);
+  motor_interface->set_odometry_orientation(0.0);
   motor_interface->write();
+
+  // instantiate motion model
+  motion_model = new OmniMotionModel(radius, wheel_radius, gear_reduction, true);
+
+  // instantiate velocity controller
+  velocity_controller = new LinearVelocityController(clock, loop_time, 1.5);
 }
 
 void
 MotorThread::finalize()
 {
-  logger->log_info("MotorThread", "Finalizing thread %s", name());
+  logger->log_info(name(), "Finalizing thread %s", name());
 
+  // close blackboard interface
   try
     {
       blackboard->close(motor_interface);
     }
   catch (Exception& e)
     {
-      logger->log_error("MotorThread", "Closing interface failed!");
-      logger->log_error("MotorThread", e);
+      logger->log_error(name(), "Closing interface failed!");
+      logger->log_error(name(), e);
     }
 
-  if(!no_vmc)
+  // disconnect from VMC
+  if( !no_vmc )
     {
-      apiObject->closeDevice();
-      delete apiObject;
+      vmc_api->closeDevice();
+      delete vmc_api;
     }
-  logger->log_info("MotorThread", "End of Finalizing thread %s", name());
+  
+  free(vmc_port);
+  
+  delete motion_model;
+  delete velocity_controller;
+
+  logger->log_info(name(), "End of Finalizing thread %s", name());
 }
 
 
-/** Here the driving commands are transformed to the RPMs
- *   for the three motors.
+/** Here the driving commands are transformed to the RPMs for the three motors
+ * and the odometric pose is updated.
  */
 void
 MotorThread::loop()
 {
+  // desired RPMs
+  float rpm_right_des = 0.0;
+  float rpm_rear_des = 0.0;
+  float rpm_left_des = 0.0;
+
+  // actual RPMs
+  float rpm_right_act = 0.0;
+  float rpm_rear_act = 0.0;
+  float rpm_left_act = 0.0;
+
+  // shaft rotations
+  float rot_right = 0.0;
+  float rot_rear = 0.0;
+  float rot_left = 0.0;
+
+  // odometric pose
+  float odo_x = 0.0;
+  float odo_y = 0.0;
+  float odo_phi = 0.0;
+
+  float path_length = 0.0;
+  float time_diff_sec = 0.0;
+
+  Time now(clock);
+
+  // here we go...
   motor_interface->read();
-  /*
-    if ( motor_interface->msgq_size() > 0 ) {
-    logger->log_error(name(), "We have %u messages", motor_interface->msgq_size());
-    }*/
-  if ( ! motor_interface->msgq_empty() )
+
+  // get message
+  if ( !motor_interface->msgq_empty() )
     {
-      if (motor_interface->msgq_first_is<MotorInterface::AcquireControlMessage>() )
+      // acquire control message
+      if ( motor_interface->msgq_first_is<MotorInterface::AcquireControlMessage>() )
         {
           MotorInterface::AcquireControlMessage* msg = motor_interface->msgq_first<MotorInterface::AcquireControlMessage>();
 
@@ -264,19 +298,20 @@ MotorThread::loop()
                             motor_interface->controller_thread_name(),
                             motor_interface->controller());
         }
+      
+      // RPM message
       else if ( motor_interface->msgq_first_is<MotorInterface::DriveRPMMessage>() )
         {
           MotorInterface::DriveRPMMessage* msg = motor_interface->msgq_first<MotorInterface::DriveRPMMessage>();
 
           if ( msg->sender_id() == motor_interface->controller() )
             {
-              alpha = msg->front_right();
-              beta = msg->rear();
-              gamma =msg->front_left();
+              rpm_right_des = msg->front_right();
+              rpm_rear_des  = msg->rear();
+              rpm_left_des  = msg->front_left();
 
               motor_interface->set_drive_mode(MotorInterface::DRIVE_MODE_RPM);
               motor_interface->write();
-              start_time = true;
             }
           else
             {
@@ -287,42 +322,34 @@ MotorThread::loop()
                                motor_interface->controller());
             }
         }
+
+      // trans-rot message
       else if ( motor_interface->msgq_first_is<MotorInterface::TransRotMessage>() )
         {
           MotorInterface::TransRotMessage* msg = motor_interface->msgq_first<MotorInterface::TransRotMessage>();
 
           if ( msg->sender_id() == motor_interface->controller() )
             {
-              //correction_factor * RPM for m/s * gear_factor
-              forward = msg->vx() * translation_rpm_factor;
-              sideward = msg->vy() * translation_rpm_factor;
-              rotation = msg->omega() * rotation_rpm_factor;
+              vx_des    = msg->vx();
+              vy_des    = msg->vy();
+              omega_des = msg->omega();
 
-              if(!no_vmc)
-                {
-                  forward *= correction_x;
-                  forward *= correction_y;
-                  forward *= correction_rotation;
-                  //                  if(stopped)
-                  //                    {
-                  //                      last_alpha_rotations += apiObject->useVMC().Motor[0].AbsolutRotations.getValue();
-                  //                      last_beta_rotations += apiObject->useVMC().Motor[1].AbsolutRotations.getValue();
-                  //                      last_gamma_rotations += apiObject->useVMC().Motor[2].AbsolutRotations.getValue();
-                  //                      stopped = false;
-                  //                    }
+	      velocity_controller->set_target_velocity( (float) sqrt( vx_des * vx_des +
+								      vy_des * vy_des ) );
 
-                }
-              current_max_velocity = sqrt(pow(forward, 2.) + pow(sideward, 2.));
-              last_acceleration_time = clock->now();
+	      // TODO: check necessity
+//               if( !no_vmc )
+//                 {
+//                   forward *= correction_x;
+//                   forward *= correction_y;
+//                   forward *= correction_rotation;
+//                 }
+
+//               current_max_velocity = sqrt(pow(forward, 2.) + pow(sideward, 2.));
+//               last_acceleration_time = clock->now();
 
               motor_interface->set_drive_mode(MotorInterface::DRIVE_MODE_TRANS_ROT);
               motor_interface->write();
-              start_time = true;
-              /*
-                logger->log_debug(name(), "Processing TransRotMessage, VX: %f, "
-                "VY: %f, Omega: %f",
-                forward, sideward, rotation);
-              */
             }
           else
             {
@@ -333,34 +360,34 @@ MotorThread::loop()
                                motor_interface->controller());
             }
         }
+
+      // trans message
       else if ( motor_interface->msgq_first_is<MotorInterface::TransMessage>() )
         {
           MotorInterface::TransMessage* msg = motor_interface->msgq_first<MotorInterface::TransMessage>();
 
           if ( msg->sender_id() == motor_interface->controller() )
             {
-              //correction_factor * RPM for m/s * gear_factor
-              forward = msg->vx() * translation_rpm_factor;
-              sideward = msg->vy() * translation_rpm_factor;
-              if(!no_vmc)
-                {
-                  forward *= correction_x;
-                  forward *= correction_y;
-                  //                  if(stopped)
-                  //                    {
-                  //                      last_alpha_rotations += apiObject->useVMC().Motor[0].AbsolutRotations.getValue();
-                  //                      last_beta_rotations += apiObject->useVMC().Motor[1].AbsolutRotations.getValue();
-                  //                      last_gamma_rotations += apiObject->useVMC().Motor[2].AbsolutRotations.getValue();
-                  //                      stopped = false;
-                  //                    }
-                }
-              current_max_velocity = sqrt(pow(forward, 2.) + pow(sideward, 2.));
-              last_acceleration_time = clock->now();
-              rotation = 0;
+              vx_des    = msg->vx();
+              vy_des    = msg->vy();
+	      omega_des = 0.0;
+
+	      velocity_controller->set_target_velocity( (float) sqrt( vx_des * vx_des +
+								      vy_des * vy_des ) );
+
+	      // TODO: see above
+//               if( !no_vmc )
+//                 {
+//                   forward *= correction_x;
+//                   forward *= correction_y;
+//                 }
+
+//               current_max_velocity = sqrt(pow(forward, 2.) + pow(sideward, 2.));
+//               last_acceleration_time = clock->now();
+//               rotation = 0;
+
               motor_interface->set_drive_mode(MotorInterface::DRIVE_MODE_TRANS);
               motor_interface->write();
-              start_time = true;
-              // logger->log_info("MotorThread", " received trans message x = %f, y = %f ", msg->vx(), msg->vy());
             }
           else
             {
@@ -371,30 +398,26 @@ MotorThread::loop()
                                motor_interface->controller());
             }
         }
+
+      // rotation messsage
       else if ( motor_interface->msgq_first_is<MotorInterface::RotMessage>() )
         {
           MotorInterface::RotMessage* msg = motor_interface->msgq_first<MotorInterface::RotMessage>();
 
           if ( msg->sender_id() == motor_interface->controller() )
             {
-              //correction_factor * RPM for m/s * gear_factor
-              rotation = msg->omega() * rotation_rpm_factor;
-              if(!no_vmc)
-                {
-                  forward *= correction_rotation;
-                  //                  if(stopped)
-                  //                    {
-                  //                      last_alpha_rotations += apiObject->useVMC().Motor[0].AbsolutRotations.getValue();
-                  //                      last_beta_rotations += apiObject->useVMC().Motor[1].AbsolutRotations.getValue();
-                  //                      last_gamma_rotations += apiObject->useVMC().Motor[2].AbsolutRotations.getValue();
-                  //                      stopped = false;
-                  //                    }
-                }
-              sideward = 0;
-              forward = 0;
+	      vx_des    = 0.0;
+	      vy_des    = 0.0;
+	      omega_des = msg->omega();
+
+	      // TODO: see above
+//               if( !no_vmc )
+//                 {
+//                   forward *= correction_rotation;
+//                 }
+
               motor_interface->set_drive_mode(MotorInterface::DRIVE_MODE_ROT);
               motor_interface->write();
-              start_time = true;
             }
           else
             {
@@ -405,82 +428,108 @@ MotorThread::loop()
                                motor_interface->controller());
             }
         }
+
+      // orbit message
       else if ( motor_interface->msgq_first_is<MotorInterface::OrbitMessage>() )
         {
           MotorInterface::OrbitMessage* msg = motor_interface->msgq_first<MotorInterface::OrbitMessage>();
 
           if ( msg->sender_id() == motor_interface->controller() )
             {
-              orbit_center.x(msg->px());
-              orbit_center.y(msg->py());
-              orbit_position.x(0.);
-              orbit_position.y(0.);
-              orbit_angular_velocity = msg->omega(); //neg clockwise, pos counterclockwise
-              orbit_radius = orbit_center.length(); //m
-              orbit_direction = orbit_center;
-              if(orbit_angular_velocity < 0)
-                {
-                  orbit_sign = 1;
-                  orbit_angular_velocity *= -1;
-                }
-              else
-                {
-                  orbit_sign = -1;
-                }
-              orbit_velocity = orbit_radius * orbit_angular_velocity; //m/s
+	      // TODO
+//               orbit_center.x(msg->px());
+//               orbit_center.y(msg->py());
+//               orbit_position.x(0.);
+//               orbit_position.y(0.);
+//               orbit_angular_velocity = msg->omega(); //neg clockwise, pos counterclockwise
+//               orbit_radius = orbit_center.length(); //m
+//               orbit_direction = orbit_center;
+//               if(orbit_angular_velocity < 0)
+//                 {
+//                   orbit_sign = 1;
+//                   orbit_angular_velocity *= -1;
+//                 }
+//               else
+//                 {
+//                   orbit_sign = -1;
+//                 }
+//               orbit_velocity = orbit_radius * orbit_angular_velocity; //m/s
 
-              logger->log_info("MotorThread", "-----> orbit_center.x() : %f", orbit_center.x());
-              logger->log_info("MotorThread", "-----> orbit_center.y() : %f", orbit_center.y());
+//               logger->log_info("MotorThread", "-----> orbit_center.x() : %f", orbit_center.x());
+//               logger->log_info("MotorThread", "-----> orbit_center.y() : %f", orbit_center.y());
 
-              rotation = 0;
+//               rotation = 0;
 
-              motor_interface->set_drive_mode(MotorInterface::DRIVE_MODE_ORBIT);
-              motor_interface->write();
-              start_time = true;
-              //  last_time = clock->now();
-              //              if(!no_vmc)
-              //                {
-              //                  if(stopped)
-              //                    {
-              //                      last_alpha_rotations += apiObject->useVMC().Motor[0].AbsolutRotations.getValue();
-              //                      last_beta_rotations += apiObject->useVMC().Motor[1].AbsolutRotations.getValue();
-              //                      last_gamma_rotations += apiObject->useVMC().Motor[2].AbsolutRotations.getValue();
-              //                      stopped = false;
-              //                    }
-              //                }
-              /*
-                logger->log_debug(name(), "Processing OrbitMessage, PX: %f, "
-                "PY: %f, Omega: %f",
-                orbit_center.x(), orbit_center.y(), orbit_angular_velocity);
-              */
+//               motor_interface->set_drive_mode(MotorInterface::DRIVE_MODE_ORBIT);
+//               motor_interface->write();
+//               start_time = true;
+//               //  last_time = clock->now();
+//               //              if(!no_vmc)
+//               //                {
+//               //                  if(stopped)
+//               //                    {
+//               //                      last_alpha_rotations += vmc_api->useVMC().Motor[0].AbsolutRotations.getValue();
+//               //                      last_beta_rotations += vmc_api->useVMC().Motor[1].AbsolutRotations.getValue();
+//               //                      last_gamma_rotations += vmc_api->useVMC().Motor[2].AbsolutRotations.getValue();
+//               //                      stopped = false;
+//               //                    }
+//               //                }
+//               /*
+//                 logger->log_debug(name(), "Processing OrbitMessage, PX: %f, "
+//                 "PY: %f, Omega: %f",
+//                 orbit_center.x(), orbit_center.y(), orbit_angular_velocity);
+//               */
+            }
+	  else
+            {
+              logger->log_warn(name(), "Warning, received OrbitMessage of thread %s (%u), "
+                               "but the motor is currently controlled by thread %s (%u)",
+                               msg->sender_thread_name(), msg->sender_id(),
+                               motor_interface->controller_thread_name(),
+                               motor_interface->controller());
             }
         }
+
+      // linear trans-rot message
       else if ( motor_interface->msgq_first_is<MotorInterface::LinTransRotMessage>() )
         {
           MotorInterface::LinTransRotMessage* msg = motor_interface->msgq_first<MotorInterface::LinTransRotMessage>();
 
           if ( msg->sender_id() == motor_interface->controller() )
             {
-              forward = msg->vx() * translation_rpm_factor;
-              sideward = msg->vy() * translation_rpm_factor;
-              rotation = msg->omega() * rotation_rpm_factor;
-              ;
+	      vx_des    = msg->vx();
+	      vy_des    = msg->vy();
+	      omega_des = msg->omega();
+
+	      velocity_controller->set_target_velocity( (float) sqrt( vx_des * vx_des +
+								      vy_des * vy_des ) );
 
               motor_interface->set_drive_mode(MotorInterface::DRIVE_MODE_LINE_TRANS_ROT);
               motor_interface->write();
-              start_time = true;
             }
-
+	  else
+            {
+              logger->log_warn(name(), "Warning, received LinTransRotMessage of thread %s (%u), "
+                               "but the motor is currently controlled by thread %s (%u)",
+                               msg->sender_thread_name(), msg->sender_id(),
+                               motor_interface->controller_thread_name(),
+                               motor_interface->controller());
+            }
         }
+
+      // reset odometry
       else if (motor_interface->msgq_first_is<MotorInterface::ResetOdometryMessage>() )
         {
-          odometry_distance = 0.;
-          motor_interface->set_odometry_path_length(0.);
-          motor_interface->set_odometry_position_x(0.);
-          motor_interface->set_odometry_position_y(0.);
-          motor_interface->set_odometry_orientation(0.);
+	  motion_model->reset_odometry();
+
+          motor_interface->set_odometry_path_length(0.0);
+          motor_interface->set_odometry_position_x(0.0);
+          motor_interface->set_odometry_position_y(0.0);
+          motor_interface->set_odometry_orientation(0.0);
           motor_interface->write();
         }
+
+      // change motor state
       else if (motor_interface->msgq_first_is<MotorInterface::SetMotorStateMessage>() )
         {
           MotorInterface::SetMotorStateMessage* msg = motor_interface->msgq_first<MotorInterface::SetMotorStateMessage>();
@@ -489,11 +538,13 @@ MotorThread::loop()
           if ( msg->motor_state() == MotorInterface::MOTOR_ENABLED )
             {
               motor_interface->set_motor_state(MotorInterface::MOTOR_ENABLED);
+	      motor_interface->write();
               logger->log_info(name(), "Enabling motor control");
             }
           else if ( msg->motor_state() == MotorInterface::MOTOR_DISABLED )
             {
               motor_interface->set_motor_state(MotorInterface::MOTOR_DISABLED);
+	      motor_interface->write();
               logger->log_info(name(), "Disabling motor control");
             }
           else
@@ -502,413 +553,180 @@ MotorThread::loop()
                                 msg->motor_state());
             }
         }
+
+      // received message with unknown type
       else
         {
-          logger->log_error("MotorThread", "Message of invalid type received from %s", motor_interface->msgq_first()->sender_thread_name());
+          logger->log_error(name(), "Message of invalid type received from %s", motor_interface->msgq_first()->sender_thread_name());
         }
 
       motor_interface->msgq_pop();
     }
 
-  //if a new command is received and the robot is not moving than last_time has to be 0
-  if(start_time && motor_interface->vx() == 0 && motor_interface->vy() == 0)
+  // velocity controller
+  velocity_controller->set_actual_velocity( (float) sqrt( vx_act * vx_act +
+							  vy_act * vy_act ) );
+
+  float vel;
+  vel = *velocity_controller->get_next_velocity();
+  HomVector v(vx_des, vy_des);
+  v.set_length(vel);
+  vx_des = v.x();
+  vy_des = v.y();
+
+  // non-stateless messages need some further computations to take the robot's movement
+  // since the message was received into account.
+  unsigned int drive_mode = motor_interface->drive_mode();
+  if ( drive_mode == MotorInterface::DRIVE_MODE_ORBIT )
     {
-      last_time = clock->now();
-      time_difference = (last_time - last_time).in_sec();
+      // TODO
+      logger->log_debug(name(), "NOT YET IMPLEMENTED");
+
+//           //calculate the tangent to the orbit passing through the actual position
+//           if(orbit_direction.length() != 0)
+//             {
+//               Vector old_direction = orbit_direction;
+//               orbit_direction = orbit_center - orbit_position;
+//               double alpha = 0;
+//               // logger->log_info("MotorThread", " orbit_direction.length() %f ", orbit_direction.length());
+//               //  logger->log_info("MotorThread", " orbit_radius %f ", orbit_radius);
+//               if(orbit_radius <= orbit_direction.length())
+//                 {
+//                   alpha = asin(orbit_radius / orbit_direction.length()) * orbit_sign;
+//                   //   logger->log_info("MotorThread", " alpha %f ", alpha);
+
+//                   orbit_direction.rotate_z(alpha);
+//                 }
+//               else
+//                 {
+//                   orbit_direction = old_direction;
+//                 }
+
+//               orbit_direction.unit();
+//               forward = orbit_direction.x() * orbit_velocity * translation_rpm_factor;
+//               sideward = orbit_direction.y() * orbit_velocity * translation_rpm_factor;
+//             }
     }
-  else
+  else if ( drive_mode == MotorInterface::DRIVE_MODE_LINE_TRANS_ROT)
     {
-      time_difference = (clock->now() - last_time).in_sec();
-      last_time = clock->now();
-    }
-
-  start_time = false;
-
-  if(motor_interface->drive_mode() != MotorInterface::DRIVE_MODE_RPM)
-    {
-      if(motor_interface->drive_mode() == MotorInterface::DRIVE_MODE_ORBIT)
-        {
-          /*
-            logger->log_info("MotorThread", " orbit_center.x() %f ",  orbit_center.x());
-            logger->log_info("MotorThread", " orbit_center.y() %f ",  orbit_center.y());
-            logger->log_info("MotorThread", " orbit_position.x() %f ",  orbit_center.x());
-            logger->log_info("MotorThread", " orbit_position.y() %f ",  orbit_center.y());
-            logger->log_info("MotorThread", " orbit_direction.length() %f ", orbit_direction.length());
-          */
-          //calculate the tangent to the orbit passing through the actual position
-          if(orbit_direction.length() != 0)
-            {
-              HomVector old_direction = orbit_direction;
-              orbit_direction = orbit_center - orbit_position;
-              double alpha = 0;
-              // logger->log_info("MotorThread", " orbit_direction.length() %f ", orbit_direction.length());
-              //  logger->log_info("MotorThread", " orbit_radius %f ", orbit_radius);
-              if(orbit_radius <= orbit_direction.length())
-                {
-                  alpha = asin(orbit_radius / orbit_direction.length()) * orbit_sign;
-                  //   logger->log_info("MotorThread", " alpha %f ", alpha);
-
-                  orbit_direction.rotate_z(alpha);
-                }
-              else
-                {
-                  orbit_direction = old_direction;
-                }
-
-              orbit_direction.unit();
-              forward = orbit_direction.x() * orbit_velocity * translation_rpm_factor;
-              sideward = orbit_direction.y() * orbit_velocity * translation_rpm_factor;
-            }
-          else if(orbit_direction.length() != 0 && orbit_position.length() == 0)
-            {
-              forward = orbit_direction.x() * orbit_velocity * translation_rpm_factor;
-              sideward = orbit_direction.y() * orbit_velocity * translation_rpm_factor;
-            }
-          else
-            {
-              sideward = 0.;
-              forward = 0.;
-            }
-          //the positions has to be calculated after the velocities are calculated
-          //because if not, orbit_radius == orbit_direction.length() will not hold
-          //and then the robot will first intersect the orbit until it will start drive on the orbit
-          orbit_position.x(orbit_position.x() + motor_interface->vx() * time_difference);
-          orbit_position.y(orbit_position.y() + motor_interface->vy() * time_difference);
-
-        }
-      else if(motor_interface->drive_mode() == MotorInterface::DRIVE_MODE_LINE_TRANS_ROT)
-        {
-          //          logger->log_info(name(), "========DRIVE_MODE_LINE_TRANS_ROT");
-
-          //          logger->log_info("MotorThread", "LinTransRot: forward : %f, sideward: %f",
-          //                               forward, sideward);
-          //          logger->log_info("MotorThread", "LinTransRot: time_difference : %f",
-          //                               time_difference);
-          double rotation_change = time_difference * -(rotation /  rotation_rpm_factor);
-          double velocity = sqrt(pow(forward, 2.) + pow(sideward, 2.));
-
-          double direction_x = 0;
-          double direction_y = 0;
-
-          if (velocity != 0.)
-            {
-              direction_x = forward / velocity;
-              direction_y = sideward / velocity;
-            }
-          //          logger->log_info("MotorThread", "LinTransRot: 1. direction_x : %f, direction_y: %f",
-          //                               direction_x, direction_y);
-
-          direction_x = direction_x * cos(rotation_change) - direction_y * sin(rotation_change);
-          direction_y = direction_x * sin (rotation_change) + direction_y * cos(rotation_change);
-
-          //          logger->log_info("MotorThread", "LinTransRot: velocity : %f",
-          //                               velocity);
-//                    logger->log_info("MotorThread", "LinTransRot: rotation : %f",
-//                                         rotation);
-//                    logger->log_info("MotorThread", "LinTransRot: rotation_change : %f",
-//                                         rotation * time_difference);
-          //          logger->log_info("MotorThread", "LinTransRot: 2. direction_x : %f, direction_y: %f",
-          //                               direction_x, direction_y);
-          forward = direction_x * velocity;
-          sideward = direction_y * velocity;
-        }
-      else //acceleration
-        {
-          double velocity = sqrt(pow(forward, 2.) + pow(sideward, 2.));
-          if(velocity > 0.)
-            {
-              forward /= velocity;
-              sideward /= velocity;
-              if(last_velocity > 0.)
-                {
-                  velocity = last_velocity;
-                }
-              else
-                {
-                  velocity = 0;
-                }
-            }
-
-          if(velocity < current_max_velocity)
-            {
-              velocity += clock->elapsed(&last_acceleration_time) * acceleration_factor * translation_rpm_factor; //m/s^2
-              last_acceleration_time = clock->now();
-            }
-          else if(velocity >= current_max_velocity)
-            {
-              velocity = current_max_velocity;
-              last_acceleration_time = clock->now();
-            }
-          last_velocity = velocity;
-          forward *= velocity;
-          sideward *= velocity;
-        }
-
-      alpha  = 	((cos(M_PI/3.)				* -sideward) - (sin(M_PI/3.)				* forward)) - rotation;
-      beta   = 	((cos(M_PI) 					* -sideward) - (sin(M_PI) 					* forward)) - rotation;
-      gamma  = 	((cos((5./3.) * M_PI) 	* -sideward) - (sin((5./3.) * M_PI) 	* forward)) - rotation;
-      /*
-        if(sideward != 0. || forward != 0. || rotation != 0.)
-          {
-            alpha  = 	((cos(M_PI/3.)				* -sideward) - (sin(M_PI/3.)				* forward)) - (rotation - last_rotation);
-            beta   = 	((cos(M_PI) 					* -sideward) - (sin(M_PI) 					* forward)) - (rotation - last_rotation);
-            gamma  = 	((cos((5./3.) * M_PI) 	* -sideward) - (sin((5./3.) * M_PI) 	* forward)) - (rotation - last_rotation);
-          }
-        else
-          {
-            alpha  = 	0.;//((cos(M_PI/3.)				* -sideward) - (sin(M_PI/3.)				* forward)) - rotation;
-            beta   = 	0.;//((cos(M_PI) 					* -sideward) - (sin(M_PI) 					* forward)) - rotation;
-            gamma  = 	0.;//((cos((5./3.) * M_PI) 	* -sideward) - (sin((5./3.) * M_PI) 	* forward)) - rotation;
-          }
-      */
-      //    logger->log_info("MotorThread", " sideward : %f, forward: %f, rotation: %f",
-      //                     sideward, forward, rotation);
+      HomVector v(vx_des, vy_des);
+      v.rotate_z( -odo_delta_phi );
+      vx_des = v.x();
+      vy_des = v.y();
     }
 
-  //needful for accurate acceleration
-  if(alpha == 0. && beta == 0. && gamma == 0.)
+  //   logger->log_info(name(), "Desired velocities: vx=%f  vy=%f  omega=%f",
+  // 		   vx_des, vy_des, omega_des);
+
+  // if the RPMs weren't set directly they have to be computed from the velocites
+  if ( motor_interface->drive_mode() != MotorInterface::DRIVE_MODE_RPM )
     {
-      forward = 0;
-      sideward = 0;
-      rotation = 0;
-      last_velocity = 0;
+      motion_model->velocities_to_rpm( vx_des, vy_des, omega_des, 
+				       rpm_right_des, rpm_rear_des, rpm_left_des );
     }
 
-  if(!no_vmc)
+  //   logger->log_info(name(), "Desired RPMs: right: %f  rear=%f  left=%f", 
+  // 		   rpm_right_des, rpm_rear_des, rpm_left_des);
+
+  // send RPMs to the motor controller and obtain the actual  rotations form
+  // the  motor controller
+  if ( !no_vmc )
     {
       if ( motor_interface->motor_state() == MotorInterface::MOTOR_ENABLED )
-        {
-          //  if(alpha != 0 || beta != 0 || gamma != 0)
-          {
-            apiObject->useVMC().MotorRPMs.Set(alpha, beta, gamma);
-          }
-          usleep(22000);
-        }
-      /*
-          else if( (alpha == 0.) && (beta == 0.) && (gamma == 0.) && ( (round(alpha_ )!= 0.) || (round(beta_) != 0.) || (round(gamma_) != 0.)))
-             {
-               logger->log_info("MotorThread",  "braking");
+	{
+	  vmc_api->useVMC().MotorRPMs.Set(rpm_right_des, rpm_rear_des, rpm_left_des);
+	}
 
-               apiObject->useVMC().MotorRPMs.Set(0, 0, 0);
-             }
-           else if ((alpha_ == 0.) && (beta_ == 0.) && (gamma_ == 0.))
-             {
-               stopped = true;
-             }
-      */
+      // wait for the ultra-fast VMC
+      usleep(loop_time);
+      
+      now.stamp();
 
-
-      //  logger->log_info("MotorThread", " alpha : %f, beta: %f, gamma: %f, rotation: %f"
-      //                   " old_alpha : %f, old_beta: %f, old_gamma: %f",
-      //                   alpha, beta, gamma, rotation,
-      //                   old_alpha, old_beta, old_gamma );
-      /*
-        //for saving too much logging
-        if ( (alpha != old_alpha) || (beta != old_beta) || (gamma != old_gamma) )
-          {
-            logger->log_info("MotorThread", " alpha : %f, beta: %f, gamma: %f, rotation: %f",
-                             alpha, beta, gamma, rotation);
-       
-            logger->log_info("MotorThread", " sideward : %f, forward: %f, rotation: %f",
-                             sideward, forward, rotation);
-            old_alpha = alpha;
-            old_beta  = beta;
-            old_gamma = gamma;
-          }
-      */
-      /*
-        logger->log_info("MotorThread", "RPM1: %f  RPM2: %f  RPM3: %f ", 
-        apiObject->useVMC().Motor[0].ActualRPM.getValue(),
-        apiObject->useVMC().Motor[1].ActualRPM.getValue(),
-        apiObject->useVMC().Motor[2].ActualRPM.getValue());
-      */
-
-      //  	logger->log_info("MotorThread",  "odometry");
-      //AbsolutRotations provides encoder ticks
-      alpha_ = apiObject->useVMC().Motor[0].AbsolutRotations.getValue() / ticks;
-      beta_ = apiObject->useVMC().Motor[1].AbsolutRotations.getValue() / ticks;
-      gamma_ = apiObject->useVMC().Motor[2].AbsolutRotations.getValue() / ticks;
-
-      //      logger->log_info("MotorThread", " alpha_ : %f, beta_: %f, gamma_: %f",
-      //                       alpha_, beta_, gamma_);
-      //   logger->log_info("MotorThread", " time_diff : %f",
-      //                   time_diff);
-
-      //      if(alpha_ == last_alpha_rotations && beta_ == last_beta_rotations && gamma_ == last_gamma_rotations)
-      //        {
-      //          logger->log_info("MotorThread", " zero!!!!!!!!!!!!!!");
-      //        }
-      alpha_ = alpha_ - last_alpha_rotations;
-      beta_ = beta_ - last_beta_rotations;
-      gamma_ = gamma_ - last_gamma_rotations;
-
-      /*
-       * At 2147483647.0 and -2147483647.0 there can happen an overflow.
-       * But this will only happen if the robot drives about 1,000 km.
-       * So, we don't care, because the AbsolutRotations will be reset to 0 at every switching off.
-       */
-
-      last_alpha_rotations += alpha_;
-      last_beta_rotations += beta_;
-      last_gamma_rotations += gamma_;
-
-      //get RPMs
-      // double time_diff = (clock->now() - last_time).in_sec();
-      if(time_difference != 0)
-        {
-          alpha_ = (alpha_ / time_difference) * 60;
-          beta_ = (beta_ / time_difference) * 60;
-          gamma_ = (gamma_ / time_difference) * 60;
-          if(alpha_ > 7000 || beta_ > 7000 || gamma_ > 7000)
-            {
-              logger->log_info("MotorThread", "RPM reset: alpha_ : %f, beta_: %f, gamma_: %f",
-                               alpha_, beta_, gamma_);
-              alpha_ = beta_ = gamma_ = 0;
-            }
-//          logger->log_info("MotorThread", "RPM alpha_ : %f, beta_: %f, gamma_: %f",
-//                           alpha_, beta_, gamma_);
-        }
+      if ( !first_loop )
+	{ 
+	  time_diff_sec = (now - last_loop).in_sec(); 
+	}
       else
-        {
-          alpha_ = beta_ = gamma_ = 0;
-        }
+	{
+	  time_diff_sec = loop_time / 1000000.0;
+	  first_loop = false;
+	}
 
+      last_loop = now;
+
+      rpm_right_act = vmc_api->useVMC().Motor[0].ActualRPM.getValue();
+      rpm_rear_act  = vmc_api->useVMC().Motor[1].ActualRPM.getValue();
+      rpm_left_act  = vmc_api->useVMC().Motor[2].ActualRPM.getValue();
+
+      rot_right = rpm_right_act / 60.0 * time_diff_sec;
+      rot_rear  = rpm_rear_act  / 60.0 * time_diff_sec;
+      rot_left  = rpm_left_act  / 60.0 * time_diff_sec;
     }
   else
     {
-      alpha_ =  last_alpha;
-      beta_ =  last_beta;
-      gamma_ =  last_gamma;
-      last_alpha = alpha;
-      last_beta  = beta;
-      last_gamma = gamma;
-      usleep(22000);
-    }
-  double rotation_ = -(alpha_ + beta_ + gamma_) / 3.;
+      now.stamp();
 
-  alpha_ += rotation_;  //right
-  beta_ += rotation_;
-  gamma_ += rotation_;  //left
-
-  //last_rotation = rotation_ - rotation;
-
-  double  sideward_ = -(alpha_ * cos(M_PI/3.) + beta_ * cos(M_PI) + gamma_ * cos((5./3.) * M_PI)) * (2./3.);
-  double  forward_ = -(alpha_ * sin(M_PI/3.) + beta_ * sin(M_PI) + gamma_ * sin((5./3.) * M_PI)) * (2./3.);
-
-  //  logger->log_info("MotorThread", "sideward_ : %f, forward_: %f",
-  //                   sideward_, forward_);
-  sideward_ /= translation_rpm_factor;
-  forward_ /= translation_rpm_factor;
-  rotation_ /= rotation_rpm_factor;
-
-
-  //  logger->log_info("MotorThread", " sideward_ : %f, forward_: %f, rotation_: %f",
-  //                   sideward_, forward_, rotation_);
-  double velocity_ = sqrt(pow(sideward_, 2.) + pow(forward_, 2.));
-
-  //logger->log_info("MotorThread", "velocity_ : %f", velocity_);
-  //double time_difference_odometry = (clock->now() - last_time_odometry).in_sec();
-  //last_time_odometry = clock->now();
-  double odometry_difference = velocity_ * time_difference;//_odometry;
-
-  odometry_distance += odometry_difference;
-
-  HomVector new_position;
-  HomVector old_position;
-  HomVector bend_vector;
-
-  old_position.x(motor_interface->odometry_position_x());
-  old_position.y(motor_interface->odometry_position_y());
-  old_position.z(0.f);
-
-  //calculation of the odometry
-
-  //rotation and translation
-  if((rotation_ > 0.000000005 || rotation_ < -0.0000000005) && odometry_difference != 0)
-    {
-      //      logger->log_info("MotorThread", " rotation and translation ");
-      //recalculation of the arc
-      double turned_angle = rotation_ * time_difference;//_odometry;
-
-      double bend_radius = odometry_difference / fabs(turned_angle);
-
-      if(turned_angle < 0)
-        {
-          bend_vector.y(bend_radius * sin(atan2(sideward_, forward_) + motor_interface->odometry_orientation() + deg2rad(90)));
-          bend_vector.x(bend_radius * cos(atan2(sideward_, forward_) + motor_interface->odometry_orientation() + deg2rad(90)));
-        }
+      if ( !first_loop )
+	{ 
+	  time_diff_sec = (now - last_loop).in_sec(); 
+	}
       else
-        {
-          bend_vector.y(bend_radius * sin(atan2(sideward_, forward_) + motor_interface->odometry_orientation() - deg2rad(90)));
-          bend_vector.x(bend_radius * cos(atan2(sideward_, forward_) + motor_interface->odometry_orientation() - deg2rad(90)));
-        }
-      bend_vector.z(0.);
+	{
+	  time_diff_sec = loop_time / 1000000.0;
+	  first_loop = false;
+	}
 
-      new_position = old_position - bend_vector;
-      bend_vector.rotate_z(turned_angle);
+      last_loop = now;
 
-      new_position += bend_vector;
-      /*
-            logger->log_info("MotorThread", " odometry with rotation ");
-            logger->log_info("MotorThread", " turned_angle %f", turned_angle);
-            logger->log_info("MotorThread", " rotation_ %f", rotation_);
-            logger->log_info("MotorThread", " bend_radius %f", bend_radius);
-            logger->log_info("MotorThread", " bend_vector.length() %f", bend_vector.length());
-            logger->log_info("MotorThread", " odometry_difference %f", odometry_difference);
-            //    logger->log_info("MotorThread", " odometry_distance %f", odometry_distance);
-            logger->log_info("MotorThread", " motor_interface->odometry_orientation() %f ", motor_interface->odometry_orientation());
-            //    logger->log_info("MotorThread", " old_position.x() %f ", old_position.x());
-            //     logger->log_info("MotorThread", " old_position.y() %f ", old_position.y());
-            logger->log_info("MotorThread", " time_difference %f ", time_difference);
-      */
-    } //rotation without translation
-  else if((rotation_ > 0.000000005 || rotation_ < -0.0000000005) && odometry_difference == 0)
-    {
-      //      logger->log_info("MotorThread", " rotation without translation ");
-      new_position = old_position;
-    }
-  else //translation without rotation
-    {
+      rpm_right_act = rpm_right_des;
+      rpm_rear_act  = rpm_rear_des;
+      rpm_left_act  = rpm_left_des;
 
-      //      logger->log_info("MotorThread", " odometry without rotation ");
-      //      logger->log_info("MotorThread", " odometry_difference %f", odometry_difference);
-      //      logger->log_info("MotorThread", " old_position.x() %f ", old_position.x());
-      //      logger->log_info("MotorThread", " old_position.y() %f ", old_position.y());
-      //      logger->log_info("MotorThread", " forward_ %f ", forward_ * translation_rpm_factor);
-      //      logger->log_info("MotorThread", " forward %f ", forward);
-      //      logger->log_info("MotorThread", " sideward_ %f ", sideward_ * translation_rpm_factor);
-      //      logger->log_info("MotorThread", " sideward %f ", sideward);
-      //      logger->log_info("MotorThread", " time_difference %f ", time_difference);
+      rot_right = rpm_right_des / 60.0 * time_diff_sec;
+      rot_rear  = rpm_rear_des  / 60.0 * time_diff_sec;
+      rot_left  = rpm_left_des  / 60.0 * time_diff_sec;
 
-      new_position.x(old_position.x() + odometry_difference * cos(atan2(sideward_, forward_) + motor_interface->odometry_orientation()));
-      new_position.y(old_position.y() + odometry_difference * sin(atan2(sideward_, forward_) + motor_interface->odometry_orientation()));
-      /*
-            logger->log_info("MotorThread", " cos(atan2(sideward_, forward_) + motor_interface->odometry_orientation()) %f ", cos(atan2(sideward_, forward_) + motor_interface->odometry_orientation()));
-            logger->log_info("MotorThread", " sin(atan2(sideward_, forward_) + motor_interface->odometry_orientation()) %f ", sin(atan2(sideward_, forward_) + motor_interface->odometry_orientation()));
-            logger->log_info("MotorThread", " new_position.x() %f ", new_position.x());
-            logger->log_info("MotorThread", " new_position.y() %f ", new_position.y());*/
+      usleep(loop_time);
     }
 
-  //  logger->log_info("MotorThread", " rotations_sum %f ", rotations_sum);
+  //   logger->log_info(name(), "Shaft rotations: right: %f rear: %f  left: %f",
+  // 		   rot_right, rot_rear, rot_left);
+  
+  //   logger->log_info(name(), "Actual RPMs: right: %f  rear: %f  left: %f", 
+  // 		   rpm_right_act, rpm_rear_act, rpm_left_act);
+  
+  //   logger->log_info(name(), "time diff %f (sec)", time_diff_sec);
+  
+  // update pose estimation, actual velocities, and path length
+  motion_model->update_odometry(rot_right, rot_rear, rot_left, time_diff_sec);
+  motion_model->get_odom_pose(odo_x, odo_y, odo_phi);
+  motion_model->get_odom_diff(odo_delta_x, odo_delta_y, odo_delta_phi);
+  motion_model->get_actual_velocities(vx_act, vy_act, omega_act);
 
-  motor_interface->set_odometry_path_length(odometry_distance);
-  motor_interface->set_odometry_position_x(new_position.x());
-  motor_interface->set_odometry_position_y(new_position.y());
-  motor_interface->set_odometry_orientation(motor_interface->odometry_orientation() + rotation_ * time_difference);//_odometry);
-  /*
-    logger->log_info("MotorThread", " time_difference %f ", time_difference);
-    logger->log_info("MotorThread", " rotation_ %f ", rotation_);
-    logger->log_info("MotorThread", " motor_interface->odometry_orientation() %f ", motor_interface->odometry_orientation());
-    logger->log_info("MotorThread", " --------------------------------------------------------------------------");
-  */
-  motor_interface->set_right_rpm((int)(alpha_ - rotation_));
-  motor_interface->set_rear_rpm((int)(beta_ - rotation_));
-  motor_interface->set_left_rpm((int)(gamma_ - rotation_));
+  path_length = motor_interface->odometry_path_length();
+  path_length += sqrt( odo_delta_x * odo_delta_x + odo_delta_y * odo_delta_y );
 
-  // logger->log_info("MotorThread", " forward_ %f, sideward_ %f ", forward_, sideward_);
-  motor_interface->set_vx(forward_);
-  motor_interface->set_vy(sideward_ );
-  motor_interface->set_omega(rotation_ );
-  // usleep(1000000);
+  //   logger->log_info(name(), "Actual velocities: vx=%f vy=%f omega=%f",
+  // 		   vx_act, vy_act, omega_act);
+  //   logger->log_info(name(), "Odom pose: x=%f  y=%f  phi=%f",
+  // 		   odo_x, odo_y, odo_phi);
+  //   logger->log_info(name(), "Odom delta: x=%f  y=%f  phi=%f",
+  // 		   odo_delta_x, odo_delta_y, odo_delta_phi);
+
+  // update interface
+  motor_interface->set_odometry_position_x(odo_x);
+  motor_interface->set_odometry_position_y(odo_y);
+  motor_interface->set_odometry_orientation(odo_phi);
+
+  motor_interface->set_vx(vx_act);
+  motor_interface->set_vy(vy_act);
+  motor_interface->set_omega(omega_act);
+
+  motor_interface->set_right_rpm( (int) rint(rpm_right_act) );
+  motor_interface->set_rear_rpm( (int) rint(rpm_rear_act) );
+  motor_interface->set_left_rpm( (int) rint(rpm_left_act) );
+
+  motor_interface->set_odometry_path_length(path_length);
+
   motor_interface->write();
-}//loop
+}

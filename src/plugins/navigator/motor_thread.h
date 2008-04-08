@@ -4,6 +4,7 @@
  *
  *  Generated: Son Jun 03 00:07:33 2007
  *  Copyright  2007  Martin Liebenberg
+ *             2008  Daniel Beck
  *
  *  $Id$
  *
@@ -30,106 +31,76 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
-#include <utils/time/time.h>
-#include <geometry/hom_vector.h>
+#include <aspect/clock.h>
 
 class MotorInterface;
 class NavigatorThread;
-class Clock;
+class OmniMotionModel;
+class LinearVelocityController;
 
 namespace VMC
-  {
+{
   class CvmcAPI;
 }
 
-
 class MotorThread
-      : public Thread,
-      public LoggingAspect,
-      public BlackBoardAspect,
-      public ConfigurableAspect
-  {
-  public:
-    MotorThread();
+: public Thread,
+  public LoggingAspect,
+  public BlackBoardAspect,
+  public ConfigurableAspect,
+  public ClockAspect
+{
+ public:
+  MotorThread();
+  
+  virtual ~MotorThread();
+  
+  virtual void loop();
+  virtual void init();
+  virtual void finalize();
+  
+ private:
+  VMC::CvmcAPI *vmc_api;
+  MotorInterface *motor_interface;
+  OmniMotionModel* motion_model;
+  LinearVelocityController* velocity_controller;
 
-    virtual ~MotorThread();
+  Time last_loop;
+  
+  float vx_des;
+  float vy_des;
+  float omega_des;
 
-    virtual void loop();
-    virtual void init();
-    virtual void finalize();
+  float vx_act;
+  float vy_act;
+  float omega_act;
 
-  private:
-    VMC::CvmcAPI *apiObject;
+  float abs_rot_right;
+  float abs_rot_rear;
+  float abs_rot_left;
 
-    MotorInterface *motor_interface;
+  float odo_delta_x;
+  float odo_delta_y;
+  float odo_delta_phi;
 
-    bool no_vmc;
+  bool first_loop;
 
-    double forward;
-    double sideward;
-    double rotation;
-    double orbit_velocity;
-    //  double point_x;
-    //  double point_y;
-    double orbit_angular_velocity;
-    double alpha;
-    double beta;
-    double gamma;
-    double alpha_;
-    double beta_;
-    double gamma_;
-    double last_alpha_rotations;
-    double last_beta_rotations;
-    double last_gamma_rotations;
-    double last_alpha;
-    double last_beta;
-    double last_gamma;
-    double odometry_distance;
-    double orbit_direction_x;
-    double orbit_direction_y;
-    HomVector orbit_direction;
-    HomVector orbit_center;
-    HomVector orbit_position;
-    double orbit_radius;
-    double orbit_sign;
-    // double orbit_rotation_velocity;
-    double last_velocity;
-    double current_velocity;
-    double current_max_velocity;
+  // config parameters
+  unsigned int loop_time;
+  double acceleration_factor;
+  double correction_x;
+  double correction_y;
+  double correction_rotation;
+  double correction_translation;
+  double gear_reduction;
+  double wheel_radius;
+  double radius;
+  double differential_part;
+  double integral_part;
+  double linear_part;
+  int ticks;
+  char* vmc_port;
+  bool no_vmc;
+};
 
-    double old_alpha;
-    double old_beta;
-    double old_gamma;
-
-    double acceleration_factor;
-    double correction_x;
-    double correction_y;
-    double correction_rotation;
-    double correction_translation;
-    double gear_reduction;
-    double wheel_radius;
-    double radius;
-    double differential_part;
-    double integral_part;
-    double linear_part;
-    int ticks;
-    bool stopped;
-
-    double translation_rpm_factor;
-    double rotation_rpm_factor;
-
-    Time last_time;
-    Time last_time_odometry;
-    Time last_acceleration_time;
-    double time_difference;
-    bool start_time;
-
-    Clock* clock;
-
-    double rotations_sum;
-    double last_rotation;
-
-    unsigned int logger_modulo_counter;
-  };
-
-#endif /*MOTOR_THREAD_H_*/
+#endif /* __NAVIGATOR_MOTOR_THREAD_H_ */
