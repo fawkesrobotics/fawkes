@@ -68,8 +68,17 @@ class WorldModelNetworkThread
 				  float *covariance);
 
   virtual void opponent_pose_rcvd(const char *from_host,
+				  unsigned int uid,
 				  float distance, float angle,
 				  float *covariance);
+
+  virtual void gamestate_rcvd(const char *from_host,
+			      worldinfo_gamestate_t game_state,
+			      worldinfo_gamestate_team_t state_team,
+			      unsigned int score_cyan, unsigned int score_magenta,
+			      worldinfo_gamestate_team_t our_team,
+			      worldinfo_gamestate_goalcolor_t our_goal_color,
+			      worldinfo_gamestate_half_t half);
 
  private:
   WorldInfoTransceiver *worldinfo_transceiver;

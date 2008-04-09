@@ -76,15 +76,28 @@
  * floats).
  * @see WorldInfoTransceiver::set_ball_velocity()
  *
- * @fn void WorldInfoHandler::opponent_pose_rcvd(const char *from_host, float distance, float angle, , float *covariance)
+ * @fn void WorldInfoHandler::opponent_pose_rcvd(const char *from_host, unsigned int uid, float distance, float angle, , float *covariance)
  * Opponent information received.
  * @param from_host transmitting host of this information, if available symbolic name
+ * @param uid unique ID of the opponent
  * @param distance to opponent
  * @param angle angle to opponent (angle is zero if opponent is in front of robot,
  * positive if right of robot, negative if left of robot).
  * @param covariance covariance matrix with 4 entries, ordered as two concatenated
  * rows (first row, two floats, second row, two floats)
  * @see WorldInfoTransceiver::add_opponent()
+ *
+ * @fn void WorldInfoHandler::gamestate_rcvd(const char *from_host, worldinfo_gamestate_t game_state, worldinfo_gamestate_team_t state_team, unsigned int score_cyan, unsigned int score_magenta, worldinfo_gamestate_team_t our_team, worldinfo_gamestate_goalcolor_t our_goal_color, worldinfo_gamestate_half_t half)
+ * Gamestate information received.
+ * @param from_host transmitting host of this information, if available symbolic name
+ * @param game_state current gamestate
+ * @param state_team team related to the game state
+ * @param score_cyan current score of team cyan
+ * @param score_magenta current score of team magenta
+ * @param our_team our team color
+ * @param our_goal_color our goal color
+ * @param half current half of the game, first or second
+ * @see WorldInfoTransceiver::set_gamestate()
  *
  */
 

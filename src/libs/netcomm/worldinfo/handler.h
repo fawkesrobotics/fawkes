@@ -26,6 +26,8 @@
 #ifndef __NETCOMM_WORLDINFO_HANDLER_H_
 #define __NETCOMM_WORLDINFO_HANDLER_H_
 
+#include <netcomm/worldinfo/enums.h>
+
 class WorldInfoHandler
 {
  public:
@@ -47,8 +49,16 @@ class WorldInfoHandler
 				  float *covariance)                            = 0;
 
   virtual void opponent_pose_rcvd(const char *from_host,
-				  float distance, float angle,
-				  float *covariance)                            = 0;
+				  unsigned int uid, float distance,
+				  float angle,  float *covariance)              = 0;
+
+  virtual void gamestate_rcvd(const char *from_host,
+			      worldinfo_gamestate_t game_state,
+			      worldinfo_gamestate_team_t state_team,
+			      unsigned int score_cyan, unsigned int score_magenta,
+			      worldinfo_gamestate_team_t our_team,
+			      worldinfo_gamestate_goalcolor_t our_goal_color,
+			      worldinfo_gamestate_half_t half)                  = 0;
 };
 
 

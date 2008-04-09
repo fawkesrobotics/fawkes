@@ -78,8 +78,9 @@ public:
     t->set_velocity(i+3, i+4, i+5, covariance);
     t->set_ball_pos(i+6, i+7, i+8, covariance);
     t->set_ball_velocity(i+9, i+10, i+11, covariance);
-    t->add_opponent(i+12, i+13, covariance);
-    t->add_opponent(i+14, i+15, covariance);
+    t->add_opponent(i+12, i+13, i+14, covariance);
+    t->add_opponent(i+15, i+16, i+17, covariance);
+    t->set_gamestate(GS_FROZEN, TEAM_BOTH);
     t->send();
     ++i;
   }
@@ -167,13 +168,32 @@ public:
 	 << vel_x << "," << vel_y << "," << vel_z << ")" << endl;
   }
 
-  virtual void opponent_pose_rcvd(const char *from_host,
-			     float distance, float angle, float *covariance)
+  virtual void opponent_pose_rcvd(const char *from_host, unsigned int uid,
+				  float distance, float angle, float *covariance)
   {
-    cout << "Oppt[" << from_host << "]: (d,a)=("
-	 << distance << "," << angle << ")" << endl;
+    cout << "Oppt[" << from_host << "]: (uid,d,a)=("
+	 << uid << "," << distance << "," << angle << ")" << endl;
   }
 
+
+  virtual void gamestate_rcvd(const char *from_host,
+			      worldinfo_gamestate_t game_state,
+			      worldinfo_gamestate_team_t state_team,
+			      unsigned int score_cyan, unsigned int score_magenta,
+			      worldinfo_gamestate_team_t our_team,
+			      worldinfo_gamestate_goalcolor_t our_goal_color,
+			      worldinfo_gamestate_half_t half)
+  {
+    printf("Gamestate[%s]:  gs=%s  gs_team=%s  score: %u:%u  our_team: %s  our_goal: %s  half: %s\n",
+	   from_host,
+	   worldinfo_gamestate_tostring(game_state),
+	   worldinfo_gamestate_team_tostring(state_team),
+	   score_cyan, score_magenta,
+	   worldinfo_gamestate_team_tostring(our_team),
+	   worldinfo_gamestate_goalcolor_tostring(our_goal_color),
+	   worldinfo_gamestate_half_tostring(half));
+
+  }
 
  private:
   WorldInfoTransceiver *t;
@@ -204,9 +224,9 @@ class WorldInfoQAMain : public SignalHandler
     this->argp = argp;
     if ( argp->has_arg("r") ) {
       printf("Going to be a receiver\n");
-      r = new WorldInfoReceiverThread(1910, argp->has_arg("s") ? 1 : 0, rs);
+      r = new WorldInfoReceiverThread(2806, argp->has_arg("s") ? 1 : 0, rs);
     } else {
-      s = new WorldInfoSenderThread(1910, argp->has_arg("l"), rs);
+      s = new WorldInfoSenderThread(2806, argp->has_arg("l"), rs);
     }
   }
 

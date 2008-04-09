@@ -111,8 +111,19 @@ WorldInfoTransceiver::WorldInfoTransceiver(const char *addr, unsigned short port
   if (! in_buffer || ! out_buffer) {
     throw OutOfMemoryException();
   }
-  encryptor = new WorldInfoMessageEncryptor((const unsigned char *)key, (const unsigned char *)iv);
-  decryptor = new WorldInfoMessageDecryptor((const unsigned char *)key, (const unsigned char *)iv);
+  fatmsg_bufsize = sizeof(worldinfo_header_t) + sizeof(worldinfo_message_header_t)
+                                              + sizeof(worldinfo_fat_message_t);
+  fatmsg_buf = calloc(1, fatmsg_bufsize);
+  fatmsg_header = (worldinfo_header_t *)fatmsg_buf;
+  fatmsg_msgheader = (worldinfo_message_header_t *)((char *)fatmsg_buf + sizeof(worldinfo_header_t));
+  fatmsg = (worldinfo_fat_message_t *)((char *)fatmsg_buf + sizeof(worldinfo_header_t)
+				       + sizeof(worldinfo_message_header_t));
+
+  __key = strdup(key);
+  __iv  = strdup(iv);
+
+  encryptor = new WorldInfoMessageEncryptor((const unsigned char *)__key, (const unsigned char *)__iv);
+  decryptor = new WorldInfoMessageDecryptor((const unsigned char *)__key, (const unsigned char *)__iv);
 
   // set maximum size buffer to get valid results from encryptor
   encryptor->set_plain_buffer(out_buffer, WORLDINFO_MTU);
@@ -148,6 +159,8 @@ WorldInfoTransceiver::~WorldInfoTransceiver()
   free(in_buffer);
   free(crypted_out_buffer);
   free(crypted_in_buffer);
+  free(__key);
+  free(__iv);
   delete s;
   delete encryptor;
   if ( resolver_delete ) {
@@ -324,6 +337,58 @@ WorldInfoTransceiver::set_ball_velocity(float vel_x, float vel_y, float vel_z, f
 }
 
 
+/** Set current game state.
+ * @param gamestate current game state
+ * @param state_team team referenced by the game state
+ */
+void
+WorldInfoTransceiver::set_gamestate(worldinfo_gamestate_t gamestate,
+				    worldinfo_gamestate_team_t state_team)
+{
+  gamestate_msg.game_state = gamestate;
+  gamestate_msg.state_team = state_team;
+  gamestate_changed = true;
+}
+
+
+/** Set score.
+ * @param score_cyan current score of team cyan
+ * @param score_magenta current score of team magenta
+ */
+void
+WorldInfoTransceiver::set_score(unsigned int score_cyan, unsigned int score_magenta)
+{
+  gamestate_msg.score_cyan    = score_cyan;
+  gamestate_msg.score_magenta = score_magenta;
+  gamestate_changed = true;
+}
+
+
+/** Set team and goal info.
+ * @param our_team our team color
+ * @param goal_color our goal color
+ */
+void
+WorldInfoTransceiver::set_team_goal(worldinfo_gamestate_team_t our_team,
+				    worldinfo_gamestate_goalcolor_t goal_color)
+{
+  gamestate_msg.our_team       = our_team;
+  gamestate_msg.our_goal_color = goal_color;
+  gamestate_changed = true;
+}
+
+
+/** Set current half of the game time.
+ * @param half current half
+ */
+void
+WorldInfoTransceiver::set_half(worldinfo_gamestate_half_t half)
+{
+  gamestate_msg.half = half;
+  gamestate_changed = true;
+}
+
+
 /** Clear opponents list.
  * Clear the list of opponents that has to be transmitted. This is done
  * implicitly in send().
@@ -339,6 +404,9 @@ WorldInfoTransceiver::clear_opponents()
  * Add an opponent to the list of opponents to be transmitted on next send()
  * call. Opponents are given in a 2D polar coordinate system (assumption is that
  * robots don't fly in the soccer domain).
+ * @param uid unique ID of this opponent. The caller shall assign the same UID to an
+ * opponent if and only if the object is the same (for example an opponent that was
+ * tracked)
  * @param distance to opponent
  * @param angle angle to opponent (angle is zero if opponent is in front of robot,
  * positive if right of robot, negative if left of robot).
@@ -349,9 +417,10 @@ WorldInfoTransceiver::clear_opponents()
  * send() is called!
  */
 void
-WorldInfoTransceiver::add_opponent(float distance, float angle, float *covariance)
+WorldInfoTransceiver::add_opponent(unsigned int uid,
+				   float distance, float angle, float *covariance)
 {
-  opponent_t o = { distance, angle, covariance };
+  opponent_t o = { uid, distance, angle, covariance };
   opponents.push_back(o);
 }
 
@@ -398,6 +467,12 @@ WorldInfoTransceiver::reset_outbound()
   header->beef = htons(0xBEEF);
   header->version  = WORLDINFO_VERSION;
 
+  memset(fatmsg_buf, 0, fatmsg_bufsize);
+  fatmsg_header->beef = htons(0xBEEF);
+  fatmsg_header->version  = WORLDINFO_VERSION;
+  fatmsg_msgheader->type  = htons(WORLDINFO_MSGTYPE_FAT_WORLDINFO);
+  fatmsg_msgheader->size  = htons(sizeof(worldinfo_fat_message_t));
+
   outbound_buffer   = (unsigned char *)out_buffer + sizeof(worldinfo_header_t);
   outbound_bytes    = sizeof(worldinfo_header_t);
   outbound_num_msgs = 0;
@@ -415,8 +490,6 @@ WorldInfoTransceiver::send()
 
   reset_outbound();
 
-  worldinfo_fat_message_t fatmsg;
-
   if ( pose_changed ) {
     worldinfo_pose_message_t pm;
     pm.x = pose_x;
@@ -428,13 +501,11 @@ WorldInfoTransceiver::send()
     append_outbound(WORLDINFO_MSGTYPE_POSE, &pm, sizeof(pm));
 
     // fill fat msg
-    memcpy(&(fatmsg.pose), &pm, sizeof(pm));
-    fatmsg.valid_pose = 1;
+    memcpy(&(fatmsg->pose), &pm, sizeof(pm));
+    fatmsg->valid_pose = 1;
   } else {
-    fatmsg.valid_pose = 0;
+    fatmsg->valid_pose = 0;
   }
-
-
 
   if ( vel_changed ) {
     worldinfo_velocity_message_t vm;
@@ -447,10 +518,10 @@ WorldInfoTransceiver::send()
     append_outbound(WORLDINFO_MSGTYPE_VELO, &vm, sizeof(vm));
 
     // fill fat msg
-    memcpy(&(fatmsg.velo), &vm, sizeof(vm));
-    fatmsg.valid_velo = 1;
+    memcpy(&(fatmsg->velo), &vm, sizeof(vm));
+    fatmsg->valid_velo = 1;
   } else {
-    fatmsg.valid_velo = 0;
+    fatmsg->valid_velo = 0;
   }
 
   if ( ball_changed ) {
@@ -464,10 +535,16 @@ WorldInfoTransceiver::send()
     append_outbound(WORLDINFO_MSGTYPE_RELBALL, &bm, sizeof(bm));
 
     // fill fat msg
-    memcpy(&(fatmsg.relball_pos), &bm, sizeof(bm));
-    fatmsg.valid_relball_pos = 1;
+    memcpy(&(fatmsg->relball_pos), &bm, sizeof(bm));
+    fatmsg->valid_relball_pos = 1;
   } else {
-    fatmsg.valid_relball_pos = 0;
+    fatmsg->valid_relball_pos = 0;
+  }
+
+  if ( gamestate_changed ) {
+    append_outbound(WORLDINFO_MSGTYPE_GAMESTATE,
+		    &gamestate_msg, sizeof(worldinfo_gamestate_message_t));
+    gamestate_changed = false;
   }
 
   if ( ball_vel_changed ) {
@@ -481,16 +558,17 @@ WorldInfoTransceiver::send()
     append_outbound(WORLDINFO_MSGTYPE_RELBALLVELO, &rbvm, sizeof(rbvm));
 
     // fill fat msg
-    memcpy(&(fatmsg.relball_velo), &rbvm, sizeof(rbvm));
-    fatmsg.valid_relball_velo = 1;
+    memcpy(&(fatmsg->relball_velo), &rbvm, sizeof(rbvm));
+    fatmsg->valid_relball_velo = 1;
   } else {
-    fatmsg.valid_relball_velo = 0;
+    fatmsg->valid_relball_velo = 0;
   }
 
   // Append opponents
   unsigned int num_opponents = 0;
   for ( oppit = opponents.begin(); oppit != opponents.end(); ++oppit) {
     worldinfo_opppose_message_t opm;
+    opm.uid   = (*oppit).uid;
     opm.dist  = (*oppit).distance;
     opm.angle = (*oppit).angle;
     memcpy(&(opm.covariance), (*oppit).covariance, sizeof(opm.covariance));
@@ -499,11 +577,11 @@ WorldInfoTransceiver::send()
 
     if ( num_opponents < WORLDINFO_FATMSG_NUMOPPS ) {
       // fill fat msg
-      memcpy(&(fatmsg.opponents[num_opponents]), &opm, sizeof(opm));
+      memcpy(&(fatmsg->opponents[num_opponents]), &opm, sizeof(opm));
       ++num_opponents;
     }
   }
-  fatmsg.num_opponents = num_opponents;
+  fatmsg->num_opponents = num_opponents;
   opponents.clear();
 
   if ( outbound_num_msgs > 0 ) {
@@ -516,9 +594,9 @@ WorldInfoTransceiver::send()
     s->send(crypted_out_buffer, crypted_out_bytes);
 
     // send fat msg
-    header->seq      = htonl(out_seq++);
+    fatmsg_header->seq = htonl(out_seq++);
 
-    encryptor->set_plain_buffer(&fatmsg, sizeof(fatmsg));
+    encryptor->set_plain_buffer(fatmsg_buf, fatmsg_bufsize);
     crypted_out_bytes = encryptor->encrypt();
 
     s->send(crypted_out_buffer, crypted_out_bytes);
@@ -631,8 +709,8 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
       inbound_buffer += sizeof(worldinfo_message_header_t);
       uint16_t msg_type = ntohs(msgh->type);
       uint16_t msg_size = ntohs(msgh->size);
-      //cout << "Message type: " << msg_type << "  size: " << msg_size
-      //     << "  ntype: " << msgh->type << "  nsize: " << msgh->size << endl;
+      //printf("Message type: %u   size: %u  ntype: %u  nsize: %u\n",
+      //     msg_type, msg_size, msgh->type, msgh->size);
       if ( inbound_bytes < msg_size ) {
 	LibLogger::log_warn("WorldInfoTransceiver", "Truncated packet received or protocol "
 			    "error, ignoring rest of packet (got %lu bytes, but expected "
@@ -705,13 +783,32 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  worldinfo_opppose_message_t *oppp_msg = (worldinfo_opppose_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
 	    (*hit)->opponent_pose_rcvd(hostname,
-				       oppp_msg->dist, oppp_msg->angle,
+				       oppp_msg->uid, oppp_msg->dist, oppp_msg->angle,
 				       oppp_msg->covariance);
 	  }
 	} else {
 	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid opponent pose message received "
 			      "(got %lu bytes but expected %lu bytes), ignoring",
 			      msg_size, sizeof(worldinfo_opppose_message_t));
+	}
+	break;
+
+      case WORLDINFO_MSGTYPE_GAMESTATE:
+	if ( msg_size == sizeof(worldinfo_gamestate_message_t) ) {
+	  worldinfo_gamestate_message_t *gs_msg = (worldinfo_gamestate_message_t *)inbound_buffer;
+	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
+	    (*hit)->gamestate_rcvd(hostname,
+				   (worldinfo_gamestate_t)gs_msg->game_state,
+				   (worldinfo_gamestate_team_t)gs_msg->state_team,
+				   gs_msg->score_cyan, gs_msg->score_magenta,
+				   (worldinfo_gamestate_team_t)gs_msg->our_team,
+				   (worldinfo_gamestate_goalcolor_t)gs_msg->our_goal_color,
+				   (worldinfo_gamestate_half_t)gs_msg->half);
+	  }
+	} else {
+	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid gamestate message received "
+			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      msg_size, sizeof(worldinfo_gamestate_message_t));
 	}
 	break;
 
@@ -751,6 +848,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	    } else {
 	      for ( unsigned int i = 0; i < fat_msg->num_opponents; ++i ) {
 		(*hit)->opponent_pose_rcvd(hostname,
+					   fat_msg->opponents[i].uid,
 					   fat_msg->opponents[i].dist,
 					   fat_msg->opponents[i].angle,
 					   fat_msg->opponents[i].covariance);

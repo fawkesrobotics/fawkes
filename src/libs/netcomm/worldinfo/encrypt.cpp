@@ -164,6 +164,11 @@ WorldInfoMessageEncryptor::encrypt()
     throw MissingParameterException("Buffer(s) not set for encryption");
   }
 
+  /* Plain text copy-through for debugging
+  memcpy(crypt_buffer, plain_buffer, plain_buffer_length);
+  return plain_buffer_length;
+  */
+
   EVP_CIPHER_CTX ctx;
   if ( ! EVP_EncryptInit(&ctx, EVP_aes_128_ecb(), key, iv) ) {
     throw MessageEncryptionException("Could not initialize cipher context");

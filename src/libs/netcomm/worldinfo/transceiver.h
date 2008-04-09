@@ -31,6 +31,7 @@
 
 #include <netcomm/worldinfo/handler.h>
 #include <netcomm/worldinfo/defs.h>
+#include <netcomm/worldinfo/messages.h>
 
 #include <map>
 #include <string>
@@ -65,8 +66,14 @@ class WorldInfoTransceiver
   void set_ball_pos(float dist, float pitch, float yaw, float *covariance);
   void set_ball_velocity(float vel_x, float vel_y, float vel_z, float *covariance);
 
+  void set_gamestate(worldinfo_gamestate_t gamestate, worldinfo_gamestate_team_t state_team);
+  void set_score(unsigned int score_cyan, unsigned int score_magenta);
+  void set_team_goal(worldinfo_gamestate_team_t our_color,
+		     worldinfo_gamestate_goalcolor_t goal_color);
+  void set_half(worldinfo_gamestate_half_t half);
+
   void clear_opponents();
-  void add_opponent(float distance, float angle, float *covariance);
+  void add_opponent(unsigned int uid, float distance, float angle, float *covariance);
 
   void send();
   void recv(bool block = false, unsigned int max_num_msgs = 0);
@@ -100,6 +107,14 @@ class WorldInfoTransceiver
 
   size_t crypted_out_bytes;
   size_t crypted_in_bytes;
+  char * __key;
+  char * __iv;
+
+  void  *fatmsg_buf;
+  size_t fatmsg_bufsize;
+  worldinfo_header_t *fatmsg_header;
+  worldinfo_message_header_t *fatmsg_msgheader;
+  worldinfo_fat_message_t *fatmsg;
 
   unsigned int out_seq;
   unsigned int in_seq;
@@ -135,7 +150,11 @@ class WorldInfoTransceiver
   float  ball_vel_z;
   float *ball_vel_covariance;
 
+  bool gamestate_changed;
+  worldinfo_gamestate_message_t gamestate_msg;
+
   typedef struct {
+    uint32_t uid;
     float  distance;
     float  angle;
     float *covariance;

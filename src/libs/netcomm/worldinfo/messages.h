@@ -29,6 +29,8 @@
 #include <netcomm/worldinfo/defs.h>
 #include <stdint.h>
 
+#pragma pack(push,4)
+
 /** Robot pose message type ID */
 #define WORLDINFO_MSGTYPE_POSE           1
 /** Robot velocity message type ID */
@@ -41,6 +43,8 @@
 #define WORLDINFO_MSGTYPE_OPP_POSE       5
 /** Fat message containing all the information */
 #define WORLDINFO_MSGTYPE_FAT_WORLDINFO  6
+/** Gamestate info */
+#define WORLDINFO_MSGTYPE_GAMESTATE      7
 
 
 /** Per-message header.
@@ -136,11 +140,15 @@ typedef struct {
  * There is a strong binding between the sender and the object which this data
  * describes which means that with this message a robot may not distribute another
  * robots belief of an opponent position.
+ * The sending robot assigns an ID to each opponent. The ID is unique on the robot, which
+ * means that if two messages are sent with the same ID it can be assumed that it is for
+ * the exact same opponents.
  */
 typedef struct {
-  float dist;	/**< distance to the opponent. */
-  float angle;	/**< angle to the opponent */
-  float covariance[WORLDINFO_COVARIANCE_SIZE_2X2];	/**< opponent position covariance matrix */
+  uint32_t uid;		/**< unique ID of this opponent */
+  float    dist;	/**< distance to the opponent. */
+  float    angle;	/**< angle to the opponent */
+  float    covariance[WORLDINFO_COVARIANCE_SIZE_2X2];	/**< opponent position covariance matrix */
 } worldinfo_opppose_message_t;
 
 
@@ -160,5 +168,22 @@ typedef struct {
   worldinfo_relballvelo_message_t relball_velo;			/**< ball velocity relative to sending robot */
   worldinfo_opppose_message_t     opponents[WORLDINFO_FATMSG_NUMOPPS];	/**< best seen opponents */
 } worldinfo_fat_message_t;
+
+
+/** Game state message.
+ * This message is sent by the refbox repeater to indicate the current game state.
+ */
+typedef struct {
+  uint32_t   game_state     : 4;	/**< Current game state, one of worldinfo_gamestate_t */
+  uint32_t   state_team     : 2;	/**< Team the game state references */
+  uint32_t   score_cyan     : 8;	/**< Score of team cyan */
+  uint32_t   score_magenta  : 8;	/**< Score of team magenta */
+  uint32_t   our_team       : 1;	/**< Our team color */
+  uint32_t   our_goal_color : 1;	/**< Our own goal color */
+  uint32_t   half           : 1;	/**< Game time half */
+  uint32_t   reserved       : 7;	/**< Reserved for future use */
+} worldinfo_gamestate_message_t;
+
+#pragma pack(pop)
 
 #endif

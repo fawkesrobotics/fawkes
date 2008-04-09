@@ -67,7 +67,7 @@ class Socket
   virtual void         close();
   virtual bool         available();
 
-  virtual void         read(void *buf, size_t count);
+  virtual size_t       read(void *buf, size_t count, bool read_all = true);
   virtual void         write(const void *buf, size_t count);
   virtual void         send(void *buf, size_t buf_len);
   virtual void         send(void *buf, size_t buf_len,

@@ -514,11 +514,14 @@ Socket::write(const void *buf, size_t count)
  * Read from the socket. This method can only be used on streams.
  * @param buf buffer to write from
  * @param count length of buffer, number of bytes to write to stream
+ * @param read_all setting this to true causes a call to read() loop until exactly
+ * count bytes have been read, if false it will return after the first successful read
+ * with the number of bytes available then.
  * @see write
  * @exception SocketException thrown for any error during reading
  */
-void
-Socket::read(void *buf, size_t count)
+size_t
+Socket::read(void *buf, size_t count, bool read_all)
 {
   int retval = 0;
   unsigned int bytes_read = 0;
@@ -528,40 +531,66 @@ Socket::read(void *buf, size_t count)
 
     gettimeofday(&start, NULL);
 
-    do {
-      retval = ::read(sock_fd, (char *)buf + bytes_read, count - bytes_read);
-      if (retval == -1) {
-	if (errno != EAGAIN) {
+    if ( read_all ) {
+      do {
+	retval = ::read(sock_fd, (char *)buf + bytes_read, count - bytes_read);
+	if (retval == -1) {
+	  if (errno != EAGAIN) {
+	    throw SocketException("Could not read data", errno);
+	  } else {
+	    // just to meet loop condition
+	    retval = 0;
+	  }
+	} else {
+	  bytes_read += retval;
+	  // reset timeout
+	  gettimeofday(&start, NULL);
+	}
+	gettimeofday(&now, NULL);
+	usleep(0);
+      } while ((bytes_read < count) && (time_diff_sec(now, start) < timeout) );
+    } else {
+      do {
+	retval = ::read(sock_fd, (char *)buf, count);
+	if ( (retval == -1) && (errno != EAGAIN) ) {
 	  throw SocketException("Could not read data", errno);
 	} else {
-	  // just to meet loop condition
-	  retval = 0;
+	  bytes_read = retval;
 	}
-      } else {
-	bytes_read += retval;
-	// reset timeout
-	gettimeofday(&start, NULL);
-      }
-      gettimeofday(&now, NULL);
-      usleep(0);
-    } while ((bytes_read < count) && (time_diff_sec(now, start) < timeout) );
+	usleep(0);
+      } while (retval < 0);
+    }
   } else {
-    do {
-      retval = ::read(sock_fd, (char *)buf + bytes_read, count - bytes_read);
-      if (retval == -1) {
-	throw SocketException("Could not read data", errno);
-      } else if (retval == 0) {
-	throw SocketException("Could not read any data");
-      } else {
-	bytes_read += retval;
-      }
-      usleep(0);
-    } while (bytes_read < count);
+    if ( read_all ) {
+      do {
+	retval = ::read(sock_fd, (char *)buf + bytes_read, count - bytes_read);
+	if (retval == -1) {
+	  throw SocketException("Could not read data", errno);
+	} else if (retval == 0) {
+	  throw SocketException("Could not read any data");
+	} else {
+	  bytes_read += retval;
+	}
+	usleep(0);
+      } while (bytes_read < count);
+    } else {
+      do {
+	retval = ::read(sock_fd, (char *)buf, count);
+	if ( (retval == -1) && (errno != EAGAIN) ) {
+	  throw SocketException("Could not read data", errno);
+	} else {
+	  bytes_read = retval;
+	}
+	usleep(0);
+      } while (retval < 0);
+    }
   }
 
-  if ( bytes_read < count) {
+  if ( read_all && (bytes_read < count)) {
     throw SocketException("Read timeout");
   }
+
+  return bytes_read;
 }
 
 
