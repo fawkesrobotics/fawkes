@@ -80,7 +80,7 @@ Time::Time(long ms)
 Time::Time(float s)
 {
   time_t sec = (time_t) s;
-  suseconds_t usec = ((long)s - sec) * 1000000;
+  suseconds_t usec = (s - sec) * 1000000;
 
   time.tv_sec = sec;
   time.tv_usec = usec;
@@ -221,7 +221,7 @@ Time
 Time::operator+(const float sec) const
 {
   Time ret;
-  time_t sec_only = (time_t)roundf(sec);
+  time_t sec_only = (time_t)floor(sec);
   suseconds_t usec_only = (suseconds_t)roundf((sec - floor(sec)) * 1000000);
   if ((time.tv_usec + sec_only) > 1000000)
     {
