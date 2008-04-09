@@ -29,6 +29,8 @@
 #include <plugins/navigator/robot_motion/velocity_controller.h>
 #include <utils/time/time.h>
 
+class PidController;
+
 class LinearVelocityController : public VelocityController
 {
  public:
@@ -46,12 +48,14 @@ class LinearVelocityController : public VelocityController
   float* get_next_velocity(float dist_to_target);
 
  private:
-  bool start_deceleration(float* actual_velocity, float dist_to_target);
-
   float m_max_accel;
   float m_max_decel;
 
   Time m_start;
+
+  bool m_stopping;
+
+  PidController* m_pid_controller;
 };
 
 #endif /* __PLUGINS_NAVIGATOR_ROBOT_MOTION_LINEAR_VELOCITY_CONTROLLER_H_ */

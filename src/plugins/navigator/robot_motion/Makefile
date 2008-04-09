@@ -21,7 +21,8 @@ LIBS_librobotmotion = geometry utils
 OBJS_librobotmotion = motion_model.o 			\
 		      omni_motion_model.o 		\
 		      velocity_controller.o		\
-		      linear_velocity_controller.o	
+		      linear_velocity_controller.o	\
+		      pid_controller.o
 
 OBJS_all    = $(OBJS_librobotmotion)
 LIBS_all    = $(LIBDIR)/librobotmotion.so
