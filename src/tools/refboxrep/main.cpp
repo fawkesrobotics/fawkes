@@ -29,6 +29,8 @@
 #include "midsize.h"
 
 #include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
 void
 print_usage(const char *program_name)
