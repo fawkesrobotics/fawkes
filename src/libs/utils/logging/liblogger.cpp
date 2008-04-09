@@ -127,7 +127,6 @@ LibLogger::log_debug(const char *component, const char *format, ...)
   if ( logger == NULL )  init();
   mutex->lock();
   va_list va;
-  if ( logger == NULL )  init();
   va_start(va, format);
   logger->vlog_debug(component, format, va);
   va_end(va);
@@ -146,7 +145,6 @@ LibLogger::log_info(const char *component, const char *format, ...)
   if ( logger == NULL )  init();
   mutex->lock();
   va_list va;
-  if ( logger == NULL )  init();
   va_start(va, format);
   logger->vlog_info(component, format, va);
   va_end(va);
@@ -165,7 +163,6 @@ LibLogger::log_warn(const char *component, const char *format, ...)
   if ( logger == NULL )  init();
   mutex->lock();
   va_list va;
-  if ( logger == NULL )  init();
   va_start(va, format);
   logger->vlog_warn(component, format, va);
   va_end(va);
@@ -184,7 +181,6 @@ LibLogger::log_error(const char *component, const char *format, ...)
   if ( logger == NULL )  init();
   mutex->lock();
   va_list va;
-  if ( logger == NULL )  init();
   va_start(va, format);
   logger->vlog_error(component, format, va);
   va_end(va);
