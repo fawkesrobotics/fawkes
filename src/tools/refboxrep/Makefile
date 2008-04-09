@@ -1,8 +1,10 @@
 #*****************************************************************************
-#                   Makefile Build System for Fawkes: tools
+#             Makefile Build System for Fawkes : RefBox Repeater
 #                            -------------------
-#   Created on Tue Nov 21 18:36:28 2006
-#   copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Wed Apr 09 09:44:15 2008
+#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -12,18 +14,14 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 
-SUBDIRS = blackboard plugin logview config joystick plugin_gui \
-	  navigator_gui netlog_monitor refboxrep
+LIBS_refboxrep = core utils config netcomm
+OBJS_refboxrep = main.o refbox_state_sender.o midsize.o
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/etc/buildsys/rules.mk
+OBJS_all =	$(OBJS_refboxrep)
+BINS_all =	$(BINDIR)/refboxrep
+
+include $(BASEDIR)/etc/buildsys/base.mk
 
