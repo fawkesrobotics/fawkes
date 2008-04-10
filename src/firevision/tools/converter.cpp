@@ -12,8 +12,7 @@
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version. A runtime exception applies to
- *  this software (see LICENSE.GPL file mentioned below for details).
+ *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,6 +34,8 @@
 
 #include <fvutils/readers/fvraw.h>
 #include <fvutils/readers/jpeg.h>
+
+#include <fvutils/color/conversions.h>
 
 #define BUFFER_SIZE 5000000
 
@@ -110,7 +111,11 @@ int main(int argc, char** argv)
   unsigned char* buffer = (unsigned char*) malloc(BUFFER_SIZE);
   reader->set_buffer(buffer);
   reader->read();
-  
+
+  unsigned char *tmpbuf = malloc_buffer(YUV422_PLANAR, reader->pixel_width(), reader->pixel_height());
+  convert(reader->colorspace(), YUV422_PLANAR, buffer, tmpbuf,
+	  reader->pixel_width(), reader->pixel_height());
+
   // FvRaw
   if ( 0 == strcmp(ext_out, "raw") )
     {
@@ -143,7 +148,7 @@ int main(int argc, char** argv)
 
   writer->set_filename(fn_out);
   writer->set_dimensions(reader->pixel_width(), reader->pixel_height());
-  writer->set_buffer(YUV422_PLANAR, buffer);
+  writer->set_buffer(YUV422_PLANAR, tmpbuf);
   writer->write();
 
   free(fn_in_copy);
@@ -153,6 +158,7 @@ int main(int argc, char** argv)
   delete writer;
 
   free(buffer);
+  free(tmpbuf);
   
   return 0;
 }
