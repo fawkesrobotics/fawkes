@@ -161,3 +161,35 @@ ColorModelLookupTable::load(const char *filename)
   *__colormap = *tycm;
   delete tcm;
 }
+
+
+/** Add colormaps.
+ * This adds the colormap of the given lookuptable color model to internals colormap.
+ * @param cmlt lookup table color model to copy data from
+ * @return this
+ */
+ColorModelLookupTable &
+ColorModelLookupTable::operator+=(const ColorModelLookupTable &cmlt)
+{
+  *__colormap += *(cmlt.__colormap);
+  return *this;
+}
+
+
+/** Reset colormap. */
+void
+ColorModelLookupTable::reset()
+{
+  __colormap->reset();
+}
+
+/** Compose filename.
+ * @param format format string
+ * @return composed filename
+ * @see ColormapFile::compose_filename()
+ */
+std::string
+ColorModelLookupTable::compose_filename(const std::string format)
+{
+  return ColormapFile::compose_filename(format);
+}

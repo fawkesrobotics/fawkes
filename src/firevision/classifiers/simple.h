@@ -35,12 +35,12 @@ class SimpleColorClassifier : public Classifier
 {
  public:
   SimpleColorClassifier(ScanlineModel *scanline_model,
-			 ColorModel *color_model,
-			 unsigned int min_num_points=6,
-			 unsigned int box_extent = 50,
-			 bool upward = false,
-			 unsigned int neighbourhood_min_match = 8,
-                         unsigned int grow_by = 10                );
+			ColorModel *color_model,
+			unsigned int min_num_points=6,
+			unsigned int box_extent = 50,
+			bool upward = false,
+			unsigned int neighbourhood_min_match = 8,
+			unsigned int grow_by = 10                );
  
   virtual std::list< ROI > * classify();
 

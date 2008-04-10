@@ -29,6 +29,7 @@
 #include <models/color/colormodel.h>
 
 #include <fvutils/colormap/yuvcm.h>
+#include <string>
 
 class ColorModelLookupTable : public ColorModel
 {
@@ -48,6 +49,11 @@ class ColorModelLookupTable : public ColorModel
   YuvColormap *  get_colormap() const;
 
   void load(const char *filename);
+
+  void reset();
+  static std::string compose_filename(const std::string format);
+
+  ColorModelLookupTable &  operator+=(const ColorModelLookupTable &cmlt);
 
  private:
   YuvColormap *__colormap;
