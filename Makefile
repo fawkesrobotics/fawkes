@@ -60,3 +60,17 @@ linkscripts:
 		fi \
 	done
 
+.PHONY: license-check
+license-check:
+	$(SILENT)if which perl >/dev/null; then \
+		perl $(BASEDIR)/etc/licscripts/find_invlic.pl src $(wildcard $(BASEDIR)/doc/headers/lichead*.*); \
+		if [ $$? ]; then \
+			echo -e "$(INDENT_PRINT)$(TGREEN)--> All source files have a proper license header.$(TNORMAL)"; \
+		else \
+			echo -e "$(INDENT_PRINT)$(TRED)--> Some source files do not have a proper license header. Fix it!$(TNORMAL)"; \
+		fi \
+	else \
+		echo -e "$(INDENT_PRINT)$(TRED)--- Cannot do license check$(TNORMAL) (perl not installed)"; \
+		exit 1; \
+	fi
+
