@@ -49,8 +49,7 @@ include $(SRCDIR)/generator/generator_rules.mk
 $(LIBDIR)/lua/interfaces.so: | $(LIBDIR)/libinterfaces.so
 
 .SECONDARY: $(SRCS_interfaces) $(HDRS_interfaces) $(OBJS_interfaces) \
-	$(TOLUA_interfaces) $(SRCDIR)/interfaces_tolua.cpp \
-	$(OBJS_lua_interfaces)
+	$(TOLUA_interfaces) $(OBJS_lua_interfaces)
 
 ifeq ($(BUILD_INTERFACE_GENERATOR),1)
 $(SRCS_interfaces): $(BINDIR)/interface_generator
