@@ -36,8 +36,6 @@
 
 #ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
-#include <netcomm/dns-sd/avahi_service_publisher.h>
-#include <netcomm/dns-sd/avahi_browser.h>
 #include <netcomm/service_discovery/service.h>
 #include <netcomm/utils/resolver.h>
 #endif
@@ -126,7 +124,7 @@ class FountainRCSoftX : public SignalHandler
 							  "_fountain._tcp",
 							  __config->FountainPort);
     free(fountain_service_name);
-    __avahi_thread->publish(fountain_service);
+    __avahi_thread->publish_service(fountain_service);
 #endif
 
     __fuse_server->join();

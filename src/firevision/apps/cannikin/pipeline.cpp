@@ -46,8 +46,6 @@
 #include <models/scanlines/cornerhorizon.h>
 #include <models/color/thresholds.h>
 #include <models/color/lookuptable.h>
-#include <models/relative_position/box_relative.h>
-#include <models/global_position/ballglobal.h>
 
 #include <stereo/triclops.h>
 
@@ -248,10 +246,10 @@ CannikinPipeline::init()
 
 
 
-  string colormap_filestem = ColorModelLookupTable::composeFilename(config->ColormapDirectory
-								    + "/" +
-								    config->ColormapFilestem );
-  
+  string colormap_filestem = ColorModelLookupTable::compose_filename(config->ColormapDirectory
+								     + "/" +
+								     config->ColormapFilestem );
+
   cout << "Colormap filestem is '" << colormap_filestem << "'" << endl;
 
   colormap_filestem_cindex = colormap_filestem.find("%c");
@@ -288,9 +286,7 @@ CannikinPipeline::init()
     */
   }
 
-  cm  = new ColorModelLookupTable( config->LookupTableWidth,
-				   config->LookupTableHeight,
-				   "front-color",
+  cm  = new ColorModelLookupTable( "front-color",
 				   true /* destroy on free */);
   cm->reset();
   set_cup_color(CC_BLUE);
@@ -315,7 +311,7 @@ CannikinPipeline::init()
   if ( config->ClassifierType != "simple") {
     cout << msg_prefix << cyellow << "Only the really simple classifier is supporter at this time" << cnormal << endl;
   }
-  classifier   = new ReallySimpleClassifier(width, height, scanlines, cm, 20 /* min pixels to consider */, 30 /* initial box extent */);
+  classifier   = new SimpleColorClassifier(scanlines, cm, 20 /* min pixels to consider */, 30 /* initial box extent */);
 
 }
 
@@ -703,7 +699,7 @@ CannikinPipeline::detect_cup()
   memcpy(buffer_src, triclops->yuv_buffer(), buffer_size);
 
   // Classify image, find ROIs by color
-  classifier->setSrcBuffer( buffer_src );
+  classifier->set_src_buffer( buffer_src, width, height );
   rois = classifier->classify();
 
   if (rois->empty()) {
@@ -862,7 +858,7 @@ CannikinPipeline::determine_cup_color()
   memcpy(buffer, triclops->auxiliary_yuv_buffer(), buffer_size);
 
   // Classify image, find ROIs by color
-  classifier->setSrcBuffer( buffer_src );
+  classifier->set_src_buffer( buffer_src, width, height );
   rois = classifier->classify();
 
   if (rois->empty()) {

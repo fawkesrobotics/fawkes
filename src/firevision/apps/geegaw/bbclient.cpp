@@ -169,7 +169,7 @@ void FirevisionGeegawBBClient::Init ()
   camera_tracker = new CameraTracker( obj_relative,
                                       config->CameraHeight,
                                       config->CameraOrientation);
-  camera_tracker->setMode(CameraTracker::MODE_MODEL);
+  camera_tracker->set_mode(CameraTracker::MODE_MODEL);
 
   /*
   box_relative = pipeline->getRelativeBoxPosModel();
@@ -273,7 +273,7 @@ FirevisionGeegawBBClient::Loop(int Count)
 
     if ( pipeline->getMode() == GeegawPipeline::MODE_OBSTACLES ) {
       camera_tracker->calc();
-      new_pan = camera_tracker->getNewPan();
+      new_pan = camera_tracker->get_new_pan();
       new_tilt = forward_tilt;
     }
 
@@ -334,9 +334,9 @@ FirevisionGeegawBBClient::Loop(int Count)
 	new_pan  = forward_pan;
 	new_tilt = forward_tilt;
       } else {
-	camera_tracker->setMode( CameraTracker::MODE_MODEL );
+	camera_tracker->set_mode( CameraTracker::MODE_MODEL );
 	camera_tracker->calc();
-	new_pan  = camera_tracker->getNewPan();
+	new_pan  = camera_tracker->get_new_pan();
 	//if (config->CameraTrackTilt) {
 	//  new_tilt = camera_tracker->getNewTilt();
 	//} else {
@@ -349,16 +349,16 @@ FirevisionGeegawBBClient::Loop(int Count)
       // track a world point
       //cout << "Tracking POINT (" << m_pCameraControlServer->GetTrackWorldPoint( 0 )
       //     << "," << m_pCameraControlServer->GetTrackWorldPoint( 1 ) << ")." << endl;
-      camera_tracker->setMode( CameraTracker::MODE_WORLD );
-      camera_tracker->setWorldPoint( m_pCameraControlServer->GetTrackWorldPoint( 0 ),
-				     m_pCameraControlServer->GetTrackWorldPoint( 1 ) );
-      camera_tracker->setRobotPosition( m_pLocalizeMasterClient->GetCurrentX(),
-					m_pLocalizeMasterClient->GetCurrentY(),
-					m_pLocalizeMasterClient->GetCurrentOri() );
+      camera_tracker->set_mode( CameraTracker::MODE_WORLD );
+      camera_tracker->set_world_point( m_pCameraControlServer->GetTrackWorldPoint( 0 ),
+					m_pCameraControlServer->GetTrackWorldPoint( 1 ) );
+      camera_tracker->set_robot_position( m_pLocalizeMasterClient->GetCurrentX(),
+					  m_pLocalizeMasterClient->GetCurrentY(),
+					  m_pLocalizeMasterClient->GetCurrentOri() );
       camera_tracker->calc();
-      new_pan  = camera_tracker->getNewPan();
+      new_pan  = camera_tracker->get_new_pan();
       //if (config->CameraTrackTilt) {
-      //new_tilt = camera_tracker->getNewTilt();
+      //new_tilt = camera_tracker->get_new_tilt();
       //} else {
 	new_tilt = forward_tilt;
 	//}

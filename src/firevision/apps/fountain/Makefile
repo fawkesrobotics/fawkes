@@ -35,7 +35,7 @@ ifeq ($(BUILD_TYPE),rcsoftx)
     LIBS_fvfountain += pthread rutils
     INCDIRS         += $(QTDIR)/include
     BINS_all         = $(BINDIR)/fvfountain
-    CFLAGS          += $(CFLAGS_AVAHI)
+    CFLAGS          += $(CFLAGS_AVAHI) -Wno-non-virtual-dtor
     LDFLAGS         += $(LDFLAGS_AVAHI)
   endif
 else

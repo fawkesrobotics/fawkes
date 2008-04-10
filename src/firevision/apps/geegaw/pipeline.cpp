@@ -204,13 +204,9 @@ GeegawPipeline::init()
   }
 
   cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
-				   config->LookupTableWidth,
-				   config->LookupTableHeight,
 				   "omni-color",
 				   true /* destroy on free */);
   deter_cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
-					 config->LookupTableWidth,
-					 config->LookupTableHeight,
 					 "front-color",
 					 true /* destroy on free */);
 
@@ -237,7 +233,7 @@ GeegawPipeline::init()
 			    config->HorizontalViewingAngle,
 			    config->VerticalViewingAngle
 			    );
-  rel_pos->setRadius(3);
+  rel_pos->set_radius(3);
 
   object_relposmod = new BoxRelative(width, height,
 				     config->CameraHeight,
@@ -247,19 +243,17 @@ GeegawPipeline::init()
 				     config->HorizontalViewingAngle,
 				     config->VerticalViewingAngle
 				     );
-  object_relposmod->setRadius(3);
+  object_relposmod->set_radius(3);
 
 
   // Classifier
-  classifier   = new ReallySimpleClassifier(width, height,
-                                            scanlines, cm,
+  classifier   = new SimpleColorClassifier( scanlines, cm,
                                             10 /* min pixels to consider */,
                                             30 /* initial box extent */,
                                             /* upward */ (mode == MODE_OBSTACLES),
                                             /* neighbourhood min match */ 5);
 
-  deter_classifier   = new ReallySimpleClassifier(width, height,
-						  scanlines, deter_cm,
+  deter_classifier   = new SimpleColorClassifier( scanlines, deter_cm,
 						  10 /* min pixels to consider */,
 						  30 /* initial box extent */,
 						  /* upward */ true,
@@ -414,7 +408,7 @@ GeegawPipeline::object_relpos()
 void
 GeegawPipeline::detect_obstacles()
 {
-  classifier->setSrcBuffer( buffer_src );
+  classifier->set_src_buffer( buffer_src, width, height );
   rois = classifier->classify();
   obstacles.clear();
 
@@ -431,23 +425,23 @@ GeegawPipeline::detect_obstacles()
     rdf->apply();
     polar_coord_t o;
     camctrl->pan_tilt_rad(&pan, &tilt);
-    rel_pos->setPanTilt(pan, tilt);
-    rel_pos->setCenter( (*r).start.x + (*r).width / 2,
-		        (*r).start.y + (*r).height );
+    rel_pos->set_pan_tilt(pan, tilt);
+    rel_pos->set_center( (*r).start.x + (*r).width / 2,
+			 (*r).start.y + (*r).height );
     rel_pos->calc_unfiltered();
-    o.phi = rel_pos->getBearing();
-    o.r   = rel_pos->getDistance();
+    o.phi = rel_pos->get_bearing();
+    o.r   = rel_pos->get_distance();
     obstacles.push_back(o);
     if (obstacles.size() == max_obstacles) break;
 
     if ( first ) {
       // First is the biggest ROI, set as object
-      object_relposmod->setPanTilt(pan, tilt);
-      object_relposmod->setCenter( (*r).start.x + (*r).width / 2,
-				   (*r).start.y + (*r).height / 2 );
+      object_relposmod->set_pan_tilt(pan, tilt);
+      object_relposmod->set_center( (*r).start.x + (*r).width / 2,
+				    (*r).start.y + (*r).height / 2 );
       object_relposmod->calc_unfiltered();
-      _object_bearing = object_relposmod->getBearing();
-      _object_distance = object_relposmod->getDistance();
+      _object_bearing = object_relposmod->get_bearing();
+      _object_distance = object_relposmod->get_distance();
       first = false;
     }
   }
@@ -460,7 +454,7 @@ GeegawPipeline::detect_obstacles()
 void
 GeegawPipeline::detect_object()
 {
-  classifier->setSrcBuffer( buffer_src );
+  classifier->set_src_buffer( buffer_src, width, height );
   rois = classifier->classify();
   obstacles.clear();
 
@@ -471,18 +465,18 @@ GeegawPipeline::detect_object()
     rdf->set_dst_buffer(buffer, &(*r));
     rdf->apply();
     camctrl->pan_tilt_rad(&pan, &tilt);
-    rel_pos->setPanTilt(pan, tilt);
-    rel_pos->setCenter( (*r).start.x + (*r).width / 2,
-		        (*r).start.y + (*r).height );
+    rel_pos->set_pan_tilt(pan, tilt);
+    rel_pos->set_center( (*r).start.x + (*r).width / 2,
+			 (*r).start.y + (*r).height );
     rel_pos->calc_unfiltered();
 
     // First is the biggest ROI, set as object
-    object_relposmod->setPanTilt(pan, tilt);
-    object_relposmod->setCenter( (*r).start.x + (*r).width / 2,
-				   (*r).start.y + (*r).height / 2 );
+    object_relposmod->set_pan_tilt(pan, tilt);
+    object_relposmod->set_center( (*r).start.x + (*r).width / 2,
+				  (*r).start.y + (*r).height / 2 );
     object_relposmod->calc_unfiltered();
-    _object_bearing = object_relposmod->getBearing();
-    _object_distance = object_relposmod->getDistance();
+    _object_bearing = object_relposmod->get_bearing();
+    _object_distance = object_relposmod->get_distance();
 
     delete rdf;
   }
@@ -501,7 +495,7 @@ GeegawPipeline::add_object()
 
   add_status = ADDSTATUS_INPROGRESS;
 
-  deter_classifier->setSrcBuffer( buffer_src );
+  deter_classifier->set_src_buffer( buffer_src, width, height );
   rois = deter_classifier->classify();
 
   if ( rois->empty() ) {
@@ -615,8 +609,7 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
   } else if ( mode == MODE_OBSTACLES ) {
     cout << msg_prefix << "Switching to OBSTACLES mode" << endl;
     delete classifier;
-    classifier   = new ReallySimpleClassifier(width, height,
-					      scanlines, cm,
+    classifier   = new SimpleColorClassifier( scanlines, cm,
 					      10 /* min pixels to consider */,
 					      30 /* initial box extent */,
 					      /* upward */ true,
@@ -624,12 +617,11 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
   } else if ( mode == MODE_LOSTNFOUND ) {
     cout << msg_prefix << "Switching to LOSTNFOUND mode" << endl;
     delete classifier;
-    classifier   = new ReallySimpleClassifier(width, height,
-					      scanlines, cm,
-					      10 /* min pixels to consider */,
-					      30 /* initial box extent */,
-					      /* upward */ false,
-					      /* neighbourhood min match */ 5);
+    classifier   = new SimpleColorClassifier(scanlines, cm,
+					     10 /* min pixels to consider */,
+					     30 /* initial box extent */,
+					     /* upward */ false,
+					     /* neighbourhood min match */ 5);
   } else if ( mode == MODE_RESET_COLORMAP ) {
     cout << msg_prefix << "RESETting colormap" << endl;
     cm->reset();
