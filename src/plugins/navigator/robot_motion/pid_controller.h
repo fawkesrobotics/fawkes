@@ -12,8 +12,7 @@
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version. A runtime exception applies to
- *  this software (see LICENSE.GPL file mentioned below for details).
+ *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_NAVIGATOR_ROBOT_MOTION_CPIDCONTOLLER_H_
-#define __PLUGINS_NAVIGATOR_ROBOT_MOTION_CPIDCONTOLLER_H_
+#ifndef __PLUGINS_NAVIGATOR_ROBOT_MOTION_PID_CONTOLLER_H_
+#define __PLUGINS_NAVIGATOR_ROBOT_MOTION_PID_CONTOLLER_H_
 
 #define __PID_CONTROL_NUM_ERROR_SLOTS_ 10
 
