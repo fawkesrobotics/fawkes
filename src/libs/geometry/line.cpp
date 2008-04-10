@@ -29,7 +29,7 @@
 #include <iostream>
 
 
-/** @class Line libs/geometry/line.h
+/** @class Line <geometry/line.h>
  * Well, what can one say about a straight line?
  */
 

@@ -30,7 +30,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-/** @class Matrix libs/geometry/matrix.h
+/** @class Matrix <geometry/matrix.h>
  * A general matrix class. It provides all the 
  * operations that are commonly used with a matrix.
  * @author Daniel Beck
