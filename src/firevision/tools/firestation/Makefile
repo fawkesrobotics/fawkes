@@ -12,15 +12,11 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
 
 BASEDIR = ../../../..
+include $(BASEDIR)/src/firevision/fvconf.mk
 include $(BASEDIR)/etc/buildsys/gui.mk
-include $(BASEDIR)/src/libs/netcomm/netcomm.mk
+include $(LIBSRCDIR)/netcomm/netcomm.mk
 
 CFLAGS   = $(VISION_CFLAGS)
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
