@@ -24,7 +24,7 @@ TARGETS_all += linkscripts
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
 
-.PHONY: apidoc quickdoc tracdoc
+.PHONY: apidoc quickdoc tracdoc uncolored-quickdoc
 apidoc: api.doxygen
 quickdoc: api-quick.doxygen
 tracdoc: api-trac.doxygen
@@ -60,7 +60,8 @@ linkscripts:
 		fi \
 	done
 
-.PHONY: license-check
+.PHONY: license-check uncolored-license-check
+uncolored-license-check: license-check
 license-check:
 	$(SILENT)if which perl >/dev/null; then \
 		perl $(BASEDIR)/etc/licscripts/find_invlic.pl src $(wildcard $(BASEDIR)/doc/headers/lichead*.*); \
