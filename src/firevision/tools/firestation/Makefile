@@ -49,7 +49,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
 warning_guilibs:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building firestation$(TNORMAL) ($(GTK_CONF_ERR) not installed)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building firestation$(TNORMAL) $(GUI_ERROR)";
 warning_avahi:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building firestation$(TNORMAL) (Avahi not installed)";
 endif
