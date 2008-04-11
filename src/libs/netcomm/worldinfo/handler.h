@@ -41,7 +41,7 @@ class WorldInfoHandler
 			     float vel_y, float vel_theta, float *covariance)   = 0;
 
   virtual void ball_pos_rcvd(const char *from_host,
-			     float dist, float pitch, float yaw,
+			     float dist,  float bearing, float slope,
 			     float *covariance)                                 = 0;
 
   virtual void ball_velocity_rcvd(const char *from_host,
@@ -50,7 +50,7 @@ class WorldInfoHandler
 
   virtual void opponent_pose_rcvd(const char *from_host,
 				  unsigned int uid, float distance,
-				  float angle,  float *covariance)              = 0;
+				  float bearing,  float *covariance)            = 0;
 
   virtual void gamestate_rcvd(const char *from_host,
 			      worldinfo_gamestate_t game_state,

@@ -207,6 +207,11 @@ FvOmniFieldPipelineThread::init()
   m_num_interfaces = m_scanline_model->num_rays();
   m_obstacle_interfaces = (ObjectPositionInterface**)malloc(m_num_interfaces * sizeof(ObjectPositionInterface*));
   unsigned int i;
+  unsigned int flags =
+    ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN |
+    ObjectPositionInterface::FLAG_HAS_EXTENT |
+    ObjectPositionInterface::FLAG_HAS_CIRCULAR_EXTENT;
+
   try 
     {
       for ( i = 0; i < m_num_interfaces; ++i)
@@ -215,7 +220,9 @@ FvOmniFieldPipelineThread::init()
 	  id = (char*)malloc( strlen("OmniObstacle") + 4 );
 	  sprintf(id, "OmniObstacle%d", i);
 	  m_obstacle_interfaces[i] = blackboard->open_for_writing<ObjectPositionInterface>(id);
-	  m_obstacle_interfaces[i]->set_object_type(ObjectPositionInterface::OTHER);
+	  m_obstacle_interfaces[i]->set_object_type(ObjectPositionInterface::TYPE_OTHER);
+	  m_obstacle_interfaces[i]->set_flags(flags);
+	  m_obstacle_interfaces[i]->write();
 	  free(id);
 	}
     } 
@@ -348,7 +355,7 @@ FvOmniFieldPipelineThread::loop()
 	    {
 	      // write data to interface
 	      m_obstacle_interfaces[index]->set_visible( true );
-	      m_obstacle_interfaces[index]->set_extent( 0.1 );
+	      m_obstacle_interfaces[index]->set_extent_x( 0.1 );
 	      m_obstacle_interfaces[index]->set_relative_x( m_rel_pos->get_x() );
 	      m_obstacle_interfaces[index]->set_relative_y( -m_rel_pos->get_y() );
 	      m_obstacle_interfaces[index]->write();

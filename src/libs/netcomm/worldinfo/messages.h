@@ -108,11 +108,11 @@ typedef struct {
  * robots belief of a ball position.
  */
 typedef struct {
-  float dist;	/**< distance to the robot */
-  float pitch;	/**< pitch to the ball, this is the angle between the robots center position
-		 * on the ground plane and the ball */
-  float yaw;	/**< yaw to the ball, this is the angle between the robots forward direction
-		 * and the ball on the ground plane */
+  float bearing;	/**< bearing to the ball, this is the angle between the robots
+			 * forward direction and the ball on the ground plane (azimuth)*/
+  float dist;		/**< distance to the robot */
+  float slope;		/**< slope to the ball, this is the angle between the robots
+			 * center position on the ground plane and the ball (declination) */
   float covariance[WORLDINFO_COVARIANCE_SIZE_3X3];	/**< ball covariance matrix */
 } worldinfo_relballpos_message_t;
 
@@ -147,7 +147,8 @@ typedef struct {
 typedef struct {
   uint32_t uid;		/**< unique ID of this opponent */
   float    dist;	/**< distance to the opponent. */
-  float    angle;	/**< angle to the opponent */
+  float    bearing;	/**< bearing to the opponent, this is the angle between the robots
+			 * forward direction and the opponent on the ground plane (azimuth)*/
   float    covariance[WORLDINFO_COVARIANCE_SIZE_2X2];	/**< opponent position covariance matrix */
 } worldinfo_opppose_message_t;
 

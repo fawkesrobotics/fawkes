@@ -147,11 +147,11 @@ public:
   }
 
   virtual void ball_pos_rcvd(const char *from_host,
-			     float dist, float pitch, float yaw,
+			     float dist,  float bearing, float slope,
 			     float *covariance)
   {
-    cout << "Ball[" << from_host << "]: (d,p,y)=("
-	 << dist << "," << pitch << "," << yaw << "), cov=(";
+    cout << "Ball[" << from_host << "]: (d,b,s)=("
+	 << dist << "," << bearing << "," << slope << "), cov=(";
     for ( unsigned int i = 0; i < WORLDINFO_COVARIANCE_SIZE_3X3; ++i) {
       cout << covariance[i];
       if ( i != WORLDINFO_COVARIANCE_SIZE_3X3 - 1 ) {
@@ -169,10 +169,10 @@ public:
   }
 
   virtual void opponent_pose_rcvd(const char *from_host, unsigned int uid,
-				  float distance, float angle, float *covariance)
+				  float distance, float bearing, float *covariance)
   {
-    cout << "Oppt[" << from_host << "]: (uid,d,a)=("
-	 << uid << "," << distance << "," << angle << ")" << endl;
+    cout << "Oppt[" << from_host << "]: (uid,d,b)=("
+	 << uid << "," << distance << "," << bearing << ")" << endl;
   }
 
 

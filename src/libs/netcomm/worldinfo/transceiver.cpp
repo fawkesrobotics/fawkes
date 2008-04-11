@@ -111,13 +111,13 @@ WorldInfoTransceiver::WorldInfoTransceiver(const char *addr, unsigned short port
   if (! in_buffer || ! out_buffer) {
     throw OutOfMemoryException();
   }
-  fatmsg_bufsize = sizeof(worldinfo_header_t) + sizeof(worldinfo_message_header_t)
-                                              + sizeof(worldinfo_fat_message_t);
-  fatmsg_buf = calloc(1, fatmsg_bufsize);
-  fatmsg_header = (worldinfo_header_t *)fatmsg_buf;
-  fatmsg_msgheader = (worldinfo_message_header_t *)((char *)fatmsg_buf + sizeof(worldinfo_header_t));
-  fatmsg = (worldinfo_fat_message_t *)((char *)fatmsg_buf + sizeof(worldinfo_header_t)
-				       + sizeof(worldinfo_message_header_t));
+
+  fatmsg_enabled = false;
+  fatmsg_bufsize = 0;
+  fatmsg_buf = NULL;
+  fatmsg_header = NULL;
+  fatmsg_msgheader = NULL;
+  fatmsg = NULL;
 
   __key = strdup(key);
   __iv  = strdup(iv);
@@ -155,6 +155,7 @@ WorldInfoTransceiver::WorldInfoTransceiver(const char *addr, unsigned short port
 /** Destructor. */
 WorldInfoTransceiver::~WorldInfoTransceiver()
 {
+  set_fatmsg_enabled(false);
   free(out_buffer);
   free(in_buffer);
   free(crypted_out_buffer);
@@ -180,6 +181,39 @@ WorldInfoTransceiver::set_loop(bool loop)
 {
   s->set_loop( loop );
 }
+
+
+/** Enable or disable sending of fat message.
+ * The fat message is considered to be legacy code and therefore disabled by default.
+ * If you happen to need the fat message you can enable it using this method and then
+ * it will be send for every call to send().
+ * @param fatmsg_enabled true to enable sending of fat message, false otherwise
+ */
+void
+WorldInfoTransceiver::set_fatmsg_enabled(bool fatmsg_enabled)
+{
+  if ( this->fatmsg_enabled && ! fatmsg_enabled ) {
+    // fatmsg turned off
+    free(fatmsg_buf);
+    fatmsg_buf = NULL;
+    fatmsg_msgheader = NULL;
+    fatmsg_header = NULL;
+    fatmsg = NULL;
+    fatmsg_bufsize = 0;
+  } else if (! this->fatmsg_enabled && fatmsg_enabled ) {
+    // fatmsg turned on
+    fatmsg_bufsize = sizeof(worldinfo_header_t) + sizeof(worldinfo_message_header_t)
+                                                + sizeof(worldinfo_fat_message_t);
+    fatmsg_buf = calloc(1, fatmsg_bufsize);
+    fatmsg_header = (worldinfo_header_t *)fatmsg_buf;
+    fatmsg_msgheader = (worldinfo_message_header_t *)((char *)fatmsg_buf + sizeof(worldinfo_header_t));
+    fatmsg = (worldinfo_fat_message_t *)((char *)fatmsg_buf + sizeof(worldinfo_header_t)
+					                    + sizeof(worldinfo_message_header_t));
+  } // else unchanged
+
+  this->fatmsg_enabled = fatmsg_enabled;
+}
+
 
 /** Add a handler for world information.
  * World information will be dispatched to all registered handlers as soon it
@@ -296,8 +330,8 @@ WorldInfoTransceiver::set_velocity(float vel_x, float vel_y, float vel_theta, fl
  * The confidence about the ball position is transmitted as a 3x3 covariance
  * matrix.
  * @param dist distance to ball in meters
- * @param pitch pitch angle to ball
- * @param yaw yaw angle to ball
+ * @param bearing bearing angle to ball
+ * @param slope slope angle to ball
  * @param covariance covariance matrix with 9 entries, ordered as three concatenated
  * rows (first row, three floats, second row, three floats, third row, three
  * floats). No length check or whatsoever is done. This will crash if c is not
@@ -305,11 +339,11 @@ WorldInfoTransceiver::set_velocity(float vel_x, float vel_y, float vel_theta, fl
  * send() is called!
  */
 void
-WorldInfoTransceiver::set_ball_pos(float dist, float pitch, float yaw, float *covariance)
+WorldInfoTransceiver::set_ball_pos(float dist, float bearing, float slope, float *covariance)
 {
   ball_dist       = dist;
-  ball_pitch      = pitch;
-  ball_yaw        = yaw;
+  ball_bearing    = bearing;
+  ball_slope      = slope;
   ball_covariance = covariance;
   ball_changed    = true;
 }
@@ -327,7 +361,8 @@ WorldInfoTransceiver::set_ball_pos(float dist, float pitch, float yaw, float *co
  * send() is called!
  */
 void
-WorldInfoTransceiver::set_ball_velocity(float vel_x, float vel_y, float vel_z, float *covariance)
+WorldInfoTransceiver::set_ball_velocity(float vel_x, float vel_y, float vel_z,
+					float *covariance)
 {
   ball_vel_x          = vel_x;
   ball_vel_y          = vel_y;
@@ -408,7 +443,7 @@ WorldInfoTransceiver::clear_opponents()
  * opponent if and only if the object is the same (for example an opponent that was
  * tracked)
  * @param distance to opponent
- * @param angle angle to opponent (angle is zero if opponent is in front of robot,
+ * @param bearing to opponent (angle is zero if opponent is in front of robot,
  * positive if right of robot, negative if left of robot).
  * @param covariance covariance matrix with 4 entries, ordered as two concatenated
  * rows (first row, two floats, second row, two floats. No length check or
@@ -418,9 +453,9 @@ WorldInfoTransceiver::clear_opponents()
  */
 void
 WorldInfoTransceiver::add_opponent(unsigned int uid,
-				   float distance, float angle, float *covariance)
+				   float distance, float bearing, float *covariance)
 {
-  opponent_t o = { uid, distance, angle, covariance };
+  opponent_t o = { uid, distance, bearing, covariance };
   opponents.push_back(o);
 }
 
@@ -467,11 +502,13 @@ WorldInfoTransceiver::reset_outbound()
   header->beef = htons(0xBEEF);
   header->version  = WORLDINFO_VERSION;
 
-  memset(fatmsg_buf, 0, fatmsg_bufsize);
-  fatmsg_header->beef = htons(0xBEEF);
-  fatmsg_header->version  = WORLDINFO_VERSION;
-  fatmsg_msgheader->type  = htons(WORLDINFO_MSGTYPE_FAT_WORLDINFO);
-  fatmsg_msgheader->size  = htons(sizeof(worldinfo_fat_message_t));
+  if ( fatmsg_enabled ) {
+    memset(fatmsg_buf, 0, fatmsg_bufsize);
+    fatmsg_header->beef = htons(0xBEEF);
+    fatmsg_header->version  = WORLDINFO_VERSION;
+    fatmsg_msgheader->type  = htons(WORLDINFO_MSGTYPE_FAT_WORLDINFO);
+    fatmsg_msgheader->size  = htons(sizeof(worldinfo_fat_message_t));
+  }
 
   outbound_buffer   = (unsigned char *)out_buffer + sizeof(worldinfo_header_t);
   outbound_bytes    = sizeof(worldinfo_header_t);
@@ -500,11 +537,15 @@ WorldInfoTransceiver::send()
 
     append_outbound(WORLDINFO_MSGTYPE_POSE, &pm, sizeof(pm));
 
-    // fill fat msg
-    memcpy(&(fatmsg->pose), &pm, sizeof(pm));
-    fatmsg->valid_pose = 1;
+    if ( fatmsg_enabled ) {
+      // fill fat msg
+      memcpy(&(fatmsg->pose), &pm, sizeof(pm));
+      fatmsg->valid_pose = 1;
+    }
   } else {
-    fatmsg->valid_pose = 0;
+    if ( fatmsg_enabled ) {
+      fatmsg->valid_pose = 0;
+    }
   }
 
   if ( vel_changed ) {
@@ -517,28 +558,36 @@ WorldInfoTransceiver::send()
 
     append_outbound(WORLDINFO_MSGTYPE_VELO, &vm, sizeof(vm));
 
-    // fill fat msg
-    memcpy(&(fatmsg->velo), &vm, sizeof(vm));
-    fatmsg->valid_velo = 1;
+    if ( fatmsg_enabled ) {
+      // fill fat msg
+      memcpy(&(fatmsg->velo), &vm, sizeof(vm));
+      fatmsg->valid_velo = 1;
+    }
   } else {
-    fatmsg->valid_velo = 0;
+    if ( fatmsg_enabled ) {
+      fatmsg->valid_velo = 0;
+    }
   }
 
   if ( ball_changed ) {
     worldinfo_relballpos_message_t bm;
-    bm.dist  = ball_dist;
-    bm.pitch = ball_pitch;
-    bm.yaw   = ball_yaw;
+    bm.dist    = ball_dist;
+    bm.bearing = ball_bearing;
+    bm.slope   = ball_slope;
     memcpy(&(bm.covariance), ball_covariance, sizeof(bm.covariance));
     ball_changed = false;
 
     append_outbound(WORLDINFO_MSGTYPE_RELBALL, &bm, sizeof(bm));
 
-    // fill fat msg
-    memcpy(&(fatmsg->relball_pos), &bm, sizeof(bm));
-    fatmsg->valid_relball_pos = 1;
+    if ( fatmsg_enabled ) {
+      // fill fat msg
+      memcpy(&(fatmsg->relball_pos), &bm, sizeof(bm));
+      fatmsg->valid_relball_pos = 1;
+    }
   } else {
-    fatmsg->valid_relball_pos = 0;
+    if ( fatmsg_enabled ) {
+      fatmsg->valid_relball_pos = 0;
+    }
   }
 
   if ( gamestate_changed ) {
@@ -557,31 +606,37 @@ WorldInfoTransceiver::send()
 
     append_outbound(WORLDINFO_MSGTYPE_RELBALLVELO, &rbvm, sizeof(rbvm));
 
-    // fill fat msg
-    memcpy(&(fatmsg->relball_velo), &rbvm, sizeof(rbvm));
-    fatmsg->valid_relball_velo = 1;
+    if ( fatmsg_enabled ) {
+      // fill fat msg
+      memcpy(&(fatmsg->relball_velo), &rbvm, sizeof(rbvm));
+      fatmsg->valid_relball_velo = 1;
+    }
   } else {
-    fatmsg->valid_relball_velo = 0;
+    if ( fatmsg_enabled ) {
+      fatmsg->valid_relball_velo = 0;
+    }
   }
 
   // Append opponents
   unsigned int num_opponents = 0;
   for ( oppit = opponents.begin(); oppit != opponents.end(); ++oppit) {
     worldinfo_opppose_message_t opm;
-    opm.uid   = (*oppit).uid;
-    opm.dist  = (*oppit).distance;
-    opm.angle = (*oppit).angle;
+    opm.uid     = (*oppit).uid;
+    opm.dist    = (*oppit).distance;
+    opm.bearing = (*oppit).bearing;
     memcpy(&(opm.covariance), (*oppit).covariance, sizeof(opm.covariance));
 
     append_outbound(WORLDINFO_MSGTYPE_OPP_POSE, &opm, sizeof(opm));
 
-    if ( num_opponents < WORLDINFO_FATMSG_NUMOPPS ) {
-      // fill fat msg
-      memcpy(&(fatmsg->opponents[num_opponents]), &opm, sizeof(opm));
-      ++num_opponents;
+    if ( fatmsg_enabled ) {
+      if ( num_opponents < WORLDINFO_FATMSG_NUMOPPS ) {
+	// fill fat msg
+	memcpy(&(fatmsg->opponents[num_opponents]), &opm, sizeof(opm));
+	++num_opponents;
+	fatmsg->num_opponents = num_opponents;
+      }
     }
   }
-  fatmsg->num_opponents = num_opponents;
   opponents.clear();
 
   if ( outbound_num_msgs > 0 ) {
@@ -593,13 +648,15 @@ WorldInfoTransceiver::send()
 
     s->send(crypted_out_buffer, crypted_out_bytes);
 
-    // send fat msg
-    fatmsg_header->seq = htonl(out_seq++);
+    if ( fatmsg_enabled ) {
+      // send fat msg
+      fatmsg_header->seq = htonl(out_seq++);
 
-    encryptor->set_plain_buffer(fatmsg_buf, fatmsg_bufsize);
-    crypted_out_bytes = encryptor->encrypt();
+      encryptor->set_plain_buffer(fatmsg_buf, fatmsg_bufsize);
+      crypted_out_bytes = encryptor->encrypt();
 
-    s->send(crypted_out_buffer, crypted_out_bytes);
+      s->send(crypted_out_buffer, crypted_out_bytes);
+    }
   }
 
 }
@@ -753,7 +810,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  worldinfo_relballpos_message_t *ball_msg = (worldinfo_relballpos_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
 	    (*hit)->ball_pos_rcvd(hostname,
-				  ball_msg->dist, ball_msg->pitch, ball_msg->yaw,
+				  ball_msg->dist, ball_msg->bearing, ball_msg->slope,
 				  ball_msg->covariance);
 	  }
 	} else {
@@ -783,7 +840,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  worldinfo_opppose_message_t *oppp_msg = (worldinfo_opppose_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
 	    (*hit)->opponent_pose_rcvd(hostname,
-				       oppp_msg->uid, oppp_msg->dist, oppp_msg->angle,
+				       oppp_msg->uid, oppp_msg->dist, oppp_msg->bearing,
 				       oppp_msg->covariance);
 	  }
 	} else {
@@ -829,8 +886,8 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	    }
 	    if ( fat_msg->valid_relball_pos ) {
 	      (*hit)->ball_pos_rcvd(hostname,
-				    fat_msg->relball_pos.dist, fat_msg->relball_pos.pitch,
-				    fat_msg->relball_pos.yaw, fat_msg->relball_pos.covariance);
+				    fat_msg->relball_pos.dist, fat_msg->relball_pos.bearing,
+				    fat_msg->relball_pos.slope, fat_msg->relball_pos.covariance);
 	    }
 	    if ( fat_msg->valid_relball_velo ) {
 	      (*hit)->ball_velocity_rcvd(hostname,
@@ -850,7 +907,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 		(*hit)->opponent_pose_rcvd(hostname,
 					   fat_msg->opponents[i].uid,
 					   fat_msg->opponents[i].dist,
-					   fat_msg->opponents[i].angle,
+					   fat_msg->opponents[i].bearing,
 					   fat_msg->opponents[i].covariance);
 	      }
 	    }

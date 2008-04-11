@@ -1,20 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
-<interface name="ObjectPositionInterface" author="Tim Niemueller" year="2007">
+<interface name="ObjectPositionInterface" author="Tim Niemueller" year="2007-2008">
   <constants>
-    <!-- Note that the type constants are saved in a 16 bit wide unsigned int and thus have
-         to be in the range [0..65535] -->
-    <constant type="unsigned int" value="0" name="OTHER">
+    <!-- The range [0..1024] is reserved for standard types.
+	 The range [65535..16777216] can be used for application specific custom values. -->
+    <constant type="unsigned int" value="0" name="TYPE_OTHER">
       This constant denotes an object that cannot be denoted by any other constant.
     </constant>
-    <constant type="unsigned int" value="1" name="BALL">
+    <constant type="unsigned int" value="1" name="TYPE_BALL">
       This constant denotes a ball object.
     </constant>
-    <constant type="unsigned int" value="2" name="OPPONENT">
+    <constant type="unsigned int" value="2" name="TYPE_OPPONENT">
       This constant denotes an opponent robot.
     </constant>
-    <constant type="unsigned int" value="3" name="TEAMMEMBER">
+    <constant type="unsigned int" value="3" name="TYPE_TEAMMEMBER">
       This constant denotes a robot of the same team.
+    </constant>
+    <constant type="unsigned int" value="3" name="TYPE_LINE">
+      The represented object is a line. The starting point is given in world_x/y/z
+      and the end point is pointed to by a vector stored in extent_x/y/z.
+    </constant>
+
+    <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
+	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
+    <constant type="unsigned int" value="0" name="FLAG_NONE">
+      No flags set.
+    </constant>
+    <constant type="unsigned int" value="1" name="FLAG_HAS_WORLD">
+      This interface has world_* fields set to valid values.
+    </constant>
+    <constant type="unsigned int" value="2" name="FLAG_HAS_RELATIVE_CARTESIAN">
+      This interface has relative_* fields set to valid values.
+    </constant>
+    <constant type="unsigned int" value="4" name="FLAG_HAS_RELATIVE_POLAR">
+      This interface provides valid values for bearing, slope and distance.
+    </constant>
+    <constant type="unsigned int" value="8" name="FLAG_HAS_EULER_ANGLES">
+      The roll/pitch/yaw values are set with Euler angles in the relative coordinate system.
+    </constant>
+    <constant type="unsigned int" value="16" name="FLAG_HAS_EXTENT">
+      The extent_* fields are set with proper extent values.
+    </constant>
+    <constant type="unsigned int" value="32" name="FLAG_HAS_VOLUME_EXTENT">
+      The extent_* fields are set with proper extent values for the volume of an
+      object (opposed to the vector from the starting point in case of a line).
+      This value shall only be valid if FLAG_HAS_EXTENT is set as well.
+    </constant>
+    <constant type="unsigned int" value="64" name="FLAG_HAS_CIRCULAR_EXTENT">
+      Of the extent values only extent_x is set with the diameter of the object.
+    </constant>
+    <constant type="unsigned int" value="128" name="FLAG_HAS_COVARIANCES">
+      The model provides valid covariances for the values that are provided (check
+      other flags for which values are provided).
+    </constant>
+    <constant type="unsigned int" value="256" name="FLAG_HAS_WORLD_VELOCITY">
+      Proper velocities in the cartesian world coordinate system are provided along
+      the axes (world_*_velocity fields).
+    </constant>
+    <constant type="unsigned int" value="512" name="FLAG_HAS_POLAR_VELOCITY">
+      Proper velocities in the polar relative coordinate system are provided along
+      the axes ((bearing|slope|distnace)_velocity fields).
     </constant>
   </constants>
   <data>
@@ -28,26 +73,28 @@
     <field type="unsigned int" name="object_type">
       Object type, use constants to define
     </field>
-    <field type="char" name="supports_relative">
-      1 if the current interface in general has support for relative position data.
-    </field>
-    <field type="char" name="supports_global">
-      1 if the current interface in general has support for global (world) position data.
-    </field>
-    <field type="char" name="has_relative">
-      1 if the current interface at the moment has valid relative position data.
-    </field>
-    <field type="char" name="has_global">
-      1 if the current interface at the moment has valid global (world) position data.
+    <field type="unsigned int" name="flags">
+      Bit-wise concatenated fields of FLAG_* constants. Denotes features that the
+      writer of this interfaces provides. Use a bit-wise OR to concatenate multiple
+      flags, use a bit-wise AND to check if a flag has been set.
     </field>
     <field type="bool" name="visible">
       True, if object is visible.
     </field>
+    <field type="float" name="roll">
+      Roll value for the orientation of the object in space.
+    </field>
+    <field type="float" name="pitch">
+      Pitch value for the orientation of the object in space.
+    </field>
     <field type="float" name="yaw">
+      Yaw value for the orientation of the object in space.
+    </field>
+    <field type="float" name="bearing">
       Angle between the robot's forward direction and the object on the ground plane.
       This angle is in a local 3D coordinate system to the robot and given in radians.
     </field>
-    <field type="float" name="pitch">
+    <field type="float" name="slope">
       Angle between the robot's center position on the ground plane and the middle point
       of the object (e.g. this denotes the height of the object combined with the distance.
       The angle is given in radians.
@@ -91,23 +138,29 @@
       last row from left to right each.
     </field>
 
-    <field type="float" name="extent">
-      Extent of the seen object.
+    <field type="float" name="extent_x">
+      Extent of the seen object given in the relative x cartesian coordinate in m.
+    </field>
+    <field type="float" name="extent_y">
+      Extent of the seen object given in the relative y cartesian coordinate in m.
+    </field>
+    <field type="float" name="extent_z">
+      Extent of the seen object given in the relative z cartesian coordinate in m.
     </field>
 
-    <field type="float" name="yaw_velocity">
-      Gives the velocity of the object for yaw in radians per second.
+    <field type="float" name="bearing_velocity">
+      Gives the velocity of the object for bearing in radians per second.
     </field>
-    <field type="float" name="pitch_velocity">
-      Gives the velocity of the object for pitch in radians per second.
+    <field type="float" name="slope_velocity">
+      Gives the velocity of the object for slope in radians per second.
     </field>
     <field type="float" name="distance_velocity">
       Gives the velocity of the object distance meter per second.
     </field>
-    <field type="float" name="dyp_velocity_covariance" length="9">
-      Covariance of Distance/Yaw/Pitch velocityvalues. This is a 3x3 matrix ordered line by
-      line, first three values represent row, next tree values second row and last three
-      values last row from left to right each.
+    <field type="float" name="dbs_velocity_covariance" length="9">
+      Covariance of Distance/Bearing/Slope velocity values. This is a 3x3 matrix ordered
+      line by line, first three values represent row, next tree values second row and
+      last three values last row from left to right each.
     </field>
 
     <field type="float" name="world_x_velocity">

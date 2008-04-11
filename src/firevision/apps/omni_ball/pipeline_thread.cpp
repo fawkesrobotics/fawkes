@@ -139,8 +139,11 @@ FvOmniBallPipelineThread::init()
   try
     {
       ball_interface = blackboard->open_for_writing<ObjectPositionInterface>("OmniBall");
-      ball_interface->set_object_type( ObjectPositionInterface::BALL );
+      ball_interface->set_object_type( ObjectPositionInterface::TYPE_BALL );
       ball_interface->set_visible(false);
+      ball_interface->set_flags(ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN |
+				ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR);
+
       ball_interface->write();
     }
   catch (Exception &e)
@@ -323,7 +326,7 @@ FvOmniBallPipelineThread::loop()
       ball_interface->set_relative_x( rel_pos->get_x() );
       ball_interface->set_relative_y( rel_pos->get_y() );
       ball_interface->set_distance( rel_pos->get_distance() );
-      ball_interface->set_yaw( rel_pos->get_bearing() );
+      ball_interface->set_bearing( rel_pos->get_bearing() );
     }
   else { ball_interface->set_visible(false); }
 

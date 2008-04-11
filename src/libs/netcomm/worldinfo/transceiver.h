@@ -57,13 +57,15 @@ class WorldInfoTransceiver
 		       NetworkNameResolver *resolver = NULL);
   ~WorldInfoTransceiver();
 
+  void set_fatmsg_enabled(bool fatmsg_enabled);
+
   void add_handler(WorldInfoHandler *h);
   void rem_handler(WorldInfoHandler *h);
 
   void set_pose(float x, float y, float theta, float *covariance);
   void set_velocity(float vel_x, float vel_y, float vel_theta, float *covariance);
 
-  void set_ball_pos(float dist, float pitch, float yaw, float *covariance);
+  void set_ball_pos(float dist, float bearing, float slope, float *covariance);
   void set_ball_velocity(float vel_x, float vel_y, float vel_z, float *covariance);
 
   void set_gamestate(worldinfo_gamestate_t gamestate, worldinfo_gamestate_team_t state_team);
@@ -73,7 +75,7 @@ class WorldInfoTransceiver
   void set_half(worldinfo_gamestate_half_t half);
 
   void clear_opponents();
-  void add_opponent(unsigned int uid, float distance, float angle, float *covariance);
+  void add_opponent(unsigned int uid, float distance, float bearing, float *covariance);
 
   void send();
   void recv(bool block = false, unsigned int max_num_msgs = 0);
@@ -110,6 +112,7 @@ class WorldInfoTransceiver
   char * __key;
   char * __iv;
 
+  bool   fatmsg_enabled;
   void  *fatmsg_buf;
   size_t fatmsg_bufsize;
   worldinfo_header_t *fatmsg_header;
@@ -140,8 +143,8 @@ class WorldInfoTransceiver
 
   bool   ball_changed;
   float  ball_dist;
-  float  ball_pitch;
-  float  ball_yaw;
+  float  ball_bearing;
+  float  ball_slope;
   float *ball_covariance;
 
   bool   ball_vel_changed;
@@ -156,7 +159,7 @@ class WorldInfoTransceiver
   typedef struct {
     uint32_t uid;
     float  distance;
-    float  angle;
+    float  bearing;
     float *covariance;
   } opponent_t;
   std::list<opponent_t> opponents;

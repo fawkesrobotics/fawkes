@@ -231,7 +231,7 @@ NavigatorThread::loop()
       
       if ( object_interface->is_visible() )
         {
-          if(object_interface->object_type() == ObjectPositionInterface::BALL)
+          if(object_interface->object_type() == ObjectPositionInterface::TYPE_BALL)
             {
               double direction = atan2(object_interface->relative_y(), object_interface->relative_x());
               double before_ball_x = object_interface->relative_x() + 0.1 * cos(direction + M_PI);
@@ -244,12 +244,12 @@ NavigatorThread::loop()
               ball_position_y = object_interface->relative_y();
               ball_mutex->unlock();
             }
-          else if(object_interface->object_type() == ObjectPositionInterface::OTHER)
+          else if(object_interface->object_type() == ObjectPositionInterface::TYPE_OTHER)
             {
               logger->log_info("NavigatorThread", "Object received at  %f, %f (interface %s)",
                                object_interface->relative_x(), object_interface->relative_y(),
                                object_interface->id());
-              Obstacle o(object_interface->extent(), object_interface->relative_x(), object_interface->relative_y(), 0.);
+              Obstacle o(object_interface->extent_x(), object_interface->relative_x(), object_interface->relative_y(), 0.);
               add_obstacle(o);
             }
         }

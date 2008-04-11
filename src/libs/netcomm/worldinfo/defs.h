@@ -28,7 +28,7 @@
 
 #define WORLDINFO_MTU                 1400
 #define WORLDINFO_MAX_MSGS             255
-#define WORLDINFO_VERSION                1
+#define WORLDINFO_VERSION                2
 #define WORLDINFO_COVARIANCE_SIZE_3X3    9
 #define WORLDINFO_COVARIANCE_SIZE_2X2    4
 #define WORLDINFO_FATMSG_NUMOPPS        10

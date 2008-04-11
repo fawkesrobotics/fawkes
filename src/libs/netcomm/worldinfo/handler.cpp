@@ -54,12 +54,12 @@
  * floats).
  * @see WorldInfoTransceiver::set_velocity()
  *
- * @fn void WorldInfoHandler::ball_pos_rcvd(const char *from_host, float dist, float pitch, float yaw, float *covariance)
+ * @fn void WorldInfoHandler::ball_pos_rcvd(const char *from_host, float dist, float bearing, float slope, float *covariance)
  * Ball position information received.
  * @param from_host transmitting host of this information, if available symbolic name
  * @param dist distance to ball in meters
- * @param pitch pitch angle to ball
- * @param yaw yaw angle to ball
+ * @param bearing bearing angle to ball
+ * @param slope slope angle to ball
  * @param covariance covariance matrix with 9 entries, ordered as three concatenated
  * rows (first row, three floats, second row, three floats, third row, three
  * floats).
@@ -76,12 +76,12 @@
  * floats).
  * @see WorldInfoTransceiver::set_ball_velocity()
  *
- * @fn void WorldInfoHandler::opponent_pose_rcvd(const char *from_host, unsigned int uid, float distance, float angle, , float *covariance)
+ * @fn void WorldInfoHandler::opponent_pose_rcvd(const char *from_host, unsigned int uid, float distance, float bearing, , float *covariance)
  * Opponent information received.
  * @param from_host transmitting host of this information, if available symbolic name
  * @param uid unique ID of the opponent
  * @param distance to opponent
- * @param angle angle to opponent (angle is zero if opponent is in front of robot,
+ * @param bearing bearing to opponent (angle is zero if opponent is in front of robot,
  * positive if right of robot, negative if left of robot).
  * @param covariance covariance matrix with 4 entries, ordered as two concatenated
  * rows (first row, two floats, second row, two floats)

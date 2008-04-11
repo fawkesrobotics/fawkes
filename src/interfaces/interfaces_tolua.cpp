@@ -9258,38 +9258,146 @@ static int tolua_interfaces_NavigatorInterface_maxlenof_final00(lua_State* tolua
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* get function: OTHER of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_OTHER
-static int tolua_get_ObjectPositionInterface_unsigned_OTHER(lua_State* tolua_S)
+/* get function: TYPE_OTHER of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_TYPE_OTHER
+static int tolua_get_ObjectPositionInterface_unsigned_TYPE_OTHER(lua_State* tolua_S)
 {
-  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::OTHER);
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::TYPE_OTHER);
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* get function: BALL of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_BALL
-static int tolua_get_ObjectPositionInterface_unsigned_BALL(lua_State* tolua_S)
+/* get function: TYPE_BALL of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_TYPE_BALL
+static int tolua_get_ObjectPositionInterface_unsigned_TYPE_BALL(lua_State* tolua_S)
 {
-  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::BALL);
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::TYPE_BALL);
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* get function: OPPONENT of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_OPPONENT
-static int tolua_get_ObjectPositionInterface_unsigned_OPPONENT(lua_State* tolua_S)
+/* get function: TYPE_OPPONENT of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_TYPE_OPPONENT
+static int tolua_get_ObjectPositionInterface_unsigned_TYPE_OPPONENT(lua_State* tolua_S)
 {
-  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::OPPONENT);
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::TYPE_OPPONENT);
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* get function: TEAMMEMBER of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_TEAMMEMBER
-static int tolua_get_ObjectPositionInterface_unsigned_TEAMMEMBER(lua_State* tolua_S)
+/* get function: TYPE_TEAMMEMBER of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_TYPE_TEAMMEMBER
+static int tolua_get_ObjectPositionInterface_unsigned_TYPE_TEAMMEMBER(lua_State* tolua_S)
 {
-  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::TEAMMEMBER);
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::TYPE_TEAMMEMBER);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: TYPE_LINE of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_TYPE_LINE
+static int tolua_get_ObjectPositionInterface_unsigned_TYPE_LINE(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::TYPE_LINE);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FLAG_NONE of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_FLAG_NONE
+static int tolua_get_ObjectPositionInterface_unsigned_FLAG_NONE(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::FLAG_NONE);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FLAG_HAS_WORLD of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_WORLD
+static int tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_WORLD(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::FLAG_HAS_WORLD);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FLAG_HAS_RELATIVE_CARTESIAN of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_RELATIVE_CARTESIAN
+static int tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_RELATIVE_CARTESIAN(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FLAG_HAS_RELATIVE_POLAR of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_RELATIVE_POLAR
+static int tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_RELATIVE_POLAR(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FLAG_HAS_EULER_ANGLES of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_EULER_ANGLES
+static int tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_EULER_ANGLES(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::FLAG_HAS_EULER_ANGLES);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FLAG_HAS_EXTENT of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_EXTENT
+static int tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_EXTENT(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::FLAG_HAS_EXTENT);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FLAG_HAS_VOLUME_EXTENT of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_VOLUME_EXTENT
+static int tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_VOLUME_EXTENT(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::FLAG_HAS_VOLUME_EXTENT);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FLAG_HAS_CIRCULAR_EXTENT of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_CIRCULAR_EXTENT
+static int tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_CIRCULAR_EXTENT(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::FLAG_HAS_CIRCULAR_EXTENT);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FLAG_HAS_COVARIANCES of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_COVARIANCES
+static int tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_COVARIANCES(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::FLAG_HAS_COVARIANCES);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FLAG_HAS_WORLD_VELOCITY of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_WORLD_VELOCITY
+static int tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_WORLD_VELOCITY(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::FLAG_HAS_WORLD_VELOCITY);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FLAG_HAS_POLAR_VELOCITY of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_POLAR_VELOCITY
+static int tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_POLAR_VELOCITY(lua_State* tolua_S)
+{
+  tolua_pushnumber(tolua_S,(lua_Number)ObjectPositionInterface::FLAG_HAS_POLAR_VELOCITY);
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -9399,9 +9507,9 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_object_type00(lua_S
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: supports_relative of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_supports_relative00
-static int tolua_interfaces_ObjectPositionInterface_supports_relative00(lua_State* tolua_S)
+/* method: flags of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_flags00
+static int tolua_interfaces_ObjectPositionInterface_flags00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -9415,25 +9523,25 @@ static int tolua_interfaces_ObjectPositionInterface_supports_relative00(lua_Stat
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'supports_relative'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'flags'",NULL);
 #endif
   {
-   char tolua_ret = (char)  self->supports_relative();
+   unsigned int tolua_ret = (unsigned int)  self->flags();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'supports_relative'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'flags'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_supports_relative of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_supports_relative00
-static int tolua_interfaces_ObjectPositionInterface_set_supports_relative00(lua_State* tolua_S)
+/* method: set_flags of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_flags00
+static int tolua_interfaces_ObjectPositionInterface_set_flags00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -9447,26 +9555,26 @@ static int tolua_interfaces_ObjectPositionInterface_set_supports_relative00(lua_
 #endif
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-  const char new_supports_relative = ((const char)  tolua_tonumber(tolua_S,2,0));
+  unsigned const int new_flags = ((unsigned const int)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_supports_relative'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_flags'",NULL);
 #endif
   {
-   self->set_supports_relative(new_supports_relative);
+   self->set_flags(new_flags);
   }
  }
  return 0;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_supports_relative'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'set_flags'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: maxlenof_supports_relative of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_supports_relative00
-static int tolua_interfaces_ObjectPositionInterface_maxlenof_supports_relative00(lua_State* tolua_S)
+/* method: maxlenof_flags of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_flags00
+static int tolua_interfaces_ObjectPositionInterface_maxlenof_flags00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -9480,10 +9588,10 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_supports_relative00
  {
   const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_supports_relative'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_flags'",NULL);
 #endif
   {
-   size_t tolua_ret = (size_t)  self->maxlenof_supports_relative();
+   size_t tolua_ret = (size_t)  self->maxlenof_flags();
    {
 #ifdef __cplusplus
     void* tolua_obj = new size_t(tolua_ret);
@@ -9498,322 +9606,7 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_supports_relative00
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'maxlenof_supports_relative'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: supports_global of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_supports_global00
-static int tolua_interfaces_ObjectPositionInterface_supports_global00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'supports_global'",NULL);
-#endif
-  {
-   char tolua_ret = (char)  self->supports_global();
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'supports_global'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: set_supports_global of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_supports_global00
-static int tolua_interfaces_ObjectPositionInterface_set_supports_global00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-  const char new_supports_global = ((const char)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_supports_global'",NULL);
-#endif
-  {
-   self->set_supports_global(new_supports_global);
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_supports_global'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: maxlenof_supports_global of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_supports_global00
-static int tolua_interfaces_ObjectPositionInterface_maxlenof_supports_global00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"const ObjectPositionInterface",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_supports_global'",NULL);
-#endif
-  {
-   size_t tolua_ret = (size_t)  self->maxlenof_supports_global();
-   {
-#ifdef __cplusplus
-    void* tolua_obj = new size_t(tolua_ret);
-    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
-#else
-    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
-    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
-#endif
-   }
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'maxlenof_supports_global'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: has_relative of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_has_relative00
-static int tolua_interfaces_ObjectPositionInterface_has_relative00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'has_relative'",NULL);
-#endif
-  {
-   char tolua_ret = (char)  self->has_relative();
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'has_relative'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: set_has_relative of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_has_relative00
-static int tolua_interfaces_ObjectPositionInterface_set_has_relative00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-  const char new_has_relative = ((const char)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_has_relative'",NULL);
-#endif
-  {
-   self->set_has_relative(new_has_relative);
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_has_relative'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: maxlenof_has_relative of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_has_relative00
-static int tolua_interfaces_ObjectPositionInterface_maxlenof_has_relative00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"const ObjectPositionInterface",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_has_relative'",NULL);
-#endif
-  {
-   size_t tolua_ret = (size_t)  self->maxlenof_has_relative();
-   {
-#ifdef __cplusplus
-    void* tolua_obj = new size_t(tolua_ret);
-    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
-#else
-    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
-    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
-#endif
-   }
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'maxlenof_has_relative'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: has_global of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_has_global00
-static int tolua_interfaces_ObjectPositionInterface_has_global00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'has_global'",NULL);
-#endif
-  {
-   char tolua_ret = (char)  self->has_global();
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'has_global'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: set_has_global of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_has_global00
-static int tolua_interfaces_ObjectPositionInterface_set_has_global00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-  const char new_has_global = ((const char)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_has_global'",NULL);
-#endif
-  {
-   self->set_has_global(new_has_global);
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_has_global'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: maxlenof_has_global of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_has_global00
-static int tolua_interfaces_ObjectPositionInterface_maxlenof_has_global00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"const ObjectPositionInterface",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_has_global'",NULL);
-#endif
-  {
-   size_t tolua_ret = (size_t)  self->maxlenof_has_global();
-   {
-#ifdef __cplusplus
-    void* tolua_obj = new size_t(tolua_ret);
-    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
-#else
-    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
-    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
-#endif
-   }
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'maxlenof_has_global'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_flags'.",&tolua_err);
  return 0;
 #endif
 }
@@ -9924,9 +9717,9 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_visible00(lua_State
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: yaw of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_yaw00
-static int tolua_interfaces_ObjectPositionInterface_yaw00(lua_State* tolua_S)
+/* method: roll of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_roll00
+static int tolua_interfaces_ObjectPositionInterface_roll00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -9940,25 +9733,25 @@ static int tolua_interfaces_ObjectPositionInterface_yaw00(lua_State* tolua_S)
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'yaw'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'roll'",NULL);
 #endif
   {
-   float tolua_ret = (float)  self->yaw();
+   float tolua_ret = (float)  self->roll();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'yaw'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'roll'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_yaw of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_yaw00
-static int tolua_interfaces_ObjectPositionInterface_set_yaw00(lua_State* tolua_S)
+/* method: set_roll of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_roll00
+static int tolua_interfaces_ObjectPositionInterface_set_roll00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -9972,26 +9765,26 @@ static int tolua_interfaces_ObjectPositionInterface_set_yaw00(lua_State* tolua_S
 #endif
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-  const float new_yaw = ((const float)  tolua_tonumber(tolua_S,2,0));
+  const float new_roll = ((const float)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_yaw'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_roll'",NULL);
 #endif
   {
-   self->set_yaw(new_yaw);
+   self->set_roll(new_roll);
   }
  }
  return 0;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_yaw'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'set_roll'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: maxlenof_yaw of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_yaw00
-static int tolua_interfaces_ObjectPositionInterface_maxlenof_yaw00(lua_State* tolua_S)
+/* method: maxlenof_roll of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_roll00
+static int tolua_interfaces_ObjectPositionInterface_maxlenof_roll00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -10005,10 +9798,10 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_yaw00(lua_State* to
  {
   const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_yaw'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_roll'",NULL);
 #endif
   {
-   size_t tolua_ret = (size_t)  self->maxlenof_yaw();
+   size_t tolua_ret = (size_t)  self->maxlenof_roll();
    {
 #ifdef __cplusplus
     void* tolua_obj = new size_t(tolua_ret);
@@ -10023,7 +9816,7 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_yaw00(lua_State* to
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'maxlenof_yaw'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_roll'.",&tolua_err);
  return 0;
 #endif
 }
@@ -10129,6 +9922,321 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_pitch00(lua_State* 
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'maxlenof_pitch'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: yaw of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_yaw00
+static int tolua_interfaces_ObjectPositionInterface_yaw00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'yaw'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->yaw();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'yaw'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_yaw of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_yaw00
+static int tolua_interfaces_ObjectPositionInterface_set_yaw00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+  const float new_yaw = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_yaw'",NULL);
+#endif
+  {
+   self->set_yaw(new_yaw);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_yaw'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_yaw of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_yaw00
+static int tolua_interfaces_ObjectPositionInterface_maxlenof_yaw00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_yaw'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_yaw();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_yaw'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: bearing of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_bearing00
+static int tolua_interfaces_ObjectPositionInterface_bearing00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'bearing'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->bearing();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'bearing'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_bearing of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_bearing00
+static int tolua_interfaces_ObjectPositionInterface_set_bearing00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+  const float new_bearing = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_bearing'",NULL);
+#endif
+  {
+   self->set_bearing(new_bearing);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_bearing'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_bearing of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_bearing00
+static int tolua_interfaces_ObjectPositionInterface_maxlenof_bearing00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_bearing'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_bearing();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_bearing'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: slope of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_slope00
+static int tolua_interfaces_ObjectPositionInterface_slope00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'slope'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->slope();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'slope'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_slope of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_slope00
+static int tolua_interfaces_ObjectPositionInterface_set_slope00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+  const float new_slope = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_slope'",NULL);
+#endif
+  {
+   self->set_slope(new_slope);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_slope'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_slope of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_slope00
+static int tolua_interfaces_ObjectPositionInterface_maxlenof_slope00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_slope'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_slope();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_slope'.",&tolua_err);
  return 0;
 #endif
 }
@@ -11081,9 +11189,9 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_xyz_covariance00(lu
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: extent of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_extent00
-static int tolua_interfaces_ObjectPositionInterface_extent00(lua_State* tolua_S)
+/* method: extent_x of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_extent_x00
+static int tolua_interfaces_ObjectPositionInterface_extent_x00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11097,25 +11205,25 @@ static int tolua_interfaces_ObjectPositionInterface_extent00(lua_State* tolua_S)
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'extent'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'extent_x'",NULL);
 #endif
   {
-   float tolua_ret = (float)  self->extent();
+   float tolua_ret = (float)  self->extent_x();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'extent'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'extent_x'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_extent of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_extent00
-static int tolua_interfaces_ObjectPositionInterface_set_extent00(lua_State* tolua_S)
+/* method: set_extent_x of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_extent_x00
+static int tolua_interfaces_ObjectPositionInterface_set_extent_x00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11129,26 +11237,26 @@ static int tolua_interfaces_ObjectPositionInterface_set_extent00(lua_State* tolu
 #endif
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-  const float new_extent = ((const float)  tolua_tonumber(tolua_S,2,0));
+  const float new_extent_x = ((const float)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_extent'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_extent_x'",NULL);
 #endif
   {
-   self->set_extent(new_extent);
+   self->set_extent_x(new_extent_x);
   }
  }
  return 0;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_extent'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'set_extent_x'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: maxlenof_extent of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_extent00
-static int tolua_interfaces_ObjectPositionInterface_maxlenof_extent00(lua_State* tolua_S)
+/* method: maxlenof_extent_x of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_extent_x00
+static int tolua_interfaces_ObjectPositionInterface_maxlenof_extent_x00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11162,10 +11270,10 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_extent00(lua_State*
  {
   const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_extent'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_extent_x'",NULL);
 #endif
   {
-   size_t tolua_ret = (size_t)  self->maxlenof_extent();
+   size_t tolua_ret = (size_t)  self->maxlenof_extent_x();
    {
 #ifdef __cplusplus
     void* tolua_obj = new size_t(tolua_ret);
@@ -11180,15 +11288,15 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_extent00(lua_State*
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'maxlenof_extent'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_extent_x'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: yaw_velocity of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_yaw_velocity00
-static int tolua_interfaces_ObjectPositionInterface_yaw_velocity00(lua_State* tolua_S)
+/* method: extent_y of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_extent_y00
+static int tolua_interfaces_ObjectPositionInterface_extent_y00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11202,25 +11310,25 @@ static int tolua_interfaces_ObjectPositionInterface_yaw_velocity00(lua_State* to
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'yaw_velocity'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'extent_y'",NULL);
 #endif
   {
-   float tolua_ret = (float)  self->yaw_velocity();
+   float tolua_ret = (float)  self->extent_y();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'yaw_velocity'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'extent_y'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_yaw_velocity of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_yaw_velocity00
-static int tolua_interfaces_ObjectPositionInterface_set_yaw_velocity00(lua_State* tolua_S)
+/* method: set_extent_y of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_extent_y00
+static int tolua_interfaces_ObjectPositionInterface_set_extent_y00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11234,26 +11342,26 @@ static int tolua_interfaces_ObjectPositionInterface_set_yaw_velocity00(lua_State
 #endif
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-  const float new_yaw_velocity = ((const float)  tolua_tonumber(tolua_S,2,0));
+  const float new_extent_y = ((const float)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_yaw_velocity'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_extent_y'",NULL);
 #endif
   {
-   self->set_yaw_velocity(new_yaw_velocity);
+   self->set_extent_y(new_extent_y);
   }
  }
  return 0;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_yaw_velocity'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'set_extent_y'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: maxlenof_yaw_velocity of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_yaw_velocity00
-static int tolua_interfaces_ObjectPositionInterface_maxlenof_yaw_velocity00(lua_State* tolua_S)
+/* method: maxlenof_extent_y of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_extent_y00
+static int tolua_interfaces_ObjectPositionInterface_maxlenof_extent_y00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11267,10 +11375,10 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_yaw_velocity00(lua_
  {
   const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_yaw_velocity'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_extent_y'",NULL);
 #endif
   {
-   size_t tolua_ret = (size_t)  self->maxlenof_yaw_velocity();
+   size_t tolua_ret = (size_t)  self->maxlenof_extent_y();
    {
 #ifdef __cplusplus
     void* tolua_obj = new size_t(tolua_ret);
@@ -11285,15 +11393,15 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_yaw_velocity00(lua_
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'maxlenof_yaw_velocity'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_extent_y'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: pitch_velocity of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_pitch_velocity00
-static int tolua_interfaces_ObjectPositionInterface_pitch_velocity00(lua_State* tolua_S)
+/* method: extent_z of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_extent_z00
+static int tolua_interfaces_ObjectPositionInterface_extent_z00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11307,25 +11415,25 @@ static int tolua_interfaces_ObjectPositionInterface_pitch_velocity00(lua_State* 
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'pitch_velocity'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'extent_z'",NULL);
 #endif
   {
-   float tolua_ret = (float)  self->pitch_velocity();
+   float tolua_ret = (float)  self->extent_z();
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'pitch_velocity'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'extent_z'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_pitch_velocity of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_pitch_velocity00
-static int tolua_interfaces_ObjectPositionInterface_set_pitch_velocity00(lua_State* tolua_S)
+/* method: set_extent_z of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_extent_z00
+static int tolua_interfaces_ObjectPositionInterface_set_extent_z00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11339,26 +11447,26 @@ static int tolua_interfaces_ObjectPositionInterface_set_pitch_velocity00(lua_Sta
 #endif
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-  const float new_pitch_velocity = ((const float)  tolua_tonumber(tolua_S,2,0));
+  const float new_extent_z = ((const float)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_pitch_velocity'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_extent_z'",NULL);
 #endif
   {
-   self->set_pitch_velocity(new_pitch_velocity);
+   self->set_extent_z(new_extent_z);
   }
  }
  return 0;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_pitch_velocity'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'set_extent_z'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: maxlenof_pitch_velocity of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_pitch_velocity00
-static int tolua_interfaces_ObjectPositionInterface_maxlenof_pitch_velocity00(lua_State* tolua_S)
+/* method: maxlenof_extent_z of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_extent_z00
+static int tolua_interfaces_ObjectPositionInterface_maxlenof_extent_z00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11372,10 +11480,10 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_pitch_velocity00(lu
  {
   const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_pitch_velocity'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_extent_z'",NULL);
 #endif
   {
-   size_t tolua_ret = (size_t)  self->maxlenof_pitch_velocity();
+   size_t tolua_ret = (size_t)  self->maxlenof_extent_z();
    {
 #ifdef __cplusplus
     void* tolua_obj = new size_t(tolua_ret);
@@ -11390,7 +11498,217 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_pitch_velocity00(lu
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'maxlenof_pitch_velocity'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_extent_z'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: bearing_velocity of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_bearing_velocity00
+static int tolua_interfaces_ObjectPositionInterface_bearing_velocity00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'bearing_velocity'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->bearing_velocity();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'bearing_velocity'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_bearing_velocity of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_bearing_velocity00
+static int tolua_interfaces_ObjectPositionInterface_set_bearing_velocity00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+  const float new_bearing_velocity = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_bearing_velocity'",NULL);
+#endif
+  {
+   self->set_bearing_velocity(new_bearing_velocity);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_bearing_velocity'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_bearing_velocity of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_bearing_velocity00
+static int tolua_interfaces_ObjectPositionInterface_maxlenof_bearing_velocity00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_bearing_velocity'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_bearing_velocity();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_bearing_velocity'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: slope_velocity of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_slope_velocity00
+static int tolua_interfaces_ObjectPositionInterface_slope_velocity00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'slope_velocity'",NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->slope_velocity();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'slope_velocity'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_slope_velocity of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_slope_velocity00
+static int tolua_interfaces_ObjectPositionInterface_set_slope_velocity00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+  const float new_slope_velocity = ((const float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_slope_velocity'",NULL);
+#endif
+  {
+   self->set_slope_velocity(new_slope_velocity);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_slope_velocity'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: maxlenof_slope_velocity of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_slope_velocity00
+static int tolua_interfaces_ObjectPositionInterface_maxlenof_slope_velocity00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const ObjectPositionInterface",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_slope_velocity'",NULL);
+#endif
+  {
+   size_t tolua_ret = (size_t)  self->maxlenof_slope_velocity();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = new size_t(tolua_ret);
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(size_t));
+    tolua_pushusertype_and_takeownership(tolua_S,tolua_obj,"size_t");
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_slope_velocity'.",&tolua_err);
  return 0;
 #endif
 }
@@ -11501,9 +11819,9 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_distance_velocity00
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: dyp_velocity_covariance of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_dyp_velocity_covariance00
-static int tolua_interfaces_ObjectPositionInterface_dyp_velocity_covariance00(lua_State* tolua_S)
+/* method: dbs_velocity_covariance of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_dbs_velocity_covariance00
+static int tolua_interfaces_ObjectPositionInterface_dbs_velocity_covariance00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11517,25 +11835,25 @@ static int tolua_interfaces_ObjectPositionInterface_dyp_velocity_covariance00(lu
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'dyp_velocity_covariance'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'dbs_velocity_covariance'",NULL);
 #endif
   {
-   void* tolua_ret = (void*)  self->dyp_velocity_covariance();
+   void* tolua_ret = (void*)  self->dbs_velocity_covariance();
    tolua_pushuserdata(tolua_S,(void*)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'dyp_velocity_covariance'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'dbs_velocity_covariance'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_dyp_velocity_covariance of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_dyp_velocity_covariance00
-static int tolua_interfaces_ObjectPositionInterface_set_dyp_velocity_covariance00(lua_State* tolua_S)
+/* method: set_dbs_velocity_covariance of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_set_dbs_velocity_covariance00
+static int tolua_interfaces_ObjectPositionInterface_set_dbs_velocity_covariance00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11549,27 +11867,27 @@ static int tolua_interfaces_ObjectPositionInterface_set_dyp_velocity_covariance0
 #endif
  {
   ObjectPositionInterface* self = (ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
-  const float new_dyp_velocity_covariance = ((const float)  tolua_tonumber(tolua_S,2,0));
+  const float new_dbs_velocity_covariance = ((const float)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_dyp_velocity_covariance'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_dbs_velocity_covariance'",NULL);
 #endif
   {
-   self->set_dyp_velocity_covariance(&new_dyp_velocity_covariance);
-   tolua_pushnumber(tolua_S,(lua_Number)new_dyp_velocity_covariance);
+   self->set_dbs_velocity_covariance(&new_dbs_velocity_covariance);
+   tolua_pushnumber(tolua_S,(lua_Number)new_dbs_velocity_covariance);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_dyp_velocity_covariance'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'set_dbs_velocity_covariance'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: maxlenof_dyp_velocity_covariance of class  ObjectPositionInterface */
-#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_dyp_velocity_covariance00
-static int tolua_interfaces_ObjectPositionInterface_maxlenof_dyp_velocity_covariance00(lua_State* tolua_S)
+/* method: maxlenof_dbs_velocity_covariance of class  ObjectPositionInterface */
+#ifndef TOLUA_DISABLE_tolua_interfaces_ObjectPositionInterface_maxlenof_dbs_velocity_covariance00
+static int tolua_interfaces_ObjectPositionInterface_maxlenof_dbs_velocity_covariance00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -11583,10 +11901,10 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_dyp_velocity_covari
  {
   const ObjectPositionInterface* self = (const ObjectPositionInterface*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_dyp_velocity_covariance'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'maxlenof_dbs_velocity_covariance'",NULL);
 #endif
   {
-   size_t tolua_ret = (size_t)  self->maxlenof_dyp_velocity_covariance();
+   size_t tolua_ret = (size_t)  self->maxlenof_dbs_velocity_covariance();
    {
 #ifdef __cplusplus
     void* tolua_obj = new size_t(tolua_ret);
@@ -11601,7 +11919,7 @@ static int tolua_interfaces_ObjectPositionInterface_maxlenof_dyp_velocity_covari
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'maxlenof_dyp_velocity_covariance'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'maxlenof_dbs_velocity_covariance'.",&tolua_err);
  return 0;
 #endif
 }
@@ -15423,34 +15741,46 @@ TOLUA_API int tolua_interfaces_open (lua_State* tolua_S)
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"ObjectPositionInterface","ObjectPositionInterface","Interface",NULL);
   tolua_beginmodule(tolua_S,"ObjectPositionInterface");
-   tolua_variable(tolua_S,"OTHER",tolua_get_ObjectPositionInterface_unsigned_OTHER,NULL);
-   tolua_variable(tolua_S,"BALL",tolua_get_ObjectPositionInterface_unsigned_BALL,NULL);
-   tolua_variable(tolua_S,"OPPONENT",tolua_get_ObjectPositionInterface_unsigned_OPPONENT,NULL);
-   tolua_variable(tolua_S,"TEAMMEMBER",tolua_get_ObjectPositionInterface_unsigned_TEAMMEMBER,NULL);
+   tolua_variable(tolua_S,"TYPE_OTHER",tolua_get_ObjectPositionInterface_unsigned_TYPE_OTHER,NULL);
+   tolua_variable(tolua_S,"TYPE_BALL",tolua_get_ObjectPositionInterface_unsigned_TYPE_BALL,NULL);
+   tolua_variable(tolua_S,"TYPE_OPPONENT",tolua_get_ObjectPositionInterface_unsigned_TYPE_OPPONENT,NULL);
+   tolua_variable(tolua_S,"TYPE_TEAMMEMBER",tolua_get_ObjectPositionInterface_unsigned_TYPE_TEAMMEMBER,NULL);
+   tolua_variable(tolua_S,"TYPE_LINE",tolua_get_ObjectPositionInterface_unsigned_TYPE_LINE,NULL);
+   tolua_variable(tolua_S,"FLAG_NONE",tolua_get_ObjectPositionInterface_unsigned_FLAG_NONE,NULL);
+   tolua_variable(tolua_S,"FLAG_HAS_WORLD",tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_WORLD,NULL);
+   tolua_variable(tolua_S,"FLAG_HAS_RELATIVE_CARTESIAN",tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_RELATIVE_CARTESIAN,NULL);
+   tolua_variable(tolua_S,"FLAG_HAS_RELATIVE_POLAR",tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_RELATIVE_POLAR,NULL);
+   tolua_variable(tolua_S,"FLAG_HAS_EULER_ANGLES",tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_EULER_ANGLES,NULL);
+   tolua_variable(tolua_S,"FLAG_HAS_EXTENT",tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_EXTENT,NULL);
+   tolua_variable(tolua_S,"FLAG_HAS_VOLUME_EXTENT",tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_VOLUME_EXTENT,NULL);
+   tolua_variable(tolua_S,"FLAG_HAS_CIRCULAR_EXTENT",tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_CIRCULAR_EXTENT,NULL);
+   tolua_variable(tolua_S,"FLAG_HAS_COVARIANCES",tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_COVARIANCES,NULL);
+   tolua_variable(tolua_S,"FLAG_HAS_WORLD_VELOCITY",tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_WORLD_VELOCITY,NULL);
+   tolua_variable(tolua_S,"FLAG_HAS_POLAR_VELOCITY",tolua_get_ObjectPositionInterface_unsigned_FLAG_HAS_POLAR_VELOCITY,NULL);
    tolua_function(tolua_S,"object_type",tolua_interfaces_ObjectPositionInterface_object_type00);
    tolua_function(tolua_S,"set_object_type",tolua_interfaces_ObjectPositionInterface_set_object_type00);
    tolua_function(tolua_S,"maxlenof_object_type",tolua_interfaces_ObjectPositionInterface_maxlenof_object_type00);
-   tolua_function(tolua_S,"supports_relative",tolua_interfaces_ObjectPositionInterface_supports_relative00);
-   tolua_function(tolua_S,"set_supports_relative",tolua_interfaces_ObjectPositionInterface_set_supports_relative00);
-   tolua_function(tolua_S,"maxlenof_supports_relative",tolua_interfaces_ObjectPositionInterface_maxlenof_supports_relative00);
-   tolua_function(tolua_S,"supports_global",tolua_interfaces_ObjectPositionInterface_supports_global00);
-   tolua_function(tolua_S,"set_supports_global",tolua_interfaces_ObjectPositionInterface_set_supports_global00);
-   tolua_function(tolua_S,"maxlenof_supports_global",tolua_interfaces_ObjectPositionInterface_maxlenof_supports_global00);
-   tolua_function(tolua_S,"has_relative",tolua_interfaces_ObjectPositionInterface_has_relative00);
-   tolua_function(tolua_S,"set_has_relative",tolua_interfaces_ObjectPositionInterface_set_has_relative00);
-   tolua_function(tolua_S,"maxlenof_has_relative",tolua_interfaces_ObjectPositionInterface_maxlenof_has_relative00);
-   tolua_function(tolua_S,"has_global",tolua_interfaces_ObjectPositionInterface_has_global00);
-   tolua_function(tolua_S,"set_has_global",tolua_interfaces_ObjectPositionInterface_set_has_global00);
-   tolua_function(tolua_S,"maxlenof_has_global",tolua_interfaces_ObjectPositionInterface_maxlenof_has_global00);
+   tolua_function(tolua_S,"flags",tolua_interfaces_ObjectPositionInterface_flags00);
+   tolua_function(tolua_S,"set_flags",tolua_interfaces_ObjectPositionInterface_set_flags00);
+   tolua_function(tolua_S,"maxlenof_flags",tolua_interfaces_ObjectPositionInterface_maxlenof_flags00);
    tolua_function(tolua_S,"is_visible",tolua_interfaces_ObjectPositionInterface_is_visible00);
    tolua_function(tolua_S,"set_visible",tolua_interfaces_ObjectPositionInterface_set_visible00);
    tolua_function(tolua_S,"maxlenof_visible",tolua_interfaces_ObjectPositionInterface_maxlenof_visible00);
-   tolua_function(tolua_S,"yaw",tolua_interfaces_ObjectPositionInterface_yaw00);
-   tolua_function(tolua_S,"set_yaw",tolua_interfaces_ObjectPositionInterface_set_yaw00);
-   tolua_function(tolua_S,"maxlenof_yaw",tolua_interfaces_ObjectPositionInterface_maxlenof_yaw00);
+   tolua_function(tolua_S,"roll",tolua_interfaces_ObjectPositionInterface_roll00);
+   tolua_function(tolua_S,"set_roll",tolua_interfaces_ObjectPositionInterface_set_roll00);
+   tolua_function(tolua_S,"maxlenof_roll",tolua_interfaces_ObjectPositionInterface_maxlenof_roll00);
    tolua_function(tolua_S,"pitch",tolua_interfaces_ObjectPositionInterface_pitch00);
    tolua_function(tolua_S,"set_pitch",tolua_interfaces_ObjectPositionInterface_set_pitch00);
    tolua_function(tolua_S,"maxlenof_pitch",tolua_interfaces_ObjectPositionInterface_maxlenof_pitch00);
+   tolua_function(tolua_S,"yaw",tolua_interfaces_ObjectPositionInterface_yaw00);
+   tolua_function(tolua_S,"set_yaw",tolua_interfaces_ObjectPositionInterface_set_yaw00);
+   tolua_function(tolua_S,"maxlenof_yaw",tolua_interfaces_ObjectPositionInterface_maxlenof_yaw00);
+   tolua_function(tolua_S,"bearing",tolua_interfaces_ObjectPositionInterface_bearing00);
+   tolua_function(tolua_S,"set_bearing",tolua_interfaces_ObjectPositionInterface_set_bearing00);
+   tolua_function(tolua_S,"maxlenof_bearing",tolua_interfaces_ObjectPositionInterface_maxlenof_bearing00);
+   tolua_function(tolua_S,"slope",tolua_interfaces_ObjectPositionInterface_slope00);
+   tolua_function(tolua_S,"set_slope",tolua_interfaces_ObjectPositionInterface_set_slope00);
+   tolua_function(tolua_S,"maxlenof_slope",tolua_interfaces_ObjectPositionInterface_maxlenof_slope00);
    tolua_function(tolua_S,"distance",tolua_interfaces_ObjectPositionInterface_distance00);
    tolua_function(tolua_S,"set_distance",tolua_interfaces_ObjectPositionInterface_set_distance00);
    tolua_function(tolua_S,"maxlenof_distance",tolua_interfaces_ObjectPositionInterface_maxlenof_distance00);
@@ -15478,21 +15808,27 @@ TOLUA_API int tolua_interfaces_open (lua_State* tolua_S)
    tolua_function(tolua_S,"xyz_covariance",tolua_interfaces_ObjectPositionInterface_xyz_covariance00);
    tolua_function(tolua_S,"set_xyz_covariance",tolua_interfaces_ObjectPositionInterface_set_xyz_covariance00);
    tolua_function(tolua_S,"maxlenof_xyz_covariance",tolua_interfaces_ObjectPositionInterface_maxlenof_xyz_covariance00);
-   tolua_function(tolua_S,"extent",tolua_interfaces_ObjectPositionInterface_extent00);
-   tolua_function(tolua_S,"set_extent",tolua_interfaces_ObjectPositionInterface_set_extent00);
-   tolua_function(tolua_S,"maxlenof_extent",tolua_interfaces_ObjectPositionInterface_maxlenof_extent00);
-   tolua_function(tolua_S,"yaw_velocity",tolua_interfaces_ObjectPositionInterface_yaw_velocity00);
-   tolua_function(tolua_S,"set_yaw_velocity",tolua_interfaces_ObjectPositionInterface_set_yaw_velocity00);
-   tolua_function(tolua_S,"maxlenof_yaw_velocity",tolua_interfaces_ObjectPositionInterface_maxlenof_yaw_velocity00);
-   tolua_function(tolua_S,"pitch_velocity",tolua_interfaces_ObjectPositionInterface_pitch_velocity00);
-   tolua_function(tolua_S,"set_pitch_velocity",tolua_interfaces_ObjectPositionInterface_set_pitch_velocity00);
-   tolua_function(tolua_S,"maxlenof_pitch_velocity",tolua_interfaces_ObjectPositionInterface_maxlenof_pitch_velocity00);
+   tolua_function(tolua_S,"extent_x",tolua_interfaces_ObjectPositionInterface_extent_x00);
+   tolua_function(tolua_S,"set_extent_x",tolua_interfaces_ObjectPositionInterface_set_extent_x00);
+   tolua_function(tolua_S,"maxlenof_extent_x",tolua_interfaces_ObjectPositionInterface_maxlenof_extent_x00);
+   tolua_function(tolua_S,"extent_y",tolua_interfaces_ObjectPositionInterface_extent_y00);
+   tolua_function(tolua_S,"set_extent_y",tolua_interfaces_ObjectPositionInterface_set_extent_y00);
+   tolua_function(tolua_S,"maxlenof_extent_y",tolua_interfaces_ObjectPositionInterface_maxlenof_extent_y00);
+   tolua_function(tolua_S,"extent_z",tolua_interfaces_ObjectPositionInterface_extent_z00);
+   tolua_function(tolua_S,"set_extent_z",tolua_interfaces_ObjectPositionInterface_set_extent_z00);
+   tolua_function(tolua_S,"maxlenof_extent_z",tolua_interfaces_ObjectPositionInterface_maxlenof_extent_z00);
+   tolua_function(tolua_S,"bearing_velocity",tolua_interfaces_ObjectPositionInterface_bearing_velocity00);
+   tolua_function(tolua_S,"set_bearing_velocity",tolua_interfaces_ObjectPositionInterface_set_bearing_velocity00);
+   tolua_function(tolua_S,"maxlenof_bearing_velocity",tolua_interfaces_ObjectPositionInterface_maxlenof_bearing_velocity00);
+   tolua_function(tolua_S,"slope_velocity",tolua_interfaces_ObjectPositionInterface_slope_velocity00);
+   tolua_function(tolua_S,"set_slope_velocity",tolua_interfaces_ObjectPositionInterface_set_slope_velocity00);
+   tolua_function(tolua_S,"maxlenof_slope_velocity",tolua_interfaces_ObjectPositionInterface_maxlenof_slope_velocity00);
    tolua_function(tolua_S,"distance_velocity",tolua_interfaces_ObjectPositionInterface_distance_velocity00);
    tolua_function(tolua_S,"set_distance_velocity",tolua_interfaces_ObjectPositionInterface_set_distance_velocity00);
    tolua_function(tolua_S,"maxlenof_distance_velocity",tolua_interfaces_ObjectPositionInterface_maxlenof_distance_velocity00);
-   tolua_function(tolua_S,"dyp_velocity_covariance",tolua_interfaces_ObjectPositionInterface_dyp_velocity_covariance00);
-   tolua_function(tolua_S,"set_dyp_velocity_covariance",tolua_interfaces_ObjectPositionInterface_set_dyp_velocity_covariance00);
-   tolua_function(tolua_S,"maxlenof_dyp_velocity_covariance",tolua_interfaces_ObjectPositionInterface_maxlenof_dyp_velocity_covariance00);
+   tolua_function(tolua_S,"dbs_velocity_covariance",tolua_interfaces_ObjectPositionInterface_dbs_velocity_covariance00);
+   tolua_function(tolua_S,"set_dbs_velocity_covariance",tolua_interfaces_ObjectPositionInterface_set_dbs_velocity_covariance00);
+   tolua_function(tolua_S,"maxlenof_dbs_velocity_covariance",tolua_interfaces_ObjectPositionInterface_maxlenof_dbs_velocity_covariance00);
    tolua_function(tolua_S,"world_x_velocity",tolua_interfaces_ObjectPositionInterface_world_x_velocity00);
    tolua_function(tolua_S,"set_world_x_velocity",tolua_interfaces_ObjectPositionInterface_set_world_x_velocity00);
    tolua_function(tolua_S,"maxlenof_world_x_velocity",tolua_interfaces_ObjectPositionInterface_maxlenof_world_x_velocity00);

@@ -3,7 +3,7 @@
  *  object.h - Fawkes BlackBoard Interface - ObjectPositionInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2007  Tim Niemueller
+ *  Copyright  2007-2008  Tim Niemueller
  *
  *  $Id$
  *
@@ -36,10 +36,22 @@ class ObjectPositionInterface : public Interface
  /// @endcond
  public:
   /* constants */
-  static const unsigned int OTHER;
-  static const unsigned int BALL;
-  static const unsigned int OPPONENT;
-  static const unsigned int TEAMMEMBER;
+  static const unsigned int TYPE_OTHER;
+  static const unsigned int TYPE_BALL;
+  static const unsigned int TYPE_OPPONENT;
+  static const unsigned int TYPE_TEAMMEMBER;
+  static const unsigned int TYPE_LINE;
+  static const unsigned int FLAG_NONE;
+  static const unsigned int FLAG_HAS_WORLD;
+  static const unsigned int FLAG_HAS_RELATIVE_CARTESIAN;
+  static const unsigned int FLAG_HAS_RELATIVE_POLAR;
+  static const unsigned int FLAG_HAS_EULER_ANGLES;
+  static const unsigned int FLAG_HAS_EXTENT;
+  static const unsigned int FLAG_HAS_VOLUME_EXTENT;
+  static const unsigned int FLAG_HAS_CIRCULAR_EXTENT;
+  static const unsigned int FLAG_HAS_COVARIANCES;
+  static const unsigned int FLAG_HAS_WORLD_VELOCITY;
+  static const unsigned int FLAG_HAS_POLAR_VELOCITY;
 
  private:
   /** Internal data storage, do NOT modify! */
@@ -47,11 +59,25 @@ class ObjectPositionInterface : public Interface
     unsigned int object_type; /**< 
       Object type, use constants to define
      */
+    unsigned int flags; /**< 
+      Bit-wise concatenated fields of FLAG_* constants. Denotes features that the
+      writer of this interfaces provides. Use a bit-wise OR to concatenate multiple
+      flags, use a bit-wise AND to check if a flag has been set.
+     */
+    float roll; /**< 
+      Roll value for the orientation of the object in space.
+     */
+    float pitch; /**< 
+      Pitch value for the orientation of the object in space.
+     */
     float yaw; /**< 
+      Yaw value for the orientation of the object in space.
+     */
+    float bearing; /**< 
       Angle between the robot's forward direction and the object on the ground plane.
       This angle is in a local 3D coordinate system to the robot and given in radians.
      */
-    float pitch; /**< 
+    float slope; /**< 
       Angle between the robot's center position on the ground plane and the middle point
       of the object (e.g. this denotes the height of the object combined with the distance.
       The angle is given in radians.
@@ -94,22 +120,28 @@ class ObjectPositionInterface : public Interface
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
      */
-    float extent; /**< 
-      Extent of the seen object.
+    float extent_x; /**< 
+      Extent of the seen object given in the relative x cartesian coordinate in m.
      */
-    float yaw_velocity; /**< 
-      Gives the velocity of the object for yaw in radians per second.
+    float extent_y; /**< 
+      Extent of the seen object given in the relative y cartesian coordinate in m.
      */
-    float pitch_velocity; /**< 
-      Gives the velocity of the object for pitch in radians per second.
+    float extent_z; /**< 
+      Extent of the seen object given in the relative z cartesian coordinate in m.
+     */
+    float bearing_velocity; /**< 
+      Gives the velocity of the object for bearing in radians per second.
+     */
+    float slope_velocity; /**< 
+      Gives the velocity of the object for slope in radians per second.
      */
     float distance_velocity; /**< 
       Gives the velocity of the object distance meter per second.
      */
-    float dyp_velocity_covariance[9]; /**< 
-      Covariance of Distance/Yaw/Pitch velocityvalues. This is a 3x3 matrix ordered line by
-      line, first three values represent row, next tree values second row and last three
-      values last row from left to right each.
+    float dbs_velocity_covariance[9]; /**< 
+      Covariance of Distance/Bearing/Slope velocity values. This is a 3x3 matrix ordered
+      line by line, first three values represent row, next tree values second row and
+      last three values last row from left to right each.
      */
     float world_x_velocity; /**< 
       Velocity of object in the world coordinate system in X-direction in meter per second.
@@ -124,18 +156,6 @@ class ObjectPositionInterface : public Interface
       Covariance of WorldX/WorldY/WorldZ valocity values. This is a 3x3 matrix ordered line
       by line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
-     */
-    char supports_relative; /**< 
-      1 if the current interface in general has support for relative position data.
-     */
-    char supports_global; /**< 
-      1 if the current interface in general has support for global (world) position data.
-     */
-    char has_relative; /**< 
-      1 if the current interface at the moment has valid relative position data.
-     */
-    char has_global; /**< 
-      1 if the current interface at the moment has valid global (world) position data.
      */
     bool visible; /**< 
       True, if object is visible.
@@ -158,27 +178,27 @@ class ObjectPositionInterface : public Interface
   unsigned int object_type();
   void set_object_type(const unsigned int new_object_type);
   size_t maxlenof_object_type() const;
-  char supports_relative();
-  void set_supports_relative(const char new_supports_relative);
-  size_t maxlenof_supports_relative() const;
-  char supports_global();
-  void set_supports_global(const char new_supports_global);
-  size_t maxlenof_supports_global() const;
-  char has_relative();
-  void set_has_relative(const char new_has_relative);
-  size_t maxlenof_has_relative() const;
-  char has_global();
-  void set_has_global(const char new_has_global);
-  size_t maxlenof_has_global() const;
+  unsigned int flags();
+  void set_flags(const unsigned int new_flags);
+  size_t maxlenof_flags() const;
   bool is_visible();
   void set_visible(const bool new_visible);
   size_t maxlenof_visible() const;
-  float yaw();
-  void set_yaw(const float new_yaw);
-  size_t maxlenof_yaw() const;
+  float roll();
+  void set_roll(const float new_roll);
+  size_t maxlenof_roll() const;
   float pitch();
   void set_pitch(const float new_pitch);
   size_t maxlenof_pitch() const;
+  float yaw();
+  void set_yaw(const float new_yaw);
+  size_t maxlenof_yaw() const;
+  float bearing();
+  void set_bearing(const float new_bearing);
+  size_t maxlenof_bearing() const;
+  float slope();
+  void set_slope(const float new_slope);
+  size_t maxlenof_slope() const;
   float distance();
   void set_distance(const float new_distance);
   size_t maxlenof_distance() const;
@@ -206,21 +226,27 @@ class ObjectPositionInterface : public Interface
   float * xyz_covariance();
   void set_xyz_covariance(const float * new_xyz_covariance);
   size_t maxlenof_xyz_covariance() const;
-  float extent();
-  void set_extent(const float new_extent);
-  size_t maxlenof_extent() const;
-  float yaw_velocity();
-  void set_yaw_velocity(const float new_yaw_velocity);
-  size_t maxlenof_yaw_velocity() const;
-  float pitch_velocity();
-  void set_pitch_velocity(const float new_pitch_velocity);
-  size_t maxlenof_pitch_velocity() const;
+  float extent_x();
+  void set_extent_x(const float new_extent_x);
+  size_t maxlenof_extent_x() const;
+  float extent_y();
+  void set_extent_y(const float new_extent_y);
+  size_t maxlenof_extent_y() const;
+  float extent_z();
+  void set_extent_z(const float new_extent_z);
+  size_t maxlenof_extent_z() const;
+  float bearing_velocity();
+  void set_bearing_velocity(const float new_bearing_velocity);
+  size_t maxlenof_bearing_velocity() const;
+  float slope_velocity();
+  void set_slope_velocity(const float new_slope_velocity);
+  size_t maxlenof_slope_velocity() const;
   float distance_velocity();
   void set_distance_velocity(const float new_distance_velocity);
   size_t maxlenof_distance_velocity() const;
-  float * dyp_velocity_covariance();
-  void set_dyp_velocity_covariance(const float * new_dyp_velocity_covariance);
-  size_t maxlenof_dyp_velocity_covariance() const;
+  float * dbs_velocity_covariance();
+  void set_dbs_velocity_covariance(const float * new_dbs_velocity_covariance);
+  size_t maxlenof_dbs_velocity_covariance() const;
   float world_x_velocity();
   void set_world_x_velocity(const float new_world_x_velocity);
   size_t maxlenof_world_x_velocity() const;

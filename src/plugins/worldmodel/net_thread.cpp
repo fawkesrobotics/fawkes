@@ -111,7 +111,7 @@ WorldModelNetworkThread::velocity_rcvd(const char *from_host, float vel_x,
 
 void
 WorldModelNetworkThread::ball_pos_rcvd(const char *from_host,
-				       float dist, float pitch, float yaw,
+				       float dist, float bearing, float slope,
 				       float *covariance)
 {
 }
@@ -128,7 +128,7 @@ WorldModelNetworkThread::ball_velocity_rcvd(const char *from_host,
 void
 WorldModelNetworkThread::opponent_pose_rcvd(const char *from_host,
 					    unsigned int uid,
-					    float distance, float angle,
+					    float distance, float bearing,
 					    float *covariance)
 {
 }
