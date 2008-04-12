@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  battery_plugin.cpp - Fawkes Battery Thread
+ *  battery_thread.cpp - Fawkes Battery Thread
  *
  *  Generated: Tue Jan 29 13:05:15 2008
  *  Copyright  2008  Daniel Beck

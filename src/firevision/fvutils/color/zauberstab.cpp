@@ -179,11 +179,10 @@ Zauberstab::findRegion(int seedX,
     region->slices->push_back(tmp);
     // new "seed" pixel has x-coordinate in the middle of previous slice
     tmpX = int(float(tmp->leftX + tmp->rightX) / 2.0);
-    tmpY++;
-    if (tmpY > (int)this->height) {
-      break;
-    } else {
+    if (++tmpY < (int)this->height) {
       YUV422_PLANAR_YUV(buffer, width, height, tmpX, tmpY, py, pu, pv);
+    } else {
+      break;
     }
   }
 
