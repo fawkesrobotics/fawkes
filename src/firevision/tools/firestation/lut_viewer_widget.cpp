@@ -45,6 +45,7 @@ LutViewerWidget::LutViewerWidget()
 LutViewerWidget::~LutViewerWidget()
 {
   free(m_lut_img_buf);
+  delete m_img_lut;
 }
 
 /** Set the colormap to display.
@@ -65,15 +66,22 @@ LutViewerWidget::set_lut_img(Gtk::Image* img)
   m_img_lut = img;
 }
 
-/** Draw the LUT. */
+/** Draw the LUT. 
+ * @param y_layer the layer on the Y axis to be drawn
+ */
 void
-LutViewerWidget::draw()
+LutViewerWidget::draw(unsigned int y_layer)
 {
   if (m_cm == 0 || m_img_lut == 0)
     { return; }
 
+  if ( y_layer < 0 || y_layer > 255 )
+    { return; }
+
+  unsigned int layer = (y_layer * m_cm->depth()) / 255;
+
   unsigned char* lut_buffer = (unsigned char*) malloc( colorspace_buffer_size(YUV422_PLANAR, m_cm->width() * 2, m_cm->height() * 2) );
-  m_cm->to_image(lut_buffer);
+  m_cm->to_image(lut_buffer, layer);
 
   unsigned int img_width = (unsigned int) m_img_lut->get_width();
   unsigned int img_height = (unsigned int) m_img_lut->get_height();

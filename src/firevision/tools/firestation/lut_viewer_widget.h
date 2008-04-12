@@ -37,8 +37,8 @@ class LutViewerWidget
 
   void set_colormap(YuvColormap* cm);
   void set_lut_img(Gtk::Image* img);
-
-  void draw();
+  
+  void draw(unsigned int y_layer = 0);
 
  private:
   YuvColormap* m_cm;

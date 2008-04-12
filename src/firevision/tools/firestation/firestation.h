@@ -40,6 +40,7 @@ class MirrorCalibTool;
 class ColorTrainTool;
 class ColorTrainWidget;
 class FuseTransferWidget;
+class FuseImageListWidget;
 
 class Firestation : public Gtk::Window, public ServiceBrowseHandler
 {
@@ -126,14 +127,17 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   void save_image();
   void exit();
   void update_image();
+  bool call_update_image();
+  void enable_cont_img_trans();
   void open_file();
   void open_folder();
   void open_shm();
   void open_fuse();
+  void on_fuse_image_selected();
+  bool image_click(GdkEventButton*);
+
   void pre_open_img_src();
   void post_open_img_src();
-
-  bool image_click(GdkEventButton*);
   void resize_image(Gtk::Allocation& allocation);
   bool scale_image();
   void draw_image();
@@ -146,7 +150,8 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   void mc_save();
   void mc_load();
 
-  Glib::Dispatcher m_signal_update_image;
+  Glib::Dispatcher m_update_img;
+  Glib::Dispatcher m_signal_fuse_image_selected;
 
   // widgets
   Gtk::Window* m_wnd_main;
@@ -154,6 +159,7 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   Gtk::Dialog* m_dlg_open_fuse;
   Gtk::CheckButton* m_ckb_fuse_jpeg;
   Gtk::CheckButton* m_ckb_cont_trans;
+  Gtk::SpinButton* m_spb_update_time;
   Gtk::FileChooserDialog* m_fcd_open_image;
   Gtk::FileChooserDialog* m_fcd_save_image;
   Gtk::ToolButton* m_tbtn_open_file;
@@ -174,8 +180,6 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   Gtk::RadioButton* m_rbt_ct_field;
   Gtk::RadioButton* m_rbt_ct_lines;
   Gtk::Button* m_btn_ct_start;
-  Gtk::FileChooserDialog* m_fcd_ct_save_colormap;
-  Gtk::FileChooserDialog* m_fcd_ct_load_colormap;
 
   // mirror calibration widgets
   Gtk::FileChooserDialog* m_fcd_mc_save;
@@ -186,8 +190,6 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   Gtk::Entry* m_ent_mc_dist;
   Gtk::Entry* m_ent_mc_ori;
   
-  Glib::Dispatcher m_update_img;
-
   ShmColumnRecord m_shm_columns;
   Glib::RefPtr<Gtk::ListStore> m_shm_list_store;
 
@@ -215,12 +217,15 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   colorspace_t m_img_cs;
   size_t m_img_size;
 
+  bool m_cont_img_trans;
+
   bool m_enable_scaling;
   float m_scale_factor;
 
   MirrorCalibTool* m_calib_tool;
   ColorTrainWidget* m_ctw;
   FuseTransferWidget* m_ftw;
+  FuseImageListWidget* m_filw;
 
   AvahiThread* m_avahi_thread;
 };

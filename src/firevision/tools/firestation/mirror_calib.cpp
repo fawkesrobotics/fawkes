@@ -27,16 +27,15 @@
 #include <models/mirror/bulb/bulb_sampler.h>
 #include <core/exception.h>
 #include <utils/math/angle.h>
-#include <geometry/hom_point.h>
 
 #include <iostream>
+
+using namespace std;
 
 /** @class MirrorCalibTool tools/firestation/mirror_calib.h
  * This class encapsulates the routines necessary for interactive mirror
  * calibration.
  */
-
-using namespace std;
 
 float MirrorCalibTool::m_sample_dist[] = {0.5, 1.0, 1.5, 2.0, 2.5, 
 					  3.0, 3.5, 4.0, 4.5, 5.0};

@@ -54,7 +54,6 @@ class ColorTrainWidget
   void load_histograms();
   void save_histograms();
 
-  void set_lut_depth(unsigned int depth = 0);
   void add_to_lut();
   void reset_lut();
   void load_lut();
@@ -75,12 +74,18 @@ class ColorTrainWidget
   void set_threshold_scl(Gtk::Scale* scl);
   void set_min_prob_scl(Gtk::Scale* scl);
   void set_filechooser_dlg(Gtk::FileChooserDialog* dlg);
+  void set_cm_layer_selector(Gtk::Scale* scl);
+  void set_cm_depth_selector(Gtk::SpinButton* spbtn);
   
   void set_update_img_signal(Glib::Dispatcher* update_img);
 
  private:
   bool set_threshold(Gtk::ScrollType scroll, double value);
   bool set_min_prob(Gtk::ScrollType scroll, double value);
+  bool set_cm_layer(Gtk::ScrollType scroll, double value);
+  void set_cm_depth();
+
+  void reset_gui();
 
   BayesColormapGenerator* m_generator;
   Zauberstab* m_zauberstab;
@@ -96,8 +101,6 @@ class ColorTrainWidget
   colorspace_t m_img_cs;
   float m_img_ratio;
 
-  unsigned int m_lut_depth;
-
   Gtk::Window* m_wnd_parent;
   Gtk::Button* m_btn_reset_selection;
   Gtk::Button* m_btn_add_to_lut;
@@ -106,9 +109,11 @@ class ColorTrainWidget
   Gtk::Button* m_btn_save_histos;
   Gtk::Button* m_btn_load_lut;
   Gtk::Button* m_btn_save_lut;
+  Gtk::SpinButton* m_spbtn_cm_depth;
   Gtk::Image* m_img_segmentation;
   Gtk::Scale* m_scl_threshold;
   Gtk::Scale* m_scl_min_prob;
+  Gtk::Scale* m_scl_cm_layer_selector;
   Gtk::FileChooserDialog* m_fcd_filechooser;
 
   Glib::Dispatcher* m_update_img;

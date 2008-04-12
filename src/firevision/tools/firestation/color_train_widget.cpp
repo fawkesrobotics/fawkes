@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *  color_train_widget.cpp - Color training widget
  *
@@ -47,12 +46,9 @@
  */
 ColorTrainWidget::ColorTrainWidget(Gtk::Window* parent)
 {
-  m_lut_depth = 1;
-
-  m_generator = new BayesColormapGenerator(m_lut_depth);
+  m_generator = 0;
   m_zauberstab = new Zauberstab();
   m_lvw = new LutViewerWidget();
-  m_lvw->set_colormap( m_generator->get_current() );
 
   m_src_buffer = 0;
   m_draw_buffer = 0;
@@ -65,9 +61,11 @@ ColorTrainWidget::ColorTrainWidget(Gtk::Window* parent)
   m_btn_save_histos = 0;
   m_btn_load_lut = 0;
   m_btn_save_lut = 0;
+  m_spbtn_cm_depth = 0;
   m_img_segmentation = 0;
   m_scl_threshold = 0;
   m_scl_min_prob = 0;
+  m_scl_cm_layer_selector = 0;
   m_fcd_filechooser = 0;
 
   m_update_img = 0;
@@ -88,7 +86,6 @@ void
 ColorTrainWidget::set_fg_object(hint_t object)
 {
   m_fg_object = object;
-  m_generator->set_fg_object(m_fg_object);
 }
 
 /** Set the buffer containing the image data.
@@ -112,8 +109,8 @@ ColorTrainWidget::set_src_buffer(unsigned char* yuv422_buffer,
 }
 
 /** Set the buffer to draw the selection into.
- * It is assumed that this buffer has the same dimensions as the buffer holding the soruce
- * image.
+ * It is assumed that this buffer has the same dimensions as the buffer holding
+ * the soruce image.
  * @param buffer the draw buffer
  */
 void
@@ -173,20 +170,6 @@ ColorTrainWidget::reset_selection()
 
   if ( m_update_img )
     { m_update_img->emit(); }
-}
-
-/** Set the depth of the LUT that is generated.
- * Note: this invalidates the pointer returned by get_lut().
- * @param lut_depth the depth of the LUT
- */
-void
-ColorTrainWidget::set_lut_depth(unsigned int lut_depth)
-{
-  m_lut_depth = lut_depth;
-  
-  delete m_generator;
-  m_generator = new BayesColormapGenerator(m_lut_depth);
-  m_lvw->set_colormap( m_generator->get_current() );
 }
 
 /** Set the button to reset the selection.
@@ -306,6 +289,26 @@ ColorTrainWidget::set_filechooser_dlg(Gtk::FileChooserDialog* dlg)
   m_fcd_filechooser = dlg;
 }
 
+/** Set the widget to choose the layer of the colormap to display.
+ * @param scl a Scale
+ */
+void
+ColorTrainWidget::set_cm_layer_selector(Gtk::Scale* scl)
+{
+  m_scl_cm_layer_selector = scl;
+  m_scl_cm_layer_selector->signal_change_value().connect( sigc::mem_fun(*this, &ColorTrainWidget::set_cm_layer) );
+}
+
+/** Set the widget to adjust the depth of the colormap.
+ * @param spbtn a SpinButton
+ */
+void
+ColorTrainWidget::set_cm_depth_selector(Gtk::SpinButton* spbtn)
+{
+  m_spbtn_cm_depth = spbtn;
+  m_spbtn_cm_depth->signal_value_changed().connect( sigc::mem_fun(*this, &ColorTrainWidget::set_cm_depth) );
+}
+
 /** Set the signal that is emmitted whenever the draw buffer was changed and a redraw is
  * necessary.
  *@param update_img a Dispatcher
@@ -392,12 +395,24 @@ ColorTrainWidget::add_to_lut()
   if ( !m_src_buffer )
     { return; }
 
+  if ( !m_generator )
+    {
+      unsigned int cm_depth;
+      if (m_spbtn_cm_depth)
+	{ cm_depth = (unsigned int) rint( m_spbtn_cm_depth->get_value() ); }
+      else
+	{ cm_depth = 1; }
+      m_generator = new BayesColormapGenerator(cm_depth);
+      m_lvw->set_colormap( m_generator->get_current() );
+    }
+  
   if (m_fg_object == H_UNKNOWN)
     {
       printf("CTW::add_to_lut(): no fg object set\n");
       return;
     }
 
+  m_generator->set_fg_object(m_fg_object);
   m_generator->reset_undo();
   m_generator->set_buffer(m_src_buffer, m_img_width, m_img_height);
   m_generator->set_selection( m_zauberstab->getSelection() );
@@ -436,6 +451,8 @@ ColorTrainWidget::load_lut()
      {
      case (Gtk::RESPONSE_OK):
        {
+	 delete m_generator;
+
 	 std::string filename = m_fcd_filechooser->get_filename();
 	 ColormapFile cmf;
 	 cmf.read(filename.c_str());
@@ -445,10 +462,14 @@ ColorTrainWidget::load_lut()
 	   delete tcm;
 	   throw TypeMismatchException("File does not contain a YUV colormap");
 	 }
+	 unsigned int cm_depth = tcm->depth();
+	 m_scl_cm_layer_selector->set_range(0.0, cm_depth - 1.0);
+	 m_generator = new BayesColormapGenerator(cm_depth);
 	 YuvColormap *current = m_generator->get_current();
 	 *current = *tycm;
 	 delete tcm;
 
+	 m_lvw->set_colormap( m_generator->get_current() );
 	 m_lvw->draw();
 	 draw_segmentation_result();
  	break;
@@ -484,7 +505,7 @@ ColorTrainWidget::save_lut()
       {
         std::string filename = m_fcd_filechooser->get_filename();
 	ColormapFile cmf;
-	cmf.add_colormap(m_generator->get_current());
+	cmf.add_colormap( m_generator->get_current() );
 	cmf.write( filename.c_str() );
         break;
       }
@@ -505,6 +526,9 @@ ColorTrainWidget::save_lut()
 YuvColormap *
 ColorTrainWidget::get_colormap() const
 {
+  if ( !m_generator )
+    { return 0; }
+      
   return m_generator->get_current();
 }
 
@@ -520,9 +544,44 @@ ColorTrainWidget::set_threshold(Gtk::ScrollType scroll, double value)
 bool
 ColorTrainWidget::set_min_prob(Gtk::ScrollType scroll, double value)
 {
+  if ( !m_generator )
+    { return true; }
+
   m_generator->set_min_probability(value);
 
   return true;
+}
+
+bool
+ColorTrainWidget::set_cm_layer(Gtk::ScrollType scroll, double value)
+{
+  unsigned int layer = (unsigned int) rint(value);
+  m_lvw->draw(layer-1);
+  
+  return true;
+}
+
+void
+ColorTrainWidget::set_cm_depth()
+{
+  delete m_generator;
+  unsigned int cm_depth = (unsigned int) rint( pow( 2.0, m_spbtn_cm_depth->get_value_as_int() ) );
+  m_generator = new BayesColormapGenerator(cm_depth);
+
+  if (m_scl_cm_layer_selector)
+    { m_scl_cm_layer_selector->set_value(1.0); }
+
+  m_lvw->set_colormap( m_generator->get_current() );
+  m_lvw->draw();
+  draw_segmentation_result();
+}
+
+void
+ColorTrainWidget::reset_gui()
+{
+  m_scl_min_prob->set_value(0.0);
+  m_scl_cm_layer_selector->set_value(0.0);
+  m_scl_cm_layer_selector->set_range(0.0, 0.0);
 }
 
 /** Render the result of segmenting the image in the source buffer considering the current
@@ -531,14 +590,14 @@ ColorTrainWidget::set_min_prob(Gtk::ScrollType scroll, double value)
 void
 ColorTrainWidget::draw_segmentation_result()
 {
-  if ( !m_src_buffer || !m_img_segmentation ) 
+  if ( !m_src_buffer || !m_img_segmentation || !m_generator) 
     { return; }
 
   unsigned char* seg_buffer = (unsigned char*) malloc(m_img_size);
   bzero(seg_buffer, m_img_size);
 
-  Drawer* d = new Drawer();
-  d->setBuffer(seg_buffer, m_img_width, m_img_height);
+  Drawer d;
+  d.setBuffer(seg_buffer, m_img_width, m_img_height);
   
   YuvColormap* cm = m_generator->get_current();
   
@@ -555,26 +614,26 @@ ColorTrainWidget::draw_segmentation_result()
 	  
 	  if (C_GREEN == result)
 	    {
-	      d->setColor(240, 0, 0);
+	      d.setColor(240, 0, 0);
 	    }
 	  else if (C_ORANGE == result)
 	    {
-	      d->setColor(127, 30, 230);
+	      d.setColor(127, 30, 230);
 	    }
 	  else if (C_BACKGROUND == result)
 	    {
-	      d->setColor(50, 127, 127);
+	      d.setColor(50, 127, 127);
 	    }
 	  else if (C_WHITE == result)
 	    {
-	      d->setColor(255, 128, 128);
+	      d.setColor(255, 128, 128);
 	    }
 	  else
 	    {
-	      d->setColor(0, 127, 127);
+	      d.setColor(0, 127, 127);
 	    }
 
-	  d->colorPoint(w, h);
+	  d.colorPoint(w, h);
 	}
     }
 
@@ -611,9 +670,9 @@ ColorTrainWidget::draw_segmentation_result()
 								   width,
 								   height,
 								   3 * height );
-  free(seg_buffer);
-  free(scaled_buffer);
   free(rgb_buffer);
+  free(scaled_buffer);
+  free(seg_buffer);
 
   m_img_segmentation->set(image);
 }

@@ -26,6 +26,7 @@
 #include <tools/firestation/mirror_calib.h>
 #include <tools/firestation/color_train_widget.h>
 #include <tools/firestation/fuse_transfer_widget.h>
+#include <tools/firestation/fuse_image_list_widget.h>
 
 #include <cams/fileloader.h>
 #include <cams/shmem.h>
@@ -64,108 +65,57 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_rgb_scaled_buffer = 0;
   m_img_writer = 0;
 
-  m_calib_tool = new MirrorCalibTool();
-
   m_camera = 0;
-
   m_shm_buffer = 0;
 
   m_img_src = SRC_NONE;
   m_op_mode = MODE_VIEWER;
+  
+  m_scale_factor = 1.0;
 
   m_update_img.connect( sigc::mem_fun(*this, &Firestation::draw_image) );
+  m_signal_fuse_image_selected.connect( sigc::mem_fun(*this, &Firestation::on_fuse_image_selected) );
 
   // --- main window ------------------------------------------------
-  ref_xml->get_widget("wndMain", m_wnd_main);
-  if ( !m_wnd_main )
-    {
-      throw std::runtime_error("Couldn't find wndMain.");
-    }
+  m_wnd_main = dynamic_cast<Gtk::Window*>( get_widget(ref_xml, "wndMain") );
 
-  ref_xml->get_widget("imgImage", m_img_image);
-  if ( !m_img_image )
-    {
-      throw std::runtime_error("Couldn't find imgImage.");
-    }
+  m_img_image = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgImage") );
   m_img_image->signal_size_allocate().connect( sigc::mem_fun(*this, &Firestation::resize_image) );
     
-  ref_xml->get_widget("evtImageEventBox", m_evt_image);
-  if ( !m_evt_image )
-    {
-      throw std::runtime_error("Couldn't find evtImageEventBox.");
-    }
+  m_evt_image = dynamic_cast<Gtk::EventBox*>( get_widget(ref_xml, "evtImageEventBox") );
   m_evt_image->signal_button_press_event().connect( sigc::mem_fun(*this, &Firestation::image_click) );
 
+  m_trv_shm_image_ids = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvShmImageIds") );
 
-  ref_xml->get_widget("trvShmImageIds", m_trv_shm_image_ids);
-  if ( !m_trv_shm_image_ids )
-    {
-      throw std::runtime_error("Couldn't find trvShmImageIds.");
-    }
+  m_stb_status = dynamic_cast<Gtk::Statusbar*>( get_widget(ref_xml, "stbStatus") );
 
-  ref_xml->get_widget("stbStatus", m_stb_status);
-  if ( !m_stb_status )
-    {
-      throw std::runtime_error("Couldn't find stbStatus.");
-    }
+  m_ckb_cont_trans = dynamic_cast<Gtk::CheckButton*>( get_widget(ref_xml, "ckbContTrans") );
+  m_ckb_cont_trans->signal_toggled().connect( sigc::mem_fun(*this, &Firestation::enable_cont_img_trans) );
 
-  ref_xml->get_widget("ckbContTrans", m_ckb_cont_trans);
-  if ( !m_ckb_cont_trans )
-    {
-      throw std::runtime_error("Couldn't find ckbContTrans.");
-    }
-  m_ckb_cont_trans->signal_toggled().connect( sigc::mem_fun(*this, &Firestation::update_image) );
+  m_spb_update_time = dynamic_cast<Gtk::SpinButton*>( get_widget(ref_xml, "spbUpdateTime") );
   // ----------------------------------------------------------------
 
 
   // --- toolbar widgets --------------------------------------------
-  ref_xml->get_widget("tbtnExit", m_tbtn_exit);
-  if ( !m_tbtn_exit )
-    {
-      throw std::runtime_error("Couldn't find tbtmExit.");
-    }
+  m_tbtn_exit = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnExit") );
   m_tbtn_exit->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::exit) );
   
-  ref_xml->get_widget("tbtnUpdate", m_tbtn_update);
-  if ( !m_tbtn_update )
-    {
-      throw std::runtime_error("Couldn't find tbtnUpdate.");
-    }
+  m_tbtn_update = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnUpdate") );
   m_tbtn_update->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::update_image) );
 
-  ref_xml->get_widget("tbtnSave", m_tbtn_save);
-  if ( !m_tbtn_save )
-    {
-      throw std::runtime_error("Couldn't find tbtnSave.");
-    }
+  m_tbtn_save = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnSave") );
   m_tbtn_save->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::save_image) );
   
-  ref_xml->get_widget("tbtnOpenFile", m_tbtn_open_file);
-  if ( !m_tbtn_open_file )
-    {
-      throw std::runtime_error("Couldn't find tbtnOpenFile.");
-    }
+  m_tbtn_open_file = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnOpenFile") );
   m_tbtn_open_file->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::open_file) );
   
-  ref_xml->get_widget("tbtnOpenFolder", m_tbtn_open_folder);
-  if ( !m_tbtn_open_folder )
-    {
-      throw std::runtime_error("Couldn't find tbtnOpenFolder.");
-    }
+  m_tbtn_open_folder = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnOpenFolder") );
   m_tbtn_open_folder->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::open_folder) );
   
-  ref_xml->get_widget("tbtnOpenShm", m_tbtn_open_shm);
-  if ( !m_tbtn_open_shm )
-    {
-      throw std::runtime_error("Couldn't find tbtnOpenShm.");
-    }
+  m_tbtn_open_shm = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnOpenShm") );
   m_tbtn_open_shm->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::open_shm) );
 
-  ref_xml->get_widget("tbtnOpenFuse", m_tbtn_open_fuse);
-  if ( !m_tbtn_open_fuse )
-    {
-      throw std::runtime_error("Couldn't find tbtnOpenFuse.");
-    }
+  m_tbtn_open_fuse = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnOpenFuse") );
   m_tbtn_open_fuse->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::open_fuse) );
   // ----------------------------------------------------------------
 
@@ -278,6 +228,9 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclCtMinProb") );
   m_ctw->set_min_prob_scl(scl);
 
+  scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclCtLayerSelector") );
+  m_ctw->set_cm_layer_selector(scl);
+
   Gtk::Image* img;
   img = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgCtSegmentation") );
   m_ctw->set_segmentation_img(img);
@@ -286,13 +239,19 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_ctw->set_lut_img(img);
 
   Gtk::FileChooserDialog* fcd;
-  fcd = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdCtFilechooser") );
+  fcd = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdFilechooser") );
   m_ctw->set_filechooser_dlg(fcd);
+
+  Gtk::SpinButton* spbtn;
+  spbtn = dynamic_cast<Gtk::SpinButton*>( get_widget(ref_xml, "spbtnCtCmDepth") );
+  m_ctw->set_cm_depth_selector(spbtn);
 
   // ----------------------------------------------------------------
 
 
   // --- mirror calibration -----------------------------------------
+  m_calib_tool = new MirrorCalibTool();
+
   ref_xml->get_widget("btnMcStart", m_btn_mc_start);
   if ( !m_btn_mc_start )
     {
@@ -339,6 +298,7 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
     }
   // ----------------------------------------------------------------
 
+
   // --- fuse transfer widget ---------------------------------------
   m_ftw = new FuseTransferWidget();
   m_ftw->set_current_lut( m_ctw->get_colormap() );
@@ -353,7 +313,25 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_ftw->set_remote_img(img);
   // ----------------------------------------------------------------
 
-  m_signal_update_image.connect( sigc::mem_fun(*this, &Firestation::update_image) );
+
+  // --- fuse image list widget -------------------------------------
+  m_filw = new FuseImageListWidget();
+  trv = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvFuseImageList") );
+  m_filw->set_image_list_trv(trv);
+  m_filw->set_image_selected_dispatcher( &m_signal_fuse_image_selected );
+  // ----------------------------------------------------------------
+
+  m_yuv_orig_buffer = 0;
+  m_yuv_draw_buffer = 0;
+  m_yuv_scaled_buffer = 0;
+  m_rgb_scaled_buffer = 0;
+  m_img_writer = 0;
+  m_camera = 0;
+
+  m_img_src = SRC_NONE;
+  m_op_mode = MODE_VIEWER;
+
+  m_cont_img_trans = false;
 
   m_scaled_img_width = m_evt_image->get_width();
   m_scaled_img_height = m_evt_image->get_height();
@@ -377,7 +355,15 @@ Firestation::~Firestation()
   delete m_calib_tool;
   delete m_ctw;
   delete m_ftw;
+  delete m_filw;
+
   delete m_avahi_thread;
+
+  delete m_wnd_main;
+  delete m_fcd_open_image;
+  delete m_fcd_save_image;
+  delete m_dlg_open_shm;
+  delete m_dlg_open_fuse;
 }
 
 Gtk::Widget*
@@ -410,17 +396,11 @@ Firestation::get_window() const
 void
 Firestation::exit()
 {
-  cout << "Terminating avhai thread ... " << flush;
   m_avahi_thread->cancel();
   m_avahi_thread->join();
-  cout << "done" << endl;
 
   if (SRC_NONE != m_img_src)
-    { 
-      cout << "Closing camera ... " << flush;
-      m_camera->close();
-      cout << "done" << endl;
-    }
+    { m_camera->close(); }
 
   m_wnd_main->hide();
 }
@@ -493,6 +473,31 @@ Firestation::update_image()
   draw_image();
 
   m_ctw->draw_segmentation_result();
+}
+
+bool
+Firestation::call_update_image()
+{
+  if ( !m_cont_img_trans )
+    { return false; }
+
+  update_image();
+
+  return true;
+}
+
+void
+Firestation::enable_cont_img_trans()
+{
+  if (m_cont_img_trans)
+    {
+      m_cont_img_trans = false;
+      return;
+    }
+
+  int timeout = (int) rint( m_spb_update_time->get_value() );
+  sigc::connection conn = Glib::signal_timeout().connect( sigc::mem_fun(*this, &Firestation::call_update_image), timeout);
+  m_cont_img_trans = true;
 }
 
 /** Reads in an image from a file. */
@@ -786,6 +791,30 @@ Firestation::post_open_img_src()
   m_ctw->set_src_buffer(m_yuv_orig_buffer, m_img_width, m_img_height);
   m_ctw->set_draw_buffer(m_yuv_draw_buffer);
   m_ctw->draw_segmentation_result();
+}
+
+void
+Firestation::on_fuse_image_selected()
+{
+  string host_name;
+  unsigned short port;
+  string image_id;
+
+  m_filw->get_selected_image(host_name, port, image_id);
+
+  pre_open_img_src();
+  
+  try
+    {
+      m_camera = new NetworkCamera( host_name.c_str(), port, image_id.c_str());
+      m_img_src = SRC_FUSE;
+      post_open_img_src();
+    }
+  catch (Exception& e)
+    {
+      m_img_src = SRC_NONE;
+      e.print_trace();
+    }
 }
 
 /** Handles the scaling of the displayed image.
@@ -1165,39 +1194,40 @@ Firestation::service_added( const char* name,
 			    std::list<std::string>& txt,
 			    int flags )
 {
-  std::vector<FUSE_imageinfo_t> image_list;
-  NetworkCamera cam(host_name, port);
-  cam.open();
-  image_list = cam.image_list();
+//   std::vector<FUSE_imageinfo_t> image_list;
+//   NetworkCamera cam(host_name, port);
+//   cam.open();
+//   image_list = cam.image_list();
  
-  std::vector<FUSE_imageinfo_t>::iterator fit;
+//   std::vector<FUSE_imageinfo_t>::iterator fit;
 
-  Gtk::TreeModel::Children children = m_fuse_tree_store->children();
-  Gtk::TreeModel::Row row = *(m_fuse_tree_store->append());
-  row[m_fuse_columns.m_id] = children.size();
-  row[m_fuse_columns.m_name] = Glib::ustring(name);
-  row[m_fuse_columns.m_service_name] = Glib::ustring(name);
-  row[m_fuse_columns.m_service_type] = Glib::ustring(type);
-  row[m_fuse_columns.m_service_domain] = Glib::ustring(domain);
-  row[m_fuse_columns.m_service_hostname] = Glib::ustring(host_name);
-  row[m_fuse_columns.m_service_port] = port;
+//   Gtk::TreeModel::Children children = m_fuse_tree_store->children();
+//   Gtk::TreeModel::Row row = *(m_fuse_tree_store->append());
+//   row[m_fuse_columns.m_id] = children.size();
+//   row[m_fuse_columns.m_name] = Glib::ustring(name);
+//   row[m_fuse_columns.m_service_name] = Glib::ustring(name);
+//   row[m_fuse_columns.m_service_type] = Glib::ustring(type);
+//   row[m_fuse_columns.m_service_domain] = Glib::ustring(domain);
+//   row[m_fuse_columns.m_service_hostname] = Glib::ustring(host_name);
+//   row[m_fuse_columns.m_service_port] = port;
 
-  for (fit = image_list.begin(); fit != image_list.end(); ++fit)
-    {
-      Gtk::TreeModel::Row childrow = *(m_fuse_tree_store->append(row.children()));
-      childrow[m_fuse_columns.m_name] = Glib::ustring(fit->image_id);
-      childrow[m_fuse_columns.m_service_name] = Glib::ustring(name);
-      childrow[m_fuse_columns.m_service_type] = Glib::ustring(type);
-      childrow[m_fuse_columns.m_service_domain] = Glib::ustring(domain);
-      childrow[m_fuse_columns.m_service_hostname] = Glib::ustring(host_name);
-      childrow[m_fuse_columns.m_service_port] = port;
-      childrow[m_fuse_columns.m_image_id] = Glib::ustring(fit->image_id);
-      childrow[m_fuse_columns.m_image_width] = fit->width;
-      childrow[m_fuse_columns.m_image_height] = fit->height;
-      childrow[m_fuse_columns.m_image_colorspace] = Glib::ustring( colorspace_to_string((colorspace_t) fit->colorspace) );
-    }
+//   for (fit = image_list.begin(); fit != image_list.end(); ++fit)
+//     {
+//       Gtk::TreeModel::Row childrow = *(m_fuse_tree_store->append(row.children()));
+//       childrow[m_fuse_columns.m_name] = Glib::ustring(fit->image_id);
+//       childrow[m_fuse_columns.m_service_name] = Glib::ustring(name);
+//       childrow[m_fuse_columns.m_service_type] = Glib::ustring(type);
+//       childrow[m_fuse_columns.m_service_domain] = Glib::ustring(domain);
+//       childrow[m_fuse_columns.m_service_hostname] = Glib::ustring(host_name);
+//       childrow[m_fuse_columns.m_service_port] = port;
+//       childrow[m_fuse_columns.m_image_id] = Glib::ustring(fit->image_id);
+//       childrow[m_fuse_columns.m_image_width] = fit->width;
+//       childrow[m_fuse_columns.m_image_height] = fit->height;
+//       childrow[m_fuse_columns.m_image_colorspace] = Glib::ustring( colorspace_to_string((colorspace_t) fit->colorspace) );
+//     }
 
   m_ftw->add_fountain_service(name, host_name, port);
+  m_filw->add_fountain_service(name, host_name, port);
 }
 
 void
@@ -1222,4 +1252,5 @@ Firestation::service_removed( const char* name,
     }
 
   m_ftw->remove_fountain_service(name);
+  m_filw->remove_fountain_service(name);
 }

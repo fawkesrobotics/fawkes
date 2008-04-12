@@ -53,15 +53,14 @@ FuseTransferWidget::FuseTransferWidget()
   m_signal_update_local_lut_list.connect( sigc::mem_fun( *this, &FuseTransferWidget::update_local_lut_list) );
   m_signal_update_remote_lut_list.connect( sigc::mem_fun( *this, &FuseTransferWidget::update_remote_lut_list) );
   m_signal_get_lut_list.connect( sigc::mem_fun( *this, &FuseTransferWidget::get_lut_list) );
-  m_signal_delete_client.connect( sigc::mem_fun( *this, &FuseTransferWidget::delete_client) );
+  m_signal_delete_client.connect( sigc::mem_fun( *this, &FuseTransferWidget::delete_clients) );
   m_signal_update_remote_lut.connect( sigc::mem_fun( *this, &FuseTransferWidget::update_remote_lut) );
 
   m_new_clients.clear();
   m_delete_clients.clear();
 
-  m_cur_client.client = 0;
+  m_cur_client.active = false;
 
-  m_cmb_remote_items = 0;
   m_btn_upload = 0;
   m_btn_download = 0;
   m_img_local = 0;
@@ -88,12 +87,11 @@ FuseTransferWidget::~FuseTransferWidget()
     }
   m_new_clients.unlock();
 
-  if (m_cur_client.client)
-    { 
-      m_cur_client.client->cancel();
-      m_cur_client.client->join();
-      delete m_cur_client.client;
-      m_cur_client.client = 0;
+  if (m_cur_client.active)
+    {
+      m_cur_client.active = false;
+      m_delete_clients.push_locked(m_cur_client.client);
+      delete_clients();
     }
 }
 
@@ -109,10 +107,11 @@ FuseTransferWidget::add_fountain_service( const char* name,
 					  uint16_t port )
 {
   ClientData data;
-  data.client = new FuseClient(host_name, port, this);
+  data.client = 0;
   data.service_name = std::string(name);
   data.host_name = std::string(host_name);
   data.port = port;
+  data.active = false;
   
   m_new_clients.push_locked(data);
   m_signal_get_lut_list();
@@ -232,6 +231,7 @@ FuseTransferWidget::set_local_lut_list_trv(Gtk::TreeView* trv)
   m_trv_local_lut_list->append_column("Filename", m_lut_record.filename);
   m_trv_local_lut_list->append_column("Width", m_lut_record.width);
   m_trv_local_lut_list->append_column("Height", m_lut_record.height);
+  m_trv_local_lut_list->append_column("Depth", m_lut_record.depth);
   m_trv_local_lut_list->append_column("BPC", m_lut_record.bytes_per_cell);
 
   m_trv_local_lut_list->signal_cursor_changed().connect( sigc::mem_fun( *this, &FuseTransferWidget::local_lut_selected) );
@@ -250,6 +250,7 @@ FuseTransferWidget::set_remote_lut_list_trv(Gtk::TreeView* trv)
   m_trv_remote_lut_list->append_column("ID", m_lut_record.lut_id);
   m_trv_remote_lut_list->append_column("Width", m_lut_record.width);
   m_trv_remote_lut_list->append_column("Height", m_lut_record.height);
+  m_trv_remote_lut_list->append_column("Detpth", m_lut_record.depth);
   m_trv_remote_lut_list->append_column("BPC", m_lut_record.bytes_per_cell);
 
   m_trv_remote_lut_list->signal_cursor_changed().connect( sigc::mem_fun( *this, &FuseTransferWidget::remote_lut_selected) );
@@ -258,6 +259,10 @@ FuseTransferWidget::set_remote_lut_list_trv(Gtk::TreeView* trv)
 void
 FuseTransferWidget::get_lut_list()
 {
+  if (m_cur_client.active)
+    // communication in progress
+    { return; }
+
   m_new_clients.lock();
   if (m_new_clients.size() == 0)
     {
@@ -266,32 +271,44 @@ FuseTransferWidget::get_lut_list()
     }
 
   m_cur_client = m_new_clients.front();
+  m_cur_client.active = true;
   m_new_clients.pop();
   m_new_clients.unlock();
 
-  m_cur_client.client->connect();
-  m_cur_client.client->start();
-  m_cur_client.client->enqueue(FUSE_MT_GET_LUT_LIST);
+  try
+    {
+      m_cur_client.client = new FuseClient( m_cur_client.host_name.c_str(),
+					    m_cur_client.port, this );
+      m_cur_client.client->connect();
+      m_cur_client.client->start();
+      m_cur_client.client->enqueue(FUSE_MT_GET_LUT_LIST);
+    }
+  catch (Exception& e)
+    {
+      e.print_trace();
+      m_cur_client.client->cancel();
+      m_cur_client.client->join();
+      delete m_cur_client.client;
+      m_cur_client.active = false;
+    }
 }
 
 void
-FuseTransferWidget::delete_client()
+FuseTransferWidget::delete_clients()
 {
   FuseClient* c;
 
   m_delete_clients.lock();
-  if (m_delete_clients.size() == 0)
+  while (m_delete_clients.size() != 0)
     {
-      m_delete_clients.unlock();
-      return;
+      c = m_delete_clients.front();
+      m_delete_clients.pop();
+      
+      c->cancel();
+      c->join();
+      delete c;
     }
-  c = m_delete_clients.front();
-  m_delete_clients.pop();
   m_delete_clients.unlock();
-
-  c->cancel();
-  c->join();
-  delete c;
 }
 
 void
@@ -398,6 +415,7 @@ FuseTransferWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
 		  row[m_lut_record.lut_id] = Glib::ustring(lut_id);
 		  row[m_lut_record.width] = ntohl(lut_info->width);
 		  row[m_lut_record.height] = ntohl(lut_info->height);
+		  //row[m_lut_record.depth] = ntohl(lut_info->depth);
 		  row[m_lut_record.bytes_per_cell] = ntohl(lut_info->bytes_per_cell);
 		}
 	    }
@@ -407,12 +425,12 @@ FuseTransferWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
 	{
 	  e.print_trace();
 	}
-      m_signal_get_lut_list();
-
-      m_signal_update_remote_lut_list();
       
       m_delete_clients.push_locked(m_cur_client.client);
-      m_cur_client.client = 0;
+      m_cur_client.active = false;
+
+      m_signal_update_remote_lut_list();
+      m_signal_get_lut_list();
       m_signal_delete_client();
 
       break;

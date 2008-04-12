@@ -1,4 +1,4 @@
-
+ 
 /***************************************************************************
  *  fuse_transfer_widget.h - Fuse transfer widget
  *
@@ -29,8 +29,6 @@
 #include <core/utils/lock_queue.h>
 
 #include <gtkmm.h>
-#include <map>
-#include <string>
 
 class FuseClient;
 class YuvColormap;
@@ -75,6 +73,7 @@ class FuseTransferWidget : FuseClientHandler
 	  add(lut_id);
 	  add(width);
 	  add(height);
+	  add(depth);
 	  add(bytes_per_cell);
 	}
 
@@ -85,15 +84,15 @@ class FuseTransferWidget : FuseClientHandler
       Gtk::TreeModelColumn<Glib::ustring> lut_id;
       Gtk::TreeModelColumn<unsigned int> width;
       Gtk::TreeModelColumn<unsigned int> height;
+      Gtk::TreeModelColumn<unsigned int> depth;
       Gtk::TreeModelColumn<unsigned int> bytes_per_cell;
     };
-
 
   // signal handler
   void update_local_lut_list();
   void update_remote_lut_list();
   void get_lut_list();
-  void delete_client();
+  void delete_clients();
   void update_local_lut();
   void update_remote_lut();
 
@@ -106,6 +105,7 @@ class FuseTransferWidget : FuseClientHandler
     std::string service_name;
     std::string host_name;
     uint16_t port;
+    bool active;
   };
 
   LockQueue<ClientData> m_new_clients;
@@ -122,7 +122,6 @@ class FuseTransferWidget : FuseClientHandler
   LutViewerWidget* m_local_lut_viewer;
   LutViewerWidget* m_remote_lut_viewer;
 
-  Gtk::ComboBox* m_cmb_remote_items;
   Gtk::Button* m_btn_upload;
   Gtk::Button* m_btn_download;
   Gtk::Image* m_img_local;
@@ -139,4 +138,4 @@ class FuseTransferWidget : FuseClientHandler
   YuvColormap* m_remote_lut;
 };
 
-#endif /* __FIREVISION_TOOLS_IMAGE_VIEWER_MIRROR_CALIB_H_ */
+#endif /* __FIREVISION_TOOLS_FIRESTATION_FUSE_TRANSFER_WIDGET_H_ */
