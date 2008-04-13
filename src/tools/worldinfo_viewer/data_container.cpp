@@ -183,3 +183,126 @@ WorldInfoDataContainer::get_ball_pos(const char* host)
 
   return pos;
 }
+
+/** Set the gamestate.
+ * @param game_state the current game state
+ * @param state_team team association of the game state
+ * @param score_cyan score of the cyan-colored team
+ * @param score_magenta score of the magenta-colored team
+ * @param own_team own team color
+ * @param own_goal_color own goal color
+ * @param half first or second half
+ */
+void
+WorldInfoDataContainer::set_game_state( worldinfo_gamestate_t game_state,
+					worldinfo_gamestate_team_t state_team,
+					unsigned int score_cyan,
+					unsigned int score_magenta,
+					worldinfo_gamestate_team_t own_team,
+					worldinfo_gamestate_goalcolor_t own_goal_color,
+					worldinfo_gamestate_half_t half )
+{
+  m_game_state.game_state    = game_state;
+  m_game_state.state_team    = state_team;
+  m_game_state.score_cyan    = score_cyan;
+  m_game_state.score_magenta = score_magenta;
+  m_game_state.half          = half;
+  
+  m_own_team_color = own_team;
+  m_own_goal_color = own_goal_color;
+}
+
+/** Obtain the game state.
+ * @return the current game state
+ */
+WorldInfoDataContainer::GameState
+WorldInfoDataContainer::get_game_state() const
+{
+  return m_game_state;
+}
+
+/** Get the current game state as string.
+ * @return the current game mode
+ */
+std::string
+WorldInfoDataContainer::get_game_state_string() const
+{
+  const char* game_state = worldinfo_gamestate_tostring(m_game_state.game_state);
+
+  return string(game_state);
+}
+
+/** Get the current half as string.
+ * @return the current half
+ */
+std::string
+WorldInfoDataContainer::get_half_string() const
+{
+  const char* half = worldinfo_gamestate_half_tostring(m_game_state.half);
+
+  return string(half);
+}
+
+/** Get own score.
+ * @return own score
+ */
+unsigned int
+WorldInfoDataContainer::get_own_score() const
+{
+  if (m_own_team_color == TEAM_CYAN)
+    { return m_game_state.score_cyan; }
+  else
+    { return m_game_state.score_magenta; }
+}
+
+/** Get score of the other team.
+ * @return the other team's score
+ */
+unsigned int
+WorldInfoDataContainer::get_other_score() const
+{
+  if (m_own_team_color == TEAM_CYAN)
+    { return m_game_state.score_magenta; }
+  else
+    { return m_game_state.score_cyan; }
+}
+
+/** Get own team color.
+ * @return struct containing the own team color
+ */
+worldinfo_gamestate_team_t
+WorldInfoDataContainer::get_own_team_color() const
+{
+  return m_own_team_color;
+}
+
+/** Get own team color as string.
+ * @return string with the own team color
+ */
+std::string
+WorldInfoDataContainer::get_own_team_color_string() const
+{
+  const char* team_color = worldinfo_gamestate_team_tostring(m_own_team_color);
+  
+  return string(team_color);
+}
+
+/** Get own goal color.
+ * @return struct containing the own goal color
+ */
+worldinfo_gamestate_goalcolor_t
+WorldInfoDataContainer::get_own_goal_color() const
+{
+  return m_own_goal_color;
+}
+
+/** Get own goal color as string.
+ * @return string with the current goal color
+ */
+std::string
+WorldInfoDataContainer::get_own_goal_color_string() const
+{
+  const char* goal_color = worldinfo_gamestate_goalcolor_tostring(m_own_goal_color);
+  
+  return string(goal_color);
+}

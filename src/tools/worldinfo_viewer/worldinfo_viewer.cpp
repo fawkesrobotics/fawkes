@@ -57,6 +57,8 @@ WorldInfoViewer::WorldInfoViewer( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
   m_trv_robots->append_column("Voltage", m_robot_record.voltage);
 
   m_data_container = data_container;
+
+  m_message_id = m_stb_status->push("Not connected.");
 }
 
 /** Destructor. */
@@ -109,4 +111,23 @@ WorldInfoViewer::redraw_field()
     }
   
   m_field_view->queue_draw();
+}
+
+/** Call this method whenever the game state changes. */
+void
+WorldInfoViewer::gamestate_changed()
+{
+  char* status_string;
+  asprintf( &status_string, "Team color: %s  Goal color: %s  Mode: %s  Score: %d:%d  Half: %s",
+	    m_data_container->get_own_team_color_string().c_str(),
+	    m_data_container->get_own_goal_color_string().c_str(),
+	    m_data_container->get_game_state_string().c_str(),
+	    m_data_container->get_own_score(),
+	    m_data_container->get_other_score(),
+	    m_data_container->get_half_string().c_str() );
+
+  m_stb_status->remove_message(m_message_id);
+  m_message_id = m_stb_status->push( Glib::ustring(status_string) );
+
+  free(status_string);
 }

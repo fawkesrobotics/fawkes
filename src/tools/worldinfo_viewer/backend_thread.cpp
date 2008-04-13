@@ -69,6 +69,15 @@ WorldInfoViewerBackendThread::new_data()
   return m_signal_new_data;
 }
 
+/** Access the dispatcher that is emitted whenever new game state data has arrived.
+ * @return reference to the dispatcher
+ */
+Glib::Dispatcher&
+WorldInfoViewerBackendThread::new_gamestate_data()
+{
+  return m_signal_new_gamestate_data;
+}
+
 void
 WorldInfoViewerBackendThread::loop()
 {
@@ -122,9 +131,11 @@ WorldInfoViewerBackendThread::gamestate_rcvd( const char* from_host,
 					      worldinfo_gamestate_team_t state_team, 
 					      unsigned int score_cyan, 
 					      unsigned int score_magenta, 
-					      worldinfo_gamestate_team_t our_team, 
-					      worldinfo_gamestate_goalcolor_t our_goal_color,
+					      worldinfo_gamestate_team_t own_team, 
+					      worldinfo_gamestate_goalcolor_t own_goal_color,
 					      worldinfo_gamestate_half_t half )
 {
-  // TODO
+  m_data_container->set_game_state( game_state, state_team, score_cyan, score_magenta,
+				    own_team, own_goal_color, half );
+  m_signal_new_gamestate_data();
 }

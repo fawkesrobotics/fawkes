@@ -27,6 +27,7 @@
 
 #include <core/utils/lock_map.h>
 #include <geometry/hom_vector.h>
+#include <netcomm/worldinfo/enums.h>
 #include <string>
 #include <vector>
 
@@ -35,6 +36,16 @@ class WorldInfoDataContainer
  public:
   WorldInfoDataContainer();
   ~WorldInfoDataContainer();
+
+  /** Container struct for momentary game state infos. */
+  struct GameState
+  {
+    worldinfo_gamestate_t game_state;       /**< current game state */
+    worldinfo_gamestate_team_t state_team;  /**< team association of the game state */
+    unsigned int score_cyan;                /**< socre of the cyan-colored team */
+    unsigned int score_magenta;             /**< score of the magenta-colored team */ 
+    worldinfo_gamestate_half_t half;        /**< first or second half */
+  };
 
   void reset();
 
@@ -49,6 +60,25 @@ class WorldInfoDataContainer
   HomVector get_ball_pos(const char* host);
   HomVector get_robot_pos(const char* host);
 
+  void set_game_state( worldinfo_gamestate_t game_state,
+		       worldinfo_gamestate_team_t state_team,
+		       unsigned int score_cyan,
+		       unsigned int score_magenta,
+		       worldinfo_gamestate_team_t own_team,
+		       worldinfo_gamestate_goalcolor_t own_goal_color,
+		       worldinfo_gamestate_half_t half );
+
+  GameState get_game_state() const;
+  std::string get_game_state_string() const;
+  std::string get_half_string() const;
+  unsigned int get_own_score() const;
+  unsigned int get_other_score() const;
+
+  worldinfo_gamestate_team_t get_own_team_color() const;
+  std::string get_own_team_color_string() const;
+  worldinfo_gamestate_goalcolor_t get_own_goal_color() const;
+  std::string get_own_goal_color_string() const;
+  
  private:
   typedef LockMap<std::string, unsigned int> HostLockMap;
   typedef LockMap<unsigned int, HomVector> PosLockMap;
@@ -58,6 +88,10 @@ class WorldInfoDataContainer
   PosLockMap m_ball_pos;
 
   unsigned int m_host_id;
+
+  GameState m_game_state;
+  worldinfo_gamestate_team_t m_own_team_color;
+  worldinfo_gamestate_goalcolor_t m_own_goal_color;
 };
 
 #endif /* __TOOLS_WORLDINFO_VIEWER_DATA_CONTAINER_H_ */ 

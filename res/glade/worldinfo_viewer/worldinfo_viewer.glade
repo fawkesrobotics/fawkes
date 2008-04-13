@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.1 on Fri Apr 11 00:32:23 2008 -->
+<!--Generated with glade3 3.4.3 on Sun Apr 13 20:29:15 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="wndMain">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -19,9 +19,6 @@
               <placeholder/>
             </child>
           </widget>
-          <packing>
-            <property name="expand">False</property>
-          </packing>
         </child>
         <child>
           <widget class="GtkTreeView" id="trvRobots">
@@ -36,6 +33,133 @@
           </packing>
         </child>
         <child>
+          <placeholder/>
+        </child>
+        <child>
+          <widget class="GtkHBox" id="hbox1">
+            <child>
+              <widget class="GtkLabel" id="label1">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Team color: </property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="lblTeamColor">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">UNKNOWN</property>
+              </widget>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="label2">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Goal color: </property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="lblGoalColor">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">UNKNOWN</property>
+              </widget>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="label3">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Mode: </property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="lblGameMode">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">UNKNOWN</property>
+              </widget>
+              <packing>
+                <property name="position">5</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="label4">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Score: </property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">6</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="lblScoreOwn">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">0</property>
+              </widget>
+              <packing>
+                <property name="position">7</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="label5">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">:</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">8</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="lblScoreOther">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">0</property>
+              </widget>
+              <packing>
+                <property name="position">9</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="label6">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Half: </property>
+              </widget>
+              <packing>
+                <property name="position">10</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="lblHalf">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">1</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">11</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
           <widget class="GtkStatusbar" id="stbStatus">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -43,7 +167,7 @@
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="position">2</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </widget>

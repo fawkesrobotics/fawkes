@@ -42,6 +42,7 @@ class WorldInfoViewer : public Gtk::Window
   Gtk::Window& get_window() const;
 
   void redraw_field();
+  void gamestate_changed();
 
  private:
   class RobotRecord : public Gtk::TreeModelColumnRecord
@@ -65,6 +66,8 @@ class WorldInfoViewer : public Gtk::Window
   Gtk::TreeView* m_trv_robots;
   Gtk::Statusbar* m_stb_status;
 
+  unsigned int m_message_id;
+  
   FieldView* m_field_view;
 
   RobotRecord m_robot_record;

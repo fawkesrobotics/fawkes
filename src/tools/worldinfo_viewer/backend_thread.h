@@ -45,6 +45,7 @@ class WorldInfoViewerBackendThread : public Thread,
   virtual ~WorldInfoViewerBackendThread();
 
   Glib::Dispatcher& new_data();
+  Glib::Dispatcher& new_gamestate_data();
 
   // thread
   void loop();
@@ -81,6 +82,7 @@ class WorldInfoViewerBackendThread : public Thread,
   WorldInfoDataContainer* m_data_container;
 
   Glib::Dispatcher m_signal_new_data;
+  Glib::Dispatcher m_signal_new_gamestate_data;
 
   std::string m_addr;
   unsigned short m_port;
