@@ -772,9 +772,6 @@ Firestation::post_open_img_src()
 				       m_img_width, 
 				       m_img_height );
 
-  printf("Image properties: width=%d  height=%d  CS=%d buffer_size=%d\n", m_img_width, m_img_height,
-	 m_img_cs, m_img_size);
-
   free(m_yuv_orig_buffer);
   free(m_yuv_draw_buffer);
   
