@@ -62,6 +62,10 @@
  * @fn unsigned int Scaler::needed_scaled_height()
  * Minimum needed height of scaled image depending on factor and original image height.
  * @return minimum needed height
+ *
+ * @fn float Scaler::get_scale_factor()
+ * Returns the scale factor.
+ * @return the scale factor
  */
 
 /** Virtual empty destructor. */

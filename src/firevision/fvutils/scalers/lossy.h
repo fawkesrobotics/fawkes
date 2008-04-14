@@ -45,6 +45,7 @@ class LossyScaler : public Scaler {
   virtual void             scale();
   virtual unsigned int     needed_scaled_width();
   virtual unsigned int     needed_scaled_height();
+  virtual float            get_scale_factor();
 
  private:
   unsigned int    orig_width;

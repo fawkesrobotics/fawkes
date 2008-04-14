@@ -139,7 +139,6 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   void pre_open_img_src();
   void post_open_img_src();
   void resize_image(Gtk::Allocation& allocation);
-  bool scale_image();
   void draw_image();
 
   void ct_start();
@@ -213,6 +212,8 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   unsigned int m_img_height;
   unsigned int m_scaled_img_width;
   unsigned int m_scaled_img_height;
+  unsigned int m_max_img_width;
+  unsigned int m_max_img_height;
   
   colorspace_t m_img_cs;
   size_t m_img_size;

@@ -41,6 +41,7 @@ class Scaler {
   virtual void             scale()                                                = 0;
   virtual unsigned int     needed_scaled_width()                                  = 0;
   virtual unsigned int     needed_scaled_height()                                 = 0;
+  virtual float            get_scale_factor()                                     = 0;
 
 };
 

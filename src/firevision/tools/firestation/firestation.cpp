@@ -59,20 +59,6 @@ using namespace std;
  */
 Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 {
-  m_yuv_orig_buffer = 0;
-  m_yuv_draw_buffer = 0;
-  m_yuv_scaled_buffer = 0;
-  m_rgb_scaled_buffer = 0;
-  m_img_writer = 0;
-
-  m_camera = 0;
-  m_shm_buffer = 0;
-
-  m_img_src = SRC_NONE;
-  m_op_mode = MODE_VIEWER;
-  
-  m_scale_factor = 1.0;
-
   m_update_img.connect( sigc::mem_fun(*this, &Firestation::draw_image) );
   m_signal_fuse_image_selected.connect( sigc::mem_fun(*this, &Firestation::on_fuse_image_selected) );
 
@@ -321,19 +307,31 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_filw->set_image_selected_dispatcher( &m_signal_fuse_image_selected );
   // ----------------------------------------------------------------
 
-  m_yuv_orig_buffer = 0;
-  m_yuv_draw_buffer = 0;
+
+  m_yuv_orig_buffer   = 0;
+  m_yuv_draw_buffer   = 0;
   m_yuv_scaled_buffer = 0;
   m_rgb_scaled_buffer = 0;
+
+  m_img_width  = 0;
+  m_img_height = 0;
+  m_img_size   = 0;
+  m_img_cs     = CS_UNKNOWN;
+
   m_img_writer = 0;
   m_camera = 0;
+  m_shm_buffer = 0;
 
   m_img_src = SRC_NONE;
   m_op_mode = MODE_VIEWER;
+  
+  m_scale_factor = 1.0;
 
   m_cont_img_trans = false;
 
-  m_scaled_img_width = m_evt_image->get_width();
+  m_max_img_width  = m_evt_image->get_width();
+  m_max_img_height = m_evt_image->get_height();
+  m_scaled_img_width  = m_evt_image->get_width();
   m_scaled_img_height = m_evt_image->get_height();
 
   m_avahi_thread = new AvahiThread();
@@ -469,7 +467,6 @@ Firestation::update_image()
   memcpy(m_yuv_draw_buffer, m_camera->buffer(), m_img_size);
   m_camera->dispose_buffer();
   
-  scale_image();
   draw_image();
 
   m_ctw->draw_segmentation_result();
@@ -774,6 +771,12 @@ Firestation::post_open_img_src()
   m_img_size = colorspace_buffer_size( m_img_cs, 
 				       m_img_width, 
 				       m_img_height );
+
+  printf("Image properties: width=%d  height=%d  CS=%d buffer_size=%d\n", m_img_width, m_img_height,
+	 m_img_cs, m_img_size);
+
+  free(m_yuv_orig_buffer);
+  free(m_yuv_draw_buffer);
   
   m_yuv_orig_buffer = (unsigned char*) malloc(m_img_size);
   m_yuv_draw_buffer = (unsigned char*) malloc(m_img_size);
@@ -785,7 +788,6 @@ Firestation::post_open_img_src()
   m_tbtn_update->set_sensitive(true);
   m_tbtn_save->set_sensitive(true);
 
-  scale_image();
   draw_image();
 	
   m_ctw->set_src_buffer(m_yuv_orig_buffer, m_img_width, m_img_height);
@@ -817,34 +819,6 @@ Firestation::on_fuse_image_selected()
     }
 }
 
-/** Handles the scaling of the displayed image.
- * @return true if redraw is necessary
- */
-bool
-Firestation::scale_image()
-{
-  if (m_img_src != SRC_NONE)
-    {
-      float scale_factor_width = m_scaled_img_width / (float) m_img_width;
-      float scale_factor_height = m_scaled_img_height / (float) m_img_height;
-      
-      float new_scale_factor;
-      new_scale_factor = (scale_factor_width < scale_factor_height) ? scale_factor_width : scale_factor_height;
-      if ( new_scale_factor != m_scale_factor )
-	{
-	  m_scale_factor = new_scale_factor;
-	  m_scaled_img_width = (unsigned int) floor(m_img_width * m_scale_factor);
-	  m_scaled_img_height = (unsigned int) floor(m_img_height * m_scale_factor);
-	  m_img_image->set_size_request(m_scaled_img_width, m_scaled_img_height);
-	  m_evt_image->set_size_request(m_scaled_img_width, m_scaled_img_height);
-	  
-	  return true;
-	}
-    }
-  
-  return false;
-}
-
 /** Draws the image. */
 void
 Firestation::draw_image()
@@ -854,10 +828,20 @@ Firestation::draw_image()
   LossyScaler scaler;
   scaler.set_original_buffer( m_yuv_draw_buffer );
   scaler.set_original_dimensions(m_img_width, m_img_height);
-  scaler.set_scale_factor(m_scale_factor);
-  scaler.set_scaled_dimensions(m_scaled_img_width, m_scaled_img_height);
-  m_scaled_img_width = scaler.needed_scaled_width();
-  m_scaled_img_height = scaler.needed_scaled_height();
+  scaler.set_scaled_dimensions(m_max_img_width, m_max_img_height);
+
+  unsigned int scaled_width  = scaler.needed_scaled_width();
+  unsigned int scaled_height = scaler.needed_scaled_height();
+
+  if (scaled_width != m_scaled_img_width || scaled_height != m_scaled_img_height)
+    {
+      m_scaled_img_width  = scaled_width;
+      m_scaled_img_height = scaled_height;
+      m_img_image->set_size_request(m_scaled_img_width, m_scaled_img_height);
+      m_evt_image->set_size_request(m_scaled_img_width, m_scaled_img_height);
+      m_scale_factor = scaler.get_scale_factor();
+    }
+
   free(m_rgb_scaled_buffer);
   free(m_yuv_scaled_buffer);
   m_yuv_scaled_buffer = (unsigned char*) malloc( colorspace_buffer_size( m_img_cs,
@@ -865,7 +849,7 @@ Firestation::draw_image()
 									 m_scaled_img_height ) );
   scaler.set_scaled_buffer(m_yuv_scaled_buffer);
   scaler.scale();
-  
+
   m_rgb_scaled_buffer = (unsigned char*) malloc( colorspace_buffer_size( RGB,
 									 m_scaled_img_width,
 									 m_scaled_img_height ) );
@@ -891,12 +875,15 @@ Firestation::draw_image()
 void
 Firestation::resize_image(Gtk::Allocation& allocation)
 {
-  m_scaled_img_width = (unsigned int) allocation.get_width();
-  m_scaled_img_height = (unsigned int) allocation.get_height();
-  if ( scale_image() )
-    {
+  unsigned int new_width = (unsigned int) allocation.get_width();
+  unsigned int new_height = (unsigned int) allocation.get_height();
+
+  if (new_width != m_max_img_width ||  new_height != m_max_img_height)
+    { 
+      m_max_img_width = new_width;
+      m_max_img_height = new_height;
       draw_image();
-    } 
+    }
 }
 
 /** Handles mouse clicks in the image area.
@@ -911,7 +898,7 @@ Firestation::image_click(GdkEventButton* event)
 
   image_x = (unsigned int)rint(event->x / m_scale_factor);
   image_y = (unsigned int)rint(event->y / m_scale_factor);
-
+  
   switch (m_op_mode)
     {
     case MODE_VIEWER:
@@ -1194,37 +1181,45 @@ Firestation::service_added( const char* name,
 			    std::list<std::string>& txt,
 			    int flags )
 {
-//   std::vector<FUSE_imageinfo_t> image_list;
-//   NetworkCamera cam(host_name, port);
-//   cam.open();
-//   image_list = cam.image_list();
+  std::vector<FUSE_imageinfo_t> image_list;
+  NetworkCamera cam(host_name, port);
+  cam.open();
+  try
+    {
+      image_list = cam.image_list();
+    }
+  catch (Exception& e)
+    {
+      e.print_trace();
+      return;
+    }
  
-//   std::vector<FUSE_imageinfo_t>::iterator fit;
+  std::vector<FUSE_imageinfo_t>::iterator fit;
 
-//   Gtk::TreeModel::Children children = m_fuse_tree_store->children();
-//   Gtk::TreeModel::Row row = *(m_fuse_tree_store->append());
-//   row[m_fuse_columns.m_id] = children.size();
-//   row[m_fuse_columns.m_name] = Glib::ustring(name);
-//   row[m_fuse_columns.m_service_name] = Glib::ustring(name);
-//   row[m_fuse_columns.m_service_type] = Glib::ustring(type);
-//   row[m_fuse_columns.m_service_domain] = Glib::ustring(domain);
-//   row[m_fuse_columns.m_service_hostname] = Glib::ustring(host_name);
-//   row[m_fuse_columns.m_service_port] = port;
+  Gtk::TreeModel::Children children = m_fuse_tree_store->children();
+  Gtk::TreeModel::Row row = *(m_fuse_tree_store->append());
+  row[m_fuse_columns.m_id] = children.size();
+  row[m_fuse_columns.m_name] = Glib::ustring(name);
+  row[m_fuse_columns.m_service_name] = Glib::ustring(name);
+  row[m_fuse_columns.m_service_type] = Glib::ustring(type);
+  row[m_fuse_columns.m_service_domain] = Glib::ustring(domain);
+  row[m_fuse_columns.m_service_hostname] = Glib::ustring(host_name);
+  row[m_fuse_columns.m_service_port] = port;
 
-//   for (fit = image_list.begin(); fit != image_list.end(); ++fit)
-//     {
-//       Gtk::TreeModel::Row childrow = *(m_fuse_tree_store->append(row.children()));
-//       childrow[m_fuse_columns.m_name] = Glib::ustring(fit->image_id);
-//       childrow[m_fuse_columns.m_service_name] = Glib::ustring(name);
-//       childrow[m_fuse_columns.m_service_type] = Glib::ustring(type);
-//       childrow[m_fuse_columns.m_service_domain] = Glib::ustring(domain);
-//       childrow[m_fuse_columns.m_service_hostname] = Glib::ustring(host_name);
-//       childrow[m_fuse_columns.m_service_port] = port;
-//       childrow[m_fuse_columns.m_image_id] = Glib::ustring(fit->image_id);
-//       childrow[m_fuse_columns.m_image_width] = fit->width;
-//       childrow[m_fuse_columns.m_image_height] = fit->height;
-//       childrow[m_fuse_columns.m_image_colorspace] = Glib::ustring( colorspace_to_string((colorspace_t) fit->colorspace) );
-//     }
+  for (fit = image_list.begin(); fit != image_list.end(); ++fit)
+    {
+      Gtk::TreeModel::Row childrow = *(m_fuse_tree_store->append(row.children()));
+      childrow[m_fuse_columns.m_name] = Glib::ustring(fit->image_id);
+      childrow[m_fuse_columns.m_service_name] = Glib::ustring(name);
+      childrow[m_fuse_columns.m_service_type] = Glib::ustring(type);
+      childrow[m_fuse_columns.m_service_domain] = Glib::ustring(domain);
+      childrow[m_fuse_columns.m_service_hostname] = Glib::ustring(host_name);
+      childrow[m_fuse_columns.m_service_port] = port;
+      childrow[m_fuse_columns.m_image_id] = Glib::ustring(fit->image_id);
+      childrow[m_fuse_columns.m_image_width] = fit->width;
+      childrow[m_fuse_columns.m_image_height] = fit->height;
+      childrow[m_fuse_columns.m_image_colorspace] = Glib::ustring( colorspace_to_string((colorspace_t) fit->colorspace) );
+    }
 
   m_ftw->add_fountain_service(name, host_name, port);
   m_filw->add_fountain_service(name, host_name, port);

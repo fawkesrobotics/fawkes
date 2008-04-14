@@ -70,7 +70,7 @@ LossyScaler::set_scale_factor(float factor)
     scal_width += (scal_width % 2);
   }
   if (orig_height != 0) {
-    scal_height = (unsigned int) ceil(orig_width * scale_factor);
+    scal_height = (unsigned int) ceil(orig_height * scale_factor);
     scal_height += (scal_width % 2);
   }
 }
@@ -92,8 +92,8 @@ LossyScaler::set_scaled_dimensions(unsigned int width,
   scal_width  = width;
   scal_height = height;
   
-  float scale_factor_width;
-  float scale_factor_height;
+  float scale_factor_width  = 1.0;
+  float scale_factor_height = 1.0;
 
   if (orig_width != 0) {
     scale_factor_width = scal_width / float(orig_width);
@@ -102,7 +102,13 @@ LossyScaler::set_scaled_dimensions(unsigned int width,
     scale_factor_height = scal_height / float(orig_height);
   }
 
-  scale_factor = (scale_factor_width > scale_factor_height) ? scale_factor_width : scale_factor_height;
+  scale_factor = (scale_factor_width < scale_factor_height) ? scale_factor_width : scale_factor_height;
+
+  scal_width  = (unsigned int) floor(orig_width * scale_factor);
+  scal_height = (unsigned int) floor(orig_height * scale_factor);
+
+  scal_width  += (scal_width % 2);
+  scal_height += (scal_height % 2);
 }
 
 
@@ -130,9 +136,15 @@ LossyScaler::needed_scaled_width()
 unsigned int
 LossyScaler::needed_scaled_height()
 {
-  return scal_width;
+  return scal_height;
 }
 
+
+float
+LossyScaler::get_scale_factor()
+{
+  return scale_factor;
+}
 
 void
 LossyScaler::scale()
