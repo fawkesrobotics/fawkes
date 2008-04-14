@@ -73,6 +73,7 @@ class ArgumentParser
 
   bool         has_arg(const char *argn);
   const char * arg(const char *argn);
+  bool         parse_hostport(const char *argn, char **host, unsigned short int *port);
   bool         arg(const char *argn, char **value);
   const char * program_name() const;
 

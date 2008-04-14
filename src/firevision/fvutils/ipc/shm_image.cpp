@@ -619,7 +619,7 @@ SharedMemoryImageBufferHeader::print_info()
     return;
   }
   cout << "SharedMemory Image Info: " << endl;
-  printf("    address:  0x%lx\n", (long unsigned int)_header);
+  printf("    address:  %p\n", _header);
   cout << "    image id:  " << _image_id << endl
        << "    colorspace: " << _colorspace << endl
        << "    dimensions: " << _width << "x" << _height << endl;
@@ -657,6 +657,7 @@ SharedMemoryImageBufferHeader::initialize(void *memptr)
   header->width      = _width;
   header->height     = _height;
 
+  _header = header;
 }
 
 

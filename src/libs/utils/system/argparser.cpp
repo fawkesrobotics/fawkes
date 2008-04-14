@@ -24,6 +24,7 @@
  */
 
 #include <utils/system/argparser.h>
+#include <core/exceptions/software.h>
 #include <libgen.h>
 #include <cstdio>
 #include <cstdlib>
@@ -194,6 +195,50 @@ ArgumentParser::arg(const char *argn, char **value)
 {
   if (_opts.count((char *)argn) > 0) {
     *value = strdup(_opts[ (char *)argn ]);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+/** Parse host:port string.
+ * The value referenced by the given argn is parsed for the pattern "host:port". If the
+ * string does not match this pattern an exception is thrown.
+ * The host will be a newly allocated copy of the string. You have to
+ * free it after you are done with it. If no port is supplied in the string (plain
+ * hostname string) the port argument is left unchanged. If the argument has not
+ * been supplied at all both values are left unchanged. Thus it is safe to put the default
+ * values into the variables before passing them to this method. Note however that you
+ * have to free the returned host string in case of a successful return, and only in
+ * that case probably!
+ * @param argn argument name to retrieve
+ * @param host Upon successful return contains a pointer to a newly alloated string
+ * with the hostname part. Free it after you are finished.
+ * @param port upon successful return contains the port part
+ * @return true, if the argument was supplied, false otherwise
+ * @exception OutOfBoundsException thrown if port is not in the range [0..65535]
+ */
+bool
+ArgumentParser::parse_hostport(const char *argn, char **host, unsigned short int *port)
+{
+  if (_opts.count((char *)argn) > 0) {
+    char *tmpvalue = strdup(_opts[ (char *)argn ]);
+
+    if ( strchr(tmpvalue, ':') != NULL ) {
+      char *save_ptr;
+      *host = strtok_r(tmpvalue, ":", &save_ptr);
+      char *tmpport = strtok_r(NULL, "", &save_ptr);
+
+      int port_num = atoi(tmpport);
+      if ( (port_num < 0) || (port_num > 0xFFFF) ) {
+	throw OutOfBoundsException("Invalid port", port_num, 0, 0xFFFF);
+      }
+      *port = port_num;
+    } else {
+      *host = tmpvalue;
+    }
+
     return true;
   } else {
     return false;
