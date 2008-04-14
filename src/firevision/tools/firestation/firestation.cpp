@@ -898,7 +898,7 @@ Firestation::image_click(GdkEventButton* event)
 
   image_x = (unsigned int)rint(event->x / m_scale_factor);
   image_y = (unsigned int)rint(event->y / m_scale_factor);
-  
+
   switch (m_op_mode)
     {
     case MODE_VIEWER:

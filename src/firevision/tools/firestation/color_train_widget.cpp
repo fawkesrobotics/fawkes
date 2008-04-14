@@ -33,6 +33,8 @@
 #include <fvutils/colormap/yuvcm.h>
 #include <fvutils/colormap/cmfile.h>
 
+#include <fvutils/writers/jpeg.h>
+
 #include <core/exceptions/software.h>
 
 /** @class ColorTrainWidget tools/firestation/color_train_widget.h
@@ -99,11 +101,11 @@ ColorTrainWidget::set_src_buffer(unsigned char* yuv422_buffer,
 {
   m_img_width = img_width;
   m_img_height = img_height;
-  m_img_ratio = m_img_width / float(m_img_width);
   m_src_buffer = yuv422_buffer;
   m_img_cs = YUV422_PLANAR;
   m_img_size = colorspace_buffer_size( m_img_cs, m_img_width, m_img_height );
 
+  m_zauberstab->deleteRegion();
   m_zauberstab->setBuffer(m_src_buffer, m_img_width, m_img_height);
   m_zauberstab->setThreshold(10);
 }
@@ -258,6 +260,23 @@ void
 ColorTrainWidget::set_segmentation_img(Gtk::Image* img)
 {
   m_img_segmentation = img;
+  m_seg_img_max_width  = m_img_segmentation->get_width();
+  m_seg_img_max_height = m_img_segmentation->get_height();
+  m_img_segmentation->signal_size_allocate().connect( sigc::mem_fun( *this, &ColorTrainWidget::resize_seg_image) );
+}
+
+void
+ColorTrainWidget::resize_seg_image(Gtk::Allocation& allocation)
+{
+  unsigned int new_width = (unsigned int) allocation.get_width();
+  unsigned int new_height = (unsigned int) allocation.get_height();
+
+  if (new_width != m_seg_img_max_width ||  new_height != m_seg_img_max_height)
+    { 
+      m_seg_img_max_width = new_width;
+      m_seg_img_max_height = new_height;
+      draw_segmentation_result();
+    }
 }
 
 /** Set the scale to control the selection threshold.
@@ -637,20 +656,12 @@ ColorTrainWidget::draw_segmentation_result()
 	}
     }
 
-  // scale, convert to RGB, draw image
-  unsigned int width = (unsigned int) m_img_segmentation->get_width();
-  unsigned int height = (unsigned int) m_img_segmentation->get_height();
-  float ratio = width / float(height);
-  
-  if (ratio < m_img_ratio)
-    { height = (unsigned int) rint(width * m_img_ratio); }
-  else if (ratio > m_img_ratio)
-    { width = (unsigned int) rint(height / m_img_ratio); }
-  
   LossyScaler scaler;
   scaler.set_original_buffer(seg_buffer);
   scaler.set_original_dimensions(m_img_width, m_img_height);
-  scaler.set_scaled_dimensions(width, height);
+  scaler.set_scaled_dimensions(m_seg_img_max_width, m_seg_img_max_height);
+  unsigned int width  = scaler.needed_scaled_width();
+  unsigned int height = scaler.needed_scaled_height();
 
   unsigned char* scaled_buffer = (unsigned char*) malloc( colorspace_buffer_size( m_img_cs,
 										  width,
@@ -669,7 +680,7 @@ ColorTrainWidget::draw_segmentation_result()
 								   8,
 								   width,
 								   height,
-								   3 * height );
+								   3 * width );
   free(rgb_buffer);
   free(scaled_buffer);
   free(seg_buffer);

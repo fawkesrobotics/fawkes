@@ -80,6 +80,7 @@ class ColorTrainWidget
   void set_update_img_signal(Glib::Dispatcher* update_img);
 
  private:
+  void resize_seg_image(Gtk::Allocation& allocation);
   bool set_threshold(Gtk::ScrollType scroll, double value);
   bool set_min_prob(Gtk::ScrollType scroll, double value);
   bool set_cm_layer(Gtk::ScrollType scroll, double value);
@@ -99,7 +100,8 @@ class ColorTrainWidget
   unsigned int m_img_height;
   unsigned int m_img_size;
   colorspace_t m_img_cs;
-  float m_img_ratio;
+  unsigned int m_seg_img_max_width;
+  unsigned int m_seg_img_max_height;
 
   Gtk::Window* m_wnd_parent;
   Gtk::Button* m_btn_reset_selection;
