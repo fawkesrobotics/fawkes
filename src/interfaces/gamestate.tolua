@@ -1,0 +1,57 @@
+$#include <interfaces/gamestate.h>
+class GameStateInterface : public Interface
+{
+
+  typedef enum {
+    GS_FROZEN,
+    GS_PLAY,
+    GS_KICK_OFF,
+    GS_DROP_BALL,
+    GS_PENALTY,
+    GS_CORNER_KICK,
+    GS_THROW_IN,
+    GS_FREE_KICK,
+    GS_GOAL_KICK,
+    GS_HALF_TIME
+  } if_gamestate_t;
+
+  typedef enum {
+    TEAM_NONE,
+    TEAM_CYAN,
+    TEAM_MAGENTA,
+    TEAM_BOTH
+  } if_gamestate_team_t;
+
+  typedef enum {
+    GOAL_BLUE,
+    GOAL_YELLOW
+  } if_gamestate_goalcolor_t;
+
+  typedef enum {
+    HALF_FIRST,
+    HALF_SECOND
+  } if_gamestate_half_t;
+
+  if_gamestate_t game_state();
+  void set_game_state(const if_gamestate_t new_game_state);
+  size_t maxlenof_game_state() const;
+  if_gamestate_team_t state_team();
+  void set_state_team(const if_gamestate_team_t new_state_team);
+  size_t maxlenof_state_team() const;
+  if_gamestate_team_t our_team();
+  void set_our_team(const if_gamestate_team_t new_our_team);
+  size_t maxlenof_our_team() const;
+  if_gamestate_goalcolor_t our_goal_color();
+  void set_our_goal_color(const if_gamestate_goalcolor_t new_our_goal_color);
+  size_t maxlenof_our_goal_color() const;
+  if_gamestate_half_t half();
+  void set_half(const if_gamestate_half_t new_half);
+  size_t maxlenof_half() const;
+  unsigned int score_cyan();
+  void set_score_cyan(const unsigned int new_score_cyan);
+  size_t maxlenof_score_cyan() const;
+  unsigned int score_magenta();
+  void set_score_magenta(const unsigned int new_score_magenta);
+  size_t maxlenof_score_magenta() const;
+
+};
