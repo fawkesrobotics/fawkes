@@ -1190,6 +1190,7 @@ Firestation::service_added( const char* name,
       e.print_trace();
       return;
     }
+  cam.close();
  
   std::vector<FUSE_imageinfo_t>::iterator fit;
 

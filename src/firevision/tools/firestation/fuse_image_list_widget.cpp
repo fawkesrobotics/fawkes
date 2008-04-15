@@ -319,12 +319,18 @@ FuseImageListWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
 	// check whether it's already in the tree
 	m_img_list_mutex.lock();
 	Gtk::TreeModel::Children children = m_image_list->children();
-	for ( Gtk::TreeModel::Children::iterator iter = children.begin();
-	      iter != children.end(); ++iter )
+	Gtk::TreeModel::Children::iterator iter = children.begin();
+	while ( iter != children.end() )
 	  {
 	    Gtk::TreeModel::Row row = *iter;
 	    if ( row[m_image_record.service_name] == Glib::ustring(m_cur_client.service_name) )
-	      { m_image_list->erase(iter); }
+	      {
+		iter = m_image_list->erase(iter);
+	      }
+	    else
+	      {
+		++iter;
+	      }
 	  }
 
 	Gtk::TreeModel::Row row = *m_image_list->append();
