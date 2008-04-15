@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  feature.h - Feature-based classifier using OpenCV structures
+ *  siftpp.h - Feature-based classifier using siftpp
  *
- *  Created: Mon Mar 15 15:47:11 2008
+ *  Created: Sat Apr 12 10:15:23 2008
  *  Copyright 2008 Stefan Schiffer [stefanschiffer.de]
  *
  *  $Id$
@@ -23,11 +23,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CLASSIFIERS_SURF_H_
-#define __FIREVISION_CLASSIFIERS_SURF_H_
+#ifndef __FIREVISION_CLASSIFIERS_SIFTPP_H_
+#define __FIREVISION_CLASSIFIERS_SIFTPP_H_
 
-#ifndef HAVE_SURF
-#  error SURF not available, you may not use the SurfClassifier
+#ifndef HAVE_SIFTPP
+#  error SIFTPP not available, you may not use the SiftppClassifier
 #endif
 
 #include <vector>
@@ -35,74 +35,89 @@
 #include <classifiers/classifier.h>
 
 // FIXME replace with forward declarations
-#include <surf/ipoint.h>
-#include <surf/image.h>
-//class surf::Ipoint;
-//class surf::Image;
+#include <siftpp/sift.hpp>
 
-//#ifdef SURF_TIMETRACKER
+//#ifdef SIFTPP_TIMETRACKER
 class TimeTracker;
 //#endif
 
-//struct CvMemStorage;
-//typedef struct _IplImage IplImage;
-
-class SurfClassifier : public Classifier
+class SiftppClassifier : public Classifier
 {
  public:
-  SurfClassifier(const char * features_file,
-		 int samplingStep = 2,
-		 int octaves = 4,
-		 double thres = 4.0,
-		 bool doubleImageSize = false,
-		 int initLobe = 3,
-		 bool upright = false,
-		 bool extended = false,
-		 int indexSize = 4);
+  SiftppClassifier(const char * features_file,
+		   int samplingStep = 2,
+		   int octaves = 4,
+		   int levels = 3,
+		   float magnif = 3.0,
+		   int noorient = 0,
+		   int unnormalized = 0);
   
-  virtual ~SurfClassifier(); 
+  virtual ~SiftppClassifier(); 
   
   virtual std::list< ROI > * classify();
-  
+
+  /** Siftpp Feature struct. */
+  struct Feature {
+    VL::Sift::Keypoint key;    /**< keypoint */
+    int     number_of_desc;    /**< number of descriptors */
+    VL::float_t ** descs;      /**< descriptors */
+  };
+
  private:
   
   // Find closest interest point in a list, given one interest point
-  int findMatch(const surf::Ipoint& ip1, const std::vector< surf::Ipoint >& ipts);
+  int findMatch(const Feature & ip1, const std::vector< Feature > & ipts);
 
   // Calculate square distance of two vectors
-  double distSquare(double *v1, double *v2, int n);
+  //double distSquare(double *v1, double *v2, int n);
+  double distSquare(VL::float_t *v1, VL::float_t *v2, int n);
 
   // Object objects
-  surf::Image *__obj_img;
-  std::vector< surf::Ipoint > __obj_features;
+  VL::PgmBuffer      *__obj_img;
+  std::vector< Feature > __obj_features;
   int __obj_num_features;
 
   // Image objects
-  surf::Image *__image;
-  std::vector< surf::Ipoint > __img_features;
+  VL::PgmBuffer      *__image;
+  std::vector< Feature > __img_features;
   int __img_num_features;
 
   // Initial sampling step (default 2)
   int __samplingStep;
   // Number of analysed octaves (default 4)
   int __octaves;
+  // Number of levels per octave (default 3)
+  int __levels;
   // Blob response treshold
-  double __thres;
-  // Set this flag "true" to double the image size
-  bool __doubleImageSize;
-  // Initial lobe size, default 3 and 5 (with double image size)
-  int __initLobe;
-  // Upright SURF or rotation invaraiant
-  bool __upright;
-  // If the extended flag is turned on, SURF 128 is used
-  bool __extended;
-  // Spatial size of the descriptor window (default 4)
-  int __indexSize;
+  VL::float_t __threshold;
+  VL::float_t __edgeThreshold;
+
+  int   __first;
+
+  //  float const __sigman;
+  //  float const __sigma0;
+  float __sigman;
+  float __sigma0;
+
+  // Keypoint magnification (default 3)
+  float __magnif;
+  // Upright SIFTPP or rotation invaraiant
+  int   __noorient;
+  // Normalize decriptors?
+  int   __unnormalized;
+
+  // UNUSED
+//   int    stableorder    = 0 ;
+//   int    savegss        = 0 ;
+//   int    verbose        = 0 ;
+//   int    binary         = 0 ;
+//   int    haveKeypoints  = 0 ;
+//   int    fp             = 0 ;
 
   // Length of descriptor vector
   int __vlen;
 
-  //#ifdef SURF_TIMETRACKER
+  //#ifdef SIFTPP_TIMETRACKER
   TimeTracker *__tt;
   unsigned int __loop_count;
   unsigned int __ttc_objconv;

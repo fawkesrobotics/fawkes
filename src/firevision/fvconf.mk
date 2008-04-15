@@ -158,6 +158,15 @@ ifneq ($(wildcard $(realpath $(SURF_DIR))),)
   endif
 endif
 
+## check for SIFTPP-support (patent-encumbered!)
+SIFTPP_DIR = $(FVBASEDIR)/extlib/siftpp
+ifneq ($(wildcard $(realpath $(SIFTPP_DIR))),)
+  HAVE_SIFTPP = 1
+  LIBS_SIFTPP = siftpp
+  CFLAGS_SIFTPP = -DHAVE_SIFTPP -I$(FVBASEDIR)/extlib
+# -DNDEBUG -DVL_LOWE_STRICT -DVL_USEFASTMATH
+endif
+
 # Set to 1 to build shape models
 HAVE_SHAPE_MODELS = 1
 
@@ -172,7 +181,7 @@ VISION_CFLAGS       += $(foreach CTRL,$(CTRLS),$(if $(subst 0,,$(HAVE_$(CTRL)_CT
 ifeq ($(MAKECMDGOALS),printconf)
 VISION_CAM_PRINT     = $(foreach CAM,$(CAMS),$(CAM): $(if $(subst 0,,$(HAVE_$(CAM)_CAM)),"yes","no")\n)
 VISION_CTRL_PRINT    = $(foreach CTRL,$(CTRLS),$(CTRL): $(if $(subst 0,,$(HAVE_$(CTRL)_CTRL)),"yes","no")\n)
-VISION_LIBS_PRINT    = $(foreach DLIB,LIBJPEG LIBPNG LIBDC1394 SDL TRICLOPS_SDK IPP OPENCV SHAPE_MODELS SIFT SURF,$(DLIB): $(if $(subst 0,,$(HAVE_$(DLIB))),"yes","no")\n)
+VISION_LIBS_PRINT    = $(foreach DLIB,LIBJPEG LIBPNG LIBDC1394 SDL TRICLOPS_SDK IPP OPENCV SHAPE_MODELS SIFT SURF SIFTPP,$(DLIB): $(if $(subst 0,,$(HAVE_$(DLIB))),"yes","no")\n)
 printconf:
 	$(SILENT)echo "Cameras:"
 	$(SILENT)echo -e " $(VISION_CAM_PRINT)"

@@ -28,6 +28,10 @@ ifeq ($(HAVE_SURF),1)
 SUBDIRS += extlib/surf
 CLASSIFIERS_DEPS += extlib/surf
 endif
+ifeq ($(HAVE_SIFTPP),1)
+SUBDIRS += extlib/siftpp
+CLASSIFIERS_DEPS += extlib/siftpp
+endif
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
@@ -54,7 +58,14 @@ SURF_UNPACKDIR = SURF-V$(SURF_VERSION)
 URLS_surf = http://robocup.rwth-aachen.de/files/sourcecode/$(SURF_FILE) \
 	    http://robocup.rwth-aachen.de/files/sourcecode/surf-fawkes.patch
 
-.PHONY: create-extlibdir download-sift download-surf
+# http://vision.ucla.edu/~vedaldi/code/siftpp/assets/siftpp/versions/siftpp-0.8.0.tar.gz
+SIFTPP_VERSION = 0.8.0
+SIFTPP_FILE = siftpp-$(SIFTPP_VERSION).tar.gz
+SIFTPP_UNPACKDIR = siftpp
+URLS_siftpp = http://robocup.rwth-aachen.de/files/sourcecode/$(SIFTPP_FILE) \
+	    http://robocup.rwth-aachen.de/files/sourcecode/siftpp-fawkes.patch
+
+.PHONY: create-extlibdir download-sift download-surf download-siftpp
 create-extlibdir:
 	$(SILENT)mkdir -p $(FVEXTLIBDIR)
 
@@ -66,8 +77,12 @@ download-surf: create-extlibdir
 	$(SILENT)cd $(FVEXTLIBDIR); \
 	$(download-files)
 
+download-siftpp: create-extlibdir
+	$(SILENT)cd $(FVEXTLIBDIR); \
+	$(download-files)
 
-.PHONY: get-sift get-surf
+
+.PHONY: get-sift get-surf get-siftpp
 get-sift: download-sift
 	$(SILENT)cd $(FVEXTLIBDIR); \
 	rm -rf sift; \
@@ -96,3 +111,12 @@ get-surf: download-surf
 	$(SILENT)$(MAKE) -C extlib/surf
 endif
 
+get-siftpp: download-siftpp
+	$(SILENT)cd $(FVEXTLIBDIR); \
+	rm -rf siftpp; \
+	echo -e "$(INDENT_PRINT)--- Unpacking $(SIFTPP_FILE)"; \
+	tar xfz $(SIFTPP_FILE); \
+	echo -e "$(INDENT_PRINT)--- Patching SIFTPP lib for Fawkes compatibility"; \
+	cd siftpp; \
+	patch -p1 < ../siftpp-fawkes.patch
+	$(SILENT)$(MAKE) -C extlib/siftpp

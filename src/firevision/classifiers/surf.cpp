@@ -61,8 +61,6 @@
 
 /** Constructor.
  * @param object_file file that contains an image of the object to detect
- * @param pixel_width width of images that will be processed
- * @param pixel_height height of images that will be processed
  * @param samplingStep Initial sampling step
  * @param octaves Number of analysed octaves
  * @param thres Blob response treshold
@@ -73,7 +71,6 @@
  * @param indexSize Spatial size of the descriptor window (default 4)
  */
 SurfClassifier::SurfClassifier( const char * object_file,
-				unsigned int pixel_width, unsigned int pixel_height,
 				int samplingStep, int octaves, double thres, 
 				bool doubleImageSize, int initLobe, 
 				bool upright, bool extended, int indexSize)

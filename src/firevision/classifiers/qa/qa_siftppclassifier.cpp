@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  qa_surfclassifier.cpp - QA for SURF classifier
+ *  qa_siftppclassifier.cpp - QA for SIFTPP classifier
  *
  *  Generated: Wed March 15 16:00:00 2008
  *  Copyright 2008 Stefan Schiffer [stefanschiffer.de]
@@ -30,7 +30,7 @@
 #include <fvutils/writers/png.h>
 #include <filters/roidraw.h>
 
-#include <classifiers/surf.h>
+#include <classifiers/siftpp.h>
 
 #include <opencv/cv.h>
 #include <opencv/cxcore.h>
@@ -49,12 +49,12 @@ main(int argc, char **argv)
   const char *object_file = argv[1];
   const char *scene_file = argv[2];
 
-  printf("QASurfClassifier: creating cvImages for object and scene\n");
+  printf("QASiftppClassifier: creating cvImages for object and scene\n");
   IplImage * obj_img = cvLoadImage( object_file, 1 );
   IplImage * scn_img = cvLoadImage( scene_file, 1 );
   //IplImage * stacked = stack_imgs( obj_img, scn_img );
 
-  printf("QASurfClassifier: Load scene as image\n");
+  printf("QASiftppClassifier: Load scene as image\n");
   /*
   JpegReader *reader = new JpegReader(scene_file);
   */
@@ -69,25 +69,25 @@ main(int argc, char **argv)
   //  pngw.write();
 
 
-  printf("QASurfClassifier: Instantiate SurfClassifier\n");
-  SurfClassifier *classifier = new SurfClassifier(object_file);
+  printf("QASiftppClassifier: Instantiate SiftppClassifier\n");
+  SiftppClassifier *classifier = new SiftppClassifier(object_file);
 
   classifier->set_src_buffer(buffer, reader->pixel_width(), reader->pixel_height());
 
-  printf("QASurfClassifier: classify ...\n");
+  printf("QASiftppClassifier: classify ...\n");
   std::list< ROI > *rois = classifier->classify();
 
-  printf("QASurfClassifier: filterROI\n");
+  printf("QASiftppClassifier: filterROI\n");
   FilterROIDraw *roi_draw = new FilterROIDraw();
   for (std::list< ROI >::iterator i = rois->begin(); i != rois->end(); ++i) {
-    printf("QASurfClassifier: ROI: start (%u, %u)  extent %u x %u\n", 
+    printf("QASiftppClassifier: ROI: start (%u, %u)  extent %u x %u\n", 
 	   (*i).start.x, (*i).start.y, (*i).width, (*i).height);
     // draw ROIs
     roi_draw->set_dst_buffer(buffer, &(*i));
     roi_draw->apply();
   }
 
-  printf("QASurfClassifier: draw ROIs in cvWindow\n");
+  printf("QASiftppClassifier: draw ROIs in cvWindow\n");
   for (std::list< ROI >::iterator i = rois->begin(); i != rois->end(); ++i) {
     if( (*i).height == 11 && (*i).width == 11 ) {
       cvRectangle( scn_img, 

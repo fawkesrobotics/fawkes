@@ -37,7 +37,12 @@ OBJS_fv_qa_surfclassifier := qa_surfclassifier.o
 LIBS_fv_qa_surfclassifier := fvclassifiers fvutils fvwidgets fvfilters $(LIBS_SURF)
 CFLAGS_qa_surfclassifier += $(CFLAGS_SURF)
 
-OBJS_all = $(OBJS_fv_qa_facesclassifier) $(OBJS_fv_qa_siftclassifier) $(OBJS_fv_qa_surfclassifier)
+OBJS_fv_qa_siftppclassifier := qa_siftppclassifier.o
+LIBS_fv_qa_siftppclassifier := fvclassifiers fvutils fvwidgets fvfilters $(LIBS_SIFTPP)
+CFLAGS_qa_siftppclassifier += $(CFLAGS_SIFTPP)
+#LDFLAGS_fv_qa_siftppclassifier += $(LDFLAGS_SIFTPP)
+
+OBJS_all = $(OBJS_fv_qa_facesclassifier) $(OBJS_fv_qa_siftclassifier) $(OBJS_fv_qa_surfclassifier) $(OBJS_fv_qa_siftppclassifier)
 
 ifeq ($(HAVE_OPENCV),1)
   BINS_all = $(BINDIR)/fv_qa_facesclassifier
@@ -49,6 +54,10 @@ endif
 
 ifeq ($(HAVE_SURF),1)
   BINS_all += $(BINDIR)/fv_qa_surfclassifier
+endif
+
+ifeq ($(HAVE_SIFTPP),1)
+  BINS_all += $(BINDIR)/fv_qa_siftppclassifier
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
