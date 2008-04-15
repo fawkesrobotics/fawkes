@@ -50,6 +50,7 @@ class FuseClient : public Thread {
   void enqueue(FUSE_message_type_t type, void *payload, size_t payload_size);
   void enqueue(FUSE_message_type_t type);
   void wait();
+  void wait_greeting();
 
   virtual void loop();
 
@@ -71,6 +72,9 @@ class FuseClient : public Thread {
 
   FuseClientHandler       *__handler;
   WaitCondition           *__waitcond;
+
+  bool __greeting_received;
+  Mutex *__greeting_mutex;
 
   bool __alive;
 };

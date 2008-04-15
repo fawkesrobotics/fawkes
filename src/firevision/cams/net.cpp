@@ -186,7 +186,7 @@ NetworkCamera::open()
 {
   __fusec->connect();
   __fusec->start();
-  __fusec->wait();
+  __fusec->wait_greeting();
   __opened = true;
 }
 

@@ -72,8 +72,10 @@ FuseClient::FuseClient(const char *hostname, unsigned short int port,
   __mutex = new Mutex();
   __waitcond = new WaitCondition();
   __socket = new StreamSocket();
+  __greeting_mutex = new Mutex();
 
   __alive = true;
+  __greeting_received = false;
 }
 
 
@@ -99,6 +101,7 @@ FuseClient::~FuseClient()
   delete __mutex;
   delete __waitcond;
   delete __socket;
+  delete __greeting_mutex;
 }
 
 
@@ -243,6 +246,9 @@ FuseClient::loop()
 	__handler->fuse_invalid_server_version(FUSE_CURRENT_VERSION, ntohl(gm->version));
 	__alive = false;
       } else {
+	__greeting_mutex->lock();
+	__greeting_received = true;
+	__greeting_mutex->unlock();
 	__handler->fuse_connection_established();
       }
     } else {
@@ -268,7 +274,23 @@ FuseClient::loop()
 void
 FuseClient::wait()
 {
-  Mutex m;
-  m.lock();
-  __waitcond->wait(&m);
+  __waitcond->wait();
+}
+
+
+/** Wait for greeting message.
+ * This method will wait for the greeting message to arrive. Make sure that you called
+ * connect() before waiting or call it concurrently in another thread. The calling thread
+ * will be blocked until the message has been received. If the message has already been
+ * received this method will return immediately. Thus it is safe to call this at any time
+ * without risking a race condition.
+ */
+void
+FuseClient::wait_greeting()
+{
+  __greeting_mutex->lock();
+  while (! __greeting_received) {
+    __waitcond->wait(__greeting_mutex);
+  }
+  __greeting_mutex->unlock();
 }
