@@ -40,7 +40,7 @@ ifeq ($(HAVE_LUA),1)
 	$(SILENT)cat $(filter %.tolua,$^) | $(TOLUAPP) -n $(notdir $*) | \
 	sed -e 's/^\(.*Generated automatically .*\) on .*$$/\1/' | \
 	awk '/^#if defined/ { f=1 }; f { t = t "\n" $$0 }; !f {print}; f && /^#endif/ {print "extern \"C\" {" t "\n}\n"; f=0}' | \
-	awk '/^*\/$$/ { print; while ((getline line < "$(BASEDIR)/doc/headers/lichead_c.GPL_WRE") > 0) print line }; ! /^*\/$$/ { print }' \
+	awk '/^\*\/$$/ { print; while ((getline line < "$(BASEDIR)/doc/headers/lichead_c.GPL_WRE") > 0) print line }; ! /^\*\/$$/ { print }' \
 	> $@
 
   endif # HAVE_TOLUA is 1
