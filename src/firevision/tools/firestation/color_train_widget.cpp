@@ -104,10 +104,18 @@ ColorTrainWidget::set_src_buffer(unsigned char* yuv422_buffer,
   m_src_buffer = yuv422_buffer;
   m_img_cs = YUV422_PLANAR;
   m_img_size = colorspace_buffer_size( m_img_cs, m_img_width, m_img_height );
-
-  m_zauberstab->deleteRegion();
-  m_zauberstab->setBuffer(m_src_buffer, m_img_width, m_img_height);
-  m_zauberstab->setThreshold(10);
+  
+  if (yuv422_buffer)
+    {
+      m_zauberstab->deleteRegion();
+      m_zauberstab->setBuffer(m_src_buffer, m_img_width, m_img_height);
+      m_zauberstab->setThreshold(10);
+    }
+  else
+    {
+      m_img_segmentation->clear();
+      m_img_segmentation->set("gtk-missing-image");
+    }
 }
 
 /** Set the buffer to draw the selection into.

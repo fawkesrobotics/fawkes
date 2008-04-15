@@ -126,6 +126,7 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
 
   void save_image();
   void exit();
+  void close_camera();
   void update_image();
   bool call_update_image();
   void enable_cont_img_trans();
@@ -167,6 +168,7 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   Gtk::ToolButton* m_tbtn_open_fuse;
   Gtk::ToolButton* m_tbtn_update;
   Gtk::ToolButton* m_tbtn_save;
+  Gtk::ToolButton* m_tbtn_close_camera;
   Gtk::ToolButton* m_tbtn_exit;
   Gtk::Image* m_img_image;
   Gtk::EventBox* m_evt_image;

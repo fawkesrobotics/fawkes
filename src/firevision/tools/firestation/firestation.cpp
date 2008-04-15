@@ -39,6 +39,7 @@
 #include <fvutils/system/camargp.h>
 #include <fvutils/writers/jpeg.h>
 #include <fvutils/writers/fvraw.h>
+#include <fvutils/draw/drawer.h>
 
 #include <core/exception.h>
 
@@ -85,6 +86,9 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   // --- toolbar widgets --------------------------------------------
   m_tbtn_exit = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnExit") );
   m_tbtn_exit->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::exit) );
+
+  m_tbtn_close_camera = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnCloseCamera") );
+  m_tbtn_close_camera->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::close_camera) );
   
   m_tbtn_update = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnUpdate") );
   m_tbtn_update->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::update_image) );
@@ -401,6 +405,37 @@ Firestation::exit()
     { m_camera->close(); }
 
   m_wnd_main->hide();
+}
+
+void
+Firestation::close_camera()
+{
+  if (SRC_NONE == m_img_src)
+    { return; }
+
+  m_img_src = SRC_NONE;
+
+  m_camera->close();
+  delete m_camera;
+  m_camera = 0;
+
+  m_img_width = 0;
+  m_img_height = 0;
+  m_img_cs = CS_UNKNOWN;
+
+  m_img_size = 0;
+
+  free(m_yuv_orig_buffer);
+  free(m_yuv_draw_buffer);
+
+  m_yuv_orig_buffer = 0;
+  m_yuv_draw_buffer = 0;
+  
+  m_img_image->clear();
+  m_img_image->set("gtk-missing-image");
+
+  m_ctw->set_src_buffer(NULL, 0, 0);
+  m_ctw->set_draw_buffer(NULL);  
 }
 
 /** Saves the current image. */
@@ -846,6 +881,19 @@ Firestation::draw_image()
 									 m_scaled_img_height ) );
   scaler.set_scaled_buffer(m_yuv_scaled_buffer);
   scaler.scale();
+
+  if ( m_img_src == SRC_SHM )
+    {
+      SharedMemoryCamera* shm_camera = dynamic_cast<SharedMemoryCamera*>(m_camera);
+      Drawer drawer;
+      drawer.setBuffer(m_yuv_scaled_buffer, m_scaled_img_width, m_scaled_img_height);
+      drawer.setColor(255, 127, 127);
+      unsigned int roi_x = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_x() * m_scale_factor );
+      unsigned int roi_y = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_y() * m_scale_factor );
+      unsigned int roi_width  = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_width() * m_scale_factor );
+      unsigned int roi_height = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_height() * m_scale_factor );
+      drawer.drawRectangle( roi_x, roi_y, roi_width, roi_height );
+    }
 
   m_rgb_scaled_buffer = (unsigned char*) malloc( colorspace_buffer_size( RGB,
 									 m_scaled_img_width,
