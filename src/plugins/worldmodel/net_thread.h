@@ -59,6 +59,7 @@ class WorldModelNetworkThread
 			     float vel_y, float vel_theta, float *covariance);
 
   virtual void ball_pos_rcvd(const char *from_host,
+			     bool visible, int visibility_history,
 			     float dist, float bearing, float slope,
 			     float *covariance);
 
@@ -70,6 +71,8 @@ class WorldModelNetworkThread
 				  unsigned int uid,
 				  float distance, float bearing,
 				  float *covariance);
+
+  virtual void opponent_disapp_rcvd(const char *from_host, unsigned int uid);
 
   virtual void gamestate_rcvd(const char *from_host,
 			      worldinfo_gamestate_t game_state,

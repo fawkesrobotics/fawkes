@@ -349,6 +349,27 @@ WorldInfoTransceiver::set_ball_pos(float dist, float bearing, float slope, float
 }
 
 
+/** Set ball visibility.
+ * This method defines if the ball is currently visible or not. Additionally more detailed
+ * information is provided in the visibility history. The history shall be 0 only if the
+ * vision has just been initialized. It shall be positive if the ball is visible and shall
+ * have the number of vision cycles in which the ball was visible in a row. It shall be
+ * negative if the ball is not visible and shall be the negative value of the number
+ * of frames where the ball was not visible. A value of 30 for example means that the
+ * ball has been continuously visible for 30 frames, it was never lost. A value of
+ * -20 means that the ball was not seen for the last 20 frames.
+ * @param visible true if the ball is visible, false otherwise
+ * @param visibility_history visibility history, see above.
+ */
+void
+WorldInfoTransceiver::set_ball_visible(bool visible, int visibility_history)
+{
+  ball_visible            = visible;
+  ball_visibility_history = visibility_history;
+  ball_changed            = true;
+}
+
+
 /** Set ball velocity.
  * Set the current velocity of the robot.
  * @param vel_x velocity in x direction
@@ -459,6 +480,18 @@ WorldInfoTransceiver::add_opponent(unsigned int uid,
   opponents.push_back(o);
 }
 
+
+/** Add disappeared opponent.
+ * Add any opponent that you had added in an earlier cycle (before the last send()) with
+ * add_opponent() and that is no longer visible. After it has been marked as disappeared
+ * the unique ID may not be reused. Gibt it another new ID instead.
+ * @param uid Unique ID of opponent that disappeared
+ */
+void
+WorldInfoTransceiver::add_disappeared_opponent(unsigned int uid)
+{
+  disappeared_opponents.push_back(uid);
+}
 
 /** Append packet to outbound buffer.
  * @param msg_type message type
@@ -574,7 +607,10 @@ WorldInfoTransceiver::send()
     bm.dist    = ball_dist;
     bm.bearing = ball_bearing;
     bm.slope   = ball_slope;
+    bm.history = ball_visibility_history;
+    bm.visible = ball_visible ? -1 : 0;
     memcpy(&(bm.covariance), ball_covariance, sizeof(bm.covariance));
+
     ball_changed = false;
 
     append_outbound(WORLDINFO_MSGTYPE_RELBALL, &bm, sizeof(bm));
@@ -638,6 +674,14 @@ WorldInfoTransceiver::send()
     }
   }
   opponents.clear();
+
+  for ( doppit = disappeared_opponents.begin(); doppit != disappeared_opponents.end(); ++doppit) {
+    worldinfo_oppdisappeared_message_t opdm;
+    opdm.uid     = *doppit;
+
+    append_outbound(WORLDINFO_MSGTYPE_OPP_DISAPP, &opdm, sizeof(opdm));
+  }
+  disappeared_opponents.clear();
 
   if ( outbound_num_msgs > 0 ) {
     // send slim msgs
@@ -770,8 +814,8 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
       //     msg_type, msg_size, msgh->type, msgh->size);
       if ( inbound_bytes < msg_size ) {
 	LibLogger::log_warn("WorldInfoTransceiver", "Truncated packet received or protocol "
-			    "error, ignoring rest of packet (got %lu bytes, but expected "
-			    "%lu bytes)", inbound_bytes, msg_size);
+			    "error, ignoring rest of packet (got %zu bytes, but expected "
+			    "%zu bytes)", inbound_bytes, msg_size);
 	break;
       }
       switch ( msg_type ) {
@@ -785,7 +829,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  }
 	} else {
 	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid pose message received "
-			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      "(got %zu bytes but expected %zu bytes), ignoring",
 			      msg_size, sizeof(worldinfo_pose_message_t));
 	}
 	break;
@@ -800,7 +844,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  }
 	} else {
 	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid velocity message received "
-			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      "(got %zu bytes but expected %zu bytes), ignoring",
 			      msg_size, sizeof(worldinfo_velocity_message_t));
 	}
 	break;
@@ -810,12 +854,13 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  worldinfo_relballpos_message_t *ball_msg = (worldinfo_relballpos_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
 	    (*hit)->ball_pos_rcvd(hostname,
+				  (ball_msg->visible == -1), ball_msg->history,
 				  ball_msg->dist, ball_msg->bearing, ball_msg->slope,
 				  ball_msg->covariance);
 	  }
 	} else {
 	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid relative ball pos message received "
-			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      "(got %zu bytes but expected %zu bytes), ignoring",
 			      msg_size, sizeof(worldinfo_relballpos_message_t));
 	}
 	break;
@@ -830,7 +875,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  }
 	} else {
 	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid relative ball velocity message received "
-			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      "(got %zu bytes but expected %zu bytes), ignoring",
 			      msg_size, sizeof(worldinfo_relballvelo_message_t));
 	}
 	break;
@@ -845,8 +890,21 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  }
 	} else {
 	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid opponent pose message received "
-			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      "(got %zu bytes but expected %zu bytes), ignoring",
 			      msg_size, sizeof(worldinfo_opppose_message_t));
+	}
+	break;
+
+      case WORLDINFO_MSGTYPE_OPP_DISAPP:
+	if ( msg_size == sizeof(worldinfo_oppdisappeared_message_t) ) {
+	  worldinfo_oppdisappeared_message_t *oppd_msg = (worldinfo_oppdisappeared_message_t *)inbound_buffer;
+	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
+	    (*hit)->opponent_disapp_rcvd(hostname, oppd_msg->uid);
+	  }
+	} else {
+	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid opponent disappeared message received "
+			      "(got %zu bytes but expected %zu bytes), ignoring",
+			      msg_size, sizeof(worldinfo_oppdisappeared_message_t));
 	}
 	break;
 
@@ -864,7 +922,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  }
 	} else {
 	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid gamestate message received "
-			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      "(got %zu bytes but expected %zu bytes), ignoring",
 			      msg_size, sizeof(worldinfo_gamestate_message_t));
 	}
 	break;
@@ -886,6 +944,8 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	    }
 	    if ( fat_msg->valid_relball_pos ) {
 	      (*hit)->ball_pos_rcvd(hostname,
+				    (fat_msg->relball_pos.visible == -1),
+				    fat_msg->relball_pos.history,
 				    fat_msg->relball_pos.dist, fat_msg->relball_pos.bearing,
 				    fat_msg->relball_pos.slope, fat_msg->relball_pos.covariance);
 	    }
@@ -900,7 +960,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	    if ( fat_msg->num_opponents > WORLDINFO_FATMSG_NUMOPPS ) {
 	      // We can't handle this
 	      LibLogger::log_warn("WorldInfoTransceiver", "Too many opponents marked valid in message "
-				  "(got %lu but expected a maximum of %lu), ignoring",
+				  "(got %zu but expected a maximum of %zu), ignoring",
 				  fat_msg->num_opponents, WORLDINFO_FATMSG_NUMOPPS);
 	    } else {
 	      for ( unsigned int i = 0; i < fat_msg->num_opponents; ++i ) {
@@ -914,7 +974,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  } // end for each handler
 	} else {
 	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid fat message received "
-			      "(got %lu bytes but expected %lu bytes), ignoring",
+			      "(got %zu bytes but expected %zu bytes), ignoring",
 			      msg_size, sizeof(worldinfo_fat_message_t));
 	}
 	break;

@@ -77,9 +77,12 @@ public:
     t->set_pose(i, i+1, i+2, covariance);
     t->set_velocity(i+3, i+4, i+5, covariance);
     t->set_ball_pos(i+6, i+7, i+8, covariance);
+    t->set_ball_visible(i % 2 == 0, (i % 2 == 0 ? -1 : 1) * i+9);
     t->set_ball_velocity(i+9, i+10, i+11, covariance);
     t->add_opponent(i+12, i+13, i+14, covariance);
     t->add_opponent(i+15, i+16, i+17, covariance);
+    t->add_disappeared_opponent(i+18);
+    t->add_disappeared_opponent(i+19);
     t->set_gamestate(GS_FROZEN, TEAM_BOTH);
     t->send();
     ++i;
@@ -147,18 +150,15 @@ public:
   }
 
   virtual void ball_pos_rcvd(const char *from_host,
+			     bool visible, int visibility_history,
 			     float dist,  float bearing, float slope,
 			     float *covariance)
   {
-    cout << "Ball[" << from_host << "]: (d,b,s)=("
-	 << dist << "," << bearing << "," << slope << "), cov=(";
-    for ( unsigned int i = 0; i < WORLDINFO_COVARIANCE_SIZE_3X3; ++i) {
-      cout << covariance[i];
-      if ( i != WORLDINFO_COVARIANCE_SIZE_3X3 - 1 ) {
-	cout << ",";
-      }
-    }
-    cout << ")" << endl;
+    printf("Ball[%s]: vis: %i  vishis: %i   (d,b,s)=(%f,%f,%f)  cov=(%f,%f,%f,%f,%f,%f,%f,%f,%f)\n",
+	   from_host, visible, visibility_history, dist, bearing, slope,
+	   covariance[0], covariance[1], covariance[2],
+	   covariance[3], covariance[4], covariance[5],
+	   covariance[6], covariance[7], covariance[8]);
   }
 
   virtual void ball_velocity_rcvd(const char *from_host,
@@ -171,10 +171,16 @@ public:
   virtual void opponent_pose_rcvd(const char *from_host, unsigned int uid,
 				  float distance, float bearing, float *covariance)
   {
-    cout << "Oppt[" << from_host << "]: (uid,d,b)=("
-	 << uid << "," << distance << "," << bearing << ")" << endl;
+    printf("Oppt[%s]: (uid,d,b)=(%u,%f,%f)  cov=(%f,%f,%f,%f)\n",
+	   from_host, uid, distance, bearing,
+	   covariance[0], covariance[1], covariance[2], covariance[3] );
   }
 
+
+  virtual void opponent_disapp_rcvd(const char *from_host, unsigned int uid)
+  {
+    printf("OpptDisapp[%s]: uid=%u\n", from_host, uid);
+  }
 
   virtual void gamestate_rcvd(const char *from_host,
 			      worldinfo_gamestate_t game_state,

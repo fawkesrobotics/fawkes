@@ -31,20 +31,17 @@
 
 #pragma pack(push,4)
 
-/** Robot pose message type ID */
-#define WORLDINFO_MSGTYPE_POSE           1
-/** Robot velocity message type ID */
-#define WORLDINFO_MSGTYPE_VELO           2
-/** Relative ball position message type ID */
-#define WORLDINFO_MSGTYPE_RELBALL        3
-/** Relative ball velocity message type ID */
-#define WORLDINFO_MSGTYPE_RELBALLVELO    4
-/** Opponent pose message type ID */
-#define WORLDINFO_MSGTYPE_OPP_POSE       5
-/** Fat message containing all the information */
-#define WORLDINFO_MSGTYPE_FAT_WORLDINFO  6
-/** Gamestate info */
-#define WORLDINFO_MSGTYPE_GAMESTATE      7
+/** WorldInfo message IDs. */
+typedef enum {
+  WORLDINFO_MSGTYPE_POSE           = 1,	/** Sending robot's pose */
+  WORLDINFO_MSGTYPE_VELO           = 2,	/** Sending robot's velocity */
+  WORLDINFO_MSGTYPE_RELBALL        = 3,	/** Observed relative ball position */
+  WORLDINFO_MSGTYPE_RELBALLVELO    = 4,	/** Observed relative ball velocity */
+  WORLDINFO_MSGTYPE_OPP_POSE       = 5,	/** Observed opponent pose */
+  WORLDINFO_MSGTYPE_OPP_DISAPP     = 6,	/** Observed opponent disappered */
+  WORLDINFO_MSGTYPE_FAT_WORLDINFO  = 7,	/** Fat message containing all the information, @deprecated */
+  WORLDINFO_MSGTYPE_GAMESTATE      = 8	/** Gamestate info */
+} worldinfo_msgid_t;
 
 
 /** Per-message header.
@@ -108,6 +105,15 @@ typedef struct {
  * robots belief of a ball position.
  */
 typedef struct {
+  int32_t  history  : 24;	/**< visibility history, positive means number of positive
+				 * observations in a row, 0 means vision has just been
+				 * initialized, negative number means the number of negative
+				 * observations in a row (not seen for three loops results
+				 * in a history of -3). */
+  int32_t  visible  :  1;	/**< -1 if ball visible, 0 otherwise. If the ball is not
+				 * visible the position will be the last known position.
+				 */
+  int32_t  reserved :  7;	/**< reserved for future use. */
   float bearing;	/**< bearing to the ball, this is the angle between the robots
 			 * forward direction and the ball on the ground plane (azimuth)*/
   float dist;		/**< distance to the robot */
@@ -151,6 +157,16 @@ typedef struct {
 			 * forward direction and the opponent on the ground plane (azimuth)*/
   float    covariance[WORLDINFO_COVARIANCE_SIZE_2X2];	/**< opponent position covariance matrix */
 } worldinfo_opppose_message_t;
+
+
+/** Opponent disappeared.
+ * This message should be sent for every opponent that disappeared or that cannot be
+ * tracked any longer. The UID is the uid that had been sent with an earlier opponent
+ * pose message.
+ */
+typedef struct {
+  uint32_t uid;		/**< unique ID of the disappeared opponent */
+} worldinfo_oppdisappeared_message_t;
 
 
 /** Fat worldinfo message.

@@ -102,6 +102,7 @@ WorldInfoViewerBackendThread::velocity_rcvd( const char* from_host, float vel_x,
 
 void
 WorldInfoViewerBackendThread::ball_pos_rcvd( const char* from_host,
+					     bool visible, int visibility_history,
 					     float dist, float pitch, float yaw,
 					     float* covariance )
 {
@@ -124,6 +125,13 @@ WorldInfoViewerBackendThread::opponent_pose_rcvd( const char* from_host, unsigne
 {
   // TODO
 }
+
+
+void
+WorldInfoViewerBackendThread::opponent_disapp_rcvd(const char *from_host, unsigned int uid)
+{
+}
+
 
 void
 WorldInfoViewerBackendThread::gamestate_rcvd( const char* from_host, 

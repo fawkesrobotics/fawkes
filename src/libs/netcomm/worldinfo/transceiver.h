@@ -66,6 +66,7 @@ class WorldInfoTransceiver
   void set_velocity(float vel_x, float vel_y, float vel_theta, float *covariance);
 
   void set_ball_pos(float dist, float bearing, float slope, float *covariance);
+  void set_ball_visible(bool visible, int visibility_history);
   void set_ball_velocity(float vel_x, float vel_y, float vel_z, float *covariance);
 
   void set_gamestate(worldinfo_gamestate_t gamestate, worldinfo_gamestate_team_t state_team);
@@ -76,6 +77,7 @@ class WorldInfoTransceiver
 
   void clear_opponents();
   void add_opponent(unsigned int uid, float distance, float bearing, float *covariance);
+  void add_disappeared_opponent(unsigned int uid);
 
   void send();
   void recv(bool block = false, unsigned int max_num_msgs = 0);
@@ -142,6 +144,8 @@ class WorldInfoTransceiver
   float *vel_covariance;
 
   bool   ball_changed;
+  bool   ball_visible;
+  int    ball_visibility_history;
   float  ball_dist;
   float  ball_bearing;
   float  ball_slope;
@@ -164,6 +168,9 @@ class WorldInfoTransceiver
   } opponent_t;
   std::list<opponent_t> opponents;
   std::list<opponent_t>::iterator oppit;
+
+  std::list<unsigned int>  disappeared_opponents;
+  std::list<unsigned int>::iterator  doppit;
 
   LockList<WorldInfoHandler *> handlers;
   LockList<WorldInfoHandler *>::iterator hit;

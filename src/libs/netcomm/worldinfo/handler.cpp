@@ -54,9 +54,13 @@
  * floats).
  * @see WorldInfoTransceiver::set_velocity()
  *
- * @fn void WorldInfoHandler::ball_pos_rcvd(const char *from_host, float dist, float bearing, float slope, float *covariance)
+ * @fn void WorldInfoHandler::ball_pos_rcvd(const char *from_host, bool visible, int visibility_history, float dist, float bearing, float slope, float *covariance)
  * Ball position information received.
  * @param from_host transmitting host of this information, if available symbolic name
+ * @param visible true if ball is visible, false otherwise. If the ball is not visible
+ * the given position is the last known position and may be invalid. Use visibility history
+ * to decide whether you expect useful data.
+ * @param visibility_history Ball visibility history.
  * @param dist distance to ball in meters
  * @param bearing bearing angle to ball
  * @param slope slope angle to ball
@@ -64,6 +68,7 @@
  * rows (first row, three floats, second row, three floats, third row, three
  * floats).
  * @see WorldInfoTransceiver::set_ball_pos()
+ * @see WorldInfoTransceiver::set_ball_visible()
  *
  * @fn void WorldInfoHandler::ball_velocity_rcvd(const char *from_host, float vel_x, float vel_y, float vel_z, float *covariance)
  * Ball velocity information received.
@@ -86,6 +91,11 @@
  * @param covariance covariance matrix with 4 entries, ordered as two concatenated
  * rows (first row, two floats, second row, two floats)
  * @see WorldInfoTransceiver::add_opponent()
+ *
+ * @fn void WorldInfoHandler::opponent_disapp_rcvd(const char *from_host, unsigned int uid)
+ * Opponent disappeared.
+ * @param from_host transmitting host of this information, if available symbolic name
+ * @param uid unique ID of the opponent
  *
  * @fn void WorldInfoHandler::gamestate_rcvd(const char *from_host, worldinfo_gamestate_t game_state, worldinfo_gamestate_team_t state_team, unsigned int score_cyan, unsigned int score_magenta, worldinfo_gamestate_team_t our_team, worldinfo_gamestate_goalcolor_t our_goal_color, worldinfo_gamestate_half_t half)
  * Gamestate information received.

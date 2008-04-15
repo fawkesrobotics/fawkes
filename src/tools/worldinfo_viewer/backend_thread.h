@@ -59,6 +59,7 @@ class WorldInfoViewerBackendThread : public Thread,
 			     float vel_y, float vel_theta, float *covariance);
 
   virtual void ball_pos_rcvd(const char *from_host,
+			     bool visible, int visibility_history,
 			     float dist, float pitch, float yaw,
 			     float *covariance);
 
@@ -70,6 +71,8 @@ class WorldInfoViewerBackendThread : public Thread,
 				   float distance, float angle,
 				   float *covarianceconst );
   
+  virtual void opponent_disapp_rcvd(const char *from_host, unsigned int uid);
+
   virtual void gamestate_rcvd( const char *from_host, worldinfo_gamestate_t game_state, 
 			       worldinfo_gamestate_team_t state_team, 
 			       unsigned int score_cyan, unsigned int score_magenta, 
