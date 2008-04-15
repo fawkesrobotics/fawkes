@@ -38,7 +38,8 @@ local skill_mt      = {
                         -- interfaces
                         navigator   = navigator,
                         wm_ball     = wm_ball,
-                        wm_pose     = wm_pose
+                        wm_pose     = wm_pose,
+                        gamestate   = gamestate
 		      };
 
 
@@ -142,9 +143,10 @@ function gensandbox()
    for _, s in ipairs(skills) do
       rv[s.name] = s.func;
    end
-   rv.S_FINAL   = skill_mt.S_FINAL;
-   rv.S_RUNNING = skill_mt.S_RUNNING;
-   rv.S_FAILED  = skill_mt.S_FAILED;
+   for k,v in pairs(skill_mt) do
+      rv[k] = v;
+   end
+
    return rv;
 end
 

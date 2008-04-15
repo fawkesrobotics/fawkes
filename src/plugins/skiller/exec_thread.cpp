@@ -34,6 +34,7 @@
 #include <interfaces/object.h>
 #include <interfaces/skiller.h>
 #include <interfaces/navigator.h>
+#include <interfaces/gamestate.h>
 
 #include <lua.hpp>
 #include <tolua++.h>
@@ -163,6 +164,9 @@ SkillerExecutionThread::start_lua()
 
   tolua_pushusertype(__L, __slt->navigator, __slt->navigator->type());
   lua_setglobal(__L, "navigator");
+
+  tolua_pushusertype(__L, __slt->gamestate, __slt->gamestate->type());
+  lua_setglobal(__L, "gamestate");
 
   // Load start code
   if ( (__err = luaL_loadfile(__L, START_FILE)) != 0) {

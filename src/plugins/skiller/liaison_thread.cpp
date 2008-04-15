@@ -29,6 +29,7 @@
 #include <interfaces/object.h>
 #include <interfaces/skiller.h>
 #include <interfaces/navigator.h>
+#include <interfaces/gamestate.h>
 
 #include <cstring>
 
@@ -82,6 +83,7 @@ SkillerLiaisonThread::init_failure_cleanup()
     if ( wm_ball_w )  blackboard->close(wm_ball_w);
     if ( navigator )  blackboard->close(navigator);
     if ( wm_pose_w )  blackboard->close(wm_pose_w);
+    if ( gamestate )  blackboard->close(gamestate);
   } catch (...) {
     // we really screwed up, can't do anything about it, ignore error, logger is
     // initialized since this method is only called from init() which is only called if
@@ -100,6 +102,7 @@ SkillerLiaisonThread::init()
   navigator    = NULL;
   wm_ball_w    = NULL;
   wm_pose_w    = NULL;
+  gamestate    = NULL;
 
   try {
     skiller   = blackboard->open_for_writing<SkillerInterface>("Skiller");
@@ -108,6 +111,7 @@ SkillerLiaisonThread::init()
     wm_pose   = blackboard->open_for_reading<ObjectPositionInterface>("WM Pose");
     wm_pose_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Pose");
     navigator = blackboard->open_for_reading<NavigatorInterface>("Navigator");
+    gamestate = blackboard->open_for_reading<GameStateInterface>("WM GameState");
     std::list<ObjectPositionInterface *> *obs_lst = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("WM Obstacles");
     for (std::list<ObjectPositionInterface *>::iterator i = obs_lst->begin(); i != obs_lst->end(); ++i) {
       wm_obstacles.push_back(*i);
@@ -141,6 +145,7 @@ SkillerLiaisonThread::finalize()
   blackboard->close(wm_pose);
   blackboard->close(wm_pose_w);
   blackboard->close(navigator);
+  blackboard->close(gamestate);
 }
 
 
@@ -185,6 +190,7 @@ SkillerLiaisonThread::loop()
   wm_ball->read();
   wm_pose->read();
   navigator->read();
+  gamestate->read();
 
   wm_obstacles.lock();
   for (wm_obs_it = wm_obstacles.begin(); wm_obs_it != wm_obstacles.end(); ++wm_obs_it) {

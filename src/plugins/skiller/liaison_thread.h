@@ -40,6 +40,7 @@ class Barrier;
 class ObjectPositionInterface;
 class NavigatorInterface;
 class SkillerInterface;
+class GameStateInterface;
 class SkillerExecutionThread;
 
 class SkillerLiaisonThread
@@ -82,6 +83,7 @@ class SkillerLiaisonThread
   ObjectPositionInterface *wm_pose;
   ObjectPositionInterface *wm_pose_w;
   NavigatorInterface      *navigator;
+  GameStateInterface      *gamestate;
 
   LockList<ObjectPositionInterface *>  wm_obstacles;
   LockList<ObjectPositionInterface *>::iterator  wm_obs_it;
