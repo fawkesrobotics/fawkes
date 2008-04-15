@@ -19,9 +19,7 @@
 --  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 --  GNU Library General Public License for more details.
 --
---  You should have received a copy of the GNU General Public License
---  along with this program; if not, write to the Free Software Foundation,
---  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
+--  Read the full text in the LICENSE.GPL file in the doc directory.
 
 require("general.utils");
 
@@ -64,7 +62,9 @@ function get_skill_entry(skill)
 	 end
       end
    elseif type(skill) == "function" then
+      printf("Looking for %s", tostring(skill));
       for _, s in ipairs(skills) do
+	 printf("Comparing with %s (%s)", tostring(s.func), s.name);
 	 if ( s.func == skill ) then
 	    return s;
 	 end
@@ -78,8 +78,8 @@ end
 -- @param skill skill to print the documentation string for. If nil a list of available
 -- skills is printed.
 function skill_info(skill)
-   print("Available skills:");
    if skill == nil then
+      print("Available skills:");
       for _, s in ipairs(skills) do
 	 print(" ", s.name);
       end
@@ -140,11 +140,11 @@ function gensandbox()
    for k,v in pairs(skill_env_template) do
       rv[k] = v;
    end
-   for _, s in ipairs(skills) do
-      rv[s.name] = s.func;
-   end
    for k,v in pairs(skill_mt) do
       rv[k] = v;
+   end
+   for _, s in ipairs(skills) do
+      rv[s.name] = s.func;
    end
 
    return rv;

@@ -1,8 +1,8 @@
 
 ----------------------------------------------------------------------------
---  init.lua - skiller Lua initialization code
+--  penalty.lua - Mid-size league reactive agent: penalty
 --
---  Created: Mon Mar 10 17:00:35 2008
+--  Created: Tue Apr 15 15:42:04 2008
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
@@ -21,16 +21,17 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
+require("midsize");
+module("midsize.agent.penalty", midsize.module_init);
 
--- SKILLDIR is set by skiller before loading init.lua
-package.path  = package.path .. ";" .. SKILLDIR .. "/?.lua";
-package.cpath = package.cpath .. ";" .. LIBDIR .. "/lua/?.so";
-
--- Include C/C++ compat packages
-require("utils");
-require("config");
-require("interface");
-require("interfaces");
-
--- Base package extensions
-require("general.stringext");
+--- Execute code for GS_PENALTY
+-- @param role role
+-- @param state_team active team
+function exec(role, state_team)
+   print_debug("Penalty");
+   if state_team == gamestate.TEAM_CYAN then
+      print_debug("Penalty team: cyan");
+   else
+      print_debug("Penalty team: magenta");
+   end
+end

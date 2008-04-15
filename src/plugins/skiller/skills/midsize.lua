@@ -19,9 +19,7 @@
 --  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 --  GNU Library General Public License for more details.
 --
---  You should have received a copy of the GNU General Public License
---  along with this program; if not, write to the Free Software Foundation,
---  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
+--  Read the full text in the LICENSE.GPL file in the doc directory.
 
 local require = require;
 
@@ -42,3 +40,4 @@ require("midsize.example");
 require("midsize.relgoto");
 require("midsize.goto");
 require("midsize.intercept");
+require("midsize.agent");

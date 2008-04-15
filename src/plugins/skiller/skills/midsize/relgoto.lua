@@ -19,9 +19,7 @@
 --  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 --  GNU Library General Public License for more details.
 --
---  You should have received a copy of the GNU General Public License
---  along with this program; if not, write to the Free Software Foundation,
---  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
+--  Read the full text in the LICENSE.GPL file in the doc directory.
 
 require("midsize")
 module("midsize.relgoto", midsize.module_init)
@@ -35,13 +33,11 @@ local msgid = 0;
 --- Check status of goto.
 -- @param margin the radius of a circle around the destination point,
 -- if the robot is within that circle the goto is considered final.
-function relgoto_checkstatus(margin)
-   assert(margin, "Invalid margin supplied");
-
+function relgoto_checkstatus()
    if msgid == 0 then -- we did not yet enqueue a goto message
       return S_RUNNING;
    elseif msgid == navigator:msgid() then
-      if dest_dist < margin then
+      if navigator:is_final() then
 	 return S_FINAL;
       else
 	 return S_RUNNING;
@@ -111,7 +107,7 @@ function relgoto(...)
    end
 
    -- Check if we reached the destination or if we cannot at all
-   local status = relgoto_checkstatus(margin);
+   local status = relgoto_checkstatus();
    if status ~= S_RUNNING then
       return status;
    end
@@ -134,6 +130,7 @@ function relgoto(...)
    return S_RUNNING;
 end
 
+
 relgoto_skill_doc = [==[Relative goto skill.
 This skill takes you to a position given in relative coordinates in the robot-local
 coordinate system. The orientation is the final orientation, nothing is said about the
@@ -144,7 +141,7 @@ is considered final if the robot is in a circle of 0.5m radius around the target
 The default margin is 0.2m.
 
 There are several forms to call this skill:
-1. relgoto(phi, dist[, ori[, margin])
+1. relgoto(phi, dist[, ori[, margin]])
    This will goto the position giving in the relative polar coordinates, optionally with
    the given orientation.
 2. relgoto{x=X, y=Y[, ori=ORI][, margin=MARGIN]}

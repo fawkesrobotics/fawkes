@@ -1,8 +1,8 @@
 
 ----------------------------------------------------------------------------
---  init.lua - skiller Lua initialization code
+--  play.lua - Mid-size league reactive agent: play
 --
---  Created: Mon Mar 10 17:00:35 2008
+--  Created: Tue Apr 15 11:02:16 2008
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
@@ -21,16 +21,13 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
+require("midsize");
+module("midsize.agent.play", midsize.module_init);
 
--- SKILLDIR is set by skiller before loading init.lua
-package.path  = package.path .. ";" .. SKILLDIR .. "/?.lua";
-package.cpath = package.cpath .. ";" .. LIBDIR .. "/lua/?.so";
 
--- Include C/C++ compat packages
-require("utils");
-require("config");
-require("interface");
-require("interfaces");
-
--- Base package extensions
-require("general.stringext");
+--- Execute code for GS_PLAY
+-- @param role role
+-- @param last_game_state_team game state from the last cycle
+function exec(role, last_game_state)
+   print_debug("Agent play");
+end

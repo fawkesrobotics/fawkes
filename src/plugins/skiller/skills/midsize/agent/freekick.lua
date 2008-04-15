@@ -1,8 +1,8 @@
 
 ----------------------------------------------------------------------------
---  init.lua - skiller Lua initialization code
+--  freekick.lua - Mid-size league reactive agent: free kick
 --
---  Created: Mon Mar 10 17:00:35 2008
+--  Created: Tue Apr 15 15:52:48 2008
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
@@ -21,16 +21,17 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
+require("midsize");
+module("midsize.agent.freekick", midsize.module_init);
 
--- SKILLDIR is set by skiller before loading init.lua
-package.path  = package.path .. ";" .. SKILLDIR .. "/?.lua";
-package.cpath = package.cpath .. ";" .. LIBDIR .. "/lua/?.so";
-
--- Include C/C++ compat packages
-require("utils");
-require("config");
-require("interface");
-require("interfaces");
-
--- Base package extensions
-require("general.stringext");
+--- Execute code for GS_FREE_KICK
+-- @param role role
+-- @param state_team active team
+function exec(role, state_team)
+   print_debug("Free kick");
+   if state_team == gamestate.TEAM_CYAN then
+      print_debug("Free kick team: cyan");
+   else
+      print_debug("Free kick team: magenta");
+   end
+end
