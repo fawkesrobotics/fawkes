@@ -80,9 +80,9 @@ SkillerLiaisonThread::init_failure_cleanup()
     if ( skiller )    blackboard->close(skiller);
     if ( wm_ball )    blackboard->close(wm_ball);
     if ( wm_pose )    blackboard->close(wm_pose);
-    if ( wm_ball_w )  blackboard->close(wm_ball_w);
+    //if ( wm_ball_w )  blackboard->close(wm_ball_w);
     if ( navigator )  blackboard->close(navigator);
-    if ( wm_pose_w )  blackboard->close(wm_pose_w);
+    //if ( wm_pose_w )  blackboard->close(wm_pose_w);
     if ( gamestate )  blackboard->close(gamestate);
   } catch (...) {
     // we really screwed up, can't do anything about it, ignore error, logger is
@@ -100,16 +100,16 @@ SkillerLiaisonThread::init()
   wm_ball      = NULL;
   wm_pose      = NULL;
   navigator    = NULL;
-  wm_ball_w    = NULL;
-  wm_pose_w    = NULL;
+  //wm_ball_w    = NULL;
+  //wm_pose_w    = NULL;
   gamestate    = NULL;
 
   try {
     skiller   = blackboard->open_for_writing<SkillerInterface>("Skiller");
     wm_ball   = blackboard->open_for_reading<ObjectPositionInterface>("WM Ball");
-    wm_ball_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Ball");
+    //wm_ball_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Ball");
     wm_pose   = blackboard->open_for_reading<ObjectPositionInterface>("WM Pose");
-    wm_pose_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Pose");
+    //wm_pose_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Pose");
     navigator = blackboard->open_for_reading<NavigatorInterface>("Navigator");
     gamestate = blackboard->open_for_reading<GameStateInterface>("WM GameState");
     std::list<ObjectPositionInterface *> *obs_lst = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("WM Obstacles");
@@ -141,9 +141,9 @@ SkillerLiaisonThread::finalize()
 
   blackboard->close(skiller);
   blackboard->close(wm_ball);
-  blackboard->close(wm_ball_w);
+  //blackboard->close(wm_ball_w);
   blackboard->close(wm_pose);
-  blackboard->close(wm_pose_w);
+  //blackboard->close(wm_pose_w);
   blackboard->close(navigator);
   blackboard->close(gamestate);
 }
@@ -177,9 +177,9 @@ SkillerLiaisonThread::bb_interface_reader_removed(Interface *interface,
 void
 SkillerLiaisonThread::loop()
 {
-  wm_ball_w->set_world_x(wm_ball_w->world_x() + 1);
-  wm_ball_w->set_visible(false);
-  wm_ball_w->write();
+  //wm_ball_w->set_world_x(wm_ball_w->world_x() + 1);
+  //wm_ball_w->set_visible(false);
+  //wm_ball_w->write();
 
   /* Can be used for debugging if worldmodel/localization is not available
   wm_pose_w->set_world_x(wm_pose_w->world_x() + 0.1);

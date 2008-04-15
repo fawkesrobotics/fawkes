@@ -78,10 +78,10 @@ class SkillerLiaisonThread
   SkillerExecutionThread *__exec_thread;
 
   SkillerInterface *skiller;
-  ObjectPositionInterface *wm_ball_w;
+  //ObjectPositionInterface *wm_ball_w;
   ObjectPositionInterface *wm_ball;
   ObjectPositionInterface *wm_pose;
-  ObjectPositionInterface *wm_pose_w;
+  //ObjectPositionInterface *wm_pose_w;
   NavigatorInterface      *navigator;
   GameStateInterface      *gamestate;
 

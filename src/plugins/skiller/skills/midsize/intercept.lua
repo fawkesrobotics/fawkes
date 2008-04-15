@@ -56,7 +56,7 @@ function intercept(...)
    local ball_x = wm_ball:relative_x();
    local ball_y = wm_ball:relative_y();
 
-   return relgoto{x=ball_x, y=ball_y, margin=intercept_margin};
+   return relgoto{x=ball_x, y=-ball_y, margin=intercept_margin};
 end
 
 

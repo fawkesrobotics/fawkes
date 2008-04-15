@@ -43,6 +43,7 @@ function relgoto_checkstatus()
 	 return S_RUNNING;
       end
    else
+      printf("Message in navigator interface is %u but expected %u", navigator:msgid(), msgid);
       return S_FAILED;
    end
 end
@@ -88,6 +89,7 @@ end
 
 --- Relative goto reset.
 function relgoto_reset()
+   print_debug("relgoto_reset() called");
    msgid = 0;
 end
 
@@ -113,14 +115,23 @@ function relgoto(...)
    end
 
    if navigator:has_writer() then
-      if x ~= nil and y ~= nil then
-	 -- send CartesianGotoMessage
-	 local m = navigator.CartesianGotoMessage:new(x, y, ori);
-	 msgid   = navigator:msgq_enqueue_copy(m);
-      else
-	 -- send PolarGotoMessage
-	 local m = navigator.PolarGotoMessage:new(phi, ori, ori);
-	 msgid = navigator:msgq_enqueue_copy(m);
+      if msgid == 0 then
+	 local vm = navigator.MaxVelocityMessage:new(1.0);
+	 navigator:msgq_enqueue_copy(vm);
+
+	 if x ~= nil and y ~= nil then
+	    -- send CartesianGotoMessage
+	    printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori);
+	    local m = navigator.CartesianGotoMessage:new(x, y, ori);
+	    msgid   = navigator:msgq_enqueue_copy(m);
+	 else
+	    -- send PolarGotoMessage
+	    printf("Sending PolarGotoMessage(%f, %f, %f)", phi, dist, ori);
+	    local m = navigator.PolarGotoMessage:new(phi, dist, ori);
+	    msgid = navigator:msgq_enqueue_copy(m);
+	 end
+
+	 printf("Enqueued message with ID %u", msgid);
       end
    else
       print_error("Navigator not loaded, cannot execute relgoto");
@@ -141,8 +152,8 @@ is considered final if the robot is in a circle of 0.5m radius around the target
 The default margin is 0.2m.
 
 There are several forms to call this skill:
-1. relgoto(phi, dist[, ori[, margin]])
-   This will goto the position giving in the relative polar coordinates, optionally with
+1. relgoto(x, y[, ori[, margin]])
+   This will goto the position giving in the relative cartesian coordinates, optionally with
    the given orientation.
 2. relgoto{x=X, y=Y[, ori=ORI][, margin=MARGIN]}
    Go to the relative cartesian coordinates (X,Y) with the optional final orientation ORI.
