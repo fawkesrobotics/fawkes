@@ -32,6 +32,12 @@ class GameStateInterface : public Interface
     HALF_SECOND
   } if_gamestate_half_t;
 
+  typedef enum {
+    ROLE_GOALIE,
+    ROLE_DEFENDER,
+    ROLE_ATTACKER
+  } if_gamestate_role_t;
+
   if_gamestate_t game_state();
   void set_game_state(const if_gamestate_t new_game_state);
   size_t maxlenof_game_state() const;
@@ -47,6 +53,9 @@ class GameStateInterface : public Interface
   if_gamestate_half_t half();
   void set_half(const if_gamestate_half_t new_half);
   size_t maxlenof_half() const;
+  if_gamestate_role_t role();
+  void set_role(const if_gamestate_role_t new_role);
+  size_t maxlenof_role() const;
   unsigned int score_cyan();
   void set_score_cyan(const unsigned int new_score_cyan);
   size_t maxlenof_score_cyan() const;

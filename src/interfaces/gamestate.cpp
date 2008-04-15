@@ -50,7 +50,7 @@ GameStateInterface::GameStateInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(Interface::IFT_UINT, "score_cyan", &data->score_cyan);
   add_fieldinfo(Interface::IFT_UINT, "score_magenta", &data->score_magenta);
-  unsigned char tmp_hash[] = {0x18, 0x6a, 0xf7, 0xc0, 0x53, 0x9b, 0x6b, 0x7b, 0xab, 0x64, 0x54, 0x50, 0xda, 0xd4, 0x80, 0x79};
+  unsigned char tmp_hash[] = {0xeb, 0x75, 0xc0, 0x5b, 0xf5, 0xe1, 0xc3, 0x70, 0x7f, 0xc0, 0x29, 0x93, 0x2c, 0xba, 0xfd, 0xd};
   set_hash(tmp_hash);
 }
 
@@ -208,6 +208,36 @@ void
 GameStateInterface::set_half(const if_gamestate_half_t new_half)
 {
   data->half = new_half;
+}
+
+/** Get role value.
+ * Current role of this robot
+ * @return role value
+ */
+GameStateInterface::if_gamestate_role_t
+GameStateInterface::role()
+{
+  return data->role;
+}
+
+/** Get maximum length of role value.
+ * @return length of role value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+GameStateInterface::maxlenof_role() const
+{
+  return 1;
+}
+
+/** Set role value.
+ * Current role of this robot
+ * @param new_role new role value
+ */
+void
+GameStateInterface::set_role(const if_gamestate_role_t new_role)
+{
+  data->role = new_role;
 }
 
 /** Get score_cyan value.

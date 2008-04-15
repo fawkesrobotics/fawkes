@@ -44,6 +44,15 @@
       <item name="HALF_FIRST">First half</item>
       <item name="HALF_SECOND">Second half</item>
     </enum>
+    <enum name="if_gamestate_role_t">
+      <comment>
+        Enumeration defining the different robot roles. Keep in sync with
+	worldinfo_gamestate_role_t.
+      </comment>
+      <item name="ROLE_GOALIE">Goalie</item>
+      <item name="ROLE_DEFENDER">Defender</item>
+      <item name="ROLE_ATTACKER">Attacker</item>
+    </enum>
   </constants>
   <data>
     <comment>
@@ -56,6 +65,7 @@
     <field type="if_gamestate_team_t" name="our_team">Our team color</field>
     <field type="if_gamestate_goalcolor_t" name="our_goal_color">Our own goal color</field>
     <field type="if_gamestate_half_t" name="half">Current game half</field>
+    <field type="if_gamestate_role_t" name="role">Current role of this robot</field>
     <field type="unsigned int" name="score_cyan">Score of team cyan</field>
     <field type="unsigned int" name="score_magenta">Score of team magenta</field>
   </data>

@@ -83,6 +83,16 @@ class GameStateInterface : public Interface
     HALF_SECOND /**< Second half */
   } if_gamestate_half_t;
 
+  /** 
+        Enumeration defining the different robot roles. Keep in sync with
+	worldinfo_gamestate_role_t.
+       */
+  typedef enum {
+    ROLE_GOALIE /**< Goalie */,
+    ROLE_DEFENDER /**< Defender */,
+    ROLE_ATTACKER /**< Attacker */
+  } if_gamestate_role_t;
+
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
@@ -93,6 +103,7 @@ class GameStateInterface : public Interface
     if_gamestate_team_t our_team; /**< Our team color */
     if_gamestate_goalcolor_t our_goal_color; /**< Our own goal color */
     if_gamestate_half_t half; /**< Current game half */
+    if_gamestate_role_t role; /**< Current role of this robot */
   } GameStateInterface_data_t;
 
   GameStateInterface_data_t *data;
@@ -123,6 +134,9 @@ class GameStateInterface : public Interface
   if_gamestate_half_t half();
   void set_half(const if_gamestate_half_t new_half);
   size_t maxlenof_half() const;
+  if_gamestate_role_t role();
+  void set_role(const if_gamestate_role_t new_role);
+  size_t maxlenof_role() const;
   unsigned int score_cyan();
   void set_score_cyan(const unsigned int new_score_cyan);
   size_t maxlenof_score_cyan() const;
