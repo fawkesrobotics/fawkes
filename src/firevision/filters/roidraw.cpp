@@ -33,56 +33,70 @@
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-FilterROIDraw::FilterROIDraw()
+/** Constructor.
+ * @param rois optional list of ROIs to draw additionally to the dst_roi
+ */
+FilterROIDraw::FilterROIDraw(std::list<ROI *> *rois)
   : Filter("FilterROIDraw")
 {
+  __rois = rois;
 }
 
 
 void
-FilterROIDraw::apply()
+FilterROIDraw::draw_roi(ROI *roi)
 {
   // destination y-plane
-  unsigned char *dyp  = dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step);
-  /*
-  // destination u-plane
-  register unsigned char *dup  = YUV422_PLANAR_U_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
-                                   + ((dst_roi->start.y * dst_roi->line_step) / 2 + (dst_roi->start.x * dst_roi->pixel_step) / 2) ;
-  // destination v-plane
-  register unsigned char *dvp  = YUV422_PLANAR_V_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
-                                   + ((dst_roi->start.y * dst_roi->line_step) / 2 + (dst_roi->start.x * dst_roi->pixel_step) / 2);
-  */
+  unsigned char *dyp  = dst + (roi->start.y * roi->line_step) + (roi->start.x * roi->pixel_step);
 
   // line starts
   unsigned char *ldyp = dyp;  // destination y-plane
-  /*
-  unsigned char *ldup = dup;  // destination y-plane
-  unsigned char *ldvp = dvp;  // destination y-plane
-  */
-
 
   // top border
-  for (unsigned int i = dst_roi->start.x; i < (dst_roi->start.x + dst_roi->width); ++i) {
+  for (unsigned int i = roi->start.x; i < (roi->start.x + roi->width); ++i) {
     *dyp = 255 - *dyp;
     dyp++;
   }
 
   // left and right borders
-  for (unsigned int i = dst_roi->start.y; i < (dst_roi->start.y + dst_roi->height); ++i) {
-    ldyp += dst_roi->line_step;
+  for (unsigned int i = roi->start.y; i < (roi->start.y + roi->height); ++i) {
+    ldyp += roi->line_step;
     dyp = ldyp;
     *dyp = 255 - *dyp;
-    dyp += dst_roi->width;
+    dyp += roi->width;
     *dyp = 255 - *dyp;
   }
-  ldyp += dst_roi->line_step;
+  ldyp += roi->line_step;
   dyp = ldyp;
 
   // bottom border
-  for (unsigned int i = dst_roi->start.x; i < (dst_roi->start.x + dst_roi->width); ++i) {
+  for (unsigned int i = roi->start.x; i < (roi->start.x + roi->width); ++i) {
     *dyp = 255 - *dyp;
     dyp++;
   }
+}
 
+void
+FilterROIDraw::apply()
+{
+  if ( dst_roi ) {
+    draw_roi(dst_roi);
+  }
+  if ( __rois ) {
+    for (std::list<ROI *>::iterator r = __rois->begin(); r != __rois->end(); ++r) {
+      draw_roi(*r);
+    }
+  }
+}
+
+
+/** Set ROIs.
+ * Set a list of ROIs. The list must persist as long as the filter is applied with
+ * this list. Set to NULL to have it ignored again.
+ * @param rois list of ROIs to draw additionally to the dst_roi.
+ */
+void
+FilterROIDraw::set_rois(std::list<ROI *> *rois)
+{
+  __rois = rois;
 }
