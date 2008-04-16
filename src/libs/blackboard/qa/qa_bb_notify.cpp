@@ -82,29 +82,33 @@ class QaBBEventListener
     return false;
   }
 
-  virtual void bb_interface_writer_added(Interface *interface) throw()
+  virtual void bb_interface_writer_added(Interface *interface, unsigned int instance_serial) throw()
   {
-    printf("BBIL: Writer has been added to interface %s\n", interface->uid());
+    printf("BBIL: Writer has been added to interface %s (event serial %u)\n",
+	   interface->uid(), instance_serial);
   }
 
-  virtual void bb_interface_writer_removed(Interface *interface) throw()
+  virtual void bb_interface_writer_removed(Interface *interface, unsigned int instance_serial) throw()
   {
-    printf("BBIL: Writer has been removed from interface %s\n", interface->uid());
+    printf("BBIL: Writer has been removed from interface %s (event serial %u)\n",
+	   interface->uid(), instance_serial);
   }
 
-  virtual void bb_interface_reader_added(Interface *interface) throw()
+  virtual void bb_interface_reader_added(Interface *interface, unsigned int instance_serial) throw()
   {
-    printf("BBIL: Reader has been added to interface %s\n", interface->uid());
+    printf("BBIL: Reader has been added to interface %s (event serial %u)\n",
+	   interface->uid(), instance_serial);
   }
 
-  virtual void bb_interface_reader_removed(Interface *interface) throw()
+  virtual void bb_interface_reader_removed(Interface *interface, unsigned int instance_serial) throw()
   {
-    printf("BBIL: Reader has been removed from interface %s\n", interface->uid());
+    printf("BBIL: Reader has been removed from interface %s (event serial %u)\n",
+	   interface->uid(), instance_serial);
   }
 
   virtual void add_interface(Interface *interface) throw()
   {
-    printf("Listener: Adding interface %s\n", interface->uid());
+    printf("Listener: Adding interface %s (this: %p)\n", interface->uid(), this);
     bbil_add_data_interface(interface);
     try {
       if ( ! interface->is_writer() ) {
