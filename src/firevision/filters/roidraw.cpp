@@ -36,7 +36,7 @@
 /** Constructor.
  * @param rois optional list of ROIs to draw additionally to the dst_roi
  */
-FilterROIDraw::FilterROIDraw(std::list<ROI *> *rois)
+FilterROIDraw::FilterROIDraw(std::list<ROI> *rois)
   : Filter("FilterROIDraw")
 {
   __rois = rois;
@@ -83,8 +83,8 @@ FilterROIDraw::apply()
     draw_roi(dst_roi);
   }
   if ( __rois ) {
-    for (std::list<ROI *>::iterator r = __rois->begin(); r != __rois->end(); ++r) {
-      draw_roi(*r);
+    for (std::list<ROI>::iterator r = __rois->begin(); r != __rois->end(); ++r) {
+      draw_roi(&(*r));
     }
   }
 }
@@ -96,7 +96,7 @@ FilterROIDraw::apply()
  * @param rois list of ROIs to draw additionally to the dst_roi.
  */
 void
-FilterROIDraw::set_rois(std::list<ROI *> *rois)
+FilterROIDraw::set_rois(std::list<ROI> *rois)
 {
   __rois = rois;
 }
