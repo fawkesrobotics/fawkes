@@ -51,7 +51,9 @@ const unsigned int ObjectPositionInterface::TYPE_OPPONENT = 2;
 /** TYPE_TEAMMEMBER constant */
 const unsigned int ObjectPositionInterface::TYPE_TEAMMEMBER = 3;
 /** TYPE_LINE constant */
-const unsigned int ObjectPositionInterface::TYPE_LINE = 3;
+const unsigned int ObjectPositionInterface::TYPE_LINE = 4;
+/** TYPE_SELF constant */
+const unsigned int ObjectPositionInterface::TYPE_SELF = 5;
 /** FLAG_NONE constant */
 const unsigned int ObjectPositionInterface::FLAG_NONE = 0;
 /** FLAG_HAS_WORLD constant */
@@ -110,7 +112,7 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "world_y_velocity", &data->world_y_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "world_z_velocity", &data->world_z_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "xyz_velocity_covariance", &data->xyz_velocity_covariance);
-  unsigned char tmp_hash[] = {0xaa, 0x60, 0x95, 0x1a, 0x90, 0x18, 0x4e, 0xab, 0x61, 00, 0x5d, 0xe, 0x54, 0x7f, 0xbc, 0x47};
+  unsigned char tmp_hash[] = {0x7, 0x9d, 0x6f, 0x5f, 0x97, 0xb1, 0xfe, 0xa, 0xbb, 0xcb, 0xaf, 0x41, 0x31, 0xd4, 0x9d, 0x15};
   set_hash(tmp_hash);
 }
 

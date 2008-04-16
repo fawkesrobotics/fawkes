@@ -6,6 +6,7 @@ class ObjectPositionInterface : public Interface
   static const unsigned int TYPE_OPPONENT;
   static const unsigned int TYPE_TEAMMEMBER;
   static const unsigned int TYPE_LINE;
+  static const unsigned int TYPE_SELF;
   static const unsigned int FLAG_NONE;
   static const unsigned int FLAG_HAS_WORLD;
   static const unsigned int FLAG_HAS_RELATIVE_CARTESIAN;

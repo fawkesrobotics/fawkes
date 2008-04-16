@@ -16,9 +16,12 @@
     <constant type="unsigned int" value="3" name="TYPE_TEAMMEMBER">
       This constant denotes a robot of the same team.
     </constant>
-    <constant type="unsigned int" value="3" name="TYPE_LINE">
+    <constant type="unsigned int" value="4" name="TYPE_LINE">
       The represented object is a line. The starting point is given in world_x/y/z
       and the end point is pointed to by a vector stored in extent_x/y/z.
+    </constant>
+    <constant type="unsigned int" value="5" name="TYPE_SELF">
+      This constant denotes my own position.
     </constant>
 
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
