@@ -62,7 +62,7 @@ HomPose::HomPose(float x, float y, float z, float roll, float pitch, float yaw)
 }
 
 /** Copy constructor.
- * @parm h a homoegeneous coordinate
+ * @param h a homogeneous coordinate
  */
 HomPose::HomPose(const HomCoord& h)
   : HomPoint(h)
