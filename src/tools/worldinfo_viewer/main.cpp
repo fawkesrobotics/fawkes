@@ -24,7 +24,7 @@
 
 #include <tools/worldinfo_viewer/worldinfo_viewer.h>
 #include <tools/worldinfo_viewer/backend_thread.h>
-#include <tools/worldinfo_viewer/data_container.h>
+#include <worldinfo_utils/data_container.h>
 #include <utils/system/hostinfo.h>
 #include <config/sqlite.h>
 

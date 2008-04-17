@@ -22,13 +22,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/worldinfo_viewer/data_container.h>
+#include <worldinfo_utils/data_container.h>
 #include <cmath>
 
 using namespace std;
 
-/** @class WorldInfoDataContainer <tools/worldinfo_viewer/data_container.h>
- * Central data container of the worldinfo viewer application.
+/** @class WorldInfoDataContainer <worldinfo_utils/data_container.h>
+ * Data container to store and exchange worldinfo data.
  * @author Daniel Beck
  */
 

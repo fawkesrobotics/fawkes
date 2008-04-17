@@ -30,7 +30,7 @@
 #include <cstdio>
 
 /** @class Vector geometry/vector.h
- * 
+ * A simple column vector.
  * @author Daniel Beck
  */
 

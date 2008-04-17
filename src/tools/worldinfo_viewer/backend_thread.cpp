@@ -23,7 +23,7 @@
  */
 
 #include <tools/worldinfo_viewer/backend_thread.h>
-#include <tools/worldinfo_viewer/data_container.h>
+#include <worldinfo_utils/data_container.h>
 #include <netcomm/worldinfo/transceiver.h>
 
 /** @class WorldInfoViewerBackendThread <tools/worldinfo_viewer/backend_thread.h>
