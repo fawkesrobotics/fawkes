@@ -113,7 +113,7 @@ ArgumentParser::ArgumentParser(int argc, char **argv, const char *opt_string, op
 	throw MissingArgumentException(c);
       }
       sprintf(tmp, "%c", c);
-      _opts[ strdup(tmp) ] = optarg;
+      _opts[ tmp ] = optarg;
     }
   } else {
     int opt_ind = 0;
@@ -123,11 +123,11 @@ ArgumentParser::ArgumentParser(int argc, char **argv, const char *opt_string, op
 	throw UnknownArgumentException(c);
       } else if (c == 0) {
 	// long options
-	_opts[ strdup(long_options[opt_ind].name) ] = optarg;
+	_opts[ long_options[opt_ind].name ] = optarg;
       } else {
 	char tmp[2];
 	sprintf(tmp, "%c", c);
-	_opts[ strdup(tmp) ] = optarg;
+	_opts[ tmp ] = optarg;
       }
     }
   }
@@ -145,11 +145,7 @@ ArgumentParser::ArgumentParser(int argc, char **argv, const char *opt_string, op
 ArgumentParser::~ArgumentParser()
 {
   free(_program_name);
-  while ( ! _opts.empty() ) {
-    char *tmp = (*(_opts.begin())).first;
-    _opts.erase(_opts.begin());
-    free(tmp);
-  }
+  _opts.clear();
 }
 
 

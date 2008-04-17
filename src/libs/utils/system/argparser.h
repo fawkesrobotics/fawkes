@@ -30,11 +30,8 @@
 
 #include <utils/misc/string_compare.h>
 #include <vector>
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
-#  include <tr1/unordered_map>
-#else
-#  include <ext/hash_map>
-#endif
+#include <map>
+#include <string>
 
 #include <getopt.h>
 
@@ -84,14 +81,8 @@ class ArgumentParser
   const char **  argv() const;
 
  private:
-
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
-  std::tr1::unordered_map< char *, const char *, std::tr1::hash<char *>, StringEquality > _opts;
-  std::tr1::unordered_map< char *, const char *, std::tr1::hash<char *>, StringEquality >::const_iterator  _opts_cit;
-#else
-  __gnu_cxx::hash_map< char *, const char *, __gnu_cxx::hash<char *>, StringEquality > _opts;
-  __gnu_cxx::hash_map< char *, const char *, __gnu_cxx::hash<char *>, StringEquality >::const_iterator  _opts_cit;
-#endif
+  std::map<std::string, const char *> _opts;
+  std::map<std::string, const char *> _opts_cit;
   std::vector< const char * >  _items;
 
   char *  _program_name;
