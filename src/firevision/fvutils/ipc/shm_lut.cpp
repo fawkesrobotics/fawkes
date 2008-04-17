@@ -105,6 +105,8 @@ SharedMemoryLookupTable::constructor(const char *lut_id,
 /** Destructor. */
 SharedMemoryLookupTable::~SharedMemoryLookupTable()
 {
+  delete __priv_header;
+  ::free(__lut_id);
 }
 
 

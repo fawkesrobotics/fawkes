@@ -54,6 +54,9 @@ class FireVisionDataFile
   virtual void write(const char *file_name);
   virtual void read(const char *file_name);
 
+  static unsigned short int read_magic_token(const char *filename);
+  static bool has_magic_token(const char *filename, unsigned short int magic_token);
+
   /** List of FireVision data file blocks. */
   typedef std::list<FireVisionDataFileBlock *> BlockList;
   BlockList &  blocks();

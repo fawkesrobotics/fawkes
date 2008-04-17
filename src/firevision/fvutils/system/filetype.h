@@ -29,6 +29,7 @@
 
 #include <utils/system/filetype.h>
 #include <fvutils/readers/fvraw.h>
+#include <fvutils/colormap/cmfile.h>
 #include <string>
 
 inline std::string
@@ -39,6 +40,8 @@ fv_filetype_file(const char *filename)
   if ( rv == "data" ) {
     if ( FvRawReader::is_FvRaw(filename) ) {
       rv = "FvRaw";
+    } else if ( ColormapFile::is_colormap_file(filename) ) {
+      rv = "FvColormap";
     }
   }
 

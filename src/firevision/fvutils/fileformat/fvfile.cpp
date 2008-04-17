@@ -407,3 +407,39 @@ FireVisionDataFile::read(const char *file_name)
 
   fclose(f);
 }
+
+
+/** Get magic token from file.
+ * @param filename name of file to read the magic token from
+ * @return magic token
+ */
+unsigned short int
+FireVisionDataFile::read_magic_token(const char *filename)
+{
+  uint16_t magic_token = 0;
+
+  FILE *f;
+  f = fopen(filename, "r");
+  if (f != NULL) {
+    if ( fread((char *)&magic_token, sizeof(magic_token), 1, f) != 1 ) {
+      fclose(f);
+      throw FileReadException(filename, errno, "Could not read magic token from file");
+    }
+  }
+  fclose(f);
+
+  return magic_token;
+}
+
+
+/** Check if file has a certain magic token.
+ * @param filename name of file to read the magic token from
+ * @param magic_token magic token to look for
+ * @return true if magic token was  found, false otherwise
+ */
+bool
+FireVisionDataFile::has_magic_token(const char *filename, unsigned short int magic_token)
+{
+  uint16_t file_magic_token = read_magic_token(filename);
+  return (htons(magic_token) == file_magic_token);
+}
