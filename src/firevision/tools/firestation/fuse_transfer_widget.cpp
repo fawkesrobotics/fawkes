@@ -23,7 +23,7 @@
  */
 
 #include <tools/firestation/fuse_transfer_widget.h>
-#include <tools/firestation/lut_viewer_widget.h>
+#include <tools/firestation/colormap_viewer_widget.h>
 
 #include <fvutils/net/fuse_client.h>
 #include <fvutils/net/fuse_message.h>
@@ -44,8 +44,8 @@
 /** Constructor. */
 FuseTransferWidget::FuseTransferWidget()
 {
-  m_local_lut_viewer = new LutViewerWidget();
-  m_remote_lut_viewer = new LutViewerWidget();
+  m_local_colormap_viewer  = new ColormapViewerWidget();
+  m_remote_colormap_viewer = new ColormapViewerWidget();
 
   m_local_lut_list = Gtk::ListStore::create(m_lut_record);
   m_remote_lut_list = Gtk::ListStore::create(m_lut_record);
@@ -72,8 +72,8 @@ FuseTransferWidget::FuseTransferWidget()
 /** Destructor. */
 FuseTransferWidget::~FuseTransferWidget()
 {
-  delete m_local_lut_viewer;
-  delete m_remote_lut_viewer;
+  delete m_local_colormap_viewer;
+  delete m_remote_colormap_viewer;
 
   FuseClient* c;
   m_new_clients.lock();
@@ -207,7 +207,7 @@ void
 FuseTransferWidget::set_local_img(Gtk::Image* img)
 {
   m_img_local = img;
-  m_local_lut_viewer->set_lut_img(m_img_local);
+  m_local_colormap_viewer->set_colormap_img(m_img_local);
 }
 
 /** Set the Image to display the remote LUT.
@@ -217,7 +217,7 @@ void
 FuseTransferWidget::set_remote_img(Gtk::Image* img)
 {
   m_img_remote = img;
-  m_remote_lut_viewer->set_lut_img(m_img_remote);
+  m_remote_colormap_viewer->set_colormap_img(m_img_remote);
 }
 
 /** Set the TreeView for the list of local LUTs.
@@ -317,7 +317,7 @@ FuseTransferWidget::update_local_lut()
   if ( !m_img_local )
     { return; }
 
-  m_local_lut_viewer->draw();
+  m_local_colormap_viewer->draw();
 }
 
 void
@@ -326,7 +326,7 @@ FuseTransferWidget::update_remote_lut()
   if ( !m_img_remote )
     { return; }
 
-  m_remote_lut_viewer->draw();
+  m_remote_colormap_viewer->draw();
 }
 
 void
@@ -348,7 +348,7 @@ FuseTransferWidget::local_lut_selected()
       // TODO
     }
 
-  m_local_lut_viewer->set_colormap(m_local_lut);
+  m_local_colormap_viewer->set_colormap(m_local_lut);
   update_local_lut();
 }
 
@@ -450,7 +450,7 @@ FuseTransferWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
 	{
 	  e.print_trace();
 	}
-      m_remote_lut_viewer->set_colormap(m_remote_lut);
+      m_remote_colormap_viewer->set_colormap(m_remote_lut);
       m_signal_update_remote_lut();
 
       m_delete_clients.push_locked(m_cur_client.client);

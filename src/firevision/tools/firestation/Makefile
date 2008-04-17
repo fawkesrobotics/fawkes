@@ -30,7 +30,7 @@ OBJS_firestation = color_train_widget.o         \
 		   mirror_calib.o		\
 		   fuse_transfer_widget.o	\
 		   fuse_image_list_widget.o     \
-		   lut_viewer_widget.o		\
+		   colormap_viewer_widget.o	\
 	           firestation.o		\
 		   main.o
 OBJS_all += $(OBJS_firestation)

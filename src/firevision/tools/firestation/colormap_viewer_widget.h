@@ -22,29 +22,29 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_FIRESTATION_LUT_VIEWER_WIDGET_H_
-#define __FIREVISION_TOOLS_FIRESTATION_LUT_VIEWER_WIDGET_H_
+#ifndef __FIREVISION_TOOLS_FIRESTATION_COLORMAP_VIEWER_WIDGET_H_
+#define __FIREVISION_TOOLS_FIRESTATION_COLORMAP_VIEWER_WIDGET_H_
 
 #include <gtkmm.h>
 
 class YuvColormap;
 
-class LutViewerWidget
+class ColormapViewerWidget
 {
  public:
-  LutViewerWidget();
-  ~LutViewerWidget();
+  ColormapViewerWidget();
+  ~ColormapViewerWidget();
 
   void set_colormap(YuvColormap* cm);
-  void set_lut_img(Gtk::Image* img);
+  void set_colormap_img(Gtk::Image* img);
   
   void draw(unsigned int y_layer = 0);
 
  private:
   YuvColormap* m_cm;
 
-  Gtk::Image* m_img_lut;
-  unsigned char* m_lut_img_buf;
+  Gtk::Image* m_img_colormap;
+  unsigned char* m_colormap_img_buf;
 };
 
-#endif /* #define __FIREVISION_TOOLS_FIRESTATION_LUT_VIEWER_WIDGET_H_ */
+#endif /* #define __FIREVISION_TOOLS_FIRESTATION_COLORMAP_VIEWER_WIDGET_H_ */

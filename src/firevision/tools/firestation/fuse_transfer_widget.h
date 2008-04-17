@@ -32,7 +32,7 @@
 
 class FuseClient;
 class YuvColormap;
-class LutViewerWidget;
+class ColormapViewerWidget;
 
 class FuseTransferWidget : FuseClientHandler
 {
@@ -119,8 +119,8 @@ class FuseTransferWidget : FuseClientHandler
   Glib::Dispatcher m_signal_delete_client;
   Glib::Dispatcher m_signal_update_remote_lut;
 
-  LutViewerWidget* m_local_lut_viewer;
-  LutViewerWidget* m_remote_lut_viewer;
+  ColormapViewerWidget* m_local_colormap_viewer;
+  ColormapViewerWidget* m_remote_colormap_viewer;
 
   Gtk::Button* m_btn_upload;
   Gtk::Button* m_btn_download;

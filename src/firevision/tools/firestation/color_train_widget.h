@@ -30,7 +30,7 @@
 
 #include <gtkmm.h>
 
-class LutViewerWidget;
+class ColormapViewerWidget;
 class BayesColormapGenerator;
 class Zauberstab;
 class YuvColormap;
@@ -90,7 +90,7 @@ class ColorTrainWidget
 
   BayesColormapGenerator* m_generator;
   Zauberstab* m_zauberstab;
-  LutViewerWidget* m_lvw;
+  ColormapViewerWidget* m_lvw;
   
   hint_t m_fg_object;
 

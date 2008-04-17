@@ -22,7 +22,7 @@
  */
 
 #include <tools/firestation/color_train_widget.h>
-#include <tools/firestation/lut_viewer_widget.h>
+#include <tools/firestation/colormap_viewer_widget.h>
 #include <fvutils/color/yuv.h>
 #include <fvutils/color/zauberstab.h>
 #include <fvutils/color/colorspaces.h>
@@ -50,7 +50,7 @@ ColorTrainWidget::ColorTrainWidget(Gtk::Window* parent)
 {
   m_generator = 0;
   m_zauberstab = new Zauberstab();
-  m_lvw = new LutViewerWidget();
+  m_lvw = new ColormapViewerWidget();
 
   m_src_buffer = 0;
   m_draw_buffer = 0;
@@ -258,7 +258,7 @@ ColorTrainWidget::set_save_lut_btn(Gtk::Button* btn)
 void
 ColorTrainWidget::set_lut_img(Gtk::Image* img)
 {
-  m_lvw->set_lut_img(img);
+  m_lvw->set_colormap_img(img);
 }
 
 /** Set the image to render the segmented image into.
