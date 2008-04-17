@@ -335,10 +335,6 @@ class FireVisionNetworkTool
 					    /* bytes per cell */ 1);
     delete cm;
 
-    printf("Sending LUT, w:%u h:%u d:%u bpc: %u\n", lc->width(), lc->height(), lc->depth(),
-	   lc->bytes_per_cell());
-
-    printf("Enqueueing setlut message of size %zu\n", lc->payload_size());
     __client->enqueue(new FuseNetworkMessage(FUSE_MT_SET_LUT, lc));
   }
 

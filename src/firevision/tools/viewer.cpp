@@ -58,13 +58,15 @@
 void
 print_usage(const char *program_name)
 {
-  printf("Usage: %s [-c] [-s shmem_id] [-n host[:port]/image_id] [-f file] [-v] [cam arg string]\n"
+  printf("Usage: %s [-c] [-s shmem_id] [-n host[:port]/image_id] [-f file] [-v] \\\n"
+	 "          [-d delay] [cam arg string]\n\n"
          "  -c             Start in continuous update mode\n"
 	 "  -s shmem_id    Open shared memory image with given ID\n"
 	 "  -n net_string  Open network camera, the camera string is of the form\n"
 	 "                 host[:port]/image_id. You have to specify at least the host\n"
 	 "                 and the image_id, the port is optional and defaults to 5000\n"
 	 "  -j             Receive JPEG images, only valid with -n\n"
+	 "  -d delay       Delay in ms before a new image is capture.\n"
 	 "  -f file        Open file loader camera with given file (image, colormap)\n"
 	 "  -v             Verbose output on console\n"
 	 "  cam arg string Can be an arbitrary camera argument string that is understood\n"
@@ -76,9 +78,11 @@ void
 print_keys()
 {
   printf("Keys:\n"
-	 "  c        continuous mode (automatic image updating as fast as possible)\n"
+	 "  c        Toggle continuous mode (automatic image updating as fast as possible)\n"
 	 "  r        rectify image, will query for rectification info file and possibly\n"
 	 "           for camera if there is more than one block.\n"
+	 "  +        Increase delay by 5 ms\n"
+	 "  -        Decrease delay by 5 ms\n"
 	 "  Shift-R  rectify image, use already loaded lut info file, do not query for\n"
 	 "           new file\n"
 	 "  Space    Refresh image\n"
@@ -99,7 +103,7 @@ process_gtk_events()
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hs:f:n:vjc");
+  ArgumentParser argp(argc, argv, "hs:f:n:vjcd:");
 
 #ifdef HAVE_GTKMM
   Gtk::Main gtk_main(argc, argv);
@@ -107,6 +111,12 @@ main(int argc, char **argv)
 
   Camera *cam;
   bool verbose = argp.has_arg("v");
+  int delay = 0;
+
+  if ( argp.has_arg("d") ) {
+    delay = atoi(argp.arg("d"));
+    if ( delay < 0 )  delay = 0;
+  }
 
   if ( argp.has_arg("h") ) {
     print_usage(argp.program_name());
@@ -186,10 +196,12 @@ main(int argc, char **argv)
     printf("Camera opened, settings:\n"
 	   "  Colorspace:  %u (%s)\n"
 	   "  Dimensions:  %u x %u\n"
-	   "  Buffer size: %zu\n",
+	   "  Buffer size: %zu\n"
+	   "  Delay:       %i ms\n",
 	   cam->colorspace(), colorspace_to_string(cam->colorspace()),
 	   cam->pixel_width(), cam->pixel_height(),
-	   colorspace_buffer_size(cam->colorspace(), cam->pixel_width(), cam->pixel_height()));
+	   colorspace_buffer_size(cam->colorspace(), cam->pixel_width(), cam->pixel_height()),
+	   delay);
   }
 
   ImageDisplay *display = new ImageDisplay(cam->pixel_width(), cam->pixel_height());
@@ -221,7 +233,6 @@ main(int argc, char **argv)
 	break;
       case SDL_KEYUP:
 	if ( event.key.keysym.sym == SDLK_SPACE ) {
-	  usleep(100);
 	  cam->capture();
           if (cam->buffer() != NULL ) {
 #ifdef HAVE_RECTINFO
@@ -245,6 +256,7 @@ main(int argc, char **argv)
             printf("No valid frame received\n");
           }
 	  if ( continuous ) {
+	    usleep(delay * 1000);
 	    SDL_PushEvent(&redraw_event);
 	  }
 	} else if ( event.key.keysym.sym == SDLK_ESCAPE ) {
@@ -252,8 +264,18 @@ main(int argc, char **argv)
 	} else if ( event.key.keysym.sym == SDLK_q ) {
 	  quit = true;
 	} else if ( event.key.keysym.sym == SDLK_c ) {
-	  continuous = true;
+	  continuous = ! continuous;
 	  SDL_PushEvent(&redraw_event);
+	} else if ( event.key.keysym.sym == SDLK_PLUS ) {
+	  delay += 5;
+	  printf("New delay: %i ms\n", delay);
+	} else if ( event.key.keysym.sym == SDLK_MINUS ) {
+	  if ( delay > 5 ) {
+	    delay -= 5;
+	  } else {
+	    delay = 0;
+	  }
+	  printf("New delay: %i ms\n", delay);
 	} else if ( event.key.keysym.sym == SDLK_r ) {
 #ifdef HAVE_GTKMM
 #  ifdef HAVE_RECTINFO
