@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  hom_point.h - Homogenous point
+ *  hom_pose.h - Homogenous Pose
  *
- *  Created: Thu Sep 27 16:55:50 2007
- *  Copyright  2007-2008  Daniel Beck
+ *  Created: Sun April 13 16:10:45 2008
+ *  Copyright  2008  Daniel Beck
  *
  *  $Id$
  *
@@ -23,24 +23,42 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __GEOMETRY_HOM_POINT_H_
-#define __GEOMETRY_HOM_POINT_H_
+#ifndef __GEOMETRY_HOM_POSE_H_
+#define __GEOMETRY_HOM_POSE_H_
 
-#include <geometry/hom_coord.h>
+#include <geometry/hom_point.h>
 
-class HomVector;
-
-class HomPoint : public HomCoord
+class HomPose : public HomPoint
 {
  public:
-  HomPoint(float x = 0.0, float y = 0.0, float z = 0.0);
-  HomPoint(const HomCoord& h);
-  virtual ~HomPoint();
+  HomPose(float x = 0, float y = 0, float yaw = 0);
+  HomPose( float x, float y, float z, 
+	   float roll, float pitch, float yaw );
+  HomPose(const HomCoord& h);
+  virtual ~HomPose();
+  
+  float  roll() const;
+  float& roll();
+  void   roll(float roll);
 
-  float distance() const;
+  float  pitch() const;
+  float& pitch();
+  void   pitch(float pitch);
 
-  HomPoint& move(float dx, float dy, float dz);
-  HomPoint& move_to(float x, float y, float z);
+  float  yaw() const;
+  float& yaw();
+  void   yaw(float yaw);
+
+  HomPoint pos() const;
+
+  virtual HomPose& rotate_x(float rad);
+  virtual HomPose& rotate_y(float rad);
+  virtual HomPose& rotate_z(float rad);
+
+ private:
+  float m_roll;
+  float m_pitch;
+  float m_yaw;
 };
 
-#endif /* __GEOMETRY_HOM_POINT_H_ */
+#endif /* __GEOMETRY_HOM_POSE_H_ */

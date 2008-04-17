@@ -235,7 +235,7 @@ HomCoord::rotate_z(float rad)
 HomCoord
 HomCoord::operator-(const HomCoord& h) const
 {
-  HomCoord result;
+  HomCoord result = *this;
   result -= h;
 
   return result;
@@ -263,7 +263,7 @@ HomCoord::operator-=(const HomCoord& h)
 HomCoord
 HomCoord::operator+(const HomCoord& h) const
 {
-  HomCoord result;
+  HomCoord result = *this;
   result += h;
 
   return result;

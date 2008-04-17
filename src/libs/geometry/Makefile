@@ -17,7 +17,7 @@
 
 BASEDIR = ../../..
 
-LIBS_libgeometry = stdc++ core
+LIBS_libgeometry = stdc++
 OBJS_libgeometry = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
 OBJS_all = $(OBJS_libgeometry)

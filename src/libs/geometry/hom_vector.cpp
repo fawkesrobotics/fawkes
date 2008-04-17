@@ -25,6 +25,8 @@
 
 #include <geometry/hom_vector.h>
 #include <cmath>
+#include <cstdio>
+#include <exception>
 
 /** @class HomVector geometry/hom_vector.h
  * A homogeneous vector.
@@ -47,6 +49,11 @@ HomVector::HomVector(float x, float y, float z)
 HomVector::HomVector(const HomCoord& h)
   : HomCoord(h)
 {
+  if ( 0.0 != w() )
+    { 
+      printf("HomVector(const HomCoord& h): The fourth component of a homogeneous vector has to be 0.0\n"); 
+      throw std::exception();
+    }
 }
 
 /** Destructor. */

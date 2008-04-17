@@ -53,9 +53,9 @@ class HomCoord
   virtual float& w();
   virtual void   w(float w);
 
-  HomCoord& rotate_x(float rad);
-  HomCoord& rotate_y(float rad);
-  HomCoord& rotate_z(float rad);
+  virtual HomCoord& rotate_x(float rad);
+  virtual HomCoord& rotate_y(float rad);
+  virtual HomCoord& rotate_z(float rad);
 
   virtual HomCoord  operator-(const HomCoord& h) const;
   virtual HomCoord& operator-=(const HomCoord& h);

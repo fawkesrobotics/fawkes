@@ -26,6 +26,8 @@
 #include <geometry/hom_point.h>
 #include <geometry/hom_vector.h>
 #include <cmath>
+#include <cstdio>
+#include <exception>
 
 /** @class HomPoint geometry/hom_point.h
  * A homogeneous point.
@@ -48,6 +50,11 @@ HomPoint::HomPoint(float x, float y, float z)
 HomPoint::HomPoint(const HomCoord& h)
   : HomCoord(h)
 {
+  if ( 1.0 != w() )
+    { 
+      printf("HomPoint(const HomCoord& h): The forth component of a homogeneous point has to be 1.0\n");
+      throw std::exception(); 
+    }
 }
 
 /** Destructor */
