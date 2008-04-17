@@ -83,14 +83,13 @@ class ColorTrainWidget
   void resize_seg_image(Gtk::Allocation& allocation);
   bool set_threshold(Gtk::ScrollType scroll, double value);
   bool set_min_prob(Gtk::ScrollType scroll, double value);
-  bool set_cm_layer(Gtk::ScrollType scroll, double value);
   void set_cm_depth();
 
   void reset_gui();
 
   BayesColormapGenerator* m_generator;
   Zauberstab* m_zauberstab;
-  ColormapViewerWidget* m_lvw;
+  ColormapViewerWidget* m_cvw;
   
   hint_t m_fg_object;
 
@@ -115,7 +114,6 @@ class ColorTrainWidget
   Gtk::Image* m_img_segmentation;
   Gtk::Scale* m_scl_threshold;
   Gtk::Scale* m_scl_min_prob;
-  Gtk::Scale* m_scl_cm_layer_selector;
   Gtk::FileChooserDialog* m_fcd_filechooser;
 
   Glib::Dispatcher* m_update_img;

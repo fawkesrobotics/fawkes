@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  lut_viewer_widget.h - Viwer widget for lookup tables
+ *  colormap_viewer_widget.h - Viwer widget for colormaps
  *
  *  Created: Thu Mar 20 19:03:02 2008
  *  Copyright  2008  Daniel Beck
@@ -27,7 +27,7 @@
 
 #include <gtkmm.h>
 
-class YuvColormap;
+class Colormap;
 
 class ColormapViewerWidget
 {
@@ -35,15 +35,19 @@ class ColormapViewerWidget
   ColormapViewerWidget();
   ~ColormapViewerWidget();
 
-  void set_colormap(YuvColormap* cm);
+  void set_colormap(Colormap* cm);
   void set_colormap_img(Gtk::Image* img);
+  void set_layer_selector(Gtk::Scale* scl);
   
-  void draw(unsigned int y_layer = 0);
+  void draw(unsigned int layer = 0);
 
  private:
-  YuvColormap* m_cm;
+  bool on_layer_selected(Gtk::ScrollType scroll, double value);
+
+  Colormap* m_cm;
 
   Gtk::Image* m_img_colormap;
+  Gtk::Scale* m_scl_layer_selector;
   unsigned char* m_colormap_img_buf;
 };
 

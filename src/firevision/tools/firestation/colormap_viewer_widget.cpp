@@ -23,12 +23,12 @@
  */
 
 #include <tools/firestation/colormap_viewer_widget.h>
-#include <models/color/lookuptable.h>
+#include <fvutils/colormap/colormap.h>
 #include <fvutils/scalers/lossy.h>
 #include <fvutils/color/conversions.h>
 
 /** @class ColormapViewerWidget <tools/firestation/colormap_viewer_widget.h>
- * Displays a colormap in an Gtk::Image.
+ * Select a layer from a colormap and render it to a Gtk::Image.
  * @author Daniel Beck
  */
 
@@ -37,6 +37,7 @@ ColormapViewerWidget::ColormapViewerWidget()
 {
   m_cm = 0;
   m_img_colormap = 0;
+  m_scl_layer_selector = 0;
   m_colormap_img_buf = 0;
 }
 
@@ -44,16 +45,23 @@ ColormapViewerWidget::ColormapViewerWidget()
 ColormapViewerWidget::~ColormapViewerWidget()
 {
   free(m_colormap_img_buf);
-  delete m_img_colormap;
 }
 
 /** Set the colormap to display.
  * @param cm colormap
  */
 void
-ColormapViewerWidget::set_colormap(YuvColormap *cm)
+ColormapViewerWidget::set_colormap(Colormap *cm)
 {
   m_cm = cm;
+
+  if (m_scl_layer_selector)
+    {
+      double max = m_cm->deepness();
+      m_scl_layer_selector->set_range(0.0, max);
+      m_scl_layer_selector->set_increments(1.0, 1.0);
+      m_scl_layer_selector->set_value(0.0);
+    }
 }
 
 /** Set the image to render into.
@@ -65,27 +73,56 @@ ColormapViewerWidget::set_colormap_img(Gtk::Image* img)
   m_img_colormap = img;
 }
 
-/** Draw the COLORMAP. 
- * @param y_layer the layer on the Y axis to be drawn
+/** Set the selector widget to choose the layer of the colormap which gets rendered.
+ * @param scl a Gtk::Scale
  */
 void
-ColormapViewerWidget::draw(unsigned int y_layer)
+ColormapViewerWidget::set_layer_selector(Gtk::Scale* scl)
+{
+  m_scl_layer_selector = scl;
+
+  double max;
+  if (m_cm)
+    { max = m_cm->deepness(); }
+  else
+    { max = 256.0; }
+  m_scl_layer_selector->set_range(0.0, max);
+  m_scl_layer_selector->set_increments(1.0, 1.0);
+  m_scl_layer_selector->set_value(0.0);
+
+  m_scl_layer_selector->signal_change_value().connect( sigc::mem_fun(*this, &ColormapViewerWidget::on_layer_selected) );
+}
+
+bool
+ColormapViewerWidget::on_layer_selected(Gtk::ScrollType scroll, double value)
+{
+  unsigned int layer = (unsigned int) rint(value);
+  draw(layer);
+
+  return true;
+}
+
+/** Draw the colormap. 
+ * @param layer the plane in the third dimension of the colormap to be drawn
+ */
+void
+ColormapViewerWidget::draw(unsigned int layer)
 {
   if (m_cm == 0 || m_img_colormap == 0)
     { return; }
 
-  if ( y_layer < 0 || y_layer > 255 )
+  if ( layer < 0 || layer >= m_cm->deepness() )
     { return; }
 
-  unsigned int layer = (y_layer * m_cm->depth()) / 255;
+  unsigned int cm_layer = (layer * m_cm->depth()) / m_cm->deepness();
 
   unsigned char* colormap_buffer = (unsigned char*) malloc( colorspace_buffer_size(YUV422_PLANAR, m_cm->width() * 2, m_cm->height() * 2) );
-  m_cm->to_image(colormap_buffer, layer);
+  m_cm->to_image(colormap_buffer, cm_layer);
 
-  unsigned int img_width = (unsigned int) m_img_colormap->get_width();
+  unsigned int img_width  = (unsigned int) m_img_colormap->get_width();
   unsigned int img_height = (unsigned int) m_img_colormap->get_height();
 
-  img_width = (img_width < img_height) ? img_width : img_height;
+  img_width  = (img_width < img_height) ? img_width : img_height;
   img_height = (img_width < img_height) ? img_width : img_height;
   
   // scale
