@@ -105,7 +105,12 @@ SurfClassifier::SurfClassifier( const char * object_file,
   //#ifdef SURF_TIMETRACKER
   __tt->ping_start(__ttc_objconv);
   //#endif
-  
+
+  if( !object_file && object_file == "" ) {
+    throw Exception("empty object file");
+  }  
+  std::cout << "SurfClassifier(classify): opening object image file '" << object_file << "'" << std::endl;
+
   PNGReader pngr( object_file );
   unsigned char* buf = malloc_buffer( pngr.colorspace(), pngr.pixel_width(), pngr.pixel_height() );
   pngr.set_buffer( buf );
@@ -127,7 +132,7 @@ SurfClassifier::SurfClassifier( const char * object_file,
   //__obj_img->setFrame( buf );
 
   if ( ! __obj_img ) {
-    throw Exception("Could not load object file");
+    throw Exception("Could not load object file '%s'", object_file);
   }
 
   //#ifdef SURF_TIMETRACKER
@@ -182,6 +187,9 @@ SurfClassifier::SurfClassifier( const char * object_file,
     throw Exception("Could not compute object features");
   }
   std::cout << "SurfClassifier(classify): computed '" << __obj_num_features << "' features from object" << std::endl;
+
+  // CleanUp
+  delete __simage;
 
   //#ifdef SURF_TIMETRACKER
   __tt->ping_end(__ttc_objfeat);
@@ -361,13 +369,17 @@ SurfClassifier::classify()
   __tt->ping_end(__ttc_roimerg);
   //#endif
 
+  // CleanUp
+  delete __image;
+  delete __simage;
+
   //#ifdef SURF_TIMETRACKER
   __tt->ping_end(0);
   //#endif
 
   //#ifdef SURF_TIMETRACKER
   // print timetracker statistics
-  __tt->print_to_stdout();
+  //__tt->print_to_stdout();
   //#endif
 
   std::cout << "SurfClassifier(classify): done ... returning '" << rv->size() << "' ROIs." << std::endl;

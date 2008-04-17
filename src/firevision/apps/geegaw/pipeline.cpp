@@ -47,6 +47,15 @@
 #include <models/relative_position/box_relative.h>
 
 #include <classifiers/simple.h>
+#ifdef HAVE_SIFT
+#include <classifiers/sift.h>
+#endif
+#ifdef HAVE_SURF
+#include <classifiers/surf.h>
+#endif
+#ifdef HAVE_SIFTPP
+#include <classifiers/siftpp.h>
+#endif
 #include <filters/roidraw.h>
 
 #include <unistd.h>
@@ -77,6 +86,8 @@ GeegawPipeline::GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool 
   box_globvelo = NULL;
   */
   classifier    = NULL;
+
+  objectimg     = NULL;
 
   generate_output = argp->has_arg("o");
 
@@ -123,6 +134,7 @@ GeegawPipeline::~GeegawPipeline()
   delete box_globvelo;
   */
   delete classifier;
+  delete objectimg;
 
 }
 
@@ -159,6 +171,8 @@ GeegawPipeline::init()
   width  = cam->pixel_width();
   height = cam->pixel_height();
   cspace_from = cam->colorspace();
+
+  printf("Camera opened. size: %ux%u (cspace %s)\n", width, height, colorspace_to_string(cspace_from));
 
   /* NOTE:
    * buffer_src is the place where the converted image is stored. 
@@ -202,13 +216,14 @@ GeegawPipeline::init()
 				  /* num beams */   20);
   }
 
-  cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
-				   "omni-color",
-				   true /* destroy on free */);
-  deter_cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
-					 "front-color",
-					 true /* destroy on free */);
 
+  cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
+ 				   "omni-color",
+ 				   true /* destroy on free */);
+  deter_cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
+ 					 "front-color",
+ 					 true /* destroy on free */);
+  
   /*
   // Position models for box
   box_rel      = new BoxRelative(width, height,
@@ -232,7 +247,8 @@ GeegawPipeline::init()
 			    config->HorizontalViewingAngle,
 			    config->VerticalViewingAngle
 			    );
-  rel_pos->set_radius(3);
+  //rel_pos->set_radius(3);
+  rel_pos->set_radius(5);
 
   object_relposmod = new BoxRelative(width, height,
 				     config->CameraHeight,
@@ -242,21 +258,25 @@ GeegawPipeline::init()
 				     config->HorizontalViewingAngle,
 				     config->VerticalViewingAngle
 				     );
-  object_relposmod->set_radius(3);
+  //object_relposmod->set_radius(3);
+  object_relposmod->set_radius(5);
 
 
   // Classifier
   classifier   = new SimpleColorClassifier( scanlines, cm,
-                                            10 /* min pixels to consider */,
-                                            30 /* initial box extent */,
-                                            /* upward */ (mode == MODE_OBSTACLES),
-                                            /* neighbourhood min match */ 5);
-
+					    10 /* min pixels to consider */,
+					    30 /* initial box extent */,
+					    /* upward */ (mode == MODE_OBSTACLES),
+					    /* neighbourhood min match */ 5);
+  
   deter_classifier   = new SimpleColorClassifier( scanlines, deter_cm,
-						  10 /* min pixels to consider */,
-						  30 /* initial box extent */,
-						  /* upward */ true,
-						  /* neighbourhood min match */ 5);
+ 						  10 /* min pixels to consider */,
+ 						  30 /* initial box extent */,
+ 						  /* upward */ true,
+ 						  /* neighbourhood min match */ 5);
+
+  // default object-image
+  objectimg = "../res/opx/alogo.png";
 
 }
 
@@ -485,6 +505,159 @@ GeegawPipeline::detect_object()
 
 
 void
+GeegawPipeline::detect_sift()
+{
+#ifdef HAVE_SIFT
+  classifier->set_src_buffer( buffer_src, width, height );
+  rois = classifier->classify();
+  
+  // Go through all ROIs, 
+  // count features and extract object
+  unsigned int num_features = 0;
+  if ( rois->empty() ) {
+    // cout << "Doh, no ROIs!" << endl;
+  } 
+  else {
+
+    FilterROIDraw *rdf = new FilterROIDraw();
+
+    camctrl->pan_tilt_rad(&pan, &tilt);
+
+    bool first = true;
+    for (r = rois->begin(); r != rois->end(); ++r) {
+      rdf->set_dst_buffer(buffer, &(*r));
+      /// feature rois have a fixed size (11x11):
+      if( (*r).width == 11 && (*r).height == 11 ) {
+	/// this is just a feature ROI, discard it!
+	/// but increase number of features
+	++num_features;
+      } else {
+	if ( first ) {
+	  /// First is the biggest ROI, set as object
+	  //object_relposmod->set_pan_tilt(pan, tilt);
+	  object_relposmod->set_center( (*r).start.x + (*r).width / 2,
+					(*r).start.y + (*r).height / 2 );
+	  object_relposmod->calc_unfiltered();
+	  _object_bearing = object_relposmod->get_bearing();
+	  _object_distance = object_relposmod->get_distance();
+	  first = false;
+	}
+      }
+    }
+    delete rdf;
+  }
+  rois->clear();
+  delete rois;
+#endif
+}
+
+void
+GeegawPipeline::detect_surf()
+{
+#ifdef HAVE_SURF
+  classifier->set_src_buffer( buffer_src, width, height );
+  rois = classifier->classify();
+  
+  // Go through all ROIs, 
+  // count features and extract object
+  unsigned int num_features = 0;
+  if ( rois->empty() ) {
+    // cout << "Doh, no ROIs!" << endl;
+    cout << msg_prefix << " ##### NOTHING FOUND! #####" << endl;
+  } 
+  else {
+    cout << msg_prefix << " FOUND SOMETHING!" << endl;
+
+    FilterROIDraw *rdf = new FilterROIDraw();
+    //r = rois->begin();
+    //rdf->set_dst_buffer(buffer, &(*r));
+  
+    camctrl->pan_tilt_rad(&pan, &tilt);
+
+    bool first = true;
+    for (r = rois->begin(); r != rois->end(); ++r) {
+
+      rdf->set_dst_buffer(buffer, &(*r));
+    
+      /// feature rois have a fixed size (11x11):
+      if( (*r).width == 11 && (*r).height == 11 ) {
+	/// this is just a feature ROI, discard it!
+	/// but increase number of features
+	++num_features;
+      } else {
+	if ( first ) {
+	  /// First is the biggest ROI, set as object
+	  //object_relposmod->set_pan_tilt(pan, tilt);
+	  object_relposmod->set_center( (*r).start.x + (*r).width / 2,
+					(*r).start.y + (*r).height / 2 );
+	  object_relposmod->calc_unfiltered();
+	  _object_bearing = object_relposmod->get_bearing();
+	  _object_distance = object_relposmod->get_distance();
+	  first = false;
+	}
+      }
+    }
+
+    rdf->apply();
+    delete rdf;
+  }
+  //
+  cout << msg_prefix << " bearing='" << _object_bearing << "'" << endl;
+  cout << msg_prefix << " distance='" << _object_distance  << "'" << endl;
+  //getchar();
+  rois->clear();
+  delete rois;
+#endif
+}
+
+void
+GeegawPipeline::detect_siftpp()
+{
+#ifdef HAVE_SIFTPP
+  classifier->set_src_buffer( buffer_src, width, height );
+  rois = classifier->classify();
+  
+  // Go through all ROIs, 
+  // count features and extract object
+  unsigned int num_features = 0;
+  if ( rois->empty() ) {
+    // cout << "Doh, no ROIs!" << endl;
+  } 
+  else {
+    FilterROIDraw *rdf = new FilterROIDraw();
+
+    camctrl->pan_tilt_rad(&pan, &tilt);
+
+    bool first = true;
+    for (r = rois->begin(); r != rois->end(); ++r) {
+      rdf->set_dst_buffer(buffer, &(*r));
+      /// feature rois have a fixed size (11x11):
+      if( (*r).width == 11 && (*r).height == 11 ) {
+	/// this is just a feature ROI, discard it!
+	/// but increase number of features
+	++num_features;
+      } else {
+	if ( first ) {
+	  /// First is the biggest ROI, set as object
+	  //object_relposmod->set_pan_tilt(pan, tilt);
+	  object_relposmod->set_center( (*r).start.x + (*r).width / 2,
+					(*r).start.y + (*r).height / 2 );
+	  object_relposmod->calc_unfiltered();
+	  _object_bearing = object_relposmod->get_bearing();
+	  _object_distance = object_relposmod->get_distance();
+	  first = false;
+	}
+      }
+    }
+    delete rdf;
+  }
+  rois->clear();
+  delete rois;
+#endif
+}
+
+
+void
 GeegawPipeline::add_object()
 {
   if ( (add_status == ADDSTATUS_SUCCESS) || (add_status == ADDSTATUS_FAILURE) ) {
@@ -559,12 +732,25 @@ GeegawPipeline::add_object()
 void
 GeegawPipeline::loop()
 {
+  cout << msg_prefix << " camctrl->process_control()" << endl;
   camctrl->process_control();
 
+  cout << msg_prefix << " camctrl->start_get_pan_tilt()" << endl;
   camctrl->start_get_pan_tilt();
-  cam->capture();
+
+  cout << msg_prefix << " cam->capture()" << endl;
+  
+  try{
+    cam->capture();
+  } catch ( Exception &e) {
+    e.print_trace();
+    cout << msg_prefix << " IGNORING THIS LOOP, CAPTURE FAILED!!!!" << endl;
+    return;
+  }
 
   gettimeofday(&data_taken_time, NULL);
+
+  cout << msg_prefix << " convert" << endl;
 
   // Convert buffer (re-order bytes) and set classifier buffer
   convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
@@ -575,11 +761,23 @@ GeegawPipeline::loop()
       add_object();
     }
   } else if ( mode == MODE_OBSTACLES ) {
+    cout << msg_prefix << " calling detect_obstacles()" << endl;
     detect_obstacles();
   } else if ( mode == MODE_LOSTNFOUND ) {
+    cout << msg_prefix << " calling detect_object()" << endl;
     detect_object();
+  } else if ( mode == MODE_SIFT ) {
+    cout << msg_prefix << " calling detect_sift()" << endl;
+    detect_sift();
+  } else if ( mode == MODE_SURF ) {
+    cout << msg_prefix << " calling detect_surf()" << endl;
+    detect_surf();
+  } else if ( mode == MODE_SIFTPP ) {
+    cout << msg_prefix << " calling detect_siftpp()" << endl;
+    detect_siftpp();
+  } else {
+    cout << msg_prefix << " ##### unhandled mode! #####" << endl;
   }
-
 
   // Classify image, find ROIs by color
   cam->dispose_buffer();
@@ -621,9 +819,51 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
 					     30 /* initial box extent */,
 					     /* upward */ false,
 					     /* neighbourhood min match */ 5);
+  } else if ( mode == MODE_SIFT ) {
+    cout << msg_prefix << "Switching to SIFT mode" << endl;
+    delete classifier;
+    #ifdef HAVE_SIFT
+    classifier   = new SiftClassifier( objectimg, width, height );
+    #endif
+  } else if ( mode == MODE_SURF ) {
+    cout << msg_prefix << "Switching to SURF mode" << endl;
+    delete classifier;
+    #ifdef HAVE_SURF
+    classifier   = new SurfClassifier( objectimg );
+    #endif
+  } else if ( mode == MODE_SIFTPP ) {
+    cout << msg_prefix << "Switching to SIFTPP mode" << endl;
+    delete classifier;
+    #ifdef HAVE_SIFTPP
+    classifier   = new SiftppClassifier( objectimg, width, height );
+    #endif
   } else if ( mode == MODE_RESET_COLORMAP ) {
     cout << msg_prefix << "RESETting colormap" << endl;
     cm->reset();
+  }
+}
+
+void
+GeegawPipeline::reload_classifier()
+{
+  if ( mode == MODE_SIFT ) {
+    cout << msg_prefix << "Switching to SIFT mode" << endl;
+    if( classifier ) delete classifier;
+    #ifdef HAVE_SIFT
+    classifier   = new SiftClassifier( objectimg, width, height );
+    #endif
+  } else if ( mode == MODE_SURF ) {
+    cout << msg_prefix << "Switching to SURF mode" << endl;
+    if( classifier ) delete classifier;
+    #ifdef HAVE_SURF
+    classifier   = new SurfClassifier( objectimg );
+    #endif
+  } else if ( mode == MODE_SIFTPP ) {
+    cout << msg_prefix << "Switching to SIFTPP mode" << endl;
+    if( classifier ) delete classifier;
+    #ifdef HAVE_SIFTPP
+    classifier   = new SiftppClassifier( objectimg, width, height );
+    #endif
   }
 }
 
@@ -654,6 +894,16 @@ GeegawPipeline::setColormap(std::string colormap_filename_without_path)
 {
   cout << msg_prefix << "Loading colormap " << (config->ColormapDirectory + "/" + colormap_filename_without_path) << endl;
   cm->load((config->ColormapDirectory + "/" + colormap_filename_without_path).c_str());
+}
+
+
+
+void
+GeegawPipeline::setObjectimage(std::string object_filename_without_path)
+{
+  cout << msg_prefix << "Loading object_file " << (config->ColormapDirectory + "/" + object_filename_without_path) << endl;
+  objectimg = object_filename_without_path.c_str();
+  reload_classifier();
 }
 
 /// @endcond

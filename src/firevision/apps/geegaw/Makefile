@@ -34,5 +34,18 @@ LIBS_bbgeegaw = core utils rutils bb interfaces
 OBJS_all = $(OBJS_geegaw) $(OBJS_bbgeegaw)
 BINS_all = $(BINDIR)/geegaw $(BINDIR)/bbgeegaw
 
+ifeq ($(HAVE_SIFT),1)
+   CFLAGS += $(CFLAGS_SIFT)
+   LIBS   += $(LIBS_SIFT)
+endif
+ifeq ($(HAVE_SURF),1)
+   CFLAGS += $(CFLAGS_SURF)
+   LIBS   += $(LIBS_SURF)
+endif
+ifeq ($(HAVE_SIFTPP),1)
+   CFLAGS += $(CFLAGS_SIFTPP)
+   LIBS   += $(LIBS_SIFTPP)
+endif
+
 include $(BASEDIR)/etc/buildsys/base.mk
 

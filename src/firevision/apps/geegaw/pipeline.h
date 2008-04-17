@@ -83,7 +83,10 @@ class GeegawPipeline : SignalHandler {
     MODE_OBSTACLES      = 0,
     MODE_ADD_OBJECT     = 1,
     MODE_LOSTNFOUND     = 2,
-    MODE_RESET_COLORMAP = 3
+    MODE_RESET_COLORMAP = 3,
+    MODE_SIFT           = 4,
+    MODE_SURF           = 5,
+    MODE_SIFTPP         = 6
   } GeegawOperationMode;
 
   // keep congruent to Geegaw interface constants
@@ -102,13 +105,21 @@ class GeegawPipeline : SignalHandler {
 
   void setColormap(std::string colormap_filename_without_path);
 
+  void setObjectimage(std::string object_filename_without_path);
+
  private:
   /* private methods */
   void handle_signal(int signum);
 
+  void reload_classifier();
+
   void detect_obstacles();
   void detect_object();
   void add_object();
+
+  void detect_sift();
+  void detect_surf();
+  void detect_siftpp();
 
   ArgumentParser  *argp;
   GeegawConfig  *config;
@@ -157,6 +168,9 @@ class GeegawPipeline : SignalHandler {
   RelativePositionModel    *object_relposmod;
   //BallGlobal             *box_glob;
   Classifier               *classifier;
+
+  // sift/surf stuff
+  const char               *objectimg;
 
   bool                      already_fetched_pantilt;
   cart_coord_t              mass_point;

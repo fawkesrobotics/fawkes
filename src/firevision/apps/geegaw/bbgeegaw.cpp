@@ -26,6 +26,7 @@
 
 #include <blackboard/clientappl.h>
 #include <interfaces/vision_obstacles_client.h>
+#include <interfaces/object_position_client.h>
 #include <interfaces/geegaw_client.h>
 
 #include <unistd.h>
@@ -46,6 +47,7 @@ class GeegawTestBBClient : public bb::ClientAppl
  private:
 
   bbClients::VisionObstacles_Client   *m_pVisObsClient;
+  bbClients::ObjectPosition_Client    *m_pObjPosClient;
   bbClients::Geegaw_Client   *m_pGeegawClient;
 
   int last_mode;
@@ -83,12 +85,17 @@ void GeegawTestBBClient::Init ()
   m_pVisObsClient = new bbClients::VisionObstacles_Client( hostname );
   BBRegisterObj( m_pVisObsClient );
 
+  // initialize object position client
+  m_pObjPosClient = new bbClients::ObjectPosition_Client( hostname );
+  BBRegisterObj( m_pObjPosClient );
+
   // initialize localize camera control client
   m_pGeegawClient = new bbClients::Geegaw_Client( hostname );
   BBRegisterObj( m_pGeegawClient );
 
   BBOperate();
   m_pVisObsClient->Update();
+  m_pObjPosClient->read();
   m_pGeegawClient->Update();
   BBOperate();
 
@@ -107,6 +114,7 @@ GeegawTestBBClient::Loop(int Count)
 { 
 
   m_pVisObsClient->Update();
+  m_pObjPosClient->read();
   m_pGeegawClient->Update();
   BBOperate();
 
@@ -127,6 +135,27 @@ GeegawTestBBClient::Loop(int Count)
   case 'l':
     cout << "Requesting switch to LOSTNFOUND mode" << endl;
     m_pGeegawClient->SetMode(bbClients::Geegaw_Client::MODE_LOSTNFOUND);
+    m_pGeegawClient->UpdateBB();
+    BBOperate();
+    break;
+  case 'i':
+    cout << "Requesting switch to SIFT mode" << endl;
+    m_pGeegawClient->SetMode(bbClients::Geegaw_Client::MODE_SIFT);
+    m_pGeegawClient->SetObjectimage("../res/opx/alogo.png");
+    m_pGeegawClient->UpdateBB();
+    BBOperate();
+    break;
+  case 'u':
+    cout << "Requesting switch to SURF mode" << endl;
+    m_pGeegawClient->SetMode(bbClients::Geegaw_Client::MODE_SURF);
+    m_pGeegawClient->SetObjectimage("../res/opx/alogo.png");
+    m_pGeegawClient->UpdateBB();
+    BBOperate();
+    break;
+  case 'p':
+    cout << "Requesting switch to SIFTPP mode" << endl;
+    m_pGeegawClient->SetMode(bbClients::Geegaw_Client::MODE_SIFTPP);
+    m_pGeegawClient->SetObjectimage("../res/opx/alogo.png");
     m_pGeegawClient->UpdateBB();
     BBOperate();
     break;
@@ -170,6 +199,18 @@ GeegawTestBBClient::Loop(int Count)
     }
   } else if (m_pGeegawClient->GetCurrentMode() == bbClients::Geegaw_Client::MODE_LOSTNFOUND ) {
     cout << "lostnfound mode" << endl;
+  } else if (m_pGeegawClient->GetCurrentMode() == bbClients::Geegaw_Client::MODE_SIFT ) {
+    cout << "SIFT mode" << endl;
+    if ( m_pObjPosClient->visible() ) {
+      cout << "object visible" << endl;
+    } 
+    else {
+      cout << "object NOT visible" << endl;
+    }  
+  } else if (m_pGeegawClient->GetCurrentMode() == bbClients::Geegaw_Client::MODE_SURF ) {
+    cout << "SURF mode" << endl;
+  } else if (m_pGeegawClient->GetCurrentMode() == bbClients::Geegaw_Client::MODE_SIFTPP ) {
+    cout << "SIFTPP mode" << endl;
   }
 }
 
@@ -182,6 +223,7 @@ GeegawTestBBClient::Exit()
 {
   cout << "GeegawTestBBClient exiting" << endl;
   delete m_pVisObsClient;
+  delete m_pObjPosClient;
 }
 
 

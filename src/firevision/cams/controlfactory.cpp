@@ -26,6 +26,8 @@
 #include <cams/controlfactory.h>
 #include <fvutils/system/camargp.h>
 
+#include <cams/dummy_control.h>
+
 #ifdef HAVE_VISCA_CTRL
 #include <cams/visca.h>
 #endif
@@ -93,6 +95,11 @@ CameraControlFactory::instance(const CameraArgumentParser *cap)
 #else
     throw UnknownCameraControlTypeException("No DPPTU support at compile time");
 #endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "dummy" ) {
+    c = new DummyControl();
   }
 
   if ( c == NULL ) {

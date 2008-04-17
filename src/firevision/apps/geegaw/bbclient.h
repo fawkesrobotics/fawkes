@@ -45,6 +45,7 @@ namespace bbClients {
   class CameraControl_Server;
   class Alive_Server;
   class VisionObstacles_Server;
+  class ObjectPosition_Server;
   class BallPos_Server;
   class Geegaw_Server;
 }
@@ -118,9 +119,10 @@ class FirevisionGeegawBBClient : public bb::ClientAppl
   Timestamp   now;
 
   bbClients::VisionObstacles_Server  *m_pVisObsServer;
+  bbClients::ObjectPosition_Server   *m_pObjPosServer;
+  bbClients::BallPos_Server          *m_pOldPosServer;
   bbClients::CameraControl_Server    *m_pCameraControlServer;
   bbClients::Alive_Server            *m_pFrontAliveFakeServer;
-  bbClients::BallPos_Server          *m_pObjPosServer;
   bbClients::Localize_Master_Client  *m_pLocalizeMasterClient;
   bbClients::Geegaw_Server           *m_pGeegawServer;
 

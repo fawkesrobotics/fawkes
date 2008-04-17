@@ -41,10 +41,11 @@
 #include <models/scanlines/scanlinemodel.h>
 
 #include <interfaces/localize_master_client.h>
-#include <interfaces/ballpos_server.h>
 #include <interfaces/camera_control_server.h>
 #include <interfaces/alive_server.h>
 #include <interfaces/vision_obstacles_server.h>
+#include <interfaces/object_position_server.h>
+#include <interfaces/ballpos_server.h>
 #include <interfaces/geegaw_server.h>
 
 #include <unistd.h>
@@ -129,7 +130,9 @@ void FirevisionGeegawBBClient::Init ()
   BBRegisterObj( m_pLocalizeMasterClient );
 
   // initialize obj position server
-  m_pObjPosServer = new bbClients::BallPos_Server( hostname );
+  m_pOldPosServer = new bbClients::BallPos_Server( hostname );
+  BBRegisterObj( m_pOldPosServer );
+  m_pObjPosServer = new bbClients::ObjectPosition_Server( hostname );
   BBRegisterObj( m_pObjPosServer );
 
   // initialize geegaw server
@@ -146,7 +149,8 @@ void FirevisionGeegawBBClient::Init ()
   BBOperate();
   m_pLocalizeMasterClient->Update();
   m_pCameraControlServer->Update();
-  m_pObjPosServer->Update();  
+  m_pObjPosServer->read();  
+  m_pOldPosServer->Update();  
   m_pGeegawServer->Update();
   BBOperate();
 
@@ -187,7 +191,8 @@ FirevisionGeegawBBClient::Loop(int Count)
   loop_running = true;
 
   m_pCameraControlServer->Update();
-  m_pObjPosServer->Update();
+  m_pObjPosServer->read();
+  m_pOldPosServer->Update();
   m_pLocalizeMasterClient->Update();
   m_pGeegawServer->Update();
   BBOperate();
@@ -205,6 +210,14 @@ FirevisionGeegawBBClient::Loop(int Count)
     cout << msg_prefix << "Loading colormap " << m_pGeegawServer->GetColormap() << endl;
     pipeline->setColormap(m_pGeegawServer->GetColormap());
     m_pGeegawServer->SetCurrentColormap(m_pGeegawServer->GetColormap());
+    m_pGeegawServer->UpdateBB();
+    BBOperate();
+  }
+
+  if ( m_pGeegawServer->ChangedObjectimage() ) {
+    cout << msg_prefix << "Loading object image " << m_pGeegawServer->GetObjectimage() << endl;
+    pipeline->setObjectimage(m_pGeegawServer->GetObjectimage());
+    m_pGeegawServer->SetCurrentObjectimage(m_pGeegawServer->GetObjectimage());
     m_pGeegawServer->UpdateBB();
     BBOperate();
   }
@@ -264,11 +277,20 @@ FirevisionGeegawBBClient::Loop(int Count)
 
     box_lost = false;
 
-    // Misusing fields here!
-    m_pObjPosServer->SetRelVelX( pipeline->object_bearing() );
-    m_pObjPosServer->SetRelVelY( pipeline->object_distance() );
-    m_pObjPosServer->SetConfidence( 1.f );
-    m_pObjPosServer->SetVisible( true );
+    // DEPRECATED! Misusing fields here!
+    m_pOldPosServer->SetRelVelX( pipeline->object_bearing() );
+    m_pOldPosServer->SetRelVelY( pipeline->object_distance() );
+    m_pOldPosServer->SetConfidence( 1.f );
+    m_pOldPosServer->SetVisible( true );
+    // use new object_position interface
+    m_pObjPosServer->set_supports_relative( true );
+    m_pObjPosServer->set_has_relative( true );
+    m_pObjPosServer->set_bearing( pipeline->object_bearing() );
+    m_pObjPosServer->set_distance( pipeline->object_distance() );
+    //m_pObjPosServer->set_slope( pipeline->object_slope() );
+    m_pObjPosServer->set_slope( 0.f );
+    m_pObjPosServer->set_confidence( 1.f );
+    m_pObjPosServer->set_visible( true );
 
     if ( pipeline->getMode() == GeegawPipeline::MODE_OBSTACLES ) {
       camera_tracker->calc();
@@ -276,7 +298,7 @@ FirevisionGeegawBBClient::Loop(int Count)
       new_tilt = forward_tilt;
     }
 
-  } else {
+  } else { // NO OBSTACLES FOUND!
     if ( pipeline->getMode() == GeegawPipeline::MODE_OBSTACLES ) {
       cout << msg_prefix << cred << "No obstacles found" << cnormal << endl;
     }
@@ -286,8 +308,12 @@ FirevisionGeegawBBClient::Loop(int Count)
     } else {
       --visibility_history;
     }
-    m_pObjPosServer->SetVisible( false );
-    m_pObjPosServer->SetConfidence( 0.f );
+    m_pOldPosServer->SetVisible( false );
+    m_pOldPosServer->SetConfidence( 0.f );
+    m_pObjPosServer->set_has_global( false );
+    m_pObjPosServer->set_has_relative( false );
+    m_pObjPosServer->set_visible( false );
+    m_pObjPosServer->set_confidence( 0.f );
     if ( pipeline->getMode() == GeegawPipeline::MODE_OBSTACLES ) {
       new_pan  = forward_pan;
       new_tilt = forward_tilt;
@@ -300,8 +326,10 @@ FirevisionGeegawBBClient::Loop(int Count)
 
   }
   m_pVisObsServer->UpdateBB();
-  m_pObjPosServer->SetVisibilityHistory( visibility_history );
-  m_pObjPosServer->UpdateBB();
+  m_pObjPosServer->set_visibility_history( visibility_history );
+  m_pObjPosServer->write();
+  m_pOldPosServer->SetVisibilityHistory( visibility_history );
+  m_pOldPosServer->UpdateBB();
 
   m_pFrontAliveFakeServer->PingAlive();
   m_pFrontAliveFakeServer->UpdateBB();
@@ -315,7 +343,7 @@ FirevisionGeegawBBClient::Loop(int Count)
     
     if ( tracking_mode == bbClients::CameraControl_Client::TRACKING_NONE ) {
       // no tracking
-    //cout << "Tracking OFF." << endl;
+      //cout << "Tracking OFF." << endl;
       if (m_pCameraControlServer->ChangedTargetPan() ||
 	  m_pCameraControlServer->ChangedTargetTilt() ) {
 	// For the Leutron cam we know that this has to be set in one go
