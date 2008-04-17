@@ -38,7 +38,8 @@ class FuseLutListContent : public FuseMessageContent
   ~FuseLutListContent();
 
   void add_lutinfo(const char *lut_id,
-		   unsigned int width, unsigned int height, unsigned int bytes_per_cell);
+		   unsigned int width, unsigned int height,
+		   unsigned int depth, unsigned int bytes_per_cell);
 
 
   void                reset_iterator();

@@ -52,6 +52,7 @@ class FuseServerClientThread : public Thread
   void process_greeting_message(FuseNetworkMessage *m);
   void process_getimage_message(FuseNetworkMessage *m);
   void process_getlut_message(FuseNetworkMessage *m);
+  void process_setlut_message(FuseNetworkMessage *m);
   void process_getimagelist_message(FuseNetworkMessage *m);
   void process_getlutlist_message(FuseNetworkMessage *m);
 

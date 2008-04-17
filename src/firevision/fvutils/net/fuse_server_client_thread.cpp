@@ -40,6 +40,7 @@
 #include <core/exceptions/system.h>
 #include <netcomm/socket/stream.h>
 #include <netcomm/utils/exceptions.h>
+#include <utils/logging/liblogger.h>
 
 #include <netinet/in.h>
 #include <cstring>
@@ -87,6 +88,11 @@ FuseServerClientThread::~FuseServerClientThread()
     delete __bit->second;
   }
   __buffers.clear();
+
+  for (__lit = __luts.begin(); __lit != __luts.end(); ++__lit ) {
+    delete __lit->second;
+  }
+  __luts.clear();
 
   while ( ! __inbound_queue->empty() ) {
     FuseNetworkMessage *m = __inbound_queue->front();
@@ -226,7 +232,7 @@ FuseServerClientThread::process_getlut_message(FuseNetworkMessage *m)
 
   if ( (__lit = __luts.find( tmp_lut_id )) != __luts.end() ) {
     // the buffer had already be opened
-    FuseLutContent *lm = new FuseLutContent((*__lit).second);
+    FuseLutContent *lm = new FuseLutContent(__lit->second);
     __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_LUT, lm));
   } else {
     try {
@@ -242,6 +248,55 @@ FuseServerClientThread::process_getlut_message(FuseNetworkMessage *m)
       __outbound_queue->push(nm);
     }
   }
+}
+
+
+/** Process LUT setting.
+ * @param m received message
+ */
+void
+FuseServerClientThread::process_setlut_message(FuseNetworkMessage *m)
+{
+  FuseLutContent *lc = m->msgc<FuseLutContent>();  
+  FUSE_lutdesc_message_t *reply = (FUSE_lutdesc_message_t *)malloc(sizeof(FUSE_lutdesc_message_t));
+  strncpy(reply->lut_id, lc->lut_id(), LUT_ID_MAX_LENGTH);
+  // Currently we expect colormaps, so make sure we get sensible dimensions
+
+  SharedMemoryLookupTable *b;
+  if ( (__lit = __luts.find( lc->lut_id() )) != __luts.end() ) {
+    // the buffer had already been opened
+    b = __lit->second;
+  } else {
+    try {
+      b = new SharedMemoryLookupTable(lc->lut_id(), /* read only */ false);
+      __luts[lc->lut_id()] = b;
+    } catch (Exception &e) {
+      __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_SET_LUT_FAILED,
+						    reply, sizeof(FUSE_lutdesc_message_t)));
+      e.append("Cannot open shared memory lookup table %s", lc->lut_id());
+      LibLogger::log_warn("FuseServerClientThread", e);
+      delete lc;
+      return;
+    }
+  }
+
+  if ( (b->width() != lc->width())   ||
+       (b->height() != lc->height()) ||
+       (b->depth() != lc->depth())   ||
+       (b->bytes_per_cell() != lc->bytes_per_cell()) ) {
+    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_SET_LUT_FAILED,
+						  reply, sizeof(FUSE_lutdesc_message_t)));
+    LibLogger::log_warn("FuseServerClientThread", "LUT upload: dimensions do not match. "
+			"Existing (%u,%u,%u,%u) != uploaded (%u,%u,%u,%u)",
+			b->width(), b->height(), b->depth(), b->bytes_per_cell(),
+			lc->width(), lc->height(), lc->depth(), lc->bytes_per_cell());
+  } else {
+    b->set(lc->buffer());
+    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_SET_LUT_SUCCEEDED,
+						  reply, sizeof(FUSE_lutdesc_message_t)));
+  }
+
+  delete lc;
 }
 
 
@@ -287,7 +342,7 @@ FuseServerClientThread::process_getlutlist_message(FuseNetworkMessage *m)
   while ( i != endi ) {
     const SharedMemoryLookupTableHeader *lh = dynamic_cast<const SharedMemoryLookupTableHeader *>(*i);
     if ( lh ) {
-      llm->add_lutinfo(lh->lut_id(), lh->width(), lh->height(), lh->bytes_per_cell());
+      llm->add_lutinfo(lh->lut_id(), lh->width(), lh->height(), lh->depth(), lh->bytes_per_cell());
     }
 
     ++i;
@@ -324,10 +379,15 @@ FuseServerClientThread::process_inbound()
       case FUSE_MT_GET_LUT:
 	process_getlut_message(m);
 	break;
+      case FUSE_MT_SET_LUT:
+	process_setlut_message(m);
+	break;
       default:
 	throw Exception("Unknown message type received\n");
       }
     } catch (Exception &e) {
+      e.append("FUSE protocol error");
+      LibLogger::log_warn("FuseServerClientThread", e);
       __fuse_server->connection_died(this);
       __alive = false;
     }

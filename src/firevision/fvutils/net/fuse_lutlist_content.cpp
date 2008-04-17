@@ -80,12 +80,13 @@ FuseLutListContent::~FuseLutListContent()
  * @param lut_id LUT ID
  * @param width width of LUT
  * @param height height of LUT
+ * @param depth depth of LUT
  * @param bytes_per_cell bytes per cell
  */
 void
 FuseLutListContent::add_lutinfo(const char *lut_id,
 				unsigned int width, unsigned int height,
-				unsigned int bytes_per_cell)
+				unsigned int depth, unsigned int bytes_per_cell)
 {
   FUSE_lutinfo_t lutinfo;
   memset(&lutinfo, 0, sizeof(lutinfo));
@@ -93,6 +94,7 @@ FuseLutListContent::add_lutinfo(const char *lut_id,
   strncpy(lutinfo.lut_id, lut_id, LUT_ID_MAX_LENGTH);
   lutinfo.width = ntohl(width);
   lutinfo.height = ntohl(height);
+  lutinfo.depth  = ntohl(depth);  
   lutinfo.bytes_per_cell = ntohl(bytes_per_cell);
 
   __list->append(&lutinfo, sizeof(lutinfo));

@@ -49,17 +49,24 @@
 FuseLutContent::FuseLutContent(uint32_t type,
 			       void *payload, size_t payload_size)
 {
-  if ( type != FUSE_MT_LUT ) {
-    throw TypeMismatchException("Type %u != FUSE_MT_LUT (%u)", type, FUSE_MT_LUT);
+  if ( (type != FUSE_MT_LUT) && (type != FUSE_MT_SET_LUT) ) {
+    throw TypeMismatchException("Type %u != FUSE_MT_LUT/FUSE_MT_SET_LUT (%u/%u)",
+				type, FUSE_MT_LUT, FUSE_MT_SET_LUT);
   }
 
   _payload_size = payload_size;
   _payload = payload;
+  
 
   __header = (FUSE_lut_message_header_t *)_payload;
   __buffer = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
 
-  __buffer_size = ntohl(__header->width) * ntohl(__header->height) * ntohl(__header->bytes_per_cell);
+  __lut_id = (char *)malloc(LUT_ID_MAX_LENGTH + 1);
+  __lut_id[LUT_ID_MAX_LENGTH] = 0;
+  strncpy(__lut_id, __header->lut_id, LUT_ID_MAX_LENGTH);
+
+  __buffer_size = ntohl(__header->width) * ntohl(__header->height) *
+                  ntohl(__header->depth) * ntohl(__header->bytes_per_cell);
 }
 
 
@@ -68,7 +75,7 @@ FuseLutContent::FuseLutContent(uint32_t type,
  */
 FuseLutContent::FuseLutContent(SharedMemoryLookupTable *b)
 {
-  __buffer_size  = b->width() * b->height() * b->bytes_per_cell();
+  __buffer_size  = b->width() * b->height() * b->depth() * b->bytes_per_cell();
   _payload_size = __buffer_size + sizeof(FUSE_lut_message_header_t);
 
   _payload = malloc(_payload_size);
@@ -82,13 +89,65 @@ FuseLutContent::FuseLutContent(SharedMemoryLookupTable *b)
   strncpy(__header->lut_id, b->lut_id(), LUT_ID_MAX_LENGTH);
   __header->width  = htonl(b->width());
   __header->height = htonl(b->height());
+  __header->depth  = htonl(b->depth());
   __header->bytes_per_cell = htonl(b->bytes_per_cell());
+  __lut_id = strdup(b->lut_id());
 
   // b->lock_for_read(); 
   memcpy(__buffer, b->buffer(), __buffer_size);
   // b->unlock();
 }
 
+
+/** Constructor.
+ * Create a brand new FuseLutContent from a raw buffer.
+ * @param lut_id LUT ID
+ * @param buffer buffer that holds the LUT data
+ * @param width LUT width
+ * @param height LUT height
+ * @param depth LUT depth
+ * @param bpc LUT bytes per cell
+ */
+FuseLutContent::FuseLutContent(const char *lut_id, void *buffer,
+			       unsigned int width, unsigned int height,
+			       unsigned int depth, unsigned int bpc)
+{
+  __buffer_size  = width * height * depth * bpc;
+  _payload_size = __buffer_size + sizeof(FUSE_lut_message_header_t);
+
+  _payload = malloc(_payload_size);
+  if ( _payload == NULL ) {
+    throw OutOfMemoryException("Cannot allocate FuseLutContent buffer");
+  }
+
+  __header = (FUSE_lut_message_header_t *)_payload;
+  __buffer = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
+
+  strncpy(__header->lut_id, lut_id, LUT_ID_MAX_LENGTH);
+  __header->width  = htonl(width);
+  __header->height = htonl(height);
+  __header->depth  = htonl(depth);
+  __header->bytes_per_cell = htonl(bpc);
+  __lut_id = strdup(lut_id);
+
+  memcpy(__buffer, buffer, __buffer_size);
+}
+
+
+FuseLutContent::~FuseLutContent()
+{
+  free(__lut_id);
+}
+
+
+/** Get LUT ID.
+ * @return LUT ID
+ */
+const char *
+FuseLutContent::lut_id() const
+{
+  return __lut_id;
+}
 
 /** Get buffer.
  * @return buffer
@@ -129,13 +188,23 @@ FuseLutContent::height() const
   return ntohl(__header->height);
 }
 
+/** Depth of LUT.
+ * @return depth of LUT
+ */
+unsigned int
+FuseLutContent::depth() const
+{
+  return ntohl(__header->depth);
+}
+
+
 /** Bytes per cell in LUT.
  * @return Bytes per cell in LUT
  */
 unsigned int
 FuseLutContent::bytes_per_cell() const
 {
-  return ntohs(__header->bytes_per_cell);
+  return ntohl(__header->bytes_per_cell);
 }
 
 

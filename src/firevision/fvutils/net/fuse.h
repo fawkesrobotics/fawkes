@@ -56,6 +56,8 @@ typedef enum {
   FUSE_MT_LUT_LIST            = 1003,		/**< lut list */
   FUSE_MT_GET_IMAGE_FAILED    = 1004,		/**< Fetching an image failed */
   FUSE_MT_GET_LUT_FAILED      = 1005,		/**< Fetching a LUT failed */
+  FUSE_MT_SET_LUT_SUCCEEDED   = 1006,		/**< Setting a LUT succeeded */
+  FUSE_MT_SET_LUT_FAILED      = 1007,		/**< Setting a LUT failed */
 
   /* client to server, 2000-2999 */
   FUSE_MT_GET_IMAGE           = 2000,		/**< request image */
@@ -98,6 +100,7 @@ typedef struct {
   char     lut_id[LUT_ID_MAX_LENGTH];	/**< LUT ID */
   uint32_t width;			/**< width of LUT */
   uint32_t height;			/**< height of LUT */
+  uint32_t depth;			/**< depth of LUT */
   uint32_t bytes_per_cell;		/**< bytes per cell */
 } FUSE_lut_message_header_t;
 
@@ -158,6 +161,7 @@ typedef struct {
   char     lut_id[LUT_ID_MAX_LENGTH];	/**< LUT ID */
   uint32_t width;			/**< width of LUT */
   uint32_t height;			/**< height of LUT */
+  uint32_t depth;			/**< depth of LUT */
   uint32_t bytes_per_cell;		/**< bytes per cell */
 } FUSE_lutinfo_t;
 

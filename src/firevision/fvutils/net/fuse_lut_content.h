@@ -35,18 +35,25 @@ class SharedMemoryLookupTable;
 class FuseLutContent : public FuseMessageContent
 {
  public:
+  FuseLutContent(const char *lut_id, void *buffer,
+		 unsigned int width, unsigned int height,
+		 unsigned int depth, unsigned int bpc);
   FuseLutContent(SharedMemoryLookupTable *l);
   FuseLutContent(uint32_t type, void *payload, size_t payload_size);
+  virtual ~FuseLutContent();
 
+  const char *     lut_id() const;
   unsigned char *  buffer() const;
   size_t           buffer_size() const;
   unsigned int     width() const;
   unsigned int     height() const;
+  unsigned int     depth() const;
   unsigned int     bytes_per_cell() const;
 
   virtual void     serialize();
 
  private:
+  char          *__lut_id;
   unsigned char *__buffer;
   size_t         __buffer_size;
   FUSE_lut_message_header_t *__header;
