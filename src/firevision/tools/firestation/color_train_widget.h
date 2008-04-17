@@ -54,22 +54,22 @@ class ColorTrainWidget
   void load_histograms();
   void save_histograms();
 
-  void add_to_lut();
-  void reset_lut();
-  void load_lut();
-  void save_lut();
+  void add_to_colormap();
+  void reset_colormap();
+  void load_colormap();
+  void save_colormap();
   YuvColormap* get_colormap() const;
 
   void draw_segmentation_result();
 
   void set_reset_selection_btn(Gtk::Button* btn);
-  void set_add_to_lut_btn(Gtk::Button* btn);
-  void set_reset_lut_btn(Gtk::Button* btn);
+  void set_add_to_colormap_btn(Gtk::Button* btn);
+  void set_reset_colormap_btn(Gtk::Button* btn);
   void set_load_histos_btn(Gtk::Button* btn);
   void set_save_histos_btn(Gtk::Button* btn);
-  void set_load_lut_btn(Gtk::Button* btn);
-  void set_save_lut_btn(Gtk::Button* btn);
-  void set_lut_img(Gtk::Image* img);
+  void set_load_colormap_btn(Gtk::Button* btn);
+  void set_save_colormap_btn(Gtk::Button* btn);
+  void set_colormap_img(Gtk::Image* img);
   void set_segmentation_img(Gtk::Image* img);
   void set_threshold_scl(Gtk::Scale* scl);
   void set_min_prob_scl(Gtk::Scale* scl);
@@ -77,7 +77,8 @@ class ColorTrainWidget
   void set_cm_layer_selector(Gtk::Scale* scl);
   void set_cm_depth_selector(Gtk::SpinButton* spbtn);
   
-  void set_update_img_signal(Glib::Dispatcher* update_img);
+  Glib::Dispatcher& update_image();
+  Glib::Dispatcher& colormap_updated();
 
  private:
   void resize_seg_image(Gtk::Allocation& allocation);
@@ -104,19 +105,20 @@ class ColorTrainWidget
 
   Gtk::Window* m_wnd_parent;
   Gtk::Button* m_btn_reset_selection;
-  Gtk::Button* m_btn_add_to_lut;
-  Gtk::Button* m_btn_reset_lut;
+  Gtk::Button* m_btn_add_to_colormap;
+  Gtk::Button* m_btn_reset_colormap;
   Gtk::Button* m_btn_load_histos;
   Gtk::Button* m_btn_save_histos;
-  Gtk::Button* m_btn_load_lut;
-  Gtk::Button* m_btn_save_lut;
+  Gtk::Button* m_btn_load_colormap;
+  Gtk::Button* m_btn_save_colormap;
   Gtk::SpinButton* m_spbtn_cm_depth;
   Gtk::Image* m_img_segmentation;
   Gtk::Scale* m_scl_threshold;
   Gtk::Scale* m_scl_min_prob;
   Gtk::FileChooserDialog* m_fcd_filechooser;
 
-  Glib::Dispatcher* m_update_img;
+  Glib::Dispatcher m_signal_update_image;
+  Glib::Dispatcher m_signal_colormap_updated;
 };
 
 #endif /* __FIREVISION_TOOLS_FIRESTATION_COLOR_TRAIN_WIDGET_H_ */

@@ -190,14 +190,15 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_btn_ct_start->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_start) );
   
   m_ctw = new ColorTrainWidget(this);
-  m_ctw->set_update_img_signal(&m_update_img);
+  m_ctw->update_image().connect( sigc::mem_fun(*this, &Firestation::draw_image) );
+  m_ctw->colormap_updated().connect( sigc::mem_fun(*this, &Firestation::on_colormap_updated) );
 
   Gtk::Button* btn;
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtUnselect") );
   m_ctw->set_reset_selection_btn(btn);
 
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtAdd") );
-  m_ctw->set_add_to_lut_btn(btn);
+  m_ctw->set_add_to_colormap_btn(btn);
 
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtSaveHistos") );
   m_ctw->set_save_histos_btn(btn);
@@ -206,10 +207,10 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_ctw->set_load_histos_btn(btn);
  
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtSaveColormap") );
-  m_ctw->set_save_lut_btn(btn);
+  m_ctw->set_save_colormap_btn(btn);
 
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtLoadColormap") );
-  m_ctw->set_load_lut_btn(btn);
+  m_ctw->set_load_colormap_btn(btn);
 
   Gtk::Scale* scl;
   scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclCtThreshold") );
@@ -226,7 +227,7 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_ctw->set_segmentation_img(img);
 
   img = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgCtColormap") );
-  m_ctw->set_lut_img(img);
+  m_ctw->set_colormap_img(img);
 
   Gtk::FileChooserDialog* fcd;
   fcd = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdFilechooser") );
@@ -849,6 +850,12 @@ Firestation::on_fuse_image_selected()
       m_img_src = SRC_NONE;
       e.print_trace();
     }
+}
+
+void
+Firestation::on_colormap_updated()
+{
+  m_ftw->set_current_lut( m_ctw->get_colormap() );
 }
 
 /** Draws the image. */

@@ -1,8 +1,9 @@
+
 /***************************************************************************
  *  color_train_widget.cpp - Color training widget
  *
  *  Created: Thu Mar 20 22:19:36 2008
- *  Copyright  2006  Daniel Beck
+ *  Copyright  2008  Daniel Beck
  *
  *  $Id$
  *
@@ -57,19 +58,17 @@ ColorTrainWidget::ColorTrainWidget(Gtk::Window* parent)
 
   m_wnd_parent = parent;
   m_btn_reset_selection = 0;
-  m_btn_add_to_lut = 0;
-  m_btn_reset_lut = 0;
+  m_btn_add_to_colormap = 0;
+  m_btn_reset_colormap = 0;
   m_btn_load_histos = 0;
   m_btn_save_histos = 0;
-  m_btn_load_lut = 0;
-  m_btn_save_lut = 0;
+  m_btn_load_colormap = 0;
+  m_btn_save_colormap = 0;
   m_spbtn_cm_depth = 0;
   m_img_segmentation = 0;
   m_scl_threshold = 0;
   m_scl_min_prob = 0;
   m_fcd_filechooser = 0;
-
-  m_update_img = 0;
 }
 
 /** Destructor. */
@@ -163,8 +162,7 @@ ColorTrainWidget::click(unsigned int x, unsigned int y)
   
   delete d;
 
-  if ( m_update_img )
-    { m_update_img->emit(); }
+  m_signal_update_image();
 }
 
 /** Reset the selection. */
@@ -177,8 +175,7 @@ ColorTrainWidget::reset_selection()
   if( m_src_buffer && m_draw_buffer )
     { memcpy(m_draw_buffer, m_src_buffer, m_img_size); }
 
-  if ( m_update_img )
-    { m_update_img->emit(); }
+  m_signal_update_image();
 }
 
 /** Set the button to reset the selection.
@@ -191,24 +188,24 @@ ColorTrainWidget::set_reset_selection_btn(Gtk::Button* btn)
   m_btn_reset_selection->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::reset_selection) );
 }
 
-/** Set the button to trigger the generation of the LUT.
+/** Set the button to trigger the generation of the colormap.
  * @param btn a Button
  */
 void
-ColorTrainWidget::set_add_to_lut_btn(Gtk::Button* btn)
+ColorTrainWidget::set_add_to_colormap_btn(Gtk::Button* btn)
 {
-  m_btn_add_to_lut = btn;
-  m_btn_add_to_lut->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::add_to_lut) );
+  m_btn_add_to_colormap = btn;
+  m_btn_add_to_colormap->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::add_to_colormap) );
 }
 
-/** Set the button to reset the LUT.
+/** Set the button to reset the colormap.
  * @param btn a Button
  */
 void
-ColorTrainWidget::set_reset_lut_btn(Gtk::Button* btn)
+ColorTrainWidget::set_reset_colormap_btn(Gtk::Button* btn)
 {
-  m_btn_reset_lut = btn;
-  m_btn_reset_lut->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::reset_lut) );
+  m_btn_reset_colormap = btn;
+  m_btn_reset_colormap->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::reset_colormap) );
 }
 
 /** Set the buffon to open a dialog to load histograms.
@@ -231,31 +228,31 @@ ColorTrainWidget::set_save_histos_btn(Gtk::Button* btn)
   m_btn_save_histos->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::save_histograms) );
 }
 
-/** Set the buffon to open a dialog to load a LUT.
+/** Set the buffon to open a dialog to load a colormap.
  * @param btn a Button
  */
 void
-ColorTrainWidget::set_load_lut_btn(Gtk::Button* btn)
+ColorTrainWidget::set_load_colormap_btn(Gtk::Button* btn)
 {
-  m_btn_load_lut = btn;
-  m_btn_load_lut->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::load_lut) );
+  m_btn_load_colormap = btn;
+  m_btn_load_colormap->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::load_colormap) );
 }
 
-/** Set the buffon to open a dialog to save a LUT.
+/** Set the buffon to open a dialog to save a colormap.
  * @param btn a Button
  */
 void
-ColorTrainWidget::set_save_lut_btn(Gtk::Button* btn)
+ColorTrainWidget::set_save_colormap_btn(Gtk::Button* btn)
 {
-  m_btn_save_lut = btn;
-  m_btn_save_lut->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::save_lut) );
+  m_btn_save_colormap = btn;
+  m_btn_save_colormap->signal_clicked().connect( sigc::mem_fun(*this, &ColorTrainWidget::save_colormap) );
 }
 
-/** Set the image to render the LUT into.
+/** Set the image to render the colormap into.
  * @param img an Image
  */
 void
-ColorTrainWidget::set_lut_img(Gtk::Image* img)
+ColorTrainWidget::set_colormap_img(Gtk::Image* img)
 {
   m_cvw->set_colormap_img(img);
 }
@@ -334,14 +331,22 @@ ColorTrainWidget::set_cm_depth_selector(Gtk::SpinButton* spbtn)
   m_spbtn_cm_depth->signal_value_changed().connect( sigc::mem_fun(*this, &ColorTrainWidget::set_cm_depth) );
 }
 
-/** Set the signal that is emmitted whenever the draw buffer was changed and a redraw is
- * necessary.
- *@param update_img a Dispatcher
+/** Access the signal that is emitted whenever a redraw of the image is necessary.
+ * @return reference to a Dispatcher.
  */
-void
-ColorTrainWidget::set_update_img_signal(Glib::Dispatcher* update_img)
+Glib::Dispatcher&
+ColorTrainWidget::update_image()
 {
-  m_update_img = update_img;
+  return m_signal_update_image;
+}
+
+/** Access the signal that is emitted whenever the colormap has changed.
+ * @return reference to a Dispatcher.
+ */
+Glib::Dispatcher&
+ColorTrainWidget::colormap_updated()
+{
+  return m_signal_colormap_updated;
 }
 
 /** Open a dialog to load a histogram. */
@@ -364,9 +369,9 @@ ColorTrainWidget::load_histograms()
        {
 	 std::string filename = m_fcd_filechooser->get_filename();
 	 m_generator->load_histograms( filename.c_str() );
-
+	 m_signal_colormap_updated();
 	 m_cvw->draw();
-	 // draw_segmentation_result();
+	 draw_segmentation_result();
  	break;
        }
 
@@ -413,9 +418,9 @@ ColorTrainWidget::save_histograms()
    m_fcd_filechooser->hide();
 }
 
-/** Generate a new LUT by adding the current histograms. */
+/** Generate a new colormap by adding the current histograms. */
 void
-ColorTrainWidget::add_to_lut()
+ColorTrainWidget::add_to_colormap()
 {
   if ( !m_src_buffer )
     { return; }
@@ -433,7 +438,7 @@ ColorTrainWidget::add_to_lut()
   
   if (m_fg_object == H_UNKNOWN)
     {
-      printf("CTW::add_to_lut(): no fg object set\n");
+      printf("CTW::add_to_colormap(): no fg object set\n");
       return;
     }
 
@@ -443,29 +448,31 @@ ColorTrainWidget::add_to_lut()
   m_generator->set_selection( m_zauberstab->getSelection() );
   m_generator->consider();
   m_generator->calc();
+  m_signal_colormap_updated();
 
-  // update lut image
+  // update colormap image
   m_cvw->draw();
 
   // update segmentation image
   draw_segmentation_result();
 }
 
-/** Reset the LUT. */
+/** Reset the colormap. */
 void
-ColorTrainWidget::reset_lut()
+ColorTrainWidget::reset_colormap()
 {
   // TODO
+  m_signal_colormap_updated();
 }
 
-/** Open a dialog to load a LUT. */
+/** Open a dialog to load a colormap. */
 void
-ColorTrainWidget::load_lut()
+ColorTrainWidget::load_colormap()
 {
   if ( !m_fcd_filechooser )
     { return; }
 
-  m_fcd_filechooser->set_title("Load colormap LUT");
+  m_fcd_filechooser->set_title("Load colormap colormap");
   m_fcd_filechooser->set_action(Gtk::FILE_CHOOSER_ACTION_OPEN);
   
   m_fcd_filechooser->set_transient_for(*m_wnd_parent);
@@ -493,6 +500,7 @@ ColorTrainWidget::load_lut()
 	 *current = *tycm;
 	 delete tcm;
 
+	 m_signal_colormap_updated();
 	 m_cvw->set_colormap( m_generator->get_current() );
 	 m_cvw->draw();
 	 draw_segmentation_result();
@@ -509,14 +517,14 @@ ColorTrainWidget::load_lut()
    m_fcd_filechooser->hide();
 }
 
-/** Open a dialog to save a LUT. */
+/** Open a dialog to save a colormap. */
 void
-ColorTrainWidget::save_lut()
+ColorTrainWidget::save_colormap()
 {
   if ( !m_fcd_filechooser )
     { return; }
 
-  m_fcd_filechooser->set_title("Save colormap LUT");
+  m_fcd_filechooser->set_title("Save colormap colormap");
   m_fcd_filechooser->set_action(Gtk::FILE_CHOOSER_ACTION_SAVE);
   
   m_fcd_filechooser->set_transient_for(*m_wnd_parent);
@@ -544,8 +552,8 @@ ColorTrainWidget::save_lut()
    m_fcd_filechooser->hide();
 }
 
-/** Get the current LUT.
- * @return the current LUT
+/** Get the current colormap.
+ * @return the current colormap
  */
 YuvColormap *
 ColorTrainWidget::get_colormap() const
@@ -595,7 +603,7 @@ ColorTrainWidget::reset_gui()
 }
 
 /** Render the result of segmenting the image in the source buffer considering the current
- * LUT into the specified Image.
+ * colormap into the specified Image.
  */
 void
 ColorTrainWidget::draw_segmentation_result()

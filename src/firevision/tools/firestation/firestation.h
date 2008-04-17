@@ -135,6 +135,7 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   void open_shm();
   void open_fuse();
   void on_fuse_image_selected();
+  void on_colormap_updated();
   bool image_click(GdkEventButton*);
 
   void pre_open_img_src();
