@@ -330,6 +330,7 @@ NavigatorGUI::NavigatorGUI(const char *host_name)
   cursor_point.y = 0.;
   odometry_point.x = 0.;
   odometry_point.y = 0.;
+  odometry_orientation = 0.0;
   ball_point.x = 1000000.;
   ball_point.y = 1000000.;
   mouse_point.x = 0.;
@@ -512,6 +513,7 @@ NavigatorGUI::reset_gui()
   odometry_direction = 0.;
   odometry_point.x = 0.;
   odometry_point.y = 0.;
+  odometry_orientation = 0.0;
   mouse_point.x = 0.;
   mouse_point.y = 0.;
   ball_point.x = 1000000.;
@@ -675,6 +677,7 @@ void NavigatorGUI::process_navigator_message(FawkesNetworkMessage *msg) throw()
       odometry_point_mutex->lock();
       odometry_point.x = -odometry_msg->position_y;
       odometry_point.y = -odometry_msg->position_x;
+      odometry_orientation = odometry_msg->orientation;
       if(odometry_msg->velocity_y == 0. && odometry_msg->velocity_x == 0.)
         {
           odometry_direction = 0.;
@@ -1585,7 +1588,7 @@ bool NavigatorGUI::on_expose_event(GdkEventExpose* event)
           //draw odometry coordinates
           layout = Pango::Layout::create (create_pango_context ());
           char print_string[100];
-          sprintf(print_string, "%.2f, %.2f \t\t\t velocity: %.2f", -odometry_point.y, -odometry_point.x, odometry_velocity);
+          sprintf(print_string, "%.2f, %.2f, %.2f \t\t\t velocity: %.2f", -odometry_point.y, -odometry_point.x, odometry_orientation, odometry_velocity);
           layout->set_text(print_string);
 
           Glib::RefPtr<Gdk::GC> gc_odometry = Gdk::GC::create(window);
