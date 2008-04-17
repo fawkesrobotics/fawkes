@@ -3,7 +3,7 @@
  *  net.cpp - Camera to access images over the network
  *
  *  Created: Wed Feb 01 12:24:04 2006
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -74,6 +74,7 @@ NetworkCamera::NetworkCamera(const char *host, unsigned short port, bool jpeg)
   __last_height = 0;
   __fuse_image = NULL;
   __fuse_message = NULL;
+  __fuse_imageinfo = NULL;
 
   __fusec = new FuseClient(__host, __port, this);
   if ( __get_jpeg ) {
@@ -103,6 +104,7 @@ NetworkCamera::NetworkCamera(const char *host, unsigned short port, const char *
   __get_jpeg = jpeg;
 
   __connected       = false;
+  __opened          = false;
   __local_version   = 0;
   __remote_version  = 0;
   __decompressor    = NULL;
@@ -111,6 +113,7 @@ NetworkCamera::NetworkCamera(const char *host, unsigned short port, const char *
   __last_height = 0;
   __fuse_image = NULL;
   __fuse_message = NULL;
+  __fuse_imageinfo = NULL;
 
   __fusec = new FuseClient(__host, __port, this);
   if ( __get_jpeg ) {
@@ -153,6 +156,7 @@ NetworkCamera::NetworkCamera(const CameraArgumentParser *cap)
   __get_jpeg = ( cap->has("jpeg") && (cap->get("jpeg") == "true"));
 
   __connected       = false;
+  __opened          = false;
   __local_version   = 0;
   __remote_version  = 0;
   __decompressor    = NULL;
@@ -161,6 +165,7 @@ NetworkCamera::NetworkCamera(const CameraArgumentParser *cap)
   __last_height = 0;
   __fuse_image = NULL;
   __fuse_message = NULL;
+  __fuse_imageinfo = NULL;
 
   __fusec = new FuseClient(__host, __port, this);
   if ( __get_jpeg ) {
@@ -184,9 +189,21 @@ NetworkCamera::~NetworkCamera()
 void
 NetworkCamera::open()
 {
+  if ( __opened )  return;
+
   __fusec->connect();
   __fusec->start();
   __fusec->wait_greeting();
+
+  FUSE_imagedesc_message_t *imagedesc = (FUSE_imagedesc_message_t *)calloc(1, sizeof(FUSE_imagedesc_message_t));
+  strncpy(imagedesc->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
+  __fusec->enqueue(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
+  __fusec->wait();
+
+  if ( ! __fuse_imageinfo ) {
+    throw Exception("Could not received image info. Image not available?");
+  }
+
   __opened = true;
 }
 
@@ -289,6 +306,10 @@ NetworkCamera::close()
   if ( __started ) {
     stop();
   }
+  if ( __fuse_imageinfo ) {
+    free(__fuse_imageinfo);
+    __fuse_imageinfo = NULL;
+  }
   if ( __opened ) {
     __fusec->disconnect();
     __fusec->cancel();
@@ -311,20 +332,20 @@ NetworkCamera::dispose_buffer()
 unsigned int
 NetworkCamera::pixel_width()
 {
-  if ( __fuse_image ) {
-    return __fuse_image->pixel_width();
+  if ( __fuse_imageinfo ) {
+    return ntohl(__fuse_imageinfo->width);
   } else {
-    return 0;
+    throw NullPointerException("No valid image info received");
   }
 }
 
 unsigned int
 NetworkCamera::pixel_height()
 {
-  if ( __fuse_image ) {
-    return __fuse_image->pixel_height();
+  if ( __fuse_imageinfo ) {
+    return ntohl(__fuse_imageinfo->height);
   } else {
-    return 0;
+    throw NullPointerException("No valid image info received");
   }
 }
 
@@ -367,8 +388,8 @@ NetworkCamera::colorspace()
   if ( __get_jpeg ) {
     return YUV422_PLANAR;
   } else {
-    if ( __fuse_image ) {
-      return (colorspace_t)__fuse_image->colorspace();
+    if ( __fuse_imageinfo ) {
+      return (colorspace_t)ntohs(__fuse_imageinfo->colorspace);
     } else {
       return CS_UNKNOWN;
     }
@@ -429,6 +450,27 @@ NetworkCamera::fuse_inbound_received(FuseNetworkMessage *m) throw()
     }
     break;
 
+
+  case FUSE_MT_IMAGE_INFO:
+    try {
+      __fuse_imageinfo = m->msg_copy<FUSE_imageinfo_t>();
+    } catch (Exception &e) {
+      __fuse_imageinfo = NULL;
+    }
+    break;
+
+  case FUSE_MT_IMAGE_INFO_FAILED:
+    __fuse_imageinfo = NULL;
+    break;
+
+  case FUSE_MT_GET_IMAGE_FAILED:
+    if ( __fuse_message ) {
+      __fuse_message->unref();
+    }
+    __fuse_message = NULL;
+    __fuse_image = NULL;
+    break;
+
   case FUSE_MT_IMAGE_LIST:
     try {
       FuseImageListContent* fuse_image_list = m->msgc<FuseImageListContent>();
@@ -442,11 +484,6 @@ NetworkCamera::fuse_inbound_received(FuseNetworkMessage *m) throw()
 	  ii.height = ntohl(iip->height);
 	  ii.buffer_size = ntohl(iip->buffer_size);
 	  __image_list.push_back(ii);
-	  
-	  /*
-	  printf("NetworkCamera: id: %s  width: %d  height: %d  cs: %s\n",
-		 ii.image_id, ii.width, ii.height, colorspace_to_string((colorspace_t) ii.colorspace));
-	  */
 	}
       }
     }

@@ -96,6 +96,8 @@ class NetworkCamera : public Camera, public FuseClientHandler
   FuseImageContent   *__fuse_image;
   FuseNetworkMessage *__fuse_message;
 
+  FUSE_imageinfo_t   *__fuse_imageinfo;
+
   std::vector<FUSE_imageinfo_t> __image_list;
 };
 
