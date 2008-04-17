@@ -44,6 +44,10 @@
 void
 print_usage(const char *program_name)
 {
+  printf("Usage: %s [-h] [-r host[:port]]\n"
+	 " -h              This help message\n"
+	 " -r host[:port]  Remote host (and optionally port) to connect to\n",
+	 program_name);
 }
 
 static int
@@ -80,7 +84,14 @@ class SkillShellThread : public Thread, public FawkesNetworkClientHandler
 
     continuous = false;
 
-    c = new FawkesNetworkClient("localhost", 1910);
+    char *host = (char *)"localhost";
+    unsigned short int port = 1910;
+    bool free_host = argp->parse_hostport("r", &host, &port);
+
+    c = new FawkesNetworkClient(host, port);
+
+    if ( free_host )  free(host);
+
     c->register_handler(this, FAWKES_CID_SKILLER_PLUGIN);
     c->connect();
   }
@@ -248,7 +259,7 @@ class SkillShellThread : public Thread, public FawkesNetworkClientHandler
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "h");
+  ArgumentParser argp(argc, argv, "hr:");
 
   if ( argp.has_arg("h") ) {
     print_usage(argv[0]);
