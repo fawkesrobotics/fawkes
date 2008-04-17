@@ -156,6 +156,28 @@ FuseServerClientThread::process_greeting_message(FuseNetworkMessage *m)
 }
 
 
+SharedMemoryImageBuffer *
+FuseServerClientThread::get_shmimgbuf(const char *id)
+{
+  char tmp_image_id[IMAGE_ID_MAX_LENGTH + 1];
+  tmp_image_id[IMAGE_ID_MAX_LENGTH] = 0;
+  strncpy(tmp_image_id, id, IMAGE_ID_MAX_LENGTH);
+
+  if ( (__bit = __buffers.find( tmp_image_id )) == __buffers.end() ) {
+    // the buffer has not yet been opened
+    try {
+      SharedMemoryImageBuffer *b = new SharedMemoryImageBuffer(tmp_image_id);
+      __buffers[tmp_image_id] = b;
+      return b;
+    } catch (Exception &e) {
+      throw;
+    }
+  } else {
+    return __bit->second;
+  }
+}
+
+
 /** Process image request message.
  * @param m received message
  */
@@ -164,52 +186,70 @@ FuseServerClientThread::process_getimage_message(FuseNetworkMessage *m)
 {
   FUSE_imagereq_message_t *irm = m->msg<FUSE_imagereq_message_t>();
 
-  char tmp_image_id[IMAGE_ID_MAX_LENGTH + 1];
-  tmp_image_id[IMAGE_ID_MAX_LENGTH] = 0;
-  strncpy(tmp_image_id, irm->image_id, IMAGE_ID_MAX_LENGTH);
-
-  if ( (__bit = __buffers.find( tmp_image_id )) == __buffers.end() ) {
-    // the buffer has not yet been opened
-    try {
-      SharedMemoryImageBuffer *b = new SharedMemoryImageBuffer(tmp_image_id);
-      __buffers[tmp_image_id] = b;
-    } catch (Exception &e) {
-      // ignored
-    }
+  SharedMemoryImageBuffer *b;
+  try {
+    b = get_shmimgbuf(irm->image_id);
+  } catch (Exception &e) {
+    FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_IMAGE_FAILED,
+						    m->payload(), m->payload_size(),
+						    /* copy payload */ true);
+    __outbound_queue->push(nm);
+    return;
   }
 
-  if ( (__bit = __buffers.find( tmp_image_id )) != __buffers.end() ) {
-    // the buffer had already be opened
-    SharedMemoryImageBuffer *eb = (*__bit).second;
-    if ( irm->format == FUSE_IF_RAW ) {
-      FuseImageContent *im = new FuseImageContent(eb);
-      __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
-    } else if ( irm->format == FUSE_IF_JPEG ) {
-      if ( ! __jpeg_compressor) {
-	__jpeg_compressor = new JpegImageCompressor();
-	__jpeg_compressor->set_compression_destination(ImageCompressor::COMP_DEST_MEM);
-      }
-      eb->lock_for_read();
-      __jpeg_compressor->set_image_dimensions(eb->width(), eb->height());
-      __jpeg_compressor->set_image_buffer(eb->colorspace(), eb->buffer());
-      unsigned char *compressed_buffer = (unsigned char *)malloc(__jpeg_compressor->recommended_compressed_buffer_size());
-      __jpeg_compressor->set_destination_buffer(compressed_buffer, __jpeg_compressor->recommended_compressed_buffer_size());
-      __jpeg_compressor->compress();
-      eb->unlock();
-      size_t compressed_buffer_size = __jpeg_compressor->compressed_size();
-      FuseImageContent *im = new FuseImageContent(FUSE_IF_JPEG, eb->image_id(),
-						  compressed_buffer, compressed_buffer_size,
-						  CS_UNKNOWN, eb->width(), eb->height());
-      __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
-      free(compressed_buffer);
-    } else {
-      FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_IMAGE_FAILED,
-						      m->payload(), m->payload_size(),
-						      /* copy payload */ true);
-      __outbound_queue->push(nm);
+  if ( irm->format == FUSE_IF_RAW ) {
+    FuseImageContent *im = new FuseImageContent(b);
+    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
+  } else if ( irm->format == FUSE_IF_JPEG ) {
+    if ( ! __jpeg_compressor) {
+      __jpeg_compressor = new JpegImageCompressor();
+      __jpeg_compressor->set_compression_destination(ImageCompressor::COMP_DEST_MEM);
     }
+    b->lock_for_read();
+    __jpeg_compressor->set_image_dimensions(b->width(), b->height());
+    __jpeg_compressor->set_image_buffer(b->colorspace(), b->buffer());
+    unsigned char *compressed_buffer = (unsigned char *)malloc(__jpeg_compressor->recommended_compressed_buffer_size());
+    __jpeg_compressor->set_destination_buffer(compressed_buffer, __jpeg_compressor->recommended_compressed_buffer_size());
+    __jpeg_compressor->compress();
+    b->unlock();
+    size_t compressed_buffer_size = __jpeg_compressor->compressed_size();
+    FuseImageContent *im = new FuseImageContent(FUSE_IF_JPEG, b->image_id(),
+						compressed_buffer, compressed_buffer_size,
+						CS_UNKNOWN, b->width(), b->height());
+    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
+    free(compressed_buffer);
   } else {
-    // could not open the shared memory segment for some reason, send failure
+    FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_IMAGE_FAILED,
+						    m->payload(), m->payload_size(),
+						    /* copy payload */ true);
+    __outbound_queue->push(nm);
+  }
+}
+
+/** Process image info request message.
+ * @param m received message
+ */
+void
+FuseServerClientThread::process_getimageinfo_message(FuseNetworkMessage *m)
+{
+  FUSE_imagedesc_message_t *idm = m->msg<FUSE_imagedesc_message_t>();
+
+  SharedMemoryImageBuffer *b;
+  try {
+    b = get_shmimgbuf(idm->image_id);
+
+    FUSE_imageinfo_t *ii = (FUSE_imageinfo_t *)calloc(1, sizeof(FUSE_imageinfo_t));
+    
+    strncpy(ii->image_id, b->image_id(), IMAGE_ID_MAX_LENGTH);
+    ii->colorspace = htons(b->colorspace());
+    ii->width = htonl(b->width());
+    ii->height = htonl(b->height());
+    ii->buffer_size = colorspace_buffer_size(b->colorspace(), b->width(), b->height());
+
+    FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_IMAGE_INFO,
+						    ii, sizeof(FUSE_imageinfo_t));
+    __outbound_queue->push(nm);
+  } catch (Exception &e) {
     FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_IMAGE_FAILED,
 						    m->payload(), m->payload_size(),
 						    /* copy payload */ true);
@@ -369,6 +409,9 @@ FuseServerClientThread::process_inbound()
 	break;
       case FUSE_MT_GET_IMAGE:
 	process_getimage_message(m);
+	break;
+      case FUSE_MT_GET_IMAGE_INFO:
+	process_getimageinfo_message(m);
 	break;
       case FUSE_MT_GET_IMAGE_LIST:
 	process_getimagelist_message(m);

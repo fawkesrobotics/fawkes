@@ -30,6 +30,8 @@
 #include <core/exceptions/software.h>
 #include <fvutils/net/fuse.h>
 #include <sys/types.h>
+#include <cstdlib>
+#include <cstring>
 
 class FuseMessageContent;
 
@@ -65,6 +67,26 @@ class FuseNetworkMessage : public RefCount
 	throw TypeMismatchException("FawkesNetworkMessage: message has incorrect size for this type");
       }
       return (MT *)(_msg.payload);
+    }
+
+
+  /** Get copy of correctly casted payload.
+   * Use this method to cast the payload to a specific type. The size is
+   * check as a sanity check and a TypeMismatchException is thrown if the
+   * size does not match.
+   * @return copy of casted message
+   * @exception TypeMismatchException payload size does not match requested type
+   */
+  template <typename MT>
+    MT *
+    msg_copy() const
+    {
+      if ( payload_size() != sizeof(MT) ) {
+	throw TypeMismatchException("FawkesNetworkMessage: message has incorrect size for this type");
+      }
+      void *tmp = malloc(sizeof(MT));
+      memcpy(tmp, _msg.payload, sizeof(MT));
+      return (MT *)tmp;
     }
 
   /** Get correctly parsed output.

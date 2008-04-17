@@ -58,6 +58,8 @@ typedef enum {
   FUSE_MT_GET_LUT_FAILED      = 1005,		/**< Fetching a LUT failed */
   FUSE_MT_SET_LUT_SUCCEEDED   = 1006,		/**< Setting a LUT succeeded */
   FUSE_MT_SET_LUT_FAILED      = 1007,		/**< Setting a LUT failed */
+  FUSE_MT_IMAGE_INFO          = 1008,		/**< image info */
+  FUSE_MT_IMAGE_INFO_FAILED   = 1009,		/**< Retrieval of image info failed */
 
   /* client to server, 2000-2999 */
   FUSE_MT_GET_IMAGE           = 2000,		/**< request image */
@@ -65,6 +67,7 @@ typedef enum {
   FUSE_MT_SET_LUT             = 2002,		/**< set lookup table */
   FUSE_MT_GET_IMAGE_LIST      = 2003,		/**< get image list */
   FUSE_MT_GET_LUT_LIST        = 2004,		/**< get LUT list */
+  FUSE_MT_GET_IMAGE_INFO      = 2005,		/**< get image info */
 
 } FUSE_message_type_t;
 
@@ -140,6 +143,12 @@ typedef struct {
   uint32_t format   : 8;		/**< requested image format, see FUSE_image_format_t */
   uint32_t reserved : 24;		/**< reserved for future use */
 } FUSE_imagereq_message_t;
+
+
+/** Image description message. */
+typedef struct {
+  char image_id[IMAGE_ID_MAX_LENGTH];	/**< image ID */
+} FUSE_imagedesc_message_t;
 
 /** LUT description message. */
 typedef struct {

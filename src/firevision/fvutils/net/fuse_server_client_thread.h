@@ -51,14 +51,15 @@ class FuseServerClientThread : public Thread
   
   void process_greeting_message(FuseNetworkMessage *m);
   void process_getimage_message(FuseNetworkMessage *m);
+  void process_getimageinfo_message(FuseNetworkMessage *m);
+  void process_getimagelist_message(FuseNetworkMessage *m);
   void process_getlut_message(FuseNetworkMessage *m);
   void process_setlut_message(FuseNetworkMessage *m);
-  void process_getimagelist_message(FuseNetworkMessage *m);
   void process_getlutlist_message(FuseNetworkMessage *m);
 
  private:
   void process_inbound();
-
+  SharedMemoryImageBuffer *  get_shmimgbuf(const char *id);
 
   FuseServer   *__fuse_server;
   StreamSocket *__socket;
