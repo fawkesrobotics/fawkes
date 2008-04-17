@@ -65,7 +65,7 @@ print_usage(const char *program_name)
 	 "                 host[:port]/image_id. You have to specify at least the host\n"
 	 "                 and the image_id, the port is optional and defaults to 5000\n"
 	 "  -j             Receive JPEG images, only valid with -n\n"
-	 "  -f file        Open file loader camera with given file\n"
+	 "  -f file        Open file loader camera with given file (image, colormap)\n"
 	 "  -v             Verbose output on console\n"
 	 "  cam arg string Can be an arbitrary camera argument string that is understood\n"
 	 "                 by CameraFactory and the desired camera.\n",

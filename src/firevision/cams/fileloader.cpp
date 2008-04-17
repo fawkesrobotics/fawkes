@@ -31,6 +31,8 @@
 #include <fvutils/writers/fvraw.h>
 #include <fvutils/system/filetype.h>
 #include <fvutils/system/camargp.h>
+#include <fvutils/colormap/cmfile.h>
+#include <fvutils/colormap/colormap.h>
 
 #include <fvutils/readers/fvraw.h>
 #ifdef HAVE_LIBJPEG
@@ -340,7 +342,7 @@ FileLoader::read_file()
 
   std::string ft = fv_filetype_file( fn );
 
-  if ( FvRawReader::is_FvRaw(fn) ) {
+  if ( ft == "FvRaw" ) {
     FvRawReader *fvrr = new FvRawReader( fn );
     cspace = fvrr->colorspace();
     width  = fvrr->pixel_width();
@@ -378,8 +380,7 @@ FileLoader::read_file()
 
 #ifdef HAVE_LIBPNG
   } else if ( ft.find( "PNG" ) != std::string::npos ) {
-    PNGReader *pr = new PNGReader( fn );
-    cspace = pr->colorspace();
+    PNGReader *pr = new PNGReader( fn );    cspace = pr->colorspace();
     width  = pr->pixel_width();
     height = pr->pixel_height();
     _buffer_size = colorspace_buffer_size( cspace, width, height );
@@ -394,6 +395,20 @@ FileLoader::read_file()
     }
     delete pr;
 #endif
+
+  } else if ( ft == "FvColormap" ) {
+    ColormapFile cmf;
+    cmf.read(fn);
+
+    Colormap *colormap = cmf.get_colormap();
+    cspace = YUV422_PLANAR;
+    width  = colormap->width() * 2;
+    height = colormap->height() * 2;
+    _buffer_size = colorspace_buffer_size( cspace, width, height );
+    file_buffer = (unsigned char*)malloc(_buffer_size);
+    colormap->to_image(file_buffer);
+
+    delete colormap;
 
   } else {
     _buffer_size = colorspace_buffer_size( cspace, width, height );

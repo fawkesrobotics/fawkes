@@ -32,6 +32,8 @@
 #include <fvutils/net/fuse_lutlist_content.h>
 #include <fvutils/writers/fvraw.h>
 #include <fvutils/color/colorspaces.h>
+#include <fvutils/colormap/yuvcm.h>
+#include <fvutils/colormap/cmfile.h>
 
 #include <core/threading/wait_condition.h>
 #include <core/exceptions/software.h>
@@ -139,8 +141,9 @@ class FireVisionNetworkTool
 	    char tmp[LUT_ID_MAX_LENGTH + 1];
 	    tmp[LUT_ID_MAX_LENGTH] = 0;
 	    strncpy(tmp, li->lut_id, LUT_ID_MAX_LENGTH);
-	    printf("  %s (%u x %u, %u bpc)\n", tmp,
-		   ntohl(li->width), ntohl(li->height), ntohl(li->bytes_per_cell));
+	    printf("  %s (%u x %u x %u, %u bpc)\n", tmp,
+		   ntohl(li->width), ntohl(li->height),
+		   ntohl(li->depth), ntohl(li->bytes_per_cell));
 	  }
 	} else {
 	  printf("No lookup tables available\n");
@@ -152,13 +155,30 @@ class FireVisionNetworkTool
       }
       __client->cancel();
       break;
+
     case FUSE_MT_LUT:
-      // we got an image, save it to the given file
+      // we got a LUT, save it to the given file
       try {
 	FuseLutContent *lc = m->msgc<FuseLutContent>();
-	FILE *f = fopen(__file, "w");
-	fwrite(lc->buffer(), lc->buffer_size(), 1, f);
-	fclose(f);
+	// Currently we expect colormaps, so make sure we get sensible dimensions
+	if ( lc->width() != 256 ) {
+	  printf("Invalid dimensions for LUT received, colormap width %u != 256", lc->width());
+	} else if ( lc->height() != 256 ) {
+	  printf("Invalid dimensions for LUT received, colormap height %u != 256", lc->height());
+	} else if ( lc->depth() > 256 ) {
+	  printf("Invalid dimensions for LUT received, colormap depth %u > 256", lc->depth());
+	} else {
+	  try {
+	    YuvColormap yuvcm(lc->depth());
+	    yuvcm.set(lc->buffer());
+	    ColormapFile cmf;
+	    cmf.add_colormap(&yuvcm);
+	    cmf.write(__file);
+	  } catch (Exception &e) {
+	    e.append("Failed to save colormap");
+	    e.print_trace();
+	  }
+	}
 	delete lc;
       } catch (Exception &e) {
 	printf("Received message cannot be casted to FuseLutMessage\n");
@@ -166,6 +186,29 @@ class FireVisionNetworkTool
       }
       __client->cancel();
       break;
+
+    case FUSE_MT_SET_LUT_SUCCEEDED:
+      {
+	FUSE_lutdesc_message_t *lutdesc = m->msg<FUSE_lutdesc_message_t>();
+	char lut_id[LUT_ID_MAX_LENGTH + 1];
+	lut_id[LUT_ID_MAX_LENGTH] = 0;
+	strncpy(lut_id, lutdesc->lut_id, LUT_ID_MAX_LENGTH);
+	printf("LUT %s has been uploaded successfully.\n", lut_id);
+	__client->cancel();
+      }
+      break;
+
+    case FUSE_MT_SET_LUT_FAILED:
+      {
+	FUSE_lutdesc_message_t *lutdesc = m->msg<FUSE_lutdesc_message_t>();
+	char lut_id[LUT_ID_MAX_LENGTH + 1];
+	lut_id[LUT_ID_MAX_LENGTH] = 0;
+	strncpy(lut_id, lutdesc->lut_id, LUT_ID_MAX_LENGTH);
+	printf("LUT upload of %s has failed.\n", lut_id);
+	__client->cancel();
+      }
+      break;
+
     default:
       printf("Unhandled message of type %u received\n", m->type());
       __client->cancel();
@@ -238,8 +281,8 @@ class FireVisionNetworkTool
     printf("Usage: %s -i/-l/-L/-s -n host[:port]/id file\n"
 	   "  -i             Get image\n"
 	   "  -j             Get JPEG-compressed image\n"
-	   "  -l             Get LUT\n"
-	   "  -L             Set LUT\n"
+	   "  -c             Get colormap\n"
+	   "  -C             Set colormap from file\n"
 	   "  -s             Show available images and LUTs\n"
 	   "  -e             Explore network. Will query all instances of Fountain\n"
 	   "                 found on the network for all available images and LUTs.\n"
@@ -270,7 +313,7 @@ class FireVisionNetworkTool
    * @param lut_id LUT ID.
    */
   void
-  get_lut(const char *lut_id)
+  get_colormap(const char *lut_id)
   {
     FUSE_lutdesc_message_t *ldm = (FUSE_lutdesc_message_t *)malloc(sizeof(FUSE_lutdesc_message_t));
     memset(ldm, 0, sizeof(FUSE_lutdesc_message_t));
@@ -282,10 +325,21 @@ class FireVisionNetworkTool
    * @param lut_id LUT ID.
    */
   void
-  set_lut(const char *lut_id)
+  set_colormap(const char *lut_id)
   {
-    printf("This is currently not supported\n");
-    __client->cancel();
+    ColormapFile cmf;
+    cmf.read(__file);
+    Colormap *cm = cmf.get_colormap();
+    FuseLutContent *lc = new FuseLutContent(lut_id, cm->get_buffer(),
+					    cm->width(), cm->height(), cm->depth(),
+					    /* bytes per cell */ 1);
+    delete cm;
+
+    printf("Sending LUT, w:%u h:%u d:%u bpc: %u\n", lc->width(), lc->height(), lc->depth(),
+	   lc->bytes_per_cell());
+
+    printf("Enqueueing setlut message of size %zu\n", lc->payload_size());
+    __client->enqueue(new FuseNetworkMessage(FUSE_MT_SET_LUT, lc));
   }
 
   /** Show all images and LUTs. */
@@ -319,7 +373,7 @@ class FireVisionNetworkTool
     __avahi_thread->join();
     delete __avahi_thread;
 #else
-    printf("\nExploration is not available, since Avahi support is missing. "
+    printf("\nExploration is not available because Avahi support is missing. "
 	   "Install avahi-devel and recompile.\n\n");
 #endif
   }
@@ -360,7 +414,7 @@ class FireVisionNetworkTool
       }
 
       if (__argp->has_arg("i") || __argp->has_arg("j") ||
-	  __argp->has_arg("l") || __argp->has_arg("L")) {
+	  __argp->has_arg("c") || __argp->has_arg("C")) {
 	if ( __argp->num_items() == 0 ) {
 	  print_usage();
 	  printf("\nFile name missing\n\n");
@@ -371,7 +425,7 @@ class FireVisionNetworkTool
 
 	if (id == NULL) {
 	  print_usage();
-	  printf("\nNo Image ID given, needed for -i/-l/-L\n\n");
+	  printf("\nNo Image/LUT ID given, needed for -i/-c/-C\n\n");
 	  exit(2);
 	}
       }
@@ -386,10 +440,10 @@ class FireVisionNetworkTool
 	get_image(id, /* JPEG? */ false);
       } else if ( __argp->has_arg("j") ) {
 	get_image(id, /* JPEG? */ true);
-      } else if ( __argp->has_arg("l") ) {
-	get_lut(id);
-      } else if ( __argp->has_arg("L") ) {
-	set_lut(id);
+      } else if ( __argp->has_arg("c") ) {
+	get_colormap(id);
+      } else if ( __argp->has_arg("C") ) {
+	set_colormap(id);
       } else if ( __argp->has_arg("s") ) {
 	show_all();
       } else if ( __argp->has_arg("e") ) {
@@ -426,7 +480,7 @@ private:
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hn:ilLsej");
+  ArgumentParser argp(argc, argv, "hn:icCsej");
 
   FireVisionNetworkTool *nettool = new FireVisionNetworkTool(&argp);
   nettool->run();
