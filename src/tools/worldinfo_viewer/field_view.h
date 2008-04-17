@@ -27,6 +27,8 @@
 
 #include <gtkmm/drawingarea.h>
 #include <geometry/hom_vector.h>
+#include <geometry/hom_point.h>
+#include <geometry/hom_pose.h>
 #include <map>
 
 class FieldView : public Gtk::DrawingArea
@@ -37,7 +39,7 @@ class FieldView : public Gtk::DrawingArea
 
   void reset();
 
-  void set_robot_pos(const char* name, float glob_x, float glob_y, float theta);
+  void set_robot_pose(const char* name, float glob_x, float glob_y, float theta);
   void set_ball_pos(const char* robot_name, float rel_x, float rel_y);
 /*   void set_opponent_pos(const char* robot_name, float rel_x, float rel_y); */
 
@@ -54,7 +56,7 @@ class FieldView : public Gtk::DrawingArea
 		 float x, float y);
 
   std::map<std::string, unsigned int> m_robots;
-  std::map<unsigned int, HomVector> m_robot_positions;
+  std::map<unsigned int, HomPose> m_robot_poses;
 /*   std::map<unsigned int, std::vector<HomVector> > m_opponent_positions; */
   std::map<unsigned int, HomVector> m_ball_positions;
 

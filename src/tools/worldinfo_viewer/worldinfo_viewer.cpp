@@ -58,7 +58,7 @@ WorldInfoViewer::WorldInfoViewer( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 
   m_data_container = data_container;
 
-  m_message_id = m_stb_status->push("Not connected.");
+  m_message_id = m_stb_status->push("No game state information available.");
 }
 
 /** Destructor. */
@@ -102,12 +102,26 @@ WorldInfoViewer::redraw_field()
   vector<string>::iterator hit;
   vector<string> hosts = m_data_container->get_hosts();
 
-  HomVector pos;
+  HomPoint pos;
+  HomVector pos_rel;
   for (hit = hosts.begin(); hit != hosts.end(); ++hit)
     {
-      pos = m_data_container->get_robot_pos( hit->c_str() );
-      m_field_view->set_robot_pos( hit->c_str(), pos.x(), pos.y(), 0.0 /* TODO */);
-      //m_field_view->set_ball_pos();
+      // robot pose
+      HomPose pose;
+      if ( m_data_container->get_robot_pose( hit->c_str(), pose) )
+	{ m_field_view->set_robot_pose( hit->c_str(), pose.x(), pose.y(), pose.yaw()); }
+
+      // global ball positions
+      const char* host_name = (*hit).c_str();
+      if ( m_data_container->get_ball_pos_global(host_name, pos) )
+	{ m_field_view->set_ball_pos(host_name, pos.x(), pos.y()); }
+
+      // relative ball positions
+//       if ( m_data_container->get_ball_pos_relative(host_name, pos_rel) )
+// 	{ m_field_view->set_ball_pos(host_name, pos_rel.x(), pos_rel.y()); }
+      
+      // opponents
+      // TODO
     }
   
   m_field_view->queue_draw();

@@ -49,19 +49,19 @@ FieldView::~FieldView()
 void
 FieldView::reset()
 {
-  m_robot_positions.clear();
+  m_robot_poses.clear();
   m_ball_positions.clear();
   //m_opponent_positions.clear();
 }
 
-/** Set the position of a robot.
+/** Set the pose of a robot.
  * @param name the hostname of the robot
  * @param glob_x the global x-coordinate of the robot's position
  * @param glob_y the gloabl y-coordinate of the robot's position
  * @param theta the global orienation of the robot
  */
 void
-FieldView::set_robot_pos(const char* name, float glob_x, float glob_y, float theta)
+FieldView::set_robot_pose(const char* name, float glob_x, float glob_y, float theta)
 {
   unsigned int id;
   string robot_name(name);
@@ -75,9 +75,8 @@ FieldView::set_robot_pos(const char* name, float glob_x, float glob_y, float the
       m_robots[robot_name] = id;
     }
   
-  // TODO: theta
-  HomVector pos(glob_x, glob_y);
-  m_robot_positions[id] = pos;
+  HomPose pose(glob_x, glob_y, theta);
+  m_robot_poses[id] = pose;
 }
 
 /** Set the position of the ball as it is estimated by the given robot.
@@ -163,15 +162,21 @@ FieldView::on_expose_event(GdkEventExpose* event)
       for (rit = m_robots.begin(); rit != m_robots.end(); ++rit)
 	{
 	  HomVector pos;
-	  HomVector robot_pos;
+	  HomPose robot_pose;
 
 	  // robot
-	  robot_pos = m_robot_positions[rit->second];
-	  draw_robot(context, robot_pos.x(), robot_pos.y(), 0.0 /* TODO */);
+	  if (m_robot_poses.end() != m_robot_poses.find(rit->second))
+	    {
+	      robot_pose = m_robot_poses[rit->second];
+	      draw_robot(context, robot_pose.x(), robot_pose.y(), robot_pose.yaw());
+	    }
 
 	  // ball
-	  pos = m_ball_positions[rit->second];
-	  draw_ball(context, pos.x(), pos.y());
+	  if (m_ball_positions.end() != m_ball_positions.find(rit->second))
+	    {
+	      pos = m_ball_positions[rit->second];
+	      draw_ball(context, pos.x(), pos.y());
+	    }
 
 	  // opponents
 	  // TODO
@@ -267,10 +272,10 @@ void
 FieldView::draw_robot(Cairo::RefPtr<Cairo::Context> context, float x, float y, float ori)
 {
   context->save();
-  context->set_source_rgb(0.7, 0.7, 0.7);
+  context->set_source_rgb(0.2, 0.2, 0.2);
   context->set_line_width(0.05);
   context->move_to(x, y);
-  context->arc(x, y, 0.3, ori, 2*M_PI);
+  context->arc(x, y, 0.3, ori, 2*M_PI + ori);
   context->stroke();
   context->restore();
 }

@@ -82,6 +82,7 @@ void
 WorldInfoViewerBackendThread::loop()
 {
   m_transceiver->recv(true, 100);
+  usleep(100000);
 }
 
 void
@@ -103,10 +104,14 @@ WorldInfoViewerBackendThread::velocity_rcvd( const char* from_host, float vel_x,
 void
 WorldInfoViewerBackendThread::ball_pos_rcvd( const char* from_host,
 					     bool visible, int visibility_history,
-					     float dist, float pitch, float yaw,
+					     float dist, float bearing, float slope,
 					     float* covariance )
 {
-  m_data_container->set_ball_pos(from_host, dist, pitch, yaw, covariance);
+  // TODO: visibility history
+  if (visible)
+    { m_data_container->set_ball_pos_relative(from_host, dist, bearing, slope, covariance); }
+  else
+    { m_data_container->delete_ball_pos(from_host); }
   m_signal_new_data();
 }
 
@@ -123,13 +128,15 @@ WorldInfoViewerBackendThread::opponent_pose_rcvd( const char* from_host, unsigne
 						  float distance, float angle,
 						  float* covariance )
 {
-  // TODO
+  m_data_container->set_opponent_pos(from_host, uid, distance, angle, covariance);
+  m_signal_new_data();
 }
 
 
 void
 WorldInfoViewerBackendThread::opponent_disapp_rcvd(const char *from_host, unsigned int uid)
 {
+  // TODO
 }
 
 

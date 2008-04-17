@@ -26,6 +26,7 @@
 #include <tools/worldinfo_viewer/backend_thread.h>
 #include <worldinfo_utils/data_container.h>
 #include <utils/system/hostinfo.h>
+#include <utils/time/clock.h>
 #include <config/sqlite.h>
 
 #include <libglademm/xml.h>
@@ -62,7 +63,8 @@ int main(int argc, char** argv)
   
   delete config;
 
-  WorldInfoDataContainer* data_container = new WorldInfoDataContainer;
+  Clock* clock = Clock::instance();
+  WorldInfoDataContainer* data_container = new WorldInfoDataContainer(clock);
   WorldInfoViewerBackendThread* backend_thread = new WorldInfoViewerBackendThread(data_container,
 										  addr.c_str(), 
 										  port,
@@ -91,6 +93,7 @@ int main(int argc, char** argv)
   delete backend_thread;
 
   delete data_container;
+  Clock::finalize();
 
   Thread::destroy_main();
 
