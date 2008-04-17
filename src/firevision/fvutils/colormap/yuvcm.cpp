@@ -163,6 +163,7 @@ YuvColormap::reset()
 void
 YuvColormap::set(unsigned char *buffer)
 {
+  memcpy(__lut, buffer, __lut_size);
 }
 
 

@@ -53,6 +53,7 @@ class ColormapFile : public FireVisionDataFile
   ColormapBlockVector *  colormap_blocks();
   Colormap *             get_colormap();
 
+  static bool            is_colormap_file(const char *filename);
   static std::string     compose_filename(const std::string format);
 };
 

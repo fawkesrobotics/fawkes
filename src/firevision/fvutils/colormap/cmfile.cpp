@@ -136,6 +136,16 @@ ColormapFile::get_colormap()
 }
 
 
+/** Check if given file is a colormap file.
+ * @param filename name of file to check
+ */
+bool
+ColormapFile::is_colormap_file(const char *filename)
+{
+  return FireVisionDataFile::has_magic_token(filename, CMFILE_MAGIC_TOKEN);
+}
+
+
 /** Compose filename.
  * In the format %g is replaced with the hostname.
  * @param format format for the filename
