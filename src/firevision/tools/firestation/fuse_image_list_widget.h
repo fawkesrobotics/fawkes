@@ -45,19 +45,21 @@ class FuseImageListWidget : FuseClientHandler
 			     uint32_t port );
   void remove_fountain_service(const char* name);
 
+  void set_auto_update_chk(Gtk::CheckButton* chk);
   void set_image_list_trv(Gtk::TreeView* trv);
-  void set_image_selected_dispatcher(Glib::Dispatcher* image_selected);
+  Glib::Dispatcher& image_selected();
 
   bool auto_update();
   void set_auto_update(bool active, unsigned int interval_sec = 5);
 
-  bool get_selected_image(std::string& host_name, unsigned short& port, std::string& image_id);
+  bool get_selected_image( std::string& host_name, unsigned short& port, 
+			   std::string& image_id );
 
   // Fuse client handler
-  void fuse_invalid_server_version(uint32_t local_version, 
-				   uint32_t remote_version) throw();
-  void fuse_connection_established () throw();
-  void fuse_inbound_received (FuseNetworkMessage *m) throw();
+  void fuse_invalid_server_version( uint32_t local_version, 
+				    uint32_t remote_version ) throw();
+  void fuse_connection_established() throw();
+  void fuse_inbound_received(FuseNetworkMessage *m) throw();
 
  private:
   class ImageRecord : public Gtk::TreeModelColumnRecord
@@ -96,7 +98,8 @@ class FuseImageListWidget : FuseClientHandler
     bool active;
   };
 
-  void on_cursor_changed();
+  void on_image_selected();
+  void on_auto_update_toggled();
   void get_image_list();
   void delete_clients();
   bool update_image_list();
@@ -105,7 +108,8 @@ class FuseImageListWidget : FuseClientHandler
   LockQueue<FuseClient*> m_delete_clients;
 
   ClientData m_cur_client;
-
+  
+  Gtk::CheckButton* m_chk_auto_update;
   Gtk::TreeView* m_trv_image_list;
   Glib::RefPtr<Gtk::TreeStore> m_image_list;
   Mutex m_img_list_mutex;
@@ -114,7 +118,7 @@ class FuseImageListWidget : FuseClientHandler
 
   Glib::Dispatcher m_signal_get_image_list;
   Glib::Dispatcher m_signal_delete_clients;
-  Glib::Dispatcher* m_signal_image_selected;
+  Glib::Dispatcher m_signal_image_selected;
 
   bool m_auto_update;
 };

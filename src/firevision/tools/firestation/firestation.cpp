@@ -309,7 +309,9 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_filw = new FuseImageListWidget();
   trv = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvFuseImageList") );
   m_filw->set_image_list_trv(trv);
-  m_filw->set_image_selected_dispatcher( &m_signal_fuse_image_selected );
+  Gtk::CheckButton* chk = dynamic_cast<Gtk::CheckButton*>( get_widget(ref_xml, "chkFuseImageListUpdate") );
+  m_filw->set_auto_update_chk(chk);
+  m_filw->image_selected().connect( sigc::mem_fun(*this, &Firestation::on_fuse_image_selected) );
   // ----------------------------------------------------------------
 
 

@@ -42,7 +42,6 @@ FuseImageListWidget::FuseImageListWidget()
   m_cur_client.active = false;
 
   m_trv_image_list = 0;
-  m_signal_image_selected = 0;
 
   m_new_clients.clear();
   m_delete_clients.clear();
@@ -72,8 +71,8 @@ FuseImageListWidget::~FuseImageListWidget()
     {
       m_cur_client.active = false;
       m_delete_clients.push_locked(m_cur_client.client);
-      delete_clients();
     }
+  delete_clients();
 }
 
 /** Call this method when new Fountain services are discovered.
@@ -113,7 +112,7 @@ FuseImageListWidget::add_fountain_service( const char* name,
 	}
     }
   m_new_clients.unlock();
-  
+
   ClientData data;
   data.client = 0;
   data.service_name = std::string(name);
@@ -131,26 +130,27 @@ FuseImageListWidget::add_fountain_service( const char* name,
 void
 FuseImageListWidget::remove_fountain_service(const char* name)
 {
-  printf("Removing service: %s\n", name);
-
   m_img_list_mutex.lock();
   Gtk::TreeModel::Children children = m_image_list->children();
-  for ( Gtk::TreeModel::Children::iterator iter = children.begin();
-	iter != children.end(); ++iter )
+  Gtk::TreeModel::Children::iterator iter = children.begin();
+  while ( iter != children.end() )
     {
       Gtk::TreeModel::Row row = *iter;
       if ( row[m_image_record.service_name] == Glib::ustring(name) )
 	{
-	  // TODO:
-	  //m_image_list->erase(iter);
-	  //m_image_list->row_deleted( m_image_list->get_path(iter) );
+	  iter = m_image_list->erase(iter);
+	  m_image_list->row_deleted( m_image_list->get_path(iter) );
+ 	}
+      else
+	{
+	  ++iter;
 	}
     }
   m_img_list_mutex.unlock();
 }
 
 /** Assign the TreeView widget to hold the list of images.
- * @param trv a TreeView
+ * @param trv a Gtk::TreeView
  */
 void
 FuseImageListWidget::set_image_list_trv(Gtk::TreeView* trv)
@@ -160,18 +160,29 @@ FuseImageListWidget::set_image_list_trv(Gtk::TreeView* trv)
   m_trv_image_list->set_model(m_image_list);
   m_trv_image_list->append_column("asdf", m_image_record.display_text);
   m_trv_image_list->set_headers_visible(false);
-  m_trv_image_list->signal_cursor_changed().connect( sigc::mem_fun(*this, &FuseImageListWidget::on_cursor_changed) );
+  m_trv_image_list->signal_cursor_changed().connect( sigc::mem_fun(*this, &FuseImageListWidget::on_image_selected) );
   m_img_list_mutex.unlock();
 }
 
-/** Assign the dispatcher that is signalled whenever the user selects a row in the 
- * TreeView containing the list of images.
- * @param image_selected pointer to the dispatcher
+/** Assign the CheckButton that enables/disables the auto update function.
+ * @param chk a Gtk::CheckButton
  */
 void
-FuseImageListWidget::set_image_selected_dispatcher(Glib::Dispatcher* image_selected)
+FuseImageListWidget::set_auto_update_chk(Gtk::CheckButton* chk)
 {
-  m_signal_image_selected = image_selected;
+  m_chk_auto_update = chk;
+  m_chk_auto_update->signal_toggled().connect( sigc::mem_fun(*this, &FuseImageListWidget::on_auto_update_toggled) );
+}
+
+/** Access the Dispatcher that is signalled when a new image is selected in the list of
+ * images.
+ * @return reference to the Dispatcher that is activated when an image is selected in the
+ *         list of images
+ */
+Glib::Dispatcher&
+FuseImageListWidget::image_selected()
+{
+  return m_signal_image_selected;
 }
 
 /** Get auto-update status.
@@ -228,10 +239,15 @@ FuseImageListWidget::get_selected_image( std::string& host_name, unsigned short&
 }
 
 void
-FuseImageListWidget::on_cursor_changed()
+FuseImageListWidget::on_image_selected()
 {
-  if (m_signal_image_selected)
-    { (*m_signal_image_selected)(); }
+  m_signal_image_selected();
+}
+
+void
+FuseImageListWidget::on_auto_update_toggled()
+{
+  set_auto_update( m_chk_auto_update->get_active() );
 }
 
 void
@@ -292,7 +308,28 @@ FuseImageListWidget::delete_clients()
 bool
 FuseImageListWidget::update_image_list()
 {
-  // TODO
+  m_img_list_mutex.lock();
+  Gtk::TreeModel::Children children = m_image_list->children();
+  for ( Gtk::TreeModel::Children::iterator iter = children.begin();
+	iter != children.end(); ++iter )
+    {
+      if ( (*iter)[m_image_record.image_id] == "invalid" )
+	{
+	  ClientData data;
+	  data.client = 0;
+	  Glib::ustring service_name = (*iter)[m_image_record.service_name];
+	  Glib::ustring host_name = (*iter)[m_image_record.host_name];
+	  data.service_name = std::string( service_name.c_str() );
+	  data.host_name = std::string( host_name.c_str() );
+	  data.port = (*iter)[m_image_record.port];
+	  data.active = false;
+
+	  m_new_clients.push_back_locked(data);
+	}
+    }
+  m_img_list_mutex.unlock();
+
+  m_signal_get_image_list();
 
   return m_auto_update;
 }
@@ -333,19 +370,24 @@ FuseImageListWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
 	      }
 	  }
 
-	Gtk::TreeModel::Row row = *m_image_list->append();
-	row[m_image_record.display_text] = Glib::ustring(m_cur_client.host_name);
-	row[m_image_record.service_name] = Glib::ustring(m_cur_client.service_name);
-	row[m_image_record.host_name]    = Glib::ustring(m_cur_client.host_name);
-	row[m_image_record.port]         = m_cur_client.port;
-
-	Gtk::TreeModel::Path path = m_image_list->get_path(row);
-
 	try
 	  {
 	    FuseImageListContent* content = m->msgc<FuseImageListContent>();
 	    if ( content->has_next() )
 	      {
+		Gtk::TreeModel::Row row = *m_image_list->append();
+		row[m_image_record.display_text] = Glib::ustring(m_cur_client.host_name);
+		row[m_image_record.service_name] = Glib::ustring(m_cur_client.service_name);
+		row[m_image_record.host_name]    = Glib::ustring(m_cur_client.host_name);
+		row[m_image_record.port]         = m_cur_client.port;
+		row[m_image_record.colorspace]   = 0;
+		row[m_image_record.image_id]     = "invalid";
+		row[m_image_record.width]        = 0;
+		row[m_image_record.height]       = 0;
+		row[m_image_record.buffer_size]  = 0;
+		
+		Gtk::TreeModel::Path path = m_image_list->get_path(row);
+
 		while ( content->has_next() )
 		  {
 		    FUSE_imageinfo_t* image_info = content->next();
@@ -363,7 +405,9 @@ FuseImageListWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
 		    childrow[m_image_record.width]        = ntohl(image_info->width);
 		    childrow[m_image_record.height]       = ntohl(image_info->height);
 		    childrow[m_image_record.buffer_size]  = ntohl(image_info->buffer_size);
-		  } 
+		  }
+
+		m_trv_image_list->expand_row(path, false);
 	      }
 
 	    delete content;
@@ -374,8 +418,6 @@ FuseImageListWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
 	  }
 
 	m_img_list_mutex.unlock();
-
-	m_trv_image_list->expand_row(path, false);
 
 	m_delete_clients.push_locked(m_cur_client.client);
 	m_cur_client.active = false;
