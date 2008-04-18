@@ -521,12 +521,6 @@ GeegawPipeline::detect_sift()
     // cout << "Doh, no ROIs!" << endl;
   } 
   else {
-
-    polar_coord_t o;
-    o.phi = 0.f;
-    o.r   = 0.f;
-    obstacles.push_back(o);
-
     FilterROIDraw *rdf = new FilterROIDraw();
 
     camctrl->pan_tilt_rad(&pan, &tilt);
@@ -542,6 +536,11 @@ GeegawPipeline::detect_sift()
       } else {
 	if ( first ) {
 	  /// First is the biggest ROI, set as object
+	  polar_coord_t o;
+	  o.phi = 0.f;
+	  o.r   = 0.f;
+	  obstacles.push_back(o);
+
 	  //object_relposmod->set_pan_tilt(pan, tilt);
 	  object_relposmod->set_center( (*r).start.x + (*r).width / 2,
 					(*r).start.y + (*r).height / 2 );
@@ -576,13 +575,6 @@ GeegawPipeline::detect_surf()
     cout << msg_prefix << " ##### NOTHING FOUND! #####" << endl;
   } 
   else {
-    cout << msg_prefix << " FOUND SOMETHING!" << endl;
-
-    polar_coord_t o;
-    o.phi = 0.f;
-    o.r   = 0.f;
-    obstacles.push_back(o);
-
     FilterROIDraw *rdf = new FilterROIDraw();
     //r = rois->begin();
     //rdf->set_dst_buffer(buffer, &(*r));
@@ -591,6 +583,8 @@ GeegawPipeline::detect_surf()
 
     bool first = true;
     for (r = rois->begin(); r != rois->end(); ++r) {
+
+      cout << msg_prefix << " some features matched ..." << endl;
 
       rdf->set_dst_buffer(buffer, &(*r));
     
@@ -601,7 +595,13 @@ GeegawPipeline::detect_surf()
 	++num_features;
       } else {
 	if ( first ) {
+	  cout << msg_prefix << " FOUND THE OBJECT!" << endl;
 	  /// First is the biggest ROI, set as object
+	  polar_coord_t o;
+	  o.phi = 0.f;
+	  o.r   = 0.f;
+	  obstacles.push_back(o);
+
 	  //object_relposmod->set_pan_tilt(pan, tilt);
 	  object_relposmod->set_center( (*r).start.x + (*r).width / 2,
 					(*r).start.y + (*r).height / 2 );
@@ -641,12 +641,6 @@ GeegawPipeline::detect_siftpp()
     // cout << "Doh, no ROIs!" << endl;
   } 
   else {
-
-    polar_coord_t o;
-    o.phi = 0.f;
-    o.r   = 0.f;
-    obstacles.push_back(o);
-
     FilterROIDraw *rdf = new FilterROIDraw();
 
     camctrl->pan_tilt_rad(&pan, &tilt);
@@ -662,6 +656,10 @@ GeegawPipeline::detect_siftpp()
       } else {
 	if ( first ) {
 	  /// First is the biggest ROI, set as object
+	  polar_coord_t o;
+	  o.phi = 0.f;
+	  o.r   = 0.f;
+	  obstacles.push_back(o);
 	  //object_relposmod->set_pan_tilt(pan, tilt);
 	  object_relposmod->set_center( (*r).start.x + (*r).width / 2,
 					(*r).start.y + (*r).height / 2 );

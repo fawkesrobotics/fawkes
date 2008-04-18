@@ -287,10 +287,11 @@ FirevisionGeegawBBClient::Loop(int Count)
     m_pObjPosServer->set_has_relative( true );
     m_pObjPosServer->set_bearing( pipeline->object_bearing() );
     m_pObjPosServer->set_distance( pipeline->object_distance() );
-    long int * sec, * usec;
-    pipeline->getDataTakenTime(sec,usec);
-    m_pObjPosServer->set_evidence_time_sec( *sec );
-    m_pObjPosServer->set_evidence_time_usec( *usec );
+    long int sec = 0;
+    long int usec = 0;
+    pipeline->getDataTakenTime(&sec,&usec);
+    m_pObjPosServer->set_evidence_time_sec( sec );
+    m_pObjPosServer->set_evidence_time_usec( usec );
     //m_pObjPosServer->set_slope( pipeline->object_slope() );
     m_pObjPosServer->set_slope( 0.f );
     m_pObjPosServer->set_confidence( 1.f );
