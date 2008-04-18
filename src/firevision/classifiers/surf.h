@@ -51,6 +51,8 @@ class SurfClassifier : public Classifier
 {
  public:
   SurfClassifier(const char * features_file,
+		 unsigned int min_match = 0,
+		 float min_match_ratio = 0.0,
 		 int samplingStep = 2,
 		 int octaves = 4,
 		 double thres = 4.0,
@@ -81,6 +83,11 @@ class SurfClassifier : public Classifier
   surf::Image *__image;
   std::vector< surf::Ipoint > __img_features;
   int __img_num_features;
+
+  // minimum (absolute) number of features that have to be matched per ROI
+  unsigned int __min_match;
+  // minimum ratio of features per total object-features that have to be matched per ROI
+  float __min_match_ratio;
 
   // Initial sampling step (default 2)
   int __samplingStep;

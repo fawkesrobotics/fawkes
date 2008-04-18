@@ -852,7 +852,7 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
     cout << msg_prefix << "Switching to SURF mode" << endl;
     delete classifier;
     #ifdef HAVE_SURF
-    classifier   = new SurfClassifier( objectimg );
+    classifier   = new SurfClassifier( objectimg, 5 );
     #endif
   } else if ( mode == MODE_SIFTPP ) {
     cout << msg_prefix << "Switching to SIFTPP mode" << endl;

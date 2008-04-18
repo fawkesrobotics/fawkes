@@ -71,11 +71,15 @@
  * @param indexSize Spatial size of the descriptor window (default 4)
  */
 SurfClassifier::SurfClassifier( const char * object_file,
+				unsigned int min_match, float min_match_ratio,
 				int samplingStep, int octaves, double thres, 
 				bool doubleImageSize, int initLobe, 
 				bool upright, bool extended, int indexSize)
   : Classifier("SurfClassifier")
 {
+  // matching constraints
+  __min_match = min_match;
+  __min_match_ratio = min_match_ratio;
   // params for FastHessian
   __samplingStep = samplingStep;
   __octaves = octaves;
@@ -332,6 +336,7 @@ SurfClassifier::classify()
       // std::cout << " Matched feature " << i << " in object image with feature " << match << " in image." << std::endl;
       /// adding feature-ROI
       ROI r( (int)(__img_features[matches[i]].x)-5, (int)(__img_features[matches[i]].y )-5, 11, 11, _width, _height);
+      r.num_hint_points = 0;
       rv->push_back(r);
       /// increment feature-match-count
       ++c;
@@ -342,6 +347,7 @@ SurfClassifier::classify()
   //#endif
   std::cout << "SurfClassifier(classify) matched '" << c << "' of '" << __obj_features.size() << "' features in scene." << std::endl;
 
+  float match_ratio = ((float)c / (float)__obj_num_features);
 
   std::cout << "SurfClassifier(classify): computing ROI" << std::endl;
   //#ifdef SURF_TIMETRACKER
@@ -361,8 +367,9 @@ SurfClassifier::classify()
 	y_max = (int)__img_features[matches[i]].y;
     }
   }
-  if( c != 0 ) {
+  if( (c != 0) && ((unsigned)c > __min_match) && (match_ratio > __min_match_ratio) ) {
     ROI r(x_min, y_min, x_max-x_min, y_max-y_min, _width, _height);
+    r.num_hint_points = c;
     rv->push_back(r);
   }
   //#ifdef SURF_TIMETRACKER
