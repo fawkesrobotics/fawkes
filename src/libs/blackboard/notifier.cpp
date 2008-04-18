@@ -318,8 +318,10 @@ BlackBoardNotifier::notify_of_writer_removed(const Interface *interface,
     for (i = list.begin(); i != list.end(); ++i) {
       BlackBoardInterfaceListener *bbil = (*i);
       Interface *bbil_iface = bbil->bbil_writer_interface(uid);
-      if (bbil_iface != NULL ) {
-	bbil->bb_interface_writer_removed(bbil_iface, event_instance_serial);
+      if (bbil_iface != NULL) {
+	if (bbil_iface->serial() != event_instance_serial) {
+	  bbil->bb_interface_writer_removed(bbil_iface, event_instance_serial);
+	}
       } else {
 	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for writer "
 			    "events (close) for '%s' but has no such interface", uid);
@@ -378,8 +380,10 @@ BlackBoardNotifier::notify_of_reader_removed(const Interface *interface,
     for (i = list.begin(); i != list.end(); ++i) {
       BlackBoardInterfaceListener *bbil = (*i);
       Interface *bbil_iface = bbil->bbil_reader_interface(uid);
-      if (bbil_iface != NULL ) {
-	bbil->bb_interface_reader_removed(bbil_iface, event_instance_serial);
+      if (bbil_iface != NULL) {
+	if (bbil_iface->serial() != event_instance_serial) {
+	  bbil->bb_interface_reader_removed(bbil_iface, event_instance_serial);
+	}
       } else {
 	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for reader "
 			    "events (close) for '%s' but has no such interface", uid);
@@ -411,8 +415,10 @@ BlackBoardNotifier::notify_of_data_change(const Interface *interface)
     for (i = list.begin(); i != list.end(); ++i) {
       BlackBoardInterfaceListener *bbil = (*i);
       Interface *bbil_iface = bbil->bbil_data_interface(uid);
-      if (bbil_iface != NULL ) {
-	bbil->bb_interface_data_changed(bbil_iface);
+      if (bbil_iface != NULL) {
+	if (bbil_iface->serial() != interface->serial()) {
+	  bbil->bb_interface_data_changed(bbil_iface);
+	}
       } else {
 	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for data change "
 			    "events for '%s' but has no such interface", uid);

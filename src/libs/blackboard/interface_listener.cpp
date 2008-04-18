@@ -52,6 +52,9 @@
  * the general idea is that you opened the interface by yourself for reading and
  * thus the deletion will not happen before you close the interface.
  *
+ * You will not be notified if you change data of the interface that you registered
+ * for or remove your own reading/writing instance of an interface.
+ *
  * Here is a simple life cycle of a BlackBoard interface listener:
  * First you create your interface that you want to listen for.
  * The protected methods bbil_add_data_interface(), bbil_add_reader_interface(),

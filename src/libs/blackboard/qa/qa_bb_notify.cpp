@@ -84,26 +84,26 @@ class QaBBEventListener
 
   virtual void bb_interface_writer_added(Interface *interface, unsigned int instance_serial) throw()
   {
-    printf("BBIL: Writer has been added to interface %s (event serial %u)\n",
-	   interface->uid(), instance_serial);
+    printf("BBIL: Writer has been added to interface %s/%u (event serial %u)\n",
+	   interface->uid(), interface->serial(), instance_serial);
   }
 
   virtual void bb_interface_writer_removed(Interface *interface, unsigned int instance_serial) throw()
   {
-    printf("BBIL: Writer has been removed from interface %s (event serial %u)\n",
-	   interface->uid(), instance_serial);
+    printf("BBIL: Writer has been removed from interface %s/%u (event serial %u)\n",
+	   interface->uid(), interface->serial(), instance_serial);
   }
 
   virtual void bb_interface_reader_added(Interface *interface, unsigned int instance_serial) throw()
   {
-    printf("BBIL: Reader has been added to interface %s (event serial %u)\n",
-	   interface->uid(), instance_serial);
+    printf("BBIL: Reader has been added to interface %s/%u (event serial %u)\n",
+	   interface->uid(), interface->serial(), instance_serial);
   }
 
   virtual void bb_interface_reader_removed(Interface *interface, unsigned int instance_serial) throw()
   {
-    printf("BBIL: Reader has been removed from interface %s (event serial %u)\n",
-	   interface->uid(), instance_serial);
+    printf("BBIL: Reader has been removed from interface %s/%u (event serial %u)\n",
+	   interface->uid(), interface->serial(), instance_serial);
   }
 
   virtual void add_interface(Interface *interface) throw()
@@ -202,12 +202,13 @@ main(int argc, char **argv)
   unsigned int msg_id = ti_reader_1->msgq_enqueue(m);
   printf("Message ID = %u, enqueued messages: %u\n", msg_id, ti_writer_1->msgq_size());
   
+  printf("Removing writer 1. No BBIL output should appear\n");
+  bb->close(ti_writer_1);
 
   bb->unregister_listener(&qabbel);
   usleep(100000);
 
   printf("Removing other writers. No warning should appear.\n");
-  bb->close(ti_writer_1);
   bb->close(ti_writer_2);
   bb->close(ti_writer_3);
   bb->close(ti_writer_4);
