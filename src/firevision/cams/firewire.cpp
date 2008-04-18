@@ -75,6 +75,7 @@ FirewireCamera::FirewireCamera(dc1394framerate_t framerate,
   _model = strdup("any");
   _do_set_shutter = false;
   _do_set_white_balance = false;
+  _do_set_focus = false;
 
   _dc1394 = NULL;
   _camera = NULL;
@@ -167,11 +168,16 @@ FirewireCamera::open()
       }
     }
 
-    set_auto_focus(_auto_focus);
     set_auto_shutter(_auto_shutter);
     if ( !_auto_shutter && _do_set_shutter ) {
       set_shutter(_shutter);
     }
+
+    set_auto_focus(_auto_focus);
+    if ( ! _auto_focus && _do_set_focus ) {
+      set_focus(_focus);
+    }
+
     set_auto_white_balance(_auto_white_balance);
     if ( ! _auto_white_balance &&
 	 (_white_balance_ub != 0xFFFFFFFF) &&
@@ -712,6 +718,9 @@ FirewireCamera::set_white_balance(unsigned int ub, unsigned int vr)
  * - white_balance=(auto|U,V), white balance value, either auto for auto white balance
  *                             or U/B and V/R values for adjustment
  * - shutter=auto, determine the shutter time automatically
+ * - focus=MODE, MODE is either auto for auto focus, manual for manual focus without
+ *               actually setting (for example set from external application) or a
+ *               number for the focus.
  * @param cap camera argument parser
  */
 FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
@@ -725,6 +734,7 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   _white_balance_vr = 0xFFFFFFFF;
   _do_set_shutter = false;
   _do_set_white_balance = false;
+  _do_set_focus = false;
 
   // Defaults
   _mode = DC1394_VIDEO_MODE_640x480_YUV422;
@@ -797,6 +807,25 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
       _framerate = DC1394_FRAMERATE_60;
     } else if ( f == "120" ) {
       _framerate = DC1394_FRAMERATE_120;
+    }
+  }
+  if ( cap->has("focus") ) {
+    string f = cap->get("focus");
+    if ( f == "auto" ) {
+      _auto_focus = true;
+    } else if ( f == "manual" ) {
+      _auto_focus = false;
+    } else {
+      char *endptr = NULL;
+      long int focus = strtol(f.c_str(), &endptr, 10);
+      if ( endptr[0] != 0 ) {
+	throw TypeMismatchException("Focus value is invalid. String to int conversion failed");
+      } else if ( focus < 0 ) {
+	throw OutOfBoundsException("'Focus value < 0", focus, 0, 0xFFFFFFFF);
+      }
+      _auto_focus = false;
+      _focus = focus;
+      _do_set_focus = true;
     }
   }
   if ( cap->has("nbufs") ) {

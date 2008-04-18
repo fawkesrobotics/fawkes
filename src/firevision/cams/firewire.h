@@ -118,6 +118,8 @@ class FirewireCamera : public Camera, public CameraControl
   bool _do_set_shutter;
   /** true if the white balance should actually be set, false otherwise */
   bool _do_set_white_balance;
+  /** true if the focus should actually be set, false otherwise */
+  bool _do_set_focus;
 
   /** DC1394 main context */
   dc1394_t                      *_dc1394;
@@ -153,6 +155,9 @@ class FirewireCamera : public Camera, public CameraControl
 
   /** Shutter value */
   unsigned int                   _shutter;
+
+  /** Focus value */
+  unsigned int                   _focus;
 
   /** Camera model, used in open to identify the camera, if empty first found camera is used */
   char *_model;
