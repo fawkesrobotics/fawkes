@@ -799,7 +799,13 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   }
   if ( cap->has("framerate") ) {
     string f = cap->get("framerate");
-    if ( f == "15" ) {
+    if ( f == "1.875" ) {
+      _framerate = DC1394_FRAMERATE_1_875;
+    } else if ( f == "3.75" ) {
+      _framerate = DC1394_FRAMERATE_3_75;
+    } else if ( f == "7.5" ) {
+      _framerate = DC1394_FRAMERATE_7_5;
+    } else if ( f == "15" ) {
       _framerate = DC1394_FRAMERATE_15;
     } else if ( f == "30" ) {
       _framerate = DC1394_FRAMERATE_30;
@@ -807,6 +813,8 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
       _framerate = DC1394_FRAMERATE_60;
     } else if ( f == "120" ) {
       _framerate = DC1394_FRAMERATE_120;
+    } else if ( f == "240" ) {
+      _framerate = DC1394_FRAMERATE_240;
     }
   }
   if ( cap->has("focus") ) {
