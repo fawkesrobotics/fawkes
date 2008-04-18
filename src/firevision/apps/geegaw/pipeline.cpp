@@ -512,6 +512,8 @@ GeegawPipeline::detect_sift()
   classifier->set_src_buffer( buffer_src, width, height );
   rois = classifier->classify();
   
+  obstacles.clear();
+
   // Go through all ROIs, 
   // count features and extract object
   unsigned int num_features = 0;
@@ -519,6 +521,11 @@ GeegawPipeline::detect_sift()
     // cout << "Doh, no ROIs!" << endl;
   } 
   else {
+
+    polar_coord_t o;
+    o.phi = 0.f;
+    o.r   = 0.f;
+    obstacles.push_back(o);
 
     FilterROIDraw *rdf = new FilterROIDraw();
 
@@ -559,6 +566,8 @@ GeegawPipeline::detect_surf()
   classifier->set_src_buffer( buffer_src, width, height );
   rois = classifier->classify();
   
+  obstacles.clear();
+
   // Go through all ROIs, 
   // count features and extract object
   unsigned int num_features = 0;
@@ -568,6 +577,11 @@ GeegawPipeline::detect_surf()
   } 
   else {
     cout << msg_prefix << " FOUND SOMETHING!" << endl;
+
+    polar_coord_t o;
+    o.phi = 0.f;
+    o.r   = 0.f;
+    obstacles.push_back(o);
 
     FilterROIDraw *rdf = new FilterROIDraw();
     //r = rois->begin();
@@ -618,6 +632,8 @@ GeegawPipeline::detect_siftpp()
   classifier->set_src_buffer( buffer_src, width, height );
   rois = classifier->classify();
   
+  obstacles.clear();
+
   // Go through all ROIs, 
   // count features and extract object
   unsigned int num_features = 0;
@@ -625,6 +641,12 @@ GeegawPipeline::detect_siftpp()
     // cout << "Doh, no ROIs!" << endl;
   } 
   else {
+
+    polar_coord_t o;
+    o.phi = 0.f;
+    o.r   = 0.f;
+    obstacles.push_back(o);
+
     FilterROIDraw *rdf = new FilterROIDraw();
 
     camctrl->pan_tilt_rad(&pan, &tilt);

@@ -106,7 +106,7 @@ SurfClassifier::SurfClassifier( const char * object_file,
   __tt->ping_start(__ttc_objconv);
   //#endif
 
-  if( !object_file && object_file == "" ) {
+  if( !object_file && strcmp( object_file, "" ) == 0 ) {
     throw Exception("empty object file");
   }  
   std::cout << "SurfClassifier(classify): opening object image file '" << object_file << "'" << std::endl;
