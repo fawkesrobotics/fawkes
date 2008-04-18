@@ -62,6 +62,8 @@
 /** Constructor.
  * @param object_file file that contains an image of the object to detect
  * @param samplingStep Initial sampling step
+ * @param min_match minimum number of features that have to be matched per ROI
+ * @param min_match_ratio  minimum ratio of features matched per object to be matched per ROI
  * @param octaves Number of analysed octaves
  * @param thres Blob response treshold
  * @param doubleImageSize true to double the image size, false to keep original
