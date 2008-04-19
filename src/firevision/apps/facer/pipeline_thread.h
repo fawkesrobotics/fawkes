@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  retriever_thread.h - FireVision Retriever Thread
+ *  pipeline_thread.h - FireVision Facer Pipeline Thread
  *
- *  Created: Tue Jun 26 17:37:38 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Apr Sat 19 12:39:26 2008 (on the way to German Open 2008, Hannover)
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -22,46 +22,70 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_APPS_RETRIEVER_RETRIEVER_THREAD_H_
-#define __FIREVISION_APPS_RETRIEVER_RETRIEVER_THREAD_H_
+#ifndef __FIREVISION_APPS_FACER_PIPELINE_THREAD_H_
+#define __FIREVISION_APPS_FACER_PIPELINE_THREAD_H_
 
 #include <core/threading/thread.h>
 
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/vision.h>
+#include <aspect/blackboard.h>
+
+#include <interfaces/facer.h>
+
+#include <fvutils/base/roi.h>
+
+#include <string>
+#include <list>
 
 class Camera;
 class SharedMemoryImageBuffer;
-class SeqWriter;
 class TimeTracker;
-class ColorModelLookupTable;
+class FacesClassifier;
+class FaceRecognizer;
 
-class FvRetrieverThread
+typedef struct _IplImage IplImage;
+
+class FacerPipelineThread
 : public Thread,
   public ConfigurableAspect,
   public LoggingAspect,
-  public VisionAspect
+  public VisionAspect,
+  public BlackBoardAspect
 {
  public:
-  FvRetrieverThread();
-  virtual ~FvRetrieverThread();
+  FacerPipelineThread();
+  virtual ~FacerPipelineThread();
 
   virtual void init();
   virtual void finalize();
   virtual void loop();
 
  private:
-  Camera *cam;
-  SharedMemoryImageBuffer *shm;
-  SeqWriter *seq_writer;
+  Camera *__cam;
+  SharedMemoryImageBuffer *__shm;
+  IplImage *__image;
+
   TimeTracker *__tt;
   unsigned int __loop_count;
   unsigned int __ttc_capture;
   unsigned int __ttc_memcpy;
   unsigned int __ttc_dispose;
 
-  ColorModelLookupTable *__cm;
+  FacesClassifier *__classifier;
+  FacerInterface *__facer_if;
+  FacerInterface::if_facer_opmode_t  __opmode;
+
+  std::string __face_label;
+  std::list<ROI> *__rois;
+
+  std::string __cfg_haarcascade_file;
+  float       __cfg_haar_scale_factor;
+  int         __cfg_min_neighbours;
+
+  FaceRecognizer *__facerecog;
+
 };
 
 

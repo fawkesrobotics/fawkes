@@ -29,6 +29,7 @@
 #include <utils/time/tracker.h>
 #include <fvutils/writers/seq_writer.h>
 #include <fvutils/writers/jpeg.h>
+#include <models/color/lookuptable.h>
 
 #include <cstring>
 
@@ -109,6 +110,14 @@ FvRetrieverThread::init()
   } catch (Exception &e) {
     // ignored, not critical
   }
+
+  __cm = new ColorModelLookupTable(1, "retriever-colormap", true);
+  YuvColormap *ycm = __cm->get_colormap();
+  for (unsigned int u = 100; u < 150; ++u) {
+    for (unsigned int v = 100; v < 150; ++v) {
+      ycm->set(128, u, v, C_ORANGE);
+    }
+  }
 }
 
 
@@ -121,6 +130,7 @@ FvRetrieverThread::finalize()
   delete shm;
   delete seq_writer;
   delete __tt;
+  delete __cm;
 }
 
 

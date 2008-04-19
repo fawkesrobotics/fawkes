@@ -1,8 +1,8 @@
 #*****************************************************************************
-#         Makefile Build System for Fawkes: FireVision Retriever Plugin
+#         Makefile Build System for Fawkes: FireVision Facer Plugin
 #                            -------------------
-#   Created on Tue Jun 26 17:32:34 2007
-#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Apr Sat 19 12:34:48 2008 (on the way to German Open 2008, Hannover)
+#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #   $Id$
 #
@@ -24,11 +24,11 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-LIBS_fvretriever = core utils fvutils fvcams fvmodels
-OBJS_fvretriever = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+LIBS_fvfacer = core utils fvutils fvcams fvmodels
+OBJS_fvfacer = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_fvretriever)
-PLUGINS_all = $(PLUGINDIR)/fvretriever.so
+OBJS_all    = $(OBJS_fvfacer)
+PLUGINS_all = $(PLUGINDIR)/fvfacer.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
