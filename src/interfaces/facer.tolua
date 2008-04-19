@@ -1,0 +1,41 @@
+$#include <interfaces/facer.h>
+class FacerInterface : public Interface
+{
+
+  typedef enum {
+    OPMODE_DISABLED,
+    OPMODE_DETECTION,
+    OPMODE_RECOGNITION,
+    OPMODE_LEARNING
+  } if_facer_opmode_t;
+
+  class LearnFaceMessage : public Message
+  {
+    LearnFaceMessage(char * ini_face_label);
+    LearnFaceMessage();
+    ~LearnFaceMessage();
+
+    char * face_label();
+    void set_face_label(const char * new_face_label);
+    size_t maxlenof_face_label() const;
+  };
+
+  class SetOpmodeMessage : public Message
+  {
+    SetOpmodeMessage(if_facer_opmode_t ini_opmode);
+    SetOpmodeMessage();
+    ~SetOpmodeMessage();
+
+    if_facer_opmode_t opmode();
+    void set_opmode(const if_facer_opmode_t new_opmode);
+    size_t maxlenof_opmode() const;
+  };
+
+  if_facer_opmode_t opmode();
+  void set_opmode(const if_facer_opmode_t new_opmode);
+  size_t maxlenof_opmode() const;
+  char * face_label();
+  void set_face_label(const char * new_face_label);
+  size_t maxlenof_face_label() const;
+
+};
