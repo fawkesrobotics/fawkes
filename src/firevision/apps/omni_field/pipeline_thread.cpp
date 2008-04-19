@@ -71,7 +71,7 @@ FvOmniFieldPipelineThread::FvOmniFieldPipelineThread()
 
   m_cfg_prefix = "/firevision/omni/field/";
   m_cfgfile_prefix = "../cfg/firevision/";
-  
+
   m_cspace_to = YUV422_PLANAR;
 
   /*
@@ -96,10 +96,10 @@ void
 FvOmniFieldPipelineThread::init()
 {
   // camera
-  try 
+  try
     {
       m_camera = vision_master->register_for_camera( config->get_string("/firevision/omni/camera").c_str(), this );
-    } 
+    }
   catch (Exception& e)
     {
       e.append("FvOmniFieldPipelineThread::init() failed since no camera is specified");
@@ -109,7 +109,7 @@ FvOmniFieldPipelineThread::init()
   m_img_width = m_camera->pixel_width();
   m_img_height = m_camera->pixel_height();
   m_cspace_from = m_camera->colorspace();
-  
+
   // config values
   unsigned int num_rays;
   unsigned int radius_incr;
@@ -128,8 +128,8 @@ FvOmniFieldPipelineThread::init()
       max_radius = config->get_uint( (m_cfg_prefix + string("max_radius")).c_str() );
       margin = config->get_uint( (m_cfg_prefix + string("margin")).c_str() );
       colormodel_file = strdup( ( m_cfgfile_prefix + config->get_string( (m_cfg_prefix + string("colormap")).c_str() ) ).c_str() );
-    } 
-  catch (Exception &e) 
+    }
+  catch (Exception &e)
     {
       free(colormodel_file);
       free(mirror_file);
@@ -141,7 +141,7 @@ FvOmniFieldPipelineThread::init()
 
   try
     {
-      mirror_file = strdup( ( m_cfgfile_prefix + config->get_string( (m_cfg_prefix + string("mirror")).c_str() ) ).c_str() );
+      mirror_file = strdup( ( m_cfgfile_prefix + config->get_string( "/firevision/omni/mirror" ) ).c_str() );
     }
   catch (Exception &e)
     {
@@ -152,10 +152,10 @@ FvOmniFieldPipelineThread::init()
       strcat(mirror_file, hi.short_name());
       strcat(mirror_file, ".mirror");
     }
-     
+
   try
     {
-      mask_file = strdup( ( m_cfgfile_prefix + config->get_string( (m_cfg_prefix + string("mask")).c_str() ) ).c_str() );
+      mask_file = strdup( ( m_cfgfile_prefix + config->get_string( "/firevision/omni/mask" ) ).c_str() );
     }
   catch (Exception &e)
     {
@@ -167,7 +167,7 @@ FvOmniFieldPipelineThread::init()
       strcat(mask_file, "_mask.pnm");
     }
 
-  
+
   // mask
   logger->log_debug(name(), "Loading mask from file %s", mask_file);
   PNMReader reader(mask_file);
@@ -176,7 +176,7 @@ FvOmniFieldPipelineThread::init()
 				reader.pixel_width(), reader.pixel_height() ) );
   reader.set_buffer(m_mask);
   reader.read();
-  
+
   // mirror
   logger->log_debug(name(), "Creating mirror model from file %s", mirror_file);
   m_mirror = new Bulb( mirror_file,
@@ -187,7 +187,7 @@ FvOmniFieldPipelineThread::init()
   // scanline model
   cart_coord_t center;
   center = m_mirror->getCenter();
-  
+
   //  logger->log_debug(name(), "Creating scanlines: w=%d h=%d center_x=%d center_y=%d num_rays=%d radius_incr=%d dead_radius=%d max_radius=%d margin=%d", m_img_width, m_img_height, center.x, center.y, num_rays, radius_incr, dead_radius, max_radius, margin);
   m_scanline_model = new ScanlineStar( m_img_width, m_img_height,
 				       center.x, center.y,
@@ -195,7 +195,7 @@ FvOmniFieldPipelineThread::init()
 				       m_mask,
 				       dead_radius, max_radius,
 				       margin );
-  
+
   // color model
   logger->log_debug(name(), "Creating colormodel from colormap %s", colormodel_file);
   m_colormodel = new ColorModelLookupTable( colormodel_file,
@@ -212,7 +212,7 @@ FvOmniFieldPipelineThread::init()
     ObjectPositionInterface::FLAG_HAS_EXTENT |
     ObjectPositionInterface::FLAG_HAS_CIRCULAR_EXTENT;
 
-  try 
+  try
     {
       for ( i = 0; i < m_num_interfaces; ++i)
 	{
@@ -225,10 +225,10 @@ FvOmniFieldPipelineThread::init()
 	  m_obstacle_interfaces[i]->write();
 	  free(id);
 	}
-    } 
-  catch (Exception &e) 
+    }
+  catch (Exception &e)
     {
-      for ( unsigned int j = 0; j < i; ++j) 
+      for ( unsigned int j = 0; j < i; ++j)
 	{
 	  blackboard->close( m_obstacle_interfaces[j] );
 	}
@@ -246,7 +246,7 @@ FvOmniFieldPipelineThread::init()
   m_shm_buffer = new SharedMemoryImageBuffer( "omni-field",
 				m_cspace_to, m_img_width, m_img_height );
   m_buffer = m_shm_buffer->buffer();
-  
+
   // position models
   m_rel_pos = new OmniRelative(m_mirror);
 
@@ -270,7 +270,7 @@ FvOmniFieldPipelineThread::init()
 void
 FvOmniFieldPipelineThread::finalize()
 {
-  try 
+  try
     {
       for (unsigned int i = 0; i < m_num_interfaces; ++i)
 	{
@@ -305,7 +305,7 @@ FvOmniFieldPipelineThread::finalize()
 }
 
 
-/** A new image is retrieved from the camera and the classifier looks 
+/** A new image is retrieved from the camera and the classifier looks
  * for a ball in the image */
 void
 FvOmniFieldPipelineThread::loop()
@@ -313,12 +313,12 @@ FvOmniFieldPipelineThread::loop()
   m_camera->capture();
   if ( 0 == m_camera->buffer() ) { return; }
 
-  convert( m_cspace_from, m_cspace_to, m_camera->buffer(), m_buffer, 
+  convert( m_cspace_from, m_cspace_to, m_camera->buffer(), m_buffer,
 	   m_img_width, m_img_height );
   m_camera->dispose_buffer();
 
   m_scanline_model->reset();
-  
+
   // reset interfaces
   for (unsigned int i = 0; i < m_num_interfaces; ++i)
     {
@@ -338,13 +338,13 @@ FvOmniFieldPipelineThread::loop()
 	{
 	  unsigned int cur_x = cur_point.x;
 	  unsigned int cur_y = cur_point.y;
-	  
+
 	  // determine relative world coordinates
 	  m_rel_pos->set_center(cur_x, cur_y);
 	  m_rel_pos->calc_unfiltered();
-	  
+
 	  index = m_scanline_model->ray_index();
-	  
+
 	  // check distance (necessary to avoid obstacles at the robot's own
 	  // position which might happen with the current mirror model)
 	  float x = m_rel_pos->get_x();
@@ -360,9 +360,9 @@ FvOmniFieldPipelineThread::loop()
 	      m_obstacle_interfaces[index]->set_relative_y( -m_rel_pos->get_y() );
 	      m_obstacle_interfaces[index]->write();
 	    }
-	  
-	  /* 
-      	  logger->log_debug( name(), "Ray [%d]: px=%d py=%d dist=%f ori=%f x_world=%f y_world=%f)", 
+
+	  /*
+      	  logger->log_debug( name(), "Ray [%d]: px=%d py=%d dist=%f ori=%f x_world=%f y_world=%f)",
 			     index,
 			     cur_x, cur_y,
 			     m_rel_pos->getDistance(), m_rel_pos->getBearing(),
@@ -378,10 +378,10 @@ FvOmniFieldPipelineThread::loop()
 	  // continue with next ray
 	  m_scanline_model->skip_current_ray();
 	}
-      else 
-	{ 
+      else
+	{
 	  // continue with next scanline point
-	  ++(*m_scanline_model); 
+	  ++(*m_scanline_model);
 	}
     }
 
@@ -392,7 +392,7 @@ FvOmniFieldPipelineThread::loop()
 }
 
 
-/** Determines whether it's justified to classify a pixel at 
+/** Determines whether it's justified to classify a pixel at
  * a given pixel as field.
  * @param point the pixel coordinates
  * @return true if pixel at given coordinate is classified as field
@@ -431,7 +431,7 @@ FvOmniFieldPipelineThread::is_field(point_t* point)
 
 	  YUV422_PLANAR_YUV(m_buffer, m_img_width, m_img_height,
 			    x, y, yp, up, vp);
-	  
+
 	  color = m_colormodel->determine(yp, up, vp);
 
 	  if ( C_GREEN == color ) { ++num_green; }
