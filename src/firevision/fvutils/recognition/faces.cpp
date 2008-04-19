@@ -53,9 +53,36 @@ FaceRecognizer::~FaceRecognizer()
  * @return map of ROIs with strings as labels for the ROI.
  */
 FaceRecognizer::FaceRoiMap *
-FaceRecognizer::recognize(unsigned char *buffer, std::list<ROI> &rois)
+FaceRecognizer::recognize(unsigned char *buffer, std::list<ROI> *rois)
 {
   FaceRoiMap *rv = new FaceRoiMap();
+
+  return rv;
+}
+
+
+/** Recognize a single face.
+ * Scans the given ROIs in the image for faces and returns a string with the face
+ * label.
+ * @param buffer image buffer
+ * @param roi pointer to ROI to consider
+ * @return string with face label, or empty string if no face was recognized
+ */
+std::string
+FaceRecognizer::recognize(unsigned char *buffer, ROI *roi)
+{
+  return "";
+}
+
+
+/** Recognize faces in passed images.
+ * @param face_images Images with faces to recognize
+ * @return vector of labels, indexes match the one from the input vector
+ */
+std::vector<std::string>
+FaceRecognizer::recognize(std::vector<IplImage *> face_images)
+{
+  std::vector<std::string> rv;
 
   return rv;
 }

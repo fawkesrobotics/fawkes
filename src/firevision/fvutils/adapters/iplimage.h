@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  faces.h - Faces classifier based on OpenCV
+ *  iplimage.h - Helper to convert FireVision buffers to IplImages for OpenCV
  *
- *  Created: Mon Dec 10 15:46:06 2007
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Apr 19 17:28:58 2008 (GO2008, day 1)
+ *  Copyright  2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -23,35 +23,21 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CLASSIFIERS_FACES_H_
-#define __FIREVISION_CLASSIFIERS_FACES_H_
+#ifndef __FIREVISION_FVUTILS_ADAPTERS_IPLIMAGE_H_
+#define __FIREVISION_FVUTILS_ADAPTERS_IPLIMAGE_H
 
-#include <classifiers/classifier.h>
+#include <fvutils/base/roi.h>
 
-struct CvHaarClassifierCascade;
-struct CvMemStorage;
 typedef struct _IplImage IplImage;
 
-class FacesClassifier : public Classifier
+class IplImageAdapter
 {
  public:
-  FacesClassifier(const char *haarcascade_file,
-		  unsigned int pixel_width, unsigned int pixel_height,
-		  IplImage *image = NULL,
-		  float haar_scale_factor = 1.1, int min_neighbours = 3, int flags = 0);
+  static void convert_image_bgr(unsigned char *buffer, IplImage *image);
 
-  virtual ~FacesClassifier(); 
+  //static IplImage *  create_image_from_roi(unsigned char *buffer, ROI *roi);
 
-  virtual std::list< ROI > * classify();
-
- private:
-  CvHaarClassifierCascade *__cascade;
-  CvMemStorage *__storage;
-  IplImage *__image;
-  float __haar_scale_factor;
-  int __min_neighbours;
-  int __flags;
-  bool  __own_image;
 };
+
 
 #endif

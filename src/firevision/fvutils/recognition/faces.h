@@ -31,6 +31,9 @@
 #include <map>
 #include <list>
 #include <string>
+#include <vector>
+
+typedef struct _IplImage IplImage;
 
 class FaceRecognizer
 {
@@ -41,7 +44,9 @@ class FaceRecognizer
   /** Map of labeled ROIs. */
   typedef std::map<ROI, std::string> FaceRoiMap ;
 
-  FaceRoiMap *  recognize(unsigned char *buffer, std::list<ROI> &rois);
+  FaceRoiMap *  recognize(unsigned char *buffer, std::list<ROI> *rois);
+  std::string   recognize(unsigned char *buffer, ROI *roi);
+  std::vector<std::string>   recognize(std::vector<IplImage *> face_images);
 
 };
 

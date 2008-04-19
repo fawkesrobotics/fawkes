@@ -29,6 +29,7 @@
 #include <core/exceptions/software.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/conversions.h>
+#include <fvutils/adapters/iplimage.h>
 
 #include <opencv/cv.h>
 
@@ -48,12 +49,17 @@
  * @param haarcascade_file Haar cascade file to use
  * @param pixel_width width of images that will be processed
  * @param pixel_height height of images that will be processed
+ * @param image Optional image that is used by the classifier. If this image is NULL
+ * an internal IplImage is created and the buffer converted. If you need the buffer
+ * anyway pass a pointer to this image to do the conversion only once. In that case
+ * the classifier assume that the image has already been converted!
  * @param haar_scale_factor Haar scale factor
  * @param min_neighbours minimum neighbours
  * @param flags flags, can only be CV_HAAR_DO_CANNY_PRUNING at the moment.
  */
 FacesClassifier::FacesClassifier(const char *haarcascade_file,
 				 unsigned int pixel_width, unsigned int pixel_height,
+				 IplImage *image,
 				 float haar_scale_factor, int min_neighbours, int flags)
   : Classifier("FacesClassifier")
 {
@@ -72,7 +78,13 @@ FacesClassifier::FacesClassifier(const char *haarcascade_file,
     throw Exception("Could not initialize OpenCV memory");
   }
 
-  __image = cvCreateImage(cvSize(pixel_width, pixel_height), IPL_DEPTH_8U, 3);
+  if ( image ) {
+    __image = image;
+    __own_image = false;
+  } else {
+    __image = cvCreateImage(cvSize(pixel_width, pixel_height), IPL_DEPTH_8U, 3);
+    __own_image = true;
+  }
 }
 
 
@@ -81,7 +93,9 @@ FacesClassifier::~FacesClassifier()
 {
   cvReleaseHaarClassifierCascade(&__cascade);
   cvReleaseMemStorage(&__storage);
-  cvReleaseImage(&__image);
+  if ( __own_image ) {
+    cvReleaseImage(&__image);
+  }
 }
 
 
@@ -90,7 +104,9 @@ FacesClassifier::classify()
 {
   std::list< ROI > *rv = new std::list< ROI >();
 
-  convert(YUV422_PLANAR, BGR, _src, (unsigned char *)__image->imageData, _width, _height);
+  if ( __own_image ) {
+    IplImageAdapter::convert_image_bgr(_src, __image);
+  }
 
   CvSeq *face_seq = cvHaarDetectObjects(__image, __cascade, __storage,
 					__haar_scale_factor, __min_neighbours, __flags);
@@ -98,8 +114,12 @@ FacesClassifier::classify()
   for ( int i = 0; i < face_seq->total; ++i) {
     CvAvgComp el = *(CvAvgComp*)cvGetSeqElem(face_seq, i);
     ROI r(el.rect.x, el.rect.y, el.rect.width, el.rect.height, _width, _height);
+    r.num_hint_points = el.rect.width * el.rect.height;
     rv->push_back(r);
   }
+
+  // sort, biggest first, we define num_hint_points as area enclosed by the ROI
+  rv->sort();
 
   return rv;
 }
