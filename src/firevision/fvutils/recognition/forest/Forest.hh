@@ -541,11 +541,11 @@ namespace Forest {
 	  if(WR_DOT_FILE) {		   /* graphviz output of the root being divided */
 		strcpy(bins," ");
 		for(i=0;i<config.getNclasses()-1;i++){
-		  sprintf(buffer1,"%d", theIntegralImages[i].iiVector.size());		  
+		  sprintf(buffer1,"%zu", theIntegralImages[i].iiVector.size());		  
 		  strcat(bins, buffer1);
 		  strcat(bins,",");
 		}
-		sprintf(buffer1,"%d",theIntegralImages[config.getNclasses()-1].iiVector.size());		  
+		sprintf(buffer1,"%zu",theIntegralImages[config.getNclasses()-1].iiVector.size());		  
 		strcat(bins, buffer1);
 		sprintf(buffer1, "%f",bestTest->getEntropyValue(config));
 		sizeOfSprintf = sprintf(buffer,
@@ -711,7 +711,7 @@ namespace Forest {
 		  for(i=0;i<config.getNclasses()-1;i++){
 			
 			if( WR_DOT_FILE )
-			  sprintf(buffer1,"%d",childrenToTest.at(j)->theIntegralImages[i].iiVector.size());
+			  sprintf(buffer1,"%zu",childrenToTest.at(j)->theIntegralImages[i].iiVector.size());
 			//		if(childrenToTest.at(j)->theIntegralImages[i].iiVector.size()!=0) {
 			//		  checkGrowth = false; 
 			//		  numberContaining++;
@@ -731,7 +731,7 @@ namespace Forest {
 		  
 		  
 		  if(WR_DOT_FILE) { 
-			sprintf(buffer1,"%d",childrenToTest.at(j)->theIntegralImages[config.getNclasses()-1].iiVector.size());
+			sprintf(buffer1,"%zu",childrenToTest.at(j)->theIntegralImages[config.getNclasses()-1].iiVector.size());
 			strcat(bins, buffer1);
 			sprintf(buffer1, "%f",childrenToTest.at(j)->bestTest->getEntropyValue(config));
 			sizeOfSprintf = sprintf(buffer,
@@ -1550,7 +1550,7 @@ namespace Forest {
 	
 	for( int i = 0; i < config.getNclasses(); i++ ) 
 	{
-	  printf("the sizes are %d\n", root->theIntegralImages[i].iiVector.size() ); 
+	  printf("the sizes are %zu\n", root->theIntegralImages[i].iiVector.size() ); 
 	  
 	  if( (int)(root->theIntegralImages[i].iiVector.size()) > max ) 
 	  {
@@ -1645,7 +1645,7 @@ namespace Forest {
 	
 	for( int i = 0; i < nclasses; i++ ) 
 	{
-	  printf("the sizes are %d\n", root->theIntegralImages[i].iiVector.size() ); 
+	  printf("the sizes are %zu\n", root->theIntegralImages[i].iiVector.size() ); 
 	  
 	  if( (int)(root->theIntegralImages[i].iiVector.size()) > max ) 
 	  {

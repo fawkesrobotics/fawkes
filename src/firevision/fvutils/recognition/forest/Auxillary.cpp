@@ -226,7 +226,7 @@ namespace Auxillary{
       sprintf( s, "%s-class_%d.dat", writeLoc.c_str(), p ); 
       
       
-      printf("\n Written down to the file are %d images of the Class %d. \n", 
+      printf("\n Written down to the file are %zu images of the Class %d. \n", 
 	     integralImages[i].iiVector.size(), i );
       
       char writeLocName[ PATH_MAX ]; 
