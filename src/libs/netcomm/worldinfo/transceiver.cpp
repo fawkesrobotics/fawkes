@@ -96,7 +96,12 @@ WorldInfoException::WorldInfoException(const char *msg)
  */
 WorldInfoTransceiver::WorldInfoTransceiver(const char *addr, unsigned short port,
 					   const char *key, const char *iv,
-					   NetworkNameResolver *resolver)
+					   NetworkNameResolver *resolver) :
+  pose_changed( false ),
+  vel_changed( false ),
+  ball_changed( false ),
+  ball_vel_changed( false ),
+  gamestate_changed( false )
 {
   try {
     s = new MulticastDatagramSocket(addr, port);
@@ -256,7 +261,7 @@ void
 WorldInfoTransceiver::flush_sequence_numbers(unsigned int sec)
 {
   time_t limit = time(NULL) - sec;
-  
+
   std::map<uint32_t, time_t>::iterator   lrtit2;
   lrtit = last_received_time.begin();
   while (lrtit != last_received_time.end()) {
@@ -517,7 +522,7 @@ WorldInfoTransceiver::append_outbound(uint16_t msg_type,
 
   outbound_bytes  += sizeof(mh);
   outbound_buffer += sizeof(mh);
-  
+
   // message body
   memcpy(outbound_buffer, msg, msg_size);
   outbound_bytes  += msg_size;
@@ -763,7 +768,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
     /*
     cout << "Plain:";
     for (size_t i = 0; i < inbound_bytes; ++i) {
-      unsigned int u = *((unsigned char *)in_buffer + i); 
+      unsigned int u = *((unsigned char *)in_buffer + i);
       printf("%02x ", u);
     }
     cout << endl;
@@ -781,7 +786,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
       LibLogger::log_warn("WorldInfoTransceiver", "Unsupported version of world info data received, ignoring");
       continue;
     }
-    
+
     // Sequence number handling per client, IPv4 only, for IPv6 in the pre-128-bit era
     // we would need a custom compare function
     unsigned int cseq = ntohl(header->seq);
