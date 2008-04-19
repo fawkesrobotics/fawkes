@@ -25,6 +25,7 @@
 #include <plugins/worldmodel/net_thread.h>
 
 #include <netcomm/worldinfo/transceiver.h>
+#include <worldinfo_utils/data_container.h>
 
 #include <string>
 
@@ -40,13 +41,35 @@ using namespace std;
 WorldModelNetworkThread::WorldModelNetworkThread()
   : Thread("WorldModelNetworkThread", Thread::OPMODE_CONTINUOUS)
 {
+  data = 0;
   worldinfo_transceiver = NULL;
+  set_prepfin_conc_loop(true);
 }
 
 
 /** Destructor. */
 WorldModelNetworkThread::~WorldModelNetworkThread()
 {
+}
+
+
+/** Gain access to the worldinfo transceiver.
+ * @return pointer to the worldinfo transceiver
+ */
+WorldInfoTransceiver *
+WorldModelNetworkThread::get_transceiver()
+{
+  return worldinfo_transceiver;
+}
+
+
+/** Gain access to the worldinfo data container.
+ * @return pointer to the worldinfo data container
+ */
+WorldInfoDataContainer *
+WorldModelNetworkThread::get_data_container()
+{
+  return data;
 }
 
 
@@ -59,12 +82,12 @@ WorldModelNetworkThread::init()
   std::string encryption_key;
   std::string encryption_iv;
   try {
-    multicast_addr = config->get_string("/worldmodel/worldinfo_transceiver/multicast_addr");
-    port = config->get_uint("/worldmodel/worldinfo_transceiver/port");
-    encryption_key = config->get_string("/worldmodel/worldinfo_transceiver/encryption_key");
-    encryption_iv  = config->get_string("/worldmodel/worldinfo_transceiver/encryption_iv");
-    sleep_time_msec = config->get_uint("/worldmodel/worldinfo_transceiver/sleep_time_msec");
-    max_msgs_per_recv = config->get_uint("/worldmodel/worldinfo_transceiver/max_msgs_per_recv");
+    multicast_addr = config->get_string("/worldinfo/multicast_addr");
+    port = config->get_uint("/worldinfo/udp_port");
+    encryption_key = config->get_string("/worldinfo/encryption_key");
+    encryption_iv  = config->get_string("/worldinfo/encryption_iv");
+    sleep_time_msec = 100; //config->get_uint("/worldinfo/sleep_time_msec");
+    max_msgs_per_recv = 10; //config->get_uint("/worldinfo/max_msgs_per_recv");
   } catch (Exception &e) {
     e.append("Could not get required configuration data for worldmodel");
     throw;
@@ -75,6 +98,9 @@ WorldModelNetworkThread::init()
 						   nnresolver);
 
   worldinfo_transceiver->add_handler(this);
+  worldinfo_transceiver->set_loop(true);
+
+  data = new WorldInfoDataContainer(clock);
 }
 
 
@@ -83,13 +109,14 @@ WorldModelNetworkThread::finalize()
 {
   logger->log_info(name(), "finalize() called");
   delete worldinfo_transceiver;
+  delete data;
 }
 
 
 void
 WorldModelNetworkThread::loop()
 {
-  worldinfo_transceiver->recv(true, max_msgs_per_recv);
+  worldinfo_transceiver->recv(false, max_msgs_per_recv);
   usleep( sleep_time_msec * 1000 );
 }
 
@@ -99,6 +126,7 @@ WorldModelNetworkThread::pose_rcvd(const char *from_host,
 				   float x, float y, float theta,
 				   float *covariance)
 {
+  data->set_robot_pose(from_host, x, y, theta, covariance);
 }
 
 
@@ -106,6 +134,7 @@ void
 WorldModelNetworkThread::velocity_rcvd(const char *from_host, float vel_x,
 				       float vel_y, float vel_theta, float *covariance)
 {
+  // TODO
 }
 
 
@@ -115,6 +144,11 @@ WorldModelNetworkThread::ball_pos_rcvd(const char *from_host,
 				       float dist, float bearing, float slope,
 				       float *covariance)
 {
+  // TODO: visible, visibility_history
+  if ( visible )
+    { data->set_ball_pos_relative(from_host, dist, bearing, slope, covariance); }
+  else
+    { data->delete_ball_pos(from_host); }
 }
 
 
@@ -123,6 +157,7 @@ WorldModelNetworkThread::ball_velocity_rcvd(const char *from_host,
 					    float vel_x, float vel_y, float vel_z,
 					    float *covariance)
 {
+  // TODO
 }
 
 
@@ -132,12 +167,14 @@ WorldModelNetworkThread::opponent_pose_rcvd(const char *from_host,
 					    float distance, float bearing,
 					    float *covariance)
 {
+  data->set_opponent_pos(from_host, uid, distance, bearing, covariance);
 }
 
 
 void
 WorldModelNetworkThread::opponent_disapp_rcvd(const char *from_host, unsigned int uid)
 {
+  // TODO
 }
 
 
@@ -150,4 +187,6 @@ WorldModelNetworkThread::gamestate_rcvd(const char *from_host,
 					worldinfo_gamestate_goalcolor_t our_goal_color,
 					worldinfo_gamestate_half_t half)
 {
+  data->set_game_state(game_state, state_team, score_cyan, score_magenta, 
+		       our_team, our_goal_color, half);
 }

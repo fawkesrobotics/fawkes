@@ -27,6 +27,8 @@
 
 #include <core/plugin.h>
 
+class WorldInfoDataContainer;
+
 class WorldModelPlugin : public Plugin
 {
  public:

@@ -21,7 +21,7 @@
 
 BASEDIR = ../../..
 
-LIBS_worldmodel = core utils netcomm
+LIBS_worldmodel = core utils netcomm worldinfo_utils
 OBJS_worldmodel = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_worldmodel)

@@ -33,6 +33,7 @@
 #include <netcomm/worldinfo/handler.h>
 
 class WorldInfoTransceiver;
+class WorldInfoDataContainer;
 
 class WorldModelNetworkThread
   : public Thread,
@@ -45,6 +46,9 @@ class WorldModelNetworkThread
  public:
   WorldModelNetworkThread();
   virtual ~WorldModelNetworkThread();
+
+  WorldInfoTransceiver *get_transceiver();
+  WorldInfoDataContainer *get_data_container();
 
   virtual void init();
   virtual void loop();
@@ -84,6 +88,7 @@ class WorldModelNetworkThread
 
  private:
   WorldInfoTransceiver *worldinfo_transceiver;
+  WorldInfoDataContainer *data;
 
   unsigned int sleep_time_msec;
   unsigned int max_msgs_per_recv;

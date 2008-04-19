@@ -25,6 +25,7 @@
 #include <plugins/worldmodel/worldmodel_plugin.h>
 #include <plugins/worldmodel/wm_thread.h>
 #include <plugins/worldmodel/net_thread.h>
+#include <worldinfo_utils/data_container.h>
 
 /** @class WorldModelPlugin plugins/worldmodel/worldmodel_plugin.h
  * Simple worldmodel plugin.
@@ -39,8 +40,9 @@
 WorldModelPlugin::WorldModelPlugin()
   : Plugin("worldmodel")
 {
-  thread_list.push_back(new WorldModelThread());
-  thread_list.push_back(new WorldModelNetworkThread());
+  WorldModelNetworkThread* net_thread = new WorldModelNetworkThread();
+  thread_list.push_back(new WorldModelThread(net_thread));
+  thread_list.push_back(net_thread);
 }
 
 EXPORT_PLUGIN(WorldModelPlugin)
