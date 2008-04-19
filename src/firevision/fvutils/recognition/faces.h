@@ -27,7 +27,7 @@
 #define __FIREVISION_FVUTILS_RECOGNITION_FACES_H
 
 #include <fvutils/base/roi.h>
-
+#include <vector> 
 #include <map>
 #include <list>
 #include <string>
@@ -37,16 +37,31 @@ typedef struct _IplImage IplImage;
 
 class FaceRecognizer
 {
+ private:
+  /** location of the training images */
+  char __training_images_location[PATH_MAX]; 
+  /** number of identities */ 
+  int __n_identities;
+  /** forest size */
+  int __forest_size;
+  /** map of identity indices to person names */
+  std::map<int, std::string> __person_names; 
+
  public:
-  FaceRecognizer();
+  FaceRecognizer(const char* loc, int number_of_identities, int forest_size );
   ~FaceRecognizer();
 
-  /** Map of labeled ROIs. */
-  typedef std::map<ROI, std::string> FaceRoiMap ;
+  /** a vector containing the identities of the faces supplied */ 
+  typedef std::vector<int> Identities; 
 
-  FaceRoiMap *  recognize(unsigned char *buffer, std::list<ROI> *rois);
-  std::string   recognize(unsigned char *buffer, ROI *roi);
-  std::vector<std::string>   recognize(std::vector<IplImage *> face_images);
+  
+  void add_identity( int, std::string );
+
+  //  Identities recognize(unsigned char *buffer, std::list<ROI> &rois, int number_of_identities );
+  Identities   recognize(std::vector<IplImage *> faces, int number_of_identities );
+  std::vector<std::string>  get_identities( Identities& ); 
+
+
 
 };
 
