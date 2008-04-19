@@ -118,20 +118,20 @@ void FvOmniLocalizerPipelineThread::init()
   mImageHeight = mCamera->pixel_height();
   mColorspaceFrom = mCamera->colorspace();
 
-  string colormapPath = string( CONFDIR ) + "/firevision/colormaps/" + colormapFile;
+  string colormapPath = string( CONFDIR ) + "/firevision/" + colormapFile;
   mColorModel = new ColorModelLookupTable( colormapPath.c_str(),
                                            "omni-localizer-colormap", true /* destroy on delete */ );
 
   mShmBuffer = new SharedMemoryImageBuffer( "omni-localizer-processed", mColorspaceTo, mImageWidth, mImageHeight );
   mBuffer = mShmBuffer->buffer();
 
-  string maskPath = string( CONFDIR ) + "/firevision/masks/" + maskFile;
+  string maskPath = string( CONFDIR ) + "/firevision/" + maskFile;
   PNMReader reader( maskPath.c_str() );
   mMask = malloc_buffer( YUV422_PLANAR, reader.pixel_width(), reader.pixel_height() );
   reader.set_buffer( mMask );
   reader.read();
 
-  string mirrorPath = string( CONFDIR ) + "/firevision/mirror/" + mirrorFile;
+  string mirrorPath = string( CONFDIR ) + "/firevision/" + mirrorFile;
   mMirror = new Bulb( mirrorPath.c_str(), "omni-localizer-mirror", true /* destroy on delete */ );
 
   mScanlineModel = new ScanlineStar( mImageWidth, mImageHeight,
