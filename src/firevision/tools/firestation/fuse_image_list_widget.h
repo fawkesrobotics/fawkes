@@ -45,6 +45,7 @@ class FuseImageListWidget : FuseClientHandler
 			     uint32_t port );
   void remove_fountain_service(const char* name);
 
+  void set_toggle_compression_chk(Gtk::CheckButton* chk);
   void set_auto_update_chk(Gtk::CheckButton* chk);
   void set_image_list_trv(Gtk::TreeView* trv);
   Glib::Dispatcher& image_selected();
@@ -53,7 +54,7 @@ class FuseImageListWidget : FuseClientHandler
   void set_auto_update(bool active, unsigned int interval_sec = 5);
 
   bool get_selected_image( std::string& host_name, unsigned short& port, 
-			   std::string& image_id );
+			   std::string& image_id, bool& compression );
 
   // Fuse client handler
   void fuse_invalid_server_version( uint32_t local_version, 
@@ -100,6 +101,7 @@ class FuseImageListWidget : FuseClientHandler
 
   void on_image_selected();
   void on_auto_update_toggled();
+  void on_compression_toggled();
   void get_image_list();
   void delete_clients();
   bool update_image_list();
@@ -110,6 +112,7 @@ class FuseImageListWidget : FuseClientHandler
   ClientData m_cur_client;
   
   Gtk::CheckButton* m_chk_auto_update;
+  Gtk::CheckButton* m_chk_compression;
   Gtk::TreeView* m_trv_image_list;
   Glib::RefPtr<Gtk::TreeStore> m_image_list;
   Mutex m_img_list_mutex;
@@ -121,6 +124,8 @@ class FuseImageListWidget : FuseClientHandler
   Glib::Dispatcher m_signal_image_selected;
 
   bool m_auto_update;
+
+  Glib::RefPtr<Gtk::TreeSelection> m_cur_selection;
 };
 
 #endif /* __FIREVISION_TOOLS_FIRESTATION_FUSE_IMAGE_LIST_WIDGET_H_ */

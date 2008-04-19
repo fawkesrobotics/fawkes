@@ -84,7 +84,6 @@ class ColorTrainWidget
   void resize_seg_image(Gtk::Allocation& allocation);
   bool set_threshold(Gtk::ScrollType scroll, double value);
   bool set_min_prob(Gtk::ScrollType scroll, double value);
-  void set_cm_depth();
 
   void reset_gui();
 

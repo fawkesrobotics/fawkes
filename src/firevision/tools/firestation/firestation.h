@@ -122,7 +122,7 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   } OpMode;
 
   Gtk::Widget* get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
-			   const char* widget_name) const;
+			  const char* widget_name) const;
 
   void save_image();
   void exit();
@@ -152,7 +152,6 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   void mc_load();
 
   Glib::Dispatcher m_update_img;
-  Glib::Dispatcher m_signal_fuse_image_selected;
 
   // widgets
   Gtk::Window* m_wnd_main;

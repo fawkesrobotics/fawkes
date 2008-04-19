@@ -47,7 +47,7 @@ FuseTransferWidget::FuseTransferWidget()
   m_local_colormap_viewer  = new ColormapViewerWidget();
   m_remote_colormap_viewer = new ColormapViewerWidget();
 
-  m_local_lut_list = Gtk::ListStore::create(m_lut_record);
+  m_local_lut_list  = Gtk::ListStore::create(m_lut_record);
   m_remote_lut_list = Gtk::ListStore::create(m_lut_record);
 
   m_signal_update_local_lut_list.connect( sigc::mem_fun( *this, &FuseTransferWidget::update_local_lut_list) );
@@ -125,47 +125,53 @@ void
 FuseTransferWidget::remove_fountain_service(const char* name)
 {
   Gtk::TreeModel::Children children = m_remote_lut_list->children();
-  for (Gtk::TreeModel::Children::iterator iter = children.begin();
-       iter != children.end(); ++iter)
+  Gtk::TreeModel::Children::iterator iter = children.begin();
+  while( iter != children.end() )
     {
       Gtk::TreeModel::Row row = *iter;
       if (row[m_lut_record.service_name] == Glib::ustring(name))
 	{
-	  m_local_lut_list->erase(iter);
+	  iter = m_local_lut_list->erase(iter);
 	  m_local_lut_list->row_deleted( m_local_lut_list->get_path(iter) );
+	}
+      else
+	{
+	  ++iter;
 	}
     }
 }
 
-/** Set the current LUT.
- * The current LUT is the local LUT that is currently trained.
- * @param lut the LUT
+/** Set the current colormap.
+ * The current colormap is the local colormap that is currently trained.
+ * @param colormap the colormap
  */
 void
-FuseTransferWidget::set_current_lut(YuvColormap* lut)
+FuseTransferWidget::set_current_colormap(YuvColormap* colormap)
 {
-  m_current_lut = lut;
+  m_current_colormap = colormap;
 
   // delete existing "Current" row
   Gtk::TreeModel::Children children = m_local_lut_list->children();
-  for (Gtk::TreeModel::Children::iterator iter = children.begin();
-       iter != children.end(); ++iter)
+  Gtk::TreeModel::Children::iterator iter = children.begin();
+  while ( iter != children.end() )
     {
       Gtk::TreeModel::Row row = *iter;
       if (row[m_lut_record.filename] == "Current")
 	{
-	  m_local_lut_list->erase(iter);
+	  iter = m_local_lut_list->erase(iter);
 	  m_local_lut_list->row_deleted( m_local_lut_list->get_path(iter) );
+	}
+      else
+	{
+	  ++iter;
 	}
     }
 
   Gtk::TreeModel::Row row = *m_local_lut_list->prepend();
   row[m_lut_record.filename] = "Current";
-
-  // TODO
-  //   row[m_lut_record.width] = width;
-  //   row[m_lut_record.height] = height;
-  //   row[m_lut_record.bytes_per_cell] = bpc;
+  row[m_lut_record.width]    = colormap->width();
+  row[m_lut_record.height]   = colormap->height();
+  row[m_lut_record.depth]    = colormap->depth();
 }
 
 void
@@ -189,6 +195,7 @@ void
 FuseTransferWidget::set_upload_btn(Gtk::Button* btn)
 {
   m_btn_upload = btn;
+  m_btn_upload->signal_clicked().connect( sigc::mem_fun( *this, &FuseTransferWidget::upload_lut) );
 }
 
 /** Set the button to trigger the LUT download.
@@ -210,6 +217,15 @@ FuseTransferWidget::set_local_img(Gtk::Image* img)
   m_local_colormap_viewer->set_colormap_img(m_img_local);
 }
 
+/** Assign a Scale to switch between the layers of the loal colormap.
+ * @param scl a Gtk::Scale
+ */
+void
+FuseTransferWidget::set_local_layer_selector(Gtk::Scale* scl)
+{
+  m_local_colormap_viewer->set_layer_selector(scl);
+}
+
 /** Set the Image to display the remote LUT.
  * @param img the remote LUT Image
  */
@@ -218,6 +234,15 @@ FuseTransferWidget::set_remote_img(Gtk::Image* img)
 {
   m_img_remote = img;
   m_remote_colormap_viewer->set_colormap_img(m_img_remote);
+}
+
+/** Assign a Scale to switch between the layers of the remote colormap.
+ * @param scl a Gtk::Scale
+ */
+void
+FuseTransferWidget::set_remote_layer_selector(Gtk::Scale* scl)
+{
+  m_remote_colormap_viewer->set_layer_selector(scl);
 }
 
 /** Set the TreeView for the list of local LUTs.
@@ -232,7 +257,7 @@ FuseTransferWidget::set_local_lut_list_trv(Gtk::TreeView* trv)
   m_trv_local_lut_list->append_column("Width", m_lut_record.width);
   m_trv_local_lut_list->append_column("Height", m_lut_record.height);
   m_trv_local_lut_list->append_column("Depth", m_lut_record.depth);
-  m_trv_local_lut_list->append_column("BPC", m_lut_record.bytes_per_cell);
+  //  m_trv_local_lut_list->append_column("BPC", m_lut_record.bytes_per_cell);
 
   m_trv_local_lut_list->signal_cursor_changed().connect( sigc::mem_fun( *this, &FuseTransferWidget::local_lut_selected) );
 }
@@ -250,7 +275,7 @@ FuseTransferWidget::set_remote_lut_list_trv(Gtk::TreeView* trv)
   m_trv_remote_lut_list->append_column("ID", m_lut_record.lut_id);
   m_trv_remote_lut_list->append_column("Width", m_lut_record.width);
   m_trv_remote_lut_list->append_column("Height", m_lut_record.height);
-  m_trv_remote_lut_list->append_column("Detpth", m_lut_record.depth);
+  m_trv_remote_lut_list->append_column("Depth", m_lut_record.depth);
   m_trv_remote_lut_list->append_column("BPC", m_lut_record.bytes_per_cell);
 
   m_trv_remote_lut_list->signal_cursor_changed().connect( sigc::mem_fun( *this, &FuseTransferWidget::remote_lut_selected) );
@@ -330,6 +355,58 @@ FuseTransferWidget::update_remote_lut()
 }
 
 void
+FuseTransferWidget::upload_lut()
+{
+  if ( !m_local_colormap )
+    { return; }
+
+  // get current selection remote
+  Glib::RefPtr<Gtk::TreeSelection> selection = m_trv_remote_lut_list->get_selection();
+  
+  if ( 1 != selection->count_selected_rows() )
+    {
+      printf("No remote lut selected\n");
+      return;
+    }
+  
+  Gtk::TreeModel::iterator i = selection->get_selected();
+  Glib::ustring hostname = (*i)[m_lut_record.host_name];
+  unsigned int port = (*i)[m_lut_record.port];
+  Glib::ustring lut_id = (*i)[m_lut_record.lut_id];
+
+  printf("sending lut to %s:%d id %s\n", hostname.c_str(), port, lut_id.c_str());
+
+  FuseLutContent* lut_content = new FuseLutContent( lut_id.c_str(), 
+						    m_local_colormap->get_buffer(),
+						    m_local_colormap->width(),
+						    m_local_colormap->height(),
+						    m_local_colormap->depth(),
+						    1 /* bytes per cell*/ );
+  
+  // create FUSE client
+  FuseClient* client = new FuseClient(hostname.c_str(), port, this);
+
+  try
+    {
+      client->connect();
+      client->start();
+      
+      // send lut
+      client->enqueue( new FuseNetworkMessage(FUSE_MT_SET_LUT, lut_content) );
+      
+      // mark FUSE client for deletion
+      m_delete_clients.push_locked(client);
+    }
+  catch (Exception& e)
+    {
+      e.print_trace();
+      client->cancel();
+      client->join();
+      delete client;
+    }
+}
+
+void
 FuseTransferWidget::local_lut_selected()
 {
   Glib::RefPtr<Gtk::TreeSelection> selection = m_trv_local_lut_list->get_selection();
@@ -341,14 +418,14 @@ FuseTransferWidget::local_lut_selected()
 
   if (filename == "Current")
     {
-      m_local_lut = m_current_lut;
+      m_local_colormap = m_current_colormap;
     }
   else
     {
       // TODO
     }
 
-  m_local_colormap_viewer->set_colormap(m_local_lut);
+  m_local_colormap_viewer->set_colormap(m_local_colormap);
   update_local_lut();
 }
 
@@ -361,21 +438,29 @@ FuseTransferWidget::remote_lut_selected()
 
   Gtk::TreeModel::iterator it = selection->get_selected();
   Glib::ustring host_name = (*it)[m_lut_record.host_name];
-  unsigned int port = (*it)[m_lut_record.port];
-  Glib::ustring lut_id = (*it)[m_lut_record.lut_id];
+  unsigned int port       = (*it)[m_lut_record.port];
+  Glib::ustring lut_id    = (*it)[m_lut_record.lut_id];
 
   FuseClient* c = new FuseClient(host_name.c_str(), port, this);
-  c->connect();
-  c->start();
+  try
+    {
+      c->connect();
+      c->start();
 
-  FUSE_lutdesc_message_t* lut_desc = (FUSE_lutdesc_message_t*) malloc( sizeof(FUSE_lutdesc_message_t));
-  memset(lut_desc, 0, sizeof(FUSE_lutdesc_message_t));
-  strncpy(lut_desc->lut_id, lut_id.c_str(), LUT_ID_MAX_LENGTH);
-  c->enqueue(FUSE_MT_GET_LUT, lut_desc, sizeof(FUSE_lutdesc_message_t));
+      FUSE_lutdesc_message_t* lut_desc = (FUSE_lutdesc_message_t*) malloc( sizeof(FUSE_lutdesc_message_t));
+      memset(lut_desc, 0, sizeof(FUSE_lutdesc_message_t));
+      strncpy(lut_desc->lut_id, lut_id.c_str(), LUT_ID_MAX_LENGTH);
+      c->enqueue(FUSE_MT_GET_LUT, lut_desc, sizeof(FUSE_lutdesc_message_t));
 
-  m_cur_client.client = c;
-  m_cur_client.host_name = host_name.c_str();
-  m_cur_client.port = port;
+      m_delete_clients.push_locked(c);
+    }
+  catch (Exception& e)
+    {
+      e.print_trace();
+      c->cancel();
+      c->join();
+      delete c;
+    }
 }
 
 void
@@ -403,19 +488,31 @@ FuseTransferWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
 	    {
 	      while ( content->has_next() )
 		{
+		  // check whether there already is an entry for the given lut_id
 		  FUSE_lutinfo_t* lut_info = content->next();
 		  char lut_id[LUT_ID_MAX_LENGTH + 1];
 		  lut_id[LUT_ID_MAX_LENGTH] = '\0';
 		  strncpy(lut_id, lut_info->lut_id, LUT_ID_MAX_LENGTH);
+
+		  Gtk::TreeModel::Children children = m_remote_lut_list->children();
+		  Gtk::TreeModel::Children::iterator iter = children.begin();
+		  while ( iter != children.end() )
+		    {
+		      Gtk::TreeModel::Row row = *iter;
+		      if ( row[m_lut_record.lut_id] == Glib::ustring(lut_id) )
+			{ iter = m_remote_lut_list->erase(iter); }
+		      else
+			{ ++iter; }
+		    }
 		  
 		  Gtk::TreeModel::Row row = *m_remote_lut_list->append();
-		  row[m_lut_record.service_name] = Glib::ustring(m_cur_client.service_name);
-		  row[m_lut_record.host_name] = Glib::ustring(m_cur_client.host_name);
-		  row[m_lut_record.port] = m_cur_client.port;
-		  row[m_lut_record.lut_id] = Glib::ustring(lut_id);
-		  row[m_lut_record.width] = ntohl(lut_info->width);
-		  row[m_lut_record.height] = ntohl(lut_info->height);
-		  //row[m_lut_record.depth] = ntohl(lut_info->depth);
+		  row[m_lut_record.service_name]   = Glib::ustring(m_cur_client.service_name);
+		  row[m_lut_record.host_name]      = Glib::ustring(m_cur_client.host_name);
+		  row[m_lut_record.port]           = m_cur_client.port;
+		  row[m_lut_record.lut_id]         = Glib::ustring(lut_id);
+		  row[m_lut_record.width]          = ntohl(lut_info->width);
+		  row[m_lut_record.height]         = ntohl(lut_info->height);
+		  row[m_lut_record.depth]          = ntohl(lut_info->depth);
 		  row[m_lut_record.bytes_per_cell] = ntohl(lut_info->bytes_per_cell);
 		}
 	    }
@@ -438,25 +535,39 @@ FuseTransferWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
     case FUSE_MT_LUT:
       try
 	{
-	  //FuseLutContent* lut_content = m->msgc<FuseLutContent>();
+	  FuseLutContent* lut_content = m->msgc<FuseLutContent>();
 	  
-	  if (m_remote_lut)
-	    { delete m_remote_lut; }
+	  if (m_remote_colormap)
+	    { delete m_remote_colormap; }
 
-	  //unsigned int depth = lut_content->depth();
-	  m_remote_lut = new YuvColormap();
+	  if ( lut_content->width() != 256 ||
+	       lut_content->height() != 256 )
+	    {
+	      m_signal_delete_client();
+	      break;
+	    }
+
+	  m_remote_colormap = new YuvColormap( lut_content->depth() );
+	  m_remote_colormap->set( lut_content->buffer() );
+
+	  delete lut_content;
 	}
       catch (Exception& e)
 	{
 	  e.print_trace();
 	}
-      m_remote_colormap_viewer->set_colormap(m_remote_lut);
+      m_remote_colormap_viewer->set_colormap(m_remote_colormap);
       m_signal_update_remote_lut();
-
-      m_delete_clients.push_locked(m_cur_client.client);
-      m_cur_client.client = 0;
       m_signal_delete_client();
 
+      break;
+
+    case FUSE_MT_SET_LUT_FAILED:
+      printf("LUT upload failed\n");
+
+    case FUSE_MT_SET_LUT_SUCCEEDED:
+      printf("LUT upload succeeded\n");
+      m_signal_delete_client();
       break;
 
     default:

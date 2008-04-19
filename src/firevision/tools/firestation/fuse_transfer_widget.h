@@ -45,12 +45,14 @@ class FuseTransferWidget : FuseClientHandler
 			     uint16_t port );
   void remove_fountain_service(const char* name);
 
-  void set_current_lut(YuvColormap* lut);
+  void set_current_colormap(YuvColormap* colormap);
 
   void set_upload_btn(Gtk::Button* btn_upload);
   void set_download_btn(Gtk::Button* btn_download);
   void set_local_img(Gtk::Image* img_local);
+  void set_local_layer_selector(Gtk::Scale* scl);
   void set_remote_img(Gtk::Image* img_remote);
+  void set_remote_layer_selector(Gtk::Scale* scl);
   void set_local_lut_list_trv(Gtk::TreeView* lut_list);
   void set_remote_lut_list_trv(Gtk::TreeView* lut_list);
 
@@ -75,7 +77,14 @@ class FuseTransferWidget : FuseClientHandler
 	  add(height);
 	  add(depth);
 	  add(bytes_per_cell);
+	  add(type);
 	}
+      
+      typedef enum
+      {
+	LUT_COLORMAP,
+	LUT_MIRROR
+      } LutType;
 
       Gtk::TreeModelColumn<Glib::ustring> filename;
       Gtk::TreeModelColumn<Glib::ustring> service_name;
@@ -86,6 +95,7 @@ class FuseTransferWidget : FuseClientHandler
       Gtk::TreeModelColumn<unsigned int> height;
       Gtk::TreeModelColumn<unsigned int> depth;
       Gtk::TreeModelColumn<unsigned int> bytes_per_cell;
+      Gtk::TreeModelColumn<LutRecord::LutType> type;
     };
 
   // signal handler
@@ -95,6 +105,7 @@ class FuseTransferWidget : FuseClientHandler
   void delete_clients();
   void update_local_lut();
   void update_remote_lut();
+  void upload_lut();
 
   void local_lut_selected();
   void remote_lut_selected();
@@ -133,9 +144,9 @@ class FuseTransferWidget : FuseClientHandler
   Glib::RefPtr<Gtk::ListStore> m_local_lut_list;
   LutRecord m_lut_record;
 
-  YuvColormap* m_current_lut;
-  YuvColormap* m_local_lut;
-  YuvColormap* m_remote_lut;
+  YuvColormap* m_current_colormap;
+  YuvColormap* m_local_colormap;
+  YuvColormap* m_remote_colormap;
 };
 
 #endif /* __FIREVISION_TOOLS_FIRESTATION_FUSE_TRANSFER_WIDGET_H_ */

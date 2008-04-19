@@ -328,7 +328,6 @@ void
 ColorTrainWidget::set_cm_depth_selector(Gtk::SpinButton* spbtn)
 {
   m_spbtn_cm_depth = spbtn;
-  m_spbtn_cm_depth->signal_value_changed().connect( sigc::mem_fun(*this, &ColorTrainWidget::set_cm_depth) );
 }
 
 /** Access the signal that is emitted whenever a redraw of the image is necessary.
@@ -425,16 +424,13 @@ ColorTrainWidget::add_to_colormap()
   if ( !m_src_buffer )
     { return; }
 
-  if ( !m_generator )
-    {
-      unsigned int cm_depth;
-      if (m_spbtn_cm_depth)
-	{ cm_depth = (unsigned int) rint( m_spbtn_cm_depth->get_value() ); }
-      else
-	{ cm_depth = 1; }
-      m_generator = new BayesColormapGenerator(cm_depth);
-      m_cvw->set_colormap( m_generator->get_current() );
-    }
+  unsigned int cm_depth;
+  if (m_spbtn_cm_depth)
+    { cm_depth = (unsigned int) rint( pow(2.0, m_spbtn_cm_depth->get_value()) ); }
+  else
+    { cm_depth = 1; }
+  m_generator = new BayesColormapGenerator(cm_depth);
+  m_cvw->set_colormap( m_generator->get_current() );
   
   if (m_fg_object == H_UNKNOWN)
     {
@@ -582,18 +578,6 @@ ColorTrainWidget::set_min_prob(Gtk::ScrollType scroll, double value)
   m_generator->set_min_probability(value);
 
   return true;
-}
-
-void
-ColorTrainWidget::set_cm_depth()
-{
-  delete m_generator;
-  unsigned int cm_depth = (unsigned int) rint( pow( 2.0, m_spbtn_cm_depth->get_value_as_int() ) );
-  m_generator = new BayesColormapGenerator(cm_depth);
-
-  m_cvw->set_colormap( m_generator->get_current() );
-  m_cvw->draw();
-  draw_segmentation_result();
 }
 
 void

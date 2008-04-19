@@ -3,7 +3,7 @@
  *  firestation.cpp - Firestation
  *
  *  Created: Wed Oct 10 14:19:30 2007
- *  Copyright  2007  Daniel Beck
+ *  Copyright  2007-2008  Daniel Beck
  *
  *  $Id$
  *
@@ -60,9 +60,6 @@ using namespace std;
  */
 Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 {
-  m_update_img.connect( sigc::mem_fun(*this, &Firestation::draw_image) );
-  m_signal_fuse_image_selected.connect( sigc::mem_fun(*this, &Firestation::on_fuse_image_selected) );
-
   // --- main window ------------------------------------------------
   m_wnd_main = dynamic_cast<Gtk::Window*>( get_widget(ref_xml, "wndMain") );
 
@@ -236,63 +233,31 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   Gtk::SpinButton* spbtn;
   spbtn = dynamic_cast<Gtk::SpinButton*>( get_widget(ref_xml, "spbtnCtCmDepth") );
   m_ctw->set_cm_depth_selector(spbtn);
-
   // ----------------------------------------------------------------
 
 
   // --- mirror calibration -----------------------------------------
   m_calib_tool = new MirrorCalibTool();
 
-  ref_xml->get_widget("btnMcStart", m_btn_mc_start);
-  if ( !m_btn_mc_start )
-    {
-      throw std::runtime_error("Couldn't find btnMcStart.");
-    }
+  m_btn_mc_start = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart") );
   m_btn_mc_start->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start) );
 
-  ref_xml->get_widget("entCalibDist", m_ent_mc_dist);
-  if ( ! m_ent_mc_dist ) 
-    {
-      throw std::runtime_error("Couldn't find entCalibDist.");
-    }
-
-  ref_xml->get_widget("entCalibOri", m_ent_mc_ori);
-  if ( ! m_ent_mc_ori ) 
-    {
-      throw std::runtime_error("Couldn't find entCalibOri.");
-    }
-
-  ref_xml->get_widget("btnCalibLoad", m_btn_mc_load);
-  if ( ! m_btn_mc_load )
-    {
-      throw std::runtime_error("Couldn't find btnCalibLoad.");
-    }
+  m_btn_mc_load = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCalibLoad") );
   m_btn_mc_load->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_load) );
 
-  ref_xml->get_widget("btnCalibSave", m_btn_mc_save);
-  if ( ! m_btn_mc_save )
-    {
-      throw std::runtime_error("Couldn't find btnCalibSave.");
-    }
+  m_btn_mc_save = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCalibSave") );
   m_btn_mc_save->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_save) );
 
-  ref_xml->get_widget("fcdCalibSave", m_fcd_mc_save);
-  if ( ! m_fcd_mc_save )
-    {
-      throw std::runtime_error("Couldn't find fcdCalibSave.");
-    }
-  
-  ref_xml->get_widget("fcdCalibLoad", m_fcd_mc_load);
-  if ( ! m_fcd_mc_load )
-    {
-      throw std::runtime_error("Couldn't find fcdCalibLoad.");
-    }
+  m_ent_mc_dist = dynamic_cast<Gtk::Entry*>( get_widget(ref_xml, "entCalibDist") );
+  m_ent_mc_ori = dynamic_cast<Gtk::Entry*>( get_widget(ref_xml, "entCalibOri") );
+
+  m_fcd_mc_save = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdCalibSave") );
+  m_fcd_mc_load = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdCalibLoad") );
   // ----------------------------------------------------------------
 
 
   // --- fuse transfer widget ---------------------------------------
   m_ftw = new FuseTransferWidget();
-  m_ftw->set_current_lut( m_ctw->get_colormap() );
 
   Gtk::TreeView* trv = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvFuseRemoteLuts") );
   m_ftw->set_remote_lut_list_trv(trv);
@@ -302,6 +267,8 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_ftw->set_local_img(img);
   img = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgFuseRemote") );
   m_ftw->set_remote_img(img);
+  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnFuseUpload") );
+  m_ftw->set_upload_btn(btn);
   // ----------------------------------------------------------------
 
 
@@ -311,6 +278,8 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_filw->set_image_list_trv(trv);
   Gtk::CheckButton* chk = dynamic_cast<Gtk::CheckButton*>( get_widget(ref_xml, "chkFuseImageListUpdate") );
   m_filw->set_auto_update_chk(chk);
+  chk = dynamic_cast<Gtk::CheckButton*>( get_widget(ref_xml, "chkFuseCompression") );
+  m_filw->set_toggle_compression_chk(chk);
   m_filw->image_selected().connect( sigc::mem_fun(*this, &Firestation::on_fuse_image_selected) );
   // ----------------------------------------------------------------
 
@@ -326,20 +295,19 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_img_cs     = CS_UNKNOWN;
 
   m_img_writer = 0;
-  m_camera = 0;
+  m_camera     = 0;
   m_shm_buffer = 0;
 
   m_img_src = SRC_NONE;
   m_op_mode = MODE_VIEWER;
   
-  m_scale_factor = 1.0;
-
   m_cont_img_trans = false;
 
   m_max_img_width  = m_evt_image->get_width();
   m_max_img_height = m_evt_image->get_height();
   m_scaled_img_width  = m_evt_image->get_width();
   m_scaled_img_height = m_evt_image->get_height();
+  m_scale_factor = 1.0;
 
   m_avahi_thread = new AvahiThread();
   m_avahi_thread->watch_service("_fountain._tcp", this);
@@ -790,17 +758,23 @@ Firestation::pre_open_img_src()
     }
 }
 
-/** Stuff that is executed after an image source has been opened
- * successfully.
- */ 
+/** Stuff that is executed after an image source has been selected. */ 
 void
 Firestation::post_open_img_src()
 {
   if (m_img_src == SRC_NONE) { return; }
 
-  m_camera->open();
-  m_camera->start();
-  m_camera->capture();
+  try
+    {
+      m_camera->open();
+      m_camera->start();
+      m_camera->capture();
+    }
+  catch (Exception& e)
+    {
+      e.print_trace();
+      printf("Opening camera failed.\n");
+    }
 
   m_img_width = m_camera->pixel_width();
   m_img_height = m_camera->pixel_height();
@@ -836,14 +810,15 @@ Firestation::on_fuse_image_selected()
   string host_name;
   unsigned short port;
   string image_id;
+  bool compression;
 
-  m_filw->get_selected_image(host_name, port, image_id);
+  m_filw->get_selected_image(host_name, port, image_id, compression);
 
   pre_open_img_src();
   
   try
     {
-      m_camera = new NetworkCamera( host_name.c_str(), port, image_id.c_str());
+      m_camera = new NetworkCamera( host_name.c_str(), port, image_id.c_str(), compression );
       m_img_src = SRC_FUSE;
       post_open_img_src();
     }
@@ -857,7 +832,7 @@ Firestation::on_fuse_image_selected()
 void
 Firestation::on_colormap_updated()
 {
-  m_ftw->set_current_lut( m_ctw->get_colormap() );
+  m_ftw->set_current_colormap( m_ctw->get_colormap() );
 }
 
 /** Draws the image. */
@@ -894,14 +869,17 @@ Firestation::draw_image()
   if ( m_img_src == SRC_SHM )
     {
       SharedMemoryCamera* shm_camera = dynamic_cast<SharedMemoryCamera*>(m_camera);
-      Drawer drawer;
-      drawer.setBuffer(m_yuv_scaled_buffer, m_scaled_img_width, m_scaled_img_height);
-      drawer.setColor(255, 127, 127);
-      unsigned int roi_x = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_x() * m_scale_factor );
-      unsigned int roi_y = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_y() * m_scale_factor );
-      unsigned int roi_width  = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_width() * m_scale_factor );
-      unsigned int roi_height = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_height() * m_scale_factor );
-      drawer.drawRectangle( roi_x, roi_y, roi_width, roi_height );
+      if ( shm_camera->shared_memory_image_buffer()->circle_found() )
+	{ 
+	  Drawer drawer;
+	  drawer.setBuffer(m_yuv_scaled_buffer, m_scaled_img_width, m_scaled_img_height);
+	  drawer.setColor(255, 127, 127);
+	  unsigned int roi_x = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_x() * m_scale_factor );
+	  unsigned int roi_y = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_y() * m_scale_factor );
+	  unsigned int roi_width  = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_width() * m_scale_factor );
+	  unsigned int roi_height = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_height() * m_scale_factor );
+	  drawer.drawRectangle( roi_x, roi_y, roi_width, roi_height );
+	}
     }
 
   m_rgb_scaled_buffer = (unsigned char*) malloc( colorspace_buffer_size( RGB,

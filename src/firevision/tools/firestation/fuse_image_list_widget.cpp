@@ -164,6 +164,16 @@ FuseImageListWidget::set_image_list_trv(Gtk::TreeView* trv)
   m_img_list_mutex.unlock();
 }
 
+/** Assign the CheckButton to toggle the compression.
+ * @param chk a Gtk::CheckButton
+ */
+void
+FuseImageListWidget::set_toggle_compression_chk(Gtk::CheckButton* chk)
+{
+  m_chk_compression = chk;
+  m_chk_compression->signal_toggled().connect( sigc::mem_fun(*this, &FuseImageListWidget::on_compression_toggled) );
+}
+
 /** Assign the CheckButton that enables/disables the auto update function.
  * @param chk a Gtk::CheckButton
  */
@@ -214,26 +224,31 @@ FuseImageListWidget::set_auto_update(bool active, unsigned int interval_sec)
  * @param host_name the host name of the selected image
  * @param port the port of the selected image
  * @param image_id the id of the selected image
+ * @param compression true if compression shall be switched on
  * @return true if references could be assigned
  */
 bool
 FuseImageListWidget::get_selected_image( std::string& host_name, unsigned short& port,
-					 std::string& image_id )
+					 std::string& image_id, bool& compression )
 {
   if ( !m_trv_image_list )
     { return false; }
 
-  m_img_list_mutex.lock();
   Glib::RefPtr<Gtk::TreeSelection> selection = m_trv_image_list->get_selection();
 
   if ( selection->count_selected_rows() != 1 )
     { return false; }
-
+  
   Gtk::TreeModel::iterator iter = selection->get_selected();
   host_name = iter->get_value(m_image_record.host_name);
   port      = iter->get_value(m_image_record.port);
   image_id  = iter->get_value(m_image_record.image_id);
   m_img_list_mutex.unlock();
+
+  if (m_chk_compression)
+    { compression = m_chk_compression->get_active(); }
+  else
+    { compression = false; }
   
   return true;
 }
@@ -241,13 +256,27 @@ FuseImageListWidget::get_selected_image( std::string& host_name, unsigned short&
 void
 FuseImageListWidget::on_image_selected()
 {
-  m_signal_image_selected();
+  m_img_list_mutex.lock();
+  Glib::RefPtr<Gtk::TreeSelection> selection = m_trv_image_list->get_selection();
+  m_img_list_mutex.unlock();
+
+  if ( m_cur_selection != selection )
+    { 
+      m_cur_selection = selection;
+      m_signal_image_selected();
+    }
 }
 
 void
 FuseImageListWidget::on_auto_update_toggled()
 {
   set_auto_update( m_chk_auto_update->get_active() );
+}
+
+void
+FuseImageListWidget::on_compression_toggled()
+{
+  m_signal_image_selected();
 }
 
 void
