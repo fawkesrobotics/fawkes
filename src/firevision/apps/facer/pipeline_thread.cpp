@@ -4,7 +4,7 @@
  *
  *  Created: Sat Sat 19 12:41:48 2008 (on the way to German Open 2008, Hannover)
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *             2008 Vaishak Belle
  *  $Id$
  *
  ****************************************************************************/
@@ -193,9 +193,13 @@ FacerPipelineThread::loop()
 
       std::vector<IplImage *> face_images;
       face_images.push_back(face);
-      std::vector<std::string> face_labels = __facerecog->recognize(face_images);
-      __face_label = face_labels[0];
-
+      // the second parameter, number_of_identities, is 0 since we are NOT learning new ppl at the momnent
+      std::vector<std::string> face_labels = __facerecog->get_identities(__facerecog->recognize(face_images, 0)); 
+      if( faces_labels.size() != 0 )
+	__face_label = face_labels[0];
+      else 
+	logger->log_info("FacerPipelineThread", "No identity returned. Most probably forest has not been instantiated/training images not supplied."); 
+      
       __facer_if->set_face_label(__face_label.c_str());
     } else {
       logger->log_info("FacerPipelineThread", "No ROIs found");
