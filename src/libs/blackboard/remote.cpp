@@ -120,6 +120,10 @@ RemoteBlackBoard::~RemoteBlackBoard()
 Interface *
 RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool writer)
 {
+  if ( ! __fnc->connected() ) {
+    throw Exception("Cannot instantiate remote interface, connection is dead");
+  }
+
   Interface *iface = __instance_factory->new_interface_instance(type, identifier);
 
   bb_iopen_msg_t *om = (bb_iopen_msg_t *)calloc(1, sizeof(bb_iopen_msg_t));
@@ -419,6 +423,12 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m,
 void
 RemoteBlackBoard::connection_died(unsigned int id) throw()
 {
+  // mark all assigned interfaces as invalid
+  __proxies.lock();
+  for (__pit = __proxies.begin(); __pit != __proxies.end(); ++__pit) {
+    __pit->second->interface()->set_validity(false);
+  }
+  __proxies.unlock();
 }
 
 

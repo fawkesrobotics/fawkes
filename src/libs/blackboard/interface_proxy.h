@@ -53,7 +53,9 @@ class BlackBoardInterfaceProxy
   void writer_added(unsigned int event_serial);
   void writer_removed(unsigned int event_serial);
 
-  unsigned int serial();
+  unsigned int serial() const;
+  unsigned int clid() const;
+  Interface *  interface() const;
 
   /* InterfaceMediator */
   virtual bool exists_writer(const Interface *interface) const;

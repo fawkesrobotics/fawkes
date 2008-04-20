@@ -233,10 +233,30 @@ BlackBoardInterfaceProxy::writer_removed(unsigned int event_serial)
  * @return instance serial
  */
 unsigned int
-BlackBoardInterfaceProxy::serial()
+BlackBoardInterfaceProxy::serial() const
 {
   return __instance_serial;
 }
+
+
+/** Get client ID of assigned client.
+ * @return client ID
+ */
+unsigned int
+BlackBoardInterfaceProxy::clid() const
+{
+  return __instance_serial;
+}
+
+/** Get instance serial of interface.
+ * @return instance serial
+ */
+Interface *
+BlackBoardInterfaceProxy::interface() const
+{
+  return __interface;
+}
+
 
 /* InterfaceMediator */
 bool
