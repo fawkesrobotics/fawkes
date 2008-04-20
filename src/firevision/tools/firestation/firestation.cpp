@@ -197,6 +197,9 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtAdd") );
   m_ctw->set_add_to_colormap_btn(btn);
 
+  btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtReset") );
+  m_ctw->set_reset_colormap_btn(btn);
+
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtSaveHistos") );
   m_ctw->set_save_histos_btn(btn);
 
@@ -1227,9 +1230,9 @@ Firestation::service_added( const char* name,
 {
   std::vector<FUSE_imageinfo_t> image_list;
   NetworkCamera cam(host_name, port);
-  cam.open();
   try
     {
+      cam.open();
       image_list = cam.image_list();
     }
   catch (Exception& e)

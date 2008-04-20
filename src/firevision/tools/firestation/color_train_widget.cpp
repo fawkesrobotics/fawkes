@@ -461,8 +461,16 @@ ColorTrainWidget::add_to_colormap()
 void
 ColorTrainWidget::reset_colormap()
 {
-  // TODO
-  m_signal_colormap_updated();
+  if (m_generator)
+    { 
+      m_generator->reset();
+      m_signal_colormap_updated();
+
+      if (m_cvw)
+	{ m_cvw->draw(); }
+
+      draw_segmentation_result();
+    }
 }
 
 /** Open a dialog to load a colormap. */
