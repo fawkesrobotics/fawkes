@@ -26,7 +26,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/lua.mk
 include $(SRCDIR)/generator/generator.mk
 
-CFLAGS += -DINTERFACEDIR=\"$(realpath $(BASEDIR)/src/interfaces)\"
+CFLAGS += -DINTERFACEDIR=\"$(INTERFACEDIR)\"
 
 OBJS_interfaces  = $(notdir $(patsubst %.xml,%.o,$(wildcard $(SRCDIR)/*.xml)))
 SRCS_interfaces  = $(patsubst %.xml,%.cpp,$(wildcard $(SRCDIR)/*.xml))

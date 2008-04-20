@@ -23,7 +23,7 @@ endif
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-CFLAGS += -DINTERFACEDIR=\"$(realpath $(BASEDIR)/src/interfaces)\" \
+CFLAGS += -DINTERFACEDIR=\"$(INTERFACEDIR)\" \
           $(shell $(PKGCONFIG) --cflags libxml++-2.6)
 
 include $(SRCDIR)/generator_rules.mk
