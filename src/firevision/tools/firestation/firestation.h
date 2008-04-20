@@ -180,6 +180,7 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   Gtk::RadioButton* m_rbt_ct_ball;
   Gtk::RadioButton* m_rbt_ct_field;
   Gtk::RadioButton* m_rbt_ct_lines;
+  Gtk::RadioButton* m_rbt_ct_robot;
   Gtk::Button* m_btn_ct_start;
 
   // mirror calibration widgets

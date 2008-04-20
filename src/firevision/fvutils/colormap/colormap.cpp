@@ -145,8 +145,8 @@ Colormap::to_image(unsigned char *yuv422_planar_buffer, unsigned int level)
       case C_CYAN:       *yp++ = 255; *yp++ = 255; *up++ = 128; *vp++ =   0; break;
       case C_MAGENTA:    *yp++ = 128; *yp++ = 128; *up++ = 128; *vp++ = 255; break;
       case C_WHITE:      *yp++ = 255; *yp++ = 255; *up++ = 128; *vp++ = 128; break;
-      case C_BLACK:
-      case C_BACKGROUND: *yp++ =   0; *yp++ =   0; *up++ = 128; *vp++ = 128; break;
+      case C_BLACK:      *yp++ =   0; *yp++ =   0; *up++ = 128; *vp++ = 128; break;
+      case C_BACKGROUND: *yp++ =  64; *yp++ =  64; *up++ = 128; *vp++ = 128; break;
       case C_GREEN:      *yp++ = 128; *yp++ = 128; *up++ =   0; *vp++ =   0; break;
       case C_RED:        *yp++ = 128; *yp++ = 128; *up++ =   0; *vp++ = 255; break;
       default:           *yp++ = 128; *yp++ = 128; *up++ = 128; *vp++ = 128; break;

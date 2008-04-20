@@ -478,6 +478,20 @@
                                                     <property name="position">2</property>
                                                   </packing>
                                                 </child>
+                                                <child>
+                                                  <widget class="GtkRadioButton" id="rbtCtRobot">
+                                                    <property name="visible">True</property>
+                                                    <property name="can_focus">True</property>
+                                                    <property name="label" translatable="yes">Robot</property>
+                                                    <property name="response_id">0</property>
+                                                    <property name="active">True</property>
+                                                    <property name="draw_indicator">True</property>
+                                                    <property name="group">rbtCtBall</property>
+                                                  </widget>
+                                                  <packing>
+                                                    <property name="position">3</property>
+                                                  </packing>
+                                                </child>
                                               </widget>
                                             </child>
                                           </widget>

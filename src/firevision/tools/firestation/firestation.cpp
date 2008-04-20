@@ -176,12 +176,14 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
 
   // --- color train widget -----------------------------------------
-  m_rbt_ct_ball = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtBall") );
+  m_rbt_ct_ball  = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtBall") );
   m_rbt_ct_field = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtField") );
   m_rbt_ct_lines = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtLines") );
+  m_rbt_ct_robot = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtRobot") );
   m_rbt_ct_ball->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_object_changed) );
   m_rbt_ct_field->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_object_changed) );
   m_rbt_ct_lines->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_object_changed) );
+  m_rbt_ct_robot->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_object_changed) );
 
   m_btn_ct_start = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtStart") );
   m_btn_ct_start->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_start) );
@@ -1064,6 +1066,10 @@ Firestation::ct_get_fg_object()
     {
       return H_LINE;
     }
+  else if ( m_rbt_ct_robot->get_active() )
+    {
+      return H_ROBOT;
+    }
   else
     {
       printf("ct_get_fg_object(): UNKNOWN\n");
@@ -1085,6 +1091,10 @@ Firestation::ct_object_changed()
   else if ( m_rbt_ct_lines->get_active() )
     {
       m_ctw->set_fg_object(H_LINE);
+    }
+  else if ( m_rbt_ct_robot->get_active() )
+    {
+      m_ctw->set_fg_object(H_ROBOT);
     }
   else
     {

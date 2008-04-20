@@ -636,11 +636,15 @@ ColorTrainWidget::draw_segmentation_result()
 	    }
 	  else if (C_BACKGROUND == result)
 	    {
-	      d.setColor(50, 127, 127);
+	      d.setColor(64, 127, 127);
 	    }
 	  else if (C_WHITE == result)
 	    {
 	      d.setColor(255, 128, 128);
+	    }
+	  else if (C_BLACK == result)
+	    {
+	      d.setColor(0, 127, 127);
 	    }
 	  else
 	    {

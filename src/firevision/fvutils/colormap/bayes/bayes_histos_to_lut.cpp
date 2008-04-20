@@ -476,6 +476,7 @@ BayesHistosToLut::calculateLutValues( bool penalty )
   unsigned int count_ball       = 0;
   unsigned int count_field      = 0;
   unsigned int count_line       = 0;
+  unsigned int count_robot      = 0;
   unsigned int count_background = 0;
   unsigned int count_unknown    = 0;
   
@@ -495,6 +496,10 @@ BayesHistosToLut::calculateLutValues( bool penalty )
 	case H_BACKGROUND:
 	  count_background++;
 	  lut->set(y_index, u, v, C_BACKGROUND);
+	  break;
+	case H_ROBOT:
+	  count_robot++;
+	  lut->set(y_index, u, v, C_BLACK);
 	  break;
 	case H_FIELD:
 	  count_field++;
@@ -523,8 +528,8 @@ BayesHistosToLut::calculateLutValues( bool penalty )
     }
   }
 
-  printf("ball: %d  field: %d  line: %d  background: %d  unknown: %d\n", count_ball, 
-	 count_field, count_line, count_background, count_unknown);
+  printf("ball: %d  field: %d  line: %d  robot: %d  background: %d  unknown: %d\n", 
+	 count_ball, count_field, count_line, count_robot, count_background, count_unknown);
 
   if ( penalty ) {
     Histogram *histo_bg   = histograms.at( H_BACKGROUND );
