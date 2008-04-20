@@ -56,8 +56,8 @@ Field::Field( Configuration *config ) :
     mHeight( 0 )
 {
   // defaults
-  config->set_default_float( "/firevision/omni/localizer/lower_range", 0.1 );
-  config->set_default_float( "/firevision/omni/localizer/upper_range", 3.5 );
+  config->set_default_float( "/firevision/omni/localizer/lower_range", 0.25 );
+  config->set_default_float( "/firevision/omni/localizer/upper_range", 3.8 );
 
   const string fieldFile = config->get_string( "/firevision/omni/localizer/field" );
   const string fieldPath = string( CONFDIR ) + "/firevision/fields/" + fieldFile;

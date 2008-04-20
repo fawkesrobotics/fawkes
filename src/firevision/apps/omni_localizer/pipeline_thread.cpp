@@ -104,6 +104,11 @@ void FvOmniLocalizerPipelineThread::init()
     throw;
   }
 
+#ifdef DEBUG_UNWRAP
+  mLowerRange = config->get_float( "/firevision/omni/localizer/lower_range" );
+  mUpperRange = config->get_float( "/firevision/omni/localizer/upper_range" );
+#endif
+
   try
   {
     mCamera = vision_master->register_for_camera( config->get_string("/firevision/omni/camera").c_str(), this );
@@ -262,6 +267,12 @@ void FvOmniLocalizerPipelineThread::loop()
       }
     }
   }
+
+  // lower/upper limits
+  debugDrawer.setColor( 128, 128, 255 );
+  debugDrawer.drawCircle( DEBUG_IMAGE_SIZE / 2, DEBUG_IMAGE_SIZE / 2, (unsigned int)(DEBUG_IMAGE_SCALE * mLowerRange) );
+  debugDrawer.drawCircle( DEBUG_IMAGE_SIZE / 2, DEBUG_IMAGE_SIZE / 2, (unsigned int)(DEBUG_IMAGE_SCALE * mUpperRange) );
+  debugDrawer.setColor( 128, 0, 255 );
 #endif
 
   // unwrap sensor readings
@@ -343,4 +354,8 @@ void FvOmniLocalizerPipelineThread::loop()
   mPositionInterface->set_dyp_covariance( cov );
   mPositionInterface->write();
   delete[] cov;
+
+#ifdef DEBUG_MCL_LOG
+  ++loopCount;
+#endif
 }

@@ -80,7 +80,8 @@ MCL::MCL( Configuration *config ) :
   config->set_default_float( "/firevision/omni/localizer/mcl/variance_limit_y", 3.0 );
   config->set_default_float( "/firevision/omni/localizer/mcl/variance_limit_ori", M_PI/2.0 );
   config->set_default_float( "/firevision/omni/localizer/mcl/unexpected_penalty", -0.5 );
-  config->set_default_float( "/firevision/omni/localizer/mcl/unexpected_penalty_min_distance", 0.2 );
+  config->set_default_float( "/firevision/omni/localizer/mcl/unexpected_penalty_min_distance", 0.4 );
+  config->set_default_float( "/firevision/omni/localizer/mcl/out_of_field_threshold", 0.2 );
 
   // read config settings
   mField = new Field( config );
@@ -139,11 +140,25 @@ void MCL::predict( const field_pos_t &movement, float pathLength )
 #endif
 
   // ### add correct error model
-  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
+  int droppedSamples = 0;
+  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ) {
     (*it).position.x += ( cos((*it).position.ori) * movement.x ) - ( sin((*it).position.ori) * movement.y )+ (mNormalDist( mRng ) * noise);
     (*it).position.y += ( sin((*it).position.ori) * movement.x ) + ( cos((*it).position.ori) * movement.y ) + (mNormalDist( mRng ) * noise);
     (*it).position.ori += movement.ori + (mNormalDist( mRng ) * movement.ori * 0.2);
-    clampToField( *it );
+    // drop samples that clearly moved outside
+    if ( (std::abs((*it).position.x) + mOutOfFieldThreshold) > mField->totalWidth()/2.0 ||
+         (std::abs((*it).position.y) + mOutOfFieldThreshold) > mField->totalHeight()/2.0 ) {
+      ++droppedSamples;
+      it = mSamples.erase( it );
+    } else {
+      clampToField( *it );
+      ++it;
+    }
+  }
+
+  if ( droppedSamples > 0 ) {
+    cout << "Dropped " << droppedSamples << " samples that moved out of field." << endl;
+    generateRandomSamples( droppedSamples );
   }
 
   if ( movement.x > 0.0 || movement.y > 0.0 || movement.ori != 0.0 )
@@ -244,22 +259,28 @@ float MCL::weightForPosition( const field_pos_t &pos,
     // make sure we only count the best sensor reading per expected hit to avoid
     // skewing the results for parallel lines (real parallel lines as well as those caused
     // by cam vibrations)
-    map< float, float > bestSensorWeights;
+    map< float, pair<float,float> > bestSensorWeights;
     sort( expectedHits.begin(), expectedHits.end() );
+    float penalty = 0.0;
     for ( vector<polar_coord_t>::const_iterator hitIt = (*rayIt).second.begin(); hitIt != (*rayIt).second.end(); ++hitIt ) {
       const float closestExp = find_closest( expectedHits.begin(), expectedHits.end(), (*hitIt).r );
       // only keep the best weight for this expected hit
       if ( bestSensorWeights.find( closestExp ) != bestSensorWeights.end() ) {
-        bestSensorWeights[ closestExp ] = max( bestSensorWeights[ closestExp ],
-          mField->weightForDistance( closestExp, (*hitIt).r ) );
+        const pair<float, float> prevWeight = bestSensorWeights[ closestExp ];
+        const float currentWeight = mField->weightForDistance( closestExp, (*hitIt).r );
+        if ( currentWeight > prevWeight.first )
+          bestSensorWeights[ closestExp ] = make_pair( currentWeight, (*hitIt).r );
+        if ( std::abs( (*hitIt).r - prevWeight.second ) > mUnexpectedPenaltyMinDistance )
+          penalty += mUnexpectedPenalty;
       } else {
-        bestSensorWeights[ closestExp ] = mField->weightForDistance( closestExp, (*hitIt).r );
+        bestSensorWeights[ closestExp ] = make_pair( mField->weightForDistance( closestExp, (*hitIt).r ), (*hitIt).r );
       }
     }
 
     // sum up all weights for this ray
-    for ( map<float, float>::const_iterator it = bestSensorWeights.begin(); it != bestSensorWeights.end(); ++it )
-      sensorWeight += (*it).second;
+    for ( map<float, pair<float, float> >::const_iterator it = bestSensorWeights.begin(); it != bestSensorWeights.end(); ++it )
+      sensorWeight += (*it).second.first;
+    sensorWeight += penalty;
   }
   sensorWeight = max( sensorWeight, 0.0f );
   if ( maxWeight > 0.0 )

@@ -68,6 +68,7 @@ class FvOmniLocalizerPipelineThread
   ObjectPositionInterface *mPositionInterface;
 
   unsigned int mImageWidth, mImageHeight;
+  float mLowerRange, mUpperRange;
 
   colorspace_t mColorspaceFrom, mColorspaceTo;
 };

@@ -88,6 +88,7 @@ class MCL
     field_pos_t mVarianceLimit;
     float mUnexpectedPenalty;
     float mUnexpectedPenaltyMinDistance;
+    float mOutOfFieldThreshold;
 
     // debug
     std::vector<field_pos_t> mPath;
