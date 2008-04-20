@@ -331,6 +331,21 @@
                                   </widget>
                                 </child>
                                 <child>
+                                  <widget class="GtkCheckButton" id="chkFuseCompression">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="label" translatable="yes">Enable JPEG compression</property>
+                                    <property name="response_id">0</property>
+                                    <property name="active">True</property>
+                                    <property name="draw_indicator">True</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
                                   <widget class="GtkCheckButton" id="chkFuseImageListUpdate">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -340,7 +355,8 @@
                                   </widget>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="position">1</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                               </widget>
@@ -799,7 +815,7 @@
                                                 <property name="width_request">150</property>
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
-                                                <property name="adjustment">0 0 0 0 0 0</property>
+                                                <property name="adjustment">0 0 1 0.01 0.050000000000000003 0</property>
                                               </widget>
                                             </child>
                                           </widget>
@@ -960,7 +976,7 @@
                                       <widget class="GtkHScale" id="sclCtLayerSelector">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="adjustment">1 1 256 1 1 1</property>
+                                        <property name="adjustment">1 1 257 1 1 1</property>
                                         <property name="digits">0</property>
                                         <property name="value_pos">GTK_POS_LEFT</property>
                                       </widget>
@@ -1198,6 +1214,18 @@
                                       </packing>
                                     </child>
                                     <child>
+                                      <widget class="GtkHScale" id="hscale1">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">1 1 257 1 1 1</property>
+                                        <property name="digits">0</property>
+                                        <property name="value_pos">GTK_POS_LEFT</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
                                       <widget class="GtkButton" id="btnFuseUpload">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -1210,7 +1238,7 @@
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
-                                        <property name="position">1</property>
+                                        <property name="position">2</property>
                                       </packing>
                                     </child>
                                   </widget>
@@ -1278,6 +1306,18 @@
                                       </packing>
                                     </child>
                                     <child>
+                                      <widget class="GtkHScale" id="hscale3">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="adjustment">1 1 257 1 1 1</property>
+                                        <property name="digits">0</property>
+                                        <property name="value_pos">GTK_POS_LEFT</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
                                       <widget class="GtkButton" id="button1">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -1290,7 +1330,7 @@
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
-                                        <property name="position">1</property>
+                                        <property name="position">2</property>
                                       </packing>
                                     </child>
                                   </widget>
@@ -1503,8 +1543,8 @@
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Save image as</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
-    <property name="do_overwrite_confirmation">True</property>
     <property name="action">GTK_FILE_CHOOSER_ACTION_SAVE</property>
+    <property name="do_overwrite_confirmation">True</property>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox3">
         <property name="visible">True</property>
