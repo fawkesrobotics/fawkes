@@ -27,11 +27,8 @@
 #include <fvutils/color/conversions.h>
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/readers/pnm.h>
-/*
-// DEBUG
+
 #include <fvutils/draw/drawer.h>
-#include <fvutils/writers/jpeg.h>
-*/
 
 #include <models/mirror/mirrormodel.h>
 #include <models/scanlines/star.h>
@@ -74,11 +71,7 @@ FvOmniFieldPipelineThread::FvOmniFieldPipelineThread()
 
   m_cspace_to = YUV422_PLANAR;
 
-  /*
-  // DEBUG
-  m_writer = 0;
   m_drawer = 0;
-  */
 }
 
 
@@ -120,53 +113,49 @@ FvOmniFieldPipelineThread::init()
   char* mirror_file = NULL;
   char* mask_file = NULL;
 
+  // omni-field config values
   try
     {
-      num_rays = config->get_uint( (m_cfg_prefix + string("num_rays")).c_str() );
-      radius_incr = config->get_uint( (m_cfg_prefix + string("radius_incr")).c_str() );
-      dead_radius = config->get_uint( (m_cfg_prefix + string("dead_radius")).c_str() );
-      max_radius = config->get_uint( (m_cfg_prefix + string("max_radius")).c_str() );
-      margin = config->get_uint( (m_cfg_prefix + string("margin")).c_str() );
+      num_rays        = config->get_uint( (m_cfg_prefix + string("num_rays")).c_str() );
+      radius_incr     = config->get_uint( (m_cfg_prefix + string("radius_incr")).c_str() );
+      dead_radius     = config->get_uint( (m_cfg_prefix + string("dead_radius")).c_str() );
+      max_radius      = config->get_uint( (m_cfg_prefix + string("max_radius")).c_str() );
+      margin          = config->get_uint( (m_cfg_prefix + string("margin")).c_str() );
       colormodel_file = strdup( ( m_cfgfile_prefix + config->get_string( (m_cfg_prefix + string("colormap")).c_str() ) ).c_str() );
     }
   catch (Exception &e)
     {
       free(colormodel_file);
-      free(mirror_file);
-      free(mask_file);
       delete m_camera;
       e.append("OmniFieldPipelineThread::init() failed since config parameters are missing");
       throw;
     }
 
+  // mirror config values
   try
     {
       mirror_file = strdup( ( m_cfgfile_prefix + config->get_string( "/firevision/omni/mirror" ) ).c_str() );
     }
   catch (Exception &e)
     {
+      free(mirror_file);
       logger->log_warn(name(), "No mirror specified in config. Using default.");
       HostInfo hi;
-      mirror_file = (char*) malloc( m_cfgfile_prefix.length() + strlen(hi.short_name()) + 8);
-      strcpy(mirror_file, m_cfgfile_prefix.c_str());
-      strcat(mirror_file, hi.short_name());
-      strcat(mirror_file, ".mirror");
+      asprintf(&mirror_file, "%s%s.mirror", m_cfgfile_prefix.c_str(), hi.short_name());
     }
 
+  // mask config values
   try
     {
       mask_file = strdup( ( m_cfgfile_prefix + config->get_string( "/firevision/omni/mask" ) ).c_str() );
     }
   catch (Exception &e)
     {
+      free(mask_file);
       logger->log_warn(name(), "No mask specified in config. Using default.");
       HostInfo hi;
-      mask_file = (char*) malloc( m_cfgfile_prefix.length() + strlen(hi.short_name()) + 10);
-      strcpy(mask_file, m_cfgfile_prefix.c_str());
-      strcat(mask_file, hi.short_name());
-      strcat(mask_file, "_mask.pnm");
+      asprintf(&mask_file, "%s%s_mask.pnm", m_cfgfile_prefix.c_str(), hi.short_name());
     }
-
 
   // mask
   logger->log_debug(name(), "Loading mask from file %s", mask_file);
@@ -188,7 +177,6 @@ FvOmniFieldPipelineThread::init()
   cart_coord_t center;
   center = m_mirror->getCenter();
 
-  //  logger->log_debug(name(), "Creating scanlines: w=%d h=%d center_x=%d center_y=%d num_rays=%d radius_incr=%d dead_radius=%d max_radius=%d margin=%d", m_img_width, m_img_height, center.x, center.y, num_rays, radius_incr, dead_radius, max_radius, margin);
   m_scanline_model = new ScanlineStar( m_img_width, m_img_height,
 				       center.x, center.y,
 				       num_rays, radius_incr,
@@ -207,7 +195,7 @@ FvOmniFieldPipelineThread::init()
   m_num_interfaces = m_scanline_model->num_rays();
   m_obstacle_interfaces = (ObjectPositionInterface**)malloc(m_num_interfaces * sizeof(ObjectPositionInterface*));
   unsigned int i;
-  unsigned int flags =
+  unsigned int flags = 
     ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN |
     ObjectPositionInterface::FLAG_HAS_EXTENT |
     ObjectPositionInterface::FLAG_HAS_CIRCULAR_EXTENT;
@@ -217,8 +205,7 @@ FvOmniFieldPipelineThread::init()
       for ( i = 0; i < m_num_interfaces; ++i)
 	{
 	  char* id;
-	  id = (char*)malloc( strlen("OmniObstacle") + 4 );
-	  sprintf(id, "OmniObstacle%d", i);
+	  asprintf(&id, "OmniObstacle%d", i);
 	  m_obstacle_interfaces[i] = blackboard->open_for_writing<ObjectPositionInterface>(id);
 	  m_obstacle_interfaces[i]->set_object_type(ObjectPositionInterface::TYPE_OTHER);
 	  m_obstacle_interfaces[i]->set_flags(flags);
@@ -237,32 +224,23 @@ FvOmniFieldPipelineThread::init()
       free(m_mask);
       free(m_obstacle_interfaces);
       delete m_camera;
-      e.append("Opening Field interface for writing failed");
+      e.append("%s: Opening object position interface for writing failed", name());
       throw;
     }
 
   // shm buffer
   m_buffer_size = colorspace_buffer_size(m_cspace_to, m_img_width, m_img_height);
-  m_shm_buffer = new SharedMemoryImageBuffer( "omni-field",
+  m_shm_buffer = new SharedMemoryImageBuffer( "omni-field-processed",
 				m_cspace_to, m_img_width, m_img_height );
   m_buffer = m_shm_buffer->buffer();
 
   // position models
   m_rel_pos = new OmniRelative(m_mirror);
 
-  // drawer (DEBUG)
-  /*
+  // drawer
   m_drawer = new Drawer();
   m_drawer->setBuffer(m_buffer, m_img_width, m_img_height);
   m_drawer->setColor(127, 220, 220);
-  */
-
-  // writer (DEBUG)
-  /*
-  m_writer = new JpegWriter("output.jpg");
-  m_writer->set_dimensions(m_img_width, m_img_height);
-  m_writer->set_buffer(m_cspace_to, m_buffer);
-  */
 }
 
 
@@ -279,7 +257,7 @@ FvOmniFieldPipelineThread::finalize()
     }
   catch (Exception &e)
     {
-      e.append("Closing Field interface failed");
+      e.append("%s: Closing object position interface failed", name());
       throw;
     }
   logger->log_debug(name(), "Unregistering form vision master");
@@ -293,6 +271,7 @@ FvOmniFieldPipelineThread::finalize()
   free(m_mask);
   delete m_scanline_model;
   delete m_rel_pos;
+  delete m_drawer;
 
   m_camera = 0;
   m_obstacle_interfaces = 0;
@@ -302,6 +281,7 @@ FvOmniFieldPipelineThread::finalize()
   m_mask = 0;
   m_scanline_model = 0;
   m_rel_pos = 0;
+  m_drawer = 0;
 }
 
 
@@ -326,6 +306,8 @@ FvOmniFieldPipelineThread::loop()
       m_obstacle_interfaces[i]->write();
     }
 
+  m_num_whites = 0;
+
   // search for obstacles
   unsigned int index;
   while ( !m_scanline_model->finished() )
@@ -334,7 +316,11 @@ FvOmniFieldPipelineThread::loop()
       cur_point.x = (*m_scanline_model)->x;
       cur_point.y = (*m_scanline_model)->y;
 
-      if ( !is_field(&cur_point) )
+      hint_t object_type;
+      bool _is_field = is_field(&cur_point, &object_type);
+
+      // neither H_FIELD nor H_LINE
+      if (!_is_field)
 	{
 	  unsigned int cur_x = cur_point.x;
 	  unsigned int cur_y = cur_point.y;
@@ -345,60 +331,78 @@ FvOmniFieldPipelineThread::loop()
 
 	  index = m_scanline_model->ray_index();
 
-	  // check distance (necessary to avoid obstacles at the robot's own
-	  // position which might happen with the current mirror model)
-	  float x = m_rel_pos->get_x();
-	  float y = m_rel_pos->get_y();
-	  float dist = sqrt(x*x + y*y);
+	  // write data to interface
+	  m_obstacle_interfaces[index]->set_visible( true );
+	  m_obstacle_interfaces[index]->set_extent_x( 0.1 );
+	  m_obstacle_interfaces[index]->set_relative_x( m_rel_pos->get_x() );
+	  m_obstacle_interfaces[index]->set_relative_y( -m_rel_pos->get_y() );
+	  m_obstacle_interfaces[index]->write();
 
-	  if (dist >= 0.3)
-	    {
-	      // write data to interface
-	      m_obstacle_interfaces[index]->set_visible( true );
-	      m_obstacle_interfaces[index]->set_extent_x( 0.1 );
-	      m_obstacle_interfaces[index]->set_relative_x( m_rel_pos->get_x() );
-	      m_obstacle_interfaces[index]->set_relative_y( -m_rel_pos->get_y() );
-	      m_obstacle_interfaces[index]->write();
-	    }
-
-	  /*
-      	  logger->log_debug( name(), "Ray [%d]: px=%d py=%d dist=%f ori=%f x_world=%f y_world=%f)",
-			     index,
-			     cur_x, cur_y,
-			     m_rel_pos->getDistance(), m_rel_pos->getBearing(),
-			     m_obstacle_interfaces[index]->relative_x(),
-			     m_obstacle_interfaces[index]->relative_y() );
-	  */
-
-	  /*
-	  // draw circle in image (DEBUG)
-	  m_drawer->drawCircle(cur_x, cur_y, 2);
-	  */
+	  // draw circle in image
+	  m_drawer->drawCircle(cur_x, cur_y, 4);
 
 	  // continue with next ray
 	  m_scanline_model->skip_current_ray();
 	}
-      else
+
+      // H_LINE
+      else if (object_type == H_LINE)
 	{
+	  if (m_last_seen_object == H_LINE)
+	    {
+	      if (4 < ++m_num_whites)
+		// white obstacle
+		{
+		  m_rel_pos->set_center(m_first_white.x, m_first_white.y);
+		  m_rel_pos->calc_unfiltered();
+
+		  index = m_scanline_model->ray_index();
+		  
+		  m_obstacle_interfaces[index]->set_visible( true );
+		  m_obstacle_interfaces[index]->set_extent_x( 0.1 );
+		  m_obstacle_interfaces[index]->set_relative_x( m_rel_pos->get_x() );
+		  m_obstacle_interfaces[index]->set_relative_y( -m_rel_pos->get_y() );
+		  m_obstacle_interfaces[index]->write();
+
+		  // draw circle in image
+		  m_drawer->drawCircle(m_first_white.x, m_first_white.y, 4);
+		  
+		  // continue with next ray
+		  m_scanline_model->skip_current_ray();
+
+		  m_last_seen_object = H_UNKNOWN;
+		  m_num_whites = 0;
+		}
+	    }
+	  else
+	    { 
+	      m_last_seen_object = H_LINE;
+	      m_first_white = cur_point; 
+
+	      // continue with next scanline point
+	      ++(*m_scanline_model); 
+	    }
+	}
+      
+      // H_FIELD
+      else
+	{ 
 	  // continue with next scanline point
 	  ++(*m_scanline_model);
 	}
     }
-
-  /*
-  // (DEGUB)
-  m_writer->write();
-  */
 }
 
 
 /** Determines whether it's justified to classify a pixel at
  * a given pixel as field.
  * @param point the pixel coordinates
- * @return true if pixel at given coordinate is classified as field
+ * @param object_type the type of the object the current pixel has been classified as
+ * @return true if pixel at given coordinate is either classified as H_FIELD or as
+ *         H_LINE
  */
 bool
-FvOmniFieldPipelineThread::is_field(point_t* point)
+FvOmniFieldPipelineThread::is_field(point_t* point, hint_t* object_type)
 {
   unsigned int x_center;
   unsigned int y_center;
@@ -411,9 +415,11 @@ FvOmniFieldPipelineThread::is_field(point_t* point)
   short offsets[3] = {-2, 0, 2};
   unsigned int num_offsets = 3;
   unsigned int num_green = 0;
-  unsigned int num_neighbours = num_offsets * num_offsets;
+  unsigned int num_white = 0;
+  unsigned int num_pixels = num_offsets * num_offsets;
 
-  x_center = point->x; y_center = point->y;
+  x_center = point->x; 
+  y_center = point->y;
 
   for ( unsigned int i = 0; i < num_offsets; ++i )
     {
@@ -425,7 +431,7 @@ FvOmniFieldPipelineThread::is_field(point_t* point)
 	  if ( x < 0 || (unsigned int)x >= m_img_width ||
 	       y < 0 || (unsigned int)y >= m_img_height )
 	    {
-	      --num_neighbours;
+	      --num_pixels;
 	      continue;
 	    }
 
@@ -434,11 +440,31 @@ FvOmniFieldPipelineThread::is_field(point_t* point)
 
 	  color = m_colormodel->determine(yp, up, vp);
 
-	  if ( C_GREEN == color ) { ++num_green; }
+	  if ( C_GREEN == color ) 
+	    { ++num_green; }
+	  if ( C_WHITE == color )
+	    { ++num_white; }
 	}
     }
 
-  float ratio = num_green / (float) num_neighbours;
+  float ratio = (num_green + num_white) / float(num_pixels);
 
-  if (ratio > 0.8) { return true; } else { return false; }
+  bool is_field = false;
+  if (object_type)
+    { *object_type = H_UNKNOWN; }
+
+  if (ratio > 0.8)
+    { 
+      is_field = true;
+      
+      if (object_type)
+	{
+	  if (num_green > num_white)
+	    { *object_type = H_FIELD; }
+	  else
+	    { *object_type = H_LINE; }
+	}
+    }
+
+  return is_field;
 }

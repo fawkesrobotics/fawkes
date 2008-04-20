@@ -34,6 +34,7 @@
 
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/types.h>
+#include <fvutils/base/roi.h>
 
 class Camera;
 class ScanlineStar;
@@ -42,11 +43,7 @@ class MirrorModel;
 class RelativePositionModel;
 class SharedMemoryImageBuffer;
 class ObjectPositionInterface;
-/*
-// DEBUG
 class Drawer;
-class Writer;
-*/
 
 class FvOmniFieldPipelineThread
 : public Thread,
@@ -64,7 +61,7 @@ class FvOmniFieldPipelineThread
   virtual void loop();
 
  private:
-  bool is_field(point_t* point);
+  bool is_field(point_t* point, hint_t* object_type = NULL);
 
   std::string m_cfg_prefix;
   std::string m_cfgfile_prefix;
@@ -88,18 +85,13 @@ class FvOmniFieldPipelineThread
   colorspace_t m_cspace_from;
   colorspace_t m_cspace_to;
 
-  unsigned int  m_field_image_x;
-  unsigned int  m_field_image_y;
-  cart_coord_t  m_mass_point;
-  float         m_min_dist;
-
   unsigned int m_num_interfaces;
 
-  /*
-  // DEBUG
+  unsigned int m_num_whites;
+  hint_t m_last_seen_object;
+  point_t m_first_white;
+
   Drawer* m_drawer;
-  Writer* m_writer;
-  */
 };
 
 #endif /* __FIREVISION_APPS_OMNIFIELD_PIPELINE_THREAD_H_ */
