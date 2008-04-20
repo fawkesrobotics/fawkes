@@ -67,7 +67,6 @@ FaceRecognizer::~FaceRecognizer()
  * @param number_of_identities it specifies the number
  * @return the list of corresponding recognized identities 
  */
-
 FaceRecognizer::Identities 
 FaceRecognizer::recognize(vector<IplImage*> faces, int number_of_identities )
 {
@@ -100,6 +99,10 @@ FaceRecognizer::recognize(vector<IplImage*> faces, int number_of_identities )
 }
 
 
+/** Add identity to internal conversion map.
+ * @param person_index person of index
+ * @param person_name name/label for this person
+ */
 void 
 FaceRecognizer::add_identity( int person_index , std::string person_name )
 { 
@@ -107,6 +110,11 @@ FaceRecognizer::add_identity( int person_index , std::string person_name )
   __person_names[person_index] = person_name; 
 }
 
+/** Transform person indexes to labels.
+ * @param identities vector of identities to convert
+ * @return vector of labels, indexes of vector correspond to the indexes in the given
+ * identities vector.
+ */
 std::vector<std::string> 
 FaceRecognizer::get_identities( Identities& identities )
 { 
