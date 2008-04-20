@@ -247,7 +247,7 @@ main(int argc, char **argv)
 	      netconf->set_default_float(args[1], f);
 	    }
 	  }
-	} else if ( desired_type == "uint" ) {
+	} else if ( (desired_type == "unsigned int") || (desired_type == "uint") ) {
 	  char *endptr;
 	  long int li = strtol(args[2], &endptr, 10);
 	  if ( (endptr[0] != 0) || (li < 0) ) {
