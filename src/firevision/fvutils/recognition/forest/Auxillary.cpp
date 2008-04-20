@@ -138,7 +138,7 @@ namespace Auxillary{
 	return false;
     }
 
-    if(number == 1) { 
+    else { 
 
       if(feature>theta1 || feature==theta1)
 	return true;
@@ -147,7 +147,7 @@ namespace Auxillary{
 	return false; 
     } 
     
-    return false;
+
   }
 
   /** random number for x - row  */ 
