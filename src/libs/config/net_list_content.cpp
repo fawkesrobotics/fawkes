@@ -92,7 +92,7 @@ ConfigListContent::append(Configuration::ValueIterator *i)
   } else if ( i->is_int() ) {
     append_int(i->path(), i->get_int(), i->is_default());
   } else if ( i->is_uint() ) {
-    append_int(i->path(), i->get_uint(), i->is_default());
+    append_uint(i->path(), i->get_uint(), i->is_default());
   } else if ( i->is_bool() ) {
     append_bool(i->path(), i->get_bool(), i->is_default());
   } else if ( i->is_string() ) {
