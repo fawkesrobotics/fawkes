@@ -38,7 +38,6 @@
 #include <fvutils/draw/drawer.h>
 
 #include <cams/factory.h>
-#include <cams/bumblebee2.h>
 
 #include <models/scanlines/grid.h>
 #include <models/scanlines/radial.h>
