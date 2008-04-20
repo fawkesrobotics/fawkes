@@ -606,16 +606,33 @@
                                         <property name="n_rows">2</property>
                                         <property name="n_columns">2</property>
                                         <child>
-                                          <widget class="GtkButton" id="btnCtLoadHistos">
+                                          <widget class="GtkButton" id="btnCtUndoHistos">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="label">gtk-open</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                                            <property name="label" translatable="yes">gtk-undo</property>
                                             <property name="use_stock">True</property>
                                             <property name="response_id">0</property>
                                           </widget>
                                           <packing>
-                                            <property name="top_attach">1</property>
-                                            <property name="bottom_attach">2</property>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="x_options">GTK_FILL</property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <widget class="GtkButton" id="btnCtResetHistos">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                                            <property name="label" translatable="yes">gtk-new</property>
+                                            <property name="use_stock">True</property>
+                                            <property name="response_id">0</property>
+                                          </widget>
+                                          <packing>
                                             <property name="x_options">GTK_FILL</property>
                                             <property name="y_options"></property>
                                           </packing>
@@ -638,33 +655,16 @@
                                           </packing>
                                         </child>
                                         <child>
-                                          <widget class="GtkButton" id="btnCtResetHistos">
+                                          <widget class="GtkButton" id="btnCtLoadHistos">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="receives_default">True</property>
-                                            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                            <property name="label" translatable="yes">gtk-new</property>
+                                            <property name="label">gtk-open</property>
                                             <property name="use_stock">True</property>
                                             <property name="response_id">0</property>
                                           </widget>
                                           <packing>
-                                            <property name="x_options">GTK_FILL</property>
-                                            <property name="y_options"></property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <widget class="GtkButton" id="btnCtUndoHistos">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="receives_default">True</property>
-                                            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                            <property name="label" translatable="yes">gtk-undo</property>
-                                            <property name="use_stock">True</property>
-                                            <property name="response_id">0</property>
-                                          </widget>
-                                          <packing>
-                                            <property name="left_attach">1</property>
-                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
                                             <property name="x_options">GTK_FILL</property>
                                             <property name="y_options"></property>
                                           </packing>
@@ -1214,7 +1214,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <widget class="GtkHScale" id="hscale1">
+                                      <widget class="GtkHScale" id="sclLocalLayerSelector">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="adjustment">1 1 257 1 1 1</property>
@@ -1306,7 +1306,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <widget class="GtkHScale" id="hscale3">
+                                      <widget class="GtkHScale" id="sclRemoteLayerSelector">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="adjustment">1 1 257 1 1 1</property>

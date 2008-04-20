@@ -269,6 +269,10 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_ftw->set_remote_img(img);
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnFuseUpload") );
   m_ftw->set_upload_btn(btn);
+  scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclLocalLayerSelector") );
+  m_ftw->set_local_layer_selector(scl);
+  scl = dynamic_cast<Gtk::Scale*>( get_widget(ref_xml, "sclRemoteLayerSelector") );
+  m_ftw->set_remote_layer_selector(scl);
   // ----------------------------------------------------------------
 
 
