@@ -304,20 +304,3 @@ BlackBoard::start_nethandler(FawkesNetworkHub *hub)
   __nethandler->start();
 }
 
-
-/** Strip numbers at the beginning of the class type.
- * This has been implemented by observations of C++ class names as returned by GCC's
- * typeid operator.
- * @param type type name to strip
- * @return stripped class type
- */
-char *
-BlackBoard::strip_class_type(const char *type)
-{
-  std::string t = type;
-  t = t.substr( t.find_first_not_of("0123456789") );
-  char *rv = new char[t.length() + 1];
-  strcpy(rv, t.c_str());
-  return rv;
-}
-

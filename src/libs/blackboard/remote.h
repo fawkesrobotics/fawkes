@@ -26,17 +26,26 @@
 #ifndef __BLACKBOARD_REMOTE_H_
 #define __BLACKBOARD_REMOTE_H_
 
-#include <blackboard/blackboard.h>
+//include <blackboard/blackboard.h>
 #include <netcomm/fawkes/client_handler.h>
 #include <core/utils/lock_map.h>
+#include <core/exceptions/software.h>
+#include <utils/misc/sigmangler.h>
+
+#include <list>
+#include <typeinfo>
 
 class FawkesNetworkClient;
 class FawkesNetworkMessage;
 class Mutex;
+class Interface;
+class InterfaceInfoList;
 
 class BlackBoardInstanceFactory;
 class BlackBoardNotifier;
 class BlackBoardInterfaceProxy;
+class BlackBoardInterfaceListener;
+class BlackBoardInterfaceObserver;
 
 class RemoteBlackBoard : public FawkesNetworkClientHandler
 {
@@ -112,7 +121,7 @@ template <class InterfaceType>
 InterfaceType *
 RemoteBlackBoard::open_for_reading(const char *identifier)
 {
-  char *type_name = BlackBoard::strip_class_type(typeid(InterfaceType).name());
+  char *type_name = CppSignatureMangler::strip_class_type(typeid(InterfaceType).name());
   InterfaceType *interface = dynamic_cast<InterfaceType *>(open_for_reading(type_name, identifier));
   delete[] type_name;
   if ( interface == 0 ) {
@@ -135,7 +144,7 @@ template <class InterfaceType>
 std::list<InterfaceType *> *
 RemoteBlackBoard::open_all_of_type_for_reading(const char *id_prefix)
 {
-  char *type_name = BlackBoard::strip_class_type(typeid(InterfaceType).name());
+  char *type_name = CppSignatureMangler::strip_class_type(typeid(InterfaceType).name());
   std::list<Interface *> *il = open_all_of_type_for_reading(type_name, id_prefix);
   delete[] type_name;
   std::list<InterfaceType *> *rv = new std::list<InterfaceType *>();
@@ -176,7 +185,7 @@ template <class InterfaceType>
 InterfaceType *
 RemoteBlackBoard::open_for_writing(const char *identifier)
 {
-  char *type_name = BlackBoard::strip_class_type(typeid(InterfaceType).name());
+  char *type_name = CppSignatureMangler::strip_class_type(typeid(InterfaceType).name());
   InterfaceType *interface;
   try {
     interface = dynamic_cast<InterfaceType *>(open_for_writing(type_name, identifier));

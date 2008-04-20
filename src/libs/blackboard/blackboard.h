@@ -26,9 +26,11 @@
 #ifndef __BLACKBOARD_BLACKBOARD_H_
 #define __BLACKBOARD_BLACKBOARD_H_
 
+#include <core/exceptions/software.h>
+#include <utils/misc/sigmangler.h>
+
 #include <list>
 #include <typeinfo>
-#include <core/exceptions/software.h>
 
 class BlackBoardInterfaceManager;
 class BlackBoardMemoryManager;
@@ -88,8 +90,6 @@ class BlackBoard
   /* for debugging only */
   const BlackBoardMemoryManager * memory_manager() const;
 
-  static char * strip_class_type(const char *type);
-
  private: /* members */
   BlackBoardInterfaceManager *__im;
   BlackBoardMemoryManager    *__memmgr;
@@ -115,7 +115,7 @@ template <class InterfaceType>
 InterfaceType *
 BlackBoard::open_for_reading(const char *identifier)
 {
-  char *type_name = BlackBoard::strip_class_type(typeid(InterfaceType).name());
+  char *type_name = CppSignatureMangler::strip_class_type(typeid(InterfaceType).name());
   InterfaceType *interface = dynamic_cast<InterfaceType *>(open_for_reading(type_name, identifier));
   delete[] type_name;
   if ( interface == 0 ) {
@@ -138,7 +138,7 @@ template <class InterfaceType>
 std::list<InterfaceType *> *
 BlackBoard::open_all_of_type_for_reading(const char *id_prefix)
 {
-  char *type_name = BlackBoard::strip_class_type(typeid(InterfaceType).name());
+  char *type_name = CppSignatureMangler::strip_class_type(typeid(InterfaceType).name());
   std::list<Interface *> *il = open_all_of_type_for_reading(type_name, id_prefix);
   delete[] type_name;
   std::list<InterfaceType *> *rv = new std::list<InterfaceType *>();
@@ -179,7 +179,7 @@ template <class InterfaceType>
 InterfaceType *
 BlackBoard::open_for_writing(const char *identifier)
 {
-  char *type_name = BlackBoard::strip_class_type(typeid(InterfaceType).name());
+  char *type_name = CppSignatureMangler::strip_class_type(typeid(InterfaceType).name());
   InterfaceType *interface;
   try {
     interface = dynamic_cast<InterfaceType *>(open_for_writing(type_name, identifier));
