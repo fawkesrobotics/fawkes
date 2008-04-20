@@ -38,6 +38,16 @@ else
 UTILS_EXTRA_LIBS += png
 endif
 
+ifneq ($(HAVE_OPENCV),1)
+WARN_TARGETS += warning_opencv
+FILTER_OUT   += recognition/faces.o
+FILTER_OUT   += recognition/forest/UserDef.o
+FILTER_OUT   += adapters/iplimage.o
+else
+CFLAGS  += $(CFLAGS_OPENCV)
+LDFLAGS += $(LDFLAGS_OPENCV)
+endif
+
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 warning_libjpeg:
