@@ -51,9 +51,7 @@ FaceRecognizer::FaceRecognizer(const char* loc, int number_of_identities, int fo
   __n_identities = number_of_identities;
   __forest_size = forest_size;
 
-  
- 
-}
+ }
 
 
 /** Generic Destructor. */

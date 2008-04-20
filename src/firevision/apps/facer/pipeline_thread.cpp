@@ -141,6 +141,7 @@ void
 FacerPipelineThread::loop()
 {
   __rois = NULL;
+  bool debug = false; 
 
   __cam->capture();
   memcpy(__shm->buffer(), __cam->buffer(), __cam->buffer_size());
@@ -179,8 +180,16 @@ FacerPipelineThread::loop()
       cvSetImageROI(__image, roi_rect);
       IplImage *face = cvCreateImage( cvSize(roi.width, roi.height),
 				      __image->depth, __image->nChannels);
+      
+      
       cvCopyImage(__image, face);
       cvResetImageROI(__image);
+
+      if( debug ) { 
+	char buffer[PATH_MAX]; 
+	sprintf( buffer,"%f.png", rand() ); 
+	cvvSaveImage( buffer, face ); 
+      }
 
       std::vector<IplImage *> face_images;
       face_images.push_back(face);
