@@ -87,6 +87,8 @@ GeegawPipeline::GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool 
   box_globvelo = NULL;
   */
   classifier    = NULL;
+  deter_cm = NULL;
+  deter_classifier = NULL;
 
   objectimg     = NULL;
 
@@ -135,7 +137,9 @@ GeegawPipeline::~GeegawPipeline()
   delete box_globvelo;
   */
   delete classifier;
-  delete objectimg;
+  if (objectimg) {
+    free(objectimg);
+  }
 
 }
 
@@ -277,7 +281,7 @@ GeegawPipeline::init()
  						  /* neighbourhood min match */ 5);
 
   // default object-image
-  objectimg = "../res/opx/alogo.png";
+  objectimg = strdup("../res/opx/alogo.png");
 
 }
 
@@ -572,7 +576,7 @@ GeegawPipeline::detect_surf()
   unsigned int num_features = 0;
   if ( rois->empty() ) {
     // cout << "Doh, no ROIs!" << endl;
-    cout << msg_prefix << " ##### NOTHING FOUND! #####" << endl;
+    cout << msg_prefix << cred << " ##### NOTHING FOUND! #####" << cnormal << endl;
   } 
   else {
     FilterROIDraw *rdf = new FilterROIDraw();
@@ -595,7 +599,9 @@ GeegawPipeline::detect_surf()
 	++num_features;
       } else {
 	if ( first ) {
-	  cout << msg_prefix << " FOUND THE OBJECT!" << endl;
+	  cout << msg_prefix << cgreen << " FOUND THE OBJECT!" << cnormal << endl;
+	  cout << msg_prefix << cgreen << " ROI is of size [" << (*r).width 
+				       << "," << (*r).height << "]" << endl;
 	  /// First is the biggest ROI, set as object
 	  polar_coord_t o;
 	  o.phi = 0.f;
@@ -877,7 +883,7 @@ GeegawPipeline::reload_classifier()
     cout << msg_prefix << "Switching to SURF mode" << endl;
     if( classifier ) delete classifier;
     #ifdef HAVE_SURF
-    classifier   = new SurfClassifier( objectimg );
+    classifier   = new SurfClassifier( objectimg, 5 );
     #endif
   } else if ( mode == MODE_SIFTPP ) {
     cout << msg_prefix << "Switching to SIFTPP mode" << endl;
@@ -923,7 +929,7 @@ void
 GeegawPipeline::setObjectimage(std::string object_filename_without_path)
 {
   cout << msg_prefix << "Loading object_file " << (config->ColormapDirectory + "/" + object_filename_without_path) << endl;
-  objectimg = object_filename_without_path.c_str();
+  objectimg = strdup(object_filename_without_path.c_str());
   reload_classifier();
 }
 

@@ -170,7 +170,7 @@ class GeegawPipeline : SignalHandler {
   Classifier               *classifier;
 
   // sift/surf stuff
-  const char               *objectimg;
+  char                     *objectimg;
 
   bool                      already_fetched_pantilt;
   cart_coord_t              mass_point;
