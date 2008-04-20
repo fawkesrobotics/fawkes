@@ -59,7 +59,7 @@ class FaceRecognizer
 
   //  Identities recognize(unsigned char *buffer, std::list<ROI> &rois, int number_of_identities );
   Identities   recognize(std::vector<IplImage *> faces, int number_of_identities );
-  std::vector<std::string>  get_identities( Identities& ); 
+  std::vector<std::string>  get_identities( Identities ); 
 
 
 

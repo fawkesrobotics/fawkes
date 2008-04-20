@@ -83,6 +83,11 @@ class FacerPipelineThread
   std::string __cfg_haarcascade_file;
   float       __cfg_haar_scale_factor;
   int         __cfg_min_neighbours;
+  std::string __cfg_dir_path;
+  unsigned  int  __cfg_forest_size;
+  unsigned int  __cfg_number_identities;
+
+  unsigned int __saved_faces;
 
   FaceRecognizer *__facerecog;
 

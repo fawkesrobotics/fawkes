@@ -34,6 +34,7 @@
 #include <classifiers/faces.h>
 
 #include <opencv/cv.h>
+#include <opencv/highgui.h>
 #include <cstring>
 
 /** @class FacerPipelineThread <apps/facer/pipeline_thread.h>
@@ -60,9 +61,16 @@ void
 FacerPipelineThread::init()
 {
   try {
+    // detection specific
     __cfg_haarcascade_file  = config->get_string("/firevision/facer/haarcascade_file");
     __cfg_haar_scale_factor = config->get_float("/firevision/facer/haar_scale_factor");
     __cfg_min_neighbours    = config->get_int("/firevision/facer/min_neighbours");
+    // recognition specific
+    __cfg_dir_path = config->get_string("/firevision/facer/faces_dir_path");
+    __cfg_forest_size = config->get_uint("/firevision/facer/forest_size"); 
+    __cfg_number_identities = config->get_uint("/firevision/facer/number_identities");
+    __saved_faces = 0;
+
   } catch (Exception &e) {
     throw;
   }
@@ -115,7 +123,8 @@ FacerPipelineThread::init()
 				     __image,
 				     __cfg_haar_scale_factor,
 				     __cfg_min_neighbours);
-  __facerecog  = new FaceRecognizer();
+
+  __facerecog  = new FaceRecognizer( __cfg_dir_path.c_str(), __cfg_forest_size, __cfg_number_identities );
 
   __opmode = FacerInterface::OPMODE_DISABLED;
   __face_label = "";
@@ -186,16 +195,17 @@ FacerPipelineThread::loop()
       cvResetImageROI(__image);
 
       if( debug ) { 
-	char buffer[PATH_MAX]; 
-	sprintf( buffer,"%f.png", rand() ); 
+	char *buffer;
+	asprintf( &buffer,"%d.png", ++__saved_faces ); 
 	cvvSaveImage( buffer, face ); 
+	free( buffer );
       }
 
       std::vector<IplImage *> face_images;
       face_images.push_back(face);
       // the second parameter, number_of_identities, is 0 since we are NOT learning new ppl at the momnent
       std::vector<std::string> face_labels = __facerecog->get_identities(__facerecog->recognize(face_images, 0)); 
-      if( faces_labels.size() != 0 )
+      if( face_labels.size() != 0 )
 	__face_label = face_labels[0];
       else 
 	logger->log_info("FacerPipelineThread", "No identity returned. Most probably forest has not been instantiated/training images not supplied."); 

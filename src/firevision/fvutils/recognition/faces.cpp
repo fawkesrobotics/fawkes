@@ -116,7 +116,7 @@ FaceRecognizer::add_identity( int person_index , std::string person_name )
  * identities vector.
  */
 std::vector<std::string> 
-FaceRecognizer::get_identities( Identities& identities )
+FaceRecognizer::get_identities( Identities identities )
 { 
   std::vector<std::string> person_names;
  
