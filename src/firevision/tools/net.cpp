@@ -81,6 +81,11 @@ class FireVisionNetworkTool
   }
 
   virtual void
+  fuse_connection_died() throw()
+  {
+  }
+
+  virtual void
   fuse_inbound_received(FuseNetworkMessage *m) throw()
   {
     // printf("Received message of type %u\n", m->type());

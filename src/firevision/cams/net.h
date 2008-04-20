@@ -72,6 +72,7 @@ class NetworkCamera : public Camera, public FuseClientHandler
   virtual void fuse_invalid_server_version(uint32_t local_version,
 					   uint32_t remote_version) throw();
   virtual void fuse_connection_established() throw();
+  virtual void fuse_connection_died() throw();
   virtual void fuse_inbound_received(FuseNetworkMessage *m) throw();
 
  private:

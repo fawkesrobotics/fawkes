@@ -376,6 +376,18 @@ FuseImageListWidget::fuse_connection_established () throw()
 }
 
 void
+FuseImageListWidget::fuse_connection_died() throw()
+{
+  if (m_cur_client.active)
+    {
+      m_delete_clients.push_locked(m_cur_client.client);
+      m_cur_client.active = false;
+    }
+  
+  m_signal_delete_clients();
+}
+
+void
 FuseImageListWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
 {
   switch ( m->type() )

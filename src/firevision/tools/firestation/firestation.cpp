@@ -468,14 +468,24 @@ Firestation::update_image()
   if (m_img_src == SRC_NONE)
     { return; }
 
-  m_camera->capture();
-  memcpy(m_yuv_orig_buffer, m_camera->buffer(), m_img_size);
-  memcpy(m_yuv_draw_buffer, m_camera->buffer(), m_img_size);
-  m_camera->dispose_buffer();
+  printf("Updating image...\n");
   
-  draw_image();
-
-  m_ctw->draw_segmentation_result();
+  try
+    {
+      m_camera->capture();
+      memcpy(m_yuv_orig_buffer, m_camera->buffer(), m_img_size);
+      memcpy(m_yuv_draw_buffer, m_camera->buffer(), m_img_size);
+      m_camera->dispose_buffer();
+  
+      draw_image();
+      
+      m_ctw->draw_segmentation_result();
+    }
+  catch (Exception& e)
+    {
+      e.print_trace();
+    }
+  printf("done\n");
 }
 
 bool
@@ -769,39 +779,39 @@ Firestation::post_open_img_src()
       m_camera->open();
       m_camera->start();
       m_camera->capture();
+      m_img_width = m_camera->pixel_width();
+      m_img_height = m_camera->pixel_height();
+      m_img_cs = m_camera->colorspace();
+      
+      m_img_size = colorspace_buffer_size( m_img_cs, 
+					   m_img_width, 
+					   m_img_height );
+      
+      free(m_yuv_orig_buffer);
+      free(m_yuv_draw_buffer);
+      
+      m_yuv_orig_buffer = (unsigned char*) malloc(m_img_size);
+      m_yuv_draw_buffer = (unsigned char*) malloc(m_img_size);
+      memcpy(m_yuv_orig_buffer, m_camera->buffer(), m_img_size);
+      memcpy(m_yuv_draw_buffer, m_camera->buffer(), m_img_size);
+      
+      m_camera->dispose_buffer();
+      
+      m_tbtn_update->set_sensitive(true);
+      m_tbtn_save->set_sensitive(true);
+      
+      draw_image();
+      
+      m_ctw->set_src_buffer(m_yuv_orig_buffer, m_img_width, m_img_height);
+      m_ctw->set_draw_buffer(m_yuv_draw_buffer);
+      m_ctw->draw_segmentation_result();
     }
   catch (Exception& e)
     {
       e.print_trace();
       printf("Opening camera failed.\n");
     }
-
-  m_img_width = m_camera->pixel_width();
-  m_img_height = m_camera->pixel_height();
-  m_img_cs = m_camera->colorspace();
   
-  m_img_size = colorspace_buffer_size( m_img_cs, 
-				       m_img_width, 
-				       m_img_height );
-
-  free(m_yuv_orig_buffer);
-  free(m_yuv_draw_buffer);
-  
-  m_yuv_orig_buffer = (unsigned char*) malloc(m_img_size);
-  m_yuv_draw_buffer = (unsigned char*) malloc(m_img_size);
-  memcpy(m_yuv_orig_buffer, m_camera->buffer(), m_img_size);
-  memcpy(m_yuv_draw_buffer, m_camera->buffer(), m_img_size);
-
-  m_camera->dispose_buffer();
-  
-  m_tbtn_update->set_sensitive(true);
-  m_tbtn_save->set_sensitive(true);
-
-  draw_image();
-	
-  m_ctw->set_src_buffer(m_yuv_orig_buffer, m_img_width, m_img_height);
-  m_ctw->set_draw_buffer(m_yuv_draw_buffer);
-  m_ctw->draw_segmentation_result();
 }
 
 void
@@ -820,13 +830,14 @@ Firestation::on_fuse_image_selected()
     {
       m_camera = new NetworkCamera( host_name.c_str(), port, image_id.c_str(), compression );
       m_img_src = SRC_FUSE;
-      post_open_img_src();
     }
   catch (Exception& e)
     {
       m_img_src = SRC_NONE;
       e.print_trace();
     }
+  
+  post_open_img_src();
 }
 
 void

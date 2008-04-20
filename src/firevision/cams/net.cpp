@@ -195,13 +195,15 @@ NetworkCamera::open()
   __fusec->start();
   __fusec->wait_greeting();
 
-  FUSE_imagedesc_message_t *imagedesc = (FUSE_imagedesc_message_t *)calloc(1, sizeof(FUSE_imagedesc_message_t));
-  strncpy(imagedesc->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
-  __fusec->enqueue(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
-  __fusec->wait();
+  if ( __image_id) {
+    FUSE_imagedesc_message_t *imagedesc = (FUSE_imagedesc_message_t *)calloc(1, sizeof(FUSE_imagedesc_message_t));
+    strncpy(imagedesc->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
+    __fusec->enqueue(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
+    __fusec->wait();
 
-  if ( ! __fuse_imageinfo ) {
-    throw Exception("Could not received image info. Image not available?");
+    if ( ! __fuse_imageinfo ) {
+      throw Exception("Could not received image info. Image not available?");
+    }
   }
 
   __opened = true;
@@ -429,6 +431,13 @@ void
 NetworkCamera::fuse_connection_established() throw()
 {
   __connected = true;
+}
+
+
+void
+NetworkCamera::fuse_connection_died() throw()
+{
+  __connected = false;
 }
 
 

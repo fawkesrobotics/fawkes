@@ -60,6 +60,7 @@ class FuseImageListWidget : FuseClientHandler
   void fuse_invalid_server_version( uint32_t local_version, 
 				    uint32_t remote_version ) throw();
   void fuse_connection_established() throw();
+  void fuse_connection_died() throw();
   void fuse_inbound_received(FuseNetworkMessage *m) throw();
 
  private:

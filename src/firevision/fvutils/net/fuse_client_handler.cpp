@@ -38,7 +38,11 @@
  * @param remote_version version that the remote FUSE server speaks.
  *
  * @fn void FuseClientHandler::fuse_connection_established() throw() = 0
- * Connection hsa been established.
+ * Connection has been established.
+ *
+ * @fn void FuseClientHandler::fuse_connection_died()  throw() = 0
+ * Connection died.
+ *
  *
  * @fn void FuseClientHandler::fuse_inbound_received(FuseNetworkMessage *m) throw() = 0
  * Message received.

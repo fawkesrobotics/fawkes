@@ -140,7 +140,7 @@ FuseClient::send()
     e.print_trace();
     __socket->close();
     __alive = false;
-    throw;
+    __handler->fuse_connection_died();
   }
 }
 
@@ -157,7 +157,7 @@ FuseClient::recv()
     e.print_trace();
     __socket->close();
     __alive = false;
-    throw;
+    __handler->fuse_connection_died();
   }
 }
 
