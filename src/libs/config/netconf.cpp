@@ -1070,7 +1070,6 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
 	throw CannotEnableMirroringException("Client connection is dead");
       }
 
-      __mirror_mode = true;
       // Create local temporary database
       tmp_volatile = (char *)malloc(L_tmpnam);
       tmp_default  = (char *)malloc(L_tmpnam);
@@ -1085,12 +1084,13 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
       mirror_config = new SQLiteConfiguration();
       mirror_config->load(tmp_volatile, tmp_default);
 
-
       // subscribe
       FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							    MSG_CONFIG_SUBSCRIBE);
       c->enqueue(omsg);
       omsg->unref();
+
+      __mirror_mode = true;
 
       // unlocked after all data has been received once
       mutex->lock();
