@@ -468,8 +468,6 @@ Firestation::update_image()
   if (m_img_src == SRC_NONE)
     { return; }
 
-  printf("Updating image...\n");
-  
   try
     {
       m_camera->capture();
@@ -485,7 +483,6 @@ Firestation::update_image()
     {
       e.print_trace();
     }
-  printf("done\n");
 }
 
 bool

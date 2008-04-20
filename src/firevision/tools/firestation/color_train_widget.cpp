@@ -429,8 +429,12 @@ ColorTrainWidget::add_to_colormap()
     { cm_depth = (unsigned int) rint( pow(2.0, m_spbtn_cm_depth->get_value()) ); }
   else
     { cm_depth = 1; }
-  m_generator = new BayesColormapGenerator(cm_depth);
-  m_cvw->set_colormap( m_generator->get_current() );
+
+  if ( !m_generator || cm_depth != m_generator->get_current()->depth() )
+    {
+      m_generator = new BayesColormapGenerator(cm_depth);
+      m_cvw->set_colormap( m_generator->get_current() );
+    }
   
   if (m_fg_object == H_UNKNOWN)
     {
