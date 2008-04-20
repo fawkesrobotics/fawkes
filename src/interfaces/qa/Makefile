@@ -19,7 +19,11 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
+ifneq ($(wildcard ../../../etc/config.mk),)
+  BASEDIR = ../../..
+else
+  BASEDIR = ../../../..
+endif
 
 CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\"
 
