@@ -28,6 +28,10 @@ LIBS_fvfountain = core utils fvutils netcomm
 
 ifeq ($(BUILD_TYPE),rcsoftx)
   include $(BASEDIR)/src/fawkes/netcomm/netcomm.mk
+  ifneq ($(HAVE_AVAHI),1)
+    WARN_TARGETS += warning_avahi
+  endif
+
   ifeq ($(realpath $(QTDIR)/include),)
     WARN_TARGETS += warning_rcxqt
   else
@@ -45,9 +49,11 @@ endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: warning_rcxqt
+.PHONY: warning_rcxqt warning_avahi
 warning_rcxqt:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Cannot build Fountain$(TNORMAL) (qt-devel not installed)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Cannot build Fountain$(TNORMAL) (qt-devel not installed)"
+warning_avahi:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Fountain will be built without mDNS-SD$(TNORMAL) (avahi-devel not installed)"
 endif
 
 OBJS_all = $(OBJS_fvfountain)
