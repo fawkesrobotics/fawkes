@@ -16,6 +16,7 @@
 #*****************************************************************************
 
 LIBSRCDIR=$(abspath $(BASEDIR)/src/libs)
+INTERFACEDIR=$(realpath $(BASEDIR)/src/interfaces)
 
 # Add -DDEBUG_THREADING if you run into threading problems like deadlocks.
 # Read FawkesDebugging in the Fawkes Trac Wiki on how to use it
