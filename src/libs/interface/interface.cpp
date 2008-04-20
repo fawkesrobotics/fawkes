@@ -65,10 +65,9 @@ InterfaceWriteDeniedException::InterfaceWriteDeniedException(const char *type,
  */
 InterfaceMessageEnqueueException::InterfaceMessageEnqueueException(const char *type,
 								   const char *id)
-  : Exception()
+  : Exception("This interface instance '%s' of type '%s' IS opened for writing, but "
+	      "messages can only be enqueued on reading interfaces.", id, type)
 {
-  append("This interface instance '%s' of type '%s' IS opened for writing, but "
-	 "messages can only be enqueued on reading interfaces.", id, type);
 }
 
 /** @class InterfaceInvalidMessageException interface/interface.h
@@ -83,10 +82,27 @@ InterfaceMessageEnqueueException::InterfaceMessageEnqueueException(const char *t
  */
 InterfaceInvalidMessageException::InterfaceInvalidMessageException(const Interface *interface,
 								   const Message *message)
-  : Exception()
+  : Exception("Message of type '%s' cannot be enqueued in interface of type '%s'",
+	      message->type(), interface->type())
 {
-  append("Message of type '%s' cannot be enqueued in interface of type '%s'",
-	 message->type(), interface->type());
+}
+
+
+/** @class InterfaceInvalidException <interface/interface.h>
+ * This exception is thrown if an interface is invalid and it is attempted to call
+ * read()/write().
+ * @ingroup Exceptions
+ */
+
+/** Constructor.
+ * @param interface invalid interface that the operation was tried on
+ * @param method the method that was tried to execute
+ */
+InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
+						     const char *method)
+  : Exception("The interface %s (instance serial %u) is invalid. You cannot call %s anymore.",
+	      interface->uid(), interface->serial(), method)
+{
 }
 
 
@@ -134,6 +150,7 @@ Interface::Interface()
   __write_access = false;
   __info_list = NULL;
   __rwlock = NULL;
+  __valid = true;
   memset(__hash, 0, __INTERFACE_HASH_SIZE);
   memset(__hash_printable, 0, __INTERFACE_HASH_SIZE * 2 + 1);
 
@@ -256,17 +273,50 @@ Interface::is_writer() const
 }
 
 
-/** Read from BlackBoard into local copy */
+/** Mark this interface invalid.
+ * An interface can become invalid, for example if the connection of a RemoteBlackBoard
+ * dies. In this case the interface becomes invalid and successive read()/write() calls
+ * will throw an InterfaceInvalidException.
+ */
 void
-Interface::read()
+Interface::set_validity(bool valid)
 {
-  __rwlock->lock_for_read();
-  memcpy(data_ptr, __mem_data_ptr, data_size);
+  __rwlock->lock_for_write();
+  __valid = valid;
   __rwlock->unlock();
 }
 
 
-/** Write from local copy into BlackBoard memory. */
+/** Check validity of interface.
+ * @return true if interface is valid, false otherwise
+ */
+bool
+Interface::is_valid() const
+{
+  return __valid;
+}
+
+
+/** Read from BlackBoard into local copy.
+ * @exception InterfaceInvalidException thrown if the interface has been marked invalid
+ */
+void
+Interface::read()
+{
+  __rwlock->lock_for_read();
+  if ( __valid ) {
+    memcpy(data_ptr, __mem_data_ptr, data_size);
+  } else {
+    __rwlock->unlock();
+    throw InterfaceInvalidException(this, "read()");
+  }
+  __rwlock->unlock();
+}
+
+
+/** Write from local copy into BlackBoard memory.
+ * @exception InterfaceInvalidException thrown if the interface has been marked invalid
+ */
 void
 Interface::write()
 {
@@ -275,7 +325,12 @@ Interface::write()
   }
 
   __rwlock->lock_for_write();
-  memcpy(__mem_data_ptr, data_ptr, data_size);
+  if ( __valid ) {
+    memcpy(__mem_data_ptr, data_ptr, data_size);
+  } else {
+    __rwlock->unlock();
+    throw InterfaceInvalidException(this, "write()");
+  }
   __rwlock->unlock();
 
   __interface_mediator->notify_of_data_change(this);

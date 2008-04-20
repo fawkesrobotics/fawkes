@@ -61,6 +61,13 @@ class InterfaceInvalidMessageException : public Exception
   InterfaceInvalidMessageException(const Interface *interface, const Message *message);
 };
 
+
+class InterfaceInvalidException : public Exception
+{
+ public:
+  InterfaceInvalidException(const Interface *interface, const char *method);
+};
+
 class Interface
 {
  friend class BlackBoardInterfaceManager;
@@ -84,6 +91,8 @@ class Interface
   size_t                  hash_size() const;
   const char *            hash_printable() const;
   bool                    is_writer() const;
+  void                    set_validity(bool valid);
+  bool                    is_valid() const;
 
   void                    set_from_chunk(void *chunk);
 
@@ -205,6 +214,7 @@ class Interface
   char               __hash_printable[__INTERFACE_HASH_SIZE * 2 + 1];
 
   unsigned int       __instance_serial;
+  bool               __valid;
 
   void *             __mem_data_ptr;
   void *             __mem_real_ptr;
