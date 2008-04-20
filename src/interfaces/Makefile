@@ -13,7 +13,14 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+ifneq ($(wildcard ../../etc/buildsys/config.mk),)
+  # Fawkes
+  BASEDIR = ../..
+else
+  # RCSoftX
+  BASEDIR = ../../..
+endif
+
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/lua.mk
