@@ -46,6 +46,7 @@ class SimpleColorClassifier;
 class RelativePositionModel;
 class SharedMemoryImageBuffer;
 class ObjectPositionInterface;
+class Drawer;
 
 class FvOmniBallPipelineThread
 : public Thread,
@@ -92,6 +93,8 @@ class FvOmniBallPipelineThread
   std::list< ROI >::iterator r;
 
   char* cfgfile_prefix;
+
+  Drawer* drawer;
 };
 
 #endif /* __FIREVISION_APPS_OMNI_BALL_PIPELINE_THREAD_H_ */

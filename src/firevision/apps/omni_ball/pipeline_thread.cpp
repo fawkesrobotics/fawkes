@@ -28,7 +28,7 @@
 
 #include <fvutils/color/conversions.h>
 #include <fvutils/ipc/shm_image.h>
-#include <fvutils/scalers/lossy.h>
+#include <fvutils/draw/drawer.h>
 
 #include <models/mirror/mirrormodel.h>
 #include <models/relative_position/omni_relative.h>
@@ -73,17 +73,14 @@ FvOmniBallPipelineThread::FvOmniBallPipelineThread()
   cspace_to = YUV422_PLANAR;
 
   cfgfile_prefix = strdup(FVCONFDIR);
+
+  drawer = 0;
 }
 
 
 /** Destructor. */
 FvOmniBallPipelineThread::~FvOmniBallPipelineThread()
 {
-  delete scanline;
-  delete cm;
-  delete mirror;
-  delete rel_pos;
-  delete classifier;
 }
 
 
@@ -138,7 +135,7 @@ FvOmniBallPipelineThread::init()
   // interface
   try
     {
-      ball_interface = blackboard->open_for_writing<ObjectPositionInterface>("OmniBall");
+      ball_interface = blackboard->open_for_writing<ObjectPositionInterface>("BallOmni");
       ball_interface->set_object_type( ObjectPositionInterface::TYPE_BALL );
       ball_interface->set_visible(false);
       ball_interface->set_flags(ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN |
@@ -169,7 +166,7 @@ FvOmniBallPipelineThread::init()
 			 true /* destroy on delete */ );
       free(mirror_file);
       mirror_file = NULL;
-      
+
       // colormodel
       cm = new ColorModelLookupTable(colormap_file, 
 				     "omni-ball-colormap", 
@@ -212,6 +209,11 @@ FvOmniBallPipelineThread::init()
   free(camera);
   free(mirror_file);
   free(colormap_file);
+
+  // drawer
+  drawer = new Drawer();
+  drawer->setBuffer(buffer, img_width, img_height);
+  drawer->setColor(0, 127, 127);
 }
 
 
@@ -219,6 +221,14 @@ FvOmniBallPipelineThread::init()
 void
 FvOmniBallPipelineThread::finalize()
 {
+  delete drawer;
+  delete classifier;
+  delete rel_pos;
+  delete scanline;
+  delete shm_buffer;
+  delete cm;
+  delete mirror;
+
   try
     {
       ball_interface->set_visible(false);
@@ -234,8 +244,6 @@ FvOmniBallPipelineThread::finalize()
   logger->log_debug(name(), "Unregistering from vision master");
   vision_master->unregister_thread(this);
   delete cam;
-  delete shm_buffer;
-  shm_buffer = NULL;
 }
 
 
@@ -259,6 +267,7 @@ FvOmniBallPipelineThread::loop()
   if (rois->empty()) 
     {
       logger->log_warn(name(), "Could not find any ROIs in image");
+      shm_buffer->set_circle_found( false );
     } 
   else 
     {
@@ -293,6 +302,7 @@ FvOmniBallPipelineThread::loop()
     if ( ball_visible ) 
       {
 	rel_pos->set_center( ball_image_x, ball_image_y );
+	drawer->drawCircle(ball_image_x, ball_image_y, 8);
 
 	if ( rel_pos->is_pos_valid() ) { rel_pos->calc(); } 
 	else { ball_visible = false; }
