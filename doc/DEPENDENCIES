@@ -74,7 +74,7 @@ FireVision	libdc1394		>= 2.0.1		recommended
 FireVision	SDL			>= 1.2.13		recommended
 		(strongly recommended for visualization tools)
 
-FireVision	Intel IPP		== 5.1			mandatory
+FireVision	Intel IPP		== 5.1			optional
 		(used in filters)
 
 FireVision	libjpeg			>= 6b-39		recommended
