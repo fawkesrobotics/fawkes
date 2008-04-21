@@ -21,8 +21,11 @@
 #include <apps/omni_localizer/utils.h>
 
 #include <fvutils/draw/drawer.h>
-#include <utils/math/angle.h>
+
+#include <blackboard/blackboard.h>
 #include <config/config.h>
+#include <interfaces/object.h>
+#include <utils/math/angle.h>
 
 #include <iostream>
 #include <fstream>
@@ -50,14 +53,17 @@ static f_point_t make_point( float x, float y )
   Initialize field model.
   @param config The configuration.
 */
-Field::Field( Configuration *config ) :
+Field::Field( BlackBoard *blackboard, Configuration *config ) :
     mDebugBuffer( 0 ),
     mWidth( 0 ),
-    mHeight( 0 )
+    mHeight( 0 ),
+    mBlackBoard( blackboard ),
+    mWMBallInterface( 0 )
 {
   // defaults
   config->set_default_float( "/firevision/omni/localizer/lower_range", 0.25 );
   config->set_default_float( "/firevision/omni/localizer/upper_range", 3.8 );
+  config->set_default_float( "/firevision/omni/localizer/ball_position_weight", 0.25 );
 
   const string fieldFile = config->get_string( "/firevision/omni/localizer/field" );
   const string fieldPath = string( CONFDIR ) + "/firevision/fields/" + fieldFile;
@@ -65,6 +71,7 @@ Field::Field( Configuration *config ) :
 
   mLowerRange = config->get_float( "/firevision/omni/localizer/lower_range" );
   mUpperRange = config->get_float( "/firevision/omni/localizer/upper_range" );
+  mBallPositionWeight = config->get_float( "/firevision/omni/localizer/ball_position_weight" );
 
 #ifdef DEBUG_SENSOR_WEIGHTS
   field_pos_t pos;
@@ -83,11 +90,23 @@ Field::Field( Configuration *config ) :
   pos.y = 4.75;
   dumpSensorProbabilities( pos, "sensor-prob-test-corner.dat" );
 #endif
+
+  // try to get the ball interfaces if they are already there
+  try {
+    mWMBallInterface = blackboard->open_for_reading<ObjectPositionInterface>( "WM Ball" );
+  } catch ( Exception &e ) {
+    e.append( "Ball interface registration for field model failed." );
+    throw;
+  }
+
+  bbio_add_interface_create_type("ObjectPositionInterface");
+  blackboard->register_observer( this, BlackBoard::BBIO_FLAG_CREATED | BlackBoard::BBIO_FLAG_DESTROYED );
 }
 
 /** Destructor. */
 Field::~ Field()
 {
+  mBlackBoard->close( mWMBallInterface );
 }
 
 /** Width of the field. */
@@ -125,10 +144,10 @@ float Field::weightForDistance( float lineDistance, float sensorDistance ) const
   const float distance2 = ( sensorDistance - lineDistance ) * ( sensorDistance - lineDistance );
 #if 1
   const float sigma = std::max( 1.0f, lineDistance * 0.5f ) * 0.75;
-  return exp( - distance2/(sigma * sigma) ) / (sigma  * std::max( 1.5f, lineDistance * 0.5f ));
+  return expf( - distance2/(sigma * sigma) ) / (sigma  * std::max( 1.5f, lineDistance * 0.5f ));
 #else
   const float sigma = 0.75;
-  return exp( - distance2/(sigma * sigma) ) / sigma;
+  return expf( - distance2/(sigma * sigma) ) / sigma;
 #endif
 }
 
@@ -136,7 +155,7 @@ float Field::weightForDistance( float lineDistance, float sensorDistance ) const
 #define mapToImageY(y) ((unsigned int)(scale * ((y) + totalHeight()/2.0)))
 
 /**
-  Finds all radi that intersect with a field line begin on postion @p position
+  Finds all radi that intersect with a field line begin on position @p position
   looking at @p phi.
   @param position The position.
   @param phi The angle we are looking at.
@@ -276,6 +295,20 @@ void Field::drawField()
                         mapToImageY( (sin(phi)*(*it).r) + (*it).m.y ) );
     }
   }
+
+  if ( mWMBallInterface ) {
+    mWMBallInterface->read();
+    drawer.setColor( 128, 0, 192 );
+    float radius = 0.2f;
+    if ( mWMBallInterface->dyp_covariance() )
+      radius = mWMBallInterface->dyp_covariance()[4];
+    radius = max( radius, 0.1f );
+    drawer.drawCircle( mapToImageX( mWMBallInterface->world_x() ),
+                       mapToImageY( mWMBallInterface->world_y() ),
+                       (unsigned int)(scale * radius) );
+  } else {
+    cout << "No WM Ball interface!" << endl;
+  }
 }
 
 /**
@@ -348,4 +381,22 @@ void Field::dumpSensorProbabilities(const field_pos_t & position, const char * f
     }
     dbg << endl;
   }
+}
+
+/**
+  Returns the weight for the given position based on the given ball sighting.
+  @param position The current position.
+  @param ballHit Relative ball coordinates.
+*/
+float Field::weightForBall(const field_pos_t & position, const f_point_t & ballHit)
+{
+  mWMBallInterface->read();
+  const float absX = position.x + ( cos(position.ori) * ballHit.x ) - ( sin(position.ori) * ballHit.y );
+  const float absY = position.y + ( sin(position.ori) * ballHit.x ) + ( cos(position.ori) * ballHit.y );
+  const float diffX = absX - mWMBallInterface->world_x();
+  const float diffY = absY - mWMBallInterface->world_y();
+  const float distToBall = sqrtf( diffX * diffX + diffY * diffY );
+  // ### TODO
+  const float sigma = 0.5;
+  return expf( - ((distToBall * distToBall) / (sigma * sigma)) ) * mBallPositionWeight;
 }

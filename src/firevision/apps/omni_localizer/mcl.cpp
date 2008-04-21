@@ -25,6 +25,7 @@
 #include <fvutils/writers/jpeg.h>
 #include <fvutils/draw/drawer.h>
 
+#include <blackboard/blackboard.h>
 #include <config/config.h>
 
 #include <iostream>
@@ -67,7 +68,7 @@ static bool operator<( float left, const mcl_sample_t &right )
   Constructor.
   @param config The configuration to setup MCL.
 */
-MCL::MCL( Configuration *config ) :
+MCL::MCL( BlackBoard *blackboard, Configuration *config ) :
     mNewOdometry( false ),
     mUniformDist( mRng )
 {
@@ -84,7 +85,7 @@ MCL::MCL( Configuration *config ) :
   config->set_default_float( "/firevision/omni/localizer/mcl/out_of_field_threshold", 0.2 );
 
   // read config settings
-  mField = new Field( config );
+  mField = new Field( blackboard, config );
 
   mSampleCount = config->get_uint( "/firevision/omni/localizer/mcl/sample_count" );
   mFreeSampleRatio = config->get_float( "/firevision/omni/localizer/mcl/free_sample_ratio" );
@@ -108,6 +109,7 @@ MCL::MCL( Configuration *config ) :
   mLastBestSample.weight = 0.0;
 
 #ifdef DEBUG_MCL_STATE
+  calculatePose();
   dumpState( "mclstate-initial.jpg" );
 #endif
 
@@ -191,10 +193,11 @@ void MCL::update(const std::map< float, std::vector < polar_coord_t > > & sensor
     (*it).weight = weightForPosition( (*it).position, sensorHits );
   }
 
+
+#ifdef DEBUG_MCL_LOG
   sort( mSamples.rbegin(), mSamples.rend() );
   mLastBestSample = mSamples.front();
 
-#ifdef DEBUG_MCL_LOG
   for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
     mMCLLog << "Sample: " << (*it).position << " weight: " << (*it).weight << endl;;
 #endif
@@ -218,6 +221,32 @@ void MCL::update(const std::map< float, std::vector < polar_coord_t > > & sensor
   char fileNamePosProbs[32];
   snprintf( fileNamePosProbs, 32, "pos-probability-%04d.dat", mLoopCount );
   dumpPositionProbabilities( fileNamePosProbs, sensorHits );
+#endif
+}
+
+/**
+  Update samples based on detected ball positions.
+  @param ballHits List of seen ball positions.
+*/
+void MCL::updateBall(const std::vector< f_point_t > & ballHits)
+{
+  if ( ballHits.empty() )
+    return;
+
+#ifdef DEBUG_MCL_LOG
+  mMCLLog << "Got ball positions: ";
+  copy( ballHits.begin(), ballHits.end(), ostream_iterator<f_point_t>( mMCLLog, " " ) );
+  mMCLLog << endl;
+#endif
+
+  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
+    for ( vector<f_point_t>::const_iterator ballIt = ballHits.begin(); ballIt != ballHits.end(); ++ballIt )
+      (*it).weight += mField->weightForBall( (*it).position, (*ballIt) );
+  }
+
+#ifdef DEBUG_MCL_LOG
+  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
+    mMCLLog << "Sample with ball: " << (*it).position << " weight: " << (*it).weight << endl;;
 #endif
 }
 
@@ -291,6 +320,9 @@ float MCL::weightForPosition( const field_pos_t &pos,
 /** Evaluate samples. */
 void MCL::resample()
 {
+  sort( mSamples.rbegin(), mSamples.rend() );
+  mLastBestSample = mSamples.front();
+
   if ( !mNewOdometry ) {
     vector<mcl_sample_t>::reverse_iterator it = upper_bound( mSamples.rbegin(), mSamples.rend(), mIdleRegenerationThreshold );
     if ( it == mSamples.rend() ) {
@@ -350,9 +382,9 @@ void MCL::resample()
 }
 
 /**
-  Returns the currently estimated position.
+  Calculate the current pose estimate and variance.
 */
-field_pos_t MCL::currentEstimate()
+void MCL::calculatePose()
 {
   normalizeSamples();
 
@@ -375,8 +407,25 @@ field_pos_t MCL::currentEstimate()
   }
 
   if ( mVariance.x > mVarianceLimit.x || mVariance.y > mVarianceLimit.y || mVariance.ori > mVarianceLimit.ori )
-    return mLastBestSample.position;
-  return mMean;
+    mPose = mLastBestSample.position;
+  else
+    mPose = mMean;
+}
+
+/**
+  Returns the current pose estimae.
+*/
+field_pos_t MCL::pose() const
+{
+  return mPose;
+}
+
+/**
+  Returns the variance of the current pose estimate.
+*/
+field_pos_t MCL::variance() const
+{
+  return mVariance;
 }
 
 /**
@@ -403,7 +452,7 @@ void MCL::normalizeSamples()
 */
 void MCL::dumpState(const char * filename)
 {
-  field_pos_t estimate = currentEstimate();
+  field_pos_t estimate = pose();
   mPath.push_back( estimate );
   cout << "MCL: esitmated position: " << estimate << endl;
   cout << "MCL: mean: " << mMean << " variance: " << mVariance << endl;
@@ -630,12 +679,4 @@ void MCL::dumpPositionProbabilities( const char * filename,
     }
     s << endl;
   }
-}
-
-/**
-  Returns the variance of the current position estimation.
-*/
-field_pos_t MCL::currentVariance() const
-{
-  return mVariance;
 }

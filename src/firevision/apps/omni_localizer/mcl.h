@@ -27,6 +27,7 @@
 #include <vector>
 #include <fstream>
 
+class BlackBoard;
 class Drawer;
 class Field;
 class Configuration;
@@ -42,15 +43,17 @@ struct mcl_sample_t {
 class MCL
 {
   public:
-    MCL( Configuration *config );
+    MCL( BlackBoard *blackboard, Configuration *config );
     ~MCL();
 
     void predict( const field_pos_t &movement, float pathLength );
     void update( const std::map< float, std::vector<polar_coord_t> > &sensorHits );
+    void updateBall( const std::vector<f_point_t> &ballHits );
     void resample();
+    void calculatePose();
 
-    field_pos_t currentEstimate();
-    field_pos_t currentVariance() const;
+    field_pos_t pose() const;
+    field_pos_t variance() const;
 
     void dumpState( const char *filename );
 
@@ -78,8 +81,9 @@ class MCL
     Field* mField;
     bool mNewOdometry;
     mcl_sample_t mLastBestSample;
-
     field_pos_t mMean;
+
+    field_pos_t mPose;
     field_pos_t mVariance;
 
     unsigned int mSampleCount;

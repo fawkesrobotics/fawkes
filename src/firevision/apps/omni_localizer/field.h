@@ -21,10 +21,14 @@
 
 #include <fvutils/base/types.h>
 
+#include <blackboard/interface_observer.h>
+
 #include <vector>
 #include <fstream>
 
+class BlackBoard;
 class Configuration;
+class ObjectPositionInterface;
 
 /** Represents an arc. */
 struct arc_t
@@ -39,10 +43,10 @@ struct arc_t
   float right;
 };
 
-class Field
+class Field : public BlackBoardInterfaceObserver
 {
   public:
-    Field( Configuration *config );
+    Field( BlackBoard *blackboard, Configuration *config );
     ~Field();
 
     void load( const char *filename );
@@ -56,6 +60,7 @@ class Field
 
     std::vector<float> findIntersections( const field_pos_t &position, float phi );
     float weightForDistance( float lineDistance, float sensorDistance ) const;
+    float weightForBall( const field_pos_t &position, const f_point_t &ballHit );
 
     void setDebugBuffer( unsigned char *buffer, unsigned int width = 0, unsigned int height = 0 );
     void drawField();
@@ -71,6 +76,10 @@ class Field
     unsigned int mWidth, mHeight;
 
     float mUpperRange, mLowerRange;
+
+    BlackBoard *mBlackBoard;
+    ObjectPositionInterface *mWMBallInterface;
+    float mBallPositionWeight;
 };
 
 #endif

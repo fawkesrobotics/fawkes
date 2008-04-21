@@ -25,6 +25,12 @@
 #include <cmath>
 #include <iostream>
 
+inline std::ostream& operator<<( std::ostream& s, const f_point_t &pos )
+{
+  s << "(" << pos.x << "," << pos.y << ")";
+  return s;
+}
+
 inline std::ostream& operator<<( std::ostream& s, const field_pos_t &pos )
 {
   s << "(" << pos.x << "," << pos.y << ") ori: " << pos.ori;

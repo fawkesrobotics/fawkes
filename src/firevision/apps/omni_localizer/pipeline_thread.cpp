@@ -64,7 +64,8 @@ FvOmniLocalizerPipelineThread::FvOmniLocalizerPipelineThread() :
     mMotorInterface( 0 ),
     mPositionInterface( 0 ),
     mColorspaceFrom( CS_UNKNOWN ),
-    mColorspaceTo( YUV422_PLANAR )
+    mColorspaceTo( YUV422_PLANAR ),
+    mUseBallPosition( false )
 {
 }
 
@@ -86,6 +87,7 @@ void FvOmniLocalizerPipelineThread::init()
   config->set_default_int( "/firevision/omni/localizer/segments", 180 );
   config->set_default_int( "/firevision/omni/localizer/radius_increase", 2 );
   config->set_default_int( "/firevision/omni/localizer/max_radius", 575 );
+  config->set_default_bool( "/firevision/omni/localizer/use_ball_position", false );
 
   string colormapFile, mirrorFile, maskFile;
   int num_segments, radius_increase, maxRadius;
@@ -97,6 +99,7 @@ void FvOmniLocalizerPipelineThread::init()
     radius_increase = config->get_int( "/firevision/omni/localizer/radius_increase" );
     maxRadius = config->get_int( "/firevision/omni/localizer/max_radius" );
     maskFile = config->get_string( "/firevision/omni/mask" );
+    mUseBallPosition = config->get_bool( "/firevision/omni/localizer/use_ball_position" );
   }
   catch ( Exception &e )
   {
@@ -155,7 +158,7 @@ void FvOmniLocalizerPipelineThread::init()
   }
 
   try {
-    mMCL = new MCL( config );
+    mMCL = new MCL( blackboard, config );
   } catch ( Exception &e ) {
     e.append( "Creating MCL failed!" );
     throw;
@@ -180,11 +183,25 @@ void FvOmniLocalizerPipelineThread::init()
     e.append( "Opening object position interface failed!" );
     throw;
   }
+
+  try {
+    list<ObjectPositionInterface *> *lst = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("Ball");
+    for ( list<ObjectPositionInterface *>::const_iterator it = lst->begin(); it != lst->end(); ++it )
+      mBallInterfaces.push_back( *it );
+    logger->log_debug( name(), "Found %i ball position interfaces", mBallInterfaces.size() );
+    delete lst;
+  } catch ( Exception &e ) {
+    e.append( "Opening ball interfaces failed!" );
+  }
+
+  bbio_add_interface_create_type( "ObjectPositionInterface" );
+  blackboard->register_observer( this, BlackBoard::BBIO_FLAG_CREATED );
 }
 
 void FvOmniLocalizerPipelineThread::finalize()
 {
   logger->log_debug( name(), "FvOmniLocalizerPipelineThread::finalize()" );
+  blackboard->unregister_observer( this );
   vision_master->unregister_thread( this );
   delete mCamera;
   mBuffer = 0;
@@ -195,8 +212,10 @@ void FvOmniLocalizerPipelineThread::finalize()
 
   try {
     blackboard->close( mMotorInterface );
+    for ( vector<ObjectPositionInterface*>::const_iterator it = mBallInterfaces.begin(); it != mBallInterfaces.end(); ++it )
+      blackboard->close( *it );
   } catch (Exception& e) {
-    e.append( "Failed to close motor interface!" );
+    e.append( "Failed to close interfaces!" );
     throw;
   }
 
@@ -314,13 +333,29 @@ void FvOmniLocalizerPipelineThread::loop()
     convertedHits[ rayPhi ] = v;
   }
 
+  // get locally determined ball position(s)
+  vector<f_point_t> ballHits;
+  if ( mUseBallPosition ) {
+    for ( vector<ObjectPositionInterface*>::const_iterator it = mBallInterfaces.begin(); it != mBallInterfaces.end(); ++it ) {
+      // TODO
+      (*it)->read();
+      f_point_t p;
+      p.x = (*it)->relative_x();
+      p.y = (*it)->relative_y();
+      ballHits.push_back( p );
+    }
+  }
+
   // update and resample if we have new sensor readings
   if ( hitCount == 0 ) {
     logger->log_warn( name(), "No sensor readings found." );
   } else {
     mMCL->update( convertedHits );
+    if ( mUseBallPosition )
+      mMCL->updateBall( ballHits );
     mMCL->resample();
   }
+  mMCL->calculatePose();
 
 #ifdef DEBUG_UNWRAP
   JpegWriter writer;
@@ -339,8 +374,8 @@ void FvOmniLocalizerPipelineThread::loop()
   mMCL->dumpState( fileName );
 #endif
 
-  field_pos_t currentPos = mMCL->currentEstimate();
-  field_pos_t currentVar = mMCL->currentVariance();
+  field_pos_t currentPos = mMCL->pose();
+  field_pos_t currentVar = mMCL->variance();
   mPositionInterface->set_world_x( currentPos.x );
   mPositionInterface->set_world_y( currentPos.y );
   mPositionInterface->set_yaw( currentPos.ori );
@@ -358,4 +393,18 @@ void FvOmniLocalizerPipelineThread::loop()
 #ifdef DEBUG_MCL_LOG
   ++loopCount;
 #endif
+}
+
+void FvOmniLocalizerPipelineThread::bb_interface_created(const char * type, const char * id) throw(  )
+{
+  cout << "interface created: " << id << endl;
+  if ( strncmp( id, "Ball", strlen("Ball") ) == 0 ) {
+    logger->log_debug( name(), "Found new ball position interface: %s", id );
+    try {
+      ObjectPositionInterface *ballIface = blackboard->open_for_reading<ObjectPositionInterface>( id );
+      mBallInterfaces.push_back( ballIface );
+    } catch ( Exception &e ) {
+      cout << "Opening interface failed: " << e.what() << endl;
+    }
+  }
 }

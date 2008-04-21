@@ -26,6 +26,8 @@
 #include <aspect/vision.h>
 #include <aspect/blackboard.h>
 
+#include <blackboard/interface_observer.h>
+
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/roi.h>
 
@@ -44,7 +46,8 @@ class FvOmniLocalizerPipelineThread
   public LoggingAspect,
   public VisionAspect,
   public ConfigurableAspect,
-  public BlackBoardAspect
+  public BlackBoardAspect,
+  public BlackBoardInterfaceObserver
 {
  public:
   FvOmniLocalizerPipelineThread();
@@ -53,6 +56,8 @@ class FvOmniLocalizerPipelineThread
   virtual void init();
   virtual void finalize();
   virtual void loop();
+
+  virtual void bb_interface_created(const char *type, const char *id) throw();
 
  private:
   Camera* mCamera;
@@ -71,6 +76,9 @@ class FvOmniLocalizerPipelineThread
   float mLowerRange, mUpperRange;
 
   colorspace_t mColorspaceFrom, mColorspaceTo;
+
+  bool mUseBallPosition;
+  std::vector<ObjectPositionInterface*> mBallInterfaces;
 };
 
 

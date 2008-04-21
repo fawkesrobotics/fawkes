@@ -52,6 +52,9 @@ class LineClassifier : public Classifier
     ColorModel   *mColorModel;
     int mMaxGaps;
     int mMaxLineWidth;
+
+    float mUVLow, mUVHigh;
+    float mYLow;
 };
 
 

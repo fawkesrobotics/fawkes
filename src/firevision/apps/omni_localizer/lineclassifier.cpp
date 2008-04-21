@@ -56,9 +56,15 @@ LineClassifier::LineClassifier(ScanlineStar * scanlineModel, ColorModel * colorM
   // defaults
   config->set_default_int( "/firevision/omni/localizer/classifier/max_gaps", 2 );
   config->set_default_int( "/firevision/omni/localizer/classifier/max_line_width", 64 );
+  config->set_default_float( "/firevision/omni/localizer/classifier/fallback_uvlow", 16.0 );
+  config->set_default_float( "/firevision/omni/localizer/classifier/fallback_uvhigh", 196.0 );
+  config->set_default_float( "/firevision/omni/localizer/classifier/fallback_ylow", 96.0 );
 
   mMaxGaps = config->get_int( "/firevision/omni/localizer/classifier/max_gaps" );
   mMaxLineWidth = config->get_int( "/firevision/omni/localizer/classifier/max_line_width" );
+  mUVLow = config->get_float( "/firevision/omni/localizer/classifier/fallback_uvlow" );
+  mUVHigh = config->get_float( "/firevision/omni/localizer/classifier/fallback_uvhigh" );
+  mYLow = config->get_float( "/firevision/omni/localizer/classifier/fallback_ylow" );
 }
 
 /**
@@ -71,16 +77,12 @@ color_t LineClassifier::colorAt(unsigned x, unsigned y) const
   unsigned char yp = 0, up = 0, vp = 0;
   YUV422_PLANAR_YUV(_src, _width, _height, x, y, yp, up, vp);
   color_t c = mColorModel->determine(yp, up, vp);
-  if ( c == C_WHITE || c == C_GREEN )
+  if ( c == C_WHITE || c == C_GREEN || c == C_BLACK )
     return c;
 
   // ### temporary until we get C_WHITE reliably
-  const float uvlow = 16.0;
-  const float uvhigh = 196.0;
-  const float ylow = 96.0;
-  const int colr = (int)((uvlow + (((yp - ylow)/(255.0 - ylow)) * (uvhigh - uvlow))) / 2.0);
-//   if ( yp > 72 && (up > 120 && up < 136) && (vp > 120 && up < 136) ) // test07
-  if ( yp > ylow && (up > (128 - colr) && up < (128 + colr)) && (vp > (128 - colr) && up < (128 + colr)) )
+  const int colr = (int)((mUVLow + (((yp - mYLow)/(255.0 - mYLow)) * (mUVHigh - mUVLow))) / 2.0);
+  if ( yp > mYLow && (up > (128 - colr) && up < (128 + colr)) && (vp > (128 - colr) && up < (128 + colr)) )
     c = C_WHITE;
   return c;
 }
@@ -114,6 +116,7 @@ std::map< float, std::vector < f_point_t > > LineClassifier::classify2()
   map<float, vector<f_point_t> > rv;
   color_t c;
   bool skipAdvance = false;
+  bool skipRay = false;
 
 #ifdef DEBUG_CLASSIFY
   unsigned char *debugBuffer;
@@ -192,6 +195,8 @@ std::map< float, std::vector < f_point_t > > LineClassifier::classify2()
               ++gapCount;
             } else {
               skipAdvance = true;
+              if ( c == C_BLACK ) // might be the field limit
+                skipRay = true;
               break;
             }
           } else {
@@ -230,8 +235,17 @@ std::map< float, std::vector < f_point_t > > LineClassifier::classify2()
                                 (int)(hit.y + cos( currentAngle - M_PI/2.0 ) * lineWidth( hit, currentAngle - M_PI/2.0 )) );
         }
 #endif
+      } else if ( c == C_BLACK ) {
+        // reached the field limit
+        skipRay = true;
       }
 
+      if ( skipRay ) {
+        skipRay = false;
+        skipAdvance = false;
+        mScanlineModel->skip_current_ray();
+        break;
+      }
       if ( skipAdvance )
         skipAdvance = false;
       else
