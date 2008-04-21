@@ -1942,14 +1942,18 @@ public:
     /** destrcutor */    
    ~ForestClass() 
    {
-    for( int i=0; i < _forestSize; i++ ) 
-    { 
-        Tree* tempTree = _forest.at(i); 
-        delete tempTree; 
+
+     for( unsigned int i = 0; i < _forest.size(); i++ ) 
+       delete _forest.at(i); 
+
+//      for( int i=0; i < _forestSize; i++ ) 
+//     { 
+//         Tree* tempTree = _forest.at(i); 
+//         delete tempTree; 
         
-    }
+//     }
     
-    _forest.clear(); 
+//     _forest.clear(); 
    
   } 
   };

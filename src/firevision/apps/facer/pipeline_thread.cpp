@@ -11,7 +11,7 @@
 
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free     Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
@@ -23,7 +23,7 @@
  */
 
 #include <apps/facer/pipeline_thread.h>
-
+#include <stdio.h>
 #include <cams/camera.h>
 #include <fvutils/ipc/shm_image.h>
 #include <utils/time/tracker.h>
@@ -32,7 +32,8 @@
 #include <fvutils/recognition/faces.h>
 #include <fvutils/adapters/iplimage.h>
 #include <classifiers/faces.h>
-
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <cstring>
@@ -65,7 +66,7 @@ FacerPipelineThread::~FacerPipelineThread()
 void
 FacerPipelineThread::init()
 {
-  std::map<int, std::string> persons;
+  //  std::map<int, std::string> persons;
   __roi_not_found_flag = false; 
   __person_recognized_cnt = 0; 
   
@@ -90,7 +91,7 @@ FacerPipelineThread::init()
         s = strtok_r(NULL, "_", &saveptr);
         int id = atoi(s);
         free(tmp);
-        persons[id] = i->get_string();
+        __persons[id] = i->get_string();
       } else {
         logger->log_warn("FacerPipelineThread", "Value %s is not of type string, but of type %s", i->path(), i->type());
       }
@@ -151,11 +152,13 @@ FacerPipelineThread::init()
 				     __cfg_min_neighbours);
 
   __facerecog  = new FaceRecognizer( (__cfg_dir_path).c_str(),  __cfg_number_identities, __cfg_forest_size );
-  for (std::map<int, std::string>::iterator i = persons.begin(); i != persons.end(); ++i ) {
+  //  logger->log_info("FacerPipelineThread","number of identiites instantiated %d", __facerecog->get_n_identities()); 
+  for (std::map<int, std::string>::iterator i = __persons.begin(); i != __persons.end(); ++i ) {
     __facerecog->add_identity(i->first, i->second);
   }
-
-  __opmode = FacerInterface::OPMODE_RECOGNITION;
+  //  logger->log_info("FacerPipelineThread","number of identiites instantiated %d after instation", __facerecog->get_n_identities()); 
+  //  __opmode = FacerInterface::OPMODE_RECOGNITION;
+    __opmode = FacerInterface::OPMODE_LEARNING; 
   __face_label = "";
 }
 
@@ -319,14 +322,28 @@ FacerPipelineThread::loop()
                                              __image->depth, __image->nChannels);
 
       cvResize(face, scaled_face, CV_INTER_LINEAR);
-
-      if( debug ) { 
-	char *buffer;
-	asprintf( &buffer,"%d.png", ++__saved_faces ); 
-        logger->log_debug("FacerPipelineThread", "Face saved to %s", buffer);
-	cvvSaveImage( buffer, scaled_face ); 
-	free( buffer );
-      }
+      //      cvvSaveImage( buffer, scaled_face ); 
+      
+      //            if( debug ) {
+      char *buffer;
+      char* dirname;
+      asprintf( &dirname, "%s%d", (__cfg_dir_path).c_str(), __facerecog->get_n_identities() ); 
+      mkdir( dirname, 777 ); 
+	
+      //	logger->log_info("FacerPipelineThread","NUMBER Of identiites = %d", __facerecog->get_n_identities() ); 
+      //	asprintf( &buffer,"%s%d/%d.png",(__cfg_dir_path).c_str(), __facerecog->get_n_identities(), ++__saved_faces ); 
+      asprintf( &buffer, "%d.png", ++__saved_faces ); 
+      cvvSaveImage( buffer, scaled_face ); 
+      char* new_name;
+      asprintf( &new_name, "%s%d/%d.png", (__cfg_dir_path).c_str(), __facerecog->get_n_identities(), __saved_faces); 
+      rename( buffer, new_name ); 
+      //rename("%d.png","%s%d/%d.png", __saved_faces, (__cfg_dir_path).c_str(), __facerecog->get_n_identities(), __saved_faces );
+      logger->log_debug("FacerPipelineThread", "Face saved to %s", new_name);
+	
+      free( new_name ); 
+      free( dirname ); 
+      free( buffer );
+      //    }
 
       cvReleaseImage(&face);
       cvReleaseImage(&scaled_face);
@@ -334,8 +351,42 @@ FacerPipelineThread::loop()
       logger->log_info("FacerPipelineThread", "No ROIs found");
 
     }
-    break;
 
+
+    // @TODO: do the procedure below in the calling functoin 
+
+//     //    std::map<int, std::string> persons;
+//     try {
+
+//       Configuration::ValueIterator *i = config->search("/firevision/facer/identity_");
+//       while(i->next()) {
+// 	if ( i->is_string() ) {
+// 	  char *tmp = strdup(i->path());
+// 	  char *saveptr;
+// 	  char *s = strtok_r(tmp, "_", &saveptr);
+// 	  s = strtok_r(NULL, "_", &saveptr);
+// 	  int id = atoi(s);
+// 	  free(tmp);
+// 	  __persons[id] = i->get_string();
+// 	} else {
+// 	  logger->log_warn("FacerPipelineThread", "Value %s is not of type string, but of type %s", i->path(), i->type());
+// 	}
+//       }
+//       delete i;
+
+//     } catch (Exception &e) {
+//       throw;
+//     }
+
+    delete __facerecog; 
+
+//     __facerecog  = new FaceRecognizer( (__cfg_dir_path).c_str(),  __cfg_number_identities + 1, __cfg_forest_size );
+//     //  logger->log_info("FacerPipelineThread","number of identiites instantiated %d", __facerecog->get_n_identities()); 
+//     for (std::map<int, std::string>::iterator i = __persons.begin(); i != __persons.end(); ++i ) {
+//       __facerecog->add_identity(i->first, i->second);
+//       __facerecog->add_identity( __facerecog->get_n_identities(), "NewPerson" ); 
+//     }
+    break;
   default:
     logger->log_debug("FacerPipelineThread", "disabled");
     break;

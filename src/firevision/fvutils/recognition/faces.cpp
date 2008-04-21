@@ -115,7 +115,7 @@ FaceRecognizer::recognize(vector<IplImage*> faces, int number_of_identities )
 void 
 FaceRecognizer::add_identity( int person_index , std::string person_name )
 { 
-  __n_identities++; 
+  //__n_identities++; 
   __person_names[person_index] = person_name; 
 }
 

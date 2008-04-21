@@ -66,6 +66,8 @@ class FacerPipelineThread
   Camera *__cam;
   SharedMemoryImageBuffer *__shm;
   IplImage *__image;
+
+  std::map<int, std::string> __persons;
  
   bool __roi_not_found_flag; 
   int __person_recognized_cnt;
