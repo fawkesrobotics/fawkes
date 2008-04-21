@@ -66,6 +66,10 @@ class FacerPipelineThread
   Camera *__cam;
   SharedMemoryImageBuffer *__shm;
   IplImage *__image;
+ 
+  bool __roi_not_found_flag; 
+  int __person_recognized_cnt;
+  int __person_labels[10]; 
 
   TimeTracker *__tt;
   unsigned int __loop_count;

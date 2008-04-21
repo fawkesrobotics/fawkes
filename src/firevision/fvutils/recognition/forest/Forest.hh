@@ -1,5 +1,6 @@
 #include "Parameters.hh"
 #include "Auxillary.hh"
+#include <utils/logging/liblogger.h>
 
 #ifndef __forest__hh__ 
 #define __forest__hh__
@@ -867,7 +868,7 @@ namespace Forest {
 		graphviz.close();  
 	  }
 	  
-	  fprintf(stderr,"The total number of nodes grown is %d.\n", globalNodeIndex ); 
+	  //	  fprintf(stderr,"The total number of nodes grown is %d.\n", globalNodeIndex ); 
 	  
 	} 
 	
@@ -1217,12 +1218,14 @@ namespace Forest {
 	  
 	  
 	  if(testHeight<trainHeight) { 
-		perror("~Forest.hh@slidingWindow: testheight<trainheight;");
-		exit(1);
+	    //		perror("~Forest.hh@slidingWindow: testheight<trainheight;");
+	    LibLogger::log_error("Forest.hh","test_height < train_height "); 
+		//		exit(1);
 	  }
 	  if(testWidth<trainWidth) {
-		perror("~Forest.hh@slidingWindow: testWidth<trainWidth");
-		exit(1);
+	    LibLogger::log_error("Forest.hh","test_width < train_width"); 
+	    //		perror("~Forest.hh@slidingWindow: testWidth<trainWidth");
+	    //		exit(1);
 	  }
 	  
 	  int lastHOffset = -1;
@@ -1550,7 +1553,7 @@ namespace Forest {
 	
 	for( int i = 0; i < config.getNclasses(); i++ ) 
 	{
-	  printf("the sizes are %zu\n", root->theIntegralImages[i].iiVector.size() ); 
+	  //	  printf("the sizes are %zu\n", root->theIntegralImages[i].iiVector.size() ); 
 	  
 	  if( (int)(root->theIntegralImages[i].iiVector.size()) > max ) 
 	  {
@@ -1645,7 +1648,7 @@ namespace Forest {
 	
 	for( int i = 0; i < nclasses; i++ ) 
 	{
-	  printf("the sizes are %zu\n", root->theIntegralImages[i].iiVector.size() ); 
+	  //	  printf("the sizes are %zu\n", root->theIntegralImages[i].iiVector.size() ); 
 	  
 	  if( (int)(root->theIntegralImages[i].iiVector.size()) > max ) 
 	  {
@@ -1744,8 +1747,10 @@ namespace Forest {
 		
 		if((dir = opendir(dirPath.c_str())) == NULL){
 		  printf("the directory searched for is %s\n", dirPath.c_str() ); 
-		  perror("Directory does not exist");
-		  exit(0);
+		  LibLogger::log_error("Forest","The directory does not exist");
+		  continue;
+										      //		  perror("Directory does not exist");
+										      //		  exit(0);
 		}
 		
 		bool setBorders = false; 
@@ -1957,10 +1962,10 @@ public:
   int getClassLabelFromForest( ForestClass* forestClassInstance , IplImage* inputImage )
   {
     
-    int recognition_histogram[ forestClassInstance->getNclasses() ];
+    int recognition_histogram[ forestClassInstance->getSize() ];
     
         for( int i = 0; i < forestClassInstance->getSize(); i++ ) 
-            recognition_histogram[i] = returnClassLabelForIplImage( forestClassInstance->getTree(i), inputImage, forestClassInstance->getTrainHeight(), forestClassInstance->getTrainWidth(), forestClassInstance->getNclasses() );  
+	  recognition_histogram[i] = returnClassLabelForIplImage( forestClassInstance->getTree(i), inputImage, forestClassInstance->getTrainHeight(), forestClassInstance->getTrainWidth(), forestClassInstance->getNclasses() );  
       
     int votes[ forestClassInstance->getNclasses() ]; 
     

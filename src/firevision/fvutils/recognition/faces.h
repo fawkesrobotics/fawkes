@@ -30,6 +30,7 @@
 #include <vector> 
 #include <map>
 #include <list>
+#include <fvutils/recognition/forest/Forest.hh>
 #include <string>
 #include <vector>
 
@@ -46,10 +47,25 @@ class FaceRecognizer
   int __forest_size;
   /** map of identity indices to person names */
   std::map<int, std::string> __person_names; 
+  /** a configclass Instance */
+  UserDef::ConfigClass *__config; 
+  /** a random forest */ 
+  Forest::ForestClass *__forest; 
+  /** height of the trainig images. this value can be read later */
+  int __train_height;
+  /** width of the training imaes */ 
+  int __train_width; 
 
  public:
   FaceRecognizer(const char* loc, int number_of_identities, int forest_size );
   ~FaceRecognizer();
+
+  /** get the training height */
+  int getTrainHeight() const { return __train_height; }
+  /** get the training widht */ 
+  int getTrainWidth() const { return __train_width; } 
+  /** return the number of identities */
+  int get_n_identities() const { return __n_identities; } 
 
   /** a vector containing the identities of the faces supplied */ 
   typedef std::vector<int> Identities; 

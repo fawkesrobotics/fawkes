@@ -1,6 +1,6 @@
 #include "UserDef.hh"
 #include "Auxillary.hh"
-
+#include <utils/logging/liblogger.h>
 /***************************************************************************
  *  UserDef.cpp - Src file for object recognition with random forests: user specific functions, needed only for our framework 
  *
@@ -69,9 +69,9 @@ namespace UserDef {
     image = cvLoadImage(path.c_str());
 
     if(!image){ 
-
-      perror("UserDef.cpp@getImageFromLocation: image not found!");
-      exit(1);
+      LibLogger::log_error("UserDef.cpp", "image not found");
+      //      perror("UserDef.cpp@getImageFromLocation: image not found!");
+      //      exit(1);
     }
 
     return image;
@@ -135,8 +135,9 @@ namespace UserDef {
       for(j=0;j<width-1;j++)
 	if(ii[i][j]<0) { 
 
-	  cout<<"lesser than 0";
-	  exit(0);
+	  LibLogger::log_error("UserDef.cpp","the integral image value is lesser than 0"); 
+	  //	  cout<<"lesser than 0";
+	  //	  exit(0);
 	}
 	else
 	  integralImage[i*width + j] = ii[i][j]; 
@@ -778,9 +779,9 @@ namespace UserDef {
     
     // Make sure image exists
     if(!image){ 
-
-      perror("UserDef.cpp@drawDetections: There is no image!");
-      exit(1);
+      LibLogger::log_error("Userdef.cpp","no image present"); 
+      //      perror("UserDef.cpp@drawDetections: There is no image!");
+      //      exit(1);
     }
 
     char fullname[PATH_MAX];
@@ -1752,7 +1753,7 @@ namespace UserDef {
 	} 
       }
     }
-    
+      
     
     WindowClass* wc = 0 ;
     for( unsigned int i = 0 ; i < windows.size() ; i++ ) { 

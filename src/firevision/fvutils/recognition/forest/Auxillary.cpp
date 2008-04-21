@@ -1,5 +1,5 @@
 #include "UserDef.hh"
-
+#include <utils/logging/liblogger.h>
 
 /***************************************************************************
  *  Auxillary.cpp - Src file for object recognition with random forests: Auxillary Components 
@@ -91,8 +91,9 @@ namespace Auxillary{
     
     if(size<0){
 
-      perror("The entropy array is empty - it needs to contain values");
-      exit(0);
+      //      perror("The entropy array is empty - it needs to contain values");
+      LibLogger::log_error("Auxillary.cpp","entropy array is empty"); 
+      //      exit(0);
       return 0;
     }
 

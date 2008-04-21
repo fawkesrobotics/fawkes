@@ -38,7 +38,7 @@
 #define NODECOUNT 400
 #define MAX_TRY_ALLOWED 20 // maximum number of tries the children is allowed to sent back to tree growth tests : _deprecated_ 
 
-#define _FOREST 3
+#define _FOREST 10
 
 #define NOS_SCALES 11 //How many differnet scales of the images to try out sliding window?
 

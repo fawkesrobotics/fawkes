@@ -36,6 +36,11 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <cstring>
+#include <map>
+#include <string>
+
+#define __SUBSEQ_FACES 3
+
 
 /** @class FacerPipelineThread <apps/facer/pipeline_thread.h>
  * FireVision facer pipeline thread.
@@ -60,6 +65,11 @@ FacerPipelineThread::~FacerPipelineThread()
 void
 FacerPipelineThread::init()
 {
+  std::map<int, std::string> persons;
+  __roi_not_found_flag = false; 
+  __person_recognized_cnt = 0; 
+  
+
   try {
     // detection specific
     __cfg_haarcascade_file  = config->get_string("/firevision/facer/haarcascade_file");
@@ -70,6 +80,22 @@ FacerPipelineThread::init()
     __cfg_forest_size = config->get_uint("/firevision/facer/forest_size"); 
     __cfg_number_identities = config->get_uint("/firevision/facer/number_identities");
     __saved_faces = 0;
+
+    Configuration::ValueIterator *i = config->search("/firevision/facer/identity_");
+    while(i->next()) {
+      if ( i->is_string() ) {
+	char *tmp = strdup(i->path());
+        char *saveptr;
+        char *s = strtok_r(tmp, "_", &saveptr);
+        s = strtok_r(NULL, "_", &saveptr);
+        int id = atoi(s);
+        free(tmp);
+        persons[id] = i->get_string();
+      } else {
+        logger->log_warn("FacerPipelineThread", "Value %s is not of type string, but of type %s", i->path(), i->type());
+      }
+    }
+    delete i;
 
   } catch (Exception &e) {
     throw;
@@ -124,9 +150,12 @@ FacerPipelineThread::init()
 				     __cfg_haar_scale_factor,
 				     __cfg_min_neighbours);
 
-  __facerecog  = new FaceRecognizer( __cfg_dir_path.c_str(), __cfg_forest_size, __cfg_number_identities );
+  __facerecog  = new FaceRecognizer( (__cfg_dir_path).c_str(),  __cfg_number_identities, __cfg_forest_size );
+  for (std::map<int, std::string>::iterator i = persons.begin(); i != persons.end(); ++i ) {
+    __facerecog->add_identity(i->first, i->second);
+  }
 
-  __opmode = FacerInterface::OPMODE_DISABLED;
+  __opmode = FacerInterface::OPMODE_RECOGNITION;
   __face_label = "";
 }
 
@@ -137,6 +166,7 @@ FacerPipelineThread::finalize()
   logger->log_debug(name(), "Unregistering from vision master");
   vision_master->unregister_thread(this);
   blackboard->close(__facer_if);
+  cvReleaseImage(&__image);
   delete __classifier;
   delete __facerecog;
   delete __cam;
@@ -150,7 +180,7 @@ void
 FacerPipelineThread::loop()
 {
   __rois = NULL;
-  bool debug = false; 
+  bool debug = true; 
 
   __cam->capture();
   memcpy(__shm->buffer(), __cam->buffer(), __cam->buffer_size());
@@ -193,7 +223,7 @@ FacerPipelineThread::loop()
       
       cvCopyImage(__image, face);
       cvResetImageROI(__image);
-
+      
       if( debug ) { 
 	char *buffer;
 	asprintf( &buffer,"%d.png", ++__saved_faces ); 
@@ -204,20 +234,106 @@ FacerPipelineThread::loop()
       std::vector<IplImage *> face_images;
       face_images.push_back(face);
       // the second parameter, number_of_identities, is 0 since we are NOT learning new ppl at the momnent
-      std::vector<std::string> face_labels = __facerecog->get_identities(__facerecog->recognize(face_images, 0)); 
-      if( face_labels.size() != 0 )
+
+      std::vector<int> recognition_indices = __facerecog->recognize( face_images, 0 ); 
+      int recognition_index = recognition_indices.at(0); 
+
+      std::vector<std::string> face_labels = __facerecog->get_identities(recognition_indices); 
+      if( face_labels.size() != 0 ) {
 	__face_label = face_labels[0];
-      else 
+        logger->log_info("FacerPipelineThread", "Current Face is recognized, person is %s", __face_label.c_str());
+	if( __roi_not_found_flag ) //previously a face was not reocgnized
+	  { 
+	    if( __person_recognized_cnt == 0 ) // start recording __SUBSEQ_FACES recognitions 
+	      {
+		__roi_not_found_flag = false; // reset the flag until another no-roi found
+		__person_labels[__person_recognized_cnt++] = recognition_index; // first recognition
+	      }
+	    else 
+	      {
+		__person_recognized_cnt = 0; // person went away, stop recording - reset flag
+	      }
+	  }
+	else 
+	  {
+	    if( __person_recognized_cnt < __SUBSEQ_FACES ) // if below __SUBSEQ_FACES 
+	      __person_labels[__person_recognized_cnt++] = recognition_index;  // subsequent recognitions 
+	    else 
+	      {
+		int histogram[__facerecog->get_n_identities()];  // all recorded 
+		for( int i = 0; i < __facerecog->get_n_identities(); i++ )
+		  histogram[i] = 0;
+		
+		for( int i = 0; i < (int)recognition_indices.size(); i++ ) 
+		  {
+		    ++histogram[recognition_indices.at(i)]; // record recognitions for each
+		  }
+
+		int max_label = -1, max_recognized = -1;
+		for( int i = 0; i < __facerecog->get_n_identities(); i++ )
+		  {
+		    if( histogram[__facerecog->get_n_identities()] > max_recognized ) //ginf max
+		      {
+			max_label = i;
+			max_recognized = histogram[__facerecog->get_n_identities()];
+		      }
+		  }
+		
+		// can also put a threshold here
+		logger->log_info("FacerPipelineThread","The final recognized identitey %d and %s", max_label, (face_labels.at(max_label)).c_str()); 
+
+		   
+	      }
+	  }
+      	
+      
+      } else {
 	logger->log_info("FacerPipelineThread", "No identity returned. Most probably forest has not been instantiated/training images not supplied."); 
+      }
       
       __facer_if->set_face_label(__face_label.c_str());
     } else {
       logger->log_info("FacerPipelineThread", "No ROIs found");
+      __roi_not_found_flag = true; 
     }
     break;
 
   case FacerInterface::OPMODE_LEARNING:
     // train new faces, recognition data is learned from current images
+    __rois = __classifier->classify();
+    if ( ! __rois->empty() ) {
+      // pass only most dominant ROI (biggest one)
+
+      logger->log_debug("FacerPipelineThread", "Smile, you're on robot TV!");
+
+      ROI &roi = *(__rois->begin());
+      CvRect roi_rect = cvRect(roi.start.x, roi.start.y, roi.width, roi.height);
+      cvSetImageROI(__image, roi_rect);
+      IplImage *face = cvCreateImage( cvSize(roi.width, roi.height),
+				      __image->depth, __image->nChannels);
+      
+      cvCopyImage(__image, face);
+      cvResetImageROI(__image);
+
+      IplImage *scaled_face = cvCreateImage( cvSize(48, 48),
+                                             __image->depth, __image->nChannels);
+
+      cvResize(face, scaled_face, CV_INTER_LINEAR);
+
+      if( debug ) { 
+	char *buffer;
+	asprintf( &buffer,"%d.png", ++__saved_faces ); 
+        logger->log_debug("FacerPipelineThread", "Face saved to %s", buffer);
+	cvvSaveImage( buffer, scaled_face ); 
+	free( buffer );
+      }
+
+      cvReleaseImage(&face);
+      cvReleaseImage(&scaled_face);
+    } else {
+      logger->log_info("FacerPipelineThread", "No ROIs found");
+
+    }
     break;
 
   default:

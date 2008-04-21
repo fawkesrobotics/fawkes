@@ -27,7 +27,7 @@
 #include <fvutils/recognition/faces.h>
 #include <fvutils/recognition/forest/Auxillary.hh>
 #include <fvutils/recognition/forest/UserDef.hh>
-#include <fvutils/recognition/forest/Forest.hh>
+
 #include <fvutils/recognition/forest/CommonHeaders.hh>
 #include <fvutils/recognition/forest/Parameters.hh>
 
@@ -50,6 +50,11 @@ FaceRecognizer::FaceRecognizer(const char* loc, int number_of_identities, int fo
   strcpy( __training_images_location, loc ); 
   __n_identities = number_of_identities;
   __forest_size = forest_size;
+  __config = new UserDef::ConfigClass( __n_identities );
+  __train_height = __train_width = 0; 
+  __forest = new Forest::ForestClass( __training_images_location, __n_identities, __train_height, __train_width, 
+				      *__config, __forest_size );
+  
 
  }
 
@@ -57,6 +62,8 @@ FaceRecognizer::FaceRecognizer(const char* loc, int number_of_identities, int fo
 /** Generic Destructor. */
 FaceRecognizer::~FaceRecognizer()
 {
+  delete __forest; 
+  delete __config; 
 }
 
 
@@ -72,17 +79,19 @@ FaceRecognizer::recognize(vector<IplImage*> faces, int number_of_identities )
 {
 
   if( number_of_identities != 0 )
-    this->__n_identities = number_of_identities; 
+    {
+      // @TODO introduce rebuilding the forest 
+    }
 
   FaceRecognizer::Identities identities;
   
-  int rescaling_height = 0, rescaling_width = 0;   // the detected faces need to be scaled to the following size 
-  UserDef::ConfigClass config( this->__n_identities );   // creating an instance of the config class
+//   int rescaling_height = 0, rescaling_width = 0;   // the detected faces need to be scaled to the following size 
+//   UserDef::ConfigClass config( this->__n_identities );   // creating an instance of the config class
 
   //BUILD FOREST
-  Forest::ForestClass *theForest = new Forest::ForestClass( this->__training_images_location, this->__n_identities, rescaling_height, 
-							    rescaling_width, config,  this->__forest_size);
-  CvSize rescaling_size = cvSize( rescaling_width, rescaling_height ); 
+//   Forest::ForestClass *theForest = new Forest::ForestClass( this->__training_images_location, this->__n_identities, rescaling_height, 
+// 							    rescaling_width, config,  this->__forest_size);
+  CvSize rescaling_size = cvSize( getTrainWidth(), getTrainHeight() ); 
 
   
   IplImage* face; 
@@ -90,11 +99,11 @@ FaceRecognizer::recognize(vector<IplImage*> faces, int number_of_identities )
     { 
       face = cvCreateImage( rescaling_size, faces.at(i)->depth, faces.at(i)->nChannels ); 
       cvResize( faces.at(i), face, CV_INTER_LINEAR );
-      identities.push_back( Forest::getClassLabelFromForest( theForest, face ) ); 
+      identities.push_back( Forest::getClassLabelFromForest( __forest, face ) ); 
       cvReleaseImage( &face ); 
     }
 
-  delete theForest;
+  //delete theForest;
   return identities; 
 }
 
@@ -120,8 +129,10 @@ FaceRecognizer::get_identities( Identities identities )
 { 
   std::vector<std::string> person_names;
  
-  for( Identities::iterator i = identities.begin(); i != identities.end(); ++i ) 
-    person_names.push_back( __person_names[*i] ); 
+  for( Identities::iterator i = identities.begin(); i != identities.end(); ++i ) {
+    printf("Processing Person %d, name is %s\n", *i, __person_names[*i].c_str());
+    person_names.push_back( __person_names[*i] );
+  }
   
   return person_names; 
 }
