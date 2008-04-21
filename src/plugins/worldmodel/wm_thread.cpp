@@ -69,7 +69,7 @@ WorldModelThread::bb_interface_created(const char *type, const char *id) throw()
       proxy->add_interface(opi);
       blackboard->register_listener( proxy, BlackBoard::BBIL_FLAG_WRITER | BlackBoard::BBIL_FLAG_READER );
       proxy_map[ opi->serial() ] = proxy;
-    } 
+    }
   } catch (Exception &e) {
     logger->log_error(name(), "Tried to open new %s interface instance "
 		      "'%s', failed, ignoring this interface.", type, id);
@@ -106,7 +106,7 @@ WorldModelThread::bb_interface_reader_removed(Interface *interface, unsigned int
 	}
       }
       in_ball_interfaces->unlock();
-      
+
       // mark corresponding proxy for deletion
       ProxyMap::iterator i = proxy_map.find( interface->serial() );
       if ( i != proxy_map.end() ) {
@@ -133,7 +133,7 @@ void
 WorldModelThread::bb_interface_writer_removed(Interface *interface, unsigned int instance_serial)  throw()
 {
   if ( interface->num_readers() == 1 ) {
-    
+
     // writer of Ball* interface removed
     if ( 0 == strncmp( interface->id(), "Ball", strlen("Ball") ) ) {
 
@@ -155,7 +155,7 @@ WorldModelThread::bb_interface_writer_removed(Interface *interface, unsigned int
       }
 
       // actually close interface
-      blackboard->close(interface);      
+      blackboard->close(interface);
     }
 
     // TODO: opponents
@@ -183,7 +183,7 @@ WorldModelThread::init()
     wm_ball_interface = blackboard->open_for_writing<ObjectPositionInterface>("WM Ball");
     wm_pose_interface = blackboard->open_for_writing<ObjectPositionInterface>("WM Pose");
     //wm_opp_interfaces = new std::list<ObjectPositionInterface *>();
-    
+
     // pose
     in_pose_interface = blackboard->open_for_reading<ObjectPositionInterface>("OmniLocalize");
 
@@ -191,9 +191,10 @@ WorldModelThread::init()
     in_ball_interfaces = new LockList<ObjectPositionInterface *>;
     std::list<ObjectPositionInterface *> *opi_list = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("Ball");
     for ( std::list<ObjectPositionInterface *>::iterator iter = opi_list->begin();
-	  iter != opi_list->end(); ++iter ) { 
+	  iter != opi_list->end(); ++iter ) {
       in_ball_interfaces->push_back_locked( *iter );
     }
+    delete opi_list;
 
     for (opii = in_ball_interfaces->begin(); opii != in_ball_interfaces->end(); ++opii) {
       BlackboardNotificationProxy* proxy = new BlackboardNotificationProxy(this);
@@ -203,16 +204,16 @@ WorldModelThread::init()
     }
 
     // TODO: opponents
-    
+
   } catch (Exception &e) {
     init_failure_cleanup();
     e.append("WorldModel::init() failed");
     throw;
   }
 
-  blackboard->register_observer(this, BlackBoard::BBIO_FLAG_CREATED | 
+  blackboard->register_observer(this, BlackBoard::BBIO_FLAG_CREATED |
 				      BlackBoard::BBIO_FLAG_DESTROYED);
-  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_WRITER | 
+  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_WRITER |
 				      BlackBoard::BBIL_FLAG_READER);
 }
 
@@ -265,14 +266,14 @@ WorldModelThread::finalize()
   blackboard->close(wm_ball_interface);
   blackboard->close(wm_pose_interface);
   //   for (wm_opp_interfaces->begin(); opii != wm_opp_interfaces->end(); ++opii) {
-  //     blackboard->close(*opii);    
+  //     blackboard->close(*opii);
   //   }
   //   delete wm_opp_interfaces;
-  
+
   blackboard->close(in_pose_interface);
 
   for (opii = in_ball_interfaces->begin(); opii != in_ball_interfaces->end(); ++opii) {
-    blackboard->close(*opii);    
+    blackboard->close(*opii);
   }
   delete in_ball_interfaces;
 
@@ -353,27 +354,27 @@ WorldModelThread::loop()
     case(GS_PLAY):
       wm_game_state_interface->set_game_state( GameStateInterface::GS_PLAY );
       break;
-	
+
     case(GS_KICK_OFF):
       wm_game_state_interface->set_game_state( GameStateInterface::GS_KICK_OFF );
       break;
-	
+
     case(GS_DROP_BALL):
       wm_game_state_interface->set_game_state( GameStateInterface::GS_DROP_BALL );
       break;
-	
+
     case(GS_PENALTY):
       wm_game_state_interface->set_game_state( GameStateInterface::GS_PENALTY );
       break;
-	
+
     case(GS_CORNER_KICK):
       wm_game_state_interface->set_game_state( GameStateInterface::GS_CORNER_KICK );
       break;
-	
+
     case(GS_THROW_IN):
       wm_game_state_interface->set_game_state( GameStateInterface::GS_THROW_IN );
       break;
-    
+
     case(GS_FREE_KICK):
       wm_game_state_interface->set_game_state( GameStateInterface::GS_FREE_KICK );
       break;
@@ -429,7 +430,7 @@ WorldModelThread::loop()
       wm_ball_interface->set_distance( ball_interface->distance() );
       wm_ball_interface->set_bearing( ball_interface->bearing() );
       wm_ball_interface->write();
-      
+
       if (worldinfo_sender) {
 	float dist = sqrt(rel_x * rel_x + rel_y * rel_y);
 	float bearing = atan2f(rel_y, rel_x);
@@ -446,17 +447,17 @@ WorldModelThread::loop()
       float robot_x;
       float robot_y;
       float robot_theta;
-      
+
       in_pose_interface->read();
       robot_x = in_pose_interface->world_x();
       robot_y = in_pose_interface->world_y();
       robot_theta = in_pose_interface->yaw();
-      
+
       wm_pose_interface->set_world_x(robot_x);
       wm_pose_interface->set_world_y(robot_y);
       wm_pose_interface->set_yaw(robot_theta);
-      
-      worldinfo_sender->set_pose( robot_x, robot_y, robot_theta, 
+
+      worldinfo_sender->set_pose( robot_x, robot_y, robot_theta,
 				  in_pose_interface->dyp_covariance() );
       worldinfo_sender->send();
     }
@@ -479,13 +480,13 @@ WorldModelThread::BlackboardNotificationProxy::~BlackboardNotificationProxy()
 }
 
 void
-WorldModelThread::BlackboardNotificationProxy::bb_interface_reader_added(Interface *interface, unsigned int instance_serial) throw() 
+WorldModelThread::BlackboardNotificationProxy::bb_interface_reader_added(Interface *interface, unsigned int instance_serial) throw()
 {
   listener->bb_interface_reader_added(interface, instance_serial);
 }
 
 void
-WorldModelThread::BlackboardNotificationProxy::bb_interface_reader_removed(Interface *interface, unsigned int instance_serial) throw() 
+WorldModelThread::BlackboardNotificationProxy::bb_interface_reader_removed(Interface *interface, unsigned int instance_serial) throw()
 {
   listener->bb_interface_reader_removed(interface, instance_serial);
 }
@@ -503,7 +504,7 @@ WorldModelThread::BlackboardNotificationProxy::bb_interface_writer_removed(Inter
 }
 
 void
-WorldModelThread::BlackboardNotificationProxy::add_interface(Interface *interface) 
+WorldModelThread::BlackboardNotificationProxy::add_interface(Interface *interface)
 {
   bbil_add_reader_interface(interface);
   bbil_add_writer_interface(interface);
