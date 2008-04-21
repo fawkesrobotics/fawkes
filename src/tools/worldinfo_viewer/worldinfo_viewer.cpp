@@ -83,7 +83,7 @@ WorldInfoViewer::get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
   Gtk::Widget* widget;
   ref_xml->get_widget(widget_name, widget);
   if ( !widget )
-    { 
+    {
       char* err_str;
       asprintf(&err_str, "Couldn't find widget %s", widget_name);
       throw std::runtime_error(err_str);
@@ -108,7 +108,8 @@ WorldInfoViewer::redraw_field()
     {
       // robot pose
       HomPose pose;
-      if ( m_data_container->get_robot_pose( hit->c_str(), pose) )
+      Matrix pose_cov;
+      if ( m_data_container->get_robot_pose( hit->c_str(), pose, pose_cov) )
 	{ m_field_view->set_robot_pose( hit->c_str(), pose.x(), pose.y(), pose.yaw()); }
 
       // global ball positions
@@ -119,11 +120,11 @@ WorldInfoViewer::redraw_field()
       // relative ball positions
 //       if ( m_data_container->get_ball_pos_relative(host_name, pos_rel) )
 // 	{ m_field_view->set_ball_pos(host_name, pos_rel.x(), pos_rel.y()); }
-      
+
       // opponents
       // TODO
     }
-  
+
   m_field_view->queue_draw();
 }
 

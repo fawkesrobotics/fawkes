@@ -29,6 +29,7 @@
 #include <geometry/hom_vector.h>
 #include <geometry/hom_point.h>
 #include <geometry/hom_pose.h>
+#include <geometry/matrix.h>
 #include <netcomm/worldinfo/enums.h>
 #include <string>
 #include <vector>
@@ -48,7 +49,7 @@ class WorldInfoDataContainer
     worldinfo_gamestate_t game_state;       /**< current game state */
     worldinfo_gamestate_team_t state_team;  /**< team association of the game state */
     unsigned int score_cyan;                /**< socre of the cyan-colored team */
-    unsigned int score_magenta;             /**< score of the magenta-colored team */ 
+    unsigned int score_magenta;             /**< score of the magenta-colored team */
     worldinfo_gamestate_half_t half;        /**< first or second half */
   };
 
@@ -62,11 +63,11 @@ class WorldInfoDataContainer
   void set_robot_pose( const char* from_host, float x, float y, float theta,
 		       float* covariance );
   bool delete_robot_pose(const char* from_host);
-  bool get_robot_pose(const char* host, HomPose& robot_pose);
+  bool get_robot_pose(const char* host, HomPose& robot_pose, Matrix &robot_pose_cov);
 
-  void set_ball_pos_relative( const char* from_host, float dist, 
+  void set_ball_pos_relative( const char* from_host, float dist,
 			      float bearing, float slope, float* covariance );
-  bool get_ball_pos_relative(const char* host, HomVector& ball_pos);
+  bool get_ball_pos_relative(const char* host, HomVector& ball_pos, Matrix &ball_pos_cov);
   bool get_ball_pos_global(const char* host, HomPoint& ball_pos);
   bool delete_ball_pos(const char* from_host);
 
@@ -92,19 +93,22 @@ class WorldInfoDataContainer
   std::string get_own_team_color_string() const;
   worldinfo_gamestate_goalcolor_t get_own_goal_color() const;
   std::string get_own_goal_color_string() const;
-  
+
  private:
   typedef LockMap<std::string, unsigned int> HostLockMap;
   typedef LockMap<unsigned int, HomVector> RelPosLockMap;
   typedef LockMap<unsigned int, HomPoint> GlobPosLockMap;
   typedef LockMap<unsigned int, HomPose> PoseLockMap;
-    
+  typedef LockMap<unsigned int, Matrix> MatrixLockMap;
+
   HostLockMap m_hosts;
   LockMap<unsigned int, long> m_last_seen;
   PoseLockMap m_robot_pose;
   RelPosLockMap m_ball_pos_rel;
   GlobPosLockMap m_ball_pos_global;
   LockMap<unsigned int, PosMap> m_opponent_pos;
+  MatrixLockMap m_ball_pos_rel_cov;
+  MatrixLockMap m_robot_pose_cov;
 
   unsigned int m_host_id;
 
@@ -115,4 +119,4 @@ class WorldInfoDataContainer
   Clock* m_clock;
 };
 
-#endif /* __TOOLS_WORLDINFO_VIEWER_DATA_CONTAINER_H_ */ 
+#endif /* __TOOLS_WORLDINFO_VIEWER_DATA_CONTAINER_H_ */

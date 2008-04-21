@@ -79,7 +79,7 @@ WorldInfoDataContainer::get_hosts()
       if ( now.in_msec() - m_last_seen[ iter->second ] < 3000 )
 	{ hosts.push_back( iter->first ); }
       else
-	{ 
+	{
 	  unsigned int id = iter->second;
 	  m_last_seen.lock();
 	  m_last_seen.erase(id);
@@ -103,7 +103,7 @@ WorldInfoDataContainer::get_hosts()
 	}
     }
   m_hosts.unlock();
-  
+
   return hosts;
 }
 
@@ -130,14 +130,14 @@ WorldInfoDataContainer::set_robot_pose( const char* host, float x, float y, floa
       m_hosts[ string(host) ] = id;
     }
   else
-    { 
-      id = iter->second; 
+    {
+      id = iter->second;
     }
   m_hosts.unlock();
-  
+
   Time now(m_clock);
   now.stamp();
-  
+
   m_last_seen.lock();
   m_last_seen[id] = now.in_msec();
   m_last_seen.unlock();
@@ -146,6 +146,10 @@ WorldInfoDataContainer::set_robot_pose( const char* host, float x, float y, floa
   m_robot_pose.lock();
   m_robot_pose[id] = p;
   m_robot_pose.unlock();
+
+  m_robot_pose_cov.lock();
+  m_robot_pose_cov[id] = Matrix( 3, 3, covariance );
+  m_robot_pose_cov.unlock();
 }
 
 
@@ -163,7 +167,7 @@ WorldInfoDataContainer::delete_robot_pose(const char* host)
       m_hosts.unlock();
       return false;
     }
-  
+
   m_hosts.erase(iter);
   m_hosts.unlock();
   return true;
@@ -174,10 +178,12 @@ WorldInfoDataContainer::delete_robot_pose(const char* host)
  * @param host the hostname of the robot
  * @param robot_pose reference to a HomPoint where the global position of the robot is
  *        written to
+ * @param robot_pose_cov reference to a Matrix where the covariance of the robot position
+          is written to
  * @return true if a pose for the robot could be found
  */
 bool
-WorldInfoDataContainer::get_robot_pose(const char* host, HomPose& robot_pose)
+WorldInfoDataContainer::get_robot_pose(const char* host, HomPose& robot_pose, Matrix &robot_pose_cov)
 {
   HostLockMap::iterator hit;
   PoseLockMap::iterator pit;
@@ -195,14 +201,24 @@ WorldInfoDataContainer::get_robot_pose(const char* host, HomPose& robot_pose)
   pit = m_robot_pose.find( hit->second );
   if ( pit == m_robot_pose.end() )
     // no pose for given robot
-    { 
+    {
       m_robot_pose.unlock();
       return false;
     }
 
   robot_pose = pit->second;
   m_robot_pose.unlock();
-  
+
+  m_robot_pose_cov.lock();
+  MatrixLockMap::const_iterator it = m_robot_pose_cov.find( hit->second );
+  if ( it == m_robot_pose_cov.end() )
+    {
+      m_robot_pose_cov.unlock();
+      return false;
+    }
+  robot_pose_cov = it->second;
+  m_robot_pose_cov.unlock();
+
   return true;
 }
 
@@ -214,7 +230,7 @@ WorldInfoDataContainer::get_robot_pose(const char* host, HomPose& robot_pose)
  * @param covariance covariance associated with the position estimation
  */
 void
-WorldInfoDataContainer::set_ball_pos_relative( const char* host, float dist, 
+WorldInfoDataContainer::set_ball_pos_relative( const char* host, float dist,
 					       float bearing, float slope, float* covariance )
 {
   string host_string(host);
@@ -228,14 +244,14 @@ WorldInfoDataContainer::set_ball_pos_relative( const char* host, float dist,
       m_hosts[ string(host) ] = id;
     }
   else
-    { 
-      id = iter->second; 
+    {
+      id = iter->second;
     }
   m_hosts.unlock();
 
   Time now(m_clock);
   now.stamp();
-  
+
   m_last_seen.lock();
   m_last_seen[id] = now.in_msec();
   m_last_seen.unlock();
@@ -249,8 +265,13 @@ WorldInfoDataContainer::set_ball_pos_relative( const char* host, float dist,
   m_ball_pos_rel[id] = rel_pos;
   m_ball_pos_rel.unlock();
 
+  m_ball_pos_rel_cov.lock();
+  m_ball_pos_rel_cov[id] = Matrix( 3, 3, covariance );
+  m_ball_pos_rel_cov.unlock();
+
   HomPose robot_pose;
-  if ( get_robot_pose(host, robot_pose) )
+  Matrix robot_pose_cov( 3, 3 );
+  if ( get_robot_pose(host, robot_pose, robot_pose_cov) )
     {
       HomPoint glob_pos;
       glob_pos = rel_pos.rotate_z( robot_pose.yaw() ) + robot_pose.pos();
@@ -267,7 +288,7 @@ WorldInfoDataContainer::set_ball_pos_relative( const char* host, float dist,
  * @return true if a global ball position was found
  */
 bool
-WorldInfoDataContainer::get_ball_pos_relative(const char* host, HomVector& ball_pos)
+WorldInfoDataContainer::get_ball_pos_relative(const char* host, HomVector& ball_pos, Matrix &ball_pos_cov)
 {
   HostLockMap::iterator hit;
   RelPosLockMap::iterator bit;
@@ -285,14 +306,24 @@ WorldInfoDataContainer::get_ball_pos_relative(const char* host, HomVector& ball_
   bit = m_ball_pos_rel.find(hit->second);
   if ( bit == m_ball_pos_rel.end() )
     // no relative ball position for given robot
-    { 
+    {
       m_ball_pos_rel.unlock();
       return false;
     }
 
   ball_pos = bit->second;
   m_ball_pos_rel.unlock();
-  
+
+  m_ball_pos_rel_cov.lock();
+  MatrixLockMap::const_iterator it = m_ball_pos_rel_cov.find( hit->second );
+  if ( it == m_ball_pos_rel_cov.end() )
+    {
+      m_ball_pos_rel_cov.unlock();
+      return false;
+    }
+  ball_pos_cov = it->second;
+  m_ball_pos_rel_cov.lock();
+
   return true;
 }
 
@@ -300,6 +331,7 @@ WorldInfoDataContainer::get_ball_pos_relative(const char* host, HomVector& ball_
 /** Get the global position of the ball as it is estimated by the specified robot.
  * @param host the robot's hostname
  * @param ball_pos refercence to a HomPoint where the position of the ball written to
+ * @param ball_pos_cov reference to a Matrix where the ball position covariance is written to
  */
 bool
 WorldInfoDataContainer::get_ball_pos_global(const char* host, HomPoint& ball_pos)
@@ -320,14 +352,14 @@ WorldInfoDataContainer::get_ball_pos_global(const char* host, HomPoint& ball_pos
   bit = m_ball_pos_global.find(hit->second);
   if ( bit == m_ball_pos_global.end() )
     // no global ball position for given robot
-    { 
+    {
       m_ball_pos_global.unlock();
       return false;
     }
 
   ball_pos = bit->second;
   m_ball_pos_global.unlock();
-  
+
   return true;
 }
 
@@ -347,7 +379,7 @@ WorldInfoDataContainer::delete_ball_pos(const char* host)
       m_hosts.unlock();
       return false;
     }
-  
+
   m_ball_pos_rel.lock();
   m_ball_pos_rel.erase( iter->second );
   m_ball_pos_rel.unlock();
@@ -378,14 +410,14 @@ WorldInfoDataContainer::set_opponent_pos( const char* host, unsigned int uid,
       m_hosts[ string(host) ] = id;
     }
   else
-    { 
-      id = iter->second; 
+    {
+      id = iter->second;
     }
   m_hosts.unlock();
 
   Time now(m_clock);
   now.stamp();
-  
+
   m_last_seen.lock();
   m_last_seen[id] = now.in_msec();
   m_last_seen.unlock();
@@ -403,7 +435,7 @@ WorldInfoDataContainer::set_opponent_pos( const char* host, unsigned int uid,
  * @param opp_positions map containing the positions of the detected opponents
  */
 bool
-WorldInfoDataContainer::get_opponent_pos( const char* host, 
+WorldInfoDataContainer::get_opponent_pos( const char* host,
 					  WorldInfoDataContainer::PosMap& opp_positions )
 {
   // TODO
@@ -433,7 +465,7 @@ WorldInfoDataContainer::set_game_state( worldinfo_gamestate_t game_state,
   m_game_state.score_cyan    = score_cyan;
   m_game_state.score_magenta = score_magenta;
   m_game_state.half          = half;
-  
+
   m_own_team_color = own_team;
   m_own_goal_color = own_goal_color;
 }
@@ -509,7 +541,7 @@ std::string
 WorldInfoDataContainer::get_own_team_color_string() const
 {
   const char* team_color = worldinfo_gamestate_team_tostring(m_own_team_color);
-  
+
   return string(team_color);
 }
 
@@ -529,6 +561,6 @@ std::string
 WorldInfoDataContainer::get_own_goal_color_string() const
 {
   const char* goal_color = worldinfo_gamestate_goalcolor_tostring(m_own_goal_color);
-  
+
   return string(goal_color);
 }

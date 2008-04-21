@@ -31,8 +31,8 @@ class Vector;
 class Matrix
 {
  public:
-  Matrix( unsigned int num_rows,
-	  unsigned int num_cols,
+  Matrix( unsigned int num_rows = 0,
+	  unsigned int num_cols = 0,
 	  float* data = 0 );
   Matrix(const Matrix& m);
   ~Matrix();
@@ -73,7 +73,7 @@ class Matrix
 
   Matrix  operator*(const float& f) const;
   Matrix& operator*=(const float& f);
-  
+
   Matrix  operator/(const float& f) const;
   Matrix& operator/=(const float& f);
 
@@ -90,7 +90,7 @@ class Matrix
   void sub_row( unsigned int row_a,
 		unsigned int row_b,
 		float factor );
-  
+
   Vector** m_columns;
 
   unsigned int m_num_rows;

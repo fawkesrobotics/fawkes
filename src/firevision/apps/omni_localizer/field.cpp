@@ -300,8 +300,8 @@ void Field::drawField()
     mWMBallInterface->read();
     drawer.setColor( 128, 0, 192 );
     float radius = 0.2f;
-    if ( mWMBallInterface->dyp_covariance() )
-      radius = mWMBallInterface->dyp_covariance()[4];
+    if ( mWMBallInterface->dbs_covariance() )
+      radius = mWMBallInterface->dbs_covariance()[4];
     radius = max( radius, 0.1f );
     drawer.drawCircle( mapToImageX( mWMBallInterface->world_x() ),
                        mapToImageY( mWMBallInterface->world_y() ),

@@ -422,19 +422,19 @@ WorldModelThread::loop()
       bool visible = ball_interface->is_visible();
       float rel_x = ball_interface->relative_x();
       float rel_y = ball_interface->relative_y();
+      float dist = ball_interface->distance();
+      float bearing = ball_interface->bearing();
       wm_ball_interface->set_object_type( ObjectPositionInterface::TYPE_BALL );
       wm_ball_interface->set_visible(visible);
       wm_ball_interface->set_flags( ball_interface->flags() );
       wm_ball_interface->set_relative_x(rel_x);
       wm_ball_interface->set_relative_y(rel_y);
-      wm_ball_interface->set_distance( ball_interface->distance() );
-      wm_ball_interface->set_bearing( ball_interface->bearing() );
+      wm_ball_interface->set_distance( dist );
+      wm_ball_interface->set_bearing( bearing );
       wm_ball_interface->write();
 
       if (worldinfo_sender) {
-	float dist = sqrt(rel_x * rel_x + rel_y * rel_y);
-	float bearing = atan2f(rel_y, rel_x);
-	float *cov = ball_interface->dyp_covariance();
+	float *cov = ball_interface->dbs_covariance();
 	worldinfo_sender->set_ball_pos(dist, bearing, 0.0 /* slope */, cov);
 	worldinfo_sender->set_ball_visible(visible, 1);
 	worldinfo_sender->send();
@@ -451,14 +451,15 @@ WorldModelThread::loop()
       in_pose_interface->read();
       robot_x = in_pose_interface->world_x();
       robot_y = in_pose_interface->world_y();
-      robot_theta = in_pose_interface->yaw();
+      robot_theta = in_pose_interface->world_z();
+      float *robot_cov = in_pose_interface->world_xyz_covariance();
 
       wm_pose_interface->set_world_x(robot_x);
       wm_pose_interface->set_world_y(robot_y);
-      wm_pose_interface->set_yaw(robot_theta);
+      wm_pose_interface->set_world_z(robot_theta);
+      wm_pose_interface->set_world_xyz_covariance( robot_cov );
 
-      worldinfo_sender->set_pose( robot_x, robot_y, robot_theta,
-				  in_pose_interface->dyp_covariance() );
+      worldinfo_sender->set_pose( robot_x, robot_y, robot_theta, robot_cov );
       worldinfo_sender->send();
     }
 

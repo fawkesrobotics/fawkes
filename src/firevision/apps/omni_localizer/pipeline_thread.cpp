@@ -177,7 +177,8 @@ void FvOmniLocalizerPipelineThread::init()
     mPositionInterface->set_object_type( ObjectPositionInterface::TYPE_SELF );
     mPositionInterface->set_visible( true );
     mPositionInterface->set_flags( ObjectPositionInterface::FLAG_HAS_WORLD |
-                                   ObjectPositionInterface::FLAG_HAS_COVARIANCES );
+                                   ObjectPositionInterface::FLAG_HAS_COVARIANCES |
+                                   ObjectPositionInterface::FLAG_HAS_Z_AS_ORI );
     mPositionInterface->write();
   } catch ( Exception &e ) {
     e.append( "Opening object position interface failed!" );
@@ -229,7 +230,7 @@ void FvOmniLocalizerPipelineThread::finalize()
   }
 }
 
-#define DEBUG_IMAGE_SCALE 125.0
+#define DEBUG_IMAGE_SCALE 100.0
 
 void FvOmniLocalizerPipelineThread::loop()
 {
@@ -378,15 +379,13 @@ void FvOmniLocalizerPipelineThread::loop()
   field_pos_t currentVar = mMCL->variance();
   mPositionInterface->set_world_x( currentPos.x );
   mPositionInterface->set_world_y( currentPos.y );
-  mPositionInterface->set_yaw( currentPos.ori );
+  mPositionInterface->set_world_z( currentPos.ori );
   float *cov = new float[9];
   memset( cov, 0, 9 );
   cov[0] = currentVar.x;
   cov[4] = currentVar.y;
-  mPositionInterface->set_xyz_covariance( cov );
-  memset( cov, 0, 9 );
-  cov[4] = currentVar.ori;
-  mPositionInterface->set_dyp_covariance( cov );
+  cov[8] = currentVar.ori;
+  mPositionInterface->set_world_xyz_covariance( cov );
   mPositionInterface->write();
   delete[] cov;
 
