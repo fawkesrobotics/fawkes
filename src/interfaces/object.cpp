@@ -74,8 +74,8 @@ const unsigned int ObjectPositionInterface::FLAG_HAS_CIRCULAR_EXTENT = 64;
 const unsigned int ObjectPositionInterface::FLAG_HAS_COVARIANCES = 128;
 /** FLAG_HAS_WORLD_VELOCITY constant */
 const unsigned int ObjectPositionInterface::FLAG_HAS_WORLD_VELOCITY = 256;
-/** FLAG_HAS_POLAR_VELOCITY constant */
-const unsigned int ObjectPositionInterface::FLAG_HAS_POLAR_VELOCITY = 512;
+/** FLAG_HAS_Z_AS_ORI constant */
+const unsigned int ObjectPositionInterface::FLAG_HAS_Z_AS_ORI = 512;
 
 /** Constructor */
 ObjectPositionInterface::ObjectPositionInterface() : Interface()
@@ -87,32 +87,34 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   add_fieldinfo(Interface::IFT_UINT, "object_type", &data->object_type);
   add_fieldinfo(Interface::IFT_UINT, "flags", &data->flags);
   add_fieldinfo(Interface::IFT_BOOL, "visible", &data->visible);
+  add_fieldinfo(Interface::IFT_INT, "visibility_history", &data->visibility_history);
   add_fieldinfo(Interface::IFT_FLOAT, "roll", &data->roll);
   add_fieldinfo(Interface::IFT_FLOAT, "pitch", &data->pitch);
   add_fieldinfo(Interface::IFT_FLOAT, "yaw", &data->yaw);
+  add_fieldinfo(Interface::IFT_FLOAT, "distance", &data->distance);
   add_fieldinfo(Interface::IFT_FLOAT, "bearing", &data->bearing);
   add_fieldinfo(Interface::IFT_FLOAT, "slope", &data->slope);
-  add_fieldinfo(Interface::IFT_FLOAT, "distance", &data->distance);
-  add_fieldinfo(Interface::IFT_FLOAT, "dyp_covariance", &data->dyp_covariance);
+  add_fieldinfo(Interface::IFT_FLOAT, "dbs_covariance", &data->dbs_covariance);
   add_fieldinfo(Interface::IFT_FLOAT, "world_x", &data->world_x);
   add_fieldinfo(Interface::IFT_FLOAT, "world_y", &data->world_y);
   add_fieldinfo(Interface::IFT_FLOAT, "world_z", &data->world_z);
+  add_fieldinfo(Interface::IFT_FLOAT, "world_xyz_covariance", &data->world_xyz_covariance);
   add_fieldinfo(Interface::IFT_FLOAT, "relative_x", &data->relative_x);
   add_fieldinfo(Interface::IFT_FLOAT, "relative_y", &data->relative_y);
   add_fieldinfo(Interface::IFT_FLOAT, "relative_z", &data->relative_z);
-  add_fieldinfo(Interface::IFT_FLOAT, "xyz_covariance", &data->xyz_covariance);
+  add_fieldinfo(Interface::IFT_FLOAT, "relative_xyz_covariance", &data->relative_xyz_covariance);
   add_fieldinfo(Interface::IFT_FLOAT, "extent_x", &data->extent_x);
   add_fieldinfo(Interface::IFT_FLOAT, "extent_y", &data->extent_y);
   add_fieldinfo(Interface::IFT_FLOAT, "extent_z", &data->extent_z);
-  add_fieldinfo(Interface::IFT_FLOAT, "bearing_velocity", &data->bearing_velocity);
-  add_fieldinfo(Interface::IFT_FLOAT, "slope_velocity", &data->slope_velocity);
-  add_fieldinfo(Interface::IFT_FLOAT, "distance_velocity", &data->distance_velocity);
-  add_fieldinfo(Interface::IFT_FLOAT, "dbs_velocity_covariance", &data->dbs_velocity_covariance);
   add_fieldinfo(Interface::IFT_FLOAT, "world_x_velocity", &data->world_x_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "world_y_velocity", &data->world_y_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "world_z_velocity", &data->world_z_velocity);
-  add_fieldinfo(Interface::IFT_FLOAT, "xyz_velocity_covariance", &data->xyz_velocity_covariance);
-  unsigned char tmp_hash[] = {0x7, 0x9d, 0x6f, 0x5f, 0x97, 0xb1, 0xfe, 0xa, 0xbb, 0xcb, 0xaf, 0x41, 0x31, 0xd4, 0x9d, 0x15};
+  add_fieldinfo(Interface::IFT_FLOAT, "world_xyz_velocity_covariance", &data->world_xyz_velocity_covariance);
+  add_fieldinfo(Interface::IFT_FLOAT, "relative_x_velocity", &data->relative_x_velocity);
+  add_fieldinfo(Interface::IFT_FLOAT, "relative_y_velocity", &data->relative_y_velocity);
+  add_fieldinfo(Interface::IFT_FLOAT, "relative_z_velocity", &data->relative_z_velocity);
+  add_fieldinfo(Interface::IFT_FLOAT, "relative_xyz_velocity_covariance", &data->relative_xyz_velocity_covariance);
+  unsigned char tmp_hash[] = {0xa9, 0xa8, 0xeb, 0x57, 0x72, 0x1e, 0x36, 0x54, 0x52, 0x73, 0xcb, 0xab, 0x84, 0x2a, 0x25, 0x76};
   set_hash(tmp_hash);
 }
 
@@ -228,6 +230,48 @@ ObjectPositionInterface::set_visible(const bool new_visible)
   data->visible = new_visible;
 }
 
+/** Get visibility_history value.
+ * 
+      The visibilitiy history indicates the number of consecutive positive or negative
+      sightings. If the history is negative, there have been as many negative sightings
+      (object not visible) as the absolute value of the history. A positive value denotes
+      as many positive sightings. 0 shall only be used during the initialisation of the
+      interface or if the visibility history is not filled.
+    
+ * @return visibility_history value
+ */
+int
+ObjectPositionInterface::visibility_history()
+{
+  return data->visibility_history;
+}
+
+/** Get maximum length of visibility_history value.
+ * @return length of visibility_history value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_visibility_history() const
+{
+  return 1;
+}
+
+/** Set visibility_history value.
+ * 
+      The visibilitiy history indicates the number of consecutive positive or negative
+      sightings. If the history is negative, there have been as many negative sightings
+      (object not visible) as the absolute value of the history. A positive value denotes
+      as many positive sightings. 0 shall only be used during the initialisation of the
+      interface or if the visibility history is not filled.
+    
+ * @param new_visibility_history new visibility_history value
+ */
+void
+ObjectPositionInterface::set_visibility_history(const int new_visibility_history)
+{
+  data->visibility_history = new_visibility_history;
+}
+
 /** Get roll value.
  * 
       Roll value for the orientation of the object in space.
@@ -330,6 +374,42 @@ ObjectPositionInterface::set_yaw(const float new_yaw)
   data->yaw = new_yaw;
 }
 
+/** Get distance value.
+ * 
+      Distance from the robot to the object on the ground plane. The distance is given
+      in meters.
+    
+ * @return distance value
+ */
+float
+ObjectPositionInterface::distance()
+{
+  return data->distance;
+}
+
+/** Get maximum length of distance value.
+ * @return length of distance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_distance() const
+{
+  return 1;
+}
+
+/** Set distance value.
+ * 
+      Distance from the robot to the object on the ground plane. The distance is given
+      in meters.
+    
+ * @param new_distance new distance value
+ */
+void
+ObjectPositionInterface::set_distance(const float new_distance)
+{
+  data->distance = new_distance;
+}
+
 /** Get bearing value.
  * 
       Angle between the robot's forward direction and the object on the ground plane.
@@ -404,78 +484,42 @@ ObjectPositionInterface::set_slope(const float new_slope)
   data->slope = new_slope;
 }
 
-/** Get distance value.
- * 
-      Distance from the robot to the object on the ground plane. The distance is given
-      in meters.
-    
- * @return distance value
- */
-float
-ObjectPositionInterface::distance()
-{
-  return data->distance;
-}
-
-/** Get maximum length of distance value.
- * @return length of distance value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-ObjectPositionInterface::maxlenof_distance() const
-{
-  return 1;
-}
-
-/** Set distance value.
- * 
-      Distance from the robot to the object on the ground plane. The distance is given
-      in meters.
-    
- * @param new_distance new distance value
- */
-void
-ObjectPositionInterface::set_distance(const float new_distance)
-{
-  data->distance = new_distance;
-}
-
-/** Get dyp_covariance value.
+/** Get dbs_covariance value.
  * 
       Covariance of Distance/Yaw/Pitch values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
     
- * @return dyp_covariance value
+ * @return dbs_covariance value
  */
 float *
-ObjectPositionInterface::dyp_covariance()
+ObjectPositionInterface::dbs_covariance()
 {
-  return data->dyp_covariance;
+  return data->dbs_covariance;
 }
 
-/** Get maximum length of dyp_covariance value.
- * @return length of dyp_covariance value, can be length of the array or number of 
+/** Get maximum length of dbs_covariance value.
+ * @return length of dbs_covariance value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-ObjectPositionInterface::maxlenof_dyp_covariance() const
+ObjectPositionInterface::maxlenof_dbs_covariance() const
 {
   return 9;
 }
 
-/** Set dyp_covariance value.
+/** Set dbs_covariance value.
  * 
       Covariance of Distance/Yaw/Pitch values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
     
- * @param new_dyp_covariance new dyp_covariance value
+ * @param new_dbs_covariance new dbs_covariance value
  */
 void
-ObjectPositionInterface::set_dyp_covariance(const float * new_dyp_covariance)
+ObjectPositionInterface::set_dbs_covariance(const float * new_dbs_covariance)
 {
-  memcpy(data->dyp_covariance, new_dyp_covariance, sizeof(float) * 9);
+  memcpy(data->dbs_covariance, new_dbs_covariance, sizeof(float) * 9);
 }
 
 /** Get world_x value.
@@ -592,6 +636,44 @@ ObjectPositionInterface::set_world_z(const float new_world_z)
   data->world_z = new_world_z;
 }
 
+/** Get world_xyz_covariance value.
+ * 
+      Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
+      first three values represent row, next tree values second row and last three values
+      last row from left to right each.
+    
+ * @return world_xyz_covariance value
+ */
+float *
+ObjectPositionInterface::world_xyz_covariance()
+{
+  return data->world_xyz_covariance;
+}
+
+/** Get maximum length of world_xyz_covariance value.
+ * @return length of world_xyz_covariance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_world_xyz_covariance() const
+{
+  return 9;
+}
+
+/** Set world_xyz_covariance value.
+ * 
+      Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
+      first three values represent row, next tree values second row and last three values
+      last row from left to right each.
+    
+ * @param new_world_xyz_covariance new world_xyz_covariance value
+ */
+void
+ObjectPositionInterface::set_world_xyz_covariance(const float * new_world_xyz_covariance)
+{
+  memcpy(data->world_xyz_covariance, new_world_xyz_covariance, sizeof(float) * 9);
+}
+
 /** Get relative_x value.
  * 
       This is the X coordinate in the cartesian right-handed robot coordinate system.
@@ -694,42 +776,42 @@ ObjectPositionInterface::set_relative_z(const float new_relative_z)
   data->relative_z = new_relative_z;
 }
 
-/** Get xyz_covariance value.
+/** Get relative_xyz_covariance value.
  * 
-      Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
+      Covariance of relative x/y/z values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
     
- * @return xyz_covariance value
+ * @return relative_xyz_covariance value
  */
 float *
-ObjectPositionInterface::xyz_covariance()
+ObjectPositionInterface::relative_xyz_covariance()
 {
-  return data->xyz_covariance;
+  return data->relative_xyz_covariance;
 }
 
-/** Get maximum length of xyz_covariance value.
- * @return length of xyz_covariance value, can be length of the array or number of 
+/** Get maximum length of relative_xyz_covariance value.
+ * @return length of relative_xyz_covariance value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-ObjectPositionInterface::maxlenof_xyz_covariance() const
+ObjectPositionInterface::maxlenof_relative_xyz_covariance() const
 {
   return 9;
 }
 
-/** Set xyz_covariance value.
+/** Set relative_xyz_covariance value.
  * 
-      Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
+      Covariance of relative x/y/z values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
     
- * @param new_xyz_covariance new xyz_covariance value
+ * @param new_relative_xyz_covariance new relative_xyz_covariance value
  */
 void
-ObjectPositionInterface::set_xyz_covariance(const float * new_xyz_covariance)
+ObjectPositionInterface::set_relative_xyz_covariance(const float * new_relative_xyz_covariance)
 {
-  memcpy(data->xyz_covariance, new_xyz_covariance, sizeof(float) * 9);
+  memcpy(data->relative_xyz_covariance, new_relative_xyz_covariance, sizeof(float) * 9);
 }
 
 /** Get extent_x value.
@@ -834,146 +916,6 @@ ObjectPositionInterface::set_extent_z(const float new_extent_z)
   data->extent_z = new_extent_z;
 }
 
-/** Get bearing_velocity value.
- * 
-      Gives the velocity of the object for bearing in radians per second.
-    
- * @return bearing_velocity value
- */
-float
-ObjectPositionInterface::bearing_velocity()
-{
-  return data->bearing_velocity;
-}
-
-/** Get maximum length of bearing_velocity value.
- * @return length of bearing_velocity value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-ObjectPositionInterface::maxlenof_bearing_velocity() const
-{
-  return 1;
-}
-
-/** Set bearing_velocity value.
- * 
-      Gives the velocity of the object for bearing in radians per second.
-    
- * @param new_bearing_velocity new bearing_velocity value
- */
-void
-ObjectPositionInterface::set_bearing_velocity(const float new_bearing_velocity)
-{
-  data->bearing_velocity = new_bearing_velocity;
-}
-
-/** Get slope_velocity value.
- * 
-      Gives the velocity of the object for slope in radians per second.
-    
- * @return slope_velocity value
- */
-float
-ObjectPositionInterface::slope_velocity()
-{
-  return data->slope_velocity;
-}
-
-/** Get maximum length of slope_velocity value.
- * @return length of slope_velocity value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-ObjectPositionInterface::maxlenof_slope_velocity() const
-{
-  return 1;
-}
-
-/** Set slope_velocity value.
- * 
-      Gives the velocity of the object for slope in radians per second.
-    
- * @param new_slope_velocity new slope_velocity value
- */
-void
-ObjectPositionInterface::set_slope_velocity(const float new_slope_velocity)
-{
-  data->slope_velocity = new_slope_velocity;
-}
-
-/** Get distance_velocity value.
- * 
-      Gives the velocity of the object distance meter per second.
-    
- * @return distance_velocity value
- */
-float
-ObjectPositionInterface::distance_velocity()
-{
-  return data->distance_velocity;
-}
-
-/** Get maximum length of distance_velocity value.
- * @return length of distance_velocity value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-ObjectPositionInterface::maxlenof_distance_velocity() const
-{
-  return 1;
-}
-
-/** Set distance_velocity value.
- * 
-      Gives the velocity of the object distance meter per second.
-    
- * @param new_distance_velocity new distance_velocity value
- */
-void
-ObjectPositionInterface::set_distance_velocity(const float new_distance_velocity)
-{
-  data->distance_velocity = new_distance_velocity;
-}
-
-/** Get dbs_velocity_covariance value.
- * 
-      Covariance of Distance/Bearing/Slope velocity values. This is a 3x3 matrix ordered
-      line by line, first three values represent row, next tree values second row and
-      last three values last row from left to right each.
-    
- * @return dbs_velocity_covariance value
- */
-float *
-ObjectPositionInterface::dbs_velocity_covariance()
-{
-  return data->dbs_velocity_covariance;
-}
-
-/** Get maximum length of dbs_velocity_covariance value.
- * @return length of dbs_velocity_covariance value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-ObjectPositionInterface::maxlenof_dbs_velocity_covariance() const
-{
-  return 9;
-}
-
-/** Set dbs_velocity_covariance value.
- * 
-      Covariance of Distance/Bearing/Slope velocity values. This is a 3x3 matrix ordered
-      line by line, first three values represent row, next tree values second row and
-      last three values last row from left to right each.
-    
- * @param new_dbs_velocity_covariance new dbs_velocity_covariance value
- */
-void
-ObjectPositionInterface::set_dbs_velocity_covariance(const float * new_dbs_velocity_covariance)
-{
-  memcpy(data->dbs_velocity_covariance, new_dbs_velocity_covariance, sizeof(float) * 9);
-}
-
 /** Get world_x_velocity value.
  * 
       Velocity of object in the world coordinate system in X-direction in meter per second.
@@ -1076,42 +1018,182 @@ ObjectPositionInterface::set_world_z_velocity(const float new_world_z_velocity)
   data->world_z_velocity = new_world_z_velocity;
 }
 
-/** Get xyz_velocity_covariance value.
+/** Get world_xyz_velocity_covariance value.
  * 
-      Covariance of WorldX/WorldY/WorldZ valocity values. This is a 3x3 matrix ordered line
+      Covariance of WorldX/WorldY/WorldZ velocity values. This is a 3x3 matrix ordered line
       by line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
     
- * @return xyz_velocity_covariance value
+ * @return world_xyz_velocity_covariance value
  */
 float *
-ObjectPositionInterface::xyz_velocity_covariance()
+ObjectPositionInterface::world_xyz_velocity_covariance()
 {
-  return data->xyz_velocity_covariance;
+  return data->world_xyz_velocity_covariance;
 }
 
-/** Get maximum length of xyz_velocity_covariance value.
- * @return length of xyz_velocity_covariance value, can be length of the array or number of 
+/** Get maximum length of world_xyz_velocity_covariance value.
+ * @return length of world_xyz_velocity_covariance value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-ObjectPositionInterface::maxlenof_xyz_velocity_covariance() const
+ObjectPositionInterface::maxlenof_world_xyz_velocity_covariance() const
 {
   return 9;
 }
 
-/** Set xyz_velocity_covariance value.
+/** Set world_xyz_velocity_covariance value.
  * 
-      Covariance of WorldX/WorldY/WorldZ valocity values. This is a 3x3 matrix ordered line
+      Covariance of WorldX/WorldY/WorldZ velocity values. This is a 3x3 matrix ordered line
       by line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
     
- * @param new_xyz_velocity_covariance new xyz_velocity_covariance value
+ * @param new_world_xyz_velocity_covariance new world_xyz_velocity_covariance value
  */
 void
-ObjectPositionInterface::set_xyz_velocity_covariance(const float * new_xyz_velocity_covariance)
+ObjectPositionInterface::set_world_xyz_velocity_covariance(const float * new_world_xyz_velocity_covariance)
 {
-  memcpy(data->xyz_velocity_covariance, new_xyz_velocity_covariance, sizeof(float) * 9);
+  memcpy(data->world_xyz_velocity_covariance, new_world_xyz_velocity_covariance, sizeof(float) * 9);
+}
+
+/** Get relative_x_velocity value.
+ * 
+      Velocity of object in the world coordinate system in X-direction in meter per second.
+    
+ * @return relative_x_velocity value
+ */
+float
+ObjectPositionInterface::relative_x_velocity()
+{
+  return data->relative_x_velocity;
+}
+
+/** Get maximum length of relative_x_velocity value.
+ * @return length of relative_x_velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_relative_x_velocity() const
+{
+  return 1;
+}
+
+/** Set relative_x_velocity value.
+ * 
+      Velocity of object in the world coordinate system in X-direction in meter per second.
+    
+ * @param new_relative_x_velocity new relative_x_velocity value
+ */
+void
+ObjectPositionInterface::set_relative_x_velocity(const float new_relative_x_velocity)
+{
+  data->relative_x_velocity = new_relative_x_velocity;
+}
+
+/** Get relative_y_velocity value.
+ * 
+      Velocity of object in the world coordinate system in Y-direction in meter per second.
+    
+ * @return relative_y_velocity value
+ */
+float
+ObjectPositionInterface::relative_y_velocity()
+{
+  return data->relative_y_velocity;
+}
+
+/** Get maximum length of relative_y_velocity value.
+ * @return length of relative_y_velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_relative_y_velocity() const
+{
+  return 1;
+}
+
+/** Set relative_y_velocity value.
+ * 
+      Velocity of object in the world coordinate system in Y-direction in meter per second.
+    
+ * @param new_relative_y_velocity new relative_y_velocity value
+ */
+void
+ObjectPositionInterface::set_relative_y_velocity(const float new_relative_y_velocity)
+{
+  data->relative_y_velocity = new_relative_y_velocity;
+}
+
+/** Get relative_z_velocity value.
+ * 
+      Velocity of object in the world coordinate system in Z-direction in meter per second.
+    
+ * @return relative_z_velocity value
+ */
+float
+ObjectPositionInterface::relative_z_velocity()
+{
+  return data->relative_z_velocity;
+}
+
+/** Get maximum length of relative_z_velocity value.
+ * @return length of relative_z_velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_relative_z_velocity() const
+{
+  return 1;
+}
+
+/** Set relative_z_velocity value.
+ * 
+      Velocity of object in the world coordinate system in Z-direction in meter per second.
+    
+ * @param new_relative_z_velocity new relative_z_velocity value
+ */
+void
+ObjectPositionInterface::set_relative_z_velocity(const float new_relative_z_velocity)
+{
+  data->relative_z_velocity = new_relative_z_velocity;
+}
+
+/** Get relative_xyz_velocity_covariance value.
+ * 
+      Covariance of relative x/y/z velocity values. This is a 3x3 matrix ordered line
+      by line, first three values represent row, next tree values second row and last three
+      values last row from left to right each.
+    
+ * @return relative_xyz_velocity_covariance value
+ */
+float *
+ObjectPositionInterface::relative_xyz_velocity_covariance()
+{
+  return data->relative_xyz_velocity_covariance;
+}
+
+/** Get maximum length of relative_xyz_velocity_covariance value.
+ * @return length of relative_xyz_velocity_covariance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_relative_xyz_velocity_covariance() const
+{
+  return 9;
+}
+
+/** Set relative_xyz_velocity_covariance value.
+ * 
+      Covariance of relative x/y/z velocity values. This is a 3x3 matrix ordered line
+      by line, first three values represent row, next tree values second row and last three
+      values last row from left to right each.
+    
+ * @param new_relative_xyz_velocity_covariance new relative_xyz_velocity_covariance value
+ */
+void
+ObjectPositionInterface::set_relative_xyz_velocity_covariance(const float * new_relative_xyz_velocity_covariance)
+{
+  memcpy(data->relative_xyz_velocity_covariance, new_relative_xyz_velocity_covariance, sizeof(float) * 9);
 }
 
 /* =========== message create =========== */

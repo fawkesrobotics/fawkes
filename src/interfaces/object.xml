@@ -60,9 +60,8 @@
       Proper velocities in the cartesian world coordinate system are provided along
       the axes (world_*_velocity fields).
     </constant>
-    <constant type="unsigned int" value="512" name="FLAG_HAS_POLAR_VELOCITY">
-      Proper velocities in the polar relative coordinate system are provided along
-      the axes ((bearing|slope|distnace)_velocity fields).
+    <constant type="unsigned int" value="512" name="FLAG_HAS_Z_AS_ORI">
+      The Z-coordinate of any coordinate is an orientation.
     </constant>
   </constants>
   <data>
@@ -84,6 +83,13 @@
     <field type="bool" name="visible">
       True, if object is visible.
     </field>
+    <field type="int" name="visibility_history">
+      The visibilitiy history indicates the number of consecutive positive or negative
+      sightings. If the history is negative, there have been as many negative sightings
+      (object not visible) as the absolute value of the history. A positive value denotes
+      as many positive sightings. 0 shall only be used during the initialisation of the
+      interface or if the visibility history is not filled.
+    </field>
     <field type="float" name="roll">
       Roll value for the orientation of the object in space.
     </field>
@@ -92,6 +98,10 @@
     </field>
     <field type="float" name="yaw">
       Yaw value for the orientation of the object in space.
+    </field>
+    <field type="float" name="distance">
+      Distance from the robot to the object on the ground plane. The distance is given
+      in meters.
     </field>
     <field type="float" name="bearing">
       Angle between the robot's forward direction and the object on the ground plane.
@@ -102,11 +112,7 @@
       of the object (e.g. this denotes the height of the object combined with the distance.
       The angle is given in radians.
     </field>
-    <field type="float" name="distance">
-      Distance from the robot to the object on the ground plane. The distance is given
-      in meters.
-    </field>
-    <field type="float" name="dyp_covariance" length="9">
+    <field type="float" name="dbs_covariance" length="9">
       Covariance of Distance/Yaw/Pitch values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
@@ -126,6 +132,11 @@
       This coordinate system has its origin in the center of the field, Y pointing to
       the opponent's goal and X pointing to the right.
     </field>
+    <field type="float" name="world_xyz_covariance" length="9">
+      Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
+      first three values represent row, next tree values second row and last three values
+      last row from left to right each.
+    </field>
     <field type="float" name="relative_x">
       This is the X coordinate in the cartesian right-handed robot coordinate system.
     </field>
@@ -135,8 +146,8 @@
     <field type="float" name="relative_z">
       This is the Z coordinate in the cartesian right-handed robot coordinate system.
     </field>
-    <field type="float" name="xyz_covariance" length="9">
-      Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
+    <field type="float" name="relative_xyz_covariance" length="9">
+      Covariance of relative x/y/z values. This is a 3x3 matrix ordered line by line,
       first three values represent row, next tree values second row and last three values
       last row from left to right each.
     </field>
@@ -151,21 +162,6 @@
       Extent of the seen object given in the relative z cartesian coordinate in m.
     </field>
 
-    <field type="float" name="bearing_velocity">
-      Gives the velocity of the object for bearing in radians per second.
-    </field>
-    <field type="float" name="slope_velocity">
-      Gives the velocity of the object for slope in radians per second.
-    </field>
-    <field type="float" name="distance_velocity">
-      Gives the velocity of the object distance meter per second.
-    </field>
-    <field type="float" name="dbs_velocity_covariance" length="9">
-      Covariance of Distance/Bearing/Slope velocity values. This is a 3x3 matrix ordered
-      line by line, first three values represent row, next tree values second row and
-      last three values last row from left to right each.
-    </field>
-
     <field type="float" name="world_x_velocity">
       Velocity of object in the world coordinate system in X-direction in meter per second.
     </field>
@@ -175,8 +171,23 @@
     <field type="float" name="world_z_velocity">
       Velocity of object in the world coordinate system in Z-direction in meter per second.
     </field>
-    <field type="float" name="xyz_velocity_covariance" length="9">
-      Covariance of WorldX/WorldY/WorldZ valocity values. This is a 3x3 matrix ordered line
+    <field type="float" name="world_xyz_velocity_covariance" length="9">
+      Covariance of WorldX/WorldY/WorldZ velocity values. This is a 3x3 matrix ordered line
+      by line, first three values represent row, next tree values second row and last three
+      values last row from left to right each.
+    </field>
+
+    <field type="float" name="relative_x_velocity">
+      Velocity of object in the world coordinate system in X-direction in meter per second.
+    </field>
+    <field type="float" name="relative_y_velocity">
+      Velocity of object in the world coordinate system in Y-direction in meter per second.
+    </field>
+    <field type="float" name="relative_z_velocity">
+      Velocity of object in the world coordinate system in Z-direction in meter per second.
+    </field>
+    <field type="float" name="relative_xyz_velocity_covariance" length="9">
+      Covariance of relative x/y/z velocity values. This is a 3x3 matrix ordered line
       by line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
     </field>
