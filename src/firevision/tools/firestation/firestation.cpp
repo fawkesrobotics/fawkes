@@ -1243,6 +1243,7 @@ Firestation::service_added( const char* name,
   try
     {
       cam.open();
+      cam.start();
       image_list = cam.image_list();
     }
   catch (Exception& e)

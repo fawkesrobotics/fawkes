@@ -61,6 +61,7 @@ FuseImageListWidget::~FuseImageListWidget()
     {
       c = m_new_clients.front().client;
       m_new_clients.pop_front();
+      c->disconnect();
       c->cancel();
       c->join();
       delete c;
@@ -327,6 +328,7 @@ FuseImageListWidget::delete_clients()
       c = m_delete_clients.front();
       m_delete_clients.pop();
 
+      c->disconnect();
       c->cancel();
       c->join();
       delete c;
