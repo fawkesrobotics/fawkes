@@ -31,7 +31,7 @@
 #include <cstdio>
 
 /** @class Matrix <geometry/matrix.h>
- * A general matrix class. It provides all the 
+ * A general matrix class. It provides all the
  * operations that are commonly used with a matrix.
  * @author Daniel Beck
  */
@@ -119,13 +119,13 @@ Matrix::id()
       (*this)(row, col) = (row == col) ? 1.0 : 0.0;
     }
   }
-  
+
   return *this;
 }
 
 
 /** Transposes the matrix.
- * A new field is allocated and the elements of the 
+ * A new field is allocated and the elements of the
  * matrix are copied to the appropriate positions.
  * @return a reference to the matrix object now containing the transposed matrix
  */
@@ -150,15 +150,15 @@ Matrix
 Matrix::get_transpose() const
 {
   Matrix m(*this);
-  
+
   m.transpose();
-  
+
   return m;
 }
 
 
 /** Inverts the matrix.
- * The algorithm that is implemented for computing the inverse 
+ * The algorithm that is implemented for computing the inverse
  * of the matrix is the Gauss-Jordan-Algorithm. Hereby, the block-
  * matrix (A|I) consisting of the matrix to be inverted (A) and the
  * identity matrix (I) is transformed into (I|A^(-1)).
@@ -180,8 +180,8 @@ Matrix::invert()
       float factor = 1.0f / (*this)(col,col);
       i.mult_row(col, factor);
       this->mult_row(col, factor);
-      
-      // ...and substract that row multiplied by the elements 
+
+      // ...and substract that row multiplied by the elements
       // in the current column from all other rows.
       for (unsigned int row = 0; row < m_num_rows; row++)
       {
@@ -193,7 +193,7 @@ Matrix::invert()
 	}
       }
     }
-    
+
     *this = i;
   }
   else
@@ -229,7 +229,7 @@ Matrix::det() const
 {
   if (m_num_rows != m_num_cols)
     {
-      printf("The determinant can only be calculated for nxn matrices.\n"); 
+      printf("The determinant can only be calculated for nxn matrices.\n");
       Exception e("Matrix::det()");
       throw e;
     }
@@ -284,7 +284,7 @@ Matrix::get_submatrix(unsigned int row,
     {
       for (unsigned int c = 0; c < num_cols; c++)
 	{
-	  m(r,c) = (*this)(row + r, col + c); 
+	  m(r,c) = (*this)(row + r, col + c);
 	}
     }
 
@@ -318,10 +318,10 @@ Matrix::overlay(unsigned int row,
 
 
 /** (Read-only) Access-operator.
- * With this operator it is possible to access a specific 
+ * With this operator it is possible to access a specific
  * element of the matrix. To conform with the mathematical
  * fashion of specifying the elements of a matrix the top
- * left element of the matrix is accessed with (1, 1) 
+ * left element of the matrix is accessed with (1, 1)
  * (i.e., numeration starts with 1 and not with 0).
  * @param row the row of the element
  * @param col the column of the element
@@ -338,7 +338,7 @@ Matrix::operator()(unsigned int row,
     { ret =  (*m_columns[row])[col]; }
   else
     { ret =  (*m_columns[col])[row]; }
-  
+
   return ret;
 }
 
@@ -370,19 +370,16 @@ Matrix::operator()(unsigned int row,
 Matrix&
 Matrix::operator=(const Matrix& m)
 {
-  m.size(m_num_rows, m_num_cols);
-
   for (unsigned int i = 0; i < m_num_cols; ++i)
     {
       delete m_columns[i];
     }
   free(m_columns);
 
-  m_num_cols = m.m_num_cols;
-  m_num_rows = m.m_num_rows;
+  m.size(m_num_rows, m_num_cols);
 
   m_columns = (Vector**) malloc( m_num_cols * sizeof(Vector*) );
-  
+
   for (unsigned int i = 0; i < m_num_cols; ++i)
     {
       m_columns[i] = new Vector(m_num_rows);
@@ -458,7 +455,7 @@ Vector
 Matrix::operator*(const Vector& v) const
 {
   unsigned int max_cols = v.size();
-  
+
   Vector result(m_num_rows);
 
   for (unsigned int r = 0; r < m_num_rows; ++r)
@@ -619,7 +616,7 @@ Matrix::mult_row(unsigned int row,
 {
   if (row > m_num_rows)
     {
-      printf("Out of range: matrix has %d rows -- no %d-th row.\n", 
+      printf("Out of range: matrix has %d rows -- no %d-th row.\n",
 	     m_num_rows, row);
       Exception e("Matrix::mult_row(...)");
       throw e;
@@ -651,7 +648,7 @@ Matrix::sub_row(unsigned int row_a,
       Exception e("Matrix::sub_row(...)");
       throw e;
     }
-  
+
   for (unsigned int col = 0; col < m_num_cols; col++)
     {
       (*this)(row_a,col) -= factor * (*this)(row_b,col);
