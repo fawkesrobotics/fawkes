@@ -261,9 +261,12 @@ FuseImageListWidget::on_image_selected()
   Glib::RefPtr<Gtk::TreeSelection> selection = m_trv_image_list->get_selection();
   m_img_list_mutex.unlock();
 
-  if ( m_cur_selection != selection )
+  Gtk::TreeModel::iterator iter = selection->get_selected();
+  Glib::ustring image_id;
+  image_id = (*iter)[m_image_record.image_id];
+  if (image_id != m_cur_image_id)
     { 
-      m_cur_selection = selection;
+      m_cur_image_id = image_id;
       m_signal_image_selected();
     }
 }

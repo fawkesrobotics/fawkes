@@ -870,8 +870,6 @@ Firestation::draw_image()
     {
       m_scaled_img_width  = scaled_width;
       m_scaled_img_height = scaled_height;
-      m_img_image->set_size_request(m_scaled_img_width, m_scaled_img_height);
-      m_evt_image->set_size_request(m_scaled_img_width, m_scaled_img_height);
       m_scale_factor = scaler.get_scale_factor();
     }
 
@@ -942,11 +940,24 @@ Firestation::resize_image(Gtk::Allocation& allocation)
 bool
 Firestation::image_click(GdkEventButton* event)
 {
+  unsigned int offset_x;
+  unsigned int offset_y;
+
+  offset_x = (m_max_img_width - m_scaled_img_width) / 2;
+  offset_y = (m_max_img_height - m_scaled_img_height) / 2;
+  
+  offset_x = offset_x > m_max_img_width ? 0 : offset_x;
+  offset_y = offset_y > m_max_img_height ? 0 : offset_y;
+
   unsigned int image_x;
   unsigned int image_y;
 
-  image_x = (unsigned int)rint(event->x / m_scale_factor);
-  image_y = (unsigned int)rint(event->y / m_scale_factor);
+  image_x = (unsigned int)rint( (event->x - offset_x) / m_scale_factor);
+  image_y = (unsigned int)rint( (event->y - offset_y) / m_scale_factor);
+
+  if ( image_x < 0 || image_x > m_img_width ||
+       image_y < 0 || image_y > m_img_height )
+    { return true; }
 
   switch (m_op_mode)
     {

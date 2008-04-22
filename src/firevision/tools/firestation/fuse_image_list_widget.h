@@ -126,7 +126,7 @@ class FuseImageListWidget : FuseClientHandler
 
   bool m_auto_update;
 
-  Glib::RefPtr<Gtk::TreeSelection> m_cur_selection;
+  Glib::ustring m_cur_image_id;
 };
 
 #endif /* __FIREVISION_TOOLS_FIRESTATION_FUSE_IMAGE_LIST_WIDGET_H_ */
