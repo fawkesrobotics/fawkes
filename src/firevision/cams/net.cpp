@@ -66,6 +66,7 @@ NetworkCamera::NetworkCamera(const char *host, unsigned short port, bool jpeg)
   __get_jpeg = jpeg;
 
   __connected       = false;
+  __opened          = false;
   __local_version   = 0;
   __remote_version  = 0;
   __decompressor    = NULL;
