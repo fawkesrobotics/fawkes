@@ -367,8 +367,12 @@ ColorTrainWidget::load_histograms()
      case (Gtk::RESPONSE_OK):
        {
 	 std::string filename = m_fcd_filechooser->get_filename();
+	 if (!m_generator)
+	   { m_generator = new BayesColormapGenerator(); }
 	 m_generator->load_histograms( filename.c_str() );
+	 m_generator->calc();
 	 m_signal_colormap_updated();
+	 m_cvw->set_colormap(m_generator->get_current());
 	 m_cvw->draw();
 	 draw_segmentation_result();
  	break;
