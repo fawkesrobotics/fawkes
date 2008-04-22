@@ -241,6 +241,8 @@ CameraControl::start_get_pan_tilt()
 void
 CameraControl::pan_tilt(int *pan, int *tilt)
 {
+  *pan  = 0;
+  *tilt = 0;
 }
 
 
@@ -253,6 +255,8 @@ CameraControl::pan_tilt(int *pan, int *tilt)
 void
 CameraControl::pan_tilt_rad(float *pan, float *tilt)
 {
+  *pan  = 0.;
+  *tilt = 0.;
 }
 
 
