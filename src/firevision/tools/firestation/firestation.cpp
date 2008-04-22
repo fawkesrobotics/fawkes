@@ -973,8 +973,8 @@ Firestation::image_click(GdkEventButton* event)
 	      YUV422_PLANAR_YUV( m_yuv_orig_buffer,
 				 m_img_width,
 				 m_img_height,
-				 (unsigned int)rint(event->x / m_scale_factor),
-				 (unsigned int)rint(event->y / m_scale_factor),
+				 image_x,
+				 image_y,
 				 y, u, v );
 	      cout << "Y: " << (unsigned int)y 
 		   << " U: " << (unsigned int)u 
@@ -987,15 +987,13 @@ Firestation::image_click(GdkEventButton* event)
       break;
 
     case MODE_COLOR_TRAIN:
-      m_ctw->click( (unsigned int) rint(event->x / m_scale_factor),
-		    (unsigned int) rint(event->y / m_scale_factor) );
+      m_ctw->click(image_x, image_y);
       draw_image();
      break;
 
     case MODE_MIRROR_CALIB:
       {
-	m_calib_tool->step( (unsigned int) rint(event->x / m_scale_factor),
-			    (unsigned int) rint(event->y / m_scale_factor) );
+	m_calib_tool->step(image_x, image_y);
 
 	bool show;
 	float next_dist;
