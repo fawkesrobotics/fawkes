@@ -322,7 +322,7 @@ WorldInfoDataContainer::get_ball_pos_relative(const char* host, HomVector& ball_
       return false;
     }
   ball_pos_cov = it->second;
-  m_ball_pos_rel_cov.lock();
+  m_ball_pos_rel_cov.unlock();
 
   return true;
 }
