@@ -55,11 +55,14 @@ WorldInfoDataContainer::reset()
 {
   m_hosts.clear();
   m_last_seen.clear();
-  m_ball_pos_rel.clear();
+  m_ball_pos.clear();
   m_ball_pos_global.clear();
   m_opponent_pos.clear();
 
   m_host_id = 0;
+
+  m_host_added   = false;
+  m_host_removed = false;
 }
 
 /** Get the names of all registered hosts.
@@ -89,22 +92,52 @@ WorldInfoDataContainer::get_hosts()
 	  m_robot_pose.erase(id);
 	  m_robot_pose.unlock();
 
-	  m_ball_pos_rel.lock();
-	  m_ball_pos_rel.erase(id);
-	  m_ball_pos_rel.unlock();
+	  m_ball_pos.lock();
+	  m_ball_pos.erase(id);
+	  m_ball_pos.unlock();
 
 	  m_ball_pos_global.lock();
 	  m_ball_pos_global.erase(id);
 	  m_ball_pos_global.unlock();
 
-	  // TODO: opponents
-
 	  m_hosts.erase(iter);
+
+	  m_host_removed = true;
 	}
     }
   m_hosts.unlock();
 
   return hosts;
+}
+
+/** Check whether a host was added since the last time checked.
+ * @return true if a host was added
+ */
+bool
+WorldInfoDataContainer::host_added()
+{
+  if (m_host_added)
+    {
+      m_host_added = false;
+      return true;
+    }
+
+  return false;
+}
+
+/** Check whether a host was removed since the last time checked.
+ * @return true if a host was removed
+ */
+bool
+WorldInfoDataContainer::host_removed()
+{
+  if (m_host_removed)
+    {
+      m_host_removed = false;
+      return true;
+    }
+
+  return false;
 }
 
 /** Set the pose of a robot.
@@ -119,28 +152,9 @@ WorldInfoDataContainer::set_robot_pose( const char* host, float x, float y, floa
 					float* covariance )
 {
   string host_string(host);
-  unsigned int id;
+  unsigned int id = get_host_id(host_string);
 
-  m_hosts.lock();
-  HostLockMap::iterator iter = m_hosts.find(host_string);
-  if ( iter == m_hosts.end() )
-    // no id for this robot yet
-    {
-      id =  m_host_id++;
-      m_hosts[ string(host) ] = id;
-    }
-  else
-    {
-      id = iter->second;
-    }
-  m_hosts.unlock();
-
-  Time now(m_clock);
-  now.stamp();
-
-  m_last_seen.lock();
-  m_last_seen[id] = now.in_msec();
-  m_last_seen.unlock();
+  clock_in_host(id);
 
   HomPose p(x, y, theta);
   m_robot_pose.lock();
@@ -170,6 +184,7 @@ WorldInfoDataContainer::delete_robot_pose(const char* host)
 
   m_hosts.erase(iter);
   m_hosts.unlock();
+  m_host_removed = true;
   return true;
 }
 
@@ -222,6 +237,48 @@ WorldInfoDataContainer::get_robot_pose(const char* host, HomPose& robot_pose, Ma
   return true;
 }
 
+/** Set the velocity of the robot.
+ * @param host the hostname of the robot
+ * @param vel_x the current forward velocity of the robot
+ * @param vel_y the current sideward velocity of the robot
+ * @param vel_theta the current rotational velociy of the robot
+ * @param covariance the velocity covariance
+ */
+void
+WorldInfoDataContainer::set_robot_velocity( const char* host, 
+					    float vel_x, float vel_y, float vel_theta,
+					    float* covariance )
+{
+  string host_string = string(host);
+  unsigned int id;
+
+  id = get_host_id(host_string);
+
+  clock_in_host(id);
+  // TODO
+}
+
+/** Remove velocity information for the specified robot.
+ * @param host hostname of the robot
+ */
+void
+WorldInfoDataContainer::delete_robot_velocity(const char* host)
+{
+  // TODO
+}
+
+/** Obtain current velocity of the specified robot.
+ * @param host the hostname of the robot
+ * @param robot_vel reference to a HomVector where the velocity information is written to
+ * @return true, if velocity information for the specified host are available
+ */
+bool
+WorldInfoDataContainer::get_robot_velocity(const char* host, HomVector& robot_vel)
+{
+  // TODO
+  return true;
+}
+
 /** Set the ball position estimation of a robot.
  * @param host the hostname of the robot
  * @param dist distance to the robot
@@ -230,40 +287,19 @@ WorldInfoDataContainer::get_robot_pose(const char* host, HomPose& robot_pose, Ma
  * @param covariance covariance associated with the position estimation
  */
 void
-WorldInfoDataContainer::set_ball_pos_relative( const char* host, float dist,
-					       float bearing, float slope, float* covariance )
+WorldInfoDataContainer::set_ball_pos( const char* host, float dist,
+				      float bearing, float slope, float* covariance )
 {
   string host_string(host);
-  unsigned int id;
+  unsigned int id = get_host_id(host_string);
 
-  m_hosts.lock();
-  HostLockMap::iterator iter = m_hosts.find(host_string);
-  if ( iter == m_hosts.end() )
-    {
-      id =  m_host_id++;
-      m_hosts[ string(host) ] = id;
-    }
-  else
-    {
-      id = iter->second;
-    }
-  m_hosts.unlock();
+  clock_in_host(id);
 
-  Time now(m_clock);
-  now.stamp();
-
-  m_last_seen.lock();
-  m_last_seen[id] = now.in_msec();
-  m_last_seen.unlock();
-
-  // TODO: take slope into account
-  float x = dist * cos(bearing);
-  float y = dist * sin(bearing);
-
-  HomVector rel_pos(x, y);
-  m_ball_pos_rel.lock();
-  m_ball_pos_rel[id] = rel_pos;
-  m_ball_pos_rel.unlock();
+  // compute global ball position in case a global pose for the robot is known
+  HomPolar pos(dist, bearing, slope);
+  m_ball_pos.lock();
+  m_ball_pos[id] = pos;
+  m_ball_pos.unlock();
 
   m_ball_pos_rel_cov.lock();
   m_ball_pos_rel_cov[id] = Matrix( 3, 3, covariance );
@@ -274,7 +310,7 @@ WorldInfoDataContainer::set_ball_pos_relative( const char* host, float dist,
   if ( get_robot_pose(host, robot_pose, robot_pose_cov) )
     {
       HomPoint glob_pos;
-      glob_pos = rel_pos.rotate_z( robot_pose.yaw() ) + robot_pose.pos();
+      glob_pos = pos.rotate_z( robot_pose.yaw() ) + robot_pose.pos();
       m_ball_pos_global.lock();
       m_ball_pos_global[id] = glob_pos;
       m_ball_pos_global.unlock();
@@ -284,15 +320,16 @@ WorldInfoDataContainer::set_ball_pos_relative( const char* host, float dist,
 
 /** Get the ball position estimation of a certain robot.
  * @param host the hostname of the robot
- * @param ball_pos reference to a HomVector where the position is written to
+ * @param ball_pos reference to a HomPolar where the position is written to
  * @param ball_pos_cov reference to a Matrix where the ball position covariance is written to
  * @return true if a global ball position was found
  */
 bool
-WorldInfoDataContainer::get_ball_pos_relative(const char* host, HomVector& ball_pos, Matrix &ball_pos_cov)
+WorldInfoDataContainer::get_ball_pos( const char* host, HomPolar& ball_pos, 
+				      Matrix &ball_pos_cov )
 {
   HostLockMap::iterator hit;
-  RelPosLockMap::iterator bit;
+  PolarLockMap::iterator bit;
   m_hosts.lock();
   hit = m_hosts.find( string(host) );
   if ( hit == m_hosts.end() )
@@ -303,17 +340,17 @@ WorldInfoDataContainer::get_ball_pos_relative(const char* host, HomVector& ball_
     }
   m_hosts.unlock();
 
-  m_ball_pos_rel.lock();
-  bit = m_ball_pos_rel.find(hit->second);
-  if ( bit == m_ball_pos_rel.end() )
+  m_ball_pos.lock();
+  bit = m_ball_pos.find(hit->second);
+  if ( bit == m_ball_pos.end() )
     // no relative ball position for given robot
     {
-      m_ball_pos_rel.unlock();
+      m_ball_pos.unlock();
       return false;
     }
 
   ball_pos = bit->second;
-  m_ball_pos_rel.unlock();
+  m_ball_pos.unlock();
 
   m_ball_pos_rel_cov.lock();
   MatrixLockMap::const_iterator it = m_ball_pos_rel_cov.find( hit->second );
@@ -337,7 +374,7 @@ bool
 WorldInfoDataContainer::get_ball_pos_global(const char* host, HomPoint& ball_pos)
 {
   HostLockMap::iterator hit;
-  GlobPosLockMap::iterator bit;
+  PointLockMap::iterator bit;
   m_hosts.lock();
   hit = m_hosts.find( string(host) );
   if ( hit == m_hosts.end() )
@@ -380,11 +417,48 @@ WorldInfoDataContainer::delete_ball_pos(const char* host)
       return false;
     }
 
-  m_ball_pos_rel.lock();
-  m_ball_pos_rel.erase( iter->second );
-  m_ball_pos_rel.unlock();
+  m_ball_pos.lock();
+  m_ball_pos.erase( iter->second );
+  m_ball_pos.unlock();
   m_hosts.unlock();
+  m_host_removed = true;
 
+  return true;
+}
+
+/** Set the ball velocity as it is estimated by the specified robot.
+ * @param host the hostname of the robot
+ * @param vel_x the ball velocity in x-direction of the robot-centered coordinate system
+ * @param vel_y the ball velocity in y-direction of the robot-centered coordinate system
+ * @param vel_z the ball velocity in z-direction of the robot-centered coordinate system
+ * @param covariance ball velocity covariance
+ */
+void
+WorldInfoDataContainer::set_ball_velocity( const char* host, 
+					   float vel_x, float vel_y, float vel_z, 
+					   float* covariance )
+{
+  // TODO
+}
+
+/** Delete ball velocity information from specified robot.
+ * @param host the hostname of the robot
+ */
+void
+WorldInfoDataContainer::delete_ball_velocity(const char* host)
+{
+  // TODO
+}
+
+/** Obtain ball velocity information for specified robot.
+ * @param host the hostname of the robot
+ * @param ball_vel refrence to a HomVector where the velocity information is written to
+ * @return true if ball velocity information from the specified robot are available
+ */
+bool
+WorldInfoDataContainer::get_ball_velocity(const char* host, HomVector& ball_vel)
+{
+  // TODO
   return true;
 }
 
@@ -400,34 +474,26 @@ WorldInfoDataContainer::set_opponent_pos( const char* host, unsigned int uid,
 					  float distance, float angle, float* covariance )
 {
   string host_string(host);
-  unsigned int id;
+  unsigned int id = get_host_id(host_string);
 
-  m_hosts.lock();
-  HostLockMap::iterator iter = m_hosts.find(host_string);
-  if ( iter == m_hosts.end() )
-    {
-      id =  m_host_id++;
-      m_hosts[ string(host) ] = id;
-    }
-  else
-    {
-      id = iter->second;
-    }
-  m_hosts.unlock();
+  clock_in_host(id);
 
-  Time now(m_clock);
-  now.stamp();
-
-  m_last_seen.lock();
-  m_last_seen[id] = now.in_msec();
-  m_last_seen.unlock();
-
-  HomVector pos;
-  pos.x() = distance * cos(angle);
-  pos.y() = distance * sin(angle);
+  HomPolar pos(distance, angle);
 
   PosMap& opponents = m_opponent_pos[id];
   opponents[uid] = pos;
+
+  // TODO: covariance
+}
+
+/** Delete opponent position information for specified robot.
+ * @param host hostname of the robot
+ * @param uid the id of the opponent
+ */
+void
+WorldInfoDataContainer::delete_opponent_pos(const char* host, unsigned int uid)
+{
+  // TODO
 }
 
 /** Get all oppenents detected by a certain robot.
@@ -563,4 +629,37 @@ WorldInfoDataContainer::get_own_goal_color_string() const
   const char* goal_color = worldinfo_gamestate_goalcolor_tostring(m_own_goal_color);
 
   return string(goal_color);
+}
+
+unsigned int
+WorldInfoDataContainer::get_host_id(std::string host)
+{
+  unsigned int id;
+
+  m_hosts.lock();
+  HostLockMap::iterator iter = m_hosts.find(host);
+  if ( iter == m_hosts.end() )
+    {
+      id            = m_host_id++;
+      m_hosts[host] = id;
+      m_host_added  = true;
+    }
+  else
+    { 
+      id = iter->second; 
+    }
+  m_hosts.unlock();
+
+  return id;
+}
+
+void
+WorldInfoDataContainer::clock_in_host(unsigned int id)
+{
+  Time now(m_clock);
+  now.stamp();
+  
+  m_last_seen.lock();
+  m_last_seen[id] = now.in_msec();
+  m_last_seen.unlock();
 }

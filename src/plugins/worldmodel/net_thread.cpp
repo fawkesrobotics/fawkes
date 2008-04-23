@@ -98,6 +98,7 @@ WorldModelNetworkThread::init()
 						   nnresolver);
 
   worldinfo_transceiver->add_handler(this);
+  // DEBUG
   worldinfo_transceiver->set_loop(true);
 
   data = new WorldInfoDataContainer(clock);
@@ -146,7 +147,7 @@ WorldModelNetworkThread::ball_pos_rcvd(const char *from_host,
 {
   // TODO: visible, visibility_history
   if ( visible )
-    { data->set_ball_pos_relative(from_host, dist, bearing, slope, covariance); }
+    { data->set_ball_pos(from_host, dist, bearing, slope, covariance); }
   else
     { data->delete_ball_pos(from_host); }
 }

@@ -626,9 +626,9 @@ bool WorldModelThread::globalBallPosition( bool localBallAvailable, const HomVec
                          robotPoseCov( 0, 0 ), robotPoseCov( 1, 1 ), robotPoseCov( 2, 2 ) );
       continue;
     }
-    HomVector remoteBallPosition;
+    HomPolar remoteBallPosition;
     Matrix remoteBallCov;
-    if ( !data->get_ball_pos_relative( (*it).c_str(), remoteBallPosition, remoteBallCov ) ) {
+    if ( !data->get_ball_pos( (*it).c_str(), remoteBallPosition, remoteBallCov ) ) {
       logger->log_debug( name(), "%s does not provide ball position", (*it).c_str() );
       continue;
     }
