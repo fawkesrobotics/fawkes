@@ -150,6 +150,7 @@ class CannikinPipeline : SignalHandler {
   cannikin_mode_t  _mode;
   cannikin_state_t state;
   cannikin_state_t last_state;
+  cannikin_state_t new_last_state;
 
   // Color detection stuff
   unsigned int     determine_cycle_num;

@@ -146,6 +146,10 @@ CannikinTestBBClient::Loop(int Count)
       cout << "DETECTION";
     } else if (m_pCannikin->GetCurrentMode() ==  bbClients::Cannikin_Client::MODE_DETERMINE_CUP_COLOR ) {
       cout << "DETERMINE_CUP_COLOR";
+    } else if (m_pCannikin->GetCurrentMode() ==  bbClients::Cannikin_Client::MODE_TESTING ) {
+      cout << "TESTING";
+    } else if (m_pCannikin->GetCurrentMode() ==  bbClients::Cannikin_Client::MODE_STEREO_TESTING ) {
+      cout << "STEREO_TESTING";
     } else {
       cout << "I have no fucking clue";
     }
@@ -161,7 +165,7 @@ CannikinTestBBClient::Loop(int Count)
       } else if (m_pCannikin->GetDeterminedCupColor() ==  bbClients::Cannikin_Client::CC_GREEN) {
 	cout << "green";
       } else if (m_pCannikin->GetDeterminedCupColor() ==  bbClients::Cannikin_Client::CC_RED) {
-      cout << "red";
+        cout << "red";
       } else if (m_pCannikin->GetDeterminedCupColor() ==  bbClients::Cannikin_Client::CC_ORANGE) {
 	cout << "orange";
       } else {

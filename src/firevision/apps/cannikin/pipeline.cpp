@@ -257,10 +257,21 @@ CannikinPipeline::init()
 
     string tmp;
 
+
     tmp = colormap_filestem;
-    tmp.insert(colormap_filestem_cindex, "red");
+    tmp.insert(colormap_filestem_cindex, "orange");
     cout << "Adding colormap " << tmp << endl;
-    colormaps[CC_RED] = strdup(tmp.c_str());
+    colormaps[CC_ORANGE] = strdup(tmp.c_str());
+
+    tmp = colormap_filestem;
+    tmp.insert(colormap_filestem_cindex, "blue");
+    cout << "Adding colormap " << tmp << endl;
+    colormaps[CC_BLUE] = strdup(tmp.c_str());
+
+    tmp = colormap_filestem;
+    tmp.insert(colormap_filestem_cindex, "green");
+    cout << "Adding colormap " << tmp << endl;
+    colormaps[CC_GREEN] = strdup(tmp.c_str());
 
     /*
     tmp = colormap_filestem;
@@ -268,26 +279,16 @@ CannikinPipeline::init()
     cout << "Adding colormap " << tmp << endl;
     colormaps[CC_YELLOW] = strdup(tmp.c_str());
     tmp = colormap_filestem;
-    tmp.insert(colormap_filestem_cindex, "blue");
+    tmp.insert(colormap_filestem_cindex, "red");
     cout << "Adding colormap " << tmp << endl;
-    colormaps[CC_BLUE] = strdup(tmp.c_str());
-*/
-    /*
-    tmp = colormap_filestem;
-    tmp.insert(colormap_filestem_cindex, "orange");
-    cout << "Adding colormap " << tmp << endl;
-    colormaps[CC_ORANGE] = strdup(tmp.c_str());
-    tmp = colormap_filestem;
-    tmp.insert(colormap_filestem_cindex, "green");
-    cout << "Adding colormap " << tmp << endl;
-    colormaps[CC_GREEN] = strdup(tmp.c_str());
+    colormaps[CC_RED] = strdup(tmp.c_str());
     */
   }
 
-  cm  = new ColorModelLookupTable( "front-color",
+  cm  = new ColorModelLookupTable( colormaps[CC_ORANGE], "cannikin-colormap",
 				   true /* destroy on free */);
   cm->reset();
-  set_cup_color(CC_BLUE);
+  set_cup_color(CC_ORANGE);
 
 
   /*
@@ -309,7 +310,7 @@ CannikinPipeline::init()
   if ( config->ClassifierType != "simple") {
     cout << msg_prefix << cyellow << "Only the really simple classifier is supporter at this time" << cnormal << endl;
   }
-  classifier   = new SimpleColorClassifier(scanlines, cm, 20 /* min pixels to consider */, 30 /* initial box extent */);
+  classifier   = new SimpleColorClassifier(scanlines, cm, 10 /* min pixels to consider */, 30 /* initial box extent */);
 
 }
 
@@ -585,6 +586,8 @@ CannikinPipeline::loop()
   cup_visible = false;
 
   ipc_messaging();
+
+  new_last_state = state;
   
   if ( state != last_state ) {
     cout << msg_prefix << "State changed to: ";
@@ -620,7 +623,7 @@ CannikinPipeline::loop()
   default: return;
   }
 
-  last_state = state;
+  last_state = new_last_state;
 }
 
 
@@ -674,7 +677,15 @@ CannikinPipeline::reinitialize_colormap()
     cout << "Loading colormap " << colormaps[_cup_color] << endl;
     cm->load(colormaps[_cup_color]);
   } else {
-    cout << "Cannot load colormap for requested color!" << endl;
+    cout << "Cannot load colormap for requested color (";
+    switch (_cup_color) {
+    case CC_YELLOW: cout << "yellow"; break;
+    case CC_GREEN:  cout << "green"; break;
+    case CC_BLUE:   cout << "orange"; break;
+    case CC_RED:    cout << "red"; break;
+    case CC_ORANGE: cout << "orange"; break;
+    }
+    cout << ")!" << endl;
     cm->reset();
   }
 }
@@ -836,7 +847,7 @@ CannikinPipeline::determine_cup_color()
     determined_valid_frames = 0;
     determine_cycle_num = 0;
     cup_color_determination_done = false;
-    _cup_color = CC_RED;
+    _cup_color = CC_ORANGE;
     reinitialize_colormap();
   }
 
