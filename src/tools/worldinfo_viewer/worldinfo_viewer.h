@@ -31,6 +31,8 @@
 
 class WorldInfoDataContainer;
 class FieldView;
+class RemoteBlackBoard;
+class BatteryInterface;
 
 class WorldInfoViewer : public Gtk::Window
 {
@@ -43,6 +45,8 @@ class WorldInfoViewer : public Gtk::Window
 
   void redraw_field();
   void gamestate_changed();
+  void robot_added();
+  void robot_removed();
 
  private:
   class RobotRecord : public Gtk::TreeModelColumnRecord
@@ -52,10 +56,12 @@ class WorldInfoViewer : public Gtk::Window
 	{
 	  add(name);
 	  add(voltage);
+	  //add(show_obstacles);
 	}
 
       Gtk::TreeModelColumn<Glib::ustring> name;
       Gtk::TreeModelColumn<float> voltage;
+      Gtk::TreeModelColumn<bool> show_obstacles;
     };
 
   Gtk::Widget* get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
@@ -66,7 +72,7 @@ class WorldInfoViewer : public Gtk::Window
   Gtk::TreeView* m_trv_robots;
   Gtk::Statusbar* m_stb_status;
 
-  unsigned int m_message_id;
+  unsigned int m_stb_message_id;
   
   FieldView* m_field_view;
 
@@ -74,6 +80,13 @@ class WorldInfoViewer : public Gtk::Window
   Glib::RefPtr<Gtk::ListStore> m_robots_list;
 
   WorldInfoDataContainer* m_data_container;
+
+  unsigned int m_robot_id;
+  std::map<Glib::ustring, unsigned int> m_robots;
+  std::map<unsigned int, RemoteBlackBoard*> m_remote_bbs;
+  std::map<unsigned int, BatteryInterface*> m_battery_interfaces;
+  std::map<unsigned int, Gtk::TreeModel::Row> m_list_entries;
+  std::map<unsigned int, bool> m_robot_active;
 };
 
 #endif /*  __TOOLS_WORLDINFO_VIEWER_WORLDINFO_VIEWER_H_ */

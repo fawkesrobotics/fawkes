@@ -22,7 +22,7 @@ include $(BASEDIR)/etc/buildsys/ext/gmsl
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_wiv = core netcomm config utils geometry worldinfo_utils
+LIBS_wiv = blackboard config core geometry interfaces netcomm utils worldinfo_utils
 OBJS_wiv = main.o			\
 	   worldinfo_viewer.o		\
 	   field_view.o			\

@@ -53,7 +53,7 @@ class FieldView : public Gtk::DrawingArea
   void draw_obstacle(Cairo::RefPtr<Cairo::Context> context, 
 		     float x, float y, float extend);
   void draw_ball(Cairo::RefPtr<Cairo::Context> context, 
-		 float x, float y);
+		 float ball_x, float ball_y, float bot_x, float bot_y);
 
   std::map<std::string, unsigned int> m_robots;
   std::map<unsigned int, HomPose> m_robot_poses;

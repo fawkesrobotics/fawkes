@@ -44,8 +44,10 @@ class WorldInfoViewerBackendThread : public Thread,
 
   virtual ~WorldInfoViewerBackendThread();
 
-  Glib::Dispatcher& new_data();
+  Glib::Dispatcher& new_worldinfo_data();
   Glib::Dispatcher& new_gamestate_data();
+  Glib::Dispatcher& robot_added();
+  Glib::Dispatcher& robot_removed();
 
   // thread
   void loop();
@@ -84,13 +86,15 @@ class WorldInfoViewerBackendThread : public Thread,
   WorldInfoTransceiver* m_transceiver;
   WorldInfoDataContainer* m_data_container;
 
-  Glib::Dispatcher m_signal_new_data;
+  Glib::Dispatcher m_signal_new_worldinfo_data;
   Glib::Dispatcher m_signal_new_gamestate_data;
+  Glib::Dispatcher m_signal_robot_added;
+  Glib::Dispatcher m_signal_robot_removed;
 
-  std::string m_addr;
+  std::string    m_addr;
   unsigned short m_port;
-  std::string m_key;
-  std::string m_iv;
+  std::string    m_key;
+  std::string    m_iv;
 };
 
 #endif /* __TOOL_WORLDINFO_VIEWER_BACKEND_THREAD_H_ */

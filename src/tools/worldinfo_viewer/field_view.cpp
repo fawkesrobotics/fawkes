@@ -175,7 +175,7 @@ FieldView::on_expose_event(GdkEventExpose* event)
 	  if (m_ball_positions.end() != m_ball_positions.find(rit->second))
 	    {
 	      pos = m_ball_positions[rit->second];
-	      draw_ball(context, pos.x(), pos.y());
+	      draw_ball( context, pos.x(), pos.y(), robot_pose.x(), robot_pose.y() );
 	    }
 
 	  // opponents
@@ -295,11 +295,17 @@ FieldView::draw_obstacle(Cairo::RefPtr<Cairo::Context> context, float x, float y
 }
 
 void
-FieldView::draw_ball(Cairo::RefPtr<Cairo::Context> context, float x, float y)
+FieldView::draw_ball( Cairo::RefPtr<Cairo::Context> context, 
+		      float ball_x, float ball_y,
+		      float bot_x, float bot_y )
 {
   context->save();
   context->set_source_rgb(1.0, 0.3, 0.0);
-  context->arc(x, y, 0.15, 0.0, 2.0 * M_PI);
+  context->set_line_width(0.05);
+  context->move_to(bot_x, bot_y);
+  context->line_to(ball_x, ball_y);
+  context->stroke();
+  context->arc(ball_x, ball_y, 0.15, 0.0, 2.0 * M_PI);
   context->fill();
   context->restore();
 }

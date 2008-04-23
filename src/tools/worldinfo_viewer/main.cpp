@@ -78,8 +78,10 @@ int main(int argc, char** argv)
       Gtk::Main kit(argc, argv);
       Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/worldinfo_viewer/worldinfo_viewer.glade");
       WorldInfoViewer viewer(ref_xml, data_container);
-      backend_thread->new_data().connect( sigc::mem_fun(viewer, &WorldInfoViewer::redraw_field ) );
+      backend_thread->new_worldinfo_data().connect( sigc::mem_fun(viewer, &WorldInfoViewer::redraw_field ) );
       backend_thread->new_gamestate_data().connect( sigc::mem_fun(viewer, &WorldInfoViewer::gamestate_changed ) );
+      backend_thread->robot_added().connect( sigc::mem_fun(viewer, &WorldInfoViewer::robot_added) );
+      backend_thread->robot_removed().connect( sigc::mem_fun(viewer, &WorldInfoViewer::robot_removed) );
 
       kit.run( viewer.get_window() );
     }
