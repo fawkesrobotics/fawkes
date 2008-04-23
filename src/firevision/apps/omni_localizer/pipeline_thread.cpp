@@ -378,7 +378,7 @@ void FvOmniLocalizerPipelineThread::loop()
   mPositionInterface->set_world_y( currentPos.y );
   mPositionInterface->set_world_z( currentPos.ori );
   float *cov = new float[9];
-  memset( cov, 0, 9 );
+  memset( cov, 0, 9 * sizeof(float) );
   cov[0] = currentVar.x;
   cov[4] = currentVar.y;
   cov[8] = currentVar.ori;

@@ -599,7 +599,7 @@ bool WorldModelThread::globalBallPosition( bool localBallAvailable, const HomVec
   // check if relative local position is usable to determine a global position
   if ( localBallAvailable ) {
     float cov[9];
-    memcpy( cov, in_pose_interface->world_xyz_covariance(), 9 );
+    memcpy( cov, in_pose_interface->world_xyz_covariance(), 9 * sizeof(float) );
     if ( in_pose_interface->has_writer() && cov[0] <= 3.0 && cov[4] <= 3.0 && cov[8] <= 1.5 ) {
       ++count;
       global_ball_pos.x() += in_pose_interface->world_x() + (local_ball_pos.x() * cos( local_ball_pos.y() ));

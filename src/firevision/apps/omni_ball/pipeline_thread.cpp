@@ -338,7 +338,7 @@ FvOmniBallPipelineThread::loop()
       ball_interface->set_distance( rel_pos->get_distance() );
       ball_interface->set_bearing( rel_pos->get_bearing() );
       float cov[9];
-      memset( &cov, 0, 9 );
+      memset( cov, 0, 9 * sizeof(float) );
       ball_interface->set_dbs_covariance( cov );
     }
   else { ball_interface->set_visible(false); }
