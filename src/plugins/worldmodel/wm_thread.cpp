@@ -32,6 +32,8 @@
 
 #include <cmath>
 
+using namespace std;
+
 /** @class WorldModelThread <plugins/worldmodel/wm_thread.h>
  * Main thread of worldmodel plugin.
  * @author Tim Niemueller
@@ -298,6 +300,14 @@ WorldModelThread::finalize()
   blackboard->unregister_listener(this);
 }
 
+static void matrixToFloat( const Matrix &matrix, float* cov )
+{
+  unsigned int row, col;
+  matrix.size( row, col );
+  for ( unsigned int r = 0; r < row; ++r )
+    for ( unsigned int c = 0; c < col; ++c )
+      cov[(r*col) + c] = matrix( r, c );
+}
 
 void
 WorldModelThread::loop()
@@ -409,37 +419,60 @@ WorldModelThread::loop()
 
   wm_game_state_interface->write();
 
+
   // ball
-  // TODO: currently it just looks for the first interface that starts with "BallOmni"
-  for (opii = in_ball_interfaces->begin(); opii != in_ball_interfaces->end(); ++opii)
-    {
-      if ( strcmp("BallOmni", (*opii)->id()) != 0)
-	{ continue; }
+  HomVector local_ball_pos;
+  Matrix local_ball_cov;
+  bool local_ball_visible = localBallPosition( local_ball_pos, local_ball_cov );
 
-      ObjectPositionInterface* ball_interface;
-      ball_interface = *( in_ball_interfaces->begin() );
-      ball_interface->read();
-      bool visible = ball_interface->is_visible();
-      float rel_x = ball_interface->relative_x();
-      float rel_y = ball_interface->relative_y();
-      float dist = ball_interface->distance();
-      float bearing = ball_interface->bearing();
-      wm_ball_interface->set_object_type( ObjectPositionInterface::TYPE_BALL );
-      wm_ball_interface->set_visible(visible);
-      wm_ball_interface->set_flags( ball_interface->flags() );
-      wm_ball_interface->set_relative_x(rel_x);
-      wm_ball_interface->set_relative_y(rel_y);
-      wm_ball_interface->set_distance( dist );
-      wm_ball_interface->set_bearing( bearing );
-      wm_ball_interface->write();
+  float ball_cov[9];
+  matrixToFloat( local_ball_cov, ball_cov );
 
-      if (worldinfo_sender) {
-	float *cov = ball_interface->dbs_covariance();
-	worldinfo_sender->set_ball_pos(dist, bearing, 0.0 /* slope */, cov);
-	worldinfo_sender->set_ball_visible(visible, 1);
-	worldinfo_sender->send();
-      }
-    }
+  // report combined ball position we observed to the world
+  // TODO ball_visible == false is not yet handled in the world info stuff, so better send nothing at all in this case
+  if ( local_ball_visible && worldinfo_sender ) {
+    logger->log_debug( name(), "Local ball position merged to: %f dist, %f rad", local_ball_pos.x(), local_ball_pos.y() );
+    worldinfo_sender->set_ball_visible( true, 1 /* visibility history, not supported here yet either */ );
+    worldinfo_sender->set_ball_pos( local_ball_pos.x(), local_ball_pos.y(), local_ball_pos.z(), ball_cov );
+    worldinfo_sender->send();
+  }
+
+  HomVector global_ball_pos;
+  Matrix global_ball_cov( 3, 3 );
+  bool global_ball_visible = globalBallPosition( local_ball_visible, local_ball_pos, local_ball_cov,
+                                                 global_ball_pos, global_ball_cov );
+
+  // report merged ball position
+  wm_ball_interface->set_object_type( ObjectPositionInterface::TYPE_BALL );
+  wm_ball_interface->set_visible( local_ball_visible || global_ball_visible );
+  unsigned int flags = ObjectPositionInterface::FLAG_HAS_COVARIANCES;
+  if ( local_ball_visible ) {
+    // TODO: we could calculate relative positions also based on the globals ones and our own position if available
+    // which would be useful in at least two cases: no local sensor reading and improved accurancy due to sensor fusion
+    logger->log_info( name(), "Estimated ball position [polar relative]: (%f,%f)", local_ball_pos.x(), local_ball_pos.y() );
+    float dist = local_ball_pos.x();
+    float bearing = local_ball_pos.y();
+    wm_ball_interface->set_relative_x( dist * cosf( bearing ) );
+    wm_ball_interface->set_relative_y( dist * sinf( bearing ) );
+    wm_ball_interface->set_distance( dist );
+    wm_ball_interface->set_bearing( bearing );
+    matrixToFloat( local_ball_cov, ball_cov );
+    wm_ball_interface->set_dbs_covariance( ball_cov );
+    flags |= ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN |
+             ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR;
+  }
+  if ( global_ball_visible ) {
+    logger->log_info( name(), "Estimated ball position [cartesian global]: (%f,%f)", global_ball_pos.x(), global_ball_pos.y() );
+    wm_ball_interface->set_world_x( global_ball_pos.x() );
+    wm_ball_interface->set_world_y( global_ball_pos.y() );
+    wm_ball_interface->set_world_z( global_ball_pos.z() );
+    matrixToFloat( global_ball_cov, ball_cov );
+    wm_ball_interface->set_world_xyz_covariance( ball_cov );
+    flags |= ObjectPositionInterface::FLAG_HAS_WORLD;
+  }
+  wm_ball_interface->set_flags( flags );
+  wm_ball_interface->write();
+
 
   // own pose
   if ( in_pose_interface->has_writer() )
@@ -509,4 +542,114 @@ WorldModelThread::BlackboardNotificationProxy::add_interface(Interface *interfac
 {
   bbil_add_reader_interface(interface);
   bbil_add_writer_interface(interface);
+}
+
+/**
+  Merge ball postions detected by local sensors.
+  @param local_ball_pos Reference parameter to return the merged ball position (as relative polar coordinate).
+  @param local_ball_cov Reference parameter to return the covariance of the merged ball position.
+  @return @c true if at least one local sensor detected a ball.
+*/
+bool WorldModelThread::localBallPosition( HomVector & local_ball_pos, Matrix &local_ball_cov )
+{
+  // TODO: also consider covariance here and handle largely different values from different sensors somehow
+  int count = 0;
+  float dist = 0.0f, bearing = 0.0f;
+  Matrix cov( 3, 3 );
+  for ( LockList<ObjectPositionInterface *>::const_iterator iface = in_ball_interfaces->begin();
+        iface != in_ball_interfaces->end(); ++iface ) {
+    (*iface)->read();
+    if ( !((*iface)->flags() & ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR) )
+      continue; // the following code so far only handles relative polar coords, so skip the rest
+
+    if ( !(*iface)->is_visible() )
+      continue;
+
+    ++count;
+    dist += (*iface)->distance();
+    bearing += (*iface)->bearing();
+    cov += Matrix( 3, 3, (*iface)->dbs_covariance() );
+  }
+  if ( count == 0 )
+    return false;
+  local_ball_pos.x() = dist / count;
+  local_ball_pos.y() = bearing / count;
+  local_ball_pos.z() = 0.0f;
+  local_ball_cov = cov / count;
+  return true;
+}
+
+/**
+  Merge all available ball information (local and remote).
+  @param local_ball_available @c true if the following two parameters contain valid data.
+  @param local_ball_pos Merged relative poloar coordinate of the ball based on local sensors.
+  @param local_ball_cov Merged covarance of relative poloar coordinates of the ball based
+  on local sensors.
+  @param global_ball_pos Reference to the determined global cartesian ball coordinates.
+  @param global_ball_cov Reference to the determined covariance of the previous parameter.
+  @return @c true if there are any usable remote ball position information.
+*/
+bool WorldModelThread::globalBallPosition( bool localBallAvailable, const HomVector & local_ball_pos,
+                                           const Matrix & local_ball_cov, HomVector & global_ball_pos,
+                                           Matrix & global_ball_cov )
+{
+  int count = 0;
+  global_ball_cov = Matrix( 3, 3 );
+
+  // check if relative local position is usable to determine a global position
+  if ( localBallAvailable ) {
+    float cov[9];
+    memcpy( &cov, in_pose_interface->world_xyz_covariance(), 9 );
+    if ( in_pose_interface->has_writer() && cov[0] <= 3.0 && cov[4] <= 3.0 && cov[8] <= 1.5 ) {
+      ++count;
+      global_ball_pos.x() += in_pose_interface->world_x() + (local_ball_pos.x() * cos( local_ball_pos.y() ));
+      global_ball_pos.y() += in_pose_interface->world_y() + (local_ball_pos.x() * sin( local_ball_pos.y() ));
+      global_ball_cov += Matrix( 3, 3, cov ) + local_ball_cov;
+      logger->log_debug( name(), "Global ball position based on own localization: (%f,%f)", global_ball_pos.x(), global_ball_pos.y() );
+    } else {
+      logger->log_debug( name(), "My own localization is not precise enough to determine global ball position." );
+    }
+  }
+
+  vector<string> hosts = data->get_hosts();
+  for ( vector<string>::const_iterator it = hosts.begin(); it != hosts.end(); ++it ) {
+    // TODO check ball visibility (not yet provided by WorldInfoDataContainer
+    HomPose robotPose;
+    Matrix robotPoseCov;
+    if ( !data->get_robot_pose( (*it).c_str(), robotPose, robotPoseCov ) ) {
+      logger->log_debug( name(), "%s has no pose in", (*it).c_str() );
+      continue;
+    }
+    // he doesn't know himself where he is, ignore
+    if ( robotPoseCov( 0, 0 ) > 3.0 || robotPoseCov( 1, 1 ) > 3.0 || robotPoseCov( 2, 2 ) > 1.5 ) {
+      logger->log_debug( name(), "%s is not localized precisely enough (%f, %f, %f)", (*it).c_str(),
+                         robotPoseCov( 0, 0 ), robotPoseCov( 1, 1 ), robotPoseCov( 2, 2 ) );
+      continue;
+    }
+    HomVector remoteBallPosition;
+    Matrix remoteBallCov;
+    if ( !data->get_ball_pos_relative( (*it).c_str(), remoteBallPosition, remoteBallCov ) ) {
+      logger->log_debug( name(), "%s does not provide ball position", (*it).c_str() );
+      continue;
+    }
+    if ( remoteBallCov( 0, 0 ) > 3.0 || robotPoseCov( 1, 1 ) > 3.0 || robotPoseCov( 2, 2 ) > 1.5 ) {
+      logger->log_debug( name(), "%s does not know ball position precisely enough", (*it).c_str() );
+      continue;
+    }
+    ++count;
+    remoteBallPosition.rotate_z( robotPose.yaw() );  // <-- ### remoteBallPosition is a relative cartesian coord!!
+    global_ball_pos.x() += robotPose.x() + remoteBallPosition.x();
+    global_ball_pos.y() += robotPose.y() + remoteBallPosition.y();
+    global_ball_cov += robotPoseCov + remoteBallCov;
+    logger->log_debug( name(), "%s provides usable ball position (%f,%f)", (*it).c_str(), remoteBallPosition.x(), remoteBallPosition.y() );
+  }
+
+  if ( count == 0 )
+    return false;
+
+  global_ball_pos.x() = global_ball_pos.x() / count;
+  global_ball_pos.y() = global_ball_pos.y() / count;
+  global_ball_pos.z() = 0.0f;
+  global_ball_cov = global_ball_cov / count;
+  return true;
 }

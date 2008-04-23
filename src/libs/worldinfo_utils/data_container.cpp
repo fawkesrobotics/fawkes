@@ -285,6 +285,7 @@ WorldInfoDataContainer::set_ball_pos_relative( const char* host, float dist,
 /** Get the ball position estimation of a certain robot.
  * @param host the hostname of the robot
  * @param ball_pos reference to a HomVector where the position is written to
+ * @param ball_pos_cov reference to a Matrix where the ball position covariance is written to
  * @return true if a global ball position was found
  */
 bool
@@ -331,7 +332,6 @@ WorldInfoDataContainer::get_ball_pos_relative(const char* host, HomVector& ball_
 /** Get the global position of the ball as it is estimated by the specified robot.
  * @param host the robot's hostname
  * @param ball_pos refercence to a HomPoint where the position of the ball written to
- * @param ball_pos_cov reference to a Matrix where the ball position covariance is written to
  */
 bool
 WorldInfoDataContainer::get_ball_pos_global(const char* host, HomPoint& ball_pos)

@@ -51,6 +51,7 @@ static f_point_t make_point( float x, float y )
 
 /**
   Initialize field model.
+  @param blackboard The blackboard.
   @param config The configuration.
 */
 Field::Field( BlackBoard *blackboard, Configuration *config ) :
@@ -296,7 +297,7 @@ void Field::drawField()
     }
   }
 
-  if ( mWMBallInterface ) {
+  if ( mWMBallInterface && mWMBallInterface->has_writer() ) {
     mWMBallInterface->read();
     drawer.setColor( 128, 0, 192 );
     float radius = 0.2f;
@@ -307,7 +308,7 @@ void Field::drawField()
                        mapToImageY( mWMBallInterface->world_y() ),
                        (unsigned int)(scale * radius) );
   } else {
-    cout << "No WM Ball interface!" << endl;
+    cout << "No active WM Ball interface!" << endl;
   }
 }
 

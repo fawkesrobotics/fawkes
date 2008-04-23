@@ -66,6 +66,7 @@ static bool operator<( float left, const mcl_sample_t &right )
 
 /**
   Constructor.
+  @param blackboard The blackboard.
   @param config The configuration to setup MCL.
 */
 MCL::MCL( BlackBoard *blackboard, Configuration *config ) :

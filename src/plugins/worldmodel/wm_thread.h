@@ -35,7 +35,8 @@
 #include <aspect/clock.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
-
+#include <geometry/hom_vector.h>
+#include <geometry/matrix.h>
 
 class GameStateInterface;
 class ObjectPositionInterface;
@@ -78,14 +79,14 @@ class WorldModelThread
   public:
     BlackboardNotificationProxy(BlackBoardInterfaceListener* listener);
     virtual ~BlackboardNotificationProxy();
-    
+
     virtual void bb_interface_reader_added(Interface *interface, unsigned int instance_serial) throw();
     virtual void bb_interface_reader_removed(Interface *interface, unsigned int instance_serial) throw();
     virtual void bb_interface_writer_added(Interface *interface, unsigned int instance_serial) throw();
     virtual void bb_interface_writer_removed(Interface *interface, unsigned int instance_serial) throw();
-    
+
     void add_interface(Interface *interface);
-    
+
   private:
     BlackBoardInterfaceListener *listener;
   };
@@ -93,6 +94,10 @@ class WorldModelThread
   void init_failure_cleanup();
 
  private:
+  bool localBallPosition( HomVector &local_ball_pos, Matrix &local_ball_cov );
+  bool globalBallPosition( bool localBallAvailable, const HomVector &local_ball_pos, const Matrix &local_ball_cov,
+                           HomVector &global_ball_pos, Matrix &global_ball_cov );
+
   typedef std::map<unsigned int, BlackboardNotificationProxy *> ProxyMap;
   ProxyMap proxy_map;
   LockList<BlackboardNotificationProxy *> proxy_delete_list;

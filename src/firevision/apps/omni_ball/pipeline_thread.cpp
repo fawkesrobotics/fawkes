@@ -99,7 +99,7 @@ FvOmniBallPipelineThread::init()
   try
     {
       camera = strdup( (config->get_string("/firevision/omni/camera")).c_str() );
-      asprintf(&colormap_file, "%s/%s", cfgfile_prefix, 
+      asprintf(&colormap_file, "%s/%s", cfgfile_prefix,
 	       (config->get_string("/firevision/omni/ball/colormap")).c_str() );
     }
   catch (Exception &e)
@@ -107,11 +107,11 @@ FvOmniBallPipelineThread::init()
       e.append("OmniBallPipeline::init() failed since config parameters are missing");
       throw;
     }
-  
+
   // mirror
   try
     {
-      asprintf(&mirror_file, "%s/%s", cfgfile_prefix, 
+      asprintf(&mirror_file, "%s/%s", cfgfile_prefix,
 	       (config->get_string("/firevision/omni/mirror")).c_str() );
     }
   catch (Exception &e)
@@ -122,11 +122,11 @@ FvOmniBallPipelineThread::init()
     }
 
   // camera
-  try 
+  try
     {
       cam = vision_master->register_for_camera( camera, this );
-    } 
-  catch (Exception& e) 
+    }
+  catch (Exception& e)
     {
       e.append("FvOmniBallPipelineThread::init() failed since no camera is specified");
       throw;
@@ -150,7 +150,7 @@ FvOmniBallPipelineThread::init()
       e.append("Opening ball interface for writing failed");
       throw;
     }
-  
+
   // image properties
   img_width = cam->pixel_width();
   img_height = cam->pixel_height();
@@ -168,10 +168,10 @@ FvOmniBallPipelineThread::init()
       mirror_file = NULL;
 
       // colormodel
-      cm = new ColorModelLookupTable(colormap_file, 
-				     "omni-ball-colormap", 
+      cm = new ColorModelLookupTable(colormap_file,
+				     "omni-ball-colormap",
 				     true /* destroy on delete */ );
-      
+
       // SHM image buffer
       shm_buffer = new SharedMemoryImageBuffer("omni-ball-processed", cspace_to,
 					       img_width, img_height);
@@ -198,10 +198,10 @@ FvOmniBallPipelineThread::init()
 
   // scanline model
   scanline = new ScanlineGrid( img_width, img_height, 5, 5 );
-  
+
   // position model
   rel_pos = new OmniRelative(mirror);
-  
+
   // classifier
   classifier = new SimpleColorClassifier(scanline, cm, 0, 30);
 
@@ -264,16 +264,16 @@ FvOmniBallPipelineThread::loop()
   rois = classifier->classify();
 
   // post-process ROIs
-  if (rois->empty()) 
+  if (rois->empty())
     {
       logger->log_warn(name(), "Could not find any ROIs in image");
       shm_buffer->set_circle_found( false );
-    } 
-  else 
+    }
+  else
     {
-      // if we have at least one ROI 
+      // if we have at least one ROI
       ball_visible = true;
-      
+
       // find the ball candidate that is closest to the robot
       min_dist = 1000000.f;
       // for each ROI
@@ -288,8 +288,8 @@ FvOmniBallPipelineThread::loop()
 	      // update ball position
 	      rel_pos->set_center( mass_point.x, mass_point.y );
 	      rel_pos->calc_unfiltered();
-	      
-	      if (rel_pos->get_distance() < min_dist) 
+
+	      if (rel_pos->get_distance() < min_dist)
 		{
 		  min_dist = rel_pos->get_distance();
 		  ball_image_x = mass_point.x;
@@ -299,16 +299,16 @@ FvOmniBallPipelineThread::loop()
 	    }
 	}
 
-    if ( ball_visible ) 
+    if ( ball_visible )
       {
 	rel_pos->set_center( ball_image_x, ball_image_y );
 	drawer->drawCircle(ball_image_x, ball_image_y, 8);
 
-	if ( rel_pos->is_pos_valid() ) { rel_pos->calc(); } 
+	if ( rel_pos->is_pos_valid() ) { rel_pos->calc(); }
 	else { ball_visible = false; }
       }
-    
-    if ( ball_visible && (winner_roi != rois->end())) 
+
+    if ( ball_visible && (winner_roi != rois->end()))
       {
 	shm_buffer->set_circle_found( true );
 	shm_buffer->set_circle( ball_image_x, ball_image_y, 10 );
@@ -316,14 +316,14 @@ FvOmniBallPipelineThread::loop()
 			     winner_roi->start.y,
 			     winner_roi->width,
 			     winner_roi->height );
-      } 
-    else 
+      }
+    else
       {
 	shm_buffer->set_circle_found( false );
 	shm_buffer->set_roi( 0, 0, 0, 0 );
 	shm_buffer->set_circle( 0, 0, 0 );
       }
-    
+
     // clean up
     rois->clear();
     delete rois;
@@ -337,6 +337,9 @@ FvOmniBallPipelineThread::loop()
       ball_interface->set_relative_y( rel_pos->get_y() );
       ball_interface->set_distance( rel_pos->get_distance() );
       ball_interface->set_bearing( rel_pos->get_bearing() );
+      float cov[9];
+      memset( &cov, 0, 9 );
+      ball_interface->set_dbs_covariance( (float*)&cov );
     }
   else { ball_interface->set_visible(false); }
 
