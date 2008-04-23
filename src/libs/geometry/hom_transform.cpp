@@ -108,10 +108,10 @@ HomTransform::rotate_x(float rad)
   Matrix m(3, 3);
   m.id();
   
-  m(1,1) =  cos(rad);
-  m(1,2) = -sin(rad);
-  m(2,1) =  sin(rad);
-  m(2,2) =  cos(rad);
+  m(1,1) =  cosf(rad);
+  m(1,2) = -sinf(rad);
+  m(2,1) =  sinf(rad);
+  m(2,2) =  cosf(rad);
 
   Matrix rot = m_matrix->get_submatrix(0, 0, 3, 3);
   rot *= m;
@@ -129,10 +129,10 @@ HomTransform::rotate_y(float rad)
   Matrix m(3, 3);
   m.id();
   
-  m(0,0) =  cos(rad);
-  m(0,2) =  sin(rad);
-  m(2,2) = -sin(rad);
-  m(2,2) =  cos(rad);
+  m(0,0) =  cosf(rad);
+  m(0,2) =  sinf(rad);
+  m(2,0) = -sinf(rad);
+  m(2,2) =  cosf(rad);
 
   Matrix rot = m_matrix->get_submatrix(0, 0, 3, 3);
   rot *= m;
@@ -149,10 +149,10 @@ HomTransform::rotate_z(float rad)
   Matrix m(3, 3);
   m.id();
   
-  m(0,0) =  cos(rad);
-  m(0,1) = -sin(rad);
-  m(1,0) =  sin(rad);
-  m(1,1) =  cos(rad);
+  m(0,0) =  cosf(rad);
+  m(0,1) = -sinf(rad);
+  m(1,0) =  sinf(rad);
+  m(1,1) =  cosf(rad);
 
   Matrix rot = m_matrix->get_submatrix(0, 0, 3, 3);
   rot *= m;

@@ -24,8 +24,7 @@
  */
 
 #include <geometry/vector.h>
-#include <core/exceptions/software.h>
-
+#include <exception>
 #include <cstdlib>
 #include <cstdio>
 
@@ -149,8 +148,8 @@ Vector::get(unsigned int d)
 {
   if (m_size <= d)
     { 
-      throw OutOfBoundsException("This column vector doesn't have this many elements",
-				 d, 0, m_size - 1); 
+      printf("This column vector has %u elements -- element %u not available", m_size, d);
+      throw std::exception();
     }  
 
   return m_data[d];
@@ -165,8 +164,8 @@ Vector::set(unsigned int d, float f)
 {
   if (m_size <= d)
     { 
-      throw OutOfBoundsException("This column vector doesn't have this many elements",
-				 d, 0, m_size - 1); 
+      printf("This column vector has %u elements -- element %u not available", m_size, d);
+      throw std::exception();
     }
   
   m_data[d] = f;
@@ -278,8 +277,8 @@ Vector::operator[](unsigned int d)
 {
   if (m_size <= d)
     { 
-      throw OutOfBoundsException("This column vector doesn't have this many elements",
-				 d, 0, m_size - 1); 
+      printf("This column vector has %u elements -- element %u not available", m_size, d);
+      throw std::exception();
     }
   
   return m_data[d];

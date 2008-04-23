@@ -25,8 +25,8 @@
 
 #include <geometry/matrix.h>
 #include <geometry/vector.h>
-#include <core/exception.h>
 
+#include <exception>
 #include <cstdlib>
 #include <cstdio>
 
@@ -198,9 +198,8 @@ Matrix::invert()
   }
   else
     {
-      printf("Trying to compute inverse of non-quadratic matrix!\n");
-      Exception e("Matrix::invert()");
-      throw e;
+      printf("Matrix::invert(): Trying to compute inverse of non-quadratic matrix!\n");
+      throw std::exception();
     }
 
   return *this;
@@ -229,9 +228,8 @@ Matrix::det() const
 {
   if (m_num_rows != m_num_cols)
     {
-      printf("The determinant can only be calculated for nxn matrices.\n");
-      Exception e("Matrix::det()");
-      throw e;
+      printf("Matrix::det(): The determinant can only be calculated for nxn matrices.\n");
+      throw std::exception();
     }
 
   Matrix m(*this);
@@ -403,11 +401,10 @@ Matrix::operator*(const Matrix& b) const
 
   if (a.m_num_cols != b.m_num_rows)
     {
-      printf("Dimension mismatch: a %d x %d matrix can't be multiplied "
+      printf("Matrix::operator*(...): Dimension mismatch: a %d x %d matrix can't be multiplied "
 	     "with a %d x %d matrix.\n",
 	     a.m_num_rows, a.m_num_cols, b.m_num_rows, b.m_num_cols);
-      Exception e("Matrix::operator*(...)");
-      throw e;
+      throw std::exception();
     }
 
   unsigned int rows = a.m_num_rows;
@@ -549,10 +546,9 @@ Matrix::operator+(const Matrix& m) const
 {
   if (m_num_rows != m.m_num_rows || m_num_cols != m.m_num_cols)
     {
-      printf("Dimension mismatch: a %d x %d matrix can't be added to a %d x %d matrix\n",
+      printf("Matrix::operator+(...): Dimension mismatch: a %d x %d matrix can't be added to a %d x %d matrix\n",
 	     m_num_rows, m_num_cols, m.m_num_rows, m.m_num_cols);
-      Exception e("Matrix::operator+(...)");
-      throw e;
+      throw std::exception();
     }
 
   Matrix result(m_num_rows, m_num_cols);
@@ -616,10 +612,9 @@ Matrix::mult_row(unsigned int row,
 {
   if (row > m_num_rows)
     {
-      printf("Out of range: matrix has %d rows -- no %d-th row.\n",
+      printf("Matrix::mult_row(...): Out of range: matrix has %d rows -- no %d-th row.\n",
 	     m_num_rows, row);
-      Exception e("Matrix::mult_row(...)");
-      throw e;
+      throw std::exception();
     }
 
   for (unsigned int col = 0; col < m_num_cols; col++)
@@ -642,11 +637,10 @@ Matrix::sub_row(unsigned int row_a,
 {
   if (row_a > m_num_rows || row_b > m_num_rows)
     {
-      printf("Out of range: one of the argument \"row_a\"=%d or \"row_b\"=%d is greater "
+      printf("Matrix::sub_row(...): Out of range: one of the argument \"row_a\"=%d or \"row_b\"=%d is greater "
 	     "than the number of rows (%d)\n",
 	     row_a, row_b, m_num_rows);
-      Exception e("Matrix::sub_row(...)");
-      throw e;
+      throw std::exception();
     }
 
   for (unsigned int col = 0; col < m_num_cols; col++)

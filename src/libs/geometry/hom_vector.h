@@ -33,16 +33,12 @@ class HomVector : public HomCoord
  public:
   HomVector(float x = 0, float y = 0, float z = 0);
   HomVector(const HomCoord& h);
-  ~HomVector();
+  virtual ~HomVector();
 
   float length() const;
   HomVector& unit();
   HomVector& set_length(float length);
   HomVector& scale(float factor);
-
-/*  private: */
-/*   float m_length; */
-/*   bool  m_changed; */
 };
 
 #endif /* __GEOMETRY_HOM_VECTOR_H_ */
