@@ -129,8 +129,20 @@ HomPolar::phi() const
 void
 HomPolar::phi(float phi)
 {
+  float phi_y = m_phi_y;
+
+  x() = m_r;
+  y() = 0.0;
+  z() = 0.0;
+
+  HomTransform t;
+  t.rotate_z(phi);
+  t.rotate_y(m_phi_y);
+  
+  *this = t * (*this);
+
   m_phi_z = phi;
-  HomCoord::rotate_z(phi);
+  m_phi_y = phi_y;
 }
 
 /** Get the rotation angle around the z-axis.
@@ -148,8 +160,20 @@ HomPolar::phi_z() const
 void
 HomPolar::phi_z(float phi_z)
 {
+  float phi_y = m_phi_y;
+
+  x() = m_r;
+  y() = 0.0;
+  z() = 0.0;
+
+  HomTransform t;
+  t.rotate_z(phi_z);
+  t.rotate_y(phi_y);
+  
+  *this = t * (*this);
+
   m_phi_z = phi_z;
-  HomCoord::rotate_z(phi_z);
+  m_phi_y = phi_y;
 }
 
 /** Obtain the rotation angle around the y-axis after rotating around the z-axis.
@@ -189,6 +213,16 @@ HomPolar::phi_y(float phi_y)
 void
 HomPolar::phi(float phi_z, float phi_y)
 {
+  x() = m_r;
+  y() = 0.0;
+  z() = 0.0;
+
+  HomTransform t;
+  t.rotate_z(phi_z);
+  t.rotate_y(phi_y);
+  
+  *this = t * (*this);
+
   m_phi_z = phi_z;
   m_phi_y = phi_y;
 }
@@ -313,4 +347,3 @@ HomPolar::get_vector() const
 
   return v;
 }
-
