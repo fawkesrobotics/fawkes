@@ -96,6 +96,7 @@ MCL::MCL( BlackBoard *blackboard, Configuration *config ) :
   mVarianceLimit.ori = config->get_float( "/firevision/omni/localizer/mcl/variance_limit_ori" );
   mUnexpectedPenalty = config->get_float( "/firevision/omni/localizer/mcl/unexpected_penalty" );
   mUnexpectedPenaltyMinDistance = config->get_float( "/firevision/omni/localizer/mcl/unexpected_penalty_min_distance" );
+  mOutOfFieldThreshold = config->get_float( "/firevision/omni/localizer/mcl/out_of_field_threshold" );
 
   // generate initial samples
   generateRandomSamples( mSampleCount );
