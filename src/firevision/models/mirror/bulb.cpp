@@ -115,7 +115,7 @@ Bulb::Bulb(unsigned int width, unsigned int height,
  * @param height height of LUT
  */
 Bulb::Bulb(unsigned int width, unsigned int height)
-{  
+{
   init();
 
   this->width  = width;
@@ -332,11 +332,11 @@ Bulb::warp2unwarp(unsigned int warp_x, unsigned int warp_y,
 }
 
 
-void 
+void
 Bulb::unwarp2warp(unsigned int unwarp_x, unsigned int unwarp_y,
 		  unsigned int *warp_x, unsigned int *warp_y    )
 {
-  
+
 }
 
 
@@ -356,7 +356,7 @@ Bulb::isValid()
 }
 
 
-polar_coord_t 
+polar_coord_t
 Bulb::getWorldPointRelative(unsigned int image_x,
 			    unsigned int image_y) const
 {
@@ -368,7 +368,7 @@ Bulb::getWorldPointRelative(unsigned int image_x,
     // will be tuned
     polar_coord_t rv;
     rv.r   = lut[image_y * width + image_x].r;
-    rv.phi = convertAngleI2W(lut[image_y * width + image_x].phi);
+    rv.phi = lut[image_y * width + image_x].phi;
     return rv;
 
   }
@@ -396,7 +396,7 @@ Bulb::getWorldPointGlobal(unsigned int image_x,
   pointRelative = getWorldPointRelative( image_x, image_y );
 
   // convert relative angle "pointRelative.phi" to global angle "globalPhi"
-  // (depends on "robOri") 
+  // (depends on "robOri")
   float globalPhi;
   if ( pose_ori                   >= 0.0  &&
        pointRelative.phi          >= 0.0  &&
@@ -418,7 +418,7 @@ Bulb::getWorldPointGlobal(unsigned int image_x,
   return rv;
 }
 
- 
+
 /** Set a world point mapping.
  * This modifies the mapping in the LUT. An exception is thrown if the coordinates
  * are out of range or the distance is zero.
@@ -427,7 +427,7 @@ Bulb::getWorldPointGlobal(unsigned int image_x,
  * @param world_r distance to real object from camera center in meters
  * @param world_phi angle to real object
  */
-void 
+void
 Bulb::setWorldPoint(unsigned int image_x,
 		    unsigned int image_y,
 		    float        world_r,
@@ -446,7 +446,7 @@ Bulb::setWorldPoint(unsigned int image_x,
   // set world point
   lut[image_y * width + image_x].r   = world_r;
   lut[image_y * width + image_x].phi = world_phi; //convertAngleI2W( world_phi );
-    
+
   // update distances
   float dist_new = getDistanceInImage( image_x, image_y,
 				       image_center_x, image_center_y );
@@ -459,7 +459,7 @@ Bulb::setWorldPoint(unsigned int image_x,
 }
 
 
-void 
+void
 Bulb::reset()
 {
   memset(lut, 0, lut_bytes);
@@ -527,11 +527,11 @@ Bulb::isValidPoint(unsigned int image_x, unsigned int image_y) const
 /** Check if pixel maps to valid world point.
  * @param image_x x coordinate in image
  * @param image_y y coordinate in image
- * @return true, iff image pixel (imagePointX, imagePointY) is not zero 
+ * @return true, iff image pixel (imagePointX, imagePointY) is not zero
  * (checks distances "r" only, not the angles "phi") i.e. if it maps to a
  * real-world position
  */
-bool 
+bool
 Bulb::isNonZero(unsigned int image_x,
 		unsigned int image_y  ) const
 {
@@ -568,7 +568,7 @@ Bulb::numNonZero() const
  * counter-clockwise is negative.)
  */
 float
-Bulb::getAngle(unsigned int image_x, 
+Bulb::getAngle(unsigned int image_x,
 	       unsigned int image_y  ) const
 {
   return atan2f((float(image_y) - float(image_center_y)),
@@ -583,7 +583,7 @@ Bulb::getAngle(unsigned int image_x,
  * @param image_p2_x x coordinate in image of point 2
  * @param image_p2_y y coordinate in image of point 2
  */
-float 
+float
 Bulb::getDistanceInImage(unsigned int image_p1_x, unsigned int image_p1_y,
 			 unsigned int image_p2_x, unsigned int image_p2_y  )
 {
@@ -597,11 +597,11 @@ Bulb::getDistanceInImage(unsigned int image_p1_x, unsigned int image_p1_y,
 
 /** convertAngleI2W
  * @return If you have a (ball-) direction in the omni-image,
- * at which direction is the ball in the world, 
+ * at which direction is the ball in the world,
  * relative to the robot?
  * @param angle_in_image angle to be converted
  */
-float 
+float
 Bulb::convertAngleI2W (float angle_in_image) const
 {
   // get rid of impact of "orientation" on angle_in_image
@@ -609,7 +609,7 @@ Bulb::convertAngleI2W (float angle_in_image) const
       angle_in_image - orientation <=  M_PI   ) {
     angle_in_image = angle_in_image - orientation;
   }
-  else if (angle_in_image - orientation > M_PI) { 
+  else if (angle_in_image - orientation > M_PI) {
     angle_in_image = -( M_PI - ((angle_in_image - orientation) - M_PI) );
   }
   else { // "angle_in_image - orientation < -M_PI"
@@ -622,7 +622,7 @@ Bulb::convertAngleI2W (float angle_in_image) const
       angle_in_image + M_PI <= M_PI    ) {
     angle_in_image = angle_in_image + M_PI;
   }
-  else if (angle_in_image + M_PI > M_PI) { 
+  else if (angle_in_image + M_PI > M_PI) {
     angle_in_image = -( M_PI - angle_in_image );
   }
   else { // "angle_in_image + M_PI < -M_PI"
@@ -648,7 +648,7 @@ Bulb::convertAngleI2W (float angle_in_image) const
 	 << angle_in_image << ")." << endl;
     return 0.0;
   }
-  
+
   return angle_in_image;
 }
 

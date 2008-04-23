@@ -39,8 +39,6 @@
 #include <iostream>
 #include <cmath>
 
-#define MIRROR_ROTATION_OFFSET (M_PI/2.0)
-
 using namespace std;
 
 /** @class FvOmniLocalizerPipelineThread <apps/omni_localizer/pipeline_thread.h>
@@ -303,7 +301,6 @@ void FvOmniLocalizerPipelineThread::loop()
     vector<polar_coord_t> v;
     for ( vector<f_point_t>::const_iterator hitIt = (*rayIt).second.begin(); hitIt != (*rayIt).second.end(); ++hitIt ) {
       polar_coord_t unwrap = mMirror->getWorldPointRelative( (int)(*hitIt).x, (int)(*hitIt).y );
-      unwrap.phi += MIRROR_ROTATION_OFFSET;
       if ( unwrap.r > 0 ) {
         ++hitCount;
         v.push_back( unwrap );
@@ -327,7 +324,7 @@ void FvOmniLocalizerPipelineThread::loop()
       const polar_coord_t unwrap = mMirror->getWorldPointRelative(
           (int)(sin( (*rayIt).first ) * 200 + mMirror->getCenter().x),
           (int)(cos( (*rayIt).first ) * 200 + mMirror->getCenter().y) );
-      rayPhi = unwrap.phi + MIRROR_ROTATION_OFFSET;
+      rayPhi = unwrap.phi;
     } else {
       rayPhi = avgPhi/v.size();
     }
