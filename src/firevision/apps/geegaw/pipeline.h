@@ -160,6 +160,7 @@ class GeegawPipeline : SignalHandler {
   unsigned char            *buffer3;
   unsigned char            *buffer_src;
   SharedMemoryImageBuffer  *shm_buffer;
+  SharedMemoryImageBuffer  *shm_buffer_segm;
   SharedMemoryImageBuffer  *shm_buffer_src;
 
   ScanlineModel            *scanlines;

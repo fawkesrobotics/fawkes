@@ -297,6 +297,8 @@ FirevisionGeegawBBClient::Loop(int Count)
     m_pObjPosServer->set_confidence( 1.f );
     m_pObjPosServer->set_visible( true );
 
+    printf("%s Object found at (bearing,distance)=(%f,%f)\n", msg_prefix.c_str(), pipeline->object_bearing(), pipeline->object_distance());
+
     if ( pipeline->getMode() == GeegawPipeline::MODE_OBSTACLES ) {
       camera_tracker->calc();
       new_pan = camera_tracker->get_new_pan();

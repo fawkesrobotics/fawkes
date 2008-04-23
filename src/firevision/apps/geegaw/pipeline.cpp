@@ -36,6 +36,7 @@
 #include <fvutils/color/conversions.h>
 
 #include <fvutils/draw/drawer.h>
+#include <filters/segment_color.h>
 
 #include <cams/factory.h>
 #include <cams/controlfactory.h>
@@ -120,6 +121,8 @@ GeegawPipeline::~GeegawPipeline()
 
   cout << msg_prefix << "Deleting shared memory buffer for final image" << endl;
   delete shm_buffer;
+  cout << msg_prefix << "Deleting shared memory buffer for segmented image" << endl;
+  delete shm_buffer_segm;
   cout << msg_prefix << "Deleting shared memory buffer for source image" << endl;
   delete shm_buffer_src;
   cout << msg_prefix << "Freeing temporary buffers" << endl;
@@ -197,6 +200,8 @@ GeegawPipeline::init()
 
   cout << msg_prefix << "Creating shared memory segment for final image" << endl;
   shm_buffer     = new SharedMemoryImageBuffer("geegaw-processed", YUV422_PLANAR, width, height);
+  cout << msg_prefix << "Creating shared memory segment for segmented image" << endl;
+  shm_buffer_segm= new SharedMemoryImageBuffer("geegaw-segmented", YUV422_PLANAR, width, height);
   cout << msg_prefix << "Creating shared memory segment for source image" << endl;
   shm_buffer_src = new SharedMemoryImageBuffer("geegaw-raw", YUV422_PLANAR, width, height);
 
@@ -208,7 +213,7 @@ GeegawPipeline::init()
 
   // models
   if ( mode == MODE_LOSTNFOUND ) {
-    scanlines = new ScanlineGrid(width, height, 5, 5);
+    scanlines = new ScanlineGrid(width, height, 3, 3);
   } else {
     scanlines = new ScanlineBeams(width, height, 
 				  /* start x  */    width / 2,
@@ -223,10 +228,10 @@ GeegawPipeline::init()
 
 
   cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
- 				   "omni-color",
+ 				   "geegaw-colormap",
  				   true /* destroy on free */);
   deter_cm  = new ColorModelLookupTable( "../etc/firevision/colormaps/geegaw.colormap",
- 					 "front-color",
+ 					 "geegaw-deter-colormap",
  					 true /* destroy on free */);
   
   /*
@@ -269,10 +274,10 @@ GeegawPipeline::init()
 
   // Classifier
   classifier   = new SimpleColorClassifier( scanlines, cm,
-					    10 /* min pixels to consider */,
-					    30 /* initial box extent */,
+					    5 /* min pixels to consider */,
+					    20 /* initial box extent */,
 					    /* upward */ (mode == MODE_OBSTACLES),
-					    /* neighbourhood min match */ 5);
+					    /* neighbourhood min match */ 3);
   
   deter_classifier   = new SimpleColorClassifier( scanlines, deter_cm,
  						  10 /* min pixels to consider */,
@@ -478,6 +483,11 @@ GeegawPipeline::detect_obstacles()
 void
 GeegawPipeline::detect_object()
 {
+  FilterColorSegmentation segm(cm);
+  segm.set_src_buffer(buffer_src, ROI::full_image(width, height));
+  segm.set_dst_buffer(shm_buffer_segm->buffer(), ROI::full_image(width, height));
+  segm.apply();
+
   classifier->set_src_buffer( buffer_src, width, height );
   rois = classifier->classify();
   obstacles.clear();
@@ -502,7 +512,17 @@ GeegawPipeline::detect_object()
     _object_bearing = object_relposmod->get_bearing();
     _object_distance = object_relposmod->get_distance();
 
+    /// First is the biggest ROI, set as object
+    polar_coord_t o;
+    o.phi = 0.f;
+    o.r   = 0.f;
+    obstacles.push_back(o);
+
     delete rdf;
+  } else {
+    if ( generate_output ) {
+      cout << msg_prefix << cred << "No ROIs found" << cnormal << endl;
+    }
   }
   rois->clear();
   delete rois;
@@ -759,13 +779,13 @@ GeegawPipeline::add_object()
 void
 GeegawPipeline::loop()
 {
-  cout << msg_prefix << " camctrl->process_control()" << endl;
+  //cout << msg_prefix << " camctrl->process_control()" << endl;
   camctrl->process_control();
 
-  cout << msg_prefix << " camctrl->start_get_pan_tilt()" << endl;
+  //cout << msg_prefix << " camctrl->start_get_pan_tilt()" << endl;
   camctrl->start_get_pan_tilt();
 
-  cout << msg_prefix << " cam->capture()" << endl;
+  //cout << msg_prefix << " cam->capture()" << endl;
   
   try{
     cam->capture();
@@ -777,7 +797,7 @@ GeegawPipeline::loop()
 
   gettimeofday(&data_taken_time, NULL);
 
-  cout << msg_prefix << " convert" << endl;
+  //cout << msg_prefix << " convert" << endl;
 
   // Convert buffer (re-order bytes) and set classifier buffer
   convert(cspace_from, cspace_to, cam->buffer(), buffer_src, width, height);
@@ -842,10 +862,10 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
     cout << msg_prefix << "Switching to LOSTNFOUND mode" << endl;
     delete classifier;
     classifier   = new SimpleColorClassifier(scanlines, cm,
-					     10 /* min pixels to consider */,
-					     30 /* initial box extent */,
+					     5 /* min pixels to consider */,
+					     20 /* initial box extent */,
 					     /* upward */ false,
-					     /* neighbourhood min match */ 5);
+					     /* neighbourhood min match */ 3);
   } else if ( mode == MODE_SIFT ) {
     cout << msg_prefix << "Switching to SIFT mode" << endl;
     delete classifier;
