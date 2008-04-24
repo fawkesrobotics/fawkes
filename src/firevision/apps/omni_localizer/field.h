@@ -22,6 +22,9 @@
 #include <fvutils/base/types.h>
 
 #include <blackboard/interface_observer.h>
+#include <blackboard/interface_listener.h>
+
+#include <core/threading/mutex.h>
 
 #include <vector>
 #include <fstream>
@@ -43,7 +46,20 @@ struct arc_t
   float right;
 };
 
-class Field : public BlackBoardInterfaceObserver
+/** Represents a obstacle observation (in global or relative cartesian coordinates. */
+struct obstacle_t
+{
+  /** X coord */
+  float x;
+  /** Y coord */
+  float y;
+  /** Extent radius */
+  float extent;
+  /** Covariance of the position */
+  float* covariance;
+};
+
+class Field : public BlackBoardInterfaceObserver, BlackBoardInterfaceListener
 {
   public:
     Field( BlackBoard *blackboard, Configuration *config );
@@ -61,10 +77,18 @@ class Field : public BlackBoardInterfaceObserver
     std::vector<float> findIntersections( const field_pos_t &position, float phi );
     float weightForDistance( float lineDistance, float sensorDistance ) const;
     float weightForBall( const field_pos_t &position, const f_point_t &ballHit );
+    float weightForObstacle( const obstacle_t &expectedObs, const obstacle_t &seenObs );
+
+    void updateDynamicObjects();
+
+    std::vector<obstacle_t> obstacles() const;
 
     void setDebugBuffer( unsigned char *buffer, unsigned int width = 0, unsigned int height = 0 );
     void drawField();
     void dumpSensorProbabilities( const field_pos_t &position, const char* filename );
+
+    virtual void bb_interface_created(const char *type, const char *id) throw();
+    virtual void bb_interface_writer_removed(Interface *interface, unsigned int instance_serial) throw();
 
   private:
     std::vector< std::pair<f_point_t, f_point_t> > mLines;
@@ -80,6 +104,11 @@ class Field : public BlackBoardInterfaceObserver
     BlackBoard *mBlackBoard;
     ObjectPositionInterface *mWMBallInterface;
     float mBallPositionWeight;
+
+    std::vector<ObjectPositionInterface*> mWMObstacleInterfaces;
+    std::vector<obstacle_t> mObstacles;
+
+    Mutex mInterfaceMutex;
 };
 
 #endif

@@ -47,8 +47,10 @@ class MCL
     ~MCL();
 
     void predict( const field_pos_t &movement, float pathLength );
+    void prepareUpdate();
     void update( const std::map< float, std::vector<polar_coord_t> > &sensorHits );
     void updateBall( const std::vector<f_point_t> &ballHits );
+    void updateObstacles( const std::vector<f_point_t> &obstacleHits );
     void resample();
     void calculatePose();
 
@@ -93,6 +95,8 @@ class MCL
     float mUnexpectedPenalty;
     float mUnexpectedPenaltyMinDistance;
     float mOutOfFieldThreshold;
+
+    float mObsPositionWeight;
 
     // debug
     std::vector<field_pos_t> mPath;

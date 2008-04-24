@@ -63,7 +63,8 @@ FvOmniLocalizerPipelineThread::FvOmniLocalizerPipelineThread() :
     mPositionInterface( 0 ),
     mColorspaceFrom( CS_UNKNOWN ),
     mColorspaceTo( YUV422_PLANAR ),
-    mUseBallPosition( false )
+    mUseBallPosition( false ),
+    mUseObstaclePositions( false )
 {
 }
 
@@ -86,6 +87,7 @@ void FvOmniLocalizerPipelineThread::init()
   config->set_default_int( "/firevision/omni/localizer/radius_increase", 2 );
   config->set_default_int( "/firevision/omni/localizer/max_radius", 575 );
   config->set_default_bool( "/firevision/omni/localizer/use_ball_position", false );
+  config->set_default_bool( "/firevision/omni/localizer/use_obstacle_positions", false );
 
   string colormapFile, mirrorFile, maskFile;
   int num_segments, radius_increase, maxRadius;
@@ -98,6 +100,7 @@ void FvOmniLocalizerPipelineThread::init()
     maxRadius = config->get_int( "/firevision/omni/localizer/max_radius" );
     maskFile = config->get_string( "/firevision/omni/mask" );
     mUseBallPosition = config->get_bool( "/firevision/omni/localizer/use_ball_position" );
+    mUseObstaclePositions = config->get_bool( "/firevision/omni/localizer/use_obstacle_positions" );
   }
   catch ( Exception &e )
   {
@@ -185,12 +188,20 @@ void FvOmniLocalizerPipelineThread::init()
 
   try {
     list<ObjectPositionInterface *> *lst = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("Ball");
-    for ( list<ObjectPositionInterface *>::const_iterator it = lst->begin(); it != lst->end(); ++it )
+    for ( list<ObjectPositionInterface *>::const_iterator it = lst->begin(); it != lst->end(); ++it ) {
       mBallInterfaces.push_back( *it );
-    logger->log_debug( name(), "Found %i ball position interfaces", mBallInterfaces.size() );
+      bbil_add_writer_interface( *it );
+    }
     delete lst;
+    lst = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>( "OmniObstacle" );
+    for ( list<ObjectPositionInterface*>::const_iterator it = lst->begin(); it != lst->end(); ++it ) {
+      mObstacleInterfaces.push_back( *it );
+      bbil_add_writer_interface( *it );
+    }
+    logger->log_debug( name(), "Found %i ball position interfaces", mBallInterfaces.size() );
+    logger->log_debug( name(), "Found %i obstacle position interfaces", mObstacleInterfaces.size() );
   } catch ( Exception &e ) {
-    e.append( "Opening ball interfaces failed!" );
+    e.append( "Opening ball/obstacle interfaces failed!" );
   }
 
   bbio_add_interface_create_type( "ObjectPositionInterface" );
@@ -332,11 +343,12 @@ void FvOmniLocalizerPipelineThread::loop()
   }
 
   // get locally determined ball position(s)
-  vector<f_point_t> ballHits;
+  vector<f_point_t> ballHits; // TODO: add covariance
   if ( mUseBallPosition ) {
     for ( vector<ObjectPositionInterface*>::const_iterator it = mBallInterfaces.begin(); it != mBallInterfaces.end(); ++it ) {
-      // TODO
       (*it)->read();
+      if ( !(*it)->is_visible() )
+        continue;
       f_point_t p;
       p.x = (*it)->relative_x();
       p.y = (*it)->relative_y();
@@ -344,13 +356,30 @@ void FvOmniLocalizerPipelineThread::loop()
     }
   }
 
+  // get locally detected obstacles
+  vector<f_point_t> obstacleHits; // TODO: add covariance, extend, etc.
+  if ( mUseObstaclePositions ) {
+    for ( vector<ObjectPositionInterface*>::const_iterator it = mObstacleInterfaces.begin(); it != mObstacleInterfaces.end(); ++it ) {
+      (*it)->read();
+      if ( !(*it)->is_visible() )
+        continue;
+      f_point_t p;
+      p.x = (*it)->relative_x();
+      p.y = (*it)->relative_y();
+      obstacleHits.push_back( p );
+    }
+  }
+
   // update and resample if we have new sensor readings
   if ( hitCount == 0 ) {
     logger->log_warn( name(), "No sensor readings found." );
   } else {
+    mMCL->prepareUpdate();
     mMCL->update( convertedHits );
     if ( mUseBallPosition )
       mMCL->updateBall( ballHits );
+    if ( mUseObstaclePositions )
+      mMCL->updateObstacles( obstacleHits );
     mMCL->resample();
   }
   mMCL->calculatePose();
@@ -393,14 +422,36 @@ void FvOmniLocalizerPipelineThread::loop()
 
 void FvOmniLocalizerPipelineThread::bb_interface_created(const char * type, const char * id) throw(  )
 {
-  cout << "interface created: " << id << endl;
   if ( strncmp( id, "Ball", strlen("Ball") ) == 0 ) {
     logger->log_debug( name(), "Found new ball position interface: %s", id );
     try {
       ObjectPositionInterface *ballIface = blackboard->open_for_reading<ObjectPositionInterface>( id );
       mBallInterfaces.push_back( ballIface );
+      bbil_add_writer_interface( ballIface );
     } catch ( Exception &e ) {
-      cout << "Opening interface failed: " << e.what() << endl;
+      logger->log_warn( name(), "Opening ball interface %i failed: %s", id, e.what() );
     }
   }
+
+  else if ( strncmp( id, "OmniObstacle", strlen("OmniObstacle") ) == 0 ) {
+    logger->log_debug( name(), "Found new obstacle position interface: %s", id );
+    try {
+      ObjectPositionInterface *iface = blackboard->open_for_reading<ObjectPositionInterface>( id );
+      mObstacleInterfaces.push_back( iface );
+      bbil_add_writer_interface( iface );
+    } catch ( Exception &e ) {
+      logger->log_warn( name(), "Opening obstacle interface %i failed: %s", id, e.what() );
+    }
+  }
+}
+
+void FvOmniLocalizerPipelineThread::bb_interface_writer_removed(Interface * interface, unsigned int instance_serial) throw(  )
+{
+  logger->log_debug( name(), "Interface %s removed", interface->id() );
+  vector<ObjectPositionInterface*>::iterator it = find( mBallInterfaces.begin(), mBallInterfaces.end(), interface );
+  if ( it != mBallInterfaces.end() )
+    mBallInterfaces.erase( it );
+  it = find( mObstacleInterfaces.begin(), mObstacleInterfaces.end(), interface );
+  if ( it != mObstacleInterfaces.end() )
+    mObstacleInterfaces.erase( it );
 }

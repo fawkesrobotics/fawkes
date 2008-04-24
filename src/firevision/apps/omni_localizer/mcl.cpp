@@ -84,6 +84,7 @@ MCL::MCL( BlackBoard *blackboard, Configuration *config ) :
   config->set_default_float( "/firevision/omni/localizer/mcl/unexpected_penalty", -0.5 );
   config->set_default_float( "/firevision/omni/localizer/mcl/unexpected_penalty_min_distance", 0.4 );
   config->set_default_float( "/firevision/omni/localizer/mcl/out_of_field_threshold", 0.2 );
+  config->set_default_float( "/firevision/omni/localizer/obstacle_position_weight", 0.1 );
 
   // read config settings
   mField = new Field( blackboard, config );
@@ -97,6 +98,7 @@ MCL::MCL( BlackBoard *blackboard, Configuration *config ) :
   mUnexpectedPenalty = config->get_float( "/firevision/omni/localizer/mcl/unexpected_penalty" );
   mUnexpectedPenaltyMinDistance = config->get_float( "/firevision/omni/localizer/mcl/unexpected_penalty_min_distance" );
   mOutOfFieldThreshold = config->get_float( "/firevision/omni/localizer/mcl/out_of_field_threshold" );
+  mObsPositionWeight = config->get_float( "/firevision/omni/localizer/obstacle_position_weight" );
 
   // generate initial samples
   generateRandomSamples( mSampleCount );
@@ -172,15 +174,24 @@ void MCL::predict( const field_pos_t &movement, float pathLength )
 }
 
 /**
-  Update samples based on the last sensor readings.
-  @param sensorHits The sensor readings.
+  Prepare updating samples based on new sensor readings.
+  Call this methods before any of the update() methods.
 */
-void MCL::update(const std::map< float, std::vector < polar_coord_t > > & sensorHits)
+void MCL::prepareUpdate()
 {
 #ifdef DEBUG_MCL_LOG
   mMCLLog << endl << "***************************** LOOP " << mLoopCount << " *********************" << endl;
 #endif
 
+  mField->updateDynamicObjects();
+}
+
+/**
+  Update samples based on the last field line sensor readings.
+  @param sensorHits The field line sensor readings.
+*/
+void MCL::update(const std::map< float, std::vector < polar_coord_t > > & sensorHits)
+{
 #ifdef DEBUG_MCL_UPDATE
   unsigned int width, height;
   float scale;
@@ -249,6 +260,62 @@ void MCL::updateBall(const std::vector< f_point_t > & ballHits)
 #ifdef DEBUG_MCL_LOG
   for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
     mMCLLog << "Sample with ball: " << (*it).position << " weight: " << (*it).weight << endl;;
+#endif
+}
+
+/**
+  Update samples based on detected obstacle positions.
+  @param obstacleHits List of obstacles seen by our own sensors.
+*/
+void MCL::updateObstacles(const std::vector< f_point_t > & obstacleHits)
+{
+#ifdef DEBUG_MCL_LOG
+  mMCLLog << "Got obstacle positions: ";
+  copy( obstacleHits.begin(), obstacleHits.end(), ostream_iterator<f_point_t>( mMCLLog, " " ) );
+  mMCLLog << endl;
+#endif
+
+  vector<obstacle_t> expObstacles = mField->obstacles();
+  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
+
+    float maxWeight = 0.0;
+    float weight = 0.0;
+
+    // get maximal possible weight
+    for ( vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt ) {
+      maxWeight += mField->weightForObstacle( *expIt, *expIt ); // ### TODO add current position to determine distance (and decrease weight with distance)
+    }
+    // TODO consider our own position for maxWeight as well
+
+    // get actual weight
+    for ( vector<f_point_t>::const_iterator obsIt = obstacleHits.begin(); obsIt != obstacleHits.end(); ++obsIt ) {
+      float currentWeight = 0.0;
+      for ( vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt ) {
+        obstacle_t currentObs;
+        currentObs.x = it->position.x + ( cosf(it->position.ori) * obsIt->x ) - ( sinf(it->position.ori) * obsIt->y );
+        currentObs.y = it->position.y + ( sinf(it->position.ori) * obsIt->x ) + ( cosf(it->position.ori) * obsIt->y );
+        currentWeight = std::max( mField->weightForObstacle( *expIt, currentObs ), currentWeight );
+      }
+      weight += currentWeight;
+    }
+
+    // Others observe us as obstacle as well
+    obstacle_t myself;
+    myself.x = it->position.x;
+    myself.y = it->position.y;
+    myself.extent = 0.48;
+    // TODO covariance?!?!?
+    float myWeight = 0.0;
+    for ( vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt )
+      myWeight = max( myWeight, mField->weightForObstacle( *expIt, myself ) );
+    weight += myWeight;
+
+    (*it).weight += ( weight / maxWeight ) * mObsPositionWeight;
+  }
+
+#ifdef DEBUG_MCL_LOG
+  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
+    mMCLLog << "Sample with obstacles: " << (*it).position << " weight: " << (*it).weight << endl;;
 #endif
 }
 

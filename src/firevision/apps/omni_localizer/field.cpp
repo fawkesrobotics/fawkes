@@ -92,16 +92,23 @@ Field::Field( BlackBoard *blackboard, Configuration *config ) :
   dumpSensorProbabilities( pos, "sensor-prob-test-corner.dat" );
 #endif
 
-  // try to get the ball interfaces if they are already there
+  // try to get the ball and obstacle interfaces if they are already there
   try {
     mWMBallInterface = blackboard->open_for_reading<ObjectPositionInterface>( "WM Ball" );
+    list<ObjectPositionInterface *> *lst = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("WM Obstacle");
+    for ( list<ObjectPositionInterface *>::const_iterator it = lst->begin(); it != lst->end(); ++it ) {
+      mWMObstacleInterfaces.push_back( *it );
+      bbil_add_writer_interface( *it );
+    }
+    delete lst;
+
   } catch ( Exception &e ) {
-    e.append( "Ball interface registration for field model failed." );
+    e.append( "Ball/Obstacle interface registration for field model failed." );
     throw;
   }
 
   bbio_add_interface_create_type("ObjectPositionInterface");
-  blackboard->register_observer( this, BlackBoard::BBIO_FLAG_CREATED | BlackBoard::BBIO_FLAG_DESTROYED );
+  blackboard->register_observer( this, BlackBoard::BBIO_FLAG_CREATED );
 }
 
 /** Destructor. */
@@ -150,6 +157,22 @@ float Field::weightForDistance( float lineDistance, float sensorDistance ) const
   const float sigma = 0.75;
   return expf( - distance2/(sigma * sigma) ) / sigma;
 #endif
+}
+
+/**
+  Calculates the weight for a given obstacle sensor reading @p seenObs when obstacle
+  @p expectedObs is expected.
+  @param expectedObs The expected obstacle, in global cartesian coordinates.
+  @param seenObs The detected obstacle, in global cartesian coordinates.
+*/
+float Field::weightForObstacle(const obstacle_t & expectedObs, const obstacle_t & seenObs)
+{
+  const float diffX = expectedObs.x - seenObs.x;
+  const float diffY = expectedObs.y - seenObs.y;
+  const float dist = sqrtf( diffX * diffX + diffY * diffY );
+  // ### TODO
+  const float sigma = 1.0 * expectedObs.extent;
+  return expf( - ((dist * dist) / (sigma * sigma)) );
 }
 
 #define mapToImageX(x) ((unsigned int)(scale * ((x) + totalWidth()/2.0)))
@@ -391,13 +414,69 @@ void Field::dumpSensorProbabilities(const field_pos_t & position, const char * f
 */
 float Field::weightForBall(const field_pos_t & position, const f_point_t & ballHit)
 {
-  mWMBallInterface->read();
-  const float absX = position.x + ( cos(position.ori) * ballHit.x ) - ( sin(position.ori) * ballHit.y );
-  const float absY = position.y + ( sin(position.ori) * ballHit.x ) + ( cos(position.ori) * ballHit.y );
+  if ( !mWMBallInterface->is_visible() )
+    return 0.0;
+  const float absX = position.x + ( cosf(position.ori) * ballHit.x ) - ( sinf(position.ori) * ballHit.y );
+  const float absY = position.y + ( sinf(position.ori) * ballHit.x ) + ( cosf(position.ori) * ballHit.y );
   const float diffX = absX - mWMBallInterface->world_x();
   const float diffY = absY - mWMBallInterface->world_y();
   const float distToBall = sqrtf( diffX * diffX + diffY * diffY );
   // ### TODO
   const float sigma = 0.5;
   return expf( - ((distToBall * distToBall) / (sigma * sigma)) ) * mBallPositionWeight;
+}
+
+/**
+  Update dynamic objects on the field (ball, obstacles, etc.)
+*/
+void Field::updateDynamicObjects()
+{
+  mWMBallInterface->read();
+
+  mInterfaceMutex.lock();
+  mObstacles.clear();
+  for ( vector<ObjectPositionInterface*>::const_iterator it = mWMObstacleInterfaces.begin();
+        it != mWMObstacleInterfaces.end(); ++it )
+  {
+    (*it)->read();
+    if ( !(*it)->is_visible() )
+      continue;
+    obstacle_t obs;
+    obs.x = (*it)->world_x();
+    obs.y = (*it)->world_y();
+    obs.extent = (*it)->extent_x();
+    obs.covariance = (*it)->world_xyz_covariance();
+    mObstacles.push_back( obs );
+  }
+  mInterfaceMutex.unlock();
+}
+
+void Field::bb_interface_created(const char * type, const char * id) throw(  )
+{
+  if ( strncmp( id, "WM Obstacle", strlen("WM Obstacle") ) == 0 ) {
+    try {
+      ObjectPositionInterface *iface = mBlackBoard->open_for_reading<ObjectPositionInterface>( id );
+      mInterfaceMutex.lock();
+      mWMObstacleInterfaces.push_back( iface );
+      mInterfaceMutex.unlock();
+      bbil_add_writer_interface( iface );
+    } catch ( Exception &e ) {
+      cout << "Opening interface " << id << " failed: " << e.what() << endl;
+    }
+  }
+}
+
+void Field::bb_interface_writer_removed(Interface * interface, unsigned int instance_serial) throw(  )
+{
+  vector<ObjectPositionInterface*>::iterator it = find( mWMObstacleInterfaces.begin(), mWMObstacleInterfaces.end(), interface );
+  if ( it != mWMObstacleInterfaces.end() ) {
+    mInterfaceMutex.lock();
+    mWMObstacleInterfaces.erase( it );
+    mInterfaceMutex.unlock();
+  }
+}
+
+std::vector< obstacle_t > Field::obstacles() const
+{
+  return mObstacles;
 }
