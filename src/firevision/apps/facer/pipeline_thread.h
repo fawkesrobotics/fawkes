@@ -82,6 +82,8 @@ class FacerPipelineThread
   FacesClassifier *__classifier;
   FacerInterface *__facer_if;
   FacerInterface::if_facer_opmode_t  __opmode;
+  unsigned int __nos_new_to_save; 
+  std::string __new_identity_name; 
 
   std::string __face_label;
   std::list<ROI> *__rois;
