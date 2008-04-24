@@ -28,7 +28,7 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-LIBS_fvomnifield = core utils fvutils fvcams fvmodels fvclassifiers
+LIBS_fvomnifield = core utils fvutils fvcams fvmodels fvclassifiers geometry
 OBJS_fvomnifield = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_fvomnifield)

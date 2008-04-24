@@ -36,6 +36,8 @@
 #include <fvutils/base/types.h>
 #include <fvutils/base/roi.h>
 
+#include <geometry/hom_polar.h>
+
 class Camera;
 class ScanlineStar;
 class ColorModel;
@@ -73,6 +75,7 @@ class FvOmniFieldPipelineThread
   RelativePositionModel* m_rel_pos;
   SharedMemoryImageBuffer* m_shm_buffer;
   ObjectPositionInterface** m_obstacle_interfaces;
+  std::map<float, HomPolar> m_obstacles;
 
   size_t m_buffer_size;
   unsigned char* m_buffer;
@@ -87,6 +90,9 @@ class FvOmniFieldPipelineThread
 
   unsigned int m_num_interfaces;
 
+  unsigned int m_num_non_field;
+  point_t m_last_field;
+  
   unsigned int m_num_whites;
   hint_t m_last_seen_object;
   point_t m_first_white;

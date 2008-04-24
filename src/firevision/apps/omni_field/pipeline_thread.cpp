@@ -27,7 +27,6 @@
 #include <fvutils/color/conversions.h>
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/readers/pnm.h>
-
 #include <fvutils/draw/drawer.h>
 
 #include <models/mirror/mirrormodel.h>
@@ -36,6 +35,9 @@
 #include <models/mirror/bulb.h>
 #include <models/relative_position/omni_relative.h>
 
+#include <geometry/hom_point.h>
+#include <geometry/hom_vector.h>
+#include <geometry/hom_polar.h>
 #include <cams/camera.h>
 #include <interfaces/object.h>
 #include <utils/math/angle.h>
@@ -72,6 +74,8 @@ FvOmniFieldPipelineThread::FvOmniFieldPipelineThread()
   m_cspace_to = YUV422_PLANAR;
 
   m_drawer = 0;
+
+  m_num_non_field = 0;
 }
 
 
@@ -305,11 +309,11 @@ FvOmniFieldPipelineThread::loop()
       m_obstacle_interfaces[i]->set_visible(false);
       m_obstacle_interfaces[i]->write();
     }
+  m_obstacles.clear();
 
   m_num_whites = 0;
 
   // search for obstacles
-  unsigned int index;
   while ( !m_scanline_model->finished() )
     {
       point_t cur_point;
@@ -319,77 +323,178 @@ FvOmniFieldPipelineThread::loop()
       hint_t object_type;
       bool _is_field = is_field(&cur_point, &object_type);
 
-      // neither H_FIELD nor H_LINE
-      if (!_is_field)
-	{
-	  unsigned int cur_x = cur_point.x;
-	  unsigned int cur_y = cur_point.y;
+      // neither H_FIELD nor H_LINE nor H_BALL
+      if ( !_is_field )
+	{ 
+	  ++m_num_non_field;
 
-	  // determine relative world coordinates
-	  m_rel_pos->set_center(cur_x, cur_y);
-	  m_rel_pos->calc_unfiltered();
-
-	  index = m_scanline_model->ray_index();
-
-	  // write data to interface
-	  m_obstacle_interfaces[index]->set_visible( true );
-	  m_obstacle_interfaces[index]->set_extent_x( 0.1 );
-	  m_obstacle_interfaces[index]->set_relative_x( m_rel_pos->get_x() );
-	  m_obstacle_interfaces[index]->set_relative_y( -m_rel_pos->get_y() );
-	  m_obstacle_interfaces[index]->write();
-
-	  // draw circle in image
-	  m_drawer->drawCircle(cur_x, cur_y, 4);
-
-	  // continue with next ray
-	  m_scanline_model->skip_current_ray();
-	}
-
-      // H_LINE
-      else if (object_type == H_LINE)
-	{
-	  if (m_last_seen_object == H_LINE)
+	  if (m_num_non_field > 4)
 	    {
-	      if (4 < ++m_num_whites)
-		// white obstacle
-		{
-		  m_rel_pos->set_center(m_first_white.x, m_first_white.y);
-		  m_rel_pos->calc_unfiltered();
+	      unsigned int obstacle_x = m_last_field.x;
+	      unsigned int obstacle_y = m_last_field.y;
+	      
+	      // determine relative world coordinates
+	      m_rel_pos->set_center(obstacle_x, obstacle_y);
+	      m_rel_pos->calc_unfiltered();
+	      
+	      unsigned int index;
+	      index = m_scanline_model->ray_index();
+	      
+	      // save detected obstacles for post-processing
+	      HomPolar obstacle( m_rel_pos->get_distance(), m_rel_pos->get_bearing() );
+	      m_obstacles[obstacle.phi()] = obstacle;
 
-		  index = m_scanline_model->ray_index();
-		  
-		  m_obstacle_interfaces[index]->set_visible( true );
-		  m_obstacle_interfaces[index]->set_extent_x( 0.1 );
-		  m_obstacle_interfaces[index]->set_relative_x( m_rel_pos->get_x() );
-		  m_obstacle_interfaces[index]->set_relative_y( -m_rel_pos->get_y() );
-		  m_obstacle_interfaces[index]->write();
-
-		  // draw circle in image
-		  m_drawer->drawCircle(m_first_white.x, m_first_white.y, 4);
-		  
-		  // continue with next ray
-		  m_scanline_model->skip_current_ray();
-
-		  m_last_seen_object = H_UNKNOWN;
-		  m_num_whites = 0;
-		}
+	      // continue with next ray
+	      m_scanline_model->skip_current_ray();
+	      
+	      // DEBUG
+	      cart_coord_t center = m_mirror->getCenter();
+	      m_drawer->setColor(0, 127, 127);
+	      m_drawer->drawLine(center.x, center.y, obstacle_x, obstacle_y);
 	    }
 	  else
-	    { 
-	      m_last_seen_object = H_LINE;
-	      m_first_white = cur_point; 
-
-	      // continue with next scanline point
-	      ++(*m_scanline_model); 
-	    }
+	    { ++(*m_scanline_model); }
 	}
-      
-      // H_FIELD
       else
-	{ 
+	{
+	  m_num_non_field = 0;
+	  m_last_field = cur_point;
+
 	  // continue with next scanline point
 	  ++(*m_scanline_model);
 	}
+    }
+
+  if (m_obstacles.size() == 0)
+    // no obstacles detected
+    {
+      for (unsigned int i = 0; i < m_num_interfaces; ++i)
+	{ 
+	  m_obstacle_interfaces[i]->set_visible(false);
+	  m_obstacle_interfaces[i]->write();
+	}
+
+      return;
+    }
+
+  else if (m_obstacles.size() == 1)
+    // exactly 1 obstacle was detected
+    {
+      std::map<float, HomPolar>::iterator i;
+      i = m_obstacles.begin();
+      HomPolar p = i->second;
+      m_obstacle_interfaces[0]->set_visible(true);
+      m_obstacle_interfaces[0]->set_distance( p.r() );
+      m_obstacle_interfaces[0]->set_bearing( p.phi() );
+      m_obstacle_interfaces[0]->write();
+
+      for (unsigned int i = 1; i < m_num_interfaces; ++i)
+	{
+	  m_obstacle_interfaces[i]->set_visible(false);
+	  m_obstacle_interfaces[i]->write();
+	}
+
+      return;
+    }
+  
+  // find start of first cluster
+  std::map<float, HomPolar>::iterator loit;
+  std::map<float, HomPolar>::iterator coit;
+  std::map<float, HomPolar>::iterator start_oit = m_obstacles.begin();
+  loit = m_obstacles.end();
+  --loit;
+  for ( coit = m_obstacles.begin(); coit != m_obstacles.end(); ++coit )
+    {
+      float dx = coit->second.x() - loit->second.x();
+      float dy = coit->second.y() - loit->second.y();
+      float delta = sqrt( dx * dx + dy * dy ); 
+
+      loit = coit;
+
+      if ( delta > 0.5 )
+	{
+	  start_oit = coit;
+	  break;
+	}
+    }
+
+  typedef std::vector<HomPolar> Cluster;
+  std::vector<Cluster> clusters;
+  Cluster cur_cluster;
+  cur_cluster.push_back(start_oit->second);
+  clusters.push_back(cur_cluster);
+  
+  // It is assumed that at the beginning of the while-loop we are at the first point
+  // of a cluster, i.e., it is visible and the point before is not visible or it is
+  // too far away.
+  HomPolar cluster_start = start_oit->second;
+  coit = start_oit;
+  ++coit;
+  while ( coit != start_oit )
+    {
+      Cluster  cur_cluster  = clusters.back();
+      HomPolar cur_obstacle = coit->second;
+
+      // compute the center of the obstacles in the current cluster and the current obstacle
+      HomPolar center;
+      float avg_r = cur_obstacle.r();
+      for (unsigned int c = 0; c < cur_cluster.size(); ++c)
+	{ avg_r += cur_cluster[c].r(); }
+      avg_r /= float(cur_cluster.size() + 1);
+
+      float avg_phi = fabs(cur_obstacle.phi() - cluster_start.phi()) / 2.0 + cluster_start.phi();
+
+      center.r(avg_r);
+      center.phi(avg_phi);
+      
+      float dist_to_center;
+      unsigned int c = 0;
+      bool start_new_cluster = false;
+      
+      // Check distance of all points in the cluster to the point in the middle between
+      // the first point of the cluster and the current point. If all points lie within
+      // a certain radius around the center the new point is added to the cluster.
+      // Otherwise a new cluster is started.
+      while ( c < cur_cluster.size() && !start_new_cluster)
+	{
+	  dist_to_center = HomVector(cur_cluster[c] - center).length();
+	  if (dist_to_center > 0.3)
+	    {
+	      ObjectPositionInterface* opi;
+	      opi = m_obstacle_interfaces[ clusters.size() - 1 ];
+	      opi->set_visible(true);
+	      opi->set_relative_x( center.x() );
+	      opi->set_relative_y( center.y() );
+	      opi->set_bearing( center.phi() );
+	      opi->set_distance( center.r() );
+	      HomPolar cluster_end = cur_cluster.back();
+	      opi->set_extent_x( HomVector(cluster_end - cluster_start).length() / 2.0 );
+	      
+	      Cluster new_cluster;
+	      new_cluster.push_back(cur_obstacle);
+	      clusters.push_back(new_cluster);
+	      cluster_start = cur_obstacle;
+	      
+	      start_new_cluster = true;
+	    }
+	  ++c;
+	}
+
+      if ( !start_new_cluster )
+	{
+	  cur_cluster.push_back(cur_obstacle);
+	}
+
+      if ( ++coit == m_obstacles.end() )
+	{ coit = m_obstacles.begin(); }
+    }
+
+  for (unsigned int i = 0; i < m_num_interfaces; ++i)
+    {
+      if ( i >= clusters.size() )
+	{ m_obstacle_interfaces[i]->set_visible(false); }
+
+      m_obstacle_interfaces[i]->write();
     }
 }
 
@@ -412,11 +517,14 @@ FvOmniFieldPipelineThread::is_field(point_t* point, hint_t* object_type)
   unsigned char up = 0;
   unsigned char vp = 0;
   color_t color;
-  short offsets[3] = {-2, 0, 2};
+
+  short offsets[3] = {-4, 0, 4};
   unsigned int num_offsets = 3;
-  unsigned int num_green = 0;
-  unsigned int num_white = 0;
-  unsigned int num_pixels = num_offsets * num_offsets;
+  unsigned int num_pixels  = num_offsets * num_offsets;
+
+  unsigned int num_green  = 0;
+  unsigned int num_white  = 0;
+  unsigned int num_orange = 0;
 
   x_center = point->x; 
   y_center = point->y;
@@ -440,31 +548,54 @@ FvOmniFieldPipelineThread::is_field(point_t* point, hint_t* object_type)
 
 	  color = m_colormodel->determine(yp, up, vp);
 
-	  if ( C_GREEN == color ) 
-	    { ++num_green; }
-	  if ( C_WHITE == color )
-	    { ++num_white; }
+	  switch(color)
+	    {
+	    case C_GREEN:
+	      ++num_green;
+	      break;
+
+	    case C_WHITE:
+	      ++num_white;
+	      break;
+	      
+	    case C_ORANGE:
+	      ++num_orange;
+	      break;
+
+	    default:
+	      break;
+	    }
 	}
     }
 
-  float ratio = (num_green + num_white) / float(num_pixels);
+  float ratio = (num_green + num_white + num_orange) / float(num_pixels);
 
-  bool is_field = false;
-  if (object_type)
-    { *object_type = H_UNKNOWN; }
+  bool is_field;
 
-  if (ratio > 0.8)
+  if (ratio > 0.6)
     { 
-      is_field = true;
-      
       if (object_type)
 	{
-	  if (num_green > num_white)
-	    { *object_type = H_FIELD; }
-	  else
+	  *object_type = H_FIELD;
+	  unsigned int max = num_green;
+
+	  if (num_white > max)
 	    { *object_type = H_LINE; }
+	  
+	  if (num_orange > max)
+	    { *object_type = H_BALL; }
 	}
+
+      is_field = true;      
     }
+  else
+    {
+      if (object_type)
+	{ *object_type = H_UNKNOWN; }
+
+      is_field = false;
+    }
+
 
   return is_field;
 }
