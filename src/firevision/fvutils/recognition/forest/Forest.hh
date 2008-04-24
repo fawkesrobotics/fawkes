@@ -282,6 +282,8 @@ namespace Forest {
 	  
 //	  for( int i = 0; i < config.getNclasses(); i++ ) { 
 	//	for( int j = 0; j < leftBranch[i].size(); j++ ) 
+	  
+
 	  delete[] leftBranch;
 	  delete[] rightBranch;
 		  //		  leftBranch[i].iiVector.at( j ) = 0; 

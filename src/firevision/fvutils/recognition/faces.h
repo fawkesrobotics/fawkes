@@ -49,8 +49,6 @@ class FaceRecognizer
   std::map<int, std::string> __person_names; 
   /** a configclass Instance */
   UserDef::ConfigClass *__config; 
-  /** a random forest */ 
-  Forest::ForestClass *__forest; 
   /** height of the trainig images. this value can be read later */
   int __train_height;
   /** width of the training imaes */ 
@@ -59,6 +57,9 @@ class FaceRecognizer
  public:
   FaceRecognizer(const char* loc, int number_of_identities, int forest_size );
   ~FaceRecognizer();
+  /** a random forest */ 
+  Forest::ForestClass *__forest; 
+
 
   /** get the training height */
   int getTrainHeight() const { return __train_height; }

@@ -34,7 +34,7 @@
 #define NCLASSES 2
 
 // Growth of Tree
-#define NITERATIONS 50
+#define NITERATIONS 100
 #define NODECOUNT 400
 #define MAX_TRY_ALLOWED 20 // maximum number of tries the children is allowed to sent back to tree growth tests : _deprecated_ 
 
