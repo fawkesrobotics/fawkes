@@ -19,7 +19,7 @@
 #
 #*****************************************************************************
 
-ifneq ($(wildcard ../../../etc/config.mk),)
+ifneq ($(wildcard ../../../etc/buildsys/config.mk),)
   BASEDIR = ../../..
 else
   BASEDIR = ../../../..

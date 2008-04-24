@@ -2134,7 +2134,7 @@ int main( int argc, char** argv ) {
 	  
       
       for( int i =0; i < config.getNclasses(); i++) 
-		printf("Total number of training images: class %d has %d images\n", i , config.integralImages[i].iiVector.size() );
+		printf("Total number of training images: class %d has %zu images\n", i , config.integralImages[i].iiVector.size() );
       
     }    
     
@@ -2818,7 +2818,7 @@ int main( int argc, char** argv ) {
     filterNoise5( config.forestWindows, config, 1.0, 1 ); 
 
 	  
-	  printf("the number of windows are %d", config.forestWindows.size() );
+	  printf("the number of windows are %zu", config.forestWindows.size() );
 	   
 	  for(unsigned int q = 0; q < config.forestWindows.size(); q++ ) 
 	    {

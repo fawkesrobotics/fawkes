@@ -24,7 +24,7 @@
  */
 
 #ifndef __GEOMETRY_HOM_POLAR_H_
-#define __GEOMETRY_HOM_POLOAR_H_
+#define __GEOMETRY_HOM_POLAR_H_
 
 #include <geometry/hom_vector.h>
 
