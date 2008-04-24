@@ -54,7 +54,7 @@ class WorldInfoDataContainer
     worldinfo_gamestate_half_t half;        /**< first or second half */
   };
 
-  /** Map that assigns positions to ids. */
+  /** Map that assigns positions (in polar coordinates) to ids. */
   typedef std::map<unsigned int, HomPolar> PosMap;
 
   void reset();
@@ -92,6 +92,7 @@ class WorldInfoDataContainer
   void set_opponent_pos( const char* from_host, unsigned int uid,
 			 float distance, float angle, float* covariance );
   void delete_opponent_pos(const char* from_host, unsigned int uid);
+  void delete_all_opponent_pos(const char* from_host);
   bool get_opponent_pos(const char* host, PosMap& opponent_pos);
 
   // game state
@@ -134,7 +135,7 @@ class WorldInfoDataContainer
   MatrixLockMap  m_robot_vel_cov;
 
   PolarLockMap   m_ball_pos;
-  PointLockMap m_ball_pos_global;
+  PointLockMap   m_ball_pos_global;
   MatrixLockMap  m_ball_pos_rel_cov;
 
   LockMap<unsigned int, PosMap> m_opponent_pos;

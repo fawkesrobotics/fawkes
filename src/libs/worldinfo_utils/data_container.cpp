@@ -41,6 +41,15 @@ WorldInfoDataContainer::WorldInfoDataContainer(Clock* clock)
 {
   reset();
   m_clock = clock;
+
+  m_own_team_color = TEAM_CYAN;
+  m_own_goal_color = GOAL_BLUE;
+
+  m_game_state.game_state    = GS_FROZEN;
+  m_game_state.state_team    = TEAM_BOTH;
+  m_game_state.score_cyan    = 0;
+  m_game_state.score_magenta = 0;
+  m_game_state.half          = HALF_FIRST;
 }
 
 /** Destructor. */
@@ -53,11 +62,25 @@ WorldInfoDataContainer::~WorldInfoDataContainer()
 void
 WorldInfoDataContainer::reset()
 {
+  m_hosts.lock();
   m_hosts.clear();
+  m_hosts.unlock();
+
+  m_last_seen.lock();
   m_last_seen.clear();
+  m_last_seen.unlock();
+
+  m_ball_pos.lock();
   m_ball_pos.clear();
+  m_ball_pos.unlock();
+
+  m_ball_pos_global.lock();
   m_ball_pos_global.clear();
+  m_ball_pos_global.unlock();
+
+  m_opponent_pos.lock();
   m_opponent_pos.clear();
+  m_opponent_pos.unlock();
 
   m_host_id = 0;
 
@@ -76,11 +99,11 @@ WorldInfoDataContainer::get_hosts()
   now.stamp();
 
   m_hosts.lock();
-  HostLockMap::iterator iter;
-  for (iter = m_hosts.begin(); iter != m_hosts.end(); ++iter)
+  HostLockMap::iterator iter = m_hosts.begin();
+  while ( iter != m_hosts.end() )
     {
       if ( now.in_msec() - m_last_seen[ iter->second ] < 3000 )
-	{ hosts.push_back( iter->first ); }
+	{ hosts.push_back( iter->first ); ++iter; }
       else
 	{
 	  unsigned int id = iter->second;
@@ -100,7 +123,7 @@ WorldInfoDataContainer::get_hosts()
 	  m_ball_pos_global.erase(id);
 	  m_ball_pos_global.unlock();
 
-	  m_hosts.erase(iter);
+	  m_hosts.erase(iter++);
 
 	  m_host_removed = true;
 	}
@@ -310,7 +333,7 @@ WorldInfoDataContainer::set_ball_pos( const char* host, float dist,
   if ( get_robot_pose(host, robot_pose, robot_pose_cov) )
     {
       HomPoint glob_pos;
-      glob_pos = pos.rotate_z( robot_pose.yaw() ) + robot_pose.pos();
+      glob_pos = robot_pose.pos() + pos.rotate_z( robot_pose.yaw() );
       m_ball_pos_global.lock();
       m_ball_pos_global[id] = glob_pos;
       m_ball_pos_global.unlock();
@@ -480,8 +503,21 @@ WorldInfoDataContainer::set_opponent_pos( const char* host, unsigned int uid,
 
   HomPolar pos(distance, angle);
 
-  PosMap& opponents = m_opponent_pos[id];
-  opponents[uid] = pos;
+  LockMap<unsigned int, PosMap>::iterator iter;
+  m_opponent_pos.lock();
+  iter = m_opponent_pos.find(id);
+  if ( iter == m_opponent_pos.end() )
+    {
+      PosMap opponents;
+      opponents[uid] = pos;
+      m_opponent_pos[id] = opponents;
+    }
+  else
+    {
+      PosMap& opponents = iter->second;
+      opponents[uid] = pos;
+    }
+  m_opponent_pos.unlock();
 
   // TODO: covariance
 }
@@ -493,7 +529,42 @@ WorldInfoDataContainer::set_opponent_pos( const char* host, unsigned int uid,
 void
 WorldInfoDataContainer::delete_opponent_pos(const char* host, unsigned int uid)
 {
-  // TODO
+  string host_string(host);
+  unsigned int id = get_host_id(host_string);
+
+  LockMap<unsigned int, PosMap>::iterator iter;
+  m_opponent_pos.lock();
+  iter = m_opponent_pos.find(id);
+  if ( iter != m_opponent_pos.end() )
+    {
+      PosMap& obstacles = iter->second;
+      PosMap::iterator opit;
+      opit = obstacles.find(uid);
+      if ( opit != obstacles.end() )
+	{
+	  obstacles.erase(opit);
+	}
+    }
+  m_opponent_pos.unlock();  
+}
+
+/** Delete all opponents seen by the specified robot.
+ * @param host the hostname of the robot
+ */
+void
+WorldInfoDataContainer::delete_all_opponent_pos(const char* host)
+{
+  string host_string(host);
+  unsigned int id = get_host_id(host_string);
+
+  LockMap<unsigned int, PosMap>::iterator iter;
+  m_opponent_pos.lock();
+  iter = m_opponent_pos.find(id);
+  if ( iter != m_opponent_pos.end() )
+    {
+      m_opponent_pos.erase(iter);
+    }
+  m_opponent_pos.unlock();
 }
 
 /** Get all oppenents detected by a certain robot.
@@ -504,7 +575,20 @@ bool
 WorldInfoDataContainer::get_opponent_pos( const char* host,
 					  WorldInfoDataContainer::PosMap& opp_positions )
 {
-  // TODO
+  string host_string(host);
+  unsigned int id = get_host_id(host_string);
+
+  LockMap<unsigned int, PosMap>::iterator iter;
+  m_opponent_pos.lock();
+  iter = m_opponent_pos.find(id);
+  if ( iter == m_opponent_pos.end() )
+    {
+      m_opponent_pos.unlock();
+      return false;
+    }
+
+  m_opponent_pos.unlock();
+  opp_positions = iter->second;
   return true;
 }
 
