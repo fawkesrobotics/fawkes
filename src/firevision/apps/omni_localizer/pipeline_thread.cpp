@@ -20,6 +20,7 @@
 #include <apps/omni_localizer/lineclassifier.h>
 #include <apps/omni_localizer/mcl.h>
 #include <apps/omni_localizer/debug.h>
+#include <apps/omni_localizer/field.h>
 
 #include <fvutils/color/conversions.h>
 #include <fvutils/ipc/shm_image.h>
@@ -357,16 +358,18 @@ void FvOmniLocalizerPipelineThread::loop()
   }
 
   // get locally detected obstacles
-  vector<f_point_t> obstacleHits; // TODO: add covariance, extend, etc.
+  vector<obstacle_t> obstacleHits; // TODO: add covariance, extend, etc.
   if ( mUseObstaclePositions ) {
     for ( vector<ObjectPositionInterface*>::const_iterator it = mObstacleInterfaces.begin(); it != mObstacleInterfaces.end(); ++it ) {
       (*it)->read();
       if ( !(*it)->is_visible() )
         continue;
-      f_point_t p;
-      p.x = (*it)->relative_x();
-      p.y = (*it)->relative_y();
-      obstacleHits.push_back( p );
+      obstacle_t obs;
+      obs.x = (*it)->relative_x();
+      obs.y = (*it)->relative_y();
+      obs.extent = (*it)->extent_x();
+      obs.covariance = (*it)->relative_xyz_covariance();
+      obstacleHits.push_back( obs );
     }
   }
 

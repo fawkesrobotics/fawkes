@@ -225,9 +225,11 @@ void MCL::update(const std::map< float, std::vector < polar_coord_t > > & sensor
 #ifdef DEBUG_SENSOR_WEIGHTS
   char fileNameSensorWeights[32];
   snprintf( fileNameSensorWeights, 32, "sensor-weights-%04d.dat", mLoopCount );
+  char fileNameObsWeights[32];
+  snprintf( fileNameObsWeights, 32, "obs-weights-%04d.dat", mLoopCount );
   field_pos_t pos = mLastBestSample.position;
   pos.ori = 0.0;
-  mField->dumpSensorProbabilities( pos, fileNameSensorWeights );
+  mField->dumpSensorProbabilities( pos, fileNameSensorWeights, fileNameObsWeights );
 #endif
 
 #ifdef DEBUG_POSITION_PROBABILITIES
@@ -265,14 +267,14 @@ void MCL::updateBall(const std::vector< f_point_t > & ballHits)
 
 /**
   Update samples based on detected obstacle positions.
-  @param obstacleHits List of obstacles seen by our own sensors.
+  @param obstacleHits List of obstacles seen by our own sensors, as relative cartesian coordinates.
 */
-void MCL::updateObstacles(const std::vector< f_point_t > & obstacleHits)
+void MCL::updateObstacles(const std::vector< obstacle_t > & obstacleHits)
 {
 #ifdef DEBUG_MCL_LOG
-  mMCLLog << "Got obstacle positions: ";
-  copy( obstacleHits.begin(), obstacleHits.end(), ostream_iterator<f_point_t>( mMCLLog, " " ) );
-  mMCLLog << endl;
+//   mMCLLog << "Got obstacle positions: ";
+//   copy( obstacleHits.begin(), obstacleHits.end(), ostream_iterator<obstacle_t>( mMCLLog, " " ) );
+//   mMCLLog << endl;
 #endif
 
   vector<obstacle_t> expObstacles = mField->obstacles();
@@ -283,18 +285,21 @@ void MCL::updateObstacles(const std::vector< f_point_t > & obstacleHits)
 
     // get maximal possible weight
     for ( vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt ) {
-      maxWeight += mField->weightForObstacle( *expIt, *expIt ); // ### TODO add current position to determine distance (and decrease weight with distance)
+      maxWeight += mField->weightForObstacle( it->position, *expIt, *expIt );
     }
     // TODO consider our own position for maxWeight as well
 
     // get actual weight
-    for ( vector<f_point_t>::const_iterator obsIt = obstacleHits.begin(); obsIt != obstacleHits.end(); ++obsIt ) {
+    for ( vector<obstacle_t>::const_iterator obsIt = obstacleHits.begin(); obsIt != obstacleHits.end(); ++obsIt ) {
       float currentWeight = 0.0;
       for ( vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt ) {
+        // convert to global cartesian coordinates
         obstacle_t currentObs;
         currentObs.x = it->position.x + ( cosf(it->position.ori) * obsIt->x ) - ( sinf(it->position.ori) * obsIt->y );
         currentObs.y = it->position.y + ( sinf(it->position.ori) * obsIt->x ) + ( cosf(it->position.ori) * obsIt->y );
-        currentWeight = std::max( mField->weightForObstacle( *expIt, currentObs ), currentWeight );
+        currentObs.extent = obsIt->extent;
+        currentObs.covariance = obsIt->covariance;
+        currentWeight = std::max( mField->weightForObstacle( it->position, *expIt, currentObs ), currentWeight );
       }
       weight += currentWeight;
     }
@@ -307,7 +312,7 @@ void MCL::updateObstacles(const std::vector< f_point_t > & obstacleHits)
     // TODO covariance?!?!?
     float myWeight = 0.0;
     for ( vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt )
-      myWeight = max( myWeight, mField->weightForObstacle( *expIt, myself ) );
+      myWeight = max( myWeight, mField->weightForObstacle( it->position, *expIt, myself ) );
     weight += myWeight;
 
     (*it).weight += ( weight / maxWeight ) * mObsPositionWeight;

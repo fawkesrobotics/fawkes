@@ -162,17 +162,25 @@ float Field::weightForDistance( float lineDistance, float sensorDistance ) const
 /**
   Calculates the weight for a given obstacle sensor reading @p seenObs when obstacle
   @p expectedObs is expected.
+  @param pos The current position.
   @param expectedObs The expected obstacle, in global cartesian coordinates.
   @param seenObs The detected obstacle, in global cartesian coordinates.
 */
-float Field::weightForObstacle(const obstacle_t & expectedObs, const obstacle_t & seenObs)
+float Field::weightForObstacle( const field_pos_t &pos, const obstacle_t & expectedObs, const obstacle_t & seenObs)
 {
+  const float globalDiffX = pos.x - expectedObs.x;
+  const float globalDiffY = pos.y - expectedObs.y;
+  const float globalDist = sqrtf( globalDiffX * globalDiffX + globalDiffY * globalDiffY );
+  if ( globalDist > mUpperRange ) // ignore lower_range since we might be the obstacle ourselves
+    return 0.0;
+
   const float diffX = expectedObs.x - seenObs.x;
   const float diffY = expectedObs.y - seenObs.y;
   const float dist = sqrtf( diffX * diffX + diffY * diffY );
+
   // ### TODO
-  const float sigma = 1.0 * expectedObs.extent;
-  return expf( - ((dist * dist) / (sigma * sigma)) );
+  const float sigma = expectedObs.extent * globalDist;
+  return expf( - ((dist * dist) / (sigma * sigma)) ) / sigma;
 }
 
 #define mapToImageX(x) ((unsigned int)(scale * ((x) + totalWidth()/2.0)))
@@ -383,10 +391,15 @@ void Field::save(const char * filename)
   Write gnuplot file with sensor weights for the given position for debugging.
   @param position The position.
   @param filename The target file.
+  @param filenameObs The target file for obstacle/ball probablility dumps.
 */
-void Field::dumpSensorProbabilities(const field_pos_t & position, const char * filename)
+void Field::dumpSensorProbabilities( const field_pos_t & position, const char * filename,
+                                     const char* filenameObs )
 {
   ofstream dbg( filename );
+  ofstream dbgObs;
+  if ( filenameObs );
+    dbgObs.open( filenameObs );
   for ( float x = -totalWidth()/2.0; x < totalWidth()/2.0; x += 0.1 ) {
     for ( float y = -totalHeight()/2.0; y < totalHeight()/2.0; y += 0.1 ) {
       const float phi = atan2( y - position.y, x - position.x );
@@ -402,8 +415,28 @@ void Field::dumpSensorProbabilities(const field_pos_t & position, const char * f
       } else {
         dbg << x << " " << y << " " << 0.0 << endl;
       }
+
+      if ( dbgObs.is_open() ) {
+        vector<obstacle_t> obs = obstacles();
+        float maxObsWeight = 0.0;
+        obstacle_t seenObs;
+        seenObs.x = x;
+        seenObs.y = y;
+        seenObs.extent = 0.1;
+        // TODO covariance!?
+        for ( vector<obstacle_t>::const_iterator it = obs.begin(); it != obs.end(); ++it ) {
+          maxObsWeight = std::max( maxObsWeight, weightForObstacle( position, *it, seenObs ) );
+        }
+        f_point_t seenBall;
+        seenBall.x = x -position.x;
+        seenBall.y = y - position.y;
+        const float ballWeight = weightForBall( position, seenBall );
+        dbgObs << x << " " << y << " " << (maxObsWeight + ballWeight) << endl;
+      }
     }
     dbg << endl;
+    if ( dbgObs.is_open() )
+      dbgObs << endl;
   }
 }
 
@@ -414,7 +447,7 @@ void Field::dumpSensorProbabilities(const field_pos_t & position, const char * f
 */
 float Field::weightForBall(const field_pos_t & position, const f_point_t & ballHit)
 {
-  if ( !mWMBallInterface->is_visible() )
+  if ( !mWMBallInterface || !mWMBallInterface->is_visible() )
     return 0.0;
   const float absX = position.x + ( cosf(position.ori) * ballHit.x ) - ( sinf(position.ori) * ballHit.y );
   const float absY = position.y + ( sinf(position.ori) * ballHit.x ) + ( cosf(position.ori) * ballHit.y );
@@ -476,6 +509,9 @@ void Field::bb_interface_writer_removed(Interface * interface, unsigned int inst
   }
 }
 
+/**
+  Returns all currently known obstacles (in global cartesian coordinates).
+*/
 std::vector< obstacle_t > Field::obstacles() const
 {
   return mObstacles;

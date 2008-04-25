@@ -77,7 +77,7 @@ class Field : public BlackBoardInterfaceObserver, BlackBoardInterfaceListener
     std::vector<float> findIntersections( const field_pos_t &position, float phi );
     float weightForDistance( float lineDistance, float sensorDistance ) const;
     float weightForBall( const field_pos_t &position, const f_point_t &ballHit );
-    float weightForObstacle( const obstacle_t &expectedObs, const obstacle_t &seenObs );
+    float weightForObstacle( const field_pos_t &pos, const obstacle_t &expectedObs, const obstacle_t &seenObs );
 
     void updateDynamicObjects();
 
@@ -85,7 +85,7 @@ class Field : public BlackBoardInterfaceObserver, BlackBoardInterfaceListener
 
     void setDebugBuffer( unsigned char *buffer, unsigned int width = 0, unsigned int height = 0 );
     void drawField();
-    void dumpSensorProbabilities( const field_pos_t &position, const char* filename );
+    void dumpSensorProbabilities( const field_pos_t &position, const char* filename, const char* filenameObs = 0 );
 
     virtual void bb_interface_created(const char *type, const char *id) throw();
     virtual void bb_interface_writer_removed(Interface *interface, unsigned int instance_serial) throw();

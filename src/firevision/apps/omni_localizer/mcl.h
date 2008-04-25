@@ -31,6 +31,7 @@ class BlackBoard;
 class Drawer;
 class Field;
 class Configuration;
+struct obstacle_t;
 
 /** Represents a MCL sample. */
 struct mcl_sample_t {
@@ -50,7 +51,7 @@ class MCL
     void prepareUpdate();
     void update( const std::map< float, std::vector<polar_coord_t> > &sensorHits );
     void updateBall( const std::vector<f_point_t> &ballHits );
-    void updateObstacles( const std::vector<f_point_t> &obstacleHits );
+    void updateObstacles( const std::vector<obstacle_t> &obstacleHits );
     void resample();
     void calculatePose();
 
