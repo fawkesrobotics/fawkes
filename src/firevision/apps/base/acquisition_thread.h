@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  aquisition_thread.h - FireVision Aquisition Thread
+ *  acquisition_thread.h - FireVision Acquisition Thread
  *
  *  Created: Wed Jun 06 19:01:10 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_APPS_BASE_AQUISITION_THREAD_H_
-#define __FIREVISION_APPS_BASE_AQUISITION_THREAD_H_
+#ifndef __FIREVISION_APPS_BASE_ACQUISITION_THREAD_H_
+#define __FIREVISION_APPS_BASE_ACQUISITION_THREAD_H_
 
 #include <core/threading/thread.h>
 
@@ -39,23 +39,23 @@ class Clock;
 class TimeTracker;
 #endif
 
-class FvAquisitionThread
+class FvAcquisitionThread
 : public Thread
 {
  public:
   friend class FvBaseThread;
 
-  /** Aquisition thread mode. */
+  /** Acquisition thread mode. */
   typedef enum {
     AqtCyclic,		/**< cyclic mode, use if there is at least one cyclic thread
-			 * for this aquisition thread. */
+			 * for this acquisition thread. */
     AqtContinuous	/**< continuous mode, use if there are only continuous threads
-			 * for this aquisition thread. */
+			 * for this acquisition thread. */
   } AqtMode;
 
-  FvAquisitionThread(const char *id, Camera *camera,
+  FvAcquisitionThread(const char *id, Camera *camera,
 		     Logger *logger, Clock *clock);
-  virtual ~FvAquisitionThread();
+  virtual ~FvAcquisitionThread();
 
   virtual void loop();
 

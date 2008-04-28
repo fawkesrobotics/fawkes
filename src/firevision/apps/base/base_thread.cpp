@@ -23,9 +23,8 @@
  */
 
 #include <apps/base/base_thread.h>
-#include <apps/base/aquisition_thread.h>
+#include <apps/base/acquisition_thread.h>
 #include <apps/base/aqt_vision_threads.h>
-#include <apps/base/aquisition_thread.h>
 
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
@@ -79,6 +78,7 @@ FvBaseThread::init()
 void
 FvBaseThread::finalize()
 {
+  printf("base finalize\n");
   aqts.lock();
   for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
     thread_collector->remove(ait->second);
@@ -93,11 +93,12 @@ FvBaseThread::finalize()
 void
 FvBaseThread::loop()
 {
+  printf("base loop\n");
   aqts.lock();
 
-  // Wakeup all cyclic aquisition threads and wait for them
+  // Wakeup all cyclic acquisition threads and wait for them
   for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
-    if ( ait->second->aqtmode() == FvAquisitionThread::AqtCyclic ) {
+    if ( ait->second->aqtmode() == FvAcquisitionThread::AqtCyclic ) {
       //logger->log_error(name(), "Waking Thread %s", ait->second->name());
       ait->second->wakeup(aqt_barrier);
     }
@@ -110,7 +111,7 @@ FvBaseThread::loop()
     if ( ait->second->_vision_threads->empty() &&
 	 (ait->second->_vision_threads->empty_time() > _aqt_timeout) ) {
       
-      logger->log_info(name(), "Aquisition thread %s timed out, destroying",
+      logger->log_info(name(), "Acquisition thread %s timed out, destroying",
 		       ait->second->name());
 
       
@@ -128,24 +129,24 @@ FvBaseThread::loop()
     stit->second->_vision_threads->set_thread_running(stit->first);
 
     if ( stit->second->_vision_threads->has_cyclic_thread() ) {
-      if (stit->second->aqtmode() != FvAquisitionThread::AqtCyclic ) {
-	logger->log_info(name(), "Switching aquisition thread %s to cyclic mode (%s)",
+      if (stit->second->aqtmode() != FvAcquisitionThread::AqtCyclic ) {
+	logger->log_info(name(), "Switching acquisition thread %s to cyclic mode (%s)",
 			 stit->second->name(), Thread::current_thread()->name());
 
 	stit->second->prepare_finalize();
 	stit->second->cancel();
 	stit->second->join();
-	stit->second->set_aqtmode(FvAquisitionThread::AqtCyclic);
+	stit->second->set_aqtmode(FvAcquisitionThread::AqtCyclic);
 	stit->second->start();
 	stit->second->cancel_finalize();
       }
-    } else if (stit->second->aqtmode() != FvAquisitionThread::AqtContinuous ) {
-      logger->log_info(name(), "Switching aquisition thread %s to continuous mode",
+    } else if (stit->second->aqtmode() != FvAcquisitionThread::AqtContinuous ) {
+      logger->log_info(name(), "Switching acquisition thread %s to continuous mode",
 		       stit->second->name());
       stit->second->prepare_finalize();
       stit->second->cancel();
       stit->second->join();
-      stit->second->set_aqtmode(FvAquisitionThread::AqtContinuous);
+      stit->second->set_aqtmode(FvAcquisitionThread::AqtContinuous);
       stit->second->start();
       stit->second->cancel_finalize();
     }
@@ -163,6 +164,7 @@ FvBaseThread::loop()
   cond_recreate_barrier(num_cyclic_threads);
 
   aqts.unlock();
+  printf("base loop DONE\n");
 }
 
 
@@ -213,7 +215,7 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread, boo
 	throw;
       }
 
-      FvAquisitionThread *aqt = new FvAquisitionThread(id.c_str(), cam, logger, clock);
+      FvAcquisitionThread *aqt = new FvAcquisitionThread(id.c_str(), cam, logger, clock);
 
       c = aqt->camera_instance(raw, (vision_thread->vision_thread_mode() ==
 				     VisionAspect::CONTINUOUS));
@@ -225,7 +227,7 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread, boo
 
       // no need to recreate barrier, by default aqts operate in continuous mode
 
-      logger->log_info(name(), "Aquisition thread '%s' started for thread '%s' and camera '%s'",
+      logger->log_info(name(), "Acquisition thread '%s' started for thread '%s' and camera '%s'",
 		       aqt->name(), thread->name(), id.c_str());
 
     }
@@ -268,6 +270,7 @@ FvBaseThread::cond_recreate_barrier(unsigned int num_cyclic_threads)
 void
 FvBaseThread::unregister_thread(Thread *thread)
 {
+  printf("Unregister %s\n", thread->name());
   aqts.lock();
   unsigned int num_cyclic_threads = 0;
 
@@ -279,14 +282,14 @@ FvBaseThread::unregister_thread(Thread *thread)
     if ( ait->second->_vision_threads->has_cyclic_thread() ) {
       ++num_cyclic_threads;
 
-    } else if (ait->second->aqtmode() != FvAquisitionThread::AqtContinuous ) {
-      logger->log_info(name(), "Switching aquisition thread %s to continuous mode "
+    } else if (ait->second->aqtmode() != FvAcquisitionThread::AqtContinuous ) {
+      logger->log_info(name(), "Switching acquisition thread %s to continuous mode "
 		               "on unregister", ait->second->name());
       
       ait->second->prepare_finalize();
       ait->second->cancel();
       ait->second->join();
-      ait->second->set_aqtmode(FvAquisitionThread::AqtContinuous);
+      ait->second->set_aqtmode(FvAcquisitionThread::AqtContinuous);
       ait->second->start();
       ait->second->cancel_finalize();
     }

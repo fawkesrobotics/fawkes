@@ -39,7 +39,7 @@
 #include <fvutils/base/vision_master.h>
 #include <string>
 
-class FvAquisitionThread;
+class FvAcquisitionThread;
 class Barrier;
 
 class FvBaseThread
@@ -75,12 +75,12 @@ class FvBaseThread
   void cond_recreate_barrier(unsigned int num_cyclic_threads);
 
  private:
-  LockMap<std::string, FvAquisitionThread *> aqts;
-  LockMap<std::string, FvAquisitionThread *>::iterator ait;
+  LockMap<std::string, FvAcquisitionThread *> aqts;
+  LockMap<std::string, FvAcquisitionThread *>::iterator ait;
   unsigned int _aqt_timeout;
 
-  LockMap<Thread *, FvAquisitionThread *> started_threads;
-  LockMap<Thread *, FvAquisitionThread *>::iterator stit;
+  LockMap<Thread *, FvAcquisitionThread *> started_threads;
+  LockMap<Thread *, FvAcquisitionThread *>::iterator stit;
 
   Barrier *aqt_barrier;
 };

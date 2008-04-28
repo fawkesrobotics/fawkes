@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  aquisition_thread.h - FireVision Aquisition Thread
+ *  acquisition_thread.h - FireVision Acquisition Thread
  *
  *  Created: Wed Jun 06 19:01:10 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
@@ -22,7 +22,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <apps/base/aquisition_thread.h>
+#include <apps/base/acquisition_thread.h>
 #include <apps/base/aqt_vision_threads.h>
 
 #include <core/exceptions/system.h>
@@ -42,9 +42,9 @@
 #include <string>
 #include <algorithm>
 
-/** @class FvAquisitionThread <apps/base/aquisition_thread.h>
- * FireVision base application aquisition thread.
- * This thread is used by the base application to aquire images from a camera
+/** @class FvAcquisitionThread <apps/base/acquisition_thread.h>
+ * FireVision base application acquisition thread.
+ * This thread is used by the base application to acquire images from a camera
  * and call dependant threads when new images are available so that these
  * threads can start processing the images.
  * @author Tim Niemueller
@@ -57,9 +57,9 @@
  * @param camera camera to manage
  * @param clock clock to use for timeout measurement (system time)
  */
-FvAquisitionThread::FvAquisitionThread(const char *id,  Camera *camera,
+FvAcquisitionThread::FvAcquisitionThread(const char *id,  Camera *camera,
 				       Logger *logger, Clock *clock)
-  : Thread((std::string("FvAquisitionThread::") + id).c_str())
+  : Thread((std::string("FvAcquisitionThread::") + id).c_str())
 {
   _logger        = logger;
   _image_id      = strdup(id);
@@ -95,7 +95,7 @@ FvAquisitionThread::FvAquisitionThread(const char *id,  Camera *camera,
 
 
 /** Destructor. */
-FvAquisitionThread::~FvAquisitionThread()
+FvAcquisitionThread::~FvAcquisitionThread()
 {
   _camera->close();
 
@@ -123,15 +123,15 @@ FvAquisitionThread::~FvAquisitionThread()
  *
  * When a thread is added it is internally put into a waiting queue. Since
  * at the time when it is added the thread is not yet started, and its
- * initialization may even fail. For this reason the aquisition thread
+ * initialization may even fail. For this reason the acquisition thread
  * registers itself to receive status notifications of the thread. If the
  * thread signals successful startup it is moved to the running queue and
  * from then on woken up when new image material can be processed. If the
  * thread fails for whatever reason it is dropped.
  *
- * The aquisition thread has a timeout. If no thread is in the running or
+ * The acquisition thread has a timeout. If no thread is in the running or
  * waiting queue for this number of seconds, the base thread is signalled
- * to shut down this aquisition thread (which the base thread may do or
+ * to shut down this acquisition thread (which the base thread may do or
  * deny). This is done so that if a plugin is just unloaded shortly and
  * then quickly loaded again the overhead of closing the camera and then
  * opening it again is avoided.
@@ -143,7 +143,7 @@ FvAquisitionThread::~FvAquisitionThread()
  * @see SharedMemoryCamera
  */
 SharedMemoryCamera *
-FvAquisitionThread::camera_instance(bool raw, bool deep_copy)
+FvAcquisitionThread::camera_instance(bool raw, bool deep_copy)
 {
   if ( raw && (_shm_raw == NULL) ) {
     _shm_raw = new SharedMemoryImageBuffer(_image_id_raw, _colorspace,
@@ -163,13 +163,13 @@ FvAquisitionThread::camera_instance(bool raw, bool deep_copy)
 }
 
 
-/** Set aquisition thread mode.
+/** Set acquisition thread mode.
  * Note that this may only be called on a stopped thread or an
  * exception will be thrown by Thread::set_opmode()!
- * @param mode new aquisition thread mode
+ * @param mode new acquisition thread mode
  */
 void
-FvAquisitionThread::set_aqtmode(AqtMode mode)
+FvAcquisitionThread::set_aqtmode(AqtMode mode)
 {
   if ( mode == AqtCyclic ) {
     //_logger->log_info(name(), "Setting WAITFORWAKEUPMODE");
@@ -182,18 +182,18 @@ FvAquisitionThread::set_aqtmode(AqtMode mode)
 }
 
 
-/** Get aquisition thread mode.
- * @return aquisition thread mode.
+/** Get acquisition thread mode.
+ * @return acquisition thread mode.
  */
-FvAquisitionThread::AqtMode
-FvAquisitionThread::aqtmode()
+FvAcquisitionThread::AqtMode
+FvAcquisitionThread::aqtmode()
 {
   return _mode;
 }
 
 
 void
-FvAquisitionThread::loop()
+FvAcquisitionThread::loop()
 {
   // We disable cancelling here to avoid problems with the write lock
   Thread::CancelState old_cancel_state;
