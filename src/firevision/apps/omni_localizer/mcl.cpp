@@ -1,20 +1,26 @@
-/*
-    Copyright (c) 2008 Volker Krause <volker.krause@rwth-aachen.de>
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+/***************************************************************************
+ *  mcl.cpp - Monte Carlo Localization
+ *
+ *  Created: ???
+ *  Copyright  2008  Volker Krause <volker.krause@rwth-aachen.de>
+ *
+ *  $Id: pipeline_thread.cpp 1049 2008-04-24 22:40:12Z beck $
+ *
+ ****************************************************************************/
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
 
 #include <apps/omni_localizer/mcl.h>
 #include <apps/omni_localizer/field.h>
@@ -41,7 +47,7 @@
 // #define SENSOR_COUNT_WEIGHT(x) ( min(1.0f, (0.02f*x + 0.8f) ) )
 // #define SENSOR_COUNT_WEIGHT(x) ( min(1.0f, (0.04f*x)) )
 
-using namespace std;
+// sing namespace std;
 
 /** @class MCL <apps/omni_localizer/mcl.h>
  * Monte Carlo Localization.
@@ -147,7 +153,7 @@ void MCL::predict( const field_pos_t &movement, float pathLength )
 
   // ### add correct error model
   int droppedSamples = 0;
-  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ) {
+  for ( std::vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ) {
     (*it).position.x += ( cos((*it).position.ori) * movement.x ) - ( sin((*it).position.ori) * movement.y )+ (mNormalDist( mRng ) * noise);
     (*it).position.y += ( sin((*it).position.ori) * movement.x ) + ( cos((*it).position.ori) * movement.y ) + (mNormalDist( mRng ) * noise);
     (*it).position.ori += movement.ori + (mNormalDist( mRng ) * movement.ori * 0.2);
@@ -163,7 +169,7 @@ void MCL::predict( const field_pos_t &movement, float pathLength )
   }
 
   if ( droppedSamples > 0 ) {
-    cout << "Dropped " << droppedSamples << " samples that moved out of field." << endl;
+    std::cout << "Dropped " << droppedSamples << " samples that moved out of field." << std::endl;
     generateRandomSamples( droppedSamples );
   }
 
@@ -180,7 +186,7 @@ void MCL::predict( const field_pos_t &movement, float pathLength )
 void MCL::prepareUpdate()
 {
 #ifdef DEBUG_MCL_LOG
-  mMCLLog << endl << "***************************** LOOP " << mLoopCount << " *********************" << endl;
+  mMCLLog << std::endl << "***************************** LOOP " << mLoopCount << " *********************" << std::endl;
 #endif
 
   mField->updateDynamicObjects();
@@ -201,8 +207,8 @@ void MCL::update(const std::map< float, std::vector < polar_coord_t > > & sensor
   mField->setDebugBuffer( buffer, width, height );
 #endif
 
-  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
-//     mMCLLog << "Raw sample: " << (*it).position << " weight: " << (*it).weight << endl;;
+  for ( std::vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
+//     mMCLLog << "Raw sample: " << (*it).position << " weight: " << (*it).weight << std::endl;;
     (*it).weight = weightForPosition( (*it).position, sensorHits );
   }
 
@@ -211,8 +217,8 @@ void MCL::update(const std::map< float, std::vector < polar_coord_t > > & sensor
   sort( mSamples.rbegin(), mSamples.rend() );
   mLastBestSample = mSamples.front();
 
-  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
-    mMCLLog << "Sample: " << (*it).position << " weight: " << (*it).weight << endl;;
+  for ( std::vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
+    mMCLLog << "Sample: " << (*it).position << " weight: " << (*it).weight << std::endl;;
 #endif
 
 #ifdef DEBUG_MCL_UPDATE
@@ -251,17 +257,17 @@ void MCL::updateBall(const std::vector< f_point_t > & ballHits)
 #ifdef DEBUG_MCL_LOG
   mMCLLog << "Got ball positions: ";
   copy( ballHits.begin(), ballHits.end(), ostream_iterator<f_point_t>( mMCLLog, " " ) );
-  mMCLLog << endl;
+  mMCLLog << std::endl;
 #endif
 
-  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
-    for ( vector<f_point_t>::const_iterator ballIt = ballHits.begin(); ballIt != ballHits.end(); ++ballIt )
+  for ( std::vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
+    for ( std::vector<f_point_t>::const_iterator ballIt = ballHits.begin(); ballIt != ballHits.end(); ++ballIt )
       (*it).weight += mField->weightForBall( (*it).position, (*ballIt) );
   }
 
 #ifdef DEBUG_MCL_LOG
-  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
-    mMCLLog << "Sample with ball: " << (*it).position << " weight: " << (*it).weight << endl;;
+  for ( std::vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
+    mMCLLog << "Sample with ball: " << (*it).position << " weight: " << (*it).weight << std::endl;;
 #endif
 }
 
@@ -274,25 +280,25 @@ void MCL::updateObstacles(const std::vector< obstacle_t > & obstacleHits)
 #ifdef DEBUG_MCL_LOG
 //   mMCLLog << "Got obstacle positions: ";
 //   copy( obstacleHits.begin(), obstacleHits.end(), ostream_iterator<obstacle_t>( mMCLLog, " " ) );
-//   mMCLLog << endl;
+//   mMCLLog << std::endl;
 #endif
 
-  vector<obstacle_t> expObstacles = mField->obstacles();
-  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
+  std::vector<obstacle_t> expObstacles = mField->obstacles();
+  for ( std::vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
 
     float maxWeight = 0.0;
     float weight = 0.0;
 
     // get maximal possible weight
-    for ( vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt ) {
+    for ( std::vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt ) {
       maxWeight += mField->weightForObstacle( it->position, *expIt, *expIt );
     }
     // TODO consider our own position for maxWeight as well
 
     // get actual weight
-    for ( vector<obstacle_t>::const_iterator obsIt = obstacleHits.begin(); obsIt != obstacleHits.end(); ++obsIt ) {
+    for ( std::vector<obstacle_t>::const_iterator obsIt = obstacleHits.begin(); obsIt != obstacleHits.end(); ++obsIt ) {
       float currentWeight = 0.0;
-      for ( vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt ) {
+      for ( std::vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt ) {
         // convert to global cartesian coordinates
         obstacle_t currentObs;
         currentObs.x = it->position.x + ( cosf(it->position.ori) * obsIt->x ) - ( sinf(it->position.ori) * obsIt->y );
@@ -311,16 +317,16 @@ void MCL::updateObstacles(const std::vector< obstacle_t > & obstacleHits)
     myself.extent = 0.48;
     // TODO covariance?!?!?
     float myWeight = 0.0;
-    for ( vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt )
-      myWeight = max( myWeight, mField->weightForObstacle( it->position, *expIt, myself ) );
+    for ( std::vector<obstacle_t>::const_iterator expIt = expObstacles.begin(); expIt != expObstacles.end(); ++expIt )
+      myWeight = std::max( myWeight, mField->weightForObstacle( it->position, *expIt, myself ) );
     weight += myWeight;
 
     (*it).weight += ( weight / maxWeight ) * mObsPositionWeight;
   }
 
 #ifdef DEBUG_MCL_LOG
-  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
-    mMCLLog << "Sample with obstacles: " << (*it).position << " weight: " << (*it).weight << endl;;
+  for ( std::vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
+    mMCLLog << "Sample with obstacles: " << (*it).position << " weight: " << (*it).weight << std::endl;;
 #endif
 }
 
@@ -336,13 +342,13 @@ float MCL::weightForPosition( const field_pos_t &pos,
   float maxWeight = 0.0;
   float sensorWeight = 0.0;
   int totalExpected = 0;
-  typedef map<float, vector<polar_coord_t> > HitMap;
+  typedef std::map<float, std::vector<polar_coord_t> > HitMap;
   for ( HitMap::const_iterator rayIt = sensorHits.begin(); rayIt != sensorHits.end(); ++rayIt ) {
-    vector<float> expectedHits = mField->findIntersections( pos, (*rayIt).first );
+    std::vector<float> expectedHits = mField->findIntersections( pos, (*rayIt).first );
     if ( expectedHits.empty() ) {
       // calculate penalty for unexpected hits
       float prevHit = -mUnexpectedPenaltyMinDistance;
-      for ( vector<polar_coord_t>::const_iterator it = (*rayIt).second.begin(); it != (*rayIt).second.end(); ++it ) {
+      for ( std::vector<polar_coord_t>::const_iterator it = (*rayIt).second.begin(); it != (*rayIt).second.end(); ++it ) {
         if ( (*it).r > prevHit + mUnexpectedPenaltyMinDistance )
           sensorWeight += mUnexpectedPenalty;
         prevHit = (*it).r;
@@ -351,41 +357,41 @@ float MCL::weightForPosition( const field_pos_t &pos,
     }
 //     mMCLLog << "expected: ";
 //     copy( expectedHits.begin(), expectedHits.end(), ostream_iterator<float>( mMCLLog, ", " ) );
-//     mMCLLog << endl << "actual: ";
+//     mMCLLog << std::endl << "actual: ";
 //     copy( rayIt->second.begin(), rayIt->second.end(), ostream_iterator<polar_coord_t>( mMCLLog, ", " ) );
-//     mMCLLog << endl;
+//     mMCLLog << std::endl;
     totalExpected += expectedHits.size();
-    for ( vector<float>::const_iterator expHitIt = expectedHits.begin(); expHitIt != expectedHits.end(); ++expHitIt )
+    for ( std::vector<float>::const_iterator expHitIt = expectedHits.begin(); expHitIt != expectedHits.end(); ++expHitIt )
       maxWeight += mField->weightForDistance( *expHitIt, *expHitIt );
 
     // find the closest sensor reading to the expected hits
     // make sure we only count the best sensor reading per expected hit to avoid
     // skewing the results for parallel lines (real parallel lines as well as those caused
     // by cam vibrations)
-    map< float, pair<float,float> > bestSensorWeights;
+    std::map< float, std::pair<float,float> > bestSensorWeights;
     sort( expectedHits.begin(), expectedHits.end() );
     float penalty = 0.0;
-    for ( vector<polar_coord_t>::const_iterator hitIt = (*rayIt).second.begin(); hitIt != (*rayIt).second.end(); ++hitIt ) {
+    for (std::vector<polar_coord_t>::const_iterator hitIt = (*rayIt).second.begin(); hitIt != (*rayIt).second.end(); ++hitIt ) {
       const float closestExp = find_closest( expectedHits.begin(), expectedHits.end(), (*hitIt).r );
       // only keep the best weight for this expected hit
       if ( bestSensorWeights.find( closestExp ) != bestSensorWeights.end() ) {
-        const pair<float, float> prevWeight = bestSensorWeights[ closestExp ];
+        const std::pair<float, float> prevWeight = bestSensorWeights[ closestExp ];
         const float currentWeight = mField->weightForDistance( closestExp, (*hitIt).r );
         if ( currentWeight > prevWeight.first )
-          bestSensorWeights[ closestExp ] = make_pair( currentWeight, (*hitIt).r );
+          bestSensorWeights[ closestExp ] = std::make_pair( currentWeight, (*hitIt).r );
         if ( std::abs( (*hitIt).r - prevWeight.second ) > mUnexpectedPenaltyMinDistance )
           penalty += mUnexpectedPenalty;
       } else {
-        bestSensorWeights[ closestExp ] = make_pair( mField->weightForDistance( closestExp, (*hitIt).r ), (*hitIt).r );
+        bestSensorWeights[ closestExp ] = std::make_pair( mField->weightForDistance( closestExp, (*hitIt).r ), (*hitIt).r );
       }
     }
 
     // sum up all weights for this ray
-    for ( map<float, pair<float, float> >::const_iterator it = bestSensorWeights.begin(); it != bestSensorWeights.end(); ++it )
+    for ( std::map<float, std::pair<float, float> >::const_iterator it = bestSensorWeights.begin(); it != bestSensorWeights.end(); ++it )
       sensorWeight += (*it).second.first;
     sensorWeight += penalty;
   }
-  sensorWeight = max( sensorWeight, 0.0f );
+  sensorWeight = std::max( sensorWeight, 0.0f );
   if ( maxWeight > 0.0 )
     return (sensorWeight / maxWeight) * SENSOR_COUNT_WEIGHT( totalExpected );
   return 0.0;
@@ -398,18 +404,18 @@ void MCL::resample()
   mLastBestSample = mSamples.front();
 
   if ( !mNewOdometry ) {
-    vector<mcl_sample_t>::reverse_iterator it = upper_bound( mSamples.rbegin(), mSamples.rend(), mIdleRegenerationThreshold );
+   std::vector<mcl_sample_t>::reverse_iterator it = upper_bound( mSamples.rbegin(), mSamples.rend(), mIdleRegenerationThreshold );
     if ( it == mSamples.rend() ) {
-      cout << "WTF? all samples bad?" << endl;
+      std::cout << "WTF? all samples bad?" << std::endl;
       mSamples.clear();
       generateRandomSamples( mSampleCount );
     } else if ( it != mSamples.rend() ) {
       const int index = it - mSamples.rbegin();
-      cout << "removing samples after: " << (*it).weight << " and generating " << index << " new samples" << endl;
+      std::cout << "removing samples after: " << (*it).weight << " and generating " << index << " new samples" << std::endl;
       mSamples.resize( mSampleCount - index );
       generateRandomSamples( index );
     } else {
-      cout << "skipping resampling - no movement" << endl;
+      std::cout << "skipping resampling - no movement" << std::endl;
     }
     return;
   }
@@ -420,15 +426,15 @@ void MCL::resample()
     mSamples[i].weight = RESAMPLE_ADJUST(mSamples[i].weight) + mSamples[i - 1].weight;
 
 #ifdef DEBUG_MCL_LOG
-  mMCLLog << endl << "*** RESAMPLE ***" << endl;
-  for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
+  mMCLLog << std::endl << "*** RESAMPLE ***" << std::endl;
+  for (std::vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
     mMCLLog << (*it).weight << ", ";
   }
-  mMCLLog << endl;
+  mMCLLog << std::endl;
 #endif
 
   if ( mSamples.back().weight == 0.0 ) {
-    cout << "WTF? no weights - regenerating samples" << endl;
+    std::cout << "WTF? no weights - regenerating samples" << std::endl;
     mSamples.clear();
     generateRandomSamples( mSampleCount );
     return;
@@ -436,10 +442,10 @@ void MCL::resample()
   sort( mSamples.begin(), mSamples.end() );
 
   // draw new samples
-  vector<mcl_sample_t> newSamples;
+ std::vector<mcl_sample_t> newSamples;
   for ( unsigned int i = 0; i < (mSampleCount * (1 - mFreeSampleRatio)); ++i ) {
     float random = mUniformDist() * mSamples.back().weight;
-    vector<mcl_sample_t>::iterator it = lower_bound( mSamples.begin(), mSamples.end(), random );
+   std::vector<mcl_sample_t>::iterator it = lower_bound( mSamples.begin(), mSamples.end(), random );
     mcl_sample_t sample = *it;
     sample.weight = 1.0;
 
@@ -465,7 +471,7 @@ void MCL::calculatePose()
   mMean.x = 0.0;
   mMean.y = 0.0;
   mMean.ori = 0.0;
-  for ( vector<mcl_sample_t>::const_iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
+  for (std::vector<mcl_sample_t>::const_iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
     mMean.x += (*it).position.x * (*it).weight;
     mMean.y += (*it).position.y * (*it).weight;
     mMean.ori += (*it).position.ori * (*it).weight;
@@ -474,7 +480,7 @@ void MCL::calculatePose()
   mVariance.x = 0.0;
   mVariance.y = 0.0;
   mVariance.ori = 0.0;
-  for ( vector<mcl_sample_t>::const_iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
+  for (std::vector<mcl_sample_t>::const_iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
     mVariance.x += ((*it).position.x - mMean.x) * ((*it).position.x - mMean.x) * (*it).weight;
     mVariance.y += ((*it).position.y - mMean.y) * ((*it).position.y - mMean.y) * (*it).weight;
     mVariance.ori += ((*it).position.ori - mMean.ori) * ((*it).position.ori - mMean.ori) * (*it).weight;
@@ -508,10 +514,10 @@ field_pos_t MCL::variance() const
 void MCL::normalizeSamples()
 {
   float p = 0.0;
-  for ( vector<mcl_sample_t>::const_iterator it = mSamples.begin(); it != mSamples.end(); ++it )
+  for (std::vector<mcl_sample_t>::const_iterator it = mSamples.begin(); it != mSamples.end(); ++it )
     p += (*it).weight;
   if ( p != 1.0 && p != 0.0 ) {
-    for ( vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
+    for (std::vector<mcl_sample_t>::iterator it = mSamples.begin(); it != mSamples.end(); ++it )
       (*it).weight /= p;
   }
 }
@@ -528,9 +534,9 @@ void MCL::dumpState(const char * filename)
 {
   field_pos_t estimate = pose();
   mPath.push_back( estimate );
-  cout << "MCL: esitmated position: " << estimate << endl;
-  cout << "MCL: mean: " << mMean << " variance: " << mVariance << endl;
-  cout << "MCL: top sample is: " << mLastBestSample.position << " p: " << mLastBestSample.weight <<endl;
+  std::cout << "MCL: esitmated position: " << estimate << std::endl;
+  std::cout << "MCL: mean: " << mMean << " variance: " << mVariance << std::endl;
+  std::cout << "MCL: top sample is: " << mLastBestSample.position << " p: " << mLastBestSample.weight <<std::endl;
 
   unsigned int width, height;
   float scale;
@@ -544,8 +550,8 @@ void MCL::dumpState(const char * filename)
   // odometry path
   debugDrawer.setColor( 128, 32, 255 );
   if ( mOdometryPath.size() >= 2 ) {
-    vector<field_pos_t>::const_iterator currentIt = mOdometryPath.begin();
-    vector<field_pos_t>::const_iterator prevIt = currentIt++;
+   std::vector<field_pos_t>::const_iterator currentIt = mOdometryPath.begin();
+   std::vector<field_pos_t>::const_iterator prevIt = currentIt++;
     for ( ; currentIt != mOdometryPath.end(); ++currentIt, ++prevIt ) {
       debugDrawer.drawLine( mapToImageX( prevIt->x ), mapToImageY( prevIt->y ),
                             mapToImageX( currentIt->x ), mapToImageY( currentIt->y ) );
@@ -555,8 +561,8 @@ void MCL::dumpState(const char * filename)
   // previous path
   debugDrawer.setColor( 96, 128, 128 );
   if ( mPath.size() >= 2 ) {
-    vector<field_pos_t>::const_iterator currentIt = mPath.begin();
-    vector<field_pos_t>::const_iterator prevIt = currentIt++;
+   std::vector<field_pos_t>::const_iterator currentIt = mPath.begin();
+   std::vector<field_pos_t>::const_iterator prevIt = currentIt++;
     for ( ; currentIt != mPath.end(); ++currentIt, ++prevIt ) {
       debugDrawer.drawLine( mapToImageX( prevIt->x ), mapToImageY( prevIt->y ),
                             mapToImageX( currentIt->x ), mapToImageY( currentIt->y ) );
@@ -655,7 +661,7 @@ void MCL::drawField(unsigned char * buffer, unsigned int width, unsigned int hei
   Drawer debugDrawer;
   debugDrawer.setBuffer( buffer, width, height );
 
-  for ( vector<mcl_sample_t>::const_iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
+  for (std::vector<mcl_sample_t>::const_iterator it = mSamples.begin(); it != mSamples.end(); ++it ) {
     debugDrawer.setColor( (unsigned int)(255.0 * (*it).weight),
                            128 - (unsigned int)(128.0 * (*it).weight),
                            128 + (unsigned int)(127.0 * (*it).weight) );
@@ -681,10 +687,10 @@ void MCL::clampToField(mcl_sample_t & sample) const
   if ( isnan(sample.position.ori) )
     sample.position.ori = 0.0;
 
-  sample.position.x = min( max( sample.position.x, (float)(-mField->totalWidth() / 2.0) ),
-                           (float)(mField->totalWidth() / 2.0) );
-  sample.position.y = min( max( sample.position.y, (float)(-mField->totalHeight() / 2.0) ),
-                           (float)(mField->totalHeight() / 2.0) );
+  sample.position.x = std::min( std::max( sample.position.x, (float)(-mField->totalWidth() / 2.0) ),
+				(float)(mField->totalWidth() / 2.0) );
+  sample.position.y = std::min( std::max( sample.position.y, (float)(-mField->totalHeight() / 2.0) ),
+				(float)(mField->totalHeight() / 2.0) );
   sample.position.ori -= ((int)(sample.position.ori / (2.0*M_PI))) * 2.0 * M_PI;
   if ( sample.position.ori < 0 )
     sample.position.ori += 2.0 * M_PI;
@@ -733,7 +739,7 @@ void MCL::generateRandomSamples(int count, const field_pos_t & position, float v
 void MCL::dumpPositionProbabilities( const char * filename,
                                      const std::map< float, std::vector < polar_coord_t > > & sensorHits ) const
 {
-  ofstream s( filename );
+  std::ofstream s( filename );
   for ( float x = -mField->totalWidth()/2.0; x < mField->totalWidth()/2.0; x += 0.1 ) {
     for ( float y = -mField->totalHeight()/2.0; y < mField->totalHeight()/2.0; y += 0.1 ) {
       float weight = 0.0;
@@ -749,8 +755,8 @@ void MCL::dumpPositionProbabilities( const char * filename,
           maxPhi = phi;
         }
       }
-      s << x << " " << y << " " << weight << " " << maxPhi << endl;
+      s << x << " " << y << " " << weight << " " << maxPhi << std::endl;
     }
-    s << endl;
+    s << std::endl;
   }
 }

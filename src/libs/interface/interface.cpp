@@ -277,6 +277,7 @@ Interface::is_writer() const
  * An interface can become invalid, for example if the connection of a RemoteBlackBoard
  * dies. In this case the interface becomes invalid and successive read()/write() calls
  * will throw an InterfaceInvalidException.
+ * @param valid true to mark the interface valid or false to mark it invalid
  */
 void
 Interface::set_validity(bool valid)

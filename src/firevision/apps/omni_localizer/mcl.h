@@ -1,23 +1,29 @@
-/*
-    Copyright (c) 2008 Volker Krause <volker.krause@rwth-aachen.de>
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+/***************************************************************************
+ *  mcl.h - Monte Carlo Localization
+ *
+ *  Created: ???
+ *  Copyright  2008  Volker Krause <volker.krause@rwth-aachen.de>
+ *
+ *  $Id: pipeline_thread.cpp 1049 2008-04-24 22:40:12Z beck $
+ *
+ ****************************************************************************/
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU General Public License for more details.
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
-
-#ifndef FVOMNILOCALIZER_MCL_H
-#define FVOMNILOCALIZER_MCL_H
+#ifndef __FIREVISION_APPS_OMNI_LOCALIZER_MCL_H_
+#define __FIREVISION_APPS_OMNI_LOCALIZER_MCL_H_
 
 #include <fvutils/base/types.h>
 
@@ -49,7 +55,7 @@ class MCL
 
     void predict( const field_pos_t &movement, float pathLength );
     void prepareUpdate();
-    void update( const std::map< float, std::vector<polar_coord_t> > &sensorHits );
+    void update(const std::map< float, std::vector< polar_coord_t > > & sensorHits);
     void updateBall( const std::vector<f_point_t> &ballHits );
     void updateObstacles( const std::vector<obstacle_t> &obstacleHits );
     void resample();
