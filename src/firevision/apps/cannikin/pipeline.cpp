@@ -287,8 +287,8 @@ CannikinPipeline::init()
 
   cm  = new ColorModelLookupTable( colormaps[CC_ORANGE], "cannikin-colormap",
 				   true /* destroy on free */);
-  cm->reset();
-  set_cup_color(CC_ORANGE);
+  //cm->reset();
+  //set_cup_color(CC_);
 
 
   /*
@@ -630,7 +630,11 @@ CannikinPipeline::loop()
 void
 CannikinPipeline::test_mode()
 {
-  cam->capture();
+  try {
+    cam->capture();
+  } catch (Exception &e) {
+    return;
+  }
 #ifdef HAVE_TRICLOPS_SDK
   triclops->preprocess_stereo();
   triclops->calculate_yuv(/* both */ true);
@@ -649,7 +653,11 @@ CannikinPipeline::test_mode()
 void
 CannikinPipeline::stereo_test_mode()
 {
-  cam->capture();
+  try {
+    cam->capture();
+  } catch (Exception &e) {
+    return;
+  }
 #ifdef HAVE_TRICLOPS_SDK
   triclops->preprocess_stereo();
   triclops->calculate_yuv(/* both */ false);
@@ -695,7 +703,11 @@ void
 CannikinPipeline::detect_cup()
 {
 #ifdef HAVE_TRICLOPS_SDK
-  cam->capture();
+  try {
+    cam->capture();
+  } catch (Exception &e) {
+    return;
+  }
 
   triclops->preprocess_stereo();
   triclops->calculate_yuv();
@@ -860,7 +872,11 @@ CannikinPipeline::determine_cup_color()
     //     reinitialize_colormap();
   }
 
-  cam->capture();
+  try {
+    cam->capture();
+  } catch (Exception &e) {
+    return;
+  }
   triclops->preprocess_stereo();
   triclops->calculate_yuv(/* both */ true);
   memcpy(buffer_src, triclops->yuv_buffer(), buffer_size);
