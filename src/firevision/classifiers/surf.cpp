@@ -43,6 +43,7 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/conversions.h>
 #include <fvutils/readers/png.h>
+#include <utils/system/console_colors.h>
 //#include <fvutils/writers/pnm.h>
 //#include <fvutils/writers/png.h>
 
@@ -72,6 +73,8 @@
  * @param extended true to use the extended descriptor (SURF 128)
  * @param indexSize Spatial size of the descriptor window (default 4)
  */
+
+
 SurfClassifier::SurfClassifier( const char * object_file,
 				unsigned int min_match, float min_match_ratio,
 				int samplingStep, int octaves, double thres, 
@@ -347,9 +350,11 @@ SurfClassifier::classify()
   //#ifdef SURF_TIMETRACKER
   __tt->ping_end(__ttc_matchin);
   //#endif
-  std::cout << "SurfClassifier(classify) matched '" << c << "' of '" << __obj_features.size() << "' features in scene." << std::endl;
+  std::cout << "SurfClassifier(classify) matched '" << std::cblue << c << std::cnormal <<"' of '" << __obj_features.size() << "' features in scene." << std::endl;
 
   float match_ratio = ((float)c / (float)__obj_num_features);
+
+  std::cout << "SurfClassifier(classify): match_ratio is '" << match_ratio << "'" << std::endl;
 
   std::cout << "SurfClassifier(classify): computing ROI" << std::endl;
   //#ifdef SURF_TIMETRACKER
@@ -369,10 +374,18 @@ SurfClassifier::classify()
 	y_max = (int)__img_features[matches[i]].y;
     }
   }
-  if( (c != 0) && ((unsigned)c > __min_match) && (match_ratio > __min_match_ratio) ) {
+  if( (c != 0) && ((unsigned)c > __min_match) &&
+      (match_ratio > __min_match_ratio) &&
+      (x_max - x_min != 0 ) && (y_max - y_min != 0) ) {
+
+    std::cout << "SurfClassifier(classify): c='" << c << "' __min_match='" << __min_match << "'." << std::endl;
+
     ROI r(x_min, y_min, x_max-x_min, y_max-y_min, _width, _height);
     r.num_hint_points = c;
     rv->push_back(r);
+  } else {
+    std::cout << " clearing ROI-list (no or too few matches or [0,0]-roi!)" << std::endl;
+    rv->clear();
   }
   //#ifdef SURF_TIMETRACKER
   __tt->ping_end(__ttc_roimerg);
