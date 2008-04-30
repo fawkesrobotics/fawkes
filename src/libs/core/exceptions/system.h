@@ -38,6 +38,7 @@ class OutOfMemoryException : public Exception {
 class InterruptedException : public Exception {
  public:
   InterruptedException() throw();
+  InterruptedException(const char *format, ...) throw();
 };
 
 

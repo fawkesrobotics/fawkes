@@ -64,6 +64,19 @@ InterruptedException::InterruptedException() throw()
 }
 
 
+/** Constructor
+ * @param format message format string
+ */
+InterruptedException::InterruptedException(const char *format, ...) throw()
+  : Exception()
+{
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
+}
+
+
 /** @class CouldNotOpenFileException <core/exceptions/system.h>
  * File could not be opened.
  * The file could not be opened. Optional error number and message describe the
