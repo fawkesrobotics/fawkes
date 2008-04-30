@@ -251,6 +251,9 @@ NetworkCamera::capture()
 
   __fusec->wait();
 
+  if (! __connected) {
+    throw CaptureException("Capture failed, connection died while waiting for image");
+  }
   if ( ! __fuse_image ) {
     throw CaptureException("Fetching the image failed, no image received");
   }

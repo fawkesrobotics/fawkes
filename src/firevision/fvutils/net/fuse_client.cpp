@@ -141,6 +141,7 @@ FuseClient::send()
     __socket->close();
     __alive = false;
     __handler->fuse_connection_died();
+    __waitcond->wake_all();
   }
 }
 
@@ -158,6 +159,7 @@ FuseClient::recv()
     __socket->close();
     __alive = false;
     __handler->fuse_connection_died();
+    __waitcond->wake_all();
   }
 }
 
