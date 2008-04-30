@@ -217,20 +217,35 @@ FvAqtVisionThreads::empty_time()
 }
 
 
-/** Wakeup all cyclic threads. */
+/** Wakeup and wait for all cyclic threads. */
 void
-FvAqtVisionThreads::wakeup_cyclic_threads()
+FvAqtVisionThreads::wakeup_and_wait_cyclic_threads()
 {
   if ( has_cyclic_thread() ) {
     running_threads_cyclic->wakeup(cyclic_barrier);
     running_threads_cyclic_raw->wakeup(cyclic_barrier);
+    cyclic_barrier->wait();
   }
 }
 
 
-/** Wait for all cyclic threads to finish. */
+/** Set prepfin hold fo cyclic threads.
+ * Sets prepfin hold for cyclice threads and rolls back if it cannot
+ * be set for any of the threads.
+ * @param hold prepfin hold value
+ * @exception Exception thrown if setting fails
+ * @see Thread::set_prepfin_hold()
+ * @see ThreadList::set_prepfin_hold()
+ */
 void
-FvAqtVisionThreads::wait_cyclic_threads()
+FvAqtVisionThreads::set_prepfin_hold(bool hold)
 {
-  cyclic_barrier->wait();
+  try {
+    running_threads_cyclic->set_prepfin_hold(hold);
+    running_threads_cyclic_raw->set_prepfin_hold(hold);
+  } catch (Exception &e) {
+    running_threads_cyclic->set_prepfin_hold(false);
+    running_threads_cyclic_raw->set_prepfin_hold(false);
+    throw;
+  }
 }

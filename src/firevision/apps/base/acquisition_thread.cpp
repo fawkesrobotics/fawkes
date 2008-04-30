@@ -192,6 +192,23 @@ FvAcquisitionThread::aqtmode()
 }
 
 
+/** Set prepfin hold status for vision threads.
+ * @param hold prepfin hold status
+ * @see Thread::set_prepfin_hold()
+ */
+void
+FvAcquisitionThread::set_vt_prepfin_hold(bool hold)
+{
+  try {
+    _vision_threads->set_prepfin_hold(hold);
+  } catch (Exception &e) {
+    _logger->log_warn(name(), "At least one thread was being finalized while prepfin hold "
+		      "was about to be acquired");
+    throw;
+  }
+}
+
+
 void
 FvAcquisitionThread::loop()
 {
@@ -255,8 +272,9 @@ FvAcquisitionThread::loop()
   _camera->dispose_buffer();
 #endif
 
-  _vision_threads->wakeup_cyclic_threads();
-  _vision_threads->wait_cyclic_threads();
+  if ( _mode == AqtCyclic ) {
+    _vision_threads->wakeup_and_wait_cyclic_threads();
+  }
 
   // reset to the original cancel state, cancelling is now safe
   set_cancel_state(old_cancel_state);

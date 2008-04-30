@@ -49,8 +49,9 @@ class FvAqtVisionThreads
 
   bool  has_cyclic_thread();
 
-  void  wakeup_cyclic_threads();
-  void  wait_cyclic_threads();
+  void  wakeup_and_wait_cyclic_threads();
+
+  void  set_prepfin_hold(bool hold);
 
   bool  has_waiting_thread(Thread *t);
 

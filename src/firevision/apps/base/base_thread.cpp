@@ -78,7 +78,6 @@ FvBaseThread::init()
 void
 FvBaseThread::finalize()
 {
-  printf("base finalize\n");
   aqts.lock();
   for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
     thread_collector->remove(ait->second);
@@ -93,13 +92,24 @@ FvBaseThread::finalize()
 void
 FvBaseThread::loop()
 {
-  printf("base loop\n");
   aqts.lock();
+
+  try {
+    for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
+      ait->second->set_vt_prepfin_hold(true);
+    }
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Cannot get prepfin hold status, skipping this loop");
+    for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
+      ait->second->set_vt_prepfin_hold(false);
+    }
+    return;
+  }
 
   // Wakeup all cyclic acquisition threads and wait for them
   for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
     if ( ait->second->aqtmode() == FvAcquisitionThread::AqtCyclic ) {
-      //logger->log_error(name(), "Waking Thread %s", ait->second->name());
+      //logger->log_debug(name(), "Waking Thread %s", ait->second->name());
       ait->second->wakeup(aqt_barrier);
     }
   }
@@ -163,8 +173,11 @@ FvBaseThread::loop()
   }
   cond_recreate_barrier(num_cyclic_threads);
 
+  for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
+    ait->second->set_vt_prepfin_hold(false);
+  }
+
   aqts.unlock();
-  printf("base loop DONE\n");
 }
 
 
@@ -270,7 +283,6 @@ FvBaseThread::cond_recreate_barrier(unsigned int num_cyclic_threads)
 void
 FvBaseThread::unregister_thread(Thread *thread)
 {
-  printf("Unregister %s\n", thread->name());
   aqts.lock();
   unsigned int num_cyclic_threads = 0;
 
