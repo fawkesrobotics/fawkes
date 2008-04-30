@@ -191,7 +191,7 @@ main(int argc, char **argv)
     printf("Not enough args\n\n");
     print_usage(argv[0]);
   } else if (strcmp("get", args[0]) == 0) {
-    if (args.size() == 1) {
+    if (args.size() == 2) {
       printf("Requesting value %s\n", args[1]);
       Configuration::ValueIterator *i = netconf->get_value(args[1]);
       if ( i->next() ) {
@@ -203,7 +203,7 @@ main(int argc, char **argv)
       delete i;
     } else {
       // Error!
-      printf("You must supply component and path arguments\n");
+      printf("You must supply path argument\n");
     }
   } else if ((strcmp("set", args[0]) == 0) || (strcmp("set_default", args[0]) == 0)) {
     bool set_def = (strcmp("set_default", args[0]) == 0);
