@@ -70,6 +70,7 @@ class ThreadList : private LockList<Thread *>
   bool prepare_finalize(ThreadFinalizer *finalizer);
   void finalize(ThreadFinalizer *finalizer);
   void cancel_finalize();
+  void set_prepfin_hold(bool hold);
 
   void wakeup();
   void wakeup(Barrier *barrier);

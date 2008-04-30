@@ -471,6 +471,32 @@ ThreadList::cancel_finalize()
 }
 
 
+/** Set prepfin hold on all threads.
+ * This method will call Thread::set_prepfin_hold() for all threads in the list. If
+ * any of the threads fails to set prepfin hold then all thread were it has already
+ * been set are set to prepfin hold false.
+ * @param hold prepfin hold value
+ * @see Thread::set_prepfin_hold()
+ */
+void
+ThreadList::set_prepfin_hold(bool hold)
+{
+  iterator i;
+  try {
+    for (i = begin(); i != end(); ++i) {
+      (*i)->set_prepfin_hold(hold);
+    }
+  } catch (Exception &e) {
+    // boom, we failed, at least one thread was already in the state of being prepared
+    // for finalization, rollback the hold for the threads were we already set it
+    for (iterator j = begin(); j != i; ++j) {
+      (*j)->set_prepfin_hold(false);
+    }
+    throw;
+  }
+}
+
+
 /** Force stop of all threads.
  * This will call prepare_finalize(), finalize(), cancel() and join() on the
  * list without caring about the return values in the prepare_finalize() step.

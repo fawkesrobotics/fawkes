@@ -233,14 +233,16 @@ Thread::__constructor(const char *name, OpMode op_mode)
   __started     = false;
   __cancelled   = false;
   __delete_on_exit = false;
+  __prepfin_hold   = false;
 
   __finalize_sync_lock = NULL;
   loop_mutex = new Mutex();
   finalize_prepared = false;
 
-  __prepfin_mutex = new Mutex();
-  __startup_barrier = new Barrier(2);
-
+  __prepfin_antistarve_mutex = new Mutex();
+  __prepfin_hold_mutex       = new Mutex();
+  __prepfin_hold_waitcond    = new WaitCondition();
+  __startup_barrier          = new Barrier(2);
 }
 
 
@@ -252,9 +254,12 @@ Thread::~Thread()
   delete loop_mutex;
   free(__name);
   delete __notification_listeners;
-  delete __prepfin_mutex;
+  delete __prepfin_antistarve_mutex;
   delete __startup_barrier;
+  delete __prepfin_hold_mutex;
+  delete __prepfin_hold_waitcond;
 }
+
 
 
 /** Copy constructor is NOT supported.
@@ -350,16 +355,21 @@ Thread::prepare_finalize()
   if ( finalize_prepared ) {
     throw CannotFinalizeThreadException("prepare_finalize() has already been called");
   }
+  __prepfin_hold_mutex->lock();
+  while (__prepfin_hold) {
+    __prepfin_hold_waitcond->wait(__prepfin_hold_mutex);
+  }
   if (! __prepfin_conc_loop) {
-    __prepfin_mutex->lock();
+    __prepfin_antistarve_mutex->lock();
     loop_mutex->lock();
   }
   finalize_prepared = true;
   bool prepared = prepare_finalize_user();
   if (! __prepfin_conc_loop) {
     loop_mutex->unlock();
-    __prepfin_mutex->unlock();
+    __prepfin_antistarve_mutex->unlock();
   }
+  __prepfin_hold_mutex->unlock();
   return prepared;
 }
 
@@ -674,6 +684,32 @@ Thread::set_prepfin_conc_loop(bool concurrent)
 }
 
 
+/** Hold prepare_finalize().
+ * In some situations you have to hold the finalization of a thread up to a certain
+ * safe point. With set_prepfin_hold() you can do this. If you set \p hold to true
+ * then a call to \c prepare_finalize() will block until \c set_prepfin_hold(false)
+ * is called.
+ * @param hold true to hold next call to \c prepare_finalize(), false to release it
+ * @exception Exception thrown if \c prepare_finalize() has already been called before
+ * trying to set \p hold to true.
+ */
+void
+Thread::set_prepfin_hold(bool hold)
+{
+  __prepfin_hold_mutex->lock();
+  if ( hold && finalize_prepared ) {
+    __prepfin_hold_mutex->unlock();
+    throw Exception("Thread(%s)::set_prepfin_hold: prepare_finalize() has "
+		    "been called already()", __name);
+  }
+  __prepfin_hold = hold;
+  __prepfin_hold_mutex->unlock();
+  if ( ! hold ) {
+    __prepfin_hold_waitcond->wake_all();
+  }
+}
+
+
 /** Get name of thread.
  * This name is mainly used for debugging purposes. Give it a descriptive
  * name. Is nothing is given the raw class name is used.
@@ -781,7 +817,7 @@ Thread::run()
 
     if ( __finalize_sync_lock )  __finalize_sync_lock->lock_for_read();
 
-    __prepfin_mutex->stopby();
+    __prepfin_antistarve_mutex->stopby();
 
     loop_mutex->lock();
     if ( ! finalize_prepared ) {

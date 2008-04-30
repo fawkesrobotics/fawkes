@@ -44,12 +44,9 @@ class Thread {
 
   /** Thread operation mode.
    * A thread can operate in two different modes. In continuous mode the
-   * thread is on it's own running continuously. No timing is done. You must
-   * use this mode if you implement run() instead of loop(). In
-   * wait-for-wakeup mode the thread will pause after each loop and wait for
-   * an explicit wakeup. This is only guaranteed if you override loop() and
-   * leave run() as it is. Have this in mind of chaos and havoc will
-   * get you.
+   * thread is on it's own running continuously. No timing is done. The loop() is
+   * immediately called again after it has finished once. In wait-for-wakeup mode
+   * the thread will pause after each loop and wait for an explicit wakeup.
    */
   typedef enum {
     OPMODE_CONTINUOUS,		/**< operate in continuous mode (default) */
@@ -100,6 +97,7 @@ class Thread {
   static void      set_cancel_state(CancelState new_state, CancelState *old_state = 0);
 
   void set_delete_on_exit(bool del);
+  void set_prepfin_hold(bool hold);
 
   void add_notification_listener(ThreadNotificationListener *notification_listener);
   void remove_notification_listener(ThreadNotificationListener *notification_listener);
@@ -138,10 +136,14 @@ class Thread {
   pthread_t      __thread_id;
 
   Barrier       *__startup_barrier;
-  Mutex         *__prepfin_mutex;
+  Mutex         *__prepfin_antistarve_mutex;
   Mutex         *__sleep_mutex;
   WaitCondition *__sleep_condition;
   Barrier       *__barrier;
+
+  bool           __prepfin_hold;
+  Mutex         *__prepfin_hold_mutex;
+  WaitCondition *__prepfin_hold_waitcond;
 
   ReadWriteLock *__finalize_sync_lock;
 
