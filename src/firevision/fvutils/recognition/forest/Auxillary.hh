@@ -35,6 +35,12 @@
 using namespace std;
 
 
+namespace UserDef {
+  class ConfigClass;
+  class VectorOfIntegralImages; 
+
+}
+
 namespace Auxillary {
 
 
@@ -90,8 +96,6 @@ namespace Auxillary {
   /** Feature pass */
   bool featurePass(double,double,double, int nosThresholds); 
   
-  class UserDef::ConfigClass; 
-
 
   /** Random number for x - row */ 
   int randRowIndex(UserDef::ConfigClass& );
@@ -104,8 +108,6 @@ namespace Auxillary {
 
   /** Integer to String */ 
   string itos(int);
-
-  class UserDef::VectorOfIntegralImages; 
 
   /** Test module to investiage integral images */
   void writeOutIntegralImages(UserDef::VectorOfIntegralImages* integralImages, 

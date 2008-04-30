@@ -38,6 +38,8 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/roi.h>
 
+#include <vector>
+
 class Camera;
 class ScanlineStar;
 class ColorModel;

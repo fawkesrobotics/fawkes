@@ -965,11 +965,12 @@ namespace Forest {
 	  
 	  faceProbabilityResult = faceProbability; // This is stored in WindowClass instance
 	  
-	  if(WR_FACE_MAP_FILE)
+	  if(WR_FACE_MAP_FILE) {
 		if(capacityOfBin == 0)
 		  config.faceMapFile<<" "<<-1<<" ";
 		else
 		  config.faceMapFile<<" "<<faceProbability<<" ";
+          }
 	  
 	  test = 0;
 	  currentTree = 0;
@@ -1175,11 +1176,12 @@ namespace Forest {
 	  double faceProbability = (double)numberOfFaces/(double)capacityOfBin;
 	  faceProbabilityResult = faceProbability; 
 	  
-	  if( WR_FACE_MAP_FILE )
+	  if( WR_FACE_MAP_FILE ) {
 		if(capacityOfBin == 0)
 		  config.faceMapFile<<" "<<-1<<" ";
 		else
 		  config.faceMapFile<<" "<<faceProbability<<" ";
+          }
 	  
 	  test = 0;
 	  currentTree = 0;

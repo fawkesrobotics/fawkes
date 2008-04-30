@@ -31,6 +31,7 @@
 #include <interfaces/object.h>
 
 #include <cmath>
+#include <cstring>
 
 using namespace std;
 
