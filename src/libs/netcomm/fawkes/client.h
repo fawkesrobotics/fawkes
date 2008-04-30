@@ -64,6 +64,9 @@ class FawkesNetworkClient
   void wait(unsigned int component_id);
   void wake(unsigned int component_id);
 
+  void wait_connection_established();
+  void interrupt_wait_connection_established();
+
   void register_handler(FawkesNetworkClientHandler *handler, unsigned int component_id);
   void deregister_handler(unsigned int component_id);
 
@@ -91,6 +94,11 @@ class FawkesNetworkClient
   typedef LockMap<unsigned int, WaitCondition *> WaitCondMap;
   HandlerMap  handlers;
   WaitCondMap waitconds;
+
+  WaitCondition *__connest_waitcond;
+  Mutex         *__connest_mutex;
+  bool           __connest;
+  bool           __connest_interrupted;
 
   FawkesNetworkClientRecvThread *recv_slave;
   FawkesNetworkClientSendThread *send_slave;

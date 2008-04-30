@@ -266,6 +266,11 @@ FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short in
 
   _id     = 0;
   _has_id = false;
+
+  __connest_waitcond    = new WaitCondition();
+  __connest_mutex       = new Mutex();
+  __connest             = false;
+  __connest_interrupted = false;
 }
 
 
@@ -292,6 +297,11 @@ FawkesNetworkClient::FawkesNetworkClient(unsigned int id, const char *hostname,
 
   _id     = id;
   _has_id = true;
+
+  __connest_waitcond    = new WaitCondition();
+  __connest_mutex       = new Mutex();
+  __connest             = false;
+  __connest_interrupted = false;
 }
 
 
@@ -307,6 +317,9 @@ FawkesNetworkClient::~FawkesNetworkClient()
   delete s;
   free(hostname);
   delete slave_status_mutex;
+
+  delete __connest_waitcond;
+  delete __connest_mutex;
 }
 
 
@@ -373,6 +386,40 @@ FawkesNetworkClient::disconnect()
   recv_slave_alive = false;
   delete s;
   s = NULL;
+}
+
+
+/** Wait until the connection has been established.
+ * @exception InterruptedException thrown if this method has been interrupted with
+ * interrupt_wait_connection_established().
+ */
+void
+FawkesNetworkClient::wait_connection_established()
+{
+  __connest_mutex->lock();
+  while ( ! __connest && ! __connest_interrupted ) {
+    __connest_waitcond->wait(__connest_mutex);
+  }
+  bool interrupted = __connest_interrupted;
+  __connest_interrupted = false;
+  __connest_mutex->unlock();
+  if ( interrupted ) {
+    throw InterruptedException("FawkesNetworkClient::wait_connection_established()");
+  }
+}
+
+
+/** Interrupt wait_connection_estbalished().
+ * This is for example handy to interrupt in connection_died() before a
+ * connection_established() event has been received.
+ */
+void
+FawkesNetworkClient::interrupt_wait_connection_established()
+{
+  __connest_mutex->lock();
+  __connest_interrupted = true;
+  __connest_mutex->unlock();
+  __connest_waitcond->wake_all();
 }
 
 
@@ -450,11 +497,15 @@ FawkesNetworkClient::wake_handlers(unsigned int cid)
 void
 FawkesNetworkClient::notify_of_connection_dead()
 {
+  __connest_mutex->lock();
+  __connest = false;
+  __connest_mutex->unlock();
+
   for ( HandlerMap::iterator i = handlers.begin(); i != handlers.end(); ++i ) {
-    (*i).second->connection_died(_id);
+    i->second->connection_died(_id);
   }
   for ( WaitCondMap::iterator j = waitconds.begin(); j != waitconds.end(); ++j) {
-    (*j).second->wake_all();
+    j->second->wake_all();
   }
 }
 
@@ -462,11 +513,16 @@ void
 FawkesNetworkClient::notify_of_connection_established()
 {
   for ( HandlerMap::iterator i = handlers.begin(); i != handlers.end(); ++i ) {
-    (*i).second->connection_established(_id);
+    i->second->connection_established(_id);
   }
   for ( WaitCondMap::iterator j = waitconds.begin(); j != waitconds.end(); ++j) {
-    (*j).second->wake_all();
+    j->second->wake_all();
   }
+
+  __connest_mutex->lock();
+  __connest = true;
+  __connest_mutex->unlock();
+  __connest_waitcond->wake_all();
 }
 
 
