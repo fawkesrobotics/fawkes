@@ -25,3 +25,7 @@ ifneq ($(wildcard /usr/include/readline/readline.h),)
   HAVE_READLINE=1
 endif
 
+ifneq ($(wildcard /usr/include/termcap.h),)
+  HAVE_TERMCAP=1
+endif
+
