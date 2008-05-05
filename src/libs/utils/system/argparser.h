@@ -70,9 +70,12 @@ class ArgumentParser
 
   bool         has_arg(const char *argn);
   const char * arg(const char *argn);
-  bool         parse_hostport(const char *argn, char **host, unsigned short int *port);
   bool         arg(const char *argn, char **value);
   const char * program_name() const;
+
+  bool         parse_hostport(const char *argn, char **host, unsigned short int *port);
+  long int     parse_int(const char *argn);
+  double       parse_float(const char *argn);
 
   const std::vector< const char * > &    items() const;
   std::vector< const char * >::size_type num_items() const;

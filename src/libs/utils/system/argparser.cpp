@@ -242,6 +242,54 @@ ArgumentParser::parse_hostport(const char *argn, char **host, unsigned short int
 }
 
 
+/** Parse argument as integer.
+ * Converts the value of the given argument to an integer.
+ * @param argn argument name to retrieve
+ * @return value of string as long int
+ * @exception IllegalArgumentException thrown if the value cannot be properly
+ * converted to an integer
+ * @exception Exception thrown if the argument has not been supplied
+ */
+long int
+ArgumentParser::parse_int(const char *argn)
+{
+  if (_opts.count((char *)argn) > 0) {
+    char *endptr;
+    long int rv = strtol(_opts[argn], &endptr, 10);
+    if ( endptr[0] != 0 ) {
+      throw IllegalArgumentException("Supplied argument is not of type int");
+    }
+    return rv;
+  } else {
+    throw Exception("Value for '%s' not available", argn);
+  }
+}
+
+
+/** Parse argument as double.
+ * Converts the value of the given argument to a double.
+ * @param argn argument name to retrieve
+ * @return value of string as double
+ * @exception IllegalArgumentException thrown if the value cannot be properly
+ * converted to a double
+ * @exception Exception thrown if the argument has not been supplied
+ */
+double
+ArgumentParser::parse_float(const char *argn)
+{
+  if (_opts.count((char *)argn) > 0) {
+    char *endptr;
+    double rv = strtod(_opts[argn], &endptr);
+    if ( endptr[0] != 0 ) {
+      throw IllegalArgumentException("Supplied argument is not of type double");
+    }
+    return rv;
+  } else {
+    throw Exception("Value for '%s' not available", argn);
+  }
+}
+
+
 /** Get non-option items.
  * @return pointer to vector of pointer to non-argument values. Handled internally,
  * do not free or delete!
