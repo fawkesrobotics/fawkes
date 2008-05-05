@@ -34,7 +34,7 @@ OBJS_fvshmem = shmem.o
 LIBS_fvlistfwcams = $(VISION_CAM_LIBS) utils fvcams
 OBJS_fvlistfwcams = listfwcams.o
 
-LIBS_fvconverter = fvutils
+LIBS_fvconverter = fvutils fvcams
 OBJS_fvconverter = converter.o
 
 LIBS_fvstereodecoder = $(VISION_CAM_LIBS) utils fvcams

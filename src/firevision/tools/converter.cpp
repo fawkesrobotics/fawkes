@@ -4,6 +4,7 @@
  *
  *  Created: Tue Jul 05 14:34:21 2007
  *  Copyright  2007  Daniel Beck
+ *             2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -22,11 +23,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <iostream>
-
-#include <string.h>
-#include <stdlib.h>
-
+#include <cams/fileloader.h>
 #include <fvutils/writers/fvraw.h>
 #include <fvutils/writers/jpeg.h>
 #include <fvutils/writers/png.h>
@@ -36,128 +33,128 @@
 #include <fvutils/readers/jpeg.h>
 
 #include <fvutils/color/conversions.h>
+#include <utils/system/argparser.h>
 
-#define BUFFER_SIZE 5000000
+#include <cstring>
+#include <cstdlib>
 
-using namespace std;
-
-int main(int argc, char** argv)
+void
+print_usage(const char *program_name)
 {
-  if (3 != argc)
-    {
-      cout << "Usage: " << argv[0] << " infile outfile" << endl;
-      return 0;
-    }
+  printf("Usage: %s [-u -c colorspace -w width -h height] <infile> <outfile>\n\n"
+         "  -u             Unformatted raw, you must supply -c, -w and -h\n"
+	 "  -c colorspace  colorspace string\n"
+	 "  -w width       width of image in pixels\n"
+	 "  -h height      height of image in pixels\n",
+	 program_name);
+}
 
-  char* fn_in = argv[1];
-  char* fn_out = argv[2];
 
-  char* fn_in_copy = strdup(fn_in);
+int
+main(int argc, char** argv)
+{
+  ArgumentParser argp(argc, argv, "uw:h:c:");
+  if ( argp.num_items() != 2 )
+  {
+    print_usage(argp.program_name());
+    printf("\nInvalid number of files given\n\n");
+    return -1;
+  }
+
+  const char *fn_in  = argp.items()[0];
+  const char *fn_out = argp.items()[1];
+
   char* fn_out_copy = strdup(fn_out);
   
-  cout << "Input file: " << fn_in_copy << endl;
-  cout << "Output file: " << fn_out_copy << endl;
+  printf("Input file:  %s\n"
+	 "Output file: %s\n",
+	 fn_in, fn_out);
   
   // strip off extension
-  char* t = strtok(fn_in_copy, ".");
+  char *t = strtok(fn_out_copy, ".");
   if (NULL == t)
-    {
-      cout << "invalid filename" << endl;
-      return 0;
-    }
-
-  char* ext_in;
-  while(NULL != t)
-    {
-      ext_in = t;
-      t = strtok(NULL, ".");
-    }
-  
-  t = strtok(fn_out_copy, ".");
-  if (NULL == t)
-    {
-      cout << "invalid filename" << endl;
-      return 0;
-    }
+  {
+    printf("invalid filename");
+    return -2;
+  }
 
   char* ext_out;
   while(NULL != t)
-    {
-      ext_out = t;
-      t = strtok(NULL, ".");
-    }
+  {
+    ext_out = t;
+    t = strtok(NULL, ".");
+  }
 
-  Reader* reader = NULL;
+  FileLoader *fl = NULL;
   Writer* writer = NULL;
 
-  // FvRaw
-  if ( 0 == strcmp(ext_in, "raw") )
+  if ( argp.has_arg("u") )
+  {
+    if (argp.has_arg("c") && argp.has_arg("w") && argp.has_arg("h"))
     {
-      cout << "Format of file " << fn_in << " is FvRaw" << endl;
-      reader = new FvRawReader(fn_in);
+      fl = new FileLoader(colorspace_by_name(argp.arg("c")), fn_in,
+			  argp.parse_int("w"), argp.parse_int("h"));
+      printf("Input image: %s, %lix%li\n", argp.arg("c"),
+	     argp.parse_int("w"), argp.parse_int("h"));
     }
-  // JPEG
-  else if ( 0 == strcmp(ext_in, "jpg") || 0 == strcmp(ext_in, "jpeg") )
+    else
     {
-      cout << "Format of file " << fn_in << " is Jpeg" << endl;
-      reader = new JpegReader(fn_in);
+      printf("You have to supply all of -w, -h, -c when using -u.\n");
+      return -3;
     }
+  }
   else
-    {
-      cout << "Unknown input file format" << endl;
-      exit(-1);
-    }
-  
-  unsigned char* buffer = (unsigned char*) malloc(BUFFER_SIZE);
-  reader->set_buffer(buffer);
-  reader->read();
+  {
+    fl = new FileLoader(fn_in);
+  }
 
-  unsigned char *tmpbuf = malloc_buffer(YUV422_PLANAR, reader->pixel_width(), reader->pixel_height());
-  convert(reader->colorspace(), YUV422_PLANAR, buffer, tmpbuf,
-	  reader->pixel_width(), reader->pixel_height());
+  fl->open();
+  fl->start();
+
+  unsigned char *tmpbuf = malloc_buffer(YUV422_PLANAR, fl->pixel_width(), fl->pixel_height());
+  convert(fl->colorspace(), YUV422_PLANAR, fl->buffer(), tmpbuf,
+	  fl->pixel_width(), fl->pixel_height());
 
   // FvRaw
   if ( 0 == strcmp(ext_out, "raw") )
-    {
-      cout << "Format of file " << fn_out << " is FvRaw" << endl;
-      writer = new FvRawWriter();
-    }
+  {
+    printf("Format for out file %s is FvRaw\n", fn_out);
+    writer = new FvRawWriter();
+  }
   // JPEG
   else if ( 0 == strcmp(ext_out, "jpeg") || 0 == strcmp(ext_out, "jpg") )
-    { 
-      cout << "Format of file " << fn_out << " is Jpeg" << endl;
-      writer = new JpegWriter();
-    }
+  { 
+    printf("Format for out file %s is Jpeg\n", fn_out);
+    writer = new JpegWriter();
+  }
   // PNG
   else if ( 0 == strcmp(ext_out, "png") )
-    {
-      cout << "Format of file " << fn_out << " is PNG" << endl;
-      writer = new PNGWriter();
-    }
+  {
+    printf("Format for out file %s is PNG\n", fn_out);
+    writer = new PNGWriter();
+  }
   // PNM
   else if ( 0 == strcmp(ext_out, "pnm") )
-    {
-      cout << "Format of file " << fn_out << " is PNM" << endl;
-      writer = new PNMWriter(PNM_PPM);
-    }
+  {
+    printf("Format for out file %s is PNM\n", fn_out);
+    writer = new PNMWriter(PNM_PPM);
+  }
   else
-    {
-      cout << "Unknown output file format" << endl;
-      exit(-2);
-    }
+  {
+    printf("Unknown output file format\n");
+    exit(-2);
+  }
 
   writer->set_filename(fn_out);
-  writer->set_dimensions(reader->pixel_width(), reader->pixel_height());
+  writer->set_dimensions(fl->pixel_width(), fl->pixel_height());
   writer->set_buffer(YUV422_PLANAR, tmpbuf);
   writer->write();
 
-  free(fn_in_copy);
   free(fn_out_copy);
 
-  delete reader;
+  delete fl;
   delete writer;
 
-  free(buffer);
   free(tmpbuf);
   
   return 0;
