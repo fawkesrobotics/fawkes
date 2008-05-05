@@ -30,7 +30,7 @@
 #include <cstdlib>
 
 colorspace_t
-colorspace_by_name(char *mode)
+colorspace_by_name(const char *mode)
 {
 
   if (strcmp(mode, "RGB") == 0) {
@@ -45,6 +45,10 @@ colorspace_by_name(char *mode)
     return BGR;
   } else if (strcmp(mode, "YUV422_PACKED") == 0) {
     return YUV422_PACKED;
+  } else if (strcmp(mode, "YUV444_PACKED") == 0) {
+    return YUV444_PACKED;
+  } else if (strcmp(mode, "YVU444_PACKED") == 0) {
+    return YVU444_PACKED;
   } else if (strcmp(mode, "YUV422_PLANAR") == 0) {
     return YUV422_PLANAR;
   } else if (strcmp(mode, "GRAY8") == 0) {
@@ -85,6 +89,10 @@ colorspace_to_string(colorspace_t colorspace)
     return "BGR";
   case YUV422_PACKED:
     return "YUV422_PACKED";
+  case YUV444_PACKED:
+    return "YUV444_PACKED";
+  case YVU444_PACKED:
+    return "YVU444_PACKED";
   case YUV422_PLANAR:
     return "YUV422_PLANAR";
   case GRAY8:

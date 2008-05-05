@@ -100,6 +100,20 @@ void yuv422planar_to_yuv422packed(unsigned char *planar, unsigned char *packed,
 void yuv422packed_to_yuv422planar(unsigned char *packed, unsigned char *planar,
 				  unsigned int width, unsigned int height);
 
+/** Convert YUV444_PACKED images to YUV422_PLANAR
+ */
+void yuv444packed_to_yuv422planar(unsigned char *yuv444, unsigned char *yuv422,
+				  unsigned int width, unsigned int height);
+
+void yuv444packed_to_yuv422packed(unsigned char *yuv444, unsigned char *yuv422,
+				  unsigned int width, unsigned int height);
+
+void yvu444packed_to_yuv422planar(unsigned char *yuv444, unsigned char *yuv422,
+				  unsigned int width, unsigned int height);
+
+void yvu444packed_to_yuv422packed(unsigned char *yuv444, unsigned char *yuv422,
+				  unsigned int width, unsigned int height);
+
 
 
 void yuv422planar_erase_y_plane(unsigned char *yuv, unsigned int width, unsigned int height);

@@ -29,27 +29,32 @@
 
 #include <sys/types.h>
 
+/** Color spaces. */
 typedef enum {
-  CS_UNKNOWN         =  0,
-  RGB                =  1,
-  YUV411_PACKED      =  2,
-  YUV411_PLANAR      =  3,
-  YUY2               =  4,
-  BGR                =  5,
-  YUV422_PACKED      =  6,
-  YUV422_PLANAR      =  7,
-  GRAY8              =  8,
-  RGB_WITH_ALPHA     =  9,
-  BGR_WITH_ALPHA     = 10,
-  BAYER_MOSAIC_RGGB  = 11,
-  BAYER_MOSAIC_GBRG  = 12,
-  BAYER_MOSAIC_GRBG  = 13,
-  BAYER_MOSAIC_BGGR  = 14,
-  RAW16              = 15,
-  RAW8               = 16,
-  MONO8              = 17,
-  MONO16             = 18,
-  COLORSPACE_N       = 19
+  CS_UNKNOWN         =  0,	/**< Unknown color space */
+  RGB                =  1,	/**< RGB, three bytes per pixel, one byte per color, ordered
+				 * line by line */
+  YUV411_PACKED      =  2,	/**< YUV image with 4:1:1 sampling, byte order U Y0 Y1 V Y2 Y3 */
+  YUV411_PLANAR      =  3,	/**< YUV image with 4:1:1 sampling, first Y plane, then U then V plane */
+  YUY2               =  4,	/**< YUV image with 4:2:2 sampling, byte order Y0 U Y1 V */
+  BGR                =  5,	/**< RGB, 3 bytes per pixel, one byte per color, ordererd
+				 * line by line, pixels orderd B G R */
+  YUV422_PACKED      =  6,	/**< YUV image with 4:2:2 sampling, byte order U Y0 V Y1 */
+  YUV422_PLANAR      =  7,	/**< YUV image with 4:2:2 sampling, first Y plane, then U then V plane */
+  GRAY8              =  8,	/**< plain gray buffer, one byte per pixel */
+  RGB_WITH_ALPHA     =  9,	/**< RGB with alpha, 4 bytes per pixel, byte order R G B A */
+  BGR_WITH_ALPHA     = 10,	/**< RGB with alpha, 4 bytes per pixel, byte order B G R A */
+  BAYER_MOSAIC_RGGB  = 11,	/**< Image has RGGB bayer pattern */
+  BAYER_MOSAIC_GBRG  = 12,	/**< Image has GBRG bayer pattern */
+  BAYER_MOSAIC_GRBG  = 13,	/**< Image has GRBG bayer pattern */
+  BAYER_MOSAIC_BGGR  = 14,	/**< Image has BGGR bayer pattern */
+  RAW16              = 15,	/**< Raw image, 2 bytes per pixel, format depends on camera */
+  RAW8               = 16,	/**< Raw image, 1 byte per pixel, format depends on camera */
+  MONO8              = 17,	/**< Like GRAY8 */
+  MONO16             = 18,	/**< Gray-scale image, 2 bytes per pixel */
+  YUV444_PACKED      = 19,	/**< Full sampled YUV, byte order Y U V */
+  YVU444_PACKED      = 20,	/**< Full sampled YUV, byte order Y V U */
+  COLORSPACE_N       = 21	/**< number of colorspaces */
 } colorspace_t;
 
 
@@ -59,6 +64,8 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
   switch (cspace) {
   case RGB:
   case BGR:
+  case YUV444_PACKED:
+  case YVU444_PACKED:
     return (width * height * 3);
  
   case RGB_WITH_ALPHA:
@@ -92,7 +99,7 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
 }
 
 
-colorspace_t     colorspace_by_name(char *colorspace);
+colorspace_t     colorspace_by_name(const char *colorspace);
 const char *     colorspace_to_string(colorspace_t colorspace);
 unsigned char *  malloc_buffer(colorspace_t colorspace, unsigned int width, unsigned int height);
 

@@ -164,6 +164,104 @@ yuv422packed_to_yuv422planar(unsigned char *packed, unsigned char *planar,
 
 
 void
+yuv444packed_to_yuv422planar(unsigned char *yuv444, unsigned char *yuv422,
+			     unsigned int width, unsigned int height)
+{
+  register volatile unsigned char *y, *u, *v;
+  register int i, iy, iiy;
+
+  unsigned int wh = (width * height);
+  int wh2 = wh >> 1;
+  y = yuv422;
+  u = yuv422 + wh;
+  v = u + wh2;
+
+#ifdef ___OPENMP
+  #pragma omp parallel for firstprivate(wh2) private(i, iy, iiy) shared(y, u, v, yuv444) schedule(static)
+#endif
+  for (i = 0; i < wh2; ++i) {
+    iy  = i << 1;
+    iiy = i * 6;
+    y[iy]   = yuv444[iiy];
+    y[iy+1] = yuv444[iiy + 3];
+    u[i]    = (yuv444[iiy + 1] + yuv444[iiy + 4]) >> 1;
+    v[i]    = (yuv444[iiy + 2] + yuv444[iiy + 5]) >> 1;
+  }
+}
+
+
+void
+yuv444packed_to_yuv422packed(unsigned char *yvu444, unsigned char *yuv422,
+			     unsigned int width, unsigned int height)
+{
+  register int i, iiy;
+
+  unsigned int wh = (width * height);
+  int wh2 = wh >> 1;
+
+#ifdef ___OPENMP
+#  pragma omp parallel for firstprivate(wh2) private(i, iiy) shared(yuv422, yvu444) schedule(static)
+#endif
+  for (i = 0; i < wh2; i += 4) {
+    iiy = i * 6;
+    yuv422[i] = (yvu444[iiy + 1] + yvu444[iiy + 4]) >> 1;
+    yuv422[i+1] = yvu444[iiy];
+    yuv422[i+2]   = (yvu444[iiy + 2] + yvu444[iiy + 5]) >> 1;
+    yuv422[i+3] = yvu444[iiy + 3];
+  }
+}
+
+
+void
+yvu444packed_to_yuv422planar(unsigned char *yvu444, unsigned char *yuv422,
+			     unsigned int width, unsigned int height)
+{
+  register volatile unsigned char *y, *u, *v;
+  register int i, iy, iiy;
+
+  unsigned int wh = (width * height);
+  int wh2 = wh >> 1;
+  y = yuv422;
+  u = yuv422 + wh;
+  v = u + wh2;
+
+#ifdef ___OPENMP
+#  pragma omp parallel for firstprivate(wh2) private(i, iy, iiy) shared(y, u, v, yvu444) schedule(static)
+#endif
+  for (i = 0; i < wh2; ++i) {
+    iy  = i << 1;
+    iiy = i * 6;
+    y[iy]   = yvu444[iiy];
+    y[iy+1] = yvu444[iiy + 3];
+    u[i]    = (yvu444[iiy + 2] + yvu444[iiy + 5]) >> 1;
+    v[i]    = (yvu444[iiy + 1] + yvu444[iiy + 4]) >> 1;
+  }
+}
+
+
+void
+yvu444packed_to_yuv422packed(unsigned char *yvu444, unsigned char *yuv422,
+			     unsigned int width, unsigned int height)
+{
+  register int i, iiy;
+
+  unsigned int wh = (width * height);
+  int wh2 = wh >> 1;
+
+#ifdef ___OPENMP
+#  pragma omp parallel for firstprivate(wh2) private(i, iiy) shared(yuv422, yvu444) schedule(static)
+#endif
+  for (i = 0; i < wh2; i += 4) {
+    iiy = i * 6;
+    yuv422[i]   = (yvu444[iiy + 2] + yvu444[iiy + 5]) >> 1;
+    yuv422[i+1] = yvu444[iiy];
+    yuv422[i+2] = (yvu444[iiy + 1] + yvu444[iiy + 4]) >> 1;
+    yuv422[i+3] = yvu444[iiy + 3];
+  }
+}
+
+
+void
 yuv422planar_erase_y_plane(unsigned char *yuv, unsigned int width, unsigned int height)
 {
   memset(yuv, 128, (width * height));

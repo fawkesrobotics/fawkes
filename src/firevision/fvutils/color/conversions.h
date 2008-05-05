@@ -103,6 +103,14 @@ convert(colorspace_t   from,  colorspace_t   to,
     yuv422packed_to_bgr_with_alpha_plainc(src, dst, width, height);
   } else if ( (from == BAYER_MOSAIC_GBRG) && (to == YUV422_PLANAR) ) {
     bayerGBRG_to_yuv422planar_bilinear(src, dst, width, height);
+  } else if ( (from == YUV444_PACKED) && (to == YUV422_PLANAR) ) {
+    yuv444packed_to_yuv422planar(src, dst, width, height);
+  } else if ( (from == YUV444_PACKED) && (to == YUV422_PACKED) ) {
+    yuv444packed_to_yuv422packed(src, dst, width, height);
+  } else if ( (from == YVU444_PACKED) && (to == YUV422_PLANAR) ) {
+    yvu444packed_to_yuv422planar(src, dst, width, height);
+  } else if ( (from == YVU444_PACKED) && (to == YUV422_PACKED) ) {
+    yvu444packed_to_yuv422packed(src, dst, width, height);
   } else {
     throw Exception("Cannot convert image data from %s to %s",
 		    colorspace_to_string(from), colorspace_to_string(to));
