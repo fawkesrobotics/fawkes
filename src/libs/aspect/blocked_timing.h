@@ -38,11 +38,13 @@ class BlockedTimingAspect
    */
   typedef enum {
     WAKEUP_HOOK_PRE_LOOP,	/**< before each loop */
-    WAKEUP_HOOK_SENSOR,		/**< sensor thread */
+    WAKEUP_HOOK_SENSOR,		/**< sensor thread, recording and processing */
+    WAKEUP_HOOK_SENSOR_PROCESS,	/**< sensor data processing thread */
     WAKEUP_HOOK_WORLDSTATE,	/**< world state thread */
     WAKEUP_HOOK_THINK,		/**< think thread (agent) */
     WAKEUP_HOOK_SKILL,		/**< skill thread (skill module) */
     WAKEUP_HOOK_ACT,		/**< act thread (motor module etc.) */
+    WAKEUP_HOOK_ACT_EXEC,	/**< act execution thread */
     WAKEUP_HOOK_POST_LOOP	/**< run after loop */
   } WakeupHook;
 

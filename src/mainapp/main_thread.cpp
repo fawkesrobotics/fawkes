@@ -334,6 +334,7 @@ FawkesMainThread::loop()
   TIMETRACK_INTER(__ttc_pre_loop, __ttc_sensor)
 
   thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
+  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS );
 
   TIMETRACK_INTER(__ttc_sensor, __ttc_worldstate)
 
@@ -350,6 +351,7 @@ FawkesMainThread::loop()
   TIMETRACK_INTER(__ttc_skill, __ttc_act)
 
   thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT );
+  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC );
 
   TIMETRACK_INTER(__ttc_act, __ttc_post_loop)
 
