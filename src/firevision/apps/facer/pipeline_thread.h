@@ -70,8 +70,10 @@ class FacerPipelineThread
   std::map<int, std::string> __persons;
  
   bool __roi_not_found_flag; 
+  int __last_recognized_person_index; 
   int __person_recognized_cnt;
   int __person_labels[10]; 
+  std::string __person_names[10]; 
 
   TimeTracker *__tt;
   unsigned int __loop_count;

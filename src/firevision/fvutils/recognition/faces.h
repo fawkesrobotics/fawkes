@@ -24,13 +24,13 @@
  */
 
 #ifndef __FIREVISION_FVUTILS_RECOGNITION_FACES_H_
-#define __FIREVISION_FVUTILS_RECOGNITION_FACES_H
+#define __FIREVISION_FVUTILS_RECOGNITION_FACES_H_
 
 #include <fvutils/base/roi.h>
 #include <vector> 
 #include <map>
 #include <list>
-#include <fvutils/recognition/forest/Forest.hh>
+#include <fvutils/recognition/forest/forest.h>
 #include <string>
 #include <vector>
 
@@ -48,7 +48,7 @@ class FaceRecognizer
   /** map of identity indices to person names */
   std::map<int, std::string> __person_names; 
   /** a configclass Instance */
-  UserDef::ConfigClass *__config; 
+  ForestConfigClass *__config; 
   /** height of the trainig images. this value can be read later */
   int __train_height;
   /** width of the training imaes */ 
@@ -58,7 +58,7 @@ class FaceRecognizer
   FaceRecognizer(const char* loc, int number_of_identities, int forest_size );
   ~FaceRecognizer();
   /** a random forest */ 
-  Forest::ForestClass *__forest; 
+ ForestClass *__forest; 
 
 
   /** get the training height */

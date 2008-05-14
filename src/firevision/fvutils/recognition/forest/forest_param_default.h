@@ -1,10 +1,9 @@
-#ifndef __parameters__hh__
-#define __parameters__hh__
+
 
 /***************************************************************************
- *  Parameters.hh - Header file for object recognition with random forests: All the parameterization. Needs to be moved into a xml config file later on 
+ *  forest_param_default default values for parameters  
  *
- *  Created: April 18/2008
+ *  Created: 05 05 2008 
  *  Copyright  2008  Vaishak Belle
  *
  * 
@@ -25,6 +24,12 @@
  *
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
+
+
+
+
+#ifndef __FIREVISION_FVUTILS_RECOGNITION_FOREST_FOREST_PARAM_DEFAULT_H_
+#define __FIREVISION_FVUTILS_RECOGNITION_FOREST_FOREST_PARAM_DEFAULT_H_
 
 
 // Features Related

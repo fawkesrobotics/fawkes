@@ -25,11 +25,10 @@
  */
 
 #include <fvutils/recognition/faces.h>
-#include <fvutils/recognition/forest/Auxillary.hh>
-#include <fvutils/recognition/forest/UserDef.hh>
+#include <fvutils/recognition/forest/forest.h>
+#include <fvutils/recognition/forest/forest_aux.h>
+#include <fvutils/recognition/forest/forest_param_default.h>
 
-#include <fvutils/recognition/forest/CommonHeaders.hh>
-#include <fvutils/recognition/forest/Parameters.hh>
 
 
 /** @class FaceRecognizer <fvutils/recognition/faces.h>
@@ -50,10 +49,12 @@ FaceRecognizer::FaceRecognizer(const char* loc, int number_of_identities, int fo
   strcpy( __training_images_location, loc ); 
   __n_identities = number_of_identities;
   __forest_size = forest_size;
-  __config = new UserDef::ConfigClass( __n_identities );
+  __config = new ForestConfigClass( __n_identities ); 
+  //  __config = new UserDef::ConfigClass( __n_identities );
   __train_height = __train_width = 0; 
-  __forest = new Forest::ForestClass( __training_images_location, __n_identities, __train_height, __train_width, 
-				      *__config, __forest_size );
+  //    __forest = new Forest::ForestClass( __training_images_location, __n_identities, __train_height, __train_width, 
+  //			      *__config, __forest_size );
+    __forest = new ForestClass( __training_images_location, __n_identities, __train_height, __train_width, *__config, __forest_size ); 
   
 
  }
@@ -99,7 +100,8 @@ FaceRecognizer::recognize(vector<IplImage*> faces, int number_of_identities )
     { 
       face = cvCreateImage( rescaling_size, faces.at(i)->depth, faces.at(i)->nChannels ); 
       cvResize( faces.at(i), face, CV_INTER_LINEAR );
-      identities.push_back( Forest::getClassLabelFromForest( __forest, face ) ); 
+      identities.push_back( getClassLabelFromForest( __forest, face ) ); 
+      //      identities.push_back( Forest::getClassLabelFromForest( __forest, face ) ); 
       cvReleaseImage( &face ); 
     }
 
