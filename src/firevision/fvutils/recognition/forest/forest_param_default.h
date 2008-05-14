@@ -1,9 +1,7 @@
-
-
 /***************************************************************************
  *  forest_param_default default values for parameters  
  *
- *  Created: 05 05 2008 
+ *  Created: Wed Dec 12 13:04:12 2008
  *  Copyright  2008  Vaishak Belle
  *
  * 

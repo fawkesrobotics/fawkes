@@ -1,14 +1,7 @@
-#include <utils/logging/liblogger.h>
-#include "forest_param_default.h" 
-#include <iostream>
-#include <math.h> 
-#include <opencv/cv.h> 
-#include "forest_aux.h" 
-
 /***************************************************************************
  *  forest_aux.cpp auxillary functions for the random forest implementation
  *
- *  Created: 07 05 2008 
+ *  Created: Wed Dec 12 13:04:12 2008
  *  Copyright  2008 Vaishak Belle
  *
  *  $Id$ 
@@ -31,6 +24,15 @@
  */
 
 
+#include <utils/logging/liblogger.h>
+#include "forest_param_default.h" 
+#include <iostream>
+#include <math.h> 
+#include <opencv/cv.h> 
+#include "forest_aux.h" 
+
+
+
 //Haar Filter Set used
 enum {BLOCK , RECT2_HORIZONTAL , RECT2_VERTICAL, RECT3_VERTICAL};
 
@@ -38,7 +40,7 @@ enum {BLOCK , RECT2_HORIZONTAL , RECT2_VERTICAL, RECT3_VERTICAL};
 
 
 /** get the rectangular feature score */ 
-double getRectangularIntegralImagefeature(int* integralImageCalculated, int xMain, int yMain, int x, int y, int height, int width, int haarFeature){
+double get_rectangular_integral_image_feature(int* integralImageCalculated, int xMain, int yMain, int x, int y, int height, int width, int haarFeature){
     
   double normalizedII;
   
@@ -192,13 +194,13 @@ double getRectangularIntegralImagefeature(int* integralImageCalculated, int xMai
 /** return a random rectangle dimension 
  * returns a random dimension 
  */ 
-int randomRectangle() 
+int random_rectangle() 
 {
   return rand()%RECTANGULAR_FEATURE_SIZE; 
 }
 
 /** feature pass */
-bool featurePass(double feature, double theta1, double theta2, int number){
+bool feature_pass(double feature, double theta1, double theta2, int number){
 
   if(number == 2) { 
 
@@ -223,7 +225,7 @@ bool featurePass(double feature, double theta1, double theta2, int number){
 
 
 /** find the minimum among the double values - (entropies) */
-int findMin( double* entropies=0, int size=0){
+int find_min( double* entropies=0, int size=0){
 
   int finalIndex = -1;
   int i =0;
@@ -253,7 +255,7 @@ int findMin( double* entropies=0, int size=0){
 
 
 /** For a given image at a location, calculate its integralimage */ 
-void calculateIntegralImage(IplImage* image=0, int *integralImage=0)
+void calculate_integral_image(IplImage* image=0, int *integralImage=0)
 {
 
   const int height = image->height;

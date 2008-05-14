@@ -100,7 +100,7 @@ FaceRecognizer::recognize(vector<IplImage*> faces, int number_of_identities )
     { 
       face = cvCreateImage( rescaling_size, faces.at(i)->depth, faces.at(i)->nChannels ); 
       cvResize( faces.at(i), face, CV_INTER_LINEAR );
-      identities.push_back( getClassLabelFromForest( __forest, face ) ); 
+      identities.push_back( get_class_label_from_forest( __forest, face ) ); 
       //      identities.push_back( Forest::getClassLabelFromForest( __forest, face ) ); 
       cvReleaseImage( &face ); 
     }

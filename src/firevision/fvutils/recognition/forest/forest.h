@@ -1,24 +1,7 @@
-#include "forest_aux.h" 
-#include "forest_param_default.h" 
-#include <string> 
-#include <iostream> 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
-#include <fstream>  
-#include <boost/nondet_random.hpp>
-#include <boost/random.hpp>
-#include <boost/config.hpp>
-#include <boost/random.hpp>
-#include <boost/progress.hpp>
-#include <boost/shared_ptr.hpp>
-#include <dirent.h>
-#include <utils/logging/liblogger.h>
-
-
 /***************************************************************************
  *  forest.h random forest implementation
  *
- *  Created: 07 05 2008 
+ *  Created: Wed Dec 12 13:04:12 2008
  *  Copyright  2008 Vaishak Belle
  *
  *  $Id$ 
@@ -44,13 +27,30 @@
 #ifndef __FIREVISION_FVUTILS_RECOGNITION_FOREST_FOREST_H_
 #define __FIREVISION_FVUTILS_RECOGNITION_FOREST_FOREST_H_
 
+#include "forest_aux.h" 
+#include "forest_param_default.h" 
+#include <string> 
+#include <iostream> 
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#include <fstream>  
+#include <boost/nondet_random.hpp>
+#include <boost/random.hpp>
+#include <boost/config.hpp>
+#include <boost/random.hpp>
+#include <boost/progress.hpp>
+#include <boost/shared_ptr.hpp>
+#include <dirent.h>
+#include <utils/logging/liblogger.h>
+
+
 using namespace std; 
 typedef vector<IplImage*> ImageGroup;
 boost::minstd_rand g;
 boost::uniform_01<boost::minstd_rand> randBoost(g);
 
 /** rand boost */ 
-double randomBooster(){
+double random_booster(){
   return randBoost();
 }
 
@@ -69,15 +69,15 @@ class ImageInfoClass : public CvSize {
   /** set height information 
    * \param h integer denoting height
    */ 
-  void setHeight(int h){height=h;}
+  void set_height(int h){height=h;}
   /** set width information 
    * \param w integer denoting width
    */ 
-  void setWidth(int w){width = w;}
+  void set_width(int w){width = w;}
   /** get the height set */
-  int getHeight() const { return height;}
+  int get_height() const { return height;}
   /** get the width considered */ 
-  int getWidth() const {return width;}
+  int get_width() const {return width;}
 };
 
 /** 
@@ -89,44 +89,44 @@ class ForestConfigClass {
 
  private:
   /** the training images location */ 
-  string trainImages_;
+  string __train_images;
   /** the test images location */ 
-  string testImages_;
+  string __test_images;
   /** the global fmp  value*/ 
-  int detection_threshold; 
+  int __detection_threshold; 
   /** detection heuristic */ 
-  int subwindow_range;
+  int __subwindow_range;
   /** default location of the training images */ 
-  string trainIntegralImagesLoc_;
+  string __train_integral_images_loc;
   /** default location of the test images */ 
-  string testIntegralImagesLoc_;
+  string __test_integral_images_loc; 
   /** fmp value global threshold */ 
-  double face_map_threshold; 
-  /** number of the identities */ 
-  int nclasses; 
-  /** offline or online training */
-  bool relearnStatusValue_;
+  double __face_map_threshold; 
     
 
  public:
+  /** number of the identities */ 
+  int nclasses; 
+  /** offline or online training */
+  bool relearn_status_value; 
   /** Given the sliding window implementation, imageInfoInstance refers to size that the tree was trained with (32X32 and so on). */
-  ImageInfoClass imageInfoInstance;
+  ImageInfoClass image_info_instance; 
   /** testImageInfoInstance details the test Image submitted. Essentially, we look for faces of the size we trained the tree with(32X32) which are the dimensions of the window as well in the whole test image. */
-  ImageInfoClass testImageInfoInstance;
+  ImageInfoClass test_image_info_instance; 
   /** limitations of the feature size */ 
   int rectangular_feature_size;
   /** file to store log messages */ 
-  std::ofstream logfile;
+  std::ofstream log_file; 
   /** file to store all detections */
-  std::ofstream detectionsFile;
+  std::ofstream detections_file;
   /** file to store fmp values */ 
-  std::ofstream faceMapFile;
+  std::ofstream face_map_file; 
   /** the trainig images */ 
   ImageGroup* images;
   /** file to store all the detection results */ 
-  ofstream globalDetectionsFile;
+  ofstream global_detections_file; 
   /** image grop of the test images */ 
-  ImageGroup* testImages;
+  ImageGroup* test_images;
   /** histogram for the entire forest  */ 
   int nodes_nos_faces; // nodes_nos_faces, nodes_nos_nonfaces count the number of faces in all the nodes all the path
   /** histogram for the entire forest */
@@ -134,12 +134,12 @@ class ForestConfigClass {
 
 
   /** the integral images of the training samples */ 
-  VectorOfIntegralImages *integralImages; 
+  VectorOfIntegralImages *integral_images; 
   /** the integral images of the test sampels */ 
-  VectorOfIntegralImages *testIntegralImages; 
+  VectorOfIntegralImages *test_integral_images; 
 
   /** maintaining the global node index */ 
-  int globalNodeIndex;
+  int global_node_index; 
     
   /** constructor that takes number of object classes as the parameter
    * @param number_of_classes the number of object classes
@@ -147,86 +147,86 @@ class ForestConfigClass {
   ForestConfigClass(int number_of_classes){
     rectangular_feature_size = RECTANGULAR_FEATURE_SIZE;
     images = 0;
-    testImages = 0;
+    test_images = 0;
     nodes_nos_faces = 1;
     nodes_nos_nonfaces = 1;
-    globalNodeIndex = 0;
-    globalDetectionsFile.open("all-detections.txt");
-    logfile.open("logfile.txt");
-    detectionsFile.open("the-detections.txt");
-    faceMapFile.open("the-faceMapFile.txt");
-    integralImages = new VectorOfIntegralImages[ number_of_classes ];
-    testIntegralImages = new VectorOfIntegralImages[ number_of_classes ];
+    global_node_index = 0; 
+    global_detections_file.open("all-detections.txt");
+    log_file.open("logfile.txt");
+    detections_file.open("the-detections.txt");
+    face_map_file.open("the-faceMapFile.txt");
+    integral_images = new VectorOfIntegralImages[ number_of_classes ];
+    test_integral_images = new VectorOfIntegralImages[ number_of_classes ];
     nclasses = number_of_classes; 
   }
 
   /** set the number of identities for leanring 
    * @param n interger for number of classes */ 
-  void setNclasses( int n ) {
+  void set_nclasses( int n ) {
     nclasses = n;
   }
   /** get the number of identities used in learning */ 
-  int getNclasses() const {
+  int get_nclasses() const {
     return nclasses; 
   }
   /** detection window heurisitc - defining neighbor range 
    * @param p is the range */
-  void setSubwindowRange(int p) { subwindow_range = p; }
+  void set_subwindow_range(int p) { __subwindow_range = p; }
   /** setting the feature size 
    * @param r is the dimension */ 
-  void setRectangularFeatureSize(int r) { rectangular_feature_size = r; }
+  void set_rectangular_feature_size(int r) { rectangular_feature_size = r; }
   /** set fmp gloabl threshold 
    * @param fmp is the value */ 
-  void setFaceMapThreshold(double fmp) {face_map_threshold = fmp;}
+  void set_face_map_threshold(double fmp) {__face_map_threshold = fmp;}
   /** detection heurisitc range 
    * @param dt is the integeer value */ 
-  void setDetectionThreshold(int dt){detection_threshold = dt;} 
+  void set_detection_threshold(int dt){__detection_threshold = dt;} 
   /** set training images location 
    * @param s is the location */ 
-  void setTrainImages(string s=TRAIN_IMAGES_LOC){ trainImages_ = s;}
+  void set_train_images(string s=TRAIN_IMAGES_LOC){ __train_images = s;}
   /** set test images location 
    * @param s is the location */ 
-  void setTestImages(string s=TEST_IMAGES_LOC){ testImages_ = s;}
+  void set_test_images(string s=TEST_IMAGES_LOC){ __test_images = s;}
   /** set training images default location 
    * @param s default loc */ 
-  void setTrainIntegralImagesLoc( string s=TRAINDT){ trainIntegralImagesLoc_ = s;}
+  void set_train_integral_images_loc( string s=TRAINDT){ __train_integral_images_loc = s;}
   /** set test images default location 
    * @param s default test images lcoation */
-  void setTestIntegralImagesLoc(string s=TESTDT) { testIntegralImagesLoc_ = s;}
+  void set_test_integral_images_loc(string s=TESTDT) { __test_integral_images_loc = s;}
   /** set relearn value - offline or online 
    * @param q is 1 for online learning and 0 for offline learning */ 
-  void setRelearnStatusValue(bool q) { relearnStatusValue_ = q;}
+  void set_relearn_status_value(bool q) { relearn_status_value = q;}
   /** get subwindow range set */ 
-  int getSubwindowRange() const { return subwindow_range; }
+  int get_subwindow_range() const { return __subwindow_range; }
   /** get global fmp value */ 
-  double getFaceMapThreshold() { return face_map_threshold;}
+  double get_face_map_threshold() { return __face_map_threshold;}
   /** get detection threshold */ 
-  int getDetectionThreshold() { return detection_threshold;}
+  int get_detection_threshold() { return __detection_threshold;}
   /** get training images location */
-  string getTrainImages() { return trainImages_;}
+  string get_train_images() { return __train_images;}
   /** get test images location */ 
-  string getTestImages() { return testImages_;}
+  string get_test_images() { return __test_images;}
   /** get training images default loc */ 
-  string getTrainIntegralImagesLoc(){ return trainIntegralImagesLoc_;}
+  string get_train_integral_images_loc(){ return __train_integral_images_loc;}
   /** get test images default loc */ 
-  string getTestIntegralImageDataLoc() { return testIntegralImagesLoc_;}
+  string get_test_integral_image_data_loc() { return __test_integral_images_loc;}
   /** get relearn status value */ 
-  bool getRelearnStatusValue() { return relearnStatusValue_;}
+  bool get_relearn_status_value() { return relearn_status_value;}
 
   ~ForestConfigClass() { 
 
     for( int i = 0; i < nclasses; i++ ) { 
-      for( int j =0; j < integralImages[i].size() ; j++ )
-	delete (integralImages[i].iiVector.at(j)); 
+      for( int j =0; j < integral_images[i].size() ; j++ )
+	delete (integral_images[i].iiVector.at(j)); 
     }
-    delete[] integralImages;
+    delete[] integral_images;
 	  
     for( int i = 0; i < nclasses; i++ ) { 
-      for( int j = 0; j < testIntegralImages[i].size(); j++ ) 
-	delete (testIntegralImages[i].iiVector.at(j)); 
+      for( int j = 0; j < test_integral_images[i].size(); j++ ) 
+	delete (test_integral_images[i].iiVector.at(j)); 
     }
 	  
-    delete[] testIntegralImages; 
+    delete[] test_integral_images; 
 
   }      
 };
@@ -234,16 +234,16 @@ class ForestConfigClass {
 /** random x index 
  * @param config the config class instance 
  */
-int randRowIndex( ForestConfigClass &config )
+int rand_row_index( ForestConfigClass &config )
 { 
-  return rand()%config.imageInfoInstance.getHeight(); 
+  return rand()%config.image_info_instance.get_height(); 
 }
 /** random y index
  * @param config the config class instance 
  */
-int randColIndex( ForestConfigClass &config )
+int rand_col_index( ForestConfigClass &config )
 { 
-  return rand()%config.imageInfoInstance.getWidth(); 
+  return rand()%config.image_info_instance.get_width(); 
 }
 
 /**
@@ -254,17 +254,17 @@ class ForestTest {
   
  public:
   /** all images that get assigned on left brnach on test candidate */ 
-  VectorOfIntegralImages *leftBranch; 
+  VectorOfIntegralImages *left_branch; 
   /** all images that get assigned to rifght branch on test candidate */ 
-  VectorOfIntegralImages *rightBranch; 
+  VectorOfIntegralImages *right_branch; 
   /** the threshold theta1, */
   double theta1; 
   /** theta2 */
   double  theta2;
   /** top left coordinates of randomrectangle sampled */ 
-  int xMain; 
+  int xmain; 
   /** top left coordinates of randomrectangle sampled */    
-  int yMain;
+  int ymain;
     
   /** width of the sampled random rectangle */ 
   int xdash; 
@@ -272,18 +272,18 @@ class ForestTest {
   int ydash;
 
   /** haar featuree considered */ 
-  int haarFeature;
+  int haar_feature;
 	
 	
  private:
 	
   /** entropy value of the test candidate */ 
-  double entropyValue; // the value of the entropy between the left and right branches.
+  double __entropy_value; // the value of the entropy between the left and right branches.
     
   /** 
    * calculation of entropy using class histogram and derived probabiliities 
    */ 
-  double entropyCalculation(ForestConfigClass& config)
+  double entropy_calculation(ForestConfigClass& config)
   {
     double finalProbabilityLeft = 0.0;
     double finalProbabilityRight = 0.0;
@@ -293,16 +293,16 @@ class ForestTest {
     int denominatorRight = 0;
     int i=0;
 	  
-    for(i=0;i<config.getNclasses();i++)
+    for(i=0;i<config.get_nclasses();i++)
       {
-	denominatorLeft += leftBranch[i].iiVector.size()+1;
-	denominatorRight += rightBranch[i].iiVector.size()+1;
+	denominatorLeft += left_branch[i].iiVector.size()+1;
+	denominatorRight += right_branch[i].iiVector.size()+1;
       }
 	  
-    for(i=0;i<config.getNclasses();i++)
+    for(i=0;i<config.get_nclasses();i++)
       {
-	numeratorLeft = leftBranch[i].iiVector.size()+1; 
-	numeratorRight = rightBranch[i].iiVector.size()+1;
+	numeratorLeft = left_branch[i].iiVector.size()+1; 
+	numeratorRight = right_branch[i].iiVector.size()+1;
 	probabilityLeft = (double) numeratorLeft/denominatorLeft;
 	probabilityRight = (double) numeratorRight/denominatorLeft;
 		
@@ -313,9 +313,9 @@ class ForestTest {
     finalProbabilityRight *=-1.0;
 	  
     if(finalProbabilityLeft > finalProbabilityRight) // en.wikipedia.org/wiki/Shannon_entropy
-      return (entropyValue = finalProbabilityLeft);
+      return (__entropy_value = finalProbabilityLeft);
     else
-      return (entropyValue = finalProbabilityRight);
+      return (__entropy_value = finalProbabilityRight);
 	  
   }
 	
@@ -324,7 +324,7 @@ class ForestTest {
    * get entropy for split by test candidate
    * @param config ConfigClass Instance 
    */ 
-  double getEntropyValue(ForestConfigClass &config) { return (entropyValue=entropyCalculation(config));}
+  double get_entropy_value(ForestConfigClass &config) { return (__entropy_value=entropy_calculation(config));}
 
 
   /** 
@@ -333,43 +333,43 @@ class ForestTest {
    * @param config ConfigClass Instance 
    */
 
-  ForestTest(ForestTest* copyTest, ForestConfigClass& config)
+  ForestTest(ForestTest* copy_test, ForestConfigClass& config)
     {
 	  
-      leftBranch = new VectorOfIntegralImages[ config.getNclasses() ];
-      rightBranch = new VectorOfIntegralImages[ config.getNclasses() ]; 
-      xdash = ydash = xMain = yMain = haarFeature = 0;
+      left_branch = new VectorOfIntegralImages[ config.get_nclasses() ];
+      right_branch = new VectorOfIntegralImages[ config.get_nclasses() ]; 
+      xdash = ydash = xmain = ymain = haar_feature = 0;
       theta1 = theta2 = 0.0; 
 
-      for(int i=0;i<config.getNclasses();i++){
+      for(int i=0;i<config.get_nclasses();i++){
 		
-	for(unsigned int j=0; j<copyTest->leftBranch[i].iiVector.size(); j++)
-	  leftBranch[i].iiVector.push_back( copyTest->leftBranch[i].iiVector.at(j) );
+	for(unsigned int j=0; j<copy_test->left_branch[i].iiVector.size(); j++)
+	  left_branch[i].iiVector.push_back( copy_test->left_branch[i].iiVector.at(j) );
 		
 		
-	for(unsigned int j=0; j<copyTest->rightBranch[i].iiVector.size(); j++)
-	  rightBranch[i].iiVector.push_back( copyTest->rightBranch[i].iiVector.at(j) );
+	for(unsigned int j=0; j<copy_test->right_branch[i].iiVector.size(); j++)
+	  right_branch[i].iiVector.push_back( copy_test->right_branch[i].iiVector.at(j) );
       }
 	  
-      theta1 = copyTest->theta1;
-      theta2 = copyTest->theta2;
-      xdash = copyTest->xdash;
-      ydash = copyTest->ydash;
-      xMain = copyTest->xMain;
-      yMain = copyTest->yMain;
+      theta1 = copy_test->theta1;
+      theta2 = copy_test->theta2;
+      xdash = copy_test->xdash;
+      ydash = copy_test->ydash;
+      xmain = copy_test->xmain;
+      ymain = copy_test->ymain;
 	  
-      entropyValue = copyTest->getEntropyValue(config);
-      haarFeature = copyTest->haarFeature;
+      __entropy_value = copy_test->get_entropy_value(config);
+      haar_feature = copy_test->haar_feature;
     }
 
   /** 
    * a constructor that works form the configClass object
    * @param config ConfigClass Instance
    */ 
- ForestTest(ForestConfigClass& config):/*leftBranch(0), rightBranch(0), */theta1(0.0), theta2(0.0), xMain(0), 
-    yMain(0), xdash(0), ydash(0), haarFeature(0) {
-    leftBranch = new VectorOfIntegralImages[ config.getNclasses() ];
-    rightBranch = new VectorOfIntegralImages[ config.getNclasses() ];
+ ForestTest(ForestConfigClass& config):/*left_branch(0), right_branch(0), */theta1(0.0), theta2(0.0), xmain(0), 
+    ymain(0), xdash(0), ydash(0), haar_feature(0) {
+    left_branch = new VectorOfIntegralImages[ config.get_nclasses() ];
+    right_branch = new VectorOfIntegralImages[ config.get_nclasses() ];
   }
 
   /** 
@@ -378,20 +378,20 @@ class ForestTest {
    * @param y top left y coord 
    * @param config ConfigClass Instance 
    */ 
- ForestTest(int x, int y, ForestConfigClass& config): theta1(0.0), theta2(0.0), xMain(x),yMain(y), xdash(0), ydash(0),
-    haarFeature(0)	 {
+ ForestTest(int x, int y, ForestConfigClass& config): theta1(0.0), theta2(0.0), xmain(x),ymain(y), xdash(0), ydash(0),
+    haar_feature(0)	 {
 	  
-    leftBranch = new VectorOfIntegralImages[ config.getNclasses() ];
-    rightBranch = new VectorOfIntegralImages[ config.getNclasses() ];
+    left_branch = new VectorOfIntegralImages[ config.get_nclasses() ];
+    right_branch = new VectorOfIntegralImages[ config.get_nclasses() ];
 	  
-    theta1 =randomBooster();
-    theta2 =randomBooster();
+    theta1 =random_booster();
+    theta2 =random_booster();
 	  
-    while( (xdash = randomRectangle()) < RECTANGULAR_MIN_FEATURE_SIZE ) 
-      xdash = randomRectangle();
+    while( (xdash = random_rectangle()) < RECTANGULAR_MIN_FEATURE_SIZE ) 
+      xdash = random_rectangle();
 	  
-    while( (ydash = randomRectangle()) < RECTANGULAR_MIN_FEATURE_SIZE )
-      ydash = randomRectangle();
+    while( (ydash = random_rectangle()) < RECTANGULAR_MIN_FEATURE_SIZE )
+      ydash = random_rectangle();
 	  
 	  
     double temp;
@@ -401,69 +401,69 @@ class ForestTest {
       theta2 = temp;
     }
 	  
-    entropyValue = -1.0;
+    __entropy_value = -1.0;
   }
 
 
   /** Does the image pass the test - as defined by a region and threshold? 
-   * \param integralImage - the integral image of the test image
-   * \param xMain top left x coordinate 
-   * \param yMain top left y coordinate 
-   * \param xdash width 
-   * \param ydash height 
-   * \param theta1 first threshold 
-   * \param theta2 second threshold 
-   * \param height height of the training images 
-   * \param width width of the training images 
-   * \param haarFeature haar feature taken into consideration 
+   * @param integralImage - the integral image of the test image
+   * @param xmain top left x coordinate 
+   * @param ymain top left y coordinate 
+   * @param xdash width 
+   * @param ydash height 
+   * @param theta1 first threshold 
+   * @param theta2 second threshold 
+   * @param height height of the training images 
+   * @param width width of the training images 
+   * @param haar_feature haar feature taken into consideration 
    */
 
-  bool imagePass(int* integralImage, int xMain, int yMain, int xdash, 
-		 int ydash, double theta1, double theta2, int height, int width, int haarFeature){
+  bool image_pass(int* integral_image, int xmain, int ymain, int xdash, 
+		 int ydash, double theta1, double theta2, int height, int width, int haar_feature){
 	  
-    return featurePass(
-		       getRectangularIntegralImagefeature(
-							  integralImage, xMain, yMain, 
+    return feature_pass(
+		       get_rectangular_integral_image_feature(
+							  integral_image, xmain, ymain, 
 							  xdash, ydash, height, width, 
-							  haarFeature), 
+							  haar_feature), 
 		       theta1, theta2, 
 		       NOS_THRESHOLDS);
   }
 
   /** Run tests on the integral images and return final entropy of the division. 
    * @param integralImages vector of II 
-   * @param haarFeature haar feature consdiered
+   * @param haar_feature haar feature consdiered
    * @param config ConfigClass Instance
    */
-  double runTestsOnIntegralImages(VectorOfIntegralImages *integralImages, 
-				  int haarFeature, ForestConfigClass& config){
+  double run_tests_on_integral_images(VectorOfIntegralImages *integral_images, 
+				  int haar_feature, ForestConfigClass& config){
 	  
 	  
-    for(int i=0;i<config.getNclasses();i++){
-      leftBranch[i].iiVector.clear();
-      rightBranch[i].iiVector.clear();
+    for(int i=0;i<config.get_nclasses();i++){
+      left_branch[i].iiVector.clear();
+      right_branch[i].iiVector.clear();
     }
 	  
-    this->haarFeature = haarFeature;
+    this->haar_feature = haar_feature;
 	  
     int *integralImage;
 	  
-    for(int i=0;i<config.getNclasses();i++)
-      for(unsigned int j=0;j<integralImages[i].iiVector.size();j++){
-	integralImage = (integralImages[i].iiVector.at(j));
+    for(int i=0;i<config.get_nclasses();i++)
+      for(unsigned int j=0;j<integral_images[i].iiVector.size();j++){
+	integralImage = (integral_images[i].iiVector.at(j));
 		  
-	if(imagePass((integralImage), xMain, yMain, xdash, ydash, theta1, 
-		     theta2, config.imageInfoInstance.getHeight(), 
-		     config.imageInfoInstance.getWidth(), haarFeature))
-	  leftBranch[i].iiVector.push_back(integralImages[i].iiVector.at(j));
+	if(image_pass((integralImage), xmain, ymain, xdash, ydash, theta1, 
+		     theta2, config.image_info_instance.get_height(), 
+		     config.image_info_instance.get_width(), haar_feature))
+	  left_branch[i].iiVector.push_back(integral_images[i].iiVector.at(j));
 	else
-	  rightBranch[i].iiVector.push_back(integralImages[i].iiVector.at(j));
+	  right_branch[i].iiVector.push_back(integral_images[i].iiVector.at(j));
       }
 	  
     integralImage = 0; 					
 	  
 	  
-    return getEntropyValue(config);
+    return get_entropy_value(config);
   }
 	
 	
@@ -471,8 +471,8 @@ class ForestTest {
   ~ForestTest()
     {
 	  
-      delete[] leftBranch;
-      delete[] rightBranch;
+      delete[] left_branch;
+      delete[] right_branch;
 
     }
 	
@@ -484,59 +484,64 @@ class ForestTest {
 class Tree {
  private:
   /** level of the tree */ 
-  int TreeLevel; // was initially static int TreeLevel
+  int __tree_level; // was initially static int TreeLevel
   /** index of the forest */ 
-  int ForestIndex; // Useful to control the forest; has a value of -1 if the tree is not Root
+  int __forest_index; // Useful to control the forest; has a value of -1 if the tree is not Root
+  /** entropy of the parent node for comparisons */
+  double __parent_entropy;
+  /** index of the current node */ 
+  int __node_index;
+  /** index of the parent node */ 
+  int __parent_node_index;
+  /** level of the node in the main tree */
+  int __level;
+  
+  
+
 	
  public:
+  /** a global node counter */
+  int global_node_index;
   /** vector of integral images for the tree */ 
-  VectorOfIntegralImages *theIntegralImages; // [config.getNclasses()];
-  /** entropy of the parent node for comparisons */
-  double parentEntropy_;
-  /** index of the current node */ 
-  int nodeIndex_;
-  /** index of the parent node */ 
-  int parentNodeIndex_;
-  /** level of the node in the main tree */
-  int level_;
+  VectorOfIntegralImages *the_integral_images;
   /** best candidate chosen */ 
-  ForestTest* bestTest;
+  ForestTest* best_test;
   /** link the left child */
-  Tree* leftTree;
+  Tree* left_tree;
   /** link to the right child */
-  Tree* rightTree;
+  Tree* right_tree;
   /** how difficult is to split the images at the node? */ 
   int max_try; 
 	
   /** get the level of the tree */ 
-  int getTreeLevel() const { return TreeLevel; }
+  int get_tree_level() const { return __tree_level; }
 	
   /** is the node allowed to grow further? */
-  bool isNodeAllowed() const { return ( max_try > MAX_TRY_ALLOWED )?true:false; }
+  bool is_node_allowed() const { return ( max_try > MAX_TRY_ALLOWED )?true:false; }
 	
   /** are the images at the node difficult to divide here? */ 
-  void nodeTry() { max_try++; }
+  void node_try() { max_try++; }
 	
   /** what is the index of the current random tree */
-  int getForestIndex() const { return ForestIndex; }
+  int get_forest_index() const { return __forest_index; }
 	
   /** get a unique number to label the nodes of the random tree */ 
-  int getUniqueNumber() const 
+  int get_unique_number() const 
   {
-    return nodeIndex_;   
+    return __node_index; 
   }
 	
   /** increment the level of the tree growth */
-  int incrementLevel() { return TreeLevel++; }
+  int increment_level() { return __tree_level++; } 
 	
   /** destructor */
   ~Tree()
     {
 	  
-      delete bestTest; 
-      delete leftTree; 
-      delete rightTree; 
-      delete[] theIntegralImages; 
+      delete best_test;
+      delete left_tree; 
+      delete right_tree; 
+      delete[] the_integral_images; 
 	
     }
 
@@ -549,18 +554,18 @@ class Tree {
    * @param sParentNodeIndex node index of the parent node
    * @param config ConfigClass Instance 
    */
- Tree(VectorOfIntegralImages* integralImages, double pE, int levelOfTree, 
+ Tree(VectorOfIntegralImages* integral_images, double pE, int level_of_tree, 
       int sNodeIndex, int sParentNodeIndex, ForestConfigClass &config): 
-  ForestIndex(-1),parentEntropy_(pE),  nodeIndex_(sNodeIndex), 
-    parentNodeIndex_(sParentNodeIndex), level_(levelOfTree), 
-    bestTest(0), leftTree(0), rightTree(0), max_try(0)  {
+  __forest_index(-1),__parent_entropy(pE), __node_index(sNodeIndex), 
+    __parent_node_index(sParentNodeIndex), __level(level_of_tree), 
+    best_test(0), left_tree(0), right_tree(0), max_try(0)  {
 	  
-    theIntegralImages = new VectorOfIntegralImages[config.getNclasses()];
+    the_integral_images = new VectorOfIntegralImages[config.get_nclasses()];
 	  
 
-    for(int i=0;i<config.getNclasses();i++)
-      theIntegralImages[i].iiVector.assign(integralImages[i].iiVector.begin(), 
-					   integralImages[i].iiVector.end());
+    for(int i=0;i<config.get_nclasses();i++)
+      the_integral_images[i].iiVector.assign(integral_images[i].iiVector.begin(), 
+					   integral_images[i].iiVector.end());
 	 
   }
 
@@ -572,24 +577,24 @@ class Tree {
    * @param ForestIndexOfRoot number of the random tree in the forest 
    */ 
  Tree( ForestConfigClass &config, int &globalNodeIndex, 
-       int ForestIndexOfRoot): 
-  ForestIndex(ForestIndexOfRoot), parentEntropy_(200.0), 
-    nodeIndex_(globalNodeIndex++), parentNodeIndex_(-1), 
-    level_(0), bestTest(0), leftTree(0), 
-    rightTree(0), max_try(0)
+       int forest_index_of_root): 
+  __forest_index(forest_index_of_root), __parent_entropy(200.0), 
+    __node_index(globalNodeIndex++), __parent_node_index(-1), 
+    __level(0), best_test(0), left_tree(0), 
+    right_tree(0), max_try(0)
     {
 	  
-      theIntegralImages = new VectorOfIntegralImages[ config.getNclasses() ];
+      the_integral_images = new VectorOfIntegralImages[ config.get_nclasses() ];
 	 
 	  
-      for( int i =0; i < config.getNclasses(); i++ )
-	theIntegralImages[i].iiVector.assign( 
-					     config.integralImages[i].iiVector.begin(), 
-					     config.integralImages[i].iiVector.end() ); 
+      for( int i =0; i < config.get_nclasses(); i++ )
+	the_integral_images[i].iiVector.assign( 
+					     config.integral_images[i].iiVector.begin(), 
+					     config.integral_images[i].iiVector.end() ); 
       //		 } 
 	  
 	  
-      level_ = incrementLevel();
+      __level = increment_level();
 	  
       ofstream graphviz;
       string treedot = TREEDOT;
@@ -621,7 +626,7 @@ class Tree {
 	  
       for(i =0;i<NITERATIONS;i++)  // make tests
 	{ 
-	  temp_test = new ForestTest(randRowIndex(config),randColIndex(config), config); 
+	  temp_test = new ForestTest(rand_row_index(config),rand_col_index(config), config); 
 	  testsMade.push_back( temp_test );
 	} 
 	  
@@ -629,9 +634,9 @@ class Tree {
       for(haarIndex = 0; haarIndex < HAARFEATURES; haarIndex++ )
 	{
 	  for(i=0;i<NITERATIONS;i++)
-	    entropies[i] = testsMade.at(i)->runTestsOnIntegralImages( theIntegralImages, haarIndex, config );
+	    entropies[i] = testsMade.at(i)->run_tests_on_integral_images( the_integral_images, haarIndex, config );
 		
-	  finalIndex = findMin( entropies, NITERATIONS );
+	  finalIndex = find_min( entropies, NITERATIONS );
 	  entropiesHaar[haarIndex] = entropies[finalIndex];
 	  testIndex[haarIndex] = finalIndex;
 	}	
@@ -642,10 +647,10 @@ class Tree {
 	 so in essence, haarIndex has the best Haar feature for the 
 	 200 tests considered
       */
-      haarIndex = findMin(entropiesHaar, HAARFEATURES);
+      haarIndex = find_min(entropiesHaar, HAARFEATURES);
       /*
 	re-use final index to store the index of the best test 
-	( a test is instantiated by xMain,YMain,xdash, ydash,
+	( a test is instantiated by xmain,YMain,xdash, ydash,
 	theta1, theta2 & a HAAR feature found out here. So, we keep
 	track of the other things 
       */
@@ -654,8 +659,8 @@ class Tree {
 	 since the allocation of images will be different in the
 	 given testsMade vector (it will be of the last test run) , we run it again 
       */  
-      testsMade.at(finalIndex)->runTestsOnIntegralImages(theIntegralImages, haarIndex, config);
-      bestTest = new ForestTest(testsMade.at(finalIndex), config);
+      testsMade.at(finalIndex)->run_tests_on_integral_images(the_integral_images, haarIndex, config);
+      best_test = new ForestTest(testsMade.at(finalIndex), config);
 	  
       for( unsigned int k = 0; k < testsMade.size(); k++ ) 
 	{ 
@@ -668,22 +673,24 @@ class Tree {
 	  
       if(WR_DOT_FILE) {		   /* graphviz output of the root being divided */
 	strcpy(bins," ");
-	for(i=0;i<config.getNclasses()-1;i++){
-	  sprintf(buffer1,"%zu", theIntegralImages[i].iiVector.size());		  
+	for(i=0;i<config.get_nclasses()-1;i++){
+	  sprintf(buffer1,"%zu", the_integral_images[i].iiVector.size());		  
 	  strcat(bins, buffer1);
 	  strcat(bins,",");
 	}
-	sprintf(buffer1,"%zu",theIntegralImages[config.getNclasses()-1].iiVector.size());		  
+	sprintf(buffer1,"%zu",the_integral_images[config.get_nclasses()-1].iiVector.size());		  
 	strcat(bins, buffer1);
-	sprintf(buffer1, "%f",bestTest->getEntropyValue(config));
+	sprintf(buffer1, "%f",best_test->get_entropy_value(config));
 	sizeOfSprintf = sprintf(buffer,
 				"node%d[label = \"<f0> %d| <f1> %s |<f2> %s \"];",
-				nodeIndex_,nodeIndex_,bins,
+				__node_index,__node_index,bins,
 				buffer1);
 	graphviz.write(buffer, sizeOfSprintf);
 		
       }
-	  
+
+
+
       /* 
 	 We want to run the same 200 tests on every child at a level,
 	 so there is a vector containing these children (initialized)
@@ -698,27 +705,28 @@ class Tree {
       /* now, the left and right nodes of the root is going to be created. 
 	 Hence, we increment the level of the tree depth 
       */
-      i = incrementLevel(); 
+      i = increment_level(); 
+      int global_node_index = 0; 
 	  
       /* left tree obtains the left branch of the best split. */
-      leftTree = new Tree(bestTest->leftBranch, bestTest->getEntropyValue(config), 
-			  i, globalNodeIndex++ , nodeIndex_, config );
+      left_tree = new Tree(best_test->left_branch, best_test->get_entropy_value(config), 
+			   i, global_node_index++ , __node_index, config );
 	  
       if( WR_DOT_FILE ) { 
 		
 	/* grapbviz for left tree */
-	sizeOfSprintf = sprintf(buffer,"\"node%d\":f0 -> \"node%d\":f1;",nodeIndex_,leftTree->nodeIndex_);
+	sizeOfSprintf = sprintf(buffer,"\"node%d\":f0 -> \"node%d\":f1;",__node_index,left_tree->__node_index);
 	graphviz.write(buffer, sizeOfSprintf);
       }
 	  
       /* right tree obtains the right branch of the best split */
-      rightTree = new Tree(bestTest->rightBranch, bestTest->getEntropyValue(config), 
-			   i, globalNodeIndex++, nodeIndex_, config );
+      right_tree = new Tree(best_test->right_branch, best_test->get_entropy_value(config), 
+			   i, global_node_index++, __node_index, config );
 	  
       if( WR_DOT_FILE ) { 
 		
 	/* graphviz for the right tree */
-	sizeOfSprintf = sprintf(buffer,"\"node%d\":f2 -> \"node%d\":f1;",nodeIndex_,rightTree->nodeIndex_);
+	sizeOfSprintf = sprintf(buffer,"\"node%d\":f2 -> \"node%d\":f1;",__node_index,right_tree->__node_index);
 	graphviz.write(buffer, sizeOfSprintf);
       }	   
 	  
@@ -728,19 +736,19 @@ class Tree {
       */
       childrenToTest.clear();
       /* put the left and right trees on the stack */
-      childrenToTest.push_back(leftTree);
-      childrenToTest.push_back(rightTree);
+      childrenToTest.push_back(left_tree);
+      childrenToTest.push_back(right_tree);
       /* clear another vector (clear out garbage) */
       tempChildrenToTest.clear();
 	  
 	  
-      while(globalNodeIndex<NODECOUNT && childrenToTest.size()!=0){		  
+      while(global_node_index<NODECOUNT && childrenToTest.size()!=0){		  
 	/* we want only NODECOUNT to be total number of nodes created */
 		
 		
 		
 	for(i=0;i<NITERATIONS;i++) { 
-	  temp_test = new ForestTest(randRowIndex(config),randColIndex(config), config); 
+	  temp_test = new ForestTest(rand_row_index(config),rand_col_index(config), config); 
 	  testsMade.push_back( temp_test );
 	}
 		
@@ -751,33 +759,33 @@ class Tree {
 	      for(haarIndex = 0; haarIndex<HAARFEATURES; haarIndex++){
 		for( i=0;i < NITERATIONS; i++)
 		  entropies[i] = testsMade.at(i)->
-		    runTestsOnIntegralImages(childrenToTest.at(j)->theIntegralImages, 
-					     haarIndex, config);
+		    run_tests_on_integral_images(childrenToTest.at(j)->the_integral_images, 
+						 haarIndex, config);
 			
 			
-		finalIndex = findMin(entropies, NITERATIONS);
+		finalIndex = find_min(entropies, NITERATIONS);
 		entropiesHaar[haarIndex] = entropies[finalIndex];
 		testIndex[haarIndex] = finalIndex;
 	      }
 		  
 		  
-	      haarIndex = findMin(entropiesHaar, HAARFEATURES);
+	      haarIndex = find_min(entropiesHaar, HAARFEATURES);
 	      finalIndex = testIndex[haarIndex];
 		  
 	      testsMade.at(finalIndex)->
-		runTestsOnIntegralImages(childrenToTest.at(j)->theIntegralImages, 
+		run_tests_on_integral_images(childrenToTest.at(j)->the_integral_images, 
 					 haarIndex, config);
 		  
-	      childrenToTest.at(j)->bestTest = new ForestTest(testsMade.at(finalIndex), config);
+	      childrenToTest.at(j)->best_test = new ForestTest(testsMade.at(finalIndex), config);
 		  
 	      /* graphviz instructions - create the node (label it)*/
 	      if( WR_DOT_FILE )
 		strcpy(bins," ");
 		  
-	      for(i=0;i<config.getNclasses()-1;i++){
+	      for(i=0;i<config.get_nclasses()-1;i++){
 			
 		if( WR_DOT_FILE )
-		  sprintf(buffer1,"%zu",childrenToTest.at(j)->theIntegralImages[i].iiVector.size());
+		  sprintf(buffer1,"%zu",childrenToTest.at(j)->the_integral_images[i].iiVector.size());
 		if( WR_DOT_FILE ) { 
 		  strcat(bins, buffer1);
 		  strcat(bins,",");
@@ -787,63 +795,63 @@ class Tree {
 	 
 		  
 	      if(WR_DOT_FILE) { 
-		sprintf(buffer1,"%zu",childrenToTest.at(j)->theIntegralImages[config.getNclasses()-1].iiVector.size());
+		sprintf(buffer1,"%zu",childrenToTest.at(j)->the_integral_images[config.get_nclasses()-1].iiVector.size());
 		strcat(bins, buffer1);
-		sprintf(buffer1, "%f",childrenToTest.at(j)->bestTest->getEntropyValue(config));
+		sprintf(buffer1, "%f",childrenToTest.at(j)->best_test->get_entropy_value(config));
 		sizeOfSprintf = sprintf(buffer,
 					"node%d[label = \"<f0> %d| <f1> %s |<f2> %s \"];", 
-					childrenToTest.at(j)->nodeIndex_, 
-					childrenToTest.at(j)->nodeIndex_,bins,buffer1);
+					childrenToTest.at(j)->__node_index, 
+					childrenToTest.at(j)->__node_index,bins,buffer1);
 		graphviz.write(buffer, sizeOfSprintf);
 			
 	      }
 		  
 	      //		if(!checkGrowth){
 		  
-	      bool leftBranchIsEmpty = true;
-	      bool rightBranchIsEmpty = true;
+	      bool left_branchIsEmpty = true;
+	      bool right_branchIsEmpty = true;
 		  
-	      for( int k = 0 ; k < config.getNclasses() ; k++ )
-		if( testsMade.at( finalIndex )->leftBranch[ k ].size() != 0 ) {
-		  leftBranchIsEmpty = false; 
+	      for( int k = 0 ; k < config.get_nclasses() ; k++ )
+		if( testsMade.at( finalIndex )->left_branch[ k ].size() != 0 ) {
+		  left_branchIsEmpty = false; 
 		}
 		  
 		  
-	      for( int k = 0 ; k < config.getNclasses() ; k++ ) 
-		if( testsMade.at( finalIndex )->rightBranch[ k ].size() != 0 ) { 
-		  rightBranchIsEmpty = false; 
+	      for( int k = 0 ; k < config.get_nclasses() ; k++ ) 
+		if( testsMade.at( finalIndex )->right_branch[ k ].size() != 0 ) { 
+		  right_branchIsEmpty = false; 
 		}
 		  
 		  
 		  
-	      if( !leftBranchIsEmpty )
-		childrenToTest.at(j)->leftTree = new Tree(testsMade.at(finalIndex)->leftBranch, 
+	      if( !left_branchIsEmpty )
+		childrenToTest.at(j)->left_tree = new Tree(testsMade.at(finalIndex)->left_branch, 
 							  entropiesHaar[haarIndex], temp, 
-							  globalNodeIndex++, 
-							  childrenToTest.at(j)->nodeIndex_, config);
+							  global_node_index++, 
+							  childrenToTest.at(j)->__node_index, config);
 		  
-	      if( WR_DOT_FILE && !leftBranchIsEmpty ) 
+	      if( WR_DOT_FILE && !left_branchIsEmpty ) 
 		{ 
 		  /* establish graphviz connection between parent & this new child */
 		  sizeOfSprintf = sprintf(buffer,"\"node%d\":f0 -> \"node%d\":f1;",
-					  childrenToTest.at(j)->nodeIndex_, 
-					  childrenToTest.at(j)->leftTree->nodeIndex_);
+					  childrenToTest.at(j)->__node_index, 
+					  childrenToTest.at(j)->left_tree->__node_index);
 		  graphviz.write(buffer, sizeOfSprintf);
 		}
 		  
 		  
-	      if( !rightBranchIsEmpty )
-		childrenToTest.at(j)->rightTree = new Tree(testsMade.at(finalIndex)->rightBranch, 
+	      if( !right_branchIsEmpty )
+		childrenToTest.at(j)->right_tree = new Tree(testsMade.at(finalIndex)->right_branch, 
 							   entropiesHaar[haarIndex], temp, 
-							   globalNodeIndex++, 
-							   childrenToTest.at(j)->nodeIndex_, config);
+							   global_node_index++, 
+							   childrenToTest.at(j)->__node_index, config);
 		  
-	      if( WR_DOT_FILE && !rightBranchIsEmpty ) 
+	      if( WR_DOT_FILE && !right_branchIsEmpty ) 
 		{ 
 		  /* establish graphviz connection between parent & new child */
 		  sizeOfSprintf = sprintf(buffer,"\"node%d\":f2 -> \"node%d\":f1;",
-					  childrenToTest.at(j)->nodeIndex_,
-					  childrenToTest.at(j)->rightTree->nodeIndex_);
+					  childrenToTest.at(j)->__node_index,
+					  childrenToTest.at(j)->right_tree->__node_index);
 			
 		  graphviz.write(buffer, sizeOfSprintf);
 			
@@ -852,10 +860,10 @@ class Tree {
 		  
 	      /* store the newly created trees for tests in the next iteration */
 		  
-	      if( !leftBranchIsEmpty )
-		tempChildrenToTest.push_back(childrenToTest.at(j)->leftTree);
-	      if( !rightBranchIsEmpty )
-		tempChildrenToTest.push_back(childrenToTest.at(j)->rightTree);
+	      if( !left_branchIsEmpty )
+		tempChildrenToTest.push_back(childrenToTest.at(j)->left_tree);
+	      if( !right_branchIsEmpty )
+		tempChildrenToTest.push_back(childrenToTest.at(j)->right_tree);
 	
 	    }
 		
@@ -896,12 +904,12 @@ class Tree {
    * @param train_width width of the training images
    * @param config ConfigClass Instance 
 */ 
-  void growTreeFromImages( char* train_images, int nclasses, Tree* &root, int &train_height, int &train_width, ForestConfigClass& config  )
+  void grow_tree_from_images( char* train_images, int nclasses, Tree* &root, int &train_height, int &train_width, ForestConfigClass& config  )
   {
     // Define a ConfigClass
 	
-    config.setSubwindowRange( SUBWINDOW_RANGE ); 
-    config.setTrainImages( train_images ); 
+    config.set_subwindow_range( SUBWINDOW_RANGE ); 
+    config.set_train_images( train_images ); 
 
     IplImage* tempImage = 0; 
     DIR* dir = 0;
@@ -917,9 +925,9 @@ class Tree {
 	
     string fileName , dirPath, mainDirPath;
 
-    mainDirPath = config.getTrainImages(); 
+    mainDirPath = config.get_train_images(); 
 	
-    for(i = 0;i<config.getNclasses();i++){
+    for(i = 0;i<config.get_nclasses();i++){
 	  
       j = 0;
 	  
@@ -951,22 +959,22 @@ class Tree {
 			
 	  //	  config.images[i].push_back(tempImage);
 			
-	  config.imageInfoInstance.setHeight( tempImage->height );
-	  config.imageInfoInstance.setWidth( tempImage->width );
+	  config.image_info_instance.set_height( tempImage->height );
+	  config.image_info_instance.set_width( tempImage->width );
 			
 	  train_height = tempImage->height; 
 	  train_width = tempImage->width; 
 			
 	  tempII = new int[ ( tempImage->height ) * ( tempImage->width ) ];
 			
-	  calculateIntegralImage( tempImage, tempII );
+	  calculate_integral_image( tempImage, tempII );
 			
-	  config.integralImages[i].iiVector.push_back( tempII );
+	  config.integral_images[i].iiVector.push_back( tempII );
 			
 	  if( !setBorders ) { 
 			  
-	    config.integralImages[i].setHeight( tempImage->height ); 
-	    config.integralImages[i].setWidth( tempImage->width ); 
+	    config.integral_images[i].set_height( tempImage->height ); 
+	    config.integral_images[i].set_width( tempImage->width ); 
 	    setBorders = true; 
 	  }
 			
@@ -978,9 +986,9 @@ class Tree {
       } 
     } 	  
 	  
-    int globalNodeIndex = 0;
-    int numberOfTreesGrown = 0;
-    root = new Tree( config, globalNodeIndex, numberOfTreesGrown++ ); 
+    int global_node_index = 0;
+    int number_of_trees_grown = 0;
+    root = new Tree( config, global_node_index, number_of_trees_grown++ ); 
 
 		
   }
@@ -996,15 +1004,15 @@ class ForestClass
   
  private: 
   /** the random forest */
-  vector<Tree*> _forest; 
+  vector<Tree*> __forest; 
   /** number of identiites */ 
-  int _nclasses; 
+  int __nclasses; 
   /** the size of the forest */
-  int _forestSize; 
+  int __forest_size; 
   /** the height of the training images */ 
-  int _train_height; 
+  int __train_height; 
   /** the width of the trainign images */ 
-  int _train_width; 
+  int __train_width; 
 
  public:     
   /** constructor 
@@ -1018,30 +1026,30 @@ class ForestClass
   ForestClass( char* train_images, int nclasses, int &train_height, int &train_width, ForestConfigClass& config, int forestSize ) 
     { 
     
-      _nclasses = nclasses; 
-      _forestSize = forestSize; 
+      __nclasses = nclasses; 
+      __forest_size = forestSize; 
 
     
-      for(int i = 0; i < _forestSize ; i++ ) 
+      for(int i = 0; i < __forest_size ; i++ ) 
 	{ 
 
    
-	  int _globalNodeIndex = 0;
-	  int _numberOfTrees = 0;
+	  int global_node_index = 0;
+	  int __number_of_trees = 0;
 	  if( i == 0 )
 	    {   
 	      Tree* tempTree; 
-	      growTreeFromImages( train_images, nclasses, tempTree, train_height, train_width, config ); 
-	      _train_height = train_height; 
-	      _train_width = train_width; 
-	      _forest.push_back( tempTree ); 
+	      grow_tree_from_images( train_images, nclasses, tempTree, train_height, train_width, config ); 
+	      __train_height = train_height; 
+	      __train_width = train_width; 
+	      __forest.push_back( tempTree ); 
 	    }
     
 	  else 
 	    {
-	      _globalNodeIndex = 0 ;
-	      _numberOfTrees = i; 
-	      _forest.push_back( new Tree( config, _globalNodeIndex, _numberOfTrees ) ); 
+	      global_node_index = 0 ;
+	      __number_of_trees = i; 
+	      __forest.push_back( new Tree( config, global_node_index, __number_of_trees ) ); 
 	    }
     
     
@@ -1052,27 +1060,27 @@ class ForestClass
    
 
   /** get the forest size */ 
-  int getSize() const 
+  int get_size() const 
   { 
-    return _forest.size(); 
+    return __forest.size(); 
   }
     
   /** get the numner of obeject classes/identities */ 
-  int getNclasses() const 
+  int get_nclasses() const 
   { 
-    return _nclasses; 
+    return __nclasses; 
   }
     
   /** get the height of the training samples - for rescaling test images */ 
-  int getTrainHeight() const 
+  int get_train_height() const 
   { 
-    return _train_height; 
+    return __train_height; 
   }
      
   /** get the width of the training samples - for rescaling test images */ 
-  int getTrainWidth() const 
+  int get_train_width() const 
   { 
-    return _train_width;
+    return __train_width;
   }
        
 
@@ -1080,10 +1088,10 @@ class ForestClass
   /** get the random tree of index i from the forest 
    * @param i get the tree of the index in the forest 
    */ 
-  Tree* getTree( int i ) 
+  Tree* get_tree( int i ) 
   { 
   
-    return this->_forest.at(i);
+    return __forest.at(i);
   }
 
 
@@ -1091,8 +1099,8 @@ class ForestClass
   ~ForestClass() 
     {
 
-      for( unsigned int i = 0; i < _forest.size(); i++ ) 
-	delete _forest.at(i); 
+      for( unsigned int i = 0; i < __forest.size(); i++ ) 
+	delete __forest.at(i); 
 
     } 
 };
@@ -1106,19 +1114,19 @@ class ForestClass
  * @param train_width widht of the trainign images
  * @param nclasses number of indentities 
  */ 
-int runClassificationForArbitraryTree( Tree* aTree, int* &ii, int train_height, int train_width, int nclasses )
+int run_classification_for_arbitrary_tree( Tree* aTree, int* &ii, int train_height, int train_width, int nclasses )
 {
 	
   Tree *root = aTree, *prevTree = aTree; 
-  bool childPass; 
+  bool child_pass; 
   ForestTest* root_test = 0;
 	
  	
   while( root!= 0 )
     {
-      if( root->leftTree == 0 || root->rightTree == 0 )
+      if( root->left_tree == 0 || root->right_tree == 0 )
 	{
-	  if( root->theIntegralImages == 0 ) 
+	  if( root->the_integral_images == 0 ) 
 	    {
 	      root = prevTree;
 	      break;
@@ -1127,7 +1135,7 @@ int runClassificationForArbitraryTree( Tree* aTree, int* &ii, int train_height, 
 	    break;
 	}
 	  
-      root_test = root->bestTest; 
+      root_test = root->best_test; 
 	  
       if( root_test == 0 )
 	{
@@ -1135,14 +1143,14 @@ int runClassificationForArbitraryTree( Tree* aTree, int* &ii, int train_height, 
 	  break; 
 	}
 	  
-      childPass = root_test->imagePass( ii, root_test->xMain, root_test->yMain, root_test->xdash, root_test->ydash, root_test->theta1, root_test->theta2, train_height, train_width, root_test->haarFeature ); 
+      child_pass = root_test->image_pass( ii, root_test->xmain, root_test->ymain, root_test->xdash, root_test->ydash, root_test->theta1, root_test->theta2, train_height, train_width, root_test->haar_feature ); 
 	  
       prevTree = root; 
 	  
-      if( childPass ) 
-	root = root->leftTree; 
+      if( child_pass ) 
+	root = root->left_tree; 
       else
-	root = root->rightTree; 
+	root = root->right_tree; 
 	  
     }
 	
@@ -1153,12 +1161,12 @@ int runClassificationForArbitraryTree( Tree* aTree, int* &ii, int train_height, 
   for( int i = 0; i < nclasses; i++ ) 
     {
 	  
-      if( (int)(root->theIntegralImages[i].iiVector.size()) > max ) 
+      if( (int)(root->the_integral_images[i].iiVector.size()) > max ) 
 	{
-	  max  = root->theIntegralImages[i].iiVector.size();
+	  max  = root->the_integral_images[i].iiVector.size();
 	  index = i; 
 		
-	  total_size += root->theIntegralImages[i].iiVector.size(); 
+	  total_size += root->the_integral_images[i].iiVector.size(); 
 	}
 	  
     }
@@ -1182,13 +1190,13 @@ int runClassificationForArbitraryTree( Tree* aTree, int* &ii, int train_height, 
  * @param train_width width of the training images
  * @param nclasses number of identities 
  */ 
-int returnClassLabelForIplImage( Tree *aTree, IplImage *imageToClassify, int train_height, int train_width, int nclasses )
+int return_class_label_for_IplImage( Tree *aTree, IplImage *imageToClassify, int train_height, int train_width, int nclasses )
 {
 	
   int* ii = new int[ imageToClassify->height * imageToClassify->width ]; 
-  calculateIntegralImage( imageToClassify, ii );
+  calculate_integral_image( imageToClassify, ii );
 	
-  return runClassificationForArbitraryTree( aTree, ii, train_height, train_width, nclasses  ) ; 
+  return run_classification_for_arbitrary_tree( aTree, ii, train_height, train_width, nclasses  ) ; 
 	
 
 }
@@ -1198,26 +1206,26 @@ int returnClassLabelForIplImage( Tree *aTree, IplImage *imageToClassify, int tra
  * @param forestClassInstance the forest class instance
  * @param inputImage the input image
  */ 
-int getClassLabelFromForest( ForestClass* forestClassInstance , IplImage* inputImage )
+int get_class_label_from_forest( ForestClass* forestClassInstance , IplImage* inputImage )
 {
     
-  int recognition_histogram[ forestClassInstance->getSize() ];
+  int recognition_histogram[ forestClassInstance->get_size() ];
     
-  for( int i = 0; i < forestClassInstance->getSize(); i++ ) 
-    recognition_histogram[i] = returnClassLabelForIplImage( forestClassInstance->getTree(i), inputImage, forestClassInstance->getTrainHeight(), forestClassInstance->getTrainWidth(), forestClassInstance->getNclasses() );  
+  for( int i = 0; i < forestClassInstance->get_size(); i++ ) 
+    recognition_histogram[i] = return_class_label_for_IplImage( forestClassInstance->get_tree(i), inputImage, forestClassInstance->get_train_height(), forestClassInstance->get_train_width(), forestClassInstance->get_nclasses() );  
       
-  int votes[ forestClassInstance->getNclasses() ]; 
+  int votes[ forestClassInstance->get_nclasses() ]; 
     
-  for( int i = 0; i < forestClassInstance->getNclasses(); i++ ) 
+  for( int i = 0; i < forestClassInstance->get_nclasses(); i++ ) 
     votes[i] = 0;
         
-  for( int i = 0; i < forestClassInstance->getSize(); i++ ) 
+  for( int i = 0; i < forestClassInstance->get_size(); i++ ) 
     votes[ recognition_histogram[i] ]++; 
         
   int max_identity = -1; 
   int index_max_identity = -1; 
 	  
-  for( int i = 0; i < forestClassInstance->getNclasses() ; i++ ) 
+  for( int i = 0; i < forestClassInstance->get_nclasses() ; i++ ) 
     if( votes[i] > max_identity ) 
       {
 	max_identity = votes[i]; 

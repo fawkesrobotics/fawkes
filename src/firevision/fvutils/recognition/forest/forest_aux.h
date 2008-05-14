@@ -2,7 +2,7 @@
 /***************************************************************************
  *  forest_aux.h auxillary functions for the random forest implementation
  *
- *  Created: 07 05 2008 
+ *  Created: Wed Dec 12 13:04:12 2008
  *  Copyright  2008 Vaishak Belle
  *
  *  $Id$ 
@@ -24,12 +24,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <vector> 
-#include <opencv/cv.h> 
-
 
 #ifndef __FIREVISION_FVUTILS_RECOGNITION_FOREST_FOREST_AUX_H_
 #define __FIREVISION_FVUTILS_RECOGNITION_FOREST_FOREST_AUX_H_
+
+#include <vector> 
+#include <opencv/cv.h> 
+
 
 
 /**
@@ -81,9 +82,9 @@ typedef Image<RgbPixel> RgbImage;
 class VectorOfIntegralImages {
  private:
   /** height of the training images */ 
-  int heightOfEachImage;
+  int height_of_each_image;
   /** width of the trainig images */ 
-  int widthOfEachImage;
+  int width_of_each_image;
     
  public:
   /** Storing the pointers to the integral-image array */
@@ -97,32 +98,32 @@ class VectorOfIntegralImages {
   /** sets the height of each image in the vector - the images are assumed to be scaled to the same size 
    * @param height set the height to this integer 
    */ 
-  void setHeight(int height) { heightOfEachImage = height; }
+  void set_height(int height) { height_of_each_image = height; }
   /** set the width of each image in the vector  - the images are assumed to be scaled to the same size 
    * @param width set the width to this integer value */ 
-  void setWidth(int width) { widthOfEachImage = width; }
+  void set_width(int width) { width_of_each_image = width; }
   /** returns the height of an image - the images are assumed to be scaled to the same size */
-  int getHeight() { return heightOfEachImage; }
+  int get_height() { return height_of_each_image; }
   /** returns the width of an image - the images are assumed to be scaled to the same size */ 
-  int getWidth() { return widthOfEachImage; }
+  int get_width() { return width_of_each_image; }
 };
 
 /** get the rectangular feature score */ 
-double getRectangularIntegralImagefeature(int* integralImageCalculated, int xMain, int yMain, int x, int y, int height, int width, int haarFeature);
+double get_rectangular_integral_image_feature(int* integralImageCalculated, int xMain, int yMain, int x, int y, int height, int width, int haarFeature);
 
 /** x_ & y_ : Depenedent on RECTANGULAR_FEATURE  */
-int randomRectangle();
+int random_rectangle();
 
 /** Feature pass */
-bool featurePass(double,double,double, int nosThresholds); 
+bool feature_pass(double,double,double, int nosThresholds); 
 
 /**   Find the minimum among the double values - (entropies)  */ 
-int findMin(double *, int); 
+int find_min(double *, int); 
 
 
 
 /** calculating the integral image */
-void calculateIntegralImage(IplImage* image, int *integralImage); 
+void calculate_integral_image(IplImage* image, int *integralImage); 
 
 
 
