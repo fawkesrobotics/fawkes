@@ -329,7 +329,7 @@ class ForestTest {
 
   /** 
    * a constructor 
-   * @param copyTest created to copy a chosen test candidate and store it at the node
+   * @param copy_test created to copy a chosen test candidate and store it at the node
    * @param config ConfigClass Instance 
    */
 
@@ -406,7 +406,7 @@ class ForestTest {
 
 
   /** Does the image pass the test - as defined by a region and threshold? 
-   * @param integralImage - the integral image of the test image
+   * @param integral_image - the integral image of the test image
    * @param xmain top left x coordinate 
    * @param ymain top left y coordinate 
    * @param xdash width 
@@ -431,7 +431,7 @@ class ForestTest {
   }
 
   /** Run tests on the integral images and return final entropy of the division. 
-   * @param integralImages vector of II 
+   * @param integral_images vector of II 
    * @param haar_feature haar feature consdiered
    * @param config ConfigClass Instance
    */
@@ -542,14 +542,14 @@ class Tree {
       delete left_tree; 
       delete right_tree; 
       delete[] the_integral_images; 
-	
+      
     }
 
 
   /** Tree constructor for all nodes other than the "main" root node 
-   * @param integralImages vector of integral images at the node 
+   * @param integral_images vector of integral images at the node 
    * @param pE entropy of the parent node 
-   * @param levelOfTree level of the node in the main tree 
+   * @param level_of_tree level of the node in the main tree 
    * @param sNodeIndex node index of the current node 
    * @param sParentNodeIndex node index of the parent node
    * @param config ConfigClass Instance 
@@ -574,7 +574,7 @@ class Tree {
   /** Tree constructor for "only" the root node 
    * @param config ConfigClass Instance
    * @param globalNodeIndex global counter to monitor node indices
-   * @param ForestIndexOfRoot number of the random tree in the forest 
+   * @param forest_index_of_root number of the random tree in the forest 
    */ 
  Tree( ForestConfigClass &config, int &globalNodeIndex, 
        int forest_index_of_root): 
