@@ -57,6 +57,18 @@ BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(size_t data_size,
 }
 
 
+/** Constructor.
+ * @param version The BB version to store in the shared memory segment to prevent
+ *                conflicts with older software.
+ */
+BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(unsigned int version)
+{
+  _data_size = 0;
+  _version   = version;
+  data       = NULL;
+}
+
+
 /** Copy constructor.
  * @param h header to copy
  */

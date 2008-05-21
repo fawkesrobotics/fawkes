@@ -28,9 +28,9 @@
 #define __BLACKBOARD_BBCONFIG_H_
 
 #define  BLACKBOARD_VERSION  1
-#define  BLACKBOARD_MAGIC_TOKEN "FawkesBlackBoard"
 
-// 2 MB
-#define  BLACKBOARD_MEMORY_SIZE 2 * 1024 * 1024
+// Can be used as useful defaults
+#define BLACKBOARD_MEMSIZE 2 * 1024 * 1024
+#define BLACKBOARD_MAGIC_TOKEN "FawkesBlackBoard"
 
 #endif

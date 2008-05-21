@@ -28,6 +28,7 @@
 #include <blackboard/exceptions.h>
 #include <utils/system/console_colors.h>
 #include <utils/time/time.h>
+#include <config/sqlite.h>
 
 #include <iostream>
 
@@ -37,11 +38,15 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
+  SQLiteConfiguration config(CONFDIR);
+  config.load();
+
   BlackBoardMemoryManager *memmgr;
   try {
-    memmgr = new BlackBoardMemoryManager( BLACKBOARD_MEMORY_SIZE,
+    memmgr = new BlackBoardMemoryManager( config.get_uint("/fawkes/mainapp/blackboard_size"),
 					  BLACKBOARD_VERSION,
-					  /* master? */ false );
+					  /* master? */ false,
+					  config.get_string("/fawkes/mainapp/blackboard_magic_token").c_str());
   } catch (BBMemMgrCannotOpenException &e) {
     cout << "No BlackBoard shared memory segment found!" << endl;
     return 1;

@@ -46,6 +46,7 @@ class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
   } BlackBoardSharedMemoryHeaderData;
 
  public:
+  BlackBoardSharedMemoryHeader(unsigned int version);
   BlackBoardSharedMemoryHeader(size_t data_size, unsigned int version);
   BlackBoardSharedMemoryHeader(const BlackBoardSharedMemoryHeader *h);
   virtual ~BlackBoardSharedMemoryHeader();

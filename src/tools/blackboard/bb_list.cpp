@@ -23,8 +23,10 @@
  */
 
 #include <utils/ipc/shm.h>
+#include <config/sqlite.h>
 #include <blackboard/shmem_header.h>
 #include <blackboard/shmem_lister.h>
+#include <blackboard/blackboard.h>
 #include <blackboard/bbconfig.h>
 #include <iostream>
 
@@ -34,10 +36,12 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  BlackBoardSharedMemoryHeader *bbsh = new BlackBoardSharedMemoryHeader( BLACKBOARD_MEMORY_SIZE,
-									 BLACKBOARD_VERSION );
+  SQLiteConfiguration config(CONFDIR);
+  config.load();
+
+  BlackBoardSharedMemoryHeader *bbsh = new BlackBoardSharedMemoryHeader( BLACKBOARD_VERSION );
   BlackBoardSharedMemoryLister *bblister = new BlackBoardSharedMemoryLister();
-  SharedMemory::list(BLACKBOARD_MAGIC_TOKEN, bbsh, bblister);
+  SharedMemory::list(config.get_string("/fawkes/mainapp/blackboard_magic_token").c_str(), bbsh, bblister);
   delete bblister;
   delete bbsh;
   return 0;

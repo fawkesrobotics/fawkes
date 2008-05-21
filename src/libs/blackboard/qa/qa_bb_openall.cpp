@@ -26,7 +26,7 @@
 
 /// @cond QA
 
-#include <blackboard/blackboard.h>
+#include <blackboard/local.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
 
@@ -49,7 +49,9 @@ int
 main(int argc, char **argv)
 {
   LibLogger::init();
-  BlackBoard *bb = new BlackBoard();
+  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE,
+				       BLACKBOARD_MAGIC_TOKEN,
+				       /* master */  true);
 
   TestInterface *ti_writer_1;
   TestInterface *ti_writer_2;

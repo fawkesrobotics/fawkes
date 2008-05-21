@@ -52,6 +52,7 @@ signal_handler(int signum)
 
 
 #define NUM_CHUNKS 5
+#define BLACKBOARD_MEMORY_SIZE 2 * 1024 * 1024
 
 int
 main(int argc, char **argv)

@@ -108,18 +108,18 @@ namespace fawkes {
  * has already been created.
  * @see SharedMemory::SharedMemory()
  */
-BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
+BlackBoardMemoryManager::BlackBoardMemoryManager(size_t memsize,
 						 unsigned int version,
 						 bool master,
 						 const char *shmem_token)
 {
-  this->memsize = memsize;
+  __memsize = memsize;
   __master = master;
 
   // open shared memory segment, if it exists try to aquire exclusive
   // semaphore, if that fails, throw an exception
   
-  shmem_header = new BlackBoardSharedMemoryHeader(memsize, version);
+  shmem_header = new BlackBoardSharedMemoryHeader(__memsize, version);
   try {
     shmem = new SharedMemory(shmem_token, shmem_header,
 			     /* read only   */ false,
@@ -160,7 +160,7 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(unsigned int memsize,
 
     chunk_list_t *f = (chunk_list_t *)shmem->memptr();
     f->ptr  = (char *)f + sizeof(chunk_list_t);
-    f->size = memsize - sizeof(chunk_list_t);
+    f->size = __memsize - sizeof(chunk_list_t);
     f->overhang = 0;
     f->next = NULL;
 
@@ -374,7 +374,7 @@ BlackBoardMemoryManager::check()
     }
   }
 
-  if ( mem != memsize ) {
+  if ( mem != __memsize ) {
     throw BBInconsistentMemoryException("unmanaged memory found, managed memory size != total memory size");
   }
 }
@@ -507,7 +507,7 @@ BlackBoardMemoryManager::num_free_chunks() const
 unsigned int
 BlackBoardMemoryManager::memory_size() const
 {
-  return memsize;
+  return __memsize;
 }
 
 

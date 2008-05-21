@@ -30,11 +30,10 @@
 
 namespace fawkes {
   class ArgumentParser;
-  class BlackBoard;
+  class LocalBlackBoard;
   class Configuration;
   class MultiLogger;
   class NetworkLogger;
-  class HostInfo;
   class Clock;
   class TimeWait;
 #ifdef USE_TIMETRACKER
@@ -61,8 +60,7 @@ class FawkesMainThread : public fawkes::Thread
 
   fawkes::ArgumentParser     *argp;
   fawkes::Configuration      *config;
-  fawkes::BlackBoard         *blackboard;
-  fawkes::HostInfo           *hostinfo;
+  fawkes::LocalBlackBoard    *blackboard;
   fawkes::MultiLogger        *multi_logger;
   fawkes::NetworkLogger      *network_logger;
   fawkes::Clock              *clock;
@@ -73,9 +71,6 @@ class FawkesMainThread : public fawkes::Thread
   FawkesPluginManager        *plugin_manager;
   FawkesNetworkManager       *network_manager;
   FawkesConfigManager        *config_manager;
-
-  char *config_mutable_file;
-  const char *config_default_file;
 
 #ifdef USE_TIMETRACKER
   fawkes::TimeTracker  *__tt;

@@ -26,7 +26,7 @@
 
 /// @cond QA
 
-#include <blackboard/blackboard.h>
+#include <blackboard/local.h>
 #include <blackboard/remote.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
@@ -137,7 +137,8 @@ main(int argc, char **argv)
   Thread::init_main();
 
   //RemoteBlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
-  BlackBoard *bb = new BlackBoard();
+  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE,
+				       BLACKBOARD_MAGIC_TOKEN);
 
   QaBBEventListener qabbel;
 

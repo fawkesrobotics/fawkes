@@ -30,6 +30,8 @@
 #include <unistd.h>
 #include <cstdio>
 
+using namespace fawkes;
+
 int main(int argc, char** argv)
 {
   Clock* clock = Clock::instance();

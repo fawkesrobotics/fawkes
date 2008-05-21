@@ -24,7 +24,6 @@
  */
 
 #include <blackboard/remote.h>
-#include <blackboard/bbconfig.h>
 #include <blackboard/net_messages.h>
 #include <blackboard/net_ilist_content.h>
 #include <blackboard/notifier.h>

@@ -31,12 +31,11 @@
 #include <utils/logging/liblogger.h>
 #include <utils/logging/factory.h>
 #include <utils/system/argparser.h>
-#include <utils/system/hostinfo.h>
 #include <utils/time/clock.h>
 #include <utils/time/wait.h>
 #include <netcomm/utils/network_logger.h>
 
-#include <blackboard/blackboard.h>
+#include <blackboard/local.h>
 #include <mainapp/thread_inifin.h>
 #include <mainapp/plugin_manager.h>
 #include <mainapp/network_manager.h>
@@ -71,32 +70,16 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   blackboard          = NULL;
   config_manager      = NULL;
   config              = NULL;
-  config_mutable_file = NULL;
-  hostinfo            = NULL;
   network_manager     = NULL;
   thread_manager      = NULL;
   thread_inifin       = NULL;
 
-  hostinfo = new HostInfo();
   this->argp = argp;
 
   /* Config stuff */
   config             = new SQLiteConfiguration(CONFDIR);
 
-  if ( argp->has_arg("c") ) {
-    config_mutable_file = strdup(argp->arg("c"));
-  } else {
-    if ( asprintf(&config_mutable_file, "%s.db", hostinfo->short_name()) == -1 ) {
-      config_mutable_file = strdup(hostinfo->short_name());
-      printf("WARNING: could not asprintf local config file name, using short hostname\n");
-    }
-  }
-  if ( argp->has_arg("d") ) {
-    config_default_file = argp->arg("d");
-  } else {
-    config_default_file = "default.db";
-  }
-  config->load(config_mutable_file, config_default_file);
+  config->load(argp->arg("c"), argp->arg("d"));
 
   /* Logging stuff */
   const char *tmp;
@@ -149,10 +132,17 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   /* Clock */
   clock = Clock::instance();
 
+  // Cleanup stale BlackBoard shared memory segments if requested
+  if ( argp->has_arg("C") ) {
+    LocalBlackBoard::cleanup(config->get_string("/fawkes/mainapp/blackboard_magic_token").c_str(),
+			     /* output with lister? */ true);
+  }
+
   /* Managers */
   try {
     config_manager     = new FawkesConfigManager(config);
-    blackboard         = new BlackBoard();
+    blackboard         = new LocalBlackBoard(config->get_uint("/fawkes/mainapp/blackboard_size"),
+					     config->get_string("/fawkes/mainapp/blackboard_magic_token").c_str());
     thread_manager     = new FawkesThreadManager();
     thread_inifin      = new FawkesThreadIniFin(blackboard,
 						thread_manager->aspect_collector(),
@@ -245,8 +235,6 @@ FawkesMainThread::destruct()
     delete config_manager;
   }
   delete config;
-  if ( config_mutable_file != NULL )  free(config_mutable_file);
-  delete hostinfo;
   delete network_manager;
   delete thread_manager;
   delete thread_inifin;

@@ -26,12 +26,6 @@
 #include <utils/system/signal.h>
 #include <utils/system/argparser.h>
 
-// for -C: bb_cleanup
-#include <utils/ipc/shm.h>
-#include <blackboard/shmem_header.h>
-#include <blackboard/shmem_lister.h>
-#include <blackboard/bbconfig.h>
-
 #include <iostream>
 
 using namespace std;
@@ -122,15 +116,6 @@ main(int argc, char **argv)
     usage(argv[0]);
     delete argp;
     return 0;
-  }
-
-  if ( argp->has_arg("C") ) {
-    BlackBoardSharedMemoryHeader *bbsh = new BlackBoardSharedMemoryHeader( BLACKBOARD_MEMORY_SIZE,
-									   BLACKBOARD_VERSION );
-    BlackBoardSharedMemoryLister *bblister = new BlackBoardSharedMemoryLister();
-    SharedMemory::erase_orphaned(BLACKBOARD_MAGIC_TOKEN, bbsh, bblister);
-    delete bblister;
-    delete bbsh;
   }
 
   FawkesMainApp fawkes;

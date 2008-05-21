@@ -74,7 +74,7 @@ WorldInfoViewer::~WorldInfoViewer()
   for (rit = m_robots.begin(); rit != m_robots.end(); ++rit)
     {
       unsigned int id = rit->second;
-      RemoteBlackBoard* rbb = m_remote_bbs[id];
+      BlackBoard* rbb = m_remote_bbs[id];
       BatteryInterface* bi  = m_battery_interfaces[id];
       rbb->close(bi);
       delete m_remote_bbs[id];
@@ -215,7 +215,7 @@ WorldInfoViewer::robot_added()
 	  m_list_entries[m_robot_id] = row;
 	  
 	  // open new remote blackboard
-	  RemoteBlackBoard* rbb = new RemoteBlackBoard( (*hit).c_str(), 1910 );
+	  BlackBoard* rbb = new RemoteBlackBoard( (*hit).c_str(), 1910 );
 	  m_remote_bbs[m_robot_id] = rbb;
 	  
 	  // create new battery interface

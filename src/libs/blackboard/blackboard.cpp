@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  blackboard.cpp - BlackBoard plugin
+ *  blackboard.cpp - BlackBoard Interface
  *
- *  Generated: Sat Sep 16 17:11:13 2006 (on train to Cologne)
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Sep 16 17:11:13 2006 (on train to Cologne)
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -24,12 +24,6 @@
  */
 
 #include <blackboard/blackboard.h>
-#include <blackboard/bbconfig.h>
-#include <blackboard/message_manager.h>
-#include <blackboard/memory_manager.h>
-#include <blackboard/interface_manager.h>
-#include <blackboard/network_handler.h>
-#include <blackboard/notifier.h>
 
 #include <string>
 #include <cstring>
@@ -85,7 +79,82 @@ namespace fawkes {
  * @see Message
  *
  * @author Tim Niemueller
+ *
+ *
+ * @fn Interface *  BlackBoard::open_for_reading(const char *type, const char *identifier)
+ * Open interface for reading.
+ * This will create a new interface instance of the given type. The result can be
+ * casted to the appropriate type.
+ * @param type type of the interface
+ * @param identifier identifier of the interface
+ * @return new fully initialized interface instance of requested type
+ * @exception OutOfMemoryException thrown if there is not enough free space for
+ * the requested interface.
+ *
+ *
+ * @fn Interface *  BlackBoard::open_for_writing(const char *type, const char *identifier)
+ * Open interface for writing.
+ * This will create a new interface instance of the given type. The result can be
+ * casted to the appropriate type. This will only succeed if there is not already
+ * a writer for the given interface type/id!
+ * @param type type of the interface
+ * @param identifier identifier of the interface
+ * @return new fully initialized interface instance of requested type
+ * @exception OutOfMemoryException thrown if there is not enough free space for
+ * the requested interface.
+ * @exception BlackBoardWriterActiveException thrown if there is already a writing
+ * instance with the same type/id
+ *
+ *
+ * @fn void BlackBoard::close(Interface *interface)
+ * Close interface.
+ * @param interface interface to close
+ *
+ *
+ * @fn std::list<Interface *> *  BlackBoard::open_all_of_type_for_reading(const char *type, const char *id_prefix = NULL)
+ * Open all interfaces of the given type for reading.
+ * This will create interface instances for all currently registered interfaces of
+ * the given type. The result can be casted to the appropriate type.
+ * @param type type of the interface
+ * @param id_prefix if set only interfaces whose ids have this prefix are returned
+ * @return list of new fully initialized interface instances of requested type. The
+ * is allocated using new and you have to free it using delete after you are done
+ * with it!
+ *
+ *
+ * @fn InterfaceInfoList * BlackBoard::list_all()
+ * Get list of interfaces.
+ * @return list of interfaces
+ *
+ *
+ * @fn void BlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsigned int flags)
+ * Register BB event listener.
+ * @param listener BlackBoard event listener to register
+ * @param flags an or'ed combination of BBIL_FLAG_DATA, BBIL_FLAG_READER, BBIL_FLAG_WRITER
+ * and BBIL_FLAG_INTERFACE. Only for the given types the event listener is registered.
+ * BBIL_FLAG_ALL can be supplied to register for all events.
+ *
+ *
+ * @fn void BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
+ * Unregister BB interface listener.
+ * This will remove the given BlackBoard interface listener from any event that it was
+ * previously registered for.
+ * @param listener BlackBoard event listener to remove
+ *
+ *
+ * @fn void BlackBoard::register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags)
+ * Register BB interface observer.
+ * @param observer BlackBoard interface observer to register
+ * @param flags an or'ed combination of BBIO_FLAG_CREATED, BBIO_FLAG_DESTROYED
+ *
+ *
+ * @fn void BlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
+ * Unregister BB interface observer.
+ * This will remove the given BlackBoard event listener from any event that it was
+ * previously registered for.
+ * @param observer BlackBoard event listener to remove
  */
+
 
 /** Data changed notification flag. */
 const unsigned int BlackBoard::BBIL_FLAG_DATA      = 1;
@@ -112,198 +181,30 @@ const unsigned int BlackBoard::BBIO_FLAG_ALL =
 
 
 
-/** Constructor.
- * @param master true to operate in master mode, false otherwise
- */
-BlackBoard::BlackBoard(bool master)
-{
-  __memmgr = new BlackBoardMemoryManager(BLACKBOARD_MEMORY_SIZE,
-					 BLACKBOARD_VERSION,
-					 master,
-					 BLACKBOARD_MAGIC_TOKEN);
-
-  __notifier = new BlackBoardNotifier();
-  __msgmgr = new BlackBoardMessageManager(__notifier);
-  __im = new BlackBoardInterfaceManager(__memmgr, __msgmgr, __notifier);
-
-  __msgmgr->set_interface_manager(__im);
-
-  __nethandler = NULL;
-}
-
-
-/** Destructor. */
+/** Virtual empty destructor. */
 BlackBoard::~BlackBoard()
 {
-  if ( __nethandler ) {
-    __nethandler->cancel();
-    __nethandler->join();
-    delete __nethandler;
-  }
-  delete __im;
-  delete __msgmgr;
-  delete __memmgr;
-  delete __notifier;
 }
 
 
-/** Open interface for reading.
- * This will create a new interface instance of the given type. The result can be
- * casted to the appropriate type.
- * @param type type of the interface
- * @param identifier identifier of the interface
- * @return new fully initialized interface instance of requested type
- * @exception OutOfMemoryException thrown if there is not enough free space for
- * the requested interface.
+/** Produce interface name from C++ signature.
+ * This extracts the interface name for a mangled signature. It has
+ * has been coded with GCC (4) in mind and assumes interfaces to be
+ * in the fawkes namespace. It cannot deal with anythin else.
+ * @param type type name to strip
+ * @return stripped class type, use delete to free it after you are done
  */
-Interface *
-BlackBoard::open_for_reading(const char *type, const char *identifier)
+char *
+BlackBoard::demangle_fawkes_interface_name(const char *type)
 {
-  try {
-    return __im->open_for_reading(type, identifier);
-  } catch (Exception &e) {
-    throw;
-  }
+  std::string t = type;
+  t = t.substr( 8 ); // Hack to remove N6fawkes namespace prefix
+  t = t.substr( t.find_first_not_of("0123456789") );
+  t = t.substr(0, t.length() - 1); // Hack to remove trailing letter
+  char *rv = new char[t.length() + 1];
+  strcpy(rv, t.c_str());
+  return rv;
 }
 
-
-/** Open interface for writing.
- * This will create a new interface instance of the given type. The result can be
- * casted to the appropriate type. This will only succeed if there is not already
- * a writer for the given interface type/id!
- * @param type type of the interface
- * @param identifier identifier of the interface
- * @return new fully initialized interface instance of requested type
- * @exception OutOfMemoryException thrown if there is not enough free space for
- * the requested interface.
- * @exception BlackBoardWriterActiveException thrown if there is already a writing
- * instance with the same type/id
- */
-Interface *
-BlackBoard::open_for_writing(const char *type, const char *identifier)
-{
-  try {
-    return __im->open_for_writing(type, identifier);
-  } catch (Exception &e) {
-    throw;
-  }
-}
-
-
-/** Open all interfaces of the given type for reading.
- * This will create interface instances for all currently registered interfaces of
- * the given type. The result can be casted to the appropriate type.
- * @param type type of the interface
- * @param id_prefix if set only interfaces whose ids have this prefix are returned
- * @return list of new fully initialized interface instances of requested type. The
- * is allocated using new and you have to free it using delete after you are done
- * with it!
- */
-std::list<Interface *> *
-BlackBoard::open_all_of_type_for_reading(const char *type, const char *id_prefix)
-{
-  try {
-    return __im->open_all_of_type_for_reading(type, id_prefix);
-  } catch (Exception &e) {
-    throw;
-  }  
-}
-
-
-/** Close interface.
- * @param interface interface to close
- */
-void
-BlackBoard::close(Interface *interface)
-{
-  __im->close(interface);
-}
-
-
-/** Get list of interfaces.
- * @return list of interfaces
- */
-InterfaceInfoList *
-BlackBoard::list_all() const
-{
-  return __im->list_all();
-}
-
-
-/** Register BB event listener.
- * @param listener BlackBoard event listener to register
- * @param flags an or'ed combination of BBIL_FLAG_DATA, BBIL_FLAG_READER, BBIL_FLAG_WRITER
- * and BBIL_FLAG_INTERFACE. Only for the given types the event listener is registered.
- * BBIL_FLAG_ALL can be supplied to register for all events.
- */
-void
-BlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsigned int flags)
-{
-  __notifier->register_listener(listener, flags);
-}
-
-
-/** Unregister BB interface listener.
- * This will remove the given BlackBoard interface listener from any event that it was
- * previously registered for.
- * @param listener BlackBoard event listener to remove
- */
-void
-BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
-{
-  __notifier->unregister_listener(listener);
-}
-
-
-/** Register BB interface observer.
- * @param observer BlackBoard interface observer to register
- * @param flags an or'ed combination of BBIO_FLAG_CREATED, BBIO_FLAG_DESTROYED
- */
-void
-BlackBoard::register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags)
-{
-  __notifier->register_observer(observer, flags);
-}
-
-
-/** Unregister BB interface observer.
- * This will remove the given BlackBoard event listener from any event that it was
- * previously registered for.
- * @param observer BlackBoard event listener to remove
- */
-void
-BlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
-{
-  __notifier->unregister_observer(observer);
-}
-
-
-/** Get memory manager.
- * CAUTION: This is NOT meant to be used in your application.
- * This returns a pointer to the used memory manager. The return type
- * is declared const. Use this only for debugging purposes to output info about
- * the BlackBoard memory.
- * @return const pointer to memory manager
- */
-const BlackBoardMemoryManager *
-BlackBoard::memory_manager() const
-{
-  return __memmgr;
-}
-
-
-/** Start network handler.
- * This will start the network handler thread and register it with the given hub.
- * @param hub hub to use and to register with
- */
-void
-BlackBoard::start_nethandler(FawkesNetworkHub *hub)
-{
-  if ( __nethandler ) {
-    throw Exception("BlackBoardNetworkHandler already started");
-  }
-  __nethandler = new BlackBoardNetworkHandler(this, hub);
-  __nethandler->start();
-}
 
 } // end namespace fawkes

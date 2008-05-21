@@ -26,7 +26,7 @@
 
 /// @cond QA
 
-#include <blackboard/blackboard.h>
+#include <blackboard/local.h>
 #include <blackboard/remote.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
@@ -56,6 +56,8 @@ signal_handler(int signum)
 
 
 #define NUM_CHUNKS 5
+#define BLACKBOARD_MEMSIZE 2 * 1024 * 1024
+#define BLACKBOARD_MAGIC_TOKEN "FawkesBlackBoard"
 
 int
 main(int argc, char **argv)
@@ -65,8 +67,10 @@ main(int argc, char **argv)
 
   signal(SIGINT, signal_handler);
 
-  //BlackBoard *bb = new BlackBoard(/* master */  true);
-  RemoteBlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
+  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE,
+				       BLACKBOARD_MAGIC_TOKEN,
+				       /* master */  true);
+  //BlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
 
   TestInterface *ti_writer;
   TestInterface *ti_reader;

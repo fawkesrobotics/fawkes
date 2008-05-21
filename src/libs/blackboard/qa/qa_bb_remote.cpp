@@ -67,7 +67,7 @@ main(int argc, char **argv)
   FawkesNetworkClient *fnc = new FawkesNetworkClient("localhost", 1910);
   fnc->connect();
 
-  RemoteBlackBoard *rbb = new RemoteBlackBoard(fnc);
+  BlackBoard *rbb = new RemoteBlackBoard(fnc);
 
   InterfaceInfoList *infl = rbb->list_all();
   for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {

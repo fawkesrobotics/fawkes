@@ -244,7 +244,7 @@ class SkillShellThread : public Thread, public FawkesNetworkClientHandler
  private:
   ArgumentParser *argp;
   FawkesNetworkClient *c;
-  RemoteBlackBoard *rbb;
+  BlackBoard *rbb;
   SkillerInterface *sif;
   const char *prompt;
   bool just_connected;

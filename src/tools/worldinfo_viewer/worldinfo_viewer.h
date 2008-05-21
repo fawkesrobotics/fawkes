@@ -32,7 +32,7 @@
 class FieldView;
 namespace fawkes {
   class WorldInfoDataContainer;
-  class RemoteBlackBoard;
+  class BlackBoard;
   class BatteryInterface;
 }
 
@@ -85,7 +85,7 @@ class WorldInfoViewer : public Gtk::Window
 
   unsigned int m_robot_id;
   std::map<Glib::ustring, unsigned int> m_robots;
-  std::map<unsigned int, fawkes::RemoteBlackBoard*> m_remote_bbs;
+  std::map<unsigned int, fawkes::BlackBoard*> m_remote_bbs;
   std::map<unsigned int, fawkes::BatteryInterface*> m_battery_interfaces;
   std::map<unsigned int, Gtk::TreeModel::Row> m_list_entries;
   std::map<unsigned int, bool> m_robot_active;

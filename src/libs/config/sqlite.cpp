@@ -251,17 +251,32 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
 
   mutex->lock();
 
+  char *host_file;
+  const char *default_file = "default.db";
+
+  if ( name ) {
+    host_file = strdup(name);
+  } else {
+    HostInfo hostinfo;
+    if ( asprintf(&host_file, "%s.db", hostinfo.short_name()) == -1 ) {
+      host_file = strdup(hostinfo.short_name());
+    }
+  }
+  if (defaults_name) {
+    default_file = defaults_name;
+  }
+
   if ( conf_path != NULL ) {
-    if ( asprintf(&filename, "%s/%s", conf_path, name) == -1 ) {
+    if ( asprintf(&filename, "%s/%s", conf_path, host_file) == -1 ) {
       throw CouldNotOpenConfigException("Could not create filename");
     }
-    if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, conf_path, defaults_name) == -1 ) {
+    if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, conf_path, default_file) == -1 ) {
       free(filename);
       throw CouldNotOpenConfigException("Could not create attachment SQL");
     }
   } else {
-    filename = strdup(name);
-    if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS_ABSOLUTE, defaults_name) == -1 ) {
+    filename = strdup(host_file);
+    if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS_ABSOLUTE, default_file) == -1 ) {
       free(filename);
       throw CouldNotOpenConfigException("Could not create attachment SQL");
     }
@@ -279,10 +294,25 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
 
   init();
 
+  free(host_file);
+
   mutex->unlock();
 
   opened = true;
 }
+
+
+/** Load config from default files.
+ * Default file is "shorthostname.db" (shorthostname replaced by the
+ * short host name returned by uname) and default.db).
+ * @param tag optional tag to restore
+ */
+void
+SQLiteConfiguration::load(const char *tag)
+{
+  load(NULL, NULL, tag);
+}
+
 
 /*
  * @fn void Configuration::copy(Configuration *copyconf)

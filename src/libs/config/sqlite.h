@@ -27,6 +27,7 @@
 #define __CONFIG_SQLITE_H_
 
 #include <config/config.h>
+#include <utils/system/hostinfo.h>
 
 struct sqlite3;
 struct sqlite3_stmt;
@@ -45,6 +46,8 @@ class SQLiteConfiguration : public Configuration
 
   virtual void          load(const char *filename, const char *defaults_filename,
 			     const char *tag = NULL);
+
+  void load(const char *tag = NULL);
 
   virtual void          tag(const char *tag);
   virtual std::list<std::string> tags();

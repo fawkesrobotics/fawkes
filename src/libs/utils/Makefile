@@ -24,7 +24,7 @@ else
   ERROR_TARGETS += error_libmagic
 endif
 
-LIBS_libutils = stdc++ core magic $(if $(filter Linux,$(OS)),dl) 
+LIBS_libutils = stdc++ core magic $(if $(filter Linux,$(OS)),dl) bfd
 OBJS_libutils =	$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 
 CFLAGS_utils_tolua = -Wno-unused-function

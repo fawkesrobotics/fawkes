@@ -22,10 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <utils/ipc/shm.h>
-#include <blackboard/shmem_header.h>
-#include <blackboard/shmem_lister.h>
-#include <blackboard/bbconfig.h>
+#include <blackboard/local.h>
+#include <config/sqlite.h>
 #include <iostream>
 
 using namespace std;
@@ -34,11 +32,8 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  BlackBoardSharedMemoryHeader *bbsh = new BlackBoardSharedMemoryHeader( BLACKBOARD_MEMORY_SIZE,
-									 BLACKBOARD_VERSION );
-  BlackBoardSharedMemoryLister *bblister = new BlackBoardSharedMemoryLister();
-  SharedMemory::erase_orphaned(BLACKBOARD_MAGIC_TOKEN, bbsh, bblister);
-  delete bblister;
-  delete bbsh;
+  SQLiteConfiguration config(CONFDIR);
+  config.load();
+  LocalBlackBoard::cleanup(config.get_string("/fawkes/mainapp/blackboard_magic_token").c_str(), true);
   return 0;
 }

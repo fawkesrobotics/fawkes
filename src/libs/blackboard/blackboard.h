@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  blackboard.h - BlackBoard plugin
+ *  blackboard.h - BlackBoard Interface
  *
- *  Generated: Sat Sep 16 17:09:15 2006 (on train to Cologne)
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Sep 16 17:09:15 2006 (on train to Cologne)
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -27,7 +27,6 @@
 #define __BLACKBOARD_BLACKBOARD_H_
 
 #include <core/exceptions/software.h>
-#include <utils/misc/sigmangler.h>
 
 #include <list>
 #include <typeinfo>
@@ -48,17 +47,17 @@ class FawkesNetworkHub;
 class BlackBoard
 {
  public:
-  BlackBoard(bool master = true);
-  ~BlackBoard();
+  virtual ~BlackBoard();
 
-  Interface *  open_for_reading(const char *interface_type, const char *identifier);
-  Interface *  open_for_writing(const char *interface_type, const char *identifier);
-  void         close(Interface *interface);
+  virtual Interface *  open_for_reading(const char *interface_type, const char *identifier) = 0;
+  virtual Interface *  open_for_writing(const char *interface_type, const char *identifier) = 0;
+  virtual void         close(Interface *interface) = 0;
 
-  InterfaceInfoList *  list_all() const;
+  virtual InterfaceInfoList *  list_all() = 0;
 
-  std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type,
-							 const char *id_prefix = NULL);
+  virtual std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type,
+							 const char *id_prefix = NULL) = 0;
+
   template <class InterfaceType>
     std::list<InterfaceType *> *  open_all_of_type_for_reading(const char *id_prefix = NULL);
 
@@ -67,7 +66,6 @@ class BlackBoard
 
   template <class InterfaceType>
     InterfaceType * open_for_writing(const char *identifier);
-
 
   static const unsigned int BBIL_FLAG_DATA;
   static const unsigned int BBIL_FLAG_MESSAGES;
@@ -79,25 +77,15 @@ class BlackBoard
   static const unsigned int BBIO_FLAG_DESTROYED;
   static const unsigned int BBIO_FLAG_ALL;
 
-  void register_listener(BlackBoardInterfaceListener *listener,
-			 unsigned int flags);
-  void unregister_listener(BlackBoardInterfaceListener *listener);
+  virtual void register_listener(BlackBoardInterfaceListener *listener,
+				 unsigned int flags) = 0;
+  virtual void unregister_listener(BlackBoardInterfaceListener *listener) = 0;
 
-  void register_observer(BlackBoardInterfaceObserver *observer,
-			 unsigned int flags);
-  void unregister_observer(BlackBoardInterfaceObserver *observer);
+  virtual void register_observer(BlackBoardInterfaceObserver *observer,
+				 unsigned int flags) = 0;
+  virtual void unregister_observer(BlackBoardInterfaceObserver *observer) = 0;
 
-  void start_nethandler(FawkesNetworkHub *hub);
-
-  /* for debugging only */
-  const BlackBoardMemoryManager * memory_manager() const;
-
- private: /* members */
-  BlackBoardInterfaceManager *__im;
-  BlackBoardMemoryManager    *__memmgr;
-  BlackBoardMessageManager   *__msgmgr;
-  BlackBoardNetworkHandler   *__nethandler;
-  BlackBoardNotifier         *__notifier;
+  char *  demangle_fawkes_interface_name(const char *type);
 };
 
 
@@ -117,7 +105,7 @@ template <class InterfaceType>
 InterfaceType *
 BlackBoard::open_for_reading(const char *identifier)
 {
-  char *type_name = CppSignatureMangler::strip_class_type(typeid(InterfaceType).name());
+  char *type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
   InterfaceType *interface = dynamic_cast<InterfaceType *>(open_for_reading(type_name, identifier));
   delete[] type_name;
   if ( interface == 0 ) {
@@ -140,7 +128,7 @@ template <class InterfaceType>
 std::list<InterfaceType *> *
 BlackBoard::open_all_of_type_for_reading(const char *id_prefix)
 {
-  char *type_name = CppSignatureMangler::strip_class_type(typeid(InterfaceType).name());
+  char *type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
   std::list<Interface *> *il = open_all_of_type_for_reading(type_name, id_prefix);
   delete[] type_name;
   std::list<InterfaceType *> *rv = new std::list<InterfaceType *>();
@@ -181,7 +169,7 @@ template <class InterfaceType>
 InterfaceType *
 BlackBoard::open_for_writing(const char *identifier)
 {
-  char *type_name = CppSignatureMangler::strip_class_type(typeid(InterfaceType).name());
+  char *type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
   InterfaceType *interface;
   try {
     interface = dynamic_cast<InterfaceType *>(open_for_writing(type_name, identifier));

@@ -36,7 +36,7 @@ class Message;
 
 class BlackBoardMessageManager : public MessageMediator
 {
- friend class BlackBoard;
+ friend class LocalBlackBoard;
  public:
   BlackBoardMessageManager(BlackBoardNotifier *notifier);
   ~BlackBoardMessageManager();

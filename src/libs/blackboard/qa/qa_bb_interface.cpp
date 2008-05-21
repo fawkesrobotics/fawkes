@@ -27,7 +27,7 @@
 /// @cond QA
 
 #include <blackboard/memory_manager.h>
-#include <blackboard/blackboard.h>
+#include <blackboard/local.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
 
@@ -62,8 +62,12 @@ main(int argc, char **argv)
 
   signal(SIGINT, signal_handler);
 
-  BlackBoard *bb = new BlackBoard(/* master */  true);
-  const BlackBoardMemoryManager *mm = bb->memory_manager();
+  LocalBlackBoard *lbb = new LocalBlackBoard(BLACKBOARD_MEMSIZE,
+					     BLACKBOARD_MAGIC_TOKEN,
+					     /* master */  true);
+
+  BlackBoard *bb = lbb;
+  const BlackBoardMemoryManager *mm = lbb->memory_manager();
 
   TestInterface *ti_writer;
   TestInterface *ti_reader;

@@ -26,6 +26,8 @@
 #ifndef __BLACKBOARD_MEMORY_MANAGER_H_
 #define __BLACKBOARD_MEMORY_MANAGER_H_
 
+#include <sys/types.h>
+
 namespace fawkes {
 
 class BlackBoardSharedMemoryHeader;
@@ -57,7 +59,8 @@ class BlackBoardMemoryManager
 {
  friend class BlackBoardInterfaceManager;
  public:
-  BlackBoardMemoryManager(unsigned int memsize, unsigned int version, bool master,
+  BlackBoardMemoryManager(size_t memsize, unsigned int version,
+			  bool master,
 			  const char *shmem_token = "FawkesBlackBoard");
   ~BlackBoardMemoryManager();
 
@@ -143,7 +146,7 @@ class BlackBoardMemoryManager
   BlackBoardSharedMemoryHeader *shmem_header;
   SharedMemory *shmem;
 
-  unsigned int memsize;
+  size_t __memsize;
 
   // Mutex to be used for all list operations (alloc, free)
   Mutex        *mutex;
