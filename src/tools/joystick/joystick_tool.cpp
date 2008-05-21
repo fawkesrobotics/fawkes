@@ -42,6 +42,8 @@
 #include <cstring>
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** @class JoystickTool <tools/joystick/joystick_tool.h>
  *   The joystick control for the robots.
  *   It communicates with the navigator plugin controlling the motion of the robot.
@@ -304,11 +306,11 @@ JoystickTool::mainLoop()
 
                   if (js.getAxis(4) == 0 && js.getAxis(5) == 0)
                     {
-                      std::cout << std::cred << "Use coolie hat to define kick:" << std::endl
+                      std::cout << cred << "Use coolie hat to define kick:" << std::endl
                       << "  left:  left kick" << std::endl
                       << "  right: right kick" << std::endl
                       << "  up:    left and right kick" << std::endl
-                      << "  down:  high kick" << std::cnormal << std::endl;
+                      << "  down:  high kick" << cnormal << std::endl;
                     }
 
                   std::cerr << "Kick: left = " << kick_msg->left << "; center = " << kick_msg->center << "; right = " << kick_msg->right << std::endl;
@@ -335,7 +337,7 @@ JoystickTool::mainLoop()
 
               if ( ((joy_msg->forward != 0) || (joy_msg->sideward != 0)) && (joy_msg->speed == 0))
                 {
-                  std::cerr << std::cred << " (speed control zeroed?)" << std::cnormal << std::endl;
+                  std::cerr << cred << " (speed control zeroed?)" << cnormal << std::endl;
                 }
               std::cerr << std::endl;
 

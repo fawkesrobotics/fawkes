@@ -34,14 +34,15 @@
 
 #include <vector>
 
-class FawkesNetworkClient;
-class FawkesNetworkMessage;
+namespace fawkes {
+  class FawkesNetworkClient;
+  class FawkesNetworkMessage;
+  class Mutex;
+}
 class NLine;
-class Mutex;
 class Obstacle;
 
-namespace Gtk
-  {
+namespace Gtk {
   class Button;
   class HScale;
   class Adjustment;
@@ -61,179 +62,179 @@ namespace Gtk
   class Statusbar;
  }
 
-namespace Pango
-  {
-   class Layout;
-  }
+namespace Pango {
+  class Layout;
+}
 
-class NavigatorGUI : public  Gtk::DrawingArea, public FawkesNetworkClientHandler
-  {
-  public:
+class NavigatorGUI
+: public Gtk::DrawingArea,
+  public fawkes::FawkesNetworkClientHandler
+{
+ public:
+  NavigatorGUI(const char *host_name);
+  virtual ~NavigatorGUI();
 
-    NavigatorGUI(const char *host_name);
-    virtual ~NavigatorGUI();
+ private:
+  const char *host_name;
 
-  private:
-    const char *host_name;
+  Gtk::Window* win;
 
-    Gtk::Window* win;
+  Gtk::Button* control_button;
+  Gtk::Button* stop_button;
+  Gtk::Button* send_button;
+  Gtk::Button* reset_odometry_button;
+  Gtk::HScale* zooming_HScale;
 
-    Gtk::Button* control_button;
-    Gtk::Button* stop_button;
-    Gtk::Button* send_button;
-    Gtk::Button* reset_odometry_button;
-    Gtk::HScale* zooming_HScale;
+  Gtk::SpinButton* right_rpm_entry;
+  Gtk::SpinButton* left_rpm_entry;
+  Gtk::SpinButton* center_rpm_entry;
+  Gtk::SpinButton* xv_entry;
+  Gtk::SpinButton* yv_entry;
+  Gtk::SpinButton* rotation_entry;
+  Gtk::SpinButton* angular_velocity_entry;
+  Gtk::SpinButton* navigator_velocity_entry;
 
-    Gtk::SpinButton* right_rpm_entry;
-    Gtk::SpinButton* left_rpm_entry;
-    Gtk::SpinButton* center_rpm_entry;
-    Gtk::SpinButton* xv_entry;
-    Gtk::SpinButton* yv_entry;
-    Gtk::SpinButton* rotation_entry;
-    Gtk::SpinButton* angular_velocity_entry;
-    Gtk::SpinButton* navigator_velocity_entry;
+  Gtk::Label* right_rpm_label;
+  Gtk::Label* left_rpm_label;
+  Gtk::Label* center_rpm_label;
+  Gtk::Label* xv_label;
+  Gtk::Label* yv_label;
+  Gtk::Label* angular_velocity_label;
+  Gtk::Label* navigator_velocity_label;
+  Gtk::Label* zooming_label;
 
-    Gtk::Label* right_rpm_label;
-    Gtk::Label* left_rpm_label;
-    Gtk::Label* center_rpm_label;
-    Gtk::Label* xv_label;
-    Gtk::Label* yv_label;
-    Gtk::Label* angular_velocity_label;
-    Gtk::Label* navigator_velocity_label;
-    Gtk::Label* zooming_label;
+  Gtk::RadioButton* navigator_control_radio;
+  Gtk::RadioButton* motor_control_radio;
+  Gtk::RadioButton* behold_radio;
 
-    Gtk::RadioButton* navigator_control_radio;
-    Gtk::RadioButton* motor_control_radio;
-    Gtk::RadioButton* behold_radio;
+  Gtk::CheckButton* obstacle_check;
+  Gtk::CheckButton* orientation_check;
+  Gtk::CheckButton* debug_check;
+  Gtk::CheckButton* odometry_check;
 
-    Gtk::CheckButton* obstacle_check;
-    Gtk::CheckButton* orientation_check;
-    Gtk::CheckButton* debug_check;
-    Gtk::CheckButton* odometry_check;
+  Gtk::RadioButton* rpm_radio;
+  Gtk::RadioButton* trans_rot_radio;
+  Gtk::RadioButton* trans_radio;
+  Gtk::RadioButton* rot_radio;
+  Gtk::RadioButton* orbit_radio;
+  Gtk::RadioButton* line_trans_rot_radio;
+  Gtk::RadioButton* navigator_radio;
 
-    Gtk::RadioButton* rpm_radio;
-    Gtk::RadioButton* trans_rot_radio;
-    Gtk::RadioButton* trans_radio;
-    Gtk::RadioButton* rot_radio;
-    Gtk::RadioButton* orbit_radio;
-    Gtk::RadioButton* line_trans_rot_radio;
-    Gtk::RadioButton* navigator_radio;
+  Gtk::Adjustment *zooming_adjustment;
 
-    Gtk::Adjustment *zooming_adjustment;
+  Gtk::VBox* m_VBox_Main;
+  Gtk::HBox* m_HBox_Left;
+  Gtk::ButtonBox* bbox_top;
+  Gtk::VBox* bbox_left;
+  Gtk::VBox* control_VBox;
+  Gtk::HBox* translation_HBox;
 
-    Gtk::VBox* m_VBox_Main;
-    Gtk::HBox* m_HBox_Left;
-    Gtk::ButtonBox* bbox_top;
-    Gtk::VBox* bbox_left;
-    Gtk::VBox* control_VBox;
-    Gtk::HBox* translation_HBox;
+  Gtk::RadioButton::Group control_group;
 
-    Gtk::RadioButton::Group control_group;
+  Gtk::RadioButton::Group drive_mode_group;
+  Gtk::Frame* rpm_frame;
+  Gtk::Frame* translation_frame;
+  Gtk::Frame* rotation_frame;
+  Gtk::Frame* orbit_frame;
+  Gtk::Frame* navigator_frame;
+  Gtk::Frame* status_frame;
 
-    Gtk::RadioButton::Group drive_mode_group;
-    Gtk::Frame* rpm_frame;
-    Gtk::Frame* translation_frame;
-    Gtk::Frame* rotation_frame;
-    Gtk::Frame* orbit_frame;
-    Gtk::Frame* navigator_frame;
-    Gtk::Frame* status_frame;
+  Gtk::ButtonBox* rpm_entry_box;
+  Gtk::HBox* trans_rot_entry_box;
 
-    Gtk::ButtonBox* rpm_entry_box;
-    Gtk::HBox* trans_rot_entry_box;
+  Gtk::ButtonBox* rpm_label_box1;
+  Gtk::ButtonBox* rpm_label_box2;
+  Gtk::ButtonBox* rpm_label_box3;
+  Gtk::ButtonBox* translation_x_label;
+  Gtk::ButtonBox* translation_y_label;
+  Gtk::ButtonBox* orbit_label_box;
+  Gtk::ButtonBox* navigator_label_box;
+  Gtk::ButtonBox* zoom_debug_box;
 
-    Gtk::ButtonBox* rpm_label_box1;
-    Gtk::ButtonBox* rpm_label_box2;
-    Gtk::ButtonBox* rpm_label_box3;
-    Gtk::ButtonBox* translation_x_label;
-    Gtk::ButtonBox* translation_y_label;
-    Gtk::ButtonBox* orbit_label_box;
-    Gtk::ButtonBox* navigator_label_box;
-    Gtk::ButtonBox* zoom_debug_box;
+  Gtk::Alignment* left_rpm_alignment;
+  Gtk::Alignment* center_rpm_alignment;
+  Gtk::Alignment* right_rpm_alignment;
 
-    Gtk::Alignment* left_rpm_alignment;
-    Gtk::Alignment* center_rpm_alignment;
-    Gtk::Alignment* right_rpm_alignment;
+  Gtk::Alignment* x_translation_alignment;
+  Gtk::Alignment* y_translation_alignment;
+  Gtk::Alignment* rotation_alignment;
+  Gtk::Alignment* rotation_frame_alignment;
 
-    Gtk::Alignment* x_translation_alignment;
-    Gtk::Alignment* y_translation_alignment;
-    Gtk::Alignment* rotation_alignment;
-    Gtk::Alignment* rotation_frame_alignment;
+  Gtk::Alignment* orbit_alignment;
+  Gtk::Alignment* navigator_alignment;
 
-    Gtk::Alignment* orbit_alignment;
-    Gtk::Alignment* navigator_alignment;
+  Gtk::Statusbar* statusbar;
 
-    Gtk::Statusbar* statusbar;
+  Glib::RefPtr<Pango::Layout> layout;
 
-    Glib::RefPtr<Pango::Layout> layout;
+  double window_width;
+  double window_height;
+  double scanning_area_width;
+  double scanning_area_height;
 
-    double window_width;
-    double window_height;
-    double scanning_area_width;
-    double scanning_area_height;
+  double zoom_factor;
 
-    double zoom_factor;
+  double point_radius;
+  double robot_radius;
 
-    double point_radius;
-    double robot_radius;
+  NPoint ball_point;
+  NPoint odometry_point;
+  NPoint mouse_point;
+  NPoint cursor_point;
+  double odometry_direction;
+  double odometry_orientation;
 
-    NPoint ball_point;
-    NPoint odometry_point;
-    NPoint mouse_point;
-    NPoint cursor_point;
-    double odometry_direction;
-    double odometry_orientation;
+  fawkes::LockList<NPoint*> points;
+  fawkes::LockList<NLine*> lines;
+  fawkes::LockList<NPoint*> path_points;
+  fawkes::LockList<Obstacle*> obstacles;
 
-    LockList<NPoint*> points;
-    LockList<NLine*> lines;
-    LockList<NPoint*> path_points;
-    LockList<Obstacle*> obstacles;
+  fawkes::Mutex *odometry_orientation_mutex;
+  fawkes::Mutex *ball_point_mutex;
+  fawkes::Mutex *odometry_point_mutex;
+  fawkes::Mutex *mouse_point_mutex;
+  fawkes::Mutex *cursor_point_mutex;
+  bool cursor_over_area;
 
-    Mutex *odometry_orientation_mutex;
-    Mutex *ball_point_mutex;
-    Mutex *odometry_point_mutex;
-    Mutex *mouse_point_mutex;
-    Mutex *cursor_point_mutex;
-    bool cursor_over_area;
+  double odometry_velocity;
+  bool orientating;
+  double orientation;
 
-    double odometry_velocity;
-    bool orientating;
-    double orientation;
+  fawkes::FawkesNetworkClient *net_client;
+  void deregistered(unsigned int id) throw();
+  void inbound_received(fawkes::FawkesNetworkMessage *msg,
+			unsigned int id) throw();
+  void process_navigator_message(fawkes::FawkesNetworkMessage *msg) throw();
+  void process_pluginmanager_message(fawkes::FawkesNetworkMessage *msg) throw();
+  void prepare_navigator_contact();
+  bool navigator_loaded;
+  bool connection_is_dead;
+  bool connected;
 
-    FawkesNetworkClient *net_client;
-    void deregistered(unsigned int id) throw();
-    void inbound_received(FawkesNetworkMessage *msg,
-			  unsigned int id) throw();
-    void process_navigator_message(FawkesNetworkMessage *msg) throw();
-    void process_pluginmanager_message(FawkesNetworkMessage *msg) throw();
-    void prepare_navigator_contact();
-    bool navigator_loaded;
-    bool connection_is_dead;
-    bool connected;
+  void connection_established(unsigned int id) throw();
+  void connection_died(unsigned int id) throw();
+  void reset_gui();
+  void connect();
 
-    void connection_established(unsigned int id) throw();
-    void connection_died(unsigned int id) throw();
-    void reset_gui();
-    void connect();
-
-    bool on_idle();
-    bool on_expose_event(GdkEventExpose* event);
-    bool on_button_press_event(GdkEventButton* event);
-    bool on_scroll_event(GdkEventScroll* event);
-    bool on_button_release_event(GdkEventButton* event);
-    bool on_motion_notify_event(GdkEventMotion* event);
-    bool on_leave_notify_event(GdkEventCrossing* event);
-    bool on_enter_notify_event(GdkEventCrossing* event);
-    void on_navigator_control_radio_clicked();
-    void on_motor_control_radio_clicked();
-    void on_behold_radio_clicked();
-    void on_stop_button_clicked();
-    void on_send_button_clicked();
-    void on_reset_odometry_button_clicked();
-    void on_zooming_value_changed();
-    void send_stop();
-    void send_drive_command();
-    bool navigator_control;
-    bool motor_control;
-  };
+  bool on_idle();
+  bool on_expose_event(GdkEventExpose* event);
+  bool on_button_press_event(GdkEventButton* event);
+  bool on_scroll_event(GdkEventScroll* event);
+  bool on_button_release_event(GdkEventButton* event);
+  bool on_motion_notify_event(GdkEventMotion* event);
+  bool on_leave_notify_event(GdkEventCrossing* event);
+  bool on_enter_notify_event(GdkEventCrossing* event);
+  void on_navigator_control_radio_clicked();
+  void on_motor_control_radio_clicked();
+  void on_behold_radio_clicked();
+  void on_stop_button_clicked();
+  void on_send_button_clicked();
+  void on_reset_odometry_button_clicked();
+  void on_zooming_value_changed();
+  void send_stop();
+  void send_drive_command();
+  bool navigator_control;
+  bool motor_control;
+};
 
 #endif /*NAVIGATOR_GUI_H_*/

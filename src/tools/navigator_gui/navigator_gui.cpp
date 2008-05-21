@@ -50,6 +50,8 @@
 #include <gdkmm/drawable.h>
 #include <gtkmm.h>
 
+using namespace fawkes;
+
 /** @class NavigatorGUI <tools/navigator_gui/navigator_gui.h>
  *   A GUI to control, simulate and monitor the behavior of the navigator.
  *   

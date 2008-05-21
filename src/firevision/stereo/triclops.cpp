@@ -41,6 +41,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+using namespace fawkes;
+
 /// @cond INTERNALS
 /** Data internal to Triclops stereo processor
  * This class exists to be able to hide the triclops stuff from the camera

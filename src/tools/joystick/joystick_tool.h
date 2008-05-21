@@ -27,10 +27,12 @@
 
 #include <netcomm/fawkes/client_handler.h>
 
-class FawkesNetworkClient;
-class FawkesNetworkMessage;
+namespace fawkes {
+  class FawkesNetworkClient;
+  class FawkesNetworkMessage;
+}
 
-class JoystickTool : public FawkesNetworkClientHandler
+class JoystickTool : public fawkes::FawkesNetworkClientHandler
 {
  public:
         
@@ -44,13 +46,13 @@ class JoystickTool : public FawkesNetworkClientHandler
  private:
         
   virtual void deregistered(unsigned int id) throw();
-  virtual void inbound_received(FawkesNetworkMessage *m,
+  virtual void inbound_received(fawkes::FawkesNetworkMessage *m,
 				unsigned int id) throw();
   virtual void connection_established(unsigned int id) throw();
   virtual void connection_died(unsigned int id) throw();
   bool sending;
 
-  FawkesNetworkClient *net_client;
+  fawkes::FawkesNetworkClient *net_client;
 
   bool quit;
   float max_speed;
