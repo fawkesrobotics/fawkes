@@ -49,6 +49,8 @@ extern "C" {
 #include <opencv/cxcore.h>
 #include <opencv/highgui.h>
 
+using namespace fawkes;
+
 /** @class SiftClassifier <classifiers/sift.h>
  * SIFT classifier.
  *

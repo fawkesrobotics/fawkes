@@ -33,6 +33,8 @@
 
 #include <aspect/blocked_timing.h>
 
+using namespace fawkes;
+
 /** @class FawkesThreadManager mainapp/thread_manager.h
  * Thread Manager.
  * This class provides a manager for the threads. Threads are memorized by
@@ -440,7 +442,7 @@ FawkesThreadManager::force_remove(ThreadList &tl)
  * before they are removed (may cause unpredictable results otherwise).
  */
 void
-FawkesThreadManager::force_remove(Thread *thread)
+FawkesThreadManager::force_remove(fawkes::Thread *thread)
 {
   MutexLocker lock(threads.mutex());
   try {

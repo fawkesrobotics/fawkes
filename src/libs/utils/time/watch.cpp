@@ -27,6 +27,8 @@
 #include <utils/time/clock.h>
 #include <utils/time/time.h>
 
+namespace fawkes {
+
 /** @class Watch <utils/time/watch.h>
  * This is a stop-watch. Also, one can request the current time from the 
  * clock. Every watch counts time w.r.t. a certain time source.
@@ -187,3 +189,5 @@ Watch::clock_time()
   Time t(&now);
   return t;
 }
+
+} // end namespace fawkes

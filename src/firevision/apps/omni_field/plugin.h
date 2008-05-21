@@ -27,7 +27,7 @@
 
 #include <core/plugin.h>
 
-class FvOmniFieldPlugin : public Plugin
+class FvOmniFieldPlugin : public fawkes::Plugin
 {
  public:
   FvOmniFieldPlugin();

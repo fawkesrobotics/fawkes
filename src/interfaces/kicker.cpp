@@ -30,7 +30,9 @@
 #include <cstring>
 #include <cstdlib>
 
-/** @class KickerInterface interfaces/kicker.h
+namespace fawkes {
+
+/** @class KickerInterface <interfaces/kicker.h>
  * KickerInterface Fawkes BlackBoard Interface.
  * 
       In these variables it is stored how often the right, center or 
@@ -577,3 +579,5 @@ KickerInterface::message_valid(const Message *message) const
 EXPORT_INTERFACE(KickerInterface)
 /// @endcond
 
+
+} // end namespace fawkes

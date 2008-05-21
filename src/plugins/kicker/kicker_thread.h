@@ -31,13 +31,15 @@
 #include <aspect/blackboard.h>
 
 class KickerControl;
-class KickerInterface;
+namespace fawkes {
+  class KickerInterface;
+}
 
 class KickerThread
-  : public Thread,
-    public BlockedTimingAspect,
-    public LoggingAspect,
-    public BlackBoardAspect
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::BlackBoardAspect
 {
  public:
   KickerThread();
@@ -48,7 +50,7 @@ class KickerThread
   virtual void loop();
 
  private:
-  KickerInterface* kicker_interface;  
+  fawkes::KickerInterface* kicker_interface;  
   KickerControl* kicker_control;
 
 };

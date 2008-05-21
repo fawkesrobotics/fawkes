@@ -32,6 +32,8 @@
 
 #include <cmath>
 
+namespace fawkes {
+
 /** @class HomTransform geometry/hom_transform.h
  * This class describes a homogeneous transformation.
  * @author Daniel Beck
@@ -234,3 +236,5 @@ HomTransform::operator*(const HomCoord& h) const
   
   return HomCoord(v);
 }
+
+} // end namespace fawkes

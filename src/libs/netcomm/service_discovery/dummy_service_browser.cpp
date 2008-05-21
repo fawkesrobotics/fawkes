@@ -25,6 +25,8 @@
 
 #include <netcomm/service_discovery/dummy_service_browser.h>
 
+namespace fawkes {
+
 /** @class DummyServiceBrowser <netcomm/service_discovery/dummy_service_browser.h>
  * Dummy Service browser.
  * Does nothing, used to fulfill NetworkAspect guarantees if Avahi is not available.
@@ -56,3 +58,4 @@ DummyServiceBrowser::unwatch_service(const char *service_type,
 {
 }
 
+} // end namespace fawkes

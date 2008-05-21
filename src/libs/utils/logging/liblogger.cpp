@@ -30,6 +30,7 @@
 #include <core/exceptions/software.h>
 #include <core/threading/mutex.h>
 
+namespace fawkes {
 
 /** @class LibLogger <utils/logging/liblogger.h>
  * Library logger.
@@ -306,3 +307,6 @@ LibLogger::log_error(const char *component, Exception &e)
   logger->log_error(component, e);
   mutex->unlock();
 }
+
+
+} // end namespace fawkes

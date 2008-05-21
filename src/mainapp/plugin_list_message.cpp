@@ -34,6 +34,8 @@
 #  include <strfunc.h>
 #endif
 
+namespace fawkes {
+
 /** @class PluginListMessage <mainapp/plugin_list_message.h>
  * Plugin list message.
  * A complex dynamic message with an arbitrary number of plugins. Uses
@@ -137,3 +139,5 @@ PluginListMessage::next()
   void *tmp = plugin_list->next(&size);
   return strndup((const char *)tmp, size);
 }
+
+} // end namespace fawkes

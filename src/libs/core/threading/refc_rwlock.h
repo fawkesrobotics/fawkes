@@ -29,6 +29,9 @@
 #include <core/threading/read_write_lock.h>
 #include <core/utils/refcount.h>
 
+namespace fawkes {
+
+
 class RefCountRWLock : public ReadWriteLock, public RefCount
 {
  public:
@@ -38,5 +41,7 @@ class RefCountRWLock : public ReadWriteLock, public RefCount
 
 };
 
+
+} // end namespace fawkes
 
 #endif

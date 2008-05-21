@@ -29,6 +29,8 @@
 #include <interface/interface.h>
 #include <interface/message.h>
 
+namespace fawkes {
+
 class GameStateInterface : public Interface
 {
  /// @cond INTERNALS
@@ -145,5 +147,7 @@ class GameStateInterface : public Interface
   size_t maxlenof_score_magenta() const;
 
 };
+
+} // end namespace fawkes
 
 #endif

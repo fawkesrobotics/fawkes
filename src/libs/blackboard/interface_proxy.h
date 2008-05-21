@@ -30,6 +30,8 @@
 #include <interface/mediators/message_mediator.h>
 #include <cstdlib>
 
+namespace fawkes {
+
 class FawkesNetworkClient;
 class FawkesNetworkMessage;
 class RefCountRWLock;
@@ -81,5 +83,7 @@ class BlackBoardInterfaceProxy
   bool                 __has_writer;
   unsigned int         __clid;
 };
+
+} // end namespace fawkes
 
 #endif

@@ -30,6 +30,8 @@
  * @author Tim Niemueller
  */
 
+using namespace fawkes;
+
 /** Constructor.
  */
 BallPosLogThread::BallPosLogThread()

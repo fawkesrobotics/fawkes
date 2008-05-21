@@ -25,6 +25,8 @@
 
 #include <cams/cam_exceptions.h>
 
+using namespace fawkes;
+
 /** @class CameraNotOpenedException <cams/cam_exceptions.h>
  * Camera not opened exception.
  * Throw this exception if an operations was requested on a camera that is

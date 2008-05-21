@@ -31,6 +31,8 @@
 #include <list>
 #include <string>
 
+namespace fawkes {
+
 class Interface;
 class Message;
 class BlackBoardInterfaceListener;
@@ -86,5 +88,7 @@ class BlackBoardNotifier
   BBioLockMap __bbio_destroyed;
 
 };
+
+} // end namespace fawkes
 
 #endif

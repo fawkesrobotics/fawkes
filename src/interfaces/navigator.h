@@ -29,6 +29,8 @@
 #include <interface/interface.h>
 #include <interface/message.h>
 
+namespace fawkes {
+
 class NavigatorInterface : public Interface
 {
  /// @cond INTERNALS
@@ -214,5 +216,7 @@ class NavigatorInterface : public Interface
   size_t maxlenof_final() const;
 
 };
+
+} // end namespace fawkes
 
 #endif

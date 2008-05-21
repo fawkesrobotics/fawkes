@@ -29,6 +29,7 @@
 #include <fvutils/color/yuv.h>
 #include <cstddef>
 
+using namespace fawkes;
 
 /** @class FilterMin <filters/min.h>
  * Minimum filter

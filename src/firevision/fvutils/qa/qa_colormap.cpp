@@ -35,6 +35,8 @@
 #include <cstdlib>
 #include <cstdio>
 
+using namespace fawkes;
+
 #define BIGDEPTH 8
 
 int

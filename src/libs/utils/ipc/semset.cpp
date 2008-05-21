@@ -34,6 +34,9 @@
 #include <sys/sem.h>
 #include <limits.h>
 
+namespace fawkes {
+
+
 /// @cond INTERNALS
 class SemaphoreSetData
 {
@@ -416,3 +419,6 @@ SemaphoreSet::destroy(int key)
   if ( semid == -1 ) return;
   semctl(semid, 0, IPC_RMID, 0);
 }
+
+
+} // end namespace fawkes

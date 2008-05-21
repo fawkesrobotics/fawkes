@@ -28,7 +28,7 @@
 
 #include <core/plugin.h>
 
-class FvOmniBallPlugin : public Plugin
+class FvOmniBallPlugin : public fawkes::Plugin
 {
  public:
   FvOmniBallPlugin();

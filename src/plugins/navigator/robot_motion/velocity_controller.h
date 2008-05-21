@@ -31,7 +31,7 @@
 class VelocityController
 {
  public:
-  VelocityController(Clock* clock, unsigned int avg_loop_time_ms,
+  VelocityController(fawkes::Clock* clock, unsigned int avg_loop_time_ms,
 		     unsigned int dimensions);
   virtual ~VelocityController();
 
@@ -42,7 +42,7 @@ class VelocityController
   virtual float* get_next_velocity(float dist_to_target)                     = 0;
 
  protected:
-  Clock* m_clock;
+  fawkes::Clock* m_clock;
   long m_avg_loop_time;
   unsigned int m_dimensions;
 
@@ -51,7 +51,7 @@ class VelocityController
   float* m_next_velocity;
   float* m_start_vel_diff;
 
-  Time m_last_loop;
+  fawkes::Time m_last_loop;
   
  private:
   bool m_first;

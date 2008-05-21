@@ -25,6 +25,7 @@
 
 #include <utils/logging/logger.h>
 
+namespace fawkes {
 
 /** @class Logger logging/logger.h
  * Interface for logging.
@@ -384,3 +385,6 @@ Logger::tlog(LogLevel level, struct timeval *t, const char *component, Exception
     }
   }
 }
+
+
+} // end namespace fawkes

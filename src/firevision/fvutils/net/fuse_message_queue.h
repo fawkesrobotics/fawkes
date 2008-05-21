@@ -34,7 +34,7 @@
  * outbound queues.
  * @author Tim Niemueller
  */
-class FuseNetworkMessageQueue : public LockQueue<FuseNetworkMessage *>
+class FuseNetworkMessageQueue : public fawkes::LockQueue<FuseNetworkMessage *>
 {
 };
 

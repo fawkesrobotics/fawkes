@@ -31,14 +31,17 @@
 #include <gtkmm.h>
 #include <string>
 
-class WorldInfoTransceiver;
-class WorldInfoDataContainer;
+namespace fawkes {
+  class WorldInfoTransceiver;
+  class WorldInfoDataContainer;
+}
 
-class WorldInfoViewerBackendThread : public Thread,
-  public WorldInfoHandler
+class WorldInfoViewerBackendThread
+: public fawkes::Thread,
+  public fawkes::WorldInfoHandler
 {
  public:
-  WorldInfoViewerBackendThread( WorldInfoDataContainer* data_container,
+  WorldInfoViewerBackendThread( fawkes::WorldInfoDataContainer* data_container,
 				const char* addr, unsigned short port,
 				const char* key, const char* iv );
 
@@ -75,16 +78,17 @@ class WorldInfoViewerBackendThread : public Thread,
   
   virtual void opponent_disapp_rcvd(const char *from_host, unsigned int uid);
 
-  virtual void gamestate_rcvd( const char *from_host, worldinfo_gamestate_t game_state, 
-			       worldinfo_gamestate_team_t state_team, 
+  virtual void gamestate_rcvd( const char *from_host,
+			       fawkes::worldinfo_gamestate_t game_state, 
+			       fawkes::worldinfo_gamestate_team_t state_team, 
 			       unsigned int score_cyan, unsigned int score_magenta, 
-			       worldinfo_gamestate_team_t our_team, 
-			       worldinfo_gamestate_goalcolor_t our_goal_color,
-			       worldinfo_gamestate_half_t half );
+			       fawkes::worldinfo_gamestate_team_t our_team, 
+			       fawkes::worldinfo_gamestate_goalcolor_t our_goal_color,
+			       fawkes::worldinfo_gamestate_half_t half );
 
  private:
-  WorldInfoTransceiver* m_transceiver;
-  WorldInfoDataContainer* m_data_container;
+  fawkes::WorldInfoTransceiver* m_transceiver;
+  fawkes::WorldInfoDataContainer* m_data_container;
 
   Glib::Dispatcher m_signal_new_worldinfo_data;
   Glib::Dispatcher m_signal_new_gamestate_data;

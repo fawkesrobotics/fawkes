@@ -25,6 +25,8 @@
 #include <apps/fountain/fountain_plugin.h>
 #include <apps/fountain/fountain_thread.h>
 
+using namespace fawkes;
+
 /** @class FvFountainPlugin <fountain_plugin.h>
  * FireVision Fountain Plugin.
  * This is the FireVision fountain plugin. It is a simple plugin that will

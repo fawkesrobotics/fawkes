@@ -55,7 +55,7 @@ warning_libjpeg:
 warning_libpng:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PNG support$(TNORMAL) (No libpng[-devel] installed)"
 warning_opencv:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenCV dependent stuff in the fvutils$(TNORMAL) (No libopencv[-devel] installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenCV dependent stuff in the fvutils$(TNORMAL) (No opencv[-devel] installed)"
 endif
 
 # We are lazy in the utils...

@@ -35,6 +35,8 @@
 #include <cmath>
 #include <unistd.h>
 
+using namespace fawkes;
+
 /** @class MotorThread plugins/navigator/motor_thread.h
  * The thread controlling the motors.
  * It gets some driving commands and calculates the rpms for

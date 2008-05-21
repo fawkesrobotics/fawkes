@@ -29,6 +29,7 @@
 #include <netcomm/fawkes/message_content.h>
 #include <sys/types.h>
 
+namespace fawkes {
 
 class StringContent : public FawkesNetworkMessageContent
 {
@@ -48,5 +49,7 @@ class StringContent : public FawkesNetworkMessageContent
   char *  __string;
 
 };
+
+} // end namespace fawkes
 
 #endif

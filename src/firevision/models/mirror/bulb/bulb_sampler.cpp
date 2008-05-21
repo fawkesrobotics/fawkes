@@ -30,6 +30,7 @@
 #include <cmath>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class BulbSampler <models/mirror/bulb/bulb_sampler.h>
  * Bulb sampler.

@@ -30,6 +30,8 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+namespace fawkes {
+
 #pragma pack(push,4)
 
 /** Dynamic list type.
@@ -80,5 +82,7 @@ class DynamicBuffer
   void              *_it_curdata;
 
 };
+
+} // end namespace fawkes
 
 #endif

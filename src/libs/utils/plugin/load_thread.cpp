@@ -36,6 +36,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class PluginLoadThread <utils/plugin/load_thread.h>
  * Plugin load thread.
  * This thread is used internally by the plugin loader for asynchronous
@@ -172,3 +174,6 @@ PluginLoadThread::loop()
   _finished = true;
   exit();
 }
+
+
+} // end namespace fawkes

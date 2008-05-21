@@ -33,6 +33,9 @@
 #  include <ext/hash_map>
 #endif
 
+namespace fawkes {
+
+
 template <class KeyType,
           class ValueType,
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
@@ -142,5 +145,7 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::mutex() const
 {
   return __mutex;
 }
+
+} // end namespace fawkes
 
 #endif

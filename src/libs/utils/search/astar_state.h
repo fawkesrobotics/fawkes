@@ -28,6 +28,8 @@
 
 #include <vector>
 
+namespace fawkes {
+
 /** @class AStarState <utils/search/astar_state.h>
  *  This is the abstract(!) class for an A* State.
  * 
@@ -79,5 +81,7 @@ class AStarState
   /** The unique key of this state. */
   long key;
 };
+
+} // end namespace fawkes
 
 #endif

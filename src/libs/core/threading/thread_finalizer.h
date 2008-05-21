@@ -28,6 +28,9 @@
 
 #include <core/exception.h>
 
+namespace fawkes {
+
+
 class Thread;
 
 class CannotFinalizeThreadException : public Exception
@@ -45,5 +48,8 @@ class ThreadFinalizer
   virtual bool prepare_finalize(Thread *thread)                      = 0;
   virtual void finalize(Thread *thread)                              = 0;
 };
+
+
+} // end namespace fawkes
 
 #endif

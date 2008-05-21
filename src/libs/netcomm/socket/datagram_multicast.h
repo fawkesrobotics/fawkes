@@ -27,6 +27,9 @@
 #define __NETCOMM_SOCKET_DATAGRAM_MULTICAST_H_
 
 #include <netcomm/socket/socket.h>
+#include <netinet/in.h>
+
+namespace fawkes {
 
 class MulticastDatagramSocket : public Socket
 {
@@ -46,8 +49,10 @@ class MulticastDatagramSocket : public Socket
   void set_ttl(int ttl);
 
  private:
-  struct sockaddr_in *multicast_addr;
+  struct ::sockaddr_in *multicast_addr;
 
 };
+
+} // end namespace fawkes
 
 #endif

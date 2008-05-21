@@ -35,6 +35,9 @@
 
 #include <getopt.h>
 
+
+namespace fawkes {
+
 /** Thrown if unknown argument was supplied */
 class UnknownArgumentException : public Exception
 {
@@ -93,5 +96,7 @@ class ArgumentParser
   int     _argc;
 
 };
+
+} // end namespace fawkes
 
 #endif

@@ -26,7 +26,9 @@
 
 #include <netcomm/worldinfo/messages.h>
 
-#include <stdio.h>
+#include <cstdio>
+
+using namespace fawkes;
 
 int
 main(int argc, char **argv)

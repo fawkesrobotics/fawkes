@@ -34,14 +34,16 @@
 class Camera;
 class SharedMemoryImageBuffer;
 class SeqWriter;
-class TimeTracker;
 class ColorModelLookupTable;
+namespace fawkes {
+  class TimeTracker;
+}
 
 class FvRetrieverThread
-: public Thread,
-  public ConfigurableAspect,
-  public LoggingAspect,
-  public VisionAspect
+: public fawkes::Thread,
+  public fawkes::ConfigurableAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::VisionAspect
 {
  public:
   FvRetrieverThread();
@@ -55,7 +57,7 @@ class FvRetrieverThread
   Camera *cam;
   SharedMemoryImageBuffer *shm;
   SeqWriter *seq_writer;
-  TimeTracker *__tt;
+  fawkes::TimeTracker *__tt;
   unsigned int __loop_count;
   unsigned int __ttc_capture;
   unsigned int __ttc_memcpy;

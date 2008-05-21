@@ -47,6 +47,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class BlackBoardInterfaceManager <blackboard/interface_manager.h>
  * BlackBoard interface manager.
  * This class is used by the BlackBoard to manage interfaces stored in the
@@ -522,3 +524,5 @@ BlackBoardInterfaceManager::num_readers(const Interface *interface) const
   const interface_header_t *ih = (interface_header_t *)interface->__mem_real_ptr;
   return ih->num_readers;
 }
+
+} // end namespace fawkes

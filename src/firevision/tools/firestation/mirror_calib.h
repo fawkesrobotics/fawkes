@@ -78,7 +78,7 @@ class MirrorCalibTool : public BulbGeneratorProgressHandler
   unsigned int m_num_dists;
   unsigned int m_num_oris;
 
-  HomPoint m_next_sample_point;
+  fawkes::HomPoint m_next_sample_point;
 
   bool m_calib_done;
   bool m_step_two;

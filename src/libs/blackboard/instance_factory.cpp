@@ -34,6 +34,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class BlackBoardInstanceFactory <blackboard/instance_factory.h>
  * BlackBoard instance factory.
  * This class is used to interact with the interface shared object to create
@@ -116,3 +118,5 @@ BlackBoardInstanceFactory::delete_interface_instance(Interface *interface)
   idf(interface);
   free(destroyer_name);
 }
+
+} // end namespace fawkes

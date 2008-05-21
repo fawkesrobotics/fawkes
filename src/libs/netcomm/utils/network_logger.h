@@ -34,6 +34,8 @@
 
 #include <stdint.h>
 
+namespace fawkes {
+
 class Mutex;
 class FawkesNetworkHub;
 
@@ -137,5 +139,6 @@ class NetworkLoggerMessageContent : public FawkesNetworkMessageContent
   const char *__message;
 };
 
+} // end namespace fawkes
 
 #endif

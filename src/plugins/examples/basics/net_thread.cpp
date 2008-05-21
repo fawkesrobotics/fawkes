@@ -28,6 +28,8 @@
 #include <cstdlib>
 #include <unistd.h>
 
+using namespace fawkes;
+
 /** @class ExampleNetworkThread plugins/examples/basics/net_thread.h
  * Network thread of example plugin.
  * @author Tim Niemueller

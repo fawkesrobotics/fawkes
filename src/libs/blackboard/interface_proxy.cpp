@@ -37,6 +37,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class BlackBoardInterfaceProxy <blackboard/interface_proxy.h>
  * Interface proxy for remote BlackBoard.
  * This proxy is used internally by RemoteBlackBoard to interact with an interface
@@ -313,3 +315,5 @@ BlackBoardInterfaceProxy::transmit(Message *message)
 
   return 0;
 }
+
+} // end namespace fawkes

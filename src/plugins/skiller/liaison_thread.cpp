@@ -33,6 +33,8 @@
 
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class SkillerLiaisonThread <plugins/skiller/liaison_thread.h>
  * Skiller Liaison Thread.
  * This threads connects the skill module to the Fawkes main loop. It gathers
@@ -44,7 +46,7 @@
 /** Constructor.
  * @param liaison_exec_barrier Barrier used to synchronize liaison and exec thread
  */
-SkillerLiaisonThread::SkillerLiaisonThread(Barrier *liaison_exec_barrier)
+SkillerLiaisonThread::SkillerLiaisonThread(fawkes::Barrier *liaison_exec_barrier)
   : Thread("SkillerLiaisonThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL)
 {

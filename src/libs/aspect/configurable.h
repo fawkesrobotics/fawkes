@@ -28,15 +28,19 @@
 
 #include <config/config.h>
 
+namespace fawkes {
+
 class ConfigurableAspect
 {
  public:
   virtual ~ConfigurableAspect();
 
-  void initConfigurableAspect(Configuration *config);
+  void init_ConfigurableAspect(Configuration *config);
 
  protected:
   Configuration *config;
 };
+
+} // end namespace fawkes
 
 #endif

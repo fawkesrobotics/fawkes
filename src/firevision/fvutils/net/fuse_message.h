@@ -35,7 +35,7 @@
 
 class FuseMessageContent;
 
-class FuseNetworkMessage : public RefCount
+class FuseNetworkMessage : public fawkes::RefCount
 {
  public:
   FuseNetworkMessage();
@@ -64,7 +64,7 @@ class FuseNetworkMessage : public RefCount
     msg() const
     {
       if ( payload_size() != sizeof(MT) ) {
-	throw TypeMismatchException("FawkesNetworkMessage: message has incorrect size for this type");
+	throw fawkes::TypeMismatchException("FawkesNetworkMessage: message has incorrect size for this type");
       }
       return (MT *)(_msg.payload);
     }
@@ -82,7 +82,7 @@ class FuseNetworkMessage : public RefCount
     msg_copy() const
     {
       if ( payload_size() != sizeof(MT) ) {
-	throw TypeMismatchException("FawkesNetworkMessage: message has incorrect size for this type");
+	throw fawkes::TypeMismatchException("FawkesNetworkMessage: message has incorrect size for this type");
       }
       void *tmp = malloc(sizeof(MT));
       memcpy(tmp, _msg.payload, sizeof(MT));
@@ -106,10 +106,10 @@ class FuseNetworkMessage : public RefCount
       try {
 	MT *m = new MT(type(), _msg.payload, payload_size());
 	return m;
-      } catch (Exception &e) {
+      } catch (fawkes::Exception &e) {
 	throw;
       } catch (...) {
-	throw Exception("Unknown exception caught while parsing complex network message");
+	throw fawkes::Exception("Unknown exception caught while parsing complex network message");
       }
     }
 

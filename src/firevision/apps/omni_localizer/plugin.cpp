@@ -25,6 +25,8 @@
 #include <apps/omni_localizer/plugin.h>
 #include <apps/omni_localizer/pipeline_thread.h>
 
+using namespace fawkes;
+
 /** @class FvOmniLocalizerPlugin <apps/omni_localizer/plugin.h>
  * Omnivision self-localization plugin.
  *

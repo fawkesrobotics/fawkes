@@ -43,6 +43,7 @@
 #include <vector>
 
 using namespace std;
+using namespace fawkes;
 
 
 bool quit = false;

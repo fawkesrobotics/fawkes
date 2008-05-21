@@ -29,6 +29,8 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class Plugin core/plugin.h
  * Plugin interface class.
  * Derive this class to create a new Fawkes plugin. There is not much that
@@ -53,55 +55,6 @@
  *
  * @ingroup FCL
  * @author Tim Niemueller
- */
-
-
-/** @typedef void      (* PluginDestroyFunc)  (Plugin *)
- * Plugin destructor function for the shared library.
- * Declare and define this function exactly like this:
- *
- * @code
- * extern "C"
- * void
- * plugin_destroy(Plugin *plugin)
- * {
- *   delete plugin;
- * }
- * @endcode
- * Do not change the type or name of this function or type of arguments
- * of this function!
- *
- * There is a convenience macro that you can use to create a function like
- * the one above called PLUGIN_FACTORY(class_name).
- *
- * It is recommended to use the EXPORT_PLUGIN(class_name) macro which will
- * create proper plugin factory and destroy functions.
- *
- * @relates Plugin
- */
-
-/** @typedef Plugin *  (* PluginFactoryFunc)  (void);
- * Plugin loader function for the shared library
- * Declare and define this function exactly like this:
- *
- * @code
- * extern "C"
- * Plugin *
- * plugin_factory()
- * {
- *  return new MightyPlugin();
- * }
- * @endcode
- * Do not change the type or name of this function, replace MightyPlugin
- * with the name of your plugin derivative.
- *
- * There is a convenience macro that you can use to create a function like
- * the one above called PLUGIN_DESTROY(class_name).
- *
- * It is recommended to use the EXPORT_PLUGIN(class_name) macro which will
- * create proper plugin factory and destroy functions.
- *
- * @relates Plugin
  */
 
 
@@ -167,3 +120,6 @@ Plugin::name() const
 {
   return _name;
 }
+
+
+} // end namespace fawkes

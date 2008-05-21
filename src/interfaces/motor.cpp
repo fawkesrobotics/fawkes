@@ -30,7 +30,9 @@
 #include <cstring>
 #include <cstdlib>
 
-/** @class MotorInterface interfaces/motor.h
+namespace fawkes {
+
+/** @class MotorInterface <interfaces/motor.h>
  * MotorInterface Fawkes BlackBoard Interface.
  * This are the actual RPMs of the motors taken from the VMC.
  */
@@ -1701,3 +1703,5 @@ MotorInterface::message_valid(const Message *message) const
 EXPORT_INTERFACE(MotorInterface)
 /// @endcond
 
+
+} // end namespace fawkes

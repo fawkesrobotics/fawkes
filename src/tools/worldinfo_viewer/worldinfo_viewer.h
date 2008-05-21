@@ -29,16 +29,18 @@
 #include <libglademm/xml.h>
 #include <cairomm/context.h>
 
-class WorldInfoDataContainer;
 class FieldView;
-class RemoteBlackBoard;
-class BatteryInterface;
+namespace fawkes {
+  class WorldInfoDataContainer;
+  class RemoteBlackBoard;
+  class BatteryInterface;
+}
 
 class WorldInfoViewer : public Gtk::Window
 {
  public:
   WorldInfoViewer( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
-		   WorldInfoDataContainer* data_container );
+		   fawkes::WorldInfoDataContainer* data_container );
   virtual ~WorldInfoViewer();
 
   Gtk::Window& get_window() const;
@@ -79,12 +81,12 @@ class WorldInfoViewer : public Gtk::Window
   RobotRecord m_robot_record;
   Glib::RefPtr<Gtk::ListStore> m_robots_list;
 
-  WorldInfoDataContainer* m_data_container;
+  fawkes::WorldInfoDataContainer* m_data_container;
 
   unsigned int m_robot_id;
   std::map<Glib::ustring, unsigned int> m_robots;
-  std::map<unsigned int, RemoteBlackBoard*> m_remote_bbs;
-  std::map<unsigned int, BatteryInterface*> m_battery_interfaces;
+  std::map<unsigned int, fawkes::RemoteBlackBoard*> m_remote_bbs;
+  std::map<unsigned int, fawkes::BatteryInterface*> m_battery_interfaces;
   std::map<unsigned int, Gtk::TreeModel::Row> m_list_entries;
   std::map<unsigned int, bool> m_robot_active;
 };

@@ -33,6 +33,8 @@
 #include <cstdlib>
 #include <cstddef>
 
+namespace fawkes {
+
 /** @class FawkesNetworkMessageTooBigException netcomm/fawkes/message.h
  * The given message size exceeds the limit.
  * The message payload can only be of a certain size, which is limited especially
@@ -414,3 +416,5 @@ FawkesNetworkMessage::pack()
     _msg.header.payload_size = htonl(_content->payload_size());
   }
 }
+
+} // end namespace fawkes

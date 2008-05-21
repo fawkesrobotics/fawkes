@@ -35,6 +35,8 @@
 #  include <cstring>
 #endif
 
+using namespace fawkes;
+
 void
 SkillerExecutionThread::inotify_watch_dir(std::string dir)
 {

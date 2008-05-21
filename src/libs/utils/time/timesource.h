@@ -28,6 +28,8 @@
 
 #include <sys/time.h>
 
+namespace fawkes {
+
 /** TimeSource interface.
  * This interfaces describes a way to interact with time sources that can be
  * given to a Clock (for instance for simulation environments).
@@ -50,5 +52,7 @@ class TimeSource
    */
   virtual timeval conv_to_realtime(const timeval* tv) const = 0;
 };
+
+} // end namespace fawkes
 
 #endif /*  __UTILS_TIME_TIMESOURCE_H_ */

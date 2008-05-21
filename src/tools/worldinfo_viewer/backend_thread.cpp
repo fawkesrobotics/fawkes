@@ -26,6 +26,8 @@
 #include <worldinfo_utils/data_container.h>
 #include <netcomm/worldinfo/transceiver.h>
 
+using namespace fawkes;
+
 /** @class WorldInfoViewerBackendThread <tools/worldinfo_viewer/backend_thread.h>
  * The backend thread of the worldinfo viewer application.
  * @author Daniel Beck

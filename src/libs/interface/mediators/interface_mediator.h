@@ -26,6 +26,8 @@
 #ifndef __INTERFACE_MEDIATOR_H_
 #define __INTERFACE_MEDIATOR_H_
 
+namespace fawkes {
+
 class Interface;
 
 /** Interface mediator interface.
@@ -62,5 +64,7 @@ class InterfaceMediator
    */
   virtual void notify_of_data_change(const Interface *interface)         = 0;
 };
+
+} // end namespace fawkes
 
 #endif

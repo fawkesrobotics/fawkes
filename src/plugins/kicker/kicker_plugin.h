@@ -27,7 +27,7 @@
 
 #include <core/plugin.h>
 
-class KickerPlugin : public Plugin 
+class KickerPlugin : public fawkes::Plugin 
 {
  public:
   KickerPlugin();

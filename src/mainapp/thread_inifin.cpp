@@ -30,6 +30,8 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
 
+using namespace fawkes;
+
 /** @class FawkesThreadIniFin mainapp/thread_inifin.h
  * Fawkes Thread Initializer/Finalizer.
  * Initializes threads that are added to the thread manager if needed.

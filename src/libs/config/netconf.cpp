@@ -40,6 +40,8 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class CannotEnableMirroringException config/netconf.h
  * Thrown if enabling mirror mode failed.
  */
@@ -1504,3 +1506,5 @@ NetworkConfiguration::NetConfValueIterator::get_string()
     return i->get_string();
   }
 }
+
+} // end namespace fawkes

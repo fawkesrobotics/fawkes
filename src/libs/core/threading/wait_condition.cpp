@@ -31,6 +31,9 @@
 #include <pthread.h>
 #include <cerrno>
 
+namespace fawkes {
+
+
 /// @cond INTERNALS
 class WaitConditionData
 {
@@ -192,3 +195,5 @@ WaitCondition::wake_all()
   pthread_mutex_unlock( &(cond_data->mutex) );
 }
 
+
+} // end namespace fawkes

@@ -93,7 +93,7 @@ VelocityFromGlobal::setRobotPosition(float x, float y, float ori, timeval t)
   robot_pos_x   = x;
   robot_pos_y   = y;
   robot_pos_ori = ori;
-  robot_pos_age = time_diff_sec(_now, t);
+  robot_pos_age = fawkes::time_diff_sec(_now, t);
 }
 
 

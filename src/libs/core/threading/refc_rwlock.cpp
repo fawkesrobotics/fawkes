@@ -25,6 +25,8 @@
 
 #include <core/threading/refc_rwlock.h>
 
+namespace fawkes {
+
 /** @class RefCountRWLock core/threading/refc_rwlock.h
  * Read/write lock with reference counting.
  * This class is a combination of ReadWriteLock and RefCount. A reference count
@@ -50,3 +52,6 @@ RefCountRWLock::RefCountRWLock(ReadWriteLock::ReadWriteLockPolicy policy)
 RefCountRWLock::~RefCountRWLock()
 {
 }
+
+
+} // end namespace fawkes

@@ -69,13 +69,13 @@ FacesClassifier::FacesClassifier(const char *haarcascade_file,
 
   __cascade = (CvHaarClassifierCascade *) cvLoad(haarcascade_file);
   if ( ! __cascade ) {
-    throw Exception("Could not load Haar casca via OpenCV");
+    throw fawkes::Exception("Could not load Haar casca via OpenCV");
   }
 
   __storage = cvCreateMemStorage(0);
   if ( ! __storage ) {
     cvReleaseHaarClassifierCascade(&__cascade);
-    throw Exception("Could not initialize OpenCV memory");
+    throw fawkes::Exception("Could not initialize OpenCV memory");
   }
 
   if ( image ) {

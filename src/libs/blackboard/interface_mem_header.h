@@ -30,6 +30,8 @@
 
 #include <stdint.h>
 
+namespace fawkes {
+
 /** This struct is used as header for interfaces in memory chunks.
  * This header is stored at the beginning of each allocated memory chunk.
  */
@@ -44,5 +46,6 @@ typedef struct {
   uint32_t         serial;			/**< memory serial */
 } interface_header_t;
 
+} // end namespace fawkes
 
 #endif

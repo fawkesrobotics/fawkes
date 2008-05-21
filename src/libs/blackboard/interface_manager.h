@@ -33,6 +33,8 @@
 
 #include <list>
 
+namespace fawkes {
+
 class Interface;
 class InterfaceInfoList;
 class BlackBoardMemoryManager;
@@ -94,5 +96,7 @@ class BlackBoardInterfaceManager : public InterfaceMediator
   LockMap< unsigned int, Interface * >              writer_interfaces;
   LockMap< unsigned int, RefCountRWLock * >         rwlocks;
 };
+
+} // end namespace fawkes
 
 #endif

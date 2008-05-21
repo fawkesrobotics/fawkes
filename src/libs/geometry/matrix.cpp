@@ -30,6 +30,8 @@
 #include <cstdlib>
 #include <cstdio>
 
+namespace fawkes {
+
 /** @class Matrix <geometry/matrix.h>
  * A general matrix class. It provides all the
  * operations that are commonly used with a matrix.
@@ -668,3 +670,5 @@ Matrix::print_info(const char* name)  const
       printf("\n");
     }
 }
+
+} // end namespace fawkes

@@ -30,7 +30,9 @@
 #include <cstring>
 #include <cstdlib>
 
-/** @class SkillerInterface interfaces/skiller.h
+namespace fawkes {
+
+/** @class SkillerInterface <interfaces/skiller.h>
  * SkillerInterface Fawkes BlackBoard Interface.
  * 
       The interface provides access to the skill execution runtime plugin.
@@ -604,3 +606,5 @@ SkillerInterface::message_valid(const Message *message) const
 EXPORT_INTERFACE(SkillerInterface)
 /// @endcond
 
+
+} // end namespace fawkes

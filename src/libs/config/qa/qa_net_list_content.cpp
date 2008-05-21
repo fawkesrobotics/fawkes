@@ -26,11 +26,11 @@
 /// @cond QA
 
 #include <config/net_list_content.h>
-#include <mainapp/plugin_list_message.h>
 
 #include <iostream>
 
 using namespace std;
+using namespace fawkes;
 
 int
 main(int argc, char **argv)

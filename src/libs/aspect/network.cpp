@@ -25,6 +25,8 @@
 
 #include <aspect/network.h>
 
+namespace fawkes {
+
 /** @class NetworkAspect aspect/network.h
  * Thread aspect for network communication.
  * Give this aspect to your thread if you want to implement custom network
@@ -73,11 +75,13 @@ NetworkAspect::~NetworkAspect()
  * @param service_browser service browser
  */
 void
-NetworkAspect::initNetworkAspect(NetworkNameResolver *resolver,
-				 ServicePublisher *service_publisher,
-				 ServiceBrowser *service_browser)
+NetworkAspect::init_NetworkAspect(NetworkNameResolver *resolver,
+				  ServicePublisher *service_publisher,
+				  ServiceBrowser *service_browser)
 {
   this->nnresolver = resolver;
   this->service_publisher = service_publisher;
   this->service_browser = service_browser;
 }
+
+} // end namespace fawkes

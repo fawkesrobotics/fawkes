@@ -29,6 +29,8 @@
 #include <interface/interface.h>
 #include <interface/message.h>
 
+namespace fawkes {
+
 class FacerInterface : public Interface
 {
  /// @cond INTERNALS
@@ -121,5 +123,7 @@ class FacerInterface : public Interface
   size_t maxlenof_face_label() const;
 
 };
+
+} // end namespace fawkes
 
 #endif

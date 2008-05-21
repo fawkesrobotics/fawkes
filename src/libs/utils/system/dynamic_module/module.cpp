@@ -25,6 +25,8 @@
 
 #include <utils/system/dynamic_module/module.h>
 
+namespace fawkes {
+
 /** @class ModuleOpenException <utils/system/dynamic_module/module.h>
  * Opening a module failed.
  * Thrown if a call to Module::open() failed.
@@ -90,3 +92,6 @@ ModuleOpenException::ModuleOpenException(const char *msg)
 Module::~Module()
 {
 }
+
+
+} // end namespace fawkes

@@ -28,6 +28,7 @@
 #include <cstdio>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class FieldView <tools/worldinfo_viewer/field_view.h>
  * Drawing widget that draws an (MSL-) soccer field with robots, opponentes, and balls.

@@ -34,6 +34,8 @@
 #include <map>
 #include <string>
 
+namespace fawkes {
+
 /// @cond QA
 class PluginLoaderData
 {
@@ -276,3 +278,5 @@ PluginLoader::unload(Plugin *plugin)
     d->plugin_name_map.erase(plugin);
   }
 }
+
+} // end namespace fawkes

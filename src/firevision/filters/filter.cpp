@@ -29,6 +29,8 @@
 #include <cstdlib>
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class Filter <filters/filter.h>
  * Filter interface.
  * This class defines the general interface that filters are used with.

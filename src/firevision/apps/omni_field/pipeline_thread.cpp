@@ -47,6 +47,7 @@
 #include <cstdio>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class FvOmniFieldPipelineThread <apps/omni_field/pipeline_thread.h>
  * Field detector thread.

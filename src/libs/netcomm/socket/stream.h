@@ -28,6 +28,8 @@
 
 #include <netcomm/socket/socket.h>
 
+namespace fawkes {
+
 class StreamSocket : public Socket
 {
  public:
@@ -41,5 +43,7 @@ class StreamSocket : public Socket
 
  protected:
 };
+
+} // end namespace fawkes
 
 #endif

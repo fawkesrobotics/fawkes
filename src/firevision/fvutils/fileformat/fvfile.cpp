@@ -36,6 +36,7 @@
 #  include <strfunc.h>
 #endif
 
+using namespace fawkes;
 
 /** @class FireVisionDataFile <fvutils/fileformat/fvff.h>
  * FireVision File Format for data files.

@@ -32,6 +32,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+using namespace fawkes;
+
 /** @class PNGWriter <fvutils/writers/png.h>
  * PNG file writer.
  */

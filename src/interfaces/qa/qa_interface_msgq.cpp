@@ -31,6 +31,7 @@
 #include <typeinfo>
 
 using namespace std;
+using namespace fawkes;
 
 void
 printMessages(MessageQueue *mq)

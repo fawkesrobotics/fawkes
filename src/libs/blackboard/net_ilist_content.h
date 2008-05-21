@@ -30,6 +30,8 @@
 #include <netcomm/fawkes/message_content.h>
 #include <interface/interface_info.h>
 
+namespace fawkes {
+
 class DynamicBuffer;
 
 class BlackBoardInterfaceListContent : public FawkesNetworkMessageContent
@@ -54,5 +56,7 @@ class BlackBoardInterfaceListContent : public FawkesNetworkMessageContent
   DynamicBuffer     *interface_list;
   bb_ilist_msg_t     msg;
 };
+
+} // end namespace fawkes
 
 #endif

@@ -32,6 +32,7 @@
 #include <utils/math/angle.h>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class FrontBallRelativePos <models/relative_position/front_ball.h>
  * Relative ball position model for front vision.

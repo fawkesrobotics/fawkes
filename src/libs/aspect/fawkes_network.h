@@ -28,15 +28,19 @@
 
 #include <netcomm/fawkes/hub.h>
 
+namespace fawkes {
+
 class FawkesNetworkAspect
 {
  public:
   virtual ~FawkesNetworkAspect();
 
-  void initFawkesNetworkAspect(FawkesNetworkHub *fnethub);
+  void init_FawkesNetworkAspect(FawkesNetworkHub *fnethub);
 
  protected:
   FawkesNetworkHub *fnethub;
 };
+
+} // end namespace fawkes
 
 #endif

@@ -26,6 +26,8 @@
 #ifndef __NETCOMM_WORLDINFO_ENUMS_H_
 #define __NETCOMM_WORLDINFO_ENUMS_H_
 
+namespace fawkes {
+
 /** Game states. */
 typedef enum {
   GS_FROZEN       =  0,	/**< Frozen, nothing moves */
@@ -68,5 +70,7 @@ const char * worldinfo_gamestate_tostring(worldinfo_gamestate_t gamestate);
 const char * worldinfo_gamestate_team_tostring(worldinfo_gamestate_team_t team);
 const char * worldinfo_gamestate_goalcolor_tostring(worldinfo_gamestate_goalcolor_t goal_color);
 const char * worldinfo_gamestate_half_tostring(worldinfo_gamestate_half_t half);
+
+} // end namespace fawkes
 
 #endif

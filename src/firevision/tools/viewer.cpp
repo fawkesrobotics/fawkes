@@ -55,6 +55,8 @@
 
 #include <fvutils/color/conversions.h>
 
+using namespace fawkes;
+
 void
 print_usage(const char *program_name)
 {

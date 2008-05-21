@@ -105,7 +105,7 @@ InterfaceParser::getFields(xmlpp::Node *node)
     try {
       f.valid();
       result.push_back(f);
-    } catch ( Exception &e ) {
+    } catch ( fawkes::Exception &e ) {
       e.print_trace();
     }
   }

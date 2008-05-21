@@ -38,22 +38,24 @@
 #include <geometry/hom_vector.h>
 #include <geometry/matrix.h>
 
-class GameStateInterface;
-class ObjectPositionInterface;
-class WorldInfoDataContainer;
+namespace fawkes {
+  class GameStateInterface;
+  class ObjectPositionInterface;
+  class WorldInfoDataContainer;
+  class WorldInfoTransceiver;
+}
 class WorldModelNetworkThread;
-class WorldInfoTransceiver;
 
 class WorldModelThread
-: public Thread,
-  public BlockedTimingAspect,
-  public LoggingAspect,
-  public ConfigurableAspect,
-  public BlackBoardAspect,
-  public ClockAspect,
-  public NetworkAspect,
-  public BlackBoardInterfaceListener,
-  public BlackBoardInterfaceObserver
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::ClockAspect,
+  public fawkes::NetworkAspect,
+  public fawkes::BlackBoardInterfaceListener,
+  public fawkes::BlackBoardInterfaceObserver
 {
  public:
   WorldModelThread(WorldModelNetworkThread *net_thread);
@@ -68,53 +70,54 @@ class WorldModelThread
   virtual void bb_interface_destroyed(const char *type, const char *id) throw();
 
   // interface listener
-  virtual void bb_interface_reader_added(Interface *interface, unsigned int instance_serial) throw();
-  virtual void bb_interface_reader_removed(Interface *interface, unsigned int instance_serial) throw();
-  virtual void bb_interface_writer_added(Interface *interface, unsigned int instance_serial) throw();
-  virtual void bb_interface_writer_removed(Interface *interface, unsigned int instance_serial) throw();
+  virtual void bb_interface_reader_added(fawkes::Interface *interface, unsigned int instance_serial) throw();
+  virtual void bb_interface_reader_removed(fawkes::Interface *interface, unsigned int instance_serial) throw();
+  virtual void bb_interface_writer_added(fawkes::Interface *interface, unsigned int instance_serial) throw();
+  virtual void bb_interface_writer_removed(fawkes::Interface *interface, unsigned int instance_serial) throw();
 
  private:
-  class BlackboardNotificationProxy : public BlackBoardInterfaceListener
+  class BlackboardNotificationProxy
+    : public fawkes::BlackBoardInterfaceListener
   {
   public:
-    BlackboardNotificationProxy(BlackBoardInterfaceListener* listener);
+    BlackboardNotificationProxy(fawkes::BlackBoardInterfaceListener* listener);
     virtual ~BlackboardNotificationProxy();
 
-    virtual void bb_interface_reader_added(Interface *interface, unsigned int instance_serial) throw();
-    virtual void bb_interface_reader_removed(Interface *interface, unsigned int instance_serial) throw();
-    virtual void bb_interface_writer_added(Interface *interface, unsigned int instance_serial) throw();
-    virtual void bb_interface_writer_removed(Interface *interface, unsigned int instance_serial) throw();
+    virtual void bb_interface_reader_added(fawkes::Interface *interface, unsigned int instance_serial) throw();
+    virtual void bb_interface_reader_removed(fawkes::Interface *interface, unsigned int instance_serial) throw();
+    virtual void bb_interface_writer_added(fawkes::Interface *interface, unsigned int instance_serial) throw();
+    virtual void bb_interface_writer_removed(fawkes::Interface *interface, unsigned int instance_serial) throw();
 
-    void add_interface(Interface *interface);
+    void add_interface(fawkes::Interface *interface);
 
   private:
-    BlackBoardInterfaceListener *listener;
+    fawkes::BlackBoardInterfaceListener *listener;
   };
 
   void init_failure_cleanup();
 
  private:
-  bool localBallPosition( HomVector &local_ball_pos, Matrix &local_ball_cov );
-  bool globalBallPosition( bool localBallAvailable, const HomVector &local_ball_pos, const Matrix &local_ball_cov,
-                           HomVector &global_ball_pos, Matrix &global_ball_cov );
+  bool localBallPosition( fawkes::HomVector &local_ball_pos, fawkes::Matrix &local_ball_cov );
+  bool globalBallPosition( bool localBallAvailable, const fawkes::HomVector &local_ball_pos, const fawkes::Matrix &local_ball_cov,
+                           fawkes::HomVector &global_ball_pos, fawkes::Matrix &global_ball_cov );
 
   typedef std::map<unsigned int, BlackboardNotificationProxy *> ProxyMap;
   ProxyMap proxy_map;
-  LockList<BlackboardNotificationProxy *> proxy_delete_list;
+  fawkes::LockList<BlackboardNotificationProxy *> proxy_delete_list;
 
-  GameStateInterface *wm_game_state_interface;
-  ObjectPositionInterface *wm_ball_interface;
-  ObjectPositionInterface *wm_pose_interface;
+  fawkes::GameStateInterface *wm_game_state_interface;
+  fawkes::ObjectPositionInterface *wm_ball_interface;
+  fawkes::ObjectPositionInterface *wm_pose_interface;
 
-  LockList<ObjectPositionInterface *>  *in_ball_interfaces;
-  ObjectPositionInterface *in_pose_interface;
-/*   LockList<ObjectPositionInterface *>  *wm_opp_interfaces; */
-/*   LockList<ObjectPositionInterface *>  *in_opp_interfaces; */
-  LockList<ObjectPositionInterface *>::iterator opii;
+  fawkes::LockList<fawkes::ObjectPositionInterface *>  *in_ball_interfaces;
+  fawkes::ObjectPositionInterface *in_pose_interface;
+/*   LockList<fawkes::ObjectPositionInterface *>  *wm_opp_interfaces; */
+/*   LockList<fawkes::ObjectPositionInterface *>  *in_opp_interfaces; */
+  fawkes::LockList<fawkes::ObjectPositionInterface *>::iterator opii;
 
   WorldModelNetworkThread *net_thread;
-  WorldInfoTransceiver *worldinfo_sender;
-  WorldInfoDataContainer *data;
+  fawkes::WorldInfoTransceiver *worldinfo_sender;
+  fawkes::WorldInfoDataContainer *data;
 };
 
 

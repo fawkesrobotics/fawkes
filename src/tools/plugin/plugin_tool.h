@@ -28,15 +28,19 @@
 #include <netcomm/fawkes/client_handler.h>
 #include <utils/system/signal.h>
 
-class FawkesNetworkClient;
-class FawkesNetworkMessage;
-class ArgumentParser;
+namespace fawkes {
+  class FawkesNetworkClient;
+  class FawkesNetworkMessage;
+  class ArgumentParser;
+}
 
-class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
+class PluginTool
+: public fawkes::SignalHandler,
+  public fawkes::FawkesNetworkClientHandler
 {
  public:
-  PluginTool(ArgumentParser *argp, FawkesNetworkClient *c);
-  PluginTool(FawkesNetworkClient *c);
+  PluginTool(fawkes::ArgumentParser *argp, fawkes::FawkesNetworkClient *c);
+  PluginTool(fawkes::FawkesNetworkClient *c);
   ~PluginTool();
 
   void handle_signal(int signum);
@@ -58,7 +62,7 @@ class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
   void list_avail();
 
   virtual void deregistered(unsigned int id) throw();
-  virtual void inbound_received(FawkesNetworkMessage *msg,
+  virtual void inbound_received(fawkes::FawkesNetworkMessage *msg,
 				unsigned int id) throw();
   virtual void connection_died(unsigned int id) throw();
   virtual void connection_established(unsigned int id) throw();
@@ -74,7 +78,7 @@ class PluginTool : public SignalHandler, public FawkesNetworkClientHandler
     M_UNKNOWN
   } OperationMode;
 
-  FawkesNetworkClient *c;
+  fawkes::FawkesNetworkClient *c;
   OperationMode   opmode;
   const char     *plugin_name;
   const char     *__program_name;

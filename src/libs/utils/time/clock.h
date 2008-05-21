@@ -29,6 +29,8 @@
 
 #include <utils/time/time.h>
 
+namespace fawkes {
+
 class TimeSource;
 
 class Clock
@@ -81,5 +83,7 @@ class Clock
 
   static Clock* _instance;
 };
+
+} // end namespace fawkes
 
 #endif /* __UTILS_TIME_CLOCK_H_ */

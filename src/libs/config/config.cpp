@@ -26,6 +26,7 @@
 #include <config/config.h>
 #include <cstring>
 
+namespace fawkes {
 
 /** @class Configuration config/config.h
  * Interface for configuration handling.
@@ -460,3 +461,4 @@ Configuration::find_handlers(const char *path)
   return rv;
 }
 
+} // end namespace fawkes

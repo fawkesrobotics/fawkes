@@ -18,6 +18,8 @@
 #include <limits>
 #include <cmath>
 
+using namespace fawkes;
+
 long PathState::keyCount = 0;
 
 
@@ -384,7 +386,10 @@ GtsPoint * PathState::nextPoint(GtsPoint* p1, GtsPoint* p2, double &newCost)
  *  @param next_edge the edge where on is the next point of the path
  *  @param children a vector with all successors of this state
  */
-void PathState::addChild(GtsPoint * p1, GtsPoint * p2, GtsEdge * next_edge, std::vector< AStarState * > &children)
+void
+PathState::addChild(GtsPoint * p1, GtsPoint * p2,
+		    GtsEdge * next_edge,
+		    std::vector< AStarState * > &children)
 {
   if(GTS_IS_OBSTACLE(p1))
     obstacle1_radius = GTS_OBSTACLE(p1)->width / 2.;

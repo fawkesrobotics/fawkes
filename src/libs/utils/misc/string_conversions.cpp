@@ -32,6 +32,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+namespace fawkes {
 
 /** @class StringConversions utils/misc/string_conversions.h
  * Utility class that holds string methods.
@@ -204,3 +205,6 @@ StringConversions::toBool(std::string s)
     return false;
   }
 }
+
+
+} // end namespace fawkes

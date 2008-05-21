@@ -26,6 +26,8 @@
 #ifndef __CONFIG_CHANGE_HANDLER_H_
 #define __CONFIG_CHANGE_HANDLER_H_
 
+namespace fawkes {
+
 class ConfigurationChangeHandler
 {
  public:
@@ -45,5 +47,7 @@ class ConfigurationChangeHandler
   char *__path_prefix;
 
 };
+
+} // end namespace fawkes
 
 #endif

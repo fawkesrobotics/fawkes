@@ -114,7 +114,7 @@ ColormapFile::get_colormap()
   BlockList &bl = blocks();
   for (BlockList::iterator b = bl.begin(); b != bl.end(); ++b) {
     if ( (*b)->type() != CMFILE_TYPE_YUV ) {
-      throw Exception("Colormap file contains block of unknown type");
+      throw fawkes::Exception("Colormap file contains block of unknown type");
     }
   }
 
@@ -126,7 +126,7 @@ ColormapFile::get_colormap()
     if ( (*b)->data_size() != cm->plane_size() ) {
       // invalid size, for a YUV colormap we must have this for one plane!
       delete cm;
-      throw Exception("Invalid data size for a YUV block");
+      throw fawkes::Exception("Invalid data size for a YUV block");
     }
 
     cm->copy_uvplane((unsigned char *)(*b)->data_ptr(), level++);

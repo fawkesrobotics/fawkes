@@ -28,6 +28,8 @@
 
 #include <netcomm/socket/socket.h>
 
+namespace fawkes {
+
 class DatagramSocket : public Socket
 {
  public:
@@ -35,8 +37,8 @@ class DatagramSocket : public Socket
   DatagramSocket(DatagramSocket &s);
 
   virtual Socket *  clone();
-
- protected:
 };
+
+} // end namespace fawkes
 
 #endif

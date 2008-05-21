@@ -39,22 +39,24 @@
 #include <string>
 #include <utility>
 
-class FawkesNetworkHub;
-class Mutex;
+namespace fawkes {
+  class FawkesNetworkHub;
+  class Mutex;
+}
 
 class FawkesConfigManager
-: public Thread,
-  public FawkesNetworkHandler,
-  public ConfigurationChangeHandler
+: public fawkes::Thread,
+  public fawkes::FawkesNetworkHandler,
+  public fawkes::ConfigurationChangeHandler
 {
  public:
-  FawkesConfigManager(Configuration *config);
+  FawkesConfigManager(fawkes::Configuration *config);
   ~FawkesConfigManager();
 
-  void set_hub(FawkesNetworkHub *hub);
+  void set_hub(fawkes::FawkesNetworkHub *hub);
 
   /* from FawkesNetworkHandler interface */
-  virtual void handle_network_message(FawkesNetworkMessage *msg);
+  virtual void handle_network_message(fawkes::FawkesNetworkMessage *msg);
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
   virtual void loop();
@@ -70,7 +72,7 @@ class FawkesConfigManager
 
  private:
 
-  void send_value(unsigned int clid, Configuration::ValueIterator *i);
+  void send_value(unsigned int clid, fawkes::Configuration::ValueIterator *i);
   void send_inv_value(unsigned int clid, const char *path);
 
   template <typename T>
@@ -82,14 +84,14 @@ class FawkesConfigManager
       return m;
     }
 
-  Configuration  *config;
-  Mutex *mutex;
-  LockQueue< FawkesNetworkMessage * > inbound_queue;
+  fawkes::Configuration  *config;
+  fawkes::Mutex *mutex;
+  fawkes::LockQueue< fawkes::FawkesNetworkMessage * > inbound_queue;
 
-  LockList< unsigned int >           subscribers;
-  LockList< unsigned int >::iterator sit;
+  fawkes::LockList< unsigned int >           subscribers;
+  fawkes::LockList< unsigned int >::iterator sit;
 
-  FawkesNetworkHub *hub;
+  fawkes::FawkesNetworkHub *hub;
 };
 
 #endif

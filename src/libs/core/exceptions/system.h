@@ -28,6 +28,9 @@
 
 #include <core/exception.h>
 
+namespace fawkes {
+
+
 class OutOfMemoryException : public Exception {
  public:
   OutOfMemoryException(const char *format, ...) throw();
@@ -64,5 +67,7 @@ class FileWriteException : public Exception {
   FileWriteException(const char *filename, const char *additional_msg = 0) throw();
 };
 
+
+} // end namespace fawkes
 
 #endif

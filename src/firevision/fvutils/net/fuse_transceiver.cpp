@@ -32,6 +32,8 @@
 #include <netinet/in.h>
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** @class FuseNetworkTransceiver <fvutils/net/fuse_transceiver.h>
  * FUSE Network Transceiver.
  * Utility class that provides methods to send and receive messages via

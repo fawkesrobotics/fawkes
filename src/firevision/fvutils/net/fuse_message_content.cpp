@@ -74,7 +74,7 @@ void *
 FuseMessageContent::payload() const
 {
   if ( (_payload == NULL) || (_payload_size == 0) ) {
-    throw NullPointerException("Payload in network message content may not be NULL");
+    throw fawkes::NullPointerException("Payload in network message content may not be NULL");
   }
   return _payload;
 }
@@ -90,7 +90,7 @@ size_t
 FuseMessageContent::payload_size() const
 {
   if ( (_payload == NULL) || (_payload_size == 0) ) {
-    throw NullPointerException("Payload in network message content may not be NULL");
+    throw fawkes::NullPointerException("Payload in network message content may not be NULL");
   }
   return _payload_size;
 }

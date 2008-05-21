@@ -25,6 +25,8 @@
 
 #include <aspect/vision.h>
 
+namespace fawkes {
+
 /** @class VisionAspect aspect/vision.h
  * Thread aspect to use in FireVision apps.
  *
@@ -71,7 +73,7 @@ VisionAspect::~VisionAspect()
  * @see VisionMaster
  */
 void
-VisionAspect::initVisionAspect(VisionMaster *vision_master)
+VisionAspect::init_VisionAspect(::VisionMaster *vision_master)
 {
   this->vision_master = vision_master;
 }
@@ -85,3 +87,5 @@ VisionAspect::vision_thread_mode()
 {
   return __vision_thread_mode;
 }
+
+} // end namespace fawkes

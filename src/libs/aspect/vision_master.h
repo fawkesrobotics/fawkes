@@ -28,16 +28,20 @@
 
 class VisionMaster;
 
+namespace fawkes {
+
 class VisionMasterAspect
 {
  public:
-  VisionMasterAspect(VisionMaster *master);
+  VisionMasterAspect(::VisionMaster *master);
   virtual ~VisionMasterAspect();
 
-  VisionMaster *  vision_master();
+  ::VisionMaster *  vision_master();
 
  private:
-  VisionMaster *master;
+  ::VisionMaster *master;
 };
+
+} // end namespace fawkes
 
 #endif

@@ -32,7 +32,9 @@
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
 
-class MotorInterface;
+namespace fawkes {
+  class MotorInterface;
+}
 class NavigatorThread;
 class OmniMotionModel;
 class LinearVelocityController;
@@ -43,11 +45,11 @@ namespace VMC
 }
 
 class MotorThread
-: public Thread,
-  public LoggingAspect,
-  public BlackBoardAspect,
-  public ConfigurableAspect,
-  public ClockAspect
+: public fawkes::Thread,
+  public fawkes::LoggingAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::ClockAspect
 {
  public:
   MotorThread();
@@ -60,11 +62,11 @@ class MotorThread
   
  private:
   VMC::CvmcAPI *vmc_api;
-  MotorInterface *motor_interface;
+  fawkes::MotorInterface *motor_interface;
   OmniMotionModel* motion_model;
   LinearVelocityController* velocity_controller;
 
-  Time last_loop;
+  fawkes::Time last_loop;
   
   float vx_des;
   float vy_des;

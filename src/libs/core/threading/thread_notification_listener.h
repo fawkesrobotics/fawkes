@@ -26,6 +26,9 @@
 #ifndef __CORE_THREADING_THREAD_NOTIFICATION_LISTENER_H_
 #define __CORE_THREADING_THREAD_NOTIFICATION_LISTENER_H_
 
+namespace fawkes {
+
+
 class Thread;
 
 class ThreadNotificationListener
@@ -37,5 +40,8 @@ class ThreadNotificationListener
   virtual void thread_init_failed(Thread *thread)                        = 0;
 
 };
+
+
+} // end namespace fawkes
 
 #endif

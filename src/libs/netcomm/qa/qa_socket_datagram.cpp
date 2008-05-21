@@ -30,9 +30,11 @@
 #include <utils/system/signal.h>
 
 #include <netdb.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <netinet/in.h>
+
+using namespace fawkes;
 
 class DatagramServerThread : public Thread
 {

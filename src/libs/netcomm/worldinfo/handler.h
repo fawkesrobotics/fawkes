@@ -28,6 +28,8 @@
 
 #include <netcomm/worldinfo/enums.h>
 
+namespace fawkes {
+
 class WorldInfoHandler
 {
  public:
@@ -63,6 +65,8 @@ class WorldInfoHandler
 			      worldinfo_gamestate_goalcolor_t our_goal_color,
 			      worldinfo_gamestate_half_t half)                  = 0;
 };
+
+} // end namespace fawkes
 
 
 #endif

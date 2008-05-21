@@ -31,6 +31,8 @@
 #include <cstring>
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** Tool to watch and output config changes.
  */
 class ConfigChangeWatcherTool : public ConfigurationChangeHandler, public SignalHandler

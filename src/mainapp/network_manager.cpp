@@ -40,6 +40,8 @@
 
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** @class FawkesNetworkManager mainapp/network_manager.h
  * Fawkes Network Manager.
  * This class provides a manager for network connections used in Fawkes.

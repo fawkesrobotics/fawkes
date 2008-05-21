@@ -29,6 +29,9 @@
 
 #include <core/exception.h>
 
+namespace fawkes {
+
+
 /** Semaphore or semaphore set invalid */
 class SemInvalidException : public Exception {
  public:
@@ -56,5 +59,8 @@ class SemCannotSetValException : public Exception {
   /** Constructor */
   SemCannotSetValException() : Exception("Cannot set value")  {}
 };
+
+
+} // end namespace fawkes
 
 #endif

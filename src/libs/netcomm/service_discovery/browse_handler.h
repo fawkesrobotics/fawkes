@@ -33,6 +33,8 @@
 #include <string>
 #include <list>
 
+namespace fawkes {
+
 /** @class ServiceBrowseHandler <netcomm/service_discovery/browse_handler.h>
  * Interface for class that process browse results.
  * Implement this class if you want to browse for services on the network.
@@ -101,5 +103,7 @@ class ServiceBrowseHandler
 			       const char *domain)            = 0;
 
 };
+
+} // end namespace fawkes
 
 #endif

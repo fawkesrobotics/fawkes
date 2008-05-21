@@ -95,9 +95,9 @@ class NetLogMonitor : public Gtk::Window
   Glib::Dispatcher m_signal_new_host;
 
   // client id, host name
-  LockQueue< std::pair<unsigned int, std::string> > m_new_hosts;
+  fawkes::LockQueue< std::pair<unsigned int, std::string> > m_new_hosts;
   // client id, new conn status
-  LockQueue< std::pair<unsigned int, bool> > m_conn_status_chg;
+  fawkes::LockQueue< std::pair<unsigned int, bool> > m_conn_status_chg;
 
   // host name, page number
   std::map<std::string, int> m_pages;

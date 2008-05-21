@@ -28,20 +28,20 @@
 
 #include <core/exception.h>
 
-class CameraNotOpenedException : public Exception
+class CameraNotOpenedException : public fawkes::Exception
 {
  public:
   CameraNotOpenedException();
 };
 
-class CameraNotStartedException : public Exception
+class CameraNotStartedException : public fawkes::Exception
 {
  public:
   CameraNotStartedException();
 };
 
 
-class CaptureException : public Exception
+class CaptureException : public fawkes::Exception
 {
  public:
   CaptureException(const char *format, ...);

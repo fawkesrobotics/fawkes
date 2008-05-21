@@ -40,6 +40,7 @@
 #include <cstdlib>
 #include <unistd.h>
 
+namespace fawkes {
 
 /** @class HandlerAlreadyRegisteredException netcomm/fawkes/client.h
  * Client handler has already been registered.
@@ -618,3 +619,5 @@ FawkesNetworkClient::id() const
 
   return _id;
 }
+
+} // end namespace fawkes

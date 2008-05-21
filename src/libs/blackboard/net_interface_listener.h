@@ -28,6 +28,8 @@
 
 #include <blackboard/interface_listener.h>
 
+namespace fawkes {
+
 class FawkesNetworkHub;
 class BlackBoard;
 
@@ -60,5 +62,6 @@ class BlackBoardNetHandlerInterfaceListener
   unsigned int      __clid;
 };
 
+} // end namespace fawkes
 
 #endif

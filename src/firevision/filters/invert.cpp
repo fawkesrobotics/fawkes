@@ -45,8 +45,8 @@ FilterInvert::FilterInvert()
 void
 FilterInvert::apply()
 {
-  if ( src[0] == NULL )     throw NullPointerException("FilterInvert: src buffer is NULL");
-  if ( src_roi[0] == NULL ) throw NullPointerException("FilterInvert: src ROI is NULL");
+  if ( src[0] == NULL )     throw fawkes::NullPointerException("FilterInvert: src buffer is NULL");
+  if ( src_roi[0] == NULL ) throw fawkes::NullPointerException("FilterInvert: src ROI is NULL");
 
   if ( (dst == NULL) || (dst == src[0]) ) {
     // In-place

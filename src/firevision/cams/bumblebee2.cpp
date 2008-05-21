@@ -44,6 +44,8 @@
 #include <dc1394/register.h>
 #include <dc1394/conversions.h>
 
+using namespace fawkes;
+
 
 /** @class Bumblebee2Camera <cams/bumblebee2.h>
  * Bumblebee2 camera.

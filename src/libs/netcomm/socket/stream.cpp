@@ -31,6 +31,8 @@
 #include <netinet/tcp.h>
 #include <errno.h>
 
+namespace fawkes {
+
 
 /** @class StreamSocket netcomm/socket/stream.h
  * TCP stream socket over IP.
@@ -99,3 +101,5 @@ StreamSocket::set_nodelay(bool nodelay)
     throw SocketException("StreamSocket::set_nodelay: setsockopt failed", errno);
   }
 }
+
+} // end namespace fawkes

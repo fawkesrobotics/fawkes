@@ -25,6 +25,8 @@
 
 #include <core/exceptions/system.h>
 
+namespace fawkes {
+
 /** @class OutOfMemoryException <core/exceptions/system.h>
  * System ran out of memory and desired operation could not be fulfilled.
  * @ingroup Exceptions
@@ -177,3 +179,6 @@ FileWriteException::FileWriteException(const char *filename,
 	      (additional_msg) ? ")" : "")
 {
 }
+
+
+} // end namespace fawkes

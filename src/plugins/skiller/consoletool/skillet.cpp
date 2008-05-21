@@ -41,6 +41,8 @@
 
 #include <interfaces/skiller.h>
 
+using namespace fawkes;
+
 void
 print_usage(const char *program_name)
 {

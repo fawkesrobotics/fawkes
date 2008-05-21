@@ -40,6 +40,8 @@
 
 #include <unistd.h>
 
+using namespace fawkes;
+
 /** @class FvBaseThread <apps/base/base_thread.h>
  * FireVision base thread.
  * This implements the functionality of the FvBasePlugin.

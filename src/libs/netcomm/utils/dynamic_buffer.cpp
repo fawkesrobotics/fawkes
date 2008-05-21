@@ -32,6 +32,7 @@
 #include <cstring>
 #include <netinet/in.h>
 
+namespace fawkes {
 
 /** @class DynamicBuffer <netcomm/utils/dynamic_buffer.h>
  * Dynamically growing buffer.
@@ -273,3 +274,5 @@ DynamicBuffer::next(size_t *size)
 
   return _it_curdata;
 }
+
+} // end namespace fawkes

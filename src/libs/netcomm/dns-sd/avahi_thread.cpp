@@ -45,6 +45,8 @@
 #include <cstddef>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class AvahiThread netcomm/dns-sd/avahi_thread.h
  * Avahi main thread.
  * This thread handles all tasks related to avahi. This is the single
@@ -1013,3 +1015,5 @@ AvahiThread::wait_initialized()
 {
   init_wc->wait();
 }
+
+} // end namespace fawkes

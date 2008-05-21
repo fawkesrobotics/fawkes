@@ -30,6 +30,9 @@
 #include <cstdarg>
 #include <exception>
 
+namespace fawkes {
+
+
 class Mutex;
 
 class Exception : public std::exception {
@@ -106,5 +109,6 @@ class Exception : public std::exception {
 };
 
 
+} // end namespace fawkes
 
 #endif

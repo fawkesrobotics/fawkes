@@ -30,7 +30,9 @@
 #include <utils/math/angle.h>
 
 #include <iostream>
+
 using namespace std;
+using namespace fawkes;
 
 /** @class BoxRelative <models/relative_position/box_relative.h>
  * Relative (beer) box position model.

@@ -30,6 +30,9 @@
 
 #define forever while (1)
 
+namespace fawkes {
+
+
 class WaitCondition;
 class Mutex;
 class Barrier;
@@ -162,5 +165,8 @@ class Thread {
   static pthread_key_t   MAIN_THREAD_KEY;
   static pthread_mutex_t __thread_key_mutex;
 };
+
+
+} // end namespace fawkes
 
 #endif

@@ -30,6 +30,8 @@
 #include <cstdlib>
 #include <cstring>
 
+using namespace fawkes;
+
 const float CornerHorizon::M_PI_HALF = M_PI / 2.f;
 
 /** @class CornerHorizon <models/scanlines/cornerhorizon.h>

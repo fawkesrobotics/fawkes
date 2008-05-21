@@ -365,7 +365,7 @@ BayesColormapGenerator::load_histograms(const char *filename)
 
   if ( !bg_histogram_block )
     {
-      throw Exception("Histograms file does not contain a background histogram");
+      throw fawkes::Exception("Histograms file does not contain a background histogram");
     }
 
   // read in foreground histograms
@@ -475,7 +475,7 @@ BayesColormapGenerator::normalize_histos()
       hint_t cur_object = histo_it->first;
 
       if ( bg_histos.find(cur_object) == bg_histos.end() ) {
-	throw Exception("Corresponding background histogram is missing");
+	throw fawkes::Exception("Corresponding background histogram is missing");
       }
       
       Histogram *fg = fg_histos[cur_object];

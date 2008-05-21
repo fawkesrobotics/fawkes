@@ -46,6 +46,8 @@
 #include <cstring>
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** @class FuseServerClientThread <fvutils/net/fuse_server_client_thread.h>
  * FUSE Server Client Thread.
  * This thread is instantiated and started for each client that connects to a

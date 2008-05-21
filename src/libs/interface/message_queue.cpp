@@ -32,6 +32,8 @@
 #include <cstddef>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class MessageAlreadyQueuedException interface/message_queue.h
  * Message already enqueued exception.
  * This exception is thrown if you try to enqueue a message that has already
@@ -538,3 +540,5 @@ MessageQueue::MessageIterator::id() const
   if ( cur == NULL ) return 0;
   return cur->msg_id;
 }
+
+} // end namespace fawkes

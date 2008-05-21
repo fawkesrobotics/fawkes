@@ -25,6 +25,8 @@
 
 #include <netcomm/utils/exceptions.h>
 
+namespace fawkes {
+
 /** @class ConnectionDiedException <netcomm/utils/exceptions.h>
  * Thrown if the connection died during an operation.
  * @ingroup NetComm
@@ -42,3 +44,4 @@ ConnectionDiedException::ConnectionDiedException(const char *format, ...)
   va_end(va);
 }
 
+} // end namespace fawkes

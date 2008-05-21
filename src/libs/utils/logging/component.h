@@ -29,6 +29,9 @@
 #include <core/exception.h>
 #include <string>
 
+namespace fawkes {
+
+
 class Logger;
 
 class ComponentLogger
@@ -56,6 +59,9 @@ class ComponentLogger
   Logger *__logger;
   char *__component;
 };
+
+
+} // end namespace fawkes
 
 #endif
 

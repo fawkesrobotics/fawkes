@@ -29,6 +29,8 @@
 
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class ScanlineStar <models/scanlines/star.h>
  * Star-like arranged scanline points.
  *

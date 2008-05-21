@@ -30,31 +30,36 @@
 #include <core/utils/lock_list.h>
 #include <netcomm/utils/incoming_connection_handler.h>
 
-class ThreadCollector;
-class StreamSocket;
-class NetworkAcceptorThread;
+namespace fawkes {
+  class ThreadCollector;
+  class StreamSocket;
+  class NetworkAcceptorThread;
+}
 class FuseServerClientThread;
 
-class FuseServer : public Thread, public NetworkIncomingConnectionHandler {
+class FuseServer
+: public fawkes::Thread,
+  public fawkes::NetworkIncomingConnectionHandler
+{
  public:
 
-  FuseServer(unsigned short int port, ThreadCollector *collector = NULL);
+  FuseServer(unsigned short int port, fawkes::ThreadCollector *collector = NULL);
   virtual ~FuseServer();
 
-  virtual void add_connection(StreamSocket *s) throw();
+  virtual void add_connection(fawkes::StreamSocket *s) throw();
   void connection_died(FuseServerClientThread *client) throw();
 
   virtual void loop();
 
  private:
-  NetworkAcceptorThread *__acceptor_thread;
+  fawkes::NetworkAcceptorThread *__acceptor_thread;
 
-  LockList<FuseServerClientThread *>  __clients;
-  LockList<FuseServerClientThread *>::iterator  __cit;
+  fawkes::LockList<FuseServerClientThread *>  __clients;
+  fawkes::LockList<FuseServerClientThread *>::iterator  __cit;
 
-  LockList<FuseServerClientThread *>  __dead_clients;
+  fawkes::LockList<FuseServerClientThread *>  __dead_clients;
 
-  ThreadCollector *__thread_collector;
+  fawkes::ThreadCollector *__thread_collector;
 };
 
 

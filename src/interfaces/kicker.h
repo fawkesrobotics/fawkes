@@ -29,6 +29,8 @@
 #include <interface/interface.h>
 #include <interface/message.h>
 
+namespace fawkes {
+
 class KickerInterface : public Interface
 {
  /// @cond INTERNALS
@@ -170,5 +172,7 @@ class KickerInterface : public Interface
   size_t maxlenof_current_intensity() const;
 
 };
+
+} // end namespace fawkes
 
 #endif

@@ -28,7 +28,9 @@
 #include <core/threading/thread.h>
 #include <netcomm/worldinfo/enums.h>
 
-class WorldInfoTransceiver;
+namespace fawkes {
+  class WorldInfoTransceiver;
+}
 
 class RefBoxStateSender
 {
@@ -40,13 +42,14 @@ class RefBoxStateSender
 
   void send();
   void execute_send();
-  void set_gamestate(worldinfo_gamestate_t game_state, worldinfo_gamestate_team_t state_team);
+  void set_gamestate(fawkes::worldinfo_gamestate_t game_state,
+		     fawkes::worldinfo_gamestate_team_t state_team);
   void set_score(unsigned int score_cyan, unsigned int score_magenta);
-  void set_team_goal(worldinfo_gamestate_team_t our_team,
-		     worldinfo_gamestate_goalcolor_t goal_color);
-  void set_half(worldinfo_gamestate_half_t half);
+  void set_team_goal(fawkes::worldinfo_gamestate_team_t our_team,
+		     fawkes::worldinfo_gamestate_goalcolor_t goal_color);
+  void set_half(fawkes::worldinfo_gamestate_half_t half);
 
-  class TimeoutThread : public Thread
+  class TimeoutThread : public fawkes::Thread
   {
    public:
     TimeoutThread(RefBoxStateSender *rss);
@@ -58,17 +61,17 @@ class RefBoxStateSender
   };
 
  private:
-  bool                    __debug;
-  WorldInfoTransceiver   *__transceiver;
-  TimeoutThread          *__timeout_thread;
+  bool                                    __debug;
+  fawkes::WorldInfoTransceiver           *__transceiver;
+  TimeoutThread                          *__timeout_thread;
 
-  worldinfo_gamestate_t           __game_state;
-  worldinfo_gamestate_team_t      __state_team;
-  unsigned int                    __score_cyan;
-  unsigned int                    __score_magenta;
-  worldinfo_gamestate_team_t      __our_team;
-  worldinfo_gamestate_goalcolor_t __our_goal_color;
-  worldinfo_gamestate_half_t      __half;
+  fawkes::worldinfo_gamestate_t           __game_state;
+  fawkes::worldinfo_gamestate_team_t      __state_team;
+  unsigned int                            __score_cyan;
+  unsigned int                            __score_magenta;
+  fawkes::worldinfo_gamestate_team_t      __our_team;
+  fawkes::worldinfo_gamestate_goalcolor_t __our_goal_color;
+  fawkes::worldinfo_gamestate_half_t      __half;
 };
 
 #endif

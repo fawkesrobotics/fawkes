@@ -30,8 +30,11 @@
 #include <cstdio>
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** @class JpegReader <fvutils/readers/jpeg.h>
  * JPEG file reader.
+ * @author Tim Niemueller
  */
 
 /** Constructor.

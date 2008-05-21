@@ -33,14 +33,16 @@
 class SharedMemoryImageBuffer;
 class FvBaseThread;
 class FvAqtVisionThreads;
-class Logger;
-class Clock;
+namespace fawkes {
+  class Logger;
+  class Clock;
 #ifdef FVBASE_TIMETRACKER
-class TimeTracker;
+  class TimeTracker;
 #endif
+}
 
 class FvAcquisitionThread
-: public Thread
+: public fawkes::Thread
 {
  public:
   friend class FvBaseThread;
@@ -54,7 +56,7 @@ class FvAcquisitionThread
   } AqtMode;
 
   FvAcquisitionThread(const char *id, Camera *camera,
-		     Logger *logger, Clock *clock);
+		      fawkes::Logger *logger, fawkes::Clock *clock);
   virtual ~FvAcquisitionThread();
 
   virtual void loop();
@@ -72,7 +74,7 @@ class FvAcquisitionThread
   char                     *_image_id;
   char                     *_image_id_raw;
 
-  Logger                   *_logger;
+  fawkes::Logger           *_logger;
 
   colorspace_t              _colorspace;
   unsigned int              _width;
@@ -84,7 +86,7 @@ class FvAcquisitionThread
   FvAqtVisionThreads       *_vision_threads;
 
 #ifdef FVBASE_TIMETRACKER
-  TimeTracker *__tt;
+  fawkes::TimeTracker *__tt;
   unsigned int __loop_count;
   unsigned int __ttc_capture;
   unsigned int __ttc_lock;

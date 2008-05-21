@@ -29,6 +29,8 @@
 #include <interface/interface.h>
 #include <interface/message.h>
 
+namespace fawkes {
+
 class SkillerInterface : public Interface
 {
  /// @cond INTERNALS
@@ -191,5 +193,7 @@ class SkillerInterface : public Interface
   size_t maxlenof_continuous() const;
 
 };
+
+} // end namespace fawkes
 
 #endif

@@ -37,6 +37,9 @@
 #  include <core/threading/wait_condition.h>
 #endif
 
+namespace fawkes {
+
+
 /// @cond INTERNALS
 class BarrierData
 {
@@ -163,3 +166,6 @@ Barrier::count()
 {
   return _count;
 }
+
+
+} // end namespace fawkes

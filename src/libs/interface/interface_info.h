@@ -28,6 +28,8 @@
 
 #include <list>
 
+namespace fawkes {
+
 class InterfaceInfo
 {
  public:
@@ -59,5 +61,7 @@ class InterfaceInfoList : public std::list<InterfaceInfo>
   void append(const char *type, const char *id, const unsigned char *hash,
 	      unsigned int serial, bool has_writer, unsigned int num_readers);
 };
+
+} // end namespace fawkes
 
 #endif

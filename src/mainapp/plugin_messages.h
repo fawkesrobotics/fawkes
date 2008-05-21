@@ -28,6 +28,8 @@
 
 #include <netcomm/utils/dynamic_buffer.h>
 
+namespace fawkes {
+
 /** Plugin message type. */
 typedef enum {
   MSG_PLUGIN_LOAD               =   1,	/**< request plugin load (plugin_load_msg_t) */
@@ -95,5 +97,8 @@ typedef struct {
 typedef struct {
   dynamic_list_t plugin_list;	/**< dynamically growing list of plugin names. */
 } plugin_list_msg_t;
+
+
+} // end namespace fawkes
 
 #endif

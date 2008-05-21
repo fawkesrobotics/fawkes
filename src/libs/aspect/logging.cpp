@@ -25,6 +25,8 @@
 
 #include <aspect/logging.h>
 
+namespace fawkes {
+
 /** @class LoggingAspect aspect/logging.h
  * Thread aspect to log output.
  * Give this aspect to your thread to gain access to the central log.
@@ -60,7 +62,9 @@ LoggingAspect::~LoggingAspect()
  * @param logger Logger instance to use.
  */
 void
-LoggingAspect::initLoggingAspect(Logger *logger)
+LoggingAspect::init_LoggingAspect(Logger *logger)
 {
   this->logger = logger;
 }
+
+} // end namespace fawkes

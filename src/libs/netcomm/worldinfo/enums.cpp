@@ -27,6 +27,12 @@
 
 #define CASE_STRING(x) case x: return #x
 
+namespace fawkes {
+
+/** Convert gamestate to a string.
+ * @param gamestate game state to translate into a string
+ * @return string representation of the given state.
+ */
 const char *
 worldinfo_gamestate_tostring(worldinfo_gamestate_t gamestate)
 {
@@ -46,6 +52,10 @@ worldinfo_gamestate_tostring(worldinfo_gamestate_t gamestate)
 }
 
 
+/** Convert gamestate team to a string.
+ * @param team game state team to translate into a string
+ * @return string representation of the given team.
+ */
 const char *
 worldinfo_gamestate_team_tostring(worldinfo_gamestate_team_t team)
 {
@@ -59,6 +69,10 @@ worldinfo_gamestate_team_tostring(worldinfo_gamestate_team_t team)
 }
 
 
+/** Convert goal color to a string.
+ * @param goal_color goal color
+ * @return string representation of the given goal color.
+ */
 const char *
 worldinfo_gamestate_goalcolor_tostring(worldinfo_gamestate_goalcolor_t goal_color)
 {
@@ -71,7 +85,12 @@ worldinfo_gamestate_goalcolor_tostring(worldinfo_gamestate_goalcolor_t goal_colo
 }
 
 
-const char * worldinfo_gamestate_half_tostring(worldinfo_gamestate_half_t half)
+/** Convert half time to a string.
+ * @param half half time
+ * @return string representation of the given half time.
+ */
+const char *
+worldinfo_gamestate_half_tostring(worldinfo_gamestate_half_t half)
 {
   switch (half) {
     CASE_STRING(HALF_FIRST);
@@ -79,3 +98,5 @@ const char * worldinfo_gamestate_half_tostring(worldinfo_gamestate_half_t half)
   default: return "Unknown Half";
   }
 }
+
+} // end namespace fawkes

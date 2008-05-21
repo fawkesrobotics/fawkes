@@ -93,7 +93,7 @@ CppInterfaceGenerator::CppInterfaceGenerator(std::string directory, std::string 
     class_name = interface_name;
   }
 
-  deflector = "__INTERFACES_" + StringConversions::toUpper(config_basename) + "_H_";
+  deflector = "__INTERFACES_" + fawkes::StringConversions::toUpper(config_basename) + "_H_";
 }
 
 
@@ -208,7 +208,8 @@ CppInterfaceGenerator::write_cpp(FILE *f)
 	  "#include <core/exceptions/software.h>\n\n"
 	  "#include <cstring>\n"
 	  "#include <cstdlib>\n\n"
-	  "/** @class %s interfaces/%s\n"
+	  "namespace fawkes {\n\n"
+	  "/** @class %s <interfaces/%s>\n"
 	  " * %s Fawkes BlackBoard Interface.\n"
 	  " * %s\n"
 	  " */\n\n\n",
@@ -221,6 +222,8 @@ CppInterfaceGenerator::write_cpp(FILE *f)
   write_messages_cpp(f);
 
   write_management_funcs_cpp(f);
+
+  fprintf(f, "\n} // end namespace fawkes\n");
 }
 
 
@@ -797,6 +800,7 @@ CppInterfaceGenerator::write_h(FILE *f)
   fprintf(f,
 	  "#include <interface/interface.h>\n"
 	  "#include <interface/message.h>\n\n"
+	  "namespace fawkes {\n\n"
 	  "class %s : public Interface\n"
 	  "{\n"
 	  " /// @cond INTERNALS\n"
@@ -821,7 +825,7 @@ CppInterfaceGenerator::write_h(FILE *f)
   fprintf(f, " public:\n");
   fprintf(f, "  virtual Message * create_message(const char *type) const;\n\n");
   write_methods_h(f, "  ", data_fields);
-  fprintf(f, "\n};\n\n#endif\n");
+  fprintf(f, "\n};\n\n} // end namespace fawkes\n\n#endif\n");
 }
 
 

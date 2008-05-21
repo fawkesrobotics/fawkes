@@ -26,6 +26,8 @@
 #include <core/threading/mutex_locker.h>
 #include <core/threading/mutex.h>
 
+namespace fawkes {
+
 /** @class MutexLocker <core/threading/mutex_locker.h>
  * Mutex locking helper.
  * This class is a convenience function which can help you prevent a quite
@@ -123,3 +125,6 @@ MutexLocker::unlock()
   __locked = false;
   __mutex->unlock();
 }
+
+
+} // end namespace fawkes

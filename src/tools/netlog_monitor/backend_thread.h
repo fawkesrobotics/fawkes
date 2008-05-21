@@ -32,13 +32,16 @@
 #include <netcomm/service_discovery/browse_handler.h>
 
 class NetLogMonitor;
-class FawkesNetworkClient;
-class WaitCondition;
-class AvahiThread;
+namespace fawkes {
+  class FawkesNetworkClient;
+  class WaitCondition;
+  class AvahiThread;
+}
 
-class NetLogMonitorBackendThread : public Thread,
-  public FawkesNetworkClientHandler,
-  public ServiceBrowseHandler
+class NetLogMonitorBackendThread
+: public fawkes::Thread,
+  public fawkes::FawkesNetworkClientHandler,
+  public fawkes::ServiceBrowseHandler
 {
  public:
   NetLogMonitorBackendThread(NetLogMonitor* nlm);
@@ -56,7 +59,7 @@ class NetLogMonitorBackendThread : public Thread,
   void deregistered(unsigned int id) throw();
   void connection_died(unsigned int id) throw();
   void connection_established(unsigned int id) throw();
-  void inbound_received(FawkesNetworkMessage* m,
+  void inbound_received(fawkes::FawkesNetworkMessage* m,
 			unsigned int id) throw();
 
   // service browser handler
@@ -79,20 +82,19 @@ class NetLogMonitorBackendThread : public Thread,
 			const char* domain );
 
  private:
-  typedef LockMap<unsigned int, FawkesNetworkClient*> ClientMap;
+  typedef fawkes::LockMap<unsigned int, fawkes::FawkesNetworkClient*> ClientMap;
   ClientMap m_new_clients;
   ClientMap m_clients;
   unsigned int m_client_id;
 
-  LockMap<std::string, unsigned int> m_hosts;
-  LockMap<unsigned int, std::string> m_host_names;
+  fawkes::LockMap<std::string, unsigned int> m_hosts;
+  fawkes::LockMap<unsigned int, std::string> m_host_names;
 
-  
-  LockQueue<FawkesNetworkClient*> m_disconnected_clients;
+  fawkes::LockQueue<fawkes::FawkesNetworkClient*> m_disconnected_clients;
 
   NetLogMonitor* m_frontend;
-  WaitCondition* m_sleep;
-  AvahiThread* m_avahi;
+  fawkes::WaitCondition* m_sleep;
+  fawkes::AvahiThread* m_avahi;
 };
 
 #endif /* __TOOLS_NETLOG_MONITOR_BACKEND_THREAD_H_ */

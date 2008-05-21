@@ -31,7 +31,9 @@
 #include <map>
 #include <vector>
 
-class Configuration;
+namespace fawkes {
+  class Configuration;
+}
 class ScanlineStar;
 class ColorModel;
 
@@ -40,7 +42,7 @@ class LineClassifier : public Classifier
   public:
     LineClassifier( ScanlineStar *scanlineModel,
                     ColorModel *colorModel,
-                    Configuration *config );
+                    fawkes::Configuration *config );
 
     std::list< ROI > * classify();
 

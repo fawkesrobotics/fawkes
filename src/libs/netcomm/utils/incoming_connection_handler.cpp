@@ -25,6 +25,8 @@
 
 #include <netcomm/utils/incoming_connection_handler.h>
 
+namespace fawkes {
+
 /** @class NetworkIncomingConnectionHandler <netcomm/utils/incoming_connection_handler.h>
  * Interface for handling incoming connections.
  * @author Tim Niemueller
@@ -41,3 +43,4 @@ NetworkIncomingConnectionHandler::~NetworkIncomingConnectionHandler()
 {
 }
 
+} // end namespace fawkes

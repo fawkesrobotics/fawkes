@@ -27,6 +27,8 @@
 #include <plugins/worldmodel/net_thread.h>
 #include <worldinfo_utils/data_container.h>
 
+using namespace fawkes;
+
 /** @class WorldModelPlugin plugins/worldmodel/worldmodel_plugin.h
  * Simple worldmodel plugin.
  * This plugin facilitates the Fawkes worldmodel, which agglomerates data produced

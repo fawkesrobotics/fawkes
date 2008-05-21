@@ -175,7 +175,7 @@ FuseNetworkMessage::set_payload(void *payload, size_t payload_size)
 {
   if ( payload_size > 0xFFFFFFFF ) {
     // cannot carry that many bytes
-    throw OutOfBoundsException("Payload too big", payload_size, 0, 0xFFFFFFFF);
+    throw fawkes::OutOfBoundsException("Payload too big", payload_size, 0, 0xFFFFFFFF);
   }
   _msg.payload = payload;
   _msg.header.payload_size = htonl(payload_size);

@@ -27,7 +27,7 @@
 
 #include <core/plugin.h>
 
-class FvOmniLocalizerPlugin : public Plugin
+class FvOmniLocalizerPlugin : public fawkes::Plugin
 {
   public:
     FvOmniLocalizerPlugin();

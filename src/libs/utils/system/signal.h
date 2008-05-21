@@ -32,6 +32,8 @@
 
 #include <signal.h>
 
+namespace fawkes {
+
 class SignalHandler {
  public:
   virtual ~SignalHandler() {}
@@ -71,7 +73,6 @@ class SignalManager {
 
 };
 
-
-
+} // end namespace fawkes
 
 #endif

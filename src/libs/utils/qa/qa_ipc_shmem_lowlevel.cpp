@@ -39,6 +39,7 @@
 #include <signal.h>
 
 using namespace std;
+using namespace fawkes;
 
 #define SHMEM_SIZE 2048
 #define SHMEM_TOKEN "JustSomeDumbQA"

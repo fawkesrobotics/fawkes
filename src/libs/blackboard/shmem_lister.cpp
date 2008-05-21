@@ -30,6 +30,7 @@
 #include <iostream>
 
 using namespace std;
+namespace fawkes {
 
 /** @class BlackBoardSharedMemoryLister <blackboard/shmem_lister.h>
  * BlackBoard shared memory lister.
@@ -131,3 +132,5 @@ BlackBoardSharedMemoryLister::print_info(const SharedMemoryHeader *header,
 	  ((swapable || destroyed) ? ")" : "")
 	  );
 }
+
+} // end namespace fawkes

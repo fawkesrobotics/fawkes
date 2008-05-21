@@ -42,6 +42,8 @@
 #include <cerrno>
 #include <csignal>
 
+namespace fawkes {
+
 /** @def forever
  * Shortcut for "while (1)".
  * @relates Thread
@@ -1111,3 +1113,6 @@ Thread::set_cancel_state(CancelState new_state, CancelState *old_state)
     }
   }
 }
+
+
+} // end namespace fawkes

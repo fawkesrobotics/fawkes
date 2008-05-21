@@ -1,4 +1,5 @@
 $#include <interfaces/navigator.h>
+namespace fawkes {
 class NavigatorInterface : public Interface
 {
 
@@ -94,3 +95,5 @@ class NavigatorInterface : public Interface
   size_t maxlenof_final() const;
 
 };
+
+}

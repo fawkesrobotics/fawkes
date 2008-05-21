@@ -26,6 +26,9 @@
 #ifndef __CORE_THREADING_BARRIER_H_
 #define __CORE_THREADING_BARRIER_H_
 
+namespace fawkes {
+
+
 class BarrierData;
 
 class Barrier
@@ -44,5 +47,7 @@ class Barrier
   unsigned int _count;
 };
 
+
+} // end namespace fawkes
 
 #endif

@@ -32,6 +32,8 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+namespace fawkes {
+
 /// @cond INTERNALS
 class IPCMessageQueueData
 {
@@ -247,3 +249,5 @@ IPCMessageQueue::send(MessageStruct *msg, unsigned int data_size)
   }
 }
 
+
+} // end namespace fawkes

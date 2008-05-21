@@ -28,15 +28,19 @@
 
 #include <utils/time/clock.h>
 
+namespace fawkes {
+
 class ClockAspect
 {
  public:
     virtual ~ClockAspect();
 
-    void initClockAspect(Clock* clock);
+    void init_ClockAspect(Clock* clock);
 
  protected:
     Clock* clock;
 };
+
+} // end namespace fawkes
 
 #endif /*__ASPECT_CLOCK_H_ */

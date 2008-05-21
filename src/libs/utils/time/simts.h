@@ -29,6 +29,8 @@
 #include <utils/time/clock.h>
 #include <utils/time/timesource.h>
 
+namespace fawkes {
+
 class SimulatorTimeSource : public TimeSource
 {
  public:
@@ -49,5 +51,7 @@ class SimulatorTimeSource : public TimeSource
   float start_simoffset;
   float current_simoffset;
 };
+
+} // end namespace fawkes
 
 #endif

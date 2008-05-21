@@ -38,6 +38,8 @@
 #include <cstdlib>
 #include <cstring>
 
+using namespace fawkes;
+
 class ResolverQAMain : public SignalHandler
 {
  public:

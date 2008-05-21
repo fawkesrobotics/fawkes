@@ -40,18 +40,20 @@
 #include <string>
 
 class FvAcquisitionThread;
-class Barrier;
+namespace fawkes {
+  class Barrier;
+}
 
 class FvBaseThread
-: public Thread,
-  public BlockedTimingAspect,
-  public LoggingAspect,
-  public VisionMasterAspect,
-  public ClockAspect,
-  public VisionMaster,
-  public ThreadProducerAspect,
-  public ConfigurableAspect,
-  public ThreadNotificationListener
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::VisionMasterAspect,
+  public fawkes::ClockAspect,
+  public fawkes::ThreadProducerAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::ThreadNotificationListener,
+  public VisionMaster
 {
  public:
   FvBaseThread();
@@ -64,25 +66,25 @@ class FvBaseThread
   virtual VisionMaster *  vision_master();
 
   virtual Camera *  register_for_camera(const char *camera_string,
-					Thread *thread,
+					fawkes::Thread *thread,
 					bool raw = false);
-  virtual void      unregister_thread(Thread *thread);
+  virtual void      unregister_thread(fawkes::Thread *thread);
 
-  virtual void thread_started(Thread *thread);
-  virtual void thread_init_failed(Thread *thread);
+  virtual void thread_started(fawkes::Thread *thread);
+  virtual void thread_init_failed(fawkes::Thread *thread);
 
  private:
   void cond_recreate_barrier(unsigned int num_cyclic_threads);
 
  private:
-  LockMap<std::string, FvAcquisitionThread *> aqts;
-  LockMap<std::string, FvAcquisitionThread *>::iterator ait;
+  fawkes::LockMap<std::string, FvAcquisitionThread *> aqts;
+  fawkes::LockMap<std::string, FvAcquisitionThread *>::iterator ait;
   unsigned int _aqt_timeout;
 
-  LockMap<Thread *, FvAcquisitionThread *> started_threads;
-  LockMap<Thread *, FvAcquisitionThread *>::iterator stit;
+  fawkes::LockMap<Thread *, FvAcquisitionThread *> started_threads;
+  fawkes::LockMap<Thread *, FvAcquisitionThread *>::iterator stit;
 
-  Barrier *aqt_barrier;
+  fawkes::Barrier *aqt_barrier;
 };
 
 

@@ -45,6 +45,8 @@
 #include <utils/constraints/dependency_onetomany.h>
 #include <utils/constraints/unique.h>
 
+namespace fawkes {
+
 /** @class AspectIniFin <aspect/inifin.h>
  * Fawkes Aspect Initializer/Finalizer.
  * Initializes certain thread aspects.
@@ -159,17 +161,17 @@ AspectIniFin::init(Thread *thread)
 
   ConfigurableAspect *configurable_thread;
   if ( (configurable_thread = dynamic_cast<ConfigurableAspect *>(thread)) != NULL ) {
-    configurable_thread->initConfigurableAspect(__config);
+    configurable_thread->init_ConfigurableAspect(__config);
   }
 
   LoggingAspect *logging_thread;
   if ( (logging_thread = dynamic_cast<LoggingAspect *>(thread)) != NULL ) {
-    logging_thread->initLoggingAspect(__logger);
+    logging_thread->init_LoggingAspect(__logger);
   }
 
   ClockAspect *clock_thread;
   if ( (clock_thread = dynamic_cast<ClockAspect *>(thread)) != NULL ) {
-    clock_thread->initClockAspect(__clock);
+    clock_thread->init_ClockAspect(__clock);
   }
 
   FawkesNetworkAspect *fnet_thread;
@@ -179,7 +181,7 @@ AspectIniFin::init(Thread *thread)
 					    "FawkesNetworkHub has been set in AspectIniFin",
 					    thread->name());
     }
-    fnet_thread->initFawkesNetworkAspect(__fnethub);
+    fnet_thread->init_FawkesNetworkAspect(__fnethub);
   }
 
 #ifdef HAVE_FIREVISION
@@ -211,7 +213,7 @@ AspectIniFin::init(Thread *thread)
 					      "mode.", thread->name());
       }
       __vision_dependency->add(vision_thread);
-      vision_thread->initVisionAspect( __vision_dependency->provider()->vision_master() );
+      vision_thread->init_VisionAspect( __vision_dependency->provider()->vision_master() );
       thread->add_notification_listener(this);
     } catch (DependencyViolationException &e) {
       CannotInitializeThreadException ce("Dependency violation for VisionAspect detected");
@@ -228,7 +230,7 @@ AspectIniFin::init(Thread *thread)
       throw CannotInitializeThreadException("Thread has NetworkAspect but required data "
 					    "has not been set in AspectIniFin");
     }
-    net_thread->initNetworkAspect(__nnresolver, __service_publisher, __service_browser);
+    net_thread->init_NetworkAspect(__nnresolver, __service_publisher, __service_browser);
   }
 
   TimeSourceAspect *timesource_thread;
@@ -331,3 +333,5 @@ AspectIniFin::thread_init_failed(Thread *thread)
     __logger->log_error("AspectIniFin", e);
   }
 }
+
+} // end namespace fawkes

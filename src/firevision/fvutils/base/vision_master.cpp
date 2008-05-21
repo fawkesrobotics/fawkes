@@ -25,6 +25,8 @@
 
 #include <fvutils/base/vision_master.h>
 
+using namespace fawkes;
+
 /** @class VisionMaster <fvutils/base/vision_master.h>
  * Vision Master.
  * The vision master shall be the entry point for vision plugins. It shall

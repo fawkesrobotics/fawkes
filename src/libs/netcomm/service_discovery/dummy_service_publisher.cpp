@@ -25,6 +25,8 @@
 
 #include <netcomm/service_discovery/dummy_service_publisher.h>
 
+namespace fawkes {
+
 /** @class DummyServicePublisher <netcomm/service_discovery/dummy_service_publisher.h>
  * Dummy service publisher interface.
  * Does nothing, used to fulfill NetworkAspect guarantees if Avahi is not available.
@@ -51,3 +53,5 @@ void
 DummyServicePublisher::unpublish_service(NetworkService *service)
 {
 }
+
+} // end namespace fawkes

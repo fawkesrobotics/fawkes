@@ -32,6 +32,8 @@
 #include <cstring>
 #include <netinet/in.h>
 
+using namespace fawkes;
+
 /** @class FuseLutListContent <fvutils/net/fuse_lutlist_content.h>
  * FUSE lookup table list content.
  * This content provides means to send an arbitrary length list of LUT

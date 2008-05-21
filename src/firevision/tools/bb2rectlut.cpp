@@ -39,6 +39,8 @@
 #include <cstdlib>
 #include <cstdio>
 
+using namespace fawkes;
+
 void
 print_usage(ArgumentParser *argp)
 {

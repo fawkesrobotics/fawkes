@@ -29,6 +29,8 @@
 #include <interface/interface.h>
 #include <interface/message.h>
 
+namespace fawkes {
+
 class ObjectPositionInterface : public Interface
 {
  /// @cond INTERNALS
@@ -280,5 +282,7 @@ class ObjectPositionInterface : public Interface
   size_t maxlenof_relative_xyz_velocity_covariance() const;
 
 };
+
+} // end namespace fawkes
 
 #endif

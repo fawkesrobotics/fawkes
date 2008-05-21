@@ -120,8 +120,8 @@ class FuseTransferWidget : FuseClientHandler
     bool active;
   };
 
-  LockQueue<ClientData> m_new_clients;
-  LockQueue<FuseClient*> m_delete_clients;
+  fawkes::LockQueue<ClientData> m_new_clients;
+  fawkes::LockQueue<FuseClient*> m_delete_clients;
 
   ClientData m_cur_client;
 

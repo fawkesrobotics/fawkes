@@ -37,6 +37,7 @@
 #include <sys/wait.h>
 
 using namespace std;
+using namespace fawkes;
 
 #define MAGIC_TOKEN "FawkesShmemQAApp"
 

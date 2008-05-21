@@ -28,6 +28,8 @@
 
 #include <netcomm/service_discovery/service_browser.h>
 
+namespace fawkes {
+
 class DummyServiceBrowser : public ServiceBrowser
 {
  public:
@@ -37,6 +39,8 @@ class DummyServiceBrowser : public ServiceBrowser
   virtual void watch_service(const char *service_type, ServiceBrowseHandler *h);
   virtual void unwatch_service(const char *service_type, ServiceBrowseHandler *h);
 };
+
+} // end namespace fawkes
 
 
 #endif

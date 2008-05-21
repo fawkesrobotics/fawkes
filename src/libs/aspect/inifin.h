@@ -30,6 +30,8 @@
 #include <core/threading/thread_finalizer.h>
 #include <core/threading/thread_notification_listener.h>
 
+namespace fawkes {
+
 class BlackBoard;
 class Configuration;
 class Logger;
@@ -89,5 +91,6 @@ class AspectIniFin
   UniquenessConstraint<TimeSource> *__timesource_uc;
 };
 
+} // end namespace fawkes
 
 #endif

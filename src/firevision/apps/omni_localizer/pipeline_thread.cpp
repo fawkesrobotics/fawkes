@@ -47,6 +47,7 @@
 #include <cmath>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class FvOmniLocalizerPipelineThread <apps/omni_localizer/pipeline_thread.h>
  * Omnivision self-localization.

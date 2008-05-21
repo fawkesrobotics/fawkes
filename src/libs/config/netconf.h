@@ -34,6 +34,8 @@
 #include <list>
 #include <string>
 
+namespace fawkes {
+
 class Mutex;
 class FawkesNetworkClient;
 class SQLiteConfiguration;
@@ -187,5 +189,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
 
   bool __connected;
 };
+
+} // end namespace fawkes
 
 #endif

@@ -38,6 +38,8 @@
 #include <cstddef>
 #include <ctime>
 
+namespace fawkes {
+
 class MulticastDatagramSocket;
 class WorldInfoMessageEncryptor;
 class WorldInfoMessageDecryptor;
@@ -180,6 +182,8 @@ class WorldInfoTransceiver
   std::map<uint32_t, time_t>             last_received_time;
   std::map<uint32_t, time_t>::iterator   lrtit;
 };
+
+} // end namespace fawkes
 
 
 #endif

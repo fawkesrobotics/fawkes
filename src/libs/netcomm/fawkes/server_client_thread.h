@@ -29,6 +29,8 @@
 #include <core/threading/thread.h>
 #include <list>
 
+namespace fawkes {
+
 class StreamSocket;
 class FawkesNetworkServerThread;
 class FawkesNetworkMessage;
@@ -67,5 +69,7 @@ class FawkesNetworkServerClientThread : public Thread
 
   FawkesNetworkServerClientSendThread  *_send_slave;
 };
+
+} // end namespace fawkes
 
 #endif

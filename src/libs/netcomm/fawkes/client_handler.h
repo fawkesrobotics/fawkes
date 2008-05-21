@@ -26,6 +26,8 @@
 #ifndef __NETCOMM_FAWKES_CLIENT_HANDLER_H_
 #define __NETCOMM_FAWKES_CLIENT_HANDLER_H_
 
+namespace fawkes {
+
 class FawkesNetworkMessage;
 
 class FawkesNetworkClientHandler
@@ -41,5 +43,6 @@ class FawkesNetworkClientHandler
 
 };
 
+} // end namespace fawkes
 
 #endif

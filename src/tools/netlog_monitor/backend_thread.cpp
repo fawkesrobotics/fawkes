@@ -34,6 +34,8 @@
 
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class NetLogMonitorBackendThread tools/netlog_monitor/backend_thread.h
  * Backend for the netlog monitor.
  *

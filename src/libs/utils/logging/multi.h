@@ -28,6 +28,9 @@
 
 #include <utils/logging/logger.h>
 
+namespace fawkes {
+
+
 class MultiLoggerData;
 
 class MultiLogger : public Logger
@@ -95,5 +98,8 @@ class MultiLogger : public Logger
  private:
   MultiLoggerData *data;
 };
+
+
+} // end namespace fawkes
 
 #endif

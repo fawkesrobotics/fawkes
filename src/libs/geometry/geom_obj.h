@@ -32,6 +32,8 @@
 
 #include <vector>
 
+namespace fawkes {
+
 class GeomObj
 {
  public:
@@ -66,5 +68,7 @@ class GeomObj
 
   bool mChanged;
 };
+
+} // end namespace fawkes
 
 #endif /* __GEOMETRY_GEOM_OBJ_H_ */

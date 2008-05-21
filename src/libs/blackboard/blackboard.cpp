@@ -34,6 +34,8 @@
 #include <string>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class BlackBoard <blackboard/blackboard.h>
  * The BlackBoard.
  * This class is the single one entry point for programs that use the BlackBoard.
@@ -304,3 +306,4 @@ BlackBoard::start_nethandler(FawkesNetworkHub *hub)
   __nethandler->start();
 }
 
+} // end namespace fawkes

@@ -26,6 +26,8 @@
 #ifndef __CORE_THREADING_MUTEX_H_
 #define __CORE_THREADING_MUTEX_H_
 
+namespace fawkes {
+
 class MutexData;
 class WaitCondition;
 
@@ -47,5 +49,7 @@ class Mutex
   MutexData *mutex_data;
 };
 
+
+} // end namespace fawkes
 
 #endif

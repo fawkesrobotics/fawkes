@@ -34,6 +34,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace fawkes;
 
 #define MAXLENGTH 1200
 

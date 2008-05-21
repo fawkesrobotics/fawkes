@@ -36,6 +36,7 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace fawkes {
 
 /** @class NetworkNameResolverThread <netcomm/utils/resolver_thread.h>
  * Worker thread for NetworkNameResolver.
@@ -217,7 +218,7 @@ NetworkNameResolverThread::resolve_name(const char *name)
 void
 NetworkNameResolverThread::resolve_address(struct sockaddr *addr, socklen_t addrlen)
 {
-  struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
+  struct ::sockaddr_in *saddr = (struct ::sockaddr_in *)addr;
   addrq.lock();
   if ( addrq.find(saddr->sin_addr.s_addr) == addrq.end() ) {
     struct sockaddr *taddr = (struct sockaddr *)malloc(addrlen);
@@ -341,3 +342,5 @@ NetworkNameResolverThread::loop()
   }
   namesq.unlock();
 }
+
+} // end namespace fawkes

@@ -26,6 +26,8 @@
 #ifndef __GEOMETRY_MATRIX_H_
 #define __GEOMETRY_MATRIX_H_
 
+namespace fawkes {
+
 class Vector;
 
 class Matrix
@@ -98,5 +100,7 @@ class Matrix
 
   bool m_transposed;
 };
+
+} // end namespace fawkes
 
 #endif /* __GEOMETRY_MATRIX_H_ */

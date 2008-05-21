@@ -34,6 +34,8 @@
 
 #define QA_MTYPE 1
 
+using namespace fawkes;
+
 typedef struct {
   long mtype;
   char msg[20];

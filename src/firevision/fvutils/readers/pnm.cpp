@@ -31,6 +31,8 @@
 #include <cstdlib>
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class PNMReader <fvutils/readers/pnm.h>
  * PNM file reader.
  *

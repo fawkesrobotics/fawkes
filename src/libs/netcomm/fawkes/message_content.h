@@ -29,6 +29,8 @@
 #include <sys/types.h>
 #include <cstddef>
 
+namespace fawkes {
+
 class FawkesNetworkMessageContent
 {
  public:
@@ -49,5 +51,6 @@ class FawkesNetworkMessageContent
   size_t  _payload_size;
 };
 
+} // end namespace fawkes
 
 #endif

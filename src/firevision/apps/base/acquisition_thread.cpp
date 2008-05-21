@@ -42,6 +42,8 @@
 #include <string>
 #include <algorithm>
 
+using namespace fawkes;
+
 /** @class FvAcquisitionThread <apps/base/acquisition_thread.h>
  * FireVision base application acquisition thread.
  * This thread is used by the base application to acquire images from a camera
@@ -58,7 +60,7 @@
  * @param clock clock to use for timeout measurement (system time)
  */
 FvAcquisitionThread::FvAcquisitionThread(const char *id,  Camera *camera,
-				       Logger *logger, Clock *clock)
+					 Logger *logger, Clock *clock)
   : Thread((std::string("FvAcquisitionThread::") + id).c_str())
 {
   _logger        = logger;

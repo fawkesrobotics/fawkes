@@ -27,6 +27,8 @@
 
 $#include <interface/message_queue.h>
 
+namespace fawkes {
+
 class MessageQueue
 {
   MessageQueue();
@@ -65,3 +67,4 @@ class MessageQueue
 
 };
 
+}

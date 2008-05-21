@@ -31,6 +31,8 @@
 #include <netcomm/fawkes/hub.h>
 #include <netcomm/utils/incoming_connection_handler.h>
 
+namespace fawkes {
+
 class ThreadCollector;
 class Mutex;
 class FawkesNetworkServerClientThread;
@@ -90,5 +92,7 @@ class FawkesNetworkServerThread
 
   FawkesNetworkMessageQueue *inbound_messages;
 };
+
+} // end namespace fawkes
 
 #endif

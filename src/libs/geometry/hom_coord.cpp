@@ -29,6 +29,8 @@
 
 #include <cstdio>
 
+namespace fawkes {
+
 /** @class HomCoord geometry/hom_coord.h
  * Base class for homogeneous primitives (vector and point).
  * @author Daniel Beck
@@ -295,3 +297,5 @@ HomCoord::operator=(const HomCoord& h)
 
   return *this;
 }
+
+} // end namespace fawkes

@@ -23,26 +23,28 @@ extern "C"
 #include <gts.h>
 }
 
-class PathState : public AStarState
+class PathState : public fawkes::AStarState
 {
  public:
 
   PathState();
-  PathState(GtsSurface *surface, GtsEdge *current_edge, GtsPoint *current_point, GtsFace *current_face, GtsPoint *target,
-            GtsPoint *start_point, double pastCost, PathState *father);
+  PathState(GtsSurface *surface, GtsEdge *current_edge,
+	    GtsPoint *current_point, GtsFace *current_face,
+	    GtsPoint *target, GtsPoint *start_point,
+	    double pastCost, PathState *father);
   ~PathState();
   
   GtsPoint *getPoint();
   long calculateKey();
   double estimate();
   bool isGoal();
-  std::vector< AStarState * > generateChildren();
+  std::vector< fawkes::AStarState * > generateChildren();
   GtsEdge *getEdge();
   
   
  private:
     
-  void addChild(GtsPoint *p1, GtsPoint *p2, GtsEdge *next_edge,  std::vector< AStarState * > &children);
+  void addChild(GtsPoint *p1, GtsPoint *p2, GtsEdge *next_edge,  std::vector< fawkes::AStarState * > &children);
   GtsPoint *nextPoint(GtsPoint *p1, GtsPoint *p2, double &newCost);
   double shortest_difference_between_two_angles(double angle1, double angle2);
    

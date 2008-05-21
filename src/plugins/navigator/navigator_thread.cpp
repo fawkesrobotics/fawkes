@@ -32,6 +32,8 @@
 #include <unistd.h>
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class NavigatorThread <plugins/navigator/navigator_thread.h>
  * Navigator thread.
  * Navigator functional thread.

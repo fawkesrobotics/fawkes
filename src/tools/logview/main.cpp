@@ -34,6 +34,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+using namespace fawkes;
+
 /// @cond INTERNALS
 
 class NetLogConsolePrinter

@@ -29,6 +29,9 @@
 #include <core/threading/mutex.h>
 #include <list>
 
+namespace fawkes {
+
+
 template <typename Type>
 class LockList : public std::list<Type>
 {
@@ -170,5 +173,7 @@ LockList<Type>::mutex() const
   return __mutex;
 }
 
+
+} // end namespace fawkes
 
 #endif

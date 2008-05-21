@@ -32,6 +32,8 @@
 #include <cstdio>
 #include <cerrno>
 
+using namespace fawkes;
+
 /** File identifier for FvRaw images. */
 const unsigned int FvRawWriter::FILE_IDENTIFIER = 0x17559358; // 16
 

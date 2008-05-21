@@ -29,6 +29,8 @@
 #include <utils/ipc/shm.h>
 #include <blackboard/memory_manager.h>
 
+namespace fawkes {
+
 class SharedMemory;
 
 class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
@@ -69,5 +71,7 @@ class BlackBoardSharedMemoryHeader : public SharedMemoryHeader
   BlackBoardSharedMemoryHeaderData *data;
   SharedMemory                     *shmem;
 };
+
+} // end namespace fawkes
 
 #endif

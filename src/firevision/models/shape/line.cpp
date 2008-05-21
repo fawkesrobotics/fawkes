@@ -108,7 +108,7 @@ LineShape::calcPoints()
   last_calc_r   = r;
   last_calc_phi = phi;
 
-  float rad_angle = deg2rad(phi);
+  float rad_angle = fawkes::deg2rad(phi);
 
   // if true, point (x1, y1) will be moved the opposite direction
   bool reverse_direction = false;

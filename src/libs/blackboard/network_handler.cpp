@@ -40,6 +40,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class BlackBoardNetworkHandler <blackboard/network_handler.h>
  * BlackBoard Network Handler.
  * This class provides a network handler that can be registered with the
@@ -358,3 +360,5 @@ BlackBoardNetworkHandler::client_disconnected(unsigned int clid)
   }
   __client_interfaces.unlock();
 }
+
+} // end namespace fawkes

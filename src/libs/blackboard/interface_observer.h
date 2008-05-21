@@ -29,6 +29,8 @@
 #include <core/utils/lock_hashset.h>
 #include <utils/misc/string_compare.h>
 
+namespace fawkes {
+
 class BlackBoardInterfaceObserver
 {
 
@@ -73,5 +75,6 @@ class BlackBoardInterfaceObserver
   InterfaceTypeLockHashSetIterator __bbio_iti;
 };
 
+} // end namespace fawkes
 
 #endif

@@ -29,7 +29,9 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 
-class ExampleFinalizeNettlerThread : public Thread, public LoggingAspect
+class ExampleFinalizeNettlerThread
+: public fawkes::Thread,
+  public fawkes::LoggingAspect
 {
 
  public:

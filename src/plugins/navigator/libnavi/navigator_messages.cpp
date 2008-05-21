@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <cstring>
 
+using namespace fawkes;
 
 /** @class NavigatorLinesListMessage <navigator/libnavi/navigator_messages.h>
  * This message is for containing the lines of the surface of the triangulation.

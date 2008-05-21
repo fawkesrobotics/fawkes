@@ -29,6 +29,9 @@
 // for size_t
 #include <sys/types.h>
 
+namespace fawkes {
+
+
 class SharedMemoryHeader {
  public:
   virtual ~SharedMemoryHeader() {}
@@ -187,5 +190,7 @@ class SharedMemory
 
 };
 
+
+} // end namespace fawkes
 
 #endif

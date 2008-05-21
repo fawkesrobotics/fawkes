@@ -27,6 +27,8 @@
 #include <cstring>
 #include <cmath>
 
+using namespace fawkes;
+
 /** @class VelocityController plugins/navigator/robot_motion/velocity_controller.h
  * Velocity controller base class.
  * @author Daniel Beck

@@ -36,11 +36,13 @@
 #include <cstring>
 #include <dlfcn.h>
 
+
+namespace fawkes {
+
 /** @class ModuleDL utils/system/dynamic_module/module_dl.h
  * A Module implementation for the dl dynamic loader library that comes
  * with glibc, applicable for Linux Systems
  */
-
 
 const char * ModuleDL::FILE_EXTENSION = "so";
 
@@ -280,3 +282,6 @@ ModuleDL::getBaseFilename()
     return filename.c_str();
   }
 }
+
+
+} // end namespace fawkes

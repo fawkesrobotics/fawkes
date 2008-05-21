@@ -31,6 +31,8 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class NetworkService <netcomm/service_discovery/service.h>
  * Representation of a service announced or found via service
  * discovery (i.e. mDNS/DNS-SD via Avahi).
@@ -254,3 +256,5 @@ NetworkService::operator<(const NetworkService &s) const
     return (typediff < 0);
   }
 }
+
+} // end namespace fawkes

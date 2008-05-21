@@ -37,6 +37,7 @@
 #define CHILD_LOCK  1
 
 using namespace std;
+using namespace fawkes;
 
 bool quit;
 

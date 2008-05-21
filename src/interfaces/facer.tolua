@@ -1,4 +1,5 @@
 $#include <interfaces/facer.h>
+namespace fawkes {
 class FacerInterface : public Interface
 {
 
@@ -39,3 +40,5 @@ class FacerInterface : public Interface
   size_t maxlenof_face_label() const;
 
 };
+
+}

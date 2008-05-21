@@ -30,6 +30,7 @@
 
 #define FILE_STEP 1024
 
+using namespace fawkes;
 
 /** @class InterfaceDigest <interfaces/generator/digest.h>
  * Interface digest generator.

@@ -28,6 +28,7 @@
 
 #include <geometry/hom_coord.h>
 
+namespace fawkes {
 class HomVector;
 
 class HomPoint : public HomCoord
@@ -42,5 +43,8 @@ class HomPoint : public HomCoord
   HomPoint& move(float dx, float dy, float dz);
   HomPoint& move_to(float x, float y, float z);
 };
+
+} // end namespace fawkes
+
 
 #endif /* __GEOMETRY_HOM_POINT_H_ */

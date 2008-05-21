@@ -28,21 +28,23 @@
 
 #include <aspect/inifin.h>
 
-class BlackBoard;
-class Configuration;
-class Logger;
-class Clock;
-class Thread;
-class ThreadCollector;
+namespace fawkes {
+  class BlackBoard;
+  class Configuration;
+  class Logger;
+  class Clock;
+  class Thread;
+  class ThreadCollector;
+}
 
-class FawkesThreadIniFin : public AspectIniFin
+class FawkesThreadIniFin : public fawkes::AspectIniFin
 {
  public:
-  FawkesThreadIniFin(BlackBoard *blackboard, ThreadCollector *collector,
-		     Configuration *config, Logger *logger, Clock *clock);
+  FawkesThreadIniFin(fawkes::BlackBoard *blackboard, fawkes::ThreadCollector *collector,
+		     fawkes::Configuration *config, fawkes::Logger *logger, fawkes::Clock *clock);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+  virtual void init(fawkes::Thread *thread);
+  virtual void finalize(fawkes::Thread *thread);
 };
 
 

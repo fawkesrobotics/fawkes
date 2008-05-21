@@ -28,6 +28,8 @@
 
 #include <core/threading/thread_collector.h>
 
+namespace fawkes {
+
 class ThreadProducerAspect
 {
  public:
@@ -38,5 +40,7 @@ class ThreadProducerAspect
  protected:
   ThreadCollector *thread_collector;
 };
+
+} // end namespace fawkes
 
 #endif

@@ -30,13 +30,15 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 
-class TestInterface;
+namespace fawkes {
+  class TestInterface;
+}
 
 class ExampleBlackBoardThread
-  : public Thread,
-    public BlockedTimingAspect,
-    public LoggingAspect,
-    public BlackBoardAspect
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::BlackBoardAspect
 {
  public:
   ExampleBlackBoardThread(bool reader);
@@ -47,8 +49,8 @@ class ExampleBlackBoardThread
   virtual void loop();
 
  private:
-  TestInterface* test_interface;  
-  bool           reader;
+  fawkes::TestInterface* test_interface;  
+  bool                   reader;
 };
 
 #endif

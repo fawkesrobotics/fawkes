@@ -28,10 +28,14 @@
 
 #include <core/exception.h>
 
+namespace fawkes {
+
 class ConnectionDiedException : public Exception
 {
  public:
   ConnectionDiedException(const char *format, ...);
 };
+
+} // end namespace fawkes
 
 #endif

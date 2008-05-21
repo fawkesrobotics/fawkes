@@ -42,9 +42,11 @@
 #include <utils/system/argparser.h>
 
 #include <netdb.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <netinet/in.h>
+
+using namespace fawkes;
 
 class MulticastDatagramServerThread : public Thread
 {

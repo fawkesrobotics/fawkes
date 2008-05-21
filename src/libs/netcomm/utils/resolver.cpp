@@ -36,6 +36,8 @@
 #include <cstdlib>
 #include <cstdio>
 
+namespace fawkes {
+
 /** @class NetworkNameResolver <netcomm/utils/resolver.h>
  * Network name and address resolver.
  * This class implements a facility to resolve host names to addresses
@@ -333,3 +335,5 @@ NetworkNameResolver::short_hostname()
 {
   return __host_info->short_name();
 }
+
+} // end namespace fawkes

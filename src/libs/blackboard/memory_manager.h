@@ -26,6 +26,8 @@
 #ifndef __BLACKBOARD_MEMORY_MANAGER_H_
 #define __BLACKBOARD_MEMORY_MANAGER_H_
 
+namespace fawkes {
+
 class BlackBoardSharedMemoryHeader;
 class SharedMemory;
 class Mutex;
@@ -148,5 +150,6 @@ class BlackBoardMemoryManager
 
 };
 
+} // end namespace fawkes
 
 #endif

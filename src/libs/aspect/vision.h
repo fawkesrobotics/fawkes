@@ -28,6 +28,8 @@
 
 #include <fvutils/base/vision_master.h>
 
+namespace fawkes {
+
 class VisionAspect
 {
  public:
@@ -42,13 +44,15 @@ class VisionAspect
   VisionAspect(VisionThreadMode mode);
   virtual ~VisionAspect();
 
-  void              initVisionAspect(VisionMaster *vision_master);
+  void              init_VisionAspect(::VisionMaster *vision_master);
   VisionThreadMode  vision_thread_mode();
  protected:
   /** Vision master */
-  VisionMaster *vision_master;
+  ::VisionMaster *vision_master;
  private:
   VisionThreadMode __vision_thread_mode;
 };
+
+} // end namespace fawkes
 
 #endif

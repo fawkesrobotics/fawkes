@@ -32,6 +32,8 @@
 #  include <strfunc.h>
 #endif
 
+namespace fawkes {
+
 /** @class InterfaceInfo <interface/interface_info.h>
  * Interface info.
  * This class holds information about a specific interface.
@@ -163,3 +165,5 @@ InterfaceInfoList::append(const char *type, const char *id, const unsigned char 
 {
   push_back(InterfaceInfo(type, id, hash, serial, has_writer, num_readers));
 }
+
+} // end namespace fawkes

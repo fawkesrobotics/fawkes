@@ -45,15 +45,17 @@ class MirrorModel;
 class SimpleColorClassifier;
 class RelativePositionModel;
 class SharedMemoryImageBuffer;
-class ObjectPositionInterface;
 class Drawer;
+namespace fawkes {
+  class ObjectPositionInterface;
+}
 
 class FvOmniBallPipelineThread
-: public Thread,
-  public LoggingAspect,
-  public VisionAspect,
-  public ConfigurableAspect,
-  public BlackBoardAspect
+: public fawkes::Thread,
+  public fawkes::LoggingAspect,
+  public fawkes::VisionAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::BlackBoardAspect
 {
  public:
   FvOmniBallPipelineThread();
@@ -87,7 +89,7 @@ class FvOmniBallPipelineThread
   cart_coord_t  mass_point;
   float         min_dist;
 
-  ObjectPositionInterface* ball_interface;
+  fawkes::ObjectPositionInterface* ball_interface;
 
   std::list< ROI > *rois;
   std::list< ROI >::iterator r;

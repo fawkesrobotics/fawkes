@@ -49,6 +49,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+using namespace fawkes;
+
 /** @class FileLoader <cams/fileloader.h>
  * Load images from files.
  * The file loader tries to determine the image format of the given image using

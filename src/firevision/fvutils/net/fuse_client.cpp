@@ -41,6 +41,8 @@
 #include <cstdlib>
 #include <unistd.h>
 
+using namespace fawkes;
+
 /** @class FuseClient <fvutils/net/fuse_client.h>
  * FUSE client.
  * FUSE is the FireVision protocol to retrieve information, images and lookup

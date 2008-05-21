@@ -28,6 +28,10 @@
 #define __UTILS_LOGGING_FILE_H_
 
 #include <utils/logging/logger.h>
+#include <ctime>
+
+namespace fawkes {
+
 
 class Mutex;
 class File;
@@ -74,10 +78,13 @@ class FileLogger : public Logger
 			   const char *format, va_list va);
 
  private:
-  struct tm *now_s;
+  struct ::tm *now_s;
 
-  File       *log_file;
-  Mutex      *mutex;
+  File        *log_file;
+  Mutex       *mutex;
 };
+
+
+} // end namespace fawkes
 
 #endif

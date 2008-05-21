@@ -33,6 +33,8 @@
 #include <cstdlib>
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class YuvColormap <fvutils/colormap/colormap.h>
  * YUV Colormap.
  * This class is the implementation of a 3D YUV colormap. The U/V planes are always

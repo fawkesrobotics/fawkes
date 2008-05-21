@@ -27,6 +27,10 @@
 #define __UTILS_LOGGING_CONSOLE_H_
 
 #include <utils/logging/logger.h>
+#include <ctime>
+
+namespace fawkes {
+
 
 class Mutex;
 
@@ -72,8 +76,11 @@ class ConsoleLogger : public Logger
 
 
  private:
-  struct tm      *now_s;
-  Mutex          *mutex;
+  struct ::tm  *now_s;
+  Mutex        *mutex;
 };
+
+
+} // end namespace fawkes
 
 #endif

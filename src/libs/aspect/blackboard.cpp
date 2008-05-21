@@ -25,6 +25,8 @@
 
 #include <aspect/blackboard.h>
 
+namespace fawkes {
+
 /** @class BlackBoardAspect aspect/blackboard.h
  * Thread aspect to access to BlackBoard.
  * Give this aspect to your thread to gain access to the BlackBoard.
@@ -58,3 +60,5 @@ BlackBoardAspect::init_BlackBoardAspect(BlackBoard *bb)
 {
   blackboard = bb;
 }
+
+} // end namespace fawkes

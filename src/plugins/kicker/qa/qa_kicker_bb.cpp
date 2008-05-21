@@ -30,6 +30,8 @@
 #include <aspect/logging.h>
 #include <interfaces/kicker.h>
 
+using namespace fawkes;
+
 class KickerQAThread : public Thread, public BlackBoardAspect, public LoggingAspect
 {
  public:

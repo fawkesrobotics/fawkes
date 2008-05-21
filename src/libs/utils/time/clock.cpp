@@ -30,6 +30,8 @@
 
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class Clock <utils/time/clock.h>
  * This is supposed to be the central clock in Fawkes.
  * It is implemented as a singleton to ensure that there is only
@@ -348,3 +350,5 @@ Clock::has_ext_timesource() const
     return false;
   }
 }
+
+} // end namespace fawkes

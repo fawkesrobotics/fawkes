@@ -28,6 +28,8 @@
 
 #include <core/exception.h>
 
+namespace fawkes {
+
 /** A NULL pointer was supplied where not allowed.
  * Throw this exception if a pointer to NULL has been supplied where this is
  * not allowed.
@@ -147,5 +149,6 @@ class BlackBoardNoWritingInstanceException : public Exception {
   BlackBoardNoWritingInstanceException() : Exception("No writing instance for interface") {}
 };
 
+} // end namespace fawkes
 
 #endif

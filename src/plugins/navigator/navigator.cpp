@@ -38,6 +38,8 @@
 
 #include <cmath>
 
+using namespace fawkes;
+
 #define FUZZY_POTENTIAL_FIELD
 #define FUZZY_SMOOTHING
 

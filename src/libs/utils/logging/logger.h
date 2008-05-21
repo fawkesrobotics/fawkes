@@ -28,6 +28,10 @@
 
 #include <core/exception.h>
 #include <cstdarg>
+#include <sys/time.h>
+
+namespace fawkes {
+
 
 class Logger
 {
@@ -125,5 +129,8 @@ class Logger
    */
   LogLevel log_level;
 };
+
+
+} // end namespace fawkes
 
 #endif

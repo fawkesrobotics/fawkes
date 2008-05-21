@@ -33,6 +33,8 @@
 #include <iostream>
 #include <string>
 
+using namespace fawkes;
+
 int main(int argc, char** argv)
 {
   Thread::init_main();

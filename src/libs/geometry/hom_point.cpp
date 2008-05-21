@@ -29,6 +29,8 @@
 #include <cstdio>
 #include <exception>
 
+namespace fawkes {
+
 /** @class HomPoint geometry/hom_point.h
  * A homogeneous point.
  * @author Daniel Beck
@@ -103,3 +105,5 @@ HomPoint::move_to(float x, float y, float z)
 
   return *this;
 }
+
+} // end namespace fawkes

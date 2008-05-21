@@ -27,6 +27,8 @@
 #include <netcomm/utils/incoming_connection_handler.h>
 #include <netcomm/socket/stream.h>
 
+namespace fawkes {
+
 /** @class NetworkAcceptorThread <netcomm/utils/acceptor_thread.h>
  * Network Acceptor Thread.
  * Opens and maintains a server socket and waits for incoming connections. If
@@ -105,3 +107,5 @@ NetworkAcceptorThread::loop()
   StreamSocket *s = __socket->accept<StreamSocket>();
   __handler->add_connection(s);
 }
+
+} // end namespace fawkes

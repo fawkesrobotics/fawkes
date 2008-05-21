@@ -29,6 +29,8 @@
 
 #include <unistd.h>
 
+namespace fawkes {
+
 /** @class RefCount core/utils/refcount.h
  * Reference counting base class.
  * Derive this class with your object if you need reference counting for the object
@@ -126,3 +128,6 @@ RefCount::refcount()
 {
   return refc;
 }
+
+
+} // end namespace fawkes

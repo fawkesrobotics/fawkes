@@ -31,6 +31,8 @@
 #include <cstdio>
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class OmniMotionModel plugins/navigator/robot_motion/omni_motion_model.h
  * A motion model for a three-wheeled omni-drive robot. It is assumed that the wheels are
  * mounted at angles -60° (front right), 180° (rear), and 60° (left), all with the same

@@ -33,6 +33,9 @@
 #endif
 #include <stdio.h>
 
+namespace fawkes {
+
+
 /** @class ShmCouldNotAttachException utils/ipc/shm_exceptions.h
  * Could not attach to shared memory segment.
  */
@@ -112,3 +115,6 @@ ShmPtrOutOfBoundsException::ShmPtrOutOfBoundsException()
 	      "point inside the shared memory segment")
 {
 }
+
+
+} // end namespace fawkes

@@ -25,6 +25,8 @@
 
 #include <aspect/time_source.h>
 
+namespace fawkes {
+
 /** @class TimeSourceAspect <aspect/time_source.h>
  * Thread aspect that allows to provide a time source to the Fawkes clock.
  * There may be at most one external time source provided by a thread with
@@ -61,3 +63,5 @@ TimeSourceAspect::get_timesource() const
 {
   return __time_source;
 }
+
+} // end namespace fawkes

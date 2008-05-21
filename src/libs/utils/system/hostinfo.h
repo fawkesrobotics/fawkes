@@ -23,6 +23,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#ifndef __UTILS_SYSTEM_HOSTINFO_H_
+#define __UTILS_SYSTEM_HOSTINFO_H_
+
+struct utsname;
+
+namespace fawkes {
+
 class HostInfo
 {
  public:
@@ -42,7 +49,11 @@ class HostInfo
   void update();
 
  private:
-  struct utsname *utsname;
+  struct ::utsname *utsname;
   char *short__name;
   char *domain_name;
 };
+
+} // end namespace fawkes
+
+#endif

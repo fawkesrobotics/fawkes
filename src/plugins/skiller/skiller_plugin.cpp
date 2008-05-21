@@ -28,6 +28,8 @@
 
 #include <core/threading/barrier.h>
 
+using namespace fawkes;
+
 /** @class SkillerPlugin <plugins/skiller/skiller_plugin.h>
  * Skill Execution Runtime Plugin.
  * This plugin facilitates the Fawkes skill module. It allows for execution of

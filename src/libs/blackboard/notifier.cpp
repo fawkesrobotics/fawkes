@@ -36,6 +36,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class BlackBoardNotifier <blackboard/notifier.h>
  * BlackBoard notifier.
  * This class is used by the BlackBoard to notify listeners and observers
@@ -467,3 +469,5 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
 
   return rv;
 }
+
+} // end namespace fawkes

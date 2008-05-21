@@ -25,6 +25,8 @@
 
 #include <core/threading/thread_initializer.h>
 
+namespace fawkes {
+
 /** @class CannotInitializeThreadException core/threading/thread_initializer.h
  * Thread cannot be initialized.
  * Thrown if a thread could not be initialized for whatever reason.
@@ -64,3 +66,6 @@ CannotInitializeThreadException::CannotInitializeThreadException(const char *for
 ThreadInitializer::~ThreadInitializer()
 {
 }
+
+
+} // end namespace fawkes

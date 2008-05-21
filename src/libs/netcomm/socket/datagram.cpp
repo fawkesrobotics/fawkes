@@ -27,6 +27,8 @@
 
 #include <sys/socket.h>
 
+namespace fawkes {
+
 /** @class DatagramSocket netcomm/socket/datagram.h
  * Datagram socket. A UDP socket on top of IP.
  *
@@ -61,3 +63,5 @@ DatagramSocket::clone()
 {
   return new DatagramSocket(*this);
 }
+
+} // end namespace fawkes

@@ -28,6 +28,9 @@
 #include <pthread.h>
 #include <cstring>
 
+namespace fawkes {
+
+
 /// @cond INTERNALS
 class ReadWriteLockData
 {
@@ -146,3 +149,6 @@ ReadWriteLock::unlock()
 {
   pthread_rwlock_unlock( &(rwlock_data->rwlock) );
 }
+
+
+} // end namespace fawkes

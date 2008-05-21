@@ -38,6 +38,8 @@
 #include <cstdlib>
 #include <cmath>
 
+using namespace fawkes;
+
 // #define RESAMPLE_ADJUST(x) x
 #define RESAMPLE_ADJUST(x) (powf(x, 2.0f))
 // #define RESAMPLE_ADJUST(x) (0.1f + (x*0.9f))

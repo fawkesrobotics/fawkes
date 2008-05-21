@@ -27,6 +27,8 @@
 #include <fvutils/statistical/histogram_block.h>
 #include <core/exception.h>
 
+using namespace fawkes;
+
 
 /** @class HistogramFile fvutils/statistical/histogram_file.h
  * A fileformat for histograms. Such a file might contain multiple histograms, each for a

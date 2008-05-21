@@ -32,6 +32,8 @@
 
 #include <cmath>
 
+using namespace fawkes;
+
 
 /** @class JoystickControl <plugins/navigator/joystick_control.h>
  *      The joystick control for the motors.

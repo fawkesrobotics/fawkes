@@ -29,6 +29,8 @@
 #include <interface/interface.h>
 #include <interface/message.h>
 
+namespace fawkes {
+
 class BatteryInterface : public Interface
 {
  /// @cond INTERNALS
@@ -91,5 +93,7 @@ class BatteryInterface : public Interface
   size_t maxlenof_temperature() const;
 
 };
+
+} // end namespace fawkes
 
 #endif

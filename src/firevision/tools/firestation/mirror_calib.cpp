@@ -31,6 +31,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class MirrorCalibTool tools/firestation/mirror_calib.h
  * This class encapsulates the routines necessary for interactive mirror

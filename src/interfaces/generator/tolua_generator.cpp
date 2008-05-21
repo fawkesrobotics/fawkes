@@ -271,6 +271,7 @@ ToLuaInterfaceGenerator::write_toluaf(FILE *f)
 {
   fprintf(f,
 	  "$#include <interfaces/%s>\n"
+	  "namespace fawkes {\n"
 	  "class %s : public Interface\n"
 	  "{\n",
 	  filename_h.c_str(),
@@ -280,7 +281,7 @@ ToLuaInterfaceGenerator::write_toluaf(FILE *f)
   write_messages_h(f);
   //write_ctor_dtor_h(f, "  ", class_name);
   write_methods_h(f, "  ", data_fields);
-  fprintf(f, "\n};\n");
+  fprintf(f, "\n};\n\n}\n");
 }
 
 

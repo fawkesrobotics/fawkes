@@ -29,6 +29,9 @@
 #include <core/threading/mutex.h>
 #include <map>
 
+namespace fawkes {
+
+
 template <typename KeyType,
           typename ValueType,
           typename LessKey     = std::less<KeyType> >
@@ -144,5 +147,7 @@ LockMap<KeyType, ValueType, LessKey>::mutex() const
   return __mutex;
 }
 
+
+} // end namespace fawkes
 
 #endif

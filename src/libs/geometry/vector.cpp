@@ -28,6 +28,8 @@
 #include <cstdlib>
 #include <cstdio>
 
+namespace fawkes {
+
 /** @class Vector geometry/vector.h
  * A simple column vector.
  * @author Daniel Beck
@@ -408,3 +410,5 @@ Vector::print_info(const char* name) const
     }
   printf("]T\n");
 }
+
+} // end namespace fawkes

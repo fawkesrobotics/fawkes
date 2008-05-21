@@ -34,6 +34,7 @@
 #include <core/exceptions/software.h>
 #include <utils/logging/liblogger.h>
 
+namespace fawkes {
 
 /** @class BlackBoardMessageManager <blackboard/message_manager.h>
  * BlackBoard message manager.
@@ -92,3 +93,5 @@ BlackBoardMessageManager::set_interface_manager(BlackBoardInterfaceManager *im)
 {
   __im = im;
 }
+
+} // end namespace fawkes

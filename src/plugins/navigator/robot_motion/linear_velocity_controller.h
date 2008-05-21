@@ -33,10 +33,10 @@ class PidController;
 class LinearVelocityController : public VelocityController
 {
  public:
-  LinearVelocityController(Clock* clock,
+  LinearVelocityController(fawkes::Clock* clock,
 			   unsigned int avg_loop_time_ms,
 			   float max_accel);
-  LinearVelocityController(Clock* clock, unsigned int avg_loop_time_ms,
+  LinearVelocityController(fawkes::Clock* clock, unsigned int avg_loop_time_ms,
 			   float max_accel, float max_decel);
   ~LinearVelocityController();
 
@@ -50,7 +50,7 @@ class LinearVelocityController : public VelocityController
   float m_max_accel;
   float m_max_decel;
 
-  Time m_start;
+  fawkes::Time m_start;
 
   bool m_stopping;
 

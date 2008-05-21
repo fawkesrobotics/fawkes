@@ -34,6 +34,8 @@
 #include <cstdlib>
 #include <cstdio>
 
+namespace fawkes {
+
 /** @class Exception core/exception.h
  * Base class for exceptions in Fawkes.
  * Exceptions are a good way to handle errors. If you choose to use
@@ -733,3 +735,6 @@ Exception::iterator::operator=(const iterator &i)
   this->mlist = i.mlist;
   return *this;
 }
+
+
+} // end namespace fawkes

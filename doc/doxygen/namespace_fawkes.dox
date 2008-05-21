@@ -1,0 +1,5 @@
+/** @namespace fawkes
+ * Fawkes library namespace.
+ * This namespace is used for the Fawkes base libraries. As a rule of
+ * thumb everything that is in src/libs belongs to this namespace.
+ */

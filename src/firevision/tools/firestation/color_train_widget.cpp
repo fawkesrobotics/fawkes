@@ -504,7 +504,7 @@ ColorTrainWidget::load_colormap()
 	 YuvColormap *tycm = dynamic_cast<YuvColormap *>(tcm);
 	 if ( ! tycm ) {
 	   delete tcm;
-	   throw TypeMismatchException("File does not contain a YUV colormap");
+	   throw fawkes::TypeMismatchException("File does not contain a YUV colormap");
 	 }
 	 unsigned int cm_depth = tcm->depth();
 	 m_generator = new BayesColormapGenerator(cm_depth);

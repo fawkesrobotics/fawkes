@@ -27,6 +27,8 @@
 #include <cmath>
 #include <cstdio>
 
+using namespace fawkes;
+
 /** @class LinearVelocityController plugins/navigator/robot_motion/linear_velocity_controller.h
  * A simple one-dimensional velocity controller with integrated PID controller that
  * accelerates/decelerates linearly.

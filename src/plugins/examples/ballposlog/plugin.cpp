@@ -33,6 +33,8 @@
  * @author Tim Niemueller
  */
 
+using namespace fawkes;
+
 /** Constructor. */
 BallPosLogPlugin::BallPosLogPlugin()
   : Plugin("ballposlog")

@@ -28,6 +28,7 @@
 #include <math.h>
 #include <iostream>
 
+namespace fawkes {
 
 /** @class Line <geometry/line.h>
  * Well, what can one say about a straight line?
@@ -242,3 +243,5 @@ Line::rotate_z_ref(float angle)
 
   return *this;
 }
+
+} // end namespace fawkes

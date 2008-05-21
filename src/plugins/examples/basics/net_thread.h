@@ -30,8 +30,11 @@
 #include <aspect/fawkes_network.h>
 #include <netcomm/fawkes/handler.h>
 
-class ExampleNetworkThread : public Thread, public LoggingAspect, public FawkesNetworkAspect,
-  public FawkesNetworkHandler
+class ExampleNetworkThread
+: public fawkes::Thread,
+  public fawkes::LoggingAspect,
+  public fawkes::FawkesNetworkAspect,
+  public fawkes::FawkesNetworkHandler
 {
 
  public:
@@ -43,7 +46,7 @@ class ExampleNetworkThread : public Thread, public LoggingAspect, public FawkesN
   virtual void loop();
 
   /* from FawkesNetworkHandler interface */
-  virtual void handle_network_message(FawkesNetworkMessage *msg);
+  virtual void handle_network_message(fawkes::FawkesNetworkMessage *msg);
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
 

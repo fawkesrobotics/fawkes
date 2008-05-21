@@ -25,6 +25,8 @@
 
 #include <aspect/configurable.h>
 
+namespace fawkes {
+
 /** @class ConfigurableAspect aspect/configurable.h
  * Thread aspect to access configuration data.
  * Give this aspect to your thread to gain access to the configuration.
@@ -65,7 +67,9 @@ ConfigurableAspect::~ConfigurableAspect()
  * @param config Configuration instance to use.
  */
 void
-ConfigurableAspect::initConfigurableAspect(Configuration *config)
+ConfigurableAspect::init_ConfigurableAspect(Configuration *config)
 {
   this->config = config;
 }
+
+} // end namespace fawkes

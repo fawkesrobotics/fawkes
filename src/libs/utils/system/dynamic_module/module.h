@@ -29,6 +29,9 @@
 #include <core/exception.h>
 #include <string>
 
+namespace fawkes {
+
+
 class ModuleOpenException : public Exception
 {
  public:
@@ -81,5 +84,6 @@ class Module {
 
 };
 
+} // end namespace fawkes
 
 #endif

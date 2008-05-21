@@ -37,6 +37,8 @@
 #include <stdlib.h>
 #include <cstdio>
 
+namespace fawkes {
+
 /** @class UnableToOpenFileException utils/system/file.h
  * Opening a file failed for some reason.
  * @ingroup Exceptions
@@ -167,3 +169,6 @@ File::is_regular(const char *filename)
     return false;
   }
 }
+
+
+} // end namespace fawkes

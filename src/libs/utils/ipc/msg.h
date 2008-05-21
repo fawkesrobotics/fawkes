@@ -26,9 +26,10 @@
 #ifndef __UTILS_IPC_MSG_H_
 #define __UTILS_IPC_MSG_H_
 
-class IPCMessageQueueData;
+namespace fawkes {
 
-#define MTYPE(x) (IPCMessageQueue::mtype(x))
+
+class IPCMessageQueueData;
 
 class IPCMessageQueue {
  public:
@@ -78,5 +79,7 @@ class IPCMessageQueue {
 
 };
 
+
+} // end namespace fawkes
 
 #endif

@@ -30,7 +30,9 @@
 #include <cstring>
 #include <cstdlib>
 
-/** @class TestInterface interfaces/test.h
+namespace fawkes {
+
+/** @class TestInterface <interfaces/test.h>
  * TestInterface Fawkes BlackBoard Interface.
  * Test interface. Use this to play around. Do NOT remove any fields, as this
       interface is used by BlackBoard QA.
@@ -635,3 +637,5 @@ TestInterface::message_valid(const Message *message) const
 EXPORT_INTERFACE(TestInterface)
 /// @endcond
 
+
+} // end namespace fawkes

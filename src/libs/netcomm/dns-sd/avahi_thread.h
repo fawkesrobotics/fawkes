@@ -38,10 +38,6 @@
 #include <string>
 #include <utility>
 
-class ServiceBrowseHandler;
-class NetworkService;
-class WaitCondition;
-class AvahiResolverHandler;
 struct AvahiEntryGroup;
 struct AvahiSimplePoll;
 struct AvahiServiceBrowser;
@@ -49,6 +45,13 @@ struct AvahiServiceResolver;
 struct AvahiHostNameResolver;
 struct AvahiAddressResolver;
 struct sockaddr_in;
+
+namespace fawkes {
+
+class ServiceBrowseHandler;
+class NetworkService;
+class WaitCondition;
+class AvahiResolverHandler;
 
 class AvahiThread
 : public Thread,
@@ -210,5 +213,6 @@ class AvahiThread
   LockMap<struct sockaddr_in *, AvahiResolverCallbackData *>::iterator  __parit;
 };
 
+} // end namespace fawkes
 
 #endif

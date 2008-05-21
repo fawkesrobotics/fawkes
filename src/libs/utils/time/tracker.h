@@ -32,6 +32,8 @@
 #include <string>
 #include <sys/time.h>
 
+namespace fawkes {
+
 class TimeTracker {
  public:
   TimeTracker();
@@ -59,7 +61,6 @@ class TimeTracker {
   std::string tracker_comment;
 };
 
-
-
+} // end namespace fawkes
 
 #endif

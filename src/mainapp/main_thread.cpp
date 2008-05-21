@@ -50,6 +50,8 @@
 #include <cstdio>
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class FawkesMainThread mainapp/main_thread.h
  * Fawkes main thread.
  * This thread initializes all important stuff like the BlackBoard,

@@ -32,6 +32,8 @@
 #include <fvutils/color/conversions.h>
 #include <fvutils/color/yuv.h>
 
+using namespace fawkes;
+
 /** @class ImageDisplay <fvwidgets/image_display.h>
  * Simple image display.
  * This is a simple thin wrapper around the SDL to display images in a standalone

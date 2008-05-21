@@ -33,6 +33,8 @@
 
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class FvRetrieverThread <apps/retriever/retriever_thread.h>
  * FireVision retriever thread.
  * This implements the functionality of the FvRetrieverPlugin.

@@ -26,6 +26,8 @@
 #ifndef __GEOMETRY_TRANSFORM_H_
 #define __GEOMETRY_TRANSFORM_H_
 
+namespace fawkes {
+
 class Matrix;
 class HomCoord;
 class HomVector;
@@ -60,5 +62,7 @@ class HomTransform
  private:
   Matrix* m_matrix;
 };
+
+} // end namespace fawkes
 
 #endif /* __GEOMETRY_TRANSFORM_H_ */

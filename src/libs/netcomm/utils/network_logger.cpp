@@ -36,6 +36,7 @@
 #include <cstdlib>
 #include <cstdio>
 
+namespace fawkes {
 
 void
 NetworkLoggerMessageContent::serialize()
@@ -559,3 +560,5 @@ NetworkLoggerMessageContent::get_loglevel() const
 {
   return (Logger::LogLevel)header->log_level;
 }
+
+} // end namespace fawkes

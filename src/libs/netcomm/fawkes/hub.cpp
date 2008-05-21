@@ -25,6 +25,8 @@
 
 #include <netcomm/fawkes/hub.h>
 
+namespace fawkes {
+
 /** @class FawkesNetworkHub netcomm/fawkes/hub.h
  * Fawkes Network Hub.
  * This interface is the main entry point for applications, plugins and
@@ -119,3 +121,5 @@
 FawkesNetworkHub::~FawkesNetworkHub()
 {
 }
+
+} // end namespace fawkes

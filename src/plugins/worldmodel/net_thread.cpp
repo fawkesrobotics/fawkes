@@ -30,6 +30,7 @@
 #include <string>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class WorldModelNetworkThread <plugins/worldmodel/net_thread.h>
  * Network thread of worldmodel plugin.
@@ -181,12 +182,12 @@ WorldModelNetworkThread::opponent_disapp_rcvd(const char *from_host, unsigned in
 
 void
 WorldModelNetworkThread::gamestate_rcvd(const char *from_host,
-					worldinfo_gamestate_t game_state,
-					worldinfo_gamestate_team_t state_team,
+					fawkes::worldinfo_gamestate_t game_state,
+					fawkes::worldinfo_gamestate_team_t state_team,
 					unsigned int score_cyan, unsigned int score_magenta,
-					worldinfo_gamestate_team_t our_team,
-					worldinfo_gamestate_goalcolor_t our_goal_color,
-					worldinfo_gamestate_half_t half)
+					fawkes::worldinfo_gamestate_team_t our_team,
+					fawkes::worldinfo_gamestate_goalcolor_t our_goal_color,
+					fawkes::worldinfo_gamestate_half_t half)
 {
   data->set_game_state(game_state, state_team, score_cyan, score_magenta, 
 		       our_team, our_goal_color, half);

@@ -51,6 +51,8 @@
 #include <cstring>
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** FireVision Network Tool */
 class FireVisionNetworkTool
   : public FuseClientHandler,
@@ -261,7 +263,7 @@ class FireVisionNetworkTool
     char addrp[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &(s->sin_addr), addrp, sizeof(addrp));
     printf("Found %s%s%s (%s/%s on %hu), querying\n",
-	   std::c_blue, name, std::c_normal, host_name, addrp, port);
+	   c_blue, name, c_normal, host_name, addrp, port);
 
     __client = new FuseClient(host_name, port, this);
     __client->connect();

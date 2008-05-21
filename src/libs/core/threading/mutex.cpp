@@ -30,6 +30,7 @@
 
 #include <pthread.h>
 
+namespace fawkes {
 
 /** @class Mutex core/threading/mutex.h
  * Mutex mutual exclusion lock.
@@ -147,3 +148,6 @@ Mutex::stopby()
   pthread_mutex_lock(&(mutex_data->mutex));
   pthread_mutex_unlock(&(mutex_data->mutex));
 }
+
+
+} // end namespace fawkes

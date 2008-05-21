@@ -30,6 +30,8 @@
 #include <unistd.h>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class TimeWait <utils/time/wait.h>
  * Time wait utility.
  * This class allows for guaranteed waiting for a specified amout of time. It can
@@ -152,3 +154,5 @@ TimeWait::wait(long int usec)
     clock->get_time(&now);
   } while ((remaining_usec = time_diff_usec(now, start)) > 0);
 }
+
+} // end namespace fawkes

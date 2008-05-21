@@ -34,6 +34,8 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class ThreadListSealedException <core/threading/thread_list.h>
  * Thread list sealed exception.
  * This exception is thrown whenever you execute an action that would
@@ -752,3 +754,6 @@ ThreadList::notify_of_failed_init()
     (*i)->notify_of_failed_init();
   }
 }
+
+
+} // end namespace fawkes

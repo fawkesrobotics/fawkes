@@ -35,6 +35,8 @@
 #include <algorithm>
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class FawkesConfigManager mainapp/config_manager.h
  * Fawkes Configuration Manager.
  * This class provides a manager for the configuration used in fawkes.

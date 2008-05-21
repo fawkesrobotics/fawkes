@@ -33,6 +33,8 @@
 #include <cstdlib>
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class PluginTool tools/plugin/plugin_tool.h
  * Program to communicate with plugin manager via Fawkes network.
  */

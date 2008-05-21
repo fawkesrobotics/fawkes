@@ -28,6 +28,8 @@
 
 #include <blackboard/blackboard.h>
 
+namespace fawkes {
+
 class BlackBoardAspect
 {
  public:
@@ -38,5 +40,7 @@ class BlackBoardAspect
  protected:
   BlackBoard *blackboard;
 };
+
+} // end namespace fawkes
 
 #endif

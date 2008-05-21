@@ -26,6 +26,9 @@
 #ifndef __UTILS_MISC_STRING_COMPARE_H_
 #define __UTILS_MISC_STRING_COMPARE_H_
 
+namespace fawkes {
+
+
 class StringEquality
 {
  public:
@@ -37,5 +40,8 @@ class StringLess
  public:
   bool operator()(const char *__s1, const char *__s2) const;
 };
+
+
+} // end namespace fawkes
 
 #endif

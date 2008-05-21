@@ -39,7 +39,9 @@ typedef struct {
   fieldinfo_t  fieldinfo;	/**< field info */
 } fieldinfo_msg_t;
 
-class IPCMessageQueue;
+namespace fawkes {
+  class IPCMessageQueue;
+}
 
 class FieldInfoSender {
 
@@ -75,7 +77,7 @@ class FieldInfoSender {
 	     );
 
  private:
-  IPCMessageQueue  *mq;
+  fawkes::IPCMessageQueue  *mq;
 
 };
 

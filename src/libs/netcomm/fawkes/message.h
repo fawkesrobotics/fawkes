@@ -31,6 +31,8 @@
 
 #include <cstddef>
 
+namespace fawkes {
+
 /** Fawkes network message header.
  * Header that is prepended to all following messages.
  */
@@ -159,5 +161,7 @@ class FawkesNetworkMessage : public RefCount
 
   FawkesNetworkMessageContent *_content;
 };
+
+} // end namespace fawkes
 
 #endif

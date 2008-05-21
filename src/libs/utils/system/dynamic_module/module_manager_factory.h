@@ -28,6 +28,8 @@
 
 #include <utils/system/dynamic_module/module_manager.h>
 
+namespace fawkes {
+
 class ModuleManagerFactory
 {
  public:
@@ -41,5 +43,7 @@ class ModuleManagerFactory
   static ModuleManager * getInstance(ModuleManagerType mmt,
 				     const char * module_base_dir = "");
 };
+
+} // end namespace fawkes
 
 #endif

@@ -34,6 +34,8 @@
 
 #include <cstdio>
 
+using namespace fawkes;
+
 class LoggerQAThread : public Thread
 {
  public:

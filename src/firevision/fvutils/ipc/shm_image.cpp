@@ -37,6 +37,7 @@
 #endif
 
 using namespace std;
+using namespace fawkes;
 
 /** @class SharedMemoryImageBuffer <fvutils/ipc/shm_image.h>
  * Shared memory image buffer.

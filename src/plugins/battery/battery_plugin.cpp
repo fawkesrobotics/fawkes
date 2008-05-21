@@ -31,6 +31,8 @@
  * @author Daniel Beck
  */
 
+using namespace fawkes;
+
 /** Constructor. */
 BatteryPlugin::BatteryPlugin()
   : Plugin("battery_plugin")

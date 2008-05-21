@@ -25,6 +25,8 @@
 
 #include <netcomm/fawkes/client_handler.h>
 
+namespace fawkes {
+
 /** @class FawkesNetworkClientHandler <netcomm/fawkes/client_handler.h>
  * Message handler for FawkesNetworkClient.
  * This interface is used by the FawkesNetworkClient to handle incoming messages.
@@ -69,3 +71,5 @@
 FawkesNetworkClientHandler::~FawkesNetworkClientHandler()
 {
 }
+
+} // end namespace fawkes

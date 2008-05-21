@@ -32,6 +32,8 @@
 #include <map>
 #include <string>
 
+namespace fawkes {
+
 /** Manager to load and unload modules, keeps track of loaded modules and
  * does not reload modules if they are already loaded
  * This implementation is a simple template that takes the Module
@@ -150,5 +152,7 @@ class ModuleManagerTemplate : public ModuleManager {
   Mutex *mutex;
 
 };
+
+} // end namespace fawkes
 
 #endif

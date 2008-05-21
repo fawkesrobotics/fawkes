@@ -44,7 +44,8 @@ typedef struct {
 } SharedMemoryLookupTable_header_t;
 
 
-class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
+class SharedMemoryLookupTableHeader : public fawkes::SharedMemoryHeader
+{
  public:
   SharedMemoryLookupTableHeader();
   SharedMemoryLookupTableHeader(const char *lut_id,
@@ -59,7 +60,7 @@ class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
   SharedMemoryLookupTableHeader(const SharedMemoryLookupTableHeader *h);
   virtual ~SharedMemoryLookupTableHeader();
 
-  virtual SharedMemoryHeader *  clone() const;
+  virtual fawkes::SharedMemoryHeader *  clone() const;
   virtual bool         matches(void *memptr);
   virtual size_t       size();
   virtual bool         create();
@@ -67,7 +68,7 @@ class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
   virtual void         set(void *memptr);
   virtual void         reset();
   virtual size_t       data_size();
-  virtual bool         operator==(const SharedMemoryHeader & s) const;
+  virtual bool         operator==(const fawkes::SharedMemoryHeader & s) const;
 
   virtual void         print_info();
 
@@ -90,7 +91,8 @@ class SharedMemoryLookupTableHeader : public SharedMemoryHeader {
   unsigned int   __bytes_per_cell;
 };
 
-class SharedMemoryLookupTableLister : public SharedMemoryLister {
+class SharedMemoryLookupTableLister : public fawkes::SharedMemoryLister
+{
  public:
   SharedMemoryLookupTableLister();
   virtual ~SharedMemoryLookupTableLister();
@@ -99,13 +101,13 @@ class SharedMemoryLookupTableLister : public SharedMemoryLister {
   virtual void print_footer();
   virtual void print_no_segments();
   virtual void print_no_orphaned_segments();
-  virtual void print_info(const SharedMemoryHeader *header,
+  virtual void print_info(const fawkes::SharedMemoryHeader *header,
 			  int shm_id, int semaphore, unsigned int mem_size,
 			  const void *memptr);
 };
 
 
-class SharedMemoryLookupTable : public SharedMemory
+class SharedMemoryLookupTable : public fawkes::SharedMemory
 {
 
  public:

@@ -28,6 +28,9 @@
 
 #include <core/threading/thread_list.h>
 
+namespace fawkes {
+
+
 class Plugin {
  public:
 
@@ -54,8 +57,19 @@ class Plugin {
   const char *_name;
 };
 
+/** Plugin loader function for the shared library
+ * Do not use directly, rather use the EXPORT_PLUGIN macro.
+ * @relates fawkes::Plugin
+ */
 typedef Plugin *  (* PluginFactoryFunc)  (void);
-typedef void      (* PluginDestroyFunc)  (Plugin *);
+
+/** Plugin destructor function for the shared library.
+ * Do not use directly, rather use the EXPORT_PLUGIN macro.
+ * @param plugin plugin to destroy
+ * @relates fawkes::Plugin
+ */
+typedef void      (* PluginDestroyFunc)  (Plugin *plugin);
+
 
 /** Plugin factory function for this plugin.
  * @return an instance of ExamplePlugin
@@ -88,5 +102,8 @@ typedef void      (* PluginDestroyFunc)  (Plugin *);
   PLUGIN_FACTORY(plugin_class)      \
   				    \
   PLUGIN_DESTROY(plugin_class)
+
+
+} // end namespace fawkes
 
 #endif

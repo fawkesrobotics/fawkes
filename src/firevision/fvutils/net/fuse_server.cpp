@@ -31,6 +31,8 @@
 
 #include <algorithm>
 
+using namespace fawkes;
+
 /** @class FuseServer <fvutils/net/fuse_server.h>
  * FireVision FUSE protocol server.
  * The FuseServer will open a StreamSocket and listen on it for incoming

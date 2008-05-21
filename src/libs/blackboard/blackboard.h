@@ -32,6 +32,8 @@
 #include <list>
 #include <typeinfo>
 
+namespace fawkes {
+
 class BlackBoardInterfaceManager;
 class BlackBoardMemoryManager;
 class BlackBoardMessageManager;
@@ -195,5 +197,7 @@ BlackBoard::open_for_writing(const char *identifier)
     return interface;
   }
 }
+
+} // end namespace fawkes
 
 #endif

@@ -45,6 +45,7 @@
 #define START_FILE SKILLDIR"/general/start.lua"
 
 using namespace std;
+using namespace fawkes;
 
 /** @class SkillerExecutionThread <plugins/skiller/exec_thread.h>
  * Skiller Execution Thread.

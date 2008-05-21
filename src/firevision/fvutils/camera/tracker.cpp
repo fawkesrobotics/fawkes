@@ -71,7 +71,7 @@ CameraTracker::CameraTracker(RelativePositionModel *relative_position_model,
   rpm = relative_position_model;
   mode = MODE_MODEL;
   this->camera_height = camera_height;
-  this->camera_orientation = deg2rad( camera_ori_deg );
+  this->camera_orientation = fawkes::deg2rad( camera_ori_deg );
 }
 
 
@@ -122,7 +122,7 @@ CameraTracker::calc()
 
     // Calculate bearing to point
     new_pan  = atan2f( w_r_y, w_r_x );
-    new_pan = normalize_mirror_rad( new_pan - robot_ori - camera_orientation);
+    new_pan = fawkes::normalize_mirror_rad( new_pan - robot_ori - camera_orientation);
     new_tilt = atan2f( camera_height, distance );
   }
 }
@@ -158,7 +158,7 @@ CameraTracker::set_mode(unsigned int mode)
   if ( (mode == MODE_WORLD) || (mode == MODE_MODEL)) {
     this->mode = mode;
   } else {
-    throw Exception("CameraTracker: Invalid mode, not setting mode");
+    throw fawkes::Exception("CameraTracker: Invalid mode, not setting mode");
   }
 }
 

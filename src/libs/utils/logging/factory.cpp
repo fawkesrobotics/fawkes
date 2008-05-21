@@ -31,6 +31,8 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class UnknownLoggerTypeException <utils/logging/factory.h>
  * Unknown logger type exception.
  * Thrown if the requested logger has not been recognized
@@ -149,3 +151,6 @@ LoggerFactory::multilogger_instance(const char *as)
 
   return m;
 }
+
+
+} // end namespace fawkes

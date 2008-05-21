@@ -26,6 +26,9 @@
 #ifndef __CORE_UTILS_REFCOUNT_H_
 #define __CORE_UTILS_REFCOUNT_H_
 
+namespace fawkes {
+
+
 class Mutex;
 
 class RefCount
@@ -44,5 +47,7 @@ class RefCount
   Mutex        *ref_mutex;
 };
 
+
+} // end namespace fawkes
 
 #endif

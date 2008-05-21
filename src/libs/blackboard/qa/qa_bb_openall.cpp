@@ -42,6 +42,7 @@
 #include <vector>
 
 using namespace std;
+using namespace fawkes;
 
 
 int

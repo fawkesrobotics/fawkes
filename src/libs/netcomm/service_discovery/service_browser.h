@@ -29,6 +29,8 @@
 #include <netcomm/service_discovery/service.h>
 #include <netcomm/service_discovery/browse_handler.h>
 
+namespace fawkes {
+
 class ServiceBrowser
 {
  public:
@@ -38,5 +40,6 @@ class ServiceBrowser
   virtual void unwatch_service(const char *service_type, ServiceBrowseHandler *h) = 0;
 };
 
+} // end namespace fawkes
 
 #endif

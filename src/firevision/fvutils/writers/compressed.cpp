@@ -114,8 +114,8 @@ CompressedImageWriter::write()
       fclose(f);
       free(comp_buffer);
     } else {
-      throw Exception("Supplied ImageCompressor does neither support compressing "
-		      " to file nor to a memory buffer. Cannot write.");
+      throw fawkes::Exception("Supplied ImageCompressor does neither support compressing "
+			      " to file nor to a memory buffer. Cannot write.");
     }
   }
 }

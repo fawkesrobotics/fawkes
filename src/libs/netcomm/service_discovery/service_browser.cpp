@@ -25,6 +25,8 @@
 
 #include <netcomm/service_discovery/service_browser.h>
 
+namespace fawkes {
+
 /** @class ServiceBrowser <netcomm/service_discovery/service_browser.h>
  * Service browser.
  *
@@ -43,3 +45,5 @@
 ServiceBrowser::~ServiceBrowser()
 {
 }
+
+} // end namespace fawkes

@@ -32,6 +32,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace fawkes;
 
 int
 main(int argc, char **argv)

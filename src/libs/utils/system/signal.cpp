@@ -30,6 +30,7 @@
 #include <utils/system/signal.h>
 #include <cstdlib>
 
+namespace fawkes {
 
 /** @class SignalHandler utils/system/signal.h
  * Interface for signal handling.
@@ -205,3 +206,5 @@ SignalManager::dispatcher(int signum)
     __signal_handlers[signum]->handle_signal(signum);
   }
 }
+
+} // end namespace fawkes

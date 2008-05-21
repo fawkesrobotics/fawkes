@@ -32,6 +32,8 @@
 #include <cstring>
 #include <cerrno>
 
+namespace fawkes {
+
 /** @class MulticastDatagramSocket netcomm/socket/datagram.h
  * Multicast datagram socket.
  * An multicast UDP socket on top of IP.
@@ -52,7 +54,7 @@ MulticastDatagramSocket::MulticastDatagramSocket(const char *multicast_addr_s,
 						 float timeout)
   : Socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP, timeout)
 {
-  multicast_addr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+  multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
 
   struct in_addr a;
   if ( inet_aton(multicast_addr_s, &a) == -1 ) {
@@ -80,8 +82,8 @@ MulticastDatagramSocket::~MulticastDatagramSocket()
 MulticastDatagramSocket::MulticastDatagramSocket(MulticastDatagramSocket &datagram_socket)
   : Socket(datagram_socket)
 {
-  multicast_addr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
-  memcpy(multicast_addr, datagram_socket.multicast_addr, sizeof(struct sockaddr_in));
+  multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
+  memcpy(multicast_addr, datagram_socket.multicast_addr, sizeof(struct ::sockaddr_in));
 }
 
 
@@ -104,12 +106,12 @@ MulticastDatagramSocket::bind()
     throw SocketException("Could not add multicast group membership", errno);
   }
 
-  struct sockaddr_in local;
+  struct ::sockaddr_in local;
   local.sin_family = AF_INET;
   local.sin_addr.s_addr = INADDR_ANY;
   local.sin_port = multicast_addr->sin_port;
 
-  if (::bind(sock_fd, (struct sockaddr *) &local, sizeof(local)) < 0) {
+  if (::bind(sock_fd, (struct ::sockaddr *) &local, sizeof(local)) < 0) {
     throw SocketException("Could not bind to port", errno);
   }
 }
@@ -135,7 +137,7 @@ void
 MulticastDatagramSocket::send(void *buf, unsigned int buf_len)
 {
   try {
-    Socket::send(buf, buf_len, (struct sockaddr *)multicast_addr, sizeof(struct sockaddr_in));
+    Socket::send(buf, buf_len, (struct ::sockaddr *)multicast_addr, sizeof(struct ::sockaddr_in));
   } catch (SocketException &e) {
     e.append("MulticastDatagramSocket::send(void*, unsigned int) failed");
     throw;
@@ -167,3 +169,5 @@ MulticastDatagramSocket::set_ttl(int ttl)
     throw SocketException("MulticastDatagramSocket::set_ttl: setsockopt failed", errno);
   }
 }
+
+} // end namespace fawkes

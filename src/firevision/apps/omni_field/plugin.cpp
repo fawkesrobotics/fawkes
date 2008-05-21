@@ -25,6 +25,7 @@
 #include <apps/omni_field/plugin.h>
 #include <apps/omni_field/pipeline_thread.h>
 
+using namespace fawkes;
 
 /** @class FvOmniFieldPlugin <apps/omni_field/plugin.h>
  * OmniVision Field Plugin.

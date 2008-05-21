@@ -29,6 +29,9 @@
 #include <core/threading/thread.h>
 #include <utils/plugin/plugin_loader.h>
 
+namespace fawkes {
+
+
 class ModuleManager;
 class Plugin;
 class Module;
@@ -56,5 +59,8 @@ class PluginLoadThread : public Thread
   Module        *_module;
   PluginLoadException ple;
 };
+
+
+} // end namespace fawkes
 
 #endif

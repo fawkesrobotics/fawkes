@@ -26,6 +26,8 @@
 #ifndef __ASPECT_BLOCKED_TIMING_H_
 #define __ASPECT_BLOCKED_TIMING_H_
 
+namespace fawkes {
+
 class Thread;
 
 class BlockedTimingAspect
@@ -56,5 +58,7 @@ class BlockedTimingAspect
  private:
   WakeupHook wakeup_hook;
 };
+
+} // end namespace fawkes
 
 #endif

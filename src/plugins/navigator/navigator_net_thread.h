@@ -40,15 +40,24 @@
 #include <netinet/in.h>
 
 class JoystickControl;
-class MotorInterface;
-class NavigatorInterface;
 class NavigatorThread;
-class KickerInterface;
-class Time;
 
-class NavigatorNetworkThread : public Thread, public LoggingAspect, public FawkesNetworkAspect,
-                               public BlackBoardAspect, public BlockedTimingAspect, public FawkesNetworkHandler, 
-                               public ConfigurableAspect, public ClockAspect
+namespace fawkes {
+  class MotorInterface;
+  class NavigatorInterface;
+  class KickerInterface;
+  class Time;
+}
+
+class NavigatorNetworkThread
+: public fawkes::Thread,
+  public fawkes::LoggingAspect,
+  public fawkes::FawkesNetworkAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::FawkesNetworkHandler, 
+  public fawkes::ConfigurableAspect,
+  public fawkes::ClockAspect
 {
 
  public:
@@ -60,34 +69,35 @@ class NavigatorNetworkThread : public Thread, public LoggingAspect, public Fawke
   virtual void finalize();
 
   /* from FawkesNetworkHandler interface */
-  virtual void handle_network_message(FawkesNetworkMessage *msg);
+  virtual void handle_network_message(fawkes::FawkesNetworkMessage *msg);
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
 
  private:
-  void process_network_message(FawkesNetworkMessage *msg);
+  void process_network_message(fawkes::FawkesNetworkMessage *msg);
 
 
   NavigatorThread *navigator_thread;
-  MotorInterface *motor_interface;
-  KickerInterface *kicker_interface;
-  NavigatorInterface *navigator_interface;
   JoystickControl *joystick_control;
+
+  fawkes::MotorInterface     *motor_interface;
+  fawkes::KickerInterface    *kicker_interface;
+  fawkes::NavigatorInterface *navigator_interface;
     
   unsigned int connected_control_client;
-  LockList<unsigned int> connected_points_and_lines_clients;
-  LockList<unsigned int> connected_odometry_clients;
-  LockList<unsigned int> connected_ball_clients;
+  fawkes::LockList<unsigned int> connected_points_and_lines_clients;
+  fawkes::LockList<unsigned int> connected_odometry_clients;
+  fawkes::LockList<unsigned int> connected_ball_clients;
   
   unsigned long int last_motor_controller;
   char *            last_motor_controller_thread_name;
     
   unsigned int logger_modulo_counter;
 
-  LockQueue< FawkesNetworkMessage * > inbound_queue;
+  fawkes::LockQueue< fawkes::FawkesNetworkMessage * > inbound_queue;
 
   float sending_pause;
-  Time sending_time;
+  fawkes::Time sending_time;
 };
 
 

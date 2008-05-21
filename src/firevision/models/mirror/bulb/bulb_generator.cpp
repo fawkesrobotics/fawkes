@@ -37,6 +37,7 @@
 #include <utility>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class BulbGenerator <models/mirror/bulb/bulb_generator.h>
  * Bulb Lookuptable Generator.

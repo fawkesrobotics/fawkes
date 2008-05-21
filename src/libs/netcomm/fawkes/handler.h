@@ -28,6 +28,8 @@
 
 #include <netcomm/fawkes/message.h>
 
+namespace fawkes {
+
 class FawkesNetworkHandler
 {
  public:
@@ -44,5 +46,7 @@ class FawkesNetworkHandler
   unsigned short int _id;
 
 };
+
+} // end namespace fawkes
 
 #endif

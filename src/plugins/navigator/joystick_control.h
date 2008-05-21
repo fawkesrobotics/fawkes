@@ -27,34 +27,39 @@
 
 #include <utils/time/time.h>
 
-class MotorInterface;
-class Logger;
-class Configuration;
-class KickerInterface;
-class Clock;
+namespace fawkes {
+  class MotorInterface;
+  class Logger;
+  class Configuration;
+  class KickerInterface;
+  class Clock;
+}
 
 class JoystickControl
 {
  public:
-  JoystickControl(MotorInterface *motor_interface, KickerInterface *kicker_interface, 
-  							Logger *logger, Configuration *config, Clock *clock);
+  JoystickControl(fawkes::MotorInterface *motor_interface,
+		  fawkes::KickerInterface *kicker_interface, 
+		  fawkes::Logger *logger,
+		  fawkes::Configuration *config,
+		  fawkes::Clock *clock);
   virtual ~JoystickControl();
     
   void enqueueCommand(double forward, double sideward, double rotation, double max_velocity);
 
   void enqueueKick(bool left, bool center, bool right);
  private:
-  Logger *logger;
-  Configuration *config;
+  fawkes::Logger *logger;
+  fawkes::Configuration *config;
 
   double actual_velocity;
   double last_joystick_axis_scale;
   double actual_rotation_scale;
     
-  MotorInterface *motor_interface;
-  KickerInterface *kicker_interface;
-  Clock *clock;
-  Time last_kick_time;
+  fawkes::MotorInterface *motor_interface;
+  fawkes::KickerInterface *kicker_interface;
+  fawkes::Clock *clock;
+  fawkes::Time last_kick_time;
         
   unsigned int logger_modulo_counter;
   unsigned int logger_modulo_counter2;

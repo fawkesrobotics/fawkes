@@ -26,6 +26,9 @@
 #ifndef __CORE_THREADING_SPINLOCK_H_
 #define __CORE_THREADING_SPINLOCK_H_
 
+namespace fawkes {
+
+
 class SpinlockData;
 
 class Spinlock
@@ -42,5 +45,7 @@ class Spinlock
   SpinlockData *spinlock_data;
 };
 
+
+} // end namespace fawkes
 
 #endif

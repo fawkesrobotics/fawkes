@@ -27,6 +27,8 @@
 
 #include <interfaces/kicker.h>
 
+using namespace fawkes;
+
 /** @class KickerThread <plugins/kicker/kicker_thread.h>
  * This thread is started by the Kicker plugin and is the connection
  * between the kicker hardware and the blackboard.

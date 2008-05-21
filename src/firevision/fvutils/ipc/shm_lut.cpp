@@ -32,6 +32,7 @@
 #include <cstdlib>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class SharedMemoryLookupTable <fvutils/ipc/shm_lut.h>
  * Shared memory lookup table.

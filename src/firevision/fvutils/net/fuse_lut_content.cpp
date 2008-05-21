@@ -50,8 +50,8 @@ FuseLutContent::FuseLutContent(uint32_t type,
 			       void *payload, size_t payload_size)
 {
   if ( (type != FUSE_MT_LUT) && (type != FUSE_MT_SET_LUT) ) {
-    throw TypeMismatchException("Type %u != FUSE_MT_LUT/FUSE_MT_SET_LUT (%u/%u)",
-				type, FUSE_MT_LUT, FUSE_MT_SET_LUT);
+    throw fawkes::TypeMismatchException("Type %u != FUSE_MT_LUT/FUSE_MT_SET_LUT (%u/%u)",
+					type, FUSE_MT_LUT, FUSE_MT_SET_LUT);
   }
 
   _payload_size = payload_size;
@@ -80,7 +80,7 @@ FuseLutContent::FuseLutContent(SharedMemoryLookupTable *b)
 
   _payload = malloc(_payload_size);
   if ( _payload == NULL ) {
-    throw OutOfMemoryException("Cannot allocate FuseLutContent buffer");
+    throw fawkes::OutOfMemoryException("Cannot allocate FuseLutContent buffer");
   }
 
   __header = (FUSE_lut_message_header_t *)_payload;
@@ -117,7 +117,7 @@ FuseLutContent::FuseLutContent(const char *lut_id, void *buffer,
 
   _payload = malloc(_payload_size);
   if ( _payload == NULL ) {
-    throw OutOfMemoryException("Cannot allocate FuseLutContent buffer");
+    throw fawkes::OutOfMemoryException("Cannot allocate FuseLutContent buffer");
   }
 
   __header = (FUSE_lut_message_header_t *)_payload;

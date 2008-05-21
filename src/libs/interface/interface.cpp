@@ -34,6 +34,8 @@
 #include <cstdlib>
 #include <typeinfo>
 
+namespace fawkes {
+
 /** @class InterfaceWriteDeniedException interface/interface.h
  * This exception is thrown if a write has been attempted on a read-only interface.
  * @see Interface::write()
@@ -837,53 +839,6 @@ Interface::msgq_pop()
 }
 
 
-/** @typedef void      (* InterfaceDestroyFunc)  (Interface *interface)
- * @param interface Interface to destroy
- * Interface destructor function for the shared library.
- *
- * This function should never be written by hand but rather the EXPORT_INTERFACE
- * macro should be used.
- *
- * It has to be declared and defined as:
- *
- * @code
- * extern "C"
- * void
- * deleteInterfaceType(Interface *interface)
- * {
- *   delete interface;
- * }
- * @endcode
- * Do not change the type of the function. Do change the name of the function. Replace
- * InterfaceType in the method name with the actual type string of your interface.
- *
- * @relates Interface
- */
-
-/** @typedef Interface *  (* InterfaceFactoryFunc)  (void);
- * Interface generator function for the shared library
- *
- * This function should never be written by hand but rather the EXPORT_INTERFACE
- * macro should be used.
- *
- * It has to be declared and defined as:
- *
- * @code
- * extern "C"
- * Plugin *
- * newInterfaceType()
- * {
- *  return new InterfaceType();
- * }
- * @endcode
- * Do not change the type of the function. Do change the name of the method and the created
- * class type. Change InterfaceType to the type string of your interface.
- * with the name of your plugin derivative.
- *
- * @relates Interface
- */
-
-
 /** Get iterator over all fields of this interface instance.
  * @return field iterator pointing to the very first value
  */
@@ -1203,3 +1158,5 @@ Interface::FieldIterator::get_string() const
     return (const char *)__infol->value;
   }
 }
+
+} // end namespace fawkes

@@ -34,19 +34,21 @@
 #include <blackboard/interface_observer.h>
 #include <plugins/navigator/navigator.h>
 
-class NavigatorInterface;
-class MotorInterface;
-class ObjectPositionInterface;
-class Mutex;
+namespace fawkes {
+  class NavigatorInterface;
+  class MotorInterface;
+  class ObjectPositionInterface;
+  class Mutex;
+}
 
 class NavigatorThread
-: public Thread,
-  public BlockedTimingAspect,
-  public LoggingAspect,
-  public BlackBoardAspect,
-  public ConfigurableAspect,
-  public BlackBoardInterfaceListener,
-  public BlackBoardInterfaceObserver,
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::BlackBoardInterfaceListener,
+  public fawkes::BlackBoardInterfaceObserver,
   public Navigator
 {
  public:
@@ -73,13 +75,13 @@ class NavigatorThread
   double ball_position_x;
   double ball_position_y;
   
-  Mutex *ball_mutex;
+  fawkes::Mutex *ball_mutex;
   
-  std::list<ObjectPositionInterface *> *object_interface_list;
-  std::list<ObjectPositionInterface *>::iterator oili;
-  NavigatorInterface *navigator_interface;
-  MotorInterface *motor_interface;
-  ObjectPositionInterface *object_interface;
+  std::list<fawkes::ObjectPositionInterface *> *object_interface_list;
+  std::list<fawkes::ObjectPositionInterface *>::iterator oili;
+  fawkes::NavigatorInterface *navigator_interface;
+  fawkes::MotorInterface *motor_interface;
+  fawkes::ObjectPositionInterface *object_interface;
   int logger_modulo_counter;
 };
 

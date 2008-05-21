@@ -176,12 +176,12 @@ typedef struct {
 
 /** Image list message. */
 typedef struct {
-  dynamic_list_t image_list;	/**< DynamicBuffer holding a list of FUSE_imageinfo_t */
+  fawkes::dynamic_list_t image_list;	/**< DynamicBuffer holding a list of FUSE_imageinfo_t */
 } FUSE_imagelist_message_t;
 
 /** LUT list message. */
 typedef struct {
-  dynamic_list_t lut_list;	/**< DynamicBuffer holding a list of FUSE_lutinfo_t */
+  fawkes::dynamic_list_t lut_list;	/**< DynamicBuffer holding a list of FUSE_lutinfo_t */
 } FUSE_lutlist_message_t;
 
 #pragma pack(pop)

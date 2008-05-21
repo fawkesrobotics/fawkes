@@ -41,6 +41,7 @@
 #include <sys/utsname.h>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class Bulb <models/mirror/bulb.h>
  * Bulb mirror lookup table.

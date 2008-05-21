@@ -29,6 +29,8 @@
 #include <cstdio>
 #include <unistd.h>
 
+using namespace fawkes;
+
 // REFBOX_CODES //////////////////////////
 static const char REFBOX_TEST                = '*';
 static const char REFBOX_CANCEL              = 'x';

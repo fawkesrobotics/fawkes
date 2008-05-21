@@ -27,6 +27,8 @@
 
 $#include <interface/message.h>
 
+namespace fawkes {
+
 class Message : public RefCount
 {
   typedef enum {
@@ -61,3 +63,4 @@ class Message : public RefCount
   unsigned int      refcount();
 };
 
+}

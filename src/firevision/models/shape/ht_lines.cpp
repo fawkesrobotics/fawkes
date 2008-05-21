@@ -116,7 +116,7 @@ HtLinesModel::parseImage( unsigned char *buf,
       phi = RHT_ANGLE_FROM + i * RHT_ANGLE_INCREMENT;
       r   = p.x * cos( phi )  +   p.y * sin( phi );
 	
-      int angle = (int)round(rad2deg( phi ));
+      int angle = (int)round(fawkes::rad2deg( phi ));
       
       accumulator.accumulate( (int)round(r / RHT_R_SCALE),
 			      angle,

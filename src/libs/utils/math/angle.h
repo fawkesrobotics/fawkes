@@ -28,8 +28,13 @@
 
 #include <cmath>
 
-#include <stdio.h>
+namespace fawkes {
 
+
+/** Convert an angle given in degrees to radians.
+ * @param deg original value in degrees
+ * @return converted value in radians
+ */
 inline float
 deg2rad(float deg)
 {
@@ -37,6 +42,10 @@ deg2rad(float deg)
 }
 
 
+/** Convert an angle given in radians to degrees.
+ * @param rad original value in radians
+ * @return converted value in degrees
+ */
 inline float
 rad2deg(float rad)
 {
@@ -44,13 +53,25 @@ rad2deg(float rad)
 }
 
 
+/** Get distance between two 2D cartesian coordinates.
+ * @param x1 X coordinate of first point
+ * @param y1 Y coordinate of first point
+ * @param x2 X coordinate of second point
+ * @param y2 Y coordinate of second point
+ */
 inline float
 distance(float x1, float y1, float x2, float y2)
 {
   return sqrt( (x2-x1) * (x2-x1) + (y2-y1) * (y2-y1) );
 }
 
-// normalize a rad between -PI and PI
+/** Normalize angle in radian between -PI and PI.
+ * The given angle in radians is taken as an angle on the unit circle.
+ * It is then normalized into the range -PI and PI, such that it is the
+ * exact same angle on the unit circle but in the usual angle range.
+ * @param angle_rad original value
+ * @return normalized angle
+ */
 inline float 
 normalize_mirror_rad(float angle_rad)
 {
@@ -61,6 +82,13 @@ normalize_mirror_rad(float angle_rad)
   }
 }
 
+/** Normalize angle in radian between 0 and 2*PI.
+ * The given angle in radians is taken as an angle on the unit circle.
+ * It is then normalized into the range 0 and 2*PI, such that it is the
+ * exact same angle on the unit circle but in the usual angle range.
+ * @param angle_rad original value
+ * @return normalized angle
+ */
 inline float
 normalize_rad(float angle_rad)
 {
@@ -71,5 +99,7 @@ normalize_rad(float angle_rad)
   }
 }
 
-#endif
 
+} // end namespace fawkes
+
+#endif

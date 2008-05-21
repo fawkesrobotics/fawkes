@@ -40,6 +40,8 @@
 #include <cstdlib>
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class NetworkCamera <cams/net.h>
  * Network camera.
  * Retrieve images via network (FUSE).

@@ -30,7 +30,9 @@
 #include <cstring>
 #include <cstdlib>
 
-/** @class BatteryInterface interfaces/battery.h
+namespace fawkes {
+
+/** @class BatteryInterface <interfaces/battery.h>
  * BatteryInterface Fawkes BlackBoard Interface.
  * This interface contains status information about the
     battery. In addition to this it allows to send messages which
@@ -264,3 +266,5 @@ BatteryInterface::message_valid(const Message *message) const
 EXPORT_INTERFACE(BatteryInterface)
 /// @endcond
 
+
+} // end namespace fawkes

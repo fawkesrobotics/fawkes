@@ -28,6 +28,9 @@
 
 #include <core/exception.h>
 
+namespace fawkes {
+
+
 class NullPointerException : public Exception {
  public:
   NullPointerException(const char *msg) throw();
@@ -101,5 +104,7 @@ class SyntaxErrorException : public Exception {
   SyntaxErrorException(const char *format, ...) throw();
 };
 
+
+} // end namespace fawkes
 
 #endif

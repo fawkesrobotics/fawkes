@@ -26,6 +26,8 @@
 #include <utils/time/simts.h>
 #include <cstddef>
 
+namespace fawkes {
+
 /** @class SimulatorTimeSource <utils/time/simts.h>
  * Simulation time source.
  * This class is an utility to provide a generic time source for time in a simulated
@@ -111,3 +113,5 @@ SimulatorTimeSource::set_sim_offset(float sim_offset)
   //printf("New current real time: %s  New current simtime: %s   new offset: %f\n",
   //       start_time.str(), current_simtime.str(), current_simoffset);
 }
+
+} // end namespace fawkes

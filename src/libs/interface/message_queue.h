@@ -29,6 +29,8 @@
 #include <core/exception.h>
 #include <core/exceptions/software.h>
 
+namespace fawkes {
+
 class Message;
 class Mutex;
 
@@ -147,5 +149,7 @@ MessageQueue::MessageIterator::get() const
   }
   return msg;
 }
+
+} // end namespace fawkes
 
 #endif

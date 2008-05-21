@@ -27,13 +27,16 @@
 
 #include <utils/logging/logger.h>
 
+using namespace std;
+using namespace fawkes;
+
+
 /** @class NetLogMonitor tools/netlog_monitor/netlog_monitor.h
  * Graphical frontend for the network logger.
  *
  * @author Daniel Beck
  */
 
-using namespace std;
 
 /** Constructor.
  * @param ref_xml reference pointer to the Glade XML file

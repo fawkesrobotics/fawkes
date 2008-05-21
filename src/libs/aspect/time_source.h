@@ -26,6 +26,8 @@
 #ifndef __ASPECT_TIME_SOURCE_H_
 #define __ASPECT_TIME_SOURCE_H_
 
+namespace fawkes {
+
 class TimeSource;
 
 class TimeSourceAspect
@@ -39,5 +41,7 @@ class TimeSourceAspect
  private:
   TimeSource *__time_source;
 };
+
+} // end namespace fawkes
 
 #endif

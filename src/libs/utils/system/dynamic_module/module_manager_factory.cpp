@@ -27,6 +27,8 @@
 #include <utils/system/dynamic_module/module_manager_template.h>
 #include <utils/system/dynamic_module/module_dl.h>
 
+namespace fawkes {
+
 /** @class ModuleManagerFactory utils/system/dynamic_module/module_manager_factory.h
  * Class with just one static method to retrieve a module manager for the
  * specified type.
@@ -52,3 +54,5 @@ ModuleManagerFactory::getInstance(ModuleManagerType mmt, const char *module_base
     return NULL;
   }
 }
+
+} // end namespace fawkes

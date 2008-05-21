@@ -239,7 +239,7 @@ JpegImageCompressor::compress()
   } else {
     outfile = fopen(filename, "wb");
     if (outfile == NULL) {
-      throw Exception("JpegImageCompressor: cannot open %s\n", filename);
+      throw fawkes::Exception("JpegImageCompressor: cannot open %s\n", filename);
     }
     jpeg_stdio_dest( &cinfo, outfile );
   }

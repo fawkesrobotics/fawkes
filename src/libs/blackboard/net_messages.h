@@ -30,6 +30,8 @@
 #include <netcomm/utils/dynamic_buffer.h>
 #include <interface/interface.h>
 
+namespace fawkes {
+
 #pragma pack(push,4)
 
 /** BlackBoard network message types */
@@ -153,5 +155,7 @@ typedef struct
 } bb_imessage_msg_t;
 
 #pragma pack(pop)
+
+} // end namespace fawkes
 
 #endif

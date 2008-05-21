@@ -29,6 +29,8 @@
 
 #include <string>
 
+using namespace fawkes;
+
 /** @class FountainThread <apps/fountain/fountain_thread.h>
  * Fountain main thread.
  * @author Tim Niemueller

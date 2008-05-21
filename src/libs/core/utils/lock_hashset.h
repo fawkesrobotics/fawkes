@@ -33,6 +33,9 @@
 #  include <ext/hash_set>
 #endif
 
+namespace fawkes {
+
+
 template <class KeyType,
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
           class HashFunction = std::tr1::hash<KeyType>,
@@ -156,5 +159,7 @@ LockHashSet<KeyType, HashFunction, EqualKey>::mutex() const
 {
   return __mutex;
 }
+
+} // end namespace fawkes
 
 #endif

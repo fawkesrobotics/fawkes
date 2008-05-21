@@ -35,8 +35,9 @@
 #include <cstdlib>
 #include <cstring>
 
-/* SQLite statements
- */
+namespace fawkes {
+
+/* SQLite statements */
 
 #define TABLE_HOST_CONFIG "config"
 #define TABLE_DEFAULT_CONFIG "defaults.config"
@@ -1495,7 +1496,7 @@ SQLiteConfiguration::search(const char *path)
  * @param p pointer to arbitrary data that is freed (not deleted!) when the iterator
  * is deleted.
  */
-SQLiteConfiguration::SQLiteValueIterator::SQLiteValueIterator(sqlite3_stmt *stmt, void *p)
+SQLiteConfiguration::SQLiteValueIterator::SQLiteValueIterator(::sqlite3_stmt *stmt, void *p)
 {
   this->stmt = stmt;
   __p = p;
@@ -1672,4 +1673,4 @@ SQLiteConfiguration::SQLiteValueIterator::get_string()
   return (const char *)sqlite3_column_text(stmt, 2);
 }
 
-
+} // end namespace fawkes

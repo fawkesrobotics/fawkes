@@ -216,7 +216,7 @@ VelocityFromRelative::calc()
   // at that time we can compare this to the current position and estimate
   // an error from this information
   if (last_available) {
-    proj_time_diff_sec = time_diff_sec(now, last_time);
+    proj_time_diff_sec = fawkes::time_diff_sec(now, last_time);
     proj_x = last_x + velocity_x * proj_time_diff_sec;
     proj_y = last_y + velocity_y * proj_time_diff_sec;
     last_proj_error_x = cur_ball_x - proj_x;
@@ -244,7 +244,7 @@ VelocityFromRelative::calc()
     // in the history and an entry about 100ms away to extrapolate the
     // ball velocity, then correct this by the robot's velocity we got
 
-    if ( time_diff_sec(robot_rel_vel_t, vel_last_time) != 0 ) {
+    if ( fawkes::time_diff_sec(robot_rel_vel_t, vel_last_time) != 0 ) {
       // We have a new robot position data, calculate new velocity
 
       vel_last_time.tv_sec  = robot_rel_vel_t.tv_sec;
@@ -258,7 +258,7 @@ VelocityFromRelative::calc()
       for (bh_it = ball_history.begin(); bh_it != ball_history.end(); ++bh_it) {
 	// Find the ball pos history entry closest in time (but still younger) to
 	// the new position data
-	time_diff = time_diff_sec((*bh_it)->t, robot_rel_vel_t);
+	time_diff = fawkes::time_diff_sec((*bh_it)->t, robot_rel_vel_t);
 	if ( (time_diff > 0) && (time_diff < f_diff_sec) ) {
 	  f_diff_sec = time_diff;
 	  young = (*bh_it);
@@ -281,7 +281,7 @@ VelocityFromRelative::calc()
 	diff_x = young->x - old->x;
 	diff_y = young->y - old->y;
       
-	f_diff_sec = time_diff_sec(young->t, old->t);
+	f_diff_sec = fawkes::time_diff_sec(young->t, old->t);
 
 	velocity_x = diff_x / f_diff_sec;
 	velocity_y = diff_y / f_diff_sec;
@@ -346,7 +346,7 @@ VelocityFromRelative::calc()
       }
     } else {
       // we did not get a new robot position, keep old velocities for 2 seconds
-      if (time_diff_sec(now, vel_last_time) > 2) {
+      if (fawkes::time_diff_sec(now, vel_last_time) > 2) {
 	// cout << "did not get new robot position for more than 2 sec, resetting" << endl;
 	velocity_x = 0.f;
 	velocity_y = 0.f;
@@ -414,7 +414,7 @@ VelocityFromRelative::applyKalmanFilter()
   avg_vx = avg_vx_sum / avg_vx_num;
   avg_vy = avg_vy_sum / avg_vy_num;
 
-  age_factor = (time_diff_sec(now, robot_rel_vel_t) + f_diff_sec);
+  age_factor = (fawkes::time_diff_sec(now, robot_rel_vel_t) + f_diff_sec);
 
   rx = (velocity_x - avg_vx) * age_factor;
   ry = (velocity_y - avg_vy) * age_factor;

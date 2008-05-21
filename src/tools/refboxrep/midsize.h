@@ -28,7 +28,9 @@
 #include "refbox_state_sender.h"
 #include <cstdlib>
 
-class StreamSocket;
+namespace fawkes {
+  class StreamSocket;
+}
 
 class MidsizeRefBoxRepeater
 {
@@ -44,8 +46,8 @@ class MidsizeRefBoxRepeater
   void reconnect();
 
  private:
-  RefBoxStateSender &__rss;
-  StreamSocket      *__s;
+  RefBoxStateSender    &__rss;
+  fawkes::StreamSocket *__s;
 
   unsigned int __score_cyan;
   unsigned int __score_magenta;

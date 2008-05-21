@@ -29,6 +29,8 @@
 #include <fvutils/color/yuv.h>
 #include <cstddef>
 
+using namespace fawkes;
+
 /** @class FilterMax <filters/max.h>
  * Maximum filter.
  * @author Tim Niemueller

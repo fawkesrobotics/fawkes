@@ -47,7 +47,7 @@ class FuseImageListContent : public FuseMessageContent
   virtual void serialize();
 
  private:
-  DynamicBuffer  *__list;
+  fawkes::DynamicBuffer  *__list;
   FUSE_imagelist_message_t __imagelist_msg;
 };
 

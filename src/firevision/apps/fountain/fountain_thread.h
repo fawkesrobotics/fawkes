@@ -33,14 +33,16 @@
 #include <aspect/thread_producer.h>
 
 class FuseServer;
-class NetworkService;
+namespace fawkes {
+  class NetworkService;
+}
 
 class FountainThread
-: public Thread,
-  public ConfigurableAspect,
-  public LoggingAspect,
-  public NetworkAspect,
-  public ThreadProducerAspect
+: public fawkes::Thread,
+  public fawkes::ConfigurableAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::NetworkAspect,
+  public fawkes::ThreadProducerAspect
 {
  public:
   FountainThread();
@@ -52,7 +54,7 @@ class FountainThread
 
  private:
   FuseServer *__fuse_server;
-  NetworkService *__service;
+  fawkes::NetworkService *__service;
 };
 
 

@@ -78,8 +78,8 @@ RectificationInfoBlock::RectificationInfoBlock(uint8_t block_type,
   : FireVisionDataFileBlock(block_type, block_data_size, sizeof(rectinfo_block_header_t))
 {
   if ( _data_size > UINT32_MAX ) {
-    throw OutOfBoundsException("RectInfoBlock: block_data_size is too large",
-			       block_data_size, 0, UINT32_MAX);
+    throw fawkes::OutOfBoundsException("RectInfoBlock: block_data_size is too large",
+				       block_data_size, 0, UINT32_MAX);
   }
 
   _block_header = (rectinfo_block_header_t *)_spec_header;
@@ -117,7 +117,7 @@ uint8_t
 RectificationInfoBlock::camera() const
 {
   if ( _block_header == NULL ) {
-    throw NullPointerException("No memory chunk loaded for rectinfo block");
+    throw fawkes::NullPointerException("No memory chunk loaded for rectinfo block");
   }
   return _block_header->camera;
 }

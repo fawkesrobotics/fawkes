@@ -28,6 +28,8 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class ConfigurationChangeHandler <config/change_handler.h>
  * Interface for configuration change handling.
  * One of the major flaws in the old software was that for each
@@ -103,3 +105,5 @@ ConfigurationChangeHandler::config_monitor_prefix()
 {
   return __path_prefix;
 }
+
+} // end namespace fawkes

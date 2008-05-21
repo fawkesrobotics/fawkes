@@ -33,10 +33,12 @@
 #include <vector>
 #include <fstream>
 
-class BlackBoard;
+namespace fawkes {
+  class BlackBoard;
+  class Configuration;
+}
 class Drawer;
 class Field;
-class Configuration;
 struct obstacle_t;
 
 /** Represents a MCL sample. */
@@ -50,7 +52,7 @@ struct mcl_sample_t {
 class MCL
 {
   public:
-    MCL( BlackBoard *blackboard, Configuration *config );
+    MCL( fawkes::BlackBoard *blackboard, fawkes::Configuration *config );
     ~MCL();
 
     void predict( const field_pos_t &movement, float pathLength );

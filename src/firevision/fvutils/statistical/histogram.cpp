@@ -38,6 +38,7 @@
 #include <cstring>
 
 using namespace std;
+using namespace fawkes;
 
 
 /** @class Histogram <fvutils/statistical/histogram.h>

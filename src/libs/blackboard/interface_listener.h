@@ -30,6 +30,8 @@
 #include <core/utils/lock_hashset.h>
 #include <utils/misc/string_compare.h>
 
+namespace fawkes {
+
 class Interface;
 class Message;
 
@@ -96,5 +98,6 @@ class BlackBoardInterfaceListener
   InterfaceLockHashMapIterator __bbil_ii;
 };
 
+} // end namespace fawkes
 
 #endif

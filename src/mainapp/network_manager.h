@@ -27,13 +27,15 @@
 #define __FAWKES_NETWORK_MANAGER_H_
 
 class FawkesThreadManager;
-class FawkesNetworkServerThread;
-class FawkesNetworkHandler;
-class FawkesNetworkHub;
-class AvahiThread;
-class NetworkNameResolver;
-class ServicePublisher;
-class ServiceBrowser;
+namespace fawkes {
+  class FawkesNetworkServerThread;
+  class FawkesNetworkHandler;
+  class FawkesNetworkHub;
+  class AvahiThread;
+  class NetworkNameResolver;
+  class ServicePublisher;
+  class ServiceBrowser;
+}
 
 class FawkesNetworkManager
 {
@@ -41,20 +43,20 @@ class FawkesNetworkManager
   FawkesNetworkManager(FawkesThreadManager *thread_manager, unsigned short int fawkes_port);
   ~FawkesNetworkManager();
 
-  FawkesNetworkHub *     hub();
-  NetworkNameResolver *  nnresolver();
-  ServicePublisher *     service_publisher();
-  ServiceBrowser *       service_browser();
+  fawkes::FawkesNetworkHub *     hub();
+  fawkes::NetworkNameResolver *  nnresolver();
+  fawkes::ServicePublisher *     service_publisher();
+  fawkes::ServiceBrowser *       service_browser();
 
  private:
-  unsigned short int          fawkes_port;
-  FawkesThreadManager        *thread_manager;
-  FawkesNetworkServerThread  *fawkes_network_thread;
-  AvahiThread                *avahi_thread;
+  unsigned short int                  fawkes_port;
+  FawkesThreadManager                *thread_manager;
+  fawkes::FawkesNetworkServerThread  *fawkes_network_thread;
+  fawkes::AvahiThread                *avahi_thread;
 
-  NetworkNameResolver        *_nnresolver;
-  ServicePublisher           *_service_publisher;
-  ServiceBrowser             *_service_browser;
+  fawkes::NetworkNameResolver        *_nnresolver;
+  fawkes::ServicePublisher           *_service_publisher;
+  fawkes::ServiceBrowser             *_service_browser;
 };
 
 #endif

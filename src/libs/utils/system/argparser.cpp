@@ -30,6 +30,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class ArgumentParser utils/system/argparser.h
  * Parse command line arguments.
  * Interface to GNU getopt and getopt_long. Parses command line arguments and
@@ -339,3 +341,5 @@ ArgumentParser::program_name() const
 {
   return _program_name;
 }
+
+} // end namespace fawkes

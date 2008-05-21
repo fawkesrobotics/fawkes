@@ -111,7 +111,7 @@ Writer::set_filename(const char *filename)
 
     // re-generate complete filename
     if (0 == extension) {
-      throw Exception("Extension not set");
+      throw fawkes::Exception("Extension not set");
     }
 
     asprintf(&(this->filename), "%s.%s", basename, extension);

@@ -29,6 +29,9 @@
 #include <core/threading/mutex.h>
 #include <queue>
 
+namespace fawkes {
+
+
 template <typename Type>
 class LockQueue : public std::queue<Type>
 {
@@ -169,5 +172,8 @@ LockQueue<Type>::mutex() const
 {
   return __mutex;
 }
+
+
+} // end namespace fawkes
 
 #endif

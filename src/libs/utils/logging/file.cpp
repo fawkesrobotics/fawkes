@@ -34,6 +34,8 @@
 #include <time.h>
 #include <cstdio>
 
+namespace fawkes {
+
 /** @class FileLogger logging/file.h
  * Interface for logging to a specified file.
  * The FileLogger will pipe all output into the given file. The
@@ -422,3 +424,5 @@ FileLogger::vtlog_error(struct timeval *t, const char *component, const char *fo
   }
 }
 
+
+} // end namespace fawkes

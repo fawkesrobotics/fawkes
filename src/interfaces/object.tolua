@@ -1,4 +1,5 @@
 $#include <interfaces/object.h>
+namespace fawkes {
 class ObjectPositionInterface : public Interface
 {
   static const unsigned int TYPE_OTHER;
@@ -111,3 +112,5 @@ class ObjectPositionInterface : public Interface
   size_t maxlenof_relative_xyz_velocity_covariance() const;
 
 };
+
+}

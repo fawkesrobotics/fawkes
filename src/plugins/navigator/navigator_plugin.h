@@ -22,17 +22,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #ifndef __NAVIGATOR_NAVIGATOR_PLUGIN_H_
 #define __NAVIGATOR_NAVIGATOR_PLUGIN_H_
 
-class NavigatorPlugin : public Plugin
+#include <core/plugin.h>
+
+class NavigatorPlugin : public fawkes::Plugin
 {
  public:
-
   NavigatorPlugin();
-        
   virtual ~NavigatorPlugin();
 };
 

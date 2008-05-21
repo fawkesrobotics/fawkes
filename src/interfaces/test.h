@@ -29,6 +29,8 @@
 #include <interface/interface.h>
 #include <interface/message.h>
 
+namespace fawkes {
+
 class TestInterface : public Interface
 {
  /// @cond INTERNALS
@@ -170,5 +172,7 @@ class TestInterface : public Interface
   size_t maxlenof_test_lint() const;
 
 };
+
+} // end namespace fawkes
 
 #endif

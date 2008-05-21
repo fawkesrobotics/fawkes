@@ -38,6 +38,8 @@
 #include <cstring>
 #include <cstdlib>
 
+using namespace fawkes;
+
 void
 print_usage(const char *program_name)
 {

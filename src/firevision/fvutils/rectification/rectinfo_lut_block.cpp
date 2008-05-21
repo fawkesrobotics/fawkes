@@ -27,6 +27,8 @@
 
 #include <core/exceptions/software.h>
 
+using namespace fawkes;
+
 /** @class RectificationLutInfoBlock <fvutils/rectification/rectinfo_lut_block.h>
  * Recitification Lookup Table Block.
  * This class defines a rectification lookup table info block that can be used

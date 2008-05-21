@@ -39,6 +39,7 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace fawkes {
 
 /** @class WorldInfoException <netcomm/worldinfo/transceiver.h>
  * Thrown on critical errors in world info handling.
@@ -1042,3 +1043,5 @@ WorldInfoTransceiver::last_sent_crypted_buffer_size()
 {
   return crypted_out_bytes;
 }
+
+} // end namespace fawkes

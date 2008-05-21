@@ -31,6 +31,9 @@
 
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <netinet/in.h>
+
+namespace fawkes {
 
 class SocketException : public Exception
 {
@@ -99,11 +102,9 @@ class Socket
  protected:
   Socket();
 
-  // typedef struct sockaddr_in sockaddr_in;
-
   int sock_fd;
   float timeout;
-  struct sockaddr_in  *client_addr;
+  struct ::sockaddr_in  *client_addr;
   unsigned int         client_addr_len;
 
 };
@@ -121,5 +122,7 @@ Socket::accept()
     throw TypeMismatchException("Socket types do not match");
   }
 }
+
+} // end namespace fawkes
 
 #endif

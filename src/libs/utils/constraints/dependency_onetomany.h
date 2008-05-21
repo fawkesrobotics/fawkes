@@ -30,6 +30,9 @@
 
 #include <list>
 
+namespace fawkes {
+
+
 /** @class OneToManyDependency <utils/constraints/dependency_onetomany.h>
  * One-to-Many dependency constraint.
  * This dependency constraint models a 1-to-n relationship. There is one
@@ -223,5 +226,8 @@ OneToManyDependency<Provider, Dependant>::dependants()
 {
   return _dependants;
 }
+
+
+} // end namespace fawkes
 
 #endif

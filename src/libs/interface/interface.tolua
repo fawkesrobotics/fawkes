@@ -27,6 +27,8 @@
 
 $#include <interface/interface.h>
 
+namespace fawkes {
+
 class Interface 
 {
   bool                    oftype(const char *interface_type) const;
@@ -67,3 +69,4 @@ class Interface
   bool          msgq_empty();
 };
 
+}

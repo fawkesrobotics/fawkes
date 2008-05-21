@@ -31,7 +31,9 @@
 #include <core/exception.h>
 #include <utils/system/signal.h>
 
-#include <stdio.h>
+#include <cstdio>
+
+using namespace fawkes;
 
 class QAAvahiBrowserMain : public SignalHandler, public ServiceBrowseHandler
 {

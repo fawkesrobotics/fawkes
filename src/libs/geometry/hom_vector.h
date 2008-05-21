@@ -28,6 +28,8 @@
 
 #include <geometry/hom_coord.h>
 
+namespace fawkes {
+
 class HomVector : public HomCoord
 {
  public:
@@ -40,5 +42,7 @@ class HomVector : public HomCoord
   HomVector& set_length(float length);
   HomVector& scale(float factor);
 };
+
+} // end namespace fawkes
 
 #endif /* __GEOMETRY_HOM_VECTOR_H_ */

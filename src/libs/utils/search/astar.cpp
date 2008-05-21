@@ -26,6 +26,8 @@
 #include <utils/search/astar.h>
 
 
+namespace fawkes {
+
 /** @class AStar <utils/search/astar.h>
  *  This is an implementation of the A* search algorithm.
  * 
@@ -50,9 +52,9 @@
  */
  
  
-  /** Constructor.
-   *  This is the constructor for the AStar Object.
-   */
+/** Constructor.
+ *  This is the constructor for the AStar Object.
+ */
 AStar::AStar()
 {
   while ( openList.size() > 0 )
@@ -167,3 +169,6 @@ std::vector< AStarState * > AStar::getSolutionSequence( AStarState * node )
      }
   return solution;
 }
+
+
+} // end namespace fawkes

@@ -28,6 +28,10 @@
 #include <string>
 #include <cstring>
 
+
+namespace fawkes {
+
+
 /** @class CppSignatureMangler <utils/misc/sigmangler.h>
  * C++ signature mangling.
  * Simple methods to process C++ signatures. It is not true signature handling but
@@ -50,3 +54,6 @@ CppSignatureMangler::strip_class_type(const char *type)
   strcpy(rv, t.c_str());
   return rv;
 }
+
+
+} // end namespace fawkes

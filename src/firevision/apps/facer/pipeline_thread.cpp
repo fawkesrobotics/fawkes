@@ -42,6 +42,9 @@
 #include <map>
 #include <string>
 
+
+using namespace fawkes;
+
 #define __SUBSEQ_FACES 3
 
 

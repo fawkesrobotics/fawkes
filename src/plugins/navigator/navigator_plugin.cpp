@@ -27,10 +27,12 @@
 #include <plugins/navigator/navigator_net_thread.h>
 #include <plugins/navigator/motor_thread.h>
 
+using namespace fawkes;
+
 /** @class NavigatorPlugin plugins/navigator/navigator_plugin.h
- *      The Navigator Plugin of Fawkes.
+ * The Navigator Plugin of Fawkes.
  * 
- *      @author Martin Liebenberg
+ * @author Martin Liebenberg
  */
 
 /** Constructor. */

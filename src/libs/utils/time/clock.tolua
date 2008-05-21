@@ -28,6 +28,8 @@
 
 $#include <utils/time/clock.h>
 
+namespace fawkes {
+
 class Clock
 {
   typedef enum {
@@ -60,4 +62,6 @@ class Clock
   float elapsed(Time *t) const;
   float sys_elapsed(Time *t) const;
 };
+
+}
 

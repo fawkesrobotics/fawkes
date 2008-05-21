@@ -27,6 +27,8 @@
 #include <netcomm/worldinfo/encrypt.h>
 #include <openssl/evp.h>
 
+namespace fawkes {
+
 /** @class MessageEncryptionException <netcomm/worldinfo/encrypt.h>
  * Message encryption failed.
  * This exception shall be thrown if there was a problem encrypting a
@@ -190,3 +192,5 @@ WorldInfoMessageEncryptor::encrypt()
 
   return outl;
 }
+
+} // end namespace fawkes

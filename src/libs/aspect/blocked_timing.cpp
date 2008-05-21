@@ -26,6 +26,8 @@
 #include <aspect/blocked_timing.h>
 #include <core/threading/thread.h>
 
+namespace fawkes {
+
 /** @class BlockedTimingAspect aspect/blocked_timing.h
  * Thread aspect to use blocked timing
  * The Fawkes main application provides basic means to synchronize all
@@ -70,3 +72,5 @@ BlockedTimingAspect::blockedTimingAspectHook() const
 {
   return wakeup_hook;
 }
+
+} // end namespace fawkes

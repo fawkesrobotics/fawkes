@@ -27,6 +27,8 @@
 
 $#include <config/config.h>
 
+namespace fawkes {
+
 class Configuration
 {
   class ValueIterator
@@ -100,3 +102,5 @@ class Configuration
   void            unlock();
 
 };
+
+}

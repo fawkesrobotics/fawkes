@@ -29,12 +29,11 @@
 #include <fvutils/compression/jpeg_compressor.h>
 
 #include <utils/time/tracker.h>
-
 #include <iostream>
-
 #include <cstdlib>
 
 using namespace std;
+using namespace fawkes;
 
 #define IMAGE_WIDTH   500
 #define IMAGE_HEIGHT  500

@@ -42,7 +42,9 @@ class ColorTrainWidget;
 class FuseTransferWidget;
 class FuseImageListWidget;
 
-class Firestation : public Gtk::Window, public ServiceBrowseHandler
+class Firestation
+: public Gtk::Window,
+  public fawkes::ServiceBrowseHandler
 {
  public:
   Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml);
@@ -231,7 +233,7 @@ class Firestation : public Gtk::Window, public ServiceBrowseHandler
   FuseTransferWidget* m_ftw;
   FuseImageListWidget* m_filw;
 
-  AvahiThread* m_avahi_thread;
+  fawkes::AvahiThread* m_avahi_thread;
 };
 
 #endif /* __FIREVISION_TOOLS_IMAGE_VIEWER_H_ */

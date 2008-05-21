@@ -26,11 +26,16 @@
 #ifndef __FVUTILS_MISC_SIGMANGLER_H_
 #define __FVUTILS_MISC_SIGMANGLER_H_
 
+namespace fawkes {
+
+
 class CppSignatureMangler
 {
  public:
   static char * strip_class_type(const char *type);
 };
 
+
+} // end namespace fawkes
 
 #endif

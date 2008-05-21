@@ -31,6 +31,8 @@
 #include <cstring>
 #include <netinet/in.h>
 
+using namespace fawkes;
+
 /** @class FuseImageListContent <fvutils/net/fuse_imagelist_content.h>
  * FUSE image list content.
  * This content provides means to send an arbitrary length list of image

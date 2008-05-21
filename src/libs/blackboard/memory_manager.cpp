@@ -51,6 +51,7 @@
 #define chunk_ptr(a)  (chunk_list_t *)shmem->ptr(a)
 #define chunk_addr(a) (chunk_list_t *)shmem->addr(a)
 
+namespace fawkes {
 
 /** @class BlackBoardMemoryManager blackboard/memory_manager.h
  * BlackBoard memory manager.
@@ -1002,3 +1003,5 @@ BlackBoardMemoryManager::ChunkIterator::overhang() const
 {
   return ( cur != NULL ) ? cur->overhang : 0;
 }
+
+} // end namespace fawkes

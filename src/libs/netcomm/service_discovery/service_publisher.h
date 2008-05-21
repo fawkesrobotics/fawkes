@@ -28,6 +28,8 @@
 
 #include <netcomm/service_discovery/service.h>
 
+namespace fawkes {
+
 class ServicePublisher
 {
  public:
@@ -37,5 +39,6 @@ class ServicePublisher
   virtual void unpublish_service(NetworkService *service) = 0;
 };
 
+} // end namespace fawkes
 
 #endif

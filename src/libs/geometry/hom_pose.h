@@ -28,6 +28,8 @@
 
 #include <geometry/hom_point.h>
 
+namespace fawkes {
+
 class HomPose : public HomPoint
 {
  public:
@@ -60,5 +62,7 @@ class HomPose : public HomPoint
   float m_pitch;
   float m_yaw;
 };
+
+} // end namespace fawkes
 
 #endif /* __GEOMETRY_HOM_POSE_H_ */

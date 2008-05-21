@@ -25,6 +25,8 @@
 
 #include <utils/constraints/dependency.h>
 
+namespace fawkes {
+
 /** @class DependencyViolationException <utils/constraints/dependency.h>
  * Dependency violation exception.
  * Thrown if an operation is tried which would violate the dependency
@@ -38,3 +40,6 @@ DependencyViolationException::DependencyViolationException(const char *msg)
   : Exception(msg)
 {
 }
+
+
+} // end namespace fawkes

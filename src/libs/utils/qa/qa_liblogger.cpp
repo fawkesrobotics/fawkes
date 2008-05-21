@@ -42,6 +42,7 @@
 #include <list>
 
 using namespace std;
+using namespace fawkes;
 
 class LibLoggerQAThread : public Thread
 {

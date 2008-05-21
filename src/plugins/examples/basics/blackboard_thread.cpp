@@ -23,8 +23,10 @@
  */
 
 #include <plugins/examples/basics/blackboard_thread.h>
-
 #include <interfaces/test.h>
+
+using namespace fawkes;
+
 
 /** @class ExampleBlackBoardThread <plugins/examples/basics/blackboard_thread.h>
  * Simple demonstration for a thread using the BlackBoard.

@@ -44,15 +44,17 @@ class ColorModel;
 class MirrorModel;
 class RelativePositionModel;
 class SharedMemoryImageBuffer;
-class ObjectPositionInterface;
 class Drawer;
+namespace fawkes {
+  class ObjectPositionInterface;
+}
 
 class FvOmniFieldPipelineThread
-: public Thread,
-  public LoggingAspect,
-  public VisionAspect,
-  public ConfigurableAspect,
-  public BlackBoardAspect
+: public fawkes::Thread,
+  public fawkes::LoggingAspect,
+  public fawkes::VisionAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::BlackBoardAspect
 {
  public:
   FvOmniFieldPipelineThread();
@@ -74,8 +76,8 @@ class FvOmniFieldPipelineThread
   MirrorModel* m_mirror;
   RelativePositionModel* m_rel_pos;
   SharedMemoryImageBuffer* m_shm_buffer;
-  ObjectPositionInterface** m_obstacle_interfaces;
-  std::map<float, HomPolar> m_obstacles;
+  fawkes::ObjectPositionInterface** m_obstacle_interfaces;
+  std::map<float, fawkes::HomPolar> m_obstacles;
 
   size_t m_buffer_size;
   unsigned char* m_buffer;

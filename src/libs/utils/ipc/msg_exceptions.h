@@ -29,11 +29,17 @@
 
 #include <core/exception.h>
 
+namespace fawkes {
+
+
 /** Message did not fit into buffer. */
 class MessageTooBigException : public Exception {
  public:
   /** Constructor */
   MessageTooBigException() : Exception("Message too big for buffer")  {}
 };
+
+
+} // end namespace fawkes
 
 #endif

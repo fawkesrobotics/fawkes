@@ -152,28 +152,28 @@ typedef struct {
  * Message type ID is NAVIGATOR_MSGTYPE_NODES.
  */
 typedef struct {
-  dynamic_list_t nodes_list;    /**< dynamically growing list of nodes */
+  fawkes::dynamic_list_t nodes_list;    /**< dynamically growing list of nodes */
 } navigator_nodes_msg_t;
 
 /** Navigator list message.
  * Message type ID is NAVIGATOR_MSGTYPE_LINES.
  */
 typedef struct {
-  dynamic_list_t lines_list;    /**< dynamically growing list of lines */
+  fawkes::dynamic_list_t lines_list;    /**< dynamically growing list of lines */
 } navigator_lines_msg_t;
 
 /** Navigator list message.
  * Message type ID is NAVIGATOR_MSGTYPE_PATH.
  */
 typedef struct {
-  dynamic_list_t path_list;    /**< dynamically growing list of path nodes */
+  fawkes::dynamic_list_t path_list;    /**< dynamically growing list of path nodes */
 } navigator_path_msg_t;
 
 /** The message type to determine the obstacles.
  * Message type ID is NAVIGATOR_MSGTYPE_OBSTACLES.
  */
 typedef struct {
-  dynamic_list_t obstacle_list;   /**< dynamically growing list of obstacles */
+  fawkes::dynamic_list_t obstacle_list;   /**< dynamically growing list of obstacles */
 } navigator_obstacles_msg_t;
 
 /** The message type for subscribe messages to subscribe messages
@@ -232,7 +232,8 @@ typedef struct {
 //  navigator_lines_msg_t  msg;
 //};
 
-class NavigatorLinesListMessage : public FawkesNetworkMessageContent
+class NavigatorLinesListMessage
+: public fawkes::FawkesNetworkMessageContent
 {
  public:
   NavigatorLinesListMessage(std::list<NLine *> *lines);
@@ -255,11 +256,12 @@ class NavigatorLinesListMessage : public FawkesNetworkMessageContent
   nline_t *  next();
   
  private:
-  DynamicBuffer     *lines_list;
+  fawkes::DynamicBuffer     *lines_list;
   navigator_lines_msg_t  msg;
 };
 
-class NavigatorObstaclesListMessage : public FawkesNetworkMessageContent
+class NavigatorObstaclesListMessage
+: public fawkes::FawkesNetworkMessageContent
 {
  public:
   NavigatorObstaclesListMessage(std::list<Obstacle *> *obstacles);
@@ -281,11 +283,12 @@ typedef struct {
   obstacle_t *  next();
   
  private:
-  DynamicBuffer     *obstacle_list;
+  fawkes::DynamicBuffer     *obstacle_list;
   navigator_obstacles_msg_t  msg;
 };
 
-class NavigatorPathListMessage : public FawkesNetworkMessageContent
+class NavigatorPathListMessage
+: public fawkes::FawkesNetworkMessageContent
 {
  public:
   NavigatorPathListMessage(std::list<NPoint *> *points);
@@ -306,7 +309,7 @@ class NavigatorPathListMessage : public FawkesNetworkMessageContent
   npoint_t *  next();
   
  private:
-  DynamicBuffer     *path_list;
+  fawkes::DynamicBuffer     *path_list;
   navigator_path_msg_t  msg;
 };
 

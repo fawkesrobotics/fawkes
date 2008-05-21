@@ -44,6 +44,7 @@
 #include <cmath>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class ColorModelLookupTable <models/color/lookuptable.h>
  * Color model based on a lookup table.

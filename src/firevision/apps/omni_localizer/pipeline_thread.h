@@ -47,17 +47,19 @@ class LineClassifier;
 class SharedMemoryImageBuffer;
 class MirrorModel;
 class MCL;
-class MotorInterface;
-class ObjectPositionInterface;
+namespace fawkes {
+  class MotorInterface;
+  class ObjectPositionInterface;
+}
 
 class FvOmniLocalizerPipelineThread
-: public Thread,
-  public LoggingAspect,
-  public VisionAspect,
-  public ConfigurableAspect,
-  public BlackBoardAspect,
-  public BlackBoardInterfaceObserver,
-  public BlackBoardInterfaceListener
+: public fawkes::Thread,
+  public fawkes::LoggingAspect,
+  public fawkes::VisionAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::BlackBoardInterfaceObserver,
+  public fawkes::BlackBoardInterfaceListener
 {
  public:
   FvOmniLocalizerPipelineThread();
@@ -68,7 +70,7 @@ class FvOmniLocalizerPipelineThread
   virtual void loop();
 
   virtual void bb_interface_created(const char *type, const char *id) throw();
-  virtual void bb_interface_writer_removed(Interface *interface, unsigned int instance_serial) throw();
+  virtual void bb_interface_writer_removed(fawkes::Interface *interface, unsigned int instance_serial) throw();
 
  private:
   Camera* mCamera;
@@ -80,8 +82,8 @@ class FvOmniLocalizerPipelineThread
   unsigned char* mBuffer;
   MirrorModel *mMirror;
   MCL *mMCL;
-  MotorInterface *mMotorInterface;
-  ObjectPositionInterface *mPositionInterface;
+  fawkes::MotorInterface *mMotorInterface;
+  fawkes::ObjectPositionInterface *mPositionInterface;
 
   unsigned int mImageWidth, mImageHeight;
   float mLowerRange, mUpperRange;
@@ -89,10 +91,10 @@ class FvOmniLocalizerPipelineThread
   colorspace_t mColorspaceFrom, mColorspaceTo;
 
   bool mUseBallPosition;
-  std::vector<ObjectPositionInterface*> mBallInterfaces;
+  std::vector<fawkes::ObjectPositionInterface*> mBallInterfaces;
 
   bool mUseObstaclePositions;
-  std::vector<ObjectPositionInterface*> mObstacleInterfaces;
+  std::vector<fawkes::ObjectPositionInterface*> mObstacleInterfaces;
 };
 
 

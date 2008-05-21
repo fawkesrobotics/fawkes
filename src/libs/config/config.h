@@ -33,6 +33,8 @@
 #include <list>
 #include <map>
 
+namespace fawkes {
+
 class ConfigurationException : public Exception
 {
  public:
@@ -176,5 +178,7 @@ class Configuration
   ChangeHandlerList * find_handlers(const char *path);
 
 };
+
+} // end namespace fawkes
 
 #endif

@@ -37,23 +37,25 @@
 #include <utility>
 
 class FawkesThreadManager;
-class FawkesNetworkHub;
-class Plugin;
-class PluginLoader;
-class Mutex;
-class PluginListMessage;
+namespace fawkes {
+  class FawkesNetworkHub;
+  class Plugin;
+  class PluginLoader;
+  class Mutex;
+  class PluginListMessage;
+}
 
 class FawkesPluginManager
-: public Thread,
-  public FawkesNetworkHandler
+: public fawkes::Thread,
+  public fawkes::FawkesNetworkHandler
 {
  public:
   FawkesPluginManager(FawkesThreadManager *thread_manager);
   ~FawkesPluginManager();
 
-  void set_hub(FawkesNetworkHub *hub);
+  void set_hub(fawkes::FawkesNetworkHub *hub);
 
-  virtual void handle_network_message(FawkesNetworkMessage *msg);
+  virtual void handle_network_message(fawkes::FawkesNetworkMessage *msg);
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
 
@@ -63,35 +65,33 @@ class FawkesPluginManager
   void unload(const char *plugin_type);
 
  private:
-  PluginListMessage * list_avail();
-  PluginListMessage * list_loaded();
-  void add_plugin(Plugin *plugin, const char *plugin_name);
+  fawkes::PluginListMessage * list_avail();
+  fawkes::PluginListMessage * list_loaded();
   void send_load_failure(const char *plugin_name, unsigned int client_id);
   void send_load_success(const char *plugin_name, unsigned int client_id);
   void send_unload_failure(const char *plugin_name, unsigned int client_id);
   void send_unload_success(const char *plugin_name, unsigned int client_id);
-  void add_plugin_deferred(Plugin *plugin, const char *plugin_name);
   void send_loaded(const char *plugin_name);
   void send_unloaded(const char *plugin_name);
 
  private:
-  FawkesThreadManager  *thread_manager;
-  PluginLoader         *plugin_loader;
-  FawkesNetworkHub     *hub;
+  FawkesThreadManager       *thread_manager;
+  fawkes::PluginLoader      *plugin_loader;
+  fawkes::FawkesNetworkHub  *hub;
 
-  Mutex *plugins_mutex;
+  fawkes::Mutex *plugins_mutex;
 
-  std::map< std::string, Plugin * > plugins;
-  std::map< std::string, Plugin * >::iterator pit;
-  std::map< std::string, Plugin * >::reverse_iterator rpit;
+  std::map< std::string, fawkes::Plugin * > plugins;
+  std::map< std::string, fawkes::Plugin * >::iterator pit;
+  std::map< std::string, fawkes::Plugin * >::reverse_iterator rpit;
 
   unsigned int next_plugin_id;
   std::map< std::string, unsigned int > plugin_ids;
 
-  LockQueue< FawkesNetworkMessage * > inbound_queue;
+  fawkes::LockQueue< fawkes::FawkesNetworkMessage * > inbound_queue;
 
-  LockList<unsigned int>           __subscribers;
-  LockList<unsigned int>::iterator __ssit;
+  fawkes::LockList<unsigned int>           __subscribers;
+  fawkes::LockList<unsigned int>::iterator __ssit;
 };
 
 #endif

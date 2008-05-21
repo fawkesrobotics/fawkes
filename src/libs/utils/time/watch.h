@@ -28,6 +28,8 @@
 
 #include <utils/time/time.h>
 
+namespace fawkes {
+
 class Watch
 {
  public:
@@ -55,5 +57,7 @@ class Watch
   bool is_running;
   bool is_paused;
 };
+
+} // end namespace fawkes
 
 #endif /*  __UTILS_TIME_WATCH_H_ */

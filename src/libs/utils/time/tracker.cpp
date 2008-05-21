@@ -32,6 +32,8 @@
 
 using namespace std;
 
+namespace fawkes {
+
 /** @class TimeTracker <utils/time/tracker.h>
  * Time tracking utility.
  * This class provides means to track time of different tasks in a process.
@@ -347,3 +349,5 @@ TimeTracker::print_to_stdout()
   cout << endl;
 
 }
+
+} // end namespace fawkes

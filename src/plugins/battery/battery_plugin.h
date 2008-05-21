@@ -27,7 +27,7 @@
 
 #include <core/plugin.h>
 
-class BatteryPlugin : public Plugin 
+class BatteryPlugin : public fawkes::Plugin 
 {
  public:
   BatteryPlugin();

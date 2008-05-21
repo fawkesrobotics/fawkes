@@ -28,6 +28,8 @@
 
 #include <interface/mediators/message_mediator.h>
 
+namespace fawkes {
+
 class BlackBoardInterfaceManager;
 class BlackBoardNotifier;
 class Message;
@@ -48,6 +50,6 @@ class BlackBoardMessageManager : public MessageMediator
   void set_interface_manager(BlackBoardInterfaceManager *im);
 };
 
-
+} // end namespace fawkes
 
 #endif

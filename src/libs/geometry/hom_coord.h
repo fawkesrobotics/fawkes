@@ -26,6 +26,8 @@
 #ifndef __GEOMETRY_HOM_COORD_H_
 #define __GEOMETRY_HOM_COORD_H_
 
+namespace fawkes {
+
 class Vector;
 
 class HomCoord
@@ -71,5 +73,7 @@ class HomCoord
 
   Vector* m_vector;
 };
+
+} // end namespace fawkes
 
 #endif /* __GEOMETRY_HOM_COORD_H_ */

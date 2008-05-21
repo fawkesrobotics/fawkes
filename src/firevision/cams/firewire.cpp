@@ -39,6 +39,7 @@
 #include <dc1394/utils.h>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class FirewireCamera <cams/firewire.h>
  * Firewire camera.

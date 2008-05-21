@@ -55,8 +55,8 @@ class OmniMotionModel : public MotionModel
   void update_odometry(float* odom, long diff_msec);
 
  private:
-  Matrix m_omni_model;
-  Matrix m_omni_model_inverse;
+  fawkes::Matrix m_omni_model;
+  fawkes::Matrix m_omni_model_inverse;
 
   float m_radius;
   float m_wheel_radius;

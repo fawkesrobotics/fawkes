@@ -31,6 +31,8 @@
 
 #pragma pack(push,4)
 
+namespace fawkes {
+
 #define MSG_CONFIG_GET_FLOAT             1
 #define MSG_CONFIG_GET_UINT              2
 #define MSG_CONFIG_GET_INT               3
@@ -192,6 +194,8 @@ typedef struct {
   config_list_entity_header_t  header;		/**< config entity header */
   char     s[CONFIG_MSG_MAX_STRING_LENGTH];	/**< string value */
 } config_list_string_entity_t;
+
+} // end namespace fawkes
 
 #pragma pack(pop)
 

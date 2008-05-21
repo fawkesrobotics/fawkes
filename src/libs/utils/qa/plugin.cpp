@@ -31,6 +31,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace fawkes;
 
 /** Method for testing a plugin.
  * @param p The plugin to be tested

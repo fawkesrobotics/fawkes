@@ -39,6 +39,8 @@
 //  UID is:                                   type  ::   id
 #define __INTERFACE_UID_SIZE __INTERFACE_TYPE_SIZE + 2 + __INTERFACE_ID_SIZE
 
+namespace fawkes {
+
 class RefCountRWLock;
 class InterfaceMediator;
 class MessageMediator;
@@ -250,8 +252,17 @@ Interface::msgq_first_is()
 }
 
 
+/** Interface destructor function for the shared library.
+ * Do not use directly. Use EXPORT_INTERFACE macro.
+ * @param interface Interface to destroy
+ */
+typedef void         (* InterfaceDestroyFunc)  (Interface *interface);
+
+/** Interface generator function for the shared library
+ * Do not use directly. Use EXPORT_INTERFACE macro.
+ */
 typedef Interface *  (* InterfaceFactoryFunc)  (void);
-typedef void         (* InterfaceDestroyFunc)  (Interface *);
+
 
 /** Friend for interface generator function. */
 #define INTERFACE_MGMT_FRIENDS(interface_class)				\
@@ -311,5 +322,7 @@ typedef void         (* InterfaceDestroyFunc)  (Interface *);
   INTERFACE_DELETER(interface_class)	  \
   INTERFACE_FACTORY(interface_class)	  \
   INTERFACE_DESTROY(interface_class)
+
+} // end namespace fawkes
 
 #endif

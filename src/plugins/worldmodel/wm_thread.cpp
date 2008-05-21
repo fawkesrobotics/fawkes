@@ -34,6 +34,7 @@
 #include <cstring>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class WorldModelThread <plugins/worldmodel/wm_thread.h>
  * Main thread of worldmodel plugin.

@@ -35,9 +35,11 @@
 #include <vector>
 #include <fstream>
 
-class BlackBoard;
-class Configuration;
-class ObjectPositionInterface;
+namespace fawkes {
+  class BlackBoard;
+  class Configuration;
+  class ObjectPositionInterface;
+}
 
 /** Represents an arc. */
 struct arc_t
@@ -65,10 +67,12 @@ struct obstacle_t
   float* covariance;
 };
 
-class Field : public BlackBoardInterfaceObserver, BlackBoardInterfaceListener
+class Field
+: public fawkes::BlackBoardInterfaceObserver,
+  public fawkes::BlackBoardInterfaceListener
 {
   public:
-    Field( BlackBoard *blackboard, Configuration *config );
+    Field( fawkes::BlackBoard *blackboard, fawkes::Configuration *config );
     ~Field();
 
     void load( const char *filename );
@@ -94,7 +98,7 @@ class Field : public BlackBoardInterfaceObserver, BlackBoardInterfaceListener
     void dumpSensorProbabilities( const field_pos_t &position, const char* filename, const char* filenameObs = 0 );
 
     virtual void bb_interface_created(const char *type, const char *id) throw();
-    virtual void bb_interface_writer_removed(Interface *interface, unsigned int instance_serial) throw();
+    virtual void bb_interface_writer_removed(fawkes::Interface *interface, unsigned int instance_serial) throw();
 
   private:
     std::vector< std::pair<f_point_t, f_point_t> > mLines;
@@ -107,14 +111,14 @@ class Field : public BlackBoardInterfaceObserver, BlackBoardInterfaceListener
 
     float mUpperRange, mLowerRange;
 
-    BlackBoard *mBlackBoard;
-    ObjectPositionInterface *mWMBallInterface;
+    fawkes::BlackBoard *mBlackBoard;
+    fawkes::ObjectPositionInterface *mWMBallInterface;
     float mBallPositionWeight;
 
-    std::vector<ObjectPositionInterface*> mWMObstacleInterfaces;
+    std::vector<fawkes::ObjectPositionInterface*> mWMObstacleInterfaces;
     std::vector<obstacle_t> mObstacles;
 
-    Mutex mInterfaceMutex;
+    fawkes::Mutex mInterfaceMutex;
 };
 
 #endif

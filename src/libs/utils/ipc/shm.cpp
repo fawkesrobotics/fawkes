@@ -35,6 +35,8 @@
 #include <limits.h>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class SharedMemoryHeader <utils/ipc/shm.h>
  * Interface for shared memory header.
  * This class has to be implemented to be able to use shared memory segments.
@@ -1547,3 +1549,5 @@ SharedMemory::SharedMemoryIterator::databuf() const
 {
   return __data_buf;
 }
+
+} // end namespace fawkes

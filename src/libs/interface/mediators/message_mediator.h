@@ -26,6 +26,8 @@
 #ifndef __MESSAGE_MEDIATOR_H_
 #define __MESSAGE_MEDIATOR_H_
 
+namespace fawkes {
+
 class Interface;
 class Message;
 
@@ -50,5 +52,7 @@ class MessageMediator
   virtual unsigned int transmit(Message *message)                        = 0;
 
 };
+
+} // end namespace fawkes
 
 #endif

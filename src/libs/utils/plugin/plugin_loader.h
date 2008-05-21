@@ -29,6 +29,8 @@
 #include <core/plugin.h>
 #include <core/exception.h>
 
+namespace fawkes {
+
 class PluginLoaderData;
 
 class PluginLoadException : public Exception
@@ -65,5 +67,7 @@ class PluginLoader {
   PluginLoaderData *d;
 };
 
+
+} // end namespace fawkes
 
 #endif

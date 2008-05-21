@@ -35,6 +35,8 @@
 #include <list>
 #include <typeinfo>
 
+namespace fawkes {
+
 class FawkesNetworkClient;
 class FawkesNetworkMessage;
 class Mutex;
@@ -201,5 +203,7 @@ RemoteBlackBoard::open_for_writing(const char *identifier)
     return interface;
   }
 }
+
+} // end namespace fawkes
 
 #endif

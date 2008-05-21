@@ -34,6 +34,8 @@
 #include <cstdlib>
 #include <unistd.h>
 
+namespace fawkes {
+
 /** @class Message interface/message.h
  * Base class for all messages passed through interfaces in Fawkes BlackBoard.
  * Do not use directly, but instead use the interface generator to generate
@@ -322,3 +324,5 @@ Message::clone() const
 {
   return new Message(this);
 }
+
+} // end namespace fawkes

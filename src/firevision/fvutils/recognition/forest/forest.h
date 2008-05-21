@@ -937,7 +937,7 @@ class Tree {
 		
       if((dir = opendir(dirPath.c_str())) == NULL){
 	printf("the directory searched for is %s\n", dirPath.c_str() ); 
-	LibLogger::log_error("Forest","The directory does not exist");
+	fawkes::LibLogger::log_error("Forest","The directory does not exist");
 	continue;
 	//		  perror("Directory does not exist");
 	//		  exit(0);

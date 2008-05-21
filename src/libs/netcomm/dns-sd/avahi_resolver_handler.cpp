@@ -25,6 +25,7 @@
 
 #include <netcomm/dns-sd/avahi_resolver_handler.h>
 
+namespace fawkes {
 
 /** @class AvahiResolverHandler <netcomm/dns-sd/avahi_resolver_handler.h>
  * Avahi resolver handler interface.
@@ -79,3 +80,5 @@
 AvahiResolverHandler::~AvahiResolverHandler()
 {
 }
+
+} // end namespace fawkes

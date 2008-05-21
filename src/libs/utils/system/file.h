@@ -30,6 +30,8 @@
 #include <core/exception.h>
 #include <cstdio>
 
+namespace fawkes {
+
 class UnableToOpenFileException : public Exception {
  public:
   UnableToOpenFileException(const char *filename, int error);
@@ -61,5 +63,8 @@ class File {
   FILE *fp;
   char *fn;
 };
+
+
+} // end namespace fawkes
 
 #endif

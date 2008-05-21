@@ -36,6 +36,8 @@
  * @author Tim Niemueller
  */
 
+using namespace fawkes;
+
 /** Modulo count */
 #define MODC 100
 

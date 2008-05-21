@@ -37,6 +37,8 @@
 #include <cstring>
 #include <cstdio>
 
+namespace fawkes {
+
 /** @class BlackBoardNetHandlerInterfaceListener <blackboard/net_interface_listener.h>
  * Interface listener for network handler.
  * This class is used by the BlackBoardNetworkHandler to track interface changes and
@@ -160,3 +162,5 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_reader_removed(Interface *in
 {
   send_event_serial(interface, MSG_BB_READER_REMOVED, instance_serial);
 }
+
+} // end namespace fawkes

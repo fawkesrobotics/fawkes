@@ -26,6 +26,9 @@
 #ifndef __CORE_THREADING_READ_WRITE_LOCK_H_
 #define __CORE_THREADING_READ_WRITE_LOCK_H_
 
+namespace fawkes {
+
+
 class ReadWriteLockData;
 
 class ReadWriteLock
@@ -73,5 +76,6 @@ class ReadWriteLock
 };
 
 
+} // end namespace fawkes
 
 #endif

@@ -30,7 +30,8 @@
 #include <netcomm/fawkes/message_content.h>
 #include <netcomm/utils/dynamic_buffer.h>
 
-class DynamicBuffer;
+namespace fawkes {
+  class DynamicBuffer;
 
 class PluginListMessage : public FawkesNetworkMessageContent
 {
@@ -52,5 +53,7 @@ class PluginListMessage : public FawkesNetworkMessageContent
   DynamicBuffer     *plugin_list;
   plugin_list_msg_t  msg;
 };
+
+}
 
 #endif

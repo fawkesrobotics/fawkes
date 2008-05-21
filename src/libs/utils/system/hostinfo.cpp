@@ -31,6 +31,8 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class HostInfo utils/system/hostinfo.h
  * Host information.
  * This class provides access to basic system information like hostname,
@@ -42,7 +44,7 @@
 /** Constructor. */
 HostInfo::HostInfo()
 {
-  utsname = (struct utsname *)malloc(sizeof(struct utsname));
+  utsname = (struct ::utsname *)malloc(sizeof(struct ::utsname));
 
   if ( uname(utsname) != 0 ) {
     delete utsname;
@@ -165,3 +167,5 @@ HostInfo::sys_version()
 {
   return utsname->version;
 }
+
+} // end namespace fawkes

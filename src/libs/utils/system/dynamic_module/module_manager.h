@@ -28,6 +28,8 @@
 
 #include <utils/system/dynamic_module/module.h>
 
+namespace fawkes {
+
 /** Manager interface to load and unload modules, keeps track of loaded modules
  * and does not reload modules if they are already loaded
  */
@@ -78,5 +80,6 @@ class ModuleManager {
 
 };
 
+} // end namespace fawkes
 
 #endif

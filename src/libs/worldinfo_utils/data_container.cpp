@@ -28,6 +28,7 @@
 #include <cmath>
 
 using namespace std;
+namespace fawkes {
 
 /** @class WorldInfoDataContainer <worldinfo_utils/data_container.h>
  * Data container to store and exchange worldinfo data.
@@ -747,3 +748,5 @@ WorldInfoDataContainer::clock_in_host(unsigned int id)
   m_last_seen[id] = now.in_msec();
   m_last_seen.unlock();
 }
+
+} // end namespace fawkes

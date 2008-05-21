@@ -30,6 +30,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** Example Plugin network ping tool
  * Small class that waits for a reply of the example plugin after a short
  * network message was sent.

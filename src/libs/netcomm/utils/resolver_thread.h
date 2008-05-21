@@ -34,9 +34,12 @@
 #include <netcomm/dns-sd/avahi_resolver_handler.h>
 #endif
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <stdint.h>
 #include <cstddef>
 #include <utility>
+
+namespace fawkes {
 
 class AvahiThread;
 class NetworkNameResolver;
@@ -84,5 +87,7 @@ class NetworkNameResolverThread : public Thread
   LockHashMap<uint32_t, std::pair<struct sockaddr *, socklen_t> >             addrq;
   LockHashMap<uint32_t, std::pair<struct sockaddr *, socklen_t> >::iterator   aqit;
 };
+
+} // end namespace fawkes
 
 #endif

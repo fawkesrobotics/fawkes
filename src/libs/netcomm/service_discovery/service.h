@@ -29,6 +29,8 @@
 #include <string>
 #include <list>
 
+namespace fawkes {
+
 class NetworkService
 {
  public:
@@ -70,5 +72,7 @@ class NetworkService
   unsigned short int  _port;
 
 };
+
+} // end namespace fawkes
 
 #endif

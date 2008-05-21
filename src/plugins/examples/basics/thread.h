@@ -29,11 +29,15 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 
-class ExampleThread : public Thread, public BlockedTimingAspect, public LoggingAspect
+class ExampleThread
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect
 {
 
  public:
-  ExampleThread(BlockedTimingAspect::WakeupHook hook, const char *name, unsigned int modc);
+  ExampleThread(fawkes::BlockedTimingAspect::WakeupHook hook,
+		const char *name, unsigned int modc);
   virtual ~ExampleThread();
 
   virtual void init();

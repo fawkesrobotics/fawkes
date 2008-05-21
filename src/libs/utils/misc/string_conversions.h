@@ -28,6 +28,9 @@
 
 #include <string>
 
+namespace fawkes {
+
+
 class StringConversions
 {
  public:
@@ -52,5 +55,6 @@ class StringConversions
 };
 
 
+} // end namespace fawkes
 
 #endif

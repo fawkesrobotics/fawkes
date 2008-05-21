@@ -36,6 +36,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace fawkes;
 
 
 class QaTestWait

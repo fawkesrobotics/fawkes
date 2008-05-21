@@ -25,6 +25,8 @@
 #include <plugins/kicker/kicker_plugin.h>
 #include <plugins/kicker/kicker_thread.h>
 
+using namespace fawkes;
+
 /** @class KickerPlugin plugins/kicker/kicker_plugin.h
  * Fawkes plugin that allows to control the kicker.
  * The communication with the IOWarrior is encapsulated in the KickerControl class.

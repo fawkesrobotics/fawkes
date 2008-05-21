@@ -28,6 +28,8 @@
 
 #include <geometry/geom_obj.h>
 
+namespace fawkes {
+
 class Line : public GeomObj
 {
  public:
@@ -57,5 +59,7 @@ class Line : public GeomObj
   HomPoint mBasePoint;
   HomVector mDirection;
 };
+
+} // end namespace fawkes
 
 #endif /* __LINE_H_ */

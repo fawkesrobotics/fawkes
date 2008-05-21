@@ -25,6 +25,8 @@
 
 #include <aspect/clock.h>
 
+namespace fawkes {
+
 /** @class ClockAspect aspect/clock.h
  * Thread aspect that allows to obtain the current time from the clock.
  * Threads that need to deal with the current time should have this aspect
@@ -51,7 +53,9 @@ ClockAspect::~ClockAspect()
  * @param clock Clock instance to use.
  */
 void
-ClockAspect::initClockAspect(Clock* clock)
+ClockAspect::init_ClockAspect(Clock* clock)
 {
   this->clock = clock;
 }
+
+} // end namespace fawkes

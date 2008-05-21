@@ -41,6 +41,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace fawkes;
 
 class WorldInfoSenderThread : public Thread
 {

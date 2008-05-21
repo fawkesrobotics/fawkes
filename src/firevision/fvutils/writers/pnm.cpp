@@ -30,6 +30,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** @class PNMWriter <fvutils/writers/pnm.h>
  * PNM file writer.
  */

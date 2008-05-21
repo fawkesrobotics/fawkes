@@ -27,6 +27,9 @@
 #ifndef __CORE_THREADING_THREAD_COLLECTOR_H_
 #define __CORE_THREADING_THREAD_COLLECTOR_H_
 
+namespace fawkes {
+
+
 class Thread;
 class ThreadList;
 
@@ -42,5 +45,8 @@ class ThreadCollector
   virtual void remove(Thread *t)                                        = 0;
 
 };
+
+
+} // end namespace fawkes
 
 #endif

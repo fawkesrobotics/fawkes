@@ -32,23 +32,25 @@
 #include <aspect/network.h>
 #include <netcomm/worldinfo/handler.h>
 
-class WorldInfoTransceiver;
-class WorldInfoDataContainer;
+namespace fawkes {
+  class WorldInfoTransceiver;
+  class WorldInfoDataContainer;
+}
 
 class WorldModelNetworkThread
-  : public Thread,
-    public LoggingAspect,
-    public ConfigurableAspect,
-    public ClockAspect,
-    public NetworkAspect,
-    public WorldInfoHandler
+  : public fawkes::Thread,
+    public fawkes::LoggingAspect,
+    public fawkes::ConfigurableAspect,
+    public fawkes::ClockAspect,
+    public fawkes::NetworkAspect,
+    public fawkes::WorldInfoHandler
 {
  public:
   WorldModelNetworkThread();
   virtual ~WorldModelNetworkThread();
 
-  WorldInfoTransceiver *get_transceiver();
-  WorldInfoDataContainer *get_data_container();
+  fawkes::WorldInfoTransceiver *get_transceiver();
+  fawkes::WorldInfoDataContainer *get_data_container();
 
   virtual void init();
   virtual void loop();
@@ -79,16 +81,16 @@ class WorldModelNetworkThread
   virtual void opponent_disapp_rcvd(const char *from_host, unsigned int uid);
 
   virtual void gamestate_rcvd(const char *from_host,
-			      worldinfo_gamestate_t game_state,
-			      worldinfo_gamestate_team_t state_team,
+			      fawkes::worldinfo_gamestate_t game_state,
+			      fawkes::worldinfo_gamestate_team_t state_team,
 			      unsigned int score_cyan, unsigned int score_magenta,
-			      worldinfo_gamestate_team_t our_team,
-			      worldinfo_gamestate_goalcolor_t our_goal_color,
-			      worldinfo_gamestate_half_t half);
+			      fawkes::worldinfo_gamestate_team_t our_team,
+			      fawkes::worldinfo_gamestate_goalcolor_t our_goal_color,
+			      fawkes::worldinfo_gamestate_half_t half);
 
  private:
-  WorldInfoTransceiver *worldinfo_transceiver;
-  WorldInfoDataContainer *data;
+  fawkes::WorldInfoTransceiver *worldinfo_transceiver;
+  fawkes::WorldInfoDataContainer *data;
 
   unsigned int sleep_time_msec;
   unsigned int max_msgs_per_recv;

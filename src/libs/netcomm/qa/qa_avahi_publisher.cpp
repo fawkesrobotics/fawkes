@@ -29,6 +29,8 @@
 
 #include <utils/system/signal.h>
 
+using namespace fawkes;
+
 class QAAvahiPublisherMain : public SignalHandler
 {
  public:

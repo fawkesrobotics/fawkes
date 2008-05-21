@@ -29,12 +29,14 @@
 
 #include <set>
 #include <map>
+#include <utility>
 
 extern "C"
-  {
+{
 #include <gts.h>
+}
 
-  }
+using namespace fawkes;
 
 /** @class Pathfinder plugins/navigator/pathfinder.h
  *   The pathfinder of the navigator to find a path in a delaunay triangulation.
@@ -52,8 +54,7 @@ Pathfinder::Pathfinder()
 
   init_surface();
 
-  robot_point = gts_point_new(gts_point_class(), 0, 0, 0);
-
+  robot_point  = gts_point_new(gts_point_class(), 0, 0, 0);
   target_point = gts_point_new(gts_point_class(), 0, 0, 0);
 }
 
@@ -91,7 +92,8 @@ Pathfinder::~Pathfinder()
 }
 
 /** Initilizes the surface for the delaunay triangulation. */
-void Pathfinder::init_surface()
+void
+Pathfinder::init_surface()
 {
   surface = gts_surface_new (gts_surface_class (),
                              gts_face_class (),
@@ -128,26 +130,27 @@ void Pathfinder::init_surface()
  * @param map the map where the vertexes representing the bisections are stored
  * @param concave true if the surface is concave
  */
-void Pathfinder::find_bisector(GtsVertex* current_vertex, std::map<GtsVertex*, GtsVertex*>* map)
+void
+Pathfinder::find_bisector(GtsVertex* current_vertex, std::map<GtsVertex*, GtsVertex*>* map)
 {
   GtsEdge* e1 = NULL;
   GtsEdge* e2 = NULL;
 
   GSList* edge_list = current_vertex->segments;
   do
+  {
+    if(gts_edge_is_boundary(GTS_EDGE(edge_list->data), surface))
     {
-      if(gts_edge_is_boundary(GTS_EDGE(edge_list->data), surface))
-        {
-          if(e1 == NULL)
-            {
-              e1 = GTS_EDGE(edge_list->data);
-            }
-          else
-            {
-              e2 = GTS_EDGE(edge_list->data);
-            }
-        }
+      if(e1 == NULL)
+      {
+	e1 = GTS_EDGE(edge_list->data);
+      }
+      else
+      {
+	e2 = GTS_EDGE(edge_list->data);
+      }
     }
+  }
   while((edge_list = edge_list->next) != NULL);
 
   float angle1 = 0;
@@ -155,32 +158,32 @@ void Pathfinder::find_bisector(GtsVertex* current_vertex, std::map<GtsVertex*, G
 
   //calculate the angles of the vectors pointing to the current_vertex
   if(current_vertex == GTS_SEGMENT(e1)->v1)
-    {
-      angle1 = atan2(GTS_POINT(GTS_SEGMENT(e1)->v1)->y - GTS_POINT(GTS_SEGMENT(e1)->v2)->y,
-                     GTS_POINT(GTS_SEGMENT(e1)->v1)->x - GTS_POINT(GTS_SEGMENT(e1)->v2)->x);
-    }
+  {
+    angle1 = atan2(GTS_POINT(GTS_SEGMENT(e1)->v1)->y - GTS_POINT(GTS_SEGMENT(e1)->v2)->y,
+		   GTS_POINT(GTS_SEGMENT(e1)->v1)->x - GTS_POINT(GTS_SEGMENT(e1)->v2)->x);
+  }
   else
-    {
-      angle1 = atan2(GTS_POINT(GTS_SEGMENT(e1)->v2)->y - GTS_POINT(GTS_SEGMENT(e1)->v1)->y,
-                     GTS_POINT(GTS_SEGMENT(e1)->v2)->x - GTS_POINT(GTS_SEGMENT(e1)->v1)->x);
-    }
+  {
+    angle1 = atan2(GTS_POINT(GTS_SEGMENT(e1)->v2)->y - GTS_POINT(GTS_SEGMENT(e1)->v1)->y,
+		   GTS_POINT(GTS_SEGMENT(e1)->v2)->x - GTS_POINT(GTS_SEGMENT(e1)->v1)->x);
+  }
 
   if(current_vertex == GTS_SEGMENT(e2)->v1)
-    {
-      angle2 = atan2(GTS_POINT(GTS_SEGMENT(e2)->v1)->y - GTS_POINT(GTS_SEGMENT(e2)->v2)->y,
-                     GTS_POINT(GTS_SEGMENT(e2)->v1)->x - GTS_POINT(GTS_SEGMENT(e2)->v2)->x);
-    }
+  {
+    angle2 = atan2(GTS_POINT(GTS_SEGMENT(e2)->v1)->y - GTS_POINT(GTS_SEGMENT(e2)->v2)->y,
+		   GTS_POINT(GTS_SEGMENT(e2)->v1)->x - GTS_POINT(GTS_SEGMENT(e2)->v2)->x);
+  }
   else
-    {
-      angle2 = atan2(GTS_POINT(GTS_SEGMENT(e2)->v2)->y - GTS_POINT(GTS_SEGMENT(e2)->v1)->y,
-                     GTS_POINT(GTS_SEGMENT(e2)->v2)->x - GTS_POINT(GTS_SEGMENT(e2)->v1)->x);
-    }
+  {
+    angle2 = atan2(GTS_POINT(GTS_SEGMENT(e2)->v2)->y - GTS_POINT(GTS_SEGMENT(e2)->v1)->y,
+		   GTS_POINT(GTS_SEGMENT(e2)->v2)->x - GTS_POINT(GTS_SEGMENT(e2)->v1)->x);
+  }
 
   float bisector = fabs(angle1 - angle2);
   if(bisector > M_PI)
-    {
-      bisector = (M_PI * 2) - bisector;
-    }
+  {
+    bisector = (M_PI * 2) - bisector;
+  }
   bisector /= 2.;
 
   GtsPoint* p1 = GTS_POINT(GTS_SEGMENT(e1)->v1);
@@ -194,31 +197,32 @@ void Pathfinder::find_bisector(GtsVertex* current_vertex, std::map<GtsVertex*, G
   float v_y = GTS_POINT(current_vertex)->y + length * sin(alpha);
 
   if(v_y > ((p2->y - p1->y) / (p2->x - p1->x)) * (v_x - p1->x) + p1->y)
+  {
+    if(GTS_POINT(opposite_v1)->y > ((p2->y - p1->y) / (p2->x - p1->x)) * (GTS_POINT(opposite_v1)->x - p1->x) + p1->y)
     {
-      if(GTS_POINT(opposite_v1)->y > ((p2->y - p1->y) / (p2->x - p1->x)) * (GTS_POINT(opposite_v1)->x - p1->x) + p1->y)
-        {
-          alpha = angle2  + bisector;
-          v_x = GTS_POINT(current_vertex)->x + length * cos(alpha);
-          v_y = GTS_POINT(current_vertex)->y + length * sin(alpha);
-        }
+      alpha = angle2  + bisector;
+      v_x = GTS_POINT(current_vertex)->x + length * cos(alpha);
+      v_y = GTS_POINT(current_vertex)->y + length * sin(alpha);
     }
+  }
   else
+  {
+    if(GTS_POINT(opposite_v1)->y <= ((p2->y - p1->y) / (p2->x - p1->x)) * (GTS_POINT(opposite_v1)->x - p1->x) + p1->y)
     {
-      if(GTS_POINT(opposite_v1)->y <= ((p2->y - p1->y) / (p2->x - p1->x)) * (GTS_POINT(opposite_v1)->x - p1->x) + p1->y)
-        {
-          alpha = angle2  + bisector;
-          v_x = GTS_POINT(current_vertex)->x + length * cos(alpha);
-          v_y = GTS_POINT(current_vertex)->y + length * sin(alpha);
-        }
+      alpha = angle2  + bisector;
+      v_x = GTS_POINT(current_vertex)->x + length * cos(alpha);
+      v_y = GTS_POINT(current_vertex)->y + length * sin(alpha);
     }
-  map->insert(make_pair(current_vertex, gts_vertex_new(gts_vertex_class(), v_x, v_y, 0)));
+  }
+  map->insert(std::make_pair(current_vertex, gts_vertex_new(gts_vertex_class(), v_x, v_y, 0)));
 }
 
 /** Sets the target.
  * @param x the x-coordinate of the target relative to the robot
  * @param y the y-coordinate of the target relative to the robot
  */
-void Pathfinder::set_target(double x, double y)
+void
+Pathfinder::set_target(double x, double y)
 {
   gts_point_set(target_point, x, y, 0);
 }
@@ -227,13 +231,14 @@ void Pathfinder::set_target(double x, double y)
  * @param surface the surface for the GTS delaunay function
  * @param obstacles the obstacles around the robot within the scanned area
  */
-void Pathfinder::delaunay(GtsSurface * surface, std::vector< GtsObstacle *> obstacles)
+void
+Pathfinder::delaunay(GtsSurface * surface, std::vector< GtsObstacle *> obstacles)
 {
   for (guint i = 0; i < obstacles.size(); i++)
-    {
-      GtsVertex * ver = (GtsVertex *)obstacles[i];
-      gts_delaunay_add_vertex(surface, ver, NULL);
-    }
+  {
+    GtsVertex * ver = (GtsVertex *)obstacles[i];
+    gts_delaunay_add_vertex(surface, ver, NULL);
+  }
 
   gts_allow_floating_vertices = TRUE;
   gts_object_destroy(GTS_OBJECT(v0));
@@ -243,316 +248,317 @@ void Pathfinder::delaunay(GtsSurface * surface, std::vector< GtsObstacle *> obst
   gts_allow_floating_vertices = FALSE;
 
   if(surface != NULL && gts_surface_face_number(surface) > 0)
+  {
+    start_face = gts_point_locate (robot_point, surface, NULL);
+    GSList* boundary_list  =  gts_surface_boundary(surface);
+    GSList* list = boundary_list;
+
+    //the outer triangles may flicker because the gts_point_locate does not work
+    //accurate if the surface is concave
+    bool target_outside_triangulation = false;
+    if(gts_point_locate(target_point, surface, NULL) == NULL)
     {
-      start_face = gts_point_locate (robot_point, surface, NULL);
-      GSList* boundary_list  =  gts_surface_boundary(surface);
-      GSList* list = boundary_list;
+      //          printf("target outside\n");
+      target_outside_triangulation = true;
+    }
+    //      else
+    //        printf("target inside \n");
+    bool robot_outside_triangulation = false;
+    if(gts_point_locate(robot_point, surface, NULL) == NULL)
+    {
+      //          printf("robot outside\n");
+      robot_outside_triangulation = true;
+    }
+    //      else
+    //        printf("robot inside \n");
 
-      //the outer triangles may flicker because the gts_point_locate does not work
-      //accurate if the surface is concave
-      bool target_outside_triangulation = false;
-      if(gts_point_locate(target_point, surface, NULL) == NULL)
-        {
-          //          printf("target outside\n");
-          target_outside_triangulation = true;
-        }
-      //      else
-      //        printf("target inside \n");
-      bool robot_outside_triangulation = false;
-      if(gts_point_locate(robot_point, surface, NULL) == NULL)
-        {
-          //          printf("robot outside\n");
-          robot_outside_triangulation = true;
-        }
-      //      else
-      //        printf("robot inside \n");
+    //calculate the bisectors
+    std::map<GtsVertex*, GtsVertex*>* bisectors_map = new std::map<GtsVertex*, GtsVertex*>();
+    do //for each boundary edge
+    {
+      GtsVertex* current_vertex = NULL;
+      //angle bisection
+      if(bisectors_map->find(GTS_SEGMENT(list->data)->v1) == bisectors_map->end())
+      {
+	current_vertex = GTS_SEGMENT(list->data)->v1;
+	find_bisector(current_vertex, bisectors_map);
+      }
+      if(bisectors_map->find(GTS_SEGMENT(list->data)->v2) == bisectors_map->end())
+      {
+	current_vertex = GTS_SEGMENT(list->data)->v2;
+	find_bisector(current_vertex, bisectors_map);
+      }
+    }
+    while((list = list->next) != NULL);
 
-	  //calculate the bisectors
-      std::map<GtsVertex*, GtsVertex*>* bisectors_map = new std::map<GtsVertex*, GtsVertex*>();
-      do //for each boundary edge
-        {
-          GtsVertex* current_vertex = NULL;
-          //angle bisection
-          if(bisectors_map->find(GTS_SEGMENT(list->data)->v1) == bisectors_map->end())
-            {
-              current_vertex = GTS_SEGMENT(list->data)->v1;
-              find_bisector(current_vertex, bisectors_map);
-            }
-          if(bisectors_map->find(GTS_SEGMENT(list->data)->v2) == bisectors_map->end())
-            {
-              current_vertex = GTS_SEGMENT(list->data)->v2;
-              find_bisector(current_vertex, bisectors_map);
-            }
-        }
-      while((list = list->next) != NULL);
+    GtsPoint* p1 = NULL;
+    GtsPoint* p2 = NULL;
+    list = boundary_list;
 
-      GtsPoint* p1 = NULL;
-      GtsPoint* p2 = NULL;
-      list = boundary_list;
+    do //for each boundary edge
+    {
+      GtsVertex* center_v = gts_segment_midvertex(GTS_SEGMENT(list->data), gts_vertex_class());
+      GtsVertex* opposite_v =  gts_triangle_vertex_opposite(GTS_TRIANGLE(GTS_EDGE(list->data)->triangles->data), GTS_EDGE(list->data));
 
-      do //for each boundary edge
-        {
-          GtsVertex* center_v = gts_segment_midvertex(GTS_SEGMENT(list->data), gts_vertex_class());
-          GtsVertex* opposite_v =  gts_triangle_vertex_opposite(GTS_TRIANGLE(GTS_EDGE(list->data)->triangles->data), GTS_EDGE(list->data));
+      if(robot_outside_triangulation)
+      {
+	bool no_triangle = true;
+	GSList* polygon_list = boundary_list;
+	do
+	{
+	  GtsVertex* v1 = gts_vertex_new(gts_vertex_class(), robot_point->x, robot_point->y, robot_point->z);
+	  GtsVertex* v2 = gts_vertex_new(gts_vertex_class(), GTS_POINT(center_v)->x, GTS_POINT(center_v)->y, GTS_POINT(center_v)->z);
+	  GtsSegment* s = gts_segment_new(gts_segment_class(), v1, v2);
 
-          if(robot_outside_triangulation)
-            {
-              bool no_triangle = true;
-              GSList* polygon_list = boundary_list;
-              do
-                {
-                  GtsVertex* v1 = gts_vertex_new(gts_vertex_class(), robot_point->x, robot_point->y, robot_point->z);
-                  GtsVertex* v2 = gts_vertex_new(gts_vertex_class(), GTS_POINT(center_v)->x, GTS_POINT(center_v)->y, GTS_POINT(center_v)->z);
-                  GtsSegment* s = gts_segment_new(gts_segment_class(), v1, v2);
+	  if(polygon_list->data != list->data
+	     && GTS_IN == gts_segments_are_intersecting(s, GTS_SEGMENT(polygon_list->data)))
+	  {
+	    gts_object_destroy(GTS_OBJECT(s));
+	    no_triangle = false;
+	    break;
+	  }
+	  gts_object_destroy(GTS_OBJECT(s));
+	}
+	while((polygon_list = polygon_list->next) != NULL);
+	//if the direct line between the robot_point and center_v does not intersect the triangulation -> no new triangle is added
+	if(no_triangle)
+	{
+	  continue;
+	}
+      }
 
-                  if(polygon_list->data != list->data
-                      && GTS_IN == gts_segments_are_intersecting(s, GTS_SEGMENT(polygon_list->data)))
-                    {
-                      gts_object_destroy(GTS_OBJECT(s));
-                      no_triangle = false;
-                      break;
-                    }
-                  gts_object_destroy(GTS_OBJECT(s));
-                }
-              while((polygon_list = polygon_list->next) != NULL);
-              //if the direct line between the robot_point and center_v does not intersect the triangulation -> no new triangle is added
-              if(no_triangle)
-                {
-                  continue;
-                }
-            }
+      if(target_outside_triangulation)
+      {
+	bool no_triangle = true;
+	GSList* polygon_list = boundary_list;
+	do
+	{
+	  GtsVertex* v1 = gts_vertex_new(gts_vertex_class(), target_point->x, target_point->y, target_point->z);
+	  GtsVertex* v2 = gts_vertex_new(gts_vertex_class(), GTS_POINT(center_v)->x, GTS_POINT(center_v)->y, GTS_POINT(center_v)->z);
+	  GtsSegment* s = gts_segment_new(gts_segment_class(), v1, v2);
 
-          if(target_outside_triangulation)
-            {
-              bool no_triangle = true;
-              GSList* polygon_list = boundary_list;
-              do
-                {
-                  GtsVertex* v1 = gts_vertex_new(gts_vertex_class(), target_point->x, target_point->y, target_point->z);
-                  GtsVertex* v2 = gts_vertex_new(gts_vertex_class(), GTS_POINT(center_v)->x, GTS_POINT(center_v)->y, GTS_POINT(center_v)->z);
-                  GtsSegment* s = gts_segment_new(gts_segment_class(), v1, v2);
+	  if(polygon_list->data != list->data
+	     && GTS_IN == gts_segments_are_intersecting(s, GTS_SEGMENT(polygon_list->data)))
+	  {
+	    gts_object_destroy(GTS_OBJECT(s));
+	    no_triangle = false;
+	    break;
+	  }
+	  gts_object_destroy(GTS_OBJECT(s));
+	}
+	while((polygon_list = polygon_list->next) != NULL);
+	//if the direct line between the target_point and center_v does not intersect the triangulation -> no new triangle is added
+	if(no_triangle)
+	{
+	  continue;
+	}
+      }
 
-                  if(polygon_list->data != list->data
-                      && GTS_IN == gts_segments_are_intersecting(s, GTS_SEGMENT(polygon_list->data)))
-                    {
-                      gts_object_destroy(GTS_OBJECT(s));
-                      no_triangle = false;
-                      break;
-                    }
-                  gts_object_destroy(GTS_OBJECT(s));
-                }
-              while((polygon_list = polygon_list->next) != NULL);
-              //if the direct line between the target_point and center_v does not intersect the triangulation -> no new triangle is added
-              if(no_triangle)
-                {
-                  continue;
-                }
-            }
+      //add a new triangle
 
-          //add a new triangle
+      p1 = GTS_POINT(GTS_SEGMENT(list->data)->v1);
+      p2 = GTS_POINT(GTS_SEGMENT(list->data)->v2);
+      float v_x = 0;
+      float v_y = 0;
+      int sign = 0;
+      float length = robot_width + (2 * minimum_distance) + std::max(GTS_OBSTACLE(p1)->width, GTS_OBSTACLE(p2)->width);
+      float direction = atan2((p2->y - p1->y), (p2->x - p1->x));
 
-          p1 = GTS_POINT(GTS_SEGMENT(list->data)->v1);
-          p2 = GTS_POINT(GTS_SEGMENT(list->data)->v2);
-          float v_x = 0;
-          float v_y = 0;
-          int sign = 0;
-          float length = robot_width + (2 * minimum_distance) + max(GTS_OBSTACLE(p1)->width, GTS_OBSTACLE(p2)->width);
-          float direction = atan2((p2->y - p1->y), (p2->x - p1->x));
+      //turn the vector and check whether it's on the right side, if not turn the other way round
+      //Is it possible that p2->x - p1->x == 0?
+      if(GTS_POINT(opposite_v)->y < ((p2->y - p1->y) / (p2->x - p1->x)) * (GTS_POINT(opposite_v)->x - p1->x) + p1->y)
+      {
+	v_x = GTS_POINT(center_v)->x + length * cos(direction + M_PI / 2.);
+	v_y = GTS_POINT(center_v)->y + length * sin(direction + M_PI / 2.);
+	sign = 1;
 
-          //turn the vector and check whether it's on the right side, if not turn the other way round
-          //Is it possible that p2->x - p1->x == 0?
-          if(GTS_POINT(opposite_v)->y < ((p2->y - p1->y) / (p2->x - p1->x)) * (GTS_POINT(opposite_v)->x - p1->x) + p1->y)
-            {
-              v_x = GTS_POINT(center_v)->x + length * cos(direction + M_PI / 2.);
-              v_y = GTS_POINT(center_v)->y + length * sin(direction + M_PI / 2.);
-              sign = 1;
+	if(v_y < ((p2->y - p1->y) / (p2->x - p1->x)) * (v_x - p1->x) + p1->y)
+	{
+	  v_x = GTS_POINT(center_v)->x + length * cos(direction - M_PI / 2.);
+	  v_y = GTS_POINT(center_v)->y + length * sin(direction - M_PI / 2.);
+	  sign = -1;
+	}
+      }
+      else
+      {
+	v_x = GTS_POINT(center_v)->x + length * cos(direction - M_PI / 2.);
+	v_y = GTS_POINT(center_v)->y + length * sin(direction - M_PI / 2.);
+	sign = -1;
 
-              if(v_y < ((p2->y - p1->y) / (p2->x - p1->x)) * (v_x - p1->x) + p1->y)
-                {
-                  v_x = GTS_POINT(center_v)->x + length * cos(direction - M_PI / 2.);
-                  v_y = GTS_POINT(center_v)->y + length * sin(direction - M_PI / 2.);
-                  sign = -1;
-                }
-            }
-          else
-            {
-              v_x = GTS_POINT(center_v)->x + length * cos(direction - M_PI / 2.);
-              v_y = GTS_POINT(center_v)->y + length * sin(direction - M_PI / 2.);
-              sign = -1;
+	if(v_y >= ((p2->y - p1->y) / (p2->x - p1->x)) * (v_x - p1->x) + p1->y)
+	{
+	  v_x = GTS_POINT(center_v)->x + length * cos(direction + M_PI / 2.);
+	  v_y = GTS_POINT(center_v)->y + length * sin(direction + M_PI / 2.);
+	  sign = 1;
+	}
+      }
 
-              if(v_y >= ((p2->y - p1->y) / (p2->x - p1->x)) * (v_x - p1->x) + p1->y)
-                {
-                  v_x = GTS_POINT(center_v)->x + length * cos(direction + M_PI / 2.);
-                  v_y = GTS_POINT(center_v)->y + length * sin(direction + M_PI / 2.);
-                  sign = 1;
-                }
-            }
-
-          //this was a try to check if the surface is at the current edge cuncave
-          //because then the auxiliary edges left and right perpendicular to the edge are crossed
-          //and the bisector is wrong
-          //but there is a bug somewhere
-          //          bool concave1 = false;
-          //          bool concave2 = false;
-          //          GtsEdge* e1 = NULL;
-          //          GtsEdge* e2 = NULL;
-          //
-          //          GSList* edge_list = GTS_VERTEX(p1)->segments;
-          //          do
-          //            {
-          //              if(gts_edge_is_boundary(GTS_EDGE(edge_list->data), surface)
-          //                  && edge_list->data != list->data)
-          //                {
-          //                  e1 = GTS_EDGE(edge_list->data);
-          //                  break;
-          //                }
-          //            }
-          //          while((edge_list = edge_list->next) != NULL);
-          //          edge_list = GTS_VERTEX(p2)->segments;
-          //          do
-          //            {
-          //              if(gts_edge_is_boundary(GTS_EDGE(edge_list->data), surface)
-          //                  && edge_list->data != list->data)
-          //                {
-          //                  e2 = GTS_EDGE(edge_list->data);
-          //                  break;
-          //                }
-          //            }
-          //          while((edge_list = edge_list->next) != NULL);
-          //          GtsVertex* concave_v1 = NULL;
-          //          GtsVertex* concave_v2 = NULL;
-          //          if(GTS_SEGMENT(e1)->v1 != GTS_VERTEX(p1))
-          //            {
-          //              concave_v1 = GTS_SEGMENT(e1)->v1;
-          //            }
-          //          else
-          //            {
-          //              concave_v1 = GTS_SEGMENT(e1)->v2;
-          //            }
-          //          if(GTS_SEGMENT(e2)->v1 != GTS_VERTEX(p2))
-          //            {
-          //              concave_v2 = GTS_SEGMENT(e2)->v1;
-          //            }
-          //          else
-          //            {
-          //              concave_v2 = GTS_SEGMENT(e2)->v2;
-          //            }
-          //
-          //          if(sign == 1 && GTS_POINT(concave_v1)->y >= ((p2->y - p1->y) / (p2->x - p1->x)) * (GTS_POINT(concave_v1)->x - p1->x) + p1->y)
-          //            {
-          //              concave1 = true;
-          //            }
-          //
-          //          if(sign == 1 && GTS_POINT(concave_v2)->y >= ((p2->y - p1->y) / (p2->x - p1->x)) * (GTS_POINT(concave_v2)->x - p1->x) + p1->y)
-          //            {
-          //              concave2 = true;
-          //            }
+      //this was a try to check if the surface is at the current edge cuncave
+      //because then the auxiliary edges left and right perpendicular to the edge are crossed
+      //and the bisector is wrong
+      //but there is a bug somewhere
+      //          bool concave1 = false;
+      //          bool concave2 = false;
+      //          GtsEdge* e1 = NULL;
+      //          GtsEdge* e2 = NULL;
+      //
+      //          GSList* edge_list = GTS_VERTEX(p1)->segments;
+      //          do
+      //            {
+      //              if(gts_edge_is_boundary(GTS_EDGE(edge_list->data), surface)
+      //                  && edge_list->data != list->data)
+      //                {
+      //                  e1 = GTS_EDGE(edge_list->data);
+      //                  break;
+      //                }
+      //            }
+      //          while((edge_list = edge_list->next) != NULL);
+      //          edge_list = GTS_VERTEX(p2)->segments;
+      //          do
+      //            {
+      //              if(gts_edge_is_boundary(GTS_EDGE(edge_list->data), surface)
+      //                  && edge_list->data != list->data)
+      //                {
+      //                  e2 = GTS_EDGE(edge_list->data);
+      //                  break;
+      //                }
+      //            }
+      //          while((edge_list = edge_list->next) != NULL);
+      //          GtsVertex* concave_v1 = NULL;
+      //          GtsVertex* concave_v2 = NULL;
+      //          if(GTS_SEGMENT(e1)->v1 != GTS_VERTEX(p1))
+      //            {
+      //              concave_v1 = GTS_SEGMENT(e1)->v1;
+      //            }
+      //          else
+      //            {
+      //              concave_v1 = GTS_SEGMENT(e1)->v2;
+      //            }
+      //          if(GTS_SEGMENT(e2)->v1 != GTS_VERTEX(p2))
+      //            {
+      //              concave_v2 = GTS_SEGMENT(e2)->v1;
+      //            }
+      //          else
+      //            {
+      //              concave_v2 = GTS_SEGMENT(e2)->v2;
+      //            }
+      //
+      //          if(sign == 1 && GTS_POINT(concave_v1)->y >= ((p2->y - p1->y) / (p2->x - p1->x)) * (GTS_POINT(concave_v1)->x - p1->x) + p1->y)
+      //            {
+      //              concave1 = true;
+      //            }
+      //
+      //          if(sign == 1 && GTS_POINT(concave_v2)->y >= ((p2->y - p1->y) / (p2->x - p1->x)) * (GTS_POINT(concave_v2)->x - p1->x) + p1->y)
+      //            {
+      //              concave2 = true;
+      //            }
 
 
-          float v1_x = p1->x + length * cos(direction + sign * M_PI / 2.);
-          float v1_y = p1->y + length * sin(direction + sign * M_PI / 2.);
-          float v2_x = p2->x + length * cos(direction + sign * M_PI / 2.);
-          float v2_y = p2->y + length * sin(direction + sign * M_PI / 2.);
+      float v1_x = p1->x + length * cos(direction + sign * M_PI / 2.);
+      float v1_y = p1->y + length * sin(direction + sign * M_PI / 2.);
+      float v2_x = p2->x + length * cos(direction + sign * M_PI / 2.);
+      float v2_y = p2->y + length * sin(direction + sign * M_PI / 2.);
 
-          //the auxiliary edges left and right perpendicular to the edge
-          GtsVertex* auxiliary_vertex1 = gts_vertex_new(gts_vertex_class(), v1_x, v1_y, 0);
-          GtsVertex* auxiliary_vertex2 = gts_vertex_new(gts_vertex_class(), v2_x, v2_y, 0);
-          GtsEdge* auxiliary_edge1 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p1), auxiliary_vertex1);
-          GtsEdge* auxiliary_edge2 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p2), auxiliary_vertex2);
+      //the auxiliary edges left and right perpendicular to the edge
+      GtsVertex* auxiliary_vertex1 = gts_vertex_new(gts_vertex_class(), v1_x, v1_y, 0);
+      GtsVertex* auxiliary_vertex2 = gts_vertex_new(gts_vertex_class(), v2_x, v2_y, 0);
+      GtsEdge* auxiliary_edge1 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p1), auxiliary_vertex1);
+      GtsEdge* auxiliary_edge2 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p2), auxiliary_vertex2);
 
-          //the auxiliary triangle
-          GtsVertex* auxiliary_triangle_vertex = gts_vertex_new(gts_vertex_class(), v_x, v_y, 0);
-          GtsEdge* triangle_e1 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p1), auxiliary_triangle_vertex);
-          GtsEdge* triangle_e2 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p2), auxiliary_triangle_vertex);
+      //the auxiliary triangle
+      GtsVertex* auxiliary_triangle_vertex = gts_vertex_new(gts_vertex_class(), v_x, v_y, 0);
+      GtsEdge* triangle_e1 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p1), auxiliary_triangle_vertex);
+      GtsEdge* triangle_e2 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p2), auxiliary_triangle_vertex);
 
-          //the outer connecting edges between the auxiliary triangle and the auxiliary vertexes
-          GtsEdge* auxiliary_edge_1 = gts_edge_new(gts_edge_class(), auxiliary_vertex1, auxiliary_triangle_vertex);
-          GtsEdge* auxiliary_edge_2 = gts_edge_new(gts_edge_class(), auxiliary_vertex2, auxiliary_triangle_vertex);
-          GtsFace* face = NULL;
+      //the outer connecting edges between the auxiliary triangle and the auxiliary vertexes
+      GtsEdge* auxiliary_edge_1 = gts_edge_new(gts_edge_class(), auxiliary_vertex1, auxiliary_triangle_vertex);
+      GtsEdge* auxiliary_edge_2 = gts_edge_new(gts_edge_class(), auxiliary_vertex2, auxiliary_triangle_vertex);
+      GtsFace* face = NULL;
 
-          face = gts_face_new(gts_face_class(), GTS_EDGE(list->data), triangle_e1, triangle_e2);
-          if(gts_triangle_orientation(GTS_TRIANGLE(face)) < 0)
-            {
-              gts_triangle_revert(GTS_TRIANGLE(face));
-            }
-          gts_surface_add_face(surface, face);
-          face = gts_face_new(gts_face_class(), auxiliary_edge_1, triangle_e1, auxiliary_edge1);
-          if(gts_triangle_orientation(GTS_TRIANGLE(face)) < 0)
-            {
-              gts_triangle_revert(GTS_TRIANGLE(face));
-            }
-          gts_surface_add_face(surface, face);
-          face = gts_face_new(gts_face_class(), auxiliary_edge_2, triangle_e2, auxiliary_edge2);
-          if(gts_triangle_orientation(GTS_TRIANGLE(face)) < 0)
-            {
-              gts_triangle_revert(GTS_TRIANGLE(face));
-            }
-          gts_surface_add_face(surface, face);
+      face = gts_face_new(gts_face_class(), GTS_EDGE(list->data), triangle_e1, triangle_e2);
+      if(gts_triangle_orientation(GTS_TRIANGLE(face)) < 0)
+      {
+	gts_triangle_revert(GTS_TRIANGLE(face));
+      }
+      gts_surface_add_face(surface, face);
+      face = gts_face_new(gts_face_class(), auxiliary_edge_1, triangle_e1, auxiliary_edge1);
+      if(gts_triangle_orientation(GTS_TRIANGLE(face)) < 0)
+      {
+	gts_triangle_revert(GTS_TRIANGLE(face));
+      }
+      gts_surface_add_face(surface, face);
+      face = gts_face_new(gts_face_class(), auxiliary_edge_2, triangle_e2, auxiliary_edge2);
+      if(gts_triangle_orientation(GTS_TRIANGLE(face)) < 0)
+      {
+	gts_triangle_revert(GTS_TRIANGLE(face));
+      }
+      gts_surface_add_face(surface, face);
 
-          //if there are bisection vertexes for v1 or v2, then add new faces to the surface by using this vertexes
-          std::map<GtsVertex*, GtsVertex*>::iterator iterator;
-          if((iterator = bisectors_map->find(GTS_SEGMENT(list->data)->v1)) != bisectors_map->end())
-            {
-              GtsEdge* e1 = auxiliary_edge1;
-              GtsEdge* e2 = NULL;
-              GSList* segments_list = iterator->second->segments;
-              if(segments_list != NULL)
-                {
-                  do
-                    {
-                      e2 = GTS_EDGE((GtsSegment*)segments_list->data);
-                      segments_list = segments_list->next;
-                    }
-                  while(!gts_segment_connect(GTS_SEGMENT(e2), iterator->second, GTS_VERTEX(p1)));
-                }
-              else
-                {
-                  e2 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p1), iterator->second);
-                }
-              GtsEdge* e3 = gts_edge_new(gts_edge_class(), auxiliary_vertex1, iterator->second);
-              face = gts_face_new(gts_face_class(), e1, e2, e3);
-              if(gts_triangle_orientation(GTS_TRIANGLE(face)) < 0)
-                {//avoids holes within the surface
-                  gts_triangle_revert(GTS_TRIANGLE(face));
-                }
-              gts_surface_add_face(surface, face);
-            }
+      //if there are bisection vertexes for v1 or v2, then add new faces to the surface by using this vertexes
+      std::map<GtsVertex*, GtsVertex*>::iterator iterator;
+      if((iterator = bisectors_map->find(GTS_SEGMENT(list->data)->v1)) != bisectors_map->end())
+      {
+	GtsEdge* e1 = auxiliary_edge1;
+	GtsEdge* e2 = NULL;
+	GSList* segments_list = iterator->second->segments;
+	if(segments_list != NULL)
+	{
+	  do
+	  {
+	    e2 = GTS_EDGE((GtsSegment*)segments_list->data);
+	    segments_list = segments_list->next;
+	  }
+	  while(!gts_segment_connect(GTS_SEGMENT(e2), iterator->second, GTS_VERTEX(p1)));
+	}
+	else
+	{
+	  e2 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p1), iterator->second);
+	}
+	GtsEdge* e3 = gts_edge_new(gts_edge_class(), auxiliary_vertex1, iterator->second);
+	face = gts_face_new(gts_face_class(), e1, e2, e3);
+	if(gts_triangle_orientation(GTS_TRIANGLE(face)) < 0)
+	{//avoids holes within the surface
+	  gts_triangle_revert(GTS_TRIANGLE(face));
+	}
+	gts_surface_add_face(surface, face);
+      }
 
-          if((iterator = bisectors_map->find(GTS_SEGMENT(list->data)->v2)) != bisectors_map->end())
-            {
-              GtsEdge* e1 = auxiliary_edge2;
-              GtsEdge* e2 = NULL;
-              GSList* segments_list = iterator->second->segments;
-              if(segments_list != NULL)
-                {
-                  do
-                    {
-                      e2 = GTS_EDGE((GtsSegment*)segments_list->data);
-                      segments_list = segments_list->next;
-                    }
-                  while(!gts_segment_connect(GTS_SEGMENT(e2), iterator->second, GTS_VERTEX(p2)));
-                }
-              else
-                {
-                  e2 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p2), iterator->second);
-                }
-              GtsEdge* e3 = gts_edge_new(gts_edge_class(), auxiliary_vertex2, iterator->second);
-              face = gts_face_new(gts_face_class(), e1, e2, e3);
-              if(gts_triangle_orientation(GTS_TRIANGLE(face)) < 0)
-                {//avoids holes within the surface
-                  gts_triangle_revert(GTS_TRIANGLE(face));
-                }
-              gts_surface_add_face(surface, face);
-            }
-        }
-      while((list = list->next) != NULL);
-    } // if(surface != NULL && gts_surface_face_number(surface) > 0)
+      if((iterator = bisectors_map->find(GTS_SEGMENT(list->data)->v2)) != bisectors_map->end())
+      {
+	GtsEdge* e1 = auxiliary_edge2;
+	GtsEdge* e2 = NULL;
+	GSList* segments_list = iterator->second->segments;
+	if(segments_list != NULL)
+	{
+	  do
+	  {
+	    e2 = GTS_EDGE((GtsSegment*)segments_list->data);
+	    segments_list = segments_list->next;
+	  }
+	  while(!gts_segment_connect(GTS_SEGMENT(e2), iterator->second, GTS_VERTEX(p2)));
+	}
+	else
+	{
+	  e2 = gts_edge_new(gts_edge_class(), GTS_VERTEX(p2), iterator->second);
+	}
+	GtsEdge* e3 = gts_edge_new(gts_edge_class(), auxiliary_vertex2, iterator->second);
+	face = gts_face_new(gts_face_class(), e1, e2, e3);
+	if(gts_triangle_orientation(GTS_TRIANGLE(face)) < 0)
+	{//avoids holes within the surface
+	  gts_triangle_revert(GTS_TRIANGLE(face));
+	}
+	gts_surface_add_face(surface, face);
+      }
+    }
+    while((list = list->next) != NULL);
+  } // if(surface != NULL && gts_surface_face_number(surface) > 0)
 }
 
 /** A kind of sign funcion.
  * @param x the funtions
  */
-double Pathfinder::p_sgn(double x)
+double
+Pathfinder::p_sgn(double x)
 {
   if(x < 0)
     return -1;
@@ -575,11 +581,12 @@ double Pathfinder::p_sgn(double x)
  * @param vertex4_x x-coordinate of one point of the rectangle
  * @param vertex4_y y-coordinate of one point of the rectangle
  */
-bool Pathfinder::is_in_rectangle(double point_x, double point_y,
-                                 double vertex1_x, double vertex1_y,
-                                 double vertex2_x, double vertex2_y,
-                                 double vertex3_x, double vertex3_y,
-                                 double vertex4_x, double vertex4_y)
+bool
+Pathfinder::is_in_rectangle(double point_x, double point_y,
+			    double vertex1_x, double vertex1_y,
+			    double vertex2_x, double vertex2_y,
+			    double vertex3_x, double vertex3_y,
+			    double vertex4_x, double vertex4_y)
 {
   double determinant1 = vertex1_x*vertex2_y - vertex1_y*vertex2_x - vertex1_x*point_y + vertex1_y*point_x + vertex2_x*point_y - vertex2_y*point_x;
   double determinant2 = vertex2_x*vertex3_y - vertex2_y*vertex3_x - vertex2_x*point_y + vertex2_y*point_x + vertex3_x*point_y - vertex3_y*point_x;
@@ -587,7 +594,7 @@ bool Pathfinder::is_in_rectangle(double point_x, double point_y,
   double determinant4 = vertex4_x*vertex1_y - vertex4_y*vertex1_x - vertex4_x*point_y + vertex4_y*point_x + vertex1_x*point_y - vertex1_y*point_x;
 
   return (determinant1 < 0 && determinant2 < 0  && determinant3 < 0 && determinant4 < 0)
-         || (determinant1 >= 0 && determinant2 >= 0  && determinant3 >= 0 && determinant4 >= 0);
+    || (determinant1 >= 0 && determinant2 >= 0  && determinant3 >= 0 && determinant4 >= 0);
 }
 
 /**Tests if the straight way is free.
@@ -598,7 +605,8 @@ bool Pathfinder::is_in_rectangle(double point_x, double point_y,
  * @return true, if the robot would not hit any obstacle on the straight way to the target,
  *                              false otherwise
  */
-bool Pathfinder::test_straight_ahead()
+bool
+Pathfinder::test_straight_ahead()
 {
   /*     ____________ ..start_base(width of the robot)
    *     |.......S.........|..start(robot)
@@ -697,43 +705,43 @@ bool Pathfinder::test_straight_ahead()
 
 
   for (guint i = 0; i < map.size(); i++)
-    {
-      Obstacle o = map[i];
-      GtsObstacle * obstacle = gts_obstacle_new(gts_obstacle_class(), o.x, o.y, 0, o.width);
+  {
+    Obstacle o = map[i];
+    GtsObstacle * obstacle = gts_obstacle_new(gts_obstacle_class(), o.x, o.y, 0, o.width);
 
-      obstacle_x = GTS_POINT(obstacle)->x;
-      obstacle_y = GTS_POINT(obstacle)->y;
+    obstacle_x = GTS_POINT(obstacle)->x;
+    obstacle_y = GTS_POINT(obstacle)->y;
 
-      obstacle_width = obstacle->width;
+    obstacle_width = obstacle->width;
 
-      gts_object_destroy(GTS_OBJECT(obstacle));
+    gts_object_destroy(GTS_OBJECT(obstacle));
 
-      obstacle_base1_x = p_sgn(tan) * sin(tan) * (obstacle_width / 2.) +  obstacle_x;
-      obstacle_base1_y = p_sgn(tan) * cos(tan) * (obstacle_width / 2.) +  obstacle_y;
+    obstacle_base1_x = p_sgn(tan) * sin(tan) * (obstacle_width / 2.) +  obstacle_x;
+    obstacle_base1_y = p_sgn(tan) * cos(tan) * (obstacle_width / 2.) +  obstacle_y;
 
-      obstacle_base2_x = p_sgn(tan) * -sin(tan) * (obstacle_width / 2.) +  obstacle_x;
-      obstacle_base2_y = p_sgn(tan) * -cos(tan) * (obstacle_width / 2.) +  obstacle_y;
+    obstacle_base2_x = p_sgn(tan) * -sin(tan) * (obstacle_width / 2.) +  obstacle_x;
+    obstacle_base2_y = p_sgn(tan) * -cos(tan) * (obstacle_width / 2.) +  obstacle_y;
 
-      //it checks only if the left or the right or the middle lies within the recangle
-      //this requires that the obstace is never more than twice as width as the robot
-      test |= is_in_rectangle(obstacle_base1_x, obstacle_base1_y,
-                              start_base1_x, start_base1_y,
-                              target_base1_x, target_base1_y,
-                              target_base2_x, target_base2_y,
-                              start_base2_x, start_base2_y);
-      test |= is_in_rectangle(obstacle_base2_x, obstacle_base2_y,
-                              start_base1_x, start_base1_y,
-                              target_base1_x, target_base1_y,
-                              target_base2_x, target_base2_y,
-                              start_base2_x, start_base2_y);
-      test |= is_in_rectangle(obstacle_x, obstacle_y,
-                              start_base1_x, start_base1_y,
-                              target_base1_x, target_base1_y,
-                              target_base2_x, target_base2_y,
-                              start_base2_x, start_base2_y);
-      if(test)
-        break;
-    }
+    //it checks only if the left or the right or the middle lies within the recangle
+    //this requires that the obstace is never more than twice as width as the robot
+    test |= is_in_rectangle(obstacle_base1_x, obstacle_base1_y,
+			    start_base1_x, start_base1_y,
+			    target_base1_x, target_base1_y,
+			    target_base2_x, target_base2_y,
+			    start_base2_x, start_base2_y);
+    test |= is_in_rectangle(obstacle_base2_x, obstacle_base2_y,
+			    start_base1_x, start_base1_y,
+			    target_base1_x, target_base1_y,
+			    target_base2_x, target_base2_y,
+			    start_base2_x, start_base2_y);
+    test |= is_in_rectangle(obstacle_x, obstacle_y,
+			    start_base1_x, start_base1_y,
+			    target_base1_x, target_base1_y,
+			    target_base2_x, target_base2_y,
+			    start_base2_x, start_base2_y);
+    if(test)
+      break;
+  }
   return !test;
 }
 
@@ -742,7 +750,8 @@ bool Pathfinder::test_straight_ahead()
  * @param vertex the pushed vertex
  * @param fifo the GTS fifo with the vertexes
  */
-void Pathfinder::get_vertexes(GtsVertex *vertex, GtsFifo * fifo)
+void
+Pathfinder::get_vertexes(GtsVertex *vertex, GtsFifo * fifo)
 {
   gts_fifo_push(fifo, GTS_OBJECT(vertex));
 }
@@ -750,28 +759,30 @@ void Pathfinder::get_vertexes(GtsVertex *vertex, GtsFifo * fifo)
 /** Returns the nearest obstacle.
  * @return the nearest obstacle
  */
-Obstacle* Pathfinder::get_nearest_obstacle()
+Obstacle *
+Pathfinder::get_nearest_obstacle()
 {
   double length = 1000000;
   Obstacle * obstacle = NULL;
 
   for(unsigned int i = 0; i < map.size(); i++)
+  {
+    double distance = sqrt(((map[i].x - robot_point->x) * (map[i].x - robot_point->x))
+			   + ((map[i].y - robot_point->y) * (map[i].y - robot_point->y))) - map[i].width/2. - robot_width/2.;
+    if(distance < length)
     {
-      double distance = sqrt(((map[i].x - robot_point->x) * (map[i].x - robot_point->x))
-                             + ((map[i].y - robot_point->y) * (map[i].y - robot_point->y))) - map[i].width/2. - robot_width/2.;
-      if(distance < length)
-        {
-          length = distance;
-          obstacle = &map[i];
-        }
+      length = distance;
+      obstacle = &map[i];
     }
+  }
   return obstacle;
 }
 
 /** Sets the recognized obstacles to the pathfinder.
  * @param obstacles a vector of obstacles
  */
-void Pathfinder::set_obstacles(std::vector< Obstacle > obstacles)
+void
+Pathfinder::set_obstacles(std::vector< Obstacle > obstacles)
 {
   map = obstacles;
 }
@@ -779,7 +790,8 @@ void Pathfinder::set_obstacles(std::vector< Obstacle > obstacles)
 /** Adds an obstacle to the pathfinder.
  * @param obstacle an obstacle
  */
-void Pathfinder::add_obstacle(Obstacle obstacle)
+void
+Pathfinder::add_obstacle(Obstacle obstacle)
 {
   map.push_back(obstacle);
 }
@@ -787,21 +799,22 @@ void Pathfinder::add_obstacle(Obstacle obstacle)
 /** Regains the Obstacles from the map if every obstacle
  *   is destoyed by destoying the surface.
  */
-void Pathfinder::regain_obstacles()
+void
+Pathfinder::regain_obstacles()
 {
   this->obstacles.clear();
 
   //generate a vector of obstacles in the scanning_area
   for(unsigned int i = 0; i < map.size(); i++)
+  {
+    Obstacle o = map[i];
+    if(!out_of_area(o.x, o.y))
     {
-      Obstacle o = map[i];
-      if(!out_of_area(o.x, o.y))
-        {
-          GtsObstacle * obs = gts_obstacle_new(gts_obstacle_class(), o.x, o.y, 0, o.width);
+      GtsObstacle * obs = gts_obstacle_new(gts_obstacle_class(), o.x, o.y, 0, o.width);
 
-          this->obstacles.push_back(obs);
-        }
+      this->obstacles.push_back(obs);
     }
+  }
 }
 
 /** Checks if a point given by its coordinates is within the scan area.
@@ -809,7 +822,8 @@ void Pathfinder::regain_obstacles()
  * @param y the y-coordinate of the point
  * @return true if the point is within the scan area, false otherwise
  */
-bool Pathfinder::out_of_area(double x, double y)
+bool
+Pathfinder::out_of_area(double x, double y)
 {
   return (   x < -scanning_area_width  / 2 && x > scanning_area_width  / 2
              && y < -scanning_area_height / 2 && y > scanning_area_height / 2);
@@ -817,7 +831,8 @@ bool Pathfinder::out_of_area(double x, double y)
 
 /** Calculates the delaunay triangulation.
  */
-void Pathfinder::calculate_delaunay()
+void
+Pathfinder::calculate_delaunay()
 {
   gts_object_destroy(GTS_OBJECT(surface));
   init_surface();
@@ -828,7 +843,8 @@ void Pathfinder::calculate_delaunay()
 /** Returns the surface of the delaunay triangulation.
  * @return the surface of the delaunay triangulation
  */
-GtsSurface * Pathfinder::get_surface()
+GtsSurface *
+Pathfinder::get_surface()
 {
   return surface;
 }
@@ -836,7 +852,8 @@ GtsSurface * Pathfinder::get_surface()
 /** Returns the position of the robot.
  * @return the position of the robot as a GtsPoint
  */
-GtsPoint * Pathfinder::get_robot_point()
+GtsPoint *
+Pathfinder::get_robot_point()
 {
   return robot_point;
 }
@@ -844,7 +861,8 @@ GtsPoint * Pathfinder::get_robot_point()
 /** Returns the current target.
  * @return the target as GtsPoint
  */
-GtsPoint * Pathfinder::get_target_point()
+GtsPoint *
+Pathfinder::get_target_point()
 {
   return target_point;
 }
@@ -853,7 +871,8 @@ GtsPoint * Pathfinder::get_target_point()
 /** Returns the path.
  * @return a vector of the path points as GtsPoints
  */
-std::vector< GtsPoint * > Pathfinder::get_path()
+std::vector< GtsPoint * >
+Pathfinder::get_path()
 {
   std::vector< GtsPoint * > solution_path;
 
@@ -863,33 +882,33 @@ std::vector< GtsPoint * > Pathfinder::get_path()
   //if there is no obstacle on the way, then the robot can drive ahead
   //or there is no triangulation 
   if((surface != NULL && gts_surface_face_number(surface) == 0) || test_straight_ahead())
-    {
-      solution_path.push_back(gts_point_new(gts_point_class(), robot_point->x, robot_point->y, 0));
-      solution_path.push_back(gts_point_new(gts_point_class(), target_point->x, target_point->y, 0));
-    }
+  {
+    solution_path.push_back(gts_point_new(gts_point_class(), robot_point->x, robot_point->y, 0));
+    solution_path.push_back(gts_point_new(gts_point_class(), target_point->x, target_point->y, 0));
+  }
   else
+  {
+    AStar * astar = new AStar();
+    PathState * initialState = new PathState(surface, NULL,
+					     robot_point,
+					     start_face,  target_point, robot_point, 0, 0);
+    std::vector< AStarState * > solution = astar->solve( initialState );
+
+    for (unsigned int i = 0; i < solution.size(); i++ )
     {
-      AStar * astar = new AStar();
-      PathState * initialState = new PathState(surface, NULL,
-                                 robot_point,
-                                 start_face,  target_point, robot_point, 0, 0);
-      std::vector< AStarState * > solution = astar->solve( initialState );
-
-      for (unsigned int i = 0; i < solution.size(); i++ )
-        {
-          PathState * state = (PathState *)(solution[i]);
-          GtsPoint * p = state->getPoint();
-          solution_path.push_back(gts_point_new(gts_point_class(), p->x, p->y, 0));
-        }
-
-      for (unsigned int j = 0; j < solution.size(); j++ )
-        {
-          PathState * state = (PathState *)(solution[j]);
-          delete state;
-        }
-
-      solution_path.push_back(gts_point_new(gts_point_class(), target_point->x, target_point->y, 0));
-      delete astar;
+      PathState * state = (PathState *)(solution[i]);
+      GtsPoint * p = state->getPoint();
+      solution_path.push_back(gts_point_new(gts_point_class(), p->x, p->y, 0));
     }
+
+    for (unsigned int j = 0; j < solution.size(); j++ )
+    {
+      PathState * state = (PathState *)(solution[j]);
+      delete state;
+    }
+
+    solution_path.push_back(gts_point_new(gts_point_class(), target_point->x, target_point->y, 0));
+    delete astar;
+  }
   return solution_path;
 }

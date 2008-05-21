@@ -42,6 +42,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+using namespace fawkes;
+
 /** @class FawkesPluginManager mainapp/plugin_manager.h
  * Fawkes Plugin Manager.
  * This class provides a manager for the plugins used in fawkes. It can
@@ -111,7 +113,7 @@ FawkesPluginManager::set_hub(FawkesNetworkHub *hub)
  * all plugins is stored. Memory is allocated at this address and
  * has to be freed by the caller!
  */
-PluginListMessage *
+fawkes::PluginListMessage *
 FawkesPluginManager::list_avail()
 {
   DIR* plugin_dir;
@@ -139,7 +141,7 @@ FawkesPluginManager::list_avail()
   return m;
 }
 
-PluginListMessage *
+fawkes::PluginListMessage *
 FawkesPluginManager::list_loaded()
 {
   PluginListMessage *m = new PluginListMessage();

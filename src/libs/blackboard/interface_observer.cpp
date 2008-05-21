@@ -28,6 +28,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class BlackBoardInterfaceObserver <blackboard/interface_observer.h>
  * BlackBoard interface observer.
  * Derive this class if you want to be notified of specific BlackBoard 
@@ -165,3 +167,5 @@ BlackBoardInterfaceObserver::bbio_interface_destroy_types() throw()
 {
   return &__bbio_interface_destroy_types;
 }
+
+} // end namespace fawkes

@@ -49,7 +49,7 @@ class FuseLutListContent : public FuseMessageContent
   virtual void        serialize();
 
  private:
-  DynamicBuffer  *__list;
+  fawkes::DynamicBuffer  *__list;
   FUSE_lutlist_message_t __lutlist_msg;
 };
 

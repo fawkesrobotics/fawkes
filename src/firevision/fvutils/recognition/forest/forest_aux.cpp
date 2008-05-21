@@ -233,7 +233,7 @@ int find_min( double* entropies=0, int size=0){
   double finalEntropy = 2.0;
     
   if(size<0){
-    LibLogger::log_error("Auxillary.cpp","entropy array is empty"); 
+    fawkes::LibLogger::log_error("Auxillary.cpp","entropy array is empty"); 
     return 0;
   }
 
@@ -288,7 +288,7 @@ void calculate_integral_image(IplImage* image=0, int *integralImage=0)
   for(i=0;i<height-1;i++)
     for(j=0;j<width-1;j++)
       if(ii[i][j]<0) { 
-	LibLogger::log_error("UserDef.cpp","the integral image value is lesser than 0"); 
+	fawkes::LibLogger::log_error("UserDef.cpp","the integral image value is lesser than 0"); 
       }
       else
 	integralImage[i*width + j] = ii[i][j]; 

@@ -25,6 +25,8 @@
 
 #include <aspect/vision_master.h>
 
+namespace fawkes {
+
 /** @class VisionMasterAspect aspect/vision_master.h
  * Vision Master Aspect.
  *
@@ -40,7 +42,7 @@
 /** Constructor.
  * @param master vision master
  */
-VisionMasterAspect::VisionMasterAspect(VisionMaster *master)
+VisionMasterAspect::VisionMasterAspect(::VisionMaster *master)
 {
   this->master = master;
 }
@@ -55,8 +57,10 @@ VisionMasterAspect::~VisionMasterAspect()
 /** Get vision master.
  * @return vision master
  */
-VisionMaster *
+::VisionMaster *
 VisionMasterAspect::vision_master()
 {
   return master;
 }
+
+} // end namespace fawkes

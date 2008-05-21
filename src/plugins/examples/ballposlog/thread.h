@@ -31,14 +31,16 @@
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 
-class ObjectPositionInterface;
+namespace fawkes {
+  class ObjectPositionInterface;
+}
 
 class BallPosLogThread
-  : public Thread,
-    public BlockedTimingAspect,
-    public LoggingAspect,
-    public ConfigurableAspect,
-    public BlackBoardAspect
+  : public fawkes::Thread,
+    public fawkes::BlockedTimingAspect,
+    public fawkes::LoggingAspect,
+    public fawkes::ConfigurableAspect,
+    public fawkes::BlackBoardAspect
 {
  public:
   BallPosLogThread();
@@ -49,8 +51,8 @@ class BallPosLogThread
   virtual void finalize();
 
  private:
-  ObjectPositionInterface *wm_ball_interface;
-  Logger::LogLevel         log_level;
+  fawkes::ObjectPositionInterface *wm_ball_interface;
+  fawkes::Logger::LogLevel         log_level;
 };
 
 #endif

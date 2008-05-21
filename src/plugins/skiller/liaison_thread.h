@@ -36,26 +36,28 @@
 #include <blackboard/interface_observer.h>
 #include <blackboard/interface_listener.h>
 
-class Barrier;
-class ObjectPositionInterface;
-class NavigatorInterface;
-class SkillerInterface;
-class GameStateInterface;
+namespace fawkes {
+  class Barrier;
+  class ObjectPositionInterface;
+  class NavigatorInterface;
+  class SkillerInterface;
+  class GameStateInterface;
+}
 class SkillerExecutionThread;
 
 class SkillerLiaisonThread
-: public Thread,
-  public BlockedTimingAspect,
-  public LoggingAspect,
-  public ConfigurableAspect,
-  public BlackBoardAspect,
-  public ClockAspect,
-  public BlackBoardInterfaceObserver,
-  public BlackBoardInterfaceListener
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::ClockAspect,
+  public fawkes::BlackBoardInterfaceObserver,
+  public fawkes::BlackBoardInterfaceListener
 {
  friend class SkillerExecutionThread;
  public:
-  SkillerLiaisonThread(Barrier *liaison_exec_barrier);
+  SkillerLiaisonThread(fawkes::Barrier *liaison_exec_barrier);
   virtual ~SkillerLiaisonThread();
 
   virtual void init();
@@ -66,7 +68,7 @@ class SkillerLiaisonThread
   virtual void bb_interface_created(const char *type, const char *id) throw();
 
   /* BlackBoardInterfaceListener */
-  void bb_interface_reader_removed(Interface *interface, unsigned int instance_serial) throw();
+  void bb_interface_reader_removed(fawkes::Interface *interface, unsigned int instance_serial) throw();
 
   void set_execthread(SkillerExecutionThread *set);
 
@@ -74,19 +76,19 @@ class SkillerLiaisonThread
   void init_failure_cleanup();
 
  private:
-  Barrier *__liaison_exec_barrier;
+  fawkes::Barrier *__liaison_exec_barrier;
   SkillerExecutionThread *__exec_thread;
 
-  SkillerInterface *skiller;
-  //ObjectPositionInterface *wm_ball_w;
-  ObjectPositionInterface *wm_ball;
-  ObjectPositionInterface *wm_pose;
-  //ObjectPositionInterface *wm_pose_w;
-  NavigatorInterface      *navigator;
-  GameStateInterface      *gamestate;
+  fawkes::SkillerInterface *skiller;
+  //fawkes::ObjectPositionInterface *wm_ball_w;
+  fawkes::ObjectPositionInterface *wm_ball;
+  fawkes::ObjectPositionInterface *wm_pose;
+  //fawkes::ObjectPositionInterface *wm_pose_w;
+  fawkes::NavigatorInterface      *navigator;
+  fawkes::GameStateInterface      *gamestate;
 
-  LockList<ObjectPositionInterface *>  wm_obstacles;
-  LockList<ObjectPositionInterface *>::iterator  wm_obs_it;
+  fawkes::LockList<fawkes::ObjectPositionInterface *>  wm_obstacles;
+  fawkes::LockList<fawkes::ObjectPositionInterface *>::iterator  wm_obs_it;
 };
 
 

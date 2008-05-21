@@ -31,6 +31,8 @@
 #include <cstring>
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** @class SharedMemoryCamera <cams/shmem.h>
  * Shared memory camera.
  * Camera to retrieve images from a shared memory segment.

@@ -40,6 +40,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class LineClassifier <apps/omni_localizer/lineclassifier.h>
  * Find field lines in images.

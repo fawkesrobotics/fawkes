@@ -30,6 +30,8 @@
 
 #include <algorithm>
 
+using namespace fawkes;
+
 /** @class FvAqtVisionThreads <apps/base/aqt_vision_threads.h>
  * Aquisition-dependant threads.
  * This class is used for managing the vision threads that depend on a

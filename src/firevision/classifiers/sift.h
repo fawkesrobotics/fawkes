@@ -33,7 +33,9 @@
 #include <classifiers/classifier.h>
 
 //#ifdef FEAT_TIMETRACKER
-class TimeTracker;
+namespace fawkes {
+  class TimeTracker;
+}
 //#endif
 
 struct CvMemStorage;
@@ -70,7 +72,7 @@ class SiftClassifier : public Classifier
   int __flags;
 
   //#ifdef FEAT_TIMETRACKER
-  TimeTracker *__tt;
+  fawkes::TimeTracker *__tt;
   unsigned int __loop_count;
   unsigned int __ttc_objconv;
   unsigned int __ttc_objfeat;

@@ -30,7 +30,9 @@
 #include <cstring>
 #include <cstdlib>
 
-/** @class NavigatorInterface interfaces/navigator.h
+namespace fawkes {
+
+/** @class NavigatorInterface <interfaces/navigator.h>
  * NavigatorInterface Fawkes BlackBoard Interface.
  * 
       The navigator interface is used by the navigator to export information about
@@ -913,3 +915,5 @@ NavigatorInterface::message_valid(const Message *message) const
 EXPORT_INTERFACE(NavigatorInterface)
 /// @endcond
 
+
+} // end namespace fawkes

@@ -26,6 +26,9 @@
 #ifndef __CORE_THREADING_MUTEX_LOCKER_H_
 #define __CORE_THREADING_MUTEX_LOCKER_H_
 
+namespace fawkes {
+
+
 class Mutex;
 
 class MutexLocker
@@ -42,5 +45,7 @@ class MutexLocker
   Mutex *__mutex;
 };
 
+
+} // end namespace fawkes
 
 #endif

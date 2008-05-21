@@ -26,6 +26,8 @@
 
 #include <unistd.h>
 
+using namespace fawkes;
+
 /** @class ExampleFinalizeNettlerThread plugins/examples/basics/finalize_nettler_thread.h
  * Thread of example plugin.
  * This thread does nothing but nagging once on finalize. On the first call to

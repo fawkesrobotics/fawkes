@@ -66,9 +66,9 @@ ScanlineBeams::ScanlineBeams(unsigned int image_width, unsigned int image_height
 			     float angle_from, float angle_range,
                              unsigned int num_beams)
 {
-  if ( start_y < stop_y )  throw Exception("start_y < stop_y");
+  if ( start_y < stop_y )  throw fawkes::Exception("start_y < stop_y");
   if ( (stop_y > image_height) || (start_y > image_height) ) {
-    throw Exception("(stop_y > height) || (start_y > height)");
+    throw fawkes::Exception("(stop_y > height) || (start_y > height)");
   }
 
   this->start_x = start_x;

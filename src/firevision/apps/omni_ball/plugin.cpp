@@ -26,6 +26,7 @@
 #include <apps/omni_ball/plugin.h>
 #include <apps/omni_ball/pipeline_thread.h>
 
+using namespace fawkes;
 
 /** @class FvOmniBallPlugin <apps/omni_ball/plugin.h>
  * OmniVision Ball Plugin.

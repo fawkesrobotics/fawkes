@@ -25,6 +25,8 @@
 
 #include <netcomm/worldinfo/handler.h>
 
+namespace fawkes {
+
 /** @class WorldInfoHandler netcomm/worldinfo/handler.h
  * World info handler.
  * This interface defines methods called by WorldInfoTransceiver for incoming
@@ -117,3 +119,4 @@ WorldInfoHandler::~WorldInfoHandler()
 }
 
 
+} // end namespace fawkes

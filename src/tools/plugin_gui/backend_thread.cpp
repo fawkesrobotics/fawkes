@@ -35,6 +35,7 @@
 #include <cstring>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class PluginGuiBackendThread tools/plugin_gui/backend_thread.h
  * Backend-thread for the graphical plugin management tool.

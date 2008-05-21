@@ -35,6 +35,8 @@
 #include <netinet/in.h>
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class FuseTransferWidget tools/firestation/fuse_transfer_widget.h
  * This class implements the logic for a GUI that allows to transfer LUTs via FUSE.
  *

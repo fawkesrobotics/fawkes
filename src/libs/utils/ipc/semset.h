@@ -26,6 +26,9 @@
 #ifndef __UTILS_IPC_SEMSET_H_
 #define __UTILS_IPC_SEMSET_H_
 
+namespace fawkes {
+
+
 class SemaphoreSetData;
 
 class SemaphoreSet {
@@ -65,5 +68,8 @@ class SemaphoreSet {
   SemaphoreSetData *data;
 
 };
+
+
+} // end namespace fawkes
 
 #endif

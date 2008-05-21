@@ -28,6 +28,7 @@
 
 using namespace std;
 
+namespace fawkes {
 
 /** @class GeomObj <geometry/geom_obj.h>
  * Base class of all geometric objects (e.g. line, circle, cube, etc.).
@@ -288,3 +289,5 @@ GeomObj::_get_vectors_ref()
 
   return mVectorsRef;
 }
+
+} // end namespace fawkes

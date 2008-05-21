@@ -40,18 +40,21 @@ extern "C" {
 #include <regex.h>
 
 class SkillerLiaisonThread;
-class ComponentLogger;
-class Mutex;
+namespace fawkes {
+  class ComponentLogger;
+  class Mutex;
+}
 
 class SkillerExecutionThread
-: public Thread,
-  public BlockedTimingAspect,
-  public LoggingAspect,
-  public ConfigurableAspect,
-  public ClockAspect
+: public fawkes::Thread,
+  public fawkes::BlockedTimingAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::ClockAspect
 {
  public:
-  SkillerExecutionThread(Barrier *liaison_exec_barrier, SkillerLiaisonThread *slt);
+  SkillerExecutionThread(fawkes::Barrier *liaison_exec_barrier,
+			 SkillerLiaisonThread *slt);
   virtual ~SkillerExecutionThread();
 
   virtual void init();
@@ -72,14 +75,14 @@ class SkillerExecutionThread
   void publish_skill_status(std::string &curss);
 
  private: /* members */
-  Barrier *__liaison_exec_barrier;
+  fawkes::Barrier *__liaison_exec_barrier;
   SkillerLiaisonThread *__slt;
-  ComponentLogger *__clog;
+  fawkes::ComponentLogger *__clog;
 
   lua_State *__L;
   int __err;
   std::string __errmsg;
-  Mutex *__lua_mutex;
+  fawkes::Mutex *__lua_mutex;
 
   bool        __continuous_run;
   bool        __continuous_rst;

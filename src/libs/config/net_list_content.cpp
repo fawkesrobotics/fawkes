@@ -31,6 +31,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class ConfigListContent <config/net_list_content.h>
  * Config list content.
  * A complex dynamic message with an arbitrary number of config entities. Uses
@@ -233,3 +235,5 @@ ConfigListContent::next(size_t *size)
   void *tmp = config_list->next(size);
   return (config_list_entity_header_t *)tmp;
 }
+
+} // end namespace fawkes

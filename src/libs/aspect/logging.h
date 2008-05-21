@@ -28,15 +28,19 @@
 
 #include <utils/logging/logger.h>
 
+namespace fawkes {
+
 class LoggingAspect
 {
  public:
   virtual ~LoggingAspect();
 
-  void initLoggingAspect(Logger *logger);
+  void init_LoggingAspect(Logger *logger);
 
  protected:
   Logger *logger;
 };
+
+} // end namespace fawkes
 
 #endif

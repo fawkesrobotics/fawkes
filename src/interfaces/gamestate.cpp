@@ -30,7 +30,9 @@
 #include <cstring>
 #include <cstdlib>
 
-/** @class GameStateInterface interfaces/gamestate.h
+namespace fawkes {
+
+/** @class GameStateInterface <interfaces/gamestate.h>
  * GameStateInterface Fawkes BlackBoard Interface.
  * 
       This interface provides access to the current game state. It is closely related to
@@ -323,3 +325,5 @@ GameStateInterface::message_valid(const Message *message) const
 EXPORT_INTERFACE(GameStateInterface)
 /// @endcond
 
+
+} // end namespace fawkes

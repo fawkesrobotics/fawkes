@@ -33,6 +33,8 @@
 #include <core/exception.h>
 #include <core/utils/lock_map.h>
 
+namespace fawkes {
+
 class StreamSocket;
 class Mutex;
 class WaitCondition;
@@ -111,5 +113,6 @@ class FawkesNetworkClient
   unsigned int _id;
 };
 
+} // end namespace fawkes
 
 #endif

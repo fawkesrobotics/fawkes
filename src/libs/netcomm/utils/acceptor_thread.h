@@ -28,6 +28,8 @@
 
 #include <core/threading/thread.h>
 
+namespace fawkes {
+
 class StreamSocket;
 class NetworkIncomingConnectionHandler;
 
@@ -51,5 +53,7 @@ class NetworkAcceptorThread : public Thread
   NetworkIncomingConnectionHandler *__handler;
 
 };
+
+} // end namespace fawkes
 
 #endif

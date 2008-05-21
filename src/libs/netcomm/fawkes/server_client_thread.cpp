@@ -36,6 +36,8 @@
 
 #include <unistd.h>
 
+namespace fawkes {
+
 /** @class FawkesNetworkServerClientSendThread <netcomm/fawkes/server_client_thread.h>
  * Sending thread for a Fawkes client connected to the server.
  * This thread is spawned for each client connected to the server to handle the
@@ -292,3 +294,5 @@ FawkesNetworkServerClientThread::connection_died()
   _alive = false;
   _parent->wakeup();
 }
+
+} // end namespace fawkes

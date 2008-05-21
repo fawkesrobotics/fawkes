@@ -27,6 +27,8 @@
 
 #include <netcomm/fawkes/hub.h>
 
+namespace fawkes {
+
 /** @class FawkesNetworkAspect aspect/fawkes_network.h
  * Thread aspect to participate in the Fawkes Network protocol.
  * Give this aspect to your thread to make use of the Fawkes network
@@ -69,7 +71,9 @@ FawkesNetworkAspect::~FawkesNetworkAspect()
  * communication.
  */
 void
-FawkesNetworkAspect::initFawkesNetworkAspect(FawkesNetworkHub *fnethub)
+FawkesNetworkAspect::init_FawkesNetworkAspect(FawkesNetworkHub *fnethub)
 {
   this->fnethub = fnethub;
 }
+
+} // end namespace fawkes

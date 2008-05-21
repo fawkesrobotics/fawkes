@@ -59,6 +59,8 @@
 #  include <sys/ioctl.h>
 #endif
 
+namespace fawkes {
+
 /** @class SocketException netcomm/socket/socket.h
  * Socket exception.
  * Thrown if an exception occurs in a socket. If the error was caused by
@@ -191,7 +193,7 @@ Socket::Socket()
 Socket::Socket(Socket &socket)
 {
   if ( socket.client_addr != NULL ) {
-    client_addr = (struct sockaddr_in *)malloc(socket.client_addr_len);
+    client_addr = (struct ::sockaddr_in *)malloc(socket.client_addr_len);
     client_addr_len = socket.client_addr_len;
     memcpy(client_addr, socket.client_addr, client_addr_len);
   } else {
@@ -272,7 +274,7 @@ Socket::connect(const char *hostname, unsigned short int port)
   if ( sock_fd == -1 )  throw SocketException("Trying to connect invalid socket");
 
   struct hostent* h;
-  struct sockaddr_in host;
+  struct ::sockaddr_in host;
 
 
   h = gethostbyname(hostname);
@@ -297,7 +299,7 @@ Socket::connect(const char *hostname, unsigned short int port)
 void
 Socket::bind(const unsigned short int port)
 {
-  struct sockaddr_in host;
+  struct ::sockaddr_in host;
 
   host.sin_family = AF_INET;
   host.sin_addr.s_addr = INADDR_ANY;
@@ -323,7 +325,7 @@ void
 Socket::bind(const unsigned short int port, const char *hostname)
 {
   struct hostent* h;
-  struct sockaddr_in host;
+  struct ::sockaddr_in host;
 
   h = gethostbyname(hostname);
   if ( ! h ) {
@@ -370,8 +372,8 @@ Socket::listen(int backlog)
 Socket *
 Socket::accept()
 {
-  struct sockaddr_in  tmp_client_addr;
-  unsigned int  tmp_client_addr_len = sizeof(struct sockaddr_in);
+  struct ::sockaddr_in  tmp_client_addr;
+  unsigned int  tmp_client_addr_len = sizeof(struct ::sockaddr_in);
 
   int a_sock_fd = -1;
 
@@ -394,8 +396,8 @@ Socket::accept()
   if ( s->client_addr != NULL ) {
     free(s->client_addr);
   }
-  struct sockaddr_in  *tmp_client_addr_alloc = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
-  memcpy(tmp_client_addr_alloc, &tmp_client_addr, sizeof(struct sockaddr_in));
+  struct ::sockaddr_in  *tmp_client_addr_alloc = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
+  memcpy(tmp_client_addr_alloc, &tmp_client_addr, sizeof(struct ::sockaddr_in));
   s->client_addr = tmp_client_addr_alloc;
   s->client_addr_len = tmp_client_addr_len;
 
@@ -747,3 +749,5 @@ Socket::mtu()
 
   return m;
 }
+
+} // end namespace fawkes

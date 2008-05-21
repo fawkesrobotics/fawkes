@@ -25,6 +25,8 @@
 
 #include <core/threading/thread_notification_listener.h>
 
+namespace fawkes {
+
 /** @class ThreadNotificationListener <core/threading/thread_notification_listener.h>
  * Thread notification listener interface.
  * A thread notification listener can be added to a thread to be notified of a
@@ -51,3 +53,6 @@
 ThreadNotificationListener::~ThreadNotificationListener()
 {
 }
+
+
+} // end namespace fawkes

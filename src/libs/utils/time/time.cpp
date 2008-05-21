@@ -33,6 +33,8 @@
 #include <cmath>
 #include <cstdio>
 
+namespace fawkes {
+
 /** @class Time <utils/time/time.h>
  * A class for handling time.
  * @author Daniel Beck
@@ -403,3 +405,5 @@ Time::str_r(char *s)
     asctime_r(&time_tm, s);
   }
 }
+
+} // end namespace fawkes

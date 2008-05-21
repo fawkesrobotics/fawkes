@@ -51,7 +51,7 @@ FuseImageContent::FuseImageContent(uint32_t type,
 				   void *payload, size_t payload_size)
 {
   if ( type != FUSE_MT_IMAGE ) {
-    throw TypeMismatchException("Type %u != FUSE_MT_IMAGE (%u)", type, FUSE_MT_IMAGE);
+    throw fawkes::TypeMismatchException("Type %u != FUSE_MT_IMAGE (%u)", type, FUSE_MT_IMAGE);
   }
 
   _payload_size = payload_size;
@@ -75,7 +75,7 @@ FuseImageContent::FuseImageContent(SharedMemoryImageBuffer *b)
   _payload = malloc(_payload_size);
 
   if ( _payload == NULL ) {
-    throw OutOfMemoryException("Cannot allocate FuseImageContent buffer");
+    throw fawkes::OutOfMemoryException("Cannot allocate FuseImageContent buffer");
   }
 
   __header = (FUSE_image_message_header_t *)_payload;
@@ -115,7 +115,7 @@ FuseImageContent::FuseImageContent(FUSE_image_format_t image_format, const char 
   _payload = malloc(_payload_size);
 
   if ( _payload == NULL ) {
-    throw OutOfMemoryException("Cannot allocate FuseImageContent buffer");
+    throw fawkes::OutOfMemoryException("Cannot allocate FuseImageContent buffer");
   }
 
   __header = (FUSE_image_message_header_t *)_payload;
@@ -215,7 +215,7 @@ FuseImageContent::decompress(unsigned char *yuv422_planar_buffer, size_t buffer_
 {
   if ( buffer_size < colorspace_buffer_size(YUV422_PLANAR, ntohs(__header->width),
 					    ntohs(__header->height)) ) {
-    throw IllegalArgumentException("Supplied buffer is too small\n");
+    throw fawkes::IllegalArgumentException("Supplied buffer is too small\n");
   }
   if ( __header->format != FUSE_IF_JPEG ) {
     JpegImageDecompressor *decompressor = new JpegImageDecompressor();

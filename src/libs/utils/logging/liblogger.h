@@ -30,6 +30,9 @@
 #include <cstdarg>
 #include <cstddef>
 
+namespace fawkes {
+
+
 class MultiLogger;
 class Logger;
 class Mutex;
@@ -64,5 +67,8 @@ class LibLogger
   static MultiLogger *logger;
   static Mutex       *mutex;
 };
+
+
+} // end namespace fawkes
 
 #endif

@@ -25,6 +25,8 @@
 #include <apps/retriever/fvretriever_plugin.h>
 #include <apps/retriever/retriever_thread.h>
 
+using namespace fawkes;
+
 /** @class FvRetrieverPlugin <fvretriever_plugin.h>
  * FireVision Retriever Plugin.
  * This is the FireVision retriever plugin. It is a simple plugin that will

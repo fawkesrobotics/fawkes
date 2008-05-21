@@ -28,6 +28,8 @@
 #include <cstdio>
 #include <exception>
 
+namespace fawkes {
+
 /** @class HomVector geometry/hom_vector.h
  * A homogeneous vector.
  * @author Daniel Beck
@@ -113,3 +115,5 @@ HomVector::scale(float factor)
 
   return *this;
 }
+
+} // end namespace fawkes

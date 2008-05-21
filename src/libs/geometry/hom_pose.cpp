@@ -25,6 +25,8 @@
 
 #include <geometry/hom_pose.h>
 
+namespace fawkes {
+
 /** @class HomPose <geometry/hom_pose.h>
  * A homogeneous pose combines a position with an orienation in space.
  * @author Daniel Beck
@@ -198,3 +200,5 @@ HomPose::rotate_z(float rad)
 
   return *this;
 }
+
+} // end namespace fawkes

@@ -32,6 +32,8 @@
 
 #include <cstdio>
 
+using namespace fawkes;
+
 /** @class SeqWriter <fvutils/writers/seq_writer.h>
  * Writes a sequence of images to disk.
  *

@@ -36,6 +36,9 @@
 #include <cstdio>
 #endif
 
+namespace fawkes {
+
+
 /// @cond INTERNALS
 /** Internal class of Mutexes, do not use directly.
  */
@@ -83,5 +86,8 @@ class MutexData {
 #endif
 };
 /// @endcond
+
+
+} // end namespace fawkes
 
 #endif

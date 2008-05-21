@@ -34,81 +34,83 @@
 #include <core/utils/lock_map.h>
 #include <list>
 
-class Mutex;
-class WaitCondition;
-class ThreadInitializer;
-class ThreadFinalizer;
+namespace fawkes {
+  class Mutex;
+  class WaitCondition;
+  class ThreadInitializer;
+  class ThreadFinalizer;
+}
 
-class FawkesThreadManager : public ThreadCollector
+class FawkesThreadManager : public fawkes::ThreadCollector
 {
  public:
   FawkesThreadManager();
   virtual ~FawkesThreadManager();
 
-  void set_inifin(ThreadInitializer *initializer, ThreadFinalizer *finalizer);
+  void set_inifin(fawkes::ThreadInitializer *initializer, fawkes::ThreadFinalizer *finalizer);
 
-  virtual void add(ThreadList &tl)
+  virtual void add(fawkes::ThreadList &tl)
   {
     add_maybelocked(tl, /* lock */ true);
   }
 
-  virtual void add(Thread *t)
+  virtual void add(fawkes::Thread *t)
   {
     add_maybelocked(t, /* lock */ true);
   }
 
-  virtual void remove(ThreadList &tl)
+  virtual void remove(fawkes::ThreadList &tl)
   {
     remove_maybelocked(tl, /* lock */ true);
   }
 
-  virtual void remove(Thread *t)
+  virtual void remove(fawkes::Thread *t)
   {
     remove_maybelocked(t, /* lock */ true);
   }
 
-  virtual void force_remove(ThreadList &tl);
-  virtual void force_remove(Thread *t);
+  virtual void force_remove(fawkes::ThreadList &tl);
+  virtual void force_remove(fawkes::Thread *t);
 
-  void wakeup_and_wait(BlockedTimingAspect::WakeupHook hook);
+  void wakeup_and_wait(fawkes::BlockedTimingAspect::WakeupHook hook);
 
   bool timed_threads_exist() const;
   void wait_for_timed_threads();
 
-  ThreadCollector *  aspect_collector() const;
+  fawkes::ThreadCollector *  aspect_collector() const;
 
  private:
-  void internal_add_thread(Thread *t);
-  void internal_remove_thread(Thread *t);
-  void add_maybelocked(ThreadList &tl, bool lock);
-  void add_maybelocked(Thread *t, bool lock);
-  void remove_maybelocked(ThreadList &tl, bool lock);
-  void remove_maybelocked(Thread *t, bool lock);
+  void internal_add_thread(fawkes::Thread *t);
+  void internal_remove_thread(fawkes::Thread *t);
+  void add_maybelocked(fawkes::ThreadList &tl, bool lock);
+  void add_maybelocked(fawkes::Thread *t, bool lock);
+  void remove_maybelocked(fawkes::ThreadList &tl, bool lock);
+  void remove_maybelocked(fawkes::Thread *t, bool lock);
 
-  class FawkesThreadManagerAspectCollector : public ThreadCollector
+  class FawkesThreadManagerAspectCollector : public fawkes::ThreadCollector
   {
    public:
     FawkesThreadManagerAspectCollector(FawkesThreadManager *parent_manager);
 
-    virtual void add(ThreadList &tl);
-    virtual void add(Thread *t);
+    virtual void add(fawkes::ThreadList &tl);
+    virtual void add(fawkes::Thread *t);
 
-    virtual void remove(ThreadList &tl);
-    virtual void remove(Thread *t);
+    virtual void remove(fawkes::ThreadList &tl);
+    virtual void remove(fawkes::Thread *t);
 
    private:
     FawkesThreadManager *__parent_manager;
   };
 
  private:
-  ThreadInitializer *initializer;
-  ThreadFinalizer   *finalizer;
+  fawkes::ThreadInitializer *initializer;
+  fawkes::ThreadFinalizer   *finalizer;
 
-  LockMap< BlockedTimingAspect::WakeupHook, ThreadList > threads;
-  LockMap< BlockedTimingAspect::WakeupHook, ThreadList >::iterator tit;
+  fawkes::LockMap< fawkes::BlockedTimingAspect::WakeupHook, fawkes::ThreadList > threads;
+  fawkes::LockMap< fawkes::BlockedTimingAspect::WakeupHook, fawkes::ThreadList >::iterator tit;
 
-  ThreadList untimed_threads;
-  WaitCondition *waitcond_timedthreads;
+  fawkes::ThreadList untimed_threads;
+  fawkes::WaitCondition *waitcond_timedthreads;
 
   FawkesThreadManagerAspectCollector *__aspect_collector;
 };

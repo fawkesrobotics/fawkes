@@ -33,6 +33,8 @@
 #include <core/utils/lock_map.h>
 #include <list>
 
+namespace fawkes {
+
 class Interface;
 class BlackBoard;
 class FawkesNetworkHub;
@@ -77,5 +79,7 @@ class BlackBoardNetworkHandler
 
   FawkesNetworkHub *__nhub;
 };
+
+} // end namespace fawkes
 
 #endif

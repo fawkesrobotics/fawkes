@@ -27,7 +27,9 @@
 #define __FIREVISION_FVUTILS_BASE_VISION_MASTER_H_
 
 class Camera;
-class Thread;
+namespace fawkes {
+  class Thread;
+}
 
 class VisionMaster
 {
@@ -35,8 +37,9 @@ class VisionMaster
   virtual ~VisionMaster();
 
   virtual Camera *  register_for_camera(const char *camera_string,
-					Thread *thread, bool raw = false) = 0;
-  virtual void      unregister_thread(Thread *thread)                     = 0;
+					fawkes::Thread *thread,
+					bool raw = false) = 0;
+  virtual void      unregister_thread(fawkes::Thread *thread)                     = 0;
 };
 
 

@@ -28,6 +28,8 @@
 #include <cmath>
 #include <cstdio>
 
+namespace fawkes {
+
 /** @class HomPolar <geometry/hom_polar.h>
  * A homogeneous representation of a polar coordinate.
  * @author Daniel Beck
@@ -347,3 +349,5 @@ HomPolar::get_vector() const
 
   return v;
 }
+
+} // end namespace fawkes

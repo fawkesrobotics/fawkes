@@ -34,6 +34,8 @@
 #include <jpeglib.h>
 #include <string.h>
 
+using namespace fawkes;
+
 /** @class JpegWriter <fvutils/writers/jpeg.h>
  * JPEG file writer.
  */

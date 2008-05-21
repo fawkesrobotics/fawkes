@@ -31,6 +31,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class BlackBoardInterfaceListContent <blackboard/net_ilist_content.h>
  * BlackBoard interface list content.
  * A complex dynamic message with an arbitrary number of interfaces. Uses
@@ -169,3 +171,5 @@ BlackBoardInterfaceListContent::next(size_t *size)
   void *tmp = interface_list->next(size);
   return (bb_iinfo_msg_t *)tmp;
 }
+
+} // end namespace fawkes

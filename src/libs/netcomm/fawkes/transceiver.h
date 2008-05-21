@@ -28,6 +28,8 @@
 
 #include <core/exception.h>
 
+namespace fawkes {
+
 class StreamSocket;
 class FawkesNetworkMessageQueue;
 
@@ -38,5 +40,7 @@ class FawkesNetworkTransceiver
   static void recv(StreamSocket *s, FawkesNetworkMessageQueue *msgq,
 		   unsigned int max_num_msgs = 8);
 };
+
+} // end namespace fawkes
 
 #endif

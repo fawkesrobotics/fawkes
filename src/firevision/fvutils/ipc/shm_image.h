@@ -57,7 +57,9 @@ typedef struct {
 } SharedMemoryImageBuffer_header_t;
 
 
-class SharedMemoryImageBufferHeader : public SharedMemoryHeader {
+class SharedMemoryImageBufferHeader
+: public fawkes::SharedMemoryHeader
+{
  public:
   SharedMemoryImageBufferHeader();
   SharedMemoryImageBufferHeader(const char *image_id,
@@ -67,7 +69,7 @@ class SharedMemoryImageBufferHeader : public SharedMemoryHeader {
   SharedMemoryImageBufferHeader(const SharedMemoryImageBufferHeader *h);
   virtual ~SharedMemoryImageBufferHeader();
 
-  virtual SharedMemoryHeader *  clone() const;
+  virtual fawkes::SharedMemoryHeader *  clone() const;
   virtual bool         matches(void *memptr);
   virtual size_t       size();
   virtual void         print_info();
@@ -76,7 +78,7 @@ class SharedMemoryImageBufferHeader : public SharedMemoryHeader {
   virtual void         set(void *memptr);
   virtual void         reset();
   virtual size_t       data_size();
-  virtual bool         operator==(const SharedMemoryHeader & s) const;
+  virtual bool         operator==(const fawkes::SharedMemoryHeader & s) const;
 
   void                 set_image_id(const char *image_id);
   colorspace_t         colorspace() const;
@@ -100,7 +102,9 @@ class SharedMemoryImageBufferHeader : public SharedMemoryHeader {
   SharedMemoryImageBuffer_header_t *_header;
 };
 
-class SharedMemoryImageBufferLister : public SharedMemoryLister {
+class SharedMemoryImageBufferLister
+: public fawkes::SharedMemoryLister
+{
  public:
   SharedMemoryImageBufferLister();
   virtual ~SharedMemoryImageBufferLister();
@@ -109,14 +113,14 @@ class SharedMemoryImageBufferLister : public SharedMemoryLister {
   virtual void print_footer();
   virtual void print_no_segments();
   virtual void print_no_orphaned_segments();
-  virtual void print_info(const SharedMemoryHeader *header,
+  virtual void print_info(const fawkes::SharedMemoryHeader *header,
 			  int shm_id, int semaphore,
 			  unsigned int mem_size,
 			  const void *memptr);
 };
 
 
-class SharedMemoryImageBuffer : public SharedMemory
+class SharedMemoryImageBuffer : public fawkes::SharedMemory
 {
 
  public:

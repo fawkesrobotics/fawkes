@@ -26,6 +26,8 @@
 #include <utils/misc/string_compare.h>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class StringEquality <utils/misc/string_compare.h>
  * String equality checker.
  * This is a valid binary predicate that can be used for instance hash maps
@@ -70,3 +72,6 @@ StringLess::operator()(const char *__s1, const char *__s2) const
 {
   return ( strcmp(__s1, __s2) < 0 );
 }
+
+
+} // end namespace fawkes

@@ -36,6 +36,7 @@
 #include <dirent.h>
 
 using namespace std;
+using namespace fawkes;
 
 /** Interleave to YUV422 planar buffers.
  * Creates an image buffer which has both images side by side.

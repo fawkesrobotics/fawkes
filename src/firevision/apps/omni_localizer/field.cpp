@@ -39,6 +39,7 @@
 #include <cstring>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class Field <apps/omni_localizer/field.h>
  * Model of the playing field.

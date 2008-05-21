@@ -34,6 +34,8 @@
 #include <signal.h>
 #include <iostream>
 
+using namespace fawkes;
+
 #define MAGIC_TOKEN "FawkesShmemQAApp"
 
 class QASharedMemoryHeader : public SharedMemoryHeader

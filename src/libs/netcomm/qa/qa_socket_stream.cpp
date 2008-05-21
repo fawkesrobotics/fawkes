@@ -30,7 +30,9 @@
 #include <utils/system/signal.h>
 #include <utils/system/argparser.h>
 
-#include <stdio.h>
+#include <cstdio>
+
+using namespace fawkes;
 
 class StreamServerThread : public Thread
 {

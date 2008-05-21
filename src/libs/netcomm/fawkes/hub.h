@@ -26,6 +26,8 @@
 #ifndef __NETCOMM_FAWKES_HUB_H_
 #define __NETCOMM_FAWKES_HUB_H_
 
+namespace fawkes {
+
 class FawkesNetworkMessage;
 class FawkesNetworkHandler;
 class FawkesNetworkMessageContent;
@@ -68,5 +70,7 @@ class FawkesNetworkHub
   virtual void force_send()                                                = 0;
 
 };
+
+} // end namespace fawkes
 
 #endif

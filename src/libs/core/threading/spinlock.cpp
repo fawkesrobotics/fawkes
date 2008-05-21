@@ -30,6 +30,16 @@
 #include <pthread.h>
 #include <unistd.h>
 
+// cf. http://people.redhat.com/drepper/posix-option-groups.html
+#if defined(_POSIX_SPIN_LOCKS) && (_POSIX_SPIN_LOCKS - 200112L) >= 0
+#  define USE_POSIX_SPIN_LOCKS
+#else
+#  undef USE_POSIX_SPIN_LOCKS
+#  include <core/threading/mutex.h>
+#endif
+
+namespace fawkes {
+
 /** @class Spinlock <core/threading/spinlock.h>
  * Spin lock.
  * This class is similar to a Mutex in that it is used in a multi-threading
@@ -47,14 +57,6 @@
  *
  * @author Tim Niemueller
  */
-
-// cf. http://people.redhat.com/drepper/posix-option-groups.html
-#if defined(_POSIX_SPIN_LOCKS) && (_POSIX_SPIN_LOCKS - 200112L) >= 0
-#  define USE_POSIX_SPIN_LOCKS
-#else
-#  undef USE_POSIX_SPIN_LOCKS
-#  include <core/threading/mutex.h>
-#endif
 
 /// @cond INTERNALS
 class SpinlockData
@@ -152,3 +154,6 @@ Spinlock::unlock()
   spinlock_data->mutex.unlock();
 #endif
 }
+
+
+} // end namespace fawkes

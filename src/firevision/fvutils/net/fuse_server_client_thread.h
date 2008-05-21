@@ -32,17 +32,21 @@
 #include <string>
 
 class FuseServer;
-class StreamSocket;
 class FuseNetworkMessageQueue;
 class FuseNetworkMessage;
 class SharedMemoryImageBuffer;
 class SharedMemoryLookupTable;
 class JpegImageCompressor;
 
-class FuseServerClientThread : public Thread
+namespace fawkes {
+  class StreamSocket;
+}
+
+class FuseServerClientThread : public fawkes::Thread
 {
  public:
-  FuseServerClientThread(FuseServer *fuse_server, StreamSocket *s);
+  FuseServerClientThread(FuseServer *fuse_server,
+			 fawkes::StreamSocket *s);
   virtual ~FuseServerClientThread();
 
   void recv();
@@ -62,7 +66,7 @@ class FuseServerClientThread : public Thread
   SharedMemoryImageBuffer *  get_shmimgbuf(const char *id);
 
   FuseServer   *__fuse_server;
-  StreamSocket *__socket;
+  fawkes::StreamSocket *__socket;
 
   FuseNetworkMessageQueue *__outbound_queue;
   FuseNetworkMessageQueue *__inbound_queue;

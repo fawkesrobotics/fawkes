@@ -26,6 +26,8 @@
 
 #include <core/threading/thread_collector.h>
 
+namespace fawkes {
+
 /** @class ThreadCollector core/threading/thread_collector.h
  * Thread collector.
  * This interface is meant to provide a central place where to put threads
@@ -83,3 +85,6 @@
 ThreadCollector::~ThreadCollector()
 {
 }
+
+
+} // end namespace fawkes

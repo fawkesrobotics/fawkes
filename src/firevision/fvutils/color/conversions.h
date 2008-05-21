@@ -112,8 +112,9 @@ convert(colorspace_t   from,  colorspace_t   to,
   } else if ( (from == YVU444_PACKED) && (to == YUV422_PACKED) ) {
     yvu444packed_to_yuv422packed(src, dst, width, height);
   } else {
-    throw Exception("Cannot convert image data from %s to %s",
-		    colorspace_to_string(from), colorspace_to_string(to));
+    throw fawkes::Exception("Cannot convert image data from %s to %s",
+			    colorspace_to_string(from),
+			    colorspace_to_string(to));
   }
 }
 
@@ -131,9 +132,9 @@ grayscale(colorspace_t cspace,
     grayscale_yuv422planar(src, dst, width, height);
     break;
   default:
-    Exception e("FirevisionUtils: Cannot grayscale image");
-    e.append("Grayscaling of images in colorspace '%s' is not supported",
-	     colorspace_to_string(cspace));
+    fawkes::Exception e("FirevisionUtils: Cannot grayscale image. "
+			"Images from colorspace %s are not supported.",
+			colorspace_to_string(cspace));
     throw e;
   }
 }

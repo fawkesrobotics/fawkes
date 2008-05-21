@@ -41,18 +41,21 @@
 
 class Camera;
 class SharedMemoryImageBuffer;
-class TimeTracker;
 class FacesClassifier;
 class FaceRecognizer;
+
+namespace fawkes {
+  class TimeTracker;
+}
 
 typedef struct _IplImage IplImage;
 
 class FacerPipelineThread
-: public Thread,
-  public ConfigurableAspect,
-  public LoggingAspect,
-  public VisionAspect,
-  public BlackBoardAspect
+: public fawkes::Thread,
+  public fawkes::ConfigurableAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::VisionAspect,
+  public fawkes::BlackBoardAspect
 {
  public:
   FacerPipelineThread();
@@ -75,7 +78,7 @@ class FacerPipelineThread
   int __person_labels[10]; 
   std::string __person_names[10]; 
 
-  TimeTracker *__tt;
+  fawkes::TimeTracker *__tt;
   unsigned int __loop_count;
   unsigned int __ttc_capture;
   unsigned int __ttc_memcpy;

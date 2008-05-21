@@ -26,6 +26,8 @@
 #ifndef __NETCOMM_UTILS_INCOMING_CONNECTION_HANDLER_H_
 #define __NETCOMM_UTILS_INCOMING_CONNECTION_HANDLER_H_
 
+namespace fawkes {
+
 class StreamSocket;
 
 class NetworkIncomingConnectionHandler
@@ -35,5 +37,7 @@ class NetworkIncomingConnectionHandler
 
   virtual void add_connection(StreamSocket *s) throw() = 0;
 };
+
+} // end namespace fawkes
 
 #endif

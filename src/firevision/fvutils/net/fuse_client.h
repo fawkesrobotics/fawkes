@@ -30,14 +30,16 @@
 #include <core/threading/thread.h>
 #include <sys/types.h>
 
-class StreamSocket;
-class WaitCondition;
-class Mutex;
+namespace fawkes {
+  class StreamSocket;
+  class WaitCondition;
+  class Mutex;
+}
 class FuseNetworkMessageQueue;
 class FuseNetworkMessage;
 class FuseClientHandler;
 
-class FuseClient : public Thread {
+class FuseClient : public fawkes::Thread {
  public:
   FuseClient(const char *hostname, unsigned short int port,
 	     FuseClientHandler *handler);
@@ -62,19 +64,19 @@ class FuseClient : public Thread {
   char *__hostname;
   unsigned short int __port;
 
-  StreamSocket *__socket;
+  fawkes::StreamSocket *__socket;
   unsigned int __wait_timeout;
 
-  Mutex *__mutex;
+  fawkes::Mutex *__mutex;
 
   FuseNetworkMessageQueue *  __inbound_msgq;
   FuseNetworkMessageQueue *  __outbound_msgq;
 
   FuseClientHandler       *__handler;
-  WaitCondition           *__waitcond;
+  fawkes::WaitCondition           *__waitcond;
 
   bool __greeting_received;
-  Mutex *__greeting_mutex;
+  fawkes::Mutex *__greeting_mutex;
 
   bool __alive;
 };

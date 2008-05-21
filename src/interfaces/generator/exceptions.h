@@ -31,13 +31,13 @@
  * This may happen if the document is not well-formed or if the file does not
  * exist.
  */
-class InterfaceGeneratorInvalidDocumentException : public Exception {
+class InterfaceGeneratorInvalidDocumentException : public fawkes::Exception {
  public:
   /** Constructor
    * @param msg message
    */
   InterfaceGeneratorInvalidDocumentException(const char *msg)
-    : Exception("Interface document invalid.")
+    : fawkes::Exception("Interface document invalid.")
   {
     append(msg);
   }
@@ -47,13 +47,13 @@ class InterfaceGeneratorInvalidDocumentException : public Exception {
  * This happens if there was content in the file which was while syntactically correct
  * semantically wrong. Examples for this are more than one data segment or no one at all.
  */
-class InterfaceGeneratorInvalidContentException : public Exception {
+class InterfaceGeneratorInvalidContentException : public fawkes::Exception {
  public:
   /** Constructor
    * @param msg message
    */
   InterfaceGeneratorInvalidContentException(const char *msg)
-    : Exception()
+    : fawkes::Exception()
   {
     append("Invalid content: %s", msg);
   }
@@ -64,7 +64,7 @@ class InterfaceGeneratorInvalidContentException : public Exception {
  * Only a few basic types are allowed. If a typo occured or an unknown type was used
  * this exception is thrown.
  */
-class InterfaceGeneratorInvalidTypeException : public Exception {
+class InterfaceGeneratorInvalidTypeException : public fawkes::Exception {
  public:
   /** Constructor
    * @param item item type
@@ -72,7 +72,7 @@ class InterfaceGeneratorInvalidTypeException : public Exception {
    * @param type invalid data type
    */
   InterfaceGeneratorInvalidTypeException(const char *item, const char *name, const char *type)
-    : Exception()
+    : fawkes::Exception()
   {
     append("Invalid type for %s item '%s': %s", item, name, type);
   }
@@ -81,7 +81,7 @@ class InterfaceGeneratorInvalidTypeException : public Exception {
 /** Thrown if illegal value is supplied.
  * Thrown if wrong value was supplied for a given value
  */
-class InterfaceGeneratorInvalidValueException : public Exception {
+class InterfaceGeneratorInvalidValueException : public fawkes::Exception {
  public:
   /** Constructor
    * @param name item name
@@ -89,7 +89,7 @@ class InterfaceGeneratorInvalidValueException : public Exception {
    * @param value invalid value
    */
  InterfaceGeneratorInvalidValueException(const char *name, const char *type, const char *value)
-    : Exception()
+    : fawkes::Exception()
   {
     append("Invalid value for '%s' of type %s: %s", name, type, value);
   }
@@ -98,7 +98,7 @@ class InterfaceGeneratorInvalidValueException : public Exception {
 /** Thrown if illegal attribute is supplied.
  * Thrown if illegal attribute was supplied for a given value
  */
-class InterfaceGeneratorInvalidAttributeException : public Exception {
+class InterfaceGeneratorInvalidAttributeException : public fawkes::Exception {
  public:
   /** Constructor
    * @param name item name
@@ -106,7 +106,7 @@ class InterfaceGeneratorInvalidAttributeException : public Exception {
    * @param attr invalid attribute
    */
  InterfaceGeneratorInvalidAttributeException(const char *name, const char *type, const char *attr)
-    : Exception()
+    : fawkes::Exception()
   {
     append("Attribute '%s' may not be specified for '%s' of type %s", attr, name, type);
   }
@@ -116,14 +116,14 @@ class InterfaceGeneratorInvalidAttributeException : public Exception {
 /** Thrown if illegal flag is supplied.
  * Thrown if illegal flag was supplied for a given value
  */
-class InterfaceGeneratorInvalidFlagException : public Exception {
+class InterfaceGeneratorInvalidFlagException : public fawkes::Exception {
  public:
   /** Constructor
    * @param name item name
    * @param flag invalid flag
    */
  InterfaceGeneratorInvalidFlagException(const char *name, const char *flag)
-    : Exception()
+    : fawkes::Exception()
   {
     append("Illegal flag '%s' set for %s", flag, name);
   }
@@ -133,7 +133,7 @@ class InterfaceGeneratorInvalidFlagException : public Exception {
 /** Thrown if required attribute is missing supplied.
  * Thrown if required attribute was not supplied for a given value
  */
-class InterfaceGeneratorMissingAttributeException : public Exception {
+class InterfaceGeneratorMissingAttributeException : public fawkes::Exception {
  public:
   /** Constructor
    * @param name item name
@@ -141,7 +141,7 @@ class InterfaceGeneratorMissingAttributeException : public Exception {
    * @param attr missing attribute
    */
  InterfaceGeneratorMissingAttributeException(const char *name, const char *type, const char *attr)
-    : Exception()
+    : fawkes::Exception()
   {
     append("Attribute '%s' is required '%s' of type %s", attr, name, type);
   }
@@ -149,14 +149,14 @@ class InterfaceGeneratorMissingAttributeException : public Exception {
 
 
 /** Thrown if name is ambiguous. */
-class InterfaceGeneratorAmbiguousNameException : public Exception {
+class InterfaceGeneratorAmbiguousNameException : public fawkes::Exception {
  public:
   /** Constructor
    * @param name ambiguous name
    * @param item item type
    */
  InterfaceGeneratorAmbiguousNameException(const char *name, const char *item)
-    : Exception()
+    : fawkes::Exception()
   {
     append("There are multiple %s items with name '%s'", item, name);
   }

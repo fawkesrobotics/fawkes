@@ -28,6 +28,8 @@
 
 #include <sys/time.h>
 
+namespace fawkes {
+
 /** Calculate time difference of two time structs.
  * The calculated time is t = a - b, where t is a represented as the number of
  * seconds in a single precision float.
@@ -113,5 +115,7 @@ class Time
   timeval  time;
   char     timestr[26]; // 26 as described in asctime_r() docs     
 };
+
+} // end namespace fawkes
 
 #endif

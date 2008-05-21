@@ -31,6 +31,9 @@
 
 #include <cstddef>
 
+namespace fawkes {
+
+
 class UnknownLoggerTypeException : public Exception
 {
  public:
@@ -71,5 +74,7 @@ LoggerFactory::instance(const char *type, const char *as)
   }
   return tl;
 }
+
+} // end namespace fawkes
 
 #endif

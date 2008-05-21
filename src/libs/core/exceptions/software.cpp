@@ -27,6 +27,8 @@
 
 #include <cmath>
 
+namespace fawkes {
+
 /** @class NullPointerException <core/exceptions/software.h>
  * A NULL pointer was supplied where not allowed.
  * Throw this exception if a pointer to NULL has been supplied where this is
@@ -246,3 +248,6 @@ SyntaxErrorException::SyntaxErrorException(const char *format, ...) throw()
   append_va(format, va);
   va_end(va);
 }
+
+
+} // end namespace fawkes

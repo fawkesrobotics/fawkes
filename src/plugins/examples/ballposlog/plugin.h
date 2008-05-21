@@ -27,7 +27,7 @@
 
 #include <core/plugin.h>
 
-class BallPosLogPlugin : public Plugin
+class BallPosLogPlugin : public fawkes::Plugin
 {
  public:
       BallPosLogPlugin();

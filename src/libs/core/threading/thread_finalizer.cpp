@@ -25,6 +25,8 @@
 
 #include <core/threading/thread_finalizer.h>
 
+namespace fawkes {
+
 /** @class CannotFinalizeThreadException core/threading/thread_finalizer.h
  * Thread cannot be finalized.
  * Thrown if a thread could not be finalized for whatever reason.
@@ -95,3 +97,6 @@ CannotFinalizeThreadException::CannotFinalizeThreadException(Exception &e)
 ThreadFinalizer::~ThreadFinalizer()
 {
 }
+
+
+} // end namespace fawkes

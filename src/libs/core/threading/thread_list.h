@@ -34,6 +34,9 @@
 
 #include <utility>
 
+namespace fawkes {
+
+
 class ThreadList;
 class Mutex;
 class Barrier;
@@ -120,5 +123,8 @@ class ThreadList : private LockList<Thread *>
   ReadWriteLock             *_sync_lock;
   Barrier                   *_wnw_barrier;
 };
+
+
+} // end namespace fawkes
 
 #endif

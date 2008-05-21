@@ -31,6 +31,7 @@
 #include <cstdlib>
 #include <png.h>
 
+using namespace fawkes;
 
 /// @cond INTERNALS
 class PNGReaderData

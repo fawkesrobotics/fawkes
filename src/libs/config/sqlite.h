@@ -28,6 +28,11 @@
 
 #include <config/config.h>
 
+struct sqlite3;
+struct sqlite3_stmt;
+
+namespace fawkes {
+
 class Mutex;
 
 class SQLiteConfiguration : public Configuration
@@ -91,15 +96,12 @@ class SQLiteConfiguration : public Configuration
 
   virtual void          erase_default(const char *path);
 
- private:
-  typedef struct sqlite3_stmt sqlite3_stmt;
-
  public:
  class SQLiteValueIterator : public Configuration::ValueIterator
   {
     friend class SQLiteConfiguration;
    protected:
-    SQLiteValueIterator(sqlite3_stmt *stmt, void *p = NULL);
+    SQLiteValueIterator(::sqlite3_stmt *stmt, void *p = NULL);
    public:
     virtual ~SQLiteValueIterator();
     virtual bool          next();
@@ -123,7 +125,7 @@ class SQLiteConfiguration : public Configuration
     virtual std::string   get_string();
 
    private:
-    sqlite3_stmt *stmt;
+    ::sqlite3_stmt *stmt;
     void *__p;
   };
 
@@ -138,21 +140,22 @@ class SQLiteConfiguration : public Configuration
   void            init();
   std::string     get_type(const char *table, const char *path);
   bool            exists(const char *sql, const char *path);
-  sqlite3_stmt *  get_value(const char *type, const char *path);
-  sqlite3_stmt *  prepare_update_value(const char *sql,
+  ::sqlite3_stmt *  get_value(const char *type, const char *path);
+  ::sqlite3_stmt *  prepare_update_value(const char *sql,
 				       const char *path);
-  sqlite3_stmt *  prepare_insert_value(const char *sql, const char *type,
+  ::sqlite3_stmt *  prepare_insert_value(const char *sql, const char *type,
 				       const char *path);
   void            execute_insert_or_update(sqlite3_stmt *stmt);
 
 
  private:
-  typedef struct sqlite3 sqlite3;
-  sqlite3 *db;
+  ::sqlite3 *db;
   const char *conf_path;
   bool opened;
   Mutex *mutex;
 
 };
+
+} // end namespace fawkes
 
 #endif

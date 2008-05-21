@@ -30,7 +30,9 @@
 #include <cstring>
 #include <cstdlib>
 
-/** @class FacerInterface interfaces/facer.h
+namespace fawkes {
+
+/** @class FacerInterface <interfaces/facer.h>
  * FacerInterface Fawkes BlackBoard Interface.
  * 
       The interface provides access to the face recognition plugin (facer).
@@ -327,3 +329,5 @@ FacerInterface::message_valid(const Message *message) const
 EXPORT_INTERFACE(FacerInterface)
 /// @endcond
 
+
+} // end namespace fawkes

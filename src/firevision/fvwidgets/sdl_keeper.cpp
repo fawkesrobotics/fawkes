@@ -31,6 +31,8 @@
 
 #include <SDL.h>
 
+using namespace fawkes;
+
 unsigned int SDLKeeper::_refcount = 0;
 Mutex        SDLKeeper::_mutex;
 

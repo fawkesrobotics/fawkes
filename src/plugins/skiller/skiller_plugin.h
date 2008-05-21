@@ -27,16 +27,18 @@
 
 #include <core/plugin.h>
 
-class Barrier;
+namespace fawkes {
+  class Barrier;
+}
 
-class SkillerPlugin : public Plugin
+class SkillerPlugin : public fawkes::Plugin
 {
  public:
   SkillerPlugin();
   virtual ~SkillerPlugin();
 
  private:
-  Barrier *__liaison_exec_barrier;
+  fawkes::Barrier *__liaison_exec_barrier;
 };
 
 #endif

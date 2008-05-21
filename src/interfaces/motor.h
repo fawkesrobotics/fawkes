@@ -29,6 +29,8 @@
 #include <interface/interface.h>
 #include <interface/message.h>
 
+namespace fawkes {
+
 class MotorInterface : public Interface
 {
  /// @cond INTERNALS
@@ -396,5 +398,7 @@ class MotorInterface : public Interface
   size_t maxlenof_controller_thread_name() const;
 
 };
+
+} // end namespace fawkes
 
 #endif

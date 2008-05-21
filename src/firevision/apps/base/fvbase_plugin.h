@@ -27,7 +27,7 @@
 
 #include <core/plugin.h>
 
-class FvBasePlugin : public Plugin
+class FvBasePlugin : public fawkes::Plugin
 {
  public:
   FvBasePlugin();

@@ -29,6 +29,9 @@
 
 #include <core/exception.h>
 
+namespace fawkes {
+
+
 class ShmCouldNotAttachException : public Exception
 {
  public:
@@ -75,5 +78,8 @@ class ShmPtrOutOfBoundsException : public Exception
  public:
   ShmPtrOutOfBoundsException();
 };
+
+
+} // end namespace fawkes
 
 #endif

@@ -37,6 +37,8 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+using namespace fawkes;
+
 class QAAvahiResolverMain : public SignalHandler, public AvahiResolverHandler
 {
  public:

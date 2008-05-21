@@ -30,6 +30,8 @@
 #include <netinet/in.h>
 #include <cstring>
 
+using namespace fawkes;
+
 /** @class FuseImageListWidget <tools/firestation/fuse_image_list_widget.h>
  * This widget displays all available Fuse images in a tree view. It also can check
  * the registered host for new images, regularly.

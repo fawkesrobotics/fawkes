@@ -30,24 +30,24 @@
 #include <core/exception.h>
 
 /** Throw if an inconsistent image was found. */
-class InconsistentImageException : public Exception {
+class InconsistentImageException : public fawkes::Exception {
  public:
   /** Constructor.
    * @param msg additional message
    */
   InconsistentImageException(const char *msg)
-    : Exception(msg)  {}
+    : fawkes::Exception(msg)  {}
 };
 
 
 /** Throw if an inconsistent LUT was found. */
-class InconsistentLUTException : public Exception {
+class InconsistentLUTException : public fawkes::Exception {
  public:
   /** Constructor.
    * @param msg additional message
    */
   InconsistentLUTException(const char *msg)
-    : Exception(msg)  {}
+    : fawkes::Exception(msg)  {}
 };
 
 

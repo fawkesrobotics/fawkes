@@ -30,6 +30,8 @@
 #include <utils/system/dynamic_module/module.h>
 #include <string>
 
+namespace fawkes {
+
 class ModuleDL : public Module {
  public:
 
@@ -67,5 +69,6 @@ class ModuleDL : public Module {
   unsigned int ref_count;
 };
 
+} // end namespace fawkes
 
 #endif

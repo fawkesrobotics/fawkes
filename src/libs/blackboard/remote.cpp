@@ -41,6 +41,8 @@
 #include <string>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class RemoteBlackBoard <blackboard/remote.h>
  * Remote BlackBoard.
  * This class implements the access to a remote BlackBoard using the Fawkes
@@ -436,3 +438,5 @@ void
 RemoteBlackBoard::connection_established(unsigned int id) throw()
 {
 }
+
+} // end namespace fawkes

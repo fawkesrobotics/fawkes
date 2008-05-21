@@ -26,6 +26,7 @@
 
 #include <netcomm/worldinfo/transceiver.h>
 
+using namespace fawkes;
 
 /** @class RefBoxStateSender <tools/refboxrep/refbox_state_sender.h>
  * RefBox repeater state sender.

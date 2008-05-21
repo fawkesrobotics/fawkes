@@ -34,13 +34,16 @@
 #include <string>
 
 class PluginGui;
-class FawkesNetworkClient;
-class WaitCondition;
-class AvahiThread;
+namespace fawkes {
+  class FawkesNetworkClient;
+  class WaitCondition;
+  class AvahiThread;
+}
 
-class PluginGuiBackendThread : public Thread, 
-  public FawkesNetworkClientHandler,
-  public ServiceBrowseHandler
+class PluginGuiBackendThread
+: public fawkes::Thread, 
+  public fawkes::FawkesNetworkClientHandler,
+  public fawkes::ServiceBrowseHandler
 {
  public:
   PluginGuiBackendThread(PluginGui* gui);
@@ -56,7 +59,7 @@ class PluginGuiBackendThread : public Thread,
   void deregistered(unsigned int id) throw();
   void connection_died(unsigned int id) throw();
   void connection_established(unsigned int id) throw();
-  void inbound_received(FawkesNetworkMessage* m,
+  void inbound_received(fawkes::FawkesNetworkMessage* m,
 			unsigned int id) throw();
 
   // service browser handler
@@ -85,15 +88,15 @@ class PluginGuiBackendThread : public Thread,
   void request_unload(const char* plugin_name);
 
  private:
-  FawkesNetworkClient* m_client;
-  AvahiThread* m_avahi;
+  fawkes::FawkesNetworkClient* m_client;
+  fawkes::AvahiThread* m_avahi;
   std::map<std::string,bool> m_plugin_status;
   std::map<std::string,std::string> m_hosts;
   PluginGui* m_gui;
   bool m_connected;
   bool m_connection_died;
 
-  WaitCondition* m_longsleep;
+  fawkes::WaitCondition* m_longsleep;
 };
 
 #endif /* __TOOLS_PLUGIN_PLUGIN_GUI_BACKEND_THREAD_H_ */

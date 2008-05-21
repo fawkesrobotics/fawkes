@@ -25,6 +25,8 @@
 
 #include <aspect/thread_producer.h>
 
+namespace fawkes {
+
 /** @class ThreadProducerAspect <aspect/thread_producer.h>
  * Aspect for thread producing threads.
  * Some threads have to be started by a plugin after it is loaded. Thus
@@ -74,3 +76,5 @@ ThreadProducerAspect::init_ThreadProducerAspect(ThreadCollector *collector)
 {
   thread_collector = collector;
 }
+
+} // end namespace fawkes

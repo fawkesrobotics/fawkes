@@ -28,27 +28,29 @@
 
 #include <core/threading/thread.h>
 
-class ArgumentParser;
-class BlackBoard;
+namespace fawkes {
+  class ArgumentParser;
+  class BlackBoard;
+  class Configuration;
+  class MultiLogger;
+  class NetworkLogger;
+  class HostInfo;
+  class Clock;
+  class TimeWait;
+#ifdef USE_TIMETRACKER
+  class TimeTracker;
+#endif
+}
 class FawkesThreadManager;
 class FawkesPluginManager;
 class FawkesNetworkManager;
 class FawkesThreadIniFin;
 class FawkesConfigManager;
-class Configuration;
-class MultiLogger;
-class NetworkLogger;
-class HostInfo;
-class Clock;
-class TimeWait;
-#ifdef USE_TIMETRACKER
-class TimeTracker;
-#endif
 
-class FawkesMainThread : public Thread
+class FawkesMainThread : public fawkes::Thread
 {
  public:
-  FawkesMainThread(ArgumentParser *argp);
+  FawkesMainThread(fawkes::ArgumentParser *argp);
   virtual ~FawkesMainThread();
 
   virtual void once();
@@ -57,25 +59,26 @@ class FawkesMainThread : public Thread
  private:
   void destruct();
 
-  ArgumentParser             *argp;
-  Configuration              *config;
-  BlackBoard                 *blackboard;
-  HostInfo                   *hostinfo;
+  fawkes::ArgumentParser     *argp;
+  fawkes::Configuration      *config;
+  fawkes::BlackBoard         *blackboard;
+  fawkes::HostInfo           *hostinfo;
+  fawkes::MultiLogger        *multi_logger;
+  fawkes::NetworkLogger      *network_logger;
+  fawkes::Clock              *clock;
+  fawkes::TimeWait           *__time_wait;
+
   FawkesThreadManager        *thread_manager;
   FawkesThreadIniFin         *thread_inifin;
   FawkesPluginManager        *plugin_manager;
   FawkesNetworkManager       *network_manager;
   FawkesConfigManager        *config_manager;
-  MultiLogger                *multi_logger;
-  NetworkLogger              *network_logger;
-  Clock                      *clock;
-  TimeWait                   *__time_wait;
 
   char *config_mutable_file;
   const char *config_default_file;
 
 #ifdef USE_TIMETRACKER
-  TimeTracker  *__tt;
+  fawkes::TimeTracker  *__tt;
   unsigned int  __tt_loopcount;
   unsigned int  __ttc_pre_loop;
   unsigned int  __ttc_sensor;

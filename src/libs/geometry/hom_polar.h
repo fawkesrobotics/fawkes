@@ -28,6 +28,8 @@
 
 #include <geometry/hom_vector.h>
 
+namespace fawkes {
+
 class HomPolar : public HomVector
 {
  public:
@@ -66,5 +68,7 @@ class HomPolar : public HomVector
   float m_phi_z;
   float m_phi_y;
 };
+
+} // end namespace fawkes
 
 #endif /* __GEOMETRY_HOM_POLART_H_ */

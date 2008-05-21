@@ -56,9 +56,9 @@ class FieldView : public Gtk::DrawingArea
 		 float ball_x, float ball_y, float bot_x, float bot_y);
 
   std::map<std::string, unsigned int> m_robots;
-  std::map<unsigned int, HomPose> m_robot_poses;
-/*   std::map<unsigned int, std::vector<HomVector> > m_opponent_positions; */
-  std::map<unsigned int, HomVector> m_ball_positions;
+  std::map<unsigned int, fawkes::HomPose> m_robot_poses;
+/*   std::map<unsigned int, std::vector<fawkes::HomVector> > m_opponent_positions; */
+  std::map<unsigned int, fawkes::HomVector> m_ball_positions;
 
   unsigned int m_robot_id;
 };

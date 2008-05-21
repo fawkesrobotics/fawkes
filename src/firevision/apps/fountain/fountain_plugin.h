@@ -27,7 +27,7 @@
 
 #include <core/plugin.h>
 
-class FvFountainPlugin : public Plugin
+class FvFountainPlugin : public fawkes::Plugin
 {
  public:
   FvFountainPlugin();

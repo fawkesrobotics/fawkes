@@ -28,6 +28,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace fawkes {
+
 /** @class BlackBoardInterfaceListener <blackboard/interface_listener.h>
  * BlackBoard interface listener.
  * Derive this class if you want to be notified of specific BlackBoard 
@@ -375,3 +377,5 @@ BlackBoardInterfaceListener::bbil_writer_interface(const char *iuid) throw()
     return NULL;
   }
 }
+
+} // end namespace fawkes

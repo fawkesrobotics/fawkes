@@ -62,8 +62,7 @@ BINS_all = $(BINDIR)/fv_qa_camargp		\
 	   $(BINDIR)/fv_qa_shmlut		\
 	   $(BINDIR)/fv_qa_rectlut		\
 	   $(BINDIR)/fv_qa_fuse			\
-	   $(BINDIR)/fv_qa_colormap		\
-	   $(BINDIR)/fv_qa_randomtree
+	   $(BINDIR)/fv_qa_colormap
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

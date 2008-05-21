@@ -28,14 +28,16 @@
 
 #include <core/exception.h>
 
-class StreamSocket;
+namespace fawkes {
+  class StreamSocket;
+}
 class FuseNetworkMessageQueue;
 
 class FuseNetworkTransceiver
 {
  public:
-  static void send(StreamSocket *s, FuseNetworkMessageQueue *msgq);
-  static void recv(StreamSocket *s, FuseNetworkMessageQueue *msgq,
+  static void send(fawkes::StreamSocket *s, FuseNetworkMessageQueue *msgq);
+  static void recv(fawkes::StreamSocket *s, FuseNetworkMessageQueue *msgq,
 		   unsigned int max_num_msgs = 8);
 };
 

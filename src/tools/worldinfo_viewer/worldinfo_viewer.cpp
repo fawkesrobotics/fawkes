@@ -33,6 +33,7 @@
 #include <cstdio>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class WorldInfoViewer <tools/worldinfo_viewer/worldinfo_viewer.h>
  * Main class of the WorldInfoViewer application.

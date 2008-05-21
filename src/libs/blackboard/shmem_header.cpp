@@ -27,6 +27,7 @@
 #include <utils/ipc/shm.h>
 #include <cstddef>
 
+namespace fawkes {
 
 /** @class BlackBoardSharedMemoryHeader blackboard/shmem_header.h
  * BlackBoard Shared Memory Header.
@@ -225,3 +226,5 @@ BlackBoardSharedMemoryHeader::version() const
 {
   return data->version;
 }
+
+} // end namespace fawkes

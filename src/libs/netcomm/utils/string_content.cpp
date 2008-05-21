@@ -29,6 +29,8 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class StringContent <netcomm/utils/string_content.h>
  * Content for a variable length string.
  * This content class can be used with a FawkesNetworkMessage. It takes a
@@ -121,3 +123,5 @@ StringContent::serialize()
 {
   // nothing to do...
 }
+
+} // end namespace fawkes

@@ -27,6 +27,7 @@
 #include <core/exceptions/software.h>
 #include <cstring>
 
+using namespace fawkes;
 
 /** @class HistogramBlock fvutils/statistical/histogram_block.h
  * This class defines a file block for histograms. Additionally, the very basic routines

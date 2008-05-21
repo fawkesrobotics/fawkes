@@ -33,6 +33,7 @@ typedef struct {
   long int tv_usec;
 } timeval;
 
+namespace fawkes {
 
 class Time
 {
@@ -62,4 +63,6 @@ class Time
   const char * str();
   void         str_r(char *s);
 };
+
+}
 

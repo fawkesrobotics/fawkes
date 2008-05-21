@@ -30,7 +30,9 @@
 #include <cstring>
 #include <cstdlib>
 
-/** @class ObjectPositionInterface interfaces/object.h
+namespace fawkes {
+
+/** @class ObjectPositionInterface <interfaces/object.h>
  * ObjectPositionInterface Fawkes BlackBoard Interface.
  * 
       This interface provides access to arbitrary object positions and velocities. You
@@ -1219,3 +1221,5 @@ ObjectPositionInterface::message_valid(const Message *message) const
 EXPORT_INTERFACE(ObjectPositionInterface)
 /// @endcond
 
+
+} // end namespace fawkes

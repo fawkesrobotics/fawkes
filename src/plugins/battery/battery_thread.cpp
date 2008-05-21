@@ -31,6 +31,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+using namespace fawkes;
+
 /** @class BatteryThread <plugins/battery/battery_thread.h>
  * This is the main thread of the battery plugin. It reads out some values
  * from the battery and writes them to the blackboard.

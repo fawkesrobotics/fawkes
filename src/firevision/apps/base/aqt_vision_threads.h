@@ -27,22 +27,24 @@
 
 #include <core/threading/thread_list.h>
 
-class Clock;
-class Time;
-class Barrier;
+namespace fawkes {
+  class Clock;
+  class Time;
+  class Barrier;
+}
 
 class FvAqtVisionThreads
 {
  friend class FvBaseThread;
  friend class FvAquisitionThread;
  public:
-  FvAqtVisionThreads(Clock *clock);
+  FvAqtVisionThreads(fawkes::Clock *clock);
   ~FvAqtVisionThreads();
 
-  void add_waiting_thread(Thread *thread, bool raw);
-  void remove_thread(Thread *thread);
-  void remove_waiting_thread(Thread *thread);
-  void set_thread_running(Thread *thread);
+  void add_waiting_thread(fawkes::Thread *thread, bool raw);
+  void remove_thread(fawkes::Thread *thread);
+  void remove_waiting_thread(fawkes::Thread *thread);
+  void set_thread_running(fawkes::Thread *thread);
 
   bool  empty();
   float empty_time();
@@ -53,21 +55,20 @@ class FvAqtVisionThreads
 
   void  set_prepfin_hold(bool hold);
 
-  bool  has_waiting_thread(Thread *t);
+  bool  has_waiting_thread(fawkes::Thread *t);
 
  private:
-  ThreadList  *running_threads_cyclic;
-  ThreadList  *running_threads_cyclic_raw;
-  ThreadList  *running_threads_cont;
-  ThreadList  *running_threads_cont_raw;
-  ThreadList  *waiting_threads;
-  ThreadList  *waiting_threads_raw;
+  fawkes::ThreadList  *running_threads_cyclic;
+  fawkes::ThreadList  *running_threads_cyclic_raw;
+  fawkes::ThreadList  *running_threads_cont;
+  fawkes::ThreadList  *running_threads_cont_raw;
+  fawkes::ThreadList  *waiting_threads;
+  fawkes::ThreadList  *waiting_threads_raw;
 
-  Barrier     *cyclic_barrier;
+  fawkes::Barrier     *cyclic_barrier;
 
-  Clock *clock;
-  Time  *_empty_time;
-
+  fawkes::Clock *clock;
+  fawkes::Time  *_empty_time;
 };
 
 #endif

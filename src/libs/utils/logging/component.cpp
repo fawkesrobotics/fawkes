@@ -29,6 +29,8 @@
 #include <cstring>
 #include <cstdlib>
 
+namespace fawkes {
+
 /** @class ComponentLogger <logging/component.h>
  * Component logger.
  * This is a small wrapper around a logger to make it simpler to use in a
@@ -191,3 +193,5 @@ ComponentLogger::log_error(Exception &e)
   __logger->log_debug(__component, e);
 }
 
+
+} // end namespace fawkes

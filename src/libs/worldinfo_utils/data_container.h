@@ -36,6 +36,8 @@
 #include <vector>
 #include <map>
 
+namespace fawkes {
+
 class Clock;
 
 class WorldInfoDataContainer
@@ -151,5 +153,7 @@ class WorldInfoDataContainer
 
   Clock* m_clock;
 };
+
+} // end namespace fawkes
 
 #endif /* __TOOLS_WORLDINFO_VIEWER_DATA_CONTAINER_H_ */

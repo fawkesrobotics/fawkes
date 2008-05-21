@@ -29,6 +29,8 @@
 #include <core/exception.h>
 #include <cstddef>
 
+namespace fawkes {
+
 class MessageDecryptionException : public Exception
 {
  public:
@@ -56,6 +58,8 @@ class WorldInfoMessageDecryptor
   const unsigned char *key;
   const unsigned char *iv;
 };
+
+} // end namespace fawkes
 
 
 #endif

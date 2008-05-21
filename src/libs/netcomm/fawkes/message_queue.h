@@ -30,13 +30,15 @@
 
 #include <netcomm/fawkes/message.h>
 
+namespace fawkes {
+
 class FawkesNetworkMessageQueue : public LockQueue<FawkesNetworkMessage *>
 {
  public:
   FawkesNetworkMessageQueue();
   ~FawkesNetworkMessageQueue();
-
- private:
 };
+
+} // end namespace fawkes
 
 #endif

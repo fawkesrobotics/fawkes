@@ -30,6 +30,8 @@
 
 #define __INTERFACE_MESSAGE_TYPE_SIZE 32
 
+namespace fawkes {
+
 class Mutex;
 class Interface;
 
@@ -99,5 +101,7 @@ class Message : public RefCount
   void         *data_ptr;
   unsigned int  data_size;
 };
+
+} // end namespace fawkes
 
 #endif

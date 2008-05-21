@@ -35,6 +35,8 @@
 
 #include <cstdio>
 
+namespace fawkes {
+
 /** @class FawkesNetworkServerThread <netcomm/fawkes/server_thread.h>
  * Fawkes Network Thread.
  * Maintains a list of clients and reacts on events triggered by the clients.
@@ -349,3 +351,5 @@ FawkesNetworkServerThread::dispatch(FawkesNetworkMessage *msg)
   msg->ref();
   inbound_messages->push_locked(msg);
 }
+
+} // end namespace fawkes

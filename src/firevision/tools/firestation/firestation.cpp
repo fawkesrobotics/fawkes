@@ -49,11 +49,13 @@
 
 #include <iostream>
 
+using namespace std;
+using namespace fawkes;
+
 /** @class Firestation tools/firestation/firestation.h
  * Control GUI for vision related stuff.
+ * @author Daniel Beck
  */
-
-using namespace std;
 
 /** Constructor.
  * @param ref_xml reference pointer to the glade file

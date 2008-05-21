@@ -33,6 +33,7 @@
 // #include "utils/system/time.h"
 
 using namespace std;
+using namespace fawkes;
 
 /** @class VelocityGlobalFromRelative <models/velocity/globfromrel.h>
  * Global velocity from relative velocities.

@@ -28,6 +28,8 @@
 
 #include <utils/ipc/shm_lister.h>
 
+namespace fawkes {
+
 class SharedMemoryHeader;
 
 class BlackBoardSharedMemoryLister : public SharedMemoryLister {
@@ -48,5 +50,7 @@ class BlackBoardSharedMemoryLister : public SharedMemoryLister {
  private:
   unsigned int num;
 };
+
+} // end namespace fawkes
 
 #endif

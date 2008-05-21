@@ -25,6 +25,8 @@
 
 #include <netcomm/service_discovery/service_publisher.h>
 
+namespace fawkes {
+
 /** @class ServicePublisher <netcomm/service_discovery/service_publisher.h>
  * Service publisher interface.
  *
@@ -41,3 +43,5 @@
 ServicePublisher::~ServicePublisher()
 {
 }
+
+} // end namespace fawkes

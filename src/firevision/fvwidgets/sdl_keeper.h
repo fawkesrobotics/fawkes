@@ -40,7 +40,7 @@ class SDLKeeper
   SDLKeeper();
 
   static unsigned int  _refcount;
-  static Mutex         _mutex;
+  static fawkes::Mutex         _mutex;
 };
 
 #endif

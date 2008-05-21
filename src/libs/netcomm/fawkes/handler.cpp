@@ -25,6 +25,8 @@
 
 #include <netcomm/fawkes/handler.h>
 
+namespace fawkes {
+
 /** @class FawkesNetworkHandler <netcomm/fawkes/handler.h>
  * Network handler abstract base class.
  * This class shall be extended by threads that want to use the Fawkes
@@ -79,3 +81,5 @@ FawkesNetworkHandler::id() const
 {
   return _id;
 }
+
+} // end namespace fawkes

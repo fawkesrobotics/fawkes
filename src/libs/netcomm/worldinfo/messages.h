@@ -31,6 +31,8 @@
 
 #pragma pack(push,4)
 
+namespace fawkes {
+
 /** WorldInfo message IDs. */
 typedef enum {
   WORLDINFO_MSGTYPE_POSE           = 1,	/** Sending robot's pose */
@@ -200,6 +202,8 @@ typedef struct {
   uint32_t   half           : 1;	/**< Game time half */
   uint32_t   reserved       : 7;	/**< Reserved for future use */
 } worldinfo_gamestate_message_t;
+
+} // end namespace fawkes
 
 #pragma pack(pop)
 

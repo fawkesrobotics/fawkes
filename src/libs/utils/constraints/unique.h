@@ -28,6 +28,9 @@
 
 #include <core/exception.h>
 
+namespace fawkes {
+
+
 /** @class UniquenessViolationException <utils/constraints/unique.h>
  * Uniqueness violation exception.
  * Thrown if an operation is tried which would violate the uniqueness
@@ -117,5 +120,8 @@ UniquenessConstraint<ResourceType>::resource()
 {
   return _resource;
 }
+
+
+} // end namespace fawkes
 
 #endif

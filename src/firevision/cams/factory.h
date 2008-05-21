@@ -35,7 +35,7 @@
 
 class CameraArgumentParser;
 
-class UnknownCameraTypeException : public Exception
+class UnknownCameraTypeException : public fawkes::Exception
 {
  public:
   UnknownCameraTypeException(const char *msg = NULL);
@@ -67,7 +67,7 @@ CameraFactory::instance(const char *as)
   Camera *c = CameraFactory::instance(as);
   C *tc = dynamic_cast<C *>(c);
   if ( tc == NULL ) {
-    throw TypeMismatchException();
+    throw fawkes::TypeMismatchException();
   }
   return tc;
 }

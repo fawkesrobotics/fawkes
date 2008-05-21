@@ -32,15 +32,13 @@
 #include <map>
 #include <queue>
 
-using namespace std;
+namespace fawkes {
 
 
 class AStar
 {
  public:
-
   AStar ();
-
   ~AStar();
 
   std::vector< AStarState * > solve( AStarState * initialState );
@@ -53,15 +51,16 @@ class AStar
   };
   
   std::priority_queue< AStarState *, std::vector< AStarState * >, Cmp > openList;
-  
   std::map< const long, AStarState*> closedList;
 
   AStarState * search();
   
   std::vector< AStarState * > getSolutionSequence( AStarState * node );
-
   std::vector< AStarState * > solution;
   
 };
+
+
+} // end namespace fawkes
 
 #endif

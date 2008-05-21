@@ -43,7 +43,7 @@ ColormapFileYuvBlock::ColormapFileYuvBlock(YuvColormap *cm, unsigned int level)
   : ColormapFileBlock(CMFILE_TYPE_YUV, 256 * 256, sizeof(cmfile_yuvblock_header_t))
 {
   if ( level > cm->depth() ) {
-    throw OutOfBoundsException("YuvColormap level is out of bounds", level, 0, cm->depth());
+    throw fawkes::OutOfBoundsException("YuvColormap level is out of bounds", level, 0, cm->depth());
   }
 
   __cm    = cm;

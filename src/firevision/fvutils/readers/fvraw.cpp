@@ -31,8 +31,11 @@
 #include <cstdio>
 #include <errno.h>
 
+using namespace fawkes;
+
 /** @class FvRawReader <fvutils/readers/fvraw.h>
  * FvRaw image reader implementation.
+ * @author Tim Niemueller
  */
 
 /** Constructor.

@@ -26,6 +26,8 @@
 #ifndef __BLACKBOARD_INSTANCE_FACTORY_H_
 #define __BLACKBOARD_INSTANCE_FACTORY_H_
 
+namespace fawkes {
+
 class Interface;
 class Module;
 
@@ -42,5 +44,7 @@ class BlackBoardInstanceFactory
  private:
   Module                       *iface_module;
 };
+
+} // end namespace fawkes
 
 #endif

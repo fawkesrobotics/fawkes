@@ -28,6 +28,8 @@
 
 #include <sys/socket.h>
 
+namespace fawkes {
+
 class AvahiResolverHandler
 {
  public:
@@ -41,5 +43,7 @@ class AvahiResolverHandler
   virtual void address_resolution_failed(struct sockaddr_in *addr,
 					 socklen_t addrlen)              = 0;
 };
+
+} // end namespace fawkes
 
 #endif

@@ -28,6 +28,8 @@
 
 #include <cstring>
 
+namespace fawkes {
+
 /** @class FawkesNetworkMessageContent <netcomm/fawkes/message_content.h>
  * Fawkes network message content.
  * Interface for complex Fawkes network messages. Use this type if you want
@@ -106,3 +108,5 @@ FawkesNetworkMessageContent::copy_payload(size_t offset, const void *buf, size_t
   void *tmp = (void *)((size_t)_payload + offset);
   memcpy(tmp, buf, len);
 }
+
+} // end namespace fawkes

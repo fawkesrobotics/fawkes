@@ -25,6 +25,8 @@
 #include "fvbase_plugin.h"
 #include "base_thread.h"
 
+using namespace fawkes;
+
 /** @class FvBasePlugin "fvbase_plugin.h"
  * FireVision Base Plugin
  * This is the FireVision base plugin. It provides access to low-level

@@ -98,7 +98,7 @@ FilterRectify::apply()
   if ( rlib ) {
     if ( (rlib->pixel_width() != dst_roi->image_width) ||
 	 (rlib->pixel_height() != dst_roi->image_height) ) {
-      throw IllegalArgumentException("Rectification LUT and image sizes do not match");
+      throw fawkes::IllegalArgumentException("Rectification LUT and image sizes do not match");
     }
 
     // we have an rectification LUT info block

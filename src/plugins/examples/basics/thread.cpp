@@ -26,6 +26,9 @@
 
 #include <unistd.h>
 
+using namespace std;
+using namespace fawkes;
+
 /** @class ExampleThread plugins/examples/basics/thread.h
  * Thread of example plugin.
  * @author Tim Niemueller

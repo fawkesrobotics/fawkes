@@ -107,8 +107,8 @@ class FuseImageListWidget : FuseClientHandler
   void delete_clients();
   bool update_image_list();
 
-  LockList<ClientData> m_new_clients;
-  LockQueue<FuseClient*> m_delete_clients;
+  fawkes::LockList<ClientData> m_new_clients;
+  fawkes::LockQueue<FuseClient*> m_delete_clients;
 
   ClientData m_cur_client;
   
@@ -116,7 +116,7 @@ class FuseImageListWidget : FuseClientHandler
   Gtk::CheckButton* m_chk_compression;
   Gtk::TreeView* m_trv_image_list;
   Glib::RefPtr<Gtk::TreeStore> m_image_list;
-  Mutex m_img_list_mutex;
+  fawkes::Mutex m_img_list_mutex;
 
   ImageRecord m_image_record;
 

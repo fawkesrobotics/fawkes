@@ -26,6 +26,8 @@
 #ifndef __GEOMETRY_VECTOR_H_
 #define __GEOMETRY_VECTOR_H_
 
+namespace fawkes {
+
 class Vector
 {
  public:
@@ -74,5 +76,7 @@ class Vector
   float*       m_data;
   bool         m_manage_memory;
 };
+
+} // end namespace fawkes
 
 #endif /* __GEOMETRY_VECTOR_H_ */

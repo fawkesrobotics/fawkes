@@ -25,7 +25,9 @@
 
 #include <core/plugin.h>
 
-#include <stdio.h>
+#include <cstdio>
+
+using namespace fawkes;
 
 /** Simple test plugin for QA application.
  */

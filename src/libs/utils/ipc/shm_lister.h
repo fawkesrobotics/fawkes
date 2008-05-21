@@ -26,6 +26,9 @@
 #ifndef __UTILS_IPC_SHM_LISTER_H_
 #define __UTILS_IPC_SHM_LISTER_H_
 
+namespace fawkes {
+
+
 class SharedMemoryHeader;
 
 /** Format list output for shared memory segments.
@@ -78,5 +81,7 @@ class SharedMemoryLister {
 			  unsigned int mem_size, const void *memptr)   = 0;
 };
 
+
+} // end namespace fawkes
 
 #endif

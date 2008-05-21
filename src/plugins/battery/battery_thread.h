@@ -33,14 +33,17 @@
 
 #include <termios.h>
 
-class BatteryInterface;
-class TimeWait;
+namespace fawkes {
+  class BatteryInterface;
+  class TimeWait;
+}
 
-class BatteryThread : public Thread,
-  public LoggingAspect,
-  public BlackBoardAspect,
-  public ConfigurableAspect,
-  public ClockAspect
+class BatteryThread
+: public fawkes::Thread,
+  public fawkes::LoggingAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::ClockAspect
 {
  public:
   BatteryThread();
@@ -55,8 +58,8 @@ class BatteryThread : public Thread,
   unsigned int read_numeric(unsigned char cmd);
   /*  char* read_string(unsigned char cmd); */
 
-  BatteryInterface* m_battery_interface;
-  TimeWait* m_time_wait;
+  fawkes::BatteryInterface* m_battery_interface;
+  fawkes::TimeWait* m_time_wait;
 
   unsigned int m_interval;
   char* m_port;

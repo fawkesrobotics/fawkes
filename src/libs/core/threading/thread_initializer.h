@@ -28,6 +28,9 @@
 
 #include <core/exception.h>
 
+namespace fawkes {
+
+
 class Thread;
 
 class CannotInitializeThreadException : public Exception
@@ -43,5 +46,8 @@ class ThreadInitializer
 
   virtual void init(Thread *thread) = 0;
 };
+
+
+} // end namespace fawkes
 
 #endif

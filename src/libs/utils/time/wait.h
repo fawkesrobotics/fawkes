@@ -26,6 +26,8 @@
 #ifndef __UTILS_TIME_WAIT_H_
 #define __UTILS_TIME_WAIT_H_
 
+namespace fawkes {
+
 class Clock;
 class Time;
 
@@ -48,5 +50,7 @@ class TimeWait {
   Time  *__now;
   long int __desired_loop_time;
 };
+
+} // end namespace fawkes
 
 #endif

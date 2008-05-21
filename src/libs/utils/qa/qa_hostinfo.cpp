@@ -27,8 +27,9 @@
 ///@cond QA
 
 #include <utils/system/hostinfo.h>
+#include <cstdio>
 
-#include <stdio.h>
+using namespace fawkes;
 
 int
 main(int argc, char **argv)

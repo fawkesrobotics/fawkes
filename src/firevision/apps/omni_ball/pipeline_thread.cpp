@@ -48,6 +48,7 @@
 #include <string>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class FvOmniBallPipelineThread <apps/omni_ball/pipeline_thread.h>
  * Ball detector thread.

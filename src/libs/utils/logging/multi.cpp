@@ -26,13 +26,15 @@
 #include <utils/logging/multi.h>
 #include <utils/logging/logger.h>
 
-/// @cond INTERNALS
 #include <core/utils/lock_list.h>
 #include <core/threading/thread.h>
 
 #include <sys/time.h>
 #include <time.h>
 
+namespace fawkes {
+
+/// @cond INTERNALS
 class MultiLoggerData
 {
  public:
@@ -52,7 +54,6 @@ class MultiLoggerData
   Mutex                        *mutex;
   Thread::CancelState           old_state;
 };
-
 /// @endcond
 
 
@@ -691,3 +692,5 @@ MultiLogger::vtlog_error(struct timeval *t, const char *component, const char *f
   data->mutex->unlock();
 }
 
+
+} // end namespace fawkes

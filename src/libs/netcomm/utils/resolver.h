@@ -31,11 +31,14 @@
 #include <utils/misc/string_compare.h>
 
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <cstddef>
 
 #include <ctime>
 #include <string>
 #include <utility>
+
+namespace fawkes {
 
 class AvahiThread;
 class NetworkNameResolverThread;
@@ -70,7 +73,7 @@ class NetworkNameResolver
 
   LockHashMap<uint32_t, std::pair<char *, time_t> >       addr2name_cache;
   LockHashMap<char *,
-             std::pair<struct sockaddr *, time_t>,
+    std::pair<struct sockaddr *, time_t>,
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
              std::tr1::hash<char *>,
 #else
@@ -87,5 +90,7 @@ class NetworkNameResolver
 #endif
     StringEquality >::iterator                                 n2acit;
 };
+
+} // end namespace fawkes
 
 #endif
