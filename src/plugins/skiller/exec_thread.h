@@ -30,6 +30,7 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
+#include <utils/system/fam.h>
 
 extern "C" {
 #include <lua.h>
@@ -37,7 +38,6 @@ extern "C" {
 
 #include <string>
 #include <cstdlib>
-#include <regex.h>
 
 class SkillerLiaisonThread;
 namespace fawkes {
@@ -50,7 +50,8 @@ class SkillerExecutionThread
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect
+  public fawkes::ClockAspect,
+  public fawkes::FamListener
 {
  public:
   SkillerExecutionThread(fawkes::Barrier *liaison_exec_barrier,
@@ -64,14 +65,12 @@ class SkillerExecutionThread
 
   void skiller_reader_removed(unsigned int instance_serial);
 
+  virtual void fam_event(const char *filename, unsigned int mask);
+
  private: /* methods */
   void init_lua();
   void start_lua();
   void restart_lua();
-  void init_inotify();
-  void proc_inotify();
-  void close_inotify();
-  void inotify_watch_dir(std::string dir);
   void publish_skill_status(std::string &curss);
 
  private: /* members */
@@ -91,14 +90,7 @@ class SkillerExecutionThread
   std::string __cfg_skillspace;
   bool        __cfg_watch_files;
 
-#ifdef HAVE_INOTIFY
-  int     __inotify_fd;
-  char   *__inotify_buf;
-  size_t  __inotify_bufsize;
-  regex_t __inotify_regex;
-  std::map<int, std::string> __inotify_watches;
-  std::map<int, std::string>::iterator __inotify_wit;
-#endif
+  fawkes::FileAlterationMonitor *__fam;
 };
 
 #endif

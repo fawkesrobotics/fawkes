@@ -1,0 +1,302 @@
+
+/***************************************************************************
+ *  fam.h - File Alteration Monitor
+ *
+ *  Created: Fri May 23 11:38:41 2008
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
+
+#include <utils/system/fam.h>
+#include <utils/logging/liblogger.h>
+
+#ifdef HAVE_INOTIFY
+#  include <sys/inotify.h>
+#  include <sys/stat.h>
+#  include <poll.h>
+#  include <dirent.h>
+#  include <unistd.h>
+#  include <cerrno>
+#  include <cstring>
+#endif
+#include <cstdlib>
+
+namespace fawkes {
+
+/** @class FileAlterationMonitor <utils/system/fam.h>
+ * Monitors files for changes.
+ * This is a wrapper around inotify. It will watch directories and files
+ * for modifications. If a modifiacation, removal or addition of a file
+ * is detected one or more listeners are called. The files which trigger
+ * the event can be constrained with regular expressions.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * Opens the inotify context.
+ */
+FileAlterationMonitor::FileAlterationMonitor()
+{
+#ifdef HAVE_INOTIFY
+  if ( (__inotify_fd = inotify_init()) == -1 ) {
+    throw Exception(errno, "Failed to initialize inotify");
+  }
+
+  // from http://www.linuxjournal.com/article/8478
+  __inotify_bufsize = 1024 * (sizeof(struct inotify_event) + 16);
+  __inotify_buf     = (char *)malloc(__inotify_bufsize);
+#endif
+}
+
+
+/** Destructor. */
+FileAlterationMonitor::~FileAlterationMonitor()
+{
+  for (__rxit = __regexes.begin(); __rxit != __regexes.end(); ++__rxit) {
+    regfree(*__rxit);
+    free(*__rxit);
+  }
+
+#ifdef HAVE_INOTIFY
+  for (__inotify_wit = __inotify_watches.begin(); __inotify_wit != __inotify_watches.end(); ++__inotify_wit) {
+    inotify_rm_watch(__inotify_fd, __inotify_wit->first);
+  }
+  close(__inotify_fd);
+  if ( __inotify_buf ) {
+    free(__inotify_buf);
+    __inotify_buf = NULL;
+  }
+#endif
+}
+
+
+/** Watch a directory.
+ * This adds the given directory recursively to this FAM.
+ * @param dirpath path to directory to add
+ */
+void
+FileAlterationMonitor::watch_dir(const char *dirpath)
+{
+#ifdef HAVE_INOTIFY
+  DIR *d = opendir(dirpath);
+  if ( d == NULL ) {
+    throw Exception(errno, "Failed to open dir %s", dirpath);
+  }
+
+  uint32_t mask = IN_MODIFY | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF;
+  int iw;
+
+  LibLogger::log_debug("FileAlterationMonitor", "Adding watch for %s", dirpath);
+  if ( (iw = inotify_add_watch(__inotify_fd, dirpath, mask)) >= 0) {
+    __inotify_watches[iw] = dirpath;
+
+    dirent de, *res;
+    while ( (readdir_r(d, &de, &res) == 0) && (res != NULL) ) {
+      std::string fp = std::string(dirpath) + "/" + de.d_name;
+      struct stat st;
+      if ( stat(fp.c_str(), &st) == 0 ) {
+	if ( (de.d_name[0] != '.') && S_ISDIR(st.st_mode) ) {
+	  try {
+	    watch_dir(fp.c_str());
+	  } catch (Exception &e) {
+	    closedir(d);
+	    throw;
+	  }
+	//} else {
+	  //LibLogger::log_debug("SkillerExecutionThread", "Skipping file %s", fp.c_str());	  
+	}
+      } else {
+	LibLogger::log_debug("FileAlterationMonitor",
+			     "Skipping watch on %s, cannot stat (%s)",
+			     fp.c_str(), strerror(errno));
+      }
+    }
+  } else {
+    throw Exception("FileAlterationMonitor",
+		    "Cannot add watch for %s", dirpath);
+  }
+
+  closedir(d);
+#endif
+}
+
+
+/** Add a filter.
+ * Filters are applied to path names that triggered an event. All
+ * pathnames are checked against this regex and if any does not match
+ * the event is not posted to listeners.
+ * An example regular expression is
+ * @code
+ * ^[^.].*\\.lua$
+ * @endcode
+ * This regular expression matches to all files that does not start with
+ * a dot and have an .lua ending.
+ * @param regex regular expression to add
+ */
+void
+FileAlterationMonitor::add_filter(const char *regex)
+{
+  int regerr = 0;
+  regex_t *rx = (regex_t *)malloc(sizeof(regex_t));
+  if ( (regerr = regcomp(rx, regex, REG_EXTENDED)) != 0 ) {
+    char errtmp[1024];
+    regerror(regerr, rx, errtmp, sizeof(errtmp));
+    free(rx);
+    throw Exception("Failed to compile lua file regex: %s", errtmp);
+  }
+  __regexes.push_back_locked(rx);
+}
+
+
+/** Add a listener.
+ * @param listener listener to add
+ */
+void
+FileAlterationMonitor::add_listener(FamListener *listener)
+{
+  __listeners.push_back_locked(listener);
+}
+
+
+/** Remove a listener.
+ * @param listener listener to remove
+ */
+void
+FileAlterationMonitor::remove_listener(FamListener *listener)
+{
+  __listeners.remove_locked(listener);
+}
+
+
+/** Process events.
+ * Call this when you want file events to be processed.
+ */
+void
+FileAlterationMonitor::process_events()
+{
+#ifdef HAVE_INOTIFY
+  // Check for inotify events
+  pollfd ipfd;
+  ipfd.fd = __inotify_fd;
+  ipfd.events = POLLIN;
+  ipfd.revents = 0;
+  int prv = poll(&ipfd, 1, 0);
+  if ( prv == -1 ) {
+    LibLogger::log_error("FileAlterationMonitor",
+			 "inotify poll failed: %s (%i)",
+			 strerror(errno), errno);
+  } else while ( prv > 0 ) {
+    // Our fd has an event, we can read
+    if ( ipfd.revents & POLLERR ) {      
+      LibLogger::log_error("FileAlterationMonitor", "inotify poll error");
+    } else {
+      // must be POLLIN
+      int bytes = 0, i = 0;
+      if ((bytes = read(__inotify_fd, __inotify_buf, __inotify_bufsize)) != -1) {
+	while (i < bytes) {
+	  struct inotify_event *event = (struct inotify_event *) &__inotify_buf[i];
+	  
+	  bool valid = true;
+	  if (! (event->mask & IN_ISDIR)) {
+	    for (__rxit = __regexes.begin(); __rxit != __regexes.end(); ++__rxit) {
+	      if (regexec(*__rxit, event->name, 0, NULL, 0) == REG_NOMATCH ) {
+		LibLogger::log_debug("FileAlterationMonitor", "A regex did not match for %s", event->name);
+		valid = false;
+		break;
+	      }
+	    }
+	  }
+
+	  if (event->mask & IN_MODIFY) {
+	    LibLogger::log_debug("FileAlterationMonitor", "%s has been modified", event->name);
+	    }
+	  if (event->mask & IN_MOVE) {
+	    LibLogger::log_debug("FileAlterationMonitor", "%s has been moved", event->name);
+	    }
+	  if (event->mask & IN_DELETE) {
+	    LibLogger::log_debug("FileAlterationMonitor", "%s has been deleted", event->name);
+	  }
+	  if (event->mask & IN_CREATE) {
+	    LibLogger::log_debug("FileAlterationMonitor", "%s has been created", event->name);
+	  }
+
+	  if ( valid ) {
+	    for (__lit = __listeners.begin(); __lit != __listeners.end(); ++__lit) {
+	      (*__lit)->fam_event(event->name, event->mask);
+	    }
+	  }
+
+	  if (event->mask & IN_DELETE_SELF) {
+	    LibLogger::log_debug("FileAlterationMonitor", "Watched %s has been deleted", event->name);
+	    __inotify_watches.erase(event->wd);
+	    inotify_rm_watch(__inotify_fd, event->wd);
+	  }
+
+	  if (event->mask & IN_CREATE) {
+	    // Check if it is a directory, if it is, watch it
+	    std::string fp = __inotify_watches[event->wd] + "/" + event->name;
+	    if (  (event->mask & IN_ISDIR) && (event->name[0] != '.') ) {
+	      LibLogger::log_debug("FileAlterationMonitor",
+				   "Directory %s has been created, "
+				   "adding to watch list", event->name);
+	      try {
+		watch_dir(fp.c_str());
+	      } catch (Exception &e) {
+		LibLogger::log_warn("FileAlterationMonitor", "Adding watch for %s failed, ignoring.", fp.c_str());
+		LibLogger::log_warn("FileAlterationMonitor", e);
+	      }
+	    }
+	  }
+
+	  i += sizeof(struct inotify_event) + event->len;
+	}
+      } else {
+	LibLogger::log_error("FileAlterationMonitor", "inotify failed to read any bytes");
+      }
+    }
+
+    prv = poll(&ipfd, 1, 0);
+  }
+#else
+  LibLogger::log_error("FileAlterationMonitor",
+		       "inotify support not available, but "
+		       "process_events() was called. Ignoring.");
+#endif
+}
+
+
+
+/** @class FamListener <utils/system/fam.h>
+ * File Alteration Monitor Listener.
+ * Listener called by FileAlterationMonitor for events.
+ * @author Tim Niemueller
+ *
+ * @fn FamListener::fam_event(const char *filename, unsigned int mask)
+ * Event has been raised.
+ * @param filename name of the file that triggered the event
+ * @param mask mask indicating the event. Currently inotify event flags
+ * are used, see inotify.h.
+ *
+ */
+
+/** Virtual empty destructor. */
+FamListener::~FamListener()
+{
+}
+
+} // end of namespace fawkes

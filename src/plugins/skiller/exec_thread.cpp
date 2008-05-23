@@ -40,6 +40,7 @@
 #include <tolua++.h>
 
 #include <string>
+#include <cstring>
 
 #define INIT_FILE  SKILLDIR"/general/init.lua"
 #define START_FILE SKILLDIR"/general/start.lua"
@@ -71,9 +72,7 @@ SkillerExecutionThread::SkillerExecutionThread(Barrier *liaison_exec_barrier,
 
   __continuous_run = false;
 
-#ifdef HAVE_INOTIFY
-  __inotify_buf = NULL;
-#endif
+  __fam = NULL;
 }
 
 
@@ -131,13 +130,13 @@ SkillerExecutionThread::init_lua()
   // Export some utilities to Lua
   // NOTE: all the (tLua) types that you use here must have been declared before, probably
   // by having an appropriate require clause for a wrapper in init.lua!
-  tolua_pushusertype(tL, config, "Configuration");
+  tolua_pushusertype(tL, config, "fawkes::Configuration");
   lua_setglobal(tL, "config");
 
-  tolua_pushusertype(tL, __clog, "ComponentLogger");
+  tolua_pushusertype(tL, __clog, "fawkes::ComponentLogger");
   lua_setglobal(tL, "logger");
 
-  tolua_pushusertype(tL, clock, "Clock");
+  tolua_pushusertype(tL, clock, "fawkes::Clock");
   lua_setglobal(tL, "clock");
 
   // Make sure Lua is not currently being executed
@@ -156,17 +155,24 @@ SkillerExecutionThread::init_lua()
 void
 SkillerExecutionThread::start_lua()
 {
+  unsigned int tmp_size = 64;
+  char tmp[tmp_size];
   // Get interfaces from liaison thread
-  tolua_pushusertype(__L, __slt->wm_ball, __slt->wm_ball->type());
+
+  strcpy(tmp, "fawkes::");
+  tolua_pushusertype(__L, __slt->wm_ball, strncat(tmp, __slt->wm_ball->type(), tmp_size));
   lua_setglobal(__L, "wm_ball");
 
-  tolua_pushusertype(__L, __slt->wm_pose, __slt->wm_pose->type());
+  strcpy(tmp, "fawkes::");
+  tolua_pushusertype(__L, __slt->wm_pose, strncat(tmp, __slt->wm_pose->type(), tmp_size));
   lua_setglobal(__L, "wm_pose");
 
-  tolua_pushusertype(__L, __slt->navigator, __slt->navigator->type());
+  strcpy(tmp, "fawkes::");
+  tolua_pushusertype(__L, __slt->navigator, strncat(tmp, __slt->navigator->type(), tmp_size));
   lua_setglobal(__L, "navigator");
 
-  tolua_pushusertype(__L, __slt->gamestate, __slt->gamestate->type());
+  strcpy(tmp, "fawkes::");
+  tolua_pushusertype(__L, __slt->gamestate, strncat(tmp, __slt->gamestate->type(), tmp_size));
   lua_setglobal(__L, "gamestate");
 
   // Load start code
@@ -286,7 +292,10 @@ SkillerExecutionThread::init()
     throw;
   }
 
-  init_inotify();
+  __fam = new FileAlterationMonitor();
+  __fam->add_listener(this);
+  __fam->add_filter("^[^.].*\\.lua$");
+  __fam->watch_dir(SKILLDIR);
 
   __clog = new ComponentLogger(logger, "SkillerLua");
   __lua_mutex = new Mutex();
@@ -296,9 +305,7 @@ SkillerExecutionThread::init()
   } catch (Exception &e) {
     delete __clog;
     delete __lua_mutex;
-#ifdef HAVE_INOTIFY
-    close_inotify();
-#endif
+    delete __fam;
     throw;
   }
 
@@ -314,9 +321,8 @@ SkillerExecutionThread::finalize()
   __clog = NULL;
   delete __lua_mutex;
   __lua_mutex = NULL;
-#ifdef HAVE_INOTIFY
-  close_inotify();
-#endif
+  delete __fam;
+  __fam = NULL;
 }
 
 
@@ -345,7 +351,7 @@ void
 SkillerExecutionThread::loop()
 {
 #ifdef HAVE_INOTIFY
-  proc_inotify();
+  __fam->process_events();
 #endif
 
   __liaison_exec_barrier->wait();
@@ -515,4 +521,11 @@ SkillerExecutionThread::loop()
     }
   } // end if (curss != "")
   __lua_mutex->unlock();
+}
+
+
+void
+SkillerExecutionThread::fam_event(const char *filename, unsigned int mask)
+{
+  restart_lua();
 }
