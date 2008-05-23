@@ -1,4 +1,4 @@
-#*****************************************************************************
+
 #           Makefile Build System for Fawkes : FireVision Utils QA
 #                            -------------------
 #   Created on Wed Apr 11 16:00:32 2007
@@ -62,7 +62,8 @@ BINS_all = $(BINDIR)/fv_qa_camargp		\
 	   $(BINDIR)/fv_qa_shmlut		\
 	   $(BINDIR)/fv_qa_rectlut		\
 	   $(BINDIR)/fv_qa_fuse			\
-	   $(BINDIR)/fv_qa_colormap
+	   $(BINDIR)/fv_qa_colormap 		\
+	   $(BINDIR)/fv_qa_randomtree	
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
