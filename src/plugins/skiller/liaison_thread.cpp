@@ -48,16 +48,17 @@ using namespace fawkes;
  */
 SkillerLiaisonThread::SkillerLiaisonThread(fawkes::Barrier *liaison_exec_barrier)
   : Thread("SkillerLiaisonThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL),
+    BlackBoardInterfaceListener("SkillerLiaisonThread")
 {
   __liaison_exec_barrier = liaison_exec_barrier;
+  bbio_add_interface_create_type("ObjectPositionInterface");
 }
 
 
 /** Destructor. */
 SkillerLiaisonThread::~SkillerLiaisonThread()
 {
-  bbio_add_interface_create_type("ObjectPositionInterface");
 }
 
 

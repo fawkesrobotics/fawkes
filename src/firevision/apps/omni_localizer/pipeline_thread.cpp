@@ -59,6 +59,7 @@ using namespace fawkes;
 FvOmniLocalizerPipelineThread::FvOmniLocalizerPipelineThread() :
     Thread( "FvOmniLocalizerThread", Thread::OPMODE_WAITFORWAKEUP ),
     VisionAspect( VisionAspect::CYCLIC ),
+    BlackBoardInterfaceListener("FvOmniLocalizerPipelineThread"),
     mCamera( 0 ),
     mScanlineModel( 0 ),
     mColorModel( 0 ),

@@ -47,7 +47,8 @@ using namespace fawkes;
  */
 WorldModelThread::WorldModelThread(WorldModelNetworkThread* net_thread)
   : Thread("WorldModelThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE),
+    BlackBoardInterfaceListener("WorldModelThread")
 {
   this->net_thread = net_thread;
   this->data = 0;
@@ -507,6 +508,7 @@ WorldModelThread::loop()
 
 
 WorldModelThread::BlackboardNotificationProxy::BlackboardNotificationProxy(BlackBoardInterfaceListener *listener)
+  : BlackBoardInterfaceListener("NotificatioProxy/%s", listener->bbil_name())
 {
   this->listener = listener;
 }

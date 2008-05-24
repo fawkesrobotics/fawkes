@@ -70,8 +70,8 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
 				      unsigned int flags)
 {
   if ( flags & BlackBoard::BBIL_FLAG_DATA ) {
-    BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
-    BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_data_interfaces();
+    BlackBoardInterfaceListener::InterfaceLockMapIterator i;
+    BlackBoardInterfaceListener::InterfaceLockMap *im = listener->bbil_data_interfaces();
     __bbil_data.lock();
     for (i = im->begin(); i != im->end(); ++i) {
       __bbil_data[i->first].push_back(listener);
@@ -79,8 +79,8 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
     __bbil_data.unlock();
   }
   if ( flags & BlackBoard::BBIL_FLAG_MESSAGES ) {
-    BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
-    BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_message_interfaces();
+    BlackBoardInterfaceListener::InterfaceLockMapIterator i;
+    BlackBoardInterfaceListener::InterfaceLockMap *im = listener->bbil_message_interfaces();
     __bbil_messages.lock();
     for (i = im->begin(); i != im->end(); ++i) {
       if ( i->second->is_writer() ) {
@@ -90,8 +90,8 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
     __bbil_messages.unlock();
   }
   if ( flags & BlackBoard::BBIL_FLAG_READER ) {
-    BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
-    BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_reader_interfaces();
+    BlackBoardInterfaceListener::InterfaceLockMapIterator i;
+    BlackBoardInterfaceListener::InterfaceLockMap *im = listener->bbil_reader_interfaces();
     __bbil_reader.lock();
     for (i = im->begin(); i != im->end(); ++i) {
       __bbil_reader[i->first].push_back(listener);
@@ -99,8 +99,8 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
     __bbil_reader.unlock();
   }
   if ( flags & BlackBoard::BBIL_FLAG_WRITER ) {
-    BlackBoardInterfaceListener::InterfaceLockHashMapIterator i;
-    BlackBoardInterfaceListener::InterfaceLockHashMap *im = listener->bbil_writer_interfaces();
+    BlackBoardInterfaceListener::InterfaceLockMapIterator i;
+    BlackBoardInterfaceListener::InterfaceLockMap *im = listener->bbil_writer_interfaces();
     __bbil_writer.lock();
     for (i = im->begin(); i != im->end(); ++i) {
       __bbil_writer[i->first].push_back(listener);
@@ -293,8 +293,10 @@ BlackBoardNotifier::notify_of_writer_added(const Interface *interface,
       if (bbil_iface != NULL ) {
 	bbil->bb_interface_writer_added(bbil_iface, event_instance_serial);
       } else {
-	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for writer "
-			    "events (open) for '%s' but has no such interface", uid);
+	LibLogger::log_warn("BlackBoardNotifier",
+			    "BBIL[%s] registered for writer events "
+			    "(open) for '%s' but has no such interface",
+			    bbil->bbil_name(), uid);
       }
     }
     __bbil_writer.unlock();
@@ -325,8 +327,10 @@ BlackBoardNotifier::notify_of_writer_removed(const Interface *interface,
 	  bbil->bb_interface_writer_removed(bbil_iface, event_instance_serial);
 	}
       } else {
-	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for writer "
-			    "events (close) for '%s' but has no such interface", uid);
+	LibLogger::log_warn("BlackBoardNotifier",
+			    "BBIL[%s] registered for writer events "
+			    "(close) for '%s' but has no such interface",
+			    bbil->bbil_name(), uid);
       }
     }
   }
@@ -355,8 +359,10 @@ BlackBoardNotifier::notify_of_reader_added(const Interface *interface,
       if (bbil_iface != NULL ) {
 	bbil->bb_interface_reader_added(bbil_iface, event_instance_serial);
       } else {
-	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for reader "
-			    "events (open) for '%s' but has no such interface", uid);
+	LibLogger::log_warn("BlackBoardNotifier",
+			    "BBIL[%s] registered for reader events "
+			    "(open) for '%s' but has no such interface",
+			    bbil->bbil_name(), uid);
       }
     }
   }
@@ -387,8 +393,10 @@ BlackBoardNotifier::notify_of_reader_removed(const Interface *interface,
 	  bbil->bb_interface_reader_removed(bbil_iface, event_instance_serial);
 	}
       } else {
-	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for reader "
-			    "events (close) for '%s' but has no such interface", uid);
+	LibLogger::log_warn("BlackBoardNotifier",
+			    "BBIL[%s] registered for reader events "
+			    "(close) for '%s' but has no such interface",
+			    bbil->bbil_name(), uid);
       }
     }
     __bbil_reader.unlock();
@@ -422,8 +430,10 @@ BlackBoardNotifier::notify_of_data_change(const Interface *interface)
 	  bbil->bb_interface_data_changed(bbil_iface);
 	}
       } else {
-	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for data change "
-			    "events for '%s' but has no such interface", uid);
+	LibLogger::log_warn("BlackBoardNotifier",
+			    "BBIL[%s] registered for data change events "
+			    "for '%s' but has no such interface",
+			    bbil->bbil_name(), uid);
       }
     }
     __bbil_data.unlock();
@@ -460,8 +470,10 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
 	  rv = true;
 	}
       } else {
-	LibLogger::log_warn("BlackBoardNotifier", "BBIL registered for message received "
-			    "events for '%s' but has no such interface", uid);
+	LibLogger::log_warn("BlackBoardNotifier", "BBIL[%s] registered "
+			    "for message received events for '%s' "
+			    "but has no such interface",
+			    bbil->bbil_name(), uid);
       }
     }
     __bbil_messages.unlock();

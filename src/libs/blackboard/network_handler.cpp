@@ -209,7 +209,7 @@ BlackBoardNetworkHandler::loop()
 	if ( __interfaces.find(dm->serial) != __interfaces.end() ) {
 	
 	  if ( dm->data_size != __interfaces[dm->serial]->datasize() ) {
-	    LibLogger::log_error("BlackBoardInterfaceProxy", "DATA_CHANGED: Data size mismatch, "
+	    LibLogger::log_error("BlackBoardNetworkHandler", "DATA_CHANGED: Data size mismatch, "
 				 "expected %zu, but got %zu, ignoring.",
 				 __interfaces[dm->serial]->datasize(), dm->data_size);
 	  } else {
@@ -217,7 +217,7 @@ BlackBoardNetworkHandler::loop()
 	    __interfaces[dm->serial]->write();
 	  }
 	} else {
-	  LibLogger::log_error("BlackBoardInterfaceProxy", "DATA_CHANGED: Interface with "
+	  LibLogger::log_error("BlackBoardNetworkHandler", "DATA_CHANGED: Interface with "
 			       "serial %u not found, ignoring.", dm->serial);
 	}
       }
@@ -234,7 +234,7 @@ BlackBoardNetworkHandler::loop()
 	      Message *ifm = __interfaces[mm->serial]->create_message(mm->msg_type);
 
 	      if ( mm->data_size != ifm->datasize() ) {
-		LibLogger::log_error("BlackBoardInterfaceProxy", "MESSAGE: Data size mismatch, "
+		LibLogger::log_error("BlackBoardNetworkHandler", "MESSAGE: Data size mismatch, "
 				     "expected %zu, but got %zu, ignoring.",
 				     ifm->datasize(), mm->data_size);
 	      } else {
@@ -244,16 +244,16 @@ BlackBoardNetworkHandler::loop()
 
 	      }
 	    } catch (Exception &e) {
-	      LibLogger::log_error("BlackBoardInterfaceProxy", "MESSAGE: Could not create "
+	      LibLogger::log_error("BlackBoardNetworkHandler", "MESSAGE: Could not create "
 				   "interface message, ignoring.");
-	      LibLogger::log_error("BlackBoardInterfaceProxy", e);
+	      LibLogger::log_error("BlackBoardNetworkHandler", e);
 	    }
 	  } else {
-	    LibLogger::log_error("BlackBoardInterfaceProxy", "MESSAGE: Received message "
+	    LibLogger::log_error("BlackBoardNetworkHandler", "MESSAGE: Received message "
 				 "notification, but for a writing instance, ignoring.");
 	  }
 	} else {
-	  LibLogger::log_error("BlackBoardInterfaceProxy", "DATA_CHANGED: Interface with "
+	  LibLogger::log_error("BlackBoardNetworkHandler", "DATA_CHANGED: Interface with "
 			       "serial %u not found, ignoring.", mm->serial);
 	}
       }

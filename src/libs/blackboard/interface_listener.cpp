@@ -27,6 +27,7 @@
 #include <interface/interface.h>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 namespace fawkes {
 
@@ -77,36 +78,48 @@ namespace fawkes {
  * @see BlackBoardInterfaceManager::unregister_listener()
  */
 
-/** Empty constructor. */
-BlackBoardInterfaceListener::BlackBoardInterfaceListener()
+/** Constructor.
+ * @param name_format format of name to identify the listener,
+ * see sprintf for supported tokens
+ */
+  BlackBoardInterfaceListener::BlackBoardInterfaceListener(const char *name_format, ...)
 {
+  va_list arg;
+  va_start(arg, name_format);
+  vasprintf(&__name, name_format, arg);
+  va_end(arg);
 }
+
 
 /** Destructor. */
 BlackBoardInterfaceListener::~BlackBoardInterfaceListener()
 {
-  char *tmp;
-
   while ( ! __bbil_data_interfaces.empty() ) {
     __bbil_ii = __bbil_data_interfaces.begin();
-    tmp = (*__bbil_ii).first;
     __bbil_data_interfaces.erase(__bbil_ii);
-    free(tmp);
   }
 
   while ( ! __bbil_reader_interfaces.empty() ) {
     __bbil_ii = __bbil_reader_interfaces.begin();
-    tmp = (*__bbil_ii).first;
     __bbil_reader_interfaces.erase(__bbil_ii);
-    free(tmp);
   }
 
   while ( ! __bbil_writer_interfaces.empty() ) {
     __bbil_ii = __bbil_writer_interfaces.begin();
-    tmp = (*__bbil_ii).first;
     __bbil_writer_interfaces.erase(__bbil_ii);
-    free(tmp);
   }
+
+  free(__name);
+}
+
+
+/** Get BBIL name.
+ * @return BBIL name
+ */
+const char *
+BlackBoardInterfaceListener::bbil_name() const
+{
+  return __name;
 }
 
 
@@ -211,7 +224,7 @@ BlackBoardInterfaceListener::bbil_add_data_interface(Interface *interface)
   if ( __bbil_data_interfaces.find((char *)interface->uid()) != __bbil_data_interfaces.end() ) {
     throw Exception("Interface %s already registered (data)", interface->uid());
   }
-  __bbil_data_interfaces[strdup(interface->uid())] = interface;
+  __bbil_data_interfaces[interface->uid()] = interface;
 }
 
 /** Add an interface to the message received watch list.
@@ -226,7 +239,7 @@ BlackBoardInterfaceListener::bbil_add_message_interface(Interface *interface)
   if ( __bbil_message_interfaces.find((char *)interface->uid()) != __bbil_message_interfaces.end() ) {
     throw Exception("Interface %s already registered (message)", interface->uid());
   }
-  __bbil_message_interfaces[strdup(interface->uid())] = interface;
+  __bbil_message_interfaces[interface->uid()] = interface;
 }
 
 
@@ -242,7 +255,7 @@ BlackBoardInterfaceListener::bbil_add_reader_interface(Interface *interface)
   if ( __bbil_reader_interfaces.find((char *)interface->uid()) != __bbil_reader_interfaces.end() ) {
     throw Exception("Interface %s already registered (reader)", interface->uid());
   }
-  __bbil_reader_interfaces[strdup(interface->uid())] = interface;
+  __bbil_reader_interfaces[interface->uid()] = interface;
 }
 
 
@@ -258,14 +271,14 @@ BlackBoardInterfaceListener::bbil_add_writer_interface(Interface *interface)
   if ( __bbil_writer_interfaces.find((char *)interface->uid()) != __bbil_writer_interfaces.end() ) {
     throw Exception("Interface %s already registered (writer)", interface->uid());
   }
-  __bbil_writer_interfaces[strdup(interface->uid())] = interface;
+  __bbil_writer_interfaces[interface->uid()] = interface;
 }
 
 
 /** Get data modification watch list.
  * @return data modification watch list
  */
-BlackBoardInterfaceListener::InterfaceLockHashMap *
+BlackBoardInterfaceListener::InterfaceLockMap *
 BlackBoardInterfaceListener::bbil_data_interfaces() throw()
 {
   return &__bbil_data_interfaces;
@@ -274,7 +287,7 @@ BlackBoardInterfaceListener::bbil_data_interfaces() throw()
 /** Get message received watch list.
  * @return message received watch list
  */
-BlackBoardInterfaceListener::InterfaceLockHashMap *
+BlackBoardInterfaceListener::InterfaceLockMap *
 BlackBoardInterfaceListener::bbil_message_interfaces() throw()
 {
   return &__bbil_message_interfaces;
@@ -283,7 +296,7 @@ BlackBoardInterfaceListener::bbil_message_interfaces() throw()
 /** Get reader watch list.
  * @return reader watch list
  */
-BlackBoardInterfaceListener::InterfaceLockHashMap *
+BlackBoardInterfaceListener::InterfaceLockMap *
 BlackBoardInterfaceListener::bbil_reader_interfaces() throw()
 {
   return &__bbil_reader_interfaces;
@@ -292,7 +305,7 @@ BlackBoardInterfaceListener::bbil_reader_interfaces() throw()
 /** Get writer watch list.
  * @return writer watch list
  */
-BlackBoardInterfaceListener::InterfaceLockHashMap *
+BlackBoardInterfaceListener::InterfaceLockMap *
 BlackBoardInterfaceListener::bbil_writer_interfaces() throw()
 {
   return &__bbil_writer_interfaces;

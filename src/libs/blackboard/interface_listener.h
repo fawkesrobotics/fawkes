@@ -26,9 +26,9 @@
 #ifndef __BLACKBOARD_INTERFACE_LISTENER_H_
 #define __BLACKBOARD_INTERFACE_LISTENER_H_
 
-#include <core/utils/lock_hashmap.h>
-#include <core/utils/lock_hashset.h>
+#include <core/utils/lock_map.h>
 #include <utils/misc/string_compare.h>
+#include <string>
 
 namespace fawkes {
 
@@ -40,27 +40,16 @@ class BlackBoardInterfaceListener
  friend class BlackBoardNotifier;
 
  public:
-  /** Type for lockable interface hash maps. */
-  typedef  LockHashMap<char *, Interface *,
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
-                       std::tr1::hash<char *>,
-#else
-                       __gnu_cxx::hash<char *>,
-#endif
-                       StringEquality >            InterfaceLockHashMap;
-
-  /** Type for iterator of lockable interface hash maps. */
-  typedef  LockHashMap<char *, Interface *,
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
-                       std::tr1::hash<char *>,
-#else
-                       __gnu_cxx::hash<char *>,
-#endif
-                       StringEquality >::iterator  InterfaceLockHashMapIterator;
+  /** Type for lockable interface maps. */
+ typedef  LockMap<std::string, Interface *> InterfaceLockMap;
+ /** Iterator for InterfaceLockMap */
+ typedef  InterfaceLockMap::iterator   InterfaceLockMapIterator;
 
 
-  BlackBoardInterfaceListener();
+  BlackBoardInterfaceListener(const char *name_format, ...);
   virtual ~BlackBoardInterfaceListener();
+
+  const char * bbil_name() const;
 
   virtual void bb_interface_data_changed(Interface *interface) throw();
   virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
@@ -79,10 +68,10 @@ class BlackBoardInterfaceListener
   void bbil_add_reader_interface(Interface *interface);
   void bbil_add_writer_interface(Interface *interface);
 
-  InterfaceLockHashMap *      bbil_data_interfaces() throw();
-  InterfaceLockHashMap *      bbil_message_interfaces() throw();
-  InterfaceLockHashMap *      bbil_reader_interfaces() throw();
-  InterfaceLockHashMap *      bbil_writer_interfaces() throw();
+  InterfaceLockMap *      bbil_data_interfaces() throw();
+  InterfaceLockMap *      bbil_message_interfaces() throw();
+  InterfaceLockMap *      bbil_reader_interfaces() throw();
+  InterfaceLockMap *      bbil_writer_interfaces() throw();
 
   Interface * bbil_data_interface(const char *iuid) throw();
   Interface * bbil_message_interface(const char *iuid) throw();
@@ -90,12 +79,14 @@ class BlackBoardInterfaceListener
   Interface * bbil_writer_interface(const char *iuid) throw();
 
  private:
-  InterfaceLockHashMap       __bbil_data_interfaces;
-  InterfaceLockHashMap       __bbil_message_interfaces;
-  InterfaceLockHashMap       __bbil_reader_interfaces;
-  InterfaceLockHashMap       __bbil_writer_interfaces;
+  InterfaceLockMap         __bbil_data_interfaces;
+  InterfaceLockMap         __bbil_message_interfaces;
+  InterfaceLockMap         __bbil_reader_interfaces;
+  InterfaceLockMap         __bbil_writer_interfaces;
 
-  InterfaceLockHashMapIterator __bbil_ii;
+  InterfaceLockMapIterator __bbil_ii;
+
+  char *__name;
 };
 
 } // end namespace fawkes

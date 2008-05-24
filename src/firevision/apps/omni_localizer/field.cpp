@@ -62,7 +62,8 @@ static f_point_t make_point( float x, float y )
   @param blackboard The blackboard.
   @param config The configuration.
 */
-Field::Field( BlackBoard *blackboard, Configuration *config ) :
+Field::Field( BlackBoard *blackboard, Configuration *config )
+  : BlackBoardInterfaceListener("OmniLocalizerField"),
     mDebugBuffer( 0 ),
     mWidth( 0 ),
     mHeight( 0 ),

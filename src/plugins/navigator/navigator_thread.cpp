@@ -42,8 +42,9 @@ using namespace fawkes;
 
 /** Contructor. */
 NavigatorThread::NavigatorThread()
-    : Thread("NavigatorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+  : Thread("NavigatorThread", Thread::OPMODE_WAITFORWAKEUP),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
+    BlackBoardInterfaceListener("NavigatorThread")
 {
   logger_modulo_counter = 0;
   old_velocity_x = 0;
