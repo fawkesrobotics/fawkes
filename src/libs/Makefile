@@ -21,7 +21,7 @@
 
 BASEDIR = ../..
 
-SUBDIRS = core utils interface netcomm blackboard config aspect geometry 	\
+SUBDIRS = core utils interface netcomm blackboard config lua aspect geometry 	\
 	  worldinfo_utils
 
 include $(BASEDIR)/etc/buildsys/config.mk

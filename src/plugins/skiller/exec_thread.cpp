@@ -31,6 +31,8 @@
 #include <core/threading/barrier.h>
 #include <utils/logging/component.h>
 
+#include <lua/context.h>
+
 #include <interfaces/object.h>
 #include <interfaces/skiller.h>
 #include <interfaces/navigator.h>
@@ -68,171 +70,16 @@ SkillerExecutionThread::SkillerExecutionThread(Barrier *liaison_exec_barrier,
 {
   __liaison_exec_barrier = liaison_exec_barrier;
   __slt = slt;
-  __L = NULL;
 
   __continuous_run = false;
 
-  __fam = NULL;
+  __lua = NULL;
 }
 
 
 /** Destructor. */
 SkillerExecutionThread::~SkillerExecutionThread()
 {
-}
-
-
-void
-SkillerExecutionThread::init_lua()
-{
-  lua_State *tL = luaL_newstate();
-  luaL_openlibs(tL);
-
-  lua_pushstring(tL, SKILLDIR);                  lua_setglobal(tL, "SKILLDIR");
-  lua_pushstring(tL, LIBDIR);                    lua_setglobal(tL, "LIBDIR");
-
-  lua_pushstring(tL, __cfg_skillspace.c_str());  lua_setglobal(tL, "SKILLSPACE");
-
-  // Load initialization code
-  if ( (__err = luaL_loadfile(tL, INIT_FILE)) != 0) {
-    __errmsg = lua_tostring(tL, -1);
-    lua_pop(tL, 1);
-    lua_close(tL);
-    switch (__err) {
-    case LUA_ERRSYNTAX:
-      throw SyntaxErrorException("Lua syntax error: %s", __errmsg.c_str());
-
-    case LUA_ERRMEM:
-      throw OutOfMemoryException("Could not load Lua init file");
-
-    case LUA_ERRFILE:
-      throw CouldNotOpenFileException(INIT_FILE, __errmsg.c_str());
-    }
-  }
-
-  if ( (__err = lua_pcall(tL, 0, 0, 0)) != 0 ) {
-    // There was an error while executing the initialization file
-    __errmsg = lua_tostring(tL, -1);
-    lua_pop(tL, 1);
-    lua_close(tL);
-    switch (__err) {
-    case LUA_ERRRUN:
-      throw Exception("Lua runtime error: %s", __errmsg.c_str());
-
-    case LUA_ERRMEM:
-      throw OutOfMemoryException("Could not execute Lua init file");
-
-    case LUA_ERRERR:
-      throw Exception("Failed to execute error handler during error: %s", __errmsg.c_str());
-    }
-  }
-
-  // Export some utilities to Lua
-  // NOTE: all the (tLua) types that you use here must have been declared before, probably
-  // by having an appropriate require clause for a wrapper in init.lua!
-  tolua_pushusertype(tL, config, "fawkes::Configuration");
-  lua_setglobal(tL, "config");
-
-  tolua_pushusertype(tL, __clog, "fawkes::ComponentLogger");
-  lua_setglobal(tL, "logger");
-
-  tolua_pushusertype(tL, clock, "fawkes::Clock");
-  lua_setglobal(tL, "clock");
-
-  // Make sure Lua is not currently being executed
-  __lua_mutex->lock();
-  if ( __L != NULL ) {
-    lua_close(__L);
-  }
-  __L = tL;
-
-  __continuous_run = false;
-
-  __lua_mutex->unlock();
-}
-
-
-void
-SkillerExecutionThread::start_lua()
-{
-  unsigned int tmp_size = 64;
-  char tmp[tmp_size];
-  // Get interfaces from liaison thread
-
-  strcpy(tmp, "fawkes::");
-  tolua_pushusertype(__L, __slt->wm_ball, strncat(tmp, __slt->wm_ball->type(), tmp_size));
-  lua_setglobal(__L, "wm_ball");
-
-  strcpy(tmp, "fawkes::");
-  tolua_pushusertype(__L, __slt->wm_pose, strncat(tmp, __slt->wm_pose->type(), tmp_size));
-  lua_setglobal(__L, "wm_pose");
-
-  strcpy(tmp, "fawkes::");
-  tolua_pushusertype(__L, __slt->navigator, strncat(tmp, __slt->navigator->type(), tmp_size));
-  lua_setglobal(__L, "navigator");
-
-  strcpy(tmp, "fawkes::");
-  tolua_pushusertype(__L, __slt->gamestate, strncat(tmp, __slt->gamestate->type(), tmp_size));
-  lua_setglobal(__L, "gamestate");
-
-  // Load start code
-  if ( (__err = luaL_loadfile(__L, START_FILE)) != 0) {
-    __errmsg = lua_tostring(__L, -1);
-    lua_pop(__L, 1);
-    switch (__err) {
-    case LUA_ERRSYNTAX:
-      logger->log_debug("SkillerExecutionThread", "Lua syntax error: %s", __errmsg.c_str());
-      break;
-
-    case LUA_ERRMEM:
-      logger->log_debug("SkillerExecutionThread", "Lua: Out of memory, cannot load start file");
-      break;
-
-    case LUA_ERRFILE:
-      logger->log_debug("SkillerExecutionThread", "Lua: could not open start file (%s)", __errmsg.c_str());
-      break;
-
-    default:
-      logger->log_debug("SkillerExecutionThread", "Lua: unknown error occured (%s)", __errmsg.c_str());
-      break;
-    }
-  } else {
-    if ( (__err = lua_pcall(__L, 0, 0, 0)) != 0 ) {
-      // There was an error while executing the initialization file
-      __errmsg = lua_tostring(__L, -1);
-      lua_pop(__L, 1);
-      switch (__err) {
-      case LUA_ERRRUN:
-	logger->log_debug("SkillerExecutionThread", "Lua runtime error: %s", __errmsg.c_str());
-	break;
-	
-      case LUA_ERRMEM:
-	logger->log_debug("SkillerExecutionThread", "Lua: Out of memory, cannot execute start file");
-	break;
-
-      case LUA_ERRERR:
-	logger->log_debug("SkillerExecutionThread", "Lua: Execution failed, error handled failed as well (%s)", __errmsg.c_str());
-	break;
-
-      default:
-	logger->log_debug("SkillerExecutionThread", "Lua: unknown error occured (%s)", __errmsg.c_str());
-	break;
-      }
-    }
-  }
-}
-
-
-void
-SkillerExecutionThread::restart_lua()
-{
-  try {
-    init_lua();
-    start_lua();
-  } catch (Exception &e) {
-    logger->log_error("SkillerExecutionThread", "Failed to restart Lua, exception follows");
-    logger->log_error("SkillerExecutionThread", e);
-  }
 }
 
 
@@ -249,13 +96,15 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
   const char *sst = "Unknown";
   LUA_INTEGER running = 0, final = 0, failed = 0;
 
-  if ( luaL_dostring(__L, "return general.skillenv.get_status()") != 0 ) {
-    __errmsg = lua_tostring(__L, -1);
-    logger->log_error("SkillerExecutionThread", "Failed to get skill status: %s", __errmsg.c_str());
-  } else {
-    running = lua_tointeger(__L, -3);
-    final   = lua_tointeger(__L, -2);
-    failed  = lua_tointeger(__L, -1);
+  try {
+    __lua->do_string("return general.skillenv.get_status()");
+    running = __lua->to_integer(-3);
+    final   = __lua->to_integer(-2);
+    failed  = __lua->to_integer(-1);
+
+    logger->log_debug("SkillerExecutionThread", "Status is %s "
+		      "(running %i, final: %i, failed: %i)",
+		      sst, running, final, failed);
 
     if ( failed > 0 ) {
       sst = "S_FAILED";
@@ -271,11 +120,12 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
       sst = "S_INACTIVE";
       __slt->skiller->set_status(SkillerInterface::S_INACTIVE);
     }
-  }
 
-  logger->log_debug("SkillerExecutionThread", "Status is %s "
-		    "(running %i, final: %i, failed: %i)",
-		    sst, running, final, failed);
+  } catch (Exception &e) {
+    logger->log_error("SkillerExecutionThread", "Failed to retrieve skill status");
+    logger->log_error("SkillerExecutionThread", e);
+    __slt->skiller->set_status(SkillerInterface::S_FAILED);
+  }
 
   __slt->skiller->write();
 }
@@ -292,44 +142,43 @@ SkillerExecutionThread::init()
     throw;
   }
 
-  __fam = new FileAlterationMonitor();
-  __fam->add_listener(this);
-  __fam->add_filter("^[^.].*\\.lua$");
-  __fam->watch_dir(SKILLDIR);
+  logger->log_debug("SkillerExecutionThread", "Skill space: %s", __cfg_skillspace.c_str());
 
   __clog = new ComponentLogger(logger, "SkillerLua");
-  __lua_mutex = new Mutex();
+  __lua  = new LuaContext(__cfg_watch_files);
 
-  try {
-    init_lua();
-  } catch (Exception &e) {
-    delete __clog;
-    delete __lua_mutex;
-    delete __fam;
-    throw;
-  }
+  __lua->add_package_dir(SKILLDIR);
+  __lua->add_cpackage_dir(LIBDIR"/lua");
 
-  logger->log_debug("SkillerExecutionThread", "Skill space: %s", __cfg_skillspace.c_str());
+  __lua->add_package("utils");
+  __lua->add_package("config");
+  __lua->add_package("interface");
+  __lua->add_package("interfaces");
+  __lua->add_package("general.stringext");
+
+  __lua->set_string("SKILLSPACE", __cfg_skillspace.c_str());
+  __lua->set_usertype("config", config, "Configuration", "fawkes");
+  __lua->set_usertype("logger", __clog, "ComponentLogger", "fawkes");
+  __lua->set_usertype("clock", clock, "Clock", "fawkes");
+
+  __lua->set_usertype("wm_ball", __slt->wm_ball, __slt->wm_ball->type(), "fawkes");
+  __lua->set_usertype("wm_pose", __slt->wm_pose, __slt->wm_pose->type(), "fawkes");
+  __lua->set_usertype("navigator", __slt->navigator, __slt->navigator->type(), "fawkes");
+  __lua->set_usertype("gamestate", __slt->gamestate, __slt->gamestate->type(), "fawkes");
+
+  __lua->set_start_script(SKILLDIR"/general/start.lua");
 }
 
 
 void
 SkillerExecutionThread::finalize()
 {
-  lua_close(__L);
+  delete __lua;
+  __lua = NULL;
   delete __clog;
   __clog = NULL;
-  delete __lua_mutex;
-  __lua_mutex = NULL;
-  delete __fam;
-  __fam = NULL;
-}
 
 
-void
-SkillerExecutionThread::once()
-{
-  start_lua();
 }
 
 
@@ -347,14 +196,12 @@ SkillerExecutionThread::skiller_reader_removed(unsigned int instance_serial)
   }
 }
 
+
 void
 SkillerExecutionThread::loop()
 {
-#ifdef HAVE_INOTIFY
-  __fam->process_events();
-#endif
-
   __liaison_exec_barrier->wait();
+  __lua->process_fam_events();
 
   // Current skill string
   std::string curss = "";
@@ -459,10 +306,9 @@ SkillerExecutionThread::loop()
     curss = __slt->skiller->skill_string();
   }
 
-  __lua_mutex->lock();
   if ( continuous_reset ) {
     logger->log_debug("SkillerExecutionThread", "Continuous reset forced");
-    luaL_dostring(__L, "general.skillenv.reset_all()");
+    __lua->do_string("general.skillenv.reset_all()");
   }
 
   if ( curss != "" ) {
@@ -472,60 +318,27 @@ SkillerExecutionThread::loop()
     if ( __continuous_run && ! continuous_reset) {
       // was continuous execution, status has to be cleaned up anyway
       logger->log_debug("SkillerExecutionThread", "Resetting skill status in continuous mode");
-      luaL_dostring(__L, "general.skillenv.reset_status()");
+      __lua->do_string("general.skillenv.reset_status()");
     }
 
-    if ( (__err = luaL_loadstring(__L, curss.c_str())) != 0 ) {// sksf (skill string function)
-      __errmsg = lua_tostring(__L, -1);
-      lua_pop(__L, 1);
-      switch (__err) {
-      case LUA_ERRSYNTAX:
-	logger->log_error("SkillerExecutionThread", "Lua syntax error: %s", __errmsg.c_str());
-	break;
+    try {
+                                          // Stack:
+      __lua->load_string(curss.c_str());  // sksf (skill string function)
+      __lua->do_string("return general.skillenv.gensandbox()"); // sksf, sandbox
+      __lua->setfenv();                   // sksf
+      __lua->pcall();                     // ---
 
-      case LUA_ERRMEM:
-	logger->log_error("SkillerExecutionThread", "Lua ran out of memory");
-	break;
+    } catch (Exception &e) {
+      logger->log_error("SkillerExecutionThread", e);
+    }
 
-      }
-    } else {
-      luaL_dostring(__L, "return general.skillenv.gensandbox()");  // sksf sandbox
-      lua_setfenv(__L, -2);                                        // sksf
+    publish_skill_status(curss);
 
-      if ( (__err = lua_pcall(__L, 0, 0, 0)) != 0 ) { // execute skill string
-	// There was an error while executing the initialization file
-	__errmsg = lua_tostring(__L, -1);
-	lua_pop(__L, 1);
-	switch (__err) {
-	case LUA_ERRRUN:
-	  logger->log_error("SkillerExecutionThread", "Lua runtime error: %s", __errmsg.c_str());
-	  break;
-
-	case LUA_ERRMEM:
-	  logger->log_error("SkillerExecutionThread", "Lua ran out of memory");
-	  break;
-
-	case LUA_ERRERR:
-	  logger->log_error("SkillerExecutionThread", "Lua runtime error and error function failed: %s", __errmsg.c_str());
-	  break;
-	}
-      }
-
-      publish_skill_status(curss);
-
-      if ( ! __continuous_run ) {
-	// was one-shot execution, cleanup
-	logger->log_debug("SkillerExecutionThread", "Resetting skills");
-	luaL_dostring(__L, "general.skillenv.reset_all()");
-      }
+    if ( ! __continuous_run ) {
+      // was one-shot execution, cleanup
+      logger->log_debug("SkillerExecutionThread", "Resetting skills");
+      __lua->do_string("general.skillenv.reset_all()");
     }
   } // end if (curss != "")
-  __lua_mutex->unlock();
 }
 
-
-void
-SkillerExecutionThread::fam_event(const char *filename, unsigned int mask)
-{
-  restart_lua();
-}

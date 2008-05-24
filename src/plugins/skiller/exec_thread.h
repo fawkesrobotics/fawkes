@@ -32,10 +32,6 @@
 #include <aspect/clock.h>
 #include <utils/system/fam.h>
 
-extern "C" {
-#include <lua.h>
-}
-
 #include <string>
 #include <cstdlib>
 
@@ -43,6 +39,7 @@ class SkillerLiaisonThread;
 namespace fawkes {
   class ComponentLogger;
   class Mutex;
+  class LuaContext;
 }
 
 class SkillerExecutionThread
@@ -50,8 +47,7 @@ class SkillerExecutionThread
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::FamListener
+  public fawkes::ClockAspect
 {
  public:
   SkillerExecutionThread(fawkes::Barrier *liaison_exec_barrier,
@@ -59,29 +55,18 @@ class SkillerExecutionThread
   virtual ~SkillerExecutionThread();
 
   virtual void init();
-  virtual void once();
   virtual void loop();
   virtual void finalize();
 
   void skiller_reader_removed(unsigned int instance_serial);
 
-  virtual void fam_event(const char *filename, unsigned int mask);
-
  private: /* methods */
-  void init_lua();
-  void start_lua();
-  void restart_lua();
   void publish_skill_status(std::string &curss);
 
  private: /* members */
   fawkes::Barrier *__liaison_exec_barrier;
   SkillerLiaisonThread *__slt;
   fawkes::ComponentLogger *__clog;
-
-  lua_State *__L;
-  int __err;
-  std::string __errmsg;
-  fawkes::Mutex *__lua_mutex;
 
   bool        __continuous_run;
   bool        __continuous_rst;
@@ -90,7 +75,7 @@ class SkillerExecutionThread
   std::string __cfg_skillspace;
   bool        __cfg_watch_files;
 
-  fawkes::FileAlterationMonitor *__fam;
+  fawkes::LuaContext  *__lua;
 };
 
 #endif

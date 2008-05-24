@@ -1,8 +1,10 @@
 #*****************************************************************************
-#       Makefile Build System for Fawkes: Skill Execution Runtime Plugin
+#         Makefile Build System for Fawkes: Fawkes Lua Integration
 #                            -------------------
-#   Created on Fri Feb 08 00:47:23 2008
+#   Created on Fri May 23 11:21:28 2008
 #   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -14,22 +16,19 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/lua.mk
-include $(LIBSRCDIR)/utils/utils.mk
 
-SUBDIRS = consoletool
+LIBS_libfawkeslua = core lua tolua++
+OBJS_libfawkeslua = $(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
-CFLAGS  += -DSKILLDIR=\"$(SKILLDIR)\"
+CFLAGS += $(CFLAGS_lua)
+LDFLAGS_libfawkeslua += $(LDFLAGS_lua)
 
-LIBS_skiller = core utils netcomm fawkeslua
-OBJS_skiller = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
-
-OBJS_all    = $(OBJS_skiller)
+OBJS_all = $(OBJS_libfawkeslua)
 
 ifeq ($(HAVE_LUA),1)
   ifeq ($(HAVE_TOLUA),1)
-    PLUGINS_all = $(PLUGINDIR)/skiller.so
+    LIBS_all = $(LIBDIR)/libfawkeslua.so
   else
     WARN_TARGETS += warning_tolua
   endif
@@ -42,11 +41,12 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_lua warning_tolua
 warning_lua:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Skiller Plugin$(TNORMAL) (Lua >= $(LUA_MINVERSION) not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Fawkes Lua integration$(TNORMAL) (Lua >= $(LUA_MINVERSION) not installed)"
 
 warning_tolua:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Skiller Plugin$(TNORMAL) (tolua++[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Fawkes Lua integration$(TNORMAL) (tolua++[-devel] not installed)"
 endif
+
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

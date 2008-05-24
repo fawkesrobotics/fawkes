@@ -58,7 +58,6 @@ BlackBoardNetHandlerInterfaceListener::BlackBoardNetHandlerInterfaceListener(Bla
 									     unsigned int clid)
   : BlackBoardInterfaceListener("NetIL/%s", interface->uid())
 {
-  printf("Registering for %s\n", interface->uid());
   bbil_add_data_interface(interface);
   bbil_add_reader_interface(interface);
   bbil_add_writer_interface(interface);
