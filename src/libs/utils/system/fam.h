@@ -27,12 +27,9 @@
 
 #include <core/utils/lock_list.h>
 
-#ifdef HAVE_INOTIFY
-#  include <sys/inotify.h>
-#  include <map>
-#  include <string>
-#endif
 #include <sys/types.h>
+#include <map>
+#include <string>
 #include <regex.h>
 
 namespace fawkes {
@@ -41,6 +38,34 @@ class FamListener
 {
  public:
   virtual ~FamListener();
+
+  static const unsigned int FAM_ACCESS;
+  static const unsigned int FAM_MODIFY;
+  static const unsigned int FAM_ATTRIB;
+  static const unsigned int FAM_CLOSE_WRITE;
+  static const unsigned int FAM_CLOSE_NOWRITE;
+  static const unsigned int FAM_CLOSE;
+  static const unsigned int FAM_OPEN;
+  static const unsigned int FAM_MOVED_FROM;
+  static const unsigned int FAM_MOVED_TO;
+  static const unsigned int FAM_MOVE;
+  static const unsigned int FAM_CREATE;
+  static const unsigned int FAM_DELETE;
+  static const unsigned int FAM_DELETE_SELF;
+  static const unsigned int FAM_MOVE_SELF;
+
+  static const unsigned int FAM_UNMOUNT;
+  static const unsigned int FAM_Q_OVERFLOW;
+  static const unsigned int FAM_IGNORED;
+
+  static const unsigned int FAM_ONLYDIR;
+  static const unsigned int FAM_DONT_FOLLOW;
+  static const unsigned int FAM_MASK_ADD;
+  static const unsigned int FAM_ISDIR;
+  static const unsigned int FAM_ONESHOT;
+
+  static const unsigned int FAM_ALL_EVENTS;
+
 
   virtual void fam_event(const char *filename, unsigned int mask) = 0;
 };
@@ -60,18 +85,16 @@ class FileAlterationMonitor
   void remove_listener(FamListener *listener);
 
  private:
-  fawkes::LockList<FamListener *>            __listeners;
-  fawkes::LockList<FamListener *>::iterator  __lit;
-  fawkes::LockList<regex_t *>                __regexes;
-  fawkes::LockList<regex_t *>::iterator      __rxit;
+  LockList<FamListener *>            __listeners;
+  LockList<FamListener *>::iterator  __lit;
+  LockList<regex_t *>                __regexes;
+  LockList<regex_t *>::iterator      __rxit;
 
-#ifdef HAVE_INOTIFY
   int     __inotify_fd;
   char   *__inotify_buf;
   size_t  __inotify_bufsize;
   std::map<int, std::string> __inotify_watches;
   std::map<int, std::string>::iterator __inotify_wit;
-#endif
 
 };
 

@@ -38,6 +38,63 @@
 
 namespace fawkes {
 
+/* Supported events suitable for MASK parameter of INOTIFY_ADD_WATCH.  */
+/** File was accessed.  */
+const unsigned int FamListener::FAM_ACCESS        = 0x00000001;
+/** File was modified.  */
+const unsigned int FamListener::FAM_MODIFY	  = 0x00000002;
+/** Metadata changed.  */
+const unsigned int FamListener::FAM_ATTRIB	  = 0x00000004;
+/** Writtable file was closed.  */
+const unsigned int FamListener::FAM_CLOSE_WRITE	  = 0x00000008;
+/** Unwrittable file closed.  */
+const unsigned int FamListener::FAM_CLOSE_NOWRITE = 0x00000010;
+/** Close.  */
+const unsigned int FamListener::FAM_CLOSE	  = (FAM_CLOSE_WRITE | FAM_CLOSE_NOWRITE);
+/** File was opened.  */
+const unsigned int FamListener::FAM_OPEN	  = 0x00000020;
+/** File was moved from X.  */
+const unsigned int FamListener::FAM_MOVED_FROM	  = 0x00000040;
+/** File was moved to Y.  */
+const unsigned int FamListener::FAM_MOVED_TO      = 0x00000080;
+/** Moves.  */
+const unsigned int FamListener::FAM_MOVE          = (FAM_MOVED_FROM | FAM_MOVED_TO);
+/** Subfile was created.  */
+const unsigned int FamListener::FAM_CREATE	  = 0x00000100;
+/** Subfile was deleted.  */
+const unsigned int FamListener::FAM_DELETE	  = 0x00000200;
+/** Self was deleted.  */
+const unsigned int FamListener::FAM_DELETE_SELF	  = 0x00000400;
+/** Self was moved.  */
+const unsigned int FamListener::FAM_MOVE_SELF	  = 0x00000800;
+
+/* Events sent by the kernel.  */
+/** Backing fs was unmounted.  */
+const unsigned int FamListener::FAM_UNMOUNT	  = 0x00002000;
+/** Event queued overflowed.  */
+const unsigned int FamListener::FAM_Q_OVERFLOW	  = 0x00004000;
+/** File was ignored.  */
+const unsigned int FamListener::FAM_IGNORED	  = 0x00008000;
+
+/* Special flags.  */
+/** Only watch the path if it is a directory.  */
+const unsigned int FamListener::FAM_ONLYDIR	  = 0x01000000;
+/** Do not follow a sym link.  */
+const unsigned int FamListener::FAM_DONT_FOLLOW	  = 0x02000000;
+/** Add to the mask of an already existing watch.  */
+const unsigned int FamListener::FAM_MASK_ADD	  = 0x20000000;
+/** Event occurred against dir.  */
+const unsigned int FamListener::FAM_ISDIR	  = 0x40000000;
+/** Only send event once.  */
+const unsigned int FamListener::FAM_ONESHOT	  = 0x80000000;
+
+/** All events which a program can wait on.  */
+const unsigned int FamListener::FAM_ALL_EVENTS	   = (FAM_ACCESS | FAM_MODIFY | FAM_ATTRIB | FAM_CLOSE_WRITE \
+						      | FAM_CLOSE_NOWRITE | FAM_OPEN | FAM_MOVED_FROM \
+						      | FAM_MOVED_TO | FAM_CREATE | FAM_DELETE \
+						      | FAM_DELETE_SELF | FAM_MOVE_SELF);
+
+
 /** @class FileAlterationMonitor <utils/system/fam.h>
  * Monitors files for changes.
  * This is a wrapper around inotify. It will watch directories and files
@@ -61,6 +118,8 @@ FileAlterationMonitor::FileAlterationMonitor()
   __inotify_bufsize = 1024 * (sizeof(struct inotify_event) + 16);
   __inotify_buf     = (char *)malloc(__inotify_bufsize);
 #endif
+
+  __regexes.clear();
 }
 
 
@@ -278,7 +337,6 @@ FileAlterationMonitor::process_events()
 		       "process_events() was called. Ignoring.");
 #endif
 }
-
 
 
 /** @class FamListener <utils/system/fam.h>
