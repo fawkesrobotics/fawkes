@@ -15,7 +15,7 @@
 #
 #*****************************************************************************
 
-SKILLDIR = $(abspath $(BASEDIR)/src/plugins/skiller/skills)
+SKILLERLUADIR = $(abspath $(BASEDIR)/src/plugins/skiller/lua)
 
 ifneq ($(wildcard /usr/include/sys/inotify.h),)
   HAVE_INOTIFY=1

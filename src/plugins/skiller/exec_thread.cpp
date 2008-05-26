@@ -44,9 +44,6 @@
 #include <string>
 #include <cstring>
 
-#define INIT_FILE  SKILLDIR"/general/init.lua"
-#define START_FILE SKILLDIR"/general/start.lua"
-
 using namespace std;
 using namespace fawkes;
 
@@ -97,7 +94,7 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
   LUA_INTEGER running = 0, final = 0, failed = 0;
 
   try {
-    __lua->do_string("return general.skillenv.get_status()");
+    __lua->do_string("return skills.skillenv.get_status()");
     running = __lua->to_integer(-3);
     final   = __lua->to_integer(-2);
     failed  = __lua->to_integer(-1);
@@ -147,14 +144,14 @@ SkillerExecutionThread::init()
   __clog = new ComponentLogger(logger, "SkillerLua");
   __lua  = new LuaContext(__cfg_watch_files);
 
-  __lua->add_package_dir(SKILLDIR);
-  __lua->add_cpackage_dir(LIBDIR"/lua");
+  __lua->add_package_dir(SKILLERLUADIR);
+  __lua->add_package_dir(LUADIR);
+  __lua->add_cpackage_dir(LUALIBDIR);
 
   __lua->add_package("utils");
   __lua->add_package("config");
   __lua->add_package("interface");
   __lua->add_package("interfaces");
-  __lua->add_package("general.stringext");
 
   __lua->set_string("SKILLSPACE", __cfg_skillspace.c_str());
   __lua->set_usertype("config", config, "Configuration", "fawkes");
@@ -166,7 +163,7 @@ SkillerExecutionThread::init()
   __lua->set_usertype("navigator", __slt->navigator, __slt->navigator->type(), "fawkes");
   __lua->set_usertype("gamestate", __slt->gamestate, __slt->gamestate->type(), "fawkes");
 
-  __lua->set_start_script(SKILLDIR"/general/start.lua");
+  __lua->set_start_script(SKILLERLUADIR"/skills/common/start.lua");
 }
 
 
@@ -207,8 +204,7 @@ SkillerExecutionThread::loop()
   std::string curss = "";
 
   unsigned int excl_ctrl  = __slt->skiller->exclusive_controller();
-
-  bool        continuous_reset = false;
+  bool continuous_reset   = false;
 
   while ( ! __slt->skiller->msgq_empty() ) {
     if ( __slt->skiller->msgq_first_is<SkillerInterface::AcquireControlMessage>() ) {
@@ -308,7 +304,7 @@ SkillerExecutionThread::loop()
 
   if ( continuous_reset ) {
     logger->log_debug("SkillerExecutionThread", "Continuous reset forced");
-    __lua->do_string("general.skillenv.reset_all()");
+    __lua->do_string("skills.skillenv.reset_all()");
   }
 
   if ( curss != "" ) {
@@ -318,13 +314,13 @@ SkillerExecutionThread::loop()
     if ( __continuous_run && ! continuous_reset) {
       // was continuous execution, status has to be cleaned up anyway
       logger->log_debug("SkillerExecutionThread", "Resetting skill status in continuous mode");
-      __lua->do_string("general.skillenv.reset_status()");
+      __lua->do_string("skills.skillenv.reset_status()");
     }
 
     try {
                                           // Stack:
       __lua->load_string(curss.c_str());  // sksf (skill string function)
-      __lua->do_string("return general.skillenv.gensandbox()"); // sksf, sandbox
+      __lua->do_string("return skills.skillenv.gensandbox()"); // sksf, sandbox
       __lua->setfenv();                   // sksf
       __lua->pcall();                     // ---
 
@@ -337,7 +333,7 @@ SkillerExecutionThread::loop()
     if ( ! __continuous_run ) {
       // was one-shot execution, cleanup
       logger->log_debug("SkillerExecutionThread", "Resetting skills");
-      __lua->do_string("general.skillenv.reset_all()");
+      __lua->do_string("skills.skillenv.reset_all()");
     }
   } // end if (curss != "")
 }

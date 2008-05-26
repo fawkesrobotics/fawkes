@@ -23,21 +23,18 @@
 
 local require = require;
 
-require("general.utils")
-require("general.skillenv");
-
-module("midsize", general.utils.register_all);
+require("fawkes.modinit")
+module("skills.midsize", fawkes.modinit.register_all);
+require("skills.common.skillenv");
 
 function module_init(m)
-   general.utils.module_init(m);
-   general.skillenv.module_init(m);
+   skills.skillenv.module_init(m);
 
    m.midsize = _M;
 end
 
 -- Require all mid-size skills
-require("midsize.example");
-require("midsize.relgoto");
-require("midsize.goto");
-require("midsize.intercept");
-require("midsize.agent");
+require("skills.midsize.example");
+require("skills.midsize.relgoto");
+require("skills.midsize.goto");
+require("skills.midsize.intercept");

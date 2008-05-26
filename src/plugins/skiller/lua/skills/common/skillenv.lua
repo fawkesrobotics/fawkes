@@ -21,9 +21,10 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-require("general.utils");
+require("fawkes.modinit");
 
-module("general.skillenv", general.utils.register_all);
+module("skills.skillenv", fawkes.modinit.register_all);
+require("fawkes.logprint");
 
 local skills        = {};
 local skill_status  = { running = {}, final = {}, failed = {} };
@@ -116,11 +117,11 @@ local skill_env_template = {
    next        = next,
    print       = print,
    pairs       = pairs,
-   print       = general.utils.print_info,
-   print_debug = general.utils.print_debug,
-   print_info  = general.utils.print_info,
-   print_warn  = general.utils.print_warn,
-   print_error = general.utils.print_error,
+   print       = fawkes.logprint.print_info,
+   print_debug = fawkes.logprint.print_debug,
+   print_info  = fawkes.logprint.print_info,
+   print_warn  = fawkes.logprint.print_warn,
+   print_error = fawkes.logprint.print_error,
    select      = select,
    sinfo       = skill_info,
    skill_info  = skill_info,
@@ -240,6 +241,8 @@ end
 -- Initialize a skill module.
 -- @param m table of the module to initialize
 function module_init(m)
+   fawkes.modinit.module_init(m);
+
    local mt = getmetatable(m);
    assert(mt == nil or mt.__index == nil, "Metatable already has an __index function/table.");
 
@@ -250,6 +253,8 @@ function module_init(m)
    end
 
    setmetatable(m, mt);
+
+   m.register_skill = register_skill;
 end
 
 -- Register a skill.

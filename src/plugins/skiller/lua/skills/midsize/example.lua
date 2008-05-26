@@ -23,8 +23,8 @@
 --  along with this program; if not, write to the Free Software Foundation,
 --  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA.
 
-require("midsize")
-module("midsize.example", midsize.module_init)
+require("skills.midsize")
+module("skills.midsize.example", skills.midsize.module_init)
 
 function example(arg)
    local status = S_RUNNING;

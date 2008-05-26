@@ -21,27 +21,27 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-require("midsize")
-module("midsize.agent", midsize.module_init)
+require("agents.midsize")
+module("agents.midsize", midsize.module_init)
 
-require("midsize.agent.cornerkick");
-require("midsize.agent.dropball");
-require("midsize.agent.freekick");
-require("midsize.agent.goalkick");
-require("midsize.agent.kickoff");
-require("midsize.agent.penalty");
-require("midsize.agent.play");
-require("midsize.agent.throwin");
+require("agents.midsize.cornerkick");
+require("agents.midsize.dropball");
+require("agents.midsize.freekick");
+require("agents.midsize.goalkick");
+require("agents.midsize.kickoff");
+require("agents.midsize.penalty");
+require("agents.midsize.play");
+require("agents.midsize.throwin");
 
 -- rebind functions to have shorter names
-local agent_cornerkick = midsize.agent.cornerkick.exec;
-local agent_dropball   = midsize.agent.dropball.exec;
-local agent_freekick   = midsize.agent.freekick.exec;
-local agent_goalkick   = midsize.agent.goalkick.exec;
-local agent_kickoff    = midsize.agent.kickoff.exec;
-local agent_penalty    = midsize.agent.penalty.exec;
-local agent_play       = midsize.agent.play.exec;
-local agent_throwin    = midsize.agent.throwin.exec;
+local agent_cornerkick = agents.midsize.cornerkick.exec;
+local agent_dropball   = agents.midsize.dropball.exec;
+local agent_freekick   = agents.midsize.freekick.exec;
+local agent_goalkick   = agents.midsize.goalkick.exec;
+local agent_kickoff    = agents.midsize.kickoff.exec;
+local agent_penalty    = agents.midsize.penalty.exec;
+local agent_play       = agents.midsize.play.exec;
+local agent_throwin    = agents.midsize.throwin.exec;
 
 -- local state variables
 local last_game_state = gamestate.GS_FROZEN;

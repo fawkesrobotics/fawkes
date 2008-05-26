@@ -46,9 +46,11 @@ while ( v:next() ) do
 end
 --]]
 
-require("general.utils");
-require("general.skillenv");
+require("fawkes.logprint");
+require("skills.common.skillenv");
 
-require(SKILLSPACE)
+require("skills." .. SKILLSPACE)
+
+fawkes.logprint.init(logger);
 
 logger:log_debug("Lua startup completed");

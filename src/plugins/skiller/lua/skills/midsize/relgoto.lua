@@ -21,8 +21,8 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-require("midsize")
-module("midsize.relgoto", midsize.module_init)
+require("skills.midsize")
+module("skills.midsize.relgoto", skills.midsize.module_init)
 
 -- constants
 local DEFAULT_MARGIN = 0.2;

@@ -20,7 +20,7 @@ include $(LIBSRCDIR)/utils/utils.mk
 
 SUBDIRS = consoletool
 
-CFLAGS  += -DSKILLDIR=\"$(SKILLDIR)\"
+CFLAGS  += -DSKILLERLUADIR=\"$(SKILLERLUADIR)\" $(CFLAGS_LUA)
 
 LIBS_skiller = core utils netcomm fawkeslua
 OBJS_skiller = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))

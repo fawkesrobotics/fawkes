@@ -21,9 +21,9 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-require("midsize")
-module("midsize.intercept", midsize.module_init)
-require("midsize.relgoto");
+require("skills.midsize")
+module("skills.midsize.intercept", skills.midsize.module_init)
+require("skills.midsize.relgoto");
 
 
 local intercept_margin = 0.3;

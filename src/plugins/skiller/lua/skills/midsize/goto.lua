@@ -21,13 +21,13 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-require("midsize")
-module("midsize.goto", midsize.module_init)
-require("midsize.relgoto");
+require("skills.midsize")
+module("skills.midsize.goto", skills.midsize.module_init)
+require("skills.midsize.relgoto");
 
 -- Check goto status
 function goto_checkstatus(margin)
-   return midsize.relgoto.relgoto_checkstatus(margin);
+   return skills.midsize.relgoto.relgoto_checkstatus(margin);
 end
 
 
@@ -77,7 +77,7 @@ end
 
 
 function goto_reset()
-   midsize.relgoto.relgoto_reset();
+   skills.midsize.relgoto.relgoto_reset();
 end
 
 
