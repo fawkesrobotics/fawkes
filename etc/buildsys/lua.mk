@@ -28,7 +28,9 @@ ifneq ($(PKGCONFIG),)
 endif
 
 ifeq ($(HAVE_LUA),1)
-  CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags 'lua')
+  LUADIR = $(abspath $(BASEDIR)/src/lua)
+  LUALIBDIR = $(abspath $(LIBDIR)/lua)
+  CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags 'lua') -DLUADIR=\"$(LUADIR)\" -DLUALIBDIR=\"$(LUALIBDIR)\"
   LDFLAGS_LUA = $(shell $(PKGCONFIG) --libs 'lua')
   ifneq ($(wildcard /usr/include/tolua++.h),)
     HAVE_TOLUA = 1

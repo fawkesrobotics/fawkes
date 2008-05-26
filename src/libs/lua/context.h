@@ -59,7 +59,7 @@ class LuaContext : public FamListener
   void unlock();
 
   void do_file(const char *filename);
-  void do_string(const char *s);
+  void do_string(const char *format, ...);
 
   void load_string(const char *s);
   void pcall(int nargs = 0, int nresults = 0, int errfunc = 0);
@@ -99,7 +99,7 @@ class LuaContext : public FamListener
 
  private:
   lua_State *  init_state();
-  void         do_string(lua_State *L, const char *s);
+  void         do_string(lua_State *L, const char *format, ...);
   void         do_file(lua_State *L, const char *s);
   void         assert_unique_name(const char *name);
 

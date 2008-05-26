@@ -31,6 +31,7 @@
 #include <tolua++.h>
 #include <cstdlib>
 #include <cstring>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -62,6 +63,8 @@ LuaContext::LuaContext(bool watch_dirs)
 {
   if ( watch_dirs ) {
     __fam = new FileAlterationMonitor();
+    __fam->add_filter("^[^.].*\\.lua$"); 
+    __fam->add_listener(this);
   } else {
     __fam = NULL;
   }
@@ -97,13 +100,13 @@ LuaContext::init_state()
   for (__slit = __package_dirs.begin(); __slit != __package_dirs.end(); ++__slit) {
     char *s;
     asprintf(&s, "package.path = package.path .. \";\" .. \"%s\" .. \"/?.lua\"", __slit->c_str());
-    do_string(s);
+    do_string(L, s);
     free(s);
   }
 
   for (__slit = __cpackage_dirs.begin(); __slit != __cpackage_dirs.end(); ++__slit) {
     char *s;
-    asprintf(&s, "package.cpath = package.cpath .. \";\" .. \"%s\" .. \"/?.lua\"", __slit->c_str());
+    asprintf(&s, "package.cpath = package.cpath .. \";\" .. \"%s\" .. \"/?.so\"", __slit->c_str());
     do_string(L, s);
     free(s);
   }
@@ -117,32 +120,37 @@ LuaContext::init_state()
   }
 
   for ( __utit = __usertypes.begin(); __utit != __usertypes.end(); ++__utit) {
-    tolua_pushusertype(__L, __utit->second.first, __utit->second.second.c_str());
-    lua_setglobal(__L, __utit->first.c_str());
+    tolua_pushusertype(L, __utit->second.first, __utit->second.second.c_str());
+    lua_setglobal(L, __utit->first.c_str());
   }
 
   for ( __strings_it = __strings.begin(); __strings_it != __strings.end(); ++__strings_it) {
-    lua_pushstring(__L, __strings_it->second.c_str());
-    lua_setglobal(__L, __strings_it->first.c_str());
+    lua_pushstring(L, __strings_it->second.c_str());
+    lua_setglobal(L, __strings_it->first.c_str());
   }
 
   for ( __booleans_it = __booleans.begin(); __booleans_it != __booleans.end(); ++__booleans_it) {
-    lua_pushboolean(__L, __booleans_it->second);
-    lua_setglobal(__L, __booleans_it->first.c_str());
+    lua_pushboolean(L, __booleans_it->second);
+    lua_setglobal(L, __booleans_it->first.c_str());
   }
 
   for ( __numbers_it = __numbers.begin(); __numbers_it != __numbers.end(); ++__numbers_it) {
-    lua_pushnumber(__L, __numbers_it->second);
-    lua_setglobal(__L, __numbers_it->first.c_str());
+    lua_pushnumber(L, __numbers_it->second);
+    lua_setglobal(L, __numbers_it->first.c_str());
   }
 
   for ( __integers_it = __integers.begin(); __integers_it != __integers.end(); ++__integers_it) {
-    lua_pushinteger(__L, __integers_it->second);
-    lua_setglobal(__L, __integers_it->first.c_str());
+    lua_pushinteger(L, __integers_it->second);
+    lua_setglobal(L, __integers_it->first.c_str());
   }
 
   if ( __start_script ) {
-    do_file(L, __start_script);
+    if (access(__start_script, R_OK) == 0) {
+      // it's a file and we can access it, execute it!
+      do_file(L, __start_script);
+    } else {
+      do_string(L, "require(\"%s\")", __start_script);
+    }
   }
 
   return L;
@@ -153,7 +161,12 @@ LuaContext::init_state()
  * The script will be executed once immediately in this method, make
  * sure you call this after all other init-relevant routines like
  * add_* if you need to access these in the start script!
- * @param start_script script to execute now and on restart()
+ * @param start_script script to execute now and on restart(). If the
+ * string is the path and name of an accessible file it is loaded via
+ * do_file(), otherwise it is considered to be the name of a module and
+ * loaded via Lua's require(). Note however, that if you use a module,
+ * special care has to be taken to correctly modify the global
+ * environment!
  */
 void
 LuaContext::set_start_script(const char *start_script)
@@ -161,7 +174,12 @@ LuaContext::set_start_script(const char *start_script)
   if ( __start_script )  free(__start_script);
   if ( start_script ) {
     __start_script = strdup(start_script);
-    do_file(start_script);
+    if (access(__start_script, R_OK) == 0) {
+      // it's a file and we can access it, execute it!
+      do_file(__start_script);
+    } else {
+      do_string("require(\"%s\")", __start_script);
+    }
   } else {
     __start_script = NULL;
   }
@@ -337,27 +355,45 @@ LuaContext::do_file(lua_State *L, const char *filename)
 
 /** Execute string on a specific Lua state.
  * @param L Lua state to execute the string in
- * @param s string to execute
+ * @param format format of string to execute, arguments can be the same as
+ * for vasprintf.
  */
 void
-LuaContext::do_string(lua_State *L, const char *s)
+LuaContext::do_string(lua_State *L, const char *format, ...)
 {
+  va_list arg;
+  va_start(arg, format);
+  char *s;
+  if (vasprintf(&s, format, arg) == -1) {
+    throw Exception("LuaContext::do_string: Could not form string");
+  }
   if ( luaL_dostring(L, s) != 0 ) {
     throw Exception(lua_tostring(L, -1));
   }
+  free(s);
+  va_end(arg);
 }
 
 
 /** Execute string.
- * @param s string to execute
+ * @param format format of string to execute, arguments can be the same as
+ * for vasprintf.
  */
 void
-LuaContext::do_string(const char *s)
+LuaContext::do_string(const char *format, ...)
 {
   MutexLocker lock(__lua_mutex);
+  va_list arg;
+  va_start(arg, format);
+  char *s;
+  if (vasprintf(&s, format, arg) == -1) {
+    throw Exception("LuaContext::do_string: Could not form string");
+  }
   if ( luaL_dostring(__L, s) != 0 ) {
     throw Exception(lua_tostring(__L, -1));
   }
+  free(s);
+  va_end(arg);
 }
 
 
