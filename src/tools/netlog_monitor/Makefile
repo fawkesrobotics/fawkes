@@ -22,7 +22,7 @@ include $(BASEDIR)/etc/buildsys/ext/gmsl
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_nlm = core utils netcomm fawkesmainappmsgs
+LIBS_nlm = fawkescore fawkesutils fawkesnetcomm fawkesmainappmsgs
 OBJS_nlm = main.o			\
 	      netlog_monitor.o		\
 	      backend_thread.o
@@ -43,3 +43,4 @@ warning_nlm:
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

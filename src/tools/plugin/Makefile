@@ -15,7 +15,7 @@
 
 BASEDIR = ../../..
 
-LIBS_plugin = core utils netcomm fawkesmainappmsgs
+LIBS_plugin = fawkescore fawkesutils fawkesnetcomm fawkesmainappmsgs
 OBJS_plugin = main.o	\
 	      plugin_tool.o
 

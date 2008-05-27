@@ -17,7 +17,7 @@
 
 BASEDIR = ../../..
 
-LIBS_config = core utils config netcomm
+LIBS_config = fawkescore fawkesutils fawkesconfig fawkesnetcomm
 OBJS_config = main.o
 
 OBJS_all =	$(OBJS_config)

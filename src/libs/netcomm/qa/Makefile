@@ -12,12 +12,6 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
@@ -31,13 +25,13 @@ endif
 CFLAGS = -g
 
 ifeq ($(HAVE_AVAHI),1)
-LIBS_qa_netcomm_avahi_publisher = netcomm utils
+LIBS_qa_netcomm_avahi_publisher = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_avahi_publisher = qa_avahi_publisher.o
 
-LIBS_qa_netcomm_avahi_browser = netcomm utils
+LIBS_qa_netcomm_avahi_browser = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_avahi_browser = qa_avahi_browser.o
 
-LIBS_qa_netcomm_avahi_resolver = netcomm utils
+LIBS_qa_netcomm_avahi_resolver = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_avahi_resolver = qa_avahi_resolver.o
 
 BINS_all +=	$(BINDIR)/qa_netcomm_avahi_publisher		\
@@ -45,31 +39,31 @@ BINS_all +=	$(BINDIR)/qa_netcomm_avahi_publisher		\
 		$(BINDIR)/qa_netcomm_avahi_resolver
 endif
 
-LIBS_qa_netcomm_socket_typeof = netcomm
+LIBS_qa_netcomm_socket_typeof = fawkesnetcomm
 OBJS_qa_netcomm_socket_typeof = qa_socket_typeof.o
 
-LIBS_qa_netcomm_socket_stream = netcomm utils
+LIBS_qa_netcomm_socket_stream = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_socket_stream = qa_socket_stream.o
 
-LIBS_qa_netcomm_socket_datagram = netcomm utils
+LIBS_qa_netcomm_socket_datagram = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_socket_datagram = qa_socket_datagram.o
 
-LIBS_qa_netcomm_socket_datagram_multicast = netcomm utils
+LIBS_qa_netcomm_socket_datagram_multicast = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_socket_datagram_multicast = qa_socket_datagram_multicast.o
 
-LIBS_qa_netcomm_worldinfo = netcomm utils
+LIBS_qa_netcomm_worldinfo = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_worldinfo = qa_worldinfo.o
 
-LIBS_qa_netcomm_worldinfo_encryption = netcomm utils
+LIBS_qa_netcomm_worldinfo_encryption = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_worldinfo_encryption = qa_worldinfo_encryption.o
 
-LIBS_qa_netcomm_worldinfo_msgsizes = netcomm utils
+LIBS_qa_netcomm_worldinfo_msgsizes = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_worldinfo_msgsizes = qa_worldinfo_msgsizes.o
 
-LIBS_qa_netcomm_resolver = netcomm utils
+LIBS_qa_netcomm_resolver = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_resolver = qa_resolver.o
 
-LIBS_qa_netcomm_dynamic_buffer = netcomm utils
+LIBS_qa_netcomm_dynamic_buffer = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_dynamic_buffer = qa_dynamic_buffer.o
 
 OBJS_all =	$(OBJS_qa_netcomm_avahi_publisher)		\

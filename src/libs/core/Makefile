@@ -17,11 +17,11 @@
 
 BASEDIR = ../../..
 
-LIBS_libcore = pthread stdc++
-OBJS_libcore = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
+LIBS_libfawkescore = pthread stdc++
+OBJS_libfawkescore = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 
-OBJS_all = $(OBJS_libcore)
-LIBS_all  = $(LIBDIR)/libcore.so
+OBJS_all = $(OBJS_libfawkescore)
+LIBS_all  = $(LIBDIR)/libfawkescore.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

@@ -18,7 +18,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_battery = core utils
+LIBS_battery = fawkesaspects
 OBJS_battery = battery_plugin.o	\
 	       battery_thread.o
 

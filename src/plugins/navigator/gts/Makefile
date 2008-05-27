@@ -19,7 +19,7 @@ BASEDIR = ../../../..
 
 CFLAGS = $(shell gts-config --cflags)
 
-LIBS_libgts_obstacle = core utils vmc netcomm
+LIBS_libgts_obstacle = fawkesaspects vmc
 OBJS_libgts_obstacle = gts_obstacle.o
 LDFLAGS_libgts_obstacle = `gts-config --libs`
 
@@ -27,3 +27,4 @@ OBJS_all = $(OBJS_libgts_obstacle)
 LIBS_all = $(LIBDIR)/libgts_obstacle.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

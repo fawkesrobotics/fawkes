@@ -2,7 +2,7 @@
 #            Makefile Build System for Fawkes: FireVision Config
 #                            -------------------
 #   Created on Sun Jan 14 23:00:47 2007
-#   copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -10,12 +10,6 @@
 #   it under the terms of the GNU General Public License as published by
 #   the Free Software Foundation; either version 2 of the License, or
 #   (at your option) any later version.
-#
-#*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
 #
 #*****************************************************************************
 

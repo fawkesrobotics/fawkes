@@ -1,5 +1,5 @@
 #*****************************************************************************
-#                 Makefile Build System for Fawkes: Navigator Library
+#          Makefile Build System for Fawkes: Robot Motion Library
 #                            -------------------
 #   Created on Fri Jun 29 16:42:05 2007
 #   Copyright (C) 2008 by Daniel Beck, AllemaniACs RoboCup Team
@@ -17,7 +17,7 @@
 
 BASEDIR = ../../../..
 
-LIBS_librobotmotion = geometry utils
+LIBS_librobotmotion = fawkesgeometry fawkesutils
 OBJS_librobotmotion = motion_model.o 			\
 		      omni_motion_model.o 		\
 		      velocity_controller.o		\
@@ -28,3 +28,4 @@ OBJS_all    = $(OBJS_librobotmotion)
 LIBS_all    = $(LIBDIR)/librobotmotion.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

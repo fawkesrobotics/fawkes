@@ -17,11 +17,11 @@
 
 BASEDIR = ../../..
 
-LIBS_libgeometry = stdc++
-OBJS_libgeometry = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
+LIBS_libfawkesgeometry = stdc++
+OBJS_libfawkesgeometry = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
-OBJS_all = $(OBJS_libgeometry)
-LIBS_all  = $(LIBDIR)/libgeometry.so
+OBJS_all = $(OBJS_libfawkesgeometry)
+LIBS_all  = $(LIBDIR)/libfawkesgeometry.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

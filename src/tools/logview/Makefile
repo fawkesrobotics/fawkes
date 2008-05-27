@@ -17,7 +17,7 @@
 
 BASEDIR = ../../..
 
-LIBS_logview = core utils netcomm
+LIBS_logview = fawkescore fawkesutils fawkesnetcomm
 OBJS_logview = main.o
 
 OBJS_all =	$(OBJS_logview)

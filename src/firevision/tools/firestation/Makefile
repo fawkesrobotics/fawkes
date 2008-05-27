@@ -25,7 +25,7 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-LIBS_firestation = utils fvutils fvmodels fvclassifiers geometry fvcams
+LIBS_firestation = fawkesutils fawkesgeometry fvutils fvmodels fvclassifiers fvcams
 OBJS_firestation = color_train_widget.o         \
 		   mirror_calib.o		\
 		   fuse_transfer_widget.o	\

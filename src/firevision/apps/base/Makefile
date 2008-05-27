@@ -28,10 +28,11 @@ LIBS     += $(VISION_LIBS)
 # CFLAGS += -DFVBASE_TIMETRACKER -DFVBASE_TT_PRINT_INT=100
 # Set the print interval to the number of loops
 
-LIBS_fvbase = core utils fvutils fvcams
+LIBS_fvbase = fawkesaspects fvutils fvcams
 OBJS_fvbase = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_fvbase)
 PLUGINS_all = $(PLUGINDIR)/fvbase.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

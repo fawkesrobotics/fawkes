@@ -19,7 +19,7 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/skiller/skiller.mk
 
-LIBS_skillet = core utils netcomm blackboard interfaces readline history $(if $(HAVE_TERMCAP),termcap)
+LIBS_skillet = fawkescore fawkesutils fawkesnetcomm fawkesblackboard fawkesinterfaces readline history $(if $(HAVE_TERMCAP),termcap)
 OBJS_skillet = skillet.o
 
 OBJS_all =	$(OBJS_skillet)

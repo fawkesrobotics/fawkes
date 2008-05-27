@@ -53,7 +53,7 @@ class QaBBEventListener
     public BlackBoardInterfaceObserver
 {
  public:
-  QaBBEventListener()
+  QaBBEventListener() : BlackBoardInterfaceListener("QaBBEventListener")
   {
     bbio_add_interface_create_type("TestInterface");
     bbio_add_interface_destroy_type("TestInterface");

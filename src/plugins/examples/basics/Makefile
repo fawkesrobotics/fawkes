@@ -15,10 +15,10 @@
 
 BASEDIR = ../../../..
 
-LIBS_example = core utils netcomm
+LIBS_example = fawkesaspects
 OBJS_example = $(filter-out example_plugin_netping.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
-LIBS_example_plugin_netping = core utils netcomm
+LIBS_example_plugin_netping = fawkescore fawkesutils fawkesnetcomm
 OBJS_example_plugin_netping = example_plugin_netping.o
 
 OBJS_all    = $(OBJS_example)		\
@@ -27,3 +27,4 @@ BINS_all    = $(BINDIR)/example_plugin_netping
 PLUGINS_all = $(PLUGINDIR)/example.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

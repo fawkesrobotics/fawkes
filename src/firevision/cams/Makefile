@@ -24,7 +24,7 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-LIBS_libfvcams = $(VISION_CAM_LIBS) core utils fvutils
+LIBS_libfvcams = $(VISION_CAM_LIBS) fawkescore fawkesutils fvutils
 OBJS_libfvcams = camera.o			\
 		 cameracontrol.o		\
 		 cam_exceptions.o		\

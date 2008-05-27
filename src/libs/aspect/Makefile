@@ -24,11 +24,11 @@ else
   OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/vision*.cpp))
 endif
 
-LIBS_libaspects = core utils blackboard netcomm config
-OBJS_libaspects = $(patsubst %.cpp,%.o,$(filter-out $(OBJS_FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
+LIBS_libfawkesaspects = fawkescore fawkesutils fawkesblackboard fawkesnetcomm fawkesconfig
+OBJS_libfawkesaspects = $(patsubst %.cpp,%.o,$(filter-out $(OBJS_FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
-OBJS_all = $(OBJS_libaspects)
-LIBS_all  = $(LIBDIR)/libaspects.so
+OBJS_all = $(OBJS_libfawkesaspects)
+LIBS_all  = $(LIBDIR)/libfawkesaspects.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

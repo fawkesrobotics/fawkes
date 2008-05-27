@@ -24,7 +24,7 @@ include $(BASEDIR)/etc/buildsys/gui.mk
 CFLAGS  += $(CFLAGS_GTKMM)
 LDFLAGS += $(LDFLAGS_GTKMM)
 
-LIBS_navigator_gui = core utils netcomm navigator fawkesmainappmsgs
+LIBS_navigator_gui = fawkescore fawkesutils fawkesnetcomm navigator fawkesmainappmsgs
 OBJS_navigator_gui = navigator_gui.o
 
 OBJS_all = $(OBJS_navigator_gui)

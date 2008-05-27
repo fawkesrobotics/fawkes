@@ -12,12 +12,6 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../..
 
@@ -37,4 +31,5 @@ config: core netcomm utils
 aspect: core utils blackboard netcomm config
 geometry: core
 worldinfo_utils: core netcomm geometry
+lua: core utils
 

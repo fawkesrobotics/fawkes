@@ -23,8 +23,8 @@ ifneq ($(HAVE_SQLITE),1)
   ERROR_TARGETS += error_sqlite
 else
   CFLAGS += $(shell $(PKGCONFIG) --cflags sqlite3)
-  LDFLAGS_libconfig = $(shell $(PKGCONFIG) --libs sqlite3)
-  LIBS_all  = $(LIBDIR)/libconfig.so
+  LDFLAGS_libfawkesconfig = $(shell $(PKGCONFIG) --libs sqlite3)
+  LIBS_all  = $(LIBDIR)/libfawkesconfig.so
   ifeq ($(HAVE_TOLUA),1)
     LIBS_all += $(LIBDIR)/lua/config.so
     TARGETS_all += $(SRCDIR)/config_tolua.cpp
@@ -39,17 +39,17 @@ error_sqlite:
 	$(SILENT)exit 1
 endif
 
-LIBS_libconfig = stdc++ core utils netcomm
-OBJS_libconfig =$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
+LIBS_libfawkesconfig = stdc++ fawkescore fawkesutils fawkesnetcomm
+OBJS_libfawkesconfig =$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
 CFLAGS_config_tolua = -Wno-unused-function
 TOLUA_config = $(wildcard $(SRCDIR)/*.tolua)
-LIBS_lua_config = core config tolua++
+LIBS_lua_config = fawkescore fawkesconfig tolua++
 OBJS_lua_config = config_tolua.o
 
-OBJS_all = $(OBJS_libconfig) $(OBJS_lua_config)
+OBJS_all = $(OBJS_libfawkesconfig) $(OBJS_lua_config)
 
-$(LIBDIR)/lua/config.so: | $(LIBDIR)/libconfig.so
+$(LIBDIR)/lua/config.so: | $(LIBDIR)/libfawkesconfig.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

@@ -26,10 +26,10 @@ LIBDIRS  += $(VISION_LIBDIRS) $(QTDIR)/lib
 LIBS     += $(VISION_LIBS)
 
 OBJS_geegaw = bbclient.o config.o main.o pipeline.o
-LIBS_geegaw = core utils rutils fvutils fvcams fvmodels fvclassifiers rbb rinterfaces qt-mt fvfilters pthread
+LIBS_geegaw = fawkescore fawkesutils rutils fvutils fvcams fvmodels fvclassifiers rbb rinterfaces qt-mt fvfilters pthread
 
 OBJS_bbgeegaw = bbgeegaw.o
-LIBS_bbgeegaw = core utils rutils rbb rinterfaces
+LIBS_bbgeegaw = fawkescore fawkesutils rutils rbb rinterfaces
 
 OBJS_all = $(OBJS_geegaw) $(OBJS_bbgeegaw)
 BINS_all = $(BINDIR)/geegaw $(BINDIR)/bbgeegaw

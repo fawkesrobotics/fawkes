@@ -24,7 +24,7 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-LIBS_fvomniball = core utils fvutils fvcams fvmodels fvclassifiers
+LIBS_fvomniball = fawkesaspects fvutils fvcams fvmodels fvclassifiers
 OBJS_fvomniball = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_fvomniball)

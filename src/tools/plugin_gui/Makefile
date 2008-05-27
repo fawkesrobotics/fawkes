@@ -22,7 +22,7 @@ include $(BASEDIR)/etc/buildsys/ext/gmsl
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_pt_gui = core utils netcomm fawkesmainappmsgs
+LIBS_pt_gui = fawkescore fawkesutils fawkesnetcomm fawkesmainappmsgs
 OBJS_pt_gui = main.o			\
 	      plugin_gui.o		\
 	      backend_thread.o

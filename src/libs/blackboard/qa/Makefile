@@ -12,36 +12,30 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../../../..
 
 CFLAGS = -g
 
-LIBS_qa_bb_memmgr = core utils blackboard
+LIBS_qa_bb_memmgr = fawkesblackboard
 OBJS_qa_bb_memmgr = qa_bb_memmgr.o
 
-LIBS_qa_bb_interface = core utils interfaces blackboard
+LIBS_qa_bb_interface = fawkesinterfaces fawkesblackboard
 OBJS_qa_bb_interface = qa_bb_interface.o
 
-LIBS_qa_bb_messaging = core utils interfaces blackboard
+LIBS_qa_bb_messaging = fawkesinterfaces fawkesblackboard
 OBJS_qa_bb_messaging = qa_bb_messaging.o
 
-LIBS_qa_bb_openall = core utils interfaces blackboard
+LIBS_qa_bb_openall = fawkesinterfaces fawkesblackboard
 OBJS_qa_bb_openall = qa_bb_openall.o
 
-LIBS_qa_bb_notify = core utils interfaces blackboard
+LIBS_qa_bb_notify = fawkesinterfaces fawkesblackboard
 OBJS_qa_bb_notify = qa_bb_notify.o
 
-LIBS_qa_bb_listall = core utils interfaces blackboard
+LIBS_qa_bb_listall = fawkesinterfaces fawkesblackboard
 OBJS_qa_bb_listall = qa_bb_listall.o
 
-LIBS_qa_bb_remote = core utils interfaces blackboard
+LIBS_qa_bb_remote = fawkesinterfaces fawkesblackboard
 OBJS_qa_bb_remote = qa_bb_remote.o
 
 OBJS_all =	$(OBJS_qa_bb_memmgr) 		\

@@ -17,7 +17,7 @@
 
 BASEDIR = ../../../..
 
-LIBS_libnavigator = core utils netcomm
+LIBS_libnavigator = fawkescore fawkesutils fawkesnetcomm
 OBJS_libnavigator =	npoint.o \
 			obstacle.o \
 			nline.o \
@@ -27,3 +27,4 @@ OBJS_all    = $(OBJS_navigator) $(OBJS_libnavigator)
 LIBS_all    = $(LIBDIR)/libnavigator.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

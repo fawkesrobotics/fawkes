@@ -29,7 +29,7 @@ else
   LIBDIRS  += $(VISION_LIBDIRS)
   LIBS     += $(VISION_LIBS)
 
-  LIBS_fvomnilocalizer = core utils fvutils fvcams fvmodels fvclassifiers
+  LIBS_fvomnilocalizer = fawkesaspects fvutils fvcams fvmodels fvclassifiers
   OBJS_fvomnilocalizer = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
   OBJS_all    = $(OBJS_fvomnilocalizer)

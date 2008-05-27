@@ -26,7 +26,7 @@ LIBDIRS  += $(VISION_LIBDIRS) $(QTDIR)/lib
 LIBS     += $(VISION_LIBS)
 
 OBJS_pantilter = bbclient.o main.o
-LIBS_pantilter = core utils rutils fvutils fvcams fvmodels fvclassifiers bb rinterfaces qt-mt fvfilters pthread
+LIBS_pantilter = fawkescore fawkesutils rutils fvutils fvcams fvmodels fvclassifiers bb rinterfaces qt-mt fvfilters pthread
 
 OBJS_all = $(OBJS_pantilter)
 BINS_all = $(BINDIR)/pantilter

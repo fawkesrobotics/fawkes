@@ -12,11 +12,6 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
 
 BASEDIR = ../..
 
@@ -38,10 +33,10 @@ ifeq ($(HAVE_AVAHI),1)
   CFLAGS += $(CFLAGS_AVAHI)
 endif
 
-LIBS_libfawkesmainappmsgs = core utils netcomm
+LIBS_libfawkesmainappmsgs = fawkesnetcomm
 OBJS_libfawkesmainappmsgs = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*_message.cpp)))))
 
-LIBS_fawkes = core utils interfaces blackboard netcomm config aspects fawkesmainappmsgs
+LIBS_fawkes = fawkescore fawkesutils fawkesinterfaces fawkesblackboard fawkesnetcomm fawkesconfig fawkesaspects fawkesmainappmsgs
 OBJS_fawkes = $(filter-out $(OBJS_fawkesmainappmsgs),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
 OBJS_all =	$(OBJS_fawkes)			\

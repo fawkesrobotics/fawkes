@@ -13,12 +13,6 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 # We now assume a system wide installation via RPM
 #IOWKIT_SDK=/opt/iowkit

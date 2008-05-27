@@ -28,22 +28,22 @@ include $(SRCDIR)/generator/generator.mk
 
 CFLAGS += -DINTERFACEDIR=\"$(INTERFACEDIR)\"
 
-OBJS_interfaces  = $(notdir $(patsubst %.xml,%.o,$(wildcard $(SRCDIR)/*.xml)))
-SRCS_interfaces  = $(patsubst %.xml,%.cpp,$(wildcard $(SRCDIR)/*.xml))
-HDRS_interfaces  = $(patsubst %.xml,%.h,$(wildcard $(SRCDIR)/*.xml))
+OBJS_fawkesinterfaces  = $(notdir $(patsubst %.xml,%.o,$(wildcard $(SRCDIR)/*.xml)))
+SRCS_fawkesinterfaces  = $(patsubst %.xml,%.cpp,$(wildcard $(SRCDIR)/*.xml))
+HDRS_fawkesinterfaces  = $(patsubst %.xml,%.h,$(wildcard $(SRCDIR)/*.xml))
 TOLUA_interfaces = $(patsubst %.xml,%.tolua,$(wildcard $(SRCDIR)/*.xml))
 
-LIBS_libinterfaces = core interface
-OBJS_libinterfaces = $(OBJS_interfaces)
+LIBS_libfawkesinterfaces = fawkescore fawkesinterface
+OBJS_libfawkesinterfaces = $(OBJS_fawkesinterfaces)
 
 CFLAGS_interfaces_tolua = -Wno-unused-function
-LIBS_lua_interfaces = core interface interfaces tolua++
+LIBS_lua_interfaces = fawkescore fawkesinterface fawkesinterfaces tolua++
 OBJS_lua_interfaces = interfaces_tolua.o
 
-OBJS_all = $(OBJS_libinterfaces) $(OBJS_interface_generator) \
+OBJS_all = $(OBJS_libfawkesinterfaces) $(OBJS_interface_generator) \
 	   $(OBJS_lua_interfaces)
 
-LIBS_all = $(LIBDIR)/libinterfaces.so
+LIBS_all = $(LIBDIR)/libfawkesinterfaces.so
 ifeq ($(HAVE_TOLUA),1)
   LIBS_all += $(LIBDIR)/lua/interfaces.so
   TARGETS_all += $(SRCDIR)/interfaces_tolua.cpp
@@ -53,22 +53,22 @@ endif
 
 include $(SRCDIR)/generator/generator_rules.mk
 
-$(LIBDIR)/lua/interfaces.so: | $(LIBDIR)/libinterfaces.so
+$(LIBDIR)/lua/interfaces.so: | $(LIBDIR)/libfawkesinterfaces.so
 
-.SECONDARY: $(SRCS_interfaces) $(HDRS_interfaces) $(OBJS_interfaces) \
-	$(TOLUA_interfaces) $(OBJS_lua_interfaces)
+.SECONDARY: $(SRCS_fawkesinterfaces) $(HDRS_fawkesinterfaces) \
+	$(OBJS_fawkesinterfaces) $(TOLUA_interfaces) $(OBJS_lua_interfaces)
 
 ifeq ($(BUILD_INTERFACE_GENERATOR),1)
-$(SRCS_interfaces): $(BINDIR)/interface_generator
-$(SRCS_interfaces): %.cpp: %.xml
+$(SRCS_fawkesinterfaces): $(BINDIR)/interface_generator
+$(SRCS_fawkesinterfaces): %.cpp: %.xml
 	$(SILENT) echo "$(INDENT_PRINT)--> Generating $(@F) (Interface XML Template)"
 	$(SILENT)$(BINDIR)/interface_generator $<
 endif
 
-ifeq ($(MAKECMDGOALS),interface-clean)
-.PHONY: interface-clean
-interface-clean:
-	$(SILENT) rm -f $(SRCS_interfaces) $(HDRS_interfaces)
+ifeq ($(MAKECMDGOALS),clean-interfaces)
+.PHONY: clean-interfaces
+clean-interfaces:
+	$(SILENT) rm -f $(SRCS_fawkesinterfaces) $(HDRS_fawkesinterfaces)
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

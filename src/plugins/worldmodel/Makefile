@@ -12,16 +12,10 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../../..
 
-LIBS_worldmodel = core utils netcomm worldinfo_utils
+LIBS_worldmodel = fawkesaspects fawkesworldinfo_utils
 OBJS_worldmodel = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_worldmodel)

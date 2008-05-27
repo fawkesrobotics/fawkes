@@ -45,7 +45,7 @@ endif
 
 # We are lazy in the utils...
 OBJS_libfvstereo := $(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
-LIBS_libfvstereo := core utils fvutils
+LIBS_libfvstereo := fawkescore fawkesutils fvutils
 
 OBJS_all = $(OBJS_libfvstereo)
 LIBS_all = $(LIBDIR)/libfvstereo.so

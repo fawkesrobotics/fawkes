@@ -39,7 +39,7 @@ warning_sdl:
 endif
 
 OBJS_libfvwidgets := $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
-LIBS_libfvwidgets := core utils fvutils
+LIBS_libfvwidgets := fawkescore fawkesutils fvutils
 
 OBJS_all = $(OBJS_libfvwidgets)
 

@@ -41,7 +41,7 @@ LIBS_qa_kicker_control = stdc++ iowkit
 OBJS_qa_kicker_control = qa_kicker_control.o		\
 		         ../kicker_control.o
 
-LIBS_qa_kicker_bb = stdc++ core aspects interfaces
+LIBS_qa_kicker_bb = stdc++ fawkescore fawkesaspects fawkesinterfaces
 OBJS_qa_kicker_bb = qa_kicker_bb.o
 
 OBJS_all =	$(OBJS_qa_kicker_control)		\

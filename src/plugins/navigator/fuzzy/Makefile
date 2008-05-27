@@ -1,5 +1,5 @@
 #*****************************************************************************
-#                 Makefile Build System for Fawkes: Navigator Plugin
+#             Makefile Build System for Fawkes: Navigator Fuzzy Lib
 #                            -------------------
 #   Created on Tue May 29 18:41:17 2007
 #   Copyright (C) 2007 by Martin Liebenberg, AllemaniACs RoboCup Team
@@ -31,3 +31,4 @@ OBJS_all    = $(OBJS_libfuzzy)
 LIBS_all = $(LIBDIR)/libfuzzy.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

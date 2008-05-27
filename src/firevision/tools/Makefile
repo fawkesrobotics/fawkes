@@ -28,36 +28,36 @@ LIBS     += $(VISION_LIBS)
 
 SUBDIRS = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/firestation))
 
-LIBS_fvshmem = $(VISION_CAM_LIBS) utils fvutils
+LIBS_fvshmem = $(VISION_CAM_LIBS) fawkesutils fvutils
 OBJS_fvshmem = shmem.o
 
-LIBS_fvlistfwcams = $(VISION_CAM_LIBS) utils fvcams
+LIBS_fvlistfwcams = $(VISION_CAM_LIBS) fawkesutils fvcams
 OBJS_fvlistfwcams = listfwcams.o
 
 LIBS_fvconverter = fvutils fvcams
 OBJS_fvconverter = converter.o
 
-LIBS_fvstereodecoder = $(VISION_CAM_LIBS) utils fvcams
+LIBS_fvstereodecoder = $(VISION_CAM_LIBS) fawkesutils fvcams
 OBJS_fvstereodecoder = stereodecoder.o
 
-LIBS_fvtricalcdisp = $(VISION_CAM_LIBS) utils fvcams fvstereo
+LIBS_fvtricalcdisp = $(VISION_CAM_LIBS) fawkesutils fvcams fvstereo
 OBJS_fvtricalcdisp = tricalcdisp.o
 
-LIBS_fvbb2gettric = $(VISION_CAM_LIBS) utils fvcams fvutils
+LIBS_fvbb2gettric = $(VISION_CAM_LIBS) fawkesutils fvcams fvutils
 OBJS_fvbb2gettric = bb2gettric.o
 
-LIBS_fvbb2rectlut = $(VISION_CAM_LIBS) utils fvcams fvutils fvstereo
+LIBS_fvbb2rectlut = $(VISION_CAM_LIBS) fawkesutils fvcams fvutils fvstereo
 OBJS_fvbb2rectlut = bb2rectlut.o
 
-LIBS_fvbb2info = $(VISION_CAM_LIBS) utils fvcams fvutils fvstereo
+LIBS_fvbb2info = $(VISION_CAM_LIBS) fawkesutils fvcams fvutils fvstereo
 OBJS_fvbb2info = bb2info.o
 
-LIBS_fvviewer = $(VISION_CAM_LIBS) utils fvcams fvutils fvwidgets fvfilters
+LIBS_fvviewer = $(VISION_CAM_LIBS) fawkesutils fvcams fvutils fvwidgets fvfilters
 OBJS_fvviewer = viewer.o
 CFLAGS_viewer    += $(CFLAGS_GTKMM) $(CFLAGS_SDL)
 LDFLAGS_fvviewer += $(LDFLAGS_GTKMM) $(LDFLAGS_SDL)
 
-LIBS_fvnet = utils fvutils
+LIBS_fvnet = fawkesutils fvutils
 OBJS_fvnet = net.o
 
 LIBS_fvshowyuv = fvutils fvwidgets

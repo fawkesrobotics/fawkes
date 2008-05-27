@@ -32,7 +32,7 @@ warning_iowkit:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Kicker Plugin$(TNORMAL) (install IowKit)"
 endif
 
-LIBS_kicker = core utils iowkit
+LIBS_kicker = fawkesaspects iowkit
 OBJS_kicker = kicker_plugin.o	\
 		     kicker_thread.o	\
                      kicker_control.o

@@ -12,12 +12,6 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 ifneq ($(wildcard ../../../etc/buildsys/config.mk),)
   BASEDIR = ../../..
@@ -27,10 +21,10 @@ endif
 
 CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\"
 
-LIBS_qa_interface_loader = core utils interfaces
+LIBS_qa_interface_loader = fawkescore fawkesutils fawkesinterfaces
 OBJS_qa_interface_loader = qa_interface_loader.o
 
-LIBS_qa_interface_msgq = core utils interfaces
+LIBS_qa_interface_msgq = fawkescore fawkesutils fawkesinterfaces
 OBJS_qa_interface_msgq = qa_interface_msgq.o
 
 OBJS_all =	$(OBJS_qa_interface_loader)	\

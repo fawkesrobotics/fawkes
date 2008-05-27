@@ -12,12 +12,6 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
@@ -28,10 +22,11 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-LIBS_fvomnifield = core utils fvutils fvcams fvmodels fvclassifiers geometry
+LIBS_fvomnifield = fawkesaspects fvutils fvcams fvmodels fvclassifiers fawkesgeometry
 OBJS_fvomnifield = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_fvomnifield)
 PLUGINS_all = $(PLUGINDIR)/fvomnifield.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

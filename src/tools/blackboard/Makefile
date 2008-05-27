@@ -15,13 +15,13 @@
 
 BASEDIR = ../../..
 
-LIBS_bb_cleanup = core utils config blackboard
+LIBS_bb_cleanup = fawkescore fawkesutils fawkesconfig fawkesblackboard
 OBJS_bb_cleanup = bb_cleanup.o
 
-LIBS_bb_list = core utils config blackboard
+LIBS_bb_list = fawkescore fawkesutils fawkesconfig fawkesblackboard
 OBJS_bb_list = bb_list.o
 
-LIBS_bb_meminfo = core utils config blackboard
+LIBS_bb_meminfo = fawkescore fawkesutils fawkesconfig fawkesblackboard
 OBJS_bb_meminfo = bb_meminfo.o
 
 OBJS_all = $(OBJS_bb_cleanup) $(OBJS_bb_list) $(OBJS_bb_meminfo)

@@ -17,11 +17,11 @@
 
 BASEDIR = ../../..
 
-LIBS_libblackboard = core utils interface netcomm
-OBJS_libblackboard = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+LIBS_libfawkesblackboard = fawkescore fawkesutils fawkesinterface fawkesnetcomm
+OBJS_libfawkesblackboard = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all =	$(OBJS_libblackboard) $(OBJS_blackboard)
-LIBS_all =	$(LIBDIR)/libblackboard.so
+OBJS_all =	$(OBJS_libfawkesblackboard)
+LIBS_all =	$(LIBDIR)/libfawkesblackboard.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

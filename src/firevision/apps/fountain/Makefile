@@ -24,7 +24,7 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-LIBS_fvfountain = core utils fvutils netcomm
+LIBS_fvfountain = fawkescore fawkesutils fvutils fawkesnetcomm
 
 ifeq ($(BUILD_TYPE),rcsoftx)
   include $(BASEDIR)/src/fawkes/netcomm/netcomm.mk
@@ -43,6 +43,7 @@ ifeq ($(BUILD_TYPE),rcsoftx)
     LDFLAGS         += $(LDFLAGS_AVAHI)
   endif
 else
+  LIBS_fvfountain += fawkesaspects
   OBJS_fvfountain  = fountain_thread.o fountain_plugin.o
   PLUGINS_all      = $(PLUGINDIR)/fvfountain.so
 endif

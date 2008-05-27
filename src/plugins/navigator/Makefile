@@ -47,7 +47,7 @@ ifeq ($(BUILD_NAVIGATOR),1)
   $(PLUGINS_all): | presubdirs
 endif
 
-LIBS_navigator = core utils vmc netcomm geometry fuzzy gts_obstacle navigator robotmotion
+LIBS_navigator = fawkesaspects vmc fawkesgeometry fuzzy gts_obstacle navigator robotmotion
 OBJS_navigator = navigator_plugin.o \
 		 navigator_thread.o \
 		 joystick_control.o \

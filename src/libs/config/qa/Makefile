@@ -12,25 +12,19 @@
 #   (at your option) any later version.
 #
 #*****************************************************************************
-#
-#           $Id$
-# last modified: $Date$
-#            by: $Author$
-#
-#*****************************************************************************
 
 BASEDIR = ../../../..
 
 CFLAGS = -g
 
 OBJS_qa_config = qa_config.o
-LIBS_qa_config = config
+LIBS_qa_config = fawkesconfig
 
 OBJS_qa_config_change_handler = qa_config_change_handler.o
-LIBS_qa_config_change_handler = config
+LIBS_qa_config_change_handler = fawkesconfig
 
 OBJS_qa_config_net_list_content = qa_net_list_content.o
-LIBS_qa_config_net_list_content = config
+LIBS_qa_config_net_list_content = fawkesconfig
 
 OBJS_all = $(OBJS_qa_config) $(OBJS_qa_config_change_handler) \
 	$(OBJS_qa_config_net_list_content)

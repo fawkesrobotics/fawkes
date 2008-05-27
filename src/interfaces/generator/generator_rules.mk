@@ -21,7 +21,7 @@ ifeq ($(BUILD_INTERFACE_GENERATOR),1)
     GENDIR=generator/
   endif
 
-  LIBS_interface_generator = core utils
+  LIBS_interface_generator = fawkescore fawkesutils
   LDFLAGS_interface_generator = $(shell $(PKGCONFIG) --libs libxml++-2.6) $(LDFLAGS_LIBCRYPTO)
   CFLAGS += $(CFLAGS_LIBCRYPTO)
   OBJS_interface_generator = $(GENDIR)constant.o	\

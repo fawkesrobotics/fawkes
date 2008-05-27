@@ -15,7 +15,7 @@
 
 BASEDIR = ../../../..
 
-LIBS_ballposlog = core utils aspects
+LIBS_ballposlog = fawkesaspects
 OBJS_ballposlog = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_ballposlog)

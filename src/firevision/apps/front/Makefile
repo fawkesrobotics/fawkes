@@ -24,7 +24,7 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-LIBS_fvfront = core utils fvutils fvcams fvmodels fvclassifiers fvfilters
+LIBS_fvfront = fawkesaspects fvutils fvcams fvmodels fvclassifiers fvfilters
 OBJS_fvfront = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_fvfront)

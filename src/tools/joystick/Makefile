@@ -26,7 +26,7 @@ warning_nonavi:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting JoystickTool (navigator not built)$(TNORMAL)"
 endif
 
-LIBS_joystick = core utils netcomm navigator fawkesmainappmsgs
+LIBS_joystick = fawkescore fawkesutils fawkesnetcomm navigator fawkesmainappmsgs
 OBJS_joystick = joystick_tool.o	\
 		        cjoystick.o
 
