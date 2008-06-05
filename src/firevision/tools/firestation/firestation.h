@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_IMAGE_VIEWER_H_
-#define __FIREVISION_TOOLS_IMAGE_VIEWER_H_
+#ifndef __FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_
+#define __FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_
 
 #include <gtkmm.h>
 #include <libglademm/xml.h>
@@ -236,4 +236,4 @@ class Firestation
   fawkes::AvahiThread* m_avahi_thread;
 };
 
-#endif /* __FIREVISION_TOOLS_IMAGE_VIEWER_H_ */
+#endif /* __FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_ */

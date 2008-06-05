@@ -22,16 +22,20 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_IMAGE_VIEWER_MIRROR_CALIB_H_
-#define __FIREVISION_TOOLS_IMAGE_VIEWER_MIRROR_CALIB_H_
+#ifndef __FIREVISION_TOOLS_FIRESTATION_MIRROR_CALIB_H_
+#define __FIREVISION_TOOLS_FIRESTATION_MIRROR_CALIB_H_
 
-#include <models/mirror/bulb/bulb_generator.h>
 #include <geometry/hom_point.h>
 
+#ifdef HAVE_BULB
+#include <models/mirror/bulb/bulb_generator.h>
 class Bulb;
 class BulbSampler;
 
 class MirrorCalibTool : public BulbGeneratorProgressHandler
+#else
+class MirrorCalibTool
+#endif
 {
  public:
   MirrorCalibTool();
@@ -83,9 +87,12 @@ class MirrorCalibTool : public BulbGeneratorProgressHandler
   bool m_calib_done;
   bool m_step_two;
 
+#ifdef HAVE_BULB
   Bulb* m_bulb;
   BulbSampler* m_sampler;
   BulbGenerator* m_generator;
+#endif
 };
+
 
 #endif /*  __FIREVISION_TOOLS_IMAGE_VIEWER_MIRROR_CALIB_H_ */

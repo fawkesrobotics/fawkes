@@ -48,9 +48,11 @@ float MirrorCalibTool::m_sample_ori[]  = {0.0, deg2rad(45.0),
 /** Constructor. */
 MirrorCalibTool::MirrorCalibTool()
 {
+#ifdef HAVE_BULB
   m_bulb = 0;
   m_sampler = 0;
   m_generator = 0;
+#endif
   
   m_img_width = 0;
   m_img_height = 0;
@@ -72,6 +74,7 @@ MirrorCalibTool::MirrorCalibTool()
 MirrorCalibTool::MirrorCalibTool(unsigned int width, unsigned int height
 				 /*, unsigned int num_dists, unsigned int num_oris*/ )
 {
+#ifdef HAVE_BULB
   m_bulb = 0;
   m_sampler = 0;
   m_generator = 0;
@@ -87,20 +90,24 @@ MirrorCalibTool::MirrorCalibTool(unsigned int width, unsigned int height
   m_sample_ori_step = 0;
 
   m_calib_done = false;
+#endif
 }
 
 /** Destructor. */
 MirrorCalibTool::~MirrorCalibTool()
 {
+#ifdef HAVE_BULB
   delete m_bulb;
   delete m_sampler;
   delete m_generator;
+#endif
 }
 
 /** Inititates the calibration process. */
 void
 MirrorCalibTool::start()
 {
+#ifdef HAVE_BULB
   m_sample_step = 0;
   m_sample_dist_step = 0;
   m_sample_ori_step = 0;
@@ -111,6 +118,7 @@ MirrorCalibTool::start()
   m_next_sample_point = HomPoint(0.0, 0.0, 0.0);
 
   cout << "Define center" << endl;
+#endif
 }
 
 /** Aborts the calibration process. */
@@ -129,52 +137,54 @@ MirrorCalibTool::abort()
 void
 MirrorCalibTool::step(unsigned int x, unsigned int y)
 {
+#ifdef HAVE_BULB
   if (m_sample_step == 0)
-    {
-      m_sampler->setCenter(x, y);
-      m_center_x = x;
-      m_center_y = y;
-      cout << "Center set to (" << x << ", " << y << ")" << endl;
-      m_sample_step++;
-      m_sampler->calculateOmniOrientation(x, y-100);
-    }
+  {
+    m_sampler->setCenter(x, y);
+    m_center_x = x;
+    m_center_y = y;
+    cout << "Center set to (" << x << ", " << y << ")" << endl;
+    m_sample_step++;
+    m_sampler->calculateOmniOrientation(x, y-100);
+  }
   else if (m_sample_step == 1)
+  {
+    if (m_sample_dist_step < m_num_dists)
     {
-      if (m_sample_dist_step < m_num_dists)
-	{
-	  float dist = m_sample_dist[m_sample_dist_step];
-	  m_next_sample_point = HomPoint(0.0, dist, 0.0);
-	  float phi = atan2f( float(x) - float(m_center_x), 
-			      float(m_center_y) - float(y) );
-	  cout << "phi: " << phi << endl;
-	  m_next_sample_point.rotate_z(phi);
-	  cout << "Next sample dist  : " << dist << endl;
-	  cout << "Next sample ori   : " << rad2deg(phi) << endl;
-	  cout << "Next sample point : " << m_next_sample_point.x() 
-	       << ", " << m_next_sample_point.y() << endl;
+      float dist = m_sample_dist[m_sample_dist_step];
+      m_next_sample_point = HomPoint(0.0, dist, 0.0);
+      float phi = atan2f( float(x) - float(m_center_x), 
+			  float(m_center_y) - float(y) );
+      cout << "phi: " << phi << endl;
+      m_next_sample_point.rotate_z(phi);
+      cout << "Next sample dist  : " << dist << endl;
+      cout << "Next sample ori   : " << rad2deg(phi) << endl;
+      cout << "Next sample point : " << m_next_sample_point.x() 
+	   << ", " << m_next_sample_point.y() << endl;
 
-	  m_sampler->setBallPosition(m_next_sample_point.x(), m_next_sample_point.y());
-	  try
-	    {
-	      m_sampler->consider(x, y, 0.0, 0.0, 0.0);
-	    }
-	  catch (Exception &e)
-	    {
-	      e.print_trace();
-	    }
+      m_sampler->setBallPosition(m_next_sample_point.x(), m_next_sample_point.y());
+      try
+      {
+	m_sampler->consider(x, y, 0.0, 0.0, 0.0);
+      }
+      catch (Exception &e)
+      {
+	e.print_trace();
+      }
 
-	  ++m_sample_dist_step;
-	}
-      else
-	{
-	  cout << "Generating bulb" << endl;
-	  m_generator = new BulbGenerator(m_sampler, this);
-	  m_generator->generate();
-	  m_calib_done = true;
-	  cout << "Calibration done" << endl;
-	  ++m_sample_step;
-	}
+      ++m_sample_dist_step;
     }
+    else
+    {
+      cout << "Generating bulb" << endl;
+      m_generator = new BulbGenerator(m_sampler, this);
+      m_generator->generate();
+      m_calib_done = true;
+      cout << "Calibration done" << endl;
+      ++m_sample_step;
+    }
+  }
+#endif
 }
 
 /** Returns the world coordinates of the next calibration point in polar
@@ -186,19 +196,25 @@ MirrorCalibTool::step(unsigned int x, unsigned int y)
 bool
 MirrorCalibTool::get_next(float* dist, float* ori)
 {
+#ifdef HAVE_BULB
   if (m_step_two)
-    {
-      *dist = m_sample_dist[m_sample_dist_step];
-      *ori = rad2deg(m_sample_ori[m_sample_ori_step]);
+  {
+    *dist = m_sample_dist[m_sample_dist_step];
+    *ori = rad2deg(m_sample_ori[m_sample_ori_step]);
       
-      return true;
-    }
+    return true;
+  }
   else
-    {
-      *dist = 0;
-      *ori = 0;
-      return false;
-    }
+  {
+    *dist = 0;
+    *ori = 0;
+    return false;
+  }
+#else
+  *dist = 0;
+  *ori = 0;
+  return false;
+#endif
 } 
 
 /** Loads a calibration file.
@@ -207,7 +223,9 @@ MirrorCalibTool::get_next(float* dist, float* ori)
 void
 MirrorCalibTool::load(const char* filename)
 {
+#ifdef HAVE_BULB
   m_bulb = new Bulb(filename);
+#endif
 }
 
 /** Saves calibration data to a file.
@@ -216,14 +234,16 @@ MirrorCalibTool::load(const char* filename)
 void
 MirrorCalibTool::save(const char* filename)
 {
+#ifdef HAVE_BULB
   if (m_calib_done)
-    {
-      m_generator->getResult()->save(filename);
-    }
+  {
+    m_generator->getResult()->save(filename);
+  }
   else
-    {
-      cout << "Can't save in the middle of the calibration" << endl;
-    }
+  {
+    cout << "Can't save in the middle of the calibration" << endl;
+  }
+#endif
 }
 
 /** Determines the world coordinates for the given image point.
@@ -235,11 +255,13 @@ MirrorCalibTool::save(const char* filename)
 void
 MirrorCalibTool::eval(unsigned int x, unsigned int y, float* dist_ret, float* ori_ret)
 {
+#ifdef HAVE_BULB
   polar_coord_t coord;
   coord = m_bulb->getWorldPointRelative(x, y);
 
   *dist_ret = coord.r;
   *ori_ret = coord.phi;
+#endif
 }
 
 /** Setter routine for the image dimensions.

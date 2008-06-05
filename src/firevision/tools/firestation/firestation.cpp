@@ -246,6 +246,13 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   // --- mirror calibration -----------------------------------------
   m_calib_tool = new MirrorCalibTool();
 
+#ifndef HAVE_BULB
+  Gtk::Notebook *nb = dynamic_cast<Gtk::Notebook*>( get_widget(ref_xml, "ntbOptions") );
+  Gtk::HBox *box = dynamic_cast<Gtk::HBox*>( get_widget(ref_xml, "boxMirrorCalib") );
+  nb->get_tab_label(*box)->set_sensitive(false);
+  box->set_sensitive(false);
+#endif
+
   m_btn_mc_start = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart") );
   m_btn_mc_start->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start) );
 
