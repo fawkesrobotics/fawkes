@@ -297,17 +297,25 @@ MirrorCalibTool::set_oris(float oris[], unsigned int num_oris)
   // TODO
 }
 
+/** Set total steps.
+ * @param total_steps total number of steps
+ */
 void
 MirrorCalibTool::setTotalSteps(unsigned int total_steps)
 {
 }
 
+/** Set progress.
+ * @param progress current progress
+ */
 void
 MirrorCalibTool::setProgress(unsigned int progress)
 {
 }
 
+/** Generation finished. */
 void
 MirrorCalibTool::finished()
 {
 }
+
