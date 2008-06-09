@@ -92,6 +92,7 @@ Clock::finalize()
 {
   destruct_ok = true;
   delete _instance;
+  _instance = NULL;
 }
 
 
