@@ -869,18 +869,21 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
   } else if ( mode == MODE_SIFT ) {
     cout << msg_prefix << "Switching to SIFT mode" << endl;
     delete classifier;
+    classifier = NULL;
     #ifdef HAVE_SIFT
     classifier   = new SiftClassifier( objectimg, width, height );
     #endif
   } else if ( mode == MODE_SURF ) {
     cout << msg_prefix << "Switching to SURF mode" << endl;
     delete classifier;
+    classifier = NULL;
     #ifdef HAVE_SURF
     classifier   = new SurfClassifier( objectimg, 5 );
     #endif
   } else if ( mode == MODE_SIFTPP ) {
     cout << msg_prefix << "Switching to SIFTPP mode" << endl;
     delete classifier;
+    classifier = NULL;
     #ifdef HAVE_SIFTPP
     classifier   = new SiftppClassifier( objectimg, width, height );
     #endif
