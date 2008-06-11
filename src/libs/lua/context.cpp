@@ -212,7 +212,7 @@ LuaContext::add_package_dir(const char *path)
   MutexLocker lock(__lua_mutex);
 
   char *s;
-  asprintf(&s, "package.path = package.path .. \";\" .. \"%s\" .. \"/?.lua\"", path);
+  asprintf(&s, "package.path = package.path .. \";%s/?.lua;%s/?/init.lua\"", path, path);
   do_string(__L, s);
   free(s);
 
@@ -232,7 +232,7 @@ LuaContext::add_cpackage_dir(const char *path)
   MutexLocker lock(__lua_mutex);
 
   char *s;
-  asprintf(&s, "package.cpath = package.cpath .. \";\" .. \"%s\" .. \"/?.so\"", path);
+  asprintf(&s, "package.cpath = package.cpath .. \";%s/?.so\"", path);
   do_string(__L, s);
   free(s);
 
