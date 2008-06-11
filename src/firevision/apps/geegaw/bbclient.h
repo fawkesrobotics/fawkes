@@ -34,11 +34,14 @@
 class RelativePositionModel;
 class GlobalPositionModel;
 class ScanlineModel;
-class ArgumentParser;
 class GeegawPipeline;
 class GeegawConfig;
 class CameraControl;
 class CameraTracker;
+
+namespace fawkes {
+  class ArgumentParser;
+}
 
 namespace bbClients {
   class Localize_Master_Client;
@@ -53,7 +56,7 @@ namespace bbClients {
 class FirevisionGeegawBBClient : public bb::ClientAppl
 { 
  public:
-  FirevisionGeegawBBClient(int argc, char* argv[], ArgumentParser *argp);
+  FirevisionGeegawBBClient(int argc, char* argv[], fawkes::ArgumentParser *argp);
   virtual ~FirevisionGeegawBBClient();
 
   virtual void Init();
@@ -64,7 +67,7 @@ class FirevisionGeegawBBClient : public bb::ClientAppl
 
   bool object_mode;
 
-  ArgumentParser  *argp;
+  fawkes::ArgumentParser  *argp;
   GeegawConfig    *config;
   GeegawPipeline  *pipeline;
 

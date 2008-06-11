@@ -56,6 +56,7 @@ include "front/config.h"
 */
 
 using namespace std;
+using namespace fawkes;
 
 // ==============================================================================
 // Constructor

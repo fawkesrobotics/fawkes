@@ -32,6 +32,7 @@
 #include <utils/math/angle.h>
 
 using namespace std;
+using namespace fawkes;
 
 class CannikinTestBBClient : public bb::ClientAppl
 {

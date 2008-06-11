@@ -43,6 +43,7 @@
 #include <cstdlib>
 
 using namespace std;
+using namespace fawkes;
 
 class FountainRCSoftX : public SignalHandler
 {

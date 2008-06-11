@@ -64,6 +64,7 @@
 #include <cstdlib>
 
 using namespace std;
+using namespace fawkes;
 
 GeegawPipeline::GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool object_mode)
 {

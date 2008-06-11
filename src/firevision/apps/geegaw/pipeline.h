@@ -46,14 +46,17 @@ class RelativePositionModel;
 class GlobalPositionModel;
 class ScanlineModel;
 class Classifier;
-class ArgumentParser;
 class SharedMemoryImageBuffer;
 class GeegawConfig;
 
-class GeegawPipeline : SignalHandler {
+namespace fawkes {
+  class ArgumentParser;
+}
+
+class GeegawPipeline : fawkes::SignalHandler {
 
  public:
-  GeegawPipeline(ArgumentParser *argp, GeegawConfig *config, bool object_mode = false);
+  GeegawPipeline(fawkes::ArgumentParser *argp, GeegawConfig *config, bool object_mode = false);
   ~GeegawPipeline();
 
   void init();
@@ -121,7 +124,7 @@ class GeegawPipeline : SignalHandler {
   void detect_surf();
   void detect_siftpp();
 
-  ArgumentParser  *argp;
+  fawkes::ArgumentParser  *argp;
   GeegawConfig  *config;
   std::string      msg_prefix;
 

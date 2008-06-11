@@ -37,10 +37,10 @@ warning_triclops:
 endif
 
 OBJS_cannikin = bbclient.o config.o main.o pipeline.o
-LIBS_cannikin = fawkescore fawkesutils rutils fvutils fvcams fvmodels fvclassifiers fvstereo rbb rinterfaces qt-mt
+LIBS_cannikin = fawkescore fawkesutils utils fvutils fvcams fvmodels fvclassifiers fvstereo bb interfaces
 
 OBJS_bbcannikin = bbcannikin.o
-LIBS_bbcannikin = fawkescore fawkesutils rutils rbb rinterfaces qt-mt
+LIBS_bbcannikin = fawkescore fawkesutils utils bb interfaces
 
 OBJS_all = $(OBJS_cannikin) $(OBJS_bbcannikin)
 BINS_all = $(BINDIR)/cannikin $(BINDIR)/bbcannikin

@@ -34,11 +34,13 @@
 class RelativePositionModel;
 class GlobalPositionModel;
 class ScanlineModel;
-class ArgumentParser;
 class CannikinPipeline;
 class CannikinConfig;
 class CameraTracker;
 class CameraControl;
+namespace fawkes {
+  class ArgumentParser;
+}
 
 namespace bbClients {
   // class Localize_Master_Client;
@@ -51,7 +53,7 @@ namespace bbClients {
 class FirevisionCannikinBBClient : public bb::ClientAppl
 { 
  public:
-  FirevisionCannikinBBClient(int argc, char* argv[], ArgumentParser *argp);
+  FirevisionCannikinBBClient(int argc, char* argv[], fawkes::ArgumentParser *argp);
   virtual ~FirevisionCannikinBBClient();
 
   virtual void Init();
@@ -62,7 +64,7 @@ class FirevisionCannikinBBClient : public bb::ClientAppl
 
   void cup_not_visible();
 
-  ArgumentParser    *argp;
+  fawkes::ArgumentParser    *argp;
   CannikinConfig    *config;
   CannikinPipeline  *pipeline;
 

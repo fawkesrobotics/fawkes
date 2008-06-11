@@ -36,7 +36,7 @@ ifeq ($(BUILD_TYPE),rcsoftx)
     WARN_TARGETS += warning_rcxqt
   else
     OBJS_fvfountain  = rcxmain.o config.o
-    LIBS_fvfountain += pthread rutils
+    LIBS_fvfountain += pthread utils
     INCDIRS         += $(QTDIR)/include
     BINS_all         = $(BINDIR)/fvfountain
     CFLAGS          += $(CFLAGS_AVAHI) -Wno-non-virtual-dtor

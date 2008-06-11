@@ -50,16 +50,18 @@ class RelativePositionModel;
 class GlobalPositionModel;
 class ScanlineModel;
 class Classifier;
-class ArgumentParser;
 class SharedMemoryImageBuffer;
 class CannikinConfig;
 class ScanlineRadial;
 class ScanlineGrid;
 class TriclopsStereoProcessor;
-class IPCMessageQueue;
 class Drawer;
+namespace fawkes {
+  class ArgumentParser;
+  class IPCMessageQueue;
+}
 
-class CannikinPipeline : SignalHandler {
+class CannikinPipeline : fawkes::SignalHandler {
 
  public:
   typedef enum {
@@ -77,7 +79,7 @@ class CannikinPipeline : SignalHandler {
     STEREO_TEST_MODE = 3
   } cannikin_mode_t;
 
-  CannikinPipeline(ArgumentParser *argp, CannikinConfig *config);
+  CannikinPipeline(fawkes::ArgumentParser *argp, CannikinConfig *config);
   ~CannikinPipeline();
 
   void init();
@@ -125,7 +127,7 @@ class CannikinPipeline : SignalHandler {
     CANNIKIN_STATE_DETERMINE_CUP_COLOR
   } cannikin_state_t;
 
-  ArgumentParser  *argp;
+  fawkes::ArgumentParser  *argp;
   CannikinConfig  *config;
   std::string      msg_prefix;
 
@@ -133,7 +135,7 @@ class CannikinPipeline : SignalHandler {
   CameraControl   *camctrl;
   TriclopsStereoProcessor *triclops;
 
-  IPCMessageQueue *msgq;
+  fawkes::IPCMessageQueue *msgq;
   unsigned long int mtype;
   cannikin_stereo_params_t stereo_params;
 

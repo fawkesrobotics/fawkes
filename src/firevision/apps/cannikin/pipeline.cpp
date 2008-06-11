@@ -54,6 +54,7 @@
 #include <algorithm>  // for min/max
 
 using namespace std;
+using namespace fawkes;
 
 class DisparityPoint {
  public:
