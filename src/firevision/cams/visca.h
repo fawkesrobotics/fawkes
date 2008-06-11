@@ -30,20 +30,20 @@
 
 #ifdef TIMETRACKER_VISCA
 #  warning Visca time tracker enabled
-#  include "utils/timetracker.h"
+#  include <utils/timetracker.h>
 #  include <fstream>
 #endif
 
 #include <cstddef>
 
-class ViscaException : public Exception
+class ViscaException : public fawkes::Exception
 {
  public:
   ViscaException(const char *msg);
   ViscaException(const char *msg, const int _errno);
 };
 
-class ViscaInquiryRunningException : public Exception
+class ViscaInquiryRunningException : public fawkes::Exception
 {
  public:
   ViscaInquiryRunningException();
@@ -372,7 +372,7 @@ class Visca {
   bool         nonblocking_running[2];
   unsigned int nonblocking_sockets[2];
 #ifdef TIMETRACKER_VISCA
-  TimeTracker    *tracker;
+  fawkes::TimeTracker    *tracker;
   std::ofstream   track_file;
   unsigned int    ttcls_pantilt_get_send;
   unsigned int    ttcls_pantilt_get_read;

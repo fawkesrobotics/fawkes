@@ -33,6 +33,8 @@
 #include <grabber.h>
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** @class LeutronCamera <cams/leutron.h>
  * Cameras accessed through Leutron framegrabber.
  */

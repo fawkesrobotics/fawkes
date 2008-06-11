@@ -31,6 +31,7 @@
 #include <utils/math/angle.h>
 
 using namespace std;
+using namespace fawkes;
 
 /** Maximum pan. */
 const int   SonyEviD100PControl::MAX_PAN       =  1440;
