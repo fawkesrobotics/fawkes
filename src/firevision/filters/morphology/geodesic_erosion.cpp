@@ -33,6 +33,9 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/statistical/imagediff.h>
 
+#include <cstdlib>
+#include <cstring>
+
 /** Marker */
 const unsigned int FilterGeodesicErosion::MARKER = 0;
 /** Mask */

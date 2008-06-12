@@ -34,6 +34,9 @@
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/roi.h>
 
+#include <cstdlib>
+#include <cstring>
+
 /** Marker */
 const unsigned int FilterGeodesicDilation::MARKER = 0;
 /** Mask */
