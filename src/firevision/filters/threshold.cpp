@@ -102,7 +102,7 @@ FilterThreshold::apply()
   }
 
   if ( status != ippStsNoErr ) {
-    throw Exception("Threshold filter failed with %i\n", status);
+    throw fawkes::Exception("Threshold filter failed with %i\n", status);
   }
 
 }

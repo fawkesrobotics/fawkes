@@ -75,7 +75,7 @@ SEGenerator::linear(unsigned int width, unsigned int height,
   d->setBuffer(tmp, width, height);
   d->setColor(1, 0, 0);
 
-  float a = normalize_mirror_rad( slope_angle_rad );
+  float a = fawkes::normalize_mirror_rad( slope_angle_rad );
 
   if ( (a == M_PI/2) || (a == -M_PI/2) ) {
     // It's just a vertical line

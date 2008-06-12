@@ -70,7 +70,7 @@ FilterOr::apply()
   }
 
   if ( status != ippStsNoErr ) {
-    throw Exception("Or filter failed with %i\n", status);
+    throw fawkes::Exception("Or filter failed with %i\n", status);
   }
 
 }

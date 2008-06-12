@@ -61,7 +61,7 @@ FilterMedian::apply()
 				    size, mask, anchor );
 
   if ( status != ippStsNoErr ) {
-    throw Exception("Median filter failed with %i\n", status);
+    throw fawkes::Exception("Median filter failed with %i\n", status);
   }
 
 }

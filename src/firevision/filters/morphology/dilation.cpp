@@ -150,7 +150,7 @@ FilterDilation::apply()
   }
 
   if ( status != ippStsNoErr ) {
-    throw Exception("Morphological dilation failed with %i\n", status);
+    throw fawkes::Exception("Morphological dilation failed with %i\n", status);
   }
 
 }

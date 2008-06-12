@@ -157,7 +157,7 @@ FilterSobel::apply()
   }
 
   if ( status != ippStsNoErr ) {
-    throw Exception("Sobel filter failed with %i\n", status);
+    throw fawkes::Exception("Sobel filter failed with %i\n", status);
   }
 
 }

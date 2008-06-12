@@ -38,7 +38,7 @@ const unsigned int FilterTophatClosing::SUBTRACTFROM = 0;
 const unsigned int FilterTophatClosing::FILTERIMAGE  = 1;
 
 #define ERROR(m) {							\
-    Exception e("FilterTophatClosing failed");				\
+    fawkes::Exception e("FilterTophatClosing failed");				\
     e.append("Function: %s", __FUNCTION__);				\
     e.append("Message:  %s", m);					\
     throw e;								\

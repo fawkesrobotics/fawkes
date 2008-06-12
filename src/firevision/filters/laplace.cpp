@@ -99,7 +99,7 @@ FilterLaplace::apply()
   }
 
   if ( status != ippStsNoErr ) {
-    throw Exception("Laplace filter failed with %i\n", status);
+    throw fawkes::Exception("Laplace filter failed with %i\n", status);
   }
 
   /*

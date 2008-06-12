@@ -39,7 +39,7 @@ const unsigned int FilterGeodesicErosion::MARKER = 0;
 const unsigned int FilterGeodesicErosion::MASK   = 1;
 
 #define ERROR(m) {							\
-    Exception e("FilterGeodesicErosion failed");			\
+    fawkes::Exception e("FilterGeodesicErosion failed");			\
     e.append("Function: %s", __FUNCTION__);				\
     e.append("Message:  %s", m);					\
     throw e;								\

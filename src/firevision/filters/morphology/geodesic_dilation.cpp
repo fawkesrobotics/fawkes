@@ -40,7 +40,7 @@ const unsigned int FilterGeodesicDilation::MARKER = 0;
 const unsigned int FilterGeodesicDilation::MASK   = 1;
 
 #define ERROR(m) {							\
-    Exception e("FilterGeodesicDilation failed");			\
+    fawkes::Exception e("FilterGeodesicDilation failed");			\
     e.append("Function: %s", __FUNCTION__);				\
     e.append("Message:  %s", m);					\
     throw e;								\

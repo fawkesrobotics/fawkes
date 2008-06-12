@@ -54,6 +54,6 @@ FilterHipass::apply()
 				    size, ippMskSize3x3 );
 
   if ( status != ippStsNoErr ) {
-    throw Exception("Hipass filter failed with %i\n", status);
+    throw fawkes::Exception("Hipass filter failed with %i\n", status);
   }
 }

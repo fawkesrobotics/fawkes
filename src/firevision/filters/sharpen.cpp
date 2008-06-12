@@ -56,7 +56,7 @@ FilterSharpen::apply()
 				     size );
 
   if ( status != ippStsNoErr ) {
-    throw Exception("Sharpen filter failed with %i\n", status);
+    throw fawkes::Exception("Sharpen filter failed with %i\n", status);
   }
 
 }

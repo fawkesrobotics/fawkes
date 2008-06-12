@@ -113,7 +113,7 @@ FilterErosion::apply()
   }
 
   if ( status != ippStsNoErr ) {
-    throw Exception("Morphological erosion failed with %i\n", status);
+    throw fawkes::Exception("Morphological erosion failed with %i\n", status);
   }
 
 }
