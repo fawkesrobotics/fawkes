@@ -89,6 +89,7 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   add_fieldinfo(Interface::IFT_UINT, "object_type", &data->object_type);
   add_fieldinfo(Interface::IFT_UINT, "flags", &data->flags);
   add_fieldinfo(Interface::IFT_BOOL, "visible", &data->visible);
+  add_fieldinfo(Interface::IFT_BOOL, "valid", &data->valid);
   add_fieldinfo(Interface::IFT_INT, "visibility_history", &data->visibility_history);
   add_fieldinfo(Interface::IFT_FLOAT, "roll", &data->roll);
   add_fieldinfo(Interface::IFT_FLOAT, "pitch", &data->pitch);
@@ -116,7 +117,7 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "relative_y_velocity", &data->relative_y_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "relative_z_velocity", &data->relative_z_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "relative_xyz_velocity_covariance", &data->relative_xyz_velocity_covariance);
-  unsigned char tmp_hash[] = {0xa9, 0xa8, 0xeb, 0x57, 0x72, 0x1e, 0x36, 0x54, 0x52, 0x73, 0xcb, 0xab, 0x84, 0x2a, 0x25, 0x76};
+  unsigned char tmp_hash[] = {0x2e, 0xe1, 0xe3, 0x5c, 0xf6, 0xaf, 0xb3, 0x59, 0x42, 0xa9, 0x6d, 0x69, 0xa0, 0xfe, 0xd3, 0x9b};
   set_hash(tmp_hash);
 }
 
@@ -199,9 +200,7 @@ ObjectPositionInterface::set_flags(const unsigned int new_flags)
 }
 
 /** Get visible value.
- * 
-      True, if object is visible.
-    
+ * True, if object is visible.
  * @return visible value
  */
 bool
@@ -221,15 +220,43 @@ ObjectPositionInterface::maxlenof_visible() const
 }
 
 /** Set visible value.
- * 
-      True, if object is visible.
-    
+ * True, if object is visible.
  * @param new_visible new visible value
  */
 void
 ObjectPositionInterface::set_visible(const bool new_visible)
 {
   data->visible = new_visible;
+}
+
+/** Get valid value.
+ * True, if this position is valid.
+ * @return valid value
+ */
+bool
+ObjectPositionInterface::is_valid()
+{
+  return data->valid;
+}
+
+/** Get maximum length of valid value.
+ * @return length of valid value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+ObjectPositionInterface::maxlenof_valid() const
+{
+  return 1;
+}
+
+/** Set valid value.
+ * True, if this position is valid.
+ * @param new_valid new valid value
+ */
+void
+ObjectPositionInterface::set_valid(const bool new_valid)
+{
+  data->valid = new_valid;
 }
 
 /** Get visibility_history value.

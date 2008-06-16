@@ -172,9 +172,8 @@ class ObjectPositionInterface : public Interface
       by line, first three values represent row, next tree values second row and last three
       values last row from left to right each.
      */
-    bool visible; /**< 
-      True, if object is visible.
-     */
+    bool visible; /**< True, if object is visible. */
+    bool valid; /**< True, if this position is valid. */
   } ObjectPositionInterface_data_t;
 
   ObjectPositionInterface_data_t *data;
@@ -199,6 +198,9 @@ class ObjectPositionInterface : public Interface
   bool is_visible();
   void set_visible(const bool new_visible);
   size_t maxlenof_visible() const;
+  bool is_valid();
+  void set_valid(const bool new_valid);
+  size_t maxlenof_valid() const;
   int visibility_history();
   void set_visibility_history(const int new_visibility_history);
   size_t maxlenof_visibility_history() const;

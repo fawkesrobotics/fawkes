@@ -29,6 +29,9 @@ class ObjectPositionInterface : public Interface
   bool is_visible();
   void set_visible(const bool new_visible);
   size_t maxlenof_visible() const;
+  bool is_valid();
+  void set_valid(const bool new_valid);
+  size_t maxlenof_valid() const;
   int visibility_history();
   void set_visibility_history(const int new_visibility_history);
   size_t maxlenof_visibility_history() const;
