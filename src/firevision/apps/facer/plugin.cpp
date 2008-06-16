@@ -25,6 +25,8 @@
 #include <apps/facer/plugin.h>
 #include <apps/facer/pipeline_thread.h>
 
+using namespace fawkes;
+
 /** @class FvFacerPlugin <apps/facer/plugin.h>
  * FireVision Facer Plugin.
  * This is the FireVision facer plugin. It is used for face detection, training
