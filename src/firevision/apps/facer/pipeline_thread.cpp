@@ -42,9 +42,6 @@
 #include <map>
 #include <string>
 
-
-using namespace fawkes;
-
 #define __SUBSEQ_FACES 3
 
 
@@ -257,26 +254,40 @@ FacerPipelineThread::loop()
 
       ROI &roi = *(__rois->begin());
       CvRect roi_rect = cvRect(roi.start.x, roi.start.y, roi.width, roi.height);
+
+      if( roi.width < 300 || roi.height < 300 ) //heuristically set 
+	{ 
+	  logger->log_info("FacerPipelineThread", " the roi is too small");
+	  break; 
+	}
+
+
       cvSetImageROI(__image, roi_rect);
       IplImage *face = cvCreateImage( cvSize(roi.width, roi.height),
 				      __image->depth, __image->nChannels); 
 
       cvCopyImage( __image, face );  
       cvResetImageROI(__image);
+
+      
       
       IplImage *scaled_face = cvCreateImage( cvSize(48, 48),
                                              __image->depth, __image->nChannels);
       
       cvResize(face, scaled_face, CV_INTER_LINEAR);
-      cvReleaseImage( &face ); 
+      //      cvReleaseImage( &face ); 
       
       
       if( debug ) { 
 	char *buffer;
 	asprintf( &buffer,"face-%d.png", ++__saved_faces ); 
 	cvvSaveImage( buffer, scaled_face ); 
+	asprintf( &buffer, "face-original-%d.png", __saved_faces );
+	cvvSaveImage( buffer, face ); 
 	free( buffer );
       }
+
+      cvReleaseImage( &face ); 
       
       std::vector<IplImage *> face_images;
       face_images.push_back(scaled_face);
