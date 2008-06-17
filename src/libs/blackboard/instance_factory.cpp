@@ -49,7 +49,7 @@ namespace fawkes {
 BlackBoardInstanceFactory::BlackBoardInstanceFactory()
 {
   try {
-    iface_module = new ModuleDL( LIBDIR"/libinterfaces.so" );
+    iface_module = new ModuleDL( LIBDIR"/libfawkesinterfaces.so" );
     iface_module->open();
   } catch (Exception &e) {
     e.append("BlackBoardInstanceFactory cannot open interface module");
@@ -67,7 +67,7 @@ BlackBoardInstanceFactory::~BlackBoardInstanceFactory()
 
 
 /** Creates a new interface instance.
- * This method will look in the libinterfaces shared object for a factory function
+ * This method will look in the libfawkesinterfaces shared object for a factory function
  * for the interface of the given type. If this was found a new instance of the
  * interface is returned.
  * @param type type of the interface

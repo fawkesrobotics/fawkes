@@ -42,7 +42,7 @@ main(int argc, char **argv)
 {
   ArgumentParser *argp = new ArgumentParser(argc, argv, "");
 
-  ModuleDL *mod = new ModuleDL(LIBDIR"/libinterfaces.so");
+  ModuleDL *mod = new ModuleDL(LIBDIR"/libfawkesinterfaces.so");
   mod->open();
 
   const vector<const char *> items = argp->items();
