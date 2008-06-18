@@ -31,29 +31,29 @@ CFLAGS += -DINTERFACEDIR=\"$(INTERFACEDIR)\"
 OBJS_fawkesinterfaces  = $(notdir $(patsubst %.xml,%.o,$(wildcard $(SRCDIR)/*.xml)))
 SRCS_fawkesinterfaces  = $(patsubst %.xml,%.cpp,$(wildcard $(SRCDIR)/*.xml))
 HDRS_fawkesinterfaces  = $(patsubst %.xml,%.h,$(wildcard $(SRCDIR)/*.xml))
-TOLUA_interfaces = $(patsubst %.xml,%.tolua,$(wildcard $(SRCDIR)/*.xml))
+TOLUA_fawkesinterfaces = $(patsubst %.xml,%.tolua,$(wildcard $(SRCDIR)/*.xml))
 
 LIBS_libfawkesinterfaces = fawkescore fawkesinterface
 OBJS_libfawkesinterfaces = $(OBJS_fawkesinterfaces)
 
-CFLAGS_interfaces_tolua = -Wno-unused-function
-LIBS_lua_interfaces = fawkescore fawkesinterface fawkesinterfaces tolua++
-OBJS_lua_interfaces = interfaces_tolua.o
+CFLAGS_fawkesinterfaces_tolua = -Wno-unused-function
+LIBS_lua_fawkesinterfaces = fawkescore fawkesinterface fawkesinterfaces tolua++
+OBJS_lua_fawkesinterfaces = fawkesinterfaces_tolua.o
 
 OBJS_all = $(OBJS_libfawkesinterfaces) $(OBJS_interface_generator) \
-	   $(OBJS_lua_interfaces)
+	   $(OBJS_lua_fawkesinterfaces)
 
 LIBS_all = $(LIBDIR)/libfawkesinterfaces.so
 ifeq ($(HAVE_TOLUA),1)
-  LIBS_all += $(LIBDIR)/lua/interfaces.so
-  TARGETS_all += $(SRCDIR)/interfaces_tolua.cpp
+  LIBS_all += $(LUALIBDIR)/fawkesinterfaces.so
+  TARGETS_all += $(SRCDIR)/fawkesinterfaces_tolua.cpp
 else
   all: warning_tolua_wrapper
 endif
 
 include $(SRCDIR)/generator/generator_rules.mk
 
-$(LIBDIR)/lua/interfaces.so: | $(LIBDIR)/libfawkesinterfaces.so
+$(LUALIBDIR)/fawkesinterfaces.so: | $(LIBDIR)/libfawkesinterfaces.so
 
 .SECONDARY: $(SRCS_fawkesinterfaces) $(HDRS_fawkesinterfaces) \
 	$(OBJS_fawkesinterfaces) $(TOLUA_interfaces) $(OBJS_lua_interfaces)
