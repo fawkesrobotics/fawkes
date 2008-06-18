@@ -27,17 +27,17 @@ endif
 LIBS_libfawkesutils = stdc++ fawkescore magic $(if $(filter Linux,$(OS)),dl)
 OBJS_libfawkesutils =	$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 
-CFLAGS_utils_tolua = -Wno-unused-function
-TOLUA_utils = $(wildcard $(SRCDIR)/*.tolua $(SRCDIR)/*/*.tolua $(SRCDIR)/*/*/*.tolua)
-LIBS_lua_utils = fawkescore fawkesutils tolua++
-OBJS_lua_utils = utils_tolua.o
+CFLAGS_fawkesutils_tolua = -Wno-unused-function
+TOLUA_fawkesutils = $(wildcard $(SRCDIR)/*.tolua $(SRCDIR)/*/*.tolua $(SRCDIR)/*/*/*.tolua)
+LIBS_lua_fawkesutils = fawkescore fawkesutils tolua++
+OBJS_lua_fawkesutils = fawkesutils_tolua.o
 
-OBJS_all = $(OBJS_libfawkesutils) $(OBJS_lua_utils)
+OBJS_all = $(OBJS_libfawkesutils) $(OBJS_lua_fawkesutils)
 ifeq ($(HAVE_LIBMAGIC),1)
   LIBS_all  = $(LIBDIR)/libfawkesutils.so
   ifeq ($(HAVE_TOLUA),1)
-    LIBS_all += $(LIBDIR)/lua/utils.so
-    TARGETS_all += $(SRCDIR)/utils_tolua.cpp
+    LIBS_all += $(LUALIBDIR)/fawkesutils.so
+    TARGETS_all += $(SRCDIR)/fawkesutils_tolua.cpp
   else
     WARN_TARGETS += warning_tolua_wrapper
   endif
@@ -51,7 +51,7 @@ error_libmagic:
 	$(SILENT)exit 1
 endif
 
-$(LIBDIR)/lua/utils.so: | $(LIBDIR)/libfawkesutils.so
+$(LUALIBDIR)/fawkesutils.so: | $(LIBDIR)/libfawkesutils.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

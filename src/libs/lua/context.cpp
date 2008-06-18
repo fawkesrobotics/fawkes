@@ -27,6 +27,7 @@
 #include <core/threading/mutex_locker.h>
 #include <core/exceptions/system.h>
 #include <core/exceptions/software.h>
+#include <utils/logging/liblogger.h>
 
 #include <tolua++.h>
 #include <cstdlib>
@@ -99,14 +100,14 @@ LuaContext::init_state()
   // Add package paths
   for (__slit = __package_dirs.begin(); __slit != __package_dirs.end(); ++__slit) {
     char *s;
-    asprintf(&s, "package.path = package.path .. \";\" .. \"%s\" .. \"/?.lua\"", __slit->c_str());
+    asprintf(&s, "package.path = package.path .. \";%s/?.lua;%s/?/init.lua\"", __slit->c_str(), __slit->c_str());
     do_string(L, s);
     free(s);
   }
 
   for (__slit = __cpackage_dirs.begin(); __slit != __cpackage_dirs.end(); ++__slit) {
     char *s;
-    asprintf(&s, "package.cpath = package.cpath .. \";\" .. \"%s\" .. \"/?.so\"", __slit->c_str());
+    asprintf(&s, "package.cpath = package.cpath .. \";%s/?.so\"", __slit->c_str());
     do_string(L, s);
     free(s);
   }
@@ -194,10 +195,16 @@ void
 LuaContext::restart()
 {
   MutexLocker lock(__lua_mutex);
-  lua_State *L = init_state();
-  lua_State *tL = __L;
-  __L = L;
-  lua_close(tL);
+  try {
+    lua_State *L = init_state();
+    lua_State *tL = __L;
+    __L = L;
+    lua_close(tL);
+  } catch (Exception &e) {
+    LibLogger::log_error("LuaContext", "Could not restart Lua instance, an error "
+			 "occured while initializing new state. Keeping old state.");
+    LibLogger::log_error("LuaContext", e);
+  }
 }
 
 
@@ -453,25 +460,28 @@ LuaContext::pcall(int nargs, int nresults, int errfunc)
 
 /** Assert that the name is unique.
  * Checks the internal context structures if the name has been used
- * already.
+ * already. It will accept a value that has already been set that is of the same
+ * type as the one supplied. Pass the empty string to avoid this.
  * @param name name to check
+ * @param type type of value
+ * @exception Exception thrown if name is not unique
  */
 void
-LuaContext::assert_unique_name(const char *name)
+LuaContext::assert_unique_name(const char *name, std::string type)
 {
-  if ( __usertypes.find(name) != __usertypes.end() ) {
+  if ( (type != "usertype") && (__usertypes.find(name) != __usertypes.end()) ) {
     throw Exception("User type entry already exists for name %s", name);
   }
-  if ( __strings.find(name) != __strings.end() ) {
+  if ( (type != "string") && (__strings.find(name) != __strings.end()) ) {
     throw Exception("String entry already exists for name %s", name);
   }
-  if ( __booleans.find(name) != __booleans.end() ) {
+  if ( (type != "boolean") && (__booleans.find(name) != __booleans.end()) ) {
     throw Exception("Boolean entry already exists for name %s", name);
   }
-  if ( __numbers.find(name) != __numbers.end() ) {
+  if ( (type != "number") && (__numbers.find(name) != __numbers.end()) ) {
     throw Exception("Number entry already exists for name %s", name);
   }
-  if ( __integers.find(name) != __integers.end() ) {
+  if ( (type != "integer") && (__integers.find(name) != __integers.end()) ) {
     throw Exception("Integer entry already exists for name %s", name);
   }
 }
@@ -494,7 +504,7 @@ LuaContext::set_usertype(const char *name, void *data,
     type_n = std::string(name_space) + "::" + type_name;
   }
 
-  assert_unique_name(name);
+  assert_unique_name(name, "usertype");
 
   __usertypes[name] = std::make_pair(data, type_n);
 
@@ -511,7 +521,7 @@ void
 LuaContext::set_string(const char *name, const char *value)
 {
   MutexLocker lock(__lua_mutex);
-  assert_unique_name(name);
+  assert_unique_name(name, "string");
 
   __strings[name] = value;
 
@@ -528,7 +538,7 @@ void
 LuaContext::set_boolean(const char *name, bool value)
 {
   MutexLocker lock(__lua_mutex);
-  assert_unique_name(name);
+  assert_unique_name(name, "boolean");
 
   __booleans[name] = value;
 
@@ -545,7 +555,7 @@ void
 LuaContext::set_number(const char *name, lua_Number value)
 {
   MutexLocker lock(__lua_mutex);
-  assert_unique_name(name);
+  assert_unique_name(name, "number");
 
   __numbers[name] = value;
 
@@ -562,7 +572,7 @@ void
 LuaContext::set_integer(const char *name, lua_Integer value)
 {
   MutexLocker lock(__lua_mutex);
-  assert_unique_name(name);
+  assert_unique_name(name, "integer");
 
   __integers[name] = value;
 

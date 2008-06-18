@@ -26,8 +26,8 @@ else
   LDFLAGS_libfawkesconfig = $(shell $(PKGCONFIG) --libs sqlite3)
   LIBS_all  = $(LIBDIR)/libfawkesconfig.so
   ifeq ($(HAVE_TOLUA),1)
-    LIBS_all += $(LIBDIR)/lua/config.so
-    TARGETS_all += $(SRCDIR)/config_tolua.cpp
+    LIBS_all += $(LUALIBDIR)/fawkesconfig.so
+    TARGETS_all += $(SRCDIR)/fawkesconfig_tolua.cpp
   endif
 endif
 
@@ -42,14 +42,14 @@ endif
 LIBS_libfawkesconfig = stdc++ fawkescore fawkesutils fawkesnetcomm
 OBJS_libfawkesconfig =$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
-CFLAGS_config_tolua = -Wno-unused-function
-TOLUA_config = $(wildcard $(SRCDIR)/*.tolua)
-LIBS_lua_config = fawkescore fawkesconfig tolua++
-OBJS_lua_config = config_tolua.o
+CFLAGS_fawkesconfig_tolua = -Wno-unused-function
+TOLUA_fawkesconfig = $(wildcard $(SRCDIR)/*.tolua)
+LIBS_lua_fawkesconfig = fawkescore fawkesconfig tolua++
+OBJS_lua_fawkesconfig = fawkesconfig_tolua.o
 
-OBJS_all = $(OBJS_libfawkesconfig) $(OBJS_lua_config)
+OBJS_all = $(OBJS_libfawkesconfig) $(OBJS_lua_fawkesconfig)
 
-$(LIBDIR)/lua/config.so: | $(LIBDIR)/libfawkesconfig.so
+$(LUALIBDIR)/fawkesconfig.so: | $(LIBDIR)/libfawkesconfig.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

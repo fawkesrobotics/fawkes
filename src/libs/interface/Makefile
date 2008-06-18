@@ -23,21 +23,21 @@ include $(BASEDIR)/etc/buildsys/lua.mk
 LIBS_libfawkesinterface = fawkescore
 OBJS_libfawkesinterface = interface.o interface_info.o message.o message_queue.o
 
-CFLAGS_interface_tolua = -Wno-unused-function
-TOLUA_interface = $(wildcard $(SRCDIR)/*.tolua)
-LIBS_lua_interface = fawkescore fawkesinterface tolua++
-OBJS_lua_interface = interface_tolua.o
+CFLAGS_fawkesinterface_tolua = -Wno-unused-function
+TOLUA_fawkesinterface = $(wildcard $(SRCDIR)/*.tolua)
+LIBS_lua_fawkesinterface = fawkescore fawkesinterface tolua++
+OBJS_lua_fawkesinterface = fawkesinterface_tolua.o
 
-OBJS_all = $(OBJS_libfawkesinterface) $(OBJS_lua_interface) $(SRCDIR)/interface_tolua.cpp
+OBJS_all = $(OBJS_libfawkesinterface) $(OBJS_lua_fawkesinterface) $(SRCDIR)/interface_tolua.cpp
 LIBS_all = $(LIBDIR)/libfawkesinterface.so
 ifeq ($(HAVE_TOLUA),1)
-  LIBS_all += $(LIBDIR)/lua/interface.so
-  TARGETS_all += $(SRCDIR)/interface_tolua.cpp
+  LIBS_all += $(LUALIBDIR)/fawkesinterface.so
+  TARGETS_all += $(SRCDIR)/fawkesinterface_tolua.cpp
 else
   all: warning_tolua_wrapper
 endif
 
-$(LIBDIR)/lua/interface.so: | $(LIBDIR)/libfawkesinterface.so
+$(LUALIBDIR)/fawkesinterface.so: | $(LIBDIR)/libfawkesinterface.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

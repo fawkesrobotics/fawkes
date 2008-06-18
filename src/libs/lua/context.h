@@ -101,7 +101,7 @@ class LuaContext : public FamListener
   lua_State *  init_state();
   void         do_string(lua_State *L, const char *format, ...);
   void         do_file(lua_State *L, const char *s);
-  void         assert_unique_name(const char *name);
+  void         assert_unique_name(const char *name, std::string type);
 
  private:
   lua_State *__L;
