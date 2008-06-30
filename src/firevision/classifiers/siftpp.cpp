@@ -41,6 +41,9 @@
 //#include <fvutils/writers/pnm.h>
 //#include <fvutils/writers/png.h>
 
+//using namespace fawkes; 
+using namespace fawkes; 
+
 /** @class SiftppClassifier <classifiers/siftpp.h>
  * SIFTPP classifier.
  *

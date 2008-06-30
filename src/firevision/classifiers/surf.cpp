@@ -75,6 +75,7 @@
  */
 
 
+
 SurfClassifier::SurfClassifier( const char * object_file,
 				unsigned int min_match, float min_match_ratio,
 				int samplingStep, int octaves, double thres, 
@@ -101,7 +102,7 @@ SurfClassifier::SurfClassifier( const char * object_file,
 
 
   //#ifdef SURF_TIMETRACKER
-  __tt = new TimeTracker();
+  __tt = new fawkes::TimeTracker();
   __loop_count = 0;
   __ttc_objconv = __tt->add_class("ObjectConvert");
   __ttc_objfeat = __tt->add_class("ObjectFeatures");
@@ -116,7 +117,7 @@ SurfClassifier::SurfClassifier( const char * object_file,
   //#endif
 
   if( !object_file && strcmp( object_file, "" ) == 0 ) {
-    throw Exception("empty object file");
+    throw fawkes::Exception("empty object file");
   }  
   std::cout << "SurfClassifier(classify): opening object image file '" << object_file << "'" << std::endl;
 
@@ -141,7 +142,7 @@ SurfClassifier::SurfClassifier( const char * object_file,
   //__obj_img->setFrame( buf );
 
   if ( ! __obj_img ) {
-    throw Exception("Could not load object file '%s'", object_file);
+    throw fawkes::Exception("Could not load object file '%s'", object_file);
   }
 
   //#ifdef SURF_TIMETRACKER
@@ -193,7 +194,7 @@ SurfClassifier::SurfClassifier( const char * object_file,
 
   __obj_num_features = __obj_features.size();
   if ( ! __obj_num_features > 0 ) {
-    throw Exception("Could not compute object features");
+    throw fawkes::Exception("Could not compute object features");
   }
   std::cout << "SurfClassifier(classify): computed '" << __obj_num_features << "' features from object" << std::endl;
 
@@ -350,7 +351,7 @@ SurfClassifier::classify()
   //#ifdef SURF_TIMETRACKER
   __tt->ping_end(__ttc_matchin);
   //#endif
-  std::cout << "SurfClassifier(classify) matched '" << std::cblue << c << std::cnormal <<"' of '" << __obj_features.size() << "' features in scene." << std::endl;
+  std::cout << "SurfClassifier(classify) matched '" << fawkes::cblue << c << fawkes::cnormal <<"' of '" << __obj_features.size() << "' features in scene." << std::endl;
 
   float match_ratio = ((float)c / (float)__obj_num_features);
 

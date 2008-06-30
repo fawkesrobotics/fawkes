@@ -31,6 +31,8 @@
 #endif
 
 #include <vector>
+#include <utils/time/clock.h>
+#include <utils/time/tracker.h>
 
 #include <classifiers/classifier.h>
 
@@ -38,7 +40,8 @@
 #include <siftpp/sift.hpp>
 
 //#ifdef SIFTPP_TIMETRACKER
-class TimeTracker;
+
+class fawkes::TimeTracker;
 //#endif
 
 class SiftppClassifier : public Classifier
@@ -118,7 +121,7 @@ class SiftppClassifier : public Classifier
   int __vlen;
 
   //#ifdef SIFTPP_TIMETRACKER
-  TimeTracker *__tt;
+  fawkes::TimeTracker *__tt;
   unsigned int __loop_count;
   unsigned int __ttc_objconv;
   unsigned int __ttc_objfeat;

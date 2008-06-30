@@ -39,9 +39,11 @@
 #include <surf/image.h>
 //class surf::Ipoint;
 //class surf::Image;
+#include <utils/time/clock.h>
+#include <utils/time/tracker.h>
 
 //#ifdef SURF_TIMETRACKER
-class TimeTracker;
+class fawkes::TimeTracker;
 //#endif
 
 //struct CvMemStorage;
@@ -110,7 +112,7 @@ class SurfClassifier : public Classifier
   int __vlen;
 
   //#ifdef SURF_TIMETRACKER
-  TimeTracker *__tt;
+  fawkes::TimeTracker *__tt;
   unsigned int __loop_count;
   unsigned int __ttc_objconv;
   unsigned int __ttc_objfeat;
