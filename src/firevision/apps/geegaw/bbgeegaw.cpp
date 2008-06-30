@@ -148,9 +148,10 @@ GeegawTestBBClient::Loop(int Count)
   case 'u':
     cout << "Requesting switch to SURF mode" << endl;
     m_pGeegawClient->SetMode(bbClients::Geegaw_Client::MODE_SURF);
-    m_pGeegawClient->SetObjectimage("../res/opx/alogo.png");
+    m_pGeegawClient->SetObjectimage("../res/opx/objects/");
     m_pGeegawClient->UpdateBB();
     BBOperate();
+    //    cout<<"The new mode is : " << m_pGeegawClient->GetCurrentMode() << endl; 
     break;
   case 'p':
     cout << "Requesting switch to SIFTPP mode" << endl;
@@ -171,6 +172,9 @@ GeegawTestBBClient::Loop(int Count)
     m_pGeegawClient->UpdateBB();
     BBOperate();
   }
+
+  //  cout<<"The new mode is : " << m_pGeegawClient->GetCurrentMode() << endl; 
+  
 
   if ( m_pGeegawClient->GetCurrentMode() == bbClients::Geegaw_Client::MODE_OBSTACLES ) {
     cout << "==========================================================================" << endl;

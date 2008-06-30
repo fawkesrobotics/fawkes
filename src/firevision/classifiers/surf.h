@@ -42,6 +42,8 @@
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
 
+#define NUM_OBJ 2
+
 //#ifdef SURF_TIMETRACKER
 class fawkes::TimeTracker;
 //#endif
@@ -78,7 +80,7 @@ class SurfClassifier : public Classifier
 
   // Object objects
   surf::Image *__obj_img;
-  std::vector< surf::Ipoint > __obj_features;
+  std::vector< surf::Ipoint > __obj_features[NUM_OBJ];
   int __obj_num_features;
 
   // Image objects

@@ -33,6 +33,8 @@
 #include <utils/time/tracker.h>
 //#endif
 
+#include <string> 
+
 #include <surf/surflib.h>
 //#include <surf/ipoint.h>
 //#include <surf/image.h>
@@ -44,6 +46,9 @@
 #include <fvutils/color/conversions.h>
 #include <fvutils/readers/png.h>
 #include <utils/system/console_colors.h>
+#include <dirent.h>
+#include <utils/logging/liblogger.h>
+
 //#include <fvutils/writers/pnm.h>
 //#include <fvutils/writers/png.h>
 
@@ -76,7 +81,7 @@
 
 
 
-SurfClassifier::SurfClassifier( const char * object_file,
+SurfClassifier::SurfClassifier( const char * object_dir,
 				unsigned int min_match, float min_match_ratio,
 				int samplingStep, int octaves, double thres, 
 				bool doubleImageSize, int initLobe, 
@@ -116,12 +121,38 @@ SurfClassifier::SurfClassifier( const char * object_file,
   __tt->ping_start(__ttc_objconv);
   //#endif
 
-  if( !object_file && strcmp( object_file, "" ) == 0 ) {
-    throw fawkes::Exception("empty object file");
-  }  
+
+  DIR *dir = 0; 
+
+  std::string dir_path = object_dir; 
+
+  if( (dir = opendir( dir_path.c_str() ) ) == NULL ) 
+    {
+      char* buffer = new char[256];
+      sprintf(buffer, "The directory %s does not exist!", dir_path.c_str() ); 
+            
+      fawkes::LibLogger::log_error("SurfClassifier",buffer);
+    }
+
+  struct dirent* ent; 
+  std::string object_file; 
+  int num_obj_index = 0;
+  
+  while( (ent = readdir(dir)) != NULL ) 
+    { 
+      
+      if ( strcmp( ent->d_name, ".") == 0 || strcmp( ent->d_name,"..") == 0 )
+	continue;
+      
+      object_file = dir_path + ent->d_name; 
+
+//       if( !object_file && strcmp( object_file, "" ) == 0 ) {
+//     throw fawkes::Exception("empty object file");
+//   }  
+
   std::cout << "SurfClassifier(classify): opening object image file '" << object_file << "'" << std::endl;
 
-  PNGReader pngr( object_file );
+  PNGReader pngr( object_file.c_str() );
   unsigned char* buf = malloc_buffer( pngr.colorspace(), pngr.pixel_width(), pngr.pixel_height() );
   pngr.set_buffer( buf );
   pngr.read();
@@ -142,7 +173,7 @@ SurfClassifier::SurfClassifier( const char * object_file,
   //__obj_img->setFrame( buf );
 
   if ( ! __obj_img ) {
-    throw fawkes::Exception("Could not load object file '%s'", object_file);
+    throw fawkes::Exception("Could not load object file '%s'", object_file.c_str());
   }
 
   //#ifdef SURF_TIMETRACKER
@@ -157,12 +188,12 @@ SurfClassifier::SurfClassifier( const char * object_file,
   //#endif
 
   // COMPUTE OBJECT FEATURES
-  __obj_features.clear();
-  __obj_features.reserve(1000);
+  __obj_features[num_obj_index].clear();
+  __obj_features[num_obj_index].reserve(1000);
   __obj_num_features = 0;
   // Extract interest points with Fast-Hessian
   surf::FastHessian fh(__obj_img, /* pointer to integral image */
-		       __obj_features,
+		       __obj_features[num_obj_index],
 		       __thres, /* blob response threshold */
 		       __doubleImageSize, /* double image size flag */
 		       __initLobe * 3 /* 3 times lobe size equals the mask size */, 
@@ -183,16 +214,16 @@ SurfClassifier::SurfClassifier( const char * object_file,
   //printf("vlen=%i\n", __vlen);
 
   // Compute the orientation and the descriptor for every interest point
-  for (unsigned n=0; n < __obj_features.size(); n++){
+  for (unsigned n=0; n < __obj_features[num_obj_index].size(); n++){
     // set the current interest point
-    des.setIpoint(&__obj_features[n]);
+    des.setIpoint(&(__obj_features[num_obj_index])[n]);
     // assign reproducible orientation
     des.assignOrientation();
     // make the SURF descriptor
     des.makeDescriptor();
   }
 
-  __obj_num_features = __obj_features.size();
+  __obj_num_features = __obj_features[num_obj_index].size();
   if ( ! __obj_num_features > 0 ) {
     throw fawkes::Exception("Could not compute object features");
   }
@@ -204,6 +235,9 @@ SurfClassifier::SurfClassifier( const char * object_file,
   //#ifdef SURF_TIMETRACKER
   __tt->ping_end(__ttc_objfeat);
   //#endif
+
+  num_obj_index++;
+    }
 
 }
 
@@ -223,7 +257,12 @@ SurfClassifier::classify()
   //#endif
 
   // list of ROIs to return
-  std::list< ROI > *rv = new std::list< ROI >();
+
+  std::list<ROI> rv[NUM_OBJ];
+  float match_ratios[NUM_OBJ]; 
+
+  
+  //  std::list< ROI > *rv = new std::list< ROI >();
 
   // for ROI calculation
   int x_min = _width;
@@ -333,17 +372,19 @@ SurfClassifier::classify()
   //#endif
   std::cout << "SurfClassifier(classify): matching ..." << std::endl;
 
-  std::vector< int > matches(__obj_features.size());
-  int c = 0;
-  for (unsigned i = 0; i < __obj_features.size(); i++) {
-    int match = findMatch(__obj_features[i], __img_features);
+  for( unsigned j = 0; j < NUM_OBJ; j++ ) 
+    { 
+      std::vector< int > matches(__obj_features[j].size());
+      int c = 0;
+      for (unsigned i = 0; i < __obj_features[j].size(); i++) {
+	int match = findMatch((__obj_features[j])[i], __img_features);
     matches[i] = match;
     if (match != -1) {
       // std::cout << " Matched feature " << i << " in object image with feature " << match << " in image." << std::endl;
       /// adding feature-ROI
       ROI r( (int)(__img_features[matches[i]].x)-5, (int)(__img_features[matches[i]].y )-5, 11, 11, _width, _height);
       r.num_hint_points = 0;
-      rv->push_back(r);
+      rv[j].push_back(r);
       /// increment feature-match-count
       ++c;
     }
@@ -351,11 +392,12 @@ SurfClassifier::classify()
   //#ifdef SURF_TIMETRACKER
   __tt->ping_end(__ttc_matchin);
   //#endif
-  std::cout << "SurfClassifier(classify) matched '" << fawkes::cblue << c << fawkes::cnormal <<"' of '" << __obj_features.size() << "' features in scene." << std::endl;
+  std::cout << "SurfClassifier(classify) matched '" << fawkes::cblue << c << fawkes::cnormal <<"' of '" << __obj_features[j].size() << "' features in scene. (for supplied object = " << j << std::endl ;
 
   float match_ratio = ((float)c / (float)__obj_num_features);
+  match_ratios[j] = match_ratio; 
 
-  std::cout << "SurfClassifier(classify): match_ratio is '" << match_ratio << "'" << std::endl;
+  std::cout << "SurfClassifier(classify): match_ratio is '" << match_ratio << "' and min_match_ratio is" << __min_match_ratio << std::endl;
 
   std::cout << "SurfClassifier(classify): computing ROI" << std::endl;
   //#ifdef SURF_TIMETRACKER
@@ -378,16 +420,17 @@ SurfClassifier::classify()
   if( (c != 0) && ((unsigned)c > __min_match) &&
       (match_ratio > __min_match_ratio) &&
       (x_max - x_min != 0 ) && (y_max - y_min != 0) ) {
-
+    
     std::cout << "SurfClassifier(classify): c='" << c << "' __min_match='" << __min_match << "'." << std::endl;
 
     ROI r(x_min, y_min, x_max-x_min, y_max-y_min, _width, _height);
     r.num_hint_points = c;
-    rv->push_back(r);
-  } else {
+    rv[j].push_back(r);
+   } else {
     std::cout << " clearing ROI-list (no or too few matches or [0,0]-roi!)" << std::endl;
-    rv->clear();
-  }
+    rv[j].clear();
+  } 
+      }
   //#ifdef SURF_TIMETRACKER
   __tt->ping_end(__ttc_roimerg);
   //#endif
@@ -405,8 +448,27 @@ SurfClassifier::classify()
   //__tt->print_to_stdout();
   //#endif
 
-  std::cout << "SurfClassifier(classify): done ... returning '" << rv->size() << "' ROIs." << std::endl;
-  return rv;
+
+  // HISTOGRAM COMPARISON OF ALL ROIS AND FEATURES DETECTED
+  float min_ratio_tmp = -1.0; 
+  int min_ratio_index = -1; 
+  for( unsigned int i = 0; i < NUM_OBJ; i++ ) 
+    {
+      if( match_ratios[i] > min_ratio_tmp ) 
+	{
+	  min_ratio_tmp = match_ratios[i];
+	  min_ratio_index = i; 
+	}
+    }
+
+  std::list<ROI> *final_rv = new std::list<ROI>; 
+  
+  final_rv->assign( rv[min_ratio_index].begin(), rv[min_ratio_index].end() ); 
+  
+      
+
+  std::cout << "SurfClassifier(classify): done,  ... returning '" << rv->size() << "' ROIs. The object class is " << min_ratio_index << std::endl;
+  return final_rv;
 }
 
 int

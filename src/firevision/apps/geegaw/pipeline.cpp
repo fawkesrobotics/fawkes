@@ -586,10 +586,14 @@ GeegawPipeline::detect_sift()
 void
 GeegawPipeline::detect_surf()
 {
+  
+  cout<<"Entering SURF mode"<<endl; 
+
 #ifdef HAVE_SURF
   classifier->set_src_buffer( buffer_src, width, height );
   rois = classifier->classify();
   
+  cout<<" SURF found"<<endl; 
   obstacles.clear();
 
   // Go through all ROIs, 
@@ -875,10 +879,11 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
     classifier   = new SiftClassifier( objectimg, width, height );
     #endif
   } else if ( mode == MODE_SURF ) {
-    cout << msg_prefix << "Switching to SURF mode" << endl;
+    cout << msg_prefix << "Switching to SURF mode with directory location as "<< objectimg <<endl;
     delete classifier;
     classifier = NULL;
     #ifdef HAVE_SURF
+    objectimg = "../res/opx/objects/"; 
     classifier   = new SurfClassifier( objectimg, 5 );
     #endif
   } else if ( mode == MODE_SIFTPP ) {
