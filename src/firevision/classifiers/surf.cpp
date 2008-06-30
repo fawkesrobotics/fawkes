@@ -66,7 +66,7 @@
  */
 
 /** Constructor.
- * @param object_file file that contains an image of the object to detect
+ * @param object_dir file that contains an image of the object to detect
  * @param samplingStep Initial sampling step
  * @param min_match minimum number of features that have to be matched per ROI
  * @param min_match_ratio  minimum ratio of features matched per object to be matched per ROI
@@ -141,7 +141,7 @@ SurfClassifier::SurfClassifier( const char * object_dir,
   while( (ent = readdir(dir)) != NULL ) 
     { 
       
-      if ( strcmp( ent->d_name, ".") == 0 || strcmp( ent->d_name,"..") == 0 )
+      if ( strcmp( ent->d_name, ".") == 0 || strcmp( ent->d_name,"..") == 0 || strcmp( ent->d_name,".svn") == 0)
 	continue;
       
       object_file = dir_path + ent->d_name; 

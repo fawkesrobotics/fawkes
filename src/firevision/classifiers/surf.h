@@ -42,7 +42,7 @@
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
 
-#define NUM_OBJ 2
+#define NUM_OBJ 9
 
 //#ifdef SURF_TIMETRACKER
 class fawkes::TimeTracker;
