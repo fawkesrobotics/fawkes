@@ -601,7 +601,7 @@ GeegawPipeline::detect_surf()
   unsigned int num_features = 0;
   if ( rois->empty() ) {
     // cout << "Doh, no ROIs!" << endl;
-    cout << msg_prefix << cred << " ##### NOTHING FOUND! #####" << cnormal << endl;
+    cout << msg_prefix << cred << " ##### NOTHING FOUND! :( #####" << cnormal << endl;
   } 
   else {
     FilterROIDraw *rdf = new FilterROIDraw();
@@ -879,12 +879,19 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
     classifier   = new SiftClassifier( objectimg, width, height );
     #endif
   } else if ( mode == MODE_SURF ) {
-    cout << msg_prefix << "Switching to SURF mode with directory location as "<< objectimg <<endl;
+    cout << msg_prefix << "apps/geegaw/pipeline.cpp: Switching to SURF mode " <<endl;
     delete classifier;
     classifier = NULL;
     #ifdef HAVE_SURF
-    objectimg = "../res/opx/objects/"; 
-    classifier   = new SurfClassifier( objectimg, 5 );
+    if( !OFFLINE_SURF )
+      {
+	objectimg = "../res/opx/objects/"; 
+	classifier   = new SurfClassifier( objectimg, 5 ); // read from images 
+      }
+    else { 
+      cout<< "reading dir: " << objectimg <<endl; 
+      classifier = new SurfClassifier(std::string("descriptors/")); 
+    }
     #endif
   } else if ( mode == MODE_SIFTPP ) {
     cout << msg_prefix << "Switching to SIFTPP mode" << endl;
@@ -909,10 +916,16 @@ GeegawPipeline::reload_classifier()
     classifier   = new SiftClassifier( objectimg, width, height );
     #endif
   } else if ( mode == MODE_SURF ) {
-    cout << msg_prefix << "Switching to SURF mode" << endl;
+    cout << msg_prefix << "apps/geegaw/pipeline.cpp/reload_classifier: Switching to SURF mode" << endl;
     if( classifier ) delete classifier;
-    #ifdef HAVE_SURF
-    classifier   = new SurfClassifier( objectimg, 5 );
+#ifdef HAVE_SURF
+    if( !OFFLINE_SURF )
+      { 
+	objectimg = "../res/opx/objects/";  
+        classifier   = new SurfClassifier( objectimg, 5 ); // read from images 
+      }
+    else 
+      classifier = new SurfClassifier(std::string("descriptors/") );  //read from descriptor directory
     #endif
   } else if ( mode == MODE_SIFTPP ) {
     cout << msg_prefix << "Switching to SIFTPP mode" << endl;

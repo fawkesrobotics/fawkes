@@ -27,11 +27,12 @@
 #include <vector>
 
 #include <classifiers/surf.h>
-
+#include <math.h>
 //#ifdef SURF_TIMETRACKER
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
 //#endif
+#include <fstream> 
 
 #include <string> 
 
@@ -49,6 +50,8 @@
 #include <dirent.h>
 #include <utils/logging/liblogger.h>
 
+#define BVERBOSE true
+
 //#include <fvutils/writers/pnm.h>
 //#include <fvutils/writers/png.h>
 
@@ -65,6 +68,243 @@
  * @author Stefan Schiffer
  */
 
+
+/** saveIpoints
+ * save Surf points
+ * @param sFileName surf file name
+ * @param ipts surf ipoints (surf::iPoint) 
+ * @param bVerbose verbose mode
+ * @param bLaplacian laplacian mode 
+ */ 
+
+void saveIpoints(std::string sFileName, const std::vector< surf::Ipoint >& ipts, bool bVerbose, bool bLaplacian, int VLength) 
+{
+  std::cout<<"Attempting to save interest points" << std::endl; 
+
+  std::ofstream ipfile(sFileName.c_str());
+  if( !ipfile ) {
+    std::cerr << "ERROR in loadIpoints(): "
+	      << "Couldn't open file '" << sFileName.c_str() << "'!" << std::endl; //STS
+    return;
+  }
+
+  double sc;
+  unsigned count = ipts.size();
+
+  // Write the file header
+  if (bLaplacian)		
+     ipfile << VLength + 1 << std::endl << count << std::endl;
+   else
+     ipfile << VLength << std::endl << count << std::endl;
+  // In order to just save the interest points without descriptor, comment 
+  // the above and uncomment the following command.
+  //  ipfile << 1.0 << std::endl << count << std::endl;
+  // Save interest point with descriptor in the format of Krystian Mikolajczyk
+  // for reasons of comparison with other descriptors. As our interest points 
+  // are circular in any case, we use the second component of the ellipse to 
+  // provide some information about the strength of the interest point. This is 
+  // important for 3D reconstruction as only the strongest interest points are 
+  // considered. Replace the strength with 0.0 in order to perform Krystian's 
+  // comparisons.
+  for (unsigned n=0; n<ipts.size(); n++){
+    // circular regions with diameter 5 x scale
+    sc = 2.5 * ipts[n].scale; sc*=sc;
+    ipfile  << ipts[n].x /* x-location of the interest point */
+            << " " << ipts[n].y /* y-location of the interest point */
+            << " " << 1.0/sc /* 1/r^2 */
+            << " " << 0.0     //(*ipts)[n]->strength /* 0.0 */
+            << " " << 1.0/sc; /* 1/r^2 */
+
+    if (bLaplacian)
+      ipfile << " " << ipts[n].laplace;
+
+    // Here comes the descriptor
+    for (int i = 0; i < VLength; i++) {
+      ipfile << " " << ipts[n].ivec[i];
+    }
+    ipfile << std::endl;
+  }
+
+  // Write message to terminal.
+  if( bVerbose )
+    std::cout << count << " interest points found" << std::endl;
+}
+
+/** loadIpoints
+ * load interest points
+ * @param sFileName location of the interest points
+ * @param ipts vector to store interest points
+ * @param bVerbose if the saveIpoints was carried out with verbose mode 
+ */ 
+void loadIpoints( std::string sFileName, std::vector< surf::Ipoint >& ipts, bool bVerbose, int& __vlen ) 
+{
+  std::ifstream ipfile(sFileName.c_str());
+	  		
+  if( !ipfile ) { 
+  std::cerr << "ERROR in loadIpoints(): "
+	    << "Couldn't open file '" << sFileName.c_str() << "'!" << std::endl; //STS
+    return;
+  }
+
+  // Load the file header
+
+  unsigned count;
+  ipfile >> __vlen >> count;
+  
+  __vlen--; 
+
+  // create a new interest point vector
+  ipts.clear();
+  ipts.resize(count);
+
+  // Load the interest points in Mikolajczyk's format
+  for (unsigned n=0; n<count; n++){
+    // circular regions with diameter 5 x scale
+    float x, y, a, b, c;
+    ipfile >> x >> y >> a >> b >> c;
+
+    float det = sqrt((a-c)*(a-c) + 4.0*b*b);
+    float e1 = 0.5*(a+c + det);
+    float e2 = 0.5*(a+c - det);
+    float l1 = (1.0/sqrt(e1));
+    float l2 = (1.0/sqrt(e2));
+    float sc = sqrt( l1*l2 );
+
+    ipts[n].x     = x;
+    ipts[n].y     = y;
+    ipts[n].scale = sc/2.5;
+    ipfile >> ipts[n].laplace;
+
+    //ipts[n].allocIvec( VLength ); 
+    ipts[n].ivec = new double[ __vlen]; 
+
+    for( int j = 0 ; j < __vlen; j++ ) 
+      { 
+	
+	ipfile >> ipts[n].ivec[j]; 
+	
+	//	std::cout << ipts[n].ivec[j] << " "; 
+      } 
+
+  }
+
+  // close the interest point file again
+  ipfile.close();
+
+  // Write message to terminal.
+  if( bVerbose )
+    std::cout << "read in " << count << " interest points." << std::endl;
+}
+
+/** Constructor. 
+ * @param keypoints_dir location of the keypoints for the reference objects
+ * @param samplingStep Initial sampling step
+ * @param min_match minimum number of features that have to be matched per ROI
+ * @param min_match_ratio  minimum ratio of features matched per object to be matched per ROI
+ * @param octaves Number of analysed octaves
+ * @param thres Blob response treshold
+ * @param doubleImageSize true to double the image size, false to keep original
+ * @param initLobe Initial lobe size, default 3 and 5 (with double image size)
+ * @param upright rotation invariance (fasle) or upright (true)
+ * @param extended true to use the extended descriptor (SURF 128)
+ * @param indexSize Spatial size of the descriptor window (default 4)
+
+ */
+SurfClassifier::SurfClassifier( std::string keypoints_dir, unsigned int min_match, float min_match_ratio,
+				int samplingStep, int octaves, double thres, 
+				bool doubleImageSize, int initLobe, 
+				bool upright, bool extended, int indexSize ): Classifier("SurfClassifier") 
+{ 
+  // matching constraints
+  __min_match = min_match;
+  __min_match_ratio = min_match_ratio;
+  // params for FastHessian
+  __samplingStep = samplingStep;
+  __octaves = octaves;
+  __thres = thres;
+  __doubleImageSize = doubleImageSize;
+  __initLobe = initLobe;
+  // params for Descriptors
+  __upright = upright;
+  __extended = extended;
+  __indexSize = indexSize;
+
+  // descriptor vector length
+  __vlen = 0;
+
+  //#ifdef SURF_TIMETRACKER
+  __tt = new fawkes::TimeTracker();
+  __loop_count = 0;
+  __ttc_objconv = __tt->add_class("ObjectConvert");
+  __ttc_objfeat = __tt->add_class("ObjectFeatures");
+  __ttc_imgconv = __tt->add_class("ImageConvert");
+  __ttc_imgfeat = __tt->add_class("ImageFeatures");
+  __ttc_matchin = __tt->add_class("Matching");
+  __ttc_roimerg = __tt->add_class("MergeROIs");
+  //#endif
+
+  //#ifdef SURF_TIMETRACKER
+  __tt->ping_start(__ttc_objconv);
+  //#endif
+
+    
+
+  DIR *dir = 0; 
+
+  if( (dir = opendir( keypoints_dir.c_str() ) ) == NULL ) 
+    {
+      char* buffer = new char[256];
+      sprintf(buffer, "The directory %s does not exist!", keypoints_dir.c_str() ); 
+      fawkes::LibLogger::log_error("SurfClassifier",buffer);
+    }
+
+  struct dirent* ent; 
+  std::string object_file; 
+  int num_obj_index = 0;
+
+  
+  while( (ent = readdir(dir)) != NULL ) 
+    { 
+     
+ 
+      if ( strcmp( ent->d_name, ".") == 0 || strcmp( ent->d_name,"..") == 0 || strcmp( ent->d_name,".svn") == 0 || num_obj_index > NUM_OBJ || num_obj_index == NUM_OBJ)
+	continue;
+      
+      object_file = keypoints_dir + ent->d_name; 
+            std:: cout<<"SurfClassifier: reading the following descriptor file" << object_file << std::endl; 
+
+
+      bool b_verbose = BVERBOSE; 
+      loadIpoints( object_file, __obj_features[num_obj_index], b_verbose, __vlen); 
+      num_obj_index++; 
+      
+    }
+
+  closedir(dir); 
+  delete ent;
+
+  std::cout<< "SurfClassifier: Reading successful"<< std::endl; 
+        //#ifdef SURF_TIMETRACKER
+  __tt->ping_end(__ttc_objconv);
+  //#endif
+
+  // save object image for debugging
+  ///surf::ImLoad::saveImage( "obj.pgm", __obj_img);
+
+  //#ifdef SURF_TIMETRACKER
+  __tt->ping_start(__ttc_objfeat);
+  //#endif
+ //#ifdef SURF_TIMETRACKER
+  __tt->ping_end(__ttc_objfeat);
+  //#endif
+
+
+}
+
+
+
+
+
 /** Constructor.
  * @param object_dir file that contains an image of the object to detect
  * @param samplingStep Initial sampling step
@@ -78,7 +318,6 @@
  * @param extended true to use the extended descriptor (SURF 128)
  * @param indexSize Spatial size of the descriptor window (default 4)
  */
-
 
 
 SurfClassifier::SurfClassifier( const char * object_dir,
@@ -221,14 +460,27 @@ SurfClassifier::SurfClassifier( const char * object_dir,
     des.assignOrientation();
     // make the SURF descriptor
     des.makeDescriptor();
+    
   }
 
+  
   __obj_num_features = __obj_features[num_obj_index].size();
   if ( ! __obj_num_features > 0 ) {
     throw fawkes::Exception("Could not compute object features");
   }
   std::cout << "SurfClassifier(classify): computed '" << __obj_num_features << "' features from object" << std::endl;
 
+  char buffer[256]; 
+  sprintf( buffer, "%d.surf", num_obj_index );  
+  std::string des_file_name = buffer; 
+  
+  bool b_verbose = BVERBOSE;  
+  bool b_laplacian = true; 
+  
+  // save descriptor  
+  saveIpoints( des_file_name, __obj_features[num_obj_index], b_verbose, b_laplacian, __vlen ); 
+
+ 
   // CleanUp
   delete __simage;
 
@@ -252,6 +504,8 @@ SurfClassifier::~SurfClassifier()
 std::list< ROI > *
 SurfClassifier::classify()
 {
+
+  //  std::cout<<"SurfClassifier: Entering classification:-"<< std::endl; 
   //#ifdef SURF_TIMETRACKER
   __tt->ping_start(0);
   //#endif
@@ -336,6 +590,7 @@ SurfClassifier::classify()
 		       __samplingStep, /* subsample the blob response map */
 		       __octaves /* number of octaves to be analysed */);
   // Extract them and get their pointer
+  std::cout<<"surfclassifer/classify : getting intrest points"<<std::endl;
   fh.getInterestPoints();
   // Initialise the SURF descriptor
   surf::Surf des(__image, /* pointer to integral image */  
@@ -375,24 +630,29 @@ SurfClassifier::classify()
   for( unsigned j = 0; j < NUM_OBJ; j++ ) 
     { 
       std::vector< int > matches(__obj_features[j].size());
+      //      std::cout<< "SurfClassifier; _debug_ : " << __obj_features[j].size()  << "and" << __img_features.size() << std::endl; 
       int c = 0;
       for (unsigned i = 0; i < __obj_features[j].size(); i++) {
 	int match = findMatch((__obj_features[j])[i], __img_features);
-    matches[i] = match;
-    if (match != -1) {
-      // std::cout << " Matched feature " << i << " in object image with feature " << match << " in image." << std::endl;
-      /// adding feature-ROI
-      ROI r( (int)(__img_features[matches[i]].x)-5, (int)(__img_features[matches[i]].y )-5, 11, 11, _width, _height);
-      r.num_hint_points = 0;
-      rv[j].push_back(r);
-      /// increment feature-match-count
-      ++c;
-    }
-  }
-  //#ifdef SURF_TIMETRACKER
+	matches[i] = match;
+	if (match != -1) {
+	  // std::cout << " Matched feature " << i << " in object image with feature " << match << " in image." << std::endl;
+	  /// adding feature-ROI
+	  ROI r( (int)(__img_features[matches[i]].x)-5, (int)(__img_features[matches[i]].y )-5, 11, 11, _width, _height);
+	  r.num_hint_points = 0;
+	  rv[j].push_back(r);
+	  /// increment feature-match-count
+	  ++c;
+	}
+      }
+      //#ifdef SURF_TIMETRACKER
   __tt->ping_end(__ttc_matchin);
   //#endif
+  if( c == 0 )
   std::cout << "SurfClassifier(classify) matched '" << fawkes::cblue << c << fawkes::cnormal <<"' of '" << __obj_features[j].size() << "' features in scene. (for supplied object = " << j << std::endl ;
+  else
+  std::cout << "SurfClassifier(classify) matched '" << fawkes::cred << c << fawkes::cnormal <<"' of '" << __obj_features[j].size() << "' features in scene. (for supplied object = " << j << std::endl ;
+    
 
   float match_ratio = ((float)c / (float)__obj_num_features);
   match_ratios[j] = match_ratio; 
@@ -430,7 +690,7 @@ SurfClassifier::classify()
     std::cout << " clearing ROI-list (no or too few matches or [0,0]-roi!)" << std::endl;
     rv[j].clear();
   } 
-      }
+    }
   //#ifdef SURF_TIMETRACKER
   __tt->ping_end(__ttc_roimerg);
   //#endif
@@ -476,6 +736,8 @@ SurfClassifier::findMatch(const surf::Ipoint& ip1, const std::vector< surf::Ipoi
   double mind = 1e100, second = 1e100;
   int match = -1;
   
+  //  std::cout<< "SurfClassifier/findMatch: " << ipts.size() <<" " << __vlen << std::endl;
+  
   for (unsigned i = 0; i < ipts.size(); i++) {
     // Take advantage of Laplacian to speed up matching
     if (ipts[i].laplace != ip1.laplace)
@@ -501,11 +763,17 @@ SurfClassifier::findMatch(const surf::Ipoint& ip1, const std::vector< surf::Ipoi
 
 double
 SurfClassifier::distSquare(double *v1, double *v2, int n) {
-	double dsq = 0.;
-	while (n--) {
-		dsq += (*v1 - *v2) * (*v1 - *v2);
-		v1++;
-		v2++;
-	}
-	return dsq;
+  double dsq = 0.;
+  //  std::cout<< fawkes::cblue << (*v1) << fawkes::cred << (*v2);   
+  
+  while (n--) {
+
+    dsq += (*v1 - *v2) * (*v1 - *v2);
+    v1++;
+    v2++;
+  }
+
+  //  std::cout << fawkes::cgreen << " "<<dsq << std::endl; 
+
+  return dsq;
 }

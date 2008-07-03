@@ -43,6 +43,7 @@
 #include <utils/time/tracker.h>
 
 #define NUM_OBJ 9
+#define OFFLINE_SURF true  // offline reading - reading from descriptors folder
 
 //#ifdef SURF_TIMETRACKER
 class fawkes::TimeTracker;
@@ -51,9 +52,25 @@ class fawkes::TimeTracker;
 //struct CvMemStorage;
 //typedef struct _IplImage IplImage;
 
+void saveIpoints(std::string sFileName, const std::vector< surf::Ipoint >& ipts, bool bVerbose, bool bLaplacian, int VLength); 
+
+void loadIpoints(std::string sFileName, std::vector< surf::Ipoint >& ipts, bool bVerbose, int&); 
+
 class SurfClassifier : public Classifier
 {
  public:
+  SurfClassifier( std::string location,  
+		  unsigned int min_match = 0,
+		  float min_match_ratio = 0.0,
+		  int samplingStep = 2,
+		  int octaves = 4,
+		  double thres = 4.0,
+		  bool doubleImageSize = false,
+		  int initLobe = 3,
+		  bool upright = false,
+		  bool extended = false,
+		  int indexSize = 4); 
+  
   SurfClassifier(const char * features_file,
 		 unsigned int min_match = 0,
 		 float min_match_ratio = 0.0,
