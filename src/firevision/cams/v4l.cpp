@@ -24,6 +24,7 @@
  */
 
 #include <core/exception.h>
+#include <core/exceptions/software.h>
 
 #include <cams/v4l.h>
 #include <fvutils/color/colorspaces.h>
@@ -44,7 +45,7 @@
 #include <iostream>
 
 using namespace std;
-
+using namespace fawkes;
 
 /** @class V4LCamera <cams/v4l.h>
  * Video4Linux camera implementation.
@@ -67,7 +68,7 @@ V4LCamera::V4LCamera(const char *device_name)
  * - device=DEV, device file, for example /dev/video0
  * @param cap camera argument parser
  */
-V4LCamera::V4LCamera(CameraArgumentParser *cap)
+V4LCamera::V4LCamera(const CameraArgumentParser *cap)
 {
   started = opened = false;
   if ( cap->has("device") ) {
