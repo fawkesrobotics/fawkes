@@ -42,7 +42,7 @@
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
 
-#define NUM_OBJ 9
+#define NUM_OBJ 13
 #define OFFLINE_SURF true  // offline reading - reading from descriptors folder
 
 //#ifdef SURF_TIMETRACKER
@@ -60,8 +60,8 @@ class SurfClassifier : public Classifier
 {
  public:
   SurfClassifier( std::string location,  
-		  unsigned int min_match = 0,
-		  float min_match_ratio = 0.0,
+		  unsigned int min_match = 5,
+		  float min_match_ratio = 0.05,
 		  int samplingStep = 2,
 		  int octaves = 4,
 		  double thres = 4.0,
@@ -72,8 +72,8 @@ class SurfClassifier : public Classifier
 		  int indexSize = 4); 
   
   SurfClassifier(const char * features_file,
-		 unsigned int min_match = 0,
-		 float min_match_ratio = 0.0,
+		 unsigned int min_match = 5,
+		 float min_match_ratio = 0.05,
 		 int samplingStep = 2,
 		 int octaves = 4,
 		 double thres = 4.0,

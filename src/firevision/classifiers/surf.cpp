@@ -654,7 +654,7 @@ SurfClassifier::classify()
   std::cout << "SurfClassifier(classify) matched '" << fawkes::cred << c << fawkes::cnormal <<"' of '" << __obj_features[j].size() << "' features in scene. (for supplied object = " << j << std::endl ;
     
 
-  float match_ratio = ((float)c / (float)__obj_num_features);
+  float match_ratio = ((float)c / (float)__obj_features[j].size());
   match_ratios[j] = match_ratio; 
 
   std::cout << "SurfClassifier(classify): match_ratio is '" << match_ratio << "' and min_match_ratio is" << __min_match_ratio << std::endl;
