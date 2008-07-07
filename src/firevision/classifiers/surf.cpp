@@ -273,6 +273,8 @@ SurfClassifier::SurfClassifier( std::string keypoints_dir, unsigned int min_matc
       object_file = keypoints_dir + ent->d_name; 
             std:: cout<<"SurfClassifier: reading the following descriptor file" << object_file << std::endl; 
 
+	    __obj_names[ num_obj_index ] = object_file; 
+
 
       bool b_verbose = BVERBOSE; 
       loadIpoints( object_file, __obj_features[num_obj_index], b_verbose, __vlen); 
@@ -471,12 +473,14 @@ SurfClassifier::SurfClassifier( const char * object_dir,
   std::cout << "SurfClassifier(classify): computed '" << __obj_num_features << "' features from object" << std::endl;
 
   char buffer[256]; 
-  sprintf( buffer, "%d.surf", num_obj_index );  
+  sprintf( buffer, "%s-%d.surf", ent->d_name, num_obj_index );  
   std::string des_file_name = buffer; 
   
   bool b_verbose = BVERBOSE;  
   bool b_laplacian = true; 
   
+  __obj_names[ num_obj_index ] = des_file_name; 
+
   // save descriptor  
   saveIpoints( des_file_name, __obj_features[num_obj_index], b_verbose, b_laplacian, __vlen ); 
 
@@ -727,7 +731,7 @@ SurfClassifier::classify()
   
       
 
-  std::cout << "SurfClassifier(classify): done,  ... returning '" << rv->size() << "' ROIs. The object class is " << min_ratio_index << std::endl;
+  std::cout << "SurfClassifier(classify): done,  ... returning '" << rv->size() << "' ROIs. The object class is " << min_ratio_index << "and object name is " << fawkes::cgreen << __obj_names[ min_ratio_index ] << fawkes::cnormal << std::endl;
   return final_rv;
 }
 

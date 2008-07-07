@@ -43,7 +43,7 @@
 #include <utils/time/tracker.h>
 
 #define NUM_OBJ 13
-#define OFFLINE_SURF true  // offline reading - reading from descriptors folder
+#define OFFLINE_SURF false  // offline reading - reading from descriptors folder
 
 //#ifdef SURF_TIMETRACKER
 class fawkes::TimeTracker;
@@ -98,6 +98,7 @@ class SurfClassifier : public Classifier
   // Object objects
   surf::Image *__obj_img;
   std::vector< surf::Ipoint > __obj_features[NUM_OBJ];
+  std::string __obj_names[NUM_OBJ]; 
   int __obj_num_features;
 
   // Image objects
