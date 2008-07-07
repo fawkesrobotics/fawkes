@@ -42,7 +42,7 @@
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
 
-#define NUM_OBJ 13
+//#define NUM_OBJ 13
 #define OFFLINE_SURF false  // offline reading - reading from descriptors folder
 
 //#ifdef SURF_TIMETRACKER
@@ -89,6 +89,8 @@ class SurfClassifier : public Classifier
   
  private:
   
+  unsigned int __num_obj; // number of objects
+
   // Find closest interest point in a list, given one interest point
   int findMatch(const surf::Ipoint& ip1, const std::vector< surf::Ipoint >& ipts);
 
@@ -97,8 +99,8 @@ class SurfClassifier : public Classifier
 
   // Object objects
   surf::Image *__obj_img;
-  std::vector< surf::Ipoint > __obj_features[NUM_OBJ];
-  std::string __obj_names[NUM_OBJ]; 
+  std::vector<std::vector< surf::Ipoint > > __obj_features; 
+  std::vector<std::string> __obj_names; 
   int __obj_num_features;
 
   // Image objects

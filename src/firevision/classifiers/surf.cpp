@@ -215,6 +215,8 @@ SurfClassifier::SurfClassifier( std::string keypoints_dir, unsigned int min_matc
 				bool doubleImageSize, int initLobe, 
 				bool upright, bool extended, int indexSize ): Classifier("SurfClassifier") 
 { 
+  __obj_features.clear(); 
+  __obj_features.reserve(1000); 
   // matching constraints
   __min_match = min_match;
   __min_match_ratio = min_match_ratio;
@@ -267,13 +269,13 @@ SurfClassifier::SurfClassifier( std::string keypoints_dir, unsigned int min_matc
     { 
      
  
-      if ( strcmp( ent->d_name, ".") == 0 || strcmp( ent->d_name,"..") == 0 || strcmp( ent->d_name,".svn") == 0 || num_obj_index > NUM_OBJ || num_obj_index == NUM_OBJ)
+      if ( strcmp( ent->d_name, ".") == 0 || strcmp( ent->d_name,"..") == 0 || strcmp( ent->d_name,".svn") == 0 )
 	continue;
       
       object_file = keypoints_dir + ent->d_name; 
             std:: cout<<"SurfClassifier: reading the following descriptor file" << object_file << std::endl; 
 
-	    __obj_names[ num_obj_index ] = object_file; 
+	    __obj_names.push_back(object_file); 
 
 
       bool b_verbose = BVERBOSE; 
@@ -284,6 +286,8 @@ SurfClassifier::SurfClassifier( std::string keypoints_dir, unsigned int min_matc
 
   closedir(dir); 
   delete ent;
+
+  __num_obj = num_obj_index; 
 
   std::cout<< "SurfClassifier: Reading successful"<< std::endl; 
         //#ifdef SURF_TIMETRACKER
@@ -329,6 +333,9 @@ SurfClassifier::SurfClassifier( const char * object_dir,
 				bool upright, bool extended, int indexSize)
   : Classifier("SurfClassifier")
 {
+
+  __obj_features.clear(); 
+  __obj_features.reserve(1000); 
   // matching constraints
   __min_match = min_match;
   __min_match_ratio = min_match_ratio;
@@ -427,8 +434,11 @@ SurfClassifier::SurfClassifier( const char * object_dir,
   //#ifdef SURF_TIMETRACKER
   __tt->ping_start(__ttc_objfeat);
   //#endif
-
+  
   // COMPUTE OBJECT FEATURES
+
+  std::vector<surf::Ipoint> obj_feature;
+  __obj_features.push_back( obj_feature ); 
   __obj_features[num_obj_index].clear();
   __obj_features[num_obj_index].reserve(1000);
   __obj_num_features = 0;
@@ -457,7 +467,7 @@ SurfClassifier::SurfClassifier( const char * object_dir,
   // Compute the orientation and the descriptor for every interest point
   for (unsigned n=0; n < __obj_features[num_obj_index].size(); n++){
     // set the current interest point
-    des.setIpoint(&(__obj_features[num_obj_index])[n]);
+    des.setIpoint(&(__obj_features.at(num_obj_index).at(n)));
     // assign reproducible orientation
     des.assignOrientation();
     // make the SURF descriptor
@@ -479,7 +489,8 @@ SurfClassifier::SurfClassifier( const char * object_dir,
   bool b_verbose = BVERBOSE;  
   bool b_laplacian = true; 
   
-  __obj_names[ num_obj_index ] = des_file_name; 
+  __obj_names.push_back( des_file_name ); 
+
 
   // save descriptor  
   saveIpoints( des_file_name, __obj_features[num_obj_index], b_verbose, b_laplacian, __vlen ); 
@@ -494,6 +505,8 @@ SurfClassifier::SurfClassifier( const char * object_dir,
 
   num_obj_index++;
     }
+
+  __num_obj = num_obj_index; 
 
 }
 
@@ -516,8 +529,8 @@ SurfClassifier::classify()
 
   // list of ROIs to return
 
-  std::list<ROI> rv[NUM_OBJ];
-  float match_ratios[NUM_OBJ]; 
+  std::list<ROI> rv[__num_obj];
+  float match_ratios[__num_obj]; 
 
   
   //  std::list< ROI > *rv = new std::list< ROI >();
@@ -631,7 +644,7 @@ SurfClassifier::classify()
   //#endif
   std::cout << "SurfClassifier(classify): matching ..." << std::endl;
 
-  for( unsigned j = 0; j < NUM_OBJ; j++ ) 
+  for( unsigned j = 0; j < __num_obj; j++ ) 
     { 
       std::vector< int > matches(__obj_features[j].size());
       //      std::cout<< "SurfClassifier; _debug_ : " << __obj_features[j].size()  << "and" << __img_features.size() << std::endl; 
@@ -716,7 +729,7 @@ SurfClassifier::classify()
   // HISTOGRAM COMPARISON OF ALL ROIS AND FEATURES DETECTED
   float min_ratio_tmp = -1.0; 
   int min_ratio_index = -1; 
-  for( unsigned int i = 0; i < NUM_OBJ; i++ ) 
+  for( unsigned int i = 0; i < __num_obj; i++ ) 
     {
       if( match_ratios[i] > min_ratio_tmp ) 
 	{
@@ -730,8 +743,13 @@ SurfClassifier::classify()
   final_rv->assign( rv[min_ratio_index].begin(), rv[min_ratio_index].end() ); 
   
       
+  std::string first_not(".-"); 
+  int first_not_index = __obj_names[ min_ratio_index ].find_first_of( first_not ); 
+  std::string obj_name_tmp( __obj_names[ min_ratio_index ] ); 
+  obj_name_tmp.erase( first_not_index ); 
 
-  std::cout << "SurfClassifier(classify): done,  ... returning '" << rv->size() << "' ROIs. The object class is " << min_ratio_index << "and object name is " << fawkes::cgreen << __obj_names[ min_ratio_index ] << fawkes::cnormal << std::endl;
+
+  std::cout << "SurfClassifier(classify): done,  ... returning '" << rv->size() << "' ROIs. The object class is " << min_ratio_index << "and object name is " << fawkes::cgreen << obj_name_tmp << fawkes::cnormal << std::endl;
   return final_rv;
 }
 
