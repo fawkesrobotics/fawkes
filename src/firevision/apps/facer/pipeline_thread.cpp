@@ -389,6 +389,16 @@ FacerPipelineThread::loop()
 
       ROI &roi = *(__rois->begin());
       CvRect roi_rect = cvRect(roi.start.x, roi.start.y, roi.width, roi.height);
+
+
+      if( roi.width < 300 || roi.height < 300 ) //heuristically set 
+	{ 
+	  logger->log_info("FacerPipelineThread", " the roi is too small");
+	  break; 
+	}
+
+
+
       cvSetImageROI(__image, roi_rect);
       IplImage *face = cvCreateImage( cvSize(roi.width, roi.height),
 				      __image->depth, __image->nChannels);
