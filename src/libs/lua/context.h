@@ -81,6 +81,7 @@ class LuaContext : public FamListener
   void push_boolean(bool value);
   void push_integer(lua_Integer value);
   void pop(int n);
+  int  stack_size();
 
   void create_table(int narr = 0, int nrec = 0);
   void set_table(int t_index = -3);

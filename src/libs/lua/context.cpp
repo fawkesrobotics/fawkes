@@ -656,6 +656,16 @@ LuaContext::pop(int n)
 }
 
 
+/** Get size of stack.
+ * @return number of elements on the stack
+ */
+int
+LuaContext::stack_size()
+{
+  return lua_gettop(__L);
+}
+
+
 /** Create a table on top of the stack.
  * @param narr number of array elements
  * @param nrec number of non-array elements
