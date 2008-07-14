@@ -25,6 +25,7 @@
 #ifndef __LUA_CONTEXT_H_
 #define __LUA_CONTEXT_H_
 
+#include <lua/exceptions.h>
 #include <utils/system/fam.h>
 
 #include <lua.hpp>
@@ -71,6 +72,7 @@ class LuaContext : public FamListener
   void set_boolean(const char *name, bool value);
   void set_integer(const char *name, lua_Integer value);
   void remove_global(const char *name);
+  void set_global(const char *name);
 
   void push_usertype(void *data, const char *type_name,
 		     const char *name_space = 0);
@@ -79,6 +81,10 @@ class LuaContext : public FamListener
   void push_boolean(bool value);
   void push_integer(lua_Integer value);
   void pop(int n);
+
+  void create_table(int narr = 0, int nrec = 0);
+  void set_table(int t_index = -3);
+  void set_field(const char *key, int t_index = -2);
 
   lua_Number   to_number(int idx);
   lua_Integer  to_integer(int idx);

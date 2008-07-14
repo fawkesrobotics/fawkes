@@ -347,13 +347,13 @@ LuaContext::do_file(lua_State *L, const char *filename)
     lua_pop(L, 1);
     switch (err) {
     case LUA_ERRRUN:
-      throw Exception("Lua runtime error: %s", errmsg.c_str());
+      throw LuaRuntimeException("do_file", errmsg.c_str());
 
     case LUA_ERRMEM:
       throw OutOfMemoryException("Could not execute Lua file %s", filename);
 
     case LUA_ERRERR:
-      throw Exception("Failed to execute error handler during error: %s", errmsg.c_str());
+      throw LuaErrorException("do_file", errmsg.c_str());
     }
   }
 
@@ -446,13 +446,13 @@ LuaContext::pcall(int nargs, int nresults, int errfunc)
     lua_pop(__L, 1);
     switch (err) {
     case LUA_ERRRUN:
-      throw Exception("Lua runtime error (pcall): %s", errmsg.c_str());
+      throw LuaRuntimeException("pcall", errmsg.c_str());
 
     case LUA_ERRMEM:
       throw OutOfMemoryException("Could not execute Lua chunk via pcall");
 
     case LUA_ERRERR:
-      throw Exception("Failed to execute error handler during error (pcall): %s", errmsg.c_str());
+      throw LuaErrorException("pcall", errmsg.c_str());
     }
   }
 }
@@ -653,6 +653,55 @@ LuaContext::pop(int n)
 {
   MutexLocker lock(__lua_mutex);
   lua_pop(__L, n);
+}
+
+
+/** Create a table on top of the stack.
+ * @param narr number of array elements
+ * @param nrec number of non-array elements
+ */
+void
+LuaContext::create_table(int narr, int nrec)
+{
+  lua_createtable(__L, narr, nrec);
+}
+
+
+/** Set value of a table.
+ * Sets value t[k] = v. t is the table at the given index, by default it is the
+ * third-last entry (index is -3). v is the value at the top of the stack, k
+ * is the element just below the top.
+ * @param t_index index of the table on the stack
+ */
+void
+LuaContext::set_table(int t_index)
+{
+  lua_settable(__L, t_index);
+}
+
+
+/** Set field of a table.
+ * Does the equivalent to t[k] = v, where t is the value at the given valid
+ * index and v is the value at the top of the stack.
+ * This function pops the value from the stack. As in Lua, this function may
+ * trigger a metamethod for the "newindex" event.
+ */
+void
+LuaContext::set_field(const char *key, int t_index)
+{
+  lua_setfield(__L, t_index, key);
+}
+
+
+/** Set a global value.
+ * Sets the global variable with the given name to the value currently on top
+ * of the stack. No check whatsoever regarding the name is done.
+ * @param name name of the variable to assign
+ */
+void
+LuaContext::set_global(const char *name)
+{
+  lua_setglobal(__L, name);
 }
 
 
