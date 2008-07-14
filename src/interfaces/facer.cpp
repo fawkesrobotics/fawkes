@@ -52,7 +52,9 @@ FacerInterface::FacerInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (FacerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  unsigned char tmp_hash[] = {0x98, 0xd0, 0xac, 0x73, 0xe, 0x11, 0x3f, 00, 0x3e, 0xe7, 0x6b, 0x7a, 0x4e, 0xdc, 0xd2, 0xd0};
+  add_fieldinfo(Interface::IFT_BOOL, "learning_done", &data->learning_done);
+  add_fieldinfo(Interface::IFT_UINT, "num_detections", &data->num_detections);
+  unsigned char tmp_hash[] = {0x55, 0x1b, 0xf2, 0xd6, 0x42, 0x7c, 0x25, 0xea, 0x56, 0x88, 0x71, 0xf0, 0x39, 0xf1, 0x20, 0xd0};
   set_hash(tmp_hash);
 }
 
@@ -120,6 +122,66 @@ void
 FacerInterface::set_face_label(const char * new_face_label)
 {
   strncpy(data->face_label, new_face_label, sizeof(data->face_label));
+}
+
+/** Get learning_done value.
+ * True if opmode is learning and learning has been completed, false otherwise
+ * @return learning_done value
+ */
+bool
+FacerInterface::is_learning_done()
+{
+  return data->learning_done;
+}
+
+/** Get maximum length of learning_done value.
+ * @return length of learning_done value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_learning_done() const
+{
+  return 1;
+}
+
+/** Set learning_done value.
+ * True if opmode is learning and learning has been completed, false otherwise
+ * @param new_learning_done new learning_done value
+ */
+void
+FacerInterface::set_learning_done(const bool new_learning_done)
+{
+  data->learning_done = new_learning_done;
+}
+
+/** Get num_detections value.
+ * Number of currently detected faces
+ * @return num_detections value
+ */
+unsigned int
+FacerInterface::num_detections()
+{
+  return data->num_detections;
+}
+
+/** Get maximum length of num_detections value.
+ * @return length of num_detections value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_num_detections() const
+{
+  return 1;
+}
+
+/** Set num_detections value.
+ * Number of currently detected faces
+ * @param new_num_detections new num_detections value
+ */
+void
+FacerInterface::set_num_detections(const unsigned int new_num_detections)
+{
+  data->num_detections = new_num_detections;
 }
 
 /* =========== message create =========== */

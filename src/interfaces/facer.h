@@ -52,8 +52,10 @@ class FacerInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
+    unsigned int num_detections; /**< Number of currently detected faces */
     if_facer_opmode_t opmode; /**< Current opmode. */
     char face_label[64]; /**< Label of the recognized face */
+    bool learning_done; /**< True if opmode is learning and learning has been completed, false otherwise */
   } FacerInterface_data_t;
 
   FacerInterface_data_t *data;
@@ -121,6 +123,12 @@ class FacerInterface : public Interface
   char * face_label();
   void set_face_label(const char * new_face_label);
   size_t maxlenof_face_label() const;
+  bool is_learning_done();
+  void set_learning_done(const bool new_learning_done);
+  size_t maxlenof_learning_done() const;
+  unsigned int num_detections();
+  void set_num_detections(const unsigned int new_num_detections);
+  size_t maxlenof_num_detections() const;
 
 };
 

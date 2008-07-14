@@ -38,6 +38,12 @@ class FacerInterface : public Interface
   char * face_label();
   void set_face_label(const char * new_face_label);
   size_t maxlenof_face_label() const;
+  bool is_learning_done();
+  void set_learning_done(const bool new_learning_done);
+  size_t maxlenof_learning_done() const;
+  unsigned int num_detections();
+  void set_num_detections(const unsigned int new_num_detections);
+  size_t maxlenof_num_detections() const;
 
 };
 

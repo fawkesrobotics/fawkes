@@ -22,6 +22,8 @@
     </comment>
     <field type="if_facer_opmode_t" name="opmode">Current opmode.</field>
     <field type="char" length="64" name="face_label">Label of the recognized face</field>
+    <field type="bool" name="learning_done">True if opmode is learning and learning has been completed, false otherwise</field>
+    <field type="unsigned int" name="num_detections">Number of currently detected faces</field>
   </data>
   <message name="LearnFace">
     <comment>Sets opmode to OPMODE_LEARNING and will assume the given label for the face.</comment>
