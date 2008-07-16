@@ -3,7 +3,7 @@
  *  interface_listener.cpp - BlackBoard event listener
  *
  *  Created: Wed Nov 08 10:00:34 2007
- *  Copyright  2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2007-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -341,9 +341,9 @@ BlackBoardInterfaceListener::bbil_data_interface(const char *iuid) throw()
 Interface *
 BlackBoardInterfaceListener::bbil_message_interface(const char *iuid) throw()
 {
-  __bbil_writer_interfaces.lock();
-  bool found = ((__bbil_ii = __bbil_writer_interfaces.find((char *)iuid)) != __bbil_writer_interfaces.end());
-  __bbil_writer_interfaces.unlock();
+  __bbil_message_interfaces.lock();
+  bool found = ((__bbil_ii = __bbil_message_interfaces.find((char *)iuid)) != __bbil_message_interfaces.end());
+  __bbil_message_interfaces.unlock();
   if ( found ) {
     return (*__bbil_ii).second;
   } else {
