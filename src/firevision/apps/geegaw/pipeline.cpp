@@ -62,6 +62,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <cstdlib>
+#include <cstring>
 
 using namespace std;
 using namespace fawkes;
@@ -885,7 +886,7 @@ GeegawPipeline::setMode(GeegawPipeline::GeegawOperationMode mode)
     #ifdef HAVE_SURF
     if( !OFFLINE_SURF )
       {
-	objectimg = "../res/opx/objects/"; 
+	objectimg = strdup("../res/opx/objects/"); 
 	classifier   = new SurfClassifier( objectimg, 5 ); // read from images 
       }
     else { 
@@ -921,7 +922,7 @@ GeegawPipeline::reload_classifier()
 #ifdef HAVE_SURF
     if( !OFFLINE_SURF )
       { 
-	objectimg = "../res/opx/objects/";  
+	objectimg = strdup("../res/opx/objects/");  
         classifier   = new SurfClassifier( objectimg, 5 ); // read from images 
       }
     else 
