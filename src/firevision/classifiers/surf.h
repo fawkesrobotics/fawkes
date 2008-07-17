@@ -46,7 +46,9 @@
 #define OFFLINE_SURF false  // offline reading - reading from descriptors folder
 
 //#ifdef SURF_TIMETRACKER
-class fawkes::TimeTracker;
+namespace fawkes {
+    class TimeTracker; 
+}
 //#endif
 
 //struct CvMemStorage;
