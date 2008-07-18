@@ -83,10 +83,17 @@ LuaTriggerManager::trigger(const char *event, const char *param_format, ...)
     }
     va_end(args);
 
-    __lua->do_string("%s:trigger(\"%s\", %s)", __trigger_var, event, params);
+    try {
+      __lua->do_string("%s:trigger(\"%s\", %s)", __trigger_var, event, params);
+    } catch (Exception &e) {
+      e.print_trace();
+    }
     free(params);
   } else {
-    __lua->do_string("%s:trigger(\"%s\")", __trigger_var, event);
+    try {
+      __lua->do_string("%s:trigger(\"%s\")", __trigger_var, event);
+    } catch (Exception &e) {
+      e.print_trace();
+    }
   }
 }
-
