@@ -140,10 +140,10 @@ function FSM:trans(next, ...)
       end
       self.current:exit()
       local init_rv = {next:init(...)}
-      if #init_rv > 0 then
-	 return self:trans(init_rv)
-      end
       self.current = next
+      if #init_rv > 0 then
+	 return self:trans(unpack(init_rv))
+      end
    else
       if ... then
 	 error("State " .. self.current.name .. " returned parameters but " ..
