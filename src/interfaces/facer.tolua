@@ -44,6 +44,9 @@ class FacerInterface : public Interface
   unsigned int num_detections();
   void set_num_detections(const unsigned int new_num_detections);
   size_t maxlenof_num_detections() const;
+  float sec_since_detection();
+  void set_sec_since_detection(const float new_sec_since_detection);
+  size_t maxlenof_sec_since_detection() const;
 
 };
 

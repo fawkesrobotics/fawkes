@@ -54,7 +54,8 @@ FacerInterface::FacerInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(Interface::IFT_BOOL, "learning_done", &data->learning_done);
   add_fieldinfo(Interface::IFT_UINT, "num_detections", &data->num_detections);
-  unsigned char tmp_hash[] = {0x55, 0x1b, 0xf2, 0xd6, 0x42, 0x7c, 0x25, 0xea, 0x56, 0x88, 0x71, 0xf0, 0x39, 0xf1, 0x20, 0xd0};
+  add_fieldinfo(Interface::IFT_FLOAT, "sec_since_detection", &data->sec_since_detection);
+  unsigned char tmp_hash[] = {0x8b, 0x31, 0x70, 0xb8, 0x71, 0x47, 0xdf, 0x64, 0xbf, 0x9f, 0x43, 0x7b, 0x96, 0xa1, 0x8d, 0xfd};
   set_hash(tmp_hash);
 }
 
@@ -182,6 +183,36 @@ void
 FacerInterface::set_num_detections(const unsigned int new_num_detections)
 {
   data->num_detections = new_num_detections;
+}
+
+/** Get sec_since_detection value.
+ * Time in seconds since the last successful detection.
+ * @return sec_since_detection value
+ */
+float
+FacerInterface::sec_since_detection()
+{
+  return data->sec_since_detection;
+}
+
+/** Get maximum length of sec_since_detection value.
+ * @return length of sec_since_detection value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_sec_since_detection() const
+{
+  return 1;
+}
+
+/** Set sec_since_detection value.
+ * Time in seconds since the last successful detection.
+ * @param new_sec_since_detection new sec_since_detection value
+ */
+void
+FacerInterface::set_sec_since_detection(const float new_sec_since_detection)
+{
+  data->sec_since_detection = new_sec_since_detection;
 }
 
 /* =========== message create =========== */
