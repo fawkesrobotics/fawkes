@@ -100,6 +100,24 @@ normalize_rad(float angle_rad)
 }
 
 
+inline void
+cart2polar2d(float cart_x, float cart_y,
+	     float *polar_phi, float *polar_dist)
+{
+  *polar_phi  = atan2f(cart_y, cart_x);
+  *polar_dist = sqrtf(cart_x * cart_x + cart_y * cart_y);
+}
+
+
+inline void
+polar2cart2d(float polar_phi, float polar_dist,
+	     float *cart_x, float *cart_y)
+{
+  *cart_x = polar_dist * cosf(polar_phi);
+  *cart_y = polar_dist * sinf(polar_phi);
+}
+
+
 } // end namespace fawkes
 
 #endif
