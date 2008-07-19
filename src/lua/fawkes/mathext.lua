@@ -44,3 +44,30 @@ end
 function math.polar2cart2d(polar_phi, polar_dist)
    return polar_dist * math.cos(polar_phi), polar_dist * math.sin(polar_phi);
 end
+
+
+function math.round(r)
+  if r >= 0 then
+    local rf = math.floor(r)
+    if r - rf >= 0.5 then
+      return rf + 1
+    else
+      return rf
+    end
+  else
+    local rf = math.ceil(r)
+    if r - rf < -0.5 then
+      return rf + 1
+    else
+      return rf
+    end
+  end
+end
+
+function math.normalize_mirror_rad(angle_rad)
+  if angle_rad < -math.pi or angle_rad > math.pi then
+    return angle_rad - 2 * math.pi * math.round(angle_rad / (2 * math.pi))
+  else
+    return angle_rad
+  end
+end
