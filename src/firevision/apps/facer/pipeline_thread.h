@@ -30,6 +30,7 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/vision.h>
+#include <aspect/clock.h>
 #include <aspect/blackboard.h>
 
 #include <interfaces/facer.h>
@@ -46,6 +47,7 @@ class FaceRecognizer;
 
 namespace fawkes {
   class TimeTracker;
+  class Time;
 }
 
 typedef struct _IplImage IplImage;
@@ -55,6 +57,7 @@ class FacerPipelineThread
   public fawkes::ConfigurableAspect,
   public fawkes::LoggingAspect,
   public fawkes::VisionAspect,
+  public fawkes::ClockAspect,
   public fawkes::BlackBoardAspect
 {
  public:
@@ -77,6 +80,8 @@ class FacerPipelineThread
   int __person_recognized_cnt;
   int __person_labels[10]; 
   std::string __person_names[10]; 
+
+  fawkes::Time *__time_det; 
 
   fawkes::TimeTracker *__tt;
   unsigned int __loop_count;

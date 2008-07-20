@@ -22,11 +22,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <firevision/fvutils/color/colorspaces.h>
 #include <apps/facer/pipeline_thread.h>
+#include <fvutils/writers/png.h>
 #include <stdio.h>
 #include <cams/camera.h>
 #include <fvutils/ipc/shm_image.h>
 #include <utils/time/tracker.h>
+#include <utils/time/time.h>
+#include <utils/time/clock.h>
 #include <fvutils/writers/seq_writer.h>
 #include <fvutils/writers/jpeg.h>
 #include <fvutils/recognition/faces.h>
@@ -44,6 +48,7 @@
 
 #define __SUBSEQ_FACES 3
 
+using namespace fawkes;
 
 /** @class FacerPipelineThread <apps/facer/pipeline_thread.h>
  * FireVision facer pipeline thread.
@@ -73,7 +78,7 @@ FacerPipelineThread::init()
   __person_recognized_cnt = 0; 
   __nos_new_to_save = 40;
   __new_identity_name = "Ceaser"; 
-  
+  __time_det = new fawkes::Time(clock);
 
   try {
     // detection specific
@@ -182,7 +187,7 @@ FacerPipelineThread::init()
   }
   //  logger->log_info("FacerPipelineThread","number of identiites instantiated %d after instation", __facerecog->get_n_identities()); 
     __opmode = FacerInterface::OPMODE_RECOGNITION;
-//      __opmode = FacerInterface::OPMODE_LEARNING; 
+  //    __opmode = FacerInterface::OPMODE_LEARNING; 
   __face_label = "";
 }
 
@@ -207,21 +212,22 @@ void
 FacerPipelineThread::loop()
 {
   __rois = NULL;
-  bool debug = true; 
+  //bool debug = true; 
+  fawkes::Time time_det_now(clock);
 
   __cam->capture();
   memcpy(__shm->buffer(), __cam->buffer(), __cam->buffer_size());
   IplImageAdapter::convert_image_bgr(__cam->buffer(), __image);
 
-  bool save_all_objects = false; // Hannover 2008 hack. remove this part .. need a seperate class
-  if( save_all_objects ) 
-    { 
-      char *buffer;
-      asprintf( &buffer, "%d.png", ++__saved_faces );
-      cvvSaveImage( buffer, __image ); 
-      free( buffer );
+//   bool save_all_objects = false; // Hannover 2008 hack. remove this part .. need a seperate class
+//   if( save_all_objects ) 
+//     { 
+//       char *buffer;
+//       asprintf( &buffer, "%d.png", ++__saved_faces );
+//       cvvSaveImage( buffer, __image ); 
+//       free( buffer );
 
-    }
+//     }
   
 
   while ( ! __facer_if->msgq_empty() ) {
@@ -247,20 +253,30 @@ FacerPipelineThread::loop()
     break;
 
   case FacerInterface::OPMODE_RECOGNITION:
+    
+
     // detect faces, then try to recognize the found faces
     __rois = __classifier->classify();
     if ( ! __rois->empty() ) {
       // pass only most dominant ROI (biggest one)
-
+      
       ROI &roi = *(__rois->begin());
       CvRect roi_rect = cvRect(roi.start.x, roi.start.y, roi.width, roi.height);
 
-      if( roi.width < 300 || roi.height < 300 ) //heuristically set 
+      if( roi.width < 70 || roi.height < 70 ) //heuristically set 
 	{ 
 	  logger->log_info("FacerPipelineThread", " the roi is too small");
+	  __facer_if->set_num_detections(0);
+	  __facer_if->set_sec_since_detection(time_det_now - __time_det);
+	  __facer_if->write();
+	  
 	  break; 
 	}
-
+      
+      __facer_if->set_sec_since_detection(0); 
+      __time_det->stamp();
+      __facer_if->set_num_detections((int)__rois->size());
+      __facer_if->write();
 
       cvSetImageROI(__image, roi_rect);
       IplImage *face = cvCreateImage( cvSize(roi.width, roi.height),
@@ -278,14 +294,14 @@ FacerPipelineThread::loop()
       //      cvReleaseImage( &face ); 
       
       
-      if( debug ) { 
-	char *buffer;
-	asprintf( &buffer,"face-%d.png", ++__saved_faces ); 
-	cvvSaveImage( buffer, scaled_face ); 
-	asprintf( &buffer, "face-original-%d.png", __saved_faces );
-	cvvSaveImage( buffer, face ); 
-	free( buffer );
-      }
+//       if( debug ) { 
+// 	char *buffer;
+// 	asprintf( &buffer,"face-%d.png", ++__saved_faces ); 
+// 	cvvSaveImage( buffer, scaled_face ); 
+// 	asprintf( &buffer, "face-original-%d.png", __saved_faces );
+// 	cvvSaveImage( buffer, face ); 
+// 	free( buffer );
+//       }
 
       cvReleaseImage( &face ); 
       
@@ -371,7 +387,9 @@ FacerPipelineThread::loop()
     } 
     else {
       __face_label = "";
+      __facer_if->set_num_detections(0);
       __facer_if->set_face_label( __face_label.c_str() ); 
+      __facer_if->set_sec_since_detection(time_det_now - __time_det);
       logger->log_info("FacerPipelineThread", "No ROIs found during Face Recognition.");
       __roi_not_found_flag = true; 
     }
@@ -382,22 +400,18 @@ FacerPipelineThread::loop()
     __rois = __classifier->classify();
     if ( ! __rois->empty() && __saved_faces < __nos_new_to_save) {
       // pass only most dominant ROI (biggest one)
-
-      
-
       logger->log_debug("FacerPipelineThread", "Smile, you're on robot TV!");
 
       ROI &roi = *(__rois->begin());
       CvRect roi_rect = cvRect(roi.start.x, roi.start.y, roi.width, roi.height);
 
+      
 
-      if( roi.width < 300 || roi.height < 300 ) //heuristically set 
+      if( roi.width < 70 || roi.height < 70) //heuristically set 
 	{ 
 	  logger->log_info("FacerPipelineThread", " the roi is too small");
 	  break; 
 	}
-
-
 
       cvSetImageROI(__image, roi_rect);
       IplImage *face = cvCreateImage( cvSize(roi.width, roi.height),
@@ -413,31 +427,40 @@ FacerPipelineThread::loop()
       //      cvvSaveImage( buffer, scaled_face ); 
       
       //            if( debug ) {
-      char *buffer;
+
       char* dirname;
       asprintf( &dirname, "%s%d", (__cfg_dir_path).c_str(), __facerecog->get_n_identities() ); 
-      mkdir( dirname, 777 ); 
+      //      mkdir( dirname, 777 );  //this mkidr statement is giving me problems 
 	
       //	logger->log_info("FacerPipelineThread","NUMBER Of identiites = %d", __facerecog->get_n_identities() ); 
-      //	asprintf( &buffer,"%s%d/%d.png",(__cfg_dir_path).c_str(), __facerecog->get_n_identities(), ++__saved_faces ); 
-      asprintf( &buffer, "%d.png", ++__saved_faces ); 
-      cvvSaveImage( buffer, scaled_face ); 
-      char* new_name;
-      asprintf( &new_name, "%s%d/%d.png", (__cfg_dir_path).c_str(), __facerecog->get_n_identities(), __saved_faces); 
-      rename( buffer, new_name ); 
+      //      asprintf( &buffer,"%s%d/%d.png",(__cfg_dir_path).c_str(), __facerecog->get_n_identities(), ++__saved_faces ); 
+
+      ++__saved_faces;
+      //      asprintf( &buffer, "%d.png", __saved_faces );  // save a copy locally
+
+      char *new_name;
+      asprintf( &new_name, "%s%d/%d.png", (__cfg_dir_path).c_str(), __facerecog->get_n_identities(), __saved_faces );
+      PNGWriter pngwr(new_name, scaled_face->height, scaled_face->width ); 
+      pngwr.set_buffer( RGB, (unsigned char*)scaled_face->imageData );
+      pngwr.write();  
+ 
+
+      //      cvvSaveImage( buffer, scaled_face ); 
+
+
+      //      rename( buffer, new_name ); 
       //rename("%d.png","%s%d/%d.png", __saved_faces, (__cfg_dir_path).c_str(), __facerecog->get_n_identities(), __saved_faces );
       logger->log_debug("FacerPipelineThread", "Face saved to %s", new_name);
 	
       free( new_name ); 
       free( dirname ); 
-      free( buffer );
+      //      free( buffer );
       //    }
 
       cvReleaseImage(&face);
       cvReleaseImage(&scaled_face);
     } else {
       logger->log_info("FacerPipelineThread", "No ROIs found");
-
     }
 
     if( __saved_faces == __nos_new_to_save )
@@ -468,7 +491,9 @@ FacerPipelineThread::loop()
 	  throw;
 	}
 	
+	logger->log_info("FacerPipelineThread","Previous number of identities were (%d, %d ) and forest size of %d", __facerecog->get_n_identities(), __cfg_number_identities +1 , __cfg_forest_size );  
 	delete __facerecog; 
+	
 	
 	__facerecog  = new FaceRecognizer( (__cfg_dir_path).c_str(),  __cfg_number_identities + 1, __cfg_forest_size );
 	//  logger->log_info("FacerPipelineThread","number of identiites instantiated %d", __facerecog->get_n_identities()); 
@@ -476,9 +501,31 @@ FacerPipelineThread::loop()
 	  __facerecog->add_identity(i->first, i->second);
 	  //	  __facerecog->add_identity( __facerecog->get_n_identities(), "NewPerson" ); 
 	}
-	__facerecog->add_identity( __cfg_number_identities, __new_identity_name ); 
 
+
+	//check if there is any entry in the config setup for additional new persons
+	char tmpBuffer[256];
+	sprintf(tmpBuffer,"/firevision/facer/identity_%d", __cfg_number_identities );
+	
+	Configuration::ValueIterator *jVI = config->search(tmpBuffer);
+	if( jVI->next() && jVI->is_string() )
+	  { 
+	    __new_identity_name = jVI->get_string();
+	  }
+	else
+	  { //config file doesnt contain details for the new person name
+	    char tmpBuffer[256];
+	    sprintf(tmpBuffer,"newperson%d", __cfg_number_identities + 1); 
+	    __new_identity_name = tmpBuffer; //DUMMY NAME
+	  }
+	
+	__facerecog->add_identity( __cfg_number_identities, __new_identity_name ); 
+	++__cfg_number_identities;
+
+	//	logger->log_info("FacerPipelineThread","The cfg_num, forest bin size and name %d, %s", __cfg_number_identities, __facerecog->get_n_identities(), __new_identity_name.c_str() ); 
 	__saved_faces = 0; 
+	//done learning .. now go to recognition 
+	__opmode = FacerInterface::OPMODE_RECOGNITION;
 	logger->log_info("FacerPiplelineThread","New identity:%s saved", (__new_identity_name).c_str() ); 
       }
 	break;
