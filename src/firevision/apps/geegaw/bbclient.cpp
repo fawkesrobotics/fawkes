@@ -279,10 +279,14 @@ FirevisionGeegawBBClient::Loop(int Count)
     box_lost = false;
 
     // DEPRECATED! Misusing fields here!
+    printf("Setting to (b,d,s) = (%f, %f, %i)\n",
+            pipeline->object_bearing(), pipeline->object_distance(),
+            pipeline->object_index());
     m_pOldPosServer->SetRelVelX( pipeline->object_bearing() );
     m_pOldPosServer->SetRelVelY( pipeline->object_distance() );
     m_pOldPosServer->SetConfidence( 1.f );
     m_pOldPosServer->SetVisible( true );
+    m_pOldPosServer->SetSource( pipeline->object_index() );
     // use new object_position interface
     m_pObjPosServer->set_supports_relative( true );
     m_pObjPosServer->set_has_relative( true );

@@ -24,11 +24,17 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-LIBS_fvretriever = fawkesaspects fvutils fvcams fvmodels
-OBJS_fvretriever = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+ifeq ($(BUILD_TYPE),rcsoftx)
+  LIBS_fvretriever = fvutils fvcams
+  OBJS_fvretriever = rcxretriever.o
+  BINS_all = $(BINDIR)/fvretriever
+else
+  LIBS_fvretriever = fawkesaspects fvutils fvcams fvmodels
+  OBJS_fvretriever = plugin_retriever.o retriever_thread.o
+  PLUGINS_all = $(PLUGINDIR)/fvretriever.so
+endif
 
 OBJS_all    = $(OBJS_fvretriever)
-PLUGINS_all = $(PLUGINDIR)/fvretriever.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

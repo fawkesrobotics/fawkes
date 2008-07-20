@@ -30,6 +30,7 @@
 #include <utils/system/console_colors.h>
 
 using namespace std;
+using namespace fawkes;
 
 int
 main( int argc, char **argv )

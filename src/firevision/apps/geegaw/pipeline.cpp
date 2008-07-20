@@ -436,6 +436,12 @@ GeegawPipeline::object_relpos()
 }
 
 
+int
+GeegawPipeline::object_index()
+{
+  return __object_index;
+}
+
 void
 GeegawPipeline::detect_obstacles()
 {
@@ -640,6 +646,7 @@ GeegawPipeline::detect_surf()
 	  object_relposmod->calc_unfiltered();
 	  _object_bearing = object_relposmod->get_bearing();
 	  _object_distance = object_relposmod->get_distance();
+          __object_index = (*r).hint;
 	  first = false;
 	}
       }
@@ -920,6 +927,7 @@ GeegawPipeline::reload_classifier()
     cout << msg_prefix << "apps/geegaw/pipeline.cpp/reload_classifier: Switching to SURF mode" << endl;
     if( classifier ) delete classifier;
 #ifdef HAVE_SURF
+
     if( !OFFLINE_SURF )
       { 
 	objectimg = strdup("../res/opx/objects/");  
@@ -927,7 +935,7 @@ GeegawPipeline::reload_classifier()
       }
     else 
       classifier = new SurfClassifier(std::string("descriptors/") );  //read from descriptor directory
-    #endif
+#endif
   } else if ( mode == MODE_SIFTPP ) {
     cout << msg_prefix << "Switching to SIFTPP mode" << endl;
     if( classifier ) delete classifier;
@@ -971,7 +979,7 @@ GeegawPipeline::setColormap(std::string colormap_filename_without_path)
 void
 GeegawPipeline::setObjectimage(std::string object_filename_without_path)
 {
-  cout << msg_prefix << "Loading object_file " << (config->ColormapDirectory + "/" + object_filename_without_path) << endl;
+  cout << msg_prefix << "Loading object_file " << /*(config->ColormapDirectory + "/" +*/ object_filename_without_path /*)*/ << endl;
   objectimg = strdup(object_filename_without_path.c_str());
   reload_classifier();
 }

@@ -78,6 +78,7 @@ class GeegawPipeline : fawkes::SignalHandler {
   RelativePositionModel * object_relpos();
   float                   object_bearing();
   float                   object_distance();
+  int                     object_index();
 
   void                    pan_tilt(float *pan, float *tilt);
 
@@ -195,6 +196,7 @@ class GeegawPipeline : fawkes::SignalHandler {
   std::vector<const char *>  deter_colormaps;
   unsigned int               deter_nextcm;
   
+  int __object_index;
 
 };
 
