@@ -260,9 +260,9 @@ CannikinPipeline::init()
 
 
     tmp = colormap_filestem;
-    tmp.insert(colormap_filestem_cindex, "orange");
+    tmp.insert(colormap_filestem_cindex, "red");
     cout << "Adding colormap " << tmp << endl;
-    colormaps[CC_ORANGE] = strdup(tmp.c_str());
+    colormaps[CC_RED] = strdup(tmp.c_str());
 
     tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "blue");
@@ -270,23 +270,23 @@ CannikinPipeline::init()
     colormaps[CC_BLUE] = strdup(tmp.c_str());
 
     tmp = colormap_filestem;
-    tmp.insert(colormap_filestem_cindex, "green");
-    cout << "Adding colormap " << tmp << endl;
-    colormaps[CC_GREEN] = strdup(tmp.c_str());
-
-    /*
-    tmp = colormap_filestem;
     tmp.insert(colormap_filestem_cindex, "yellow");
     cout << "Adding colormap " << tmp << endl;
     colormaps[CC_YELLOW] = strdup(tmp.c_str());
+
+    /*
     tmp = colormap_filestem;
-    tmp.insert(colormap_filestem_cindex, "red");
+    tmp.insert(colormap_filestem_cindex, "green");
     cout << "Adding colormap " << tmp << endl;
-    colormaps[CC_RED] = strdup(tmp.c_str());
+    colormaps[CC_GREEN] = strdup(tmp.c_str());
+    tmp = colormap_filestem;
+    tmp.insert(colormap_filestem_cindex, "orange");
+    cout << "Adding colormap " << tmp << endl;
+    colormaps[CC_ORANGE] = strdup(tmp.c_str());
     */
   }
 
-  cm  = new ColorModelLookupTable( colormaps[CC_ORANGE], "cannikin-colormap",
+  cm  = new ColorModelLookupTable( colormaps[CC_RED], "cannikin-colormap",
 				   true /* destroy on free */);
   //cm->reset();
   //set_cup_color(CC_);
@@ -860,7 +860,7 @@ CannikinPipeline::determine_cup_color()
     determined_valid_frames = 0;
     determine_cycle_num = 0;
     cup_color_determination_done = false;
-    _cup_color = CC_ORANGE;
+    _cup_color = CC_RED;
     reinitialize_colormap();
   }
 
