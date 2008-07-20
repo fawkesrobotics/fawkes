@@ -70,7 +70,7 @@ void rgb_to_bgr_with_alpha_plainc(unsigned char *rgb, unsigned char *bgr_alpha,
 void bgr_to_rgb_plainc(unsigned char *BGR, unsigned char *RGB,
 		       unsigned int width, unsigned int height);
 
-void convert_line_rgb_bgr( unsigned char *BGR,  png_byte *RGB,
+void convert_line_bgr_rgb( unsigned char *BGR,  png_byte *RGB,
 			   unsigned int width, unsigned int height); 
 
 

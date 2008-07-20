@@ -107,7 +107,7 @@ bgr_to_rgb_plainc(unsigned char *BGR, unsigned char *RGB,
  * @param yuv_line the index of the line to convert to in the YUV buffer
  */
 
-void convert_line_rgb_bgr( unsigned char *BGR, png_byte *RGB,
+void convert_line_bgr_rgb( unsigned char *BGR, png_byte *RGB,
 			    unsigned int width, unsigned int height)
  {
   register unsigned int i = 0; 
