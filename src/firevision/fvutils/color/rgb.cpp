@@ -26,6 +26,10 @@
 
 #include <fvutils/color/rgb.h>
 
+
+
+
+
 /** Convert RGB to RGB with alpha values.
  * This is plain C code without special optimizations.
  * @param rgb RGB source buffer
@@ -90,4 +94,45 @@ bgr_to_rgb_plainc(unsigned char *BGR, unsigned char *RGB,
     RGB += 3;
   }
 }
+
+/* Convert a line of a BGR buffer to a line in a planar RGB buffer, see above for general
+ * notes about color space conversion from RGB to BGR
+ * @param RGB where the RGB output will be written to, will have pixel after pixel, 3 bytes per pixel
+ *            (thus this is a 24bit RGB with one byte per color) line by line.
+ * @param BGR unsigned char array that contains the pixels, 4 pixels in 6 byte macro pixel, line after
+ *            line
+ * @param width Width of the image contained in the YUV buffer
+ * @param height Height of the image contained in the YUV buffer
+ * @param rgb_line the index of the line to be converted
+ * @param yuv_line the index of the line to convert to in the YUV buffer
+ */
+
+void convert_line_rgb_bgr( unsigned char *BGR, png_byte *RGB,
+			    unsigned int width, unsigned int height)
+ {
+  register unsigned int i = 0; 
+  register unsigned char *r1, *r2, *r3; 
+  register unsigned char *n1, *n2, *n3; 
+
+  while( i < width ) { 
+
+    n1 = RGB++;
+    n2 = RGB++; 
+    n3 = RGB++; 
+
+    r1 = BGR++;
+    r2 = BGR++; 
+    r3 = BGR++; 
+
+    *n1 = *r3; 
+    *n2 = *r2; 
+    *n3 = *r1; 
+    
+    
+    i += 1; 
+  }
+}
+ 
+    
+
 
