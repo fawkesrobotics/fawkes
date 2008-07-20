@@ -31,6 +31,8 @@
 
 class PNGWriter : public Writer
 {
+ private:
+  bool __isBGR; 
  public:
   PNGWriter();
   PNGWriter(const char *filename, unsigned int width, unsigned int height);

@@ -66,9 +66,16 @@ PNGWriter::~PNGWriter()
 void
 PNGWriter::set_buffer(colorspace_t cspace, unsigned char *buffer)
 {
-  if (cspace == YUV422_PLANAR) {
+  if( cspace == BGR ) 
+    {
+      __isBGR = true; 
+      this->buffer = buffer; 
+    }
+  else if (cspace == YUV422_PLANAR) {
     this->buffer = buffer;
+    __isBGR  = false; 
   } else {
+    __isBGR = false;
     throw Exception("Color space not supported, can only write YUV422_PLANAR images");
   }
 }
@@ -114,45 +121,50 @@ PNGWriter::write()
   // Can be used to get informed about progress
   // png_set_write_status_fn(png_ptr, write_row_callback);
 
-  png_set_IHDR(png_ptr, info_ptr, width, height,
-	       8 /* bit per channel */, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+    png_set_IHDR(png_ptr, info_ptr, width, height,
+		 8 /* bit per channel */,  PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
 	       PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-
 
   png_write_info(png_ptr, info_ptr);
 
   // png_byte == unsigned char, create one row, three bytes 
-  png_byte row[width * 3];
+  //  png_byte row[width * 3];
+  png_byte row[width*3]; 
   png_byte *row_p;
   unsigned char *yp, *up, *vp;
   unsigned char y1, y2, u = 0, v = 0;
+
 
   yp = buffer;
   up = YUV422_PLANAR_U_PLANE(buffer, width, height);
   vp = YUV422_PLANAR_V_PLANE(buffer, width, height);
 
-
   for (unsigned int i = 0; i < height; ++i) {
-    // pack row
-    row_p = row;
-    for (unsigned int j = 0; j < (width / 2); ++j) {
-      y1 = *yp++;
-      y2 = *yp++;
-      u  = *up++;
-      v  = *vp++;
-      pixel_yuv_to_rgb(y1, u, v, &row_p[0], &row_p[1], &row_p[2]);
-      row_p += 3;
-      pixel_yuv_to_rgb(y2, u, v, &row_p[0], &row_p[1], &row_p[2]);
-      row_p += 3;
-    }
+    if( !__isBGR ) {
+      // pack row
+      row_p = row;
+      for (unsigned int j = 0; j < (width / 2); ++j) {
+	y1 = *yp++;
+	y2 = *yp++;
+	u  = *up++;
+	v  = *vp++;
+	pixel_yuv_to_rgb(y1, u, v, &row_p[0], &row_p[1], &row_p[2]);
+	row_p += 3;
+	pixel_yuv_to_rgb(y2, u, v, &row_p[0], &row_p[1], &row_p[2]);
+	row_p += 3;
+      }
+      
+      if ( (width % 2) == 1 ) {
+	// odd number of columns, we have to take care of this
+	// use last u,v values and new y value for this
+	y1 = *yp++;
+	pixel_yuv_to_rgb(y1, u, v, &row_p[0], &row_p[1], &row_p[2]);      
+      }
+    } else  {
+      convert_line_bgr_rgb( (buffer + width*3*i), row,
+			    width,  height ); 
 
-    if ( (width % 2) == 1 ) {
-      // odd number of columns, we have to take care of this
-      // use last u,v values and new y value for this
-      y1 = *yp++;
-      pixel_yuv_to_rgb(y1, u, v, &row_p[0], &row_p[1], &row_p[2]);      
     }
-
     png_write_row(png_ptr, row);
   }
 
