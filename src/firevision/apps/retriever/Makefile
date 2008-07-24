@@ -30,7 +30,7 @@ ifeq ($(BUILD_TYPE),rcsoftx)
   BINS_all = $(BINDIR)/fvretriever
 else
   LIBS_fvretriever = fawkesaspects fvutils fvcams fvmodels
-  OBJS_fvretriever = plugin_retriever.o retriever_thread.o
+  OBJS_fvretriever = fvretriever_plugin.o retriever_thread.o
   PLUGINS_all = $(PLUGINDIR)/fvretriever.so
 endif
 
