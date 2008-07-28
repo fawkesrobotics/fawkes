@@ -45,11 +45,22 @@ struct ZSlice {
 
 /** a region is a stack of slices,
    together with the y-position of the slice at the top */
-struct ZRegion {
-  std::vector<ZSlice*> *slices;	/**< slices */
-  int topSliceY;		/**< top slice Y */
-};
+//struct ZRegion {
+//  std::vector<ZSlice*> *slices;	/**< slices */
+//  int topSliceY;		/**< top slice Y */
+//};
 
+/** a region is a stack of slices,
+   together with the y-position of the slice at the top */
+class ZRegion {
+	public:
+		std::vector<ZSlice*> *slices;	/**< slices */
+		int topSliceY;		/**< top slice Y */
+		
+		ZRegion();
+		virtual ~ZRegion();
+		void clear();
+};
 
 class Zauberstab {
  public:
@@ -58,15 +69,13 @@ class Zauberstab {
 
   void setThreshold(unsigned int t);
   unsigned int getThreshold();
-  void setBuffer(unsigned char *b,
-		 unsigned int w,
-		 unsigned int h);
-  void findRegion(int seedX,
-		  int seedY);
-  void addRegion(int seedX,
-		 int seedY);
+  void setBuffer(unsigned char *b, unsigned int w, unsigned int h);
+  void findRegion(unsigned int seedX, unsigned int seedY);
+  void addRegion(unsigned int seedX, unsigned int seedY);
   void addRegion(ZRegion *region2);
   void deleteRegion();
+  void deleteRegion(unsigned int seedX, unsigned int seedY);
+  void deleteRegion(ZRegion *region2);
   bool isEmptyRegion();
 
   ZRegion * getRegion() const;
@@ -79,11 +88,13 @@ class Zauberstab {
   unsigned int width;
   unsigned int height;
 
-  ZSlice* findSlice(int x,
-		    int y,
-		    unsigned int vSeed);
-  bool isSimilarV(unsigned int v1,
-		  unsigned int v2);
+  ZRegion* privFindRegion(unsigned int seedX, unsigned int seedY);
+  ZSlice* findSlice(unsigned int x, unsigned int y, 
+                    unsigned int vSeed, int uSeed = -1);
+  bool isSimilarV(unsigned int v1, unsigned int v2);
+  bool isSimilarU(unsigned int u1, unsigned int u2);
+  bool isSimilarUV(unsigned int u1, unsigned int u2,
+                   unsigned int v1, unsigned int v2);
 };
 
 

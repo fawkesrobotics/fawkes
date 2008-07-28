@@ -16,8 +16,8 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gui.mk
-include $(BASEDIR)/etc/buildsys/ext/gmsl
 
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
@@ -34,8 +34,8 @@ else
   WARN_TARGETS += warning_nlm
 endif
 
-ifneq ($(SRCDIR),.)
-all: $(WARN_TARGETS)
+ifeq ($(OBJSSUBMAKE),1)
+gui: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
 warning_nlm:

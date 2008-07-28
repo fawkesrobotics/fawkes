@@ -33,72 +33,81 @@ class Vector;
 class Matrix
 {
  public:
-  Matrix( unsigned int num_rows = 0,
-	  unsigned int num_cols = 0,
-	  float* data = 0 );
-  Matrix(const Matrix& m);
-  ~Matrix();
+	Matrix(unsigned int num_rows = 0,
+		unsigned int num_cols = 0,
+		float *data = 0);
+	Matrix(const Matrix &m);
+	virtual ~Matrix();
 
-  void size( unsigned int& num_rows,
-	     unsigned int& num_cols ) const;
+	virtual void size(unsigned int &num_rows,
+		unsigned int &num_cols) const;
+	virtual inline unsigned int num_rows() const
+	{ return m_transposed ? m_int_num_cols : m_int_num_rows; }
+	virtual inline unsigned int num_cols() const
+	{ return m_transposed ? m_int_num_rows : m_int_num_cols; }
 
-  Matrix& id();
+	virtual Matrix &id();
 
-  Matrix& transpose();
-  Matrix  get_transpose() const;
+	virtual Matrix &transpose();
+	virtual Matrix  get_transpose() const;
 
-  Matrix& invert();
-  Matrix  get_inverse() const;
+	virtual Matrix &invert();
+	virtual Matrix  get_inverse() const;
 
-  float det() const;
+	virtual float det() const;
 
-  Matrix get_submatrix( unsigned int row,
-			unsigned int col,
-			unsigned int num_rows,
-			unsigned int num_cols ) const;
-
-  void overlay( unsigned int row,
+	virtual Matrix get_submatrix(unsigned int row,
 		unsigned int col,
-		const Matrix& m );
+		unsigned int num_rows,
+		unsigned int num_cols) const;
 
-  float  operator()( unsigned int row,
-		     unsigned int col ) const;
-  float& operator()( unsigned int row,
-		     unsigned int col );
+	virtual void overlay(unsigned int row,
+		unsigned int col,
+		const Matrix &m);
 
-  Matrix& operator=(const Matrix& m);
+	virtual float  operator()(unsigned int row,
+		unsigned int col) const;
+	virtual float &operator()(unsigned int row,
+		unsigned int col);
 
-  Matrix  operator*(const Matrix& m) const;
-  Matrix& operator*=(const Matrix& m);
+	virtual Matrix &operator=(const Matrix &m);
 
-  Vector operator*(const Vector& cv) const;
+	virtual Matrix  operator*(const Matrix &m) const;
+	virtual Matrix &operator*=(const Matrix &m);
 
-  Matrix  operator*(const float& f) const;
-  Matrix& operator*=(const float& f);
+	virtual Vector operator*(const Vector &cv) const;
 
-  Matrix  operator/(const float& f) const;
-  Matrix& operator/=(const float& f);
+	virtual Matrix  operator*(const float &f) const;
+	virtual Matrix &operator*=(const float &f);
 
-  Matrix  operator+(const Matrix& m) const;
-  Matrix& operator+=(const Matrix& m);
+	virtual Matrix  operator/(const float &f) const;
+	virtual Matrix &operator/=(const float &f);
 
-  bool operator==(const Matrix& m) const;
+	virtual Matrix  operator+(const Matrix &m) const;
+	virtual Matrix &operator+=(const Matrix &m);
 
-  void print_info(const char* name = 0) const;
+	virtual bool operator==(const Matrix &m) const;
+
+	virtual void print_info(const char *name = 0,
+		const char *col_sep = 0,
+		const char *row_sep = 0) const;
 
  private:
-  void mult_row( unsigned int row,
-		 double factor );
-  void sub_row( unsigned int row_a,
+	virtual void mult_row(unsigned int row,
+		float factor );
+	virtual void sub_row( unsigned int row_a,
 		unsigned int row_b,
 		float factor );
 
-  Vector** m_columns;
+ private:
+	Vector **m_columns;
 
-  unsigned int m_num_rows;
-  unsigned int m_num_cols;
+	/* Internal number of rows / cols of the stored data - 
+	   Needed because of the unfortunate m_transposed concept */
+	unsigned int m_int_num_rows;
+	unsigned int m_int_num_cols;
 
-  bool m_transposed;
+	bool m_transposed;
 };
 
 } // end namespace fawkes

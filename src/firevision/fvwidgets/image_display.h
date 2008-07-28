@@ -35,7 +35,7 @@ typedef struct SDL_Rect    SDL_Rect;
 class ImageDisplay
 {
  public:
-  ImageDisplay(unsigned int width, unsigned int height);
+  ImageDisplay(unsigned int width, unsigned int height, const char* title = 0);
   ~ImageDisplay();
 
   void show(colorspace_t colorspace, unsigned char *buffer);

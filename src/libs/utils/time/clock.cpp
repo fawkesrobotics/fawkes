@@ -32,7 +32,7 @@
 
 namespace fawkes {
 
-/** @class Clock <utils/time/clock.h>
+/** @class Clock clock.h <utils/time/clock.h>
  * This is supposed to be the central clock in Fawkes.
  * It is implemented as a singleton to ensure that there is only
  * one object. So-called TimeSources can be registered at the Clock

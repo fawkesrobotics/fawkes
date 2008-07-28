@@ -40,7 +40,9 @@ namespace fawkes {
 inline float
 time_diff_sec(const timeval &a, const timeval &b)
 {
-  return a.tv_sec  - b.tv_sec + (a.tv_usec - b.tv_usec) / 1000000.f;
+  //double required if we do not want to loose the usecs
+  double res = a.tv_sec  - b.tv_sec + (a.tv_usec - b.tv_usec) / 1000000.0;
+  return res;
 }
 
 
@@ -57,7 +59,9 @@ inline float
 time_diff_sec(const long int a_sec, const long int a_usec,
 	      const long int b_sec, const long int b_usec)
 {
-  return a_sec - b_sec + (a_usec - b_usec) / 1000000.f;
+  //double required if we do not want to loose the usecs
+  double res = a_sec - b_sec + (a_usec - b_usec) / 1000000.0;
+  return res;
 }
 
 

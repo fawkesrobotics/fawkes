@@ -44,11 +44,13 @@ using namespace fawkes;
 /** Constructor.
  * @param width width of image
  * @param height height of image
+ * @param title window title
  */
-ImageDisplay::ImageDisplay(unsigned int width, unsigned int height)
+ImageDisplay::ImageDisplay(unsigned int width, unsigned int height, const char* title)
 {
 
   SDLKeeper::init(SDL_INIT_VIDEO);
+  if (title) SDL_WM_SetCaption (title, NULL);
 
   _width  = width;
   _height = height;

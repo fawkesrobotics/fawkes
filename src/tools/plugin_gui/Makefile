@@ -35,7 +35,7 @@ else
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
-all: $(WARN_TARGETS)
+gui: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
 warning_plugin_gui:

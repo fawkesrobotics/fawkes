@@ -26,6 +26,7 @@
 
 #include "refbox_state_sender.h"
 #include "midsize.h"
+#include "spl.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -38,7 +39,7 @@ print_usage(const char *program_name)
 {
   printf("Usage: %s [-d] -l league -t team -g goal_color\n"
 	 "  -d             Turn on debug mode (prints to stdout)\n"
-	 "  -l league      Define league, may be one of midsize or nao\n"
+	 "  -l league      Define league, may be one of midsize or spl\n"
 	 "  -t team        Our team, either cyan or magenta\n"
 	 "  -g goal_color  Our goal color, either blue or yellow\n"
 	 "  -p port        UDP port to send to (default 2806)\n"
@@ -133,11 +134,9 @@ main(int argc, char **argv)
   if ( strcmp(argp.arg("l"), "midsize") == 0 ) {
     MidsizeRefBoxRepeater mrr(rss, "127.0.0.1", 28097);
     mrr.run();
-    /*
-  } else if ( strcmp(argp->get_arg("l"), "midsize") == 0 ) {
-    NaoRefBoxRepeater nrr(rss);
+  } else if ( strcmp(argp.arg("l"), "spl") == 0 ) {
+    SplRefBoxRepeater nrr(rss, "255.255.255.0", 3838);
     nrr.run();
-    */
   } else {
     printf("Invalid league name given.\n\n");
     print_usage(argv[0]);

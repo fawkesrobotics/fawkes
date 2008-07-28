@@ -56,11 +56,12 @@ class RemoteBlackBoard
   RemoteBlackBoard(const char *hostname, unsigned short int port);
   virtual ~RemoteBlackBoard();
 
-  Interface *  open_for_reading(const char *interface_type, const char *identifier);
-  Interface *  open_for_writing(const char *interface_type, const char *identifier);
-  void         close(Interface *interface);
+  virtual Interface *  open_for_reading(const char *interface_type, const char *identifier);
+  virtual Interface *  open_for_writing(const char *interface_type, const char *identifier);
+  virtual void         close(Interface *interface);
 
-  InterfaceInfoList *  list_all();
+  virtual InterfaceInfoList *  list_all();
+  virtual bool                 is_alive() const throw();
 
   std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type,
 							 const char *id_prefix = NULL);

@@ -29,6 +29,8 @@
 #include <fvutils/base/roi.h>
 #include <list>
 
+typedef std::list<ROI> ROIList;
+
 class Classifier
 {
 
@@ -40,7 +42,7 @@ class Classifier
 			      unsigned int width, unsigned int height);
   virtual const char *  name() const;
 
-  virtual std::list< ROI > * classify()                      = 0;
+  virtual ROIList * classify()                      = 0;
 
  protected:
   /** Source buffer, encoded as YUV422_PLANAR */

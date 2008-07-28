@@ -66,7 +66,7 @@ BatteryInterface::~BatteryInterface()
  * @return current value
  */
 unsigned int
-BatteryInterface::current()
+BatteryInterface::current() const
 {
   return data->current;
 }
@@ -96,7 +96,7 @@ BatteryInterface::set_current(const unsigned int new_current)
  * @return voltage value
  */
 unsigned int
-BatteryInterface::voltage()
+BatteryInterface::voltage() const
 {
   return data->voltage;
 }
@@ -126,7 +126,7 @@ BatteryInterface::set_voltage(const unsigned int new_voltage)
  * @return temperature value
  */
 unsigned int
-BatteryInterface::temperature()
+BatteryInterface::temperature() const
 {
   return data->temperature;
 }

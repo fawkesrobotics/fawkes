@@ -71,7 +71,7 @@ SkillerInterface::~SkillerInterface()
  * @return skill_string value
  */
 char *
-SkillerInterface::skill_string()
+SkillerInterface::skill_string() const
 {
   return data->skill_string;
 }
@@ -108,7 +108,7 @@ SkillerInterface::set_skill_string(const char * new_skill_string)
  * @return exclusive_controller value
  */
 unsigned int
-SkillerInterface::exclusive_controller()
+SkillerInterface::exclusive_controller() const
 {
   return data->exclusive_controller;
 }
@@ -144,7 +144,7 @@ SkillerInterface::set_exclusive_controller(const unsigned int new_exclusive_cont
  * @return status value
  */
 SkillerInterface::SkillStatusEnum
-SkillerInterface::status()
+SkillerInterface::status() const
 {
   return data->status;
 }
@@ -179,7 +179,7 @@ SkillerInterface::set_status(const SkillStatusEnum new_status)
  * @return continuous value
  */
 bool
-SkillerInterface::is_continuous()
+SkillerInterface::is_continuous() const
 {
   return data->continuous;
 }
@@ -284,7 +284,7 @@ SkillerInterface::ExecSkillMessage::ExecSkillMessage(const ExecSkillMessage *m) 
  * @return skill_string value
  */
 char *
-SkillerInterface::ExecSkillMessage::skill_string()
+SkillerInterface::ExecSkillMessage::skill_string() const
 {
   return data->skill_string;
 }
@@ -375,7 +375,7 @@ SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage(const E
  * @return skill_string value
  */
 char *
-SkillerInterface::ExecSkillContinuousMessage::skill_string()
+SkillerInterface::ExecSkillContinuousMessage::skill_string() const
 {
   return data->skill_string;
 }

@@ -33,7 +33,7 @@
 
 using namespace fawkes;
 
-/** @class FvRawReader <fvutils/readers/fvraw.h>
+/** @class FvRawReader fvraw.h <fvutils/readers/fvraw.h>
  * FvRaw image reader implementation.
  * @author Tim Niemueller
  */

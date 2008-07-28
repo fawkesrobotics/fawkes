@@ -118,17 +118,18 @@ endif
 ifeq ($(HAVE_SDL)$(HAVE_GTKMM),11)
   BINS_gui += $(BINDIR)/fvviewer
 else
-  WARN_TARGETS += warning_viewer
+  WARN_TARGETS_GUI += warning_viewer
 endif
 ifeq ($(HAVE_SDL),1)
   BINS_gui += $(BINDIR)/fvshowyuv
 else
-  WARN_TARGETS += warning_showyuv
+  WARN_TARGETS_GUI += warning_showyuv
 endif
 
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
+gui: $(WARN_TARGETS_GUI)
 
 .PHONY: $(WARN_TARGETS)
 warning_listfwcams:

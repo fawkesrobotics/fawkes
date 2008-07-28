@@ -76,13 +76,13 @@ class NavigatorInterface : public Interface
 
     CartesianGotoMessage(const CartesianGotoMessage *m);
     /* Methods */
-    float x();
+    float x() const;
     void set_x(const float new_x);
     size_t maxlenof_x() const;
-    float y();
+    float y() const;
     void set_y(const float new_y);
     size_t maxlenof_y() const;
-    float orientation();
+    float orientation() const;
     void set_orientation(const float new_orientation);
     size_t maxlenof_orientation() const;
     virtual Message * clone() const;
@@ -107,13 +107,13 @@ class NavigatorInterface : public Interface
 
     PolarGotoMessage(const PolarGotoMessage *m);
     /* Methods */
-    float phi();
+    float phi() const;
     void set_phi(const float new_phi);
     size_t maxlenof_phi() const;
-    float dist();
+    float dist() const;
     void set_dist(const float new_dist);
     size_t maxlenof_dist() const;
-    float orientation();
+    float orientation() const;
     void set_orientation(const float new_orientation);
     size_t maxlenof_orientation() const;
     virtual Message * clone() const;
@@ -136,7 +136,7 @@ class NavigatorInterface : public Interface
 
     MaxVelocityMessage(const MaxVelocityMessage *m);
     /* Methods */
-    float velocity();
+    float velocity() const;
     void set_velocity(const float new_velocity);
     size_t maxlenof_velocity() const;
     virtual Message * clone() const;
@@ -161,13 +161,13 @@ class NavigatorInterface : public Interface
 
     ObstacleMessage(const ObstacleMessage *m);
     /* Methods */
-    float x();
+    float x() const;
     void set_x(const float new_x);
     size_t maxlenof_x() const;
-    float y();
+    float y() const;
     void set_y(const float new_y);
     size_t maxlenof_y() const;
-    float width();
+    float width() const;
     void set_width(const float new_width);
     size_t maxlenof_width() const;
     virtual Message * clone() const;
@@ -193,25 +193,25 @@ class NavigatorInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   /* Methods */
-  float x();
+  float x() const;
   void set_x(const float new_x);
   size_t maxlenof_x() const;
-  float y();
+  float y() const;
   void set_y(const float new_y);
   size_t maxlenof_y() const;
-  float dest_x();
+  float dest_x() const;
   void set_dest_x(const float new_dest_x);
   size_t maxlenof_dest_x() const;
-  float dest_y();
+  float dest_y() const;
   void set_dest_y(const float new_dest_y);
   size_t maxlenof_dest_y() const;
-  float dest_dist();
+  float dest_dist() const;
   void set_dest_dist(const float new_dest_dist);
   size_t maxlenof_dest_dist() const;
-  unsigned int msgid();
+  unsigned int msgid() const;
   void set_msgid(const unsigned int new_msgid);
   size_t maxlenof_msgid() const;
-  bool is_final();
+  bool is_final() const;
   void set_final(const bool new_final);
   size_t maxlenof_final() const;
 

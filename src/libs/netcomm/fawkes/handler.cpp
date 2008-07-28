@@ -27,7 +27,7 @@
 
 namespace fawkes {
 
-/** @class FawkesNetworkHandler <netcomm/fawkes/handler.h>
+/** @class FawkesNetworkHandler handler.h <netcomm/fawkes/handler.h>
  * Network handler abstract base class.
  * This class shall be extended by threads that want to use the Fawkes
  * network connection.

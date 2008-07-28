@@ -34,7 +34,7 @@
 
 namespace fawkes {
 
-/** @class MessageAlreadyQueuedException interface/message_queue.h
+/** @class MessageAlreadyQueuedException message_queue.h <interface/message_queue.h>
  * Message already enqueued exception.
  * This exception is thrown if you try to enqueue a message that has already
  * been enqueued in another message queue. This is an illegal operation. If you
@@ -50,7 +50,7 @@ MessageAlreadyQueuedException::MessageAlreadyQueuedException()
 
 
 
-/** @class MessageQueue <interface/message_queue.h>
+/** @class MessageQueue message_queue.h <interface/message_queue.h>
  * Message queue used in interfaces.
  * This message queue handles the basic messaging operations. The methods the
  * Interface provides for handling message queues are forwarded to a
@@ -360,7 +360,7 @@ MessageQueue::end()
 }
 
 
-/** @class MessageQueue::MessageIterator <interface/message_queue.h>
+/** @class MessageQueue::MessageIterator message_queue.h <interface/message_queue.h>
  * Message iterator.
  * Use this iterator to iterate over messages in a message queue.
  * Use MessageQueue::begin() to get the iterator.

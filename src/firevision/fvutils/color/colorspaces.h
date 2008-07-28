@@ -54,7 +54,8 @@ typedef enum {
   MONO16             = 18,	/**< Gray-scale image, 2 bytes per pixel */
   YUV444_PACKED      = 19,	/**< Full sampled YUV, byte order Y U V */
   YVU444_PACKED      = 20,	/**< Full sampled YUV, byte order Y V U */
-  COLORSPACE_N       = 21	/**< number of colorspaces */
+  YVY2               = 21,	/**< YUV image with 4:2:2 sampling, byte order Y0 V Y1 U */
+  COLORSPACE_N       = 22	/**< number of colorspaces */
 } colorspace_t;
 
 
@@ -77,8 +78,7 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
     return (width * height * 3 / 2);
     
   case YUY2:
-    return (width * height * 2);
-    
+  case YVY2:
   case YUV422_PACKED:
   case YUV422_PLANAR:
     return (width * height * 2);

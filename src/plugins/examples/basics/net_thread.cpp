@@ -30,7 +30,7 @@
 
 using namespace fawkes;
 
-/** @class ExampleNetworkThread plugins/examples/basics/net_thread.h
+/** @class ExampleNetworkThread net_thread.h <plugins/examples/basics/net_thread.h>
  * Network thread of example plugin.
  * @author Tim Niemueller
  */

@@ -70,7 +70,7 @@ KickerInterface::~KickerInterface()
  * @return num_kicks_left value
  */
 int
-KickerInterface::num_kicks_left()
+KickerInterface::num_kicks_left() const
 {
   return data->num_kicks_left;
 }
@@ -104,7 +104,7 @@ KickerInterface::set_num_kicks_left(const int new_num_kicks_left)
  * @return num_kicks_center value
  */
 int
-KickerInterface::num_kicks_center()
+KickerInterface::num_kicks_center() const
 {
   return data->num_kicks_center;
 }
@@ -138,7 +138,7 @@ KickerInterface::set_num_kicks_center(const int new_num_kicks_center)
  * @return num_kicks_right value
  */
 int
-KickerInterface::num_kicks_right()
+KickerInterface::num_kicks_right() const
 {
   return data->num_kicks_right;
 }
@@ -171,7 +171,7 @@ KickerInterface::set_num_kicks_right(const int new_num_kicks_right)
  * @return guide_ball_side value
  */
 KickerInterface::GuideBallSideEnum
-KickerInterface::guide_ball_side()
+KickerInterface::guide_ball_side() const
 {
   return data->guide_ball_side;
 }
@@ -204,7 +204,7 @@ KickerInterface::set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side
  * @return current_intensity value
  */
 unsigned int
-KickerInterface::current_intensity()
+KickerInterface::current_intensity() const
 {
   return data->current_intensity;
 }
@@ -305,7 +305,7 @@ KickerInterface::KickMessage::KickMessage(const KickMessage *m) : Message("KickM
  * @return left value
  */
 bool
-KickerInterface::KickMessage::is_left()
+KickerInterface::KickMessage::is_left() const
 {
   return data->left;
 }
@@ -335,7 +335,7 @@ KickerInterface::KickMessage::set_left(const bool new_left)
  * @return center value
  */
 bool
-KickerInterface::KickMessage::is_center()
+KickerInterface::KickMessage::is_center() const
 {
   return data->center;
 }
@@ -365,7 +365,7 @@ KickerInterface::KickMessage::set_center(const bool new_center)
  * @return right value
  */
 bool
-KickerInterface::KickMessage::is_right()
+KickerInterface::KickMessage::is_right() const
 {
   return data->right;
 }
@@ -395,7 +395,7 @@ KickerInterface::KickMessage::set_right(const bool new_right)
  * @return intensity value
  */
 unsigned int
-KickerInterface::KickMessage::intensity()
+KickerInterface::KickMessage::intensity() const
 {
   return data->intensity;
 }
@@ -519,7 +519,7 @@ KickerInterface::GuideBallMessage::GuideBallMessage(const GuideBallMessage *m) :
  * @return guide_ball_side value
  */
 KickerInterface::GuideBallSideEnum
-KickerInterface::GuideBallMessage::guide_ball_side()
+KickerInterface::GuideBallMessage::guide_ball_side() const
 {
   return data->guide_ball_side;
 }

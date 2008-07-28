@@ -40,7 +40,7 @@
 
 using namespace std;
 
-/** @class UnknownCameraControlTypeException <cams/factory.h>
+/** @class UnknownCameraControlTypeException factory.h <cams/factory.h>
  * Unknown camera control exception.
  * Thrown if the requested camera control has not been recognized or the needed
  * libraries were not available at compile time.

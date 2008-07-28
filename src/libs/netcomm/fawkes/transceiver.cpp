@@ -34,7 +34,7 @@
 
 namespace fawkes {
 
-/** @class FawkesNetworkTransceiver netcomm/fawkes/transceiver.h
+/** @class FawkesNetworkTransceiver transceiver.h <netcomm/fawkes/transceiver.h>
  * Fawkes Network Transceiver.
  * Utility class that provides methods to send and receive messages via
  * the network. Operates on message queues and a given socket.

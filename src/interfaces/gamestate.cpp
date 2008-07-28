@@ -67,7 +67,7 @@ GameStateInterface::~GameStateInterface()
  * @return game_state value
  */
 GameStateInterface::if_gamestate_t
-GameStateInterface::game_state()
+GameStateInterface::game_state() const
 {
   return data->game_state;
 }
@@ -97,7 +97,7 @@ GameStateInterface::set_game_state(const if_gamestate_t new_game_state)
  * @return state_team value
  */
 GameStateInterface::if_gamestate_team_t
-GameStateInterface::state_team()
+GameStateInterface::state_team() const
 {
   return data->state_team;
 }
@@ -127,7 +127,7 @@ GameStateInterface::set_state_team(const if_gamestate_team_t new_state_team)
  * @return our_team value
  */
 GameStateInterface::if_gamestate_team_t
-GameStateInterface::our_team()
+GameStateInterface::our_team() const
 {
   return data->our_team;
 }
@@ -157,7 +157,7 @@ GameStateInterface::set_our_team(const if_gamestate_team_t new_our_team)
  * @return our_goal_color value
  */
 GameStateInterface::if_gamestate_goalcolor_t
-GameStateInterface::our_goal_color()
+GameStateInterface::our_goal_color() const
 {
   return data->our_goal_color;
 }
@@ -187,7 +187,7 @@ GameStateInterface::set_our_goal_color(const if_gamestate_goalcolor_t new_our_go
  * @return half value
  */
 GameStateInterface::if_gamestate_half_t
-GameStateInterface::half()
+GameStateInterface::half() const
 {
   return data->half;
 }
@@ -217,7 +217,7 @@ GameStateInterface::set_half(const if_gamestate_half_t new_half)
  * @return role value
  */
 GameStateInterface::if_gamestate_role_t
-GameStateInterface::role()
+GameStateInterface::role() const
 {
   return data->role;
 }
@@ -247,7 +247,7 @@ GameStateInterface::set_role(const if_gamestate_role_t new_role)
  * @return score_cyan value
  */
 unsigned int
-GameStateInterface::score_cyan()
+GameStateInterface::score_cyan() const
 {
   return data->score_cyan;
 }
@@ -277,7 +277,7 @@ GameStateInterface::set_score_cyan(const unsigned int new_score_cyan)
  * @return score_magenta value
  */
 unsigned int
-GameStateInterface::score_magenta()
+GameStateInterface::score_magenta() const
 {
   return data->score_magenta;
 }

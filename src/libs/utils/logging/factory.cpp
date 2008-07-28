@@ -33,7 +33,7 @@
 
 namespace fawkes {
 
-/** @class UnknownLoggerTypeException <utils/logging/factory.h>
+/** @class UnknownLoggerTypeException factory.h <utils/logging/factory.h>
  * Unknown logger type exception.
  * Thrown if the requested logger has not been recognized
  */
@@ -48,7 +48,7 @@ UnknownLoggerTypeException::UnknownLoggerTypeException(const char *msg)
 }
 
 
-/** @class LoggerFactory <utils/logging/factory.h>
+/** @class LoggerFactory factory.h <utils/logging/factory.h>
  * Logger factory.
  * This logging factory provides access to all loggers in a unified way. You just
  * supply a logger argument string and depending on the logger type an instance of

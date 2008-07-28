@@ -29,7 +29,7 @@
 using namespace std;
 using namespace fawkes;
 
-/** @class ExampleThread plugins/examples/basics/thread.h
+/** @class ExampleThread thread.h <plugins/examples/basics/thread.h>
  * Thread of example plugin.
  * @author Tim Niemueller
  */

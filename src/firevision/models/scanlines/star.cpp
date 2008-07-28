@@ -270,10 +270,7 @@ ScanlineStar::generate_scan_points()
   unsigned int radius;
   Ray* current_ray;
   bool abort_ray;
-  YUV_t ignore;
-  ignore.Y = 0;
-  ignore.U = 127;
-  ignore.V = 127;
+  YUV_t ignore(0);
 
   while (angle < deg2rad(359.9) )
     {

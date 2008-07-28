@@ -24,6 +24,7 @@
  */
 
 #include <models/scanlines/grid.h>
+#include <core/exceptions/software.h>
 
 #include <cstring>
 
@@ -38,15 +39,30 @@
  * @param height height of grid
  * @param offset_x x offset between lines
  * @param offset_y y offset between lines
+ * @param roi the grid will only be calculated within the roi (if NULL the roi 
+ *            will be from 0,0 to width,height). The object will be deleted by 
+ *            ScanlineGrid!
+ * @param horizontal_grid if true x will be increased before y
  */
 ScanlineGrid::ScanlineGrid(unsigned int width, unsigned int height,
-			   unsigned int offset_x, unsigned int offset_y)
+			   unsigned int offset_x, unsigned int offset_y, 
+			   ROI* roi, bool horizontal_grid)
 {
-  this->width = width;
-  this->height = height;
-  this->offset_x = offset_x;
-  this->offset_y = offset_y;
-  coord.x = coord.y = 0;
+  this->roi = NULL;
+  setGridParams(width, height, 
+                offset_x, offset_y, 
+                roi, horizontal_grid);
+  //reset is done in setGridParams ()
+}
+
+/** Destructor
+ */
+ScanlineGrid::~ScanlineGrid()
+{
+  if (roi) //Has to be set, but still...
+  {
+    delete roi;
+  }
 }
 
 point_t
@@ -61,17 +77,56 @@ ScanlineGrid::operator->()
   return &coord;
 }
 
+void 
+ScanlineGrid::calc_next_coord()
+{
+  if (finished())
+    return;
+  
+  if (horizontal_grid)
+  {
+    if (coord.x < (roi->image_width - offset_x))
+    {
+      coord.x += offset_x;
+    } 
+    else
+    {
+      if (coord.y < (roi->image_height - offset_y))
+      {
+        coord.x = roi->start.x;
+        coord.y += offset_y;
+      }
+      else
+      {
+        more_to_come = false;
+      }
+    }
+  } 
+  else // vertical grid
+  {
+    if (coord.y < (roi->image_height - offset_y))
+    {
+      coord.y += offset_y;
+    } 
+    else
+    {
+      if (coord.x < (roi->image_width - offset_x))
+      {
+        coord.x += offset_x;
+        coord.y = roi->start.y;
+      }
+      else
+      {
+        more_to_come = false;
+      }
+    }
+  }
+}
+
 point_t *
 ScanlineGrid::operator++()
 {
-  if (coord.x < (width - offset_x)) {
-    coord.x += offset_x;
-  } else if (coord.y < (height - offset_y)) {
-    coord.x = 0;
-    coord.y += offset_y;
-  } else {
-    // finished
-  }
+  calc_next_coord();
   return &coord;
 }
 
@@ -79,27 +134,23 @@ point_t *
 ScanlineGrid::operator++(int)
 {
   memcpy(&tmp_coord, &coord, sizeof(point_t));
-  if (coord.x < (width - offset_x)) {
-    coord.x += offset_x;
-  } else if (coord.y < (height - offset_y)) {
-    coord.x = 0;
-    coord.y += offset_y;
-  } else {
-    // finished
-  }
+  calc_next_coord();
   return &tmp_coord;
 }
 
 bool
 ScanlineGrid::finished()
 {
-  return ( (coord.y >= (height - offset_y)) && (coord.x >= (width - offset_x)) );
+  return !more_to_come;
 }
 
 void
 ScanlineGrid::reset()
 {
-  coord.x = coord.y = 0;
+  coord.x = roi->start.x;
+  coord.y = roi->start.y;
+
+  more_to_come = true;
 }
 
 const char *
@@ -134,14 +185,35 @@ ScanlineGrid::set_pan_tilt(float pan, float tilt)
  * Set width and height of scanline grid. Implicitly resets the grid.
  * @param width width
  * @param height height
+ * @param roi the grid will only be calculated within the roi (if NULL the roi 
+ *            will be from 0,0 to width,height). The object will be deleted by 
+ *            ScanlineGrid!
  */
 void
-ScanlineGrid::setDimensions(unsigned int width, unsigned int height)
+ScanlineGrid::setDimensions(unsigned int width, unsigned int height, ROI* roi)
 {
   this->width  = width;
   this->height = height;
-  // reset
-  coord.x = coord.y = 0;
+
+  if (this->roi)
+    delete this->roi;
+  
+  if (!roi)
+    this->roi = new ROI(0, 0, this->width, this->height, this->width, this->height);
+  else 
+  {
+    this->roi = roi;
+    //Use roi image width/height as grid boundary
+    this->roi->set_image_width(this->roi->start.x + this->roi->width);
+    this->roi->set_image_height(this->roi->start.y + this->roi->height);
+    
+    if (this->roi->image_width > this->width)
+      throw fawkes::OutOfBoundsException("ScanlineGrid: ROI is out of grid bounds!", this->roi->image_width, 0, this->width);
+    if (this->roi->image_height > this->height)
+      throw fawkes::OutOfBoundsException("ScanlineGrid: ROI is out of grid bounds!", this->roi->image_height, 0, this->height);
+  }
+  
+  reset();
 }
 
 
@@ -155,8 +227,8 @@ ScanlineGrid::setOffset(unsigned int offset_x, unsigned int offset_y)
 {
   this->offset_x = offset_x;
   this->offset_y = offset_y;
-  // reset
-  coord.x = coord.y = 0;
+
+  reset();
 }
 
 
@@ -167,15 +239,18 @@ ScanlineGrid::setOffset(unsigned int offset_x, unsigned int offset_y)
  * @param height height
  * @param offset_x offset_x
  * @param offset_y offset_y
+ * @param roi the grid will only be calculated within the roi (if NULL the roi 
+ *            will be from 0,0 to width,height). The object will be deleted by 
+ *            ScanlineGrid!
+ * @param horizontal_grid if true x will be increased before y
  */
 void
 ScanlineGrid::setGridParams(unsigned int width, unsigned int height,
-			    unsigned int offset_x, unsigned int offset_y)
+                            unsigned int offset_x, unsigned int offset_y, 
+                            ROI* roi, bool horizontal_grid)
 {
-  this->width  = width;
-  this->height = height;
-  this->offset_x = offset_x;
-  this->offset_y = offset_y;
-  // reset
-  coord.x = coord.y = 0;
+  this->horizontal_grid = horizontal_grid;
+
+  setDimensions(width, height, roi);
+  setOffset (offset_x, offset_y);
 }

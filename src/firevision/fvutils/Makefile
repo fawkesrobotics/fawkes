@@ -25,17 +25,17 @@ LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
 ifneq ($(HAVE_LIBJPEG),1)
-WARN_TARGETS += warning_libjpeg
-FILTER_OUT   += readers/jpeg.o writers/jpeg.o compression/jpeg.o
+  WARN_TARGETS += warning_libjpeg
+  FILTER_OUT   += readers/jpeg.o writers/jpeg.o compression/jpeg.o
 else
-UTILS_EXTRA_LIBS += jpeg
+  UTILS_EXTRA_LIBS += jpeg
 endif
 
 ifneq ($(HAVE_LIBPNG),1)
-WARN_TARGETS += warning_libpng
-FILTER_OUT   += readers/png.o writers/png.o
+  WARN_TARGETS += warning_libpng
+  FILTER_OUT   += readers/png.o writers/png.o
 else
-UTILS_EXTRA_LIBS += png
+  UTILS_EXTRA_LIBS += png
 endif
 
 ifneq ($(HAVE_OPENCV),1)

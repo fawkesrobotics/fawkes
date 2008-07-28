@@ -27,7 +27,7 @@
 
 namespace fawkes {
 
-/** @class WorldInfoHandler netcomm/worldinfo/handler.h
+/** @class WorldInfoHandler handler.h <netcomm/worldinfo/handler.h>
  * World info handler.
  * This interface defines methods called by WorldInfoTransceiver for incoming
  * information.

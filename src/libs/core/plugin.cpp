@@ -31,7 +31,7 @@
 
 namespace fawkes {
 
-/** @class Plugin core/plugin.h
+/** @class Plugin plugin.h <core/plugin.h>
  * Plugin interface class.
  * Derive this class to create a new Fawkes plugin. There is not much that
  * you have to do to get a basic plugin working. The base plugin will already

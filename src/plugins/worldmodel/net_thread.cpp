@@ -32,7 +32,7 @@
 using namespace std;
 using namespace fawkes;
 
-/** @class WorldModelNetworkThread <plugins/worldmodel/net_thread.h>
+/** @class WorldModelNetworkThread net_thread.h <plugins/worldmodel/net_thread.h>
  * Network thread of worldmodel plugin.
  * @author Tim Niemueller
  */

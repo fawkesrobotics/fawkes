@@ -35,7 +35,7 @@
 
 namespace fawkes {
 
-/** @class FawkesNetworkMessageTooBigException netcomm/fawkes/message.h
+/** @class FawkesNetworkMessageTooBigException message.h <netcomm/fawkes/message.h>
  * The given message size exceeds the limit.
  * The message payload can only be of a certain size, which is limited especially
  * by the data type used for the payload size in the header. If you try to assign too
@@ -55,7 +55,7 @@ FawkesNetworkMessageTooBigException::FawkesNetworkMessageTooBigException(size_t 
          sizeof(fmh.payload_size));
 }
 
-/** @class FawkesNetworkMessage netcomm/fawkes/message.h
+/** @class FawkesNetworkMessage message.h <netcomm/fawkes/message.h>
  * Representation of a message that is sent over the network.
  *
  * For the basic format of a message see fawkes_message_t. This class

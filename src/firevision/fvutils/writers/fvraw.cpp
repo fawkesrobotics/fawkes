@@ -37,7 +37,7 @@ using namespace fawkes;
 /** File identifier for FvRaw images. */
 const unsigned int FvRawWriter::FILE_IDENTIFIER = 0x17559358; // 16
 
-/** @class FvRawWriter <fvutils/writers/fvraw.h>
+/** @class FvRawWriter fvraw.h <fvutils/writers/fvraw.h>
  * FvRaw Writer implementation.
  * This class allows for writing FvRaw images to a file.
  */

@@ -39,7 +39,7 @@
 
 namespace fawkes {
 
-/** @class UnableToOpenFileException utils/system/file.h
+/** @class UnableToOpenFileException file.h <utils/system/file.h>
  * Opening a file failed for some reason.
  * @ingroup Exceptions
  */
@@ -54,7 +54,7 @@ UnableToOpenFileException::UnableToOpenFileException(const char *filename, int e
 }
 
 
-/** @class File utils/system/file.h
+/** @class File file.h <utils/system/file.h>
  * File utility methods.
  * Allows for opening a file and provides utilities to check if a file exists
  * or whether it is a regular file (and not a symbolic link/directory).

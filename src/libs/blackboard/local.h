@@ -56,6 +56,7 @@ class LocalBlackBoard : public BlackBoard
   virtual void         close(Interface *interface);
 
   virtual InterfaceInfoList *  list_all();
+  virtual bool                 is_alive() const throw();
 
   virtual std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type,
 							 const char *id_prefix = NULL);

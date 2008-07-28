@@ -31,12 +31,14 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
-#include <jpeglib.h>
 #include <string.h>
+extern "C" {
+#include <jpeglib.h>
+}
 
 using namespace fawkes;
 
-/** @class JpegWriter <fvutils/writers/jpeg.h>
+/** @class JpegWriter jpeg.h <fvutils/writers/jpeg.h>
  * JPEG file writer.
  */
 

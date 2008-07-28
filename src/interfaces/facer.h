@@ -80,7 +80,7 @@ class FacerInterface : public Interface
 
     LearnFaceMessage(const LearnFaceMessage *m);
     /* Methods */
-    char * face_label();
+    char * face_label() const;
     void set_face_label(const char * new_face_label);
     size_t maxlenof_face_label() const;
     virtual Message * clone() const;
@@ -103,7 +103,7 @@ class FacerInterface : public Interface
 
     SetOpmodeMessage(const SetOpmodeMessage *m);
     /* Methods */
-    if_facer_opmode_t opmode();
+    if_facer_opmode_t opmode() const;
     void set_opmode(const if_facer_opmode_t new_opmode);
     size_t maxlenof_opmode() const;
     virtual Message * clone() const;
@@ -118,19 +118,19 @@ class FacerInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   /* Methods */
-  if_facer_opmode_t opmode();
+  if_facer_opmode_t opmode() const;
   void set_opmode(const if_facer_opmode_t new_opmode);
   size_t maxlenof_opmode() const;
-  char * face_label();
+  char * face_label() const;
   void set_face_label(const char * new_face_label);
   size_t maxlenof_face_label() const;
-  bool is_learning_done();
+  bool is_learning_done() const;
   void set_learning_done(const bool new_learning_done);
   size_t maxlenof_learning_done() const;
-  unsigned int num_detections();
+  unsigned int num_detections() const;
   void set_num_detections(const unsigned int new_num_detections);
   size_t maxlenof_num_detections() const;
-  float sec_since_detection();
+  float sec_since_detection() const;
   void set_sec_since_detection(const float new_sec_since_detection);
   size_t maxlenof_sec_since_detection() const;
 

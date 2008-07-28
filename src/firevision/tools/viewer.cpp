@@ -106,6 +106,7 @@ int
 main(int argc, char **argv)
 {
   ArgumentParser argp(argc, argv, "hs:f:n:vjcd:");
+  std::string title = "";
 
 #ifdef HAVE_GTKMM
   Gtk::Main gtk_main(argc, argv);
@@ -125,18 +126,21 @@ main(int argc, char **argv)
     exit(0);
   } else if ( argp.has_arg("s") ) {
 #ifdef HAVE_SHMEM_CAM
+		title = std::string(argp.arg("s"));
     cam = new SharedMemoryCamera(argp.arg("s"));
 #else
     throw Exception("SharedMemoryCamera not available at compile time");
 #endif
   } else if ( argp.has_arg("f") ) {
 #ifdef HAVE_FILELOADER_CAM
+    title = std::string("File: ").append(argp.arg("f"));
     cam = new FileLoader(argp.arg("f"));
 #else
     throw Exception("FileLoader not available at compile time");
 #endif
   } else if ( argp.has_arg("n") ) {
 #ifdef HAVE_NETWORK_CAM
+    title = std::string("Net cam: ").append(argp.arg("n"));
     char *net_string = strdup(argp.arg("n"));
     char *image_id = NULL, *host = NULL, *port = NULL, *save_ptr = NULL;
     int port_num = 2208;
@@ -206,7 +210,7 @@ main(int argc, char **argv)
 	   delay);
   }
 
-  ImageDisplay *display = new ImageDisplay(cam->pixel_width(), cam->pixel_height());
+  ImageDisplay *display = new ImageDisplay(cam->pixel_width(), cam->pixel_height(), title.c_str());
 
 #ifdef HAVE_RECTINFO
   RectificationInfoFile *rectfile = new RectificationInfoFile();

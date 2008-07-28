@@ -27,7 +27,7 @@
 
 using namespace fawkes;
 
-/** @class VisionMaster <fvutils/base/vision_master.h>
+/** @class VisionMaster vision_master.h <fvutils/base/vision_master.h>
  * Vision Master.
  * The vision master shall be the entry point for vision plugins. It shall
  * allow for requesting cameras that are opened in a central place such that

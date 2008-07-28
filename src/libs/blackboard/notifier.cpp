@@ -426,9 +426,7 @@ BlackBoardNotifier::notify_of_data_change(const Interface *interface)
       BlackBoardInterfaceListener *bbil = (*i);
       Interface *bbil_iface = bbil->bbil_data_interface(uid);
       if (bbil_iface != NULL) {
-	if (bbil_iface->serial() != interface->serial()) {
-	  bbil->bb_interface_data_changed(bbil_iface);
-	}
+	bbil->bb_interface_data_changed(bbil_iface);
       } else {
 	LibLogger::log_warn("BlackBoardNotifier",
 			    "BBIL[%s] registered for data change events "
@@ -457,11 +455,12 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
 {
   BBilLockMapIterator lhmi;
   BBilListIterator i, l;
-  bool rv = __bbil_messages.empty();
+  bool rv = true;
   const char *uid = interface->uid();
   if ( (lhmi = __bbil_messages.find(uid)) != __bbil_messages.end() ) {
     BBilList &list = (*lhmi).second;
     __bbil_messages.lock();
+    rv = false;
     for (i = list.begin(); i != list.end(); ++i) {
       BlackBoardInterfaceListener *bbil = (*i);
       Interface *bbil_iface = bbil->bbil_message_interface(uid);

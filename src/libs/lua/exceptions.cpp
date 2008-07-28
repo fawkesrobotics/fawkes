@@ -24,29 +24,37 @@
 
 #include <lua/exceptions.h>
 
-using namespace fawkes;
+namespace fawkes {
 
-/** @class LuaRuntimeException <lua/exceptions.h>
+/** @class LuaRuntimeException exceptions.h <lua/exceptions.h>
  * Lua runtime exception.
  * Thrown if a runtime error occurs while executing Lua code.
  * @author Tim Niemueller
  */
 
-/** Constructor. */
+/** Constructor.
+ * @param what in what?
+ * @param errmsg error message
+ */
 LuaRuntimeException::LuaRuntimeException(const char *what, const char *errmsg)
   : Exception("Lua runtime error (in '%s'): %s", what, errmsg)
 {
 }
 
 
-/** @class LuaRuntimeException <lua/exceptions.h>
+/** @class LuaErrorException exceptions.h <lua/exceptions.h>
  * Lua error exception.
  * Thrown if a runtime error occurs while executing an error handler.
  * @author Tim Niemueller
  */
 
-/** Constructor. */
+/** Constructor.
+ * @param what in what?
+ * @param errmsg error message
+ */
 LuaErrorException::LuaErrorException(const char *what, const char *errmsg)
   : Exception("Lua error while running error handler (in '%s'): %s", what, errmsg)
 {
 }
+
+} // end of namespace fawkes

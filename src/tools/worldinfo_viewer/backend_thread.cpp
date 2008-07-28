@@ -28,7 +28,7 @@
 
 using namespace fawkes;
 
-/** @class WorldInfoViewerBackendThread <tools/worldinfo_viewer/backend_thread.h>
+/** @class WorldInfoViewerBackendThread backend_thread.h <tools/worldinfo_viewer/backend_thread.h>
  * The backend thread of the worldinfo viewer application.
  * @author Daniel Beck
  */

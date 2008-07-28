@@ -120,7 +120,7 @@ class MotorInterface : public Interface
 
     SetMotorStateMessage(const SetMotorStateMessage *m);
     /* Methods */
-    unsigned int motor_state();
+    unsigned int motor_state() const;
     void set_motor_state(const unsigned int new_motor_state);
     size_t maxlenof_motor_state() const;
     virtual Message * clone() const;
@@ -151,10 +151,10 @@ class MotorInterface : public Interface
 
     AcquireControlMessage(const AcquireControlMessage *m);
     /* Methods */
-    unsigned int controller();
+    unsigned int controller() const;
     void set_controller(const unsigned int new_controller);
     size_t maxlenof_controller() const;
-    char * controller_thread_name();
+    char * controller_thread_name() const;
     void set_controller_thread_name(const char * new_controller_thread_name);
     size_t maxlenof_controller_thread_name() const;
     virtual Message * clone() const;
@@ -190,13 +190,13 @@ class MotorInterface : public Interface
 
     DriveRPMMessage(const DriveRPMMessage *m);
     /* Methods */
-    float front_right();
+    float front_right() const;
     void set_front_right(const float new_front_right);
     size_t maxlenof_front_right() const;
-    float front_left();
+    float front_left() const;
     void set_front_left(const float new_front_left);
     size_t maxlenof_front_left() const;
-    float rear();
+    float rear() const;
     void set_rear(const float new_rear);
     size_t maxlenof_rear() const;
     virtual Message * clone() const;
@@ -220,10 +220,10 @@ class MotorInterface : public Interface
 
     TransMessage(const TransMessage *m);
     /* Methods */
-    float vx();
+    float vx() const;
     void set_vx(const float new_vx);
     size_t maxlenof_vx() const;
-    float vy();
+    float vy() const;
     void set_vy(const float new_vy);
     size_t maxlenof_vy() const;
     virtual Message * clone() const;
@@ -246,7 +246,7 @@ class MotorInterface : public Interface
 
     RotMessage(const RotMessage *m);
     /* Methods */
-    float omega();
+    float omega() const;
     void set_omega(const float new_omega);
     size_t maxlenof_omega() const;
     virtual Message * clone() const;
@@ -271,13 +271,13 @@ class MotorInterface : public Interface
 
     TransRotMessage(const TransRotMessage *m);
     /* Methods */
-    float vx();
+    float vx() const;
     void set_vx(const float new_vx);
     size_t maxlenof_vx() const;
-    float vy();
+    float vy() const;
     void set_vy(const float new_vy);
     size_t maxlenof_vy() const;
-    float omega();
+    float omega() const;
     void set_omega(const float new_omega);
     size_t maxlenof_omega() const;
     virtual Message * clone() const;
@@ -302,13 +302,13 @@ class MotorInterface : public Interface
 
     OrbitMessage(const OrbitMessage *m);
     /* Methods */
-    float px();
+    float px() const;
     void set_px(const float new_px);
     size_t maxlenof_px() const;
-    float py();
+    float py() const;
     void set_py(const float new_py);
     size_t maxlenof_py() const;
-    float omega();
+    float omega() const;
     void set_omega(const float new_omega);
     size_t maxlenof_omega() const;
     virtual Message * clone() const;
@@ -333,13 +333,13 @@ class MotorInterface : public Interface
 
     LinTransRotMessage(const LinTransRotMessage *m);
     /* Methods */
-    float vx();
+    float vx() const;
     void set_vx(const float new_vx);
     size_t maxlenof_vx() const;
-    float vy();
+    float vy() const;
     void set_vy(const float new_vy);
     size_t maxlenof_vy() const;
-    float omega();
+    float omega() const;
     void set_omega(const float new_omega);
     size_t maxlenof_omega() const;
     virtual Message * clone() const;
@@ -354,46 +354,46 @@ class MotorInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   /* Methods */
-  unsigned int motor_state();
+  unsigned int motor_state() const;
   void set_motor_state(const unsigned int new_motor_state);
   size_t maxlenof_motor_state() const;
-  unsigned int drive_mode();
+  unsigned int drive_mode() const;
   void set_drive_mode(const unsigned int new_drive_mode);
   size_t maxlenof_drive_mode() const;
-  int right_rpm();
+  int right_rpm() const;
   void set_right_rpm(const int new_right_rpm);
   size_t maxlenof_right_rpm() const;
-  int rear_rpm();
+  int rear_rpm() const;
   void set_rear_rpm(const int new_rear_rpm);
   size_t maxlenof_rear_rpm() const;
-  int left_rpm();
+  int left_rpm() const;
   void set_left_rpm(const int new_left_rpm);
   size_t maxlenof_left_rpm() const;
-  float odometry_path_length();
+  float odometry_path_length() const;
   void set_odometry_path_length(const float new_odometry_path_length);
   size_t maxlenof_odometry_path_length() const;
-  float odometry_position_x();
+  float odometry_position_x() const;
   void set_odometry_position_x(const float new_odometry_position_x);
   size_t maxlenof_odometry_position_x() const;
-  float odometry_position_y();
+  float odometry_position_y() const;
   void set_odometry_position_y(const float new_odometry_position_y);
   size_t maxlenof_odometry_position_y() const;
-  float odometry_orientation();
+  float odometry_orientation() const;
   void set_odometry_orientation(const float new_odometry_orientation);
   size_t maxlenof_odometry_orientation() const;
-  float vx();
+  float vx() const;
   void set_vx(const float new_vx);
   size_t maxlenof_vx() const;
-  float vy();
+  float vy() const;
   void set_vy(const float new_vy);
   size_t maxlenof_vy() const;
-  float omega();
+  float omega() const;
   void set_omega(const float new_omega);
   size_t maxlenof_omega() const;
-  unsigned int controller();
+  unsigned int controller() const;
   void set_controller(const unsigned int new_controller);
   size_t maxlenof_controller() const;
-  char * controller_thread_name();
+  char * controller_thread_name() const;
   void set_controller_thread_name(const char * new_controller_thread_name);
   size_t maxlenof_controller_thread_name() const;
 

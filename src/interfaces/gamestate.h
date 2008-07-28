@@ -121,28 +121,28 @@ class GameStateInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   /* Methods */
-  if_gamestate_t game_state();
+  if_gamestate_t game_state() const;
   void set_game_state(const if_gamestate_t new_game_state);
   size_t maxlenof_game_state() const;
-  if_gamestate_team_t state_team();
+  if_gamestate_team_t state_team() const;
   void set_state_team(const if_gamestate_team_t new_state_team);
   size_t maxlenof_state_team() const;
-  if_gamestate_team_t our_team();
+  if_gamestate_team_t our_team() const;
   void set_our_team(const if_gamestate_team_t new_our_team);
   size_t maxlenof_our_team() const;
-  if_gamestate_goalcolor_t our_goal_color();
+  if_gamestate_goalcolor_t our_goal_color() const;
   void set_our_goal_color(const if_gamestate_goalcolor_t new_our_goal_color);
   size_t maxlenof_our_goal_color() const;
-  if_gamestate_half_t half();
+  if_gamestate_half_t half() const;
   void set_half(const if_gamestate_half_t new_half);
   size_t maxlenof_half() const;
-  if_gamestate_role_t role();
+  if_gamestate_role_t role() const;
   void set_role(const if_gamestate_role_t new_role);
   size_t maxlenof_role() const;
-  unsigned int score_cyan();
+  unsigned int score_cyan() const;
   void set_score_cyan(const unsigned int new_score_cyan);
   size_t maxlenof_score_cyan() const;
-  unsigned int score_magenta();
+  unsigned int score_magenta() const;
   void set_score_magenta(const unsigned int new_score_magenta);
   size_t maxlenof_score_magenta() const;
 

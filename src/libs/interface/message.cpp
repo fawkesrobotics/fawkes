@@ -36,7 +36,7 @@
 
 namespace fawkes {
 
-/** @class Message interface/message.h
+/** @class Message message.h <interface/message.h>
  * Base class for all messages passed through interfaces in Fawkes BlackBoard.
  * Do not use directly, but instead use the interface generator to generate
  * an interface with accompanying messages.

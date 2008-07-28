@@ -36,7 +36,7 @@ else
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
-all: $(WARN_TARGETS)
+gui: $(WARN_TARGETS)
 .PHONY: warning_nonavi
 warning_nonavi:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Navigator GUI (navigator not built)$(TNORMAL) $(NAVIGATOR_ERROR)$(GUI_ERROR)"

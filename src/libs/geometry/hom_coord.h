@@ -26,6 +26,8 @@
 #ifndef __GEOMETRY_HOM_COORD_H_
 #define __GEOMETRY_HOM_COORD_H_
 
+#include <ostream>
+
 namespace fawkes {
 
 class Vector;
@@ -41,19 +43,19 @@ class HomCoord
 
   virtual float  x() const;
   virtual float& x();
-  virtual void   x(float x);
+  virtual HomCoord& x(float x);
 
   virtual float  y() const;
   virtual float& y();
-  virtual void   y(float y);
+  virtual HomCoord& y(float y);
 
   virtual float  z() const;
   virtual float& z();
-  virtual void   z(float z);
+  virtual HomCoord& z(float z);
 
   virtual float  w() const;
   virtual float& w();
-  virtual void   w(float w);
+  virtual HomCoord& w(float w);
 
   virtual HomCoord& rotate_x(float rad);
   virtual HomCoord& rotate_y(float rad);
@@ -64,13 +66,18 @@ class HomCoord
 
   virtual HomCoord  operator+(const HomCoord& h) const;
   virtual HomCoord& operator+=(const HomCoord& h);
-
+		
+	virtual float operator*(const HomCoord& h) const;
+		
   virtual HomCoord& operator=(const HomCoord& h);
-  
+
+	friend std::ostream& operator<<(std::ostream& stream, const HomCoord& h);
+		
  protected:
   HomCoord(float x = 0.0, float y = 0.0, float z = 0.0, float w = 0.0);
   HomCoord(const Vector& v);
 
+	virtual std::ostream& addToStream(std::ostream& stream) const;
   Vector* m_vector;
 };
 

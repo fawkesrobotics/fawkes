@@ -34,6 +34,8 @@
 #include <fvutils/colormap/yuvcm.h>
 #include <fvutils/colormap/cmfile.h>
 
+#include <fvutils/color/color_object_map.h>
+
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -358,36 +360,7 @@ BayesHistosToLut::calculateLutAllColors()
 	}
 
 	// set lut value for color (u, v) to most probable color
-	switch( color_with_highest_prob ) {
-	case H_BALL:
-	  lut->set(y_index, u, v, C_ORANGE);
-	  break;
-	case H_BACKGROUND:
-	  lut->set(y_index, u, v, C_BACKGROUND);
-	  break;
-	case H_ROBOT:
-	  lut->set(y_index, u, v, C_BLACK);
-	  break;
-	case H_FIELD:
-	  lut->set(y_index, u, v, C_GREEN);
-	  break;
-	case H_GOAL_BLUE:
-	  lut->set(y_index, u, v, C_BLUE);
-	  break;
-	case H_GOAL_YELLOW:
-	  lut->set(y_index, u, v, C_YELLOW);
-	  break;
-	case H_LINE:
-	  lut->set(y_index, u, v, C_WHITE);
-	  break;
-	case H_UNKNOWN:
-	  lut->set(y_index, u, v, C_OTHER);
-	  break;
-	default:
-	  cout << "(BayesHistosToLut::calculateLutAllColors): Invalid object." << endl;
-	  exit(-1);
-	  break;
-	}
+	lut->set(y_index, u, v, ColorObjectMap::get_instance()->get(color_with_highest_prob));
       }
     }
   }
@@ -478,6 +451,7 @@ BayesHistosToLut::calculateLutValues( bool penalty )
   unsigned int count_line       = 0;
   unsigned int count_robot      = 0;
   unsigned int count_background = 0;
+  unsigned int count_goal       = 0;
   unsigned int count_unknown    = 0;
   
   lut->reset();
@@ -491,45 +465,39 @@ BayesHistosToLut::calculateLutValues( bool penalty )
 	switch(mostLikelyObject) {
 	case H_BALL:
 	  count_ball++;
-	  lut->set(y_index, u, v, C_ORANGE);
 	  break;
 	case H_BACKGROUND:
 	  count_background++;
-	  lut->set(y_index, u, v, C_BACKGROUND);
 	  break;
 	case H_ROBOT:
+	case H_ROBOT_OPP:
 	  count_robot++;
-	  lut->set(y_index, u, v, C_BLACK);
 	  break;
 	case H_FIELD:
 	  count_field++;
-	  lut->set(y_index, u, v, C_GREEN);
-	  break;
-	case H_GOAL_BLUE:
-	  lut->set(y_index, u, v, C_BLUE);
-	  break;
-	case H_GOAL_YELLOW:
-	  lut->set(y_index, u, v, C_YELLOW);
 	  break;
 	case H_LINE:
 	  count_line++;
-	  lut->set(y_index, u, v, C_WHITE);
+	  break;
+	case H_GOAL_YELLOW:
+	case H_GOAL_BLUE:
+	  count_goal++;
 	  break;
 	case H_UNKNOWN:
 	  count_unknown++;
-	  lut->set(y_index, u, v, C_OTHER);
 	  break;
 	default:
-	  cout << "(BayesHistosToLut::calculateLutValues): Invalid object." << endl;
+	  cout << "(BayesHistosToLut::calculateLutValues(): Invalid object." << endl;
 	  exit(-1);
 	  break;
 	}
+        lut->set(y_index, u, v, ColorObjectMap::get_instance()->get(mostLikelyObject));
       }
     }
   }
 
-  printf("ball: %d  field: %d  line: %d  robot: %d  background: %d  unknown: %d\n", 
-	 count_ball, count_field, count_line, count_robot, count_background, count_unknown);
+	printf("ball: %d  field: %d  line: %d  robot: %d  goal: %d  background: %d  unknown: %d\n", 
+	 count_ball, count_field, count_line, count_robot, count_goal, count_background, count_unknown);
 
   if ( penalty ) {
     Histogram *histo_bg   = histograms.at( H_BACKGROUND );

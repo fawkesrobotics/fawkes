@@ -30,6 +30,9 @@
 #include <interfaces/skiller.h>
 #include <interfaces/navigator.h>
 #include <interfaces/gamestate.h>
+#include <interfaces/humanoidmotion.h>
+#include <interfaces/switch.h>
+#include <interfaces/speechsynth.h>
 
 #include <cstring>
 
@@ -83,10 +86,16 @@ SkillerLiaisonThread::init_failure_cleanup()
     if ( skiller )    blackboard->close(skiller);
     if ( wm_ball )    blackboard->close(wm_ball);
     if ( wm_pose )    blackboard->close(wm_pose);
+    if ( nao_ball )    blackboard->close(nao_ball);
     //if ( wm_ball_w )  blackboard->close(wm_ball_w);
     if ( navigator )  blackboard->close(navigator);
+    if ( nao_navigator )  blackboard->close(nao_navigator);
     //if ( wm_pose_w )  blackboard->close(wm_pose_w);
     if ( gamestate )  blackboard->close(gamestate);
+    if ( hummot )  blackboard->close(hummot);
+    if ( chbut )  blackboard->close(chbut);
+    if ( tballrec ) blackboard->close(tballrec);
+    if ( speechsynth )  blackboard->close(speechsynth);
   } catch (...) {
     // we really screwed up, can't do anything about it, ignore error, logger is
     // initialized since this method is only called from init() which is only called if
@@ -100,12 +109,17 @@ SkillerLiaisonThread::init_failure_cleanup()
 void
 SkillerLiaisonThread::init()
 {
-  wm_ball      = NULL;
-  wm_pose      = NULL;
-  navigator    = NULL;
-  //wm_ball_w    = NULL;
-  //wm_pose_w    = NULL;
-  gamestate    = NULL;
+  wm_ball       = NULL;
+  wm_pose       = NULL;
+  navigator     = NULL;
+  nao_navigator = NULL;
+  //wm_ball_w     = NULL;
+  //wm_pose_w     = NULL;
+  gamestate     = NULL;
+  hummot        = NULL;
+  chbut         = NULL;
+  tballrec      = NULL;
+  speechsynth   = NULL;
 
   try {
     skiller   = blackboard->open_for_writing<SkillerInterface>("Skiller");
@@ -113,8 +127,14 @@ SkillerLiaisonThread::init()
     //wm_ball_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Ball");
     wm_pose   = blackboard->open_for_reading<ObjectPositionInterface>("WM Pose");
     //wm_pose_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Pose");
+    nao_ball   = blackboard->open_for_reading<ObjectPositionInterface>("Ball Nao");
     navigator = blackboard->open_for_reading<NavigatorInterface>("Navigator");
+    nao_navigator = blackboard->open_for_reading<NavigatorInterface>("Nao Navi");
     gamestate = blackboard->open_for_reading<GameStateInterface>("WM GameState");
+    hummot    = blackboard->open_for_reading<HumanoidMotionInterface>("Nao Motion");
+    chbut     = blackboard->open_for_reading<SwitchInterface>("Nao ChestButton");
+    tballrec  = blackboard->open_for_writing<SwitchInterface>("Toggle Ball Rec");
+    speechsynth = blackboard->open_for_reading<SpeechSynthInterface>("Nao SpeechSynth");
     std::list<ObjectPositionInterface *> *obs_lst = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("WM Obstacles");
     for (std::list<ObjectPositionInterface *>::iterator i = obs_lst->begin(); i != obs_lst->end(); ++i) {
       wm_obstacles.push_back(*i);
@@ -147,8 +167,14 @@ SkillerLiaisonThread::finalize()
   //blackboard->close(wm_ball_w);
   blackboard->close(wm_pose);
   //blackboard->close(wm_pose_w);
+  blackboard->close(nao_ball);
   blackboard->close(navigator);
+  blackboard->close(nao_navigator);
   blackboard->close(gamestate);
+  blackboard->close(hummot);
+  blackboard->close(chbut);
+  blackboard->close(tballrec);
+  blackboard->close(speechsynth);
 }
 
 
@@ -192,8 +218,14 @@ SkillerLiaisonThread::loop()
 
   wm_ball->read();
   wm_pose->read();
+  nao_ball->read();
   navigator->read();
+  nao_navigator->read();
   gamestate->read();
+  hummot->read();
+  chbut->read();
+  tballrec->read();
+  speechsynth->read();
 
   wm_obstacles.lock();
   for (wm_obs_it = wm_obstacles.begin(); wm_obs_it != wm_obstacles.end(); ++wm_obs_it) {

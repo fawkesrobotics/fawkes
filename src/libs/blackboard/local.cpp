@@ -135,6 +135,13 @@ LocalBlackBoard::list_all()
 }
 
 
+bool
+LocalBlackBoard::is_alive() const throw()
+{
+  return true;
+}
+
+
 void
 LocalBlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsigned int flags)
 {

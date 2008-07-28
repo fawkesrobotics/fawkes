@@ -29,7 +29,9 @@
 #include <fvutils/readers/reader.h>
 
 #include <cstdio>
+extern "C" {
 #include <jpeglib.h>
+}
 
 class JpegReader : public Reader {
 

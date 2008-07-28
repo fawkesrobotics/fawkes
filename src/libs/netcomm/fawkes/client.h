@@ -62,6 +62,7 @@ class FawkesNetworkClient
   void disconnect();
 
   void enqueue(FawkesNetworkMessage *message);
+  void enqueue_and_wait(FawkesNetworkMessage *message);
 
   void wait(unsigned int component_id);
   void wake(unsigned int component_id);

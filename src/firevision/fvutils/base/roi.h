@@ -47,7 +47,8 @@ typedef enum {
   H_GOAL_BLUE     = 5,	/**< blue goal */
   H_LINE          = 6,	/**< line */
   H_UNKNOWN       = 7,	/**< unknown */
-  H_SIZE          = 8	/**< size of enum */
+  H_ROBOT_OPP     = 8,	/**< opponents robot */
+  H_SIZE              	/**< size of enum (Has to be the last entry) */
 } hint_t;
 
 

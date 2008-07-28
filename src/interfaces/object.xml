@@ -23,6 +23,12 @@
     <constant type="unsigned int" value="5" name="TYPE_SELF">
       This constant denotes my own position.
     </constant>
+    <constant type="unsigned int" value="6" name="TYPE_GOAL_BLUE">
+      This constant denotes the position of the sky-blue goal.
+    </constant>
+    <constant type="unsigned int" value="7" name="TYPE_GOAL_YELLOW">
+      This constant denotes the position of the yellow goal.
+    </constant>
 
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
 	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
@@ -62,6 +68,10 @@
     </constant>
     <constant type="unsigned int" value="512" name="FLAG_HAS_Z_AS_ORI">
       The Z-coordinate of any coordinate is an orientation.
+    </constant>
+    <constant type="unsigned int" value="1024" name="FLAG_IS_FIXED_OBJECT">
+      This object is fixed and the world model should update its position
+      according to the odometry, iff the object is not visible.
     </constant>
   </constants>
   <data>

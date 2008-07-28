@@ -690,11 +690,13 @@ LuaContext::set_table(int t_index)
 }
 
 
-/** Set field of a table.
- * Does the equivalent to t[k] = v, where t is the value at the given valid
- * index and v is the value at the top of the stack.
- * This function pops the value from the stack. As in Lua, this function may
- * trigger a metamethod for the "newindex" event.
+/** Set field of a table.  Does the equivalent to t[k] = v, where t is
+ * the value at the given valid index and v is the value at the top of
+ * the stack.  This function pops the value from the stack. As in Lua,
+ * this function may trigger a metamethod for the "newindex" event.
+ * @param key key of the field to set @param t_index index of the
+ * table on the stack, defaults to the element just below the value to
+ * set (-2, second last element on the stack).
  */
 void
 LuaContext::set_field(const char *key, int t_index)

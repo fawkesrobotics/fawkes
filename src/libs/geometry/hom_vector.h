@@ -41,6 +41,12 @@ class HomVector : public HomCoord
   HomVector& unit();
   HomVector& set_length(float length);
   HomVector& scale(float factor);
+		
+	virtual HomVector  operator*(const float s) const;
+  virtual HomVector& operator*=(const float s);
+		
+	float operator*(const HomCoord& h) const;
+	HomVector crossP(const HomCoord& h) const;
 };
 
 } // end namespace fawkes

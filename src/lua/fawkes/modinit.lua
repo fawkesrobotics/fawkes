@@ -60,6 +60,10 @@ end
 --- Initializes a skill module.
 -- @param m module that contains a skill
 function module_init(m)
-   register_global_funcs(m);
+   for k,v in pairs(_G) do
+      if type(v) == "function" or type(v) == "table" then
+	 m[k] = v;
+      end
+   end
    fawkes.logprint.register_print_funcs(m);
 end

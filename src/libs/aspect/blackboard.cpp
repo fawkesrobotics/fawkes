@@ -27,7 +27,7 @@
 
 namespace fawkes {
 
-/** @class BlackBoardAspect aspect/blackboard.h
+/** @class BlackBoardAspect blackboard.h <aspect/blackboard.h>
  * Thread aspect to access to BlackBoard.
  * Give this aspect to your thread to gain access to the BlackBoard.
  * It is guaranteed that if used properly from within plugins that the

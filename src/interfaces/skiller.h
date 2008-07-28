@@ -94,7 +94,7 @@ class SkillerInterface : public Interface
 
     ExecSkillMessage(const ExecSkillMessage *m);
     /* Methods */
-    char * skill_string();
+    char * skill_string() const;
     void set_skill_string(const char * new_skill_string);
     size_t maxlenof_skill_string() const;
     virtual Message * clone() const;
@@ -120,7 +120,7 @@ class SkillerInterface : public Interface
 
     ExecSkillContinuousMessage(const ExecSkillContinuousMessage *m);
     /* Methods */
-    char * skill_string();
+    char * skill_string() const;
     void set_skill_string(const char * new_skill_string);
     size_t maxlenof_skill_string() const;
     virtual Message * clone() const;
@@ -179,16 +179,16 @@ class SkillerInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   /* Methods */
-  char * skill_string();
+  char * skill_string() const;
   void set_skill_string(const char * new_skill_string);
   size_t maxlenof_skill_string() const;
-  unsigned int exclusive_controller();
+  unsigned int exclusive_controller() const;
   void set_exclusive_controller(const unsigned int new_exclusive_controller);
   size_t maxlenof_exclusive_controller() const;
-  SkillStatusEnum status();
+  SkillStatusEnum status() const;
   void set_status(const SkillStatusEnum new_status);
   size_t maxlenof_status() const;
-  bool is_continuous();
+  bool is_continuous() const;
   void set_continuous(const bool new_continuous);
   size_t maxlenof_continuous() const;
 

@@ -56,6 +56,10 @@ const unsigned int ObjectPositionInterface::TYPE_TEAMMEMBER = 3;
 const unsigned int ObjectPositionInterface::TYPE_LINE = 4;
 /** TYPE_SELF constant */
 const unsigned int ObjectPositionInterface::TYPE_SELF = 5;
+/** TYPE_GOAL_BLUE constant */
+const unsigned int ObjectPositionInterface::TYPE_GOAL_BLUE = 6;
+/** TYPE_GOAL_YELLOW constant */
+const unsigned int ObjectPositionInterface::TYPE_GOAL_YELLOW = 7;
 /** FLAG_NONE constant */
 const unsigned int ObjectPositionInterface::FLAG_NONE = 0;
 /** FLAG_HAS_WORLD constant */
@@ -78,6 +82,8 @@ const unsigned int ObjectPositionInterface::FLAG_HAS_COVARIANCES = 128;
 const unsigned int ObjectPositionInterface::FLAG_HAS_WORLD_VELOCITY = 256;
 /** FLAG_HAS_Z_AS_ORI constant */
 const unsigned int ObjectPositionInterface::FLAG_HAS_Z_AS_ORI = 512;
+/** FLAG_IS_FIXED_OBJECT constant */
+const unsigned int ObjectPositionInterface::FLAG_IS_FIXED_OBJECT = 1024;
 
 /** Constructor */
 ObjectPositionInterface::ObjectPositionInterface() : Interface()
@@ -117,7 +123,7 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "relative_y_velocity", &data->relative_y_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "relative_z_velocity", &data->relative_z_velocity);
   add_fieldinfo(Interface::IFT_FLOAT, "relative_xyz_velocity_covariance", &data->relative_xyz_velocity_covariance);
-  unsigned char tmp_hash[] = {0x2e, 0xe1, 0xe3, 0x5c, 0xf6, 0xaf, 0xb3, 0x59, 0x42, 0xa9, 0x6d, 0x69, 0xa0, 0xfe, 0xd3, 0x9b};
+  unsigned char tmp_hash[] = {0xe6, 0x60, 0x23, 0x1b, 0xa4, 0x1a, 0x32, 0xb3, 0xed, 0x8e, 0xf8, 0x7f, 0x13, 0x1c, 0x73, 0x1f};
   set_hash(tmp_hash);
 }
 
@@ -134,7 +140,7 @@ ObjectPositionInterface::~ObjectPositionInterface()
  * @return object_type value
  */
 unsigned int
-ObjectPositionInterface::object_type()
+ObjectPositionInterface::object_type() const
 {
   return data->object_type;
 }
@@ -170,7 +176,7 @@ ObjectPositionInterface::set_object_type(const unsigned int new_object_type)
  * @return flags value
  */
 unsigned int
-ObjectPositionInterface::flags()
+ObjectPositionInterface::flags() const
 {
   return data->flags;
 }
@@ -204,7 +210,7 @@ ObjectPositionInterface::set_flags(const unsigned int new_flags)
  * @return visible value
  */
 bool
-ObjectPositionInterface::is_visible()
+ObjectPositionInterface::is_visible() const
 {
   return data->visible;
 }
@@ -234,7 +240,7 @@ ObjectPositionInterface::set_visible(const bool new_visible)
  * @return valid value
  */
 bool
-ObjectPositionInterface::is_valid()
+ObjectPositionInterface::is_valid() const
 {
   return data->valid;
 }
@@ -270,7 +276,7 @@ ObjectPositionInterface::set_valid(const bool new_valid)
  * @return visibility_history value
  */
 int
-ObjectPositionInterface::visibility_history()
+ObjectPositionInterface::visibility_history() const
 {
   return data->visibility_history;
 }
@@ -308,7 +314,7 @@ ObjectPositionInterface::set_visibility_history(const int new_visibility_history
  * @return roll value
  */
 float
-ObjectPositionInterface::roll()
+ObjectPositionInterface::roll() const
 {
   return data->roll;
 }
@@ -342,7 +348,7 @@ ObjectPositionInterface::set_roll(const float new_roll)
  * @return pitch value
  */
 float
-ObjectPositionInterface::pitch()
+ObjectPositionInterface::pitch() const
 {
   return data->pitch;
 }
@@ -376,7 +382,7 @@ ObjectPositionInterface::set_pitch(const float new_pitch)
  * @return yaw value
  */
 float
-ObjectPositionInterface::yaw()
+ObjectPositionInterface::yaw() const
 {
   return data->yaw;
 }
@@ -411,7 +417,7 @@ ObjectPositionInterface::set_yaw(const float new_yaw)
  * @return distance value
  */
 float
-ObjectPositionInterface::distance()
+ObjectPositionInterface::distance() const
 {
   return data->distance;
 }
@@ -447,7 +453,7 @@ ObjectPositionInterface::set_distance(const float new_distance)
  * @return bearing value
  */
 float
-ObjectPositionInterface::bearing()
+ObjectPositionInterface::bearing() const
 {
   return data->bearing;
 }
@@ -484,7 +490,7 @@ ObjectPositionInterface::set_bearing(const float new_bearing)
  * @return slope value
  */
 float
-ObjectPositionInterface::slope()
+ObjectPositionInterface::slope() const
 {
   return data->slope;
 }
@@ -522,7 +528,7 @@ ObjectPositionInterface::set_slope(const float new_slope)
  * @return dbs_covariance value
  */
 float *
-ObjectPositionInterface::dbs_covariance()
+ObjectPositionInterface::dbs_covariance() const
 {
   return data->dbs_covariance;
 }
@@ -560,7 +566,7 @@ ObjectPositionInterface::set_dbs_covariance(const float * new_dbs_covariance)
  * @return world_x value
  */
 float
-ObjectPositionInterface::world_x()
+ObjectPositionInterface::world_x() const
 {
   return data->world_x;
 }
@@ -598,7 +604,7 @@ ObjectPositionInterface::set_world_x(const float new_world_x)
  * @return world_y value
  */
 float
-ObjectPositionInterface::world_y()
+ObjectPositionInterface::world_y() const
 {
   return data->world_y;
 }
@@ -636,7 +642,7 @@ ObjectPositionInterface::set_world_y(const float new_world_y)
  * @return world_z value
  */
 float
-ObjectPositionInterface::world_z()
+ObjectPositionInterface::world_z() const
 {
   return data->world_z;
 }
@@ -674,7 +680,7 @@ ObjectPositionInterface::set_world_z(const float new_world_z)
  * @return world_xyz_covariance value
  */
 float *
-ObjectPositionInterface::world_xyz_covariance()
+ObjectPositionInterface::world_xyz_covariance() const
 {
   return data->world_xyz_covariance;
 }
@@ -710,7 +716,7 @@ ObjectPositionInterface::set_world_xyz_covariance(const float * new_world_xyz_co
  * @return relative_x value
  */
 float
-ObjectPositionInterface::relative_x()
+ObjectPositionInterface::relative_x() const
 {
   return data->relative_x;
 }
@@ -744,7 +750,7 @@ ObjectPositionInterface::set_relative_x(const float new_relative_x)
  * @return relative_y value
  */
 float
-ObjectPositionInterface::relative_y()
+ObjectPositionInterface::relative_y() const
 {
   return data->relative_y;
 }
@@ -778,7 +784,7 @@ ObjectPositionInterface::set_relative_y(const float new_relative_y)
  * @return relative_z value
  */
 float
-ObjectPositionInterface::relative_z()
+ObjectPositionInterface::relative_z() const
 {
   return data->relative_z;
 }
@@ -814,7 +820,7 @@ ObjectPositionInterface::set_relative_z(const float new_relative_z)
  * @return relative_xyz_covariance value
  */
 float *
-ObjectPositionInterface::relative_xyz_covariance()
+ObjectPositionInterface::relative_xyz_covariance() const
 {
   return data->relative_xyz_covariance;
 }
@@ -850,7 +856,7 @@ ObjectPositionInterface::set_relative_xyz_covariance(const float * new_relative_
  * @return extent_x value
  */
 float
-ObjectPositionInterface::extent_x()
+ObjectPositionInterface::extent_x() const
 {
   return data->extent_x;
 }
@@ -884,7 +890,7 @@ ObjectPositionInterface::set_extent_x(const float new_extent_x)
  * @return extent_y value
  */
 float
-ObjectPositionInterface::extent_y()
+ObjectPositionInterface::extent_y() const
 {
   return data->extent_y;
 }
@@ -918,7 +924,7 @@ ObjectPositionInterface::set_extent_y(const float new_extent_y)
  * @return extent_z value
  */
 float
-ObjectPositionInterface::extent_z()
+ObjectPositionInterface::extent_z() const
 {
   return data->extent_z;
 }
@@ -952,7 +958,7 @@ ObjectPositionInterface::set_extent_z(const float new_extent_z)
  * @return world_x_velocity value
  */
 float
-ObjectPositionInterface::world_x_velocity()
+ObjectPositionInterface::world_x_velocity() const
 {
   return data->world_x_velocity;
 }
@@ -986,7 +992,7 @@ ObjectPositionInterface::set_world_x_velocity(const float new_world_x_velocity)
  * @return world_y_velocity value
  */
 float
-ObjectPositionInterface::world_y_velocity()
+ObjectPositionInterface::world_y_velocity() const
 {
   return data->world_y_velocity;
 }
@@ -1020,7 +1026,7 @@ ObjectPositionInterface::set_world_y_velocity(const float new_world_y_velocity)
  * @return world_z_velocity value
  */
 float
-ObjectPositionInterface::world_z_velocity()
+ObjectPositionInterface::world_z_velocity() const
 {
   return data->world_z_velocity;
 }
@@ -1056,7 +1062,7 @@ ObjectPositionInterface::set_world_z_velocity(const float new_world_z_velocity)
  * @return world_xyz_velocity_covariance value
  */
 float *
-ObjectPositionInterface::world_xyz_velocity_covariance()
+ObjectPositionInterface::world_xyz_velocity_covariance() const
 {
   return data->world_xyz_velocity_covariance;
 }
@@ -1092,7 +1098,7 @@ ObjectPositionInterface::set_world_xyz_velocity_covariance(const float * new_wor
  * @return relative_x_velocity value
  */
 float
-ObjectPositionInterface::relative_x_velocity()
+ObjectPositionInterface::relative_x_velocity() const
 {
   return data->relative_x_velocity;
 }
@@ -1126,7 +1132,7 @@ ObjectPositionInterface::set_relative_x_velocity(const float new_relative_x_velo
  * @return relative_y_velocity value
  */
 float
-ObjectPositionInterface::relative_y_velocity()
+ObjectPositionInterface::relative_y_velocity() const
 {
   return data->relative_y_velocity;
 }
@@ -1160,7 +1166,7 @@ ObjectPositionInterface::set_relative_y_velocity(const float new_relative_y_velo
  * @return relative_z_velocity value
  */
 float
-ObjectPositionInterface::relative_z_velocity()
+ObjectPositionInterface::relative_z_velocity() const
 {
   return data->relative_z_velocity;
 }
@@ -1196,7 +1202,7 @@ ObjectPositionInterface::set_relative_z_velocity(const float new_relative_z_velo
  * @return relative_xyz_velocity_covariance value
  */
 float *
-ObjectPositionInterface::relative_xyz_velocity_covariance()
+ObjectPositionInterface::relative_xyz_velocity_covariance() const
 {
   return data->relative_xyz_velocity_covariance;
 }

@@ -30,7 +30,7 @@
 
 namespace fawkes {
 
-/** @class BlackBoard <blackboard/blackboard.h>
+/** @class BlackBoard blackboard.h <blackboard/blackboard.h>
  * The BlackBoard.
  * This class is the single one entry point for programs that use the BlackBoard.
  * It is used to open and close interfaces, register and unregister listeners and
@@ -109,6 +109,11 @@ namespace fawkes {
  * @fn void BlackBoard::close(Interface *interface)
  * Close interface.
  * @param interface interface to close
+ *
+ *
+ * @fn bool BlackBoard::is_alive() const throw() = 0
+ * Check if the BlackBoard is still alive.
+ * @return true, if the BlackBoard is still alive and may be used, false otherwise.
  *
  *
  * @fn std::list<Interface *> *  BlackBoard::open_all_of_type_for_reading(const char *type, const char *id_prefix = NULL)

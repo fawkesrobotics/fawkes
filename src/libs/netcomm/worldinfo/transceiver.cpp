@@ -41,7 +41,7 @@
 
 namespace fawkes {
 
-/** @class WorldInfoException <netcomm/worldinfo/transceiver.h>
+/** @class WorldInfoException transceiver.h <netcomm/worldinfo/transceiver.h>
  * Thrown on critical errors in world info handling.
  * @ingroup NetComm
  */
@@ -55,7 +55,7 @@ WorldInfoException::WorldInfoException(const char *msg)
 }
 
 
-/** @class WorldInfoTransceiver netcomm/worldinfo/transceiver.h
+/** @class WorldInfoTransceiver transceiver.h <netcomm/worldinfo/transceiver.h>
  * Class to send and receive world information.
  * An important point in a domain of cooperating soccer robots is transmitting
  * and receiving a robot's belief of its surrounding. The world info

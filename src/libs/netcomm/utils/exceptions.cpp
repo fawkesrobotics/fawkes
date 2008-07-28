@@ -27,7 +27,7 @@
 
 namespace fawkes {
 
-/** @class ConnectionDiedException <netcomm/utils/exceptions.h>
+/** @class ConnectionDiedException exceptions.h <netcomm/utils/exceptions.h>
  * Thrown if the connection died during an operation.
  * @ingroup NetComm
  */

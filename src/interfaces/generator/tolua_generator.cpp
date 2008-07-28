@@ -237,6 +237,51 @@ ToLuaInterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* inden
   write_ctor_dtor_h(f, is, classname);
 }
 
+/** Write superclass methods.
+ * @param f file to write to
+ */
+void
+ToLuaInterfaceGenerator::write_superclass_h(FILE *f)
+{
+  fprintf(f,
+          "  bool                    oftype(const char *interface_type) const;\n"
+          "  const void *            datachunk() const;\n"
+          "  unsigned int            datasize() const;\n"
+          "  const char *            type() const;\n"
+          "  const char *            id() const;\n"
+          "  const char *            uid() const;\n"
+          "  unsigned int            serial() const;\n"
+          "  unsigned int            mem_serial() const;\n"
+          "  bool                    operator== (Interface &comp) const;\n"
+          "  const unsigned char *   hash() const;\n"
+          "  size_t                  hash_size() const;\n"
+          "  const char *            hash_printable() const;\n"
+          "  bool                    is_writer() const;\n"
+
+          "  void                    set_from_chunk(void *chunk);\n"
+
+          "  virtual Message *   create_message(const char *type) const = 0;\n"
+
+          "  void          read();\n"
+          "  void          write();\n"
+
+          "  bool          has_writer() const;\n"
+          "  unsigned int  num_readers() const;\n"
+
+
+          "  unsigned int  msgq_enqueue_copy(Message *message);\n"
+          "  void          msgq_remove(Message *message);\n"
+          "  void          msgq_remove(unsigned int message_id);\n"
+          "  unsigned int  msgq_size();\n"
+          "  void          msgq_flush();\n"
+          "  void          msgq_lock();\n"
+          "  bool          msgq_try_lock();\n"
+          "  void          msgq_unlock();\n"
+          "  void          msgq_pop();\n"
+          "  Message *     msgq_first();\n"
+          "  bool          msgq_empty();\n"
+          "\n");
+}
 
 /** Write methods to h file.
  * @param f file to write to
@@ -264,13 +309,14 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */
 
 
 /** Write h file.
- * @param f file to write to
- */
+          " * @param f file to write to
+          " */
 void
 ToLuaInterfaceGenerator::write_toluaf(FILE *f)
 {
   fprintf(f,
 	  "$#include <interfaces/%s>\n"
+	  "$using namespace fawkes;\n"
 	  "namespace fawkes {\n"
 	  "class %s : public Interface\n"
 	  "{\n",
@@ -281,6 +327,7 @@ ToLuaInterfaceGenerator::write_toluaf(FILE *f)
   write_messages_h(f);
   //write_ctor_dtor_h(f, "  ", class_name);
   write_methods_h(f, "  ", data_fields);
+  write_superclass_h(f);
   fprintf(f, "\n};\n\n}\n");
 }
 

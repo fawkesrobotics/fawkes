@@ -32,6 +32,7 @@
 
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <core/threading/wait_condition.h>
 #include <core/exceptions/system.h>
 
@@ -153,20 +154,21 @@ class FawkesNetworkClientRecvThread : public Thread
   FawkesNetworkClientRecvThread(StreamSocket *s, FawkesNetworkClient *parent)
     : Thread("FawkesNetworkClientRecvThread")
   {
-    _s = s;
-    _parent = parent;
-    inbound_msgq = new FawkesNetworkMessageQueue();
+    __s = s;
+    __parent = parent;
+    __inbound_msgq = new FawkesNetworkMessageQueue();
+    __recv_mutex = new Mutex();
   }
 
   /** Destructor. */
   ~FawkesNetworkClientRecvThread()
   {
-    while ( ! inbound_msgq->empty() ) {
-      FawkesNetworkMessage *m = inbound_msgq->front();
+    while ( ! __inbound_msgq->empty() ) {
+      FawkesNetworkMessage *m = __inbound_msgq->front();
       m->unref();
-      inbound_msgq->pop();
+      __inbound_msgq->pop();
     }
-    delete inbound_msgq;
+    delete __inbound_msgq;
   }
 
   /** Receive and process messages. */
@@ -175,22 +177,26 @@ class FawkesNetworkClientRecvThread : public Thread
     std::list<unsigned int> wakeup_list;
 
     try {
-      FawkesNetworkTransceiver::recv(_s, inbound_msgq);
+      FawkesNetworkTransceiver::recv(__s, __inbound_msgq);
 
-      inbound_msgq->lock();
-      while ( ! inbound_msgq->empty() ) {
-	FawkesNetworkMessage *m = inbound_msgq->front();
+      MutexLocker lock(__recv_mutex);
+
+      __inbound_msgq->lock();
+      while ( ! __inbound_msgq->empty() ) {
+	FawkesNetworkMessage *m = __inbound_msgq->front();
 	wakeup_list.push_back(m->cid());
-	_parent->dispatch_message(m);
+	__parent->dispatch_message(m);
 	m->unref();
-	inbound_msgq->pop();
+	__inbound_msgq->pop();
       }
-      inbound_msgq->unlock();
+      __inbound_msgq->unlock();
+
+      lock.unlock();
     
       wakeup_list.sort();
       wakeup_list.unique();
       for (std::list<unsigned int>::iterator i = wakeup_list.begin(); i != wakeup_list.end(); ++i) {
-	_parent->wake_handlers(*i);
+	__parent->wake_handlers(*i);
       }
     } catch (ConnectionDiedException &e) {
       throw;
@@ -198,19 +204,27 @@ class FawkesNetworkClientRecvThread : public Thread
   }
 
 
+  /** Get recveiver mutex.
+   * @return mutex
+   */
+  Mutex * mutex()
+  {
+    return __recv_mutex;
+  }
+
   virtual void once()
   {
-    _parent->set_recv_slave_alive();
+    __parent->set_recv_slave_alive();
   }
 
   virtual void loop()
   {
     // just return if not connected
-    if (! _s ) return;
+    if (! __s ) return;
 
     short p = 0;
     try {
-      p = _s->poll();
+      p = __s->poll();
     } catch (InterruptedException &e) {
       return;
     }
@@ -218,23 +232,24 @@ class FawkesNetworkClientRecvThread : public Thread
     if ( (p & Socket::POLL_ERR) ||
 	 (p & Socket::POLL_HUP) ||
 	 (p & Socket::POLL_RDHUP)) {
-      _parent->connection_died();
+      __parent->connection_died();
       exit();
     } else if ( p & Socket::POLL_IN ) {
       // Data can be read
       try {
 	recv();
       } catch (ConnectionDiedException &e) {
-	_parent->connection_died();
+	__parent->connection_died();
 	exit();
       }
     }
   }
 
  private:
-  StreamSocket *_s;
-  FawkesNetworkClient *_parent;
-  FawkesNetworkMessageQueue *  inbound_msgq;
+  StreamSocket *__s;
+  FawkesNetworkClient *__parent;
+  FawkesNetworkMessageQueue *  __inbound_msgq;
+  Mutex *__recv_mutex;
 };
 
 
@@ -431,6 +446,31 @@ void
 FawkesNetworkClient::enqueue(FawkesNetworkMessage *message)
 {
   if (send_slave)  send_slave->enqueue(message);
+}
+
+
+/** Enqueue message to send and wait for answer. It is guaranteed that an
+ * answer cannot be missed. However, if the component sends another message
+ * (which is not the answer to the query) this will also trigger the wait
+ * condition to be woken up. The component ID to wait for is taken from the
+ * message.
+ * This message also calls unref() on the message. If you want to use it
+ * after enqueuing make sure you ref() before calling this method.
+ * @param message message to send
+ */
+void
+FawkesNetworkClient::enqueue_and_wait(FawkesNetworkMessage *message)
+{
+  if (send_slave && recv_slave) {
+    Mutex *m = recv_slave->mutex();
+    m->lock();
+    send_slave->enqueue(message);
+    if ( waitconds.find(message->cid()) != waitconds.end() ) {
+      waitconds[message->cid()]->wait(m);
+    }
+    m->unlock();
+  }
+  message->unref();
 }
 
 

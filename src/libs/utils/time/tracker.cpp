@@ -34,7 +34,7 @@ using namespace std;
 
 namespace fawkes {
 
-/** @class TimeTracker <utils/time/tracker.h>
+/** @class TimeTracker tracker.h <utils/time/tracker.h>
  * Time tracking utility.
  * This class provides means to track time of different tasks in a process.
  * You can assign an arbitrary number of tracking classes per object (although

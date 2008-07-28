@@ -68,6 +68,9 @@ class SkillerExecutionThread
   SkillerLiaisonThread *__slt;
   fawkes::ComponentLogger *__clog;
 
+  unsigned int __last_exclusive_controller;
+  bool         __reader_just_left;
+
   bool        __continuous_run;
   bool        __continuous_rst;
 

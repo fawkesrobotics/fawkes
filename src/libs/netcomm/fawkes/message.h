@@ -33,6 +33,8 @@
 
 namespace fawkes {
 
+#pragma pack(push,4)
+
 /** Fawkes network message header.
  * Header that is prepended to all following messages.
  */
@@ -42,6 +44,7 @@ typedef struct {
   unsigned int        payload_size;	/**< payload size in bytes */
 } fawkes_message_header_t;
 
+#pragma pack(pop)
 
 /** Message as stored in local queues.
  * A message takes a header and a pointer to the data that

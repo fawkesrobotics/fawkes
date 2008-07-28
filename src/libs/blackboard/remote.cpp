@@ -85,6 +85,8 @@ RemoteBlackBoard::RemoteBlackBoard(const char *hostname, unsigned short int port
     delete __fnc;
     throw;
   }
+
+  __fnc->wait_connection_established();
   __fnc_owner = true;
 
   if ( ! __fnc->connected() ) {
@@ -118,6 +120,13 @@ RemoteBlackBoard::~RemoteBlackBoard()
 }
 
 
+bool
+RemoteBlackBoard::is_alive() const throw()
+{
+  return __fnc->connected();
+}
+
+
 Interface *
 RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool writer)
 {
@@ -135,10 +144,7 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD,
 							writer ? MSG_BB_OPEN_FOR_WRITING : MSG_BB_OPEN_FOR_READING,
 							om, sizeof(bb_iopen_msg_t));
-  __fnc->enqueue(omsg);
-  omsg->unref();
-  
-  __fnc->wait(FAWKES_CID_BLACKBOARD);
+  __fnc->enqueue_and_wait(omsg);
 
   if ( !__m ) {
     __instance_factory->delete_interface_instance(iface);
@@ -339,11 +345,7 @@ RemoteBlackBoard::list_all()
 
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD,
 							MSG_BB_LIST_ALL);
-  __fnc->enqueue(omsg);
-  omsg->unref();
-
-  __fnc->wait(FAWKES_CID_BLACKBOARD);
-
+  __fnc->enqueue_and_wait(omsg);
 
   if ( !__m || (__m->msgid() != MSG_BB_INTERFACE_LIST) ) {
     throw Exception("No message or invalid message ID");

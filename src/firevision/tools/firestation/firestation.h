@@ -179,10 +179,7 @@ class Firestation
   Gtk::Statusbar* m_stb_status;
 
   // color training widgets
-  Gtk::RadioButton* m_rbt_ct_ball;
-  Gtk::RadioButton* m_rbt_ct_field;
-  Gtk::RadioButton* m_rbt_ct_lines;
-  Gtk::RadioButton* m_rbt_ct_robot;
+  Gtk::ComboBox*    m_cmb_ct_type;
   Gtk::Button* m_btn_ct_start;
 
   // mirror calibration widgets

@@ -178,19 +178,14 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
 
   // --- color train widget -----------------------------------------
-  m_rbt_ct_ball  = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtBall") );
-  m_rbt_ct_field = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtField") );
-  m_rbt_ct_lines = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtLines") );
-  m_rbt_ct_robot = dynamic_cast<Gtk::RadioButton*>( get_widget(ref_xml, "rbtCtRobot") );
-  m_rbt_ct_ball->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_object_changed) );
-  m_rbt_ct_field->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_object_changed) );
-  m_rbt_ct_lines->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_object_changed) );
-  m_rbt_ct_robot->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_object_changed) );
+  m_ctw = new ColorTrainWidget(this);
+  m_cmb_ct_type  = dynamic_cast<Gtk::ComboBox*>( get_widget(ref_xml, "cmbCtObjectType") );
+  m_cmb_ct_type->signal_changed().connect(sigc::mem_fun(*this, &Firestation::ct_object_changed));
+  m_cmb_ct_type->set_active(0);
 
   m_btn_ct_start = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtStart") );
   m_btn_ct_start->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_start) );
   
-  m_ctw = new ColorTrainWidget(this);
   m_ctw->update_image().connect( sigc::mem_fun(*this, &Firestation::draw_image) );
   m_ctw->colormap_updated().connect( sigc::mem_fun(*this, &Firestation::on_colormap_updated) );
 
@@ -996,7 +991,7 @@ Firestation::image_click(GdkEventButton* event)
       break;
 
     case MODE_COLOR_TRAIN:
-      m_ctw->click(image_x, image_y);
+      m_ctw->click(image_x, image_y, event->button);
       draw_image();
      break;
 
@@ -1072,52 +1067,41 @@ Firestation::ct_start()
 hint_t
 Firestation::ct_get_fg_object()
 {
-  if ( m_rbt_ct_ball->get_active() )
-    {
-      return H_BALL;
-    }
-  else if ( m_rbt_ct_field->get_active() )
-    {
-      return H_FIELD;
-    }
-  else if ( m_rbt_ct_lines->get_active() )
-    {
-      return H_LINE;
-    }
-  else if ( m_rbt_ct_robot->get_active() )
-    {
-      return H_ROBOT;
-    }
-  else
-    {
-      printf("ct_get_fg_object(): UNKNOWN\n");
-      return H_UNKNOWN;
-    }
+	int active = m_cmb_ct_type->get_active_row_number();
+	switch(active)
+	{
+		case 0: //Ball
+			return H_BALL;
+
+		case 1: //Field
+			return H_FIELD;
+
+		case 2: //Lines
+			return H_LINE;
+
+		case 3: //Robot (Team A or all)
+			return H_ROBOT;
+
+		case 4: //Robot (Team B)
+			return H_ROBOT_OPP;
+
+		case 5: //Goal (yellow)
+			return H_GOAL_YELLOW;
+
+		case 6: //Goal (sky-blue)
+			return H_GOAL_BLUE;
+
+		default:
+			printf("ct_get_fg_object(): UNKNOWN\n");
+			return H_UNKNOWN;
+	}
 }
 
 void
 Firestation::ct_object_changed()
 {
-  if ( m_rbt_ct_ball->get_active() )
-    {
-      m_ctw->set_fg_object(H_BALL);
-    }
-  else if ( m_rbt_ct_field->get_active() )
-    {
-      m_ctw->set_fg_object(H_FIELD);
-    }
-  else if ( m_rbt_ct_lines->get_active() )
-    {
-      m_ctw->set_fg_object(H_LINE);
-    }
-  else if ( m_rbt_ct_robot->get_active() )
-    {
-      m_ctw->set_fg_object(H_ROBOT);
-    }
-  else
-    {
-      printf("ct_object_changed(): UNKNOWN\n");
-    }
+	hint_t object = ct_get_fg_object();
+	m_ctw->set_fg_object(object);
 }
 
 /** Start the mirror calibration process. */

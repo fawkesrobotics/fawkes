@@ -46,6 +46,11 @@ class SimpleColorClassifier : public Classifier
 
   virtual void get_mass_point_of_ball( ROI *roi, cart_coord_t *massPoint );
 
+  /** Sets the object of interest (hint_t) 
+   * @param hint Object of interest
+   */
+  virtual void set_hint (hint_t hint) {this->hoi = hint;};
+
  private:
   unsigned int consider_neighbourhood(unsigned int x, unsigned int y, color_t what);
 
@@ -66,6 +71,7 @@ class SimpleColorClassifier : public Classifier
   ScanlineModel *scanline_model;
   ColorModel    *color_model;
 
+  hint_t       hoi;
 };
 
 #endif

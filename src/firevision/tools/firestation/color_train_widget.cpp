@@ -36,6 +36,8 @@
 
 #include <fvutils/writers/jpeg.h>
 
+#include <fvutils/color/color_object_map.h>
+
 #include <core/exceptions/software.h>
 
 /** @class ColorTrainWidget tools/firestation/color_train_widget.h
@@ -130,20 +132,32 @@ ColorTrainWidget::set_draw_buffer(unsigned char* buffer)
 /** The user clicked into the image.
  * @param x the x-coordinate
  * @param y the y-coordinate
+ * @param button 1 for left click, 3 for right click @see GdkEventButton
  */
 void
-ColorTrainWidget::click(unsigned int x, unsigned int y)
+ColorTrainWidget::click(unsigned int x, unsigned int y, unsigned int button)
 {
   if (m_src_buffer == 0 || m_draw_buffer == 0)
     { return; } 
 
   if ( m_zauberstab->isEmptyRegion() )
     {
-      m_zauberstab->findRegion(x, y);
+      if (button == MOUSE_BUTTON_LEFT) //left click
+			{ 
+				m_zauberstab->findRegion(x, y);
+			}
     }
   else
     {
-      m_zauberstab->addRegion(x, y);
+      if (button == MOUSE_BUTTON_LEFT) //left click
+			{
+				m_zauberstab->addRegion(x, y);
+			}
+
+      if (button == MOUSE_BUTTON_RIGHT) //right click
+			{
+				m_zauberstab->deleteRegion(x, y);
+			}
     }
   
   memcpy(m_draw_buffer, m_src_buffer, m_img_size);
@@ -627,35 +641,9 @@ ColorTrainWidget::draw_segmentation_result()
 	  unsigned int u = YUV422_PLANAR_U_AT(m_src_buffer, m_img_width, m_img_height, w, h);
 	  unsigned int v = YUV422_PLANAR_V_AT(m_src_buffer, m_img_width, m_img_height, w, h);
 
-	  color_t result;
-	  result = cm->determine(y, u, v);				  
-	  
-	  if (C_GREEN == result)
-	    {
-	      d.setColor(240, 0, 0);
-	    }
-	  else if (C_ORANGE == result)
-	    {
-	      d.setColor(127, 30, 230);
-	    }
-	  else if (C_BACKGROUND == result)
-	    {
-	      d.setColor(64, 127, 127);
-	    }
-	  else if (C_WHITE == result)
-	    {
-	      d.setColor(255, 128, 128);
-	    }
-	  else if (C_BLACK == result)
-	    {
-	      d.setColor(0, 127, 127);
-	    }
-	  else
-	    {
-	      d.setColor(0, 127, 127);
-	    }
-
-	  d.colorPoint(w, h);
+		YUV_t c = ColorObjectMap::get_color(cm->determine(y, u, v));
+		d.setColor(c.Y, c.U, c.V);
+		d.colorPoint(w, h);
 	}
     }
 
@@ -683,10 +671,19 @@ ColorTrainWidget::draw_segmentation_result()
 								   8,
 								   width,
 								   height,
-								   3 * width );
-  free(rgb_buffer);
-  free(scaled_buffer);
-  free(seg_buffer);
+								   3 * width, 
+								   Gdk::Pixbuf::SlotDestroyData(&free_rgb_buffer));
 
   m_img_segmentation->set(image);
+
+  free(scaled_buffer);
+  free(seg_buffer);
+}
+
+/** Callback to free the rgb buffer
+ * @param rgb_buffer pointer to the buffer
+ */
+void ColorTrainWidget::free_rgb_buffer(const guint8* rgb_buffer)
+{
+	free(const_cast<guint8 *>(rgb_buffer));
 }

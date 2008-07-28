@@ -25,7 +25,7 @@
 #include <plugins/examples/ballposlog/plugin.h>
 #include <plugins/examples/ballposlog/thread.h>
 
-/** @class BallPosLogPlugin <plugins/examples/ballposlog/plugin.h>
+/** @class BallPosLogPlugin plugin.h <plugins/examples/ballposlog/plugin.h>
  * Simple ball position logger plugin.
  * This plugin exists for demonstration purposes. It is part of the Fawkes
  * introductory talk on January 25th 2008 or AG RoboCup.

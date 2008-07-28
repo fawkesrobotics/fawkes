@@ -50,6 +50,8 @@ class Exception : public std::exception {
   void append_va(const char *format, va_list va) throw();
   void append(const Exception &e) throw();
   void print_trace() throw();
+  void print_backtrace() const throw();
+  char *  generate_backtrace() const throw();
 
   int errno() throw();
 
@@ -62,7 +64,7 @@ class Exception : public std::exception {
    struct message_list_t {
      message_list_t  *next;   /**< pointer to next element, NULL if last element */
      char            *msg;    /**< pointer to message, may not be NULL, will be freed
-   			      *   in dtor */
+			       *   in dtor */
    };
 
  public:

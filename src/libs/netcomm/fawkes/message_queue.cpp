@@ -27,7 +27,7 @@
 
 namespace fawkes {
 
-/** @class FawkesNetworkMessageQueue netcomm/fawkes/message_queue.h
+/** @class FawkesNetworkMessageQueue message_queue.h <netcomm/fawkes/message_queue.h>
  * A LockQueue of FawkesNetworkMessage to hold messages in inbound and
  * outbound queues.
  *

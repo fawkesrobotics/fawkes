@@ -32,6 +32,7 @@
 #include <core/macros.h>
 
 #include <cstdlib>
+#include <iostream>
 
 using namespace std;
 
@@ -40,12 +41,45 @@ using namespace std;
  */
 
 /** Constructor. */
+ZRegion::ZRegion()
+{
+  topSliceY = 0;
+  slices = new vector<ZSlice*>();
+  slices->clear();
+}
+
+/** Constructor. */
+ZRegion::~ZRegion()
+{
+	for (std::vector<ZSlice*>::iterator it = slices->begin(); it != slices->end(); ++it)
+	{
+		delete (*it);
+	}
+	
+	delete slices;
+}
+
+/** Clears all slices.
+ */
+void
+ZRegion::clear()
+{
+	for (std::vector<ZSlice*>::iterator it = slices->begin(); it != slices->end(); ++it)
+	{
+		delete (*it);
+	}
+
+	slices->clear();
+}
+
+/** @class Zauberstab <fvutils/color/zauberstab.h>
+ * Zaubertab selection utility.
+ */
+
+/** Constructor. */
 Zauberstab::Zauberstab() {
   // create empty region
-  region = new ZRegion;
-  region->topSliceY = 0;
-  region->slices = new vector<ZSlice*>;
-  region->slices->clear();
+  region = new ZRegion();
 
   buffer = NULL;
   width = 0;
@@ -59,11 +93,6 @@ Zauberstab::Zauberstab() {
 
 /** Destructor. */
 Zauberstab::~Zauberstab() {
-  // delete all slices
-  for (unsigned int i = 0; i < region->slices->size(); i++) {
-    delete region->slices->at(i);
-  }
-  region->slices->clear();
   delete(region);
 }
 
@@ -110,118 +139,113 @@ Zauberstab::isEmptyRegion() {
 }
 
 
-/** Delete region. */
+/** Delete all regions. */
 void
 Zauberstab::deleteRegion() {
-  // delete all slices
-  for (unsigned int i = 0; i < region->slices->size(); i++) {
-    delete region->slices->at(i);
-  }
-  region->slices->clear();
+  region->clear();
 }
 
-
-/** Find region.
+/** Delete region.
  * @param seedX seed x
  * @param seedY seed y
  */
 void
-Zauberstab::findRegion(int seedX,
-		       int seedY) {
+Zauberstab::deleteRegion(unsigned int seedX, unsigned int seedY)
+{
+  // STEP 1:
+  // find the region
+  ZRegion* region2 = privFindRegion (seedX, seedY);
 
-  if (buffer == NULL) return;
-  if (width == 0) return;
-  if (height == 0) return;
+  // STEP 2:
+  // now delete the newly found region2 from the original region
+  deleteRegion(region2);
 
-  unsigned char py __unused;
-  unsigned char pu __unused;
-  unsigned char pv;
-
-  // delete all slices
-  for (unsigned int i = 0; i < region->slices->size(); i++) {
-    delete region->slices->at(i);
-  }
-  region->slices->clear();
-
-  /* find seed pixel´s v-value
-     (consider seed pixel´s neighborhood
-      and take average v-value) */
-  unsigned int vSeed = 0;
-  for (int x = seedX - 2; x <= seedX + 2; x++) {
-    for (int y = seedY - 2; y <= seedY + 2; y++) {
-      YUV422_PLANAR_YUV(buffer, width, height, x, y, py, pu, pv);
-      vSeed += pv;
-    }
-  }
-  vSeed = int(float(vSeed) / 25.f);
-
-  /* initial slice 
-     thru seed pixel (seedX, seedY) */
-  ZSlice *tmp = NULL;
-  tmp = findSlice(seedX, seedY, vSeed);
-  region->slices->push_back(tmp);
-
-  /* NOTE: The following search works fine for
-     objects that are convex (such as ball, goal, ...).
-     For non-convex objects it may miss parts
-     (e.g. for a U-shaped object it can only find right or left half). */
-
-  // search downwards for more slices
-  tmp = region->slices->front();
-  int tmpY = seedY + 1;
-
-  // new "seed" pixel has x-coordinate in the middle of initial slice
-  int tmpX = int(float(tmp->leftX + tmp->rightX) / 2.0);
-  YUV422_PLANAR_YUV(buffer, width, height, tmpX, tmpY, py, pu, pv);
-
-  while (isSimilarV(pv, vSeed)) {
-    tmp = findSlice(tmpX, tmpY, vSeed);
-    region->slices->push_back(tmp);
-    // new "seed" pixel has x-coordinate in the middle of previous slice
-    tmpX = int(float(tmp->leftX + tmp->rightX) / 2.0);
-    if (++tmpY < (int)this->height) {
-      YUV422_PLANAR_YUV(buffer, width, height, tmpX, tmpY, py, pu, pv);
-    } else {
-      break;
-    }
-  }
-
-  /* search upwards for more slices
-     (start search from initial slice again) */
-  tmp = region->slices->front();
-  tmpY = seedY - 1;
-  // new "seed" pixel has x-coordinate in the middle of initial slice
-  tmpX = int(float(tmp->leftX + tmp->rightX) / 2.0);
-  YUV422_PLANAR_YUV(buffer, width, height, tmpX, tmpY, py, pu, pv);
-
-  while (isSimilarV(pv, vSeed)) {
-    tmp = findSlice(tmpX, tmpY, vSeed);
-    region->slices->push_back(tmp);
-    // new "seed" pixel has x-coordinate in the middle of previous slice
-    tmpX = int(float(tmp->leftX + tmp->rightX) / 2.0);
-    tmpY--;
-    if (tmpY < 0) {
-      break;
-    } else {
-      YUV422_PLANAR_YUV(buffer, width, height, tmpX, tmpY, py, pu, pv);
-    }
-  }
-  
-  region->topSliceY = tmpY + 1;
+  delete region2;
 }
 
 
-/** Add region.
- * @param seedX seed x
- * @param seedY seed y
+/** Delete region.
+ * @param region2 region to delete
  */
 void
-Zauberstab::addRegion(int seedX,
-		      int seedY) {
+Zauberstab::deleteRegion(ZRegion *region2)
+{
+  ZSlice* nSlice; //A slice to be deleted
+  ZSlice* oSlice; //A slice currently in the region
 
+	// delete each slice of region 2 from region
+	while (region2->slices->size())
+	{
+		/* check if current slice from region 2 is at
+			 at a height different from all slices at region */
+    nSlice = region2->slices->back();
+    region2->slices->pop_back();
+		int heightOfSlice = nSlice->y;
+
+		unsigned int i = 0;
+		unsigned int size = region->slices->size();
+		
+		while(i < size) //for all existing slices (but not the newly added)
+		{
+			oSlice = region->slices->at(i);
+			if (oSlice->y == heightOfSlice) //same height check for overlapping
+			{
+				if ((oSlice->leftX >= nSlice->leftX) 
+						&& (oSlice->leftX < nSlice->rightX))
+				{
+					//The slice to delete starts before the slice to be deleted
+					if (oSlice->rightX > nSlice->rightX) //A part of the region remains
+					{
+						oSlice->leftX = nSlice->rightX;
+					}
+					else //The whole slice dissapears
+					{
+						region->slices->erase(region->slices->begin() + i);
+						size--;
+						delete oSlice;
+
+						//The index now points to the next element in the region->slices vector
+						continue;
+					}
+				}
+
+				if ((nSlice->leftX >= oSlice->leftX) 
+						&& (nSlice->leftX < oSlice->rightX))
+				{
+					//The slice to be deleted starts before the part that should be deleted
+					if (oSlice->rightX <= nSlice->rightX)
+					{//just truncate the old slices
+						oSlice->rightX = nSlice->leftX;
+					}
+					else //split the old spice
+					{
+						ZSlice* newPart = new ZSlice;
+						newPart->rightX = oSlice->rightX;
+						newPart->leftX = nSlice->rightX;
+						newPart->y = heightOfSlice;
+
+						oSlice->rightX = nSlice->leftX;
+						region->slices->push_back(newPart);
+					}
+				}
+			}
+
+			i++;
+		}
+	}
+}
+
+/** A private region finder
+ * @param seedX seed x
+ * @param seedY seed y
+ * @return a ZRegion pointer (has to be deleted by the caller)
+ */
+ZRegion*
+Zauberstab::privFindRegion (unsigned int seedX, unsigned int seedY)
+{
   unsigned char py __unused;
-  unsigned char pu __unused;
-  unsigned char pv=0;
+  unsigned char pu = 0;
+  unsigned char pv = 0;
 
   // STEP 1:
   // first of all find the region around (seedX, seedY)
@@ -229,31 +253,37 @@ Zauberstab::addRegion(int seedX,
   // (could be done more elegantly without the following redundant code)
 
   // create empty region
-  ZRegion *region2 = new ZRegion;
-  region2->topSliceY = 0;
-  region2->slices = new vector<ZSlice*>;
-  region2->slices->clear();
+  ZRegion *region2 = new ZRegion();
 
   /* find seed pixel's v-value
      (consider seed pixel's neighborhood
       and take average v-value) */
+  unsigned int uSeed = 0;
   unsigned int vSeed = 0;
-  for (int x = seedX - 2; x <= seedX + 2; x++) {
+  unsigned int cnt = 0;
+
+  for (int x = seedX - 2; x <= (int)seedX + 2; ++x) {
     if (x < 0) continue;
     if ((unsigned int )x >= width) continue;
-    for (int y = seedY - 2; y <= seedY + 2; y++) {
+    for (int y = seedY - 2; y <= (int)seedY + 2; ++y) {
       if (y < 0) continue;
       if ((unsigned int)y >= height) continue;
       YUV422_PLANAR_YUV(buffer, width, height, x, y, py, pu, pv);
+      uSeed += pu;
       vSeed += pv;
+      ++cnt;
     }
   }
-  vSeed = int(float(vSeed) / 25.f);
 
+	if (cnt) 
+	{
+		uSeed = uSeed / cnt;
+		vSeed = vSeed / cnt;
+	}
   /* initial slice 
      thru seed pixel (seedX, seedY) */
   ZSlice *tmp = NULL;
-  tmp = findSlice(seedX, seedY, vSeed);
+  tmp = findSlice(seedX, seedY, vSeed, uSeed);
   region2->slices->push_back(tmp);
 
   /* NOTE: The following search works fine for
@@ -263,13 +293,13 @@ Zauberstab::addRegion(int seedX,
 
   // search downwards for more slices
   tmp = region2->slices->front();
-  int tmpY = (seedY == (int)(height - 1)) ? height : seedY + 1;
+  int tmpY = ((int)seedY >= (int)(height - 1)) ? height -1 : seedY + 1;
   // new "seed" pixel has x-coordinate in the middle of initial slice
   int tmpX = int(float(tmp->leftX + tmp->rightX) / 2.0);
 
   YUV422_PLANAR_YUV(buffer, width, height, tmpX, tmpY, py, pu, pv);
-  while (isSimilarV(pv, vSeed)) {
-    tmp = findSlice(tmpX, tmpY, vSeed);
+  while (isSimilarUV(pu, uSeed, pv, vSeed)) {
+    tmp = findSlice(tmpX, tmpY, vSeed, uSeed);
     region2->slices->push_back(tmp);
     // new "seed" pixel has x-coordinate in the middle of previous slice
     tmpX = int(float(tmp->leftX + tmp->rightX) / 2.0);
@@ -289,8 +319,8 @@ Zauberstab::addRegion(int seedX,
   tmpX = int(float(tmp->leftX + tmp->rightX) / 2.0);
 
   YUV422_PLANAR_YUV(buffer, width, height, tmpX, tmpY, py, pu, pv);
-  while (isSimilarV(pv, vSeed)) {
-    tmp = findSlice(tmpX, tmpY, vSeed);
+  while (isSimilarUV(pu, uSeed, pv, vSeed)) {
+    tmp = findSlice(tmpX, tmpY, vSeed, uSeed);
     region2->slices->push_back(tmp);
     // new "seed" pixel has x-coordinate in the middle of previous slice
     tmpX = int(float(tmp->leftX + tmp->rightX) / 2.0);
@@ -304,9 +334,45 @@ Zauberstab::addRegion(int seedX,
   
   region2->topSliceY = tmpY + 1;
 
+	for (std::vector<ZSlice*>::iterator it = region2->slices->begin(); it != region2->slices->end(); ++it)
+	{
+		cout << "start x: " << ((*it)->leftX) << " end x: " << ((*it)->rightX) << " y: " << ((*it)->y) << endl;
+	}
+	cout << endl;
+  return region2;
+}
+
+/** Find region.
+ * @param seedX seed x
+ * @param seedY seed y
+ */
+void
+Zauberstab::findRegion(unsigned int seedX, unsigned int seedY) {
+  if (buffer == NULL) return;
+  if (width == 0) return;
+  if (height == 0) return;
+
+  delete region;
+  region = privFindRegion(seedX, seedY);
+}
+
+
+/** Add region.
+ * @param seedX seed x
+ * @param seedY seed y
+ */
+void
+Zauberstab::addRegion(unsigned int seedX, unsigned int seedY)
+{
+  // STEP 1:
+  // find the region
+  ZRegion* region2 = privFindRegion (seedX, seedY);
+
   // STEP 2:
   // now merge the newly found region2 with the original region
   addRegion(region2);
+
+  delete region2;
 }
 
 
@@ -317,10 +383,9 @@ Zauberstab::addRegion(int seedX,
  * @return slice
  */
 ZSlice*
-Zauberstab::findSlice(int x, 
-		      int y,
-		      unsigned int vSeed) {  
-
+Zauberstab::findSlice(unsigned int x, unsigned int y,
+                      unsigned int vSeed, int uSeed)
+{
   // slice with single pixel (x, y)
   ZSlice *slice = new ZSlice;
   slice->y = y;
@@ -328,35 +393,41 @@ Zauberstab::findSlice(int x,
   slice->rightX = x;
 
   unsigned char py __unused;
-  unsigned char pu __unused;
+  unsigned char pu=0;
   unsigned char pv=0;
   int tmpX = x + 1;
 
-  YUV422_PLANAR_YUV(buffer, width, height, tmpX, y, py, pu, pv);
+  if ((unsigned int)tmpX < width)
+  {
+    YUV422_PLANAR_YUV(buffer, width, height, tmpX, y, py, pu, pv);
 
-  // search to the right
-  while (isSimilarV(pv, vSeed)) {
-    (slice->rightX)++;
-    tmpX++;
-    if (tmpX > (int)this->width) {
-      break;
-    } else {
-      YUV422_PLANAR_YUV(buffer, width, height, tmpX, y, py, pu, pv);
-    }
-  };
+    // search to the right
+		while (uSeed >= 0 ? isSimilarUV(pu, uSeed, pv, vSeed) : isSimilarV(pv, vSeed)) {
+      (slice->rightX)++;
+      tmpX++;
+      if (tmpX >= (int)this->width) {
+        break;
+      } else {
+        YUV422_PLANAR_YUV(buffer, width, height, tmpX, y, py, pu, pv);
+      }
+    };
+  }
 
   // search to the left
   tmpX = x - 1;
-  YUV422_PLANAR_YUV(buffer, width, height, tmpX, y, py, pu, pv);
-  while (isSimilarV(pv, vSeed)) {
-    (slice->leftX)--;
-    tmpX--;
-    if (tmpX < 0) {
-      break;
-    } else {
-      YUV422_PLANAR_YUV(buffer, width, height, tmpX, y, py, pu, pv);
-    }
-  };
+  if (tmpX >= 0)
+  {
+    YUV422_PLANAR_YUV(buffer, width, height, tmpX, y, py, pu, pv);
+    while (uSeed >= 0 ? isSimilarUV(pu, uSeed, pv, vSeed) : isSimilarV(pv, vSeed)) {
+      (slice->leftX)--;
+      tmpX--;
+      if (tmpX < 0) {
+        break;
+      } else {
+        YUV422_PLANAR_YUV(buffer, width, height, tmpX, y, py, pu, pv);
+      }
+    };
+  }
   /*
   cout << "Zauberstab: Slice found." << endl;
   cout << "            (left : " << slice->leftX << endl
@@ -371,53 +442,50 @@ Zauberstab::findSlice(int x,
  * @param region2 region to add
  */
 void
-Zauberstab::addRegion(ZRegion *region2) {
+Zauberstab::addRegion(ZRegion *region2)
+{
+  ZSlice* nSlice; //A slice to be added
+  ZSlice* oSlice; //A slice currently in the region
+
   // add each slice from region 2 to region
-  for (unsigned int s2 = 0; s2 < region2->slices->size(); s2++) {
+  while (region2->slices->size())
+  {
     /* check if current slice from region 2 is at
        at a height different from all slices at region */
-    int heightOfSlice = region2->slices->at(s2)->y;
-    bool differentY = true;
-    unsigned int correspondingSlice = 0;
-    for (unsigned int s = 0; s < region->slices->size(); s++) {
-      if (region->slices->at(s)->y == heightOfSlice) {
-	differentY = false;
-	correspondingSlice = s;
-	//break;
-      }
-    }
-    if (differentY) {
-      // slice from region 2 can be added, no overlap
-      region->slices->push_back(region2->slices->at(s2));
-    }
-    else {
-      // check if slices are overlapping
-      if (region2->slices->at(s2)->leftX >= region->slices->at(correspondingSlice)->leftX &&
-	  region2->slices->at(s2)->rightX <= region->slices->at(correspondingSlice)->rightX) {
-	// slice from region 2 is contained by slice from region 
-	// do nothing
-      }
-      else if (region2->slices->at(s2)->leftX < region->slices->at(correspondingSlice)->leftX &&
-	       region2->slices->at(s2)->rightX > region->slices->at(correspondingSlice)->rightX) {
-	// slice from region2 contains slice from region 
-	region->slices->at(correspondingSlice)->leftX = region2->slices->at(s2)->leftX;
-	region->slices->at(correspondingSlice)->rightX = region2->slices->at(s2)->rightX;
-      }
-      else if (region2->slices->at(s2)->leftX < region->slices->at(correspondingSlice)->leftX &&
-	       region2->slices->at(s2)->rightX > region->slices->at(correspondingSlice)->leftX) {
-	// slice from region2 overlaps left part of slice from region 
-	region->slices->at(correspondingSlice)->leftX = region2->slices->at(s2)->leftX;
-      }
-      else if (region2->slices->at(s2)->rightX > region->slices->at(correspondingSlice)->rightX &&
-	       region2->slices->at(s2)->leftX < region->slices->at(correspondingSlice)->rightX) {
-	// slice from region2 overlaps right part of slice from region
-	region->slices->at(correspondingSlice)->rightX = region2->slices->at(s2)->rightX;
-      }
-      else {
-	// slices are at same height y, but not overlapping
-	region->slices->push_back(region2->slices->at(s2));
-      }
-    }
+    nSlice = region2->slices->back();
+    region2->slices->pop_back();
+    int heightOfSlice = nSlice->y;
+
+		unsigned int i = 0;
+
+		while(i < region->slices->size()) //for all existing slices
+		{
+			oSlice = region->slices->at(i);
+			if (oSlice->y == heightOfSlice) //same height check for overlapping
+			{
+				if (((oSlice->leftX >= nSlice->leftX) 
+				     && (oSlice->leftX <= nSlice->rightX))
+				    || ((nSlice->leftX >= oSlice->leftX) 
+				        && (nSlice->leftX <= oSlice->rightX)))
+				{
+					//They are overlapping so grow the new slice
+					nSlice->leftX  = min(nSlice->leftX,  oSlice->leftX);
+					nSlice->rightX = max(nSlice->rightX, oSlice->rightX);
+					
+					//and delete the old one
+					region->slices->erase(region->slices->begin() + i);
+					delete oSlice;
+					
+					//The iterator i now points to the next element in the region->slices vector
+					continue;
+				}
+			}
+
+			++i;
+		}
+
+		//By now all overlapping slices have been removed
+		region->slices->push_back(nSlice);
   }
 }
 
@@ -431,6 +499,33 @@ bool
 Zauberstab::isSimilarV(unsigned int v1,
 		       unsigned int v2) {
   return ( (unsigned int)abs((int)v1 - (int)v2) > this->threshold ) ? false : true;
+}
+
+
+/** True if two U values are similar.
+ * @param u1 U value 1
+ * @param u2 U value 2
+ * @return true if U values are similar (depends on threshold)
+ */
+bool 
+Zauberstab::isSimilarU(unsigned int u1,
+		       unsigned int u2) {
+  return ( (unsigned int)abs((int)u1 - (int)u2) > this->threshold ) ? false : true;
+}
+
+
+/** True if two u and V values are similar.
+ * @param u1 U value 1
+ * @param u2 U value 2
+ * @param v1 V value 1
+ * @param v2 V value 2
+ * @return true if V values are similar (depends on threshold)
+ */
+bool 
+Zauberstab::isSimilarUV(unsigned int u1, unsigned int u2,
+                       unsigned int v1, unsigned int v2)
+{
+  return isSimilarU(u1, u2) && isSimilarV(v1, v2);
 }
 
 

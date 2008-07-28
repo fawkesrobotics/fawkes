@@ -70,7 +70,7 @@ FacerInterface::~FacerInterface()
  * @return opmode value
  */
 FacerInterface::if_facer_opmode_t
-FacerInterface::opmode()
+FacerInterface::opmode() const
 {
   return data->opmode;
 }
@@ -100,7 +100,7 @@ FacerInterface::set_opmode(const if_facer_opmode_t new_opmode)
  * @return face_label value
  */
 char *
-FacerInterface::face_label()
+FacerInterface::face_label() const
 {
   return data->face_label;
 }
@@ -130,7 +130,7 @@ FacerInterface::set_face_label(const char * new_face_label)
  * @return learning_done value
  */
 bool
-FacerInterface::is_learning_done()
+FacerInterface::is_learning_done() const
 {
   return data->learning_done;
 }
@@ -160,7 +160,7 @@ FacerInterface::set_learning_done(const bool new_learning_done)
  * @return num_detections value
  */
 unsigned int
-FacerInterface::num_detections()
+FacerInterface::num_detections() const
 {
   return data->num_detections;
 }
@@ -190,7 +190,7 @@ FacerInterface::set_num_detections(const unsigned int new_num_detections)
  * @return sec_since_detection value
  */
 float
-FacerInterface::sec_since_detection()
+FacerInterface::sec_since_detection() const
 {
   return data->sec_since_detection;
 }
@@ -281,7 +281,7 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage(const LearnFaceMessage *m) : 
  * @return face_label value
  */
 char *
-FacerInterface::LearnFaceMessage::face_label()
+FacerInterface::LearnFaceMessage::face_label() const
 {
   return data->face_label;
 }
@@ -366,7 +366,7 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage(const SetOpmodeMessage *m) : 
  * @return opmode value
  */
 FacerInterface::if_facer_opmode_t
-FacerInterface::SetOpmodeMessage::opmode()
+FacerInterface::SetOpmodeMessage::opmode() const
 {
   return data->opmode;
 }

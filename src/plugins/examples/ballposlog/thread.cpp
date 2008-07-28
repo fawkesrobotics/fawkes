@@ -25,7 +25,7 @@
 #include <plugins/examples/ballposlog/thread.h>
 #include <interfaces/object.h>
 
-/** @class BallPosLogThread <plugins/examples/ballposlog/thread.h>
+/** @class BallPosLogThread thread.h <plugins/examples/ballposlog/thread.h>
  * Main thread of ball position logger plugin.
  * @author Tim Niemueller
  */

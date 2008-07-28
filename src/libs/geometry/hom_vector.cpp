@@ -92,13 +92,13 @@ HomVector::unit()
 HomVector&
 HomVector::set_length(float length)
 {
-  float cur_len = this->length();
-  if (cur_len != 0.0)
-    {
-      x() = x() / cur_len * length;
-      y() = y() / cur_len * length;
-      z() = z() / cur_len * length;
-    }
+  if (this->length() == 0.0) return *this;
+
+  float scale_factor = length / this->length();
+
+  x() = x() * scale_factor;
+  y() = y() * scale_factor;
+  z() = z() * scale_factor;
 
   return *this;
 }
@@ -109,11 +109,61 @@ HomVector::set_length(float length)
 HomVector&
 HomVector::scale(float factor)
 {
-  x() = x() * factor;
-  y() = y() * factor;
-  z() = z() * factor;
+  return *this *= factor;
+}
+
+/** Multiplication with a scalar operator.
+ * @param s the scalar
+ * @return the resulting HomCoord
+ */
+HomVector
+HomVector::operator*(const float s) const
+{
+  HomVector result = *this;
+  result *= s;
+
+  return result;
+}
+
+/** Multiplication with a scalar-assignment operator.
+ * Notice: The w-component doesn't get changed (has always to be 1.0 for HomPoints)
+ * @param s the scalar
+ * @return reference to the resulting HomCoord
+ */
+HomVector&
+HomVector::operator*=(const float s)
+{
+  x() = x() * s;
+  y() = y() * s;
+  z() = z() * s;
 
   return *this;
+}
+
+/** Calculates the dot product of two coords.
+ * @param h the rhs HomCoord
+ * @return the scalar product
+ */
+float
+HomVector::operator*(const HomCoord& h) const
+{
+	return x()*h.x() + y()*h.y() + z()*h.z();
+}
+
+/** Returns the cross product of two vectors
+ * @param b the second Vector
+ * @return the HomVector that is normal to *this and h
+ */
+HomVector 
+HomVector::crossP(const HomCoord& b) const
+{
+      HomVector res;
+   
+      res.x(y()*b.z() - z() * b.y()); 
+      res.y(z()*b.x() - x() * b.z());
+      res.z(x()*b.y() - y() * b.x());
+
+      return res;
 }
 
 } // end namespace fawkes

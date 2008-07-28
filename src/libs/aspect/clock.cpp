@@ -27,7 +27,7 @@
 
 namespace fawkes {
 
-/** @class ClockAspect aspect/clock.h
+/** @class ClockAspect clock.h <aspect/clock.h>
  * Thread aspect that allows to obtain the current time from the clock.
  * Threads that need to deal with the current time should have this aspect
  * and not obtain the time by means of gettimeofday! 

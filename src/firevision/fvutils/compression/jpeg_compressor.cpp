@@ -34,9 +34,11 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <setjmp.h>
+extern "C" {
 #include <jpeglib.h>
 #include <jerror.h>
-#include <setjmp.h>
+}
 
 ///@cond INTERNALS
 

@@ -42,6 +42,9 @@ namespace fawkes {
   class NavigatorInterface;
   class SkillerInterface;
   class GameStateInterface;
+  class HumanoidMotionInterface;
+  class SwitchInterface;
+  class SpeechSynthInterface;
 }
 class SkillerExecutionThread;
 
@@ -84,8 +87,14 @@ class SkillerLiaisonThread
   fawkes::ObjectPositionInterface *wm_ball;
   fawkes::ObjectPositionInterface *wm_pose;
   //fawkes::ObjectPositionInterface *wm_pose_w;
+  fawkes::ObjectPositionInterface *nao_ball;
   fawkes::NavigatorInterface      *navigator;
+  fawkes::NavigatorInterface      *nao_navigator;
   fawkes::GameStateInterface      *gamestate;
+  fawkes::HumanoidMotionInterface *hummot;
+  fawkes::SwitchInterface         *chbut;
+  fawkes::SwitchInterface         *tballrec;
+  fawkes::SpeechSynthInterface    *speechsynth;
 
   fawkes::LockList<fawkes::ObjectPositionInterface *>  wm_obstacles;
   fawkes::LockList<fawkes::ObjectPositionInterface *>::iterator  wm_obs_it;

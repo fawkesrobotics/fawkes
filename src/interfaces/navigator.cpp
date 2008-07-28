@@ -80,7 +80,7 @@ NavigatorInterface::~NavigatorInterface()
  * @return x value
  */
 float
-NavigatorInterface::x()
+NavigatorInterface::x() const
 {
   return data->x;
 }
@@ -110,7 +110,7 @@ NavigatorInterface::set_x(const float new_x)
  * @return y value
  */
 float
-NavigatorInterface::y()
+NavigatorInterface::y() const
 {
   return data->y;
 }
@@ -140,7 +140,7 @@ NavigatorInterface::set_y(const float new_y)
  * @return dest_x value
  */
 float
-NavigatorInterface::dest_x()
+NavigatorInterface::dest_x() const
 {
   return data->dest_x;
 }
@@ -170,7 +170,7 @@ NavigatorInterface::set_dest_x(const float new_dest_x)
  * @return dest_y value
  */
 float
-NavigatorInterface::dest_y()
+NavigatorInterface::dest_y() const
 {
   return data->dest_y;
 }
@@ -200,7 +200,7 @@ NavigatorInterface::set_dest_y(const float new_dest_y)
  * @return dest_dist value
  */
 float
-NavigatorInterface::dest_dist()
+NavigatorInterface::dest_dist() const
 {
   return data->dest_dist;
 }
@@ -231,7 +231,7 @@ NavigatorInterface::set_dest_dist(const float new_dest_dist)
  * @return msgid value
  */
 unsigned int
-NavigatorInterface::msgid()
+NavigatorInterface::msgid() const
 {
   return data->msgid;
 }
@@ -263,7 +263,7 @@ NavigatorInterface::set_msgid(const unsigned int new_msgid)
  * @return final value
  */
 bool
-NavigatorInterface::is_final()
+NavigatorInterface::is_final() const
 {
   return data->final;
 }
@@ -365,7 +365,7 @@ NavigatorInterface::CartesianGotoMessage::CartesianGotoMessage(const CartesianGo
  * @return x value
  */
 float
-NavigatorInterface::CartesianGotoMessage::x()
+NavigatorInterface::CartesianGotoMessage::x() const
 {
   return data->x;
 }
@@ -395,7 +395,7 @@ NavigatorInterface::CartesianGotoMessage::set_x(const float new_x)
  * @return y value
  */
 float
-NavigatorInterface::CartesianGotoMessage::y()
+NavigatorInterface::CartesianGotoMessage::y() const
 {
   return data->y;
 }
@@ -425,7 +425,7 @@ NavigatorInterface::CartesianGotoMessage::set_y(const float new_y)
  * @return orientation value
  */
 float
-NavigatorInterface::CartesianGotoMessage::orientation()
+NavigatorInterface::CartesianGotoMessage::orientation() const
 {
   return data->orientation;
 }
@@ -514,7 +514,7 @@ NavigatorInterface::PolarGotoMessage::PolarGotoMessage(const PolarGotoMessage *m
  * @return phi value
  */
 float
-NavigatorInterface::PolarGotoMessage::phi()
+NavigatorInterface::PolarGotoMessage::phi() const
 {
   return data->phi;
 }
@@ -544,7 +544,7 @@ NavigatorInterface::PolarGotoMessage::set_phi(const float new_phi)
  * @return dist value
  */
 float
-NavigatorInterface::PolarGotoMessage::dist()
+NavigatorInterface::PolarGotoMessage::dist() const
 {
   return data->dist;
 }
@@ -574,7 +574,7 @@ NavigatorInterface::PolarGotoMessage::set_dist(const float new_dist)
  * @return orientation value
  */
 float
-NavigatorInterface::PolarGotoMessage::orientation()
+NavigatorInterface::PolarGotoMessage::orientation() const
 {
   return data->orientation;
 }
@@ -659,7 +659,7 @@ NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage(const MaxVelocityMess
  * @return velocity value
  */
 float
-NavigatorInterface::MaxVelocityMessage::velocity()
+NavigatorInterface::MaxVelocityMessage::velocity() const
 {
   return data->velocity;
 }
@@ -748,7 +748,7 @@ NavigatorInterface::ObstacleMessage::ObstacleMessage(const ObstacleMessage *m) :
  * @return x value
  */
 float
-NavigatorInterface::ObstacleMessage::x()
+NavigatorInterface::ObstacleMessage::x() const
 {
   return data->x;
 }
@@ -778,7 +778,7 @@ NavigatorInterface::ObstacleMessage::set_x(const float new_x)
  * @return y value
  */
 float
-NavigatorInterface::ObstacleMessage::y()
+NavigatorInterface::ObstacleMessage::y() const
 {
   return data->y;
 }
@@ -808,7 +808,7 @@ NavigatorInterface::ObstacleMessage::set_y(const float new_y)
  * @return width value
  */
 float
-NavigatorInterface::ObstacleMessage::width()
+NavigatorInterface::ObstacleMessage::width() const
 {
   return data->width;
 }

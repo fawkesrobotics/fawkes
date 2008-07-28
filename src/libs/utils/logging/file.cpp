@@ -36,7 +36,7 @@
 
 namespace fawkes {
 
-/** @class FileLogger logging/file.h
+/** @class FileLogger file.h <logging/file.h>
  * Interface for logging to a specified file.
  * The FileLogger will pipe all output into the given file. The
  * output will be prepended by a single character which determines the 

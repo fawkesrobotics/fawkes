@@ -313,12 +313,12 @@ ROI::contains(unsigned int x, unsigned int y)
  * @param margin margin
  * @return true if this ROI is a neigbour of the given pixel, false otherwise
  */
-bool
+inline bool
 ROI::neighbours(unsigned int x, unsigned int y, unsigned int margin) const
 {
-  return ( (x >= start.x - margin) &&
+  return ( (static_cast<int>(x) >= static_cast<int>(start.x) - static_cast<int>(margin)) &&
 	   (x <= start.x + width + margin) &&
-	   (y >= start.y - margin) &&
+	   (static_cast<int>(y) >= static_cast<int>(start.y) - static_cast<int>(margin)) &&
 	   (y <= start.y + height + margin) );
 }
 
@@ -333,14 +333,19 @@ ROI::neighbours(unsigned int x, unsigned int y, unsigned int margin) const
 bool
 ROI::neighbours(ROI *roi, unsigned int margin) const
 {
-  return ( ( ((roi->start.x >= start.x - margin) &&
-	      (roi->start.x <= start.x + width + margin)) ||
-	     ((roi->start.x + roi->width >= start.x - margin) &&
-	      (roi->start.x + roi->width <= start.x + width + margin)) ) &&
-	   ( ((roi->start.y >= start.y - margin) &&
-	      (roi->start.y <= start.y + height + margin)) ||
-	     ((roi->start.y + roi->height >= start.y - margin) &&
-	      (roi->start.y + roi->height <= start.y + height + margin)) ) );
+  //Testing only x -> y test returns always true
+  bool overlapping_x = neighbours(roi->start.x, start.y, margin) 
+    || neighbours(roi->start.x + roi->width, start.y, margin) 
+    || roi->neighbours(start.x, roi->start.y, margin)
+    || roi->neighbours(start.x + width, roi->start.y, margin);
+
+  //Testing only y -> x test returns always true
+  bool overlapping_y = roi->neighbours(roi->start.x, start.y, margin) 
+    || roi->neighbours(roi->start.x, start.y + height, margin) 
+    || neighbours(start.x, roi->start.y, margin)
+    || neighbours(start.x, roi->start.y + roi->height, margin);
+
+  return overlapping_x && overlapping_y;
 }
 
 

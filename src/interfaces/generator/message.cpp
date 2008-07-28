@@ -25,7 +25,7 @@
 #include <interfaces/generator/message.h>
 
 
-/** @class InterfaceMessage interfaces/generator/message.h
+/** @class InterfaceMessage message.h <interfaces/generator/message.h>
  * Interface generator internal representation of a message as parsed from
  * the XML template file.
  */

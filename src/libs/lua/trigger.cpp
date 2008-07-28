@@ -31,7 +31,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-using namespace fawkes;
+namespace fawkes {
 
 /** @class LuaTriggerManager <lua/trigger.h>
  * Lua Trigger Manager.
@@ -83,17 +83,11 @@ LuaTriggerManager::trigger(const char *event, const char *param_format, ...)
     }
     va_end(args);
 
-    try {
-      __lua->do_string("%s:trigger(\"%s\", %s)", __trigger_var, event, params);
-    } catch (Exception &e) {
-      e.print_trace();
-    }
+    __lua->do_string("%s:trigger(\"%s\", %s)", __trigger_var, event, params);
     free(params);
   } else {
-    try {
-      __lua->do_string("%s:trigger(\"%s\")", __trigger_var, event);
-    } catch (Exception &e) {
-      e.print_trace();
-    }
+    __lua->do_string("%s:trigger(\"%s\")", __trigger_var, event);
   }
 }
+
+} // end of namespace fawkes

@@ -36,7 +36,7 @@
 
 using namespace fawkes;
 
-/** @class NetLogMonitorBackendThread tools/netlog_monitor/backend_thread.h
+/** @class NetLogMonitorBackendThread backend_thread.h <tools/netlog_monitor/backend_thread.h>
  * Backend for the netlog monitor.
  *
  * @author Daniel Beck

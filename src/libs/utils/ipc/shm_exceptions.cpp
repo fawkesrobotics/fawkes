@@ -36,7 +36,7 @@
 namespace fawkes {
 
 
-/** @class ShmCouldNotAttachException utils/ipc/shm_exceptions.h
+/** @class ShmCouldNotAttachException shm_exceptions.h <utils/ipc/shm_exceptions.h>
  * Could not attach to shared memory segment.
  */
 /** Constructor.
@@ -47,7 +47,7 @@ ShmCouldNotAttachException::ShmCouldNotAttachException(const char *msg)
 {
 }
 
-/** @class ShmNoHeaderException utils/ipc/shm_exceptions.h
+/** @class ShmNoHeaderException shm_exceptions.h <utils/ipc/shm_exceptions.h>
  * No shared memory header set before attach()
  */
 /** Constructor. */
@@ -57,7 +57,7 @@ ShmNoHeaderException::ShmNoHeaderException()
 }
 
 
-/** @class ShmInconsistentSegmentSizeException utils/ipc/shm_exceptions.h
+/** @class ShmInconsistentSegmentSizeException shm_exceptions.h <utils/ipc/shm_exceptions.h>
  * Memory size does not match
  */
 /** Constructor
@@ -73,7 +73,7 @@ ShmInconsistentSegmentSizeException::ShmInconsistentSegmentSizeException(unsigne
 }
 
 
-/** @class ShmDoesNotExistException utils/ipc/shm_exceptions.h
+/** @class ShmDoesNotExistException shm_exceptions.h <utils/ipc/shm_exceptions.h>
  * Shared memory segment does not exist.
  */
 /** Constructor */
@@ -83,7 +83,7 @@ ShmDoesNotExistException::ShmDoesNotExistException()
 }
 
 
-/** @class ShmCouldNotAttachAddrDepException utils/ipc/shm_exceptions.h
+/** @class ShmCouldNotAttachAddrDepException shm_exceptions.h <utils/ipc/shm_exceptions.h>
  * The shared memory is set adress-dependend but could not be opened at the appropriate
  * address.
  */
@@ -95,7 +95,7 @@ ShmCouldNotAttachAddrDepException::ShmCouldNotAttachAddrDepException()
 }
 
 
-/** @class ShmAddrOutOfBoundsException utils/ipc/shm_exceptions.h
+/** @class ShmAddrOutOfBoundsException shm_exceptions.h <utils/ipc/shm_exceptions.h>
  * The address points out of the shared memory.
  */
 /** Constructor. */
@@ -106,7 +106,7 @@ ShmAddrOutOfBoundsException::ShmAddrOutOfBoundsException()
 }
 
 
-/** @class ShmPtrOutOfBoundsException utils/ipc/shm_exceptions.h
+/** @class ShmPtrOutOfBoundsException shm_exceptions.h <utils/ipc/shm_exceptions.h>
  * The pointer does not point inside the shared memory.
  */
 /** Constructor. */
@@ -115,6 +115,5 @@ ShmPtrOutOfBoundsException::ShmPtrOutOfBoundsException()
 	      "point inside the shared memory segment")
 {
 }
-
 
 } // end namespace fawkes

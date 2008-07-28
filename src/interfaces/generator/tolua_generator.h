@@ -54,6 +54,7 @@ class ToLuaInterfaceGenerator
   void write_header(FILE *f, std::string filename);
   void write_constants_h(FILE *f);
   void write_messages_h(FILE *f);
+  void write_superclass_h(FILE *f);
   void write_methods_h(FILE *f,
 		       std::string /* indent space */ is,
 		       std::vector<InterfaceField> fields);

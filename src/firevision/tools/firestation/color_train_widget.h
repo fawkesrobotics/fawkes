@@ -38,6 +38,9 @@ class YuvColormap;
 class ColorTrainWidget
 {
  public:
+	static const unsigned int MOUSE_BUTTON_LEFT = 1; /**< constant for left mouse button id */
+	static const unsigned int MOUSE_BUTTON_RIGHT = 3; /**< constant for right mouse button id */
+
   ColorTrainWidget(Gtk::Window* parent);
   virtual ~ColorTrainWidget();
 
@@ -48,7 +51,7 @@ class ColorTrainWidget
   void set_draw_buffer(unsigned char* buffer);
 
 
-  void click(unsigned int x, unsigned int y);
+  void click(unsigned int x, unsigned int y, unsigned int button = MOUSE_BUTTON_LEFT);
   void reset_selection();
   
   void load_histograms();
@@ -84,6 +87,7 @@ class ColorTrainWidget
   void resize_seg_image(Gtk::Allocation& allocation);
   bool set_threshold(Gtk::ScrollType scroll, double value);
   bool set_min_prob(Gtk::ScrollType scroll, double value);
+  static void free_rgb_buffer(const guint8* rgb_buffer);
 
   void reset_gui();
 

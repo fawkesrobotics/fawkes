@@ -20,21 +20,27 @@ __buildsys_lua_mk := 1
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LUA_MINVERSION = 5.1
+LUA_VERSION = 5.1
 
 # Check for Lua (Fedora packages lua and lua-devel)
 ifneq ($(PKGCONFIG),)
-  HAVE_LUA = $(if $(shell $(PKGCONFIG) --atleast-version $(LUA_MINVERSION) 'lua'; echo $${?/1/}),1,0)
+  HAVE_LUA = $(if $(shell $(PKGCONFIG) --atleast-version $(LUA_VERSION) 'lua'; echo $${?/1/}),1,0)
+  LUA_LIBNAME = lua
+  ifneq ($(HAVE_LUA),1)
+    HAVE_LUA = $(if $(shell $(PKGCONFIG) --atleast-version $(LUA_VERSION) 'lua$(LUA_VERSION)'; echo $${?/1/}),1,0)
+    LUA_LIBNAME = lua$(LUA_VERSION)
+  endif
 endif
 
 ifeq ($(HAVE_LUA),1)
   LUADIR = $(abspath $(BASEDIR)/src/lua)
   LUALIBDIR = $(abspath $(LIBDIR)/lua)
-  CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags 'lua') -DLUADIR=\"$(LUADIR)\" -DLUALIBDIR=\"$(LUALIBDIR)\"
-  LDFLAGS_LUA = $(shell $(PKGCONFIG) --libs 'lua')
-  ifneq ($(wildcard /usr/include/tolua++.h),)
+  CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags '$(LUA_LIBNAME)') -DLUADIR=\"$(LUADIR)\" -DLUALIBDIR=\"$(LUALIBDIR)\"
+  LDFLAGS_LUA = $(shell $(PKGCONFIG) --libs '$(LUA_LIBNAME)')
+  ifneq ($(wildcard $(SYSROOT)/usr/include/tolua++.h),)
     HAVE_TOLUA = 1
     TOLUAPP=tolua++
+    TOLUA_LIBS=tolua++-$(LUA_VERSION)
 
 .SECONDEXPANSION:
 %_tolua.cpp: $$(TOLUA_$$(subst /,_,$$*))

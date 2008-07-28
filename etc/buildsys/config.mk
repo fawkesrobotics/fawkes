@@ -36,10 +36,11 @@ OS=$(shell uname -s)
 
 ### Directories
 SRCDIR ?= .
-OBJDIR = .objs
-DEPDIR = $(abspath $(SRCDIR)/.deps)
+OBJDIR = .objs_$(BUILD_TYPE)
+DEPDIR = $(abspath $(SRCDIR)/.deps_$(BUILD_TYPE))
 BINDIR = $(abspath $(BASEDIR)/bin)
 LIBDIR = $(abspath $(BASEDIR)/lib)
+#LIBDIR = $(abspath $(BASEDIR)/lib/$(BUILD_TYPE))
 CONFDIR = $(abspath $(BASEDIR)/cfg)
 PLUGINDIR = $(abspath $(BASEDIR)/plugins)
 RESDIR = $(abspath $(BASEDIR)/res)
@@ -74,7 +75,8 @@ GCC_USE_OPENMP=1
 ### CFLAGS, preprocessor, compiler and linker options
 LDFLAGS_LIBDIRS  = -Wl,-R$(LIBDIR) $(LIBDIRS:%=-Wl,-R%)
 DEFAULT_INCLUDES = -I$(abspath $(BASEDIR)/src) -I$(abspath $(BASEDIR)/src/libs) -I$(abspath $(BASEDIR)/src/firevision)
-CFLAGS_BASE      = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP)
+CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP)
+CFLAGS_BASE      = $(CFLAGS_MINIMUM)
 LDFLAGS_BASE     = -L$(LIBDIR) $(LDFLAGS_OPENMP)
 LDFLAGS_SHARED   = -shared
 ifeq ($(GCC_USE_OPENMP),1)

@@ -113,9 +113,12 @@ Vector::set_size(unsigned int size)
     }
 
   m_size = size;
-  m_manage_memory = true;
+	
+	if (m_manage_memory) //I'm not supposed to delete foreign buffers
+		delete[] m_data;
+  else 
+		m_manage_memory = true;
 
-  delete[] m_data;
   m_data = t;
 }
 
@@ -207,7 +210,7 @@ Vector::x(float x)
 float
 Vector::y() const
 {
-  return get(0);
+  return get(1);
 }
 
 /** Convenience getter to obtain a reference to the second element.
@@ -226,7 +229,7 @@ Vector::y()
 void
 Vector::y(float y)
 {
-  set(0, y);
+  set(1, y);
 }
 
 /** Convenience getter to obtain the third element.
@@ -235,7 +238,7 @@ Vector::y(float y)
 float
 Vector::z() const
 {
-  return get(0);
+  return get(2);
 }
 
 /** Convenience getter to obtain a reference to the third element.
@@ -254,7 +257,7 @@ Vector::z()
 void
 Vector::z(float z)
 {
-  set(0, z);
+  set(2, z);
 }
 
 /** Access operator.
@@ -411,4 +414,44 @@ Vector::print_info(const char* name) const
   printf("]T\n");
 }
 
+
+/** Calculates the dot product of two vectors.
+ * @param v the rhs Vector
+ * @return the scalar product
+ */
+float
+Vector::operator*(const Vector& v) const
+{
+	float res = 0;
+	
+	for (unsigned int i = 0; i < m_size; ++i)
+		res += this->get(i) * v.get(i);
+	
+	return res;
+}
+
+
+/**
+ * Appends the components of the Vector to the ostream
+ * @param stream the input stream
+ * @param v the vector to be appended
+ * @return the resulting stream
+ */
+std::ostream&
+operator<<(std::ostream& stream, const Vector &v)
+{
+	stream << "[";
+	
+	for (unsigned int i = 0; i < v.m_size; ++i)
+	{
+		stream << v.get(i);
+		
+		if (i + 1 < v.m_size)
+			stream << ",";
+	}
+	
+	return stream << "]";
+}
+
 } // end namespace fawkes
+

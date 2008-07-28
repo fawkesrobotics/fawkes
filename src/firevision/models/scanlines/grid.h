@@ -27,6 +27,7 @@
 #define __FIREVISION_SCANLINE_GRID_H_
 
 #include "models/scanlines/scanlinemodel.h"
+#include <fvutils/base/roi.h>
 #include <fvutils/base/types.h>
 
 class ScanlineGrid : public ScanlineModel
@@ -34,8 +35,10 @@ class ScanlineGrid : public ScanlineModel
 
  public:
 
-  ScanlineGrid(unsigned int width, unsigned int height,
-	       unsigned int offset_x, unsigned int offset_y);
+	ScanlineGrid(unsigned int width, unsigned int height,
+	       unsigned int offset_x, unsigned int offset_y, 
+	       ROI* roi = NULL, bool horizontal_grid = true);
+	virtual ~ScanlineGrid();
 
   point_t  operator*();
   point_t* operator->();
@@ -50,10 +53,11 @@ class ScanlineGrid : public ScanlineModel
   virtual void  set_robot_pose(float x, float y, float ori);
   virtual void  set_pan_tilt(float pan, float tilt);
 
-  void setDimensions(unsigned int width, unsigned int height);
+  void setDimensions(unsigned int width, unsigned int height, ROI* roi = NULL);
   void setOffset(unsigned int offset_x, unsigned int offset_y);
   void setGridParams(unsigned int width, unsigned int height,
-		     unsigned int offset_x, unsigned int offset_y);
+		     unsigned int offset_x, unsigned int offset_y, 
+		     ROI* roi = NULL, bool horizontal_grid = true);
 
  private:
   unsigned int width;
@@ -61,9 +65,15 @@ class ScanlineGrid : public ScanlineModel
   unsigned int offset_x;
   unsigned int offset_y;
 
+  ROI* roi;
+
+  bool horizontal_grid;
+  bool more_to_come;
+
   point_t coord;
   point_t tmp_coord;
 
+  void calc_next_coord();
 };
 
 #endif

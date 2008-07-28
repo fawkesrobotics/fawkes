@@ -170,9 +170,14 @@ HomTransform::rotate_z(float rad)
 void
 HomTransform::trans(float dx, float dy, float dz)
 {
-  (*m_matrix)(0, 3) += dx;
-  (*m_matrix)(1, 3) += dy;
-  (*m_matrix)(2, 3) += dz;
+	Matrix m(4, 4);
+  m.id();
+
+  m(0, 3) = dx;
+  m(1, 3) = dy;
+  m(2, 3) = dz;
+	
+	(*m_matrix) *= m;
 }
 
 /** Assignement operator.
@@ -237,4 +242,26 @@ HomTransform::operator*(const HomCoord& h) const
   return HomCoord(v);
 }
 
+/** Prints the matrix.
+ * @param name Heading of the output
+ * @param col_sep a string used to separate columns (defaults to '\\t')
+ * @param row_sep a string used to separate rows (defaults to '\\n')
+ */
+void
+HomTransform::print_info(const char *name, const char *col_sep, const char *row_sep) const
+{
+	m_matrix->print_info(name ? name : "HomTransform", col_sep, row_sep);
+}
+
+
+/** Returns a copy of the matrix.
+ * @return the matrix of the transformation
+ */
+Matrix
+HomTransform::get_matrix() const
+{
+	return Matrix(*m_matrix);
+}
+
 } // end namespace fawkes
+

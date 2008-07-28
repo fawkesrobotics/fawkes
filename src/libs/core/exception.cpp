@@ -30,6 +30,7 @@
 #define _GNU_SOURCE
 #endif
 
+#include <execinfo.h>
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
@@ -546,6 +547,50 @@ Exception::raise()
 }
 
 
+/** Prints a backtrace. */
+void
+Exception::print_backtrace() const throw()
+{
+  void * array[25];
+  int size = backtrace(array, 25);
+  char ** symbols = backtrace_symbols(array, size);
+
+  printf("Backtrace:\n");
+  for (int i = 0; i < size; ++i) {
+    printf("  %s\n", symbols[i]);
+  }
+  
+  free(symbols);
+}
+
+
+/** Generate backtrace string.
+ * @return freshly allocated string of backtrace. Free after you are done.
+ */
+char *
+Exception::generate_backtrace() const throw()
+{
+  void * array[25];
+  int size = backtrace(array, 25);
+  char ** symbols = backtrace_symbols(array, size);
+  
+  size_t total_size = 1; //null termination
+  for (int i = 0; i < size; ++i) {
+    total_size += strlen(symbols[i]) + 1;
+  }
+  char *rv = (char *)calloc(1, total_size);
+  char *r = rv;
+  for (int i = 0; i < size; ++i) {
+    sprintf(r, "%s\n", symbols[i]);
+    r += strlen(symbols[i]);
+  }
+  
+  free(symbols);
+
+  return rv;
+}
+
+
 /** Prints trace to stderr.
  * This prints out a message trace of all messages appended to the exception
  * in chronological order starting with the oldest (first message appended
@@ -596,6 +641,7 @@ Exception::errno() throw()
 const char *
 Exception::what() const throw()
 {
+  print_backtrace();
   if ( messages != NULL ) {
     return messages->msg;
   } else {

@@ -351,7 +351,7 @@ BlackBoardNetworkHandler::client_disconnected(unsigned int clid)
 
       unsigned int serial = (*__ciit)->serial();
       __serial_to_clid.erase(serial);
-      __interfaces.erase(serial);
+      __interfaces.erase_locked(serial);
       delete __listeners[serial];
       __listeners.erase(serial);
       __bb->close(*__ciit);

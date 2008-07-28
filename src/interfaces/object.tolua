@@ -1,4 +1,5 @@
 $#include <interfaces/object.h>
+$using namespace fawkes;
 namespace fawkes {
 class ObjectPositionInterface : public Interface
 {
@@ -8,6 +9,8 @@ class ObjectPositionInterface : public Interface
   static const unsigned int TYPE_TEAMMEMBER;
   static const unsigned int TYPE_LINE;
   static const unsigned int TYPE_SELF;
+  static const unsigned int TYPE_GOAL_BLUE;
+  static const unsigned int TYPE_GOAL_YELLOW;
   static const unsigned int FLAG_NONE;
   static const unsigned int FLAG_HAS_WORLD;
   static const unsigned int FLAG_HAS_RELATIVE_CARTESIAN;
@@ -19,6 +22,7 @@ class ObjectPositionInterface : public Interface
   static const unsigned int FLAG_HAS_COVARIANCES;
   static const unsigned int FLAG_HAS_WORLD_VELOCITY;
   static const unsigned int FLAG_HAS_Z_AS_ORI;
+  static const unsigned int FLAG_IS_FIXED_OBJECT;
 
   unsigned int object_type();
   void set_object_type(const unsigned int new_object_type);
@@ -113,6 +117,37 @@ class ObjectPositionInterface : public Interface
   float * relative_xyz_velocity_covariance();
   void set_relative_xyz_velocity_covariance(const float * new_relative_xyz_velocity_covariance);
   size_t maxlenof_relative_xyz_velocity_covariance() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  size_t                  hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
 
 };
 

@@ -44,13 +44,19 @@
 #ifdef HAVE_V4L_CAM
 #include <cams/v4l.h>
 #endif
+#ifdef HAVE_V4L1_CAM
+#include <cams/v4l1.h>
+#endif
+#ifdef HAVE_V4L2_CAM
+#include <cams/v4l2.h>
+#endif
 #ifdef HAVE_BUMBLEBEE2_CAM
 #include <cams/bumblebee2.h>
 #endif
 
 using namespace std;
 
-/** @class UnknownCameraTypeException <cams/factory.h>
+/** @class UnknownCameraTypeException factory.h <cams/factory.h>
  * Unknown camera exception.
  * Thrown if the requested camera has not been recognized or the needed
  * libraries were not available at compile time.
@@ -66,7 +72,7 @@ UnknownCameraTypeException::UnknownCameraTypeException(const char *msg)
 }
 
 
-/** @class CameraFactory <cams/factory.h>
+/** @class CameraFactory factory.h <cams/factory.h>
  * Camera factory.
  * This camera factory provides access to all cameras in a unified way. You just
  * supply a camera argument string and depending on the camera ID and compile-time
@@ -139,6 +145,24 @@ CameraFactory::instance(const CameraArgumentParser *cap)
     c = new V4LCamera(cap);
 #else
     throw UnknownCameraTypeException("No video4linux support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "v4l1" ) {
+#ifdef HAVE_V4L1_CAM
+    c = new V4L1Camera(cap);
+#else
+    throw UnknownCameraTypeException("No video4linux1 support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "v4l2" ) {
+#ifdef HAVE_V4L2_CAM
+    c = new V4L2Camera(cap);
+#else
+    throw UnknownCameraTypeException("No video4linux2 support at compile time");
 #endif
   }
 

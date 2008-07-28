@@ -62,15 +62,14 @@ rgb_to_yuy2(unsigned char *RGB, unsigned char *YUV, unsigned int width, unsigned
  * Cb = U = -(0.148 * R) - (0.291 * G) + (0.439 * B) + 128
  *
  * Values have to be clamped to keep them in the [0-255] range.
- * Rumour has it that the valid range is actually a subset of [0-255] (fourcc.org
- * mentions an RGB range of [16-235] mentioned) but clamping the values into [0-255]
- * seems to produce acceptable results.
- * @param RGB where the RGB output will be written to, will have pixel after pixel,
- * 3 bytes per pixel(thus this is a 24bit RGB with one byte per color) line by line.
- * @param YUV unsigned char array that contains the pixels, 4 pixels in 6 byte macro pixel,
- * line after line
- * @param width Width of the image contained in the YUV buffer
- * @param height Height of the image contained in the YUV buffer
+ * Rumour has it that the valid range is actually a subset of [0-255] (fourcc.org mentions an RGB range
+ * of [16-235]) but clamping the values into [0-255] seems to produce acceptable results.
+ * @param RGB unsigned char array that contains the pixels, pixel after pixel, 3 bytes per pixel
+ *            (thus this is a 24bit RGB with one byte per color) line by line.
+ * @param YUV where the YUV output will be written to, will have 4 pixels in 6 byte macro pixel, line after
+ *            line
+ * @param width Width of the image contained in the RGB buffer
+ * @param height Height of the image contained in the RGB buffer
  */
 void
 rgb_to_yuv411packed_plainc(unsigned char *RGB, unsigned char *YUV,
@@ -102,12 +101,12 @@ rgb_to_yuv411packed_plainc(unsigned char *RGB, unsigned char *YUV,
 
 /** Convert a line of a RGB buffer to a line in a planar YUV422 buffer.
  * See above for general notes about color space conversion from RGB to YUV.
- * @param RGB where the RGB output will be written to, will have pixel after pixel,
- 3 bytes per pixel (thus this is a 24bit RGB with one byte per color) line by line.
- * @param YUV unsigned char array that contains the pixels, 4 pixels in 6 byte macro
- * pixel, line after line
- * @param width Width of the image contained in the YUV buffer
- * @param height Height of the image contained in the YUV buffer
+ * @param RGB unsigned char array that contains the pixels, pixel after pixel, 3 bytes per pixel
+ *            (thus this is a 24bit RGB with one byte per color) line by line.
+ * @param YUV where the YUV output will be written to, will have 4 pixels in 6 byte macro pixel, line after
+ *            line
+ * @param width Width of the image contained in the RGB buffer
+ * @param height Height of the image contained in the RGB buffer
  * @param rgb_line the index of the line to be converted
  * @param yuv_line the index of the line to convert to in the YUV buffer
  */
@@ -148,12 +147,12 @@ convert_line_rgb_to_yuv422planar(unsigned char *RGB, unsigned char *YUV,
 
 /** Convert an RGB buffer to a planar YUV422 buffer.
  * See above for general notes about color space conversion from RGB to YUV.
- * @param RGB where the RGB output will be written to, will have pixel after pixel,
- * 3 bytes per pixel (thus this is a 24bit RGB with one byte per color) line by line.
- * @param YUV unsigned char array that contains the pixels, 4 pixels in 6 byte macro
- * pixel, line after line
- * @param width Width of the image contained in the YUV buffer
- * @param height Height of the image contained in the YUV buffer
+ * @param RGB unsigned char array that contains the pixels, pixel after pixel, 3 bytes per pixel
+ *            (thus this is a 24bit RGB with one byte per color) line by line.
+ * @param YUV where the YUV output will be written to, will have 4 pixels in 6 byte macro pixel, line after
+ *            line
+ * @param width Width of the image contained in the RGB buffer
+ * @param height Height of the image contained in the RGB buffer
  */
 void
 rgb_to_yuv422planar_plainc(unsigned char *RGB, unsigned char *YUV,
@@ -186,15 +185,95 @@ rgb_to_yuv422planar_plainc(unsigned char *RGB, unsigned char *YUV,
   }
 }
 
+/* Convert a line of a RGB buffer to a line in a packed YUV422 buffer, see above for general
+ * notes about color space conversion from RGB to YUV
+ * @param RGB unsigned char array that contains the pixels, pixel after pixel, 3 bytes per pixel
+ *            (thus this is a 24bit RGB with one byte per color) line by line.
+ * @param YUV where the YUV output will be written to, will have 4 pixels in 6 byte macro pixel, line after
+ *            line
+ * @param width Width of the image contained in the RGB buffer
+ * @param height Height of the image contained in the RGB buffer
+ * @param rgb_line the index of the line to be converted
+ * @param yuv_line the index of the line to convert to in the YUV buffer
+ */
+void
+convert_line_rgb_to_yuv422packed(unsigned char *RGB, unsigned char *YUV,
+				 unsigned int width, unsigned int height,
+				 unsigned int rgb_line, unsigned int yuv_line)
+{
+  register unsigned int i = 0;
+  register int y1, y2, u1, u2, v1, v2;
+  register RGB_t *r1, *r2;
+  register unsigned char *p;
+
+  p = YUV + (width * yuv_line) * 2;
+
+  RGB += 3 * width * rgb_line;
+
+  while (i < width) {
+    r1 = (RGB_t *)RGB;
+    RGB += 3;
+    r2 = (RGB_t *)RGB;
+    RGB += 3;
+
+    RGB2YUV(r1->R, r1->G, r1->B, y1, u1, v1);
+    RGB2YUV(r2->R, r2->G, r2->B, y2, u2, v2);
+
+    *p++ = (u1 + u2) / 2;
+    *p++ = y1;
+    *p++ = (v1 + v2) / 2;
+    *p++ = y2;
+
+    i += 2;
+  }
+}
+
+/* Convert an RGB buffer to a packed YUV422 buffer, see above for general notes about color space
+ * conversion from RGB to YUV
+ * @param RGB unsigned char array that contains the pixels, pixel after pixel, 3 bytes per pixel
+ *            (thus this is a 24bit RGB with one byte per color) line by line.
+ * @param YUV where the YUV output will be written to, will have 4 pixels in 6 byte macro pixel, line after
+ *            line
+ * @param width Width of the image contained in the RGB buffer
+ * @param height Height of the image contained in the RGB buffer
+ */
+void
+rgb_to_yuv422packed_plainc(unsigned char *RGB, unsigned char *YUV,
+			   unsigned int width, unsigned int height)
+{
+  register unsigned int i = 0;
+  register int y1, y2, u1, u2, v1, v2;
+  register RGB_t *r1, *r2;
+  register unsigned char *p;
+
+  p = YUV;
+
+  while (i < (width * height)) {
+    r1 = (RGB_t *)RGB;
+    RGB += 3;
+    r2 = (RGB_t *)RGB;
+    RGB += 3;
+
+    RGB2YUV(r1->R, r1->G, r1->B, y1, u1, v1);
+    RGB2YUV(r2->R, r2->G, r2->B, y2, u2, v2);
+
+    *p++ = (u1 + u2) / 2;
+    *p++ = y1;
+    *p++ = (v1 + v2) / 2;
+    *p++ = y2;
+
+    i += 2;
+  }
+}
 
 /** Convert an BGR buffer to a planar YUV422 buffer.
  * See above for general notes about color space conversion from RGB to YUV.
- * @param RGB where the RGB output will be written to, will have pixel after pixel,
- * 3 bytes per pixel (thus this is a 24bit RGB with one byte per color) line by line.
- * @param YUV unsigned char array that contains the pixels, 4 pixels in 6 byte macro
- * pixel, line after line
- * @param width Width of the image contained in the YUV buffer
- * @param height Height of the image contained in the YUV buffer
+ * @param RGB unsigned char array that contains the pixels, pixel after pixel, 3 bytes per pixel
+ *            (thus this is a 24bit RGB with one byte per color) line by line.
+ * @param YUV where the YUV output will be written to, will have 4 pixels in 6 byte macro pixel, line after
+ *            line
+ * @param width Width of the image contained in the RGB buffer
+ * @param height Height of the image contained in the RGB buffer
  */
 void
 bgr_to_yuv422planar_plainc(unsigned char *BGR, unsigned char *YUV,

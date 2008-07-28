@@ -18,7 +18,7 @@
 BASEDIR = ../../..
 
 LIBS_refboxrep = fawkescore fawkesutils fawkesconfig fawkesnetcomm
-OBJS_refboxrep = main.o refbox_state_sender.o midsize.o
+OBJS_refboxrep = main.o refbox_state_sender.o midsize.o spl.o
 
 OBJS_all =	$(OBJS_refboxrep)
 BINS_all =	$(BINDIR)/refboxrep

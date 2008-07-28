@@ -33,7 +33,7 @@
 
 #include <cmath>
 
-/** @class CameraTracker <fvutils/camera/tracker.h>
+/** @class CameraTracker tracker.h <fvutils/camera/tracker.h>
  * Camera Tracker.
  * Utility class that allows for tracking and object or a world point
  * by using a camera pan/tilt unit. It is NOT meant to track an object

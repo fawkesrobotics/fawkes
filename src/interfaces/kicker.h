@@ -97,16 +97,16 @@ class KickerInterface : public Interface
 
     KickMessage(const KickMessage *m);
     /* Methods */
-    bool is_left();
+    bool is_left() const;
     void set_left(const bool new_left);
     size_t maxlenof_left() const;
-    bool is_center();
+    bool is_center() const;
     void set_center(const bool new_center);
     size_t maxlenof_center() const;
-    bool is_right();
+    bool is_right() const;
     void set_right(const bool new_right);
     size_t maxlenof_right() const;
-    unsigned int intensity();
+    unsigned int intensity() const;
     void set_intensity(const unsigned int new_intensity);
     size_t maxlenof_intensity() const;
     virtual Message * clone() const;
@@ -140,7 +140,7 @@ class KickerInterface : public Interface
 
     GuideBallMessage(const GuideBallMessage *m);
     /* Methods */
-    GuideBallSideEnum guide_ball_side();
+    GuideBallSideEnum guide_ball_side() const;
     void set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side);
     size_t maxlenof_guide_ball_side() const;
     virtual Message * clone() const;
@@ -155,19 +155,19 @@ class KickerInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   /* Methods */
-  int num_kicks_left();
+  int num_kicks_left() const;
   void set_num_kicks_left(const int new_num_kicks_left);
   size_t maxlenof_num_kicks_left() const;
-  int num_kicks_center();
+  int num_kicks_center() const;
   void set_num_kicks_center(const int new_num_kicks_center);
   size_t maxlenof_num_kicks_center() const;
-  int num_kicks_right();
+  int num_kicks_right() const;
   void set_num_kicks_right(const int new_num_kicks_right);
   size_t maxlenof_num_kicks_right() const;
-  GuideBallSideEnum guide_ball_side();
+  GuideBallSideEnum guide_ball_side() const;
   void set_guide_ball_side(const GuideBallSideEnum new_guide_ball_side);
   size_t maxlenof_guide_ball_side() const;
-  unsigned int current_intensity();
+  unsigned int current_intensity() const;
   void set_current_intensity(const unsigned int new_current_intensity);
   size_t maxlenof_current_intensity() const;
 

@@ -82,13 +82,13 @@ class BatteryInterface : public Interface
   virtual Message * create_message(const char *type) const;
 
   /* Methods */
-  unsigned int current();
+  unsigned int current() const;
   void set_current(const unsigned int new_current);
   size_t maxlenof_current() const;
-  unsigned int voltage();
+  unsigned int voltage() const;
   void set_voltage(const unsigned int new_voltage);
   size_t maxlenof_voltage() const;
-  unsigned int temperature();
+  unsigned int temperature() const;
   void set_temperature(const unsigned int new_temperature);
   size_t maxlenof_temperature() const;
 

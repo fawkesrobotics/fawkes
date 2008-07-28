@@ -704,7 +704,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	    " * @return %s value\n"
 	    " */\n"
 	    "%s%s\n"
-	    "%s%s::%s%s()\n"
+	    "%s%s::%s%s() const\n"
 	    "{\n"
 	    "  return data->%s;\n"
 	    "}\n\n",
@@ -774,7 +774,7 @@ CppInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ i
   fprintf(f, "%s/* Methods */\n", is.c_str());
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
     fprintf(f,
-	    "%s%s %s%s();\n"
+	    "%s%s %s%s() const;\n"
 	    "%svoid set_%s(const %s new_%s);\n"
 	    "%ssize_t maxlenof_%s() const;\n",
 	    is.c_str(), (*i).getAccessType().c_str(),

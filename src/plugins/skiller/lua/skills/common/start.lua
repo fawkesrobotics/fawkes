@@ -49,8 +49,8 @@ end
 require("fawkes.logprint");
 require("skills.common.skillenv");
 
-require("skills." .. SKILLSPACE)
-
 fawkes.logprint.init(logger);
+
+require("skills." .. SKILLSPACE)
 
 logger:log_debug("Lua startup completed");

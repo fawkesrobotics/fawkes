@@ -32,7 +32,7 @@
 
 using namespace fawkes;
 
-/** @class JpegReader <fvutils/readers/jpeg.h>
+/** @class JpegReader jpeg.h <fvutils/readers/jpeg.h>
  * JPEG file reader.
  * @author Tim Niemueller
  */

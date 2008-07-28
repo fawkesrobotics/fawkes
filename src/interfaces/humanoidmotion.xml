@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="HumanoidMotionInterface" author="Tim Niemueller" year="2008">
+  <constants>
+    <enum name="LegEnum">
+      <comment>Type to determinate leg side.</comment>
+      <item name="LEG_LEFT">Left leg.</item>
+      <item name="LEG_RIGHT">Right leg.</item>
+    </enum>
+  </constants>
+  <data>
+    <comment>
+      This interface provides acces to basic humanoid motion patterns.
+    </comment>
+
+    <field type="bool" name="moving">True if the robot is currently moving.</field>
+
+    <!-- Walk pattern config -->
+    <field type="float" name="max_step_length">
+      Maximum length of a footstep in m.
+    </field>
+    <field type="float" name="max_step_height">
+      Maxium height of a footstep cycloid in m.
+    </field>
+    <field type="float" name="max_step_side">
+      Maximum length of side step in m.
+    </field>
+    <field type="float" name="max_step_turn">
+      Maximum change around vertical axis on radians per footstep.
+    </field>
+    <field type="float" name="zmp_offset_forward">
+      Zero moment point offset in forward direction in m.
+    </field>
+    <field type="float" name="zmp_offset_sideward">
+      Zero moment point offset in sideward direction in m.
+    </field>
+    <field type="float" name="l_hip_roll_compensation">
+      Amplitude in degrees of backlash compensation for left hip roll.
+      This is fitted to the Nao and is possibly not applicable to other robots.
+    </field>
+    <field type="float" name="r_hip_roll_compensation">
+      Amplitude in degrees of backlash compensation for left hip roll.
+      This is fitted to the Nao and is possibly not applicable to other robots.
+    </field>
+    <field type="float" name="hip_height">
+      Height of hip during walk process.
+      This is fitted to the Nao and is possibly not applicable to other robots.
+    </field>
+    <field type="float" name="torso_sideward_orientation">
+      Torso orientation in degrees in sideward direction during walking.
+      This is fitted to the Nao and is possibly not applicable to other robots.
+    </field>
+
+
+    <!-- Arm during walk config -->
+    <field type="bool" name="arms_enabled">
+      If true the arms are controlled during walking for balancing.
+    </field>
+    <field type="float" name="shoulder_pitch_median">
+      Median in radians of the shoulder pitch during walking.
+    </field>
+    <field type="float" name="shoulder_pitch_amplitude">
+      Amplitude of the shoulder pitch movement during walking.
+    </field>
+    <field type="float" name="elbow_pitch_median">
+      Median in radians of the elbow pitch during walking.
+    </field>
+    <field type="float" name="elbow_pitch_amplitude">
+      Amplitude of the elbow pitch movement during walking.
+    </field>
+    <field type="unsigned int" name="msgid">
+      The ID of the message that is currently being
+      processed, or 0 if no message is being processed.
+    </field>
+  </data>
+
+  <message name="SetWalkParams">
+    <comment>Allows for setting certain walking parameters.
+      Values that have a magic value of -1234567 are ignored.
+    </comment>
+    <ref>max_step_length</ref>
+    <ref>max_step_height</ref>
+    <ref>max_step_side</ref>
+    <ref>max_step_turn</ref>
+    <ref>zmp_offset_forward</ref>
+    <ref>zmp_offset_sideward</ref>
+    <ref>l_hip_roll_compensation</ref>
+    <ref>r_hip_roll_compensation</ref>
+    <ref>hip_height</ref>
+    <ref>torso_sideward_orientation</ref>
+  </message>
+  <message name="SetWalkArmsParams">
+    <comment>Allows for setting certain walking parameters related to using the
+      arms for balancing. Values that have a magic value of -1234567 are ignored.
+    </comment>
+    <ref>arms_enabled</ref>
+    <ref>shoulder_pitch_median</ref>
+    <ref>shoulder_pitch_amplitude</ref>
+    <ref>elbow_pitch_median</ref>
+    <ref>elbow_pitch_amplitude</ref>
+  </message>
+
+  <message name="Stop">
+    <comment>Stop as soon as possible.</comment>
+  </message>
+  <message name="WalkStraight">
+    <comment>Orders the robot to walk on a straight line.</comment>
+    <field type="float" name="distance">Distance in m to walk.</field>
+    <field type="unsigned int" name="num_samples">
+      Number of intermediate samples to use for walking.
+    </field>
+  </message>
+  <message name="WalkSideways">
+    <comment>Walk sideways.</comment>
+    <field type="float" name="distance">Distance in m to walk.</field>
+    <field type="unsigned int" name="num_samples">
+      Number of intermediate samples to use for strafing.
+    </field>
+  </message>
+  <message name="WalkArc">
+    <comment>Orders the robot to walk on an arc.</comment>
+    <field type="float" name="angle">Angle in radians to turn over the way.</field>
+    <field type="float" name="radius">Radius in m of the circle in m.</field>
+    <field type="unsigned int" name="num_samples">
+      Number of intermediate samples to use for walking.
+    </field>
+  </message>
+  <message name="Turn">
+    <comment>Orders the robot to turn on the current position.</comment>
+    <field type="float" name="angle">Angle in radians to turn.</field>
+    <field type="unsigned int" name="num_samples">
+      Number of intermediate samples to use for turning.
+    </field>
+  </message>
+  <message name="Kick">
+    <comment>
+      Kick with a robot's leg, for instance a ball.
+    </comment>
+    <field type="LegEnum" name="leg">Leg to kick with</field>
+    <field type="float" name="strength">Kick strength</field>
+  </message>
+  <message name="Park">
+    <comment>
+      Bring robot into a park position where it is safe to turn servos off.
+    </comment>
+    <field type="float" name="time_sec">Time in seconds when to reach the position.</field>
+  </message>
+  <message name="GetUp">
+    <comment>Bring robot into a standing position when lying on the ground.</comment>
+    <field type="float" name="time_sec">Time in seconds when to reach the position.</field>
+  </message>
+</interface>

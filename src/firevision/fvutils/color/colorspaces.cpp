@@ -41,6 +41,8 @@ colorspace_by_name(const char *mode)
     return YUV411_PLANAR;
   } else if (strcmp(mode, "YUY2") == 0) {
     return YUY2;
+  } else if (strcmp(mode, "YVY2") == 0) {
+    return YVY2;
   } else if (strcmp(mode, "BGR") == 0) {
     return BGR;
   } else if (strcmp(mode, "YUV422_PACKED") == 0) {
@@ -85,6 +87,8 @@ colorspace_to_string(colorspace_t colorspace)
     return "YUV411_PLANAR";
   case YUY2:
     return "YUY2";
+  case YVY2:
+    return "YVY2";
   case BGR:
     return "BGR";
   case YUV422_PACKED:

@@ -35,10 +35,17 @@ local skill_mt      = {
 			S_FAILED    = 3,
 
                         -- interfaces
-                        navigator   = navigator,
-                        wm_ball     = wm_ball,
-                        wm_pose     = wm_pose,
-                        gamestate   = gamestate
+                        navigator     = navigator,
+                        nao_navigator = nao_navigator,
+                        wm_ball       = wm_ball,
+                        wm_pose       = wm_pose,
+                        nao_ball      = nao_ball,
+                        gamestate     = gamestate,
+                        naohw         = naohw,
+                        speechsynth   = speechsynth,
+                        hummot        = hummot,
+                        chbut         = chbut,
+                        tballrec      = tballrec
 		      };
 
 
@@ -194,7 +201,7 @@ end
 -- that a skill has started its execution.
 -- @param skill_name name of the skill that is about to start
 function skill_loop_begin(skill_name)
-   print("Skill " .. skill_name .. " starts execution");
+   --print("Skill " .. skill_name .. " starts execution");
 end
 
 -- Top skill execution ends.
@@ -209,13 +216,13 @@ function skill_loop_end(skill_name, status)
    end
 
    if status == skill_mt.S_FINAL then
-      print_debug("Skill function " .. skill_name .. " is final");
+      --print_debug("Skill function " .. skill_name .. " is final");
       table.insert(skill_status.final, skill_name);
    elseif status == skill_mt.S_RUNNING then
-      print_debug("Skill function " .. skill_name .. " is *running*");
+      --print_debug("Skill function " .. skill_name .. " is *running*");
       table.insert(skill_status.running, skill_name);
    elseif status == skill_mt.S_FAILED then
-      print_debug("Skill function " .. skill_name .. " has failed");
+      --print_debug("Skill function " .. skill_name .. " has failed");
       table.insert(skill_status.failed, skill_name);
    else
       print("Skill " .. skill_name .. " returned an invalid skill status (" .. status .. ")");

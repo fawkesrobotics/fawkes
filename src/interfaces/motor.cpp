@@ -92,7 +92,7 @@ MotorInterface::~MotorInterface()
  * @return motor_state value
  */
 unsigned int
-MotorInterface::motor_state()
+MotorInterface::motor_state() const
 {
   return data->motor_state;
 }
@@ -126,7 +126,7 @@ MotorInterface::set_motor_state(const unsigned int new_motor_state)
  * @return drive_mode value
  */
 unsigned int
-MotorInterface::drive_mode()
+MotorInterface::drive_mode() const
 {
   return data->drive_mode;
 }
@@ -160,7 +160,7 @@ MotorInterface::set_drive_mode(const unsigned int new_drive_mode)
  * @return right_rpm value
  */
 int
-MotorInterface::right_rpm()
+MotorInterface::right_rpm() const
 {
   return data->right_rpm;
 }
@@ -194,7 +194,7 @@ MotorInterface::set_right_rpm(const int new_right_rpm)
  * @return rear_rpm value
  */
 int
-MotorInterface::rear_rpm()
+MotorInterface::rear_rpm() const
 {
   return data->rear_rpm;
 }
@@ -228,7 +228,7 @@ MotorInterface::set_rear_rpm(const int new_rear_rpm)
  * @return left_rpm value
  */
 int
-MotorInterface::left_rpm()
+MotorInterface::left_rpm() const
 {
   return data->left_rpm;
 }
@@ -262,7 +262,7 @@ MotorInterface::set_left_rpm(const int new_left_rpm)
  * @return odometry_path_length value
  */
 float
-MotorInterface::odometry_path_length()
+MotorInterface::odometry_path_length() const
 {
   return data->odometry_path_length;
 }
@@ -296,7 +296,7 @@ MotorInterface::set_odometry_path_length(const float new_odometry_path_length)
  * @return odometry_position_x value
  */
 float
-MotorInterface::odometry_position_x()
+MotorInterface::odometry_position_x() const
 {
   return data->odometry_position_x;
 }
@@ -330,7 +330,7 @@ MotorInterface::set_odometry_position_x(const float new_odometry_position_x)
  * @return odometry_position_y value
  */
 float
-MotorInterface::odometry_position_y()
+MotorInterface::odometry_position_y() const
 {
   return data->odometry_position_y;
 }
@@ -364,7 +364,7 @@ MotorInterface::set_odometry_position_y(const float new_odometry_position_y)
  * @return odometry_orientation value
  */
 float
-MotorInterface::odometry_orientation()
+MotorInterface::odometry_orientation() const
 {
   return data->odometry_orientation;
 }
@@ -398,7 +398,7 @@ MotorInterface::set_odometry_orientation(const float new_odometry_orientation)
  * @return vx value
  */
 float
-MotorInterface::vx()
+MotorInterface::vx() const
 {
   return data->vx;
 }
@@ -432,7 +432,7 @@ MotorInterface::set_vx(const float new_vx)
  * @return vy value
  */
 float
-MotorInterface::vy()
+MotorInterface::vy() const
 {
   return data->vy;
 }
@@ -466,7 +466,7 @@ MotorInterface::set_vy(const float new_vy)
  * @return omega value
  */
 float
-MotorInterface::omega()
+MotorInterface::omega() const
 {
   return data->omega;
 }
@@ -501,7 +501,7 @@ MotorInterface::set_omega(const float new_omega)
  * @return controller value
  */
 unsigned int
-MotorInterface::controller()
+MotorInterface::controller() const
 {
   return data->controller;
 }
@@ -538,7 +538,7 @@ MotorInterface::set_controller(const unsigned int new_controller)
  * @return controller_thread_name value
  */
 char *
-MotorInterface::controller_thread_name()
+MotorInterface::controller_thread_name() const
 {
   return data->controller_thread_name;
 }
@@ -649,7 +649,7 @@ MotorInterface::SetMotorStateMessage::SetMotorStateMessage(const SetMotorStateMe
  * @return motor_state value
  */
 unsigned int
-MotorInterface::SetMotorStateMessage::motor_state()
+MotorInterface::SetMotorStateMessage::motor_state() const
 {
   return data->motor_state;
 }
@@ -741,7 +741,7 @@ MotorInterface::AcquireControlMessage::AcquireControlMessage(const AcquireContro
  * @return controller value
  */
 unsigned int
-MotorInterface::AcquireControlMessage::controller()
+MotorInterface::AcquireControlMessage::controller() const
 {
   return data->controller;
 }
@@ -778,7 +778,7 @@ MotorInterface::AcquireControlMessage::set_controller(const unsigned int new_con
  * @return controller_thread_name value
  */
 char *
-MotorInterface::AcquireControlMessage::controller_thread_name()
+MotorInterface::AcquireControlMessage::controller_thread_name() const
 {
   return data->controller_thread_name;
 }
@@ -910,7 +910,7 @@ MotorInterface::DriveRPMMessage::DriveRPMMessage(const DriveRPMMessage *m) : Mes
  * @return front_right value
  */
 float
-MotorInterface::DriveRPMMessage::front_right()
+MotorInterface::DriveRPMMessage::front_right() const
 {
   return data->front_right;
 }
@@ -940,7 +940,7 @@ MotorInterface::DriveRPMMessage::set_front_right(const float new_front_right)
  * @return front_left value
  */
 float
-MotorInterface::DriveRPMMessage::front_left()
+MotorInterface::DriveRPMMessage::front_left() const
 {
   return data->front_left;
 }
@@ -970,7 +970,7 @@ MotorInterface::DriveRPMMessage::set_front_left(const float new_front_left)
  * @return rear value
  */
 float
-MotorInterface::DriveRPMMessage::rear()
+MotorInterface::DriveRPMMessage::rear() const
 {
   return data->rear;
 }
@@ -1057,7 +1057,7 @@ MotorInterface::TransMessage::TransMessage(const TransMessage *m) : Message("Tra
  * @return vx value
  */
 float
-MotorInterface::TransMessage::vx()
+MotorInterface::TransMessage::vx() const
 {
   return data->vx;
 }
@@ -1087,7 +1087,7 @@ MotorInterface::TransMessage::set_vx(const float new_vx)
  * @return vy value
  */
 float
-MotorInterface::TransMessage::vy()
+MotorInterface::TransMessage::vy() const
 {
   return data->vy;
 }
@@ -1172,7 +1172,7 @@ MotorInterface::RotMessage::RotMessage(const RotMessage *m) : Message("RotMessag
  * @return omega value
  */
 float
-MotorInterface::RotMessage::omega()
+MotorInterface::RotMessage::omega() const
 {
   return data->omega;
 }
@@ -1261,7 +1261,7 @@ MotorInterface::TransRotMessage::TransRotMessage(const TransRotMessage *m) : Mes
  * @return vx value
  */
 float
-MotorInterface::TransRotMessage::vx()
+MotorInterface::TransRotMessage::vx() const
 {
   return data->vx;
 }
@@ -1291,7 +1291,7 @@ MotorInterface::TransRotMessage::set_vx(const float new_vx)
  * @return vy value
  */
 float
-MotorInterface::TransRotMessage::vy()
+MotorInterface::TransRotMessage::vy() const
 {
   return data->vy;
 }
@@ -1321,7 +1321,7 @@ MotorInterface::TransRotMessage::set_vy(const float new_vy)
  * @return omega value
  */
 float
-MotorInterface::TransRotMessage::omega()
+MotorInterface::TransRotMessage::omega() const
 {
   return data->omega;
 }
@@ -1410,7 +1410,7 @@ MotorInterface::OrbitMessage::OrbitMessage(const OrbitMessage *m) : Message("Orb
  * @return px value
  */
 float
-MotorInterface::OrbitMessage::px()
+MotorInterface::OrbitMessage::px() const
 {
   return data->px;
 }
@@ -1440,7 +1440,7 @@ MotorInterface::OrbitMessage::set_px(const float new_px)
  * @return py value
  */
 float
-MotorInterface::OrbitMessage::py()
+MotorInterface::OrbitMessage::py() const
 {
   return data->py;
 }
@@ -1470,7 +1470,7 @@ MotorInterface::OrbitMessage::set_py(const float new_py)
  * @return omega value
  */
 float
-MotorInterface::OrbitMessage::omega()
+MotorInterface::OrbitMessage::omega() const
 {
   return data->omega;
 }
@@ -1559,7 +1559,7 @@ MotorInterface::LinTransRotMessage::LinTransRotMessage(const LinTransRotMessage 
  * @return vx value
  */
 float
-MotorInterface::LinTransRotMessage::vx()
+MotorInterface::LinTransRotMessage::vx() const
 {
   return data->vx;
 }
@@ -1589,7 +1589,7 @@ MotorInterface::LinTransRotMessage::set_vx(const float new_vx)
  * @return vy value
  */
 float
-MotorInterface::LinTransRotMessage::vy()
+MotorInterface::LinTransRotMessage::vy() const
 {
   return data->vy;
 }
@@ -1619,7 +1619,7 @@ MotorInterface::LinTransRotMessage::set_vy(const float new_vy)
  * @return omega value
  */
 float
-MotorInterface::LinTransRotMessage::omega()
+MotorInterface::LinTransRotMessage::omega() const
 {
   return data->omega;
 }

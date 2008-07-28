@@ -247,9 +247,7 @@ NetworkConfiguration::send_get(const char *path, unsigned int msgid)
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							msgid,
 							g, sizeof(config_getval_msg_t));
-  c->enqueue(omsg);
-  omsg->unref();
-  c->wait(FAWKES_CID_CONFIGMANAGER);
+  c->enqueue_and_wait(omsg);
 
   if ( msg == NULL ) {
     mutex->unlock();
@@ -262,7 +260,6 @@ NetworkConfiguration::send_get(const char *path, unsigned int msgid)
     mutex->unlock();
     throw TypeMismatchException("NetworkConfiguration::send_get: msg type not float");
   }
-
 }
 
 
@@ -542,9 +539,7 @@ NetworkConfiguration::get_value(const char *path)
     FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							  MSG_CONFIG_GET_VALUE,
 							  g, sizeof(config_getval_msg_t));
-    c->enqueue(omsg);
-    omsg->unref();
-    c->wait(FAWKES_CID_CONFIGMANAGER);
+    c->enqueue_and_wait(omsg);
 
     if ( msg == NULL ) {
       mutex->unlock();
@@ -583,9 +578,7 @@ NetworkConfiguration::set_float_internal(unsigned int msg_type,
   config_float_value_msg_t *fm = omsg->msg<config_float_value_msg_t>();
   strncpy(fm->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   fm->f = f;
-  c->enqueue(omsg);
-  omsg->unref();
-  c->wait(FAWKES_CID_CONFIGMANAGER);
+  c->enqueue_and_wait(omsg);
   if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
@@ -628,9 +621,7 @@ NetworkConfiguration::set_uint_internal(unsigned int msg_type,
   config_uint_value_msg_t *m = omsg->msg<config_uint_value_msg_t>();
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   m->u = uint;
-  c->enqueue(omsg);
-  omsg->unref();
-  c->wait(FAWKES_CID_CONFIGMANAGER);
+  c->enqueue_and_wait(omsg);
   if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
@@ -669,9 +660,7 @@ NetworkConfiguration::set_int_internal(unsigned int msg_type,
   config_int_value_msg_t *m = omsg->msg<config_int_value_msg_t>();
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   m->i = i;
-  c->enqueue(omsg);
-  omsg->unref();
-  c->wait(FAWKES_CID_CONFIGMANAGER);
+  c->enqueue_and_wait(omsg);
   if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
@@ -714,9 +703,7 @@ NetworkConfiguration::set_bool_internal(unsigned int msg_type,
   config_bool_value_msg_t *m = omsg->msg<config_bool_value_msg_t>();
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   m->b = (b ? 1 : 0);
-  c->enqueue(omsg);
-  omsg->unref();
-  c->wait(FAWKES_CID_CONFIGMANAGER);
+  c->enqueue_and_wait(omsg);
   if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
@@ -764,9 +751,7 @@ NetworkConfiguration::set_string_internal(unsigned int msg_type,
   config_string_value_msg_t *m = omsg->msg<config_string_value_msg_t>();
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   strncpy(m->s, s, CONFIG_MSG_MAX_STRING_LENGTH);
-  c->enqueue(omsg);
-  omsg->unref();
-  c->wait(FAWKES_CID_CONFIGMANAGER);
+  c->enqueue_and_wait(omsg);
   if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
@@ -822,9 +807,7 @@ NetworkConfiguration::erase_internal(unsigned int msg_type,
 							sizeof(config_erase_value_msg_t));
   config_erase_value_msg_t *m = omsg->msg<config_erase_value_msg_t>();
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  c->enqueue(omsg);
-  omsg->unref();
-  c->wait(FAWKES_CID_CONFIGMANAGER);
+  c->enqueue_and_wait(omsg);
   if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();
     msg = NULL;

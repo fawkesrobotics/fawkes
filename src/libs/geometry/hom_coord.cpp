@@ -28,6 +28,7 @@
 #include <geometry/vector.h>
 
 #include <cstdio>
+#include <iomanip>
 
 namespace fawkes {
 
@@ -101,10 +102,11 @@ HomCoord::x()
 /** Setter function for x.
  * @param x the new x value
  */
-void
+HomCoord&
 HomCoord::x(float x)
 {
   m_vector->set(0, x);
+	return *this;
 }
 
 /** RO-getter for y.
@@ -129,10 +131,11 @@ HomCoord::y()
 /** Setter function for y.
  * @param y the new y value
  */
-void
+HomCoord&
 HomCoord::y(float y)
 {
   m_vector->set(1, y);
+	return *this;
 }
 
 /** RO-getter for z.
@@ -157,10 +160,11 @@ HomCoord::z()
 /** Setter function for z.
  * @param z the new z value
  */
-void
+HomCoord&
 HomCoord::z(float z)
 {
   m_vector->set(2, z);
+	return *this;
 }
 
 /** RO-getter for w.
@@ -185,10 +189,11 @@ HomCoord::w()
 /** Setter function for w.
  * @param w the new w value
  */
-void
+HomCoord&
 HomCoord::w(float w)
 {
   m_vector->set(3, w);
+	return *this;
 }
 
 /** Convenience function to rotate the HomCoord around the x-axis.
@@ -250,7 +255,7 @@ HomCoord::operator-(const HomCoord& h) const
 HomCoord&
 HomCoord::operator-=(const HomCoord& h)
 {
-  for (unsigned int i = 0; i < 4; ++i)
+  for (unsigned int i = 0; i < 3; ++i)
     {
       (*m_vector)[i] -= (*h.m_vector)[i];
     }
@@ -278,13 +283,14 @@ HomCoord::operator+(const HomCoord& h) const
 HomCoord&
 HomCoord::operator+=(const HomCoord& h)
 {
-  for (unsigned int i = 0; i < 4; ++i)
+  for (unsigned int i = 0; i < 3; ++i)
     {
       (*m_vector)[i] += (*h.m_vector)[i];
     }
 
   return *this;
 }
+  
   
 /** Assignment operator.
  * @param h the rhs HomCoord
@@ -298,4 +304,38 @@ HomCoord::operator=(const HomCoord& h)
   return *this;
 }
 
+/** Calculates the dot product of two coords.
+ * @param h the rhs HomCoord
+ * @return the scalar product
+ */
+float
+HomCoord::operator*(const HomCoord& h) const
+{
+	return x()*h.x() + y()*h.y() + z()*h.z();
+}
+
+
+/** Appends the components of the HomCoord to the ostream.
+ * @param stream to be extended
+ * @param h extending HomCoord
+ * @return the extended stream
+ */
+std::ostream&
+operator<<(std::ostream& stream, const HomCoord &h)
+{
+	return h.addToStream(stream);
+}
+
+
+/** Appends the components of the HomCoord to the ostream.
+ * @param stream to be extended
+ * @return the extended stream
+ */
+std::ostream& 
+HomCoord::addToStream(std::ostream& stream) const
+{
+	return stream << "[" << x() << ","  << y() << ","  << z() << ","  << w() << "]";
+}
+
 } // end namespace fawkes
+

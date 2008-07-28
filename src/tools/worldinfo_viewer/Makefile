@@ -16,8 +16,9 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
+
+include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gui.mk
-include $(BASEDIR)/etc/buildsys/ext/gmsl
 
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
@@ -36,12 +37,12 @@ else
   WARN_TARGETS += warning_wiv
 endif
 
-ifneq ($(SRCDIR),.)
-all: $(WARN_TARGETS)
+ifeq ($(OBJSSUBMAKE),1)
+gui: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
 warning_wiv:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building wiv$(TNORMAL) $(GUI_ERROR)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Not building wiv$(TNORMAL) $(GUI_ERROR)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

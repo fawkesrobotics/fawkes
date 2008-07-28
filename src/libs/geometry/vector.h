@@ -26,6 +26,8 @@
 #ifndef __GEOMETRY_VECTOR_H_
 #define __GEOMETRY_VECTOR_H_
 
+#include <ostream>
+
 namespace fawkes {
 
 class Vector
@@ -33,7 +35,7 @@ class Vector
  public:
   Vector(unsigned int size = 3, float* elems = 0, bool manage_memory = true);
   Vector(const Vector& v);
-  ~Vector();
+  virtual ~Vector();
 
   unsigned int size() const;
   void         set_size(unsigned int size);
@@ -61,6 +63,8 @@ class Vector
 
   Vector  operator*(const float& f) const;
   Vector& operator*=(const float& f);
+	
+	float operator*(const Vector& v) const;
 
   Vector  operator/(const float& f) const;
   Vector& operator/=(const float& f);
@@ -70,6 +74,8 @@ class Vector
   bool operator==(const Vector& v);
 
   void print_info(const char* name = 0) const;
+		
+	friend std::ostream& operator<<(std::ostream& stream, const Vector &v);
 
  private:
   unsigned int m_size;

@@ -29,9 +29,8 @@ ifneq ($(HAVE_LIBCRYPTO),1)
   ERROR_TARGETS += error_libcrypto
 else
   CFLAGS += $(shell $(PKGCONFIG) --cflags $(LIBCRYPTO_PKG))
-  LDFLAGS_libfawkesnetcomm += $(shell pkg-config --libs $(LIBCRYPTO_PKG))
+  LDFLAGS_libfawkesnetcomm += $(shell $(PKGCONFIG) --libs $(LIBCRYPTO_PKG))
 endif
-
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS) $(ERROR_TARGETS)

@@ -50,10 +50,22 @@
 #define YUV422_PLANAR_V_PLANE(YUV, width, height) (YUV + ((width) * (height)) + ((width) * (height) / 2))
 
 /** YUV pixel. */
-typedef struct {
+typedef struct YUV_t_struct{
   unsigned char Y;	/**< Y component */
   unsigned char U;	/**< U component */
   unsigned char V;	/**< V component */
+
+  /** Standard constructor 
+   * @param y Y component
+   * @param u U component
+   * @param v V component
+   */
+  YUV_t_struct(unsigned char y = 127, unsigned char u = 127, unsigned char v = 127)
+  {
+    Y = y;
+    U = u;
+    V = v;
+  }
 } YUV_t;
 
 
@@ -98,6 +110,16 @@ void yuv422planar_to_yuv422packed(unsigned char *planar, unsigned char *packed,
 /** Convert YUV422_PACKED images to YUV422_PLANAR
  */
 void yuv422packed_to_yuv422planar(unsigned char *packed, unsigned char *planar,
+				  unsigned int width, unsigned int height);
+
+/** Convert YUY2 images to YUV422_PLANAR
+ */
+void yuy2_to_yuv422planar(unsigned char *packed, unsigned char *planar,
+				  unsigned int width, unsigned int height);
+
+/** Convert YVY2 images to YUV422_PLANAR
+ */
+void yvy2_to_yuv422planar(unsigned char *packed, unsigned char *planar,
 				  unsigned int width, unsigned int height);
 
 /** Convert YUV444_PACKED images to YUV422_PLANAR

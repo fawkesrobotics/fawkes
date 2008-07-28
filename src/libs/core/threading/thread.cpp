@@ -49,7 +49,7 @@ namespace fawkes {
  * @relates Thread
  */
 
-/** @class Thread core/threading/thread.h
+/** @class Thread thread.h <core/threading/thread.h>
  * Thread class encapsulation of pthreads.
  * This is the base class for all threads in Fawkes. Derive this class for
  * your thread. Note that you have to set a meaningful name, as this name

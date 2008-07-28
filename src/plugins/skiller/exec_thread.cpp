@@ -37,6 +37,9 @@
 #include <interfaces/skiller.h>
 #include <interfaces/navigator.h>
 #include <interfaces/gamestate.h>
+#include <interfaces/humanoidmotion.h>
+#include <interfaces/switch.h>
+#include <interfaces/speechsynth.h>
 
 #include <lua.hpp>
 #include <tolua++.h>
@@ -99,10 +102,6 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
     final   = __lua->to_integer(-2);
     failed  = __lua->to_integer(-1);
 
-    logger->log_debug("SkillerExecutionThread", "Status is %s "
-		      "(running %i, final: %i, failed: %i)",
-		      sst, running, final, failed);
-
     if ( failed > 0 ) {
       sst = "S_FAILED";
       __slt->skiller->set_status(SkillerInterface::S_FAILED);
@@ -118,6 +117,12 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
       __slt->skiller->set_status(SkillerInterface::S_INACTIVE);
     }
 
+    /*
+    logger->log_debug("SkillerExecutionThread", "Status is %s "
+		      "(running %i, final: %i, failed: %i)",
+		      sst, running, final, failed);
+    */
+
   } catch (Exception &e) {
     logger->log_error("SkillerExecutionThread", "Failed to retrieve skill status");
     logger->log_error("SkillerExecutionThread", e);
@@ -131,6 +136,9 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
 void
 SkillerExecutionThread::init()
 {
+  __last_exclusive_controller = 0;
+  __reader_just_left = false;
+
   try {
     __cfg_skillspace  = config->get_string("/skiller/skillspace");
     __cfg_watch_files = config->get_bool("/skiller/watch_files");
@@ -148,10 +156,10 @@ SkillerExecutionThread::init()
   __lua->add_package_dir(LUADIR);
   __lua->add_cpackage_dir(LUALIBDIR);
 
-  __lua->add_package("utils");
-  __lua->add_package("config");
-  __lua->add_package("interface");
-  __lua->add_package("interfaces");
+  __lua->add_package("fawkesutils");
+  __lua->add_package("fawkesconfig");
+  __lua->add_package("fawkesinterface");
+  __lua->add_package("fawkesinterfaces");
 
   __lua->set_string("SKILLSPACE", __cfg_skillspace.c_str());
   __lua->set_usertype("config", config, "Configuration", "fawkes");
@@ -160,8 +168,14 @@ SkillerExecutionThread::init()
 
   __lua->set_usertype("wm_ball", __slt->wm_ball, __slt->wm_ball->type(), "fawkes");
   __lua->set_usertype("wm_pose", __slt->wm_pose, __slt->wm_pose->type(), "fawkes");
+  __lua->set_usertype("nao_ball", __slt->nao_ball, __slt->nao_ball->type(), "fawkes");
   __lua->set_usertype("navigator", __slt->navigator, __slt->navigator->type(), "fawkes");
+  __lua->set_usertype("nao_navigator", __slt->nao_navigator, __slt->nao_navigator->type(), "fawkes");
   __lua->set_usertype("gamestate", __slt->gamestate, __slt->gamestate->type(), "fawkes");
+  __lua->set_usertype("hummot", __slt->hummot, __slt->hummot->type(), "fawkes");
+  __lua->set_usertype("chbut", __slt->chbut, __slt->chbut->type(), "fawkes");
+  __lua->set_usertype("tballrec", __slt->tballrec, __slt->tballrec->type(), "fawkes");
+  __lua->set_usertype("speechsynth", __slt->speechsynth, __slt->speechsynth->type(), "fawkes");
 
   __lua->set_start_script(SKILLERLUADIR"/skills/common/start.lua");
 }
@@ -174,8 +188,6 @@ SkillerExecutionThread::finalize()
   __lua = NULL;
   delete __clog;
   __clog = NULL;
-
-
 }
 
 
@@ -188,6 +200,10 @@ SkillerExecutionThread::skiller_reader_removed(unsigned int instance_serial)
   if ( instance_serial == __slt->skiller->exclusive_controller() ) {
     logger->log_debug("SkillerExecutionThread", "Controlling interface instance was closed, "
 		      "revoking exclusive control");
+
+    __last_exclusive_controller = instance_serial;
+    __reader_just_left = true;
+
     __slt->skiller->set_exclusive_controller(0);
     __slt->skiller->write();
   }
@@ -224,16 +240,19 @@ SkillerExecutionThread::loop()
       if ( excl_ctrl == m->sender_id() ) {
 	logger->log_debug("SkillerExecutionThread", "%s releases exclusive control",
 			  m->sender_thread_name());
-
+	
 	if ( __continuous_run ) {
 	  __continuous_run = false;
 	  continuous_reset = true;
 	}
+	__last_exclusive_controller = __slt->skiller->exclusive_controller();
 	__slt->skiller->set_exclusive_controller(0);
 	excl_ctrl = 0;
-      } else {
-	logger->log_warn("SkillerExecutionThread", "%s tried to release exclusive control, "
-			 "it's not the controller", m->sender_thread_name());
+    } else {
+	if ( !__reader_just_left || (m->sender_id() != __last_exclusive_controller)) {
+	  logger->log_warn("SkillerExecutionThread", "%s tried to release exclusive control, "
+			   "it's not the controller", m->sender_thread_name());
+	}
       }
     } else if ( __slt->skiller->msgq_first_is<SkillerInterface::ExecSkillMessage>() ) {
       SkillerInterface::ExecSkillMessage *m = __slt->skiller->msgq_first<SkillerInterface::ExecSkillMessage>();
@@ -280,7 +299,8 @@ SkillerExecutionThread::loop()
     } else if ( __slt->skiller->msgq_first_is<SkillerInterface::StopExecMessage>() ) {
       SkillerInterface::StopExecMessage *m = __slt->skiller->msgq_first<SkillerInterface::StopExecMessage>();
 
-      if ( m->sender_id() == excl_ctrl ) {
+      if ( (m->sender_id() == excl_ctrl) ||
+	   (__reader_just_left && (m->sender_id() == __last_exclusive_controller)) ) {
 	logger->log_debug("SkillerExecutionThread", "Stopping continuous execution");
 	if ( __continuous_run ) {
 	  __continuous_run = false;
@@ -313,7 +333,7 @@ SkillerExecutionThread::loop()
     // we're in continuous mode, reset status for this new loop
     if ( __continuous_run && ! continuous_reset) {
       // was continuous execution, status has to be cleaned up anyway
-      logger->log_debug("SkillerExecutionThread", "Resetting skill status in continuous mode");
+      //logger->log_debug("SkillerExecutionThread", "Resetting skill status in continuous mode");
       __lua->do_string("skills.skillenv.reset_status()");
     }
 
@@ -336,5 +356,7 @@ SkillerExecutionThread::loop()
       __lua->do_string("skills.skillenv.reset_all()");
     }
   } // end if (curss != "")
+
+  __reader_just_left = false;
 }
 

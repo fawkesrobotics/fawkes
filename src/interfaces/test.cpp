@@ -72,7 +72,7 @@ TestInterface::~TestInterface()
  * @return test_bool value
  */
 bool
-TestInterface::is_test_bool()
+TestInterface::is_test_bool() const
 {
   return data->test_bool;
 }
@@ -102,7 +102,7 @@ TestInterface::set_test_bool(const bool new_test_bool)
  * @return test_int value
  */
 int
-TestInterface::test_int()
+TestInterface::test_int() const
 {
   return data->test_int;
 }
@@ -132,7 +132,7 @@ TestInterface::set_test_int(const int new_test_int)
  * @return _flags value
  */
 char
-TestInterface::_flags()
+TestInterface::_flags() const
 {
   return data->_flags;
 }
@@ -162,7 +162,7 @@ TestInterface::set__flags(const char new__flags)
  * @return test_string value
  */
 char *
-TestInterface::test_string()
+TestInterface::test_string() const
 {
   return data->test_string;
 }
@@ -192,7 +192,7 @@ TestInterface::set_test_string(const char * new_test_string)
  * @return result value
  */
 int
-TestInterface::result()
+TestInterface::result() const
 {
   return data->result;
 }
@@ -222,7 +222,7 @@ TestInterface::set_result(const int new_result)
  * @return test_uint value
  */
 unsigned int
-TestInterface::test_uint()
+TestInterface::test_uint() const
 {
   return data->test_uint;
 }
@@ -252,7 +252,7 @@ TestInterface::set_test_uint(const unsigned int new_test_uint)
  * @return test_ulint value
  */
 unsigned long int
-TestInterface::test_ulint()
+TestInterface::test_ulint() const
 {
   return data->test_ulint;
 }
@@ -282,7 +282,7 @@ TestInterface::set_test_ulint(const unsigned long int new_test_ulint)
  * @return test_lint value
  */
 long int
-TestInterface::test_lint()
+TestInterface::test_lint() const
 {
   return data->test_lint;
 }
@@ -375,7 +375,7 @@ TestInterface::SetTestIntMessage::SetTestIntMessage(const SetTestIntMessage *m) 
  * @return test_int value
  */
 int
-TestInterface::SetTestIntMessage::test_int()
+TestInterface::SetTestIntMessage::test_int() const
 {
   return data->test_int;
 }
@@ -460,7 +460,7 @@ TestInterface::SetTestStringMessage::SetTestStringMessage(const SetTestStringMes
  * @return test_string value
  */
 char *
-TestInterface::SetTestStringMessage::test_string()
+TestInterface::SetTestStringMessage::test_string() const
 {
   return data->test_string;
 }
@@ -547,7 +547,7 @@ TestInterface::CalculateMessage::CalculateMessage(const CalculateMessage *m) : M
  * @return summand value
  */
 int
-TestInterface::CalculateMessage::summand()
+TestInterface::CalculateMessage::summand() const
 {
   return data->summand;
 }
@@ -577,7 +577,7 @@ TestInterface::CalculateMessage::set_summand(const int new_summand)
  * @return addend value
  */
 int
-TestInterface::CalculateMessage::addend()
+TestInterface::CalculateMessage::addend() const
 {
   return data->addend;
 }

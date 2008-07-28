@@ -51,6 +51,12 @@ OBJS_libfvcams += leutron.o
 # Leutron headers are in a bad shape...
 CFLAGS += -Wno-packed -Wno-attributes -Wno-non-virtual-dtor
 endif
+ifeq ($(HAVE_V4L1_CAM),1)
+OBJS_libfvcams += v4l1.o
+endif
+ifeq ($(HAVE_V4L2_CAM),1)
+OBJS_libfvcams += v4l2.o
+endif
 ifeq ($(HAVE_V4L_CAM),1)
 OBJS_libfvcams += v4l.o
 endif

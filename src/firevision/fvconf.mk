@@ -18,7 +18,7 @@ __fvconf_mk_ := 1
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L BUMBLEBEE2
+CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L V4L1 V4L2 BUMBLEBEE2
 CTRLS=EVID100P DPPTU
 
 FVBASEDIR           = $(BASEDIR)/src/firevision
@@ -28,13 +28,13 @@ VISION_INCDIRS      = $(realpath $(FVBASEDIR))
 VISION_CFLAGS       = -D__STDC_LIMIT_MACROS -DFVCONFDIR=\"$(FVCONFDIR)\"
 
 # PTGrey Triclops SDK used for Bumblebee2 stereo processing
-TRICLOPS_SDK=/opt/Triclops3.2.0.8-FC3
+TRICLOPS_SDK=$(SYSROOT)/opt/Triclops3.2.0.8-FC3
 
-ifneq ($(wildcard /usr/include/lvsds),)
+ifneq ($(wildcard $(SYSROOT)/usr/include/lvsds),)
 HAVE_LEUTRON_CAM    = 1
 HAVE_VISCA_CTRL     = 1
-VISION_LIBDIRs     += /usr/lib/lvsds
-VISION_INCDIRS     += /usr/include/lvsds
+VISION_LIBDIRs     += $(SYSROOT)/usr/lib/lvsds
+VISION_INCDIRS     += $(SYSROOT)/usr/include/lvsds
 VISION_CAM_LIBS    += lvsds.34
 endif
 ifeq ($(HAVE_VISCA_CTRL),1)
@@ -42,13 +42,13 @@ HAVE_EVID100P_CTRL  = 1
 endif
 
 # check for JPEG lib
-ifneq ($(wildcard /usr/include/jpeglib.h /usr/local/include/jpeglib.h),)
+ifneq ($(wildcard $(SYSROOT)/usr/include/jpeglib.h $(SYSROOT)/usr/local/include/jpeglib.h),)
   HAVE_LIBJPEG   = 1
   VISION_CFLAGS += -DHAVE_LIBJPEG
 endif
 
 # check for PNG lib
-ifneq ($(wildcard /usr/include/png.h /usr/local/include/png.h),)
+ifneq ($(wildcard $(SYSROOT)/usr/include/png.h $(SYSROOT)/usr/local/include/png.h),)
   HAVE_LIBPNG    = 1
   VISION_CFLAGS += -DHAVE_LIBPNG
 endif
@@ -105,10 +105,22 @@ ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/shmem.h)),)
   HAVE_SHMEM_CAM      = 1
 endif
 HAVE_DPPTU_CTRL     = 0
-HAVE_V4L_CAM        = 0
+HAVE_V4L_CAM        = 1
+HAVE_V4L1_CAM       = 1
+HAVE_V4L2_CAM       = 1
+
+
+### Need at lease one of V4L 1 or 2 for V4L
+ifeq ($(HAVE_V4L_CAM),1)
+  ifneq ($(HAVE_V4L1_CAM),1)
+    ifneq ($(HAVE_V4L2_CAM),1)
+      ERROR_TARGETS += error_V4L_CAM
+    endif
+  endif
+endif
 
 ### Check for external libraries
-IPP_DIR  = /opt/intel/ipp
+IPP_DIR  = $(SYSROOT)/opt/intel/ipp
 HAVE_IPP = 0
 ifneq ($(wildcard $(realpath $(IPP_DIR))),)
   # Check versions, use first one found
@@ -192,6 +204,14 @@ printconf:
 	$(SILENT)echo VISION_INCDIRS:  $(VISION_INCDIRS)
 	$(SILENT)echo VISION_CAM_LIBS: $(VISION_CAM_LIBS)
 	$(SILENT)echo VISION_CFLAGS:   $(VISION_CFLAGS)
+endif
+
+ifneq ($(SRCDIR),)
+all: $(ERROR_TARGETS)
+.PHONY: error_V4L_CAM
+error_V4L_CAM:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)If you enable V4L_CAM, you have to enable at least one of V4L1_CAM and V4L2_CAM$(TNORMAL)"
+	$(SILENT)exit 1
 endif
 
 endif # __fvconf_mk_
