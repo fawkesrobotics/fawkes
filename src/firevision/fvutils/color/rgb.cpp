@@ -26,10 +26,6 @@
 
 #include <fvutils/color/rgb.h>
 
-
-
-
-
 /** Convert RGB to RGB with alpha values.
  * This is plain C code without special optimizations.
  * @param rgb RGB source buffer
