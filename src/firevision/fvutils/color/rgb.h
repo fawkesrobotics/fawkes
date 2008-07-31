@@ -24,11 +24,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-
-
 #ifndef __FIREVISION_UTILS_COLOR_RGB_H
 #define __FIREVISION_UTILS_COLOR_RGB_H
-
 
 #define RGB_PIXEL_SIZE 3
 #define RGB_PIXEL_AT(RGB, width, x, y)    ((RGB_t *)(RGB + ((y) * (width) * RGB_PIXEL_SIZE) + (x) * RGB_PIXEL_SIZE))
@@ -39,11 +36,6 @@
 #define RGB_SET_RED(RGB, width, x, y)     {RGB_t *p=RGB_PIXEL_AT(RGB, (width), (x), (y)); p->R=255; p->G=0;   p->B=0; }
 #define RGB_SET_GREEN(RGB, width, x, y)   {RGB_t *p=RGB_PIXEL_AT(RGB, (width), (x), (y)); p->R=0;   p->G=255; p->B=0; }
 #define RGB_SET_BLUE(RGB, width, x, y)    {RGB_t *p=RGB_PIXEL_AT(RGB, (width), (x), (y)); p->R=0;   p->G=0;   p->B=255; }
-
-#include <fvutils/writers/png.h>
-#include <png.h>
-
-
 
 /** Structure defining an RGB pixel (in R-G-B byte ordering). */
 typedef struct {
@@ -59,10 +51,8 @@ typedef struct {
   unsigned char R;	/**< R value */
 } BGR_t;
 
-
 void rgb_to_rgb_with_alpha_plainc(unsigned char *rgb, unsigned char *rgb_alpha,
 				  unsigned int width, unsigned int height);
-
 
 void rgb_to_bgr_with_alpha_plainc(unsigned char *rgb, unsigned char *bgr_alpha,
 				  unsigned int width, unsigned int height);
@@ -70,9 +60,7 @@ void rgb_to_bgr_with_alpha_plainc(unsigned char *rgb, unsigned char *bgr_alpha,
 void bgr_to_rgb_plainc(unsigned char *BGR, unsigned char *RGB,
 		       unsigned int width, unsigned int height);
 
-void convert_line_bgr_rgb( unsigned char *BGR,  png_byte *RGB,
+void convert_line_bgr_rgb( unsigned char *BGR, unsigned char *RGB,
 			   unsigned int width, unsigned int height); 
-
-
 
 #endif
