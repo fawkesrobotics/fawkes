@@ -27,7 +27,7 @@
 
 #include <geometry/hom_point.h>
 
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
 #include <models/mirror/bulb/bulb_generator.h>
 class Bulb;
 class BulbSampler;
@@ -87,7 +87,7 @@ class MirrorCalibTool
   bool m_calib_done;
   bool m_step_two;
 
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
   Bulb* m_bulb;
   BulbSampler* m_sampler;
   BulbGenerator* m_generator;

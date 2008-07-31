@@ -23,7 +23,7 @@
  */
 
 #include <tools/firestation/mirror_calib.h>
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
 #include <models/mirror/bulb.h>
 #include <models/mirror/bulb/bulb_sampler.h>
 #endif
@@ -50,7 +50,7 @@ float MirrorCalibTool::m_sample_ori[]  = {0.0, deg2rad(45.0),
 /** Constructor. */
 MirrorCalibTool::MirrorCalibTool()
 {
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
   m_bulb = 0;
   m_sampler = 0;
   m_generator = 0;
@@ -76,7 +76,7 @@ MirrorCalibTool::MirrorCalibTool()
 MirrorCalibTool::MirrorCalibTool(unsigned int width, unsigned int height
 				 /*, unsigned int num_dists, unsigned int num_oris*/ )
 {
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
   m_bulb = 0;
   m_sampler = 0;
   m_generator = 0;
@@ -98,7 +98,7 @@ MirrorCalibTool::MirrorCalibTool(unsigned int width, unsigned int height
 /** Destructor. */
 MirrorCalibTool::~MirrorCalibTool()
 {
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
   delete m_bulb;
   delete m_sampler;
   delete m_generator;
@@ -109,7 +109,7 @@ MirrorCalibTool::~MirrorCalibTool()
 void
 MirrorCalibTool::start()
 {
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
   m_sample_step = 0;
   m_sample_dist_step = 0;
   m_sample_ori_step = 0;
@@ -139,7 +139,7 @@ MirrorCalibTool::abort()
 void
 MirrorCalibTool::step(unsigned int x, unsigned int y)
 {
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
   if (m_sample_step == 0)
   {
     m_sampler->setCenter(x, y);
@@ -198,7 +198,7 @@ MirrorCalibTool::step(unsigned int x, unsigned int y)
 bool
 MirrorCalibTool::get_next(float* dist, float* ori)
 {
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
   if (m_step_two)
   {
     *dist = m_sample_dist[m_sample_dist_step];
@@ -225,7 +225,7 @@ MirrorCalibTool::get_next(float* dist, float* ori)
 void
 MirrorCalibTool::load(const char* filename)
 {
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
   m_bulb = new Bulb(filename);
 #endif
 }
@@ -236,7 +236,7 @@ MirrorCalibTool::load(const char* filename)
 void
 MirrorCalibTool::save(const char* filename)
 {
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
   if (m_calib_done)
   {
     m_generator->getResult()->save(filename);
@@ -257,7 +257,7 @@ MirrorCalibTool::save(const char* filename)
 void
 MirrorCalibTool::eval(unsigned int x, unsigned int y, float* dist_ret, float* ori_ret)
 {
-#ifdef HAVE_BULB
+#ifdef HAVE_BULB_CREATOR
   polar_coord_t coord;
   coord = m_bulb->getWorldPointRelative(x, y);
 

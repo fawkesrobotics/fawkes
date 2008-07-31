@@ -16,7 +16,7 @@
 BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-SUBDIRS = battery kicker navigator worldmodel skiller
+SUBDIRS = worldmodel skiller
 
 include $(BASEDIR)/etc/buildsys/rules.mk
 

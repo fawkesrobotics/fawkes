@@ -176,9 +176,9 @@ endif
 # Set to 1 to build shape models
 HAVE_SHAPE_MODELS = 1
 
-ifneq ($(wildcard $(FVBASEDIR)/models/mirror/bulb*),)
-  HAVE_BULB = 1
-  VISION_CFLAGS += -DHAVE_BULB
+ifneq ($(wildcard $(FVBASEDIR)/models/mirror/bulb/*),)
+  HAVE_BULB_CREATOR = 1
+  VISION_CFLAGS += -DHAVE_BULB_CREATOR
 endif
 
 ifneq ($(wildcard $(realpath $(FVBASEDIR)/fvutils/rectification)),)
