@@ -28,12 +28,13 @@ module("skills.midsize", fawkes.modinit.register_all);
 require("skills.common.skillenv");
 
 function module_init(m)
-   skills.skillenv.module_init(m);
+   skills.common.skillenv.module_init(m);
 
    m.midsize = _M;
 end
 
 -- Require all mid-size skills
+-- *** Interfaces are not yet available at this point! ***
 require("skills.midsize.example");
 require("skills.midsize.relgoto");
 require("skills.midsize.goto");

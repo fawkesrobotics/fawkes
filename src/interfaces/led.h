@@ -56,18 +56,24 @@ class LedInterface : public Interface
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
+      float time_sec; /**< 
+      Time in seconds when to reach the intensity.
+     */
       float intensity; /**< Intensity value. */
     } SetIntensityMessage_data_t;
 
     SetIntensityMessage_data_t *data;
 
    public:
-    SetIntensityMessage(const float ini_intensity);
+    SetIntensityMessage(const float ini_time_sec, const float ini_intensity);
     SetIntensityMessage();
     ~SetIntensityMessage();
 
     SetIntensityMessage(const SetIntensityMessage *m);
     /* Methods */
+    float time_sec() const;
+    void set_time_sec(const float new_time_sec);
+    size_t maxlenof_time_sec() const;
     float intensity() const;
     void set_intensity(const float new_intensity);
     size_t maxlenof_intensity() const;

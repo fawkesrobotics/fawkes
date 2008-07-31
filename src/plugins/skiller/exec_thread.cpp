@@ -33,13 +33,7 @@
 
 #include <lua/context.h>
 
-#include <interfaces/object.h>
 #include <interfaces/skiller.h>
-#include <interfaces/navigator.h>
-#include <interfaces/gamestate.h>
-#include <interfaces/humanoidmotion.h>
-#include <interfaces/switch.h>
-#include <interfaces/speechsynth.h>
 
 #include <lua.hpp>
 #include <tolua++.h>
@@ -97,7 +91,7 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
   LUA_INTEGER running = 0, final = 0, failed = 0;
 
   try {
-    __lua->do_string("return skills.skillenv.get_status()");
+    __lua->do_string("return skills.common.skillenv.get_status()");
     running = __lua->to_integer(-3);
     final   = __lua->to_integer(-2);
     failed  = __lua->to_integer(-1);
@@ -166,16 +160,16 @@ SkillerExecutionThread::init()
   __lua->set_usertype("logger", __clog, "ComponentLogger", "fawkes");
   __lua->set_usertype("clock", clock, "Clock", "fawkes");
 
-  __lua->set_usertype("wm_ball", __slt->wm_ball, __slt->wm_ball->type(), "fawkes");
-  __lua->set_usertype("wm_pose", __slt->wm_pose, __slt->wm_pose->type(), "fawkes");
-  __lua->set_usertype("nao_ball", __slt->nao_ball, __slt->nao_ball->type(), "fawkes");
-  __lua->set_usertype("navigator", __slt->navigator, __slt->navigator->type(), "fawkes");
-  __lua->set_usertype("nao_navigator", __slt->nao_navigator, __slt->nao_navigator->type(), "fawkes");
-  __lua->set_usertype("gamestate", __slt->gamestate, __slt->gamestate->type(), "fawkes");
-  __lua->set_usertype("hummot", __slt->hummot, __slt->hummot->type(), "fawkes");
-  __lua->set_usertype("chbut", __slt->chbut, __slt->chbut->type(), "fawkes");
-  __lua->set_usertype("tballrec", __slt->tballrec, __slt->tballrec->type(), "fawkes");
-  __lua->set_usertype("speechsynth", __slt->speechsynth, __slt->speechsynth->type(), "fawkes");
+  SkillerLiaisonThread::InterfaceMap::iterator imi;
+  SkillerLiaisonThread::InterfaceMap &rimap = __slt->reading_interfaces();
+  for (imi = rimap.begin(); imi != rimap.end(); ++imi) {
+    __lua->set_usertype(("interface_" + imi->first).c_str(), imi->second, imi->second->type(), "fawkes");
+  }
+
+  SkillerLiaisonThread::InterfaceMap &wimap = __slt->writing_interfaces();
+  for (imi = wimap.begin(); imi != wimap.end(); ++imi) {
+    __lua->set_usertype(("interface_" + imi->first).c_str(), imi->second, imi->second->type(), "fawkes");
+  }
 
   __lua->set_start_script(SKILLERLUADIR"/skills/common/start.lua");
 }
@@ -324,7 +318,7 @@ SkillerExecutionThread::loop()
 
   if ( continuous_reset ) {
     logger->log_debug("SkillerExecutionThread", "Continuous reset forced");
-    __lua->do_string("skills.skillenv.reset_all()");
+    __lua->do_string("skills.common.skillenv.reset_all()");
   }
 
   if ( curss != "" ) {
@@ -334,13 +328,13 @@ SkillerExecutionThread::loop()
     if ( __continuous_run && ! continuous_reset) {
       // was continuous execution, status has to be cleaned up anyway
       //logger->log_debug("SkillerExecutionThread", "Resetting skill status in continuous mode");
-      __lua->do_string("skills.skillenv.reset_status()");
+      __lua->do_string("skills.common.skillenv.reset_status()");
     }
 
     try {
                                           // Stack:
       __lua->load_string(curss.c_str());  // sksf (skill string function)
-      __lua->do_string("return skills.skillenv.gensandbox()"); // sksf, sandbox
+      __lua->do_string("return skills.common.skillenv.gensandbox()"); // sksf, sandbox
       __lua->setfenv();                   // sksf
       __lua->pcall();                     // ---
 
@@ -353,10 +347,12 @@ SkillerExecutionThread::loop()
     if ( ! __continuous_run ) {
       // was one-shot execution, cleanup
       logger->log_debug("SkillerExecutionThread", "Resetting skills");
-      __lua->do_string("skills.skillenv.reset_all()");
+      __lua->do_string("skills.common.skillenv.reset_all()");
     }
   } // end if (curss != "")
 
   __reader_just_left = false;
+
+  __liaison_exec_barrier->wait();
 }
 

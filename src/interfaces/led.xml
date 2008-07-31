@@ -16,11 +16,14 @@
   <message name="SetIntensity">
     <comment>Sets a new intensity on the LED.</comment>
     <ref>intensity</ref>
+    <field type="float" name="time_sec">
+      Time in seconds when to reach the intensity.
+    </field>
   </message>
   <message name="TurnOn">
-    <comment>Turns the LED on to maximum intensity.</comment>
+    <comment>Turns the LED on to maximum intensity immediately.</comment>
   </message>
   <message name="TurnOff">
-    <comment>Turns the LED off.</comment>
+    <comment>Turns the LED off immediately.</comment>
   </message>
 </interface>

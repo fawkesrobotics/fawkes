@@ -26,13 +26,7 @@
 #include <plugins/skiller/exec_thread.h>
 
 #include <core/threading/barrier.h>
-#include <interfaces/object.h>
 #include <interfaces/skiller.h>
-#include <interfaces/navigator.h>
-#include <interfaces/gamestate.h>
-#include <interfaces/humanoidmotion.h>
-#include <interfaces/switch.h>
-#include <interfaces/speechsynth.h>
 
 #include <cstring>
 
@@ -75,6 +69,27 @@ SkillerLiaisonThread::set_execthread(SkillerExecutionThread *set)
 }
 
 
+/** Get map of reading interfaces.
+ * @return map with variable name as key and interface as value of interfaces
+ * opened for reading.
+ */
+SkillerLiaisonThread::InterfaceMap &
+SkillerLiaisonThread::reading_interfaces()
+{
+  return __reading_ifs;
+}
+
+
+/** Get map of writing interfaces.
+ * @return map with variable name as key and interface as value of interfaces
+ * opened for writing.
+ */
+SkillerLiaisonThread::InterfaceMap &
+SkillerLiaisonThread::writing_interfaces()
+{
+  return __writing_ifs;
+}
+
 /** Clean up when init failed.
  * You may only call this from init(). Never ever call it from anywhere
  * else!
@@ -84,18 +99,13 @@ SkillerLiaisonThread::init_failure_cleanup()
 {
   try {
     if ( skiller )    blackboard->close(skiller);
-    if ( wm_ball )    blackboard->close(wm_ball);
-    if ( wm_pose )    blackboard->close(wm_pose);
-    if ( nao_ball )    blackboard->close(nao_ball);
-    //if ( wm_ball_w )  blackboard->close(wm_ball_w);
-    if ( navigator )  blackboard->close(navigator);
-    if ( nao_navigator )  blackboard->close(nao_navigator);
-    //if ( wm_pose_w )  blackboard->close(wm_pose_w);
-    if ( gamestate )  blackboard->close(gamestate);
-    if ( hummot )  blackboard->close(hummot);
-    if ( chbut )  blackboard->close(chbut);
-    if ( tballrec ) blackboard->close(tballrec);
-    if ( speechsynth )  blackboard->close(speechsynth);
+
+    for (InterfaceMap::iterator i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
+      blackboard->close(i->second);
+    }
+    for (InterfaceMap::iterator i = __writing_ifs.begin(); i != __writing_ifs.end(); ++i) {
+      blackboard->close(i->second);
+    }
   } catch (...) {
     // we really screwed up, can't do anything about it, ignore error, logger is
     // initialized since this method is only called from init() which is only called if
@@ -107,49 +117,68 @@ SkillerLiaisonThread::init_failure_cleanup()
 
 
 void
+SkillerLiaisonThread::open_interfaces(std::string &prefix, InterfaceMap &imap, bool write)
+{
+  Configuration::ValueIterator *vi = config->search(prefix.c_str());
+  while (vi->next()) {
+    if (strcmp(vi->type(), "string") != 0) {
+      TypeMismatchException e("Only values of type string may occur in %s, "
+			      "but found value of type %s",
+			      prefix.c_str(), vi->type());
+      delete vi;
+      throw e;
+    }
+    std::string uid = vi->get_string();
+    std::string varname = std::string(vi->path()).substr(prefix.length());
+    std::string iftype = uid.substr(0, uid.find("::"));
+    std::string ifname = uid.substr(uid.find("::") + 2);
+    logger->log_info(name(), "Adding %s interface %s::%s with name %s",
+		     write ? "writing" : "reading",
+		     iftype.c_str(), ifname.c_str(), varname.c_str());
+    try {
+      Interface *iface;
+      if (write) {
+	iface = blackboard->open_for_writing(iftype.c_str(), ifname.c_str());
+      } else {
+	iface = blackboard->open_for_reading(iftype.c_str(), ifname.c_str());
+      }
+      imap[varname] = iface;
+    } catch (Exception &e) {
+      delete vi;
+      throw;
+    }
+  }
+  delete vi;
+}
+
+void
 SkillerLiaisonThread::init()
 {
-  wm_ball       = NULL;
-  wm_pose       = NULL;
-  navigator     = NULL;
-  nao_navigator = NULL;
-  //wm_ball_w     = NULL;
-  //wm_pose_w     = NULL;
-  gamestate     = NULL;
-  hummot        = NULL;
-  chbut         = NULL;
-  tballrec      = NULL;
-  speechsynth   = NULL;
+  skiller = NULL;
 
   try {
     skiller   = blackboard->open_for_writing<SkillerInterface>("Skiller");
-    wm_ball   = blackboard->open_for_reading<ObjectPositionInterface>("WM Ball");
-    //wm_ball_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Ball");
-    wm_pose   = blackboard->open_for_reading<ObjectPositionInterface>("WM Pose");
-    //wm_pose_w = blackboard->open_for_writing<ObjectPositionInterface>("WM Pose");
-    nao_ball   = blackboard->open_for_reading<ObjectPositionInterface>("Ball Nao");
-    navigator = blackboard->open_for_reading<NavigatorInterface>("Navigator");
-    nao_navigator = blackboard->open_for_reading<NavigatorInterface>("Nao Navi");
-    gamestate = blackboard->open_for_reading<GameStateInterface>("WM GameState");
-    hummot    = blackboard->open_for_reading<HumanoidMotionInterface>("Nao Motion");
-    chbut     = blackboard->open_for_reading<SwitchInterface>("Nao ChestButton");
-    tballrec  = blackboard->open_for_writing<SwitchInterface>("Toggle Ball Rec");
-    speechsynth = blackboard->open_for_reading<SpeechSynthInterface>("Nao SpeechSynth");
-    std::list<ObjectPositionInterface *> *obs_lst = blackboard->open_all_of_type_for_reading<ObjectPositionInterface>("WM Obstacles");
-    for (std::list<ObjectPositionInterface *>::iterator i = obs_lst->begin(); i != obs_lst->end(); ++i) {
-      wm_obstacles.push_back(*i);
-    }
-    delete obs_lst;
+
+    std::string skillspace  = config->get_string("/skiller/skillspace");
+
+    std::string reading_prefix = "/skiller/interfaces/" + skillspace + "/reading/";
+    std::string writing_prefix = "/skiller/interfaces/" + skillspace + "/writing/";
+    open_interfaces(reading_prefix, __reading_ifs, /* write */ false);
+    open_interfaces(writing_prefix, __writing_ifs, /* write */ true);
+
   } catch (Exception &e) {
+    e.print_trace();
     init_failure_cleanup();
     e.append("SkillerLiaisonThread::init() failed");
     throw;
   }
 
+  /*
   // we only watch create events, since we never ever close an interface while
   // running, we only open newly created ones. We have memory an do not want
   // "oscillating" open/close loops
   blackboard->register_observer(this, BlackBoard::BBIO_FLAG_CREATED);
+  */
 
   // We want to know if our reader leaves and closes the interface
   bbil_add_reader_interface(skiller);
@@ -163,24 +192,20 @@ SkillerLiaisonThread::finalize()
   blackboard->unregister_listener(this);
 
   blackboard->close(skiller);
-  blackboard->close(wm_ball);
-  //blackboard->close(wm_ball_w);
-  blackboard->close(wm_pose);
-  //blackboard->close(wm_pose_w);
-  blackboard->close(nao_ball);
-  blackboard->close(navigator);
-  blackboard->close(nao_navigator);
-  blackboard->close(gamestate);
-  blackboard->close(hummot);
-  blackboard->close(chbut);
-  blackboard->close(tballrec);
-  blackboard->close(speechsynth);
+
+  for (InterfaceMap::iterator i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
+    blackboard->close(i->second);
+  }
+  for (InterfaceMap::iterator i = __writing_ifs.begin(); i != __writing_ifs.end(); ++i) {
+    blackboard->close(i->second);
+  }
 }
 
 
 void
 SkillerLiaisonThread::bb_interface_created(const char *type, const char *id) throw()
 {
+  /*
   if ( strncmp(id, "WM Obstacle", strlen("WM Obstacle")) == 0 ) {
     // It's a new obstacle in WM, open it
     try {
@@ -192,6 +217,7 @@ SkillerLiaisonThread::bb_interface_created(const char *type, const char *id) thr
       logger->log_error("SkillerLiaisonThread", e);
     }
   }
+  */
 }
 
 
@@ -206,32 +232,22 @@ SkillerLiaisonThread::bb_interface_reader_removed(Interface *interface,
 void
 SkillerLiaisonThread::loop()
 {
-  //wm_ball_w->set_world_x(wm_ball_w->world_x() + 1);
-  //wm_ball_w->set_visible(false);
-  //wm_ball_w->write();
-
-  /* Can be used for debugging if worldmodel/localization is not available
-  wm_pose_w->set_world_x(wm_pose_w->world_x() + 0.1);
-  wm_pose_w->set_world_y(wm_pose_w->world_y() + 0.1);
-  wm_pose_w->write();
-  */
-
-  wm_ball->read();
-  wm_pose->read();
-  nao_ball->read();
-  navigator->read();
-  nao_navigator->read();
-  gamestate->read();
-  hummot->read();
-  chbut->read();
-  tballrec->read();
-  speechsynth->read();
-
-  wm_obstacles.lock();
-  for (wm_obs_it = wm_obstacles.begin(); wm_obs_it != wm_obstacles.end(); ++wm_obs_it) {
-    (*wm_obs_it)->read();
+  for (InterfaceMap::iterator i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
+    i->second->read();
   }
-  wm_obstacles.unlock();
 
+  // This barrier wait triggers exec thread execution
   __liaison_exec_barrier->wait();
+
+  // This barrier wait makes us wait until the exec thread is finished
+  __liaison_exec_barrier->wait();
+
+  for (InterfaceMap::iterator i = __writing_ifs.begin(); i != __writing_ifs.end(); ++i) {
+    try {
+      i->second->write();
+    } catch (Exception &e) {
+      e.append("Failed to write interface %s, ignoring.", i->second->uid());
+      e.print_trace();
+    }
+  }
 }

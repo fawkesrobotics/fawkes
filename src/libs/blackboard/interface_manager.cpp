@@ -249,35 +249,41 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
 
   ptr = find_interface_in_memory(type, identifier);
 
-  if ( ptr != NULL ) {
-    // found, instantiate new interface for given memory chunk
-    iface = new_interface_instance(type, identifier);
-    ih  = (interface_header_t *)ptr;
-    if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
-	 (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
-      memmgr->unlock();
-      mutex->unlock();
-      throw BlackBoardInterfaceVersionMismatchException();
+  try {
+    if ( ptr != NULL ) {
+      // found, instantiate new interface for given memory chunk
+      iface = new_interface_instance(type, identifier);
+      ih  = (interface_header_t *)ptr;
+      if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
+	   (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
+	throw BlackBoardInterfaceVersionMismatchException();
+      }
+      iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
+      rwlocks[ih->serial]->ref();
+    } else {
+      created = true;
+      create_interface(type, identifier, iface, ptr);
+      ih  = (interface_header_t *)ptr;
     }
-    iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
-    rwlocks[ih->serial]->ref();
-  } else {
-    created = true;
-    create_interface(type, identifier, iface, ptr);
-    ih  = (interface_header_t *)ptr;
+
+    iface->set_readwrite(false, rwlocks[ih->serial]);
+    ih->refcount++;
+    ih->num_readers++;
+
+    memmgr->unlock();
+    mutex->unlock();
+
+    if ( created ) {
+      notifier->notify_of_interface_created(type, identifier);
+    }
+    notifier->notify_of_reader_added(iface, iface->serial());
+
+  } catch (Exception &e) {
+    if (iface)  delete_interface_instance(iface);
+    memmgr->unlock();
+    mutex->unlock();
+    throw;
   }
-
-  iface->set_readwrite(false, rwlocks[ih->serial]);
-  ih->refcount++;
-  ih->num_readers++;
-
-  memmgr->unlock();
-  mutex->unlock();
-
-  if ( created ) {
-    notifier->notify_of_interface_created(type, identifier);
-  }
-  notifier->notify_of_reader_added(iface, iface->serial());
 
   return iface;
 }
@@ -305,48 +311,60 @@ BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type,
   Interface *iface = NULL;
   interface_header_t *ih;
   BlackBoardMemoryManager::ChunkIterator cit;
-  for ( cit = memmgr->begin(); cit != memmgr->end(); ++cit ) {
-    ih = (interface_header_t *)*cit;
 
-    if (NULL == id_prefix) {
-      match = (strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0);
-    } else {
-      unsigned int len = (id_prefix != NULL) ? strlen(id_prefix) : 0;
-      match = ((strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0) &&
-	       (len <= strlen(ih->id)) &&
-	       (strncmp(id_prefix, ih->id, len) == 0) );
-    }
+  try {
+    for ( cit = memmgr->begin(); cit != memmgr->end(); ++cit ) {
+      iface = NULL;
+      ih = (interface_header_t *)*cit;
 
-    if (match) {
-      // found one!
-      // open 
-      void *ptr = *cit;
-      iface = new_interface_instance(ih->type, ih->id);
-      iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
-
-      if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
-	   (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
-	delete_interface_instance( iface );
-	memmgr->unlock();
-	mutex->unlock();
-	throw BlackBoardInterfaceVersionMismatchException();
+      if (NULL == id_prefix) {
+	match = (strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0);
+      } else {
+	unsigned int len = (id_prefix != NULL) ? strlen(id_prefix) : 0;
+	match = ((strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0) &&
+		 (len <= strlen(ih->id)) &&
+		 (strncmp(id_prefix, ih->id, len) == 0) );
       }
 
-      rwlocks[ih->serial]->ref();
+      if (match) {
+	// found one!
+	// open 
+	void *ptr = *cit;
+	iface = new_interface_instance(ih->type, ih->id);
+	iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
 
-      iface->set_readwrite(false, rwlocks[ih->serial]);
-      ih->refcount++;
-      ih->num_readers++;
+	if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
+	     (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
+	  throw BlackBoardInterfaceVersionMismatchException();
+	}
 
-      rv->push_back(iface);
+	rwlocks[ih->serial]->ref();
+
+	iface->set_readwrite(false, rwlocks[ih->serial]);
+	ih->refcount++;
+	ih->num_readers++;
+
+	rv->push_back(iface);
+      }
     }
-  }
 
-  mutex->unlock();
-  memmgr->unlock();
+    mutex->unlock();
+    memmgr->unlock();
 
-  for (std::list<Interface *>::iterator j = rv->begin(); j != rv->end(); ++j) {
-    notifier->notify_of_reader_added(*j, (*j)->serial());
+    for (std::list<Interface *>::iterator j = rv->begin(); j != rv->end(); ++j) {
+      notifier->notify_of_reader_added(*j, (*j)->serial());
+    }
+
+
+  } catch (Exception &e) {
+    if (iface)  delete_interface_instance( iface );
+    for (std::list<Interface *>::iterator i = rv->begin(); i != rv->end(); ++i) {
+      delete_interface_instance(*i);
+    }
+    delete rv;
+    memmgr->unlock();
+    mutex->unlock();
+    throw;
   }
 
   return rv;
@@ -376,46 +394,48 @@ BlackBoardInterfaceManager::open_for_writing(const char *type, const char *ident
   interface_header_t *ih;
   bool created = false;
 
-  ptr = find_interface_in_memory(type, identifier);
+  try {
+    ptr = find_interface_in_memory(type, identifier);
 
-  if ( ptr != NULL ) {
-    // found, check if there is already a writer
-    //instantiate new interface for given memory chunk
-    ih  = (interface_header_t *)ptr;
-    if ( ih->flag_writer_active ) {
-      memmgr->unlock();
-      mutex->unlock();
-      throw BlackBoardWriterActiveException(identifier, type);
+    if ( ptr != NULL ) {
+      // found, check if there is already a writer
+      //instantiate new interface for given memory chunk
+      ih  = (interface_header_t *)ptr;
+      if ( ih->flag_writer_active ) {
+	throw BlackBoardWriterActiveException(identifier, type);
+      }
+      iface = new_interface_instance(type, identifier);
+      if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
+	   (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
+	throw BlackBoardInterfaceVersionMismatchException();
+      }
+      iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
+      rwlocks[ih->serial]->ref();
+    } else {
+      created = true;
+      create_interface(type, identifier, iface, ptr);
+      ih = (interface_header_t *)ptr;
     }
-    iface = new_interface_instance(type, identifier);
-    if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
-	 (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
-      delete_interface_instance(iface);
-      memmgr->unlock();
-      mutex->unlock();
-      throw BlackBoardInterfaceVersionMismatchException();
+
+    iface->set_readwrite(true, rwlocks[ih->serial]);
+    ih->flag_writer_active = 1;
+    ih->refcount++;
+
+    memmgr->unlock();
+    writer_interfaces[ih->serial] = iface;
+
+    mutex->unlock();
+
+    if ( created ) {
+      notifier->notify_of_interface_created(type, identifier);
     }
-    iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
-    rwlocks[ih->serial]->ref();
-  } else {
-    created = true;
-    create_interface(type, identifier, iface, ptr);
-    ih = (interface_header_t *)ptr;
+    notifier->notify_of_writer_added(iface, iface->serial());
+  } catch (Exception &e) {
+    if (iface)  delete_interface_instance(iface);
+    memmgr->unlock();
+    mutex->unlock();
+    throw;
   }
-
-  iface->set_readwrite(true, rwlocks[ih->serial]);
-  ih->flag_writer_active = 1;
-  ih->refcount++;
-
-  memmgr->unlock();
-  writer_interfaces[ih->serial] = iface;
-
-  mutex->unlock();
-
-  if ( created ) {
-    notifier->notify_of_interface_created(type, identifier);
-  }
-  notifier->notify_of_writer_added(iface, iface->serial());
 
   return iface;
 }

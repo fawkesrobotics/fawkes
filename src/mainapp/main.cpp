@@ -27,6 +27,13 @@
 #include <utils/system/argparser.h>
 
 #include <iostream>
+#ifdef HAVE_LIBDAEMON
+#  include <cerrno>
+#  include <cstring>
+#  include <libdaemon/dfork.h>
+#  include <libdaemon/dlog.h>
+#  include <libdaemon/dpid.h>
+#endif
 
 using namespace std;
 using namespace fawkes;
@@ -79,27 +86,118 @@ usage(const char *progname)
        << "===============================================================================" << endl
        << "Call with: " << progname << " [options]" << endl
        << "where [options] is one or more of:" << endl
-       << " -h             these help instructions" << endl
-       << " -C             cleanup old BB segments" << endl
-       << " -c conffile    mutable configuration file, created if it does not exist" << endl
-       << "                if it does however it must contain valid SQLite database" << endl
-       << " -d conffile    default configuration file, created if it does not exist" << endl
-       << "                if it does however it must contain valid SQLite database" << endl
-       << " -q[qqq]        Quiet mode, -q omits debug, -qq debug and info," << endl
-       << "                -qqq omit debug, info and warn, -qqqq no output of logger" << endl
-       << " -l level       set log level directly mutually exclusive with -q" << endl
-       << "                level is one of debug, info, warn, error and none" << endl
-       << " -L loggers     define loggers. By default this setting is read from " << endl
-       << "                config file (or console logger if unset in config)." << endl
-       << "                format for loggers is: logger:args[;logger2:args2[!...]]" << endl
-       << "                the loggeroptions depend on the logger. Currently supported:" << endl
-       << "                console (default), file:file.log, network logger always starts" << endl
-       << " -p plugins     Comma-separated list of plugins, for example " << endl
-       << "                fvbase,fvfountain,fvretriever. These plugins will be loaded" << endl
-       << "                in the given order after startup."
+       << " -h               These help instructions" << endl
+       << " -C               Cleanup old BB segments" << endl
+       << " -c conffile      Mutable configuration file, created if it does not exist" << endl
+       << "                  if it does however it must contain valid SQLite database" << endl
+       << " -d conffile      Default configuration file, created if it does not exist" << endl
+       << "                  if it does however it must contain valid SQLite database" << endl
+       << " -q[qqq]          Quiet mode, -q omits debug, -qq debug and info," << endl
+       << "                  -qqq omit debug, info and warn, -qqqq no output of logger" << endl
+       << " -l level         Set log level directly mutually exclusive with -q" << endl
+       << "                  level is one of debug, info, warn, error and none" << endl
+       << " -L loggers       Define loggers. By default this setting is read from " << endl
+       << "                  config file (or console logger if unset in config)." << endl
+       << "                  format for loggers is: logger:args[;logger2:args2[!...]]" << endl
+       << "                  the loggeroptions depend on the logger. Currently supported:" << endl
+       << "                  console (default), file:file.log, network logger always starts" << endl
+       << " -p plugins       Comma-separated list of plugins, for example " << endl
+       << "                  fvbase,fvfountain,fvretriever. These plugins will be loaded" << endl
+       << "                  in the given order after startup." << endl
+#ifdef HAVE_LIBDAEMON
+       << " -D[pid file]     Run daemonized in the background, pid file is optional, " << endl
+       << "                  defaults to /var/run/fawkes.pid, must be absolute path." << endl
+       << " -D[pid file] -k  Kill a daemonized process running in the background," << endl
+       << "                  pid file is optional as above." << endl
+#endif
        << endl;
 }
 
+
+#ifdef HAVE_LIBDAEMON
+void
+daemonize_cleanup()
+{
+  daemon_retval_send(-1);
+  daemon_retval_done();
+  daemon_pid_file_remove();
+}
+
+pid_t
+daemonize(int argc, char **argv)
+{
+  pid_t pid;
+
+  // Prepare for return value passing
+  daemon_retval_init();
+
+  // Do the fork
+  if ((pid = daemon_fork()) < 0) {
+    return -1;
+        
+  } else if (pid) { // the parent
+    int ret;
+
+    // Wait for 20 seconds for the return value passed from the daemon process
+    if ((ret = daemon_retval_wait(20)) < 0) {
+      daemon_log(LOG_ERR, "Could not recieve return value from daemon process.");
+      return -1;
+    }
+
+    if ( ret != 0 ) {
+      daemon_log(LOG_ERR, "*** Daemon startup failed, see syslog for details. ***");
+      switch (ret) {
+      case 1:
+	daemon_log(LOG_ERR, "Daemon failed to close file descriptors");
+	break;
+      case 2:
+	daemon_log(LOG_ERR, "Daemon failed to create PID file");
+	break;
+      }
+      return -1;
+    } else {
+      return pid;
+    }
+
+  } else { // the daemon
+    if (daemon_close_all(-1) < 0) {
+      daemon_log(LOG_ERR, "Failed to close all file descriptors: %s", strerror(errno));
+      // Send the error condition to the parent process
+      daemon_retval_send(1);
+      return -1;
+    }
+
+    // Create the PID file
+    if (daemon_pid_file_create() < 0) {
+      printf("Could not create PID file (%s).", strerror(errno));
+      daemon_log(LOG_ERR, "Could not create PID file (%s).", strerror(errno));
+
+      // Send the error condition to the parent process
+      daemon_retval_send(2);
+      return -1;
+    }
+
+    // Send OK to parent process
+    daemon_retval_send(0);
+
+    daemon_log(LOG_INFO, "Sucessfully started");
+    return 0;
+  }
+}
+
+/** Global variable containing the path to the PID file.
+ * unfortunately needed for libdaemon */
+const char *fawkes_pid_file;
+
+/** Function that returns the PID file name.
+ * @return PID file name
+ */
+const char *
+fawkes_daemon_pid_file_proc()
+{
+  return fawkes_pid_file;
+}
+#endif // HAVE_LIBDAEMON
 
 /** Fawkes application.
  * @param argc argument count
@@ -108,9 +206,59 @@ usage(const char *progname)
 int
 main(int argc, char **argv)
 {
-  Thread::init_main();
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:D::k");
 
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:");
+#ifdef HAVE_LIBDAEMON
+  pid_t pid;
+  int ret;
+
+  if ( argp->has_arg("D") ) {
+    // Set identification string for the daemon for both syslog and PID file
+    daemon_pid_file_ident = daemon_log_ident = daemon_ident_from_argv0(argv[0]);
+    if ( argp->arg("D") != NULL ) {
+      fawkes_pid_file      = argp->arg("D");
+      daemon_pid_file_proc = fawkes_daemon_pid_file_proc;
+    }
+
+    // We should daemonize, check if we were called to kill a daemonized copy
+    if ( argp->has_arg("k") ) {
+      // Check that the daemon is not run twice a the same time
+      if ((pid = daemon_pid_file_is_running()) < 0) {
+	daemon_log(LOG_ERR, "Fawkes daemon not running.");
+	return 1;
+      }
+
+      // Kill daemon with SIGINT
+      if ((ret = daemon_pid_file_kill_wait(SIGINT, 5)) < 0) {
+	daemon_log(LOG_WARNING, "Failed to kill daemon");
+      }
+      return (ret < 0) ? 1 : 0;
+    }
+
+    // Check that the daemon is not run twice a the same time
+    if ((pid = daemon_pid_file_is_running()) >= 0) {
+      daemon_log(LOG_ERR, "Daemon already running on PID file %u", pid);
+      return 201;
+    }
+
+    pid = daemonize(argc, argv);
+    if ( pid < 0 ) {
+      daemonize_cleanup();
+      return 201;
+    } else if (pid) {
+      // parent
+      return 0;
+    } // else child, continue as usual
+  }
+#else
+  if ( argp->has_arg("D") ) {
+    printf("Daemonizing support is not available.\n"
+	   "(libdaemon[-devel] was not available at compile time)\n");
+    return 202;
+  }
+#endif
+
+  Thread::init_main();
 
   if ( argp->has_arg("h") ) {
     usage(argv[0]);
@@ -130,6 +278,12 @@ main(int argc, char **argv)
   }
 
   Thread::destroy_main();
+
+#ifdef HAVE_LIBDAEMON
+  if ( argp->has_arg("D") ) {
+    daemonize_cleanup();
+  }
+#endif
 
   delete argp;
   return 0;

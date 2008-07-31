@@ -55,7 +55,7 @@ LedInterface::LedInterface() : Interface()
   data      = (LedInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(Interface::IFT_FLOAT, "intensity", &data->intensity);
-  unsigned char tmp_hash[] = {0xae, 0xbe, 0xe2, 0xba, 0xf7, 0x15, 0xbd, 0xd3, 0x2, 0x74, 0x4a, 0x6a, 0xe9, 0xbf, 0x75, 0xab};
+  unsigned char tmp_hash[] = {0xd, 0x86, 0x60, 0xcd, 0xae, 0x41, 0xa5, 0xa1, 0xbc, 0xb7, 0xf, 0x9, 0x90, 00, 0x4d, 0x40};
   set_hash(tmp_hash);
 }
 
@@ -121,14 +121,16 @@ LedInterface::create_message(const char *type) const
 
 
 /** Constructor with initial values.
+ * @param ini_time_sec initial value for time_sec
  * @param ini_intensity initial value for intensity
  */
-LedInterface::SetIntensityMessage::SetIntensityMessage(const float ini_intensity) : Message("SetIntensityMessage")
+LedInterface::SetIntensityMessage::SetIntensityMessage(const float ini_time_sec, const float ini_intensity) : Message("SetIntensityMessage")
 {
   data_size = sizeof(SetIntensityMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetIntensityMessage_data_t *)data_ptr;
+  data->time_sec = ini_time_sec;
   data->intensity = ini_intensity;
 }
 /** Constructor */
@@ -158,6 +160,40 @@ LedInterface::SetIntensityMessage::SetIntensityMessage(const SetIntensityMessage
 }
 
 /* Methods */
+/** Get time_sec value.
+ * 
+      Time in seconds when to reach the intensity.
+    
+ * @return time_sec value
+ */
+float
+LedInterface::SetIntensityMessage::time_sec() const
+{
+  return data->time_sec;
+}
+
+/** Get maximum length of time_sec value.
+ * @return length of time_sec value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+LedInterface::SetIntensityMessage::maxlenof_time_sec() const
+{
+  return 1;
+}
+
+/** Set time_sec value.
+ * 
+      Time in seconds when to reach the intensity.
+    
+ * @param new_time_sec new time_sec value
+ */
+void
+LedInterface::SetIntensityMessage::set_time_sec(const float new_time_sec)
+{
+  data->time_sec = new_time_sec;
+}
+
 /** Get intensity value.
  * Intensity value.
  * @return intensity value

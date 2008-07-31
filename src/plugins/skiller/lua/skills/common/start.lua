@@ -30,27 +30,29 @@ print(package.cpath);
 --]]
 
 --[[ lists whole config
-v = config:iterator();
+v = config:iterator()
 while ( v:next() ) do
    if ( v:is_float() ) then
-      print(v:path(), "[float]", v:get_float());
+      print(v:path(), "[float]", v:get_float())
    elseif ( v:is_uint() ) then
-      print(v:path(), "[uint]", v:get_uint());
+      print(v:path(), "[uint]", v:get_uint())
    elseif ( v:is_int() ) then
-      print(v:path(), "[int]", v:get_int());
+      print(v:path(), "[int]", v:get_int())
    elseif ( v:is_bool() ) then
-      print(v:path(), "[bool]", v:get_bool());
+      print(v:path(), "[bool]", v:get_bool())
    elseif ( v:is_string() ) then
-      print(v:path(), "[string]", v:get_string());
+      print(v:path(), "[string]", v:get_string())
    end
 end
 --]]
 
-require("fawkes.logprint");
-require("skills.common.skillenv");
+require("fawkes.logprint")
+require("skills.common.skillenv")
 
-fawkes.logprint.init(logger);
+fawkes.logprint.init(logger)
+skills.common.skillenv.init()
 
+-- Interfaces are not yet available at this point!
 require("skills." .. SKILLSPACE)
 
-logger:log_debug("Lua startup completed");
+logger:log_debug("Lua startup completed")

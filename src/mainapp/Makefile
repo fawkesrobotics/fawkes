@@ -27,6 +27,13 @@ include $(BASEDIR)/src/libs/netcomm/netcomm.mk
 #	   $(patsubst %,-l:%,$(subst $(abspath $(PLUGINDIR))/,,$(wildcard $(PLUGINDIR)/*.so))) \
 #	   -lpthread
 
+# Check for availability of libdaemon
+HAVE_LIBDAEMON = $(if $(shell $(PKGCONFIG) --exists 'libdaemon'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBDAEMON),1)
+  CFLAGS  += -DHAVE_LIBDAEMON $(shell $(PKGCONFIG) --cflags 'libdaemon')
+  LDFLAGS += $(shell $(PKGCONFIG) --libs 'libdaemon')
+endif
+
 # We need Avahi CFLAGS because of includes in Avahi source, on BSD this is
 # in /usr/local/include and thus it needs extra flags
 ifeq ($(HAVE_AVAHI),1)

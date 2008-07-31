@@ -32,6 +32,7 @@ local IDLE_LOOP_LENGTH = 300 -- 9 secs?
 -- Create FSM states
 -- Indentation intentional to mark dependencies
 fawkes.fsm.new_state("INITIAL")
+fawkes.fsm.new_state("PRE_READY")
 fawkes.fsm.new_state("READY")
 fawkes.fsm.new_state("SET")
 fawkes.fsm.new_state("PLAY")
@@ -58,9 +59,9 @@ end
 
 
 function short_activation()
-  if chbut:short_activations() > 0 and chbut:activation_count() ~= last_act_count
+  if chestbutton:short_activations() > 0 and chestbutton:activation_count() ~= last_act_count
   then
-    last_act_count = chbut:activation_count()
+    last_act_count = chestbutton:activation_count()
     return true
   else
     return false
@@ -69,39 +70,44 @@ end
 
 
 function long_activation()
-  if chbut:long_activations() > 0 and chbut:activation_count() ~= last_act_count
+  if chestbutton:long_activations() > 0 and chestbutton:activation_count() ~= last_act_count
   then
-    last_act_count = chbut:activation_count()
+    last_act_count = chestbutton:activation_count()
     return true
   else
     return false
   end
 end
 
-function INITIAL:init()
-  say("INITIAL")
-end
 
 function INITIAL:loop()
-  if short_activation() then return READY end
+  if short_activation() then return PRE_READY end
 end
 
+
+function PRE_READY:init()
+  local m = naohw.EnableServosMessage:new()
+  naohw:msgq_enqueue_copy(m)
+  self.start = os.time();
+end
+
+
+function PRE_READY:loop()
+   if os.time() - self.start > 1 then
+      return READY
+   end
+end
 
 function READY:init()
   -- get stiff
-  local m = naohw.EnableServosMessage:new()
-  naohw:msgq_enqueue_copy(m)
 
   -- reset head to 0 pos
-  --m = naohw.SetHeadYawPitchMessage:new(20, 0, 0) --speed, yaw, pitch
-  --naohw:msgq_enqueue_copy(m)
+  local m = naohw.SetHeadYawPitchMessage:new(20, 0, 0) --speed, yaw, pitch
+  naohw:msgq_enqueue_copy(m)
 
   -- go to initial position
-  m = naohw.GotoBodyAnglesMessage:new(2, naohw.INTERPOLATION_SMOOTH, 0, 0, 2.1,
-                                      0.35, -1.4, -1.4, 0, 0, -0.52, 1.05,
-                                      -0.52, 0, 0, 0, -0.52, 1.05, -0.52, 0,
-                                      2.1, -0.35, 1.4, 1.4)
-  naohw:msgq_enqueue_copy(m)
+  m = naomotion.GetUpMessage:new(3.0 --[[ sec --]] );
+  naomotion:msgq_enqueue_copy(m)
 
   toggle_ball_rec(true)
   
@@ -119,6 +125,7 @@ function SET:init()
  end
 
 function SET:loop()
+   if long_activation() then return PRE_READY end
   if short_activation() then
     say("Let's go")
     return PLAY
@@ -127,7 +134,7 @@ end
 
 
 function PLAY:process_buttons()
-   if long_activation() then return READY end
+   if long_activation() then return PRE_READY end
    if short_activation() then return PENALIZED end
    return nil
 end
@@ -221,14 +228,15 @@ function trivialagent()
    return S_RUNNING
 end
 
-
 function trivialagent_reset()
    FSM = fawkes.fsm.FSM:new{name="NaoFSM", start=INITIAL, debug=true}
 end
 
-
+-- Note that interfaces are not available here! Only when the skill is properly
+-- called! This reset function is called here to initialize the FSM initially. It
+-- is only done to write the init code only once. However, this means that the
+-- initial FSM state cannot use any interfaces!
 trivialagent_reset();
-
 
 trivialagent_skill_doc = [==[Trivial Agent.
       This skill implements a trivial agent. It takes no arguments.

@@ -44,9 +44,12 @@ All		Subversion		>= 1.4			recommended
 		 system, older version may suffice to checkout)
 
 Fawkes		libxml++		>= 2.20.0		recommended
-		needed to build interface_generator
+		(needed to build interface_generator)
 
 Fawkes		Avahi			>= 0.6			recommended
+
+Fawkes		libdaemon		>= 0.12			recommended
+		(needed for daemonize support in mainapp)
 
 All		gtkmm			>= 2.12			optional
 
@@ -90,6 +93,10 @@ FireVision	leutron			== 1.96.204		optional
 
 FireVision	Triclops SDK		>= 3.2.0.8		optional
 		(Bumblebee 2 support)
+
+naomotion	NaoQi			>= 0.1.18		optional
+		(required for NaoQi integration and cross compilation in
+		 nao branch)
 
 $Id$
 

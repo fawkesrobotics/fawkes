@@ -28,12 +28,14 @@ module("skills.nao", fawkes.modinit.register_all);
 require("skills.common.skillenv");
 
 function module_init(m)
-   skills.skillenv.module_init(m);
+   skills.common.skillenv.module_init(m);
 
    m.nao = _M;
 end
 
 -- Require all nao skills
+
+-- *** Interfaces are not yet available at this point! ***
 require("skills.nao.relgoto");
 require("skills.nao.intercept");
 require("skills.nao.trivialagent");

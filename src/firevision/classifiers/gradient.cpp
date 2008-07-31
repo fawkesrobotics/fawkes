@@ -124,10 +124,11 @@ GradientClassifier::classify()
 	}
 
 	list< ROI > *rv = new list< ROI >;
-	int cur_val, cur_diff, direction;
+	int cur_val, cur_diff, direction = 0;
 	point_t cur_pos, edge_start;
+        cur_pos.x = cur_pos.y = edge_start.x = edge_start.y = 0;
 
-	unsigned int jumpSize;
+	unsigned int jumpSize = 0;
 
 	ROI current;
 

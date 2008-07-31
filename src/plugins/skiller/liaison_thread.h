@@ -32,19 +32,15 @@
 #include <aspect/blackboard.h>
 #include <aspect/clock.h>
 
-#include <core/utils/lock_list.h>
+#include <core/utils/lock_map.h>
 #include <blackboard/interface_observer.h>
 #include <blackboard/interface_listener.h>
 
+#include <string>
+
 namespace fawkes {
   class Barrier;
-  class ObjectPositionInterface;
-  class NavigatorInterface;
   class SkillerInterface;
-  class GameStateInterface;
-  class HumanoidMotionInterface;
-  class SwitchInterface;
-  class SpeechSynthInterface;
 }
 class SkillerExecutionThread;
 
@@ -60,6 +56,10 @@ class SkillerLiaisonThread
 {
  friend class SkillerExecutionThread;
  public:
+
+  /** Map for interfaces. */
+  typedef fawkes::LockMap<std::string, fawkes::Interface *>  InterfaceMap;
+
   SkillerLiaisonThread(fawkes::Barrier *liaison_exec_barrier);
   virtual ~SkillerLiaisonThread();
 
@@ -75,29 +75,21 @@ class SkillerLiaisonThread
 
   void set_execthread(SkillerExecutionThread *set);
 
+  InterfaceMap &  reading_interfaces();
+  InterfaceMap &  writing_interfaces();
+
  private:
   void init_failure_cleanup();
+  void open_interfaces(std::string &prefix, InterfaceMap &imap, bool write);
 
  private:
   fawkes::Barrier *__liaison_exec_barrier;
   SkillerExecutionThread *__exec_thread;
 
-  fawkes::SkillerInterface *skiller;
-  //fawkes::ObjectPositionInterface *wm_ball_w;
-  fawkes::ObjectPositionInterface *wm_ball;
-  fawkes::ObjectPositionInterface *wm_pose;
-  //fawkes::ObjectPositionInterface *wm_pose_w;
-  fawkes::ObjectPositionInterface *nao_ball;
-  fawkes::NavigatorInterface      *navigator;
-  fawkes::NavigatorInterface      *nao_navigator;
-  fawkes::GameStateInterface      *gamestate;
-  fawkes::HumanoidMotionInterface *hummot;
-  fawkes::SwitchInterface         *chbut;
-  fawkes::SwitchInterface         *tballrec;
-  fawkes::SpeechSynthInterface    *speechsynth;
+  InterfaceMap  __reading_ifs;
+  InterfaceMap  __writing_ifs;
 
-  fawkes::LockList<fawkes::ObjectPositionInterface *>  wm_obstacles;
-  fawkes::LockList<fawkes::ObjectPositionInterface *>::iterator  wm_obs_it;
+  fawkes::SkillerInterface *skiller;
 };
 
 

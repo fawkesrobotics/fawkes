@@ -38,6 +38,7 @@ namespace fawkes {
 class FawkesNetworkClient;
 class FawkesNetworkMessage;
 class Mutex;
+class WaitCondition;
 class Interface;
 class InterfaceInfoList;
 
@@ -96,6 +97,9 @@ class RemoteBlackBoard
   BlackBoardInstanceFactory *__instance_factory;
   LockMap<unsigned int, BlackBoardInterfaceProxy *> __proxies;
   LockMap<unsigned int, BlackBoardInterfaceProxy *>::iterator __pit;
+
+  Mutex         *__wait_mutex;
+  WaitCondition *__wait_cond;
 };
 
 } // end namespace fawkes

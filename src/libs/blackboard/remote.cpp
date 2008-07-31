@@ -35,6 +35,7 @@
 
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
+#include <core/threading/wait_condition.h>
 #include <netcomm/fawkes/client.h>
 
 #include <string>
@@ -67,6 +68,9 @@ RemoteBlackBoard::RemoteBlackBoard(FawkesNetworkClient *client)
   __mutex = new Mutex();
   __notifier = new BlackBoardNotifier();
   __instance_factory = new BlackBoardInstanceFactory();
+
+  __wait_mutex = new Mutex();
+  __wait_cond  = new WaitCondition();
 }
 
 
@@ -98,6 +102,9 @@ RemoteBlackBoard::RemoteBlackBoard(const char *hostname, unsigned short int port
   __mutex = new Mutex();
   __notifier = new BlackBoardNotifier();
   __instance_factory = new BlackBoardInstanceFactory();
+
+  __wait_mutex = new Mutex();
+  __wait_cond  = new WaitCondition();
 }
 
 
@@ -117,6 +124,9 @@ RemoteBlackBoard::~RemoteBlackBoard()
     __fnc->disconnect();
     delete __fnc;
   }
+
+  delete __wait_cond;
+  delete __wait_mutex;
 }
 
 
@@ -144,12 +154,22 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD,
 							writer ? MSG_BB_OPEN_FOR_WRITING : MSG_BB_OPEN_FOR_READING,
 							om, sizeof(bb_iopen_msg_t));
-  __fnc->enqueue_and_wait(omsg);
 
-  if ( !__m ) {
-    __instance_factory->delete_interface_instance(iface);
-    throw Exception("No message or invalid message ID");
-  } else if ( __m->msgid() == MSG_BB_OPEN_SUCCESS ) {
+  __wait_mutex->lock();
+  __fnc->enqueue(omsg);
+  omsg->unref();
+  while (! __m ||
+	 ((__m->msgid() != MSG_BB_OPEN_SUCCESS) &&
+	  (__m->msgid() != MSG_BB_OPEN_FAILURE))) {
+    if ( __m ) {
+      __m->unref();
+      __m = NULL;
+    }
+    __wait_cond->wait(__wait_mutex);
+  }
+  __wait_mutex->unlock();
+
+  if ( __m->msgid() == MSG_BB_OPEN_SUCCESS ) {
     // We got the interface, create internal storage and prepare instance for return
     BlackBoardInterfaceProxy *proxy = new BlackBoardInterfaceProxy(__fnc, __m, __notifier,
 								   iface, writer);
@@ -165,11 +185,6 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
     } else {
       throw Exception("Could not open inteface");
     }
-  } else {
-    __m->unref();
-    __m = NULL;
-    __instance_factory->delete_interface_instance(iface);
-    throw Exception("Unexpected message received");
   }
 
   __m->unref();
@@ -345,11 +360,18 @@ RemoteBlackBoard::list_all()
 
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD,
 							MSG_BB_LIST_ALL);
-  __fnc->enqueue_and_wait(omsg);
-
-  if ( !__m || (__m->msgid() != MSG_BB_INTERFACE_LIST) ) {
-    throw Exception("No message or invalid message ID");
+  __wait_mutex->lock();
+  __fnc->enqueue(omsg);
+  omsg->unref();
+  while (! __m ||
+	 (__m->msgid() != MSG_BB_INTERFACE_LIST)) {
+    if ( __m ) {
+      __m->unref();
+      __m = NULL;
+    }
+    __wait_cond->wait(__wait_mutex);
   }
+  __wait_mutex->unlock();
 
   BlackBoardInterfaceListContent *bbilc = __m->msgc<BlackBoardInterfaceListContent>();
   while ( bbilc->has_next() ) {
@@ -413,8 +435,10 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m,
 	  __proxies[esm->serial]->writer_removed(esm->event_serial);
 	}
       } else {
+	__wait_mutex->stopby();
 	__m = m;
 	__m->ref();
+	__wait_cond->wake_all();
       }
     } catch (Exception &e) {
       // Bam, you're dead. Ok, not now, we just ignore that this shit happened...

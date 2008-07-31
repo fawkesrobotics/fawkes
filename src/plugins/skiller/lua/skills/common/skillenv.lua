@@ -23,7 +23,7 @@
 
 require("fawkes.modinit");
 
-module("skills.skillenv", fawkes.modinit.register_all);
+module(..., fawkes.modinit.register_all);
 require("fawkes.logprint");
 
 local skills        = {};
@@ -35,17 +35,7 @@ local skill_mt      = {
 			S_FAILED    = 3,
 
                         -- interfaces
-                        navigator     = navigator,
-                        nao_navigator = nao_navigator,
-                        wm_ball       = wm_ball,
-                        wm_pose       = wm_pose,
-                        nao_ball      = nao_ball,
-                        gamestate     = gamestate,
-                        naohw         = naohw,
-                        speechsynth   = speechsynth,
-                        hummot        = hummot,
-                        chbut         = chbut,
-                        tballrec      = tballrec
+                        -- all vars with magic prefix interface_ get added automagically
 		      };
 
 
@@ -70,9 +60,7 @@ function get_skill_entry(skill)
 	 end
       end
    elseif type(skill) == "function" then
-      printf("Looking for %s", tostring(skill));
       for _, s in ipairs(skills) do
-	 printf("Comparing with %s (%s)", tostring(s.func), s.name);
 	 if ( s.func == skill ) then
 	    return s;
 	 end
@@ -139,7 +127,16 @@ local skill_env_template = {
 };
 
 
--- Generate a sandbox for skill execution.
+function init()
+   for k,v in pairs(_G) do
+      local n = string.match(k, "^interface_([%a_]+)$")
+      if n then
+	 skill_mt[n] = v;
+      end
+   end
+end
+
+--- Generate a sandbox for skill execution.
 -- The sandbox is used in the execution thread to create a new safe environment each
 -- time a skill string is executed.
 -- @return table suitable to be used with setfenv
