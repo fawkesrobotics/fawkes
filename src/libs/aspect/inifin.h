@@ -43,6 +43,9 @@ class NetworkNameResolver;
 class ServicePublisher;
 class ServiceBrowser;
 class TimeSource;
+class MainLoop;
+class MainLoopEmployer;
+class BlockedTimingExecutor;
 template <class Provider, class Dependant>
   class OneToManyDependency;
 template <class ResourceType>
@@ -67,6 +70,8 @@ class AspectIniFin
   virtual bool prepare_finalize(Thread *thread);
 
   void set_fnet_hub(FawkesNetworkHub *fnethub);
+  void set_mainloop_employer(MainLoopEmployer *employer);
+  void set_blocked_timing_executor(BlockedTimingExecutor *btexec);
   void set_network_members(NetworkNameResolver *nnresolver,
 			   ServicePublisher *service_publisher,
 			   ServiceBrowser *service_browser);
@@ -75,20 +80,23 @@ class AspectIniFin
   virtual void thread_init_failed(Thread *thread);
 
  private:
-  BlackBoard          *__blackboard;
-  ThreadCollector     *__thread_collector;
-  Configuration       *__config;
-  Logger              *__logger;
-  Clock               *__clock;
-  FawkesNetworkHub    *__fnethub;
-  NetworkNameResolver *__nnresolver;
-  ServicePublisher    *__service_publisher;
-  ServiceBrowser      *__service_browser;
+  BlackBoard            *__blackboard;
+  ThreadCollector       *__thread_collector;
+  Configuration         *__config;
+  Logger                *__logger;
+  Clock                 *__clock;
+  FawkesNetworkHub      *__fnethub;
+  NetworkNameResolver   *__nnresolver;
+  ServicePublisher      *__service_publisher;
+  ServiceBrowser        *__service_browser;
+  MainLoopEmployer      *__mainloop_employer;
+  BlockedTimingExecutor *__btexec;
 
 #ifdef HAVE_FIREVISION
   OneToManyDependency<VisionMasterAspect, VisionAspect> *__vision_dependency;
 #endif
   UniquenessConstraint<TimeSource> *__timesource_uc;
+  UniquenessConstraint<MainLoop>   *__mainloop_uc;
 };
 
 } // end namespace fawkes

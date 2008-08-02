@@ -37,6 +37,8 @@
 #include <aspect/network.h>
 #include <aspect/thread_producer.h>
 #include <aspect/time_source.h>
+#include <aspect/mainloop.h>
+#include <aspect/mainloop/employer.h>
 #ifdef HAVE_FIREVISION
 #include <aspect/vision_master.h>
 #include <aspect/vision.h>
@@ -80,8 +82,10 @@ AspectIniFin::AspectIniFin(BlackBoard *blackboard,
   __nnresolver        = NULL;
   __service_publisher = NULL;
   __service_browser   = NULL;
+  __mainloop_employer = NULL;
 
   __timesource_uc     = new UniquenessConstraint<TimeSource>();
+  __mainloop_uc       = new UniquenessConstraint<MainLoop>();
 #ifdef HAVE_FIREVISION
   __vision_dependency = new OneToManyDependency<VisionMasterAspect, VisionAspect>();
 #endif
@@ -92,6 +96,7 @@ AspectIniFin::AspectIniFin(BlackBoard *blackboard,
 AspectIniFin::~AspectIniFin()
 {
   delete __timesource_uc;
+  delete __mainloop_uc;
 #ifdef HAVE_FIREVISION
   delete __vision_dependency;
 #endif
@@ -109,6 +114,30 @@ void
 AspectIniFin::set_fnet_hub(FawkesNetworkHub *fnethub)
 {
   __fnethub = fnethub;
+}
+
+
+/** Set Fawkes MainLoopEmployer.
+ * Use this to set the Fawkes main loop employer. The main loop employer is used
+ * to set a new main loop of a plugin with the MainLoopAspect. Uniqueness is
+ * quaranteed such that only a single main loop exists at any given time.
+ * @param employer main loop employer
+ */
+void
+AspectIniFin::set_mainloop_employer(MainLoopEmployer *employer)
+{
+  __mainloop_employer = employer;
+}
+
+
+/** Set Fawkes BlockedTimingExecutor.
+ * Use this to set the Fawkes blocked timing executor.
+ * @param btexec blocked timing executor instance
+ */
+void
+AspectIniFin::set_blocked_timing_executor(BlockedTimingExecutor *btexec)
+{
+  __btexec = btexec;
 }
 
 
@@ -239,12 +268,31 @@ AspectIniFin::init(Thread *thread)
       __timesource_uc->add(timesource_thread->get_timesource());
       __clock->register_ext_timesource(timesource_thread->get_timesource(),
 				       /* make default */ true);
-    } catch (Exception &e) {
+    } catch (...) {
       throw CannotInitializeThreadException("Thread has TimeSourceAspect but there is "
 					    "already another time provider.");
-    }      
+    }
   }
 
+  MainLoopAspect *mainloop_thread;
+  if ( (mainloop_thread = dynamic_cast<MainLoopAspect *>(thread)) != NULL ) {
+    if ( __mainloop_employer == NULL ) {
+      throw CannotInitializeThreadException("Thread has MainLoopAspect but no "
+					    "MainLoopEmployer has been set.");
+    }
+    if ( __btexec == NULL ) {
+      throw CannotInitializeThreadException("Thread has MainLoopAspect but no "
+					    "BlockedTimingExecutor has been set.");
+    }
+    try {
+      mainloop_thread->init_MainLoopAspect(__btexec);
+      __mainloop_uc->add(mainloop_thread->get_mainloop());
+      __mainloop_employer->set_mainloop(mainloop_thread->get_mainloop());
+    } catch (...) {
+      throw CannotInitializeThreadException("Thread has MainLoopAspect but there is "
+					    "already another main loop provider.");
+    }
+  }
 }
 
 
@@ -307,6 +355,18 @@ AspectIniFin::finalize(Thread *thread)
       __timesource_uc->remove(timesource_thread->get_timesource());
     } catch (Exception &e) {
       CannotFinalizeThreadException ce("Failed to remove time source");
+      ce.append(e);
+      throw;
+    }
+  }
+
+  MainLoopAspect *mainloop_thread;
+  if ( (mainloop_thread = dynamic_cast<MainLoopAspect *>(thread)) != NULL ) {
+    try {
+      __mainloop_employer->set_mainloop(NULL);
+      __mainloop_uc->remove(mainloop_thread->get_mainloop());
+    } catch (Exception &e) {
+      CannotFinalizeThreadException ce("Failed to remove main loop");
       ce.append(e);
       throw;
     }
