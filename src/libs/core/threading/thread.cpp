@@ -151,11 +151,25 @@ namespace fawkes {
  * @code
  * MyThread::set_parameter(int x)
  * {
+ *   loopinterrupt_antistarve_mutex->lock();
  *   loop_mutex->lock();
  *   // do what you need to do...
  *   loop_mutex->unlock();
+ *   loopinterrupt_antistarve_mutex->unlock();
  * }
  * @endcode
+ * See documentation for loopinterrupt_antistarve_mutex why you need to use two
+ * mutexes here.
+ */
+
+/** @var Mutex *  Thread::loopinterrupt_antistarve_mutex
+ * Mutex to avoid starvation when trying to lock loop_mutex.
+ * If you want to interrupt the main loop only locking loop_mutex is not enough,
+ * as this might make your try to lock it starve if the loop is running too fast
+ * (for example on a continuous thread). Because of this you always need to
+ * lock both mutexes. The anti-starve mutex will only be visited shortly and thus
+ * allows you to lock it easily. This will then block the thread from trying to
+ * lock the loop_mutex. See loop_mutex for an example.
  */
 
 
@@ -241,7 +255,7 @@ Thread::__constructor(const char *name, OpMode op_mode)
   loop_mutex = new Mutex();
   finalize_prepared = false;
 
-  __prepfin_antistarve_mutex = new Mutex();
+  loopinterrupt_antistarve_mutex = new Mutex();
   __prepfin_hold_mutex       = new Mutex();
   __prepfin_hold_waitcond    = new WaitCondition();
   __startup_barrier          = new Barrier(2);
@@ -256,7 +270,7 @@ Thread::~Thread()
   delete loop_mutex;
   free(__name);
   delete __notification_listeners;
-  delete __prepfin_antistarve_mutex;
+  delete loopinterrupt_antistarve_mutex;
   delete __startup_barrier;
   delete __prepfin_hold_mutex;
   delete __prepfin_hold_waitcond;
@@ -362,14 +376,14 @@ Thread::prepare_finalize()
     __prepfin_hold_waitcond->wait(__prepfin_hold_mutex);
   }
   if (! __prepfin_conc_loop) {
-    __prepfin_antistarve_mutex->lock();
+    loopinterrupt_antistarve_mutex->lock();
     loop_mutex->lock();
   }
   finalize_prepared = true;
   bool prepared = prepare_finalize_user();
   if (! __prepfin_conc_loop) {
     loop_mutex->unlock();
-    __prepfin_antistarve_mutex->unlock();
+    loopinterrupt_antistarve_mutex->unlock();
   }
   __prepfin_hold_mutex->unlock();
   return prepared;
@@ -819,7 +833,7 @@ Thread::run()
 
     if ( __finalize_sync_lock )  __finalize_sync_lock->lock_for_read();
 
-    __prepfin_antistarve_mutex->stopby();
+    loopinterrupt_antistarve_mutex->stopby();
 
     loop_mutex->lock();
     if ( ! finalize_prepared ) {

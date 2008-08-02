@@ -120,6 +120,7 @@ class Thread {
 
   bool       finalize_prepared;
   Mutex     *loop_mutex;
+  Mutex     *loopinterrupt_antistarve_mutex;
 
  private:
   Thread(const Thread &t);
@@ -139,7 +140,6 @@ class Thread {
   pthread_t      __thread_id;
 
   Barrier       *__startup_barrier;
-  Mutex         *__prepfin_antistarve_mutex;
   Mutex         *__sleep_mutex;
   WaitCondition *__sleep_condition;
   Barrier       *__barrier;
