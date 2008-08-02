@@ -40,7 +40,6 @@ TimeTrackerMainLoopThread::TimeTrackerMainLoopThread()
   : Thread("TimeTrackerMainLoopThread", Thread::OPMODE_WAITFORWAKEUP),
     MainLoopAspect(this)
 {
-  __loop_mod = 150;
 }
 
 
@@ -58,12 +57,22 @@ TimeTrackerMainLoopThread::init()
     unsigned int min_loop_time = config->get_uint("/fawkes/mainapp/min_loop_time");
     if ( min_loop_time > 0 ) {
       __time_wait = new TimeWait(clock, min_loop_time);
-      // about every 5 seconds the output should appear
-      __loop_mod = (1000000 / min_loop_time) * 5;
     }
   } catch (Exception &e) {
     logger->log_info(name(), "Minimum loop time not set, assuming 0");
   }
+
+  try {
+    __output_interval = config->get_uint("/ttmainloop/output_interval");
+  } catch (Exception &e) {
+    __output_interval = 5.0;
+    logger->log_info(name(), "Output interval not set, using 5 seconds.");
+  }
+
+
+  __last_outp_time = new Time(clock);
+  __now            = new Time(clock);
+  __last_outp_time->stamp();
 
   __tt = new TimeTracker();
   __tt_loopcount   = 0;
@@ -94,10 +103,6 @@ TimeTrackerMainLoopThread::init()
 #define TIMETRACK_END(c)			\
   if ( __tt ) {					\
     __tt->ping_end(c);				\
-  }
-#define TIMETRACK_OUTPUT			\
-  if ( __tt && (++__tt_loopcount % __loop_mod) == 0) {	\
-    __tt->print_to_stdout();\
   }
 
 void
@@ -175,5 +180,11 @@ TimeTrackerMainLoopThread::mloop()
   }
 
   TIMETRACK_END(__ttc_full_loop);
-  TIMETRACK_OUTPUT
+
+  __now->stamp();
+  if ( (*__now - __last_outp_time) >= __output_interval ) {
+    __tt->print_to_stdout();
+    *__last_outp_time = *__now;
+  }
+
 }

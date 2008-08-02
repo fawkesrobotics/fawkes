@@ -33,6 +33,7 @@
 #include <aspect/mainloop.h>
 
 namespace fawkes {
+  class Time;
   class TimeWait;
   class TimeTracker;
 }
@@ -56,7 +57,9 @@ class TimeTrackerMainLoopThread
   virtual void mloop();
 
  private:
-  unsigned int __loop_mod;
+  float             __output_interval;
+  fawkes::Time     *__last_outp_time;
+  fawkes::Time     *__now;
 
   fawkes::TimeWait *__time_wait;
 
