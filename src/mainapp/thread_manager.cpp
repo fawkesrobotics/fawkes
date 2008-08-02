@@ -30,6 +30,7 @@
 #include <core/threading/thread_initializer.h>
 #include <core/threading/thread_finalizer.h>
 #include <core/exceptions/software.h>
+#include <core/exceptions/system.h>
 
 #include <aspect/blocked_timing.h>
 
@@ -122,6 +123,7 @@ FawkesThreadManager::FawkesThreadManager()
   finalizer   = NULL;
   threads.clear();
   waitcond_timedthreads = new WaitCondition();
+  __interrupt_timed_thread_wait = false;
   __aspect_collector = new FawkesThreadManagerAspectCollector(this);
 }
 
@@ -460,11 +462,6 @@ FawkesThreadManager::force_remove(fawkes::Thread *thread)
 }
 
 
-/** Wakeup thread for given hook and wait for completion.
- * This will wakeup all threads registered for the given hook. Afterwards
- * this method will block until all threads finished their loop.
- * @param hook hook for which to wait for
- */
 void
 FawkesThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook)
 {
@@ -483,25 +480,53 @@ FawkesThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook)
 }
 
 
-/** Check if any timed threads exist.
- * @return true if threads exist that need to be woken up for execution, false
- * otherwise
- */
+void
+FawkesThreadManager::wakeup(BlockedTimingAspect::WakeupHook hook, Barrier *barrier)
+{
+  threads.lock();
+  if ( threads.find(hook) != threads.end() ) {
+    threads.unlock();
+    if ( barrier ) {
+      threads[hook].wakeup(barrier);
+    } else {
+      threads[hook].wakeup();
+    }
+    threads.lock();
+    if ( threads[hook].size() == 0 ) {
+      threads.erase(hook);
+    }
+    threads.unlock();
+  } else {
+    threads.unlock();
+  }
+}
+
+
 bool
-FawkesThreadManager::timed_threads_exist() const
+FawkesThreadManager::timed_threads_exist()
 {
   return (threads.size() > 0);
 }
 
 
-/** Wait for timed threads.
- * Use this method to wait until a timed that is added to the thread manager.
- */
 void
 FawkesThreadManager::wait_for_timed_threads()
 {
+  __interrupt_timed_thread_wait = false;
   waitcond_timedthreads->wait();
+  if ( __interrupt_timed_thread_wait ) {
+    __interrupt_timed_thread_wait = false;
+    throw InterruptedException("Waiting for timed threads was interrupted");
+  }
 }
+
+void
+FawkesThreadManager::interrupt_timed_thread_wait()
+{
+  __interrupt_timed_thread_wait = true;
+  waitcond_timedthreads->wake_all();  
+}
+
 
 
 /** Get a thread collector to be used for an aspect initializer.

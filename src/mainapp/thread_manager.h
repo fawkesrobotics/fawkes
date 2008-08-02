@@ -30,6 +30,7 @@
 #include <core/threading/thread_collector.h>
 #include <core/exception.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/blocked_timing/executor.h>
 
 #include <core/utils/lock_map.h>
 #include <list>
@@ -41,7 +42,9 @@ namespace fawkes {
   class ThreadFinalizer;
 }
 
-class FawkesThreadManager : public fawkes::ThreadCollector
+class FawkesThreadManager
+: public fawkes::ThreadCollector,
+  public fawkes::BlockedTimingExecutor
 {
  public:
   FawkesThreadManager();
@@ -72,10 +75,13 @@ class FawkesThreadManager : public fawkes::ThreadCollector
   virtual void force_remove(fawkes::ThreadList &tl);
   virtual void force_remove(fawkes::Thread *t);
 
-  void wakeup_and_wait(fawkes::BlockedTimingAspect::WakeupHook hook);
+  virtual void wakeup_and_wait(fawkes::BlockedTimingAspect::WakeupHook hook);
+  virtual void wakeup(fawkes::BlockedTimingAspect::WakeupHook hook,
+		      fawkes::Barrier *barrier = 0);
 
-  bool timed_threads_exist() const;
-  void wait_for_timed_threads();
+  virtual bool timed_threads_exist();
+  virtual void wait_for_timed_threads();
+  virtual void interrupt_timed_thread_wait();
 
   fawkes::ThreadCollector *  aspect_collector() const;
 
@@ -113,6 +119,8 @@ class FawkesThreadManager : public fawkes::ThreadCollector
   fawkes::WaitCondition *waitcond_timedthreads;
 
   FawkesThreadManagerAspectCollector *__aspect_collector;
+  bool __interrupt_timed_thread_wait;
+
 };
 
 #endif

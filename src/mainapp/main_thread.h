@@ -27,6 +27,7 @@
 #define __FAWKES_MAIN_THREAD_H_
 
 #include <core/threading/thread.h>
+#include <aspect/mainloop/employer.h>
 
 namespace fawkes {
   class ArgumentParser;
@@ -37,16 +38,16 @@ namespace fawkes {
   class NetworkLogger;
   class Clock;
   class TimeWait;
-#ifdef USE_TIMETRACKER
-  class TimeTracker;
-#endif
+  class AspectIniFin;
 }
 class FawkesThreadManager;
 class FawkesPluginManager;
 class FawkesNetworkManager;
-class FawkesThreadIniFin;
 
-class FawkesMainThread : public fawkes::Thread
+class FawkesMainThread
+: public fawkes::Thread,
+  public fawkes::MainLoopEmployer,
+  public fawkes::MainLoop
 {
  public:
   FawkesMainThread(fawkes::ArgumentParser *argp);
@@ -54,6 +55,9 @@ class FawkesMainThread : public fawkes::Thread
 
   virtual void once();
   virtual void loop();
+
+  virtual void mloop();
+  virtual void set_mainloop(fawkes::MainLoop *mainloop);
 
  private:
   void destruct();
@@ -66,26 +70,13 @@ class FawkesMainThread : public fawkes::Thread
   fawkes::NetworkLogger        *__network_logger;
   fawkes::Clock                *__clock;
   fawkes::TimeWait             *__time_wait;
+  fawkes::AspectIniFin         *__aspect_inifin;
+  fawkes::MainLoop             *__mainloop;
 
   FawkesThreadManager        *thread_manager;
-  FawkesThreadIniFin         *thread_inifin;
   FawkesPluginManager        *plugin_manager;
   FawkesNetworkManager       *network_manager;
 
-#ifdef USE_TIMETRACKER
-  fawkes::TimeTracker  *__tt;
-  unsigned int  __tt_loopcount;
-  unsigned int  __ttc_pre_loop;
-  unsigned int  __ttc_sensor;
-  unsigned int  __ttc_worldstate;
-  unsigned int  __ttc_think;
-  unsigned int  __ttc_skill;
-  unsigned int  __ttc_act;
-  unsigned int  __ttc_post_loop;
-  unsigned int  __ttc_netproc;
-  unsigned int  __ttc_full_loop;
-  unsigned int  __ttc_real_loop;
-#endif
 };
 
 #endif

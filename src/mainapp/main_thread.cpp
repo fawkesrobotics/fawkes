@@ -25,6 +25,7 @@
 
 #include <mainapp/main_thread.h>
 
+#include <core/exceptions/system.h>
 #include <config/sqlite.h>
 #include <config/net_handler.h>
 #include <utils/logging/multi.h>
@@ -37,14 +38,11 @@
 #include <netcomm/utils/network_logger.h>
 
 #include <blackboard/local.h>
-#include <mainapp/thread_inifin.h>
+#include <aspect/inifin.h>
+
 #include <mainapp/plugin_manager.h>
 #include <mainapp/network_manager.h>
 #include <mainapp/thread_manager.h>
-
-#ifdef USE_TIMETRACKER
-#include <utils/time/tracker.h>
-#endif
 
 #include <cstdio>
 #include <cstring>
@@ -66,19 +64,20 @@ using namespace fawkes;
 FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   : Thread("FawkesMainThread")
 {
+  __blackboard        = NULL;
+  __config_nethandler = NULL;
+  __config            = NULL;
   plugin_manager      = NULL;
-  __blackboard          = NULL;
-  __config_nethandler   = NULL;
-  __config              = NULL;
   network_manager     = NULL;
   thread_manager      = NULL;
-  thread_inifin       = NULL;
+  __aspect_inifin     = NULL;
+
+  __mainloop          = this;
 
   __argp = argp;
 
   /* Config stuff */
-  __config             = new SQLiteConfiguration(CONFDIR);
-
+  __config = new SQLiteConfiguration(CONFDIR);
   __config->load(__argp->arg("c"), __argp->arg("d"));
 
   /* Logging stuff */
@@ -143,10 +142,10 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     __blackboard         = new LocalBlackBoard(__config->get_uint("/fawkes/mainapp/blackboard_size"),
 					     __config->get_string("/fawkes/mainapp/blackboard_magic_token").c_str());
     thread_manager     = new FawkesThreadManager();
-    thread_inifin      = new FawkesThreadIniFin(__blackboard,
-						thread_manager->aspect_collector(),
-						__config, __multi_logger, __clock);
-    thread_manager->set_inifin(thread_inifin, thread_inifin);
+    __aspect_inifin    = new AspectIniFin(__blackboard,
+					  thread_manager->aspect_collector(),
+					  __config, __multi_logger, __clock);
+    thread_manager->set_inifin(__aspect_inifin, __aspect_inifin);
     plugin_manager     = new FawkesPluginManager(thread_manager);
     network_manager    = new FawkesNetworkManager(thread_manager, 1910);
     __config_nethandler  = new ConfigNetworkHandler(__config, network_manager->hub());
@@ -159,10 +158,12 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   __network_logger = new NetworkLogger(network_manager->hub(), log_level);
   __multi_logger->add_logger(__network_logger);
 
-  thread_inifin->set_fnet_hub( network_manager->hub() );
-  thread_inifin->set_network_members( network_manager->nnresolver(),
-				      network_manager->service_publisher(),
-				      network_manager->service_browser() );
+  __aspect_inifin->set_fnet_hub( network_manager->hub() );
+  __aspect_inifin->set_network_members( network_manager->nnresolver(),
+					network_manager->service_publisher(),
+					network_manager->service_browser() );
+  __aspect_inifin->set_mainloop_employer(this);
+  __aspect_inifin->set_blocked_timing_executor(thread_manager);
 
   plugin_manager->set_hub( network_manager->hub() );
   plugin_manager->start();
@@ -178,27 +179,6 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   } catch (Exception &e) {
     __multi_logger->log_info("FawkesMainApp", "Minimum loop time not set, assuming 0");
   }
-#ifdef USE_TIMETRACKER
-  __tt = NULL;
-  try {
-    if (__config->get_bool("/fawkes/mainapp/use_time_tracker") ) {
-      __tt = new TimeTracker();
-      __tt_loopcount   = 0;
-      __ttc_pre_loop   = __tt->add_class("Pre Loop");
-      __ttc_sensor     = __tt->add_class("Sensor");
-      __ttc_worldstate = __tt->add_class("World State");
-      __ttc_think      = __tt->add_class("Think");
-      __ttc_skill      = __tt->add_class("Skill");
-      __ttc_act        = __tt->add_class("Act");
-      __ttc_post_loop  = __tt->add_class("Post Loop");
-      __ttc_netproc    = __tt->add_class("Net Proc");
-      __ttc_full_loop  = __tt->add_class("Full Loop");
-      __ttc_real_loop  = __tt->add_class("Real Loop");
-    }
-  } catch (Exception &e) {
-    // ignored, if config value is missing we just don't start the time tracker
-  }
-#endif
 }
 
 
@@ -230,11 +210,8 @@ FawkesMainThread::destruct()
   delete __config;
   delete network_manager;
   delete thread_manager;
-  delete thread_inifin;
+  delete __aspect_inifin;
   delete __time_wait;
-#ifdef USE_TIMETRACER
-  delete __tt;
-#endif
 
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();
@@ -266,93 +243,78 @@ FawkesMainThread::once()
   }
 }
 
-#ifdef USE_TIMETRACKER
-#define TIMETRACK_START(c1, c2, c3)		\
-  if ( __tt ) {					\
-    __tt->ping_start(c1);			\
-    __tt->ping_start(c2);			\
-    __tt->ping_start(c3);			\
+void
+FawkesMainThread::set_mainloop(MainLoop *mainloop)
+{
+  loopinterrupt_antistarve_mutex->lock();
+  thread_manager->interrupt_timed_thread_wait();
+  loop_mutex->lock();
+  if ( mainloop ) {
+    __mainloop = mainloop;
+  } else {
+    __mainloop = this;
   }
-#define TIMETRACK_INTER(c1, c2)			\
-  if ( __tt ) {					\
-    __tt->ping_end(c1);			\
-    __tt->ping_start(c2);			\
-  }
-#define TIMETRACK_END(c)			\
-  if ( __tt ) {					\
-    __tt->ping_end(c);				\
-  }
-#define TIMETRACK_OUTPUT			\
-  if ( __tt && (++__tt_loopcount % 100) == 0) {	\
-    __tt->print_to_stdout();\
-  }
-#else
-#define TIMETRACK_START(c1, c2, c3)
-#define TIMETRACK_INTER(c1, c2)
-#define TIMETRACK_END(c)
-#define TIMETRACK_OUTPUT
-#endif
+  loop_mutex->unlock();
+  loopinterrupt_antistarve_mutex->unlock();
+}
+
+
+void
+FawkesMainThread::loop()
+{
+  __mainloop->mloop();
+}
+
 
 /** Thread loop.
  * Runs the main loop.
  */
 void
-FawkesMainThread::loop()
+FawkesMainThread::mloop()
 {
-  if ( ! thread_manager->timed_threads_exist() ) {
-    __multi_logger->log_debug("FawkesMainThread", "No threads exist, waiting");
-    thread_manager->wait_for_timed_threads();
-    __multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "
-			                        "running main loop now");
+  try {
+    if ( ! thread_manager->timed_threads_exist() ) {
+      __multi_logger->log_debug("FawkesMainThread", "No threads exist, waiting");
+      try {
+	thread_manager->wait_for_timed_threads();
+	__multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "
+				"running main loop now");
+      } catch (InterruptedException &e) {
+	return;
+      }
+    }
+
+    if ( __time_wait ) {
+      __time_wait->mark_start();
+    }
+
+    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
+    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
+    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS );
+    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
+    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK );
+    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL );
+    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT );
+    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC );
+    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
+
+    test_cancel();
+
+    if ( __time_wait ) {
+      __time_wait->wait_systime();
+    } else {
+      yield();
+    }
+  } catch (Exception &e) {
+    __multi_logger->log_warn("FawkesMainThread",
+			     "Exception caught while executing default main "
+			     "loop, ignoring.");
+    __multi_logger->log_warn("FawkesMainThread", e);
+  } catch (std::exception &e) {
+    __multi_logger->log_warn("FawkesMainThread",
+			     "STL Exception caught while executing default main "
+			     "loop, ignoring. (what: %s)", e.what());
   }
-
-  TIMETRACK_START(__ttc_real_loop, __ttc_full_loop, __ttc_pre_loop);
-
-  if ( __time_wait ) {
-    __time_wait->mark_start();
-  }
-
-  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
-
-  TIMETRACK_INTER(__ttc_pre_loop, __ttc_sensor)
-
-  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
-  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS );
-
-  TIMETRACK_INTER(__ttc_sensor, __ttc_worldstate)
-
-  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
-
-  TIMETRACK_INTER(__ttc_worldstate, __ttc_think)
-
-  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK );
-
-  TIMETRACK_INTER(__ttc_think, __ttc_skill)
-
-  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL );
-
-  TIMETRACK_INTER(__ttc_skill, __ttc_act)
-
-  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT );
-  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC );
-
-  TIMETRACK_INTER(__ttc_act, __ttc_post_loop)
-
-  thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
-
-  TIMETRACK_INTER(__ttc_post_loop, __ttc_netproc)
-
-  TIMETRACK_END(__ttc_netproc);
-  TIMETRACK_END(__ttc_real_loop);
-
-  test_cancel();
-
-  if ( __time_wait ) {
-    __time_wait->wait_systime();
-  } else {
-    yield();
-  }
-
-  TIMETRACK_END(__ttc_full_loop);
-  TIMETRACK_OUTPUT
+  // catch ... is not a good idea, would catch cancellation exception
+  // at least needs to be rethrown.
 }

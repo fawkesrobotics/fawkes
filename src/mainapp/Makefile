@@ -18,9 +18,6 @@ BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/libs/netcomm/netcomm.mk
 
-# Add to enable TimeTracker support in Fawkes main application
-#CFLAGS += -DUSE_TIMETRACKER
-
 # Uncomment the following lines to link the main app against all plugins. This
 # makes debugging easier, use it if you see ??? in gdb or valgrind
 #LDFLAGS += -Wl,-R$(PLUGINDIR) -L$(PLUGINDIR) \
