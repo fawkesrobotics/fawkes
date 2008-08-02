@@ -2,8 +2,8 @@
 /***************************************************************************
  *  main_thread.cpp - Fawkes main thread
  *
- *  Generated: Thu Nov  2 16:47:50 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Nov  2 16:47:50 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -26,6 +26,7 @@
 #include <mainapp/main_thread.h>
 
 #include <config/sqlite.h>
+#include <config/net_handler.h>
 #include <utils/logging/multi.h>
 #include <utils/logging/console.h>
 #include <utils/logging/liblogger.h>
@@ -39,7 +40,6 @@
 #include <mainapp/thread_inifin.h>
 #include <mainapp/plugin_manager.h>
 #include <mainapp/network_manager.h>
-#include <mainapp/config_manager.h>
 #include <mainapp/thread_manager.h>
 
 #ifdef USE_TIMETRACKER
@@ -67,26 +67,26 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   : Thread("FawkesMainThread")
 {
   plugin_manager      = NULL;
-  blackboard          = NULL;
-  config_manager      = NULL;
-  config              = NULL;
+  __blackboard          = NULL;
+  __config_nethandler   = NULL;
+  __config              = NULL;
   network_manager     = NULL;
   thread_manager      = NULL;
   thread_inifin       = NULL;
 
-  this->argp = argp;
+  __argp = argp;
 
   /* Config stuff */
-  config             = new SQLiteConfiguration(CONFDIR);
+  __config             = new SQLiteConfiguration(CONFDIR);
 
-  config->load(argp->arg("c"), argp->arg("d"));
+  __config->load(__argp->arg("c"), __argp->arg("d"));
 
   /* Logging stuff */
   const char *tmp;
   Logger::LogLevel log_level = Logger::LL_DEBUG;
-  if ( argp->has_arg("q") ) {
+  if ( __argp->has_arg("q") ) {
     log_level = Logger::LL_INFO;
-    if ( (tmp = argp->arg("q")) != NULL ) {
+    if ( (tmp = __argp->arg("q")) != NULL ) {
       for (unsigned int i = 0; i < strlen(tmp); ++i) {
 	if ( tmp[i] == 'q' ) {
 	  switch (log_level) {
@@ -98,7 +98,7 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 	}
       }
     }
-  } else if ( (tmp = argp->arg("l")) != NULL ) {
+  } else if ( (tmp = __argp->arg("l")) != NULL ) {
     if ( strcmp(tmp, "debug") == 0 ) {
       log_level = Logger::LL_DEBUG;
     } else if ( strcmp(tmp, "info") == 0 ) {
@@ -114,77 +114,74 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     }
   }
 
-  if ( (tmp = argp->arg("L")) != NULL ) {
+  if ( (tmp = __argp->arg("L")) != NULL ) {
     try {
-      multi_logger = LoggerFactory::multilogger_instance(tmp);
+      __multi_logger = LoggerFactory::multilogger_instance(tmp);
     } catch (Exception &e) {
       e.append("Initializing multi logger failed");
       destruct();
       throw;
     }
   } else {
-    multi_logger = new MultiLogger(new ConsoleLogger());
+    __multi_logger = new MultiLogger(new ConsoleLogger());
   }
 
-  multi_logger->set_loglevel(log_level);
-  LibLogger::init(multi_logger);
+  __multi_logger->set_loglevel(log_level);
+  LibLogger::init(__multi_logger);
 
   /* Clock */
-  clock = Clock::instance();
+  __clock = Clock::instance();
 
   // Cleanup stale BlackBoard shared memory segments if requested
-  if ( argp->has_arg("C") ) {
-    LocalBlackBoard::cleanup(config->get_string("/fawkes/mainapp/blackboard_magic_token").c_str(),
+  if ( __argp->has_arg("C") ) {
+    LocalBlackBoard::cleanup(__config->get_string("/fawkes/mainapp/blackboard_magic_token").c_str(),
 			     /* output with lister? */ true);
   }
 
   /* Managers */
   try {
-    config_manager     = new FawkesConfigManager(config);
-    blackboard         = new LocalBlackBoard(config->get_uint("/fawkes/mainapp/blackboard_size"),
-					     config->get_string("/fawkes/mainapp/blackboard_magic_token").c_str());
+    __blackboard         = new LocalBlackBoard(__config->get_uint("/fawkes/mainapp/blackboard_size"),
+					     __config->get_string("/fawkes/mainapp/blackboard_magic_token").c_str());
     thread_manager     = new FawkesThreadManager();
-    thread_inifin      = new FawkesThreadIniFin(blackboard,
+    thread_inifin      = new FawkesThreadIniFin(__blackboard,
 						thread_manager->aspect_collector(),
-						config, multi_logger, clock);
+						__config, __multi_logger, __clock);
     thread_manager->set_inifin(thread_inifin, thread_inifin);
     plugin_manager     = new FawkesPluginManager(thread_manager);
     network_manager    = new FawkesNetworkManager(thread_manager, 1910);
+    __config_nethandler  = new ConfigNetworkHandler(__config, network_manager->hub());
   } catch (Exception &e) {
     e.append("Initializing managers failed");
     destruct();
     throw;
   }
 
-  network_logger = new NetworkLogger(network_manager->hub(), log_level);
-  multi_logger->add_logger(network_logger);
+  __network_logger = new NetworkLogger(network_manager->hub(), log_level);
+  __multi_logger->add_logger(__network_logger);
 
   thread_inifin->set_fnet_hub( network_manager->hub() );
   thread_inifin->set_network_members( network_manager->nnresolver(),
 				      network_manager->service_publisher(),
 				      network_manager->service_browser() );
 
-  config_manager->set_hub( network_manager->hub() );
   plugin_manager->set_hub( network_manager->hub() );
-
-  config_manager->start();
   plugin_manager->start();
 
-  blackboard->start_nethandler(network_manager->hub());
+  __blackboard->start_nethandler(network_manager->hub());
 
   __time_wait = NULL;
   try {
-    unsigned int min_loop_time = config->get_uint("/fawkes/mainapp/min_loop_time");
+    unsigned int min_loop_time = __config->get_uint("/fawkes/mainapp/min_loop_time");
     if ( min_loop_time > 0 ) {
-      __time_wait = new TimeWait(clock, min_loop_time);
+      __time_wait = new TimeWait(__clock, min_loop_time);
     }
   } catch (Exception &e) {
-    multi_logger->log_info("FawkesMainApp", "Minimum loop time not set, assuming 0");
+    __multi_logger->log_info("FawkesMainApp", "Minimum loop time not set, assuming 0");
   }
 #ifdef USE_TIMETRACKER
   __tt = NULL;
   try {
-    if (config->get_bool("/fawkes/mainapp/use_time_tracker") ) {
+    if (__config->get_bool("/fawkes/mainapp/use_time_tracker") ) {
       __tt = new TimeTracker();
       __tt_loopcount   = 0;
       __ttc_pre_loop   = __tt->add_class("Pre Loop");
@@ -220,21 +217,17 @@ FawkesMainThread::destruct()
 {
   // Must delete network logger first since network manager has to die before the LibLogger
   // is finalized.
-  multi_logger->remove_logger(network_logger);
-  delete network_logger;
+  __multi_logger->remove_logger(__network_logger);
+  delete __network_logger;
 
   if ( plugin_manager ) {
     plugin_manager->cancel();
     plugin_manager->join();
     delete plugin_manager;
   }
-  delete blackboard;
-  if (config_manager) {
-    config_manager->cancel();
-    config_manager->join();
-    delete config_manager;
-  }
-  delete config;
+  delete __blackboard;
+  delete __config_nethandler;
+  delete __config;
   delete network_manager;
   delete thread_manager;
   delete thread_inifin;
@@ -252,8 +245,8 @@ FawkesMainThread::destruct()
 void
 FawkesMainThread::once()
 {
-  if ( argp->has_arg("p") ) {
-    char *plugins = strdup(argp->arg("p"));
+  if ( __argp->has_arg("p") ) {
+    char *plugins = strdup(__argp->arg("p"));
     char *saveptr;
     char *plugin;
 
@@ -262,9 +255,9 @@ FawkesMainThread::once()
       try {
 	plugin_manager->load(plugin);
       } catch (Exception &e) {
-	multi_logger->log_error("FawkesMainThread", "Failed to load plugin %s, "
+	__multi_logger->log_error("FawkesMainThread", "Failed to load plugin %s, "
 				"exception follows", plugin);
-	multi_logger->log_error("FawkesMainThread", e);
+	__multi_logger->log_error("FawkesMainThread", e);
       }
       plugin = strtok_r(NULL, ",", &saveptr);
     }
@@ -307,9 +300,9 @@ void
 FawkesMainThread::loop()
 {
   if ( ! thread_manager->timed_threads_exist() ) {
-    multi_logger->log_debug("FawkesMainThread", "No threads exist, waiting");
+    __multi_logger->log_debug("FawkesMainThread", "No threads exist, waiting");
     thread_manager->wait_for_timed_threads();
-    multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "
+    __multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "
 			                        "running main loop now");
   }
 

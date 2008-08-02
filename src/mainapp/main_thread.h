@@ -3,7 +3,7 @@
  *  main_thread.h - Fawkes main thread
  *
  *  Created: Thu Nov  2 16:46:37 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -32,6 +32,7 @@ namespace fawkes {
   class ArgumentParser;
   class LocalBlackBoard;
   class Configuration;
+  class ConfigNetworkHandler;
   class MultiLogger;
   class NetworkLogger;
   class Clock;
@@ -44,7 +45,6 @@ class FawkesThreadManager;
 class FawkesPluginManager;
 class FawkesNetworkManager;
 class FawkesThreadIniFin;
-class FawkesConfigManager;
 
 class FawkesMainThread : public fawkes::Thread
 {
@@ -58,19 +58,19 @@ class FawkesMainThread : public fawkes::Thread
  private:
   void destruct();
 
-  fawkes::ArgumentParser     *argp;
-  fawkes::Configuration      *config;
-  fawkes::LocalBlackBoard    *blackboard;
-  fawkes::MultiLogger        *multi_logger;
-  fawkes::NetworkLogger      *network_logger;
-  fawkes::Clock              *clock;
-  fawkes::TimeWait           *__time_wait;
+  fawkes::ArgumentParser       *__argp;
+  fawkes::Configuration        *__config;
+  fawkes::ConfigNetworkHandler *__config_nethandler;
+  fawkes::LocalBlackBoard      *__blackboard;
+  fawkes::MultiLogger          *__multi_logger;
+  fawkes::NetworkLogger        *__network_logger;
+  fawkes::Clock                *__clock;
+  fawkes::TimeWait             *__time_wait;
 
   FawkesThreadManager        *thread_manager;
   FawkesThreadIniFin         *thread_inifin;
   FawkesPluginManager        *plugin_manager;
   FawkesNetworkManager       *network_manager;
-  FawkesConfigManager        *config_manager;
 
 #ifdef USE_TIMETRACKER
   fawkes::TimeTracker  *__tt;
