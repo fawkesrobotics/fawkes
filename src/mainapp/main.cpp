@@ -1,8 +1,9 @@
+
 /***************************************************************************
  *  main.cpp - Fawkes main application
  *
- *  Generated: Thu Nov  2 16:44:48 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Nov  2 16:44:48 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -109,6 +110,7 @@ usage(const char *progname)
        << "                  defaults to /var/run/fawkes.pid, must be absolute path." << endl
        << " -D[pid file] -k  Kill a daemonized process running in the background," << endl
        << "                  pid file is optional as above." << endl
+       << " -D[pid file] -s  Check status of daemon." << endl
 #endif
        << endl;
 }
@@ -206,7 +208,7 @@ fawkes_daemon_pid_file_proc()
 int
 main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:D::k");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "hCc:d:q::l:L:p:D::ks");
 
 #ifdef HAVE_LIBDAEMON
   pid_t pid;
@@ -233,6 +235,11 @@ main(int argc, char **argv)
 	daemon_log(LOG_WARNING, "Failed to kill daemon");
       }
       return (ret < 0) ? 1 : 0;
+    }
+
+    if ( argp->has_arg("s") ) {
+      // Check daemon status
+      return (daemon_pid_file_is_running() < 0);
     }
 
     // Check that the daemon is not run twice a the same time

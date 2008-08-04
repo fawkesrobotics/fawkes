@@ -23,6 +23,7 @@ TARGETS_all += linkscripts
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
+include $(BASEDIR)/etc/buildsys/lua.mk
 
 .PHONY: apidoc quickdoc tracdoc uncolored-quickdoc
 apidoc: api.doxygen
@@ -74,5 +75,18 @@ license-check:
 	else \
 		echo -e "$(INDENT_PRINT)$(TRED)--- Cannot do license check$(TNORMAL) (perl not installed)"; \
 		exit 1; \
+	fi
+
+.PHONY: simple-clean
+simple-clean:
+	$(SILENT)rm -f $(BINDIR)/* $(LIBDIR)/*.so $(if $(LUALIBDIR),$(LUALIBDIR)/*.so) $(PLUGINDIR)/*.so
+
+.PHONY: switch-buildtype
+switch-buildtype: simple-clean
+	$(SILENT) if [ -z "$(BT)" ]; then \
+		echo -e "$(INDENT_PRINT)$(TRED)--- Usage: make build-type BT=new_buildtype$(TNORMAL)"; \
+	else \
+		echo -e "$(INDENT_PRINT)--- Switching build type from $(BUILD_TYPE) to $(BT)"; \
+		sed -i -e 's/^BUILD_TYPE=.*$$/BUILD_TYPE=$(BT)/' etc/buildsys_local/buildtype.mk; \
 	fi
 

@@ -33,6 +33,7 @@
 #include <utils/logging/liblogger.h>
 #include <interface/interface.h>
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 
@@ -84,7 +85,7 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
     __bbil_messages.lock();
     for (i = im->begin(); i != im->end(); ++i) {
       if ( i->second->is_writer() ) {
-	__bbil_messages[i->first].push_back(listener);
+	__bbil_messages[i->first] = listener;
       }
     }
     __bbil_messages.unlock();
@@ -113,6 +114,7 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *listener,
 /** Remove listener from map.
  * @param ilmap interface listener map to remove the listener from
  * @param listener listener to remove
+ * @return true of the map has been altered, false otherwise
  */
 void
 BlackBoardNotifier::remove_listener(BBilLockMap &ilmap, BlackBoardInterfaceListener *listener)
@@ -141,6 +143,29 @@ BlackBoardNotifier::remove_listener(BBilLockMap &ilmap, BlackBoardInterfaceListe
   ilmap.unlock();
 }
 
+
+void
+BlackBoardNotifier::remove_message_listener(BlackBoardInterfaceListener *listener)
+{
+  BBilMessageLockMapIterator i, tmp;
+
+  __bbil_messages.lock();
+
+  i = __bbil_messages.begin();;
+  while (i != __bbil_messages.end()) {
+    if ( i->second == listener ) {
+      // found!
+      tmp = i;
+      ++i;
+      __bbil_messages.erase(tmp);
+    } else {
+      ++i;
+    }
+  }
+
+  __bbil_messages.unlock();
+}
+
 /** Unregister BB interface listener.
  * This will remove the given BlackBoard interface listener from any event that it was
  * previously registered for.
@@ -149,8 +174,8 @@ BlackBoardNotifier::remove_listener(BBilLockMap &ilmap, BlackBoardInterfaceListe
 void
 BlackBoardNotifier::unregister_listener(BlackBoardInterfaceListener *listener)
 {
+  remove_message_listener(listener);
   remove_listener(__bbil_data, listener);
-  remove_listener(__bbil_messages, listener);
   remove_listener(__bbil_reader, listener);
   remove_listener(__bbil_writer, listener);
 }
@@ -453,28 +478,27 @@ BlackBoardNotifier::notify_of_data_change(const Interface *interface)
 bool
 BlackBoardNotifier::notify_of_message_received(const Interface *interface, Message *message)
 {
-  BBilLockMapIterator lhmi;
-  BBilListIterator i, l;
-  bool rv = true;
+  bool rv = false;
+
   const char *uid = interface->uid();
-  if ( (lhmi = __bbil_messages.find(uid)) != __bbil_messages.end() ) {
-    BBilList &list = (*lhmi).second;
-    __bbil_messages.lock();
-    rv = false;
-    for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceListener *bbil = (*i);
-      Interface *bbil_iface = bbil->bbil_message_interface(uid);
-      if (bbil_iface != NULL ) {
-	if ( bbil->bb_interface_message_received(bbil_iface, message) ) {
+  __bbil_messages.lock();
+  if ( __bbil_messages.find(uid) != __bbil_messages.end() ) {
+    BlackBoardInterfaceListener *bbil = __bbil_messages[uid];
+    __bbil_messages.unlock();
+
+    Interface *bbil_iface = bbil->bbil_message_interface(uid);
+    if (bbil_iface != NULL ) {
+      if ( bbil->bb_interface_message_received(bbil_iface, message) ) {
 	  rv = true;
-	}
-      } else {
-	LibLogger::log_warn("BlackBoardNotifier", "BBIL[%s] registered "
-			    "for message received events for '%s' "
-			    "but has no such interface",
-			    bbil->bbil_name(), uid);
       }
+    } else {
+      LibLogger::log_warn("BlackBoardNotifier", "BBIL[%s] registered "
+			  "for message received events for '%s' "
+			  "but has no such interface",
+			  bbil->bbil_name(), uid);
     }
+  } else {
+    rv = true;
     __bbil_messages.unlock();
   }
 

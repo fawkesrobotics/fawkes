@@ -44,7 +44,7 @@ OBJS_libfawkesconfig =$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/
 
 CFLAGS_fawkesconfig_tolua = -Wno-unused-function
 TOLUA_fawkesconfig = $(wildcard $(SRCDIR)/*.tolua)
-LIBS_lua_fawkesconfig = fawkescore fawkesconfig tolua++
+LIBS_lua_fawkesconfig = fawkescore fawkesconfig $(TOLUA_LIBS)
 OBJS_lua_fawkesconfig = fawkesconfig_tolua.o
 
 OBJS_all = $(OBJS_libfawkesconfig) $(OBJS_lua_fawkesconfig)

@@ -29,7 +29,7 @@ OBJS_libfawkesutils =	$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/
 
 CFLAGS_fawkesutils_tolua = -Wno-unused-function
 TOLUA_fawkesutils = $(wildcard $(SRCDIR)/*.tolua $(SRCDIR)/*/*.tolua $(SRCDIR)/*/*/*.tolua)
-LIBS_lua_fawkesutils = fawkescore fawkesutils tolua++
+LIBS_lua_fawkesutils = fawkescore fawkesutils $(TOLUA_LIBS)
 OBJS_lua_fawkesutils = fawkesutils_tolua.o
 
 OBJS_all = $(OBJS_libfawkesutils) $(OBJS_lua_fawkesutils)

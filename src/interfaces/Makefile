@@ -37,7 +37,7 @@ LIBS_libfawkesinterfaces = fawkescore fawkesinterface
 OBJS_libfawkesinterfaces = $(OBJS_fawkesinterfaces)
 
 CFLAGS_fawkesinterfaces_tolua = -Wno-unused-function
-LIBS_lua_fawkesinterfaces = fawkescore fawkesinterface fawkesinterfaces tolua++
+LIBS_lua_fawkesinterfaces = fawkescore fawkesinterface fawkesinterfaces $(TOLUA_LIBS)
 OBJS_lua_fawkesinterfaces = fawkesinterfaces_tolua.o
 
 OBJS_all = $(OBJS_libfawkesinterfaces) $(OBJS_interface_generator) \

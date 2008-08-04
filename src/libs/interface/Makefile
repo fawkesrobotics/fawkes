@@ -25,7 +25,7 @@ OBJS_libfawkesinterface = interface.o interface_info.o message.o message_queue.o
 
 CFLAGS_fawkesinterface_tolua = -Wno-unused-function
 TOLUA_fawkesinterface = $(wildcard $(SRCDIR)/*.tolua)
-LIBS_lua_fawkesinterface = fawkescore fawkesinterface tolua++
+LIBS_lua_fawkesinterface = fawkescore fawkesinterface $(TOLUA_LIBS)
 OBJS_lua_fawkesinterface = fawkesinterface_tolua.o
 
 OBJS_all = $(OBJS_libfawkesinterface) $(OBJS_lua_fawkesinterface) $(SRCDIR)/interface_tolua.cpp

@@ -37,6 +37,7 @@ class Interface;
 class Message;
 class BlackBoardInterfaceListener;
 class BlackBoardInterfaceObserver;
+class Mutex;
 
 class BlackBoardNotifier
 {
@@ -67,22 +68,28 @@ class BlackBoardNotifier
   typedef std::list< BlackBoardInterfaceListener * >  BBilList;
   typedef LockMap< std::string, BBilList >            BBilLockMap;
 
+  typedef LockMap< std::string, BlackBoardInterfaceListener * > BBilMessageLockMap;
+  typedef LockMap< std::string, BlackBoardInterfaceListener * >::iterator BBilMessageLockMapIterator;
+
   typedef std::list< BlackBoardInterfaceObserver * >  BBioList;
   typedef LockMap< std::string, BBioList >            BBioLockMap;
 
   typedef std::list< BlackBoardInterfaceListener * >::iterator BBilListIterator;
   typedef BBilLockMap::iterator BBilLockMapIterator;
 
+
   typedef std::list< BlackBoardInterfaceObserver * >::iterator BBioListIterator;
   typedef BBioLockMap::iterator BBioLockMapIterator;
 
   void remove_listener(BBilLockMap &ifmap, BlackBoardInterfaceListener *listener);
   void remove_observer(BBioLockMap &iomap, BlackBoardInterfaceObserver *observer);
+  void remove_message_listener(BlackBoardInterfaceListener *listener);
 
   BBilLockMap __bbil_data;
-  BBilLockMap __bbil_messages;
   BBilLockMap __bbil_reader;
   BBilLockMap __bbil_writer;
+
+  BBilMessageLockMap __bbil_messages;
 
   BBioLockMap __bbio_created;
   BBioLockMap __bbio_destroyed;

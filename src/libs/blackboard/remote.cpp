@@ -71,6 +71,8 @@ RemoteBlackBoard::RemoteBlackBoard(FawkesNetworkClient *client)
 
   __wait_mutex = new Mutex();
   __wait_cond  = new WaitCondition();
+
+  __m = NULL;
 }
 
 
@@ -105,6 +107,8 @@ RemoteBlackBoard::RemoteBlackBoard(const char *hostname, unsigned short int port
 
   __wait_mutex = new Mutex();
   __wait_cond  = new WaitCondition();
+
+  __m = NULL;
 }
 
 
