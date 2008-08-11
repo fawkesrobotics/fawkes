@@ -38,7 +38,7 @@
  * @author Tim Niemueller.
  */
 template <typename XabslType, typename FieldType>
-  class XabslInterfaceFieldWrapper : public xabsl::FunctionProvider,
+  class XabslInterfaceFieldWrapper : public xabsl::FunctionProvider
 {
  public:
   /** Constructor.

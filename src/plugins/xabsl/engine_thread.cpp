@@ -113,7 +113,7 @@ XabslEngineThread::init()
     }
   }
 
-  XabslFileInputSource xinput(XABSLDIR"program.xabslc");
+  XabslFileInputSource xinput(XABSLDIR"agent.xabslc");
   __xe->createOptionGraph(xinput);
 
   if ( __xleh->errorsOccurred ) {

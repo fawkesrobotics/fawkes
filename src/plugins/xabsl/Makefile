@@ -20,7 +20,8 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/download.mk
 
-CFLAGS = -I$(SRCDIR)/XABSL/Xabsl -DXABSLDIR=\"$(SRCDIR)/xabsl-code/\"
+XABSLDIR=$(abspath $(SRCDIR)/xabsl-code/)/
+CFLAGS = -I$(SRCDIR)/XABSL/Xabsl -DXABSLDIR=\"$(XABSLDIR)\"
 XABSL_FILE_STEM = XABSL-Soccer
 XABSL_FILE = $(XABSL_FILE_STEM).zip
 URLS_xabsl = http://robocup.rwth-aachen.de/files/sourcecode/$(XABSL_FILE) \
@@ -53,6 +54,13 @@ LIBS_all = $(LIBDIR)/libxabsl.so
 LIBS_xabsl = xabsl
 OBJS_xabsl = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 PLUGINS_all = $(PLUGINDIR)/xabsl.so
+
+XABSL_intermediate = $(XABSLDIR)/agent.xabslc
+$(PLUGINDIR)/xabsl.so: | $(XABSL_intermediate)
+
+%.xabslc: %.xabsl
+	$(SILENT)touch $(SRCDIR)/XABSL/Xabsl/compiler/timestamp
+	$(SILENT)ruby $(SRCDIR)/XABSL/Xabsl/compiler/xabsl.rb -I $(XABSLDIR) -i $@ $<
 
 $(PLUGINS_all): | $(LIBS_all)
 
