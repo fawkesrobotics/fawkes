@@ -1,0 +1,7 @@
+
+include "basic-behaviors.xabsl";
+include "symbols.xabsl";
+include "option-intercept.xabsl";
+
+agent interceptor("Interceptor", intercept_ball);
+

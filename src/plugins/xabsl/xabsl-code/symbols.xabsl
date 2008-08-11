@@ -1,0 +1,8 @@
+namespace symbols("Symbols") {
+  /** X coordinate of relative position of the ball */
+  float input ball.relative_x;
+
+  /** Y coordinate of relative position of the ball */
+  float input ball.relative_y;
+}
+

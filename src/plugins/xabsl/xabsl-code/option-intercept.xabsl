@@ -1,0 +1,9 @@
+
+option intercept_ball {
+  initial state goto_ball {
+    action {
+      relgoto(x = ball.relative_x, y = ball.relative_y);
+    }
+  }
+}
+

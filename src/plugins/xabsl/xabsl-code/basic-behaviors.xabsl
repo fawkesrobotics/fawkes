@@ -1,0 +1,9 @@
+
+namespace basic_behaviors("Basic Behaviors") {
+  behavior relgoto {
+    float x;
+    float y;
+    float ori;
+  }
+}
+
