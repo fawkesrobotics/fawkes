@@ -20,12 +20,14 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/download.mk
 
-XABSLDIR=$(abspath $(SRCDIR)/xabsl-code/)/
-CFLAGS = -I$(SRCDIR)/XABSL/Xabsl -DXABSLDIR=\"$(XABSLDIR)\"
+XABSLDIR=$(abspath $(SRCDIR)/xabsl-code/)
+CFLAGS = -I$(SRCDIR)/XABSL/Xabsl -DXABSLDIR=\"$(XABSLDIR)/\"
 XABSL_FILE_STEM = XABSL-Soccer
 XABSL_FILE = $(XABSL_FILE_STEM).zip
 URLS_xabsl = http://robocup.rwth-aachen.de/files/sourcecode/$(XABSL_FILE) \
 	     http://robocup.rwth-aachen.de/files/sourcecode/$(XABSL_FILE_STEM).patch
+
+all:
 
 ifeq ($(OBJSSUBMAKE),1)
 all: get-xabsl
@@ -56,14 +58,20 @@ OBJS_xabsl = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcar
 PLUGINS_all = $(PLUGINDIR)/xabsl.so
 
 XABSL_intermediate = $(XABSLDIR)/agent.xabslc
-$(PLUGINDIR)/xabsl.so: | $(XABSL_intermediate)
+TARGETS_all += $(XABSL_intermediate)
 
 %.xabslc: %.xabsl
 	$(SILENT)touch $(SRCDIR)/XABSL/Xabsl/compiler/timestamp
-	$(SILENT)ruby $(SRCDIR)/XABSL/Xabsl/compiler/xabsl.rb -I $(XABSLDIR) -i $@ $<
+	$(SILENT)echo -e "$(INDENT_PRINT)--> Generating $(@F) (XABSL)"
+	$(SILENT)ruby $(SRCDIR)/XABSL/Xabsl/compiler/xabsl.rb -q -I $(XABSLDIR) -i $@ $<
+
+.PHONY: clean-xabsl
+clean-xabsl:
+	$(SILENT)rm -rf $(XABSLDIR)/*.xabslc $(XABSLDIR)/*.dump
+clean: clean-xabsl
 
 $(PLUGINS_all): | $(LIBS_all)
 
-OBJS_all = $(OBJS_libxabsl) $(OBJS_xabsl)
+OBJS_all = $(OBJS_libxabsl) $(OBJS_xabsl) $(XABSL_intermediate)
 
 include $(BASEDIR)/etc/buildsys/base.mk
