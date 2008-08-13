@@ -21,12 +21,9 @@ else
   BASEDIR = ../../..
 endif
 
-
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/lua.mk
 include $(SRCDIR)/generator/generator.mk
-
-CFLAGS += -DINTERFACEDIR=\"$(INTERFACEDIR)\"
 
 OBJS_fawkesinterfaces  = $(notdir $(patsubst %.xml,%.o,$(wildcard $(SRCDIR)/*.xml)))
 SRCS_fawkesinterfaces  = $(patsubst %.xml,%.cpp,$(wildcard $(SRCDIR)/*.xml))
@@ -56,13 +53,14 @@ include $(SRCDIR)/generator/generator_rules.mk
 $(LUALIBDIR)/fawkesinterfaces.so: | $(LIBDIR)/libfawkesinterfaces.so
 
 .SECONDARY: $(SRCS_fawkesinterfaces) $(HDRS_fawkesinterfaces) \
-	$(OBJS_fawkesinterfaces) $(TOLUA_interfaces) $(OBJS_lua_interfaces)
+	$(OBJS_fawkesinterfaces) $(TOLUA_fawkesinterfaces) \
+	$(OBJS_lua_fawkesinterfaces)
 
 ifeq ($(BUILD_INTERFACE_GENERATOR),1)
 $(SRCS_fawkesinterfaces): $(BINDIR)/interface_generator
 $(SRCS_fawkesinterfaces): %.cpp: %.xml
 	$(SILENT) echo "$(INDENT_PRINT)--> Generating $(@F) (Interface XML Template)"
-	$(SILENT)$(BINDIR)/interface_generator $<
+	$(SILENT)$(BINDIR)/interface_generator -d $(SRCDIR) $<
 endif
 
 ifeq ($(MAKECMDGOALS),clean-interfaces)

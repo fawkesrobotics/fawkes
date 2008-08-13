@@ -31,6 +31,7 @@
 #include <linux/videodev2.h>
 
 class CameraArgumentParser;
+class V4L2CameraData;
 
 class V4L2Camera: public Camera 
 {
@@ -61,7 +62,7 @@ class V4L2Camera: public Camera
   virtual void           set_image_number(unsigned int n);
 
  protected:
-  V4L2Camera(const char *device_name, int dev, v4l2_capability caps);
+  V4L2Camera(const char *device_name, int dev);
 
  private:
   virtual void post_open();
@@ -96,7 +97,8 @@ class V4L2Camera: public Camera
 
   char *_device_name;           //< Device name
   int _dev;                     //< Device file descriptor
-  v4l2_capability _caps;        //< Device capabilites
+
+  V4L2CameraData *_data;
 
   ReadMethod _read_method;      //< Used read method
   bool _opened;                 //< Device has been open()ed

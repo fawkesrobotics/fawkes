@@ -84,19 +84,20 @@ else
   endif
 endif
 
+
 .PHONY: clean
 clean: presubdirs subdirs
 	$(SILENT) echo -e "$(INDENT_PRINT)--> Cleaning up directory $(TBOLDGRAY)$(CURDIR)$(TNORMAL)"
-	$(SILENT) if [ "$(SRCDIR)/$(OBJDIR)" != "/" ]; then rm -rf $(SRCDIR)/$(OBJDIR) ; fi
-	$(SILENT) if [ -n "$(DEPDIR)" ]; then rm -rf $(DEPDIR) ; fi
-	$(SILENT) if [ -n "$(BINS_all)" ]; then rm -rf $(BINS_all) ; fi
-	$(SILENT) if [ -n "$(LIBS_all)" ]; then rm -rf $(LIBS_all) ; fi
-	$(SILENT) if [ -n "$(PLUGINS_all)" ]; then rm -rf $(PLUGINS_all) ; fi
-	$(SILENT) if [ -n "$(TARGETS_all)" ]; then rm -rf $(TARGETS_all) ; fi
-	$(SILENT) if [ -n "$(BINS_gui)" ]; then rm -rf $(BINS_gui) ; fi
-	$(SILENT) if [ -n "$(LIBS_gui)" ]; then rm -rf $(LIBS_gui) ; fi
-	$(SILENT) if [ -n "$(PLUGINS_gui)" ]; then rm -rf $(PLUGINS_gui) ; fi
-	$(SILENT) if [ -n "$(TARGETS_gui)" ]; then rm -rf $(TARGETS_gui) ; fi
+	$(SILENT) if [ "$(SRCDIR)/$(OBJDIR)" != "/" ]; then rm -rf "$(SRCDIR)/$(OBJDIR)" ; fi
+	$(SILENT) if [ -n "$(DEPDIR)" ]; then rm -rf "$(DEPDIR)" ; fi
+	$(SILENT)$(foreach B,$(BINS_all),rm -rf $(B);)
+	$(SILENT)$(foreach L,$(LIBS_all),rm -rf $(L);)
+	$(SILENT)$(foreach P,$(PLUGINS_all),rm -rf $(P);)
+	$(SILENT)$(foreach T,$(TARGETS_all),rm -rf $(T);)
+	$(SILENT)$(foreach B,$(BINS_gui),rm -rf $(B);)
+	$(SILENT)$(foreach L,$(LIBS_gui),rm -rf $(L);)
+	$(SILENT)$(foreach P,$(PLUGINS_gui),rm -rf $(P);)
+	$(SILENT)$(foreach T,$(TARGETS_gui),rm -rf $(T);)
 
 ifeq (,$(findstring qa,$(SUBDIRS)))
 .PHONY: qa
@@ -140,24 +141,24 @@ endif
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo "$(INDENT_PRINT)--- Compiling $(subst $(SRCDIR)/,,$<) (C++)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
-	$(SILENT) $(CC) -MD -MF $(df).td $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
+	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
-	$(SILENT)sed -e '/^[^:]*\//! s/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(df).td > $(df).d; \
+	$(SILENT)sed -e '/^[^:]*\//! s/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(DEPFILE).td > $(DEPFILE).d; \
 	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e 's/^ *//' \
-	    -e '/^$$/ d' -e 's/$$/ :/' < $(df).td >> $(df).d; \
-	rm -f $(df).td
+	    -e '/^$$/ d' -e 's/$$/ :/' < $(DEPFILE).td >> $(DEPFILE).d; \
+	rm -f $(DEPFILE).td
 
 %.o: %.c
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo "$(INDENT_PRINT)--- Compiling $(subst $(SRCDIR)/,,$<) (C)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
-	$(SILENT) $(CC) -MD -MF $(df).td $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
+	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(CFLAGS) $(CFLAGS_$*) \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
-	$(SILENT)sed -e '/^[^:]*\//! s/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(df).td > $(df).d; \
+	$(SILENT)sed -e '/^[^:]*\//! s/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(DEPFILE).td > $(DEPFILE).d; \
 	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e 's/^ *//' \
-	    -e '/^$$/ d' -e 's/$$/ :/' < $(df).td >> $(df).d; \
-	rm -f $(df).td
+	    -e '/^$$/ d' -e 's/$$/ :/' < $(DEPFILE).td >> $(DEPFILE).d; \
+	rm -f $(DEPFILE).td
 
 moc_%.cpp: %.h
 	$(SILENT) echo "$(INDENT_PRINT)--- Running Qt moc on $(subst $(SRCDIR)/,,$<), creating $(subst ..,__,$@)"

@@ -44,14 +44,48 @@
 #include <cstring>
 #include <iostream>
 #include <cassert>
+#include <sys/types.h>
+#include <linux/videodev.h>
+
 
 using namespace std;
 using namespace fawkes;
 
+/// @cond INTERNALS
+
+class V4L1CameraData
+{
+ public:
+  V4L1CameraData(const char *device_name)
+  {
+    this->device_name = strdup(device_name);
+  }
+
+  ~V4L1CameraData()
+  {
+    free(device_name);
+  }
+
+ public:
+  char *device_name;
+
+  /* V4L1 stuff */
+  struct video_capability  capabilities;          // Device Capabilities: Can overlay, Number of channels, etc
+  struct video_buffer      vbuffer;               // information about buffer
+  struct video_window      window;                // Window Information: Size, Depth, etc
+  struct video_channel    *channel;               // Channels information: Channel[0] holds information for channel 0 and so on...
+  struct video_picture     picture;               // Picture information: Palette, contrast, hue, etc
+  struct video_tuner      *tuner;                 // Tuner Information: if the card has tuners...
+  struct video_audio       audio;                 // If the card has audio
+  struct video_mbuf        captured_frame_buffer; // Information for the frame to be captured: norm, palette, etc
+  struct video_mmap       *buf_v4l;               // mmap() buffer VIDIOCMCAPTURE
+};
+
+/// @endcond
+
 /** @class V4L1Camera <cams/v4l1.h>
  * Video4Linux 1 camera implementation.
  */
-
 
 /** Constructor.
  * @param device_name device file name (e.g. /dev/video0)
@@ -59,7 +93,7 @@ using namespace fawkes;
 V4L1Camera::V4L1Camera(const char *device_name)
 {
   started = opened = false;
-  this->device_name = strdup(device_name);
+  __data = new V4L1CameraData(device_name);
 }
 
 
@@ -73,27 +107,28 @@ V4L1Camera::V4L1Camera(const CameraArgumentParser *cap)
 {
   started = opened = false;
   if ( cap->has("device") ) {
-    device_name = strdup(cap->get("device").c_str());
+    __data = new V4L1CameraData(cap->get("device").c_str());
   } else {
     throw MissingParameterException("Missing device for V4L1Camera");
   }
 }
-
 
 /** Protected Constructor.
  * Gets called from V4LCamera, when the device has already been opened
  * and determined to be a V4L1 device.
  * @param device_name device file name (e.g. /dev/video0)
  * @param dev file descriptor of the opened device
- * @param capabilities capabilities of the device
  */
-V4L1Camera::V4L1Camera(const char *device_name, int dev,
-                       struct video_capability capabilities)
+V4L1Camera::V4L1Camera(const char *device_name, int dev)
 {
   started = opened = false;
-  this->device_name = strdup(device_name);
+  __data = new V4L1CameraData(device_name);
   this->dev = dev;
-  this->capabilities = capabilities;
+
+  // getting grabber info in capabilities struct
+  if ( (ioctl(dev, VIDIOCGCAP, &(__data->capabilities))) == -1 ) {
+    throw Exception("V4L1Cam: Could not get capabilities");
+  }
 
   post_open();
 }
@@ -102,7 +137,7 @@ V4L1Camera::V4L1Camera(const char *device_name, int dev,
 /** Destructor. */
 V4L1Camera::~V4L1Camera()
 {
-  free(device_name);
+  delete __data;
 }
 
 
@@ -111,13 +146,13 @@ V4L1Camera::open()
 {
   opened = false;
 
-  dev = ::open(device_name, O_RDWR);
+  dev = ::open(__data->device_name, O_RDWR);
   if (dev < 0) {
     throw Exception("V4L1Cam: Could not open device");
   }
 
   // getting grabber info in capabilities struct
-  if ( (ioctl(dev, VIDIOCGCAP, &capabilities)) == -1 ) {
+  if ( (ioctl(dev, VIDIOCGCAP, &(__data->capabilities))) == -1 ) {
     throw Exception("V4L1Cam: Could not get capabilities");
   }
 
@@ -132,38 +167,38 @@ void
 V4L1Camera::post_open()
 {
   // Capture window information
-  if ( (ioctl(dev, VIDIOCGWIN, &window)) == -1) {
+  if ( (ioctl(dev, VIDIOCGWIN, &__data->window)) == -1) {
     throw Exception("V4L1Cam: Could not get window information");
   }
 
   // Picture information
-  if ( (ioctl(dev, VIDIOCGPICT, &picture)) == -1) {
+  if ( (ioctl(dev, VIDIOCGPICT, &__data->picture)) == -1) {
     throw Exception("V4L1Cam: Could not get window information");
   }
 
   ///Video Channel Information or Video Sources
   ///Allocate space for each channel
-  channel = (struct video_channel*)malloc(sizeof(struct video_channel)*(capabilities.channels+1));
-  for(int ch = 0; ch < capabilities.channels; ch++) {
-    channel[ch].norm = 0;
-    if ( (ioctl(dev, VIDIOCSCHAN, &channel[ch])) == -1) {
+  __data->channel = (struct video_channel*)malloc(sizeof(struct video_channel)*(__data->capabilities.channels+1));
+  for(int ch = 0; ch < __data->capabilities.channels; ch++) {
+    __data->channel[ch].norm = 0;
+    if ( (ioctl(dev, VIDIOCSCHAN, &__data->channel[ch])) == -1) {
       printf("V4L1Cam: Could not get channel information for channel %i: %s", ch, strerror(errno));
     }
   }
 
   ///Trying to capture through read()
-  if (ioctl (dev, VIDIOCGMBUF, captured_frame_buffer) == -1) {
+  if (ioctl (dev, VIDIOCGMBUF, __data->captured_frame_buffer) == -1) {
     capture_method = READ;
-    frame_buffer = (unsigned char *)malloc(window.width * window.height * RGB_PIXEL_SIZE);
+    frame_buffer = (unsigned char *)malloc(__data->window.width * __data->window.height * RGB_PIXEL_SIZE);
   } else {
     capture_method = MMAP;
-    frame_buffer = (unsigned char*)mmap (0, captured_frame_buffer.size, PROT_READ | PROT_WRITE, MAP_SHARED, dev, 0);
+    frame_buffer = (unsigned char*)mmap (0, __data->captured_frame_buffer.size, PROT_READ | PROT_WRITE, MAP_SHARED, dev, 0);
     if ((unsigned char *) -1 == (unsigned char *)frame_buffer) {
       throw Exception("V4L1Cam: Cannot initialize mmap region");
     }
   }
 
-  buf_v4l = NULL;
+  __data->buf_v4l = NULL;
 
   opened = true;
 }
@@ -198,34 +233,34 @@ V4L1Camera::print_info()
   cout << endl << "CAPABILITIES" << endl
        << "===========================================================================" << endl;
 
-  if(capabilities.type & VID_TYPE_CAPTURE)
+  if(__data->capabilities.type & VID_TYPE_CAPTURE)
     cout << " + Can capture to memory" << endl;
-  if(capabilities.type & VID_TYPE_TUNER)
+  if(__data->capabilities.type & VID_TYPE_TUNER)
     cout << " + Has a tuner of some form" << endl;
-  if(capabilities.type & VID_TYPE_TELETEXT)
+  if(__data->capabilities.type & VID_TYPE_TELETEXT)
     cout << " + Has teletext capability" << endl;
-  if(capabilities.type & VID_TYPE_OVERLAY)
+  if(__data->capabilities.type & VID_TYPE_OVERLAY)
     cout << " + Can overlay its image onto the frame buffer" << endl;
-  if(capabilities.type & VID_TYPE_CHROMAKEY)
+  if(__data->capabilities.type & VID_TYPE_CHROMAKEY)
     cout << " + Overlay is Chromakeyed" << endl;
-  if(capabilities.type & VID_TYPE_CLIPPING)
+  if(__data->capabilities.type & VID_TYPE_CLIPPING)
     cout << " + Overlay clipping is supported" << endl;
-  if(capabilities.type & VID_TYPE_FRAMERAM)
+  if(__data->capabilities.type & VID_TYPE_FRAMERAM)
     cout << " + Overlay overwrites frame buffer memory" << endl;
-  if(capabilities.type & VID_TYPE_SCALES)
+  if(__data->capabilities.type & VID_TYPE_SCALES)
     cout << " + The hardware supports image scaling" << endl;
-  if(capabilities.type & VID_TYPE_MONOCHROME)
+  if(__data->capabilities.type & VID_TYPE_MONOCHROME)
     cout << " + Image capture is grey scale only" << endl;
-  if(capabilities.type & VID_TYPE_SUBCAPTURE)
+  if(__data->capabilities.type & VID_TYPE_SUBCAPTURE)
     cout << " + Can subcapture" << endl;
 
   cout << endl;
-  cout << " Number of Channels ='" << capabilities.channels << "'" << endl;
-  cout << " Number of Audio Devices ='" << capabilities.audios << "'" << endl;
-  cout << " Maximum Capture Width ='" << capabilities.maxwidth << "'" << endl;
-  cout << " Maximum Capture Height ='" << capabilities.maxheight << "'" << endl;
-  cout << " Minimum Capture Width ='" << capabilities.minwidth << "'" << endl;
-  cout << " Minimum Capture Height ='" << capabilities.minheight << "'" << endl;
+  cout << " Number of Channels ='" << __data->capabilities.channels << "'" << endl;
+  cout << " Number of Audio Devices ='" << __data->capabilities.audios << "'" << endl;
+  cout << " Maximum Capture Width ='" << __data->capabilities.maxwidth << "'" << endl;
+  cout << " Maximum Capture Height ='" << __data->capabilities.maxheight << "'" << endl;
+  cout << " Minimum Capture Width ='" << __data->capabilities.minwidth << "'" << endl;
+  cout << " Minimum Capture Height ='" << __data->capabilities.minheight << "'" << endl;
 
 
 
@@ -233,11 +268,11 @@ V4L1Camera::print_info()
   cout << endl << "CAPTURE WINDOW INFO" << endl
        << "===========================================================================" << endl;
 
-  cout << " X Coord in X window Format:  " << window.x << endl;
-  cout << " Y Coord in X window Format:  " << window.y << endl;
-  cout << " Width of the Image Capture:  " << window.width << endl;
-  cout << " Height of the Image Capture: " << window.height << endl;
-  cout << " ChromaKey:                   " << window.chromakey  << endl;
+  cout << " X Coord in X window Format:  " << __data->window.x << endl;
+  cout << " Y Coord in X window Format:  " << __data->window.y << endl;
+  cout << " Width of the Image Capture:  " << __data->window.width << endl;
+  cout << " Height of the Image Capture: " << __data->window.height << endl;
+  cout << " ChromaKey:                   " << __data->window.chromakey  << endl;
 
 
 
@@ -245,41 +280,41 @@ V4L1Camera::print_info()
   cout << endl << "DEVICE PICTURE INFO" << endl
        << "===========================================================================" << endl;
 
-  cout << " Picture Brightness: " << picture.brightness << endl;
-  cout << " Picture        Hue: " << picture.hue << endl;
-  cout << " Picture     Colour: " << picture.colour << endl;
-  cout << " Picture   Contrast: " << picture.contrast << endl;
-  cout << " Picture  Whiteness: " << picture.whiteness << endl;
-  cout << " Picture      Depth: " << picture.depth << endl;
-  cout << " Picture    Palette: " << picture.palette << " (";
+  cout << " Picture Brightness: " << __data->picture.brightness << endl;
+  cout << " Picture        Hue: " << __data->picture.hue << endl;
+  cout << " Picture     Colour: " << __data->picture.colour << endl;
+  cout << " Picture   Contrast: " << __data->picture.contrast << endl;
+  cout << " Picture  Whiteness: " << __data->picture.whiteness << endl;
+  cout << " Picture      Depth: " << __data->picture.depth << endl;
+  cout << " Picture    Palette: " << __data->picture.palette << " (";
 
-  if(picture.palette == VIDEO_PALETTE_GREY)
+  if(__data->picture.palette == VIDEO_PALETTE_GREY)
     cout << "VIDEO_PALETTE_GRAY";
-  if(picture.palette == VIDEO_PALETTE_HI240)
+  if(__data->picture.palette == VIDEO_PALETTE_HI240)
     cout << "VIDEO_PALETTE_HI240";
-  if(picture.palette == VIDEO_PALETTE_RGB565)
+  if(__data->picture.palette == VIDEO_PALETTE_RGB565)
     cout << "VIDEO_PALETTE_RGB565";
-  if(picture.palette == VIDEO_PALETTE_RGB555)
+  if(__data->picture.palette == VIDEO_PALETTE_RGB555)
     cout << "VIDEO_PALETTE_RGB555";
-  if(picture.palette == VIDEO_PALETTE_RGB24)
+  if(__data->picture.palette == VIDEO_PALETTE_RGB24)
     cout << "VIDEO_PALETTE_RGB24";
-  if(picture.palette == VIDEO_PALETTE_RGB32)
+  if(__data->picture.palette == VIDEO_PALETTE_RGB32)
     cout << "VIDEO_PALETTE_RGB32";
-  if(picture.palette == VIDEO_PALETTE_YUV422)
+  if(__data->picture.palette == VIDEO_PALETTE_YUV422)
     cout << "VIDEO_PALETTE_YUV422";
-  if(picture.palette == VIDEO_PALETTE_YUYV)
+  if(__data->picture.palette == VIDEO_PALETTE_YUYV)
     cout << "VIDEO_PALETTE_YUYV";
-  if(picture.palette == VIDEO_PALETTE_UYVY)
+  if(__data->picture.palette == VIDEO_PALETTE_UYVY)
     cout << "VIDEO_PALETTE_UYVY";
-  if(picture.palette == VIDEO_PALETTE_YUV420)
+  if(__data->picture.palette == VIDEO_PALETTE_YUV420)
     cout << "VIDEO_PALETTE_YUV420";
-  if(picture.palette == VIDEO_PALETTE_YUV411)
+  if(__data->picture.palette == VIDEO_PALETTE_YUV411)
     cout << "VIDEO_PALETTE_YUV411";
-  if(picture.palette == VIDEO_PALETTE_RAW)
+  if(__data->picture.palette == VIDEO_PALETTE_RAW)
     cout << "VIDEO_PALETTE_RAW";
-  if(picture.palette == VIDEO_PALETTE_YUV422P)
+  if(__data->picture.palette == VIDEO_PALETTE_YUV422P)
     cout << "VIDEO_PALETTE_YUV422P";
-  if(picture.palette == VIDEO_PALETTE_YUV411P)
+  if(__data->picture.palette == VIDEO_PALETTE_YUV411P)
     cout << "VIDEO_PALETTE_YUV411P";
 
   cout << ")" << endl;
@@ -289,17 +324,17 @@ V4L1Camera::print_info()
   cout << endl << "VIDEO SOURCE INFO" << endl
        << "===========================================================================" << endl;
 
-  cout << " Channel Number or Video Source Number: " << channel->channel << endl;
-  cout << " Channel Name:                          " << channel->name << endl;
-  cout << " Number of Tuners for this source:      " << channel->tuners << endl;
-  cout << " Channel Norm:                          " << channel->norm << endl;
-  if(channel->flags & VIDEO_VC_TUNER)
+  cout << " Channel Number or Video Source Number: " << __data->channel->channel << endl;
+  cout << " Channel Name:                          " << __data->channel->name << endl;
+  cout << " Number of Tuners for this source:      " << __data->channel->tuners << endl;
+  cout << " Channel Norm:                          " << __data->channel->norm << endl;
+  if(__data->channel->flags & VIDEO_VC_TUNER)
     cout << " + This channel source has tuners" << endl;
-  if(channel->flags & VIDEO_VC_AUDIO)
+  if(__data->channel->flags & VIDEO_VC_AUDIO)
     cout << " + This channel source has audio" << endl;
-  if(channel->type & VIDEO_TYPE_TV)
+  if(__data->channel->type & VIDEO_TYPE_TV)
     cout << " + This channel source is a TV input" << endl;
-  if(channel->type & VIDEO_TYPE_CAMERA)
+  if(__data->channel->type & VIDEO_TYPE_CAMERA)
     cout << " + This channel source is a Camera input" << endl;
 
 
@@ -308,11 +343,11 @@ V4L1Camera::print_info()
   cout << endl << "FRAME BUFFER INFO" << endl
        << "===========================================================================" << endl;
 
-  cout << " Base Physical Address:  " << vbuffer.base << endl;
-  cout << " Height of Frame Buffer: " << vbuffer.height << endl;
-  cout << " Width of Frame Buffer:  " << vbuffer.width << endl;
-  cout << " Depth of Frame Buffer:  " << vbuffer.depth << endl;
-  cout << " Bytes Per Line:         " << vbuffer.bytesperline << endl;
+  cout << " Base Physical Address:  " << __data->vbuffer.base << endl;
+  cout << " Height of Frame Buffer: " << __data->vbuffer.height << endl;
+  cout << " Width of Frame Buffer:  " << __data->vbuffer.width << endl;
+  cout << " Depth of Frame Buffer:  " << __data->vbuffer.depth << endl;
+  cout << " Bytes Per Line:         " << __data->vbuffer.bytesperline << endl;
 
 
 
@@ -341,21 +376,21 @@ V4L1Camera::capture()
 {
 
   if (capture_method == READ) {
-    int len = read(dev, frame_buffer, window.width * window.height * RGB_PIXEL_SIZE);
+    int len = read(dev, frame_buffer, __data->window.width * __data->window.height * RGB_PIXEL_SIZE);
     if (len < 0) {
       throw Exception("V4L1Cam: Could not capture frame");
     }
   } else {
 
-    buf_v4l = (struct video_mmap*)malloc(captured_frame_buffer.frames * sizeof(struct video_mmap));
+    __data->buf_v4l = (struct video_mmap*)malloc(__data->captured_frame_buffer.frames * sizeof(struct video_mmap));
 
     ///Setting up the palette, size of frame and which frame to capture
-    buf_v4l[0].format = picture.palette;
-    buf_v4l[0].frame  = 0;
-    buf_v4l[0].width  = window.width;
-    buf_v4l[0].height = window.height;
+    __data->buf_v4l[0].format = __data->picture.palette;
+    __data->buf_v4l[0].frame  = 0;
+    __data->buf_v4l[0].width  = __data->window.width;
+    __data->buf_v4l[0].height = __data->window.height;
 
-    if (ioctl (dev, VIDIOCMCAPTURE, &(buf_v4l[0])) == -1) {
+    if (ioctl (dev, VIDIOCMCAPTURE, &(__data->buf_v4l[0])) == -1) {
       throw Exception("V4L1Cam: Could not capture frame (VIDIOCMCAPTURE)");
     }
     ///Waiting for the frame to finish
@@ -371,11 +406,11 @@ void
 V4L1Camera::dispose_buffer()
 {
   if (capture_method == MMAP) {
-    if (buf_v4l != NULL) {
-      free(buf_v4l);
-      buf_v4l = NULL;
+    if (__data->buf_v4l != NULL) {
+      free(__data->buf_v4l);
+      __data->buf_v4l = NULL;
     }
-    munmap(frame_buffer, captured_frame_buffer.size);
+    munmap(frame_buffer, __data->captured_frame_buffer.size);
   }
 }
 
@@ -389,7 +424,7 @@ V4L1Camera::buffer()
 unsigned int
 V4L1Camera::buffer_size()
 {
-  return colorspace_buffer_size(RGB, window.width, window.height);
+  return colorspace_buffer_size(RGB, __data->window.width, __data->window.height);
 }
 
 void
@@ -404,7 +439,7 @@ unsigned int
 V4L1Camera::pixel_width()
 {
   if (opened) {
-    return window.width;
+    return __data->window.width;
   } else {
     throw Exception("V4L1Cam::pixel_width(): Camera not opened");
   }
@@ -414,7 +449,7 @@ unsigned int
 V4L1Camera::pixel_height()
 {
   if (opened) {
-    return window.height;
+    return __data->window.height;
   } else {
     throw Exception("V4L1Cam::pixel_height(): Camera not opened");
   }

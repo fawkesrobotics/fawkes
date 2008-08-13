@@ -2,8 +2,8 @@
 /***************************************************************************
  *  v4l2.cpp - Video4Linux 2 camera access
  *
- *  Generated: Sat Jul  5 20:40:20 2008
- *  Copyright  2008 Tobias Kellner
+ *  Created: Sat Jul  5 20:40:20 2008
+ *  Copyright  2008  Tobias Kellner
  *
  *  $Id$
  *
@@ -45,11 +45,22 @@ using fawkes::Exception;
 using fawkes::MissingParameterException;
 using fawkes::LibLogger;
 
+/// @cond INTERNALS
+class V4L2CameraData
+{
+ public:
+  v4l2_capability caps;        //< Device capabilites
+};
+
+/// @endcond
+
+
 /** @class V4L2Camera <cams/v4l2.h>
  * Video4Linux 2 camera access implementation.
  *
- * TODO: Standards queries (VIDIOC_ENUMSTD)
- * TODO: v4l2_pix_format.field
+ * @todo Standards queries (VIDIOC_ENUMSTD)
+ * @todo v4l2_pix_format.field
+ * @author Tobias Kellner
  */
 
 
@@ -69,6 +80,7 @@ V4L2Camera::V4L2Camera(const char *device_name)
   memset(_format, 0, 5);
   _frame_buffer = NULL;
   _device_name = strdup(device_name);
+  _data = new V4L2CameraData();
 }
 
 
@@ -109,6 +121,7 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
   _nao_hacks = false;
   _width = _height = _bytes_per_line = _buffer_size = 0;
   _frame_buffer = NULL;
+  _data = new V4L2CameraData();
 
   if (cap->has("device")) _device_name = strdup(cap->get("device").c_str());
   else throw MissingParameterException("V4L2Cam: Missing device");
@@ -349,9 +362,8 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
  * and determined to be a V4L2 device.
  * @param device_name device file name (e.g. /dev/video0)
  * @param dev file descriptor of the opened device
- * @param caps capabilities of the device
  */
-V4L2Camera::V4L2Camera(const char *device_name, int dev, v4l2_capability caps)
+V4L2Camera::V4L2Camera(const char *device_name, int dev)
 {
   _opened = true;
   _started = false;
@@ -365,9 +377,16 @@ V4L2Camera::V4L2Camera(const char *device_name, int dev, v4l2_capability caps)
   memset(_format, 0, 5);
   _frame_buffer = NULL;
   _device_name = strdup(device_name);
+  _data = new V4L2CameraData();
 
   _dev = dev;
-  _caps = caps;
+
+  // getting capabilities
+  if (ioctl(_dev, VIDIOC_QUERYCAP, &_data->caps))
+  {
+    close();
+    throw Exception("V4L2Cam: Could not get capabilities - probably not a v4l2 device");
+  }
 
   post_open();
 }
@@ -379,6 +398,7 @@ V4L2Camera::~V4L2Camera()
   if (_opened) close();
 
   free(_device_name);
+  delete _data;
 }
 
 void
@@ -393,7 +413,7 @@ V4L2Camera::open()
   _opened = true;
 
   // getting capabilities
-  if (ioctl(_dev, VIDIOC_QUERYCAP, &_caps))
+  if (ioctl(_dev, VIDIOC_QUERYCAP, &_data->caps))
   {
     close();
     throw Exception("V4L2Cam: Could not get capabilities - probably not a v4l2 device");
@@ -404,7 +424,7 @@ V4L2Camera::open()
 
 /**
  * Post-open() operations.
- * Precondition: _dev (file desc) and _caps (capabilities) are set.
+ * Precondition: _dev (file desc) and _data->caps (capabilities) are set.
  * @param dev file descriptor of the opened device
  */
 void
@@ -443,12 +463,12 @@ void
 V4L2Camera::select_read_method()
 {
   /* try preferred method */
-  if (!(_caps.capabilities &
+  if (!(_data->caps.capabilities &
         (_read_method == READ ? V4L2_CAP_READWRITE : V4L2_CAP_STREAMING)))
   {
     /* preferred read method not supported - try next */
     _read_method = (_read_method == READ ? MMAP : READ);
-    if (!(_caps.capabilities & 
+    if (!(_data->caps.capabilities & 
           (_read_method == READ ? V4L2_CAP_READWRITE : V4L2_CAP_STREAMING)))
     {
       close();
@@ -685,7 +705,7 @@ V4L2Camera::select_format()
 void
 V4L2Camera::set_fps()
 {
-  if (!(_caps.capabilities & V4L2_CAP_TIMEPERFRAME) && !_nao_hacks)
+  if (!(_data->caps.capabilities & V4L2_CAP_TIMEPERFRAME) && !_nao_hacks)
   {
     LibLogger::log_warn("V4L2Cam", "FPS change not supported");
     return;
@@ -1205,48 +1225,48 @@ V4L2Camera::print_info()
  /* General capabilities */
   cout << 
     "=========================================================================="
-    << endl << _device_name << " (" << _caps.card << ") - " << _caps.bus_info
-    << endl << "Driver: " << _caps.driver << " (ver " <<
-    ((_caps.version >> 16) & 0xFF) << "." <<
-    ((_caps.version >> 8) & 0xFF) << "." <<
-    (_caps.version & 0xFF) << ")" << endl <<
+    << endl << _device_name << " (" << _data->caps.card << ") - " << _data->caps.bus_info
+    << endl << "Driver: " << _data->caps.driver << " (ver " <<
+    ((_data->caps.version >> 16) & 0xFF) << "." <<
+    ((_data->caps.version >> 8) & 0xFF) << "." <<
+    (_data->caps.version & 0xFF) << ")" << endl <<
     "--------------------------------------------------------------------------"
     << endl;
 
   /* General capabilities */
   cout << "Capabilities:" << endl;
-  if (_caps.capabilities & V4L2_CAP_VIDEO_CAPTURE)
+  if (_data->caps.capabilities & V4L2_CAP_VIDEO_CAPTURE)
     cout << " + Video capture interface supported" << endl;
-  if (_caps.capabilities & V4L2_CAP_VIDEO_OUTPUT)
+  if (_data->caps.capabilities & V4L2_CAP_VIDEO_OUTPUT)
     cout << " + Video output interface supported" << endl;
-  if (_caps.capabilities & V4L2_CAP_VIDEO_OVERLAY)
+  if (_data->caps.capabilities & V4L2_CAP_VIDEO_OVERLAY)
     cout << " + Video overlay interface supported" << endl;
-  if (_caps.capabilities & V4L2_CAP_VBI_CAPTURE)
+  if (_data->caps.capabilities & V4L2_CAP_VBI_CAPTURE)
     cout << " + Raw VBI capture interface supported" << endl;
-  if (_caps.capabilities & V4L2_CAP_VBI_OUTPUT)
+  if (_data->caps.capabilities & V4L2_CAP_VBI_OUTPUT)
     cout << " + Raw VBI output interface supported" << endl;
-  if (_caps.capabilities & V4L2_CAP_SLICED_VBI_CAPTURE)
+  if (_data->caps.capabilities & V4L2_CAP_SLICED_VBI_CAPTURE)
     cout << " + Sliced VBI capture interface supported" << endl;
-  if (_caps.capabilities & V4L2_CAP_SLICED_VBI_OUTPUT)
+  if (_data->caps.capabilities & V4L2_CAP_SLICED_VBI_OUTPUT)
     cout << " + Sliced VBI output interface supported" << endl;
-  if (_caps.capabilities & V4L2_CAP_RDS_CAPTURE)
+  if (_data->caps.capabilities & V4L2_CAP_RDS_CAPTURE)
     cout << " + RDS_CAPTURE set" << endl;
   /* Not included in Nao's version 
   if (caps.capabilities & V4L2_CAP_VIDEO_OUTPUT_OVERLAY)
     cout << " + Video output overlay interface supported" << endl; */
-  if (_caps.capabilities & V4L2_CAP_TUNER)
+  if (_data->caps.capabilities & V4L2_CAP_TUNER)
     cout << " + Has some sort of tuner" << endl;
-  if (_caps.capabilities & V4L2_CAP_AUDIO)
+  if (_data->caps.capabilities & V4L2_CAP_AUDIO)
     cout << " + Has audio inputs or outputs" << endl;
-  if (_caps.capabilities & V4L2_CAP_RADIO)
+  if (_data->caps.capabilities & V4L2_CAP_RADIO)
     cout << " + Has a radio receiver" << endl;
-  if (_caps.capabilities & V4L2_CAP_READWRITE)
+  if (_data->caps.capabilities & V4L2_CAP_READWRITE)
     cout << " + read() and write() IO supported" << endl;
-  if (_caps.capabilities & V4L2_CAP_ASYNCIO)
+  if (_data->caps.capabilities & V4L2_CAP_ASYNCIO)
     cout << " + asynchronous IO supported" << endl;
-  if (_caps.capabilities & V4L2_CAP_STREAMING)
+  if (_data->caps.capabilities & V4L2_CAP_STREAMING)
     cout << " + streaming IO supported" << endl;
-  if (_caps.capabilities & V4L2_CAP_TIMEPERFRAME)
+  if (_data->caps.capabilities & V4L2_CAP_TIMEPERFRAME)
     cout << " + timeperframe field is supported" << endl;
   cout << endl;
 

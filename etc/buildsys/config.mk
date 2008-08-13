@@ -44,8 +44,17 @@ LIBDIR = $(abspath $(BASEDIR)/lib)
 CONFDIR = $(abspath $(BASEDIR)/cfg)
 PLUGINDIR = $(abspath $(BASEDIR)/plugins)
 RESDIR = $(abspath $(BASEDIR)/res)
+
+# Paths at execution time, may be different if installed or deployed
+EXEC_BASEDIR ?= $(BASEDIR)
+EXEC_BINDIR = $(abspath $(EXEC_BASEDIR)/bin)
+EXEC_LIBDIR = $(abspath $(EXEC_BASEDIR)/lib)
+EXEC_CONFDIR = $(abspath $(EXEC_BASEDIR)/cfg)
+EXEC_PLUGINDIR = $(abspath $(EXEC_BASEDIR)/plugins)
+EXEC_RESDIR = $(abspath $(EXEC_BASEDIR)/res)
+
 VPATH = $(SRCDIR)
-df = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
+DEPFILE = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
 
 ### Programs used, do not mention trivial stuff like ln, rm, ls as per Makefile manual
 CC = gcc
@@ -73,7 +82,7 @@ endif
 GCC_USE_OPENMP=1
 
 ### CFLAGS, preprocessor, compiler and linker options
-LDFLAGS_LIBDIRS  = -Wl,-R$(LIBDIR) $(LIBDIRS:%=-Wl,-R%)
+LDFLAGS_LIBDIRS  = -Wl,-R$(EXEC_LIBDIR) -Wl,-R$(LIBDIR) $(LIBDIRS:%=-Wl,-R%)
 DEFAULT_INCLUDES = -I$(abspath $(BASEDIR)/src) -I$(abspath $(BASEDIR)/src/libs) -I$(abspath $(BASEDIR)/src/firevision)
 CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP)
 CFLAGS_BASE      = $(CFLAGS_MINIMUM)
@@ -89,33 +98,6 @@ LDFLAGS_BASE     += -L/usr/local/lib -lpthread -lstrfunc
 endif
 
 ifeq ($(COLORED),1)
-### colors, to be used as command, not via echo
-BLACK		= tput setaf 0
-BG_BLACK	= tput setab 0
-DARKGREY	= tput bold ; tput setaf 0
-LIGHTGREY	= tput setaf 7
-BG_LIGHTGREY	= tput setab 7
-WHITE		= tput bold ; tput setaf 7
-RED		= tput setaf 1
-BG_RED		= tput setab 1
-BRIGHTRED	= tput bold ; tput setaf 1
-GREEN		= tput setaf 2
-BG_GREEN	= tput setab 2
-BRIGHTGREEN	= tput bold ; tput setaf 2
-BROWN		= tput setaf 3
-BG_BROWN	= tput setab 3
-YELLOW		= tput bold ; tput setaf 3
-BLUE		= tput setaf 4
-BG_BLUE		= tput setab 4
-BRIGHTBLUE	= tput bold ; tput setaf 4
-PURPLE		= tput setaf 5
-BG_PURPLE	= tput setab 5
-PINK		= tput bold ; tput setaf 5
-CYAN		= tput setaf 6
-BG_CYAN		= tput setab 6
-BRIGHTCYAN	= tput bold ; tput setaf 6
-NORMAL		= tput sgr0
-
 TBOLDGRAY	= \033[1;30m
 TBLUE		= \033[0;34m
 TBOLDBLUE	= \033[1;34m
@@ -134,32 +116,6 @@ TBLUEBG		= \033[44m
 TMAGENTABG	= \033[45m
 TCYANBG		= \033[46m
 TGREYBG		= \033[47m
-else
-BLACK           = : 
-BG_BLACK        = :
-DARKGREY        = :
-LIGHTGREY       = :
-BG_LIGHTGREY    = :
-WHITE           = :
-RED             = :
-BG_RED          = :
-BRIGHTRED       = :
-GREEN           = :
-BG_GREEN        = :
-BRIGHTGREEN     = :
-BROWN           = :
-BG_BROWN        = :
-YELLOW          = :
-BLUE            = :
-BG_BLUE         = :
-BRIGHTBLUE      = :
-PURPLE          = :
-BG_PURPLE       = :
-PINK            = :
-CYAN            = :
-BG_CYAN         = :
-BRIGHTCYAN      = :
-NORMAL          = :
 endif
 
 ### Check if there are special config files for the chosen compiler

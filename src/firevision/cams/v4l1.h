@@ -28,10 +28,8 @@
 
 #include <cams/camera.h>
 
-#include <sys/types.h>
-#include <linux/videodev.h>
-
 class CameraArgumentParser;
+class V4L1CameraData;
 
 class V4L1Camera : public Camera
 {
@@ -62,8 +60,7 @@ class V4L1Camera : public Camera
   virtual void           set_image_number(unsigned int n);
 
  protected:
-  V4L1Camera(const char *device_name, int dev,
-             struct video_capability capabilities);
+  V4L1Camera(const char *device_name, int dev);
 
  private:
   virtual void post_open();
@@ -73,26 +70,15 @@ class V4L1Camera : public Camera
   static const int MMAP = 1;
   static const int READ = 2;
 
+  V4L1CameraData *__data;
 
   bool opened;
   bool started;
-  char *device_name;
 
   int capture_method;
 
   int dev;
   unsigned char *frame_buffer;
-
-  /* V4L1 stuff */
-  struct video_capability  capabilities;          // Device Capabilities: Can overlay, Number of channels, etc
-  struct video_buffer      vbuffer;               // information about buffer
-  struct video_window      window;                // Window Information: Size, Depth, etc
-  struct video_channel    *channel;               // Channels information: Channel[0] holds information for channel 0 and so on...
-  struct video_picture     picture;               // Picture information: Palette, contrast, hue, etc
-  struct video_tuner      *tuner;                 // Tuner Information: if the card has tuners...
-  struct video_audio       audio;                 // If the card has audio
-  struct video_mbuf        captured_frame_buffer; // Information for the frame to be captured: norm, palette, etc
-  struct video_mmap       *buf_v4l;               // mmap() buffer VIDIOCMCAPTURE
 
 
 };

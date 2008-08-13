@@ -146,7 +146,6 @@ SkillerExecutionThread::init()
   __clog = new ComponentLogger(logger, "SkillerLua");
   __lua  = new LuaContext(__cfg_watch_files);
 
-  __lua->add_package_dir(SKILLERLUADIR);
   __lua->add_package_dir(LUADIR);
   __lua->add_cpackage_dir(LUALIBDIR);
 
@@ -171,7 +170,7 @@ SkillerExecutionThread::init()
     __lua->set_usertype(("interface_" + imi->first).c_str(), imi->second, imi->second->type(), "fawkes");
   }
 
-  __lua->set_start_script(SKILLERLUADIR"/skills/common/start.lua");
+  __lua->set_start_script(LUADIR"/skills/common/start.lua");
 }
 
 

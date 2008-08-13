@@ -21,8 +21,8 @@ include $(BASEDIR)/etc/buildsys/lua.mk
 LIBS_libfawkeslua = fawkescore fawkesutils $(TOLUA_LIBS)
 OBJS_libfawkeslua = $(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
-CFLAGS += $(CFLAGS_lua)
-LDFLAGS_libfawkeslua += $(LDFLAGS_lua)
+CFLAGS += $(CFLAGS_LUA)
+LDFLAGS_libfawkeslua += $(LDFLAGS_LUA)
 
 OBJS_all = $(OBJS_libfawkeslua)
 

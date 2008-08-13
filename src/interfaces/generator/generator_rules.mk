@@ -14,8 +14,7 @@
 #*****************************************************************************
 
 ifeq ($(BUILD_INTERFACE_GENERATOR),1)
-  CFLAGS += -DINTERFACEDIR=\"$(INTERFACEDIR)\" \
-	    $(shell $(PKGCONFIG) --cflags libxml++-2.6)
+  CFLAGS += $(shell $(PKGCONFIG) --cflags libxml++-2.6)
 
   ifneq ($(notdir $(SRCDIR)),generator)
     GENDIR=generator/

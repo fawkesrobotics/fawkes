@@ -36,15 +36,11 @@ uncolored-quickdoc: quickdoc
 	$(SILENT) rm -rf doc/api
 	$(SILENT) $(DOXYGEN) doc/doxygen/$@ >/dev/null 2>&1
 	$(SILENT) if [ "`wc -l warnings.txt | awk '{ print $$1 }'`" != "0" ]; then \
-		$(RED); \
-		echo "--> Warnings have been generated:"; \
-		$(NORMAL); \
+		echo -e "$(TRED)--> Warnings have been generated:$(TNORMAL)"; \
 		cat warnings.txt; \
 		exit 1; \
 	else \
-		$(GREEN); \
-		echo "--> No warnings. Nice job."; \
-		$(NORMAL); \
+		echo -e "$(TGREEN)--> No warnings. Nice job.$(TNORMAL)"; \
 	fi
 
 .PHONY: linkscripts

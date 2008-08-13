@@ -47,7 +47,7 @@ main(int argc, char **argv)
   if ( items.size() == 0 ) {
     cout << "Usage: " << argv[0] << " [-d dir] config.xml [config2.xml...]" << endl << endl;
   } else {
-    string dir = INTERFACEDIR;
+    string dir = ".";
     if ( argp->has_arg("d") ) {
       dir = argp->arg("d");
     }

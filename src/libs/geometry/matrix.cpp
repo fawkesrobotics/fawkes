@@ -684,10 +684,16 @@ Matrix::print_info(const char *name,
 		{
 			printf("%f", (*this)(r, c));
 			if (c+1 < num_cols())
-				printf(col_sep ? col_sep : "\t");
+			{
+				if (col_sep) printf("%s", col_sep);
+				else printf("\t");
+			}
 		}
 		if (r+1 < num_rows())
-			printf(row_sep ? row_sep : "\n");
+		{
+			if (row_sep) printf("%s", row_sep);
+			else printf("\n");
+		}
 		else
 			printf("]\n\n");
 	}

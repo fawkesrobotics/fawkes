@@ -3,7 +3,7 @@
  *  v4l.cpp - General Video4Linux access
  *
  *  Generated: Sat Jul  5 16:16:16 2008
- *  Copyright  2008 Tobias Kellner
+ *  Copyright  2008  Tobias Kellner
  *
  *  $Id$
  *
@@ -48,6 +48,7 @@
  * General Video4Linux camera implementation.
  * Maintains backwards compatibility.
  * Chooses on the fly whether v4l1 or v4l2 is needed for a given device.
+ * @author Tobias Kellner
  */
 
 /** Constructor.
@@ -106,13 +107,13 @@ V4LCamera::open()
       throw fawkes::Exception("V4LCam: Device doesn't appear to be a v4l device");
 #ifdef HAVE_V4L1_CAM
     }
-    _v4l_cam = new V4L1Camera(_device_name, dev, caps1);
+    _v4l_cam = new V4L1Camera(_device_name, dev);
 #endif
 #ifdef HAVE_V4L2_CAM
   }
   else
   {
-    _v4l_cam = new V4L2Camera(_device_name, dev, caps2);
+    _v4l_cam = new V4L2Camera(_device_name, dev);
   }
 #endif
 }
@@ -207,5 +208,5 @@ V4LCamera::colorspace()
 void
 V4LCamera::set_image_number(unsigned int n)
 {
-if (_v4l_cam) _v4l_cam->set_image_number(n);
+  if (_v4l_cam) _v4l_cam->set_image_number(n);
 }
