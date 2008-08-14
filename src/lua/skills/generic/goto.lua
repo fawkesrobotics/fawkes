@@ -1,8 +1,8 @@
 
 ----------------------------------------------------------------------------
---  goto.lua - global goto
+--  goto.lua - generic global goto
 --
---  Created: Tue Mar 25 23:22:55 2008
+--  Created: Thu Aug 14 14:32:47 2008
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
@@ -21,18 +21,17 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-require("skills.midsize")
-module("skills.midsize.goto", skills.midsize.module_init)
-require("skills.midsize.relgoto");
+local skillenv = require("skills.skiller.skillenv")
+module(..., skillenv.module_init)
 
 -- Check goto status
-function goto_checkstatus(margin)
-   return skills.midsize.relgoto.relgoto_checkstatus(margin);
+function checkstatus(margin)
+   return relgoto.checkstatus(margin);
 end
 
 
 -- parameter parsing to support different call styles
-function goto_parseparams(...)
+function parseparams(...)
    local x, y, ori, margin;
 
    local f = ...; -- first var
@@ -61,8 +60,8 @@ function goto_parseparams(...)
 end
 
 
-function goto(...)
-   local x, y, ori, margin = goto_parseparams(...);
+function execute(...)
+   local x, y, ori, margin = parseparams(...);
 
    -- ori not yet calculated, not yet in interface
    local rx, ry= wm_pose:world_x(), wm_pose:world_y(); -- robot position
@@ -72,16 +71,21 @@ function goto(...)
 
    printf("Pose(x,y)=(%f, %f)  Dest(x,y)=(%f, %f)  Rel(x,y)=(%f, %f)", rx, ry, x, y, relx, rely);
 
-   return relgoto(relx, rely, ori, margin);
+   return relgoto.execute(relx, rely, ori, margin);
 end
 
 
-function goto_reset()
-   skills.midsize.relgoto.relgoto_reset();
+function reset()
+   relgoto.reset();
 end
 
+name               = "goto"
+depends_skills     = {"relgoto"}
+depends_interfaces = {
+   {v = "wm_pose", id = "WM Pose", type="ObjectPositionInterface"}
+}
 
-goto_skill_doc = [==[Global goto skill.
+documentation      = [==[Global goto skill.
 This skill takes you to a position given in global coordinates in the global world
 coordinate system. The orientation is the final orientation, nothing is said about the
 intermediate orientation while on the way. The margin is the precision of the goto
@@ -110,9 +114,3 @@ has been reached (at least once, the robot might move afterwards for example if 
 brake fast enough or if another robot crashed into this robot). The skill is S_FAILED if
 the navigator started processing another goto message.
 ]==]
-
-register_skill{name       = "goto",
-	       func       = goto,
-	       reset_func = goto_reset,
-	       doc        = goto_skill_doc
-	      };

@@ -1,8 +1,8 @@
 
 ----------------------------------------------------------------------------
---  relgoto.lua - relative goto
+--  relgoto.lua - generic relative goto
 --
---  Created: Tue Mar 25 16:31:42 2008
+--  Created: Thu Aug 14 14:28:19 2008
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
@@ -21,128 +21,136 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-require("skills.nao")
-module("skills.nao.relgoto", skills.nao.module_init)
+local skillenv = require("skills.skiller.skillenv")
+module(..., skillenv.module_init)
 
 -- constants
-local DEFAULT_MARGIN = 0.2;
+local DEFAULT_MARGIN = 0.2
 
 -- skill state variables
-local msgid = 0;
+local msgid = 0
+
 
 --- Check status of goto.
 -- @param margin the radius of a circle around the destination point,
 -- if the robot is within that circle the goto is considered final.
-function relgoto_checkstatus()
+function checkstatus()
    if msgid == 0 then -- we did not yet enqueue a goto message
-      return S_RUNNING;
-   elseif msgid == nao_navigator:msgid() then
-      if nao_navigator:is_final() then
-	 return S_FINAL;
+      return S_RUNNING
+   elseif msgid == navigator:msgid() then
+      if navigator:is_final() then
+	 return S_FINAL
       else
-	 return S_RUNNING;
+	 return S_RUNNING
       end
    else
-      printf("Message in nao_navigator interface is %u but expected %u", nao_navigator:msgid(), msgid);
-      return S_FAILED;
+      printf("Message in navigator interface is %u but expected %u", navigator:msgid(), msgid)
+      return S_FAILED
    end
 end
 
 
 --- Parameter parsing to support different call styles.
 -- @param ... see skill documentation about supported call styles.
-function relgoto_parseparams(...)
-   local x, y, ori, phi, dist, margin;
+function parseparams(...)
+   local x, y, ori, phi, dist, margin
 
-   local f = ...; -- first var
+   local f = ... -- first var
    if type(f) == "table" then
       -- it's called with style 2. or 3.
       if f.x ~= nil and f.y ~= nil then
 	 -- style 2.
-	 x      = f.x;
-	 y      = f.y;
-	 ori    = f.ori;
-	 margin = f.margin;
-	 print_debug("2. relgoto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")");
+	 x      = f.x
+	 y      = f.y
+	 ori    = f.ori
+	 margin = f.margin
+	 print_debug("2. relgoto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
       elseif f.phi ~= nil and f.dist ~= nil then
 	 -- style 3.
-	 phi    = f.phi;
-	 dist   = f.dist;
-	 ori    = f.ori;
-	 margin = f.margin;
-	 print_debug("3. relgoto(phi=" .. phi .. ", dist=" .. dist .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")");
+	 phi    = f.phi
+	 dist   = f.dist
+	 ori    = f.ori
+	 margin = f.margin
+	 print_debug("3. relgoto(phi=" .. phi .. ", dist=" .. dist .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
       else
-	 error("relgoto called with insufficient parameters");
+	 error("relgoto called with insufficient parameters")
       end
    else
       -- positional style
-      x, y, ori, margin = ...;
+      x, y, ori, margin = ...
       if x == nil or y == nil then
-	 error("Insufficient parameters for relgoto (positional)");
+	 error("Insufficient parameters for relgoto (positional)")
       end
-      print_debug("1. relgoto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")");
+      print_debug("1. relgoto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
    end
 
-   return x, y, ori, phi, dist, margin;
+   return x, y, ori, phi, dist, margin
 end
 
 
 --- Relative goto reset.
-function relgoto_reset()
-   print_debug("relgoto_reset() called");
-   msgid = 0;
+function reset()
+   print_debug("relgoto.reset() called")
+   msgid = 0
 end
 
 
 --- Goto skill.
 -- See skill documentation for info.
 -- @param ... see skill documentation about supported call styles
-function relgoto(...)
-   local x, y, ori, phi, dist, margin = relgoto_parseparams(...);
+function execute(...)
+   local x, y, ori, phi, dist, margin = parseparams(...)
 
    -- default values for margin and orientation
    if tonumber(margin) == nil then
-      margin = DEFAULT_MARGIN;
+      margin = DEFAULT_MARGIN
    end
    if tonumber(ori) == nil then
-      ori = 0;
+      ori = 0
    end
 
    -- Check if we reached the destination or if we cannot at all
-   local status = relgoto_checkstatus();
+   local status = checkstatus()
    if status ~= S_RUNNING then
-      return status;
+      return status
    end
 
-   if nao_navigator:has_writer() then
+   if navigator:has_writer() then
       if msgid == 0 then
-	 local vm = nao_navigator.MaxVelocityMessage:new(1.0);
-	 nao_navigator:msgq_enqueue_copy(vm);
+	 local vm = navigator.MaxVelocityMessage:new(1.0)
+	 navigator:msgq_enqueue_copy(vm)
 
 	 if x ~= nil and y ~= nil then
 	    -- send CartesianGotoMessage
-	    printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori);
-	    local m = nao_navigator.CartesianGotoMessage:new(x, y, ori);
-	    msgid   = nao_navigator:msgq_enqueue_copy(m);
+	    printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
+	    local m = navigator.CartesianGotoMessage:new(x, y, ori)
+	    msgid   = navigator:msgq_enqueue_copy(m)
 	 else
 	    -- send PolarGotoMessage
-	    printf("Sending PolarGotoMessage(%f, %f, %f)", phi, dist, ori);
-	    local m = nao_navigator.PolarGotoMessage:new(phi, dist, ori);
-	    msgid = nao_navigator:msgq_enqueue_copy(m);
+	    printf("Sending PolarGotoMessage(%f, %f, %f)", phi, dist, ori)
+	    local m = navigator.PolarGotoMessage:new(phi, dist, ori)
+	    msgid = navigator:msgq_enqueue_copy(m)
 	 end
 
-	 printf("Enqueued message with ID %u", msgid);
+	 printf("Enqueued message with ID %u", msgid)
       end
    else
-      print_error("Navigator not loaded, cannot execute relgoto");
-      return S_FAILED;
+      print_error("Navigator not loaded, cannot execute relgoto")
+      return S_FAILED
    end
 
-   return S_RUNNING;
+   return S_RUNNING
 end
 
 
-relgoto_skill_doc = [==[Relative goto skill.
+-- Global variables required for a skill
+name               = "relgoto"
+depends_skills     = nil
+depends_interfaces = {
+   {v = "navigator", id = "Navigator", type = "NavigatorInterface"}
+}
+
+documentation      = [==[Relative goto skill.
 This skill takes you to a position given in relative coordinates in the robot-local
 coordinate system. The orientation is the final orientation, nothing is said about the
 intermediate orientation while on the way. The margin is the precision of the relgoto
@@ -173,9 +181,3 @@ has been reached (at least once, the robot might move afterwards for example if 
 brake fast enough or if another robot crashed into this robot). The skill is S_FAILED if
 the navigator started processing another goto message.
 ]==]
-
-register_skill{name       = "relgoto",
-	       func       = relgoto,
-	       reset_func = relgoto_reset,
-	       doc        = relgoto_skill_doc
-	      };

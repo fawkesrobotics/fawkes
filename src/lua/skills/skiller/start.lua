@@ -47,10 +47,10 @@ end
 --]]
 
 require("fawkes.logprint")
-require("skills.common.skillenv")
+require("skills.skiller.skillenv")
 
 fawkes.logprint.init(logger)
-skills.common.skillenv.init()
+skills.skiller.skillenv.init(SKILLSPACE)
 
 -- Interfaces are not yet available at this point!
 require("skills." .. SKILLSPACE)
