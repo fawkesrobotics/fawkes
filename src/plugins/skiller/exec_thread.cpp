@@ -91,7 +91,7 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
   LUA_INTEGER running = 0, final = 0, failed = 0;
 
   try {
-    __lua->do_string("return skills.common.skillenv.get_status()");
+    __lua->do_string("return skills.skiller.skillenv.get_status()");
     running = __lua->to_integer(-3);
     final   = __lua->to_integer(-2);
     failed  = __lua->to_integer(-1);
@@ -170,7 +170,7 @@ SkillerExecutionThread::init()
     __lua->set_usertype(("interface_" + imi->first).c_str(), imi->second, imi->second->type(), "fawkes");
   }
 
-  __lua->set_start_script(LUADIR"/skills/common/start.lua");
+  __lua->set_start_script(LUADIR"/skills/skiller/start.lua");
 }
 
 
@@ -317,7 +317,12 @@ SkillerExecutionThread::loop()
 
   if ( continuous_reset ) {
     logger->log_debug("SkillerExecutionThread", "Continuous reset forced");
-    __lua->do_string("skills.common.skillenv.reset_all()");
+    try {
+      __lua->do_string("skills.skiller.skillenv.reset_all()");
+    } catch (Exception &e) {
+      logger->log_warn("SkillerExecutionThread", "Caught exception while resetting skills, ignored, output follows");
+      logger->log_warn("SkillerExecutionThread", e);
+    }
   }
 
   if ( curss != "" ) {
@@ -327,13 +332,18 @@ SkillerExecutionThread::loop()
     if ( __continuous_run && ! continuous_reset) {
       // was continuous execution, status has to be cleaned up anyway
       //logger->log_debug("SkillerExecutionThread", "Resetting skill status in continuous mode");
-      __lua->do_string("skills.common.skillenv.reset_status()");
+      try {
+	__lua->do_string("skills.skiller.skillenv.reset_status()");
+      } catch (Exception &e) {
+	logger->log_warn("SkillerExecutionThread", "Caught exception while resetting status, ignored, output follows");
+	logger->log_warn("SkillerExecutionThread", e);
+      }
     }
 
     try {
                                           // Stack:
       __lua->load_string(curss.c_str());  // sksf (skill string function)
-      __lua->do_string("return skills.common.skillenv.gensandbox()"); // sksf, sandbox
+      __lua->do_string("return skills.skiller.skillenv.gensandbox()"); // sksf, sandbox
       __lua->setfenv();                   // sksf
       __lua->pcall();                     // ---
 
@@ -346,7 +356,12 @@ SkillerExecutionThread::loop()
     if ( ! __continuous_run ) {
       // was one-shot execution, cleanup
       logger->log_debug("SkillerExecutionThread", "Resetting skills");
-      __lua->do_string("skills.common.skillenv.reset_all()");
+      try {
+	__lua->do_string("skills.skiller.skillenv.reset_all()");
+      } catch (Exception &e) {
+	logger->log_warn("SkillerExecutionThread", "Caught exception while resetting skills, ignored, output follows");
+	logger->log_warn("SkillerExecutionThread", e);
+      }
     }
   } // end if (curss != "")
 
