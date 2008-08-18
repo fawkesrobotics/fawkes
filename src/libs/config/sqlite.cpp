@@ -25,6 +25,7 @@
 
 #include <config/sqlite.h>
 #include <core/threading/mutex.h>
+#include <core/exceptions/system.h>
 
 #include <sqlite3.h>
 
@@ -34,6 +35,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cerrno>
 
 namespace fawkes {
 
@@ -72,9 +74,6 @@ namespace fawkes {
   ")"
 
 #define SQL_ATTACH_DEFAULTS			\
-  "ATTACH DATABASE '%s/%s' AS defaults"
-
-#define SQL_ATTACH_DEFAULTS_ABSOLUTE		\
   "ATTACH DATABASE '%s' AS defaults"
 
 #define SQL_SELECT_VALUE_TYPE						\
@@ -129,6 +128,9 @@ namespace fawkes {
 #define SQL_DELETE_DEFAULT_VALUE		\
   "DELETE FROM defaults.config WHERE path=?"
 
+#define SQL_UPDATE_DEFAULT_DB						\
+  "INSERT INTO config SELECT * FROM defaults.config AS dc "		\
+  "WHERE NOT EXISTS (SELECT path from config WHERE path = dc.path)"
 
 /** @class SQLiteConfiguration <config/sqlite.h>
  * Configuration storage using SQLite.
@@ -164,8 +166,22 @@ SQLiteConfiguration::~SQLiteConfiguration()
     opened = false;
     if ( sqlite3_close(db) == SQLITE_BUSY ) {
       printf("Boom, we are dead, database cannot be closed because there are open handles\n");
+    } else {
+      sqlite3 *tdb;
+      if ( sqlite3_open(__default_file, &tdb) == SQLITE_OK ) {
+	try {
+	  dump(tdb, __default_dump);
+	} catch (Exception &e) {
+	  e.print_trace();
+	}
+	sqlite3_close(tdb);
+      }
     }
   }
+
+  free(__host_file);
+  free(__default_file);
+  free(__default_dump);
   delete mutex;
 }
 
@@ -233,6 +249,176 @@ SQLiteConfiguration::init()
 }
 
 
+/** Dump table.
+ * Dumps a table to the given file.
+ * @param f file to write to
+ * @param tdb SQLite3 database to read from
+ * @param table_name Name of the table to dump
+ */
+static void
+dump_table(FILE *f, ::sqlite3 *tdb, const char *table_name)
+{
+  std::string tisql = "PRAGMA table_info(\"";
+  tisql += table_name;
+  tisql += "\");";
+
+  sqlite3_stmt *stmt;
+  if ( sqlite3_prepare(tdb, tisql.c_str(), -1, &stmt, 0) != SQLITE_OK ) {
+    throw ConfigurationException("dump_table/prepare", sqlite3_errmsg(tdb));
+  }
+  std::string value_query = "SELECT 'INSERT INTO ' || '\"";
+  value_query += table_name;
+  value_query += "\"' || ' VALUES(' || ";
+  int rv = sqlite3_step(stmt);
+  while ( rv == SQLITE_ROW ) {
+    value_query += "quote(\"";
+    value_query += (const char *)sqlite3_column_text(stmt, 1);
+    value_query += "\") || ";
+    rv = sqlite3_step(stmt);
+    if ( rv == SQLITE_ROW ) {
+      value_query += " ',' || ";
+    }
+  }
+  value_query += "')' FROM ";
+  value_query += table_name;
+  sqlite3_finalize(stmt);
+
+  sqlite3_stmt *vstmt;
+  if ( sqlite3_prepare(tdb, value_query.c_str(), -1, &vstmt, 0) != SQLITE_OK ) {
+    throw ConfigurationException("dump_table/prepare 2", sqlite3_errmsg(tdb));
+  }
+  while ( sqlite3_step(vstmt) == SQLITE_ROW ) {
+    fprintf(f, "%s;\n", sqlite3_column_text(vstmt, 0));
+  }
+  sqlite3_finalize(vstmt);
+}
+
+void
+SQLiteConfiguration::dump(::sqlite3 *tdb, const char *dumpfile)
+{
+  FILE *f = fopen(dumpfile, "w");
+  if ( ! f ) {
+    throw CouldNotOpenFileException(dumpfile, errno, "Could not open SQLite dump file");
+  }
+
+  fprintf(f, "BEGIN TRANSACTION;\n");
+
+  const char *sql = "SELECT name, sql FROM sqlite_master "
+                    "WHERE sql NOT NULL AND type=='table'";
+  sqlite3_stmt *stmt;
+  if ( (sqlite3_prepare(tdb, sql, -1, &stmt, 0) != SQLITE_OK) || ! stmt ) {
+    throw ConfigurationException("dump_query/prepare", sqlite3_errmsg(tdb));
+  }
+  while ( sqlite3_step(stmt) == SQLITE_ROW ) {
+    fprintf(f, "%s;\n", sqlite3_column_text(stmt, 1));
+    dump_table(f, tdb, (const char *)sqlite3_column_text(stmt, 0));
+  }
+  sqlite3_finalize(stmt);
+
+  fprintf(f, "COMMIT;\n");
+  fclose(f);
+}
+
+
+void
+SQLiteConfiguration::import(::sqlite3 *tdb, const char *dumpfile)
+{
+  FILE *f = fopen(dumpfile, "r");
+
+  char line[4096];
+  char *errmsg;
+  while (! feof(f) ) {
+    line[0] = 0;
+    unsigned int i = 0;
+    while (! feof(f) && (i < sizeof(line) - 1)) {
+      if (fread(&(line[i]), 1, 1, f) == 1) {
+	++i;
+	if ( (i > 2) && (line[i-1] == '\n') && (line[i-2] == ';') ) {
+	  break;
+	}
+      } else {
+	break;
+      }
+    }
+    line[i] = 0;
+    if ( line[0] != 0 ) {
+      if ( sqlite3_exec(tdb, line, 0, 0, &errmsg) != SQLITE_OK ) {
+	ConfigurationException e("import", errmsg);
+	sqlite3_free(errmsg);
+	throw e;
+      }
+    }
+  }
+
+  fclose(f);
+}
+
+
+void
+SQLiteConfiguration::merge_default(const char *default_file,
+				   const char *default_dump)
+{
+  if ( access(default_file, F_OK) == 0 ) {
+    // Default database exists, import dump into temporary database, then merge
+
+    char *tmpfile = (char *)malloc(strlen(conf_path) + strlen("/tmp_default_XXXXXX") + 1);
+    sprintf(tmpfile, "%s/tmp_default_XXXXXX", conf_path);
+    tmpfile = mktemp(tmpfile);
+    if ( tmpfile[0] == 0 ) {
+      throw CouldNotOpenConfigException("Failed to create temp file for default DB import");
+    }
+
+    sqlite3 *dump_db;
+    if ( sqlite3_open(tmpfile, &dump_db) == SQLITE_OK ) {
+      import(dump_db, default_dump);
+      sqlite3_close(dump_db);
+    } else {
+      throw CouldNotOpenConfigException("Failed to import dump file into temp DB");
+    }
+
+    sqlite3 *dflt_db;
+    char *errmsg;
+    if ( sqlite3_open(default_file, &dflt_db) == SQLITE_OK ) {
+      char *attach_sql;
+      if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, tmpfile) == -1 ) {
+	sqlite3_close(dump_db);
+	sqlite3_close(dflt_db);
+	throw CouldNotOpenConfigException("Could not create attachment SQL in merge");
+      }
+      if ( sqlite3_exec(dflt_db, attach_sql, NULL, NULL, &errmsg) != SQLITE_OK ) {
+	sqlite3_close(dump_db);
+	sqlite3_close(dflt_db);
+	free(attach_sql);
+	CouldNotOpenConfigException e("Could not attach dump DB in merge: %s", errmsg);
+	sqlite3_free(errmsg);
+	throw e;
+      }
+      free(attach_sql);
+    }
+
+    if ( sqlite3_exec(dflt_db, SQL_UPDATE_DEFAULT_DB, 0, 0, &errmsg) != SQLITE_OK ) {
+      sqlite3_close(dflt_db);
+      CouldNotOpenConfigException e("Failed to merge dump into default DB: %s", errmsg);
+      sqlite3_free(errmsg);
+      throw e;
+    }
+
+    sqlite3_close(dflt_db);
+    unlink(tmpfile);
+    free(tmpfile);
+  } else {
+    // Default database does *not* exist, simply import
+    sqlite3 *dflt_db;
+    if ( sqlite3_open(default_file, &dflt_db) == SQLITE_OK ) {
+      import(dflt_db, default_dump);
+      sqlite3_close(dflt_db);
+    } else {
+      throw CouldNotOpenConfigException("Failed to import dump file into default DB");
+    }
+  }
+}
+
+
 /** Load configuration.
  * This load the configuration and if requested restores the configuration for the
  * given tag.
@@ -246,55 +432,85 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
 			  const char *tag)
 {
   char *errmsg;
-  char *filename;
   char *attach_sql;
 
   mutex->lock();
 
-  char *host_file;
-  const char *default_file = "default.db";
+  __default_file = strdup("default.db");
+  __default_dump = strdup("default.sql");
 
   if ( name ) {
-    host_file = strdup(name);
+    __host_file = strdup(name);
   } else {
     HostInfo hostinfo;
-    if ( asprintf(&host_file, "%s.db", hostinfo.short_name()) == -1 ) {
-      host_file = strdup(hostinfo.short_name());
+    if ( asprintf(&__host_file, "%s.db", hostinfo.short_name()) == -1 ) {
+      __host_file = strdup(hostinfo.short_name());
     }
   }
   if (defaults_name) {
-    default_file = defaults_name;
+    __default_file = strdup(defaults_name);
+    free(__default_dump);
+    __default_dump = (char *)malloc(strlen(__default_file) + 5);
+    strcpy(__default_dump, __default_file);
+    strcat(__default_dump, ".sql");
   }
 
-  if ( conf_path != NULL ) {
-    if ( asprintf(&filename, "%s/%s", conf_path, host_file) == -1 ) {
+  if ( conf_path == NULL ) {
+    conf_path = ".";
+  }
+
+  if ( access(__default_file, F_OK) != 0 ) {
+    // the given path was not found as file, add the config path
+    char *tdf = __default_file;
+    if ( asprintf(&__default_file, "%s/%s", conf_path, tdf) == -1 ) {
+      free(tdf);
+      throw CouldNotOpenConfigException("Could not create default filename");
+    }
+    free(tdf);
+  }
+
+  if ( access(__default_dump, F_OK) != 0 ) {
+    // the given path was not found as file, add the config path
+    char *tdf = __default_dump;
+    if ( asprintf(&__default_dump, "%s/%s", conf_path, tdf) == -1 ) {
+      free(tdf);
+      throw CouldNotOpenConfigException("Could not create default filename");
+    }
+    free(tdf);
+  }
+
+  if ( access(__host_file, F_OK) != 0 ) {
+    // the given path was not found as file, add the config path
+    char *thf = __host_file;
+    if ( asprintf(&__host_file, "%s/%s", conf_path, thf) == -1 ) {
+      free(thf);
       throw CouldNotOpenConfigException("Could not create filename");
     }
-    if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, conf_path, default_file) == -1 ) {
-      free(filename);
-      throw CouldNotOpenConfigException("Could not create attachment SQL");
-    }
-  } else {
-    filename = strdup(host_file);
-    if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS_ABSOLUTE, default_file) == -1 ) {
-      free(filename);
+    free(thf);
+    if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, __default_file) == -1 ) {
+      free(__host_file);
       throw CouldNotOpenConfigException("Could not create attachment SQL");
     }
   }
-  if ( (sqlite3_open(filename, &db) != SQLITE_OK) ||
+
+  if ( access(__default_dump, R_OK) == 0 ) {
+    merge_default(__default_file, __default_dump);
+  }
+
+  // Now really open the config databases
+  if ( (sqlite3_open(__host_file, &db) != SQLITE_OK) ||
        (sqlite3_exec(db, attach_sql, NULL, NULL, &errmsg) != SQLITE_OK) ) {
     CouldNotOpenConfigException ce(sqlite3_errmsg(db));
     free(attach_sql);
-    free(filename);
+    free(__host_file);
+    free(__default_file);
+    free(__default_dump);
     sqlite3_close(db);
     throw ce;
   }
   free(attach_sql);
-  free(filename);
 
   init();
-
-  free(host_file);
 
   mutex->unlock();
 

@@ -149,7 +149,9 @@ class SQLiteConfiguration : public Configuration
   ::sqlite3_stmt *  prepare_insert_value(const char *sql, const char *type,
 				       const char *path);
   void            execute_insert_or_update(sqlite3_stmt *stmt);
-
+  void dump       (::sqlite3 *tdb, const char *dumpfile);
+  void import     (::sqlite3 *tdb, const char *dumpfile);
+  void merge_default(const char *default_file, const char *default_dump);
 
  private:
   ::sqlite3 *db;
@@ -157,6 +159,9 @@ class SQLiteConfiguration : public Configuration
   bool opened;
   Mutex *mutex;
 
+  char *__host_file;
+  char *__default_file;
+  char *__default_dump;
 };
 
 } // end namespace fawkes

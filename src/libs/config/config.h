@@ -58,7 +58,7 @@ class ConfigTypeMismatchException : public Exception
 class CouldNotOpenConfigException : public Exception
 {
  public:
-  CouldNotOpenConfigException(const char *msg);
+  CouldNotOpenConfigException(const char *format, ...);
 };
 
 class Configuration

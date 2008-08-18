@@ -131,23 +131,39 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   /* Clock */
   __clock = Clock::instance();
 
+  std::string bb_magic_token = "FawkesBlackBoard";
+  unsigned int bb_size = 2097152;
+  try {
+    bb_magic_token = __config->get_string("/fawkes/mainapp/blackboard_magic_token");
+  } catch (Exception &e) {
+    __multi_logger->log_warn("FawkesMainApp", "BlackBoard magic token not defined. "
+			     "Will use %s, saving to default DB", bb_magic_token.c_str());
+    __config->set_default_string("/fawkes/mainapp/blackboard_magic_token",
+				 bb_magic_token.c_str());
+  }
+  try {
+    bb_size = __config->get_uint("/fawkes/mainapp/blackboard_size");
+  } catch (Exception &e) {
+    __multi_logger->log_warn("FawkesMainApp", "BlackBoard size not defined. "
+			     "Will use %u, saving to default DB", bb_size);
+    __config->set_default_uint("/fawkes/mainapp/blackboard_size", bb_size);
+  }
+
   // Cleanup stale BlackBoard shared memory segments if requested
   if ( __argp->has_arg("C") ) {
-    LocalBlackBoard::cleanup(__config->get_string("/fawkes/mainapp/blackboard_magic_token").c_str(),
-			     /* output with lister? */ true);
+    LocalBlackBoard::cleanup(bb_magic_token.c_str(), /* output with lister? */ true);
   }
 
   /* Managers */
   try {
-    __blackboard         = new LocalBlackBoard(__config->get_uint("/fawkes/mainapp/blackboard_size"),
-					     __config->get_string("/fawkes/mainapp/blackboard_magic_token").c_str());
-    thread_manager     = new FawkesThreadManager();
-    __aspect_inifin    = new AspectIniFin(__blackboard,
-					  thread_manager->aspect_collector(),
-					  __config, __multi_logger, __clock);
+    __blackboard         = new LocalBlackBoard(bb_size, bb_magic_token.c_str());
+    thread_manager       = new FawkesThreadManager();
+    __aspect_inifin      = new AspectIniFin(__blackboard,
+					    thread_manager->aspect_collector(),
+					    __config, __multi_logger, __clock);
     thread_manager->set_inifin(__aspect_inifin, __aspect_inifin);
-    plugin_manager     = new FawkesPluginManager(thread_manager);
-    network_manager    = new FawkesNetworkManager(thread_manager, 1910);
+    plugin_manager       = new FawkesPluginManager(thread_manager);
+    network_manager      = new FawkesNetworkManager(thread_manager, 1910);
     __config_nethandler  = new ConfigNetworkHandler(__config, network_manager->hub());
   } catch (Exception &e) {
     e.append("Initializing managers failed");

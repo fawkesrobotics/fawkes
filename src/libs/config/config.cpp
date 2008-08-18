@@ -302,19 +302,22 @@ ConfigTypeMismatchException::ConfigTypeMismatchException(const char *path,
 	 path, requested, actual);
 }
 
-/** @class CouldNotOpenConfigException config/config.h
+/** @class CouldNotOpenConfigException <config/config.h>
  * Thrown if config could not be opened.
  * This is most likely to happen during the constructor or load().
  */
 
 /** Constructor.
- * @param msg cause or symptom of failure
+ * @param format format of message to describe cause or symptom of failure
  */
-CouldNotOpenConfigException::CouldNotOpenConfigException(const char *msg)
-  : Exception(msg)
+CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...)
+  : Exception()
 {
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
-
 
 
 /** @class Configuration::ValueIterator config/config.h
