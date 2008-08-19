@@ -207,7 +207,9 @@ void
 SkillerExecutionThread::loop()
 {
   __liaison_exec_barrier->wait();
+#ifdef HAVE_INOTIFY
   __lua->process_fam_events();
+#endif
 
   // Current skill string
   std::string curss = "";

@@ -105,9 +105,11 @@ ifneq ($(wildcard $(realpath $(FVBASEDIR)/cams/shmem.h)),)
   HAVE_SHMEM_CAM      = 1
 endif
 HAVE_DPPTU_CTRL     = 0
-HAVE_V4L_CAM        = 1
-HAVE_V4L1_CAM       = 1
-HAVE_V4L2_CAM       = 1
+ifeq ($(OS),Linux)
+  HAVE_V4L_CAM        = 1
+  HAVE_V4L1_CAM       = 1
+  HAVE_V4L2_CAM       = 1
+endif
 
 
 ### Need at lease one of V4L 1 or 2 for V4L

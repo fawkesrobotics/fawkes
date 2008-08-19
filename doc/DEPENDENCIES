@@ -34,6 +34,12 @@ Fawkes		OpenSSL			>= 0.9.8b		mandatory
 Fawkes		file			>= 4.21			mandatory
 		(needs libmagic that comes on Fedora in file-devel)
 
+Fawkes		libstrfunc		>= 8.3			mandatory
+		(required on FreeBSD)
+
+Fawkes		libexecinfo		>= 1.1			optional
+		(req. on FreeBSD for backtraces in Exception)
+
 All		Intel Compiler		>= 10.1.008		optional
 		(icc can be used to compile the software. Set
 		 CC to icc in config.mk and ICC_PATH

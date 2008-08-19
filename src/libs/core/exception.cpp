@@ -30,10 +30,12 @@
 #define _GNU_SOURCE
 #endif
 
-#include <execinfo.h>
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#ifdef HAVE_EXECINFO
+#  include <execinfo.h>
+#endif
 
 namespace fawkes {
 
@@ -551,6 +553,7 @@ Exception::raise()
 void
 Exception::print_backtrace() const throw()
 {
+#ifdef HAVE_EXECINFO
   void * array[25];
   int size = backtrace(array, 25);
   char ** symbols = backtrace_symbols(array, size);
@@ -561,6 +564,9 @@ Exception::print_backtrace() const throw()
   }
   
   free(symbols);
+#else
+  printf("Backtrace not available on current system\n");
+#endif
 }
 
 
@@ -570,6 +576,7 @@ Exception::print_backtrace() const throw()
 char *
 Exception::generate_backtrace() const throw()
 {
+#ifdef HAVE_BACKTRACE
   void * array[25];
   int size = backtrace(array, 25);
   char ** symbols = backtrace_symbols(array, size);
@@ -586,6 +593,9 @@ Exception::generate_backtrace() const throw()
   }
   
   free(symbols);
+#else
+  char *rv = strdup("Backtrace not available on current system\n");
+#endif
 
   return rv;
 }
@@ -641,7 +651,9 @@ Exception::errno() throw()
 const char *
 Exception::what() const throw()
 {
+#ifdef HAVE_EXECINFO
   print_backtrace();
+#endif
   if ( messages != NULL ) {
     return messages->msg;
   } else {

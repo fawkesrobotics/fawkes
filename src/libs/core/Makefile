@@ -16,12 +16,34 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_libfawkescore = pthread stdc++
 OBJS_libfawkescore = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 
 OBJS_all = $(OBJS_libfawkescore)
 LIBS_all  = $(LIBDIR)/libfawkescore.so
+
+ifeq ($(OS),FreeBSD)
+  ifneq ($(wildcard /usr/local/include/execinfo.h),)
+    LIBS_libfawkescore += execinfo
+    CFLAGS += -DHAVE_EXECINFO
+  else
+    WARN_TARGETS += warn_libexecinfo
+  endif
+else
+  CFLAGS += -DHAVE_EXECINFO
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+  ifneq ($(ERROR_TARGETS)$(WARN_TARGETS),)
+all: $(ERROR_TARGETS) $(WARN_TARGETS)
+.PHONY: warn_libexecinfo
+warn_libexecinfo:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Fawkes Core lib built w/o backtrace support$(TNORMAL) (FreeBSD: devel/libexecinfo not installed)"
+
+  endif
+endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

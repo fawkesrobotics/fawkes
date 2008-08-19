@@ -33,7 +33,8 @@ TOLUA_fawkesinterfaces = $(patsubst %.xml,%.tolua,$(wildcard $(SRCDIR)/*.xml))
 LIBS_libfawkesinterfaces = fawkescore fawkesinterface
 OBJS_libfawkesinterfaces = $(OBJS_fawkesinterfaces)
 
-CFLAGS_fawkesinterfaces_tolua = -Wno-unused-function
+CFLAGS_fawkesinterfaces_tolua = -Wno-unused-function $(CFLAGS_LUA)
+LDFLAGS_lua_fawkesinterfaces = $(LDFLAGS_LUA)
 LIBS_lua_fawkesinterfaces = fawkescore fawkesinterface fawkesinterfaces $(TOLUA_LIBS)
 OBJS_lua_fawkesinterfaces = fawkesinterfaces_tolua.o
 

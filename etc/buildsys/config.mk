@@ -93,8 +93,11 @@ ifeq ($(GCC_USE_OPENMP),1)
   LDFLAGS_OPENMP = -lgomp
 endif
 ifeq ($(OS),FreeBSD)
-DEFAULT_INCLUDES += -I/usr/local/include
-LDFLAGS_BASE     += -L/usr/local/lib -lpthread -lstrfunc
+  ifeq ($(wildcard /usr/local/include/strfunc.h),)
+    $(error libstrfunc is needed on FreeBSD, install devel/libstrfunc!)
+  endif
+  DEFAULT_INCLUDES += -I/usr/local/include
+  LDFLAGS_BASE     += -L/usr/local/lib -lpthread -lstrfunc
 endif
 
 ifeq ($(COLORED),1)

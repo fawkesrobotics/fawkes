@@ -27,8 +27,9 @@ endif
 LIBS_libfawkesutils = stdc++ fawkescore magic $(if $(filter Linux,$(OS)),dl)
 OBJS_libfawkesutils =	$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 
-CFLAGS_fawkesutils_tolua = -Wno-unused-function
+CFLAGS_fawkesutils_tolua = -Wno-unused-function $(CFLAGS_LUA)
 TOLUA_fawkesutils = $(wildcard $(SRCDIR)/*.tolua $(SRCDIR)/*/*.tolua $(SRCDIR)/*/*/*.tolua)
+LDFLAGS_lua_fawkesutils = $(LDFLAGS_LUA)
 LIBS_lua_fawkesutils = fawkescore fawkesutils $(TOLUA_LIBS)
 OBJS_lua_fawkesutils = fawkesutils_tolua.o
 

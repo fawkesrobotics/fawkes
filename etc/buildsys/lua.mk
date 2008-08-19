@@ -24,12 +24,8 @@ LUA_VERSION = 5.1
 
 # Check for Lua (Fedora packages lua and lua-devel)
 ifneq ($(PKGCONFIG),)
-  HAVE_LUA = $(if $(shell $(PKGCONFIG) --atleast-version $(LUA_VERSION) 'lua'; echo $${?/1/}),1,0)
-  LUA_LIBNAME = lua
-  ifneq ($(HAVE_LUA),1)
-    HAVE_LUA = $(if $(shell $(PKGCONFIG) --atleast-version $(LUA_VERSION) 'lua$(LUA_VERSION)'; echo $${?/1/}),1,0)
-    LUA_LIBNAME = lua$(LUA_VERSION)
-  endif
+  LUA_PACKAGE = $(firstword $(foreach P,lua lua$(LUA_VERSION) lua-$(LUA_VERSION),$(if $(shell $(PKGCONFIG) --atleast-version $(LUA_VERSION) $(P); echo $${?/1/}),$(P))))
+  HAVE_LUA = $(if $(LUA_PACKAGE),1,0)
 endif
 
 ifeq ($(HAVE_LUA),1)
@@ -37,13 +33,20 @@ ifeq ($(HAVE_LUA),1)
   LUALIBDIR = $(abspath $(LIBDIR)/lua)
   EXEC_LUADIR    ?= $(abspath $(EXEC_BASEDIR)/src/lua)
   EXEC_LUALIBDIR ?= $(abspath $(EXEC_LIBDIR)/lua)
-  CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags '$(LUA_LIBNAME)') -DLUADIR=\"$(EXEC_LUADIR)\" -DLUALIBDIR=\"$(EXEC_LUALIBDIR)\"
-  LDFLAGS_LUA = $(shell $(PKGCONFIG) --libs '$(LUA_LIBNAME)')
+  CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags '$(LUA_PACKAGE)') -DHAVE_LUA -DLUADIR=\"$(EXEC_LUADIR)\" -DLUALIBDIR=\"$(EXEC_LUALIBDIR)\"
+  LDFLAGS_LUA = $(shell $(PKGCONFIG) --libs '$(LUA_PACKAGE)')
   ifneq ($(wildcard $(SYSROOT)/usr/include/tolua++.h),)
     HAVE_TOLUA = 1
     TOLUAPP=tolua++
     TOLUA_LIBS=tolua++-$(LUA_VERSION)
+  endif
+  ifneq ($(wildcard $(SYSROOT)/usr/local/include/lua$(subst .,,$(LUA_VERSION))/tolua++.h),)
+    HAVE_TOLUA = 1
+    TOLUAPP=/usr/local/bin/lua$(subst .,,$(LUA_VERSION))/tolua++
+    TOLUA_LIBS=tolua++
+  endif
 
+  ifeq ($(HAVE_TOLUA),1)
 .SECONDEXPANSION:
 %_tolua.cpp: $$(TOLUA_$$(subst /,_,$$*))
 	$(SILENT) echo "$(INDENT_PRINT)--- Generating Lua package C++ file $(@F)"
