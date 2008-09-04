@@ -313,7 +313,7 @@ ROI::contains(unsigned int x, unsigned int y)
  * @param margin margin
  * @return true if this ROI is a neigbour of the given pixel, false otherwise
  */
-inline bool
+bool
 ROI::neighbours(unsigned int x, unsigned int y, unsigned int margin) const
 {
   return ( (static_cast<int>(x) >= static_cast<int>(start.x) - static_cast<int>(margin)) &&
