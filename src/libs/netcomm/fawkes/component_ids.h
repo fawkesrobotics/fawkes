@@ -39,6 +39,9 @@
 #ifndef __NETCOMM_FAWKES_COMPONENT_IDS_H_
 #define __NETCOMM_FAWKES_COMPONENT_IDS_H_
 
+// Never use this CID for any application. It is intended to only observe
+// changes of the connection status.
+#define FAWKES_CID_OBSERVER_MODE         0
 
 /* **** System CIDs **** */
 

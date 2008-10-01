@@ -16,7 +16,8 @@
 BASEDIR = ../..
 
 SUBDIRS = blackboard plugin logview config plugin_gui \
-	  netlog_monitor refboxrep worldinfo_viewer
+	  netlog_monitor refboxrep worldinfo_viewer \
+	  config_editor
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
