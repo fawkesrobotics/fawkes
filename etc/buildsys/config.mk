@@ -86,7 +86,7 @@ LDFLAGS_LIBDIRS  = -Wl,-R$(EXEC_LIBDIR) -Wl,-R$(LIBDIR) $(LIBDIRS:%=-Wl,-R%)
 DEFAULT_INCLUDES = -I$(abspath $(BASEDIR)/src) -I$(abspath $(BASEDIR)/src/libs) -I$(abspath $(BASEDIR)/src/firevision)
 CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP)
 CFLAGS_BASE      = $(CFLAGS_MINIMUM)
-LDFLAGS_BASE     = -L$(LIBDIR) $(LDFLAGS_OPENMP)
+LDFLAGS_BASE     = -L$(LIBDIR) -rdynamic $(LDFLAGS_OPENMP)
 LDFLAGS_SHARED   = -shared
 ifeq ($(GCC_USE_OPENMP),1)
   CFLAGS_OPENMP  = -fopenmp

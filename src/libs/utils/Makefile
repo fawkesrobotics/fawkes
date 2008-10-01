@@ -18,7 +18,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/lua.mk
 
-ifneq ($(realpath /usr/include/magic.h),)
+ifneq ($(realpath $(SYSROOT)/usr/include/magic.h),)
   HAVE_LIBMAGIC = 1
 else
   ERROR_TARGETS += error_libmagic

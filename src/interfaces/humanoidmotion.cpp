@@ -62,10 +62,10 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   add_fieldinfo(Interface::IFT_BOOL, "arms_enabled", &data->arms_enabled);
   add_fieldinfo(Interface::IFT_FLOAT, "shoulder_pitch_median", &data->shoulder_pitch_median);
   add_fieldinfo(Interface::IFT_FLOAT, "shoulder_pitch_amplitude", &data->shoulder_pitch_amplitude);
-  add_fieldinfo(Interface::IFT_FLOAT, "elbow_pitch_median", &data->elbow_pitch_median);
-  add_fieldinfo(Interface::IFT_FLOAT, "elbow_pitch_amplitude", &data->elbow_pitch_amplitude);
+  add_fieldinfo(Interface::IFT_FLOAT, "elbow_roll_median", &data->elbow_roll_median);
+  add_fieldinfo(Interface::IFT_FLOAT, "elbow_roll_amplitude", &data->elbow_roll_amplitude);
   add_fieldinfo(Interface::IFT_UINT, "msgid", &data->msgid);
-  unsigned char tmp_hash[] = {0x7e, 0x44, 0x91, 0x75, 0x1, 0x60, 0xff, 0xa6, 0xbf, 0x17, 0x1b, 0xbb, 0x54, 0xbf, 0xc9, 0x34};
+  unsigned char tmp_hash[] = {0x36, 0xbc, 0x2f, 0xfe, 0x2b, 0x75, 0x85, 0xe5, 0xb9, 0x7e, 0xfc, 0xb6, 0xb, 0xf6, 0x86, 0xee};
   set_hash(tmp_hash);
 }
 
@@ -555,72 +555,72 @@ HumanoidMotionInterface::set_shoulder_pitch_amplitude(const float new_shoulder_p
   data->shoulder_pitch_amplitude = new_shoulder_pitch_amplitude;
 }
 
-/** Get elbow_pitch_median value.
+/** Get elbow_roll_median value.
  * 
-      Median in radians of the elbow pitch during walking.
+      Median in radians of the elbow roll during walking.
     
- * @return elbow_pitch_median value
+ * @return elbow_roll_median value
  */
 float
-HumanoidMotionInterface::elbow_pitch_median() const
+HumanoidMotionInterface::elbow_roll_median() const
 {
-  return data->elbow_pitch_median;
+  return data->elbow_roll_median;
 }
 
-/** Get maximum length of elbow_pitch_median value.
- * @return length of elbow_pitch_median value, can be length of the array or number of 
+/** Get maximum length of elbow_roll_median value.
+ * @return length of elbow_roll_median value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-HumanoidMotionInterface::maxlenof_elbow_pitch_median() const
+HumanoidMotionInterface::maxlenof_elbow_roll_median() const
 {
   return 1;
 }
 
-/** Set elbow_pitch_median value.
+/** Set elbow_roll_median value.
  * 
-      Median in radians of the elbow pitch during walking.
+      Median in radians of the elbow roll during walking.
     
- * @param new_elbow_pitch_median new elbow_pitch_median value
+ * @param new_elbow_roll_median new elbow_roll_median value
  */
 void
-HumanoidMotionInterface::set_elbow_pitch_median(const float new_elbow_pitch_median)
+HumanoidMotionInterface::set_elbow_roll_median(const float new_elbow_roll_median)
 {
-  data->elbow_pitch_median = new_elbow_pitch_median;
+  data->elbow_roll_median = new_elbow_roll_median;
 }
 
-/** Get elbow_pitch_amplitude value.
+/** Get elbow_roll_amplitude value.
  * 
-      Amplitude of the elbow pitch movement during walking.
+      Amplitude of the elbow roll movement during walking.
     
- * @return elbow_pitch_amplitude value
+ * @return elbow_roll_amplitude value
  */
 float
-HumanoidMotionInterface::elbow_pitch_amplitude() const
+HumanoidMotionInterface::elbow_roll_amplitude() const
 {
-  return data->elbow_pitch_amplitude;
+  return data->elbow_roll_amplitude;
 }
 
-/** Get maximum length of elbow_pitch_amplitude value.
- * @return length of elbow_pitch_amplitude value, can be length of the array or number of 
+/** Get maximum length of elbow_roll_amplitude value.
+ * @return length of elbow_roll_amplitude value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-HumanoidMotionInterface::maxlenof_elbow_pitch_amplitude() const
+HumanoidMotionInterface::maxlenof_elbow_roll_amplitude() const
 {
   return 1;
 }
 
-/** Set elbow_pitch_amplitude value.
+/** Set elbow_roll_amplitude value.
  * 
-      Amplitude of the elbow pitch movement during walking.
+      Amplitude of the elbow roll movement during walking.
     
- * @param new_elbow_pitch_amplitude new elbow_pitch_amplitude value
+ * @param new_elbow_roll_amplitude new elbow_roll_amplitude value
  */
 void
-HumanoidMotionInterface::set_elbow_pitch_amplitude(const float new_elbow_pitch_amplitude)
+HumanoidMotionInterface::set_elbow_roll_amplitude(const float new_elbow_roll_amplitude)
 {
-  data->elbow_pitch_amplitude = new_elbow_pitch_amplitude;
+  data->elbow_roll_amplitude = new_elbow_roll_amplitude;
 }
 
 /** Get msgid value.
@@ -1123,10 +1123,10 @@ HumanoidMotionInterface::SetWalkParamsMessage::clone() const
  * @param ini_arms_enabled initial value for arms_enabled
  * @param ini_shoulder_pitch_median initial value for shoulder_pitch_median
  * @param ini_shoulder_pitch_amplitude initial value for shoulder_pitch_amplitude
- * @param ini_elbow_pitch_median initial value for elbow_pitch_median
- * @param ini_elbow_pitch_amplitude initial value for elbow_pitch_amplitude
+ * @param ini_elbow_roll_median initial value for elbow_roll_median
+ * @param ini_elbow_roll_amplitude initial value for elbow_roll_amplitude
  */
-HumanoidMotionInterface::SetWalkArmsParamsMessage::SetWalkArmsParamsMessage(const bool ini_arms_enabled, const float ini_shoulder_pitch_median, const float ini_shoulder_pitch_amplitude, const float ini_elbow_pitch_median, const float ini_elbow_pitch_amplitude) : Message("SetWalkArmsParamsMessage")
+HumanoidMotionInterface::SetWalkArmsParamsMessage::SetWalkArmsParamsMessage(const bool ini_arms_enabled, const float ini_shoulder_pitch_median, const float ini_shoulder_pitch_amplitude, const float ini_elbow_roll_median, const float ini_elbow_roll_amplitude) : Message("SetWalkArmsParamsMessage")
 {
   data_size = sizeof(SetWalkArmsParamsMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -1135,8 +1135,8 @@ HumanoidMotionInterface::SetWalkArmsParamsMessage::SetWalkArmsParamsMessage(cons
   data->arms_enabled = ini_arms_enabled;
   data->shoulder_pitch_median = ini_shoulder_pitch_median;
   data->shoulder_pitch_amplitude = ini_shoulder_pitch_amplitude;
-  data->elbow_pitch_median = ini_elbow_pitch_median;
-  data->elbow_pitch_amplitude = ini_elbow_pitch_amplitude;
+  data->elbow_roll_median = ini_elbow_roll_median;
+  data->elbow_roll_amplitude = ini_elbow_roll_amplitude;
 }
 /** Constructor */
 HumanoidMotionInterface::SetWalkArmsParamsMessage::SetWalkArmsParamsMessage() : Message("SetWalkArmsParamsMessage")
@@ -1267,72 +1267,72 @@ HumanoidMotionInterface::SetWalkArmsParamsMessage::set_shoulder_pitch_amplitude(
   data->shoulder_pitch_amplitude = new_shoulder_pitch_amplitude;
 }
 
-/** Get elbow_pitch_median value.
+/** Get elbow_roll_median value.
  * 
-      Median in radians of the elbow pitch during walking.
+      Median in radians of the elbow roll during walking.
     
- * @return elbow_pitch_median value
+ * @return elbow_roll_median value
  */
 float
-HumanoidMotionInterface::SetWalkArmsParamsMessage::elbow_pitch_median() const
+HumanoidMotionInterface::SetWalkArmsParamsMessage::elbow_roll_median() const
 {
-  return data->elbow_pitch_median;
+  return data->elbow_roll_median;
 }
 
-/** Get maximum length of elbow_pitch_median value.
- * @return length of elbow_pitch_median value, can be length of the array or number of 
+/** Get maximum length of elbow_roll_median value.
+ * @return length of elbow_roll_median value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-HumanoidMotionInterface::SetWalkArmsParamsMessage::maxlenof_elbow_pitch_median() const
+HumanoidMotionInterface::SetWalkArmsParamsMessage::maxlenof_elbow_roll_median() const
 {
   return 1;
 }
 
-/** Set elbow_pitch_median value.
+/** Set elbow_roll_median value.
  * 
-      Median in radians of the elbow pitch during walking.
+      Median in radians of the elbow roll during walking.
     
- * @param new_elbow_pitch_median new elbow_pitch_median value
+ * @param new_elbow_roll_median new elbow_roll_median value
  */
 void
-HumanoidMotionInterface::SetWalkArmsParamsMessage::set_elbow_pitch_median(const float new_elbow_pitch_median)
+HumanoidMotionInterface::SetWalkArmsParamsMessage::set_elbow_roll_median(const float new_elbow_roll_median)
 {
-  data->elbow_pitch_median = new_elbow_pitch_median;
+  data->elbow_roll_median = new_elbow_roll_median;
 }
 
-/** Get elbow_pitch_amplitude value.
+/** Get elbow_roll_amplitude value.
  * 
-      Amplitude of the elbow pitch movement during walking.
+      Amplitude of the elbow roll movement during walking.
     
- * @return elbow_pitch_amplitude value
+ * @return elbow_roll_amplitude value
  */
 float
-HumanoidMotionInterface::SetWalkArmsParamsMessage::elbow_pitch_amplitude() const
+HumanoidMotionInterface::SetWalkArmsParamsMessage::elbow_roll_amplitude() const
 {
-  return data->elbow_pitch_amplitude;
+  return data->elbow_roll_amplitude;
 }
 
-/** Get maximum length of elbow_pitch_amplitude value.
- * @return length of elbow_pitch_amplitude value, can be length of the array or number of 
+/** Get maximum length of elbow_roll_amplitude value.
+ * @return length of elbow_roll_amplitude value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-HumanoidMotionInterface::SetWalkArmsParamsMessage::maxlenof_elbow_pitch_amplitude() const
+HumanoidMotionInterface::SetWalkArmsParamsMessage::maxlenof_elbow_roll_amplitude() const
 {
   return 1;
 }
 
-/** Set elbow_pitch_amplitude value.
+/** Set elbow_roll_amplitude value.
  * 
-      Amplitude of the elbow pitch movement during walking.
+      Amplitude of the elbow roll movement during walking.
     
- * @param new_elbow_pitch_amplitude new elbow_pitch_amplitude value
+ * @param new_elbow_roll_amplitude new elbow_roll_amplitude value
  */
 void
-HumanoidMotionInterface::SetWalkArmsParamsMessage::set_elbow_pitch_amplitude(const float new_elbow_pitch_amplitude)
+HumanoidMotionInterface::SetWalkArmsParamsMessage::set_elbow_roll_amplitude(const float new_elbow_roll_amplitude)
 {
-  data->elbow_pitch_amplitude = new_elbow_pitch_amplitude;
+  data->elbow_roll_amplitude = new_elbow_roll_amplitude;
 }
 
 /** Clone this message.

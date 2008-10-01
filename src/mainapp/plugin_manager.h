@@ -30,6 +30,7 @@
 #include <core/threading/thread.h>
 #include <core/utils/lock_queue.h>
 #include <core/utils/lock_list.h>
+#include <core/utils/lock_map.h>
 
 #include <map>
 #include <list>
@@ -43,6 +44,7 @@ namespace fawkes {
   class PluginLoader;
   class Mutex;
   class PluginListMessage;
+  class Configuration;
 }
 
 class FawkesPluginManager
@@ -50,7 +52,9 @@ class FawkesPluginManager
   public fawkes::FawkesNetworkHandler
 {
  public:
-  FawkesPluginManager(FawkesThreadManager *thread_manager);
+  FawkesPluginManager(FawkesThreadManager *thread_manager,
+		      fawkes::Configuration *config,
+		      const char *meta_plugin_prefix);
   ~FawkesPluginManager();
 
   void set_hub(fawkes::FawkesNetworkHub *hub);
@@ -61,8 +65,8 @@ class FawkesPluginManager
 
   virtual void loop();
 
-  void load(const char *plugin_type);
-  void unload(const char *plugin_type);
+  void load(const char *plugin_list);
+  void unload(const char *plugin_name);
 
  private:
   fawkes::PluginListMessage * list_avail();
@@ -74,16 +78,22 @@ class FawkesPluginManager
   void send_loaded(const char *plugin_name);
   void send_unloaded(const char *plugin_name);
 
+  void load(const char *plugin_list, unsigned int clid);
+  void unload(const char *plugin_list, unsigned int clid);
+
+  std::list<std::string>  parse_plugin_list(const char *plugin_type_list);
+
  private:
   FawkesThreadManager       *thread_manager;
   fawkes::PluginLoader      *plugin_loader;
   fawkes::FawkesNetworkHub  *hub;
 
-  fawkes::Mutex *plugins_mutex;
+  fawkes::LockMap< std::string, fawkes::Plugin * > plugins;
+  fawkes::LockMap< std::string, fawkes::Plugin * >::iterator pit;
+  fawkes::LockMap< std::string, fawkes::Plugin * >::reverse_iterator rpit;
 
-  std::map< std::string, fawkes::Plugin * > plugins;
-  std::map< std::string, fawkes::Plugin * >::iterator pit;
-  std::map< std::string, fawkes::Plugin * >::reverse_iterator rpit;
+  fawkes::LockMap< std::string, std::string > __meta_plugins;
+  fawkes::LockMap< std::string, std::string >::iterator __mpit;
 
   unsigned int next_plugin_id;
   std::map< std::string, unsigned int > plugin_ids;
@@ -92,6 +102,9 @@ class FawkesPluginManager
 
   fawkes::LockList<unsigned int>           __subscribers;
   fawkes::LockList<unsigned int>::iterator __ssit;
+
+  fawkes::Configuration *__config;
+  std::string __meta_plugin_prefix;
 };
 
 #endif

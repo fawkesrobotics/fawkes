@@ -112,7 +112,7 @@ ifeq ($(OS),Linux)
 endif
 
 
-### Need at lease one of V4L 1 or 2 for V4L
+### Need at least one of V4L 1 or 2 for V4L
 ifeq ($(HAVE_V4L_CAM),1)
   ifneq ($(HAVE_V4L1_CAM),1)
     ifneq ($(HAVE_V4L2_CAM),1)

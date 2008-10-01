@@ -162,7 +162,8 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 					    thread_manager->aspect_collector(),
 					    __config, __multi_logger, __clock);
     thread_manager->set_inifin(__aspect_inifin, __aspect_inifin);
-    plugin_manager       = new FawkesPluginManager(thread_manager);
+    plugin_manager       = new FawkesPluginManager(thread_manager, __config,
+						   "/fawkes/meta_plugins/");
     network_manager      = new FawkesNetworkManager(thread_manager, 1910);
     __config_nethandler  = new ConfigNetworkHandler(__config, network_manager->hub());
   } catch (Exception &e) {
@@ -239,23 +240,19 @@ void
 FawkesMainThread::once()
 {
   if ( __argp->has_arg("p") ) {
-    char *plugins = strdup(__argp->arg("p"));
-    char *saveptr;
-    char *plugin;
-
-    plugin = strtok_r(plugins, ",", &saveptr);
-    while ( plugin ) {
-      try {
-	plugin_manager->load(plugin);
-      } catch (Exception &e) {
-	__multi_logger->log_error("FawkesMainThread", "Failed to load plugin %s, "
-				"exception follows", plugin);
-	__multi_logger->log_error("FawkesMainThread", e);
-      }
-      plugin = strtok_r(NULL, ",", &saveptr);
+    try {
+      plugin_manager->load(__argp->arg("p"));
+    } catch (Exception &e) {
+      __multi_logger->log_error("FawkesMainThread", "Failed to load plugins %s, "
+				"exception follows", __argp->arg("p"));
+      __multi_logger->log_error("FawkesMainThread", e);
     }
-
-    free(plugins);
+  } else {
+    try {
+      plugin_manager->load("default");
+    } catch (Exception &e) {
+      // ignored, there is no default meta plugin set
+    }
   }
 }
 

@@ -459,7 +459,7 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
     conf_path = ".";
   }
 
-  if ( access(__default_file, F_OK) != 0 ) {
+  if ( (access(__default_file, F_OK) != 0) && (__default_file[0] != '/') ) {
     // the given path was not found as file, add the config path
     char *tdf = __default_file;
     if ( asprintf(&__default_file, "%s/%s", conf_path, tdf) == -1 ) {
@@ -469,7 +469,7 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
     free(tdf);
   }
 
-  if ( access(__default_dump, F_OK) != 0 ) {
+  if ( (access(__default_dump, F_OK) != 0) && (__default_dump[0] != '/') ) {
     // the given path was not found as file, add the config path
     char *tdf = __default_dump;
     if ( asprintf(&__default_dump, "%s/%s", conf_path, tdf) == -1 ) {
@@ -479,7 +479,7 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
     free(tdf);
   }
 
-  if ( access(__host_file, F_OK) != 0 ) {
+  if ( (access(__host_file, F_OK) != 0) && (__host_file[0] != '/') ) {
     // the given path was not found as file, add the config path
     char *thf = __host_file;
     if ( asprintf(&__host_file, "%s/%s", conf_path, thf) == -1 ) {
@@ -487,10 +487,13 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
       throw CouldNotOpenConfigException("Could not create filename");
     }
     free(thf);
-    if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, __default_file) == -1 ) {
-      free(__host_file);
-      throw CouldNotOpenConfigException("Could not create attachment SQL");
-    }
+  }
+
+  if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, __default_file) == -1 ) {
+    free(__host_file);
+    free(__default_file);
+    free(__default_dump);
+    throw CouldNotOpenConfigException("Could not create attachment SQL");
   }
 
   if ( access(__default_dump, R_OK) == 0 ) {
@@ -501,6 +504,8 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
   if ( (sqlite3_open(__host_file, &db) != SQLITE_OK) ||
        (sqlite3_exec(db, attach_sql, NULL, NULL, &errmsg) != SQLITE_OK) ) {
     CouldNotOpenConfigException ce(sqlite3_errmsg(db));
+    ce.append("Failed to open host file '%s' or attaching default file (%s)",
+	      __host_file, __default_file);
     free(attach_sql);
     free(__host_file);
     free(__default_file);

@@ -308,6 +308,8 @@ PluginGui::toggled_status(const Glib::ustring path)
 {
   Gtk::TreeModel::Row row = *m_plugin_list->get_iter(path);
   Glib::ustring plugin_name = row[m_plugin_record.m_name];
+  Glib::ustring::size_type pn_until = plugin_name.find(" ");
+  plugin_name = plugin_name.substr(0, pn_until);
   bool loaded = row[m_plugin_record.m_status];
   if (loaded)
     {

@@ -31,6 +31,7 @@
 #include <core/plugin.h>
 #include <utils/plugin/plugin_loader.h>
 #include <utils/logging/liblogger.h>
+#include <config/config.h>
 
 #include <netcomm/fawkes/component_ids.h>
 #include <netcomm/fawkes/hub.h>
@@ -65,8 +66,12 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_manager thread manager plugin threads will be added to
  * and removed from appropriately.
+ * @param config Fawkes configuration
+ * @param meta_plugin_prefix Path prefix for meta plugins
  */
-FawkesPluginManager::FawkesPluginManager(FawkesThreadManager *thread_manager)
+FawkesPluginManager::FawkesPluginManager(FawkesThreadManager *thread_manager,
+					 fawkes::Configuration *config,
+					 const char *meta_plugin_prefix)
   : Thread("FawkesPluginManager", Thread::OPMODE_WAITFORWAKEUP),
     FawkesNetworkHandler(FAWKES_CID_PLUGINMANAGER)
 {
@@ -74,7 +79,8 @@ FawkesPluginManager::FawkesPluginManager(FawkesThreadManager *thread_manager)
   this->thread_manager = thread_manager;
   plugin_loader = new PluginLoader(PLUGINDIR);
   next_plugin_id = 1;
-  plugins_mutex = new Mutex();
+  __config = config;
+  __meta_plugin_prefix = meta_plugin_prefix;
 }
 
 
@@ -89,7 +95,6 @@ FawkesPluginManager::~FawkesPluginManager()
   plugins.clear();
   plugin_ids.clear();
   delete plugin_loader;
-  delete plugins_mutex;
 }
 
 
@@ -138,6 +143,21 @@ FawkesPluginManager::list_avail()
 
   closedir(plugin_dir);
 
+  try {
+    Configuration::ValueIterator *i = __config->search(__meta_plugin_prefix.c_str());
+    while (i->next()) {
+      if (i->is_string()) {
+	std::string p = std::string(i->path()).substr(__meta_plugin_prefix.length());
+	std::string s = p + " (" + i->get_string() + ")";
+	
+	//m->append(s.c_str(), s.length());
+	m->append(p.c_str(), p.length());
+      }
+    }
+    delete i;
+  } catch (Exception &e) {
+  }
+
   return m;
 }
 
@@ -146,11 +166,14 @@ FawkesPluginManager::list_loaded()
 {
   PluginListMessage *m = new PluginListMessage();
 
-  plugins_mutex->lock();
+  plugins.lock();
   for (pit = plugins.begin(); pit != plugins.end(); ++pit) {
     m->append((*pit).first.c_str(), (*pit).first.length());
   }
-  plugins_mutex->unlock();
+  for (__mpit = __meta_plugins.begin(); __mpit != __meta_plugins.end(); ++__mpit) {
+    m->append(__mpit->first.c_str(), __mpit->first.length());
+  }
+  plugins.unlock();
 
   return m;
 }
@@ -221,29 +244,121 @@ FawkesPluginManager::send_unload_success(const char *plugin_name, unsigned int c
 }
 
 
+/** Parse a list of plugin types.
+ * Takes a comma-separated list of plugins and parses them into the individual
+ * plugin names.
+ * @param plugin_type_list string containing a comma-separated list of plugin types
+ * @return parsed list of plugin types
+ */
+std::list<std::string>
+FawkesPluginManager::parse_plugin_list(const char *plugin_list)
+{
+  std::list<std::string> rv;
+
+  char *plugins = strdup(plugin_list);
+  char *saveptr;
+  char *plugin;
+
+  plugin = strtok_r(plugins, ",", &saveptr);
+  while ( plugin ) {
+    rv.push_back(plugin);
+    plugin = strtok_r(NULL, ",", &saveptr);
+  }
+  free(plugins);
+
+  return rv;
+}
+
+
 /** Load plugin.
- * @param plugin_type plugin type to load
+ * The loading is interrupted if any of the plugins does not load properly.
+ * The already loaded plugins are *not* unloaded, but kept.
+ * @param plugin_list string containing a comma-separated list of plugins
+ * to load. The plugin list can contain meta plugins.
  */
 void
-FawkesPluginManager::load(const char *plugin_type)
+FawkesPluginManager::load(const char *plugin_list)
 {
-  if ( plugins.find(plugin_type) != plugins.end() ) return;
+  std::list<std::string> pp = parse_plugin_list(plugin_list);
 
-  try {
-    Plugin *plugin = plugin_loader->load(plugin_type);
-    plugins_mutex->lock();
-    try {
-      thread_manager->add(plugin->threads());
-      plugins[plugin_type] = plugin;
-      plugin_ids[plugin_type] = next_plugin_id++;
-    } catch (CannotInitializeThreadException &e) {
-      e.append("Could not initialize one or more "
-	       "threads of plugin %s, unloading plugin", plugin_type);
-      plugins_mutex->unlock();
-      plugin_loader->unload(plugin);
-      throw;
+  for (std::list<std::string>::iterator i = pp.begin(); i != pp.end(); ++i) {
+    if ( i->length() == 0 ) continue;
+
+    bool try_real_plugin = true;
+    if ( __meta_plugins.find(*i) == __meta_plugins.end() ) {
+      std::string meta_plugin = __meta_plugin_prefix + *i;
+      try {
+	std::string pset = __config->get_string(meta_plugin.c_str());
+	if (pset.length() > 0) {
+	  //printf("Going to load meta plugin %s (%s)\n", i->c_str(), pset.c_str());
+	  __meta_plugins.lock();
+	  // Setting has to happen here, so that a meta plugin will not cause an endless
+	  // loop if it references itself!
+	  __meta_plugins[*i] = pset;
+	  try {
+	    LibLogger::log_info("FawkesPluginManager", "Loading plugins %s for meta plugin %s",
+				pset.c_str(), i->c_str());
+	    load(pset.c_str());
+	    send_loaded(i->c_str());
+	  } catch (Exception &e) {
+	    e.append("Could not initialize meta plugin %s, aborting loading.", i->c_str());
+	    __meta_plugins.erase(*i);
+	    __meta_plugins.unlock();
+	    throw;
+	  }
+	  __meta_plugins.unlock();
+	}
+	try_real_plugin = false;
+      } catch (ConfigEntryNotFoundException &e) {
+	// no meta plugin defined by that name
+	//printf("No meta plugin defined with the name %s\n", i->c_str());
+	try_real_plugin = true;
+      }
     }
-    plugins_mutex->unlock();
+
+    if (try_real_plugin && (plugins.find(*i) == plugins.end()) ) {
+      try {
+	//printf("Going to load real plugin %s\n", i->c_str());
+	Plugin *plugin = plugin_loader->load(i->c_str());
+	plugins.lock();
+	try {
+	  thread_manager->add(plugin->threads());
+	  plugins[*i] = plugin;
+	  plugin_ids[*i] = next_plugin_id++;
+	  send_loaded(i->c_str());
+	} catch (CannotInitializeThreadException &e) {
+	  e.append("Could not initialize one or more "
+		   "threads of plugin %s, unloading plugin", i->c_str());
+	  plugins.unlock();
+	  plugin_loader->unload(plugin);
+	  throw;
+	}
+	plugins.unlock();
+      } catch (Exception &e) {
+	if ( __meta_plugins.find(*i) == __meta_plugins.end() ) {
+	  // only throw exception if no meta plugin with that name has already been loaded
+	  throw;
+	}
+      }
+    }
+  }
+}
+
+
+/** Load plugin.
+ * The loading is interrupted if any of the plugins does not load properly.
+ * The already loaded plugins are *not* unloaded, but kept.
+ * @param plugin_list string containing a comma-separated list of plugins
+ * to load. The plugin list can contain meta plugins.
+ * @param clid Fawkes network client ID of client that gets a success message
+ * with the exact string that was put into
+ */
+void
+FawkesPluginManager::load(const char *plugin_list, unsigned int clid)
+{
+  try {
+    load(plugin_list);
+    send_load_success(plugin_list, clid);
   } catch (Exception &e) {
     throw;
   }
@@ -251,25 +366,88 @@ FawkesPluginManager::load(const char *plugin_type)
 
 
 /** Unload plugin.
- * @param plugin_type plugin type to unload.
+ * Note that this method does not allow to pass a list of plugins, but it will
+ * only accept a single plugin at a time.
+ * @param plugin_name plugin to unload, can be a meta plugin.
  */
 void
-FawkesPluginManager::unload(const char *plugin_type)
+FawkesPluginManager::unload(const char *plugin_name)
 {
-  if ( plugins.find(plugin_type) == plugins.end() )  return;
+  if ( plugins.find(plugin_name) != plugins.end() ) {
+    plugins.lock();
+    try {
+      thread_manager->remove(plugins[plugin_name]->threads());
+      plugin_loader->unload(plugins[plugin_name]);
+      plugins.erase(plugin_name);
+      plugin_ids.erase(plugin_name);
+      send_unloaded(plugin_name);
+      // find all meta plugins that required this module, this can no longer
+      // be considered loaded
+      __meta_plugins.lock();
+      __mpit = __meta_plugins.begin();
+      while (__mpit != __meta_plugins.end()) {
+	std::list<std::string> pp = parse_plugin_list(__mpit->second.c_str());
 
-  plugins_mutex->lock();
+	bool erase = false;
+	for (std::list<std::string>::iterator i = pp.begin(); i != pp.end(); ++i) {
+	  if ( *i == plugin_name ) {
+	    erase = true;
+	    break;
+	  }
+	}
+	if ( erase ) {
+	  fawkes::LockMap< std::string, std::string >::iterator tmp = __mpit;
+	  ++__mpit;
+	  send_unloaded(tmp->first.c_str());
+	  __meta_plugins.erase(tmp);
+	} else {
+	  ++__mpit;
+	}
+      }
+      __meta_plugins.unlock();
+      
+    } catch (Exception &e) {
+      LibLogger::log_error("FawkesPluginManager", "Could not finalize one or more threads of plugin %s, NOT unloading plugin", plugin_name);
+      plugins.unlock();
+      throw;
+    }
+    plugins.unlock();
+  } else if (__meta_plugins.find(plugin_name) != __meta_plugins.end()) {
+    std::list<std::string> pp = parse_plugin_list(__meta_plugins[plugin_name].c_str());
+
+    for (std::list<std::string>::reverse_iterator i = pp.rbegin(); i != pp.rend(); ++i) {
+      if ( i->length() == 0 ) continue;
+      if ( (plugins.find(*i) == plugins.end()) &&
+	   (__meta_plugins.find(*i) != __meta_plugins.end()) ) {
+	continue;
+      }
+      __meta_plugins.lock();
+      __meta_plugins.erase(*i);
+      __meta_plugins.unlock();
+      LibLogger::log_info("FawkesPluginManager", "UNloading plugin %s for meta plugin %s",
+			  i->c_str(), plugin_name);
+      unload(i->c_str());
+    }
+  }
+}
+
+
+/** Unload plugin.
+ * Note that this method does not allow to pass a list of plugins, but it will
+ * only accept a single plugin at a time.
+ * @param plugin_name plugin to unload, can be a meta plugin.
+ * @param clid Fawkes network client ID of client that gets a success message
+ * with the exact string that was put into
+ */
+void
+FawkesPluginManager::unload(const char *plugin_name, unsigned int clid)
+{
   try {
-    thread_manager->remove(plugins[plugin_type]->threads());
-    plugin_loader->unload(plugins[plugin_type]);
-    plugins.erase(plugin_type);
-    plugin_ids.erase(plugin_type);
+    unload(plugin_name);
+    send_unload_success(plugin_name, clid);
   } catch (Exception &e) {
-    LibLogger::log_error("FawkesPluginManager", "Could not finalize one or more threads of plugin %s, NOT unloading plugin", plugin_type);
-    plugins_mutex->unlock();
     throw;
   }
-  plugins_mutex->unlock();
 }
 
 
@@ -297,9 +475,7 @@ FawkesPluginManager::loop()
 	} else {
 	  LibLogger::log_info("FawkesPluginManager", "Loading plugin %s", name);
 	  try {
-	    load(name);
-	    send_load_success(name, msg->clid());
-	    send_loaded(name);
+	    load(name, msg->clid());
 	  } catch (Exception &e) {
 	    LibLogger::log_error("FawkesPluginManager", "Failed to load plugin %s", name);
 	    LibLogger::log_error("FawkesPluginManager", e);
@@ -318,15 +494,14 @@ FawkesPluginManager::loop()
 	name[PLUGIN_MSG_NAME_LENGTH] = 0;
 	strncpy(name, m->name, PLUGIN_MSG_NAME_LENGTH);
 
-	if ( ! plugin_loader->is_loaded(name) ) {
+	if ( (plugins.find(name) == plugins.end()) &&
+	     (__meta_plugins.find(name) == __meta_plugins.end()) ) {
 	  LibLogger::log_info("FawkesPluginManager", "Client requested unloading of %s which is not loaded", name);
 	  send_unload_success(name, msg->clid());
 	} else {
 	  LibLogger::log_info("FawkesPluginManager", "UNloading plugin %s", name);
 	  try {
-	    unload(name);
-	    send_unload_success(name, msg->clid());
-	    send_unloaded(name);
+	    unload(name, msg->clid());
 	  } catch (Exception &e) {
 	    LibLogger::log_error("FawkesPluginManager", "Failed to unload plugin %s", name);
 	    LibLogger::log_error("FawkesPluginManager", e);

@@ -19,8 +19,8 @@
 $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
-	$(SILENT) $(CC) $(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
+	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
+	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$*)) $(addprefix -l,$(LIBS)) \
-	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS)) \
-	-o $@ $(subst ..,__,$^)
+	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
 

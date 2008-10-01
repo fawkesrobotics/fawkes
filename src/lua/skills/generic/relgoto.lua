@@ -39,6 +39,7 @@ function checkstatus()
       return S_RUNNING
    elseif msgid == navigator:msgid() then
       if navigator:is_final() then
+	 print("relgoto() is final")
 	 return S_FINAL
       else
 	 return S_RUNNING
@@ -62,14 +63,22 @@ function parseparams(...)
 	 -- style 2.
 	 x      = f.x
 	 y      = f.y
-	 ori    = f.ori
+	 if f.ori ~= nil then
+	    ori    = f.ori
+	 else
+	    ori    = math.atan2(y, x)
+	 end
 	 margin = f.margin
 	 print_debug("2. relgoto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
       elseif f.phi ~= nil and f.dist ~= nil then
 	 -- style 3.
 	 phi    = f.phi
 	 dist   = f.dist
-	 ori    = f.ori
+	 if f.ori ~= nil then
+	    ori    = f.ori
+	 else
+	    ori    = f.phi
+	 end
 	 margin = f.margin
 	 print_debug("3. relgoto(phi=" .. phi .. ", dist=" .. dist .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
       else
@@ -99,6 +108,13 @@ end
 -- See skill documentation for info.
 -- @param ... see skill documentation about supported call styles
 function execute(...)
+
+   -- Check if we reached the destination or if we cannot at all
+   local status = checkstatus()
+   if status ~= S_RUNNING then
+      return status
+   end
+
    local x, y, ori, phi, dist, margin = parseparams(...)
 
    -- default values for margin and orientation
@@ -107,12 +123,6 @@ function execute(...)
    end
    if tonumber(ori) == nil then
       ori = 0
-   end
-
-   -- Check if we reached the destination or if we cannot at all
-   local status = checkstatus()
-   if status ~= S_RUNNING then
-      return status
    end
 
    if navigator:has_writer() then

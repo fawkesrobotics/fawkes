@@ -62,11 +62,11 @@
     <field type="float" name="shoulder_pitch_amplitude">
       Amplitude of the shoulder pitch movement during walking.
     </field>
-    <field type="float" name="elbow_pitch_median">
-      Median in radians of the elbow pitch during walking.
+    <field type="float" name="elbow_roll_median">
+      Median in radians of the elbow roll during walking.
     </field>
-    <field type="float" name="elbow_pitch_amplitude">
-      Amplitude of the elbow pitch movement during walking.
+    <field type="float" name="elbow_roll_amplitude">
+      Amplitude of the elbow roll movement during walking.
     </field>
     <field type="unsigned int" name="msgid">
       The ID of the message that is currently being
@@ -96,8 +96,8 @@
     <ref>arms_enabled</ref>
     <ref>shoulder_pitch_median</ref>
     <ref>shoulder_pitch_amplitude</ref>
-    <ref>elbow_pitch_median</ref>
-    <ref>elbow_pitch_amplitude</ref>
+    <ref>elbow_roll_median</ref>
+    <ref>elbow_roll_amplitude</ref>
   </message>
 
   <message name="Stop">

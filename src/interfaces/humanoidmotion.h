@@ -92,11 +92,11 @@ class HumanoidMotionInterface : public Interface
     float shoulder_pitch_amplitude; /**< 
       Amplitude of the shoulder pitch movement during walking.
      */
-    float elbow_pitch_median; /**< 
-      Median in radians of the elbow pitch during walking.
+    float elbow_roll_median; /**< 
+      Median in radians of the elbow roll during walking.
      */
-    float elbow_pitch_amplitude; /**< 
-      Amplitude of the elbow pitch movement during walking.
+    float elbow_roll_amplitude; /**< 
+      Amplitude of the elbow roll movement during walking.
      */
     bool moving; /**< True if the robot is currently moving. */
     bool arms_enabled; /**< 
@@ -202,11 +202,11 @@ class HumanoidMotionInterface : public Interface
       float shoulder_pitch_amplitude; /**< 
       Amplitude of the shoulder pitch movement during walking.
      */
-      float elbow_pitch_median; /**< 
-      Median in radians of the elbow pitch during walking.
+      float elbow_roll_median; /**< 
+      Median in radians of the elbow roll during walking.
      */
-      float elbow_pitch_amplitude; /**< 
-      Amplitude of the elbow pitch movement during walking.
+      float elbow_roll_amplitude; /**< 
+      Amplitude of the elbow roll movement during walking.
      */
       bool arms_enabled; /**< 
       If true the arms are controlled during walking for balancing.
@@ -216,7 +216,7 @@ class HumanoidMotionInterface : public Interface
     SetWalkArmsParamsMessage_data_t *data;
 
    public:
-    SetWalkArmsParamsMessage(const bool ini_arms_enabled, const float ini_shoulder_pitch_median, const float ini_shoulder_pitch_amplitude, const float ini_elbow_pitch_median, const float ini_elbow_pitch_amplitude);
+    SetWalkArmsParamsMessage(const bool ini_arms_enabled, const float ini_shoulder_pitch_median, const float ini_shoulder_pitch_amplitude, const float ini_elbow_roll_median, const float ini_elbow_roll_amplitude);
     SetWalkArmsParamsMessage();
     ~SetWalkArmsParamsMessage();
 
@@ -231,12 +231,12 @@ class HumanoidMotionInterface : public Interface
     float shoulder_pitch_amplitude() const;
     void set_shoulder_pitch_amplitude(const float new_shoulder_pitch_amplitude);
     size_t maxlenof_shoulder_pitch_amplitude() const;
-    float elbow_pitch_median() const;
-    void set_elbow_pitch_median(const float new_elbow_pitch_median);
-    size_t maxlenof_elbow_pitch_median() const;
-    float elbow_pitch_amplitude() const;
-    void set_elbow_pitch_amplitude(const float new_elbow_pitch_amplitude);
-    size_t maxlenof_elbow_pitch_amplitude() const;
+    float elbow_roll_median() const;
+    void set_elbow_roll_median(const float new_elbow_roll_median);
+    size_t maxlenof_elbow_roll_median() const;
+    float elbow_roll_amplitude() const;
+    void set_elbow_roll_amplitude(const float new_elbow_roll_amplitude);
+    size_t maxlenof_elbow_roll_amplitude() const;
     virtual Message * clone() const;
   };
 
@@ -495,12 +495,12 @@ class HumanoidMotionInterface : public Interface
   float shoulder_pitch_amplitude() const;
   void set_shoulder_pitch_amplitude(const float new_shoulder_pitch_amplitude);
   size_t maxlenof_shoulder_pitch_amplitude() const;
-  float elbow_pitch_median() const;
-  void set_elbow_pitch_median(const float new_elbow_pitch_median);
-  size_t maxlenof_elbow_pitch_median() const;
-  float elbow_pitch_amplitude() const;
-  void set_elbow_pitch_amplitude(const float new_elbow_pitch_amplitude);
-  size_t maxlenof_elbow_pitch_amplitude() const;
+  float elbow_roll_median() const;
+  void set_elbow_roll_median(const float new_elbow_roll_median);
+  size_t maxlenof_elbow_roll_median() const;
+  float elbow_roll_amplitude() const;
+  void set_elbow_roll_amplitude(const float new_elbow_roll_amplitude);
+  size_t maxlenof_elbow_roll_amplitude() const;
   unsigned int msgid() const;
   void set_msgid(const unsigned int new_msgid);
   size_t maxlenof_msgid() const;

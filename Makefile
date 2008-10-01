@@ -80,7 +80,7 @@ simple-clean:
 .PHONY: switch-buildtype
 switch-buildtype: simple-clean
 	$(SILENT) if [ -z "$(BT)" ]; then \
-		echo -e "$(INDENT_PRINT)$(TRED)--- Usage: make build-type BT=new_buildtype$(TNORMAL)"; \
+		echo -e "$(INDENT_PRINT)$(TRED)--- Usage: make switch-buildtype BT=new_buildtype$(TNORMAL)"; \
 	else \
 		echo -e "$(INDENT_PRINT)--- Switching build type from $(BUILD_TYPE) to $(BT)"; \
 		sed -i -e 's/^BUILD_TYPE=.*$$/BUILD_TYPE=$(BT)/' etc/buildsys_local/buildtype.mk; \

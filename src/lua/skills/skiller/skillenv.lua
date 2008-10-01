@@ -136,6 +136,7 @@ function init(skillspace)
       local n = string.match(k, "^interface_([%a_]+)$")
       if n then
 	 interfaces_by_uid[v:uid()] = v
+	 printf("Adding interface %s", v:uid())
 	 interfaces[n] = v
       end
    end
@@ -252,6 +253,7 @@ end
 
 
 function use_skill(module_name)
+   --printf("Loading skill from module %s", module_name)
    local m = require(module_name)
 
    assert(m.name and type(m.name) == "string", "Skill name not set or not a string")
@@ -262,7 +264,7 @@ function use_skill(module_name)
    assert(m.reset and type(m.reset) == "function",
 	  "Skill reset() function not defined or not a function")
 
-   printf("Trying to add skill %s", m.name)
+   --printf("Trying to add skill %s", m.name)
 
    if m.depends_skills then
       assert(type(m.depends_skills) == "table", "Type of depends_skills not table")
@@ -282,10 +284,12 @@ function use_skill(module_name)
 	 assert(t.type, "Interface dependency does not have a type field")
 	 if t.id then
 	    local uid = t.type .. "::" .. t.id
-	    assert(interfaces_by_uid[uid], "No interface available with the UID " .. uid)
+	    assert(interfaces_by_uid[uid], "No interface available with the UID " .. uid ..
+		                           ", required by " .. m.name)
 	    m[t.v] = interfaces_by_uid[uid]
 	 else
-	    assert(interfaces[t.v], "No interface with the variable name " .. t.v)
+	    assert(interfaces[t.v], "No interface with the variable name " .. t.v ..
+		                    ", required by " .. m.name)
 	    m[t.v] = interfaces[t.v]
 	 end
       end
@@ -299,6 +303,7 @@ function use_skill(module_name)
    end
 
    table.insert(skills, m)
+   printf("Successfully added skill %s to current skill space", m.name)
 end
 
 
