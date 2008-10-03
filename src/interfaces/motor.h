@@ -202,6 +202,41 @@ class MotorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class GotoMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float x; /**< X distance in m. */
+      float y; /**< Y distance in m. */
+      float phi; /**< Angle relative to current angle in rad. */
+      float time_sec; /**< When to reach the desired location. */
+    } GotoMessage_data_t;
+
+    GotoMessage_data_t *data;
+
+   public:
+    GotoMessage(const float ini_x, const float ini_y, const float ini_phi, const float ini_time_sec);
+    GotoMessage();
+    ~GotoMessage();
+
+    GotoMessage(const GotoMessage *m);
+    /* Methods */
+    float x() const;
+    void set_x(const float new_x);
+    size_t maxlenof_x() const;
+    float y() const;
+    void set_y(const float new_y);
+    size_t maxlenof_y() const;
+    float phi() const;
+    void set_phi(const float new_phi);
+    size_t maxlenof_phi() const;
+    float time_sec() const;
+    void set_time_sec(const float new_time_sec);
+    size_t maxlenof_time_sec() const;
+    virtual Message * clone() const;
+  };
+
   class TransMessage : public Message
   {
    private:

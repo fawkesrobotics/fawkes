@@ -53,6 +53,8 @@ TestInterface::TestInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(Interface::IFT_BOOL, "test_bool", &data->test_bool);
   add_fieldinfo(Interface::IFT_INT, "test_int", &data->test_int);
+  add_fieldinfo(Interface::IFT_STRING, "_flags", &data->_flags);
+  add_fieldinfo(Interface::IFT_STRING, "test_string", data->test_string);
   add_fieldinfo(Interface::IFT_INT, "result", &data->result);
   add_fieldinfo(Interface::IFT_UINT, "test_uint", &data->test_uint);
   add_fieldinfo(Interface::IFT_LONGUINT, "test_ulint", &data->test_ulint);

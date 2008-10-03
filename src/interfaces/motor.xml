@@ -29,7 +29,9 @@
     </constant>
   </constants>
   <data>
-    <comment>This are the actual RPMs of the motors taken from the VMC.</comment>
+    <comment>This interface is currently prepared best for a holonomic robot.
+      It will need modifications or a split to support differential drives.
+    </comment>
     <field type="unsigned int" name="motor_state">
       The current state of the motor.
     </field>
@@ -98,6 +100,15 @@
     <field type="float" name="front_right">Rotation in RPM of the right front wheel.</field>
     <field type="float" name="front_left">Rotation in RPM of the left front wheel.</field>
     <field type="float" name="rear">Rotation in RPM of the rear wheel.</field>
+  </message>
+  <message name="Goto">
+    <comment>Translate and rotate the robot to the given relative position. The
+      provider may choose to translate this message into a TransRotMessage and
+      process it accordingly.</comment>
+    <field type="float" name="x">X distance in m.</field>
+    <field type="float" name="y">Y distance in m.</field>
+    <field type="float" name="phi">Angle relative to current angle in rad.</field>
+    <field type="float" name="time_sec">When to reach the desired location.</field>
   </message>
   <message name="Trans">
     <comment>Translate the robot by the given velocities in X/Y direction.</comment>

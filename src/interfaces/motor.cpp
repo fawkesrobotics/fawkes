@@ -34,7 +34,9 @@ namespace fawkes {
 
 /** @class MotorInterface <interfaces/motor.h>
  * MotorInterface Fawkes BlackBoard Interface.
- * This are the actual RPMs of the motors taken from the VMC.
+ * This interface is currently prepared best for a holonomic robot.
+      It will need modifications or a split to support differential drives.
+    
  */
 
 
@@ -75,7 +77,8 @@ MotorInterface::MotorInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "vy", &data->vy);
   add_fieldinfo(Interface::IFT_FLOAT, "omega", &data->omega);
   add_fieldinfo(Interface::IFT_UINT, "controller", &data->controller);
-  unsigned char tmp_hash[] = {0x32, 0xf7, 0xef, 0x43, 0xe8, 0x78, 0x43, 0x17, 0x55, 0xbb, 0xb9, 0xbf, 0x48, 0x72, 0x21, 0x94};
+  add_fieldinfo(Interface::IFT_STRING, "controller_thread_name", data->controller_thread_name);
+  unsigned char tmp_hash[] = {0xc0, 0x2, 0xd, 0x62, 0x77, 0xf6, 0xae, 0x71, 0x47, 0x7c, 0xd1, 0x6, 0x3f, 0x8a, 0xef, 0xb};
   set_hash(tmp_hash);
 }
 
@@ -579,6 +582,8 @@ MotorInterface::create_message(const char *type) const
     return new ResetOdometryMessage();
   } else if ( strncmp("DriveRPMMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new DriveRPMMessage();
+  } else if ( strncmp("GotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new GotoMessage();
   } else if ( strncmp("TransMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new TransMessage();
   } else if ( strncmp("RotMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -1004,6 +1009,187 @@ Message *
 MotorInterface::DriveRPMMessage::clone() const
 {
   return new MotorInterface::DriveRPMMessage(this);
+}
+/** @class MotorInterface::GotoMessage interfaces/motor.h
+ * GotoMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_x initial value for x
+ * @param ini_y initial value for y
+ * @param ini_phi initial value for phi
+ * @param ini_time_sec initial value for time_sec
+ */
+MotorInterface::GotoMessage::GotoMessage(const float ini_x, const float ini_y, const float ini_phi, const float ini_time_sec) : Message("GotoMessage")
+{
+  data_size = sizeof(GotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (GotoMessage_data_t *)data_ptr;
+  data->x = ini_x;
+  data->y = ini_y;
+  data->phi = ini_phi;
+  data->time_sec = ini_time_sec;
+}
+/** Constructor */
+MotorInterface::GotoMessage::GotoMessage() : Message("GotoMessage")
+{
+  data_size = sizeof(GotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (GotoMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+MotorInterface::GotoMessage::~GotoMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+MotorInterface::GotoMessage::GotoMessage(const GotoMessage *m) : Message("GotoMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (GotoMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get x value.
+ * X distance in m.
+ * @return x value
+ */
+float
+MotorInterface::GotoMessage::x() const
+{
+  return data->x;
+}
+
+/** Get maximum length of x value.
+ * @return length of x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::GotoMessage::maxlenof_x() const
+{
+  return 1;
+}
+
+/** Set x value.
+ * X distance in m.
+ * @param new_x new x value
+ */
+void
+MotorInterface::GotoMessage::set_x(const float new_x)
+{
+  data->x = new_x;
+}
+
+/** Get y value.
+ * Y distance in m.
+ * @return y value
+ */
+float
+MotorInterface::GotoMessage::y() const
+{
+  return data->y;
+}
+
+/** Get maximum length of y value.
+ * @return length of y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::GotoMessage::maxlenof_y() const
+{
+  return 1;
+}
+
+/** Set y value.
+ * Y distance in m.
+ * @param new_y new y value
+ */
+void
+MotorInterface::GotoMessage::set_y(const float new_y)
+{
+  data->y = new_y;
+}
+
+/** Get phi value.
+ * Angle relative to current angle in rad.
+ * @return phi value
+ */
+float
+MotorInterface::GotoMessage::phi() const
+{
+  return data->phi;
+}
+
+/** Get maximum length of phi value.
+ * @return length of phi value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::GotoMessage::maxlenof_phi() const
+{
+  return 1;
+}
+
+/** Set phi value.
+ * Angle relative to current angle in rad.
+ * @param new_phi new phi value
+ */
+void
+MotorInterface::GotoMessage::set_phi(const float new_phi)
+{
+  data->phi = new_phi;
+}
+
+/** Get time_sec value.
+ * When to reach the desired location.
+ * @return time_sec value
+ */
+float
+MotorInterface::GotoMessage::time_sec() const
+{
+  return data->time_sec;
+}
+
+/** Get maximum length of time_sec value.
+ * @return length of time_sec value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+MotorInterface::GotoMessage::maxlenof_time_sec() const
+{
+  return 1;
+}
+
+/** Set time_sec value.
+ * When to reach the desired location.
+ * @param new_time_sec new time_sec value
+ */
+void
+MotorInterface::GotoMessage::set_time_sec(const float new_time_sec)
+{
+  data->time_sec = new_time_sec;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+MotorInterface::GotoMessage::clone() const
+{
+  return new MotorInterface::GotoMessage(this);
 }
 /** @class MotorInterface::TransMessage interfaces/motor.h
  * TransMessage Fawkes BlackBoard Interface Message.
@@ -1676,24 +1862,28 @@ MotorInterface::message_valid(const Message *message) const
   if ( m3 != NULL ) {
     return true;
   }
-  const TransMessage *m4 = dynamic_cast<const TransMessage *>(message);
+  const GotoMessage *m4 = dynamic_cast<const GotoMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
-  const RotMessage *m5 = dynamic_cast<const RotMessage *>(message);
+  const TransMessage *m5 = dynamic_cast<const TransMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const TransRotMessage *m6 = dynamic_cast<const TransRotMessage *>(message);
+  const RotMessage *m6 = dynamic_cast<const RotMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const OrbitMessage *m7 = dynamic_cast<const OrbitMessage *>(message);
+  const TransRotMessage *m7 = dynamic_cast<const TransRotMessage *>(message);
   if ( m7 != NULL ) {
     return true;
   }
-  const LinTransRotMessage *m8 = dynamic_cast<const LinTransRotMessage *>(message);
+  const OrbitMessage *m8 = dynamic_cast<const OrbitMessage *>(message);
   if ( m8 != NULL ) {
+    return true;
+  }
+  const LinTransRotMessage *m9 = dynamic_cast<const LinTransRotMessage *>(message);
+  if ( m9 != NULL ) {
     return true;
   }
   return false;

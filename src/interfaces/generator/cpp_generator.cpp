@@ -535,9 +535,14 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
       } else if ( (*i).getType() == "float" ) {
 	fprintf(f, "  add_fieldinfo(Interface::IFT_FLOAT, \"%s\", &data->%s);\n",
 		(*i).getName().c_str(), (*i).getName().c_str());
-      } else if ( (*i).getType() == "string" ) {
-	fprintf(f, "  add_fieldinfo(Interface::IFT_STRING, \"%s\", data->%s);\n",
-		(*i).getName().c_str(), (*i).getName().c_str());
+      } else if ( (*i).getType() == "char" ) {
+	if ( i->getLengthValue() == 0 ) {
+	  fprintf(f, "  add_fieldinfo(Interface::IFT_STRING, \"%s\", &data->%s);\n",
+		  (*i).getName().c_str(), (*i).getName().c_str());
+	} else {
+	  fprintf(f, "  add_fieldinfo(Interface::IFT_STRING, \"%s\", data->%s);\n",
+		  (*i).getName().c_str(), (*i).getName().c_str());
+	}
       }
     }
   } else {

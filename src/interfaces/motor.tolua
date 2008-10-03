@@ -61,6 +61,26 @@ class MotorInterface : public Interface
     size_t maxlenof_rear() const;
   };
 
+  class GotoMessage : public Message
+  {
+    GotoMessage(float ini_x, float ini_y, float ini_phi, float ini_time_sec);
+    GotoMessage();
+    ~GotoMessage();
+
+    float x();
+    void set_x(const float new_x);
+    size_t maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    size_t maxlenof_y() const;
+    float phi();
+    void set_phi(const float new_phi);
+    size_t maxlenof_phi() const;
+    float time_sec();
+    void set_time_sec(const float new_time_sec);
+    size_t maxlenof_time_sec() const;
+  };
+
   class TransMessage : public Message
   {
     TransMessage(float ini_vx, float ini_vy);

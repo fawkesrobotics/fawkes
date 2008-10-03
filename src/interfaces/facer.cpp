@@ -52,6 +52,7 @@ FacerInterface::FacerInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (FacerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  add_fieldinfo(Interface::IFT_STRING, "face_label", data->face_label);
   add_fieldinfo(Interface::IFT_BOOL, "learning_done", &data->learning_done);
   add_fieldinfo(Interface::IFT_UINT, "num_detections", &data->num_detections);
   add_fieldinfo(Interface::IFT_FLOAT, "sec_since_detection", &data->sec_since_detection);
