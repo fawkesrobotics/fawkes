@@ -874,6 +874,7 @@ Interface::fields_end()
 Interface::FieldIterator::FieldIterator()
 {
   __infol = NULL;
+  __value_string = NULL;
 }
 
 
@@ -884,6 +885,7 @@ Interface::FieldIterator::FieldIterator()
 Interface::FieldIterator::FieldIterator(const interface_fieldinfo_t *info_list)
 {
   __infol = info_list;
+  __value_string = NULL;
 }
 
 
@@ -893,12 +895,18 @@ Interface::FieldIterator::FieldIterator(const interface_fieldinfo_t *info_list)
 Interface::FieldIterator::FieldIterator(const FieldIterator &fit)
 {
   __infol = fit.__infol;
+  if ( fit.__value_string ) {
+    __value_string = strdup(fit.__value_string);
+  } else {
+    __value_string = NULL;
+  }
 }
 
 
 /** Destructor. */
 Interface::FieldIterator::~FieldIterator()
 {
+  if ( __value_string )  free(__value_string);
 }
 
 
@@ -910,6 +918,8 @@ Interface::FieldIterator::operator++()
 {
   if ( __infol != NULL ) {
     __infol = __infol->next;
+    if ( __value_string )  free(__value_string);
+    __value_string = NULL;
   }
 
   return *this;
@@ -1020,6 +1030,29 @@ Interface::FieldIterator::get_type() const
 }
 
 
+/** Get type of current field as string.
+ * @return field type as string
+ */
+const char *
+Interface::FieldIterator::get_typename() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get type of end element");
+  } else {
+    switch (__infol->type) {
+    case IFT_BOOL:     return "bool";
+    case IFT_INT:      return "int";
+    case IFT_UINT:     return "unsigned int";
+    case IFT_LONGINT:  return "long int";
+    case IFT_LONGUINT: return "long unsigned int";
+    case IFT_FLOAT:    return "float";
+    case IFT_STRING:   return "string";
+    default:           return "unknown";
+    }
+  }
+}
+
+
 /** Get name of current field.
  * @return field name
  */
@@ -1044,6 +1077,45 @@ Interface::FieldIterator::get_value() const
     throw NullPointerException("Cannot get value of end element");
   } else {
     return __infol->value;
+  }
+}
+
+
+/** Get value of current field as string.
+ * @return field value as string
+ */
+const char *
+Interface::FieldIterator::get_value_string()
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else {
+    if ( __value_string == NULL ) {
+      switch (__infol->type) {
+      case IFT_BOOL:
+	asprintf(&__value_string, "%s", (bool)(*((bool *)__infol->value)) ? "true" : "false");
+	break;
+      case IFT_INT:
+	asprintf(&__value_string, "%i", *((int *)__infol->value));
+	break;
+      case IFT_UINT:
+	asprintf(&__value_string, "%u", *((unsigned int *)__infol->value));
+	break;
+      case IFT_LONGINT:
+	asprintf(&__value_string, "%li", *((long int *)__infol->value));
+	break;
+      case IFT_LONGUINT:
+	asprintf(&__value_string, "%lu", *((long unsigned int *)__infol->value));
+	break;
+      case IFT_FLOAT:
+	asprintf(&__value_string, "%f", *((float *)__infol->value));
+	break;
+      case IFT_STRING:
+	asprintf(&__value_string, "%s", (const char *)__infol->value);
+	break;
+      }
+    }
+    return __value_string;
   }
 }
 

@@ -170,8 +170,10 @@ class Interface
     FieldIterator &        operator=  (const FieldIterator & shmit);
 
     interface_fieldtype_t  get_type() const;
+    const char *           get_typename() const;
     const char *           get_name() const;
     const void *           get_value() const;
+    const char *           get_value_string();
     bool                   get_bool() const;
     int                    get_int() const;
     unsigned int           get_uint() const;
@@ -185,6 +187,7 @@ class Interface
 
    private:
     const interface_fieldinfo_t   *__infol;
+    char                          *__value_string;
   };
 
   FieldIterator fields();
