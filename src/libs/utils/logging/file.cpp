@@ -52,7 +52,7 @@ FileLogger::FileLogger(const char* filename, LogLevel log_level)
   : Logger(log_level)
 {
   try {
-    log_file = new File(filename, File::ADD_SUFFIX);
+    log_file = new File(filename, File::APPEND);
   } catch (UnableToOpenFileException& e) {
     throw;
   }
@@ -127,6 +127,7 @@ FileLogger::log_debug(const char *component, Exception &e)
       fprintf(log_file->stream(), "%s", *i);
       fprintf(log_file->stream(), "\n");
     }
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -146,6 +147,7 @@ FileLogger::log_info(const char *component, Exception &e)
       fprintf(log_file->stream(), "%s", *i);
       fprintf(log_file->stream(), "\n");
     }
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -165,6 +167,7 @@ FileLogger::log_warn(const char *component, Exception &e)
       fprintf(log_file->stream(), "%s", *i);
       fprintf(log_file->stream(), "\n");
     }
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -184,6 +187,7 @@ FileLogger::log_error(const char *component, Exception &e)
       fprintf(log_file->stream(), "%s", *i);
       fprintf(log_file->stream(), "\n");
     }
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -201,6 +205,7 @@ FileLogger::vlog_debug(const char* component, const char* format, va_list va)
 	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -218,6 +223,7 @@ FileLogger::vlog_info(const char *component, const char *format, va_list va)
 	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -235,6 +241,7 @@ FileLogger::vlog_warn(const char *component, const char *format, va_list va)
 	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -252,6 +259,7 @@ FileLogger::vlog_error(const char *component, const char *format, va_list va)
 	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -309,6 +317,7 @@ FileLogger::tlog_debug(struct timeval *t, const char *component, Exception &e)
       fprintf(log_file->stream(), "%s", *i);
       fprintf(log_file->stream(), "\n");
     }
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -326,6 +335,7 @@ FileLogger::tlog_info(struct timeval *t, const char *component, Exception &e)
       fprintf(log_file->stream(), "%s", *i);
       fprintf(log_file->stream(), "\n");
     }
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -343,6 +353,7 @@ FileLogger::tlog_warn(struct timeval *t, const char *component, Exception &e)
       fprintf(log_file->stream(), "%s", *i);
       fprintf(log_file->stream(), "\n");
     }
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -360,6 +371,7 @@ FileLogger::tlog_error(struct timeval *t, const char *component, Exception &e)
       fprintf(log_file->stream(), "%s", *i);
       fprintf(log_file->stream(), "\n");
     }
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -375,6 +387,7 @@ FileLogger::vtlog_debug(struct timeval *t, const char* component, const char* fo
 	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -390,6 +403,7 @@ FileLogger::vtlog_info(struct timeval *t, const char *component, const char *for
 	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -405,6 +419,7 @@ FileLogger::vtlog_warn(struct timeval *t, const char *component, const char *for
 	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
@@ -420,6 +435,7 @@ FileLogger::vtlog_error(struct timeval *t, const char *component, const char *fo
 	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
     vfprintf(log_file->stream(), format, va);
     fprintf(log_file->stream(), "\n");
+    fflush(log_file->stream());
     mutex->unlock();
   }
 }
