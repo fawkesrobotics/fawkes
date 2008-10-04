@@ -1,0 +1,21 @@
+body {
+    font-family: sans-serif;
+    font-style: normal;
+    text-decoration : none;
+}
+
+h2 {
+    margin-top: 30px;
+}
+
+table {
+    margin-top: 10px;
+}
+
+tr {
+    text-align: left;
+}
+
+td {
+    padding-right: 10px;
+}
