@@ -25,7 +25,12 @@
 
 #include <core/exceptions/software.h>
 #include <netcomm/worldinfo/encrypt.h>
-#include <openssl/evp.h>
+
+#ifdef HAVE_LIBCRYPTO
+#  include <openssl/evp.h>
+#else
+#  include <cstring>
+#endif
 
 namespace fawkes {
 
@@ -132,12 +137,15 @@ WorldInfoMessageEncryptor::recommended_crypt_buffer_size()
     throw MissingParameterException("plain buffer must be set and plain buffer size > 0");
   }
 
+#ifdef HAVE_LIBCRYPTO
   EVP_CIPHER_CTX ctx;
   EVP_EncryptInit(&ctx, EVP_aes_128_ecb(), key, iv);
   size_t rv = plain_buffer_length + EVP_CIPHER_CTX_block_size(&ctx);
   EVP_CIPHER_CTX_cleanup(&ctx);
-
   return rv;
+#else
+  return plain_buffer_length;
+#endif
 }
 
 
@@ -166,11 +174,7 @@ WorldInfoMessageEncryptor::encrypt()
     throw MissingParameterException("Buffer(s) not set for encryption");
   }
 
-  /* Plain text copy-through for debugging
-  memcpy(crypt_buffer, plain_buffer, plain_buffer_length);
-  return plain_buffer_length;
-  */
-
+#ifdef HAVE_LIBCRYPTO
   EVP_CIPHER_CTX ctx;
   if ( ! EVP_EncryptInit(&ctx, EVP_aes_128_ecb(), key, iv) ) {
     throw MessageEncryptionException("Could not initialize cipher context");
@@ -189,8 +193,13 @@ WorldInfoMessageEncryptor::encrypt()
     throw MessageEncryptionException("EncryptFinal failed");
   }
   outl += plen;
-
+ 
   return outl;
+#else
+  /* Plain text copy-through for debugging */
+  memcpy(crypt_buffer, plain_buffer, plain_buffer_length);
+  return plain_buffer_length;
+#endif
 }
 
 } // end namespace fawkes

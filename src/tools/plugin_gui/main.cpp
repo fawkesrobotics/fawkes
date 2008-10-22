@@ -22,6 +22,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <core/exception.h>
 #include <tools/plugin_gui/plugin_gui.h>
 #include <tools/plugin_gui/backend_thread.h>
 #include <libglademm/xml.h>
@@ -39,7 +40,16 @@ int main(int argc, char** argv)
   try
     {
       Gtk::Main kit(argc, argv);
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
       Glib::RefPtr<Gnome::Glade::Xml> refXml = Gnome::Glade::Xml::create(RESDIR"/glade/plugin_tool/plugin_tool.glade");
+#else
+      std::auto_ptr<Gnome::Glade::XmlError> error;
+      Glib::RefPtr<Gnome::Glade::Xml> refXml = Gnome::Glade::Xml::create(RESDIR"/glade/plugin_tool/plugin_tool.glade", "", "", error);
+      if (error.get()) {
+	throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
+      }
+#endif
+			
       PluginGui pt_gui(refXml);
       backend = new PluginGuiBackendThread(&pt_gui);
       pt_gui.register_backend(backend);

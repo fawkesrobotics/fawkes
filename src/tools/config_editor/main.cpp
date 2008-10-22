@@ -22,6 +22,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <core/exception.h>
 #include <tools/config_editor/config_editor.h>
 #include <libglademm/xml.h>
 #include <iostream>
@@ -33,7 +34,16 @@ int main(int argc, char** argv)
   try
     {
       Gtk::Main kit(argc, argv);
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
       Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/config_editor/config_editor.glade");
+#else
+      std::auto_ptr<Gnome::Glade::XmlError> error;
+      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/config_editor/config_editor.glade", "", "", error);
+      if (error.get()) {
+        throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
+      }
+#endif
+
       FawkesConfigEditor fce(ref_xml);
 
       kit.run( fce.get_window() );

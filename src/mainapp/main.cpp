@@ -34,6 +34,8 @@
 #  include <libdaemon/dfork.h>
 #  include <libdaemon/dlog.h>
 #  include <libdaemon/dpid.h>
+#  include <sys/types.h>
+#  include <sys/stat.h>
 #endif
 
 using namespace std;
@@ -129,6 +131,7 @@ pid_t
 daemonize(int argc, char **argv)
 {
   pid_t pid;
+  mode_t old_umask = umask(0);
 
   // Prepare for return value passing
   daemon_retval_init();
@@ -183,6 +186,8 @@ daemonize(int argc, char **argv)
     daemon_retval_send(0);
 
     daemon_log(LOG_INFO, "Sucessfully started");
+
+    umask(old_umask);
     return 0;
   }
 }

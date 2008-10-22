@@ -150,6 +150,15 @@ Bumblebee2Camera::Bumblebee2Camera(const CameraArgumentParser *cap)
   if ( cap->has("starty") ) {
     _format7_starty = atoi(cap->get("starty").c_str());
   }
+  if ( cap->has("focus") ) {
+    parse_set_focus(cap->get("focus").c_str());
+  }
+  if ( cap->has("white_balance") ) {
+    parse_set_white_balance(cap->get("white_balance").c_str());
+  }
+  if ( cap->has("shutter") ) {
+    parse_set_shutter(cap->get("shutter").c_str());
+  }
 
   __buffer_deinterlaced = NULL;
   __buffer_rgb = NULL;

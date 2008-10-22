@@ -21,17 +21,28 @@ __gui_mk := 1
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/ext/gmsl
 
-PC_GTKMM    = gtkmm-2.4
-PC_CAIROMM  = cairomm-1.0
-PC_GLADEMM  = libglademm-2.4
-PKG_GTKMM   = gtkmm24[-devel]
-PKG_CAIROMM = cairomm[-devel]
-PKG_GLADEMM = libglademm24[-devel]
+PC_GTKMM        = gtkmm-2.4
+PC_CAIROMM      = cairomm-1.0
+PC_GLADEMM      = libglademm-2.4
+PC_HILDONMM     = hildonmm
+PC_HILDONFMMM   = hildon-fmmm
+PKG_GTKMM       = gtkmm24[-devel]
+PKG_CAIROMM     = cairomm[-devel]
+PKG_GLADEMM     = libglademm24[-devel]
 
 ifneq ($(PKGCONFIG),)
   HAVE_GTKMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_GTKMM)'; echo $${?/1/}),1,0)
   HAVE_CAIROMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_CAIROMM)'; echo $${?/1/}),1,0)
   HAVE_GLADEMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_GLADEMM)'; echo $${?/1/}),1,0)
+  ifeq ($(BUILD_TYPE), maemo)
+    HAVE_HILDONMM   = $(if $(shell $(PKGCONFIG) --exists '$(PC_HILDONMM)'; echo $${?/1/}),1,0)
+    HAVE_HILDONFMMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_HILDONFMMM)'; echo $${?/1/}),1,0)
+  endif
+endif
+
+ifeq ($(HAVE_HILDONMM)$(HAVE_HILDONFMMM),11)
+  CFLAGS_HILDONMM  = $(shell $(PKGCONFIG) --cflags '$(PC_HILDONMM)' '$(PC_HILDONFMMM)')
+  LDFLAGS_HILDONMM = $(shell $(PKGCONFIG) --libs '$(PC_HILDONMM)' '$(PC_HILDONFMMM)')
 endif
 
 ifeq ($(HAVE_GTKMM),1)
@@ -61,13 +72,15 @@ endif
 
 # Some default warnings that may be used
 ifeq ($(OBJSSUBMAKE),1)
-.PHONY: warning_gtkmm warning_cairomm warning_glademm
+.PHONY: warning_gtkmm warning_cairomm warning_glademm warning_hildonmm
 warning_gtkmm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Gtk dependent GUI apps$(TNORMAL) $(ERROR_GTKMM)";
 warning_cairomm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Cairo dependent GUI apps$(TNORMAL) $(ERROR_CAIROMM)";
 warning_glademm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Glade dependent GUI apps$(TNORMAL) $(ERROR_GLADEMM)";
+warning_hildonmm:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting HildonMM dependent GUI apps$(TNORMAL) (hildonmm/hildon-fmmm not installed)";
 endif
 
 endif # __gui_mk_

@@ -16,7 +16,7 @@
 BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-SUBDIRS = worldmodel skiller
+SUBDIRS = laser skiller
 
 include $(BASEDIR)/etc/buildsys/rules.mk
 

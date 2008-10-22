@@ -684,6 +684,100 @@ FirewireCamera::set_white_balance(unsigned int ub, unsigned int vr)
 }
 
 
+/** Parse focus and set value.
+ * Parses the given string for a valid focus value and sets it.
+ * @param focus string representation of value
+ */
+void
+FirewireCamera::parse_set_focus(const char *focus)
+{
+  string f = focus;
+  if ( f == "auto" ) {
+    _auto_focus = true;
+  } else if ( f == "manual" ) {
+    _auto_focus = false;
+  } else {
+    char *endptr = NULL;
+    long int focus = strtol(f.c_str(), &endptr, 10);
+    if ( endptr[0] != 0 ) {
+      throw TypeMismatchException("Focus value is invalid. String to int conversion failed");
+    } else if ( focus < 0 ) {
+      throw OutOfBoundsException("'Focus value < 0", focus, 0, 0xFFFFFFFF);
+    }
+    _auto_focus = false;
+    _focus = focus;
+    _do_set_focus = true;
+  }
+}
+
+
+/** Parse white balance and set value.
+ * Parses the given string for a valid white balance value and sets it.
+ * @param white_balance string representation of value
+ */
+void
+FirewireCamera::parse_set_white_balance(const char *white_balance)
+{
+  string w = white_balance;
+  if ( w == "auto" ) {
+    _auto_white_balance = true;
+  } else {
+    // try to parse U/V values
+    string::size_type commapos = w.find(",", 0);
+    if ( commapos == string::npos ) {
+      throw Exception("Illegal white balance value, neither auto and no comma found");
+    }
+    string ub = w.substr(0, commapos);
+    string vr = w.substr(commapos + 1);
+    char *endptr;
+    long int ub_i = strtol(ub.c_str(), &endptr, 10);
+    if ( endptr[0] != 0 ) {
+      throw TypeMismatchException("White balance value for U/B is invalid. "
+				  "String to int conversion failed");
+    } else if ( ub_i < 0 ) {
+      throw OutOfBoundsException("White balance value for U/B < 0", ub_i, 0, 0xFFFFFFFF);
+    }
+    long int vr_i = strtol(vr.c_str(), &endptr, 10);
+    if ( endptr[0] != 0 ) {
+      throw TypeMismatchException("White balance value for V/R is invalid. "
+				  "String to int conversion failed");
+    } else if ( vr_i < 0 ) {
+      throw OutOfBoundsException("White balance value for V/R < 0", vr_i, 0, 0xFFFFFFFF);
+    }
+
+    _auto_white_balance = false;
+    _white_balance_ub = ub_i;
+    _white_balance_vr = vr_i;
+    _do_set_white_balance = true;
+  }
+}
+
+
+/** Parse shutter and set value.
+ * Parses the given string for a valid shutter value and sets it.
+ * @param shutter string representation of value
+ */
+void
+FirewireCamera::parse_set_shutter(const char *shutter)
+{
+  string s = shutter;
+  if ( s == "auto" ) {
+    _auto_shutter = true;
+  } else {
+    char *endptr;
+    long int tmp = strtol(s.c_str(), &endptr, 10);
+    if ( endptr[0] != '\0' ) {
+      throw TypeMismatchException("Shutter value is invalid. "
+				  "String to int conversion failed");
+    } else if ( tmp < 0 ) {
+      throw OutOfBoundsException("Shutter value < 0", tmp, 0, 0xFFFFFFFF);
+    }
+    _auto_shutter = false;
+    _shutter = tmp;
+    _do_set_shutter = true;
+  }
+}
+
 /** Constructor.
  * Initialize and take parameters from camera argument parser. The following
  * arguments are supported:
@@ -819,23 +913,7 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
     }
   }
   if ( cap->has("focus") ) {
-    string f = cap->get("focus");
-    if ( f == "auto" ) {
-      _auto_focus = true;
-    } else if ( f == "manual" ) {
-      _auto_focus = false;
-    } else {
-      char *endptr = NULL;
-      long int focus = strtol(f.c_str(), &endptr, 10);
-      if ( endptr[0] != 0 ) {
-	throw TypeMismatchException("Focus value is invalid. String to int conversion failed");
-      } else if ( focus < 0 ) {
-	throw OutOfBoundsException("'Focus value < 0", focus, 0, 0xFFFFFFFF);
-      }
-      _auto_focus = false;
-      _focus = focus;
-      _do_set_focus = true;
-    }
+    parse_set_focus(cap->get("focus").c_str());
   }
   if ( cap->has("nbufs") ) {
     _num_buffers = atoi(cap->get("nbufs").c_str());
@@ -856,57 +934,10 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
     _format7_bpp = atoi(cap->get("packetsize").c_str());
   }
   if ( cap->has("white_balance") ) {
-    string w = cap->get("white_balance");
-    if ( w == "auto" ) {
-      _auto_white_balance = true;
-    } else {
-      // try to parse U/V values
-      string::size_type commapos = w.find(",", 0);
-      if ( commapos == string::npos ) {
-	throw Exception("Illegal white balance value, neither auto and no comma found");
-      }
-      string ub = w.substr(0, commapos);
-      string vr = w.substr(commapos + 1);
-      char *endptr;
-      long int ub_i = strtol(ub.c_str(), &endptr, 10);
-      if ( endptr[0] != 0 ) {
-	throw TypeMismatchException("White balance value for U/B is invalid. "
-				    "String to int conversion failed");
-      } else if ( ub_i < 0 ) {
-	throw OutOfBoundsException("White balance value for U/B < 0", ub_i, 0, 0xFFFFFFFF);
-      }
-      long int vr_i = strtol(vr.c_str(), &endptr, 10);
-      if ( endptr[0] != 0 ) {
-	throw TypeMismatchException("White balance value for V/R is invalid. "
-				    "String to int conversion failed");
-      } else if ( vr_i < 0 ) {
-	throw OutOfBoundsException("White balance value for V/R < 0", vr_i, 0, 0xFFFFFFFF);
-      }
-
-      _auto_white_balance = false;
-      _white_balance_ub = ub_i;
-      _white_balance_vr = vr_i;
-      _do_set_white_balance = true;
-    }
+    parse_set_white_balance(cap->get("white_balance").c_str());
   }
   if ( cap->has("shutter") ) {
-    string s = cap->get("shutter");
-    if ( s == "auto" ) {
-      _auto_shutter = true;
-    }
-    else {
-      char *endptr;
-      long int tmp = strtol(s.c_str(), &endptr, 10);
-      if ( endptr[0] != '\0' ) {
-	throw TypeMismatchException("Shutter value is invalid. "
-				    "String to int conversion failed");
-      } else if ( tmp < 0 ) {
-	throw OutOfBoundsException("Shutter value < 0", tmp, 0, 0xFFFFFFFF);
-      }
-      _auto_shutter = false;
-      _shutter = tmp;
-      _do_set_shutter = true;
-    }
+    parse_set_shutter(cap->get("shutter").c_str());
   }
 }
 

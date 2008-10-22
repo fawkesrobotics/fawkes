@@ -264,6 +264,7 @@ ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
     try {
       initializer->init(*i);
       (*i)->init();
+      initialized_threads.push_back(*i);
     } catch (CannotInitializeThreadException &e) {
       notify_of_failed_init();
       cite.append(e);

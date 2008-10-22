@@ -43,27 +43,29 @@
 #include <utils/time/tracker.h>
 
 //#define NUM_OBJ 13
-#define OFFLINE_SURF false  // offline reading - reading from descriptors folder
+#define OFFLINE_SURF true  // offline reading - reading from descriptors folder
+#define MIN_MATCH_RATIO 0.05
 
 //#ifdef SURF_TIMETRACKER
 namespace fawkes {
-    class TimeTracker; 
+    class TimeTracker;
 }
 //#endif
 
 //struct CvMemStorage;
 //typedef struct _IplImage IplImage;
 
-void saveIpoints(std::string sFileName, const std::vector< surf::Ipoint >& ipts, bool bVerbose, bool bLaplacian, int VLength); 
+void saveIpoints(std::string sFileName, const std::vector< surf::Ipoint >& ipts, bool bVerbose, bool bLaplacian, int VLength);
 
-void loadIpoints(std::string sFileName, std::vector< surf::Ipoint >& ipts, bool bVerbose, int&); 
+void loadIpoints(std::string sFileName, std::vector< surf::Ipoint >& ipts, bool bVerbose, int&);
 
 class SurfClassifier : public Classifier
 {
  public:
-  SurfClassifier( std::string location,  
+	 //instantiating using descriptor files
+  SurfClassifier( std::string keypoints_descriptor_txt_file,
 		  unsigned int min_match = 5,
-		  float min_match_ratio = 0.05,
+		  float min_match_ratio = MIN_MATCH_RATIO,
 		  int samplingStep = 2,
 		  int octaves = 4,
 		  double thres = 4.0,
@@ -71,11 +73,12 @@ class SurfClassifier : public Classifier
 		  int initLobe = 3,
 		  bool upright = false,
 		  bool extended = false,
-		  int indexSize = 4); 
-  
-  SurfClassifier(const char * features_file,
+		  int indexSize = 4);
+
+	//instantiating using a directory containing the png images
+  SurfClassifier(const char * image_directory_png_files,
 		 unsigned int min_match = 5,
-		 float min_match_ratio = 0.05,
+		 float min_match_ratio = MIN_MATCH_RATIO,
 		 int samplingStep = 2,
 		 int octaves = 4,
 		 double thres = 4.0,
@@ -84,13 +87,13 @@ class SurfClassifier : public Classifier
 		 bool upright = false,
 		 bool extended = false,
 		 int indexSize = 4);
-  
-  virtual ~SurfClassifier(); 
-  
+
+  virtual ~SurfClassifier();
+
   virtual std::list< ROI > * classify();
-  
+
  private:
-  
+
   unsigned int __num_obj; // number of objects
 
   // Find closest interest point in a list, given one interest point
@@ -101,8 +104,8 @@ class SurfClassifier : public Classifier
 
   // Object objects
   surf::Image *__obj_img;
-  std::vector<std::vector< surf::Ipoint > > __obj_features; 
-  std::vector<std::string> __obj_names; 
+  std::vector<std::vector< surf::Ipoint > > __obj_features;
+  std::vector<std::string> __obj_names;
   int __obj_num_features;
 
   // Image objects

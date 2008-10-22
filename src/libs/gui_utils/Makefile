@@ -22,7 +22,7 @@ include $(BASEDIR)/etc/buildsys/ext/gmsl
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_libfawkesguiutils = stdc++ fawkescore fawkesnetcomm
+LIBS_libfawkesguiutils = stdc++ fawkescore fawkesnetcomm fawkesblackboard
 OBJS_libfawkesguiutils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
 OBJS_all = $(OBJS_libfawkesguiutils)

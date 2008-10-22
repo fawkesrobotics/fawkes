@@ -291,6 +291,35 @@ FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short in
 
 
 /** Constructor.
+ * Note, you cannot call the connect() without parameters the first time you
+ * establish an connection when using this ctor!
+ */
+FawkesNetworkClient::FawkesNetworkClient()
+{
+  this->hostname = NULL;
+  this->port     = 0;
+
+  s = NULL;
+  send_slave = NULL;
+  recv_slave = NULL;
+
+  connection_died_recently = false;
+  send_slave_alive = false;
+  recv_slave_alive = false;
+
+  slave_status_mutex = new Mutex();
+
+  _id     = 0;
+  _has_id = false;
+
+  __connest_waitcond    = new WaitCondition();
+  __connest_mutex       = new Mutex();
+  __connest             = false;
+  __connest_interrupted = false;
+}
+
+
+/** Constructor.
  * @param id id of the client.
  * @param hostname remote host to connect to.
  * @param port port to connect to.
@@ -331,7 +360,7 @@ FawkesNetworkClient::~FawkesNetworkClient()
   }
   waitconds.clear();
   delete s;
-  free(hostname);
+  if (hostname) free(hostname);
   delete slave_status_mutex;
 
   delete __connest_waitcond;
@@ -341,10 +370,14 @@ FawkesNetworkClient::~FawkesNetworkClient()
 
 /** Connect to remote.
  * @exception SocketException thrown by Socket::connect()
+ * @exception NullPointerException thrown if hostname has not been set
  */
 void
 FawkesNetworkClient::connect()
 {
+  if ( hostname == NULL ) {
+    throw NullPointerException("Hostname not set. Cannot connect.");
+  }
   try {
     s = new StreamSocket();
     s->connect(hostname, port);
@@ -375,6 +408,21 @@ FawkesNetworkClient::connect()
 }
 
 
+/** Connect to new host and port.
+ * @param hostname new hostname to connect to
+ * @param port new port to connect to
+ * @see connect() Look there for more documentation and notes about possible
+ * exceptions.
+ */
+void
+FawkesNetworkClient::connect(const char *hostname, unsigned short int port)
+{
+  if (this->hostname)  free(this->hostname);
+  this->hostname = strdup(hostname);
+  this->port = port;
+  connect();
+}
+
 /** Disconnect socket. */
 void
 FawkesNetworkClient::disconnect()
@@ -402,6 +450,8 @@ FawkesNetworkClient::disconnect()
   recv_slave_alive = false;
   delete s;
   s = NULL;
+
+  connection_died();
 }
 
 

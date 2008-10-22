@@ -26,7 +26,7 @@ else
   LDFLAGS_libfawkesnetcomm += $(LDFLAGS_AVAHI)
 endif
 ifneq ($(HAVE_LIBCRYPTO),1)
-  ERROR_TARGETS += error_libcrypto
+  WARN_TARGETS += warning_libcrypto
 else
   CFLAGS += $(shell $(PKGCONFIG) --cflags $(LIBCRYPTO_PKG))
   LDFLAGS_libfawkesnetcomm += $(shell $(PKGCONFIG) --libs $(LIBCRYPTO_PKG))
@@ -37,10 +37,9 @@ all: $(WARN_TARGETS) $(ERROR_TARGETS)
 .PHONY: warn_avahi
 warn_avahi:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting mDNS/DNS-SD support$(TNORMAL) (Avahi not installed)"
-.PHONY: error_libcrypto
-error_libcrypto:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)netcomm cannot be built$(TNORMAL) (No OpenSSL/libcrypto installed)"
-	$(SILENT)exit 1
+.PHONY: warning_libcrypto
+warning_libcrypto:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Building WorldInfo proto without encryption$(TNORMAL) (No OpenSSL/libcrypto installed)"
 endif
 
 LIBS_libfawkesnetcomm = fawkescore fawkesutils

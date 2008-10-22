@@ -25,7 +25,11 @@
 
 #include <core/exceptions/software.h>
 #include <netcomm/worldinfo/decrypt.h>
-#include <openssl/evp.h>
+#ifdef HAVE_LIBCRYPTO
+#  include <openssl/evp.h>
+#else
+#  include <cstring>
+#endif
 
 namespace fawkes {
 
@@ -122,11 +126,7 @@ WorldInfoMessageDecryptor::decrypt()
     throw MissingParameterException("Buffer(s) not set for decryption");
   }
 
-  /* Plain-text copy-through for debugging.
-  memcpy(plain_buffer, crypt_buffer, crypt_buffer_length);
-  return crypt_buffer_length;
-  */
-
+#ifdef HAVE_LIBCRYPTO
   EVP_CIPHER_CTX ctx;
   if ( ! EVP_DecryptInit(&ctx, EVP_aes_128_ecb(), key, iv) ) {
     throw MessageDecryptionException("Could not initialize cipher context");
@@ -146,6 +146,11 @@ WorldInfoMessageDecryptor::decrypt()
   outl += plen;
 
   return outl;
+#else
+  // Plain-text copy-through for debugging.
+  memcpy(plain_buffer, crypt_buffer, crypt_buffer_length);
+  return crypt_buffer_length;
+#endif
 }
 
 } // end namespace fawkes

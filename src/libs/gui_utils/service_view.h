@@ -43,7 +43,7 @@ class ServiceView
   
  protected:
   
-  class ServiceRecord : public Gtk::TreeModelColumnRecord
+  class ServiceRecord : public Gtk::TreeModel::ColumnRecord
     {
     public:
       ServiceRecord()
@@ -52,6 +52,7 @@ class ServiceView
 	  add(type);
 	  add(domain);
 	  add(hostname);
+	  add(ipaddr);
 	  add(port);
 	}
       
@@ -59,6 +60,7 @@ class ServiceView
       Gtk::TreeModelColumn<Glib::ustring> type;      /**< The type of the service */
       Gtk::TreeModelColumn<Glib::ustring> domain;    /**< The domain of the service */
       Gtk::TreeModelColumn<Glib::ustring> hostname;  /**< The name of the host the service is running on */
+      Gtk::TreeModelColumn<Glib::ustring> ipaddr;    /**< The IP address as string of the host the service is running on */
       Gtk::TreeModelColumn<unsigned short> port;     /**< The port the service is running on */
     };
 
@@ -100,7 +102,8 @@ class ServiceView
     std::string type;      /**< the type of the new service */
     std::string domain;    /**< the domain of the new service */
     std::string hostname;  /**< the hostname of the new service */
-    unsigned short port;   /**< the port the new serice is running on */
+    std::string ipaddr;    /**< the IP address of the new service */
+    unsigned short port;   /**< the port the new service is running on */
   };
 
   struct ServiceRemovedRecord

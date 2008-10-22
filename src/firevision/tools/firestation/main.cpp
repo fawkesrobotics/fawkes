@@ -33,7 +33,12 @@ int main(int argc, char** argv)
   try
     {
       Gtk::Main kit(argc, argv);
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
       Glib::RefPtr<Gnome::Glade::Xml> refXml = Gnome::Glade::Xml::create(RESDIR"/glade/firestation/firestation.glade");
+#else
+      std::auto_ptr<Gnome::Glade::XmlError> error;
+      Glib::RefPtr<Gnome::Glade::Xml> refXml = Gnome::Glade::Xml::create(RESDIR"/glade/firestation/firestation.glade", "", "", error);
+#endif
       Firestation firestation(refXml);
       kit.run( firestation.get_window() );
       return 0;

@@ -314,8 +314,8 @@ Thread::operator=(const Thread &t)
  * this thread does not automatically imply that it will run. If it belongs
  * to a group of threads in a ThreadList and any of the other threads fail
  * to initialize then no thread from this group is run and thus this thread
- * will never run. So you should not do any initialization that cannot be
- * undone in the destructor! finalize() will not be called in that case.
+ * will never run. In that situation finalize() is called for this very
+ * instance, prepare_finalize() however is not called.
  *
  * @see Aspects
  */

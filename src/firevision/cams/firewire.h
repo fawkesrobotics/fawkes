@@ -94,6 +94,10 @@ class FirewireCamera : public Camera, public CameraControl
   virtual void           white_balance(unsigned int *ub, unsigned int *vr);
   virtual void           set_white_balance(unsigned int ub, unsigned int vr);
 
+  virtual void           parse_set_focus(const char *focus);
+  virtual void           parse_set_white_balance(const char *white_balance);
+  virtual void           parse_set_shutter(const char *shutter);
+
   virtual uint64_t       guid() const;
   virtual const char *   model() const;
 

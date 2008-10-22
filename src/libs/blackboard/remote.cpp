@@ -187,7 +187,7 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
     if ( error == BB_ERR_WRITER_EXISTS ) {
       throw BlackBoardWriterActiveException(identifier, type);
     } else {
-      throw Exception("Could not open inteface");
+      throw Exception("Could not open interface");
     }
   }
 

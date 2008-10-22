@@ -88,10 +88,8 @@ CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP)
 CFLAGS_BASE      = $(CFLAGS_MINIMUM)
 LDFLAGS_BASE     = -L$(LIBDIR) -rdynamic $(LDFLAGS_OPENMP)
 LDFLAGS_SHARED   = -shared
-ifeq ($(GCC_USE_OPENMP),1)
-  CFLAGS_OPENMP  = -fopenmp
-  LDFLAGS_OPENMP = -lgomp
-endif
+CFLAGS_OPENMP  = $(if $(filter 1,$(firstword $(GCC_USE_OPENMP))),-fopenmp)
+LDFLAGS_OPENMP = $(if $(filter 1,$(firstword $(GCC_USE_OPENMP))),-lgomp)
 ifeq ($(OS),FreeBSD)
   ifeq ($(wildcard /usr/local/include/strfunc.h),)
     $(error libstrfunc is needed on FreeBSD, install devel/libstrfunc!)

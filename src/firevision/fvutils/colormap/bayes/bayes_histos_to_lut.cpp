@@ -500,7 +500,7 @@ BayesHistosToLut::calculateLutValues( bool penalty )
 	 count_ball, count_field, count_line, count_robot, count_goal, count_background, count_unknown);
 
   if ( penalty ) {
-    Histogram *histo_bg   = histograms.at( H_BACKGROUND );
+    Histogram *histo_bg   = histograms[H_BACKGROUND];
     if ( histo_bg->get_num_undos() >= 2 ) {
       histo_bg->undo();
       histo_bg->switch_undo( old_undo );

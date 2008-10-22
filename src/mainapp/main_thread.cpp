@@ -76,10 +76,6 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 
   __argp = argp;
 
-  /* Config stuff */
-  __config = new SQLiteConfiguration(CONFDIR);
-  __config->load(__argp->arg("c"), __argp->arg("d"));
-
   /* Logging stuff */
   const char *tmp;
   Logger::LogLevel log_level = Logger::LL_DEBUG;
@@ -127,6 +123,10 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 
   __multi_logger->set_loglevel(log_level);
   LibLogger::init(__multi_logger);
+
+  /* Config stuff */
+  __config = new SQLiteConfiguration(CONFDIR);
+  __config->load(__argp->arg("c"), __argp->arg("d"));
 
   /* Clock */
   __clock = Clock::instance();

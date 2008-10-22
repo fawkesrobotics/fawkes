@@ -39,7 +39,16 @@ int main(int argc, char** argv)
   try
     {
       Gtk::Main kit(argc, argv);
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
       Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/netlog_monitor/netlog_monitor.glade");
+#else
+      std::auto_ptr<Gnome::Glade::XmlError> error;
+      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/netlog_monitor/netlog_monitor.glade", "", "", error);
+      if (error.get()) {
+        throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
+      }
+#endif
+			      
       NetLogMonitor netlog(ref_xml);
       backend = new NetLogMonitorBackendThread(&netlog);
       netlog.register_backend(backend);

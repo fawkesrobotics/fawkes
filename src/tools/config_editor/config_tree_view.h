@@ -55,7 +55,7 @@ class ConfigTreeView : public Gtk::TreeView
   void set_value(const char* path, const char* type, bool is_default, float value);
   void set_value(const char* path, const char* type, bool is_default, std::string value);
 
-  virtual bool on_button_press_event(GdkEventButton* event);
+  virtual bool on_button_press_event_custom(GdkEventButton* event);
   virtual void on_menu_edit_selected();
   virtual void on_menu_add_selected();
   virtual void on_menu_remove_selected();

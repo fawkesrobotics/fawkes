@@ -25,6 +25,11 @@
 
 #include <cams/v4l2.h>
 
+#include <core/exception.h>
+#include <core/exceptions/software.h>
+#include <utils/logging/liblogger.h>
+#include <fvutils/system/camargp.h>
+
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
@@ -32,11 +37,7 @@
 #include <cstring>
 #include <cerrno>
 #include <cstdlib>
-
-#include <core/exception.h>
-#include <core/exceptions/software.h>
-#include <utils/logging/liblogger.h>
-#include <fvutils/system/camargp.h>
+#include <linux/version.h>
 
 using std::cout;
 using std::endl;
@@ -1456,6 +1457,7 @@ V4L2Camera::print_info()
         cout << "button";
         break;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
       case V4L2_CTRL_TYPE_INTEGER64:
         cout << "int64";
         break;
@@ -1463,6 +1465,7 @@ V4L2Camera::print_info()
       case V4L2_CTRL_TYPE_CTRL_CLASS:
         cout << "ctrl_class";
         break;
+#endif
     }
     cout << ")" << endl;
 
@@ -1515,18 +1518,25 @@ V4L2Camera::print_info()
 
       case V4L2_CTRL_TYPE_MENU:
         cout << "menu [def " << queryctrl.default_value << "]";
+        break;
 
       case V4L2_CTRL_TYPE_BOOLEAN:
         cout << "bool [def " << queryctrl.default_value << "]";
+        break;
 
       case V4L2_CTRL_TYPE_BUTTON:
         cout << "button";
+        break;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
       case V4L2_CTRL_TYPE_INTEGER64:
         cout << "int64";
+	break;
 
       case V4L2_CTRL_TYPE_CTRL_CLASS:
         cout << "ctrl_class";
+	break;
+#endif
     }
     cout << ")" << endl;
 

@@ -78,7 +78,16 @@ int main(int argc, char** argv)
   try
     {
       Gtk::Main kit(argc, argv);
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
       Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/worldinfo_viewer/worldinfo_viewer.glade");
+#else
+      std::auto_ptr<Gnome::Glade::XmlError> error;
+      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/worldinfo_viewer/worldinfo_viewer.glade", "", "", error);
+      if (error.get()) {
+        throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
+      }
+#endif
+			      
       WorldInfoViewer viewer(ref_xml, data_container);
       backend_thread->new_worldinfo_data().connect( sigc::mem_fun(viewer, &WorldInfoViewer::redraw_field ) );
       backend_thread->new_gamestate_data().connect( sigc::mem_fun(viewer, &WorldInfoViewer::gamestate_changed ) );

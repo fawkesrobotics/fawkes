@@ -42,7 +42,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_lua warning_tolua
 warning_lua:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Skiller Plugin$(TNORMAL) (Lua >= $(LUA_MINVERSION) not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Skiller Plugin$(TNORMAL) (Lua >= $(LUA_VERSION) not installed)"
 
 warning_tolua:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Skiller Plugin$(TNORMAL) (tolua++[-devel] not installed)"

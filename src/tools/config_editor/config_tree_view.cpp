@@ -111,6 +111,8 @@ ConfigTreeView::ConfigTreeView( BaseObjectType* cobject,
 
   m_config = NULL;
   m_own_config = false;
+
+  signal_button_press_event().connect(sigc::mem_fun(*this, &ConfigTreeView::on_button_press_event_custom));
 }
 
 /** Destructor. */
@@ -361,10 +363,8 @@ ConfigTreeView::get_iter(const char* p)
  * @return true if signal has been handled, false otherwise
  */
 bool
-ConfigTreeView::on_button_press_event(GdkEventButton* event)
+ConfigTreeView::on_button_press_event_custom(GdkEventButton* event)
 {
-  bool ret_val = TreeView::on_button_press_event(event);
-
   if (event->type == GDK_2BUTTON_PRESS)
     {
       edit_entry( get_selection()->get_selected() );
@@ -374,7 +374,7 @@ ConfigTreeView::on_button_press_event(GdkEventButton* event)
       m_menu.popup(event->button, event->time);
     }
 
-  return ret_val;
+  return false;
 }
 
 /** Signal handler that is called when the 'edit' entry is selected

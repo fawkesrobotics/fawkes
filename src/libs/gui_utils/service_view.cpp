@@ -12,20 +12,23 @@
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
  *
- *  Read the full text in the LICENSE.GPL file in the doc directory.
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
 #include <gui_utils/service_view.h>
 #include <netcomm/dns-sd/avahi_thread.h>
 
-#include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 using namespace std;
 using namespace fawkes;
@@ -153,10 +156,13 @@ ServiceView::service_added( const char* name,
 			    int flags )
 {
   ServiceAddedRecord s;
+  char ipaddr[INET_ADDRSTRLEN];
+  struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
   s.name = string(name);
   s.type = string(type);
   s.domain = string(domain);
   s.hostname = string(host_name);
+  s.ipaddr = inet_ntop(AF_INET, &(saddr->sin_addr), ipaddr, sizeof(ipaddr));
   s.port = port;
 
   m_added_services.push_locked(s);
@@ -190,11 +196,12 @@ ServiceView::on_service_added()
       ServiceAddedRecord& s  = m_added_services.front();
 
       Gtk::TreeModel::Row row = *m_service_list->append();
-      
+
       row[m_service_record.name]     = s.name;
       row[m_service_record.type]     = s.type;
       row[m_service_record.domain]   = s.domain;
       row[m_service_record.hostname] = s.hostname;
+      row[m_service_record.ipaddr]   = s.ipaddr;
       row[m_service_record.port]     = s.port;
 
       m_added_services.pop();

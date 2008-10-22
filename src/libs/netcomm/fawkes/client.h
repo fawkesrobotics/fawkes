@@ -53,6 +53,7 @@ class FawkesNetworkClient
  friend class FawkesNetworkClientSendThread;
  friend class FawkesNetworkClientRecvThread;
  public:
+ FawkesNetworkClient();
  FawkesNetworkClient(const char *hostname, unsigned short int port);
  FawkesNetworkClient(unsigned int id, const char *hostname, 
 		     unsigned short int port);
@@ -60,6 +61,7 @@ class FawkesNetworkClient
 
   void connect();
   void disconnect();
+  void connect(const char *hostname, unsigned short int port);
 
   void enqueue(FawkesNetworkMessage *message);
   void enqueue_and_wait(FawkesNetworkMessage *message);
