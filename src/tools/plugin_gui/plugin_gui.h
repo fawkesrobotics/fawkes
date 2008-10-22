@@ -28,7 +28,10 @@
 #include <gtkmm.h>
 #include <libglademm/xml.h>
 
-class PluginGuiBackendThread;
+class PluginTreeView;
+namespace fawkes {
+  class ServiceSelectorCBE;
+}
 
 class PluginGui : public Gtk::Window
 {
@@ -38,70 +41,15 @@ class PluginGui : public Gtk::Window
 
   Gtk::Window& get_window() const;
 
-  void signal_update_status();
-  void signal_update_list();
-  void signal_update_hosts();
-  void signal_update_connection();
-
-  void register_backend(PluginGuiBackendThread* backend);
-
  private:
-  class PluginRecord : public Gtk::TreeModelColumnRecord
-  {
-  public:
-    PluginRecord() 
-      { 
-	add(m_index);
-	add(m_name);
-	add(m_status);
-      }
-    
-    Gtk::TreeModelColumn<int> m_index;
-    Gtk::TreeModelColumn<Glib::ustring> m_name;
-    Gtk::TreeModelColumn<bool> m_status;
-  };
-
-  class HostRecord : public Gtk::TreeModelColumnRecord
-  {
-  public:
-    HostRecord() 
-      { 
-	add(m_index);
-	add(m_host);
-      }
-    
-    Gtk::TreeModelColumn<int> m_index;
-    Gtk::TreeModelColumn<Glib::ustring> m_host;
-  };
-
-  // signal handler
-  void clicked_connect();
-  void changed_host();
-  void toggled_status(const Glib::ustring path);
-
-  void update_status();
-  void update_list();
-  void update_hosts();
-  void update_connection();
+  void on_connection_established();
 
   // widgets
   Gtk::Window* m_wnd_main;
-  Gtk::ComboBoxEntry* m_cbe_hosts;
-  Gtk::Button* m_btn_connect;
-  Gtk::TreeView* m_trv_plugins;
+  PluginTreeView* m_trv_plugins;
   Gtk::Statusbar* m_stb_status;
-
-  Glib::Dispatcher m_signal_update_status;
-  Glib::Dispatcher m_signal_update_list;
-  Glib::Dispatcher m_signal_update_hosts;
-  Glib::Dispatcher m_signal_update_connection;
-
-  PluginGuiBackendThread* m_backend;
-
-  Glib::RefPtr<Gtk::ListStore> m_plugin_list;
-  Glib::RefPtr<Gtk::ListStore> m_host_list;
-  PluginRecord m_plugin_record;
-  HostRecord m_host_record;
+  
+  fawkes::ServiceSelectorCBE* m_service_selector;
 };
 
 #endif /* __TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H_ */

@@ -24,19 +24,13 @@
 
 #include <core/exception.h>
 #include <tools/plugin_gui/plugin_gui.h>
-#include <tools/plugin_gui/backend_thread.h>
 #include <libglademm/xml.h>
 #include <iostream>
 
 using namespace std;
-using namespace fawkes;
 
 int main(int argc, char** argv)
 {
-  PluginGuiBackendThread* backend = 0;
-
-  Thread::init_main();
-
   try
     {
       Gtk::Main kit(argc, argv);
@@ -51,16 +45,12 @@ int main(int argc, char** argv)
 #endif
 			
       PluginGui pt_gui(refXml);
-      backend = new PluginGuiBackendThread(&pt_gui);
-      pt_gui.register_backend(backend);
       kit.run( pt_gui.get_window() );
     }
   catch (std::exception const& e)
     {
       std::cerr << "Error: " << e.what() << std::endl;
     }
-
-  Thread::destroy_main();
 
   return 0;
 }

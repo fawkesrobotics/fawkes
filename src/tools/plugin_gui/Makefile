@@ -22,10 +22,10 @@ include $(BASEDIR)/etc/buildsys/ext/gmsl
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_pt_gui = fawkescore fawkesutils fawkesnetcomm fawkesmainappmsgs
+LIBS_pt_gui = fawkescore fawkesutils fawkesnetcomm fawkesmainappmsgs fawkesguiutils
 OBJS_pt_gui = main.o			\
 	      plugin_gui.o		\
-	      backend_thread.o
+	      plugin_tree_view.o
 OBJS_all = $(OBJS_pt_gui)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
