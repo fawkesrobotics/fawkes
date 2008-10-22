@@ -188,6 +188,8 @@ PlayerClientThread::open_player_proxies()
 	  proxy = new Position2dProxy(__client, i->addr.index);
 	} else if ( iftype == "bumper" ) {
 	  proxy = new BumperProxy(__client, i->addr.index);
+	} else if ( iftype == "laser" ) {
+	  proxy = new LaserProxy(__client, i->addr.index);
 	} else {
 	  logger->log_warn(name(), "Unknown interface type %s, ignoring", iftype.c_str());
 	}

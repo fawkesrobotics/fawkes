@@ -37,8 +37,9 @@ ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
   endif
 .PHONY: warning_playercc
-warning_libxmlpp:
+warning_playercc:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting player plugin$(TNORMAL) (libplayerc++ not installed)"
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

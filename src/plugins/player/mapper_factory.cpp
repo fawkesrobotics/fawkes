@@ -25,9 +25,11 @@
 #include "mapper_factory.h"
 #include "position_mapper.h"
 #include "motor_mapper.h"
+#include "laser_mapper.h"
 
 #include <interfaces/object.h>
 #include <interfaces/motor.h>
+#include <interfaces/laser360.h>
 #include <libplayerc++/playerc++.h>
 
 using namespace PlayerCc;
@@ -59,6 +61,8 @@ PlayerMapperFactory::create_mapper(std::string varname,
   if ( (rv = try_create<ObjectPositionInterface, Position2dProxy, PlayerPositionMapper>(varname, interface, proxy)) != NULL ) {
     return rv;
   } else if ( (rv = try_create<MotorInterface, Position2dProxy, PlayerMotorPositionMapper>(varname, interface, proxy)) != NULL ) {
+    return rv;
+  } else if ( (rv = try_create<Laser360Interface, LaserProxy, PlayerLaserMapper>(varname, interface, proxy)) != NULL ) {
     return rv;
   } else {
     throw Exception("Unknown mapping, don't know how to map Fawkes interface %s "
