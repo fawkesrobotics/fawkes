@@ -149,6 +149,7 @@ class Interface
   struct interface_fieldinfo_t {
     interface_fieldtype_t    type;	/**< type of this field */
     const char              *name;	/**< Name of this field */
+    size_t                   length;	/**< Length of field (array, string) */
     void                    *value;	/**< Current value of this field */
     interface_fieldinfo_t   *next;	/**< next field, NULL if last */
   };
@@ -174,6 +175,7 @@ class Interface
     const char *           get_name() const;
     const void *           get_value() const;
     const char *           get_value_string();
+    size_t                 get_length() const;
     bool                   get_bool() const;
     int                    get_int() const;
     unsigned int           get_uint() const;
@@ -198,7 +200,8 @@ class Interface
   virtual bool  message_valid(const Message *message) const = 0;
 
   void set_hash(unsigned char ihash[__INTERFACE_HASH_SIZE]);
-  void add_fieldinfo(interface_fieldtype_t type, const char *name, void *value);
+  void add_fieldinfo(interface_fieldtype_t type, const char *name,
+		     size_t length, void *value);
 
   void         *data_ptr;
   unsigned int  data_size;

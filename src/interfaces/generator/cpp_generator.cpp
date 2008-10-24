@@ -517,32 +517,36 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 
 
     for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
-      if ( (*i).getType() == "bool" ) {
-	fprintf(f, "  add_fieldinfo(Interface::IFT_BOOL, \"%s\", &data->%s);\n",
-		(*i).getName().c_str(), (*i).getName().c_str());
-      } else if ( (*i).getType() == "int" ) {
-	fprintf(f, "  add_fieldinfo(Interface::IFT_INT, \"%s\", &data->%s);\n",
-		(*i).getName().c_str(), (*i).getName().c_str());
-      } else if ( (*i).getType() == "unsigned int" ) {
-	fprintf(f, "  add_fieldinfo(Interface::IFT_UINT, \"%s\", &data->%s);\n",
-		(*i).getName().c_str(), (*i).getName().c_str());
-      } else if ( (*i).getType() == "long int" ) {
-	fprintf(f, "  add_fieldinfo(Interface::IFT_LONGINT, \"%s\", &data->%s);\n",
-		(*i).getName().c_str(), (*i).getName().c_str());
-      } else if ( (*i).getType() == "unsigned long int" ) {
-	fprintf(f, "  add_fieldinfo(Interface::IFT_LONGUINT, \"%s\", &data->%s);\n",
-		(*i).getName().c_str(), (*i).getName().c_str());
-      } else if ( (*i).getType() == "float" ) {
-	fprintf(f, "  add_fieldinfo(Interface::IFT_FLOAT, \"%s\", &data->%s);\n",
-		(*i).getName().c_str(), (*i).getName().c_str());
-      } else if ( (*i).getType() == "char" ) {
-	if ( i->getLengthValue() == 0 ) {
-	  fprintf(f, "  add_fieldinfo(Interface::IFT_STRING, \"%s\", &data->%s);\n",
-		  (*i).getName().c_str(), (*i).getName().c_str());
-	} else {
-	  fprintf(f, "  add_fieldinfo(Interface::IFT_STRING, \"%s\", data->%s);\n",
-		  (*i).getName().c_str(), (*i).getName().c_str());
+      const char *type = "";
+      const char *dataptr = "&";
+      bool do_print = true;
+
+      if ( i->getType() == "bool" ) {
+	type = "BOOL";
+      } else if ( i->getType() == "int" ) {
+	type = "INT";
+      } else if ( i->getType() == "unsigned int" ) {
+	type = "UINT";
+      } else if ( i->getType() == "long int" ) {
+	type = "LONGINT";
+      } else if ( i->getType() == "unsigned long int" ) {
+	type = "LONGUINT";
+      } else if ( i->getType() == "float" ) {
+	type = "FLOAT";
+      } else if ( i->getType() == "char" ) {
+	type = "STRING";
+	if ( i->getLengthValue() > 0 ) {
+	  dataptr = "";
 	}
+      } else {
+	do_print = false;
+      }
+
+      if (do_print) {
+	fprintf(f, "  add_fieldinfo(Interface::IFT_%s, \"%s\", %u, %sdata->%s);\n",
+		type, i->getName().c_str(),
+		(i->getLengthValue() > 0) ? i->getLengthValue() : 1,
+		dataptr, i->getName().c_str());
       }
     }
   } else {

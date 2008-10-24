@@ -217,18 +217,21 @@ Interface::set_hash(unsigned char ihash[__INTERFACE_HASH_SIZE])
  * of an interface.
  * @param type field type
  * @param name name of the field, this is referenced, not copied
+ * @param length length of the field
  * @param value pointer to the value in the data struct
  */
 void
-Interface::add_fieldinfo(interface_fieldtype_t type, const char *name, void *value)
+Interface::add_fieldinfo(interface_fieldtype_t type, const char *name,
+			 size_t length, void *value)
 {
   interface_fieldinfo_t *infol = __info_list;
   interface_fieldinfo_t *newinfo = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
 
-  newinfo->type  = type;
-  newinfo->name  = name;
-  newinfo->value = value;
-  newinfo->next  = NULL;
+  newinfo->type   = type;
+  newinfo->name   = name;
+  newinfo->length = length;
+  newinfo->value  = value;
+  newinfo->next   = NULL;
 
   if ( infol == NULL ) {
     // first entry
@@ -1081,6 +1084,20 @@ Interface::FieldIterator::get_value() const
 }
 
 
+/** Get length of current field.
+ * @return length of field
+ */
+size_t
+Interface::FieldIterator::get_length() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get length of end element");
+  } else {
+    return __infol->length;
+  }
+}
+
+
 /** Get value of current field as string.
  * @return field value as string
  */
@@ -1091,28 +1108,55 @@ Interface::FieldIterator::get_value_string()
     throw NullPointerException("Cannot get value of end element");
   } else {
     if ( __value_string == NULL ) {
-      switch (__infol->type) {
-      case IFT_BOOL:
-	asprintf(&__value_string, "%s", (bool)(*((bool *)__infol->value)) ? "true" : "false");
-	break;
-      case IFT_INT:
-	asprintf(&__value_string, "%i", *((int *)__infol->value));
-	break;
-      case IFT_UINT:
-	asprintf(&__value_string, "%u", *((unsigned int *)__infol->value));
-	break;
-      case IFT_LONGINT:
-	asprintf(&__value_string, "%li", *((long int *)__infol->value));
-	break;
-      case IFT_LONGUINT:
-	asprintf(&__value_string, "%lu", *((long unsigned int *)__infol->value));
-	break;
-      case IFT_FLOAT:
-	asprintf(&__value_string, "%f", *((float *)__infol->value));
-	break;
-      case IFT_STRING:
-	asprintf(&__value_string, "%s", (const char *)__infol->value);
-	break;
+      if ( __infol->length == 0 )  throw OutOfBoundsException("Field length out of bounds",
+							      __infol->length, 1, (unsigned int)0xFFFFFFFF);
+
+      char *tmp1 = strdup("");
+      char *tmp2;
+
+      if ( __infol->type != IFT_STRING ) {
+	for (size_t i = 0; i < __infol->length; ++i) {
+	  switch (__infol->type) {
+	  case IFT_BOOL:
+	    asprintf(&tmp2, "%s%s", tmp1, (((bool *)__infol->value)[i]) ? "true" : "false");
+	    break;
+	  case IFT_INT:
+	    asprintf(&tmp2, "%s%i", tmp1, ((int *)__infol->value)[i]);
+	    break;
+	  case IFT_UINT:
+	    asprintf(&tmp2, "%s%u", tmp1, ((unsigned int *)__infol->value)[i]);
+	    break;
+	  case IFT_LONGINT:
+	    asprintf(&tmp2, "%s%li", tmp1, ((long int *)__infol->value)[i]);
+	    break;
+	  case IFT_LONGUINT:
+	    asprintf(&tmp2, "%s%lu", tmp1, ((long unsigned int *)__infol->value)[i]);
+	    break;
+	  case IFT_FLOAT:
+	    asprintf(&tmp2, "%s%f", tmp1, ((float *)__infol->value)[i]);
+	    break;
+	  case IFT_STRING:
+	    // cannot happen, caught with surrounding if statement
+	    break;
+	  }
+	  
+	  free(tmp1);
+	  tmp1 = tmp2;
+	  if ( (__infol->length > 1) && (i < __infol->length - 1) ) {
+	    asprintf(&tmp2, "%s, ", tmp1);
+	    free(tmp1);
+	    tmp1 = tmp2;
+	  }
+	}
+
+	__value_string = tmp1;
+      } else {
+	// it's a string, or a small number
+	if ( __infol->length > 1 ) {
+	  asprintf(&__value_string, "%s", (const char *)__infol->value);
+	} else {
+	  asprintf(&__value_string, "%c", *((const char *)__infol->value));
+	}
       }
     }
     return __value_string;

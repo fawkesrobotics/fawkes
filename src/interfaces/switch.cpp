@@ -51,12 +51,12 @@ SwitchInterface::SwitchInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (SwitchInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_BOOL, "enabled", &data->enabled);
-  add_fieldinfo(Interface::IFT_FLOAT, "value", &data->value);
-  add_fieldinfo(Interface::IFT_FLOAT, "history", &data->history);
-  add_fieldinfo(Interface::IFT_UINT, "short_activations", &data->short_activations);
-  add_fieldinfo(Interface::IFT_UINT, "long_activations", &data->long_activations);
-  add_fieldinfo(Interface::IFT_UINT, "activation_count", &data->activation_count);
+  add_fieldinfo(Interface::IFT_BOOL, "enabled", 1, &data->enabled);
+  add_fieldinfo(Interface::IFT_FLOAT, "value", 1, &data->value);
+  add_fieldinfo(Interface::IFT_FLOAT, "history", 1, &data->history);
+  add_fieldinfo(Interface::IFT_UINT, "short_activations", 1, &data->short_activations);
+  add_fieldinfo(Interface::IFT_UINT, "long_activations", 1, &data->long_activations);
+  add_fieldinfo(Interface::IFT_UINT, "activation_count", 1, &data->activation_count);
   unsigned char tmp_hash[] = {0xcb, 0xd2, 0x25, 0x8e, 0x3e, 0x18, 0xd6, 0x3a, 0xe0, 0x12, 0x73, 0x27, 0x26, 0x75, 0x95, 0x56};
   set_hash(tmp_hash);
 }

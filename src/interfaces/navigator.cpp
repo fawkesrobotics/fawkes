@@ -58,13 +58,13 @@ NavigatorInterface::NavigatorInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (NavigatorInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_FLOAT, "x", &data->x);
-  add_fieldinfo(Interface::IFT_FLOAT, "y", &data->y);
-  add_fieldinfo(Interface::IFT_FLOAT, "dest_x", &data->dest_x);
-  add_fieldinfo(Interface::IFT_FLOAT, "dest_y", &data->dest_y);
-  add_fieldinfo(Interface::IFT_FLOAT, "dest_dist", &data->dest_dist);
-  add_fieldinfo(Interface::IFT_UINT, "msgid", &data->msgid);
-  add_fieldinfo(Interface::IFT_BOOL, "final", &data->final);
+  add_fieldinfo(Interface::IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(Interface::IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(Interface::IFT_FLOAT, "dest_x", 1, &data->dest_x);
+  add_fieldinfo(Interface::IFT_FLOAT, "dest_y", 1, &data->dest_y);
+  add_fieldinfo(Interface::IFT_FLOAT, "dest_dist", 1, &data->dest_dist);
+  add_fieldinfo(Interface::IFT_UINT, "msgid", 1, &data->msgid);
+  add_fieldinfo(Interface::IFT_BOOL, "final", 1, &data->final);
   unsigned char tmp_hash[] = {0xbc, 0x36, 0xff, 0x5, 0x28, 0xbf, 0x57, 0x98, 0x24, 0x5e, 0x3e, 0xc8, 0x29, 0x49, 0x46, 0xba};
   set_hash(tmp_hash);
 }

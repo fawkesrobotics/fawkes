@@ -51,7 +51,7 @@ SpeechSynthInterface::SpeechSynthInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (SpeechSynthInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_STRING, "text", data->text);
+  add_fieldinfo(Interface::IFT_STRING, "text", 1024, data->text);
   unsigned char tmp_hash[] = {0xbf, 0xbe, 0x6b, 0x2f, 0x9e, 0x25, 0x6f, 0x5a, 0xd6, 0x43, 0x56, 0x8f, 0x1e, 0xc5, 0x6, 0x3e};
   set_hash(tmp_hash);
 }

@@ -49,10 +49,10 @@ KickerInterface::KickerInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (KickerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_INT, "num_kicks_left", &data->num_kicks_left);
-  add_fieldinfo(Interface::IFT_INT, "num_kicks_center", &data->num_kicks_center);
-  add_fieldinfo(Interface::IFT_INT, "num_kicks_right", &data->num_kicks_right);
-  add_fieldinfo(Interface::IFT_UINT, "current_intensity", &data->current_intensity);
+  add_fieldinfo(Interface::IFT_INT, "num_kicks_left", 1, &data->num_kicks_left);
+  add_fieldinfo(Interface::IFT_INT, "num_kicks_center", 1, &data->num_kicks_center);
+  add_fieldinfo(Interface::IFT_INT, "num_kicks_right", 1, &data->num_kicks_right);
+  add_fieldinfo(Interface::IFT_UINT, "current_intensity", 1, &data->current_intensity);
   unsigned char tmp_hash[] = {0xdc, 0xe9, 0x59, 0xc4, 0xc2, 0xd9, 0x46, 0x62, 0xd7, 0x78, 0x52, 0xb0, 0x6f, 0xb, 0x2c, 0x76};
   set_hash(tmp_hash);
 }
