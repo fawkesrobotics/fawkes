@@ -26,6 +26,8 @@
 #ifndef __UTILS_FILETYPE_H_
 #define __UTILS_FILETYPE_H_
 
+#include <core/exception.h>
+
 #include <magic.h>
 #include <string>
 
@@ -39,13 +41,35 @@ filetype_file(const char *filename)
 
   const char * res = magic_file( m, filename );
   if ( res == NULL ) {
-    res = magic_error( m );
+    fawkes::Exception e("Failed to determine file type of %s: %s", filename, magic_error(m));
+    magic_close(m);
+    throw e;
   }
 
   rv = res;
-
   magic_close( m );
 
+  return rv;
+}
+
+
+inline std::string
+mimetype_file(const char *filename)
+{
+  std::string rv;
+
+  magic_t m = magic_open( MAGIC_ERROR | MAGIC_MIME_TYPE );
+  magic_load( m, NULL );
+
+  const char * res = magic_file( m, filename );
+  if ( res == NULL ) {
+    fawkes::Exception e("Failed to determine mime type of %s: %s", filename, magic_error(m));
+    magic_close(m);
+    throw e;
+  }
+
+  rv = res;
+  magic_close(m);
   return rv;
 }
 

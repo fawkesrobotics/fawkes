@@ -1,8 +1,7 @@
-
 /***************************************************************************
- *  string_compare.h - Fawkes string compare utils
+ *  string_urlescape.h - Fawkes string URL escape utils
  *
- *  Created: Fri May 11 23:39:18 2007
+ *  Created: Fri Oct 24 09:31:39 2008
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -23,23 +22,47 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_MISC_STRING_COMPARE_H_
-#define __UTILS_MISC_STRING_COMPARE_H_
+#ifndef __UTILS_MISC_STRING_URLESCAPE_H_
+#define __UTILS_MISC_STRING_URLESCAPE_H_
 
 namespace fawkes {
 
 
-class StringEquality
+/** Transform hex to value.
+ * @param c character
+ * @return value of hex code as number
+ */
+int
+unhex(char c)
 {
- public:
-  bool operator()(const char *__s1, const char *__s2) const;
-};
+  return( c >= '0' && c <= '9' ? c - '0'
+	  : c >= 'A' && c <= 'F' ? c - 'A' + 10
+	  : c - 'a' + 10 );
+}
 
-class StringLess
+/** Remove URL hex escapes from s in place.
+ * @param s string to manipulate
+ */
+void
+hex_unescape( char *s )
 {
- public:
-  bool operator()(const char *__s1, const char *__s2) const;
-};
+  char	*p;
+
+  for ( p = s; *s != '\0'; ++s ) {
+    if ( *s == '%' ) {
+      if ( *++s != '\0' ) {
+	*p = unhex( *s ) << 4;
+      }
+      if ( *++s != '\0' ) {
+	*p++ += unhex( *s );
+      }
+    } else {
+      *p++ = *s;
+    }
+  }
+
+  *p = '\0';
+}
 
 
 } // end namespace fawkes
