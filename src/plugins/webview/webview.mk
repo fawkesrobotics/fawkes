@@ -1,8 +1,8 @@
 #*****************************************************************************
-#            Makefile Build System for Fawkes: Webview
+#           Makefile Build System for Fawkes: Webview Plugin Config
 #                            -------------------
-#   Created on Fri Oct 03 14:07:13 2 2008 (19th German Unity Day)
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Mon Oct 13 18:00:51 2008
+#   Copyright (C) 2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,17 +13,9 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys/config.mk
-
-CFLAGS  += $(CFLAGS_FCGI)
-LDFLAGS += $(LDFLAGS_FCGI)
-
-LIBS_webview = fawkescore fawkesutils fawkesnetcomm fawkesblackboard
-OBJS_webview = fawkeswebview.o
-
-OBJS_all =	$(OBJS_webview)
-BINS_all =	$(BINDIR)/webview
-
-include $(BASEDIR)/etc/buildsys/base.mk
+ifneq ($(wildcard $(SYSROOT)/usr/include/microhttpd.h),)
+  HAVE_LIBMICROHTTPD=1
+  CFLAGS_LIBMICROHTTPD  = -DHAVE_LIBMICROHTTPD
+  LDFLAGS_LIBMICROHTTPD = -lmicrohttpd
+endif
 

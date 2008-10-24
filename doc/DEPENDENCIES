@@ -65,9 +65,7 @@ All		cairomm			>= 1.4.4		optional
 
 All		glademm			>= 2.6.4		optional
 
-Fawkes Webview	lighttpd		>= 1.4.19		optional
-
-Fawkes Webview	fcgi			>= 2.4.0		optional
+Fawkes Webview	libmicrohttpd		>= 0.3.1		optional
 
 Fawkes/		OpenMP			>= 2.5			optional
 FireVision	(OpenMP spec 2.5, comes with GCC 4.2
