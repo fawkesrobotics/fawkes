@@ -35,7 +35,7 @@
 inline std::string
 fv_filetype_file(const char *filename)
 {
-  std::string rv = filetype_file(filename);
+  std::string rv = fawkes::filetype_file(filename);
 
   if ( rv == "data" ) {
     if ( FvRawReader::is_FvRaw(filename) ) {

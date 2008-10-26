@@ -39,10 +39,27 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-/** Constructor.
+/** Constructor (C++ string).
  * @param path path to parse
  */
 PathParser::PathParser(std::string &path)
+{
+  ctor(path);
+}
+
+
+/** Constructor (C string).
+ * @param path path to parse
+ */
+PathParser::PathParser(const char *path)
+{
+  std::string spath = path;
+  ctor(spath);
+}
+
+
+void
+PathParser::ctor(const std::string &path)
 {
   __abs_path  = false;
 

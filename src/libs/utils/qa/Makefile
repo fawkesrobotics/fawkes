@@ -45,6 +45,9 @@ LIBS_qa_utils_angle = fawkesutils
 OBJS_qa_utils_pathparser = qa_pathparser.o
 LIBS_qa_utils_pathparser = fawkesutils
 
+OBJS_qa_utils_filetype = qa_filetype.o
+LIBS_qa_utils_filetype = fawkesutils
+
 OBJS_all =	$(OBJS_test_plugin)			\
 		$(OBJS_qa_utils_plugin)			\
 		$(OBJS_qa_utils_ipc_shmem)		\
@@ -58,7 +61,8 @@ OBJS_all =	$(OBJS_test_plugin)			\
 		$(OBJS_qa_utils_time)			\
 		$(OBJS_qa_utils_timebug)		\
 		$(OBJS_qa_utils_angle)			\
-		$(OBJS_qa_utils_pathparser)
+		$(OBJS_qa_utils_pathparser)		\
+		$(OBJS_qa_utils_filetype)
 
 BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_ipc_shmem		\
@@ -71,7 +75,8 @@ BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_time			\
 		$(BINDIR)/qa_utils_timebug		\
 		$(BINDIR)/qa_utils_pathparser		\
-		$(BINDIR)/qa_utils_angle
+		$(BINDIR)/qa_utils_angle		\
+		$(BINDIR)/qa_utils_filetype
 
 ifeq ($(OS),Linux)
   BINS_all += $(BINDIR)/qa_utils_ipc_shmem_lowlevel

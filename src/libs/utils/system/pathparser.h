@@ -35,11 +35,15 @@ class PathParser : public std::vector<std::string>
 {
  public:
   PathParser(std::string &path);
+  PathParser(const char *path);
 
   void        print_debug();
   std::string path_as_string();
 
   bool        is_absolute() const;
+
+ private:
+  void        ctor(const std::string &path);
 
  private:
   bool __abs_path;

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  filetype.h - little utility to decide on filetype
+ *  qa_filetype.cpp - angle QA app
  *
- *  Generated: Tue Feb 23 13:49:38 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Oct 26 10:44:55
+ *  Copyright  2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -23,16 +23,17 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_FILETYPE_H_
-#define __UTILS_FILETYPE_H_
+#include <utils/system/filetype.h>
+#include <cstdio>
 
-#include <string>
+using namespace fawkes;
 
-namespace fawkes {
+int
+main(int argc, char **argv)
+{
+  printf("File type: %s\n", filetype_file(argv[0]).c_str());
+  printf("Mime type: %s\n", mimetype_file(argv[0]).c_str());
 
-std::string filetype_file(const char *filename);
-std::string mimetype_file(const char *filename);
-
+  return 0;
 }
 
-#endif
