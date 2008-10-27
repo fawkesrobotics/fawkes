@@ -79,6 +79,24 @@ namespace fawkes {
  * for whatever reason the thread is NOT cancelled or stopped. In that case
  * a CannotFinalizeThreadException is thrown.
  * @param t Thread to remove.
+ *
+ * @fn ThreadCollector::force_remove(ThreadList &tl) = 0
+ * Force removal of multiple threads.
+ * Remove all threads in the thread list from this collector. If there is
+ * a thread in the supplied thread list that has never been collected no
+ * error shall be thrown but this just be silently ignored.
+ *
+ * The threads are finalized, cancelled and joined. The result of the finalization
+ * is ignored and the thread is cancelled and joined in any case.
+ * @param tl list of threads to remove
+ *
+ * @fn ThreadCollector::force_remove(Thread *t) = 0
+ * Force removal of a single thread.
+ * Remove the thread from the internal thread list. If the thread has never
+ * been collected no error shall be thrown but just be silently ignored.
+ * The threads are finalized, cancelled and joined. The result of the finalization
+ * is ignored and the thread is cancelled and joined in any case.
+ * @param t Thread to remove.
  */
 
 /** Empty virtual destructor. */

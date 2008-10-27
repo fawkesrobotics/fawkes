@@ -41,6 +41,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <csignal>
+#include <cstdio>
 
 namespace fawkes {
 
@@ -697,6 +698,28 @@ void
 Thread::set_prepfin_conc_loop(bool concurrent)
 {
   __prepfin_conc_loop = concurrent;
+}
+
+
+/** Set name of thread.
+ * If you want a more descriptive thread name you can do so by calling this method
+ * in your thread's constructor, and only in the constructor.
+ * Use parameters similar to printf().
+ * @param format format string
+ */
+void
+Thread::set_name(const char *format, ...)
+{
+  va_list va;
+  va_start(va, format);
+  char *old_name = __name;
+  if (vasprintf(&__name, format, va) == -1) {
+    __name = old_name;
+    throw OutOfMemoryException("Could not set new thread name for '%s'", __name);
+  } else {
+    free(old_name);
+  }
+  va_end(va);
 }
 
 

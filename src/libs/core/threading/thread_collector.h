@@ -44,6 +44,9 @@ class ThreadCollector
   virtual void remove(ThreadList &tl)                                   = 0;
   virtual void remove(Thread *t)                                        = 0;
 
+  virtual void force_remove(fawkes::ThreadList &tl)                     = 0;
+  virtual void force_remove(fawkes::Thread *t)                          = 0;
+
 };
 
 

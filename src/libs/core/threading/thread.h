@@ -115,6 +115,8 @@ class Thread {
   void set_opmode(OpMode op_mode);
   void set_prepfin_conc_loop(bool concurrent);
 
+  void set_name(const char *format, ...);
+
   virtual void once();
   virtual void loop();
 
