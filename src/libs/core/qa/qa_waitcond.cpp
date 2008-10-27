@@ -1,11 +1,11 @@
 
 /***************************************************************************
- *  example_barrier.cpp - barrier example program
+ *  example_waitcond.cpp - wait condition example program
  *
- *  Created: Thu Sep 15 14:48:11 2006
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Mar 01 15:13:44 2008
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
+ *  $Id: example_barrier.cpp 210 2007-06-13 14:01:49Z tim $
  *
  ****************************************************************************/
 
@@ -26,35 +26,41 @@
 /// @cond EXAMPLES
 
 #include <core/threading/thread.h>
-#include <core/threading/barrier.h>
+#include <core/threading/wait_condition.h>
 
 #include <iostream>
 #include <string>
 
 using namespace std;
+using namespace fawkes;
 
-class ExampleBarrierThread : public Thread
+class ExampleWaitCondThread : public Thread
 {
  public:
-  ExampleBarrierThread(string pp,
-		       Barrier *barrier, unsigned int sleep_time)
-    : Thread("ExampleBarrierThread", Thread::OPMODE_CONTINUOUS)
+  ExampleWaitCondThread(string pp,
+		       WaitCondition *waitcond, unsigned int sleep_time)
+    : Thread("ExampleWaitCondThread", Thread::OPMODE_CONTINUOUS)
   {
     this->pp         = pp;
-    this->barrier    = barrier;
+    this->waitcond   = waitcond;
     this->sleep_time = sleep_time;
   }
 
   virtual void loop()
   {
-    usleep( sleep_time );
-    cout << pp << ": Waiting for barrier" << endl;
-    barrier->wait();
-    cout << pp << ": Barrier lifted" << endl;
+    if ( pp == "waiter" ) {
+      cout << pp << ": Waiting for waker" << endl;
+      waitcond->wait();
+    } else {
+      usleep( sleep_time );
+      cout << pp << ": Waking waiter" << endl;
+      waitcond->wake_all();
+      cout << pp << ": Woke waiter" << endl;
+    }
   }
 
  private:
-  Barrier *barrier;
+  WaitCondition *waitcond;
   unsigned int sleep_time;
   string pp;
 
@@ -64,25 +70,21 @@ class ExampleBarrierThread : public Thread
 int
 main(int argc, char **argv)
 {
-  Barrier *b = new Barrier(3);
+  WaitCondition *w = new WaitCondition();
 
-  ExampleBarrierThread *t1 = new ExampleBarrierThread("t1", b, 3424345);
-  ExampleBarrierThread *t2 = new ExampleBarrierThread("t2", b, 326545);
-  ExampleBarrierThread *t3 = new ExampleBarrierThread("t3", b, 6458642);
+  ExampleWaitCondThread *t1 = new ExampleWaitCondThread("waiter", w, 0);
+  ExampleWaitCondThread *t2 = new ExampleWaitCondThread("waker", w, 6458642);
 
   t1->start();
   t2->start();
-  t3->start();
 
   t1->join();
   t2->join();
-  t3->join();
 
   delete t1;
   delete t2;
-  delete t3;
 
-  delete b;
+  delete w;
 }
 
 

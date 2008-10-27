@@ -30,6 +30,8 @@
 #include <core/exceptions/software.h>
 #include <typeinfo>
 
+namespace fawkes {
+
 template <class Type>
 class RefCounter : public RefCount
 {
@@ -175,5 +177,6 @@ RefCounter<Type>::operator -> () const
   return const_cast<Type *>(p);
 }
 
+} // end namespace fawkes
 
 #endif

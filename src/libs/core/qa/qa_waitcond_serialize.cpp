@@ -32,6 +32,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace fawkes;
 
 /** Small example hread serializing with other threads using a wait condition.
  * Run the program and see them printing out numbers serialized.

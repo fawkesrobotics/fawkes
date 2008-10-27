@@ -31,6 +31,8 @@
 #include <iostream>
 #include <cstdarg>
 
+using namespace fawkes;
+
 class ExampleSmallException : public Exception
 {
  public:

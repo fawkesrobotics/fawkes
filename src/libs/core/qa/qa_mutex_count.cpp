@@ -32,6 +32,7 @@
 /// @cond EXAMPLES
 
 using namespace std;
+using namespace fawkes;
 
 #define WASTETIME  \
   for ( unsigned int i = 0; i < 1000000; i++) { \

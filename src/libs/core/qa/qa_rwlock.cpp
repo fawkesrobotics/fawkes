@@ -32,6 +32,7 @@
 #include <string>
 
 using namespace std;
+using namespace fawkes;
 
 /** Example writer thread, will aquire lock and increment
  * the value. Will print out a notice if it has
