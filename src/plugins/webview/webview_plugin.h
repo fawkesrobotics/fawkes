@@ -30,7 +30,7 @@
 class WebviewPlugin : public fawkes::Plugin
 {
  public:
-  WebviewPlugin();
+  WebviewPlugin(fawkes::Configuration *config);
 };
 
 #endif

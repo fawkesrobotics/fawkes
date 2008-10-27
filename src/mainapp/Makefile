@@ -37,15 +37,10 @@ ifeq ($(HAVE_AVAHI),1)
   CFLAGS += $(CFLAGS_AVAHI)
 endif
 
-LIBS_libfawkesmainappmsgs = fawkesnetcomm
-OBJS_libfawkesmainappmsgs = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*_message.cpp)))))
+LIBS_fawkes = fawkescore fawkesutils fawkesinterfaces fawkesblackboard fawkesnetcomm fawkesconfig fawkesplugin fawkesaspects
+OBJS_fawkes = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-LIBS_fawkes = fawkescore fawkesutils fawkesinterfaces fawkesblackboard fawkesnetcomm fawkesconfig fawkesaspects fawkesmainappmsgs
-OBJS_fawkes = $(filter-out $(OBJS_fawkesmainappmsgs),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
-
-OBJS_all =	$(OBJS_fawkes)			\
-		$(OBJS_fawkesmainappmsgs)
-LIBS_all =	$(LIBDIR)/libfawkesmainappmsgs.so
+OBJS_all =	$(OBJS_fawkes)
 BINS_all =	$(BINDIR)/fawkes
 
 include $(BASEDIR)/etc/buildsys/base.mk

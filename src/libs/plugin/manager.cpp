@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  plugin_manager.cpp - Fawkes plugin manager
+ *  manager.cpp - Fawkes plugin manager
  *
  *  Generated: Wed Nov 15 23:31:55 2006 (on train to Cologne)
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -23,13 +23,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <mainapp/plugin_manager.h>
-#include <mainapp/plugin_messages.h>
-#include <mainapp/plugin_list_message.h>
-#include <mainapp/thread_manager.h>
-#include <core/threading/thread_initializer.h>
+#include <plugin/manager.h>
+#include <plugin/net/messages.h>
+#include <plugin/net/list_message.h>
+#include <plugin/loader/plugin_loader.h>
+
 #include <core/plugin.h>
-#include <utils/plugin/plugin_loader.h>
+#include <core/threading/thread_collector.h>
+#include <core/threading/thread_initializer.h>
 #include <utils/logging/liblogger.h>
 #include <config/config.h>
 
@@ -43,9 +44,9 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-using namespace fawkes;
+namespace fawkes {
 
-/** @class FawkesPluginManager mainapp/plugin_manager.h
+/** @class PluginManager <plugin/manager.h>
  * Fawkes Plugin Manager.
  * This class provides a manager for the plugins used in fawkes. It can
  * load and unload modules.
@@ -64,20 +65,20 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param thread_manager thread manager plugin threads will be added to
+ * @param thread_collector thread manager plugin threads will be added to
  * and removed from appropriately.
  * @param config Fawkes configuration
  * @param meta_plugin_prefix Path prefix for meta plugins
  */
-FawkesPluginManager::FawkesPluginManager(FawkesThreadManager *thread_manager,
-					 fawkes::Configuration *config,
-					 const char *meta_plugin_prefix)
-  : Thread("FawkesPluginManager", Thread::OPMODE_WAITFORWAKEUP),
+PluginManager::PluginManager(ThreadCollector *thread_collector,
+			     Configuration *config,
+			     const char *meta_plugin_prefix)
+  : Thread("PluginManager", Thread::OPMODE_WAITFORWAKEUP),
     FawkesNetworkHandler(FAWKES_CID_PLUGINMANAGER)
 {
   plugins.clear();
-  this->thread_manager = thread_manager;
-  plugin_loader = new PluginLoader(PLUGINDIR);
+  this->thread_collector = thread_collector;
+  plugin_loader = new PluginLoader(PLUGINDIR, config);
   next_plugin_id = 1;
   __config = config;
   __meta_plugin_prefix = meta_plugin_prefix;
@@ -85,11 +86,11 @@ FawkesPluginManager::FawkesPluginManager(FawkesThreadManager *thread_manager,
 
 
 /** Destructor. */
-FawkesPluginManager::~FawkesPluginManager()
+PluginManager::~PluginManager()
 {
   // Unload all plugins
   for (rpit = plugins.rbegin(); rpit != plugins.rend(); ++rpit) {
-    thread_manager->force_remove((*rpit).second->threads());
+    thread_collector->force_remove((*rpit).second->threads());
     plugin_loader->unload( (*rpit).second );
   }
   plugins.clear();
@@ -99,12 +100,12 @@ FawkesPluginManager::~FawkesPluginManager()
 
 
 /** Set Fawkes network hub.
- * The hub will be used for network communication. The FawkesPluginManager
+ * The hub will be used for network communication. The PluginManager
  * is automatically added as handler to the hub for plugin messages.
  * @param hub Fawkes network hub
  */
 void
-FawkesPluginManager::set_hub(FawkesNetworkHub *hub)
+PluginManager::set_hub(FawkesNetworkHub *hub)
 {
   this->hub = hub;
   hub->add_handler( this );
@@ -118,8 +119,8 @@ FawkesPluginManager::set_hub(FawkesNetworkHub *hub)
  * all plugins is stored. Memory is allocated at this address and
  * has to be freed by the caller!
  */
-fawkes::PluginListMessage *
-FawkesPluginManager::list_avail()
+PluginListMessage *
+PluginManager::list_avail()
 {
   DIR* plugin_dir;
   struct dirent* dirp;
@@ -129,7 +130,7 @@ FawkesPluginManager::list_avail()
   PluginListMessage *m = new PluginListMessage();
 
   if ( NULL == (plugin_dir = opendir(PLUGINDIR)) ) {
-    LibLogger::log_error("FawkesPluginManager", "Opening Plugindir failed.");
+    LibLogger::log_error("PluginManager", "Opening Plugindir failed.");
     return m;
   }
 
@@ -161,8 +162,8 @@ FawkesPluginManager::list_avail()
   return m;
 }
 
-fawkes::PluginListMessage *
-FawkesPluginManager::list_loaded()
+PluginListMessage *
+PluginManager::list_loaded()
 {
   PluginListMessage *m = new PluginListMessage();
 
@@ -180,7 +181,7 @@ FawkesPluginManager::list_loaded()
 
 
 void
-FawkesPluginManager::send_load_failure(const char *plugin_name,
+PluginManager::send_load_failure(const char *plugin_name,
 				       unsigned int client_id)
 {
   plugin_load_failed_msg_t *r = (plugin_load_failed_msg_t *)calloc(1, sizeof(plugin_load_failed_msg_t));
@@ -191,7 +192,7 @@ FawkesPluginManager::send_load_failure(const char *plugin_name,
 
 
 void
-FawkesPluginManager::send_load_success(const char *plugin_name, unsigned int client_id)
+PluginManager::send_load_success(const char *plugin_name, unsigned int client_id)
 {
   plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
   strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
@@ -202,7 +203,7 @@ FawkesPluginManager::send_load_success(const char *plugin_name, unsigned int cli
 
 
 void
-FawkesPluginManager::send_unloaded(const char *plugin_name)
+PluginManager::send_unloaded(const char *plugin_name)
 {
   __subscribers.lock();
   for (__ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
@@ -213,7 +214,7 @@ FawkesPluginManager::send_unloaded(const char *plugin_name)
 
 
 void
-FawkesPluginManager::send_loaded(const char *plugin_name)
+PluginManager::send_loaded(const char *plugin_name)
 {
   __subscribers.lock();
   for (__ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
@@ -224,7 +225,7 @@ FawkesPluginManager::send_loaded(const char *plugin_name)
 
 
 void
-FawkesPluginManager::send_unload_failure(const char *plugin_name,
+PluginManager::send_unload_failure(const char *plugin_name,
 					 unsigned int client_id)
 {
   plugin_unload_failed_msg_t *r = (plugin_unload_failed_msg_t *)calloc(1, sizeof(plugin_unload_failed_msg_t));
@@ -235,7 +236,7 @@ FawkesPluginManager::send_unload_failure(const char *plugin_name,
 
 
 void
-FawkesPluginManager::send_unload_success(const char *plugin_name, unsigned int client_id)
+PluginManager::send_unload_success(const char *plugin_name, unsigned int client_id)
 {
   plugin_unloaded_msg_t *r = (plugin_unloaded_msg_t *)calloc(1, sizeof(plugin_unloaded_msg_t));
   strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
@@ -251,7 +252,7 @@ FawkesPluginManager::send_unload_success(const char *plugin_name, unsigned int c
  * @return parsed list of plugin types
  */
 std::list<std::string>
-FawkesPluginManager::parse_plugin_list(const char *plugin_list)
+PluginManager::parse_plugin_list(const char *plugin_list)
 {
   std::list<std::string> rv;
 
@@ -277,7 +278,7 @@ FawkesPluginManager::parse_plugin_list(const char *plugin_list)
  * to load. The plugin list can contain meta plugins.
  */
 void
-FawkesPluginManager::load(const char *plugin_list)
+PluginManager::load(const char *plugin_list)
 {
   std::list<std::string> pp = parse_plugin_list(plugin_list);
 
@@ -296,7 +297,7 @@ FawkesPluginManager::load(const char *plugin_list)
 	  // loop if it references itself!
 	  __meta_plugins[*i] = pset;
 	  try {
-	    LibLogger::log_info("FawkesPluginManager", "Loading plugins %s for meta plugin %s",
+	    LibLogger::log_info("PluginManager", "Loading plugins %s for meta plugin %s",
 				pset.c_str(), i->c_str());
 	    load(pset.c_str());
 	    send_loaded(i->c_str());
@@ -322,7 +323,7 @@ FawkesPluginManager::load(const char *plugin_list)
 	Plugin *plugin = plugin_loader->load(i->c_str());
 	plugins.lock();
 	try {
-	  thread_manager->add(plugin->threads());
+	  thread_collector->add(plugin->threads());
 	  plugins[*i] = plugin;
 	  plugin_ids[*i] = next_plugin_id++;
 	  send_loaded(i->c_str());
@@ -354,7 +355,7 @@ FawkesPluginManager::load(const char *plugin_list)
  * with the exact string that was put into
  */
 void
-FawkesPluginManager::load(const char *plugin_list, unsigned int clid)
+PluginManager::load(const char *plugin_list, unsigned int clid)
 {
   try {
     load(plugin_list);
@@ -371,12 +372,12 @@ FawkesPluginManager::load(const char *plugin_list, unsigned int clid)
  * @param plugin_name plugin to unload, can be a meta plugin.
  */
 void
-FawkesPluginManager::unload(const char *plugin_name)
+PluginManager::unload(const char *plugin_name)
 {
   if ( plugins.find(plugin_name) != plugins.end() ) {
     plugins.lock();
     try {
-      thread_manager->remove(plugins[plugin_name]->threads());
+      thread_collector->remove(plugins[plugin_name]->threads());
       plugin_loader->unload(plugins[plugin_name]);
       plugins.erase(plugin_name);
       plugin_ids.erase(plugin_name);
@@ -396,7 +397,7 @@ FawkesPluginManager::unload(const char *plugin_name)
 	  }
 	}
 	if ( erase ) {
-	  fawkes::LockMap< std::string, std::string >::iterator tmp = __mpit;
+	  LockMap< std::string, std::string >::iterator tmp = __mpit;
 	  ++__mpit;
 	  send_unloaded(tmp->first.c_str());
 	  __meta_plugins.erase(tmp);
@@ -407,7 +408,7 @@ FawkesPluginManager::unload(const char *plugin_name)
       __meta_plugins.unlock();
       
     } catch (Exception &e) {
-      LibLogger::log_error("FawkesPluginManager", "Could not finalize one or more threads of plugin %s, NOT unloading plugin", plugin_name);
+      LibLogger::log_error("PluginManager", "Could not finalize one or more threads of plugin %s, NOT unloading plugin", plugin_name);
       plugins.unlock();
       throw;
     }
@@ -424,7 +425,7 @@ FawkesPluginManager::unload(const char *plugin_name)
       __meta_plugins.lock();
       __meta_plugins.erase(*i);
       __meta_plugins.unlock();
-      LibLogger::log_info("FawkesPluginManager", "UNloading plugin %s for meta plugin %s",
+      LibLogger::log_info("PluginManager", "UNloading plugin %s for meta plugin %s",
 			  i->c_str(), plugin_name);
       unload(i->c_str());
     }
@@ -440,7 +441,7 @@ FawkesPluginManager::unload(const char *plugin_name)
  * with the exact string that was put into
  */
 void
-FawkesPluginManager::unload(const char *plugin_name, unsigned int clid)
+PluginManager::unload(const char *plugin_name, unsigned int clid)
 {
   try {
     unload(plugin_name);
@@ -454,7 +455,7 @@ FawkesPluginManager::unload(const char *plugin_name, unsigned int clid)
 /** Process all network messages that have been received.
  */
 void
-FawkesPluginManager::loop()
+PluginManager::loop()
 {
   while ( ! inbound_queue.empty() ) {
     FawkesNetworkMessage *msg = inbound_queue.front();
@@ -462,7 +463,7 @@ FawkesPluginManager::loop()
     switch (msg->msgid()) {
     case MSG_PLUGIN_LOAD:
       if ( msg->payload_size() != sizeof(plugin_load_msg_t) ) {
-	LibLogger::log_error("FawkesPluginManager", "Invalid load message size");
+	LibLogger::log_error("PluginManager", "Invalid load message size");
       } else {
 	plugin_load_msg_t *m = (plugin_load_msg_t *)msg->payload();
 	char name[PLUGIN_MSG_NAME_LENGTH + 1];
@@ -470,15 +471,15 @@ FawkesPluginManager::loop()
 	strncpy(name, m->name, PLUGIN_MSG_NAME_LENGTH);
 
 	if ( plugin_loader->is_loaded(name) ) {
-	  LibLogger::log_info("FawkesPluginManager", "Client requested loading of %s which is already loaded", name);
+	  LibLogger::log_info("PluginManager", "Client requested loading of %s which is already loaded", name);
 	  send_load_success(name, msg->clid());
 	} else {
-	  LibLogger::log_info("FawkesPluginManager", "Loading plugin %s", name);
+	  LibLogger::log_info("PluginManager", "Loading plugin %s", name);
 	  try {
 	    load(name, msg->clid());
 	  } catch (Exception &e) {
-	    LibLogger::log_error("FawkesPluginManager", "Failed to load plugin %s", name);
-	    LibLogger::log_error("FawkesPluginManager", e);
+	    LibLogger::log_error("PluginManager", "Failed to load plugin %s", name);
+	    LibLogger::log_error("PluginManager", e);
 	    send_load_failure(name, msg->clid());
 	  }
 	}
@@ -487,7 +488,7 @@ FawkesPluginManager::loop()
 
     case MSG_PLUGIN_UNLOAD:
       if ( msg->payload_size() != sizeof(plugin_unload_msg_t) ) {
-	LibLogger::log_error("FawkesPluginManager", "Invalid unload message size.");
+	LibLogger::log_error("PluginManager", "Invalid unload message size.");
       } else {
 	plugin_unload_msg_t *m = (plugin_unload_msg_t *)msg->payload();
 	char name[PLUGIN_MSG_NAME_LENGTH + 1];
@@ -496,15 +497,15 @@ FawkesPluginManager::loop()
 
 	if ( (plugins.find(name) == plugins.end()) &&
 	     (__meta_plugins.find(name) == __meta_plugins.end()) ) {
-	  LibLogger::log_info("FawkesPluginManager", "Client requested unloading of %s which is not loaded", name);
+	  LibLogger::log_info("PluginManager", "Client requested unloading of %s which is not loaded", name);
 	  send_unload_success(name, msg->clid());
 	} else {
-	  LibLogger::log_info("FawkesPluginManager", "UNloading plugin %s", name);
+	  LibLogger::log_info("PluginManager", "UNloading plugin %s", name);
 	  try {
 	    unload(name, msg->clid());
 	  } catch (Exception &e) {
-	    LibLogger::log_error("FawkesPluginManager", "Failed to unload plugin %s", name);
-	    LibLogger::log_error("FawkesPluginManager", e);
+	    LibLogger::log_error("PluginManager", "Failed to unload plugin %s", name);
+	    LibLogger::log_error("PluginManager", e);
 	    send_unload_failure(name, msg->clid());
 	  }
 	}
@@ -513,7 +514,7 @@ FawkesPluginManager::loop()
 
     case MSG_PLUGIN_LIST_AVAIL:
       try {
-	LibLogger::log_debug("FawkesPluginManager", "Sending list of all available plugins");
+	LibLogger::log_debug("PluginManager", "Sending list of all available plugins");
 	PluginListMessage *plm = list_avail();
 	hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_AVAIL_LIST, plm);
       } catch (Exception &e) {
@@ -523,7 +524,7 @@ FawkesPluginManager::loop()
 
     case MSG_PLUGIN_LIST_LOADED:
       try {
-	LibLogger::log_debug("FawkesPluginManager", "Sending list of all loaded plugins");
+	LibLogger::log_debug("PluginManager", "Sending list of all loaded plugins");
 	PluginListMessage *plm = list_loaded();
 	hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED_LIST, plm);
       } catch (Exception &e) {
@@ -555,7 +556,7 @@ FawkesPluginManager::loop()
 
 
 void
-FawkesPluginManager::handle_network_message(FawkesNetworkMessage *msg)
+PluginManager::handle_network_message(FawkesNetworkMessage *msg)
 {
   msg->ref();
   inbound_queue.push_locked(msg);
@@ -564,13 +565,15 @@ FawkesPluginManager::handle_network_message(FawkesNetworkMessage *msg)
 
 
 void
-FawkesPluginManager::client_connected(unsigned int clid)
+PluginManager::client_connected(unsigned int clid)
 {
 }
 
 
 void
-FawkesPluginManager::client_disconnected(unsigned int clid)
+PluginManager::client_disconnected(unsigned int clid)
 {
   __subscribers.remove_locked(clid);
 }
+
+} // end namespace fawkes

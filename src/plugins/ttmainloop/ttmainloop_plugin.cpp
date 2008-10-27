@@ -35,9 +35,11 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-TimeTrackerMainLoopPlugin::TimeTrackerMainLoopPlugin()
-  : Plugin("ttmainloop")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+TimeTrackerMainLoopPlugin::TimeTrackerMainLoopPlugin(Configuration *config)
+  : Plugin(config)
 {
   thread_list.push_back(new TimeTrackerMainLoopThread());
 }

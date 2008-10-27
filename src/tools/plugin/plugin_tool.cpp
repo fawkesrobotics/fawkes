@@ -25,8 +25,8 @@
 #include <tools/plugin/plugin_tool.h>
 
 #include <netcomm/fawkes/client.h>
-#include <mainapp/plugin_messages.h>
-#include <mainapp/plugin_list_message.h>
+#include <plugin/net/messages.h>
+#include <plugin/net/list_message.h>
 #include <utils/system/argparser.h>
 
 #include <cstdio>

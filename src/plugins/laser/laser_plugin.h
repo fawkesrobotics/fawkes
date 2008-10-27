@@ -30,7 +30,7 @@
 class LaserPlugin : public fawkes::Plugin
 {
  public:
-  LaserPlugin();
+  LaserPlugin(fawkes::Configuration *config);
 };
 
 #endif

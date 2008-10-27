@@ -34,7 +34,7 @@ namespace fawkes {
 class SkillerPlugin : public fawkes::Plugin
 {
  public:
-  SkillerPlugin();
+  SkillerPlugin(fawkes::Configuration *config);
   virtual ~SkillerPlugin();
 
  private:

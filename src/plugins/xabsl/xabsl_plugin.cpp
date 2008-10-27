@@ -35,9 +35,11 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-XabslPlugin::XabslPlugin()
-  : Plugin("xabsl")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+XabslPlugin::XabslPlugin(Configuration *config)
+  : Plugin(config)
 {
   thread_list.push_back(new XabslEngineThread());
 }

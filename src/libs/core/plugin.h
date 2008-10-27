@@ -30,14 +30,16 @@
 
 namespace fawkes {
 
+class Configuration;
 
 class Plugin {
  public:
 
-  Plugin(const char *plugin_name);
+  Plugin(Configuration *config);
   virtual ~Plugin();
 
-  virtual const char *  name() const;
+  void          set_name(const char *name);
+  const char *  name() const;
   ThreadList &  threads();
 
   virtual bool          persistent();
@@ -52,6 +54,11 @@ class Plugin {
    */
   ThreadList thread_list;
 
+  /** Fawkes configuration. You can use the configuration to add certain threads
+   * depending on the requested feature set. Use it only in your constructor.
+   */
+  Configuration *config;
+
  private:
   char       *_name_alloc;
   const char *_name;
@@ -61,7 +68,7 @@ class Plugin {
  * Do not use directly, rather use the EXPORT_PLUGIN macro.
  * @relates fawkes::Plugin
  */
-typedef Plugin *  (* PluginFactoryFunc)  (void);
+typedef Plugin *  (* PluginFactoryFunc)  (fawkes::Configuration *);
 
 /** Plugin destructor function for the shared library.
  * Do not use directly, rather use the EXPORT_PLUGIN macro.
@@ -77,9 +84,9 @@ typedef void      (* PluginDestroyFunc)  (Plugin *plugin);
 #define PLUGIN_FACTORY(plugin_class)			\
   extern "C"						\
   Plugin *						\
-  plugin_factory()					\
+  plugin_factory(fawkes::Configuration *config)		\
   {							\
-    return new plugin_class();				\
+    return new plugin_class(config);			\
   }
 
 

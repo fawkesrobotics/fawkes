@@ -1,8 +1,10 @@
 #*****************************************************************************
-#            Makefile Build System for Fawkes : Plugin Tool
+#              Makefile Build System for Fawkes: Utility Library
 #                            -------------------
-#   Created on Wed Nov 22 00:29:31 2006
+#   Created on Sun Sep 03 14:14:14 2006
 #   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -15,12 +17,11 @@
 
 BASEDIR = ../../..
 
-LIBS_plugin = fawkescore fawkesutils fawkesnetcomm fawkesplugin
-OBJS_plugin = main.o	\
-	      plugin_tool.o
+LIBS_libfawkesplugin = stdc++ fawkescore fawkesutils fawkesconfig $(if $(filter Linux,$(OS)),dl)
+OBJS_libfawkesplugin =	$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
-OBJS_all =	$(OBJS_plugin)
-BINS_all =	$(BINDIR)/plugin
+OBJS_all = $(OBJS_libfawkesplugin)
+LIBS_all  = $(LIBDIR)/libfawkesplugin.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

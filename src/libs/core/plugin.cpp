@@ -31,7 +31,7 @@
 
 namespace fawkes {
 
-/** @class Plugin plugin.h <core/plugin.h>
+/** @class Plugin <core/plugin.h>
  * Plugin interface class.
  * Derive this class to create a new Fawkes plugin. There is not much that
  * you have to do to get a basic plugin working. The base plugin will already
@@ -57,21 +57,24 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
+/* IMPLEMENTOR'S NOTE:
+ * I'm aware that we do not link libfawkescore against libfawkesconfig, so why
+ * do we put the reference to fawkes::Configuration here? Two things to consider:
+ * 1. We only pass through the pointer, nothing more. We do not need to know about
+ * the declaration or definition!
+ * 2. We want to keep plugin.(h|cpp) in libfawkescore, rather than in
+ * libfawkesplugin to keep the minimum requirements for plugins low.
+ */
 
 /** Constructor.
  * Pass the name of your plugin to this ctor.
- * @param plugin_name name of the plugin
+ * @param config configuration
  */
-Plugin::Plugin(const char *plugin_name)
-  : thread_list(plugin_name)
+Plugin::Plugin(Configuration *config)
 {
-  _name_alloc = strdup(plugin_name);
-  if ( ! _name_alloc ) {
-    // We do not want to throw an exception here
-    _name = "OutOfMemoryForPluginName";
-  } else {
-    _name = _name_alloc;
-  }
+  this->config = config;
+  _name_alloc = NULL;
+  _name = "PluginNameNotSet";
 }
 
 /** Virtual destructor */
@@ -109,6 +112,28 @@ ThreadList &
 Plugin::threads()
 {
   return thread_list;
+}
+
+
+/** Set plugin name.
+ * Set the name of this plugin. This method should never be called from user code,
+ * but only from the plugin loding/initialization system.
+ * @param name new name
+ */
+void
+Plugin::set_name(const char *name)
+{
+  if ( _name_alloc )  free(_name_alloc);
+
+  thread_list.set_name("%s", name);
+
+  _name_alloc = strdup(name);
+  if ( ! _name_alloc ) {
+    // We do not want to throw an exception here
+    _name = "OutOfMemoryForPluginName";
+  } else {
+    _name = _name_alloc;
+  }
 }
 
 

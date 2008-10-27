@@ -23,13 +23,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/plugin/plugin_loader.h>
+#include <plugin/loader/plugin_loader.h>
+#include <plugin/loader/load_thread.h>
+
 #include <utils/system/dynamic_module/module_manager_factory.h>
 #include <utils/system/dynamic_module/module_manager.h>
 #include <utils/system/dynamic_module/module.h>
-#include <utils/plugin/load_thread.h>
-
-#include <iostream>
 
 #include <map>
 #include <string>
@@ -48,7 +47,7 @@ class PluginLoaderData
 };
 /// @endcond
 
-/** @class PluginLoadException utils/plugin/plugin_loader.h
+/** @class PluginLoadException <plugin/loader/plugin_loader.h>
  * This exception is thrown if the requested plugin could not be loaded.
  */
 
@@ -65,7 +64,7 @@ PluginLoadException::PluginLoadException(const char *plugin_name,
 }
 
 
-/** @class PluginUnloadException utils/plugin/plugin_loader.h
+/** @class PluginUnloadException <plugin/loader/plugin_loader.h>
  * This exception is thrown if the requested plugin could not be unloaded.
  */
 
@@ -82,7 +81,7 @@ PluginUnloadException::PluginUnloadException(const char *plugin_name,
 }
 
 
-/** @class PluginLoader utils/plugin/plugin_loader.h
+/** @class PluginLoader <plugin/loader/plugin_loader.h>
  * This class manages plugins.
  * With this class plugins can be loaded and unloaded. Information is
  * kept about active plugins.
@@ -93,10 +92,12 @@ PluginUnloadException::PluginUnloadException(const char *plugin_name,
 /** Constructor
  * @param plugin_base_dir The base directory where to search for the shared
  * libraries which contain the plugins
+ * @param config Fawkes configuration
  */
-PluginLoader::PluginLoader(const char *plugin_base_dir)
+PluginLoader::PluginLoader(const char *plugin_base_dir, Configuration *config)
 {
   d = new PluginLoaderData();
+  __config = config;
   d->mm = ModuleManagerFactory::getInstance(ModuleManagerFactory::MMT_DL, plugin_base_dir);
 }
 
@@ -134,7 +135,7 @@ PluginLoader::load(const char *plugin_name)
     return d->name_plugin_map[pn];
   }
 
-  PluginLoadThread plt(d->mm, plugin_name);
+  PluginLoadThread plt(d->mm, plugin_name, __config);
   plt.load_blocking();
   try {
     Plugin *p = plt.plugin();
@@ -180,7 +181,7 @@ PluginLoader::request_load(const char *plugin_name)
     throw PluginLoadException(plugin_name, "Load already requested");    
   }
 
-  PluginLoadThread *plt = new PluginLoadThread(d->mm, plugin_name);
+  PluginLoadThread *plt = new PluginLoadThread(d->mm, plugin_name, __config);
   plt->start();
 
   d->load_threads[plugin_name] = plt;

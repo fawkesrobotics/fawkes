@@ -41,9 +41,11 @@ using namespace fawkes;
 /** Modulo count */
 #define MODC 100
 
-/** Constructor. */
-ExamplePlugin::ExamplePlugin()
-  : Plugin("example")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+ExamplePlugin::ExamplePlugin(Configuration *config)
+  : Plugin(config)
 {
   // printf("ExamplePlugin constructor called\n");
   thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,

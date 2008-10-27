@@ -23,8 +23,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FAWKES_PLUGIN_MESSAGES_H_
-#define __FAWKES_PLUGIN_MESSAGES_H_
+#ifndef __PLUGIN_NET_MESSAGES_H_
+#define __PLUGIN_NET_MESSAGES_H_
 
 #include <netcomm/utils/dynamic_buffer.h>
 

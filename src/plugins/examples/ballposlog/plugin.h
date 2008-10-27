@@ -30,7 +30,7 @@
 class BallPosLogPlugin : public fawkes::Plugin
 {
  public:
-      BallPosLogPlugin();
+  BallPosLogPlugin(fawkes::Configuration *config);
 };
 
 #endif

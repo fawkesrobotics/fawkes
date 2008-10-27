@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  plugin_manager.h - Fawkes plugin manager
+ *  manager.h - Fawkes plugin manager
  *
  *  Created: Wed Nov 15 23:28:01 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -23,8 +23,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FAWKES_PLUGIN_MANAGER_H_
-#define __FAWKES_PLUGIN_MANAGER_H_
+#ifndef __PLUGIN_MANAGER_H_
+#define __PLUGIN_MANAGER_H_
 
 #include <netcomm/fawkes/handler.h>
 #include <core/threading/thread.h>
@@ -37,29 +37,29 @@
 #include <string>
 #include <utility>
 
-class FawkesThreadManager;
 namespace fawkes {
-  class FawkesNetworkHub;
-  class Plugin;
-  class PluginLoader;
-  class Mutex;
-  class PluginListMessage;
-  class Configuration;
-}
 
-class FawkesPluginManager
+class ThreadCollector;
+class FawkesNetworkHub;
+class Plugin;
+class PluginLoader;
+class Mutex;
+class PluginListMessage;
+class Configuration;
+
+class PluginManager
 : public fawkes::Thread,
   public fawkes::FawkesNetworkHandler
 {
  public:
-  FawkesPluginManager(FawkesThreadManager *thread_manager,
-		      fawkes::Configuration *config,
+  PluginManager(ThreadCollector *thread_collector,
+		      Configuration *config,
 		      const char *meta_plugin_prefix);
-  ~FawkesPluginManager();
+  ~PluginManager();
 
-  void set_hub(fawkes::FawkesNetworkHub *hub);
+  void set_hub(FawkesNetworkHub *hub);
 
-  virtual void handle_network_message(fawkes::FawkesNetworkMessage *msg);
+  virtual void handle_network_message(FawkesNetworkMessage *msg);
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
 
@@ -69,8 +69,8 @@ class FawkesPluginManager
   void unload(const char *plugin_name);
 
  private:
-  fawkes::PluginListMessage * list_avail();
-  fawkes::PluginListMessage * list_loaded();
+  PluginListMessage * list_avail();
+  PluginListMessage * list_loaded();
   void send_load_failure(const char *plugin_name, unsigned int client_id);
   void send_load_success(const char *plugin_name, unsigned int client_id);
   void send_unload_failure(const char *plugin_name, unsigned int client_id);
@@ -84,27 +84,29 @@ class FawkesPluginManager
   std::list<std::string>  parse_plugin_list(const char *plugin_type_list);
 
  private:
-  FawkesThreadManager       *thread_manager;
-  fawkes::PluginLoader      *plugin_loader;
-  fawkes::FawkesNetworkHub  *hub;
+  ThreadCollector   *thread_collector;
+  PluginLoader      *plugin_loader;
+  FawkesNetworkHub  *hub;
 
-  fawkes::LockMap< std::string, fawkes::Plugin * > plugins;
-  fawkes::LockMap< std::string, fawkes::Plugin * >::iterator pit;
-  fawkes::LockMap< std::string, fawkes::Plugin * >::reverse_iterator rpit;
+  LockMap< std::string, Plugin * > plugins;
+  LockMap< std::string, Plugin * >::iterator pit;
+  LockMap< std::string, Plugin * >::reverse_iterator rpit;
 
-  fawkes::LockMap< std::string, std::string > __meta_plugins;
-  fawkes::LockMap< std::string, std::string >::iterator __mpit;
+  LockMap< std::string, std::string > __meta_plugins;
+  LockMap< std::string, std::string >::iterator __mpit;
 
   unsigned int next_plugin_id;
   std::map< std::string, unsigned int > plugin_ids;
 
-  fawkes::LockQueue< fawkes::FawkesNetworkMessage * > inbound_queue;
+  LockQueue< FawkesNetworkMessage * > inbound_queue;
 
-  fawkes::LockList<unsigned int>           __subscribers;
-  fawkes::LockList<unsigned int>::iterator __ssit;
+  LockList<unsigned int>           __subscribers;
+  LockList<unsigned int>::iterator __ssit;
 
-  fawkes::Configuration *__config;
+  Configuration *__config;
   std::string __meta_plugin_prefix;
 };
+
+} // end namespace fawkes
 
 #endif

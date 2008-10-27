@@ -38,9 +38,11 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-WorldModelPlugin::WorldModelPlugin()
-  : Plugin("worldmodel")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+WorldModelPlugin::WorldModelPlugin(Configuration *config)
+  : Plugin(config)
 {
   WorldModelNetworkThread* net_thread = new WorldModelNetworkThread();
   thread_list.push_back(new WorldModelThread(net_thread));

@@ -38,9 +38,11 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-PlayerPlugin::PlayerPlugin()
-  : Plugin("player")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+PlayerPlugin::PlayerPlugin(Configuration *config)
+  : Plugin(config)
 {
   PlayerClientThread *pct = new PlayerClientThread();
   thread_list.push_back(pct);

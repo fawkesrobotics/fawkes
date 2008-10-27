@@ -30,7 +30,7 @@
 class PlayerPlugin : public fawkes::Plugin
 {
  public:
-  PlayerPlugin();
+  PlayerPlugin(fawkes::Configuration *config);
 };
 
 #endif

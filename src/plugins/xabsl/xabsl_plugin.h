@@ -30,7 +30,7 @@
 class XabslPlugin : public fawkes::Plugin
 {
  public:
-  XabslPlugin();
+  XabslPlugin(fawkes::Configuration *config);
 };
 
 #endif

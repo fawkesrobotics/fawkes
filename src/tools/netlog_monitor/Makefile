@@ -22,10 +22,8 @@ include $(BASEDIR)/etc/buildsys/gui.mk
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_nlm = fawkescore fawkesutils fawkesnetcomm fawkesmainappmsgs
-OBJS_nlm = main.o			\
-	      netlog_monitor.o		\
-	      backend_thread.o
+LIBS_nlm = fawkescore fawkesutils fawkesnetcomm
+OBJS_nlm = main.o netlog_monitor.o backend_thread.o
 OBJS_all = $(OBJS_nlm)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)

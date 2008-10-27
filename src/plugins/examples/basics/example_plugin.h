@@ -30,7 +30,7 @@
 class ExamplePlugin : public fawkes::Plugin
 {
  public:
-  ExamplePlugin();
+  ExamplePlugin(fawkes::Configuration *config);
 };
 
 #endif

@@ -104,6 +104,9 @@ class FawkesThreadManager
     virtual void remove(fawkes::ThreadList &tl);
     virtual void remove(fawkes::Thread *t);
 
+    virtual void force_remove(fawkes::ThreadList &tl);
+    virtual void force_remove(fawkes::Thread *t);
+
    private:
     FawkesThreadManager *__parent_manager;
   };

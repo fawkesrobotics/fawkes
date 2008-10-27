@@ -115,6 +115,19 @@ FawkesThreadManager::FawkesThreadManagerAspectCollector::remove(Thread *t)
 }
 
 
+void
+FawkesThreadManager::FawkesThreadManagerAspectCollector::force_remove(fawkes::ThreadList &tl)
+{
+  throw AccessViolationException("ThreadManagerAspect threads may not force removal of threads");
+}
+
+void
+FawkesThreadManager::FawkesThreadManagerAspectCollector::force_remove(fawkes::Thread *t)
+{
+  throw AccessViolationException("ThreadManagerAspect threads may not force removal of threads");
+}
+
+
 /** Constructor.
  */
 FawkesThreadManager::FawkesThreadManager()

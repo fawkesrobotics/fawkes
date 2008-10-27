@@ -23,14 +23,15 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_PLUGIN_PLUGIN_LOADER_H_
-#define __UTILS_PLUGIN_PLUGIN_LOADER_H_
+#ifndef __PLUGIN_LOADER_PLUGIN_LOADER_H_
+#define __PLUGIN_LOADER_PLUGIN_LOADER_H_
 
 #include <core/plugin.h>
 #include <core/exception.h>
 
 namespace fawkes {
 
+class Configuration;
 class PluginLoaderData;
 
 class PluginLoadException : public Exception
@@ -49,7 +50,7 @@ class PluginUnloadException : public Exception
 class PluginLoader {
  public:
 
-  PluginLoader(const char *plugin_base_dir);
+  PluginLoader(const char *plugin_base_dir, Configuration *config);
   ~PluginLoader();
 
   Plugin * load(const char *plugin_name);
@@ -65,6 +66,7 @@ class PluginLoader {
 
  private:
   PluginLoaderData *d;
+  Configuration    *__config;
 };
 
 

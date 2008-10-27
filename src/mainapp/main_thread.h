@@ -39,9 +39,9 @@ namespace fawkes {
   class Clock;
   class TimeWait;
   class AspectIniFin;
+  class PluginManager;
 }
 class FawkesThreadManager;
-class FawkesPluginManager;
 class FawkesNetworkManager;
 
 class FawkesMainThread
@@ -74,7 +74,7 @@ class FawkesMainThread
   fawkes::MainLoop             *__mainloop;
 
   FawkesThreadManager        *thread_manager;
-  FawkesPluginManager        *plugin_manager;
+  fawkes::PluginManager      *plugin_manager;
   FawkesNetworkManager       *network_manager;
 
 };

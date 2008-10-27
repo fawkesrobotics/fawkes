@@ -30,7 +30,7 @@
 class TimeTrackerMainLoopPlugin : public fawkes::Plugin
 {
  public:
-  TimeTrackerMainLoopPlugin();
+  TimeTrackerMainLoopPlugin(fawkes::Configuration *config);
 };
 
 #endif

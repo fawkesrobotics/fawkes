@@ -35,9 +35,11 @@
 
 using namespace fawkes;
 
-/** Constructor. */
-BallPosLogPlugin::BallPosLogPlugin()
-  : Plugin("ballposlog")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+BallPosLogPlugin::BallPosLogPlugin(Configuration *config)
+  : Plugin(config)
 {
   thread_list.push_back(new BallPosLogThread());
 }

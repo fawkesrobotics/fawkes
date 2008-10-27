@@ -30,7 +30,7 @@
 class WorldModelPlugin : public fawkes::Plugin
 {
  public:
-  WorldModelPlugin();
+  WorldModelPlugin(fawkes::Configuration *config);
 };
 
 #endif

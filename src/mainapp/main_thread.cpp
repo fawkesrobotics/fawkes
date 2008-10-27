@@ -25,6 +25,9 @@
 
 #include <mainapp/main_thread.h>
 
+#include <mainapp/network_manager.h>
+#include <mainapp/thread_manager.h>
+
 #include <core/exceptions/system.h>
 #include <config/sqlite.h>
 #include <config/net_handler.h>
@@ -39,10 +42,7 @@
 
 #include <blackboard/local.h>
 #include <aspect/inifin.h>
-
-#include <mainapp/plugin_manager.h>
-#include <mainapp/network_manager.h>
-#include <mainapp/thread_manager.h>
+#include <plugin/manager.h>
 
 #include <cstdio>
 #include <cstring>
@@ -162,8 +162,8 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 					    thread_manager->aspect_collector(),
 					    __config, __multi_logger, __clock);
     thread_manager->set_inifin(__aspect_inifin, __aspect_inifin);
-    plugin_manager       = new FawkesPluginManager(thread_manager, __config,
-						   "/fawkes/meta_plugins/");
+    plugin_manager       = new PluginManager(thread_manager, __config,
+					     "/fawkes/meta_plugins/");
     network_manager      = new FawkesNetworkManager(thread_manager, 1910);
     __config_nethandler  = new ConfigNetworkHandler(__config, network_manager->hub());
   } catch (Exception &e) {

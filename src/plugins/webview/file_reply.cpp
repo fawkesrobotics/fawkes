@@ -55,7 +55,7 @@ DynamicFileWebReply::DynamicFileWebReply(const char *filename)
   }
   __size = sbuf.st_size;
 
-  add_header("Content-type", mimetype_file(filename));
+  add_header("Content-type", fawkes::mimetype_file(filename));
 }
 
 /** Destructor. */

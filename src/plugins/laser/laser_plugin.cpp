@@ -36,9 +36,11 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-LaserPlugin::LaserPlugin()
-  : Plugin("laser")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+LaserPlugin::LaserPlugin(Configuration *config)
+  : Plugin(config)
 {
   LaseEdlAcquisitionThread *aqt = new LaseEdlAcquisitionThread();
   thread_list.push_back(new LaserSensorThread(aqt));

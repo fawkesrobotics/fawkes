@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <mainapp/plugin_list_message.h>
+#include <plugin/net/list_message.h>
 
 #include <netcomm/utils/dynamic_buffer.h>
 #include <netcomm/fawkes/component_ids.h>
@@ -36,7 +36,7 @@
 
 namespace fawkes {
 
-/** @class PluginListMessage <mainapp/plugin_list_message.h>
+/** @class PluginListMessage <plugin/net/list_message.h>
  * Plugin list message.
  * A complex dynamic message with an arbitrary number of plugins. Uses
  * DynamicBuffer for the internal list of plugins and thus the buffer is

@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  load_thread.cpp - Plugin load thread
+ *  plugin_list_messages.h - Fawkes Plugin Messages
  *
- *  Created: Thu May 31 15:07:18 2007
+ *  Created: Sat Jun 02 01:21:03 2007
  *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -23,44 +23,37 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_PLUGIN_LOAD_THREAD_H_
-#define __UTILS_PLUGIN_LOAD_THREAD_H_
+#ifndef __FAWKES_PLUGIN_LIST_MESSAGE_H_
+#define __FAWKES_PLUGIN_LIST_MESSAGE_H_
 
-#include <core/threading/thread.h>
-#include <utils/plugin/plugin_loader.h>
+#include <plugin/net/messages.h>
+#include <netcomm/fawkes/message_content.h>
 
 namespace fawkes {
 
+class DynamicBuffer;
 
-class ModuleManager;
-class Plugin;
-class Module;
-
-class PluginLoadThread : public Thread
+class PluginListMessage : public FawkesNetworkMessageContent
 {
  public:
-  PluginLoadThread(ModuleManager *mm, const char *plugin_name);
-  virtual ~PluginLoadThread();
+  PluginListMessage();
+  PluginListMessage(unsigned int component_id, unsigned int msg_id,
+		    void *payload, size_t payload_size);
+  virtual ~PluginListMessage();
 
-  Plugin *  plugin();
-  Module *  module();
-  void      load_blocking();
-  bool      finished();
+  void append(const char *plugin_name, size_t len);
+  virtual void serialize();
 
-  virtual void loop();
+  void   reset_iterator();
+  bool   has_next();
+  char * next();
+  
 
  private:
-  void      load();
-
-  char          *module_name;
-  bool           _finished;
-  ModuleManager *mm;
-  Plugin        *_plugin;
-  Module        *_module;
-  PluginLoadException ple;
+  DynamicBuffer     *plugin_list;
+  plugin_list_msg_t  msg;
 };
 
-
-} // end namespace fawkes
+}
 
 #endif

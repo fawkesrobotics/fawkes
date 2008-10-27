@@ -34,9 +34,11 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-WebviewPlugin::WebviewPlugin()
-  : Plugin("webview")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+WebviewPlugin::WebviewPlugin(Configuration *config)
+  : Plugin(config)
 {
   thread_list.push_back(new WebviewThread());
 }

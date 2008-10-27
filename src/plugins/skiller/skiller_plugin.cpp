@@ -39,9 +39,11 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-SkillerPlugin::SkillerPlugin()
-  : Plugin("skiller")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+SkillerPlugin::SkillerPlugin(Configuration *config)
+  : Plugin(config)
 {
   __liaison_exec_barrier = new Barrier(2);
   SkillerLiaisonThread *slt   = new SkillerLiaisonThread(__liaison_exec_barrier);

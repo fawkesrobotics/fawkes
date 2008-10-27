@@ -25,8 +25,8 @@
 
 #include <tools/plugin_gui/plugin_tree_view.h>
 #include <netcomm/fawkes/client.h>
-#include <mainapp/plugin_messages.h>
-#include <mainapp/plugin_list_message.h>
+#include <plugin/net/messages.h>
+#include <plugin/net/list_message.h>
 
 #include <cstring>
 #include <string>

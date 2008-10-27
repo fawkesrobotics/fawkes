@@ -3,7 +3,7 @@
  *  load_thread.h - Plugin load thread
  *
  *  Created: Thu May 31 12:04:18 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/plugin/load_thread.h>
+#include <plugin/loader/load_thread.h>
 
 #include <utils/system/dynamic_module/module_manager.h>
 #include <utils/system/dynamic_module/module.h>
@@ -38,7 +38,7 @@
 
 namespace fawkes {
 
-/** @class PluginLoadThread <utils/plugin/load_thread.h>
+/** @class PluginLoadThread <plugin/loader/load_thread.h>
  * Plugin load thread.
  * This thread is used internally by the plugin loader for asynchronous
  * load operations.
@@ -48,20 +48,23 @@ namespace fawkes {
 /** Constructor.
  * @param mm module manager to use to load the module containing the plugin
  * @param plugin_name name of the plugin to load
+ * @param config Fawkes configuration
  */
-PluginLoadThread::PluginLoadThread(ModuleManager *mm, const char *plugin_name)
+PluginLoadThread::PluginLoadThread(ModuleManager *mm, const char *plugin_name,
+				   Configuration *config)
   : Thread((std::string("PluginLoadThread::") + std::string(plugin_name)).c_str()),
     ple(plugin_name)
 {
-  this->mm = mm;
+  _mm = mm;
   _finished = false;
   _module = NULL;
   _plugin = NULL;
+  _config = config;
 
   // This is dependent on the system architecture!
-  if ( asprintf(&module_name, "%s.%s", plugin_name, mm->getModuleFileExtension()) == -1 ) {
+  if ( asprintf(&_module_name, "%s.%s", plugin_name, _mm->getModuleFileExtension()) == -1 ) {
     ple.append("Could not allocate module_name buffer");
-    module_name = NULL;
+    _module_name = NULL;
   }
 }
 
@@ -69,8 +72,8 @@ PluginLoadThread::PluginLoadThread(ModuleManager *mm, const char *plugin_name)
 /** Destructor. */
 PluginLoadThread::~PluginLoadThread()
 {
-  if ( module_name != NULL ) {
-    free(module_name);
+  if ( _module_name != NULL ) {
+    free(_module_name);
   }
 }
 
@@ -123,19 +126,19 @@ PluginLoadThread::module()
 void
 PluginLoadThread::load()
 {
-  if ( module_name == NULL )  return;
+  if ( _module_name == NULL )  return;
 
   try {
-    _module = mm->openModule(module_name);
+    _module = _mm->openModule(_module_name);
   } catch (ModuleOpenException &e) {
-    ple.append("PluginLoader failed to open module %s", module_name);
+    ple.append("PluginLoader failed to open module %s", _module_name);
     ple.append(e);
     return;
   }
 
   if ( _module == NULL ) {
     // we could NOT open the plugin module
-    ple.append("Could not open plugin module '%s'", module_name);
+    ple.append("Could not open plugin module '%s'", _module_name);
     return;
   }
 
@@ -146,12 +149,19 @@ PluginLoadThread::load()
 
   PluginFactoryFunc pff = (PluginFactoryFunc)_module->getSymbol("plugin_factory");
 
-  Plugin *p = pff();
-  if ( p == NULL ) {
-    ple.append("Plugin from module '%s' could not be instantiated", module_name);
-  } else {
-    _plugin = p;
+  try {
+    Plugin *p = pff(_config);
+    if ( p == NULL ) {
+      ple.append("Plugin from module '%s' could not be instantiated", _module_name);
+    } else {
+      _plugin = p;
+      _plugin->set_name(_module_name);
+    }
+  } catch (Exception &e) {
+    ple.append("Plugin instantiation caused exception, trace follows.");
+    ple.append(e);
   }
+
 }
 
 /** Load blocking.
