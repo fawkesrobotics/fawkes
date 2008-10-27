@@ -66,8 +66,11 @@ class FvAcquisitionThread
   SharedMemoryCamera *  camera_instance(bool raw, bool deep_copy);
 
   void set_vt_prepfin_hold(bool hold);
+  void set_enabled(bool enabled);
 
  private:
+  bool                      _enabled;
+
   Camera                   *_camera;
   SharedMemoryImageBuffer  *_shm;
   SharedMemoryImageBuffer  *_shm_raw;

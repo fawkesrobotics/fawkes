@@ -32,20 +32,28 @@
 #include <models/color/lookuptable.h>
 
 #include <cstring>
+#include <cstdlib>
 
 using namespace fawkes;
 
-/** @class FvRetrieverThread <apps/retriever/retriever_thread.h>
+/** @class FvRetrieverThread "retriever_thread.h"
  * FireVision retriever thread.
  * This implements the functionality of the FvRetrieverPlugin.
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-FvRetrieverThread::FvRetrieverThread()
+/** Constructor.
+ * @param camera_string camera argument string for camera to open
+ * @param id ID used to form thread name (FvRetrieverThread_[ID]) and shared
+ * memory image segment ID (retriever_[ID]).
+ */
+FvRetrieverThread::FvRetrieverThread(const char *camera_string, const char *id)
   : Thread("FvRetrieverThread", Thread::OPMODE_WAITFORWAKEUP),
     VisionAspect(VisionAspect::CYCLIC)
 {
+  __id = strdup(id);
+  __camera_string = strdup(camera_string);
+  set_name("FvRetrieverThread_%s", id);
   seq_writer = NULL;
 }
 
@@ -53,6 +61,8 @@ FvRetrieverThread::FvRetrieverThread()
 /** Destructor. */
 FvRetrieverThread::~FvRetrieverThread()
 {
+  free(__camera_string);
+  free(__id);
 }
 
 
@@ -60,16 +70,21 @@ void
 FvRetrieverThread::init()
 {
   try {
-    logger->log_debug(name(), "Registering for camera '%s'",
-		      config->get_string("/firevision/retriever/camera").c_str());
-    cam = vision_master->register_for_camera(config->get_string("/firevision/retriever/camera").c_str(), this);
+    logger->log_debug(name(), "Registering for camera '%s'", __camera_string);
+    cam = vision_master->register_for_camera(__camera_string, this);
   } catch (Exception &e) {
     e.append("FvRetrieverThread::init() failed");
     throw;
   }
   try {
-    shm = new SharedMemoryImageBuffer("retriever", cam->colorspace(),
+    char *imgbufname;
+    if ( asprintf(&imgbufname, "retriever_%s", __id) == -1 ) {
+      throw Exception("Cannot allocate buffer name");
+    }
+    shm = new SharedMemoryImageBuffer(imgbufname, cam->colorspace(),
 				      cam->pixel_width(), cam->pixel_height());
+
+    free(imgbufname);
     if ( ! shm->is_valid() ) {
       throw Exception("Shared memory segment not valid");
     }
@@ -158,7 +173,7 @@ FvRetrieverThread::loop()
   } else {
     // no time tracker
     cam->capture();
-    memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
+    memcpy(shm->buffer(), cam->buffer(), cam->buffer_size());
     cam->dispose_buffer();
   }
 

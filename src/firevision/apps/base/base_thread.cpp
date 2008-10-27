@@ -135,15 +135,20 @@ FvBaseThread::loop()
     }
   }
 
-  for (stit = started_threads.begin(); stit != started_threads.end();) {
+  started_threads.lock();
+  fawkes::LockMap<Thread *, FvAcquisitionThread *>::iterator stit = started_threads.begin();
+  while (stit != started_threads.end()) {
+
+    logger->log_info(name(), "Thread %s has been started, %zu",
+		     stit->second->name(), started_threads.size());
 
     // if the thread is registered in that aqt mark it running
     stit->second->_vision_threads->set_thread_running(stit->first);
 
     if ( stit->second->_vision_threads->has_cyclic_thread() ) {
       if (stit->second->aqtmode() != FvAcquisitionThread::AqtCyclic ) {
-	logger->log_info(name(), "Switching acquisition thread %s to cyclic mode (%s)",
-			 stit->second->name(), Thread::current_thread()->name());
+	logger->log_info(name(), "Switching acquisition thread %s to cyclic mode",
+			 stit->second->name());
 
 	stit->second->prepare_finalize();
 	stit->second->cancel();
@@ -163,8 +168,14 @@ FvBaseThread::loop()
       stit->second->cancel_finalize();
     }
 
-    started_threads.erase( stit++ );
+    // Make thread actually capture data
+    stit->second->set_enabled(true);
+    
+    fawkes::LockMap<Thread *, FvAcquisitionThread *>::iterator stittmp = stit;
+    ++stit;
+    started_threads.erase( stittmp );
   }
+  started_threads.unlock();
 
   // Re-create barrier as necessary after _adding_ threads
   unsigned int num_cyclic_threads = 0;
@@ -321,7 +332,9 @@ FvBaseThread::thread_started(Thread *thread)
   aqts.lock();
   for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
     if (ait->second->_vision_threads->has_waiting_thread(thread)) {
+      started_threads.lock();
       started_threads[thread] = ait->second;
+      started_threads.unlock();
     }
   }
   aqts.unlock();

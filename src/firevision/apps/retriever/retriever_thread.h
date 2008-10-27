@@ -46,7 +46,7 @@ class FvRetrieverThread
   public fawkes::VisionAspect
 {
  public:
-  FvRetrieverThread();
+  FvRetrieverThread(const char *camera_string, const char *id);
   virtual ~FvRetrieverThread();
 
   virtual void init();
@@ -54,6 +54,9 @@ class FvRetrieverThread
   virtual void loop();
 
  private:
+  char *__id;
+  char *__camera_string;
+
   Camera *cam;
   SharedMemoryImageBuffer *shm;
   SeqWriter *seq_writer;

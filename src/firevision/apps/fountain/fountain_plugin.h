@@ -30,7 +30,7 @@
 class FvFountainPlugin : public fawkes::Plugin
 {
  public:
-  FvFountainPlugin();
+  FvFountainPlugin(fawkes::Configuration *config);
 };
 
 #endif

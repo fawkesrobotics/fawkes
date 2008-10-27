@@ -83,6 +83,7 @@ FvAcquisitionThread::FvAcquisitionThread(const char *id,  Camera *camera,
   _buffer_raw  = NULL;
 
   _mode = AqtContinuous;
+  _enabled = false;
 
 #ifdef FVBASE_TIMETRACKER
   __tt = new TimeTracker();
@@ -184,6 +185,19 @@ FvAcquisitionThread::set_aqtmode(AqtMode mode)
 }
 
 
+/** Enable or disable image retrieval.
+ * When the acquisition thread is enabled image data will be converted or copied
+ * to the shared memory buffer, otherwise only the capture/dispose cycle is
+ * executed.
+ * @param enabled true to enable acquisition thread, false to disable
+ */
+void
+FvAcquisitionThread::set_enabled(bool enabled)
+{
+  _enabled = enabled;
+}
+
+
 /** Get acquisition thread mode.
  * @return acquisition thread mode.
  */
@@ -223,7 +237,7 @@ FvAcquisitionThread::loop()
     __tt->ping_start(__ttc_capture);
     _camera->capture();
     __tt->ping_end(__ttc_capture);
-    if ( _shm ) {
+    if ( _shm && _enabled ) {
       __tt->ping_start(__ttc_lock);
       _shm->lock_for_write();
       __tt->ping_end(__ttc_lock);
@@ -236,7 +250,7 @@ FvAcquisitionThread::loop()
       _shm->unlock();
       __tt->ping_end(__ttc_unlock);
     }
-    if ( _shm_raw ) {
+    if ( _shm_raw && _enabled ) {
       _shm_raw->lock_for_write();
       memcpy(_buffer_raw, _camera->buffer(), _camera->buffer_size());
       _shm_raw->unlock();
@@ -256,14 +270,14 @@ FvAcquisitionThread::loop()
 #else // no time tracking
   try {
     _camera->capture();
-    if ( _shm ) {
+    if ( _shm && _enabled ) {
       _shm->lock_for_write();
       convert(_colorspace, YUV422_PLANAR,
 	      _camera->buffer(), _buffer,
 	      _width, _height);
       _shm->unlock();
     }
-    if ( _shm_raw ) {
+    if ( _shm_raw && _enabled ) {
       _shm_raw->lock_for_write();
       memcpy(_buffer_raw, _camera->buffer(), _camera->buffer_size());
       _shm_raw->unlock();

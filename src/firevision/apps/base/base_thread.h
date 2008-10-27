@@ -82,7 +82,6 @@ class FvBaseThread
   unsigned int _aqt_timeout;
 
   fawkes::LockMap<Thread *, FvAcquisitionThread *> started_threads;
-  fawkes::LockMap<Thread *, FvAcquisitionThread *>::iterator stit;
 
   fawkes::Barrier *aqt_barrier;
 };

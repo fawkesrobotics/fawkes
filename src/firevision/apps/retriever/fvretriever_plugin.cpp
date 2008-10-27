@@ -22,12 +22,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <apps/retriever/fvretriever_plugin.h>
-#include <apps/retriever/retriever_thread.h>
+#include "fvretriever_plugin.h"
+#include "retriever_thread.h"
+
+#include <core/exceptions/software.h>
 
 using namespace fawkes;
 
-/** @class FvRetrieverPlugin <fvretriever_plugin.h>
+/** @class FvRetrieverPlugin "fvretriever_plugin.h"
  * FireVision Retriever Plugin.
  * This is the FireVision retriever plugin. It is a simple plugin that will
  * fetch images from a specific camera defined as a configuration setting.
@@ -35,11 +37,33 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-FvRetrieverPlugin::FvRetrieverPlugin()
-  : Plugin("fvretriever")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+FvRetrieverPlugin::FvRetrieverPlugin(Configuration *config)
+  : Plugin(config)
 {
-  thread_list.push_back(new FvRetrieverThread());
+
+  std::string prefix = "/firevision/retriever/camera/";
+  Configuration::ValueIterator *vi = config->search(prefix.c_str());
+
+  while (vi->next()) {
+    if ( ! vi->is_string() ) {
+      throw TypeMismatchException("Only values of type string are valid for camera"
+				  " argument strings, but got %s for %s",
+				  vi->type(), vi->path());
+    }
+
+    std::string id = std::string(vi->path()).substr(prefix.length());
+
+    thread_list.push_back(new FvRetrieverThread(vi->get_string().c_str(), id.c_str()));
+  }
+
+  if ( thread_list.empty() ) {
+    throw Exception("No cameras have been set for fvretriever");
+  }
+
+  delete vi;
 }
 
 EXPORT_PLUGIN(FvRetrieverPlugin)

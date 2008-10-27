@@ -27,7 +27,7 @@
 
 using namespace fawkes;
 
-/** @class FvFountainPlugin <fountain_plugin.h>
+/** @class FvFountainPlugin "fountain_plugin.h"
  * FireVision Fountain Plugin.
  * This is the FireVision fountain plugin. It is a simple plugin that will
  * start a FuseServer that will then fulfill remote requests for internal
@@ -36,9 +36,11 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-FvFountainPlugin::FvFountainPlugin()
-  : Plugin("fvfountain")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+FvFountainPlugin::FvFountainPlugin(Configuration *config)
+  : Plugin(config)
 {
   thread_list.push_back(new FountainThread());
 }

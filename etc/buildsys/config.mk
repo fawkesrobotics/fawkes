@@ -79,7 +79,7 @@ endif
 
 ### Features ###
 # If gcc is used, enable OpenMP?
-GCC_USE_OPENMP=1
+GCC_USE_OPENMP=0
 
 ### CFLAGS, preprocessor, compiler and linker options
 LDFLAGS_LIBDIRS  = -Wl,-R$(EXEC_LIBDIR) -Wl,-R$(LIBDIR) $(LIBDIRS:%=-Wl,-R%)

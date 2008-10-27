@@ -38,11 +38,12 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-FvBasePlugin::FvBasePlugin()
-  : Plugin("fvbase")
+/** Constructor.
+ * @param config Fawkes configuration
+ */
+FvBasePlugin::FvBasePlugin(Configuration *config)
+  : Plugin(config)
 {
-  // printf("ExamplePlugin constructor called\n");
   thread_list.push_back(new FvBaseThread());
 }
 
