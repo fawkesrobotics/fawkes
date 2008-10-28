@@ -24,6 +24,7 @@
  */
 
 #include <gui_utils/service_selector_cbe.h>
+#include <gui_utils/service_model.h>
 #include <gui_utils/utils.h>
 #include <netcomm/fawkes/client.h>
 
@@ -67,6 +68,10 @@ using namespace fawkes;
  * A network client of the selected service.
  */
 
+/** @var fawkes::ServiceSelectorCBE::m_service_model
+ * A liststore which contains information about detected services.
+ */
+
 /** Construtor.
  * @param services the combo box to hold the list of services
  * @param connect the button to trigger the network connection
@@ -75,8 +80,9 @@ using namespace fawkes;
 ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
 					Gtk::Button* connect,
 					const char* service )
-  : ServiceView(service)
 {
+  m_service_model = new ServiceModel(service);
+
   m_cbe_services = services;
   m_btn_connect  = connect;
 
@@ -93,38 +99,41 @@ ServiceSelectorCBE::ServiceSelectorCBE( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 					const char* cbe_name,
 					const char* btn_name,
 					const char* service )
-  : ServiceView(service)
 {
+  m_service_model = new ServiceModel(service);
+
   m_cbe_services = dynamic_cast<Gtk::ComboBoxEntry*>( get_widget(ref_xml, cbe_name) );
   m_btn_connect  = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, btn_name) );
 
   initialize();
 }
 
+/** Initializer method. */
 void
 ServiceSelectorCBE::initialize()
 {
   m_signal_connected_internal.connect( sigc::mem_fun(*this, &ServiceSelectorCBE::on_connection_established) );
   m_signal_disconnected_internal.connect( sigc::mem_fun(*this, &ServiceSelectorCBE::on_connection_died) );
 
-  m_cbe_services->set_model(m_service_list);
-  m_cbe_services->set_text_column(m_service_record.hostname);
+  m_cbe_services->set_model( m_service_model->get_list_store() );
+  m_cbe_services->set_text_column(m_service_model->get_column_record().hostname);
   m_cbe_services->get_entry()->set_activates_default(true);
-  m_cbe_services->signal_changed().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_btn_connect_clicked) );
+  //  m_cbe_services->get_entry()->signal_activate().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_btn_connect_clicked) );
+  m_cbe_services->signal_changed().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_service_selected) );
 
   m_btn_connect->signal_clicked().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_btn_connect_clicked) );
   m_btn_connect->set_label("gtk-connect");
   m_btn_connect->set_use_stock(true);
   m_btn_connect->grab_default();
 
-  m_client = new FawkesNetworkClient();
-  m_client->register_handler(this, FAWKES_CID_OBSERVER_MODE);
+  m_client = NULL;
 }
 
 /** Destructor. */
 ServiceSelectorCBE::~ServiceSelectorCBE()
 {
   delete m_client;
+  delete m_service_model;
 }
 
 /** Access the current network client.
@@ -160,26 +169,79 @@ ServiceSelectorCBE::signal_disconnected()
 void
 ServiceSelectorCBE::on_btn_connect_clicked()
 {
-  if ( m_client && m_client->connected() )
-  { 
-    m_client->disconnect();
-  }
-  else
-  { 
-    Gtk::TreeModel::Row row =	*m_cbe_services->get_active();
-
-    Glib::ustring hostname = row[m_service_record.hostname];
-    unsigned short port    = row[m_service_record.port];
-
-    try
+  if (m_client)
     {
-      m_client->connect(hostname.c_str(), port);
+      if ( m_client->connected() )
+	{ m_client->disconnect(); }
+
+      delete m_client;
+      m_client = NULL; 
+
+      m_btn_connect->set_label("gtk-connect");
     }
-    catch (Exception& e)
+  else
+    { 
+      Glib::ustring hostname;
+      unsigned short port;
+
+      if ( -1 == m_cbe_services->get_active_row_number() )
+	{
+	  Gtk::Entry* entry = m_cbe_services->get_entry();
+	  hostname = entry->get_text();
+	  port = 1910;
+	}
+      else
+	{
+	  Gtk::TreeModel::Row row = *m_cbe_services->get_active();
+	  hostname = row[m_service_model->get_column_record().hostname];
+	  port = row[m_service_model->get_column_record().port];
+	}
+
+      m_client = new FawkesNetworkClient( hostname.c_str(), port );
+      m_client->register_handler(this, FAWKES_CID_OBSERVER_MODE);
+
+      try
+	{ m_client->connect(); }
+      catch (Exception& e)
+	{ 
+	  delete m_client;
+	  e.print_trace();
+	}
+    }
+}
+
+/** Signal handler that is called whenever an entry is selected from
+ * the combo box.
+ */
+void
+ServiceSelectorCBE::on_service_selected()
+{
+  if ( -1 == m_cbe_services->get_active_row_number() )
+    { return; }
+
+  if (m_client)
     {
+      if ( m_client->connected() )
+	{ m_client->disconnect(); }
+
+      delete m_client;
+      m_client = NULL;
+    }
+
+  Gtk::TreeModel::Row row = *m_cbe_services->get_active();
+  Glib::ustring hostname = row[m_service_model->get_column_record().hostname];
+  unsigned short port = row[m_service_model->get_column_record().port];
+
+  m_client = new FawkesNetworkClient( hostname.c_str(), port );
+  m_client->register_handler(this, FAWKES_CID_OBSERVER_MODE);
+  
+  try
+    { m_client->connect(); }
+  catch (Exception& e)
+    { 
+      delete m_client;
       e.print_trace();
     }
-  }
 }
 
 /** Signal handler for the internal connection established signal. */

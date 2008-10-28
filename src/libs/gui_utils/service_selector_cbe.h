@@ -26,7 +26,6 @@
 #ifndef __LIBS_GUI_UTILS_SERVICE_SELECTOR_CBE_H_
 #define __LIBS_GUI_UTILS_SERVICE_SELECTOR_CBE_H_
 
-#include <gui_utils/service_view.h>
 #include <netcomm/fawkes/client_handler.h>
 
 #include <gtkmm.h>
@@ -34,10 +33,9 @@
 
 namespace fawkes {
 class FawkesNetworkClient;
+class ServiceModel;
 
-class ServiceSelectorCBE 
-: public ServiceView,
-  public FawkesNetworkClientHandler
+class ServiceSelectorCBE : public FawkesNetworkClientHandler
 {
  public:
   ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
@@ -63,6 +61,7 @@ class ServiceSelectorCBE
  protected:
   void initialize();
   void on_btn_connect_clicked();
+  void on_service_selected();
   void on_connection_established();
   void on_connection_died();
 
@@ -75,6 +74,7 @@ class ServiceSelectorCBE
   Glib::Dispatcher m_signal_disconnected_internal;
 
   FawkesNetworkClient* m_client;
+  ServiceModel* m_service_model;
 };
 
 }

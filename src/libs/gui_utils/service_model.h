@@ -12,14 +12,15 @@
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
  *
- *  Read the full text in the LICENSE.GPL file in the doc directory.
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
 #ifndef __LIBS_GUI_UTILS_SERVICE_MODEL_H_
@@ -32,18 +33,16 @@
 namespace fawkes {
 class AvahiThread;
 
-class ServiceView
-: public Gtk::TreeModel,
-  public fawkes::ServiceBrowseHandler
+class ServiceModel : public fawkes::ServiceBrowseHandler
 {
  public:
-  ServiceView(const char* service = "_fawkes._tcp");
-  ServiceView(fawkes::AvahiThread* avahi_thread);
-  virtual ~ServiceView();
+  ServiceModel(const char* service = "_fawkes._tcp");
+  ServiceModel(fawkes::AvahiThread* avahi_thread);
+  virtual ~ServiceModel();
+
+  Glib::RefPtr<Gtk::ListStore>& get_list_store();
   
- protected:
-  
-  class ServiceRecord : public Gtk::TreeModel::ColumnRecord
+  class ServiceRecord : public Gtk::TreeModelColumnRecord
     {
     public:
       ServiceRecord()
@@ -64,8 +63,9 @@ class ServiceView
       Gtk::TreeModelColumn<unsigned short> port;     /**< The port the service is running on */
     };
 
-  virtual void initialize() =0;
+  ServiceRecord& get_column_record();
   
+ protected:
   // service browser handler
   void all_for_now();
   void cache_exhausted();
@@ -85,17 +85,6 @@ class ServiceView
 			const char* type,
 			const char* domain );
   
-  Glib::RefPtr<Gtk::ListStore> m_service_list;
-  ServiceRecord m_service_record;
-  
-  fawkes::AvahiThread* m_avahi;
-  
-  Glib::Dispatcher m_signal_service_added;
-  Glib::Dispatcher m_signal_service_removed;
-  
-  virtual void on_service_added();
-  virtual void on_service_removed();
-
   struct ServiceAddedRecord
   {
     std::string name;      /**< the name of the new service */
@@ -113,8 +102,19 @@ class ServiceView
     std::string domain;  /**< the domain of the service */
   };
       
-  fawkes::LockQueue<ServiceAddedRecord> m_added_services;
+  fawkes::LockQueue<ServiceAddedRecord>   m_added_services;
   fawkes::LockQueue<ServiceRemovedRecord> m_removed_services;
+  
+  Glib::Dispatcher m_signal_service_added;
+  Glib::Dispatcher m_signal_service_removed;
+  
+  virtual void on_service_added();
+  virtual void on_service_removed();
+
+  Glib::RefPtr<Gtk::ListStore> m_service_list;
+  ServiceRecord                m_service_record;
+  
+  fawkes::AvahiThread* m_avahi;
   
  private:
   bool m_own_avahi_thread;

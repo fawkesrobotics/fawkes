@@ -31,15 +31,15 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/expander.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gui_utils/service_view.h>
+#include <gui_utils/service_model.h>
 
 namespace fawkes {
 
 class FawkesNetworkClient;
+class ServiceModel;
 
 class ServiceChooserDialog
-  : public Gtk::Dialog,
-    public ServiceView
+  : public Gtk::Dialog
 {
  public:
   ServiceChooserDialog(Gtk::Window &parent,
@@ -51,9 +51,9 @@ class ServiceChooserDialog
 		       Glib::ustring title = "Select Service",
 		       const char *service = "_fawkes._tcp");
 
-  virtual void initialize();
+  virtual ~ServiceChooserDialog();
 
-  void get_selected_service(Glib::ustring &name, Glib::ustring &hostname,
+ void get_selected_service(Glib::ustring &name, Glib::ustring &hostname,
 			    Glib::ustring &ipaddr, unsigned short int &port);
 
   void run_and_connect();
@@ -70,6 +70,8 @@ class ServiceChooserDialog
   Gtk::Entry           __entry;
   Gtk::Expander        __expander;
   Gtk::ScrolledWindow  __scrollwin;
+
+  ServiceModel *__service_model;
 };
 
 } // end of namespace fawkes

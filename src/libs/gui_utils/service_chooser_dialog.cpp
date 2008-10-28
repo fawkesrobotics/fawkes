@@ -27,6 +27,7 @@
 #include <core/exceptions/software.h>
 #include <netcomm/fawkes/client.h>
 #include <gui_utils/service_chooser_dialog.h>
+#include <gui_utils/service_model.h>
 
 #include <cstring>
 
@@ -49,9 +50,9 @@ ServiceChooserDialog::ServiceChooserDialog(Gtk::Window &parent,
 					   Glib::ustring title,
 					   const char *service)
   : Gtk::Dialog(title, parent, /* modal */ true, /* separator */ true),
-    ServiceView(service),
     __parent(parent), __expander("Manual entry")
 {
+  __service_model = new ServiceModel(service);
   ctor();
   __client = NULL;
 }
@@ -68,11 +69,18 @@ ServiceChooserDialog::ServiceChooserDialog(Gtk::Window &parent,
 					   Glib::ustring title,
 					   const char *service)
   : Gtk::Dialog(title, parent, /* modal */ true, /* separator */ true),
-    ServiceView(service),
     __parent(parent), __expander("Manual entry")
 {
+  __service_model = new ServiceModel(service);
   ctor();
   __client = client;
+}
+
+
+/** Destructor. */
+ServiceChooserDialog::~ServiceChooserDialog()
+{
+  delete __service_model;
 }
 
 
@@ -81,8 +89,8 @@ ServiceChooserDialog::ctor()
 {
   set_default_size(360, 240);
 
-  __treeview.set_model(m_service_list);
-  __treeview.append_column("Service", m_service_record.name);
+  __treeview.set_model(__service_model->get_list_store());
+  __treeview.append_column("Service", __service_model->get_column_record().name);
   __scrollwin.add(__treeview);
   __scrollwin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
   __treeview.show();
@@ -104,11 +112,6 @@ ServiceChooserDialog::ctor()
 #ifdef GLIBMM_PROPERTIES_ENABLED
   __expander.property_expanded().signal_changed().connect(sigc::mem_fun(*this, &ServiceChooserDialog::on_expander_changed));
 #endif
-}
-
-void
-ServiceChooserDialog::initialize()
-{
 }
 
 
@@ -154,13 +157,13 @@ ServiceChooserDialog::get_selected_service(Glib::ustring &name,
     }
   }
 
-  TreeModel::iterator iter = treesel->get_selected();
+  Gtk::TreeModel::iterator iter = treesel->get_selected();
   if (iter) {
-    TreeModel::Row row = *iter;
-    name     = row[m_service_record.name];
-    hostname = row[m_service_record.hostname];
-    ipaddr   = row[m_service_record.ipaddr];
-    port     = row[m_service_record.port];
+    Gtk::TreeModel::Row row = *iter;
+    name     = row[__service_model->get_column_record().name];
+    hostname = row[__service_model->get_column_record().hostname];
+    ipaddr   = row[__service_model->get_column_record().ipaddr];
+    port     = row[__service_model->get_column_record().port];
 
   } else {
     throw Exception("No host selected");
