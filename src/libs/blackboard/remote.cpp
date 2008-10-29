@@ -186,6 +186,12 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
     __instance_factory->delete_interface_instance(iface);
     if ( error == BB_ERR_WRITER_EXISTS ) {
       throw BlackBoardWriterActiveException(identifier, type);
+    } else if ( error == BB_ERR_HASH_MISMATCH ) {
+      throw Exception("Hash mismatch for interface %s:%s", type, identifier);
+    } else if ( error == BB_ERR_UNKNOWN_TYPE ) {
+      throw Exception("Type %s unknoen (%s:%s)", type, type, identifier);
+    } else if ( error == BB_ERR_WRITER_EXISTS ) {
+      throw BlackBoardWriterActiveException(identifier, type);
     } else {
       throw Exception("Could not open interface");
     }

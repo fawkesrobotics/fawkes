@@ -46,6 +46,7 @@ PLUGINDIR = $(abspath $(BASEDIR)/plugins)
 RESDIR = $(abspath $(BASEDIR)/res)
 
 # Paths at execution time, may be different if installed or deployed
+TARGET_ARCH ?= $(ARCH)
 EXEC_BASEDIR ?= $(BASEDIR)
 EXEC_BINDIR = $(abspath $(EXEC_BASEDIR)/bin)
 EXEC_LIBDIR = $(abspath $(EXEC_BASEDIR)/lib)

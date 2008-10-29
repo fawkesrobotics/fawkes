@@ -306,7 +306,7 @@ ConfigTreeView::get_iter(const char* p)
   char* path;
   char* full_path;
 
-  asprintf(&full_path, p);
+  asprintf(&full_path, "%s", p);
   char* node = strtok(full_path, "/");
 
   asprintf(&path, "/%s/", node);
