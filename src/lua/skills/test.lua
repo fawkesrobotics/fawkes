@@ -27,3 +27,5 @@ local skillenv = require("skills.skiller.skillenv")
 
 skillenv.use_skill("skills.generic.relgoto")
 skillenv.use_skill("skills.generic.goto")
+skillenv.use_skill("skills.generic.say")
+

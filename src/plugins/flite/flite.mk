@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#           Makefile Build System for Fawkes: Flite Plugin Config
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Tue Oct 28 14:50:59 2008
+#   Copyright (C) 2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,10 +13,13 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
-include $(BASEDIR)/etc/buildsys/config.mk
+ifneq ($(wildcard $(SYSROOT)/usr/include/flite/flite.h),)
+  HAVE_FLITE=1
+endif
 
-SUBDIRS = laser skiller webview flite
-
-include $(BASEDIR)/etc/buildsys/rules.mk
+ifneq ($(PKGCONFIG),)
+  HAVE_ALSA = $(if $(shell $(PKGCONFIG) --exists 'alsa'; echo $${?/1/}),1,0)
+  CFLAGS_ALSA  = $(shell $(PKGCONFIG) --cflags 'alsa')
+  LDFLAGS_ALSA = $(shell $(PKGCONFIG) --libs 'alsa')
+endif
 
