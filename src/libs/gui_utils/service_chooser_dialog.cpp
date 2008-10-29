@@ -209,11 +209,11 @@ ServiceChooserDialog::run_and_connect()
 
       __client->connect(ipaddr.c_str(), port);
     } catch (Exception &e) {
-      Glib::ustring message = "Connection failed: ";
-      message += *(e.begin());
+      Glib::ustring message = *(e.begin());
       Gtk::MessageDialog md(__parent, message, /* markup */ false,
 			    Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
 			    /* modal */ true);
+      md.set_title("Connection failed");
       md.run();
     }
   }
