@@ -130,7 +130,7 @@ TimeWait::wait_systime(long int usec)
   do {
     usleep(remaining_usec);
     gettimeofday(&now, NULL);
-  } while ((remaining_usec = time_diff_usec(now, start)) > 0);
+  } while ((remaining_usec = usec - time_diff_usec(now, start)) > 0);
 }
 
 /** Wait at least usec microseconds.
@@ -152,7 +152,7 @@ TimeWait::wait(long int usec)
   do {
     usleep(remaining_usec);
     clock->get_time(&now);
-  } while ((remaining_usec = time_diff_usec(now, start)) > 0);
+  } while ((remaining_usec = usec - time_diff_usec(now, start)) > 0);
 }
 
 } // end namespace fawkes
