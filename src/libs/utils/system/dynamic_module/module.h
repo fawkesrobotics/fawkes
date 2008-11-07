@@ -76,11 +76,11 @@ class Module {
   virtual void          ref()                                              = 0;
   virtual void          unref()                                            = 0;
   virtual bool          notref()                                           = 0;
-  virtual unsigned int  getRefCount()                                      = 0;
-  virtual bool          hasSymbol(const char *symbol_name)                 = 0;
-  virtual void *        getSymbol(const char *symbol_name)                 = 0;
-  virtual std::string   getFilename()                                      = 0;
-  virtual std::string   getBaseFilename()                                  = 0;
+  virtual unsigned int  get_ref_count()                                    = 0;
+  virtual bool          has_symbol(const char *symbol_name)                = 0;
+  virtual void *        get_symbol(const char *symbol_name)                = 0;
+  virtual std::string   get_filename()                                     = 0;
+  virtual std::string   get_base_filename()                                = 0;
 
 };
 

@@ -28,7 +28,8 @@
 
 #include <interface/interface.h>
 
-#include <utils/system/dynamic_module/module_dl.h>
+#include <utils/system/dynamic_module/module_manager_factory.h>
+#include <utils/system/dynamic_module/module.h>
 #include <utils/logging/liblogger.h>
 
 #include <cstdlib>
@@ -48,28 +49,21 @@ namespace fawkes {
 /** Constructor.*/
 BlackBoardInstanceFactory::BlackBoardInstanceFactory()
 {
-  try {
-    iface_module = new ModuleDL( LIBDIR"/libfawkesinterfaces.so" );
-    iface_module->open();
-  } catch (Exception &e) {
-    e.append("BlackBoardInstanceFactory cannot open interface module");
-    delete iface_module;
-    throw;
-  }
+  __mm = ModuleManagerFactory::getInstance(ModuleManagerFactory::MMT_DL, LIBDIR"/interfaces");
 }
 
 
 /** Destructor */
 BlackBoardInstanceFactory::~BlackBoardInstanceFactory()
 {
-  delete iface_module;
+  delete __mm;
 }
 
 
 /** Creates a new interface instance.
- * This method will look in the libfawkesinterfaces shared object for a factory function
- * for the interface of the given type. If this was found a new instance of the
- * interface is returned.
+ * This method will look in the for the appropriate library in LIBDIR/interfaces
+ * and then use the factory function for the interface of the given type. If
+ * this was found a new instance of the interface is returned.
  * @param type type of the interface
  * @param identifier identifier of the interface
  * @return a new instance of the requested interface type
@@ -79,20 +73,23 @@ BlackBoardInstanceFactory::~BlackBoardInstanceFactory()
 Interface *
 BlackBoardInstanceFactory::new_interface_instance(const char *type, const char *identifier)
 {
-  char *generator_name;
-  asprintf(&generator_name, "new%s", type);
-  if ( ! iface_module->hasSymbol(generator_name) ) {
-    free(generator_name);
-    throw BlackBoardInterfaceNotFoundException(type);
+  Module *mod = NULL;
+  std::string filename = std::string(type) + "." + __mm->get_module_file_extension();
+  try {
+      mod = __mm->open_module(filename.c_str());
+  } catch (Exception &e) {
+    throw BlackBoardInterfaceNotFoundException(type, " Module file not found.");
   }
 
-  InterfaceFactoryFunc iff = (InterfaceFactoryFunc)iface_module->getSymbol(generator_name);
+  if ( ! mod->has_symbol("interface_factory") ) {
+    throw BlackBoardInterfaceNotFoundException(type, " Generator function not found.");
+  }
+
+  InterfaceFactoryFunc iff = (InterfaceFactoryFunc)mod->get_symbol("interface_factory");
 
   Interface *iface = iff();
-
   iface->set_type_id(type, identifier);
 
-  free(generator_name);
   return iface;
 }
 
@@ -107,16 +104,22 @@ BlackBoardInstanceFactory::new_interface_instance(const char *type, const char *
 void
 BlackBoardInstanceFactory::delete_interface_instance(Interface *interface)
 {
-  char *destroyer_name;
-  asprintf(&destroyer_name, "delete%s", interface->__type);
-  if ( ! iface_module->hasSymbol(destroyer_name) ) {
-    free(destroyer_name);
-    throw BlackBoardInterfaceNotFoundException(interface->__type);
+  std::string filename = std::string(interface->__type) + "." + __mm->get_module_file_extension();
+  Module *mod = __mm->get_module(filename.c_str());
+
+  if ( ! mod) {
+    throw BlackBoardInterfaceNotFoundException(interface->__type, " Interface module not opened.");
   }
 
-  InterfaceDestroyFunc idf = (InterfaceDestroyFunc)iface_module->getSymbol(destroyer_name);
+  if ( ! mod->has_symbol("interface_destroy") ) {
+    throw BlackBoardInterfaceNotFoundException(interface->__type, " Destroyer function not found.");
+  }
+
+  InterfaceDestroyFunc idf = (InterfaceDestroyFunc)mod->get_symbol("interface_destroy");
   idf(interface);
-  free(destroyer_name);
+
+  mod->unref();
+  __mm->close_module(mod);
 }
 
 } // end namespace fawkes

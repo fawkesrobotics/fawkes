@@ -30,7 +30,7 @@
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
 
-#include <interfaces/test.h>
+#include <interfaces/TestInterface.h>
 #include <interface/interface_info.h>
 
 #include <core/exceptions/system.h>

@@ -62,7 +62,7 @@ PluginLoadThread::PluginLoadThread(ModuleManager *mm, const char *plugin_name,
   _config = config;
 
   // This is dependent on the system architecture!
-  if ( asprintf(&_module_name, "%s.%s", plugin_name, _mm->getModuleFileExtension()) == -1 ) {
+  if ( asprintf(&_module_name, "%s.%s", plugin_name, _mm->get_module_file_extension()) == -1 ) {
     ple.append("Could not allocate module_name buffer");
     _module_name = NULL;
   }
@@ -129,7 +129,7 @@ PluginLoadThread::load()
   if ( _module_name == NULL )  return;
 
   try {
-    _module = _mm->openModule(_module_name);
+    _module = _mm->open_module(_module_name);
   } catch (ModuleOpenException &e) {
     ple.append("PluginLoader failed to open module %s", _module_name);
     ple.append(e);
@@ -142,12 +142,12 @@ PluginLoadThread::load()
     return;
   }
 
-  if ( ! _module->hasSymbol("plugin_factory") ) {
+  if ( ! _module->has_symbol("plugin_factory") ) {
     ple.append("Symbol 'plugin_factory' not found");
     return;
   }
 
-  PluginFactoryFunc pff = (PluginFactoryFunc)_module->getSymbol("plugin_factory");
+  PluginFactoryFunc pff = (PluginFactoryFunc)_module->get_symbol("plugin_factory");
 
   try {
     Plugin *p = pff(_config);

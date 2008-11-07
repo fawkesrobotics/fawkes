@@ -64,25 +64,25 @@ ModuleOpenException::ModuleOpenException(const char *msg)
  * @return Returns true if there are no references to this module,
  * false if there is at least one reference
  *
- * @fn unsigned int Module::getRefCount() = 0
+ * @fn unsigned int Module::get_ref_count() = 0
  * Get the reference count of this module
  * @return Returns the number of references to this module
  *
- * @fn bool Module::hasSymbol(const char *symbol_name) = 0
+ * @fn bool Module::has_symbol(const char *symbol_name) = 0
  * Check if the module has the given symbol
  * @param symbol_name The name of the symbol.
  * @return Returns true if the symbol was found, false otherwise
  *
- * @fn void * Module::getSymbol(const char *symbol_name) = 0
+ * @fn void * Module::get_symbol(const char *symbol_name) = 0
  * Get a symbol from the module
  * @param symbol_name The name of the symbol.
  * @return Returns a pointer to the symbol or NULL if symbol was not found
  *
- * @fn std::string Module::getFilename() = 0
+ * @fn std::string Module::get_filename() = 0
  * Get the full file name of the module
  * @return Returns a string with the full file name of the module
  *
- * @fn std::string Module::getBaseFilename() = 0
+ * @fn std::string Module::get_base_filename() = 0
  * Get the base file name of the module
  * @return Returns the base file name of the module. On Unix systems this is
  * everything after the last slash

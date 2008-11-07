@@ -50,19 +50,19 @@ class ModuleManager {
    * closeModule to close it.
    * @exception ModuleOpenException thrown if the module could not be opened
    */
-  virtual Module *  openModule(const char *filename) = 0;
+  virtual Module *  open_module(const char *filename) = 0;
 
   /** Close a module by Module instance
    * @param module The module that is to be closed
    */
-  virtual void      closeModule(Module *module) = 0;
+  virtual void      close_module(Module *module) = 0;
 
   /** Close a module by filename
    * @param filename the name of the module file that should be closed, this
    * is compared to loaded modules and must match what
    * Module::GetBaseFilename() returns
    */
-  virtual void      closeModule(const char *filename) = 0;
+  virtual void      close_module(const char *filename) = 0;
 
   /** Check if the module for the given filename is already
    * opened
@@ -70,13 +70,24 @@ class ModuleManager {
    * It is compared to loaded modules and must match what
    * Module::GetBaseFilename() returns
    */
-  virtual bool      moduleOpened(const char *filename) = 0;
+  virtual bool      module_opened(const char *filename) = 0;
+
+  /** Get a module if opened.
+   * This will return a pointer to a module if it had already been opened! The
+   * reference count is increased and you have to manually unref the module once
+   * you are done with it! This method works similar to open_module() with the
+   * difference that it is not tried to load the module if it is not open.
+   * @param filename file name of the module
+   * @return a pointer to the module with the reference cound incremented by one
+   * if the module had been opened already or NULL if it was not opened.
+   */
+  virtual Module *  get_module(const char *filename) = 0;
 
   /** Get the file extension for the current module type
    * @return Returns a string with the file extension that has to
    * be used for modules on the current system (for example "so")
    */
-  virtual const char * getModuleFileExtension() = 0;
+  virtual const char * get_module_file_extension() = 0;
 
 };
 

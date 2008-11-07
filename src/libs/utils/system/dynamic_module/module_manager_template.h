@@ -27,6 +27,7 @@
 #define __UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_TEMPLATE_H_
 
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <utils/system/dynamic_module/module.h>
 #include <utils/system/dynamic_module/module_manager.h>
 #include <map>
@@ -64,16 +65,7 @@ class ModuleManagerTemplate : public ModuleManager {
     delete mutex;
   }
 
-  /** Open a module
-   * @param filename The file name of the module that should be
-   * opened. This filename is relative to the base dir given to the
-   * constructor
-   * @return Returns the module if the file was opened successfully
-   * or NULL otherwise. Do NOT delete the module after usage but use
-   * closeModule to close it.
-   * @exception ModuleOpenException thrown if the module could not be opened
-   */
-  MODULE_CLASS *  openModule(const char *filename)
+  MODULE_CLASS *  open_module(const char *filename)
   {
     mutex->lock();
     if ( modules.find(filename) != modules.end() ) {
@@ -85,7 +77,7 @@ class ModuleManagerTemplate : public ModuleManager {
       try {
 	module->open();
 	// ref count of module is now 1
-	modules[module->getBaseFilename()] = module;
+	modules[module->get_base_filename()] = module;
 	mutex->unlock();
 	return module;
       } catch (ModuleOpenException &e) {
@@ -97,20 +89,12 @@ class ModuleManagerTemplate : public ModuleManager {
     mutex->unlock();
   }
 
-  /** Close a module by Module instance
-   * @param module The module that is to be closed
-   */
-  void closeModule(Module *module)
+  void close_module(Module *module)
   {
-    closeModule(module->getBaseFilename().c_str());
+    close_module(module->get_base_filename().c_str());
   }
 
-  /** Close a module by filename
-   * @param filename the name of the module file that should be closed, this
-   * is compared to loaded modules and must match what
-   * Module::GetBaseFilename() returns
-   */
-  void closeModule(const char *filename)
+  void close_module(const char *filename)
   {
     mutex->lock();
     if ( modules.find(filename) != modules.end() ) {
@@ -124,25 +108,27 @@ class ModuleManagerTemplate : public ModuleManager {
   }
 
 
-  /** Check if the module for the given filename is already
-   * opened
-   * @param filename the name of the module file to check if it is opened.
-   * It is compared to loaded modules and must match what
-   * MODULE_CLASS::GetBaseFilename() returns
-   */
-  bool moduleOpened(const char *filename)
+  Module *  get_module(const char *filename)
+  {
+    MutexLocker lock(mutex);
+    if ( modules.find(filename) != modules.end() ) {
+      modules[filename]->ref();
+      return modules[filename];
+    } else {
+      return NULL;
+    }
+  }
+
+
+  bool module_opened(const char *filename)
   {
     return ( modules.find(filename) != modules.end() );
   }
 
   
-  /** Get the file extension for the current module type
-   * @return Returns a string with the file extension that has to
-   * be used for modules on the current system (for example "so")
-   */
-  const char *getModuleFileExtension()
+  const char *get_module_file_extension()
   {
-    return MODULE_CLASS::getFileExtension();
+    return MODULE_CLASS::get_file_extension();
   }
 
  private:

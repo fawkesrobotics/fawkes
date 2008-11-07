@@ -20,22 +20,22 @@ CFLAGS = -g
 LIBS_qa_bb_memmgr = fawkesblackboard
 OBJS_qa_bb_memmgr = qa_bb_memmgr.o
 
-LIBS_qa_bb_interface = fawkesinterfaces fawkesblackboard
+LIBS_qa_bb_interface = TestInterface fawkesblackboard
 OBJS_qa_bb_interface = qa_bb_interface.o
 
-LIBS_qa_bb_messaging = fawkesinterfaces fawkesblackboard
+LIBS_qa_bb_messaging = TestInterface fawkesblackboard
 OBJS_qa_bb_messaging = qa_bb_messaging.o
 
-LIBS_qa_bb_openall = fawkesinterfaces fawkesblackboard
+LIBS_qa_bb_openall = TestInterface fawkesblackboard
 OBJS_qa_bb_openall = qa_bb_openall.o
 
-LIBS_qa_bb_notify = fawkesinterfaces fawkesblackboard
+LIBS_qa_bb_notify = TestInterface fawkesblackboard
 OBJS_qa_bb_notify = qa_bb_notify.o
 
-LIBS_qa_bb_listall = fawkesinterfaces fawkesblackboard
+LIBS_qa_bb_listall = TestInterface fawkesblackboard
 OBJS_qa_bb_listall = qa_bb_listall.o
 
-LIBS_qa_bb_remote = fawkesinterfaces fawkesblackboard
+LIBS_qa_bb_remote = TestInterface fawkesblackboard
 OBJS_qa_bb_remote = qa_bb_remote.o
 
 OBJS_all =	$(OBJS_qa_bb_memmgr) 		\

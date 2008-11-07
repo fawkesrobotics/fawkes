@@ -268,11 +268,11 @@ PluginLoader::unload(Plugin *plugin)
 {
   if ( d->plugin_module_map.find(plugin) != d->plugin_module_map.end() ) {
     
-    PluginDestroyFunc pdf = (PluginDestroyFunc)d->plugin_module_map[plugin]->getSymbol("plugin_destroy");
+    PluginDestroyFunc pdf = (PluginDestroyFunc)d->plugin_module_map[plugin]->get_symbol("plugin_destroy");
     if ( pdf != NULL ) {
       pdf(plugin);
     }
-    d->mm->closeModule(d->plugin_module_map[plugin]);
+    d->mm->close_module(d->plugin_module_map[plugin]);
     d->plugin_module_map.erase(plugin);
 
     d->name_plugin_map.erase(d->plugin_name_map[plugin]);

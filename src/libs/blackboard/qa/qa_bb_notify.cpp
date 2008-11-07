@@ -33,7 +33,7 @@
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
 
-#include <interfaces/test.h>
+#include <interfaces/TestInterface.h>
 
 #include <core/threading/thread.h>
 #include <core/exceptions/system.h>

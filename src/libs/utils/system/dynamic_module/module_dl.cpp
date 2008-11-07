@@ -188,7 +188,7 @@ ModuleDL::notref()
  * @return Returns the number of references to this module
  */
 unsigned int
-ModuleDL::getRefCount()
+ModuleDL::get_ref_count()
 {
   return ref_count;
 }
@@ -202,7 +202,7 @@ ModuleDL::getRefCount()
 bool
 ModuleDL::operator==(ModuleDL &cmod)
 {
-  return ( filename == cmod.getFilename() );
+  return ( filename == cmod.get_filename() );
 }
 
 
@@ -216,7 +216,7 @@ ModuleDL::operator==(ModuleDL &cmod)
  * @return Returns true if the symbol was found, false otherwise
  */
 bool
-ModuleDL::hasSymbol(const char *symbol_name)
+ModuleDL::has_symbol(const char *symbol_name)
 {
   if( symbol_name == NULL ) {
     return false;
@@ -239,7 +239,7 @@ ModuleDL::hasSymbol(const char *symbol_name)
  * @return Returns a pointer to the symbol or NULL if symbol was not found
  */
 void *
-ModuleDL::getSymbol(const char *symbol_name)
+ModuleDL::get_symbol(const char *symbol_name)
 {
   if( symbol_name == NULL ) return NULL;
   if ( handle == NULL ) return NULL;
@@ -252,7 +252,7 @@ ModuleDL::getSymbol(const char *symbol_name)
  * @return Returns the file extension for dl modules, this is "so"
  */
 const char *
-ModuleDL::getFileExtension()
+ModuleDL::get_file_extension()
 {
   return FILE_EXTENSION;
 }
@@ -262,7 +262,7 @@ ModuleDL::getFileExtension()
  * @return Returns a string with the full file name of the module
  */
 std::string
-ModuleDL::getFilename()
+ModuleDL::get_filename()
 {
   return filename;
 }
@@ -273,7 +273,7 @@ ModuleDL::getFilename()
  * everything after the last slash
  */
 std::string
-ModuleDL::getBaseFilename()
+ModuleDL::get_base_filename()
 {
   if ( filename.find("/", 0) != std::string::npos ) {
     std::string rv = filename.substr(filename.rfind("/", filename.length()) + 1, filename.length());

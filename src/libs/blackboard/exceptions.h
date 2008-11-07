@@ -94,10 +94,11 @@ class BlackBoardInterfaceNotFoundException : public Exception {
  public:
   /** Constructor
    * @param type type of interface that could not be found
+   * @param add_msg additional message, add a space as first character
    */
-  BlackBoardInterfaceNotFoundException(const char *type) : Exception()
+  BlackBoardInterfaceNotFoundException(const char *type, const char *add_msg = "")
+    : Exception("Interface of type '%s' not found.%s", type, add_msg)
   {
-    append("Interface of type '%s' not found.", type);
   }
 };
 

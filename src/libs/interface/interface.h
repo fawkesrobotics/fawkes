@@ -303,7 +303,7 @@ typedef Interface *  (* InterfaceFactoryFunc)  (void);
 #define INTERFACE_FACTORY(interface_class)			\
   extern "C"							\
   Interface *							\
-  new##interface_class()						\
+  interface_factory()						\
   {								\
     return private_new##interface_class();			\
   }
@@ -315,7 +315,7 @@ typedef Interface *  (* InterfaceFactoryFunc)  (void);
 #define INTERFACE_DESTROY(interface_class)		\
   extern "C"						\
   void							\
-  delete##interface_class (interface_class *interface)	\
+  interface_destroy(interface_class *interface)		\
   {							\
     private_delete##interface_class(interface);		\
   }

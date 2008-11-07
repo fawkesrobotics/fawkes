@@ -45,18 +45,18 @@ class ModuleDL : public Module {
   virtual void    ref();
   virtual void    unref();
   virtual bool    notref();
-  virtual unsigned int getRefCount();
+  virtual unsigned int get_ref_count();
 
 
-  virtual bool    hasSymbol(const char *symbol_name);
-  virtual void *  getSymbol(const char *symbol_name);
+  virtual bool    has_symbol(const char *symbol_name);
+  virtual void *  get_symbol(const char *symbol_name);
 
   virtual bool    operator==(ModuleDL &cmod);
 
-  virtual std::string getFilename();
-  virtual std::string getBaseFilename();
+  virtual std::string get_filename();
+  virtual std::string get_base_filename();
 
-  static const char * getFileExtension();
+  static const char * get_file_extension();
 
  private:
   static const char *FILE_EXTENSION;
