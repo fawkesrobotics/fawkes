@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/SkillerInterface.h>
+#include "SkillerInterface.h"
 
 #include <core/exceptions/software.h>
 
@@ -233,7 +233,7 @@ SkillerInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class SkillerInterface::ExecSkillMessage interfaces/SkillerInterface.h
+/** @class SkillerInterface::ExecSkillMessage <interfaces/SkillerInterface.h>
  * ExecSkillMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -324,7 +324,7 @@ SkillerInterface::ExecSkillMessage::clone() const
 {
   return new SkillerInterface::ExecSkillMessage(this);
 }
-/** @class SkillerInterface::ExecSkillContinuousMessage interfaces/SkillerInterface.h
+/** @class SkillerInterface::ExecSkillContinuousMessage <interfaces/SkillerInterface.h>
  * ExecSkillContinuousMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -415,7 +415,7 @@ SkillerInterface::ExecSkillContinuousMessage::clone() const
 {
   return new SkillerInterface::ExecSkillContinuousMessage(this);
 }
-/** @class SkillerInterface::RestartInterpreterMessage interfaces/SkillerInterface.h
+/** @class SkillerInterface::RestartInterpreterMessage <interfaces/SkillerInterface.h>
  * RestartInterpreterMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -454,7 +454,7 @@ SkillerInterface::RestartInterpreterMessage::clone() const
 {
   return new SkillerInterface::RestartInterpreterMessage(this);
 }
-/** @class SkillerInterface::StopExecMessage interfaces/SkillerInterface.h
+/** @class SkillerInterface::StopExecMessage <interfaces/SkillerInterface.h>
  * StopExecMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -493,7 +493,7 @@ SkillerInterface::StopExecMessage::clone() const
 {
   return new SkillerInterface::StopExecMessage(this);
 }
-/** @class SkillerInterface::AcquireControlMessage interfaces/SkillerInterface.h
+/** @class SkillerInterface::AcquireControlMessage <interfaces/SkillerInterface.h>
  * AcquireControlMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -532,7 +532,7 @@ SkillerInterface::AcquireControlMessage::clone() const
 {
   return new SkillerInterface::AcquireControlMessage(this);
 }
-/** @class SkillerInterface::ReleaseControlMessage interfaces/SkillerInterface.h
+/** @class SkillerInterface::ReleaseControlMessage <interfaces/SkillerInterface.h>
  * ReleaseControlMessage Fawkes BlackBoard Interface Message.
  * 
     

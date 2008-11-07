@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/TestInterface.h>
+#include "TestInterface.h"
 
 #include <core/exceptions/software.h>
 
@@ -328,7 +328,7 @@ TestInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class TestInterface::SetTestIntMessage interfaces/TestInterface.h
+/** @class TestInterface::SetTestIntMessage <interfaces/TestInterface.h>
  * SetTestIntMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -413,7 +413,7 @@ TestInterface::SetTestIntMessage::clone() const
 {
   return new TestInterface::SetTestIntMessage(this);
 }
-/** @class TestInterface::SetTestStringMessage interfaces/TestInterface.h
+/** @class TestInterface::SetTestStringMessage <interfaces/TestInterface.h>
  * SetTestStringMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -498,7 +498,7 @@ TestInterface::SetTestStringMessage::clone() const
 {
   return new TestInterface::SetTestStringMessage(this);
 }
-/** @class TestInterface::CalculateMessage interfaces/TestInterface.h
+/** @class TestInterface::CalculateMessage <interfaces/TestInterface.h>
  * CalculateMessage Fawkes BlackBoard Interface Message.
  * 
     

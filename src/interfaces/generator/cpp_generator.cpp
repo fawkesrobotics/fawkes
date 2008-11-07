@@ -204,7 +204,7 @@ CppInterfaceGenerator::write_cpp(FILE *f)
 {
   write_header(f, filename_cpp);
   fprintf(f,
-	  "#include <interfaces/%s>\n\n"
+	  "#include \"%s\"\n\n"
 	  "#include <core/exceptions/software.h>\n\n"
 	  "#include <cstring>\n"
 	  "#include <cstdlib>\n\n"
@@ -332,7 +332,7 @@ CppInterfaceGenerator::write_messages_cpp(FILE *f)
   fprintf(f, "/* =========== messages =========== */\n");
   for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
     fprintf(f,
-	    "/** @class %s::%s interfaces/%s\n"
+	    "/** @class %s::%s <interfaces/%s>\n"
 	    " * %s Fawkes BlackBoard Interface Message.\n"
 	    " * %s\n"
 	    " */\n\n\n",

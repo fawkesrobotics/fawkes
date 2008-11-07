@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/MotorInterface.h>
+#include "MotorInterface.h"
 
 #include <core/exceptions/software.h>
 
@@ -603,7 +603,7 @@ MotorInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class MotorInterface::SetMotorStateMessage interfaces/MotorInterface.h
+/** @class MotorInterface::SetMotorStateMessage <interfaces/MotorInterface.h>
  * SetMotorStateMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -692,7 +692,7 @@ MotorInterface::SetMotorStateMessage::clone() const
 {
   return new MotorInterface::SetMotorStateMessage(this);
 }
-/** @class MotorInterface::AcquireControlMessage interfaces/MotorInterface.h
+/** @class MotorInterface::AcquireControlMessage <interfaces/MotorInterface.h>
  * AcquireControlMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -823,7 +823,7 @@ MotorInterface::AcquireControlMessage::clone() const
 {
   return new MotorInterface::AcquireControlMessage(this);
 }
-/** @class MotorInterface::ResetOdometryMessage interfaces/MotorInterface.h
+/** @class MotorInterface::ResetOdometryMessage <interfaces/MotorInterface.h>
  * ResetOdometryMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -862,7 +862,7 @@ MotorInterface::ResetOdometryMessage::clone() const
 {
   return new MotorInterface::ResetOdometryMessage(this);
 }
-/** @class MotorInterface::DriveRPMMessage interfaces/MotorInterface.h
+/** @class MotorInterface::DriveRPMMessage <interfaces/MotorInterface.h>
  * DriveRPMMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1011,7 +1011,7 @@ MotorInterface::DriveRPMMessage::clone() const
 {
   return new MotorInterface::DriveRPMMessage(this);
 }
-/** @class MotorInterface::GotoMessage interfaces/MotorInterface.h
+/** @class MotorInterface::GotoMessage <interfaces/MotorInterface.h>
  * GotoMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1192,7 +1192,7 @@ MotorInterface::GotoMessage::clone() const
 {
   return new MotorInterface::GotoMessage(this);
 }
-/** @class MotorInterface::TransMessage interfaces/MotorInterface.h
+/** @class MotorInterface::TransMessage <interfaces/MotorInterface.h>
  * TransMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1309,7 +1309,7 @@ MotorInterface::TransMessage::clone() const
 {
   return new MotorInterface::TransMessage(this);
 }
-/** @class MotorInterface::RotMessage interfaces/MotorInterface.h
+/** @class MotorInterface::RotMessage <interfaces/MotorInterface.h>
  * RotMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1394,7 +1394,7 @@ MotorInterface::RotMessage::clone() const
 {
   return new MotorInterface::RotMessage(this);
 }
-/** @class MotorInterface::TransRotMessage interfaces/MotorInterface.h
+/** @class MotorInterface::TransRotMessage <interfaces/MotorInterface.h>
  * TransRotMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1543,7 +1543,7 @@ MotorInterface::TransRotMessage::clone() const
 {
   return new MotorInterface::TransRotMessage(this);
 }
-/** @class MotorInterface::OrbitMessage interfaces/MotorInterface.h
+/** @class MotorInterface::OrbitMessage <interfaces/MotorInterface.h>
  * OrbitMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1692,7 +1692,7 @@ MotorInterface::OrbitMessage::clone() const
 {
   return new MotorInterface::OrbitMessage(this);
 }
-/** @class MotorInterface::LinTransRotMessage interfaces/MotorInterface.h
+/** @class MotorInterface::LinTransRotMessage <interfaces/MotorInterface.h>
  * LinTransRotMessage Fawkes BlackBoard Interface Message.
  * 
     

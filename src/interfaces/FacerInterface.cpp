@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/FacerInterface.h>
+#include "FacerInterface.h"
 
 #include <core/exceptions/software.h>
 
@@ -233,7 +233,7 @@ FacerInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class FacerInterface::LearnFaceMessage interfaces/FacerInterface.h
+/** @class FacerInterface::LearnFaceMessage <interfaces/FacerInterface.h>
  * LearnFaceMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -318,7 +318,7 @@ FacerInterface::LearnFaceMessage::clone() const
 {
   return new FacerInterface::LearnFaceMessage(this);
 }
-/** @class FacerInterface::SetOpmodeMessage interfaces/FacerInterface.h
+/** @class FacerInterface::SetOpmodeMessage <interfaces/FacerInterface.h>
  * SetOpmodeMessage Fawkes BlackBoard Interface Message.
  * 
     

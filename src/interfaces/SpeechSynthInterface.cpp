@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/SpeechSynthInterface.h>
+#include "SpeechSynthInterface.h"
 
 #include <core/exceptions/software.h>
 
@@ -111,7 +111,7 @@ SpeechSynthInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class SpeechSynthInterface::SayMessage interfaces/SpeechSynthInterface.h
+/** @class SpeechSynthInterface::SayMessage <interfaces/SpeechSynthInterface.h>
  * SayMessage Fawkes BlackBoard Interface Message.
  * 
     

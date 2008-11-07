@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/KickerInterface.h>
+#include "KickerInterface.h"
 
 #include <core/exceptions/software.h>
 
@@ -250,7 +250,7 @@ KickerInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class KickerInterface::KickMessage interfaces/KickerInterface.h
+/** @class KickerInterface::KickMessage <interfaces/KickerInterface.h>
  * KickMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -431,7 +431,7 @@ KickerInterface::KickMessage::clone() const
 {
   return new KickerInterface::KickMessage(this);
 }
-/** @class KickerInterface::ResetCounterMessage interfaces/KickerInterface.h
+/** @class KickerInterface::ResetCounterMessage <interfaces/KickerInterface.h>
  * ResetCounterMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -470,7 +470,7 @@ KickerInterface::ResetCounterMessage::clone() const
 {
   return new KickerInterface::ResetCounterMessage(this);
 }
-/** @class KickerInterface::GuideBallMessage interfaces/KickerInterface.h
+/** @class KickerInterface::GuideBallMessage <interfaces/KickerInterface.h>
  * GuideBallMessage Fawkes BlackBoard Interface Message.
  * 
     

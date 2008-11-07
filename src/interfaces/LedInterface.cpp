@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/LedInterface.h>
+#include "LedInterface.h"
 
 #include <core/exceptions/software.h>
 
@@ -114,7 +114,7 @@ LedInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class LedInterface::SetIntensityMessage interfaces/LedInterface.h
+/** @class LedInterface::SetIntensityMessage <interfaces/LedInterface.h>
  * SetIntensityMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -235,7 +235,7 @@ LedInterface::SetIntensityMessage::clone() const
 {
   return new LedInterface::SetIntensityMessage(this);
 }
-/** @class LedInterface::TurnOnMessage interfaces/LedInterface.h
+/** @class LedInterface::TurnOnMessage <interfaces/LedInterface.h>
  * TurnOnMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -274,7 +274,7 @@ LedInterface::TurnOnMessage::clone() const
 {
   return new LedInterface::TurnOnMessage(this);
 }
-/** @class LedInterface::TurnOffMessage interfaces/LedInterface.h
+/** @class LedInterface::TurnOffMessage <interfaces/LedInterface.h>
  * TurnOffMessage Fawkes BlackBoard Interface Message.
  * 
     

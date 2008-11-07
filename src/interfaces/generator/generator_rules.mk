@@ -13,7 +13,9 @@
 #
 #*****************************************************************************
 
-ifeq ($(BUILD_INTERFACE_GENERATOR),1)
+include $(BASEDIR)/etc/buildsys/interface.mk
+
+ifeq ($(HAVE_INTERFACE_GENERATOR),1)
   CFLAGS += $(shell $(PKGCONFIG) --cflags libxml++-2.6)
 
   ifneq ($(notdir $(SRCDIR)),generator)
@@ -22,7 +24,7 @@ ifeq ($(BUILD_INTERFACE_GENERATOR),1)
 
   LIBS_interface_generator = fawkescore fawkesutils
   LDFLAGS_interface_generator = $(shell $(PKGCONFIG) --libs libxml++-2.6) $(LDFLAGS_LIBCRYPTO)
-  CFLAGS += $(CFLAGS_LIBCRYPTO)
+  CFLAGS += $(CFLAGS_LIBXMLPP) $(CFLAGS_LIBCRYPTO)
   OBJS_interface_generator = $(GENDIR)constant.o	\
 			     $(GENDIR)cpp_generator.o	\
 			     $(GENDIR)digest.o		\

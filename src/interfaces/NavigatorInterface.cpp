@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/NavigatorInterface.h>
+#include "NavigatorInterface.h"
 
 #include <core/exceptions/software.h>
 
@@ -312,7 +312,7 @@ NavigatorInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class NavigatorInterface::CartesianGotoMessage interfaces/NavigatorInterface.h
+/** @class NavigatorInterface::CartesianGotoMessage <interfaces/NavigatorInterface.h>
  * CartesianGotoMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -461,7 +461,7 @@ NavigatorInterface::CartesianGotoMessage::clone() const
 {
   return new NavigatorInterface::CartesianGotoMessage(this);
 }
-/** @class NavigatorInterface::PolarGotoMessage interfaces/NavigatorInterface.h
+/** @class NavigatorInterface::PolarGotoMessage <interfaces/NavigatorInterface.h>
  * PolarGotoMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -610,7 +610,7 @@ NavigatorInterface::PolarGotoMessage::clone() const
 {
   return new NavigatorInterface::PolarGotoMessage(this);
 }
-/** @class NavigatorInterface::MaxVelocityMessage interfaces/NavigatorInterface.h
+/** @class NavigatorInterface::MaxVelocityMessage <interfaces/NavigatorInterface.h>
  * MaxVelocityMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -695,7 +695,7 @@ NavigatorInterface::MaxVelocityMessage::clone() const
 {
   return new NavigatorInterface::MaxVelocityMessage(this);
 }
-/** @class NavigatorInterface::ObstacleMessage interfaces/NavigatorInterface.h
+/** @class NavigatorInterface::ObstacleMessage <interfaces/NavigatorInterface.h>
  * ObstacleMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -844,7 +844,7 @@ NavigatorInterface::ObstacleMessage::clone() const
 {
   return new NavigatorInterface::ObstacleMessage(this);
 }
-/** @class NavigatorInterface::ResetOdometryMessage interfaces/NavigatorInterface.h
+/** @class NavigatorInterface::ResetOdometryMessage <interfaces/NavigatorInterface.h>
  * ResetOdometryMessage Fawkes BlackBoard Interface Message.
  * 
     

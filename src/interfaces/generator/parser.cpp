@@ -46,7 +46,7 @@ using namespace xmlpp;
 InterfaceParser::InterfaceParser(std::string config_filename)
 {
   dom = new DomParser();
-  dom->set_validate();
+  //dom->set_validate();
   dom->set_substitute_entities();
   dom->parse_file(config_filename);
   root = dom->get_document()->get_root_node();

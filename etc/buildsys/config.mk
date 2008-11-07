@@ -44,6 +44,7 @@ LIBDIR = $(abspath $(BASEDIR)/lib)
 CONFDIR = $(abspath $(BASEDIR)/cfg)
 PLUGINDIR = $(abspath $(BASEDIR)/plugins)
 RESDIR = $(abspath $(BASEDIR)/res)
+IFACEDIR = $(abspath $(BASEDIR)/src/interfaces)
 
 # Paths at execution time, may be different if installed or deployed
 TARGET_ARCH ?= $(ARCH)
@@ -53,6 +54,7 @@ EXEC_LIBDIR = $(abspath $(EXEC_BASEDIR)/lib)
 EXEC_CONFDIR = $(abspath $(EXEC_BASEDIR)/cfg)
 EXEC_PLUGINDIR = $(abspath $(EXEC_BASEDIR)/plugins)
 EXEC_RESDIR = $(abspath $(EXEC_BASEDIR)/res)
+EXEC_IFACEDIR = $(abspath $(EXEC_BASEDIR)/src/interfaces)
 
 VPATH = $(SRCDIR)
 DEPFILE = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)

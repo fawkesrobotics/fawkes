@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/HumanoidMotionInterface.h>
+#include "HumanoidMotionInterface.h"
 
 #include <core/exceptions/software.h>
 
@@ -692,7 +692,7 @@ HumanoidMotionInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class HumanoidMotionInterface::SetWalkParamsMessage interfaces/HumanoidMotionInterface.h
+/** @class HumanoidMotionInterface::SetWalkParamsMessage <interfaces/HumanoidMotionInterface.h>
  * SetWalkParamsMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1113,7 +1113,7 @@ HumanoidMotionInterface::SetWalkParamsMessage::clone() const
 {
   return new HumanoidMotionInterface::SetWalkParamsMessage(this);
 }
-/** @class HumanoidMotionInterface::SetWalkArmsParamsMessage interfaces/HumanoidMotionInterface.h
+/** @class HumanoidMotionInterface::SetWalkArmsParamsMessage <interfaces/HumanoidMotionInterface.h>
  * SetWalkArmsParamsMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1346,7 +1346,7 @@ HumanoidMotionInterface::SetWalkArmsParamsMessage::clone() const
 {
   return new HumanoidMotionInterface::SetWalkArmsParamsMessage(this);
 }
-/** @class HumanoidMotionInterface::StopMessage interfaces/HumanoidMotionInterface.h
+/** @class HumanoidMotionInterface::StopMessage <interfaces/HumanoidMotionInterface.h>
  * StopMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1385,7 +1385,7 @@ HumanoidMotionInterface::StopMessage::clone() const
 {
   return new HumanoidMotionInterface::StopMessage(this);
 }
-/** @class HumanoidMotionInterface::WalkStraightMessage interfaces/HumanoidMotionInterface.h
+/** @class HumanoidMotionInterface::WalkStraightMessage <interfaces/HumanoidMotionInterface.h>
  * WalkStraightMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1506,7 +1506,7 @@ HumanoidMotionInterface::WalkStraightMessage::clone() const
 {
   return new HumanoidMotionInterface::WalkStraightMessage(this);
 }
-/** @class HumanoidMotionInterface::WalkSidewaysMessage interfaces/HumanoidMotionInterface.h
+/** @class HumanoidMotionInterface::WalkSidewaysMessage <interfaces/HumanoidMotionInterface.h>
  * WalkSidewaysMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1627,7 +1627,7 @@ HumanoidMotionInterface::WalkSidewaysMessage::clone() const
 {
   return new HumanoidMotionInterface::WalkSidewaysMessage(this);
 }
-/** @class HumanoidMotionInterface::WalkArcMessage interfaces/HumanoidMotionInterface.h
+/** @class HumanoidMotionInterface::WalkArcMessage <interfaces/HumanoidMotionInterface.h>
  * WalkArcMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1780,7 +1780,7 @@ HumanoidMotionInterface::WalkArcMessage::clone() const
 {
   return new HumanoidMotionInterface::WalkArcMessage(this);
 }
-/** @class HumanoidMotionInterface::TurnMessage interfaces/HumanoidMotionInterface.h
+/** @class HumanoidMotionInterface::TurnMessage <interfaces/HumanoidMotionInterface.h>
  * TurnMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -1901,7 +1901,7 @@ HumanoidMotionInterface::TurnMessage::clone() const
 {
   return new HumanoidMotionInterface::TurnMessage(this);
 }
-/** @class HumanoidMotionInterface::KickMessage interfaces/HumanoidMotionInterface.h
+/** @class HumanoidMotionInterface::KickMessage <interfaces/HumanoidMotionInterface.h>
  * KickMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -2018,7 +2018,7 @@ HumanoidMotionInterface::KickMessage::clone() const
 {
   return new HumanoidMotionInterface::KickMessage(this);
 }
-/** @class HumanoidMotionInterface::ParkMessage interfaces/HumanoidMotionInterface.h
+/** @class HumanoidMotionInterface::ParkMessage <interfaces/HumanoidMotionInterface.h>
  * ParkMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -2103,7 +2103,7 @@ HumanoidMotionInterface::ParkMessage::clone() const
 {
   return new HumanoidMotionInterface::ParkMessage(this);
 }
-/** @class HumanoidMotionInterface::GetUpMessage interfaces/HumanoidMotionInterface.h
+/** @class HumanoidMotionInterface::GetUpMessage <interfaces/HumanoidMotionInterface.h>
  * GetUpMessage Fawkes BlackBoard Interface Message.
  * 
     

@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/Laser360Interface.h>
+#include "Laser360Interface.h"
 
 #include <core/exceptions/software.h>
 

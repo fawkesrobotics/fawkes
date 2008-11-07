@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/SwitchInterface.h>
+#include "SwitchInterface.h"
 
 #include <core/exceptions/software.h>
 
@@ -310,7 +310,7 @@ SwitchInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class SwitchInterface::SetMessage interfaces/SwitchInterface.h
+/** @class SwitchInterface::SetMessage <interfaces/SwitchInterface.h>
  * SetMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -439,7 +439,7 @@ SwitchInterface::SetMessage::clone() const
 {
   return new SwitchInterface::SetMessage(this);
 }
-/** @class SwitchInterface::EnableSwitchMessage interfaces/SwitchInterface.h
+/** @class SwitchInterface::EnableSwitchMessage <interfaces/SwitchInterface.h>
  * EnableSwitchMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -478,7 +478,7 @@ SwitchInterface::EnableSwitchMessage::clone() const
 {
   return new SwitchInterface::EnableSwitchMessage(this);
 }
-/** @class SwitchInterface::DisableSwitchMessage interfaces/SwitchInterface.h
+/** @class SwitchInterface::DisableSwitchMessage <interfaces/SwitchInterface.h>
  * DisableSwitchMessage Fawkes BlackBoard Interface Message.
  * 
     

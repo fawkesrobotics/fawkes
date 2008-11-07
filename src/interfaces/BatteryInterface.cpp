@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/BatteryInterface.h>
+#include "BatteryInterface.h"
 
 #include <core/exceptions/software.h>
 
@@ -168,7 +168,7 @@ BatteryInterface::create_message(const char *type) const
 
 
 /* =========== messages =========== */
-/** @class BatteryInterface::PushButtonMessage interfaces/BatteryInterface.h
+/** @class BatteryInterface::PushButtonMessage <interfaces/BatteryInterface.h>
  * PushButtonMessage Fawkes BlackBoard Interface Message.
  * 
     
@@ -207,7 +207,7 @@ BatteryInterface::PushButtonMessage::clone() const
 {
   return new BatteryInterface::PushButtonMessage(this);
 }
-/** @class BatteryInterface::SleepMessage interfaces/BatteryInterface.h
+/** @class BatteryInterface::SleepMessage <interfaces/BatteryInterface.h>
  * SleepMessage Fawkes BlackBoard Interface Message.
  * 
     
