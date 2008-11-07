@@ -27,8 +27,8 @@
 #include <netcomm/worldinfo/transceiver.h>
 #include <worldinfo_utils/data_container.h>
 
-#include <interfaces/gamestate.h>
-#include <interfaces/object.h>
+#include <interfaces/GameStateInterface.h>
+#include <interfaces/ObjectInterface.h>
 
 #include <cmath>
 #include <cstring>

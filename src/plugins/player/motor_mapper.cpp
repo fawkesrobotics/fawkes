@@ -24,7 +24,7 @@
 
 #include "motor_mapper.h"
 
-#include <interfaces/motor.h>
+#include <interfaces/MotorInterface.h>
 #include <libplayerc++/playerc++.h>
 #include <cstdio>
 

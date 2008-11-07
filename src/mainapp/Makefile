@@ -37,7 +37,7 @@ ifeq ($(HAVE_AVAHI),1)
   CFLAGS += $(CFLAGS_AVAHI)
 endif
 
-LIBS_fawkes = fawkescore fawkesutils fawkesinterfaces fawkesblackboard fawkesnetcomm fawkesconfig fawkesplugin fawkesaspects
+LIBS_fawkes = fawkescore fawkesutils fawkesblackboard fawkesnetcomm fawkesconfig fawkesplugin fawkesaspects
 OBJS_fawkes = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all =	$(OBJS_fawkes)

@@ -26,7 +26,7 @@
 #include <tools/worldinfo_viewer/field_view.h>
 #include <worldinfo_utils/data_container.h>
 #include <blackboard/remote.h>
-#include <interfaces/battery.h>
+#include <interfaces/BatteryInterface.h>
 #include <vector>
 #include <map>
 #include <string>

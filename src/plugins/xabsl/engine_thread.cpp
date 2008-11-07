@@ -28,8 +28,8 @@
 
 #include <core/exceptions/software.h>
 #include <utils/time/time.h>
-#include <interfaces/skiller.h>
-#include <interfaces/object.h>
+#include <interfaces/SkillerInterface.h>
+#include <interfaces/ObjectPositionInterface.h>
 
 #include <XabslEngine/XabslEngine.h>
 

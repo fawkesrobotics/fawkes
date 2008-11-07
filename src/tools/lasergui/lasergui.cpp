@@ -26,7 +26,7 @@
 
 #include <netcomm/fawkes/client.h>
 #include <blackboard/remote.h>
-#include <interfaces/laser360.h>
+#include <interfaces/Laser360Interface.h>
 
 #include <gui_utils/service_chooser_dialog.h>
 #include <gui_utils/interface_dispatcher.h>

@@ -22,10 +22,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/examples/ballposlog/plugin.h>
-#include <plugins/examples/ballposlog/thread.h>
+#include "plugin.h"
+#include "thread.h"
 
-/** @class BallPosLogPlugin plugin.h <plugins/examples/ballposlog/plugin.h>
+/** @class BallPosLogPlugin "plugin.h"
  * Simple ball position logger plugin.
  * This plugin exists for demonstration purposes. It is part of the Fawkes
  * introductory talk on January 25th 2008 or AG RoboCup.
@@ -45,3 +45,4 @@ BallPosLogPlugin::BallPosLogPlugin(Configuration *config)
 }
 
 EXPORT_PLUGIN(BallPosLogPlugin)
+

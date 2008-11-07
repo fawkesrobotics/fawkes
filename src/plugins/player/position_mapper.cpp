@@ -24,7 +24,7 @@
 
 #include "position_mapper.h"
 
-#include <interfaces/object.h>
+#include <interfaces/ObjectPositionMapper.h>
 #include <libplayerc++/playerc++.h>
 
 /** @class PlayerPositionMapper "position_mapper.h"

@@ -26,7 +26,7 @@
 
 #include <core/exceptions/software.h>
 #include <utils/math/angle.h>
-#include <interfaces/laser360.h>
+#include <interfaces/Laser360Interface.h>
 #include <libplayerc++/playerc++.h>
 
 /** @class PlayerLaserMapper "laser_mapper.h"

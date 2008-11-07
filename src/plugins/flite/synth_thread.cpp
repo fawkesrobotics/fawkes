@@ -24,7 +24,7 @@
 
 #include "synth_thread.h"
 
-#include <interfaces/speechsynth.h>
+#include <interfaces/SpeechSynthInterface.h>
 #include <utils/time/wait.h>
 #include <asoundlib.h>
 

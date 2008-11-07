@@ -29,7 +29,7 @@
 
 #include <core/exceptions/software.h>
 #include <utils/time/time.h>
-#include <interfaces/object.h>
+#include <interfaces/ObjectPositionInterface.h>
 
 #include <libplayerc++/playerc++.h>
 

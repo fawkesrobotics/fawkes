@@ -26,7 +26,7 @@
 #include "acquisition_thread.h"
 #include "circle_filter.h"
 
-#include <interfaces/laser360.h>
+#include <interfaces/Laser360Interface.h>
 
 using namespace fawkes;
 

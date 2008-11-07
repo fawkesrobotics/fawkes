@@ -279,6 +279,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
   return true;
 }
 
+
 /** Scroll event handler.
  * @param event event structure
  * @return signal return value
