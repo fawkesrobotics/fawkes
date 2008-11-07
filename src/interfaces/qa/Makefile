@@ -21,17 +21,12 @@ endif
 
 CFLAGS = -g -DLIBDIR=\"$(LIBDIR)\"
 
-LIBS_qa_interface_loader = fawkescore fawkesutils fawkesinterfaces
-OBJS_qa_interface_loader = qa_interface_loader.o
-
-LIBS_qa_interface_msgq = fawkescore fawkesutils fawkesinterfaces
+LIBS_qa_interface_msgq = fawkescore fawkesutils TestInterface
 OBJS_qa_interface_msgq = qa_interface_msgq.o
 
-OBJS_all =	$(OBJS_qa_interface_loader)	\
-		$(OBJS_qa_interface_msgq)
+OBJS_all =	$(OBJS_qa_interface_msgq)
 
-BINS_all =	$(BINDIR)/qa_interface_loader	\
-		$(BINDIR)/qa_interface_msgq
+BINS_all =	$(BINDIR)/qa_interface_msgq
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

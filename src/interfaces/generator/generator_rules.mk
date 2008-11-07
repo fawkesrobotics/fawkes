@@ -34,8 +34,8 @@ ifeq ($(BUILD_INTERFACE_GENERATOR),1)
 			     $(GENDIR)tolua_generator.o	\
 			     $(GENDIR)type_checker.o
 
-  OBJS_all = $(OBJS_interface_generator)
-  BINS_all = $(BINDIR)/interface_generator
+  OBJS_all += $(OBJS_interface_generator)
+  BINS_all += $(BINDIR)/interface_generator
 
 else
   ifneq ($(HAVE_LIBXMLPP),1)

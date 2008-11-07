@@ -1,0 +1,131 @@
+$#include <interfaces/NavigatorInterface.h>
+$using namespace fawkes;
+namespace fawkes {
+class NavigatorInterface : public Interface
+{
+
+  class CartesianGotoMessage : public Message
+  {
+    CartesianGotoMessage(float ini_x, float ini_y, float ini_orientation);
+    CartesianGotoMessage();
+    ~CartesianGotoMessage();
+
+    float x();
+    void set_x(const float new_x);
+    size_t maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    size_t maxlenof_y() const;
+    float orientation();
+    void set_orientation(const float new_orientation);
+    size_t maxlenof_orientation() const;
+  };
+
+  class PolarGotoMessage : public Message
+  {
+    PolarGotoMessage(float ini_phi, float ini_dist, float ini_orientation);
+    PolarGotoMessage();
+    ~PolarGotoMessage();
+
+    float phi();
+    void set_phi(const float new_phi);
+    size_t maxlenof_phi() const;
+    float dist();
+    void set_dist(const float new_dist);
+    size_t maxlenof_dist() const;
+    float orientation();
+    void set_orientation(const float new_orientation);
+    size_t maxlenof_orientation() const;
+  };
+
+  class MaxVelocityMessage : public Message
+  {
+    MaxVelocityMessage(float ini_velocity);
+    MaxVelocityMessage();
+    ~MaxVelocityMessage();
+
+    float velocity();
+    void set_velocity(const float new_velocity);
+    size_t maxlenof_velocity() const;
+  };
+
+  class ObstacleMessage : public Message
+  {
+    ObstacleMessage(float ini_x, float ini_y, float ini_width);
+    ObstacleMessage();
+    ~ObstacleMessage();
+
+    float x();
+    void set_x(const float new_x);
+    size_t maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    size_t maxlenof_y() const;
+    float width();
+    void set_width(const float new_width);
+    size_t maxlenof_width() const;
+  };
+
+  class ResetOdometryMessage : public Message
+  {
+    ResetOdometryMessage();
+    ~ResetOdometryMessage();
+
+  };
+
+  float x();
+  void set_x(const float new_x);
+  size_t maxlenof_x() const;
+  float y();
+  void set_y(const float new_y);
+  size_t maxlenof_y() const;
+  float dest_x();
+  void set_dest_x(const float new_dest_x);
+  size_t maxlenof_dest_x() const;
+  float dest_y();
+  void set_dest_y(const float new_dest_y);
+  size_t maxlenof_dest_y() const;
+  float dest_dist();
+  void set_dest_dist(const float new_dest_dist);
+  size_t maxlenof_dest_dist() const;
+  unsigned int msgid();
+  void set_msgid(const unsigned int new_msgid);
+  size_t maxlenof_msgid() const;
+  bool is_final();
+  void set_final(const bool new_final);
+  size_t maxlenof_final() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  size_t                  hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
+
+};
+
+}

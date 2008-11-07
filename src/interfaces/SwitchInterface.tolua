@@ -1,0 +1,87 @@
+$#include <interfaces/SwitchInterface.h>
+$using namespace fawkes;
+namespace fawkes {
+class SwitchInterface : public Interface
+{
+
+  class SetMessage : public Message
+  {
+    SetMessage(bool ini_enabled, float ini_value);
+    SetMessage();
+    ~SetMessage();
+
+    bool is_enabled();
+    void set_enabled(const bool new_enabled);
+    size_t maxlenof_enabled() const;
+    float value();
+    void set_value(const float new_value);
+    size_t maxlenof_value() const;
+  };
+
+  class EnableSwitchMessage : public Message
+  {
+    EnableSwitchMessage();
+    ~EnableSwitchMessage();
+
+  };
+
+  class DisableSwitchMessage : public Message
+  {
+    DisableSwitchMessage();
+    ~DisableSwitchMessage();
+
+  };
+
+  bool is_enabled();
+  void set_enabled(const bool new_enabled);
+  size_t maxlenof_enabled() const;
+  float value();
+  void set_value(const float new_value);
+  size_t maxlenof_value() const;
+  float history();
+  void set_history(const float new_history);
+  size_t maxlenof_history() const;
+  unsigned int short_activations();
+  void set_short_activations(const unsigned int new_short_activations);
+  size_t maxlenof_short_activations() const;
+  unsigned int long_activations();
+  void set_long_activations(const unsigned int new_long_activations);
+  size_t maxlenof_long_activations() const;
+  unsigned int activation_count();
+  void set_activation_count(const unsigned int new_activation_count);
+  size_t maxlenof_activation_count() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  size_t                  hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
+
+};
+
+}

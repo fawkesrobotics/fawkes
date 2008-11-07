@@ -1,0 +1,4 @@
+/** @defgroup FawkesInterfaces Fawkes Interfaces
+ * This group contains the BlackBoard interfaces that can be used withing
+ * Fawkes.
+ */

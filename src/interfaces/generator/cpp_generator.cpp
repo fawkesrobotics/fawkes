@@ -212,6 +212,7 @@ CppInterfaceGenerator::write_cpp(FILE *f)
 	  "/** @class %s <interfaces/%s>\n"
 	  " * %s Fawkes BlackBoard Interface.\n"
 	  " * %s\n"
+	  " * @ingroup FawkesInterfaces\n"
 	  " */\n\n\n",
 	  filename_h.c_str(), class_name.c_str(), filename_h.c_str(),
 	  class_name.c_str(), data_comment.c_str());

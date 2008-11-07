@@ -1,0 +1,260 @@
+$#include <interfaces/HumanoidMotionInterface.h>
+$using namespace fawkes;
+namespace fawkes {
+class HumanoidMotionInterface : public Interface
+{
+
+  typedef enum {
+    LEG_LEFT,
+    LEG_RIGHT
+  } LegEnum;
+
+  class SetWalkParamsMessage : public Message
+  {
+    SetWalkParamsMessage(float ini_max_step_length, float ini_max_step_height, float ini_max_step_side, float ini_max_step_turn, float ini_zmp_offset_forward, float ini_zmp_offset_sideward, float ini_l_hip_roll_compensation, float ini_r_hip_roll_compensation, float ini_hip_height, float ini_torso_sideward_orientation);
+    SetWalkParamsMessage();
+    ~SetWalkParamsMessage();
+
+    float max_step_length();
+    void set_max_step_length(const float new_max_step_length);
+    size_t maxlenof_max_step_length() const;
+    float max_step_height();
+    void set_max_step_height(const float new_max_step_height);
+    size_t maxlenof_max_step_height() const;
+    float max_step_side();
+    void set_max_step_side(const float new_max_step_side);
+    size_t maxlenof_max_step_side() const;
+    float max_step_turn();
+    void set_max_step_turn(const float new_max_step_turn);
+    size_t maxlenof_max_step_turn() const;
+    float zmp_offset_forward();
+    void set_zmp_offset_forward(const float new_zmp_offset_forward);
+    size_t maxlenof_zmp_offset_forward() const;
+    float zmp_offset_sideward();
+    void set_zmp_offset_sideward(const float new_zmp_offset_sideward);
+    size_t maxlenof_zmp_offset_sideward() const;
+    float l_hip_roll_compensation();
+    void set_l_hip_roll_compensation(const float new_l_hip_roll_compensation);
+    size_t maxlenof_l_hip_roll_compensation() const;
+    float r_hip_roll_compensation();
+    void set_r_hip_roll_compensation(const float new_r_hip_roll_compensation);
+    size_t maxlenof_r_hip_roll_compensation() const;
+    float hip_height();
+    void set_hip_height(const float new_hip_height);
+    size_t maxlenof_hip_height() const;
+    float torso_sideward_orientation();
+    void set_torso_sideward_orientation(const float new_torso_sideward_orientation);
+    size_t maxlenof_torso_sideward_orientation() const;
+  };
+
+  class SetWalkArmsParamsMessage : public Message
+  {
+    SetWalkArmsParamsMessage(bool ini_arms_enabled, float ini_shoulder_pitch_median, float ini_shoulder_pitch_amplitude, float ini_elbow_roll_median, float ini_elbow_roll_amplitude);
+    SetWalkArmsParamsMessage();
+    ~SetWalkArmsParamsMessage();
+
+    bool is_arms_enabled();
+    void set_arms_enabled(const bool new_arms_enabled);
+    size_t maxlenof_arms_enabled() const;
+    float shoulder_pitch_median();
+    void set_shoulder_pitch_median(const float new_shoulder_pitch_median);
+    size_t maxlenof_shoulder_pitch_median() const;
+    float shoulder_pitch_amplitude();
+    void set_shoulder_pitch_amplitude(const float new_shoulder_pitch_amplitude);
+    size_t maxlenof_shoulder_pitch_amplitude() const;
+    float elbow_roll_median();
+    void set_elbow_roll_median(const float new_elbow_roll_median);
+    size_t maxlenof_elbow_roll_median() const;
+    float elbow_roll_amplitude();
+    void set_elbow_roll_amplitude(const float new_elbow_roll_amplitude);
+    size_t maxlenof_elbow_roll_amplitude() const;
+  };
+
+  class StopMessage : public Message
+  {
+    StopMessage();
+    ~StopMessage();
+
+  };
+
+  class WalkStraightMessage : public Message
+  {
+    WalkStraightMessage(float ini_distance, unsigned int ini_num_samples);
+    WalkStraightMessage();
+    ~WalkStraightMessage();
+
+    float distance();
+    void set_distance(const float new_distance);
+    size_t maxlenof_distance() const;
+    unsigned int num_samples();
+    void set_num_samples(const unsigned int new_num_samples);
+    size_t maxlenof_num_samples() const;
+  };
+
+  class WalkSidewaysMessage : public Message
+  {
+    WalkSidewaysMessage(float ini_distance, unsigned int ini_num_samples);
+    WalkSidewaysMessage();
+    ~WalkSidewaysMessage();
+
+    float distance();
+    void set_distance(const float new_distance);
+    size_t maxlenof_distance() const;
+    unsigned int num_samples();
+    void set_num_samples(const unsigned int new_num_samples);
+    size_t maxlenof_num_samples() const;
+  };
+
+  class WalkArcMessage : public Message
+  {
+    WalkArcMessage(float ini_angle, float ini_radius, unsigned int ini_num_samples);
+    WalkArcMessage();
+    ~WalkArcMessage();
+
+    float angle();
+    void set_angle(const float new_angle);
+    size_t maxlenof_angle() const;
+    float radius();
+    void set_radius(const float new_radius);
+    size_t maxlenof_radius() const;
+    unsigned int num_samples();
+    void set_num_samples(const unsigned int new_num_samples);
+    size_t maxlenof_num_samples() const;
+  };
+
+  class TurnMessage : public Message
+  {
+    TurnMessage(float ini_angle, unsigned int ini_num_samples);
+    TurnMessage();
+    ~TurnMessage();
+
+    float angle();
+    void set_angle(const float new_angle);
+    size_t maxlenof_angle() const;
+    unsigned int num_samples();
+    void set_num_samples(const unsigned int new_num_samples);
+    size_t maxlenof_num_samples() const;
+  };
+
+  class KickMessage : public Message
+  {
+    KickMessage(LegEnum ini_leg, float ini_strength);
+    KickMessage();
+    ~KickMessage();
+
+    LegEnum leg();
+    void set_leg(const LegEnum new_leg);
+    size_t maxlenof_leg() const;
+    float strength();
+    void set_strength(const float new_strength);
+    size_t maxlenof_strength() const;
+  };
+
+  class ParkMessage : public Message
+  {
+    ParkMessage(float ini_time_sec);
+    ParkMessage();
+    ~ParkMessage();
+
+    float time_sec();
+    void set_time_sec(const float new_time_sec);
+    size_t maxlenof_time_sec() const;
+  };
+
+  class GetUpMessage : public Message
+  {
+    GetUpMessage(float ini_time_sec);
+    GetUpMessage();
+    ~GetUpMessage();
+
+    float time_sec();
+    void set_time_sec(const float new_time_sec);
+    size_t maxlenof_time_sec() const;
+  };
+
+  bool is_moving();
+  void set_moving(const bool new_moving);
+  size_t maxlenof_moving() const;
+  float max_step_length();
+  void set_max_step_length(const float new_max_step_length);
+  size_t maxlenof_max_step_length() const;
+  float max_step_height();
+  void set_max_step_height(const float new_max_step_height);
+  size_t maxlenof_max_step_height() const;
+  float max_step_side();
+  void set_max_step_side(const float new_max_step_side);
+  size_t maxlenof_max_step_side() const;
+  float max_step_turn();
+  void set_max_step_turn(const float new_max_step_turn);
+  size_t maxlenof_max_step_turn() const;
+  float zmp_offset_forward();
+  void set_zmp_offset_forward(const float new_zmp_offset_forward);
+  size_t maxlenof_zmp_offset_forward() const;
+  float zmp_offset_sideward();
+  void set_zmp_offset_sideward(const float new_zmp_offset_sideward);
+  size_t maxlenof_zmp_offset_sideward() const;
+  float l_hip_roll_compensation();
+  void set_l_hip_roll_compensation(const float new_l_hip_roll_compensation);
+  size_t maxlenof_l_hip_roll_compensation() const;
+  float r_hip_roll_compensation();
+  void set_r_hip_roll_compensation(const float new_r_hip_roll_compensation);
+  size_t maxlenof_r_hip_roll_compensation() const;
+  float hip_height();
+  void set_hip_height(const float new_hip_height);
+  size_t maxlenof_hip_height() const;
+  float torso_sideward_orientation();
+  void set_torso_sideward_orientation(const float new_torso_sideward_orientation);
+  size_t maxlenof_torso_sideward_orientation() const;
+  bool is_arms_enabled();
+  void set_arms_enabled(const bool new_arms_enabled);
+  size_t maxlenof_arms_enabled() const;
+  float shoulder_pitch_median();
+  void set_shoulder_pitch_median(const float new_shoulder_pitch_median);
+  size_t maxlenof_shoulder_pitch_median() const;
+  float shoulder_pitch_amplitude();
+  void set_shoulder_pitch_amplitude(const float new_shoulder_pitch_amplitude);
+  size_t maxlenof_shoulder_pitch_amplitude() const;
+  float elbow_roll_median();
+  void set_elbow_roll_median(const float new_elbow_roll_median);
+  size_t maxlenof_elbow_roll_median() const;
+  float elbow_roll_amplitude();
+  void set_elbow_roll_amplitude(const float new_elbow_roll_amplitude);
+  size_t maxlenof_elbow_roll_amplitude() const;
+  unsigned int msgid();
+  void set_msgid(const unsigned int new_msgid);
+  size_t maxlenof_msgid() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  size_t                  hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
+
+};
+
+}
