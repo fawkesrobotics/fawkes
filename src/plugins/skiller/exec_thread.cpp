@@ -33,7 +33,7 @@
 
 #include <lua/context.h>
 
-#include <interfaces/skiller.h>
+#include <interfaces/SkillerInterface.h>
 
 #include <lua.hpp>
 #include <tolua++.h>
@@ -152,7 +152,6 @@ SkillerExecutionThread::init()
   __lua->add_package("fawkesutils");
   __lua->add_package("fawkesconfig");
   __lua->add_package("fawkesinterface");
-  __lua->add_package("fawkesinterfaces");
 
   __lua->set_string("SKILLSPACE", __cfg_skillspace.c_str());
   __lua->set_usertype("config", config, "Configuration", "fawkes");
@@ -162,11 +161,13 @@ SkillerExecutionThread::init()
   SkillerLiaisonThread::InterfaceMap::iterator imi;
   SkillerLiaisonThread::InterfaceMap &rimap = __slt->reading_interfaces();
   for (imi = rimap.begin(); imi != rimap.end(); ++imi) {
+    __lua->add_package((std::string("interfaces.") + imi->second->type()).c_str());
     __lua->set_usertype(("interface_" + imi->first).c_str(), imi->second, imi->second->type(), "fawkes");
   }
 
   SkillerLiaisonThread::InterfaceMap &wimap = __slt->writing_interfaces();
   for (imi = wimap.begin(); imi != wimap.end(); ++imi) {
+    __lua->add_package((std::string("interfaces.") + imi->second->type()).c_str());
     __lua->set_usertype(("interface_" + imi->first).c_str(), imi->second, imi->second->type(), "fawkes");
   }
 

@@ -26,7 +26,7 @@
 #include <plugins/skiller/exec_thread.h>
 
 #include <core/threading/barrier.h>
-#include <interfaces/skiller.h>
+#include <interfaces/SkillerInterface.h>
 
 #include <cstring>
 

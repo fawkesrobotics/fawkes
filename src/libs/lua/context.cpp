@@ -29,6 +29,7 @@
 #include <core/exceptions/software.h>
 #include <utils/logging/liblogger.h>
 
+#include <algorithm>
 #include <tolua++.h>
 #include <cstdlib>
 #include <cstring>
@@ -257,13 +258,14 @@ void
 LuaContext::add_package(const char *package)
 {
   MutexLocker lock(__lua_mutex);
+  if (find(__packages.begin(), __packages.end(), package) == __packages.end()) {
+    char *s;
+    asprintf(&s, "require(\"%s\")", package);
+    do_string(__L, s);
+    free(s);
 
-  char *s;
-  asprintf(&s, "require(\"%s\")", package);
-  do_string(__L, s);
-  free(s);
-
-  __packages.push_back(package);
+    __packages.push_back(package);
+  }
 }
 
 

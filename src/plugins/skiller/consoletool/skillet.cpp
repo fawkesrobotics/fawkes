@@ -39,7 +39,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#include <interfaces/skiller.h>
+#include <interfaces/SkillerInterface.h>
 
 using namespace fawkes;
 

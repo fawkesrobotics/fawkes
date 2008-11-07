@@ -22,7 +22,7 @@ SUBDIRS = consoletool
 
 CFLAGS  += $(CFLAGS_LUA)
 
-LIBS_skiller = fawkescore fawkesutils fawkesnetcomm fawkeslua
+LIBS_skiller = fawkescore fawkesutils fawkesnetcomm fawkeslua SkillerInterface
 OBJS_skiller = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_skiller)
