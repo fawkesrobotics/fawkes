@@ -23,7 +23,7 @@
  */
 
 #include "laser_drawing_area.h"
-#include <interfaces/laser360.h>
+#include <interfaces/Laser360Interface.h>
 #include <utils/math/angle.h>
 #include <gui_utils/robot/drawer.h>
 

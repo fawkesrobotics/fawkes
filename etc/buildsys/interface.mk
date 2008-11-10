@@ -72,8 +72,12 @@ $(foreach I,$(INTERFACES_all),							\
 	$(eval LIBS_all_tolua           += $$(LUALIBDIR)/interfaces/$(I).so)	\
 )
 
-ifneq ($(wildcard $(BINDIR)/interface_generator),)
+ifeq ($(IFACEDIR),$(SRCDIR))
   INTERFACE_GENERATOR_BUILD = 1
+else
+  ifneq ($(wildcard $(BINDIR)/interface_generator),)
+    INTERFACE_GENERATOR_BUILD = 1
+  endif
 endif
 
 ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
