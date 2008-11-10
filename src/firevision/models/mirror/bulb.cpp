@@ -205,18 +205,18 @@ Bulb::~Bulb()
 void
 Bulb::create()
 {
-  bytes_per_sample = sizeof(polar_coord_t);
+  bytes_per_sample = sizeof(polar_coord_2d_t);
 
   if ( lut_id != NULL ) {
     shm_lut   = new SharedMemoryLookupTable( lut_id,
 					     width, height, /* depth */ 1,
 					     bytes_per_sample);
     shm_lut->set_destroy_on_delete( destroy_on_delete );
-    lut       = (polar_coord_t *)shm_lut->buffer();
+    lut       = (polar_coord_2d_t *)shm_lut->buffer();
     lut_bytes = shm_lut->data_size();
   } else {
     lut_bytes = width * height * bytes_per_sample;
-    lut = (polar_coord_t *)malloc( lut_bytes );
+    lut = (polar_coord_2d_t *)malloc( lut_bytes );
   }
   memset(lut, 0, lut_bytes);
 }
@@ -323,7 +323,7 @@ Bulb::warp2unwarp(unsigned int warp_x, unsigned int warp_y,
   // check if image pixel (warp_x, warp_y) maps to something
   if ( this->lut->isNonZero(warp_x, warp_y) ) {
     // get corresponding world point (polar coordinates)
-    polar_coord_t worldPoint = this->lut->getWorldPointRelative(warp_x, warp_y);
+    polar_coord_2d_t worldPoint = this->lut->getWorldPointRelative(warp_x, warp_y);
 
     // convert to cartesian coordinates
     *unwarp_x = (unsigned int) ( worldPoint.r * cos(worldPoint.phi) );
@@ -357,17 +357,17 @@ Bulb::isValid()
 }
 
 
-polar_coord_t
+polar_coord_2d_t
 Bulb::getWorldPointRelative(unsigned int image_x,
 			    unsigned int image_y) const
 {
   if ( (image_x > width) || (image_y > height) ) {
-    polar_coord_t rv;
+    polar_coord_2d_t rv;
     rv.r = rv.phi = 0;
     return rv;
   } else {
     // will be tuned
-    polar_coord_t rv;
+    polar_coord_2d_t rv;
     rv.r   = lut[image_y * width + image_x].r;
     rv.phi = lut[image_y * width + image_x].phi;
     return rv;
@@ -376,7 +376,7 @@ Bulb::getWorldPointRelative(unsigned int image_x,
 }
 
 
-f_point_t
+cart_coord_2d_t
 Bulb::getWorldPointGlobal(unsigned int image_x,
 			  unsigned int image_y,
 			  float pose_x,
@@ -384,7 +384,7 @@ Bulb::getWorldPointGlobal(unsigned int image_x,
 			  float pose_ori        ) const
 {
 
-  f_point_t rv;
+  cart_coord_2d_t rv;
   rv.x = 0;
   rv.y = 0;
 
@@ -393,7 +393,7 @@ Bulb::getWorldPointGlobal(unsigned int image_x,
 
 
   // get relative world point (polar coordinates)
-  polar_coord_t pointRelative;
+  polar_coord_2d_t pointRelative;
   pointRelative = getWorldPointRelative( image_x, image_y );
 
   // convert relative angle "pointRelative.phi" to global angle "globalPhi"
@@ -467,10 +467,10 @@ Bulb::reset()
 }
 
 
-cart_coord_t
+point_t
 Bulb::getCenter() const
 {
-  cart_coord_t center;
+  point_t center;
 
   center.x = image_center_x;
   center.y = image_center_y;

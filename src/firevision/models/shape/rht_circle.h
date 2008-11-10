@@ -30,6 +30,7 @@
 #include <vector>
 #include <iostream>
 
+#include <utils/math/types.h>
 #include <fvutils/base/types.h>
 #include <models/shape/circle.h>
 #include <models/shape/accumulators/ht_accum.h>
@@ -56,9 +57,9 @@ class RhtCircleModel: public ShapeModel
   
  private:
   void		calcCircle(	// for calculating circles from 3 points
-			   const point_t& p1,
-			   const point_t& p2,
-			   const point_t& p3,
+			   const fawkes::point_t& p1,
+			   const fawkes::point_t& p2,
+			   const fawkes::point_t& p3,
 			   center_in_roi_t& center,
 			   float& radius);
 };

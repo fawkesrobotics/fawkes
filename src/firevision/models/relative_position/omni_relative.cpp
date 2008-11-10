@@ -165,7 +165,7 @@ OmniRelative::calc()
 {
 
   if ( mirror_model->isValidPoint( image_x, image_y ) ) {
-    polar_coord_t rel_pos = mirror_model->getWorldPointRelative( image_x, image_y );
+    fawkes::polar_coord_2d_t rel_pos = mirror_model->getWorldPointRelative( image_x, image_y );
 
     distance_ball_cam = rel_pos.r;
     bearing           = rel_pos.phi;
@@ -192,7 +192,7 @@ void
 OmniRelative::calc_unfiltered()
 {
 
-  polar_coord_t rel_pos = mirror_model->getWorldPointRelative( image_x, image_y );
+  fawkes::polar_coord_2d_t rel_pos = mirror_model->getWorldPointRelative( image_x, image_y );
 
   distance_ball_cam = rel_pos.r;
   bearing           = rel_pos.phi;

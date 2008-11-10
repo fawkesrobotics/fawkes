@@ -30,6 +30,7 @@
 #include "models/shape/rht_circle.h"
 
 using namespace std;
+using namespace fawkes;
 
 #define TEST_IF_IS_A_PIXEL(x) ((x)>230)
 

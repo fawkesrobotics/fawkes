@@ -26,6 +26,7 @@
 #ifndef __FIREVISION_FIT_ACCUM_H_
 #define __FIREVISION_FIT_ACCUM_H_
 
+#include <utils/math/types.h>
 #include <fvutils/base/types.h>
 
 class Circle;
@@ -48,8 +49,8 @@ public:
 	~FitAccum(void);
 
 	void reset(void);
-	void addPoint(const point_t&);    // add a point
-	void removePoint(const point_t&); // remove a point
+	void addPoint(const fawkes::point_t&);    // add a point
+	void removePoint(const fawkes::point_t&); // remove a point
 
 	int getCount(void) const;
 	Circle* getCircle(void) const;

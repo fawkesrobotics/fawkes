@@ -30,6 +30,7 @@
 #include <vector>
 #include <iostream>
 
+#include <utils/math/types.h>
 #include <fvutils/base/types.h>
 #include <fvutils/base/roi.h>
 #include <models/shape/shapemodel.h>
@@ -49,7 +50,7 @@ class Circle : public Shape
   void setMargin( unsigned int margin );
   bool isClose( unsigned int in_roi_x, unsigned int in_roi_y );
 
-  void fitCircle(std::vector< point_t >& points);
+  void fitCircle(std::vector< fawkes::point_t >& points);
 
  public:
   /** Center of object in ROI */

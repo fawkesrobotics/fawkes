@@ -26,6 +26,7 @@
 #ifndef __FIREVISION_FC_ACCUM_H_
 #define __FIREVISION_FC_ACCUM_H_
 
+#include <utils/math/types.h>
 #include <fvutils/base/types.h>
 #include <models/shape/circle.h>
 
@@ -52,11 +53,11 @@ public:
 	~FittedCircle(void);
 
 	void reset(void);
-	float addPoint(const point_t&); // add a new point
+	float addPoint(const fawkes::point_t&); // add a new point
 		// and return the distance from it to the fitted circle
-	void removePoint(const point_t&); // remove a point
+	void removePoint(const fawkes::point_t&); // remove a point
 
-	float distanceTo(const point_t&, bool current = true);
+	float distanceTo(const fawkes::point_t&, bool current = true);
 
 	void commit(void);
 	int getCount(void) const;

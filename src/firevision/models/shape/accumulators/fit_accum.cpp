@@ -28,6 +28,8 @@
 #include <models/shape/circle.h>
 #include <cmath>
 
+using namespace fawkes;
+
 const float FitAccum::TOO_SMALL_DELTA = 1.0e-3f;
 
 /** @class FitAccum <models/shape/accumulators/fit_accum.h>

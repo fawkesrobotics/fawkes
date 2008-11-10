@@ -25,9 +25,10 @@
  */
 
 #include <cmath>
-#include "models/shape/circle.h"
+#include <models/shape/circle.h>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class Circle <models/shape/circle.h>
  * Circle shape.

@@ -67,18 +67,17 @@ class Bulb : public MirrorModel {
 			     float        world_phi);
 
 
-  virtual polar_coord_t getWorldPointRelative(unsigned int image_x,
-					      unsigned int image_y  ) const;
+  virtual fawkes::polar_coord_2d_t getWorldPointRelative(unsigned int image_x,
+							 unsigned int image_y  ) const;
 
-  virtual f_point_t getWorldPointGlobal(unsigned int image_x,
-					unsigned int image_y,
-					float pose_x,
-					float pose_y,
-					float pose_ori ) const;
+  virtual fawkes::cart_coord_2d_t getWorldPointGlobal(unsigned int image_x,
+						      unsigned int image_y,
+						      float pose_x, float pose_y,
+						      float pose_ori ) const;
 
   virtual void reset();
 
-  virtual cart_coord_t getCenter() const;
+  virtual fawkes::point_t getCenter() const;
   virtual void setCenter(unsigned int image_x, 
 			 unsigned int image_y  );
   virtual void setOrientation(float angle);
@@ -147,7 +146,7 @@ class Bulb : public MirrorModel {
   bool valid;
 
   char          *lut_id;
-  polar_coord_t *lut;
+  fawkes::polar_coord_2d_t *lut;
   unsigned int   lut_bytes;
   bool destroy_on_delete;
 

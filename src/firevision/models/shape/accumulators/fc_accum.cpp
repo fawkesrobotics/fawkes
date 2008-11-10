@@ -24,7 +24,9 @@
  */
                                                                                 
 #include <cmath>
-#include "models/shape/accumulators/fc_accum.h"
+#include <models/shape/accumulators/fc_accum.h>
+
+using namespace fawkes;
 
 const float FittedCircle::TOO_SMALL_DELTA = 1.0e-3f;
 

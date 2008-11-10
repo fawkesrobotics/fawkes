@@ -78,8 +78,11 @@ OmniGlobal::calc()
 {
   if ( mirror_model->isValidPoint( image_x, image_y ) ) {
 
-    f_point_t glob_pos = mirror_model->getWorldPointGlobal( image_x, image_y,
-							    pose_x, pose_y, pose_ori);
+    fawkes::cart_coord_2d_t glob_pos = mirror_model->getWorldPointGlobal( image_x,
+									  image_y,
+									  pose_x,
+									  pose_y,
+									  pose_ori);
 
     ball_x = glob_pos.x;
     ball_y = glob_pos.y;

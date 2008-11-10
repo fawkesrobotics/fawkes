@@ -31,6 +31,7 @@
 #include <vector>
 #include <iostream>
 
+#include <utils/math/types.h>
 #include <fvutils/base/types.h>
 #include <models/shape/circle.h>
 
@@ -62,9 +63,9 @@ class RcdCircleModel: public ShapeModel
  private:
   /** Calculate circle from three points
    */
-  void		calcCircle( const point_t& p1,
-			    const point_t& p2,
-			    const point_t& p3,
+  void		calcCircle( const fawkes::point_t& p1,
+			    const fawkes::point_t& p2,
+			    const fawkes::point_t& p3,
 			    center_in_roi_t& center,
 			    float& radius);
 

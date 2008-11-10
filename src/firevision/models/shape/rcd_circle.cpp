@@ -30,6 +30,7 @@
 #include <cstdlib>
 
 using namespace std;
+using namespace fawkes;
 
 #define TBY_GRAYSCALE
 #ifdef TBY_GRAYSCALE
