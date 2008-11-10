@@ -26,7 +26,7 @@
 
 #include <utils/system/argparser.h>
 #include <blackboard/remote.h>
-#include <interfaces/skiller.h>
+#include <interfaces/SkillerInterface.h>
 #include <netcomm/fawkes/client.h>
 
 #include <gui_utils/logview.h>
