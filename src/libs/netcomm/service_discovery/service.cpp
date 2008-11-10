@@ -26,12 +26,16 @@
 #include <netcomm/service_discovery/service.h>
 
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <inttypes.h>
 #include <cstddef>
 #include <cstring>
 #include <cstdlib>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class NetworkService <netcomm/service_discovery/service.h>
  * Representation of a service announced or found via service
@@ -61,6 +65,43 @@ NetworkService::NetworkService(const char         *name,
   _domain = strdup(domain);
   _host   = strdup(host);
   _port   = port;
+
+  _addr = NULL;
+  _addr_size = 0;
+}
+
+
+/** Constructor.
+ * This constructor sets all parameters.
+ * @param name name of service
+ * @param type type of service
+ * @param domain domain of service
+ * @param host host of service
+ * @param port port of service
+ * @param addr address of the service
+ * @param addr_size size in bytes of addr parameter
+ * @param txt list of TXT records
+ */
+NetworkService::NetworkService(const char         *name,
+			       const char         *type,
+			       const char         *domain,
+			       const char         *host,
+			       unsigned short int  port,
+			       const struct sockaddr *addr,
+			       const socklen_t     addr_size,
+			       std::list<std::string> &txt)
+
+{
+  _name   = strdup(name);
+  _type   = strdup(type);
+  _domain = strdup(domain);
+  _host   = strdup(host);
+  _port   = port;
+
+  _addr = (struct sockaddr *)malloc(addr_size);
+  memcpy(_addr, addr, addr_size);
+  _addr_size = addr_size;
+  list = txt;
 }
 
 
@@ -81,6 +122,29 @@ NetworkService::NetworkService(const char         *name,
   _domain = NULL;
   _host   = NULL;
   _port   = port;
+
+  _addr = NULL;
+  _addr_size = 0;
+}
+
+/** Constructor.
+ * This constructor sets all parameters.
+ * @param name name of service
+ * @param type type of service
+ * @param domain domain of service
+ */
+NetworkService::NetworkService(const char         *name,
+			       const char         *type,
+			       const char         *domain)
+{
+  _name   = strdup(name);
+  _type   = strdup(type);
+  _domain = strdup(domain);
+
+  _host   = NULL;
+  _port   = 0;
+  _addr = NULL;
+  _addr_size = 0;
 }
 
 
@@ -91,6 +155,7 @@ NetworkService::~NetworkService()
   if ( _type   != NULL)  free( _type );
   if ( _domain != NULL)  free( _domain );
   if ( _host   != NULL)  free( _host );
+  if ( _addr   != NULL)  free( _addr );
 }
 
 
@@ -113,6 +178,9 @@ NetworkService::NetworkService(const NetworkService *s)
   } else {
     _host = NULL;
   }
+
+  _addr = NULL;
+  _addr_size = 0;
 }
 
 
@@ -135,7 +203,12 @@ NetworkService::NetworkService(const NetworkService &s)
   } else {
     _host = NULL;
   }
+
+  _addr = NULL;
+  _addr_size = 0;
 }
+
+
 /** Add a TXT record.
  * @param txt TXT record to add, must be a "key=value" string.
  */
@@ -143,6 +216,16 @@ void
 NetworkService::add_txt(const char *txt)
 {
   list.push_back(txt);
+}
+
+
+/** Set TXT records all at once.
+ * @param txtlist list of TXT records
+ */
+void
+NetworkService::set_txt(std::list<std::string> &txtlist)
+{
+  list = txtlist;
 }
 
 
@@ -204,6 +287,19 @@ unsigned short int
 NetworkService::port() const
 {
   return _port;
+}
+
+
+/** Get IP address of entry as string.
+ * @return IP address as string
+ * @exception NullPointerException thrown if the address has not been set
+ */
+std::string
+NetworkService::addr_string() const
+{
+  char ipaddr[INET_ADDRSTRLEN];
+  struct sockaddr_in *saddr = (struct sockaddr_in *)_addr;
+  return std::string(inet_ntop(AF_INET, &(saddr->sin_addr), ipaddr, sizeof(ipaddr)));
 }
 
 

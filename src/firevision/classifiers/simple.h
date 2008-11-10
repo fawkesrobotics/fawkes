@@ -44,7 +44,7 @@ class SimpleColorClassifier : public Classifier
  
   virtual std::list< ROI > * classify();
 
-  virtual void get_mass_point_of_ball( ROI *roi, cart_coord_t *massPoint );
+  virtual void get_mass_point_of_ball( ROI *roi, fawkes::point_t *massPoint );
 
   /** Sets the object of interest (hint_t) 
    * @param hint Object of interest

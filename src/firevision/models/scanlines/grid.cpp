@@ -28,6 +28,8 @@
 
 #include <cstring>
 
+using fawkes::point_t;
+
 /** @class ScanlineGrid <models/scanlines/grid.h>
  * Scanline Grid.
  * A grid as scanline points. The crossings of the lines are the scanline

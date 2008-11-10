@@ -451,7 +451,9 @@ FawkesNetworkClient::disconnect()
   delete s;
   s = NULL;
 
-  connection_died();
+  if (! connection_died_recently) {
+    connection_died();
+  }
 }
 
 

@@ -387,7 +387,8 @@ RemoteBlackBoard::list_all()
   while ( bbilc->has_next() ) {
     size_t iisize;
     bb_iinfo_msg_t *ii = bbilc->next(&iisize);
-    infl->append(ii->type, ii->id, ii->hash, ii->has_writer, ii->num_readers, ii->serial);
+    infl->append(ii->type, ii->id, ii->hash,  ii->serial,
+		 ii->has_writer, ii->num_readers);
   }
 
   __m->unref();

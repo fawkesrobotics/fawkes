@@ -42,11 +42,16 @@ namespace fawkes {
  * @param listener_name name of the listener
  * @param iface interface to watch for data changes. Register this dispatcher as
  * listener by yourself!
+ * @param message_enqueueing true to enqueue messages after the message received
+ * event handler has been called, false to drop the message afterwards.
  */
 InterfaceDispatcher::InterfaceDispatcher(const char *listener_name,
-					 Interface *iface)
+					 Interface *iface,
+					 bool message_enqueueing)
   : BlackBoardInterfaceListener(listener_name)
 {
+  __message_enqueueing = message_enqueueing;
+
   bbil_add_data_interface(iface);
   if ( iface->is_writer() ) {
     bbil_add_message_interface(iface);
@@ -60,6 +65,19 @@ InterfaceDispatcher::InterfaceDispatcher(const char *listener_name,
   __dispatcher_writer_removed.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_writer_removed));
   __dispatcher_reader_added.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_reader_added));
   __dispatcher_reader_removed.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_writer_removed));
+}
+
+
+/** Set if received messages should be enqueued or not.
+ * The message received event handler can cause the message to be enqueued or not.
+ * The default is to enqueue the messages.
+ * @param enqueue true to cause messages to be enqueued, false to cause the
+ * messages not to be enqueued after they have been processed
+ */
+void
+InterfaceDispatcher::set_message_enqueueing(bool enqueue)
+{
+  __message_enqueueing = enqueue;
 }
 
 
@@ -173,7 +191,7 @@ InterfaceDispatcher::bb_interface_message_received(Interface *interface, Message
   message->ref();
   __queue_message_received.push_locked(std::make_pair(interface, message));
   __dispatcher_message_received();
-  return true;
+  return __message_enqueueing;
 }
 
 void

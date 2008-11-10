@@ -166,31 +166,6 @@ Exception::Exception(const char *format, ...) throw()
 
 
 /** Constructor.
- * Constructs a new exception with the given message.
- * @param format The format of the primary message. Supports the same
- * arguments as append(). The message is copied and not just referenced.
- * Thus the memory has to be freed if it is a dynamic  string on the heap.
- * @param va va_list with the arguments to print. Must match the format.
- * See append() for details.
- */
-Exception::Exception(const char *format, va_list va) throw()
-{
-  messages_mutex = new Mutex();
-
-  _errno = 0;
-
-  messages = NULL;
-  messages_end = NULL;
-  messages_iterator = NULL;
-
-  if ( format != NULL ) {
-    append_nolock_va(format, va);
-  } else {
-    append_nolock("Unnkown Exception");
-  }
-}
-
-/** Constructor.
  * Constructs a new exception with the given message and errno value. This
  * is particularly handy when throwing the exception after a function failed
  * that returns an error code in errno. 

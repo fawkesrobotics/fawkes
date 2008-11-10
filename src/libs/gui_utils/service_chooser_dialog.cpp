@@ -26,12 +26,21 @@
 #include <core/exception.h>
 #include <core/exceptions/software.h>
 #include <netcomm/fawkes/client.h>
+#include <netcomm/utils/resolver.h>
 #include <gui_utils/service_chooser_dialog.h>
 #include <gui_utils/service_model.h>
 
+#include <algorithm>
 #include <cstring>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class ServiceChooserDialog <gui_utils/service_chooser_dialog.h>
  * Service chooser dialog.
@@ -91,6 +100,7 @@ ServiceChooserDialog::ctor()
 
   __treeview.set_model(__service_model->get_list_store());
   __treeview.append_column("Service", __service_model->get_column_record().name);
+  __treeview.append_column("IP Address", __service_model->get_column_record().ipaddr);
   __scrollwin.add(__treeview);
   __scrollwin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
   __treeview.show();
@@ -169,6 +179,38 @@ ServiceChooserDialog::get_selected_service(Glib::ustring &name,
     throw Exception("No host selected");
   }
 }
+
+
+/** Get raw address.
+ * @param addr upon returns contains the raw representation of the IP address
+ * @param addr_size size in bytes of addr, if addr_size is too small for an
+ * AF_INET addr an exception is thrown.
+ */
+void
+ServiceChooserDialog::get_raw_address(struct sockaddr *addr, socklen_t addr_size)
+{
+  if ( addr_size < sizeof(struct sockaddr_in) ) {
+    throw Exception("Size of addrlen too small, only %u bytes, but required %zu\n",
+		    addr_size, sizeof(struct sockaddr_in));
+  }
+  Glib::ustring name, hostname, ipaddr;
+  unsigned short int port;
+  get_selected_service (name, hostname, ipaddr, port);
+
+  if (inet_pton(AF_INET, ipaddr.c_str(), &(((struct sockaddr_in *)addr)->sin_addr)) <= 0) {
+    NetworkNameResolver resolver;
+    struct sockaddr_in *saddr;
+    socklen_t saddr_len;
+    if (resolver.resolve_name_blocking(ipaddr.c_str(), (struct sockaddr **)&saddr, &saddr_len)) {
+      memcpy(addr, saddr, std::min(saddr_len, addr_size));
+    } else {
+      throw Exception("Could not lookup hostname '%s' and it is not a valid IP address",
+		      ipaddr.c_str());
+    }
+  }
+
+}
+
 
 /** Signal handler for expander event.
  * Called when expander is (de-)expanded. Only works with Glibmm properties

@@ -4,6 +4,7 @@
  *
  *  Created: Thu Nov 09 20:16:23 2007
  *  Copyright  2007  Daniel Beck
+ *             2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,49 +26,35 @@
 #include <tools/plugin_gui/plugin_gui.h>
 #include <tools/plugin_gui/plugin_tree_view.h>
 #include <gui_utils/service_selector_cbe.h>
-#include <gui_utils/utils.h>
 
 using namespace fawkes;
 
-/** @class PluginGui tools/plugin_gui/plugin_gui.h
+/** @class PluginGuiGtkWindow "plugin_gui.h"
  * Graphical plugin management tool.
  * 
  * @author Daniel Beck
+ * @author Tim Niemueller
  */
 
 /** Constructor.
- * @param ref_xml RefPtr to the Glade xml file
+ * @param cobject C base object
+ * @param ref_xml Glade XML
  */
-PluginGui::PluginGui(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
+PluginGuiGtkWindow::PluginGuiGtkWindow(BaseObjectType* cobject,
+				       const Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
+  : Gtk::Window(cobject)
 {
-  m_wnd_main    = dynamic_cast<Gtk::Window*>( get_widget(ref_xml, "wndMain") );
-  m_stb_status  = dynamic_cast<Gtk::Statusbar*>( get_widget(ref_xml, "stbStatus") );
-  
+  ref_xml->get_widget("stbStatus", m_stb_status);
   ref_xml->get_widget_derived("trvPlugins", m_trv_plugins);
 
-  m_service_selector = new ServiceSelectorCBE(ref_xml, "cbeHosts", "btnConnect");
-  m_service_selector->signal_connected().connect( sigc::mem_fun(*this, &PluginGui::on_connection_established) );
+  m_service_selector = new ServiceSelectorCBE(ref_xml, "cbeHosts", "btnConnect", "wndMain");
+  m_trv_plugins->set_network_client( m_service_selector->get_network_client() );
 
   m_stb_status->push("Started");
 }
 
 /** Destructor. */
-PluginGui::~PluginGui()
+PluginGuiGtkWindow::~PluginGuiGtkWindow()
 {
   m_stb_status->push("Exiting");
-}
-
-/** Return main window of the application.
- * @return reference to the main window
- */
-Gtk::Window&
-PluginGui::get_window() const
-{
-  return *m_wnd_main;
-}
-
-void
-PluginGui::on_connection_established()
-{
-  m_trv_plugins->set_network_client( m_service_selector->get_network_client() );
 }

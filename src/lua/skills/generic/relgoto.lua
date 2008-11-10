@@ -69,7 +69,7 @@ function parseparams(...)
 	    ori    = math.atan2(y, x)
 	 end
 	 margin = f.margin
-	 print_debug("2. relgoto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
+	 --print_debug("2. relgoto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
       elseif f.phi ~= nil and f.dist ~= nil then
 	 -- style 3.
 	 phi    = f.phi
@@ -80,7 +80,7 @@ function parseparams(...)
 	    ori    = f.phi
 	 end
 	 margin = f.margin
-	 print_debug("3. relgoto(phi=" .. phi .. ", dist=" .. dist .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
+	 --print_debug("3. relgoto(phi=" .. phi .. ", dist=" .. dist .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
       else
 	 error("relgoto called with insufficient parameters")
       end
@@ -90,7 +90,7 @@ function parseparams(...)
       if x == nil or y == nil then
 	 error("Insufficient parameters for relgoto (positional)")
       end
-      print_debug("1. relgoto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
+      --print_debug("1. relgoto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
    end
 
    return x, y, ori, phi, dist, margin
@@ -99,7 +99,7 @@ end
 
 --- Relative goto reset.
 function reset()
-   print_debug("relgoto.reset() called")
+   print("relgoto reset called")
    msgid = 0
 end
 

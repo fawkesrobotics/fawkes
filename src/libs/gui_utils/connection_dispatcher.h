@@ -28,6 +28,7 @@
 
 #include <glibmm/dispatcher.h>
 #include <netcomm/fawkes/client_handler.h>
+#include <netcomm/fawkes/component_ids.h>
 #include <core/utils/lock_queue.h>
 
 namespace fawkes {
@@ -38,9 +39,12 @@ class ConnectionDispatcher
 : public FawkesNetworkClientHandler
 {
  public:
-  ConnectionDispatcher();
+  ConnectionDispatcher(unsigned int cid = FAWKES_CID_OBSERVER_MODE);
+  ConnectionDispatcher(const char *hostname, unsigned short int port,
+		       unsigned int cid = FAWKES_CID_OBSERVER_MODE);
   virtual ~ConnectionDispatcher();
 
+  void set_cid(unsigned int cid);
   void set_client(FawkesNetworkClient *client);
   FawkesNetworkClient *   get_client();
 
@@ -59,6 +63,10 @@ class ConnectionDispatcher
   virtual void on_message_received();
 
  private:
+  void connect_signals();
+
+ private:
+  unsigned int                                   __cid;
   FawkesNetworkClient                           *__client;
   bool                                           __client_owned;
 

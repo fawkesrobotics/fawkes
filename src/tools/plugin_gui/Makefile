@@ -1,7 +1,7 @@
 #*****************************************************************************
-#            Makefile Build System for Fawkes : Plugin Tool
+#            Makefile Build System for Fawkes : Plugin GUI
 #                            -------------------
-#   Created on Wed Nov 22 00:29:31 2006
+#   Created on Wed Nov 22 00:29:31 2006 (from plugin tool)
 #   Copyright (C) 2006 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #   $Id$
@@ -21,12 +21,12 @@ include $(BASEDIR)/etc/buildsys/gui.mk
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_pt_gui = fawkescore fawkesutils fawkesnetcomm fawkesplugin fawkesguiutils
-OBJS_pt_gui = main.o plugin_gui.o plugin_tree_view.o
-OBJS_all = $(OBJS_pt_gui)
+LIBS_ffplugingui = fawkescore fawkesutils fawkesnetcomm fawkesplugin fawkesguiutils
+OBJS_ffplugingui = main.o plugin_gui.o plugin_tree_view.o
+OBJS_all = $(OBJS_ffplugingui)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
-  BINS_gui = $(BINDIR)/pt_gui
+  BINS_gui = $(BINDIR)/ffplugingui
 else
   WARN_TARGETS += warning_plugin_gui
 endif
@@ -36,7 +36,7 @@ gui: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
 warning_plugin_gui:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building pt_gui$(TNORMAL) $(GUI_ERROR)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building ffplugingui$(TNORMAL) $(GUI_ERROR)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

@@ -4,6 +4,7 @@
  *
  *  Created: Mon Sep 29 17:34:58 2008
  *  Copyright  2008  Daniel Beck
+ *             2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -32,18 +33,25 @@
 #include <libglademm/xml.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
 class FawkesNetworkClient;
 class ServiceModel;
+class ConnectionDispatcher;
 
-class ServiceSelectorCBE : public FawkesNetworkClientHandler
+class ServiceSelectorCBE
 {
  public:
   ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
 		      Gtk::Button* connect,
+		      Gtk::Window* parent,
 		      const char* service = "_fawkes._tcp" );
   ServiceSelectorCBE( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 		      const char* cbe_name = "cbeServices",
 		      const char* btn_name = "btnConnect",
+		      const char* wnd_name = "wndMain",
 		      const char* service = "_fawkes._tcp" );
   virtual ~ServiceSelectorCBE();
 
@@ -52,29 +60,20 @@ class ServiceSelectorCBE : public FawkesNetworkClientHandler
   sigc::signal<void> signal_connected();
   sigc::signal<void> signal_disconnected();
 
-  // fawkes client handler
-  void deregistered (unsigned int id) throw ();
-  void inbound_received (FawkesNetworkMessage *m, unsigned int id) throw ();
-  void connection_died (unsigned int id) throw ();
-  void connection_established (unsigned int id) throw ();
-
  protected:
   void initialize();
   void on_btn_connect_clicked();
   void on_service_selected();
-  void on_connection_established();
-  void on_connection_died();
+  void on_connected();
+  void on_disconnected();
 
-  Gtk::ComboBoxEntry* m_cbe_services;
-  Gtk::Button* m_btn_connect;
+ protected:
+  Gtk::ComboBoxEntry   *m_cbe_services;
+  Gtk::Button          *m_btn_connect;
+  Gtk::Window          *m_parent;
 
-  sigc::signal<void> m_signal_connected;
-  sigc::signal<void> m_signal_disconnected;
-  Glib::Dispatcher m_signal_connected_internal;
-  Glib::Dispatcher m_signal_disconnected_internal;
-
-  FawkesNetworkClient* m_client;
-  ServiceModel* m_service_model;
+  ConnectionDispatcher *m_dispatcher;
+  ServiceModel         *m_service_model;
 };
 
 }

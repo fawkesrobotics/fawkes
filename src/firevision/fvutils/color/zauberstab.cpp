@@ -35,6 +35,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class Zauberstab <fvutils/color/zauberstab.h>
  * Zaubertab selection utility.

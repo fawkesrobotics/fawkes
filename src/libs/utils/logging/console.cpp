@@ -180,7 +180,7 @@ ConsoleLogger::log_debug(const char *component, Exception &e)
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", c_darkgray, now_s->tm_hour,
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", c_darkgray, now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(stderr, "%s", *i);
       fprintf(stderr, "%s\n", c_normal);
@@ -199,7 +199,7 @@ ConsoleLogger::log_info(const char *component, Exception &e)
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(stderr, "%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", now_s->tm_hour,
+      fprintf(stderr, "%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(stderr, "%s", *i);
       fprintf(stderr, "%s\n", c_normal);
@@ -218,7 +218,7 @@ ConsoleLogger::log_warn(const char *component, Exception &e)
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", c_brown, now_s->tm_hour,
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", c_brown, now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(stderr, "%s", *i);
       fprintf(stderr, "%s\n", c_normal);
@@ -237,7 +237,7 @@ ConsoleLogger::log_error(const char *component, Exception &e)
     mutex->lock();
     localtime_r(&now.tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", c_red, now_s->tm_hour,
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", c_red, now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, now.tv_usec, component);
       fprintf(stderr, "%s", *i);
       fprintf(stderr, "%s\n", c_normal);
@@ -294,7 +294,7 @@ ConsoleLogger::tlog_debug(struct timeval *t, const char *component, Exception &e
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", c_darkgray, now_s->tm_hour,
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", c_darkgray, now_s->tm_hour,
 	    now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
       fprintf(stderr, "%s", *i);
       fprintf(stderr, "%s\n", c_normal);
@@ -311,7 +311,7 @@ ConsoleLogger::tlog_info(struct timeval *t, const char *component, Exception &e)
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(stderr, "%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", now_s->tm_hour,
+      fprintf(stderr, "%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
       fprintf(stderr, "%s", *i);
       fprintf(stderr, "%s\n", c_normal);
@@ -328,7 +328,7 @@ ConsoleLogger::tlog_warn(struct timeval *t, const char *component, Exception &e)
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", c_brown, now_s->tm_hour,
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", c_brown, now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
       fprintf(stderr, "%s", *i);
       fprintf(stderr, "%s\n", c_normal);
@@ -345,7 +345,7 @@ ConsoleLogger::tlog_error(struct timeval *t, const char *component, Exception &e
     mutex->lock();
     localtime_r(&t->tv_sec, now_s);
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s [EXCEPTION]: ", c_red, now_s->tm_hour,
+      fprintf(stderr, "%s%02d:%02d:%02d.%06ld %s: [EXCEPTION] ", c_red, now_s->tm_hour,
 	      now_s->tm_min, now_s->tm_sec, t->tv_usec, component);
       fprintf(stderr, "%s", *i);
       fprintf(stderr, "%s\n", c_normal);

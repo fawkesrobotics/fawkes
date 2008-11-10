@@ -175,6 +175,13 @@ function reset_skills(t)
       if m ~= nil and m.reset ~= nil then
 	 print_debug("Resetting skill " .. v)
 	 m.reset()
+	 if m.depends_skills ~= nil then
+	    for _, s in ipairs(m.depends_skills) do
+	       local sm = get_skill_module(s)
+	       print_debug("Resetting sub-skill " .. s .. " of skill " .. v)
+	       sm.reset()
+	    end
+	 end
       end
    end
 end

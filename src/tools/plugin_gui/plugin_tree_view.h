@@ -5,6 +5,7 @@
  *
  *  Created: Fri Sep 26 21:06:37 2008
  *  Copyright  2008  Daniel Beck
+ *             2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id: plugin_gui.h 899 2008-04-10 11:36:58Z tim $
  *
@@ -28,17 +29,18 @@
 
 #include <netcomm/fawkes/client_handler.h>
 #include <core/utils/lock_queue.h>
+#include <gui_utils/connection_dispatcher.h>
 
 #include <gtkmm.h>
 #include <libglademm/xml.h>
 
 namespace fawkes {
   class FawkesNetworkClient;
+  class FawkesNetworkMessage;
 }
 
 class PluginTreeView 
-: public Gtk::TreeView,
-  public fawkes::FawkesNetworkClientHandler
+: public Gtk::TreeView
 {
  public:
   PluginTreeView(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml> ref_xml);
@@ -46,15 +48,7 @@ class PluginTreeView
 
   void set_network_client(fawkes::FawkesNetworkClient* client);
 
-  // client handler
-  void deregistered(unsigned int id) throw();
-  void connection_died(unsigned int id) throw();
-  void connection_established(unsigned int id) throw();
-  void inbound_received(fawkes::FawkesNetworkMessage* m,
-			unsigned int id) throw();
-
- protected:
-
+ private:
   class PluginRecord : public Gtk::TreeModelColumnRecord
   {
   public:
@@ -70,33 +64,16 @@ class PluginTreeView
     Gtk::TreeModelColumn<bool> loaded;         /**< the loaded status of the plugin */
   };
 
-  enum PluginDataEventType
-  {
-    EVENT_TYPE_LOAD,       /**< the event contains information about the loaded status of a plugin */
-    EVENT_TYPE_LIST,       /**< the event is part of a list */
-    EVENT_TYPE_LIST_START  /**< the event marks the beginning of a list */
-  };
-
-  struct PluginData
-  {
-    PluginDataEventType event_type;  /**< the type of the event */
-    std::string name;                /**< the name of the plugin */
-    bool loaded;                     /**< the loaded status of the plugin */
-  };
-
-  fawkes::LockQueue<PluginData> m_incoming_plugin_data;
-
-  Glib::Dispatcher m_signal_incoming_plugin_data;
-  Glib::Dispatcher m_signal_connection_terminated;
-
-  void on_incoming_plugin_data();
   void on_status_toggled(const Glib::ustring& path);
-  void on_connection_terminated();
+  void on_connected();
+  void on_disconnected();
+  void on_message_received(fawkes::FawkesNetworkMessage *msg);
 
+ private:
   Glib::RefPtr<Gtk::ListStore> m_plugin_list;
   PluginRecord m_plugin_record;
 
-  fawkes::FawkesNetworkClient* m_client;
+  fawkes::ConnectionDispatcher m_dispatcher;
 };
 
 #endif /*  __TOOLS_CONFIG_GUI_PLUGIN_TREE_VIEW_H_ */

@@ -28,6 +28,8 @@
 
 #include <cmath>
 
+using fawkes::point_t;
+
 /** @class ScanlineBeams <models/scanlines/beams.h>
  * Raytraced beams scanline model.
  * This model uses a defined number of beams shot from the bottom of the image

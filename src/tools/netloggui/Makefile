@@ -1,8 +1,8 @@
 #*****************************************************************************
-#            Makefile Build System for Fawkes : Plugin Tool
+#            Makefile Build System for Fawkes : NetLog GUI
 #                            -------------------
-#   Created on Wed Nov 22 00:29:31 2006
-#   Copyright (C) 2007 by Daniel Beck, AllemaniACs RoboCup Team
+#   Created on Tue Nov 04 23:35:43 2008
+#   Copyright (C) 2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #   $Id$
 #
@@ -16,28 +16,27 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
-include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gui.mk
 
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_nlm = fawkescore fawkesutils fawkesnetcomm
-OBJS_nlm = main.o netlog_monitor.o backend_thread.o
-OBJS_all = $(OBJS_nlm)
+LIBS_netloggui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard fawkesinterfaces fawkesguiutils
+OBJS_netloggui = main.o netloggui.o
+OBJS_all = $(OBJS_netloggui)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
-  BINS_gui = $(BINDIR)/nlm
+  BINS_gui = $(BINDIR)/netloggui
 else
-  WARN_TARGETS += warning_nlm
+  WARN_TARGETS += warning_netloggui
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 gui: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
-warning_nlm:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building nlm$(TNORMAL) $(GUI_ERROR)";
+warning_skillgui:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building netloggui$(TNORMAL) $(GUI_ERROR)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

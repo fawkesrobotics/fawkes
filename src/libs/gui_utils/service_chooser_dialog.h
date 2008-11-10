@@ -26,12 +26,16 @@
 #ifndef __LIBS_GUI_UTILS_SERVICE_CHOOSER_DIALOG_H_
 #define __LIBS_GUI_UTILS_SERVICE_CHOOSER_DIALOG_H_
 
+#include <gui_utils/service_model.h>
+
 #include <gtkmm/dialog.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/expander.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gui_utils/service_model.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
 
 namespace fawkes {
 
@@ -53,8 +57,9 @@ class ServiceChooserDialog
 
   virtual ~ServiceChooserDialog();
 
- void get_selected_service(Glib::ustring &name, Glib::ustring &hostname,
+  void get_selected_service(Glib::ustring &name, Glib::ustring &hostname,
 			    Glib::ustring &ipaddr, unsigned short int &port);
+  void get_raw_address(struct sockaddr *addr, socklen_t addr_size);
 
   void run_and_connect();
 

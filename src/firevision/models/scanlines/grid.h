@@ -40,10 +40,10 @@ class ScanlineGrid : public ScanlineModel
 	       ROI* roi = NULL, bool horizontal_grid = true);
 	virtual ~ScanlineGrid();
 
-  point_t  operator*();
-  point_t* operator->();
-  point_t* operator++();
-  point_t* operator++(int); 
+  fawkes::point_t    operator*();
+  fawkes::point_t *  operator->();
+  fawkes::point_t *  operator++();
+  fawkes::point_t *  operator++(int); 
 
   bool          finished();
   void          reset();
@@ -70,8 +70,8 @@ class ScanlineGrid : public ScanlineModel
   bool horizontal_grid;
   bool more_to_come;
 
-  point_t coord;
-  point_t tmp_coord;
+  fawkes::point_t coord;
+  fawkes::point_t tmp_coord;
 
   void calc_next_coord();
 };

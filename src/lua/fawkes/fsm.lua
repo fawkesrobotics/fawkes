@@ -43,6 +43,25 @@ function State:new(o)
    return o
 end
 
+
+--- Execute init routines.
+-- This executes the init method. This may contain some general code executed for
+-- every state for derived states.
+-- @param ... Any parameters, passed to the init() function.
+function State:do_init(...)
+   return self:init(...)
+end
+
+
+--- Execute exit routines.
+-- This executes the exit method. This may contain some general code executed for
+-- every state for derived states.
+function State:do_exit()
+   self:exit()
+end
+
+
+
 --- Init function.
 -- The init function is called when you enter a state. It may take an arbitrary
 -- number of arguments, which may be passed from other states.
@@ -110,7 +129,7 @@ function FSM:new(o)
       print_debug(o.name .. ": Initialize start state " .. o.start.name)
    end
    o.current = o.start
-   o.current:init()
+   o.current:do_init()
 
    return o
 end
@@ -138,8 +157,8 @@ function FSM:trans(next, ...)
       if self.debug then
 	 print_debug(self.name .. ": Transition", self.current.name, "->", next.name)
       end
-      self.current:exit()
-      local init_rv = {next:init(...)}
+      self.current:do_exit()
+      local init_rv = {next:do_init(...)}
       self.current = next
       if #init_rv > 0 then
 	 return self:trans(unpack(init_rv))

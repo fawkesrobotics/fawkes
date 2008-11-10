@@ -34,18 +34,16 @@ using std::endl;
 
 
 
-namespace fawkes {
-  /** @class AboveHorizonException projective_cam.h <models/camera/projective_cam.h>
-   * The point that should be calculated lies above the horizon
-   * @ingroup Exceptions
-   */
-  /** Constructor
-   * @param msg message, appended to exception, base message "PostureException"
-   */
-  AboveHorizonException::AboveHorizonException(const char *msg) throw()
-    : Exception("AboveHorizonException: %s", msg)
-  {
-  }
+/** @class AboveHorizonException projective_cam.h <models/camera/projective_cam.h>
+ * The point that should be calculated lies above the horizon
+ * @ingroup Exceptions
+ */
+/** Constructor
+ * @param msg message, appended to exception, base message "PostureException"
+ */
+AboveHorizonException::AboveHorizonException(const char *msg) throw()
+  : fawkes::Exception("AboveHorizonException: %s", msg)
+{
 }
 
 
@@ -158,8 +156,8 @@ ProjectiveCam::set_location(const HomTransform& loc)
  * @param img_p a point in the image (x-px, y-px)
  * @return a point in the world (x-meters, y-meters)
  */
-f_point_t 
-ProjectiveCam::get_GPA_world_coord(point_t img_p) const
+fawkes::cart_coord_2d_t 
+ProjectiveCam::get_GPA_world_coord(fawkes::point_t img_p) const
 {
   Matrix p = get_GPA_p().invert();
   
@@ -175,10 +173,10 @@ ProjectiveCam::get_GPA_world_coord(point_t img_p) const
   if (wld_v.x() < 0)
   {
     cout << "img x: " << img_p.x << " y: " << img_p.y << " - world x: " << wld_v.x() << " y: " << wld_v.y() << endl;
-    throw fawkes::AboveHorizonException("The given point is above the horizon!\n");
+    throw AboveHorizonException("The given point is above the horizon!\n");
   }
 
-  f_point_t res;
+  fawkes::cart_coord_2d_t res;
   res.x = wld_v.x();
   res.y = -wld_v.y();
   
@@ -189,8 +187,8 @@ ProjectiveCam::get_GPA_world_coord(point_t img_p) const
  * @param wld_p a point on the ground (x-meters, y-meters)
  * @return a point in the image (x-px, y-px)
  */
-point_t 
-ProjectiveCam::get_GPA_image_coord(const f_point_t wld_p) const
+fawkes::point_t
+ProjectiveCam::get_GPA_image_coord(const fawkes::cart_coord_2d_t wld_p) const
 {
   Vector wld_v(4);
   wld_v.x(wld_p.x);

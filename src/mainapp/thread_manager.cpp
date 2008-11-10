@@ -251,8 +251,6 @@ FawkesThreadManager::add_maybelocked(ThreadList &tl, bool lock)
     tl.init(initializer, finalizer);
   } catch (Exception &e) {
     tl.unlock();
-    e.append("ThreadManager cannot start one or more threads of thread list '%s'",
-	     tl.name());
     throw;
   }
 

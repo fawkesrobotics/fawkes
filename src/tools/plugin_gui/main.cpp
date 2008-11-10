@@ -32,25 +32,30 @@ using namespace std;
 int main(int argc, char** argv)
 {
   try
-    {
-      Gtk::Main kit(argc, argv);
+  {
+    Gtk::Main kit(argc, argv);
+
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-      Glib::RefPtr<Gnome::Glade::Xml> refXml = Gnome::Glade::Xml::create(RESDIR"/glade/plugin_tool/plugin_tool.glade");
+    Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/glade/plugin_tool/plugin_tool.glade");
 #else
-      std::auto_ptr<Gnome::Glade::XmlError> error;
-      Glib::RefPtr<Gnome::Glade::Xml> refXml = Gnome::Glade::Xml::create(RESDIR"/glade/plugin_tool/plugin_tool.glade", "", "", error);
-      if (error.get()) {
-	throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
-      }
+    std::auto_ptr<Gnome::Glade::XmlError> error;
+    Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/glade/plugin_tool/plugin_tool.glade", "", "", error);
+    if (error.get()) {
+      throw fawkes::Exception("Failed to load Glade file: %s", error->what().c_str());
+    }
 #endif
+
+    PluginGuiGtkWindow *window = NULL;
+    refxml->get_widget_derived("wndMain", window);
 			
-      PluginGui pt_gui(refXml);
-      kit.run( pt_gui.get_window() );
-    }
+    kit.run( *window );
+
+    delete window;
+  }
   catch (std::exception const& e)
-    {
-      std::cerr << "Error: " << e.what() << std::endl;
-    }
+  {
+    std::cerr << "Error: " << e.what() << std::endl;
+  }
 
   return 0;
 }

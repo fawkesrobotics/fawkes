@@ -72,7 +72,7 @@ namespace fawkes {
  * @param msg reason that caused the exception.
  */
 SocketException::SocketException(const char *msg)
-  : Exception(msg)
+  : Exception("%s", msg)
 {
 }
 
@@ -82,7 +82,7 @@ SocketException::SocketException(const char *msg)
  * @param _errno error number (errno returned by a syscall)
  */
 SocketException::SocketException(const char *msg, int _errno)
-  : Exception(msg, _errno)
+  : Exception(_errno, "%s", msg)
 {
 }
 

@@ -74,7 +74,8 @@ NetworkLogger::~NetworkLogger()
 
 void
 NetworkLogger::send_message(Logger::LogLevel level, struct timeval *t,
-			    const char *component, const char *format, va_list va)
+			    const char *component, bool is_exception,
+			    const char *format, va_list va)
 {
   struct timeval now;
   if ( t == NULL ) {
@@ -84,8 +85,9 @@ NetworkLogger::send_message(Logger::LogLevel level, struct timeval *t,
 
   NetworkLoggerMessageContent *content = new NetworkLoggerMessageContent(level, t,
 									 component,
+									 is_exception,
 									 format, va);
-  
+
   for ( __ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
     NetworkLoggerMessageContent *content_copy = new NetworkLoggerMessageContent(content);
     hub->send(*__ssit, FAWKES_CID_NETWORKLOGGER, MSGTYPE_LOGMESSAGE, content_copy);
@@ -97,7 +99,8 @@ NetworkLogger::send_message(Logger::LogLevel level, struct timeval *t,
 
 void
 NetworkLogger::send_message(Logger::LogLevel level, struct timeval *t,
-			    const char *component, const char *message)
+			    const char *component, bool is_exception,
+			    const char *message)
 {
   struct timeval now;
   if ( t == NULL ) {
@@ -105,8 +108,9 @@ NetworkLogger::send_message(Logger::LogLevel level, struct timeval *t,
     t = &now;
   }
 
-  NetworkLoggerMessageContent *content = new NetworkLoggerMessageContent(LL_DEBUG, t,
+  NetworkLoggerMessageContent *content = new NetworkLoggerMessageContent(level, t,
 									 component,
+									 is_exception,
 									 message);
   
   for ( __ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
@@ -123,7 +127,7 @@ NetworkLogger::vlog_debug(const char *component, const char *format, va_list va)
 {
   if ((log_level <= LL_DEBUG) && (! __subscribers.empty()) ) {
     __subscribers.lock();
-    send_message(LL_DEBUG, NULL, component, format, va);
+    send_message(LL_DEBUG, NULL, component, /* exception? */ false, format, va);
     __subscribers.unlock();
   }
 }
@@ -134,7 +138,7 @@ NetworkLogger::vlog_info(const char *component, const char *format, va_list va)
 {
   if ((log_level <= LL_INFO) && (! __subscribers.empty()) ) {
     __subscribers.lock();
-    send_message(LL_INFO, NULL, component, format, va);
+    send_message(LL_INFO, NULL, component, /* exception? */ false, format, va);
    __subscribers.unlock();
   }
 }
@@ -145,7 +149,7 @@ NetworkLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
   if ((log_level <= LL_WARN) && (! __subscribers.empty()) ) {
     __subscribers.lock();
-    send_message(LL_WARN, NULL, component, format, va);
+    send_message(LL_WARN, NULL, component, /* exception? */ false, format, va);
    __subscribers.unlock();
   }
 }
@@ -156,7 +160,7 @@ NetworkLogger::vlog_error(const char *component, const char *format, va_list va)
 {
   if ((log_level <= LL_ERROR) && (! __subscribers.empty()) ) {
     __subscribers.lock();
-    send_message(LL_ERROR, NULL, component, format, va);
+    send_message(LL_ERROR, NULL, component, /* exception? */ false, format, va);
    __subscribers.unlock();
   }
 }
@@ -208,7 +212,7 @@ NetworkLogger::log_debug(const char *component, Exception &e)
   if ((log_level <= LL_DEBUG) && (! __subscribers.empty()) ) {
     __subscribers.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      send_message(LL_DEBUG, NULL, component, *i);
+      send_message(LL_DEBUG, NULL, component, /* exception? */ true, *i);
     } 
    __subscribers.unlock();
   }
@@ -220,7 +224,7 @@ NetworkLogger::log_info(const char *component, Exception &e)
   if ((log_level <= LL_INFO) && (! __subscribers.empty()) ) {
     __subscribers.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      send_message(LL_INFO, NULL, component, *i);
+      send_message(LL_INFO, NULL, component, /* exception? */ true, *i);
     } 
    __subscribers.unlock();
   }
@@ -233,7 +237,7 @@ NetworkLogger::log_warn(const char *component, Exception &e)
   if ((log_level <= LL_WARN) && (! __subscribers.empty()) ) {
     __subscribers.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      send_message(LL_WARN, NULL, component, *i);
+      send_message(LL_WARN, NULL, component, /* exception? */ true, *i);
     } 
    __subscribers.unlock();
   }
@@ -246,8 +250,8 @@ NetworkLogger::log_error(const char *component, Exception &e)
   if ((log_level <= LL_ERROR) && (! __subscribers.empty()) ) {
     __subscribers.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      send_message(LL_ERROR, NULL, component, *i);
-    } 
+      send_message(LL_ERROR, NULL, component, /* exception? */ true, *i);
+    }
    __subscribers.unlock();
   }
 }
@@ -261,7 +265,7 @@ NetworkLogger::vtlog_debug(struct timeval *t, const char *component,
 {
   if ((log_level <= LL_DEBUG) && (! __subscribers.empty()) ) {
     __subscribers.lock();
-    send_message(LL_DEBUG, t, component, format, va);
+    send_message(LL_DEBUG, t, component, /* exception? */ false, format, va);
     __subscribers.unlock();
   }
 }
@@ -272,7 +276,7 @@ NetworkLogger::vtlog_info(struct timeval *t, const char *component, const char *
 {
   if ((log_level <= LL_INFO) && (! __subscribers.empty()) ) {
     __subscribers.lock();
-    send_message(LL_INFO, t, component, format, va);
+    send_message(LL_INFO, t, component, /* exception? */ false, format, va);
    __subscribers.unlock();
   }
 }
@@ -283,7 +287,7 @@ NetworkLogger::vtlog_warn(struct timeval *t, const char *component, const char *
 {
   if ((log_level <= LL_WARN) && (! __subscribers.empty()) ) {
     __subscribers.lock();
-    send_message(LL_WARN, t, component, format, va);
+    send_message(LL_WARN, t, component, /* exception? */ false, format, va);
    __subscribers.unlock();
   }
 }
@@ -294,7 +298,7 @@ NetworkLogger::vtlog_error(struct timeval *t, const char *component, const char 
 {
   if ((log_level <= LL_ERROR) && (! __subscribers.empty()) ) {
     __subscribers.lock();
-    send_message(LL_ERROR, t, component, format, va);
+    send_message(LL_ERROR, t, component, /* exception? */ false, format, va);
    __subscribers.unlock();
   }
 }
@@ -346,7 +350,7 @@ NetworkLogger::tlog_debug(struct timeval *t, const char *component, Exception &e
   if ((log_level <= LL_DEBUG) && (! __subscribers.empty()) ) {
     __subscribers.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      send_message(LL_DEBUG, t, component, *i);
+      send_message(LL_DEBUG, t, component, /* exception? */ true, *i);
     } 
    __subscribers.unlock();
   }
@@ -358,7 +362,7 @@ NetworkLogger::tlog_info(struct timeval *t, const char *component, Exception &e)
   if ((log_level <= LL_INFO) && (! __subscribers.empty()) ) {
     __subscribers.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      send_message(LL_INFO, t, component, *i);
+      send_message(LL_INFO, t, component, /* exception? */ true, *i);
     } 
    __subscribers.unlock();
   }
@@ -371,7 +375,7 @@ NetworkLogger::tlog_warn(struct timeval *t, const char *component, Exception &e)
   if ((log_level <= LL_WARN) && (! __subscribers.empty()) ) {
     __subscribers.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      send_message(LL_WARN, t, component, *i);
+      send_message(LL_WARN, t, component, /* exception? */ true, *i);
     } 
    __subscribers.unlock();
   }
@@ -384,7 +388,7 @@ NetworkLogger::tlog_error(struct timeval *t, const char *component, Exception &e
   if ((log_level <= LL_ERROR) && (! __subscribers.empty()) ) {
     __subscribers.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      send_message(LL_ERROR, t, component, *i);
+      send_message(LL_ERROR, t, component, /* exception? */ true, *i);
     } 
    __subscribers.unlock();
   }
@@ -429,12 +433,14 @@ NetworkLogger::client_disconnected(unsigned int clid)
  * @param log_level Log level
  * @param t time
  * @param component component string
+ * @param is_exception true if this message originates from an exception, false otherwise
  * @param format message string format
  * @param va va_list containing the arguments for the given format
  */
 NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_level,
 							 struct timeval *t,
 							 const char *component,
+							 bool is_exception,
 							 const char *format, va_list va)
 {
   char *tmp = NULL;
@@ -444,6 +450,7 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
     _payload = calloc(1, _payload_size);
     header = (NetworkLogger::network_logger_header_t *)_payload;
     header->log_level    = log_level;
+    header->exception    = is_exception ? 1 : 0;
     header->time.tv_sec  = htonl(t->tv_sec);
     header->time.tv_usec = htonl(t->tv_usec);
     copy_payload(sizeof(NetworkLogger::network_logger_header_t), component, strlen(component));
@@ -458,17 +465,20 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
  * @param log_level Log level
  * @param t time
  * @param component component string
+ * @param is_exception true if this message originates from an exception, false otherwise
  * @param message message string.
  */
 NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_level,
 							 struct timeval *t,
 							 const char *component,
+							 bool is_exception,
 							 const char *message)
 {
   _payload_size = sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + strlen(message) + 2;
   _payload = calloc(1, _payload_size);
   header = (NetworkLogger::network_logger_header_t *)_payload;
   header->log_level    = log_level;
+  header->exception    = is_exception ? 1 : 0;
   header->time.tv_sec  = htonl(t->tv_sec);
   header->time.tv_usec = htonl(t->tv_usec);
   copy_payload(sizeof(NetworkLogger::network_logger_header_t), component, strlen(component));
@@ -559,6 +569,16 @@ Logger::LogLevel
 NetworkLoggerMessageContent::get_loglevel() const
 {
   return (Logger::LogLevel)header->log_level;
+}
+
+
+/** Check if message was generated by exception.
+ * @return true if message was generated by exception, false otherwise
+ */
+bool
+NetworkLoggerMessageContent::is_exception() const
+{
+  return (header->exception == 1);
 }
 
 } // end namespace fawkes

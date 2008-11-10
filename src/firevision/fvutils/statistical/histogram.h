@@ -39,8 +39,8 @@ class Histogram
   Histogram(HistogramBlock* histogram_block);
   ~Histogram();
 
-  void           operator+=(point_t *p);
-  void           operator+=(point_t  p);
+  void           operator+=(fawkes::point_t *p);
+  void           operator+=(fawkes::point_t  p);
 
   unsigned int * get_histogram();
   HistogramBlock* get_histogram_block();

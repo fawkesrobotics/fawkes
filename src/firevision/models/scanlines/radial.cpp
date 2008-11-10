@@ -30,6 +30,8 @@
 #include <cmath>
 #include <cstring>
 
+using fawkes::point_t;
+
 /** @class ScanlineRadial <models/scanlines/radial.h>
  * Radial scanlines.
  * Uses circles to generate scanline points. A dead radius is ignored in the

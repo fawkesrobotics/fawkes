@@ -48,10 +48,10 @@ class CornerHorizon : public ScanlineModel
 
   virtual ~CornerHorizon();
 
-  point_t  operator*();
-  point_t* operator->();
-  point_t* operator++();
-  point_t* operator++(int); 
+  fawkes::point_t    operator*();
+  fawkes::point_t *  operator->();
+  fawkes::point_t *  operator++();
+  fawkes::point_t *  operator++(int); 
 
   bool          finished();
   void          reset();
@@ -94,8 +94,8 @@ class CornerHorizon : public ScanlineModel
   float pan_pixel_per_rad;
   float tilt_pixel_per_rad;
 
-  point_t coord;
-  point_t tmp_coord;
+  fawkes::point_t coord;
+  fawkes::point_t tmp_coord;
 
   unsigned int horizon;
 

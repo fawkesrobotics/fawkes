@@ -90,10 +90,10 @@ Shrinker::shrink( ROI *roi )
        This helps against reflection. 
        (If ball is close, this does not work, because it takes away too many edge pixels.) */
 	  
-    unsigned char *bufferTmp = roi->get_roi_buffer_start( src );
-    unsigned char *line_startTmp = bufferTmp;
-    cart_coord_t leftmostPixel = {roi->width, 0};
-    cart_coord_t topmostPixel = {0, roi->height};
+    unsigned char  *bufferTmp     = roi->get_roi_buffer_start( src );
+    unsigned char  *line_startTmp = bufferTmp;
+    fawkes::point_t leftmostPixel = {roi->width, 0};
+    fawkes::point_t topmostPixel  = {0, roi->height};
 	  
     // find leftmost hint-pixel
     bool pixelFound = false;

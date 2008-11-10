@@ -79,7 +79,7 @@ class Zauberstab {
   bool isEmptyRegion();
 
   ZRegion * getRegion() const;
-  std::vector< rectangle_t >  getSelection();
+  std::vector< fawkes::rectangle_t >  getSelection();
 
  private:
   unsigned int threshold;

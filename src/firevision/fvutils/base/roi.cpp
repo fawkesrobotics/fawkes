@@ -27,6 +27,8 @@
 
 #include <cstdlib>
 
+using namespace fawkes;
+
 /** @class ROI <fvutils/base/roi.h>
  * Region of interest.
  * The ROI class is central to FireVision. All image processing is concentrated

@@ -62,7 +62,7 @@ class ROI {
       unsigned int width, unsigned int height,
       unsigned int image_width, unsigned int image_height);
 
-  void         set_start(point_t p);
+  void         set_start(fawkes::point_t p);
   void         set_start(unsigned int x, unsigned int y);
 
   void         set_width(unsigned int width);
@@ -112,7 +112,7 @@ class ROI {
 
  public: // Public for quick access
   /** ROI start */
-  point_t      start;
+  fawkes::point_t start;
   /** ROI width */
   unsigned int width;
   /** ROI height */

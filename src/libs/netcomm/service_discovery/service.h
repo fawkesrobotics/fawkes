@@ -3,7 +3,7 @@
  *  service.h - Network service representation
  *
  *  Generated: Tue Nov 07 17:58:10 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -29,6 +29,9 @@
 #include <string>
 #include <list>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+
 namespace fawkes {
 
 class NetworkService
@@ -42,13 +45,27 @@ class NetworkService
 
   NetworkService(const char         *name,
 		 const char         *type,
+		 const char         *domain,
+		 const char         *host,
+		 unsigned short int  port,
+		 const struct sockaddr *addr,
+		 const socklen_t     addr_size,
+		 std::list<std::string> &txt);
+
+  NetworkService(const char         *name,
+		 const char         *type,
 		 unsigned short int  port);
+
+  NetworkService(const char         *name,
+		 const char         *type,
+		 const char         *domain);
 
   NetworkService(const NetworkService *s);
   NetworkService(const NetworkService &s);
   ~NetworkService();
 
-  void add_txt(const char *txt);
+  void                add_txt(const char *txt);
+  void                set_txt(std::list<std::string> &txtlist);
 
   void                set_name(const char *new_name);
 
@@ -56,6 +73,7 @@ class NetworkService
   const char *        type() const;
   const char *        domain() const;
   const char *        host() const;
+  std::string         addr_string() const;
   unsigned short int  port() const;
   const std::list<std::string> & txt() const;
 
@@ -70,6 +88,8 @@ class NetworkService
   char *              _domain;
   char *              _host;
   unsigned short int  _port;
+  struct sockaddr    *_addr;
+  socklen_t           _addr_size;
 
 };
 

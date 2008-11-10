@@ -4,6 +4,7 @@
  *
  *  Created: Mon Sep 29 17:46:44 2008
  *  Copyright  2008  Daniel Beck
+ *             2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -26,6 +27,7 @@
 #include <gui_utils/service_selector_cbe.h>
 #include <gui_utils/service_model.h>
 #include <gui_utils/utils.h>
+#include <gui_utils/connection_dispatcher.h>
 #include <netcomm/fawkes/client.h>
 
 using namespace fawkes;
@@ -36,6 +38,7 @@ using namespace fawkes;
  * click the button opens a network connection to the selected service.
  *
  * @author Daniel Beck
+ * @author Tim Niemueller
  */
 
 /** @var fawkes::ServiceSelectorCBE::m_cbe_services
@@ -46,45 +49,34 @@ using namespace fawkes;
  * A Gtk::Button that trigger the connection.
  */
 
-/** @var fawkes::ServiceSelectorCBE::m_signal_connected
- * This signal is emitted whenever a connection is established.
- */
-
-/** @var fawkes::ServiceSelectorCBE::m_signal_disconnected
- * This signal is emitted whenever a connection is terminated.
- */
-
-/** @var fawkes::ServiceSelectorCBE::m_signal_connected_internal
- * This signal is emitted whenever a connection is established. It is
- * meant for class-internal signalling only!
- */
-
-/** @var fawkes::ServiceSelectorCBE::m_signal_disconnected_internal
- * This signal is emitted whenever a connection is terminated. It is
- * meant for class-internal signalling only!
- */
-
-/** @var fawkes::ServiceSelectorCBE::m_client
- * A network client of the selected service.
+/** @var fawkes::ServiceSelectorCBE::m_parent
+ * The parent Gtk::Window.
  */
 
 /** @var fawkes::ServiceSelectorCBE::m_service_model
  * A liststore which contains information about detected services.
  */
 
+/** @var fawkes::ServiceSelectorCBE::m_dispatcher
+ * A ConnectionDispatcher which dispatches connection signals.
+ */
+
 /** Construtor.
  * @param services the combo box to hold the list of services
  * @param connect the button to trigger the network connection
+ * @param parent the parent window. Used for error dialogs.
  * @param service a service identifier
  */
 ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
 					Gtk::Button* connect,
+					Gtk::Window* parent,
 					const char* service )
 {
   m_service_model = new ServiceModel(service);
 
-  m_cbe_services = services;
-  m_btn_connect  = connect;
+  m_cbe_services  = services;
+  m_btn_connect   = connect;
+  m_parent        = parent;
 
   initialize();
 }
@@ -93,17 +85,20 @@ ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
  * @param ref_xml Glade XML file
  * @param cbe_name name of the combo box
  * @param btn_name name of the button
+ * @param wnd_name name of the parent window
  * @param service service identifier
  */
 ServiceSelectorCBE::ServiceSelectorCBE( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 					const char* cbe_name,
 					const char* btn_name,
+					const char* wnd_name,
 					const char* service )
 {
   m_service_model = new ServiceModel(service);
 
-  m_cbe_services = dynamic_cast<Gtk::ComboBoxEntry*>( get_widget(ref_xml, cbe_name) );
-  m_btn_connect  = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, btn_name) );
+  ref_xml->get_widget(wnd_name, m_parent);
+  ref_xml->get_widget(cbe_name, m_cbe_services);
+  ref_xml->get_widget(btn_name, m_btn_connect);
 
   initialize();
 }
@@ -112,13 +107,9 @@ ServiceSelectorCBE::ServiceSelectorCBE( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 void
 ServiceSelectorCBE::initialize()
 {
-  m_signal_connected_internal.connect( sigc::mem_fun(*this, &ServiceSelectorCBE::on_connection_established) );
-  m_signal_disconnected_internal.connect( sigc::mem_fun(*this, &ServiceSelectorCBE::on_connection_died) );
-
   m_cbe_services->set_model( m_service_model->get_list_store() );
   m_cbe_services->set_text_column(m_service_model->get_column_record().hostname);
   m_cbe_services->get_entry()->set_activates_default(true);
-  //  m_cbe_services->get_entry()->signal_activate().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_btn_connect_clicked) );
   m_cbe_services->signal_changed().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_service_selected) );
 
   m_btn_connect->signal_clicked().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_btn_connect_clicked) );
@@ -126,13 +117,15 @@ ServiceSelectorCBE::initialize()
   m_btn_connect->set_use_stock(true);
   m_btn_connect->grab_default();
 
-  m_client = NULL;
+  m_dispatcher = new ConnectionDispatcher();
+  m_dispatcher->signal_connected().connect(sigc::mem_fun(*this, &ServiceSelectorCBE::on_connected));
+  m_dispatcher->signal_disconnected().connect(sigc::mem_fun(*this, &ServiceSelectorCBE::on_disconnected));
 }
 
 /** Destructor. */
 ServiceSelectorCBE::~ServiceSelectorCBE()
 {
-  delete m_client;
+  delete m_dispatcher;
   delete m_service_model;
 }
 
@@ -142,7 +135,7 @@ ServiceSelectorCBE::~ServiceSelectorCBE()
 FawkesNetworkClient*
 ServiceSelectorCBE::get_network_client()
 {
-  return m_client;
+  return m_dispatcher->get_client();
 }
 
 /** This signal is emitted whenever a network connection is established.
@@ -151,7 +144,7 @@ ServiceSelectorCBE::get_network_client()
 sigc::signal<void>
 ServiceSelectorCBE::signal_connected()
 {
-  return m_signal_connected;
+  return m_dispatcher->signal_connected();
 }
 
 /** This signal is emitted whenever a network connection is terminated.
@@ -160,7 +153,7 @@ ServiceSelectorCBE::signal_connected()
 sigc::signal<void>
 ServiceSelectorCBE::signal_disconnected()
 {
-  return m_signal_disconnected;
+  return m_dispatcher->signal_disconnected();
 }
 
 /** Signal handler that is called whenever the connect button is
@@ -169,45 +162,45 @@ ServiceSelectorCBE::signal_disconnected()
 void
 ServiceSelectorCBE::on_btn_connect_clicked()
 {
-  if (m_client)
-    {
-      if ( m_client->connected() )
-	{ m_client->disconnect(); }
+  FawkesNetworkClient *client = m_dispatcher->get_client();
 
-      delete m_client;
-      m_client = NULL; 
-
-      m_btn_connect->set_label("gtk-connect");
-    }
+  if (client->connected())
+  {
+    client->disconnect();
+    m_btn_connect->set_label("gtk-connect");
+  }
   else
-    { 
-      Glib::ustring hostname;
-      unsigned short port;
+  { 
+    Glib::ustring hostname;
+    unsigned short port;
 
-      if ( -1 == m_cbe_services->get_active_row_number() )
-	{
-	  Gtk::Entry* entry = m_cbe_services->get_entry();
-	  hostname = entry->get_text();
-	  port = 1910;
-	}
-      else
-	{
-	  Gtk::TreeModel::Row row = *m_cbe_services->get_active();
-	  hostname = row[m_service_model->get_column_record().hostname];
-	  port = row[m_service_model->get_column_record().port];
-	}
-
-      m_client = new FawkesNetworkClient( hostname.c_str(), port );
-      m_client->register_handler(this, FAWKES_CID_OBSERVER_MODE);
-
-      try
-	{ m_client->connect(); }
-      catch (Exception& e)
-	{ 
-	  delete m_client;
-	  e.print_trace();
-	}
+    if ( -1 == m_cbe_services->get_active_row_number() )
+    {
+      Gtk::Entry* entry = m_cbe_services->get_entry();
+      hostname = entry->get_text();
+      port = 1910;
     }
+    else
+    {
+      Gtk::TreeModel::Row row = *m_cbe_services->get_active();
+      hostname = row[m_service_model->get_column_record().hostname];
+      port = row[m_service_model->get_column_record().port];
+    }
+
+    try
+    {
+      client->connect( hostname.c_str(), port );
+    }
+    catch (Exception& e)
+    {
+      Glib::ustring message = *(e.begin());
+      Gtk::MessageDialog md(*m_parent, message, /* markup */ false,
+			    Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
+			    /* modal */ true);
+      md.set_title("Connection failed");
+      md.run();
+    }
+  }
 }
 
 /** Signal handler that is called whenever an entry is selected from
@@ -216,69 +209,43 @@ ServiceSelectorCBE::on_btn_connect_clicked()
 void
 ServiceSelectorCBE::on_service_selected()
 {
-  if ( -1 == m_cbe_services->get_active_row_number() )
-    { return; }
+  if ( -1 == m_cbe_services->get_active_row_number() )  return;
 
-  if (m_client)
-    {
-      if ( m_client->connected() )
-	{ m_client->disconnect(); }
-
-      delete m_client;
-      m_client = NULL;
-    }
+  FawkesNetworkClient *client = m_dispatcher->get_client();
+  if ( client->connected() )
+  {
+    client->disconnect();
+  }
 
   Gtk::TreeModel::Row row = *m_cbe_services->get_active();
   Glib::ustring hostname = row[m_service_model->get_column_record().hostname];
   unsigned short port = row[m_service_model->get_column_record().port];
 
-  m_client = new FawkesNetworkClient( hostname.c_str(), port );
-  m_client->register_handler(this, FAWKES_CID_OBSERVER_MODE);
-  
   try
-    { m_client->connect(); }
+  {
+    client->connect( hostname.c_str(), port );
+  }
   catch (Exception& e)
-    { 
-      delete m_client;
-      e.print_trace();
-    }
+  {
+    Glib::ustring message = *(e.begin());
+    Gtk::MessageDialog md(*m_parent, message, /* markup */ false,
+			  Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
+			  /* modal */ true);
+    md.set_title("Connection failed");
+    md.run();
+  }
 }
 
-/** Signal handler for the internal connection established signal. */
+/** Signal handler for the connection established signal. */
 void
-ServiceSelectorCBE::on_connection_established()
+ServiceSelectorCBE::on_connected()
 {
   m_btn_connect->set_label("gtk-disconnect");
-  m_signal_connected.emit();
 }
 
-/** Signal handler for the internal connection terminated signal. */
+/** Signal handler for the connection terminated signal. */
 void
-ServiceSelectorCBE::on_connection_died()
+ServiceSelectorCBE::on_disconnected()
 {
   m_btn_connect->set_label("gtk-connect");
-  m_signal_disconnected.emit();
 }
-
-void
-ServiceSelectorCBE::deregistered (unsigned int id) throw ()
-{
-}
-
-void
-ServiceSelectorCBE::inbound_received (FawkesNetworkMessage *m, unsigned int id) throw ()
-{
-}
-
-void
-ServiceSelectorCBE::connection_died (unsigned int id) throw ()
-{
-  m_signal_disconnected_internal();
-}
-
-void
-ServiceSelectorCBE::connection_established (unsigned int id) throw ()
-{
-  m_signal_connected_internal();
-}
-

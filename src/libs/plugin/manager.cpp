@@ -328,8 +328,7 @@ PluginManager::load(const char *plugin_list)
 	  plugin_ids[*i] = next_plugin_id++;
 	  send_loaded(i->c_str());
 	} catch (CannotInitializeThreadException &e) {
-	  e.append("Could not initialize one or more "
-		   "threads of plugin %s, unloading plugin", i->c_str());
+	  e.prepend("Plugin >>> %s <<< could not be initialized, unloading", i->c_str());
 	  plugins.unlock();
 	  plugin_loader->unload(plugin);
 	  throw;

@@ -34,6 +34,15 @@ namespace fawkes {
  */
 
 /** Constructor.
+ * Make sure you use append() or prepend() to add messages!
+ */
+CannotInitializeThreadException::CannotInitializeThreadException()
+  : Exception()
+{
+}
+
+
+/** Constructor.
  * @param format message format (reason or symptom of failure)
  */
 CannotInitializeThreadException::CannotInitializeThreadException(const char *format, ...)
@@ -44,6 +53,7 @@ CannotInitializeThreadException::CannotInitializeThreadException(const char *for
   append_va(format, va);
   va_end(va);
 }
+
 
 
 /** @class ThreadInitializer core/threading/thread_initializer.h

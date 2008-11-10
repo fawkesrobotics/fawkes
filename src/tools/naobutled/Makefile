@@ -1,0 +1,43 @@
+#*****************************************************************************
+#            Makefile Build System for Fawkes : Nao Button/LED GUI
+#                            -------------------
+#   Created on Thu Oct 30 21:43:11 2008
+#   Copyright (C) 2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
+#
+#*****************************************************************************
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#*****************************************************************************
+
+BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/gui.mk
+
+CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
+LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+
+LIBS_naobutled = fawkescore fawkesutils fawkesnetcomm fawkesblackboard fawkesinterfaces fawkesguiutils
+OBJS_naobutled = main.o naobutled.o led_button.o
+OBJS_all = $(OBJS_naobutled)
+
+ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
+  BINS_gui = $(BINDIR)/naobutled
+else
+  WARN_TARGETS += warning_naobutled
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+gui: $(WARN_TARGETS)
+
+.PHONY: $(WARN_TARGETS)
+warning_naobutled:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building naogui$(TNORMAL) $(GUI_ERROR)";
+endif
+
+include $(BASEDIR)/etc/buildsys/base.mk
+

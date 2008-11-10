@@ -284,7 +284,7 @@ SimpleColorClassifier::classify()
  * @param massPoint contains mass point upon return
  */
 void
-SimpleColorClassifier::get_mass_point_of_ball( ROI *roi, cart_coord_t *massPoint )
+SimpleColorClassifier::get_mass_point_of_ball( ROI *roi, fawkes::point_t *massPoint )
 {
   unsigned int nrOfOrangePixels;
   nrOfOrangePixels = 0;

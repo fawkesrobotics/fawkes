@@ -5,6 +5,7 @@
  *
  *  Created: Fri Sep 26 21:13:48 2008
  *  Copyright  2008  Daniel Beck
+ *             2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id: plugin_gui.h 899 2008-04-10 11:36:58Z tim $
  *
@@ -34,38 +35,18 @@
 using namespace std;
 using namespace fawkes;
 
-/** @class PluginTreeView tools/plugin_gui/plugin_tree_view.h
+/** @class PluginTreeView "plugin_tree_view.h"
  * A TreeView class to list available plugins und trigger their
  * loading/unloading.
  *
  * @author Daniel Beck
+ * @author Tim Niemueller
  */
 
-/** @class PluginTreeView::PluginRecord tools/plugin_gui/plugin_tree_view.h
+/** @class PluginTreeView::PluginRecord "plugin_tree_view.h"
  * Column record class for the plugin tree view.
  *
  * @author Daniel Beck
- */
-
-/** @struct PluginTreeView::PluginData
- * This data structure holds incoming plugin data.
- */
-
-/** @enum PluginTreeView::PluginDataEventType
- * Different type of incoming plugin data events.
- */
-
-/** @var PluginTreeView::m_incoming_plugin_data
- * Queue for incoming plugin data.
- */
-
-/** @var PluginTreeView::m_signal_incoming_plugin_data
- * This signal is emitted whenever new plugin data is available.
- */
-
-/** @var PluginTreeView::m_signal_connection_terminated
- * This signal is emitted whenever the network connection is
- * terminated.
  */
 
 /** @var PluginTreeView::m_plugin_list
@@ -76,17 +57,14 @@ using namespace fawkes;
  * Column record object.
  */
 
-/** @var PluginTreeView::m_client
- * The Fawkes network client.
- */
-
 /** Constructor.
  * @param cobject pointer to base object type
  * @param ref_xml Glade XML file
  */
 PluginTreeView::PluginTreeView( BaseObjectType* cobject,
 				const Glib::RefPtr<Gnome::Glade::Xml> ref_xml )
-  : Gtk::TreeView(cobject)
+  : Gtk::TreeView(cobject),
+    m_dispatcher(FAWKES_CID_PLUGINMANAGER)
 {
   m_plugin_list = Gtk::ListStore::create(m_plugin_record);
   set_model(m_plugin_list);
@@ -98,26 +76,27 @@ PluginTreeView::PluginTreeView( BaseObjectType* cobject,
   renderer = dynamic_cast<Gtk::CellRendererToggle*>( get_column_cell_renderer(1) );
   renderer->signal_toggled().connect( sigc::mem_fun(*this, &PluginTreeView::on_status_toggled));
 
-  m_signal_incoming_plugin_data.connect( sigc::mem_fun(*this, &PluginTreeView::on_incoming_plugin_data) );
-  m_signal_connection_terminated.connect( sigc::mem_fun(*this, &PluginTreeView::on_connection_terminated) );
-
-  m_client = NULL;
+  m_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &PluginTreeView::on_connected));
+  m_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &PluginTreeView::on_disconnected));
+  m_dispatcher.signal_message_received().connect(sigc::mem_fun(*this, &PluginTreeView::on_message_received));
 }
+
 
 /** Destructor. */
 PluginTreeView::~PluginTreeView()
 {
-  if ( m_client->connected() )
+  if ( m_dispatcher.get_client()->connected() )
   {
     // unsubscribe
     FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 							 MSG_PLUGIN_UNSUBSCRIBE_WATCH);
-    m_client->enqueue(msg);
+    m_dispatcher.get_client()->enqueue(msg);
     msg->unref();			
 
-    m_client->deregister_handler(FAWKES_CID_PLUGINMANAGER);
+    m_dispatcher.get_client()->deregister_handler(FAWKES_CID_PLUGINMANAGER);
   }
 }
+
 
 /** Set the network client.
  * @param client a Fawkes network client
@@ -125,217 +104,185 @@ PluginTreeView::~PluginTreeView()
 void
 PluginTreeView::set_network_client(FawkesNetworkClient* client)
 {
-  m_client = client;
+  m_dispatcher.set_client(client);
+}
 
-  m_client->register_handler(this, FAWKES_CID_PLUGINMANAGER);
 
+void
+PluginTreeView::on_connected()
+{
   try
-    {
-      if ( !m_client->connected() )
-	{ m_client->connect(); }
+  {
+    FawkesNetworkClient *client = m_dispatcher.get_client();
 
-      // subscribe for load-/unload messages
-      FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-							   MSG_PLUGIN_SUBSCRIBE_WATCH);
-      m_client->enqueue(msg);
-      msg->unref();
+    // subscribe for load-/unload messages
+    FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+							 MSG_PLUGIN_SUBSCRIBE_WATCH);
+    client->enqueue(msg);
+    msg->unref();
       
-      // request list of available plugins
-      msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-				     MSG_PLUGIN_LIST_AVAIL);
-      m_client->enqueue(msg);
-      msg->unref();
+    // request list of available plugins
+    msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+				   MSG_PLUGIN_LIST_AVAIL);
+    client->enqueue(msg);
+    msg->unref();
       
-      // request list of loaded plugins
-      msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-				     MSG_PLUGIN_LIST_LOADED);
-      m_client->enqueue(msg);
-      msg->unref();
-    }
+    // request list of loaded plugins
+    msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+				   MSG_PLUGIN_LIST_LOADED);
+    client->enqueue(msg);
+    msg->unref();
+  }
   catch (Exception& e)
-    {
-      e.print_trace();
-    }
+  {
+    e.print_trace();
+  }
 }
 
+
+/** Signal handler that is called whenever the connection is terminated. */
 void
-PluginTreeView:: deregistered(unsigned int id) throw()
+PluginTreeView::on_disconnected()
 {
+  m_plugin_list->clear();
 }
 
-void
-PluginTreeView::connection_died(unsigned int id) throw()
-{
-  m_signal_connection_terminated();
-}
 
 void
-PluginTreeView::connection_established(unsigned int id) throw()
+PluginTreeView::on_message_received(fawkes::FawkesNetworkMessage* msg)
 {
-}
-
-void
-PluginTreeView::inbound_received(fawkes::FawkesNetworkMessage* msg,
-				 unsigned int id) throw()
-{
-  bool update = false;
-
-  if (msg->cid() != FAWKES_CID_PLUGINMANAGER)
-    { return; }
+  if (msg->cid() != FAWKES_CID_PLUGINMANAGER)  return;
 
   // loading
-  if ( msg->msgid() == MSG_PLUGIN_LOADED )
+  unsigned int msgid = msg->msgid();
+  if ( (msgid == MSG_PLUGIN_LOADED) ||
+       (msgid == MSG_PLUGIN_LOAD_FAILED) ||
+       (msgid == MSG_PLUGIN_UNLOADED) ||
+       (msgid == MSG_PLUGIN_UNLOAD_FAILED) )
+  {
+    Glib::ustring name = "";
+    bool loaded = false;
+
+    if ( msgid == MSG_PLUGIN_LOADED)
     {
       if ( msg->payload_size() != sizeof(plugin_loaded_msg_t) ) 
-	{ printf("Invalid message size (load succeeded)\n"); } 
+      {
+	printf("Invalid message size (load succeeded)\n");
+      } 
       else 
-	{
-	  plugin_loaded_msg_t* m = (plugin_loaded_msg_t*) msg->payload();
-
-	  PluginData d;
-	  d.event_type = EVENT_TYPE_LOAD;
-	  d.name = string(m->name);
-	  d.loaded = true;
-
-	  m_incoming_plugin_data.push_locked(d);
-
-	  update = true;
-	}
+      {
+	plugin_loaded_msg_t* m = (plugin_loaded_msg_t*) msg->payload();
+	name   = m->name;
+	loaded = true;
+      }
     }
-
-  // loading failed
-  else if ( msg->msgid() == MSG_PLUGIN_LOAD_FAILED ) 
+    else if ( msgid == MSG_PLUGIN_LOAD_FAILED ) 
     {
       if ( msg->payload_size() != sizeof(plugin_load_failed_msg_t) ) 
-	{ printf("Invalid message size (load failed)\n"); } 
+      {
+	printf("Invalid message size (load failed)\n");
+      } 
       else 
-	{
-	  plugin_load_failed_msg_t* m = (plugin_load_failed_msg_t*) msg->payload();
-
-	  PluginData d;
-	  d.event_type = EVENT_TYPE_LOAD;
-	  d.name = string(m->name);
-	  d.loaded = false;
-	  
-	  m_incoming_plugin_data.push_locked(d);
-
-	  update = true;
-	}
+      {
+	plugin_load_failed_msg_t* m = (plugin_load_failed_msg_t*) msg->payload();
+	name   = m->name;
+	loaded = false;
+      }
     }
-
-  // unloading
-  else if ( msg->msgid() == MSG_PLUGIN_UNLOADED ) 
+    else if ( msg->msgid() == MSG_PLUGIN_UNLOADED ) 
     {
       if ( msg->payload_size() != sizeof(plugin_unloaded_msg_t) ) 
-	{ printf("Invalid message size (unload succeeded)\n"); } 
+      {
+	printf("Invalid message size (unload succeeded)\n");
+      } 
       else 
-	{
-	  plugin_unloaded_msg_t* m = (plugin_unloaded_msg_t*) msg->payload();
-
-	  PluginData d;
-	  d.event_type = EVENT_TYPE_LOAD;
-	  d.name = string(m->name);
-	  d.loaded = false;
-
-	  m_incoming_plugin_data.push_locked(d);
-
-	  update = true;
-	}
-    } 
-  
-  // unloading failed
-  else if ( msg->msgid() == MSG_PLUGIN_UNLOAD_FAILED) 
+      {
+	plugin_unloaded_msg_t* m = (plugin_unloaded_msg_t*) msg->payload();
+	name   = m->name;
+	loaded = false;
+      }
+    }
+    else if ( msg->msgid() == MSG_PLUGIN_UNLOAD_FAILED) 
     {
       if ( msg->payload_size() != sizeof(plugin_unload_failed_msg_t) ) 
-	{ printf("Invalid message size (unload failed)\n"); } 
+      {
+	printf("Invalid message size (unload failed)\n");
+      } 
       else 
-	{
-	  plugin_unload_failed_msg_t* m = (plugin_unload_failed_msg_t*) msg->payload();
-
-	  PluginData d;
-	  d.event_type = EVENT_TYPE_LOAD;
-	  d.name = string(m->name);
-	  d.loaded = true;
-
-	  m_incoming_plugin_data.push_locked(d);
-
-	  update = true;
-	}
+      {
+	plugin_unload_failed_msg_t* m = (plugin_unload_failed_msg_t*) msg->payload();
+	name   = m->name;
+	loaded = true;
+      }
     }
 
-  // list available plugins
-  else if (msg->msgid() == MSG_PLUGIN_AVAIL_LIST ) 
+    Gtk::TreeIter iter;
+    for ( iter  = m_plugin_list->children().begin();
+	  iter != m_plugin_list->children().end();
+	  ++iter )
     {
-      bool first = true;;
-      PluginListMessage* plm = msg->msgc<PluginListMessage>();
-      while ( plm->has_next() ) 
-	{
-	  char* name = plm->next();
+      Glib::ustring n = (*iter)[m_plugin_record.name];
+      if ( n == name )
+      {
+	(*iter)[m_plugin_record.loaded] = loaded;
+	break;
+      }
+    }
+  }
+  else if (msgid == MSG_PLUGIN_AVAIL_LIST) 
+  {
+    PluginListMessage* plm = msg->msgc<PluginListMessage>();
+    while ( plm->has_next() ) 
+    {
+      char* name = plm->next();
 
-	  PluginData d;
-	  if (first)
-	    { 
-	      d.event_type = EVENT_TYPE_LIST_START;
-	      first = false;
-	    }
-	  else
-	    { d.event_type = EVENT_TYPE_LIST; }
-	  d.name = string(name);
-	  d.loaded = false;
+      Gtk::TreeModel::Row row = *m_plugin_list->append();
+      unsigned int index = m_plugin_list->children().size();
+      row[m_plugin_record.index]  = index;
+      row[m_plugin_record.name]   = name;
+      row[m_plugin_record.loaded] = false;
 
-	  m_incoming_plugin_data.push_locked(d);
-
-	  free(name);
-	}
-      delete plm;
-
-      update = true;
-    } 
-
+      free(name);
+    }
+    delete plm;
+  }
   else if ( msg->msgid() == MSG_PLUGIN_AVAIL_LIST_FAILED) 
-    { printf("Obtaining list of available plugins failed\n"); }
-
-
-  // list loaded plugins
+  {
+    printf("Obtaining list of available plugins failed\n");
+  }
   else if (msg->msgid() == MSG_PLUGIN_LOADED_LIST ) 
+  {
+    PluginListMessage* plm = msg->msgc<PluginListMessage>();
+    while ( plm->has_next() ) 
     {
-      bool first = true;
-      PluginListMessage* plm = msg->msgc<PluginListMessage>();
-      while ( plm->has_next() ) 
-	{
-	  char* name = plm->next();
-	  
-	  PluginData d;
-	  if (first)
-	    {
-	      d.event_type = EVENT_TYPE_LIST_START;
-	      first = false;
-	    }
-	  else
-	    { d.event_type = EVENT_TYPE_LIST; }
-	  d.name = string(name);
-	  d.loaded = true;
+      char* name = plm->next();
 
-	  m_incoming_plugin_data.push_locked(d);
-	  
-	  free(name);
+      Gtk::TreeIter iter;
+      for ( iter  = m_plugin_list->children().begin();
+	    iter != m_plugin_list->children().end();
+	    ++iter )
+      {
+	Glib::ustring n = (*iter)[m_plugin_record.name];
+	if ( n == name )
+	{
+	  (*iter)[m_plugin_record.loaded] = true;
+	  break;
 	}
-      delete plm;
-      
-      update = true;
-    } 
-  
+      }
+      free(name);
+    }
+    delete plm;
+  }
   else if ( msg->msgid() == MSG_PLUGIN_LOADED_LIST_FAILED) 
-    { printf("Obtaining list of loaded plugins failed\n"); }
+  {
+    printf("Obtaining list of loaded plugins failed\n");
+  }
 
   // unknown message received
   else
-    {
-      printf("received message with msg-id %d\n", msg->msgid());
-    }
-
-  if (update)
-    { m_signal_incoming_plugin_data(); }
+  {
+    printf("received message with msg-id %d\n", msg->msgid());
+  }
 }
 
 /** Signal handler that is called when the loaded checkbox is
@@ -345,94 +292,32 @@ PluginTreeView::inbound_received(fawkes::FawkesNetworkMessage* msg,
 void
 PluginTreeView::on_status_toggled(const Glib::ustring& path)
 {
+  if ( ! m_dispatcher.get_client()->connected() )  return;
+
   Gtk::TreeModel::Row row = *m_plugin_list->get_iter(path);
   Glib::ustring plugin_name = row[m_plugin_record.name];
   bool loaded = row[m_plugin_record.loaded];
 
-  if ( !m_client->connected() )
-    { return; }
-
   if (loaded)
-    {
-      plugin_load_msg_t* m = (plugin_load_msg_t*) calloc(1, sizeof(plugin_load_msg_t));
-      strncpy(m->name, plugin_name.c_str(), PLUGIN_MSG_NAME_LENGTH);
+  {
+    plugin_load_msg_t* m = (plugin_load_msg_t*) calloc(1, sizeof(plugin_load_msg_t));
+    strncpy(m->name, plugin_name.c_str(), PLUGIN_MSG_NAME_LENGTH);
       
-      FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-							   MSG_PLUGIN_LOAD,
-							   m, sizeof(plugin_load_msg_t));
-      m_client->enqueue(msg);
-      msg->unref();
-    }
+    FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+							 MSG_PLUGIN_LOAD,
+							 m, sizeof(plugin_load_msg_t));
+    m_dispatcher.get_client()->enqueue(msg);
+    msg->unref();
+  }
   else
-    {
-      plugin_unload_msg_t* m = (plugin_unload_msg_t *)calloc(1, sizeof(plugin_unload_msg_t));
-      strncpy(m->name, plugin_name.c_str(), PLUGIN_MSG_NAME_LENGTH);
+  {
+    plugin_unload_msg_t* m = (plugin_unload_msg_t *)calloc(1, sizeof(plugin_unload_msg_t));
+    strncpy(m->name, plugin_name.c_str(), PLUGIN_MSG_NAME_LENGTH);
       
-      FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-							   MSG_PLUGIN_UNLOAD,
-							   m, sizeof(plugin_unload_msg_t));
-      m_client->enqueue(msg);
-      msg->unref();
-    }
-}
-
-/** Signal handler that manages the incoming data. */
-void
-PluginTreeView::on_incoming_plugin_data()
-{
-  m_incoming_plugin_data.lock();
-
-  while ( !m_incoming_plugin_data.empty() )
-    {
-      PluginData& d = m_incoming_plugin_data.front();
-
-      switch (d.event_type)
-	{
-	case EVENT_TYPE_LOAD:
-	  {
-	    Gtk::TreeIter iter;
-	    for ( iter  = m_plugin_list->children().begin();
-		  iter != m_plugin_list->children().end();
-		  ++iter )
-	      {
-		Glib::ustring n = (*iter)[m_plugin_record.name];
-		if ( n == d.name )
-		{
-		  (*iter)[m_plugin_record.loaded] = d.loaded;
-		  break;
-		}
-	      }
-
-	    break;
-	  }
-
-	case EVENT_TYPE_LIST_START:
-	  m_plugin_list->clear();
-
-	case EVENT_TYPE_LIST:
-	  {
-	    Gtk::TreeModel::Row row = *m_plugin_list->append();
-	    unsigned int index = m_plugin_list->children().size();
-	    row[m_plugin_record.index]  = index;
-	    row[m_plugin_record.name]   = d.name;
-	    row[m_plugin_record.loaded] = d.loaded;
-	    	    
-	    break;
-	  }
-
-	default:
-	  break;	
-	}
-
-      m_incoming_plugin_data.pop();
-    }
-
-  m_incoming_plugin_data.unlock();
-}
-
-/** Signal handler that is called whenever the connection is terminated. */
-void
-PluginTreeView::on_connection_terminated()
-{
-  m_plugin_list->clear();
+    FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
+							 MSG_PLUGIN_UNLOAD,
+							 m, sizeof(plugin_unload_msg_t));
+    m_dispatcher.get_client()->enqueue(msg);
+    msg->unref();
+  }
 }

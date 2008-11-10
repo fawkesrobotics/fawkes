@@ -33,14 +33,10 @@
 
 #include <core/exception.h>
 
-namespace fawkes {
-
-class AboveHorizonException : public Exception {
+class AboveHorizonException : public fawkes::Exception {
   public:
     AboveHorizonException(const char *msg) throw();
 };
-
-} // end namespace fawkes
 
 class ProjectiveCam
 {
@@ -53,8 +49,8 @@ class ProjectiveCam
     virtual ProjectiveCam& set_location(const fawkes::HomTransform& loc);
     virtual ProjectiveCam& set_location(float roll, float pitch, float height, float yaw = 0, float x = 0, float y = 0);
     
-    virtual f_point_t get_GPA_world_coord(const point_t img_p) const;
-    virtual point_t get_GPA_image_coord(const f_point_t wld_p) const;
+    virtual fawkes::cart_coord_2d_t get_GPA_world_coord(const fawkes::point_t img_p) const;
+    virtual fawkes::point_t         get_GPA_image_coord(const fawkes::cart_coord_2d_t wld_p) const;
 
     virtual void print_info (const char* name = 0, const char *col_sep = 0, const char *row_sep = 0) const;
 

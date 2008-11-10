@@ -57,24 +57,24 @@ class ScanlineModel
   /** Get the current coordinate.
    * @return current point in image that is shall be processed.
    */
-  virtual point_t       operator*()                                    = 0;
+  virtual fawkes::point_t    operator*()                                    = 0;
 
   /** Get pointer to current point.
    * @return pointer to current point
    * @see operator*()
    */
-  virtual point_t*      operator->()                                   = 0;
+  virtual fawkes::point_t *  operator->()                                   = 0;
 
   /** Postfix ++ operator.
    * Advances to the next point and returns the new point.
    * @return pointer to new point
    */
-  virtual point_t*      operator++()                                   = 0;
+  virtual fawkes::point_t *  operator++()                                   = 0;
 
   /** Prefix ++ operator.
    * Advances to the next point but returns the old point.
    */
-  virtual point_t*      operator++(int)                                = 0;
+  virtual fawkes::point_t *  operator++(int)                                = 0;
 
   /** Check if all desired points have been processed.
    * @return true if all pixels that the model defines have been iterated.

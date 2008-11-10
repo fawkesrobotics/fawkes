@@ -37,7 +37,10 @@ class InterfaceDispatcher
 : public BlackBoardInterfaceListener
 {
  public:
-  InterfaceDispatcher(const char *listener_name, fawkes::Interface *iface);
+  InterfaceDispatcher(const char *listener_name, fawkes::Interface *iface,
+		      bool message_enqueueing = true);
+
+  void set_message_enqueueing(bool enqueue);
 
   sigc::signal<void, Interface *>               signal_data_changed();
   sigc::signal<void, Interface *, Message *>    signal_message_received();
@@ -67,6 +70,8 @@ class InterfaceDispatcher
 
 
  private:
+  bool                                           __message_enqueueing;
+
   Glib::Dispatcher                               __dispatcher_data_changed;
   Glib::Dispatcher                               __dispatcher_message_received;
   Glib::Dispatcher                               __dispatcher_writer_added;

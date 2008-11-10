@@ -4,6 +4,7 @@
  *
  *  Created: Thu Nov 09 20:15:27 2007
  *  Copyright  2007  Daniel Beck
+ *             2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -33,19 +34,14 @@ namespace fawkes {
   class ServiceSelectorCBE;
 }
 
-class PluginGui : public Gtk::Window
+class PluginGuiGtkWindow : public Gtk::Window
 {
  public:
-  PluginGui(Glib::RefPtr<Gnome::Glade::Xml> ref_xml);
-  virtual ~PluginGui();
-
-  Gtk::Window& get_window() const;
+  PluginGuiGtkWindow(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml> ref_xml);
+  virtual ~PluginGuiGtkWindow();
 
  private:
-  void on_connection_established();
-
   // widgets
-  Gtk::Window* m_wnd_main;
   PluginTreeView* m_trv_plugins;
   Gtk::Statusbar* m_stb_status;
   

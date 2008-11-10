@@ -39,7 +39,6 @@ class Exception : public std::exception {
  public:
 
   Exception(const char *format, ...) throw();
-  Exception(const char *format, va_list va) throw();
   Exception(int errno, const char *format, ...) throw();
   Exception(const Exception &exc) throw();
   virtual ~Exception() throw();

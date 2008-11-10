@@ -52,7 +52,7 @@ class BayesColormapGenerator : public ColormapGenerator
   virtual void                     reset();
   virtual void                     reset_undo();
 
-  virtual void                     set_selection(std::vector< rectangle_t > region);
+  virtual void                     set_selection(std::vector< fawkes::rectangle_t > region);
 
   virtual bool                     has_histograms();
   virtual std::map< hint_t, Histogram * > *  get_histograms();
@@ -87,8 +87,8 @@ class BayesColormapGenerator : public ColormapGenerator
   unsigned int norm_size;
 
   unsigned char *buffer;
-  std::vector< rectangle_t >  region;
-  std::vector< rectangle_t >::iterator  rit;
+  std::vector< fawkes::rectangle_t >  region;
+  std::vector< fawkes::rectangle_t >::iterator  rit;
 
   bool *selection_mask;
 };

@@ -42,10 +42,10 @@ class ScanlineStar : public ScanlineModel
 
   virtual ~ScanlineStar();
     
-  point_t operator*();
-  point_t* operator->();
-  point_t* operator++();
-  point_t* operator++(int);
+  fawkes::point_t    operator*();
+  fawkes::point_t *  operator->();
+  fawkes::point_t *  operator++();
+  fawkes::point_t *  operator++(int);
 
   void advance();
   bool finished();
@@ -65,7 +65,7 @@ class ScanlineStar : public ScanlineModel
 
   unsigned int m_image_width;
   unsigned int m_image_height;
-  point_t m_center;
+  fawkes::point_t m_center;
   unsigned int m_num_rays;
   unsigned int m_radius_incr;
   unsigned int m_dead_radius;
@@ -76,11 +76,11 @@ class ScanlineStar : public ScanlineModel
 
   bool m_done;
 
-  point_t m_current_point;
-  point_t m_tmp_point;
+  fawkes::point_t m_current_point;
+  fawkes::point_t m_tmp_point;
   unsigned int m_ray_index;
 
-  typedef std::map<unsigned int, point_t> Ray;
+  typedef std::map<unsigned int, fawkes::point_t> Ray;
   std::map<float, Ray*> m_rays;
   std::map<float, Ray*>::iterator m_ray_iter;
   Ray::iterator m_point_iter;

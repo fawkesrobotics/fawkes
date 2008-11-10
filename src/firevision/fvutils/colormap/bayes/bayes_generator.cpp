@@ -37,6 +37,7 @@
 #include <cmath>
 
 using namespace std;
+using namespace fawkes;
 
 /** @class BayesColormapGenerator <fvutils/colormap/bayes/bayes_generator.h>
  * Colormap Generator using Bayes method.

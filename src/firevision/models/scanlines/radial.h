@@ -40,10 +40,10 @@ class ScanlineRadial : public ScanlineModel
 		 unsigned int max_radius = 0, unsigned int dead_radius = 0
 		 );
 
-  point_t  operator*();
-  point_t* operator->();
-  point_t* operator++();
-  point_t* operator++(int); 
+  fawkes::point_t    operator*();
+  fawkes::point_t *  operator->();
+  fawkes::point_t *  operator++();
+  fawkes::point_t *  operator++(int); 
 
   bool          finished();
   void          reset();
@@ -72,8 +72,8 @@ class ScanlineRadial : public ScanlineModel
   unsigned int dead_radius;
   bool         auto_max_radius;
 
-  point_t coord;
-  point_t tmp_coord;
+  fawkes::point_t coord;
+  fawkes::point_t tmp_coord;
 
   unsigned int sector;
 

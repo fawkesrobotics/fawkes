@@ -42,10 +42,10 @@ class ScanlineBeams : public ScanlineModel
                 bool distribute_start_x,
 		float angle_from, float angle_range, unsigned int num_beams);
 
-  point_t  operator*();
-  point_t* operator->();
-  point_t* operator++();
-  point_t* operator++(int); 
+  fawkes::point_t    operator*();
+  fawkes::point_t *  operator->();
+  fawkes::point_t *  operator++();
+  fawkes::point_t *  operator++(int); 
 
   bool          finished();
   void          reset();
@@ -61,8 +61,8 @@ class ScanlineBeams : public ScanlineModel
 
   bool _finished;
 
-  std::vector<point_t> beam_current_pos;
-  std::vector<point_t> beam_end_pos;
+  std::vector<fawkes::point_t> beam_current_pos;
+  std::vector<fawkes::point_t> beam_end_pos;
 
   unsigned int start_x;
   unsigned int start_y;
@@ -75,8 +75,8 @@ class ScanlineBeams : public ScanlineModel
   unsigned int image_height;
   bool distribute_start_x;
 
-  point_t coord;
-  point_t tmp_coord;
+  fawkes::point_t coord;
+  fawkes::point_t tmp_coord;
 
   unsigned int next_beam;
   unsigned int first_beam;

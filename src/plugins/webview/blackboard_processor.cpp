@@ -87,6 +87,8 @@ WebBlackBoardRequestProcessor::process_request(const char *url,
 		     __baseurl, i->type(), i->id(), i->type(), i->id(),
 		     i->num_readers(), i->has_writer() ? "a" : "no");
     }
+    delete iil;
+
     *r += "</ul>\n";
 
     if (subpath.find("/view/") == 0) {

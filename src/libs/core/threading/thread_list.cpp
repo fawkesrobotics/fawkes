@@ -257,7 +257,7 @@ ThreadList::set_maintain_barrier(bool maintain_barrier)
 void
 ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
 {
-  CannotInitializeThreadException cite("Cannot initialize one or more threads");
+  CannotInitializeThreadException cite;
   ThreadList initialized_threads;
   bool success = true;
   for (ThreadList::iterator i = begin(); i != end(); ++i) {
@@ -267,20 +267,20 @@ ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
       initialized_threads.push_back(*i);
     } catch (CannotInitializeThreadException &e) {
       notify_of_failed_init();
+      cite.append("Initializing thread '%s' in list '%s' failed", (*i)->name(), _name);
       cite.append(e);
-      cite.prepend("Initializing thread in list '%s' failed", _name);
       success = false;
       break;
     } catch (Exception &e) {
       notify_of_failed_init();
+      cite.append("Could not initialize thread '%s'", (*i)->name());
       cite.append(e);
-      cite.prepend("Could not initialize thread '%s'", (*i)->name());
       success = false;
       break;
     } catch (...) {
       notify_of_failed_init();
       cite.append("Could not initialize thread '%s'", (*i)->name());
-      cite.prepend("Unknown exception caught");
+      cite.append("Unknown exception caught");
       success = false;
       break;
     }
