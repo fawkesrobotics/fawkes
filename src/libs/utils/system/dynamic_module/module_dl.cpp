@@ -89,26 +89,24 @@ ModuleDL::open()
     full_filename += ".so";
   }
 
-  if ( full_filename == "") {      
-    handle = dlopen (NULL, RTLD_GLOBAL | RTLD_LAZY);
+  int tflags = 0;
+  tflags |= ((flags & MODULE_BIND_LAZY)   != 0) ? RTLD_LAZY : RTLD_NOW;
+  tflags |= ((flags & MODULE_BIND_NOW)    != 0) ? RTLD_NOW : 0;
+  tflags |= ((flags & MODULE_BIND_LOCAL)  != 0) ? RTLD_LOCAL : 0;
+  tflags |= ((flags & MODULE_BIND_GLOBAL) != 0) ? RTLD_GLOBAL : 0;
+  tflags |= ((flags & MODULE_BIND_DEEP)   != 0) ? RTLD_DEEPBIND : 0;
+
+  if ( full_filename == "") {
+    handle = dlopen (NULL, tflags);
 
     filename    = "main";
     is_resident = true;
     ref_count   = 1;
   } else {
 
-    // check whether we have a readable file right away */
+    // check whether we have a readable file right away
     if (File::is_regular(full_filename.c_str())) {
-
       // ok, try loading the module
-      int tflags = ((flags & MODULE_BIND_LAZY) != 0) ? RTLD_LAZY : RTLD_NOW;
-      if ( (flags & MODULE_BIND_LOCAL) != 0 ) {
-	tflags |= RTLD_LOCAL;
-      } else if ( (flags & MODULE_BIND_GLOBAL) != 0 ) {
-	tflags |= RTLD_GLOBAL;
-      }
-      //tflags = RTLD_LAZY;
-      //printf("Loading module %s, flags: %i\n", full_filename.c_str(), tflags);
       handle = dlopen(full_filename.c_str(), tflags);
 
       if ( NULL == handle) {

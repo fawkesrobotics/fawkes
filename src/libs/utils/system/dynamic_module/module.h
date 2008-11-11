@@ -44,6 +44,9 @@ class Module {
   /** Flags for the loading process */
   typedef enum {
     MODULE_FLAGS_NONE   = 0,		/**< No flags */
+    MODULE_FLAGS_DEFAULT= 0x000E,	/**< Default flags, these are
+					 *   MODULE_BIND_GLOBAL, MODULE_BIND_NOW and
+					 *   MODULE_BIND_DEEP. */
     MODULE_BIND_LAZY	= 0x0001,	/**< Perform lazy binding. Only resolve
 					 *   symbols as thecode that references
 					 *   them is executed. If the symbol
@@ -54,10 +57,19 @@ class Module {
 					 *   are always immediately bound when
 					 *   the library is loaded.)
 					 */
-    MODULE_BIND_LOCAL	= 0x0002,	/**< Symbols defined in this library are
+    MODULE_BIND_NOW     = 0x0002,	/**< Resolve all symbols immediately when
+					 *   loading the library. It's the opposite
+					 *   of MODULE_BIND_LAZY. It shall be the
+					 *   the default (makes sense for the
+					 *   framework robotics).
+					 */
+    MODULE_BIND_LOCAL	= 0x0000,	/**< Symbols defined in this library are
 					 *   not made available to resolve
 					 *   references in subsequently
-					 *   loaded libraries.
+					 *   loaded libraries. It's the opposite
+					 *   of MODULE_BIND_GLOBAL. It shall be the
+					 *   default and MODULE_BIND_GLOBAL shall
+					 *   automatically override it.
 					 */
     MODULE_BIND_GLOBAL	= 0x0004,	/**< Symbols defined in this library are
 					 *   not made available to resolve
@@ -66,6 +78,14 @@ class Module {
 					 */
     MODULE_BIND_MASK	= 0x0003,	/**< Can be used to encode flags in a
 					 *   longer data field
+					 */
+    MODULE_BIND_DEEP    = 0x0008	/**< Place the lookup scope of the symbols
+					 *   in this library ahead of the global
+					 *   scope. This means that a self-contained
+					 *   library will use its own symbols in
+					 *   preference to global symbols with the
+					 *   same name contained in libraries that
+					 *   have already been loaded.
 					 */
   } ModuleFlags;
 

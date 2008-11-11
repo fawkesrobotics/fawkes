@@ -35,7 +35,7 @@ namespace fawkes {
 class ModuleDL : public Module {
  public:
 
-  ModuleDL(std::string filename, Module::ModuleFlags flags = MODULE_FLAGS_NONE);
+  ModuleDL(std::string filename, Module::ModuleFlags flags = Module::MODULE_FLAGS_DEFAULT);
 
   virtual ~ModuleDL();
 
