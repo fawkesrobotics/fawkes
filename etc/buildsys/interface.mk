@@ -82,23 +82,26 @@ endif
 
 ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
   ifneq ($(INTERFACES_all),)
-    $(INTERFACES_SRCS): $(BINDIR)/interface_generator
+$(INTERFACES_SRCS): $(BINDIR)/interface_generator
+$(TOLUA_ALL): $(BINDIR)/interface_generator
 
-    $(INTERFACES_SRCS): %.cpp: %.xml
+$(INTERFACES_SRCS): %.cpp: %.xml
 	$(SILENT) echo "$(INDENT_PRINT)--> Generating $(@F) (Interface XML Template)"
 	$(SILENT)$(BINDIR)/interface_generator -d $(SRCDIR) $<
 	$(if $(filter-out $(IFACEDIR),$(SRCDIR)),$(SILENT)cp -a $*.h $(IFACEDIR))
+
   endif
 
   ifeq ($(MAKECMDGOALS),clean-interfaces)
-  .PHONY: clean-interfaces
-  clean-interfaces:
+.PHONY: clean-interfaces
+clean-interfaces:
 	$(SILENT) rm -f $(addsuffix .cpp,$(INTERFACES_all)) \
 			$(addsuffix .h,$(INTERFACES_all))
+
   endif
 else
   ifneq ($(IFACEDIR),$(SRCDIR))
-    $(INTERFACES_SRCS): %.cpp: %.xml
+$(INTERFACES_SRCS): %.cpp: %.xml
 	$(SILENT)if [ ! -e $*.h -o ! -e $*.cpp ]; then \
 		echo -e "$(INDENT_PRINT)--- $(TRED) Interfaces cannot be generated and pre-generated code does not exist!$(TNORMAL)"; \
 		exit 1; \
@@ -107,13 +110,14 @@ else
 		cp -a $*.h $(IFACEDIR); \
 		touch $*.cpp; \
 	fi
+
   endif
 endif
 
 ifeq ($(HAVE_TOLUA),1)
   LIBS_all += $(LIBS_all_tolua)
 
-  $(LUALIBDIR)/interfaces/%.so: | $(LIBDIR)/interfaces/%.so
+$(LUALIBDIR)/interfaces/%.so: $(LIBDIR)/interfaces/%.so
 
 else
   all: warning_tolua_wrapper
