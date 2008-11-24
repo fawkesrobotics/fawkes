@@ -31,7 +31,12 @@ main(int argc, char **argv) {
   Gtk::Main gtk_main(argc, argv);
 
   Glib::RefPtr<Gnome::Glade::Xml> refxml;
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   refxml = Gnome::Glade::Xml::create(RESDIR"/netloggui/netloggui.glade");
+#else
+  std::auto_ptr<Gnome::Glade::XmlError> error;
+  refxml = Gnome::Glade::Xml::create(RESDIR"/netloggui/netloggui.glade", "", "", error);
+#endif
 
   NetLogGuiGtkWindow *window = NULL;
   refxml->get_widget_derived("wnd_netloggui", window);

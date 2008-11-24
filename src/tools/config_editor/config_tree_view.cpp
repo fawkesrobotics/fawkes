@@ -104,7 +104,7 @@ ConfigTreeView::ConfigTreeView( BaseObjectType* cobject,
 
   Gtk::TreeViewColumn *column = get_column(0);
   Gtk::CellRendererText *cell = (Gtk::CellRendererText *)column->get_first_cell_renderer();
-#ifndef GLIBMM_PROPERTIES_ENABLED
+#ifdef GLIBMM_PROPERTIES_ENABLED
   column->add_attribute(cell->property_underline(), m_config_record.is_default);
 #else
   column->add_attribute(*cell, "underline", m_config_record.is_default);

@@ -116,8 +116,13 @@ LogView::ctor(const char *hostname, unsigned short int port)
     Gtk::CellRenderer *cell_renderer = (*c)->get_first_cell_renderer();
     Gtk::CellRendererText *text_renderer = dynamic_cast<Gtk::CellRendererText *>(cell_renderer);
     if ( text_renderer ) {
+#ifdef GLIBMM_PROPERTIES_ENABLED
       (*c)->add_attribute(text_renderer->property_background_gdk(), __record.background);
       (*c)->add_attribute(text_renderer->property_foreground_gdk(), __record.foreground);
+#else
+      (*c)->add_attribute(*text_renderer, "background-gdk", __record.background);
+      (*c)->add_attribute(*text_renderer, "foreground-gdk", __record.background);
+#endif
     }
   }
 

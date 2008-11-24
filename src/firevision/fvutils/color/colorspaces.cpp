@@ -126,3 +126,43 @@ malloc_buffer(colorspace_t colorspace, unsigned int width, unsigned int height)
 {
   return (unsigned char *)malloc(colorspace_buffer_size(colorspace, width, height));
 }
+
+size_t
+colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int height)
+{
+  switch (cspace) {
+  case RGB:
+  case BGR:
+  case YUV444_PACKED:
+  case YVU444_PACKED:
+    return (width * height * 3);
+ 
+  case RGB_WITH_ALPHA:
+  case BGR_WITH_ALPHA:
+    return (width * height * 4);
+
+  case YUV411_PACKED:
+  case YUV411_PLANAR:
+    return (width * height * 3 / 2);
+    
+  case YUY2:
+  case YVY2:
+  case YUV422_PACKED:
+  case YUV422_PLANAR:
+    return (width * height * 2);
+
+  case RAW16:
+    return (width * height * 2);
+    
+  case GRAY8:
+  case BAYER_MOSAIC_RGGB:
+  case BAYER_MOSAIC_GBRG:
+  case BAYER_MOSAIC_GRBG:
+  case BAYER_MOSAIC_BGGR:
+    return (width * height);
+    
+  default:
+    return 0;
+  }
+}
+

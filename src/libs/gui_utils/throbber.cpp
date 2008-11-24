@@ -109,7 +109,12 @@ Throbber::ctor(Gtk::IconSize icon_size)
 
   int size = icon_info.get_base_size();
 
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
   Glib::RefPtr<Gdk::Pixbuf> icon = icon_info.load_icon();
+#else
+  std::auto_ptr<Glib::Error> error;
+  Glib::RefPtr<Gdk::Pixbuf> icon = icon_info.load_icon(error);
+#endif
 
   int pixwidth  = icon->get_width();
   int pixheight = icon->get_height();
