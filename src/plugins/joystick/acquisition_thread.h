@@ -41,6 +41,7 @@ namespace fawkes {
 class JoystickBlackBoardHandler
 {
  public:
+  virtual ~JoystickBlackBoardHandler();
   virtual void joystick_changed(unsigned int pressed_buttons,
 				float *axis_x_values, float *axis_y_values) = 0;
   virtual void joystick_plugged(char num_axes, char num_buttons) = 0;

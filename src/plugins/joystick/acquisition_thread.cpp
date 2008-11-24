@@ -60,6 +60,10 @@ using namespace fawkes;
  * The joystick has been unplugged and is no longer available.
  */
 
+/** Virtual empty destructor. */
+JoystickBlackBoardHandler::~JoystickBlackBoardHandler()
+{
+}
 
 /** @class JoystickAcquisitionThread "acquisition_thread.h"
  * Joystick acqusition thread for Linux joystick API.

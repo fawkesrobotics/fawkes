@@ -27,6 +27,7 @@
 #include <interfaces/SpeechSynthInterface.h>
 #include <utils/time/wait.h>
 #include <asoundlib.h>
+#include <cmath>
 
 using namespace fawkes;
 
@@ -131,7 +132,7 @@ FliteSynthThread::play_wave(cst_wave *wave)
 				    cst_wave_num_channels(wave),
 				    cst_wave_sample_rate(wave),
 				    1,
-				    duration * 1000000)) < 0) {
+				    (unsigned int)roundf(duration * 1000000.))) < 0) {
     throw Exception("Playback to set params: %s", snd_strerror(err));
   }
 
@@ -148,6 +149,6 @@ FliteSynthThread::play_wave(cst_wave *wave)
 		     (long)cst_wave_num_samples(wave), frames);
   }
 
-  TimeWait::wait_systime(duration * 1000000.f);
+  TimeWait::wait_systime((unsigned int)roundf(duration * 1000000.f));
   snd_pcm_close(pcm);
 }
