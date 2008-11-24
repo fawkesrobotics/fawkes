@@ -69,8 +69,7 @@ class FawkesNetworkClient
   void wait(unsigned int component_id);
   void wake(unsigned int component_id);
 
-  void wait_connection_established();
-  void interrupt_wait_connection_established();
+  void interrupt_connect();
 
   void register_handler(FawkesNetworkClientHandler *handler, unsigned int component_id);
   void deregister_handler(unsigned int component_id);
