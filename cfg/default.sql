@@ -21,4 +21,5 @@ INSERT INTO "config" VALUES('/skiller/watch_files','bool',1,'Watch lua files for
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/navigator','string','NavigatorInterface::Navigator',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/wm_pose','string','ObjectPositionInterface::WM Pose',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/speechsynth','string','SpeechSynthInterface::Flite',NULL);
+INSERT INTO "config" VALUES('/joystick/device_file','string','/dev/js0',NULL);
 COMMIT;

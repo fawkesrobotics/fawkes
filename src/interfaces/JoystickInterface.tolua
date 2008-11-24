@@ -1,0 +1,88 @@
+$#include <interfaces/JoystickInterface.h>
+$using namespace fawkes;
+namespace fawkes {
+class JoystickInterface : public Interface
+{
+  static const unsigned int BUTTON_1;
+  static const unsigned int BUTTON_2;
+  static const unsigned int BUTTON_3;
+  static const unsigned int BUTTON_4;
+  static const unsigned int BUTTON_5;
+  static const unsigned int BUTTON_6;
+  static const unsigned int BUTTON_7;
+  static const unsigned int BUTTON_8;
+  static const unsigned int BUTTON_9;
+  static const unsigned int BUTTON_10;
+  static const unsigned int BUTTON_11;
+  static const unsigned int BUTTON_12;
+  static const unsigned int BUTTON_13;
+  static const unsigned int BUTTON_14;
+  static const unsigned int BUTTON_15;
+  static const unsigned int BUTTON_16;
+  static const unsigned int BUTTON_17;
+  static const unsigned int BUTTON_18;
+  static const unsigned int BUTTON_19;
+  static const unsigned int BUTTON_20;
+  static const unsigned int BUTTON_21;
+  static const unsigned int BUTTON_22;
+  static const unsigned int BUTTON_23;
+  static const unsigned int BUTTON_24;
+  static const unsigned int BUTTON_25;
+  static const unsigned int BUTTON_26;
+  static const unsigned int BUTTON_27;
+  static const unsigned int BUTTON_28;
+  static const unsigned int BUTTON_29;
+  static const unsigned int BUTTON_30;
+  static const unsigned int BUTTON_31;
+  static const unsigned int BUTTON_32;
+
+  char num_axes();
+  void set_num_axes(const char new_num_axes);
+  size_t maxlenof_num_axes() const;
+  char num_buttons();
+  void set_num_buttons(const char new_num_buttons);
+  size_t maxlenof_num_buttons() const;
+  unsigned int pressed_buttons();
+  void set_pressed_buttons(const unsigned int new_pressed_buttons);
+  size_t maxlenof_pressed_buttons() const;
+  float * axis_x();
+  void set_axis_x(const float * new_axis_x);
+  size_t maxlenof_axis_x() const;
+  float * axis_y();
+  void set_axis_y(const float * new_axis_y);
+  size_t maxlenof_axis_y() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  size_t                  hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
+
+};
+
+}

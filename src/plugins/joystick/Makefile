@@ -1,8 +1,10 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#           Makefile Build System for Fawkes: Joystick Plugin
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
+#   Created on Sat Nov 22 18:02:00 2008
 #   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#
+#   $Id$
 #
 #*****************************************************************************
 #
@@ -13,10 +15,17 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
+BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-SUBDIRS = laser skiller webview flite joystick
+LIBS_joystick = fawkescore fawkesutils fawkesaspects JoystickInterface
+OBJS_joystick = joystick_plugin.o sensor_thread.o acquisition_thread.o
 
-include $(BASEDIR)/etc/buildsys/rules.mk
+LIBS_ffjoystick = fawkescore fawkesutils fawkesaspects JoystickInterface
+OBJS_ffjoystick = ffjoystick.o acquisition_thread.o
 
+OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick)
+BINS_all = $(BINDIR)/ffjoystick
+PLUGINS_all = $(PLUGINDIR)/joystick.so
+
+include $(BASEDIR)/etc/buildsys/base.mk
