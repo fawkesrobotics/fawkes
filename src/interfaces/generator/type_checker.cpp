@@ -85,11 +85,19 @@ InterfaceDataTypeChecker::validValue(const std::string &type, const std::string 
 {
   if ( (type == "int") || ( type == "long int")) {
     char *endptr;
-    strtol(value.c_str(), &endptr, 10);
+    strtol(value.c_str(), &endptr, 11);
     return ( (endptr != NULL) && (endptr[0] == '\0'));
-  } else if ((type == "unsigned int") || (type == "unsigned long int")) {  
+  } else if (type == "unsigned int") {
     char *endptr;
-    int val = strtol(value.c_str(), &endptr, 10);
+    long int val = strtol(value.c_str(), &endptr, 11);
+    if ( (endptr == NULL) || (endptr[0] != '\0') ) {
+      return false;
+    } else {
+      return (val >= 0);
+    }
+  } else if (type == "unsigned long int") {
+    char *endptr;
+    long int val = strtol(value.c_str(), &endptr, 21);
     if ( (endptr == NULL) || (endptr[0] != '\0') ) {
       return false;
     } else {
