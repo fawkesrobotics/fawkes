@@ -63,6 +63,7 @@ class RemoteBlackBoard
 
   virtual InterfaceInfoList *  list_all();
   virtual bool                 is_alive() const throw();
+  virtual bool                 try_aliveness_restore() throw();
 
   std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type,
 							 const char *id_prefix = NULL);
@@ -85,7 +86,10 @@ class RemoteBlackBoard
   /* extensions for RemoteBlackBoard */
 
  private: /* methods */
+  void        open_interface(const char *type, const char *identifier,
+			     bool writer, Interface *iface);
   Interface * open_interface(const char *type, const char *identifier, bool writer);
+  void        reopen_interfaces();
 
 
  private: /* members */
@@ -97,6 +101,8 @@ class RemoteBlackBoard
   BlackBoardInstanceFactory *__instance_factory;
   LockMap<unsigned int, BlackBoardInterfaceProxy *> __proxies;
   LockMap<unsigned int, BlackBoardInterfaceProxy *>::iterator __pit;
+  std::list<BlackBoardInterfaceProxy *> __invalid_proxies;
+  std::list<BlackBoardInterfaceProxy *>::iterator __ipit;
 
   Mutex         *__wait_mutex;
   WaitCondition *__wait_cond;

@@ -142,6 +142,12 @@ LocalBlackBoard::is_alive() const throw()
 }
 
 
+bool
+LocalBlackBoard::try_aliveness_restore() throw()
+{
+  return true;
+}
+
 void
 LocalBlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsigned int flags)
 {

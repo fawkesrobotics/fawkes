@@ -92,7 +92,6 @@ RemoteBlackBoard::RemoteBlackBoard(const char *hostname, unsigned short int port
     throw;
   }
 
-  __fnc->wait_connection_established();
   __fnc_owner = true;
 
   if ( ! __fnc->connected() ) {
@@ -141,14 +140,49 @@ RemoteBlackBoard::is_alive() const throw()
 }
 
 
-Interface *
-RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool writer)
+void
+RemoteBlackBoard::reopen_interfaces()
+{
+  __proxies.lock();
+  __ipit = __invalid_proxies.begin();
+  while ( __ipit != __invalid_proxies.end() ) {
+    try {
+      Interface *iface = (*__ipit)->interface();
+      open_interface(iface->type(), iface->id(), iface->is_writer(), iface);
+      iface->set_validity(true);
+      __ipit = __invalid_proxies.erase(__ipit);
+    } catch (Exception &e) {
+	  // we failed to re-establish validity for the given interface, bad luck
+      ++__ipit;
+    }
+  }
+  __proxies.unlock();
+}
+
+bool
+RemoteBlackBoard::try_aliveness_restore() throw()
+{
+  bool rv = true;
+  try {
+    if ( ! __fnc->connected() ) {
+      __fnc->connect();
+
+      reopen_interfaces();
+    }
+  } catch (...) {
+    rv = false;
+  }
+  return rv;
+}
+
+
+void
+RemoteBlackBoard::open_interface(const char *type, const char *identifier,
+				 bool writer, Interface *iface)
 {
   if ( ! __fnc->connected() ) {
     throw Exception("Cannot instantiate remote interface, connection is dead");
   }
-
-  Interface *iface = __instance_factory->new_interface_instance(type, identifier);
 
   bb_iopen_msg_t *om = (bb_iopen_msg_t *)calloc(1, sizeof(bb_iopen_msg_t));
   strncpy(om->type, type, __INTERFACE_TYPE_SIZE);
@@ -183,7 +217,6 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
     unsigned int error = fm->errno;
     __m->unref();
     __m = NULL;
-    __instance_factory->delete_interface_instance(iface);
     if ( error == BB_ERR_WRITER_EXISTS ) {
       throw BlackBoardWriterActiveException(identifier, type);
     } else if ( error == BB_ERR_HASH_MISMATCH ) {
@@ -199,6 +232,22 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
 
   __m->unref();
   __m = NULL;
+}
+
+Interface *
+RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool writer)
+{
+  if ( ! __fnc->connected() ) {
+    throw Exception("Cannot instantiate remote interface, connection is dead");
+  }
+
+  Interface *iface = __instance_factory->new_interface_instance(type, identifier);
+  try {
+    open_interface(type, identifier, writer, iface);
+  } catch (...) {
+    __instance_factory->delete_interface_instance(iface);
+    throw;
+  }
 
   return iface;
 }
@@ -465,7 +514,9 @@ RemoteBlackBoard::connection_died(unsigned int id) throw()
   __proxies.lock();
   for (__pit = __proxies.begin(); __pit != __proxies.end(); ++__pit) {
     __pit->second->interface()->set_validity(false);
+    __invalid_proxies.push_back(__pit->second);
   }
+  __proxies.clear();
   __proxies.unlock();
 }
 

@@ -78,7 +78,6 @@ NetworkConfiguration::NetworkConfiguration(FawkesNetworkClient *c)
 {
   __connected = c->connected();
   this->c = c;
-  c->wait_connection_established();
   try {
     c->register_handler(this, FAWKES_CID_CONFIGMANAGER);
   } catch (Exception &e) {

@@ -115,6 +115,14 @@ namespace fawkes {
  * Check if the BlackBoard is still alive.
  * @return true, if the BlackBoard is still alive and may be used, false otherwise.
  *
+ * @fn bool BlackBoard::try_aliveness_restore() throw()
+ * Try to restore the aliveness of the BlackBoard instance.
+ * Note that even though the aliveness of the BlackBoard is restored single
+ * interfaces may still be invalid. That can for instance happen if a remote
+ * connection is re-established and a writer has been created during the
+ * downtime and an own writer instance of that very interface cannot be restored.
+ * @return true if the aliveness could be restored and the BlackBoard is
+ * operational again, false otherwise.
  *
  * @fn std::list<Interface *> *  BlackBoard::open_all_of_type_for_reading(const char *type, const char *id_prefix = NULL)
  * Open all interfaces of the given type for reading.
