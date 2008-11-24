@@ -33,7 +33,7 @@
     <constant type="unsigned int" name="BUTTON_29" value="268435456">Button 29</constant>
     <constant type="unsigned int" name="BUTTON_30" value="536870912">Button 30</constant>
     <constant type="unsigned int" name="BUTTON_31" value="1073741824">Button 31</constant>
-    <constant type="unsigned int" name="BUTTON_32" value="2147483648">Button 32</constant>
+    <constant type="unsigned int" name="BUTTON_32" value="2147483648U">Button 32</constant>
   </constants>
   <data>
     <comment>

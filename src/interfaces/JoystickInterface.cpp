@@ -106,7 +106,7 @@ const unsigned int JoystickInterface::BUTTON_30 = 536870912;
 /** BUTTON_31 constant */
 const unsigned int JoystickInterface::BUTTON_31 = 1073741824;
 /** BUTTON_32 constant */
-const unsigned int JoystickInterface::BUTTON_32 = 2147483648;
+const unsigned int JoystickInterface::BUTTON_32 = 2147483648U;
 
 /** Constructor */
 JoystickInterface::JoystickInterface() : Interface()
@@ -120,7 +120,7 @@ JoystickInterface::JoystickInterface() : Interface()
   add_fieldinfo(Interface::IFT_UINT, "pressed_buttons", 1, &data->pressed_buttons);
   add_fieldinfo(Interface::IFT_FLOAT, "axis_x", 4, &data->axis_x);
   add_fieldinfo(Interface::IFT_FLOAT, "axis_y", 4, &data->axis_y);
-  unsigned char tmp_hash[] = {0xc4, 0x7c, 0x96, 0x5, 0x4, 0xc1, 0xc0, 0x62, 0xc8, 0x19, 0xc1, 0x12, 0x20, 0x66, 0xc7, 0xfc};
+  unsigned char tmp_hash[] = {0x5d, 0x1a, 0x93, 0x31, 0x57, 0x5d, 0x6c, 0x7, 0x40, 0xb5, 0xcd, 0x4c, 0xba, 0x8b, 0x82, 0xa1};
   set_hash(tmp_hash);
 }
 

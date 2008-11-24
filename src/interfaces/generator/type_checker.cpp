@@ -88,16 +88,30 @@ InterfaceDataTypeChecker::validValue(const std::string &type, const std::string 
     strtol(value.c_str(), &endptr, 11);
     return ( (endptr != NULL) && (endptr[0] == '\0'));
   } else if (type == "unsigned int") {
+    std::string::size_type notofnumber = value.find_first_not_of("0123456789");
+    if ( notofnumber != std::string::npos ) {
+      std::string suffix = value.substr(notofnumber);
+      if ( (suffix != "U") && (suffix != "u") ) {
+        return false;
+      }
+    }
     char *endptr;
-    long int val = strtol(value.c_str(), &endptr, 11);
+    long int val = strtol(value.substr(0, notofnumber).c_str(), &endptr, 11);
     if ( (endptr == NULL) || (endptr[0] != '\0') ) {
       return false;
     } else {
       return (val >= 0);
     }
   } else if (type == "unsigned long int") {
+    std::string::size_type notofnumber = value.find_first_not_of("0123456789");
+    if ( notofnumber != std::string::npos ) {
+      std::string suffix = value.substr(notofnumber);
+      if ( (suffix != "UL") && (suffix != "ul") ) {
+        return false;
+      }
+    }
     char *endptr;
-    long int val = strtol(value.c_str(), &endptr, 21);
+    long int val = strtol(value.substr(0, notofnumber).c_str(), &endptr, 21);
     if ( (endptr == NULL) || (endptr[0] != '\0') ) {
       return false;
     } else {
