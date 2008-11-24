@@ -26,6 +26,7 @@
 #include <tools/config_editor/config_tree_view.h>
 #include <gui_utils/utils.h>
 #include <gui_utils/service_selector_cbe.h>
+#include <netcomm/fawkes/client.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -82,11 +83,13 @@ FawkesConfigEditor::on_btn_exit_clicked()
 void
 FawkesConfigEditor::on_connected()
 {
-  m_trv_config->set_network_client( m_service_selector->get_network_client() );
+  m_network_client = m_service_selector->get_network_client();
+  m_trv_config->set_network_client( m_network_client );
 }
 
 void
 FawkesConfigEditor::on_disconnected()
 {
-  //  m_trv_config->clear();
+  m_trv_config->set_network_client( NULL );
+  m_network_client->disconnect();
 }

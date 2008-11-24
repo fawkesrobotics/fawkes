@@ -37,6 +37,10 @@ using namespace fawkes;
  * A Gtk::Label that presents the path to be deleted.
  */
 
+/** @var ConfigRemoveDialog::m_chb_is_default
+ * The Gtk::CheckButton to set the remove default flag
+ */
+
 /** Constructor.
  * @param cobject pointer to base object type
  * @param ref_xml Glade XML file
@@ -46,6 +50,7 @@ ConfigRemoveDialog::ConfigRemoveDialog( BaseObjectType* cobject,
   : Gtk::Dialog(cobject)
 {
   m_lbl_path = dynamic_cast<Gtk::Label*>( get_widget(ref_xml, "lblPath") );
+  m_chb_is_default = dynamic_cast<Gtk::CheckButton*>( get_widget(ref_xml, "chbIsDefaultRemove") );
 }
 
 /** Destructor. */
@@ -55,12 +60,22 @@ ConfigRemoveDialog::~ConfigRemoveDialog()
 
 /** Initialize the dialog.
  * @param path the config path that was selected for deletion.
+ * @param is_default true if only the default config value is set
  */
 void
-ConfigRemoveDialog::init(const Glib::ustring& path)
+ConfigRemoveDialog::init(const Glib::ustring& path, bool is_default)
 {
   set_title("Remove config entry");
   Glib::ustring text = "Really remove <b>" + path + "</b>?";
   m_lbl_path->set_markup(text);
+  m_chb_is_default->set_active(is_default);
 }
-  
+
+/** Get the remove default flag of the entry to be deleted
+ * @return if true delete also the default config value
+ */
+bool
+ConfigRemoveDialog::get_remove_default() const
+{
+  return m_chb_is_default->get_active();
+}

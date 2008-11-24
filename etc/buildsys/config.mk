@@ -85,11 +85,13 @@ endif
 GCC_USE_OPENMP=0
 
 ### CFLAGS, preprocessor, compiler and linker options
-LDFLAGS_LIBDIRS  = -Wl,-R$(EXEC_LIBDIR) -Wl,-R$(LIBDIR) $(LIBDIRS:%=-Wl,-R%)
+LIBDIRS_BASE     = $(LIBDIR) $(LIBDIR)/interfaces
+LIBDIRS_EXEC_BASE= $(EXEC_LIBDIR) $(EXEC_LIBDIR)/interfaces
+LDFLAGS_LIBDIRS  = $(LIBDIRS_EXEC_BASE:%=-Wl,-R%) $(LIBDIRS_BASE:%=-Wl,-R%) $(LIBDIRS:%=-Wl,-R%)
 DEFAULT_INCLUDES = -I$(abspath $(BASEDIR)/src) -I$(abspath $(BASEDIR)/src/libs) -I$(abspath $(BASEDIR)/src/firevision)
 CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_OPENMP)
-CFLAGS_BASE      = $(CFLAGS_MINIMUM)
-LDFLAGS_BASE     = -L$(LIBDIR) -L$(LIBDIR)/interfaces -rdynamic $(LDFLAGS_OPENMP)
+CFLAGS_BASE      = $(CFLAGS_MINIMUM) 
+LDFLAGS_BASE     = $(LIBDIRS_BASE:%=-L%) -rdynamic $(LDFLAGS_OPENMP)
 LDFLAGS_SHARED   = -shared
 CFLAGS_OPENMP  = $(if $(filter 1,$(firstword $(GCC_USE_OPENMP))),-fopenmp)
 LDFLAGS_OPENMP = $(if $(filter 1,$(firstword $(GCC_USE_OPENMP))),-lgomp)

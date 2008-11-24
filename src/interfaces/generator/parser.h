@@ -25,10 +25,11 @@
 #ifndef __INTERFACES_GENERATOR_PARSER_H_
 #define __INTERFACES_GENERATOR_PARSER_H_
 
-#include <interfaces/generator/field.h>
-#include <interfaces/generator/constant.h>
-#include <interfaces/generator/enum_constant.h>
-#include <interfaces/generator/message.h>
+#include "field.h"
+#include "constant.h"
+#include "enum_constant.h"
+#include "message.h"
+#include "pseudomap.h"
 
 #include <vector>
 #include <string>
@@ -45,13 +46,17 @@ class InterfaceParser
   ~InterfaceParser();
 
   std::vector<InterfaceField>  getFields(xmlpp::Node *node);
+  std::vector<InterfacePseudoMap> getPseudoMaps(xmlpp::Node *node,
+						std::vector<InterfaceField> &fields);
   void parse();
 
   void printFields(std::vector<InterfaceField> &fields);
+  void printPseudoMaps(std::vector<InterfacePseudoMap> &pseudo_maps);
   void print();
   void printParsed(std::vector<InterfaceConstant> &     constants,
 		   std::vector<InterfaceEnumConstant> & enum_constants,
 		   std::vector<InterfaceField> &        data_fields,
+		   std::vector<InterfacePseudoMap> &    pseudo_maps,
 		   std::vector<InterfaceMessage> &      messages);
 
   std::string                         getInterfaceName();
@@ -61,6 +66,7 @@ class InterfaceParser
   std::vector<InterfaceConstant>      getConstants();
   std::vector<InterfaceEnumConstant>  getEnumConstants();
   std::vector<InterfaceField>         getDataFields();
+  std::vector<InterfacePseudoMap>     getPseudoMaps();
   std::string                         getDataComment();
   std::vector<InterfaceMessage>       getMessages();
 
@@ -76,6 +82,7 @@ class InterfaceParser
   std::vector<InterfaceConstant>     constants;
   std::vector<InterfaceEnumConstant> enum_constants;
   std::vector<InterfaceField>        data_fields;
+  std::vector<InterfacePseudoMap>    pseudo_maps;
   std::vector<InterfaceMessage>      messages;
 
 };

@@ -27,10 +27,10 @@ INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
 include $(BASEDIR)/etc/buildsys/interface.mk
 
 # Compatibility library that links to the standard Fawkes interfaces
-LIBS_libfawkesinterfaces = $(INTERFACES)
+LIBS_libfawkesinterfaces = $(INTERFACES_all)
 LIBS_all += $(LIBDIR)/libfawkesinterfaces.so
 
-$(LIBDIR)/libfawkesinterfaces.so: $(filter-out $(LIBDIR)/libfawkesinterfaces.so,$(LIBS_all))
+$(LIBDIR)/libfawkesinterfaces.so: | $(filter-out $(LIBDIR)/libfawkesinterfaces.so,$(LIBS_all))
 
 # Interface generator stuff
 include $(SRCDIR)/generator/generator_rules.mk

@@ -42,9 +42,19 @@
       <!ATTLIST item
 		name  CDATA  #REQUIRED>
 
-  <!ELEMENT data (comment, (field | ref)+)>
+  <!ELEMENT data (comment, (field | pseudomap | ref)+)>
 
     <!ELEMENT comment (#PCDATA)>
+
+    <!ELEMENT pseudomap (comment, paref+)>
+    <!ATTLIST pseudomap
+	      type      CDATA  #REQUIRED
+	      keytype CDATA  #REQUIRED
+	      name      CDATA  #REQUIRED>
+
+    <!ELEMENT mapref (#PCDATA)>
+    <!ATTLIST mapref
+	      key      CDATA  #REQUIRED>
 
     <!ELEMENT field (#PCDATA)>
     <!ATTLIST field

@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <interfaces/generator/parser.h>
-#include <interfaces/generator/exceptions.h>
+#include "parser.h"
+#include "exceptions.h"
 
 #include <iostream>
 #include <vector>
@@ -121,6 +121,114 @@ InterfaceParser::getFields(xmlpp::Node *node)
 }
 
 
+/** Get parsed pseudo maps.
+ * Get pseudo maps stored below the given node.
+ * @param node root node where to start searching
+ * @param fields vector of parsed fields, used to detect name clashes
+ * @return vector of pseudo map representations.
+ */
+std::vector<InterfacePseudoMap>
+InterfaceParser::getPseudoMaps(xmlpp::Node *node, std::vector<InterfaceField> &fields)
+{
+  vector<InterfacePseudoMap> result;
+  NodeSet set = node->find("pseudomap");
+  for (NodeSet::iterator i = set.begin(); i != set.end(); ++i) {
+    const Element *el = dynamic_cast<const Element *>(*i);
+    std::string pm_name, pm_type, pm_keytype;
+
+    if ( el ) {
+      Attribute *attr;
+      attr = el->get_attribute("name");
+      if ( ! attr ) throw InterfaceGeneratorInvalidContentException("no name for pseudo map");
+      pm_name = attr->get_value();
+
+      attr = el->get_attribute("type");
+      if ( ! attr ) throw InterfaceGeneratorInvalidContentException("no type for pseudo map");
+      pm_type = attr->get_value();
+
+      attr = el->get_attribute("keytype");
+      if ( ! attr ) throw InterfaceGeneratorInvalidContentException("no key type for pseudo map");
+      pm_keytype = attr->get_value();
+    } else {
+      throw InterfaceGeneratorInvalidContentException("pseudo map is not an element");
+    }
+
+    NodeSet comment_set = (*i)->find("text()");
+    if ( comment_set.size() == 0) {
+      throw InterfaceGeneratorInvalidContentException("pseudo map without comment");
+    }
+    std::string pm_comment = "";
+    const TextNode *comment_node = dynamic_cast<const TextNode *>(comment_set[0]);
+    if ( comment_node ) {
+      pm_comment = comment_node->get_content();
+    } else {
+      throw InterfaceGeneratorInvalidContentException("pseudo map comment not a text node");
+    }
+
+    InterfacePseudoMap pm(pm_name, pm_type, pm_keytype, pm_comment);
+
+    NodeSet ref_nodes = (*i)->find("mapref");
+    for (NodeSet::iterator r = ref_nodes.begin(); r != ref_nodes.end(); ++r) {
+      NodeSet ref_set = (*r)->find("text()");
+      if ( ref_set.size() == 0) {
+	throw InterfaceGeneratorInvalidContentException("pseudo map without referenced field");
+      }
+
+      const Element *el = dynamic_cast<const Element *>(*r);
+      Attribute *attr;
+      attr = el->get_attribute("key");
+      if ( ! attr ) throw InterfaceGeneratorInvalidContentException("no key for mapref map");
+      std::string mapref_key = attr->get_value();
+
+      const TextNode *text_node = dynamic_cast<const TextNode *>(ref_set[0]);
+      if ( text_node ) {
+	// find field in data fields
+	bool found = false;
+	for (vector<InterfaceField>::iterator j = fields.begin(); j != fields.end(); ++j) {
+	  if ( (*j).getName() == text_node->get_content() ) {
+	    // field found
+	    if ( j->getLengthValue() > 0 ) {
+	      throw InterfaceGeneratorInvalidContentException("pseudomap references may only point to non-map types");
+	    }
+	    pm.addRef(text_node->get_content(), mapref_key);
+	    found = true;
+	    break;
+	  }
+	}
+	if (! found) {
+	  throw InterfaceGeneratorInvalidContentException("reference to non-existing data field");
+	}
+
+      } else {
+	throw InterfaceGeneratorInvalidContentException("message ref not a text node");
+      }
+    }
+
+
+    try {
+      pm.valid();
+      result.push_back(pm);
+    } catch ( fawkes::Exception &e ) {
+      e.print_trace();
+    }
+  }
+  for (vector<InterfacePseudoMap>::iterator i = result.begin(); i != result.end(); ++i) {
+    for (vector<InterfacePseudoMap>::iterator j = i + 1; j != result.end(); ++j) {
+      if ( (*i).getName() == (*j).getName() ) {
+	throw InterfaceGeneratorAmbiguousNameException((*i).getName().c_str(), "field");
+      }
+    }
+    for (vector<InterfaceField>::iterator f = fields.begin(); f != fields.end(); ++f) {
+      if ( i->getName() == f->getName() ) {
+	throw InterfaceGeneratorAmbiguousNameException((*i).getName().c_str(), "pseudo map");
+      }
+    }
+  }
+
+  return result;
+}
+
+
 /** Print fields.
  * Print fields to stdout.
  * @param fields fields to print
@@ -155,17 +263,41 @@ InterfaceParser::printFields(vector<InterfaceField> &fields)
   }
 }
 
+/** Print pseudo maps.
+ * @param pseudo_maps pseudo maps to print
+ */
+void
+InterfaceParser::printPseudoMaps(vector<InterfacePseudoMap> &pseudo_maps)
+{
+  for (vector<InterfacePseudoMap>::iterator i = pseudo_maps.begin(); i != pseudo_maps.end(); ++i) {
+    cout << "  PseudoMap: name=" << i->getName()
+	 << "  type=" << i->getType()
+	 << "  keytype=" << i->getKeyType() << endl;
+    InterfacePseudoMap::RefList &reflist = i->getRefList();
+
+    InterfacePseudoMap::RefList::iterator i;
+    for (i = reflist.begin(); i != reflist.end(); ++i) {
+      cout << "    Ref:  field=" << i->first
+	   << "  key=" << i->second << endl;
+    }
+
+    cout << endl;
+  }
+}
+
 
 /** Print parsed config.
  * @param constants parsed constants
  * @param enum_constants parsed enum_constants
  * @param data_fields parsed data fields
+ * @param pseudo_maps pseudo maps
  * @param messages parsed messages.
  */
 void
 InterfaceParser::printParsed(vector<InterfaceConstant> &     constants,
 			     vector<InterfaceEnumConstant> & enum_constants,
 			     vector<InterfaceField> &        data_fields,
+			     vector<InterfacePseudoMap> &    pseudo_maps,
 			     vector<InterfaceMessage> &      messages)
 {
   cout << "Constants" << endl;
@@ -185,6 +317,7 @@ InterfaceParser::printParsed(vector<InterfaceConstant> &     constants,
     
   cout << "Data block" << endl;
   printFields(data_fields);
+  printPseudoMaps(pseudo_maps);
   for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
     cout << "Message: name=" << (*i).getName() << endl;
     vector<InterfaceField> msg_fields = (*i).getFields();
@@ -197,7 +330,7 @@ InterfaceParser::printParsed(vector<InterfaceConstant> &     constants,
 void
 InterfaceParser::print()
 {
-  printParsed(constants, enum_constants, data_fields, messages);
+  printParsed(constants, enum_constants, data_fields, pseudo_maps, messages);
 }
 
 
@@ -263,7 +396,7 @@ InterfaceParser::parse()
       const TextNode *comment_node = dynamic_cast<const TextNode *>(nameset[0]);
       if ( ! comment_node ) {
 	throw InterfaceGeneratorInvalidContentException("name node not text node for constant");
-    }
+      }
       std::string const_comment = comment_node->get_content();
       //std::cout << "Constant name: " << const_name << std::endl;
       
@@ -413,6 +546,8 @@ InterfaceParser::parse()
   if ( data_fields.size() == 0 ) {
     throw InterfaceGeneratorInvalidContentException("data block contains no field");
   }
+
+  pseudo_maps = getPseudoMaps(set[0], data_fields);
 
   NodeSet comment_set = root->find("/interface/data/comment/text()");
   if ( comment_set.size() == 0) {
@@ -572,6 +707,17 @@ std::vector<InterfaceField>
 InterfaceParser::getDataFields()
 {
   return data_fields;
+}
+
+
+/** Get data pseudo maps.
+ * Only valid after parse().
+ * @return pseudo maps
+ */
+std::vector<InterfacePseudoMap>
+InterfaceParser::getPseudoMaps()
+{
+  return pseudo_maps;
 }
 
 

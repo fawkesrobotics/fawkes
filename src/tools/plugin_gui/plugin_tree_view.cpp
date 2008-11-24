@@ -72,6 +72,15 @@ PluginTreeView::PluginTreeView( BaseObjectType* cobject,
   append_column_editable("Status", m_plugin_record.loaded);
   append_column("Plugin", m_plugin_record.name);
 
+  set_headers_clickable();
+  on_name_clicked();
+  Gtk::TreeViewColumn *column = get_column(0);
+  column->signal_clicked().connect(sigc::mem_fun(*this, &PluginTreeView::on_id_clicked));
+  column = get_column(1);
+  column->signal_clicked().connect(sigc::mem_fun(*this, &PluginTreeView::on_status_clicked));
+  column = get_column(2);
+  column->signal_clicked().connect(sigc::mem_fun(*this, &PluginTreeView::on_name_clicked));
+  
   Gtk::CellRendererToggle* renderer;
   renderer = dynamic_cast<Gtk::CellRendererToggle*>( get_column_cell_renderer(1) );
   renderer->signal_toggled().connect( sigc::mem_fun(*this, &PluginTreeView::on_status_toggled));
@@ -138,7 +147,6 @@ PluginTreeView::on_connected()
     e.print_trace();
   }
 }
-
 
 /** Signal handler that is called whenever the connection is terminated. */
 void
@@ -320,4 +328,31 @@ PluginTreeView::on_status_toggled(const Glib::ustring& path)
     m_dispatcher.get_client()->enqueue(msg);
     msg->unref();
   }
+}
+
+/**
+ * TreeView gets sorted by id
+ */
+void
+PluginTreeView::on_id_clicked()
+{
+  m_plugin_list->set_sort_column(0, Gtk::SORT_ASCENDING);
+}
+
+/**
+ * TreeView gets sorted by status (loaded/unloaded)
+ */
+void
+PluginTreeView::on_status_clicked()
+{
+  m_plugin_list->set_sort_column(2, Gtk::SORT_DESCENDING);
+}
+
+/**
+ * TreeView gets sorted by name
+ */
+void
+PluginTreeView::on_name_clicked()
+{
+  m_plugin_list->set_sort_column(1, Gtk::SORT_ASCENDING);
 }

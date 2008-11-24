@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <interfaces/generator/cpp_generator.h>
-#include <interfaces/generator/exceptions.h>
+#include "cpp_generator.h"
+#include "exceptions.h"
 
 #include <utils/misc/string_conversions.h>
 
@@ -54,6 +54,7 @@ using namespace std;
  * @param constants constants
  * @param enum_constants constants defined as an enum
  * @param data_fields data fields of the interface
+ * @param pseudo_maps pseudo maps of the interface
  * @param messages messages defined in the interface
  */
 CppInterfaceGenerator::CppInterfaceGenerator(std::string directory, std::string interface_name,
@@ -64,6 +65,7 @@ CppInterfaceGenerator::CppInterfaceGenerator(std::string directory, std::string 
 					     const std::vector<InterfaceConstant> &constants,
 					     const std::vector<InterfaceEnumConstant> &enum_constants,
 					     const std::vector<InterfaceField> &data_fields,
+					     const std::vector<InterfacePseudoMap> &pseudo_maps,
 					     const std::vector<InterfaceMessage> &messages
 					     )
 {
@@ -80,6 +82,7 @@ CppInterfaceGenerator::CppInterfaceGenerator(std::string directory, std::string 
   this->constants = constants;
   this->enum_constants = enum_constants;
   this->data_fields = data_fields;
+  this->pseudo_maps = pseudo_maps;
   this->messages = messages;
 
   filename_cpp = config_basename + ".cpp";
@@ -218,7 +221,7 @@ CppInterfaceGenerator::write_cpp(FILE *f)
 	  class_name.c_str(), data_comment.c_str());
   write_constants_cpp(f);
   write_ctor_dtor_cpp(f, class_name, "Interface", "", data_fields);
-  write_methods_cpp(f, class_name, class_name, data_fields, "");
+  write_methods_cpp(f, class_name, class_name, data_fields, pseudo_maps, "");
   write_create_message_method_cpp(f);
   write_messages_cpp(f);
 
@@ -772,6 +775,85 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 }
 
 
+/** Write methods to cpp file including pseudo maps.
+ * @param f file to write to
+ * @param interface_classname name of the interface class
+ * @param classname name of class (can be interface or message)
+ * @param fields fields
+ * @param pseudo_maps pseudo maps
+ * @param inclusion_prefix used if class is included in another class.
+ */
+void
+CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classname,
+					 std::string classname,
+					 std::vector<InterfaceField> fields,
+					 std::vector<InterfacePseudoMap> pseudo_maps,
+					 std::string inclusion_prefix)
+{
+  write_methods_cpp(f, interface_classname, classname, fields, inclusion_prefix);
+
+  for (vector<InterfacePseudoMap>::iterator i = pseudo_maps.begin(); i != pseudo_maps.end(); ++i) {
+    fprintf(f,
+	    "/** Get %s value.\n"
+	    " * %s\n"
+	    " * @param key key of the value\n"
+	    " * @return %s value\n"
+	    " */\n"
+	    "%s\n"
+	    "%s%s::%s(const %s key) const\n"
+	    "{\n",
+	    (*i).getName().c_str(),
+	    (*i).getComment().c_str(),
+	    (*i).getName().c_str(),
+            (*i).getType().c_str(),
+            inclusion_prefix.c_str(), classname.c_str(), (*i).getName().c_str(),
+	    (*i).getKeyType().c_str() );
+
+    InterfacePseudoMap::RefList &reflist = i->getRefList();
+    InterfacePseudoMap::RefList::iterator paref;
+    bool first = true;
+    for (paref = reflist.begin(); paref != reflist.end(); ++paref) {
+      fprintf(f, "  %sif (key == %s) {\n"
+	         "    return data->%s;\n",
+	         first ? "" : "} else ",
+	      paref->second.c_str(), paref->first.c_str());
+      first = false;
+    }
+    fprintf(f, "  } else {\n"
+	       "    throw Exception(\"Invalid key, cannot retrieve value\");\n"
+	       "  }\n"
+	       "}\n\n");
+
+    fprintf(f,
+	    "/** Set %s value.\n"
+	    " * %s\n"
+	    " * @param key key of the value\n"
+	    " * @param new_value new value\n"
+	    " */\n"
+	    "void\n"
+	    "%s%s::set_%s(const %s key, const %s new_value)\n"
+	    "{\n",
+	    (*i).getName().c_str(),
+	    (*i).getComment().c_str(),	    
+	    inclusion_prefix.c_str(), classname.c_str(), (*i).getName().c_str(),
+	    (*i).getKeyType().c_str(), (*i).getType().c_str());
+
+    first = true;
+    for (paref = reflist.begin(); paref != reflist.end(); ++paref) {
+      fprintf(f, "  %sif (key == %s) {\n"
+	         "    data->%s = new_value;\n",
+	         first ? "" : "} else ",
+	      paref->second.c_str(), paref->first.c_str());
+      first = false;
+    }
+
+    fprintf(f, "  }\n"
+	       "}\n\n");
+  }
+}
+
+
+
 /** Write methods to h file.
  * @param f file to write to
  * @param is indentation space.
@@ -794,6 +876,31 @@ CppInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ i
 	    i->getAccessType().c_str(), i->getName().c_str(),
 	    is.c_str(), i->getName().c_str()
 	    );
+  }
+}
+
+
+/** Write methods to h file.
+ * @param f file to write to
+ * @param is indentation space.
+ * @param fields fields to write accessor methods for.
+ * @param pseudo_maps pseudo maps
+ */
+void
+CppInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ is,
+				       std::vector<InterfaceField> fields,
+				       std::vector<InterfacePseudoMap> pseudo_maps)
+{
+  write_methods_h(f, is, fields);
+
+  for (vector<InterfacePseudoMap>::iterator i = pseudo_maps.begin(); i != pseudo_maps.end(); ++i) {
+    fprintf(f,
+	    "%s%s %s(%s key) const;\n"
+	    "%svoid set_%s(const %s key, const %s new_value);\n",
+	    is.c_str(), (*i).getType().c_str(),
+	    (*i).getName().c_str(), (*i).getKeyType().c_str(),
+	    is.c_str(), (*i).getName().c_str(),
+	    i->getKeyType().c_str(), i->getType().c_str());
   }
 }
 
@@ -834,7 +941,7 @@ CppInterfaceGenerator::write_h(FILE *f)
   write_ctor_dtor_h(f, "  ", class_name);
   fprintf(f, " public:\n");
   fprintf(f, "  virtual Message * create_message(const char *type) const;\n\n");
-  write_methods_h(f, "  ", data_fields);
+  write_methods_h(f, "  ", data_fields, pseudo_maps);
   fprintf(f, "\n};\n\n} // end namespace fawkes\n\n#endif\n");
 }
 

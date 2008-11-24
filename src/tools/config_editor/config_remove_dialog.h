@@ -35,10 +35,12 @@ class ConfigRemoveDialog : public Gtk::Dialog
 		      const Glib::RefPtr<Gnome::Glade::Xml>& ref_xml );
   virtual ~ConfigRemoveDialog();
 
-  void init(const Glib::ustring& path);
+  void init(const Glib::ustring& path, bool is_default);
+  bool get_remove_default() const;
 
  protected:
   Gtk::Label* m_lbl_path;
+  Gtk::CheckButton* m_chb_is_default;
 };
 
 #endif /* __TOOLS_CONFIG_EDITOR_CONFIG_REMOVE_DIALOG_H_ */

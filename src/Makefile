@@ -25,4 +25,5 @@ include $(BASEDIR)/etc/buildsys/rules.mk
 interfaces mainapp firevision plugins tools: libs
 mainapp plugins firevision tools: interfaces
 tools: mainapp
+plugins: firevision
 

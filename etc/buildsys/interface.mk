@@ -53,12 +53,12 @@ _CFLAGS_TOLUA     = -Wno-unused-function $(CFLAGS_LUA)
 _LDFLAGS_TOLUA    = $(LDFLAGS_LUA)
 
 $(foreach I,$(INTERFACES_all),							\
-	$(eval LIBS_interfaces_$(I)      = $$(_LIBS_INTERFACE))			\
-	$(eval OBJS_interfaces_$(I)      = $(I).o)				\
-	$(eval OBJS_all                 += $$(OBJS_interfaces_$(I)))		\
+	$(eval LIBS_interfaces_lib$(I)   = $$(_LIBS_INTERFACE))			\
+	$(eval OBJS_interfaces_lib$(I)   = $(I).o)				\
+	$(eval OBJS_all                 += $$(OBJS_interfaces_lib$(I)))		\
 	$(eval INTERFACES_SRCS          += $(SRCDIR)/$(I).cpp)			\
 	$(eval INTERFACES_HDRS          += $(I).h)				\
-	$(eval LIBS_all                 += $$(LIBDIR)/interfaces/$(I).so)	\
+	$(eval LIBS_all                 += $$(LIBDIR)/interfaces/lib$(I).so)	\
 										\
 	$(eval TOLUA_ALL                += $(I).tolua)				\
 	$(eval TOLUA_SRCS               += $(I)_tolua.cpp)			\
@@ -117,7 +117,7 @@ endif
 ifeq ($(HAVE_TOLUA),1)
   LIBS_all += $(LIBS_all_tolua)
 
-$(LUALIBDIR)/interfaces/%.so: $(LIBDIR)/interfaces/%.so
+$(LUALIBDIR)/interfaces/%.so: $(LIBDIR)/interfaces/lib%.so
 
 else
   all: warning_tolua_wrapper

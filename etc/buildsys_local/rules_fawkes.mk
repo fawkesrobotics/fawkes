@@ -21,6 +21,6 @@ $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
 	$(SILENT) $(CC) -o $@ $(subst ..,__,$^) \
 	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
-	$(addprefix -l,$(patsubst %Interface,:%Interface.so,$(LIBS_$(subst /,_,$*)))) $(addprefix -l,$(LIBS)) \
+	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
 

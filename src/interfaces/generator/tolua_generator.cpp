@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <interfaces/generator/tolua_generator.h>
-#include <interfaces/generator/exceptions.h>
+#include "tolua_generator.h"
+#include "exceptions.h"
 
 #include <utils/misc/string_conversions.h>
 
@@ -39,6 +39,7 @@ using namespace std;
 /** @class ToLuaInterfaceGenerator <interfaces/generator/tolua_generator.h>
  * Generator that transforms input from the InterfaceParser into valid
  * ToLua++ package file.
+ * @author Tim Niemueller
  */
 
 /** Constructor.
@@ -54,6 +55,7 @@ using namespace std;
  * @param constants constants
  * @param enum_constants constants defined as an enum
  * @param data_fields data fields of the interface
+ * @param pseudo_maps pseudo maps of the interface
  * @param messages messages defined in the interface
  */
 ToLuaInterfaceGenerator::ToLuaInterfaceGenerator(std::string directory, std::string interface_name,
@@ -64,6 +66,7 @@ ToLuaInterfaceGenerator::ToLuaInterfaceGenerator(std::string directory, std::str
 						 const std::vector<InterfaceConstant> &constants,
 						 const std::vector<InterfaceEnumConstant> &enum_constants,
 						 const std::vector<InterfaceField> &data_fields,
+						 const std::vector<InterfacePseudoMap> &pseudo_maps,
 						 const std::vector<InterfaceMessage> &messages
 						 )
 {
@@ -80,6 +83,7 @@ ToLuaInterfaceGenerator::ToLuaInterfaceGenerator(std::string directory, std::str
   this->constants = constants;
   this->enum_constants = enum_constants;
   this->data_fields = data_fields;
+  this->pseudo_maps = pseudo_maps;
   this->messages = messages;
 
   filename_tolua = config_basename + ".tolua";
@@ -290,7 +294,7 @@ ToLuaInterfaceGenerator::write_superclass_h(FILE *f)
  */
 void
 ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ is,
-				       std::vector<InterfaceField> fields)
+					 std::vector<InterfaceField> fields)
 {
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
     fprintf(f,
@@ -304,6 +308,31 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */
 	    (*i).getAccessType().c_str(), (*i).getName().c_str(),
 	    is.c_str(), (*i).getName().c_str()
 	    );
+  }
+}
+
+
+/** Write methods to h file.
+ * @param f file to write to
+ * @param is indentation space.
+ * @param fields fields to write accessor methods for.
+ * @param pseudo_maps pseudo maps
+ */
+void
+ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ is,
+					 std::vector<InterfaceField> fields,
+					 std::vector<InterfacePseudoMap> pseudo_maps)
+{
+  write_methods_h(f, is, fields);
+
+  for (vector<InterfacePseudoMap>::iterator i = pseudo_maps.begin(); i != pseudo_maps.end(); ++i) {
+    fprintf(f,
+	    "%s%s %s(%s key) const;\n"
+	    "%svoid set_%s(const %s key, const %s new_value);\n",
+	    is.c_str(), (*i).getType().c_str(),
+	    (*i).getName().c_str(), (*i).getKeyType().c_str(),
+	    is.c_str(), (*i).getName().c_str(),
+	    i->getKeyType().c_str(), i->getType().c_str());
   }
 }
 
@@ -326,7 +355,7 @@ ToLuaInterfaceGenerator::write_toluaf(FILE *f)
   write_constants_h(f);
   write_messages_h(f);
   //write_ctor_dtor_h(f, "  ", class_name);
-  write_methods_h(f, "  ", data_fields);
+  write_methods_h(f, "  ", data_fields, pseudo_maps);
   write_superclass_h(f);
   fprintf(f, "\n};\n\n}\n");
 }

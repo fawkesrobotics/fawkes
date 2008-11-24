@@ -41,7 +41,7 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  ArgumentParser *argp = new ArgumentParser(argc, argv, "d:");
+  ArgumentParser *argp = new ArgumentParser(argc, argv, "d:v");
 
   const vector<const char *> & items = argp->items();
   if ( items.size() == 0 ) {
@@ -80,7 +80,9 @@ main(int argc, char **argv)
       try {
 	InterfaceParser    *iparse = new InterfaceParser(*i);
 	iparse->parse();
-	// iparse->print();
+	if ( argp->has_arg("v") ) {
+	  iparse->print();
+	}
 	
 	InterfaceDigest    *idigest = new InterfaceDigest(*i);
 
@@ -96,6 +98,7 @@ main(int argc, char **argv)
 								   iparse->getConstants(),
 								   iparse->getEnumConstants(),
 								   iparse->getDataFields(),
+								   iparse->getPseudoMaps(),
 								   iparse->getMessages()
 								   );
 
@@ -111,6 +114,7 @@ main(int argc, char **argv)
 									 iparse->getConstants(),
 									 iparse->getEnumConstants(),
 									 iparse->getDataFields(),
+									 iparse->getPseudoMaps(),
 									 iparse->getMessages()
 									 );
 

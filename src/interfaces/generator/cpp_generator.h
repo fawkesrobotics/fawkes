@@ -25,10 +25,11 @@
 #ifndef __INTERFACES_GENERATOR_CPP_GENERATOR_H_
 #define __INTERFACES_GENERATOR_CPP_GENERATOR_H_
 
-#include <interfaces/generator/field.h>
-#include <interfaces/generator/constant.h>
-#include <interfaces/generator/enum_constant.h>
-#include <interfaces/generator/message.h>
+#include "field.h"
+#include "constant.h"
+#include "enum_constant.h"
+#include "message.h"
+#include "pseudomap.h"
 
 #include <vector>
 #include <string>
@@ -45,6 +46,7 @@ class CppInterfaceGenerator
 			const std::vector<InterfaceConstant> &constants,
 			const std::vector<InterfaceEnumConstant> &enum_constants,
 			const std::vector<InterfaceField> &data_fields,
+			const std::vector<InterfacePseudoMap> &pseudo_maps,
 			const std::vector<InterfaceMessage> &messages
 			);
   ~CppInterfaceGenerator();
@@ -82,6 +84,17 @@ class CppInterfaceGenerator
 			 std::vector<InterfaceField> fields,
 			 std::string inclusion_prefix);
 
+  void write_methods_h(FILE *f,
+		       std::string /* indent space */ is,
+		       std::vector<InterfaceField> fields,
+		       std::vector<InterfacePseudoMap> pseudo_maps);
+  void write_methods_cpp(FILE *f,
+			 std::string interface_classname,
+			 std::string classname,
+			 std::vector<InterfaceField> fields,
+			 std::vector<InterfacePseudoMap> pseudo_maps,
+			 std::string inclusion_prefix);
+
   void write_management_funcs_cpp(FILE *f);
 
 
@@ -96,6 +109,7 @@ class CppInterfaceGenerator
   std::vector<InterfaceConstant>     constants;
   std::vector<InterfaceEnumConstant> enum_constants;
   std::vector<InterfaceField>        data_fields;
+  std::vector<InterfacePseudoMap>    pseudo_maps;
   std::vector<InterfaceMessage>      messages;
 
   std::string dir;

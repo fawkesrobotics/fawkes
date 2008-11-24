@@ -68,6 +68,9 @@ class PluginTreeView
   void on_connected();
   void on_disconnected();
   void on_message_received(fawkes::FawkesNetworkMessage *msg);
+  void on_id_clicked();
+  void on_status_clicked();
+  void on_name_clicked();
 
  private:
   Glib::RefPtr<Gtk::ListStore> m_plugin_list;

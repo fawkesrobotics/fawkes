@@ -101,6 +101,15 @@ ConfigTreeView::ConfigTreeView( BaseObjectType* cobject,
   m_config_tree = Gtk::TreeStore::create(m_config_record);
   set_model(m_config_tree);
   append_column("Path", m_config_record.node);
+
+  Gtk::TreeViewColumn *column = get_column(0);
+  Gtk::CellRendererText *cell = (Gtk::CellRendererText *)column->get_first_cell_renderer();
+#ifndef GLIBMM_PROPERTIES_ENABLED
+  column->add_attribute(cell->property_underline(), m_config_record.is_default);
+#else
+  column->add_attribute(*cell, "underline", m_config_record.is_default);
+#endif   
+
   append_column("Value", m_config_record.value_string);
 
   Gtk::Menu::MenuList& menulist = m_menu.items();
@@ -142,12 +151,20 @@ ConfigTreeView::set_config(Configuration* config)
 void
 ConfigTreeView::set_network_client(FawkesNetworkClient* client)
 {
-  NetworkConfiguration* netconf = new NetworkConfiguration(client);
-  netconf->set_mirror_mode(true);
-  m_config = netconf;
-  m_own_config = true;
-
-  read_config();
+  if (client)
+    {
+      NetworkConfiguration* netconf = new NetworkConfiguration(client);
+      netconf->set_mirror_mode(true);
+      m_config = netconf;
+      m_own_config = true;
+    
+      read_config();
+    }
+  else
+    {
+      delete m_config;
+      m_config_tree->clear();
+    }
 }
 
 /** Set the file to read the config from.
@@ -203,7 +220,6 @@ ConfigTreeView::set_value(const char* path, const char* type, bool is_default, b
   Gtk::TreeModel::Row row;
   row = *get_iter(path);
 
-  row[m_config_record.path] = path;
   row[m_config_record.type] = type;
   row[m_config_record.is_default] = is_default;
   row[m_config_record.value_bool] = value;
@@ -222,7 +238,6 @@ ConfigTreeView::set_value(const char* path, const char* type, bool is_default, i
   Gtk::TreeModel::Row row;
   row = *get_iter(path);
 
-  row[m_config_record.path] = path;
   row[m_config_record.type] = type;
   row[m_config_record.is_default] = is_default;
   row[m_config_record.value_int] = value;
@@ -246,7 +261,6 @@ ConfigTreeView::set_value(const char* path, const char* type, bool is_default, u
   Gtk::TreeModel::Row row;
   row = *get_iter(path);
 
-  row[m_config_record.path] = path;
   row[m_config_record.type] = type;
   row[m_config_record.is_default] = is_default;
   row[m_config_record.value_uint] = value;
@@ -270,7 +284,6 @@ ConfigTreeView::set_value(const char* path, const char* type, bool is_default, f
   Gtk::TreeModel::Row row;
   row = *get_iter(path);
 
-  row[m_config_record.path] = path;
   row[m_config_record.type] = type;
   row[m_config_record.is_default] = is_default;
   row[m_config_record.value_float] = value;
@@ -294,7 +307,6 @@ ConfigTreeView::set_value(const char* path, const char* type, bool is_default, s
   Gtk::TreeModel::Row row;
   row = *get_iter(path);
 
-  row[m_config_record.path] = path;
   row[m_config_record.type] = type;
   row[m_config_record.is_default] = is_default;
   row[m_config_record.value_string] = value;
@@ -309,7 +321,7 @@ ConfigTreeView::get_iter(const char* p)
   asprintf(&full_path, "%s", p);
   char* node = strtok(full_path, "/");
 
-  asprintf(&path, "/%s/", node);
+  asprintf(&path, "/%s", node);
   
   Gtk::TreeModel::Children children = m_config_tree->children();
   Gtk::TreeIter iter = children.begin();
@@ -347,7 +359,7 @@ ConfigTreeView::get_iter(const char* p)
       node = strtok(NULL, "/");
 
       char* t;
-      asprintf(&t, "%s/%s/", path, node);
+      asprintf(&t, "%s/%s", path, node);
       free(path);
       path = t;
     }
@@ -407,18 +419,18 @@ ConfigTreeView::edit_entry(const Gtk::TreeIter& iter)
   bool ret_val;
 
   Gtk::TreeModel::Row row = *iter;
-  Glib::ustring value = row[m_config_record.value_string];
+  Glib::ustring type = row[m_config_record.type];
   
-  if (value == "")
+  if (type == "") //if type is empty the row is a directory...
     { ret_val = false; }
   else
     {
       int result;
-      Glib::ustring path = row[m_config_record.path];
-      Glib::ustring type = row[m_config_record.type];
-      bool is_default    = row[m_config_record.is_default];
+      Glib::ustring path  = row[m_config_record.path];
+      Glib::ustring value = row[m_config_record.value_string];
+      bool is_default     = row[m_config_record.is_default];
 
-      m_dlg_edit->init(path, type, value, is_default);
+      m_dlg_edit->init(path, type, value);
       Gtk::Window* parent = dynamic_cast<Gtk::Window*>( get_toplevel() );
       m_dlg_edit->set_transient_for(*parent);
       result = m_dlg_edit->run();
@@ -432,6 +444,8 @@ ConfigTreeView::edit_entry(const Gtk::TreeIter& iter)
 	    const char* p = path.c_str();
 	    const char* t = type.c_str();
 
+            is_default = m_dlg_edit->get_is_default();
+
 	    if ( m_config->is_bool(p) ) 
 	      {
 		bool b;
@@ -440,7 +454,8 @@ ConfigTreeView::edit_entry(const Gtk::TreeIter& iter)
 		else if (value == "FALSE")
 		  { b = false; }
 		
-		m_config->set_bool(p, b);
+		if (!is_default) m_config->set_bool(p, b);
+		else m_config->set_default_bool(p, b);
  		set_value(p, t, is_default, b);
 	      }
 	    else if ( m_config->is_int(p) ) 
@@ -448,7 +463,8 @@ ConfigTreeView::edit_entry(const Gtk::TreeIter& iter)
 		int i;
 		i = atoi( value.c_str() );
 		
-		m_config->set_int(p, i);
+                if (!is_default) m_config->set_int(p, i);
+                else m_config->set_default_int(p, i);
 		set_value(p, t, is_default, i);
 	      }
 	    else if ( m_config->is_uint(p) )
@@ -457,7 +473,8 @@ ConfigTreeView::edit_entry(const Gtk::TreeIter& iter)
 		i = atoi( value.c_str() );
 		if ( 0 <= i)
 		  { 
-		    m_config->set_uint( p, (unsigned int) i );
+		    if (!is_default) m_config->set_uint(p, (unsigned int) i);
+		    else m_config->set_default_uint( p, (unsigned int) i );
 		    set_value(p, t, is_default, (unsigned int) i);
 		  }
 	      }
@@ -466,17 +483,20 @@ ConfigTreeView::edit_entry(const Gtk::TreeIter& iter)
 		float f;
 		f = atof( value.c_str() );
 		
-		m_config->set_float(p, f);
+		if (!is_default) m_config->set_float(p, f);
+		else m_config->set_default_float(p, f);
 		set_value(p, t, is_default, f);
 	      }
 	    else if ( m_config->is_string(p) ) 
 	      {
 		string s( value.c_str() );
 		
-		m_config->set_string(p, s);
+		if (!is_default) m_config->set_string(p, s);
+		else m_config->set_default_string(p, s);
 		set_value(p, t, is_default, s);
 	      }
 
+            if (is_default) m_config->erase(p);
 	    ret_val = true;
 
 	    break;
@@ -499,14 +519,15 @@ ConfigTreeView::remove_entry(const Gtk::TreeIter& iter)
   bool ret_val = false;
   int result;
   Gtk::TreeModel::Row row = *iter;
-  Glib::ustring value = row[m_config_record.value_string];
+  Glib::ustring type = row[m_config_record.type];
+  bool is_default = row[m_config_record.is_default];
 
-  if (value == "")
+  if (type == "") //if type is empty the row is a directory -> return
     { ret_val = false; }
   else
     {
       Glib::ustring path = row[m_config_record.path];
-      m_dlg_remove->init(path);
+      m_dlg_remove->init(path, is_default);
       
       Gtk::Window* parent = dynamic_cast<Gtk::Window*>( get_toplevel() );
       m_dlg_remove->set_transient_for(*parent);
@@ -517,7 +538,9 @@ ConfigTreeView::remove_entry(const Gtk::TreeIter& iter)
 	case Gtk::RESPONSE_OK:
 	  {
 	    const char* p = path.c_str();
+	    bool rem_default = m_dlg_remove->get_remove_default();
 	    m_config->erase(p);
+	    if (rem_default) m_config->erase_default(p);
 
 // 	    cout << "deleting: " 
 // 		 << row[m_config_record.m_path] 
@@ -528,6 +551,21 @@ ConfigTreeView::remove_entry(const Gtk::TreeIter& iter)
 	    Gtk::TreePath tree_path = m_config_tree->get_path(iter);
   	    m_config_tree->erase(iter);
 	    m_config_tree->row_deleted(tree_path);
+	    
+	    Configuration::ValueIterator* cit = m_config->search(p);
+	    if (!rem_default && cit->next()) //reenter the default value
+	      {
+                if ( cit->is_bool() )
+                  { set_value(cit->path(), cit->type(), cit->is_default(), cit->get_bool()); }
+                else if ( cit->is_int() )
+                  { set_value(cit->path(), cit->type(), cit->is_default(), cit->get_int()); }
+                else if ( cit->is_uint() )
+                  { set_value(cit->path(), cit->type(), cit->is_default(), cit->get_uint()); }
+                else if ( cit->is_float() )
+                  { set_value(cit->path(), cit->type(), cit->is_default(), cit->get_float()); }
+                else if ( cit->is_string() )
+                  { set_value(cit->path(), cit->type(), cit->is_default(), cit->get_string()); }
+	      }
 
 	    break;
 	  }
@@ -561,15 +599,14 @@ ConfigTreeView::add_entry(const Gtk::TreeIter& iter)
     {
     case Gtk::RESPONSE_OK:
       {
-	Glib::ustring type = m_dlg_add->get_type();
-	Glib::ustring path = m_dlg_add->get_path();
+	Glib::ustring type  = m_dlg_add->get_type();
+	Glib::ustring path  = m_dlg_add->get_path();
 	Glib::ustring value = m_dlg_add->get_value();
+	bool is_default     = m_dlg_add->get_is_default();
 
 	const char* t = type.c_str();
 	const char* p = path.c_str();
 
-	bool is_default = m_dlg_add->get_is_default();
-	
 	ret_val = true;
 
 	if ( type == "bool" )
@@ -581,7 +618,8 @@ ConfigTreeView::add_entry(const Gtk::TreeIter& iter)
 	    else if ( value == "FALSE" || value == "false" )
 	      { b = false; }
 
-	    m_config->set_bool(p, b);
+            if (!is_default) m_config->set_bool(p, b);
+            else m_config->set_default_bool(p, b);
 	    set_value(p, t, is_default, b);
 	  }
 
@@ -590,7 +628,8 @@ ConfigTreeView::add_entry(const Gtk::TreeIter& iter)
 	    int i;
 	    i = atoi( value.c_str() );
 	    
-	    m_config->set_int(p, i);
+	    if (!is_default) m_config->set_int(p, i);
+	    else m_config->set_default_int(p, i);
 	    set_value(p, t, is_default, i);
 	  }
 
@@ -600,7 +639,8 @@ ConfigTreeView::add_entry(const Gtk::TreeIter& iter)
 	    i = atoi( value.c_str() );
 	    if ( 0 <= i)
 	      { 
-		m_config->set_uint( p, (unsigned int) i );
+	        if (!is_default) m_config->set_uint(p, (unsigned int) i);
+	        else m_config->set_default_uint( p, (unsigned int) i);
 		set_value(p, t, is_default, (unsigned int) i);
 	      }
 	  }
@@ -610,7 +650,8 @@ ConfigTreeView::add_entry(const Gtk::TreeIter& iter)
 	    float f;
 	    f = atof( value.c_str() );
 	    
-	    m_config->set_float(p, f);
+	    if (!is_default) m_config->set_float(p, f);
+	    else m_config->set_default_float(p, f);
 	    set_value(p, t, is_default, f);
 	  }
 
@@ -618,7 +659,8 @@ ConfigTreeView::add_entry(const Gtk::TreeIter& iter)
 	  {
 	    string s( value.c_str() );
 	    
-	    m_config->set_string(p, s);
+	    if (!is_default) m_config->set_string(p, s);
+	     else m_config->set_default_string(p, s);
 	    set_value(p, t, is_default, s);
 	  }
 

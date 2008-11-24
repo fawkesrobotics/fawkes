@@ -2,8 +2,8 @@
 /***************************************************************************
  *  angle.h - angle related math helper functions
  *
- *  Generated: Wed Jul 13 16:51:46 2005 (from FireVision)
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Jul 13 16:51:46 2005 (from FireVision)
+ *  Copyright  2005-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *

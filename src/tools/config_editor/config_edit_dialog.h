@@ -35,12 +35,17 @@ class ConfigEditDialog : public Gtk::Dialog
   virtual ~ConfigEditDialog();
 
   void init( const Glib::ustring& path, const Glib::ustring& type,
-	     const Glib::ustring& value, bool is_default );
+	     const Glib::ustring& value );
 
   Glib::ustring get_value() const;
+  bool get_is_default() const;
 
  protected:
-  Gtk::Entry* m_ent_value;
+  bool              is_bool;
+  Gtk::Entry       *m_ent_value;
+  Gtk::ComboBox    *m_cob_bool_value;
+  Gtk::Notebook    *m_type_pages;
+  Gtk::CheckButton *m_chb_is_default;
 };
 
 #endif /* __TOOLS_CONFIG_EDITOR_CONFIG_EDIT_DIALOG_H_ */

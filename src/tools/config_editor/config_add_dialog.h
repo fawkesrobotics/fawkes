@@ -42,10 +42,14 @@ class ConfigAddDialog : public Gtk::Dialog
   bool get_is_default() const;
 
  protected:
-  Gtk::Entry* m_ent_path;
-  Gtk::Entry* m_ent_value;
-  Gtk::ComboBox* m_cmb_type;
-  Gtk::CheckButton* m_chb_is_default;
+  void on_my_changed();
+  
+  Gtk::Entry       *m_ent_path;
+  Gtk::Entry       *m_ent_value;
+  Gtk::ComboBox    *m_cob_bool_value;
+  Gtk::Notebook    *m_type_pages;
+  Gtk::ComboBox    *m_cmb_type;
+  Gtk::CheckButton *m_chb_is_default;
 };
 
 #endif /* __TOOLS_CONFIG_EDITOR_CONFIG_ADD_DIALOG_H_ */

@@ -32,6 +32,7 @@ class ConfigTreeView;
 
 namespace fawkes{
   class ServiceSelectorCBE;
+  class FawkesNetworkClient;
 }
 
 class FawkesConfigEditor 
@@ -49,6 +50,7 @@ class FawkesConfigEditor
   void on_disconnected();
 
   fawkes::ServiceSelectorCBE* m_service_selector;
+  fawkes::FawkesNetworkClient* m_network_client;
 
   Gtk::Window* m_wnd_main;
   Gtk::Button* m_btn_exit;

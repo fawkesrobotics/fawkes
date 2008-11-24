@@ -200,7 +200,6 @@ SkillGuiGtkWindow::on_exec_clicked()
   __throbber->set_timeout(80);
 
   if ( sks != "" ) {
-
     if ( tb_continuous->get_active() ) {
       SkillerInterface::ExecSkillContinuousMessage *escm = new SkillerInterface::ExecSkillContinuousMessage(sks.c_str());
       __skiller_if->msgq_enqueue(escm);
@@ -208,23 +207,9 @@ SkillGuiGtkWindow::on_exec_clicked()
       SkillerInterface::ExecSkillMessage *esm = new SkillerInterface::ExecSkillMessage(sks.c_str());
       __skiller_if->msgq_enqueue(esm);
     }
-    __throbber->start_anim();
 
     Gtk::TreeModel::Row row  = *__sks_list->prepend();
     row[__sks_record.skillstring] = sks;
-
-    
-    Gtk::TreeModel::iterator i = __sks_list->get_iter("0");
-    unsigned int count = 0;
-    while (bool(i)) {
-      if ( ++count > 10 ) {
-	i = __sks_list->erase(i);
-	__throbber->stop_anim();
-      } else {
-	++i;
-	__throbber->start_anim();
-      }
-    }
   }
 
 }
@@ -233,29 +218,36 @@ SkillGuiGtkWindow::on_exec_clicked()
 void
 SkillGuiGtkWindow::on_skiller_data_changed()
 {
-  __skiller_if->read();
+  try {
+    __skiller_if->read();
 
-  switch (__skiller_if->status()) {
-  case SkillerInterface::S_INACTIVE:
+    switch (__skiller_if->status()) {
+    case SkillerInterface::S_INACTIVE:
+      __throbber->stop_anim();
+      lab_status->set_text("S_INACTIVE");
+      break;
+    case SkillerInterface::S_FINAL:
+      __throbber->stop_anim();
+      __throbber->set_stock(Gtk::Stock::APPLY);
+      lab_status->set_text("S_FINAL");
+      break;
+    case SkillerInterface::S_RUNNING:
+      __throbber->start_anim();
+      lab_status->set_text("S_RUNNING");
+      break;
+    case SkillerInterface::S_FAILED:
+      __throbber->stop_anim();
+      __throbber->set_stock(Gtk::Stock::DIALOG_WARNING);
+      lab_status->set_text("S_FAILED");
+      break;
+    }
+
+    lab_skillstring->set_text(__skiller_if->skill_string());
+    lab_continuous->set_text(__skiller_if->is_continuous() ? "Yes" : "No");
+    lab_alive->set_text(__skiller_if->has_writer() ? "Yes" : "No");
+  } catch (Exception &e) {
     __throbber->stop_anim();
-    lab_status->set_text("S_INACTIVE");
-    break;
-  case SkillerInterface::S_FINAL:
-    __throbber->stop_anim();
-    lab_status->set_text("S_FINAL");
-    break;
-  case SkillerInterface::S_RUNNING:
-    lab_status->set_text("S_RUNNING");
-    break;
-  case SkillerInterface::S_FAILED:
-    __throbber->stop_anim();
-    lab_status->set_text("S_FAILED");
-    break;
   }
-
-  lab_skillstring->set_text(__skiller_if->skill_string());
-  lab_continuous->set_text(__skiller_if->is_continuous() ? "Yes" : "No");
-  lab_alive->set_text(__skiller_if->has_writer() ? "Yes" : "No");
 }
 
 

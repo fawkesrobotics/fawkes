@@ -74,7 +74,7 @@ Interface *
 BlackBoardInstanceFactory::new_interface_instance(const char *type, const char *identifier)
 {
   Module *mod = NULL;
-  std::string filename = std::string(type) + "." + __mm->get_module_file_extension();
+  std::string filename = std::string("lib") + type + "." + __mm->get_module_file_extension();
   try {
       mod = __mm->open_module(filename.c_str());
   } catch (Exception &e) {
@@ -104,7 +104,7 @@ BlackBoardInstanceFactory::new_interface_instance(const char *type, const char *
 void
 BlackBoardInstanceFactory::delete_interface_instance(Interface *interface)
 {
-  std::string filename = std::string(interface->__type) + "." + __mm->get_module_file_extension();
+  std::string filename = std::string("lib") + interface->__type + "." + __mm->get_module_file_extension();
   Module *mod = __mm->get_module(filename.c_str());
 
   if ( ! mod) {

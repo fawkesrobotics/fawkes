@@ -30,6 +30,7 @@ ifeq ($(HAVE_INTERFACE_GENERATOR),1)
 			     $(GENDIR)digest.o		\
 			     $(GENDIR)enum_constant.o	\
 			     $(GENDIR)field.o		\
+			     $(GENDIR)pseudomap.o	\
 			     $(GENDIR)main.o		\
 			     $(GENDIR)message.o		\
 			     $(GENDIR)parser.o		\
