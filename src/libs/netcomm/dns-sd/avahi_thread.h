@@ -37,6 +37,7 @@
 #include <avahi-client/client.h>
 #include <string>
 #include <utility>
+#include <netinet/in.h>
 
 struct AvahiEntryGroup;
 struct AvahiSimplePoll;

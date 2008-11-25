@@ -27,6 +27,7 @@
 
 #include <sys/types.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #include <inttypes.h>
 #include <cstddef>
 #include <cstring>

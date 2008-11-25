@@ -25,7 +25,20 @@ LIBS_ffjoystick = fawkescore fawkesutils fawkesaspects JoystickInterface
 OBJS_ffjoystick = ffjoystick.o acquisition_thread.o
 
 OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick)
-BINS_all = $(BINDIR)/ffjoystick
-PLUGINS_all = $(PLUGINDIR)/joystick.so
+
+ifeq ($(OS),Linux)
+  BINS_all = $(BINDIR)/ffjoystick
+  PLUGINS_all = $(PLUGINDIR)/joystick.so
+else
+  WARN_TARGETS += warning_onlylinux
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+
+.PHONY: warning_onlylinux
+warning_onlylinux:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Joystick Plugin$(TNORMAL) (currently only Linux is supported)"
+endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

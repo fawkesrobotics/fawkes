@@ -94,7 +94,9 @@ ModuleDL::open()
   tflags |= ((flags & MODULE_BIND_NOW)    != 0) ? RTLD_NOW : 0;
   tflags |= ((flags & MODULE_BIND_LOCAL)  != 0) ? RTLD_LOCAL : 0;
   tflags |= ((flags & MODULE_BIND_GLOBAL) != 0) ? RTLD_GLOBAL : 0;
+#ifdef linux
   tflags |= ((flags & MODULE_BIND_DEEP)   != 0) ? RTLD_DEEPBIND : 0;
+#endif
 
   if ( full_filename == "") {
     handle = dlopen (NULL, tflags);
