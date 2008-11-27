@@ -22,4 +22,18 @@ INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/navigator','string
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/wm_pose','string','ObjectPositionInterface::WM Pose',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/speechsynth','string','SpeechSynthInterface::Flite',NULL);
 INSERT INTO "config" VALUES('/joystick/device_file','string','/dev/js0',NULL);
+INSERT INTO "config" VALUES('/laser/interface_type','string','usb','Interface type, currently only usb');
+INSERT INTO "config" VALUES('/laser/use_default','bool',0,'Use default settings from flash?');
+INSERT INTO "config" VALUES('/laser/set_default','bool',0,'Store default settings in flash?');
+INSERT INTO "config" VALUES('/laser/rotation_freq','unsigned int',20,'Maximum rotation frequency; Hz');
+INSERT INTO "config" VALUES('/laser/max_pulse_freq','unsigned int',10800,'Max pulse frequency; Hz');
+INSERT INTO "config" VALUES('/laser/angle_step','unsigned int',16,'Angle step; 1/16th degree');
+INSERT INTO "config" VALUES('/laser/profile_format','unsigned int',256,'Profile format, 0x0100 only distances, 0x0400 only echoes, 0x0500 both');
+INSERT INTO "config" VALUES('/laser/can_id','unsigned int',683,'CAN ID of laser');
+INSERT INTO "config" VALUES('/laser/can_id_resp','unsigned int',1808,'CAN ID response');
+INSERT INTO "config" VALUES('/laser/sensor_id','unsigned int',16,'Sensor ID in laser');
+INSERT INTO "config" VALUES('/laser/sensor_id_resp','unsigned int',3,'Sensor ID response');
+INSERT INTO "config" VALUES('/laser/btr0btr1','unsigned int',20,'Baud rate key, 0x14 for 1 MBit/s');
+INSERT INTO "config" VALUES('/laser/port','unsigned int',0,'Port, 0 for default');
+INSERT INTO "config" VALUES('/laser/irq','unsigned int',0,'IRQ, 0 for default');
 COMMIT;
