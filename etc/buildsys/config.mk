@@ -64,6 +64,7 @@ CC = gcc
 MOC = $(QTDIR)/bin/moc
 DOXYGEN = doxygen
 PKGCONFIG = $(shell which pkg-config)
+NM=nm
 ifneq ($(wildcard /bin/bash),)
   SHELL = /bin/bash
 else

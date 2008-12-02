@@ -23,4 +23,16 @@ $(PLUGINDIR)/%.so: $$(OBJS_$$*)
 	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS_LIBDIRS) $(LDFLAGS) $(LDFLAGS_$*) \
 	$(addprefix -l,$(LIBS_$(subst /,_,$*))) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$*)) $(addprefix -L,$(LIBDIRS))
+	$(SILENT)$(NM) $@ | grep -q plugin_factory; \
+	if [ "$$?" != "0" ]; then \
+		rm $@; \
+		echo -e "$(INDENT_PRINT)--- $(TRED)Plugin has no plugin_factory symbol. Forgot EXPORT_PLUGIN?$(TNORMAL)"; \
+		exit 3; \
+	fi
+	$(SILENT)$(NM) $@ | grep -q plugin_description; \
+	if [ "$$?" != "0" ]; then \
+		rm $@; \
+		echo -e "$(INDENT_PRINT)--- $(TRED)Plugin has no plugin_description symbol. Forgot PLUGIN_DESCRIPTION?$(TNORMAL)"; \
+		exit 3; \
+	fi
 
