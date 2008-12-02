@@ -78,6 +78,18 @@ typedef Plugin *  (* PluginFactoryFunc)  (fawkes::Configuration *);
 typedef void      (* PluginDestroyFunc)  (Plugin *plugin);
 
 
+/** Plugin description function for the shared library.
+ * @return short string describing the plugin.
+ */
+typedef const char *  (* PluginDescriptionFunc) ();
+
+/** Plugin depdendency function for the shared library.
+ * @return short string with a comma separated list of plugins that this
+ * plugin depends on.
+ */
+typedef const char *  (* PluginDependenciesFunc) ();
+
+
 /** Plugin factory function for this plugin.
  * @return an instance of ExamplePlugin
  */
@@ -101,6 +113,33 @@ typedef void      (* PluginDestroyFunc)  (Plugin *plugin);
   {							\
     delete plugin;					\
   }
+
+
+/** Plugin description.
+ * Use this macro to set a short description of the plugi
+ * @param info_string a short string describing the plugin
+ */
+#define PLUGIN_DESCRIPTION(info_string)			\
+  extern "C"						\
+  const char *						\
+  plugin_description()					\
+  {							\
+    return info_string;					\
+  }
+
+/** Set plugin dependencies.
+ * @param plugin_list a string with a comma-separated list
+ * of plugins that this plugin depends on.
+ */
+#define PLUGIN_DEPENDS(plugin_list)			\
+  extern "C"						\
+  const char *						\
+  plugin_depends()					\
+  {							\
+    return plugin_list;					\
+  }
+
+
 
 /** Export plugin.
  * This will create appropriate plugin factory and destroy functions.
