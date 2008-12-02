@@ -47,4 +47,5 @@ FvBasePlugin::FvBasePlugin(Configuration *config)
   thread_list.push_back(new FvBaseThread());
 }
 
+PLUGIN_DESCRIPTION("FireVision Base provides access to camera and handles timing")
 EXPORT_PLUGIN(FvBasePlugin)

@@ -44,5 +44,5 @@ BallPosLogPlugin::BallPosLogPlugin(Configuration *config)
   thread_list.push_back(new BallPosLogThread());
 }
 
+PLUGIN_DESCRIPTION("Example that logs ball position")
 EXPORT_PLUGIN(BallPosLogPlugin)
-

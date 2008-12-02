@@ -48,4 +48,5 @@ LaserPlugin::LaserPlugin(Configuration *config)
 }
 
 
+PLUGIN_DESCRIPTION("Reads data from laser range finder and writes to BlackBoard")
 EXPORT_PLUGIN(LaserPlugin)

@@ -44,4 +44,5 @@ FlitePlugin::FlitePlugin(Configuration *config)
 }
 
 
+PLUGIN_DESCRIPTION("Flite speech synthesis integration")
 EXPORT_PLUGIN(FlitePlugin)

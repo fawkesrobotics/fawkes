@@ -68,4 +68,5 @@ ExamplePlugin::ExamplePlugin(Configuration *config)
   thread_list.push_back(new ExampleBlackBoardThread(/* reader */ false));
 }
 
+PLUGIN_DESCRIPTION("Example plugin demonstrating Fawkes basics")
 EXPORT_PLUGIN(ExamplePlugin)

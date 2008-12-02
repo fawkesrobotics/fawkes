@@ -23,7 +23,7 @@
  */
 
 #include <plugins/examples/basics/blackboard_thread.h>
-#include <interfaces/SwitchInterface.h>
+#include <interfaces/TestInterface.h>
 
 using namespace fawkes;
 
@@ -75,9 +75,9 @@ ExampleBlackBoardThread::init()
   logger->log_debug(name(), "Opening test interface");
   try {
     if ( reader ) {
-      test_interface = blackboard->open_for_reading<SwitchInterface>("Test");
+      test_interface = blackboard->open_for_reading<TestInterface>("Test");
     } else {
-      test_interface = blackboard->open_for_writing<SwitchInterface>("Test");
+      test_interface = blackboard->open_for_writing<TestInterface>("Test");
     }
   } catch (Exception& e) {
     e.append("Opening test interface for writing failed");

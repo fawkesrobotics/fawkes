@@ -47,4 +47,5 @@ JoystickPlugin::JoystickPlugin(Configuration *config)
 }
 
 
+PLUGIN_DESCRIPTION("Provides access to a joystick")
 EXPORT_PLUGIN(JoystickPlugin)

@@ -44,4 +44,5 @@ WebviewPlugin::WebviewPlugin(Configuration *config)
 }
 
 
+PLUGIN_DESCRIPTION("Web interface for Fawkes")
 EXPORT_PLUGIN(WebviewPlugin)

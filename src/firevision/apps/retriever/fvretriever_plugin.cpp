@@ -66,4 +66,5 @@ FvRetrieverPlugin::FvRetrieverPlugin(Configuration *config)
   delete vi;
 }
 
+PLUGIN_DESCRIPTION("Reads images from cameras and stores them in shared memory")
 EXPORT_PLUGIN(FvRetrieverPlugin)

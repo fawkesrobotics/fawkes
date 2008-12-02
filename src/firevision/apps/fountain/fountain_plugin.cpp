@@ -45,4 +45,5 @@ FvFountainPlugin::FvFountainPlugin(Configuration *config)
   thread_list.push_back(new FountainThread());
 }
 
+PLUGIN_DESCRIPTION("Provides access to images, colormaps etc. via network")
 EXPORT_PLUGIN(FvFountainPlugin)
