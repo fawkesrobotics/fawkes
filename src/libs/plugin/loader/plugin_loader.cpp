@@ -24,16 +24,17 @@
  */
 
 #include <plugin/loader/plugin_loader.h>
-#include <plugin/loader/load_thread.h>
 
 #include <utils/system/dynamic_module/module_manager_factory.h>
 #include <utils/system/dynamic_module/module_manager.h>
 #include <utils/system/dynamic_module/module.h>
 
 #include <map>
-#include <string>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /// @cond QA
 class PluginLoaderData
@@ -43,7 +44,6 @@ class PluginLoaderData
   std::map< Plugin *, Module * >    plugin_module_map;
   std::map< std::string, Plugin * > name_plugin_map;
   std::map< Plugin *, std::string > plugin_name_map;
-  std::map<std::string, PluginLoadThread *> load_threads;
 };
 /// @endcond
 
@@ -52,15 +52,15 @@ class PluginLoaderData
  */
 
 /** Constructor.
- * @param plugin_name name of the plugin
- * @param add_msg additional message, reason for problem
+ * @param format format string, see printf documentation
  */
-PluginLoadException::PluginLoadException(const char *plugin_name,
-					 const char *add_msg)
+PluginLoadException::PluginLoadException(const char *format, ...)
   : Exception()
 {
-  append("Plugin '%s' could not be loaded", plugin_name);
-  append(add_msg);
+  va_list args;
+  va_start(args, format);
+  append_va(format, args);
+  va_end(args);
 }
 
 
@@ -109,6 +109,44 @@ PluginLoader::~PluginLoader()
 }
 
 
+Module *
+PluginLoader::open_module(const char *plugin_name)
+{
+  std::string module_name = std::string(plugin_name) + "." + d->mm->get_module_file_extension();
+
+  try {
+    return d->mm->open_module(module_name.c_str());
+  } catch (ModuleOpenException &e) {
+    throw PluginLoadException("PluginLoader failed to open module for plugin %s (%s)",
+			      plugin_name, *(e.begin()));
+  }
+}
+
+
+Plugin *
+PluginLoader::create_instance(const char *plugin_name, Module *module)
+{
+  if ( ! module->has_symbol("plugin_factory") ) {
+    throw PluginLoadException("Symbol 'plugin_factory' not found. Forgot EXPORT_PLUGIN?");
+  }
+  if ( ! module->has_symbol("plugin_description") ) {
+    throw PluginLoadException("Symbol 'plugin_description' not found. Forgot PLUGIN_DESCRIPTION?");
+  }
+
+  PluginFactoryFunc pff = (PluginFactoryFunc)module->get_symbol("plugin_factory");
+  Plugin *p = NULL;
+
+  p = pff(__config);
+  if ( p == NULL ) {
+    throw PluginLoadException("Plugin from plugin '%s' could not be instantiated", plugin_name);
+  } else {
+    p->set_name(plugin_name);
+  }
+
+  return p;
+}
+
+
 /** Load a specific plugin
  * The plugin loader is clever and guarantees that every plugin is only
  * loaded once (as long as you use only one instance of the PluginLoader,
@@ -128,27 +166,41 @@ PluginLoader::~PluginLoader()
 Plugin *
 PluginLoader::load(const char *plugin_name)
 {
-
   std::string pn = plugin_name;
 
   if ( d->name_plugin_map.find(pn) != d->name_plugin_map.end() ) {
     return d->name_plugin_map[pn];
   }
 
-  PluginLoadThread plt(d->mm, plugin_name, __config);
-  plt.load_blocking();
   try {
-    Plugin *p = plt.plugin();
+    Module *module = open_module(plugin_name);
+    Plugin *p = create_instance(plugin_name, module);
 
-    d->plugin_module_map[p] = plt.module();
-    d->name_plugin_map[pn] = p;
-    d->plugin_name_map[p] = pn;
+    d->plugin_module_map[p] = module;
+    d->name_plugin_map[pn]  = p;
+    d->plugin_name_map[p]   = pn;
 
     return p;
   } catch ( PluginLoadException &e) {
-    e.append("PluginLoader failed to load plugin '%s' blocking", plugin_name);
     throw;
   }
+}
+
+
+std::string
+PluginLoader::get_description(const char *plugin_name)
+{
+  Module *module = open_module(plugin_name);
+
+  if ( ! module->has_symbol("plugin_description") ) {
+    throw PluginLoadException("Symbol 'plugin_description' not found. Forgot PLUGIN_DESCRIPTION?");
+  }
+
+  PluginDescriptionFunc pdf = (PluginDescriptionFunc)module->get_symbol("plugin_description");
+  std::string rv = pdf();
+  d->mm->close_module(module);
+
+  return rv;
 }
 
 
@@ -160,95 +212,6 @@ bool
 PluginLoader::is_loaded(const char *plugin_name)
 {
   return ( d->name_plugin_map.find(plugin_name) != d->name_plugin_map.end() );
-}
-
-
-/** Request deferred loading of plugin.
- * @param plugin_name name of the plugin to load deferred
- * @exception PluginLoadException thrown, if the plugin is already loaded or
- * a load request is already running
- */
-void
-PluginLoader::request_load(const char *plugin_name)
-{
-  std::string pn = plugin_name;
-
-  if ( d->name_plugin_map.find(pn) != d->name_plugin_map.end() ) {
-    throw PluginLoadException(plugin_name, "Cannot request load for already loaded plugin");
-  }
-
-  if ( d->load_threads.find(plugin_name) != d->load_threads.end() ) {
-    throw PluginLoadException(plugin_name, "Load already requested");    
-  }
-
-  PluginLoadThread *plt = new PluginLoadThread(d->mm, plugin_name, __config);
-  plt->start();
-
-  d->load_threads[plugin_name] = plt;
-}
-
-
-/** Check if load operation succeeded.
- * Checks if the load operation for the given plugin has been finished.
- * @param plugin_name name of the plugin to check
- * @return true, if the plugin has finished loading, false otherwise.
- * @exception PluginLoadException thrown if loading was not requested or
- * if the load failed.
- */
-bool
-PluginLoader::finished_load(const char *plugin_name)
-{
-  std::map<std::string, PluginLoadThread *>::iterator i;
-  if ( (i = d->load_threads.find(plugin_name)) == d->load_threads.end() ) {
-    PluginLoadException e(plugin_name, "Plugin loading not requested");
-    e.append("Loading of plugin '%s' was not requested");
-    throw e;
-  } else {
-    return (*i).second->finished();
-  }
-}
-
-
-/** Finish deferred loading.
- * Call this to finish a load operation. Check that the load operation
- * has finished with finished_load() before.
- * @param plugin_name name of the plugin to finish the load operation of
- * @return loaded plugin
- * @exception PluginLoadException thrown, if the loading was not requested,
- * or the loading has not finished or if the loading failed.
- */
-Plugin *
-PluginLoader::finish_deferred_load(const char *plugin_name)
-{
-  std::map<std::string, PluginLoadThread *>::iterator i;
-  if ( (i = d->load_threads.find(plugin_name)) == d->load_threads.end() ) {
-    PluginLoadException e(plugin_name, "Plugin loading not requested");
-    e.append("Loading of plugin '%s' was not requested");
-    throw e;
-  } else if ( ! (*i).second->finished()) {
-    throw PluginLoadException(plugin_name, "Plugin loading not finished");
-  } else {
-    try {
-      Plugin *p = (*i).second->plugin();
-
-      d->plugin_module_map[p]         = (*i).second->module();
-      d->name_plugin_map[plugin_name] = p;
-      d->plugin_name_map[p]           = plugin_name;
-
-      (*i).second->join();
-      delete (*i).second;
-      d->load_threads.erase(i);
-
-      return p;      
-    } catch (Exception &e) {
-      e.append("PluginLoader::finish_deferred_load() failed");
-      // Cleanup
-      (*i).second->join();
-      delete (*i).second;
-      d->load_threads.erase(i);
-      throw;
-    }
-  }  
 }
 
 

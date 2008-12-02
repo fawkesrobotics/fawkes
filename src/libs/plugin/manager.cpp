@@ -122,10 +122,10 @@ PluginManager::set_hub(FawkesNetworkHub *hub)
 PluginListMessage *
 PluginManager::list_avail()
 {
-  DIR* plugin_dir;
+  DIR *plugin_dir;
   struct dirent* dirp;
   /* constant for this somewhere? */
-  const char* file_ext = ".so";
+  const char *file_ext = ".so";
 
   PluginListMessage *m = new PluginListMessage();
 
@@ -134,25 +134,41 @@ PluginManager::list_avail()
     return m;
   }
 
+  std::list<std::pair<std::string, std::string> > plugin_list;
   for (unsigned int i = 0; NULL != (dirp = readdir(plugin_dir)); ++i) {
-    char* file_name = dirp->d_name;
-    char* pos = strstr(file_name, file_ext);
+    char *file_name   = dirp->d_name;
+    char *pos         = strstr(file_name, file_ext);
+    std::string plugin_name = std::string(file_name).substr(0, strlen(file_name) - strlen(file_ext));
     if (NULL != pos) {
-      m->append(file_name, strlen(file_name) - strlen(file_ext));
+      try {
+	plugin_list.push_back(make_pair(plugin_name,
+					plugin_loader->get_description(plugin_name.c_str())));
+      } catch (Exception &e) {
+	LibLogger::log_warn("PluginManager", "Could not get description of pluign %s, "
+			    "exception follows", plugin_name.c_str());
+	LibLogger::log_warn("PluginManager", e);
+      }
     }
   }
 
   closedir(plugin_dir);
+
+  plugin_list.sort();
+  std::list<std::pair<std::string, std::string> >::iterator i;
+  for (i = plugin_list.begin(); i != plugin_list.end(); ++i) {
+    m->append(i->first.c_str(), i->first.length());
+    m->append(i->second.c_str(), i->second.length());
+  }
 
   try {
     Configuration::ValueIterator *i = __config->search(__meta_plugin_prefix.c_str());
     while (i->next()) {
       if (i->is_string()) {
 	std::string p = std::string(i->path()).substr(__meta_plugin_prefix.length());
-	std::string s = p + " (" + i->get_string() + ")";
+	std::string s = std::string("Meta: ") + i->get_string();
 	
-	//m->append(s.c_str(), s.length());
 	m->append(p.c_str(), p.length());
+	m->append(s.c_str(), s.length());
       }
     }
     delete i;

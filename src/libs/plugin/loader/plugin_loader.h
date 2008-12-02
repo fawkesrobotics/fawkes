@@ -29,15 +29,21 @@
 #include <core/plugin.h>
 #include <core/exception.h>
 
-namespace fawkes {
+#include <string>
 
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+class Module;
 class Configuration;
 class PluginLoaderData;
 
 class PluginLoadException : public Exception
 {
  public:
-  PluginLoadException(const char *plugin_type, const char *add_msg = NULL);
+  PluginLoadException(const char *format, ...);
 };
 
 class PluginUnloadException : public Exception
@@ -56,13 +62,13 @@ class PluginLoader {
   Plugin * load(const char *plugin_name);
   void     unload(Plugin *plugin);
 
-  void     request_load(const char *plugin_name);
-
-  bool     finished_load(const char *plugin_name);
-
-  Plugin * finish_deferred_load(const char *plugin_name);
+  std::string  get_description(const char *plugin_name);
 
   bool     is_loaded(const char *plugin_name);
+
+ private:
+  Module * open_module(const char *plugin_name);
+  Plugin * create_instance(const char *plugin_name, Module *module);
 
  private:
   PluginLoaderData *d;
