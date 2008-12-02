@@ -56,11 +56,13 @@ class PluginTreeView
       { 
 	add(index);
 	add(name);
+	add(description);
 	add(loaded);
       }
     
     Gtk::TreeModelColumn<int> index;           /**< an index */
     Gtk::TreeModelColumn<Glib::ustring> name;  /**< the name of the plugin */
+    Gtk::TreeModelColumn<Glib::ustring> description;  /**< description of the plugin */
     Gtk::TreeModelColumn<bool> loaded;         /**< the loaded status of the plugin */
   };
 

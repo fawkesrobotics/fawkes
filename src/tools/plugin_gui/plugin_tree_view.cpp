@@ -28,6 +28,7 @@
 #include <netcomm/fawkes/client.h>
 #include <plugin/net/messages.h>
 #include <plugin/net/list_message.h>
+#include <gui_utils/twolines_cellrenderer.h>
 
 #include <cstring>
 #include <string>
@@ -70,7 +71,18 @@ PluginTreeView::PluginTreeView( BaseObjectType* cobject,
   set_model(m_plugin_list);
   append_column("#", m_plugin_record.index);
   append_column_editable("Status", m_plugin_record.loaded);
-  append_column("Plugin", m_plugin_record.name);
+  //append_column("Plugin", m_plugin_record.name);
+  TwoLinesCellRenderer *twolines_renderer = new TwoLinesCellRenderer();
+  Gtk::TreeViewColumn *tlcol = new Gtk::TreeViewColumn("Plugin", *Gtk::manage(twolines_renderer));
+  append_column(*Gtk::manage(tlcol));
+
+#ifdef GLIBMM_PROPERTIES_ENABLED
+  tlcol->add_attribute(twolines_renderer->property_line1(), m_plugin_record.name);
+  tlcol->add_attribute(twolines_renderer->property_line2(), m_plugin_record.description);
+#else
+  tlcol->add_attribute(*twolines_renderer, "line1", m_plugin_record.line1);
+  tlcol->add_attribute(*twolines_renderer, "line2", m_plugin_record.line2);
+#endif
 
   set_headers_clickable();
   on_name_clicked();
@@ -242,15 +254,23 @@ PluginTreeView::on_message_received(fawkes::FawkesNetworkMessage* msg)
     PluginListMessage* plm = msg->msgc<PluginListMessage>();
     while ( plm->has_next() ) 
     {
-      char* name = plm->next();
+      char *plugin_name = plm->next();
+      char *plugin_desc = NULL;
+      if ( plm->has_next() ) {
+	plugin_desc = plm->next();
+      } else {
+	plugin_desc = strdup("Unknown, malformed plugin list message?");
+      }
 
       Gtk::TreeModel::Row row = *m_plugin_list->append();
       unsigned int index = m_plugin_list->children().size();
-      row[m_plugin_record.index]  = index;
-      row[m_plugin_record.name]   = name;
-      row[m_plugin_record.loaded] = false;
+      row[m_plugin_record.index]       = index;
+      row[m_plugin_record.name]        = plugin_name;
+      row[m_plugin_record.description] = plugin_desc;
+      row[m_plugin_record.loaded]      = false;
 
-      free(name);
+      free(plugin_name);
+      free(plugin_desc);
     }
     delete plm;
   }
