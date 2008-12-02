@@ -342,9 +342,16 @@ PluginTool::inbound_received(FawkesNetworkMessage *msg,
     if ( plm->has_next() ) {
       printf("Available plugins:\n");
       while ( plm->has_next() ) {
-	char *p = plm->next();
-	printf("  %s\n", p);
-	free(p);
+	char *plugin_name = plm->next();
+	char *plugin_desc = NULL;
+	if ( plm->has_next() ) {
+	  plugin_desc = plm->next();
+	} else {
+	  throw Exception("Invalid plugin list received");
+	}
+	printf(" %-16s (%s)\n", plugin_name, plugin_desc);
+	free(plugin_name);
+	free(plugin_desc);
       }
     } else {
       printf("No plugins available\n");
