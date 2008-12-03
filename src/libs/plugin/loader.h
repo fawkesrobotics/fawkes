@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  plugin_loader.h - Loads plugins from .so shared objects
+ *  loader.h - Loads plugins from .so shared objects
  *
- *  Generated: Wed Aug 23 15:18:13 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Aug 23 15:18:13 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -23,8 +23,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGIN_LOADER_PLUGIN_LOADER_H_
-#define __PLUGIN_LOADER_PLUGIN_LOADER_H_
+#ifndef __PLUGIN_LOADER_H_
+#define __PLUGIN_LOADER_H_
 
 #include <core/plugin.h>
 #include <core/exception.h>

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  plugin_loader.cpp - Loads plugins from .so shared objects
+ *  loader.cpp - Loads plugins from .so shared objects
  *
- *  Generated: Wed Aug 23 15:23:36 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Aug 23 15:23:36 2006
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugin/loader/plugin_loader.h>
+#include <plugin/loader.h>
 
 #include <utils/system/dynamic_module/module_manager_factory.h>
 #include <utils/system/dynamic_module/module_manager.h>
@@ -47,7 +47,7 @@ class PluginLoaderData
 };
 /// @endcond
 
-/** @class PluginLoadException <plugin/loader/plugin_loader.h>
+/** @class PluginLoadException <plugin/loader.h>
  * This exception is thrown if the requested plugin could not be loaded.
  */
 
@@ -64,7 +64,7 @@ PluginLoadException::PluginLoadException(const char *format, ...)
 }
 
 
-/** @class PluginUnloadException <plugin/loader/plugin_loader.h>
+/** @class PluginUnloadException <plugin/loader.h>
  * This exception is thrown if the requested plugin could not be unloaded.
  */
 
@@ -81,7 +81,7 @@ PluginUnloadException::PluginUnloadException(const char *plugin_name,
 }
 
 
-/** @class PluginLoader <plugin/loader/plugin_loader.h>
+/** @class PluginLoader <plugin/loader.h>
  * This class manages plugins.
  * With this class plugins can be loaded and unloaded. Information is
  * kept about active plugins.
@@ -187,6 +187,11 @@ PluginLoader::load(const char *plugin_name)
 }
 
 
+/** Get plugin description.
+ * @param plugin_name name of the plugin
+ * @return plugin description tring
+ * @throw PluginLoadException thrown if opening the plugin fails
+ */
 std::string
 PluginLoader::get_description(const char *plugin_name)
 {

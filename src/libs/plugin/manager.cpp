@@ -26,7 +26,7 @@
 #include <plugin/manager.h>
 #include <plugin/net/messages.h>
 #include <plugin/net/list_message.h>
-#include <plugin/loader/plugin_loader.h>
+#include <plugin/loader.h>
 
 #include <core/plugin.h>
 #include <core/threading/thread_collector.h>

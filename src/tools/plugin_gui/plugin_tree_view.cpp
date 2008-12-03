@@ -69,6 +69,7 @@ PluginTreeView::PluginTreeView( BaseObjectType* cobject,
 {
   m_plugin_list = Gtk::ListStore::create(m_plugin_record);
   set_model(m_plugin_list);
+  set_rules_hint(true);
   append_column("#", m_plugin_record.index);
   append_column_editable("Status", m_plugin_record.loaded);
   //append_column("Plugin", m_plugin_record.name);
