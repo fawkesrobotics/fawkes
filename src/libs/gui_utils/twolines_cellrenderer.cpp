@@ -105,7 +105,7 @@ TwoLinesCellRenderer::get_size_vfunc(Gtk::Widget &widget,
   Glib::RefPtr<Pango::Layout> layout2 = widget.create_pango_layout(__property_line2);
   Glib::RefPtr<Gtk::Style> style = widget.get_style();
   Pango::FontDescription font2 = style->get_font();
-  font2.set_size(Pango::SCALE_SMALL * font2.get_size());
+  font2.set_size((int)roundf(Pango::SCALE_SMALL * font2.get_size()));
   layout2->set_font_description(font2);
   Pango::Rectangle rect2 = layout2->get_pixel_logical_extents();
   layout2->set_ellipsize(Pango::ELLIPSIZE_END);
@@ -165,7 +165,7 @@ TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
   Glib::RefPtr<Pango::Layout> layout2 = widget.create_pango_layout(__property_line2);
   Glib::RefPtr<Gtk::Style> style = widget.get_style();
   Pango::FontDescription font2 = style->get_font();
-  font2.set_size(Pango::SCALE_SMALL * std::max(font2.get_size(), 8));
+  font2.set_size((int)roundf(Pango::SCALE_SMALL * std::max(font2.get_size(), 8)));
   layout2->set_font_description(font2);
   Pango::Rectangle rect2 = layout2->get_pixel_logical_extents();
   layout2->set_ellipsize(Pango::ELLIPSIZE_END);
