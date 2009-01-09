@@ -45,4 +45,5 @@ XabslPlugin::XabslPlugin(Configuration *config)
 }
 
 
+PLUGIN_DESCRIPTION("Integrates XABSL interpreter")
 EXPORT_PLUGIN(XabslPlugin)

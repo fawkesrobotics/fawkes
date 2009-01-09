@@ -44,4 +44,5 @@ TimeTrackerMainLoopPlugin::TimeTrackerMainLoopPlugin(Configuration *config)
   thread_list.push_back(new TimeTrackerMainLoopThread());
 }
 
+PLUGIN_DESCRIPTION("Replaces main loop with time tracked loop")
 EXPORT_PLUGIN(TimeTrackerMainLoopPlugin)

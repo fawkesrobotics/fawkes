@@ -43,4 +43,5 @@ LuaAgentPlugin::LuaAgentPlugin(Configuration *config)
   thread_list.push_back(new LuaAgentExecutionThread());
 }
 
+PLUGIN_DESCRIPTION("Runs an agent written in Lua")
 EXPORT_PLUGIN(LuaAgentPlugin)

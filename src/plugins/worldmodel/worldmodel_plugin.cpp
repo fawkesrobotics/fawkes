@@ -49,4 +49,5 @@ WorldModelPlugin::WorldModelPlugin(Configuration *config)
   thread_list.push_back(net_thread);
 }
 
+PLUGIN_DESCRIPTION("Aggregates data to provide central world model")
 EXPORT_PLUGIN(WorldModelPlugin)

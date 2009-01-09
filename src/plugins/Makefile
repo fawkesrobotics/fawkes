@@ -16,7 +16,8 @@
 BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-SUBDIRS = laser skiller webview flite joystick
+SUBDIRS	= laser skiller webview flite joystick
+	#festival luaagent player ttmainloop worldmodel xabsl
 
 include $(BASEDIR)/etc/buildsys/rules.mk
 

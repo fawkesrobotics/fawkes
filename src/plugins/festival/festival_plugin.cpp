@@ -44,5 +44,6 @@ FestivalPlugin::FestivalPlugin(Configuration *config)
 }
 
 
+PLUGIN_DESCRIPTION("Festival speech synthesis integration")
 EXPORT_PLUGIN(FestivalPlugin)
 

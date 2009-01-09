@@ -28,7 +28,7 @@
 #include <worldinfo_utils/data_container.h>
 
 #include <interfaces/GameStateInterface.h>
-#include <interfaces/ObjectInterface.h>
+#include <interfaces/ObjectPositionInterface.h>
 
 #include <cmath>
 #include <cstring>
