@@ -66,6 +66,13 @@ typedef struct YUV_t_struct{
     U = u;
     V = v;
   }
+  
+  static YUV_t_struct white()   { return YUV_t_struct(255, 127, 127); } /**< @return white color */
+  static YUV_t_struct black()   { return YUV_t_struct(  0, 127, 127); } /**< @return black color */
+  static YUV_t_struct green()   { return YUV_t_struct( 64,  95,  85); } /**< @return green color */
+  static YUV_t_struct cyan()    { return YUV_t_struct(180,   0, 127); } /**< @return cyan color */
+  static YUV_t_struct magenta() { return YUV_t_struct(105, 212, 234); } /**< @return magenta color */
+  static YUV_t_struct gray()    { return YUV_t_struct(127, 127, 127); } /**< @return gray color */
 } YUV_t;
 
 

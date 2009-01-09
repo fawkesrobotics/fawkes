@@ -220,7 +220,7 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread, boo
 
   CameraArgumentParser *cap = new CameraArgumentParser(camera_string);
   try {
-    std::string id = cap->cam_type() + ":" + cap->cam_id();
+    std::string id = cap->cam_type() + "." + cap->cam_id();
     if ( aqts.find(id) != aqts.end() ) {
       // this camera has already been loaded
       c = aqts[id]->camera_instance(raw,

@@ -21,24 +21,12 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-local skillenv = require("skills.skiller.skillenv")
+-- Initialize module
 module(..., skillenv.module_init)
 
-function execute(saytext)
-   if not speechsynth:has_writer() then
-      print_warn("say(): Cannot execute without a SpeechSynth provider")
-      return S_FAILED
-   end
-
-   speechsynth:msgq_enqueue_copy(speechsynth.SayMessage:new(saytext))
-   return S_FINAL
-end
-
-function reset()
-end
-
--- Global variables required for a skill
+-- Crucial skill information
 name               = "say"
+fsm                = SkillHSM:new{name=name, start="SAY"}
 depends_skills     = nil
 depends_interfaces = {
    {v = "speechsynth", type = "SpeechSynthInterface"}
@@ -50,3 +38,22 @@ and disable the servos by using the following form:
 
 servo(saytext)
 ]==]
+
+-- Initialize as skill module
+skillenv.skill_module(...)
+
+-- States
+fsm:new_jump_state("SAY")
+
+function SAY:init()
+   if speechsynth:has_writer() then
+      self.text = self.fsm.vars[1] or self.fsm.vars.text
+      if self.text then
+	 speechsynth:msgq_enqueue_copy(speechsynth.SayMessage:new(self.text))
+      end
+   end
+end
+
+SAY:add_transition(FINAL, function (state) return speechsynth:has_writer() and state.text end, "Text spoken")
+SAY:add_transition(FAILED, function (state) return not speechsynth:has_writer() end, "No SpeechSynth provider")
+SAY:add_transition(FAILED, function (state) return not state.text end, "No text given")

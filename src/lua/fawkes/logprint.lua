@@ -45,30 +45,34 @@ function init(logger_)
 end
 
 --- Write to log with log level debug.
+-- @param format format of the string
 -- @param ... Anything, will be converted to string
-function print_debug(...)
-   logger:log_debug(string.join(" ", {...}));
+function print_debug(format, ...)
+   logger:log_debug(string.format(format, ...));
 end
 
 
 --- Write to log with log level info.
+-- @param format format of the string
 -- @param ... Anything, will be converted to string
-function print_info(...)
-   logger:log_info(string.join(" ", {...}));
+function print_info(format, ...)
+   logger:log_info(string.format(format, ...));
 end
 
 
 --- Write to log with log level warn.
+-- @param format format of the string
 -- @param ... Anything, will be converted to string
-function print_warn(...)
-   logger:log_warn(string.join(" ", {...}));
+function print_warn(format, ...)
+   logger:log_warn(string.format(format, ...));
 end
 
 
 --- Write to log with log level error.
+-- @param format format of the string
 -- @param ... Anything, will be converted to string
-function print_error(...)
-   logger:log_error(string.join(" ", {...}));
+function print_error(format, ...)
+   logger:log_error(string.format(format, ...));
 end
 
 
@@ -76,7 +80,7 @@ end
 -- Uses string.format to format the string and print_info to print it.
 -- @param format format of the string
 function printf(format, ...)
-   logger:log_info(string.format(format, ...));
+   logger:log_info(string.format(format, ...))
 end
 
 

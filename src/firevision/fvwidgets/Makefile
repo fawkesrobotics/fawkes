@@ -17,6 +17,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/src/firevision/fvconf.mk
+include $(BASEDIR)/etc/buildsys/gui.mk
 
 CFLAGS   += $(VISION_CFLAGS)
 LDFLAGS  += $(VISION_LDFLAGS)
@@ -25,15 +26,15 @@ LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
 ifeq ($(HAVE_SDL),1)
-  LIBS_all = $(LIBDIR)/libfvwidgets.so
-  CFLAGS  += $(CFLAGS_SDL)
-  LDFLAGS += $(LDFLAGS_SDL)
+  LIBS_gui = $(LIBDIR)/libfvwidgets.so
+  CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_SDL)
+  LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_SDL)
 else
   WARN_TARGETS += warning_sdl
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
-all: $(WARN_TARGETS)
+gui: $(WARN_TARGETS)
 warning_sdl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting SDL Widgets$(TNORMAL) (SDL[-devel] not installed)"
 endif

@@ -20,13 +20,13 @@ class BatteryInterface : public Interface
 
   unsigned int current();
   void set_current(const unsigned int new_current);
-  size_t maxlenof_current() const;
+  int maxlenof_current() const;
   unsigned int voltage();
   void set_voltage(const unsigned int new_voltage);
-  size_t maxlenof_voltage() const;
+  int maxlenof_voltage() const;
   unsigned int temperature();
   void set_temperature(const unsigned int new_temperature);
-  size_t maxlenof_temperature() const;
+  int maxlenof_temperature() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
@@ -37,7 +37,7 @@ class BatteryInterface : public Interface
   unsigned int            mem_serial() const;
   bool                    operator== (Interface &comp) const;
   const unsigned char *   hash() const;
-  size_t                  hash_size() const;
+  int                     hash_size() const;
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);

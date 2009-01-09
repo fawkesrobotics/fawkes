@@ -164,11 +164,11 @@ ColorTrainWidget::click(unsigned int x, unsigned int y, unsigned int button)
   
   ZRegion *region = m_zauberstab->getRegion();
   Drawer *d = new Drawer();
-  d->setBuffer( m_draw_buffer, m_img_width, m_img_height );	  
+  d->set_buffer( m_draw_buffer, m_img_width, m_img_height );	  
   
   for (unsigned int s = 0; s < region->slices->size(); s++) 
     {
-      d->drawRectangleInverted( region->slices->at(s)->leftX,
+      d->draw_rectangle_inverted( region->slices->at(s)->leftX,
 				region->slices->at(s)->y,
 				region->slices->at(s)->rightX - region->slices->at(s)->leftX,
 				1 ); 
@@ -629,7 +629,7 @@ ColorTrainWidget::draw_segmentation_result()
   bzero(seg_buffer, m_img_size);
 
   Drawer d;
-  d.setBuffer(seg_buffer, m_img_width, m_img_height);
+  d.set_buffer(seg_buffer, m_img_width, m_img_height);
   
   YuvColormap* cm = m_generator->get_current();
   
@@ -641,9 +641,8 @@ ColorTrainWidget::draw_segmentation_result()
 	  unsigned int u = YUV422_PLANAR_U_AT(m_src_buffer, m_img_width, m_img_height, w, h);
 	  unsigned int v = YUV422_PLANAR_V_AT(m_src_buffer, m_img_width, m_img_height, w, h);
 
-		YUV_t c = ColorObjectMap::get_color(cm->determine(y, u, v));
-		d.setColor(c.Y, c.U, c.V);
-		d.colorPoint(w, h);
+		d.set_color(ColorObjectMap::get_color(cm->determine(y, u, v)));
+		d.color_point(w, h);
 	}
     }
 

@@ -207,7 +207,7 @@ CppInterfaceGenerator::write_cpp(FILE *f)
 {
   write_header(f, filename_cpp);
   fprintf(f,
-	  "#include \"%s\"\n\n"
+	  "#include <interfaces/%s>\n\n"
 	  "#include <core/exceptions/software.h>\n\n"
 	  "#include <cstring>\n"
 	  "#include <cstdlib>\n\n"

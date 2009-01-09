@@ -44,7 +44,7 @@
  *
  * @fn void ColormapGenerator::consider()
  * Considers the given buffer and extracts the needed information.
- * @see setBuffer()
+ * @see set_buffer()
  *
  * @fn void ColormapGenerator::calc()
  * Calculate LUT.

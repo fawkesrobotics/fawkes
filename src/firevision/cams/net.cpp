@@ -201,8 +201,7 @@ NetworkCamera::open()
   if ( __image_id) {
     FUSE_imagedesc_message_t *imagedesc = (FUSE_imagedesc_message_t *)calloc(1, sizeof(FUSE_imagedesc_message_t));
     strncpy(imagedesc->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
-    __fusec->enqueue(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
-    __fusec->wait();
+    __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
 
     if ( ! __fuse_imageinfo ) {
       throw Exception("Could not received image info. Image not available?");
@@ -249,9 +248,7 @@ NetworkCamera::capture()
   memset(irm, 0, sizeof(FUSE_imagereq_message_t));
   strncpy(irm->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
   irm->format = (__get_jpeg ? FUSE_IF_JPEG : FUSE_IF_RAW);
-  __fusec->enqueue(FUSE_MT_GET_IMAGE, irm, sizeof(FUSE_imagereq_message_t));
-
-  __fusec->wait();
+  __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE, irm, sizeof(FUSE_imagereq_message_t));
 
   if (! __connected) {
     throw CaptureException("Capture failed, connection died while waiting for image");
@@ -380,6 +377,14 @@ void
 NetworkCamera::set_image_id(const char *image_id)
 {
   __image_id = strdup(image_id);
+
+  FUSE_imagedesc_message_t *imagedesc = (FUSE_imagedesc_message_t *)calloc(1, sizeof(FUSE_imagedesc_message_t));
+  strncpy(imagedesc->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
+  __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
+
+  if ( ! __fuse_imageinfo ) {
+    throw Exception("Could not received image info. Image not available?");
+  }
 }
 
 
@@ -417,8 +422,7 @@ NetworkCamera::image_list()
     throw CaptureException("Capture failed, not connected");
   }
 
-  __fusec->enqueue(FUSE_MT_GET_IMAGE_LIST);
-  __fusec->wait();
+  __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE_LIST);
 
   return __image_list;
 }

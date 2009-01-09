@@ -30,6 +30,8 @@
 #include <gui_utils/connection_dispatcher.h>
 #include <netcomm/fawkes/client.h>
 
+#include <sstream>
+
 using namespace fawkes;
 
 /** @class fawkes::ServiceSelectorCBE gui_utils/service_selector_cbe.h
@@ -111,6 +113,14 @@ ServiceSelectorCBE::initialize()
   m_cbe_services->set_text_column(m_service_model->get_column_record().hostname);
   m_cbe_services->get_entry()->set_activates_default(true);
   m_cbe_services->signal_changed().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_service_selected) );
+  
+  Gtk::Entry *ent = static_cast<Gtk::Entry *>(m_cbe_services->get_child());
+  if (ent)
+  {
+    char * fawkes_ip = getenv("FAWKES_IP");
+    if (fawkes_ip) ent->set_text(fawkes_ip);
+    else ent->set_text("localhost");
+  }
 
   m_btn_connect->signal_clicked().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_btn_connect_clicked) );
   m_btn_connect->set_label("gtk-connect");
@@ -120,6 +130,9 @@ ServiceSelectorCBE::initialize()
   m_dispatcher = new ConnectionDispatcher();
   m_dispatcher->signal_connected().connect(sigc::mem_fun(*this, &ServiceSelectorCBE::on_connected));
   m_dispatcher->signal_disconnected().connect(sigc::mem_fun(*this, &ServiceSelectorCBE::on_disconnected));
+  
+  __hostname = "";
+  __port = 0;
 }
 
 /** Destructor. */
@@ -136,6 +149,26 @@ FawkesNetworkClient*
 ServiceSelectorCBE::get_network_client()
 {
   return m_dispatcher->get_client();
+}
+
+/**
+ * Returns the currently selected hostname (after connect)
+ * @return the hostname
+ */
+Glib::ustring
+ServiceSelectorCBE::get_hostname()
+{
+  return __hostname;
+}
+
+/**
+ * Returns the currently used port (after connect)
+ * @return the port
+ */
+unsigned int
+ServiceSelectorCBE::get_port()
+{
+  return __port;
 }
 
 /** This signal is emitted whenever a network connection is established.
@@ -171,25 +204,38 @@ ServiceSelectorCBE::on_btn_connect_clicked()
   }
   else
   { 
-    Glib::ustring hostname;
-    unsigned short port;
-
     if ( -1 == m_cbe_services->get_active_row_number() )
     {
       Gtk::Entry* entry = m_cbe_services->get_entry();
-      hostname = entry->get_text();
-      port = 1910;
+      __hostname = entry->get_text();
+
+      Glib::ustring::size_type pos;
+      if ((pos = __hostname.find(':')) != Glib::ustring::npos) 
+      {
+        Glib::ustring host = "";
+        unsigned int port = 1234567; //Greater than max port num (i.e. 65535)
+        std::istringstream is(__hostname.replace(pos, 1, " "));
+        is >> host;
+        is >> port;
+        
+        if (port != 1234567 && host.size())
+        {
+          __hostname = host;
+          __port = port;
+        }
+      }
+      else __port = 1910;
     }
     else
     {
       Gtk::TreeModel::Row row = *m_cbe_services->get_active();
-      hostname = row[m_service_model->get_column_record().hostname];
-      port = row[m_service_model->get_column_record().port];
+      __hostname = row[m_service_model->get_column_record().hostname];
+      __port = row[m_service_model->get_column_record().port];
     }
 
     try
     {
-      client->connect( hostname.c_str(), port );
+      client->connect( __hostname.c_str(), __port );
     }
     catch (Exception& e)
     {
@@ -218,12 +264,12 @@ ServiceSelectorCBE::on_service_selected()
   }
 
   Gtk::TreeModel::Row row = *m_cbe_services->get_active();
-  Glib::ustring hostname = row[m_service_model->get_column_record().hostname];
-  unsigned short port = row[m_service_model->get_column_record().port];
+  __hostname = row[m_service_model->get_column_record().hostname];
+  __port = row[m_service_model->get_column_record().port];
 
   try
   {
-    client->connect( hostname.c_str(), port );
+    client->connect( __hostname.c_str(), __port );
   }
   catch (Exception& e)
   {

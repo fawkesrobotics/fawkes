@@ -3,7 +3,7 @@
  *  context.cpp - Fawkes Lua Context
  *
  *  Created: Fri May 23 15:53:54 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -23,6 +23,7 @@
  */
 
 #include <lua/context.h>
+#include <lua/context_watcher.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 #include <core/exceptions/system.h>
@@ -36,6 +37,9 @@
 #include <unistd.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class LuaContext <lua/context.h>
  * Lua C++ wrapper.
@@ -60,9 +64,14 @@ namespace fawkes {
 /** Constructor.
  * @param watch_dirs true to watch added package and C package dirs for
  * changes
+ * @param enable_tracebacks if true an error function is installed at the top
+ * of the stackand used for pcalls where errfunc is 0.
  */
-LuaContext::LuaContext(bool watch_dirs)
+LuaContext::LuaContext(bool watch_dirs, bool enable_tracebacks)
 {
+  __owns_L = true;
+  __enable_tracebacks = enable_tracebacks;
+
   if ( watch_dirs ) {
     __fam = new FileAlterationMonitor();
     __fam->add_filter("^[^.].*\\.lua$"); 
@@ -77,6 +86,23 @@ LuaContext::LuaContext(bool watch_dirs)
 }
 
 
+/** Wrapper contstructor.
+ * This wraps around an existing Lua state. It does not initialize the state in
+ * the sense that it would add variables etc. It only provides convenient access
+ * to the state methods via a C++ interface. It's mainly intended to be used to
+ * create a LuaContext to be passed to LuaContextWatcher::lua_restarted(). The
+ * state is not closed on destruction as is done when using the other ctor.
+ * @param L Lua state to wrap
+ */
+LuaContext::LuaContext(lua_State *L)
+{
+  __owns_L = false;
+  __L = L;
+  __lua_mutex = new Mutex();
+  __start_script = NULL;
+  __fam = NULL;
+}
+
 /** Destructor. */
 LuaContext::~LuaContext()
 {
@@ -84,7 +110,9 @@ LuaContext::~LuaContext()
   delete __fam;
   delete __lua_mutex;
   if ( __start_script )  free(__start_script);
-  lua_close(__L);
+  if ( __owns_L) {
+    lua_close(__L);
+  }
 }
 
 
@@ -98,27 +126,24 @@ LuaContext::init_state()
   lua_State *L = luaL_newstate();
   luaL_openlibs(L);
 
+  if (__enable_tracebacks) {
+    lua_getglobal(L, "debug");
+    lua_getfield(L, -1, "traceback");
+    lua_remove(L, -2);
+  }
+
   // Add package paths
   for (__slit = __package_dirs.begin(); __slit != __package_dirs.end(); ++__slit) {
-    char *s;
-    asprintf(&s, "package.path = package.path .. \";%s/?.lua;%s/?/init.lua\"", __slit->c_str(), __slit->c_str());
-    do_string(L, s);
-    free(s);
+    do_string(L, "package.path = package.path .. \";%s/?.lua;%s/?/init.lua\"", __slit->c_str(), __slit->c_str());
   }
 
   for (__slit = __cpackage_dirs.begin(); __slit != __cpackage_dirs.end(); ++__slit) {
-    char *s;
-    asprintf(&s, "package.cpath = package.cpath .. \";%s/?.so\"", __slit->c_str());
-    do_string(L, s);
-    free(s);
+    do_string(L, "package.cpath = package.cpath .. \";%s/?.so\"", __slit->c_str());
   }
 
   // load base packages
   for (__slit = __packages.begin(); __slit != __packages.end(); ++__slit) {
-    char *s;
-    asprintf(&s, "require(\"%s\")", __slit->c_str());
-    do_string(L, s);
-    free(s);
+    do_string(L, "require(\"%s\")", __slit->c_str());
   }
 
   for ( __utit = __usertypes.begin(); __utit != __usertypes.end(); ++__utit) {
@@ -145,6 +170,20 @@ LuaContext::init_state()
     lua_pushinteger(L, __integers_it->second);
     lua_setglobal(L, __integers_it->first.c_str());
   }
+
+  LuaContext *tmpctx = new LuaContext(L);
+  MutexLocker(__watchers.mutex());
+  LockList<LuaContextWatcher *>::iterator i;
+  for (i = __watchers.begin(); i != __watchers.end(); ++i) {
+    try {
+      (*i)->lua_restarted(tmpctx);
+    } catch (...) {
+      delete tmpctx;
+      lua_close(L);
+      throw;
+    }
+  }
+  delete tmpctx;
 
   if ( __start_script ) {
     if (access(__start_script, R_OK) == 0) {
@@ -201,6 +240,7 @@ LuaContext::restart()
     lua_State *tL = __L;
     __L = L;
     lua_close(tL);
+
   } catch (Exception &e) {
     LibLogger::log_error("LuaContext", "Could not restart Lua instance, an error "
 			 "occured while initializing new state. Keeping old state.");
@@ -219,10 +259,7 @@ LuaContext::add_package_dir(const char *path)
 {
   MutexLocker lock(__lua_mutex);
 
-  char *s;
-  asprintf(&s, "package.path = package.path .. \";%s/?.lua;%s/?/init.lua\"", path, path);
-  do_string(__L, s);
-  free(s);
+  do_string(__L, "package.path = package.path .. \";%s/?.lua;%s/?/init.lua\"", path, path);
 
   __package_dirs.push_back(path);
   if ( __fam )  __fam->watch_dir(path);
@@ -239,10 +276,7 @@ LuaContext::add_cpackage_dir(const char *path)
 {
   MutexLocker lock(__lua_mutex);
 
-  char *s;
-  asprintf(&s, "package.cpath = package.cpath .. \";%s/?.so\"", path);
-  do_string(__L, s);
-  free(s);
+  do_string(__L, "package.cpath = package.cpath .. \";%s/?.so\"", path);
 
   __cpackage_dirs.push_back(path);
   if ( __fam )  __fam->watch_dir(path);
@@ -259,10 +293,7 @@ LuaContext::add_package(const char *package)
 {
   MutexLocker lock(__lua_mutex);
   if (find(__packages.begin(), __packages.end(), package) == __packages.end()) {
-    char *s;
-    asprintf(&s, "require(\"%s\")", package);
-    do_string(__L, s);
-    free(s);
+    do_string(__L, "require(\"%s\")", package);
 
     __packages.push_back(package);
   }
@@ -343,7 +374,8 @@ LuaContext::do_file(lua_State *L, const char *filename)
     }
   }
 
-  if ( (err = lua_pcall(L, 0, 0, 0)) != 0 ) {
+  int errfunc = __enable_tracebacks ? 1 : 0;
+  if ( (err = lua_pcall(L, 0, LUA_MULTRET, errfunc)) != 0 ) {
     // There was an error while executing the initialization file
     errmsg = lua_tostring(L, -1);
     lua_pop(L, 1);
@@ -356,6 +388,9 @@ LuaContext::do_file(lua_State *L, const char *filename)
 
     case LUA_ERRERR:
       throw LuaErrorException("do_file", errmsg.c_str());
+
+    default:
+      throw LuaErrorException("do_file/unknown error", errmsg.c_str());
     }
   }
 
@@ -376,11 +411,19 @@ LuaContext::do_string(lua_State *L, const char *format, ...)
   if (vasprintf(&s, format, arg) == -1) {
     throw Exception("LuaContext::do_string: Could not form string");
   }
-  if ( luaL_dostring(L, s) != 0 ) {
-    throw Exception(lua_tostring(L, -1));
-  }
+
+  int rv = 0;
+  int errfunc = __enable_tracebacks ? 1 : 0;
+  rv = (luaL_loadstring(L, s) || lua_pcall(L, 0, LUA_MULTRET, errfunc));
+
   free(s);
   va_end(arg);
+
+  if (rv != 0) {
+    std::string errmsg = lua_tostring(L, -1);
+    lua_pop(L, 1);
+    throw LuaRuntimeException("do_string", errmsg.c_str());
+  }
 }
 
 
@@ -398,11 +441,19 @@ LuaContext::do_string(const char *format, ...)
   if (vasprintf(&s, format, arg) == -1) {
     throw Exception("LuaContext::do_string: Could not form string");
   }
-  if ( luaL_dostring(__L, s) != 0 ) {
-    throw Exception(lua_tostring(__L, -1));
-  }
+
+  int rv = 0;
+  int errfunc = __enable_tracebacks ? 1 : 0;
+  rv = (luaL_loadstring(__L, s) || lua_pcall(__L, 0, LUA_MULTRET, errfunc));
+
   free(s);
   va_end(arg);
+
+  if ( rv != 0 ) {
+    std::string errmsg = lua_tostring(__L, -1);
+    lua_pop(__L, 1);
+    throw LuaRuntimeException("do_string", errmsg.c_str());
+  }
 }
 
 
@@ -442,8 +493,8 @@ void
 LuaContext::pcall(int nargs, int nresults, int errfunc)
 {
   int err = 0;
+  if ( ! errfunc && __enable_tracebacks )  errfunc = 1;
   if ( (err = lua_pcall(__L, nargs, nresults, errfunc)) != 0 ) {
-    // There was an error while executing the initialization file
     std::string errmsg = lua_tostring(__L, -1);
     lua_pop(__L, 1);
     switch (err) {
@@ -583,6 +634,132 @@ LuaContext::set_integer(const char *name, lua_Integer value)
 }
 
 
+/** Push boolean on top of stack.
+ * @param value value to push
+ */
+void
+LuaContext::push_boolean(bool value)
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushboolean(__L, value ? 1 : 0);
+}
+
+
+/** Push formatted string on top of stack.
+ * @param format string format
+ * @see man 3 sprintf
+ */
+void
+LuaContext::push_fstring(const char *format, ...)
+{
+  MutexLocker lock(__lua_mutex);
+  va_list arg;
+  va_start(arg, format);
+  lua_pushvfstring(__L, format, arg);
+  va_end(arg);
+}
+
+
+/** Push integer on top of stack.
+ * @param value value to push
+ */
+void
+LuaContext::push_integer(lua_Integer value)
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushinteger(__L, value);
+}
+
+
+/** Push light user data on top of stack.
+ * @param p pointer to light user data to push
+ */
+void
+LuaContext::push_light_user_data(void *p)
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushlightuserdata(__L, p);
+}
+
+
+/** Push substring on top of stack.
+ * @param s string to push
+ * @param len length of string to push
+ */
+void
+LuaContext::push_lstring(const char *s, size_t len)
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushlstring(__L, s, len);
+}
+
+
+/** Push nil on top of stack.
+ */
+void
+LuaContext::push_nil()
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushnil(__L);
+}
+
+
+/** Push number on top of stack.
+ * @param value value to push
+ */
+void
+LuaContext::push_number(lua_Number value)
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushnumber(__L, value);
+}
+
+
+/** Push string on top of stack.
+ * @param value value to push
+ */
+void
+LuaContext::push_string(const char *value)
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushstring(__L, value);
+}
+
+
+/** Push thread on top of stack.
+ */
+void
+LuaContext::push_thread()
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushthread(__L);
+}
+
+
+/** Push a copy of the element at the given index on top of the stack.
+ * @param idx index of the value to copy
+ */
+void
+LuaContext::push_value(int idx)
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushvalue(__L, idx);
+}
+
+
+/** Push formatted string on top of stack.
+ * @param format string format
+ * @param arg variadic argument list
+ * @see man 3 sprintf
+ */
+void
+LuaContext::push_vfstring(const char *format, va_list arg)
+{
+  MutexLocker lock(__lua_mutex);
+  lua_pushvfstring(__L, format, arg);
+}
+
+
 /** Push usertype on top of stack.
  * @param data usertype data
  * @param type_name type name of the data
@@ -603,50 +780,6 @@ LuaContext::push_usertype(void *data, const char *type_name,
 }
 
 
-/** Push string on top of stack.
- * @param value value to push
- */
-void
-LuaContext::push_string(const char *value)
-{
-  MutexLocker lock(__lua_mutex);
-  lua_pushstring(__L, value);
-}
-
-
-/** Push boolean on top of stack.
- * @param value value to push
- */
-void
-LuaContext::push_boolean(bool value)
-{
-  MutexLocker lock(__lua_mutex);
-  lua_pushboolean(__L, value ? 1 : 0);
-}
-
-
-/** Push number on top of stack.
- * @param value value to push
- */
-void
-LuaContext::push_number(lua_Number value)
-{
-  MutexLocker lock(__lua_mutex);
-  lua_pushnumber(__L, value);
-}
-
-
-/** Push integer on top of stack.
- * @param value value to push
- */
-void
-LuaContext::push_integer(lua_Integer value)
-{
-  MutexLocker lock(__lua_mutex);
-  lua_pushinteger(__L, value);
-}
-
-
 /** Pop value(s) from stack.
  * @param n number of values to pop
  */
@@ -654,7 +787,23 @@ void
 LuaContext::pop(int n)
 {
   MutexLocker lock(__lua_mutex);
+  if (__enable_tracebacks && (n >= stack_size())) {
+    throw LuaRuntimeException("pop", "Cannot pop traceback function, invalid n");
+  }
   lua_pop(__L, n);
+}
+
+/** Remove value from stack.
+ * @param idx index of element to remove
+ */
+void
+LuaContext::remove(int idx)
+{
+  MutexLocker lock(__lua_mutex);
+  if (__enable_tracebacks && ((idx == 1) || (idx == -stack_size()))) {
+    throw LuaRuntimeException("pop", "Cannot remove traceback function");
+  }
+  lua_remove(__L, idx);
 }
 
 
@@ -716,6 +865,43 @@ void
 LuaContext::set_global(const char *name)
 {
   lua_setglobal(__L, name);
+}
+
+
+/** Get value from table.
+ * Assumes that an index k is at the top of the stack. Then t[k] is retrieved,
+ * where t is a table at the given index idx. The resulting value is pushed
+ * onto the stack, while the key k is popped from the stack, thus the value
+ * replaces the key.
+ * @param idx index of the table on the stack
+ */
+void
+LuaContext::get_table(int idx)
+{
+  lua_gettable(__L, idx);
+}
+
+
+/** Get named value from table.
+ * Retrieves the t[k], where k is the given key and t is a table at the given
+ * index idx. The value is pushed onto the stack.
+ * @param idx index of the table
+ * @param k key of the table entry
+ */
+void
+LuaContext::get_field(int idx, const char *k)
+{
+  lua_getfield(__L, idx, k);
+}
+
+
+/** Get global variable.
+ * @param name name of the global variable
+ */
+void
+LuaContext::get_global(const char *name)
+{
+  lua_getglobal(__L, name);
 }
 
 
@@ -784,20 +970,9 @@ LuaContext::to_string(int idx)
 }
 
 
-/** Check if stack value is a number.
- * @param idx stack index of value
- * @return true if value is a number
- */
-bool
-LuaContext::is_number(int idx)
-{
-  return lua_isnumber(__L, idx);
-}
-
-
 /** Check if stack value is a boolean.
  * @param idx stack index of value
- * @return true if value is a boolean
+ * @return true if value is a boolean, false otherwise
  */
 bool
 LuaContext::is_boolean(int idx)
@@ -806,14 +981,91 @@ LuaContext::is_boolean(int idx)
 }
 
 
+/** Check if stack value is a C function.
+ * @param idx stack index of value
+ * @return true if value is a C function, false otherwise
+ */
+bool
+LuaContext::is_cfunction(int idx)
+{
+  return lua_iscfunction(__L, idx);
+}
+
+
+/** Check if stack value is a function.
+ * @param idx stack index of value
+ * @return true if value is a function, false otherwise
+ */
+bool
+LuaContext::is_function(int idx)
+{
+  return lua_isfunction(__L, idx);
+}
+
+
+/** Check if stack value is light user data.
+ * @param idx stack index of value
+ * @return true if value is light user data , false otherwise
+ */
+bool
+LuaContext::is_light_user_data(int idx)
+{
+  return lua_islightuserdata(__L, idx);
+}
+
+
+/** Check if stack value is nil.
+ * @param idx stack index of value
+ * @return true if value is nil, false otherwise
+ */
+bool
+LuaContext::is_nil(int idx)
+{
+  return lua_isnil(__L, idx);
+}
+
+
+/** Check if stack value is a number.
+ * @param idx stack index of value
+ * @return true if value is a number, false otherwise
+ */
+bool
+LuaContext::is_number(int idx)
+{
+  return lua_isnumber(__L, idx);
+}
+
+
 /** Check if stack value is a string.
  * @param idx stack index of value
- * @return true if value is a string
+ * @return true if value is a string, false otherwise
  */
 bool
 LuaContext::is_string(int idx)
 {
   return lua_isstring(__L, idx);
+}
+
+
+/** Check if stack value is a table.
+ * @param idx stack index of value
+ * @return true if value is a table, false otherwise
+ */
+bool
+LuaContext::is_table(int idx)
+{
+  return lua_istable(__L, idx);
+}
+
+
+/** Check if stack value is a thread.
+ * @param idx stack index of value
+ * @return true if value is a thread, false otherwise
+ */
+bool
+LuaContext::is_thread(int idx)
+{
+  return lua_isthread(__L, idx);
 }
 
 
@@ -838,6 +1090,27 @@ LuaContext::setfenv(int idx)
 {
   lua_setfenv(__L, idx);
 }
+
+
+/** Add a context watcher.
+ * @param watcher watcher to add
+ */
+void
+LuaContext::add_watcher(fawkes::LuaContextWatcher *watcher)
+{
+  __watchers.push_back_locked(watcher);
+}
+
+
+/** Remove a context watcher.
+ * @param watcher watcher to remove
+ */
+void
+LuaContext::remove_watcher(fawkes::LuaContextWatcher *watcher)
+{
+  __watchers.remove_locked(watcher);
+}
+
 
 
 /** Process FAM events. */

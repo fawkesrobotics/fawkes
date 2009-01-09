@@ -26,7 +26,8 @@
 #include <tools/firestation/mirror_calib.h>
 #include <tools/firestation/color_train_widget.h>
 #include <tools/firestation/fuse_transfer_widget.h>
-#include <tools/firestation/fuse_image_list_widget.h>
+
+#include <fvwidgets/fuse_image_list_widget.h>
 
 #include <cams/fileloader.h>
 #include <cams/shmem.h>
@@ -891,13 +892,13 @@ Firestation::draw_image()
       if ( shm_camera->shared_memory_image_buffer()->circle_found() )
 	{ 
 	  Drawer drawer;
-	  drawer.setBuffer(m_yuv_scaled_buffer, m_scaled_img_width, m_scaled_img_height);
-	  drawer.setColor(255, 127, 127);
+	  drawer.set_buffer(m_yuv_scaled_buffer, m_scaled_img_width, m_scaled_img_height);
+	  drawer.set_color(YUV_t::white());
 	  unsigned int roi_x = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_x() * m_scale_factor );
 	  unsigned int roi_y = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_y() * m_scale_factor );
 	  unsigned int roi_width  = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_width() * m_scale_factor );
 	  unsigned int roi_height = (unsigned int) rint( shm_camera->shared_memory_image_buffer()->roi_height() * m_scale_factor );
-	  drawer.drawRectangle( roi_x, roi_y, roi_width, roi_height );
+	  drawer.draw_rectangle( roi_x, roi_y, roi_width, roi_height );
 	}
     }
 

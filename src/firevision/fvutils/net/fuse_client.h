@@ -51,6 +51,9 @@ class FuseClient : public fawkes::Thread {
   void enqueue(FuseNetworkMessage *m);
   void enqueue(FUSE_message_type_t type, void *payload, size_t payload_size);
   void enqueue(FUSE_message_type_t type);
+  void enqueue_and_wait(FuseNetworkMessage *message);
+  void enqueue_and_wait(FUSE_message_type_t type, void *payload, size_t payload_size);
+  void enqueue_and_wait(FUSE_message_type_t type);
   void wait();
   void wait_greeting();
 
@@ -68,6 +71,7 @@ class FuseClient : public fawkes::Thread {
   unsigned int __wait_timeout;
 
   fawkes::Mutex *__mutex;
+  fawkes::Mutex *__recv_mutex;
 
   FuseNetworkMessageQueue *  __inbound_msgq;
   FuseNetworkMessageQueue *  __outbound_msgq;

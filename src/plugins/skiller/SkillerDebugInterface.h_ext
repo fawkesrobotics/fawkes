@@ -1,0 +1,102 @@
+
+/***************************************************************************
+ *  SkillerDebugInterface.h - Fawkes BlackBoard Interface - SkillerDebugInterface
+ *
+ *  Templated created:   Thu Oct 12 10:49:19 2006
+ *  Copyright  2008  Tim Niemueller
+ *
+ *  $Id: cpp_generator.cpp 1636 2008-12-30 13:22:59Z tim $
+ *
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
+ */
+
+#ifndef __INTERFACES_SKILLERDEBUGINTERFACE_H_
+#define __INTERFACES_SKILLERDEBUGINTERFACE_H_
+
+#include <interface/interface.h>
+#include <interface/message.h>
+
+namespace fawkes {
+
+class SkillerDebugInterface : public Interface
+{
+ /// @cond INTERNALS
+ INTERFACE_MGMT_FRIENDS(SkillerDebugInterface)
+ /// @endcond
+ public:
+  /* constants */
+
+ private:
+  /** Internal data storage, do NOT modify! */
+  typedef struct {
+    char graph_fsm[32]; /**< 
+      The finite state machine (FSM) the current graph has been updated for.
+     */
+    char graph[8192]; /**< 
+      The selected graph in a dot string representation.
+     */
+  } SkillerDebugInterface_data_t;
+
+  SkillerDebugInterface_data_t *data;
+
+ public:
+  /* messages */
+  class SetGraphMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      char graph_fsm[32]; /**< 
+      The finite state machine (FSM) the current graph has been updated for.
+     */
+    } SetGraphMessage_data_t;
+
+    SetGraphMessage_data_t *data;
+
+   public:
+    SetGraphMessage(const char * ini_graph_fsm);
+    SetGraphMessage();
+    ~SetGraphMessage();
+
+    SetGraphMessage(const SetGraphMessage *m);
+    /* Methods */
+    char * graph_fsm() const;
+    void set_graph_fsm(const char * new_graph_fsm);
+    size_t maxlenof_graph_fsm() const;
+    virtual Message * clone() const;
+  };
+
+  virtual bool message_valid(const Message *message) const;
+ private:
+  SkillerDebugInterface();
+  ~SkillerDebugInterface();
+
+ public:
+  virtual Message * create_message(const char *type) const;
+
+  /* Methods */
+  char * graph_fsm() const;
+  void set_graph_fsm(const char * new_graph_fsm);
+  size_t maxlenof_graph_fsm() const;
+  char * graph() const;
+  void set_graph(const char * new_graph);
+  size_t maxlenof_graph() const;
+
+};
+
+} // end namespace fawkes
+
+#endif

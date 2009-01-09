@@ -21,65 +21,12 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-local skillenv = require("skills.skiller.skillenv")
+-- Initialize module
 module(..., skillenv.module_init)
 
--- Check goto status
-function checkstatus(margin)
-   return relgoto.checkstatus(margin);
-end
-
-
--- parameter parsing to support different call styles
-function parseparams(...)
-   local x, y, ori, margin;
-
-   local f = ...; -- first var
-   if type(f) == "table" then
-      -- it's called with style 2. or 3.
-      if f.x ~= nil and f.y ~= nil then
-	 -- style 2.
-	 x      = f.x;
-	 y      = f.y;
-	 ori    = f.ori;
-	 margin = f.margin;
-	 print_debug("2. goto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")");
-      else
-	 error("goto called with insufficient parameters (named args)");
-      end
-   else
-      -- positional style
-      x, y, ori, margin = ...;
-      if x == nil or y == nil then
-	 error("Insufficient parameters for goto (positional args)");
-      end
-      print_debug("1. goto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")");
-   end
-
-   return x, y, ori, margin;
-end
-
-
-function execute(...)
-   local x, y, ori, margin = parseparams(...);
-
-   -- ori not yet calculated, not yet in interface
-   local rx, ry= wm_pose:world_x(), wm_pose:world_y(); -- robot position
-
-   local relx = x - rx;
-   local rely = y - ry;
-
-   printf("Pose(x,y)=(%f, %f)  Dest(x,y)=(%f, %f)  Rel(x,y)=(%f, %f)", rx, ry, x, y, relx, rely);
-
-   return relgoto.execute(relx, rely, ori, margin);
-end
-
-
-function reset()
-   relgoto.reset();
-end
-
+-- Crucial skill information
 name               = "goto"
+fsm                = SkillHSM:new{name=name, start="GOTO"}
 depends_skills     = {"relgoto"}
 depends_interfaces = {
    {v = "wm_pose", id = "WM Pose", type="ObjectPositionInterface"}
@@ -114,3 +61,23 @@ has been reached (at least once, the robot might move afterwards for example if 
 brake fast enough or if another robot crashed into this robot). The skill is S_FAILED if
 the navigator started processing another goto message.
 ]==]
+
+-- Initialize as skill module
+skillenv.skill_module(...)
+
+-- States
+fsm:new_jump_state("GOTO", relgoto, FINAL, FAILED)
+
+function GOTO:init()
+   local x = self.fsm.vars.x or self.fsm.vars[1]
+   local y = self.fsm.vars.y or self.fsm.vars[2]
+   local ori = self.fsm.vars.ori or self.fsm.vars[3]
+
+   -- ori not yet calculated, not yet in interface
+   local rx, ry= wm_pose:world_x(), wm_pose:world_y(); -- robot position
+
+   local relx = x - rx;
+   local rely = y - ry;
+
+   self.args = {x=relx, y=rely, ori=ori}
+end

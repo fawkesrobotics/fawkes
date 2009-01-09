@@ -66,4 +66,8 @@ function module_init(m)
       end
    end
    fawkes.logprint.register_print_funcs(m);
+
+   --Export some important Fawkes utils to the module
+   m.Time  = fawkes.Time
+   m.Clock = fawkes.Clock
 end

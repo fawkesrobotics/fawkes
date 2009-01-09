@@ -19,7 +19,7 @@ class FacerInterface : public Interface
 
     char * face_label();
     void set_face_label(const char * new_face_label);
-    size_t maxlenof_face_label() const;
+    int maxlenof_face_label() const;
   };
 
   class SetOpmodeMessage : public Message
@@ -30,24 +30,24 @@ class FacerInterface : public Interface
 
     if_facer_opmode_t opmode();
     void set_opmode(const if_facer_opmode_t new_opmode);
-    size_t maxlenof_opmode() const;
+    int maxlenof_opmode() const;
   };
 
   if_facer_opmode_t opmode();
   void set_opmode(const if_facer_opmode_t new_opmode);
-  size_t maxlenof_opmode() const;
+  int maxlenof_opmode() const;
   char * face_label();
   void set_face_label(const char * new_face_label);
-  size_t maxlenof_face_label() const;
+  int maxlenof_face_label() const;
   bool is_learning_done();
   void set_learning_done(const bool new_learning_done);
-  size_t maxlenof_learning_done() const;
+  int maxlenof_learning_done() const;
   unsigned int num_detections();
   void set_num_detections(const unsigned int new_num_detections);
-  size_t maxlenof_num_detections() const;
+  int maxlenof_num_detections() const;
   float sec_since_detection();
   void set_sec_since_detection(const float new_sec_since_detection);
-  size_t maxlenof_sec_since_detection() const;
+  int maxlenof_sec_since_detection() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
@@ -58,7 +58,7 @@ class FacerInterface : public Interface
   unsigned int            mem_serial() const;
   bool                    operator== (Interface &comp) const;
   const unsigned char *   hash() const;
-  size_t                  hash_size() const;
+  int                     hash_size() const;
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);

@@ -12,12 +12,12 @@ class SpeechSynthInterface : public Interface
 
     char * text();
     void set_text(const char * new_text);
-    size_t maxlenof_text() const;
+    int maxlenof_text() const;
   };
 
   char * text();
   void set_text(const char * new_text);
-  size_t maxlenof_text() const;
+  int maxlenof_text() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
@@ -28,7 +28,7 @@ class SpeechSynthInterface : public Interface
   unsigned int            mem_serial() const;
   bool                    operator== (Interface &comp) const;
   const unsigned char *   hash() const;
-  size_t                  hash_size() const;
+  int                     hash_size() const;
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);

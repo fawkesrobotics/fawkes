@@ -23,6 +23,9 @@
       Currently executed skill string, at least the first 1023 bytes of it.
       Must be properly null-terminated.
     </field>
+    <field type="char" length="128" name="error">
+      String describing the error. Can be set by a skill when it fails.
+    </field>
     <field type="unsigned int" name="exclusive_controller">
       Instance serial of the exclusive controller of the skiller. If this does not
       carry your instance serial your exec messages will be ignored. Aquire control with

@@ -252,6 +252,7 @@ PluginTreeView::on_message_received(fawkes::FawkesNetworkMessage* msg)
   }
   else if (msgid == MSG_PLUGIN_AVAIL_LIST) 
   {
+    m_plugin_list->clear();
     PluginListMessage* plm = msg->msgc<PluginListMessage>();
     while ( plm->has_next() ) 
     {

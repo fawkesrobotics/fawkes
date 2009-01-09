@@ -26,7 +26,7 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-SUBDIRS = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/firestation))
+SUBDIRS = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/firestation)) $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/loc_viewer)) $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/fuse_viewer))
 
 LIBS_fvshmem = $(VISION_CAM_LIBS) fawkesutils fvutils
 OBJS_fvshmem = shmem.o

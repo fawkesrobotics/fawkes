@@ -429,6 +429,7 @@ NetworkConfiguration::get_bool(const char *path)
       b = mirror_config->get_bool(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_bool: exception in mirror database");
+      mutex->unlock();
       throw;
     }
   } else {

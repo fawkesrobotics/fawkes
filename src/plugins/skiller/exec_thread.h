@@ -30,55 +30,71 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
+#include <aspect/blackboard.h>
 #include <utils/system/fam.h>
+#include <blackboard/interface_listener.h>
 
 #include <string>
 #include <cstdlib>
 
-class SkillerLiaisonThread;
 namespace fawkes {
   class ComponentLogger;
   class Mutex;
   class LuaContext;
+  class LuaInterfaceImporter;
+  class Interface;
+  class SkillerInterface;
+  class SkillerDebugInterface;
 }
 
 class SkillerExecutionThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
+  public fawkes::BlackBoardAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect
+  public fawkes::ClockAspect,
+  public fawkes::BlackBoardInterfaceListener
 {
  public:
-  SkillerExecutionThread(fawkes::Barrier *liaison_exec_barrier,
-			 SkillerLiaisonThread *slt);
+  SkillerExecutionThread();
   virtual ~SkillerExecutionThread();
 
   virtual void init();
   virtual void loop();
   virtual void finalize();
 
-  void skiller_reader_removed(unsigned int instance_serial);
+  /* BlackBoardInterfaceListener */
+  void bb_interface_reader_removed(fawkes::Interface *interface, unsigned int instance_serial) throw();
 
  private: /* methods */
+  void init_failure_cleanup();
   void publish_skill_status(std::string &curss);
+  void publish_skdbg();
+  void publish_error();
+  void process_skdbg_messages();
 
  private: /* members */
-  fawkes::Barrier *__liaison_exec_barrier;
-  SkillerLiaisonThread *__slt;
   fawkes::ComponentLogger *__clog;
 
   unsigned int __last_exclusive_controller;
   bool         __reader_just_left;
 
   bool        __continuous_run;
-  bool        __continuous_rst;
+  bool        __continuous_reset;
+  bool        __error_written;
+
+  std::string __skdbg_what;
 
   // config values
   std::string __cfg_skillspace;
   bool        __cfg_watch_files;
 
+  fawkes::SkillerInterface      *__skiller_if;
+  fawkes::SkillerDebugInterface *__skdbg_if;
+
   fawkes::LuaContext  *__lua;
+  fawkes::LuaInterfaceImporter  *__lua_ifi;
 };
 
 #endif

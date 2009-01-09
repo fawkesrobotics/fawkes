@@ -31,6 +31,8 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+  std::locale::global( std::locale( "" ) ); 
+
   try
     {
       Gtk::Main kit(argc, argv);

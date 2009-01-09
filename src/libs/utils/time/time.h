@@ -99,25 +99,32 @@ class Time
   void set_time(const timeval* tv);
   void set_time(long ms);
   void set_time(float sec);
+  void set_time(const Time &t);
+
+  void add(float seconds);
 
   Time & stamp();
 
   Time   operator+(const float sec) const;
   Time   operator+(const Time& t) const;
+  Time   operator+(const Time* t) const;
   Time   operator-(const Time& t) const;
   float  operator-(const Time* t) const;
   Time & operator+=(const long int usec);
   Time & operator+=(const Time& t);
+  Time & operator+=(const float sec);
   Time & operator-=(const Time& t);
   Time & operator=(const Time& t);
 
-  const char * str();
-  void         str_r(char *s);
+  const char * str(bool utc = false);
+  void         str_r(char *s, bool utc = false);
+
+  static const unsigned int TIMESTR_SIZE;
 
  private:
-  Clock   *clock;
-  timeval  time;
-  char     timestr[26]; // 26 as described in asctime_r() docs     
+  Clock   *__clock;
+  timeval  __time;
+  char    *__timestr;
 };
 
 } // end namespace fawkes

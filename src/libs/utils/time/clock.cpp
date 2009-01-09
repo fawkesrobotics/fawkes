@@ -207,7 +207,7 @@ Clock::get_time(struct timeval* tv) const
 void
 Clock::get_time(Time &time) const
 {
-  get_time(&(time.time));
+  get_time(&(time.__time));
 }
 
 
@@ -220,7 +220,7 @@ Clock::get_time(Time &time) const
 void
 Clock::get_time(Time &time, TimesourceSelector sel) const
 {
-  get_time(&(time.time), sel);
+  get_time(&(time.__time), sel);
 }
 
 
@@ -230,7 +230,7 @@ Clock::get_time(Time &time, TimesourceSelector sel) const
 void
 Clock::get_time(Time *time) const
 {
-  get_time(&(time->time));
+  get_time(&(time->__time));
 }
 
 
@@ -243,7 +243,7 @@ Clock::get_time(Time *time) const
 void
 Clock::get_time(Time *time, TimesourceSelector sel) const
 {
-  get_time(&(time->time), sel);
+  get_time(&(time->__time), sel);
 }
 
 
@@ -263,7 +263,7 @@ Clock::get_systime(struct timeval* tv) const
 void
 Clock::get_systime(Time &time) const
 {
-  gettimeofday(&(time.time), 0);
+  gettimeofday(&(time.__time), 0);
 }
 
 
@@ -273,7 +273,7 @@ Clock::get_systime(Time &time) const
 void
 Clock::get_systime(Time *time) const
 {
-  gettimeofday(&(time->time), 0);
+  gettimeofday(&(time->__time), 0);
 }
 
 
@@ -311,7 +311,7 @@ Clock::sys_elapsed(Time *t) const
 {
   struct timeval nowt;
   gettimeofday(&nowt, NULL);
-  return time_diff_sec(nowt, t->time);
+  return time_diff_sec(nowt, t->__time);
 }
 
 

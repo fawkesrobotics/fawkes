@@ -27,146 +27,323 @@ require("fawkes.modinit")
 -- @author Tim Niemueller
 module(..., fawkes.modinit.module_init)
 
---- @class State
--- State for an FSM.
-State = {}
+-- Re-export State and JumpState for convenience
+local statemod   = require("fawkes.fsm.state")
+State     = statemod.State
+local jumpstmod  = require("fawkes.fsm.jumpstate")
+JumpState = jumpstmod.JumpState
 
---- Create new state.
--- @param o table with initializations for the object.
--- @return Initialized FSM state
-function State:new(o)
-   assert(o, "State requires a table as argument")
-   assert(o.name, "State requires a name")
-   assert(not getmetatable(o), "Meta table already set for object")
-   setmetatable(o, self)
-   self.__index = self
-   return o
-end
+local fsmgrapher = require("fawkes.fsm.grapher")
 
 
---- Execute init routines.
--- This executes the init method. This may contain some general code executed for
--- every state for derived states.
--- @param ... Any parameters, passed to the init() function.
-function State:do_init(...)
-   return self:init(...)
-end
-
-
---- Execute exit routines.
--- This executes the exit method. This may contain some general code executed for
--- every state for derived states.
-function State:do_exit()
-   self:exit()
-end
-
-
-
---- Init function.
--- The init function is called when you enter a state. It may take an arbitrary
--- number of arguments, which may be passed from other states.
-function State:init()
-end
-
-
---- Loop function.
--- This function is called in every loop. You can for example check conditions
--- for state changes.
--- @return return nil to stay in this state, or another state to change the state
--- to this state. Additionally you can return any number of arguments (only if
--- the returned state is not nil). These arguments are passed to the init()
--- function of the state we transit to.
-function State:loop()
-end
-
-
---- Exit function.
--- This function is called by the FSM just before the state is left. If any special
--- operations are necessary (like retracting an arm) for a safe transition out of
--- this state add them here.
-function State:exit()
-end
-
-
---- Convenience method to create a new state.
--- Creates a new state in the environment of the caller of this function with the
--- given name.
--- @param name name of the state and the variable in the environment of the caller
--- that holds this state
--- @param init_table all values from this table will be added to the newly created
--- state.
-function new_state(name, init_table)
-   local e = getfenv(2)
-   local s = State:new{name = name}
-   if init_table then
-      for k,v in pairs(init_table) do
-	 s[k] = v
-      end
-   end
-   e[name] = s
-end
 
 --- @class FSM Finite State Machine
 -- Representation with utility methods of a FSM.
-FSM = { current = nil, debug = false }
+FSM = { current = nil, debug = false, export_states_to_parent = true }
+
 
 --- Constructor.
 -- Create a new FSM with the given table as the base.
 -- @param o table with initializations. The table may not have a metatable set and
--- it must have the fields name (name of the FSM) and start (start state of the FSM).
+-- it must have the fields name (name of the FSM) and start (name of start state
+-- of the FSM).
 -- @return initialized FSM
 function FSM:new(o)
    assert(o, "FSM requires a table as argument")
    assert(o.name, "FSM requires a name")
-   assert(o.start, "FSM requires a start state")
-   assert(type(o.debug) == "boolean", "FSM debug value must be a boolean")
-   o = o or {}
+   assert(o.start, "FSM requires start state")
+   if o.debug then
+     assert(type(o.debug) == "boolean", "FSM debug value must be a boolean")
+   end
    assert(not getmetatable(o), "Meta table already set for object")
    setmetatable(o, self)
    self.__index = self
 
-   if o.debug then
-      print_debug(o.name .. ": Initialize start state " .. o.start.name)
-   end
-   o.current = o.start
-   o.current:do_init()
+   o.vars          = {}
+   o.states        = {}
+   o.state_changed = false
+   o.trace         = {}
+   o.tracing       = true
+   o.error         = ""
+   o.exit_state    = o.exit_state or ""
+   o.fail_state    = o.fail_state or ""
 
    return o
 end
+
+
+--- Check if state was reached in current trace.
+-- @param state state to check if a transition originated from or went to this one
+-- @return two values, first is true if state is included in
+-- current trace, false otherwise, second is a list of traces where the
+-- given state was involved. Note that the indexes of the traces in
+-- the list are not consecutive!
+function FSM:traced_state(state)
+   if not self.tracing then return false end
+
+   local traces = {}
+
+   for i,t in ipairs(self.trace) do
+      if t.from == state or t.to == state then
+	 traces[i] = t
+      end
+   end
+
+   if next(traces) then
+      return true, traces
+   else
+      return false, {}
+   end
+end
+
+
+--- Check if the given transition was used in current trace.
+-- @param trans transition to check
+-- @return two values, first is true if transition is included in
+-- current trace, false otherwise, second is a list of traces where the
+-- given transition was involved. Note that the indexes of the traces in
+-- the list are not consecutive!
+function FSM:traced_trans(trans)
+   if not self.tracing then return false end
+
+   local traces = {}
+
+   for i,t in ipairs(self.trace) do
+      if t.transition == trans then
+	 traces[i] = t
+      end
+   end
+
+   if next(traces) then
+      return true, traces
+   else
+      return false, {}
+   end
+end
+
+
+--- Check if the given state or transition was used in current trace.
+-- @param sot state or transition to check
+-- @return two values, first is true if state/transition is included in
+-- current trace, false otherwise, second is a list of traces where the
+-- given state/transition was involved. Note that the indexes of the traces in
+-- the list are not consecutive!
+function FSM:traced(sot)
+   if not self.tracing then return false end
+
+   local traces = {}
+
+   for i,t in ipairs(self.trace) do
+      if t.from == sot or t.transition == sot or t.to == sot then
+	 traces[i] = t
+      end
+   end
+
+   if next(traces) then
+      return true, traces
+   else
+      return false, {}
+   end
+end
+
+--- Get graph representation of FSM.
+-- This creates a graph representation of this FSM using the graphviz library.
+-- The graph is returned as a string in the dot graph language.
+-- @return graph representation as string in the dot graph language
+function FSM:graph()
+   return fsmgrapher.dotgraph(self)
+end
+
+
+--- Check if the FSM changed since last call.
+-- The FSM has changed if there has been a transition to a new state since the
+-- last call to reset() or changed(). Note that changed() will only ever return
+-- true at most once per cycle as it resets the changed flag during execution.
+-- @return true if the FSM has changed, false otherwise
+function FSM:changed()
+   local rv = self.state_changed
+   self.state_changed = false
+   return rv
+end
+
+
+--- Mark FSM as changed.
+-- This can be used to cause a redrawing of the FSM graph if a state changed its
+-- label for example.
+function FSM:mark_changed()
+   self.state_changed = true
+end
+
+--- Convenience method to create a new state.
+-- Creates a new instance of State and assigns it to the states table. Any variables
+-- that exist in the (optional) vars table are put into state as local variables.
+-- If FSM.export_states_to_parent is true (the default) the state is exported to
+-- the callers environment by assigning it to a variable with the states name.
+-- @param name name of the state and optionally the variable in the environment
+-- of the caller that holds this state
+-- @param vars all values from this table will be added to the newly created state.
+function FSM:new_state(name, vars)
+   assert(self.states[name] == nil, "FSM:new_state: State with name " .. name .. " already exists")
+   local o = {name = name, fsm = self}
+   if vars then
+      assert(type(vars) == "table", "FSM:new_state: vars parameter must be a table")
+      for k,v in pairs(vars) do
+	 o[k] = v
+      end
+   end
+   local s = State:new(o)
+   self.states[name] = s
+   if self.export_states_to_parent then
+      local e = getfenv(2)
+      e[name] = s
+   end
+
+   return s
+end
+
+
+--- Convenience method to create a new jump state.
+-- Creates a new instance of JumpState and assigns it to the states table with
+-- the given initial transitions. Any variables that exist in the (optional) vars
+-- table are put into state as local variables.
+-- If FSM.export_states_to_parent is true the state is exported to the callers
+-- environment by assigning it to a variable with the states name.
+-- @param name name of the state and optionally the variable in the environment
+-- of the caller that holds this state
+-- @param transitions Initial transitions for this state (may be modified or set
+-- later)
+-- @param vars all values from this table will be added to the newly created state.
+function FSM:new_jump_state(name, transitions, vars)
+   assert(name, "FSM:new_jump_state: Name must be given")
+   assert(self.states[name] == nil, "FSM:new_state: State with name " .. name .. " already exists")
+   local o = {name = name, fsm = self, transitions = transitions}
+   if vars then
+      assert(type(vars) == "table", "FSM:new_state: vars parameter must be a table")
+      for k,v in pairs(vars) do
+	 o[k] = v
+      end
+   end
+   local s = JumpState:new(o)
+   self.states[name] = s
+   if self.export_states_to_parent then
+      local e = getfenv(2)
+      e[name] = s
+   end
+
+   return s
+end
+
+
+--- Enable or disable debugging.
+-- Value can be either set for an instance of SkillHSM, or globally for SkillHSM
+-- to set the new default value which applies to newly generated SkillHSMs.
+-- @param debug true to enable debugging, false to disable
+function FSM:set_debug(debug)
+   self.debug = debug
+end
+
+
+--- Set error of FSM.
+-- Sets the error for the FSM and prints it as warning.
+-- @param error error message
+function FSM:set_error(error)
+   self.error = error
+   print_warn("FSM %s: %s", self.name, self.error)
+end
+
+--- Add a state.
+-- @param state state to add
+function FSM:add_state(state)
+   assert(state, "State may not be nil")
+   assert(state.name, "State must have a name")
+
+   self.states[state.name] = state
+end
+
 
 --- Run the FSM.
 -- Runs the loop() function of the current state and executes possible state
 -- transitions that result from running the loop.
 function FSM:loop()
-   if self.current then
+   if not self.current then
+      -- FSM was just reset, initialize start state
+      self.current = self.states[self.start]
+      self:trans(self.current:do_init())
+      self.state_changed = true
+   end
+   if self.current.name ~= self.fail_state then
+      -- This is really noisy...
       -- if self.debug then
       --    print_debug(self.name .. ": Executing loop for state " .. self.current.name)
       -- end
-      self:trans(self.current:loop())
+      self:trans(self.current:do_loop())
+   elseif self.error == "" and self.previous then
+      local t = self.previous:last_transition()
+      if t and t.description then
+	 self:set_error(t.description)
+      else
+	 self:set_error("reached fail state " .. self.fail_state .. " via unknown transition");
+      end
    end
 end
 
+
 --- Execute state transition.
--- If next is not nil, it calls the exit() function of the current state, and
+-- If next_state is not nil, it calls the exit() function of the current state, and
 -- then calls the init() function of the next state with any given additional
 -- parameters. After that, the current state becomes next.
--- @param next next state, if nil no transition is executed
+-- @param next_state next state, if nil no transition is executed
 -- @param ... any number of extra arguments, passed to next:init().
-function FSM:trans(next, ...)
-   if next then
+function FSM:trans(next_state, ...)
+   if next_state then
+      if self.tracing then
+	 local trans = self.current:last_transition()
+	 table.insert(self.trace, {from = self.current, transition = trans, to = next_state})
+      end
+
+      self.state_changed = true
       if self.debug then
-	 print_debug(self.name .. ": Transition", self.current.name, "->", next.name)
+	 print_debug("%s: Transition %s -> %s",
+		     self.name, self.current.name, next_state.name)
       end
       self.current:do_exit()
-      local init_rv = {next:do_init(...)}
-      self.current = next
-      if #init_rv > 0 then
-	 return self:trans(unpack(init_rv))
-      end
-   else
-      if ... then
-	 error("State " .. self.current.name .. " returned parameters but " ..
-		    "not a state transition (nil)")
-      end
+      self.previous = self.current
+      self.current  = next_state
+      return self:trans(next_state:do_init(...))
+   end
+end
+
+
+--- Resets the internal trace.
+-- Tracing information will be discarded. This can be used to restart the
+-- trace without causing a whole FSM reset.
+function FSM:reset_trace()
+   self.trace = {}
+   self.state_changed = true
+end
+
+--- Reset FSM.
+-- Unsets the current state, if there was one the exit() routine is called. All
+-- states of this FSM are reset, traces and variables are reset, FSM is marked as
+-- changed. The next call to loop() will initialize the start state and set it as
+-- current state.
+function FSM:reset()
+   if self.current then
+      self.current:do_exit()
+   end
+
+   self.vars          = {}
+
+   for n,s in pairs(self.states) do
+      s:reset()
+   end
+
+   self.trace         = {}
+   self.current       = nil
+   self.state_changed = true
+   self.error         = ""
+
+   if self.debug then
+      print_debug("FSM '%s' reset done", self.name)
    end
 end

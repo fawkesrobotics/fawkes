@@ -108,6 +108,10 @@ ServiceChooserDialog::ctor()
   __entry.show();
   __entry.set_activates_default(true);
 
+  char * fawkes_ip = getenv("FAWKES_IP");
+  if (fawkes_ip) __entry.set_text(fawkes_ip);
+  else __entry.set_text("localhost");
+
   Gtk::VBox *vbox = get_vbox();
   vbox->pack_start(__scrollwin);
   vbox->pack_end(__expander, Gtk::PACK_SHRINK);
@@ -118,6 +122,8 @@ ServiceChooserDialog::ctor()
   add_button(Gtk::Stock::OK, 1);
 
   set_default_response(1);
+
+  __treeview.signal_row_activated().connect(sigc::bind(sigc::hide<0>(sigc::hide<0>(sigc::mem_fun(*this, &ServiceChooserDialog::response))), 1));
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
   __expander.property_expanded().signal_changed().connect(sigc::mem_fun(*this, &ServiceChooserDialog::on_expander_changed));
@@ -157,6 +163,7 @@ ServiceChooserDialog::get_selected_service(Glib::ustring &name,
 	port = port_num;
       } else {
 	hostname = tmpvalue;
+	port = 0;
       }
 
       // evil, but Glib::Regex is only availabel in ver >= 2.14, n/a on maemo

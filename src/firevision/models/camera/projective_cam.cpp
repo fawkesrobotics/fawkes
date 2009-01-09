@@ -40,11 +40,24 @@ using std::endl;
  */
 /** Constructor
  * @param msg message, appended to exception, base message "PostureException"
+ * @param img_pt the point in the image
  */
-AboveHorizonException::AboveHorizonException(const char *msg) throw()
+AboveHorizonException::AboveHorizonException(const char *msg, fawkes::point_t img_pt) throw()
   : fawkes::Exception("AboveHorizonException: %s", msg)
 {
+  __img_pt = img_pt;
 }
+
+/**
+ * @return the point in the image that caused the exception
+ */
+fawkes::point_t
+AboveHorizonException::get_img_pt() const
+{
+  return __img_pt;
+}
+
+
 
 
 
@@ -170,11 +183,7 @@ ProjectiveCam::get_GPA_world_coord(fawkes::point_t img_p) const
   
   wld_v /= wld_v.z();
 
-  if (wld_v.x() < 0)
-  {
-    cout << "img x: " << img_p.x << " y: " << img_p.y << " - world x: " << wld_v.x() << " y: " << wld_v.y() << endl;
-    throw AboveHorizonException("The given point is above the horizon!\n");
-  }
+  if (wld_v.x() < 0) throw AboveHorizonException("The given point is above the horizon!\n", img_p);
 
   fawkes::cart_coord_2d_t res;
   res.x = wld_v.x();

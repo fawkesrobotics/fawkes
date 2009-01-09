@@ -46,7 +46,7 @@ sub check_file()
   }
 
   # Only operate on .h, .c and .cpp files
-  if ( $entry !~ /\.(cpp|h|c)$/ ) {
+  if ( $entry !~ /\.(cpp|h|c|lua)$/ ) {
     return;
   }
 

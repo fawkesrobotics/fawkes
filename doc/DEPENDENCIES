@@ -37,6 +37,9 @@ Fawkes		file			>= 4.21			mandatory
 Fawkes		libstrfunc		>= 8.3			mandatory
 		(required on FreeBSD)
 
+Fawkes		Perl			>= 5.8			mandatory
+		(used for "make license-check")
+
 Fawkes		libexecinfo		>= 1.1			optional
 		(req. on FreeBSD for backtraces in Exception)
 
@@ -64,6 +67,8 @@ All		glibmm			>= 2.14			optional
 All		cairomm			>= 1.4.4		optional
 
 All		glademm			>= 2.6.4		optional
+
+All		gconfmm			>= 2.20			optional
 
 Fawkes Webview	libmicrohttpd		>= 0.3.1		optional
 
@@ -105,6 +110,13 @@ FireVision	Triclops SDK		>= 3.2.0.8		optional
 naomotion	NaoQi			>= 0.1.18		optional
 		(required for NaoQi integration and cross compilation in
 		 nao branch)
+
+skillgui	Graphviz		>= 2.21.20081219.0545	optional
+		(required for graph visualization)
+
+skillgui	Papyrus			>= 0.7.1		optional
+		(required for graph visualization)
+
 
 $Id$
 

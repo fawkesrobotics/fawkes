@@ -38,19 +38,19 @@ class JoystickInterface : public Interface
 
   char num_axes();
   void set_num_axes(const char new_num_axes);
-  size_t maxlenof_num_axes() const;
+  int maxlenof_num_axes() const;
   char num_buttons();
   void set_num_buttons(const char new_num_buttons);
-  size_t maxlenof_num_buttons() const;
+  int maxlenof_num_buttons() const;
   unsigned int pressed_buttons();
   void set_pressed_buttons(const unsigned int new_pressed_buttons);
-  size_t maxlenof_pressed_buttons() const;
+  int maxlenof_pressed_buttons() const;
   float * axis_x();
   void set_axis_x(const float * new_axis_x);
-  size_t maxlenof_axis_x() const;
+  int maxlenof_axis_x() const;
   float * axis_y();
   void set_axis_y(const float * new_axis_y);
-  size_t maxlenof_axis_y() const;
+  int maxlenof_axis_y() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
@@ -61,7 +61,7 @@ class JoystickInterface : public Interface
   unsigned int            mem_serial() const;
   bool                    operator== (Interface &comp) const;
   const unsigned char *   hash() const;
-  size_t                  hash_size() const;
+  int                     hash_size() const;
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);

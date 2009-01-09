@@ -73,16 +73,45 @@ license-check:
 		exit 1; \
 	fi
 
+.PHONY: check uncolored-check
+uncolored-check: check
+check: quickdoc license-check
+
 .PHONY: simple-clean
 simple-clean:
 	$(SILENT)rm -f $(BINDIR)/* $(LIBDIR)/*.so $(if $(LUALIBDIR),$(LUALIBDIR)/*.so) $(PLUGINDIR)/*.so
 
-.PHONY: switch-buildtype
-switch-buildtype: simple-clean
+.PHONY: switch-buildtype print-buildtype
+switch-buildtype:
 	$(SILENT) if [ -z "$(BT)" ]; then \
 		echo -e "$(INDENT_PRINT)$(TRED)--- Usage: make switch-buildtype BT=new_buildtype$(TNORMAL)"; \
+	elif [ "$(BUILD_TYPE)" = "$(BT)" ]; then \
+		echo -e "$(INDENT_PRINT)$(TYELLOW)--- Build type $(BT) is already set$(TNORMAL)"; \
 	else \
 		echo -e "$(INDENT_PRINT)--- Switching build type from $(BUILD_TYPE) to $(BT)"; \
 		sed -i -e 's/^BUILD_TYPE=.*$$/BUILD_TYPE=$(BT)/' etc/buildsys_local/buildtype.mk; \
+		for D in $(BINDIR) $(LIBDIR) $(PLUGINDIR); do \
+			rm -rf $${D}_$(BUILD_TYPE); \
+			mv $$D $${D}_$(BUILD_TYPE); \
+			if [ -d $${D}_$(BT) ]; then \
+				mv $${D}_$(BT) $$D; \
+			else \
+				mkdir $$D; \
+			fi; \
+			find $${D} -name .svn -type d -prune -exec rm -rf {} \; ; \
+			if [ -d $${D}_$(BUILD_TYPE) ]; then \
+				SVNDIRS=`find $${D}_$(BUILD_TYPE) -name .svn -type d -prune`; \
+				for d in $$SVNDIRS; do \
+					t=$${d#$${D}_$(BUILD_TYPE)/}; \
+					t=$$t; \
+					mkdir -p $${D}/$${t%.svn}; \
+					rm -rf $${D}/$$t; \
+					mv $${D}_$(BUILD_TYPE)/$$t $${D}/$$t; \
+				done; \
+			fi; \
+		done; \
 	fi
+
+print-buildtype:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- Current build type: $(BUILD_TYPE)";
 

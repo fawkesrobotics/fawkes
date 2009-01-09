@@ -17,34 +17,34 @@ class HumanoidMotionInterface : public Interface
 
     float max_step_length();
     void set_max_step_length(const float new_max_step_length);
-    size_t maxlenof_max_step_length() const;
+    int maxlenof_max_step_length() const;
     float max_step_height();
     void set_max_step_height(const float new_max_step_height);
-    size_t maxlenof_max_step_height() const;
+    int maxlenof_max_step_height() const;
     float max_step_side();
     void set_max_step_side(const float new_max_step_side);
-    size_t maxlenof_max_step_side() const;
+    int maxlenof_max_step_side() const;
     float max_step_turn();
     void set_max_step_turn(const float new_max_step_turn);
-    size_t maxlenof_max_step_turn() const;
+    int maxlenof_max_step_turn() const;
     float zmp_offset_forward();
     void set_zmp_offset_forward(const float new_zmp_offset_forward);
-    size_t maxlenof_zmp_offset_forward() const;
+    int maxlenof_zmp_offset_forward() const;
     float zmp_offset_sideward();
     void set_zmp_offset_sideward(const float new_zmp_offset_sideward);
-    size_t maxlenof_zmp_offset_sideward() const;
+    int maxlenof_zmp_offset_sideward() const;
     float l_hip_roll_compensation();
     void set_l_hip_roll_compensation(const float new_l_hip_roll_compensation);
-    size_t maxlenof_l_hip_roll_compensation() const;
+    int maxlenof_l_hip_roll_compensation() const;
     float r_hip_roll_compensation();
     void set_r_hip_roll_compensation(const float new_r_hip_roll_compensation);
-    size_t maxlenof_r_hip_roll_compensation() const;
+    int maxlenof_r_hip_roll_compensation() const;
     float hip_height();
     void set_hip_height(const float new_hip_height);
-    size_t maxlenof_hip_height() const;
+    int maxlenof_hip_height() const;
     float torso_sideward_orientation();
     void set_torso_sideward_orientation(const float new_torso_sideward_orientation);
-    size_t maxlenof_torso_sideward_orientation() const;
+    int maxlenof_torso_sideward_orientation() const;
   };
 
   class SetWalkArmsParamsMessage : public Message
@@ -55,19 +55,19 @@ class HumanoidMotionInterface : public Interface
 
     bool is_arms_enabled();
     void set_arms_enabled(const bool new_arms_enabled);
-    size_t maxlenof_arms_enabled() const;
+    int maxlenof_arms_enabled() const;
     float shoulder_pitch_median();
     void set_shoulder_pitch_median(const float new_shoulder_pitch_median);
-    size_t maxlenof_shoulder_pitch_median() const;
+    int maxlenof_shoulder_pitch_median() const;
     float shoulder_pitch_amplitude();
     void set_shoulder_pitch_amplitude(const float new_shoulder_pitch_amplitude);
-    size_t maxlenof_shoulder_pitch_amplitude() const;
+    int maxlenof_shoulder_pitch_amplitude() const;
     float elbow_roll_median();
     void set_elbow_roll_median(const float new_elbow_roll_median);
-    size_t maxlenof_elbow_roll_median() const;
+    int maxlenof_elbow_roll_median() const;
     float elbow_roll_amplitude();
     void set_elbow_roll_amplitude(const float new_elbow_roll_amplitude);
-    size_t maxlenof_elbow_roll_amplitude() const;
+    int maxlenof_elbow_roll_amplitude() const;
   };
 
   class StopMessage : public Message
@@ -85,10 +85,10 @@ class HumanoidMotionInterface : public Interface
 
     float distance();
     void set_distance(const float new_distance);
-    size_t maxlenof_distance() const;
+    int maxlenof_distance() const;
     unsigned int num_samples();
     void set_num_samples(const unsigned int new_num_samples);
-    size_t maxlenof_num_samples() const;
+    int maxlenof_num_samples() const;
   };
 
   class WalkSidewaysMessage : public Message
@@ -99,10 +99,10 @@ class HumanoidMotionInterface : public Interface
 
     float distance();
     void set_distance(const float new_distance);
-    size_t maxlenof_distance() const;
+    int maxlenof_distance() const;
     unsigned int num_samples();
     void set_num_samples(const unsigned int new_num_samples);
-    size_t maxlenof_num_samples() const;
+    int maxlenof_num_samples() const;
   };
 
   class WalkArcMessage : public Message
@@ -113,13 +113,13 @@ class HumanoidMotionInterface : public Interface
 
     float angle();
     void set_angle(const float new_angle);
-    size_t maxlenof_angle() const;
+    int maxlenof_angle() const;
     float radius();
     void set_radius(const float new_radius);
-    size_t maxlenof_radius() const;
+    int maxlenof_radius() const;
     unsigned int num_samples();
     void set_num_samples(const unsigned int new_num_samples);
-    size_t maxlenof_num_samples() const;
+    int maxlenof_num_samples() const;
   };
 
   class TurnMessage : public Message
@@ -130,10 +130,10 @@ class HumanoidMotionInterface : public Interface
 
     float angle();
     void set_angle(const float new_angle);
-    size_t maxlenof_angle() const;
+    int maxlenof_angle() const;
     unsigned int num_samples();
     void set_num_samples(const unsigned int new_num_samples);
-    size_t maxlenof_num_samples() const;
+    int maxlenof_num_samples() const;
   };
 
   class KickMessage : public Message
@@ -144,10 +144,10 @@ class HumanoidMotionInterface : public Interface
 
     LegEnum leg();
     void set_leg(const LegEnum new_leg);
-    size_t maxlenof_leg() const;
+    int maxlenof_leg() const;
     float strength();
     void set_strength(const float new_strength);
-    size_t maxlenof_strength() const;
+    int maxlenof_strength() const;
   };
 
   class ParkMessage : public Message
@@ -158,7 +158,7 @@ class HumanoidMotionInterface : public Interface
 
     float time_sec();
     void set_time_sec(const float new_time_sec);
-    size_t maxlenof_time_sec() const;
+    int maxlenof_time_sec() const;
   };
 
   class GetUpMessage : public Message
@@ -169,60 +169,60 @@ class HumanoidMotionInterface : public Interface
 
     float time_sec();
     void set_time_sec(const float new_time_sec);
-    size_t maxlenof_time_sec() const;
+    int maxlenof_time_sec() const;
   };
 
   bool is_moving();
   void set_moving(const bool new_moving);
-  size_t maxlenof_moving() const;
+  int maxlenof_moving() const;
   float max_step_length();
   void set_max_step_length(const float new_max_step_length);
-  size_t maxlenof_max_step_length() const;
+  int maxlenof_max_step_length() const;
   float max_step_height();
   void set_max_step_height(const float new_max_step_height);
-  size_t maxlenof_max_step_height() const;
+  int maxlenof_max_step_height() const;
   float max_step_side();
   void set_max_step_side(const float new_max_step_side);
-  size_t maxlenof_max_step_side() const;
+  int maxlenof_max_step_side() const;
   float max_step_turn();
   void set_max_step_turn(const float new_max_step_turn);
-  size_t maxlenof_max_step_turn() const;
+  int maxlenof_max_step_turn() const;
   float zmp_offset_forward();
   void set_zmp_offset_forward(const float new_zmp_offset_forward);
-  size_t maxlenof_zmp_offset_forward() const;
+  int maxlenof_zmp_offset_forward() const;
   float zmp_offset_sideward();
   void set_zmp_offset_sideward(const float new_zmp_offset_sideward);
-  size_t maxlenof_zmp_offset_sideward() const;
+  int maxlenof_zmp_offset_sideward() const;
   float l_hip_roll_compensation();
   void set_l_hip_roll_compensation(const float new_l_hip_roll_compensation);
-  size_t maxlenof_l_hip_roll_compensation() const;
+  int maxlenof_l_hip_roll_compensation() const;
   float r_hip_roll_compensation();
   void set_r_hip_roll_compensation(const float new_r_hip_roll_compensation);
-  size_t maxlenof_r_hip_roll_compensation() const;
+  int maxlenof_r_hip_roll_compensation() const;
   float hip_height();
   void set_hip_height(const float new_hip_height);
-  size_t maxlenof_hip_height() const;
+  int maxlenof_hip_height() const;
   float torso_sideward_orientation();
   void set_torso_sideward_orientation(const float new_torso_sideward_orientation);
-  size_t maxlenof_torso_sideward_orientation() const;
+  int maxlenof_torso_sideward_orientation() const;
   bool is_arms_enabled();
   void set_arms_enabled(const bool new_arms_enabled);
-  size_t maxlenof_arms_enabled() const;
+  int maxlenof_arms_enabled() const;
   float shoulder_pitch_median();
   void set_shoulder_pitch_median(const float new_shoulder_pitch_median);
-  size_t maxlenof_shoulder_pitch_median() const;
+  int maxlenof_shoulder_pitch_median() const;
   float shoulder_pitch_amplitude();
   void set_shoulder_pitch_amplitude(const float new_shoulder_pitch_amplitude);
-  size_t maxlenof_shoulder_pitch_amplitude() const;
+  int maxlenof_shoulder_pitch_amplitude() const;
   float elbow_roll_median();
   void set_elbow_roll_median(const float new_elbow_roll_median);
-  size_t maxlenof_elbow_roll_median() const;
+  int maxlenof_elbow_roll_median() const;
   float elbow_roll_amplitude();
   void set_elbow_roll_amplitude(const float new_elbow_roll_amplitude);
-  size_t maxlenof_elbow_roll_amplitude() const;
+  int maxlenof_elbow_roll_amplitude() const;
   unsigned int msgid();
   void set_msgid(const unsigned int new_msgid);
-  size_t maxlenof_msgid() const;
+  int maxlenof_msgid() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
@@ -233,7 +233,7 @@ class HumanoidMotionInterface : public Interface
   unsigned int            mem_serial() const;
   bool                    operator== (Interface &comp) const;
   const unsigned char *   hash() const;
-  size_t                  hash_size() const;
+  int                     hash_size() const;
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);

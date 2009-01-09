@@ -466,9 +466,15 @@ FuseServerClientThread::loop()
     __fuse_server->connection_died(this);
     __alive = false;
   } else if ( p & Socket::POLL_IN ) {
-    // Data can be read
-    recv();
-    process_inbound();
+    try {
+      // Data can be read
+      recv();
+      process_inbound();
+    }
+    catch (...) {
+      __fuse_server->connection_died(this);
+      __alive = false;
+    }
   }
 
   if ( __alive ) {

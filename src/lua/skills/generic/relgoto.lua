@@ -21,143 +21,15 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-local skillenv = require("skills.skiller.skillenv")
+-- Initialize module
 module(..., skillenv.module_init)
 
--- constants
-local DEFAULT_MARGIN = 0.2
-
--- skill state variables
-local msgid = 0
-
-
---- Check status of goto.
--- @param margin the radius of a circle around the destination point,
--- if the robot is within that circle the goto is considered final.
-function checkstatus()
-   if msgid == 0 then -- we did not yet enqueue a goto message
-      return S_RUNNING
-   elseif msgid == navigator:msgid() then
-      if navigator:is_final() then
-	 print("relgoto() is final")
-	 return S_FINAL
-      else
-	 return S_RUNNING
-      end
-   else
-      printf("Message in navigator interface is %u but expected %u", navigator:msgid(), msgid)
-      return S_FAILED
-   end
-end
-
-
---- Parameter parsing to support different call styles.
--- @param ... see skill documentation about supported call styles.
-function parseparams(...)
-   local x, y, ori, phi, dist, margin
-
-   local f = ... -- first var
-   if type(f) == "table" then
-      -- it's called with style 2. or 3.
-      if f.x ~= nil and f.y ~= nil then
-	 -- style 2.
-	 x      = f.x
-	 y      = f.y
-	 if f.ori ~= nil then
-	    ori    = f.ori
-	 else
-	    ori    = math.atan2(y, x)
-	 end
-	 margin = f.margin
-	 --print_debug("2. relgoto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
-      elseif f.phi ~= nil and f.dist ~= nil then
-	 -- style 3.
-	 phi    = f.phi
-	 dist   = f.dist
-	 if f.ori ~= nil then
-	    ori    = f.ori
-	 else
-	    ori    = f.phi
-	 end
-	 margin = f.margin
-	 --print_debug("3. relgoto(phi=" .. phi .. ", dist=" .. dist .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
-      else
-	 error("relgoto called with insufficient parameters")
-      end
-   else
-      -- positional style
-      x, y, ori, margin = ...
-      if x == nil or y == nil then
-	 error("Insufficient parameters for relgoto (positional)")
-      end
-      --print_debug("1. relgoto(x=" .. x .. ", y=" .. y .. ", ori=" .. tostring(ori) .. ", margin=" .. tostring(margin) .. ")")
-   end
-
-   return x, y, ori, phi, dist, margin
-end
-
-
---- Relative goto reset.
-function reset()
-   print("relgoto reset called")
-   msgid = 0
-end
-
-
---- Goto skill.
--- See skill documentation for info.
--- @param ... see skill documentation about supported call styles
-function execute(...)
-
-   -- Check if we reached the destination or if we cannot at all
-   local status = checkstatus()
-   if status ~= S_RUNNING then
-      return status
-   end
-
-   local x, y, ori, phi, dist, margin = parseparams(...)
-
-   -- default values for margin and orientation
-   if tonumber(margin) == nil then
-      margin = DEFAULT_MARGIN
-   end
-   if tonumber(ori) == nil then
-      ori = 0
-   end
-
-   if navigator:has_writer() then
-      if msgid == 0 then
-	 local vm = navigator.MaxVelocityMessage:new(1.0)
-	 navigator:msgq_enqueue_copy(vm)
-
-	 if x ~= nil and y ~= nil then
-	    -- send CartesianGotoMessage
-	    printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
-	    local m = navigator.CartesianGotoMessage:new(x, y, ori)
-	    msgid   = navigator:msgq_enqueue_copy(m)
-	 else
-	    -- send PolarGotoMessage
-	    printf("Sending PolarGotoMessage(%f, %f, %f)", phi, dist, ori)
-	    local m = navigator.PolarGotoMessage:new(phi, dist, ori)
-	    msgid = navigator:msgq_enqueue_copy(m)
-	 end
-
-	 printf("Enqueued message with ID %u", msgid)
-      end
-   else
-      print_error("Navigator not loaded, cannot execute relgoto")
-      return S_FAILED
-   end
-
-   return S_RUNNING
-end
-
-
--- Global variables required for a skill
+-- Crucial skill information
 name               = "relgoto"
+fsm                = SkillHSM:new{name=name, start="RELGOTO"}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "navigator", id = "Navigator", type = "NavigatorInterface"}
+   {v = "navigator", type = "NavigatorInterface"}
 }
 
 documentation      = [==[Relative goto skill.
@@ -191,3 +63,60 @@ has been reached (at least once, the robot might move afterwards for example if 
 brake fast enough or if another robot crashed into this robot). The skill is S_FAILED if
 the navigator started processing another goto message.
 ]==]
+
+-- Initialize as skill module
+skillenv.skill_module(...)
+
+-- States
+fsm:new_jump_state("RELGOTO")
+
+function RELGOTO:init()
+   if navigator:has_writer() then
+      local vm = navigator.MaxVelocityMessage:new(1.0)
+      navigator:msgq_enqueue_copy(vm)
+
+      if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil or
+	 self.fsm.vars[1] ~= nil and self.fsm.vars[2] ~= nil then
+	 -- cartesian goto
+	 local x = self.fsm.vars.x or self.fsm.vars[1]
+	 local y = self.fsm.vars.y or self.fsm.vars[2]
+	 local ori = self.fsm.vars.ori or self.fsm.vars[3] or math.atan2(y, x)
+	 local m = navigator.CartesianGotoMessage:new(x, y, ori)
+	 printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
+	 self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+      elseif self.fsm.vars.phi ~= nil and self.fsm.vars.dist ~= nil then
+	 -- polar goto
+	 local phi, dist = self.fsm.vars.phi, self.fsm.vars.dist
+	 local ori = self.fsm.vars.ori or phi
+	 local m = navigator.PolarGotoMessage:new(phi, dist, ori)
+	 printf("Sending PolarGotoMessage(%f, %f, %f)", phi, dist, ori)
+	 self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+      else
+	 self.param_fail = true
+      end
+   end
+   self.wait_start = 1
+end
+
+function RELGOTO:loop()
+   self.wait_start = self.wait_start + 1
+end
+
+function RELGOTO:jumpcond_paramfail()
+   return self.param_fail
+end
+
+function RELGOTO:jumpcond_navifail()
+   return (self.fsm.vars.msgid == 0
+	   or (self.fsm.vars.msgid ~= navigator:msgid() and self.wait_start > 2)
+	   or not navigator:has_writer()
+	   or self.failed)
+end
+
+function RELGOTO:jumpcond_navifinal()
+   return self.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
+end
+
+RELGOTO:add_transition(FAILED, RELGOTO.jumpcond_paramfail, "Invalid/insufficient parameters")
+RELGOTO:add_transition(FAILED, RELGOTO.jumpcond_navifail, "Navigator failure")
+RELGOTO:add_transition(FINAL, RELGOTO.jumpcond_navifinal, "Position reached")

@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "SpeechSynthInterface.h"
+#include <interfaces/SpeechSynthInterface.h>
 
 #include <core/exceptions/software.h>
 

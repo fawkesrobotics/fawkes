@@ -47,12 +47,23 @@ end
 --]]
 
 require("fawkes.logprint")
-require("skills.skiller.skillenv")
+skillenv = require("skiller.skillenv")
+require("skiller.skillhsm")
 
 fawkes.logprint.init(logger)
-skills.skiller.skillenv.init(SKILLSPACE)
 
--- Interfaces are not yet available at this point!
-require("skills." .. SKILLSPACE)
+-- prints all interfaces
+--[[
+for k,v in pairs(interfaces) do
+   for k2,v2 in pairs(v) do
+      print(k, k2)
+   end
+end
+--]]
+
+skillenv.init(SKILLSPACE)
+
+--skiller.skillhsm.SkillHSM:set_debug(true)
 
 logger:log_debug("Lua startup completed")
+

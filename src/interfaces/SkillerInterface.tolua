@@ -19,7 +19,7 @@ class SkillerInterface : public Interface
 
     char * skill_string();
     void set_skill_string(const char * new_skill_string);
-    size_t maxlenof_skill_string() const;
+    int maxlenof_skill_string() const;
   };
 
   class ExecSkillContinuousMessage : public Message
@@ -30,7 +30,7 @@ class SkillerInterface : public Interface
 
     char * skill_string();
     void set_skill_string(const char * new_skill_string);
-    size_t maxlenof_skill_string() const;
+    int maxlenof_skill_string() const;
   };
 
   class RestartInterpreterMessage : public Message
@@ -63,16 +63,19 @@ class SkillerInterface : public Interface
 
   char * skill_string();
   void set_skill_string(const char * new_skill_string);
-  size_t maxlenof_skill_string() const;
+  int maxlenof_skill_string() const;
+  char * error();
+  void set_error(const char * new_error);
+  int maxlenof_error() const;
   unsigned int exclusive_controller();
   void set_exclusive_controller(const unsigned int new_exclusive_controller);
-  size_t maxlenof_exclusive_controller() const;
+  int maxlenof_exclusive_controller() const;
   SkillStatusEnum status();
   void set_status(const SkillStatusEnum new_status);
-  size_t maxlenof_status() const;
+  int maxlenof_status() const;
   bool is_continuous();
   void set_continuous(const bool new_continuous);
-  size_t maxlenof_continuous() const;
+  int maxlenof_continuous() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
@@ -83,7 +86,7 @@ class SkillerInterface : public Interface
   unsigned int            mem_serial() const;
   bool                    operator== (Interface &comp) const;
   const unsigned char *   hash() const;
-  size_t                  hash_size() const;
+  int                     hash_size() const;
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);

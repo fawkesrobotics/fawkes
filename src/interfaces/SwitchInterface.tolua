@@ -12,10 +12,10 @@ class SwitchInterface : public Interface
 
     bool is_enabled();
     void set_enabled(const bool new_enabled);
-    size_t maxlenof_enabled() const;
+    int maxlenof_enabled() const;
     float value();
     void set_value(const float new_value);
-    size_t maxlenof_value() const;
+    int maxlenof_value() const;
   };
 
   class EnableSwitchMessage : public Message
@@ -34,22 +34,22 @@ class SwitchInterface : public Interface
 
   bool is_enabled();
   void set_enabled(const bool new_enabled);
-  size_t maxlenof_enabled() const;
+  int maxlenof_enabled() const;
   float value();
   void set_value(const float new_value);
-  size_t maxlenof_value() const;
+  int maxlenof_value() const;
   float history();
   void set_history(const float new_history);
-  size_t maxlenof_history() const;
+  int maxlenof_history() const;
   unsigned int short_activations();
   void set_short_activations(const unsigned int new_short_activations);
-  size_t maxlenof_short_activations() const;
+  int maxlenof_short_activations() const;
   unsigned int long_activations();
   void set_long_activations(const unsigned int new_long_activations);
-  size_t maxlenof_long_activations() const;
+  int maxlenof_long_activations() const;
   unsigned int activation_count();
   void set_activation_count(const unsigned int new_activation_count);
-  size_t maxlenof_activation_count() const;
+  int maxlenof_activation_count() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
@@ -60,7 +60,7 @@ class SwitchInterface : public Interface
   unsigned int            mem_serial() const;
   bool                    operator== (Interface &comp) const;
   const unsigned char *   hash() const;
-  size_t                  hash_size() const;
+  int                     hash_size() const;
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);

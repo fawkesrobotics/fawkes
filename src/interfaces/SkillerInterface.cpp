@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "SkillerInterface.h"
+#include <interfaces/SkillerInterface.h>
 
 #include <core/exceptions/software.h>
 
@@ -53,9 +53,10 @@ SkillerInterface::SkillerInterface() : Interface()
   data      = (SkillerInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(Interface::IFT_STRING, "skill_string", 1024, data->skill_string);
+  add_fieldinfo(Interface::IFT_STRING, "error", 128, data->error);
   add_fieldinfo(Interface::IFT_UINT, "exclusive_controller", 1, &data->exclusive_controller);
   add_fieldinfo(Interface::IFT_BOOL, "continuous", 1, &data->continuous);
-  unsigned char tmp_hash[] = {0x7b, 0xe3, 0xf0, 0xfe, 0x60, 0x4d, 0x22, 0x40, 0x7f, 0x8e, 0x7e, 0x1d, 0x92, 0x9c, 0x83, 0x4c};
+  unsigned char tmp_hash[] = {0x32, 0xff, 0x50, 0x8d, 0xe7, 0xfa, 0x34, 0x45, 0x8a, 0xad, 0x75, 0x87, 0x31, 0x1a, 0x75, 0x38};
   set_hash(tmp_hash);
 }
 
@@ -99,6 +100,40 @@ void
 SkillerInterface::set_skill_string(const char * new_skill_string)
 {
   strncpy(data->skill_string, new_skill_string, sizeof(data->skill_string));
+}
+
+/** Get error value.
+ * 
+      String describing the error. Can be set by a skill when it fails.
+    
+ * @return error value
+ */
+char *
+SkillerInterface::error() const
+{
+  return data->error;
+}
+
+/** Get maximum length of error value.
+ * @return length of error value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SkillerInterface::maxlenof_error() const
+{
+  return 128;
+}
+
+/** Set error value.
+ * 
+      String describing the error. Can be set by a skill when it fails.
+    
+ * @param new_error new error value
+ */
+void
+SkillerInterface::set_error(const char * new_error)
+{
+  strncpy(data->error, new_error, sizeof(data->error));
 }
 
 /** Get exclusive_controller value.

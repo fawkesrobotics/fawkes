@@ -26,35 +26,38 @@
 #ifndef __FIREVISION_FVUTILS_DRAWER_H_
 #define __FIREVISION_FVUTILS_DRAWER_H_
 
+#include <fvutils/color/yuv.h>
+
 class Drawer {
 
  public:
   Drawer();
   ~Drawer();
 
-  void drawCircle(int center_x, int center_y, unsigned int radius);
+  void draw_circle(int center_x, int center_y, unsigned int radius);
 
-  void drawRectangle(unsigned int x, unsigned int y,
+  void draw_rectangle(unsigned int x, unsigned int y,
 		     unsigned int w, unsigned int h);
 
-  void drawRectangleInverted(unsigned int x, unsigned int y,
+  void draw_rectangle_inverted(unsigned int x, unsigned int y,
 			     unsigned int w, unsigned int h);
 
-  void drawPoint(unsigned int x, unsigned int y);
-  void colorPoint(unsigned int x, unsigned int y);
-  void drawLine(unsigned int x_start, unsigned int y_start,
+  void draw_point(unsigned int x, unsigned int y);
+  void color_point(unsigned int x, unsigned int y);
+  void draw_line(unsigned int x_start, unsigned int y_start,
 		unsigned int x_end, unsigned int y_end);
 
-  void setBuffer(unsigned char *buffer,
+  void set_buffer(unsigned char *buffer,
 		 unsigned int width, unsigned int height);
 
-  void setColor(unsigned char y, unsigned char u, unsigned char v);
+  void set_color(unsigned char y, unsigned char u, unsigned char v);
+  void set_color(YUV_t color);
 
  private:
-  unsigned char  *buffer;
-  unsigned int    width;
-  unsigned int    height;
-  unsigned char   color[3];
+  unsigned char  *__buffer;
+  unsigned int    __width;
+  unsigned int    __height;
+  YUV_t           __color;
 
 };
 

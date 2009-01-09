@@ -18,25 +18,61 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/gui.mk
 
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
-LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+ifneq ($(PKGCONFIG),)
+  HAVE_PAPYRUS  = $(if $(shell $(PKGCONFIG) --exists 'papyrus-1.0' 'papyrusmm-1.0'; echo $${?/1/}),1,0)
+  HAVE_GRAPHVIZ = $(if $(shell $(PKGCONFIG) --exists 'libgvc'; echo $${?/1/}),1,0)
+  HAVE_GCONFMM  = $(if $(shell $(PKGCONFIG) --exists 'gconfmm-2.6'; echo $${?/1/}),1,0)
 
-LIBS_skillgui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard fawkesinterfaces fawkesguiutils
-OBJS_skillgui = main.o skillgui.o
-OBJS_all = $(OBJS_skillgui)
+  ifeq ($(HAVE_PAPYRUS),1)
+    CFLAGS_PAPYRUS  = $(shell $(PKGCONFIG) --cflags 'papyrus-1.0' 'papyrusmm-1.0')
+    LDFLAGS_PAPYRUS = $(shell $(PKGCONFIG) --libs 'papyrus-1.0' 'papyrusmm-1.0')
+  else
+    GUI_ERROR += (papyrus/papyrusmm not installed)
+  endif
+  ifeq ($(HAVE_GRAPHVIZ),1)
+    CFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --cflags 'libgvc') -DWITH_CODEGENS
+    LDFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --libs 'libgvc')
+  else
+    GUI_ERROR += (graphviz not installed)
+  endif
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
+  ifeq ($(HAVE_GCONFMM),1)
+    CFLAGS_GCONFMM  = $(shell $(PKGCONFIG) --cflags 'gconfmm-2.6')
+    LDFLAGS_GCONFMM = $(shell $(PKGCONFIG) --libs 'gconfmm-2.6')
+  else
+    GUI_ERROR += (GConfmm not installed)
+  endif
+endif
+
+CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM) $(CFLAGS_PAPYRUS) \
+	   $(CFLAGS_GRAPHVIZ) $(CFLAGS_GCONFMM)
+LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM) $(LDFLAGS_PAPYRUS) \
+	   $(LDFLAGS_GRAPHVIZ) $(LDFLAGS_GCONFMM)
+
+LIBS_skillgui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard fawkesguiutils \
+		SkillerInterface SkillerDebugInterface
+OBJS_skillgui = main.o skillgui.o graph_viewport.o gvplugin_skillgui_papyrus.o
+# gvplugin_skillgui_cairo.o
+# graph_viewport.o gvplugin_skillgui_papyrus.o
+
+OBJS_all = $(OBJS_skillgui) $(OBJS_libgvplugin_skillgui)
+
+ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(HAVE_PAPYRUS)$(HAVE_GRAPHVIZ)$(HAVE_GCONFMM),11111)
   BINS_gui = $(BINDIR)/skillgui
 else
   WARN_TARGETS += warning_skillgui
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
+  ifneq ($(WARN_TARGETS),)
 gui: $(WARN_TARGETS)
+all: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
 warning_skillgui:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building skillgui$(TNORMAL) $(GUI_ERROR)";
+
+  endif
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

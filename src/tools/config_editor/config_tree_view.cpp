@@ -99,6 +99,8 @@ ConfigTreeView::ConfigTreeView( BaseObjectType* cobject,
   ref_xml->get_widget_derived("dlgConfigRemove", m_dlg_remove);
   
   m_config_tree = Gtk::TreeStore::create(m_config_record);
+  m_config_tree->set_sort_column(0, Gtk::SORT_ASCENDING);
+
   set_model(m_config_tree);
   append_column("Path", m_config_record.node);
 
@@ -445,6 +447,7 @@ ConfigTreeView::edit_entry(const Gtk::TreeIter& iter)
 	    const char* t = type.c_str();
 
             is_default = m_dlg_edit->get_is_default();
+            if (is_default) m_config->erase(p);
 
 	    if ( m_config->is_bool(p) ) 
 	      {
@@ -496,7 +499,6 @@ ConfigTreeView::edit_entry(const Gtk::TreeIter& iter)
 		set_value(p, t, is_default, s);
 	      }
 
-            if (is_default) m_config->erase(p);
 	    ret_val = true;
 
 	    break;

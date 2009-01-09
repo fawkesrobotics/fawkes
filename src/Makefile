@@ -24,6 +24,6 @@ include $(BASEDIR)/etc/buildsys/rules.mk
 # error. This is also necessary for working parallel build (i.e. for dual core)
 interfaces mainapp firevision plugins tools: libs
 mainapp plugins firevision tools: interfaces
-tools: mainapp
+tools: mainapp plugins
 plugins: firevision
 

@@ -50,14 +50,16 @@ class Time
 
   const timeval* get_timeval() const;
 
+  void set_time(const timeval* tv);
   void set_time(long ms);
   void set_time(float sec);
+  void set_time(const Time &t);
+
+  void add(float seconds);
 
   Time & stamp();
 
-  Time   operator+(const float sec) const;
   Time   operator+(const Time& t) const;
-  Time   operator-(const Time& t) const;
   float  operator-(const Time* t) const;
 
   const char * str();

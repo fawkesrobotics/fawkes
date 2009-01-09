@@ -3,7 +3,7 @@
  *  context.h - Fawkes Lua Context
  *
  *  Created: Fri May 23 11:29:01 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -26,6 +26,7 @@
 #define __LUA_CONTEXT_H_
 
 #include <lua/exceptions.h>
+#include <core/utils/lock_list.h>
 #include <utils/system/fam.h>
 
 #include <lua.hpp>
@@ -36,13 +37,18 @@
 #include <string>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
+class LuaContextWatcher;
 class Mutex;
 
 class LuaContext : public FamListener
 {
  public:
-  LuaContext(bool watch_dirs = true);
+  LuaContext(bool watch_dirs = true, bool enable_tracebacks = true);
+  LuaContext(lua_State *L);
   ~LuaContext();
 
   void set_start_script(const char *start_script);
@@ -74,30 +80,51 @@ class LuaContext : public FamListener
   void remove_global(const char *name);
   void set_global(const char *name);
 
-  void push_usertype(void *data, const char *type_name,
-		     const char *name_space = 0);
-  void push_string(const char *value);
-  void push_number(lua_Number value);
   void push_boolean(bool value);
+  void push_fstring(const char *format, ...);
   void push_integer(lua_Integer value);
+  void push_light_user_data(void *p);
+  void push_lstring(const char *s, size_t len);
+  void push_nil();
+  void push_number(lua_Number value);
+  void push_string(const char *value);
+  void push_thread();
+  void push_value(int idx);
+  void push_vfstring(const char *format, va_list arg);
+  void push_usertype(void *data, const char *type_name, const char *name_space = 0);
+
   void pop(int n);
+  void remove(int idx);
   int  stack_size();
 
   void create_table(int narr = 0, int nrec = 0);
   void set_table(int t_index = -3);
   void set_field(const char *key, int t_index = -2);
 
+  void get_table(int idx);
+  void get_field(int idx, const char *k);
+  void get_global(const char *name);
+
   lua_Number   to_number(int idx);
   lua_Integer  to_integer(int idx);
   bool         to_boolean(int idx);
   const char * to_string(int idx);
 
-  bool         is_number(int idx);
   bool         is_boolean(int idx);
+  bool         is_cfunction(int idx);
+  bool         is_function(int idx);
+  bool         is_light_user_data(int idx);
+  bool         is_nil(int idx);
+  bool         is_number(int idx);
   bool         is_string(int idx);
+  bool         is_table(int idx);
+  bool         is_thread(int idx);
 
   size_t       objlen(int idx);
   void         setfenv(int idx = -2);
+
+  void         add_watcher(LuaContextWatcher *watcher);
+  void         remove_watcher(LuaContextWatcher *watcher);
 
   /* from FamListener */
   virtual void fam_event(const char *filename, unsigned int mask);
@@ -112,6 +139,8 @@ class LuaContext : public FamListener
 
  private:
   lua_State *__L;
+  bool       __owns_L;
+  bool       __enable_tracebacks;
 
   Mutex  *__lua_mutex;
   char   *__start_script;
@@ -133,6 +162,8 @@ class LuaContext : public FamListener
   std::map<std::string, lua_Integer>::iterator  __integers_it;
 
   FileAlterationMonitor  *__fam;
+
+  LockList<LuaContextWatcher *> __watchers;
 
 };
 

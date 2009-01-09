@@ -22,7 +22,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/firestation/fuse_image_list_widget.h>
+#include "fuse_image_list_widget.h"
 
 #include <fvutils/net/fuse_message.h>
 #include <fvutils/net/fuse_imagelist_content.h>
@@ -32,7 +32,7 @@
 
 using namespace fawkes;
 
-/** @class FuseImageListWidget <tools/firestation/fuse_image_list_widget.h>
+/** @class FuseImageListWidget fuse_image_list_widget.h <fvwidgets/fuse_image_list_widget.h>
  * This widget displays all available Fuse images in a tree view. It also can check
  * the registered host for new images, regularly.
  * @author Daniel Beck
@@ -43,8 +43,6 @@ FuseImageListWidget::FuseImageListWidget()
 {
   m_cur_client.active = false;
 
-  m_trv_image_list = 0;
-
   m_new_clients.clear();
   m_delete_clients.clear();
 
@@ -52,6 +50,8 @@ FuseImageListWidget::FuseImageListWidget()
 
   m_signal_get_image_list.connect( sigc::mem_fun( *this, &FuseImageListWidget::get_image_list) );
   m_signal_delete_clients.connect( sigc::mem_fun( *this, &FuseImageListWidget::delete_clients) );
+
+  set_image_list_trv(this);
 }
 
 /** Destructor. */
@@ -85,34 +85,34 @@ FuseImageListWidget::~FuseImageListWidget()
  */
 void
 FuseImageListWidget::add_fountain_service( const char* name,
-					   const char* host_name,
-					   uint32_t port )
+                                           const char* host_name,
+                                           uint32_t port )
 {
   // check whether it's already in the tree
   m_img_list_mutex.lock();
   Gtk::TreeModel::Children children = m_image_list->children();
   for ( Gtk::TreeModel::Children::iterator iter = children.begin();
-	iter != children.end(); ++iter )
+        iter != children.end(); ++iter )
     {
       Gtk::TreeModel::Row row = *iter;
       if ( row[m_image_record.service_name] == Glib::ustring(name) )
-	{ 
-	  m_img_list_mutex.unlock();
-	  return; 
-	}
+        { 
+          m_img_list_mutex.unlock();
+          return; 
+        }
     }
   m_img_list_mutex.unlock();
 
   // check if there is already a waiting request for this service
   m_new_clients.lock();
   for ( LockList<ClientData>::iterator iter = m_new_clients.begin();
-	iter != m_new_clients.end(); ++iter )
+        iter != m_new_clients.end(); ++iter )
     {
       if (name == iter->service_name)
-	{ 
-	  m_new_clients.unlock();
-	  return;
-	}
+        { 
+          m_new_clients.unlock();
+          return;
+        }
     }
   m_new_clients.unlock();
 
@@ -140,14 +140,14 @@ FuseImageListWidget::remove_fountain_service(const char* name)
     {
       Gtk::TreeModel::Row row = *iter;
       if ( row[m_image_record.service_name] == Glib::ustring(name) )
-	{
-	  iter = m_image_list->erase(iter);
-	  m_image_list->row_deleted( m_image_list->get_path(iter) );
- 	}
+        {
+          iter = m_image_list->erase(iter);
+          m_image_list->row_deleted( m_image_list->get_path(iter) );
+        }
       else
-	{
-	  ++iter;
-	}
+        {
+          ++iter;
+        }
     }
   m_img_list_mutex.unlock();
 }
@@ -219,7 +219,7 @@ FuseImageListWidget::set_auto_update(bool active, unsigned int interval_sec)
   if (m_auto_update)
     {
       sigc::connection conn = Glib::signal_timeout().connect( sigc::mem_fun(*this, &FuseImageListWidget::update_image_list),
-							      interval_sec * 1000);
+                                                              interval_sec * 1000);
     }
 }
 
@@ -232,7 +232,7 @@ FuseImageListWidget::set_auto_update(bool active, unsigned int interval_sec)
  */
 bool
 FuseImageListWidget::get_selected_image( std::string& host_name, unsigned short& port,
-					 std::string& image_id, bool& compression )
+                                         std::string& image_id, bool& compression )
 {
   if ( !m_trv_image_list )
     { return false; }
@@ -307,7 +307,7 @@ FuseImageListWidget::get_image_list()
   try
     {
       m_cur_client.client = new FuseClient( m_cur_client.host_name.c_str(), 
-					    m_cur_client.port, this );
+                                            m_cur_client.port, this );
       m_cur_client.client->connect();
       m_cur_client.client->start();
       m_cur_client.client->enqueue(FUSE_MT_GET_IMAGE_LIST);
@@ -344,26 +344,28 @@ FuseImageListWidget::delete_clients()
 bool
 FuseImageListWidget::update_image_list()
 {
-  m_img_list_mutex.lock();
-  Gtk::TreeModel::Children children = m_image_list->children();
-  for ( Gtk::TreeModel::Children::iterator iter = children.begin();
-	iter != children.end(); ++iter )
+  if (m_img_list_mutex.try_lock())
     {
-      if ( (*iter)[m_image_record.image_id] == "invalid" )
-	{
-	  ClientData data;
-	  data.client = 0;
-	  Glib::ustring service_name = (*iter)[m_image_record.service_name];
-	  Glib::ustring host_name = (*iter)[m_image_record.host_name];
-	  data.service_name = std::string( service_name.c_str() );
-	  data.host_name = std::string( host_name.c_str() );
-	  data.port = (*iter)[m_image_record.port];
-	  data.active = false;
-
-	  m_new_clients.push_back_locked(data);
-	}
+      Gtk::TreeModel::Children children = m_image_list->children();
+      for ( Gtk::TreeModel::Children::iterator iter = children.begin();
+            iter != children.end(); ++iter )
+        {
+          if ( (*iter)[m_image_record.image_id] == "invalid" )
+            {
+              ClientData data;
+              data.client = 0;
+              Glib::ustring service_name = (*iter)[m_image_record.service_name];
+              Glib::ustring host_name = (*iter)[m_image_record.host_name];
+              data.service_name = std::string( service_name.c_str() );
+              data.host_name = std::string( host_name.c_str() );
+              data.port = (*iter)[m_image_record.port];
+              data.active = false;
+    
+              m_new_clients.push_back_locked(data);
+            }
+        }
+      m_img_list_mutex.unlock();
     }
-  m_img_list_mutex.unlock();
 
   m_signal_get_image_list();
 
@@ -372,7 +374,7 @@ FuseImageListWidget::update_image_list()
 
 void
 FuseImageListWidget::fuse_invalid_server_version(uint32_t local_version, 
-						uint32_t remote_version) throw()
+                                                uint32_t remote_version) throw()
 {
   printf("Invalid versions: local: %u   remote: %u\n", local_version, remote_version);
 }
@@ -401,79 +403,79 @@ FuseImageListWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
     {
     case FUSE_MT_IMAGE_LIST:
       {
-	// check whether it's already in the tree
-	m_img_list_mutex.lock();
-	Gtk::TreeModel::Children children = m_image_list->children();
-	Gtk::TreeModel::Children::iterator iter = children.begin();
-	while ( iter != children.end() )
-	  {
-	    Gtk::TreeModel::Row row = *iter;
-	    if ( row[m_image_record.service_name] == Glib::ustring(m_cur_client.service_name) )
-	      {
-		iter = m_image_list->erase(iter);
-	      }
-	    else
-	      {
-		++iter;
-	      }
-	  }
+        // check whether it's already in the tree
+        m_img_list_mutex.lock();
+        Gtk::TreeModel::Children children = m_image_list->children();
+        Gtk::TreeModel::Children::iterator iter = children.begin();
+        while ( iter != children.end() )
+          {
+            Gtk::TreeModel::Row row = *iter;
+            if ( row[m_image_record.service_name] == Glib::ustring(m_cur_client.service_name) )
+              {
+                iter = m_image_list->erase(iter);
+              }
+            else
+              {
+                ++iter;
+              }
+          }
 
-	try
-	  {
-	    FuseImageListContent* content = m->msgc<FuseImageListContent>();
-	    if ( content->has_next() )
-	      {
-		Gtk::TreeModel::Row row = *m_image_list->append();
-		row[m_image_record.display_text] = Glib::ustring(m_cur_client.host_name);
-		row[m_image_record.service_name] = Glib::ustring(m_cur_client.service_name);
-		row[m_image_record.host_name]    = Glib::ustring(m_cur_client.host_name);
-		row[m_image_record.port]         = m_cur_client.port;
-		row[m_image_record.colorspace]   = 0;
-		row[m_image_record.image_id]     = "invalid";
-		row[m_image_record.width]        = 0;
-		row[m_image_record.height]       = 0;
-		row[m_image_record.buffer_size]  = 0;
-		
-		Gtk::TreeModel::Path path = m_image_list->get_path(row);
+        try
+          {
+            FuseImageListContent* content = m->msgc<FuseImageListContent>();
+            if ( content->has_next() )
+              {
+                Gtk::TreeModel::Row row = *m_image_list->append();
+                row[m_image_record.display_text] = Glib::ustring(m_cur_client.host_name);
+                row[m_image_record.service_name] = Glib::ustring(m_cur_client.service_name);
+                row[m_image_record.host_name]    = Glib::ustring(m_cur_client.host_name);
+                row[m_image_record.port]         = m_cur_client.port;
+                row[m_image_record.colorspace]   = 0;
+                row[m_image_record.image_id]     = "invalid";
+                row[m_image_record.width]        = 0;
+                row[m_image_record.height]       = 0;
+                row[m_image_record.buffer_size]  = 0;
+                
+                Gtk::TreeModel::Path path = m_image_list->get_path(row);
 
-		while ( content->has_next() )
-		  {
-		    FUSE_imageinfo_t* image_info = content->next();
-		    char image_id[IMAGE_ID_MAX_LENGTH + 1];
-		    image_id[IMAGE_ID_MAX_LENGTH] = '\0';
-		    strncpy(image_id, image_info->image_id, IMAGE_ID_MAX_LENGTH);
+                while ( content->has_next() )
+                  {
+                    FUSE_imageinfo_t* image_info = content->next();
+                    char image_id[IMAGE_ID_MAX_LENGTH + 1];
+                    image_id[IMAGE_ID_MAX_LENGTH] = '\0';
+                    strncpy(image_id, image_info->image_id, IMAGE_ID_MAX_LENGTH);
 
-		    Gtk::TreeModel::Row childrow = *m_image_list->append( row.children() );
-		    childrow[m_image_record.display_text] = Glib::ustring(image_id);
-		    childrow[m_image_record.service_name] = Glib::ustring(m_cur_client.service_name);
-		    childrow[m_image_record.host_name]    = Glib::ustring(m_cur_client.host_name);
-		    childrow[m_image_record.port]         = m_cur_client.port;
-		    childrow[m_image_record.colorspace]   = ntohl(image_info->colorspace);
-		    childrow[m_image_record.image_id]     = Glib::ustring(image_id);
-		    childrow[m_image_record.width]        = ntohl(image_info->width);
-		    childrow[m_image_record.height]       = ntohl(image_info->height);
-		    childrow[m_image_record.buffer_size]  = ntohl(image_info->buffer_size);
-		  }
+                    Gtk::TreeModel::Row childrow = *m_image_list->append( row.children() );
+                    childrow[m_image_record.display_text] = Glib::ustring(image_id);
+                    childrow[m_image_record.service_name] = Glib::ustring(m_cur_client.service_name);
+                    childrow[m_image_record.host_name]    = Glib::ustring(m_cur_client.host_name);
+                    childrow[m_image_record.port]         = m_cur_client.port;
+                    childrow[m_image_record.colorspace]   = ntohl(image_info->colorspace);
+                    childrow[m_image_record.image_id]     = Glib::ustring(image_id);
+                    childrow[m_image_record.width]        = ntohl(image_info->width);
+                    childrow[m_image_record.height]       = ntohl(image_info->height);
+                    childrow[m_image_record.buffer_size]  = ntohl(image_info->buffer_size);
+                  }
 
-		m_trv_image_list->expand_row(path, false);
-	      }
+                m_trv_image_list->expand_row(path, false);
+              }
 
-	    delete content;
-	  }
-	catch (Exception& e)
-	  {
-	    e.print_trace();
-	  }
+            delete content;
+          }
+        catch (Exception& e)
+          {
+            e.print_trace();
+          }
 
-	m_img_list_mutex.unlock();
+        m_img_list_mutex.unlock();
 
-	m_delete_clients.push_locked(m_cur_client.client);
-	m_cur_client.active = false;
+        m_delete_clients.push_locked(m_cur_client.client);
+        m_cur_client.active = false;
 
-	m_signal_get_image_list();
-	m_signal_delete_clients();
-	
-	break;
+        m_signal_get_image_list();
+        m_signal_delete_clients();
+        
+        break;
       }
 
     default:

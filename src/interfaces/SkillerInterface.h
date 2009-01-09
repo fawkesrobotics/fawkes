@@ -61,6 +61,9 @@ class SkillerInterface : public Interface
       Currently executed skill string, at least the first 1023 bytes of it.
       Must be properly null-terminated.
      */
+    char error[128]; /**< 
+      String describing the error. Can be set by a skill when it fails.
+     */
     SkillStatusEnum status; /**< 
       The status of the current skill execution.
      */
@@ -182,6 +185,9 @@ class SkillerInterface : public Interface
   char * skill_string() const;
   void set_skill_string(const char * new_skill_string);
   size_t maxlenof_skill_string() const;
+  char * error() const;
+  void set_error(const char * new_error);
+  size_t maxlenof_error() const;
   unsigned int exclusive_controller() const;
   void set_exclusive_controller(const unsigned int new_exclusive_controller);
   size_t maxlenof_exclusive_controller() const;

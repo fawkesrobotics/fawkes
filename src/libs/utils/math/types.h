@@ -65,6 +65,38 @@ typedef struct {
   float ori;    /**< orientation */
 } field_pos_t;
 
+/** Describes a field line */
+typedef struct field_line_struct{
+  cart_coord_2d_t start;   /**< start of the line [m] */
+  cart_coord_2d_t end;     /**< end of the line [m] */
+
+  /** 
+   * Constructor
+   * @param start of the line
+   * @param end of the line
+   */
+  field_line_struct(fawkes::cart_coord_2d_t start, fawkes::cart_coord_2d_t end)
+  {
+    this->start = start;
+    this->end   = end;
+  }
+
+  /** 
+   * Constructor
+   * @param start_x of the line
+   * @param start_y of the line
+   * @param end_x of the line
+   * @param end_y of the line
+   */
+  field_line_struct(float start_x, float start_y, float end_x, float end_y)
+  {
+    this->start.x = start_x;
+    this->start.y = start_y;
+    this->end.x   = end_x;
+    this->end.y   = end_y;
+  }
+} field_line_t;
+
 
 } // end namespace fawkes
 

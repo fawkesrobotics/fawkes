@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_FIRESTATION_FUSE_IMAGE_LIST_WIDGET_H_
-#define __FIREVISION_TOOLS_FIRESTATION_FUSE_IMAGE_LIST_WIDGET_H_
+#ifndef __FIREVISION_FVWIDGETS_FUSE_IMAGE_LIST_WIDGET_H_
+#define __FIREVISION_FVWIDGETS_FUSE_IMAGE_LIST_WIDGET_H_
 
 #include <fvutils/net/fuse_client_handler.h>
 #include <fvutils/net/fuse_client.h>
@@ -34,15 +34,15 @@
 
 #include <gtkmm.h>
 
-class FuseImageListWidget : FuseClientHandler
+class FuseImageListWidget : FuseClientHandler, public Gtk::TreeView
 {
  public:
   FuseImageListWidget();
   virtual ~FuseImageListWidget();
 
   void add_fountain_service( const char* name,
-			     const char* host_name,
-			     uint32_t port );
+                             const char* host_name,
+                             uint32_t port );
   void remove_fountain_service(const char* name);
 
   void set_toggle_compression_chk(Gtk::CheckButton* chk);
@@ -54,11 +54,11 @@ class FuseImageListWidget : FuseClientHandler
   void set_auto_update(bool active, unsigned int interval_sec = 5);
 
   bool get_selected_image( std::string& host_name, unsigned short& port, 
-			   std::string& image_id, bool& compression );
+                           std::string& image_id, bool& compression );
 
   // Fuse client handler
   void fuse_invalid_server_version( uint32_t local_version, 
-				    uint32_t remote_version ) throw();
+                                    uint32_t remote_version ) throw();
   void fuse_connection_established() throw();
   void fuse_connection_died() throw();
   void fuse_inbound_received(FuseNetworkMessage *m) throw();
@@ -68,17 +68,17 @@ class FuseImageListWidget : FuseClientHandler
     {
     public:
       ImageRecord()
-	{
-	  add(display_text);
-	  add(service_name);
-	  add(host_name);
-	  add(port);
-	  add(colorspace);
-	  add(image_id);
-	  add(width);
-	  add(height);
-	  add(buffer_size);
-	}
+        {
+          add(display_text);
+          add(service_name);
+          add(host_name);
+          add(port);
+          add(colorspace);
+          add(image_id);
+          add(width);
+          add(height);
+          add(buffer_size);
+        }
 
       Gtk::TreeModelColumn<Glib::ustring> display_text;
       Gtk::TreeModelColumn<Glib::ustring> service_name;
@@ -129,4 +129,4 @@ class FuseImageListWidget : FuseClientHandler
   Glib::ustring m_cur_image_id;
 };
 
-#endif /* __FIREVISION_TOOLS_FIRESTATION_FUSE_IMAGE_LIST_WIDGET_H_ */
+#endif /* __FIREVISION_FVWIDGETS_FUSE_IMAGE_LIST_WIDGET_H_ */

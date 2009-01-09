@@ -14,10 +14,10 @@ class LedInterface : public Interface
 
     float time_sec();
     void set_time_sec(const float new_time_sec);
-    size_t maxlenof_time_sec() const;
+    int maxlenof_time_sec() const;
     float intensity();
     void set_intensity(const float new_intensity);
-    size_t maxlenof_intensity() const;
+    int maxlenof_intensity() const;
   };
 
   class TurnOnMessage : public Message
@@ -36,7 +36,7 @@ class LedInterface : public Interface
 
   float intensity();
   void set_intensity(const float new_intensity);
-  size_t maxlenof_intensity() const;
+  int maxlenof_intensity() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
@@ -47,7 +47,7 @@ class LedInterface : public Interface
   unsigned int            mem_serial() const;
   bool                    operator== (Interface &comp) const;
   const unsigned char *   hash() const;
-  size_t                  hash_size() const;
+  int                     hash_size() const;
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);

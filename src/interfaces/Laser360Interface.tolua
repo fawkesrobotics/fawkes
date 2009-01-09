@@ -6,7 +6,7 @@ class Laser360Interface : public Interface
 
   float * distances();
   void set_distances(const float * new_distances);
-  size_t maxlenof_distances() const;
+  int maxlenof_distances() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
@@ -17,7 +17,7 @@ class Laser360Interface : public Interface
   unsigned int            mem_serial() const;
   bool                    operator== (Interface &comp) const;
   const unsigned char *   hash() const;
-  size_t                  hash_size() const;
+  int                     hash_size() const;
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);

@@ -3,7 +3,7 @@
 --  test.lua - Skiller test skill space
 --
 --  Created: Thu Aug 14 17:30:45 2008
---  Copyright  2008  Tim Niemueller [www.niemueller.de]
+--  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
 --
@@ -23,9 +23,8 @@
 
 require("fawkes.modinit")
 module(..., fawkes.modinit.register_all);
-local skillenv = require("skills.skiller.skillenv")
 
 skillenv.use_skill("skills.generic.relgoto")
 skillenv.use_skill("skills.generic.goto")
 skillenv.use_skill("skills.generic.say")
-
+skillenv.use_skill("skills.generic.hsmtest")

@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "HumanoidMotionInterface.h"
+#include <interfaces/HumanoidMotionInterface.h>
 
 #include <core/exceptions/software.h>
 

@@ -27,18 +27,10 @@
 
 #include <core/plugin.h>
 
-namespace fawkes {
-  class Barrier;
-}
-
 class SkillerPlugin : public fawkes::Plugin
 {
  public:
   SkillerPlugin(fawkes::Configuration *config);
-  virtual ~SkillerPlugin();
-
- private:
-  fawkes::Barrier *__liaison_exec_barrier;
 };
 
 #endif

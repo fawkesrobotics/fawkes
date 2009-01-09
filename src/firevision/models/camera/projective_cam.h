@@ -35,7 +35,12 @@
 
 class AboveHorizonException : public fawkes::Exception {
   public:
-    AboveHorizonException(const char *msg) throw();
+    AboveHorizonException(const char *msg, fawkes::point_t img_pt) throw();
+
+    fawkes::point_t get_img_pt() const;
+
+  private:
+    fawkes::point_t __img_pt;
 };
 
 class ProjectiveCam

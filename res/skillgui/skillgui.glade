@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Tue Nov  4 18:29:21 2008 -->
+<!--Generated with glade3 3.4.5 on Mon Dec  8 14:03:56 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="wnd_skillgui">
     <property name="width_request">800</property>
@@ -12,6 +12,7 @@
         <child>
           <widget class="GtkToolbar" id="toolbar1">
             <property name="visible">True</property>
+            <property name="toolbar_style">GTK_TOOLBAR_ICONS</property>
             <property name="icon_size">GTK_ICON_SIZE_SMALL_TOOLBAR</property>
             <child>
               <widget class="GtkToolButton" id="tb_connection">
@@ -20,7 +21,7 @@
                 <property name="stock_id">gtk-connect</property>
               </widget>
               <packing>
-                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
@@ -30,36 +31,44 @@
                 <property name="stock_id">gtk-quit</property>
               </widget>
               <packing>
-                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
               <widget class="GtkSeparatorToolItem" id="toolbutton1">
                 <property name="visible">True</property>
               </widget>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="tb_controller">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="stock_id">gtk-no</property>
+              </widget>
               <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
               <widget class="GtkToggleToolButton" id="tb_continuous">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="tooltip_text">Continuous skill execution</property>
                 <property name="stock_id">gtk-redo</property>
               </widget>
               <packing>
-                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
               <widget class="GtkToolButton" id="tb_stop">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="tooltip_text">Stop skill execution</property>
                 <property name="stock_id">gtk-stop</property>
               </widget>
               <packing>
-                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
@@ -67,10 +76,6 @@
                 <property name="visible">True</property>
                 <property name="draw">False</property>
               </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">False</property>
-              </packing>
             </child>
             <child>
               <widget class="GtkToolItem" id="tb_throbber">
@@ -82,10 +87,6 @@
                   </widget>
                 </child>
               </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">False</property>
-              </packing>
             </child>
           </widget>
           <packing>
@@ -93,17 +94,105 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkScrolledWindow" id="scw_log">
+          <widget class="GtkNotebook" id="ntb_tabs">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-            <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
             <child>
-              <widget class="GtkTreeView" id="trv_log">
+              <widget class="GtkScrolledWindow" id="scw_log">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="search_column">3</property>
+                <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                <child>
+                  <widget class="GtkTreeView" id="trv_log">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="search_column">3</property>
+                  </widget>
+                </child>
               </widget>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="label4">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Log</property>
+              </widget>
+              <packing>
+                <property name="type">tab</property>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkVBox" id="vbox3">
+                <property name="visible">True</property>
+                <child>
+                  <widget class="GtkToolbar" id="tb_fsmgraph">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkRadioToolButton" id="tb_skiller">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Skiller</property>
+                        <property name="active">True</property>
+                      </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkRadioToolButton" id="tb_agent">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Agent</property>
+                        <property name="group">tb_skiller</property>
+                      </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkToolItem" id="tb_graphlist">
+                        <property name="visible">True</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkScrolledWindow" id="scw_graph">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="label6">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">FSM</property>
+              </widget>
+              <packing>
+                <property name="type">tab</property>
+                <property name="position">1</property>
+                <property name="tab_fill">False</property>
+              </packing>
             </child>
           </widget>
           <packing>
@@ -120,7 +209,9 @@
               <widget class="GtkAlignment" id="alignment1">
                 <property name="visible">True</property>
                 <property name="top_padding">8</property>
-                <property name="left_padding">12</property>
+                <property name="bottom_padding">4</property>
+                <property name="left_padding">8</property>
+                <property name="right_padding">4</property>
                 <child>
                   <widget class="GtkVBox" id="vbox2">
                     <property name="visible">True</property>
@@ -200,20 +291,56 @@
                       <widget class="GtkHBox" id="hbox3">
                         <property name="visible">True</property>
                         <property name="spacing">4</property>
+                        <property name="homogeneous">True</property>
                         <child>
-                          <widget class="GtkLabel" id="label2">
+                          <widget class="GtkHBox" id="hbox5">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Skill:&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
+                            <child>
+                              <widget class="GtkLabel" id="label2">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Skill:&lt;/b&gt;</property>
+                                <property name="use_markup">True</property>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="lab_skillstring">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="selectable">True</property>
+                              </widget>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
                           </widget>
-                          <packing>
-                            <property name="expand">False</property>
-                          </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="lab_skillstring">
+                          <widget class="GtkHBox" id="hbox4">
                             <property name="visible">True</property>
-                            <property name="xalign">0</property>
+                            <child>
+                              <widget class="GtkLabel" id="label8">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Error:&lt;/b&gt;</property>
+                                <property name="use_markup">True</property>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="lab_error">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </widget>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
                           </widget>
                           <packing>
                             <property name="position">1</property>
@@ -252,6 +379,7 @@
             <child>
               <widget class="GtkComboBoxEntry" id="cbe_skillstring">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <child internal-child="entry">
                   <widget class="GtkEntry" id="comboboxentry-entry1">
                     <property name="visible">True</property>
@@ -265,6 +393,7 @@
             <child>
               <widget class="GtkButton" id="but_exec">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>

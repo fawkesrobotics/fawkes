@@ -22,11 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/skiller/skiller_plugin.h>
-#include <plugins/skiller/liaison_thread.h>
-#include <plugins/skiller/exec_thread.h>
-
-#include <core/threading/barrier.h>
+#include "skiller_plugin.h"
+#include "exec_thread.h"
 
 using namespace fawkes;
 
@@ -45,19 +42,7 @@ using namespace fawkes;
 SkillerPlugin::SkillerPlugin(Configuration *config)
   : Plugin(config)
 {
-  __liaison_exec_barrier = new Barrier(2);
-  SkillerLiaisonThread *slt   = new SkillerLiaisonThread(__liaison_exec_barrier);
-  SkillerExecutionThread *set =  new SkillerExecutionThread(__liaison_exec_barrier, slt);
-  slt->set_execthread(set);
-  thread_list.push_back(slt);
-  thread_list.push_back(set);
-}
-
-
-/** Destructor. */
-SkillerPlugin::~SkillerPlugin()
-{
-  delete __liaison_exec_barrier;
+  thread_list.push_back(new SkillerExecutionThread());
 }
 
 

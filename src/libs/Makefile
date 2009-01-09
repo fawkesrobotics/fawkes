@@ -33,6 +33,7 @@ plugin: core netcomm utils config
 aspect: core utils blackboard netcomm config
 geometry: core
 worldinfo_utils: core netcomm geometry
-lua: core utils
+lua: core utils blackboard config
 interfaces: core interface
 gui_utils: core netcomm
+naoutils: core utils

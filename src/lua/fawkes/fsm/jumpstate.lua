@@ -1,0 +1,175 @@
+
+------------------------------------------------------------------------
+--  jumpstate.lua - FSM Jump state to build Hybrid State Machines (HSM)
+--
+--  Created: Thu Dec 04 10:40:54 2008
+--  Copyright  2008  Tim Niemueller [www.niemueller.de]
+--
+--  $Id$
+--
+------------------------------------------------------------------------
+
+--  This program is free software; you can redistribute it and/or modify
+--  it under the terms of the GNU General Public License as published by
+--  the Free Software Foundation; either version 2 of the License, or
+--  (at your option) any later version.
+--
+--  This program is distributed in the hope that it will be useful,
+--  but WITHOUT ANY WARRANTY; without even the implied warranty of
+--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+--  GNU Library General Public License for more details.
+--
+--  Read the full text in the LICENSE.GPL file in the doc directory.
+
+require("fawkes.modinit")
+
+--- This module provides a state to create a Hybrid State Machine (HSM)
+-- @author Tim Niemueller
+module(..., fawkes.modinit.module_init)
+local fsmmod = require("fawkes.fsm")
+assert(fsmmod, "fsmmod is nil")
+local State = fsmmod.State
+assert(State, "State for JumpState is nil")
+
+
+--- @class JumpState
+-- Hybrid State Machine jump state for FSM.  This class provides a
+-- generic state that makes a Finite State Machine a Hybrid State
+-- Machine (iff only jump states are used). Jump states are states
+-- that do not return a follow state in loop(), but rather set a
+-- number of predefined transitions. Each transition has a jump
+-- condition and the target state. On a call to do_loop() all jump
+-- conditions are evaluated. If one matches this transition is
+-- executed. If multiple could match then only the very first
+-- transition is executed. The order is determined by the order the
+-- transitions where added.
+-- @author Tim Niemueller
+JumpState = { clear_transitions = State.clear_transitions,
+	      get_transitions   = State.get_transitions,
+	      last_transition   = State.last_transition,
+	      init              = State.init,
+	      exit              = State.exit,
+	      loop              = State.loop,
+	      reset             = State.reset,
+	      do_exit           = State.do_exit}
+
+--- Create new jump state.
+-- @param o table with initializations for the object.
+-- @return Initialized FSM state
+function JumpState:new(o)
+   assert(o, "JumpState requires a table as argument")
+   assert(o.name, "JumpState requires a name")
+   assert(o.fsm, "JumpState " .. o.name .. " requires a FSM")
+   assert(not getmetatable(o), "Meta table already set for object")
+   setmetatable(o, self)
+   self.__index = self
+
+   o.dotattr = o.dotattr or {}
+   o.transitions = o.transitions or {}
+   assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
+
+   return o
+end
+
+--- Execute init routines.
+-- This executes the init method. This may contain some general code
+-- executed for every state for derived states. 
+-- @param ... Any parameters, passed to the init() function.
+function JumpState:do_init(...)
+   self:init(...)
+   return self:try_transitions()
+end
+
+
+--- Execute jump state loop.
+-- This will execute the loop and afterwards check if any jump condition
+-- of the registered transitions holds. Iff one holds the checks are immediately
+-- abort and the transition is executed.
+-- @return new state if jump condition holds or false otherwise
+function JumpState:do_loop()
+   self:loop()
+
+   return self:try_transitions()
+end
+
+
+--- Add transition.
+-- Adds a transition for this state. Jump conditions are executing after loop()
+-- has run to check if a transition should happen. The jump condition is a
+-- function whose first return value must be boolean. Iff the return value is
+-- true then the condition holds/fires and the transition is executed. No further
+-- jump conditions will be tried in that case. All (optional) following return
+-- values are passed verbatim to the init() function of the state the transition
+-- points to.
+-- @param state state to switch to if jumpcond holds
+-- @param jumpcond jump condition function, see description above.
+-- @param description a string representation of the jump condition, can
+-- be a plain copy of the code as string or a verbal description, used for
+-- debugging and graph generation
+function JumpState:add_transition(state, jumpcond, description)
+   assert(state, self.name .. ": Follow state is nil while adding '" .. description .. "'")
+   assert(jumpcond, self.name .. ": Jump condition is nil while adding '" .. description .. "'")
+   --printf("%s: When '%s' -> %s (%s)", self.name, description, state.name, tostring(self.transitions))
+   local transition = {state       = state,
+		       jumpcond    = jumpcond,
+		       description = description}
+   table.insert(self.transitions, transition)
+   return transition
+end
+
+
+--- Try all transitions and return a follow state if applicable.
+-- This tries for all added transitions if the jump condition fires. If it does
+-- the follow state is returned with any parameters the jump condition might have
+-- supplied.
+-- @return follow state or nil to stay in current state as first argument, possibly
+-- any number of additional arguments that should be passed to the follow state
+function JumpState:try_transitions()
+   --print("Trying conditions for " .. self.name)
+   for _,t in ipairs(self.transitions) do
+      local rv = { t.jumpcond(self) }
+      local jcfires = rv[1]
+      table.remove(rv, 1)
+      if jcfires then
+	 if self.fsm and self.fsm.debug then
+	    print("Jump condition '" .. tostring(t.description) .. "' FIRES, returning " .. t.state.name)
+	 end
+	 self.last_trans = t
+	 return t.state, unpack(rv)
+      end
+   end
+
+   -- Remain in current state, no jump condition fired
+   return nil
+end
+
+
+--- Jump condition that returns always true.
+-- This is a convenience method that avoid having to write such a function every
+-- time it is needed (for example when using and explicit start state that only
+-- transitions to another state or when just sending a BlackBoard message and then
+-- advancing to a wait state).
+-- @return true
+function JumpState:jumpcond_true()
+   return true
+end
+
+
+--- Checks a number of interfaces for no writer.
+-- This jump condition can be used to check a number of interfaces for a
+-- non-existent writer. For this to work you need to set the nowriter_interfaces
+-- member variable of the state to an array of interfaces to check.
+-- @return true if any of the interfaces in the nowriter_interfaces table does not
+-- have a writer, false if no interfaces given or all interfaces have a writer
+function JumpState:jumpcond_nowriter()
+   if self.nowriter_interfaces and type(self.nowriter_interfaces) == "table" then
+      for _,i in ipairs(self.nowriter_interfaces) do
+	 if not i:has_writer() then
+	    return true
+	 end
+      end
+   else
+      printf("nowriter fail")
+   end
+   return false
+end

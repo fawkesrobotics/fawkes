@@ -72,6 +72,7 @@ FuseClient::FuseClient(const char *hostname, unsigned short int port,
   __outbound_msgq = new FuseNetworkMessageQueue();
 
   __mutex = new Mutex();
+  __recv_mutex = new Mutex();
   __waitcond = new WaitCondition();
   __socket = new StreamSocket();
   __greeting_mutex = new Mutex();
@@ -101,6 +102,7 @@ FuseClient::~FuseClient()
   delete __outbound_msgq;
 
   delete __mutex;
+  delete __recv_mutex;
   delete __waitcond;
   delete __socket;
   delete __greeting_mutex;
@@ -152,6 +154,7 @@ FuseClient::send()
 void
 FuseClient::recv()
 {
+  __recv_mutex->lock();
   try {
     while ( __socket->available() ) {
       FuseNetworkTransceiver::recv(__socket, __inbound_msgq);
@@ -163,6 +166,7 @@ FuseClient::recv()
     __handler->fuse_connection_died();
     __waitcond->wake_all();
   }
+  __recv_mutex->unlock();
 }
 
 
@@ -199,6 +203,54 @@ FuseClient::enqueue(FUSE_message_type_t type)
   FuseNetworkMessage *m = new FuseNetworkMessage(type);
   __outbound_msgq->push_locked(m);  
 }
+
+
+/** Enqueue message and wait for reply.
+ * The wait happens atomically, use this to avoid race conditions.
+ * @param m message to enqueue
+ */
+void
+FuseClient::enqueue_and_wait(FuseNetworkMessage *m)
+{
+  __recv_mutex->lock();
+  m->ref();
+  __outbound_msgq->push_locked(m);
+  __waitcond->wait(__recv_mutex);
+  __recv_mutex->unlock();
+}
+
+
+/** Enqueue message and wait for reply.
+ * The wait happens atomically, use this to avoid race conditions.
+ * @param type type of message
+ * @param payload payload of message
+ * @param payload_size size of payload
+ */
+void
+FuseClient::enqueue_and_wait(FUSE_message_type_t type, void *payload, size_t payload_size)
+{
+  FuseNetworkMessage *m = new FuseNetworkMessage(type, payload, payload_size);
+  __recv_mutex->lock();
+  __outbound_msgq->push_locked(m);  
+  __waitcond->wait(__recv_mutex);
+  __recv_mutex->unlock();
+}
+
+
+/** Enqueue message without payload and wait for reply.
+ * The wait happens atomically, use this to avoid race conditions.
+ * @param type type of message
+ */
+void
+FuseClient::enqueue_and_wait(FUSE_message_type_t type)
+{
+  FuseNetworkMessage *m = new FuseNetworkMessage(type);
+  __recv_mutex->lock();
+  __outbound_msgq->push_locked(m);  
+  __waitcond->wait(__recv_mutex);
+  __recv_mutex->unlock();
+}
+
 
 
 /** Sleep for some time.

@@ -258,7 +258,7 @@ ToLuaInterfaceGenerator::write_superclass_h(FILE *f)
           "  unsigned int            mem_serial() const;\n"
           "  bool                    operator== (Interface &comp) const;\n"
           "  const unsigned char *   hash() const;\n"
-          "  size_t                  hash_size() const;\n"
+          "  int                     hash_size() const;\n"
           "  const char *            hash_printable() const;\n"
           "  bool                    is_writer() const;\n"
 
@@ -300,7 +300,7 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */
     fprintf(f,
 	    "%s%s %s%s();\n"
 	    "%svoid set_%s(const %s new_%s);\n"
-	    "%ssize_t maxlenof_%s() const;\n",
+	    "%sint maxlenof_%s() const;\n",
 	    is.c_str(), (*i).getAccessType().c_str(),
 	    ( ((*i).getType() == "bool" ) ? "is_" : ""),
 	    (*i).getName().c_str(),
