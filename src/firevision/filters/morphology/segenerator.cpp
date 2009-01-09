@@ -72,15 +72,15 @@ SEGenerator::linear(unsigned int width, unsigned int height,
   unsigned char *tmp = (unsigned char *)malloc(colorspace_buffer_size(YUV422_PLANAR, width, height));
   memset(tmp, 0, colorspace_buffer_size(YUV422_PLANAR, width, height));
   Drawer *d = new Drawer();
-  d->setBuffer(tmp, width, height);
-  d->setColor(1, 0, 0);
+  d->set_buffer(tmp, width, height);
+  d->set_color(1, 0, 0);
 
   float a = fawkes::normalize_mirror_rad( slope_angle_rad );
 
   if ( (a == M_PI/2) || (a == -M_PI/2) ) {
     // It's just a vertical line
     // std::cout << "Drawing line from (0,0) -> (0," << height - 1 << ")" << std::endl;
-    d->drawLine(0, 0, 0, height - 1);
+    d->draw_line(0, 0, 0, height - 1);
   } else {
 
     // sectors 3 and 4 can be converted to sector 2 and 1 lines
@@ -91,10 +91,10 @@ SEGenerator::linear(unsigned int width, unsigned int height,
 
     if ( y < 0) {
       // std::cout << "Drawing line from (0,0) -> (" << width - 1 << "," << -y << ")" << std::endl;
-      d->drawLine( 0, 0, width - 1, -y );
+      d->draw_line( 0, 0, width - 1, -y );
     } else {
       // std::cout << "Drawing line from (0," << y << ") -> (" << width - 1 << ",0)" << std::endl;
-      d->drawLine( 0, y, width - 1, 0 );
+      d->draw_line( 0, y, width - 1, 0 );
     }
   }
 
