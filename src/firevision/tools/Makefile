@@ -43,6 +43,11 @@ OBJS_fvstereodecoder = stereodecoder.o
 LIBS_fvtricalcdisp = $(VISION_CAM_LIBS) fawkesutils fvcams fvstereo
 OBJS_fvtricalcdisp = tricalcdisp.o
 
+LIBS_fvtriode = $(VISION_CAM_LIBS) fawkesutils fvcams fvstereo
+OBJS_fvtriode = triode.o triode_visualization.o
+CFLAGS_fvtriode += $(CFLAGS_SDL)
+LDFLAGS_fvtriode += $(LDFLAGS_SDL)
+
 LIBS_fvbb2gettric = $(VISION_CAM_LIBS) fawkesutils fvcams fvutils
 OBJS_fvbb2gettric = bb2gettric.o
 
@@ -68,7 +73,7 @@ LDFLAGS_fvshowyuv += $(LDFLAGS_SDL)
 OBJS_all = $(OBJS_fvshmem) $(OBJS_fvlistfwcams) $(OBJS_fvstereodecoder) \
 	   $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
 	   $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer) \
-	   $(OBJS_fvshowyuv) $(OBJS_fvnet)
+	   $(OBJS_fvshowyuv) $(OBJS_fvnet) $(OBJS_fvtriode)
 BINS_all = $(BINDIR)/fvshmem
 
 ifneq ($(realpath $(SRCDIR)/net.cpp),)
@@ -88,6 +93,20 @@ else
   endif
   ifneq ($(realpath $(SRCDIR)/bb2rectlut.cpp),)
     WARN_TARGETS += warning_bb2rectlut_triclops
+  endif
+endif
+
+ifeq ($(HAVE_TRICLOPS_SDK),1)
+  ifeq ($(HAVE_SDL),1)
+    BINS_all += $(BINDIR)/fvtriode
+  else
+    ifneq ($(realpath $(SRCDIR)/triode.cpp),)
+      WARN_TARGETS += warning_triode_sdl
+    endif
+  endif
+else
+  ifneq ($(realpath $(SRCDIR)/triode.cpp),)
+    WARN_TARGETS += warning_triode_triclops
   endif
 endif
 
@@ -138,6 +157,10 @@ warning_stereodecoder:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building stereodecoder$(TNORMAL) (no Bumblebee2 camera support)";
 warning_tricalcdisp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvtricalcdisp$(TNORMAL) (no Triclops SDK support)";
+warning_triode_triclops:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvtriode$(TNORMAL) (no Triclops SDK support)";
+warning_triode_sdl:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvtriode$(TNORMAL) (SDL[-devel] not installed)";
 warning_bb2gettric:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvbb2gettric$(TNORMAL) (no Bumblebee2 camera support)";
 warning_bb2rectlut_nobb2:

@@ -41,6 +41,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <math.h>
+
 using namespace fawkes;
 
 /// @cond INTERNALS
@@ -951,4 +953,90 @@ TriclopsStereoProcessor::verify_rectification_lut(const char *lut_file)
 
   delete rif;
   return (left_ok && right_ok);
+}
+
+/**Calculates all three cartesian coordinates of the entire disparity map
+ * The values transformed are given by the window (specified by hoff, voff, width and height). settings contains all further information needed (in that order): the angle of the camera, the position of the camera relativ to the robot: x, y, z and the maximum distance of points allowed. Points filtered out by distance are marked as NaN in all three coordinates. Unknown Regions are marked the same way with INFINITY.
+ * @param buffer buffer for the coordinates, 1st index 0: x; 1: y; 2:z, 2nd index denotes the lines, 3rd index denotes the columns
+ * @param hoff horizontal offset of the window
+ * @param voff vertical offset of the window
+ * @param width width of the window
+ * @param height height of the window
+ * @param settings a vector of settings in floating point format (angle,position of camera x, y, z, maximum distance of points)
+ */
+void
+TriclopsStereoProcessor::getall_world_xyz(float ***buffer, int hoff, int voff, int width, int height, float *settings){
+
+  float fx,fy,fz,fed,rho;
+  int   displine, /*zline,*/ px, py;
+
+  float **x = buffer[0], **y = buffer[1], **z = buffer[2];
+
+  const float dnc       = NAN;
+  const float ur        = INFINITY;
+  const float cos_angle = cos(deg2rad(settings[0]));
+  const float sin_angle = sin(deg2rad(settings[0]));
+  const float trans_x   = settings[1];
+  const float trans_y   = settings[2];
+  const float trans_z   = settings[3];
+  const float mqd       = settings[4]*settings[4];
+
+  if( data->enable_subpixel_interpolation ){
+    unsigned short *disp = data->disparity_image_hires.data;
+
+    for(py = 0; py < height; py++){
+      displine = (py + voff) * _width;
+      //zline = py * width;
+      for(px = 0; px < width; px++){
+	if( disp[displine+px+hoff] >= 0xFF00 ){
+	  z[py][px] = x[py][px] = y[py][px] = ur;
+	}
+	else{
+	  triclopsRCD16ToXYZ(data->triclops,py+voff,px+hoff,disp[displine+px+hoff],&fx,&fy,&fz);
+	  fed = x[py][px] = -sin_angle * fy + cos_angle * fz + trans_x;
+	  fz  = z[py][px] =  cos_angle * fy + sin_angle * fz + trans_z;
+	  fy  = y[py][px] =              fx + trans_y;
+	  fx  = fed;
+	  if(fz > 0.0f){
+	    rho = trans_z / ( fz - trans_z );
+	    x[py][px] = fx = fx - rho * ( fx - trans_x );
+	    y[py][px] = fy = fy - rho * ( fy - trans_y );
+	  }
+	  fed = fx*fx + fy*fy;
+	  if(fed > mqd){
+	    z[py][px] = x[py][px] = y[py][px] = dnc;
+	  }
+	}
+      }
+    }
+  }
+  else{
+    unsigned char *disp = data->disparity_image_lores.data;
+
+    for(py = 0; py < height; py++){
+      displine = (py + voff) * _width;
+      //zline = py * width;
+      for(px = 0; px < width; px++){
+	if( disp[displine+px+hoff] == 0 ){
+	  z[py][px] = x[py][px] = y[py][px] = ur;
+	}
+	else{
+	  triclopsRCD8ToXYZ(data->triclops,py+voff,px+hoff,disp[displine+px+hoff],&fx,&fy,&fz);
+	  fed = x[py][px] = -sin_angle * fy + cos_angle * fz + trans_x;
+	  fz  = z[py][px] =  cos_angle * fy + sin_angle * fz + trans_z;
+	  fy  = y[py][px] =              fx + trans_y;
+	  fx  = fed;
+	  if(fz > 0.0f){
+	    rho = trans_z / ( fz - trans_z );
+	    x[py][px] = fx = fx - rho * ( fx - trans_x );
+	    y[py][px] = fy = fy - rho * ( fy - trans_y );
+	  }
+	  fed = fx*fx + fy*fy;
+	  if(fed > mqd){
+	    z[py][px] = x[py][px] = y[py][px] = dnc;
+	  }
+	}
+      }
+    }
+  }
 }

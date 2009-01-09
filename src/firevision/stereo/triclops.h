@@ -84,6 +84,8 @@ class TriclopsStereoProcessor : public StereoProcessor
   void    generate_rectification_lut(const char *lut_file);
   bool    verify_rectification_lut(const char *lut_file);
 
+  virtual void  getall_world_xyz(float ***buffer, int hoff, int voff, int width, int height, float *settings);
+
  private:
   void get_triclops_context_from_camera();
   void deinterlace_green( unsigned char* src, 

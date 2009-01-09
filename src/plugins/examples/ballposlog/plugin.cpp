@@ -46,3 +46,4 @@ BallPosLogPlugin::BallPosLogPlugin(Configuration *config)
 
 PLUGIN_DESCRIPTION("Example that logs ball position")
 EXPORT_PLUGIN(BallPosLogPlugin)
+

@@ -258,7 +258,7 @@ void
 MirrorCalibTool::eval(unsigned int x, unsigned int y, float* dist_ret, float* ori_ret)
 {
 #ifdef HAVE_BULB_CREATOR
-  polar_coord_t coord;
+  polar_coord_2d_t coord;
   coord = m_bulb->getWorldPointRelative(x, y);
 
   *dist_ret = coord.r;
