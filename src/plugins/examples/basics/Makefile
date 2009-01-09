@@ -15,7 +15,7 @@
 
 BASEDIR = ../../../..
 
-LIBS_example = fawkesaspects
+LIBS_example = fawkesaspects TestInterface
 OBJS_example = $(filter-out example_plugin_netping.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 
 LIBS_example_plugin_netping = fawkescore fawkesutils fawkesnetcomm

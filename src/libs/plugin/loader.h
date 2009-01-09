@@ -43,7 +43,8 @@ class PluginLoaderData;
 class PluginLoadException : public Exception
 {
  public:
-  PluginLoadException(const char *format, ...);
+  PluginLoadException(const char *plugin, const char *message);
+  PluginLoadException(const char *plugin, const char *message, Exception &e);
 };
 
 class PluginUnloadException : public Exception

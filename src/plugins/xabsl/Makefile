@@ -53,7 +53,7 @@ XABSL_SOURCES=Action Agent BooleanExpression DecimalExpression Engine \
 OBJS_libxabsl = $(addprefix XABSL/Xabsl/XabslEngine/Xabsl,$(addsuffix .o,$(XABSL_SOURCES)))
 LIBS_all = $(LIBDIR)/libxabsl.so
 
-LIBS_xabsl = xabsl
+LIBS_xabsl = xabsl ObjectPositionInterface SkillerInterface
 OBJS_xabsl = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 PLUGINS_all = $(PLUGINDIR)/xabsl.so
 

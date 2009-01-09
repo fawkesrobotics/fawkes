@@ -52,15 +52,27 @@ class PluginLoaderData
  */
 
 /** Constructor.
- * @param format format string, see printf documentation
+ * @param plugin name of the plugin that caused the exception
+ * @param message message of exception
  */
-PluginLoadException::PluginLoadException(const char *format, ...)
+PluginLoadException::PluginLoadException(const char *plugin, const char *message)
   : Exception()
 {
-  va_list args;
-  va_start(args, format);
-  append_va(format, args);
-  va_end(args);
+  append("Plugin '%s' could not be loaded: %s", plugin, message);
+}
+
+
+/** Constructor.
+ * @param plugin name of the plugin that caused the exception
+ * @param message message of exception
+ * @param e exception to copy further messages from
+ */
+PluginLoadException::PluginLoadException(const char *plugin, const char *message,
+					 Exception &e)
+  : Exception()
+{
+  append("Plugin '%s' could not be loaded: %s", plugin, message);
+  copy_messages(e);
 }
 
 
@@ -117,8 +129,7 @@ PluginLoader::open_module(const char *plugin_name)
   try {
     return d->mm->open_module(module_name.c_str());
   } catch (ModuleOpenException &e) {
-    throw PluginLoadException("PluginLoader failed to open module for plugin %s (%s)",
-			      plugin_name, *(e.begin()));
+    throw PluginLoadException(plugin_name, "failed to open module", e);
   }
 }
 
@@ -127,10 +138,10 @@ Plugin *
 PluginLoader::create_instance(const char *plugin_name, Module *module)
 {
   if ( ! module->has_symbol("plugin_factory") ) {
-    throw PluginLoadException("Symbol 'plugin_factory' not found. Forgot EXPORT_PLUGIN?");
+    throw PluginLoadException(plugin_name, "Symbol 'plugin_factory' not found. Forgot EXPORT_PLUGIN?");
   }
   if ( ! module->has_symbol("plugin_description") ) {
-    throw PluginLoadException("Symbol 'plugin_description' not found. Forgot PLUGIN_DESCRIPTION?");
+    throw PluginLoadException(plugin_name, "Symbol 'plugin_description' not found. Forgot PLUGIN_DESCRIPTION?");
   }
 
   PluginFactoryFunc pff = (PluginFactoryFunc)module->get_symbol("plugin_factory");
@@ -138,7 +149,7 @@ PluginLoader::create_instance(const char *plugin_name, Module *module)
 
   p = pff(__config);
   if ( p == NULL ) {
-    throw PluginLoadException("Plugin from plugin '%s' could not be instantiated", plugin_name);
+    throw PluginLoadException(plugin_name, "Plugin could not be instantiated");
   } else {
     p->set_name(plugin_name);
   }
@@ -181,7 +192,7 @@ PluginLoader::load(const char *plugin_name)
     d->plugin_name_map[p]   = pn;
 
     return p;
-  } catch ( PluginLoadException &e) {
+  } catch (PluginLoadException &e) {
     throw;
   }
 }
@@ -198,7 +209,7 @@ PluginLoader::get_description(const char *plugin_name)
   Module *module = open_module(plugin_name);
 
   if ( ! module->has_symbol("plugin_description") ) {
-    throw PluginLoadException("Symbol 'plugin_description' not found. Forgot PLUGIN_DESCRIPTION?");
+    throw PluginLoadException(plugin_name, "Symbol 'plugin_description' not found. Forgot PLUGIN_DESCRIPTION?");
   }
 
   PluginDescriptionFunc pdf = (PluginDescriptionFunc)module->get_symbol("plugin_description");
