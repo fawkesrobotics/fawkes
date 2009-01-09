@@ -1,8 +1,8 @@
 #*****************************************************************************
-#            Makefile Build System for Fawkes : fuse_viewer
+#        Makefile Build System for Fawkes : FireVision FUSE Viewer
 #                            -------------------
 #   Created on Thu Dec 18 14:16:23 2008
-#   copyright (C) 2008  Christof Rath <c.rath@student.tugraz.at>
+#   Copyright (C) 2008  Christof Rath <c.rath@student.tugraz.at>
 #
 #*****************************************************************************
 #
@@ -25,12 +25,12 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-LIBS_fuse_viewer = fawkescore fawkesnetcomm fawkesplugin fawkesutils fawkesguiutils fvwidgets fvcams
-OBJS_fuse_viewer = $(patsubst %.cpp,%.o,$(patsubst cox/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
-OBJS_all += $(OBJS_fuse_viewer)
+LIBS_fvfuseviewer = fawkescore fawkesnetcomm fawkesplugin fawkesutils fawkesguiutils fvwidgets fvcams
+OBJS_fvfuseviewer = $(patsubst %.cpp,%.o,$(patsubst cox/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+OBJS_all += $(OBJS_fvfuseviewer)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(HAVE_AVAHI),111)
-  BINS_gui += $(BINDIR)/fuse_viewer
+  BINS_gui += $(BINDIR)/fvfuseviewer
 else
   ifneq ($(HAVE_AVAHI),1)
     WARN_TARGETS += warning_avahi
@@ -44,9 +44,9 @@ gui: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
 warning_guilibs:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fuse_viewer$(TNORMAL) $(GUI_ERROR)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvfuseviewer$(TNORMAL) $(GUI_ERROR)";
 warning_avahi:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fuse_viewer$(TNORMAL) (Avahi not installed)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvfuseviewer$(TNORMAL) (Avahi not installed)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
