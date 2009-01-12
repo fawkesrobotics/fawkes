@@ -27,7 +27,7 @@
 #define __BLACKBOARD_SHMEM_HEADER_H_
 
 #include <utils/ipc/shm.h>
-#include <blackboard/memory_manager.h>
+#include <blackboard/internal/memory_manager.h>
 
 namespace fawkes {
 

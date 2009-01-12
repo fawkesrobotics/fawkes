@@ -74,22 +74,8 @@ BlackBoardInterfaceObserver::BlackBoardInterfaceObserver()
 /** Destructor. */
 BlackBoardInterfaceObserver::~BlackBoardInterfaceObserver()
 {
-  char *tmp;
-
-  while ( ! __bbio_interface_create_types.empty() ) {
-    __bbio_iti = __bbio_interface_create_types.begin();
-    tmp = *__bbio_iti;
-    __bbio_interface_create_types.erase(__bbio_iti);
-    free(tmp);
-  }
-
-  while ( ! __bbio_interface_destroy_types.empty() ) {
-    __bbio_iti = __bbio_interface_destroy_types.begin();
-    tmp = *__bbio_iti;
-    __bbio_interface_destroy_types.erase(__bbio_iti);
-    free(tmp);
-  }
-
+  __bbio_observed_create.clear();
+  __bbio_observed_destroy.clear();
 }
 
 
@@ -104,7 +90,7 @@ BlackBoardInterfaceObserver::~BlackBoardInterfaceObserver()
  * the duration of the method call
  */
 void
-BlackBoardInterfaceObserver::bb_interface_created(const char *type, const char *id ) throw()
+BlackBoardInterfaceObserver::bb_interface_created(const char *type, const char *id) throw()
 {
 }
 
@@ -120,7 +106,7 @@ BlackBoardInterfaceObserver::bb_interface_created(const char *type, const char *
  * the duration of the method call
  */
 void
-BlackBoardInterfaceObserver::bb_interface_destroyed(const char *type, const char *id ) throw()
+BlackBoardInterfaceObserver::bb_interface_destroyed(const char *type, const char *id) throw()
 {
 }
 
@@ -129,11 +115,15 @@ BlackBoardInterfaceObserver::bb_interface_destroyed(const char *type, const char
  * With this you add an interface type to the watch list. For any type on this list
  * you will be notified if an interface is created.
  * @param type type to watch
+ * @param id_pattern pattern of interface IDs to open, supports wildcards similar
+ * to filenames (*, ?, []), see "man fnmatch" for all supported.
  */
 void
-BlackBoardInterfaceObserver::bbio_add_interface_create_type(const char *type) throw()
+BlackBoardInterfaceObserver::bbio_add_observed_create(const char *type, const char *id_pattern) throw()
 {
-  __bbio_interface_create_types.insert(strdup(type));
+  __bbio_observed_create[type].push_back(id_pattern);
+  __bbio_observed_create[type].sort();
+  __bbio_observed_create[type].unique();
 }
 
 
@@ -141,31 +131,36 @@ BlackBoardInterfaceObserver::bbio_add_interface_create_type(const char *type) th
  * With this you add an interface type to the watch list. For any type on this list
  * you will be notified if an interface is destroyed.
  * @param type type to watch
+ * @param id_pattern pattern of interface IDs to open, supports wildcards similar
+ * to filenames (*, ?, []), see "man fnmatch" for all supported.
  */
 void
-BlackBoardInterfaceObserver::bbio_add_interface_destroy_type(const char *type) throw()
+BlackBoardInterfaceObserver::bbio_add_observed_destroy(const char *type, const char *id_pattern) throw()
 {
-  __bbio_interface_destroy_types.insert(strdup(type));
+  __bbio_observed_destroy[type].push_back(id_pattern);
+  __bbio_observed_destroy[type].sort();
+  __bbio_observed_destroy[type].unique();
 }
 
 
 /** Get interface creation type watch list.
  * @return interface type watch list
  */
-BlackBoardInterfaceObserver::InterfaceTypeLockHashSet *
-BlackBoardInterfaceObserver::bbio_interface_create_types() throw()
+BlackBoardInterfaceObserver::ObservedInterfaceMap *
+BlackBoardInterfaceObserver::bbio_get_observed_create() throw()
 {
-  return &__bbio_interface_create_types;
+  return &__bbio_observed_create;
 }
 
 
 /** Get interface destriction type watch list.
  * @return interface type watch list
  */
-BlackBoardInterfaceObserver::InterfaceTypeLockHashSet *
-BlackBoardInterfaceObserver::bbio_interface_destroy_types() throw()
+BlackBoardInterfaceObserver::ObservedInterfaceMap *
+BlackBoardInterfaceObserver::bbio_get_observed_destroy() throw()
 {
-  return &__bbio_interface_destroy_types;
+  return &__bbio_observed_destroy;
 }
+
 
 } // end namespace fawkes

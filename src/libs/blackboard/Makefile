@@ -18,7 +18,7 @@
 BASEDIR = ../../..
 
 LIBS_libfawkesblackboard = fawkescore fawkesutils fawkesinterface fawkesnetcomm
-OBJS_libfawkesblackboard = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+OBJS_libfawkesblackboard = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
 OBJS_all =	$(OBJS_libfawkesblackboard)
 LIBS_all =	$(LIBDIR)/libfawkesblackboard.so

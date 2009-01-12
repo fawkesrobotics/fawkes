@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/notifier.h>
+#include <blackboard/internal/notifier.h>
 #include <blackboard/blackboard.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
@@ -36,10 +36,11 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <fnmatch.h>
 
 namespace fawkes {
 
-/** @class BlackBoardNotifier <blackboard/notifier.h>
+/** @class BlackBoardNotifier <blackboard/internal/notifier.h>
  * BlackBoard notifier.
  * This class is used by the BlackBoard to notify listeners and observers
  * of changes. 
@@ -187,24 +188,24 @@ BlackBoardNotifier::unregister_listener(BlackBoardInterfaceListener *listener)
  */
 void
 BlackBoardNotifier::register_observer(BlackBoardInterfaceObserver *observer,
-					      unsigned int flags)
+				      unsigned int flags)
 {
   if ( flags & BlackBoard::BBIO_FLAG_CREATED ) {
-    BlackBoardInterfaceObserver::InterfaceTypeLockHashSetIterator i;
-    BlackBoardInterfaceObserver::InterfaceTypeLockHashSet *its = observer->bbio_interface_create_types();
+    BlackBoardInterfaceObserver::ObservedInterfaceMapIterator i;
+    BlackBoardInterfaceObserver::ObservedInterfaceMap *its = observer->bbio_get_observed_create();
     __bbio_created.lock();
     for (i = its->begin(); i != its->end(); ++i) {
-      __bbio_created[*i].push_back(observer);
+      __bbio_created[i->first].push_back(make_pair(observer, i->second));
     }
     __bbio_created.unlock();
   }
 
   if ( flags & BlackBoard::BBIO_FLAG_DESTROYED ) {
-    BlackBoardInterfaceObserver::InterfaceTypeLockHashSetIterator i;
-    BlackBoardInterfaceObserver::InterfaceTypeLockHashSet *its = observer->bbio_interface_destroy_types();
+    BlackBoardInterfaceObserver::ObservedInterfaceMapIterator i;
+    BlackBoardInterfaceObserver::ObservedInterfaceMap *its = observer->bbio_get_observed_destroy();
     __bbio_destroyed.lock();
     for (i = its->begin(); i != its->end(); ++i) {
-      __bbio_destroyed[*i].push_back(observer);
+      __bbio_destroyed[i->first].push_back(make_pair(observer, i->second));
     }
     __bbio_destroyed.unlock();
   }
@@ -221,11 +222,11 @@ BlackBoardNotifier::remove_observer(BBioLockMap &iomap, BlackBoardInterfaceObser
   BBioLockMapIterator i, tmp;
 
   iomap.lock();
-  i = iomap.begin();;
+  i = iomap.begin();
   while (i != iomap.end()) {
     BBioListIterator j = i->second.begin();
     while (j != i->second.end()) {
-      if ( *j == observer ) {
+      if ( j->first == observer ) {
 	j = i->second.erase(j);
       } else {
 	++j;
@@ -267,8 +268,13 @@ BlackBoardNotifier::notify_of_interface_created(const char *type, const char *id
   if ( (lhmi = __bbio_created.find(type)) != __bbio_created.end() ) {
     BBioList &list = (*lhmi).second;
     for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceObserver *bbio = (*i);
-      bbio->bb_interface_created(type, id);
+      BlackBoardInterfaceObserver *bbio = i->first;
+      for (std::list<std::string>::iterator pi = i->second.begin(); pi != i->second.end(); ++pi) {
+	if (fnmatch(pi->c_str(), id, 0) == 0) {
+	  bbio->bb_interface_created(type, id);
+	  break;
+	}
+      }
     }
   }
   __bbio_created.unlock();
@@ -288,8 +294,13 @@ BlackBoardNotifier::notify_of_interface_destroyed(const char *type, const char *
   if ( (lhmi = __bbio_destroyed.find(type)) != __bbio_destroyed.end() ) {
     BBioList &list = (*lhmi).second;
     for (i = list.begin(); i != list.end(); ++i) {
-      BlackBoardInterfaceObserver *bbio = (*i);
-      bbio->bb_interface_destroyed(type, id);
+      BlackBoardInterfaceObserver *bbio = i->first;
+      for (std::list<std::string>::iterator pi = i->second.begin(); pi != i->second.end(); ++pi) {
+	if (fnmatch(pi->c_str(), id, 0) == 0) {
+	  bbio->bb_interface_destroyed(type, id);
+	  break;
+	}
+      }
     }
   }
   __bbio_destroyed.unlock();

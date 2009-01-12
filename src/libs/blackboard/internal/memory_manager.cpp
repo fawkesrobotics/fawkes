@@ -23,9 +23,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/memory_manager.h>
+#include <blackboard/internal/memory_manager.h>
 #include <blackboard/exceptions.h>
-#include <blackboard/shmem_header.h>
+#include <blackboard/shmem/header.h>
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
@@ -53,7 +53,7 @@
 
 namespace fawkes {
 
-/** @class BlackBoardMemoryManager blackboard/memory_manager.h
+/** @class BlackBoardMemoryManager <blackboard/internal/memory_manager.h>
  * BlackBoard memory manager.
  * This class is used by the BlackBoard to manage the memory in the shared memory
  * segment. A simple strategy is used for memory management as the expected use case
@@ -819,7 +819,7 @@ BlackBoardMemoryManager::end()
 }
 
 
-/** @class BlackBoardMemoryManager::ChunkIterator blackboard/memory_manager.h
+/** @class BlackBoardMemoryManager::ChunkIterator <blackboard/internal/memory_manager.h>
  * Iterator for memory chunks.
  * The ChunkIterator can be used to iterate over all allocated memory chunks
  * in the memory segment.

@@ -23,12 +23,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/network_handler.h>
-#include <blackboard/net_messages.h>
-#include <blackboard/net_ilist_content.h>
+#include <blackboard/net/handler.h>
+#include <blackboard/net/messages.h>
+#include <blackboard/net/ilist_content.h>
 #include <blackboard/blackboard.h>
 #include <blackboard/exceptions.h>
-#include <blackboard/net_interface_listener.h>
+#include <blackboard/net/interface_listener.h>
 
 #include <interface/interface.h>
 #include <interface/interface_info.h>
@@ -42,7 +42,7 @@
 
 namespace fawkes {
 
-/** @class BlackBoardNetworkHandler <blackboard/network_handler.h>
+/** @class BlackBoardNetworkHandler <blackboard/net/handler.h>
  * BlackBoard Network Handler.
  * This class provides a network handler that can be registered with the
  * FawkesServerThread to handle client requests to a BlackBoard instance.

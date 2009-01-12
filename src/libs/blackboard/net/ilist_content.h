@@ -26,7 +26,7 @@
 #ifndef __BLACKBOARD_NET_ILIST_CONTENT_H_
 #define __BLACKBOARD_NET_ILIST_CONTENT_H_
 
-#include <blackboard/net_messages.h>
+#include <blackboard/net/messages.h>
 #include <netcomm/fawkes/message_content.h>
 #include <interface/interface_info.h>
 

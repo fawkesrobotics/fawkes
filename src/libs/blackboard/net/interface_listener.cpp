@@ -23,8 +23,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/net_interface_listener.h>
-#include <blackboard/net_messages.h>
+#include <blackboard/net/interface_listener.h>
+#include <blackboard/net/messages.h>
 
 #include <blackboard/blackboard.h>
 #include <interface/interface.h>
@@ -39,7 +39,7 @@
 
 namespace fawkes {
 
-/** @class BlackBoardNetHandlerInterfaceListener <blackboard/net_interface_listener.h>
+/** @class BlackBoardNetHandlerInterfaceListener <blackboard/net/interface_listener.h>
  * Interface listener for network handler.
  * This class is used by the BlackBoardNetworkHandler to track interface changes and
  * send out notifications timely.

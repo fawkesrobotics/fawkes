@@ -55,8 +55,8 @@ class QaBBEventListener
  public:
   QaBBEventListener() : BlackBoardInterfaceListener("QaBBEventListener")
   {
-    bbio_add_interface_create_type("TestInterface");
-    bbio_add_interface_destroy_type("TestInterface");
+    bbio_add_observed_create("TestInterface", "AnotherID *");
+    bbio_add_observed_destroy("TestInterface");
   }
 
   virtual void bb_interface_created(const char *type, const char *id) throw()
@@ -153,7 +153,7 @@ main(int argc, char **argv)
   TestInterface *ti_reader_2;
 
   try {
-    cout << "Opening interfaces.. " << endl;
+    cout << "Opening interfaces.. (SomeID *)" << endl;
     ti_writer_1 = bb->open_for_writing<TestInterface>("SomeID 1");
     ti_reader_1 = bb->open_for_reading<TestInterface>("SomeID 1");
     ti_writer_2 = bb->open_for_writing<TestInterface>("SomeID 2");
@@ -165,7 +165,9 @@ main(int argc, char **argv)
     bb->register_listener(&qabbel, BlackBoard::BBIL_FLAG_ALL);
     bb->register_observer(&qabbel, BlackBoard::BBIO_FLAG_ALL);
 
+    cout << "Opening interfaces.. (SomeID 3, should NOT trigger BBIO)" << endl;
     ti_writer_3 = bb->open_for_writing<TestInterface>("SomeID 3");
+    cout << "Opening interfaces.. (AnotherID *, SHOULD trigger BBIO)" << endl;
     ti_writer_4 = bb->open_for_writing<TestInterface>("AnotherID 1");
     ti_writer_5 = bb->open_for_writing<TestInterface>("AnotherID 2");
     ti_writer_6 = bb->open_for_writing<TestInterface>("AnotherID 3");
@@ -178,24 +180,22 @@ main(int argc, char **argv)
 
   usleep(100000);
 
-  std::list<TestInterface *> *readers = bb->open_all_of_type_for_reading<TestInterface>();
+  std::list<TestInterface *> readers = bb->open_multiple_for_reading<TestInterface>();
   usleep(100000);
-  for (std::list<TestInterface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
+  for (std::list<TestInterface *>::iterator i = readers.begin(); i != readers.end(); ++i) {
     printf("Opened reader for interface %s of type %s\n", (*i)->id(), (*i)->type());
     bb->close(*i);
   }
-  delete readers;
 
   usleep(100000);
 
-  const char* prefix = "Another";
-  readers = bb->open_all_of_type_for_reading<TestInterface>(prefix);
-  printf("Found %zu interfaces with prefix \"%s\"\n", readers->size(), prefix);
-  for (std::list<TestInterface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
+  const char* pattern = "AnotherID *";
+  readers = bb->open_multiple_for_reading<TestInterface>(pattern);
+  printf("Found %zu interfaces with pattern \"%s\"\n", readers.size(), pattern);
+  for (std::list<TestInterface *>::iterator i = readers.begin(); i != readers.end(); ++i) {
     printf("Opened reader for interface %s of type %s\n", (*i)->id(), (*i)->type());
     bb->close(*i);
   }
-  delete readers;
 
   usleep(100000);
 

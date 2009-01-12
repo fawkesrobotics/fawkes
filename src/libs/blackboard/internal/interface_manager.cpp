@@ -23,17 +23,17 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/interface_manager.h>
+#include <blackboard/internal/interface_manager.h>
 
 #include <blackboard/blackboard.h>
-#include <blackboard/memory_manager.h>
-#include <blackboard/message_manager.h>
+#include <blackboard/internal/memory_manager.h>
+#include <blackboard/internal/message_manager.h>
 #include <blackboard/exceptions.h>
-#include <blackboard/interface_mem_header.h>
+#include <blackboard/internal/interface_mem_header.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
-#include <blackboard/instance_factory.h>
-#include <blackboard/notifier.h>
+#include <blackboard/internal/instance_factory.h>
+#include <blackboard/internal/notifier.h>
 
 #include <interface/interface.h>
 #include <interface/interface_info.h>
@@ -46,10 +46,11 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <fnmatch.h>
 
 namespace fawkes {
 
-/** @class BlackBoardInterfaceManager <blackboard/interface_manager.h>
+/** @class BlackBoardInterfaceManager <blackboard/internal/interface_manager.h>
  * BlackBoard interface manager.
  * This class is used by the BlackBoard to manage interfaces stored in the
  * shared memory.
@@ -293,20 +294,20 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
  * This will create interface instances for all currently registered interfaces of
  * the given type. The result can be casted to the appropriate type.
  * @param type type of the interface
- * @param id_prefix if set only interfaces whose ids have this prefix are returned
+ * @param id_pattern pattern of interface IDs to open, supports wildcards similar
+ * to filenames (*, ?, []), see "man fnmatch" for all supported.
  * @return list of new fully initialized interface instances of requested type. The
  * is allocated using new and you have to free it using delete after you are done
  * with it!
  */
-std::list<Interface *> *
-BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type,
-							 const char *id_prefix)
+std::list<Interface *>
+BlackBoardInterfaceManager::open_multiple_for_reading(const char *type,
+						      const char *id_pattern)
 {
   mutex->lock();
   memmgr->lock();
 
-  bool match = false;
-  std::list<Interface *> *rv = new std::list<Interface *>();
+  std::list<Interface *> rv;
 
   Interface *iface = NULL;
   interface_header_t *ih;
@@ -317,51 +318,43 @@ BlackBoardInterfaceManager::open_all_of_type_for_reading(const char *type,
       iface = NULL;
       ih = (interface_header_t *)*cit;
 
-      if (NULL == id_prefix) {
-	match = (strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0);
-      } else {
-	unsigned int len = (id_prefix != NULL) ? strlen(id_prefix) : 0;
-	match = ((strncmp(ih->type, type, __INTERFACE_TYPE_SIZE) == 0) &&
-		 (len <= strlen(ih->id)) &&
-		 (strncmp(id_prefix, ih->id, len) == 0) );
+      if ((strncmp(type, ih->type, __INTERFACE_TYPE_SIZE) != 0) ||
+	  (fnmatch(id_pattern, ih->id, 0) == FNM_NOMATCH) ) {
+	// type or ID prefix does not match, go on
+	continue;
       }
 
-      if (match) {
-	// found one!
-	// open 
-	void *ptr = *cit;
-	iface = new_interface_instance(ih->type, ih->id);
-	iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
+      void *ptr = *cit;
+      iface = new_interface_instance(ih->type, ih->id);
+      iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
 
-	if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
-	     (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
-	  throw BlackBoardInterfaceVersionMismatchException();
-	}
-
-	rwlocks[ih->serial]->ref();
-
-	iface->set_readwrite(false, rwlocks[ih->serial]);
-	ih->refcount++;
-	ih->num_readers++;
-
-	rv->push_back(iface);
+      if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
+	   (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
+	throw BlackBoardInterfaceVersionMismatchException();
       }
+
+      rwlocks[ih->serial]->ref();
+
+      iface->set_readwrite(false, rwlocks[ih->serial]);
+      ih->refcount++;
+      ih->num_readers++;
+
+      rv.push_back(iface);
     }
 
     mutex->unlock();
     memmgr->unlock();
 
-    for (std::list<Interface *>::iterator j = rv->begin(); j != rv->end(); ++j) {
+    for (std::list<Interface *>::iterator j = rv.begin(); j != rv.end(); ++j) {
       notifier->notify_of_reader_added(*j, (*j)->serial());
     }
 
 
   } catch (Exception &e) {
     if (iface)  delete_interface_instance( iface );
-    for (std::list<Interface *>::iterator i = rv->begin(); i != rv->end(); ++i) {
+    for (std::list<Interface *>::iterator i = rv.begin(); i != rv.end(); ++i) {
       delete_interface_instance(*i);
     }
-    delete rv;
     memmgr->unlock();
     mutex->unlock();
     throw;

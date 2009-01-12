@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/net_ilist_content.h>
+#include <blackboard/net/ilist_content.h>
 
 #include <netcomm/utils/dynamic_buffer.h>
 #include <netcomm/fawkes/component_ids.h>
@@ -33,7 +33,7 @@
 
 namespace fawkes {
 
-/** @class BlackBoardInterfaceListContent <blackboard/net_ilist_content.h>
+/** @class BlackBoardInterfaceListContent <blackboard/net/ilist_content.h>
  * BlackBoard interface list content.
  * A complex dynamic message with an arbitrary number of interfaces. Uses
  * DynamicBuffer for the internal list of plugins and thus the buffer is

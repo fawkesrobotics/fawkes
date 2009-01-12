@@ -24,12 +24,12 @@
  */
 
 #include <blackboard/remote.h>
-#include <blackboard/net_messages.h>
-#include <blackboard/net_ilist_content.h>
-#include <blackboard/notifier.h>
-#include <blackboard/instance_factory.h>
-#include <blackboard/interface_proxy.h>
 #include <blackboard/exceptions.h>
+#include <blackboard/net/messages.h>
+#include <blackboard/net/ilist_content.h>
+#include <blackboard/net/interface_proxy.h>
+#include <blackboard/internal/notifier.h>
+#include <blackboard/internal/instance_factory.h>
 
 #include <interface/interface_info.h>
 
@@ -40,6 +40,7 @@
 
 #include <string>
 #include <cstring>
+#include <fnmatch.h>
 
 namespace fawkes {
 
@@ -253,15 +254,6 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
 }
 
 
-/** Open interface for reading.
- * This will create a new interface instance of the given type. The result can be
- * casted to the appropriate type.
- * @param type type of the interface
- * @param identifier identifier of the interface
- * @return new fully initialized interface instance of requested type
- * @exception OutOfMemoryException thrown if there is not enough free space for
- * the requested interface.
- */
 Interface *
 RemoteBlackBoard::open_for_reading(const char *type, const char *identifier)
 {
@@ -269,18 +261,6 @@ RemoteBlackBoard::open_for_reading(const char *type, const char *identifier)
 }
 
 
-/** Open interface for writing.
- * This will create a new interface instance of the given type. The result can be
- * casted to the appropriate type. This will only succeed if there is not already
- * a writer for the given interface type/id!
- * @param type type of the interface
- * @param identifier identifier of the interface
- * @return new fully initialized interface instance of requested type
- * @exception OutOfMemoryException thrown if there is not enough free space for
- * the requested interface.
- * @exception BlackBoardWriterActiveException thrown if there is already a writing
- * instance with the same type/id
- */
 Interface *
 RemoteBlackBoard::open_for_writing(const char *type, const char *identifier)
 {
@@ -288,39 +268,26 @@ RemoteBlackBoard::open_for_writing(const char *type, const char *identifier)
 }
 
 
-/** Open all interfaces of the given type for reading.
- * This will create interface instances for all currently registered interfaces of
- * the given type. The result can be casted to the appropriate type.
- * @param type type of the interface
- * @param id_prefix if set only interfaces whose ids have this prefix are returned
- * @return list of new fully initialized interface instances of requested type. The
- * is allocated using new and you have to free it using delete after you are done
- * with it!
- */
-std::list<Interface *> *
-RemoteBlackBoard::open_all_of_type_for_reading(const char *type, const char *id_prefix)
+std::list<Interface *>
+RemoteBlackBoard::open_multiple_for_reading(const char *type, const char *id_pattern)
 {
-  std::list<Interface *> *rv = new std::list<Interface *>();
-
-  unsigned int prefix_len = (id_prefix != NULL) ? strlen(id_prefix) : 0;
+  std::list<Interface *> rv;
 
   InterfaceInfoList *infl = list_all();
   for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {
-    if ((strncmp(type, (*i).type(), __INTERFACE_TYPE_SIZE) != 0) ||
-	(prefix_len > strlen((*i).id())) ||
-	(strncmp(id_prefix, (*i).id(), prefix_len) != 0) ) {
+    if ((strncmp(type, i->type(), __INTERFACE_TYPE_SIZE) != 0) ||
+	(fnmatch(id_pattern, i->id(), 0) == FNM_NOMATCH) ) {
       // type or ID prefix does not match, go on
       continue;
     }
 
     try {
       Interface *iface = open_for_reading((*i).type(), (*i).id());
-      rv->push_back(iface);
+      rv.push_back(iface);
     } catch (Exception &e) {
-      for (std::list<Interface *>::iterator j = rv->begin(); j != rv->end(); ++j) {
+      for (std::list<Interface *>::iterator j = rv.begin(); j != rv.end(); ++j) {
 	close(*j);
       }
-      delete rv;
       throw;
     }
   }
@@ -360,12 +327,6 @@ RemoteBlackBoard::close(Interface *interface)
 }
 
 
-/** Register BB event listener.
- * @param listener BlackBoard event listener to register
- * @param flags an or'ed combination of BBIL_FLAG_DATA, BBIL_FLAG_READER, BBIL_FLAG_WRITER
- * and BBIL_FLAG_INTERFACE. Only for the given types the event listener is registered.
- * BBIL_FLAG_ALL can be supplied to register for all events.
- */
 void
 RemoteBlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsigned int flags)
 {
@@ -373,11 +334,6 @@ RemoteBlackBoard::register_listener(BlackBoardInterfaceListener *listener, unsig
 }
 
 
-/** Unregister BB interface listener.
- * This will remove the given BlackBoard interface listener from any event that it was
- * previously registered for.
- * @param listener BlackBoard event listener to remove
- */
 void
 RemoteBlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 {
@@ -385,10 +341,6 @@ RemoteBlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 }
 
 
-/** Register BB interface observer.
- * @param observer BlackBoard interface observer to register
- * @param flags an or'ed combination of BBIO_FLAG_CREATED, BBIO_FLAG_DESTROYED
- */
 void
 RemoteBlackBoard::register_observer(BlackBoardInterfaceObserver *observer, unsigned int flags)
 {
@@ -396,11 +348,6 @@ RemoteBlackBoard::register_observer(BlackBoardInterfaceObserver *observer, unsig
 }
 
 
-/** Unregister BB interface observer.
- * This will remove the given BlackBoard event listener from any event that it was
- * previously registered for.
- * @param observer BlackBoard event listener to remove
- */
 void
 RemoteBlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
@@ -408,9 +355,6 @@ RemoteBlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
 }
 
 
-/** Get list of interfaces.
- * @return list of interfaces
- */
 InterfaceInfoList *
 RemoteBlackBoard::list_all()
 {

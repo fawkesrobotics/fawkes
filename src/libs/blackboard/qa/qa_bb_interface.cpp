@@ -26,7 +26,7 @@
 
 /// @cond QA
 
-#include <blackboard/memory_manager.h>
+#include <blackboard/internal/memory_manager.h>
 #include <blackboard/local.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>

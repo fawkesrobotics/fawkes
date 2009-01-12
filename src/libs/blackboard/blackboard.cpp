@@ -124,15 +124,16 @@ namespace fawkes {
  * @return true if the aliveness could be restored and the BlackBoard is
  * operational again, false otherwise.
  *
- * @fn std::list<Interface *> *  BlackBoard::open_all_of_type_for_reading(const char *type, const char *id_prefix = NULL)
- * Open all interfaces of the given type for reading.
- * This will create interface instances for all currently registered interfaces of
- * the given type. The result can be casted to the appropriate type.
+ * @fn std::list<Interface *>  BlackBoard::open_multiple_for_reading(const char *type, const char *id_pattern = "*")
+ * Open multiple interfaces for reading.
+ * This will create interface instances for currently registered interfaces of
+ * the given type that match the given ID pattern. The result can be casted to
+ * the appropriate type.
  * @param type type of the interface
- * @param id_prefix if set only interfaces whose ids have this prefix are returned
- * @return list of new fully initialized interface instances of requested type. The
- * is allocated using new and you have to free it using delete after you are done
- * with it!
+ * @param id_pattern pattern of interface IDs to open, supports wildcards similar
+ * to filenames (*, ?, []), see "man fnmatch" for all supported.
+ * @return list of new fully initialized interface instances of requested type.
+ * You have to close all interfaces on your own when done with the list!
  *
  *
  * @fn InterfaceInfoList * BlackBoard::list_all()

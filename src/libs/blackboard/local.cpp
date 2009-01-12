@@ -25,16 +25,16 @@
 
 #include <blackboard/local.h>
 #include <blackboard/bbconfig.h>
-#include <blackboard/message_manager.h>
-#include <blackboard/memory_manager.h>
-#include <blackboard/interface_manager.h>
-#include <blackboard/network_handler.h>
-#include <blackboard/notifier.h>
+#include <blackboard/internal/message_manager.h>
+#include <blackboard/internal/memory_manager.h>
+#include <blackboard/internal/interface_manager.h>
+#include <blackboard/internal/notifier.h>
+#include <blackboard/net/handler.h>
 
 // for -C: bb_cleanup
 #include <utils/ipc/shm.h>
-#include <blackboard/shmem_header.h>
-#include <blackboard/shmem_lister.h>
+#include <blackboard/shmem/header.h>
+#include <blackboard/shmem/lister.h>
 
 #include <string>
 #include <cstring>
@@ -110,11 +110,11 @@ LocalBlackBoard::open_for_writing(const char *type, const char *identifier)
 }
 
 
-std::list<Interface *> *
-LocalBlackBoard::open_all_of_type_for_reading(const char *type, const char *id_prefix)
+std::list<Interface *>
+LocalBlackBoard::open_multiple_for_reading(const char *type, const char *id_pattern)
 {
   try {
-    return __im->open_all_of_type_for_reading(type, id_prefix);
+    return __im->open_multiple_for_reading(type, id_pattern);
   } catch (Exception &e) {
     throw;
   }  

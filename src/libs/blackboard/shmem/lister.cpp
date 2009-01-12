@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/shmem_lister.h>
+#include <blackboard/shmem/lister.h>
 #include <utils/system/console_colors.h>
 #include <utils/ipc/shm.h>
 
@@ -32,7 +32,7 @@
 using namespace std;
 namespace fawkes {
 
-/** @class BlackBoardSharedMemoryLister <blackboard/shmem_lister.h>
+/** @class BlackBoardSharedMemoryLister <blackboard/shmem/lister.h>
  * BlackBoard shared memory lister.
  * Lister that can be used to print infos about BlackBoard shared memory
  * segments.

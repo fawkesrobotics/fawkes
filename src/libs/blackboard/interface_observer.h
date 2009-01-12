@@ -26,8 +26,9 @@
 #ifndef __BLACKBOARD_INTERFACE_OBSERVER_H_
 #define __BLACKBOARD_INTERFACE_OBSERVER_H_
 
-#include <core/utils/lock_hashset.h>
-#include <utils/misc/string_compare.h>
+#include <map>
+#include <list>
+#include <string>
 
 namespace fawkes {
 
@@ -44,35 +45,22 @@ class BlackBoardInterfaceObserver
   virtual void bb_interface_destroyed(const char *type, const char *id) throw();
 
  protected:
-  void bbio_add_interface_create_type(const char *type) throw();
-  void bbio_add_interface_destroy_type(const char *type) throw();
-
+  void bbio_add_observed_create(const char *type, const char *id_pattern = "*") throw();
+  void bbio_add_observed_destroy(const char *type, const char *id_pattern = "*") throw();
 
   /** Type for lockable interface type hash sets. */
-  typedef  LockHashSet<char *,
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
-                       std::tr1::hash<char *>,
-#else
-                       __gnu_cxx::hash<char *>,
-#endif
-                       StringEquality >            InterfaceTypeLockHashSet;
+  typedef  std::map<std::string, std::list<std::string> >  ObservedInterfaceMap;
 
   /** Type for iterator of lockable interface type hash sets. */
-  typedef  LockHashSet<char *,
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
-                       std::tr1::hash<char *>,
-#else
-                       __gnu_cxx::hash<char *>,
-#endif
-                       StringEquality >::iterator  InterfaceTypeLockHashSetIterator;
+  typedef  ObservedInterfaceMap::iterator   ObservedInterfaceMapIterator;
 
-  InterfaceTypeLockHashSet *  bbio_interface_create_types() throw();
-  InterfaceTypeLockHashSet *  bbio_interface_destroy_types() throw();
+  ObservedInterfaceMap *  bbio_get_observed_create() throw();
+  ObservedInterfaceMap *  bbio_get_observed_destroy() throw();
 
  private:
-  InterfaceTypeLockHashSet         __bbio_interface_create_types;
-  InterfaceTypeLockHashSet         __bbio_interface_destroy_types;
-  InterfaceTypeLockHashSetIterator __bbio_iti;
+  ObservedInterfaceMap         __bbio_observed_create;
+  ObservedInterfaceMap         __bbio_observed_destroy;
+  ObservedInterfaceMapIterator __bbio_iti;
 };
 
 } // end namespace fawkes

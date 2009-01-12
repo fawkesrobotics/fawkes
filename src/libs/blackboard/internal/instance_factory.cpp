@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/instance_factory.h>
+#include <blackboard/internal/instance_factory.h>
 #include <blackboard/exceptions.h>
 
 #include <interface/interface.h>
@@ -37,7 +37,7 @@
 
 namespace fawkes {
 
-/** @class BlackBoardInstanceFactory <blackboard/instance_factory.h>
+/** @class BlackBoardInstanceFactory <blackboard/internal/instance_factory.h>
  * BlackBoard instance factory.
  * This class is used to interact with the interface shared object to create
  * and delete interface instances.

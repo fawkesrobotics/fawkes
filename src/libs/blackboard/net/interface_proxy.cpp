@@ -23,11 +23,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/interface_proxy.h>
-#include <blackboard/instance_factory.h>
-#include <blackboard/net_messages.h>
-#include <blackboard/interface_mem_header.h>
-#include <blackboard/notifier.h>
+#include <blackboard/net/interface_proxy.h>
+#include <blackboard/internal/instance_factory.h>
+#include <blackboard/net/messages.h>
+#include <blackboard/internal/interface_mem_header.h>
+#include <blackboard/internal/notifier.h>
 
 #include <core/threading/refc_rwlock.h>
 #include <utils/logging/liblogger.h>
@@ -39,7 +39,7 @@
 
 namespace fawkes {
 
-/** @class BlackBoardInterfaceProxy <blackboard/interface_proxy.h>
+/** @class BlackBoardInterfaceProxy <blackboard/net/interface_proxy.h>
  * Interface proxy for remote BlackBoard.
  * This proxy is used internally by RemoteBlackBoard to interact with an interface
  * on the one side and the remote BlackBoard on the other side.

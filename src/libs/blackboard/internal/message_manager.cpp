@@ -23,9 +23,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/message_manager.h>
-#include <blackboard/interface_manager.h>
-#include <blackboard/notifier.h>
+#include <blackboard/internal/message_manager.h>
+#include <blackboard/internal/interface_manager.h>
+#include <blackboard/internal/notifier.h>
 #include <blackboard/exceptions.h>
 
 #include <interface/message.h>
@@ -36,7 +36,7 @@
 
 namespace fawkes {
 
-/** @class BlackBoardMessageManager <blackboard/message_manager.h>
+/** @class BlackBoardMessageManager <blackboard/internal/message_manager.h>
  * BlackBoard message manager.
  * Transmits messages from reading interface instances to the writer instance
  * if the interface, if there is any.

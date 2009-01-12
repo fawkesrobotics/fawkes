@@ -23,13 +23,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/shmem_header.h>
+#include <blackboard/shmem/header.h>
 #include <utils/ipc/shm.h>
 #include <cstddef>
 
 namespace fawkes {
 
-/** @class BlackBoardSharedMemoryHeader blackboard/shmem_header.h
+/** @class BlackBoardSharedMemoryHeader <blackboard/shmem/header.h>
  * BlackBoard Shared Memory Header.
  * This class is used identify BlackBoard shared memory headers and
  * to interact with the management data in the shared memory segment.

@@ -57,11 +57,11 @@ class BlackBoard
   virtual bool                 is_alive() const throw() = 0;
   virtual bool                 try_aliveness_restore() throw() = 0;
 
-  virtual std::list<Interface *> *  open_all_of_type_for_reading(const char *interface_type,
-							 const char *id_prefix = NULL) = 0;
+  virtual std::list<Interface *>  open_multiple_for_reading(const char *interface_type,
+							      const char *id_pattern = "*") = 0;
 
   template <class InterfaceType>
-    std::list<InterfaceType *> *  open_all_of_type_for_reading(const char *id_prefix = NULL);
+    std::list<InterfaceType *>    open_multiple_for_reading(const char *id_pattern = "*");
 
   template <class InterfaceType>
     InterfaceType * open_for_reading(const char *identifier);
@@ -121,33 +121,35 @@ BlackBoard::open_for_reading(const char *identifier)
 /** Open all interfaces of given type for reading.
  * This will create interface instances for all currently registered interfaces of
  * the given type. The result can be casted to the appropriate type.
- * @param id_prefix if set only interfaces whose ids have this prefix are returned
+ * @param id_pattern pattern of interface IDs to open, supports wildcards similar
+ * to filenames (*, ?, []), see "man fnmatch" for all supported.
  * @return list of new fully initialized interface instances of requested type. The
  * is allocated using new and you have to free it using delete after you are done
  * with it!
  */
 template <class InterfaceType>
-std::list<InterfaceType *> *
-BlackBoard::open_all_of_type_for_reading(const char *id_prefix)
+std::list<InterfaceType *>
+BlackBoard::open_multiple_for_reading(const char *id_pattern)
 {
   char *type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
-  std::list<Interface *> *il = open_all_of_type_for_reading(type_name, id_prefix);
+  std::list<Interface *> il = open_multiple_for_reading(type_name, id_pattern);
   delete[] type_name;
-  std::list<InterfaceType *> *rv = new std::list<InterfaceType *>();
-  for (std::list<Interface *>::iterator i = il->begin(); i != il->end(); ++i) {
+  std::list<InterfaceType *> rv;
+  for (std::list<Interface *>::iterator i = il.begin(); i != il.end(); ++i) {
     InterfaceType *interface = dynamic_cast<InterfaceType *>(*i);
     if ( interface == 0 ) {
       // this really should never happen, but if it does we want to know,
       // because then we have a serious problem. We don't care about the
       // memleak here for that very reason.
-      throw TypeMismatchException("open_all_off_type_for_reading: "
+      for (std::list<Interface *>::iterator j = il.begin(); j != il.end(); ++j) {
+	close(*j);
+      }
+      throw TypeMismatchException("open_multiple_for_reading: "
 				  "Interface (R) types do not match");
     } else {
-      rv->push_back(interface);
+      rv.push_back(interface);
     }
   }
-
-  delete il;
 
   return rv;
 }

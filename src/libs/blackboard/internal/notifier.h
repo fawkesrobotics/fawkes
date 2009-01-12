@@ -71,14 +71,14 @@ class BlackBoardNotifier
   typedef LockMap< std::string, BlackBoardInterfaceListener * > BBilMessageLockMap;
   typedef LockMap< std::string, BlackBoardInterfaceListener * >::iterator BBilMessageLockMapIterator;
 
-  typedef std::list< BlackBoardInterfaceObserver * >  BBioList;
-  typedef LockMap< std::string, BBioList >            BBioLockMap;
+  typedef std::pair<BlackBoardInterfaceObserver *, std::list<std::string> > BBioPair;
+  typedef std::list< BBioPair>                   BBioList;
+  typedef LockMap< std::string, BBioList >       BBioLockMap;
 
-  typedef std::list< BlackBoardInterfaceListener * >::iterator BBilListIterator;
+  typedef BBilList::iterator    BBilListIterator;
   typedef BBilLockMap::iterator BBilLockMapIterator;
 
-
-  typedef std::list< BlackBoardInterfaceObserver * >::iterator BBioListIterator;
+  typedef BBioList::iterator    BBioListIterator;
   typedef BBioLockMap::iterator BBioLockMapIterator;
 
   void remove_listener(BBilLockMap &ifmap, BlackBoardInterfaceListener *listener);

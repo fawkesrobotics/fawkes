@@ -38,13 +38,17 @@ OBJS_qa_bb_listall = qa_bb_listall.o
 LIBS_qa_bb_remote = TestInterface fawkesblackboard
 OBJS_qa_bb_remote = qa_bb_remote.o
 
+LIBS_qa_bb_objpos = fawkesblackboard ObjectPositionInterface
+OBJS_qa_bb_objpos = qa_bb_objpos.o
+
 OBJS_all =	$(OBJS_qa_bb_memmgr) 		\
 		$(OBJS_qa_bb_interface)		\
 		$(OBJS_qa_bb_messaging)		\
 		$(OBJS_qa_bb_openall)		\
 		$(OBJS_qa_bb_notify)		\
 		$(OBJS_qa_bb_listall)		\
-		$(OBJS_qa_bb_remote)
+		$(OBJS_qa_bb_remote)		\
+		$(OBJS_qa_bb_objpos)
 
 BINS_all =	$(BINDIR)/qa_bb_memmgr		\
 		$(BINDIR)/qa_bb_interface	\
@@ -52,7 +56,8 @@ BINS_all =	$(BINDIR)/qa_bb_memmgr		\
 		$(BINDIR)/qa_bb_openall		\
 		$(BINDIR)/qa_bb_notify		\
 		$(BINDIR)/qa_bb_listall		\
-		$(BINDIR)/qa_bb_remote
+		$(BINDIR)/qa_bb_remote		\
+		$(BINDIR)/qa_bb_objpos
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

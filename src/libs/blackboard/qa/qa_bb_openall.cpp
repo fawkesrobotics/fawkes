@@ -75,21 +75,19 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  std::list<Interface *> *readers = bb->open_all_of_type_for_reading("TestInterface");
-  for (std::list<Interface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
+  std::list<Interface *> readers = bb->open_multiple_for_reading("TestInterface");
+  for (std::list<Interface *>::iterator i = readers.begin(); i != readers.end(); ++i) {
     printf("Opened reader for interface %s of type %s\n", (*i)->id(), (*i)->type());
     bb->close(*i);
   }
-  delete readers;
 
-  const char* prefix = "Another";
-  readers = bb->open_all_of_type_for_reading("TestInterface", prefix);
-  printf("Found %zu interfaces with prefix \"%s\"\n", readers->size(), prefix);
-  for (std::list<Interface *>::iterator i = readers->begin(); i != readers->end(); ++i) {
+  const char* pattern = "AnotherID *";
+  readers = bb->open_multiple_for_reading("TestInterface", pattern);
+  printf("Found %zu interfaces with pattern \"%s\"\n", readers.size(), pattern);
+  for (std::list<Interface *>::iterator i = readers.begin(); i != readers.end(); ++i) {
     printf("Opened reader for interface %s of type %s\n", (*i)->id(), (*i)->type());
     bb->close(*i);
   }
-  delete readers;
   
   bb->close(ti_writer_1);
   bb->close(ti_writer_2);
