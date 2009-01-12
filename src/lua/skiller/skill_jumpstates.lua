@@ -46,6 +46,8 @@ local SubSkillState = skiller.skill_states.SubSkillState
 -- transitions and cannot return a state to switch to after the loop.
 -- @author Tim Niemueller
 SkillJumpState = { add_transition     = JumpState.add_transition,
+		   add_precondition   = JumpState.add_precondition,
+		   add_precond_trans  = JumpState.add_precond_trans,
 		   get_transitions    = JumpState.get_transitions,
 		   clear_transitions  = JumpState.clear_transitions,
 		   try_transitions    = JumpState.try_transitions,
@@ -72,9 +74,10 @@ function SkillJumpState:new(o)
    setmetatable(o, self)
    self.__index = self
 
-   o.subskills   = o.subskills or {}
-   o.transitions = o.transitions or {}
-   o.dotattr     = o.dotattr or {}
+   o.subskills     = o.subskills or {}
+   o.transitions   = o.transitions or {}
+   o.dotattr       = o.dotattr or {}
+   o.preconditions = {}
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
    assert(type(o.subskills) == "table", "Subskills for " .. o.name .. " not a table")
    assert(type(o.dotattr) == "table", "Dot attributes for " .. o.name .. " not a table")
@@ -94,6 +97,9 @@ end
 -- the state's init() routine. Do not overwrite do_init(), rather implement init().
 -- @param ... Any parameters, passed to init()
 function SkillJumpState:do_init(...)
+   local rv = { self:try_transitions(self.preconditions) }
+   if next(rv) then return unpack(rv) end
+
    for _, s in ipairs(self.subskills) do
       s.reset()
    end
@@ -195,6 +201,10 @@ function SubSkillJumpState:do_init(...)
    if next(args) then
       self.args = args
    end
+
+   local rv = { self:try_transitions(self.preconditions) }
+   if next(rv) then return unpack(rv) end
+
    self.skill.reset()
    self.skill_status = skillstati.S_RUNNING
    self:init()

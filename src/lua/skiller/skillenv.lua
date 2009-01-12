@@ -130,6 +130,8 @@ local skill_env_template = {
 function init(skillspace)
    skill_space = skillspace
 
+   skill_env_template.interfaces = interfaces
+
    if interfaces.writing.skiller then
       interfaces.writing.skiller:set_error("")
       interfaces.writing.skiller:write()

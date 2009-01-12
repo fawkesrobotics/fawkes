@@ -66,6 +66,7 @@ function JumpState:new(o)
 
    o.dotattr = o.dotattr or {}
    o.transitions = o.transitions or {}
+   o.preconditions = {}
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
 
    return o
@@ -76,6 +77,8 @@ end
 -- executed for every state for derived states. 
 -- @param ... Any parameters, passed to the init() function.
 function JumpState:do_init(...)
+   local rv = { self:try_transitions(self.preconditions) }
+   if next(rv) then return unpack(rv) end
    self:init(...)
    return self:try_transitions()
 end
@@ -92,6 +95,27 @@ function JumpState:do_loop()
    return self:try_transitions()
 end
 
+
+--- Add transition as precondition.
+-- The given transition must already exist in the list of transitions of this
+-- state. Then the transition is added to the list of preconditions. That is it
+-- is checked just before init() would be run. If any of the jump conditions of
+-- the precondition transition fires the transition is executed immediately and
+-- the state is never run (init() and loop() are not called.
+function JumpState:add_precondition(transition)
+   local ok = false
+   for _,t in ipairs(self.transitions) do
+      if t == transition then
+	 ok = true
+	 break
+      end
+   end
+   assert(ok, "JumpState/" .. self.name .. ":add_precondition: transition has not been added via add_transition before")
+
+   table.insert(self.preconditions, transition)
+
+   return transition
+end
 
 --- Add transition.
 -- Adds a transition for this state. Jump conditions are executing after loop()
@@ -118,15 +142,21 @@ function JumpState:add_transition(state, jumpcond, description)
 end
 
 
+function JumpState:add_precond_trans(state, jumpcond, description)
+   local t = self:add_transition(state, jumpcond, description)
+   self:add_precondition(t)
+end
+
 --- Try all transitions and return a follow state if applicable.
 -- This tries for all added transitions if the jump condition fires. If it does
 -- the follow state is returned with any parameters the jump condition might have
 -- supplied.
 -- @return follow state or nil to stay in current state as first argument, possibly
 -- any number of additional arguments that should be passed to the follow state
-function JumpState:try_transitions()
+function JumpState:try_transitions(transtable)
+   local transtable = transtable or self.transitions
    --print("Trying conditions for " .. self.name)
-   for _,t in ipairs(self.transitions) do
+   for _,t in ipairs(transtable) do
       local rv = { t.jumpcond(self) }
       local jcfires = rv[1]
       table.remove(rv, 1)

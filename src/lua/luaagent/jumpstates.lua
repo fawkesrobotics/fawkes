@@ -44,6 +44,8 @@ local SkillQueue    = luaagent.skillqueue.SkillQueue
 -- transitions and cannot return a state to switch to after the loop.
 -- @author Tim Niemueller
 AgentSkillExecJumpState = { add_transition     = JumpState.add_transition,
+			    add_precondition   = JumpState.add_precondition,
+			    add_precond_trans  = JumpState.add_precond_trans,
 			    get_transitions    = JumpState.get_transitions,
 			    clear_transitions  = JumpState.clear_transitions,
 			    try_transitions    = JumpState.try_transitions,
@@ -127,6 +129,9 @@ end
 -- skill queue. The skill queue is executed and intermediate skill status
 -- is S_RUNNING.
 function AgentSkillExecJumpState:do_init(params)
+   local rv = { self:try_transitions(self.preconditions) }
+   if next(rv) then return unpack(rv) end
+
    self:init()
    if params and type(params) == "table" then
       self.skill_queue:set_params(params)
