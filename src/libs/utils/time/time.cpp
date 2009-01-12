@@ -34,6 +34,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <unistd.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -444,6 +445,57 @@ Time::stamp()
   return *this;
 }
 
+
+/** Wait (sleep) for this time.
+ * This waits for as much time as this instance provides. Note that you have to
+ * make sure that you call this on a sensible time range. You probably do not want
+ * to wait for almost 40 years when passing a time point...
+ */
+void
+Time::wait()
+{
+  Time until, now;
+  until += *this;
+
+  // we want to release run status at least shortly
+  usleep(0);
+
+  long int remaining_usec = (until - now).in_usec();
+  while ( remaining_usec > 0 ) {
+    usleep(remaining_usec);
+    now.stamp();
+    remaining_usec = (until - now).in_usec();
+  }
+}
+
+
+/** Wait (sleep) for this system time.
+ * This waits for as much time as this instance provides. Unlike wait() this
+ * method calculates the time in system time, althouh the main clock may run
+ * slower for example in a simulation. Note that you have to make sure that you
+ * call this on a sensible time range. You probably do not want to wait for
+ * almost 40 years when passing a time point...
+ */
+void
+Time::wait_systime()
+{
+  Time until, now;
+
+  __clock->get_systime(until);
+  until += *this;
+
+  __clock->get_systime(now);
+
+  // we want to release run status at least shortly
+  usleep(0);
+
+  long int remaining_usec = (until - now).in_usec();
+  while ( remaining_usec > 0 ) {
+    usleep(remaining_usec);
+    __clock->get_systime(now);
+    remaining_usec = (until - now).in_usec();
+  }
+}
 
 /** Output function.
  * @return a pointer to a member containing a string represenation of

@@ -116,6 +116,9 @@ class Time
   Time & operator-=(const Time& t);
   Time & operator=(const Time& t);
 
+  void wait();
+  void wait_systime();
+
   const char * str(bool utc = false);
   void         str_r(char *s, bool utc = false);
 
