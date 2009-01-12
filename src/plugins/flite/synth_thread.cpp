@@ -83,6 +83,7 @@ FliteSynthThread::loop()
   while ( ! __speechsynth_if->msgq_empty() ) {
     if ( __speechsynth_if->msgq_first_is<SpeechSynthInterface::SayMessage>() ) {
       SpeechSynthInterface::SayMessage *msg = __speechsynth_if->msgq_first<SpeechSynthInterface::SayMessage>();
+      __speechsynth_if->set_msgid(msg->id());
       say(msg->text());
     }
 
@@ -108,8 +109,24 @@ FliteSynthThread::say(const char *text)
 {
   cst_wave *wave = flite_text_to_wave(text, __voice);
   cst_wave_save_riff(wave, "/tmp/test.wav");
+
+  __speechsynth_if->set_text(text);
+  __speechsynth_if->set_final(false);
+  __speechsynth_if->set_duration(get_duration(wave));
+  __speechsynth_if->write();
+
   play_wave(wave);
   delete_wave(wave);
+
+  __speechsynth_if->set_final(true);
+  __speechsynth_if->write();
+}
+
+
+float
+FliteSynthThread::get_duration(cst_wave *wave)
+{
+  return (float)cst_wave_num_samples(wave) / (float)cst_wave_sample_rate(wave);
 }
 
 
@@ -120,7 +137,7 @@ void
 FliteSynthThread::play_wave(cst_wave *wave)
 {
   snd_pcm_t *pcm;
-  float duration = (float)cst_wave_num_samples(wave) / (float)cst_wave_sample_rate(wave);
+  float duration = get_duration(wave);
   int err;
   if ((err = snd_pcm_open(&pcm, "default", SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
     throw Exception("Failed to open PCM: %s", snd_strerror(err));

@@ -51,14 +51,17 @@ FestivalSynthThread::init()
 {
   __speechsynth_if = blackboard->open_for_writing<SpeechSynthInterface>("Festival");
 
-  festival_initialize(/* load init files */ 1, FESTIVAL_HEAP_SIZE);
-
   bbil_add_message_interface(__speechsynth_if);
   blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
 
-  say("Festival speech synth loaded");
 }
 
+
+void FestivalSynthThread::once()
+{
+  festival_initialize(/* load init files */ 1, FESTIVAL_HEAP_SIZE);
+  say("Festival speech synth loaded");
+}
 
 void
 FestivalSynthThread::finalize()
@@ -80,6 +83,7 @@ FestivalSynthThread::loop()
   while ( ! __speechsynth_if->msgq_empty() ) {
     if ( __speechsynth_if->msgq_first_is<SpeechSynthInterface::SayMessage>() ) {
       SpeechSynthInterface::SayMessage *msg = __speechsynth_if->msgq_first<SpeechSynthInterface::SayMessage>();
+      __speechsynth_if->set_msgid(msg->id());
       say(msg->text());
     }
 
@@ -103,5 +107,32 @@ FestivalSynthThread::bb_interface_message_received(Interface *interface,
 void
 FestivalSynthThread::say(const char *text)
 {
-  festival_say_text(text);
+  EST_Wave wave;
+  festival_text_to_wave(text, wave);
+
+  float duration = (float)wave.num_samples() / (float)wave.sample_rate();
+
+  __speechsynth_if->set_text(text);
+  __speechsynth_if->set_final(false);
+  __speechsynth_if->set_duration(duration);
+  __speechsynth_if->write();
+
+  Time start;
+  clock->get_systime(start);
+
+  EST_Option al;
+  play_wave(wave, al);
+
+  // compensate for data in buffer that still needs to be player, should be
+  // replaced with a call that actually determines the size of the buffer...
+  Time now;
+  clock->get_systime(now);
+  float remaining = duration - (now - &start);
+  if (remaining > 0) {
+    Time waittime(remaining);
+    waittime.wait_systime();
+  }
+
+  __speechsynth_if->set_final(true);
+  __speechsynth_if->write();
 }

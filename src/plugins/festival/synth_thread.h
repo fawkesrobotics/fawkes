@@ -50,6 +50,7 @@ class FestivalSynthThread
 
   virtual void init();
   virtual void finalize();
+  virtual void once();
   virtual void loop();
 
   void say(const char *text);

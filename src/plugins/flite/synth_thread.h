@@ -55,10 +55,13 @@ class FliteSynthThread
   virtual void loop();
 
   void say(const char *text);
-  void play_wave(cst_wave *wave);
 
   virtual bool bb_interface_message_received(fawkes::Interface *interface,
 					     fawkes::Message *message) throw();
+
+ private: /* methods */
+  void  play_wave(cst_wave *wave);
+  float get_duration(cst_wave *wave);
 
  private:
   fawkes::SpeechSynthInterface   *__speechsynth_if;
