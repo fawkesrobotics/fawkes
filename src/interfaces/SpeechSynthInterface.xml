@@ -11,6 +11,18 @@
     <field type="char" length="1024" name="text">
       Last spoken string. Must be properly null-terminated.
     </field>
+    <field type="unsigned int" name="msgid">
+      The ID of the message that is currently being processed,
+      or 0 if no message is being processed.
+    </field>
+    <field type="bool" name="final">
+      True, if the last text has been spoken, false if it is still running.
+    </field>
+    <field type="float" name="duration">
+      Length in seconds that it takes to speek the current text, -1 if
+      unknown. This is the total duration of the current string, *not* the
+      duration of already spoken or yet to speak text!
+    </field>
   </data>
   <message name="Say">
     <comment>Orders the given text to be spoken.</comment>

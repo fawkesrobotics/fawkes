@@ -42,8 +42,20 @@ class SpeechSynthInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
+    unsigned int msgid; /**< 
+      The ID of the message that is currently being processed,
+      or 0 if no message is being processed.
+     */
+    float duration; /**< 
+      Length in seconds that it takes to speek the current text, -1 if
+      unknown. This is the total duration of the current string, *not* the
+      duration of already spoken or yet to speak text!
+     */
     char text[1024]; /**< 
       Last spoken string. Must be properly null-terminated.
+     */
+    bool final; /**< 
+      True, if the last text has been spoken, false if it is still running.
      */
   } SpeechSynthInterface_data_t;
 
@@ -88,6 +100,15 @@ class SpeechSynthInterface : public Interface
   char * text() const;
   void set_text(const char * new_text);
   size_t maxlenof_text() const;
+  unsigned int msgid() const;
+  void set_msgid(const unsigned int new_msgid);
+  size_t maxlenof_msgid() const;
+  bool is_final() const;
+  void set_final(const bool new_final);
+  size_t maxlenof_final() const;
+  float duration() const;
+  void set_duration(const float new_duration);
+  size_t maxlenof_duration() const;
 
 };
 

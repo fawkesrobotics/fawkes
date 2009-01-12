@@ -18,6 +18,15 @@ class SpeechSynthInterface : public Interface
   char * text();
   void set_text(const char * new_text);
   int maxlenof_text() const;
+  unsigned int msgid();
+  void set_msgid(const unsigned int new_msgid);
+  int maxlenof_msgid() const;
+  bool is_final();
+  void set_final(const bool new_final);
+  int maxlenof_final() const;
+  float duration();
+  void set_duration(const float new_duration);
+  int maxlenof_duration() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

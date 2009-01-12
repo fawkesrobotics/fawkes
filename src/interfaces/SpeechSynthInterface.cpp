@@ -53,7 +53,10 @@ SpeechSynthInterface::SpeechSynthInterface() : Interface()
   data      = (SpeechSynthInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(Interface::IFT_STRING, "text", 1024, data->text);
-  unsigned char tmp_hash[] = {0xbf, 0xbe, 0x6b, 0x2f, 0x9e, 0x25, 0x6f, 0x5a, 0xd6, 0x43, 0x56, 0x8f, 0x1e, 0xc5, 0x6, 0x3e};
+  add_fieldinfo(Interface::IFT_UINT, "msgid", 1, &data->msgid);
+  add_fieldinfo(Interface::IFT_BOOL, "final", 1, &data->final);
+  add_fieldinfo(Interface::IFT_FLOAT, "duration", 1, &data->duration);
+  unsigned char tmp_hash[] = {0x8e, 0x78, 0x6c, 0x1d, 0x4a, 0x6, 0x6e, 0xa, 0x35, 0x70, 0xef, 0x21, 0x5, 0xf8, 0x32, 0xc2};
   set_hash(tmp_hash);
 }
 
@@ -95,6 +98,114 @@ void
 SpeechSynthInterface::set_text(const char * new_text)
 {
   strncpy(data->text, new_text, sizeof(data->text));
+}
+
+/** Get msgid value.
+ * 
+      The ID of the message that is currently being processed,
+      or 0 if no message is being processed.
+    
+ * @return msgid value
+ */
+unsigned int
+SpeechSynthInterface::msgid() const
+{
+  return data->msgid;
+}
+
+/** Get maximum length of msgid value.
+ * @return length of msgid value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SpeechSynthInterface::maxlenof_msgid() const
+{
+  return 1;
+}
+
+/** Set msgid value.
+ * 
+      The ID of the message that is currently being processed,
+      or 0 if no message is being processed.
+    
+ * @param new_msgid new msgid value
+ */
+void
+SpeechSynthInterface::set_msgid(const unsigned int new_msgid)
+{
+  data->msgid = new_msgid;
+}
+
+/** Get final value.
+ * 
+      True, if the last text has been spoken, false if it is still running.
+    
+ * @return final value
+ */
+bool
+SpeechSynthInterface::is_final() const
+{
+  return data->final;
+}
+
+/** Get maximum length of final value.
+ * @return length of final value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SpeechSynthInterface::maxlenof_final() const
+{
+  return 1;
+}
+
+/** Set final value.
+ * 
+      True, if the last text has been spoken, false if it is still running.
+    
+ * @param new_final new final value
+ */
+void
+SpeechSynthInterface::set_final(const bool new_final)
+{
+  data->final = new_final;
+}
+
+/** Get duration value.
+ * 
+      Length in seconds that it takes to speek the current text, -1 if
+      unknown. This is the total duration of the current string, *not* the
+      duration of already spoken or yet to speak text!
+    
+ * @return duration value
+ */
+float
+SpeechSynthInterface::duration() const
+{
+  return data->duration;
+}
+
+/** Get maximum length of duration value.
+ * @return length of duration value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SpeechSynthInterface::maxlenof_duration() const
+{
+  return 1;
+}
+
+/** Set duration value.
+ * 
+      Length in seconds that it takes to speek the current text, -1 if
+      unknown. This is the total duration of the current string, *not* the
+      duration of already spoken or yet to speak text!
+    
+ * @param new_duration new duration value
+ */
+void
+SpeechSynthInterface::set_duration(const float new_duration)
+{
+  data->duration = new_duration;
 }
 
 /* =========== message create =========== */
