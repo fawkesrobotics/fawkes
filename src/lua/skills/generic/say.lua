@@ -44,16 +44,28 @@ skillenv.skill_module(...)
 
 -- States
 fsm:new_jump_state("SAY")
+fsm:new_jump_state("WAIT")
 
 function SAY:init()
-   if speechsynth:has_writer() then
-      self.text = self.fsm.vars[1] or self.fsm.vars.text
-      if self.text then
-	 speechsynth:msgq_enqueue_copy(speechsynth.SayMessage:new(self.text))
-      end
-   end
+   local text = self.fsm.vars[1] or self.fsm.vars.text
+   self.fsm.vars.msgid = speechsynth:msgq_enqueue_copy(speechsynth.SayMessage:new(text))
 end
 
-SAY:add_transition(FINAL, function (state) return speechsynth:has_writer() and state.text end, "Text spoken")
-SAY:add_transition(FAILED, function (state) return not speechsynth:has_writer() end, "No SpeechSynth provider")
-SAY:add_transition(FAILED, function (state) return not state.text end, "No text given")
+function WAIT:jumpcond_speechsynth_fail()
+   return not speechsynth:has_writer()
+          or self.fsm.vars.msgid < speechsynth:msgid()
+end
+
+function WAIT:jumpcond_speechsynth_done()
+   return self.fsm.vars.msgid == speechsynth:msgid()
+          and speechsynth:is_final()
+end
+
+SAY:add_precond_trans(FAILED, function (state) return not speechsynth:has_writer() end, "No SpeechSynth provider")
+SAY:add_precond_trans(FAILED, function (state) return not state.fsm.vars[1] and not state.fsm.vars.text end, "No text given")
+SAY:add_transition(FINAL, function (state) return not state.fsm.vars.wait end, "Speech ordered")
+SAY:add_transition(WAIT, function (state) return state.fsm.vars.wait end, "Wait for final")
+WAIT:add_transition(FAILED, WAIT.jumpcond_speechsynth_fail, "SpeechSynth failure")
+WAIT:add_transition(FINAL, WAIT.jumpcond_speechsynth_done, "SpeechSynth done")
+
+SAY:get_transitions(FINAL).dotattr = { labeloffsety = -15 }
