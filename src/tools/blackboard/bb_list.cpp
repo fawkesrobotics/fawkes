@@ -24,8 +24,8 @@
 
 #include <utils/ipc/shm.h>
 #include <config/sqlite.h>
-#include <blackboard/shmem_header.h>
-#include <blackboard/shmem_lister.h>
+#include <blackboard/shmem/header.h>
+#include <blackboard/shmem/lister.h>
 #include <blackboard/blackboard.h>
 #include <blackboard/bbconfig.h>
 #include <iostream>

@@ -23,8 +23,8 @@
  */
 
 #include <blackboard/bbconfig.h>
-#include <blackboard/memory_manager.h>
-#include <blackboard/interface_mem_header.h>
+#include <blackboard/internal/memory_manager.h>
+#include <blackboard/internal/interface_mem_header.h>
 #include <blackboard/exceptions.h>
 #include <utils/system/console_colors.h>
 #include <utils/time/time.h>
