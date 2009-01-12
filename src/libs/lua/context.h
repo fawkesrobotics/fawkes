@@ -105,6 +105,11 @@ class LuaContext : public FamListener
   void get_field(int idx, const char *k);
   void get_global(const char *name);
 
+  void raw_set(int idx);
+  void raw_seti(int idx, int n);
+  void raw_get(int idx);
+  void raw_geti(int idx, int n);
+
   lua_Number   to_number(int idx);
   lua_Integer  to_integer(int idx);
   bool         to_boolean(int idx);

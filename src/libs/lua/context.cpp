@@ -895,6 +895,53 @@ LuaContext::get_field(int idx, const char *k)
 }
 
 
+/** Set value without invoking meta methods.
+ * Similar to set_table(), but does raw access, i.e. without invoking meta-methods.
+ * @param idx index of the table
+ */
+void
+LuaContext::raw_set(int idx)
+{
+  lua_rawset(__L, idx);
+}
+
+
+/** Set indexed value without invoking meta methods.
+ * Sets t[n]=v, where t is a table at index idx and v is the value at the
+ * top of the stack.
+ * @param idx index of the table
+ * @param n index in the table
+ */
+void
+LuaContext::raw_seti(int idx, int n)
+{
+  lua_rawseti(__L, idx, n);
+}
+
+
+/** Get value without invoking meta methods.
+ * Similar to get_table(), but does raw access, i.e. without invoking meta-methods.
+ * @param idx index of the table
+ */
+void
+LuaContext::raw_get(int idx)
+{
+  lua_rawget(__L, idx);
+}
+
+
+/** Get indexed value without invoking meta methods.
+ * Pushes t[n] onto the stack, where t is a table at index idx.
+ * @param idx index of the table
+ * @param n index in the table
+ */
+void
+LuaContext::raw_geti(int idx, int n)
+{
+  lua_rawgeti(__L, idx, n);
+}
+
+
 /** Get global variable.
  * @param name name of the global variable
  */

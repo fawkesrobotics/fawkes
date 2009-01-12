@@ -28,7 +28,10 @@
 #include <lua/context_watcher.h>
 
 #include <core/utils/lock_map.h>
+#include <blackboard/interface_observer.h>
+
 #include <string>
+#include <list>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -43,10 +46,27 @@ class LuaContext;
 
 class LuaInterfaceImporter : public LuaContextWatcher
 {
- public:
-  /** Map for interfaces. */
-  typedef fawkes::LockMap<std::string, fawkes::Interface *>  InterfaceMap;
 
+  class InterfaceObserver : public BlackBoardInterfaceObserver
+  {
+   public:
+    InterfaceObserver(LuaInterfaceImporter *lii, std::string varname,
+		      const char *type, const char *id_pattern);
+
+    virtual void bb_interface_created(const char *type, const char *id) throw();
+
+   private:
+    LuaInterfaceImporter *__lii;
+    std::string           __varname;
+  };
+
+  typedef fawkes::LockMap<std::string, InterfaceObserver *>  ObserverMap;
+
+ public:
+  /** Map of varname to interface instance. */
+  typedef fawkes::LockMap<std::string, fawkes::Interface *>  InterfaceMap;
+  /** Map of varname to list of interfaces */
+  typedef fawkes::LockMap<std::string, std::list<fawkes::Interface *> >  InterfaceListMap;
 
   LuaInterfaceImporter(LuaContext *__context, BlackBoard *blackboard,
 		       Configuration *config, Logger *logger);
@@ -75,6 +95,10 @@ class LuaInterfaceImporter : public LuaContextWatcher
   void push_interfaces(LuaContext *context);
   void push_interfaces_varname(LuaContext *context, InterfaceMap &imap);
   void push_interfaces_uid(LuaContext *context, InterfaceMap &imap);
+  void push_multi_interfaces_varname(LuaContext *context, InterfaceListMap &imap);
+
+  void add_observed_interface(std::string varname,
+			      const char *type, const char *id);
 
  private:
   LuaContext    *__context;
@@ -82,11 +106,13 @@ class LuaInterfaceImporter : public LuaContextWatcher
   Configuration *__config;
   Logger        *__logger;
 
-  InterfaceMap   __reading_ifs;
-  InterfaceMap   __writing_ifs;
+  InterfaceMap      __reading_ifs;
+  InterfaceListMap  __reading_multi_ifs;
+  InterfaceMap      __writing_ifs;
+  ObserverMap       __observers;
 
-  InterfaceMap   __ext_rifs;
-  InterfaceMap   __ext_wifs;
+  InterfaceMap      __ext_rifs;
+  InterfaceMap      __ext_wifs;
 
   bool           __interfaces_pushed;
 };
