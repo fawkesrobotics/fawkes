@@ -17,11 +17,11 @@
 
 BASEDIR = ../../..
 
-LIBS_refboxrep = fawkescore fawkesutils fawkesconfig fawkesnetcomm
-OBJS_refboxrep = main.o refbox_state_sender.o midsize.o spl.o
+LIBS_ffrefboxrep = fawkescore fawkesutils fawkesconfig fawkesnetcomm
+OBJS_ffrefboxrep = main.o refbox_state_sender.o midsize.o spl.o
 
-OBJS_all =	$(OBJS_refboxrep)
-BINS_all =	$(BINDIR)/refboxrep
+OBJS_all =	$(OBJS_ffrefboxrep)
+BINS_all =	$(BINDIR)/ffrefboxrep
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

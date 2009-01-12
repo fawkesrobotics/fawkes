@@ -21,21 +21,21 @@ include $(BASEDIR)/etc/buildsys/gui.mk
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_netloggui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard fawkesinterfaces fawkesguiutils
-OBJS_netloggui = main.o netloggui.o
-OBJS_all = $(OBJS_netloggui)
+LIBS_ffnetloggui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard fawkesinterfaces fawkesguiutils
+OBJS_ffnetloggui = main.o netloggui.o
+OBJS_all = $(OBJS_ffnetloggui)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
-  BINS_gui = $(BINDIR)/netloggui
+  BINS_gui = $(BINDIR)/ffnetloggui
 else
-  WARN_TARGETS += warning_netloggui
+  WARN_TARGETS += warning_ffnetloggui
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 gui: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
-warning_skillgui:
+warning_ffnetloggui:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building netloggui$(TNORMAL) $(GUI_ERROR)";
 endif
 

@@ -2,7 +2,7 @@
 #            Makefile Build System for Fawkes : Log Tool
 #                            -------------------
 #   Created on Sat Dec 15 02:02:54 2007
-#   Copyright (C) 2006-2007 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #   $Id$
 #
@@ -17,11 +17,11 @@
 
 BASEDIR = ../../..
 
-LIBS_logview = fawkescore fawkesutils fawkesnetcomm
-OBJS_logview = main.o
+LIBS_fflogview = fawkescore fawkesutils fawkesnetcomm
+OBJS_fflogview = main.o
 
-OBJS_all =	$(OBJS_logview)
-BINS_all =	$(BINDIR)/logview
+OBJS_all =	$(OBJS_fflogview)
+BINS_all =	$(BINDIR)/fflogview
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

@@ -22,27 +22,28 @@ include $(BASEDIR)/etc/buildsys/ext/gmsl
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
-LIBS_ce = fawkesconfig fawkesguiutils
-OBJS_ce = main.o			\
-	  config_tree_view.o		\
-	  config_edit_dialog.o		\
-	  config_add_dialog.o		\
-	  config_remove_dialog.o	\
-	  config_editor.o	
-OBJS_all = $(OBJS_ce)
+LIBS_ffconfiggui = fawkesconfig fawkesguiutils
+OBJS_ffconfiggui = main.o			\
+		   config_tree_view.o		\
+		   config_edit_dialog.o		\
+		   config_add_dialog.o		\
+		   config_remove_dialog.o	\
+		   config_editor.o	
+OBJS_all = $(OBJS_ffconfiggui)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
-  BINS_gui = $(BINDIR)/ce
+  BINS_gui = $(BINDIR)/ffconfiggui
 else
-  WARN_TARGETS += warning_ce
+  WARN_TARGETS += warning_ffconfiggui
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 gui: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
-warning_ce:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building ce$(TNORMAL) $(GUI_ERROR)";
+warning_ffconfiggui:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building ffconfiggui$(TNORMAL) $(GUI_ERROR)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
+

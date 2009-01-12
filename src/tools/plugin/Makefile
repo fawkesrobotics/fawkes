@@ -15,12 +15,12 @@
 
 BASEDIR = ../../..
 
-LIBS_plugin = fawkescore fawkesutils fawkesnetcomm fawkesplugin
-OBJS_plugin = main.o	\
-	      plugin_tool.o
+LIBS_ffplugin = fawkescore fawkesutils fawkesnetcomm fawkesplugin
+OBJS_ffplugin = main.o	\
+		plugin_tool.o
 
-OBJS_all =	$(OBJS_plugin)
-BINS_all =	$(BINDIR)/plugin
+OBJS_all =	$(OBJS_ffplugin)
+BINS_all =	$(BINDIR)/ffplugin
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

@@ -17,11 +17,11 @@
 
 BASEDIR = ../../..
 
-LIBS_config = fawkescore fawkesutils fawkesconfig fawkesnetcomm
-OBJS_config = main.o
+LIBS_ffconfig = fawkescore fawkesutils fawkesconfig fawkesnetcomm
+OBJS_ffconfig = main.o
 
-OBJS_all =	$(OBJS_config)
-BINS_all =	$(BINDIR)/config
+OBJS_all =	$(OBJS_ffconfig)
+BINS_all =	$(BINDIR)/ffconfig
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
