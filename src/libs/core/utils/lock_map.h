@@ -3,7 +3,7 @@
  *  lock_map.h - Lockable map
  *
  *  Created: Sat May 12 10:45:15 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -55,9 +55,9 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
 };
 
 
-/** @class LockMap core/utils/lock_hashmap.h
- * Hash map with a lock.
- * This class provides a hahs map that has an intrinsic lock. The lock can be applied
+/** @class LockMap <core/utils/lock_map.h>
+ * Map with a lock.
+ * This class provides a map that has an intrinsic lock. The lock can be applied
  * with the regular locking methods.
  *
  * @see Mutex

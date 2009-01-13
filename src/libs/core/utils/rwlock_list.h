@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  lock_list.h - Lockable list
+ *  rwlock_list.h - List with read/write lock
  *
- *  Created: Tue Oct 31 18:25:03 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Jan 13 16:33:35 2009
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -23,45 +23,47 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_UTILS_LOCK_LIST_H_
-#define __CORE_UTILS_LOCK_LIST_H_
+#ifndef __CORE_UTILS_RWLOCK_LIST_H_
+#define __CORE_UTILS_RWLOCK_LIST_H_
 
-#include <core/threading/mutex.h>
+#include <core/threading/read_write_lock.h>
 #include <list>
 
 namespace fawkes {
 
 
 template <typename Type>
-class LockList : public std::list<Type>
+class RWLockList : public std::list<Type>
 {
  public:
-  LockList();
-  LockList(const LockList<Type> &ll);
-  virtual ~LockList();
-  virtual void  lock();
-  virtual bool  try_lock();
-  virtual void  unlock();
-  Mutex *       mutex() const;
+  RWLockList();
+  RWLockList(const RWLockList<Type> &ll);
+  virtual ~RWLockList();
+  virtual          void  lock_for_read();
+  virtual          void  lock_for_write();
+  virtual          bool  try_lock_for_read();
+  virtual          bool  try_lock_for_write();
+  virtual          void  unlock();
+  ReadWriteLock *  rwlock() const;
 
   void     push_back_locked(const Type& x);
   void     push_front_locked(const Type& x);
   void     remove_locked(const Type& x);
 
-  LockList<Type> &  operator=(const LockList<Type> &ll);
-  LockList<Type> &  operator=(const std::list<Type> &l);
+  RWLockList<Type> &  operator=(const RWLockList<Type> &ll);
+  RWLockList<Type> &  operator=(const std::list<Type> &l);
  private:
-  Mutex *__mutex;
+  ReadWriteLock *__rwlock;
 
 };
 
 
-/** @class LockList <core/utils/lock_list.h>
- * List with a lock.
+/** @class RWLockList <core/utils/rwlock_list.h>
+ * List with a read/write lock.
  * This class provides a list that has an intrinsic lock. The lock can be applied
  * with the regular locking methods.
  *
- * @see Mutex
+ * @see ReadWriteLock
  * @ingroup FCL
  * @author Tim Niemueller
  */
@@ -69,57 +71,77 @@ class LockList : public std::list<Type>
 
 /** Constructor. */
 template <typename Type>
-LockList<Type>::LockList()
+RWLockList<Type>::RWLockList()
 {
-  __mutex = new Mutex();
+  __rwlock = new ReadWriteLock();
 }
 
 
 /** Copy constructor.
- * @param ll LockList to copy
+ * @param ll RWLockList to copy
  */
 template <typename Type>
-LockList<Type>::LockList(const LockList<Type> &ll)
+RWLockList<Type>::RWLockList(const RWLockList<Type> &ll)
   : std::list<Type>::list(ll)
 {
-  __mutex = new Mutex();
+  __rwlock = new ReadWriteLock();
 }
 
 
 /** Destructor. */
 template <typename Type>
-LockList<Type>::~LockList()
+RWLockList<Type>::~RWLockList()
 {
-  delete __mutex;
+  delete __rwlock;
 }
 
 
-/** Lock list. */
+/** Lock list for reading. */
 template <typename Type>
 void
-LockList<Type>::lock()
+RWLockList<Type>::lock_for_read()
 {
-  __mutex->lock();
+  __rwlock->lock_for_read();
 }
 
 
-/** Try to lock list.
+/** Lock list for writing. */
+template <typename Type>
+void
+RWLockList<Type>::lock_for_write()
+{
+  __rwlock->lock_for_write();
+}
+
+
+/** Try to lock list for reading.
  * @return true, if the lock has been aquired, false otherwise.
  */
 template <typename Type>
 bool
-LockList<Type>::try_lock()
+RWLockList<Type>::try_lock_for_read()
 {
-  return __mutex->try_lock();
+  return __rwlock->try_lock_for_read();
+}
+
+
+/** Try to lock list for writing.
+ * @return true, if the lock has been aquired, false otherwise.
+ */
+template <typename Type>
+bool
+RWLockList<Type>::try_lock_for_write()
+{
+  return __rwlock->try_lock_for_write();
 }
 
 
 /** Unlock list. */
 template <typename Type>
 void
-LockList<Type>::unlock()
+RWLockList<Type>::unlock()
 {
-  return __mutex->unlock();
+  return __rwlock->unlock();
 }
 
 
@@ -128,11 +150,11 @@ LockList<Type>::unlock()
  */
 template <typename Type>
 void
-LockList<Type>::push_back_locked(const Type& x)
+RWLockList<Type>::push_back_locked(const Type& x)
 {
-  __mutex->lock();
+  __rwlock->lock_for_write();
   std::list<Type>::push_back(x);
-  __mutex->unlock();
+  __rwlock->unlock();
 }
 
 
@@ -141,11 +163,11 @@ LockList<Type>::push_back_locked(const Type& x)
  */
 template <typename Type>
 void
-LockList<Type>::push_front_locked(const Type& x)
+RWLockList<Type>::push_front_locked(const Type& x)
 {
-  __mutex->lock();
+  __rwlock->lock_for_write();
   std::list<Type>::push_front(x);
-  __mutex->unlock();
+  __rwlock->unlock();
 }
 
 
@@ -154,45 +176,44 @@ LockList<Type>::push_front_locked(const Type& x)
  */
 template <typename Type>
 void
-LockList<Type>::remove_locked(const Type& x)
+RWLockList<Type>::remove_locked(const Type& x)
 {
-  __mutex->lock();
+  __rwlock->lock_for_write();
   std::list<Type>::remove(x);
-  __mutex->unlock();
+  __rwlock->unlock();
 }
 
 
-/** Get access to the internal mutex.
- * Can be used with MutexLocker.
- * @return internal mutex
+/** Get access to the internal read/write lock
+ * @return internal rwlock
  */
 template <typename Type>
-Mutex *
-LockList<Type>::mutex() const
+ReadWriteLock *
+RWLockList<Type>::rwlock() const
 {
-  return __mutex;
+  return __rwlock;
 }
 
 
-/** Copy values from another LockList.
+/** Copy values from another RWLockList.
  * Copies the values one by one. Both instances are locked during the copying and
  * this instance is cleared before copying.
  * @param ll list to copy
  * @return reference to this instance
  */
 template <typename Type>
-LockList<Type> &
-LockList<Type>::operator=(const LockList<Type> &ll)
+RWLockList<Type> &
+RWLockList<Type>::operator=(const RWLockList<Type> &ll)
 {
-  __mutex->lock();
-  ll.lock();
+  __rwlock->lock_for_write();
+  ll.lock_for_read();
   this->clear();
-  typename LockList<Type>::const_iterator i;
+  typename RWLockList<Type>::const_iterator i;
   for (i = ll.begin(); i != ll.end(); ++i) {
     this->push_back(*i);
   }
   ll.unlock();
-  __mutex->unlock();
+  __rwlock->unlock();
 
   return *this;
 }
@@ -205,16 +226,16 @@ LockList<Type>::operator=(const LockList<Type> &ll)
  * @return reference to this instance
  */
 template <typename Type>
-LockList<Type> &
-LockList<Type>::operator=(const std::list<Type> &l)
+RWLockList<Type> &
+RWLockList<Type>::operator=(const std::list<Type> &l)
 {
-  __mutex->lock();
+  __rwlock->lock_for_write();
   this->clear();
   typename std::list<Type>::const_iterator i;
   for (i = l.begin(); i != l.end(); ++i) {
     this->push_back(*i);
   }
-  __mutex->unlock();
+  __rwlock->unlock();
 
   return *this;
 }
