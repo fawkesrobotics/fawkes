@@ -27,6 +27,7 @@
 #define __BLACKBOARD_NOTIFIER_H_
 
 #include <core/utils/lock_map.h>
+#include <core/utils/rwlock_map.h>
 
 #include <list>
 #include <string>
@@ -73,7 +74,7 @@ class BlackBoardNotifier
 
   typedef std::pair<BlackBoardInterfaceObserver *, std::list<std::string> > BBioPair;
   typedef std::list< BBioPair>                   BBioList;
-  typedef LockMap< std::string, BBioList >       BBioLockMap;
+  typedef RWLockMap< std::string, BBioList >     BBioLockMap;
 
   typedef BBilList::iterator    BBilListIterator;
   typedef BBilLockMap::iterator BBilLockMapIterator;

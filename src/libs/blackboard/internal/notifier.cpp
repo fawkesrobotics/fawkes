@@ -193,7 +193,7 @@ BlackBoardNotifier::register_observer(BlackBoardInterfaceObserver *observer,
   if ( flags & BlackBoard::BBIO_FLAG_CREATED ) {
     BlackBoardInterfaceObserver::ObservedInterfaceMapIterator i;
     BlackBoardInterfaceObserver::ObservedInterfaceMap *its = observer->bbio_get_observed_create();
-    __bbio_created.lock();
+    __bbio_created.lock_for_write();
     for (i = its->begin(); i != its->end(); ++i) {
       __bbio_created[i->first].push_back(make_pair(observer, i->second));
     }
@@ -203,7 +203,7 @@ BlackBoardNotifier::register_observer(BlackBoardInterfaceObserver *observer,
   if ( flags & BlackBoard::BBIO_FLAG_DESTROYED ) {
     BlackBoardInterfaceObserver::ObservedInterfaceMapIterator i;
     BlackBoardInterfaceObserver::ObservedInterfaceMap *its = observer->bbio_get_observed_destroy();
-    __bbio_destroyed.lock();
+    __bbio_destroyed.lock_for_write();
     for (i = its->begin(); i != its->end(); ++i) {
       __bbio_destroyed[i->first].push_back(make_pair(observer, i->second));
     }
@@ -221,7 +221,7 @@ BlackBoardNotifier::remove_observer(BBioLockMap &iomap, BlackBoardInterfaceObser
 {
   BBioLockMapIterator i, tmp;
 
-  iomap.lock();
+  iomap.lock_for_write();
   i = iomap.begin();
   while (i != iomap.end()) {
     BBioListIterator j = i->second.begin();
@@ -264,7 +264,7 @@ BlackBoardNotifier::notify_of_interface_created(const char *type, const char *id
 {
   BBioLockMapIterator lhmi;
   BBioListIterator i, l;
-  __bbio_created.lock();
+  __bbio_created.lock_for_read();
   if ( (lhmi = __bbio_created.find(type)) != __bbio_created.end() ) {
     BBioList &list = (*lhmi).second;
     for (i = list.begin(); i != list.end(); ++i) {
@@ -290,7 +290,7 @@ BlackBoardNotifier::notify_of_interface_destroyed(const char *type, const char *
 {
   BBioLockMapIterator lhmi;
   BBioListIterator i, l;
-  __bbio_destroyed.lock();
+  __bbio_destroyed.lock_for_read();
   if ( (lhmi = __bbio_destroyed.find(type)) != __bbio_destroyed.end() ) {
     BBioList &list = (*lhmi).second;
     for (i = list.begin(); i != list.end(); ++i) {

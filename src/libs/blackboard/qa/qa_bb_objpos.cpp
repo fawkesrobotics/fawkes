@@ -70,7 +70,19 @@ main(int argc, char **argv)
     interfaces.push_back(iface);
   }
 
-  while ( ! quit) sleep(1);
+  srand(time(NULL));
+  while ( ! quit) {
+    //int u = 0;
+    for (std::list<ObjectPositionInterface *>::iterator i = interfaces.begin(); i != interfaces.end(); ++i) {
+      int r = rand() % 1000000;
+      (*i)->set_world_x((float)r);
+      (*i)->set_world_y((float)r+1);
+      (*i)->set_world_z((float)r+2);
+      (*i)->write();
+      //++u;
+    }
+    sleep(1);
+  }
 
   for (std::list<ObjectPositionInterface *>::iterator i = interfaces.begin(); i != interfaces.end(); ++i) {
     bb->close(*i);
