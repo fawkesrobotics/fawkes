@@ -167,6 +167,20 @@ BatteryInterface::create_message(const char *type) const
 }
 
 
+/** Copy values from other interface.
+ * @param other other interface to copy values from
+ */
+void
+BatteryInterface::copy_values(const Interface *other)
+{
+  const BatteryInterface *oi = dynamic_cast<const BatteryInterface *>(other);
+  if (oi == NULL) {
+    throw TypeMismatchException("Can only copy values from interface of same type (%s vs. %s)",
+                                type(), other->type());
+  }
+  memcpy(data, oi->data, sizeof(BatteryInterface_data_t));
+}
+
 /* =========== messages =========== */
 /** @class BatteryInterface::PushButtonMessage <interfaces/BatteryInterface.h>
  * PushButtonMessage Fawkes BlackBoard Interface Message.

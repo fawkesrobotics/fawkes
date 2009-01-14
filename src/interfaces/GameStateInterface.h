@@ -118,8 +118,6 @@ class GameStateInterface : public Interface
   ~GameStateInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   if_gamestate_t game_state() const;
   void set_game_state(const if_gamestate_t new_game_state);
@@ -145,6 +143,9 @@ class GameStateInterface : public Interface
   unsigned int score_magenta() const;
   void set_score_magenta(const unsigned int new_score_magenta);
   size_t maxlenof_score_magenta() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

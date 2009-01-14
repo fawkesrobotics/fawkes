@@ -57,12 +57,13 @@ class Laser360Interface : public Interface
   ~Laser360Interface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   float * distances() const;
   void set_distances(const float * new_distances);
   size_t maxlenof_distances() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

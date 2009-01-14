@@ -311,6 +311,20 @@ NavigatorInterface::create_message(const char *type) const
 }
 
 
+/** Copy values from other interface.
+ * @param other other interface to copy values from
+ */
+void
+NavigatorInterface::copy_values(const Interface *other)
+{
+  const NavigatorInterface *oi = dynamic_cast<const NavigatorInterface *>(other);
+  if (oi == NULL) {
+    throw TypeMismatchException("Can only copy values from interface of same type (%s vs. %s)",
+                                type(), other->type());
+  }
+  memcpy(data, oi->data, sizeof(NavigatorInterface_data_t));
+}
+
 /* =========== messages =========== */
 /** @class NavigatorInterface::CartesianGotoMessage <interfaces/NavigatorInterface.h>
  * CartesianGotoMessage Fawkes BlackBoard Interface Message.

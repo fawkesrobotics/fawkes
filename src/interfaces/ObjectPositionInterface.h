@@ -189,8 +189,6 @@ class ObjectPositionInterface : public Interface
   ~ObjectPositionInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   unsigned int object_type() const;
   void set_object_type(const unsigned int new_object_type);
@@ -285,6 +283,9 @@ class ObjectPositionInterface : public Interface
   float * relative_xyz_velocity_covariance() const;
   void set_relative_xyz_velocity_covariance(const float * new_relative_xyz_velocity_covariance);
   size_t maxlenof_relative_xyz_velocity_covariance() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

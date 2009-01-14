@@ -115,8 +115,6 @@ class FacerInterface : public Interface
   ~FacerInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   if_facer_opmode_t opmode() const;
   void set_opmode(const if_facer_opmode_t new_opmode);
@@ -133,6 +131,9 @@ class FacerInterface : public Interface
   float sec_since_detection() const;
   void set_sec_since_detection(const float new_sec_since_detection);
   size_t maxlenof_sec_since_detection() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

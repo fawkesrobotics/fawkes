@@ -99,6 +99,7 @@ class Interface
   void                    set_from_chunk(void *chunk);
 
   virtual Message *       create_message(const char *type) const = 0;
+  virtual void            copy_values(const Interface *interface) = 0;
 
   void          read();
   void          write();

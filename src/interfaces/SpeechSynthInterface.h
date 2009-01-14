@@ -94,8 +94,6 @@ class SpeechSynthInterface : public Interface
   ~SpeechSynthInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   char * text() const;
   void set_text(const char * new_text);
@@ -109,6 +107,9 @@ class SpeechSynthInterface : public Interface
   float duration() const;
   void set_duration(const float new_duration);
   size_t maxlenof_duration() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

@@ -179,8 +179,6 @@ class SkillerInterface : public Interface
   ~SkillerInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   char * skill_string() const;
   void set_skill_string(const char * new_skill_string);
@@ -197,6 +195,9 @@ class SkillerInterface : public Interface
   bool is_continuous() const;
   void set_continuous(const bool new_continuous);
   size_t maxlenof_continuous() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

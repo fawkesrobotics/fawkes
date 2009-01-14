@@ -143,8 +143,6 @@ class TestInterface : public Interface
   ~TestInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   bool is_test_bool() const;
   void set_test_bool(const bool new_test_bool);
@@ -170,6 +168,9 @@ class TestInterface : public Interface
   long int test_lint() const;
   void set_test_lint(const long int new_test_lint);
   size_t maxlenof_test_lint() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

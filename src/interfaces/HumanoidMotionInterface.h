@@ -450,8 +450,6 @@ class HumanoidMotionInterface : public Interface
   ~HumanoidMotionInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   bool is_moving() const;
   void set_moving(const bool new_moving);
@@ -504,6 +502,9 @@ class HumanoidMotionInterface : public Interface
   unsigned int msgid() const;
   void set_msgid(const unsigned int new_msgid);
   size_t maxlenof_msgid() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

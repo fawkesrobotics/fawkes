@@ -386,8 +386,6 @@ class MotorInterface : public Interface
   ~MotorInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   unsigned int motor_state() const;
   void set_motor_state(const unsigned int new_motor_state);
@@ -431,6 +429,9 @@ class MotorInterface : public Interface
   char * controller_thread_name() const;
   void set_controller_thread_name(const char * new_controller_thread_name);
   size_t maxlenof_controller_thread_name() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

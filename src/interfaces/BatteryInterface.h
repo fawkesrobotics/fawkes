@@ -79,8 +79,6 @@ class BatteryInterface : public Interface
   ~BatteryInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   unsigned int current() const;
   void set_current(const unsigned int new_current);
@@ -91,6 +89,9 @@ class BatteryInterface : public Interface
   unsigned int temperature() const;
   void set_temperature(const unsigned int new_temperature);
   size_t maxlenof_temperature() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

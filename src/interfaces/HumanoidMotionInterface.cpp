@@ -691,6 +691,20 @@ HumanoidMotionInterface::create_message(const char *type) const
 }
 
 
+/** Copy values from other interface.
+ * @param other other interface to copy values from
+ */
+void
+HumanoidMotionInterface::copy_values(const Interface *other)
+{
+  const HumanoidMotionInterface *oi = dynamic_cast<const HumanoidMotionInterface *>(other);
+  if (oi == NULL) {
+    throw TypeMismatchException("Can only copy values from interface of same type (%s vs. %s)",
+                                type(), other->type());
+  }
+  memcpy(data, oi->data, sizeof(HumanoidMotionInterface_data_t));
+}
+
 /* =========== messages =========== */
 /** @class HumanoidMotionInterface::SetWalkParamsMessage <interfaces/HumanoidMotionInterface.h>
  * SetWalkParamsMessage Fawkes BlackBoard Interface Message.

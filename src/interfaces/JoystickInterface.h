@@ -99,8 +99,6 @@ class JoystickInterface : public Interface
   ~JoystickInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   char num_axes() const;
   void set_num_axes(const char new_num_axes);
@@ -117,6 +115,9 @@ class JoystickInterface : public Interface
   float * axis_y() const;
   void set_axis_y(const float * new_axis_y);
   size_t maxlenof_axis_y() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

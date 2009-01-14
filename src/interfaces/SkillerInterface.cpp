@@ -267,6 +267,20 @@ SkillerInterface::create_message(const char *type) const
 }
 
 
+/** Copy values from other interface.
+ * @param other other interface to copy values from
+ */
+void
+SkillerInterface::copy_values(const Interface *other)
+{
+  const SkillerInterface *oi = dynamic_cast<const SkillerInterface *>(other);
+  if (oi == NULL) {
+    throw TypeMismatchException("Can only copy values from interface of same type (%s vs. %s)",
+                                type(), other->type());
+  }
+  memcpy(data, oi->data, sizeof(SkillerInterface_data_t));
+}
+
 /* =========== messages =========== */
 /** @class SkillerInterface::ExecSkillMessage <interfaces/SkillerInterface.h>
  * ExecSkillMessage Fawkes BlackBoard Interface Message.

@@ -108,12 +108,13 @@ class LedInterface : public Interface
   ~LedInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   float intensity() const;
   void set_intensity(const float new_intensity);
   size_t maxlenof_intensity() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

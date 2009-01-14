@@ -58,7 +58,6 @@ class CppInterfaceGenerator
   void write_constants_h(FILE *f);
 
   void write_messages_cpp(FILE *f);
-  void write_create_message_method_cpp(FILE *f);
   void write_messages_h(FILE *f);
   void write_ctor_dtor_h(FILE *f,  std::string /* indent space */ is,
 			 std::string classname);
@@ -83,6 +82,11 @@ class CppInterfaceGenerator
 			 std::string classname,
 			 std::vector<InterfaceField> fields,
 			 std::string inclusion_prefix);
+
+  void write_create_message_method_cpp(FILE *f);
+  void write_copy_value_method_cpp(FILE *f);
+  void write_basemethods_h(FILE *f, std::string is);
+  void write_basemethods_cpp(FILE *f);
 
   void write_methods_h(FILE *f,
 		       std::string /* indent space */ is,

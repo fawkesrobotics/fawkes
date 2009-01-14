@@ -85,8 +85,6 @@ class SkillerDebugInterface : public Interface
   ~SkillerDebugInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   char * graph_fsm() const;
   void set_graph_fsm(const char * new_graph_fsm);
@@ -94,6 +92,9 @@ class SkillerDebugInterface : public Interface
   char * graph() const;
   void set_graph(const char * new_graph);
   size_t maxlenof_graph() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

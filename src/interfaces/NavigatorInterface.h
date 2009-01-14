@@ -190,8 +190,6 @@ class NavigatorInterface : public Interface
   ~NavigatorInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   float x() const;
   void set_x(const float new_x);
@@ -214,6 +212,9 @@ class NavigatorInterface : public Interface
   bool is_final() const;
   void set_final(const bool new_final);
   size_t maxlenof_final() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

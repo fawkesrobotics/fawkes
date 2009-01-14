@@ -152,8 +152,6 @@ class KickerInterface : public Interface
   ~KickerInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   int num_kicks_left() const;
   void set_num_kicks_left(const int new_num_kicks_left);
@@ -170,6 +168,9 @@ class KickerInterface : public Interface
   unsigned int current_intensity() const;
   void set_current_intensity(const unsigned int new_current_intensity);
   size_t maxlenof_current_intensity() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

@@ -221,6 +221,20 @@ SpeechSynthInterface::create_message(const char *type) const
 }
 
 
+/** Copy values from other interface.
+ * @param other other interface to copy values from
+ */
+void
+SpeechSynthInterface::copy_values(const Interface *other)
+{
+  const SpeechSynthInterface *oi = dynamic_cast<const SpeechSynthInterface *>(other);
+  if (oi == NULL) {
+    throw TypeMismatchException("Can only copy values from interface of same type (%s vs. %s)",
+                                type(), other->type());
+  }
+  memcpy(data, oi->data, sizeof(SpeechSynthInterface_data_t));
+}
+
 /* =========== messages =========== */
 /** @class SpeechSynthInterface::SayMessage <interfaces/SpeechSynthInterface.h>
  * SayMessage Fawkes BlackBoard Interface Message.

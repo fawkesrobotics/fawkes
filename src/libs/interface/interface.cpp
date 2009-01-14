@@ -143,6 +143,12 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
  * @return message of the given type, empty
  * @exception UnknownTypeException thrown if this interface cannot create a message
  * of the given type.
+ *
+ * @fn void Interface::copy_values(const Interface *interface) = 0
+ * Copy values from another interface.
+ * The operation will only succeed if the supplied interface is of the same
+ * type as this instance.
+ * @param interface interface to copy from
  */
 
 /** Constructor */

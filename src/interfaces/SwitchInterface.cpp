@@ -309,6 +309,20 @@ SwitchInterface::create_message(const char *type) const
 }
 
 
+/** Copy values from other interface.
+ * @param other other interface to copy values from
+ */
+void
+SwitchInterface::copy_values(const Interface *other)
+{
+  const SwitchInterface *oi = dynamic_cast<const SwitchInterface *>(other);
+  if (oi == NULL) {
+    throw TypeMismatchException("Can only copy values from interface of same type (%s vs. %s)",
+                                type(), other->type());
+  }
+  memcpy(data, oi->data, sizeof(SwitchInterface_data_t));
+}
+
 /* =========== messages =========== */
 /** @class SwitchInterface::SetMessage <interfaces/SwitchInterface.h>
  * SetMessage Fawkes BlackBoard Interface Message.

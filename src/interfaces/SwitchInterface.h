@@ -137,8 +137,6 @@ class SwitchInterface : public Interface
   ~SwitchInterface();
 
  public:
-  virtual Message * create_message(const char *type) const;
-
   /* Methods */
   bool is_enabled() const;
   void set_enabled(const bool new_enabled);
@@ -158,6 +156,9 @@ class SwitchInterface : public Interface
   unsigned int activation_count() const;
   void set_activation_count(const unsigned int new_activation_count);
   size_t maxlenof_activation_count() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
 
 };
 

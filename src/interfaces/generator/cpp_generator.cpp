@@ -222,7 +222,7 @@ CppInterfaceGenerator::write_cpp(FILE *f)
   write_constants_cpp(f);
   write_ctor_dtor_cpp(f, class_name, "Interface", "", data_fields);
   write_methods_cpp(f, class_name, class_name, data_fields, pseudo_maps, "");
-  write_create_message_method_cpp(f);
+  write_basemethods_cpp(f);
   write_messages_cpp(f);
 
   write_management_funcs_cpp(f);
@@ -403,6 +403,41 @@ CppInterfaceGenerator::write_create_message_method_cpp(FILE *f)
 	    "  }\n"
 	    "}\n\n\n");
   }
+}
+
+
+/** Write copy_value() method to CPP file.
+ * @param f file to write to
+ */
+void
+CppInterfaceGenerator::write_copy_value_method_cpp(FILE *f)
+{
+  fprintf(f,
+	  "/** Copy values from other interface.\n"
+	  " * @param other other interface to copy values from\n"
+	  " */\n"
+	  "void\n"
+	  "%s::copy_values(const Interface *other)\n"
+	  "{\n"
+	  "  const %s *oi = dynamic_cast<const %s *>(other);\n"
+	  "  if (oi == NULL) {\n"
+	  "    throw TypeMismatchException(\"Can only copy values from interface of same type (%%s vs. %%s)\",\n"
+	  "                                type(), other->type());\n"
+	  "  }\n"
+	  "  memcpy(data, oi->data, sizeof(%s_data_t));\n"
+	  "}\n\n",
+	  class_name.c_str(), class_name.c_str(), class_name.c_str(), class_name.c_str());
+}
+
+
+/** Write base methods.
+ * @param f file to write to
+ */ 
+void
+CppInterfaceGenerator::write_basemethods_cpp(FILE *f)
+{
+  write_create_message_method_cpp(f);
+  write_copy_value_method_cpp(f);
 }
 
 
@@ -905,6 +940,19 @@ CppInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ i
 }
 
 
+/** Write base methods header entries.
+ * @param f file to write to
+ * @param is indentation string
+ */
+void
+CppInterfaceGenerator::write_basemethods_h(FILE *f, std::string is)
+{
+  fprintf(f,
+	  "%svirtual Message * create_message(const char *type) const;\n\n"
+	  "%svirtual void copy_values(const Interface *other);\n",
+	  is.c_str(), is.c_str());
+}
+
 /** Write h file.
  * @param f file to write to
  */
@@ -940,8 +988,8 @@ CppInterfaceGenerator::write_h(FILE *f)
   fprintf(f, " private:\n");
   write_ctor_dtor_h(f, "  ", class_name);
   fprintf(f, " public:\n");
-  fprintf(f, "  virtual Message * create_message(const char *type) const;\n\n");
   write_methods_h(f, "  ", data_fields, pseudo_maps);
+  write_basemethods_h(f, "  ");
   fprintf(f, "\n};\n\n} // end namespace fawkes\n\n#endif\n");
 }
 

@@ -602,6 +602,20 @@ MotorInterface::create_message(const char *type) const
 }
 
 
+/** Copy values from other interface.
+ * @param other other interface to copy values from
+ */
+void
+MotorInterface::copy_values(const Interface *other)
+{
+  const MotorInterface *oi = dynamic_cast<const MotorInterface *>(other);
+  if (oi == NULL) {
+    throw TypeMismatchException("Can only copy values from interface of same type (%s vs. %s)",
+                                type(), other->type());
+  }
+  memcpy(data, oi->data, sizeof(MotorInterface_data_t));
+}
+
 /* =========== messages =========== */
 /** @class MotorInterface::SetMotorStateMessage <interfaces/MotorInterface.h>
  * SetMotorStateMessage Fawkes BlackBoard Interface Message.

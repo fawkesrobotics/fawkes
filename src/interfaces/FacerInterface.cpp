@@ -232,6 +232,20 @@ FacerInterface::create_message(const char *type) const
 }
 
 
+/** Copy values from other interface.
+ * @param other other interface to copy values from
+ */
+void
+FacerInterface::copy_values(const Interface *other)
+{
+  const FacerInterface *oi = dynamic_cast<const FacerInterface *>(other);
+  if (oi == NULL) {
+    throw TypeMismatchException("Can only copy values from interface of same type (%s vs. %s)",
+                                type(), other->type());
+  }
+  memcpy(data, oi->data, sizeof(FacerInterface_data_t));
+}
+
 /* =========== messages =========== */
 /** @class FacerInterface::LearnFaceMessage <interfaces/FacerInterface.h>
  * LearnFaceMessage Fawkes BlackBoard Interface Message.
