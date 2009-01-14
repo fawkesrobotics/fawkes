@@ -15,8 +15,8 @@
 
 BASEDIR = ../../..
 
-LIBS_worldmodel = fawkesaspects fawkesworldinfo_utils GameStateInterface ObjectPositionInterface
-OBJS_worldmodel = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+LIBS_worldmodel = fawkesaspects fawkesinterface GameStateInterface ObjectPositionInterface
+OBJS_worldmodel = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
 OBJS_all    = $(OBJS_worldmodel)
 PLUGINS_all = $(PLUGINDIR)/worldmodel.so

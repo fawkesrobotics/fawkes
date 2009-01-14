@@ -25,7 +25,6 @@
 #include <plugins/worldmodel/worldmodel_plugin.h>
 #include <plugins/worldmodel/wm_thread.h>
 #include <plugins/worldmodel/net_thread.h>
-#include <worldinfo_utils/data_container.h>
 
 using namespace fawkes;
 

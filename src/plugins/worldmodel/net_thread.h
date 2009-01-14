@@ -26,31 +26,36 @@
 #define __PLUGINS_WORLDMODEL_NET_THREAD_H_
 
 #include <core/threading/thread.h>
+#include <aspect/blackboard.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
 #include <aspect/network.h>
 #include <netcomm/worldinfo/handler.h>
+#include <core/utils/lock_map.h>
+
+
+#include <map>
+#include <string>
 
 namespace fawkes {
   class WorldInfoTransceiver;
-  class WorldInfoDataContainer;
+  class ObjectPositionInterface;
+  class GameStateInterface;
 }
 
 class WorldModelNetworkThread
-  : public fawkes::Thread,
-    public fawkes::LoggingAspect,
-    public fawkes::ConfigurableAspect,
-    public fawkes::ClockAspect,
-    public fawkes::NetworkAspect,
-    public fawkes::WorldInfoHandler
+: public fawkes::Thread,
+  public fawkes::LoggingAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::ClockAspect,
+  public fawkes::NetworkAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::WorldInfoHandler
 {
  public:
   WorldModelNetworkThread();
   virtual ~WorldModelNetworkThread();
-
-  fawkes::WorldInfoTransceiver *get_transceiver();
-  fawkes::WorldInfoDataContainer *get_data_container();
 
   virtual void init();
   virtual void loop();
@@ -89,12 +94,25 @@ class WorldModelNetworkThread
 			      fawkes::worldinfo_gamestate_half_t half);
 
  private:
-  fawkes::WorldInfoTransceiver *worldinfo_transceiver;
-  fawkes::WorldInfoDataContainer *data;
+  fawkes::WorldInfoTransceiver *__worldinfo_transceiver;
 
-  unsigned int sleep_time_msec;
-  unsigned int max_msgs_per_recv;
+  unsigned int __sleep_time_msec;
+  unsigned int __max_msgs_per_recv;
 
+  typedef std::pair<fawkes::Time, fawkes::ObjectPositionInterface *> TimeObjPosPair;
+  typedef std::map<unsigned int, TimeObjPosPair> UidTimeObjPosMap;
+
+  // host -> if
+  fawkes::LockMap<std::string, fawkes::ObjectPositionInterface *>  __pose_ifs;
+  fawkes::LockMap<std::string, fawkes::ObjectPositionInterface *>  __ball_ifs;
+  //host -> (uid -> if)
+  fawkes::LockMap<std::string, UidTimeObjPosMap >                  __opponent_ifs;
+  fawkes::GameStateInterface *                                     __gamestate_if;
+
+  unsigned int                                                     __opponent_id;
+
+  // host -> time
+  fawkes::LockMap<std::string, fawkes::Time>                       __last_seen;
 };
 
 
