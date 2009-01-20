@@ -48,9 +48,10 @@ ifneq ($(wildcard $(SYSROOT)/usr/include/jpeglib.h $(SYSROOT)/usr/local/include/
 endif
 
 # check for PNG lib
-ifneq ($(wildcard $(SYSROOT)/usr/include/png.h $(SYSROOT)/usr/local/include/png.h),)
-  HAVE_LIBPNG    = 1
-  VISION_CFLAGS += -DHAVE_LIBPNG
+HAVE_LIBPNG = $(if $(shell $(PKGCONFIG) --exists 'libpng'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBPNG),1)
+  CFLAGS_LIBPNG  = -DHAVE_LIBPNG $(shell $(PKGCONFIG) --cflags 'libpng')
+  LDFLAGS_LIBPNG = $(shell $(PKGCONFIG) --libs 'libpng')
 endif
 
 ifneq ($(PKGCONFIG),)

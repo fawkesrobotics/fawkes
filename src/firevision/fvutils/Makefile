@@ -35,7 +35,8 @@ ifneq ($(HAVE_LIBPNG),1)
   WARN_TARGETS += warning_libpng
   FILTER_OUT   += readers/png.o writers/png.o
 else
-  UTILS_EXTRA_LIBS += png
+  CFLAGS += $(CFLAGS_LIBPNG)
+  LDFLAGS += $(LDFLAGS_LIBPNG)
 endif
 
 ifneq ($(HAVE_OPENCV),1)

@@ -93,6 +93,12 @@ $(INTERFACES_SRCS): %.cpp: %.xml
 	$(SILENT)$(BINDIR)/interface_generator -d $(SRCDIR) $<
 	$(if $(filter-out $(IFACEDIR),$(SRCDIR)),$(SILENT)mv $*.h $*.h_ext; cp -a $*.h_ext $(IFACEDIR)/$(notdir $*.h))
 
+
+    ifeq ($(abspath $(IFACEDIR)),$(abspath $(SRCDIR)))
+$(INTERFACES_HDRS): %.h: %.cpp
+
+    endif
+
   endif
 
   ifeq ($(MAKECMDGOALS),clean-interfaces)
@@ -103,9 +109,10 @@ clean-interfaces:
 
   endif
 else
-  ifneq ($(IFACEDIR),$(SRCDIR))
+  # no interface generator available
+  ifneq ($(abspath $(IFACEDIR)),$(abspath $(SRCDIR)))
 $(INTERFACES_SRCS): %.cpp: %.xml
-	$(SILENT)if [ ! -e $*.h_ext -o ! -e $*.cpp ]; then \
+	$(SILENT)if [ ! -e $*.h_ext -a ! -e $*.cpp ]; then \
 		echo -e "$(INDENT_PRINT)--- $(TRED)Interfaces cannot be generated and pre-generated code does not exist!$(TNORMAL)"; \
 		exit 1; \
 	else \
@@ -114,19 +121,24 @@ $(INTERFACES_SRCS): %.cpp: %.xml
 		touch $*.cpp; \
 	fi
 
-  endif
-endif
-
-
 $(INTERFACES_HDRS): $(IFACEDIR)/%.h: $(SRCDIR)/%.cpp
 	$(SILENT)cp -a $(SRCDIR)/$*.h_ext $(IFACEDIR)/$*.h;
+
+  endif
+endif
 
 $(INTERFACES_OBJS): %.o: $(IFACEDIR)/%.h
 
 ifneq ($(INTERFACES_all),)
 .PHONY: clean-ext-interfaces
+ifneq ($(abspath $(IFACEDIR)),$(abspath $(SRCDIR)))
 clean-ext-interfaces:
 	$(SILENT)$(foreach I,$(INTERFACES_all),rm -f $(IFACEDIR)/$I.h; )
+
+else
+clean-ext-interfaces:
+
+endif
 
 .PHONY: clean
 clean: clean-ext-interfaces
@@ -135,7 +147,7 @@ endif
 ifeq ($(HAVE_TOLUA),1)
   LIBS_all += $(LIBS_all_tolua)
 
-$(LUALIBDIR)/interfaces/%.so: $(LIBDIR)/interfaces/lib%.so
+$(LIBS_all_tolua): $(LUALIBDIR)/interfaces/%.so: $(LIBDIR)/interfaces/lib%.so
 
 else
   all: warning_tolua_wrapper

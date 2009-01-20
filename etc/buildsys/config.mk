@@ -84,6 +84,8 @@ endif
 ### Features ###
 # If gcc is used, enable OpenMP?
 GCC_USE_OPENMP=0
+# Build for 32 Bit, even on a 64 Bit machine
+DO_32BIT_BUILD=0
 
 ### CFLAGS, preprocessor, compiler and linker options
 LIBDIRS_BASE     = $(LIBDIR) $(LIBDIR)/interfaces
@@ -103,6 +105,15 @@ ifeq ($(OS),FreeBSD)
   DEFAULT_INCLUDES += -I/usr/local/include
   LDFLAGS_BASE     += -L/usr/local/lib -lpthread -lstrfunc
 endif
+
+ifeq ($(DO_32BIT_BUILD),1)
+  CFLAGS_BASE  += -m32
+  LDFLAGS_BASE += -m32
+
+  PKGCONFIG = PKG_CONFIG_PATH=/usr/lib/pkgconfig PKG_CONFIG_LIBDIR=$$PKG_CONFIG_PATH pkg-config
+  ARCH=i386
+endif
+
 
 ifeq ($(COLORED),1)
 TBOLDGRAY	= \033[1;30m
