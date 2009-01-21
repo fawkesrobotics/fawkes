@@ -26,6 +26,7 @@
 #include "file_reply.h"
 
 #include <core/exception.h>
+#include <utils/logging/logger.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -41,10 +42,13 @@
 /** Constructor.
  * @param baseurl Base URL where the static processor is mounted
  * @param htdocs_dir directory in the file system where to look for static files
+ * @param logger logger
  */
 WebStaticRequestProcessor::WebStaticRequestProcessor(const char *baseurl,
-						     const char *htdocs_dir)
+						     const char *htdocs_dir,
+						     fawkes::Logger *logger)
 {
+  __logger      = logger;
   __baseurl     = strdup(baseurl);
   __baseurl_len = strlen(__baseurl);
   __htdocs_dir  = strdup(htdocs_dir);
@@ -74,6 +78,9 @@ WebStaticRequestProcessor::process_request(const char *url,
       DynamicFileWebReply *freply = new DynamicFileWebReply(file_path.c_str());
       return freply;
     } catch (fawkes::Exception &e) {
+      __logger->log_error("WebStaticReqProc", "Cannot fulfill request for file %s,"
+			  " exception follows", url);
+      __logger->log_error("WebStaticReqProc", e);
       return new StaticWebReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
 				*(e.begin()));
     }

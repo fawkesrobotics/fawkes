@@ -28,11 +28,16 @@
 #include "request_processor.h"
 #include <cstdlib>
 
+namespace fawkes {
+  class Logger;
+}
+
 class WebStaticRequestProcessor : public WebRequestProcessor
 {
  public:
   WebStaticRequestProcessor(const char *baseurl,
-			    const char *htdocs_dir);
+			    const char *htdocs_dir,
+			    fawkes::Logger *logger);
   virtual ~WebStaticRequestProcessor();
 
   virtual WebReply * process_request(const char *url,
@@ -46,6 +51,8 @@ class WebStaticRequestProcessor : public WebRequestProcessor
   char *__baseurl;
   size_t __baseurl_len;
   char *__htdocs_dir;
+
+  fawkes::Logger *__logger;
 };
 
 #endif

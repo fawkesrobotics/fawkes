@@ -287,7 +287,7 @@ FawkesMainThread::mloop()
 {
   try {
     if ( ! thread_manager->timed_threads_exist() ) {
-      __multi_logger->log_debug("FawkesMainThread", "No threads exist, waiting");
+      __multi_logger->log_debug("FawkesMainThread", "No timed threads exist, waiting");
       try {
 	thread_manager->wait_for_timed_threads();
 	__multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "

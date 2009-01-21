@@ -79,17 +79,25 @@ WebBlackBoardRequestProcessor::process_request(const char *url,
 
     WebPageReply *r = new WebPageReply("BlackBoard");
     *r += "<h2>BlackBoard interfaces:</h2>\n";
-    *r += "<ul>\n";
 
+    bool found_some = false;
     InterfaceInfoList *iil = __blackboard->list_all();
     for (InterfaceInfoList::iterator i = iil->begin(); i != iil->end(); ++i) {
+      if (! found_some) {
+	*r += "<ul>\n";
+	found_some = true;
+      }
       r->append_body("<li>Interface <a href=\"%s/view/%s::%s\">%s::%s</a> (%u readers, has %s writer)</li>\n",
 		     __baseurl, i->type(), i->id(), i->type(), i->id(),
 		     i->num_readers(), i->has_writer() ? "a" : "no");
     }
     delete iil;
 
-    *r += "</ul>\n";
+    if (found_some) {
+      *r += "</ul>\n";
+    } else {
+      *r += "<b>No interfaces found.</b>\n";
+    }
 
     if (subpath.find("/view/") == 0) {
       std::string iuid = subpath.substr(subpath.find_first_not_of("/", std::string("/view/").length()));

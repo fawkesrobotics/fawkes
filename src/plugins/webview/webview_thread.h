@@ -57,6 +57,8 @@ class WebviewThread
   WebRequestDispatcher *__dispatcher;
   WebStaticRequestProcessor  *__static_processor;
   WebBlackBoardRequestProcessor  *__blackboard_processor;
+
+  unsigned int __cfg_port;
 };
 
 

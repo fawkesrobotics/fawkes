@@ -15,6 +15,7 @@ INSERT INTO "config" VALUES('/worldinfo/udp_port','unsigned int','2806','UDP por
 INSERT INTO "config" VALUES('/worldinfo/encryption_key','string','AllemaniACsX0rz','Default encryption key for world info.');
 INSERT INTO "config" VALUES('/worldinfo/encryption_iv','string','DoesAnyOneCare','Default encryption initialization vector for world info.');
 INSERT INTO "config" VALUES('/worldinfo/enable_fatmsg','bool','0','Send legacy fat message?');
+INSERT INTO "config" VALUES('/webview/port','unsigned int','10117','TCP port for Webview HTTP requests');
 INSERT INTO "config" VALUES('/ballposlog/log_level','unsigned int','0','Log level for ballposlog example plugin; sum of any of debug=0, info=1, warn=2, error=4, none=8');
 INSERT INTO "config" VALUES('/skiller/skillspace','string','test','Skill space');
 INSERT INTO "config" VALUES('/skiller/watch_files','bool',1,'Watch lua files for modification and automatically reload Lua if files have been changed; true to enable');

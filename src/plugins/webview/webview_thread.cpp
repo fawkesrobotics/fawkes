@@ -57,25 +57,29 @@ WebviewThread::WebviewThread()
 void
 WebviewThread::init()
 {
+  __cfg_port = config->get_uint("/webview/port");
+
   __dispatcher = new WebRequestDispatcher();
   __daemon = MHD_start_daemon(MHD_NO_FLAG,
-			      10117,
+			      __cfg_port,
 			      NULL,
 			      NULL,
 			      WebRequestDispatcher::process_request_cb,
 			      (void *)__dispatcher,
 			      MHD_OPTION_END);
 
-  __static_processor = new WebStaticRequestProcessor(STATIC_URL_PREFIX, RESDIR"/webview");
+  if ( __daemon == NULL ) {
+    throw Exception("Could not start microhttpd");
+  }
+
+  __static_processor = new WebStaticRequestProcessor(STATIC_URL_PREFIX, RESDIR"/webview", logger);
   __blackboard_processor = new WebBlackBoardRequestProcessor(BLACKBOARD_URL_PREFIX, blackboard);
   __dispatcher->add_processor(STATIC_URL_PREFIX, __static_processor);
   __dispatcher->add_processor(BLACKBOARD_URL_PREFIX, __blackboard_processor);
 
   WebPageReply::add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
 
-  if ( __daemon == NULL ) {
-    throw Exception("Could not start microhttpd");
-  }
+  logger->log_info("WebviewThread", "Listening for HTTP connections on port %u", __cfg_port);
 }
 
 
