@@ -32,6 +32,7 @@
 #include <core/threading/thread_collector.h>
 #include <core/threading/thread_initializer.h>
 #include <utils/logging/liblogger.h>
+#include <utils/system/fam_thread.h>
 #include <config/config.h>
 
 #include <netcomm/fawkes/component_ids.h>
@@ -40,11 +41,15 @@
 #include <algorithm>
 #include <cstring>
 #include <cstdlib>
+#include <cerrno>
 
 #include <sys/types.h>
 #include <dirent.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class PluginManager <plugin/manager.h>
  * Fawkes Plugin Manager.
@@ -74,7 +79,8 @@ PluginManager::PluginManager(ThreadCollector *thread_collector,
 			     Configuration *config,
 			     const char *meta_plugin_prefix)
   : Thread("PluginManager", Thread::OPMODE_WAITFORWAKEUP),
-    FawkesNetworkHandler(FAWKES_CID_PLUGINMANAGER)
+    FawkesNetworkHandler(FAWKES_CID_PLUGINMANAGER),
+    ConfigurationChangeHandler(meta_plugin_prefix)
 {
   plugins.clear();
   this->thread_collector = thread_collector;
@@ -82,12 +88,30 @@ PluginManager::PluginManager(ThreadCollector *thread_collector,
   next_plugin_id = 1;
   __config = config;
   __meta_plugin_prefix = meta_plugin_prefix;
+
+  init_pinfo_cache();
+
+  __config->add_change_handler(this);
+
+  __fam_thread = new FamThread();
+  RefPtr<FileAlterationMonitor> fam = __fam_thread->get_fam();
+  fam->add_filter("^[^.].*\\.so$"); 
+  fam->add_listener(this);
+  fam->watch_dir(PLUGINDIR);
+  __fam_thread->start();
 }
 
 
 /** Destructor. */
 PluginManager::~PluginManager()
 {
+  __fam_thread->cancel();
+  __fam_thread->join();
+  delete __fam_thread;
+  __config->rem_change_handler(this);
+  __pinfo_cache.lock();
+  __pinfo_cache.clear();
+  __pinfo_cache.unlock();
   // Unload all plugins
   for (rpit = plugins.rbegin(); rpit != plugins.rend(); ++rpit) {
     thread_collector->force_remove((*rpit).second->threads());
@@ -111,6 +135,62 @@ PluginManager::set_hub(FawkesNetworkHub *hub)
   hub->add_handler( this );
 }
 
+
+void
+PluginManager::init_pinfo_cache()
+{
+  __pinfo_cache.lock();
+
+  Thread::CancelState old_state;
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED);
+
+  DIR *plugin_dir;
+  struct dirent* dirp;
+  /* constant for this somewhere? */
+  const char *file_ext = ".so";
+
+  if ( NULL == (plugin_dir = opendir(PLUGINDIR)) ) {
+    throw Exception(errno, "Plugin directory %s could not be opened", plugin_dir);
+  }
+
+  for (unsigned int i = 0; NULL != (dirp = readdir(plugin_dir)); ++i) {
+    char *file_name   = dirp->d_name;
+    char *pos         = strstr(file_name, file_ext);
+    std::string plugin_name = std::string(file_name).substr(0, strlen(file_name) - strlen(file_ext));
+    if (NULL != pos) {
+      try {
+	__pinfo_cache.push_back(make_pair(plugin_name,
+					  plugin_loader->get_description(plugin_name.c_str())));
+      } catch (Exception &e) {
+	LibLogger::log_warn("PluginManager", "Could not get description of plugin %s, "
+			    "exception follows", plugin_name.c_str());
+	LibLogger::log_warn("PluginManager", e);
+      }
+    }
+  }
+
+  closedir(plugin_dir);
+
+  try {
+    Configuration::ValueIterator *i = __config->search(__meta_plugin_prefix.c_str());
+    while (i->next()) {
+      if (i->is_string()) {
+	std::string p = std::string(i->path()).substr(__meta_plugin_prefix.length());
+	std::string s = std::string("Meta: ") + i->get_string();
+	
+	__pinfo_cache.push_back(make_pair(p, s));
+      }
+    }
+    delete i;
+  } catch (Exception &e) {
+  }
+
+  __pinfo_cache.sort();
+  __pinfo_cache.unlock();
+
+  Thread::set_cancel_state(old_state);
+}
+
 /** Generate list of all available plugins.
  * All files with the extension .so in the PLUGINDIR are returned.
  * @param num_plugins pointer to an unsigned int where the number
@@ -122,59 +202,13 @@ PluginManager::set_hub(FawkesNetworkHub *hub)
 PluginListMessage *
 PluginManager::list_avail()
 {
-  DIR *plugin_dir;
-  struct dirent* dirp;
-  /* constant for this somewhere? */
-  const char *file_ext = ".so";
-
   PluginListMessage *m = new PluginListMessage();
 
-  if ( NULL == (plugin_dir = opendir(PLUGINDIR)) ) {
-    LibLogger::log_error("PluginManager", "Opening Plugindir failed.");
-    return m;
-  }
-
-  std::list<std::pair<std::string, std::string> > plugin_list;
-  for (unsigned int i = 0; NULL != (dirp = readdir(plugin_dir)); ++i) {
-    char *file_name   = dirp->d_name;
-    char *pos         = strstr(file_name, file_ext);
-    std::string plugin_name = std::string(file_name).substr(0, strlen(file_name) - strlen(file_ext));
-    if (NULL != pos) {
-      try {
-	plugin_list.push_back(make_pair(plugin_name,
-					plugin_loader->get_description(plugin_name.c_str())));
-      } catch (Exception &e) {
-	LibLogger::log_warn("PluginManager", "Could not get description of pluign %s, "
-			    "exception follows", plugin_name.c_str());
-	LibLogger::log_warn("PluginManager", e);
-      }
-    }
-  }
-
-  closedir(plugin_dir);
-
-  plugin_list.sort();
   std::list<std::pair<std::string, std::string> >::iterator i;
-  for (i = plugin_list.begin(); i != plugin_list.end(); ++i) {
+  for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
     m->append(i->first.c_str(), i->first.length());
     m->append(i->second.c_str(), i->second.length());
   }
-
-  try {
-    Configuration::ValueIterator *i = __config->search(__meta_plugin_prefix.c_str());
-    while (i->next()) {
-      if (i->is_string()) {
-	std::string p = std::string(i->path()).substr(__meta_plugin_prefix.length());
-	std::string s = std::string("Meta: ") + i->get_string();
-	
-	m->append(p.c_str(), p.length());
-	m->append(s.c_str(), s.length());
-      }
-    }
-    delete i;
-  } catch (Exception &e) {
-  }
-
   return m;
 }
 
@@ -590,5 +624,129 @@ PluginManager::client_disconnected(unsigned int clid)
 {
   __subscribers.remove_locked(clid);
 }
+
+
+void
+PluginManager::config_tag_changed(const char *new_tag)
+{
+}
+
+void
+PluginManager::config_value_changed(const char *path, int value)
+{
+  LibLogger::log_warn("PluginManager", "Integer value changed in meta plugins "
+		      "path prefix at %s, ignoring", path);
+}
+
+void
+PluginManager::config_value_changed(const char *path, unsigned int value)
+{
+  LibLogger::log_warn("PluginManager", "Unsigned integer value changed in meta "
+		      "plugins path prefix at %s, ignoring", path);
+}
+
+void
+PluginManager::config_value_changed(const char *path, float value)
+{
+  LibLogger::log_warn("PluginManager", "Float value changed in meta "
+		      "plugins path prefix at %s, ignoring", path);
+}
+
+void
+PluginManager::config_value_changed(const char *path, bool value)
+{
+  LibLogger::log_warn("PluginManager", "Boolean value changed in meta "
+		      "plugins path prefix at %s, ignoring", path);
+}
+
+void
+PluginManager::config_value_changed(const char *path, const char *value)
+{
+  __pinfo_cache.lock();
+  std::string p = std::string(path).substr(__meta_plugin_prefix.length());
+  std::string s = std::string("Meta: ") + value;
+  std::list<std::pair<std::string, std::string> >::iterator i;
+  bool found = false;
+  for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
+    if (p == i->first) {
+      i->second = s;
+      found = true;
+      break;
+    }
+  }
+  if (! found) {
+    __pinfo_cache.push_back(make_pair(p, s));
+  }
+  __pinfo_cache.unlock();
+}
+
+void
+PluginManager::config_value_erased(const char *path)
+{
+  __pinfo_cache.lock();
+  std::string p = std::string(path).substr(__meta_plugin_prefix.length());
+  std::list<std::pair<std::string, std::string> >::iterator i;
+  for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
+    if (p == i->first) {
+      __pinfo_cache.erase(i);
+      break;
+    }
+  }
+  __pinfo_cache.unlock();
+}
+
+
+void
+PluginManager::fam_event(const char *filename, unsigned int mask)
+{
+  /* constant for this somewhere? */
+  const char *file_ext = ".so";
+
+  char *pos               = strstr(filename, file_ext);
+  std::string p = std::string(filename).substr(0, strlen(filename) - strlen(file_ext));
+  if (NULL != pos) {
+    __pinfo_cache.lock();
+    bool found = false;
+    std::list<std::pair<std::string, std::string> >::iterator i;
+    for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
+      if (p == i->first) {
+	found = true;
+	if ((mask & FAM_DELETE) || (mask & FAM_MOVED_FROM)) {
+	  __pinfo_cache.erase(i);
+	} else {
+	  try {
+	    i->second = plugin_loader->get_description(p.c_str());
+	  } catch (Exception &e) {
+	    LibLogger::log_warn("PluginManager", "Could not get possibly modified "
+				"description of plugin %s, exception follows", 
+				p.c_str());
+	    LibLogger::log_warn("PluginManager", e);
+	  }
+	}
+	break;
+      }
+    }
+    if (! found &&
+	!(mask & FAM_ISDIR) &&
+	((mask & FAM_MODIFY) || (mask & FAM_MOVED_TO) || (mask & FAM_CREATE))) {
+      if (plugin_loader->is_loaded(p.c_str())) {
+	LibLogger::log_info("Plugin %s changed on disk, but is loaded, no new info "
+			    "loaded", p.c_str());
+      } else {
+	try {
+	  std::string s = plugin_loader->get_description(p.c_str());
+	  __pinfo_cache.push_back(make_pair(p, s));
+	} catch (Exception &e) {
+	  LibLogger::log_warn("PluginManager", "Could not get possibly modified "
+			      "description of plugin %s, exception follows", 
+			      p.c_str());
+	  LibLogger::log_warn("PluginManager", e);
+	}
+      }
+    }
+    __pinfo_cache.unlock();
+  }
+}
+
 
 } // end namespace fawkes

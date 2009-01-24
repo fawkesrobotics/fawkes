@@ -31,6 +31,8 @@
 #include <core/utils/lock_queue.h>
 #include <core/utils/lock_list.h>
 #include <core/utils/lock_map.h>
+#include <config/change_handler.h>
+#include <utils/system/fam.h>
 
 #include <map>
 #include <list>
@@ -38,6 +40,9 @@
 #include <utility>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class ThreadCollector;
 class FawkesNetworkHub;
@@ -46,10 +51,13 @@ class PluginLoader;
 class Mutex;
 class PluginListMessage;
 class Configuration;
+class FamThread;
 
 class PluginManager
 : public fawkes::Thread,
-  public fawkes::FawkesNetworkHandler
+  public fawkes::FawkesNetworkHandler,
+  public fawkes::ConfigurationChangeHandler,
+  public FamListener
 {
  public:
   PluginManager(ThreadCollector *thread_collector,
@@ -62,6 +70,18 @@ class PluginManager
   virtual void handle_network_message(FawkesNetworkMessage *msg);
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
+
+  // for ConfigurationChangeHandler
+  virtual void config_tag_changed(const char *new_tag);
+  virtual void config_value_changed(const char *path, int value);
+  virtual void config_value_changed(const char *path, unsigned int value);
+  virtual void config_value_changed(const char *path, float value);
+  virtual void config_value_changed(const char *path, bool value);
+  virtual void config_value_changed(const char *path, const char *value);
+  virtual void config_value_erased(const char *path);
+
+  // for FamListener
+  virtual void fam_event(const char *filename, unsigned int mask);
 
   virtual void loop();
 
@@ -80,6 +100,8 @@ class PluginManager
 
   void load(const char *plugin_list, unsigned int clid);
   void unload(const char *plugin_list, unsigned int clid);
+
+  void init_pinfo_cache();
 
   std::list<std::string>  parse_plugin_list(const char *plugin_type_list);
 
@@ -103,8 +125,12 @@ class PluginManager
   LockList<unsigned int>           __subscribers;
   LockList<unsigned int>::iterator __ssit;
 
+  LockList<std::pair<std::string, std::string> > __pinfo_cache;
+
   Configuration *__config;
   std::string __meta_plugin_prefix;
+
+  FamThread *__fam_thread;
 };
 
 } // end namespace fawkes
