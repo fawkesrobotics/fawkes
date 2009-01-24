@@ -43,6 +43,7 @@ namespace fawkes {
  * and unreference cairo objects.
  *
  * Note that RefPtr is <b>not</b> thread-safe.
+ * @ingroup FCL
  */
 template <class T_CppObject>
 class RefPtr
