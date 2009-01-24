@@ -26,6 +26,8 @@
 #include <mainapp/main_thread.h>
 #include <utils/system/signal.h>
 #include <utils/system/argparser.h>
+#include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 
 #include <iostream>
 #ifdef HAVE_LIBDAEMON
@@ -49,6 +51,13 @@ class FawkesMainApp : public SignalHandler
 {
  public:
 
+  /** Constructor. */
+  FawkesMainApp()
+  {
+    __init_running = true;
+    __init_quit    = false;
+  }
+
   /** Run main thread.
    * @param argp argument parser
    */
@@ -60,8 +69,15 @@ class FawkesMainApp : public SignalHandler
       throw;
     }
 
-    fmt->start();
-    fmt->join();
+    __init_mutex.lock();
+    __init_running = false;
+    if ( ! __init_quit ) {
+      fmt->start();
+      __init_mutex.unlock();
+      fmt->join();
+    } else {
+      __init_mutex.unlock();
+    }
 
     delete fmt;
   }
@@ -73,12 +89,20 @@ class FawkesMainApp : public SignalHandler
   {
     if ( (signum == SIGINT) ||
 	 (signum == SIGTERM) ) {
-      fmt->cancel();
+      MutexLocker lock(&__init_mutex);
+      if (__init_running) {
+	__init_quit = true;
+      } else {
+	fmt->cancel();
+      }
     }
   }
 
  private:
   FawkesMainThread *fmt;
+  Mutex             __init_mutex;
+  bool              __init_running;
+  bool              __init_quit;
 };
 
 
