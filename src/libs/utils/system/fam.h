@@ -79,7 +79,7 @@ class FileAlterationMonitor
   void watch_dir(const char *dirpath);
   void add_filter(const char *regex);
 
-  void process_events();
+  void process_events(int timeout = 0);
 
   void add_listener(FamListener *listener);
   void remove_listener(FamListener *listener);

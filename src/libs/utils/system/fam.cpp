@@ -160,7 +160,7 @@ FileAlterationMonitor::watch_dir(const char *dirpath)
   uint32_t mask = IN_MODIFY | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF;
   int iw;
 
-  LibLogger::log_debug("FileAlterationMonitor", "Adding watch for %s", dirpath);
+  //LibLogger::log_debug("FileAlterationMonitor", "Adding watch for %s", dirpath);
   if ( (iw = inotify_add_watch(__inotify_fd, dirpath, mask)) >= 0) {
     __inotify_watches[iw] = dirpath;
 
@@ -244,9 +244,11 @@ FileAlterationMonitor::remove_listener(FamListener *listener)
 
 /** Process events.
  * Call this when you want file events to be processed.
+ * @param timeout timeout in milliseconds to wait for an event, 0 to just check
+ * and no wait, -1 to wait forever until an event is received
  */
 void
-FileAlterationMonitor::process_events()
+FileAlterationMonitor::process_events(int timeout)
 {
 #ifdef HAVE_INOTIFY
   // Check for inotify events
@@ -254,7 +256,7 @@ FileAlterationMonitor::process_events()
   ipfd.fd = __inotify_fd;
   ipfd.events = POLLIN;
   ipfd.revents = 0;
-  int prv = poll(&ipfd, 1, 0);
+  int prv = poll(&ipfd, 1, timeout);
   if ( prv == -1 ) {
     LibLogger::log_error("FileAlterationMonitor",
 			 "inotify poll failed: %s (%i)",
@@ -274,13 +276,14 @@ FileAlterationMonitor::process_events()
 	  if (! (event->mask & IN_ISDIR)) {
 	    for (__rxit = __regexes.begin(); __rxit != __regexes.end(); ++__rxit) {
 	      if (regexec(*__rxit, event->name, 0, NULL, 0) == REG_NOMATCH ) {
-		LibLogger::log_debug("FileAlterationMonitor", "A regex did not match for %s", event->name);
+		//LibLogger::log_debug("FileAlterationMonitor", "A regex did not match for %s", event->name);
 		valid = false;
 		break;
 	      }
 	    }
 	  }
 
+	  /*
 	  if (event->mask & IN_MODIFY) {
 	    LibLogger::log_debug("FileAlterationMonitor", "%s has been modified", event->name);
 	    }
@@ -293,6 +296,7 @@ FileAlterationMonitor::process_events()
 	  if (event->mask & IN_CREATE) {
 	    LibLogger::log_debug("FileAlterationMonitor", "%s has been created", event->name);
 	  }
+	  */
 
 	  if ( valid ) {
 	    for (__lit = __listeners.begin(); __lit != __listeners.end(); ++__lit) {
@@ -301,7 +305,7 @@ FileAlterationMonitor::process_events()
 	  }
 
 	  if (event->mask & IN_DELETE_SELF) {
-	    LibLogger::log_debug("FileAlterationMonitor", "Watched %s has been deleted", event->name);
+	    //LibLogger::log_debug("FileAlterationMonitor", "Watched %s has been deleted", event->name);
 	    __inotify_watches.erase(event->wd);
 	    inotify_rm_watch(__inotify_fd, event->wd);
 	  }
@@ -310,9 +314,11 @@ FileAlterationMonitor::process_events()
 	    // Check if it is a directory, if it is, watch it
 	    std::string fp = __inotify_watches[event->wd] + "/" + event->name;
 	    if (  (event->mask & IN_ISDIR) && (event->name[0] != '.') ) {
+	      /*
 	      LibLogger::log_debug("FileAlterationMonitor",
 				   "Directory %s has been created, "
 				   "adding to watch list", event->name);
+	      */
 	      try {
 		watch_dir(fp.c_str());
 	      } catch (Exception &e) {
