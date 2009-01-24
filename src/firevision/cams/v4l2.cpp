@@ -469,7 +469,7 @@ V4L2Camera::select_read_method()
   {
     /* preferred read method not supported - try next */
     _read_method = (_read_method == READ ? MMAP : READ);
-    if (!(_data->caps.capabilities & 
+    if (!(_data->caps.capabilities &
           (_read_method == READ ? V4L2_CAP_READWRITE : V4L2_CAP_STREAMING)))
     {
       close();
@@ -760,6 +760,18 @@ V4L2Camera::set_controls()
   {
     LibLogger::log_debug("V4L2Cam", (_agc == TRUE ? "enabling AGC" : "disabling AGC"));
     set_one_control("AGC", V4L2_CID_AUTOGAIN, (_agc == TRUE ? 1 : 0));
+  }
+
+  if (_h_flip != NOT_SET)
+  {
+    LibLogger::log_debug("V4L2Cam", (_h_flip == TRUE ? "enabling horizontal flip" : "disabling horizontal flip"));
+    set_one_control("hflip", V4L2_CID_HFLIP, (_h_flip == TRUE ? 1 : 0));
+  }
+
+  if (_v_flip != NOT_SET)
+  {
+    LibLogger::log_debug("V4L2Cam", (_v_flip == TRUE ? "enabling vertical flip" : "disabling vertical flip"));
+    set_one_control("vhflip", V4L2_CID_VFLIP, (_v_flip == TRUE ? 1 : 0));
   }
 
   if (_brightness.set)
@@ -1224,7 +1236,7 @@ void
 V4L2Camera::print_info()
 {
  /* General capabilities */
-  cout << 
+  cout <<
     "=========================================================================="
     << endl << _device_name << " (" << _data->caps.card << ") - " << _data->caps.bus_info
     << endl << "Driver: " << _data->caps.driver << " (ver " <<
@@ -1252,7 +1264,7 @@ V4L2Camera::print_info()
     cout << " + Sliced VBI output interface supported" << endl;
   if (_data->caps.capabilities & V4L2_CAP_RDS_CAPTURE)
     cout << " + RDS_CAPTURE set" << endl;
-  /* Not included in Nao's version 
+  /* Not included in Nao's version
   if (caps.capabilities & V4L2_CAP_VIDEO_OUTPUT_OVERLAY)
     cout << " + Video output overlay interface supported" << endl; */
   if (_data->caps.capabilities & V4L2_CAP_TUNER)
@@ -1435,7 +1447,7 @@ V4L2Camera::print_info()
     }
     if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED) continue;
 
-    cout << " + " <<  queryctrl.name << " [" << 
+    cout << " + " <<  queryctrl.name << " [" <<
       (queryctrl.id - V4L2_CID_BASE) << "] (";
     switch (queryctrl.type)
     {
@@ -1506,7 +1518,7 @@ V4L2Camera::print_info()
 
     if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED) continue;
 
-    cout << " + " <<  queryctrl.name << " [" << 
+    cout << " + " <<  queryctrl.name << " [" <<
       (queryctrl.id - V4L2_CID_PRIVATE_BASE) << "] (";
     switch (queryctrl.type)
     {
@@ -1562,7 +1574,7 @@ V4L2Camera::print_info()
   }
   if (queryctrl.id == V4L2_CID_PRIVATE_BASE) cout << "None" << endl;
 
-  cout << 
+  cout <<
     "=========================================================================="
     << endl;
 }

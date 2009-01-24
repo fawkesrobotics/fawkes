@@ -51,6 +51,7 @@ SkillHSM = {current = nil,
 	    traced_trans     = FSM.traced_trans,
 	    reset_trace      = FSM.reset_trace,
 	    add_state        = FSM.add_state,
+	    remove_state     = FSM.remove_state,
 	    get_start_state  = FSM.get_start_state
 	   }
 
@@ -59,26 +60,37 @@ function SkillHSM:new(o)
    setmetatable(o, self)
    self.__index = self
 
-   if not f.no_default_states then
-      f.exit_state = "FINAL"
-      f.fail_state = "FAILED"
-
-      local es = SkillJumpState:new{name = "FINAL", fsm = f}
-      local fs = SkillJumpState:new{name = "FAILED", fsm = f}
-
-      f.states["FINAL"] = es
-      f.states["FAILED"] = fs
-
-      if self.export_states_to_parent then
-	 local e = getfenv(2)
-	 e["FINAL"] = es
-	 e["FAILED"] = fs
-      end
-   end
+   f:clear_states()
 
    return f
 end
 
+--- Clear all states.
+-- Removes all states. If no_default_states is not set a FINAL and FAILED state
+-- are added.
+function SkillHSM:clear_states()
+   self.states = {}
+   if not self.no_default_states then
+      self.exit_state = "FINAL"
+      self.fail_state = "FAILED"
+
+      local es = SkillJumpState:new{name = "FINAL", fsm = self}
+      local fs = SkillJumpState:new{name = "FAILED", fsm = self}
+
+      self.states["FINAL"] = es
+      self.states["FAILED"] = fs
+
+      if self.export_states_to_parent then
+	 local e = getfenv(2)
+	 if e == _M then
+	    e = getfenv(3)
+	 end
+	 e["FINAL"] = es
+	 e["FAILED"] = fs
+      end
+   end
+   self.state_changed = true
+end
 
 --- Simple state generation not supported for SkillHSM.
 -- Throws an error. Only jump states can be created for SkillHSMs.

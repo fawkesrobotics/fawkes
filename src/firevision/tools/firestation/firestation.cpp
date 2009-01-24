@@ -586,12 +586,15 @@ Firestation::open_folder()
 
 	std::string folder = m_fcd_open_image->get_current_folder();
 	char* as;
-	asprintf(&as, "file:file:dir=%s:ext=%s", folder.c_str(), extension.c_str());
-	CameraArgumentParser cap(as);
-	m_camera = new FileLoader( &cap );
-	m_img_src = SRC_FILE;
-	post_open_img_src();
-	free(as);
+	if (asprintf(&as, "file:file:dir=%s:ext=%s", folder.c_str(), extension.c_str()) != -1) {
+	  CameraArgumentParser cap(as);
+	  m_camera = new FileLoader( &cap );
+	  m_img_src = SRC_FILE;
+	  post_open_img_src();
+	  free(as);
+	} else {
+	  printf("Cannot open folder, asprintf() ran out of memory");
+	}
 
 	break;
       }

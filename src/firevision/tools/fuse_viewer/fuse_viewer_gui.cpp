@@ -310,12 +310,15 @@ void
 FuseViewerGtkWindow::on_save_image_clicked()
 {
   char *ctmp;
-  asprintf(&ctmp, "%s/%06u.%s", m_save_filechooser->get_current_folder().c_str(),
-           ++__img_num, m_save_type->get_active_text().c_str());
-  Glib::ustring fn = ctmp;
-  free(ctmp);
+  if (asprintf(&ctmp, "%s/%06u.%s", m_save_filechooser->get_current_folder().c_str(),
+	       ++__img_num, m_save_type->get_active_text().c_str()) != -1) {
+    Glib::ustring fn = ctmp;
+    free(ctmp);
 
-  __img_widget->save_image(fn, m_save_type->get_active_text());  
+    __img_widget->save_image(fn, m_save_type->get_active_text());
+  } else {
+    printf("Could not save file, asprintf() ran out of memory");
+  }
 }
 
 /** 
@@ -342,12 +345,13 @@ FuseViewerGtkWindow::set_status(bool conn, bool fuse)
   __has_fuse     = fuse;
 
   char *ctmp;
-  asprintf(&ctmp, "%s - %s",
-      __is_connected ? "connected" : "disconnected",
-      __has_fuse ? FUSE_PLUGIN_NAME" loaded" : FUSE_PLUGIN_NAME" NOT loaded");
+  if (asprintf(&ctmp, "%s - %s",
+	       __is_connected ? "connected" : "disconnected",
+	       __has_fuse ? FUSE_PLUGIN_NAME" loaded" : FUSE_PLUGIN_NAME" NOT loaded") != -1) {
 
-  m_stb->push(Glib::ustring(ctmp));
-  free(ctmp);
+    m_stb->push(Glib::ustring(ctmp));
+    free(ctmp);
+  }
 }
 
 /** Closes the image and the camera */

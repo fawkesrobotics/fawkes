@@ -29,6 +29,7 @@
 #include <core/threading/barrier.h>
 #include <core/threading/read_write_lock.h>
 #include <core/exceptions/software.h>
+#include <core/exceptions/system.h>
 
 #include <string>
 #include <cstring>
@@ -539,8 +540,14 @@ ThreadList::set_name(const char *format, ...)
 {
   va_list va;
   va_start(va, format);
-  free(_name);
-  vasprintf(&_name, format, va);
+  
+  char *tmpname;
+  if (vasprintf(&tmpname, format, va) != -1) {
+    free(_name);
+    _name = tmpname;
+  } else {
+    throw OutOfMemoryException("ThreadList::set_name(): vasprintf() failed");
+  }
   va_end(va);
 }
 

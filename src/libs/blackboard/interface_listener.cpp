@@ -24,6 +24,7 @@
  */
 
 #include <blackboard/interface_listener.h>
+#include <core/exceptions/system.h>
 #include <interface/interface.h>
 #include <cstdlib>
 #include <cstring>
@@ -86,7 +87,9 @@ namespace fawkes {
 {
   va_list arg;
   va_start(arg, name_format);
-  vasprintf(&__name, name_format, arg);
+  if (vasprintf(&__name, name_format, arg) == -1) {
+    throw OutOfMemoryException("BlackBoardInterfaceListener ctor: vasprintf() failed");
+  }
   va_end(arg);
 }
 

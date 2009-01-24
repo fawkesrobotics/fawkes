@@ -254,7 +254,8 @@ LogView::append_message(Logger::LogLevel log_level, struct timeval t,
 			const char *message)
 {
   const char *loglevel;
-  char* time;
+  const char *timestr;
+  char* time = NULL;
   Gdk::Color color;
   bool set_foreground = false;
   bool set_background = false;
@@ -278,7 +279,7 @@ LogView::append_message(Logger::LogLevel log_level, struct timeval t,
     color.set_rgb_p(1.0, 0.8, 0.8);
     set_background = true;
     break;
-  case Logger::LL_NONE:
+  default:
     loglevel = "NONE?";
     color.set_rgb_p(1.0, 0.0, 0.0);
     set_background = true;
@@ -287,12 +288,16 @@ LogView::append_message(Logger::LogLevel log_level, struct timeval t,
 
   struct tm time_tm;
   localtime_r(&(t.tv_sec), &time_tm);
-  asprintf(&time, "%02d:%02d:%02d.%06ld", time_tm.tm_hour,
-	   time_tm.tm_min, time_tm.tm_sec, t.tv_usec);
+  if (asprintf(&time, "%02d:%02d:%02d.%06ld", time_tm.tm_hour,
+	       time_tm.tm_min, time_tm.tm_sec, t.tv_usec) == -1) {
+    timestr = "OutOfMemory";
+  } else {
+    timestr = time;
+  }
 
   Gtk::TreeModel::Row row  = *__list->append();
   row[__record.loglevel]   = loglevel;
-  row[__record.time]       = time;
+  row[__record.time]       = timestr;
   row[__record.component]  = component;
   if ( is_exception ) {
     row[__record.message]    = std::string("[EXCEPTION] ") + message;
@@ -302,7 +307,7 @@ LogView::append_message(Logger::LogLevel log_level, struct timeval t,
   if ( set_foreground )  row[__record.foreground] = color;
   if ( set_background )  row[__record.background] = color;
 
-  free(time);
+  if (time) free(time);
 }
 
 /** Message received event handler.

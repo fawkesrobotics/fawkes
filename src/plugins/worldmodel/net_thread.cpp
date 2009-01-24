@@ -262,29 +262,34 @@ WorldModelNetworkThread::opponent_pose_rcvd(const char *from_host,
   std::map<std::string, std::map<unsigned int, std::pair<Time, ObjectPositionInterface *> > >::iterator f;
   if ( ((f = __opponent_ifs.find(from_host)) == __opponent_ifs.end()) ||
        (f->second.find(uid) == f->second.end()) ) {
-    try {
-      char *tmp;
-      asprintf(&tmp, "WI Opp %u %s", ++__opponent_id, from_host);
-      std::string id = tmp;
-      free(tmp);
-      logger->log_debug("WorldModelNetworkThread", "Opening new interface for %s:%u", from_host, uid);
-      __opponent_ifs[from_host][uid] = make_pair(Time(), blackboard->open_for_writing<ObjectPositionInterface>(id.c_str()));
-    } catch (Exception &e) {
-      logger->log_warn("WorldModelNetworkThread", "Failed to create ObjectPositionInterface "
-		       "for opponent %s:%u, exception follows", from_host, uid);
-      logger->log_warn("WorldModelNetworkThread", e);
-      return;
+
+    char *tmp;
+    if (asprintf(&tmp, "WI Opp %u %s", ++__opponent_id, from_host) != -1) {
+      try {
+	std::string id = tmp;
+	free(tmp);
+	logger->log_debug("WorldModelNetworkThread", "Opening new interface for %s:%u", from_host, uid);
+	__opponent_ifs[from_host][uid] = make_pair(Time(), blackboard->open_for_writing<ObjectPositionInterface>(id.c_str()));
+      } catch (Exception &e) {
+	logger->log_warn("WorldModelNetworkThread", "Failed to create ObjectPositionInterface "
+			 "for opponent %s:%u, exception follows", from_host, uid);
+	logger->log_warn("WorldModelNetworkThread", e);
+	__opponent_ifs.unlock();
+	return;
+      }
     }
+
+    logger->log_debug("WorldModelNetworkThread", "Setting opponent %s:%u", from_host, uid);
+    ObjectPositionInterface *iface = __opponent_ifs[from_host][uid].second;
+    iface->set_distance(distance);
+    iface->set_bearing(bearing);
+    iface->set_dbs_covariance(covariance);
+    iface->write();
+
+    __opponent_ifs[from_host][uid].first.stamp();
+  } else {
+    logger->log_error("WorldModelNetworkThread", "Could not create interface ID string, out of memory during asprintf().");
   }
-
-  logger->log_debug("WorldModelNetworkThread", "Setting opponent %s:%u", from_host, uid);
-  ObjectPositionInterface *iface = __opponent_ifs[from_host][uid].second;
-  iface->set_distance(distance);
-  iface->set_bearing(bearing);
-  iface->set_dbs_covariance(covariance);
-  iface->write();
-
-  __opponent_ifs[from_host][uid].first.stamp();
   __opponent_ifs.unlock();
 }
 

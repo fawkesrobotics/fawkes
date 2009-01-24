@@ -251,6 +251,7 @@ function FSM:set_error(error)
    print_warn("FSM %s: %s", self.name, self.error)
 end
 
+
 --- Add a state.
 -- @param state state to add
 function FSM:add_state(state)
@@ -258,6 +259,23 @@ function FSM:add_state(state)
    assert(state.name, "State must have a name")
 
    self.states[state.name] = state
+end
+
+
+--- Remove a state.
+-- @param state state to remove
+function FSM:remove_state(state)
+   assert(state, "State may not be nil")
+   assert(state.name, "State must have a name")
+
+   self.states[state.name] = nil
+end
+
+
+--- Remove all states.
+function FSM:clear_states()
+   self.states = {}
+   self.state_changed = true
 end
 
 

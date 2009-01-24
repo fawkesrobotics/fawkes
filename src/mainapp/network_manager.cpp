@@ -23,9 +23,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <mainapp/network_manager.h>
+#include "network_manager.h"
+#include "thread_manager.h"
 
-#include <mainapp/thread_manager.h>
+#include <core/exceptions/system.h>
 #include <netcomm/fawkes/server_thread.h>
 #include <netcomm/fawkes/handler.h>
 #include <netcomm/utils/resolver.h>
@@ -67,7 +68,9 @@ FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
   thread_manager->add(avahi_thread);
   _nnresolver = new NetworkNameResolver(avahi_thread);
   char *fawkes_service_name;
-  asprintf(&fawkes_service_name, "Fawkes on %s", _nnresolver->short_hostname());
+  if (asprintf(&fawkes_service_name, "Fawkes on %s", _nnresolver->short_hostname()) == -1) {
+    throw OutOfMemoryException("FawkesNetworkManager ctor: asprintf() failed");
+  }
   NetworkService *fawkes_service = new NetworkService(fawkes_service_name,
 						      "_fawkes._tcp", fawkes_port);
   free(fawkes_service_name);

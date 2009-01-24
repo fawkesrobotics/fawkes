@@ -26,6 +26,7 @@
 #include <fvutils/writers/writer.h>
 
 #include <core/exception.h>
+#include <core/exceptions/system.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -114,7 +115,9 @@ Writer::set_filename(const char *filename)
       throw fawkes::Exception("Extension not set");
     }
 
-    asprintf(&(this->filename), "%s.%s", basename, extension);
+    if (asprintf(&(this->filename), "%s.%s", basename, extension) == -1) {
+      throw fawkes::OutOfMemoryException("Writer::set_filename(): asprintf() failed");
+    }
   }
 }
 

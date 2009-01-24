@@ -101,9 +101,12 @@ WorldInfoViewer::get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
   if ( !widget )
     {
       char* err_str;
-      asprintf(&err_str, "Couldn't find widget %s", widget_name);
-      throw std::runtime_error(err_str);
-      free(err_str);
+      if (asprintf(&err_str, "Couldn't find widget %s", widget_name) != -1) {
+	throw std::runtime_error(err_str);
+	free(err_str);
+      } else {
+	throw std::runtime_error("Getting widget failed");
+      }
     }
 
   return widget;
@@ -180,18 +183,19 @@ void
 WorldInfoViewer::gamestate_changed()
 {
   char* status_string;
-  asprintf( &status_string, "Team color: %s  Goal color: %s  Mode: %s  Score: %d:%d  Half: %s",
-	    m_data_container->get_own_team_color_string().c_str(),
-	    m_data_container->get_own_goal_color_string().c_str(),
-	    m_data_container->get_game_state_string().c_str(),
-	    m_data_container->get_own_score(),
-	    m_data_container->get_other_score(),
-	    m_data_container->get_half_string().c_str() );
+  if (asprintf( &status_string, "Team color: %s  Goal color: %s  Mode: %s  Score: %d:%d  Half: %s",
+		m_data_container->get_own_team_color_string().c_str(),
+		m_data_container->get_own_goal_color_string().c_str(),
+		m_data_container->get_game_state_string().c_str(),
+		m_data_container->get_own_score(),
+		m_data_container->get_other_score(),
+		m_data_container->get_half_string().c_str() ) != -1) {
 
-  m_stb_status->remove_message(m_stb_message_id);
-  m_stb_message_id = m_stb_status->push( Glib::ustring(status_string) );
+    m_stb_status->remove_message(m_stb_message_id);
+    m_stb_message_id = m_stb_status->push( Glib::ustring(status_string) );
 
-  free(status_string);
+    free(status_string);
+  }
 }
 
 /** Call this method whenever a new robot was detected. */

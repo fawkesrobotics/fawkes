@@ -27,6 +27,7 @@
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
+#include <core/exceptions/system.h>
 #include <cams/fileloader.h>
 #include <fvutils/writers/fvraw.h>
 #include <fvutils/system/filetype.h>
@@ -337,7 +338,9 @@ FileLoader::read_file()
 {
   char* fn;
   if (0 != num_files) {
-    asprintf(&fn, "%s/%s", dirname, file_list[cur_file]->d_name);
+    if (asprintf(&fn, "%s/%s", dirname, file_list[cur_file]->d_name) == -1) {
+      throw OutOfMemoryException("FileLoader::read_file(): asprintf() failed (2)");
+    }
   } else {
     fn = strdup(filename);
   }

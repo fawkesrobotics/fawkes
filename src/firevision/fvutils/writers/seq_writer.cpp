@@ -24,12 +24,13 @@
  */
 
 #include <fvutils/writers/seq_writer.h>
+#include <core/exceptions/system.h>
 
-#include <string.h>
 #include <time.h>
-#include <stdlib.h>
 #include <sys/time.h>
 
+#include <cstring>
+#include <cstdlib>
 #include <cstdio>
 
 using namespace fawkes;
@@ -122,25 +123,48 @@ void SeqWriter::write(unsigned char *buffer)
   localtime_r(&now, &now_tm);
 
   char* timestring;
-  asprintf(&timestring, "%04d%02d%02d_%02d%02d%02d_%06ld", now_tm.tm_year + 1900, 
-	   now_tm.tm_mon + 1, now_tm.tm_mday, now_tm.tm_hour, now_tm.tm_min, 
-	   now_tm.tm_sec, now_tv.tv_usec);
+  if (asprintf(&timestring, "%04d%02d%02d_%02d%02d%02d_%06ld", now_tm.tm_year + 1900, 
+	       now_tm.tm_mon + 1, now_tm.tm_mday, now_tm.tm_hour, now_tm.tm_min, 
+	       now_tm.tm_sec, now_tv.tv_usec) == -1)
+  {
+    throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (1)");
+  }
   
   if (filename)
     {
       // filename: YYYYMMDD-hhmmss_uuuuuu_name_index.ext
       if (img_path)
-	{ asprintf(&fn, "%s/%s_%s-%04u", img_path, timestring, filename, frame_number); }
+      {
+	if (asprintf(&fn, "%s/%s_%s-%04u", img_path, timestring, filename, frame_number) == -1)
+	{
+	  throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (2)");
+	}
+      }
       else
-	{ asprintf(&fn, "%s_%s-%04u", timestring, filename, frame_number); }
+      {
+	if (asprintf(&fn, "%s_%s-%04u", timestring, filename, frame_number) == -1)
+	{
+	  throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (2)");
+	}
+      }
     }	
   else
     {
       // filename: YYYYMMDD-hhmmss_uuuuuu_index.ext
       if (img_path)
-	{ asprintf(&fn, "%s/%s-%04u", img_path, timestring, frame_number); }
+      {
+	if (asprintf(&fn, "%s/%s-%04u", img_path, timestring, frame_number) == -1)
+	{
+	  throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (3)");
+	}
+      }
       else
-	{ asprintf(&fn, "%s-%04u", timestring, frame_number); }
+      {
+	if (asprintf(&fn, "%s-%04u", timestring, frame_number) == -1)
+	{
+	  throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (4)");
+	}
+      }
     }
 
   writer->set_filename(fn);

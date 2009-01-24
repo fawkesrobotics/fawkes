@@ -104,7 +104,9 @@ class FireVisionNetworkTool
 	  delete w;
 	} else if ( ic->format() == FUSE_IF_JPEG ) {
 	  FILE *f = fopen(__file, "w");
-	  fwrite(ic->buffer(), ic->buffer_size(), 1, f);
+	  if (fwrite(ic->buffer(), ic->buffer_size(), 1, f) == 0) {
+	    printf("Failed to write data to file");
+	  }
 	  fclose(f);
 	} else {
 	  printf("Image of unknown format (%u) received.\n", ic->format());

@@ -29,13 +29,19 @@ module(..., fawkes.modinit.module_init)
 local fsmmod = require("fawkes.fsm")
 assert(fsmmod, "fsmmod is nil")
 
+local gv_load_success, gv_load_error = pcall(require, "gv")
+local gv
+if gv_load_success then
+   gv = _G.gv
+else
+   print_warn("FSM graphing disabled, Graphviz could not be loaded: %s",
+	      gv_load_error)
+end
+
 function write(fsm, filename)
    assert(fsm, "Grapher requires valid FSM")
 
-   require("gv")
-   local gv = _G.gv
-
-   --print("Writing " .. fsm.name)
+   if not gv_load_success then return end
 
    local g = gv.digraph(fsm.name)
 
@@ -122,6 +128,7 @@ end
 
 
 function dotgraph(fsm)
+   if not gv_load_success then return "" end
    local tfname = os.tmpname()
    write(fsm, tfname)
    local rv = ""

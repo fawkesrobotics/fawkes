@@ -101,6 +101,11 @@ LuaInterfaceImporter::open_interfaces(std::string &prefix, InterfaceMap &imap, b
       throw e;
     }
     std::string uid = vi->get_string();
+
+    if (uid.find("::") == std::string::npos) {
+      throw Exception("Interface UID '%s' at %s is not valid, missing double colon",
+		      uid.c_str(), vi->path());
+    }
     std::string varname = std::string(vi->path()).substr(prefix.length());
     std::string iftype = uid.substr(0, uid.find("::"));
     std::string ifname = uid.substr(uid.find("::") + 2);
@@ -191,21 +196,25 @@ LuaInterfaceImporter::add_interface(std::string varname, Interface *interface)
 }
 
 
-void LuaInterfaceImporter::add_observed_interface(std::string varname, const char *type,
-						  const char *id)
+void
+LuaInterfaceImporter::add_observed_interface(std::string varname,
+					     const char *type, const char *id)
 {
   try {
     if (__reading_multi_ifs.find(varname) == __reading_multi_ifs.end() ) {
       throw Exception("Notified about unknown interface varname %s", varname.c_str());
     }
     Interface *iface = __blackboard->open_for_reading(type, id);
+    __context->add_package((std::string("interfaces.") + iface->type()).c_str());
     __reading_multi_ifs[varname].push_back(iface);
     __context->get_global("interfaces");			// it
     __context->get_field(-1, "reading");			// it rt
-    __context->get_field(-1, varname.c_str());		// it rt vt
+    __context->get_field(-1, varname.c_str());			// it rt vt
     __context->push_usertype(iface, iface->type(), "fawkes");	// it rt vt iface
     __context->raw_seti(-2, __reading_multi_ifs[varname].size()); // it rt vt
-    __context->pop(3);					// ---
+    __context->push_usertype(iface, iface->type(), "fawkes");	// it rt vt iface
+    __context->set_field(iface->uid(), -2);			// it rt vt
+    __context->pop(3);						// ---
  } catch (Exception &e) {
     __logger->log_warn("LuaInterfaceImporter", "Failed to add observed interface "
 		       "%s:%s, exception follows", type, id);
@@ -313,6 +322,8 @@ LuaInterfaceImporter::push_multi_interfaces_varname(LuaContext *context, Interfa
       context->add_package((std::string("interfaces.") + (*i)->type()).c_str());
       context->push_usertype(*i, (*i)->type(), "fawkes");
       context->raw_seti(-2, ++idx);
+      context->push_usertype(*i, (*i)->type(), "fawkes");
+      context->set_field((*i)->uid(), -2);
     }
     context->set_field(imi->first.c_str());
   }

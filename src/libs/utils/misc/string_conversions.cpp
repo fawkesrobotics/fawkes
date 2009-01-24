@@ -24,6 +24,7 @@
  */
 
 #include <utils/misc/string_conversions.h>
+#include <core/exceptions/system.h>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -75,7 +76,9 @@ StringConversions::toString(const unsigned int i)
 {
   char *tmp;
   std::string rv;
-  asprintf(&tmp, "%u", i);
+  if (asprintf(&tmp, "%u", i) == -1) {
+    throw OutOfMemoryException("StringConversions::tostring(const unsigned int): asprintf() failed");
+  }
   rv = tmp;
   free(tmp);
   return rv;
@@ -91,7 +94,9 @@ StringConversions::toString(const int i)
 {
   char *tmp;
   std::string rv;
-  asprintf(&tmp, "%i", i);
+  if (asprintf(&tmp, "%i", i) == -1) {
+    throw OutOfMemoryException("StringConversions::tostring(const int): asprintf() failed");
+  }
   rv = tmp;
   free(tmp);
   return rv;
@@ -107,7 +112,9 @@ StringConversions::toString(const float f)
 {
   char *tmp;
   std::string rv;
-  asprintf(&tmp, "%f", f);
+  if (asprintf(&tmp, "%f", f) == -1) {
+    throw OutOfMemoryException("StringConversions::tostring(const float): asprintf() failed");
+  }
   rv = tmp;
   free(tmp);
   return rv;
@@ -123,7 +130,9 @@ StringConversions::toString(const double d)
 {
   char *tmp;
   std::string rv;
-  asprintf(&tmp, "%f", d);
+  if (asprintf(&tmp, "%f", d) == -1) {
+    throw OutOfMemoryException("StringConversions::tostring(const double d): asprintf() failed");
+  }
   rv = tmp;
   free(tmp);
   return rv;

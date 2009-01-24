@@ -33,7 +33,7 @@ class Time;
 
 class TimeWait {
  public:
-  TimeWait(Clock *clock, long int desired_loop_time);
+  TimeWait(Clock *clock, long int desired_loop_time_usec);
   ~TimeWait();
 
   void mark_start();

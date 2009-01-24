@@ -323,10 +323,13 @@ ImageWidget::RefThread::perform_refresh()
 
           if (__save_imgs) {
             char *ctmp;
-            asprintf(&ctmp, "%s/%06u.%s", __save_path.c_str(), ++__save_num, __save_type.c_str());
-            Glib::ustring fn = ctmp;
-            free(ctmp);
-            __widget->save_image(fn, __save_type);
+            if (asprintf(&ctmp, "%s/%06u.%s", __save_path.c_str(), ++__save_num, __save_type.c_str()) != -1) {
+	      Glib::ustring fn = ctmp;
+	      free(ctmp);
+	      __widget->save_image(fn, __save_type);
+	    } else {
+	      printf("Cannot save image, asprintf() ran out of memory");
+	    }
           }
         }
       }

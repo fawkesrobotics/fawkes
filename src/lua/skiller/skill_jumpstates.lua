@@ -126,13 +126,16 @@ end
 -- The functions init(), loop(), and exit() are not called.
 -- Any parameters given to this sub-skill state during the transition are passed
 -- verbatim to the skill's execute() routine.
-SubSkillJumpState = { try_transitions = JumpState.try_transitions,
-		      get_transitions = JumpState.get_transitions,
-		      last_transition = JumpState.last_transition,
-		      init            = JumpState.init,
-		      loop            = JumpState.loop,
-		      exit            = JumpState.exit,
-		      do_exit         = SubSkillState.do_exit
+SubSkillJumpState = { add_transition     = JumpState.add_transition,
+		      add_precondition   = JumpState.add_precondition,
+		      add_precond_trans  = JumpState.add_precond_trans,
+		      try_transitions    = JumpState.try_transitions,
+		      get_transitions    = JumpState.get_transitions,
+		      last_transition    = JumpState.last_transition,
+		      init               = JumpState.init,
+		      loop               = JumpState.loop,
+		      exit               = JumpState.exit,
+		      do_exit            = SubSkillState.do_exit
 		     }
 
 

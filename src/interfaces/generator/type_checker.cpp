@@ -24,7 +24,10 @@
 
 #include <interfaces/generator/type_checker.h>
 #include <interfaces/generator/exceptions.h>
+#include <core/exception.h>
 #include <cstdlib>
+#include <climits>
+#include <cmath>
 
 /** @class InterfaceDataTypeChecker <interfaces/generator/type_checker.h>
  * Type checker for interface types.
@@ -85,7 +88,10 @@ InterfaceDataTypeChecker::validValue(const std::string &type, const std::string 
 {
   if ( (type == "int") || ( type == "long int")) {
     char *endptr;
-    strtol(value.c_str(), &endptr, 11);
+    long int rv = strtol(value.c_str(), &endptr, 11);
+    if ((rv == LONG_MIN) || (rv == LONG_MAX)) {
+      throw fawkes::Exception("Could not convert value string '%s' to long int", value.c_str());
+    }
     return ( (endptr != NULL) && (endptr[0] == '\0'));
   } else if (type == "unsigned int") {
     std::string::size_type notofnumber = value.find_first_not_of("0123456789");
@@ -127,7 +133,10 @@ InterfaceDataTypeChecker::validValue(const std::string &type, const std::string 
   } else if ( (type == "float") ||
 	      (type == "double") ) {
     char *endptr;
-    strtod(value.c_str(), &endptr);
+    float rv = strtod(value.c_str(), &endptr);
+    if ((rv == HUGE_VAL) || (rv == -HUGE_VAL)) {
+      throw fawkes::Exception("Could not convert string '%s' to float", value.c_str());
+    }
     return ((endptr != NULL) && (endptr[0] == '\0'));
   } else if ( type == "char" ) {
     return true;

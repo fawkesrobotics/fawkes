@@ -333,16 +333,18 @@ TimeTracker::print_to_stdout()
 	deviation += fabs((*tit)->tv_sec + ((*tit)->tv_usec / 1000000.f) - average);
       }
       deviation /= (*it)->size();
+
+      average_ms = average * 1000;
+      deviation_ms = deviation * 1000;
+
+      cout << "Class '" <<  **sit << "'" << endl
+	   << "  avg=" << average << " (" << average_ms << " ms)" << endl
+	   << "  dev=" << deviation << " (" << deviation_ms << " ms)" << endl
+	   << "  res=" << (*it)->size() << " results"
+	   << endl;
+    } else {
+      cout << "Class '" <<  **sit << "' has no results." << endl;
     }
-
-    average_ms = average * 1000;
-    deviation_ms = deviation * 1000;
-
-    cout << "Class '" <<  **sit << "'" << endl
-	 << "  avg=" << average << " (" << average_ms << " ms)" << endl
-	 << "  dev=" << deviation << " (" << deviation_ms << " ms)" << endl
-	 << "  res=" << (*it)->size() << " results"
-	 << endl;
 
   }
 

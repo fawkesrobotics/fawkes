@@ -46,11 +46,11 @@ namespace fawkes {
 
 /** Constructor.
  * @param clock clock to use
- * @param desired_loop_time desired minimum loop time
+ * @param desired_loop_time_usec desired minimum loop time in microseconds
  */
-TimeWait::TimeWait(Clock *clock, long int desired_loop_time)
+TimeWait::TimeWait(Clock *clock, long int desired_loop_time_usec)
 {
-  __desired_loop_time = desired_loop_time;
+  __desired_loop_time = desired_loop_time_usec;
   __clock = clock;
   __until = new Time();
   __until_systime = new Time();

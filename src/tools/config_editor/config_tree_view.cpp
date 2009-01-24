@@ -22,10 +22,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/config_editor/config_tree_view.h>
-#include <tools/config_editor/config_edit_dialog.h>
-#include <tools/config_editor/config_add_dialog.h>
-#include <tools/config_editor/config_remove_dialog.h>
+#include "config_tree_view.h"
+#include "config_edit_dialog.h"
+#include "config_add_dialog.h"
+#include "config_remove_dialog.h"
+
+#include <core/exceptions/system.h>
 #include <config/netconf.h>
 #include <config/sqlite.h>
 #include <netcomm/fawkes/client.h>
@@ -320,10 +322,14 @@ ConfigTreeView::get_iter(const char* p)
   char* path;
   char* full_path;
 
-  asprintf(&full_path, "%s", p);
+  if (asprintf(&full_path, "%s", p) == -1) {
+    throw OutOfMemoryException("get_iter(): asprintf() failed");
+  }
   char* node = strtok(full_path, "/");
 
-  asprintf(&path, "/%s", node);
+  if (asprintf(&path, "/%s", node) == -1) {
+    throw OutOfMemoryException("get_iter(): asprintf() failed");
+  }
   
   Gtk::TreeModel::Children children = m_config_tree->children();
   Gtk::TreeIter iter = children.begin();
@@ -361,7 +367,9 @@ ConfigTreeView::get_iter(const char* p)
       node = strtok(NULL, "/");
 
       char* t;
-      asprintf(&t, "%s/%s", path, node);
+      if (asprintf(&t, "%s/%s", path, node) == -1) {
+	throw OutOfMemoryException("get_iter(): asprintf() failed");
+      }
       free(path);
       path = t;
     }
@@ -451,7 +459,7 @@ ConfigTreeView::edit_entry(const Gtk::TreeIter& iter)
 
 	    if ( m_config->is_bool(p) ) 
 	      {
-		bool b;
+		bool b = false;
 		if (value == "TRUE")
 		  { b = true; }
 		else if (value == "FALSE")
@@ -613,7 +621,7 @@ ConfigTreeView::add_entry(const Gtk::TreeIter& iter)
 
 	if ( type == "bool" )
 	  {
-	    bool b;
+	    bool b = false;
 
 	    if ( value == "TRUE" || value == "true" )
 	      { b = true; }

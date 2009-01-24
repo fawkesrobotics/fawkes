@@ -200,7 +200,7 @@ class Interface
   Interface();
   virtual bool  message_valid(const Message *message) const = 0;
 
-  void set_hash(unsigned char ihash[__INTERFACE_HASH_SIZE]);
+  void set_hash(unsigned char *ihash);
   void add_fieldinfo(interface_fieldtype_t type, const char *name,
 		     size_t length, void *value);
 

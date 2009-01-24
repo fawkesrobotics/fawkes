@@ -9,6 +9,12 @@ class HumanoidMotionInterface : public Interface
     LEG_RIGHT
   } LegEnum;
 
+  typedef enum {
+    STANDUP_DETECT,
+    STANDUP_BACK,
+    STANDUP_FRONT
+  } StandupEnum;
+
   class SetWalkParamsMessage : public Message
   {
     SetWalkParamsMessage(float ini_max_step_length, float ini_max_step_height, float ini_max_step_side, float ini_max_step_turn, float ini_zmp_offset_forward, float ini_zmp_offset_sideward, float ini_l_hip_roll_compensation, float ini_r_hip_roll_compensation, float ini_hip_height, float ini_torso_sideward_orientation);
@@ -170,6 +176,17 @@ class HumanoidMotionInterface : public Interface
     float time_sec();
     void set_time_sec(const float new_time_sec);
     int maxlenof_time_sec() const;
+  };
+
+  class StandupMessage : public Message
+  {
+    StandupMessage(StandupEnum ini_from_pos);
+    StandupMessage();
+    ~StandupMessage();
+
+    StandupEnum from_pos();
+    void set_from_pos(const StandupEnum new_from_pos);
+    int maxlenof_from_pos() const;
   };
 
   bool is_moving();

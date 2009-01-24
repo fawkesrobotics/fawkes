@@ -28,6 +28,7 @@
 #include <interface/mediators/interface_mediator.h>
 #include <interface/mediators/message_mediator.h>
 #include <core/threading/refc_rwlock.h>
+#include <core/exceptions/system.h>
 
 #include <cstring>
 #include <cstdio>
@@ -208,7 +209,7 @@ Interface::hash_printable() const
  * @param ihash interface hash
  */
 void
-Interface::set_hash(unsigned char ihash[__INTERFACE_HASH_SIZE])
+Interface::set_hash(unsigned char *ihash)
 {
   memcpy(__hash, ihash, __INTERFACE_HASH_SIZE);
   for (size_t s = 0; s < __INTERFACE_HASH_SIZE; ++s) {
@@ -1122,34 +1123,41 @@ Interface::FieldIterator::get_value_string()
 
       if ( __infol->type != IFT_STRING ) {
 	for (size_t i = 0; i < __infol->length; ++i) {
+          int rv = 0;
 	  switch (__infol->type) {
 	  case IFT_BOOL:
-	    asprintf(&tmp2, "%s%s", tmp1, (((bool *)__infol->value)[i]) ? "true" : "false");
+	    rv = asprintf(&tmp2, "%s%s", tmp1, (((bool *)__infol->value)[i]) ? "true" : "false");
 	    break;
 	  case IFT_INT:
-	    asprintf(&tmp2, "%s%i", tmp1, ((int *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int *)__infol->value)[i]);
 	    break;
 	  case IFT_UINT:
-	    asprintf(&tmp2, "%s%u", tmp1, ((unsigned int *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%u", tmp1, ((unsigned int *)__infol->value)[i]);
 	    break;
 	  case IFT_LONGINT:
-	    asprintf(&tmp2, "%s%li", tmp1, ((long int *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%li", tmp1, ((long int *)__infol->value)[i]);
 	    break;
 	  case IFT_LONGUINT:
-	    asprintf(&tmp2, "%s%lu", tmp1, ((long unsigned int *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%lu", tmp1, ((long unsigned int *)__infol->value)[i]);
 	    break;
 	  case IFT_FLOAT:
-	    asprintf(&tmp2, "%s%f", tmp1, ((float *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%f", tmp1, ((float *)__infol->value)[i]);
 	    break;
 	  case IFT_STRING:
 	    // cannot happen, caught with surrounding if statement
 	    break;
 	  }
+
+	  if ( rv == -1 ) {
+	    throw OutOfMemoryException("Interface::FieldIterator::get_value_string(): asprintf() failed (1)");
+	  }
 	  
 	  free(tmp1);
 	  tmp1 = tmp2;
 	  if ( (__infol->length > 1) && (i < __infol->length - 1) ) {
-	    asprintf(&tmp2, "%s, ", tmp1);
+	    if (asprintf(&tmp2, "%s, ", tmp1) == -1) {
+	      throw OutOfMemoryException("Interface::FieldIterator::get_value_string(): asprintf() failed (2)");
+	    }
 	    free(tmp1);
 	    tmp1 = tmp2;
 	  }
@@ -1159,9 +1167,13 @@ Interface::FieldIterator::get_value_string()
       } else {
 	// it's a string, or a small number
 	if ( __infol->length > 1 ) {
-	  asprintf(&__value_string, "%s", (const char *)__infol->value);
+	  if (asprintf(&__value_string, "%s", (const char *)__infol->value) == -1) {
+	    throw OutOfMemoryException("Interface::FieldIterator::get_value_string(): asprintf() failed (3)");
+	  }
 	} else {
-	  asprintf(&__value_string, "%c", *((const char *)__infol->value));
+	  if (asprintf(&__value_string, "%c", *((const char *)__infol->value)) == -1) {
+	    throw OutOfMemoryException("Interface::FieldIterator::get_value_string(): asprintf() failed (4)");
+	  }
 	}
       }
     }

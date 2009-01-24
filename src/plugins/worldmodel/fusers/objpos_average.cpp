@@ -111,12 +111,12 @@ WorldModelObjPosAverageFuser::fuse()
 
   unsigned int flags = 0;
   unsigned int num_inputs = 0;
-  float roll, pitch, yaw, distance, bearing, slope,
-    world_x, world_y, world_z,
-    relative_x, relative_y, relative_z,
-    extent_x, extent_y, extent_z,
-    world_x_velocity, world_y_velocity, world_z_velocity,
-    relative_x_velocity, relative_y_velocity, relative_z_velocity;
+  float roll = 0, pitch = 0, yaw = 0, distance = 0, bearing = 0, slope = 0,
+    world_x = 0, world_y = 0, world_z = 0,
+    relative_x = 0, relative_y = 0, relative_z = 0,
+    extent_x = 0, extent_y = 0, extent_z = 0,
+    world_x_velocity = 0, world_y_velocity = 0, world_z_velocity = 0,
+    relative_x_velocity = 0, relative_y_velocity = 0, relative_z_velocity = 0;
 
   for (__iii = __input_ifs.begin(); __iii != __input_ifs.end(); ++__iii) {
     ObjectPositionInterface *iface = *__iii;

@@ -27,9 +27,11 @@
 #include <core/threading/mutex_locker.h>
 #include <blackboard/blackboard.h>
 #include <interface/interface.h>
+#include <core/exceptions/system.h>
 
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 using namespace fawkes;
 
@@ -76,11 +78,14 @@ WorldModelMultiCopyFuser::WorldModelMultiCopyFuser(fawkes::BlackBoard *blackboar
     unsigned int u = 0;
     for (std::list<Interface *>::iterator i = exifs.begin(); i != exifs.end(); ++i) {
       char *tid;
-      asprintf(&tid, to_id_format, ++u);
-      std::string sid = tid;
-      free(tid);
-      Interface *to_if = blackboard->open_for_writing(type, sid.c_str());
-      __ifmap[*i] = to_if;
+      if (asprintf(&tid, to_id_format, ++u) != -1) {
+	std::string sid = tid;
+	free(tid);
+	Interface *to_if = blackboard->open_for_writing(type, sid.c_str());
+	__ifmap[*i] = to_if;
+      } else {
+	throw OutOfMemoryException("Could not create interface ID, out of memory");
+      }
     }
   } catch (Exception &e) {
     for (std::list<Interface *>::iterator i = exifs.begin(); i != exifs.end(); ++i) {
@@ -123,7 +128,10 @@ WorldModelMultiCopyFuser::bb_interface_created(const char *type, const char *id)
 
   char *tid;
   u = __ifmap.size();
-  asprintf(&tid, __to_id_format.c_str(), u);
+  if (asprintf(&tid, __to_id_format.c_str(), u) == -1) {
+    printf("Could not create ID string, asprintf() ran out of memory");
+    return;
+  }
   std::string sid = tid;
   free(tid);
 

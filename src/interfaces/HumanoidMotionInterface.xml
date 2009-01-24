@@ -7,6 +7,12 @@
       <item name="LEG_LEFT">Left leg.</item>
       <item name="LEG_RIGHT">Right leg.</item>
     </enum>
+    <enum name="StandupEnum">
+      <comment>From which position to standup.</comment>
+      <item name="STANDUP_DETECT">Detect via accelerometer.</item>
+      <item name="STANDUP_BACK">Standup from lying on the back.</item>
+      <item name="STANDUP_FRONT">Standup from lying on the tummy.</item>
+    </enum>
   </constants>
   <data>
     <comment>
@@ -146,7 +152,11 @@
     <field type="float" name="time_sec">Time in seconds when to reach the position.</field>
   </message>
   <message name="GetUp">
-    <comment>Bring robot into a standing position when lying on the ground.</comment>
+    <comment>Bring robot into a standing position when in park position.</comment>
     <field type="float" name="time_sec">Time in seconds when to reach the position.</field>
+  </message>
+  <message name="Standup">
+    <comment>Bring robot into a standing position when lying on the ground.</comment>
+    <field type="StandupEnum" name="from_pos">Position from where to standup.</field>
   </message>
 </interface>

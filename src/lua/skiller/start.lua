@@ -5,7 +5,7 @@
 --              executed. Only run if initialization was successful.
 --
 --  Created: Thu Mar 13 11:24:40 2008
---  Copyright  2008  Tim Niemueller [www.niemueller.de]
+--  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
 --
@@ -23,13 +23,8 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
--- Can be used to debug component path
+-- lists whole config
 --[[
-print(package.path);
-print(package.cpath);
---]]
-
---[[ lists whole config
 v = config:iterator()
 while ( v:next() ) do
    if ( v:is_float() ) then
@@ -45,13 +40,6 @@ while ( v:next() ) do
    end
 end
 --]]
-
-require("fawkes.logprint")
-skillenv = require("skiller.skillenv")
-require("skiller.skillhsm")
-
-fawkes.logprint.init(logger)
-
 -- prints all interfaces
 --[[
 for k,v in pairs(interfaces) do
@@ -61,9 +49,14 @@ for k,v in pairs(interfaces) do
 end
 --]]
 
+require("fawkes.logprint")
+fawkes.logprint.init(logger)
+
+skillenv = require("skiller.skillenv")
+require("skiller.skillhsm")
+
 skillenv.init(SKILLSPACE)
 
 --skiller.skillhsm.SkillHSM:set_debug(true)
 
 logger:log_debug("Lua startup completed")
-

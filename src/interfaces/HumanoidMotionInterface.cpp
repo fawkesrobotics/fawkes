@@ -66,7 +66,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "elbow_roll_median", 1, &data->elbow_roll_median);
   add_fieldinfo(Interface::IFT_FLOAT, "elbow_roll_amplitude", 1, &data->elbow_roll_amplitude);
   add_fieldinfo(Interface::IFT_UINT, "msgid", 1, &data->msgid);
-  unsigned char tmp_hash[] = {0x36, 0xbc, 0x2f, 0xfe, 0x2b, 0x75, 0x85, 0xe5, 0xb9, 0x7e, 0xfc, 0xb6, 0xb, 0xf6, 0x86, 0xee};
+  unsigned char tmp_hash[] = {0x2c, 0x77, 0x9b, 0x10, 0xb0, 0x10, 0x94, 0x4e, 0x7f, 0x88, 0xee, 0xb, 0xed, 0x3, 0xdc, 0x92};
   set_hash(tmp_hash);
 }
 
@@ -684,6 +684,8 @@ HumanoidMotionInterface::create_message(const char *type) const
     return new ParkMessage();
   } else if ( strncmp("GetUpMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new GetUpMessage();
+  } else if ( strncmp("StandupMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new StandupMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -2202,6 +2204,91 @@ HumanoidMotionInterface::GetUpMessage::clone() const
 {
   return new HumanoidMotionInterface::GetUpMessage(this);
 }
+/** @class HumanoidMotionInterface::StandupMessage <interfaces/HumanoidMotionInterface.h>
+ * StandupMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_from_pos initial value for from_pos
+ */
+HumanoidMotionInterface::StandupMessage::StandupMessage(const StandupEnum ini_from_pos) : Message("StandupMessage")
+{
+  data_size = sizeof(StandupMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StandupMessage_data_t *)data_ptr;
+  data->from_pos = ini_from_pos;
+}
+/** Constructor */
+HumanoidMotionInterface::StandupMessage::StandupMessage() : Message("StandupMessage")
+{
+  data_size = sizeof(StandupMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StandupMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+HumanoidMotionInterface::StandupMessage::~StandupMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+HumanoidMotionInterface::StandupMessage::StandupMessage(const StandupMessage *m) : Message("StandupMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StandupMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get from_pos value.
+ * Position from where to standup.
+ * @return from_pos value
+ */
+HumanoidMotionInterface::StandupEnum
+HumanoidMotionInterface::StandupMessage::from_pos() const
+{
+  return data->from_pos;
+}
+
+/** Get maximum length of from_pos value.
+ * @return length of from_pos value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::StandupMessage::maxlenof_from_pos() const
+{
+  return 1;
+}
+
+/** Set from_pos value.
+ * Position from where to standup.
+ * @param new_from_pos new from_pos value
+ */
+void
+HumanoidMotionInterface::StandupMessage::set_from_pos(const StandupEnum new_from_pos)
+{
+  data->from_pos = new_from_pos;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+HumanoidMotionInterface::StandupMessage::clone() const
+{
+  return new HumanoidMotionInterface::StandupMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
@@ -2246,6 +2333,10 @@ HumanoidMotionInterface::message_valid(const Message *message) const
   }
   const GetUpMessage *m9 = dynamic_cast<const GetUpMessage *>(message);
   if ( m9 != NULL ) {
+    return true;
+  }
+  const StandupMessage *m10 = dynamic_cast<const StandupMessage *>(message);
+  if ( m10 != NULL ) {
     return true;
   }
   return false;

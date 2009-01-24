@@ -45,6 +45,13 @@ class HumanoidMotionInterface : public Interface
     LEG_RIGHT /**< Right leg. */
   } LegEnum;
 
+  /** From which position to standup. */
+  typedef enum {
+    STANDUP_DETECT /**< Detect via accelerometer. */,
+    STANDUP_BACK /**< Standup from lying on the back. */,
+    STANDUP_FRONT /**< Standup from lying on the tummy. */
+  } StandupEnum;
+
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
@@ -441,6 +448,29 @@ class HumanoidMotionInterface : public Interface
     float time_sec() const;
     void set_time_sec(const float new_time_sec);
     size_t maxlenof_time_sec() const;
+    virtual Message * clone() const;
+  };
+
+  class StandupMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      StandupEnum from_pos; /**< Position from where to standup. */
+    } StandupMessage_data_t;
+
+    StandupMessage_data_t *data;
+
+   public:
+    StandupMessage(const StandupEnum ini_from_pos);
+    StandupMessage();
+    ~StandupMessage();
+
+    StandupMessage(const StandupMessage *m);
+    /* Methods */
+    StandupEnum from_pos() const;
+    void set_from_pos(const StandupEnum new_from_pos);
+    size_t maxlenof_from_pos() const;
     virtual Message * clone() const;
   };
 
