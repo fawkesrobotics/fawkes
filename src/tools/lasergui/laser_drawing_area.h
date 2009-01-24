@@ -46,7 +46,7 @@ class LaserDrawingArea
 
   LaserDrawingArea();
   LaserDrawingArea(BaseObjectType* cobject,
-		   const Glib::RefPtr<Gnome::Glade::Xml>& ref_glade);
+		   const Glib::RefPtr<Gnome::Glade::Xml>& refxml);
 
   void set_laser_if(fawkes::Laser360Interface *laser_if);
   void set_robot_drawer(fawkes::CairoRobotDrawer *robot_drawer);

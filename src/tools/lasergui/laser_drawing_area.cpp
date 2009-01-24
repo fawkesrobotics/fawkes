@@ -124,7 +124,7 @@ LaserDrawingArea::zoom_in()
 }
 
 /** Zoom out.
- * Decreases zoom factor with a minimum of 1.
+ * Decreases zoom factor by 20 with a minimum of 1.
  */
 void
 LaserDrawingArea::zoom_out()

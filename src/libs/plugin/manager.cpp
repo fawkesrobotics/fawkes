@@ -141,9 +141,6 @@ PluginManager::init_pinfo_cache()
 {
   __pinfo_cache.lock();
 
-  Thread::CancelState old_state;
-  Thread::set_cancel_state(Thread::CANCEL_DISABLED);
-
   DIR *plugin_dir;
   struct dirent* dirp;
   /* constant for this somewhere? */
@@ -187,8 +184,6 @@ PluginManager::init_pinfo_cache()
 
   __pinfo_cache.sort();
   __pinfo_cache.unlock();
-
-  Thread::set_cancel_state(old_state);
 }
 
 /** Generate list of all available plugins.
