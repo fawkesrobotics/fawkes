@@ -32,11 +32,15 @@ namespace fawkes {
  * This interface defines access to threads with the blocked timing aspect.
  * @author Tim Niemueller
  *
- * @fn void BlockedTimingExecutor::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook)
+ * @fn void BlockedTimingExecutor::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook, unsigned int timeout_usec)
  * Wakeup thread for given hook and wait for completion.
  * This will wakeup all threads registered for the given hook. Afterwards
  * this method will block until all threads finished their loop.
  * @param hook hook for which to wait for
+ * @param timeout_usec timeout for thread execution in usec. 0 disables the
+ * timeout and makes this function to wait forever.
+ * @exception Exception thrown if the timeout was exceeded (at least one of the
+ * threads for the given hook took longer than the desired time.
  *
  * @fn void BlockedTimingExecutor::wakeup(BlockedTimingAspect::WakeupHook hook, Barrier *barrier = 0)
  * Wakeup thread for given hook.
@@ -46,6 +50,14 @@ namespace fawkes {
  * @param hook hook for which to wait for
  * @param barrier optional barrier that can be used to synchronize to the
  * end of the loop execution of the threads.
+ *
+ * @fn void BlockedTimingExecutor::try_recover(std::list<std::string> &recovered_threads)
+ * Try to recover threads.
+ * An advanced BlockedTimingExecutor might be able to detect deadlocked threads.
+ * In this case this function should be called regularly to allow for recovering
+ * threads that are back to normal operation.
+ * @param recovered_threads upon return the names of any threads that could be
+ * recovered from a bad state have been added to the list.
  *
  * @fn bool BlockedTimingExecutor::timed_threads_exist()
  * Check if any timed threads exist.
