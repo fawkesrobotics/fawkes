@@ -104,6 +104,7 @@ class Time
   void add(float seconds);
 
   Time & stamp();
+  Time & stamp_systime();
 
   Time   operator+(const float sec) const;
   Time   operator+(const Time& t) const;

@@ -446,6 +446,23 @@ Time::stamp()
 }
 
 
+/** Set this time to the current system time.
+ * This bypasses any possibly registered time source. Use with care and only
+ * where you really need the system time.
+ * @return reference to this instance
+ */
+Time &
+Time::stamp_systime()
+{
+  if ( NULL != __clock ) {
+    __clock->get_systime(&__time);
+  } else {
+    throw Exception("Clock not set, cannot stamp time (systime)");
+  }
+  return *this;
+}
+
+
 /** Wait (sleep) for this time.
  * This waits for as much time as this instance provides. Note that you have to
  * make sure that you call this on a sensible time range. You probably do not want
