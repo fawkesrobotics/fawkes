@@ -27,6 +27,7 @@
 #define __CORE_UTILS_RWLOCK_MAP_H_
 
 #include <core/threading/read_write_lock.h>
+#include <core/utils/refptr.h>
 #include <map>
 
 namespace fawkes {
@@ -42,17 +43,17 @@ class RWLockMap : public std::map<KeyType, ValueType, LessKey>
   RWLockMap(const RWLockMap<KeyType, ValueType, LessKey> &lm);
   virtual ~RWLockMap();
 
-  void             lock_for_read();
-  void             lock_for_write();
-  bool             try_lock_for_read();
-  bool             try_lock_for_write();
-  void             unlock();
-  ReadWriteLock *  rwlock() const;
+  void                   lock_for_read();
+  void                   lock_for_write();
+  bool                   try_lock_for_read();
+  bool                   try_lock_for_write();
+  void                   unlock();
+  RefPtr<ReadWriteLock>  rwlock() const;
 
   void     erase_locked(const KeyType &key);
 
  private:
-  ReadWriteLock *__rwlock;
+  RefPtr<ReadWriteLock> __rwlock;
 
 };
 
@@ -71,9 +72,8 @@ class RWLockMap : public std::map<KeyType, ValueType, LessKey>
 /** Constructor. */
 template <typename KeyType, typename ValueType, typename LessKey>
 RWLockMap<KeyType, ValueType, LessKey>::RWLockMap()
-{
-  __rwlock = new ReadWriteLock();
-}
+  : __rwlock(new ReadWriteLock())
+{}
 
 
 /** Copy constructor.
@@ -81,18 +81,14 @@ RWLockMap<KeyType, ValueType, LessKey>::RWLockMap()
  */
 template <typename KeyType, typename ValueType, typename LessKey>
 RWLockMap<KeyType, ValueType, LessKey>::RWLockMap(const RWLockMap<KeyType, ValueType, LessKey> &lm)
-  : std::map<KeyType, ValueType, LessKey>::map(lm)
-{
-  __rwlock = new ReadWriteLock();
-}
+  : std::map<KeyType, ValueType, LessKey>::map(lm), __rwlock(new ReadWriteLock())
+{}
 
 
 /** Destructor. */
 template <typename KeyType, typename ValueType, typename LessKey>
 RWLockMap<KeyType, ValueType, LessKey>::~RWLockMap()
-{
-  delete __rwlock;
-}
+{}
 
 
 /** Lock list for reading. */
@@ -163,7 +159,7 @@ RWLockMap<KeyType, ValueType, LessKey>::erase_locked(const KeyType &key)
  * @return internal rwlock
  */
 template <typename KeyType, typename ValueType, typename LessKey>
-ReadWriteLock *
+RefPtr<ReadWriteLock>
 RWLockMap<KeyType, ValueType, LessKey>::rwlock() const
 {
   return __rwlock;

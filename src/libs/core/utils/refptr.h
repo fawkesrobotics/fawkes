@@ -28,6 +28,8 @@
 #ifndef __CORE_UTILS_REFPTR_H_
 #define __CORE_UTILS_REFPTR_H_
 
+#include <core/threading/mutex.h>
+
 namespace fawkes {
 
 /** RefPtr<> is a reference-counting shared smartpointer.
@@ -42,7 +44,8 @@ namespace fawkes {
  * the object that it returns, and to prevent any need to manually reference 
  * and unreference cairo objects.
  *
- * Note that RefPtr is <b>not</b> thread-safe.
+ * Note that RefPtr is thread-safe.
+ *
  * @ingroup FCL
  */
 template <class T_CppObject>
@@ -169,23 +172,33 @@ class RefPtr
   template <class T_CastFrom>
   static inline RefPtr<T_CppObject> cast_const(const RefPtr<T_CastFrom>& src);
 
-
-private:
   /** For use only in the internal implementation of sharedptr.
    * @param cpp_object C++ object to wrap
    * @param refcount reference count
+   * @param refmutex reference count mutex
    */
-  explicit inline RefPtr(T_CppObject* cpp_object, int* refcount);
+  explicit inline RefPtr(T_CppObject *cpp_object, int *refcount, Mutex *refmutex);
 
-  // Warning: This is for internal use only.  Do not manually modify the
-  // reference count with this pointer.
-  // @return pointer to refcount integer
-  inline int* refcount_() const { return __ref_count; }
+  /** For use only in the internal implementation of sharedptr.
+   * Get reference count pointer.
+   * Warning: This is for internal use only.  Do not manually modify the
+   * reference count with this pointer.
+   * @return pointer to refcount integer
+   */
+  inline int *  refcount_ptr() const { return __ref_count; }
 
-  void unref();
+  /** For use only in the internal implementation of sharedptr.
+   * Get reference mutex.
+   * @return pointer to refcount mutex
+   */
+  inline Mutex *  refmutex_ptr() const { return __ref_mutex; }
 
-  T_CppObject* __cpp_object;
-  mutable int* __ref_count;
+private:
+
+  T_CppObject   *__cpp_object;
+  mutable int   *__ref_count;
+  mutable Mutex *__ref_mutex;
+
 };
 
 
@@ -202,20 +215,17 @@ template <class T_CppObject> inline
 RefPtr<T_CppObject>::RefPtr()
 :
   __cpp_object(0),
-  __ref_count(0)
+  __ref_count(0),
+  __ref_mutex(0)
 {}
 
 template <class T_CppObject> inline
 RefPtr<T_CppObject>::~RefPtr()
 {
-  unref();
-}
-
-template <class T_CppObject> inline
-void RefPtr<T_CppObject>::unref()
-{
-  if(__ref_count)
+  if(__ref_count && __ref_mutex)
   {
+    __ref_mutex->lock();
+
     --(*__ref_count);
 
     if(*__ref_count == 0)
@@ -227,7 +237,11 @@ void RefPtr<T_CppObject>::unref()
       }
 
       delete __ref_count;
+      delete __ref_mutex;
       __ref_count = 0;
+      __ref_mutex = 0;
+    } else {
+      __ref_mutex->unlock();
     }
   }
 }
@@ -237,34 +251,45 @@ template <class T_CppObject> inline
 RefPtr<T_CppObject>::RefPtr(T_CppObject* cpp_object)
 :
   __cpp_object(cpp_object),
-  __ref_count(0)
+  __ref_count(0),
+  __ref_mutex(0)
 {
   if(cpp_object)
   {
     __ref_count = new int;
+    __ref_mutex = new Mutex();
     *__ref_count = 1; //This will be decremented in the destructor.
   }
 }
 
 //Used by cast_*() implementations:
 template <class T_CppObject> inline
-RefPtr<T_CppObject>::RefPtr(T_CppObject* cpp_object, int* refcount)
+  RefPtr<T_CppObject>::RefPtr(T_CppObject* cpp_object, int* refcount, Mutex *refmutex)
 :
   __cpp_object(cpp_object),
-  __ref_count(refcount)
+  __ref_count(refcount),
+  __ref_mutex(refmutex)
 {
-  if(__cpp_object && __ref_count)
+  if(__cpp_object && __ref_count && __ref_mutex) {
+    __ref_mutex->lock();
     ++(*__ref_count);
+    __ref_mutex->unlock();
+  }
 }
 
 template <class T_CppObject> inline
 RefPtr<T_CppObject>::RefPtr(const RefPtr<T_CppObject>& src)
 :
   __cpp_object (src.__cpp_object),
-  __ref_count(src.__ref_count)
+  __ref_count(src.__ref_count),
+  __ref_mutex(src.__ref_mutex)
 {
-  if(__cpp_object && __ref_count)
+  if(__cpp_object && __ref_count && __ref_mutex)
+  {
+    __ref_mutex->lock();
     ++(*__ref_count);
+    __ref_mutex->unlock();
+  }
 }
 
 // The templated ctor allows copy construction from any object that's
@@ -279,10 +304,14 @@ RefPtr<T_CppObject>::RefPtr(const RefPtr<T_CastFrom>& src)
   // to add a get_underlying() for this, but that would encourage incorrect
   // use, so we use the less well-known operator->() accessor:
   __cpp_object (src.operator->()),
-  __ref_count(src.refcount_())
+  __ref_count(src.refcount_ptr()),
+  __ref_mutex(src.refmutex_ptr())
 {
-  if(__cpp_object && __ref_count)
+  if(__cpp_object && __ref_count && __ref_mutex) {
+    __ref_mutex->lock();
     ++(*__ref_count);
+    __ref_mutex->unlock();
+  }
 }
 
 template <class T_CppObject> inline
@@ -290,13 +319,16 @@ void
 RefPtr<T_CppObject>::swap(RefPtr<T_CppObject>& other)
 {
   T_CppObject *const temp = __cpp_object;
-  int* temp_count = __ref_count; 
+  int *temp_count         = __ref_count; 
+  Mutex *temp_mutex       = __ref_mutex;
 
   __cpp_object = other.__cpp_object;
-  __ref_count = other.__ref_count;
+  __ref_count  = other.__ref_count;
+  __ref_mutex  = other.__ref_mutex;
 
   other.__cpp_object = temp;
-  other.__ref_count = temp_count;
+  other.__ref_count  = temp_count;
+  other.__ref_mutex  = temp_mutex;
 }
 
 template <class T_CppObject> inline
@@ -379,7 +411,7 @@ RefPtr<T_CppObject>::cast_dynamic(const RefPtr<T_CastFrom>& src)
   T_CppObject *const cpp_object = dynamic_cast<T_CppObject*>(src.operator->());
 
   if(cpp_object) //Check whether dynamic_cast<> succeeded so we don't pass a null object with a used refcount:
-    return RefPtr<T_CppObject>(cpp_object, src.refcount_());
+    return RefPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
   else
     return RefPtr<T_CppObject>();
 }
@@ -392,7 +424,7 @@ RefPtr<T_CppObject>::cast_static(const RefPtr<T_CastFrom>& src)
 {
   T_CppObject *const cpp_object = static_cast<T_CppObject*>(src.operator->());
 
-  return RefPtr<T_CppObject>(cpp_object, src.refcount_());
+  return RefPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
 }
 
 template <class T_CppObject>
@@ -403,7 +435,7 @@ RefPtr<T_CppObject>::cast_const(const RefPtr<T_CastFrom>& src)
 {
   T_CppObject *const cpp_object = const_cast<T_CppObject*>(src.operator->());
 
-  return RefPtr<T_CppObject>(cpp_object, src.refcount_());
+  return RefPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
 }
 
 

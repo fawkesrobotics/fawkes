@@ -27,6 +27,7 @@
 #define __CORE_UTILS_RWLOCK_QUEUE_H_
 
 #include <core/threading/read_write_lock.h>
+#include <core/utils/refptr.h>
 #include <queue>
 
 namespace fawkes {
@@ -40,12 +41,12 @@ class RWLockQueue : public std::queue<Type>
   RWLockQueue(const RWLockQueue<Type> &ll);
   virtual ~RWLockQueue();
 
-  void             lock_for_read();
-  void             lock_for_write();
-  bool             try_lock_for_read();
-  bool             try_lock_for_write();
-  void             unlock();
-  ReadWriteLock *  rwlock() const;
+  void                   lock_for_read();
+  void                   lock_for_write();
+  bool                   try_lock_for_read();
+  bool                   try_lock_for_write();
+  void                   unlock();
+  RefPtr<ReadWriteLock>  rwlock() const;
 
   void     push_locked(const Type& x);
   void     pop_locked();
@@ -55,7 +56,7 @@ class RWLockQueue : public std::queue<Type>
   // not needed, no change to rwlock required (thus "incomplete" BigThree)
   //LockList<Type> &  operator=(const LockList<Type> &ll);
  private:
-  ReadWriteLock *__rwlock;
+  RefPtr<ReadWriteLock> __rwlock;
 
 };
 

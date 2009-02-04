@@ -27,6 +27,7 @@
 #define __CORE_UTILS_LOCK_LIST_H_
 
 #include <core/threading/mutex.h>
+#include <core/utils/refptr.h>
 #include <list>
 
 namespace fawkes {
@@ -42,7 +43,7 @@ class LockList : public std::list<Type>
   virtual void  lock();
   virtual bool  try_lock();
   virtual void  unlock();
-  Mutex *       mutex() const;
+  RefPtr<Mutex> mutex() const;
 
   void     push_back_locked(const Type& x);
   void     push_front_locked(const Type& x);
@@ -51,7 +52,7 @@ class LockList : public std::list<Type>
   LockList<Type> &  operator=(const LockList<Type> &ll);
   LockList<Type> &  operator=(const std::list<Type> &l);
  private:
-  Mutex *__mutex;
+  RefPtr<Mutex> __mutex;
 
 };
 
@@ -70,9 +71,8 @@ class LockList : public std::list<Type>
 /** Constructor. */
 template <typename Type>
 LockList<Type>::LockList()
-{
-  __mutex = new Mutex();
-}
+  : __mutex(new Mutex())
+{}
 
 
 /** Copy constructor.
@@ -80,18 +80,14 @@ LockList<Type>::LockList()
  */
 template <typename Type>
 LockList<Type>::LockList(const LockList<Type> &ll)
-  : std::list<Type>::list(ll)
-{
-  __mutex = new Mutex();
-}
+  : std::list<Type>::list(ll), __mutex(new Mutex())
+{}
 
 
 /** Destructor. */
 template <typename Type>
 LockList<Type>::~LockList()
-{
-  delete __mutex;
-}
+{}
 
 
 /** Lock list. */
@@ -167,7 +163,7 @@ LockList<Type>::remove_locked(const Type& x)
  * @return internal mutex
  */
 template <typename Type>
-Mutex *
+RefPtr<Mutex>
 LockList<Type>::mutex() const
 {
   return __mutex;

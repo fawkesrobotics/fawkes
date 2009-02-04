@@ -27,6 +27,8 @@
 #define __CORE_UTILS_LOCK_HASHSET_H_
 
 #include <core/threading/mutex.h>
+#include <core/utils/refptr.h>
+
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
 #  include <tr1/unordered_set>
 #else
@@ -52,15 +54,15 @@ class LockHashSet : public __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>
   LockHashSet(const LockHashSet<KeyType, HashFunction, EqualKey> &lh);
   virtual ~LockHashSet();
 
-  void     lock();
-  bool     try_lock();
-  void     unlock();
-  Mutex *  mutex() const;
+  void           lock();
+  bool           try_lock();
+  void           unlock();
+  RefPtr<Mutex>  mutex() const;
 
-  void     insert_locked(const KeyType& x);
+  void           insert_locked(const KeyType& x);
 
  private:
-  Mutex *__mutex;
+  RefPtr<Mutex> __mutex;
 
 };
 
@@ -79,9 +81,8 @@ class LockHashSet : public __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>
 /** Constructor. */
 template <class KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet()
-{
-  __mutex = new Mutex();
-}
+  : __mutex(new Mutex())
+{}
 
 
 /** Copy constructor.
@@ -90,21 +91,18 @@ LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet()
 template <class KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet(const LockHashSet<KeyType, HashFunction, EqualKey> &lh)
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
-  : std::tr1::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh)
+  : std::tr1::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh),
 #else
-  : __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>::hash_set(lh)
+  : __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>::hash_set(lh),
 #endif
-{
-  __mutex = new Mutex();
-}
+    __mutex(new Mutex())
+{}
 
 
 /** Destructor. */
 template <class KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey>::~LockHashSet()
-{
-  delete __mutex;
-}
+{}
 
 
 /** Lock list. */
@@ -154,7 +152,7 @@ LockHashSet<KeyType, HashFunction, EqualKey>::insert_locked(const KeyType& x)
  * @return internal mutex
  */
 template <typename KeyType, class HashFunction, class EqualKey>
-Mutex *
+RefPtr<Mutex>
 LockHashSet<KeyType, HashFunction, EqualKey>::mutex() const
 {
   return __mutex;

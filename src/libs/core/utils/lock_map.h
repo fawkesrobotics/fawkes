@@ -27,6 +27,7 @@
 #define __CORE_UTILS_LOCK_MAP_H_
 
 #include <core/threading/mutex.h>
+#include <core/utils/refptr.h>
 #include <map>
 
 namespace fawkes {
@@ -42,15 +43,15 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
   LockMap(const LockMap<KeyType, ValueType, LessKey> &lm);
   virtual ~LockMap();
 
-  void     lock();
-  bool     try_lock();
-  void     unlock();
-  Mutex *  mutex() const;
+  void           lock();
+  bool           try_lock();
+  void           unlock();
+  RefPtr<Mutex>  mutex() const;
 
   void     erase_locked(const KeyType &key);
 
  private:
-  Mutex *__mutex;
+  RefPtr<Mutex>  __mutex;
 
 };
 
@@ -69,9 +70,8 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
 /** Constructor. */
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey>::LockMap()
-{
-  __mutex = new Mutex();
-}
+  : __mutex(new Mutex())
+{}
 
 
 /** Copy constructor.
@@ -79,18 +79,15 @@ LockMap<KeyType, ValueType, LessKey>::LockMap()
  */
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey>::LockMap(const LockMap<KeyType, ValueType, LessKey> &lm)
-  : std::map<KeyType, ValueType, LessKey>::map(lm)
-{
-  __mutex = new Mutex();
-}
+  : std::map<KeyType, ValueType, LessKey>::map(lm),
+    __mutex(new Mutex())
+{}
 
 
 /** Destructor. */
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey>::~LockMap()
-{
-  delete __mutex;
-}
+{}
 
 
 /** Lock list. */
@@ -141,7 +138,7 @@ LockMap<KeyType, ValueType, LessKey>::erase_locked(const KeyType &key)
  * @return internal mutex
  */
 template <typename KeyType, typename ValueType, typename LessKey>
-Mutex *
+RefPtr<Mutex>
 LockMap<KeyType, ValueType, LessKey>::mutex() const
 {
   return __mutex;

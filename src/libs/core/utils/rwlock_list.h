@@ -27,6 +27,7 @@
 #define __CORE_UTILS_RWLOCK_LIST_H_
 
 #include <core/threading/read_write_lock.h>
+#include <core/utils/refptr.h>
 #include <list>
 
 namespace fawkes {
@@ -44,7 +45,7 @@ class RWLockList : public std::list<Type>
   virtual          bool  try_lock_for_read();
   virtual          bool  try_lock_for_write();
   virtual          void  unlock();
-  ReadWriteLock *  rwlock() const;
+  RefPtr<ReadWriteLock>  rwlock() const;
 
   void     push_back_locked(const Type& x);
   void     push_front_locked(const Type& x);
@@ -53,7 +54,7 @@ class RWLockList : public std::list<Type>
   RWLockList<Type> &  operator=(const RWLockList<Type> &ll);
   RWLockList<Type> &  operator=(const std::list<Type> &l);
  private:
-  ReadWriteLock *__rwlock;
+  RefPtr<ReadWriteLock> __rwlock;
 
 };
 
@@ -72,9 +73,8 @@ class RWLockList : public std::list<Type>
 /** Constructor. */
 template <typename Type>
 RWLockList<Type>::RWLockList()
-{
-  __rwlock = new ReadWriteLock();
-}
+  : __rwlock(new ReadWriteLock())
+{}
 
 
 /** Copy constructor.
@@ -82,18 +82,14 @@ RWLockList<Type>::RWLockList()
  */
 template <typename Type>
 RWLockList<Type>::RWLockList(const RWLockList<Type> &ll)
-  : std::list<Type>::list(ll)
-{
-  __rwlock = new ReadWriteLock();
-}
+  : std::list<Type>::list(ll), __rwlock(new ReadWriteLock())
+{}
 
 
 /** Destructor. */
 template <typename Type>
 RWLockList<Type>::~RWLockList()
-{
-  delete __rwlock;
-}
+{}
 
 
 /** Lock list for reading. */
@@ -188,7 +184,7 @@ RWLockList<Type>::remove_locked(const Type& x)
  * @return internal rwlock
  */
 template <typename Type>
-ReadWriteLock *
+RefPtr<ReadWriteLock>
 RWLockList<Type>::rwlock() const
 {
   return __rwlock;

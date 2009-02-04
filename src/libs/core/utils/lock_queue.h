@@ -27,10 +27,10 @@
 #define __CORE_UTILS_LOCK_QUEUE_H_
 
 #include <core/threading/mutex.h>
+#include <core/utils/refptr.h>
 #include <queue>
 
 namespace fawkes {
-
 
 template <typename Type>
 class LockQueue : public std::queue<Type>
@@ -40,10 +40,10 @@ class LockQueue : public std::queue<Type>
   LockQueue(const LockQueue<Type> &ll);
   virtual ~LockQueue();
 
-  void     lock();
-  bool     try_lock();
-  void     unlock();
-  Mutex *  mutex() const;
+  void           lock();
+  bool           try_lock();
+  void           unlock();
+  RefPtr<Mutex>  mutex() const;
 
   void     push_locked(const Type& x);
   void     pop_locked();
@@ -53,7 +53,7 @@ class LockQueue : public std::queue<Type>
   // not needed, no change to mutex required (thus "incomplete" BigThree)
   //LockList<Type> &  operator=(const LockList<Type> &ll);
  private:
-  Mutex *__mutex;
+  RefPtr<Mutex> __mutex;
 
 };
 
@@ -72,9 +72,8 @@ class LockQueue : public std::queue<Type>
 /** Constructor. */
 template <typename Type>
 LockQueue<Type>::LockQueue()
-{
-  __mutex = new Mutex();
-}
+  : __mutex(new Mutex())
+{}
 
 
 /** Copy constructor.
@@ -82,18 +81,14 @@ LockQueue<Type>::LockQueue()
  */
 template <typename Type>
 LockQueue<Type>::LockQueue(const LockQueue<Type> &ll)
-  : std::queue<Type>::queue(ll)
-{
-  __mutex = new Mutex();
-}
+  : std::queue<Type>::queue(ll), __mutex(new Mutex())
+{}
 
 
 /** Destructor. */
 template <typename Type>
 LockQueue<Type>::~LockQueue()
-{
-  delete __mutex;
-}
+{}
 
 
 /** Lock queue. */
@@ -167,7 +162,7 @@ LockQueue<Type>::clear()
  * @return internal mutex
  */
 template <typename Type>
-Mutex *
+RefPtr<Mutex>
 LockQueue<Type>::mutex() const
 {
   return __mutex;
