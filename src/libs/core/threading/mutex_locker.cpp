@@ -89,20 +89,40 @@ namespace fawkes {
  * @param mutex Mutex to lock/unlock appropriately.
  * @param initially_lock true to lock the mutex in the constructor, false to not lock
  */
-MutexLocker::MutexLocker(Mutex *mutex, bool initially_lock)
+MutexLocker::MutexLocker(RefPtr<Mutex> mutex, bool initially_lock)
 {
-  __mutex = mutex;
+  __rawmutex = 0;
+  __refmutex = mutex;
   if ( initially_lock ) {
-    __mutex->lock();
+    __refmutex->lock();
   }
   __locked = initially_lock;
 }
+
+
+/** Constructor.
+ * @param mutex Mutex to lock/unlock appropriately.
+ * @param initially_lock true to lock the mutex in the constructor, false to not lock
+ */
+MutexLocker::MutexLocker(Mutex *mutex, bool initially_lock)
+{
+  __rawmutex = mutex;
+  if ( initially_lock ) {
+    __rawmutex->lock();
+  }
+  __locked = initially_lock;
+}
+
 
 /** Destructor */
 MutexLocker::~MutexLocker()
 {
   if ( __locked ) {
-    __mutex->unlock();
+    if ( __rawmutex) {
+      __rawmutex->unlock();
+    } else {
+      __refmutex->unlock();
+    }
   }
 }
 
@@ -113,7 +133,11 @@ MutexLocker::~MutexLocker()
 void
 MutexLocker::relock()
 {
-  __mutex->lock();
+  if ( __rawmutex ) {
+    __rawmutex->lock();
+  } else {
+    __refmutex->lock();
+  }
   __locked = true;
 }
 
@@ -123,7 +147,11 @@ void
 MutexLocker::unlock()
 {
   __locked = false;
-  __mutex->unlock();
+  if ( __rawmutex ) {
+    __rawmutex->unlock();
+  } else {
+    __refmutex->unlock();
+  }
 }
 
 

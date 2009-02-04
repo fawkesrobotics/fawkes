@@ -26,14 +26,16 @@
 #ifndef __CORE_THREADING_MUTEX_LOCKER_H_
 #define __CORE_THREADING_MUTEX_LOCKER_H_
 
-namespace fawkes {
+#include <core/utils/refptr.h>
 
+namespace fawkes {
 
 class Mutex;
 
 class MutexLocker
 {
  public:
+  MutexLocker(RefPtr<Mutex> mutex, bool initially_lock = true);
   MutexLocker(Mutex *mutex, bool initially_lock = true);
   ~MutexLocker();
 
@@ -41,8 +43,9 @@ class MutexLocker
   void unlock();
 
  private:
-  bool   __locked;
-  Mutex *__mutex;
+  bool           __locked;
+  RefPtr<Mutex>  __refmutex;
+  Mutex         *__rawmutex;
 };
 
 
