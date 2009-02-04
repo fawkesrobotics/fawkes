@@ -3,7 +3,7 @@
  *  thread.h - base class for threads, implementation based on pthreads
  *
  *  Created: Thu Sep 14 13:06:18 2006
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -27,6 +27,7 @@
 #define __CORE_THREADING_THREAD_H_
 
 #include <sys/types.h>
+#include <stdint.h>
 
 #define forever while (1)
 
@@ -64,6 +65,8 @@ class Thread {
     CANCEL_DISABLED	/**< thread cannot be cancelled */
   } CancelState;
 
+  static const unsigned int FLAG_BAD;
+
   virtual ~Thread();
 
   virtual void init();
@@ -89,6 +92,13 @@ class Thread {
   bool          started() const;
   bool          cancelled() const;
   bool          detached() const;
+  bool          running() const;
+  bool          waiting() const;
+
+  void  set_flags(uint32_t flags);
+  void  set_flag(uint32_t flag);
+  void  unset_flag(uint32_t flag);
+  bool  flagged_bad() const;
 
   static Thread *  current_thread();
   static Thread *  current_thread_noexc() throw();
@@ -120,9 +130,9 @@ class Thread {
   virtual void once();
   virtual void loop();
 
-  bool       finalize_prepared;
-  Mutex     *loop_mutex;
-  Mutex     *loopinterrupt_antistarve_mutex;
+  bool           finalize_prepared;
+  mutable Mutex *loop_mutex;
+  Mutex         *loopinterrupt_antistarve_mutex;
 
  private:
   Thread(const Thread &t);
@@ -142,7 +152,7 @@ class Thread {
   pthread_t      __thread_id;
 
   Barrier       *__startup_barrier;
-  Mutex         *__sleep_mutex;
+  mutable Mutex *__sleep_mutex;
   WaitCondition *__sleep_condition;
   Barrier       *__barrier;
 
@@ -155,11 +165,14 @@ class Thread {
   bool           __started;
   bool           __cancelled;
   bool           __detached;
+  bool           __wakeup_finished;
   bool           __delete_on_exit;
   char          *__name;
 
   OpMode         __op_mode;
   bool           __prepfin_conc_loop;
+
+  uint32_t       __flags;
 
   LockList<ThreadNotificationListener *>  *__notification_listeners;
 

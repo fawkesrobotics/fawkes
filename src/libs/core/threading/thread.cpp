@@ -3,7 +3,7 @@
  *  thread.cpp - implementation of threads, based on pthreads
  *
  *  Created: Thu Sep 14 13:26:39 2006
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -183,6 +183,9 @@ pthread_key_t Thread::THREAD_KEY = PTHREAD_KEYS_MAX;
 
 #define MAIN_THREAD_NAME "__MainThread__"
 
+/** Standard thread flag: "thread is bad" */
+const unsigned int Thread::FLAG_BAD = 0x00000001;
+
 /** Constructor.
  * This constructor is protected so that Thread cannot be instantiated. This
  * constructor initalizes a few internal variables. Uses continuous
@@ -245,12 +248,14 @@ Thread::__constructor(const char *name, OpMode op_mode)
     __sleep_mutex = NULL;
   }
 
-  __thread_id   = 0;
-  __barrier     = NULL;
-  __started     = false;
-  __cancelled   = false;
-  __delete_on_exit = false;
-  __prepfin_hold   = false;
+  __thread_id       = 0;
+  __flags           = 0;
+  __barrier         = NULL;
+  __started         = false;
+  __cancelled       = false;
+  __wakeup_finished = false;
+  __delete_on_exit  = false;
+  __prepfin_hold    = false;
 
   __finalize_sync_lock = NULL;
   loop_mutex = new Mutex();
@@ -545,7 +550,9 @@ Thread::entry(void *pthis)
   t->__startup_barrier->wait();
 
   // Run thread
+  t->loop_mutex->lock();
   t->once();
+  t->loop_mutex->unlock();
   t->run();
 
   if ( t->__detached ) {
@@ -801,6 +808,51 @@ Thread::detached() const
 }
 
 
+/** Check if the thread is running.
+ * A thread is running if it currently is busy in its loop() or once() method.
+ * @return true if the thread is running, false otherwise
+ */
+bool
+Thread::running() const
+{
+  // loop_mutex is mutable and thus we can call the lock methods here
+  if (loop_mutex->try_lock()) {
+    loop_mutex->unlock();
+    return false;
+  } else {
+    return true;
+  }
+}
+
+
+/** Check if thread is currently waiting for wakeup.
+ * A continuous thread is never waiting for wakeup and thus will always return
+ * false. A wait-for-wakeup thread is waiting when it has passed the wakeup
+ * barrier (if supplied) and is now waiting for the next call to wakeup()
+ * to run again.
+ * @return true if the thread is waiting, false otherwise
+ */
+bool
+Thread::waiting() const
+{
+  if (__op_mode != OPMODE_WAITFORWAKEUP) {
+    return false;
+  }
+
+  if (__sleep_mutex->try_lock()) {
+    // We have to check __wakeup_finished. It can happen that a threads was woken
+    // up, another thread waiting for the same barrier timed out, then checks
+    // for waiting() to decide if the thread recovered and it seems to have
+    // recovered only because the wakeup wasn't through yet and the wait
+    // condition still blocks, but will unblock at an unpredictable time
+    bool waiting = __wakeup_finished;
+    __sleep_mutex->unlock();
+    return waiting;
+  } else {
+    return false;
+  }
+}
+
 /** Set cancellation point.
  * Tests if the thread has been canceled and if so exits the thread.
  */
@@ -850,6 +902,7 @@ Thread::run()
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
     // Wait for initial wakeup
     __sleep_condition->wait(__sleep_mutex);
+    __wakeup_finished = true;
   }
 
   forever {
@@ -873,6 +926,7 @@ Thread::run()
     }
     if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
       __sleep_condition->wait(__sleep_mutex);
+      __wakeup_finished = true;
     }
     yield();
   }
@@ -888,6 +942,7 @@ Thread::wakeup()
 {
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
     __sleep_mutex->lock();
+    __wakeup_finished = false;
     __sleep_condition->wake_all();
     __sleep_mutex->unlock();
   }
@@ -909,6 +964,7 @@ Thread::wakeup(Barrier *barrier)
   }
 
   __sleep_mutex->lock();
+  __wakeup_finished = false;
   __barrier = barrier;
   __sleep_condition->wake_all();
   __sleep_mutex->unlock();
@@ -956,6 +1012,56 @@ Thread::set_delete_on_exit(bool del)
   __delete_on_exit = del;
 }
 
+
+/** Set flag for the thread.
+ * The first two bytes of the flags are reserved for custom usage from the outside
+ * and they are never used internally. The last two bytes are used to indicate
+ * internal states, like flagging a thread as bad (timing was not ok). Setting
+ * the latter bits may have influence on the inner workings on the thread and
+ * thus should only be done if you really know what you are doing.
+ * @param flag flag to set
+ * @see set_flags()
+ */
+void
+Thread::set_flag(uint32_t flag)
+{
+  __flags |= flag;
+}
+
+
+/** Unset flag.
+ * Unsets a specified flag.
+ * @param flag flag to unset
+ * @see set_flag()
+ */
+void
+Thread::unset_flag(uint32_t flag)
+{
+  __flags &= 0xFFFFFFFF ^ flag;
+}
+
+
+/** Set all flags in one go.
+ * @param flags flags
+ */
+void
+Thread::set_flags(uint32_t flags)
+{
+  __flags = flags;
+}
+
+
+/** Check if FLAG_BAD was set.
+ * This is a convenience method to check if FLAG_BAD has been set.
+ * @return true if flag is set, false otherwise
+ */
+bool
+Thread::flagged_bad() const
+{
+  return __flags & FLAG_BAD;
+}
+
+
 /** Add notification listener.
  * Add a notification listener for this thread.
  * @param notification_listener notification listener to add
@@ -986,8 +1092,7 @@ Thread::notify_of_startup()
   __notification_listeners->lock();
   LockList<ThreadNotificationListener *>::iterator i;
   for (i = __notification_listeners->begin(); i != __notification_listeners->end(); ++i) {
-    (*i)->thread_started(this);
-  }
+    (*i)->thread_started(this);  }
   __notification_listeners->unlock();  
 }
 

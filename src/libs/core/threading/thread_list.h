@@ -3,7 +3,7 @@
  *  thread_list.h - Thread list
  *
  *  Created: Tue Oct 31 18:04:31 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -33,6 +33,7 @@
 #include <core/utils/lock_list.h>
 
 #include <utility>
+#include <string>
 
 namespace fawkes {
 
@@ -40,6 +41,7 @@ namespace fawkes {
 class ThreadList;
 class Mutex;
 class Barrier;
+class InterruptibleBarrier;
 class ReadWriteLock;
 
 class ThreadListSealedException : public Exception
@@ -79,12 +81,14 @@ class ThreadList : private LockList<Thread *>
   void wakeup(Barrier *barrier);
   void wakeup_unlocked();
   void wakeup_unlocked(Barrier *barrier);
-  void wakeup_and_wait();
+  void wakeup_and_wait(unsigned int timeout_sec = 0,
+		       unsigned int timeout_nanosec = 0);
   void start();
   void stop();
   void cancel();
   void join();
 
+  void try_recover(std::list<std::string> &recovered_threads);
   void set_maintain_barrier(bool maintain_barrier);
 
   void force_stop(ThreadFinalizer *finalizer);
@@ -117,11 +121,14 @@ class ThreadList : private LockList<Thread *>
   void update_barrier();
 
  private:
-  char                      *_name;
-  bool                       _sealed;
-  Mutex                     *_finalize_mutex;
-  ReadWriteLock             *_sync_lock;
-  Barrier                   *_wnw_barrier;
+  char                   *__name;
+  bool                    __sealed;
+  Mutex                  *__finalize_mutex;
+  ReadWriteLock          *__sync_lock;
+  InterruptibleBarrier   *__wnw_barrier;
+
+  std::list<std::pair<InterruptibleBarrier *, ThreadList> >  __wnw_bad_barriers;
+  std::list<std::pair<InterruptibleBarrier *, ThreadList> >::iterator __wnw_bbit;
 };
 
 

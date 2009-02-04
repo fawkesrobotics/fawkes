@@ -3,7 +3,7 @@
  *  barrier.cpp - Barrier
  *
  *  Created: Thu Sep 15 00:33:13 2006
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -24,6 +24,7 @@
  */
 
 #include <core/threading/barrier.h>
+#include <core/exception.h>
 
 #include <pthread.h>
 #include <unistd.h>
@@ -114,22 +115,37 @@ class BarrierData
 Barrier::Barrier(unsigned int count)
 {
   _count = count;
+  if ( _count == 0 ) {
+    throw Exception("Barrier count must be at least 1");
+  }
   barrier_data = new BarrierData();
 #ifdef USE_POSIX_BARRIERS
-  pthread_barrier_init( &(barrier_data->barrier), NULL, count );
+  pthread_barrier_init( &(barrier_data->barrier), NULL, _count );
 #else
-  barrier_data->threads_left = count;
+  barrier_data->threads_left = _count;
 #endif
+}
+
+
+/** Protected Constructor.
+ * Does not initialize any internal structures other than setting them to 0.
+ */
+Barrier::Barrier()
+{
+  _count = 0;
+  barrier_data = NULL;
 }
 
 
 /** Destructor */
 Barrier::~Barrier()
 {
+  if (barrier_data) {
 #ifdef USE_POSIX_BARRIERS
-  pthread_barrier_destroy( &(barrier_data->barrier) );
+    pthread_barrier_destroy( &(barrier_data->barrier) );
 #endif
-  delete barrier_data;
+    delete barrier_data;
+  }
 }
 
 

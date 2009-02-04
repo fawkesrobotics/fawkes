@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  barrier.h - Barrier
+ *  interruptible_barrier.h - Interruptible Barrier
  *
- *  Created: Thu Sep 15 00:31:50 2006
+ *  Created: Sat Jan 31 12:27:54 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
@@ -23,31 +23,40 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_THREADING_BARRIER_H_
-#define __CORE_THREADING_BARRIER_H_
+#ifndef __CORE_THREADING_INTERRUPTIBLE_BARRIER_H_
+#define __CORE_THREADING_INTERRUPTIBLE_BARRIER_H_
+
+#include <core/threading/barrier.h>
+#include <core/utils/refptr.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
+class InterruptibleBarrierData;
+class ThreadList;
 
-class BarrierData;
-
-class Barrier
+class InterruptibleBarrier : public Barrier
 {
  public:
-  Barrier(unsigned int count);
-  virtual ~Barrier();
+  InterruptibleBarrier(unsigned int count);
+  virtual ~InterruptibleBarrier();
 
-  virtual void wait();
+  bool wait(unsigned int timeout_sec, unsigned int timeout_nanosec);
+  virtual inline void wait() { wait(0, 0); }
 
-  unsigned int count();
+  void interrupt() throw();
+  void reset() throw();
+
+  RefPtr<ThreadList>  passed_threads();
 
  private:
-  BarrierData *barrier_data;
+  InterruptibleBarrierData *__data;
+  RefPtr<ThreadList>        __passed_threads;
 
- protected:
-  Barrier();
-  /** Number of threads that are expected to wait for the barrier */
-  unsigned int _count;
+  bool __interrupted;
+  bool __timeout;
 };
 
 

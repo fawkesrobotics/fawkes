@@ -3,7 +3,7 @@
  *  thread_list.cpp - Thread list
  *
  *  Created: Tue Oct 31 18:20:59 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -27,6 +27,7 @@
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
 #include <core/threading/barrier.h>
+#include <core/threading/interruptible_barrier.h>
 #include <core/threading/read_write_lock.h>
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
@@ -77,7 +78,7 @@ ThreadListNotSealedException::ThreadListNotSealedException(const char *format, .
   va_end(va);
 }
 
-/** @class ThreadList core/threading/thread_list.h
+/** @class ThreadList <core/threading/thread_list.h>
  * List of threads.
  * This is a list of threads derived from stl::list. It features special
  * wakeup methods that will wakeup all threads in the list. The list can
@@ -92,11 +93,11 @@ ThreadListNotSealedException::ThreadListNotSealedException(const char *format, .
  */
 ThreadList::ThreadList(const char *tlname)
 {
-  _name = strdup(tlname);
-  _sealed = false;
-  _finalize_mutex = new Mutex();
-  _sync_lock = new ReadWriteLock();
-  _wnw_barrier = NULL;
+  __name = strdup(tlname);
+  __sealed = false;
+  __finalize_mutex = new Mutex();
+  __sync_lock = new ReadWriteLock();
+  __wnw_barrier = NULL;
   clear();
 }
 
@@ -109,16 +110,13 @@ ThreadList::ThreadList(const char *tlname)
  */
 ThreadList::ThreadList(bool maintain_barrier, const char *tlname)
 {
-  _name = strdup(tlname);
-  _sealed = false;
-  _finalize_mutex = new Mutex();
-  _sync_lock = new ReadWriteLock();
-  if ( maintain_barrier ) {
-    _wnw_barrier = new Barrier(1);
-  } else {
-    _wnw_barrier = NULL;
-  }
+  __name = strdup(tlname);
+  __sealed = false;
+  __finalize_mutex = new Mutex();
+  __sync_lock = new ReadWriteLock();
+  __wnw_barrier = NULL;
   clear();
+  if ( maintain_barrier)  update_barrier();
 }
 
 
@@ -128,25 +126,22 @@ ThreadList::ThreadList(bool maintain_barrier, const char *tlname)
 ThreadList::ThreadList(const ThreadList &tl)
   : LockList<Thread *>(tl)
 {
-  _name = strdup(tl._name);
-  _sealed = tl._sealed;
-  _finalize_mutex = new Mutex();
-  _sync_lock = new ReadWriteLock();
-  if ( tl._wnw_barrier != NULL ) {
-    _wnw_barrier = new Barrier(1);
-  } else {
-    _wnw_barrier = NULL;
-  }
+  __name = strdup(tl.__name);
+  __sealed = tl.__sealed;
+  __finalize_mutex = new Mutex();
+  __sync_lock = new ReadWriteLock();
+  __wnw_barrier = NULL;
+  if ( tl.__wnw_barrier != NULL )  update_barrier();
 }
 
 
 /** Destructor. */
 ThreadList::~ThreadList()
 {
-  free(_name);
-  delete _sync_lock;
-  delete _finalize_mutex;
-  delete _wnw_barrier;
+  free(__name);
+  delete __sync_lock;
+  delete __finalize_mutex;
+  delete __wnw_barrier;
 }
 
 
@@ -197,8 +192,16 @@ ThreadList::wakeup(Barrier *barrier)
 void
 ThreadList::wakeup_unlocked(Barrier *barrier)
 {
+  unsigned int count = 1;
   for (iterator i = begin(); i != end(); ++i) {
-    (*i)->wakeup(barrier);
+    if ( ! (*i)->flagged_bad() ) {
+      (*i)->wakeup(barrier);
+      ++count;
+    }
+  }
+  if (count != barrier->count()) {
+    throw Exception("ThreadList(%s)::wakeup(): barrier has count (%u) different "
+		    "from number of unflagged threads (%u)", __name, barrier->count(), count);
   }
 }
 
@@ -207,19 +210,63 @@ ThreadList::wakeup_unlocked(Barrier *barrier)
  * This assumes that all threads are in wait-for-wakeup mode. The threads are woken
  * up with an internally maintained barrier. The method will return when all threads
  * have finished one loop() iteration.
+ * @param timeout_sec timeout in seconds
+ * @param timeout_nanosec timeout in nanoseconds
  * @exception NullPointerException thrown, if no internal barrier is maintained. Make sure
  * you use the proper constructor.
  */
 void
-ThreadList::wakeup_and_wait()
+ThreadList::wakeup_and_wait(unsigned int timeout_sec, unsigned int timeout_nanosec)
 {
-  if ( ! _wnw_barrier ) {
+  if ( ! __wnw_barrier ) {
     throw NullPointerException("ThreadList::wakeup_and_wait() can only be called if "
 			       "barrier is maintained");
   }
   lock();
-  wakeup_unlocked(_wnw_barrier);
-  _wnw_barrier->wait();
+  try {
+    wakeup_unlocked(__wnw_barrier);
+  } catch (Exception &e) {
+    unlock();
+    throw;
+  }
+  if ( ! __wnw_barrier->wait(timeout_sec, timeout_nanosec) ) {
+    // timeout, we have a bad thread, flag it
+    RefPtr<ThreadList> passed_threads = __wnw_barrier->passed_threads();
+    ThreadList bad_threads;
+    for (iterator i = begin(); i != end(); ++i) {
+      bool ok = false;
+      for (iterator j = passed_threads->begin(); j != passed_threads->end(); ++j) {
+	if (*j == *i) {
+	  ok = true;
+	  break;
+	}
+      }
+      if (! ok) {
+	bad_threads.push_back(*i);
+	(*i)->set_flag(Thread::FLAG_BAD);
+      }
+    }
+
+    __wnw_bad_barriers.push_back(make_pair(__wnw_barrier, bad_threads));
+
+    __wnw_barrier = NULL;
+    update_barrier();
+
+    // Formulate exception
+    std::string s;
+    if ( bad_threads.size() > 1 ) {
+      s = "Multiple threads did not finish in time, flagging as bad: ";
+      for (iterator i = bad_threads.begin(); i != bad_threads.end(); ++i) {
+	s += std::string((*i)->name()) + " ";
+      }
+    } else if (bad_threads.size() == 0) {
+      s = "Timeout happened, but no bad threads recorded.";
+    } else {
+      s = std::string("Thread ") + bad_threads.front()->name() + " did not finish in time, flagging as bad";
+    }
+    unlock();
+    throw Exception("%s", s.c_str());
+  }
   unlock();
 }
 
@@ -232,17 +279,50 @@ void
 ThreadList::set_maintain_barrier(bool maintain_barrier)
 {
   lock();
-  if ( maintain_barrier ) {
-    if ( ! _wnw_barrier ) {
-      _wnw_barrier = new Barrier(size() + 1);
-    }
-  } else {
-    delete _wnw_barrier;
-    _wnw_barrier = NULL;
-  }
+  delete __wnw_barrier;
+  __wnw_barrier = NULL;
+  if ( maintain_barrier )  update_barrier();
   unlock();
 }
 
+
+/** Check if any of the bad barriers recovered.
+ * If the ThreadList maintains the barrier these may get bad if a thread does
+ * not finish in time. This method will check all bad barriers if the bad threads
+ * have recovered, and if so it will re-integrate the bad threads.
+ * @param recovered_threads upon return the names of any threads that could be
+ * recovered from a bad state have been added to the list.
+ */
+void
+ThreadList::try_recover(std::list<std::string> &recovered_threads)
+{
+  lock();
+  bool changed = false;
+  __wnw_bbit = __wnw_bad_barriers.begin();
+  while (__wnw_bbit != __wnw_bad_barriers.end()) {
+    iterator i = __wnw_bbit->second.begin();
+    while (i != __wnw_bbit->second.end()) {
+      if ( (*i)->waiting() ) {
+	// waiting means running() finished and the barrier has been passed
+	recovered_threads.push_back((*i)->name());
+	// it finally finished, re-integrate and hope that it does not bust again
+	(*i)->unset_flag(Thread::FLAG_BAD);
+	i = __wnw_bbit->second.erase(i);
+	changed = true;
+      } else {
+	++i;
+      }
+    }
+    if ( __wnw_bbit->second.empty() ) {
+      delete __wnw_bbit->first;
+      __wnw_bbit = __wnw_bad_barriers.erase(__wnw_bbit);
+    } else {
+      ++__wnw_bbit;
+    }
+  }
+  if ( changed )  update_barrier();
+  unlock();
+}
 
 /** Initialize threads.
  * The threads are being initialized.
@@ -265,10 +345,12 @@ ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
     try {
       initializer->init(*i);
       (*i)->init();
+      if ((*i)->opmode() != Thread::OPMODE_CONTINUOUS )
+	(*i)->set_finalize_sync_lock(__sync_lock);
       initialized_threads.push_back(*i);
     } catch (CannotInitializeThreadException &e) {
       notify_of_failed_init();
-      cite.append("Initializing thread '%s' in list '%s' failed", (*i)->name(), _name);
+      cite.append("Initializing thread '%s' in list '%s' failed", (*i)->name(), __name);
       cite.append(e);
       success = false;
       break;
@@ -390,8 +472,8 @@ ThreadList::stop()
 bool
 ThreadList::prepare_finalize(ThreadFinalizer *finalizer)
 {
-  _finalize_mutex->lock();
-  _sync_lock->lock_for_write();
+  __finalize_mutex->lock();
+  __sync_lock->lock_for_write();
   bool can_finalize = true;
   CannotFinalizeThreadException cfte("Cannot finalize one or more threads");
   bool threw_exception = false;
@@ -408,12 +490,12 @@ ThreadList::prepare_finalize(ThreadFinalizer *finalizer)
       }
     } catch (CannotFinalizeThreadException &e) {
       cfte.append("Thread '%s' throw an exception while preparing finalization of "
-		  "ThreadList '%s'", (*i)->name(), _name);
+		  "ThreadList '%s'", (*i)->name(), __name);
       threw_exception = true;
     }
   }
-  _sync_lock->unlock();
-  _finalize_mutex->unlock();
+  __sync_lock->unlock();
+  __finalize_mutex->unlock();
   if ( threw_exception ) {
     throw cfte;
   }
@@ -440,11 +522,13 @@ ThreadList::finalize(ThreadFinalizer *finalizer)
       finalizer->finalize(*i);
     } catch (CannotFinalizeThreadException &e) {
       error = true;
-      me.append("Could not finalize thread '%s' in list '%s'", (*i)->name(), _name);
+      me.append("Could not finalize thread '%s' in list '%s'", (*i)->name(), __name);
       me.append(e);
     }
     try {
       (*i)->finalize();
+      if ((*i)->opmode() != Thread::OPMODE_CONTINUOUS )
+	(*i)->set_finalize_sync_lock(NULL);
     } catch (CannotFinalizeThreadException &e) {
       error = true;
       me.append("AspectIniFin called Thread[%s]::finalize() which failed", (*i)->name());
@@ -467,11 +551,11 @@ ThreadList::finalize(ThreadFinalizer *finalizer)
 void
 ThreadList::cancel_finalize()
 {
-  _finalize_mutex->lock();
+  __finalize_mutex->lock();
   for (reverse_iterator i = rbegin(); i != rend(); ++i) {
     (*i)->cancel_finalize();
   }
-  _finalize_mutex->unlock();
+  __finalize_mutex->unlock();
 }
 
 
@@ -527,7 +611,7 @@ ThreadList::force_stop(ThreadFinalizer *finalizer)
 const char *
 ThreadList::name()
 {
-  return _name;
+  return __name;
 }
 
 
@@ -543,8 +627,8 @@ ThreadList::set_name(const char *format, ...)
   
   char *tmpname;
   if (vasprintf(&tmpname, format, va) != -1) {
-    free(_name);
-    _name = tmpname;
+    free(__name);
+    __name = tmpname;
   } else {
     throw OutOfMemoryException("ThreadList::set_name(): vasprintf() failed");
   }
@@ -560,7 +644,7 @@ ThreadList::set_name(const char *format, ...)
 bool
 ThreadList::sealed()
 {
-  return _sealed;
+  return __sealed;
 }
 
 
@@ -568,7 +652,7 @@ ThreadList::sealed()
 void
 ThreadList::seal()
 {
-  _sealed = true;
+  __sealed = true;
 }
 
 
@@ -579,13 +663,10 @@ ThreadList::seal()
 void
 ThreadList::push_front(Thread *thread)
 {
-  if ( _sealed ) throw ThreadListSealedException("push_front");
+  if ( __sealed ) throw ThreadListSealedException("push_front");
 
-  if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
-    thread->set_finalize_sync_lock(_sync_lock);
   LockList<Thread *>::push_front(thread);
-
-  if ( _wnw_barrier)  update_barrier();
+  if ( __wnw_barrier)  update_barrier();
 }
 
 
@@ -600,14 +681,11 @@ ThreadList::push_front(Thread *thread)
 void
 ThreadList::push_front_locked(Thread *thread)
 {
-  if ( _sealed ) throw ThreadListSealedException("push_front_locked");
+  if ( __sealed ) throw ThreadListSealedException("push_front_locked");
 
   lock();
-  if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
-    thread->set_finalize_sync_lock(_sync_lock);
   LockList<Thread *>::push_front(thread);
-  
-  if ( _wnw_barrier)  update_barrier();
+  if ( __wnw_barrier)  update_barrier();
   unlock();
 }
 
@@ -619,13 +697,10 @@ ThreadList::push_front_locked(Thread *thread)
 void
 ThreadList::push_back(Thread *thread)
 {
-  if ( _sealed ) throw ThreadListSealedException("push_back");
+  if ( __sealed ) throw ThreadListSealedException("push_back");
 
-  if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
-    thread->set_finalize_sync_lock(_sync_lock);
   LockList<Thread *>::push_back(thread);
-
-  if ( _wnw_barrier)  update_barrier();
+  if ( __wnw_barrier)  update_barrier();
 }
 
 
@@ -640,14 +715,11 @@ ThreadList::push_back(Thread *thread)
 void
 ThreadList::push_back_locked(Thread *thread)
 {
-  if ( _sealed ) throw ThreadListSealedException("push_back_locked");
-
-  if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
-    thread->set_finalize_sync_lock(_sync_lock);
+  if ( __sealed ) throw ThreadListSealedException("push_back_locked");
 
   lock();
   LockList<Thread *>::push_back(thread);
-  if ( _wnw_barrier)  update_barrier();
+  if ( __wnw_barrier)  update_barrier();
   unlock();
 }
 
@@ -658,10 +730,10 @@ ThreadList::push_back_locked(Thread *thread)
 void
 ThreadList::clear()
 {
-  if ( _sealed ) throw ThreadListSealedException("clear");
+  if ( __sealed ) throw ThreadListSealedException("clear");
 
   LockList<Thread *>::clear();
-  if ( _wnw_barrier)  update_barrier();
+  if ( __wnw_barrier)  update_barrier();
 }
 
 
@@ -671,13 +743,10 @@ ThreadList::clear()
 void
 ThreadList::remove(Thread *thread)
 {
-  if ( _sealed ) throw ThreadListSealedException("remove_locked");
+  if ( __sealed ) throw ThreadListSealedException("remove_locked");
 
-  if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
-    thread->set_finalize_sync_lock(NULL);
   LockList<Thread *>::remove(thread);
-
-  if ( _wnw_barrier)  update_barrier();
+  if ( __wnw_barrier)  update_barrier();
 }
 
 
@@ -687,14 +756,11 @@ ThreadList::remove(Thread *thread)
 void
 ThreadList::remove_locked(Thread *thread)
 {
-  if ( _sealed ) throw ThreadListSealedException("remove_locked");
-
-  if (thread->opmode() != Thread::OPMODE_CONTINUOUS )
-    thread->set_finalize_sync_lock(NULL);
+  if ( __sealed ) throw ThreadListSealedException("remove_locked");
 
   lock();
   LockList<Thread *>::remove(thread);
-  if ( _wnw_barrier)  update_barrier();
+  if ( __wnw_barrier)  update_barrier();
   unlock();
 }
 
@@ -703,13 +769,10 @@ ThreadList::remove_locked(Thread *thread)
 void
 ThreadList::pop_front()
 {
-  if ( _sealed ) throw ThreadListSealedException("pop_front");
+  if ( __sealed ) throw ThreadListSealedException("pop_front");
 
-  if (front()->opmode() != Thread::OPMODE_CONTINUOUS )
-    front()->set_finalize_sync_lock(NULL);
   LockList<Thread *>::pop_front();
-
-  if ( _wnw_barrier)  update_barrier();
+  if ( __wnw_barrier)  update_barrier();
 }
 
 
@@ -717,13 +780,10 @@ ThreadList::pop_front()
 void
 ThreadList::pop_back()
 {
-  if ( _sealed ) throw ThreadListSealedException("pop_back");
+  if ( __sealed ) throw ThreadListSealedException("pop_back");
 
-  if (back()->opmode() != Thread::OPMODE_CONTINUOUS )
-    back()->set_finalize_sync_lock(NULL);
   LockList<Thread *>::pop_back();
-
-  if ( _wnw_barrier)  update_barrier();
+  if ( __wnw_barrier)  update_barrier();
 }
 
 
@@ -734,13 +794,10 @@ ThreadList::pop_back()
 ThreadList::iterator
 ThreadList::erase(iterator pos)
 {
-  if ( _sealed ) throw ThreadListSealedException("erase");
+  if ( __sealed ) throw ThreadListSealedException("erase");
 
-  if ((*pos)->opmode() != Thread::OPMODE_CONTINUOUS )
-    (*pos)->set_finalize_sync_lock(NULL);
   ThreadList::iterator rv = LockList<Thread *>::erase(pos);
-
-  if ( _wnw_barrier)  update_barrier();
+  if ( __wnw_barrier)  update_barrier();
   return rv;
 }
 
@@ -749,8 +806,12 @@ ThreadList::erase(iterator pos)
 void
 ThreadList::update_barrier()
 {
-  delete _wnw_barrier;
-  _wnw_barrier = new Barrier(size() + 1);
+  unsigned int num = 1;
+  for (iterator i = begin(); i != end(); ++i) {
+    if (! (*i)->flagged_bad() )  ++num;
+  }
+  delete __wnw_barrier;
+  __wnw_barrier = new InterruptibleBarrier(num);
 }
 
 
