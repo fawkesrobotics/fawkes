@@ -187,15 +187,26 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 
   __blackboard->start_nethandler(network_manager->hub());
 
+  __loop_start = new Time(__clock);
+  __loop_end   = new Time(__clock);
+  try {
+    __max_thread_time_usec = __config->get_uint("/fawkes/mainapp/max_thread_time");
+  } catch (Exception &e) {
+    __max_thread_time_usec = 30000;
+    __multi_logger->log_info("FawkesMainApp", "Maximum thread time not set, assuming 30ms.");
+  }
+
   __time_wait = NULL;
   try {
-    unsigned int min_loop_time = __config->get_uint("/fawkes/mainapp/min_loop_time");
-    if ( min_loop_time > 0 ) {
-      __time_wait = new TimeWait(__clock, min_loop_time);
+    __desired_loop_time_usec = __config->get_uint("/fawkes/mainapp/desired_loop_time");
+    if ( __desired_loop_time_usec > 0 ) {
+      __time_wait = new TimeWait(__clock, __desired_loop_time_usec);
     }
   } catch (Exception &e) {
+    __desired_loop_time_usec = 0;
     __multi_logger->log_info("FawkesMainApp", "Minimum loop time not set, assuming 0");
   }
+  __desired_loop_time_sec  = (float)__desired_loop_time_usec / 1000000.f;
 }
 
 
@@ -229,6 +240,8 @@ FawkesMainThread::destruct()
   delete thread_manager;
   delete __aspect_inifin;
   delete __time_wait;
+  delete __loop_start;
+  delete __loop_end;
 
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();
@@ -300,19 +313,50 @@ FawkesMainThread::mloop()
     if ( __time_wait ) {
       __time_wait->mark_start();
     }
+    __loop_start->stamp_systime();
 
-    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
-    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
-    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS );
-    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
-    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK );
-    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL );
-    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT );
-    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC );
-    thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
+    try {
+      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_usec );
+      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR,         __max_thread_time_usec );
+      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_usec );
+      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_usec );
+      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_usec );
+      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_usec );
+      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_usec );
+      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_usec );
+      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_usec );
+    } catch (Exception &e) {
+      __multi_logger->log_error("FawkesMainThread", e);
+    }
 
     test_cancel();
 
+    thread_manager->try_recover(__recovered_threads);
+    if ( ! __recovered_threads.empty() ) {
+      // threads have been recovered!
+      std::string s;
+      if ( __recovered_threads.size() == 1 ) {
+	s = std::string("The thread ") + __recovered_threads.front() +
+	  " could be recovered and resumes normal operation";
+      } else {
+	s = "The following threads could be recovered and resumed normal operation: ";
+	for (std::list<std::string>::iterator i = __recovered_threads.begin();
+	     i != __recovered_threads.end(); ++i) {
+	  s += *i + " ";
+	}
+      }
+      __recovered_threads.clear();
+      __multi_logger->log_warn("FawkesMainThread", "%s", s.c_str());
+    }
+
+    __loop_end->stamp_systime();
+    float loop_time = *__loop_end - __loop_start;
+    if (loop_time > __desired_loop_time_sec) {
+      __multi_logger->log_warn("FawkesMainThread", "Loop time exceeded, "
+			       "desired: %f sec (%u usec),  actual: %f sec",
+			       __desired_loop_time_sec, __desired_loop_time_usec,
+			       loop_time);
+    }
     if ( __time_wait ) {
       __time_wait->wait_systime();
     } else {

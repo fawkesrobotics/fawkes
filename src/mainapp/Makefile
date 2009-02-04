@@ -20,9 +20,9 @@ include $(BASEDIR)/src/libs/netcomm/netcomm.mk
 
 # Uncomment the following lines to link the main app against all plugins. This
 # makes debugging easier, use it if you see ??? in gdb or valgrind
-#LDFLAGS += -Wl,-R$(PLUGINDIR) -L$(PLUGINDIR) \
-#	   $(patsubst %,-l:%,$(subst $(abspath $(PLUGINDIR))/,,$(wildcard $(PLUGINDIR)/*.so))) \
-#	   -lpthread
+LDFLAGS += -Wl,-R$(PLUGINDIR) -L$(PLUGINDIR) \
+	   $(patsubst %,-l:%,$(subst $(abspath $(PLUGINDIR))/,,$(wildcard $(PLUGINDIR)/*.so))) \
+	   -lpthread
 
 # Check for availability of libdaemon
 HAVE_LIBDAEMON = $(if $(shell $(PKGCONFIG) --exists 'libdaemon'; echo $${?/1/}),1,0)

@@ -474,12 +474,19 @@ FawkesThreadManager::force_remove(fawkes::Thread *thread)
 
 
 void
-FawkesThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook)
+FawkesThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook,
+				     unsigned int timeout_usec)
 {
   threads.lock();
+  unsigned int timeout_sec = 0;
+  if (timeout_usec > 1000000) {
+    timeout_sec   = timeout_usec / 1000000;
+    timeout_usec -= timeout_sec  * 1000000;
+  }
+
   if ( threads.find(hook) != threads.end() ) {
     threads.unlock();
-    threads[hook].wakeup_and_wait();
+    threads[hook].wakeup_and_wait(timeout_sec, timeout_usec * 1000);
     threads.lock();
     if ( threads[hook].size() == 0 ) {
       threads.erase(hook);
@@ -510,6 +517,17 @@ FawkesThreadManager::wakeup(BlockedTimingAspect::WakeupHook hook, Barrier *barri
   } else {
     threads.unlock();
   }
+}
+
+
+void
+FawkesThreadManager::try_recover(std::list<std::string> &recovered_threads)
+{
+  threads.lock();
+  for (tit = threads.begin(); tit != threads.end(); ++tit) {
+    tit->second.try_recover(recovered_threads);
+  }
+  threads.unlock();
 }
 
 

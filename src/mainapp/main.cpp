@@ -30,6 +30,8 @@
 #include <core/threading/mutex_locker.h>
 
 #include <iostream>
+#include <cstdlib>
+#include <cstdio>
 #ifdef HAVE_LIBDAEMON
 #  include <cerrno>
 #  include <cstring>
@@ -54,8 +56,9 @@ class FawkesMainApp : public SignalHandler
   /** Constructor. */
   FawkesMainApp()
   {
-    __init_running = true;
-    __init_quit    = false;
+    __init_running   = true;
+    __init_quit      = false;
+    __sigint_running = false;
   }
 
   /** Run main thread.
@@ -87,14 +90,19 @@ class FawkesMainApp : public SignalHandler
    */
   void handle_signal(int signum)
   {
-    if ( (signum == SIGINT) ||
-	 (signum == SIGTERM) ) {
+    if ((signum == SIGINT) && ! __sigint_running) {
+      printf("\nFawkes: SIGINT received, shutting down.\n"
+	     "Hit Ctrl-C again to force immediate exit.\n\n");
       MutexLocker lock(&__init_mutex);
       if (__init_running) {
 	__init_quit = true;
       } else {
 	fmt->cancel();
       }
+      __sigint_running = true;
+    } else if ((signum == SIGTERM) || __sigint_running) {
+      // we really need to quit
+      exit(-2);
     }
   }
 
@@ -103,6 +111,7 @@ class FawkesMainApp : public SignalHandler
   Mutex             __init_mutex;
   bool              __init_running;
   bool              __init_quit;
+  bool              __sigint_running;
 };
 
 

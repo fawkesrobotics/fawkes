@@ -29,6 +29,9 @@
 #include <core/threading/thread.h>
 #include <aspect/mainloop/employer.h>
 
+#include <list>
+#include <string>
+
 namespace fawkes {
   class ArgumentParser;
   class LocalBlackBoard;
@@ -40,6 +43,7 @@ namespace fawkes {
   class TimeWait;
   class AspectIniFin;
   class PluginManager;
+  class Time;
 }
 class FawkesThreadManager;
 class FawkesNetworkManager;
@@ -73,10 +77,16 @@ class FawkesMainThread
   fawkes::AspectIniFin         *__aspect_inifin;
   fawkes::MainLoop             *__mainloop;
 
-  FawkesThreadManager        *thread_manager;
-  fawkes::PluginManager      *plugin_manager;
-  FawkesNetworkManager       *network_manager;
+  FawkesThreadManager          *thread_manager;
+  fawkes::PluginManager        *plugin_manager;
+  FawkesNetworkManager         *network_manager;
 
+  std::list<std::string>        __recovered_threads;
+  unsigned int                  __desired_loop_time_usec;
+  float                         __desired_loop_time_sec;
+  unsigned int                  __max_thread_time_usec;
+  fawkes::Time                 *__loop_start;
+  fawkes::Time                 *__loop_end;
 };
 
 #endif

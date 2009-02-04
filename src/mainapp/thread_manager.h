@@ -75,9 +75,11 @@ class FawkesThreadManager
   virtual void force_remove(fawkes::ThreadList &tl);
   virtual void force_remove(fawkes::Thread *t);
 
-  virtual void wakeup_and_wait(fawkes::BlockedTimingAspect::WakeupHook hook);
+  virtual void wakeup_and_wait(fawkes::BlockedTimingAspect::WakeupHook hook,
+			       unsigned int timeout_usec = 0);
   virtual void wakeup(fawkes::BlockedTimingAspect::WakeupHook hook,
 		      fawkes::Barrier *barrier = 0);
+  virtual void try_recover(std::list<std::string> &recovered_threads);
 
   virtual bool timed_threads_exist();
   virtual void wait_for_timed_threads();
