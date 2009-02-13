@@ -27,15 +27,11 @@
 #define __PLUGIN_MANAGER_H_
 
 #include <netcomm/fawkes/handler.h>
-#include <core/threading/thread.h>
-#include <core/utils/lock_queue.h>
 #include <core/utils/lock_list.h>
 #include <core/utils/lock_map.h>
 #include <config/change_handler.h>
 #include <utils/system/fam.h>
 
-#include <map>
-#include <list>
 #include <string>
 #include <utility>
 
@@ -45,31 +41,23 @@ namespace fawkes {
 #endif
 
 class ThreadCollector;
-class FawkesNetworkHub;
 class Plugin;
 class PluginLoader;
 class Mutex;
 class PluginListMessage;
 class Configuration;
 class FamThread;
+class PluginManagerListener;
 
 class PluginManager
-: public fawkes::Thread,
-  public fawkes::FawkesNetworkHandler,
-  public fawkes::ConfigurationChangeHandler,
+: public fawkes::ConfigurationChangeHandler,
   public FamListener
 {
  public:
   PluginManager(ThreadCollector *thread_collector,
-		      Configuration *config,
-		      const char *meta_plugin_prefix);
+		Configuration *config,
+		const char *meta_plugin_prefix);
   ~PluginManager();
-
-  void set_hub(FawkesNetworkHub *hub);
-
-  virtual void handle_network_message(FawkesNetworkMessage *msg);
-  virtual void client_connected(unsigned int clid);
-  virtual void client_disconnected(unsigned int clid);
 
   // for ConfigurationChangeHandler
   virtual void config_tag_changed(const char *new_tag);
@@ -83,32 +71,27 @@ class PluginManager
   // for FamListener
   virtual void fam_event(const char *filename, unsigned int mask);
 
-  virtual void loop();
-
   void load(const char *plugin_list);
   void unload(const char *plugin_name);
 
+  bool is_loaded(const char *plugin_name);
+
+  std::list<std::string>                           get_loaded_plugins();
+  std::list<std::pair<std::string, std::string> >  get_available_plugins();
+
+  void add_listener(PluginManagerListener *listener);
+  void remove_listener(PluginManagerListener *listener);
+
  private:
-  PluginListMessage * list_avail();
-  PluginListMessage * list_loaded();
-  void send_load_failure(const char *plugin_name, unsigned int client_id);
-  void send_load_success(const char *plugin_name, unsigned int client_id);
-  void send_unload_failure(const char *plugin_name, unsigned int client_id);
-  void send_unload_success(const char *plugin_name, unsigned int client_id);
-  void send_loaded(const char *plugin_name);
-  void send_unloaded(const char *plugin_name);
-
-  void load(const char *plugin_list, unsigned int clid);
-  void unload(const char *plugin_list, unsigned int clid);
-
   void init_pinfo_cache();
+  void notify_loaded(const char *plugin_name);
+  void notify_unloaded(const char *plugin_name);
 
   std::list<std::string>  parse_plugin_list(const char *plugin_type_list);
 
  private:
   ThreadCollector   *thread_collector;
   PluginLoader      *plugin_loader;
-  FawkesNetworkHub  *hub;
 
   LockMap< std::string, Plugin * > plugins;
   LockMap< std::string, Plugin * >::iterator pit;
@@ -120,12 +103,10 @@ class PluginManager
   unsigned int next_plugin_id;
   std::map< std::string, unsigned int > plugin_ids;
 
-  LockQueue< FawkesNetworkMessage * > inbound_queue;
-
-  LockList<unsigned int>           __subscribers;
-  LockList<unsigned int>::iterator __ssit;
-
   LockList<std::pair<std::string, std::string> > __pinfo_cache;
+
+  LockList<PluginManagerListener *>           __listeners;
+  LockList<PluginManagerListener *>::iterator __lit;
 
   Configuration *__config;
   std::string __meta_plugin_prefix;

@@ -2,8 +2,8 @@
 /***************************************************************************
  *  manager.cpp - Fawkes plugin manager
  *
- *  Generated: Wed Nov 15 23:31:55 2006 (on train to Cologne)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Nov 15 23:31:55 2006 (on train to Cologne)
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -24,8 +24,7 @@
  */
 
 #include <plugin/manager.h>
-#include <plugin/net/messages.h>
-#include <plugin/net/list_message.h>
+#include <plugin/listener.h>
 #include <plugin/loader.h>
 
 #include <core/plugin.h>
@@ -34,9 +33,6 @@
 #include <utils/logging/liblogger.h>
 #include <utils/system/fam_thread.h>
 #include <config/config.h>
-
-#include <netcomm/fawkes/component_ids.h>
-#include <netcomm/fawkes/hub.h>
 
 #include <algorithm>
 #include <cstring>
@@ -59,16 +55,6 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-/* IMPORANT IMPLEMENTER'S NOTE
- *
- * If you are going to work on this code mind the following: it is assumed
- * that only loop() will pop messages from the inbound queue. Thus the inbound
- * queue is only locked for this pop operation, not for the whole access time.
- * This is true as long as messages are only appended from the outside!
- * This is necessary to ensure that handle_network_message() will not hang
- * waiting for the queue lock.
- */
-
 /** Constructor.
  * @param thread_collector thread manager plugin threads will be added to
  * and removed from appropriately.
@@ -78,9 +64,7 @@ namespace fawkes {
 PluginManager::PluginManager(ThreadCollector *thread_collector,
 			     Configuration *config,
 			     const char *meta_plugin_prefix)
-  : Thread("PluginManager", Thread::OPMODE_WAITFORWAKEUP),
-    FawkesNetworkHandler(FAWKES_CID_PLUGINMANAGER),
-    ConfigurationChangeHandler(meta_plugin_prefix)
+  : ConfigurationChangeHandler(meta_plugin_prefix)
 {
   plugins.clear();
   this->thread_collector = thread_collector;
@@ -120,19 +104,6 @@ PluginManager::~PluginManager()
   plugins.clear();
   plugin_ids.clear();
   delete plugin_loader;
-}
-
-
-/** Set Fawkes network hub.
- * The hub will be used for network communication. The PluginManager
- * is automatically added as handler to the hub for plugin messages.
- * @param hub Fawkes network hub
- */
-void
-PluginManager::set_hub(FawkesNetworkHub *hub)
-{
-  this->hub = hub;
-  hub->add_handler( this );
 }
 
 
@@ -187,106 +158,57 @@ PluginManager::init_pinfo_cache()
 }
 
 /** Generate list of all available plugins.
- * All files with the extension .so in the PLUGINDIR are returned.
- * @param num_plugins pointer to an unsigned int where the number
- * of all plugins is stored
- * @param plugin_list pointer to the string array where the list of 
- * all plugins is stored. Memory is allocated at this address and
- * has to be freed by the caller!
+ * @return list of plugins that are available, each plugin is represented by
+ * a pair of strings. The first string is the plugin name, the second is its
+ * description.
  */
-PluginListMessage *
-PluginManager::list_avail()
+std::list<std::pair<std::string, std::string> >
+PluginManager::get_available_plugins()
 {
-  PluginListMessage *m = new PluginListMessage();
+  std::list<std::pair<std::string, std::string> > rv;
 
   std::list<std::pair<std::string, std::string> >::iterator i;
   for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
-    m->append(i->first.c_str(), i->first.length());
-    m->append(i->second.c_str(), i->second.length());
+    rv.push_back(*i);
   }
-  return m;
+
+  return rv;
 }
 
-PluginListMessage *
-PluginManager::list_loaded()
+/** Get list of loaded plugins.
+ * @return list of names of real and meta plugins currently loaded
+ */
+std::list<std::string>
+PluginManager::get_loaded_plugins()
 {
-  PluginListMessage *m = new PluginListMessage();
+  std::list<std::string> rv;
 
   plugins.lock();
   for (pit = plugins.begin(); pit != plugins.end(); ++pit) {
-    m->append((*pit).first.c_str(), (*pit).first.length());
+    rv.push_back(pit->first);
   }
   for (__mpit = __meta_plugins.begin(); __mpit != __meta_plugins.end(); ++__mpit) {
-    m->append(__mpit->first.c_str(), __mpit->first.length());
+    rv.push_back(__mpit->first);
   }
   plugins.unlock();
 
-  return m;
+  return rv;
 }
 
 
-void
-PluginManager::send_load_failure(const char *plugin_name,
-				       unsigned int client_id)
+/** Check if plugin is loaded.
+ * @param plugin_name plugin to check if it is loaded
+ * @return true if the plugin is currently loaded, false otherwise
+ */
+bool
+PluginManager::is_loaded(const char *plugin_name)
 {
-  plugin_load_failed_msg_t *r = (plugin_load_failed_msg_t *)calloc(1, sizeof(plugin_load_failed_msg_t));
-  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
-  hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOAD_FAILED,
-	    r, sizeof(plugin_load_failed_msg_t));
-}
-
-
-void
-PluginManager::send_load_success(const char *plugin_name, unsigned int client_id)
-{
-  plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
-  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
-  r->plugin_id = plugin_ids[plugin_name];
-  hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED,
-	    r, sizeof(plugin_loaded_msg_t));
-}
-
-
-void
-PluginManager::send_unloaded(const char *plugin_name)
-{
-  __subscribers.lock();
-  for (__ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
-    send_unload_success(plugin_name, *__ssit);
+  if (plugin_loader->is_loaded(plugin_name)) {
+    return true;
+  } else {
+    // Could still be a meta plugin
+    return (__meta_plugins.find(plugin_name) != __meta_plugins.end());
   }
-  __subscribers.unlock();
-}
-
-
-void
-PluginManager::send_loaded(const char *plugin_name)
-{
-  __subscribers.lock();
-  for (__ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
-    send_load_success(plugin_name, *__ssit);
-  }
-  __subscribers.unlock();
-}
-
-
-void
-PluginManager::send_unload_failure(const char *plugin_name,
-					 unsigned int client_id)
-{
-  plugin_unload_failed_msg_t *r = (plugin_unload_failed_msg_t *)calloc(1, sizeof(plugin_unload_failed_msg_t));
-  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
-  hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOAD_FAILED,
-	    r, sizeof(plugin_unload_failed_msg_t));
-}
-
-
-void
-PluginManager::send_unload_success(const char *plugin_name, unsigned int client_id)
-{
-  plugin_unloaded_msg_t *r = (plugin_unloaded_msg_t *)calloc(1, sizeof(plugin_unloaded_msg_t));
-  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
-  hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOADED,
-	    r, sizeof(plugin_unloaded_msg_t));
 }
 
 
@@ -345,7 +267,7 @@ PluginManager::load(const char *plugin_list)
 	    LibLogger::log_info("PluginManager", "Loading plugins %s for meta plugin %s",
 				pset.c_str(), i->c_str());
 	    load(pset.c_str());
-	    send_loaded(i->c_str());
+	    notify_loaded(i->c_str());
 	  } catch (Exception &e) {
 	    e.append("Could not initialize meta plugin %s, aborting loading.", i->c_str());
 	    __meta_plugins.erase(*i);
@@ -371,7 +293,7 @@ PluginManager::load(const char *plugin_list)
 	  thread_collector->add(plugin->threads());
 	  plugins[*i] = plugin;
 	  plugin_ids[*i] = next_plugin_id++;
-	  send_loaded(i->c_str());
+	  notify_loaded(i->c_str());
 	} catch (CannotInitializeThreadException &e) {
 	  e.prepend("Plugin >>> %s <<< could not be initialized, unloading", i->c_str());
 	  plugins.unlock();
@@ -386,26 +308,6 @@ PluginManager::load(const char *plugin_list)
 	}
       }
     }
-  }
-}
-
-
-/** Load plugin.
- * The loading is interrupted if any of the plugins does not load properly.
- * The already loaded plugins are *not* unloaded, but kept.
- * @param plugin_list string containing a comma-separated list of plugins
- * to load. The plugin list can contain meta plugins.
- * @param clid Fawkes network client ID of client that gets a success message
- * with the exact string that was put into
- */
-void
-PluginManager::load(const char *plugin_list, unsigned int clid)
-{
-  try {
-    load(plugin_list);
-    send_load_success(plugin_list, clid);
-  } catch (Exception &e) {
-    throw;
   }
 }
 
@@ -425,7 +327,7 @@ PluginManager::unload(const char *plugin_name)
       plugin_loader->unload(plugins[plugin_name]);
       plugins.erase(plugin_name);
       plugin_ids.erase(plugin_name);
-      send_unloaded(plugin_name);
+      notify_unloaded(plugin_name);
       // find all meta plugins that required this module, this can no longer
       // be considered loaded
       __meta_plugins.lock();
@@ -443,7 +345,7 @@ PluginManager::unload(const char *plugin_name)
 	if ( erase ) {
 	  LockMap< std::string, std::string >::iterator tmp = __mpit;
 	  ++__mpit;
-	  send_unloaded(tmp->first.c_str());
+	  notify_unloaded(tmp->first.c_str());
 	  __meta_plugins.erase(tmp);
 	} else {
 	  ++__mpit;
@@ -474,150 +376,6 @@ PluginManager::unload(const char *plugin_name)
       unload(i->c_str());
     }
   }
-}
-
-
-/** Unload plugin.
- * Note that this method does not allow to pass a list of plugins, but it will
- * only accept a single plugin at a time.
- * @param plugin_name plugin to unload, can be a meta plugin.
- * @param clid Fawkes network client ID of client that gets a success message
- * with the exact string that was put into
- */
-void
-PluginManager::unload(const char *plugin_name, unsigned int clid)
-{
-  try {
-    unload(plugin_name);
-    send_unload_success(plugin_name, clid);
-  } catch (Exception &e) {
-    throw;
-  }
-}
-
-
-/** Process all network messages that have been received.
- */
-void
-PluginManager::loop()
-{
-  while ( ! inbound_queue.empty() ) {
-    FawkesNetworkMessage *msg = inbound_queue.front();
-
-    switch (msg->msgid()) {
-    case MSG_PLUGIN_LOAD:
-      if ( msg->payload_size() != sizeof(plugin_load_msg_t) ) {
-	LibLogger::log_error("PluginManager", "Invalid load message size");
-      } else {
-	plugin_load_msg_t *m = (plugin_load_msg_t *)msg->payload();
-	char name[PLUGIN_MSG_NAME_LENGTH + 1];
-	name[PLUGIN_MSG_NAME_LENGTH] = 0;
-	strncpy(name, m->name, PLUGIN_MSG_NAME_LENGTH);
-
-	if ( plugin_loader->is_loaded(name) ) {
-	  LibLogger::log_info("PluginManager", "Client requested loading of %s which is already loaded", name);
-	  send_load_success(name, msg->clid());
-	} else {
-	  LibLogger::log_info("PluginManager", "Loading plugin %s", name);
-	  try {
-	    load(name, msg->clid());
-	  } catch (Exception &e) {
-	    LibLogger::log_error("PluginManager", "Failed to load plugin %s", name);
-	    LibLogger::log_error("PluginManager", e);
-	    send_load_failure(name, msg->clid());
-	  }
-	}
-      }
-      break;
-
-    case MSG_PLUGIN_UNLOAD:
-      if ( msg->payload_size() != sizeof(plugin_unload_msg_t) ) {
-	LibLogger::log_error("PluginManager", "Invalid unload message size.");
-      } else {
-	plugin_unload_msg_t *m = (plugin_unload_msg_t *)msg->payload();
-	char name[PLUGIN_MSG_NAME_LENGTH + 1];
-	name[PLUGIN_MSG_NAME_LENGTH] = 0;
-	strncpy(name, m->name, PLUGIN_MSG_NAME_LENGTH);
-
-	if ( (plugins.find(name) == plugins.end()) &&
-	     (__meta_plugins.find(name) == __meta_plugins.end()) ) {
-	  LibLogger::log_info("PluginManager", "Client requested unloading of %s which is not loaded", name);
-	  send_unload_success(name, msg->clid());
-	} else {
-	  LibLogger::log_info("PluginManager", "UNloading plugin %s", name);
-	  try {
-	    unload(name, msg->clid());
-	  } catch (Exception &e) {
-	    LibLogger::log_error("PluginManager", "Failed to unload plugin %s", name);
-	    LibLogger::log_error("PluginManager", e);
-	    send_unload_failure(name, msg->clid());
-	  }
-	}
-      }
-      break;
-
-    case MSG_PLUGIN_LIST_AVAIL:
-      try {
-	LibLogger::log_debug("PluginManager", "Sending list of all available plugins");
-	PluginListMessage *plm = list_avail();
-	hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_AVAIL_LIST, plm);
-      } catch (Exception &e) {
-	hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_AVAIL_LIST_FAILED);
-      }
-      break;
-
-    case MSG_PLUGIN_LIST_LOADED:
-      try {
-	LibLogger::log_debug("PluginManager", "Sending list of all loaded plugins");
-	PluginListMessage *plm = list_loaded();
-	hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED_LIST, plm);
-      } catch (Exception &e) {
-	hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED_LIST_FAILED);
-      }
-      break;
-
-    case MSG_PLUGIN_SUBSCRIBE_WATCH:
-      __subscribers.lock();
-      __subscribers.push_back(msg->clid());
-      __subscribers.sort();
-      __subscribers.unique();
-      __subscribers.unlock();
-      break;
-
-    case MSG_PLUGIN_UNSUBSCRIBE_WATCH:
-      __subscribers.remove_locked(msg->clid());
-      break;
-
-    default:
-      // error
-      break;
-    }
-
-    msg->unref();
-    inbound_queue.pop_locked();
-  }
-}
-
-
-void
-PluginManager::handle_network_message(FawkesNetworkMessage *msg)
-{
-  msg->ref();
-  inbound_queue.push_locked(msg);
-  wakeup();
-}
-
-
-void
-PluginManager::client_connected(unsigned int clid)
-{
-}
-
-
-void
-PluginManager::client_disconnected(unsigned int clid)
-{
-  __subscribers.remove_locked(clid);
 }
 
 
@@ -725,23 +483,80 @@ PluginManager::fam_event(const char *filename, unsigned int mask)
 	!(mask & FAM_ISDIR) &&
 	((mask & FAM_MODIFY) || (mask & FAM_MOVED_TO) || (mask & FAM_CREATE))) {
       if (plugin_loader->is_loaded(p.c_str())) {
-	LibLogger::log_info("Plugin %s changed on disk, but is loaded, no new info "
-			    "loaded", p.c_str());
-      } else {
-	try {
-	  std::string s = plugin_loader->get_description(p.c_str());
-	  __pinfo_cache.push_back(make_pair(p, s));
-	} catch (Exception &e) {
-	  LibLogger::log_warn("PluginManager", "Could not get possibly modified "
-			      "description of plugin %s, exception follows", 
-			      p.c_str());
-	  LibLogger::log_warn("PluginManager", e);
-	}
+	LibLogger::log_info("PluginManager", "Plugin %s changed on disk, but is "
+			    "loaded, no new info can be loaded, keeping old.",
+			    p.c_str());
+      }
+      try {
+	std::string s = plugin_loader->get_description(p.c_str());
+	__pinfo_cache.push_back(make_pair(p, s));
+      } catch (Exception &e) {
+	LibLogger::log_warn("PluginManager", "Could not get possibly modified "
+			    "description of plugin %s, exception follows", 
+			    p.c_str());
+	LibLogger::log_warn("PluginManager", e);
       }
     }
+
+    __pinfo_cache.sort();
     __pinfo_cache.unlock();
   }
 }
 
+
+/** Add listener.
+ * Listeners are notified of plugin load and unloda events.
+ * @param listener listener to add
+ */
+void
+PluginManager::add_listener(PluginManagerListener *listener)
+{
+  __listeners.lock();
+  __listeners.push_back(listener);
+  __listeners.sort();
+  __listeners.unique();
+  __listeners.unlock();
+}
+
+/** Remove listener.
+ * @param listener listener to remove
+ */
+void
+PluginManager::remove_listener(PluginManagerListener *listener)
+{
+  __listeners.remove_locked(listener);
+}
+
+void
+PluginManager::notify_loaded(const char *plugin_name)
+{
+  __listeners.lock();
+  for (__lit = __listeners.begin(); __lit != __listeners.end(); ++__lit) {
+    try {
+      (*__lit)->plugin_loaded(plugin_name);
+    } catch (Exception &e) {
+      LibLogger::log_warn("PluginManager", "PluginManagerListener threw exception "
+			  "during notification of plugin loaded, exception follows.");
+      LibLogger::log_warn("PluginManager", e);
+    }
+  }
+  __listeners.unlock();
+}
+
+void
+PluginManager::notify_unloaded(const char *plugin_name)
+{
+  __listeners.lock();
+  for (__lit = __listeners.begin(); __lit != __listeners.end(); ++__lit) {
+    try {
+      (*__lit)->plugin_unloaded(plugin_name);
+    } catch (Exception &e) {
+      LibLogger::log_warn("PluginManager", "PluginManagerListener threw exception "
+			  "during notification of plugin unloaded, exception follows.");
+      LibLogger::log_warn("PluginManager", e);
+    }
+  }
+  __listeners.unlock();
+}
 
 } // end namespace fawkes

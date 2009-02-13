@@ -71,7 +71,6 @@ typedef struct {
  */
 typedef struct {
   char         name[PLUGIN_MSG_NAME_LENGTH];	/**< name of the plugin that has been loaded */
-  unsigned int plugin_id;			/**< plugin id of the loaded plugin */
 } plugin_loaded_msg_t;
 
 /** Plugin load failed. */
