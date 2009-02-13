@@ -268,11 +268,12 @@ FawkesThreadManager::add_maybelocked(ThreadList &tl, bool lock)
 
 
 /** Add one thread.
- * Add the given thread to the thread manager. The threadis initialised
+ * Add the given thread to the thread manager. The thread is initialized
  * as appropriate and started. See the class documentation for supported
  * specialisations of threads and the performed initialisation steps.
  * If the thread initializer cannot initalize the thread it is not added.
  * @param thread thread to add
+ * @param lock if true the environment is locked before adding the thread
  * @exception CannotInitializeThreadException thrown if at least the
  * thread could not be initialised
  */

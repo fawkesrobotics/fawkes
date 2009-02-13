@@ -28,6 +28,7 @@
 
 #include <core/threading/thread.h>
 #include <aspect/mainloop/employer.h>
+#include <aspect/logger/employer.h>
 
 #include <list>
 #include <string>
@@ -44,6 +45,7 @@ namespace fawkes {
   class AspectIniFin;
   class PluginManager;
   class Time;
+  class PluginNetworkHandler;
 }
 class FawkesThreadManager;
 class FawkesNetworkManager;
@@ -51,7 +53,8 @@ class FawkesNetworkManager;
 class FawkesMainThread
 : public fawkes::Thread,
   public fawkes::MainLoopEmployer,
-  public fawkes::MainLoop
+  public fawkes::MainLoop,
+  public fawkes::LoggerEmployer
 {
  public:
   FawkesMainThread(fawkes::ArgumentParser *argp);
@@ -62,6 +65,9 @@ class FawkesMainThread
 
   virtual void mloop();
   virtual void set_mainloop(fawkes::MainLoop *mainloop);
+
+  virtual void add_logger(fawkes::Logger *logger);
+  virtual void remove_logger(fawkes::Logger *logger);
 
  private:
   void destruct();
@@ -77,9 +83,10 @@ class FawkesMainThread
   fawkes::AspectIniFin         *__aspect_inifin;
   fawkes::MainLoop             *__mainloop;
 
-  FawkesThreadManager          *thread_manager;
-  fawkes::PluginManager        *plugin_manager;
-  FawkesNetworkManager         *network_manager;
+  FawkesThreadManager          *__thread_manager;
+  fawkes::PluginManager        *__plugin_manager;
+  fawkes::PluginNetworkHandler *__plugin_nethandler;
+  FawkesNetworkManager         *__network_manager;
 
   std::list<std::string>        __recovered_threads;
   unsigned int                  __desired_loop_time_usec;

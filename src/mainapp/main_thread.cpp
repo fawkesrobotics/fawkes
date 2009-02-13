@@ -43,6 +43,7 @@
 #include <blackboard/local.h>
 #include <aspect/inifin.h>
 #include <plugin/manager.h>
+#include <plugin/net/handler.h>
 
 #include <cstdio>
 #include <cstring>
@@ -67,9 +68,9 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   __blackboard        = NULL;
   __config_nethandler = NULL;
   __config            = NULL;
-  plugin_manager      = NULL;
-  network_manager     = NULL;
-  thread_manager      = NULL;
+  __plugin_manager      = NULL;
+  __network_manager     = NULL;
+  __thread_manager      = NULL;
   __aspect_inifin     = NULL;
 
   __mainloop          = this;
@@ -157,35 +158,38 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   /* Managers */
   try {
     __blackboard         = new LocalBlackBoard(bb_size, bb_magic_token.c_str());
-    thread_manager       = new FawkesThreadManager();
+    __thread_manager     = new FawkesThreadManager();
     __aspect_inifin      = new AspectIniFin(__blackboard,
-					    thread_manager->aspect_collector(),
+					    __thread_manager->aspect_collector(),
 					    __config, __multi_logger, __clock);
-    thread_manager->set_inifin(__aspect_inifin, __aspect_inifin);
-    plugin_manager       = new PluginManager(thread_manager, __config,
+    __thread_manager->set_inifin(__aspect_inifin, __aspect_inifin);
+    __plugin_manager     = new PluginManager(__thread_manager, __config,
 					     "/fawkes/meta_plugins/");
-    network_manager      = new FawkesNetworkManager(thread_manager, 1910);
-    __config_nethandler  = new ConfigNetworkHandler(__config, network_manager->hub());
+    __network_manager    = new FawkesNetworkManager(__thread_manager, 1910);
+    __config_nethandler  = new ConfigNetworkHandler(__config, __network_manager->hub());
   } catch (Exception &e) {
     e.append("Initializing managers failed");
     destruct();
     throw;
   }
 
-  __network_logger = new NetworkLogger(network_manager->hub(), log_level);
+  __network_logger = new NetworkLogger(__network_manager->hub(), log_level);
   __multi_logger->add_logger(__network_logger);
 
-  __aspect_inifin->set_fnet_hub( network_manager->hub() );
-  __aspect_inifin->set_network_members( network_manager->nnresolver(),
-					network_manager->service_publisher(),
-					network_manager->service_browser() );
+  __aspect_inifin->set_fnet_hub( __network_manager->hub() );
+  __aspect_inifin->set_network_members( __network_manager->nnresolver(),
+					__network_manager->service_publisher(),
+					__network_manager->service_browser() );
+  __aspect_inifin->set_plugin_manager(__plugin_manager);
   __aspect_inifin->set_mainloop_employer(this);
-  __aspect_inifin->set_blocked_timing_executor(thread_manager);
+  __aspect_inifin->set_logger_employer(this);
+  __aspect_inifin->set_blocked_timing_executor(__thread_manager);
 
-  plugin_manager->set_hub( network_manager->hub() );
-  plugin_manager->start();
+  __plugin_nethandler = new PluginNetworkHandler(__plugin_manager,
+						 __network_manager->hub() );
+  __plugin_nethandler->start();
 
-  __blackboard->start_nethandler(network_manager->hub());
+  __blackboard->start_nethandler(__network_manager->hub());
 
   __loop_start = new Time(__clock);
   __loop_end   = new Time(__clock);
@@ -228,16 +232,17 @@ FawkesMainThread::destruct()
   __multi_logger->remove_logger(__network_logger);
   delete __network_logger;
 
-  if ( plugin_manager ) {
-    plugin_manager->cancel();
-    plugin_manager->join();
-    delete plugin_manager;
+  if ( __plugin_nethandler ) {
+    __plugin_nethandler->cancel();
+    __plugin_nethandler->join();
+    delete __plugin_nethandler;
   }
+  delete __plugin_manager;
   delete __blackboard;
   delete __config_nethandler;
   delete __config;
-  delete network_manager;
-  delete thread_manager;
+  delete __network_manager;
+  delete __thread_manager;
   delete __aspect_inifin;
   delete __time_wait;
   delete __loop_start;
@@ -254,7 +259,7 @@ FawkesMainThread::once()
 {
   if ( __argp->has_arg("p") ) {
     try {
-      plugin_manager->load(__argp->arg("p"));
+      __plugin_manager->load(__argp->arg("p"));
     } catch (Exception &e) {
       __multi_logger->log_error("FawkesMainThread", "Failed to load plugins %s, "
 				"exception follows", __argp->arg("p"));
@@ -262,7 +267,7 @@ FawkesMainThread::once()
     }
   } else {
     try {
-      plugin_manager->load("default");
+      __plugin_manager->load("default");
     } catch (Exception &e) {
       // ignored, there is no default meta plugin set
     }
@@ -273,7 +278,7 @@ void
 FawkesMainThread::set_mainloop(MainLoop *mainloop)
 {
   loopinterrupt_antistarve_mutex->lock();
-  thread_manager->interrupt_timed_thread_wait();
+  __thread_manager->interrupt_timed_thread_wait();
   loop_mutex->lock();
   if ( mainloop ) {
     __mainloop = mainloop;
@@ -282,6 +287,20 @@ FawkesMainThread::set_mainloop(MainLoop *mainloop)
   }
   loop_mutex->unlock();
   loopinterrupt_antistarve_mutex->unlock();
+}
+
+
+void
+FawkesMainThread::add_logger(Logger *logger)
+{
+  __multi_logger->add_logger(logger);
+}
+
+
+void
+FawkesMainThread::remove_logger(Logger *logger)
+{
+  __multi_logger->remove_logger(logger);
 }
 
 
@@ -299,10 +318,10 @@ void
 FawkesMainThread::mloop()
 {
   try {
-    if ( ! thread_manager->timed_threads_exist() ) {
+    if ( ! __thread_manager->timed_threads_exist() ) {
       __multi_logger->log_debug("FawkesMainThread", "No timed threads exist, waiting");
       try {
-	thread_manager->wait_for_timed_threads();
+	__thread_manager->wait_for_timed_threads();
 	__multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "
 				"running main loop now");
       } catch (InterruptedException &e) {
@@ -316,22 +335,22 @@ FawkesMainThread::mloop()
     __loop_start->stamp_systime();
 
     try {
-      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_usec );
-      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR,         __max_thread_time_usec );
-      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_usec );
-      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_usec );
-      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_usec );
-      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_usec );
-      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_usec );
-      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_usec );
-      thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_usec );
+      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_usec );
+      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR,         __max_thread_time_usec );
+      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_usec );
+      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_usec );
+      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_usec );
+      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_usec );
+      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_usec );
+      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_usec );
+      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_usec );
     } catch (Exception &e) {
       __multi_logger->log_error("FawkesMainThread", e);
     }
 
     test_cancel();
 
-    thread_manager->try_recover(__recovered_threads);
+    __thread_manager->try_recover(__recovered_threads);
     if ( ! __recovered_threads.empty() ) {
       // threads have been recovered!
       std::string s;
