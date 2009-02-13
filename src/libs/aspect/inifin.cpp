@@ -3,7 +3,7 @@
  *  inifin.h - Fawkes Aspect initializer/finalizer
  *
  *  Created: Tue Jan 30 13:36:42 2007
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -39,6 +39,9 @@
 #include <aspect/time_source.h>
 #include <aspect/mainloop.h>
 #include <aspect/mainloop/employer.h>
+#include <aspect/logger.h>
+#include <aspect/logger/employer.h>
+#include <aspect/plugin_director.h>
 #ifdef HAVE_FIREVISION
 #include <aspect/vision_master.h>
 #include <aspect/vision.h>
@@ -130,6 +133,16 @@ AspectIniFin::set_mainloop_employer(MainLoopEmployer *employer)
 }
 
 
+/** Set Fawkes LoggerEmployer.
+ * @param employer logger employer
+ */
+void
+AspectIniFin::set_logger_employer(LoggerEmployer *employer)
+{
+  __logger_employer = employer;
+}
+
+
 /** Set Fawkes BlockedTimingExecutor.
  * Use this to set the Fawkes blocked timing executor.
  * @param btexec blocked timing executor instance
@@ -158,6 +171,16 @@ AspectIniFin::set_network_members(NetworkNameResolver *nnresolver,
   __nnresolver = nnresolver;
   __service_publisher = service_publisher;
   __service_browser = service_browser;
+}
+
+
+/** Set plugin manager.
+ * @param manager PluginManager instance
+ */
+void
+AspectIniFin::set_plugin_manager(PluginManager *manager)
+{
+  __plugin_manager = manager;
 }
 
 
@@ -201,6 +224,22 @@ AspectIniFin::init(Thread *thread)
   ClockAspect *clock_thread;
   if ( (clock_thread = dynamic_cast<ClockAspect *>(thread)) != NULL ) {
     clock_thread->init_ClockAspect(__clock);
+  }
+
+  PluginDirectorAspect *plugin_director_thread;
+  if ( (plugin_director_thread = dynamic_cast<PluginDirectorAspect *>(thread)) != NULL ) {
+    if ( thread->opmode() != Thread::OPMODE_CONTINUOUS ) {
+      throw CannotInitializeThreadException("Thread '%s' not in CONTINUOUS mode "
+					    "(required for PluginDirectorAspect)",
+					    thread->name());
+    }
+    if ( __plugin_manager ) {
+      plugin_director_thread->init_PluginDirectorAspect(__plugin_manager);
+    } else {
+      throw CannotInitializeThreadException("Thread '%s' has PluginDirectorAspect "
+					    "but no PluginManager has been set in "
+					    "AspectIniFin", thread->name());
+    }
   }
 
   FawkesNetworkAspect *fnet_thread;
@@ -293,6 +332,25 @@ AspectIniFin::init(Thread *thread)
 					    "already another main loop provider.");
     }
   }
+
+  LoggerAspect *logger_thread;
+  if ( (logger_thread = dynamic_cast<LoggerAspect *>(thread)) != NULL ) {
+    if ( __logger_employer == NULL ) {
+      throw CannotInitializeThreadException("Thread has LoggerAspect but no "
+					    "LoggerEmployer has been set.");
+    }
+    try {
+      __logger_employer->add_logger(logger_thread->get_logger());
+    } catch (Exception &e) {
+      CannotInitializeThreadException ce("Thread has LoggerAspect but Logger "
+					 "could not be added.");
+      ce.append(e);
+      throw ce;
+    } catch (...) {
+      throw CannotInitializeThreadException("Thread has LoggerAspect but Logger "
+					    "could not be added.");
+    }
+  }
 }
 
 
@@ -367,6 +425,17 @@ AspectIniFin::finalize(Thread *thread)
       __mainloop_uc->remove(mainloop_thread->get_mainloop());
     } catch (Exception &e) {
       CannotFinalizeThreadException ce("Failed to remove main loop");
+      ce.append(e);
+      throw;
+    }
+  }
+
+  LoggerAspect *logger_thread;
+  if ( (logger_thread = dynamic_cast<LoggerAspect *>(thread)) != NULL ) {
+    try {
+      __logger_employer->remove_logger(logger_thread->get_logger());
+    } catch (Exception &e) {
+      CannotFinalizeThreadException ce("Failed to remove logger");
       ce.append(e);
       throw;
     }

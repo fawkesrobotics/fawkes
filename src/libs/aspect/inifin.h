@@ -31,12 +31,16 @@
 #include <core/threading/thread_notification_listener.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class BlackBoard;
 class Configuration;
 class Logger;
 class Clock;
 class FawkesNetworkHub;
+class PluginManager;
 class Thread;
 class ThreadCollector;
 class NetworkNameResolver;
@@ -45,6 +49,7 @@ class ServiceBrowser;
 class TimeSource;
 class MainLoop;
 class MainLoopEmployer;
+class LoggerEmployer;
 class BlockedTimingExecutor;
 template <class Provider, class Dependant>
   class OneToManyDependency;
@@ -71,10 +76,12 @@ class AspectIniFin
 
   void set_fnet_hub(FawkesNetworkHub *fnethub);
   void set_mainloop_employer(MainLoopEmployer *employer);
+  void set_logger_employer(LoggerEmployer *employer);
   void set_blocked_timing_executor(BlockedTimingExecutor *btexec);
   void set_network_members(NetworkNameResolver *nnresolver,
 			   ServicePublisher *service_publisher,
 			   ServiceBrowser *service_browser);
+  void set_plugin_manager(PluginManager *manager);
 
   virtual void thread_started(Thread *thread);
   virtual void thread_init_failed(Thread *thread);
@@ -91,6 +98,8 @@ class AspectIniFin
   ServiceBrowser        *__service_browser;
   MainLoopEmployer      *__mainloop_employer;
   BlockedTimingExecutor *__btexec;
+  LoggerEmployer        *__logger_employer;
+  PluginManager         *__plugin_manager;
 
 #ifdef HAVE_FIREVISION
   OneToManyDependency<VisionMasterAspect, VisionAspect> *__vision_dependency;
