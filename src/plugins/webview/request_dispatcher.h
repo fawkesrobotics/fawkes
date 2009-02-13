@@ -32,6 +32,10 @@ struct MHD_Connection;
 class WebRequestProcessor;
 class StaticWebReply;
 
+namespace fawkes {
+  class CacheLogger;
+}
+
 class WebRequestDispatcher
 {
  public:
@@ -62,7 +66,10 @@ class WebRequestDispatcher
 		      void **session_data);
 
  private:
-  std::map<std::string, WebRequestProcessor *> __processors;
+  fawkes::CacheLogger *__cache_logger;
+
+  std::map<std::string, WebRequestProcessor *>  __processors;
+  WebRequestProcessor                          *__startpage_processor;
 };
 
 

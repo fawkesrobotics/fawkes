@@ -27,6 +27,7 @@
 #include "page_reply.h"
 #include "error_reply.h"
 
+#include <utils/logging/cache.h>
 #include <utils/misc/string_urlescape.h>
 
 #include <microhttpd.h>
@@ -107,10 +108,22 @@ WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
 {
   struct MHD_Response *response;
   sreply->pack();
-  response = MHD_create_response_from_data(sreply->body_length(),
-					   (void*) sreply->body().c_str(),
-					   /* free */ MHD_YES,
-					   /* copy */ MHD_YES);
+  if (sreply->body_length() > 0) {
+    response = MHD_create_response_from_data(sreply->body_length(),
+					     (void*) sreply->body().c_str(),
+					     /* free */ MHD_YES,
+					     /* copy */ MHD_YES);
+  } else {
+    response = MHD_create_response_from_data(0, (void*) "",
+					     /* free */ MHD_NO,
+					     /* copy */ MHD_NO);
+  }
+
+  const WebReply::HeaderMap &headers = sreply->headers();
+  for (WebReply::HeaderMap::const_iterator i = headers.begin(); i != headers.end(); ++i) {
+    MHD_add_response_header(response, i->first.c_str(), i->second.c_str());
+  }
+
   int rv = MHD_queue_response(connection, sreply->code(), response);
   MHD_destroy_response(response);
   return rv;
@@ -160,6 +173,15 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
     }
   }
 
+  if ( surl == "/" ) {
+    if ( __startpage_processor ) {
+      proc = __startpage_processor;
+    } else {
+      WebPageReply preply("Fawkes", "<h1>Welcome to Fawkes.</h1><hr />");
+      ret = queue_static_reply(connection, &preply);
+    }
+  }
+
   if (proc) {
     struct MHD_Response *response;
 
@@ -194,13 +216,8 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
       ret = queue_static_reply(connection, &ereply);
     }
   } else {
-    if ( surl == "/" ) {
-      WebPageReply preply("Fawkes", "<h1>Welcome to Fawkes.</h1><hr />");
-      ret = queue_static_reply(connection, &preply);
-    } else {
-      WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
-      ret = queue_static_reply(connection, &ereply);
-    }
+    WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
+    ret = queue_static_reply(connection, &ereply);
   }
   return ret;
 }
@@ -213,7 +230,11 @@ void
 WebRequestDispatcher::add_processor(const char *url_prefix,
 				    WebRequestProcessor *processor)
 {
-  __processors[url_prefix] = processor;
+  if (std::string(url_prefix) == "/") {
+    __startpage_processor = processor;
+  } else {
+    __processors[url_prefix] = processor;
+  }
 }
 
 
@@ -223,5 +244,9 @@ WebRequestDispatcher::add_processor(const char *url_prefix,
 void
 WebRequestDispatcher::remove_processor(const char *url_prefix)
 {
-  __processors.erase(url_prefix);
+  if (std::string(url_prefix) == "/") {
+    __startpage_processor = NULL;
+  } else {
+    __processors.erase(url_prefix);
+  }
 }

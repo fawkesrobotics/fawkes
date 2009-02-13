@@ -26,6 +26,8 @@
 #include "request_dispatcher.h"
 #include "static_processor.h"
 #include "blackboard_processor.h"
+#include "startpage_processor.h"
+#include "plugins_processor.h"
 #include "page_reply.h"
 
 #include <microhttpd.h>
@@ -33,10 +35,12 @@
 using namespace fawkes;
 
 
-/** Prefix for the StaticRequestProcessor. */
+/** Prefix for the WebStaticRequestProcessor. */
 const char *WebviewThread::STATIC_URL_PREFIX = "/static";
-/** Prefix for the BlackBoardRequestProcessor. */
+/** Prefix for the WebBlackBoardRequestProcessor. */
 const char *WebviewThread::BLACKBOARD_URL_PREFIX = "/blackboard";
+/** Prefix for the WebPluginsRequestProcessor. */
+const char *WebviewThread::PLUGINS_URL_PREFIX = "/plugins";
 
 /** @class WebviewThread "webview_thread.h"
  * Webview Thread.
@@ -48,16 +52,23 @@ const char *WebviewThread::BLACKBOARD_URL_PREFIX = "/blackboard";
 
 /** Constructor. */
 WebviewThread::WebviewThread()
-  : Thread("WebviewThread", Thread::OPMODE_CONTINUOUS)
+  : Thread("WebviewThread", Thread::OPMODE_CONTINUOUS),
+    LoggerAspect(&__cache_logger)
 {
   set_prepfin_conc_loop(true);
 }
 
 
+WebviewThread::~WebviewThread()
+{
+}
+
 void
 WebviewThread::init()
 {
   __cfg_port = config->get_uint("/webview/port");
+
+  __cache_logger.clear();
 
   __dispatcher = new WebRequestDispatcher();
   __daemon = MHD_start_daemon(MHD_NO_FLAG,
@@ -72,12 +83,17 @@ WebviewThread::init()
     throw Exception("Could not start microhttpd");
   }
 
-  __static_processor = new WebStaticRequestProcessor(STATIC_URL_PREFIX, RESDIR"/webview", logger);
+  __startpage_processor  = new WebStartPageRequestProcessor(&__cache_logger);
+  __static_processor     = new WebStaticRequestProcessor(STATIC_URL_PREFIX, RESDIR"/webview", logger);
   __blackboard_processor = new WebBlackBoardRequestProcessor(BLACKBOARD_URL_PREFIX, blackboard);
+  __plugins_processor    = new WebPluginsRequestProcessor(PLUGINS_URL_PREFIX, plugin_manager);
+  __dispatcher->add_processor("/", __startpage_processor);
   __dispatcher->add_processor(STATIC_URL_PREFIX, __static_processor);
   __dispatcher->add_processor(BLACKBOARD_URL_PREFIX, __blackboard_processor);
+  __dispatcher->add_processor(PLUGINS_URL_PREFIX, __plugins_processor);
 
   WebPageReply::add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
+  WebPageReply::add_nav_entry(PLUGINS_URL_PREFIX, "Plugins");
 
   logger->log_info("WebviewThread", "Listening for HTTP connections on port %u", __cfg_port);
 }
@@ -91,6 +107,8 @@ WebviewThread::finalize()
   delete __dispatcher;
   delete __static_processor;
   delete __blackboard_processor;
+  delete __startpage_processor;
+  delete __plugins_processor;
   __daemon = NULL;
   __dispatcher = NULL;
 }

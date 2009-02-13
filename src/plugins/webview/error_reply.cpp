@@ -220,5 +220,5 @@ WebErrorPageReply::WebErrorPageReply(response_code_t code, std::string msg)
     break;
   }
 
-  _body += "\n" + msg;
+  _body += "<br />\n<b>" + msg + "</b>\n";
 }

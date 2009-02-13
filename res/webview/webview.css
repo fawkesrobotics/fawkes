@@ -17,6 +17,7 @@ tt { white-space: pre }
 table { margin-top: 10px; }
 tr { text-align: left; }
 td { padding-right: 10px; }
+th { padding-right: 10px; font-weight: bold; }
 
 .underline { text-decoration: underline }
 

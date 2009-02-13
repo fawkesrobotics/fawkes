@@ -30,20 +30,29 @@
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 #include <aspect/network.h>
+#include <aspect/logger.h>
+#include <aspect/plugin_director.h>
+
+#include <utils/logging/cache.h>
 
 class WebRequestDispatcher;
 class WebStaticRequestProcessor;
 class WebBlackBoardRequestProcessor;
+class WebStartPageRequestProcessor;
+class WebPluginsRequestProcessor;
 
 class WebviewThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
-  public fawkes::NetworkAspect
+  public fawkes::NetworkAspect,
+  public fawkes::LoggerAspect,
+  public fawkes::PluginDirectorAspect
 {
  public:
   WebviewThread();
+  ~WebviewThread();
 
   virtual void init();
   virtual void finalize();
@@ -51,14 +60,20 @@ class WebviewThread
 
   static const char *STATIC_URL_PREFIX;
   static const char *BLACKBOARD_URL_PREFIX;
+  static const char *PLUGINS_URL_PREFIX;
 
  private:
   struct MHD_Daemon    *__daemon;
   WebRequestDispatcher *__dispatcher;
-  WebStaticRequestProcessor  *__static_processor;
+
+  WebStaticRequestProcessor      *__static_processor;
+  WebStartPageRequestProcessor   *__startpage_processor;
   WebBlackBoardRequestProcessor  *__blackboard_processor;
+  WebPluginsRequestProcessor     *__plugins_processor;
 
   unsigned int __cfg_port;
+
+  fawkes::CacheLogger  __cache_logger;
 };
 
 

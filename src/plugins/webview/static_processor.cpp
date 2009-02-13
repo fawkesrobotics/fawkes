@@ -24,6 +24,7 @@
 
 #include "static_processor.h"
 #include "file_reply.h"
+#include "error_reply.h"
 
 #include <core/exception.h>
 #include <utils/logging/logger.h>
@@ -32,6 +33,8 @@
 #include <cstdlib>
 #include <string>
 #include <unistd.h>
+#include <cerrno>
+#include <climits>
 
 /** @class WebStaticRequestProcessor "static_processor.h"
  * Static file web processor.
@@ -48,10 +51,12 @@ WebStaticRequestProcessor::WebStaticRequestProcessor(const char *baseurl,
 						     const char *htdocs_dir,
 						     fawkes::Logger *logger)
 {
-  __logger      = logger;
-  __baseurl     = strdup(baseurl);
-  __baseurl_len = strlen(__baseurl);
-  __htdocs_dir  = strdup(htdocs_dir);
+  __logger         = logger;
+  __baseurl        = strdup(baseurl);
+  __baseurl_len    = strlen(__baseurl);
+  __htdocs_dir     = strdup(htdocs_dir);
+  __htdocs_dir_len = strlen(__htdocs_dir);
+
 }
 
 /** Destructor. */
@@ -74,17 +79,41 @@ WebStaticRequestProcessor::process_request(const char *url,
     // It is in our URL prefix range
     std::string file_path = std::string(__htdocs_dir) + std::string(url).substr(__baseurl_len);
 
-    try {
-      DynamicFileWebReply *freply = new DynamicFileWebReply(file_path.c_str());
-      return freply;
-    } catch (fawkes::Exception &e) {
-      __logger->log_error("WebStaticReqProc", "Cannot fulfill request for file %s,"
-			  " exception follows", url);
-      __logger->log_error("WebStaticReqProc", e);
-      return new StaticWebReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-				*(e.begin()));
+    char rf[PATH_MAX];
+    char *realfile = realpath(file_path.c_str(), rf);
+    if (! realfile ) {
+      if (errno == ENOENT) {
+	return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "File not found");
+      } else if (errno == EACCES) {
+	return new WebErrorPageReply(WebReply::HTTP_FORBIDDEN, "Access forbidden");
+      } else {
+	char tmp[1024];
+	strerror_r(errno, tmp, sizeof(tmp));
+	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+				 std::string("File access failed: ") + tmp);
+      }
+    } else {
+      if (strncmp(realfile, __htdocs_dir, __htdocs_dir_len) == 0) {
+	try {
+	  DynamicFileWebReply *freply = new DynamicFileWebReply(file_path.c_str());
+	  return freply;
+	} catch (fawkes::Exception &e) {
+	  __logger->log_error("WebStaticReqProc", "Cannot fulfill request for file %s,"
+			      " exception follows", url);
+	  __logger->log_error("WebStaticReqProc", e);
+	  return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+				   *(e.begin()));
+	}
+      } else {
+	// Someone tries to trick us to give away files we don't want to give
+	return new WebErrorPageReply(WebReply::HTTP_FORBIDDEN,
+				     "Access forbidden, breakout detected.");
+      }
     }
   } else {
+    // wrong base url, why the heck are we called!?
+    __logger->log_error("WebStaticReqProc", "Called for invalid base url "
+			"(url: %s, baseurl: %s)", url, __baseurl);
     return NULL;
   }
 }

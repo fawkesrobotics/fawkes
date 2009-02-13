@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  static_processor.h - Web request processor for static files
+ *  startpage_processor.h - Web request processor for the start page
  *
- *  Created: Mon Oct 13 23:41:34 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Feb 12 00:09:16 2009
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -22,23 +22,20 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_STATIC_PROCESSOR_H_
-#define __PLUGINS_WEBVIEW_STATIC_PROCESSOR_H_
+#ifndef __PLUGINS_WEBVIEW_STARTPAGE_PROCESSOR_H_
+#define __PLUGINS_WEBVIEW_STARTPAGE_PROCESSOR_H_
 
 #include "request_processor.h"
-#include <cstdlib>
 
 namespace fawkes {
-  class Logger;
+  class CacheLogger;
 }
 
-class WebStaticRequestProcessor : public WebRequestProcessor
+class WebStartPageRequestProcessor : public WebRequestProcessor
 {
  public:
-  WebStaticRequestProcessor(const char *baseurl,
-			    const char *htdocs_dir,
-			    fawkes::Logger *logger);
-  virtual ~WebStaticRequestProcessor();
+  WebStartPageRequestProcessor(fawkes::CacheLogger *cache_logger);
+  virtual ~WebStartPageRequestProcessor();
 
   virtual WebReply * process_request(const char *url,
 				     const char *method,
@@ -48,12 +45,7 @@ class WebStaticRequestProcessor : public WebRequestProcessor
 				     void **session_data);
 
  private:
-  char   *__baseurl;
-  size_t  __baseurl_len;
-  char   *__htdocs_dir;
-  size_t  __htdocs_dir_len;
-
-  fawkes::Logger *__logger;
+  fawkes::CacheLogger *__cache_logger;
 };
 
 #endif
