@@ -15,7 +15,7 @@
 
 BASEDIR = ../..
 
-SUBDIRS = core utils interface netcomm blackboard config lua aspect plugin \
+SUBDIRS = core utils interface netcomm blackboard config lua plugin aspect \
 	  geometry  worldinfo_utils gui_utils \
 	  $(subst $(CURDIR)/,,$(wildcard interfaces))
 
@@ -30,7 +30,7 @@ blackboard: core utils interface netcomm
 netcomm: core utils
 config: core netcomm utils
 plugin: core netcomm utils config
-aspect: core utils blackboard netcomm config
+aspect: core utils blackboard netcomm config plugin
 geometry: core
 worldinfo_utils: core netcomm geometry
 lua: core utils blackboard config
