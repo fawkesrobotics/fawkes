@@ -67,13 +67,8 @@ FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
   _service_browser       = avahi_thread;
   thread_manager->add(avahi_thread);
   _nnresolver = new NetworkNameResolver(avahi_thread);
-  char *fawkes_service_name;
-  if (asprintf(&fawkes_service_name, "Fawkes on %s", _nnresolver->short_hostname()) == -1) {
-    throw OutOfMemoryException("FawkesNetworkManager ctor: asprintf() failed");
-  }
-  NetworkService *fawkes_service = new NetworkService(fawkes_service_name,
+  NetworkService *fawkes_service = new NetworkService(_nnresolver, "Fawkes on %h",
 						      "_fawkes._tcp", fawkes_port);
-  free(fawkes_service_name);
   avahi_thread->publish_service(fawkes_service);
   delete fawkes_service;
 #else

@@ -96,12 +96,20 @@ WebviewThread::init()
   WebPageReply::add_nav_entry(PLUGINS_URL_PREFIX, "Plugins");
 
   logger->log_info("WebviewThread", "Listening for HTTP connections on port %u", __cfg_port);
+
+
+  __webview_service = new NetworkService(nnresolver, "Fawkes Webview on %h",
+					 "_http._tcp", __cfg_port);
+  service_publisher->publish_service(__webview_service);
 }
 
 
 void
 WebviewThread::finalize()
 {
+  service_publisher->unpublish_service(__webview_service);
+  delete __webview_service;
+
   WebPageReply::remove_nav_entry(BLACKBOARD_URL_PREFIX);
   MHD_stop_daemon(__daemon);
   delete __dispatcher;

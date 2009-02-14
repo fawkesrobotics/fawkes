@@ -35,6 +35,10 @@
 
 #include <utils/logging/cache.h>
 
+namespace fawkes {
+  class NetworkService;
+}
+
 class WebRequestDispatcher;
 class WebStaticRequestProcessor;
 class WebBlackBoardRequestProcessor;
@@ -73,7 +77,8 @@ class WebviewThread
 
   unsigned int __cfg_port;
 
-  fawkes::CacheLogger  __cache_logger;
+  fawkes::CacheLogger     __cache_logger;
+  fawkes::NetworkService *__webview_service;
 };
 
 
