@@ -24,6 +24,7 @@
  */
 
 #include <netcomm/service_discovery/service.h>
+#include <netcomm/utils/resolver.h>
 
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -119,6 +120,39 @@ NetworkService::NetworkService(const char         *name,
 			       unsigned short int  port)
 {
   _name   = strdup(name);
+  _type   = strdup(type);
+  _domain = NULL;
+  _host   = NULL;
+  _port   = port;
+
+  _addr = NULL;
+  _addr_size = 0;
+}
+
+
+/** Constructor.
+ * This constructor sets all parameters. Host and domain are the
+ * default values, which means local host name in domain .local
+ * (if not set otherwise in Avahi system configuration).
+ * This specific constructor allows the usage of a "%h" token in
+ * the name, which is replaced with the short hostname.
+ * @param nnresolver network name resolver to get the host from for
+ * the replacement of a %h token.
+ * @param name name of service
+ * @param type type of service
+ * @param port port of service
+ */
+NetworkService::NetworkService(NetworkNameResolver *nnresolver,
+			       const char         *name,
+			       const char         *type,
+			       unsigned short int  port)
+{
+  std::string s = name;
+  std::string::size_type hpos = s.find("%h");
+  if (nnresolver && (hpos != std::string::npos)) {
+    s.replace(hpos, 2, nnresolver->short_hostname());
+  }
+  _name   = strdup(s.c_str());
   _type   = strdup(type);
   _domain = NULL;
   _host   = NULL;

@@ -34,6 +34,8 @@
 
 namespace fawkes {
 
+class NetworkNameResolver;
+
 class NetworkService
 {
  public:
@@ -59,6 +61,10 @@ class NetworkService
   NetworkService(const char         *name,
 		 const char         *type,
 		 const char         *domain);
+
+  NetworkService(NetworkNameResolver *nnresolver,
+		 const char *name, const char *type,
+		 unsigned short int port);
 
   NetworkService(const NetworkService *s);
   NetworkService(const NetworkService &s);
