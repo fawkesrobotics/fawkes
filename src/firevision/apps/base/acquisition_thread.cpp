@@ -26,6 +26,7 @@
 #include <apps/base/aqt_vision_threads.h>
 
 #include <core/exceptions/system.h>
+#include <core/exceptions/software.h>
 #ifdef FVBASE_TIMETRACKER
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
@@ -247,6 +248,11 @@ FvAcquisitionThread::loop()
 	      _width, _height);
       __tt->ping_end(__ttc_convert);
       __tt->ping_start(__ttc_unlock);
+      try {
+	_shm->set_capture_time(_camera->capture_time());
+      } catch (NotImplementedException &e) {
+	// ignored
+      }
       _shm->unlock();
       __tt->ping_end(__ttc_unlock);
     }
@@ -275,6 +281,11 @@ FvAcquisitionThread::loop()
       convert(_colorspace, YUV422_PLANAR,
 	      _camera->buffer(), _buffer,
 	      _width, _height);
+      try {
+	_shm->set_capture_time(_camera->capture_time());
+      } catch (NotImplementedException &e) {
+	// ignored
+      }
       _shm->unlock();
     }
     if ( _shm_raw && _enabled ) {

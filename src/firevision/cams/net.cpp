@@ -283,7 +283,7 @@ NetworkCamera::buffer()
     if ( __fuse_image ) {
       return __fuse_image->buffer();
     } else {
-    return NULL;
+      return NULL;
     }
   }
 }
@@ -354,6 +354,15 @@ NetworkCamera::pixel_height()
   }
 }
 
+fawkes::Time *
+NetworkCamera::capture_time()
+{
+  if ( __fuse_image ) {
+    return __fuse_image->capture_time();
+  } else {
+    throw NullPointerException("No valid image exists");
+  }  
+}
 
 void
 NetworkCamera::flush()

@@ -68,6 +68,11 @@ class BlackBoardInterfaceListener
   void bbil_add_reader_interface(Interface *interface);
   void bbil_add_writer_interface(Interface *interface);
 
+  void bbil_remove_data_interface(Interface *interface);
+  void bbil_remove_message_interface(Interface *interface);
+  void bbil_remove_reader_interface(Interface *interface);
+  void bbil_remove_writer_interface(Interface *interface);
+
   InterfaceLockMap *      bbil_data_interfaces() throw();
   InterfaceLockMap *      bbil_message_interfaces() throw();
   InterfaceLockMap *      bbil_reader_interfaces() throw();

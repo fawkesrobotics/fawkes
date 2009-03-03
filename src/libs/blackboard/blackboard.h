@@ -27,8 +27,10 @@
 #define __BLACKBOARD_BLACKBOARD_H_
 
 #include <core/exceptions/software.h>
+#include <interface/interface.h>
 
 #include <list>
+#include <string>
 #include <typeinfo>
 
 namespace fawkes {
@@ -38,7 +40,6 @@ class BlackBoardMemoryManager;
 class BlackBoardMessageManager;
 class BlackBoardNetworkHandler;
 class BlackBoardNotifier;
-class Interface;
 class InterfaceInfoList;
 class BlackBoardInterfaceListener;
 class BlackBoardInterfaceObserver;
@@ -87,7 +88,7 @@ class BlackBoard
 				 unsigned int flags) = 0;
   virtual void unregister_observer(BlackBoardInterfaceObserver *observer) = 0;
 
-  char *  demangle_fawkes_interface_name(const char *type);
+  std::string  demangle_fawkes_interface_name(const char *type);
 };
 
 
@@ -107,14 +108,9 @@ template <class InterfaceType>
 InterfaceType *
 BlackBoard::open_for_reading(const char *identifier)
 {
-  char *type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
-  InterfaceType *interface = dynamic_cast<InterfaceType *>(open_for_reading(type_name, identifier));
-  delete[] type_name;
-  if ( interface == 0 ) {
-    throw TypeMismatchException("Interface (R) types do not match");
-  } else {
-    return interface;
-  }
+  std::string type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
+  Interface *interface = open_for_reading(type_name.c_str(), identifier);
+  return static_cast<InterfaceType *>(interface);
 }
 
 
@@ -131,24 +127,11 @@ template <class InterfaceType>
 std::list<InterfaceType *>
 BlackBoard::open_multiple_for_reading(const char *id_pattern)
 {
-  char *type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
-  std::list<Interface *> il = open_multiple_for_reading(type_name, id_pattern);
-  delete[] type_name;
+  std::string type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
+  std::list<Interface *> il = open_multiple_for_reading(type_name.c_str(), id_pattern);
   std::list<InterfaceType *> rv;
   for (std::list<Interface *>::iterator i = il.begin(); i != il.end(); ++i) {
-    InterfaceType *interface = dynamic_cast<InterfaceType *>(*i);
-    if ( interface == 0 ) {
-      // this really should never happen, but if it does we want to know,
-      // because then we have a serious problem. We don't care about the
-      // memleak here for that very reason.
-      for (std::list<Interface *>::iterator j = il.begin(); j != il.end(); ++j) {
-	close(*j);
-      }
-      throw TypeMismatchException("open_multiple_for_reading: "
-				  "Interface (R) types do not match");
-    } else {
-      rv.push_back(interface);
-    }
+    rv.push_back(static_cast<InterfaceType *>(*i));
   }
 
   return rv;
@@ -173,21 +156,9 @@ template <class InterfaceType>
 InterfaceType *
 BlackBoard::open_for_writing(const char *identifier)
 {
-  char *type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
-  InterfaceType *interface;
-  try {
-    interface = dynamic_cast<InterfaceType *>(open_for_writing(type_name, identifier));
-  } catch (Exception &e) {
-    // just caught to properly free memory
-    delete[] type_name;
-    throw;
-  }
-  delete[] type_name;
-  if ( interface == 0 ) {
-    throw TypeMismatchException("Interface (W) types do not match");
-  } else {
-    return interface;
-  }
+  std::string type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
+  Interface *interface = open_for_writing(type_name.c_str(), identifier);
+  return static_cast<InterfaceType *>(interface);;
 }
 
 } // end namespace fawkes

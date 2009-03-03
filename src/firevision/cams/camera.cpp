@@ -3,7 +3,7 @@
  *  camera.cpp - Abstract class defining a camera
  *
  *  Created: Wed Jan 17 14:48:17 2007
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,6 +25,8 @@
 
 #include <cams/camera.h>
 
+#include <core/exception.h>
+#include <core/exceptions/software.h>
 
 /** @class Camera cams/camera.h
  * Camera interface for image aquiring devices in FireVision.
@@ -121,4 +123,19 @@
 /** Virtual empty destructor. */
 Camera::~Camera()
 {
+}
+
+/** Get the Time of the last successfully captured image.
+ * Returns a Time representing the time when the last image was captured
+ * successfully. Note that calling this function is only valid after capture()
+ * and before dispose_buffer() has been called -- it is only valid when an image
+ * is currently available.
+ * @return Time of the currently processed image. The pointer shall be valid at
+ * least until the next call to dispose_buffer().
+ * @throw NotImplementedException thrown if Camera does not support time stamping
+ */
+fawkes::Time *
+Camera::capture_time()
+{
+  throw fawkes::NotImplementedException("Timestamping not supported by this camera");
 }

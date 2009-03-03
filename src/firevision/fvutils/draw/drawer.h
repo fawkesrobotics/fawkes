@@ -46,6 +46,7 @@ class Drawer {
   void color_point(unsigned int x, unsigned int y);
   void draw_line(unsigned int x_start, unsigned int y_start,
 		unsigned int x_end, unsigned int y_end);
+  void draw_cross(unsigned int x_center, unsigned int y_center, unsigned int width);
 
   void set_buffer(unsigned char *buffer,
 		 unsigned int width, unsigned int height);

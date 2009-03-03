@@ -31,7 +31,7 @@ using namespace fawkes;
 
 /** @class PluginGuiGtkWindow "plugin_gui.h"
  * Graphical plugin management tool.
- * 
+ *
  * @author Daniel Beck
  * @author Tim Niemueller
  */

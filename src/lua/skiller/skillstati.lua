@@ -23,6 +23,7 @@
 
 module(...)
 
-S_FINAL   = 1
-S_RUNNING = 2
-S_FAILED  = 3
+S_INACTIVE = 0
+S_FINAL    = 1
+S_RUNNING  = 2
+S_FAILED   = 3

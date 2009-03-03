@@ -53,10 +53,11 @@ namespace fawkes {
  * @param num_rows number of rows
  * @param num_cols number of columns
  * @param data array containing elements of the matrix in row-order
+ * @param manage_memory true if the memory should be managed internaly
  */
 Matrix::Matrix(unsigned int num_rows,
                unsigned int num_cols,
-               float *data )
+               float *data, bool manage_memory )
 {
 	m_int_num_rows = num_rows;
 	m_int_num_cols = num_cols;
@@ -68,7 +69,7 @@ Matrix::Matrix(unsigned int num_rows,
 	for (unsigned int i = 0; i < m_int_num_cols; ++i)
 	{
 		if ( data )
-		{ m_columns[i] = new Vector(m_int_num_rows, &data[i * m_int_num_rows]); }
+		{ m_columns[i] = new Vector(m_int_num_rows, &data[i * m_int_num_rows], manage_memory); }
 		else
 		{ m_columns[i] = new Vector(m_int_num_rows); }
 	}
@@ -133,6 +134,25 @@ Matrix::id()
 	}
 
 	return *this;
+}
+
+
+/** Creates a square matrix with dimension size and sets the diagonal elements to 1.0.
+* All other elements are set to 0.0.
+* @param size the dimension of the matrix
+* @return the id matrix object
+*/
+Matrix
+Matrix::get_id(unsigned int size)
+{
+	Matrix res(size, size);
+
+	for (unsigned int i = 0; i < size; ++i)
+	{
+		res(i, i) = 1.0f;
+	}
+
+	return res;
 }
 
 
@@ -588,6 +608,49 @@ Matrix::operator+=(const Matrix &m)
 {
 	//TODO: more efficient direct add
 	*this = *this + m;
+
+	return *this;
+}
+
+
+/** Subtract operator.
+ * Subtracts the corresponding elements of the two matrices.
+ * @param m the rhs matrix
+ * @return the resulting matrix
+ */
+Matrix
+Matrix::operator-(const Matrix &m) const
+{
+	if ((num_rows() != m.num_rows()) || (num_cols() != m.num_cols()))
+	{
+		printf("Matrix::operator-(...): Dimension mismatch: a %d x %d matrix can't be added to a %d x %d matrix\n",
+		       num_rows(), num_cols(), m.num_rows(), m.num_cols());
+		throw std::exception();
+	}
+
+	Matrix result(*this);
+
+	for (unsigned int row = 0; row < num_rows(); row++)
+	{
+		for (unsigned int col = 0; col < num_cols(); col++)
+		{
+			result(row, col) -= m(row, col);
+		}
+	}
+
+	return result;
+}
+
+
+/**Subtract-assign operator.
+ * @param m the rhs matrix
+ * @return a reference to the resulting matrix (this)
+ */
+Matrix &
+Matrix::operator-=(const Matrix &m)
+{
+	//TODO: more efficient direct add
+	*this = *this - m;
 
 	return *this;
 }

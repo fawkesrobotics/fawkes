@@ -67,33 +67,22 @@ PluginTreeView::PluginTreeView( BaseObjectType* cobject,
   : Gtk::TreeView(cobject),
     m_dispatcher(FAWKES_CID_PLUGINMANAGER)
 {
+  __gconf = Gnome::Conf::Client::get_default_client();
+  __gconf->add_dir(GCONF_PREFIX);
+
   m_plugin_list = Gtk::ListStore::create(m_plugin_record);
   set_model(m_plugin_list);
   set_rules_hint(true);
   append_column("#", m_plugin_record.index);
   append_column_editable("Status", m_plugin_record.loaded);
-  //append_column("Plugin", m_plugin_record.name);
-  TwoLinesCellRenderer *twolines_renderer = new TwoLinesCellRenderer();
-  Gtk::TreeViewColumn *tlcol = new Gtk::TreeViewColumn("Plugin", *Gtk::manage(twolines_renderer));
-  append_column(*Gtk::manage(tlcol));
+  append_plugin_column();
 
-#ifdef GLIBMM_PROPERTIES_ENABLED
-  tlcol->add_attribute(twolines_renderer->property_line1(), m_plugin_record.name);
-  tlcol->add_attribute(twolines_renderer->property_line2(), m_plugin_record.description);
-#else
-  tlcol->add_attribute(*twolines_renderer, "line1", m_plugin_record.line1);
-  tlcol->add_attribute(*twolines_renderer, "line2", m_plugin_record.line2);
-#endif
-
-  set_headers_clickable();
   on_name_clicked();
   Gtk::TreeViewColumn *column = get_column(0);
   column->signal_clicked().connect(sigc::mem_fun(*this, &PluginTreeView::on_id_clicked));
   column = get_column(1);
   column->signal_clicked().connect(sigc::mem_fun(*this, &PluginTreeView::on_status_clicked));
-  column = get_column(2);
-  column->signal_clicked().connect(sigc::mem_fun(*this, &PluginTreeView::on_name_clicked));
-  
+
   Gtk::CellRendererToggle* renderer;
   renderer = dynamic_cast<Gtk::CellRendererToggle*>( get_column_cell_renderer(1) );
   renderer->signal_toggled().connect( sigc::mem_fun(*this, &PluginTreeView::on_status_toggled));
@@ -101,6 +90,8 @@ PluginTreeView::PluginTreeView( BaseObjectType* cobject,
   m_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &PluginTreeView::on_connected));
   m_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &PluginTreeView::on_disconnected));
   m_dispatcher.signal_message_received().connect(sigc::mem_fun(*this, &PluginTreeView::on_message_received));
+
+  __gconf->signal_value_changed().connect(sigc::hide(sigc::hide(sigc::mem_fun(*this, &PluginTreeView::on_config_changed))));
 }
 
 
@@ -113,10 +104,12 @@ PluginTreeView::~PluginTreeView()
     FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 							 MSG_PLUGIN_UNSUBSCRIBE_WATCH);
     m_dispatcher.get_client()->enqueue(msg);
-    msg->unref();			
+    msg->unref();
 
     m_dispatcher.get_client()->deregister_handler(FAWKES_CID_PLUGINMANAGER);
   }
+
+  __gconf->remove_dir(GCONF_PREFIX);
 }
 
 
@@ -142,13 +135,13 @@ PluginTreeView::on_connected()
 							 MSG_PLUGIN_SUBSCRIBE_WATCH);
     client->enqueue(msg);
     msg->unref();
-      
+
     // request list of available plugins
     msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 				   MSG_PLUGIN_LIST_AVAIL);
     client->enqueue(msg);
     msg->unref();
-      
+
     // request list of loaded plugins
     msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 				   MSG_PLUGIN_LIST_LOADED);
@@ -186,50 +179,50 @@ PluginTreeView::on_message_received(fawkes::FawkesNetworkMessage* msg)
 
     if ( msgid == MSG_PLUGIN_LOADED)
     {
-      if ( msg->payload_size() != sizeof(plugin_loaded_msg_t) ) 
+      if ( msg->payload_size() != sizeof(plugin_loaded_msg_t) )
       {
 	printf("Invalid message size (load succeeded)\n");
-      } 
-      else 
+      }
+      else
       {
 	plugin_loaded_msg_t* m = (plugin_loaded_msg_t*) msg->payload();
 	name   = m->name;
 	loaded = true;
       }
     }
-    else if ( msgid == MSG_PLUGIN_LOAD_FAILED ) 
+    else if ( msgid == MSG_PLUGIN_LOAD_FAILED )
     {
-      if ( msg->payload_size() != sizeof(plugin_load_failed_msg_t) ) 
+      if ( msg->payload_size() != sizeof(plugin_load_failed_msg_t) )
       {
 	printf("Invalid message size (load failed)\n");
-      } 
-      else 
+      }
+      else
       {
 	plugin_load_failed_msg_t* m = (plugin_load_failed_msg_t*) msg->payload();
 	name   = m->name;
 	loaded = false;
       }
     }
-    else if ( msg->msgid() == MSG_PLUGIN_UNLOADED ) 
+    else if ( msg->msgid() == MSG_PLUGIN_UNLOADED )
     {
-      if ( msg->payload_size() != sizeof(plugin_unloaded_msg_t) ) 
+      if ( msg->payload_size() != sizeof(plugin_unloaded_msg_t) )
       {
 	printf("Invalid message size (unload succeeded)\n");
-      } 
-      else 
+      }
+      else
       {
 	plugin_unloaded_msg_t* m = (plugin_unloaded_msg_t*) msg->payload();
 	name   = m->name;
 	loaded = false;
       }
     }
-    else if ( msg->msgid() == MSG_PLUGIN_UNLOAD_FAILED) 
+    else if ( msg->msgid() == MSG_PLUGIN_UNLOAD_FAILED)
     {
-      if ( msg->payload_size() != sizeof(plugin_unload_failed_msg_t) ) 
+      if ( msg->payload_size() != sizeof(plugin_unload_failed_msg_t) )
       {
 	printf("Invalid message size (unload failed)\n");
-      } 
-      else 
+      }
+      else
       {
 	plugin_unload_failed_msg_t* m = (plugin_unload_failed_msg_t*) msg->payload();
 	name   = m->name;
@@ -250,11 +243,11 @@ PluginTreeView::on_message_received(fawkes::FawkesNetworkMessage* msg)
       }
     }
   }
-  else if (msgid == MSG_PLUGIN_AVAIL_LIST) 
+  else if (msgid == MSG_PLUGIN_AVAIL_LIST)
   {
     m_plugin_list->clear();
     PluginListMessage* plm = msg->msgc<PluginListMessage>();
-    while ( plm->has_next() ) 
+    while ( plm->has_next() )
     {
       char *plugin_name = plm->next();
       char *plugin_desc = NULL;
@@ -276,14 +269,14 @@ PluginTreeView::on_message_received(fawkes::FawkesNetworkMessage* msg)
     }
     delete plm;
   }
-  else if ( msg->msgid() == MSG_PLUGIN_AVAIL_LIST_FAILED) 
+  else if ( msg->msgid() == MSG_PLUGIN_AVAIL_LIST_FAILED)
   {
     printf("Obtaining list of available plugins failed\n");
   }
-  else if (msg->msgid() == MSG_PLUGIN_LOADED_LIST ) 
+  else if (msg->msgid() == MSG_PLUGIN_LOADED_LIST )
   {
     PluginListMessage* plm = msg->msgc<PluginListMessage>();
-    while ( plm->has_next() ) 
+    while ( plm->has_next() )
     {
       char* name = plm->next();
 
@@ -303,7 +296,7 @@ PluginTreeView::on_message_received(fawkes::FawkesNetworkMessage* msg)
     }
     delete plm;
   }
-  else if ( msg->msgid() == MSG_PLUGIN_LOADED_LIST_FAILED) 
+  else if ( msg->msgid() == MSG_PLUGIN_LOADED_LIST_FAILED)
   {
     printf("Obtaining list of loaded plugins failed\n");
   }
@@ -332,7 +325,7 @@ PluginTreeView::on_status_toggled(const Glib::ustring& path)
   {
     plugin_load_msg_t* m = (plugin_load_msg_t*) calloc(1, sizeof(plugin_load_msg_t));
     strncpy(m->name, plugin_name.c_str(), PLUGIN_MSG_NAME_LENGTH);
-      
+
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 							 MSG_PLUGIN_LOAD,
 							 m, sizeof(plugin_load_msg_t));
@@ -343,7 +336,7 @@ PluginTreeView::on_status_toggled(const Glib::ustring& path)
   {
     plugin_unload_msg_t* m = (plugin_unload_msg_t *)calloc(1, sizeof(plugin_unload_msg_t));
     strncpy(m->name, plugin_name.c_str(), PLUGIN_MSG_NAME_LENGTH);
-      
+
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 							 MSG_PLUGIN_UNLOAD,
 							 m, sizeof(plugin_unload_msg_t));
@@ -378,3 +371,56 @@ PluginTreeView::on_name_clicked()
 {
   m_plugin_list->set_sort_column(1, Gtk::SORT_ASCENDING);
 }
+
+/**
+ * Configuration data has changed
+ */
+void
+PluginTreeView::on_config_changed()
+{
+  Gtk::TreeViewColumn *plugin_col = get_column(2);
+  if (plugin_col) remove_column(*plugin_col);
+
+  append_plugin_column();
+}
+
+/**
+ * Append appropriate plugin column - depending on the GConf value
+ */
+void
+PluginTreeView::append_plugin_column()
+{
+#ifdef GLIBMM_EXCEPTIONS_ENABLED
+  bool description_as_tooltip = __gconf->get_bool(GCONF_PREFIX"/description_as_tooltip");
+#else
+  std::auto_ptr<Glib::Error> error;
+  bool description_as_tooltip = __gconf->get_bool(GCONF_PREFIX"/description_as_tooltip", error);
+#endif
+
+  if (description_as_tooltip)
+  {
+    append_column("Plugin", m_plugin_record.name);
+    set_tooltip_column(2);
+  }
+  else
+  {
+    TwoLinesCellRenderer *twolines_renderer = new TwoLinesCellRenderer();
+    Gtk::TreeViewColumn *tlcol = new Gtk::TreeViewColumn("Plugin", *Gtk::manage(twolines_renderer));
+    append_column(*Gtk::manage(tlcol));
+
+ #ifdef GLIBMM_PROPERTIES_ENABLED
+    tlcol->add_attribute(twolines_renderer->property_line1(), m_plugin_record.name);
+    tlcol->add_attribute(twolines_renderer->property_line2(), m_plugin_record.description);
+ #else
+    tlcol->add_attribute(*twolines_renderer, "line1", m_plugin_record.line1);
+    tlcol->add_attribute(*twolines_renderer, "line2", m_plugin_record.line2);
+ #endif
+
+    set_tooltip_column(-1);
+  }
+
+  set_headers_clickable();
+  Gtk::TreeViewColumn *plugin_col = get_column(2);
+  if (plugin_col) plugin_col->signal_clicked().connect(sigc::mem_fun(*this, &PluginTreeView::on_name_clicked));
+}
+

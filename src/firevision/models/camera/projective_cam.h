@@ -53,7 +53,7 @@ class ProjectiveCam
 
     virtual ProjectiveCam& set_location(const fawkes::HomTransform& loc);
     virtual ProjectiveCam& set_location(float roll, float pitch, float height, float yaw = 0, float x = 0, float y = 0);
-    
+
     virtual fawkes::cart_coord_2d_t get_GPA_world_coord(const fawkes::point_t img_p) const;
     virtual fawkes::point_t         get_GPA_image_coord(const fawkes::cart_coord_2d_t wld_p) const;
 
@@ -68,8 +68,10 @@ class ProjectiveCam
     fawkes::Matrix get_GPA_p() const;
 
   private:
-    Calibration* cal_;
-    fawkes::Matrix* p_;
+    Calibration    *__cal;
+    fawkes::Matrix *__p;
+    fawkes::Matrix *__gpa_inv;
+    float          *__gpa_inv_data;
 };
 
 #endif // __FIREVISION_PROJECTIVE_CAM_H__

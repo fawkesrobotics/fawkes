@@ -38,11 +38,12 @@
 /** FUSE version enum. */
 typedef enum {
   FUSE_VERSION_1 = 1,	/**< Version 1 */
-  FUSE_VERSION_2 = 2	/**< Version 2 - current */
+  FUSE_VERSION_2 = 2,	/**< Version 2 */
+  FUSE_VERSION_3 = 3	/**< Version 3 - current */
 } FUSE_version_t;
 
 /** Current FUSE version */
-#define FUSE_CURRENT_VERSION FUSE_VERSION_2
+#define FUSE_CURRENT_VERSION FUSE_VERSION_3
 
 /** FUSE packet types */
 typedef enum {
@@ -121,6 +122,8 @@ typedef struct {
   uint32_t  width;				/**< width in pixels */
   uint32_t  height;				/**< height in pixels */
   uint32_t  buffer_size;			/**< size of following image buffer in bytes */
+  int64_t   capture_time_sec;			/**< capture time seconds part */
+  int64_t   capture_time_usec;			/**< capture time microseconds part */
 } FUSE_image_message_header_t;
 
 /*

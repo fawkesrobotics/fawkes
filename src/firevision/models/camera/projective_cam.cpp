@@ -23,13 +23,16 @@
  */
 
 #include "projective_cam.h"
+
 #include <geometry/hom_point.h>
 #include <geometry/vector.h>
+#include <core/exceptions/software.h>
+
 #include <cmath>
 #include <iostream>
 
 using namespace fawkes;
-using std::cout; 
+using std::cout;
 using std::endl;
 
 
@@ -72,8 +75,11 @@ AboveHorizonException::get_img_pt() const
  */
 ProjectiveCam::ProjectiveCam(const Calibration& cal, const HomTransform& loc)
 {
-  cal_ = new Calibration(cal);
-  p_ = 0;
+  __cal     = new Calibration(cal);
+  __p       = NULL;
+  __gpa_inv = NULL;
+  __gpa_inv_data = new float[9];
+
   set_location(loc);
 }
 
@@ -88,39 +94,34 @@ ProjectiveCam::ProjectiveCam(const Calibration& cal, const HomTransform& loc)
  */
 ProjectiveCam::ProjectiveCam(const Calibration& cal, float roll, float pitch, float height, float yaw, float x, float y)
 {
-  cal_ = new Calibration(cal);
-  p_ = 0;
+  __cal          = new Calibration(cal);
+  __p            = NULL;
+  __gpa_inv      = NULL;
+  __gpa_inv_data = new float[9];
+
   set_location(roll, pitch, height, yaw, x, y);
 }
 
-/** Copy Constructor 
+/** Copy Constructor
  * @param pc the ProjectiveCam to copy
  */
 ProjectiveCam::ProjectiveCam(const ProjectiveCam& pc)
 {
-  //	cal_ = new Calibration(pc.cal_);
-  //	p_ = new Matrix (pc.p_);
+  throw fawkes::NotImplementedException("The copy constuctor is not implemented yet");
+  //	__cal = new Calibration(pc.__cal);
+  //	__p = new Matrix (pc.__p);
 }
 
 /** Destructor.
  */
 ProjectiveCam::~ProjectiveCam()
 {
-  delete cal_;
-  delete p_;
+  delete   __cal;
+  delete   __p;
+  delete   __gpa_inv;
+  delete[] __gpa_inv_data;
 }
 
-
-/** Obtain inverse matrix.
- * @return the invers matrix
- HomTransform
- ProjectiveCam::get_inverse() const
- {
-   HomTransform t(m_matrix->get_inverse());
-   
-   return t;
-   }
-   */ 
 
 /** Sets a new location for the camera
  * @param roll of the camera
@@ -131,7 +132,7 @@ ProjectiveCam::~ProjectiveCam()
  * @param y of the camera (left if yaw is zero)
  * @return a reference to the camera
  */
-ProjectiveCam& 
+ProjectiveCam&
 ProjectiveCam::set_location(float roll, float pitch, float height, float yaw, float x, float y)
 {
   HomTransform t;
@@ -140,27 +141,40 @@ ProjectiveCam::set_location(float roll, float pitch, float height, float yaw, fl
 
   //Transformation of world frame into cam frame [rot_x(-pi/2)+rot_z(-pi/2)]:
   t.rotate_x(-M_PI_2);
-  t.rotate_z(-M_PI_2 - yaw);
+  t.rotate_z(-M_PI_2);
 
-  t.rotate_x(roll);
   t.rotate_y(pitch);
-  t.trans(-x, y, height);
+  t.rotate_x(-roll);
 
+  t.trans(-x, y, height);
+  t.rotate_z(yaw);
   return set_location(t);
 }
 
 /** Sets a new location for the camera
- * @param loc the new location (remember the transformation from world frame 
+ * @param loc the new location (remember the transformation from world frame
  *            into cam frame [rot_x(-pi/2)+rot_z(-pi/2)] before the rest of the
  *            transformation)
  * @return a reference to the camera
  */
-ProjectiveCam& 
+ProjectiveCam&
 ProjectiveCam::set_location(const HomTransform& loc)
 {
-  if (p_) delete p_;
+  if (__p) {
+    delete __p;
+    __p = NULL;
+  }
+  if (__gpa_inv) {
+    delete __gpa_inv;
+    __gpa_inv = NULL;
+  }
 
-  p_ = new Matrix (*cal_ * loc.get_matrix().get_submatrix(0, 0, 3, 4));
+  __p = new Matrix (*__cal * loc.get_matrix().get_submatrix(0, 0, 3, 4));
+
+  __gpa_inv = new Matrix(3, 3, __gpa_inv_data, false);
+  __gpa_inv->overlay(0, 0, __p->get_submatrix(0, 0, 3, 2));
+  __gpa_inv->overlay(0, 2, __p->get_submatrix(0, 3, 3, 1));
+  __gpa_inv->invert();
 
   return *this;
 }
@@ -169,27 +183,23 @@ ProjectiveCam::set_location(const HomTransform& loc)
  * @param img_p a point in the image (x-px, y-px)
  * @return a point in the world (x-meters, y-meters)
  */
-fawkes::cart_coord_2d_t 
+fawkes::cart_coord_2d_t
 ProjectiveCam::get_GPA_world_coord(fawkes::point_t img_p) const
 {
-  Matrix p = get_GPA_p().invert();
-  
   Vector img_v(3);
   img_v.x(img_p.x);
   img_v.y(img_p.y);
   img_v.z(1);
-  
-  Vector wld_v = p * img_v;
-  
+
+  Vector wld_v = *__gpa_inv * img_v;
+
   wld_v /= wld_v.z();
 
-  if (wld_v.x() < 0) throw AboveHorizonException("The given point is above the horizon!\n", img_p);
+  if (wld_v.x() < 0) {
+    throw AboveHorizonException("The given point is above the horizon!\n", img_p);
+  }
 
-  fawkes::cart_coord_2d_t res;
-  res.x = wld_v.x();
-  res.y = -wld_v.y();
-  
-  return res;
+  return (fawkes::cart_coord_2d_t){ wld_v.x(), -wld_v.y() };
 }
 
 /** Returns an image point of a world point under the ground plane assumption.
@@ -204,14 +214,14 @@ ProjectiveCam::get_GPA_image_coord(const fawkes::cart_coord_2d_t wld_p) const
   wld_v.y(wld_p.y);
   wld_v.z(0); //GPA
   wld_v.set(3, 1);
-  
-  Vector img_v = *p_ * wld_v;
+
+  Vector img_v = *__p * wld_v;
   img_v /= img_v.z();
-  
+
   point_t res;
   res.x = static_cast<unsigned int>(roundf(img_v.x()));
   res.y = static_cast<unsigned int>(roundf(img_v.y()));
-  
+
   return res;
 }
 
@@ -222,7 +232,7 @@ ProjectiveCam::get_GPA_image_coord(const fawkes::cart_coord_2d_t wld_p) const
 Calibration
 ProjectiveCam::get_cal() const
 {
-  return Calibration(*cal_);
+  return Calibration(*__cal);
 }
 
 /**
@@ -232,7 +242,7 @@ ProjectiveCam::get_cal() const
 Matrix
 ProjectiveCam::get_p() const
 {
-  return Matrix(*p_);
+  return Matrix(*__p);
 }
 
 /** Returns the modified P matrix.
@@ -242,9 +252,9 @@ Matrix
 ProjectiveCam::get_GPA_p() const
 {
   Matrix res(3, 3);
-  res.overlay(0, 0, p_->get_submatrix(0, 0, 3, 2)); //first two columns
-  res.overlay(0, 2, p_->get_submatrix(0, 3, 3, 1)); //fourth column
-  
+  res.overlay(0, 0, __p->get_submatrix(0, 0, 3, 2)); //first two columns
+  res.overlay(0, 2, __p->get_submatrix(0, 3, 3, 1)); //fourth column
+
   return res;
 }
 
@@ -256,7 +266,7 @@ ProjectiveCam::get_GPA_p() const
 void
 ProjectiveCam::print_info (const char *name, const char *col_sep, const char *row_sep) const
 {
-  p_->print_info(name ? name : "Projective Camera", col_sep, row_sep);
-  cal_->print_info("Calibration Matrix", col_sep, row_sep);
+  __p->print_info(name ? name : "Projective Camera", col_sep, row_sep);
+  __cal->print_info("Calibration Matrix", col_sep, row_sep);
 }
 

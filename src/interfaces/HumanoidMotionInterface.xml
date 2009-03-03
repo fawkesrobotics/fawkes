@@ -20,6 +20,7 @@
     </comment>
 
     <field type="bool" name="moving">True if the robot is currently moving.</field>
+    <field type="LegEnum" name="supporting_leg">Marks the supporting leg</field>
 
     <!-- Walk pattern config -->
     <field type="float" name="max_step_length">
@@ -158,5 +159,11 @@
   <message name="Standup">
     <comment>Bring robot into a standing position when lying on the ground.</comment>
     <field type="StandupEnum" name="from_pos">Position from where to standup.</field>
+  </message>
+  <message name="YawPitchHead">
+    <comment>Set head's pan/tilt to the given values..</comment>
+    <field type="float" name="yaw">Desired yaw (horizontal orientation).</field>
+    <field type="float" name="pitch">Desired pitch (vertical orientation).</field>
+    <field type="float" name="time_sec">Time in seconds when to reach the target.</field>
   </message>
 </interface>

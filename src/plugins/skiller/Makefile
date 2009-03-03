@@ -20,6 +20,10 @@ include $(LIBSRCDIR)/utils/utils.mk
 
 SUBDIRS = consoletool
 
+# Uncomment to enable time tracking for the skiller
+# CFLAGS += -DSKILLER_TIMETRACKING -DSKILLER_TT_MOD=50
+
+
 CFLAGS  += $(CFLAGS_LUA)
 
 LIBS_skiller = fawkescore fawkesutils fawkesnetcomm fawkeslua SkillerInterface SkillerDebugInterface

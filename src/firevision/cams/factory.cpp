@@ -50,6 +50,9 @@
 #ifdef HAVE_V4L2_CAM
 #include <cams/v4l2.h>
 #endif
+#ifdef HAVE_NAO_CAM
+#include <cams/nao.h>
+#endif
 #ifdef HAVE_BUMBLEBEE2_CAM
 #include <cams/bumblebee2.h>
 #endif
@@ -163,6 +166,15 @@ CameraFactory::instance(const CameraArgumentParser *cap)
     c = new V4L2Camera(cap);
 #else
     throw UnknownCameraTypeException("No video4linux2 support at compile time");
+#endif
+  }
+
+  // ######
+  if ( cap->cam_type() == "nao" ) {
+#ifdef HAVE_NAO_CAM
+    c = new NaoCamera(cap);
+#else
+    throw UnknownCameraTypeException("No nao camera support at compile time");
 #endif
   }
 

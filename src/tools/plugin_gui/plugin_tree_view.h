@@ -32,14 +32,17 @@
 #include <gui_utils/connection_dispatcher.h>
 
 #include <gtkmm.h>
+#include <gconfmm.h>
 #include <libglademm/xml.h>
+
+#define GCONF_PREFIX "/apps/fawkes/plugingui"
 
 namespace fawkes {
   class FawkesNetworkClient;
   class FawkesNetworkMessage;
 }
 
-class PluginTreeView 
+class PluginTreeView
 : public Gtk::TreeView
 {
  public:
@@ -52,14 +55,14 @@ class PluginTreeView
   class PluginRecord : public Gtk::TreeModelColumnRecord
   {
   public:
-    PluginRecord() 
-      { 
+    PluginRecord()
+      {
 	add(index);
 	add(name);
 	add(description);
 	add(loaded);
       }
-    
+
     Gtk::TreeModelColumn<int> index;           /**< an index */
     Gtk::TreeModelColumn<Glib::ustring> name;  /**< the name of the plugin */
     Gtk::TreeModelColumn<Glib::ustring> description;  /**< description of the plugin */
@@ -73,9 +76,13 @@ class PluginTreeView
   void on_id_clicked();
   void on_status_clicked();
   void on_name_clicked();
+  void on_config_changed();
+
+  void append_plugin_column();
 
  private:
   Glib::RefPtr<Gtk::ListStore> m_plugin_list;
+  Glib::RefPtr<Gnome::Conf::Client> __gconf;
   PluginRecord m_plugin_record;
 
   fawkes::ConnectionDispatcher m_dispatcher;

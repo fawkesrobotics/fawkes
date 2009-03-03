@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  tracker.h - Header for time tracker, which can be used to track a
- *              process's times
+ *  tracker.h - Time tracker, which can be used to track a process's times
  *
  *  Created: Fri Jun 03 13:43:20 2005 (copied from RCSoft5 FireVision)
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -33,13 +32,19 @@
 #include <sys/time.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class TimeTracker {
  public:
-  TimeTracker();
+  static const unsigned int DEFAULT_CLASS;
+
+  TimeTracker(bool add_default_class = false);
   ~TimeTracker();
 
   unsigned int add_class(std::string name);
+  void         remove_class(unsigned int cls);
 
   void ping(unsigned int cls);
   void ping_start(unsigned int cls);
@@ -52,13 +57,13 @@ class TimeTracker {
  private:
   timeval start_time;
   timeval last_time;
-  std::vector< std::vector< struct timeval * > * > classTimes;
-  std::vector< std::string * > classNames;
-  std::vector< struct timeval * > times;
-  std::map< unsigned int, std::string * > comments;
-  std::vector< struct timeval * >::iterator time_it;
-  std::map< unsigned int, std::string * >::iterator comment_it;
-  std::string tracker_comment;
+  std::vector<std::vector<struct timeval *> >    __class_times;
+  std::vector<std::string>                       __class_names;
+  std::vector<struct timeval *>                  __times;
+  std::map<unsigned int, std::string>            __comments;
+  std::vector<struct timeval *>::iterator        __time_it;
+  std::map<unsigned int, std::string>::iterator  __comment_it;
+  std::string                                    __tracker_comment;
 };
 
 } // end namespace fawkes

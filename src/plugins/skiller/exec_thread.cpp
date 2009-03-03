@@ -3,7 +3,7 @@
  *  exec_thread.cpp - Fawkes Skiller: Execution Thread
  *
  *  Created: Mon Feb 18 10:30:17 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -28,6 +28,9 @@
 #include <core/exceptions/system.h>
 #include <core/threading/mutex.h>
 #include <utils/logging/component.h>
+#ifdef SKILLER_TIMETRACKING
+#  include <utils/time/tracker.h>
+#endif
 
 #include <lua/context.h>
 #include <lua/interface_importer.h>
@@ -82,6 +85,7 @@ SkillerExecutionThread::init_failure_cleanup()
     if ( __skdbg_if )   blackboard->close(__skdbg_if);
 
     delete __lua_ifi;
+    delete __clog;
 
   } catch (...) {
     // we really screwed up, can't do anything about it, ignore error, logger is
@@ -100,6 +104,8 @@ SkillerExecutionThread::init()
   __reader_just_left = false;
   __continuous_run = false;
   __skdbg_what = "ACTIVE";
+  __clog = NULL;
+  __sksf_pushed = false;
 
   try {
     __cfg_skillspace  = config->get_string("/skiller/skillspace");
@@ -121,10 +127,10 @@ SkillerExecutionThread::init()
   std::string reading_prefix = "/skiller/interfaces/" + __cfg_skillspace + "/reading/";
   std::string writing_prefix = "/skiller/interfaces/" + __cfg_skillspace + "/writing/";
 
-  __skiller_if = blackboard->open_for_writing<SkillerInterface>("Skiller");
-  __skdbg_if   = blackboard->open_for_writing<SkillerDebugInterface>("Skiller");
-
   try {
+    __skiller_if = blackboard->open_for_writing<SkillerInterface>("Skiller");
+    __skdbg_if   = blackboard->open_for_writing<SkillerDebugInterface>("Skiller");
+    
     __lua  = new LuaContext(__cfg_watch_files);
 
     __lua_ifi = new LuaInterfaceImporter(__lua, blackboard, config, logger);
@@ -148,28 +154,41 @@ SkillerExecutionThread::init()
     __lua_ifi->push_interfaces();
 
     __lua->set_start_script(LUADIR"/skiller/start.lua");
+  
+    __skiller_if->set_skill_string("");
+    __skiller_if->set_status(SkillerInterface::S_INACTIVE);
+    __skiller_if->write();
+
+    __skdbg_if->set_graph("");
+    __skdbg_if->set_graph_fsm("ACTIVE");
+
   } catch (Exception &e) {
     init_failure_cleanup();
     throw;
   }
 
-  __skiller_if->set_skill_string("");
-  __skiller_if->set_status(SkillerInterface::S_INACTIVE);
-  __skiller_if->write();
-
-  __skdbg_if->set_graph("");
-  __skdbg_if->set_graph_fsm("ACTIVE");
-
   // We want to know if our reader leaves and closes the interface
   bbil_add_reader_interface(__skiller_if);
   blackboard->register_listener(this, BlackBoard::BBIL_FLAG_READER);
 
+#ifdef SKILLER_TIMETRACKING
+  __tt           = new TimeTracker();
+  __ttc_total    = __tt->add_class("Total");
+  __ttc_msgproc  = __tt->add_class("Message Processing");
+  __ttc_luaprep  = __tt->add_class("Lua Preparation");
+  __ttc_luaexec  = __tt->add_class("Lua Execution");
+  __ttc_publish  = __tt->add_class("Publishing");
+  __tt_loopcount = 0;
+#endif
 }
 
 
 void
 SkillerExecutionThread::finalize()
 {
+#ifdef SKILLER_TIMETRACKING
+  delete __tt;
+#endif
   delete __lua_ifi;
 
   blackboard->unregister_listener(this);
@@ -338,6 +357,9 @@ SkillerExecutionThread::process_skdbg_messages()
 void
 SkillerExecutionThread::loop()
 {
+#ifdef SKILLER_TIMETRACKING
+  __tt->ping_start(__ttc_total);
+#endif
 #ifdef HAVE_INOTIFY
   __lua->process_fam_events();
 #endif
@@ -350,6 +372,9 @@ SkillerExecutionThread::loop()
   bool write_skiller_if    = false;
   bool last_was_continuous = __continuous_run;
 
+#ifdef SKILLER_TIMETRACKING
+  __tt->ping_start(__ttc_msgproc);
+#endif
   process_skdbg_messages();
 
   while ( ! __skiller_if->msgq_empty() ) {
@@ -455,9 +480,16 @@ SkillerExecutionThread::loop()
     curss = __skiller_if->skill_string();
   }
 
+#ifdef SKILLER_TIMETRACKING
+  __tt->ping_end(__ttc_msgproc);
+#endif
+
   if ( __continuous_reset ) {
-    logger->log_debug("SkillerExecutionThread", "Continuous reset forced");
-    try {
+    logger->log_debug("SkillerExecutionThread", "Continuous reset forced");    try {
+      if (__sksf_pushed) {
+	__lua->pop(1);			  // ---
+	__sksf_pushed = false;
+      }
       __lua->do_string("skillenv.reset_all()");
     } catch (Exception &e) {
       logger->log_warn("SkillerExecutionThread", "Caught exception while resetting skills, ignored, output follows");
@@ -479,6 +511,10 @@ SkillerExecutionThread::loop()
   if ( curss != "" ) {
     // We've got something to execute
 
+#ifdef SKILLER_TIMETRACKING
+      __tt->ping_start(__ttc_luaprep);
+#endif
+
     // we're in continuous mode, reset status for this new loop
     if ( __continuous_run ) {
       // was continuous execution, status has to be cleaned up anyway
@@ -492,11 +528,19 @@ SkillerExecutionThread::loop()
     }
 
     try {
-                                          // Stack:
-      __lua->load_string(curss.c_str());  // sksf (skill string function)
-      __lua->do_string("return skillenv.gensandbox()"); // sksf, sandbox
-      __lua->setfenv();                   // sksf
-      __lua->pcall();                     // ---
+      if (! __sksf_pushed) {
+                                            // Stack:
+	__lua->load_string(curss.c_str());  // sksf (skill string function)
+	__lua->do_string("return skillenv.gensandbox()"); // sksf, sandbox
+	__lua->setfenv();                   // sksf
+	__sksf_pushed = true;
+      }
+#ifdef SKILLER_TIMETRACKING
+      __tt->ping_end(__ttc_luaprep);
+      __tt->ping_start(__ttc_luaexec);
+#endif
+      __lua->push_value(-1);		  // sksf sksf
+      __lua->pcall();                     // sksf
 
     } catch (Exception &e) {
       logger->log_error("SkillerExecutionThread", e);
@@ -505,11 +549,18 @@ SkillerExecutionThread::loop()
       __continuous_reset = true;
       __continuous_run   = false;
     }
+#ifdef SKILLER_TIMETRACKING
+    __tt->ping_end(__ttc_luaexec);
+#endif
 
     if ( ! __continuous_run ) {
       // was one-shot execution, cleanup
       logger->log_debug("SkillerExecutionThread", "Resetting skills");
       try {
+	if (__sksf_pushed) {
+	  __lua->pop(1);			  // ---
+	  __sksf_pushed = false;
+	}
 	__lua->do_string("skillenv.reset_all()");
       } catch (Exception &e) {
 	logger->log_warn("SkillerExecutionThread", "Caught exception while resetting skills, ignored, output follows");
@@ -518,11 +569,22 @@ SkillerExecutionThread::loop()
     }
   } // end if (curss != "")
 
+#ifdef SKILLER_TIMETRACKING
+    __tt->ping_start(__ttc_publish);
+#endif
   publish_skill_status(curss);
   publish_skdbg();
 
   __reader_just_left = false;
 
   __lua_ifi->write();
+#ifdef SKILLER_TIMETRACKING
+  __tt->ping_end(__ttc_publish);
+  __tt->ping_end(__ttc_total);
+  if (++__tt_loopcount >= SKILLER_TT_MOD) {
+    logger->log_debug("Lua", "Stack size: %i", __lua->stack_size());
+    __tt_loopcount = 0;
+    __tt->print_to_stdout();
+  }
+#endif
 }
-

@@ -44,7 +44,7 @@ class PluginGuiGtkWindow : public Gtk::Window
   // widgets
   PluginTreeView* m_trv_plugins;
   Gtk::Statusbar* m_stb_status;
-  
+
   fawkes::ServiceSelectorCBE* m_service_selector;
 };
 

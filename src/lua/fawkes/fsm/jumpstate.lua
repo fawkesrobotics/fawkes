@@ -132,6 +132,7 @@ end
 -- debugging and graph generation
 function JumpState:add_transition(state, jumpcond, description)
    assert(state, self.name .. ": Follow state is nil while adding '" .. description .. "'")
+   assert(state.name or type(state) == "string", self.name .. ": Follow state does not have a valid name while adding '" .. description .. "'")
    assert(jumpcond, self.name .. ": Jump condition is nil while adding '" .. description .. "'")
    --printf("%s: When '%s' -> %s (%s)", self.name, description, state.name, tostring(self.transitions))
    local transition = {state       = state,
@@ -145,6 +146,24 @@ end
 function JumpState:add_precond_trans(state, jumpcond, description)
    local t = self:add_transition(state, jumpcond, description)
    self:add_precondition(t)
+end
+
+
+--- Prepare the state.
+-- This method is called once and only once in the FSMs and states lifetime.
+-- It is used for example to resolve forward declaration of states (when a string
+-- with the states name was given instead of the state object). If that fails an
+-- error is thrown.
+function JumpState:prepare()
+   assert(self.preconditions, self.name .. ": preconditions table is nil, will cause flaky results")
+   for _,t in ipairs(self.transitions) do
+      if type(t.state) == "string" then
+	 local name = t.state
+	 t.state = self.fsm.states[name]
+	 assert(t.state and t.state.name, "JumpState.prepare: failed to resolve "..
+		"forward declaration of state " .. name .. ", no such state in FSM")
+      end
+   end
 end
 
 --- Try all transitions and return a follow state if applicable.

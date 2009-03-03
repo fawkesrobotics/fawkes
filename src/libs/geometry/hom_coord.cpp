@@ -205,7 +205,7 @@ HomCoord::rotate_x(float rad)
   HomTransform t;
   t.rotate_x(rad);
   *this = t * (*this);
-  
+
   return *this;
 }
 
@@ -235,7 +235,7 @@ HomCoord::rotate_z(float rad)
   return *this;
 }
 
-/** Substraction operator.
+/** Subtraction operator.
  * @param h the rhs HomCoord
  * @return the resulting HomCoord
  */
@@ -262,7 +262,7 @@ HomCoord::operator-=(const HomCoord& h)
 
   return *this;
 }
-  
+
 /** Addition operator.
  * @param h the rhs HomCoord
  * @return the resulting HomCoord
@@ -290,8 +290,8 @@ HomCoord::operator+=(const HomCoord& h)
 
   return *this;
 }
-  
-  
+
+
 /** Assignment operator.
  * @param h the rhs HomCoord
  * @return a reference of the lhs vector (this)
@@ -331,7 +331,7 @@ operator<<(std::ostream& stream, const HomCoord &h)
  * @param stream to be extended
  * @return the extended stream
  */
-std::ostream& 
+std::ostream&
 HomCoord::addToStream(std::ostream& stream) const
 {
 	return stream << "[" << x() << ","  << y() << ","  << z() << ","  << w() << "]";

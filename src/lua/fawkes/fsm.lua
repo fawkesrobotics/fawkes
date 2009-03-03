@@ -36,7 +36,6 @@ JumpState = jumpstmod.JumpState
 local fsmgrapher = require("fawkes.fsm.grapher")
 
 
-
 --- @class FSM Finite State Machine
 -- Representation with utility methods of a FSM.
 FSM = { current = nil, debug = false, export_states_to_parent = true }
@@ -59,14 +58,19 @@ function FSM:new(o)
    setmetatable(o, self)
    self.__index = self
 
-   o.vars          = {}
-   o.states        = {}
-   o.state_changed = false
-   o.trace         = {}
-   o.tracing       = true
-   o.error         = ""
-   o.exit_state    = o.exit_state or ""
-   o.fail_state    = o.fail_state or ""
+   o.recursion_limit     = 10;
+   o.current_recursion   = 0;
+   o.persistent_vars     = {}
+   o.vars                = {}
+   o.states              = {}
+   o.state_changed       = false
+   o.trace               = {}
+   o.tracing             = true
+   o.error               = ""
+   o.exit_state          = o.exit_state or ""
+   o.fail_state          = o.fail_state or ""
+   o.default_transitions = {}
+   o.prepared            = false
 
    return o
 end
@@ -193,6 +197,7 @@ function FSM:new_state(name, vars)
    end
    local s = State:new(o)
    self.states[name] = s
+   self:apply_deftrans(s)
    if self.export_states_to_parent then
       local e = getfenv(2)
       e[name] = s
@@ -201,6 +206,24 @@ function FSM:new_state(name, vars)
    return s
 end
 
+
+function FSM:add_default_transition(state, jumpcond, description)
+   table.insert(self.default_transitions, {state=state, jumpcond=jumpcond, description=description})
+   for _,st in pairs(self.states) do
+      self:apply_deftrans(st)
+   end
+end
+
+
+function FSM:apply_deftrans(state)
+   for _,t in ipairs(self.default_transitions) do
+      if state ~= t.state
+	 and state.name ~= self.exit_state and name ~= self.fail_state then
+
+	 state:add_transition(t.state, t.jumpcond, t.description)
+      end
+   end
+end
 
 --- Convenience method to create a new jump state.
 -- Creates a new instance of JumpState and assigns it to the states table with
@@ -224,6 +247,7 @@ function FSM:new_jump_state(name, transitions, vars)
       end
    end
    local s = JumpState:new(o)
+   self:apply_deftrans(s)
    self.states[name] = s
    if self.export_states_to_parent then
       local e = getfenv(2)
@@ -257,8 +281,11 @@ end
 function FSM:add_state(state)
    assert(state, "State may not be nil")
    assert(state.name, "State must have a name")
+   assert(self.states[state.name] == nil, "FSM:add_state: State with name " .. state.name .. " already exists")
 
    self.states[state.name] = state
+
+   self:apply_deftrans(state)
 end
 
 
@@ -283,9 +310,11 @@ end
 -- Runs the loop() function of the current state and executes possible state
 -- transitions that result from running the loop.
 function FSM:loop()
+   self.current_recursion = 0
    if not self.current then
       -- FSM was just reset, initialize start state
       self.current = self.states[self.start]
+      assert(self.current, "Start state " .. tostring(self.start) .. " does not exist")
       self:trans(self.current:do_init())
       self.state_changed = true
    end
@@ -318,6 +347,12 @@ function FSM:trans(next_state, ...)
 	 local trans = self.current:last_transition()
 	 table.insert(self.trace, {from = self.current, transition = trans, to = next_state})
       end
+
+      -- Some sanity check to avoid infinite loops
+      self.current_recursion = self.current_recursion + 1
+      assert(self.current_recursion < self.recursion_limit,
+	     "Recursion limit (" .. tostring(self.recursion_limit) ..
+	     ") reached, infinite loop?")
 
       self.state_changed = true
       if self.debug then
@@ -352,6 +387,12 @@ function FSM:reset()
 
    self.vars          = {}
 
+   if not self.prepared then
+      for n,s in pairs(self.states) do
+	 s:prepare()
+      end
+      self.prepared = true
+   end
    for n,s in pairs(self.states) do
       s:reset()
    end

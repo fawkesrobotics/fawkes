@@ -52,8 +52,7 @@ AgentSkillExecJumpState = { add_transition     = JumpState.add_transition,
 			    last_transition    = JumpState.last_transition,
 			    init               = JumpState.init,
 			    loop               = JumpState.loop,
-			    exit               = JumpState.exit,
-			    reset              = JumpState.reset
+			    exit               = JumpState.exit
 			  }
 
 
@@ -81,16 +80,22 @@ function AgentSkillExecJumpState:new(o)
    setmetatable(o, self)
    self.__index = self
 
-   o.transitions = o.transitions or {}
+   o.transitions   = o.transitions or {}
+   o.preconditions = o.preconditions or {}
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
+   assert(type(o.preconditions) == "table", "Preconditions for " .. o.name .. " not a table")
 
    local skills = o.skills or {}
    o.skill_queue = SkillQueue:new{name=o.name, skills=skills}
 
    o.skill_status = skillstati.S_RUNNING
 
-   o.final_transition   = JumpState.add_transition(o, o.final_state, o.jumpcond_final, "Skill(s) succeeded")
-   o.failure_transition = JumpState.add_transition(o, o.failure_state, o.jumpcond_failure, "Skill(s) failed")
+   if type(o.final_state) == "table" then
+      o.final_transition   = o:add_transition(o.final_state, o.jumpcond_final, "Skill(s) succeeded")
+   end
+   if type(o.failure_state) == "table" then
+      o.failure_transition = o:add_transition(o.failure_state, o.jumpcond_failure, "Skill(s) failed")
+   end
 
    o:set_transition_labels()
 
@@ -114,11 +119,19 @@ function AgentSkillExecJumpState:set_transition_labels()
       for _,s in ipairs(self.skills) do
 	 table.insert(snames, s[1])
       end
-      self.failure_transition.description = table.concat(snames, " or ") .. " failed"
-      self.final_transition.description   = table.concat(snames, " and ") .. " succeeded"
+      if self.failure_transition then
+	 self.failure_transition.description = table.concat(snames, " or ") .. " failed"
+      end
+      if self.final_transition then
+	 self.final_transition.description   = table.concat(snames, " and ") .. " succeeded"
+      end
    else
-      self.failure_transition.description = "S_FAILED"
-      self.final_transition.description   = "S_FINAL"
+      if self.failure_transition then
+	 self.failure_transition.description = "S_FAILED"
+      end
+      if self.final_transition then
+	 self.final_transition.description   = "S_FINAL"
+      end
    end
    self.fsm:mark_changed()
 end
@@ -157,4 +170,32 @@ function AgentSkillExecJumpState:do_loop()
    self:loop()
 
    return self:try_transitions()
+end
+
+
+function AgentSkillExecJumpState:prepare()
+   JumpState.prepare(self);
+   if type(self.final_state) == "string" then
+      printf("Setting prematurely declared final state %s", self.failure_state)
+      local tmpstr = self.final_state
+      self.final_state        = self.fsm.states[self.final_state]
+      assert(self.final_state, "Prematurely defined final state %s does not exist", tmpstr)
+      self.final_transition   = self:add_transition(self.final_state, self.jumpcond_final, "Skill(s) succeeded")
+      changed = true
+   end
+   if type(self.failure_state) == "string" then
+      local tmpstr = self.failure_state
+      printf("Setting prematurely declared failure state %s", self.failure_state)
+      self.failure_state      = self.fsm.states[self.failure_state]
+      assert(self.final_state, "Prematurely defined failure state %s does not exist", tmpstr)
+      self.failure_transition = self:add_transition(self.failure_state, self.jumpcond_failure, "Skill(s) failed")
+      changed = true
+   end
+   self:set_transition_labels()
+   self.fsm:mark_changed()
+end
+
+function AgentSkillExecJumpState:reset()
+   JumpState.reset(self)
+   self.skill_status = skillstati.S_INACTIVE
 end

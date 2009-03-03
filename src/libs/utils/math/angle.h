@@ -99,6 +99,24 @@ normalize_rad(float angle_rad)
   }
 }
 
+
+/** Normalizes angle in radian between -3*PI and 3*PI.
+ * If the angle is above 2*PI or below 2*PI the angle will be clipped.
+ * The largest full amount of (-)2*PI is subtracted, such that only the amount
+ * within the range [-2*PI, 2*PI] remains. Then (-)2*PI is added again.
+ * @param angle_rad original value
+ * @return normalized angle
+ */
+inline float
+normalize_bigmirror_rad(float angle_rad)
+{
+  if ( (angle_rad < -2*M_PI) || (angle_rad > 2*M_PI) ) {
+    return (normalize_mirror_rad(angle_rad) + copysign(2*M_PI, angle_rad) );
+  } else {
+    return angle_rad;
+  }
+}
+
 } // end namespace fawkes
 
 #endif

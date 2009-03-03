@@ -85,6 +85,7 @@ class Time
  public:
   Time();
   Time(const timeval* tv);
+  Time(long sec, long usec, Clock *clock = 0);
   Time(long ms);
   Time(float sec);
   Time(Clock *clock);
@@ -97,9 +98,11 @@ class Time
   const timeval* get_timeval() const;
 
   void set_time(const timeval* tv);
+  void set_time(long int sec, long int usec);
   void set_time(long ms);
   void set_time(float sec);
   void set_time(const Time &t);
+  void set_time(const Time *t);
 
   void add(float seconds);
 

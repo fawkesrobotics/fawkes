@@ -28,6 +28,7 @@
 
 #include <fvutils/net/fuse.h>
 #include <fvutils/net/fuse_message_content.h>
+#include <utils/time/time.h>
 #include <sys/types.h>
 
 class SharedMemoryImageBuffer;
@@ -40,7 +41,10 @@ class FuseImageContent : public FuseMessageContent
   FuseImageContent(FUSE_image_format_t image_format, const char *image_id,
 		   unsigned char *buffer, size_t buffer_size,
 		   colorspace_t colorspace,
-		   unsigned int width, unsigned int height);
+		   unsigned int width, unsigned int height,
+		   long int capture_time_sec = 0, long int capture_time_usec = 0);
+
+  ~FuseImageContent();
 
   unsigned char *  buffer() const;
   size_t           buffer_size() const;
@@ -50,12 +54,16 @@ class FuseImageContent : public FuseMessageContent
   unsigned int     format() const;
   void             decompress(unsigned char *yuv422_planar_buffer, size_t buffer_size);
 
+  fawkes::Time *   capture_time() const;
+
   virtual void     serialize();
 
  private:
   unsigned char *__buffer;
   size_t         __buffer_size;
   FUSE_image_message_header_t *__header;
+
+  mutable fawkes::Time  *__capture_time;
 };
 
 #endif

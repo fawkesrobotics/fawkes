@@ -1,8 +1,8 @@
 /***************************************************************************
  *  shmem.cpp - Implementation to access images in shared memory
  *
- *  Generated: Thu Jan 12 19:43:05 2006
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jan 12 19:43:05 2006
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -24,6 +24,7 @@
 
 #include <core/exception.h>
 #include <core/exceptions/system.h>
+#include <core/exceptions/software.h>
 #include <cams/shmem.h>
 #include <fvutils/writers/fvraw.h>
 #include <fvutils/system/camargp.h>
@@ -55,14 +56,14 @@ using namespace fawkes;
  */
 SharedMemoryCamera::SharedMemoryCamera(const char *image_id, bool deep_copy)
 {
-  this->image_id = strdup(image_id);
-  this->deep_copy = deep_copy;
+  __image_id = strdup(image_id);
+  __deep_copy = deep_copy;
 
   try {
     init();
   } catch (Exception &e) {
-    free(this->image_id);
-    image_id = NULL;
+    free(__image_id);
+    __image_id = NULL;
     throw;
   }
 }
@@ -76,14 +77,23 @@ SharedMemoryCamera::SharedMemoryCamera(const char *image_id, bool deep_copy)
  */
 SharedMemoryCamera::SharedMemoryCamera(const CameraArgumentParser *cap)
 {
+  __image_id  = NULL;
+  __deep_copy = false;
+
   if ( cap->has("image_id") ) {
-    image_id = strdup(cap->get("image_id").c_str());
+    __image_id = strdup(cap->get("image_id").c_str());
   }
+  else throw MissingParameterException("The parameter 'image_id' is required");
+
+  if ( cap->has("deep_copy") ) {
+    __deep_copy = strcasecmp(cap->get("deep_copy").c_str(), "true") == 0 ? true : false;
+  }
+
   try {
     init();
   } catch (Exception &e) {
-    free(image_id);
-    image_id = NULL;
+    free(__image_id);
+    __image_id = NULL;
     throw;
   }
 }
@@ -92,31 +102,34 @@ SharedMemoryCamera::SharedMemoryCamera(const CameraArgumentParser *cap)
 /** Destructor. */
 SharedMemoryCamera::~SharedMemoryCamera()
 {
-  free(image_id);
-  if ( deep_buffer != NULL ) {
-    free( deep_buffer );
+  free(__image_id);
+  if ( __deep_buffer != NULL ) {
+    free( __deep_buffer );
   }
-  delete shm_buffer;
+  delete __shm_buffer;
+  delete __capture_time;
 }
 
 
 void
 SharedMemoryCamera::init()
 {
-  deep_buffer = NULL;
+  __deep_buffer  = NULL;
+  __capture_time = NULL;
   try {
-    shm_buffer = new SharedMemoryImageBuffer(image_id);
-    if ( deep_copy ) {
-      deep_buffer = (unsigned char *)malloc(shm_buffer->data_size());
-      if ( ! deep_buffer ) {
+    __shm_buffer = new SharedMemoryImageBuffer(__image_id);
+    if ( __deep_copy ) {
+      __deep_buffer = (unsigned char *)malloc(__shm_buffer->data_size());
+      if ( ! __deep_buffer ) {
 	throw OutOfMemoryException("SharedMemoryCamera: Cannot allocate deep buffer");
       }
     }
-    opened = true;
+    __opened = true;
   } catch (Exception &e) {
     e.append("Failed to open shared memory image");
     throw;
   }
+  __capture_time = new fawkes::Time(0, 0);
 }
 
 void
@@ -143,29 +156,31 @@ SharedMemoryCamera::print_info()
 void
 SharedMemoryCamera::capture()
 {
-  if ( deep_copy ) {
-    shm_buffer->lock_for_read();
-    memcpy(deep_buffer, shm_buffer->buffer(), shm_buffer->data_size());
-    shm_buffer->unlock();
+  if ( __deep_copy ) {
+    __shm_buffer->lock_for_read();
+    memcpy(__deep_buffer, __shm_buffer->buffer(), __shm_buffer->data_size());
+    __capture_time->set_time(__shm_buffer->capture_time());
+    __shm_buffer->unlock();
   }
+  else __capture_time->set_time(__shm_buffer->capture_time());
 }
 
 unsigned char*
 SharedMemoryCamera::buffer()
 {
-  if ( deep_copy ) {
-    return deep_buffer;
+  if ( __deep_copy ) {
+    return __deep_buffer;
   } else {
-    return shm_buffer->buffer();
+    return __shm_buffer->buffer();
   }
 }
 
 unsigned int
 SharedMemoryCamera::buffer_size()
 {
-  return colorspace_buffer_size(shm_buffer->colorspace(),
-				shm_buffer->width(),
-				shm_buffer->height() );
+  return colorspace_buffer_size(__shm_buffer->colorspace(),
+				__shm_buffer->width(),
+				__shm_buffer->height() );
 }
 
 void
@@ -181,20 +196,27 @@ SharedMemoryCamera::dispose_buffer()
 unsigned int
 SharedMemoryCamera::pixel_width()
 {
-  return shm_buffer->width();
+  return __shm_buffer->width();
 }
 
 unsigned int
 SharedMemoryCamera::pixel_height()
 {
-  return shm_buffer->height();
+  return __shm_buffer->height();
 }
 
 
 colorspace_t
 SharedMemoryCamera::colorspace()
 {
-  return shm_buffer->colorspace();
+  return __shm_buffer->colorspace();
+}
+
+
+fawkes::Time *
+SharedMemoryCamera::capture_time()
+{
+  return __capture_time;
 }
 
 
@@ -210,14 +232,14 @@ SharedMemoryCamera::flush()
 SharedMemoryImageBuffer *
 SharedMemoryCamera::shared_memory_image_buffer()
 {
-  return shm_buffer;
+  return __shm_buffer;
 }
 
 
 bool
 SharedMemoryCamera::ready()
 {
-  return opened;
+  return __opened;
 }
 
 
@@ -234,7 +256,7 @@ SharedMemoryCamera::set_image_number(unsigned int n)
 void
 SharedMemoryCamera::lock_for_read()
 {
-  shm_buffer->lock_for_read();
+  __shm_buffer->lock_for_read();
 }
 
 
@@ -244,7 +266,7 @@ SharedMemoryCamera::lock_for_read()
 bool
 SharedMemoryCamera::try_lock_for_read()
 {
-  return shm_buffer->try_lock_for_read();
+  return __shm_buffer->try_lock_for_read();
 }
 
 
@@ -254,7 +276,7 @@ SharedMemoryCamera::try_lock_for_read()
 void
 SharedMemoryCamera::lock_for_write()
 {
-  shm_buffer->lock_for_write();
+  __shm_buffer->lock_for_write();
 }
 
 
@@ -264,7 +286,7 @@ SharedMemoryCamera::lock_for_write()
 bool
 SharedMemoryCamera::try_lock_for_write()
 {
-  return shm_buffer->try_lock_for_write();
+  return __shm_buffer->try_lock_for_write();
 }
 
 
@@ -272,5 +294,5 @@ SharedMemoryCamera::try_lock_for_write()
 void
 SharedMemoryCamera::unlock()
 {
-  shm_buffer->unlock();
+  __shm_buffer->unlock();
 }

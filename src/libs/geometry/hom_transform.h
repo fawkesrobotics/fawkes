@@ -37,18 +37,21 @@ class HomTransform
 {
  public:
   HomTransform();
+  HomTransform(const HomTransform& ht);
   HomTransform(const Matrix& m);
   virtual ~HomTransform();
 
   HomTransform& reset();
   virtual HomTransform& invert();
   virtual HomTransform  get_inverse();
-  
+
   void rotate_x(float rad);
   void rotate_y(float rad);
   void rotate_z(float rad);
-  
+
   void trans(float dx, float dy, float dz);
+
+  void mDH(const float alpha, const float a, const float theta, const float d);
 
   HomTransform& operator=(const HomTransform& t);
 
@@ -59,7 +62,7 @@ class HomTransform
 
   HomCoord  operator*(const HomCoord& h) const;
 
-  void print_info(const char* name = 0, const char *col_sep = 0, const char *row_sep = 0) const; 
+  void print_info(const char* name = 0, const char *col_sep = 0, const char *row_sep = 0) const;
 
   Matrix get_matrix() const;
 

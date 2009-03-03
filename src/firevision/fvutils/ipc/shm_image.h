@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  shm.h - shared memory image buffer
+ *  shm_image.h - shared memory image buffer
  *
- *  Generated: Thu Jan 12 13:12:24 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jan 12 13:12:24 2006
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -28,6 +28,7 @@
 
 #include <utils/ipc/shm.h>
 #include <utils/ipc/shm_lister.h>
+#include <utils/time/time.h>
 
 #include <fvutils/ipc/defs.h>
 #include <fvutils/color/colorspaces.h>
@@ -51,6 +52,10 @@ typedef struct {
   int           circle_x;		/**< ROI circle center x */
   int           circle_y;		/**< ROI circle center y */
   unsigned int  circle_radius;		/**< ROI circle radius */
+  long int      capture_time_sec;	/**< Time in seconds since the epoch when
+					 * the image was captured. */
+  long int      capture_time_usec;	/**< Addendum to capture_time_sec in
+					 * micro seconds. */
   unsigned int  flag_circle_found :  1;	/**< 1 if circle found */
   unsigned int  flag_image_ready  :  1;	/**< 1 if image ready */
   unsigned int  flag_reserved     : 30;	/**< reserved for future use */
@@ -155,6 +160,11 @@ class SharedMemoryImageBuffer : public fawkes::SharedMemory
   void             set_circle(int x, int y, unsigned int r);
   void             set_circle_found(bool found);
   bool             set_image_id(const char *image_id);
+
+  fawkes::Time     capture_time() const;
+  void             capture_time(long int *sec, long int *usec) const;
+  void             set_capture_time(fawkes::Time *time);
+  void             set_capture_time(long int sec, long int usec);
 
   static void      list();
   static void      cleanup(bool use_lister = true);

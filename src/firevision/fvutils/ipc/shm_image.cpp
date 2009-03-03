@@ -2,8 +2,8 @@
 /***************************************************************************
  *  shm_image.cpp - shared memory image buffer
  *
- *  Generated: Thu Jan 12 14:10:43 2006
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jan 12 14:10:43 2006
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -152,6 +152,57 @@ SharedMemoryImageBuffer::image_id() const
   return _image_id;
 }
 
+
+/** Get the time when the image was captured.
+ * @param sec upon return contains the seconds part of the time
+ * @param usec upon return contains the micro seconds part of the time
+ */
+void
+SharedMemoryImageBuffer::capture_time(long int *sec, long int *usec) const
+{
+  *sec  = raw_header->capture_time_sec;
+  *usec = raw_header->capture_time_usec;
+}
+
+/** Get the time when the image was captured.
+ * @return capture time
+ */
+Time
+SharedMemoryImageBuffer::capture_time() const
+{
+  return Time(raw_header->capture_time_sec, raw_header->capture_time_usec);
+}
+
+
+/** Set the capture time.
+ * @param time capture time
+ */
+void
+SharedMemoryImageBuffer::set_capture_time(Time *time)
+{
+  if (_is_read_only) {
+    throw Exception("Buffer is read-only. Not setting capture time.");
+  }
+
+  const timeval *t = time->get_timeval();
+  raw_header->capture_time_sec  = t->tv_sec;
+  raw_header->capture_time_usec = t->tv_usec;
+}
+
+/** Set the capture time.
+ * @param sec seconds part of capture time
+ * @param usec microseconds part of capture time
+ */
+void
+SharedMemoryImageBuffer::set_capture_time(long int sec, long int usec)
+{
+  if (_is_read_only) {
+    throw Exception("Buffer is read-only. Not setting capture time.");
+  }
+
+  raw_header->capture_time_sec  = sec;
+  raw_header->capture_time_usec = usec;
+}
 
 /** Get image buffer.
  * @return image buffer.
@@ -630,7 +681,7 @@ SharedMemoryImageBufferHeader::print_info()
        << "    circle:     " << (header->flag_circle_found ? "" : "not ")
        << "found at (" << header->circle_x << "," << header->circle_y
        << ")  radius " << header->circle_radius << endl
-       << "    img ready:  " << (header->flag_image_ready ? "yes" : "no") << endl; 
+       << "    img ready:  " << (header->flag_image_ready ? "yes" : "no") << endl;
   */
 }
 
@@ -652,7 +703,7 @@ SharedMemoryImageBufferHeader::initialize(void *memptr)
 {
   SharedMemoryImageBuffer_header_t *header = (SharedMemoryImageBuffer_header_t *)memptr;
   memset(memptr, 0, sizeof(SharedMemoryImageBuffer_header_t));
-	 
+
   strncpy(header->image_id, _image_id, IMAGE_ID_MAX_LENGTH);
   header->colorspace = _colorspace;
   header->width      = _width;

@@ -40,22 +40,26 @@ AgentSkillExecJumpState = ajsmod.AgentSkillExecJumpState
 AgentHSM = {current = nil,
 	    debug   = false,
 	    export_states_to_parent = true,
-	    set_debug      = FSM.set_debug,
-	    loop           = FSM.loop,
-	    trans          = FSM.trans,
-	    reset          = FSM.reset,
-	    changed        = FSM.changed,
-	    mark_changed   = FSM.mark_changed,
-	    graph          = FSM.graph,
-	    traced         = FSM.traced,
-	    traced_state   = FSM.traced_state,
-	    traced_trans   = FSM.traced_trans,
-	    reset_trace    = FSM.reset_trace,
-	    add_state      = FSM.add_state,
-	    new_jump_state = FSM.new_jump_state,
-	    get_start_state = FSM.get_start_state
-	  }
-
+	    set_debug               = FSM.set_debug,
+	    set_error               = FSM.set_error,
+	    loop                    = FSM.loop,
+	    trans                   = FSM.trans,
+	    reset                   = FSM.reset,
+	    changed                 = FSM.changed,
+	    mark_changed            = FSM.mark_changed,
+	    graph                   = FSM.graph,
+	    traced                  = FSM.traced,
+	    traced_state            = FSM.traced_state,
+	    traced_trans            = FSM.traced_trans,
+	    reset_trace             = FSM.reset_trace,
+	    add_state               = FSM.add_state,
+	    remove_state            = FSM.remove_state,
+	    clear_states            = FSM.clear_states,
+	    new_jump_state          = FSM.new_jump_state,
+	    get_start_state         = FSM.get_start_state,
+	    add_default_transition  = FSM.add_default_transition,
+	    apply_deftrans          = FSM.apply_deftrans
+	 }
 
 
 --- Create new AgentHSM.

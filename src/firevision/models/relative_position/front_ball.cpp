@@ -250,19 +250,21 @@ FrontBallRelativePos::calc()
 
   float tmp = m_fBallRadius / sin(m_fRadius * m_fPanRadPerPixel);
   
-  /* projection of air-line-distance on the ground
-     (Pythagoras) */
+  /* projection of air-line-distance on the ground (Pythagoras) */
   distance_ball_cam = sqrt( tmp * tmp    -
 	                    (camera_height - m_fBallRadius) * (camera_height - m_fBallRadius)  );
 
 
-  /* Pan to the right is positive. Therefore we add it,
-     because bearing to the right shall be positive */
-  bearing = ((m_cirtCenter.x - image_width/2) * m_fPanRadPerPixel + m_fPan + camera_orientation);
+#ifdef OLD_COORD_SYS
+  /* Bearing shall be clockwise positive. */
+  bearing =   (((m_cirtCenter.x - image_width/2) * m_fPanRadPerPixel + m_fPan + camera_orientation));
+#else
+  /* Bearing shall be counter-clockwise positive. */
+  bearing = - (((m_cirtCenter.x - image_width/2) * m_fPanRadPerPixel + m_fPan + camera_orientation));
+#endif
 
-  // invert sign, because slope downward shall be negative
-  slope = -((m_cirtCenter.y - image_height / 2) * m_fTiltRadPerPixel - m_fTilt);
-
+  /* Slope shall be downward negative */
+  slope   = - ((m_cirtCenter.y - image_height / 2) * m_fTiltRadPerPixel - m_fTilt);
 
   ball_x = cos( bearing ) * distance_ball_cam + camera_offset_x;
   ball_y = sin( bearing ) * distance_ball_cam + camera_offset_y;
@@ -284,7 +286,6 @@ FrontBallRelativePos::is_pos_valid() const
 void
 FrontBallRelativePos::calc_unfiltered()
 {
-
   float tmp = m_fBallRadius / sin(m_fRadius * m_fPanRadPerPixel);
   
   /* projection of air-line-distance on the ground
@@ -293,12 +294,16 @@ FrontBallRelativePos::calc_unfiltered()
 	                    (camera_height - m_fBallRadius) * (camera_height - m_fBallRadius)  );
 
 
-  /* Pan to the right is positive. Therefore we add it,
-     because bearing to the right shall be positive */
-  bearing = ((m_cirtCenter.x - image_width/2) * m_fPanRadPerPixel + m_fPan + camera_orientation);
+#ifdef OLD_COORD_SYS
+  /* Bearing shall be clockwise positive. */
+  bearing =   (((m_cirtCenter.x - image_width/2) * m_fPanRadPerPixel + m_fPan + camera_orientation));
+#else
+  /* Bearing shall be counter-clockwise positive. */
+  bearing = - (((m_cirtCenter.x - image_width/2) * m_fPanRadPerPixel + m_fPan + camera_orientation));
+#endif
 
   // invert sign, because slope downward shall be negative
-  slope = -((m_cirtCenter.y - image_height / 2) * m_fTiltRadPerPixel - m_fTilt);
+  slope   = - ((m_cirtCenter.y - image_height / 2) * m_fTiltRadPerPixel - m_fTilt);
 
 
   ball_x = cos( bearing ) * distance_ball_cam + camera_offset_x;

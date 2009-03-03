@@ -250,4 +250,24 @@ SyntaxErrorException::SyntaxErrorException(const char *format, ...) throw()
 }
 
 
+/** @class NotImplementedException <core/exceptions/software.h>
+ * Called method has not been implemented.
+ * This exception is meant to be used in method stubs. Use this in base
+ * classes where methods are declared that may not be implemented by all
+ * and therefore making it pure virtual would just cause code clutter.
+ * @ingroup Exceptions
+ */
+/** Constructor
+ * @param format message format
+ */
+NotImplementedException::NotImplementedException(const char *format, ...) throw()
+  : Exception()
+{
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
+}
+
+
 } // end namespace fawkes

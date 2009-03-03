@@ -3,7 +3,7 @@
  *  exec_thread.h - Fawkes Skiller: Execution Thread
  *
  *  Created: Mon Feb 18 10:28:38 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -45,6 +45,9 @@ namespace fawkes {
   class Interface;
   class SkillerInterface;
   class SkillerDebugInterface;
+#ifdef SKILLER_TIMETRACKING
+  class TimeTracker;
+#endif
 }
 
 class SkillerExecutionThread
@@ -65,7 +68,8 @@ class SkillerExecutionThread
   virtual void finalize();
 
   /* BlackBoardInterfaceListener */
-  void bb_interface_reader_removed(fawkes::Interface *interface, unsigned int instance_serial) throw();
+  void bb_interface_reader_removed(fawkes::Interface *interface,
+				   unsigned int instance_serial) throw();
 
  private: /* methods */
   void init_failure_cleanup();
@@ -83,6 +87,7 @@ class SkillerExecutionThread
   bool        __continuous_run;
   bool        __continuous_reset;
   bool        __error_written;
+  bool        __sksf_pushed;
 
   std::string __skdbg_what;
 
@@ -95,6 +100,16 @@ class SkillerExecutionThread
 
   fawkes::LuaContext  *__lua;
   fawkes::LuaInterfaceImporter  *__lua_ifi;
+
+#ifdef SKILLER_TIMETRACKING
+  fawkes::TimeTracker *__tt;
+  unsigned int         __ttc_total;
+  unsigned int         __ttc_msgproc;
+  unsigned int         __ttc_luaprep;
+  unsigned int         __ttc_luaexec;
+  unsigned int         __ttc_publish;
+  unsigned int         __tt_loopcount;
+#endif
 };
 
 #endif

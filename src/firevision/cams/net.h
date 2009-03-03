@@ -67,6 +67,8 @@ class NetworkCamera : public Camera, public FuseClientHandler
   virtual void           set_image_id(const char *image_id);
   virtual void           set_image_number(unsigned int n);
 
+  virtual fawkes::Time * capture_time();
+
   virtual std::vector<FUSE_imageinfo_t>& image_list();
 
   virtual void fuse_invalid_server_version(uint32_t local_version,

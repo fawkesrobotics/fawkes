@@ -313,6 +313,7 @@ ImageWidget::RefThread::perform_refresh()
   
   try {
     if (__widget->__cam_mutex->try_lock()) {
+      __widget->__cam->dispose_buffer();
       __widget->__cam->capture();
       if (!__stop) {
         __widget->__cam_has_buffer = true;

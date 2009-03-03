@@ -26,6 +26,7 @@
 
 #include <core/threading/mutex_locker.h>
 #include <blackboard/blackboard.h>
+#include <utils/logging/logger.h>
 #include <interfaces/ObjectPositionInterface.h>
 
 #include <cstring>
@@ -45,18 +46,32 @@ using namespace fawkes;
  * @param blackboard BlackBoard
  * @param from_id_pattern pattern for ID of the interfaces to copy from
  * @param to_id ID of the interface to copy to
+ * @param logger logger
  */
-WorldModelObjPosAverageFuser::WorldModelObjPosAverageFuser(fawkes::BlackBoard *blackboard,
+WorldModelObjPosAverageFuser::WorldModelObjPosAverageFuser(fawkes::Logger *logger,
+							   fawkes::BlackBoard *blackboard,
 							   const char *from_id_pattern,
 							   const char *to_id)
 {
+  __logger     = logger;
   __blackboard = blackboard;
+  __to_id      = to_id;
 
   __input_ifs.clear();
   __output_if = NULL;
   try {
     __input_ifs = blackboard->open_multiple_for_reading<ObjectPositionInterface>(from_id_pattern);
     __output_if = blackboard->open_for_writing<ObjectPositionInterface>(to_id);
+
+    // If our output interface was already opened open_multiple might have opened
+    // it as well, check and close if that was the case
+    for (LockList<ObjectPositionInterface *>::iterator i = __input_ifs.begin(); i != __input_ifs.end(); ++i) {
+      if (__to_id == (*i)->id()) {
+	blackboard->close(*i);
+	__input_ifs.erase(i);
+	break;
+      }
+    }
   } catch (Exception &e) {
     for (LockList<ObjectPositionInterface *>::iterator i = __input_ifs.begin(); i != __input_ifs.end(); ++i) {
       blackboard->close(*i);
@@ -89,7 +104,7 @@ WorldModelObjPosAverageFuser::~WorldModelObjPosAverageFuser()
 void
 WorldModelObjPosAverageFuser::bb_interface_created(const char *type, const char *id) throw()
 {
-  if (strcmp(id, __output_if->id()) == 0) return;
+  if (__to_id == id) return;
 
   ObjectPositionInterface *from_if = NULL;
   
@@ -117,34 +132,60 @@ WorldModelObjPosAverageFuser::fuse()
     extent_x = 0, extent_y = 0, extent_z = 0,
     world_x_velocity = 0, world_y_velocity = 0, world_z_velocity = 0,
     relative_x_velocity = 0, relative_y_velocity = 0, relative_z_velocity = 0;
+  bool valid = true, visible = true;
+  int vishistory_min = 0, vishistory_max = 0;
+  unsigned int object_type = 0;
+  bool object_type_warned = false;
 
   for (__iii = __input_ifs.begin(); __iii != __input_ifs.end(); ++__iii) {
     ObjectPositionInterface *iface = *__iii;
     if (iface->has_writer()) {
       iface->read();
-      flags               |= iface->flags();
-      roll                += iface->roll();
-      pitch               += iface->pitch();
-      yaw                 += iface->yaw();
-      distance            += iface->distance();
-      bearing             += iface->bearing();
-      slope               += iface->slope();
-      world_x             += iface->world_x();
-      world_y             += iface->world_y();
-      world_z             += iface->world_z();
-      relative_x          += iface->relative_x();
-      relative_y          += iface->relative_y();
-      relative_z          += iface->relative_z();
-      extent_x            += iface->extent_x();
-      extent_y            += iface->extent_y();
-      extent_z            += iface->extent_z();
-      world_x_velocity    += iface->world_x_velocity();
-      world_y_velocity    += iface->world_y_velocity();
-      world_z_velocity    += iface->world_z_velocity();
-      relative_x_velocity += iface->relative_x_velocity();
-      relative_y_velocity += iface->relative_y_velocity();
-      relative_z_velocity += iface->relative_z_velocity();
-      ++num_inputs;
+      if (iface->is_valid()) {
+	if ( (object_type != 0) && (iface->object_type() != object_type) &&
+	     ! object_type_warned) {
+	  __logger->log_warn("WMObjPosAvgFus", "Object types of input interfaces "
+			     "for %s disagree, %s has %u, expected was %u",
+			     __to_id.c_str(), iface->uid(), iface->object_type(),
+			     object_type);
+	  object_type_warned = true;
+	} else {
+	  object_type = iface->object_type();
+	}
+	if (iface->is_visible()) {
+	  flags               |= iface->flags();
+	  roll                += iface->roll();
+	  pitch               += iface->pitch();
+	  yaw                 += iface->yaw();
+	  distance            += iface->distance();
+	  bearing             += iface->bearing();
+	  slope               += iface->slope();
+	  world_x             += iface->world_x();
+	  world_y             += iface->world_y();
+	  world_z             += iface->world_z();
+	  relative_x          += iface->relative_x();
+	  relative_y          += iface->relative_y();
+	  relative_z          += iface->relative_z();
+	  extent_x            += iface->extent_x();
+	  extent_y            += iface->extent_y();
+	  extent_z            += iface->extent_z();
+	  world_x_velocity    += iface->world_x_velocity();
+	  world_y_velocity    += iface->world_y_velocity();
+	  world_z_velocity    += iface->world_z_velocity();
+	  relative_x_velocity += iface->relative_x_velocity();
+	  relative_y_velocity += iface->relative_y_velocity();
+	  relative_z_velocity += iface->relative_z_velocity();
+	  ++num_inputs;
+
+	  if (iface->visibility_history() > vishistory_max) {
+	    vishistory_max = iface->visibility_history();
+	  }
+	} else {
+	  if (iface->visibility_history() < vishistory_min) {
+	    vishistory_min = iface->visibility_history();
+	  }
+	}
+      }
     }
   }
 
@@ -156,6 +197,7 @@ WorldModelObjPosAverageFuser::fuse()
     world_x_velocity = world_y_velocity = world_z_velocity = 0.;
     relative_x_velocity = relative_y_velocity = relative_z_velocity = 0.;
     num_inputs = 1;
+    visible = false;
   }
 
   __output_if->set_roll(roll / (float)num_inputs);
@@ -179,6 +221,9 @@ WorldModelObjPosAverageFuser::fuse()
   __output_if->set_relative_x_velocity(relative_x_velocity / (float)num_inputs);
   __output_if->set_relative_y_velocity(relative_y_velocity / (float)num_inputs);
   __output_if->set_relative_z_velocity(relative_z_velocity / (float)num_inputs);
+  __output_if->set_valid(valid);
+  __output_if->set_visible(visible);
+  __output_if->set_visibility_history(visible ? vishistory_max : vishistory_min);
 
   __output_if->write();
 }

@@ -163,3 +163,8 @@ function State:reset()
    self.last_trans = nil
 end
 
+
+--- Prepare the state.
+-- This method is called once and only once in the FSMs and states lifetime.
+function State:prepare()
+end

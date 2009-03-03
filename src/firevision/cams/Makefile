@@ -60,6 +60,9 @@ endif
 ifeq ($(HAVE_V4L_CAM),1)
 OBJS_libfvcams += v4l.o
 endif
+ifeq ($(HAVE_NAO_CAM),1)
+OBJS_libfvcams += nao.o
+endif
 ifeq ($(HAVE_FILELOADER_CAM),1)
 OBJS_libfvcams += fileloader.o
 endif

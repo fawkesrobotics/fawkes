@@ -31,10 +31,13 @@
 #include <linux/types.h>
 #include <linux/videodev2.h>
 
+/* Number of buffers to use for memory mapped IO */
+#define MMAP_NUM_BUFFERS 2;
+
 class CameraArgumentParser;
 class V4L2CameraData;
 
-class V4L2Camera: public Camera 
+class V4L2Camera: public Camera
 {
   friend class V4LCamera;
 
@@ -56,9 +59,10 @@ class V4L2Camera: public Camera
   virtual unsigned int   buffer_size();
   virtual void           dispose_buffer();
 
-  virtual unsigned int    pixel_width();
-  virtual unsigned int    pixel_height();
-  virtual colorspace_t    colorspace();
+  virtual unsigned int   pixel_width();
+  virtual unsigned int   pixel_height();
+  virtual colorspace_t   colorspace();
+  virtual fawkes::Time * capture_time();
 
   virtual void           set_image_number(unsigned int n);
 
@@ -75,19 +79,28 @@ class V4L2Camera: public Camera
   virtual void create_buffer();
   virtual void reset_cropping();
 
+ protected:
+  char *_device_name; ///< Device name
+
  private:
   enum ReadMethod
   {
-    READ, //< read() input
-    MMAP, //< Memory mapping input
-    UPTR  //< User pointer input
+    READ, ///< read() input
+    MMAP, ///< Memory mapping input
+    UPTR  ///< User pointer input
   };
 
   enum TriState
   {
-    NOT_SET, //< parameter not set
-    TRUE,    //< parameter set to true
-    FALSE    //< parameter set to false
+    NOT_SET, ///< parameter not set
+    TRUE,    ///< parameter set to true
+    FALSE    ///< parameter set to false
+  };
+
+  struct FrameBuffer
+  {
+    unsigned char *buffer;
+    unsigned int size;
   };
 
   struct ControlParameterInt
@@ -96,43 +109,44 @@ class V4L2Camera: public Camera
     int value;
   };
 
-  char *_device_name;           //< Device name
-  int _dev;                     //< Device file descriptor
+  int _dev;                          ///< Device file descriptor
 
   V4L2CameraData *_data;
 
-  ReadMethod _read_method;      //< Used read method
-  bool _opened;                 //< Device has been open()ed
-  bool _started;                //< Device has been start()ed
-  char _format[5];              //< FourCC of the image format
-  colorspace_t _colorspace;     //< Used colorspace_t
+  ReadMethod _read_method;           ///< Used read method
+  bool _opened;                      ///< Device has been open()ed
+  bool _started;                     ///< Device has been start()ed
+  char _format[5];                   ///< FourCC of the image format
+  colorspace_t _colorspace;          ///< Used colorspace_t
 
-  unsigned int _width;          //< Image width
-  unsigned int _height;         //< Image height
-  unsigned int _bytes_per_line; //< Image bytes per line
-  unsigned char *_frame_buffer; //< Image buffer
-  unsigned int _buffer_size;    //< Image buffer size
+  unsigned int _width;               ///< Image width
+  unsigned int _height;              ///< Image height
+  unsigned int _bytes_per_line;      ///< Image bytes per line
+  FrameBuffer *_frame_buffers;       ///< Image buffers
+  unsigned int _buffers_length;      ///< Image buffer size
+  int _current_buffer;               ///< Current Image buffer (-1 if not set)
+  fawkes::Time *_capture_time;       ///< Time when last picture was captured
 
-  bool _switch_u_v;             //< Switch U and V channels
-  unsigned int _fps;            //< Capture FPS
+  bool _switch_u_v;                  ///< Switch U and V channels
+  unsigned int _fps;                 ///< Capture FPS
 
-  TriState _aec;                //< Auto Exposition enabled
-  TriState _awb;                //< Auto White Balance enabled
-  TriState _agc;                //< Auto Gain enabled
-  TriState _h_flip;             //< Horizontal mirror
-  TriState _v_flip;             //< Vertical mirror
-  ControlParameterInt _brightness;              //< Brightness [0-255] (def. 128)
-  ControlParameterInt _contrast;                //< Contrast [0-127] (def. 64)
-  ControlParameterInt _saturation;              //< Saturation [0-256] (def. 128)
-  ControlParameterInt _hue;                     //< Hue [-180-180] (def. 0)
-  ControlParameterInt _red_balance;             //< Red Balance [0-255] (def. 128)
-  ControlParameterInt _blue_balance;            //< Blue Balance [0-255] (def. 128)
-  ControlParameterInt _exposure;                //< Exposure [0-65535] (def. 60)
-  ControlParameterInt _gain;                    //< Gain [0-255] (def. 0)
-  ControlParameterInt _lens_x;                  //< Lens Correction X [0-255] (def. 0)
-  ControlParameterInt _lens_y;                  //< Lens Correction Y [0-255] (def. 0)
+  TriState _aec;                     ///< Auto Exposition enabled
+  TriState _awb;                     ///< Auto White Balance enabled
+  TriState _agc;                     ///< Auto Gain enabled
+  TriState _h_flip;                  ///< Horizontal mirror
+  TriState _v_flip;                  ///< Vertical mirror
+  ControlParameterInt _brightness;   ///< Brightness [0-255] (def. 128)
+  ControlParameterInt _contrast;     ///< Contrast [0-127] (def. 64)
+  ControlParameterInt _saturation;   ///< Saturation [0-256] (def. 128)
+  ControlParameterInt _hue;          ///< Hue [-180-180] (def. 0)
+  ControlParameterInt _red_balance;  ///< Red Balance [0-255] (def. 128)
+  ControlParameterInt _blue_balance; ///< Blue Balance [0-255] (def. 128)
+  ControlParameterInt _exposure;     ///< Exposure [0-65535] (def. 60)
+  ControlParameterInt _gain;         ///< Gain [0-255] (def. 0)
+  ControlParameterInt _lens_x;       ///< Lens Correction X [0-255] (def. 0)
+  ControlParameterInt _lens_y;       ///< Lens Correction Y [0-255] (def. 0)
 
-  bool _nao_hacks;              //< Nao-specific hacks (bad driver)
+  bool _nao_hacks;                   ///< Nao-specific hacks (bad driver)
 
 };
 

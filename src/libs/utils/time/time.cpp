@@ -78,6 +78,26 @@ Time::Time(const timeval* tv)
 
 
 /** Constructor.
+ * Sets time to the given time. Basically the same as setting from a timeval struct
+ * but the components are given separately.
+ * @param sec time in seconds since the epoch (or time range)
+ * @param usec fractions in microseconds added to sec
+ * @param clock optional clock to use, if NULL Clock::instance() will be used
+ */
+Time::Time(long sec, long usec, Clock *clock)
+{
+  __time.tv_sec  = sec;
+  __time.tv_usec = usec;
+  if (clock) {
+    __clock = clock;
+  } else {
+    __clock = Clock::instance();
+  }
+  __timestr = NULL;
+}
+
+
+/** Constructor.
  * Sets time to given number of ms, use for time range.
  * @param ms the Time object is initialized to the time given in milli-seconds
  */
@@ -201,6 +221,18 @@ Time::set_time(const timeval* tv)
 
 
 /** Sets the time.
+ * @param sec seconds part of the time
+ * @param usec microseconds part of the time
+ */
+void
+Time::set_time(long int sec, long int usec)
+{
+  __time.tv_sec  = sec;
+  __time.tv_usec = usec;
+}
+
+
+/** Sets the time.
  * @param ms set the time to this value
  */
 void
@@ -230,6 +262,17 @@ void
 Time::set_time(const Time &t)
 {
   *this = t;
+}
+
+
+/** Set time to given time.
+ * @param t time to set to
+ */
+void
+Time::set_time(const Time *t)
+{
+  __time.tv_sec  = t->__time.tv_sec;
+  __time.tv_usec = t->__time.tv_usec;
 }
 
 

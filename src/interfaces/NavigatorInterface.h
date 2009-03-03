@@ -57,6 +57,45 @@ class NavigatorInterface : public Interface
 
  public:
   /* messages */
+  class StopMessage : public Message
+  {
+   public:
+    StopMessage();
+    ~StopMessage();
+
+    StopMessage(const StopMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  class TurnMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float angle; /**< Angle of the turn. */
+      float velocity; /**< The desired turning velocity in rad/s,
+      set to zero to use default value. */
+    } TurnMessage_data_t;
+
+    TurnMessage_data_t *data;
+
+   public:
+    TurnMessage(const float ini_angle, const float ini_velocity);
+    TurnMessage();
+    ~TurnMessage();
+
+    TurnMessage(const TurnMessage *m);
+    /* Methods */
+    float angle() const;
+    void set_angle(const float new_angle);
+    size_t maxlenof_angle() const;
+    float velocity() const;
+    void set_velocity(const float new_velocity);
+    size_t maxlenof_velocity() const;
+    virtual Message * clone() const;
+  };
+
   class CartesianGotoMessage : public Message
   {
    private:

@@ -24,6 +24,7 @@
 
 #include <core/exception.h>
 #include <tools/plugin_gui/plugin_gui.h>
+#include <gconfmm.h>
 #include <libglademm/xml.h>
 #include <iostream>
 
@@ -34,6 +35,7 @@ int main(int argc, char** argv)
   try
   {
     Gtk::Main kit(argc, argv);
+    Gnome::Conf::init();
 
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
     Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/glade/plugin_tool/plugin_tool.glade");
@@ -47,7 +49,7 @@ int main(int argc, char** argv)
 
     PluginGuiGtkWindow *window = NULL;
     refxml->get_widget_derived("wndMain", window);
-			
+
     kit.run( *window );
 
     delete window;

@@ -87,9 +87,10 @@ WebBlackBoardRequestProcessor::process_request(const char *url,
 	*r += "<ul>\n";
 	found_some = true;
       }
-      r->append_body("<li>Interface <a href=\"%s/view/%s::%s\">%s::%s</a> (%u readers, has %s writer)</li>\n",
+      r->append_body("<li>Interface <a href=\"%s/view/%s::%s\">%s::%s</a> (%u reader%s, <span style=\"color:%s\">%s</span> writer)</li>\n",
 		     __baseurl, i->type(), i->id(), i->type(), i->id(),
-		     i->num_readers(), i->has_writer() ? "a" : "no");
+		     i->num_readers(), i->num_readers() == 1 ? "" : "s",
+		     i->has_writer() ? "green" : "red", i->has_writer() ? "has" : "no");
     }
     delete iil;
 

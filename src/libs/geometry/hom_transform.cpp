@@ -47,6 +47,15 @@ HomTransform::HomTransform()
 }
 
 /** Copy constructor.
+ * @param t a HomTransform
+ */
+HomTransform::HomTransform(const HomTransform& t)
+{
+  m_matrix = new Matrix(4, 4);
+  (*m_matrix) = (*t.m_matrix);
+}
+
+/** Constructor from a Matrix.
  * @param m a Matrix
  */
 HomTransform::HomTransform(const Matrix& m)
@@ -75,51 +84,47 @@ HomTransform::reset()
 HomTransform&
 HomTransform::invert()
 {
+  float ct[3] = { (*m_matrix)(0, 3), (*m_matrix)(1, 3), (*m_matrix)(2, 3) };
   Matrix rot   = m_matrix->get_submatrix(0, 0, 3, 3);
 
-  Matrix inv(4, 4);
-  inv.id();
-  inv.overlay( 0, 0, rot.get_inverse() );
-  inv(0, 3) = -(*m_matrix)(0, 3);
-  inv(1, 3) = -(*m_matrix)(1, 3);
-  inv(2, 3) = -(*m_matrix)(2, 3);
-  
-  // TODO: proj. part
+  m_matrix->overlay(0, 0, rot.transpose());
+  (*m_matrix)(0, 3) = -ct[0] * (*m_matrix)(0, 0) - ct[1] * (*m_matrix)(0, 1) - ct[2] * (*m_matrix)(0, 2);
+  (*m_matrix)(1, 3) = -ct[0] * (*m_matrix)(1, 0) - ct[1] * (*m_matrix)(1, 1) - ct[2] * (*m_matrix)(1, 2);
+  (*m_matrix)(2, 3) = -ct[0] * (*m_matrix)(2, 0) - ct[1] * (*m_matrix)(2, 1) - ct[2] * (*m_matrix)(2, 2);
 
   return *this;
 }
 
-/** Obtain inverse transformatoin.
- * @return the invers transformation
- */ 
+/** Obtain inverse transform.
+ * @return the inverse transform
+ */
 HomTransform
 HomTransform::get_inverse()
 {
-  HomTransform t = *this;
+  HomTransform t(*this);
   t.invert();
 
   return t;
 }
-  
+
 /** Add rotation around the x-axis.
  * @param rad rotation angle in rad
  */
 void
 HomTransform::rotate_x(float rad)
 {
-  Matrix m(3, 3);
-  m.id();
-  
-  m(1,1) =  cosf(rad);
-  m(1,2) = -sinf(rad);
-  m(2,1) =  sinf(rad);
-  m(2,2) =  cosf(rad);
+  float cos = cosf(rad);
+  float sin = sinf(rad);
+  float s1[3] = { (*m_matrix)(0,1), (*m_matrix)(1,1), (*m_matrix)(2,1) };
+  float s2[3] = { (*m_matrix)(0,2), (*m_matrix)(1,2), (*m_matrix)(2,2) };
 
-  Matrix rot = m_matrix->get_submatrix(0, 0, 3, 3);
-  rot *= m;
-  
-  m_matrix->overlay(0, 0, rot);
+  (*m_matrix)(0,1) = s1[0] * cos + s2[0] * sin;
+  (*m_matrix)(1,1) = s1[1] * cos + s2[1] * sin;
+  (*m_matrix)(2,1) = s1[2] * cos + s2[2] * sin;
 
+  (*m_matrix)(0,2) = -s1[0] * sin + s2[0] * cos;
+  (*m_matrix)(1,2) = -s1[1] * sin + s2[1] * cos;
+  (*m_matrix)(2,2) = -s1[2] * sin + s2[2] * cos;
 }
 
 /** Add rotation around the y-axis.
@@ -128,18 +133,18 @@ HomTransform::rotate_x(float rad)
 void
 HomTransform::rotate_y(float rad)
 {
-  Matrix m(3, 3);
-  m.id();
-  
-  m(0,0) =  cosf(rad);
-  m(0,2) =  sinf(rad);
-  m(2,0) = -sinf(rad);
-  m(2,2) =  cosf(rad);
+  float cos = cosf(rad);
+  float sin = sinf(rad);
+  float s1[3] = { (*m_matrix)(0,0), (*m_matrix)(1,0), (*m_matrix)(2,0) };
+  float s2[3] = { (*m_matrix)(0,2), (*m_matrix)(1,2), (*m_matrix)(2,2) };
 
-  Matrix rot = m_matrix->get_submatrix(0, 0, 3, 3);
-  rot *= m;
-  
-  m_matrix->overlay(0, 0, rot);
+  (*m_matrix)(0,0) = s1[0] * cos - s2[0] * sin;
+  (*m_matrix)(1,0) = s1[1] * cos - s2[1] * sin;
+  (*m_matrix)(2,0) = s1[2] * cos - s2[2] * sin;
+
+  (*m_matrix)(0,2) = s1[0] * sin + s2[0] * cos;
+  (*m_matrix)(1,2) = s1[1] * sin + s2[1] * cos;
+  (*m_matrix)(2,2) = s1[2] * sin + s2[2] * cos;
 }
 
 /** Add rotation around the z-axis.
@@ -148,20 +153,20 @@ HomTransform::rotate_y(float rad)
 void
 HomTransform::rotate_z(float rad)
 {
-  Matrix m(3, 3);
-  m.id();
-  
-  m(0,0) =  cosf(rad);
-  m(0,1) = -sinf(rad);
-  m(1,0) =  sinf(rad);
-  m(1,1) =  cosf(rad);
+  float cos = cosf(rad);
+  float sin = sinf(rad);
+  float s1[3] = { (*m_matrix)(0,0), (*m_matrix)(1,0), (*m_matrix)(2,0) };
+  float s2[3] = { (*m_matrix)(0,1), (*m_matrix)(1,1), (*m_matrix)(2,1) };
 
-  Matrix rot = m_matrix->get_submatrix(0, 0, 3, 3);
-  rot *= m;
-  
-  m_matrix->overlay(0, 0, rot);
+  (*m_matrix)(0,0) = s1[0] * cos + s2[0] * sin;
+  (*m_matrix)(1,0) = s1[1] * cos + s2[1] * sin;
+  (*m_matrix)(2,0) = s1[2] * cos + s2[2] * sin;
+
+  (*m_matrix)(0,1) = -s1[0] * sin + s2[0] * cos;
+  (*m_matrix)(1,1) = -s1[1] * sin + s2[1] * cos;
+  (*m_matrix)(2,1) = -s1[2] * sin + s2[2] * cos;
 }
-  
+
 /** Add translation to the transformation.
  * @param dx offset along x-axis
  * @param dy offset along y-axis
@@ -170,15 +175,28 @@ HomTransform::rotate_z(float rad)
 void
 HomTransform::trans(float dx, float dy, float dz)
 {
-	Matrix m(4, 4);
-  m.id();
-
-  m(0, 3) = dx;
-  m(1, 3) = dy;
-  m(2, 3) = dz;
-	
-	(*m_matrix) *= m;
+  (*m_matrix)(0, 3) += (*m_matrix)(0, 0) * dx + (*m_matrix)(0, 1) * dy + (*m_matrix)(0, 2) * dz;
+  (*m_matrix)(1, 3) += (*m_matrix)(1, 0) * dx + (*m_matrix)(1, 1) * dy + (*m_matrix)(1, 2) * dz;
+  (*m_matrix)(2, 3) += (*m_matrix)(2, 0) * dx + (*m_matrix)(2, 1) * dy + (*m_matrix)(2, 2) * dz;
 }
+
+/** Modified Denavit-Hartenberg transformation.
+ * DH-transformation as used by Aldebaran
+ * @see http://robocup.aldebaran-robotics.com/index.php?option=com_content&task=view&id=30#id2514205 "3.2.2.1.3.2. Forward kinematics model parameters"
+ *
+ * @param alpha the angle from the Z_i-1 axis to the Z_i axis about the X_i-1 axis
+ * @param a     the offset distance between the Z_i-1 and Z_i axes along the X_i-1 axis
+ * @param theta the angle between the X_i-1 and X_i axes about the Z_i axis
+ * @param d     the distance from the origin of frame X_i-1 to the X_i axis along the Z_i axis
+ */
+void
+HomTransform::mDH(const float alpha, const float a, const float theta, const float d)
+{
+  if (alpha)  rotate_x(alpha);
+  if (a || d) trans(a, 0, d);
+  if (theta)  rotate_z(theta);
+}
+
 
 /** Assignement operator.
  * @param t the other transformation
@@ -238,7 +256,7 @@ HomTransform::operator*(const HomCoord& h) const
 {
   Vector v(4);
   v = (*m_matrix) * (*h.m_vector);
-  
+
   return HomCoord(v);
 }
 

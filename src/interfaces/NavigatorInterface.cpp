@@ -66,7 +66,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "dest_dist", 1, &data->dest_dist);
   add_fieldinfo(Interface::IFT_UINT, "msgid", 1, &data->msgid);
   add_fieldinfo(Interface::IFT_BOOL, "final", 1, &data->final);
-  unsigned char tmp_hash[] = {0xbc, 0x36, 0xff, 0x5, 0x28, 0xbf, 0x57, 0x98, 0x24, 0x5e, 0x3e, 0xc8, 0x29, 0x49, 0x46, 0xba};
+  unsigned char tmp_hash[] = {0xdc, 0x5e, 0x7b, 0xa9, 0x38, 0x5c, 0x71, 0xe2, 0xb7, 0x5a, 0x82, 0x43, 0x5e, 0x50, 0x13, 0xe1};
   set_hash(tmp_hash);
 }
 
@@ -294,7 +294,11 @@ NavigatorInterface::set_final(const bool new_final)
 Message *
 NavigatorInterface::create_message(const char *type) const
 {
-  if ( strncmp("CartesianGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+  if ( strncmp("StopMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new StopMessage();
+  } else if ( strncmp("TurnMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new TurnMessage();
+  } else if ( strncmp("CartesianGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new CartesianGotoMessage();
   } else if ( strncmp("PolarGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new PolarGotoMessage();
@@ -326,6 +330,164 @@ NavigatorInterface::copy_values(const Interface *other)
 }
 
 /* =========== messages =========== */
+/** @class NavigatorInterface::StopMessage <interfaces/NavigatorInterface.h>
+ * StopMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+NavigatorInterface::StopMessage::StopMessage() : Message("StopMessage")
+{
+  data_size = 0;
+  data_ptr  = NULL;
+}
+
+/** Destructor */
+NavigatorInterface::StopMessage::~StopMessage()
+{
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::StopMessage::StopMessage(const StopMessage *m) : Message("StopMessage")
+{
+  data_size = 0;
+  data_ptr  = NULL;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::StopMessage::clone() const
+{
+  return new NavigatorInterface::StopMessage(this);
+}
+/** @class NavigatorInterface::TurnMessage <interfaces/NavigatorInterface.h>
+ * TurnMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_angle initial value for angle
+ * @param ini_velocity initial value for velocity
+ */
+NavigatorInterface::TurnMessage::TurnMessage(const float ini_angle, const float ini_velocity) : Message("TurnMessage")
+{
+  data_size = sizeof(TurnMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (TurnMessage_data_t *)data_ptr;
+  data->angle = ini_angle;
+  data->velocity = ini_velocity;
+}
+/** Constructor */
+NavigatorInterface::TurnMessage::TurnMessage() : Message("TurnMessage")
+{
+  data_size = sizeof(TurnMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (TurnMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+NavigatorInterface::TurnMessage::~TurnMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::TurnMessage::TurnMessage(const TurnMessage *m) : Message("TurnMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (TurnMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get angle value.
+ * Angle of the turn.
+ * @return angle value
+ */
+float
+NavigatorInterface::TurnMessage::angle() const
+{
+  return data->angle;
+}
+
+/** Get maximum length of angle value.
+ * @return length of angle value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::TurnMessage::maxlenof_angle() const
+{
+  return 1;
+}
+
+/** Set angle value.
+ * Angle of the turn.
+ * @param new_angle new angle value
+ */
+void
+NavigatorInterface::TurnMessage::set_angle(const float new_angle)
+{
+  data->angle = new_angle;
+}
+
+/** Get velocity value.
+ * The desired turning velocity in rad/s,
+      set to zero to use default value.
+ * @return velocity value
+ */
+float
+NavigatorInterface::TurnMessage::velocity() const
+{
+  return data->velocity;
+}
+
+/** Get maximum length of velocity value.
+ * @return length of velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::TurnMessage::maxlenof_velocity() const
+{
+  return 1;
+}
+
+/** Set velocity value.
+ * The desired turning velocity in rad/s,
+      set to zero to use default value.
+ * @param new_velocity new velocity value
+ */
+void
+NavigatorInterface::TurnMessage::set_velocity(const float new_velocity)
+{
+  data->velocity = new_velocity;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::TurnMessage::clone() const
+{
+  return new NavigatorInterface::TurnMessage(this);
+}
 /** @class NavigatorInterface::CartesianGotoMessage <interfaces/NavigatorInterface.h>
  * CartesianGotoMessage Fawkes BlackBoard Interface Message.
  * 
@@ -903,24 +1065,32 @@ NavigatorInterface::ResetOdometryMessage::clone() const
 bool
 NavigatorInterface::message_valid(const Message *message) const
 {
-  const CartesianGotoMessage *m0 = dynamic_cast<const CartesianGotoMessage *>(message);
+  const StopMessage *m0 = dynamic_cast<const StopMessage *>(message);
   if ( m0 != NULL ) {
     return true;
   }
-  const PolarGotoMessage *m1 = dynamic_cast<const PolarGotoMessage *>(message);
+  const TurnMessage *m1 = dynamic_cast<const TurnMessage *>(message);
   if ( m1 != NULL ) {
     return true;
   }
-  const MaxVelocityMessage *m2 = dynamic_cast<const MaxVelocityMessage *>(message);
+  const CartesianGotoMessage *m2 = dynamic_cast<const CartesianGotoMessage *>(message);
   if ( m2 != NULL ) {
     return true;
   }
-  const ObstacleMessage *m3 = dynamic_cast<const ObstacleMessage *>(message);
+  const PolarGotoMessage *m3 = dynamic_cast<const PolarGotoMessage *>(message);
   if ( m3 != NULL ) {
     return true;
   }
-  const ResetOdometryMessage *m4 = dynamic_cast<const ResetOdometryMessage *>(message);
+  const MaxVelocityMessage *m4 = dynamic_cast<const MaxVelocityMessage *>(message);
   if ( m4 != NULL ) {
+    return true;
+  }
+  const ObstacleMessage *m5 = dynamic_cast<const ObstacleMessage *>(message);
+  if ( m5 != NULL ) {
+    return true;
+  }
+  const ResetOdometryMessage *m6 = dynamic_cast<const ResetOdometryMessage *>(message);
+  if ( m6 != NULL ) {
     return true;
   }
   return false;

@@ -4,6 +4,27 @@ namespace fawkes {
 class NavigatorInterface : public Interface
 {
 
+  class StopMessage : public Message
+  {
+    StopMessage();
+    ~StopMessage();
+
+  };
+
+  class TurnMessage : public Message
+  {
+    TurnMessage(float ini_angle, float ini_velocity);
+    TurnMessage();
+    ~TurnMessage();
+
+    float angle();
+    void set_angle(const float new_angle);
+    int maxlenof_angle() const;
+    float velocity();
+    void set_velocity(const float new_velocity);
+    int maxlenof_velocity() const;
+  };
+
   class CartesianGotoMessage : public Message
   {
     CartesianGotoMessage(float ini_x, float ini_y, float ini_orientation);

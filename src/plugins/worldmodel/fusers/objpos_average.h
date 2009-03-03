@@ -30,9 +30,12 @@
 #include <blackboard/interface_observer.h>
 #include <core/utils/lock_list.h>
 
+#include <string>
+
 namespace fawkes
 {
   class BlackBoard;
+  class Logger;
   class ObjectPositionInterface;
 }
 
@@ -41,7 +44,8 @@ class WorldModelObjPosAverageFuser
   public fawkes::BlackBoardInterfaceObserver
 {
  public:
-  WorldModelObjPosAverageFuser(fawkes::BlackBoard *blackboard,
+  WorldModelObjPosAverageFuser(fawkes::Logger *logger,
+			       fawkes::BlackBoard *blackboard,
 			       const char *from_id_pattern, const char *to_id);
   ~WorldModelObjPosAverageFuser();
 
@@ -52,6 +56,8 @@ class WorldModelObjPosAverageFuser
 
  private:
   fawkes::BlackBoard *__blackboard;
+  fawkes::Logger     *__logger;
+  std::string         __to_id;
 
   fawkes::LockList<fawkes::ObjectPositionInterface *>  __input_ifs;
   fawkes::ObjectPositionInterface                     *__output_if;

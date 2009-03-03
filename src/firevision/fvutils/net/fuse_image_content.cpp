@@ -59,6 +59,8 @@ FuseImageContent::FuseImageContent(uint32_t type,
 
   __header = (FUSE_image_message_header_t *)_payload;
   __buffer = (unsigned char *)_payload + sizeof(FUSE_image_message_header_t);
+  __capture_time = new fawkes::Time(ntohl(__header->capture_time_sec),
+				    ntohl(__header->capture_time_usec));
 
   __buffer_size = ntohl(__header->buffer_size);
 }
@@ -89,6 +91,13 @@ FuseImageContent::FuseImageContent(SharedMemoryImageBuffer *b)
   __header->height = htonl(b->height());
   __header->buffer_size = htonl(__buffer_size);
 
+  long int cts = 0, ctus = 0;
+  b->capture_time(&cts, &ctus);
+  __header->capture_time_sec = htonl(cts);
+  __header->capture_time_usec = htonl(ctus);
+
+  __capture_time = NULL;
+
   b->lock_for_read();
   memcpy(__buffer, b->buffer(), __buffer_size);
   b->unlock();
@@ -104,11 +113,15 @@ FuseImageContent::FuseImageContent(SharedMemoryImageBuffer *b)
  * @param colorspace color space
  * @param width width of image in pixels
  * @param height height of image in pixels
+ * @param capture_time_sec optional seconds part of the capture time
+ * @param capture_time_usec optional microseconds part of the capture time
  */
 FuseImageContent::FuseImageContent(FUSE_image_format_t image_format, const char *image_id,
 				   unsigned char *buffer, size_t buffer_size,
 				   colorspace_t colorspace,
-				   unsigned int width, unsigned int height)
+				   unsigned int width, unsigned int height,
+				   long int capture_time_sec,
+				   long int capture_time_usec)
 {
   __buffer_size  = buffer_size;
   _payload_size  = __buffer_size + sizeof(FUSE_image_message_header_t);
@@ -128,10 +141,20 @@ FuseImageContent::FuseImageContent(FUSE_image_format_t image_format, const char 
   __header->width  = htonl(width);
   __header->height = htonl(height);
   __header->buffer_size = htonl(__buffer_size);
+  __header->capture_time_sec = htonl(capture_time_sec);
+  __header->capture_time_usec = htonl(capture_time_usec);
+
+  __capture_time = NULL;
 
   memcpy(__buffer, buffer, __buffer_size);
 }
 
+
+/** Destructor. */
+FuseImageContent::~FuseImageContent()
+{
+  delete __capture_time;
+}
 
 /** Image buffer.
  * @return image buffer
@@ -192,6 +215,19 @@ FuseImageContent::format() const
   return __header->format;
 }
 
+
+/** Get capture time.
+ * @return capture time
+ */
+fawkes::Time *
+FuseImageContent::capture_time() const
+{
+  if ( ! __capture_time ) {
+    __capture_time = new fawkes::Time(ntohl(__header->capture_time_sec),
+				      ntohl(__header->capture_time_usec));
+  }
+  return __capture_time;
+}
 
 void
 FuseImageContent::serialize()

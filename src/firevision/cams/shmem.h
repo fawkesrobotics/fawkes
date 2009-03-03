@@ -2,8 +2,8 @@
 /***************************************************************************
  *  shmem.h - This header defines a reader for shared memory images
  *
- *  Generated: Thu Jan 12 19:41:17 2006
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jan 12 19:41:17 2006
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -58,6 +58,7 @@ class SharedMemoryCamera : public Camera
   virtual unsigned int   pixel_width();
   virtual unsigned int   pixel_height();
   virtual colorspace_t   colorspace();
+  virtual fawkes::Time * capture_time();
 
   virtual void           set_image_number(unsigned int n);
 
@@ -72,15 +73,17 @@ class SharedMemoryCamera : public Camera
  private:
   void init();
 
-  bool          deep_copy;
-  bool          opened;
-  unsigned int  width;
-  unsigned int  height;
-  char *        image_id;
+  bool          __deep_copy;
+  bool          __opened;
+  unsigned int  __width;
+  unsigned int  __height;
+  char *        __image_id;
 
-  SharedMemoryImageBuffer  *shm_buffer;
+  SharedMemoryImageBuffer  *__shm_buffer;
 
-  unsigned char *deep_buffer;
+  unsigned char *__deep_buffer;
+
+  fawkes::Time *__capture_time;
 };
 
 #endif

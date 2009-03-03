@@ -39,15 +39,16 @@ public:
   float get_field_length();
   float get_field_width();
   fawkes::cart_coord_2d_t get_field_offsets();
-  
+
   void draw_lines(SharedMemoryImageBuffer *target, YUV_t color, bool draw_landscape = true, float scale = 0);
 
 protected:
   FieldLines(float field_length, float field_width, float line_width);
-  
+
   void calc_offsets();
+  void add_circle(float r, unsigned int pieces = 8, float center_x = 0, float center_y = 0, float theta_start = 0, float theta_end = 0);
   virtual void init() = 0;
-  
+
 private: //fields
   float __line_width;
   float __field_length;
@@ -60,7 +61,7 @@ class FieldLines6x4: public FieldLines
 public:
   FieldLines6x4(float length, float width);
   virtual ~FieldLines6x4();
-  
+
 private:
   virtual void init();
 };
@@ -70,7 +71,7 @@ class FieldLinesCityTower: public FieldLines
 public:
   FieldLinesCityTower(float length, float width);
   virtual ~FieldLinesCityTower();
-  
+
 private:
   virtual void init();
 };

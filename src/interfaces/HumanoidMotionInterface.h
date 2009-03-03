@@ -106,6 +106,7 @@ class HumanoidMotionInterface : public Interface
       Amplitude of the elbow roll movement during walking.
      */
     bool moving; /**< True if the robot is currently moving. */
+    LegEnum supporting_leg; /**< Marks the supporting leg */
     bool arms_enabled; /**< 
       If true the arms are controlled during walking for balancing.
      */
@@ -474,6 +475,37 @@ class HumanoidMotionInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class YawPitchHeadMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float yaw; /**< Desired yaw (horizontal orientation). */
+      float pitch; /**< Desired pitch (vertical orientation). */
+      float time_sec; /**< Time in seconds when to reach the target. */
+    } YawPitchHeadMessage_data_t;
+
+    YawPitchHeadMessage_data_t *data;
+
+   public:
+    YawPitchHeadMessage(const float ini_yaw, const float ini_pitch, const float ini_time_sec);
+    YawPitchHeadMessage();
+    ~YawPitchHeadMessage();
+
+    YawPitchHeadMessage(const YawPitchHeadMessage *m);
+    /* Methods */
+    float yaw() const;
+    void set_yaw(const float new_yaw);
+    size_t maxlenof_yaw() const;
+    float pitch() const;
+    void set_pitch(const float new_pitch);
+    size_t maxlenof_pitch() const;
+    float time_sec() const;
+    void set_time_sec(const float new_time_sec);
+    size_t maxlenof_time_sec() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   HumanoidMotionInterface();
@@ -484,6 +516,9 @@ class HumanoidMotionInterface : public Interface
   bool is_moving() const;
   void set_moving(const bool new_moving);
   size_t maxlenof_moving() const;
+  LegEnum supporting_leg() const;
+  void set_supporting_leg(const LegEnum new_supporting_leg);
+  size_t maxlenof_supporting_leg() const;
   float max_step_length() const;
   void set_max_step_length(const float new_max_step_length);
   size_t maxlenof_max_step_length() const;

@@ -29,6 +29,17 @@
     <field type="bool" name="final">True, if the last goto command has been finished,
       false if it is still running</field>
   </data>
+  <message name="Stop">
+    <comment>Stop motion immediately.</comment>
+  </message>
+  <message name="Turn">
+    <comment>Turn around own major axis. Opposed to setting a goto with a target
+    angle this message causes the robot to turn exactly by this angle, it will
+    not normalize it and turn to a specified angle.</comment>
+    <field type="float" name="angle">Angle of the turn.</field>
+    <field type="float" name="velocity">The desired turning velocity in rad/s,
+      set to zero to use default value.</field>
+  </message>
   <message name="CartesianGoto">
     <comment>States the next target to navigate to.</comment>
     <field type="float" name="x">X-coordinate of the target, in the robot's coordinate system.</field>
@@ -42,7 +53,7 @@
     <field type="float" name="orientation">The orientation of the robot at the target.</field>
   </message>
   <message name="MaxVelocity">
-    <comment>States the maximum velocity of the robot.</comment>
+    <comment>States the maximum velocity of the robot for driving/walking, but not for turning.</comment>
     <field type="float" name="velocity">Maximum velocity of the robot.</field>
   </message>
   <message name="Obstacle">

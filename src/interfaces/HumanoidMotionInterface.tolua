@@ -189,9 +189,29 @@ class HumanoidMotionInterface : public Interface
     int maxlenof_from_pos() const;
   };
 
+  class YawPitchHeadMessage : public Message
+  {
+    YawPitchHeadMessage(float ini_yaw, float ini_pitch, float ini_time_sec);
+    YawPitchHeadMessage();
+    ~YawPitchHeadMessage();
+
+    float yaw();
+    void set_yaw(const float new_yaw);
+    int maxlenof_yaw() const;
+    float pitch();
+    void set_pitch(const float new_pitch);
+    int maxlenof_pitch() const;
+    float time_sec();
+    void set_time_sec(const float new_time_sec);
+    int maxlenof_time_sec() const;
+  };
+
   bool is_moving();
   void set_moving(const bool new_moving);
   int maxlenof_moving() const;
+  LegEnum supporting_leg();
+  void set_supporting_leg(const LegEnum new_supporting_leg);
+  int maxlenof_supporting_leg() const;
   float max_step_length();
   void set_max_step_length(const float new_max_step_length);
   int maxlenof_max_step_length() const;

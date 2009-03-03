@@ -22,7 +22,7 @@
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
 require("fawkes.modinit")
-local fsmmod = require("fawkes.fsm");
+local fsmmod = require("fawkes.fsm")
 
 --- This module provides a generic finite state machine (FSM).
 -- @author Tim Niemueller
@@ -106,9 +106,9 @@ end
 -- a SubSkillState during init() are given verbatim to the skill's execute()
 -- function.
 -- @author Tim Niemueller
-SubSkillState = {get_transitions = State.get_transitions,
-		 last_transition = State.last_transition,
-	         reset           = State.reset}
+SubSkillState = { get_transitions = State.get_transitions,
+		  last_transition = State.last_transition
+	        }
 
 --- Create new state.
 -- @param o table with initializations for the object.
@@ -163,6 +163,10 @@ function SubSkillState:do_loop()
    end
 end
 
+
+function SubSkillState:reset()
+   self.skill.reset()
+end
 
 --- Create a new skill state.
 -- This creates a new skill state for regular FSMs. Augment your FSM with

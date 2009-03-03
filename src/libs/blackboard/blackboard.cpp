@@ -208,16 +208,14 @@ BlackBoard::~BlackBoard()
  * @param type type name to strip
  * @return stripped class type, use delete to free it after you are done
  */
-char *
+std::string
 BlackBoard::demangle_fawkes_interface_name(const char *type)
 {
   std::string t = type;
   t = t.substr( 8 ); // Hack to remove N6fawkes namespace prefix
   t = t.substr( t.find_first_not_of("0123456789") );
   t = t.substr(0, t.length() - 1); // Hack to remove trailing letter
-  char *rv = new char[t.length() + 1];
-  strcpy(rv, t.c_str());
-  return rv;
+  return t;
 }
 
 

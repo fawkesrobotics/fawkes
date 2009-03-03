@@ -27,6 +27,7 @@
 #include <fvutils/color/yuv.h>
 
 #include <cmath>
+#include <algorithm>
 #include <unistd.h>
 
 /** @class Drawer <fvutils/draw/drawer.h>
@@ -119,7 +120,7 @@ Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
       up[ind_tmp] = __color.U;
       vp[ind_tmp] = __color.V;
     }
- 
+
     x_tmp = center_x - x;
     y_tmp = center_y + y;
     if ( (x_tmp < __width) && (y_tmp < __height) ) {
@@ -129,7 +130,7 @@ Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
       up[ind_tmp] = __color.U;
       vp[ind_tmp] = __color.V;
     }
- 
+
     x_tmp = center_x + y;
     y_tmp = center_y + x;
     if ( (x_tmp < __width) && (y_tmp < __height) ) {
@@ -139,7 +140,7 @@ Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
       up[ind_tmp] = __color.U;
       vp[ind_tmp] = __color.V;
     }
- 
+
     x_tmp = center_x - y;
     y_tmp = center_y + x;
     if ( (x_tmp < __width) && (y_tmp < __height) ) {
@@ -149,7 +150,7 @@ Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
       up[ind_tmp] = __color.U;
       vp[ind_tmp] = __color.V;
     }
- 
+
     x_tmp = center_x + x;
     y_tmp = center_y - y;
     if ( (x_tmp < __width) && (y_tmp < __height) ) {
@@ -159,7 +160,7 @@ Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
       up[ind_tmp] = __color.U;
       vp[ind_tmp] = __color.V;
     }
-    
+
     x_tmp = center_x - x;
     y_tmp = center_y - y;
     if ( (x_tmp < __width) && (y_tmp < __height)) {
@@ -169,7 +170,7 @@ Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
       up[ind_tmp] = __color.U;
       vp[ind_tmp] = __color.V;
     }
- 
+
     x_tmp = center_x + y;
     y_tmp = center_y - x;
     if ( (x_tmp < __width) && (y_tmp < __height)) {
@@ -179,7 +180,7 @@ Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
       up[ind_tmp] = __color.U;
       vp[ind_tmp] = __color.V;
     }
-    
+
     x_tmp = center_x - y;
     y_tmp = center_y - x;
     if ( (x_tmp < __width) && (y_tmp < __height) ) {
@@ -189,7 +190,7 @@ Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
       up[ind_tmp] = __color.U;
       vp[ind_tmp] = __color.V;
     }
-    
+
     ++x;
     y=(int)(sqrt((float)(r2 - x * x))+0.5);
   }
@@ -365,11 +366,11 @@ Drawer::draw_line(unsigned int x_start, unsigned int y_start,
 
   unsigned char *up = YUV422_PLANAR_U_PLANE(__buffer, __width, __height);
   unsigned char *vp = YUV422_PLANAR_V_PLANE(__buffer, __width, __height);
- 
+
   // calculate distance in both directions
   dx = x_end - x_start;
   dy = y_end - y_start;
- 
+
   // Calculate sign of the increment
   if(dx < 0) {
     incx = -1;
@@ -377,23 +378,23 @@ Drawer::draw_line(unsigned int x_start, unsigned int y_start,
   } else {
     incx = dx ? 1 : 0;
   }
-     
+
   if(dy < 0) {
     incy = -1;
     dy = -dy;
   } else {
     incy = dy ? 1 : 0;
   }
- 
+
   // check which distance is larger
   dist = (dx > dy) ? dx : dy;
- 
+
   // Initialize for loops
   x = x_start;
   y = y_start;
   xerr = dx;
   yerr = dy;
-     
+
   /* Calculate and draw pixels */
   for(int t = 0; t < dist; ++t) {
     if ( ((unsigned int)x < __width) && ((unsigned int)y < __height) ) {
@@ -411,22 +412,41 @@ Drawer::draw_line(unsigned int x_start, unsigned int y_start,
 
     xerr += dx;
     yerr += dy;
-     
+
     if(xerr > dist) {
       xerr -= dist;
       x += incx;
     }
-     
+
     if(yerr>dist) {
       yerr -= dist;
       y += incy;
     }
   }
-     
+
   if ( (x_end < __width) && (y_end < __height) ) {
     __buffer[ y_end * __width + x_end ]   = __color.Y;
     up[ (y_end * __width + x_end) / 2 ] = __color.U;
     vp[ (y_end * __width + x_end) / 2 ] = __color.V;
   }
-     
+
 }
+
+/** Draws a cross.
+ * @param x_center Center of the cross
+ * @param y_center Center of the cross
+ * @param width of the bars
+ */
+void
+Drawer::draw_cross(unsigned int x_center, unsigned int y_center, unsigned int width)
+{
+  unsigned int r = width / 2;
+  unsigned int a = std::max((unsigned int) 0, x_center - r);
+  unsigned int b = std::min(__width, x_center + r);
+  draw_line(a, y_center, b, y_center);
+
+  a = std::max((unsigned int) 0, y_center - r);
+  b = std::min(__height, y_center + r);
+  draw_line(x_center, a, x_center, b);
+}
+

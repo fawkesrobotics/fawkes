@@ -113,7 +113,7 @@ WorldModelThread::init()
 	}
 	logger->log_debug(name(), "Instantiating ObjPosAverageFuser for %s -> %s (type: %s)",
 			  from_id.c_str(), to_id.c_str(), type.c_str());
-	WorldModelObjPosAverageFuser *fuser = new WorldModelObjPosAverageFuser(blackboard,
+	WorldModelObjPosAverageFuser *fuser = new WorldModelObjPosAverageFuser(logger, blackboard,
 									       from_id.c_str(), to_id.c_str());
 	  __fusers.push_back(fuser);
 

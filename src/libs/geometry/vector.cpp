@@ -23,8 +23,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <geometry/vector.h>
+#include "vector.h"
 #include <exception>
+#include <core/exceptions/software.h>
 #include <cstdlib>
 #include <cstdio>
 
@@ -38,7 +39,7 @@ namespace fawkes {
 /** Constructor.
  * @param size the dimension of the vector
  * @param data pointer to a float array
- * @param manage_memory if true, the Vector will manage its memory on its own, else it 
+ * @param manage_memory if true, the Vector will manage its memory on its own, else it
  *        will not allocate new memory but works with the provided array
  */
 Vector::Vector(unsigned int size, float* data, bool manage_memory)
@@ -49,9 +50,9 @@ Vector::Vector(unsigned int size, float* data, bool manage_memory)
   if (m_manage_memory)
     {
       m_data = new float[m_size];
-      
+
       for (unsigned int i = 0; i < m_size; ++i)
-	{ 
+	{
 	  if (data)
 	    { m_data[i] = data[i]; }
 	  else
@@ -74,7 +75,7 @@ Vector::Vector(const Vector& v)
   m_data = new float[m_size];
 
   for (unsigned int i = 0; i < m_size; ++i)
-    { 
+    {
       m_data[i] = v.m_data[i];
     }
 }
@@ -84,7 +85,7 @@ Vector::~Vector()
 {
   if (m_manage_memory)
     {
-      delete[] m_data; 
+      delete[] m_data;
     }
 }
 
@@ -113,10 +114,10 @@ Vector::set_size(unsigned int size)
     }
 
   m_size = size;
-	
+
 	if (m_manage_memory) //I'm not supposed to delete foreign buffers
 		delete[] m_data;
-  else 
+  else
 		m_manage_memory = true;
 
   m_data = t;
@@ -140,7 +141,7 @@ Vector::get(unsigned int d) const
 {
   if (m_size <= d)
     { return 0.0; }
-  
+
   return m_data[d];
 }
 
@@ -152,10 +153,10 @@ float&
 Vector::get(unsigned int d)
 {
   if (m_size <= d)
-    { 
+    {
       printf("This column vector has %u elements -- element %u not available", m_size, d);
       throw std::exception();
-    }  
+    }
 
   return m_data[d];
 }
@@ -168,11 +169,11 @@ void
 Vector::set(unsigned int d, float f)
 {
   if (m_size <= d)
-    { 
+    {
       printf("This column vector has %u elements -- element %u not available", m_size, d);
       throw std::exception();
     }
-  
+
   m_data[d] = f;
 }
 
@@ -269,7 +270,7 @@ Vector::operator[](unsigned int d) const
 {
   if (m_size <= d)
     { return 0.0; }
-  
+
   return m_data[d];
 }
 
@@ -281,11 +282,11 @@ float&
 Vector::operator[](unsigned int d)
 {
   if (m_size <= d)
-    { 
+    {
       printf("This column vector has %u elements -- element %u not available", m_size, d);
       throw std::exception();
     }
-  
+
   return m_data[d];
 }
 
@@ -296,7 +297,7 @@ Vector::operator[](unsigned int d)
 Vector
 Vector::operator*(const float& f) const
 {
-  Vector result(m_size);
+  Vector result(m_size, m_data);
 
   for (unsigned int i = 0; i < m_size; ++i)
     {
@@ -328,7 +329,7 @@ Vector::operator*=(const float& f)
 Vector
 Vector::operator/(const float& f) const
 {
-  Vector result(m_size);
+  Vector result(m_size, m_data);
 
   for (unsigned int i = 0; i < m_size; ++i)
     {
@@ -353,6 +354,78 @@ Vector::operator/=(const float& f)
   return *this;
 }
 
+/** Adds two vectors.
+ * @param cv the vector to be added
+ * @return sum vector
+ */
+Vector
+Vector::operator+(const Vector& cv) const
+{
+  if (m_size != cv.size()) throw fawkes::TypeMismatchException("The two vectors have to be of equal size");
+
+  Vector result(m_size, m_data);
+
+  for (unsigned int i = 0; i < m_size; ++i)
+    {
+      result.m_data[i] += cv[i];
+    }
+
+  return result;
+}
+
+/** In-place vector addition.
+ * @param cv the vector to be added
+ * @return reference to the sum vector
+ */
+Vector&
+Vector::operator+=(const Vector& cv)
+{
+  if (m_size != cv.size()) throw fawkes::TypeMismatchException("The two vectors have to be of equal size");
+
+  for (unsigned int i = 0; i < m_size; ++i)
+    {
+      m_data[i] += cv[i];
+    }
+
+  return *this;
+}
+
+/** Substract two vectors.
+ * @param cv the vector to be substracted
+ * @return diff vector
+ */
+Vector
+Vector::operator-(const Vector& cv) const
+{
+  if (m_size != cv.size()) throw fawkes::TypeMismatchException("The two vectors have to be of equal size");
+
+  Vector result(m_size, m_data);
+
+  for (unsigned int i = 0; i < m_size; ++i)
+    {
+      result.m_data[i] -= cv[i];
+    }
+
+  return result;
+}
+
+/** In-place vector substraction.
+ * @param cv the vector to be substracted
+ * @return reference to the diff vector
+ */
+Vector&
+Vector::operator-=(const Vector& cv)
+{
+  if (m_size != cv.size()) throw fawkes::TypeMismatchException("The two vectors have to be of equal size");
+
+  for (unsigned int i = 0; i < m_size; ++i)
+    {
+      m_data[i] -= cv[i];
+    }
+
+  return *this;
+}
+
 /** Assignment operator.
  * @param v the rhs vector
  * @return reference to the lhs vector
@@ -361,7 +434,7 @@ Vector&
 Vector::operator=(const Vector& v)
 {
   if (m_size != v.m_size)
-    { 
+    {
       if (m_manage_memory)
 	{ delete[] m_data; }
 
@@ -393,7 +466,7 @@ Vector::operator==(const Vector& v)
 	{ return false; }
     }
 
-  return true;  
+  return true;
 }
 
 /** Prints the vector data to standard out.
@@ -423,10 +496,10 @@ float
 Vector::operator*(const Vector& v) const
 {
 	float res = 0;
-	
+
 	for (unsigned int i = 0; i < m_size; ++i)
 		res += this->get(i) * v.get(i);
-	
+
 	return res;
 }
 
@@ -441,15 +514,15 @@ std::ostream&
 operator<<(std::ostream& stream, const Vector &v)
 {
 	stream << "[";
-	
+
 	for (unsigned int i = 0; i < v.m_size; ++i)
 	{
 		stream << v.get(i);
-		
+
 		if (i + 1 < v.m_size)
 			stream << ",";
 	}
-	
+
 	return stream << "]";
 }
 

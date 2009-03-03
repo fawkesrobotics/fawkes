@@ -35,24 +35,26 @@ JumpState         = jsmod.JumpState
 SkillJumpState    = sjsmod.SkillJumpState
 SubSkillJumpState = sjsmod.SubSkillJumpState
 
-SkillHSM = {current = nil,
-	    debug   = false,
+SkillHSM = {current                 = nil,
+	    debug                   = false,
 	    export_states_to_parent = true,
-	    set_debug        = FSM.set_debug,
-	    set_error        = FSM.set_error,
-	    loop             = FSM.loop,
-	    trans            = FSM.trans,
-	    reset            = FSM.reset,
-	    changed          = FSM.changed,
-	    mark_changed     = FSM.mark_changed,
-	    graph            = FSM.graph,
-	    traced           = FSM.traced,
-	    traced_state     = FSM.traced_state,
-	    traced_trans     = FSM.traced_trans,
-	    reset_trace      = FSM.reset_trace,
-	    add_state        = FSM.add_state,
-	    remove_state     = FSM.remove_state,
-	    get_start_state  = FSM.get_start_state
+	    set_debug               = FSM.set_debug,
+	    set_error               = FSM.set_error,
+	    loop                    = FSM.loop,
+	    trans                   = FSM.trans,
+	    reset                   = FSM.reset,
+	    changed                 = FSM.changed,
+	    mark_changed            = FSM.mark_changed,
+	    graph                   = FSM.graph,
+	    traced                  = FSM.traced,
+	    traced_state            = FSM.traced_state,
+	    traced_trans            = FSM.traced_trans,
+	    reset_trace             = FSM.reset_trace,
+	    add_state               = FSM.add_state,
+	    remove_state            = FSM.remove_state,
+	    get_start_state         = FSM.get_start_state,
+	    add_default_transition  = FSM.add_default_transition,
+	    apply_deftrans          = FSM.apply_deftrans
 	   }
 
 function SkillHSM:new(o)
@@ -138,20 +140,7 @@ function SkillHSM:new_jump_state(name, subskill, final_state, failure_state, arg
    end
 
    self.states[name] = s
-
-   if self.export_states_to_parent then
-      local e = getfenv(2)
-      e[name] = s
-   end
-
-   return s
-end
-
-function SkillHSM:new_init_state(name, next_state)
-   local s = JumpState:new{name=name, fsm = self}
-   s:add_transition(next_state, function (state) return true end, "Goto next state")
-
-   self.states[name] = s
+   self:apply_deftrans(s)
 
    if self.export_states_to_parent then
       local e = getfenv(2)

@@ -278,6 +278,65 @@ BlackBoardInterfaceListener::bbil_add_writer_interface(Interface *interface)
 }
 
 
+
+/** Remove an interface to the data modification watch list.
+ * Only remove interfaces from the list when not currently registered to
+ * the BlackBoard or chaos and confusion will come upon you.
+ * @param interface interface to watch for data modifications.
+ */
+void
+BlackBoardInterfaceListener::bbil_remove_data_interface(Interface *interface)
+{
+  if ( __bbil_data_interfaces.find((char *)interface->uid()) != __bbil_data_interfaces.end() ) {
+    __bbil_data_interfaces.erase(interface->uid());
+  }
+}
+
+/** Remove an interface to the message received watch list.
+ * Only remove interfaces from the list when not currently registered to
+ * the BlackBoard or chaos and confusion will come upon you.
+ * @param interface interface to watch for messages
+ */
+void
+BlackBoardInterfaceListener::bbil_remove_message_interface(Interface *interface)
+{
+  if ( ! interface->is_writer() ) {
+    throw Exception("Message received events can only be watched by writing instances");
+  }
+  if ( __bbil_message_interfaces.find((char *)interface->uid()) != __bbil_message_interfaces.end() ) {
+    __bbil_message_interfaces.erase(interface->uid());
+  }
+}
+
+
+/** Remove an interface to the reader addition/removal watch list.
+ * Only remove interfaces from the list when not currently registered to
+ * the BlackBoard or chaos and confusion will come upon you.
+ * @param interface interface to watch for addition/removal of readers
+ */
+void
+BlackBoardInterfaceListener::bbil_remove_reader_interface(Interface *interface)
+{
+  if ( __bbil_reader_interfaces.find((char *)interface->uid()) != __bbil_reader_interfaces.end() ) {
+    __bbil_reader_interfaces.erase(interface->uid());
+  }
+}
+
+
+/** Remove an interface to the writer addition/removal watch list.
+ * Only remove interfaces from the list when not currently registered to
+ * the BlackBoard or chaos and confusion will come upon you.
+ * @param interface interface to watch for addition/removal of writers
+ */
+void
+BlackBoardInterfaceListener::bbil_remove_writer_interface(Interface *interface)
+{
+  if ( __bbil_writer_interfaces.find((char *)interface->uid()) != __bbil_writer_interfaces.end() ) {
+    __bbil_writer_interfaces.erase(interface->uid());
+  }
+}
+
+
 /** Get data modification watch list.
  * @return data modification watch list
  */

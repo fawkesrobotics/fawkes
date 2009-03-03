@@ -215,9 +215,12 @@ FuseServerClientThread::process_getimage_message(FuseNetworkMessage *m)
     __jpeg_compressor->compress();
     b->unlock();
     size_t compressed_buffer_size = __jpeg_compressor->compressed_size();
+    long int sec = 0, usec = 0;
+    b->capture_time(&sec, &usec);
     FuseImageContent *im = new FuseImageContent(FUSE_IF_JPEG, b->image_id(),
 						compressed_buffer, compressed_buffer_size,
-						CS_UNKNOWN, b->width(), b->height());
+						CS_UNKNOWN, b->width(), b->height(),
+						sec, usec);
     __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
     free(compressed_buffer);
   } else {

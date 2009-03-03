@@ -18,7 +18,7 @@ __fvconf_mk_ := 1
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L V4L1 V4L2 BUMBLEBEE2
+CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L V4L1 V4L2 BUMBLEBEE2 NAO
 CTRLS=EVID100P DPPTU
 
 FVBASEDIR           = $(BASEDIR)/src/firevision
@@ -110,6 +110,9 @@ ifeq ($(OS),Linux)
   HAVE_V4L_CAM        = 1
   HAVE_V4L1_CAM       = 1
   HAVE_V4L2_CAM       = 1
+  ifeq ($(BUILD_TYPE),naocross)
+    HAVE_NAO_CAM      = 1
+  endif
 endif
 
 
@@ -119,6 +122,13 @@ ifeq ($(HAVE_V4L_CAM),1)
     ifneq ($(HAVE_V4L2_CAM),1)
       ERROR_TARGETS += error_V4L_CAM
     endif
+  endif
+endif
+
+### Need V4L2 for NAO
+ifeq ($(HAVE_NAO_CAM),1)
+  ifneq ($(HAVE_V4L2_CAM),1)
+    ERROR_TARGETS += error_NAO_CAM
   endif
 endif
 
@@ -211,9 +221,13 @@ endif
 
 ifneq ($(SRCDIR),)
 all: $(ERROR_TARGETS)
-.PHONY: error_V4L_CAM
+.PHONY: error_V4L_CAM error_NAO_CAM
 error_V4L_CAM:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)If you enable V4L_CAM, you have to enable at least one of V4L1_CAM and V4L2_CAM$(TNORMAL)"
+	$(SILENT)exit 1
+
+error_NAO_CAM:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)If you enable NAO_CAM, you have to enable V4L2_CAM$(TNORMAL)"
 	$(SILENT)exit 1
 endif
 

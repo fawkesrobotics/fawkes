@@ -66,7 +66,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "elbow_roll_median", 1, &data->elbow_roll_median);
   add_fieldinfo(Interface::IFT_FLOAT, "elbow_roll_amplitude", 1, &data->elbow_roll_amplitude);
   add_fieldinfo(Interface::IFT_UINT, "msgid", 1, &data->msgid);
-  unsigned char tmp_hash[] = {0x2c, 0x77, 0x9b, 0x10, 0xb0, 0x10, 0x94, 0x4e, 0x7f, 0x88, 0xee, 0xb, 0xed, 0x3, 0xdc, 0x92};
+  unsigned char tmp_hash[] = {0x4, 0x3f, 0x29, 0xef, 0x3d, 0x76, 0x7a, 0x9a, 0x2f, 0x9, 0xcb, 0x3c, 0xb, 0x8a, 0x5f, 0x82};
   set_hash(tmp_hash);
 }
 
@@ -104,6 +104,36 @@ void
 HumanoidMotionInterface::set_moving(const bool new_moving)
 {
   data->moving = new_moving;
+}
+
+/** Get supporting_leg value.
+ * Marks the supporting leg
+ * @return supporting_leg value
+ */
+HumanoidMotionInterface::LegEnum
+HumanoidMotionInterface::supporting_leg() const
+{
+  return data->supporting_leg;
+}
+
+/** Get maximum length of supporting_leg value.
+ * @return length of supporting_leg value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::maxlenof_supporting_leg() const
+{
+  return 1;
+}
+
+/** Set supporting_leg value.
+ * Marks the supporting leg
+ * @param new_supporting_leg new supporting_leg value
+ */
+void
+HumanoidMotionInterface::set_supporting_leg(const LegEnum new_supporting_leg)
+{
+  data->supporting_leg = new_supporting_leg;
 }
 
 /** Get max_step_length value.
@@ -686,6 +716,8 @@ HumanoidMotionInterface::create_message(const char *type) const
     return new GetUpMessage();
   } else if ( strncmp("StandupMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new StandupMessage();
+  } else if ( strncmp("YawPitchHeadMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new YawPitchHeadMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -2289,6 +2321,155 @@ HumanoidMotionInterface::StandupMessage::clone() const
 {
   return new HumanoidMotionInterface::StandupMessage(this);
 }
+/** @class HumanoidMotionInterface::YawPitchHeadMessage <interfaces/HumanoidMotionInterface.h>
+ * YawPitchHeadMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_yaw initial value for yaw
+ * @param ini_pitch initial value for pitch
+ * @param ini_time_sec initial value for time_sec
+ */
+HumanoidMotionInterface::YawPitchHeadMessage::YawPitchHeadMessage(const float ini_yaw, const float ini_pitch, const float ini_time_sec) : Message("YawPitchHeadMessage")
+{
+  data_size = sizeof(YawPitchHeadMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (YawPitchHeadMessage_data_t *)data_ptr;
+  data->yaw = ini_yaw;
+  data->pitch = ini_pitch;
+  data->time_sec = ini_time_sec;
+}
+/** Constructor */
+HumanoidMotionInterface::YawPitchHeadMessage::YawPitchHeadMessage() : Message("YawPitchHeadMessage")
+{
+  data_size = sizeof(YawPitchHeadMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (YawPitchHeadMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+HumanoidMotionInterface::YawPitchHeadMessage::~YawPitchHeadMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+HumanoidMotionInterface::YawPitchHeadMessage::YawPitchHeadMessage(const YawPitchHeadMessage *m) : Message("YawPitchHeadMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (YawPitchHeadMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get yaw value.
+ * Desired yaw (horizontal orientation).
+ * @return yaw value
+ */
+float
+HumanoidMotionInterface::YawPitchHeadMessage::yaw() const
+{
+  return data->yaw;
+}
+
+/** Get maximum length of yaw value.
+ * @return length of yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::YawPitchHeadMessage::maxlenof_yaw() const
+{
+  return 1;
+}
+
+/** Set yaw value.
+ * Desired yaw (horizontal orientation).
+ * @param new_yaw new yaw value
+ */
+void
+HumanoidMotionInterface::YawPitchHeadMessage::set_yaw(const float new_yaw)
+{
+  data->yaw = new_yaw;
+}
+
+/** Get pitch value.
+ * Desired pitch (vertical orientation).
+ * @return pitch value
+ */
+float
+HumanoidMotionInterface::YawPitchHeadMessage::pitch() const
+{
+  return data->pitch;
+}
+
+/** Get maximum length of pitch value.
+ * @return length of pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::YawPitchHeadMessage::maxlenof_pitch() const
+{
+  return 1;
+}
+
+/** Set pitch value.
+ * Desired pitch (vertical orientation).
+ * @param new_pitch new pitch value
+ */
+void
+HumanoidMotionInterface::YawPitchHeadMessage::set_pitch(const float new_pitch)
+{
+  data->pitch = new_pitch;
+}
+
+/** Get time_sec value.
+ * Time in seconds when to reach the target.
+ * @return time_sec value
+ */
+float
+HumanoidMotionInterface::YawPitchHeadMessage::time_sec() const
+{
+  return data->time_sec;
+}
+
+/** Get maximum length of time_sec value.
+ * @return length of time_sec value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::YawPitchHeadMessage::maxlenof_time_sec() const
+{
+  return 1;
+}
+
+/** Set time_sec value.
+ * Time in seconds when to reach the target.
+ * @param new_time_sec new time_sec value
+ */
+void
+HumanoidMotionInterface::YawPitchHeadMessage::set_time_sec(const float new_time_sec)
+{
+  data->time_sec = new_time_sec;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+HumanoidMotionInterface::YawPitchHeadMessage::clone() const
+{
+  return new HumanoidMotionInterface::YawPitchHeadMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
@@ -2337,6 +2518,10 @@ HumanoidMotionInterface::message_valid(const Message *message) const
   }
   const StandupMessage *m10 = dynamic_cast<const StandupMessage *>(message);
   if ( m10 != NULL ) {
+    return true;
+  }
+  const YawPitchHeadMessage *m11 = dynamic_cast<const YawPitchHeadMessage *>(message);
+  if ( m11 != NULL ) {
     return true;
   }
   return false;

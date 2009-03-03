@@ -35,7 +35,7 @@ class Matrix
  public:
 	Matrix(unsigned int num_rows = 0,
 		unsigned int num_cols = 0,
-		float *data = 0);
+		float *data = 0, bool manage_memory = true);
 	Matrix(const Matrix &m);
 	virtual ~Matrix();
 
@@ -47,6 +47,7 @@ class Matrix
 	{ return m_transposed ? m_int_num_rows : m_int_num_cols; }
 
 	virtual Matrix &id();
+	static Matrix get_id(unsigned int size);
 
 	virtual Matrix &transpose();
 	virtual Matrix  get_transpose() const;
@@ -85,6 +86,9 @@ class Matrix
 
 	virtual Matrix  operator+(const Matrix &m) const;
 	virtual Matrix &operator+=(const Matrix &m);
+
+	virtual Matrix  operator-(const Matrix &m) const;
+	virtual Matrix &operator-=(const Matrix &m);
 
 	virtual bool operator==(const Matrix &m) const;
 

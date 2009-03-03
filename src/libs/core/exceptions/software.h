@@ -104,6 +104,11 @@ class SyntaxErrorException : public Exception {
   SyntaxErrorException(const char *format, ...) throw();
 };
 
+class NotImplementedException : public Exception {
+ public:
+  NotImplementedException(const char *format, ...) throw();
+};
+
 
 } // end namespace fawkes
 

@@ -58,6 +58,7 @@ SkillJumpState = { add_transition     = JumpState.add_transition,
 		   exit               = JumpState.exit,
 		   reset              = JumpState.reset,
 		   jumpcond_true      = JumpState.jumpcond_true,
+		   prepare            = JumpState.prepare,
 		   add_subskill       = SkillState.add_subkill,
 		   do_exit            = SkillState.do_exit
 		 }
@@ -135,6 +136,7 @@ SubSkillJumpState = { add_transition     = JumpState.add_transition,
 		      init               = JumpState.init,
 		      loop               = JumpState.loop,
 		      exit               = JumpState.exit,
+		      prepare            = JumpState.prepare,
 		      do_exit            = SubSkillState.do_exit
 		     }
 
@@ -175,8 +177,10 @@ function SubSkillJumpState:new(o)
    -- Could be used to make clear that there is no call of init, exit, loop etc.
    -- self.__newindex = self.protect
 
-   o.skill_status = skillstati.S_RUNNING
-   o.transitions  = {}
+   o.skill_status  = skillstati.S_RUNNING
+   o.dotattr       = o.dotattr or {}
+   o.transitions   = {}
+   o.preconditions = {}
 
    o.base_args = o.args or {}
    o.args = o:baseargs()
@@ -219,22 +223,27 @@ end
 --- Execute loop.
 function SubSkillJumpState:do_loop()
    self:loop()
-   if self.debug then
-      local s = self.skill.name .. "{"
-      local first = true
-      for k,v in pairs(self.args) do
-	 s = s .. string.format("%s%s = %s", first and "" or ", ", k, tostring(v))
-	 first = false
+   -- status might have been changed in custom loop()
+   if self.skill_status == skillstati.S_RUNNING then
+      if self.debug then
+	 local s = self.skill.name .. "{"
+	 local first = true
+	 for k,v in pairs(self.args) do
+	    s = s .. string.format("%s%s = %s", first and "" or ", ", k, tostring(v))
+	    first = false
+	 end
+	 s = s .. "}"
+	 printf("%s: executing %s", self.name, s)
       end
-      s = s .. "}"
-      printf("%s: executing %s", self.name, s)
+      self.skill_status = self.skill(self.args)
    end
-   self.skill_status = self.skill(self.args)
    return self:try_transitions()
 end
 
 
 function SubSkillJumpState:reset()
    JumpState.reset(self)
+   self.skill.reset()
+   self.skill_status = skillstati.S_INACTIVE
    self.args = self:baseargs()
 end
