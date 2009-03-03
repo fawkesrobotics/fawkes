@@ -214,7 +214,7 @@ WaitCondition::reltimed_wait(Mutex *mutex, unsigned int sec, unsigned int nanose
 
     long int s  = now.tv_sec  + sec;
     long int ns = now.tv_nsec + nanosec;
-    if (ns > 1000000000) {
+    if (ns >= 1000000000) {
       s  += 1;
       ns -= 1000000000;
     }
