@@ -144,7 +144,7 @@ InterruptibleBarrier::reset() throw()
  * times out you need to call reset() to get the barrier into a re-usable state.
  * It is your duty to make sure that all threads using the barrier are in a
  * cohesive state.
- * @param timeout_sec timeout in seconds, added to timeout_nanosec
+ * @param timeout_sec relative timeout in seconds, added to timeout_nanosec
  * @param timeout_nanosec timeout in nanoseconds
  * @return true, if the barrier was properly reached, false if the barrier timeout
  * was reached and the wait did not finish properly.
@@ -176,7 +176,7 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
   }
 
   while ( __data->threads_left && !__interrupted && !__timeout ) {
-    __timeout = ! __data->waitcond.wait(&(__data->mutex), timeout_sec, timeout_nanosec);
+    __timeout = ! __data->waitcond.reltimed_wait(&(__data->mutex), timeout_sec, timeout_nanosec);
   }
   if ( __interrupted ) {
     __data->mutex.unlock();

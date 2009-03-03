@@ -18,7 +18,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_libfawkescore = pthread stdc++
+LIBS_libfawkescore = pthread rt stdc++
 OBJS_libfawkescore = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 
 OBJS_all = $(OBJS_libfawkescore)

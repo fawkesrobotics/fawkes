@@ -2,8 +2,8 @@
 /***************************************************************************
  *  wait_condition.h - condition variable implementation
  *
- *  Generated: Thu Sep 14 21:34:58 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Sep 14 21:34:58 2006
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -38,8 +38,15 @@ class WaitCondition {
   WaitCondition();
   ~WaitCondition();
 
-  bool wait(unsigned int timeout_sec = 0, unsigned int timeout_nanosec = 0);
-  bool wait(Mutex *mutex, unsigned int timeout_sec = 0, unsigned int timeout_nanosec = 0);
+  void wait();
+  void wait(Mutex *mutex);
+
+  bool abstimed_wait(long int sec, long int nanosec);
+  bool abstimed_wait(Mutex *mutex, long int sec, long int nanosec);
+
+  bool reltimed_wait(unsigned int sec, unsigned int nanosec);
+  bool reltimed_wait(Mutex *mutex, unsigned int sec, unsigned int nanosec);
+
   void wake_one();
   void wake_all();
 

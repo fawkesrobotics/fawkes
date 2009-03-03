@@ -2,8 +2,8 @@
 /***************************************************************************
  *  wait_condition.cpp - condition variable implementation
  *
- *  Generated: Thu Sep 14 21:43:30 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Sep 14 21:43:30 2006
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -106,28 +106,58 @@ WaitCondition::~WaitCondition()
 }
 
 
-/** Releases the given mutex and waits for the condition. The mutex must
- * be locked before calling this method. Otherwise it will return immediately
- * with value false.
- * @param mutex the mutex to unlock
- * @param timeout_sec Optional timeout in seconds that we will wait at most before
- * we go on. If timeout_sec and timeout_nanosec equal zero waits forever.
- * @param timeout_nanosec Optional timeout in nanoseconds that we will wait at most before
- * we go on. If timeout_sec and timeout_nanosec equal zero waits forever.
- * @return true, if the thread was woken up by another thread calling wake_one() or
- * wake_all(). False, if the mutex was unlocked or the timeout has been reached waiting
- * for the condition.
+/** Wait for the condition forever with internal mutex.
+ * This waits forever until a wakup signal is received by another thread calling
+ * wake_all() or wake_one(). An internal mutex is used that is locked immediately
+ * before the wait starts and unlocked immediately after waiting is finished.
+ */
+void
+WaitCondition::wait()
+{
+  Mutex mutex;
+  mutex.lock();
+  int err = pthread_cond_wait( &(cond_data->cond), &(mutex.mutex_data->mutex) );
+  mutex.unlock();
+  if ( err != 0 ) {
+    throw Exception(err, "Waiting for wait condition failed");
+  }
+}
+
+/** Wait for the condition forever with supplied mutex.
+ * This waits forever until a wakup signal is received by another thread calling
+ * wake_all() or wake_one(). The passed mutex must be locked or the result is
+ * undefined. After the method returns the mutex is locked again.
+ * @param mutex Mutex to wait on
+ */
+void
+WaitCondition::wait(Mutex *mutex)
+{
+  int err = pthread_cond_wait( &(cond_data->cond), &(mutex->mutex_data->mutex) );
+  if ( err != 0 ) {
+    throw Exception(err, "Waiting for wait condition failed");
+  }
+}
+
+
+/** Wait with absolute timeout on supplied mutex.
+ * This waits for the given mutex until either a wakup signal is received or
+ * the timeout has passed. The timeout has to be given in absolute system time,
+ * a simulated clock source cannot be used.
+ * @param mutex Mutex to wait on
+ * @param sec Seconds of absolute time since the epoch (value compatible to
+ * timeval tv_sec part is sufficient).
+ * @param nanosec Nanoseconds part of the absolute timeout. Added to the seconds
+ * part.
+ * @return true, if the thread was woken up by another thread calling
+ * wake_one() or wake_all(), false otherwise if the timeout has been reached
+ * @exception Exception thrown if another error occurs for the POSIX wait condition
  */
 bool
-WaitCondition::wait(Mutex *mutex, unsigned int timeout_sec, unsigned int timeout_nanosec)
+WaitCondition::abstimed_wait(Mutex *mutex, long int sec, long int nanosec)
 {
   int err = 0;
-  if ( (timeout_sec > 0) || (timeout_nanosec > 0) ) {
-    struct timespec ts = { timeout_sec, timeout_nanosec };
-    err = pthread_cond_timedwait( &(cond_data->cond), &(mutex->mutex_data->mutex), &ts );
-  } else {
-    err = pthread_cond_wait( &(cond_data->cond), &(mutex->mutex_data->mutex) );
-  }
+  struct timespec ts = { sec, nanosec };
+  err = pthread_cond_timedwait( &(cond_data->cond), &(mutex->mutex_data->mutex), &ts );
 
   if ( err == ETIMEDOUT ) {
     return false;
@@ -139,35 +169,78 @@ WaitCondition::wait(Mutex *mutex, unsigned int timeout_sec, unsigned int timeout
   }
 }
 
-
-/** Waits for the condition.
- * Often you just want to block until some event happens and you get woken up, without
- * actually being interested in a particular mutex. In that case you can use this
- * method. An internal Mutex will be created (and destroyed) in this method for this
- * purpose.
- * @param timeout_sec Optional timeout in seconds that we will wait at most before
- * we go on. If timeout_sec and timeout_nanosec equal zero waits forever.
- * @param timeout_nanosec Optional timeout in nanoseconds that we will wait at most before
- * we go on. If timeout_sec and timeout_nanosec equal zero waits forever.
- * @return true, if the thread was woken up by another thread calling wake_one() or
- * wake_all(). False, if the mutex was unlocked or the timeout has been reached waiting
- * for the condition.
+/** Wait with absolute timeout on internal mutex.
+ * This is a convenience method for abstimed_wait() mentioned above. Creates a
+ * new mutex and calls the other function with this mutex.
+ * @param sec Seconds of absolute time since the epoch (value compatible to
+ * timeval tv_sec part is sufficient).
+ * @param nanosec Nanoseconds part of the absolute timeout. Added to the seconds
+ * part.
+ * @return true, if the thread was woken up by another thread calling
+ * wake_one() or wake_all(), false otherwise if the timeout has been reached
+ * @exception Exception thrown if another error occurs for the POSIX wait condition
  */
 bool
-WaitCondition::wait(unsigned int timeout_sec, unsigned int timeout_nanosec)
+WaitCondition::abstimed_wait(long int sec, long int nanosec)
 {
   Mutex mutex;
-  mutex.lock();
-  if ( (timeout_sec > 0) || (timeout_nanosec > 0) ) {
-    struct timespec ts = { timeout_sec, timeout_nanosec };
-    int err = pthread_cond_timedwait( &(cond_data->cond), &(mutex.mutex_data->mutex), &ts );
-    if ( err != 0 ) return false;
-  } else {
-    int err = pthread_cond_wait( &(cond_data->cond), &(mutex.mutex_data->mutex) );
-    if ( err != 0 ) return false;
+  return abstimed_wait(&mutex, sec, nanosec);
+}
+
+/** Wait with relative timeout on supplied mutex.
+ * This waits for the given mutex until either a wakup signal is received or
+ * the timeout has passed. The timeout has to be given in relative system time.
+ * It is added to the current time and is then used similar to abstime_wait().
+ * @param mutex Mutex to wait on
+ * @param sec Number of seconds to wait
+ * @param nanosec Number of nanoseconds to wait, added to seconds value
+ * @return true, if the thread was woken up by another thread calling
+ * wake_one() or wake_all(), false otherwise if the timeout has been reached
+ * @exception Exception thrown if another error occurs for the POSIX wait condition
+ */
+bool
+WaitCondition::reltimed_wait(Mutex *mutex, unsigned int sec, unsigned int nanosec)
+{
+  long err = 0;
+  struct timespec now;
+  if ( clock_gettime(CLOCK_REALTIME, &now) != 0 ) {
+    throw Exception(err, "WaitCondition::reltimed_wait: Failed to get current time");
   }
-  mutex.unlock();
-  return true;
+
+  long int s  = now.tv_sec  + sec;
+  long int ns = now.tv_nsec + nanosec;
+  if (ns > 1000000000) {
+    s  += 1;
+    ns -= 1000000000;
+  }
+
+  struct timespec ts = { s, ns };
+  err = pthread_cond_timedwait( &(cond_data->cond), &(mutex->mutex_data->mutex), &ts );
+
+  if ( err == ETIMEDOUT ) {
+    return false;
+  } else if ( err != 0 ) {
+    // some other error happened, a "real" error
+    throw Exception(err, "Waiting for wait condition failed");
+  } else {
+    return true;
+  }
+}
+
+/** Wait with relative timeout on internal mutex.
+ * This is a convenience method for reltimed_wait() mentioned above. Creates a
+ * new mutex and calls the other function with this mutex.
+ * @param sec Number of seconds to wait
+ * @param nanosec Number of nanoseconds to wait, added to seconds value
+ * @return true, if the thread was woken up by another thread calling
+ * wake_one() or wake_all(), false otherwise if the timeout has been reached
+ * @exception Exception thrown if another error occurs for the POSIX wait condition
+ */
+bool
+WaitCondition::reltimed_wait(unsigned int sec, unsigned int nanosec)
+{
+  Mutex mutex;
+  return reltimed_wait(&mutex, sec, nanosec);
 }
 
 
