@@ -191,6 +191,7 @@ WaitCondition::abstimed_wait(long int sec, long int nanosec)
  * This waits for the given mutex until either a wakup signal is received or
  * the timeout has passed. The timeout has to be given in relative system time.
  * It is added to the current time and is then used similar to abstime_wait().
+ * A timeout of (0,0) will cause this method to wait forever, similar to wait().
  * @param mutex Mutex to wait on
  * @param sec Number of seconds to wait
  * @param nanosec Number of nanoseconds to wait, added to seconds value
@@ -201,35 +202,41 @@ WaitCondition::abstimed_wait(long int sec, long int nanosec)
 bool
 WaitCondition::reltimed_wait(Mutex *mutex, unsigned int sec, unsigned int nanosec)
 {
-  long err = 0;
-  struct timespec now;
-  if ( clock_gettime(CLOCK_REALTIME, &now) != 0 ) {
-    throw Exception(err, "WaitCondition::reltimed_wait: Failed to get current time");
-  }
-
-  long int s  = now.tv_sec  + sec;
-  long int ns = now.tv_nsec + nanosec;
-  if (ns > 1000000000) {
-    s  += 1;
-    ns -= 1000000000;
-  }
-
-  struct timespec ts = { s, ns };
-  err = pthread_cond_timedwait( &(cond_data->cond), &(mutex->mutex_data->mutex), &ts );
-
-  if ( err == ETIMEDOUT ) {
-    return false;
-  } else if ( err != 0 ) {
-    // some other error happened, a "real" error
-    throw Exception(err, "Waiting for wait condition failed");
-  } else {
+  if ( ! (sec || nanosec) ) {
+    wait(mutex);
     return true;
+  } else {
+    long err = 0;
+    struct timespec now;
+    if ( clock_gettime(CLOCK_REALTIME, &now) != 0 ) {
+      throw Exception(err, "WaitCondition::reltimed_wait: Failed to get current time");
+    }
+
+    long int s  = now.tv_sec  + sec;
+    long int ns = now.tv_nsec + nanosec;
+    if (ns > 1000000000) {
+      s  += 1;
+      ns -= 1000000000;
+    }
+
+    struct timespec ts = { s, ns };
+    err = pthread_cond_timedwait( &(cond_data->cond), &(mutex->mutex_data->mutex), &ts );
+
+    if ( err == ETIMEDOUT ) {
+      return false;
+    } else if ( err != 0 ) {
+      // some other error happened, a "real" error
+      throw Exception(err, "Waiting for wait condition failed");
+    } else {
+      return true;
+    }
   }
 }
 
 /** Wait with relative timeout on internal mutex.
  * This is a convenience method for reltimed_wait() mentioned above. Creates a
  * new mutex and calls the other function with this mutex.
+ * A timeout of (0,0) will cause this method to wait forever, similar to wait().
  * @param sec Number of seconds to wait
  * @param nanosec Number of nanoseconds to wait, added to seconds value
  * @return true, if the thread was woken up by another thread calling
@@ -239,8 +246,13 @@ WaitCondition::reltimed_wait(Mutex *mutex, unsigned int sec, unsigned int nanose
 bool
 WaitCondition::reltimed_wait(unsigned int sec, unsigned int nanosec)
 {
-  Mutex mutex;
-  return reltimed_wait(&mutex, sec, nanosec);
+  if ( ! (sec || nanosec) ) {
+    wait();
+    return true;
+  } else {
+    Mutex mutex;
+    return reltimed_wait(&mutex, sec, nanosec);
+  }
 }
 
 
