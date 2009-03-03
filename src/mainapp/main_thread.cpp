@@ -368,13 +368,15 @@ FawkesMainThread::mloop()
       __multi_logger->log_warn("FawkesMainThread", "%s", s.c_str());
     }
 
-    __loop_end->stamp_systime();
-    float loop_time = *__loop_end - __loop_start;
-    if (loop_time > __desired_loop_time_sec) {
-      __multi_logger->log_warn("FawkesMainThread", "Loop time exceeded, "
-			       "desired: %f sec (%u usec),  actual: %f sec",
-			       __desired_loop_time_sec, __desired_loop_time_usec,
-			       loop_time);
+    if (__desired_loop_time_sec > 0) {
+      __loop_end->stamp_systime();
+      float loop_time = *__loop_end - __loop_start;
+      if (loop_time > __desired_loop_time_sec) {
+	__multi_logger->log_warn("FawkesMainThread", "Loop time exceeded, "
+				 "desired: %f sec (%u usec),  actual: %f sec",
+				 __desired_loop_time_sec, __desired_loop_time_usec,
+				 loop_time);
+      }
     }
     if ( __time_wait ) {
       __time_wait->wait_systime();
