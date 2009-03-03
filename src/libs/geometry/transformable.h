@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  hom_vector.h - Homogenous vector
+ *  transformable.h - Transformable interface
  *
- *  Created: Wed Sep 26 16:58:51 2007
- *  Copyright  2007-2008  Daniel Beck
+ *  Created: Thu Oct 02 16:53:27 2008
+ *  Copyright  2008  Daniel Beck
  *
  *  $Id$
  *
@@ -23,27 +23,36 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __GEOMETRY_HOM_VECTOR_H_
-#define __GEOMETRY_HOM_VECTOR_H_
+#ifndef __GEOMETRY_TRANSFORMABLE_H_
+#define __GEOMETRY_TRANSFORMABLE_H_
 
+#include <geometry/hom_transform.h>
 #include <geometry/hom_coord.h>
+
+#include <vector>
 
 namespace fawkes {
 
-class HomVector : public HomCoord
+class Transformable
 {
+  friend class HomTransform;
+
  public:
-  HomVector(float x = 0, float y = 0, float z = 0);
-  HomVector(const HomCoord& h);
-  virtual ~HomVector();
+  Transformable();
+  virtual ~Transformable();
+  
+ protected:
+  void transform(const HomTransform& t);
+  void add_primitive(HomCoord* c);
+  void clear_primitives();
 
-  float      length() const;
-  HomVector& set_length(float length);
-  HomVector& unit();
+  virtual void register_primitives() =0;
+  virtual void post_transform()      =0;
 
-  float angle_xy(const HomVector& h) const;
+ private:
+  std::vector<HomCoord*> m_primitives;
 };
 
-} // end namespace fawkes
+}
 
-#endif /* __GEOMETRY_HOM_VECTOR_H_ */
+#endif /* __GEOMETRY_TRANSFORMABLE_H_ */

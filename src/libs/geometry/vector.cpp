@@ -39,8 +39,9 @@ namespace fawkes {
 /** Constructor.
  * @param size the dimension of the vector
  * @param data pointer to a float array
- * @param manage_memory if true, the Vector will manage its memory on its own, else it
- *        will not allocate new memory but works with the provided array
+ * @param manage_memory if true, the Vector will manage its memory on
+ * its own, else it will not allocate new memory but works with the
+ * provided array
  */
 Vector::Vector(unsigned int size, float* data, bool manage_memory)
 {
@@ -115,11 +116,11 @@ Vector::set_size(unsigned int size)
 
   m_size = size;
 
-	if (m_manage_memory) //I'm not supposed to delete foreign buffers
-		delete[] m_data;
+  if (m_manage_memory) //I'm not supposed to delete foreign buffers
+    { delete[] m_data; }
   else
-		m_manage_memory = true;
-
+    { m_manage_memory = true;}
+  
   m_data = t;
 }
 
@@ -154,7 +155,8 @@ Vector::get(unsigned int d)
 {
   if (m_size <= d)
     {
-      printf("This column vector has %u elements -- element %u not available", m_size, d);
+      printf("This column vector has %u elements -- element %u not "
+	     "available", m_size, d);
       throw std::exception();
     }
 
@@ -170,7 +172,8 @@ Vector::set(unsigned int d, float f)
 {
   if (m_size <= d)
     {
-      printf("This column vector has %u elements -- element %u not available", m_size, d);
+      printf("This column vector has %u elements -- element %u not "
+	     "available", m_size, d);
       throw std::exception();
     }
 
@@ -283,7 +286,8 @@ Vector::operator[](unsigned int d)
 {
   if (m_size <= d)
     {
-      printf("This column vector has %u elements -- element %u not available", m_size, d);
+      printf("This column vector has %u elements -- element %u not "
+	     "available", m_size, d);
       throw std::exception();
     }
 
@@ -300,9 +304,7 @@ Vector::operator*(const float& f) const
   Vector result(m_size, m_data);
 
   for (unsigned int i = 0; i < m_size; ++i)
-    {
-      result.m_data[i] *= f;
-    }
+    { result.m_data[i] *= f; }
 
   return result;
 }
@@ -315,9 +317,7 @@ Vector&
 Vector::operator*=(const float& f)
 {
   for (unsigned int i = 0; i < m_size; ++i)
-    {
-      m_data[i] *= f;
-    }
+    { m_data[i] *= f; }
 
   return *this;
 }
@@ -332,9 +332,7 @@ Vector::operator/(const float& f) const
   Vector result(m_size, m_data);
 
   for (unsigned int i = 0; i < m_size; ++i)
-    {
-      result.m_data[i] /= f;
-    }
+    { result.m_data[i] /= f; }
 
   return result;
 }
@@ -347,9 +345,7 @@ Vector&
 Vector::operator/=(const float& f)
 {
   for (unsigned int i = 0; i < m_size; ++i)
-    {
-      m_data[i] /= f;
-    }
+    { m_data[i] /= f; }
 
   return *this;
 }
@@ -469,6 +465,7 @@ Vector::operator==(const Vector& v)
   return true;
 }
 
+
 /** Prints the vector data to standard out.
  * @param name a string that is printed prior to the vector data
  */
@@ -487,7 +484,6 @@ Vector::print_info(const char* name) const
   printf("]T\n");
 }
 
-
 /** Calculates the dot product of two vectors.
  * @param v the rhs Vector
  * @return the scalar product
@@ -495,12 +491,12 @@ Vector::print_info(const char* name) const
 float
 Vector::operator*(const Vector& v) const
 {
-	float res = 0;
+  float res = 0;
 
-	for (unsigned int i = 0; i < m_size; ++i)
-		res += this->get(i) * v.get(i);
+  for (unsigned int i = 0; i < m_size; ++i)
+    res += this->get(i) * v.get(i);
 
-	return res;
+  return res;
 }
 
 
@@ -513,17 +509,17 @@ Vector::operator*(const Vector& v) const
 std::ostream&
 operator<<(std::ostream& stream, const Vector &v)
 {
-	stream << "[";
-
-	for (unsigned int i = 0; i < v.m_size; ++i)
-	{
-		stream << v.get(i);
-
-		if (i + 1 < v.m_size)
-			stream << ",";
-	}
-
-	return stream << "]";
+  stream << "[";
+  
+  for (unsigned int i = 0; i < v.m_size; ++i)
+    {
+      stream << v.get(i);
+      
+      if (i + 1 < v.m_size)
+	stream << ",";
+    }
+  
+  return stream << "]";
 }
 
 } // end namespace fawkes

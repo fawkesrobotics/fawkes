@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  hom_vector.h - Homogenous vector
+ *  hom_point_drawer.h - Drawer for the HomPoint class
  *
- *  Created: Wed Sep 26 16:58:51 2007
- *  Copyright  2007-2008  Daniel Beck
+ *  Created: Thu Oct 09 14:31:45 2008
+ *  Copyright  2008  Daniel Beck
  *
  *  $Id$
  *
@@ -23,27 +23,34 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __GEOMETRY_HOM_VECTOR_H_
-#define __GEOMETRY_HOM_VECTOR_H_
+#ifndef __GEOMETRY_HOM_POINT_DRAWER_H_
+#define __GEOMETRY_HOM_POINT_DRAWER_H_
 
-#include <geometry/hom_coord.h>
+#include <geometry/gtk/geom_drawer.h>
 
 namespace fawkes {
 
-class HomVector : public HomCoord
+class HomPoint;
+
+class HomPointDrawer : public GeomDrawer
 {
  public:
-  HomVector(float x = 0, float y = 0, float z = 0);
-  HomVector(const HomCoord& h);
-  virtual ~HomVector();
+  HomPointDrawer(HomPoint& p);
+  HomPointDrawer(const HomPoint& p);
+  virtual ~HomPointDrawer();
 
-  float      length() const;
-  HomVector& set_length(float length);
-  HomVector& unit();
+  void set_point_size(float s);
 
-  float angle_xy(const HomVector& h) const;
+  virtual void draw(Cairo::RefPtr<Cairo::Context>& context);
+
+ protected:
+  float m_point_size;
+  
+ private:
+  fawkes::HomPoint* m_hom_point;
+  bool m_own_point;
 };
 
 } // end namespace fawkes
 
-#endif /* __GEOMETRY_HOM_VECTOR_H_ */
+#endif /* __GEOMETRY_HOM_POINT_DRAWER_H_ */

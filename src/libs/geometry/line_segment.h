@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  hom_vector.h - Homogenous vector
+ *  line_segment.h - A line segment
  *
- *  Created: Wed Sep 26 16:58:51 2007
- *  Copyright  2007-2008  Daniel Beck
+ *  Created: Thu Oct 02 16:47:39 2008
+ *  Copyright  2008  Daniel Beck
  *
  *  $Id$
  *
@@ -23,27 +23,42 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __GEOMETRY_HOM_VECTOR_H_
-#define __GEOMETRY_HOM_VECTOR_H_
+#ifndef __GEOMETRY_LINE_SEGMENT_H_
+#define __GEOMETRY_LINE_SEGMENT_H_
 
-#include <geometry/hom_coord.h>
+#include <geometry/transformable.h>
+#include <geometry/printable.h>
+#include <geometry/hom_point.h>
+#include <geometry/hom_vector.h>
 
 namespace fawkes {
 
-class HomVector : public HomCoord
+class LineSegment 
+  : public Transformable,
+    public Printable
+    
 {
  public:
-  HomVector(float x = 0, float y = 0, float z = 0);
-  HomVector(const HomCoord& h);
-  virtual ~HomVector();
+  LineSegment(const HomPoint& a, const HomPoint& b);
+  LineSegment(const HomPoint& p, const HomVector& v);
+  LineSegment(const LineSegment& l);
+  virtual ~LineSegment();
 
-  float      length() const;
-  HomVector& set_length(float length);
-  HomVector& unit();
+  float length() const;
 
-  float angle_xy(const HomVector& h) const;
+  const HomPoint& p1() const;
+  const HomPoint& p2() const;
+
+ protected:
+  virtual void register_primitives();
+  virtual void post_transform();
+  virtual std::ostream& print(std::ostream& stream) const;
+
+ private:
+  HomPoint m_p1;
+  HomPoint m_p2;
 };
 
 } // end namespace fawkes
 
-#endif /* __GEOMETRY_HOM_VECTOR_H_ */
+#endif /* __GEOMETRY_LINE_SEGMENT_H_ */

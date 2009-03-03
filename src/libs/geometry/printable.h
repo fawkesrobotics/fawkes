@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  hom_vector.h - Homogenous vector
+ *  printable.h - Printable interface
  *
- *  Created: Wed Sep 26 16:58:51 2007
- *  Copyright  2007-2008  Daniel Beck
+ *  Created: Tue Oct 07 14:37:22 2008
+ *  Copyright  2008  Daniel Beck
  *
  *  $Id$
  *
@@ -23,27 +23,31 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __GEOMETRY_HOM_VECTOR_H_
-#define __GEOMETRY_HOM_VECTOR_H_
+#ifndef __GEOMETRY_PRINTABLE_H_
+#define __GEOMETRY_PRINTABLE_H_
 
-#include <geometry/hom_coord.h>
+#include <ostream>
+
+namespace fawkes {
+  class Printable;
+}
+
+std::ostream& operator<<(std::ostream& stream, const fawkes::Printable& p);
 
 namespace fawkes {
 
-class HomVector : public HomCoord
+class Printable
 {
+  friend std::ostream& ::operator<<(std::ostream& stream, const Printable& p);
+
  public:
-  HomVector(float x = 0, float y = 0, float z = 0);
-  HomVector(const HomCoord& h);
-  virtual ~HomVector();
+  Printable();
+  virtual ~Printable();
 
-  float      length() const;
-  HomVector& set_length(float length);
-  HomVector& unit();
-
-  float angle_xy(const HomVector& h) const;
+ protected:
+  virtual std::ostream& print(std::ostream& stream) const =0;
 };
 
-} // end namespace fawkes
+}
 
-#endif /* __GEOMETRY_HOM_VECTOR_H_ */
+#endif /* __GEOMETRY_PRINTABLE_H_ */

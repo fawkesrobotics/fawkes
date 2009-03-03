@@ -63,25 +63,22 @@ class Vector
 
   Vector  operator*(const float& f) const;
   Vector& operator*=(const float& f);
-
-	float operator*(const Vector& v) const;
-
   Vector  operator/(const float& f) const;
   Vector& operator/=(const float& f);
+	
+  float   operator*(const Vector& v) const;
 
-  Vector  operator+(const Vector& cv) const;
-  Vector& operator+=(const Vector& cv);
-
-  Vector  operator-(const Vector& cv) const;
-  Vector& operator-=(const Vector& cv);
-
+  Vector  operator+(const Vector& v) const;
+  Vector& operator+=(const Vector& v);
+  Vector  operator-(const Vector& v) const;
+  Vector& operator-=(const Vector& v);
   Vector& operator=(const Vector& v);
 
   bool operator==(const Vector& v);
 
   void print_info(const char* name = 0) const;
 
-	friend std::ostream& operator<<(std::ostream& stream, const Vector &v);
+  friend std::ostream& operator<<(std::ostream& stream, const Vector &v);
 
  private:
   unsigned int m_size;

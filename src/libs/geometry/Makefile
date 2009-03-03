@@ -16,12 +16,28 @@
 #*****************************************************************************
 
 BASEDIR = ../../..
+include $(BASEDIR)/etc/buildsys/config.mk
+
+SUBDIRS = gtk
 
 LIBS_libfawkesgeometry = stdc++
-OBJS_libfawkesgeometry = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
+OBJS_libfawkesgeometry = matrix.o		\
+			 vector.o		\
+			 printable.o		\
+			 transformable.o	\
+			 hom_transform.o	\
+			 hom_coord.o		\
+			 hom_point.o		\
+			 hom_vector.o		\
+			 hom_polar.o		\
+			 hom_pose.o		\
+			 bezier.o		\
+			 spline.o		\
+			 line_segment.o		#\
+#			 hom_pose_2d.o		\
 
 OBJS_all = $(OBJS_libfawkesgeometry)
-LIBS_all  = $(LIBDIR)/libfawkesgeometry.so
+LIBS_all = $(LIBDIR)/libfawkesgeometry.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

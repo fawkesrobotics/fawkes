@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  hom_vector.h - Homogenous vector
+ *  line_segment_drawer.cpp - Drawer for the LineSegment class
  *
- *  Created: Wed Sep 26 16:58:51 2007
- *  Copyright  2007-2008  Daniel Beck
+ *  Created: Thu Oct 09 14:49:20 2008
+ *  Copyright  2008  Daniel Beck
  *
  *  $Id$
  *
@@ -23,27 +23,39 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __GEOMETRY_HOM_VECTOR_H_
-#define __GEOMETRY_HOM_VECTOR_H_
+#include <geometry/gtk/line_segment_drawer.h>
+#include <geometry/line_segment.h>
 
-#include <geometry/hom_coord.h>
+/** @class fawkes::LineSegmentDrawer <geometry/gtk/line_segment_drawer.h>
+ * Drawer for LineSegment objects.
+ * @author Daniel Beck
+ */
 
 namespace fawkes {
 
-class HomVector : public HomCoord
+/** Constructor.
+ * @param l the LineSegement to drawer
+ */
+LineSegmentDrawer::LineSegmentDrawer(LineSegment& l)
 {
- public:
-  HomVector(float x = 0, float y = 0, float z = 0);
-  HomVector(const HomCoord& h);
-  virtual ~HomVector();
+  m_line_segment = &l;
+}
 
-  float      length() const;
-  HomVector& set_length(float length);
-  HomVector& unit();
+/** Destructor. */
+LineSegmentDrawer::~LineSegmentDrawer()
+{
+}
 
-  float angle_xy(const HomVector& h) const;
-};
+void
+LineSegmentDrawer::draw(Cairo::RefPtr<Cairo::Context>& context)
+{
+  context->save();
+  context->move_to( m_line_segment->p1().x(),
+		    m_line_segment->p1().y() );
+  context->line_to( m_line_segment->p2().x(),
+		    m_line_segment->p2().y() );
+  context->stroke();
+  context->restore();
+}
 
 } // end namespace fawkes
-
-#endif /* __GEOMETRY_HOM_VECTOR_H_ */

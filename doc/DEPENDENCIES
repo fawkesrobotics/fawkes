@@ -79,6 +79,9 @@ FireVision	(OpenMP spec 2.5, comes with GCC 4.2
 Navigator	gts			>= 0.7.6		optional
 		(needed to build navigator plugin)
 
+Navigator	CGAL			>= 3.3.1		optional
+		(needed to build navigator plugin)
+
 Navigator	VMC			== 0.95			optional
 		(needed to build navigator with real motor support)
 

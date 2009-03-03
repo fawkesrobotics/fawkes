@@ -26,17 +26,16 @@
 #ifndef __GEOMETRY_HOM_COORD_H_
 #define __GEOMETRY_HOM_COORD_H_
 
-#include <ostream>
+#include <geometry/printable.h>
 
 namespace fawkes {
 
 class Vector;
+class HomTransform;
 
-class HomCoord
+class HomCoord : public Printable
 {
  public:
-  friend class HomTransform;
-
   HomCoord(const HomCoord& c);
 
   virtual ~HomCoord();
@@ -61,23 +60,30 @@ class HomCoord
   virtual HomCoord& rotate_y(float rad);
   virtual HomCoord& rotate_z(float rad);
 
+  HomCoord& transform(const HomTransform& t);
+
   virtual HomCoord  operator-(const HomCoord& h) const;
   virtual HomCoord& operator-=(const HomCoord& h);
 
   virtual HomCoord  operator+(const HomCoord& h) const;
   virtual HomCoord& operator+=(const HomCoord& h);
 		
-	virtual float operator*(const HomCoord& h) const;
+  virtual float operator*(const HomCoord& h) const;
+
+  virtual HomCoord  operator*(const float s) const;
+  virtual HomCoord& operator*=(const float s);
 		
   virtual HomCoord& operator=(const HomCoord& h);
 
-	friend std::ostream& operator<<(std::ostream& stream, const HomCoord& h);
-		
+  virtual bool operator==(const HomCoord& h) const;
+  virtual bool operator!=(const HomCoord& h) const;
+
  protected:
   HomCoord(float x = 0.0, float y = 0.0, float z = 0.0, float w = 0.0);
   HomCoord(const Vector& v);
 
-	virtual std::ostream& addToStream(std::ostream& stream) const;
+  virtual std::ostream& print(std::ostream& stream) const;
+
   Vector* m_vector;
 };
 

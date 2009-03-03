@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  hom_vector.h - Homogenous vector
+ *  geom_drawer.cpp - Drawer base class
  *
- *  Created: Wed Sep 26 16:58:51 2007
- *  Copyright  2007-2008  Daniel Beck
+ *  Created: Thu Oct 09 15:38:19 2008
+ *  Copyright  2008  Daniel Beck
  *
  *  $Id$
  *
@@ -23,27 +23,31 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __GEOMETRY_HOM_VECTOR_H_
-#define __GEOMETRY_HOM_VECTOR_H_
+#include <geometry/gtk/geom_drawer.h>
 
-#include <geometry/hom_coord.h>
+/** @class fawkes::GeomDrawer <geometry/gtk/geom_drawer.h>
+ * Abstract base class for all drawer classes. All objects that have
+ * corresponding drawer classes can easily be drawn on a
+ * GeomDrawingArea.
+ * @author Daniel Beck
+ */
+
+/** @fn void fawkes::GeomDrawer::draw(Cairo::RefPtr<Cairo::Context>& context)
+ * This method is called by the GeomDrawingArea. Here, derived classes
+ * should implement the drawing code.
+ * @param context the drawing context
+ */
 
 namespace fawkes {
 
-class HomVector : public HomCoord
+/** Constructor. */
+GeomDrawer::GeomDrawer()
 {
- public:
-  HomVector(float x = 0, float y = 0, float z = 0);
-  HomVector(const HomCoord& h);
-  virtual ~HomVector();
+}
 
-  float      length() const;
-  HomVector& set_length(float length);
-  HomVector& unit();
-
-  float angle_xy(const HomVector& h) const;
-};
+/** Destructor. */
+GeomDrawer::~GeomDrawer()
+{
+}
 
 } // end namespace fawkes
-
-#endif /* __GEOMETRY_HOM_VECTOR_H_ */

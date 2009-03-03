@@ -26,12 +26,9 @@
 #ifndef __GEOMETRY_TRANSFORM_H_
 #define __GEOMETRY_TRANSFORM_H_
 
-namespace fawkes {
+#include <geometry/matrix.h>
 
-class Matrix;
-class HomCoord;
-class HomVector;
-class HomPoint;
+namespace fawkes {
 
 class HomTransform
 {
@@ -49,27 +46,51 @@ class HomTransform
   void rotate_y(float rad);
   void rotate_z(float rad);
 
-  void trans(float dx, float dy, float dz);
+  void trans(float dx, float dy, float dz = 0.0);
+  void set_trans(float x, float y, float z = 0.0);
 
   void mDH(const float alpha, const float a, const float theta, const float d);
 
   HomTransform& operator=(const HomTransform& t);
 
-  HomTransform  operator*(const HomTransform& t) const;
-  HomTransform& operator*=(const HomTransform& t);
+  template <typename T> T operator*(const T& p) const;
+  HomTransform&           operator*=(const HomTransform& t);
 
   bool operator==(const HomTransform& t) const;
+  
+  void print_info( const char* name = 0,
+		   const char* col_sep = 0,
+		   const char* row_sep = 0 ) const;
 
-  HomCoord  operator*(const HomCoord& h) const;
-
-  void print_info(const char* name = 0, const char *col_sep = 0, const char *row_sep = 0) const;
-
-  Matrix get_matrix() const;
+  const Matrix& get_matrix() const;
 
  private:
   Matrix* m_matrix;
 };
 
+/** Multiplication operator.
+ * @param p the RHS object
+ * @return the transformed RHS object
+ */
+template <typename T> inline T HomTransform::operator*(const T& p) const
+  {
+    T result(p);
+    result.transform(*this);
+    return result;
+  }
+
+/** Multiplication operator (specialization for HomTransforms)
+ * @param t the RHS HomTransform
+ * @return the result of multiplying the two transforms with each other
+ */
+template <> inline HomTransform HomTransform::operator*<HomTransform>(const HomTransform& t) const
+  {
+    Matrix m(4, 4);
+    m = (*m_matrix) * (*t.m_matrix);
+    
+    return HomTransform(m);
+  }
+ 
 } // end namespace fawkes
 
 #endif /* __GEOMETRY_TRANSFORM_H_ */

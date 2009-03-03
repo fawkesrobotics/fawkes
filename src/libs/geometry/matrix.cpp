@@ -81,41 +81,43 @@ Matrix::Matrix(unsigned int num_rows,
  */
 Matrix::Matrix(const Matrix &m)
 {
-	m_int_num_rows = m.m_int_num_rows;
-	m_int_num_cols = m.m_int_num_cols;
-
-	m_transposed = m.m_transposed;
-
-	m_columns = new Vector *[m_int_num_cols];
-
-	for (unsigned int i = 0; i < m_int_num_cols; ++i)
-	{
-		m_columns[i] = new Vector(*(m.m_columns[i]));
-	}
+  m_int_num_rows = m.m_int_num_rows;
+  m_int_num_cols = m.m_int_num_cols;
+  
+  m_transposed = m.m_transposed;
+  
+  m_columns = new Vector *[m_int_num_cols];
+  
+  for (unsigned int i = 0; i < m_int_num_cols; ++i)
+    {
+      m_columns[i] = new Vector(*(m.m_columns[i]));
+    }
 }
-
-
+  
+  
 /** Destructor. */
 Matrix::~Matrix()
 {
-	for (unsigned int i = 0; i < m_int_num_cols; ++i)
-	{
-		delete m_columns[i];
-	}
-	delete[] m_columns;
+  for (unsigned int i = 0; i < m_int_num_cols; ++i)
+    {
+      delete m_columns[i];
+    }
+  delete[] m_columns;
 }
 
 
 /** Determines the dimensions of the matrix.
- * @param num_cols pointer to an unsigned int to where the number of columns is copied to
- * @param num_rows pointer to an unsigned int to where the number of rows is copied to
+ * @param num_cols pointer to an unsigned int to where the number of
+ * columns is copied to
+ * @param num_rows pointer to an unsigned int to where the number of
+ * rows is copied to
  */
 void
 Matrix::size(unsigned int &num_rows,
              unsigned int &num_cols) const
 {
-	num_rows = this->num_rows();
-	num_cols = this->num_cols();
+  num_rows = this->num_rows();
+  num_cols = this->num_cols();
 }
 
 
@@ -125,15 +127,15 @@ Matrix::size(unsigned int &num_rows,
 Matrix &
 Matrix::id()
 {
-	for (unsigned int row = 0; row < num_rows(); row++)
+  for (unsigned int row = 0; row < num_rows(); row++)
+    {
+      for (unsigned int col = 0; col < num_cols(); col++)
 	{
-		for (unsigned int col = 0; col < num_cols(); col++)
-		{
-			(*this)(row, col) = (row == col) ? 1.0 : 0.0;
-		}
+	  (*this)(row, col) = (row == col) ? 1.0 : 0.0;
 	}
-
-	return *this;
+    }
+  
+  return *this;
 }
 
 
@@ -158,14 +160,15 @@ Matrix::get_id(unsigned int size)
 
 /** Transposes the matrix.
  * Simply inverts m_transposed.
- * @return a reference to the matrix object now containing the transposed matrix
+ * @return a reference to the matrix object now containing the
+ * transposed matrix
  */
-Matrix &
+Matrix&
 Matrix::transpose()
 {
-	m_transposed = !m_transposed;
-
-	return *this;
+  m_transposed = !m_transposed;
+  
+  return *this;
 }
 
 
@@ -175,60 +178,62 @@ Matrix::transpose()
 Matrix
 Matrix::get_transpose() const
 {
-	Matrix m(*this);
-
-	m.transpose();
-
-	return m;
+  Matrix m(*this);
+  
+  m.transpose();
+  
+  return m;
 }
-
-
+  
+  
 /** Inverts the matrix.
  * The algorithm that is implemented for computing the inverse
  * of the matrix is the Gauss-Jordan-Algorithm. Hereby, the block-
  * matrix (A|I) consisting of the matrix to be inverted (A) and the
  * identity matrix (I) is transformed into (I|A^(-1)).
- * @return a reference to the matrix object which contains now the inverted matrix
+ * @return a reference to the matrix object which contains now the
+ * inverted matrix
  */
 Matrix &
 Matrix::invert()
 {
-	if (m_int_num_rows != m_int_num_cols)
+  if (m_int_num_rows != m_int_num_cols)
+    {
+      printf("Matrix::invert(): Trying to compute inverse of "
+	     "non-quadratic matrix!\n");
+      throw std::exception();
+    }
+  
+  Matrix i(m_int_num_rows, m_int_num_cols);
+  i.id();
+  
+  // for each column...
+  for (unsigned int col = 0; col < num_cols(); col++)
+    {
+      // ...multiply the row by the inverse of the element
+      // on the diagonal...
+      float factor = 1.0f / (*this)(col, col);
+      i.mult_row(col, factor);
+      this->mult_row(col, factor);
+      
+      // ...and subtract that row multiplied by the elements
+      // in the current column from all other rows.
+      for (unsigned int row = 0; row < num_rows(); row++)
 	{
-		printf("Matrix::invert(): Trying to compute inverse of non-quadratic matrix!\n");
-		throw std::exception();
+	  if (row != col)
+	    {
+	      float factor2 = (*this)(row, col);
+	      i.sub_row(row, col, factor2);
+	      this->sub_row(row, col, factor2);
+	    }
 	}
-
-	Matrix i(m_int_num_rows, m_int_num_cols);
-	i.id();
-
-	// for each column...
-	for (unsigned int col = 0; col < num_cols(); col++)
-	{
-		// ...multiply the row by the inverse of the element
-		// on the diagonal...
-		float factor = 1.0f / (*this)(col, col);
-		i.mult_row(col, factor);
-		this->mult_row(col, factor);
-
-		// ...and subtract that row multiplied by the elements
-		// in the current column from all other rows.
-		for (unsigned int row = 0; row < num_rows(); row++)
-		{
-			if (row != col)
-			{
-				float factor2 = (*this)(row, col);
-				i.sub_row(row, col, factor2);
-				this->sub_row(row, col, factor2);
-			}
-		}
-	}
-
-	*this = i;
-
-	return *this;
+    }
+  
+  *this = i;
+  
+  return *this;
 }
-
+  
 
 /** Computes a matrix that is the inverse of this matrix.
  * @return a matrix that is the inverse of this matrix
@@ -236,11 +241,11 @@ Matrix::invert()
 Matrix
 Matrix::get_inverse() const
 {
-	Matrix m(*this);
-
-	m.invert();
-
-	return m;
+  Matrix m(*this);
+  
+  m.invert();
+  
+  return m;
 }
 
 
@@ -250,69 +255,66 @@ Matrix::get_inverse() const
 float
 Matrix::det() const
 {
-	if (m_int_num_rows != m_int_num_cols)
+  if (m_int_num_rows != m_int_num_cols)
+    {
+      printf("Matrix::det(): The determinant can only be calculated "
+	     "for nxn matrices.\n");
+      throw std::exception();
+    }
+  
+  Matrix m(*this);
+  float result = 1.0f;
+  
+  // compute the upper triangular matrix
+  for (unsigned int col = 0; col < num_cols(); col++)
+    {
+      float diag_elem = m(col, col);
+      result *= diag_elem;
+      
+      // multiply n-th row by m(n,n)^{-1}
+      m.mult_row( col, 1.0 / diag_elem );
+      for (unsigned int row = col + 1; row < num_rows(); row++)
 	{
-		printf("Matrix::det(): The determinant can only be calculated for nxn matrices.\n");
-		throw std::exception();
+	  m.sub_row( row, col, m(row, col) );
 	}
-
-	Matrix m(*this);
-	float result = 1.0f;
-
-	// compute the upper triangular matrix
-	for (unsigned int col = 0; col < num_cols(); col++)
-	{
-		float diag_elem = m(col, col);
-		result *= diag_elem;
-
-		// multiply n-th row by m(n,n)^{-1}
-		m.mult_row( col, 1.0 / diag_elem );
-		for (unsigned int row = col + 1; row < num_rows(); row++)
-		{
-			m.sub_row( row, col, m(row, col) );
-		}
-	}
-
-	return result;
+    }
+  
+  return result;
 }
 
 
 /** Returns a submatrix of the matrix.
- * @param row the row in the original matrix of the top-left element in the submatrix
- * @param col the column in the original matrix of the top-left element in the submatrix
+ * @param row the row in the original matrix of the top-left element
+ * in the submatrix
+ * @param col the column in the original matrix of the top-left
+ * element in the submatrix
  * @param num_rows the number of rows of the submatrix
  * @param num_cols the number of columns of the submatrix
  * @return the submatrix
  */
 Matrix
-Matrix::get_submatrix(unsigned int row,
-                      unsigned int col,
-                      unsigned int num_rows,
-                      unsigned int num_cols) const
+Matrix::get_submatrix( unsigned int row,
+		       unsigned int col,
+		       unsigned int num_rows,
+		       unsigned int num_cols ) const
 {
-	if ( (row + num_rows) > this->num_rows() )
-	{
-		num_rows = this->num_rows() - row;
-	}
-
-	if ( (col + num_cols) > this->num_cols() )
-	{
-		num_cols = this->num_cols() - col;
-	}
-
-	Matrix m(num_rows, num_cols);
-
-	for (unsigned int r = 0; r < num_rows; r++)
-	{
-		for (unsigned int c = 0; c < num_cols; c++)
-		{
-			m(r, c) = (*this)(row + r, col + c);
-		}
-	}
-
-	return m;
+  if ( (row + num_rows) > this->num_rows() )
+    { num_rows = this->num_rows() - row; }
+  
+  if ( (col + num_cols) > this->num_cols() )
+    { num_cols = this->num_cols() - col; }
+  
+  Matrix m(num_rows, num_cols);
+  
+  for (unsigned int r = 0; r < num_rows; r++)
+    {
+      for (unsigned int c = 0; c < num_cols; c++)
+	{ m(r, c) = (*this)(row + r, col + c); }
+    }
+  
+  return m;
 }
-
+  
 
 /** Overlays another matrix over this matrix.
  * @param row the top-most row from which onwards the the elements are
@@ -322,22 +324,20 @@ Matrix::get_submatrix(unsigned int row,
  * @param m the other matrix
  */
 void
-Matrix::overlay(unsigned int row,
-                unsigned int col,
-                const Matrix &m)
+Matrix::overlay( unsigned int row,
+		 unsigned int col,
+		 const Matrix& m )
 {
-	unsigned int max_row = std::min(row + m.num_rows(), num_rows());
-	unsigned int max_col = std::min(col + m.num_cols(), num_cols());
-
-	for (unsigned int r = row; r < max_row; r++)
-	{
-		for (unsigned int c = col; c < max_col; c++)
-		{
-			(*this)(r, c) = m(r - row, c - col);
-		}
-	}
+  unsigned int max_row = std::min(row + m.num_rows(), num_rows());
+  unsigned int max_col = std::min(col + m.num_cols(), num_cols());
+  
+  for (unsigned int r = row; r < max_row; r++)
+    {
+      for (unsigned int c = col; c < max_col; c++)
+	{ (*this)(r, c) = m(r - row, c - col); }
+    }
 }
-
+  
 
 /** (Read-only) Access-operator.
  * With this operator it is possible to access a specific
@@ -346,21 +346,15 @@ Matrix::overlay(unsigned int row,
  * @param col the column of the element
  * @return the value of the specified element
  */
-/* Not True: To conform with the mathematical
- * fashion of specifying the elements of a matrix the top
- * left element of the matrix is accessed with (1, 1)
- * (i.e., numeration starts with 1 and not with 0).
- */
 float
-Matrix::operator()(unsigned int row,
-                   unsigned int col) const
+Matrix::operator()( unsigned int row, unsigned int col) const
 {
-	// TODO: sanity check
-
-	if (m_transposed)
-	{ return (*m_columns[row])[col]; }
-	else
-	{ return (*m_columns[col])[row]; }
+  // TODO: sanity check
+  
+  if (m_transposed)
+    { return (*m_columns[row])[col]; }
+  else
+    { return (*m_columns[col])[row]; }
 }
 
 
@@ -370,16 +364,16 @@ Matrix::operator()(unsigned int row,
  * @param col the column of the element
  * @return a reference to the specified element
  */
-float &
+float&
 Matrix::operator()(unsigned int row,
                    unsigned int col)
 {
   // TODO: sanity check
-
-	if (m_transposed)
-	{ return (*m_columns[row])[col]; }
-	else
-	{ return (*m_columns[col])[row]; }
+  
+  if (m_transposed)
+    { return (*m_columns[row])[col]; }
+  else
+    { return (*m_columns[col])[row]; }
 }
 
 
@@ -391,25 +385,25 @@ Matrix::operator()(unsigned int row,
 Matrix &
 Matrix::operator=(const Matrix &m)
 {
-	for (unsigned int i = 0; i < m_int_num_cols; ++i)
-	{
-		delete m_columns[i];
+  for (unsigned int i = 0; i < m_int_num_cols; ++i)
+    {
+      delete m_columns[i];
+    }
+  delete[] m_columns;
+  
+  m_int_num_rows = m.m_int_num_rows;
+  m_int_num_cols = m.m_int_num_cols;
+  
+  m_transposed = m.m_transposed;
+  
+  m_columns = new Vector *[m_int_num_cols];
+  
+  for (unsigned int i = 0; i < m_int_num_cols; ++i)
+    {
+      m_columns[i] = new Vector(*(m.m_columns[i]));
 	}
-	delete[] m_columns;
-
-	m_int_num_rows = m.m_int_num_rows;
-	m_int_num_cols = m.m_int_num_cols;
-
-	m_transposed = m.m_transposed;
-
-	m_columns = new Vector *[m_int_num_cols];
-
-	for (unsigned int i = 0; i < m_int_num_cols; ++i)
-	{
-		m_columns[i] = new Vector(*(m.m_columns[i]));
-	}
-
-	return *this;
+  
+  return *this;
 }
 
 
@@ -422,53 +416,52 @@ Matrix::operator=(const Matrix &m)
 Matrix
 Matrix::operator*(const Matrix &b) const
 {
-	const Matrix &a = (*this);
-
-	if (a.num_cols() != b.num_rows())
+  const Matrix &a = (*this);
+  
+  if (a.num_cols() != b.num_rows())
+    {
+      printf("Matrix::operator*(...): Dimension mismatch: a %d x %d "
+	     "matrix can't be multiplied with a %d x %d matrix.\n",
+	     a.num_rows(), a.num_cols(), b.num_rows(), b.num_cols());
+      throw std::exception();
+    }
+  
+  unsigned int rows = a.num_rows();
+  unsigned int cols = b.num_cols();
+  
+  Matrix result(rows, cols);
+  
+  for (unsigned int c = 0; c < cols; c++)
+    {
+      for (unsigned int r = 0; r < rows; r++)
 	{
-		printf("Matrix::operator*(...): Dimension mismatch: a %d x %d matrix can't be multiplied "
-		       "with a %d x %d matrix.\n",
-		       a.num_rows(), a.num_cols(), b.num_rows(), b.num_cols());
-		throw std::exception();
+	  float t = 0.0f;
+	  
+	  for (unsigned int i = 0; i < a.num_cols(); i++)
+	    { t += a(r, i) * b(i, c); }
+	  
+	  result(r,c) = t;
 	}
-
-	unsigned int rows = a.num_rows();
-	unsigned int cols = b.num_cols();
-
-	Matrix result(rows, cols);
-
-	for (unsigned int c = 0; c < cols; c++)
-	{
-		for (unsigned int r = 0; r < rows; r++)
-		{
-			float t = 0.0f;
-
-			for (unsigned int i = 0; i < a.num_cols(); i++)
-			{
-				t += a(r, i) * b(i, c);
-			}
-
-			result(r,c) = t;
-		}
-	}
-
-	return result;
+    }
+  
+  return result;
 }
-
+  
 
 /** Combined matrix-multipliation and assignement operator.
  * @param m the rhs Matrix
- * @return a reference to the Matrix that contains the result of the multiplication
+ * @return a reference to the Matrix that contains the result of the
+ * multiplication
  */
 Matrix &
 Matrix::operator*=(const Matrix &m)
 {
-	//TODO: more efficient direct mult
-	*this = *this * m;
-
-	return *this;
+  //TODO: more efficient direct mult
+  *this = *this * m;
+  
+  return *this;
 }
-
+  
 
 /** Multiply the matrix with given vector.
  * @param v a vector
@@ -477,29 +470,27 @@ Matrix::operator*=(const Matrix &m)
 Vector
 Matrix::operator*(const Vector &v) const
 {
-	unsigned int cols = v.size();
-
-	if (num_cols() != cols)
-	{
-		printf("Matrix::operator*(...): Dimension mismatch: a %d x %d matrix can't be multiplied "
-		       "with a vector of length %d.\n",
-		       num_rows(), num_cols(), cols);
-		throw std::exception();
-	}
-
-	Vector result(num_rows());
-
-	for (unsigned int r = 0; r < num_rows(); ++r)
-	{
-		float row_result = 0.0;
-		for (unsigned int c = 0; c < cols; ++c)
-		{
-			row_result += (*this)(r, c) * v[c];
-		}
-		result[r] = row_result;
-	}
-
-	return result;
+  unsigned int cols = v.size();
+  
+  if (num_cols() != cols)
+    {
+      printf("Matrix::operator*(...): Dimension mismatch: a %d x %d "
+	     "matrix can't be multiplied with a vector of length %d.\n",
+	     num_rows(), num_cols(), cols);
+      throw std::exception();
+    }
+  
+  Vector result(num_rows());
+  
+  for (unsigned int r = 0; r < num_rows(); ++r)
+    {
+      float row_result = 0.0;
+      for (unsigned int c = 0; c < cols; ++c)
+	{ row_result += (*this)(r, c) * v[c]; }
+      result[r] = row_result;
+    }
+  
+  return result;
 }
 
 
@@ -510,16 +501,14 @@ Matrix::operator*(const Vector &v) const
 Matrix
 Matrix::operator*(const float &f) const
 {
-	Matrix result(*this);
-
-	for (unsigned int i = 0; i < result.m_int_num_cols; ++i)
-	{
-		(*(result.m_columns[i])) *= f;
-	}
-
-	return result;
+  Matrix result(*this);
+  
+  for (unsigned int i = 0; i < result.m_int_num_cols; ++i)
+    { (*(result.m_columns[i])) *= f; }
+  
+  return result;
 }
-
+  
 /** Combined scalar multiplication and assignment operator.
  * @param f a scalar
  * @return reference to the result
@@ -527,14 +516,12 @@ Matrix::operator*(const float &f) const
 Matrix &
 Matrix::operator*=(const float &f)
 {
-	for (unsigned int i = 0; i < m_int_num_cols; ++i)
-	{
-		*(m_columns[i]) *= f;
-	}
-
-	return *this;
+  for (unsigned int i = 0; i < m_int_num_cols; ++i)
+    { *(m_columns[i]) *= f; }
+  
+  return *this;
 }
-
+  
 
 /** Divide every element of the matrix with the given scalar.
  * @param f a scalar
@@ -543,14 +530,12 @@ Matrix::operator*=(const float &f)
 Matrix
 Matrix::operator/(const float &f) const
 {
-	Matrix result(*this);
-
-	for (unsigned int i = 0; i < result.m_int_num_cols; ++i)
-	{
-		(*(result.m_columns[i])) /= f;
-	}
-
-	return result;
+  Matrix result(*this);
+  
+  for (unsigned int i = 0; i < result.m_int_num_cols; ++i)
+    { (*(result.m_columns[i])) /= f; }
+  
+  return result;
 }
 
 
@@ -561,12 +546,10 @@ Matrix::operator/(const float &f) const
 Matrix &
 Matrix::operator/=(const float &f)
 {
-	for (unsigned int i = 0; i < m_int_num_cols; ++i)
-	{
-		(*(m_columns[i])) /= f;
-	}
-
-	return *this;
+  for (unsigned int i = 0; i < m_int_num_cols; ++i)
+    { (*(m_columns[i])) /= f; }
+  
+  return *this;
 }
 
 
@@ -578,24 +561,23 @@ Matrix::operator/=(const float &f)
 Matrix
 Matrix::operator+(const Matrix &m) const
 {
-	if ((num_rows() != m.num_rows()) || (num_cols() != m.num_cols()))
-	{
-		printf("Matrix::operator+(...): Dimension mismatch: a %d x %d matrix can't be added to a %d x %d matrix\n",
-		       num_rows(), num_cols(), m.num_rows(), m.num_cols());
-		throw std::exception();
-	}
-
-	Matrix result(*this);
-
-	for (unsigned int row = 0; row < num_rows(); row++)
-	{
-		for (unsigned int col = 0; col < num_cols(); col++)
-		{
-			result(row, col) += m(row, col);
-		}
-	}
-
-	return result;
+  if ((num_rows() != m.num_rows()) || (num_cols() != m.num_cols()))
+    {
+      printf("Matrix::operator+(...): Dimension mismatch: a %d x %d "
+	     "matrix can't be added to a %d x %d matrix\n",
+	     num_rows(), num_cols(), m.num_rows(), m.num_cols());
+      throw std::exception();
+    }
+  
+  Matrix result(*this);
+  
+  for (unsigned int row = 0; row < num_rows(); row++)
+    {
+      for (unsigned int col = 0; col < num_cols(); col++)
+	{ result(row, col) += m(row, col); }
+    }
+  
+  return result;
 }
 
 
@@ -606,10 +588,10 @@ Matrix::operator+(const Matrix &m) const
 Matrix &
 Matrix::operator+=(const Matrix &m)
 {
-	//TODO: more efficient direct add
-	*this = *this + m;
-
-	return *this;
+  //TODO: more efficient direct add
+  *this = *this + m;
+  
+  return *this;
 }
 
 
@@ -664,19 +646,19 @@ Matrix::operator-=(const Matrix &m)
 bool
 Matrix::operator==(const Matrix &m) const
 {
-	if ((num_rows() != m.num_rows()) || (num_cols() != m.num_cols()))
-		return false;
-
-	for (unsigned int r = 0; r < num_rows(); r++)
+  if ((num_rows() != m.num_rows()) || (num_cols() != m.num_cols()))
+    return false;
+  
+  for (unsigned int r = 0; r < num_rows(); r++)
+    {
+      for (unsigned int c = 0; c < num_cols(); c++)
 	{
-		for (unsigned int c = 0; c < num_cols(); c++)
-		{
-			if ((*this)(r, c) != m(r, c))
-				return false;
-		}
+	  if ((*this)(r, c) != m(r, c))
+	    return false;
 	}
-
-	return true;
+    }
+  
+  return true;
 }
 
 
@@ -688,78 +670,77 @@ void
 Matrix::mult_row(unsigned int row,
                  float factor)
 {
-	if (row > num_rows())
-	{
-		printf("Matrix::mult_row(...): Out of range: matrix has %d rows -- no %dth row.\n",
-		       num_rows(), row);
-		throw std::exception();
-	}
-
-	for (unsigned int col = 0; col < num_cols(); col++)
-	{
-		(*this)(row, col) *= factor;
-	}
+  if (row > num_rows())
+    {
+      printf("Matrix::mult_row(...): Out of range: matrix has %d rows "
+	     "-- no %dth row.\n", num_rows(), row);
+      throw std::exception();
+    }
+  
+  for (unsigned int col = 0; col < num_cols(); col++)
+    { (*this)(row, col) *= factor; }
 }
 
 
 /** For two rows A and B and a factor f, A is changed to A - f*B.
  * @param row_a the row that is changed
  * @param row_b the row that is substracted from row_a
- * @param factor the factor by which every element of row_b is multiplied before it is
- *        substracted from row_a
+ * @param factor the factor by which every element of row_b is
+ * multiplied before it is substracted from row_a
  */
 void
 Matrix::sub_row(unsigned int row_a,
                 unsigned int row_b,
                 float factor)
 {
-	if ((row_a > num_rows()) || (row_b > num_rows()))
-	{
-		printf("Matrix::sub_row(...): Out of range: one of the arguments \"row_a\"=%d or \"row_b\"=%d is greater "
-		       "than the number of rows (%d)\n",
-		       row_a, row_b, num_rows());
-		throw std::exception();
-	}
-
-	for (unsigned int col = 0; col < num_cols(); col++)
-	{
-		(*this)(row_a, col) -= factor * (*this)(row_b, col);
-	}
+  if ((row_a > num_rows()) || (row_b > num_rows()))
+    {
+      printf("Matrix::sub_row(...): Out of range: one of the arguments "
+	     "\"row_a\"=%d or \"row_b\"=%d is greater than the number "
+	     "of rows (%d)\n", row_a, row_b, num_rows());
+      throw std::exception();
+    }
+  
+  for (unsigned int col = 0; col < num_cols(); col++)
+    { (*this)(row_a, col) -= factor * (*this)(row_b, col); }
 }
-
-
+  
+  
 /** Print matrix to standard out.
- * @param name a name that is printed before the content of the matrix (not required)
+
+ * @param name a name that is printed before the content of the matrix
+ * (not required)
  * @param col_sep a string used to separate columns (defaults to '\\t')
  * @param row_sep a string used to separate rows (defaults to '\\n')
  */
 void
-Matrix::print_info(const char *name,
-                   const char *col_sep, const char *row_sep) const
+Matrix::print_info( const char *name,
+		    const char *col_sep,
+		    const char *row_sep ) const
 {
-	if (name)
-	{ printf("%s:\n", name); }
-
-	for (unsigned int r = 0; r < num_rows(); ++r)
+  if (name)
+    { printf("%s:\n", name); }
+  
+  for (unsigned int r = 0; r < num_rows(); ++r)
+    {
+      printf((r == 0 ? "[" : " "));
+      for (unsigned int c = 0; c < num_cols(); ++c)
 	{
-		printf((r == 0 ? "[" : " "));
-		for (unsigned int c = 0; c < num_cols(); ++c)
-		{
-			printf("%f", (*this)(r, c));
-			if (c+1 < num_cols())
-			{
-				if (col_sep) printf("%s", col_sep);
-				else printf("\t");
-			}
-		}
-		if (r+1 < num_rows())
-		{
-			if (row_sep) printf("%s", row_sep);
-			else printf("\n");
-		}
-		else
-			printf("]\n\n");
+	  printf("%f", (*this)(r, c));
+	  if (c+1 < num_cols())
+	    {
+	      if (col_sep) printf("%s", col_sep);
+	      else printf("\t");
+	    }
 	}
+      if (r+1 < num_rows())
+	{
+	  if (row_sep) printf("%s", row_sep);
+	  else printf("\n");
+	}
+      else
+	printf("]\n\n");
+    }
 }
 
 } // end namespace fawkes

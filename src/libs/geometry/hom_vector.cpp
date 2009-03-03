@@ -53,7 +53,8 @@ HomVector::HomVector(const HomCoord& h)
 {
   if ( 0.0 != w() )
     { 
-      printf("HomVector(const HomCoord& h): The fourth component of a homogeneous vector has to be 0.0\n"); 
+      printf("HomVector(const HomCoord& h): The fourth component of a "
+	     "homogeneous vector has to be 0.0 but it is %f\n", w()); 
       throw std::exception();
     }
 }
@@ -103,67 +104,34 @@ HomVector::set_length(float length)
   return *this;
 }
 
-/** Scale the length of the vector by the given factor.
- * @param factor the scaling factor
- */
-HomVector&
-HomVector::scale(float factor)
-{
-  return *this *= factor;
-}
-
-/** Multiplication with a scalar operator.
- * @param s the scalar
- * @return the resulting HomCoord
- */
-HomVector
-HomVector::operator*(const float s) const
-{
-  HomVector result = *this;
-  result *= s;
-
-  return result;
-}
-
-/** Multiplication with a scalar-assignment operator.
- * Notice: The w-component doesn't get changed (has always to be 1.0 for HomPoints)
- * @param s the scalar
- * @return reference to the resulting HomCoord
- */
-HomVector&
-HomVector::operator*=(const float s)
-{
-  x() = x() * s;
-  y() = y() * s;
-  z() = z() * s;
-
-  return *this;
-}
-
-/** Calculates the dot product of two coords.
- * @param h the rhs HomCoord
- * @return the scalar product
+/** Compute the angle between two vectors.
+ * @param v the other vector
+ * @return the angle (-M_PI ... M_PI)
  */
 float
-HomVector::operator*(const HomCoord& h) const
+HomVector::angle_xy(const HomVector& v) const
 {
-	return x()*h.x() + y()*h.y() + z()*h.z();
-}
+  if ( 0.0 == length() ||
+       0.0 == v.length() )
+    { return 0.0; }
 
-/** Returns the cross product of two vectors
- * @param b the second Vector
- * @return the HomVector that is normal to *this and h
- */
-HomVector 
-HomVector::crossP(const HomCoord& b) const
-{
-      HomVector res;
-   
-      res.x(y()*b.z() - z() * b.y()); 
-      res.y(z()*b.x() - x() * b.z());
-      res.z(x()*b.y() - y() * b.x());
+  float s = x() * v.x() + y() * v.y() + z() * v.z();
+  float l = length() * v.length();
+  float d = s / l;
 
-      return res;
+  if (-1.0 >= d || d >= 1.0 )
+    { return 0.0; }
+
+  float a = acos( s / l );
+
+  HomVector n(1.0, 0.0);
+  float a1 = acos(   x() /   length() );
+  float a2 = acos( v.x() / v.length() );
+
+  if ( a == (a2 - a1) )
+    { return a; }
+  else
+    { return -a; }
 }
 
 } // end namespace fawkes

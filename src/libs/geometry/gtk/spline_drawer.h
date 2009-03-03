@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  hom_vector.h - Homogenous vector
+ *  spline_drawer.h - Drawer for the Spline class
  *
- *  Created: Wed Sep 26 16:58:51 2007
- *  Copyright  2007-2008  Daniel Beck
+ *  Created: Fri Oct 10 13:57:33 2008
+ *  Copyright  2008  Daniel Beck
  *
  *  $Id$
  *
@@ -23,27 +23,29 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __GEOMETRY_HOM_VECTOR_H_
-#define __GEOMETRY_HOM_VECTOR_H_
+#ifndef __GEOMETRY_SPLINE_DRAWER_H_
+#define __GEOMETRY_SPLINE_DRAWER_H_
 
-#include <geometry/hom_coord.h>
+#include <geometry/gtk/geom_drawer.h>
 
 namespace fawkes {
 
-class HomVector : public HomCoord
+class Spline;
+
+class SplineDrawer : public GeomDrawer
 {
  public:
-  HomVector(float x = 0, float y = 0, float z = 0);
-  HomVector(const HomCoord& h);
-  virtual ~HomVector();
+  SplineDrawer(Spline& s);
+  SplineDrawer(const Spline& s);
+  virtual ~SplineDrawer();
 
-  float      length() const;
-  HomVector& set_length(float length);
-  HomVector& unit();
+  virtual void draw(Cairo::RefPtr<Cairo::Context>& context);
 
-  float angle_xy(const HomVector& h) const;
+ private:
+  Spline* m_spline;
+  bool m_own_spline;
 };
 
 } // end namespace fawkes
 
-#endif /* __GEOMETRY_HOM_VECTOR_H_ */
+#endif /* __GEOMETRY_SPLINE_DRAWER_H_ */

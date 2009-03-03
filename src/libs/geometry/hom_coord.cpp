@@ -38,7 +38,7 @@ namespace fawkes {
  */
 
 /** @var HomCoord::m_vector
- * Pointer to the interanl data container.
+ * The internal data container.
  */
 
 /** Constructor.
@@ -50,6 +50,7 @@ namespace fawkes {
 HomCoord::HomCoord(float x, float y, float z, float w)
 {
   m_vector = new Vector(4);
+
   m_vector->set(0, x);
   m_vector->set(1, y);
   m_vector->set(2, z);
@@ -61,8 +62,8 @@ HomCoord::HomCoord(float x, float y, float z, float w)
  */
 HomCoord::HomCoord(const HomCoord& c)
 {
-  m_vector = new Vector(4);
-  (*m_vector) = (*c.m_vector);
+  const Vector v = *(c.m_vector);
+  m_vector = new Vector(v);
 }
 
 /** Constructor.
@@ -70,8 +71,7 @@ HomCoord::HomCoord(const HomCoord& c)
  */
 HomCoord::HomCoord(const Vector& v)
 {
-  m_vector = new Vector(4);
-  (*m_vector) = v;
+  m_vector = new Vector(v);
 }
 
 /** Destructor. */
@@ -106,7 +106,7 @@ HomCoord&
 HomCoord::x(float x)
 {
   m_vector->set(0, x);
-	return *this;
+  return *this;
 }
 
 /** RO-getter for y.
@@ -135,7 +135,7 @@ HomCoord&
 HomCoord::y(float y)
 {
   m_vector->set(1, y);
-	return *this;
+  return *this;
 }
 
 /** RO-getter for z.
@@ -164,7 +164,7 @@ HomCoord&
 HomCoord::z(float z)
 {
   m_vector->set(2, z);
-	return *this;
+  return *this;
 }
 
 /** RO-getter for w.
@@ -193,7 +193,7 @@ HomCoord&
 HomCoord::w(float w)
 {
   m_vector->set(3, w);
-	return *this;
+  return *this;
 }
 
 /** Convenience function to rotate the HomCoord around the x-axis.
@@ -204,7 +204,7 @@ HomCoord::rotate_x(float rad)
 {
   HomTransform t;
   t.rotate_x(rad);
-  *this = t * (*this);
+  transform(t);
 
   return *this;
 }
@@ -217,7 +217,7 @@ HomCoord::rotate_y(float rad)
 {
   HomTransform t;
   t.rotate_y(rad);
-  *this = t * (*this);
+  transform(t);
 
   return *this;
 }
@@ -230,7 +230,7 @@ HomCoord::rotate_z(float rad)
 {
   HomTransform t;
   t.rotate_z(rad);
-  *this = t * (*this);
+  transform(t);
 
   return *this;
 }
@@ -242,9 +242,10 @@ HomCoord::rotate_z(float rad)
 HomCoord
 HomCoord::operator-(const HomCoord& h) const
 {
-  HomCoord result = *this;
-  result -= h;
-
+  Vector v = (*m_vector) - (*h.m_vector);
+  HomCoord result(v);
+  float w = result.w();
+  result.w() = (w > 1.0) ? 1.0 : w; 
   return result;
 }
 
@@ -255,11 +256,9 @@ HomCoord::operator-(const HomCoord& h) const
 HomCoord&
 HomCoord::operator-=(const HomCoord& h)
 {
-  for (unsigned int i = 0; i < 3; ++i)
-    {
-      (*m_vector)[i] -= (*h.m_vector)[i];
-    }
-
+  (*m_vector) -= (*h.m_vector);
+  float w = this->w();
+  this->w() = (w > 1.0) ? 1.0 : w; 
   return *this;
 }
 
@@ -270,9 +269,10 @@ HomCoord::operator-=(const HomCoord& h)
 HomCoord
 HomCoord::operator+(const HomCoord& h) const
 {
-  HomCoord result = *this;
-  result += h;
-
+  Vector v = (*m_vector) + (*h.m_vector);
+  HomCoord result(v);
+  float w = result.w();
+  result.w() = (w > 1.0) ? 1.0 : w; 
   return result;
 }
 
@@ -283,11 +283,9 @@ HomCoord::operator+(const HomCoord& h) const
 HomCoord&
 HomCoord::operator+=(const HomCoord& h)
 {
-  for (unsigned int i = 0; i < 3; ++i)
-    {
-      (*m_vector)[i] += (*h.m_vector)[i];
-    }
-
+  (*m_vector) += (*h.m_vector);
+  float w = this->w();
+  this->w() = (w > 1.0) ? 1.0 : w; 
   return *this;
 }
 
@@ -311,30 +309,82 @@ HomCoord::operator=(const HomCoord& h)
 float
 HomCoord::operator*(const HomCoord& h) const
 {
-	return x()*h.x() + y()*h.y() + z()*h.z();
+  return x() * h.x() + y() * h.y() + z() * h.z();
 }
 
+/** Mulitplication operator.
+ * Multiply the vector with a scalar.
+ * @param s a scalar
+ * @return the result of multiplying the vector with the scalar
+ */
+HomCoord
+HomCoord::operator*(const float s) const
+{
+  HomCoord result;
+  result.x() = x() * s;
+  result.y() = y() * s;
+  result.z() = z() * s;
+  result.w() = w();
+
+  return result;
+}
+
+/** Multiplication-assignment operator.
+ * Multiply the vector with a scalar.
+ * @param s a scalar
+ * @return a reference to the modified vector (this)
+ */
+HomCoord&
+HomCoord::operator*=(const float s)
+{
+  x() *= s;
+  y() *= s;
+  z() *= s;
+
+  return *this;
+}
+
+/** Comparison operator.
+ * @param h the other HomCoord
+ * @return true if h is equal to *this, false otherwise
+ */
+bool
+HomCoord::operator==(const HomCoord& h) const
+{
+  return (*m_vector == *h.m_vector) ? true : false;
+}
+
+/** Inequality operator.
+ * @param h the other HomCoord
+ * @return true if h is not equal to *this, false otherwise
+ */
+bool
+HomCoord::operator!=(const HomCoord& h) const
+{
+  return (*m_vector == *h.m_vector) ? false : true;
+}
 
 /** Appends the components of the HomCoord to the ostream.
  * @param stream to be extended
- * @param h extending HomCoord
  * @return the extended stream
  */
 std::ostream&
-operator<<(std::ostream& stream, const HomCoord &h)
+HomCoord::print(std::ostream& stream) const
 {
-	return h.addToStream(stream);
+  return stream << "[" << x() << ", "  << y() << ", "  << z() << ", "  << w() << "]T";
 }
 
-
-/** Appends the components of the HomCoord to the ostream.
- * @param stream to be extended
- * @return the extended stream
+/** Transform the vector with the given transform.
+ * @param t a transform
+ * @return reference to the modified vector (this)
  */
-std::ostream&
-HomCoord::addToStream(std::ostream& stream) const
+HomCoord&
+HomCoord::transform(const HomTransform& t)
 {
-	return stream << "[" << x() << ","  << y() << ","  << z() << ","  << w() << "]";
+  Matrix m = t.get_matrix();
+  (*m_vector) = m * (*m_vector);
+
+  return *this;
 }
 
 } // end namespace fawkes

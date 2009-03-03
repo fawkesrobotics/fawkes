@@ -25,10 +25,7 @@
 
 #include <geometry/hom_transform.h>
 #include <geometry/hom_coord.h>
-#include <geometry/hom_vector.h>
-#include <geometry/hom_point.h>
 #include <geometry/matrix.h>
-#include <geometry/vector.h>
 
 #include <cmath>
 
@@ -60,8 +57,7 @@ HomTransform::HomTransform(const HomTransform& t)
  */
 HomTransform::HomTransform(const Matrix& m)
 {
-  m_matrix = new Matrix(4, 4);
-  (*m_matrix) = m;
+  m_matrix = new Matrix(m);
 }
 
 /** Destructor */
@@ -121,7 +117,6 @@ HomTransform::rotate_x(float rad)
   (*m_matrix)(0,1) = s1[0] * cos + s2[0] * sin;
   (*m_matrix)(1,1) = s1[1] * cos + s2[1] * sin;
   (*m_matrix)(2,1) = s1[2] * cos + s2[2] * sin;
-
   (*m_matrix)(0,2) = -s1[0] * sin + s2[0] * cos;
   (*m_matrix)(1,2) = -s1[1] * sin + s2[1] * cos;
   (*m_matrix)(2,2) = -s1[2] * sin + s2[2] * cos;
@@ -180,6 +175,7 @@ HomTransform::trans(float dx, float dy, float dz)
   (*m_matrix)(2, 3) += (*m_matrix)(2, 0) * dx + (*m_matrix)(2, 1) * dy + (*m_matrix)(2, 2) * dz;
 }
 
+
 /** Modified Denavit-Hartenberg transformation.
  * DH-transformation as used by Aldebaran
  * @see http://robocup.aldebaran-robotics.com/index.php?option=com_content&task=view&id=30#id2514205 "3.2.2.1.3.2. Forward kinematics model parameters"
@@ -198,6 +194,20 @@ HomTransform::mDH(const float alpha, const float a, const float theta, const flo
 }
 
 
+/** Set the translation.
+ * @param x the translation along the x-axis
+ * @param y the translation along the y-axis
+ * @param z the translation along the z-axis
+ */
+void
+HomTransform::set_trans(float x, float y, float z)
+{
+  Matrix& matrix_ref = *m_matrix;
+  matrix_ref(0, 3) = x;
+  matrix_ref(1, 3) = y;
+  matrix_ref(2, 3) = z;
+}
+
 /** Assignement operator.
  * @param t the other transformation
  * @return reference to the lhs transformation
@@ -205,22 +215,9 @@ HomTransform::mDH(const float alpha, const float a, const float theta, const flo
 HomTransform&
 HomTransform::operator=(const HomTransform& t)
 {
-  (*m_matrix) = (*t.m_matrix);
+  m_matrix = t.m_matrix;
 
   return *this;
-}
-
-/** Multiplication operator.
- * @param t the rhs transformation
- * @return result of the multiplication
- */
-HomTransform
-HomTransform::operator*(const HomTransform& t) const
-{
-  Matrix m(4, 4);
-  m = (*m_matrix) * (*t.m_matrix);
-
-  return HomTransform(m);
 }
 
 /** Multiplication-assignment operator.
@@ -230,6 +227,7 @@ HomTransform::operator*(const HomTransform& t) const
 HomTransform&
 HomTransform::operator*=(const HomTransform& t)
 {
+  *this = (*this) * t;
   return *this;
 }
 
@@ -241,23 +239,10 @@ bool
 HomTransform::operator==(const HomTransform& t) const
 {
   bool result = false;
-  if ( (*m_matrix) == (*t.m_matrix) )
+  if ( m_matrix == t.m_matrix )
     { result = true; }
 
   return true;
-}
-
-/** Transformation operator.
- * @param h a HomCoord
- * @return the transformed HomCoord
- */
-HomCoord
-HomTransform::operator*(const HomCoord& h) const
-{
-  Vector v(4);
-  v = (*m_matrix) * (*h.m_vector);
-
-  return HomCoord(v);
 }
 
 /** Prints the matrix.
@@ -268,17 +253,17 @@ HomTransform::operator*(const HomCoord& h) const
 void
 HomTransform::print_info(const char *name, const char *col_sep, const char *row_sep) const
 {
-	m_matrix->print_info(name ? name : "HomTransform", col_sep, row_sep);
+  m_matrix->print_info(name ? name : "HomTransform", col_sep, row_sep);
 }
 
 
 /** Returns a copy of the matrix.
  * @return the matrix of the transformation
  */
-Matrix
+const Matrix&
 HomTransform::get_matrix() const
 {
-	return Matrix(*m_matrix);
+  return *m_matrix;
 }
 
 } // end namespace fawkes
