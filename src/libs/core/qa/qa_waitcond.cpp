@@ -27,6 +27,8 @@
 
 #include <core/threading/thread.h>
 #include <core/threading/wait_condition.h>
+#include <core/exception.h>
+#include <core/threading/mutex.h>
 
 #include <iostream>
 #include <string>
@@ -34,35 +36,58 @@
 using namespace std;
 using namespace fawkes;
 
+typedef enum {
+  WAITER,
+  WAKER,
+  BUGGER
+} threadmode_t;
+
 class ExampleWaitCondThread : public Thread
 {
  public:
-  ExampleWaitCondThread(string pp,
-		       WaitCondition *waitcond, unsigned int sleep_time)
-    : Thread("ExampleWaitCondThread", Thread::OPMODE_CONTINUOUS)
+  ExampleWaitCondThread(threadmode_t mode, string tname,
+			WaitCondition *waitcond, unsigned int sleep_time)
+    : Thread(tname.c_str(), Thread::OPMODE_CONTINUOUS)
   {
-    this->pp         = pp;
+    this->mode       = mode;
     this->waitcond   = waitcond;
     this->sleep_time = sleep_time;
   }
 
   virtual void loop()
   {
-    if ( pp == "waiter" ) {
-      cout << pp << ": Waiting for waker" << endl;
-      waitcond->wait();
+    if ( mode == WAITER ) {
+      usleep( sleep_time );
+      cout << name() << ": Waiting for waker" << endl;
+      try {
+	waitcond->wait();
+	cout << name() << ": Woken up" << endl;
+      } catch (Exception &e) {
+	cout << name() << ": EXCEPTION" << endl;
+	e.print_trace();
+      }
+    } else if (mode == BUGGER) {
+      usleep( sleep_time );
+      Mutex mutex;
+      try {
+	waitcond->wait(&mutex);
+      } catch (Exception &e) {
+	cout << name() << ": failed as expected" << endl;
+	e.print_trace();
+      }
+      mode = WAITER;
     } else {
       usleep( sleep_time );
-      cout << pp << ": Waking waiter" << endl;
+      cout << name() << ": Waking waiter" << endl;
       waitcond->wake_all();
-      cout << pp << ": Woke waiter" << endl;
+      cout << name() << ": Woke waiter" << endl;
     }
   }
 
  private:
+  threadmode_t mode;
   WaitCondition *waitcond;
   unsigned int sleep_time;
-  string pp;
 
 };
 
@@ -72,17 +97,25 @@ main(int argc, char **argv)
 {
   WaitCondition *w = new WaitCondition();
 
-  ExampleWaitCondThread *t1 = new ExampleWaitCondThread("waiter", w, 0);
-  ExampleWaitCondThread *t2 = new ExampleWaitCondThread("waker", w, 6458642);
+  ExampleWaitCondThread *t1 = new ExampleWaitCondThread(WAITER, "waiter1", w, 1000000);
+  ExampleWaitCondThread *t2 = new ExampleWaitCondThread(WAITER, "waiter2", w, 1200000);
+  ExampleWaitCondThread *tw = new ExampleWaitCondThread(WAKER, "waker", w, 6458642);
+  ExampleWaitCondThread *tb = new ExampleWaitCondThread(BUGGER, "bugger", w, 3458642);
 
   t1->start();
   t2->start();
+  tw->start();
+  tb->start();
 
   t1->join();
   t2->join();
+  tw->join();
+  tb->join();
 
   delete t1;
   delete t2;
+  delete tw;
+  delete tb;
 
   delete w;
 }

@@ -36,10 +36,6 @@ LIBS_qa_core_barrier = stdc++ fawkescore
 OBJS_qa_core_exception = qa_exception.o
 LIBS_qa_core_exception = stdc++ fawkescore
 
-OBJS_qa_core_refcount = qa_refcount.o
-LIBS_qa_core_refcount = stdc++ fawkescore
-
-
 OBJS_all =	$(OBJS_qa_core_mutex_count)	\
 		$(OBJS_qa_core_mutex_sync)	\
 		$(OBJS_qa_core_wait_condition)	\
@@ -47,8 +43,7 @@ OBJS_all =	$(OBJS_qa_core_mutex_count)	\
 		$(OBJS_qa_core_waitcond_serialize)	\
 		$(OBJS_qa_core_rwlock)		\
 		$(OBJS_qa_core_barrier)		\
-		$(OBJS_qa_core_exception)	\
-		$(OBJS_qa_core_refcount)
+		$(OBJS_qa_core_exception)
 
 BINS_all =	$(BINDIR)/qa_core_mutex_count		\
 		$(BINDIR)/qa_core_waitcond		\
@@ -56,8 +51,7 @@ BINS_all =	$(BINDIR)/qa_core_mutex_count		\
 		$(BINDIR)/qa_core_rwlock		\
 		$(BINDIR)/qa_core_barrier		\
 		$(BINDIR)/qa_core_exception		\
-		$(BINDIR)/qa_core_mutex_sync		\
-		$(BINDIR)/qa_core_refcount
+		$(BINDIR)/qa_core_mutex_sync
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
