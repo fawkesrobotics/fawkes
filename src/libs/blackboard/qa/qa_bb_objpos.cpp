@@ -27,6 +27,7 @@
 /// @cond QA
 
 #include <blackboard/remote.h>
+#include <blackboard/local.h>
 #include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
 
@@ -34,6 +35,7 @@
 
 #include <core/exceptions/system.h>
 #include <utils/logging/liblogger.h>
+#include <utils/time/tracker.h>
 
 #include <signal.h>
 #include <cstdlib>
@@ -57,7 +59,8 @@ main(int argc, char **argv)
   signal(SIGINT, handle_signal);
 
   LibLogger::init();
-  BlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
+  //BlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
+  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE, BLACKBOARD_MAGIC_TOKEN);
 
   std::list<ObjectPositionInterface *> interfaces;
 
@@ -71,15 +74,24 @@ main(int argc, char **argv)
   }
 
   srand(time(NULL));
+
+  TimeTracker tt;
+  unsigned int ttc_write = tt.add_class("Write");
+
+  int u = 0;
   while ( ! quit) {
-    //int u = 0;
     for (std::list<ObjectPositionInterface *>::iterator i = interfaces.begin(); i != interfaces.end(); ++i) {
       int r = rand() % 1000000;
       (*i)->set_world_x((float)r);
       (*i)->set_world_y((float)r+1);
       (*i)->set_world_z((float)r+2);
+      tt.ping_start(ttc_write);
       (*i)->write();
-      //++u;
+      tt.ping_end(ttc_write);
+      if ( ++u > 100 ) {
+        tt.print_to_stdout();
+        u = 0;
+      }
     }
     sleep(1);
   }
