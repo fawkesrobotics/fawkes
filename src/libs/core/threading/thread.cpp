@@ -241,8 +241,8 @@ Thread::__constructor(const char *name, OpMode op_mode)
   __notification_listeners = new LockList<ThreadNotificationListener *>();
 
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
-    __sleep_condition = new WaitCondition();
-    __sleep_mutex = new Mutex();
+    __sleep_mutex     = new Mutex();
+    __sleep_condition = new WaitCondition(__sleep_mutex);
   } else {
     __sleep_condition = NULL;
     __sleep_mutex = NULL;
@@ -263,7 +263,7 @@ Thread::__constructor(const char *name, OpMode op_mode)
 
   loopinterrupt_antistarve_mutex = new Mutex();
   __prepfin_hold_mutex       = new Mutex();
-  __prepfin_hold_waitcond    = new WaitCondition();
+  __prepfin_hold_waitcond    = new WaitCondition(__prepfin_hold_mutex);
   __startup_barrier          = new Barrier(2);
 }
 
@@ -379,7 +379,7 @@ Thread::prepare_finalize()
   }
   __prepfin_hold_mutex->lock();
   while (__prepfin_hold) {
-    __prepfin_hold_waitcond->wait(__prepfin_hold_mutex);
+    __prepfin_hold_waitcond->wait();
   }
   if (! __prepfin_conc_loop) {
     loopinterrupt_antistarve_mutex->lock();
@@ -434,7 +434,7 @@ Thread::prepare_finalize_user()
  * This method is meant to be used in conjunction with aspects and to cover
  * thread inter-dependencies. This routine MUST bring the thread into a safe
  * state such that it may be canceled and destroyed afterwards. If there is
- * any reason that this cannot happen make your prepare_finalize() report so.
+ * any reason that this cannot happen make your prepare_finalize() reports so.
  *
  * This method is called by the thread manager just before the thread is
  * being cancelled. Here you can do whatever steps are necessary just before
@@ -680,8 +680,8 @@ Thread::set_opmode(OpMode op_mode)
     __sleep_mutex = NULL;
   } else if ( (__op_mode == OPMODE_CONTINUOUS) &&
 	      (op_mode == OPMODE_WAITFORWAKEUP) ) {
-    __sleep_mutex = new Mutex();
-    __sleep_condition = new WaitCondition();
+    __sleep_mutex     = new Mutex();
+    __sleep_condition = new WaitCondition(__sleep_mutex);
     __op_mode = OPMODE_WAITFORWAKEUP;
   }
 }
@@ -901,7 +901,7 @@ Thread::run()
 {
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
     // Wait for initial wakeup
-    __sleep_condition->wait(__sleep_mutex);
+    __sleep_condition->wait();
     __wakeup_finished = true;
   }
 
@@ -925,7 +925,7 @@ Thread::run()
       __barrier = NULL;
     }
     if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
-      __sleep_condition->wait(__sleep_mutex);
+      __sleep_condition->wait();
       __wakeup_finished = true;
     }
     yield();

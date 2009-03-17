@@ -63,7 +63,7 @@ class ExampleWaitCondThread : public Thread
   {
     m->lock();
     while (*val != actval) {
-      wc->wait(m);
+      wc->wait();
     }
     cout << *val << " called" << endl;
     *val += 1;
@@ -99,7 +99,7 @@ main(int argc, char **argv)
   int val = 0;
 
   Mutex *m = new Mutex();
-  WaitCondition *wc = new WaitCondition();
+  WaitCondition *wc = new WaitCondition(m);
 
   ExampleWaitCondThread *t1 = new ExampleWaitCondThread(wc, m, &val, 0, 4);
   ExampleWaitCondThread *t2 = new ExampleWaitCondThread(wc, m, &val, 1, 4);

@@ -43,6 +43,8 @@ class InterruptibleBarrierData
   unsigned int  threads_left;
   Mutex         mutex;
   WaitCondition waitcond;
+
+  InterruptibleBarrierData() : waitcond(&mutex) {}
 };
 /// @endcond
 
@@ -176,7 +178,7 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
   }
 
   while ( __data->threads_left && !__interrupted && !__timeout ) {
-    __timeout = ! __data->waitcond.reltimed_wait(&(__data->mutex), timeout_sec, timeout_nanosec);
+    __timeout = ! __data->waitcond.reltimed_wait(timeout_sec, timeout_nanosec);
   }
   if ( __interrupted ) {
     __data->mutex.unlock();
