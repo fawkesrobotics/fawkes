@@ -72,10 +72,11 @@ FuseClient::FuseClient(const char *hostname, unsigned short int port,
   __outbound_msgq = new FuseNetworkMessageQueue();
 
   __mutex = new Mutex();
-  __recv_mutex = new Mutex();
-  __waitcond = new WaitCondition();
+  __recv_mutex    = new Mutex();
+  __recv_waitcond = new WaitCondition(__recv_mutex);
   __socket = new StreamSocket();
-  __greeting_mutex = new Mutex();
+  __greeting_mutex    = new Mutex();
+  __greeting_waitcond = new WaitCondition(__greeting_mutex);
 
   __alive = true;
   __greeting_received = false;
@@ -103,9 +104,10 @@ FuseClient::~FuseClient()
 
   delete __mutex;
   delete __recv_mutex;
-  delete __waitcond;
+  delete __recv_waitcond;
   delete __socket;
   delete __greeting_mutex;
+  delete __greeting_waitcond;
 }
 
 
@@ -145,7 +147,7 @@ FuseClient::send()
     __socket->close();
     __alive = false;
     __handler->fuse_connection_died();
-    __waitcond->wake_all();
+    __recv_waitcond->wake_all();
   }
 }
 
@@ -164,7 +166,7 @@ FuseClient::recv()
     __socket->close();
     __alive = false;
     __handler->fuse_connection_died();
-    __waitcond->wake_all();
+    __recv_waitcond->wake_all();
   }
   __recv_mutex->unlock();
 }
@@ -215,7 +217,7 @@ FuseClient::enqueue_and_wait(FuseNetworkMessage *m)
   __recv_mutex->lock();
   m->ref();
   __outbound_msgq->push_locked(m);
-  __waitcond->wait(__recv_mutex);
+  __recv_waitcond->wait();
   __recv_mutex->unlock();
 }
 
@@ -232,7 +234,7 @@ FuseClient::enqueue_and_wait(FUSE_message_type_t type, void *payload, size_t pay
   FuseNetworkMessage *m = new FuseNetworkMessage(type, payload, payload_size);
   __recv_mutex->lock();
   __outbound_msgq->push_locked(m);  
-  __waitcond->wait(__recv_mutex);
+  __recv_waitcond->wait();
   __recv_mutex->unlock();
 }
 
@@ -247,7 +249,7 @@ FuseClient::enqueue_and_wait(FUSE_message_type_t type)
   FuseNetworkMessage *m = new FuseNetworkMessage(type);
   __recv_mutex->lock();
   __outbound_msgq->push_locked(m);  
-  __waitcond->wait(__recv_mutex);
+  __recv_waitcond->wait();
   __recv_mutex->unlock();
 }
 
@@ -304,6 +306,7 @@ FuseClient::loop()
       } else {
 	__greeting_mutex->lock();
 	__greeting_received = true;
+	__greeting_waitcond->wake_all();
 	__greeting_mutex->unlock();
 	__handler->fuse_connection_established();
       }
@@ -317,7 +320,7 @@ FuseClient::loop()
   __inbound_msgq->unlock();
 
   if ( wake ) {
-    __waitcond->wake_all();
+    __recv_waitcond->wake_all();
   }
   __mutex->unlock();
 }
@@ -330,7 +333,7 @@ FuseClient::loop()
 void
 FuseClient::wait()
 {
-  __waitcond->wait();
+  __recv_waitcond->wait();
 }
 
 
@@ -346,7 +349,7 @@ FuseClient::wait_greeting()
 {
   __greeting_mutex->lock();
   while (! __greeting_received) {
-    __waitcond->wait(__greeting_mutex);
+    __greeting_waitcond->wait();
   }
   __greeting_mutex->unlock();
 }

@@ -70,17 +70,18 @@ class FuseClient : public fawkes::Thread {
   fawkes::StreamSocket *__socket;
   unsigned int __wait_timeout;
 
-  fawkes::Mutex *__mutex;
-  fawkes::Mutex *__recv_mutex;
+  fawkes::Mutex         *__mutex;
+  fawkes::Mutex         *__recv_mutex;
+  fawkes::WaitCondition *__recv_waitcond;
 
   FuseNetworkMessageQueue *  __inbound_msgq;
   FuseNetworkMessageQueue *  __outbound_msgq;
 
   FuseClientHandler       *__handler;
-  fawkes::WaitCondition           *__waitcond;
 
   bool __greeting_received;
-  fawkes::Mutex *__greeting_mutex;
+  fawkes::Mutex         *__greeting_mutex;
+  fawkes::WaitCondition *__greeting_waitcond;
 
   bool __alive;
 };
