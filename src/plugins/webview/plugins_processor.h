@@ -42,7 +42,7 @@ class WebPluginsRequestProcessor : public WebRequestProcessor
 				     const char *method,
 				     const char *version,
 				     const char *upload_data,
-				     unsigned int *upload_data_size,
+				     size_t *upload_data_size,
 				     void **session_data);
 
  private:

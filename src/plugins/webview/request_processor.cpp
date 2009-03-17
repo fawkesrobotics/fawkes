@@ -24,6 +24,7 @@
 
 #include "request_processor.h"
 
+#include <sys/types.h>
 #include <microhttpd.h>
 #include <cstring>
 
@@ -34,7 +35,7 @@
  * @author Tim Niemueller
  *
  *
- * @fn virtual WebReply * WebRequestProcessor::process_request(const char *url, const char *method, const char *version,  const char *upload_data, unsigned int *upload_data_size, void **session_data) =  0
+ * @fn virtual WebReply * WebRequestProcessor::process_request(const char *url, const char *method, const char *version,  const char *upload_data, size_t *upload_data_size, void **session_data) =  0
  * Process a request.
  * @param url URL, may contain escape sequences
  * @param method HTTP method

@@ -49,8 +49,8 @@ class WebRequestDispatcher
 				const char *method,
 				const char *version,
 				const char *upload_data,
-				unsigned int *upload_data_size,
-				void **session_data);
+				size_t *upload_data_size,
+				void  **session_data);
 
   static int  dynamic_reply_data_cb(void *reply, size_t pos, char *buf, int max);
   static void dynamic_reply_free_cb(void *reply);
@@ -62,7 +62,7 @@ class WebRequestDispatcher
 		      const char *method,
 		      const char *version,
 		      const char *upload_data,
-		      unsigned int *upload_data_size,
+		      size_t *upload_data_size,
 		      void **session_data);
 
  private:
