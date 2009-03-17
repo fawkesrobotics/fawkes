@@ -96,6 +96,7 @@ WorldModelNetworkThread::init()
 void
 WorldModelNetworkThread::finalize()
 {
+  blackboard->close(__gamestate_if);
   delete __worldinfo_transceiver;
 }
 

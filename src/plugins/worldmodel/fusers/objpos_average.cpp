@@ -76,6 +76,7 @@ WorldModelObjPosAverageFuser::WorldModelObjPosAverageFuser(fawkes::Logger *logge
     for (LockList<ObjectPositionInterface *>::iterator i = __input_ifs.begin(); i != __input_ifs.end(); ++i) {
       blackboard->close(*i);
     }
+    __input_ifs.clear();
     blackboard->close(__output_if);
     throw;
   }
