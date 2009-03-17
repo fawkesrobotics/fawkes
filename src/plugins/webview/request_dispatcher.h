@@ -52,7 +52,7 @@ class WebRequestDispatcher
 				size_t *upload_data_size,
 				void  **session_data);
 
-  static int  dynamic_reply_data_cb(void *reply, size_t pos, char *buf, int max);
+  static int  dynamic_reply_data_cb(void *reply, uint64_t pos, char *buf, int max);
   static void dynamic_reply_free_cb(void *reply);
 
   int queue_static_reply(struct MHD_Connection * connection,

@@ -79,7 +79,7 @@ WebRequestDispatcher::process_request_cb(void *callback_data,
  */
 int
 WebRequestDispatcher::dynamic_reply_data_cb(void *reply,
-					    size_t pos, char *buf, int max)
+					    uint64_t pos, char *buf, int max)
 {
   DynamicWebReply *dreply = static_cast<DynamicWebReply *>(reply);
   return dreply->next_chunk(pos, buf, max);
