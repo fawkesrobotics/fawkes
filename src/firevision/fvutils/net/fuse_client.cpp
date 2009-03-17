@@ -327,13 +327,15 @@ FuseClient::loop()
 
 
 /** Wait for messages.
- * This will wait for messages of to arrive. The calling
+ * This will wait for messages to arrive. The calling
  * thread is blocked until messages are available.
  */
 void
 FuseClient::wait()
 {
+  __recv_mutex->lock();
   __recv_waitcond->wait();
+  __recv_mutex->unlock();
 }
 
 
