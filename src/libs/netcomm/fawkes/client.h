@@ -104,12 +104,13 @@ class FawkesNetworkClient
   bool           __connest;
   bool           __connest_interrupted;
 
-  FawkesNetworkClientRecvThread *recv_slave;
-  FawkesNetworkClientSendThread *send_slave;
+  Mutex                         *__recv_mutex;
+  FawkesNetworkClientRecvThread *__recv_slave;
+  FawkesNetworkClientSendThread *__send_slave;
+  bool                           __recv_slave_alive;
+  bool                           __send_slave_alive;
 
   bool connection_died_recently;
-  bool recv_slave_alive;
-  bool send_slave_alive;
   Mutex *slave_status_mutex;
   bool _has_id;
   unsigned int _id;

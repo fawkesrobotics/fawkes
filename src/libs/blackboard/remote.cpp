@@ -71,7 +71,7 @@ RemoteBlackBoard::RemoteBlackBoard(FawkesNetworkClient *client)
   __instance_factory = new BlackBoardInstanceFactory();
 
   __wait_mutex = new Mutex();
-  __wait_cond  = new WaitCondition();
+  __wait_cond  = new WaitCondition(__wait_mutex);
 
   __m = NULL;
 }
@@ -106,7 +106,7 @@ RemoteBlackBoard::RemoteBlackBoard(const char *hostname, unsigned short int port
   __instance_factory = new BlackBoardInstanceFactory();
 
   __wait_mutex = new Mutex();
-  __wait_cond  = new WaitCondition();
+  __wait_cond  = new WaitCondition(__wait_mutex);
 
   __m = NULL;
 }
@@ -204,7 +204,7 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier,
       __m->unref();
       __m = NULL;
     }
-    __wait_cond->wait(__wait_mutex);
+    __wait_cond->wait();
   }
   __wait_mutex->unlock();
 
@@ -372,7 +372,7 @@ RemoteBlackBoard::list_all()
       __m->unref();
       __m = NULL;
     }
-    __wait_cond->wait(__wait_mutex);
+    __wait_cond->wait();
   }
   __wait_mutex->unlock();
 
