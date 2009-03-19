@@ -2,8 +2,8 @@
 /***************************************************************************
  *  memory_manager.h - BlackBoard memory manager
  *
- *  Generated: Sat Sep 23 16:00:56 2006 (INSITE 2006, Joburg, South Africa)
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Sep 23 16:00:56 2006 (INSITE 2006, Joburg, South Africa)
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -57,10 +57,11 @@ struct chunk_list_t {
 
 class BlackBoardMemoryManager
 {
- friend class BlackBoardInterfaceManager;
+  friend class BlackBoardInterfaceManager;
  public:
+  BlackBoardMemoryManager(size_t memsize);
   BlackBoardMemoryManager(size_t memsize, unsigned int version,
-			  bool master,
+			  bool use_shmem,
 			  const char *shmem_token = "FawkesBlackBoard");
   ~BlackBoardMemoryManager();
 
@@ -103,6 +104,7 @@ class BlackBoardMemoryManager
     friend class BlackBoardMemoryManager;
    private:
     ChunkIterator(SharedMemory *shmem, chunk_list_t *cur);
+    ChunkIterator(chunk_list_t *cur);
    public:
     ChunkIterator();
     ChunkIterator(const ChunkIterator &it);
@@ -119,16 +121,14 @@ class BlackBoardMemoryManager
     unsigned int    overhang() const;
 
    private:
-    SharedMemory *shmem;
-    chunk_list_t *cur;
+    SharedMemory *__shmem;
+    chunk_list_t *__cur;
   };
 
   ChunkIterator begin();
   ChunkIterator end();
 
  private:
-  bool __master;
-
   chunk_list_t * list_add(chunk_list_t *list, chunk_list_t *addel);
   chunk_list_t * list_remove(chunk_list_t *list, chunk_list_t *rmel);
   chunk_list_t * list_find_ptr(chunk_list_t *list, void *ptr);
@@ -143,13 +143,21 @@ class BlackBoardMemoryManager
   void * alloc_nolock(unsigned int num_bytes);
 
  private:
-  BlackBoardSharedMemoryHeader *shmem_header;
-  SharedMemory *shmem;
+  bool __master;
 
   size_t __memsize;
 
   // Mutex to be used for all list operations (alloc, free)
-  Mutex        *mutex;
+  Mutex *__mutex;
+
+  // used for shmem
+  BlackBoardSharedMemoryHeader *__shmem_header;
+  SharedMemory *__shmem;
+
+  // Used for heap memory
+  void  *__memory;
+  chunk_list_t *__free_list_head;	/**< offset of the free chunks list head */
+  chunk_list_t *__alloc_list_head;	/**< offset of the allocated chunks list head */
 
 };
 

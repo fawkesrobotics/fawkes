@@ -60,9 +60,10 @@ main(int argc, char **argv)
 
   signal(SIGINT, signal_handler);
 
-  BlackBoardMemoryManager *mm = new BlackBoardMemoryManager( BLACKBOARD_MEMORY_SIZE,
-							    BLACKBOARD_VERSION,
-							    "FawkesBBMemMgrQA" /* token */ );
+  //  BlackBoardMemoryManager *mm = new BlackBoardMemoryManager( BLACKBOARD_MEMORY_SIZE,
+  //							    BLACKBOARD_VERSION,
+  //							    "FawkesBBMemMgrQA" /* token */ );
+  BlackBoardMemoryManager *mm = new BlackBoardMemoryManager(BLACKBOARD_MEMORY_SIZE);
 
   void *m[NUM_CHUNKS];
 

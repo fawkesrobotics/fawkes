@@ -34,6 +34,16 @@ main(int argc, char **argv)
 {
   SQLiteConfiguration config(CONFDIR);
   config.load();
-  LocalBlackBoard::cleanup(config.get_string("/fawkes/mainapp/blackboard_magic_token").c_str(), true);
+
+  std::string token = "";
+  try {
+    token = config.get_string("/fawkes/mainapp/blackboard_magic_token");
+  } catch (Exception &e) {
+    cout << "Could not read shared memory token for blackboard." << endl;
+    cout << "BlackBoard is probably running without shared memory." << endl;
+    return -1;
+  }
+
+  LocalBlackBoard::cleanup(token.c_str());
   return 0;
 }

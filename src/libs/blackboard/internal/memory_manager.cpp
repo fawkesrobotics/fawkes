@@ -2,8 +2,8 @@
 /***************************************************************************
  *  memory_manager.cpp - BlackBoard memory manager
  *
- *  Generated: Sat Sep 23 16:03:40 2006 (INSITE 2006, Joburg, South Africa)
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Sat Sep 23 16:03:40 2006 (INSITE 2006, Joburg, South Africa)
+ *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -38,6 +38,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <sys/mman.h>
 
 /** If a free chunk is allocated it may be split up into an allocated
  * and a new free chunk. This value determines when this is done. If
@@ -48,10 +49,13 @@
 #define BBMM_MIN_FREE_CHUNK_SIZE sizeof(chunk_list_t)
 
 // shortcuts
-#define chunk_ptr(a)  (chunk_list_t *)shmem->ptr(a)
-#define chunk_addr(a) (chunk_list_t *)shmem->addr(a)
+#define chunk_ptr(a)  (__shmem ? (chunk_list_t *)__shmem->ptr(a)  : a)
+#define chunk_addr(a) (__shmem ? (chunk_list_t *)__shmem->addr(a) : a)
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class BlackBoardMemoryManager <blackboard/internal/memory_manager.h>
  * BlackBoard memory manager.
@@ -98,7 +102,33 @@ namespace fawkes {
  */
 
 
-/** Constructor
+/** Heap Memory Constructor.
+ * Constructs a memory segment on the heap.
+ * @param memsize memory size
+ */
+BlackBoardMemoryManager::BlackBoardMemoryManager(size_t memsize)
+{
+  __shmem        = NULL;
+  __shmem_header = NULL;
+  __memsize      = memsize;
+  __memory       = malloc(memsize);
+  __mutex        = new Mutex();
+
+  // Lock memory to RAM to avoid swapping
+  mlock(__memory, __memsize);
+
+  chunk_list_t *f = (chunk_list_t *)__memory;
+  f->ptr  = (char *)f + sizeof(chunk_list_t);
+  f->size = __memsize - sizeof(chunk_list_t);
+  f->overhang = 0;
+  f->next = NULL;
+
+  __free_list_head  = f;
+  __alloc_list_head = NULL;
+}
+
+
+/** Shared Memory Constructor
  * @param memsize the size of the shared memory segment (data without header)
  * that is being managed.
  * @param version version of the BlackBoard
@@ -113,62 +143,63 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(size_t memsize,
 						 bool master,
 						 const char *shmem_token)
 {
-  __memsize = memsize;
-  __master = master;
+  __memory    = NULL;
+  __memsize   = memsize;
+  __master    = master;
 
   // open shared memory segment, if it exists try to aquire exclusive
   // semaphore, if that fails, throw an exception
-  
-  shmem_header = new BlackBoardSharedMemoryHeader(__memsize, version);
+
+  __shmem_header = new BlackBoardSharedMemoryHeader(__memsize, version);
   try {
-    shmem = new SharedMemory(shmem_token, shmem_header,
+    __shmem = new SharedMemory(shmem_token, __shmem_header,
 			     /* read only   */ false,
-			     /* create      */ master,
-			     /* dest on del */ master);
-    shmem_header->set_shared_memory(shmem);
+			     /* create      */ __master,
+			     /* dest on del */ __master);
+    __shmem_header->set_shared_memory(__shmem);
   } catch ( ShmCouldNotAttachException &e ) {
-    delete shmem_header;
+    delete __shmem_header;
     throw BBMemMgrCannotOpenException();
   }
 
-  if ( ! shmem->is_valid() ) {
-    shmem->set_destroy_on_delete(false);
-    delete shmem;
-    delete shmem_header;
+  if ( ! __shmem->is_valid() ) {
+    __shmem->set_destroy_on_delete(false);
+    delete __shmem;
+    delete __shmem_header;
     throw BBMemMgrCannotOpenException();
   }
 
-  if ( master && ! shmem->is_creator() ) {
+  if ( master && ! __shmem->is_creator() ) {
     // this might mean trouble, we throw an exception if we are not master but
     // this was requested
-    shmem->set_destroy_on_delete(false);
-    delete shmem;
-    delete shmem_header;
+    __shmem->set_destroy_on_delete(false);
+    delete __shmem;
+    delete __shmem_header;
     throw BBNotMasterException("Not owner of shared memory segment");
   }
 
   // printf("Shared memory base pointer: 0x%x\n", (size_t)shmem->getMemPtr());
 
-  if ( master ) {
+  if (master) {
     // protect memory, needed for list operations in memory, otherwise
     // we will have havoc and insanity
-    shmem->add_semaphore();
+    __shmem->add_semaphore();
 
     // This should not be swapped. Will only worked with greatly extended
     // ressource limit for this process!
-    shmem->set_swapable(false);
+    __shmem->set_swapable(false);
 
-    chunk_list_t *f = (chunk_list_t *)shmem->memptr();
-    f->ptr  = (char *)f + sizeof(chunk_list_t);
+    chunk_list_t *f = (chunk_list_t *)__shmem->memptr();
+    f->ptr  = __shmem->addr((char *)f + sizeof(chunk_list_t));
     f->size = __memsize - sizeof(chunk_list_t);
     f->overhang = 0;
     f->next = NULL;
 
-    shmem_header->set_free_list_head(f);
-    shmem_header->set_alloc_list_head(NULL);
+    __shmem_header->set_free_list_head(f);
+    __shmem_header->set_alloc_list_head(NULL);
   }
 
-  mutex = new Mutex();
+  __mutex = new Mutex();
 }
 
 
@@ -176,9 +207,12 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(size_t memsize,
 BlackBoardMemoryManager::~BlackBoardMemoryManager()
 {
   // close shared memory segment, kill semaphore
-  delete shmem;
-  delete shmem_header;
-  delete mutex;
+  delete __shmem;
+  delete __shmem_header;
+  if (__memory) {
+    ::free(__memory);
+  }
+  delete __mutex;
 }
 
 
@@ -195,7 +229,7 @@ void *
 BlackBoardMemoryManager::alloc_nolock(unsigned int num_bytes)
 {
   // search for smallest chunk just big enough for desired size
-  chunk_list_t *l = shmem_header->free_list_head();
+  chunk_list_t *l = __shmem ? __shmem_header->free_list_head() : __free_list_head;
 
   // Note: free chunks list sorted ascending by ptr
   chunk_list_t *f = NULL;
@@ -209,13 +243,15 @@ BlackBoardMemoryManager::alloc_nolock(unsigned int num_bytes)
 
   if ( f == NULL ) {
     // Doh, did not find chunk
-    shmem->unlock();
-    mutex->unlock();
     throw OutOfMemoryException("BlackBoard ran out of memory");
   }
 
   // remove chunk from free_list
-  shmem_header->set_free_list_head( list_remove(shmem_header->free_list_head(), f) );
+  if ( __shmem ) {
+    __shmem_header->set_free_list_head( list_remove(__shmem_header->free_list_head(), f) );
+  } else {
+    __free_list_head = list_remove(__free_list_head, f);
+  }
 
   /*
   // only chunk's semaphore
@@ -233,11 +269,15 @@ BlackBoardMemoryManager::alloc_nolock(unsigned int num_bytes)
   if ( f->size >= (num_bytes + BBMM_MIN_FREE_CHUNK_SIZE + sizeof(chunk_list_t)) ) {
     // we will have a new free chunk afterwards
     chunk_list_t *nfc = (chunk_list_t *)((char *)f + sizeof(chunk_list_t) + num_bytes);
-    nfc->ptr = shmem->addr((char *)nfc + sizeof(chunk_list_t));
+    nfc->ptr = __shmem ? __shmem->addr((char *)nfc + sizeof(chunk_list_t)) : (char *)nfc + sizeof(chunk_list_t);
     nfc->size = f->size - num_bytes - sizeof(chunk_list_t);
     nfc->overhang = 0;
     
-    shmem_header->set_free_list_head( list_add(shmem_header->free_list_head(), nfc) );
+    if ( __shmem ) {
+      __shmem_header->set_free_list_head( list_add(__shmem_header->free_list_head(), nfc) );
+    } else {
+      __free_list_head = list_add(__free_list_head, nfc);
+    }
 
     f->size = num_bytes;
   } else {
@@ -248,9 +288,14 @@ BlackBoardMemoryManager::alloc_nolock(unsigned int num_bytes)
   }
 
   // alloc new chunk
-  shmem_header->set_alloc_list_head( list_add(shmem_header->alloc_list_head(), f) );
+  if ( __shmem ) {
+    __shmem_header->set_alloc_list_head( list_add(__shmem_header->alloc_list_head(), f) );
+    return __shmem->ptr(f->ptr);
+  } else {
+    __alloc_list_head = list_add(__alloc_list_head, f);
+    return f->ptr;
+  }
 
-  return shmem->ptr(f->ptr);
 }
 
 
@@ -266,11 +311,17 @@ void *
 BlackBoardMemoryManager::alloc(unsigned int num_bytes)
 {
   void * ptr;
-  mutex->lock();
-  shmem->lock_for_write();
-  ptr = alloc_nolock(num_bytes);
-  shmem->unlock();
-  mutex->unlock();
+  __mutex->lock();
+  if (__shmem) __shmem->lock_for_write();
+  try {
+    ptr = alloc_nolock(num_bytes);
+  } catch (Exception &e) {
+    if (__shmem) __shmem->unlock();
+    __mutex->unlock();
+    throw;
+  }
+  if (__shmem) __shmem->unlock();
+  __mutex->unlock();
   return ptr;
 }
 
@@ -288,27 +339,46 @@ BlackBoardMemoryManager::alloc(unsigned int num_bytes)
 void
 BlackBoardMemoryManager::free(void *ptr)
 {
-  mutex->lock();
-  shmem->lock_for_write();
+  __mutex->lock();
+  if (__shmem) {
+    __shmem->lock_for_write();
 
-  // find chunk in alloc_chunks
-  chunk_list_t *ac = list_find_ptr(shmem_header->alloc_list_head(), chunk_addr(ptr));
-  if ( ac == NULL ) {
-    throw BlackBoardMemMgrInvalidPointerException();
+    // find chunk in alloc_chunks
+    chunk_list_t *ac = list_find_ptr(__shmem_header->alloc_list_head(), chunk_addr(ptr));
+    if ( ac == NULL ) {
+      throw BlackBoardMemMgrInvalidPointerException();
+    }
+
+    // remove from alloc_chunks
+    __shmem_header->set_alloc_list_head( list_remove(__shmem_header->alloc_list_head(), ac) );
+
+    // reclaim as free memory
+    ac->overhang = 0;
+    __shmem_header->set_free_list_head( list_add(__shmem_header->free_list_head(), ac) );
+
+    // merge adjacent regions
+    cleanup_free_chunks();
+
+    __shmem->unlock();
+  } else {
+    // find chunk in alloc_chunks
+    chunk_list_t *ac = list_find_ptr(__alloc_list_head, ptr);
+    if ( ac == NULL ) {
+      throw BlackBoardMemMgrInvalidPointerException();
+    }
+
+    // remove from alloc_chunks
+    __alloc_list_head =  list_remove(__alloc_list_head, ac);
+
+    // reclaim as free memory
+    ac->overhang = 0;
+    __free_list_head = list_add(__free_list_head, ac);
+
+    // merge adjacent regions
+    cleanup_free_chunks();
   }
 
-  // remove from alloc_chunks
-  shmem_header->set_alloc_list_head( list_remove(shmem_header->alloc_list_head(), ac) );
-
-  // reclaim as free memory
-  ac->overhang = 0;
-  shmem_header->set_free_list_head( list_add(shmem_header->free_list_head(), ac) );
-
-  // merge adjacent regions
-  cleanup_free_chunks();
-
-  shmem->unlock();
-  mutex->unlock();
+  __mutex->unlock();
 }
 
 
@@ -322,8 +392,8 @@ BlackBoardMemoryManager::free(void *ptr)
 void
 BlackBoardMemoryManager::check()
 {
-  chunk_list_t *f = shmem_header->free_list_head();
-  chunk_list_t *a = shmem_header->alloc_list_head();
+  chunk_list_t *f = __shmem ? __shmem_header->free_list_head() : __free_list_head;
+  chunk_list_t *a = __shmem ? __shmem_header->alloc_list_head() : __alloc_list_head;
   chunk_list_t *t = NULL;
 
   unsigned int mem = 0;
@@ -397,7 +467,7 @@ BlackBoardMemoryManager::is_master() const
 void
 BlackBoardMemoryManager::print_free_chunks_info() const
 {
-  list_print_info( shmem_header->free_list_head() );
+  list_print_info( __shmem ? __shmem_header->free_list_head() : __free_list_head );
 }
 
 
@@ -407,7 +477,7 @@ BlackBoardMemoryManager::print_free_chunks_info() const
 void
 BlackBoardMemoryManager::print_allocated_chunks_info() const
 {
-  list_print_info( shmem_header->alloc_list_head() );
+  list_print_info( __shmem ? __shmem_header->alloc_list_head() : __alloc_list_head );
 }
 
 
@@ -420,8 +490,8 @@ void
 BlackBoardMemoryManager::print_performance_info() const
 {
   printf("free chunks: %6u, alloc chunks: %6u, max free: %10u, max alloc: %10u, overhang: %10u\n",
-	 list_length( shmem_header->free_list_head()),
-	 list_length( shmem_header->alloc_list_head()),
+	 list_length( __shmem ? __shmem_header->free_list_head() : __free_list_head),
+	 list_length( __shmem ? __shmem_header->alloc_list_head() : __alloc_list_head),
 	 max_free_size(), max_allocated_size(), overhang_size());
 }
 
@@ -434,7 +504,7 @@ BlackBoardMemoryManager::print_performance_info() const
 unsigned int
 BlackBoardMemoryManager::max_free_size() const
 {
-  chunk_list_t *m = list_get_biggest( shmem_header->free_list_head() );
+  chunk_list_t *m = list_get_biggest( __shmem ? __shmem_header->free_list_head() : __free_list_head );
   if ( m == NULL ) {
     return 0;
   } else {
@@ -454,7 +524,7 @@ unsigned int
 BlackBoardMemoryManager::free_size() const
 {
   unsigned int free_size = 0;
-  chunk_list_t *l = shmem_header->free_list_head();
+  chunk_list_t *l = __shmem ? __shmem_header->free_list_head() : __free_list_head;
   while ( l ) {
     free_size += l->size;
     l = chunk_ptr(l->next);
@@ -471,7 +541,7 @@ unsigned int
 BlackBoardMemoryManager::allocated_size() const
 {
   unsigned int alloc_size = 0;
-  chunk_list_t *l = shmem_header->alloc_list_head();
+  chunk_list_t *l = __shmem ? __shmem_header->alloc_list_head() : __alloc_list_head;
   while ( l ) {
     alloc_size += l->size;
     l = chunk_ptr(l->next);
@@ -486,7 +556,7 @@ BlackBoardMemoryManager::allocated_size() const
 unsigned int
 BlackBoardMemoryManager::num_allocated_chunks() const
 {
-  return list_length( shmem_header->alloc_list_head() );
+  return list_length( __shmem ? __shmem_header->alloc_list_head() : __alloc_list_head );
 }
 
 
@@ -496,7 +566,7 @@ BlackBoardMemoryManager::num_allocated_chunks() const
 unsigned int
 BlackBoardMemoryManager::num_free_chunks() const
 {
-  return list_length( shmem_header->free_list_head() );
+  return list_length( __shmem ? __shmem_header->free_list_head() : __free_list_head );
 }
 
 
@@ -517,7 +587,7 @@ BlackBoardMemoryManager::memory_size() const
 unsigned int
 BlackBoardMemoryManager::version() const
 {
-  return shmem_header->version();
+  return __shmem ? __shmem_header->version() : 0;
 }
 
 
@@ -528,8 +598,8 @@ BlackBoardMemoryManager::version() const
 void
 BlackBoardMemoryManager::lock()
 {
-  mutex->lock();
-  shmem->lock_for_write();
+  __mutex->lock();
+  if (__shmem) __shmem->lock_for_write();
 }
 
 
@@ -542,11 +612,15 @@ BlackBoardMemoryManager::lock()
 bool
 BlackBoardMemoryManager::try_lock()
 {
-  if ( mutex->try_lock() ) {
-    if ( shmem->try_lock_for_write() ) {
-      return true;
+  if ( __mutex->try_lock() ) {
+    if (__shmem) {
+      if ( __shmem->try_lock_for_write() ) {
+	return true;
+      } else {
+	__mutex->unlock();
+      }
     } else {
-      mutex->unlock();
+      return true;
     }
   }
 
@@ -560,8 +634,8 @@ BlackBoardMemoryManager::try_lock()
 void
 BlackBoardMemoryManager::unlock()
 {
-  shmem->unlock();
-  mutex->unlock();
+  if (__shmem) __shmem->unlock();
+  __mutex->unlock();
 }
 
 
@@ -573,7 +647,7 @@ BlackBoardMemoryManager::unlock()
 unsigned int
 BlackBoardMemoryManager::max_allocated_size() const
 {
-  chunk_list_t *m = list_get_biggest( shmem_header->alloc_list_head() );
+  chunk_list_t *m = list_get_biggest( __shmem ? __shmem_header->alloc_list_head() : __alloc_list_head);
   if ( m == NULL ) {
     return 0;
   } else {
@@ -591,7 +665,7 @@ unsigned int
 BlackBoardMemoryManager::overhang_size() const
 {
   unsigned int overhang = 0;
-  chunk_list_t *a = shmem_header->alloc_list_head();
+  chunk_list_t *a = __shmem ? __shmem_header->alloc_list_head() : __alloc_list_head;
   while ( a ) {
     overhang += a->overhang;
     a = chunk_ptr(a->next);
@@ -613,7 +687,7 @@ BlackBoardMemoryManager::cleanup_free_chunks()
 	
   while (modified) {
     modified = false;
-    l = shmem_header->free_list_head();
+    l = __shmem ? __shmem_header->free_list_head() : __free_list_head;
     n = chunk_ptr(l->next);
     while ( l && n) {
       if ( ((char *)l->ptr + l->size + sizeof(chunk_list_t)) == n->ptr ) {
@@ -801,10 +875,12 @@ BlackBoardMemoryManager::list_get_biggest(const chunk_list_t *list) const
 BlackBoardMemoryManager::ChunkIterator
 BlackBoardMemoryManager::begin()
 {
-  BlackBoardMemoryManager::ChunkIterator rv(shmem, shmem_header->alloc_list_head() );
-  return rv;
+  if (__shmem) {
+    return BlackBoardMemoryManager::ChunkIterator(__shmem, __shmem_header->alloc_list_head() );
+  } else {
+    return BlackBoardMemoryManager::ChunkIterator(__alloc_list_head);
+  }
 }
-
 
 /** Get end of chunk list.
  * This returns an iterator that points to the element just beyond the allocated
@@ -814,8 +890,7 @@ BlackBoardMemoryManager::begin()
 BlackBoardMemoryManager::ChunkIterator
 BlackBoardMemoryManager::end()
 {
-  BlackBoardMemoryManager::ChunkIterator rv;
-  return rv;
+  return BlackBoardMemoryManager::ChunkIterator();
 }
 
 
@@ -830,17 +905,29 @@ BlackBoardMemoryManager::end()
  */
 BlackBoardMemoryManager::ChunkIterator::ChunkIterator()
 {
-  shmem = NULL;
-  cur = NULL;
+  __shmem = NULL;
+  __cur   = NULL;
 }
+
+/** Constructor
+ * @param shmem shared memory segkent
+ * @param cur Current element for chunk list
+ */
+BlackBoardMemoryManager::ChunkIterator::ChunkIterator(SharedMemory *shmem,
+						      chunk_list_t *cur)
+{
+  __shmem = shmem;
+  __cur   = cur;
+}
+
 
 /** Constructor
  * @param cur Current element for chunk list
  */
-BlackBoardMemoryManager::ChunkIterator::ChunkIterator(SharedMemory *shmem, chunk_list_t *cur)
+BlackBoardMemoryManager::ChunkIterator::ChunkIterator(chunk_list_t *cur)
 {
-  this->shmem = shmem;
-  this->cur   = cur;
+  __shmem = NULL;
+  __cur   = cur;
 }
 
 
@@ -849,8 +936,8 @@ BlackBoardMemoryManager::ChunkIterator::ChunkIterator(SharedMemory *shmem, chunk
  */
 BlackBoardMemoryManager::ChunkIterator::ChunkIterator(const ChunkIterator &it)
 {
-  shmem = it.shmem;
-  cur   = it.cur;
+  __shmem = it.__shmem;
+  __cur   = it.__cur;
 }
 
 
@@ -867,7 +954,7 @@ BlackBoardMemoryManager::ChunkIterator::ChunkIterator(const ChunkIterator &it)
 BlackBoardMemoryManager::ChunkIterator &
 BlackBoardMemoryManager::ChunkIterator::operator++()
 {
-  if ( cur != NULL )  cur = chunk_ptr(cur->next);
+  if ( __cur != NULL )  __cur = chunk_ptr(__cur->next);
 
   return *this;
 }
@@ -892,7 +979,7 @@ BlackBoardMemoryManager::ChunkIterator
 BlackBoardMemoryManager::ChunkIterator::operator++(int inc)
 {
   ChunkIterator rv(*this);
-  if ( cur != NULL )  cur = chunk_ptr(cur->next);
+  if ( __cur != NULL )  __cur = chunk_ptr(__cur->next);
 
   return rv;
 }
@@ -909,8 +996,8 @@ BlackBoardMemoryManager::ChunkIterator::operator++(int inc)
 BlackBoardMemoryManager::ChunkIterator &
 BlackBoardMemoryManager::ChunkIterator::operator+(unsigned int i)
 {
-  for (unsigned int j = 0; (cur != NULL) && (j < i); ++j) {
-    if ( cur != NULL )  cur = chunk_ptr(cur->next);
+  for (unsigned int j = 0; (__cur != NULL) && (j < i); ++j) {
+    if ( __cur != NULL )  __cur = chunk_ptr(__cur->next);
   }
   return *this;
 }
@@ -925,8 +1012,8 @@ BlackBoardMemoryManager::ChunkIterator::operator+(unsigned int i)
 BlackBoardMemoryManager::ChunkIterator &
 BlackBoardMemoryManager::ChunkIterator::operator+=(unsigned int i)
 {
-  for (unsigned int j = 0; (cur != NULL) && (j < i); ++j) {
-    if ( cur != NULL )  cur = chunk_ptr(cur->next);
+  for (unsigned int j = 0; (__cur != NULL) && (j < i); ++j) {
+    if ( __cur != NULL )  __cur = chunk_ptr(__cur->next);
   }
   return *this;
 }
@@ -940,7 +1027,7 @@ BlackBoardMemoryManager::ChunkIterator::operator+=(unsigned int i)
 bool
 BlackBoardMemoryManager::ChunkIterator::operator==(const ChunkIterator & c) const
 {
-  return (cur == c.cur);
+  return (__cur == c.__cur);
 }
 
 
@@ -952,7 +1039,7 @@ BlackBoardMemoryManager::ChunkIterator::operator==(const ChunkIterator & c) cons
 bool
 BlackBoardMemoryManager::ChunkIterator::operator!=(const ChunkIterator & c) const
 {
-  return (cur != c.cur);
+  return (__cur != c.__cur);
 }
 
 
@@ -964,7 +1051,10 @@ BlackBoardMemoryManager::ChunkIterator::operator!=(const ChunkIterator & c) cons
 void *
 BlackBoardMemoryManager::ChunkIterator::operator*() const
 {
-  return ( cur != NULL ) ? shmem->ptr(cur->ptr) : NULL;
+  if ( __cur == NULL )  return NULL;
+
+  if (__shmem) return __shmem->ptr(__cur->ptr);
+  else         return __cur->ptr;
 }
 
 
@@ -976,8 +1066,8 @@ BlackBoardMemoryManager::ChunkIterator::operator*() const
 BlackBoardMemoryManager::ChunkIterator &
 BlackBoardMemoryManager::ChunkIterator::operator=(const ChunkIterator & c)
 {
-  this->shmem = c.shmem;
-  this->cur   = c.cur;
+  __shmem = c.__shmem;
+  __cur   = c.__cur;
   return *this;
 }
 
@@ -989,7 +1079,7 @@ BlackBoardMemoryManager::ChunkIterator::operator=(const ChunkIterator & c)
 unsigned int
 BlackBoardMemoryManager::ChunkIterator::size() const
 {
-  return ( cur != NULL ) ? cur->size : 0;
+  return ( __cur != NULL ) ? __cur->size : 0;
 }
 
 
@@ -1001,7 +1091,7 @@ BlackBoardMemoryManager::ChunkIterator::size() const
 unsigned int
 BlackBoardMemoryManager::ChunkIterator::overhang() const
 {
-  return ( cur != NULL ) ? cur->overhang : 0;
+  return ( __cur != NULL ) ? __cur->overhang : 0;
 }
 
 } // end namespace fawkes

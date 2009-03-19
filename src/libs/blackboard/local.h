@@ -47,6 +47,7 @@ class FawkesNetworkHub;
 class LocalBlackBoard : public BlackBoard
 {
  public:
+  LocalBlackBoard(size_t memsize);
   LocalBlackBoard(size_t memsize, const char *magic_token,
 		  bool master = true);
   virtual ~LocalBlackBoard();

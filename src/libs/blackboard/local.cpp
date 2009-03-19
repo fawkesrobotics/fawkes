@@ -51,17 +51,32 @@ namespace fawkes {
  */
 
 
-/** Constructor.
+/** Shared Memory Constructor.
  * @param memsize size of memory in bytes
  * @param magic_token magic token used for shared memory segment
  * @param master true to operate in master mode, false otherwise
  */
 LocalBlackBoard::LocalBlackBoard(size_t memsize,
-				 const char *magic_token,
-				 bool master)
+				 const char *magic_token, bool master)
 {
-  __memmgr = new BlackBoardMemoryManager(memsize, BLACKBOARD_VERSION,
-					 master, magic_token);
+  __memmgr = new BlackBoardMemoryManager(memsize, BLACKBOARD_VERSION, master);
+
+  __notifier = new BlackBoardNotifier();
+  __msgmgr = new BlackBoardMessageManager(__notifier);
+  __im = new BlackBoardInterfaceManager(__memmgr, __msgmgr, __notifier);
+
+  __msgmgr->set_interface_manager(__im);
+
+  __nethandler = NULL;
+}
+
+
+/** Heap Memory Constructor.
+ * @param memsize size of memory in bytes
+ */
+LocalBlackBoard::LocalBlackBoard(size_t memsize)
+{
+  __memmgr = new BlackBoardMemoryManager(memsize);
 
   __notifier = new BlackBoardNotifier();
   __msgmgr = new BlackBoardMessageManager(__notifier);

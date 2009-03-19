@@ -41,12 +41,21 @@ main(int argc, char **argv)
   SQLiteConfiguration config(CONFDIR);
   config.load();
 
+  std::string token = "";
+  try {
+    token = config.get_string("/fawkes/mainapp/blackboard_magic_token");
+  } catch (Exception &e) {
+    cout << "Could not read shared memory token for blackboard." << endl;
+    cout << "BlackBoard is probably running without shared memory." << endl;
+    return -1;
+  }
+
   BlackBoardMemoryManager *memmgr;
   try {
     memmgr = new BlackBoardMemoryManager( config.get_uint("/fawkes/mainapp/blackboard_size"),
 					  BLACKBOARD_VERSION,
 					  /* master? */ false,
-					  config.get_string("/fawkes/mainapp/blackboard_magic_token").c_str());
+					  token.c_str());
   } catch (BBMemMgrCannotOpenException &e) {
     cout << "No BlackBoard shared memory segment found!" << endl;
     return 1;
