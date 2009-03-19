@@ -6,9 +6,9 @@ CREATE TABLE config (
   comment   TEXT,
   PRIMARY KEY (path)
 );
-INSERT INTO "config" VALUES('/fawkes/mainapp/min_loop_time','unsigned int',30000,'Minimum loop time of main thread; microseconds; 0 to disable');
 INSERT INTO "config" VALUES('/fawkes/mainapp/blackboard_size','unsigned int','2097152','Size of BlackBoard memory segment; bytes');
-INSERT INTO "config" VALUES('/fawkes/mainapp/blackboard_magic_token','string','FawkesBlackBoard','Magic token for the BlackBoard shared memory segment');
+INSERT INTO "config" VALUES('/fawkes/mainapp/desired_loop_time','unsigned int',30000,'Desired loop time of main thread; microseconds; 0 to disable');
+INSERT INTO "config" VALUES('/fawkes/mainapp/max_thread_time','unsigned int',30000,'Maximum time a thread may run per loop; microseconds; 0 to disable');
 INSERT INTO "config" VALUES('/firevision/fountain/tcp_port','unsigned int',2208,'Fountain TCP Port');
 INSERT INTO "config" VALUES('/worldinfo/multicast_addr','string','224.16.0.1','Multicast address to send world info messages to.');
 INSERT INTO "config" VALUES('/worldinfo/udp_port','unsigned int','2806','UDP port to listen for and send world info messages to.');
@@ -54,6 +54,4 @@ INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/gamestate/type','strin
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/gamestate/from_id','string','WI GameState',NULL);
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/gamestate/to_id','string','WM GameState',NULL);
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/gamestate/method','string','copy',NULL);
-INSERT INTO "config" VALUES('/fawkes/mainapp/desired_loop_time','unsigned int',30000,'Desired loop time of main thread; microseconds; 0 to disable');
-INSERT INTO "config" VALUES('/fawkes/mainapp/max_thread_time','unsigned int',30000,'Maximum time a thread may run per loop; microseconds; 0 to disable');
 COMMIT;

@@ -132,15 +132,14 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   /* Clock */
   __clock = Clock::instance();
 
-  std::string bb_magic_token = "FawkesBlackBoard";
+  std::string bb_magic_token = "";
   unsigned int bb_size = 2097152;
   try {
     bb_magic_token = __config->get_string("/fawkes/mainapp/blackboard_magic_token");
+    __multi_logger->log_info("FawkesMainApp", "BlackBoard magic token defined. "
+			     "Using shared memory BlackBoard.");
   } catch (Exception &e) {
-    __multi_logger->log_warn("FawkesMainApp", "BlackBoard magic token not defined. "
-			     "Will use %s, saving to default DB", bb_magic_token.c_str());
-    __config->set_default_string("/fawkes/mainapp/blackboard_magic_token",
-				 bb_magic_token.c_str());
+    // ignore
   }
   try {
     bb_size = __config->get_uint("/fawkes/mainapp/blackboard_size");
@@ -157,7 +156,11 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
 
   /* Managers */
   try {
-    __blackboard         = new LocalBlackBoard(bb_size, bb_magic_token.c_str());
+    if ( bb_magic_token == "") {
+      __blackboard       = new LocalBlackBoard(bb_size);
+    } else {
+      __blackboard       = new LocalBlackBoard(bb_size, bb_magic_token.c_str());
+    }
     __thread_manager     = new FawkesThreadManager();
     __aspect_inifin      = new AspectIniFin(__blackboard,
 					    __thread_manager->aspect_collector(),
