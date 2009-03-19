@@ -28,6 +28,7 @@
 #include <fvutils/net/fuse_server.h>
 
 #include <string>
+#include <cstdio>
 
 using namespace fawkes;
 

@@ -32,6 +32,7 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 #ifdef __FreeBSD__
 #  include <strfunc.h>
 #endif

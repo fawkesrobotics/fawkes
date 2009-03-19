@@ -52,7 +52,7 @@ public:
     i = 0;
     try {
       t = new WorldInfoTransceiver("224.16.0.1", port,
-				   "AllemaniACs", "WorldInfoQA",
+				   "AllemaniACsX", "DoesAnyOneCare",
 				   rs);
       t->set_loop( loop );
     } catch (Exception &e) {

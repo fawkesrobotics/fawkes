@@ -455,7 +455,7 @@ PluginManager::fam_event(const char *filename, unsigned int mask)
   /* constant for this somewhere? */
   const char *file_ext = ".so";
 
-  char *pos               = strstr(filename, file_ext);
+  const char *pos = strstr(filename, file_ext);
   std::string p = std::string(filename).substr(0, strlen(filename) - strlen(file_ext));
   if (NULL != pos) {
     __pinfo_cache.lock();

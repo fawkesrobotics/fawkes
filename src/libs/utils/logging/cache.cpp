@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <sys/time.h>
 #include <ctime>
+#include <cstdio>
 
 #define TIMESTR_LENGTH 200
 #define MESSAGE_LENGTH 4096

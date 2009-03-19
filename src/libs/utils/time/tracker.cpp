@@ -29,6 +29,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
+#include <cstdio>
 
 using namespace std;
 

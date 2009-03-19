@@ -31,6 +31,7 @@
 #include <cstdlib>
 #include <sys/time.h>
 #include <ctime>
+#include <cstdio>
 
 namespace fawkes {
 

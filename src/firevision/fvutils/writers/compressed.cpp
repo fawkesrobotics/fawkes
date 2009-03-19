@@ -32,6 +32,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 /** @class CompressedImageWriter <fvutils/writers/compressed.h>
  * Writer for arbitrarily compressed images.

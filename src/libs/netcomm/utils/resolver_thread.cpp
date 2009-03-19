@@ -119,7 +119,7 @@ NetworkNameResolverThread::resolve_name_immediately(const char *name,
 #ifdef HAVE_AVAHI
   // resolve names in .local domain with Avahi if available
   char *n = (char *)name + strlen(name) - 6; // 6 == strlen(".local")
-  char *f = strstr(name, ".local");
+  const char *f = strstr(name, ".local");
   if ( avahi_thread && f && (f == n) ) {
     avahi_thread->resolve_name(name, this);          
   /*

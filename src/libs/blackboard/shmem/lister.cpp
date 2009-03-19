@@ -28,6 +28,7 @@
 #include <utils/ipc/shm.h>
 
 #include <iostream>
+#include <cstdio>
 
 using namespace std;
 namespace fawkes {

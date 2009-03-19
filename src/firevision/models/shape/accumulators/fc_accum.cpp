@@ -23,8 +23,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
                                                                                 
-#include <cmath>
 #include <models/shape/accumulators/fc_accum.h>
+
+#include <cmath>
+#include <cstdio>
 
 using namespace fawkes;
 

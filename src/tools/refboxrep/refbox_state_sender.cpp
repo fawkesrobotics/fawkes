@@ -26,6 +26,8 @@
 
 #include <netcomm/worldinfo/transceiver.h>
 
+#include <cstdio>
+
 using namespace fawkes;
 
 /** @class RefBoxStateSender <tools/refboxrep/refbox_state_sender.h>
