@@ -67,7 +67,7 @@ Calibration::~Calibration()
 /** Calibration getter.
  * @return The calibration matrix
  */
-Matrix 
+Matrix
 Calibration::K() const
 {
   return get_submatrix(0, 0, 3, 3);

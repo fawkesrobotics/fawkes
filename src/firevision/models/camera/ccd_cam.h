@@ -28,11 +28,11 @@
 #include "ccd_calibration.h"
 
 
-class CCDCam: public ProjectiveCam 
+class CCDCam: public ProjectiveCam
 {
   public:
-    CCDCam(const CCDCalibration& cal, const fawkes::HomTransform& loc);
-    CCDCam(const float ax, const float ay, const float x0, const float y0, const fawkes::HomTransform& loc);
+    CCDCam(const CCDCalibration &cal, const fawkes::HomTransform *loc = 0);
+    CCDCam(const float ax, const float ay, const float x0, const float y0, const fawkes::HomTransform *loc = 0);
     CCDCam(const CCDCam& cp);
 
     virtual ~CCDCam();

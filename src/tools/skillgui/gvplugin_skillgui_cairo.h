@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  gvplugin_skillgui.h - Graphviz plugin for Skill GUI, that API sucks!
+ *  gvplugin_skillgui_cairo.h - Graphviz plugin for Skill GUI
  *
  *  Created: Fri Dec 19 12:01:03 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -22,12 +22,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_SKILLGUI_SKILLGUI_CAIRO_H_
-#define __TOOLS_SKILLGUI_SKILLGUI_CAIRO_H_
+#ifndef __TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_CAIRO_H_
+#define __TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_CAIRO_H_
 
 #include <gvc.h>
-#include <gtkmm/drawingarea.h>
+#include "graph_drawing_area.h"
 
-extern void gvplugin_skillgui_cairo_setup(GVC_t *gvc,  Gtk::DrawingArea *drwarea);
+extern void gvplugin_skillgui_cairo_setup(GVC_t *gvc, SkillGuiGraphDrawingArea *sggda);
 
 #endif

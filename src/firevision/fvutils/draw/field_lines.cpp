@@ -32,7 +32,7 @@ using fawkes::field_line_t;
 using std::min;
 using std::max;
 
-/** @class FieldLines field_lines.h </nao_fawkes/src/firevision/apps/nao_loc/field_lines.cpp/field_lines.h>
+/** @class FieldLines field_lines.h <firevision/apps/nao_loc/field_lines.cpp/field_lines.h>
  * This class acts as a container for lines on a soccer field.
  *
  * @fn void FieldLines::init()
@@ -221,7 +221,7 @@ FieldLines::draw_lines(SharedMemoryImageBuffer *target, YUV_t color, bool draw_l
 
 
 
-/** @class FieldLines6x4 field_lines.h </nao_fawkes/src/firevision/apps/nao_loc/field_lines.cpp/field_lines.h>
+/** @class FieldLines6x4 field_lines.h <firevision/apps/nao_loc/field_lines.cpp/field_lines.h>
  * This class implements the 6 by 4 meter SPL field according to the 2008 roules
  *
  * @author Christof Rath
@@ -246,29 +246,29 @@ void
 FieldLines6x4::init()
 {
   //opponent goal line (corner to corner)
-  push_back(field_line_t(2.975f, 1.975f, 2.975f, -1.975f));
+  push_back(field_line_t(3.f, 2.f, 3.f, -2.f));
   //opponent hor penalty area line
-  push_back(field_line_t(2.425f, 1.f, 2.425f, -1.f));
+  push_back(field_line_t(2.4f, 1.5f, 2.4f, -1.5f));
   //opponent vert penalty area lines
-  push_back(field_line_t(2.975f, 1.f, 2.425f, 1.f));
-  push_back(field_line_t(2.975f, -1.f, 2.425f, -1.f));
+  push_back(field_line_t(3.f,  1.5f, 2.4f,  1.5f));
+  push_back(field_line_t(3.f, -1.5f, 2.4f, -1.5f));
 
   //center line
-  push_back(field_line_t(0.f, 1.957f, 0.f, -1.975f));
+  push_back(field_line_t(0.f, 2.f, 0.f, -2.f));
   //side lines
-  push_back(field_line_t(2.975f, 1.975f, -2.975f, 1.975f));
-  push_back(field_line_t(2.975f, -1.975f, -2.975f, -1.975f));
+  push_back(field_line_t(3.f,  2.f, -3.f,  2.f));
+  push_back(field_line_t(3.f, -2.f, -3.f, -2.f));
 
-  //center circle (approximated by 8 lines from )
-  add_circle(0.65, 12);
+  //center circle (approximated by 12 lines from )
+  add_circle(0.6f, 12);
 
   //own goal line (corner to corner)
-  push_back(field_line_t(-2.975f, 1.975f, -2.975f, -1.975f));
+  push_back(field_line_t(-3.f, 2.f, -3.f, -2.f));
   //own hor penalty area line
-  push_back(field_line_t(-2.425f, 0.975f, -2.425f, -0.975f));
-  //opponent vert penalty area lines
-  push_back(field_line_t(-2.975f, 0.975f, -2.425f, 0.975f));
-  push_back(field_line_t(-2.975f, -0.975f, -2.425f, -0.975f));
+  push_back(field_line_t(-2.4f, 1.5f, -2.4f, -1.5f));
+  //own vert penalty area lines
+  push_back(field_line_t(-3.f,  1.5f, -2.4f,  1.5f));
+  push_back(field_line_t(-3.f, -1.5f, -2.4f, -1.5f));
 }
 
 
@@ -278,7 +278,7 @@ FieldLines6x4::init()
 
 
 
-/** @class FieldLinesCityTower field_lines.h </nao_fawkes/src/firevision/apps/nao_loc/field_lines.cpp/field_lines.h>
+/** @class FieldLinesCityTower field_lines.h <firevision/apps/nao_loc/field_lines.cpp/field_lines.h>
  * This class implements the test field in Graz, Austria at the CityTower.
  * The field is not symmetrical!
  *
@@ -329,5 +329,66 @@ FieldLinesCityTower::init()
   push_back(field_line_t(-2.975f, 0.975f, -2.425f, 0.975f));
   push_back(field_line_t(-2.975f, -0.975f, -2.425f, -0.975f));
 */
+}
+
+
+
+
+
+
+
+
+
+/** @class FieldLinesCityTowerSeminar field_lines.h <firevision/apps/nao_loc/field_lines.cpp/field_lines.h>
+ * This class implements the test field in Graz, Austria at the CityTower.
+ * The field is not symmetrical!
+ *
+ * @author Christof Rath
+ */
+
+/**
+ * Constructor.
+ * @param length of the soccer field
+ * @param width of the soccer field
+ */
+FieldLinesCityTowerSeminar::FieldLinesCityTowerSeminar(float length, float width):
+  FieldLines(length, width, 0.05f)
+{
+  init();
+  calc_offsets();
+}
+
+FieldLinesCityTowerSeminar::~FieldLinesCityTowerSeminar()
+{
+}
+
+void
+FieldLinesCityTowerSeminar::init()
+{
+  //opponent goal line (corner to corner)
+  push_back(field_line_t(2.725f, 1.825f, 2.725f, -1.825f));
+  //opponent hor penalty area line
+  push_back(field_line_t(2.125f, 1.5f, 2.125f, -1.5f));
+  //opponent vert penalty area lines
+  push_back(field_line_t(2.725f,  1.5f, 2.125f,  1.5f));
+  push_back(field_line_t(2.725f, -1.5f, 2.125f, -1.5f));
+
+  //center line
+  push_back(field_line_t(0.f, 1.825f, 0.f, -1.825f));
+  //side lines
+  push_back(field_line_t(2.725f,  1.825f, -2.725f,  1.825f));
+  push_back(field_line_t(2.725f, -1.825f, -2.725f, -1.825f));
+
+  //center circle (approximated by 12 lines from )
+  add_circle(0.57, 12);
+
+
+  //own goal line (corner to corner)
+  push_back(field_line_t(-2.725f, 1.825f, -2.725f, -1.825f));
+  //own hor penalty area line
+  push_back(field_line_t(-2.125f, 1.5f, -2.125f, -1.5f));
+  //own vert penalty area lines
+  push_back(field_line_t(-2.725f,  1.5f, -2.125f,  1.5f));
+  push_back(field_line_t(-2.725f, -1.5f, -2.125f, -1.5f));
 }
 

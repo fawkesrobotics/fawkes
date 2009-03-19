@@ -24,6 +24,7 @@
 
 
 #include "ccd_calibration.h"
+#include <cmath>
 
 /** @class CCDCalibration <models/camera/ccd_calibration.h>
  * A Calibration matrix for a ccd camera
@@ -36,14 +37,38 @@
  * @param x0 is the x-coordinate of the principal point
  * @param y0 is the y-coordinate of the principal point
  */
-CCDCalibration::CCDCalibration(const float ax, const float ay, const float x0, const float y0): Calibration()
+CCDCalibration::CCDCalibration(float ax, float ay, float x0, float y0):
+  Calibration()
 {
   Matrix k(3, 3);
-  k.id();
   k(0, 0) = ax;
-  k(0, 2) = x0;
   k(1, 1) = ay;
+  k(2, 2) = 1.f;
+  k(0, 2) = x0;
   k(1, 2) = y0;
+
+  K(k);
+}
+
+/**
+ * Constructor.
+ * @param hor_fov horizontal field of view [rad]
+ * @param img_width width of the image [px]
+ * @param img_height height of the image [px]
+ */
+CCDCalibration::CCDCalibration(float hor_fov, unsigned int img_width, unsigned int img_height):
+  Calibration()
+{
+  float w = img_width;
+  float h = img_height;
+  float ver_fov = hor_fov * h / w;
+
+  Matrix k(3, 3);
+  k(0, 0) = w / (2.f * tanf(hor_fov / 2.f));
+  k(1, 1) = h / (2.f * tanf(ver_fov / 2.f));
+  k(2, 2) = 1.f;
+  k(0, 2) = w / 2.f;
+  k(1, 2) = h / 2.f;
 
   K(k);
 }
@@ -51,7 +76,8 @@ CCDCalibration::CCDCalibration(const float ax, const float ay, const float x0, c
 /** Copy constructor.
  * @param cp the CCDCalibration to copy
  */
-CCDCalibration::CCDCalibration(const CCDCalibration& cp): Calibration()
+CCDCalibration::CCDCalibration(const CCDCalibration& cp):
+  Calibration()
 {
   K(cp.K());
 }

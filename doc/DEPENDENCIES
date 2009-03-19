@@ -114,12 +114,13 @@ naomotion	NaoQi			>= 0.1.18		optional
 		(required for NaoQi integration and cross compilation in
 		 nao branch)
 
-skillgui	Graphviz		>= 2.21.20081219.0545	optional
+skillgui	Graphviz		>= 2.22			optional
 		(required for graph visualization)
 
-skillgui	Papyrus			>= 0.7.1		optional
+skillgui	Papyrus			>= 0.10.0		optional
 		(required for graph visualization)
 
+Nao Pos Viewer	freeglut		>= 2.4.0		optional
 
 $Id$
 

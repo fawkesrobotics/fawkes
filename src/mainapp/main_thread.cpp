@@ -211,7 +211,7 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     }
   } catch (Exception &e) {
     __desired_loop_time_usec = 0;
-    __multi_logger->log_info("FawkesMainApp", "Minimum loop time not set, assuming 0");
+    __multi_logger->log_info("FawkesMainApp", "Desired loop time not set, assuming 0");
   }
   __desired_loop_time_sec  = (float)__desired_loop_time_usec / 1000000.f;
 }

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  gvplugin_skillgui.h - Graphviz plugin for Skill GUI, that API sucks!
+ *  gvplugin_skillgui_papyrus.h - Graphviz plugin for Skill GUI
  *
  *  Created: Tue Dec 16 18:22:01 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_SKILLGUI_SKILLGUI_H_
-#define __TOOLS_SKILLGUI_SKILLGUI_H_
+#ifndef __TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_PAPYRUS_H_
+#define __TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_PAPYRUS_H_
 
 #include <gvc.h>
 #include "graph_viewport.h"

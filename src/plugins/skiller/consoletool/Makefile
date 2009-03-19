@@ -36,7 +36,7 @@ ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
 .PHONY: warning_readline
-warning_lua:
+warning_readline:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Skiller console tool$(TNORMAL) (readline[-devel] not installed)"
 endif
 

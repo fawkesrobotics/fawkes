@@ -23,8 +23,11 @@
  */
 
 #include "skillgui.h"
-#include "graph_viewport.h"
-#include "gvplugin_skillgui_cairo.h"
+#ifdef USE_PAPYRUS
+#  include "graph_viewport.h"
+#else
+#  include "graph_drawing_area.h"
+#endif
 
 #include <utils/system/argparser.h>
 #include <blackboard/remote.h>
@@ -71,10 +74,10 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   refxml->get_widget_derived("trv_log", __logview);
   refxml->get_widget("tb_connection", tb_connection);
   refxml->get_widget("tb_continuous", tb_continuous);
-  refxml->get_widget("tb_stop", tb_stop);
   refxml->get_widget("tb_exit", tb_exit);
   refxml->get_widget("cbe_skillstring", cbe_skillstring);
   refxml->get_widget("but_exec", but_exec);
+  refxml->get_widget("but_stop", but_stop);
   refxml->get_widget("lab_status", lab_status);
   refxml->get_widget("lab_alive", lab_alive);
   refxml->get_widget("lab_continuous", lab_continuous);
@@ -87,6 +90,12 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   refxml->get_widget("tb_agent", tb_agent);
   refxml->get_widget("tb_graphlist", tb_graphlist);
   refxml->get_widget("tb_controller", tb_controller);
+  refxml->get_widget("tb_graphsave", tb_graphsave);
+  refxml->get_widget("tb_graphupd", tb_graphupd);
+  refxml->get_widget("tb_zoomin", tb_zoomin);
+  refxml->get_widget("tb_zoomout", tb_zoomout);
+  refxml->get_widget("tb_zoomfit", tb_zoomfit);
+  refxml->get_widget("tb_zoomreset", tb_zoomreset);
 
   refxml->get_widget_derived("img_throbber", __throbber);
   
@@ -98,9 +107,15 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   cbe_skillstring->set_model(__sks_list);
   cbe_skillstring->set_text_column(__sks_record.skillstring);
 
+#ifdef USE_PAPYRUS
   pvp_graph = Gtk::manage(new SkillGuiGraphViewport());
   scw_graph->add(*pvp_graph);
   pvp_graph->show();
+#else
+  gda = Gtk::manage(new SkillGuiGraphDrawingArea());
+  scw_graph->add(*gda);
+  gda->show();
+#endif
 
   cb_graphlist = Gtk::manage(new Gtk::ComboBoxText());
   cb_graphlist->append_text(ACTIVE_SKILL);
@@ -117,13 +132,27 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   but_exec->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_exec_clicked));
   tb_controller->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_controller_clicked));
   tb_exit->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_exit_clicked));
-  tb_stop->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_stop_clicked));
+  but_stop->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_stop_clicked));
   tb_continuous->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_contexec_toggled));
   tb_skiller->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_skdbg_data_changed));
   tb_skiller->signal_toggled().connect(sigc::bind(sigc::mem_fun(*cb_graphlist, &Gtk::ComboBoxText::set_sensitive),true));
   tb_agent->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_agdbg_data_changed));
   tb_agent->signal_toggled().connect(sigc::bind(sigc::mem_fun(*cb_graphlist, &Gtk::ComboBoxText::set_sensitive),false));
   cb_graphlist->signal_changed().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_skill_changed));
+  tb_graphupd->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_graphupd_clicked));
+#ifdef USE_PAPYRUS
+  tb_graphsave->signal_clicked().connect(sigc::mem_fun(*pvp_graph, &SkillGuiGraphViewport::save));
+  tb_zoomin->signal_clicked().connect(sigc::mem_fun(*pvp_graph, &SkillGuiGraphViewport::zoom_in));
+  tb_zoomout->signal_clicked().connect(sigc::mem_fun(*pvp_graph, &SkillGuiGraphViewport::zoom_out));
+  tb_zoomfit->signal_clicked().connect(sigc::mem_fun(*pvp_graph, &SkillGuiGraphViewport::zoom_fit));
+  tb_zoomreset->signal_clicked().connect(sigc::mem_fun(*pvp_graph, &SkillGuiGraphViewport::zoom_reset));
+#else
+  tb_graphsave->signal_clicked().connect(sigc::mem_fun(*gda, &SkillGuiGraphDrawingArea::save));
+  tb_zoomin->signal_clicked().connect(sigc::mem_fun(*gda, &SkillGuiGraphDrawingArea::zoom_in));
+  tb_zoomout->signal_clicked().connect(sigc::mem_fun(*gda, &SkillGuiGraphDrawingArea::zoom_out));
+  tb_zoomfit->signal_clicked().connect(sigc::mem_fun(*gda, &SkillGuiGraphDrawingArea::zoom_fit));
+  tb_zoomreset->signal_clicked().connect(sigc::mem_fun(*gda, &SkillGuiGraphDrawingArea::zoom_reset));
+#endif
 
   __gconf->signal_value_changed().connect(sigc::hide(sigc::hide(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_config_changed))));
   on_config_changed();
@@ -297,9 +326,7 @@ SkillGuiGtkWindow::on_connect()
 
     tb_continuous->set_sensitive(true);
     tb_controller->set_sensitive(true);
-    tb_stop->set_sensitive(true);
     cbe_skillstring->set_sensitive(true);
-    pvp_graph->queue_draw();
 
   } catch (Exception &e) {
     Glib::ustring message = *(e.begin());
@@ -320,13 +347,16 @@ SkillGuiGtkWindow::on_disconnect()
 {
   tb_continuous->set_sensitive(false);
   tb_controller->set_sensitive(false);
-  tb_stop->set_sensitive(false);
   cbe_skillstring->set_sensitive(false);
+  but_exec->set_sensitive(false);
+  but_stop->set_sensitive(false);
 
   close_bb();
 
   tb_connection->set_stock_id(Gtk::Stock::CONNECT);
+#ifdef USE_PAPYRUS
   pvp_graph->queue_draw();
+#endif
   __logview->set_client(NULL);
 }
 
@@ -435,11 +465,13 @@ SkillGuiGtkWindow::on_skiller_data_changed()
 	tb_controller->set_stock_id(Gtk::Stock::YES);
       }
       but_exec->set_sensitive(true);
+      but_stop->set_sensitive(true);
     } else {
       if ( tb_controller->get_stock_id() == Gtk::Stock::YES.id ) {
 	tb_controller->set_stock_id(Gtk::Stock::NO);
       }
       but_exec->set_sensitive(false);
+      but_stop->set_sensitive(false);
     }
 
 
@@ -471,9 +503,14 @@ SkillGuiGtkWindow::on_skdbg_data_changed()
 	  __skdbg_if->msgq_enqueue(sgm);
 	}
       } else {
+#ifdef USE_PAPYRUS
 	pvp_graph->set_graph_fsm(__skdbg_if->graph_fsm());
 	pvp_graph->set_graph(__skdbg_if->graph());
 	pvp_graph->render();
+#else
+	gda->set_graph_fsm(__skdbg_if->graph_fsm());
+	gda->set_graph(__skdbg_if->graph());
+#endif
       }
     } catch (Exception &e) {
       // ignored
@@ -488,13 +525,42 @@ SkillGuiGtkWindow::on_agdbg_data_changed()
   if (tb_agent->get_active() && __agdbg_if) {
     try {
       __agdbg_if->read();
+#ifdef USE_PAPYRUS
       pvp_graph->set_graph_fsm(__agdbg_if->graph_fsm());
       pvp_graph->set_graph(__agdbg_if->graph());
       pvp_graph->render();
+#else
+      gda->set_graph_fsm(__agdbg_if->graph_fsm());
+      gda->set_graph(__agdbg_if->graph());
+#endif
     } catch (Exception &e) {
       // ignored
     }
   }
+}
+
+
+void
+SkillGuiGtkWindow::on_graphupd_clicked()
+{
+#ifdef USE_PAPYRUS
+  if ( pvp_graph->get_update_graph() ) {
+    pvp_graph->set_update_graph(false);
+    tb_graphupd->set_stock_id(Gtk::Stock::MEDIA_STOP);
+  } else {
+    pvp_graph->set_update_graph(true);
+    tb_graphupd->set_stock_id(Gtk::Stock::MEDIA_PLAY);
+    pvp_graph->render();
+  }
+#else
+  if ( gda->get_update_graph() ) {
+    gda->set_update_graph(false);
+    tb_graphupd->set_stock_id(Gtk::Stock::MEDIA_STOP);
+  } else {
+    gda->set_update_graph(true);
+    tb_graphupd->set_stock_id(Gtk::Stock::MEDIA_PLAY);
+  }
+#endif
 }
 
 

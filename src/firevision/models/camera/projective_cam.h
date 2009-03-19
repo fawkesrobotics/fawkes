@@ -52,7 +52,7 @@ class ProjectiveCam
     //virtual HomTransform get_inverse() const;
 
     virtual ProjectiveCam& set_location(const fawkes::HomTransform& loc);
-    virtual ProjectiveCam& set_location(float roll, float pitch, float height, float yaw = 0, float x = 0, float y = 0);
+    virtual ProjectiveCam& set_location(float roll, float pitch, float yaw, float height, float x = 0, float y = 0);
 
     virtual fawkes::cart_coord_2d_t get_GPA_world_coord(const fawkes::point_t img_p) const;
     virtual fawkes::point_t         get_GPA_image_coord(const fawkes::cart_coord_2d_t wld_p) const;
@@ -60,15 +60,15 @@ class ProjectiveCam
     virtual void print_info (const char* name = 0, const char *col_sep = 0, const char *row_sep = 0) const;
 
   protected:
-    ProjectiveCam(const Calibration& cal, const fawkes::HomTransform& loc);
-    ProjectiveCam(const Calibration& cal, float roll, float pitch, float height, float yaw = 0, float x = 0, float y = 0);
+    ProjectiveCam(const Calibration &cal, const fawkes::HomTransform *loc = 0);
+    ProjectiveCam(const Calibration &cal, float roll, float pitch, float yaw, float height, float x = 0, float y = 0);
     Calibration get_cal() const;
 
     fawkes::Matrix get_p() const;
     fawkes::Matrix get_GPA_p() const;
 
   private:
-    Calibration    *__cal;
+    Calibration    __cal;
     fawkes::Matrix *__p;
     fawkes::Matrix *__gpa_inv;
     float          *__gpa_inv_data;

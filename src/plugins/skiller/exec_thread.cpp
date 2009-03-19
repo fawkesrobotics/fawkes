@@ -61,8 +61,9 @@ SkillerExecutionThread::SkillerExecutionThread()
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL),
     BlackBoardInterfaceListener("SkillerExecutionThread")
 {
-  __continuous_run = false;
-  __error_written = false;
+  __continuous_run   = false;
+  __continuous_reset = false;
+  __error_written    = false;
 
   __lua = NULL;
 }
@@ -102,7 +103,8 @@ SkillerExecutionThread::init()
 {
   __last_exclusive_controller = 0;
   __reader_just_left = false;
-  __continuous_run = false;
+  __continuous_run   = false;
+  __continuous_reset = false;
   __skdbg_what = "ACTIVE";
   __clog = NULL;
   __sksf_pushed = false;
@@ -487,8 +489,8 @@ SkillerExecutionThread::loop()
   if ( __continuous_reset ) {
     logger->log_debug("SkillerExecutionThread", "Continuous reset forced");    try {
       if (__sksf_pushed) {
-	__lua->pop(1);			  // ---
 	__sksf_pushed = false;
+	__lua->pop(1);			  // ---
       }
       __lua->do_string("skillenv.reset_all()");
     } catch (Exception &e) {
@@ -558,8 +560,8 @@ SkillerExecutionThread::loop()
       logger->log_debug("SkillerExecutionThread", "Resetting skills");
       try {
 	if (__sksf_pushed) {
-	  __lua->pop(1);			  // ---
 	  __sksf_pushed = false;
+	  __lua->pop(1);			  // ---
 	}
 	__lua->do_string("skillenv.reset_all()");
       } catch (Exception &e) {

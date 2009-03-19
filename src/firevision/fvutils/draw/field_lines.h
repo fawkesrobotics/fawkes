@@ -75,4 +75,14 @@ public:
 private:
   virtual void init();
 };
+
+class FieldLinesCityTowerSeminar: public FieldLines
+{
+public:
+  FieldLinesCityTowerSeminar(float length, float width);
+  virtual ~FieldLinesCityTowerSeminar();
+
+private:
+  virtual void init();
+};
 #endif /* __FIREVISION_APPS_NAO_LOC_FIELD_LINES__ */

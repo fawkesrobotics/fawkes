@@ -51,6 +51,7 @@ class Matrix
 			   const char* row_sep = 0 ) const;
   virtual Matrix &id();
   static Matrix get_id(unsigned int size);
+  static Matrix get_diag(unsigned int size, float value);
 
   virtual Matrix &transpose();
   virtual Matrix  get_transpose() const;

@@ -18,16 +18,21 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/gui.mk
 
+# Set to 1 to use Pyprus instead of Cairo for rendering the graph
+USE_PAPYRUS=0
+
 ifneq ($(PKGCONFIG),)
-  HAVE_PAPYRUS  = $(if $(shell $(PKGCONFIG) --exists 'papyrus-1.0' 'papyrusmm-1.0'; echo $${?/1/}),1,0)
   HAVE_GRAPHVIZ = $(if $(shell $(PKGCONFIG) --exists 'libgvc'; echo $${?/1/}),1,0)
   HAVE_GCONFMM  = $(if $(shell $(PKGCONFIG) --exists 'gconfmm-2.6'; echo $${?/1/}),1,0)
 
-  ifeq ($(HAVE_PAPYRUS),1)
-    CFLAGS_PAPYRUS  = $(shell $(PKGCONFIG) --cflags 'papyrus-1.0' 'papyrusmm-1.0')
-    LDFLAGS_PAPYRUS = $(shell $(PKGCONFIG) --libs 'papyrus-1.0' 'papyrusmm-1.0')
-  else
-    GUI_ERROR += (papyrus/papyrusmm not installed)
+  ifeq ($(USE_PAPYRUS),1)
+    HAVE_PAPYRUS  = $(if $(shell $(PKGCONFIG) --exists 'papyrus-1.0' 'papyrus-gtkmm-1.0'; echo $${?/1/}),1,0)
+    ifeq ($(HAVE_PAPYRUS),1)
+      CFLAGS_PAPYRUS  = $(shell $(PKGCONFIG) --cflags 'papyrus-1.0' 'papyrus-gtkmm-1.0')
+      LDFLAGS_PAPYRUS = $(shell $(PKGCONFIG) --libs 'papyrus-1.0' 'papyrus-gtkmm-1.0')
+    else
+      GUI_ERROR += (papyrus/papyrusmm not installed)
+    endif
   endif
   ifeq ($(HAVE_GRAPHVIZ),1)
     CFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --cflags 'libgvc') -DWITH_CODEGENS
@@ -44,20 +49,28 @@ ifneq ($(PKGCONFIG),)
   endif
 endif
 
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM) $(CFLAGS_PAPYRUS) \
+CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM) \
 	   $(CFLAGS_GRAPHVIZ) $(CFLAGS_GCONFMM)
-LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM) $(LDFLAGS_PAPYRUS) \
+LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM) \
 	   $(LDFLAGS_GRAPHVIZ) $(LDFLAGS_GCONFMM)
 
 LIBS_skillgui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard fawkesguiutils \
 		SkillerInterface SkillerDebugInterface
-OBJS_skillgui = main.o skillgui.o graph_viewport.o gvplugin_skillgui_papyrus.o
-# gvplugin_skillgui_cairo.o
-# graph_viewport.o gvplugin_skillgui_papyrus.o
+OBJS_skillgui = main.o skillgui.o
+
+ifeq ($(USE_PAPYRUS),1)
+  CFLAGS  += $(CFLAGS_PAPYRUS) -std=gnu++0x -DUSE_PAPYRUS
+  LDFLAGS += $(LDFLAGS_PAPYRUS)
+  OBJS_skillgui += graph_viewport.o gvplugin_skillgui_papyrus.o
+  PAPYRUS_OK = $(HAVE_PAPYRUS)
+else
+  PAPYRUS_OK = 1
+  OBJS_skillgui += graph_drawing_area.o gvplugin_skillgui_cairo.o
+endif
 
 OBJS_all = $(OBJS_skillgui) $(OBJS_libgvplugin_skillgui)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(HAVE_PAPYRUS)$(HAVE_GRAPHVIZ)$(HAVE_GCONFMM),11111)
+ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(PAPYRUS_OK)$(HAVE_GRAPHVIZ)$(HAVE_GCONFMM),11111)
   BINS_gui = $(BINDIR)/skillgui
 else
   WARN_TARGETS += warning_skillgui

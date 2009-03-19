@@ -28,10 +28,11 @@
 
 #include "calibration.h"
 
-class CCDCalibration: public Calibration 
+class CCDCalibration: public Calibration
 {
   public:
-    CCDCalibration(const float ax, const float ay, const float x0, const float y0);
+    CCDCalibration(float ax, float ay, float x0, float y0);
+    CCDCalibration(float hor_fov, unsigned int img_width, unsigned int img_height);
     CCDCalibration(const CCDCalibration& cp);
     virtual ~CCDCalibration();
 };

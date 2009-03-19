@@ -84,18 +84,18 @@ WebBlackBoardRequestProcessor::process_request(const char *url,
     InterfaceInfoList *iil = __blackboard->list_all();
     for (InterfaceInfoList::iterator i = iil->begin(); i != iil->end(); ++i) {
       if (! found_some) {
-	*r += "<ul>\n";
-	found_some = true;
+        *r += "<table>\n";
+        *r += "<tr><th>Interface</th><th>Reader(s)</th><th>Writer</th></tr>\n";
+        found_some = true;
       }
-      r->append_body("<li>Interface <a href=\"%s/view/%s::%s\">%s::%s</a> (%u reader%s, <span style=\"color:%s\">%s</span> writer)</li>\n",
-		     __baseurl, i->type(), i->id(), i->type(), i->id(),
-		     i->num_readers(), i->num_readers() == 1 ? "" : "s",
-		     i->has_writer() ? "green" : "red", i->has_writer() ? "has" : "no");
+      r->append_body("<tr><td><a href=\"%s/view/%s::%s\">%s::%s</a></td><td>%u</td><td style=\"color:%s\">%s</td></tr>\n",
+                     __baseurl, i->type(), i->id(), i->type(), i->id(),
+                     i->num_readers(), i->has_writer() ? "green" : "red", i->has_writer() ? "yes" : "no");
     }
     delete iil;
 
     if (found_some) {
-      *r += "</ul>\n";
+      *r += "</table>\n";
     } else {
       *r += "<b>No interfaces found.</b>\n";
     }

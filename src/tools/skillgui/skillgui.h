@@ -42,8 +42,11 @@ namespace fawkes {
   class Throbber;
 }
 
+#ifdef USE_PAPYRUS
 class SkillGuiGraphViewport;
-//typedef struct GVC_s GVC_t;
+#else
+class SkillGuiGraphDrawingArea;
+#endif
 
 class SkillGuiGtkWindow : public Gtk::Window
 {
@@ -67,9 +70,7 @@ class SkillGuiGtkWindow : public Gtk::Window
   void on_config_changed();
   void on_contexec_toggled();
   void on_skill_changed();
-
-  //void on_drw_graph_size_allocate_notify(Gtk::Allocation& alloc);
-  //bool on_drw_graph_expose_event(GdkEventExpose* event);
+  void on_graphupd_clicked();
 
  private:
   class SkillStringRecord : public Gtk::TreeModelColumnRecord
@@ -89,9 +90,9 @@ class SkillGuiGtkWindow : public Gtk::Window
   fawkes::InterfaceDispatcher  *__agdbg_ifd;
 
   Gtk::ToolButton        *tb_connection;
-  Gtk::ToolButton        *tb_stop;
   Gtk::ToolButton        *tb_exit;
   Gtk::Button            *but_exec;
+  Gtk::Button            *but_stop;
   Gtk::ComboBoxEntry     *cbe_skillstring;
   Gtk::ToggleToolButton  *tb_continuous;
   Gtk::Label             *lab_status;
@@ -106,14 +107,23 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::ToggleToolButton  *tb_agent;
   Gtk::ComboBoxText      *cb_graphlist;
   Gtk::ToolItem          *tb_graphlist;
+  Gtk::ToolButton        *tb_graphsave;
+  Gtk::ToolButton        *tb_graphupd;
   Gtk::ToolButton        *tb_controller;
+  Gtk::ToolButton        *tb_zoomin;
+  Gtk::ToolButton        *tb_zoomout;
+  Gtk::ToolButton        *tb_zoomfit;
+  Gtk::ToolButton        *tb_zoomreset;
 
   Glib::RefPtr<Gtk::ListStore> __sks_list;
 
   Glib::RefPtr<Gnome::Conf::Client> __gconf;
 
+#ifdef USE_PAPYRUS
   SkillGuiGraphViewport  *pvp_graph;
-  //GVC_t *__gvc;
+#else
+  SkillGuiGraphDrawingArea *gda;
+#endif
 
   fawkes::SkillerInterface *__skiller_if;
   fawkes::SkillerDebugInterface *__skdbg_if;
@@ -122,6 +132,7 @@ class SkillGuiGtkWindow : public Gtk::Window
   fawkes::LogView  *__logview;
   fawkes::Throbber *__throbber;
 
+  bool __update_graph;
 };
 
 #endif

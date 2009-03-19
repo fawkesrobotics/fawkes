@@ -113,7 +113,7 @@ Time::Time(long ms)
 }
 
 
-/** Constructor. 
+/** Constructor.
  * Sets time to given number of ms, use for time range.
  * @param s the Time object is initialized to the time given in seconds
  */
@@ -296,7 +296,7 @@ Time
 Time::operator+(const Time& t) const
 {
   Time ret;
-  if (__time.tv_usec + t.__time.tv_usec > 1000000)
+  if (__time.tv_usec + t.__time.tv_usec >= 1000000)
   {
     ret.__time.tv_usec = __time.tv_usec + t.__time.tv_usec - 1000000;
     ret.__time.tv_sec = __time.tv_sec + t.__time.tv_sec + 1;
@@ -332,7 +332,7 @@ Time::operator+(const float sec) const
   Time ret;
   time_t sec_only = (time_t)floor(sec);
   suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
-  if ((__time.tv_usec + usec_only) > 1000000)
+  if ((__time.tv_usec + usec_only) >= 1000000)
   {
     ret.__time.tv_usec = __time.tv_usec + usec_only - 1000000;
     ret.__time.tv_sec = __time.tv_sec + sec_only + 1;
@@ -365,7 +365,7 @@ Time::operator-(const Time& t) const
     ret.__time.tv_usec = __time.tv_usec - t.__time.tv_usec;
     ret.__time.tv_sec = __time.tv_sec - t.__time.tv_sec;
   }
-  
+
   return ret;
 }
 
@@ -381,14 +381,14 @@ Time::operator-(const Time* t) const
 }
 
 
-/** += operator 
+/** += operator
  * @param t the other time
  * @return reference to this instance
  */
 Time &
 Time::operator+=(const Time& t)
 {
-  if (__time.tv_usec + t.__time.tv_usec > 1000000)
+  if (__time.tv_usec + t.__time.tv_usec >= 1000000)
   {
     __time.tv_usec += t.__time.tv_usec - 1000000;
     __time.tv_sec  += t.__time.tv_sec + 1;
@@ -403,17 +403,19 @@ Time::operator+=(const Time& t)
 }
 
 
-/** += operator 
+/** += operator
  * @param usec microseconds to add
  * @return reference to this instance
  */
 Time &
 Time::operator+=(const long int usec)
 {
-  if ( __time.tv_usec + usec > 1000000 )
+  if ( __time.tv_usec + usec >= 1000000 )
   {
-    __time.tv_usec += usec - 1000000;
-    __time.tv_sec  += 1;
+    //usec + __time.tv_usec might be more than 1 second
+    long int tmp_usec = __time.tv_usec + usec;
+    __time.tv_usec = tmp_usec % 1000000;
+    __time.tv_sec  += tmp_usec / 1000000;
   }
   else
   {
@@ -433,7 +435,7 @@ Time::operator+=(const float sec)
 {
   time_t sec_only = (time_t)floor(sec);
   suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
-  if ((__time.tv_usec + usec_only) > 1000000)
+  if ((__time.tv_usec + usec_only) >= 1000000)
   {
     __time.tv_usec += usec_only - 1000000;
     __time.tv_sec  += sec_only + 1;
@@ -604,7 +606,7 @@ Time::str_r(char *s, bool utc)
 {
   // heuristic to distinguish times and time ranges
   if (__time.tv_sec < 1000000000) {
-#ifdef __FreeBSD__ 
+#ifdef __FreeBSD__
     snprintf(s, TIMESTR_SIZE, "%i:%li", __time.tv_sec, __time.tv_usec);
 #else
     snprintf(s, TIMESTR_SIZE, "%li:%li", __time.tv_sec, __time.tv_usec);

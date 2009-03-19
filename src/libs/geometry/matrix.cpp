@@ -147,14 +147,26 @@ Matrix::id()
 Matrix
 Matrix::get_id(unsigned int size)
 {
-	Matrix res(size, size);
+  return Matrix::get_diag(size, 1.f);
+}
 
-	for (unsigned int i = 0; i < size; ++i)
-	{
-		res(i, i) = 1.0f;
-	}
+/** Creates a quadratic matrix with dimension size and sets the diagonal elements to value.
+ * All other elements are set to 0.0.
+ * @param size dimension of the matrix
+ * @param value of the elements of the main diagonal
+ * @return the diag matrix object
+ */
+Matrix
+Matrix::get_diag(unsigned int size, float value)
+{
+  Matrix res(size, size);
 
-	return res;
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    res(i, i) = value;
+  }
+
+  return res;
 }
 
 

@@ -35,7 +35,7 @@ using namespace fawkes;
  * @param cal Calibration matrix of the camera
  * @param loc Location of the camera (= translation + rotation)
  */
-CCDCam::CCDCam(const CCDCalibration& cal, const HomTransform& loc)
+CCDCam::CCDCam(const CCDCalibration &cal, const HomTransform *loc)
 : ProjectiveCam (cal, loc)
 {
 }
@@ -47,7 +47,7 @@ CCDCam::CCDCam(const CCDCalibration& cal, const HomTransform& loc)
  * @param y0 is the y-coordinate of the principal point
  * @param loc Location of the camera (= translation + rotation)
  */
-CCDCam::CCDCam(const float ax, const float ay, const float x0, const float y0, const HomTransform& loc)
+CCDCam::CCDCam(const float ax, const float ay, const float x0, const float y0, const HomTransform *loc)
 : ProjectiveCam (CCDCalibration(ax, ay, x0, y0), loc)
 {
 }

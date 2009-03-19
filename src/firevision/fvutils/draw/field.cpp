@@ -477,6 +477,7 @@ Field::field_for_name(std::string field_name, float field_length, float field_wi
 {
   if (field_name == "Field6x4") return new Field(new FieldLines6x4(field_length, field_width));
   else if (field_name == "FieldCityTower") return new Field(new FieldLinesCityTower(field_length, field_width));
+  else if (field_name == "FieldCityTowerSeminar") return new Field(new FieldLinesCityTowerSeminar(field_length, field_width));
   else throw fawkes::IllegalArgumentException("Unknown field name! Please set field_name to a valid value (see field.h)");
 }
 

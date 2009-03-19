@@ -1,0 +1,96 @@
+
+/***************************************************************************
+ *  laser_drawing_area.h - Graph drawing area derived from Gtk::DrawingArea
+ *
+ *  Created: Wed Mar 18 10:38:07 2009
+ *  Copyright  2009  Tim Niemueller [www.niemueller.de]
+ *
+ *  $Id$
+ *
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
+
+#ifndef __TOOLS_SKILLGUI_GRAPH_DRAWING_AREA_H_
+#define __TOOLS_SKILLGUI_GRAPH_DRAWING_AREA_H_
+
+#include <gtkmm.h>
+
+#include <gvc.h>
+#include <gvcjob.h>
+
+class SkillGuiGraphDrawingArea
+  : public Gtk::DrawingArea
+{
+ public:
+
+  SkillGuiGraphDrawingArea();
+  ~SkillGuiGraphDrawingArea();
+
+  void save();
+
+  void zoom_in();
+  void zoom_out();
+  void zoom_fit();
+  void zoom_reset();
+
+  void set_gvjob(GVJ_t *job);
+  void set_graph_fsm(std::string fsm_name);
+  void set_graph(std::string graph);
+
+  void   set_bb(double bbw, double bbh);
+  void   set_pad(double pad_x, double pad_y);
+  void   set_translation(double tx, double ty);
+  void   set_scale(double scale);
+  bool   scale_override();
+  double get_scale();
+  void   get_translation(double &tx, double &ty);
+  Cairo::RefPtr<Cairo::Context> get_cairo();
+
+  bool get_update_graph();
+  void set_update_graph(bool update);
+
+ protected:
+  virtual bool on_expose_event(GdkEventExpose* event);
+  virtual bool on_scroll_event(GdkEventScroll *event);
+  virtual bool on_button_press_event(GdkEventButton *event);
+  virtual bool on_motion_notify_event(GdkEventMotion *event);
+ private:
+  Cairo::RefPtr<Cairo::Context> __cairo;
+  Gtk::FileChooserDialog *__fcd;
+
+  GVC_t *__gvc;
+  GVJ_t *__gvjob;
+
+  std::string __graph_fsm;
+  std::string __graph;
+  std::string __nonupd_graph;
+  std::string __nonupd_graph_fsm;
+
+  double __bbw;
+  double __bbh;
+  double __pad_x;
+  double __pad_y;
+  double __translation_x;
+  double __translation_y;
+  double __scale;
+
+  double __last_mouse_x;
+  double __last_mouse_y;
+
+  bool __scale_override;
+  bool __update_graph;
+};
+
+#endif

@@ -86,7 +86,7 @@ SharedMemoryCamera::SharedMemoryCamera(const CameraArgumentParser *cap)
   else throw MissingParameterException("The parameter 'image_id' is required");
 
   if ( cap->has("deep_copy") ) {
-    __deep_copy = strcasecmp(cap->get("deep_copy").c_str(), "true") == 0 ? true : false;
+    __deep_copy = (strcasecmp(cap->get("deep_copy").c_str(), "true") == 0);
   }
 
   try {

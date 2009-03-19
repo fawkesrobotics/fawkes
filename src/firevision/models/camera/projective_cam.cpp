@@ -73,50 +73,60 @@ AboveHorizonException::get_img_pt() const
  * @param cal Calibration matrix of the camera
  * @param loc Location of the camera (= translation + rotation)
  */
-ProjectiveCam::ProjectiveCam(const Calibration& cal, const HomTransform& loc)
+ProjectiveCam::ProjectiveCam(const Calibration &cal, const HomTransform *loc) :
+  __cal(cal)
 {
-  __cal     = new Calibration(cal);
   __p       = NULL;
   __gpa_inv = NULL;
   __gpa_inv_data = new float[9];
 
-  set_location(loc);
+  if (loc) set_location(*loc);
 }
 
 /** Constructor.
  * @param cal Calibration matrix of the camera
  * @param roll of the camera
  * @param pitch of the camera
- * @param height of the camera
  * @param yaw of the camera
+ * @param height of the camera
  * @param x of the camera (in front if yaw is zero)
  * @param y of the camera (left if yaw is zero)
  */
-ProjectiveCam::ProjectiveCam(const Calibration& cal, float roll, float pitch, float height, float yaw, float x, float y)
+ProjectiveCam::ProjectiveCam(const Calibration &cal,
+                             float roll, float pitch, float yaw,
+                             float height, float x, float y):
+  __cal(cal)
 {
-  __cal          = new Calibration(cal);
   __p            = NULL;
   __gpa_inv      = NULL;
   __gpa_inv_data = new float[9];
 
-  set_location(roll, pitch, height, yaw, x, y);
+  set_location(roll, pitch, yaw, height, x, y);
 }
 
 /** Copy Constructor
  * @param pc the ProjectiveCam to copy
  */
-ProjectiveCam::ProjectiveCam(const ProjectiveCam& pc)
+ProjectiveCam::ProjectiveCam(const ProjectiveCam &pc):
+  __cal(pc.__cal)
 {
-  throw fawkes::NotImplementedException("The copy constuctor is not implemented yet");
-  //	__cal = new Calibration(pc.__cal);
-  //	__p = new Matrix (pc.__p);
+  __p            = (pc.__p != NULL ? new Matrix(*pc.__p) : NULL);
+  __gpa_inv_data = new float[9];
+
+  if (pc.__gpa_inv) {
+    for (unsigned int i = 0; i < 9; ++i) {
+      __gpa_inv_data[i] = pc.__gpa_inv_data[i];
+    }
+
+    __gpa_inv = new Matrix(3, 3, __gpa_inv_data, false);
+  }
+  else __gpa_inv = NULL;
 }
 
 /** Destructor.
  */
 ProjectiveCam::~ProjectiveCam()
 {
-  delete   __cal;
   delete   __p;
   delete   __gpa_inv;
   delete[] __gpa_inv_data;
@@ -133,7 +143,7 @@ ProjectiveCam::~ProjectiveCam()
  * @return a reference to the camera
  */
 ProjectiveCam&
-ProjectiveCam::set_location(float roll, float pitch, float height, float yaw, float x, float y)
+ProjectiveCam::set_location(float roll, float pitch, float yaw, float height, float x, float y)
 {
   HomTransform t;
 
@@ -148,6 +158,7 @@ ProjectiveCam::set_location(float roll, float pitch, float height, float yaw, fl
 
   t.trans(-x, y, height);
   t.rotate_z(yaw);
+
   return set_location(t);
 }
 
@@ -161,15 +172,12 @@ ProjectiveCam&
 ProjectiveCam::set_location(const HomTransform& loc)
 {
   if (__p) {
+    delete __gpa_inv;
     delete __p;
     __p = NULL;
   }
-  if (__gpa_inv) {
-    delete __gpa_inv;
-    __gpa_inv = NULL;
-  }
 
-  __p = new Matrix (*__cal * loc.get_matrix().get_submatrix(0, 0, 3, 4));
+  __p = new Matrix (__cal * loc.get_matrix().get_submatrix(0, 0, 3, 4));
 
   __gpa_inv = new Matrix(3, 3, __gpa_inv_data, false);
   __gpa_inv->overlay(0, 0, __p->get_submatrix(0, 0, 3, 2));
@@ -232,7 +240,7 @@ ProjectiveCam::get_GPA_image_coord(const fawkes::cart_coord_2d_t wld_p) const
 Calibration
 ProjectiveCam::get_cal() const
 {
-  return Calibration(*__cal);
+  return Calibration(__cal);
 }
 
 /**
@@ -267,6 +275,6 @@ void
 ProjectiveCam::print_info (const char *name, const char *col_sep, const char *row_sep) const
 {
   __p->print_info(name ? name : "Projective Camera", col_sep, row_sep);
-  __cal->print_info("Calibration Matrix", col_sep, row_sep);
+  __cal.print_info("Calibration Matrix", col_sep, row_sep);
 }
 
