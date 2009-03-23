@@ -26,6 +26,7 @@
 
 #include <cstdlib>
 #include <cstdarg>
+#include <cstdio>
 
 /** @class WebReply "reply.h"
  * Basic web reply.

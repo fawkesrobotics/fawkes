@@ -25,6 +25,8 @@
 #include "request_processor.h"
 
 #include <sys/types.h>
+#include <stdint.h>
+#include <cstdarg>
 #include <microhttpd.h>
 #include <cstring>
 

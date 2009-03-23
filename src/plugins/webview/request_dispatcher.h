@@ -27,6 +27,7 @@
 
 #include <string>
 #include <map>
+#include <stdint.h>
 
 struct MHD_Connection;
 class WebRequestProcessor;

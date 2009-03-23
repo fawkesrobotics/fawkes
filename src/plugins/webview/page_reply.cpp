@@ -26,6 +26,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 /** @class WebPageReply "page_reply.h"
  * Basic page reply.
