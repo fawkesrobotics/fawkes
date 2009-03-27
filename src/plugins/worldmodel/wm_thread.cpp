@@ -55,6 +55,10 @@ WorldModelThread::WorldModelThread(WorldModelNetworkThread* net_thread)
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
 {
   __net_thread = net_thread;
+
+  __wi_send_enabled = false;
+  __wi_send_pose    = NULL;
+  __wi_send_ball    = NULL;
 }
 
 
@@ -126,6 +130,33 @@ WorldModelThread::init()
   } catch (Exception &e) {
     e.print_trace();
   }
+
+  try {
+    std::string prefix = "/worldmodel/wi_send/" + __cfg_confspace;
+    __wi_send_enabled = config->get_bool((prefix + "/enable_send").c_str());
+
+    if (__wi_send_enabled) {
+      logger->log_debug(name(), "Sending worldinfo messages enabled");
+
+      std::string ball_id = config->get_string((prefix + "/ball_id").c_str());
+      std::string pose_id = config->get_string((prefix + "/pose_id").c_str());
+
+      logger->log_debug(name(), "Obtaining pose worldinfo data from interface %s.",
+			pose_id.c_str());
+      logger->log_debug(name(), "Obtaining ball worldinfo data from interface %s.",
+			ball_id.c_str());
+           
+      __wi_send_ball = blackboard->open_for_reading<ObjectPositionInterface>(ball_id.c_str());
+      __wi_send_pose = blackboard->open_for_reading<ObjectPositionInterface>(pose_id.c_str());
+  
+    } else {
+      logger->log_debug(name(), "Sending worldinfo messages disabled");
+    }
+    
+  } catch (Exception& e) {
+    e.print_trace();
+  }
+
 }
 
 
@@ -146,6 +177,15 @@ WorldModelThread::finalize()
     delete *__fit;
   }
   __fusers.clear();
+
+  if (__wi_send_enabled) {
+    try {
+      blackboard->close(__wi_send_ball);
+      blackboard->close(__wi_send_pose);
+    } catch (Exception& e) {
+      e.print_trace();
+    }
+  }
 }
 
 
@@ -154,5 +194,46 @@ WorldModelThread::loop()
 {
   for (__fit = __fusers.begin(); __fit != __fusers.end(); ++__fit) {
     (*__fit)->fuse();
+  }
+
+  WorldInfoTransceiver* transceiver = __net_thread->get_transceiver();
+
+  if (__wi_send_enabled) {
+    __wi_send_ball->read();
+    __wi_send_pose->read();
+
+    bool do_send = false;
+
+    // ball
+    if (__wi_send_ball->has_writer()) {
+      do_send = true;
+      transceiver->set_ball_pos(__wi_send_ball->distance(),
+				__wi_send_ball->bearing(),
+				__wi_send_ball->slope(),
+				__wi_send_ball->dbs_covariance());
+      transceiver->set_ball_visible(__wi_send_ball->is_visible(),
+				    __wi_send_ball->visibility_history());
+      transceiver->set_ball_velocity(__wi_send_ball->relative_x_velocity(),
+				     __wi_send_ball->relative_y_velocity(),
+				     __wi_send_ball->relative_z_velocity(),
+				     __wi_send_ball->relative_xyz_velocity_covariance());
+    }
+     
+    // pose
+    if (__wi_send_pose->has_writer()) {
+      do_send = true;
+      transceiver->set_pose(__wi_send_pose->world_x(),
+			    __wi_send_pose->world_y(),
+			    __wi_send_pose->world_z(),
+			    __wi_send_pose->world_xyz_covariance());
+      transceiver->set_velocity(__wi_send_pose->world_x_velocity(),
+				__wi_send_pose->world_y_velocity(),
+				__wi_send_pose->world_z_velocity(),
+				__wi_send_pose->world_xyz_velocity_covariance());
+    }
+    
+    if (do_send) {
+      transceiver->send();
+    }
   }
 }

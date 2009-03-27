@@ -49,34 +49,32 @@ class WorldInfoViewerBackendThread
 
   Glib::Dispatcher& new_worldinfo_data();
   Glib::Dispatcher& new_gamestate_data();
-  Glib::Dispatcher& robot_added();
-  Glib::Dispatcher& robot_removed();
 
   // thread
   void loop();
 
   // handler
-  virtual void pose_rcvd(const char *from_host,
-			 float x, float y, float theta,
-			 float *covariance);
+  virtual void pose_rcvd( const char *from_host,
+			  float x, float y, float theta,
+			  float *covariance );
 
-  virtual void velocity_rcvd(const char *from_host, float vel_x,
-			     float vel_y, float vel_theta, float *covariance);
+  virtual void velocity_rcvd( const char *from_host, float vel_x,
+			      float vel_y, float vel_theta, float *covariance );
 
-  virtual void ball_pos_rcvd(const char *from_host,
-			     bool visible, int visibility_history,
-			     float dist, float pitch, float yaw,
-			     float *covariance);
+  virtual void ball_pos_rcvd( const char *from_host,
+			      bool visible, int visibility_history,
+			      float dist, float pitch, float yaw,
+			      float *covariance );
 
-  virtual void ball_velocity_rcvd(const char *from_host,
-				  float vel_x, float vel_y, float vel_z,
-				  float *covariance);
+  virtual void ball_velocity_rcvd( const char *from_host,
+				   float vel_x, float vel_y, float vel_z,
+				   float *covariance );
 
   virtual void opponent_pose_rcvd( const char *from_host, unsigned int uid,
 				   float distance, float angle,
 				   float *covarianceconst );
   
-  virtual void opponent_disapp_rcvd(const char *from_host, unsigned int uid);
+  virtual void opponent_disapp_rcvd( const char *from_host, unsigned int uid );
 
   virtual void gamestate_rcvd( const char *from_host,
 			       fawkes::worldinfo_gamestate_t game_state, 
@@ -87,18 +85,17 @@ class WorldInfoViewerBackendThread
 			       fawkes::worldinfo_gamestate_half_t half );
 
  private:
-  fawkes::WorldInfoTransceiver* m_transceiver;
+  fawkes::WorldInfoTransceiver*   m_transceiver;
   fawkes::WorldInfoDataContainer* m_data_container;
 
   Glib::Dispatcher m_signal_new_worldinfo_data;
   Glib::Dispatcher m_signal_new_gamestate_data;
-  Glib::Dispatcher m_signal_robot_added;
-  Glib::Dispatcher m_signal_robot_removed;
 
   std::string    m_addr;
   unsigned short m_port;
   std::string    m_key;
   std::string    m_iv;
+
 };
 
 #endif /* __TOOL_WORLDINFO_VIEWER_BACKEND_THREAD_H_ */

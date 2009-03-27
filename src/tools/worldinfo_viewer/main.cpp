@@ -52,10 +52,10 @@ int main(int argc, char** argv)
     {
       addr = config->get_string("/worldinfo/multicast_addr");
       port = config->get_uint("/worldinfo/udp_port");
-      key = config->get_string("/worldinfo/encryption_key");
-      iv  = config->get_string("/worldinfo/encryption_iv");
-    } 
-  catch (Exception &e) 
+      key  = config->get_string("/worldinfo/encryption_key");
+      iv   = config->get_string("/worldinfo/encryption_iv");
+    }
+  catch (Exception &e)
     {
       delete config;
       e.append("Could not get required configuration data for world info viewer");
@@ -67,11 +67,9 @@ int main(int argc, char** argv)
 
   Clock* clock = Clock::instance();
   WorldInfoDataContainer* data_container = new WorldInfoDataContainer(clock);
-  WorldInfoViewerBackendThread* backend_thread = new WorldInfoViewerBackendThread(data_container,
-										  addr.c_str(), 
-										  port,
-										  key.c_str(), 
-										  iv.c_str());
+  WorldInfoViewerBackendThread* backend_thread = 
+    new WorldInfoViewerBackendThread( data_container, addr.c_str(), port,
+				      key.c_str(), iv.c_str() );
 
   backend_thread->start();
 
@@ -79,7 +77,9 @@ int main(int argc, char** argv)
     {
       Gtk::Main kit(argc, argv);
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/worldinfo_viewer/worldinfo_viewer.glade");
+      Glib::RefPtr<Gnome::Glade::Xml> ref_xml = 
+	Gnome::Glade::Xml::create( RESDIR"/glade/worldinfo_viewer/"
+				   "worldinfo_viewer.glade" );
 #else
       std::auto_ptr<Gnome::Glade::XmlError> error;
       Glib::RefPtr<Gnome::Glade::Xml> ref_xml = Gnome::Glade::Xml::create(RESDIR"/glade/worldinfo_viewer/worldinfo_viewer.glade", "", "", error);
@@ -89,10 +89,7 @@ int main(int argc, char** argv)
 #endif
 			      
       WorldInfoViewer viewer(ref_xml, data_container);
-      backend_thread->new_worldinfo_data().connect( sigc::mem_fun(viewer, &WorldInfoViewer::redraw_field ) );
       backend_thread->new_gamestate_data().connect( sigc::mem_fun(viewer, &WorldInfoViewer::gamestate_changed ) );
-      backend_thread->robot_added().connect( sigc::mem_fun(viewer, &WorldInfoViewer::robot_added) );
-      backend_thread->robot_removed().connect( sigc::mem_fun(viewer, &WorldInfoViewer::robot_removed) );
 
       kit.run( viewer.get_window() );
     }

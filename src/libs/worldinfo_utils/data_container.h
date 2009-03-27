@@ -30,9 +30,11 @@
 #include <geometry/hom_polar.h>
 #include <geometry/hom_pose.h>
 #include <core/utils/lock_map.h>
+#include <core/utils/lock_list.h>
 #include <netcomm/worldinfo/enums.h>
 
 #include <string>
+#include <list>
 #include <vector>
 #include <map>
 
@@ -43,7 +45,7 @@ class Clock;
 class WorldInfoDataContainer
 {
  public:
-  WorldInfoDataContainer(Clock* clock);
+  WorldInfoDataContainer(Clock* clock, long timeout_msec = 3000);
   ~WorldInfoDataContainer();
 
   /** Container struct for momentary game state infos. */
@@ -56,48 +58,51 @@ class WorldInfoDataContainer
     worldinfo_gamestate_half_t half;        /**< first or second half */
   };
 
-  /** Map that assigns positions (in polar coordinates) to ids. */
-  typedef std::map<unsigned int, HomPolar> PosMap;
+  // management
+  bool                   check_timeout();
+  void                   set_timeout(long msec);
+  std::list<std::string> get_hosts(bool check_timeout_first = false);
+  std::list<std::string> get_timedout_hosts();
 
-  void reset();
-
-  std::vector<std::string> get_hosts();
-  bool host_added();
-  bool host_removed();
+  bool new_data_available();
+  bool new_host();
+  bool host_timedout();
 
   // (own) pose
   void set_robot_pose( const char* from_host, float x, float y, float theta,
 		       float* covariance );
-  bool delete_robot_pose(const char* from_host);
-  bool get_robot_pose(const char* host, HomPose& robot_pose, Matrix &robot_pose_cov);
+  bool get_robot_pose( const char* host, HomPose& robot_pose );
+  bool get_robot_pose( const char* host, HomPose& robot_pose,
+		       Matrix& robot_pose_cov );
 
   // (own) velocity
-  void set_robot_velocity( const char* from_host, float vel_x, float vel_y, float vel_theta,
+  void set_robot_velocity( const char* from_host,
+			   float vel_x, float vel_y, float vel_theta,
 			   float* covariance );
-  void delete_robot_velocity(const char* from_host);
-  bool get_robot_velocity(const char* host, HomVector& robot_vel);
+  bool get_robot_velocity( const char* host, HomVector& robot_vel );
 
   // ball position
-  void set_ball_pos( const char* from_host, float dist,
-			      float bearing, float slope, float* covariance );
-  bool get_ball_pos(const char* host, HomPolar& ball_pos, Matrix &ball_pos_cov);
+  void set_ball_pos( const char* from_host, bool visible, int visibility_history,
+		     float dist, float bearing, float slope, float* covariance );
+  bool get_ball_pos_relative( const char* host, HomPolar& ball_pos );
+  bool get_ball_pos_relative( const char* host, HomPolar& ball_pos,
+			      Matrix &ball_pos_cov );
   bool get_ball_pos_global(const char* host, HomPoint& ball_pos);
-  bool delete_ball_pos(const char* from_host);
 
   // ball velocity
-  void set_ball_velocity( const char* from_host, float vel_x, float vel_y, float vel_z,
+  void set_ball_velocity( const char* from_host,
+			  float vel_x, float vel_y, float vel_z,
 			  float* covariance );
-  void delete_ball_velocity(const char* from_host);
-  bool get_ball_velocity(const char* from_host, HomVector& ball_vel);
+  bool get_ball_velocity( const char* from_host, HomVector& ball_vel );
 
   // opponents
   void set_opponent_pos( const char* from_host, unsigned int uid,
 			 float distance, float angle, float* covariance );
-  void delete_opponent_pos(const char* from_host, unsigned int uid);
-  void delete_all_opponent_pos(const char* from_host);
-  bool get_opponent_pos(const char* host, PosMap& opponent_pos);
+  void opponent_disappeared( const char* from_host, unsigned int uid );
+  bool get_opponent_pos( const char* host,
+			 std::map<unsigned int, HomPoint>& opp_positions );
 
-  // game state
+  // gamestate
   void set_game_state( worldinfo_gamestate_t game_state,
 		       worldinfo_gamestate_team_t state_team,
 		       unsigned int score_cyan,
@@ -106,52 +111,128 @@ class WorldInfoDataContainer
 		       worldinfo_gamestate_goalcolor_t own_goal_color,
 		       worldinfo_gamestate_half_t half );
 
-  GameState get_game_state() const;
-  std::string get_game_state_string() const;
-  std::string get_half_string() const;
-  unsigned int get_own_score() const;
-  unsigned int get_other_score() const;
 
-  worldinfo_gamestate_team_t get_own_team_color() const;
-  std::string get_own_team_color_string() const;
+  GameState                       get_game_state() const;
+  std::string                     get_game_state_string() const;
+  std::string                     get_half_string() const;
+  unsigned int                    get_own_score() const;
+  unsigned int                    get_other_score() const;
+  worldinfo_gamestate_team_t      get_own_team_color() const;
+  std::string                     get_own_team_color_string() const;
   worldinfo_gamestate_goalcolor_t get_own_goal_color() const;
-  std::string get_own_goal_color_string() const;
+  std::string                     get_own_goal_color_string() const;
+
 
  private:
+
+  /* data structures for internal storage */
+  /* Ball */
+  class BallRecord
+  {
+  public:
+    BallRecord();
+    virtual ~BallRecord();
+
+    void set_pos( float dist, float bearing, float slope,
+		  float* covariance = NULL );
+    void set_visible( bool visible, int visibility_history );
+    void set_velocity( float vel_x, float vel_y, float vel_z,
+		       float* covariance = NULL );
+    
+    bool      visible() const;
+    int       visibility_history() const;
+    HomPolar  pos_relative();
+    HomVector vel_relative();
+    Matrix    covariance_relative();
+    HomPoint  pos_global( float ref_x, float ref_y, float ref_theta );
+    HomVector vel_global( float vel_x, float vel_y, float vel_theta,
+			  float ref_theta );
+
+  private:
+    HomPolar  m_rel_pos;
+    HomVector m_rel_vel;
+    Matrix    m_rel_cov;
+    bool      m_visible;
+    int       m_visibility_history;
+  };
+
+  /* Pose */
+  class PoseRecord
+  {
+  public:
+    PoseRecord();
+    virtual ~PoseRecord();
+
+    void set_pose( float x, float y, float theta,
+		   float* covariance = NULL );
+    void set_velocity( float vel_x, float vel_y, float vel_theta,
+		       float* covariance = NULL );
+
+    HomPose   pose();
+    Matrix    pose_covariance();
+    HomVector velocity();
+    Matrix    velocity_covariance();
+
+  private:
+    HomPose   m_pose;
+    Matrix    m_pose_covariance;
+    HomVector m_velocity;
+    Matrix    m_velocity_covariance;
+  };
+
+  /* Opponents */
+  class OpponentsRecord
+  {
+  public:
+    OpponentsRecord();
+    virtual ~OpponentsRecord();
+
+    void set_pos( unsigned int id, float distance, float bearing,
+		  float* covariance = NULL );
+    void disappeared( unsigned int id );
+
+    std::map<unsigned int, HomPoint> positions( float ref_x,
+						float ref_y,
+						float ref_theta );
+
+  private:
+    std::map<unsigned int, HomPoint> m_rel_opp_positions;
+  };
+
+  /* private methods */
   unsigned int get_host_id(std::string host);
-  void clock_in_host(unsigned int id);
+  void         clock_in_host(unsigned int id);
 
-  typedef LockMap<std::string, unsigned int> HostLockMap;
-  typedef LockMap<unsigned int, HomPolar>    PolarLockMap;
-  typedef LockMap<unsigned int, HomPoint>    PointLockMap;
-  typedef LockMap<unsigned int, HomPose>     PoseLockMap;
-  typedef LockMap<unsigned int, Matrix>      MatrixLockMap;
 
-  HostLockMap m_hosts;
-  LockMap<unsigned int, long> m_last_seen;
+  /* type definitions */
+  typedef LockMap<std::string, unsigned int>     HostLockMap;
+  typedef LockList<std::string>                  HostLockList;
+  typedef LockMap<unsigned int, long>            TimeLockMap;
+  typedef LockMap<unsigned int, BallRecord>      BallLockMap;
+  typedef LockMap<unsigned int, PoseRecord>      PoseLockMap;
+  typedef LockMap<unsigned int, OpponentsRecord> OpponentsLockMap;
 
-  PoseLockMap    m_robot_pose;
-  MatrixLockMap  m_robot_pose_cov;
+  /* member variables */
+  unsigned int     m_host_id;
 
-  PoseLockMap    m_robot_vel;
-  MatrixLockMap  m_robot_vel_cov;
-
-  PolarLockMap   m_ball_pos;
-  PointLockMap   m_ball_pos_global;
-  MatrixLockMap  m_ball_pos_rel_cov;
-
-  LockMap<unsigned int, PosMap> m_opponent_pos;
-
-  unsigned int m_host_id;
-
-  bool m_host_added;
-  bool m_host_removed;
-
-  GameState m_game_state;
-  worldinfo_gamestate_team_t m_own_team_color;
+  HostLockMap      m_hosts;
+  HostLockList     m_timedout_hosts;
+  TimeLockMap      m_last_seen;
+  BallLockMap      m_ball_positions;
+  PoseLockMap      m_robot_poses;
+  OpponentsLockMap m_opponents;
+  
+  GameState                       m_game_state;
+  worldinfo_gamestate_team_t      m_own_team_color;
   worldinfo_gamestate_goalcolor_t m_own_goal_color;
 
   Clock* m_clock;
+  long   m_timeout_msec;
+
+  bool m_new_data_available;
+  bool m_new_host;
+  bool m_host_timedout;
+
 };
 
 } // end namespace fawkes

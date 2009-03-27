@@ -22,27 +22,33 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/worldinfo_viewer/worldinfo_viewer.h>
-#include <tools/worldinfo_viewer/field_view.h>
+#include "worldinfo_viewer.h"
+#include "field_view.h"
+
 #include <worldinfo_utils/data_container.h>
 #include <blackboard/remote.h>
 #include <interfaces/BatteryInterface.h>
+
 #include <vector>
 #include <map>
 #include <string>
 #include <cstdio>
+#include <cstring>
 
 using namespace std;
 using namespace fawkes;
+
 
 /** @class WorldInfoViewer <tools/worldinfo_viewer/worldinfo_viewer.h>
  * Main class of the WorldInfoViewer application.
  * @author Daniel Beck
  */
 
+
 /** Constructor.
  * @param ref_xml reference to the Glade XML file
- * @param data_container pointer to the central instance of the WorldInfoDataContainer
+ * @param data_container pointer to the central instance of the
+ * WorldInfoDataContainer
  */
 WorldInfoViewer::WorldInfoViewer( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 				  WorldInfoDataContainer* data_container )
@@ -52,36 +58,44 @@ WorldInfoViewer::WorldInfoViewer( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
   m_trv_robots = dynamic_cast<Gtk::TreeView*>( get_widget(ref_xml, "trvRobots") );
   m_stb_status = dynamic_cast<Gtk::Statusbar*>( get_widget(ref_xml, "stbStatus") );
 
-  m_field_view = new FieldView();
-  m_vbx_field->pack_start(*m_field_view);
+  m_field_view = new FieldView( data_container, true, true, false );
+  m_vbx_field->pack_start( *m_field_view );
   m_field_view->show();
 
-  m_robots_list = Gtk::ListStore::create(m_robot_record);
-  m_trv_robots->set_model(m_robots_list);
-  m_trv_robots->append_column("Name", m_robot_record.name);
-  m_trv_robots->append_column("Voltage", m_robot_record.voltage);
-  //  m_trv_robots->append_column("Obstacles", m_robot_record.show_obstacles);
+  m_robots_list = Gtk::ListStore::create( m_robot_record );
+  m_trv_robots->set_model( m_robots_list );
+  m_trv_robots->append_column( "Name", m_robot_record.hostname );
+  m_trv_robots->append_column_editable( "Pose", m_robot_record.show_pose );
+  m_trv_robots->append_column_editable( "Ball", m_robot_record.show_ball );
+  m_trv_robots->append_column_editable( "Opponents", m_robot_record.show_opponents );
+
+  Gtk::CellRendererToggle* renderer;
+  renderer = dynamic_cast< Gtk::CellRendererToggle* >( m_trv_robots->get_column_cell_renderer(1) );
+  renderer->signal_toggled().connect( sigc::mem_fun( *this, 
+						     &WorldInfoViewer::on_show_pose_toggled ) );
+  renderer = dynamic_cast< Gtk::CellRendererToggle* >( m_trv_robots->get_column_cell_renderer(2) );
+  renderer->signal_toggled().connect( sigc::mem_fun( *this,
+						     &WorldInfoViewer::on_show_ball_toggled ) );
+  renderer = dynamic_cast< Gtk::CellRendererToggle* >( m_trv_robots->get_column_cell_renderer(3) );
+  renderer->signal_toggled().connect( sigc::mem_fun( *this,
+						     &WorldInfoViewer::on_show_opponents_toggled ) );
 
   m_data_container = data_container;
 
-  m_stb_message_id = m_stb_status->push("No game state information available.");
+  m_stb_message_id = m_stb_status->push( "No game state information available." );
+
+  // create timer
+  sigc::connection conn = 
+    Glib::signal_timeout().connect( sigc::mem_fun( *this, &WorldInfoViewer::update ), 200 );
 }
+
 
 /** Destructor. */
 WorldInfoViewer::~WorldInfoViewer()
 {
-  std::map<Glib::ustring, unsigned int>::iterator rit;
-  for (rit = m_robots.begin(); rit != m_robots.end(); ++rit)
-    {
-      unsigned int id = rit->second;
-      BlackBoard* rbb = m_remote_bbs[id];
-      BatteryInterface* bi  = m_battery_interfaces[id];
-      rbb->close(bi);
-      delete m_remote_bbs[id];
-    }
-
   delete m_wnd_main;
 }
+
 
 /** Obtain the main window of the application.
  * @return reference to the main window
@@ -99,83 +113,98 @@ WorldInfoViewer::get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
   Gtk::Widget* widget;
   ref_xml->get_widget(widget_name, widget);
   if ( !widget )
+  {
+    char* err_str;
+    if (asprintf(&err_str, "Couldn't find widget %s", widget_name) != -1)
     {
-      char* err_str;
-      if (asprintf(&err_str, "Couldn't find widget %s", widget_name) != -1) {
-	throw std::runtime_error(err_str);
-	free(err_str);
-      } else {
-	throw std::runtime_error("Getting widget failed");
-      }
-    }
+      throw std::runtime_error(err_str);
+      free(err_str);
+    } 
+    else 
+    { throw std::runtime_error("Getting widget failed"); }
+  }
 
   return widget;
 }
 
-/** Redraw the field. */
-void
-WorldInfoViewer::redraw_field()
+
+/** Update the GUI */
+bool
+WorldInfoViewer::update()
 {
-  m_field_view->reset();
+  if ( !m_data_container->new_data_available() )
+  { return true; }
 
-  std::map<unsigned int, bool>::iterator ait;
-  for (ait = m_robot_active.begin(); ait != m_robot_active.end(); ++ait)
+  if ( m_data_container->check_timeout() )
+  {
+    list<string> timedout_hosts = m_data_container->get_timedout_hosts();
+    
+    // remove timed out hosts
+    for ( list<string>::iterator hit = timedout_hosts.begin();
+	  hit != timedout_hosts.end();
+	  ++hit )
     {
-      ait->second = false;
+      Gtk::TreeModel::Children children = m_robots_list->children();
+      for ( Gtk::TreeModel::iterator i = children.begin();
+	    i != children.end();
+	    ++i )
+      {
+	Gtk::TreeModel::Row row = *i;
+	if ( Glib::ustring( *hit ) == row[ m_robot_record.fqdn ] )
+	{ i = m_robots_list->erase(i); }
+      }
+    }      
+  }
+
+  list<string> hosts = m_data_container->get_hosts();
+
+  // check that all hosts are in the treeview
+  for ( list<string>::iterator hit = hosts.begin();
+	hit != hosts.end();
+	++hit )
+  {
+    bool found = false;
+    
+    Gtk::TreeModel::Children children = m_robots_list->children();
+    for ( Gtk::TreeModel::iterator i = children.begin();
+	  i != children.end();
+	  ++i )
+    {
+      Gtk::TreeModel::Row row = *i;
+      if ( Glib::ustring( *hit ) == row[ m_robot_record.fqdn ] )
+      { 
+	found = true;
+	break;
+      }
     }
-
-  vector<string>::iterator hit;
-  vector<string> hosts = m_data_container->get_hosts();
-
-  HomPoint pos;
-  HomPolar pos_rel;
-  for (hit = hosts.begin(); hit != hosts.end(); ++hit)
+    
+    if ( !found )
     {
-      // robot pose
-      HomPose pose;
-      Matrix pose_cov;
-      if ( m_data_container->get_robot_pose( hit->c_str(), pose, pose_cov) )
-	{ m_field_view->set_robot_pose( hit->c_str(), pose.x(), pose.y(), pose.yaw()); }
+      char* fqdn;
+      char* hostname;
+      char delim ='.';
+      Glib::ustring fqdn_str = Glib::ustring( *hit );
 
-      // global ball positions
-      const char* host_name = (*hit).c_str();
-      if ( m_data_container->get_ball_pos_global(host_name, pos) )
-	{ m_field_view->set_ball_pos(host_name, pos.x(), pos.y()); }
-      else 
-      // relative ball positions
-	if ( m_data_container->get_ball_pos(host_name, pos_rel, pose_cov) )
-	  { m_field_view->set_ball_pos(host_name, pos_rel.x(), pos_rel.y()); }
-
-      // opponents
-      // TODO
-    }
-
-  // update BB interfaces
-  Gtk::TreeModel::Children children = m_robots_list->children();
-  for ( Gtk::TreeModel::Children::iterator iter = children.begin();
-	iter != children.end(); ++iter )
-    {
-      Gtk::TreeModel::Row row = *iter;
+      fqdn = strdup( hit->c_str() );
+      hostname = strtok( fqdn, &delim );
+      Gtk::TreeModel::Row row = *m_robots_list->append();
       
-      Glib::ustring name    = row[m_robot_record.name];
-      if ( m_robots.find(name) != m_robots.end() )
-	{
-	  unsigned int id       = m_robots[name];
-	  BatteryInterface* bi  = m_battery_interfaces[id];
-	  
-	  if ( bi->has_writer() )
-	    {
-	      bi->read();
-	      row[m_robot_record.voltage] = bi->voltage();
-	    }
-	  else
-	    { 
-	      row[m_robot_record.voltage] = 0.0;
-	    }
-	}
+      if ( hostname )
+      { row[ m_robot_record.hostname ] = Glib::ustring( hostname ); }
+      else
+      { row[ m_robot_record.hostname ] = fqdn_str; }
+      row[ m_robot_record.fqdn ]           = fqdn_str;
+      row[ m_robot_record.show_pose ]      = m_field_view->toggle_show_pose( fqdn_str );
+      row[ m_robot_record.show_ball ]      = m_field_view->toggle_show_ball( fqdn_str );
+      row[ m_robot_record.show_opponents ] = m_field_view->toggle_show_opponents( fqdn_str );
+      
+      free(fqdn);
     }
-
+  }
+  
   m_field_view->queue_draw();
+
+  return true;
 }
 
 /** Call this method whenever the game state changes. */
@@ -183,67 +212,52 @@ void
 WorldInfoViewer::gamestate_changed()
 {
   char* status_string;
-  if (asprintf( &status_string, "Team color: %s  Goal color: %s  Mode: %s  Score: %d:%d  Half: %s",
-		m_data_container->get_own_team_color_string().c_str(),
-		m_data_container->get_own_goal_color_string().c_str(),
-		m_data_container->get_game_state_string().c_str(),
-		m_data_container->get_own_score(),
-		m_data_container->get_other_score(),
-		m_data_container->get_half_string().c_str() ) != -1) {
-
+  if ( asprintf( &status_string, 
+		 "Team color: %s  Goal color: %s  Mode: %s  Score: %d:%d  Half: %s",
+		 m_data_container->get_own_team_color_string().c_str(),
+		 m_data_container->get_own_goal_color_string().c_str(),
+		 m_data_container->get_game_state_string().c_str(),
+		 m_data_container->get_own_score(),
+		 m_data_container->get_other_score(),
+		 m_data_container->get_half_string().c_str() ) != -1 )
+  {
     m_stb_status->remove_message(m_stb_message_id);
     m_stb_message_id = m_stb_status->push( Glib::ustring(status_string) );
-
+    
     free(status_string);
   }
 }
 
-/** Call this method whenever a new robot was detected. */
 void
-WorldInfoViewer::robot_added()
+WorldInfoViewer::on_show_pose_toggled( const Glib::ustring& path )
 {
-  vector<string>::iterator hit;
-  vector<string> hosts = m_data_container->get_hosts();
+  Gtk::TreeModel::Row row = *m_robots_list->get_iter( path );
+  Glib::ustring fqdn = row[ m_robot_record.fqdn ];
   
-  for (hit = hosts.begin(); hit != hosts.end(); ++hit)
-    {
-      if ( m_robots.find( *hit ) == m_robots.end() )
-	// add remote BB & interfaces
-	{
-	  m_robots[*hit] = m_robot_id;
-	  
-	  // add an entry to the list
-	  Gtk::TreeModel::Row row = *m_robots_list->append();
-	  row[m_robot_record.name]    = Glib::ustring( (*hit).c_str() );
-	  row[m_robot_record.voltage] = 0.0;
-	  m_list_entries[m_robot_id] = row;
-	  
-	  // open new remote blackboard
-	  BlackBoard* rbb = new RemoteBlackBoard( (*hit).c_str(), 1910 );
-	  m_remote_bbs[m_robot_id] = rbb;
-	  
-	  // create new battery interface
-	  BatteryInterface* bi = rbb->open_for_reading<BatteryInterface>("Battery");
-	  m_battery_interfaces[m_robot_id] = bi;
-	  
-	  ++m_robot_id;
-	}
-    }
+  row[ m_robot_record.show_pose ] = m_field_view->toggle_show_pose( fqdn );
+  
+  m_field_view->queue_draw();
 }
 
-/** Call this method whenever a robot disappeared. */
 void
-WorldInfoViewer::robot_removed()
-{ 
-  vector<string>::iterator hit;
-  vector<string> hosts = m_data_container->get_hosts();
-
-  std::map<Glib::ustring, unsigned int> cur_robots(m_robots);
-  m_robots.clear();
-
-  for (hit = hosts.begin(); hit != hosts.end(); ++hit)
-    {
-      unsigned int id = cur_robots[*hit];
-      m_robots[*hit] = id;
-    }
+WorldInfoViewer::on_show_ball_toggled( const Glib::ustring& path )
+{
+  Gtk::TreeModel::Row row = *m_robots_list->get_iter( path );
+  Glib::ustring fqdn = row[ m_robot_record.fqdn ];
+  
+  row[ m_robot_record.show_ball ] = m_field_view->toggle_show_ball( fqdn );
+  
+  m_field_view->queue_draw();
 }
+
+void
+WorldInfoViewer::on_show_opponents_toggled( const Glib::ustring& path )
+{
+  Gtk::TreeModel::Row row = *m_robots_list->get_iter( path );
+  Glib::ustring fqdn = row[ m_robot_record.fqdn ];
+  
+  row[ m_robot_record.show_opponents ] = m_field_view->toggle_show_opponents( fqdn );
+  
+  m_field_view->queue_draw();
+}
+

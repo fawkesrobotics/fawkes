@@ -61,6 +61,8 @@ class WorldModelNetworkThread
   virtual void loop();
   virtual void finalize();
 
+  fawkes::WorldInfoTransceiver* get_transceiver();
+
   /* WorldInfoHandler methods follow */
   virtual void pose_rcvd(const char *from_host,
 			 float x, float y, float theta,

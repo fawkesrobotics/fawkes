@@ -42,36 +42,43 @@ class WorldInfoViewer : public Gtk::Window
   WorldInfoViewer( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 		   fawkes::WorldInfoDataContainer* data_container );
   virtual ~WorldInfoViewer();
-
+  
   Gtk::Window& get_window() const;
-
-  void redraw_field();
+  
+  bool update();
   void gamestate_changed();
-  void robot_added();
-  void robot_removed();
-
+  
  private:
   class RobotRecord : public Gtk::TreeModelColumnRecord
+  {
+   public:
+    RobotRecord()
     {
-    public:
-      RobotRecord()
-	{
-	  add(name);
-	  add(voltage);
-	  //add(show_obstacles);
-	}
+      add(hostname);
+      add(fqdn);
+      add(show_pose);
+      add(show_ball);
+      add(show_opponents);
+    }
+    
+    Gtk::TreeModelColumn<Glib::ustring> hostname;
+    Gtk::TreeModelColumn<Glib::ustring> fqdn;
+    Gtk::TreeModelColumn<bool> show_pose;
+    Gtk::TreeModelColumn<bool> show_ball;
+    Gtk::TreeModelColumn<bool> show_opponents;
+  };
 
-      Gtk::TreeModelColumn<Glib::ustring> name;
-      Gtk::TreeModelColumn<float> voltage;
-      Gtk::TreeModelColumn<bool> show_obstacles;
-    };
+  Gtk::Widget* get_widget( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
+			   const char* widget_name ) const;
 
-  Gtk::Widget* get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
-			   const char* widget_name) const;
+  // signal handlers
+  void on_show_pose_toggled( const Glib::ustring& path );
+  void on_show_ball_toggled( const Glib::ustring& path );
+  void on_show_opponents_toggled( const Glib::ustring& path );
 
-  Gtk::Window* m_wnd_main;
-  Gtk::VBox* m_vbx_field;
-  Gtk::TreeView* m_trv_robots;
+  Gtk::Window*    m_wnd_main;
+  Gtk::VBox*      m_vbx_field;
+  Gtk::TreeView*  m_trv_robots;
   Gtk::Statusbar* m_stb_status;
 
   unsigned int m_stb_message_id;
@@ -85,10 +92,7 @@ class WorldInfoViewer : public Gtk::Window
 
   unsigned int m_robot_id;
   std::map<Glib::ustring, unsigned int> m_robots;
-  std::map<unsigned int, fawkes::BlackBoard*> m_remote_bbs;
-  std::map<unsigned int, fawkes::BatteryInterface*> m_battery_interfaces;
   std::map<unsigned int, Gtk::TreeModel::Row> m_list_entries;
-  std::map<unsigned int, bool> m_robot_active;
 };
 
 #endif /*  __TOOLS_WORLDINFO_VIEWER_WORLDINFO_VIEWER_H_ */

@@ -172,6 +172,16 @@ WorldModelNetworkThread::loop()
 }
 
 
+/** Access the WI transceiver.
+ * @return pointer to the WI transceiver
+ */
+WorldInfoTransceiver*
+WorldModelNetworkThread::get_transceiver()
+{
+  return __worldinfo_transceiver;
+}
+
+
 void
 WorldModelNetworkThread::pose_rcvd(const char *from_host,
 				   float x, float y, float theta,

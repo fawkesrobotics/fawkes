@@ -31,36 +31,43 @@
 #include <geometry/hom_pose.h>
 #include <map>
 
+namespace fawkes {
+  class WorldInfoDataContainer;
+}
+
 class FieldView : public Gtk::DrawingArea
 {
  public:
-  FieldView();
+  FieldView( fawkes::WorldInfoDataContainer* data,
+	     bool show_pose = true,
+	     bool show_ball = true,
+	     bool show_opponents = false );
   virtual ~FieldView();
 
-  void reset();
-
-  void set_robot_pose(const char* name, float glob_x, float glob_y, float theta);
-  void set_ball_pos(const char* robot_name, float rel_x, float rel_y);
-/*   void set_opponent_pos(const char* robot_name, float rel_x, float rel_y); */
+  bool toggle_show_pose( Glib::ustring name );
+  bool toggle_show_ball( Glib::ustring name );
+  bool toggle_show_opponents( Glib::ustring name );
 
  protected:
   virtual bool on_expose_event(GdkEventExpose* event);
 
  private:
-  void draw_field_msl(Cairo::RefPtr<Cairo::Context> context);
-  void draw_robot(Cairo::RefPtr<Cairo::Context> context, 
-		  float x, float y, float ori);
-  void draw_obstacle(Cairo::RefPtr<Cairo::Context> context, 
-		     float x, float y, float extend);
-  void draw_ball(Cairo::RefPtr<Cairo::Context> context, 
-		 float ball_x, float ball_y, float bot_x, float bot_y);
+  void draw_field_msl( Cairo::RefPtr<Cairo::Context> context );
+  void draw_robot( Cairo::RefPtr<Cairo::Context> context, 
+		   float x, float y, float ori );
+  void draw_obstacle( Cairo::RefPtr<Cairo::Context> context, 
+		      float x, float y, float extend );
+  void draw_ball( Cairo::RefPtr<Cairo::Context> context, 
+		  float ball_x, float ball_y, float bot_x, float bot_y );
 
-  std::map<std::string, unsigned int> m_robots;
-  std::map<unsigned int, fawkes::HomPose> m_robot_poses;
-/*   std::map<unsigned int, std::vector<fawkes::HomVector> > m_opponent_positions; */
-  std::map<unsigned int, fawkes::HomVector> m_ball_positions;
+  fawkes::WorldInfoDataContainer* m_data_container;
 
-  unsigned int m_robot_id;
+  std::map< Glib::ustring, bool > m_show_pose;
+  std::map< Glib::ustring, bool > m_show_ball;
+  std::map< Glib::ustring, bool > m_show_opponents;
+  bool m_show_pose_default;
+  bool m_show_ball_default;
+  bool m_show_opponents_default;
 };
 
 #endif /* __TOOL_WORLDINFO_VIEWER_FIELD_VIEW_H_ */

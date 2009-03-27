@@ -36,6 +36,7 @@
 
 namespace fawkes {
   class WorldInfoTransceiver;
+  class ObjectPositionInterface;
 }
 
 class WorldModelNetworkThread;
@@ -67,6 +68,10 @@ class WorldModelThread
 
   std::list<WorldModelFuser *>           __fusers;
   std::list<WorldModelFuser *>::iterator __fit;
+
+  bool __wi_send_enabled;
+  fawkes::ObjectPositionInterface* __wi_send_ball;
+  fawkes::ObjectPositionInterface* __wi_send_pose;
 
 };
 
