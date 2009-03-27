@@ -24,7 +24,9 @@
 
 #include <core/exception.h>
 #include <tools/plugin_gui/plugin_gui.h>
-#include <gconfmm.h>
+#ifdef HAVE_GCONFMM
+#  include <gconfmm.h>
+#endif
 #include <libglademm/xml.h>
 #include <iostream>
 
@@ -35,7 +37,9 @@ int main(int argc, char** argv)
   try
   {
     Gtk::Main kit(argc, argv);
+#ifdef HAVE_GCONFMM
     Gnome::Conf::init();
+#endif
 
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
     Glib::RefPtr<Gnome::Glade::Xml> refxml = Gnome::Glade::Xml::create(RESDIR"/glade/plugin_tool/plugin_tool.glade");

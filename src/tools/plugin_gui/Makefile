@@ -25,7 +25,7 @@ LIBS_ffplugingui = fawkescore fawkesutils fawkesguiutils
 OBJS_ffplugingui = main.o plugin_gui.o
 OBJS_all = $(OBJS_ffplugingui)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(HAVE_GCONFMM),111)
+ifeq ($(HAVE_GUI),1)
   BINS_gui = $(BINDIR)/ffplugingui
 else
   WARN_TARGETS += warning_plugin_gui

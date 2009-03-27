@@ -32,8 +32,10 @@
 #include <gui_utils/connection_dispatcher.h>
 
 #include <gtkmm.h>
-#include <gconfmm.h>
 #include <libglademm/xml.h>
+#ifdef HAVE_GCONF
+#  include <gconfmm.h>
+#endif
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -84,7 +86,9 @@ class PluginTreeView
 
  private:
   Glib::RefPtr<Gtk::ListStore> m_plugin_list;
+#ifdef HAVE_GCONF
   Glib::RefPtr<Gnome::Conf::Client> __gconf;
+#endif
   PluginRecord m_plugin_record;
 
   sigc::connection __gconf_connection;

@@ -28,10 +28,11 @@
 #include <gui_utils/connection_dispatcher.h>
 
 #include <gtkmm.h>
-#include <gconfmm.h>
 #include <libglademm/xml.h>
-
-#define GCONF_PREFIX "/apps/fawkes/skillgui"
+#ifdef HAVE_GCONFMM
+#  include <gconfmm.h>
+#  define GCONF_PREFIX "/apps/fawkes/skillgui"
+#endif
 
 namespace fawkes {
   class BlackBoard;
@@ -122,7 +123,9 @@ class SkillGuiGtkWindow : public Gtk::Window
 
   Glib::RefPtr<Gtk::ListStore> __sks_list;
 
+#ifdef HAVE_GCONFMM
   Glib::RefPtr<Gnome::Conf::Client> __gconf;
+#endif
 
 #ifdef USE_PAPYRUS
   SkillGuiGraphViewport  *pvp_graph;

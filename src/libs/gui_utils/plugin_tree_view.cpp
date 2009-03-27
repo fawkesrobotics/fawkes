@@ -419,17 +419,17 @@ void
 PluginTreeView::append_plugin_column()
 {
   bool description_as_tooltip = false;
+#ifdef HAVE_GCONFMM
   if ( __gconf )
   {
-#ifdef HAVE_GCONFMM
 #  ifdef GLIBMM_EXCEPTIONS_ENABLED
     description_as_tooltip = __gconf->get_bool(__gconf_prefix + "/description_as_tooltip");
 #  else
     std::auto_ptr<Glib::Error> error;
     description_as_tooltip = __gconf->get_bool(__gconf_prefix + "/description_as_tooltip", error);
 #  endif
-#endif
   }
+#endif
 
   if (description_as_tooltip)
   {

@@ -29,7 +29,9 @@
 int
 main(int argc, char **argv) {
   Gtk::Main gtk_main(argc, argv);
+#ifdef HAVE_GCONFMM
   Gnome::Conf::init();
+#endif
 
   Glib::RefPtr<Gnome::Glade::Xml> refxml;
   refxml = Gnome::Glade::Xml::create(RESDIR"/skillgui/skillgui.glade");

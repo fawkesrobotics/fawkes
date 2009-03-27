@@ -23,7 +23,6 @@ USE_PAPYRUS=0
 
 ifneq ($(PKGCONFIG),)
   HAVE_GRAPHVIZ = $(if $(shell $(PKGCONFIG) --exists 'libgvc'; echo $${?/1/}),1,0)
-  HAVE_GCONFMM  = $(if $(shell $(PKGCONFIG) --exists 'gconfmm-2.6'; echo $${?/1/}),1,0)
 
   ifeq ($(USE_PAPYRUS),1)
     HAVE_PAPYRUS  = $(if $(shell $(PKGCONFIG) --exists 'papyrus-1.0' 'papyrus-gtkmm-1.0'; echo $${?/1/}),1,0)
@@ -40,19 +39,10 @@ ifneq ($(PKGCONFIG),)
   else
     GUI_ERROR += (graphviz not installed)
   endif
-
-  ifeq ($(HAVE_GCONFMM),1)
-    CFLAGS_GCONFMM  = $(shell $(PKGCONFIG) --cflags 'gconfmm-2.6')
-    LDFLAGS_GCONFMM = $(shell $(PKGCONFIG) --libs 'gconfmm-2.6')
-  else
-    GUI_ERROR += (GConfmm not installed)
-  endif
 endif
 
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM) \
-	   $(CFLAGS_GRAPHVIZ) $(CFLAGS_GCONFMM)
-LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM) \
-	   $(LDFLAGS_GRAPHVIZ) $(LDFLAGS_GCONFMM)
+CFLAGS  += $(CFLAGS_GUI) $(CFLAGS_GRAPHVIZ) $(CFLAGS_PAPYRUS)
+LDFLAGS += $(LDFLAGS_GUI) $(LDFLAGS_GRAPHVIZ) $(LDFLAGS_PAPYRUS)
 
 LIBS_skillgui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard fawkesguiutils \
 		SkillerInterface SkillerDebugInterface
@@ -73,7 +63,7 @@ OBJS_skillgui_batch_render = batch_render.o gvplugin_skillgui_cairo.o
 
 OBJS_all = $(OBJS_skillgui) $(OBJS_skillgui_batch_render)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(PAPYRUS_OK)$(HAVE_GRAPHVIZ)$(HAVE_GCONFMM),11111)
+ifeq ($(HAVE_GUI)$(HAVE_GRAPHVIZ),11)
   BINS_gui = $(BINDIR)/skillgui $(BINDIR)/skillgui_batch_render
 else
   WARN_TARGETS += warning_skillgui

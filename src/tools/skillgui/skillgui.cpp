@@ -69,8 +69,10 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   __skdbg_if = NULL;
   __agdbg_if = NULL;
 
+#ifdef HAVE_GCONFMM
   __gconf = Gnome::Conf::Client::get_default_client();
   __gconf->add_dir(GCONF_PREFIX);
+#endif
 
   refxml->get_widget_derived("trv_log", __logview);
   refxml->get_widget("tb_connection", tb_connection);
@@ -112,7 +114,9 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   cbe_skillstring->set_text_column(__sks_record.skillstring);
 
   __trv_plugins->set_network_client(connection_dispatcher.get_client());
+#ifdef HAVE_GCONFMM
   __trv_plugins->set_gconf_prefix(GCONF_PREFIX);
+#endif
 
 #ifdef USE_PAPYRUS
   pvp_graph = Gtk::manage(new SkillGuiGraphViewport());
@@ -164,15 +168,19 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   gda->signal_update_disabled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_update_disabled));
 #endif
 
+#ifdef HAVE_GCONFMM
   __gconf->signal_value_changed().connect(sigc::hide(sigc::hide(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_config_changed))));
   on_config_changed();
+#endif
 }
 
 
 /** Destructor. */
 SkillGuiGtkWindow::~SkillGuiGtkWindow()
 {
+#ifdef HAVE_GCONFMM
   __gconf->remove_dir(GCONF_PREFIX);
+#endif
   __logview->set_client(NULL);
   __trv_plugins->set_network_client(NULL);
 }
@@ -181,6 +189,7 @@ SkillGuiGtkWindow::~SkillGuiGtkWindow()
 void
 SkillGuiGtkWindow::on_config_changed()
 {
+#ifdef HAVE_GCONFMM
   Gnome::Conf::SListHandle_ValueString l(__gconf->get_string_list(GCONF_PREFIX"/command_history"));
 
   __sks_list->clear();
@@ -196,6 +205,7 @@ SkillGuiGtkWindow::on_config_changed()
   bool continuous = __gconf->get_bool(GCONF_PREFIX"/continuous_exec", error);
 #endif
   tb_continuous->set_active(continuous);
+#endif
 }
 
 
@@ -213,7 +223,9 @@ SkillGuiGtkWindow::on_skill_changed()
 void
 SkillGuiGtkWindow::on_contexec_toggled()
 {
+#ifdef HAVE_GCONFMM
   __gconf->set(GCONF_PREFIX"/continuous_exec", tb_continuous->get_active());
+#endif
 }
 
 /** Event handler for connection button. */
@@ -424,7 +436,9 @@ SkillGuiGtkWindow::on_exec_clicked()
 	  l.push_back(row[__sks_record.skillstring]);
 	}
 
+#ifdef HAVE_GCONFMM
 	__gconf->set_string_list(GCONF_PREFIX"/command_history", l);
+#endif
       }
     } else {
       Gtk::MessageDialog md(*this, "The exclusive control over the skiller has "
