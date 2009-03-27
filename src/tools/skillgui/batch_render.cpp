@@ -28,6 +28,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <cmath>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -294,7 +295,8 @@ class SkillGuiBatchRenderer
 	  free(tmpout);
 
 	  Cairo::RefPtr<Cairo::ImageSurface> outs = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
-										maxwidth, maxheight);
+										(int)ceilf(maxwidth),
+										(int)ceilf(maxheight));
 	  double tx = (maxwidth  - imgs->get_width()) / 2.0;
 	  double ty = (maxheight - imgs->get_height()) / 2.0;
 	  printf("Re-creating %s for post-processing, "
