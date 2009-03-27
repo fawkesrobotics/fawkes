@@ -39,7 +39,6 @@ SkillGuiGraphDrawingArea::SkillGuiGraphDrawingArea()
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK);
 
   __gvc = gvContext();
-  __gvjob = NULL;
 
   __graph_fsm = "";
   __graph = "";
@@ -49,35 +48,45 @@ SkillGuiGraphDrawingArea::SkillGuiGraphDrawingArea()
   __scale = 1.0;
   __scale_override = false;
   __update_graph = true;
+  __recording = false;
 
   gvplugin_skillgui_cairo_setup(__gvc, this);
 
-  Gtk::Window *w = dynamic_cast<Gtk::Window *>(get_toplevel());
-  if (w) {
-    __fcd = new Gtk::FileChooserDialog(*w, "Save Graph",
-				       Gtk::FILE_CHOOSER_ACTION_SAVE);
-    __fcd->set_transient_for(*w);
-  } else {
-    __fcd = new Gtk::FileChooserDialog("Save Graph",
-				       Gtk::FILE_CHOOSER_ACTION_SAVE);
-  }
-  //Add response buttons the the dialog:
-  __fcd->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-  __fcd->add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
+  __fcd_save = new Gtk::FileChooserDialog("Save Graph",
+					  Gtk::FILE_CHOOSER_ACTION_SAVE);
+  __fcd_open = new Gtk::FileChooserDialog("Load Graph",
+					  Gtk::FILE_CHOOSER_ACTION_OPEN);
+  __fcd_recording = new Gtk::FileChooserDialog("Recording Directory",
+						 Gtk::FILE_CHOOSER_ACTION_CREATE_FOLDER);
 
-  Gtk::FileFilter *filter_pdf = Gtk::manage(new Gtk::FileFilter());
-  filter_pdf->set_name("Portable Document Format (PDF)");
-  filter_pdf->add_pattern("*.pdf");
-  Gtk::FileFilter *filter_svg = Gtk::manage(new Gtk::FileFilter());;
-  filter_svg->set_name("Scalable Vector Graphic (SVG)");
-  filter_svg->add_pattern("*.svg");
-  Gtk::FileFilter *filter_png = Gtk::manage(new Gtk::FileFilter());;
-  filter_png->set_name("Portable Network Graphic (PNG)");
-  filter_png->add_pattern("*.png");
-  __fcd->add_filter(*filter_pdf);
-  __fcd->add_filter(*filter_svg);
-  __fcd->add_filter(*filter_png);
-  __fcd->set_filter(*filter_pdf);
+  //Add response buttons the the dialog:
+  __fcd_save->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  __fcd_save->add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
+  __fcd_open->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  __fcd_open->add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
+  __fcd_recording->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  __fcd_recording->add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+
+  __filter_pdf = new Gtk::FileFilter();
+  __filter_pdf->set_name("Portable Document Format (PDF)");
+  __filter_pdf->add_pattern("*.pdf");
+  __filter_svg = new Gtk::FileFilter();
+  __filter_svg->set_name("Scalable Vector Graphic (SVG)");
+  __filter_svg->add_pattern("*.svg");
+  __filter_png = new Gtk::FileFilter();
+  __filter_png->set_name("Portable Network Graphic (PNG)");
+  __filter_png->add_pattern("*.png");
+  __filter_dot = new Gtk::FileFilter();
+  __filter_dot->set_name("DOT Graph");
+  __filter_dot->add_pattern("*.dot");
+  __fcd_save->add_filter(*__filter_pdf);
+  __fcd_save->add_filter(*__filter_svg);
+  __fcd_save->add_filter(*__filter_png);
+  __fcd_save->add_filter(*__filter_dot);
+  __fcd_save->set_filter(*__filter_pdf);
+
+  __fcd_open->add_filter(*__filter_dot);
+  __fcd_open->set_filter(*__filter_dot);
 
 #ifndef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
   signal_expose_event().connect(sigc::mem_fun(*this, &SkillGuiGraphDrawingArea::on_expose_event));
@@ -90,15 +99,23 @@ SkillGuiGraphDrawingArea::~SkillGuiGraphDrawingArea()
 {
   gvFreeContext(__gvc);
   //delete __fcd;
+  delete __fcd_save;
+  delete __fcd_open;
+  delete __fcd_recording;
+  delete __filter_pdf;
+  delete __filter_svg;
+  delete __filter_png;
+  delete __filter_dot;
 }
 
-/** Set current Graphviz job.
- * @param job current Graphviz job
+
+/** Get "update disabled" signal.
+ * @return "update disabled" signal
  */
-void
-SkillGuiGraphDrawingArea::set_gvjob(GVJ_t *job)
+sigc::signal<void>
+SkillGuiGraphDrawingArea::signal_update_disabled()
 {
-  __gvjob = job;
+  return __signal_update_disabled;
 }
 
 
@@ -108,11 +125,6 @@ SkillGuiGraphDrawingArea::set_gvjob(GVJ_t *job)
 void
 SkillGuiGraphDrawingArea::set_graph_fsm(std::string fsm_name)
 {
-  /*
-  if ( __graph_fsm != fsm_name ) {
-    __translator->set_translate(0, 0);
-  }
-  */
   if ( __update_graph ) {
     if ( __graph_fsm != fsm_name ) {
       __scale_override = false;
@@ -135,6 +147,29 @@ SkillGuiGraphDrawingArea::set_graph(std::string graph)
     queue_draw();
   } else {
     __nonupd_graph = graph;
+  }
+
+  if ( __recording ) {
+    char *tmp;
+    timespec t;
+    if (clock_gettime(CLOCK_REALTIME, &t) == 0) {
+      struct tm tms;
+      localtime_r(&t.tv_sec, &tms);
+
+      if ( asprintf(&tmp, "%s/%s_%04i%02i%02i-%02i%02i%02i.%09li.dot",
+		    __record_directory.c_str(), __graph_fsm.c_str(),
+		    tms.tm_year + 1900, tms.tm_mon + 1, tms.tm_mday,
+		    tms.tm_hour, tms.tm_min, tms.tm_sec, t.tv_nsec) != -1) {
+
+	//printf("Would record to filename %s\n", tmp);
+	save_dotfile(tmp);
+	free(tmp);
+      } else {
+	printf("Warning: Could not create file name for recording, skipping graph\n");
+      }
+    } else {
+      printf("Warning: Could not time recording, skipping graph\n");
+    }
   }
 }
 
@@ -161,6 +196,23 @@ SkillGuiGraphDrawingArea::set_pad(double pad_x, double pad_y)
 {
   __pad_x = pad_x;
   __pad_y = pad_y;
+}
+
+
+/** Get padding.
+ * To be called only by the Graphviz plugin.
+ * @param pad_x upon return contains padding in x
+ * @param pad_y upon return contains padding in y
+ */
+void
+SkillGuiGraphDrawingArea::get_pad(double &pad_x, double &pad_y)
+{
+  if (__scale_override) {
+    pad_x = pad_y = 0;
+  } else {
+    pad_x = __pad_x;
+    pad_y = __pad_y;
+  }
 }
 
 
@@ -206,6 +258,19 @@ SkillGuiGraphDrawingArea::get_translation(double &tx, double &ty)
 {
   tx = __translation_x;
   ty = __translation_y;
+}
+
+
+/** Get dimensions
+ * @param width upon return contains width
+ * @param height upon return contains height
+ */
+void
+SkillGuiGraphDrawingArea::get_dimensions(double &width, double &height)
+{
+  Gtk::Allocation alloc = get_allocation();
+  width  = alloc.get_width();
+  height = alloc.get_height();
 }
 
 
@@ -260,8 +325,8 @@ SkillGuiGraphDrawingArea::zoom_reset()
   Gtk::Allocation alloc = get_allocation();
   __scale = 1.0;
   __scale_override = true;
-  __translation_x = (alloc.get_width()  - __bbw) / 2.0;
-  __translation_y = (alloc.get_height() - __bbh) / 2.0 + __bbh;
+  __translation_x = (alloc.get_width()  - __bbw) / 2.0 + __pad_x;
+  __translation_y = (alloc.get_height() - __bbh) / 2.0 + __bbh - __pad_y;
   queue_draw();
 }
 
@@ -317,61 +382,103 @@ SkillGuiGraphDrawingArea::set_update_graph(bool update)
 }
 
 
+void
+SkillGuiGraphDrawingArea::save_dotfile(const char *filename)
+{
+  FILE *f = fopen(filename, "w");
+  if (f) {
+    fwrite(__graph.c_str(), __graph.length(), 1, f);
+    fclose(f);
+  }
+}
+
+
+/** Enable/disable recording.
+ * @param recording true to enable recording, false otherwise
+ * @return true if recording is enabled now, false if it is disabled.
+ * Enabling the recording may fail for example if the user chose to abort
+ * the directory creation process.
+ */
+bool
+SkillGuiGraphDrawingArea::set_recording(bool recording)
+{
+  if (recording) {
+    Gtk::Window *w = dynamic_cast<Gtk::Window *>(get_toplevel());
+    __fcd_recording->set_transient_for(*w);
+    int result = __fcd_recording->run();
+    if (result == Gtk::RESPONSE_OK) {
+      __record_directory = __fcd_recording->get_filename();
+      __recording = true;
+    }
+    __fcd_recording->hide();
+  } else {
+    __recording = false;
+  }
+  return __recording;
+}
+
+
 /** save current graph. */
 void
 SkillGuiGraphDrawingArea::save()
 {
   Gtk::Window *w = dynamic_cast<Gtk::Window *>(get_toplevel());
+  __fcd_save->set_transient_for(*w);
 
-  int result = __fcd->run();
+  int result = __fcd_save->run();
   if (result == Gtk::RESPONSE_OK) {
-    Cairo::RefPtr<Cairo::Surface> surface;
 
-    std::string filename = __fcd->get_filename();
-    bool write_to_png = false;
+    Gtk::FileFilter *f = __fcd_save->get_filter();
+    std::string filename = __fcd_save->get_filename();
     if (filename != "") {
-      Gtk::FileFilter *f = __fcd->get_filter();
-      if (f->get_name().find("PDF") != Glib::ustring::npos) {
-	surface = Cairo::PdfSurface::create(filename, __bbw, __bbh);
-      } else if (f->get_name().find("SVG") != Glib::ustring::npos) {
-	surface = Cairo::SvgSurface::create(filename, __bbw, __bbh);
-      } else if (f->get_name().find("PNG") != Glib::ustring::npos) {
-	surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
-					      (int)ceilf(__bbw),
-					      (int)ceilf(__bbh));
-	write_to_png = true;
-      }
+      if (f == __filter_dot) {
+	save_dotfile(filename.c_str());
+      } else {
+	Cairo::RefPtr<Cairo::Surface> surface;
 
-      if (surface) {
-	__cairo = Cairo::Context::create(surface);
-
-	bool old_scale_override = __scale_override;
-	double old_tx = __translation_x;
-	double old_ty = __translation_y;
-	double old_scale = __scale;
-	__translation_x = __pad_x;
-	__translation_y = __bbh - __pad_y;
-	__scale = 1.0;
-	__scale_override = true;
-
-	Agraph_t *g = agmemread((char *)__graph.c_str());
-	if (g) {
-	  gvLayout(__gvc, g, (char *)"dot");
-	  gvRender(__gvc, g, (char *)"skillguicairo", NULL);
-	  gvFreeLayout(__gvc, g);
-	  agclose(g);
+	bool write_to_png = false;
+	if (f == __filter_pdf) {
+	  surface = Cairo::PdfSurface::create(filename, __bbw, __bbh);
+	} else if (f == __filter_svg) {
+	  surface = Cairo::SvgSurface::create(filename, __bbw, __bbh);
+	} else if (f == __filter_png) {
+	  surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
+						(int)ceilf(__bbw),
+						(int)ceilf(__bbh));
+	  write_to_png = true;
 	}
 
-	if (write_to_png) {
-	  surface->write_to_png(filename);
+	if (surface) {
+	  __cairo = Cairo::Context::create(surface);
+	  
+	  bool old_scale_override = __scale_override;
+	  double old_tx = __translation_x;
+	  double old_ty = __translation_y;
+	  double old_scale = __scale;
+	  __translation_x = __pad_x;
+	  __translation_y = __bbh - __pad_y;
+	  __scale = 1.0;
+	  __scale_override = true;
+
+	  Agraph_t *g = agmemread((char *)__graph.c_str());
+	  if (g) {
+	    gvLayout(__gvc, g, (char *)"dot");
+	    gvRender(__gvc, g, (char *)"skillguicairo", NULL);
+	    gvFreeLayout(__gvc, g);
+	    agclose(g);
+	  }
+
+	  if (write_to_png) {
+	    surface->write_to_png(filename);
+	  }
+
+	  __cairo.clear();
+
+	  __translation_x = old_tx;
+	  __translation_y = old_ty;
+	  __scale = old_scale;
+	  __scale_override = old_scale_override;
 	}
-
-	__cairo.clear();
-
-	__translation_x = old_tx;
-	__translation_y = old_ty;
-	__scale = old_scale;
-	__scale_override = old_scale_override;
       }
 
     } else {
@@ -383,7 +490,40 @@ SkillGuiGraphDrawingArea::save()
     }
   }
 
-  __fcd->hide();
+  __fcd_save->hide();
+}
+
+
+/** Open a dot graph and display it. */
+void
+SkillGuiGraphDrawingArea::open()
+{
+  Gtk::Window *w = dynamic_cast<Gtk::Window *>(get_toplevel());
+  __fcd_open->set_transient_for(*w);
+
+  int result = __fcd_open->run();
+  if (result == Gtk::RESPONSE_OK) {
+    __update_graph = false;
+    __graph = "";
+    char *basec = strdup(__fcd_open->get_filename().c_str());
+    char *basen = basename(basec);
+    __graph_fsm = basen;
+    free(basec);
+
+    FILE *f = fopen(__fcd_open->get_filename().c_str(), "r");
+    while (! feof(f)) {
+      char tmp[4096];
+      size_t s;
+      if ((s = fread(tmp, 1, 4096, f)) > 0) {
+	__graph.append(tmp, s);
+      }
+    }
+    fclose(f);
+    __signal_update_disabled.emit();
+    queue_draw();
+  }
+
+  __fcd_open->hide();
 }
 
 

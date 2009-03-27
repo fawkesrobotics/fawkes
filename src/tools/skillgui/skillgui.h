@@ -40,6 +40,7 @@ namespace fawkes {
   class InterfaceDispatcher;
   class LogView;
   class Throbber;
+  class PluginTreeView;
 }
 
 #ifdef USE_PAPYRUS
@@ -71,6 +72,8 @@ class SkillGuiGtkWindow : public Gtk::Window
   void on_contexec_toggled();
   void on_skill_changed();
   void on_graphupd_clicked();
+  void on_update_disabled();
+  void on_recording_toggled();
 
  private:
   class SkillStringRecord : public Gtk::TreeModelColumnRecord
@@ -108,7 +111,9 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::ComboBoxText      *cb_graphlist;
   Gtk::ToolItem          *tb_graphlist;
   Gtk::ToolButton        *tb_graphsave;
+  Gtk::ToolButton        *tb_graphopen;
   Gtk::ToolButton        *tb_graphupd;
+  Gtk::ToggleToolButton  *tb_graphrecord;
   Gtk::ToolButton        *tb_controller;
   Gtk::ToolButton        *tb_zoomin;
   Gtk::ToolButton        *tb_zoomout;
@@ -129,8 +134,9 @@ class SkillGuiGtkWindow : public Gtk::Window
   fawkes::SkillerDebugInterface *__skdbg_if;
   fawkes::SkillerDebugInterface *__agdbg_if;
 
-  fawkes::LogView  *__logview;
-  fawkes::Throbber *__throbber;
+  fawkes::LogView         *__logview;
+  fawkes::Throbber        *__throbber;
+  fawkes::PluginTreeView  *__trv_plugins;
 
   bool __update_graph;
 };

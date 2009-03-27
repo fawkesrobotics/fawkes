@@ -38,7 +38,7 @@
 
 #define YUV422_PLANAR_V_AT(YUV, width, height, x, y)			\
   *(YUV + ((width) * (height)) + (((width) * (height) + (y) * (width) + (x)) / 2)); \
-  
+
 #define YUV422_PLANAR_YUV(YUV, width, height, x, y, yp, up, vp)		\
   {									\
     yp = YUV422_PLANAR_Y_AT(YUV, width, x, y);				\
@@ -55,7 +55,7 @@ typedef struct YUV_t_struct{
   unsigned char U;	/**< U component */
   unsigned char V;	/**< V component */
 
-  /** Standard constructor 
+  /** Standard constructor
    * @param y Y component
    * @param u U component
    * @param v V component
@@ -66,13 +66,17 @@ typedef struct YUV_t_struct{
     U = u;
     V = v;
   }
-  
+
   static YUV_t_struct white()   { return YUV_t_struct(255, 127, 127); } /**< @return white color */
   static YUV_t_struct black()   { return YUV_t_struct(  0, 127, 127); } /**< @return black color */
   static YUV_t_struct green()   { return YUV_t_struct( 64,  95,  85); } /**< @return green color */
-  static YUV_t_struct cyan()    { return YUV_t_struct(180,   0, 127); } /**< @return cyan color */
+  static YUV_t_struct cyan()    { return YUV_t_struct(178, 170,   0); } /**< @return cyan color */
   static YUV_t_struct magenta() { return YUV_t_struct(105, 212, 234); } /**< @return magenta color */
   static YUV_t_struct gray()    { return YUV_t_struct(127, 127, 127); } /**< @return gray color */
+  static YUV_t_struct orange()  { return YUV_t_struct(150,  43, 202); } /**< @return orange color */
+  static YUV_t_struct yellow()  { return YUV_t_struct(245,   0, 148); } /**< @return yellow color */
+  static YUV_t_struct blue()    { return YUV_t_struct( 29, 255, 107); } /**< @return blue color */
+  static YUV_t_struct red()     { return YUV_t_struct( 75,  85, 255); } /**< @return red color */
 } YUV_t;
 
 

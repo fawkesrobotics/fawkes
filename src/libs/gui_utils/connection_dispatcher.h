@@ -57,6 +57,8 @@ class ConnectionDispatcher
   virtual void connection_died(unsigned int id) throw();
   virtual void connection_established(unsigned int id) throw();
 
+  operator bool();
+
  protected:
   virtual void on_connection_established();
   virtual void on_connection_died();

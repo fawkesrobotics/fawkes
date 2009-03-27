@@ -212,7 +212,7 @@ FireVisionDataFile::set_comment(const char *comment)
 }
 
 
-/** Lets the file take over the ownership and give up the ownership of the blocks, 
+/** Lets the file take over the ownership and give up the ownership of the blocks,
  * respectively. By default, the file is the owner of the blocks. If a file owns
  * the blocks they will be deleted in the files destructor.
  * @param owns_blocks if true file owns the blocks
@@ -389,14 +389,14 @@ FireVisionDataFile::read(const char *file_name)
 				"Could not read content specific block header");
       }
     }
-    
+
     FireVisionDataFileBlock *block = new FireVisionDataFileBlock(bh.type, bh.size,
 								 spec_header, bh.spec_head_size);
 
     free(spec_header);
 
     //printf("Reading %u bytes for block data\n", bh.size);
-    if ( fread(block->data_ptr(), bh.size, 1, f) != 1 ) {
+    if ( bh.size && fread(block->data_ptr(), bh.size, 1, f) != 1 ) {
       fclose(f);
       delete block;
       throw FileReadException(file_name, errno,

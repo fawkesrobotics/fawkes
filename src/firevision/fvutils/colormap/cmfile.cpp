@@ -27,6 +27,7 @@
 
 #include <fvutils/colormap/colormap.h>
 #include <fvutils/colormap/cmfile_yuvblock.h>
+#include <fvutils/colormap/cmfile_headerblock.h>
 
 #include <fvutils/colormap/yuvcm.h>
 #include <core/exception.h>
@@ -74,6 +75,8 @@ ColormapFile::ColormapFile()
 void
 ColormapFile::add_colormap(Colormap *colormap)
 {
+  add_block(new ColormapFileHeaderBlock(colormap));
+
   std::list<ColormapFileBlock *> blocks = colormap->get_blocks();
   for (std::list<ColormapFileBlock *>::iterator i = blocks.begin(); i != blocks.end(); ++i) {
     add_block(*i);
@@ -112,17 +115,31 @@ ColormapFile::get_colormap()
 {
   // Make sure we only have YUV blocks
   BlockList &bl = blocks();
+  bool has_header = false;
+  YuvColormap *cm = NULL;
+
   for (BlockList::iterator b = bl.begin(); b != bl.end(); ++b) {
+    if (b == bl.begin() && (*b)->type() == CMFILE_TYPE_HEADER) {
+      has_header = true;
+      continue;
+    }
     if ( (*b)->type() != CMFILE_TYPE_YUV ) {
       throw fawkes::Exception("Colormap file contains block of unknown type");
     }
   }
 
-  // create colormap, throws an exception is depth/num_blocks is invalid
-  YuvColormap *cm = new YuvColormap(num_blocks());
+  if (has_header) {
+    ColormapFileHeaderBlock *hb = new ColormapFileHeaderBlock(*(bl.begin()));
+    cm = new YuvColormap(hb->depth(), hb->width(), hb->height());
+  }
+  else {
+    // create colormap, throws an exception is depth/num_blocks is invalid
+    cm = new YuvColormap(num_blocks());
+  }
 
   unsigned int level = 0;
   for (BlockList::iterator b = bl.begin(); b != bl.end(); ++b) {
+    if ((*b)->type() == CMFILE_TYPE_HEADER) continue;
     if ( (*b)->data_size() != cm->plane_size() ) {
       // invalid size, for a YUV colormap we must have this for one plane!
       delete cm;

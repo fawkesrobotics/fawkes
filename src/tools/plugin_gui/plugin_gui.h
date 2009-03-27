@@ -3,8 +3,8 @@
  *  plugin_gui.h - Plugin Tool Gui
  *
  *  Created: Thu Nov 09 20:15:27 2007
- *  Copyright  2007  Daniel Beck
- *             2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2007       Daniel Beck
+ *             2008-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -29,10 +29,12 @@
 #include <gtkmm.h>
 #include <libglademm/xml.h>
 
-class PluginTreeView;
 namespace fawkes {
+  class PluginTreeView;
   class ServiceSelectorCBE;
 }
+
+#define GCONF_PREFIX "/apps/fawkes/plugingui"
 
 class PluginGuiGtkWindow : public Gtk::Window
 {
@@ -41,11 +43,9 @@ class PluginGuiGtkWindow : public Gtk::Window
   virtual ~PluginGuiGtkWindow();
 
  private:
-  // widgets
-  PluginTreeView* m_trv_plugins;
-  Gtk::Statusbar* m_stb_status;
-
-  fawkes::ServiceSelectorCBE* m_service_selector;
+  Gtk::Statusbar             *m_stb_status;
+  fawkes::PluginTreeView     *m_trv_plugins;
+  fawkes::ServiceSelectorCBE *m_service_selector;
 };
 
 #endif /* __TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H_ */

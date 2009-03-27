@@ -480,7 +480,7 @@ FawkesThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook,
 {
   threads.lock();
   unsigned int timeout_sec = 0;
-  if (timeout_usec > 1000000) {
+  if (timeout_usec >= 1000000) {
     timeout_sec   = timeout_usec / 1000000;
     timeout_usec -= timeout_sec  * 1000000;
   }
@@ -554,7 +554,7 @@ void
 FawkesThreadManager::interrupt_timed_thread_wait()
 {
   __interrupt_timed_thread_wait = true;
-  waitcond_timedthreads->wake_all();  
+  waitcond_timedthreads->wake_all();
 }
 
 

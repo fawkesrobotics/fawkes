@@ -253,6 +253,10 @@ FieldLines6x4::init()
   push_back(field_line_t(3.f,  1.5f, 2.4f,  1.5f));
   push_back(field_line_t(3.f, -1.5f, 2.4f, -1.5f));
 
+  //opponent penalty point
+  push_back(field_line_t(1.2f,  0.05f, 1.2f, -0.05f));
+  push_back(field_line_t(1.15f, 0.f,   1.25f, 0.f));
+
   //center line
   push_back(field_line_t(0.f, 2.f, 0.f, -2.f));
   //side lines
@@ -269,6 +273,10 @@ FieldLines6x4::init()
   //own vert penalty area lines
   push_back(field_line_t(-3.f,  1.5f, -2.4f,  1.5f));
   push_back(field_line_t(-3.f, -1.5f, -2.4f, -1.5f));
+
+  //own penalty point
+  push_back(field_line_t(-1.2f,  0.05f, -1.2f, -0.05f));
+  push_back(field_line_t(-1.15f, 0.f,   -1.25f, 0.f));
 }
 
 
@@ -373,6 +381,10 @@ FieldLinesCityTowerSeminar::init()
   push_back(field_line_t(2.725f,  1.5f, 2.125f,  1.5f));
   push_back(field_line_t(2.725f, -1.5f, 2.125f, -1.5f));
 
+  //opponent penalty point
+  push_back(field_line_t(0.925f, 0.05f, 0.925f, -0.05f));
+  push_back(field_line_t(0.875f, 0.f,   0.975f,  0.f));
+
   //center line
   push_back(field_line_t(0.f, 1.825f, 0.f, -1.825f));
   //side lines
@@ -390,5 +402,9 @@ FieldLinesCityTowerSeminar::init()
   //own vert penalty area lines
   push_back(field_line_t(-2.725f,  1.5f, -2.125f,  1.5f));
   push_back(field_line_t(-2.725f, -1.5f, -2.125f, -1.5f));
+
+  //own penalty point
+  push_back(field_line_t(-0.925f, 0.05f, -0.925f, -0.05f));
+  push_back(field_line_t(-0.875f, 0.f,   -0.975f,  0.f));
 }
 

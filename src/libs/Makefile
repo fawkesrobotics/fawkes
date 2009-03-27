@@ -35,5 +35,5 @@ geometry: core
 worldinfo_utils: core netcomm geometry
 lua: core utils blackboard config
 interfaces: core interface
-gui_utils: core netcomm
+gui_utils: core netcomm plugin
 naoutils: core utils

@@ -36,6 +36,7 @@
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/color/conversions.h>
 #include <fvutils/color/yuv.h>
+#include <fvutils/colormap/yuvcm.h>
 #include <fvutils/scalers/lossy.h>
 #include <fvutils/system/camargp.h>
 #include <fvutils/writers/jpeg.h>
@@ -68,7 +69,7 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
   m_img_image = dynamic_cast<Gtk::Image*>( get_widget(ref_xml, "imgImage") );
   m_img_image->signal_size_allocate().connect( sigc::mem_fun(*this, &Firestation::resize_image) );
-    
+
   m_evt_image = dynamic_cast<Gtk::EventBox*>( get_widget(ref_xml, "evtImageEventBox") );
   m_evt_image->signal_button_press_event().connect( sigc::mem_fun(*this, &Firestation::image_click) );
 
@@ -89,19 +90,19 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
   m_tbtn_close_camera = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnCloseCamera") );
   m_tbtn_close_camera->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::close_camera) );
-  
+
   m_tbtn_update = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnUpdate") );
   m_tbtn_update->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::update_image) );
 
   m_tbtn_save = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnSave") );
   m_tbtn_save->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::save_image) );
-  
+
   m_tbtn_open_file = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnOpenFile") );
   m_tbtn_open_file->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::open_file) );
-  
+
   m_tbtn_open_folder = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnOpenFolder") );
   m_tbtn_open_folder->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::open_folder) );
-  
+
   m_tbtn_open_shm = dynamic_cast<Gtk::ToolButton*>( get_widget(ref_xml, "tbtnOpenShm") );
   m_tbtn_open_shm->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::open_shm) );
 
@@ -184,9 +185,9 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_cmb_ct_type->signal_changed().connect(sigc::mem_fun(*this, &Firestation::ct_object_changed));
   m_cmb_ct_type->set_active(0);
 
-  m_btn_ct_start = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtStart") );
+  m_btn_ct_start = dynamic_cast<Gtk::ToggleButton*>( get_widget(ref_xml, "btnCtStart") );
   m_btn_ct_start->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::ct_start) );
-  
+
   m_ctw->update_image().connect( sigc::mem_fun(*this, &Firestation::draw_image) );
   m_ctw->colormap_updated().connect( sigc::mem_fun(*this, &Firestation::on_colormap_updated) );
 
@@ -205,7 +206,7 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtLoadHistos") );
   m_ctw->set_load_histos_btn(btn);
- 
+
   btn = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnCtSaveColormap") );
   m_ctw->set_save_colormap_btn(btn);
 
@@ -233,9 +234,13 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   fcd = dynamic_cast<Gtk::FileChooserDialog*>( get_widget(ref_xml, "fcdFilechooser") );
   m_ctw->set_filechooser_dlg(fcd);
 
-  Gtk::SpinButton* spbtn;
-  spbtn = dynamic_cast<Gtk::SpinButton*>( get_widget(ref_xml, "spbtnCtCmDepth") );
-  m_ctw->set_cm_depth_selector(spbtn);
+
+  m_btn_ct_seg = dynamic_cast<Gtk::ToggleButton*>( get_widget(ref_xml, "btnCtSeg") );
+  m_btn_ct_seg->signal_toggled().connect( sigc::mem_fun(*this, &Firestation::draw_image) );
+  m_spbtn_depth = dynamic_cast<Gtk::SpinButton*>( get_widget(ref_xml, "spbtnCtCmDepth") );
+  m_spbtn_width = dynamic_cast<Gtk::SpinButton*>( get_widget(ref_xml, "spbtnCtCmWidth") );
+  m_spbtn_height = dynamic_cast<Gtk::SpinButton*>( get_widget(ref_xml, "spbtnCtCmHeight") );
+  m_ctw->set_cm_selector(m_spbtn_depth, m_spbtn_width, m_spbtn_height);
   // ----------------------------------------------------------------
 
 
@@ -314,7 +319,7 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
 
   m_img_src = SRC_NONE;
   m_op_mode = MODE_VIEWER;
-  
+
   m_cont_img_trans = false;
 
   m_max_img_width  = m_evt_image->get_width();
@@ -335,7 +340,7 @@ Firestation::~Firestation()
   free(m_yuv_draw_buffer);
   free(m_yuv_scaled_buffer);
   free(m_rgb_scaled_buffer);
-  
+
   delete m_camera;
   delete m_img_writer;
 
@@ -360,7 +365,7 @@ Firestation::get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
   Gtk::Widget* widget;
   ref_xml->get_widget(widget_name, widget);
   if ( !widget )
-    { 
+    {
       std::string err_str = "Couldn't find widget ";
       err_str += std::string(widget_name);
       err_str += ".";
@@ -415,12 +420,12 @@ Firestation::close_camera()
 
   m_yuv_orig_buffer = 0;
   m_yuv_draw_buffer = 0;
-  
+
   m_img_image->clear();
   m_img_image->set("gtk-missing-image");
 
   m_ctw->set_src_buffer(NULL, 0, 0);
-  m_ctw->set_draw_buffer(NULL);  
+  m_ctw->set_draw_buffer(NULL);
 }
 
 /** Saves the current image. */
@@ -434,7 +439,7 @@ Firestation::save_image()
 
   int result = m_fcd_save_image->run();
 
-  switch(result) 
+  switch(result)
     {
     case(Gtk::RESPONSE_OK):
       {
@@ -460,7 +465,7 @@ Firestation::save_image()
 	m_img_writer->set_dimensions(m_img_width, m_img_height);
 	m_img_writer->set_buffer(m_img_cs, m_yuv_orig_buffer);
 	m_img_writer->write();
-	
+
 	std::cout << "Save file: " <<  filename << std::endl;
 	break;
       }
@@ -471,7 +476,7 @@ Firestation::save_image()
     default:
       break;
     }
-  
+
   m_fcd_save_image->hide();
 }
 
@@ -488,9 +493,9 @@ Firestation::update_image()
       memcpy(m_yuv_orig_buffer, m_camera->buffer(), m_img_size);
       memcpy(m_yuv_draw_buffer, m_camera->buffer(), m_img_size);
       m_camera->dispose_buffer();
-  
+
       draw_image();
-      
+
       m_ctw->draw_segmentation_result();
     }
   catch (Exception& e)
@@ -532,34 +537,34 @@ Firestation::open_file()
   m_fcd_open_image->set_transient_for(*this);
 
   int result = m_fcd_open_image->run();
-	
+
   switch(result)
     {
     case Gtk::RESPONSE_OK:
       {
 	pre_open_img_src();
-	
+
 	std::string filename = m_fcd_open_image->get_filename();
-	
+
 	m_camera = new FileLoader( filename.c_str() );
 	m_img_src = SRC_FILE;
 	post_open_img_src();
-	
+
 	break;
       }
-      
+
     case Gtk::RESPONSE_CANCEL:
       {
 	break;
       }
-      
+
     default:
       {
 	break;
       }
     }
 
-  m_fcd_open_image->hide();  
+  m_fcd_open_image->hide();
 }
 
 /** Reads in images from a directory. */
@@ -570,13 +575,13 @@ Firestation::open_folder()
   m_fcd_open_image->set_transient_for(*this);
 
   int result = m_fcd_open_image->run();
-	
+
   switch(result)
     {
     case Gtk::RESPONSE_OK:
       {
 	pre_open_img_src();
-	
+
 	std::string extension;
 	Glib::ustring filter_name = m_fcd_save_image->get_filter()->get_name();
 	if ( Glib::ustring("JPEG") == filter_name )
@@ -598,19 +603,19 @@ Firestation::open_folder()
 
 	break;
       }
-      
+
     case Gtk::RESPONSE_CANCEL:
       {
 	break;
       }
-      
+
     default:
       {
 	break;
       }
     }
 
-  m_fcd_open_image->hide();  
+  m_fcd_open_image->hide();
 }
 
 /** Opens a SHM image. */
@@ -621,7 +626,7 @@ Firestation::open_shm()
   SharedMemory::SharedMemoryIterator shmit;
   SharedMemoryImageBufferHeader* h = new SharedMemoryImageBufferHeader;
   shmit = SharedMemory::find(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h);
-  
+
   if (shmit == SharedMemory::end())
     {
       m_stb_status->push("No SHM images found");
@@ -630,7 +635,7 @@ Firestation::open_shm()
   else
     {
       m_shm_list_store->clear();
-      
+
       while ( shmit != SharedMemory::end() )
 	{
 	  ++num_buffers;
@@ -641,23 +646,23 @@ Firestation::open_shm()
 	  shmit++;
 	}
     }
-  
+
   m_dlg_open_shm->set_transient_for(*this);
-  
+
   int result = m_dlg_open_shm->run();
-  
+
   switch(result)
     {
     case Gtk::RESPONSE_OK:
       {
 	delete m_shm_buffer;
-	
+
 	Gtk::TreeModel::Path path;
 	Gtk::TreeViewColumn* column;
 	m_trv_shm_image_ids->get_cursor(path, column);
-	
+
 	Gtk::TreeModel::iterator iter = m_shm_list_store->get_iter(path);
-	
+
 	if (iter)
 	  {
 	    Gtk::TreeModel::Row row = *iter;
@@ -665,7 +670,7 @@ Firestation::open_shm()
 	      {
 		Glib::ustring name = row[m_shm_columns.m_name];
 		pre_open_img_src();
-		
+
 		try
 		  {
 		    m_camera = new SharedMemoryCamera( name.c_str() );
@@ -674,9 +679,9 @@ Firestation::open_shm()
 		  {
 		    e.print_trace();
 		  }
-		
+
 		m_img_src = SRC_SHM;
-		
+
 		post_open_img_src();
 	      }
 	  }
@@ -684,17 +689,17 @@ Firestation::open_shm()
 	  {
 	    std::cout << "invalid iter" << std::endl;
 	  }
-	
+
 	break;
       }
-      
+
     case Gtk::RESPONSE_CANCEL:
       break;
-      
+
     default:
       break;
     }
-  
+
   m_dlg_open_shm->hide();
 }
 
@@ -708,12 +713,12 @@ Firestation::open_fuse()
       m_stb_status->push("No FUSE services found");
       return;
     }
-  
+
   m_trv_fuse_services->expand_all();
   m_dlg_open_fuse->set_transient_for(*this);
-  
+
   int result = m_dlg_open_fuse->run();
-  
+
   switch(result)
     {
     case Gtk::RESPONSE_OK:
@@ -721,9 +726,9 @@ Firestation::open_fuse()
 	Gtk::TreeModel::Path path;
 	Gtk::TreeViewColumn* column;
 	m_trv_fuse_services->get_cursor(path, column);
-	
+
 	Gtk::TreeModel::iterator iter = m_fuse_tree_store->get_iter(path);
-	
+
 	if (iter)
 	  {
 	    Gtk::TreeModel::Row row = *iter;
@@ -735,7 +740,7 @@ Firestation::open_fuse()
  		bool jpeg = m_ckb_fuse_jpeg->get_active();
 
 		pre_open_img_src();
-		
+
 		try
 		  {
  		    m_camera = new NetworkCamera(hostname.c_str(), port, image_id.c_str(), jpeg);
@@ -753,28 +758,28 @@ Firestation::open_fuse()
 	  {
 	    std::cout << "invalid iter" << std::endl;
 	  }
-	
+
 	break;
       }
-      
+
     case Gtk::RESPONSE_CANCEL:
       break;
-      
+
     default:
       break;
     }
-  
+
   m_dlg_open_fuse->hide();
 }
 
 void
 Firestation::pre_open_img_src()
-{  
+{
   if (SRC_NONE != m_img_src)
     {
       m_camera->stop();
       m_camera->close();
-      
+
       delete m_camera;
       m_camera = 0;
 
@@ -782,7 +787,7 @@ Firestation::pre_open_img_src()
     }
 }
 
-/** Stuff that is executed after an image source has been selected. */ 
+/** Stuff that is executed after an image source has been selected. */
 void
 Firestation::post_open_img_src()
 {
@@ -796,26 +801,26 @@ Firestation::post_open_img_src()
       m_img_width = m_camera->pixel_width();
       m_img_height = m_camera->pixel_height();
       m_img_cs = m_camera->colorspace();
-      
-      m_img_size = colorspace_buffer_size( m_img_cs, 
-					   m_img_width, 
+
+      m_img_size = colorspace_buffer_size( m_img_cs,
+					   m_img_width,
 					   m_img_height );
-      
+
       free(m_yuv_orig_buffer);
       free(m_yuv_draw_buffer);
-      
+
       m_yuv_orig_buffer = (unsigned char*) malloc(m_img_size);
       m_yuv_draw_buffer = (unsigned char*) malloc(m_img_size);
       memcpy(m_yuv_orig_buffer, m_camera->buffer(), m_img_size);
       memcpy(m_yuv_draw_buffer, m_camera->buffer(), m_img_size);
-      
+
       m_camera->dispose_buffer();
-      
+
       m_tbtn_update->set_sensitive(true);
       m_tbtn_save->set_sensitive(true);
-      
+
       draw_image();
-      
+
       m_ctw->set_src_buffer(m_yuv_orig_buffer, m_img_width, m_img_height);
       m_ctw->set_draw_buffer(m_yuv_draw_buffer);
       m_ctw->draw_segmentation_result();
@@ -825,7 +830,7 @@ Firestation::post_open_img_src()
       e.print_trace();
       printf("Opening camera failed.\n");
     }
-  
+
 }
 
 void
@@ -839,7 +844,7 @@ Firestation::on_fuse_image_selected()
   m_filw->get_selected_image(host_name, port, image_id, compression);
 
   pre_open_img_src();
-  
+
   try
     {
       m_camera = new NetworkCamera( host_name.c_str(), port, image_id.c_str(), compression );
@@ -850,7 +855,7 @@ Firestation::on_fuse_image_selected()
       m_img_src = SRC_NONE;
       e.print_trace();
     }
-  
+
   post_open_img_src();
 }
 
@@ -889,11 +894,25 @@ Firestation::draw_image()
   scaler.set_scaled_buffer(m_yuv_scaled_buffer);
   scaler.scale();
 
+  if (m_btn_ct_seg->get_active()) {
+    unsigned int sld_img_size = m_scaled_img_width * m_scaled_img_height;
+    unsigned char u_seg = 255 / (unsigned int)pow(2, m_spbtn_width->get_value());
+    unsigned char v_seg = 255 / (unsigned int)pow(2, m_spbtn_height->get_value());
+    unsigned int u = 0;
+    for (u = sld_img_size; u < sld_img_size + sld_img_size / 2; ++u) {
+      m_yuv_scaled_buffer[u] = (m_yuv_scaled_buffer[u] / u_seg) * u_seg;
+    }
+
+    for (; u < 2 * sld_img_size; ++u) {
+      m_yuv_scaled_buffer[u] = (m_yuv_scaled_buffer[u] / v_seg) * v_seg;
+    }
+  }
+
   if ( m_img_src == SRC_SHM )
     {
       SharedMemoryCamera* shm_camera = dynamic_cast<SharedMemoryCamera*>(m_camera);
       if ( shm_camera->shared_memory_image_buffer()->circle_found() )
-	{ 
+	{
 	  Drawer drawer;
 	  drawer.set_buffer(m_yuv_scaled_buffer, m_scaled_img_width, m_scaled_img_height);
 	  drawer.set_color(YUV_t::white());
@@ -908,11 +927,11 @@ Firestation::draw_image()
   m_rgb_scaled_buffer = (unsigned char*) malloc( colorspace_buffer_size( RGB,
 									 m_scaled_img_width,
 									 m_scaled_img_height ) );
-  
+
   convert( m_img_cs, RGB,
 	   m_yuv_scaled_buffer, m_rgb_scaled_buffer,
 	   m_scaled_img_width, m_scaled_img_height );
-  
+
   Glib::RefPtr<Gdk::Pixbuf> image = Gdk::Pixbuf::create_from_data( m_rgb_scaled_buffer,
 								   Gdk::COLORSPACE_RGB,
 								   false,
@@ -920,11 +939,11 @@ Firestation::draw_image()
 								   m_scaled_img_width,
 								   m_scaled_img_height,
 								   3 * m_scaled_img_width );
-  
+
   m_img_image->set(image);
 }
 
-/** Signal handler that is called whenever the window size is changed. 
+/** Signal handler that is called whenever the window size is changed.
  * @param allocation a Gtk allocation
  */
 void
@@ -934,7 +953,7 @@ Firestation::resize_image(Gtk::Allocation& allocation)
   unsigned int new_height = (unsigned int) allocation.get_height();
 
   if (new_width != m_max_img_width ||  new_height != m_max_img_height)
-    { 
+    {
       m_max_img_width = new_width;
       m_max_img_height = new_height;
       draw_image();
@@ -953,7 +972,7 @@ Firestation::image_click(GdkEventButton* event)
 
   offset_x = (m_max_img_width - m_scaled_img_width) / 2;
   offset_y = (m_max_img_height - m_scaled_img_height) / 2;
-  
+
   offset_x = offset_x > m_max_img_width ? 0 : offset_x;
   offset_y = offset_y > m_max_img_height ? 0 : offset_y;
 
@@ -984,8 +1003,8 @@ Firestation::image_click(GdkEventButton* event)
 				 image_x,
 				 image_y,
 				 y, u, v );
-	      cout << "Y: " << (unsigned int)y 
-		   << " U: " << (unsigned int)u 
+	      cout << "Y: " << (unsigned int)y
+		   << " U: " << (unsigned int)u
 		   << " V: " << (unsigned int)v << endl;
 	      break;
 	    default:
@@ -1012,12 +1031,12 @@ Firestation::image_click(GdkEventButton* event)
 	  {
 	    char* next_dist_char = (char*) malloc(10);
 	    char* next_ori_char = (char*) malloc(10);
-	    
+
 	    sprintf(next_dist_char, "%2f", next_dist);
 	    sprintf(next_ori_char, "%2f", next_ori);
 	    m_ent_mc_dist->set_text(Glib::ustring(next_dist_char));
 	    m_ent_mc_ori->set_text(Glib::ustring(next_ori_char));
-	    
+
 	    free(next_dist_char);
 	    free(next_ori_char);
 	  }
@@ -1026,7 +1045,7 @@ Firestation::image_click(GdkEventButton* event)
 	    m_ent_mc_dist->set_text("");
 	    m_ent_mc_ori->set_text("");
 	  }
-	
+
 	break;
       }
 
@@ -1060,7 +1079,7 @@ Firestation::ct_start()
       if (m_img_src != SRC_NONE)
 	{
 	  m_ctw->set_fg_object( ct_get_fg_object() );
-	  
+
 	  m_op_mode = MODE_COLOR_TRAIN;
 
 	  m_stb_status->push("Entering color training mode");
@@ -1092,8 +1111,11 @@ Firestation::ct_get_fg_object()
 		case 5: //Goal (yellow)
 			return H_GOAL_YELLOW;
 
-		case 6: //Goal (sky-blue)
-			return H_GOAL_BLUE;
+                case 6: //Goal (sky-blue)
+                        return H_GOAL_BLUE;
+
+                case 7: //Background
+                        return H_BACKGROUND;
 
 		default:
 			printf("ct_get_fg_object(): UNKNOWN\n");
@@ -1130,17 +1152,17 @@ Firestation::mc_start()
 	  float next_dist;
 	  float next_ori;
 	  show = m_calib_tool->get_next(&next_dist, &next_ori);
-	  
+
 	  if (show)
 	    {
 	      char* next_dist_char = (char*) malloc(10);
 	      char* next_ori_char = (char*) malloc(10);
-	      
+
 	      sprintf(next_dist_char, "%2f", next_dist);
 	      sprintf(next_ori_char, "%2f", next_ori);
 	      m_ent_mc_dist->set_text(Glib::ustring(next_dist_char));
 	      m_ent_mc_ori->set_text(Glib::ustring(next_ori_char));
-	      
+
 	      free(next_dist_char);
 	      free(next_ori_char);
 	    }
@@ -1149,7 +1171,7 @@ Firestation::mc_start()
 	      m_ent_mc_dist->set_text("");
 	      m_ent_mc_ori->set_text("");
 	    }
-	  
+
 	  m_stb_status->push("Entering mirror calibration mode");
 	}
     }
@@ -1166,7 +1188,7 @@ Firestation::mc_load()
   filter_mirror.add_pattern("*.mirror");
   filter_mirror.add_pattern("*.bulb");
   m_fcd_mc_load->add_filter(filter_mirror);
-  
+
   int result = m_fcd_mc_load->run();
 
   switch(result)
@@ -1195,7 +1217,7 @@ Firestation::mc_save()
 
   int result = m_fcd_mc_save->run();
 
-  switch(result) 
+  switch(result)
     {
     case(Gtk::RESPONSE_OK):
       {
@@ -1211,7 +1233,7 @@ Firestation::mc_save()
     default:
       break;
     }
-  
+
   m_fcd_mc_save->hide();
 
 }
@@ -1258,7 +1280,7 @@ Firestation::service_added( const char* name,
       return;
     }
   cam.close();
- 
+
   std::vector<FUSE_imageinfo_t>::iterator fit;
 
   Gtk::TreeModel::Children children = m_fuse_tree_store->children();

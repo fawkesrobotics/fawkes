@@ -35,7 +35,7 @@
 
 #define NOEXPORT __attribute__ ((visibility("hidden")))
 
-NOEXPORT SkillGuiGraphDrawingArea *__sggda = NULL;
+NOEXPORT SkillGuiCairoRenderInstructor *__sgcri = NULL;
 
 NOEXPORT std::vector<double> __skillgui_cairo_render_dashed;
 NOEXPORT std::vector<double> __skillgui_cairo_render_dotted;
@@ -62,6 +62,65 @@ NOEXPORT unsigned int __num_polyline = 0;
 NOEXPORT unsigned int __num_text = 0;
 #endif
 
+
+/** @class SkillGuiCairoRenderInstructor
+ * Graphviz Cairo render plugin instructor.
+ * @author Tim Niemueller
+ *
+ * @fn Cairo::RefPtr<Cairo::Context> SkillGuiCairoRenderInstructor::get_cairo()
+ * Get Cairo context.
+ * @return cairo context to use for drawing
+ *
+ * @fn bool   SkillGuiCairoRenderInstructor::scale_override()
+ * Check if scale override is enabled.
+ * @return true if the instructor determines the scaling, false to have the
+ * plugin do this.
+ *
+ * @fn void   SkillGuiCairoRenderInstructor::get_dimensions(double &width, double &height)
+ * Get available space dimensions.
+ * @param width upon return contains the available width
+ * @param height upon return contains the available height
+ *
+ * @fn double SkillGuiCairoRenderInstructor::get_scale()
+ * Get scale factor.
+ * If scale_override() returns true, shall return the requested scale value.
+ *
+ * @fn void   SkillGuiCairoRenderInstructor::set_scale(double scale)
+ * Set scale.
+ * Set the scale value that the plugin determined.
+ * @param scale scale determined by plugin
+ *
+ * @fn void   SkillGuiCairoRenderInstructor::get_translation(double &tx, double &ty)
+ * Get translation values.
+ * If scale_override() returns true, shall return the requested translation values.
+ * @param tx upon return contains translation in x
+ * @param ty upon return contains translation in y
+ *
+ * @fn void   SkillGuiCairoRenderInstructor::set_translation(double tx, double ty)
+ * Set translation.
+ * Set the translation values the plugin determined.
+ * @param tx translation in x
+ * @param ty translation in y
+ *
+ * @fn void   SkillGuiCairoRenderInstructor::set_bb(double bbw, double bbh)
+ * Set the bounding box.
+ * Set by the plugin before calling any other function.
+ * @param bbw bounding box width
+ * @param bbh bounding box height
+ *
+ * @fn void   SkillGuiCairoRenderInstructor::set_pad(double pad_x, double pad_y)
+ * Set padding.
+ * Set by the plugin immediately after set_bb() is called.
+ * @param pad_x padding in x
+ * @param pad_y padding in y
+ *
+ * @fn void   SkillGuiCairoRenderInstructor::get_pad(double &pad_x, double &pad_y)
+ * Get padding.
+ * If scale_override() returns true, shall return the requested padding values.
+ * @param pad_x upon return contains padding in x
+ * @param pad_y upon return contains padding in y
+ */
+
 static void
 skillgui_cairo_device_init(GVJ_t *firstjob)
 {
@@ -70,9 +129,7 @@ skillgui_cairo_device_init(GVJ_t *firstjob)
 static void
 skillgui_cairo_device_finalize(GVJ_t *firstjob)
 {
-  __sggda->set_gvjob(firstjob);
-
-  firstjob->context = (void *)__sggda;
+  firstjob->context = (void *)__sgcri;
   firstjob->external_context = TRUE;
 
   // Render!
@@ -110,28 +167,38 @@ skillgui_cairo_render_begin_page(GVJ_t *job)
   __tt.ping_start(__ttc_page);
   __tt.ping_start(__ttc_beginpage);
 #endif
-  SkillGuiGraphDrawingArea *gda = (SkillGuiGraphDrawingArea *)job->context;
-  Cairo::RefPtr<Cairo::Context> cairo = gda->get_cairo();
+  SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
 
-  Gtk::Allocation alloc = __sggda->get_allocation();
-  float avwidth  = alloc.get_width();
-  float avheight = alloc.get_height();
-  float bbwidth  = job->bb.UR.x - job->bb.LL.x + 2 * job->pad.x;
-  float bbheight = job->bb.UR.y - job->bb.LL.y + 2 * job->pad.y;
+  float bbwidth  = job->bb.UR.x - job->bb.LL.x;
+  float bbheight = job->bb.UR.y - job->bb.LL.y;
+
+  cri->set_bb(bbwidth, bbheight);
+  cri->set_pad(job->pad.x, job->pad.y);
+  Cairo::RefPtr<Cairo::Context> cairo = cri->get_cairo();
+
+  double pad_x, pad_y;
+  cri->get_pad(pad_x, pad_y);
+
+  // For internal calculations we need to care about the padding
+  //bbwidth  += 2 * pad_x;
+  //bbheight += 2 * pad_y;
+
+  double avwidth, avheight;
+  cri->get_dimensions(avwidth, avheight);
   float translate_x = 0;
   float translate_y = 0;
 
-  if ( gda->scale_override() ) {
-    float zoom = gda->get_scale();
+  if ( cri->scale_override() ) {
+    float zoom = cri->get_scale();
     float zwidth  = bbwidth * zoom;
     float zheight = bbheight * zoom;
     translate_x += (avwidth  - zwidth ) / 2.;
     translate_y += (avheight - zheight) / 2.;
 
     double translate_x, translate_y;
-    gda->get_translation(translate_x, translate_y);
+    cri->get_translation(translate_x, translate_y);
 
-    cairo->translate(translate_x + job->translation.x, translate_y - job->translation.x);
+    cairo->translate(translate_x, translate_y);
     cairo->scale(zoom, zoom);
 
   } else {
@@ -150,15 +217,13 @@ skillgui_cairo_render_begin_page(GVJ_t *job)
       translate_y += (avheight - bbheight) / 2. + bbheight;
     }
 
-    gda->set_scale(zoom);
-    gda->set_translation(translate_x, translate_y);
+    cri->set_scale(zoom);
+    cri->set_translation(translate_x, translate_y);
 
-    cairo->translate(translate_x + job->pad.x, translate_y - job->pad.x);
+    cairo->translate(translate_x + pad_x * zoom, translate_y - pad_y * zoom);
     cairo->scale(zoom, zoom);
   }
 
-  gda->set_bb(bbwidth, bbheight);
-  gda->set_pad(job->pad.x, job->pad.y);
 
 
 #ifdef USE_GVPLUGIN_TIMETRACKER
@@ -175,8 +240,8 @@ skillgui_cairo_render_begin_page(GVJ_t *job)
 static void
 skillgui_cairo_render_end_page(GVJ_t * job)
 {
-  //SkillGuiGraphDrawingArea *gda = (SkillGuiGraphDrawingArea *)job->context;
-  //gda->queue_draw();  
+  //SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
+  //cri->queue_draw();  
 #ifdef USE_GVPLUGIN_TIMETRACKER
   __tt.ping_end(__ttc_page);
   if ( ++__tt_count >= 10 ) {
@@ -200,40 +265,37 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
   __tt.ping_start(__ttc_text);
   ++__num_text;
 #endif
-  SkillGuiGraphDrawingArea *gda = (SkillGuiGraphDrawingArea *)job->context;
-  Cairo::RefPtr<Cairo::Context> cairo = gda->get_cairo();
+  SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
+  Cairo::RefPtr<Cairo::Context> cairo = cri->get_cairo();
   obj_state_t *obj = job->obj;
 
-  switch (para->just) {
-  case 'r':
-    p.x -= para->width;
-    break;
-  case 'l':
-    p.x -= 0.0;
-    break;
-  case 'n':
-  default:
-    p.x -= para->width / 2.0;
-    break;
-  }
-
-  //p.y -= para->height / 2.0;// + para->yoffset_centerline;
-  //p.y -= para->yoffset_centerline;
-  //p.y += para->yoffset_centerline; // + para->yoffset_layout;
-
-  Glib::RefPtr<Pango::Layout> pl = Glib::wrap((PangoLayout *)para->layout,
-					      /* copy */ true);
-  Pango::FontDescription fd = pl->get_font_description();
-  Cairo::FontSlant slant = Cairo::FONT_SLANT_NORMAL;
-  if (fd.get_style() == Pango::STYLE_OBLIQUE ) {
-    slant = Cairo::FONT_SLANT_OBLIQUE;
-  } else if (fd.get_style() == Pango::STYLE_ITALIC ) {
-    slant = Cairo::FONT_SLANT_ITALIC;
-  }
   Cairo::FontWeight weight = Cairo::FONT_WEIGHT_NORMAL;
-  if ( fd.get_weight() == Pango::WEIGHT_BOLD ) {
-    printf("Bold\n");
+  Cairo::FontSlant slant   = Cairo::FONT_SLANT_NORMAL;
+  char *fontweight;
+  if (obj->type == CLUSTER_OBJTYPE) {
+    fontweight = agget(obj->u.sg, (char *)"fontweight");
+  } else if (obj->type == ROOTGRAPH_OBJTYPE) {
+    fontweight = agget(obj->u.g, (char *)"fontweight");
+  } else if (obj->type == NODE_OBJTYPE) {
+    fontweight = agget(obj->u.n, (char *)"fontweight");
+  } else if (obj->type == EDGE_OBJTYPE) {
+    fontweight = agget(obj->u.e, (char *)"fontweight");
+  }
+  if (fontweight && (strcmp(fontweight, "bold") == 0)) {
     weight = Cairo::FONT_WEIGHT_BOLD;
+  }
+  char *fontslant;
+  if (obj->type == CLUSTER_OBJTYPE) {
+    fontslant = agget(obj->u.sg, (char *)"fontslant");
+  } else if (obj->type == ROOTGRAPH_OBJTYPE) {
+    fontslant = agget(obj->u.g, (char *)"fontslant");
+  } else if (obj->type == NODE_OBJTYPE) {
+    fontslant = agget(obj->u.n, (char *)"fontslant");
+  } else if (obj->type == EDGE_OBJTYPE) {
+    fontslant = agget(obj->u.e, (char *)"fontslant");
+  }
+  if (fontslant && (strcmp(fontslant, "italic") == 0)) {
+    slant = Cairo::FONT_SLANT_ITALIC;
   }
 
   double offsetx = 0.0;
@@ -247,23 +309,39 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
     }
     char *labeloffsetx = agget(obj->u.e, (char *)"labeloffsetx");
     if (labeloffsetx && (strlen(labeloffsetx) > 0)) {
-      offsetx = atof(labeloffsetx) * job->scale.x;
+      offsetx = atof(labeloffsetx);
     }
     char *labeloffsety = agget(obj->u.e, (char *)"labeloffsety");
     if (labeloffsety && (strlen(labeloffsety) > 0)) {
-      offsety = atof(labeloffsety) * job->scale.y;
+      offsety = atof(labeloffsety);
     }
   }
   //__tt.ping_start(__ttc_text_1);
 
-  cairo->move_to(p.x + offsetx, -p.y + offsety);
-  cairo->select_font_face ( fd.get_family(), slant, weight);
+  Cairo::Matrix old_matrix;
+  cairo->get_matrix(old_matrix);
+
+  cairo->select_font_face(para->fontname, slant, weight);
+  cairo->set_font_size(para->fontsize);
   //cairo->set_font_options ( Cairo::FontOptions() );
-  cairo->set_font_size ( para->fontsize );
+  //cairo->set_line_width(1.0);
+
+  Cairo::TextExtents extents;
+  cairo->get_text_extents(para->str, extents);
+
+  if (para->just == 'r') {
+    p.x -= extents.width;
+  } else if (para->just != 'l') {
+    p.x -= extents.width / 2.0;
+  }
+
+  cairo->move_to(p.x + offsetx, -p.y + offsety);
+  cairo->rotate(rotate);
   skillgui_cairo_set_color(cairo, &(obj->pencolor));
-  cairo->set_line_width(1.0);
-  cairo->text_path ( para->str );
+  cairo->text_path( para->str );
   cairo->fill();
+
+  cairo->set_matrix(old_matrix);
 
   //__tt.ping_end(__ttc_text_5);
 #ifdef USE_GVPLUGIN_TIMETRACKER
@@ -279,12 +357,14 @@ skillgui_cairo_render_ellipse(GVJ_t *job, pointf *A, int filled)
   ++__num_ellipse;
 #endif
   //printf("Render ellipse\n");
-  SkillGuiGraphDrawingArea *gda = (SkillGuiGraphDrawingArea *)job->context;
-  Cairo::RefPtr<Cairo::Context> cairo = gda->get_cairo();
+  SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
+  Cairo::RefPtr<Cairo::Context> cairo = cri->get_cairo();
   obj_state_t *obj = job->obj;
 
   Cairo::Matrix old_matrix;
   cairo->get_matrix(old_matrix);
+
+  skillgui_cairo_set_penstyle(cairo, job);
 
   cairo->translate(A[0].x, -A[0].y);
 
@@ -317,8 +397,8 @@ skillgui_cairo_render_polygon(GVJ_t *job, pointf *A, int n, int filled)
   ++__num_polygon;
 #endif
   //printf("Polygon\n");
-  SkillGuiGraphDrawingArea *gda = (SkillGuiGraphDrawingArea *)job->context;
-  Cairo::RefPtr<Cairo::Context> cairo = gda->get_cairo();
+  SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
+  Cairo::RefPtr<Cairo::Context> cairo = cri->get_cairo();
   obj_state_t *obj = job->obj;
 
   skillgui_cairo_set_penstyle(cairo, job);
@@ -328,9 +408,18 @@ skillgui_cairo_render_polygon(GVJ_t *job, pointf *A, int n, int filled)
     cairo->line_to(A[i].x, -A[i].y);
   }
   cairo->close_path();
+
   if (filled) {
     skillgui_cairo_set_color(cairo, &(obj->fillcolor));
     cairo->fill_preserve();
+  }
+
+  // HACK to workaround graphviz bug any get the Tim style...
+  if ( obj->type == CLUSTER_OBJTYPE ) {
+    obj->pencolor.u.RGBA[0] = 0.666;
+    obj->pencolor.u.RGBA[1] = 0.666;
+    obj->pencolor.u.RGBA[2] = 1.0;
+    obj->pencolor.u.RGBA[3] = 1.0;
   }
   skillgui_cairo_set_color(cairo, &(obj->pencolor));
   cairo->stroke();
@@ -349,8 +438,8 @@ skillgui_cairo_render_bezier(GVJ_t * job, pointf * A, int n, int arrow_at_start,
   ++__num_bezier;
 #endif
   //printf("Bezier\n");
-  SkillGuiGraphDrawingArea *gda = (SkillGuiGraphDrawingArea *)job->context;
-  Cairo::RefPtr<Cairo::Context> cairo = gda->get_cairo();
+  SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
+  Cairo::RefPtr<Cairo::Context> cairo = cri->get_cairo();
   obj_state_t *obj = job->obj;
 
   skillgui_cairo_set_penstyle(cairo, job);
@@ -379,8 +468,8 @@ skillgui_cairo_render_polyline(GVJ_t * job, pointf * A, int n)
   ++__num_polyline;
 #endif
   //printf("Polyline\n");
-  SkillGuiGraphDrawingArea *gda = (SkillGuiGraphDrawingArea *)job->context;
-  Cairo::RefPtr<Cairo::Context> cairo = gda->get_cairo();
+  SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
+  Cairo::RefPtr<Cairo::Context> cairo = cri->get_cairo();
   obj_state_t *obj = job->obj;
 
   skillgui_cairo_set_penstyle(cairo, job);
@@ -445,8 +534,10 @@ extern "C" {
 
 
 static gvrender_features_t skillgui_cairo_render_features = {
-  GVRENDER_Y_GOES_DOWN | GVRENDER_DOES_LABELS |
-  GVRENDER_DOES_TRANSFORM, 			/* flags, for Cairo: GVRENDER_DOES_TRANSFORM */
+  GVRENDER_Y_GOES_DOWN |
+  GVRENDER_DOES_LABELS |
+  GVRENDER_DOES_TRANSFORM |
+  GVRENDER_NO_WHITE_BG, 			/* flags */
   8,                         			/* default pad - graph units */
   0,						/* knowncolors */
   0,						/* sizeof knowncolors */
@@ -485,9 +576,9 @@ gvplugin_library_t gvplugin_skillgui_cairo_LTX_library = { (char *)"skillguicair
 
 
 void
-gvplugin_skillgui_cairo_setup(GVC_t *gvc, SkillGuiGraphDrawingArea *sggda)
+gvplugin_skillgui_cairo_setup(GVC_t *gvc, SkillGuiCairoRenderInstructor *sgcri)
 {
-  __sggda = sggda;
+  __sgcri = sgcri;
   gvAddLibrary(gvc, &gvplugin_skillgui_cairo_LTX_library);
 
   __skillgui_cairo_render_dashed.clear();

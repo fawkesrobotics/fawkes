@@ -39,6 +39,7 @@
 #include <gui_utils/throbber.h>
 #include <gui_utils/service_chooser_dialog.h>
 #include <gui_utils/interface_dispatcher.h>
+#include <gui_utils/plugin_tree_view.h>
 
 #include <cstring>
 
@@ -91,13 +92,16 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   refxml->get_widget("tb_graphlist", tb_graphlist);
   refxml->get_widget("tb_controller", tb_controller);
   refxml->get_widget("tb_graphsave", tb_graphsave);
+  refxml->get_widget("tb_graphopen", tb_graphopen);
   refxml->get_widget("tb_graphupd", tb_graphupd);
+  refxml->get_widget("tb_graphrecord", tb_graphrecord);
   refxml->get_widget("tb_zoomin", tb_zoomin);
   refxml->get_widget("tb_zoomout", tb_zoomout);
   refxml->get_widget("tb_zoomfit", tb_zoomfit);
   refxml->get_widget("tb_zoomreset", tb_zoomreset);
 
   refxml->get_widget_derived("img_throbber", __throbber);
+  refxml->get_widget_derived("trv_plugins",  __trv_plugins);
   
   Gtk::SeparatorToolItem *spacesep;
   refxml->get_widget("tb_spacesep", spacesep);
@@ -106,6 +110,9 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   __sks_list = Gtk::ListStore::create(__sks_record);
   cbe_skillstring->set_model(__sks_list);
   cbe_skillstring->set_text_column(__sks_record.skillstring);
+
+  __trv_plugins->set_network_client(connection_dispatcher.get_client());
+  __trv_plugins->set_gconf_prefix(GCONF_PREFIX);
 
 #ifdef USE_PAPYRUS
   pvp_graph = Gtk::manage(new SkillGuiGraphViewport());
@@ -148,10 +155,13 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   tb_zoomreset->signal_clicked().connect(sigc::mem_fun(*pvp_graph, &SkillGuiGraphViewport::zoom_reset));
 #else
   tb_graphsave->signal_clicked().connect(sigc::mem_fun(*gda, &SkillGuiGraphDrawingArea::save));
+  tb_graphopen->signal_clicked().connect(sigc::mem_fun(*gda, &SkillGuiGraphDrawingArea::open));
   tb_zoomin->signal_clicked().connect(sigc::mem_fun(*gda, &SkillGuiGraphDrawingArea::zoom_in));
   tb_zoomout->signal_clicked().connect(sigc::mem_fun(*gda, &SkillGuiGraphDrawingArea::zoom_out));
   tb_zoomfit->signal_clicked().connect(sigc::mem_fun(*gda, &SkillGuiGraphDrawingArea::zoom_fit));
   tb_zoomreset->signal_clicked().connect(sigc::mem_fun(*gda, &SkillGuiGraphDrawingArea::zoom_reset));
+  tb_graphrecord->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_recording_toggled));
+  gda->signal_update_disabled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_update_disabled));
 #endif
 
   __gconf->signal_value_changed().connect(sigc::hide(sigc::hide(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_config_changed))));
@@ -164,6 +174,7 @@ SkillGuiGtkWindow::~SkillGuiGtkWindow()
 {
   __gconf->remove_dir(GCONF_PREFIX);
   __logview->set_client(NULL);
+  __trv_plugins->set_network_client(NULL);
 }
 
 
@@ -456,7 +467,9 @@ SkillGuiGtkWindow::on_skiller_data_changed()
     }
 
     lab_skillstring->set_text(__skiller_if->skill_string());
+    lab_skillstring->set_tooltip_text(__skiller_if->skill_string());
     lab_error->set_text(__skiller_if->error());
+    lab_error->set_tooltip_text(__skiller_if->error());
     lab_continuous->set_text(__skiller_if->is_continuous() ? "Yes" : "No");
     lab_alive->set_text(__skiller_if->has_writer() ? "Yes" : "No");
 
@@ -567,4 +580,27 @@ SkillGuiGtkWindow::on_graphupd_clicked()
 SkillGuiGtkWindow::SkillStringRecord::SkillStringRecord()
 {
   add(skillstring);
+}
+
+
+void
+SkillGuiGtkWindow::on_update_disabled()
+{
+#ifdef USE_PAPYRUS
+#else
+  tb_graphupd->set_stock_id(Gtk::Stock::MEDIA_STOP);
+#endif
+}
+
+
+void
+SkillGuiGtkWindow::on_recording_toggled()
+{
+#ifdef USE_PAPYRUS
+#else
+  bool active = tb_graphrecord->get_active();
+  if (gda->set_recording(active) != active) {
+    tb_graphrecord->set_active(!active);
+  }
+#endif
 }

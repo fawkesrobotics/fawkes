@@ -408,7 +408,8 @@ Lines
 Robot (Team A or all)
 Robot (Team B)
 Goal (yellow)
-Goal (sky-blue)</property>
+Goal (sky-blue)
+Other</property>
                                                   </widget>
                                                 </child>
                                               </widget>
@@ -484,10 +485,10 @@ Goal (sky-blue)</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <widget class="GtkButton" id="btnCtStart">
+                                      <widget class="GtkToggleButton" id="btnCtStart">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="label" translatable="yes">Start</property>
+                                        <property name="label" translatable="yes">Color Training Mode</property>
                                         <property name="use_underline">True</property>
                                         <property name="response_id">0</property>
                                       </widget>
@@ -495,6 +496,19 @@ Goal (sky-blue)</property>
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
                                         <property name="position">3</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkToggleButton" id="btnCtSeg">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="label" translatable="yes">Test CM U/V resolution</property>
+                                        <property name="response_id">0</property>
+                                      </widget>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="position">4</property>
                                       </packing>
                                     </child>
                                   </widget>
@@ -695,9 +709,8 @@ Goal (sky-blue)</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <widget class="GtkSpinButton" id="spinbutton2">
+                                          <widget class="GtkSpinButton" id="spbtnCtCmWidth">
                                             <property name="visible">True</property>
-                                            <property name="sensitive">False</property>
                                             <property name="can_focus">True</property>
                                             <property name="adjustment">8 1 8 1 10 10</property>
                                           </widget>
@@ -717,9 +730,8 @@ Goal (sky-blue)</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <widget class="GtkSpinButton" id="spinbutton3">
+                                          <widget class="GtkSpinButton" id="spbtnCtCmHeight">
                                             <property name="visible">True</property>
-                                            <property name="sensitive">False</property>
                                             <property name="can_focus">True</property>
                                             <property name="adjustment">8 1 8 1 10 10</property>
                                           </widget>

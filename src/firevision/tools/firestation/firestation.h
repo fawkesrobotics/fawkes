@@ -180,7 +180,11 @@ class Firestation
 
   // color training widgets
   Gtk::ComboBox*    m_cmb_ct_type;
-  Gtk::Button* m_btn_ct_start;
+  Gtk::ToggleButton* m_btn_ct_start;
+  Gtk::ToggleButton* m_btn_ct_seg;
+  Gtk::SpinButton* m_spbtn_depth;
+  Gtk::SpinButton* m_spbtn_width;
+  Gtk::SpinButton* m_spbtn_height;
 
   // mirror calibration widgets
   Gtk::FileChooserDialog* m_fcd_mc_save;
@@ -190,7 +194,7 @@ class Firestation
   Gtk::Button* m_btn_mc_save;
   Gtk::Entry* m_ent_mc_dist;
   Gtk::Entry* m_ent_mc_ori;
-  
+
   ShmColumnRecord m_shm_columns;
   Glib::RefPtr<Gtk::ListStore> m_shm_list_store;
 
@@ -216,7 +220,7 @@ class Firestation
   unsigned int m_scaled_img_height;
   unsigned int m_max_img_width;
   unsigned int m_max_img_height;
-  
+
   colorspace_t m_img_cs;
   size_t m_img_size;
 

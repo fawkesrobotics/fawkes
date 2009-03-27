@@ -105,6 +105,7 @@ FvBaseThread::loop()
     for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
       ait->second->set_vt_prepfin_hold(false);
     }
+    aqts.unlock();
     return;
   }
 
@@ -117,16 +118,16 @@ FvBaseThread::loop()
   }
 
   aqt_barrier->wait();
-  
+
   // Check for aqt timeouts
   for (ait = aqts.begin(); ait != aqts.end();) {
     if ( ait->second->_vision_threads->empty() &&
 	 (ait->second->_vision_threads->empty_time() > _aqt_timeout) ) {
-      
+
       logger->log_info(name(), "Acquisition thread %s timed out, destroying",
 		       ait->second->name());
 
-      
+
       thread_collector->remove(ait->second);
       delete ait->second;
       aqts.erase(ait++);
@@ -170,7 +171,7 @@ FvBaseThread::loop()
 
     // Make thread actually capture data
     stit->second->set_enabled(true);
-    
+
     fawkes::LockMap<Thread *, FvAcquisitionThread *>::iterator stittmp = stit;
     ++stit;
     started_threads.erase( stittmp );
@@ -310,7 +311,7 @@ FvBaseThread::unregister_thread(Thread *thread)
     } else if (ait->second->aqtmode() != FvAcquisitionThread::AqtContinuous ) {
       logger->log_info(name(), "Switching acquisition thread %s to continuous mode "
 		               "on unregister", ait->second->name());
-      
+
       ait->second->prepare_finalize();
       ait->second->cancel();
       ait->second->join();

@@ -24,7 +24,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/plugin_gui/plugin_tree_view.h>
+#include <gui_utils/plugin_tree_view.h>
 #include <netcomm/fawkes/client.h>
 #include <plugin/net/messages.h>
 #include <plugin/net/list_message.h>
@@ -34,9 +34,13 @@
 #include <string>
 
 using namespace std;
-using namespace fawkes;
 
-/** @class PluginTreeView "plugin_tree_view.h"
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class PluginTreeView <gui_utils/plugin_tree_view.h>
  * A TreeView class to list available plugins und trigger their
  * loading/unloading.
  *
@@ -44,7 +48,7 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-/** @class PluginTreeView::PluginRecord "plugin_tree_view.h"
+/** @class PluginTreeView::PluginRecord <gui_utils/plugin_tree_view.h>
  * Column record class for the plugin tree view.
  *
  * @author Daniel Beck
@@ -62,14 +66,11 @@ using namespace fawkes;
  * @param cobject pointer to base object type
  * @param ref_xml Glade XML file
  */
-PluginTreeView::PluginTreeView( BaseObjectType* cobject,
-				const Glib::RefPtr<Gnome::Glade::Xml> ref_xml )
+PluginTreeView::PluginTreeView(BaseObjectType* cobject,
+			       const Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   : Gtk::TreeView(cobject),
     m_dispatcher(FAWKES_CID_PLUGINMANAGER)
 {
-  __gconf = Gnome::Conf::Client::get_default_client();
-  __gconf->add_dir(GCONF_PREFIX);
-
   m_plugin_list = Gtk::ListStore::create(m_plugin_record);
   set_model(m_plugin_list);
   set_rules_hint(true);
@@ -90,15 +91,13 @@ PluginTreeView::PluginTreeView( BaseObjectType* cobject,
   m_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &PluginTreeView::on_connected));
   m_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &PluginTreeView::on_disconnected));
   m_dispatcher.signal_message_received().connect(sigc::mem_fun(*this, &PluginTreeView::on_message_received));
-
-  __gconf->signal_value_changed().connect(sigc::hide(sigc::hide(sigc::mem_fun(*this, &PluginTreeView::on_config_changed))));
 }
 
 
 /** Destructor. */
 PluginTreeView::~PluginTreeView()
 {
-  if ( m_dispatcher.get_client()->connected() )
+  if (m_dispatcher)
   {
     // unsubscribe
     FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
@@ -109,7 +108,11 @@ PluginTreeView::~PluginTreeView()
     m_dispatcher.get_client()->deregister_handler(FAWKES_CID_PLUGINMANAGER);
   }
 
-  __gconf->remove_dir(GCONF_PREFIX);
+#ifdef HAVE_GCONFMM
+  if (__gconf) {
+    __gconf->remove_dir(__gconf_prefix);
+  }
+#endif
 }
 
 
@@ -122,6 +125,31 @@ PluginTreeView::set_network_client(FawkesNetworkClient* client)
   m_dispatcher.set_client(client);
 }
 
+
+/** Set Gconf prefix.
+ * @param gconf_prefix the GConf prefix
+ */
+void
+PluginTreeView::set_gconf_prefix(Glib::ustring gconf_prefix)
+{
+#ifdef HAVE_GCONFMM
+  if (! __gconf) {
+    __gconf = Gnome::Conf::Client::get_default_client();
+  } else {
+    __gconf->remove_dir(__gconf_prefix);
+  }
+
+  __gconf->add_dir(gconf_prefix);
+  __gconf_prefix = gconf_prefix;
+
+  if (__gconf_connection) {
+    __gconf_connection.disconnect();
+  }
+  __gconf_connection = __gconf->signal_value_changed().connect(sigc::hide(sigc::hide(sigc::mem_fun(*this, &PluginTreeView::on_config_changed))));
+
+  on_config_changed();
+#endif
+}
 
 void
 PluginTreeView::on_connected()
@@ -390,12 +418,18 @@ PluginTreeView::on_config_changed()
 void
 PluginTreeView::append_plugin_column()
 {
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
-  bool description_as_tooltip = __gconf->get_bool(GCONF_PREFIX"/description_as_tooltip");
-#else
-  std::auto_ptr<Glib::Error> error;
-  bool description_as_tooltip = __gconf->get_bool(GCONF_PREFIX"/description_as_tooltip", error);
+  bool description_as_tooltip = false;
+  if ( __gconf )
+  {
+#ifdef HAVE_GCONFMM
+#  ifdef GLIBMM_EXCEPTIONS_ENABLED
+    description_as_tooltip = __gconf->get_bool(__gconf_prefix + "/description_as_tooltip");
+#  else
+    std::auto_ptr<Glib::Error> error;
+    description_as_tooltip = __gconf->get_bool(__gconf_prefix + "/description_as_tooltip", error);
+#  endif
 #endif
+  }
 
   if (description_as_tooltip)
   {
@@ -424,3 +458,4 @@ PluginTreeView::append_plugin_column()
   if (plugin_col) plugin_col->signal_clicked().connect(sigc::mem_fun(*this, &PluginTreeView::on_name_clicked));
 }
 
+} // end namespace fawkes

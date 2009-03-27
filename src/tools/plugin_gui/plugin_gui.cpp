@@ -3,8 +3,8 @@
  *  plugin_gui.cpp -  Plugin Tool Gui
  *
  *  Created: Thu Nov 09 20:16:23 2007
- *  Copyright  2007  Daniel Beck
- *             2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2007       Daniel Beck
+ *             2008-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -23,8 +23,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/plugin_gui/plugin_gui.h>
-#include <tools/plugin_gui/plugin_tree_view.h>
+#include "plugin_gui.h"
+#include <gui_utils/plugin_tree_view.h>
 #include <gui_utils/service_selector_cbe.h>
 
 using namespace fawkes;
@@ -46,6 +46,8 @@ PluginGuiGtkWindow::PluginGuiGtkWindow(BaseObjectType* cobject,
 {
   ref_xml->get_widget("stbStatus", m_stb_status);
   ref_xml->get_widget_derived("trvPlugins", m_trv_plugins);
+
+  m_trv_plugins->set_gconf_prefix(GCONF_PREFIX);
 
   m_service_selector = new ServiceSelectorCBE(ref_xml, "cbeHosts", "btnConnect", "wndMain");
   m_trv_plugins->set_network_client( m_service_selector->get_network_client() );

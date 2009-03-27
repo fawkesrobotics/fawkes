@@ -68,10 +68,13 @@ else
   OBJS_skillgui += graph_drawing_area.o gvplugin_skillgui_cairo.o
 endif
 
-OBJS_all = $(OBJS_skillgui) $(OBJS_libgvplugin_skillgui)
+LIBS_skillgui_batch_render = fawkescore fawkesutils
+OBJS_skillgui_batch_render = batch_render.o gvplugin_skillgui_cairo.o
+
+OBJS_all = $(OBJS_skillgui) $(OBJS_skillgui_batch_render)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(PAPYRUS_OK)$(HAVE_GRAPHVIZ)$(HAVE_GCONFMM),11111)
-  BINS_gui = $(BINDIR)/skillgui
+  BINS_gui = $(BINDIR)/skillgui $(BINDIR)/skillgui_batch_render
 else
   WARN_TARGETS += warning_skillgui
 endif

@@ -107,16 +107,29 @@ LogView::ctor(const char *hostname, unsigned short int port)
 
   append_column("Level",     __record.loglevel);
   append_column("Time",      __record.time);
-  append_column("Component", __record.component);
-  append_column("Message",   __record.message);
+  int compcol = append_column("Component", __record.component);
+  int msgcol  = append_column("Message",   __record.message);
+
+  // We stored the number of columns, for an index (which starts at 0) we need
+  // to subtract 1
+  compcol -= 1;
+  msgcol  -= 1;
 
   Glib::ListHandle<Gtk::TreeViewColumn *> columns = get_columns();
-  for (Glib::ListHandle<Gtk::TreeViewColumn *>::iterator c = columns.begin();
-       c != columns.end(); ++c) {
+  int colnum = -1;
+  for (Glib::ListHandle<Gtk::TreeViewColumn *>::iterator c = columns.begin(); c != columns.end(); ++c) {
+    ++colnum;
     Gtk::CellRenderer *cell_renderer = (*c)->get_first_cell_renderer();
     Gtk::CellRendererText *text_renderer = dynamic_cast<Gtk::CellRendererText *>(cell_renderer);
     if ( text_renderer ) {
 #ifdef GLIBMM_PROPERTIES_ENABLED
+      if ( (colnum == compcol) || (colnum == msgcol) ) {
+	(*c)->set_resizable();
+      }
+      if ( colnum == compcol ) {
+	text_renderer->property_ellipsize().set_value(Pango::ELLIPSIZE_END);
+      }
+
       (*c)->add_attribute(text_renderer->property_background_gdk(), __record.background);
       (*c)->add_attribute(text_renderer->property_foreground_gdk(), __record.foreground);
 #else

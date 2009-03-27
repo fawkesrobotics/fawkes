@@ -45,14 +45,16 @@ using namespace fawkes;
  * @author Daniel Beck
  */
 
-/** Constructor. 
+/** Constructor.
  * @param lut_depth the depth of the lookup table
  * @param fg_object the type of a foreground object
+ * @param lut_width the width of the lookup table (u-resolution)
+ * @param lut_height the height of the lookup table (v-resolution)
  */
-BayesColormapGenerator::BayesColormapGenerator(unsigned int lut_depth,	hint_t fg_object)
+BayesColormapGenerator::BayesColormapGenerator(unsigned int lut_depth,	hint_t fg_object, unsigned int lut_width, unsigned int lut_height)
 {
-  this->lut_width  = 256;
-  this->lut_height = 256;
+  this->lut_width  = lut_width;
+  this->lut_height = lut_height;
   this->lut_depth  = lut_depth;
 
   set_fg_object(fg_object);
@@ -64,7 +66,7 @@ BayesColormapGenerator::BayesColormapGenerator(unsigned int lut_depth,	hint_t fg
   image_width = image_height = 0;
   selection_mask = 0;
 
-  bhtl = new BayesHistosToLut(histos, lut_depth, fg_object);
+  bhtl = new BayesHistosToLut(histos, lut_depth, fg_object, lut_width, lut_height);
   cm = bhtl->get_colormap();
 }
 
@@ -121,7 +123,7 @@ BayesColormapGenerator::set_buffer(unsigned char *buffer,
   image_height = height;
 
   selection_mask = new bool[image_width * image_height];
-  
+
   for (unsigned int i = 0; i < image_width * image_height; ++i) {
     selection_mask[i] = false;
   }
@@ -146,7 +148,7 @@ BayesColormapGenerator::get_current()
  * @return true if pixel is in region, false otherwise
  */
 bool
-BayesColormapGenerator::is_in_region(unsigned int x, unsigned int y) 
+BayesColormapGenerator::is_in_region(unsigned int x, unsigned int y)
 {
   return selection_mask[image_width * y + x];
 }
@@ -221,11 +223,13 @@ BayesColormapGenerator::consider()
       v = YUV422_PLANAR_V_AT(buffer, image_width, image_height, w, h);
 
       unsigned int y_index = (unsigned int)( y / 256.0f * float(lut_depth) );
+      unsigned int u_index = (unsigned int)( u / 256.0f * float(lut_width) );
+      unsigned int v_index = (unsigned int)( v / 256.0f * float(lut_height) );
 
       if ( is_in_region(w, h) ) {
-	fg_histos[fg_object]->inc_value(u, v, y_index );
+	fg_histos[fg_object]->inc_value(u_index, v_index, y_index );
       }	else {
-	bg_histos[fg_object]->inc_value(u, v, y_index );
+	bg_histos[fg_object]->inc_value(u_index, v_index, y_index );
       }
     }
     cout << "." << flush;
@@ -278,7 +282,7 @@ BayesColormapGenerator::reset()
   }
 
   cm->reset();
-  
+
   for (unsigned int i = 0; i < image_width * image_height; ++i) {
     selection_mask[i] = false;
   }
@@ -390,11 +394,11 @@ BayesColormapGenerator::load_histograms(const char *filename)
   HistogramMap::iterator hit;
   for (histo_it = bg_histos.begin(); histo_it != bg_histos.end(); ++histo_it) {
     hint_t cur_object = histo_it->first;
-    
+
     for (hit = fg_histos.begin(); hit != fg_histos.end(); ++hit) {
       if (cur_object == hit->first)
 	{ continue; }
-      
+
       for (unsigned int x = 0; x < lut_width; ++x) {
 	for (unsigned int y = 0; y < lut_height; ++y) {
 	  for (unsigned int z = 0; z < lut_depth; ++z) {
@@ -410,7 +414,7 @@ BayesColormapGenerator::load_histograms(const char *filename)
   for (histo_it = bg_histos.begin(); histo_it != bg_histos.end(); ++histo_it) {
     hint_t cur_object = histo_it->first;
     float factor = ( norm_size - fg_histos[cur_object]->get_sum() ) / float( histo_it->second->get_sum() );
-    
+
     if (factor == 1.0)
       { continue; }
 
@@ -426,7 +430,7 @@ BayesColormapGenerator::load_histograms(const char *filename)
   }
 
   delete bhtl;
-  bhtl = new BayesHistosToLut(histos, lut_depth);
+  bhtl = new BayesHistosToLut(histos, lut_depth, H_UNKNOWN, lut_width, lut_height);
   cm = bhtl->get_colormap();
 
   // re-compute colormap
@@ -478,7 +482,7 @@ BayesColormapGenerator::normalize_histos()
       if ( bg_histos.find(cur_object) == bg_histos.end() ) {
 	throw fawkes::Exception("Corresponding background histogram is missing");
       }
-      
+
       Histogram *fg = fg_histos[cur_object];
       Histogram *bg = bg_histos[cur_object];
 
@@ -536,7 +540,7 @@ BayesColormapGenerator::normalize_histos()
 	    for (hit = histos.begin(); hit != histos.end(); ++hit) {
 	      if (hit->first == cur_object || hit->first == H_BACKGROUND)
 		{ continue; }
-	      
+
 	      hval = hit->second->get_value(x, y, z);
 	      h->sub(x, y, z, hval);
 	    }
@@ -544,11 +548,11 @@ BayesColormapGenerator::normalize_histos()
 	}
       }
     }
-  
+
   // normalize overall background histogram
   Histogram* h = histos[H_BACKGROUND];
   norm_factor = (norm_size - fg_size) / float( h->get_sum() );
-  
+
   for (unsigned int x = 0; x < lut_width; ++x) {
     for (unsigned int y = 0; y < lut_height; ++y) {
       for (unsigned int z = 0; z < lut_depth; ++z) {

@@ -95,6 +95,7 @@ private:
   Camera          *__cam;
   fawkes::Mutex   *__cam_mutex;
   bool             __cam_has_buffer;
+  bool             __cam_has_timestamp;
 };
 
 #endif /* __FIREVISION_FVWIDGETS_IMAGE_WIDGET_H_ */

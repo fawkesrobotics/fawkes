@@ -24,8 +24,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_CONFIG_GUI_PLUGIN_TREE_VIEW_H_
-#define __TOOLS_CONFIG_GUI_PLUGIN_TREE_VIEW_H_
+#ifndef __GUI_UTILS_PLUGIN_TREE_VIEW_H_
+#define __GUI_UTILS_PLUGIN_TREE_VIEW_H_
 
 #include <netcomm/fawkes/client_handler.h>
 #include <core/utils/lock_queue.h>
@@ -35,12 +35,13 @@
 #include <gconfmm.h>
 #include <libglademm/xml.h>
 
-#define GCONF_PREFIX "/apps/fawkes/plugingui"
-
 namespace fawkes {
-  class FawkesNetworkClient;
-  class FawkesNetworkMessage;
+#if 0 /* just to make Emacs auto-indent happy */
 }
+#endif
+
+class FawkesNetworkClient;
+class FawkesNetworkMessage;
 
 class PluginTreeView
 : public Gtk::TreeView
@@ -50,11 +51,12 @@ class PluginTreeView
   virtual ~PluginTreeView();
 
   void set_network_client(fawkes::FawkesNetworkClient* client);
+  void set_gconf_prefix(Glib::ustring gconf_prefix);
 
  private:
   class PluginRecord : public Gtk::TreeModelColumnRecord
   {
-  public:
+   public:
     PluginRecord()
       {
 	add(index);
@@ -85,7 +87,12 @@ class PluginTreeView
   Glib::RefPtr<Gnome::Conf::Client> __gconf;
   PluginRecord m_plugin_record;
 
+  sigc::connection __gconf_connection;
+  Glib::ustring    __gconf_prefix;
+
   fawkes::ConnectionDispatcher m_dispatcher;
 };
 
-#endif /*  __TOOLS_CONFIG_GUI_PLUGIN_TREE_VIEW_H_ */
+} // end namespace fawkes
+
+#endif /*  __GUI_UTILS_PLUGIN_TREE_VIEW_H_ */

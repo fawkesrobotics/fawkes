@@ -39,7 +39,8 @@ class BayesColormapGenerator : public ColormapGenerator
 
  public:
   BayesColormapGenerator( unsigned int lut_depth = 1,
-			  hint_t fg_object = H_UNKNOWN);
+			  hint_t fg_object = H_UNKNOWN,
+			  unsigned int lut_width = 256, unsigned int lut_height = 256);
   ~BayesColormapGenerator();
 
   virtual void                     set_fg_object(hint_t object);

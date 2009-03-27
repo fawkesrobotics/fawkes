@@ -35,7 +35,7 @@
 
 /** @class ImageWidget <fvwidgets/image_widget.h>
  * This class is an image container to display fawkes cameras inside a Gtk::Window
- * 
+ *
  * @author Christof Rath
  */
 
@@ -48,9 +48,9 @@ ImageWidget::ImageWidget(unsigned int width, unsigned int height)
 {
   __width  = width;
   __height = height;
-  
+
   __cam            = NULL;
-  __cam_mutex      = NULL;
+  __cam_mutex      = new fawkes::Mutex;
   __refresh_thread = NULL;
 
   __pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, __width, __height);
@@ -73,13 +73,22 @@ ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay)
   __width          = __cam->pixel_width();
   __height         = __cam->pixel_height();
 
+  try {
+    fawkes::Time *time = __cam->capture_time();
+    delete time;
+    __cam_has_timestamp = true;
+  }
+  catch (fawkes::Exception &e) {
+    __cam_has_timestamp = false;
+  }
+
   __refresh_thread = new RefThread(this, refresh_delay);
 
   __pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, __width, __height);
 
   __refresh_thread->start();
   __refresh_thread->refresh_cam();
- 
+
   if (refresh_delay) set_refresh_delay(refresh_delay);
 
   set_size_request(__width, __height);
@@ -90,7 +99,7 @@ ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay)
  */
 ImageWidget::~ImageWidget()
 {
-  __refresh_thread->stop();
+  if (__refresh_thread) __refresh_thread->stop();
   delete __cam_mutex;
 }
 
@@ -126,7 +135,7 @@ ImageWidget::get_buffer() const
 
 /**
  * Sets a pixel to the given RGB colors
- * 
+ *
  * @param x position of the pixel
  * @param y position of the pixel
  * @param r component of the color
@@ -141,7 +150,7 @@ ImageWidget::set_rgb(unsigned int x, unsigned int y, unsigned char r, unsigned c
 
 /**
  * Sets a pixel to the given RGB colors
- * 
+ *
  * @param x position of the pixel
  * @param y position of the pixel
  * @param rgb the color
@@ -156,9 +165,9 @@ ImageWidget::set_rgb(unsigned int x, unsigned int y, RGB_t rgb)
   *target = rgb;
 }
 
-/** 
+/**
  * Show image from given colorspace.
- * 
+ *
  * @param colorspace colorspace of the supplied buffer
  * @param buffer image buffer
  */
@@ -177,7 +186,7 @@ ImageWidget::show(colorspace_t colorspace, unsigned char *buffer)
 
 /**
  * Sets the refresh delay for automatic camera refreshes
- * 
+ *
  * @param refresh_delay im [ms]
  */
 void
@@ -193,7 +202,7 @@ ImageWidget::set_refresh_delay(unsigned int refresh_delay)
 void
 ImageWidget::refresh_cam()
 {
-  __refresh_thread->refresh_cam(); 
+  __refresh_thread->refresh_cam();
 }
 
 /**
@@ -237,7 +246,7 @@ ImageWidget::save_image(std::string filename, Glib::ustring type) const throw()
 
 /**
  * Saves the content of the image on every refresh
- * 
+ *
  * @param enable  enables or disables the feature
  * @param path    to save the images at
  * @param type    file type (@see ImageWidget::save_image)
@@ -261,7 +270,7 @@ ImageWidget::get_image_num()
 
 /**
  * Creates a new refresh thread
- * 
+ *
  * @param widget to be refreshed
  * @param refresh_delay time between two refreshes (in [ms])
  */
@@ -273,7 +282,7 @@ ImageWidget::RefThread::RefThread(ImageWidget *widget, unsigned int refresh_dela
   __widget     = widget;
   __stop       = false;
   __do_refresh = false;
-  
+
   __save_imgs  = false;
   __save_num   = 0;
 
@@ -284,7 +293,7 @@ ImageWidget::RefThread::RefThread(ImageWidget *widget, unsigned int refresh_dela
 
 /**
  * Sets the refresh delay for automatic camera refreshes
- *  
+ *
  * @param refresh_delay im [ms]
  */
 void
@@ -310,7 +319,7 @@ void
 ImageWidget::RefThread::perform_refresh()
 {
   if (!__widget->__cam) throw fawkes::NullPointerException("Camera hasn't been given during creation");
-  
+
   try {
     if (__widget->__cam_mutex->try_lock()) {
       __widget->__cam->dispose_buffer();
@@ -318,19 +327,37 @@ ImageWidget::RefThread::perform_refresh()
       if (!__stop) {
         __widget->__cam_has_buffer = true;
         __widget->__cam_mutex->unlock();
-  
+
         if (__widget->__cam->ready()) {
           __dispatcher();
 
           if (__save_imgs) {
             char *ctmp;
-            if (asprintf(&ctmp, "%s/%06u.%s", __save_path.c_str(), ++__save_num, __save_type.c_str()) != -1) {
-	      Glib::ustring fn = ctmp;
-	      free(ctmp);
-	      __widget->save_image(fn, __save_type);
-	    } else {
-	      printf("Cannot save image, asprintf() ran out of memory");
-	    }
+            if (__widget->__cam_has_timestamp) {
+              try {
+                fawkes::Time *ts = __widget->__cam->capture_time();
+                if (asprintf(&ctmp, "%s/%06u.%ld.%s", __save_path.c_str(), ++__save_num, ts->in_msec(), __save_type.c_str()) != -1) {
+                  Glib::ustring fn = ctmp;
+                  __widget->save_image(fn, __save_type);
+                  free(ctmp);
+                } else {
+                  printf("Cannot save image, asprintf() ran out of memory\n");
+                }
+                delete ts;
+              }
+              catch (fawkes::Exception &e) {
+                printf("Cannot save image (%s)\n", e.what());
+              }
+            }
+            else {
+              if (asprintf(&ctmp, "%s/%06u.%s", __save_path.c_str(), ++__save_num, __save_type.c_str()) != -1) {
+                Glib::ustring fn = ctmp;
+                __widget->save_image(fn, __save_type);
+                free(ctmp);
+              } else {
+                printf("Cannot save image, asprintf() ran out of memory\n");
+              }
+            }
           }
         }
       }

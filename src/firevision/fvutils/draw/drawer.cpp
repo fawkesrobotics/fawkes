@@ -440,13 +440,16 @@ Drawer::draw_line(unsigned int x_start, unsigned int y_start,
 void
 Drawer::draw_cross(unsigned int x_center, unsigned int y_center, unsigned int width)
 {
-  unsigned int r = width / 2;
-  unsigned int a = std::max((unsigned int) 0, x_center - r);
-  unsigned int b = std::min(__width, x_center + r);
+  x_center = std::min(x_center, __width);
+  y_center = std::min(y_center, __height);
+
+  int r = width / 2;
+  unsigned int a = std::max(0, (int)x_center - r);
+  unsigned int b = std::min(x_center + r, __width);
   draw_line(a, y_center, b, y_center);
 
-  a = std::max((unsigned int) 0, y_center - r);
-  b = std::min(__height, y_center + r);
+  a = std::max(0, (int)y_center - r);
+  b = std::min(y_center + r, __height);
   draw_line(x_center, a, x_center, b);
 }
 

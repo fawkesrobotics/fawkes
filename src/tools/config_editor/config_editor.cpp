@@ -91,5 +91,4 @@ void
 FawkesConfigEditor::on_disconnected()
 {
   m_trv_config->set_network_client( NULL );
-  m_network_client->disconnect();
 }

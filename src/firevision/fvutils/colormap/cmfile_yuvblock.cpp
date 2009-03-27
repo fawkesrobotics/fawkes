@@ -40,7 +40,7 @@
  * @param level Y level
  */
 ColormapFileYuvBlock::ColormapFileYuvBlock(YuvColormap *cm, unsigned int level)
-  : ColormapFileBlock(CMFILE_TYPE_YUV, 256 * 256, sizeof(cmfile_yuvblock_header_t))
+  : ColormapFileBlock(CMFILE_TYPE_YUV, cm->plane_size(), sizeof(cmfile_yuvblock_header_t))
 {
   if ( level > cm->depth() ) {
     throw fawkes::OutOfBoundsException("YuvColormap level is out of bounds", level, 0, cm->depth());
@@ -50,11 +50,10 @@ ColormapFileYuvBlock::ColormapFileYuvBlock(YuvColormap *cm, unsigned int level)
   __level = level;
 
   __header = (cmfile_yuvblock_header_t *)_spec_header;
-  __header->range_from = level * 256 / cm->depth();
-  __header->range_to   = ((level + 1) * 256 / cm->depth()) - 1;
+  __header->range_from = level * cm->deepness() / cm->depth();
+  __header->range_to   = ((level + 1) * cm->deepness() / cm->depth()) - 1;
 
-  _data_size = 256 * 256;
-  memcpy(_data, __cm->get_buffer() + level * 256 * 256, _data_size);
+  memcpy(_data, __cm->get_buffer() + level * cm->plane_size(), _data_size);
 }
 
 

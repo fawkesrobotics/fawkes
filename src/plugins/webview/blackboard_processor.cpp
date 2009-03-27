@@ -139,14 +139,17 @@ WebBlackBoardRequestProcessor::process_request(const char *url,
 		       "  <th>Name</th><th>Type</th><th>Value</th>\n"
 		       " </tr>\n");
 	for (Interface::FieldIterator fi = iface->fields(); fi != iface->fields_end(); ++fi) {
+	  bool is_string = (fi.get_type() == Interface::IFT_STRING);
 	  *r += " <tr>\n";
 	  if ( fi.get_length() > 1 ) {
-	    r->append_body("  <td>%s</td><td>%s [%zu]</td><td>%s</td>\n",
+	    r->append_body("  <td>%s</td><td>%s [%zu]</td><td>%s%s%s</td>\n",
 			   fi.get_name(), fi.get_typename(),
-			   fi.get_length(), fi.get_value_string());
+			   fi.get_length(), is_string ? "<pre>" : "",
+			   fi.get_value_string(), is_string ? "</pre>" : "");
 	  } else {
-	    r->append_body("  <td>%s</td><td>%s</td><td>%s</td>\n",
-			   fi.get_name(), fi.get_typename(), fi.get_value_string());
+	    r->append_body("  <td>%s</td><td>%s</td><td>%s%s%s</td>\n",
+			   fi.get_name(), fi.get_typename(), is_string ? "<pre>" : "",
+			   fi.get_value_string(), is_string ? "</pre>" : "");
 	  }
 	  *r += " </tr>\n";
 	}

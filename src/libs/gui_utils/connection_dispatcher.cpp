@@ -131,6 +131,16 @@ ConnectionDispatcher::get_client()
 }
 
 
+/** Check if client is set and connection has been established.
+ * @return true if a client exists and a connection is established, false
+ * otherwise.
+ */
+ConnectionDispatcher::operator bool()
+{
+  return (__client && __client->connected());
+}
+
+
 /** Internal event handler.
  * Called by dispatcher to emit signal.
  */

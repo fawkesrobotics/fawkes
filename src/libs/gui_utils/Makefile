@@ -19,15 +19,15 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/gui.mk
 include $(BASEDIR)/etc/buildsys/ext/gmsl
 
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
-LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+CFLAGS  += $(CFLAGS_GUI)
+LDFLAGS += $(LDFLAGS_GUI)
 
-LIBS_libfawkesguiutils = stdc++ fawkescore fawkesnetcomm fawkesblackboard
+LIBS_libfawkesguiutils = stdc++ fawkescore fawkesnetcomm fawkesblackboard fawkesplugin
 OBJS_libfawkesguiutils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
 OBJS_all = $(OBJS_libfawkesguiutils)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
+ifeq ($(HAVE_GUI),1)
   LIBS_gui  = $(LIBDIR)/libfawkesguiutils.so
 else
   WARN_TARGETS += warning_guiutils

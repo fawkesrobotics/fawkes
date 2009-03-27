@@ -55,20 +55,22 @@ using namespace std;
  * @param histos histograms
  * @param d depth of lookup table
  * @param object type of the foreground object
+ * @param w the width of the lookup table (u-resolution)
+ * @param h the height of the lookup table (v-resolution)
  */
 BayesHistosToLut::BayesHistosToLut(std::map<hint_t, Histogram*> &histos,
-				   unsigned int d, hint_t object)
+				   unsigned int d, hint_t object, unsigned int w, unsigned int h)
   : histograms(histos)
 {
-  width  = 256;
-  height = 256;
+  width  = w;
+  height = h;
   depth  = d;
 
   fg_object  = object;
   //  histograms = histos;
 
   // no as shmem segment
-  lut = new YuvColormap(depth);
+  lut = new YuvColormap(depth, width, height);
 
   min_probability = 0.3;
   min_prob_ball = 0.0;
@@ -98,7 +100,7 @@ BayesHistosToLut::getName()
  * @param object object
  * @return probability.
  */
-float 
+float
 BayesHistosToLut::getObjectProb(hint_t object)
 {
   // These object probabilities should better be read from config file.
@@ -138,7 +140,7 @@ BayesHistosToLut::getObjectProb(hint_t object)
       return 0.0f;
       break;
     }
-    */   
+    */
   } else {
     if ( object_probabilities.find(object) != object_probabilities.end() ) {
       return object_probabilities[object];
@@ -258,13 +260,13 @@ BayesHistosToLut::getMostLikelyObject(unsigned int u,
   map<hint_t, Histogram*>::iterator hit;
   for (hit = histograms.begin(); hit != histograms.end(); hit++) {
     float tmp = getAPosterioriProb((hint_t)hit->first, u, v);
-    
+
     if (tmp > probOfMostLikelyObject) {
       probOfMostLikelyObject = tmp;
       mostLikelyObject = (hint_t)hit->first;
     }
   }
-  
+
   if (probOfMostLikelyObject > min_probability) {
     return mostLikelyObject;
   }
@@ -289,13 +291,13 @@ BayesHistosToLut::getMostLikelyObject(unsigned int y,
   map<hint_t, Histogram*>::iterator hit;
   for (hit = histograms.begin(); hit != histograms.end(); hit++) {
     float tmp = getAPosterioriProb((hint_t)hit->first, y, u, v);
-    
+
     if (tmp > probOfMostLikelyObject) {
       probOfMostLikelyObject = tmp;
       mostLikelyObject = (hint_t)hit->first;
     }
   }
-  
+
   if (probOfMostLikelyObject > min_probability) {
     return mostLikelyObject;
   }
@@ -306,7 +308,7 @@ BayesHistosToLut::getMostLikelyObject(unsigned int y,
 
 /** Calculate all LUT colors. */
 void
-BayesHistosToLut::calculateLutAllColors() 
+BayesHistosToLut::calculateLutAllColors()
 {
   // for each histogram, sum up all of its entries
   //  numberOfOccurrences.resize( histograms.size() );
@@ -331,7 +333,7 @@ BayesHistosToLut::calculateLutAllColors()
        << "histo-BLUE : " << numberOfOccurrences[5] << " counts." << endl;
   */
 
-  // for each color, mark it (in lut) as the color 
+  // for each color, mark it (in lut) as the color
   // that has the highest probability (among all histograms)
   hint_t   color_with_highest_prob;
   float    highest_prob;
@@ -373,7 +375,7 @@ BayesHistosToLut::calculateLutAllColors()
  * @param penalty if true, non-ball colors are penalized
  */
 void
-BayesHistosToLut::calculateLutValues( bool penalty ) 
+BayesHistosToLut::calculateLutValues( bool penalty )
 {
 
   unsigned int old_undo = 0;
@@ -412,7 +414,7 @@ BayesHistosToLut::calculateLutValues( bool penalty )
     }
   }
 
-  /* count for each object 
+  /* count for each object
      how many non-zero values its histogram has in total */
   //  numberOfOccurrences.resize(histograms.size());
 
@@ -454,13 +456,15 @@ BayesHistosToLut::calculateLutValues( bool penalty )
   unsigned int count_background = 0;
   unsigned int count_goal       = 0;
   unsigned int count_unknown    = 0;
-  
+
   lut->reset();
 
   for (unsigned int y = 0; y < depth; ++y) {
     unsigned int y_index = y * lut->deepness() / lut->depth();
     for (unsigned int u = 0; u < width; ++u) {
+      unsigned int u_index = u * lut->deepness() / lut->width();
       for (unsigned int v = 0; v < height; ++v) {
+        unsigned int v_index = v * lut->deepness() / lut->height();
 	hint_t mostLikelyObject = getMostLikelyObject(y, u, v);
 
 	switch(mostLikelyObject) {
@@ -492,12 +496,12 @@ BayesHistosToLut::calculateLutValues( bool penalty )
 	  exit(-1);
 	  break;
 	}
-        lut->set(y_index, u, v, ColorObjectMap::get_instance()->get(mostLikelyObject));
+        lut->set(y_index, u_index, v_index, ColorObjectMap::get_instance()->get(mostLikelyObject));
       }
     }
   }
 
-	printf("ball: %d  field: %d  line: %d  robot: %d  goal: %d  background: %d  unknown: %d\n", 
+	printf("ball: %d  field: %d  line: %d  robot: %d  goal: %d  background: %d  unknown: %d\n",
 	 count_ball, count_field, count_line, count_robot, count_goal, count_background, count_unknown);
 
   if ( penalty ) {
@@ -514,7 +518,7 @@ BayesHistosToLut::calculateLutValues( bool penalty )
   cout << " ============" << endl;
   for (unsigned int v = 0; v < height; v++) {
     for (unsigned int u = 0; u < width; u++) {
-      if (lut->determine(128, u, v) == BACKGROUND) 
+      if (lut->determine(128, u, v) == BACKGROUND)
 	cout << "lut says that (" << u << ", " << v << ") is background color." << endl;
     }
   }

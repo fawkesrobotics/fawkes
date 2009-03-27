@@ -3,7 +3,7 @@
  *  net.cpp - Generic network tool
  *
  *  Created: Fri Nov 16 10:27:57 2007
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -230,7 +230,9 @@ class FireVisionNetworkTool
   virtual void all_for_now()
   {
     printf("All for now\n");
+    __explore_mutex->lock();
     __explore_waitcond->wake_all();
+    __explore_mutex->unlock();
   }
 
   virtual void cache_exhausted()
@@ -271,6 +273,7 @@ class FireVisionNetworkTool
     __client = new FuseClient(host_name, port, this);
     __client->connect();
     __client->start();
+    __client->wait_greeting();
     show_all();
     __client->join();
     delete __client;
@@ -366,7 +369,10 @@ class FireVisionNetworkTool
   {
 #ifdef HAVE_AVAHI
     __exploring = true;
-    __explore_waitcond = new WaitCondition();
+    __explore_mutex = new Mutex();
+    __explore_waitcond = new WaitCondition(__explore_mutex);
+
+    __explore_mutex->lock();
 
     __avahi_thread = new AvahiThread();
     __avahi_thread->start();
@@ -375,6 +381,8 @@ class FireVisionNetworkTool
 
     __explore_waitcond->wait();
     delete __explore_waitcond;
+    __explore_mutex->unlock();
+    delete __explore_mutex;
     __avahi_thread->cancel();
     __avahi_thread->join();
     delete __avahi_thread;
@@ -440,6 +448,7 @@ class FireVisionNetworkTool
 	__client = new FuseClient(host, port_num, this);
 	__client->connect();
 	__client->start();
+	__client->wait_greeting();
       }
 
       if ( __argp->has_arg("i") ) {
@@ -475,6 +484,7 @@ private:
   const char     *__file;
 
   bool            __exploring;
+  Mutex          *__explore_mutex;
   WaitCondition  *__explore_waitcond;
 
 #ifdef HAVE_AVAHI

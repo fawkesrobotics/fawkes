@@ -18,22 +18,11 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/gui.mk
 
-ifneq ($(PKGCONFIG),)
-  HAVE_GCONFMM  = $(if $(shell $(PKGCONFIG) --exists 'gconfmm-2.6'; echo $${?/1/}),1,0)
+CFLAGS  += $(CFLAGS_GUI)
+LDFLAGS += $(LDFLAGS_GUI)
 
-  ifeq ($(HAVE_GCONFMM),1)
-    CFLAGS_GCONFMM  = $(shell $(PKGCONFIG) --cflags 'gconfmm-2.6')
-    LDFLAGS_GCONFMM = $(shell $(PKGCONFIG) --libs 'gconfmm-2.6')
-  else
-    GUI_ERROR += (GConfmm not installed)
-  endif
-endif
-
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM) $(CFLAGS_GCONFMM)
-LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM) $(LDFLAGS_GCONFMM)
-
-LIBS_ffplugingui = fawkescore fawkesutils fawkesnetcomm fawkesplugin fawkesguiutils
-OBJS_ffplugingui = main.o plugin_gui.o plugin_tree_view.o
+LIBS_ffplugingui = fawkescore fawkesutils fawkesguiutils
+OBJS_ffplugingui = main.o plugin_gui.o
 OBJS_all = $(OBJS_ffplugingui)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(HAVE_GCONFMM),111)

@@ -37,6 +37,7 @@ class Colormap;
 #define CMFILE_CUR_VERSION  1
 
 #define CMFILE_TYPE_YUV  1
+#define CMFILE_TYPE_HEADER  2
 
 class ColormapFile : public FireVisionDataFile
 {

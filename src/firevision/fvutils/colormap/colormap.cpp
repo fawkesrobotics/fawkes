@@ -135,8 +135,10 @@ Colormap::to_image(unsigned char *yuv422_planar_buffer, unsigned int level)
 
   color_t c;
   for (unsigned int v = lwidth; v > 0 ; --v) {
+    unsigned int v_index = (v - 1) * deepness() / lwidth;
     for (unsigned int u = 0; u < lheight; ++u) {
-      c = determine(y, u, v-1);
+      unsigned int u_index = u * deepness() / lheight;
+      c = determine(y, u_index, v_index);
 
       switch (c) {
       case C_ORANGE:     *yp++ = 128; *yp++ = 128; *up++ =  30; *vp++ = 220; break;

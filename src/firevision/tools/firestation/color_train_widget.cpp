@@ -67,6 +67,8 @@ ColorTrainWidget::ColorTrainWidget(Gtk::Window* parent)
   m_btn_load_colormap = 0;
   m_btn_save_colormap = 0;
   m_spbtn_cm_depth = 0;
+  m_spbtn_cm_width = 0;
+  m_spbtn_cm_height = 0;
   m_img_segmentation = 0;
   m_scl_threshold = 0;
   m_scl_min_prob = 0;
@@ -104,7 +106,7 @@ ColorTrainWidget::set_src_buffer(unsigned char* yuv422_buffer,
   m_src_buffer = yuv422_buffer;
   m_img_cs = YUV422_PLANAR;
   m_img_size = colorspace_buffer_size( m_img_cs, m_img_width, m_img_height );
-  
+
   if (yuv422_buffer)
     {
       m_zauberstab->deleteRegion();
@@ -138,12 +140,12 @@ void
 ColorTrainWidget::click(unsigned int x, unsigned int y, unsigned int button)
 {
   if (m_src_buffer == 0 || m_draw_buffer == 0)
-    { return; } 
+    { return; }
 
   if ( m_zauberstab->isEmptyRegion() )
     {
       if (button == MOUSE_BUTTON_LEFT) //left click
-			{ 
+			{
 				m_zauberstab->findRegion(x, y);
 			}
     }
@@ -159,21 +161,21 @@ ColorTrainWidget::click(unsigned int x, unsigned int y, unsigned int button)
 				m_zauberstab->deleteRegion(x, y);
 			}
     }
-  
+
   memcpy(m_draw_buffer, m_src_buffer, m_img_size);
-  
+
   ZRegion *region = m_zauberstab->getRegion();
   Drawer *d = new Drawer();
-  d->set_buffer( m_draw_buffer, m_img_width, m_img_height );	  
-  
-  for (unsigned int s = 0; s < region->slices->size(); s++) 
+  d->set_buffer( m_draw_buffer, m_img_width, m_img_height );
+
+  for (unsigned int s = 0; s < region->slices->size(); s++)
     {
       d->draw_rectangle_inverted( region->slices->at(s)->leftX,
 				region->slices->at(s)->y,
 				region->slices->at(s)->rightX - region->slices->at(s)->leftX,
-				1 ); 
+				1 );
     }
-  
+
   delete d;
 
   m_signal_update_image();
@@ -290,7 +292,7 @@ ColorTrainWidget::resize_seg_image(Gtk::Allocation& allocation)
   unsigned int new_height = (unsigned int) allocation.get_height();
 
   if (new_width != m_seg_img_max_width ||  new_height != m_seg_img_max_height)
-    { 
+    {
       m_seg_img_max_width = new_width;
       m_seg_img_max_height = new_height;
       draw_segmentation_result();
@@ -336,12 +338,16 @@ ColorTrainWidget::set_cm_layer_selector(Gtk::Scale* scl)
 }
 
 /** Set the widget to adjust the depth of the colormap.
- * @param spbtn a SpinButton
+ * @param depth SpinButton to set the Y-resolution of the color map
+ * @param width SpinButton to set the U-resolution of the color map
+ * @param height SpinButton to set the V-resolution of the color map
  */
 void
-ColorTrainWidget::set_cm_depth_selector(Gtk::SpinButton* spbtn)
+ColorTrainWidget::set_cm_selector(Gtk::SpinButton* depth, Gtk::SpinButton* width, Gtk::SpinButton* height)
 {
-  m_spbtn_cm_depth = spbtn;
+  m_spbtn_cm_depth = depth;
+  m_spbtn_cm_width = width;
+  m_spbtn_cm_height = height;
 }
 
 /** Access the signal that is emitted whenever a redraw of the image is necessary.
@@ -371,7 +377,7 @@ ColorTrainWidget::load_histograms()
 
   m_fcd_filechooser->set_title("Load histograms");
   m_fcd_filechooser->set_action(Gtk::FILE_CHOOSER_ACTION_OPEN);
-  
+
   m_fcd_filechooser->set_transient_for(*m_wnd_parent);
 
   int result = m_fcd_filechooser->run();
@@ -386,7 +392,13 @@ ColorTrainWidget::load_histograms()
 	 m_generator->load_histograms( filename.c_str() );
 	 m_generator->calc();
 	 m_signal_colormap_updated();
-	 m_cvw->set_colormap(m_generator->get_current());
+
+	 YuvColormap *cur = m_generator->get_current();
+         if (m_spbtn_cm_depth) m_spbtn_cm_depth->set_value(log(cur->depth()) / log(2));
+         if (m_spbtn_cm_width) m_spbtn_cm_width->set_value(log(cur->width()) / log(2));
+         if (m_spbtn_cm_height) m_spbtn_cm_height->set_value(log(cur->height()) / log(2));
+
+	 m_cvw->set_colormap(cur);
 	 m_cvw->draw();
 	 draw_segmentation_result();
  	break;
@@ -411,7 +423,7 @@ ColorTrainWidget::save_histograms()
 
   m_fcd_filechooser->set_title("Save histograms");
   m_fcd_filechooser->set_action(Gtk::FILE_CHOOSER_ACTION_SAVE);
-  
+
   m_fcd_filechooser->set_transient_for(*m_wnd_parent);
 
   int result = m_fcd_filechooser->run();
@@ -427,11 +439,11 @@ ColorTrainWidget::save_histograms()
 
      case (Gtk::RESPONSE_CANCEL):
        break;
-       
+
      default:
        break;
      }
-   
+
    m_fcd_filechooser->hide();
 }
 
@@ -448,12 +460,28 @@ ColorTrainWidget::add_to_colormap()
   else
     { cm_depth = 1; }
 
-  if ( !m_generator || cm_depth != m_generator->get_current()->depth() )
+  unsigned int cm_width;
+  if (m_spbtn_cm_width)
+    { cm_width = (unsigned int) rint( pow(2.0, m_spbtn_cm_width->get_value()) ); }
+  else
+    { cm_width = 256; }
+
+  unsigned int cm_height;
+  if (m_spbtn_cm_height)
+    { cm_height = (unsigned int) rint( pow(2.0, m_spbtn_cm_height->get_value()) ); }
+  else
+    { cm_height = 256; }
+
+  if ( !m_generator
+      || cm_depth  != m_generator->get_current()->depth()
+      || cm_width  != m_generator->get_current()->width()
+      || cm_height != m_generator->get_current()->height())
     {
-      m_generator = new BayesColormapGenerator(cm_depth);
+      delete m_generator;
+      m_generator = new BayesColormapGenerator(cm_depth, H_UNKNOWN, cm_width, cm_height);
       m_cvw->set_colormap( m_generator->get_current() );
     }
-  
+
   if (m_fg_object == H_UNKNOWN)
     {
       printf("CTW::add_to_colormap(): no fg object set\n");
@@ -469,7 +497,7 @@ ColorTrainWidget::add_to_colormap()
   m_signal_colormap_updated();
 
   // update colormap image
-  m_cvw->draw();
+  m_cvw->draw(-1);
 
   // update segmentation image
   draw_segmentation_result();
@@ -480,7 +508,7 @@ void
 ColorTrainWidget::reset_colormap()
 {
   if (m_generator)
-    { 
+    {
       m_generator->reset();
       m_signal_colormap_updated();
 
@@ -500,7 +528,7 @@ ColorTrainWidget::load_colormap()
 
   m_fcd_filechooser->set_title("Load colormap colormap");
   m_fcd_filechooser->set_action(Gtk::FILE_CHOOSER_ACTION_OPEN);
-  
+
   m_fcd_filechooser->set_transient_for(*m_wnd_parent);
 
   int result = m_fcd_filechooser->run();
@@ -520,11 +548,17 @@ ColorTrainWidget::load_colormap()
 	   delete tcm;
 	   throw fawkes::TypeMismatchException("File does not contain a YUV colormap");
 	 }
-	 unsigned int cm_depth = tcm->depth();
-	 m_generator = new BayesColormapGenerator(cm_depth);
+         unsigned int cm_depth = tcm->depth();
+         unsigned int cm_width = tcm->width();
+         unsigned int cm_height = tcm->height();
+	 m_generator = new BayesColormapGenerator(cm_depth, H_UNKNOWN, cm_width, cm_height);
 	 YuvColormap *current = m_generator->get_current();
 	 *current = *tycm;
 	 delete tcm;
+
+         if (m_spbtn_cm_depth) m_spbtn_cm_depth->set_value(log(cm_depth) / log(2));
+         if (m_spbtn_cm_width) m_spbtn_cm_width->set_value(log(cm_width) / log(2));
+         if (m_spbtn_cm_height) m_spbtn_cm_height->set_value(log(cm_height) / log(2));
 
 	 m_signal_colormap_updated();
 	 m_cvw->set_colormap( m_generator->get_current() );
@@ -552,7 +586,7 @@ ColorTrainWidget::save_colormap()
 
   m_fcd_filechooser->set_title("Save colormap colormap");
   m_fcd_filechooser->set_action(Gtk::FILE_CHOOSER_ACTION_SAVE);
-  
+
   m_fcd_filechooser->set_transient_for(*m_wnd_parent);
 
   int result = m_fcd_filechooser->run();
@@ -586,7 +620,7 @@ ColorTrainWidget::get_colormap() const
 {
   if ( !m_generator )
     { return 0; }
-      
+
   return m_generator->get_current();
 }
 
@@ -622,7 +656,7 @@ ColorTrainWidget::reset_gui()
 void
 ColorTrainWidget::draw_segmentation_result()
 {
-  if ( !m_src_buffer || !m_img_segmentation || !m_generator) 
+  if ( !m_src_buffer || !m_img_segmentation || !m_generator)
     { return; }
 
   unsigned char* seg_buffer = (unsigned char*) malloc(m_img_size);
@@ -630,9 +664,9 @@ ColorTrainWidget::draw_segmentation_result()
 
   Drawer d;
   d.set_buffer(seg_buffer, m_img_width, m_img_height);
-  
+
   YuvColormap* cm = m_generator->get_current();
-  
+
   for (unsigned int w = 0; w < m_img_width; ++w)
     {
       for (unsigned int h = 0; h < m_img_height; ++h)
@@ -670,7 +704,7 @@ ColorTrainWidget::draw_segmentation_result()
 								   8,
 								   width,
 								   height,
-								   3 * width, 
+								   3 * width,
 								   Gdk::Pixbuf::SlotDestroyData(&free_rgb_buffer));
 
   m_img_segmentation->set(image);

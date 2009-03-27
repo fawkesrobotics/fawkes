@@ -45,11 +45,13 @@ class BayesHistosToLut
  public:
   BayesHistosToLut(std::map< hint_t, Histogram * > &histos,
 		   unsigned int d = 1,
-		   hint_t fg_object = H_UNKNOWN);
+		   hint_t fg_object = H_UNKNOWN,
+		   unsigned int w = 256,
+		   unsigned int h = 256);
   ~BayesHistosToLut();
 
   std::string getName();
-  
+
   float getObjectProb(hint_t object);
 
   float getAPrioriProb( unsigned int u,
@@ -61,11 +63,11 @@ class BayesHistosToLut
 			hint_t object );
 
   float getAPosterioriProb( hint_t object,
-			    unsigned int u, 
+			    unsigned int u,
 			    unsigned int v );
   float getAPosterioriProb( hint_t object,
 			    unsigned int y,
-			    unsigned int u, 
+			    unsigned int u,
 			    unsigned int v );
 
   hint_t getMostLikelyObject( unsigned int u,
@@ -97,7 +99,7 @@ class BayesHistosToLut
   YuvColormap *lut;
   unsigned int width;
   unsigned int height;
-  unsigned int depth; 
+  unsigned int depth;
 
   hint_t fg_object;
 

@@ -46,14 +46,14 @@ class ColorTrainWidget
 
   void set_fg_object(hint_t fg_object);
 
-  void set_src_buffer(unsigned char* buffer, 
+  void set_src_buffer(unsigned char* buffer,
 		      unsigned int img_width, unsigned int img_height);
   void set_draw_buffer(unsigned char* buffer);
 
 
   void click(unsigned int x, unsigned int y, unsigned int button = MOUSE_BUTTON_LEFT);
   void reset_selection();
-  
+
   void load_histograms();
   void save_histograms();
 
@@ -78,8 +78,8 @@ class ColorTrainWidget
   void set_min_prob_scl(Gtk::Scale* scl);
   void set_filechooser_dlg(Gtk::FileChooserDialog* dlg);
   void set_cm_layer_selector(Gtk::Scale* scl);
-  void set_cm_depth_selector(Gtk::SpinButton* spbtn);
-  
+  void set_cm_selector(Gtk::SpinButton* depth, Gtk::SpinButton* width = 0, Gtk::SpinButton* height = 0);
+
   Glib::Dispatcher& update_image();
   Glib::Dispatcher& colormap_updated();
 
@@ -94,7 +94,7 @@ class ColorTrainWidget
   BayesColormapGenerator* m_generator;
   Zauberstab* m_zauberstab;
   ColormapViewerWidget* m_cvw;
-  
+
   hint_t m_fg_object;
 
   unsigned char* m_src_buffer;
@@ -115,6 +115,8 @@ class ColorTrainWidget
   Gtk::Button* m_btn_load_colormap;
   Gtk::Button* m_btn_save_colormap;
   Gtk::SpinButton* m_spbtn_cm_depth;
+  Gtk::SpinButton* m_spbtn_cm_width;
+  Gtk::SpinButton* m_spbtn_cm_height;
   Gtk::Image* m_img_segmentation;
   Gtk::Scale* m_scl_threshold;
   Gtk::Scale* m_scl_min_prob;

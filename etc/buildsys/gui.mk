@@ -26,14 +26,17 @@ PC_CAIROMM      = cairomm-1.0
 PC_GLADEMM      = libglademm-2.4
 PC_HILDONMM     = hildonmm
 PC_HILDONFMMM   = hildon-fmmm
+PC_GCONFMM      = gconfmm-2.6
 PKG_GTKMM       = gtkmm24[-devel]
 PKG_CAIROMM     = cairomm[-devel]
 PKG_GLADEMM     = libglademm24[-devel]
+PKG_GCONFMM     = gconfmm26[-devel]
 
 ifneq ($(PKGCONFIG),)
-  HAVE_GTKMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_GTKMM)'; echo $${?/1/}),1,0)
+  HAVE_GTKMM   = $(if $(shell $(PKGCONFIG) --exists '$(PC_GTKMM)'; echo $${?/1/}),1,0)
   HAVE_CAIROMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_CAIROMM)'; echo $${?/1/}),1,0)
   HAVE_GLADEMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_GLADEMM)'; echo $${?/1/}),1,0)
+  HAVE_GCONFMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_GCONFMM)'; echo $${?/1/}),1,0)
   ifeq ($(BUILD_TYPE), maemo)
     HAVE_HILDONMM   = $(if $(shell $(PKGCONFIG) --exists '$(PC_HILDONMM)'; echo $${?/1/}),1,0)
     HAVE_HILDONFMMM = $(if $(shell $(PKGCONFIG) --exists '$(PC_HILDONFMMM)'; echo $${?/1/}),1,0)
@@ -43,6 +46,9 @@ endif
 ifeq ($(HAVE_HILDONMM)$(HAVE_HILDONFMMM),11)
   CFLAGS_HILDONMM  = $(shell $(PKGCONFIG) --cflags '$(PC_HILDONMM)' '$(PC_HILDONFMMM)')
   LDFLAGS_HILDONMM = $(shell $(PKGCONFIG) --libs '$(PC_HILDONMM)' '$(PC_HILDONFMMM)')
+
+  CFLAGS_GUI  += $(CFLAGS_HILDONMM)
+  LDFLAGS_GUI += $(LDFLAGS_HILDONMM)
 endif
 
 ifeq ($(HAVE_GTKMM),1)
@@ -66,7 +72,20 @@ else
   PKG_MISSING += $(PKG_GLADEMM)
 endif
 
-ifneq ($(HAVE_GTKMM)$(HAVE_CAIROMM)$(HAVE_GLADEMM),111)
+ifeq ($(HAVE_GCONFMM),1)
+  CFLAGS_GCONFMM  = $(shell $(PKGCONFIG) --cflags '$(PC_GCONFMM)') -DHAVE_GCONFMM
+  LDFLAGS_GCONFMM = $(shell $(PKGCONFIG) --libs '$(PC_GCONFMM)')
+else
+  PKG_MISSING += $(PKG_GCONFMM)
+endif
+
+ifeq ($(HAVE_GTKMM)$(HAVE_CAIROMM)$(HAVE_GLADEMM),111)
+  HAVE_GUI     = 1
+  CFLAGS_GUI  += $(CFLAGS_GTKMM) $(CFLAGS_CAIROMM) $(CFLAGS_GLADEMM)	\
+		$(CFLAGS_GCONFMM)
+  LDFLAGS_GUI += $(LDFLAGS_GTKMM) $(LDFLAGS_CAIROMM) $(LDFLAGS_GLADEMM) $(LDFLAGS_GCONFMM)
+
+else
   GUI_ERROR = ($(call merge, and ,$(PKG_MISSING)) not installed)
 endif
 
@@ -79,6 +98,8 @@ warning_cairomm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Cairo dependent GUI apps$(TNORMAL) $(ERROR_CAIROMM)";
 warning_glademm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting Glade dependent GUI apps$(TNORMAL) $(ERROR_GLADEMM)";
+warning_gconfmm:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting GConf dependent GUI apps$(TNORMAL) $(ERROR_GCONFMM)";
 warning_hildonmm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Omitting HildonMM dependent GUI apps$(TNORMAL) (hildonmm/hildon-fmmm not installed)";
 endif

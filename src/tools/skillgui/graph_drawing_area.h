@@ -30,8 +30,11 @@
 #include <gvc.h>
 #include <gvcjob.h>
 
+#include "gvplugin_skillgui_cairo.h"
+
 class SkillGuiGraphDrawingArea
-  : public Gtk::DrawingArea
+: public Gtk::DrawingArea,
+  public SkillGuiCairoRenderInstructor
 {
  public:
 
@@ -39,13 +42,14 @@ class SkillGuiGraphDrawingArea
   ~SkillGuiGraphDrawingArea();
 
   void save();
+  void open();
+  bool set_recording(bool recording);
 
   void zoom_in();
   void zoom_out();
   void zoom_fit();
   void zoom_reset();
 
-  void set_gvjob(GVJ_t *job);
   void set_graph_fsm(std::string fsm_name);
   void set_graph(std::string graph);
 
@@ -56,22 +60,37 @@ class SkillGuiGraphDrawingArea
   bool   scale_override();
   double get_scale();
   void   get_translation(double &tx, double &ty);
+  void   get_dimensions(double &width, double &height);
+  void   get_pad(double &pad_x, double &pad_y);
   Cairo::RefPtr<Cairo::Context> get_cairo();
 
   bool get_update_graph();
   void set_update_graph(bool update);
+
+  sigc::signal<void> signal_update_disabled();
 
  protected:
   virtual bool on_expose_event(GdkEventExpose* event);
   virtual bool on_scroll_event(GdkEventScroll *event);
   virtual bool on_button_press_event(GdkEventButton *event);
   virtual bool on_motion_notify_event(GdkEventMotion *event);
+
+ private:
+  void save_dotfile(const char *filename);
+
  private:
   Cairo::RefPtr<Cairo::Context> __cairo;
-  Gtk::FileChooserDialog *__fcd;
+  Gtk::FileChooserDialog *__fcd_save;
+  Gtk::FileChooserDialog *__fcd_open;
+  Gtk::FileChooserDialog *__fcd_recording;
+  Gtk::FileFilter *__filter_pdf;
+  Gtk::FileFilter *__filter_svg;
+  Gtk::FileFilter *__filter_png;
+  Gtk::FileFilter *__filter_dot;
+
+  sigc::signal<void> __signal_update_disabled;
 
   GVC_t *__gvc;
-  GVJ_t *__gvjob;
 
   std::string __graph_fsm;
   std::string __graph;
@@ -91,6 +110,10 @@ class SkillGuiGraphDrawingArea
 
   bool __scale_override;
   bool __update_graph;
+
+
+  bool __recording;
+  std::string __record_directory;
 };
 
 #endif

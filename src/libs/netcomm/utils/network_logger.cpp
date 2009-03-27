@@ -28,6 +28,7 @@
 #include <core/threading/mutex.h>
 #include <netcomm/fawkes/component_ids.h>
 #include <netcomm/fawkes/hub.h>
+#include <netcomm/utils/ntoh64.h>
 
 #include <sys/time.h>
 #include <time.h>
@@ -451,8 +452,8 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
     header = (NetworkLogger::network_logger_header_t *)_payload;
     header->log_level    = log_level;
     header->exception    = is_exception ? 1 : 0;
-    header->time.tv_sec  = htonl(t->tv_sec);
-    header->time.tv_usec = htonl(t->tv_usec);
+    header->time_sec     = hton64(t->tv_sec);
+    header->time_usec    = htonl(t->tv_usec);
     copy_payload(sizeof(NetworkLogger::network_logger_header_t), component, strlen(component));
     copy_payload(sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + 1, tmp, tmplen);
     __component = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
@@ -479,8 +480,8 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
   header = (NetworkLogger::network_logger_header_t *)_payload;
   header->log_level    = log_level;
   header->exception    = is_exception ? 1 : 0;
-  header->time.tv_sec  = htonl(t->tv_sec);
-  header->time.tv_usec = htonl(t->tv_usec);
+  header->time_sec     = hton64(t->tv_sec);
+  header->time_usec    = htonl(t->tv_usec);
   copy_payload(sizeof(NetworkLogger::network_logger_header_t), component, strlen(component));
   copy_payload(sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + 1, message, strlen(message));
   __component = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
@@ -536,8 +537,8 @@ struct timeval
 NetworkLoggerMessageContent::get_time() const
 {
   struct timeval rv;
-  rv.tv_sec  = ntohl(header->time.tv_sec);
-  rv.tv_usec = ntohl(header->time.tv_usec);
+  rv.tv_sec  = (time_t)ntoh64(header->time_sec);
+  rv.tv_usec = ntohl(header->time_usec);
   return rv;
 }
 

@@ -36,15 +36,15 @@ class SharedMemoryLookupTable;
 class YuvColormap : public Colormap
 {
  public:
-  YuvColormap(unsigned int depth = 1);
-  YuvColormap(const char *shmem_lut_id, unsigned int depth = 1);
-  YuvColormap(const char *shmem_lut_id, bool destroy_on_free, unsigned int depth = 1);
+  YuvColormap(unsigned int depth = 1, unsigned int width = 256, unsigned int height = 256);
+  YuvColormap(const char *shmem_lut_id, unsigned int depth = 1, unsigned int width = 256, unsigned int height = 256);
+  YuvColormap(const char *shmem_lut_id, bool destroy_on_free, unsigned int depth = 1, unsigned int width = 256, unsigned int height = 256);
   YuvColormap(YuvColormap *cm, const char *shmem_lut_id, bool destroy_on_free = false);
   virtual ~YuvColormap();
 
   virtual color_t          determine(unsigned int y, unsigned int u, unsigned int v) const;
   virtual void             set(unsigned int y, unsigned int u, unsigned int v, color_t c);
-  
+
   virtual void             reset();
   virtual void             set(unsigned char *buffer);
 
@@ -67,7 +67,7 @@ class YuvColormap : public Colormap
   void copy_uvplane(unsigned char *uvplane, unsigned int level);
 
  private:
-  void constructor(unsigned int depth,
+  void constructor(unsigned int depth, unsigned int width, unsigned int height,
 		   const char *shmem_lut_id = 0, bool destroy_on_free = false);
 
 
@@ -79,6 +79,8 @@ class YuvColormap : public Colormap
   unsigned int __height;
   unsigned int __depth;
   unsigned int __depth_div;
+  unsigned int __width_div;
+  unsigned int __height_div;
   unsigned int __plane_size;
 };
 
@@ -86,7 +88,7 @@ class YuvColormap : public Colormap
 inline color_t
 YuvColormap::determine(unsigned int y, unsigned int u, unsigned int v) const
 {
-  return (color_t) *(__lut + (y / __depth_div) * __plane_size + v * __width + u);
+  return (color_t) *(__lut + (y / __depth_div) * __plane_size + (v / __height_div) * __width + (u / __width_div));
 }
 
 #endif

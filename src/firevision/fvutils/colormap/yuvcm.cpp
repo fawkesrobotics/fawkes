@@ -55,10 +55,12 @@ using namespace fawkes;
 
 /** Constructor.
  * @param depth Y resolution depth
+ * @param width U depth
+ * @param height V depth
  */
-YuvColormap::YuvColormap(unsigned int depth)
+YuvColormap::YuvColormap(unsigned int depth, unsigned int width, unsigned int height)
 {
-  constructor(depth);
+  constructor(depth, width, height);
 }
 
 
@@ -66,10 +68,12 @@ YuvColormap::YuvColormap(unsigned int depth)
  * Creates a colormap in shared memory for the given LUT ID.
  * @param shmem_lut_id shared memory LUT ID
  * @param depth Y depth
+ * @param width U depth
+ * @param height V depth
  */
-YuvColormap::YuvColormap(const char *shmem_lut_id, unsigned int depth)
+YuvColormap::YuvColormap(const char *shmem_lut_id, unsigned int depth, unsigned int width, unsigned int height)
 {
-  constructor(depth, shmem_lut_id);
+  constructor(depth, width, height, shmem_lut_id);
 }
 
 
@@ -78,10 +82,12 @@ YuvColormap::YuvColormap(const char *shmem_lut_id, unsigned int depth)
  * @param shmem_lut_id shared memory LUT ID
  * @param destroy_on_free true to delete the shared memory segment to delete, false to keep the segment
  * @param depth Y depth
+ * @param width U depth
+ * @param height V depth
  */
-YuvColormap::YuvColormap(const char *shmem_lut_id, bool destroy_on_free, unsigned int depth)
+YuvColormap::YuvColormap(const char *shmem_lut_id, bool destroy_on_free, unsigned int depth, unsigned int width, unsigned int height)
 {
-  constructor(depth, shmem_lut_id, destroy_on_free);
+  constructor(depth, width, height, shmem_lut_id, destroy_on_free);
 }
 
 
@@ -94,7 +100,7 @@ YuvColormap::YuvColormap(const char *shmem_lut_id, bool destroy_on_free, unsigne
  */
 YuvColormap::YuvColormap(YuvColormap *cm, const char *shmem_lut_id, bool destroy_on_free)
 {
-  constructor(cm->depth(), shmem_lut_id, destroy_on_free);
+  constructor(cm->depth(), cm->width(), cm->height(), shmem_lut_id, destroy_on_free);
   memcpy(__lut, cm->__lut, __lut_size);
 }
 
@@ -103,22 +109,43 @@ YuvColormap::YuvColormap(YuvColormap *cm, const char *shmem_lut_id, bool destroy
  * @param shmem_lut_id shared memory LUT ID
  * @param destroy_on_free true to delete the shared memory segment to delete, false to keep the segment
  * @param depth Y depth
+ * @param width U depth
+ * @param height V depth
  */
 void
-YuvColormap::constructor(unsigned int depth, const char *shmem_lut_id, bool destroy_on_free)
+YuvColormap::constructor(unsigned int depth, unsigned int width, unsigned int height,
+                         const char *shmem_lut_id, bool destroy_on_free)
 {
   if ( depth > 256 ) {
-    throw OutOfBoundsException("YuvColormap depth out of bounds", depth, 0, 255);
+    throw OutOfBoundsException("YuvColormap depth out of bounds", depth, 1, 256);
   }
   if ( (depth != 1) && (depth != 2) && (depth != 4) && (depth != 8) && (depth != 16) &&
        (depth != 32) && (depth != 64) && (depth != 128) && (depth != 256) ) {
     throw IllegalArgumentException("Depth must be of the form d=2^n with n from [1,8]");
   }
 
-  __width  = 256;
-  __height = 256;
+  if ( width > 256 ) {
+    throw OutOfBoundsException("YuvColormap width out of bounds", width, 1, 256);
+  }
+  if ( (width != 1) && (width != 2) && (width != 4) && (width != 8) && (width != 16) &&
+       (width != 32) && (width != 64) && (width != 128) && (width != 256) ) {
+    throw IllegalArgumentException("Width must be of the form d=2^n with n from [1,8]");
+  }
+
+  if ( height > 256 ) {
+    throw OutOfBoundsException("YuvColormap height out of bounds", height, 1, 256);
+  }
+  if ( (height != 1) && (height != 2) && (height != 4) && (height != 8) && (height != 16) &&
+       (height != 32) && (height != 64) && (height != 128) && (height != 256) ) {
+    throw IllegalArgumentException("Height must be of the form d=2^n with n from [1,8]");
+  }
+
+  __width  = width;
+  __height = height;
   __depth  = depth;
   __depth_div  = 256 / __depth;
+  __width_div  = 256 / __width;
+  __height_div  = 256 / __height;
   __plane_size = __width * __height;
 
   if ( shmem_lut_id != NULL ) {
@@ -151,10 +178,10 @@ YuvColormap::~YuvColormap()
 void
 YuvColormap::set(unsigned int y, unsigned int u, unsigned int v, color_t c)
 {
-  *(__lut + (y / __depth_div) * __plane_size + v * __width + u) = c;
+  *(__lut + (y / __depth_div) * __plane_size + (v / __height_div) * __width + (u / __width_div)) = c;
 }
 
-  
+
 void
 YuvColormap::reset()
 {

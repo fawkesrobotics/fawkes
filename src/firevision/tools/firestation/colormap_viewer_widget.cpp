@@ -102,7 +102,7 @@ ColormapViewerWidget::on_layer_selected(Gtk::ScrollType scroll, double value)
   return true;
 }
 
-/** Draw the colormap. 
+/** Draw the colormap.
  * @param layer the plane in the third dimension of the colormap to be drawn
  */
 void
@@ -111,8 +111,11 @@ ColormapViewerWidget::draw(unsigned int layer)
   if (m_cm == 0 || m_img_colormap == 0)
     { return; }
 
-  if ( layer < 0 || layer >= m_cm->deepness() )
-    { return; }
+  if (layer >= m_cm->deepness() )
+    {
+      if (!m_scl_layer_selector) return;
+      else layer = (unsigned int) rint(m_scl_layer_selector->get_value());
+    }
 
   unsigned int cm_layer = (layer * m_cm->depth()) / m_cm->deepness();
 
@@ -124,7 +127,7 @@ ColormapViewerWidget::draw(unsigned int layer)
 
   img_width  = (img_width < img_height) ? img_width : img_height;
   img_height = (img_width < img_height) ? img_width : img_height;
-  
+
   // scale
   LossyScaler scaler;
   scaler.set_original_buffer(colormap_buffer);
@@ -133,11 +136,11 @@ ColormapViewerWidget::draw(unsigned int layer)
   unsigned char* scaled_colormap_buffer = (unsigned char*) malloc( colorspace_buffer_size(YUV422_PLANAR, img_width, img_height) );
   scaler.set_scaled_buffer(scaled_colormap_buffer);
   scaler.scale();
-  
+
   free(m_colormap_img_buf);
   m_colormap_img_buf = (unsigned char*) malloc( colorspace_buffer_size(RGB, img_width, img_height) );
   convert(YUV422_PLANAR, RGB, scaled_colormap_buffer, m_colormap_img_buf, img_width, img_height);
-  
+
   Glib::RefPtr<Gdk::Pixbuf> colormap_image = Gdk::Pixbuf::create_from_data( m_colormap_img_buf,
 									    Gdk::COLORSPACE_RGB,
 									    false,
