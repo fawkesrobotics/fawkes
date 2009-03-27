@@ -32,11 +32,11 @@
 #include <iomanip>
 #include <sstream>
 
-#define M_2xPI 6.28318531
+#define M_2xPI (2*M_PI)
 using namespace fawkes;
 
-/** @class YuvViewerGtkWindow loc_viewer_gui.h  <fvwidgets/image_widget.cpp/image_widget.h>
- * Graphical localization viewer.
+/** @class YuvViewerGtkWindow "yuv_viewer_gui.h"
+ * YUV color space visualization.
  *
  * @author Christof Rath
  */
