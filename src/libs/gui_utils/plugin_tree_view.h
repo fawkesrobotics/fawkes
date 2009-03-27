@@ -33,7 +33,7 @@
 
 #include <gtkmm.h>
 #include <libglademm/xml.h>
-#ifdef HAVE_GCONF
+#ifdef HAVE_GCONFMM
 #  include <gconfmm.h>
 #endif
 
@@ -86,7 +86,7 @@ class PluginTreeView
 
  private:
   Glib::RefPtr<Gtk::ListStore> m_plugin_list;
-#ifdef HAVE_GCONF
+#ifdef HAVE_GCONFMM
   Glib::RefPtr<Gnome::Conf::Client> __gconf;
 #endif
   PluginRecord m_plugin_record;
