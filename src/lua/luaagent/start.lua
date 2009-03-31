@@ -22,9 +22,9 @@
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
 require("fawkes.logprint")
-agentenv = require("luaagent.agentenv")
-
 fawkes.logprint.init(logger)
+
+agentenv = require("luaagent.agentenv")
 
 skiller = interfaces.reading.skiller
 

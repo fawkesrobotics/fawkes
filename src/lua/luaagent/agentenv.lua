@@ -30,8 +30,12 @@ local skqmod = require("luaagent.skillqueue")
 local fsmjsmod = require("fawkes.fsm.jumpstate")
 local fsmstmod = require("fawkes.fsm.state")
 local skillenv = require("skiller.skillenv")
+local predlib  = require("fawkes.predlib")
+local grapher  = require("fawkes.fsm.grapher")
 
 local agent = nil
+
+local graphing_enabled = false
 
 --- Initialize agent module.
 -- Exports some basic features like AgentHSM, SkillQueue, JumpState etc.
@@ -78,6 +82,26 @@ function init(agentname)
    end
 end
 
+--- Set graph rankdir.
+-- @param graphdir rank dir
+-- @see fawkes.fsm.grapher.set_rankdir()
+function set_graphdir(graphdir)
+   if agent.fsm then
+      if skillenv.update_grapher_config(interfaces.writing.agdbg, graphdir) then
+	 agent.fsm:mark_changed()
+      end
+   end
+end
+
+--- Set if the graph should be colored.
+-- @param colored true to enable colored graph output, false otherwise
+function set_graph_colored(colored)
+   if agent.fsm then
+      if skillenv.update_grapher_config(interfaces.writing.agdbg, nil, colored) then
+	 agent.fsm:mark_changed()
+      end
+   end
+end
 
 --- Write graph of current agent.
 -- If the current agent supplies a FSM its graph is written to the
@@ -102,5 +126,9 @@ function execute()
       error("Agent has neither execute() function nor FSM")
    end
 
-   write_graph()
+   predlib.reset()
+
+   if graphing_enabled then
+      write_graph()
+   end
 end
