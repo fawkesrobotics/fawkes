@@ -25,10 +25,12 @@
 
 #include <utils/time/tracker.h>
 #include <core/exceptions/software.h>
+#include <core/exceptions/system.h>
 
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
+#include <cerrno>
 #include <cstdio>
 
 using namespace std;
@@ -67,6 +69,8 @@ namespace fawkes {
  */
 TimeTracker::TimeTracker(bool add_default_class)
 {
+  __timelog = NULL;
+  __write_cycle = 0;
   reset();
   if ( add_default_class ) {
     __class_times.push_back(vector<struct timeval *>());
@@ -75,9 +79,31 @@ TimeTracker::TimeTracker(bool add_default_class)
 }
 
 
+/** Constructor for file logging.
+ * @param filename name of the file to write log data to. File is overwritten.
+ * @param add_default_class if true a default time class is added.
+ */
+TimeTracker::TimeTracker(const char *filename, bool add_default_class)
+{
+  __write_cycle = 0;
+  reset();
+  if ( add_default_class ) {
+    __class_times.push_back(vector<struct timeval *>());
+    __class_names.push_back("Default");
+  }
+  __timelog = fopen(filename, "w");
+  if (!__timelog) {
+    throw CouldNotOpenFileException(filename, errno, "Failed to open time log");
+  }
+}
+
+
 /** Destructor. */
 TimeTracker::~TimeTracker()
 {
+  if (__timelog) {
+    fclose(__timelog);
+  }
   reset();
   __class_times.clear();
   __class_names.clear();
@@ -250,83 +276,109 @@ TimeTracker::ping_end(unsigned int cls)
 }
 
 
+void
+TimeTracker::average_and_deviation(vector<struct timeval *> &values,
+				   double &average_sec, double &average_ms,
+				   double &deviation_sec, double &deviation_ms)
+{
+  vector<struct timeval * >::iterator tit;
+
+  average_sec = average_ms = deviation_sec = deviation_ms = 0.f;
+
+  for (tit = values.begin(); tit != values.end(); ++tit) {
+    average_sec += float((*tit)->tv_sec);
+    average_sec += (*tit)->tv_usec / 1000000.f;
+  }
+  average_sec /= values.size();
+
+  for (tit = values.begin(); tit != values.end(); ++tit) {
+    deviation_sec += fabs((*tit)->tv_sec + ((*tit)->tv_usec / 1000000.f) - average_sec);
+  }
+  deviation_sec /= values.size();
+
+  average_ms   = average_sec   * 1000.f;
+  deviation_ms = deviation_sec * 1000.f;
+}
+
 /** Print results to stdout. */
 void
 TimeTracker::print_to_stdout()
 {
 
-  unsigned int i = 0;
-  unsigned int j = 0;
-  long diff_sec_start = 0;
-  long diff_usec_start = 0;
-  long diff_sec_last = 0;
-  long diff_usec_last = 0;
-  float diff_msec_start = 0.0;
-  float diff_msec_last = 0.0;
-  time_t last_sec = start_time.tv_sec;
-  suseconds_t last_usec = start_time.tv_usec;
-  char time_string[26];
+  if ( ! __times.empty()) {
+    unsigned int i = 0;
+    unsigned int j = 0;
+    long diff_sec_start = 0;
+    long diff_usec_start = 0;
+    long diff_sec_last = 0;
+    long diff_usec_last = 0;
+    float diff_msec_start = 0.0;
+    float diff_msec_last = 0.0;
+    time_t last_sec = start_time.tv_sec;
+    suseconds_t last_usec = start_time.tv_usec;
+    char time_string[26];
 
-  ctime_r(&(start_time.tv_sec), time_string);
-  for (j = 26; j > 0; --j) {
-    if (time_string[j] == '\n') {
-      time_string[j] = 0;
-      break;
-    }
-  }
-
-  cout << endl << "TimeTracker stats - individual times";
-  if (__tracker_comment.empty()) {
-    cout << " (" << __tracker_comment << ")";
-  }
-  cout << endl
-       << "==================================================================" << endl
-       << "Initialized: " << time_string << " (" << start_time.tv_sec << ")" << endl << endl;
-
-  for (__time_it = __times.begin(); __time_it != __times.end(); ++__time_it) {
-    char tmp[10];
-    sprintf(tmp, "%3u.", i + 1);
-    cout << tmp;
-    if (__comments.count(i) > 0) {
-      cout << "  (" << __comments[i] << ")";
-    }
-    cout << endl;
-
-    diff_sec_start  = (*__time_it)->tv_sec  - start_time.tv_sec;
-    diff_usec_start = (*__time_it)->tv_usec - start_time.tv_usec;
-    if (diff_usec_start < 0) {
-      diff_sec_start -= 1;
-      diff_usec_start = 1000000 + diff_usec_start;
-    }
-    diff_msec_start = diff_usec_start / 1000.f;
-
-    diff_sec_last  = (*__time_it)->tv_sec  - last_sec;
-    diff_usec_last = (*__time_it)->tv_usec - last_usec;
-    if (diff_usec_last < 0) {
-      diff_sec_last -= 1;
-      diff_usec_last = 1000000 + diff_usec_last;
-    }
-    diff_msec_last = diff_usec_last / 1000.f;
-
-    last_sec  = (*__time_it)->tv_sec;
-    last_usec = (*__time_it)->tv_usec;
-
-    ctime_r(&(*__time_it)->tv_sec, time_string);
+    ctime_r(&(start_time.tv_sec), time_string);
     for (j = 26; j > 0; --j) {
       if (time_string[j] == '\n') {
 	time_string[j] = 0;
 	break;
       }
     }
-    cout << time_string << " (" << (*__time_it)->tv_sec << ")" << endl;
-    cout << "Diff to start: " << diff_sec_start << " sec and " << diff_usec_start
-	 << " usec  (which are "
-	 << diff_msec_start << " msec)" << endl;
-    cout << "Diff to last:  " << diff_sec_last  << " sec and " << diff_usec_last
-	 << " usec (which are "
-	 << diff_msec_last << " msec)" << endl << endl;
 
-    i += 1;
+    cout << endl << "TimeTracker stats - individual times";
+    if (__tracker_comment.empty()) {
+      cout << " (" << __tracker_comment << ")";
+    }
+    cout << endl
+	 << "==================================================================" << endl
+	 << "Initialized: " << time_string << " (" << start_time.tv_sec << ")" << endl << endl;
+
+    for (__time_it = __times.begin(); __time_it != __times.end(); ++__time_it) {
+      char tmp[10];
+      sprintf(tmp, "%3u.", i + 1);
+      cout << tmp;
+      if (__comments.count(i) > 0) {
+	cout << "  (" << __comments[i] << ")";
+      }
+      cout << endl;
+
+      diff_sec_start  = (*__time_it)->tv_sec  - start_time.tv_sec;
+      diff_usec_start = (*__time_it)->tv_usec - start_time.tv_usec;
+      if (diff_usec_start < 0) {
+	diff_sec_start -= 1;
+	diff_usec_start = 1000000 + diff_usec_start;
+      }
+      diff_msec_start = diff_usec_start / 1000.f;
+
+      diff_sec_last  = (*__time_it)->tv_sec  - last_sec;
+      diff_usec_last = (*__time_it)->tv_usec - last_usec;
+      if (diff_usec_last < 0) {
+	diff_sec_last -= 1;
+	diff_usec_last = 1000000 + diff_usec_last;
+      }
+      diff_msec_last = diff_usec_last / 1000.f;
+
+      last_sec  = (*__time_it)->tv_sec;
+      last_usec = (*__time_it)->tv_usec;
+
+      ctime_r(&(*__time_it)->tv_sec, time_string);
+      for (j = 26; j > 0; --j) {
+	if (time_string[j] == '\n') {
+	  time_string[j] = 0;
+	  break;
+	}
+      }
+      cout << time_string << " (" << (*__time_it)->tv_sec << ")" << endl;
+      cout << "Diff to start: " << diff_sec_start << " sec and " << diff_usec_start
+	   << " usec  (which are "
+	   << diff_msec_start << " msec)" << endl;
+      cout << "Diff to last:  " << diff_sec_last  << " sec and " << diff_usec_last
+	   << " usec (which are "
+	   << diff_msec_last << " msec)" << endl << endl;
+
+      i += 1;
+    }
   }
 
   cout << endl << "TimeTracker stats - class times";
@@ -337,7 +389,6 @@ TimeTracker::print_to_stdout()
        << "==================================================================" << endl;
 
   vector<vector<struct timeval *> >::iterator it = __class_times.begin();
-  vector<struct timeval * >::iterator tit;
   vector<string>::iterator sit = __class_names.begin();
 
   double deviation = 0.f;
@@ -347,24 +398,10 @@ TimeTracker::print_to_stdout()
 
   for (; (it != __class_times.end()) && (sit != __class_names.end()); ++it, ++sit) {
     if (sit->empty()) continue;
- 
-    deviation = 0.f;
-    average = 0.f;
 
     if (it->size() > 0) {
-      for (tit = it->begin(); tit != it->end(); ++tit) {
-	average += float((*tit)->tv_sec);
-	average += (*tit)->tv_usec / 1000000.f;
-      }
-      average /= it->size();
 
-      for (tit = it->begin(); tit != it->end(); ++tit) {
-	deviation += fabs((*tit)->tv_sec + ((*tit)->tv_usec / 1000000.f) - average);
-      }
-      deviation /= it->size();
-
-      average_ms = average * 1000;
-      deviation_ms = deviation * 1000;
+      average_and_deviation(*it, average, average_ms, deviation, deviation_ms);
 
       cout << "Class '" <<  *sit << "'" << endl
 	   << "  avg=" << average << " (" << average_ms << " ms)" << endl
@@ -380,5 +417,41 @@ TimeTracker::print_to_stdout()
   cout << endl;
 
 }
+
+
+/** Print data to file suitable for gnuplot.
+ * This will write the following data:
+ * average sec, average ms, average summed sec, deviation sec, deviation ms
+ * This data is generated for each class and concatenated into a single line
+ * and written to the file. A running number will be prepended as the first
+ * value. The data file is suitable as input for gnuplot.
+ */
+void
+TimeTracker::print_to_file()
+{
+  if ( ! __timelog)  throw Exception("Time log not opened, use other ctor");
+
+  vector<vector<struct timeval *> >::iterator it = __class_times.begin();
+  vector<string>::iterator sit = __class_names.begin();
+
+  double deviation = 0.f;
+  double average = 0.f;
+  double average_ms = 0.f;
+  double deviation_ms = 0.f;
+  double avgsum = 0.f;
+
+  fprintf(__timelog, "%u ", ++__write_cycle);
+  for (; (it != __class_times.end()) && (sit != __class_names.end()); ++it, ++sit) {
+    if (sit->empty()) continue;
+
+    average_and_deviation(*it, average, average_ms, deviation, deviation_ms);
+
+    avgsum += average;
+    fprintf(__timelog, "%lf %lf %lf %lf %lf ",
+	    average, average_ms, avgsum, deviation, deviation_ms);
+  }
+  fprintf(__timelog, "\n");
+}
+
 
 } // end namespace fawkes

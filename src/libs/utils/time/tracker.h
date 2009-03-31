@@ -26,6 +26,7 @@
 #ifndef __UTILS_TIME_TRACKER_H_
 #define __UTILS_TIME_TRACKER_H_
 
+#include <cstdio>
 #include <vector>
 #include <map>
 #include <string>
@@ -40,6 +41,7 @@ class TimeTracker {
  public:
   static const unsigned int DEFAULT_CLASS;
 
+  TimeTracker(const char *filename, bool add_default_class = false);
   TimeTracker(bool add_default_class = false);
   ~TimeTracker();
 
@@ -53,7 +55,14 @@ class TimeTracker {
   void ping(std::string comment = "");
   void reset(std::string comment = "");
   void print_to_stdout();
+
+  void print_to_file();
   
+ private:
+  void average_and_deviation(std::vector<struct timeval *> &values,
+			     double &average_sec, double &average_ms,
+			     double &deviation_sec, double &deviation_ms);
+
  private:
   timeval start_time;
   timeval last_time;
@@ -64,6 +73,9 @@ class TimeTracker {
   std::vector<struct timeval *>::iterator        __time_it;
   std::map<unsigned int, std::string>::iterator  __comment_it;
   std::string                                    __tracker_comment;
+
+  unsigned int __write_cycle;
+  FILE *__timelog;
 };
 
 } // end namespace fawkes
