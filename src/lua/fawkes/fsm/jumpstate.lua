@@ -3,7 +3,7 @@
 --  jumpstate.lua - FSM Jump state to build Hybrid State Machines (HSM)
 --
 --  Created: Thu Dec 04 10:40:54 2008
---  Copyright  2008  Tim Niemueller [www.niemueller.de]
+--  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
 --
@@ -44,7 +44,9 @@ assert(State, "State for JumpState is nil")
 -- transition is executed. The order is determined by the order the
 -- transitions where added.
 -- @author Tim Niemueller
-JumpState = { clear_transitions = State.clear_transitions,
+JumpState = { comment           = "",
+              clear_transitions = State.clear_transitions,
+	      get_transition    = State.get_transition,
 	      get_transitions   = State.get_transitions,
 	      last_transition   = State.last_transition,
 	      init              = State.init,
@@ -131,18 +133,53 @@ end
 -- be a plain copy of the code as string or a verbal description, used for
 -- debugging and graph generation
 function JumpState:add_transition(state, jumpcond, description)
-   assert(state, self.name .. ": Follow state is nil while adding '" .. description .. "'")
-   assert(state.name or type(state) == "string", self.name .. ": Follow state does not have a valid name while adding '" .. description .. "'")
-   assert(jumpcond, self.name .. ": Jump condition is nil while adding '" .. description .. "'")
+   assert(state, self.name .. ": Follow state is nil while adding '" .. tostring(description) .. "'")
+   assert(state.name or type(state) == "string", self.name .. ": Follow state does not have a valid name while adding '" .. tostring(description) .. "'")
+   assert(jumpcond, self.name .. ": Jump condition is nil while adding '" .. tostring(description) .. "'")
    --printf("%s: When '%s' -> %s (%s)", self.name, description, state.name, tostring(self.transitions))
+   local jc
+   if type(jumpcond) == "function" then
+      jc = jumpcond
+      description = description or ""
+   elseif type(jumpcond) == "string" then
+      jc = assert(loadstring("return " .. jumpcond),
+		  self.name .. ": compiling jump condition '" .. jumpcond ..
+		     "' failed")
+      --local fe = getfenv(jc)
+      local fe = { string=string, math=math, table=table,
+		   os={time=os.time, date=os.date, clock=os.clock, difftime=os.difftime},
+		   next=next, rawequal=rawequal, type=type,
+		   state=self, self=self, vars=self.fsm.vars }
+      if self.closure then
+	 for k,v in pairs(self.closure) do fe[k] = v end
+      end
+      setfenv(jc, fe)
+      description = description or jumpcond
+   elseif type(jumpcond) == "boolean" then
+      assert(jumpcond == true, self.name .. ": adding a jump condition for "..
+	     "false does not make any sense, it would never fire")
+      jc = JumpState.jumpcond_true
+      description = description or "Unconditional"
+   else
+      error(self.name .. ": type of jump condition must be function, string or boolean")
+   end
+
    local transition = {state       = state,
-		       jumpcond    = jumpcond,
+		       jumpcond    = jc,
 		       description = description}
    table.insert(self.transitions, transition)
    return transition
 end
 
 
+--- Add a transition which is also a precondition.
+-- This adds a transition with the passed data. Additionally, the transition
+-- is made a precondition.
+-- @param state state to switch to if jumpcond holds
+-- @param jumpcond jump condition function, see description above.
+-- @param description a string representation of the jump condition, can
+-- be a plain copy of the code as string or a verbal description, used for
+-- debugging and graph generation
 function JumpState:add_precond_trans(state, jumpcond, description)
    local t = self:add_transition(state, jumpcond, description)
    self:add_precondition(t)

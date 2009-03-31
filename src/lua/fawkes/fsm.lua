@@ -3,7 +3,7 @@
 --  fsm.lua - Lua Finite State Machines (FSM)
 --
 --  Created: Fri Jun 13 11:25:36 2008
---  Copyright  2008  Tim Niemueller [www.niemueller.de]
+--  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
 --
@@ -29,9 +29,11 @@ module(..., fawkes.modinit.module_init)
 
 -- Re-export State and JumpState for convenience
 local statemod   = require("fawkes.fsm.state")
-State     = statemod.State
+State            = statemod.State
 local jumpstmod  = require("fawkes.fsm.jumpstate")
-JumpState = jumpstmod.JumpState
+JumpState        = jumpstmod.JumpState
+local waitstmod  = require("fawkes.fsm.waitstate")
+WaitState        = waitstmod.WaitState
 
 local fsmgrapher = require("fawkes.fsm.grapher")
 
@@ -58,8 +60,8 @@ function FSM:new(o)
    setmetatable(o, self)
    self.__index = self
 
-   o.recursion_limit     = 10;
-   o.current_recursion   = 0;
+   o.recursion_limit     = 10
+   o.current_recursion   = 0
    o.persistent_vars     = {}
    o.vars                = {}
    o.states              = {}
@@ -67,10 +69,11 @@ function FSM:new(o)
    o.trace               = {}
    o.tracing             = true
    o.error               = ""
-   o.exit_state          = o.exit_state or ""
-   o.fail_state          = o.fail_state or ""
+   o.exit_state          = o.exit_state
+   o.fail_state          = o.fail_state
    o.default_transitions = {}
    o.prepared            = false
+   o.max_num_traces      = 40
 
    return o
 end
@@ -178,6 +181,13 @@ function FSM:mark_changed()
    self.state_changed = true
 end
 
+
+--- Set change state of FSM.
+-- @param changed true to mark FSM as changed, false otherwise
+function FSM:set_changed(changed)
+   self.state_changed = changed ~= nil and changed or true
+end
+
 --- Convenience method to create a new state.
 -- Creates a new instance of State and assigns it to the states table. Any variables
 -- that exist in the (optional) vars table are put into state as local variables.
@@ -207,7 +217,21 @@ function FSM:new_state(name, vars)
 end
 
 
+--- Add default transition.
+-- A default transition is a transition that is added to every added state. Here,
+-- the transition is a HSM transition consisting of a target state, a jump
+-- condition and an optional description.
+-- Any state already added gets a new transition, as will any state added later.
+-- @param state state to switch to if jumpcond holds
+-- @param jumpcond jump condition function, see description above.
+-- @param description a string representation of the jump condition, can
+-- be a plain copy of the code as string or a verbal description, used for
+-- debugging and graph generation
 function FSM:add_default_transition(state, jumpcond, description)
+   if self.debug then
+      printf("%s: Adding default transition -> %s on %s (%s)",
+	     self.name, tostring(state), tostring(jumpcond), tostring(description))
+   end
    table.insert(self.default_transitions, {state=state, jumpcond=jumpcond, description=description})
    for _,st in pairs(self.states) do
       self:apply_deftrans(st)
@@ -215,10 +239,16 @@ function FSM:add_default_transition(state, jumpcond, description)
 end
 
 
+--- Apply default transitions to given state.
+-- @param state state to assign default transitions to
 function FSM:apply_deftrans(state)
+   assert(type(state) == "table" and state.name, "Passed state must be a state object")
+
    for _,t in ipairs(self.default_transitions) do
-      if state ~= t.state
-	 and state.name ~= self.exit_state and name ~= self.fail_state then
+      local compto = type(t.state) == "table" and state or state.name
+
+      if compto ~= t.state
+	 and state.name ~= self.exit_state and state.name ~= self.fail_state then
 
 	 state:add_transition(t.state, t.jumpcond, t.description)
       end
@@ -257,6 +287,34 @@ function FSM:new_jump_state(name, transitions, vars)
    return s
 end
 
+
+--- Convenience method to create a new wait state.
+-- Creates a new wait state and assigns it to the states table.
+-- If FSM.export_states_to_parent is true the state is exported to the callers
+-- environment by assigning it to a variable with the states name.
+-- @param name name of the state and optionally the variable in the environment
+-- @param next_state name or table of the state to transition to after time
+-- period is over.
+-- @param args table with additional arguments, possible entries are time_sec for
+-- the time in seconds to wait and labeltime to change the label with the updated
+-- time while waiting.
+function FSM:new_wait_state(name, next_state, args)
+   assert(name, "FSM:new_wait_state: Name must be given")
+   assert(next_state, "FSM:new_wait_state: next_state is mandatory")
+   assert(self.states[name] == nil, "FSM:new_state: State with name " .. name .. " already exists")
+
+   local w = WaitState:new{name=name, fsm=self, next_state = next_state,
+			   time_sec = args.time_sec, labeltime = args.labeltime}
+
+   self:apply_deftrans(w)
+   self.states[name] = w
+   if self.export_states_to_parent then
+      local e = getfenv(2)
+      e[name] = w
+   end
+
+   return w
+end
 
 --- Enable or disable debugging.
 -- Value can be either set for an instance of SkillHSM, or globally for SkillHSM
@@ -345,6 +403,9 @@ function FSM:trans(next_state, ...)
    if next_state then
       if self.tracing then
 	 local trans = self.current:last_transition()
+	 if #self.trace > self.max_num_traces then
+	    table.remove(self.trace)
+	 end
 	 table.insert(self.trace, {from = self.current, transition = trans, to = next_state})
       end
 

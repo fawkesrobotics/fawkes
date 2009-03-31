@@ -1,9 +1,9 @@
 
 ------------------------------------------------------------------------
---  grapher.lua - FSM Grapher (via graphviz)
+--  grapher.lua - FSM DOT Grapher
 --
 --  Created: Tue Dec 23 00:02:34 2008
---  Copyright  2008  Tim Niemueller [www.niemueller.de]
+--  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
 --
 --  $Id$
 --
@@ -23,121 +23,259 @@
 
 require("fawkes.modinit")
 
---- This module provides a state to create a Hybrid State Machine (HSM)
+--- Module to create DOT graphs.
 -- @author Tim Niemueller
 module(..., fawkes.modinit.module_init)
-local fsmmod = require("fawkes.fsm")
-assert(fsmmod, "fsmmod is nil")
+local gmod = require("fawkes.dotgraph")
 
-local gv_load_success, gv_load_error = pcall(require, "gv")
-local gv
-if gv_load_success then
-   gv = _G.gv
-else
-   print_warn("FSM graphing disabled, Graphviz could not be loaded: %s",
-	      gv_load_error)
+local colored_output = true
+local rankdir = "TB"
+local integrated_subfsm = true
+
+
+--- Enable/disable colored output.
+-- @param colored true to enable colored output, false to disable
+function set_colored(colored)
+   colored_output = colored
 end
 
-function write(fsm, filename)
+--- Set rank direction.
+-- Set one of "TB", "LR", "BT", "RL", corresponding to directed graphs drawn
+-- from top to bottom, from left to right, from bottom to top, and from right
+-- to left, respectively (cf. rankdir attribute of dot graphs in Graphviz
+-- documenation).
+-- @param new_rankdir new rank direction
+function set_rankdir(new_rankdir)
+   rankdir = new_rankdir
+end
+
+--- Get rankdir.
+-- @return rankdir of generated graphs
+function get_rankdir()
+   return rankdir
+end
+
+--- Get flag if colored output is enabled.
+-- @return true if colored output is enabled, false otherwise
+function get_colored()
+   if colored_output then return true else return false end
+end
+
+--- Enable/disable integrated sub-FSM mode.
+-- If enabled, the state employing a sub-fsm will have an edge leading to the
+-- initial node of the sub-FSM and the exit and fail states of the sub-FSM will
+-- have edges to the fail_to and exit_to statesof the sub-FSM state. Otherwise
+-- the employing node only has a "uses" connection to the subgraph cluster of
+-- the sub-FSM and direction connections to the fail_to and exit_to nodes.
+-- @param enable true to enable subgraph integration, false to disable
+function set_integrated_subfsm(integrated)
+   integrated_subfsm = integrated
+end
+
+local function generate_dotgraph(fsm, g)
    assert(fsm, "Grapher requires valid FSM")
+   assert(fsm.states, "No states table, not an FSM?")
 
-   if not gv_load_success then return end
+   --if not gv_load_success then return end
+   local is_subgraph = (g ~= nil)
 
-   local g = gv.digraph(fsm.name)
+   local g = g or gmod.digraph(fsm.name)
 
-   --gv.setv(g, "rankdir", "LR")
+   local defnode = gmod.get_current_default_node(g)
+   local defedge = gmod.get_current_default_edge(g)
 
-   local pn = gv.protonode(g);
-   local pe = gv.protoedge(g);
+   if is_subgraph then
+      gmod.setv(g, "label", fsm.name)
+      -- Currently, this is hardcoded in the SkillGUI because of a Graphviz bug
+      -- that prevents us from properly setting bgcolor and pencolor at the same
+      -- time.
+      --gmod.setv(g, "pencolor", "#aaaaff")
+      gmod.setv(g, "style", "filled")
+      gmod.setv(g, "bgcolor", "#f4f4f4")
+      gmod.setv(g, "fontweight", "bold")
+      gmod.setv(g, "labeljust", "r")
+   else
+      gmod.setv(g, "rankdir", rankdir)
+      gmod.setv(g, "penwidth", "2.0")
+      if not integrated_subfsm then 
+	 gmod.setv(g, "compound")
+      end
 
-   gv.setv(pn, "penwidth", "4.0")
-   --gv.setv(pn, "mindist", "0.0")
-   gv.setv(pe, "penwidth", "2.0")
-   --gv.setv(pe, "constraint", "false")
+      gmod.setv(defnode, "penwidth", "2.0")
+      gmod.setv(defnode, "shape", "rect")
+      gmod.setv(defnode, "style", "rounded,filled")
+
+      gmod.setv(defedge, "penwidth", "2.0")
+
+      if colored_output then
+	 gmod.setv(defnode, "color", "#cacaff")
+	 gmod.setv(defnode, "fillcolor", "#e6e6ff")
+
+	 gmod.setv(defedge, "color", "#8080ff")
+      end
+   end
+
+   -- Put the initial node always first, to have the desired output!
+   assert(fsm.start and fsm.states[fsm.start], "FSM grapher: No start node set " ..
+	  "for FSM or start node not created")
+   local start_state = fsm.states[fsm.start]
+   local snn = is_subgraph and g.name .. "_" .. fsm.start or fsm.start
+   local start_node = gmod.node(g, snn)
+   gmod.setv(start_node, "penwidth", "4.0")
+   if colored_output then
+      gmod.setv(start_node, "color", "#ffc080")
+   end
+   if is_subgraph then
+      gmod.setv(start_node, "label", fsm.start)
+   end
+   if fsm.current and fsm.current == start_state then
+      if colored_output then
+	 gmod.setv(start_node, "fillcolor", "#ffc080")
+      else
+	 gmod.setv(start_node, "style", "dotted")
+      end
+   end
+   gmod.setvl(start_node, start_state.dotattr)
 
    for name, state in pairs(fsm.states) do
       --print("*** Adding state " .. name)
-      local n = gv.node(g, name)
+      if name ~= fsm.start then
+	 local nn = is_subgraph and g.name .. "_" .. name or name
+	 local n = gmod.node(g, nn)
+	 gmod.setvl(n, state.dotattr)
 
-      if state.dotattr then
-	 for k,v in pairs(state.dotattr) do
-	    gv.setv(n, k, v)
+	 local current_name = fsm.current and fsm.current.name or ""
+
+	 if is_subgraph then
+	    gmod.setv(n, "label", name)
+	 end
+
+	 -- Check if this is an exit node
+	 if name == fsm.exit_state or name == fsm.fail_state then
+	    gmod.setv(n, "shape", "doubleoctagon")
+	    gmod.setv(n, "style", "solid,filled")
+	    gmod.setv(n, "penwidth", "1.0")
+	 end
+
+	 if fsm.current and name == current_name then
+	    if colored_output then
+	       if current_name == fsm.exit_state then
+		  gmod.setv(n, "fillcolor", "#ccffcc")
+	       elseif current_name == fsm.fail_state then
+		  gmod.setv(n, "fillcolor", "#ffcccc")
+	       else
+		  gmod.setv(n, "fillcolor", "#ffc080")
+	       end
+	    else
+	       gmod.setv(n, "style", "dotted")
+	    end
+	 elseif fsm.tracing and fsm:traced_state(state) then
+	    if colored_output then
+	       gmod.setv(n, "color", "#ff8000")
+	    else
+	       gmod.setv(n, "style", "dashed,rounded")
+	    end
+	 end
+
+	 if colored_output then
+	    if name == fsm.exit_state then
+	       gmod.setv(n, "color", "#6fdd6f") -- 80ff80
+	    elseif name == fsm.fail_state then
+	       gmod.setv(n, "color", "#ff8080")
+	    end
 	 end
       end
-      -- print("*** Checking exit state " .. fs.name)
-      if name == fsm.exit_state or name == fsm.fail_state then
-	 gv.setv(n, "shape", "doublecircle")
-	 gv.setv(n, "penwidth", "1.0")
-      end
-      if fsm.current and name == fsm.current.name then
-	 gv.setv(n, "color", "red")
-      elseif not fsm.current and name == fsm.start then
-	 gv.setv(n, "style", "bold")
-      elseif fsm.tracing and fsm:traced_state(state) then
-	 gv.setv(n, "color", "blue")
-      end
-   end
 
-   for name, state in pairs(fsm.states) do
-      if (state.transitions) then
+      if state.subfsm then
+	 local subfsm   = state.subfsm
+	 local name     = subfsm.name
+	 if not string.match(name, "^cluster") then
+	    name = "cluster_" .. name
+	 end
+	 local subgraph = gmod.subgraph(g, name)
+	 generate_dotgraph(subfsm, subgraph)
+	 local e = gmod.edge(g, state.name, name .. "_" .. subfsm.start)
+	 if not integrated_subfsm then
+	    gmod.setv(e, "lhead", name)
+	    gmod.setv(e, "arrowhead", "dot")
+	    gmod.setv(e, "label", "uses")
+	    gmod.setv(e, "style", "dashed")
+	 else
+	    if state.exit_to and subfsm.exit_state then
+	       gmod.edge(g, name .. "_" .. subfsm.exit_state, state.exit_to)
+	    end
+	    if state.fail_to and subfsm.fail_state then
+	       gmod.edge(g, name .. "_" .. subfsm.fail_state, state.fail_to)
+	    end
+	 end
+	 if fsm.current and state_name == fsm.current.name then
+	    gmod.setv(subgraph, "active")
+	 end
+      end
+
+      if state.transitions then
 	 for _, tr in ipairs(state.transitions) do
-	    --print("*** Adding transition " .. name .. " -> " .. tr.state.name .. "(" .. tr.description .. ")")
-	    local e = gv.edge(g, name, tr.state.name)
-	    if tr.dotattr then
-	       for k,v in pairs(tr.dotattr) do
-		  gv.setv(e, k, v)
+	    if not integrated_subfsm or
+	       state.fail_to ~= tr.state.name and state.exit_to ~= tr.state.name then
+
+	       --print("*** Adding transition " .. name .. " -> " .. tr.state.name .. "(" .. tr.description .. ")")
+	       local from = is_subgraph and g.name .. "_" .. name or name
+	       local to = is_subgraph and g.name .. "_" .. tr.state.name or tr.state.name
+
+	       local e = gmod.edge(g, from, to)
+	       if tr.description then
+		  gmod.setv(e, "label", tostring(tr.description))
 	       end
-	    end
-	    if tr.description then
-	       gv.setv(e, "label", tostring(tr.description))
-	    end
-	    if fsm.fail_state and tr.state.name == fsm.fail_state then
-	       gv.setv(e, "style", "dotted")
-	    end
-	    if fsm.exit_state and name == fsm.exit_state or
-	       fsm.fail_state and name == fsm.fail_state then
-	       gv.setv(e, "color", "red3")
-	       gv.setv(e, "style", "dashed")
-	    end
-	    if fsm.tracing then
-	       local traced, traces = fsm:traced_trans(tr)
-	       if traced then
-		  local sorted_indexes = {}
-		  for i,_ in pairs(traces) do
-		     table.insert(sorted_indexes, i)
+	       gmod.setvl(e, tr.dotattr)
+
+	       if fsm.fail_state and tr.state.name == fsm.fail_state then
+		  if colored_output then
+		     gmod.setv(e, "style", "dotted")
 		  end
-		  table.sort(sorted_indexes)
-		  if next(sorted_indexes) then
-		     local s = tostring(sorted_indexes[1])
-		     for i=2,#sorted_indexes do
-			s = s .. "," .. tostring(sorted_indexes[i])
+	       end
+	       if fsm.exit_state and name == fsm.exit_state or
+		  fsm.fail_state and name == fsm.fail_state then
+		  if colored_output then
+		     gmod.setv(e, "color", "red3")
+		  end
+		  gmod.setv(e, "style", "dashed")
+	       end
+	       if fsm.tracing then
+		  local traced, traces = fsm:traced_trans(tr)
+		  if traced then
+		     local sorted_indexes = {}
+		     for i,_ in pairs(traces) do
+			table.insert(sorted_indexes, i)
 		     end
-		     gv.setv(e, "taillabel", s)
-		     gv.setv(e, "labelfontcolor", "blue")
+		     table.sort(sorted_indexes)
+		     if next(sorted_indexes) then
+			local s = tostring(sorted_indexes[1])
+			for i=2,#sorted_indexes do
+			   s = s .. "," .. tostring(sorted_indexes[i])
+			end
+			gmod.setv(e, "taillabel", s)
+			if colored_output then
+			   gmod.setv(e, "labelfontcolor", "#ff8000")
+			end
+		     end
+		     if colored_output then
+			gmod.setv(e, "color", "#ff8000")
+		     else
+			gmod.setv(e, "style", "dashed")
+		     end
 		  end
-		  gv.setv(e, "color", "blue")
 	       end
 	    end
 	 end
       end
    end
-
-   --print("+++ Writing to file " .. filename)
-   gv.write(g, filename)
+   return g
 end
 
-
+--- Generate DOT graph.
+-- @param fsm FSM to produce the graph for
+-- @return string containing the graph in the DOT language
 function dotgraph(fsm)
-   if not gv_load_success then return "" end
-   local tfname = os.tmpname()
-   write(fsm, tfname)
-   local rv = ""
-   local tf = io.open(tfname)
-   for line in tf:lines() do
-      rv = rv .. line .. "\n"
-   end
-   tf:close()
-   os.remove(tfname)
-
-   return rv
+   local g = generate_dotgraph(fsm)
+   return gmod.generate(g)
 end

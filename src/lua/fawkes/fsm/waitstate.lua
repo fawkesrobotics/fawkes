@@ -73,20 +73,22 @@ function WaitState:loop()
    self.now = self.now or Time:new()
    if self.labeltime then
       local remaining = self.endtime - self.now
-      self.dotattr.label = string.format("\\N (%0.2f/%0.2f)", remaining, self.time_sec)
+      self.dotattr.label = string.format("%s (%0.2f/%0.2f)",
+					 self.name, remaining, self.time_sec)
       self.fsm:mark_changed()
    end
 end
 
 function WaitState:exit()
    if self.labeltime then
-      self.dotattr.label = string.format("\\N (0.00/%0.2f)", self.time_sec)
+      self.dotattr.label = string.format("%s (0.00/%0.2f)", self.name, self.time_sec)
    end
 end
 
 function WaitState:reset()
    JumpState.reset(self)
    if self.labeltime and self.time_sec then
-      self.dotattr.label = string.format("\\N (%0.2f/%0.2f)", self.time_sec, self.time_sec)
+      self.dotattr.label = string.format("%s (%0.2f/%0.2f)",
+					 self.name, self.time_sec, self.time_sec)
    end
 end

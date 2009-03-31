@@ -92,18 +92,37 @@ function State:clear_transitions()
    self.transitions = {}
 end
 
+--- Get transitions to a specified state.
+-- This will return the transition to the given state. If there are multiple
+-- transitions an error is thrown.
+-- @param state state the queried transitions must point to
+-- @return transitions that matches the given state
+function State:get_transition(state)
+   local transition = nil
+   local to_state = type(state) == "table" and state.name or state
+   for _,t in ipairs(self.transitions) do
+      local to = type(t.state) == "table" and t.state.name or t.state
+      if not state or to == to_state then
+	 assert(not transition, "Two transition to state " .. to_state)
+	 transition = t
+      end
+   end
+   return transition
+end
+
 
 --- Get transitions to a specified state.
 -- @param state state the queried transitions must point to
--- @return list of transitions that match the given state
+-- @return array of transitions that match the given state
 function State:get_transitions(state)
    local transitions = {}
+   local to_state = type(state) == "table" and state.name or state
    for _,t in ipairs(self.transitions) do
-      if t.state == state then
+      if not state or t.state.name == to_state then
 	 table.insert(transitions, t)
       end
    end
-   return unpack(transitions)
+   return transitions
 end
 
 
