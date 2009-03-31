@@ -30,10 +30,12 @@ module(..., fawkes.modinit.module_init)
 require("fawkes.fsm.jumpstate")
 require("luaagent.skillqueue")
 local skillstati = require("skiller.skillstati")
+local skjsmod = require("skiller.skill_jumpstates")
 
 -- Convenience shortcuts
-local JumpState     = fawkes.fsm.jumpstate.JumpState
-local SkillQueue    = luaagent.skillqueue.SkillQueue
+local JumpState      = fawkes.fsm.jumpstate.JumpState
+local SkillJumpState = skjsmod.SkillJumpState
+local SkillQueue     = luaagent.skillqueue.SkillQueue
 
 
 --- @class SkillJumpState
@@ -43,16 +45,17 @@ local SkillQueue    = luaagent.skillqueue.SkillQueue
 -- loop() function. You need to add transitions with jump conditions for state
 -- transitions and cannot return a state to switch to after the loop.
 -- @author Tim Niemueller
-AgentSkillExecJumpState = { add_transition     = JumpState.add_transition,
-			    add_precondition   = JumpState.add_precondition,
-			    add_precond_trans  = JumpState.add_precond_trans,
-			    get_transitions    = JumpState.get_transitions,
-			    clear_transitions  = JumpState.clear_transitions,
-			    try_transitions    = JumpState.try_transitions,
-			    last_transition    = JumpState.last_transition,
-			    init               = JumpState.init,
-			    loop               = JumpState.loop,
-			    exit               = JumpState.exit
+AgentSkillExecJumpState = { add_transition        = JumpState.add_transition,
+			    add_precondition      = JumpState.add_precondition,
+			    add_precond_trans     = JumpState.add_precond_trans,
+			    get_transitions       = JumpState.get_transitions,
+			    clear_transitions     = JumpState.clear_transitions,
+			    try_transitions       = JumpState.try_transitions,
+			    last_transition       = JumpState.last_transition,
+			    init                  = JumpState.init,
+			    loop                  = JumpState.loop,
+			    exit                  = JumpState.exit,
+			    set_transition_labels = SkillJumpState.set_transition_labels
 			  }
 
 
@@ -82,6 +85,7 @@ function AgentSkillExecJumpState:new(o)
 
    o.transitions   = o.transitions or {}
    o.preconditions = o.preconditions or {}
+   o.dotattr       = {}
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
    assert(type(o.preconditions) == "table", "Preconditions for " .. o.name .. " not a table")
 
@@ -92,9 +96,15 @@ function AgentSkillExecJumpState:new(o)
 
    if type(o.final_state) == "table" then
       o.final_transition   = o:add_transition(o.final_state, o.jumpcond_final, "Skill(s) succeeded")
+      if o.final_dotattr then
+	 o.final_transition.dotattr = o.final_dotattr
+      end
    end
    if type(o.failure_state) == "table" then
       o.failure_transition = o:add_transition(o.failure_state, o.jumpcond_failure, "Skill(s) failed")
+      if o.failure_dotattr then
+	 o.failure_transition.dotattr = o.failure_dotattr
+      end
    end
 
    o:set_transition_labels()
@@ -113,41 +123,19 @@ function AgentSkillExecJumpState:add_skill(skillname, params)
 end
 
 
-function AgentSkillExecJumpState:set_transition_labels()
-   if #self.skills > 0 then
-      local snames = {}
-      for _,s in ipairs(self.skills) do
-	 table.insert(snames, s[1])
-      end
-      if self.failure_transition then
-	 self.failure_transition.description = table.concat(snames, " or ") .. " failed"
-      end
-      if self.final_transition then
-	 self.final_transition.description   = table.concat(snames, " and ") .. " succeeded"
-      end
-   else
-      if self.failure_transition then
-	 self.failure_transition.description = "S_FAILED"
-      end
-      if self.final_transition then
-	 self.final_transition.description   = "S_FINAL"
-      end
-   end
-   self.fsm:mark_changed()
-end
 
 --- Init state.
 -- Calls init(). if params were passed (table containing parameters
 -- suitable for SkillQueue:set_params()) they are passed to the internal
 -- skill queue. The skill queue is executed and intermediate skill status
 -- is S_RUNNING.
-function AgentSkillExecJumpState:do_init(params)
+function AgentSkillExecJumpState:do_init()
    local rv = { self:try_transitions(self.preconditions) }
    if next(rv) then return unpack(rv) end
 
    self:init()
-   if params and type(params) == "table" then
-      self.skill_queue:set_params(params)
+   if self.args then
+      self.skill_queue:set_args(self.args)
    end
    self.skill_queue:execute(self.skiller)
    self.skill_status = skillstati.S_RUNNING

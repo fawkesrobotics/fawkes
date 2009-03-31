@@ -95,10 +95,14 @@ end
 
 --- Sets the parameters for all skills.
 -- This method is almost only useful if the SkillQueue is used for a single skill.
--- @param params parameters to set
-function SkillQueue:set_params(params)
+-- @param args arguments to set. The table must contain key value pairs, with the
+-- key being the skill name and the value being a table of parameters supplied as
+-- a table with key to value mappings for each argument
+function SkillQueue:set_args(args)
    for _,s in ipairs(self.skills) do
-      s[2] = params
+      if args[s[1]] then
+	 s.args = args[s[1]]
+      end
    end
 end
 
@@ -110,9 +114,9 @@ function SkillQueue:skill_string()
    local rva = {}
    for _,s in ipairs(self.skills) do
       local params = ""
-      if s[2] then -- has params
+      if s.args or s[2] then -- has params
 	 local subp = {}
-	 for k,v in pairs(s[2]) do
+	 for k,v in pairs(s.args or s[2]) do
 	    if type(v) == "table" then
 	       -- FSM variable
 	       assert(self.fsm, "SkillQueue: FSM not set and fsmp parameter used")
@@ -174,5 +178,8 @@ end
 -- Resets the queue to the base skills.
 function SkillQueue:reset()
    self.skills = self:baseskills()
+   for _,s in ipairs(self.skills) do
+      s.args = nil
+   end
    self.skillstring = ""
 end
