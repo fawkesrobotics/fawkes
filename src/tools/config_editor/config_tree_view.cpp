@@ -26,6 +26,7 @@
 #include "config_edit_dialog.h"
 #include "config_add_dialog.h"
 #include "config_remove_dialog.h"
+#include "config_editor_plugin.h"
 
 #include <core/exceptions/system.h>
 #include <config/netconf.h>
@@ -83,6 +84,10 @@ using namespace fawkes;
  * True if config was created by ConfigTreeView object.
  */
 
+/** @var ConfigTreeView::m_plugins
+ * A map of registered plugins: config-prefix => config editor plugin.
+ */
+
 /** Constructor.
  * @param cobject pointer to base object type
  * @param ref_xml Glade XML file
@@ -133,24 +138,44 @@ ConfigTreeView::~ConfigTreeView()
 {
   if (m_own_config)
     { delete m_config; }
+
+  for ( std::map< string, ConfigEditorPlugin* >::iterator iter = m_plugins.begin();
+	iter != m_plugins.end();
+	++iter )
+  { delete iter->second; }
 }
 
 /** Set the fawkes::Configuration to be displayed.
- * @param config the fawkes::Configuration
+ * @param config the fawkes::Configuration; set it to NULL to signal
+ * the unavailability of the config
  */
 void
 ConfigTreeView::set_config(Configuration* config)
 {
-  m_config = config;
-  m_own_config = false;
+  if ( config )
+  {
+    m_config = config;
+    m_own_config = false;
 
-  // TODO: enable mirror mode if it is a netconf
+    // TODO: enable mirror mode if it is a netconf
+    read_config();
+  }
+  else
+  {
+    delete m_config;
+    m_config = NULL;
+    m_config_tree->clear();
+  }
 
-  read_config();
+  for ( std::map< string, ConfigEditorPlugin* >::iterator i = m_plugins.begin();
+	i != m_plugins.end();
+	++i )
+  { i->second->set_config( m_config ); }
 }
 
 /** Set a network client that is used to open a fawkes::NetworkConfiguration.
- * @param client a fawkes::NetworkClient
+ * @param client a fawkes::NetworkClient; set it to NULL to signal the
+ * unavailability of the client
  */
 void
 ConfigTreeView::set_network_client(FawkesNetworkClient* client)
@@ -170,6 +195,11 @@ ConfigTreeView::set_network_client(FawkesNetworkClient* client)
       m_config = NULL;
       m_config_tree->clear();
     }
+
+  for ( std::map< string, ConfigEditorPlugin* >::iterator i = m_plugins.begin();
+	i != m_plugins.end();
+	++i )
+  { i->second->set_config( m_config ); }
 }
 
 /** Set the file to read the config from.
@@ -182,6 +212,34 @@ ConfigTreeView::set_config_file(const char* filename)
   m_own_config = true;
 
   read_config();
+}
+
+/** Register a plugin.
+ * This also initializes the plugin.
+ * @param plugin the new plugin to register
+ */
+void
+ConfigTreeView::register_plugin( ConfigEditorPlugin* plugin )
+{
+  plugin->initialize();
+  m_plugins[ plugin->get_config_path() ] = plugin;
+}
+
+/** Remove a plugin.
+ * @param config_path the config prefix corresponding to the plugin to
+ * be removed
+ */
+void
+ConfigTreeView::remove_plugin( string config_path )
+{
+  std::map< string, ConfigEditorPlugin* >::iterator iter = m_plugins.find( config_path );
+
+  if ( iter != m_plugins.end() )
+  {
+    ConfigEditorPlugin* p = iter->second;
+    m_plugins.erase( iter );
+    delete p;
+  }
 }
 
 void
@@ -356,14 +414,14 @@ ConfigTreeView::get_iter(const char* p)
 	}
 
       if ( !found )
-	{
-	  iter = m_config_tree->append(children);
-	  Gtk::TreeModel::Row row = *iter;
-	  row[m_config_record.node] = Glib::ustring(node);
-	  row[m_config_record.path] = Glib::ustring(path);
-
-	  children = row.children();
-	}
+      {
+	iter = m_config_tree->append(children);
+	Gtk::TreeModel::Row row = *iter;
+	row[m_config_record.node] = Glib::ustring(node);
+	row[m_config_record.path] = Glib::ustring(path);
+	
+	children = row.children();
+      }
 
       node = strtok(NULL, "/");
 
@@ -381,6 +439,32 @@ ConfigTreeView::get_iter(const char* p)
   return iter;
 }
 
+Gtk::TreeIter
+ConfigTreeView::search_path( const char* path )
+{
+  Gtk::TreeModel::Children children = m_config_tree->children();
+  Gtk::TreeModel::iterator iter = children.begin();
+  
+  while ( iter != children.end() )
+  {
+    Gtk::TreeModel::Row row = *iter;
+    Glib::ustring p = row[ m_config_record.path ];
+    size_t len = strlen( p.c_str() );
+
+    if ( strncmp( p.c_str(), path, len) == 0 )
+    {
+      if ( strcmp( p.c_str(), path ) == 0 )
+      { return iter; }
+      else
+      { iter = iter->children().begin(); }
+    }
+    else
+    { ++iter; }
+  }
+
+  return m_config_tree->children().end();
+}
+
 /** Signal handler for the button press event.
  * @param event a Gdk button event
  * @return true if signal has been handled, false otherwise
@@ -389,13 +473,20 @@ void
 ConfigTreeView::on_button_press_event_custom(GdkEventButton* event)
 {
   if (event->type == GDK_2BUTTON_PRESS)
-    {
-      edit_entry( get_selection()->get_selected() );
-    }
+  {
+    Gtk::TreeModel::Row row = *( get_selection()->get_selected() );
+    Glib::ustring path = row[ m_config_record.path ];
+
+    std::map< string, ConfigEditorPlugin* >::iterator i = m_plugins.find( path.c_str() );
+    if ( i != m_plugins.end() )
+    { i->second->run(); }
+    else
+    { edit_entry( get_selection()->get_selected() ); }
+  }
   else if ( event->type == GDK_BUTTON_PRESS && (event->button == 3) )
-    {
-      m_menu.popup(event->button, event->time);
-    }
+  {
+    m_menu.popup(event->button, event->time);
+  }
 }
 
 /** Signal handler that is called when the 'edit' entry is selected
@@ -552,12 +643,6 @@ ConfigTreeView::remove_entry(const Gtk::TreeIter& iter)
 	    bool rem_default = m_dlg_remove->get_remove_default();
 	    m_config->erase(p);
 	    if (rem_default) m_config->erase_default(p);
-
-// 	    cout << "deleting: "
-// 		 << row[m_config_record.m_path]
-// 		 << "/"
-// 		 << row[m_config_record.m_value_string]
-// 		 << endl;
 
 	    Gtk::TreePath tree_path = m_config_tree->get_path(iter);
   	    m_config_tree->erase(iter);

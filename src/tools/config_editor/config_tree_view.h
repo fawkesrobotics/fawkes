@@ -37,6 +37,7 @@ namespace fawkes {
 class ConfigEditDialog;
 class ConfigAddDialog;
 class ConfigRemoveDialog;
+class ConfigEditorPlugin;
 
 class ConfigTreeView : public Gtk::TreeView
 {
@@ -47,6 +48,9 @@ class ConfigTreeView : public Gtk::TreeView
   void set_config(fawkes::Configuration* config);
   void set_network_client(fawkes::FawkesNetworkClient* client);
   void set_config_file(const char* filename);
+
+  void register_plugin( ConfigEditorPlugin* plugin );
+  void remove_plugin( std::string config_path );
   
  protected:
   void set_value(const char* path, const char* type, bool is_default, bool value);
@@ -79,11 +83,11 @@ class ConfigTreeView : public Gtk::TreeView
       Gtk::TreeModelColumn<Glib::ustring> node;          /**< node name */
       Gtk::TreeModelColumn<Glib::ustring> path;          /**< config path */
       Gtk::TreeModelColumn<Glib::ustring> type;          /**< config value type */
-      Gtk::TreeModelColumn<bool> is_default;             /**< default flag */
-      Gtk::TreeModelColumn<bool> value_bool;             /**< bool config value */
-      Gtk::TreeModelColumn<int> value_int;               /**< int config value */
-      Gtk::TreeModelColumn<uint> value_uint;             /**< unsigned int config value */
-      Gtk::TreeModelColumn<float> value_float;           /**< float config value */
+      Gtk::TreeModelColumn<bool>          is_default;    /**< default flag */
+      Gtk::TreeModelColumn<bool>          value_bool;    /**< bool config value */
+      Gtk::TreeModelColumn<int>           value_int;     /**< int config value */
+      Gtk::TreeModelColumn<uint>          value_uint;    /**< unsigned int config value */
+      Gtk::TreeModelColumn<float>         value_float;   /**< float config value */
       Gtk::TreeModelColumn<Glib::ustring> value_string;  /**< config value as string */
     };
   
@@ -95,6 +99,8 @@ class ConfigTreeView : public Gtk::TreeView
   ConfigAddDialog* m_dlg_add;
   ConfigRemoveDialog* m_dlg_remove;
 
+  std::map< std::string, ConfigEditorPlugin* > m_plugins;
+
   fawkes::Configuration* m_config;
   bool m_own_config;
 
@@ -102,6 +108,7 @@ class ConfigTreeView : public Gtk::TreeView
   void read_config();
 
   Gtk::TreeIter get_iter(const char* path);
+  Gtk::TreeIter search_path( const char* path );
 
   bool edit_entry(const Gtk::TreeIter& iter);
   bool add_entry(const Gtk::TreeIter& iter);

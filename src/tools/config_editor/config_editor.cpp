@@ -22,8 +22,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/config_editor/config_editor.h>
-#include <tools/config_editor/config_tree_view.h>
+#include "config_editor.h"
+#include "config_tree_view.h"
+#include "retriever_config_plugin.h"
+
 #include <gui_utils/utils.h>
 #include <gui_utils/service_selector_cbe.h>
 #include <netcomm/fawkes/client.h>
@@ -51,6 +53,7 @@ FawkesConfigEditor::FawkesConfigEditor( Glib::RefPtr<Gnome::Glade::Xml> ref_xml 
 
   m_trv_config = NULL;
   ref_xml->get_widget_derived("trvConfig", m_trv_config);
+  m_trv_config->register_plugin( new RetrieverConfigPlugin( RESDIR"/glade/config_editor/retriever_config_plugin.glade" ) );
 
   m_btn_exit->signal_clicked().connect( sigc::mem_fun( *this, &FawkesConfigEditor::on_btn_exit_clicked) );
 
