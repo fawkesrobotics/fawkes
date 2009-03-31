@@ -3,7 +3,7 @@
  *  employer.cpp - Fawkes main loop employer
  *
  *  Created: Sat Aug  2 00:08:53 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -33,11 +33,14 @@ namespace fawkes {
  * implemented in the main program.
  * @author Tim Niemueller
  *
- * @fn void MainLoopEmployer::set_mainloop(fawkes::MainLoop *mainloop)
+ * @fn void MainLoopEmployer::set_mainloop_thread(fawkes::Thread *mainloop_thread)
  * Set a new main loop.
  * Set the main loop. An exception should be thrown if anything prevents this
  * from happening successful.
- * @param mainloop new main loop
+ * @param mainloop_thread new main loop thread. The caller of this method must
+ * ensure that the thread operates in wait-for-wakeup mode and executes the main
+ * loop as its loop() method (i.e. the thread must have a properly initialized
+ * MainLoopAspect).
  */
 
 /** Virtual empty destructor. */

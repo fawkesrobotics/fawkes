@@ -3,7 +3,7 @@
  *  employer.h - Fawkes main loop employer
  *
  *  Created: Sat Aug  2 00:05:37 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -26,16 +26,16 @@
 #ifndef __ASPECT_MAINLOOP_EMPLOYER_H_
 #define __ASPECT_MAINLOOP_EMPLOYER_H_
 
-#include <aspect/mainloop/mainloop.h>
-
 namespace fawkes {
+
+class Thread;
 
 class MainLoopEmployer
 {
  public:
   virtual ~MainLoopEmployer();
 
-  virtual void set_mainloop(MainLoop *mainloop) = 0;
+  virtual void set_mainloop_thread(Thread *mainloop_thread) = 0;
 };
 
 } // end of namespace fawkes

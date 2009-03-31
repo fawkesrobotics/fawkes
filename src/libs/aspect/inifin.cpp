@@ -47,9 +47,6 @@
 #include <aspect/vision.h>
 #endif
 
-#include <utils/constraints/dependency_onetomany.h>
-#include <utils/constraints/unique.h>
-
 namespace fawkes {
 
 /** @class AspectIniFin <aspect/inifin.h>
@@ -86,23 +83,12 @@ AspectIniFin::AspectIniFin(BlackBoard *blackboard,
   __service_publisher = NULL;
   __service_browser   = NULL;
   __mainloop_employer = NULL;
-
-  __timesource_uc     = new UniquenessConstraint<TimeSource>();
-  __mainloop_uc       = new UniquenessConstraint<MainLoop>();
-#ifdef HAVE_FIREVISION
-  __vision_dependency = new OneToManyDependency<VisionMasterAspect, VisionAspect>();
-#endif
 }
 
 
 /** Destructor. */
 AspectIniFin::~AspectIniFin()
 {
-  delete __timesource_uc;
-  delete __mainloop_uc;
-#ifdef HAVE_FIREVISION
-  delete __vision_dependency;
-#endif
 }
 
 
@@ -256,7 +242,7 @@ AspectIniFin::init(Thread *thread)
   VisionMasterAspect *vision_master_thread;
   if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
     try {
-      __vision_dependency->add(vision_master_thread);
+      __vision_dependency.add(vision_master_thread);
       thread->add_notification_listener(this);
     } catch (DependencyViolationException &e) {
       CannotInitializeThreadException ce("Dependency violation for VisionProviderAspect "
@@ -280,8 +266,8 @@ AspectIniFin::init(Thread *thread)
 					      "thread does not operate in wait-for-wakeup "
 					      "mode.", thread->name());
       }
-      __vision_dependency->add(vision_thread);
-      vision_thread->init_VisionAspect( __vision_dependency->provider()->vision_master() );
+      __vision_dependency.add(vision_thread);
+      vision_thread->init_VisionAspect( __vision_dependency.provider()->vision_master() );
       thread->add_notification_listener(this);
     } catch (DependencyViolationException &e) {
       CannotInitializeThreadException ce("Dependency violation for VisionAspect detected");
@@ -304,7 +290,7 @@ AspectIniFin::init(Thread *thread)
   TimeSourceAspect *timesource_thread;
   if ( (timesource_thread = dynamic_cast<TimeSourceAspect *>(thread)) != NULL ) {
     try {
-      __timesource_uc->add(timesource_thread->get_timesource());
+      __timesource_uc.add(timesource_thread->get_timesource());
       __clock->register_ext_timesource(timesource_thread->get_timesource(),
 				       /* make default */ true);
     } catch (...) {
@@ -315,6 +301,11 @@ AspectIniFin::init(Thread *thread)
 
   MainLoopAspect *mainloop_thread;
   if ( (mainloop_thread = dynamic_cast<MainLoopAspect *>(thread)) != NULL ) {
+    if (thread->opmode() != Thread::OPMODE_WAITFORWAKEUP) {
+      throw CannotInitializeThreadException("MainLoopAspect thread must operate "
+					    "in wait-for-wakeup mode.");
+      
+    }
     if ( __mainloop_employer == NULL ) {
       throw CannotInitializeThreadException("Thread has MainLoopAspect but no "
 					    "MainLoopEmployer has been set.");
@@ -324,12 +315,13 @@ AspectIniFin::init(Thread *thread)
 					    "BlockedTimingExecutor has been set.");
     }
     try {
+      __mainloop_uc.add(mainloop_thread);
       mainloop_thread->init_MainLoopAspect(__btexec);
-      __mainloop_uc->add(mainloop_thread->get_mainloop());
-      __mainloop_employer->set_mainloop(mainloop_thread->get_mainloop());
-    } catch (...) {
-      throw CannotInitializeThreadException("Thread has MainLoopAspect but there is "
-					    "already another main loop provider.");
+      thread->add_notification_listener(this);
+    } catch (Exception &e) {
+      CannotInitializeThreadException ce("Main loop thread failed to initialize");
+      ce.append(e);
+      throw ce;
     }
   }
 
@@ -360,7 +352,7 @@ AspectIniFin::prepare_finalize(Thread *thread)
 #ifdef HAVE_FIREVISION
   VisionMasterAspect *vision_master_thread;
   if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
-    if ( ! __vision_dependency->can_remove(vision_master_thread) ) {
+    if ( ! __vision_dependency.can_remove(vision_master_thread) ) {
       __logger->log_error("AspectIniFin", "Cannot remove vision master, there are "
 			  "still vision threads that depend on it");
       return false;
@@ -369,7 +361,7 @@ AspectIniFin::prepare_finalize(Thread *thread)
 
   VisionAspect *vision_thread;
   if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
-    if ( ! __vision_dependency->can_remove(vision_thread) ) {
+    if ( ! __vision_dependency.can_remove(vision_thread) ) {
       __logger->log_error("AspectIniFin", "Cannot remove vision thread, dependency "
 			  "violation");
       return false;
@@ -391,7 +383,7 @@ AspectIniFin::finalize(Thread *thread)
   VisionMasterAspect *vision_master_thread;
   if ( (vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread)) != NULL ) {
     try {
-      __vision_dependency->remove(vision_master_thread);
+      __vision_dependency.remove(vision_master_thread);
     } catch (DependencyViolationException &e) {
       CannotFinalizeThreadException ce("Dependency violation for VisionProviderAspect "
 				       "detected");
@@ -402,7 +394,7 @@ AspectIniFin::finalize(Thread *thread)
 
   VisionAspect *vision_thread;
   if ( (vision_thread = dynamic_cast<VisionAspect *>(thread)) != NULL ) {
-    __vision_dependency->remove(vision_thread);
+    __vision_dependency.remove(vision_thread);
   }
 #endif /* HAVE_FIREVISION */
 
@@ -410,7 +402,7 @@ AspectIniFin::finalize(Thread *thread)
   if ( (timesource_thread = dynamic_cast<TimeSourceAspect *>(thread)) != NULL ) {
     try {
       __clock->remove_ext_timesource(timesource_thread->get_timesource());
-      __timesource_uc->remove(timesource_thread->get_timesource());
+      __timesource_uc.remove(timesource_thread->get_timesource());
     } catch (Exception &e) {
       CannotFinalizeThreadException ce("Failed to remove time source");
       ce.append(e);
@@ -421,8 +413,10 @@ AspectIniFin::finalize(Thread *thread)
   MainLoopAspect *mainloop_thread;
   if ( (mainloop_thread = dynamic_cast<MainLoopAspect *>(thread)) != NULL ) {
     try {
-      __mainloop_employer->set_mainloop(NULL);
-      __mainloop_uc->remove(mainloop_thread->get_mainloop());
+      if (__mainloop_uc.resource() == mainloop_thread) {
+	__mainloop_employer->set_mainloop_thread(NULL);
+	__mainloop_uc.remove(mainloop_thread);
+      }
     } catch (Exception &e) {
       CannotFinalizeThreadException ce("Failed to remove main loop");
       ce.append(e);
@@ -443,16 +437,36 @@ AspectIniFin::finalize(Thread *thread)
 }
 
 
-void
-AspectIniFin::thread_started(Thread *thread)
+bool
+AspectIniFin::thread_started(Thread *thread) throw()
 {
-  // ignored
+  MainLoopAspect *mainloop_thread;
+  if ( (mainloop_thread = dynamic_cast<MainLoopAspect *>(thread)) != NULL ) {
+    try {
+      __mainloop_employer->set_mainloop_thread(thread);
+    } catch (Exception &e) {
+      __logger->log_error("AspectIniFin", "Main loop thread started successfully but "
+			  "could not add main loop thread's main loop");
+    }
+  }
+
+  return false;
 }
 
 
-void
-AspectIniFin::thread_init_failed(Thread *thread)
+bool
+AspectIniFin::thread_init_failed(Thread *thread) throw()
 {
+  MainLoopAspect *mainloop_thread;
+  if ( (mainloop_thread = dynamic_cast<MainLoopAspect *>(thread)) != NULL ) {
+    try {
+      __mainloop_uc.remove(mainloop_thread);
+    } catch (Exception &e) {
+      __logger->log_error("AspectIniFin", "Failed to remove main loop from uniqueness "
+			  "constraint on thread init fail of %s", thread->name());
+    }
+  }
+
   try {
     finalize(thread);
   } catch (Exception &e) {
@@ -461,6 +475,8 @@ AspectIniFin::thread_init_failed(Thread *thread)
 			thread->name());
     __logger->log_error("AspectIniFin", e);
   }
+
+  return false;
 }
 
 } // end namespace fawkes

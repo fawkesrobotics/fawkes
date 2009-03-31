@@ -30,6 +30,9 @@
 #include <core/threading/thread_finalizer.h>
 #include <core/threading/thread_notification_listener.h>
 
+#include <utils/constraints/dependency_onetomany.h>
+#include <utils/constraints/unique.h>
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -47,14 +50,10 @@ class NetworkNameResolver;
 class ServicePublisher;
 class ServiceBrowser;
 class TimeSource;
-class MainLoop;
-class MainLoopEmployer;
 class LoggerEmployer;
 class BlockedTimingExecutor;
-template <class Provider, class Dependant>
-  class OneToManyDependency;
-template <class ResourceType>
-  class UniquenessConstraint;
+class MainLoopEmployer;
+class MainLoopAspect;
 #ifdef HAVE_FIREVISION
 class VisionMasterAspect;
 class VisionAspect;
@@ -83,8 +82,8 @@ class AspectIniFin
 			   ServiceBrowser *service_browser);
   void set_plugin_manager(PluginManager *manager);
 
-  virtual void thread_started(Thread *thread);
-  virtual void thread_init_failed(Thread *thread);
+  virtual bool thread_started(Thread *thread) throw();
+  virtual bool thread_init_failed(Thread *thread) throw();
 
  private:
   BlackBoard            *__blackboard;
@@ -102,10 +101,10 @@ class AspectIniFin
   PluginManager         *__plugin_manager;
 
 #ifdef HAVE_FIREVISION
-  OneToManyDependency<VisionMasterAspect, VisionAspect> *__vision_dependency;
+  OneToManyDependency<VisionMasterAspect, VisionAspect> __vision_dependency;
 #endif
-  UniquenessConstraint<TimeSource> *__timesource_uc;
-  UniquenessConstraint<MainLoop>   *__mainloop_uc;
+  UniquenessConstraint<TimeSource>     __timesource_uc;
+  UniquenessConstraint<MainLoopAspect> __mainloop_uc;
 };
 
 } // end namespace fawkes

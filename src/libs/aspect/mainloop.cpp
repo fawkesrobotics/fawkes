@@ -3,7 +3,7 @@
  *  mainloop.cpp - Main loop aspect for Fawkes
  *
  *  Created: Sat Aug 02 00:16:30 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -24,7 +24,6 @@
  */
 
 #include <aspect/mainloop.h>
-#include <aspect/mainloop/mainloop.h>
 
 namespace fawkes {
 
@@ -46,15 +45,6 @@ namespace fawkes {
  * with the BlockedTimingAspect.
  */
 
-
-/** Constructor.
- * @param mainloop the new main loop
- */
-MainLoopAspect::MainLoopAspect(MainLoop *mainloop)
-{
-  __mainloop = mainloop;
-}
-
 /** Virtual empty destructor. */
 MainLoopAspect::~MainLoopAspect()
 {
@@ -70,18 +60,7 @@ MainLoopAspect::~MainLoopAspect()
 void
 MainLoopAspect::init_MainLoopAspect(BlockedTimingExecutor *btexec)
 {
-  __mainloop->set_blocked_timing_executor(btexec);
-}
-
-
-/** Get time source.
- * This method is called by the aspect initializer to get the time source
- * the thread with this aspect provides.
- */
-MainLoop *
-MainLoopAspect::get_mainloop() const
-{
-  return __mainloop;
+  blocked_timing_executor = btexec;
 }
 
 } // end namespace fawkes
