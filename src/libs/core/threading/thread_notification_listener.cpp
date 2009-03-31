@@ -35,18 +35,22 @@ namespace fawkes {
  *
  * @author Tim Niemueller
  *
- * @fn void ThreadNotificationListener::thread_started(Thread *thread)
+ * @fn bool ThreadNotificationListener::thread_started(Thread *thread) throw()
  * Thread started successfully.
  * This is called by the thread itself when the thread started successfully.
  * @param thread thread that started successfully
+ * @return true to stay registered for further thread notifications, false to
+ * unregister.
  *
- * @fn void ThreadNotificationListener::thread_init_failed(Thread *thread)
+ * @fn bool ThreadNotificationListener::thread_init_failed(Thread *thread) throw()
  * Thread initialization failed.
  * This method is called by ThreadList if one of the threads in the list failed
  * to initialize. This is not necessarily the thread that you registered the
  * notification for. However, the argument is always the thread that you
  * registered for, no matter which thread in the list failed.
  * @param thread thread that you registered for
+ * @return true to stay registered for further thread notifications, false to
+ * unregister.
  */
 
 /** Virtual empty destructor. */

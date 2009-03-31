@@ -26,6 +26,7 @@
 #include <core/threading/interruptible_barrier.h>
 #include <core/threading/thread_list.h>
 #include <core/exceptions/system.h>
+#include <core/macros.h>
 
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
@@ -40,11 +41,27 @@ namespace fawkes {
 class InterruptibleBarrierData
 {
  public:
-  unsigned int  threads_left;
-  Mutex         mutex;
-  WaitCondition waitcond;
+  unsigned int   threads_left;
+  Mutex         *mutex;
+  WaitCondition *waitcond;
+  bool           own_mutex;
 
-  InterruptibleBarrierData() : waitcond(&mutex) {}
+  InterruptibleBarrierData(Mutex *mutex)
+  {
+    if (mutex) {
+      this->mutex = mutex;
+      own_mutex   = false;
+    } else {
+      this->mutex = new Mutex();
+      own_mutex   = true;
+    }
+    waitcond = new WaitCondition(this->mutex);
+  }
+
+  ~InterruptibleBarrierData()
+  {
+    if (own_mutex)  delete mutex;
+  }
 };
 /// @endcond
 
@@ -68,7 +85,7 @@ class InterruptibleBarrierData
  */
 
 
-/** Constructor
+/** Constructor.
  * @param count the number of threads to wait for
  */
 InterruptibleBarrier::InterruptibleBarrier(unsigned int count)
@@ -78,7 +95,7 @@ InterruptibleBarrier::InterruptibleBarrier(unsigned int count)
   if ( _count == 0 ) {
     throw Exception("Barrier count must be at least 1");
   }
-  __data = new InterruptibleBarrierData();
+  __data = new InterruptibleBarrierData(NULL);
   __data->threads_left = 0;
   __passed_threads = RefPtr<ThreadList>(new ThreadList());
 
@@ -86,6 +103,29 @@ InterruptibleBarrier::InterruptibleBarrier(unsigned int count)
   __timeout     = false;
 }
 
+
+/** Constructor with custom mutex.
+ * Use this constructor only if you really know what you are doing. This constructor
+ * allows to pass a mutex that is used internally for the barrier. Note that in
+ * this case it is your duty to lock the mutex before the wait() and unlock
+ * afterwards! It combines features of a barrier and a wait condition.
+ * @param mutex Mutex to use
+ * @param count the number of threads to wait for
+ */
+InterruptibleBarrier::InterruptibleBarrier(Mutex *mutex, unsigned int count)
+  : Barrier()
+{
+  _count = count;
+  if ( _count == 0 ) {
+    throw Exception("Barrier count must be at least 1");
+  }
+  __data = new InterruptibleBarrierData(mutex);
+  __data->threads_left = 0;
+  __passed_threads = RefPtr<ThreadList>(new ThreadList());
+
+  __interrupted = false;
+  __timeout     = false;
+}
 
 /** Destructor */
 InterruptibleBarrier::~InterruptibleBarrier()
@@ -116,10 +156,10 @@ InterruptibleBarrier::passed_threads()
 void
 InterruptibleBarrier::interrupt() throw()
 {
-  __data->mutex.lock();
+  if (likely(__data->own_mutex))  __data->mutex->lock();
   __interrupted = true;
-  __data->waitcond.wake_all();
-  __data->mutex.unlock();
+  __data->waitcond->wake_all();
+  if (likely(__data->own_mutex))  __data->mutex->unlock();
 }
 
 
@@ -131,12 +171,12 @@ InterruptibleBarrier::interrupt() throw()
 void
 InterruptibleBarrier::reset() throw()
 {
-  __data->mutex.lock();
+  if (likely(__data->own_mutex))  __data->mutex->lock();
   __interrupted        = false;
   __timeout            = false;
   __data->threads_left = _count;
   __passed_threads.clear();
-  __data->mutex.unlock();  
+  if (likely(__data->own_mutex))  __data->mutex->unlock();  
 }
 
 
@@ -156,10 +196,10 @@ InterruptibleBarrier::reset() throw()
 bool
 InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanosec)
 {
-  __data->mutex.lock();
+  if (likely(__data->own_mutex))  __data->mutex->lock();
   if ( __interrupted || __timeout ) {
     // interrupted or timed out threads need to be reset if they should be reused
-    __data->mutex.unlock();
+    if (likely(__data->own_mutex))  __data->mutex->unlock();
     return true;
   }
 
@@ -178,17 +218,17 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
   }
 
   while ( __data->threads_left && !__interrupted && !__timeout ) {
-    __timeout = ! __data->waitcond.reltimed_wait(timeout_sec, timeout_nanosec);
+    __timeout = ! __data->waitcond->reltimed_wait(timeout_sec, timeout_nanosec);
   }
   if ( __interrupted ) {
-    __data->mutex.unlock();
+    if (likely(__data->own_mutex))  __data->mutex->unlock();
     throw InterruptedException("InterruptibleBarrier forcefully interrupted, only "
 			       "%u of %u threads reached the barrier",
 			       _count - __data->threads_left, _count);
   }
 
-  __data->waitcond.wake_all();
-  __data->mutex.unlock();
+  __data->waitcond->wake_all();
+  if (likely(__data->own_mutex))  __data->mutex->unlock();
 
   return ! __timeout;
 }

@@ -36,8 +36,8 @@ class ThreadNotificationListener
  public:
   virtual ~ThreadNotificationListener();
 
-  virtual void thread_started(Thread *thread)                            = 0;
-  virtual void thread_init_failed(Thread *thread)                        = 0;
+  virtual bool thread_started(Thread *thread) throw()                    = 0;
+  virtual bool thread_init_failed(Thread *thread) throw()                = 0;
 
 };
 

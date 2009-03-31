@@ -41,6 +41,7 @@ class InterruptibleBarrier : public Barrier
 {
  public:
   InterruptibleBarrier(unsigned int count);
+  InterruptibleBarrier(Mutex *mutex, unsigned int count);
   virtual ~InterruptibleBarrier();
 
   bool wait(unsigned int timeout_sec, unsigned int timeout_nanosec);

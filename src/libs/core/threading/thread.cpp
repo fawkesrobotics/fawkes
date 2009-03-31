@@ -1092,9 +1092,14 @@ void
 Thread::notify_of_startup()
 {
   __notification_listeners->lock();
-  LockList<ThreadNotificationListener *>::iterator i;
-  for (i = __notification_listeners->begin(); i != __notification_listeners->end(); ++i) {
-    (*i)->thread_started(this);  }
+  LockList<ThreadNotificationListener *>::iterator i = __notification_listeners->begin();
+  while (i != __notification_listeners->end()) {
+    if (! (*i)->thread_started(this)) {
+      i = __notification_listeners->erase(i);
+    } else {
+      ++i;
+    }
+  }
   __notification_listeners->unlock();  
 }
 
@@ -1106,9 +1111,13 @@ void
 Thread::notify_of_failed_init()
 {
   __notification_listeners->lock();
-  LockList<ThreadNotificationListener *>::iterator i;
-  for (i = __notification_listeners->begin(); i != __notification_listeners->end(); ++i) {
-    (*i)->thread_init_failed(this);
+  LockList<ThreadNotificationListener *>::iterator i = __notification_listeners->begin();
+  while (i != __notification_listeners->end()) {
+    if ( ! (*i)->thread_init_failed(this) ) {
+      i = __notification_listeners->erase(i);
+    } else {
+      ++i;
+    }
   }
   __notification_listeners->unlock();
 }
