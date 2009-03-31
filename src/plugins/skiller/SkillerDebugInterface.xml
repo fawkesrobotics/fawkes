@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <interface name="SkillerDebugInterface" author="Tim Niemueller" year="2008">
+  <constants>
+    <enum name="GraphDirectionEnum">
+      <comment>Primary direction of the graph.</comment>
+      <item name="GD_TOP_BOTTOM">From top to bottom.</item>
+      <item name="GD_BOTTOM_TOP">From bottom to top.</item>
+      <item name="GD_LEFT_RIGHT">From left to right.</item>
+      <item name="GD_RIGHT_LEFT">From left to right.</item>
+    </enum>
+  </constants>
   <data>
     <comment>
       This interface provides internal skiller data that should allow for
@@ -14,6 +23,12 @@
     <field type="char" length="8192" name="graph">
       The selected graph in a dot string representation.
     </field>
+    <field type="GraphDirectionEnum" name="graph_dir">
+      Primary direction of current graph.
+    </field>
+    <field type="bool" name="graph_colored">
+      True if the graph is colored, false otherwise.
+    </field>
   </data>
   <message name="SetGraph">
     <comment>
@@ -21,6 +36,14 @@
       will show the currently active skill's graph (if available).
     </comment>
     <ref>graph_fsm</ref>
+  </message>
+  <message name="SetGraphDirection">
+    <comment>Set desired graph direction.</comment>
+    <ref>graph_dir</ref>
+  </message>
+  <message name="SetGraphColored">
+    <comment>Enable or disable colored graph</comment>
+    <ref>graph_colored</ref>
   </message>
 </interface>
 

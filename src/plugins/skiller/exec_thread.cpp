@@ -106,6 +106,8 @@ SkillerExecutionThread::init()
   __continuous_run   = false;
   __continuous_reset = false;
   __skdbg_what = "ACTIVE";
+  __skdbg_graphdir = "TB";
+  __skdbg_graphcolored = true;
   __clog = NULL;
   __sksf_pushed = false;
 
@@ -318,10 +320,22 @@ void
 SkillerExecutionThread::publish_skdbg()
 {
   try {
-    __lua->do_string("skillenv.write_skiller_debug(interfaces.writing.skdbg, \"%s\")",
-		     __skdbg_what.c_str());
+    __lua->do_string("skillenv.write_skiller_debug(interfaces.writing.skdbg, \"%s\", \"%s\", %s)",
+		     __skdbg_what.c_str(), __skdbg_graphdir.c_str(),
+		     __skdbg_graphcolored ? "true" : "false");
   } catch (Exception &e) {
     logger->log_warn("SkillerExecutionThread", "Error writing graph");
+    logger->log_warn("SkillerExecutionThread", e);
+  }
+}
+
+void
+SkillerExecutionThread::lua_loop_reset()
+{
+  try {
+    __lua->do_string("skillenv.reset_loop()");
+  } catch (Exception &e) {
+    logger->log_warn("SkillerExecutionThread", "Lua Loop Reset failed");
     logger->log_warn("SkillerExecutionThread", e);
   }
 }
@@ -349,6 +363,18 @@ SkillerExecutionThread::process_skdbg_messages()
       SkillerDebugInterface::SetGraphMessage *m = __skdbg_if->msgq_first<SkillerDebugInterface::SetGraphMessage>();
       logger->log_warn(name(), "Setting skiller debug what to: %s", m->graph_fsm());
       __skdbg_what = m->graph_fsm();
+    } else if (__skdbg_if->msgq_first_is<SkillerDebugInterface::SetGraphDirectionMessage>() ) {
+      SkillerDebugInterface::SetGraphDirectionMessage *m = __skdbg_if->msgq_first<SkillerDebugInterface::SetGraphDirectionMessage>();
+      switch (m->graph_dir()) {
+      case SkillerDebugInterface::GD_BOTTOM_TOP:  __skdbg_graphdir = "BT"; break;
+      case SkillerDebugInterface::GD_LEFT_RIGHT:  __skdbg_graphdir = "LR"; break;
+      case SkillerDebugInterface::GD_RIGHT_LEFT:  __skdbg_graphdir = "RL"; break;
+      default:                                    __skdbg_graphdir = "TB"; break;
+      }
+
+    } else if (__skdbg_if->msgq_first_is<SkillerDebugInterface::SetGraphColoredMessage>() ) {
+      SkillerDebugInterface::SetGraphColoredMessage *m = __skdbg_if->msgq_first<SkillerDebugInterface::SetGraphColoredMessage>();
+      __skdbg_graphcolored = m->is_graph_colored();
     }
 
     __skdbg_if->msgq_pop();
@@ -569,6 +595,7 @@ SkillerExecutionThread::loop()
 	logger->log_warn("SkillerExecutionThread", e);
       }
     }
+
   } // end if (curss != "")
 
 #ifdef SKILLER_TIMETRACKING
@@ -576,6 +603,7 @@ SkillerExecutionThread::loop()
 #endif
   publish_skill_status(curss);
   publish_skdbg();
+  lua_loop_reset();
 
   __reader_just_left = false;
 
@@ -584,7 +612,7 @@ SkillerExecutionThread::loop()
   __tt->ping_end(__ttc_publish);
   __tt->ping_end(__ttc_total);
   if (++__tt_loopcount >= SKILLER_TT_MOD) {
-    logger->log_debug("Lua", "Stack size: %i", __lua->stack_size());
+    //logger->log_debug("Lua", "Stack size: %i", __lua->stack_size());
     __tt_loopcount = 0;
     __tt->print_to_stdout();
   }

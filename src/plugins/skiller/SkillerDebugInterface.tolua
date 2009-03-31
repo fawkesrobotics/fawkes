@@ -4,6 +4,13 @@ namespace fawkes {
 class SkillerDebugInterface : public Interface
 {
 
+  typedef enum {
+    GD_TOP_BOTTOM,
+    GD_BOTTOM_TOP,
+    GD_LEFT_RIGHT,
+    GD_RIGHT_LEFT
+  } GraphDirectionEnum;
+
   class SetGraphMessage : public Message
   {
     SetGraphMessage(char * ini_graph_fsm);
@@ -15,12 +22,40 @@ class SkillerDebugInterface : public Interface
     int maxlenof_graph_fsm() const;
   };
 
+  class SetGraphDirectionMessage : public Message
+  {
+    SetGraphDirectionMessage(GraphDirectionEnum ini_graph_dir);
+    SetGraphDirectionMessage();
+    ~SetGraphDirectionMessage();
+
+    GraphDirectionEnum graph_dir();
+    void set_graph_dir(const GraphDirectionEnum new_graph_dir);
+    int maxlenof_graph_dir() const;
+  };
+
+  class SetGraphColoredMessage : public Message
+  {
+    SetGraphColoredMessage(bool ini_graph_colored);
+    SetGraphColoredMessage();
+    ~SetGraphColoredMessage();
+
+    bool is_graph_colored();
+    void set_graph_colored(const bool new_graph_colored);
+    int maxlenof_graph_colored() const;
+  };
+
   char * graph_fsm();
   void set_graph_fsm(const char * new_graph_fsm);
   int maxlenof_graph_fsm() const;
   char * graph();
   void set_graph(const char * new_graph);
   int maxlenof_graph() const;
+  GraphDirectionEnum graph_dir();
+  void set_graph_dir(const GraphDirectionEnum new_graph_dir);
+  int maxlenof_graph_dir() const;
+  bool is_graph_colored();
+  void set_graph_colored(const bool new_graph_colored);
+  int maxlenof_graph_colored() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

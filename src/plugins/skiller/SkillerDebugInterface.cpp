@@ -54,7 +54,8 @@ SkillerDebugInterface::SkillerDebugInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(Interface::IFT_STRING, "graph_fsm", 32, data->graph_fsm);
   add_fieldinfo(Interface::IFT_STRING, "graph", 8192, data->graph);
-  unsigned char tmp_hash[] = {0x61, 0x5d, 0x9, 0x2d, 0x6f, 0x1, 0x20, 0xbc, 0xb1, 0xba, 0x95, 0xfa, 0xdc, 0x75, 0x73, 0xa4};
+  add_fieldinfo(Interface::IFT_BOOL, "graph_colored", 1, &data->graph_colored);
+  unsigned char tmp_hash[] = {0xa9, 0xce, 0x8a, 0x1a, 0xb4, 0x14, 0x5c, 0x96, 0x19, 0x31, 0xe0, 0x65, 0xc3, 0xb8, 0x8b, 0x3a};
   set_hash(tmp_hash);
 }
 
@@ -132,12 +133,84 @@ SkillerDebugInterface::set_graph(const char * new_graph)
   strncpy(data->graph, new_graph, sizeof(data->graph));
 }
 
+/** Get graph_dir value.
+ * 
+      Primary direction of current graph.
+    
+ * @return graph_dir value
+ */
+SkillerDebugInterface::GraphDirectionEnum
+SkillerDebugInterface::graph_dir() const
+{
+  return data->graph_dir;
+}
+
+/** Get maximum length of graph_dir value.
+ * @return length of graph_dir value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SkillerDebugInterface::maxlenof_graph_dir() const
+{
+  return 1;
+}
+
+/** Set graph_dir value.
+ * 
+      Primary direction of current graph.
+    
+ * @param new_graph_dir new graph_dir value
+ */
+void
+SkillerDebugInterface::set_graph_dir(const GraphDirectionEnum new_graph_dir)
+{
+  data->graph_dir = new_graph_dir;
+}
+
+/** Get graph_colored value.
+ * 
+      True if the graph is colored, false otherwise.
+    
+ * @return graph_colored value
+ */
+bool
+SkillerDebugInterface::is_graph_colored() const
+{
+  return data->graph_colored;
+}
+
+/** Get maximum length of graph_colored value.
+ * @return length of graph_colored value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SkillerDebugInterface::maxlenof_graph_colored() const
+{
+  return 1;
+}
+
+/** Set graph_colored value.
+ * 
+      True if the graph is colored, false otherwise.
+    
+ * @param new_graph_colored new graph_colored value
+ */
+void
+SkillerDebugInterface::set_graph_colored(const bool new_graph_colored)
+{
+  data->graph_colored = new_graph_colored;
+}
+
 /* =========== message create =========== */
 Message *
 SkillerDebugInterface::create_message(const char *type) const
 {
   if ( strncmp("SetGraphMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetGraphMessage();
+  } else if ( strncmp("SetGraphDirectionMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetGraphDirectionMessage();
+  } else if ( strncmp("SetGraphColoredMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetGraphColoredMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -249,6 +322,184 @@ SkillerDebugInterface::SetGraphMessage::clone() const
 {
   return new SkillerDebugInterface::SetGraphMessage(this);
 }
+/** @class SkillerDebugInterface::SetGraphDirectionMessage <interfaces/SkillerDebugInterface.h>
+ * SetGraphDirectionMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_graph_dir initial value for graph_dir
+ */
+SkillerDebugInterface::SetGraphDirectionMessage::SetGraphDirectionMessage(const GraphDirectionEnum ini_graph_dir) : Message("SetGraphDirectionMessage")
+{
+  data_size = sizeof(SetGraphDirectionMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetGraphDirectionMessage_data_t *)data_ptr;
+  data->graph_dir = ini_graph_dir;
+}
+/** Constructor */
+SkillerDebugInterface::SetGraphDirectionMessage::SetGraphDirectionMessage() : Message("SetGraphDirectionMessage")
+{
+  data_size = sizeof(SetGraphDirectionMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetGraphDirectionMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+SkillerDebugInterface::SetGraphDirectionMessage::~SetGraphDirectionMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+SkillerDebugInterface::SetGraphDirectionMessage::SetGraphDirectionMessage(const SetGraphDirectionMessage *m) : Message("SetGraphDirectionMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetGraphDirectionMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get graph_dir value.
+ * 
+      Primary direction of current graph.
+    
+ * @return graph_dir value
+ */
+SkillerDebugInterface::GraphDirectionEnum
+SkillerDebugInterface::SetGraphDirectionMessage::graph_dir() const
+{
+  return data->graph_dir;
+}
+
+/** Get maximum length of graph_dir value.
+ * @return length of graph_dir value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SkillerDebugInterface::SetGraphDirectionMessage::maxlenof_graph_dir() const
+{
+  return 1;
+}
+
+/** Set graph_dir value.
+ * 
+      Primary direction of current graph.
+    
+ * @param new_graph_dir new graph_dir value
+ */
+void
+SkillerDebugInterface::SetGraphDirectionMessage::set_graph_dir(const GraphDirectionEnum new_graph_dir)
+{
+  data->graph_dir = new_graph_dir;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+SkillerDebugInterface::SetGraphDirectionMessage::clone() const
+{
+  return new SkillerDebugInterface::SetGraphDirectionMessage(this);
+}
+/** @class SkillerDebugInterface::SetGraphColoredMessage <interfaces/SkillerDebugInterface.h>
+ * SetGraphColoredMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_graph_colored initial value for graph_colored
+ */
+SkillerDebugInterface::SetGraphColoredMessage::SetGraphColoredMessage(const bool ini_graph_colored) : Message("SetGraphColoredMessage")
+{
+  data_size = sizeof(SetGraphColoredMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetGraphColoredMessage_data_t *)data_ptr;
+  data->graph_colored = ini_graph_colored;
+}
+/** Constructor */
+SkillerDebugInterface::SetGraphColoredMessage::SetGraphColoredMessage() : Message("SetGraphColoredMessage")
+{
+  data_size = sizeof(SetGraphColoredMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetGraphColoredMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+SkillerDebugInterface::SetGraphColoredMessage::~SetGraphColoredMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+SkillerDebugInterface::SetGraphColoredMessage::SetGraphColoredMessage(const SetGraphColoredMessage *m) : Message("SetGraphColoredMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetGraphColoredMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get graph_colored value.
+ * 
+      True if the graph is colored, false otherwise.
+    
+ * @return graph_colored value
+ */
+bool
+SkillerDebugInterface::SetGraphColoredMessage::is_graph_colored() const
+{
+  return data->graph_colored;
+}
+
+/** Get maximum length of graph_colored value.
+ * @return length of graph_colored value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SkillerDebugInterface::SetGraphColoredMessage::maxlenof_graph_colored() const
+{
+  return 1;
+}
+
+/** Set graph_colored value.
+ * 
+      True if the graph is colored, false otherwise.
+    
+ * @param new_graph_colored new graph_colored value
+ */
+void
+SkillerDebugInterface::SetGraphColoredMessage::set_graph_colored(const bool new_graph_colored)
+{
+  data->graph_colored = new_graph_colored;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+SkillerDebugInterface::SetGraphColoredMessage::clone() const
+{
+  return new SkillerDebugInterface::SetGraphColoredMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
@@ -257,6 +508,14 @@ SkillerDebugInterface::message_valid(const Message *message) const
 {
   const SetGraphMessage *m0 = dynamic_cast<const SetGraphMessage *>(message);
   if ( m0 != NULL ) {
+    return true;
+  }
+  const SetGraphDirectionMessage *m1 = dynamic_cast<const SetGraphDirectionMessage *>(message);
+  if ( m1 != NULL ) {
+    return true;
+  }
+  const SetGraphColoredMessage *m2 = dynamic_cast<const SetGraphColoredMessage *>(message);
+  if ( m2 != NULL ) {
     return true;
   }
   return false;

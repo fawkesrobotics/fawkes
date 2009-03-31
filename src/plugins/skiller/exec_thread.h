@@ -77,6 +77,7 @@ class SkillerExecutionThread
   void publish_skdbg();
   void publish_error();
   void process_skdbg_messages();
+  void lua_loop_reset();
 
  private: /* members */
   fawkes::ComponentLogger *__clog;
@@ -90,6 +91,8 @@ class SkillerExecutionThread
   bool        __sksf_pushed;
 
   std::string __skdbg_what;
+  std::string __skdbg_graphdir;
+  bool        __skdbg_graphcolored;
 
   // config values
   std::string __cfg_skillspace;

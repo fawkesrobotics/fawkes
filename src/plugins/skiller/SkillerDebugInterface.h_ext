@@ -39,6 +39,14 @@ class SkillerDebugInterface : public Interface
  public:
   /* constants */
 
+  /** Primary direction of the graph. */
+  typedef enum {
+    GD_TOP_BOTTOM /**< From top to bottom. */,
+    GD_BOTTOM_TOP /**< From bottom to top. */,
+    GD_LEFT_RIGHT /**< From left to right. */,
+    GD_RIGHT_LEFT /**< From left to right. */
+  } GraphDirectionEnum;
+
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
@@ -47,6 +55,12 @@ class SkillerDebugInterface : public Interface
      */
     char graph[8192]; /**< 
       The selected graph in a dot string representation.
+     */
+    GraphDirectionEnum graph_dir; /**< 
+      Primary direction of current graph.
+     */
+    bool graph_colored; /**< 
+      True if the graph is colored, false otherwise.
      */
   } SkillerDebugInterface_data_t;
 
@@ -79,6 +93,56 @@ class SkillerDebugInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetGraphDirectionMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      GraphDirectionEnum graph_dir; /**< 
+      Primary direction of current graph.
+     */
+    } SetGraphDirectionMessage_data_t;
+
+    SetGraphDirectionMessage_data_t *data;
+
+   public:
+    SetGraphDirectionMessage(const GraphDirectionEnum ini_graph_dir);
+    SetGraphDirectionMessage();
+    ~SetGraphDirectionMessage();
+
+    SetGraphDirectionMessage(const SetGraphDirectionMessage *m);
+    /* Methods */
+    GraphDirectionEnum graph_dir() const;
+    void set_graph_dir(const GraphDirectionEnum new_graph_dir);
+    size_t maxlenof_graph_dir() const;
+    virtual Message * clone() const;
+  };
+
+  class SetGraphColoredMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      bool graph_colored; /**< 
+      True if the graph is colored, false otherwise.
+     */
+    } SetGraphColoredMessage_data_t;
+
+    SetGraphColoredMessage_data_t *data;
+
+   public:
+    SetGraphColoredMessage(const bool ini_graph_colored);
+    SetGraphColoredMessage();
+    ~SetGraphColoredMessage();
+
+    SetGraphColoredMessage(const SetGraphColoredMessage *m);
+    /* Methods */
+    bool is_graph_colored() const;
+    void set_graph_colored(const bool new_graph_colored);
+    size_t maxlenof_graph_colored() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   SkillerDebugInterface();
@@ -92,6 +156,12 @@ class SkillerDebugInterface : public Interface
   char * graph() const;
   void set_graph(const char * new_graph);
   size_t maxlenof_graph() const;
+  GraphDirectionEnum graph_dir() const;
+  void set_graph_dir(const GraphDirectionEnum new_graph_dir);
+  size_t maxlenof_graph_dir() const;
+  bool is_graph_colored() const;
+  void set_graph_colored(const bool new_graph_colored);
+  size_t maxlenof_graph_colored() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
