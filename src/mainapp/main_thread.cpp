@@ -3,7 +3,7 @@
  *  main_thread.cpp - Fawkes main thread
  *
  *  Created: Thu Nov  2 16:47:50 2006
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -28,7 +28,9 @@
 #include <mainapp/network_manager.h>
 #include <mainapp/thread_manager.h>
 
+#include <core/threading/interruptible_barrier.h>
 #include <core/exceptions/system.h>
+#include <core/macros.h>
 #include <config/sqlite.h>
 #include <config/net_handler.h>
 #include <utils/logging/multi.h>
@@ -68,12 +70,14 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   __blackboard        = NULL;
   __config_nethandler = NULL;
   __config            = NULL;
-  __plugin_manager      = NULL;
-  __network_manager     = NULL;
-  __thread_manager      = NULL;
+  __plugin_manager    = NULL;
+  __network_manager   = NULL;
+  __thread_manager    = NULL;
   __aspect_inifin     = NULL;
 
-  __mainloop          = this;
+  __mainloop_thread   = NULL;
+  __mainloop_mutex    = new Mutex();
+  __mainloop_barrier  = new InterruptibleBarrier(__mainloop_mutex, 2);
 
   __argp = argp;
 
@@ -213,6 +217,7 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     __desired_loop_time_usec = 0;
     __multi_logger->log_info("FawkesMainApp", "Desired loop time not set, assuming 0");
   }
+
   __desired_loop_time_sec  = (float)__desired_loop_time_usec / 1000000.f;
 }
 
@@ -251,6 +256,9 @@ FawkesMainThread::destruct()
   delete __loop_start;
   delete __loop_end;
 
+  delete __mainloop_barrier;
+  delete __mainloop_mutex;
+
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();
 
@@ -273,22 +281,21 @@ FawkesMainThread::once()
       __plugin_manager->load("default");
     } catch (Exception &e) {
       // ignored, there is no default meta plugin set
+      __multi_logger->log_error("FawkesMainThread", "Failed to load default plugins, exception follows");
+      __multi_logger->log_error("FawkesMainThread", e);
     }
   }
 }
 
 void
-FawkesMainThread::set_mainloop(MainLoop *mainloop)
+FawkesMainThread::set_mainloop_thread(Thread *mainloop_thread)
 {
   loopinterrupt_antistarve_mutex->lock();
+  __mainloop_mutex->lock();
+  if (mainloop_thread)  __mainloop_barrier->interrupt();
+  __mainloop_thread = mainloop_thread;
+  __mainloop_mutex->unlock();
   __thread_manager->interrupt_timed_thread_wait();
-  loop_mutex->lock();
-  if ( mainloop ) {
-    __mainloop = mainloop;
-  } else {
-    __mainloop = this;
-  }
-  loop_mutex->unlock();
   loopinterrupt_antistarve_mutex->unlock();
 }
 
@@ -310,92 +317,97 @@ FawkesMainThread::remove_logger(Logger *logger)
 void
 FawkesMainThread::loop()
 {
-  __mainloop->mloop();
-}
-
-
-/** Thread loop.
- * Runs the main loop.
- */
-void
-FawkesMainThread::mloop()
-{
-  try {
-    if ( ! __thread_manager->timed_threads_exist() ) {
-      __multi_logger->log_debug("FawkesMainThread", "No timed threads exist, waiting");
-      try {
-	__thread_manager->wait_for_timed_threads();
-	__multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "
-				"running main loop now");
-      } catch (InterruptedException &e) {
-	return;
-      }
-    }
-
-    if ( __time_wait ) {
-      __time_wait->mark_start();
-    }
-    __loop_start->stamp_systime();
-
+  if (unlikely(__mainloop_thread != NULL)) {
     try {
-      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_usec );
-      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR,         __max_thread_time_usec );
-      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_usec );
-      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_usec );
-      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_usec );
-      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_usec );
-      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_usec );
-      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_usec );
-      __thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_usec );
+      __mainloop_mutex->lock();
+      if (likely(__mainloop_thread != NULL)) {
+	__mainloop_thread->wakeup(__mainloop_barrier);
+	__mainloop_barrier->wait();
+      }
+      __mainloop_mutex->unlock();
     } catch (Exception &e) {
-      __multi_logger->log_error("FawkesMainThread", e);
+      __multi_logger->log_warn("FawkesMainThread", e);
     }
 
-    test_cancel();
-
-    __thread_manager->try_recover(__recovered_threads);
-    if ( ! __recovered_threads.empty() ) {
-      // threads have been recovered!
-      std::string s;
-      if ( __recovered_threads.size() == 1 ) {
-	s = std::string("The thread ") + __recovered_threads.front() +
-	  " could be recovered and resumes normal operation";
-      } else {
-	s = "The following threads could be recovered and resumed normal operation: ";
-	for (std::list<std::string>::iterator i = __recovered_threads.begin();
-	     i != __recovered_threads.end(); ++i) {
-	  s += *i + " ";
+  } else {
+    try {
+      if ( ! __thread_manager->timed_threads_exist() ) {
+	__multi_logger->log_debug("FawkesMainThread", "No timed threads exist, waiting");
+	try {
+	  __thread_manager->wait_for_timed_threads();
+	  __multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "
+				    "running main loop now");
+	} catch (InterruptedException &e) {
+	  __multi_logger->log_debug("FawkesMainThread", "Waiting for timed threads interrupted");
+	  return;
 	}
       }
-      __recovered_threads.clear();
-      __multi_logger->log_warn("FawkesMainThread", "%s", s.c_str());
-    }
 
-    if (__desired_loop_time_sec > 0) {
-      __loop_end->stamp_systime();
-      float loop_time = *__loop_end - __loop_start;
-      if (loop_time > __desired_loop_time_sec) {
-	__multi_logger->log_warn("FawkesMainThread", "Loop time exceeded, "
-				 "desired: %f sec (%u usec),  actual: %f sec",
-				 __desired_loop_time_sec, __desired_loop_time_usec,
-				 loop_time);
+      if ( __time_wait ) {
+	__time_wait->mark_start();
       }
+      __loop_start->stamp_systime();
+
+      try {
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR,         __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_usec );
+	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_usec );
+      } catch (Exception &e) {
+	__multi_logger->log_error("FawkesMainThread", e);
+      }
+
+      test_cancel();
+
+      __thread_manager->try_recover(__recovered_threads);
+      if ( ! __recovered_threads.empty() ) {
+	// threads have been recovered!
+	std::string s;
+	if ( __recovered_threads.size() == 1 ) {
+	  s = std::string("The thread ") + __recovered_threads.front() +
+	    " could be recovered and resumes normal operation";
+	} else {
+	  s = "The following threads could be recovered and resumed normal operation: ";
+	  for (std::list<std::string>::iterator i = __recovered_threads.begin();
+	       i != __recovered_threads.end(); ++i) {
+	    s += *i + " ";
+	  }
+	}
+	__recovered_threads.clear();
+	__multi_logger->log_warn("FawkesMainThread", "%s", s.c_str());
+      }
+
+      if (__desired_loop_time_sec > 0) {
+	__loop_end->stamp_systime();
+	float loop_time = *__loop_end - __loop_start;
+	if (loop_time > __desired_loop_time_sec) {
+	  __multi_logger->log_warn("FawkesMainThread", "Loop time exceeded, "
+				   "desired: %f sec (%u usec),  actual: %f sec",
+				   __desired_loop_time_sec, __desired_loop_time_usec,
+				   loop_time);
+	}
+      }
+      if ( __time_wait ) {
+	__time_wait->wait_systime();
+      } else {
+	yield();
+      }
+    } catch (Exception &e) {
+      __multi_logger->log_warn("FawkesMainThread",
+			       "Exception caught while executing default main "
+			       "loop, ignoring.");
+      __multi_logger->log_warn("FawkesMainThread", e);
+    } catch (std::exception &e) {
+      __multi_logger->log_warn("FawkesMainThread",
+			       "STL Exception caught while executing default main "
+			       "loop, ignoring. (what: %s)", e.what());
     }
-    if ( __time_wait ) {
-      __time_wait->wait_systime();
-    } else {
-      yield();
-    }
-  } catch (Exception &e) {
-    __multi_logger->log_warn("FawkesMainThread",
-			     "Exception caught while executing default main "
-			     "loop, ignoring.");
-    __multi_logger->log_warn("FawkesMainThread", e);
-  } catch (std::exception &e) {
-    __multi_logger->log_warn("FawkesMainThread",
-			     "STL Exception caught while executing default main "
-			     "loop, ignoring. (what: %s)", e.what());
+    // catch ... is not a good idea, would catch cancellation exception
+    // at least needs to be rethrown.
   }
-  // catch ... is not a good idea, would catch cancellation exception
-  // at least needs to be rethrown.
 }

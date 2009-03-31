@@ -46,6 +46,8 @@ namespace fawkes {
   class PluginManager;
   class Time;
   class PluginNetworkHandler;
+  class InterruptibleBarrier;
+  class Mutex;
 }
 class FawkesThreadManager;
 class FawkesNetworkManager;
@@ -53,7 +55,6 @@ class FawkesNetworkManager;
 class FawkesMainThread
 : public fawkes::Thread,
   public fawkes::MainLoopEmployer,
-  public fawkes::MainLoop,
   public fawkes::LoggerEmployer
 {
  public:
@@ -63,8 +64,7 @@ class FawkesMainThread
   virtual void once();
   virtual void loop();
 
-  virtual void mloop();
-  virtual void set_mainloop(fawkes::MainLoop *mainloop);
+  virtual void set_mainloop_thread(fawkes::Thread *mainloop_thread);
 
   virtual void add_logger(fawkes::Logger *logger);
   virtual void remove_logger(fawkes::Logger *logger);
@@ -81,7 +81,10 @@ class FawkesMainThread
   fawkes::Clock                *__clock;
   fawkes::TimeWait             *__time_wait;
   fawkes::AspectIniFin         *__aspect_inifin;
-  fawkes::MainLoop             *__mainloop;
+
+  fawkes::Thread               *__mainloop_thread;
+  fawkes::Mutex                *__mainloop_mutex;
+  fawkes::InterruptibleBarrier *__mainloop_barrier;
 
   FawkesThreadManager          *__thread_manager;
   fawkes::PluginManager        *__plugin_manager;

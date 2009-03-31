@@ -330,7 +330,6 @@ FawkesThreadManager::remove_maybelocked(ThreadList &tl, bool lock)
   }
 
   tl.lock();
-  MutexLocker locker(threads.mutex(), lock);
 
   try {
     if ( ! tl.prepare_finalize(finalizer) ) {
@@ -347,6 +346,8 @@ FawkesThreadManager::remove_maybelocked(ThreadList &tl, bool lock)
     e.append("One or more threads in list '%s' cannot be finalized", tl.name());
     throw CannotFinalizeThreadException(e);
   }
+
+  MutexLocker locker(threads.mutex(), lock);
 
   tl.stop();
   tl.finalize(finalizer);
