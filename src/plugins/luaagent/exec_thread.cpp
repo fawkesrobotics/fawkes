@@ -171,6 +171,39 @@ LuaAgentExecutionThread::finalize()
   delete __clog;
 }
 
+void
+LuaAgentExecutionThread::process_agdbg_messages()
+{
+  while ( ! __agdbg_if->msgq_empty() ) {
+    if (__agdbg_if->msgq_first_is<SkillerDebugInterface::SetGraphDirectionMessage>() ) {
+      SkillerDebugInterface::SetGraphDirectionMessage *m = __agdbg_if->msgq_first<SkillerDebugInterface::SetGraphDirectionMessage>();
+      try {
+	std::string graphdir = "TB";
+	switch (m->graph_dir()) {
+	case SkillerDebugInterface::GD_BOTTOM_TOP: graphdir = "BT"; break;
+	case SkillerDebugInterface::GD_LEFT_RIGHT: graphdir = "LR"; break;
+	case SkillerDebugInterface::GD_RIGHT_LEFT: graphdir = "RL"; break;
+	default: break;
+	}
+	__lua->do_string("agentenv.set_graphdir(\"%s\")", graphdir.c_str());
+      } catch (Exception &e) {
+	logger->log_warn("LuaAgentExecutionThread", "Failed to set graph direction, exception follows");
+	logger->log_warn("LuaAgentExecutionThread", e);
+      }
+    } else if (__agdbg_if->msgq_first_is<SkillerDebugInterface::SetGraphColoredMessage>() ) {
+      SkillerDebugInterface::SetGraphColoredMessage *m = __agdbg_if->msgq_first<SkillerDebugInterface::SetGraphColoredMessage>();
+      try {
+	__lua->do_string("agentenv.set_graph_colored(%s)", m->is_graph_colored() ? "true" : "false");
+      } catch (Exception &e) {
+	logger->log_warn("LuaAgentExecutionThread", "Failed to set graph direction, exception follows");
+	logger->log_warn("LuaAgentExecutionThread", e);
+      }
+    }
+
+    __agdbg_if->msgq_pop();
+  }
+}
+
 
 void
 LuaAgentExecutionThread::loop()
@@ -178,6 +211,9 @@ LuaAgentExecutionThread::loop()
 #ifdef HAVE_INOTIFY
   __lua->process_fam_events();
 #endif
+
+  process_agdbg_messages();
+
   __lua_ifi->read();
   __skiller_if->read();
 

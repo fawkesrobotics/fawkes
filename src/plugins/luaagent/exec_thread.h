@@ -65,6 +65,7 @@ class LuaAgentExecutionThread
 
  private: /* methods */
   void init_failure_cleanup();
+  void process_agdbg_messages();
 
  private: /* members */
   fawkes::ComponentLogger *__clog;
