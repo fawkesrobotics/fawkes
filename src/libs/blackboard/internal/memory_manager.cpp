@@ -113,6 +113,7 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(size_t memsize)
   __memsize      = memsize;
   __memory       = malloc(memsize);
   __mutex        = new Mutex();
+  __master       = true;
 
   // Lock memory to RAM to avoid swapping
   mlock(__memory, __memsize);
