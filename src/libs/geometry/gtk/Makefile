@@ -29,9 +29,9 @@ OBJS_libfawkesgeometrygtk = geom_drawing_area.o		\
 			    spline_drawer.o		\
 			    drawing_manipulator.o
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(HAVE_CAIROMM),111)
-  CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM) $(CFLAGS_CAIROMM)
-  LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM) $(LDFLAGS_CAIROMM)
+ifeq ($(HAVE_GUI),1)
+  CFLAGS  += $(CFLAGS_GUI)
+  LDFLAGS += $(LDFLAGS_GUI)
 
   LIBS_gui = $(LIBDIR)/libfawkesgeometrygtk.so
 else
@@ -41,11 +41,11 @@ endif
 OBJS_all = $(OBJS_libfawkesgeometrygtk)
 
 ifeq ($(OBJSSUBMAKE),1)
-all: $(WARN_TARGETS)
+gui: $(WARN_TARGETS)
 
 .PHONY: warning_geometrygtk
 warning_geometrygtk:
-	$(SILENT)echo -e "$(INDENT_RPINT)--> $(TRED)Omitting Gtk drawers of the geometry library$(TNORMAL)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Gtk drawers of the geometry library$(TNORMAL)"
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk
