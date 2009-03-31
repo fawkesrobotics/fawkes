@@ -37,8 +37,7 @@ using namespace fawkes;
 
 /** Constructor. */
 TimeTrackerMainLoopThread::TimeTrackerMainLoopThread()
-  : Thread("TimeTrackerMainLoopThread", Thread::OPMODE_WAITFORWAKEUP),
-    MainLoopAspect(this)
+  : Thread("TimeTrackerMainLoopThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 
@@ -52,14 +51,24 @@ TimeTrackerMainLoopThread::~TimeTrackerMainLoopThread()
 void
 TimeTrackerMainLoopThread::init()
 {
+  __loop_start = new Time(clock);
+  __loop_end   = new Time(clock);
+  try {
+    __max_thread_time_usec = config->get_uint("/fawkes/mainapp/max_thread_time");
+  } catch (Exception &e) {
+    __max_thread_time_usec = 30000;
+    logger->log_info("FawkesMainApp", "Maximum thread time not set, assuming 30ms.");
+  }
+
   __time_wait = NULL;
   try {
-    unsigned int min_loop_time = config->get_uint("/fawkes/mainapp/min_loop_time");
-    if ( min_loop_time > 0 ) {
-      __time_wait = new TimeWait(clock, min_loop_time);
+    __desired_loop_time_usec = config->get_uint("/fawkes/mainapp/desired_loop_time");
+    if ( __desired_loop_time_usec > 0 ) {
+      __time_wait = new TimeWait(clock, __desired_loop_time_usec);
     }
   } catch (Exception &e) {
-    logger->log_info(name(), "Minimum loop time not set, assuming 0");
+    __desired_loop_time_usec = 0;
+    logger->log_info("FawkesMainApp", "Desired loop time not set, assuming 0");
   }
 
   try {
@@ -74,7 +83,7 @@ TimeTrackerMainLoopThread::init()
   __now            = new Time(clock);
   __last_outp_time->stamp();
 
-  __tt = new TimeTracker();
+  __tt = new TimeTracker("time.log");
   __tt_loopcount   = 0;
   __ttc_pre_loop   = __tt->add_class("Pre Loop");
   __ttc_sensor     = __tt->add_class("Sensor");
@@ -90,20 +99,16 @@ TimeTrackerMainLoopThread::init()
 
 
 #define TIMETRACK_START(c1, c2, c3)		\
-  if ( __tt ) {					\
-    __tt->ping_start(c1);			\
-    __tt->ping_start(c2);			\
-    __tt->ping_start(c3);			\
-  }
+  __tt->ping_start(c1);				\
+  __tt->ping_start(c2);				\
+  __tt->ping_start(c3);
+
 #define TIMETRACK_INTER(c1, c2)			\
-  if ( __tt ) {					\
-    __tt->ping_end(c1);			\
-    __tt->ping_start(c2);			\
-  }
+ __tt->ping_end(c1);				\
+ __tt->ping_start(c2);
+
 #define TIMETRACK_END(c)			\
-  if ( __tt ) {					\
-    __tt->ping_end(c);				\
-  }
+  __tt->ping_end(c);
 
 void
 TimeTrackerMainLoopThread::finalize()
@@ -115,19 +120,14 @@ TimeTrackerMainLoopThread::finalize()
 void
 TimeTrackerMainLoopThread::loop()
 {
-}
-
-
-void
-TimeTrackerMainLoopThread::mloop()
-{
-  if ( ! _btexec->timed_threads_exist() ) {
+  if ( ! blocked_timing_executor->timed_threads_exist() ) {
     logger->log_debug("TimeTrackerMainLoopThread", "No threads exist, waiting");
     try {
-      _btexec->wait_for_timed_threads();
+      blocked_timing_executor->wait_for_timed_threads();
       logger->log_debug("TimeTrackerMainLoopThread", "Timed threads have been "
 			"added, running main loop now");
     } catch (InterruptedException &e) {
+      logger->log_debug("TimeTrackerMainLoopThread", "Waiting for timed threads interrupted");
       return;
     }
   }
@@ -137,34 +137,35 @@ TimeTrackerMainLoopThread::mloop()
   if ( __time_wait ) {
     __time_wait->mark_start();
   }
+  __loop_start->stamp_systime();
 
-  _btexec->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
+  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
 
   TIMETRACK_INTER(__ttc_pre_loop, __ttc_sensor)
 
-  _btexec->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
-  _btexec->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS );
+  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR );
+  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS );
 
   TIMETRACK_INTER(__ttc_sensor, __ttc_worldstate)
 
-  _btexec->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
+  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
 
   TIMETRACK_INTER(__ttc_worldstate, __ttc_think)
 
-  _btexec->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK );
+  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK );
 
   TIMETRACK_INTER(__ttc_think, __ttc_skill)
 
-  _btexec->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL );
+  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL );
 
   TIMETRACK_INTER(__ttc_skill, __ttc_act)
 
-  _btexec->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT );
-  _btexec->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC );
+  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT );
+  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC );
 
   TIMETRACK_INTER(__ttc_act, __ttc_post_loop)
 
-  _btexec->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
+  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
 
   TIMETRACK_INTER(__ttc_post_loop, __ttc_netproc)
 
@@ -184,7 +185,55 @@ TimeTrackerMainLoopThread::mloop()
   __now->stamp();
   if ( (*__now - __last_outp_time) >= __output_interval ) {
     __tt->print_to_stdout();
+    __tt->print_to_file();
+    __tt->reset();
     *__last_outp_time = *__now;
   }
 
+  try {
+    blocked_timing_executor->try_recover(__recovered_threads);
+    if ( ! __recovered_threads.empty() ) {
+      // threads have been recovered!
+      std::string s;
+      if ( __recovered_threads.size() == 1 ) {
+	s = std::string("The thread ") + __recovered_threads.front() +
+	  " could be recovered and resumes normal operation";
+      } else {
+	s = "The following threads could be recovered and resumed normal operation: ";
+	for (std::list<std::string>::iterator i = __recovered_threads.begin();
+	     i != __recovered_threads.end(); ++i) {
+	  s += *i + " ";
+	}
+      }
+      __recovered_threads.clear();
+      logger->log_warn("FawkesMainThread", "%s", s.c_str());
+    }
+
+    if (__desired_loop_time_sec > 0) {
+      __loop_end->stamp_systime();
+      float loop_time = *__loop_end - __loop_start;
+      if (loop_time > __desired_loop_time_sec) {
+	logger->log_warn("FawkesMainThread", "Loop time exceeded, "
+				 "desired: %f sec (%u usec),  actual: %f sec",
+				 __desired_loop_time_sec, __desired_loop_time_usec,
+				 loop_time);
+      }
+    }
+    if ( __time_wait ) {
+      __time_wait->wait_systime();
+    } else {
+      yield();
+    }
+  } catch (Exception &e) {
+    logger->log_warn("FawkesMainThread",
+			     "Exception caught while executing default main "
+			     "loop, ignoring.");
+    logger->log_warn("FawkesMainThread", e);
+  } catch (std::exception &e) {
+    logger->log_warn("FawkesMainThread",
+			     "STL Exception caught while executing default main "
+			     "loop, ignoring. (what: %s)", e.what());
+  }
+  // catch ... is not a good idea, would catch cancellation exception
+  // at least needs to be rethrown.
 }
