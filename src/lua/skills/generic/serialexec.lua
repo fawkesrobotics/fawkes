@@ -63,9 +63,11 @@ function state_init(self)
       local params = st[2]
       printf("Creating state for skill %s", skill.name)
       local final = next or FINAL
-      next = fsm:new_jump_state(tostring(i) .. ": " .. skill.name, skill, final, FAILED, params)
+      next = fsm:new_jump_state("SKILL_" .. tostring(i), skill, final, FAILED, params)
+      next.dotattr = { comment = skill.name }
+      next:reset()
    end
-   SERIALEXEC:add_transition(next, JumpState.jumpcond_true, "Start")
+   SERIALEXEC:add_transition(next, true, "Start")
 end
 
 function state_reset(self)

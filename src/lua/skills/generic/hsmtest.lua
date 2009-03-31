@@ -26,8 +26,7 @@ module(..., skillenv.module_init)
 
 -- Crucial skill information
 name               = "hsmtest"
-fsm                = SkillHSM:new{name=name, start="INITIAL",
-				  no_default_states=true, exit_state="FINAL"}
+fsm                = SkillHSM:new{name=name, start="INITIAL"}
 
 documentation      = [==[Simple test skill for HSMs.
 hsmtest()
@@ -40,30 +39,43 @@ skillenv.skill_module(...)
 fsm:new_jump_state("INITIAL")
 fsm:new_jump_state("FINAL")
 fsm:new_jump_state("LOOP")
-WS2 = WaitState:new{name="WS2", fsm=fsm, next_state=FINAL, time_sec=2, labeltime=true}
+WS2 = WaitState:new{name="WS2", fsm=fsm, next_state="SUBFSM", time_sec=2, labeltime=true}
 WS1 = WaitState:new{name="WS1", fsm=fsm, next_state=LOOP, time_sec=1, labeltime=true}
 fsm:add_state(WS2)
 fsm:add_state(WS1)
 
+local subfsm = SkillHSM:new{name="TestSubFSM", start="SUBINIT",
+			     export_states_to_parent=false}
+SUBINIT = WaitState:new{name="SUBINIT", fsm=subfsm, next_state="SUB_1", time_sec=2, labeltime=true}
+subfsm:add_state(SUBINIT)
+SUB_1 = subfsm:new_jump_state("SUB_1")
+SUB_1:add_transition(subfsm.states["FINAL"], "math.random() >= 0.5")
+SUB_1:add_transition(subfsm.states["FAILED"], true, "Unconditional")
+
+SUBFSM = SubFSMJumpState:new{name="SUBFSM", fsm=fsm, subfsm=subfsm,
+			     exit_to="FINAL", fail_to="FAILED"}
+fsm:add_state(SUBFSM)
+
 function LOOP:reset()
    self.loopcount = 0
-   self.loops     = 5
+   self.loops     = 1
    self.dotattr.label = "\\N 0/" .. self.loops
 end
-function LOOP:jumpcond_loop()      return self.loopcount < 5            end
-function LOOP:jumpcond_abortloop() return self.loopcount >= 5           end
-function LOOP:exit()               self.loopcount = self.loopcount + 1  end
+function LOOP:exit()
+   self.loopcount = self.loopcount + 1
+end
 function LOOP:init()
    self.dotattr.label = "\\N " .. tostring(self.loopcount) .. "/" .. self.loops
 end
 
-local it1 = INITIAL:add_transition(WS1, function () return true end, "Start FSM")
-local lt1 = LOOP:add_transition(WS1, LOOP.jumpcond_loop, "Keep looping")
-local lt2 = LOOP:add_transition(WS2, LOOP.jumpcond_abortloop, "Loops done")
+local it1 = INITIAL:add_transition(WS1, true, "Start FSM")
+local lt1 = LOOP:add_transition(WS1, "self.loopcount <  self.loops", "Keep looping")
+local lt2 = LOOP:add_transition(WS2, "self.loopcount >= self.loops", "Loops done")
+
 
 -- Cosmetics
-WS1:get_transitions(LOOP).dotattr = { labelangle = 15, labeldistance = 4, labeloffsetx = -10 }
-WS2:get_transitions(FINAL).dotattr = { labelangle = -50 }
-lt1.dotattr = { labelangle = 35, labeldistance = 3, labeloffsetx = -25, labeloffsety = -25 }
-lt2.dotattr = { labelangle = 10, labeldistance = 3 }
-it1.dotattr = { labelangle = -50 }
+--WS1:get_transition(LOOP).dotattr = { labelangle = 15, labeldistance = 4, labeloffsetx = -10, labeloffsety=-15, labelrotate=-20 }
+--WS2:get_transition(FINAL).dotattr = { labelangle = -50 }
+--lt1.dotattr = { labelangle = 35, labeldistance = 3, labeloffsetx = -15, labeloffsety = 30, labelrotate=-45 }
+--lt2.dotattr = { labelangle = 10, labeldistance = 3 }
+--it1.dotattr = { labelangle = -50 }

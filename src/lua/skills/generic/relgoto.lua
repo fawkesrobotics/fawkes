@@ -26,7 +26,7 @@ module(..., skillenv.module_init)
 
 -- Crucial skill information
 name               = "relgoto"
-fsm                = SkillHSM:new{name=name, start="RELGOTO"}
+fsm                = SkillHSM:new{name=name, start="RELGOTO", debug=true}
 depends_skills     = nil
 depends_interfaces = {
    {v = "navigator", type = "NavigatorInterface"}
@@ -102,6 +102,11 @@ function RELGOTO:loop()
    self.wait_start = self.wait_start + 1
 end
 
+function RELGOTO:reset()
+   --printf("relgoto: sending stop");
+   --navigator:msgq_enqueue_copy(navigator.StopMessage:new())
+end
+
 function RELGOTO:jumpcond_paramfail()
    return self.param_fail
 end
@@ -114,6 +119,7 @@ function RELGOTO:jumpcond_navifail()
 end
 
 function RELGOTO:jumpcond_navifinal()
+   --printf("msgid: %d/%d  final: %s", self.fsm.vars.msgid, navigator:msgid(), tostring(navigator:is_final()))
    return self.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
 end
 
