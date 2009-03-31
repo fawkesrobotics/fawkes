@@ -25,14 +25,18 @@ require("fawkes.modinit")
 module(..., fawkes.modinit.register_all)
 require("fawkes.logprint")
 local skillstati = require("skiller.skillstati")
-local shsmmod = require("skiller.skillhsm")
-local wsmod = require("fawkes.fsm.waitstate")
+local shsmmod    = require("skiller.skillhsm")
+local wsmod      = require("fawkes.fsm.waitstate")
+local depinit    = require("fawkes.depinit")
+local predlib    = require("fawkes.predlib")
+local grapher    = require("fawkes.fsm.grapher")
 
 local skills        = {}
 local skill_status  = { running = {}, final = {}, failed = {} }
 local active_skills = {}
 
-local skill_space       = ""
+local skill_space      = ""
+local graphing_enabled = false
 
 -- Print skill info.
 -- @param skill_entry skill entry to print
@@ -54,9 +58,10 @@ function get_skill_module(skill)
 	    return s
 	 end
       end
-   elseif type(skill) == "function" then
+   elseif type(skill) == "table" then
+      local mt = getmetatable(skill)
       for _, s in ipairs(skills) do
-	 if s.wrapped_table == skill then
+	 if s.wrapped_function == mt.__call then
 	    return s
 	 end
       end
@@ -159,7 +164,7 @@ function gensandbox()
       if string.match(k, "^S_([%a_]+)$") then rv[k] = v end
    end
    for _, s in ipairs(skills) do
-      rv[s.name] = s.wrapped_table
+      rv[s.name] = create_skill_functable(s)
    end
    for n, i in pairs(interfaces.reading) do
       rv[n] = i
@@ -221,6 +226,12 @@ function reset_all()
    reset_status()
 end
 
+--- Reset loop internals.
+-- This function is called after every loop, no matter if skills are executed
+-- continuous or one-show and independent of the status.
+function reset_loop()
+   predlib.reset()
+end
 
 --- Get current skill status.
 -- @return three return values, number of running, final and failed skills.
@@ -298,48 +309,59 @@ function write_skill_list(skdbg)
    end
 end
 
+function update_grapher_config(skdbg, graphdir, colored)
+   local params_changed = false
 
-function write_skiller_debug(skdbg, what)
+   if graphdir ~= nil then
+      local cur_graphdir = grapher.get_rankdir()
+      if cur_graphdir ~= graphdir then
+	 grapher.set_rankdir(graphdir)
+	 if graphdir == "BT" then     skdbg:set_graph_dir(skdbg.GD_BOTTOM_TOP)
+	 elseif graphdir == "LR" then skdbg:set_graph_dir(skdbg.GD_LEFT_RIGHT)
+	 elseif graphdir == "RL" then skdbg:set_graph_dir(skdbg.GD_RIGHT_LEFT)
+	 else skdbg:set_graph_dir(skdbg.GD_TOP_BOTTOM) end
+	 params_changed = true
+      end
+   end
+   if colored ~= nil then
+      local cur_colored = grapher.get_colored()
+      if cur_colored ~= colored then
+	 grapher.set_colored(colored)
+	 skdbg:set_graph_colored(colored)
+	 params_changed = true
+      end
+   end
+
+   return params_changed
+end
+
+function write_skiller_debug(skdbg, what, graphdir, colored)
    local skdbg = skdbg or interfaces.writing.skdbg
    assert(skdbg, "write_skiler_debug: No SkillerDebugInterface given")
 
-   --printf("I shall write %s", what)
+   local cur_what = skdbg:graph_fsm()
 
-   if what == "ACTIVE" then
-      local primary_active = get_active_skills()
-      local needs_write = false
-      local written = false
-      if skdbg:graph_fsm() ~= "ACTIVE" then
- 	 skdbg:set_graph_fsm("ACTIVE")
-	 needs_write = true
-      end
-
-      if primary_active then
-	 local fsm = get_skill_fsm(primary_active)
-	 if needs_write then
-	    fsm:mark_changed()
-	 end
-	 written = write_fsm_graph(fsm, skdbg)
-      elseif skdbg:graph() ~= "" then
-	 skdbg:set_graph("")
-	 needs_write = true
-      end
-
-      if not written and needs_write then
-	 skdbg:write()
-      end
-   elseif what == "LIST" then
+   if what == "LIST" then
       write_skill_list(skdbg)
-   else
-      local s = get_skill_module(what)
-      if s then
-	 if s.fsm then
-	    if skdbg:graph_fsm() ~= what then
-	       s.fsm:mark_changed()
-	       skdbg:set_graph_fsm(what)
-	    end
-	    write_fsm_graph(s.fsm, skdbg)
-	 else
+   elseif graphing_enabled then
+      local sname = what
+      if what == "ACTIVE" then
+	 sname = get_active_skills()
+      end
+
+      local fsm = get_skill_fsm(sname)
+      if fsm then
+	 local params_changed = update_grapher_config(skdbg, graphdir, colored)
+
+	 if what ~= cur_what or params_changed then
+	    fsm:mark_changed()
+	    skdbg:set_graph_fsm(what)
+	 end
+
+	 write_fsm_graph(fsm, skdbg)
+      else
+	 if what ~= cur_what then
+	    print_warn("Could not write FSM graph, FSM for %s not found", what)
 	    skdbg:set_graph_fsm(what)
 	    skdbg:set_graph("")
 	    skdbg:write()
@@ -383,21 +405,30 @@ function skill_loop_end(skill_name, status)
    end
 end
 
--- Create a skill wrapper.
--- Skills are wrapped for the sandbox. If the sandbox executes a skill it is called a
--- "top" skill, meaning that this is the highest level of execution. The skill is wrapped
--- to monitor the skill execution.
--- @param name name of the skill to wrap
--- @param func real skill function to execute
--- @return function that can be executed to execute a top skill
-function create_skill_wrapper(skill_module)
+--- Create skill wrapper function.
+-- This wraps the skill's execute() function into an anonymous functions that
+-- does some house keeping and executes the skill. The function expects the module
+-- table as the first argument. It is suitable for the create_skill_wrapper()
+-- function for generating a functable.
+function create_skill_wrapper_func()
+   return function(skill, ...)
+	     skill_loop_begin(skill.name)
+	     rv = {skill.execute(...)}
+	     skill_loop_end(skill.name, rv[1])
+	     return unpack(rv)
+	  end
+end
+
+
+-- Create a skill wrapper functable.
+-- Skills are wrapped for the sandbox. They are put into a functable for easy
+-- execution, while maintaining access to all of the skills public variables and
+-- functions and preventing (accidental) modification of the skill module.
+-- @param skill_module module table of the skill
+-- 
+function create_skill_functable(skill_module)
    local t = {}
-   local mt = { __call  = function(skill, ...)
-			     skill_loop_begin(skill.name)
-			     rv = {skill.execute(...)}
-			     skill_loop_end(skill.name, rv[1])
-			     return unpack(rv)
-			  end,
+   local mt = { __call  = skill_module.wrapped_function,
 		__index = skill_module }
    setmetatable(t, mt)
    return t
@@ -411,7 +442,7 @@ end
 -- it's the fail_state it returns S_FAILED, otherwise S_RUNNING.
 function skill_fsm_execute_wrapper(fsm)
    return function (...)
-	     if not fsm.vars.set then
+	     if not fsm.vars.__set__ then
 		local t = ...
 		if type(t) == "table" then
 		   -- named arguments
@@ -426,7 +457,7 @@ function skill_fsm_execute_wrapper(fsm)
 		      end
 		   end
 		end
-		fsm.vars.set = true
+		fsm.vars.__set__ = true
 	     end
 
 	     fsm:loop()
@@ -447,6 +478,13 @@ function skill_fsm_reset_wrapper(fsm)
    return function ()
 	     fsm:reset()
 	  end
+end
+
+--- Simple tostring method for skill modules.
+-- @param m skill module
+-- @return name of skill
+function skill_module_tostring(m)
+   return m.name
 end
 
 --- Add skill to skill space.
@@ -489,7 +527,8 @@ function use_skill(module_name)
    printf("Trying to add skill %s", m.name)
 
    assert(get_skill_module(m.name) == nil, "A skill with the name " .. m.name .. " already exists")
-   m.wrapped_table = create_skill_wrapper(m)
+   m.wrapped_function = create_skill_wrapper_func(m)
+   --m.wrapped_table = create_skill_wrapper(m)
 
    if m.init then
       m.init()
@@ -511,7 +550,7 @@ function module_init(m)
    m.SkillHSM          = shsmmod.SkillHSM
    m.JumpState         = shsmmod.JumpState
    m.SkillJumpState    = shsmmod.SkillJumpState
-   m.SubSkillJumpState = shsmmod.SubSkillJumpState
+   m.SubFSMJumpState   = shsmmod.SubFSMJumpState
    m.WaitState         = wsmod.WaitState
 end
 
@@ -550,35 +589,11 @@ function skill_module(module_name)
    end
 
    if m.depends_interfaces then
-      assert(type(m.depends_interfaces) == "table", "Type of depends_interfaces not table")
-      for _,t in ipairs(m.depends_interfaces) do
-	 assert(type(t) == "table", "Non-table element in interface dependencies")
-	 assert(t.v, "Interface dependency does not have a variable name (v) field")
-	 assert(t.type, "Interface dependency does not have a type field")
-	 if t.id then
-	    local uid = t.type .. "::" .. t.id
-	    if interfaces.reading_by_uid[uid] then
-	       indextable[t.v] = interfaces.reading_by_uid[uid]
-	    elseif interfaces.writing_by_uid[uid] then
-	       indextable[t.v] = interfaces.writing_by_uid[uid]
-	    else
-	       error("No interface available with the UID " .. uid ..
-		     ", required by "..m.name)
-	    end
-	 else
-	    if interfaces.reading[t.v] then
-	       indextable[t.v] = interfaces.reading[t.v]
-	    elseif interfaces.writing[t.v] then
-	       indextable[t.v] = interfaces.writing[t.v]
-	    else
-	       error("No interface available with the variable name " .. t.v ..
-		     ", required by "..m.name)
-	    end
-	 end
-      end
+      depinit.init_interfaces(m.name, m.depends_interfaces, indextable)
    end
 
-   mt.__index = indextable
+   mt.__index    = indextable
+   --mt.__tostring = skill_module_tostring
 
    setmetatable(m, mt)
 end
