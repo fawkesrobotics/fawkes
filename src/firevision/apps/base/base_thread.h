@@ -70,8 +70,8 @@ class FvBaseThread
 					bool raw = false);
   virtual void      unregister_thread(fawkes::Thread *thread);
 
-  virtual void thread_started(fawkes::Thread *thread);
-  virtual void thread_init_failed(fawkes::Thread *thread);
+  virtual bool thread_started(fawkes::Thread *thread) throw();
+  virtual bool thread_init_failed(fawkes::Thread *thread) throw();
 
  private:
   void cond_recreate_barrier(unsigned int num_cyclic_threads);

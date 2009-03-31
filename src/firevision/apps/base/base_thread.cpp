@@ -327,8 +327,8 @@ FvBaseThread::unregister_thread(Thread *thread)
 }
 
 
-void
-FvBaseThread::thread_started(Thread *thread)
+bool
+FvBaseThread::thread_started(Thread *thread) throw()
 {
   aqts.lock();
   for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
@@ -339,15 +339,19 @@ FvBaseThread::thread_started(Thread *thread)
     }
   }
   aqts.unlock();
+
+  return false;
 }
 
 
-void
-FvBaseThread::thread_init_failed(Thread *thread)
+bool
+FvBaseThread::thread_init_failed(Thread *thread) throw()
 {
   aqts.lock();
   for (ait = aqts.begin(); ait != aqts.end(); ++ait) {
     ait->second->_vision_threads->remove_waiting_thread(thread);
   }
   aqts.unlock();
+
+  return false;
 }
