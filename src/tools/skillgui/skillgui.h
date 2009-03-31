@@ -34,10 +34,11 @@
 #  define GCONF_PREFIX "/apps/fawkes/skillgui"
 #endif
 
+#include <interfaces/SkillerInterface.h>
+#include <interfaces/SkillerDebugInterface.h>
+
 namespace fawkes {
   class BlackBoard;
-  class SkillerInterface;
-  class SkillerDebugInterface;
   class InterfaceDispatcher;
   class LogView;
   class Throbber;
@@ -58,6 +59,8 @@ class SkillGuiGtkWindow : public Gtk::Window
 
  private:
   void close_bb();
+  void send_graphdir_message(fawkes::SkillerDebugInterface *iface,
+			     fawkes::SkillerDebugInterface::GraphDirectionEnum gd);
 
   void on_connection_clicked();
   void on_connect();
@@ -75,6 +78,9 @@ class SkillGuiGtkWindow : public Gtk::Window
   void on_graphupd_clicked();
   void on_update_disabled();
   void on_recording_toggled();
+  void on_graphdir_clicked();
+  void on_graphdir_changed(fawkes::SkillerDebugInterface::GraphDirectionEnum gd);
+  void on_graphcolor_toggled();
 
  private:
   class SkillStringRecord : public Gtk::TreeModelColumnRecord
@@ -120,6 +126,14 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::ToolButton        *tb_zoomout;
   Gtk::ToolButton        *tb_zoomfit;
   Gtk::ToolButton        *tb_zoomreset;
+
+  Gtk::MenuToolButton    *tb_graphdir;
+  Gtk::ToggleToolButton  *tb_graphcolored;
+  Gtk::MenuItem          *mi_graphdir;
+  Gtk::MenuItem          *mi_bottom_top;
+  Gtk::MenuItem          *mi_top_bottom;
+  Gtk::MenuItem          *mi_left_right;
+  Gtk::MenuItem          *mi_right_left;
 
   Glib::RefPtr<Gtk::ListStore> __sks_list;
 

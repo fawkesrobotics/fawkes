@@ -31,8 +31,6 @@
 
 #include <utils/system/argparser.h>
 #include <blackboard/remote.h>
-#include <interfaces/SkillerInterface.h>
-#include <interfaces/SkillerDebugInterface.h>
 #include <netcomm/fawkes/client.h>
 
 #include <gui_utils/logview.h>
@@ -101,6 +99,13 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   refxml->get_widget("tb_zoomout", tb_zoomout);
   refxml->get_widget("tb_zoomfit", tb_zoomfit);
   refxml->get_widget("tb_zoomreset", tb_zoomreset);
+  refxml->get_widget("tb_graphdir", tb_graphdir);
+  refxml->get_widget("tb_graphcolored", tb_graphcolored);
+  refxml->get_widget("mi_graphdir_title", mi_graphdir);
+  refxml->get_widget("mi_top_bottom", mi_top_bottom);
+  refxml->get_widget("mi_bottom_top", mi_bottom_top);
+  refxml->get_widget("mi_left_right", mi_left_right);
+  refxml->get_widget("mi_right_left", mi_right_left);
 
   refxml->get_widget_derived("img_throbber", __throbber);
   refxml->get_widget_derived("trv_plugins",  __trv_plugins);
@@ -108,6 +113,24 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   Gtk::SeparatorToolItem *spacesep;
   refxml->get_widget("tb_spacesep", spacesep);
   spacesep->set_expand();
+
+  Gtk::Label *mi_graphdir_label = dynamic_cast<Gtk::Label *>(mi_graphdir->get_child());
+  if ( mi_graphdir_label ) {
+    mi_graphdir_label->set_markup("<b>Graph Direction</b>");
+  }
+  mi_graphdir->set_sensitive(false);
+
+  // This should be in the Glade file, but is not restored for some reason
+  tb_graphsave->set_homogeneous(false);
+  tb_graphopen->set_homogeneous(false);
+  tb_graphupd->set_homogeneous(false);
+  tb_graphrecord->set_homogeneous(false);
+  tb_zoomin->set_homogeneous(false);
+  tb_zoomout->set_homogeneous(false);
+  tb_zoomfit->set_homogeneous(false);
+  tb_zoomreset->set_homogeneous(false);
+  tb_graphdir->set_homogeneous(false);
+  tb_graphcolored->set_homogeneous(false);
 
   __sks_list = Gtk::ListStore::create(__sks_record);
   cbe_skillstring->set_model(__sks_list);
@@ -151,6 +174,12 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   tb_agent->signal_toggled().connect(sigc::bind(sigc::mem_fun(*cb_graphlist, &Gtk::ComboBoxText::set_sensitive),false));
   cb_graphlist->signal_changed().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_skill_changed));
   tb_graphupd->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_graphupd_clicked));
+  tb_graphdir->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_graphdir_clicked));
+  mi_top_bottom->signal_activate().connect(sigc::bind(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_graphdir_changed), SkillerDebugInterface::GD_TOP_BOTTOM));
+  mi_bottom_top->signal_activate().connect(sigc::bind(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_graphdir_changed), SkillerDebugInterface::GD_BOTTOM_TOP));
+  mi_left_right->signal_activate().connect(sigc::bind(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_graphdir_changed), SkillerDebugInterface::GD_LEFT_RIGHT));
+  mi_right_left->signal_activate().connect(sigc::bind(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_graphdir_changed), SkillerDebugInterface::GD_RIGHT_LEFT));
+  tb_graphcolored->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_graphcolor_toggled));
 #ifdef USE_PAPYRUS
   tb_graphsave->signal_clicked().connect(sigc::mem_fun(*pvp_graph, &SkillGuiGraphViewport::save));
   tb_zoomin->signal_clicked().connect(sigc::mem_fun(*pvp_graph, &SkillGuiGraphViewport::zoom_in));
@@ -200,11 +229,14 @@ SkillGuiGtkWindow::on_config_changed()
 
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   bool continuous = __gconf->get_bool(GCONF_PREFIX"/continuous_exec");
+  bool colored    = __gconf->get_bool(GCONF_PREFIX"/graph_colored");
 #else
   std::auto_ptr<Glib::Error> error;
   bool continuous = __gconf->get_bool(GCONF_PREFIX"/continuous_exec", error);
+  bool colored    = __gconf->get_bool(GCONF_PREFIX"/graph_colored", error);
 #endif
   tb_continuous->set_active(continuous);
+  tb_graphcolored->set_active(colored);
 #endif
 }
 
@@ -539,6 +571,17 @@ SkillGuiGtkWindow::on_skdbg_data_changed()
 	gda->set_graph(__skdbg_if->graph());
 #endif
       }
+
+      switch (__skdbg_if->graph_dir()) {
+      case SkillerDebugInterface::GD_TOP_BOTTOM:
+	tb_graphdir->set_stock_id(Gtk::Stock::GO_DOWN); break;
+      case SkillerDebugInterface::GD_BOTTOM_TOP:
+	tb_graphdir->set_stock_id(Gtk::Stock::GO_UP); break;
+      case SkillerDebugInterface::GD_LEFT_RIGHT:
+	tb_graphdir->set_stock_id(Gtk::Stock::GO_FORWARD); break;
+      case SkillerDebugInterface::GD_RIGHT_LEFT:
+	tb_graphdir->set_stock_id(Gtk::Stock::GO_BACK); break;
+      }
     } catch (Exception &e) {
       // ignored
     }
@@ -560,6 +603,17 @@ SkillGuiGtkWindow::on_agdbg_data_changed()
       gda->set_graph_fsm(__agdbg_if->graph_fsm());
       gda->set_graph(__agdbg_if->graph());
 #endif
+
+      switch (__agdbg_if->graph_dir()) {
+      case SkillerDebugInterface::GD_TOP_BOTTOM:
+	tb_graphdir->set_stock_id(Gtk::Stock::GO_DOWN); break;
+      case SkillerDebugInterface::GD_BOTTOM_TOP:
+	tb_graphdir->set_stock_id(Gtk::Stock::GO_UP); break;
+      case SkillerDebugInterface::GD_LEFT_RIGHT:
+	tb_graphdir->set_stock_id(Gtk::Stock::GO_FORWARD); break;
+      case SkillerDebugInterface::GD_RIGHT_LEFT:
+	tb_graphdir->set_stock_id(Gtk::Stock::GO_BACK); break;
+      }
     } catch (Exception &e) {
       // ignored
     }
@@ -588,6 +642,90 @@ SkillGuiGtkWindow::on_graphupd_clicked()
     tb_graphupd->set_stock_id(Gtk::Stock::MEDIA_PLAY);
   }
 #endif
+}
+
+
+void
+SkillGuiGtkWindow::on_graphdir_clicked()
+{
+  SkillerDebugInterface *iface = __skdbg_if;
+  if (tb_agent->get_active()) {
+    iface = __agdbg_if;
+  }
+
+  Glib::ustring stockid = tb_graphdir->get_stock_id();
+  if (stockid == Gtk::Stock::GO_DOWN.id) {
+    send_graphdir_message(iface, SkillerDebugInterface::GD_BOTTOM_TOP);
+  } else if (stockid == Gtk::Stock::GO_UP.id) {
+    send_graphdir_message(iface, SkillerDebugInterface::GD_LEFT_RIGHT);
+  } else if (stockid == Gtk::Stock::GO_FORWARD.id) {
+    send_graphdir_message(iface, SkillerDebugInterface::GD_RIGHT_LEFT);
+  } else if (stockid == Gtk::Stock::GO_BACK.id) {
+    send_graphdir_message(iface, SkillerDebugInterface::GD_TOP_BOTTOM);
+  }
+}
+
+void
+SkillGuiGtkWindow::send_graphdir_message(SkillerDebugInterface *iface,
+					 SkillerDebugInterface::GraphDirectionEnum gd)
+{
+  try {
+    if (iface) {
+      SkillerDebugInterface::SetGraphDirectionMessage *m;
+      m = new SkillerDebugInterface::SetGraphDirectionMessage(gd);
+      iface->msgq_enqueue(m);
+    } else {
+      throw Exception("Not connected to Fawkes.");
+    }
+  } catch (Exception &e) {
+    Gtk::MessageDialog md(*this,
+			  Glib::ustring("Setting graph direction failed: ") + e.what(),
+			  /* markup */ false,
+			  Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
+			  /* modal */ true);
+    md.set_title("Communication Failure");
+    md.run();
+  }
+}
+
+void
+SkillGuiGtkWindow::on_graphdir_changed(SkillerDebugInterface::GraphDirectionEnum gd)
+{
+  if (tb_agent->get_active()) {
+    send_graphdir_message(__agdbg_if, gd);
+  } else {
+    send_graphdir_message(__skdbg_if, gd);
+  }
+}
+
+
+void
+SkillGuiGtkWindow::on_graphcolor_toggled()
+{
+  __gconf->set(GCONF_PREFIX"/graph_colored", tb_graphcolored->get_active());
+
+  SkillerDebugInterface *iface = __skdbg_if;
+  if (tb_agent->get_active()) {
+    iface = __agdbg_if;
+  }
+
+  try {
+    if (iface) {
+      SkillerDebugInterface::SetGraphColoredMessage *m;
+      m = new SkillerDebugInterface::SetGraphColoredMessage(tb_graphcolored->get_active());
+      iface->msgq_enqueue(m);
+    } else {
+      throw Exception("Not connected to Fawkes.");
+    }
+  } catch (Exception &e) {
+    Gtk::MessageDialog md(*this,
+			  Glib::ustring("Setting graph color failed: ") + e.what(),
+			  /* markup */ false,
+			  Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
+			  /* modal */ true);
+    md.set_title("Communication Failure");
+    md.run();
+  }
 }
 
 

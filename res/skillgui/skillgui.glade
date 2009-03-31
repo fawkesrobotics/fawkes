@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Mar 22 16:50:38 2009 -->
+<!--Generated with glade3 3.4.5 on Sun Mar 29 19:10:44 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="wnd_skillgui">
     <property name="width_request">800</property>
@@ -158,12 +158,18 @@
                         <property name="visible">True</property>
                         <property name="stock_id">gtk-save</property>
                       </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkToolButton" id="tb_graphopen">
                         <property name="visible">True</property>
                         <property name="stock_id">gtk-open</property>
                       </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkSeparatorToolItem" id="toolbutton4">
@@ -178,12 +184,18 @@
                         <property name="visible">True</property>
                         <property name="stock_id">gtk-media-play</property>
                       </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkToggleToolButton" id="tb_graphrecord">
                         <property name="visible">True</property>
                         <property name="stock_id">gtk-media-record</property>
                       </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkSeparatorToolItem" id="toolbutton3">
@@ -195,23 +207,59 @@
                         <property name="visible">True</property>
                         <property name="stock_id">gtk-zoom-in</property>
                       </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkToolButton" id="tb_zoomout">
                         <property name="visible">True</property>
                         <property name="stock_id">gtk-zoom-out</property>
                       </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkToolButton" id="tb_zoomfit">
                         <property name="visible">True</property>
                         <property name="stock_id">gtk-zoom-fit</property>
                       </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkToolButton" id="tb_zoomreset">
                         <property name="visible">True</property>
                         <property name="stock_id">gtk-zoom-100</property>
+                      </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorToolItem" id="toolbutton5">
+                        <property name="visible">True</property>
+                      </widget>
+                      <packing>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkMenuToolButton" id="tb_graphdir">
+                        <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Graph Direction</property>
+                        <property name="label" translatable="yes">Graph Direction</property>
+                        <property name="stock_id">gtk-go-down</property>
+                        <property name="menu">menu_graphdir</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkToggleToolButton" id="tb_graphcolored">
+                        <property name="visible">True</property>
+                        <property name="stock_id">gtk-select-color</property>
+                        <property name="active">True</property>
                       </widget>
                     </child>
                   </widget>
@@ -289,183 +337,22 @@
             <property name="n_columns">2</property>
             <property name="row_spacing">4</property>
             <child>
-              <widget class="GtkFrame" id="frame1">
-                <property name="visible">True</property>
-                <property name="border_width">2</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">GTK_SHADOW_OUT</property>
-                <child>
-                  <widget class="GtkAlignment" id="alignment1">
-                    <property name="visible">True</property>
-                    <property name="top_padding">8</property>
-                    <property name="bottom_padding">4</property>
-                    <property name="left_padding">8</property>
-                    <property name="right_padding">4</property>
-                    <child>
-                      <widget class="GtkTable" id="table2">
-                        <property name="visible">True</property>
-                        <property name="n_rows">3</property>
-                        <property name="n_columns">6</property>
-                        <property name="column_spacing">2</property>
-                        <property name="row_spacing">2</property>
-                        <child>
-                          <widget class="GtkLabel" id="lab_continuous">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="label" translatable="yes">?</property>
-                            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
-                          </widget>
-                          <packing>
-                            <property name="left_attach">5</property>
-                            <property name="right_attach">6</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="label7">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Continuous:&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </widget>
-                          <packing>
-                            <property name="left_attach">4</property>
-                            <property name="right_attach">5</property>
-                            <property name="x_options">GTK_FILL</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="lab_alive">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="label" translatable="yes">?</property>
-                            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
-                          </widget>
-                          <packing>
-                            <property name="left_attach">3</property>
-                            <property name="right_attach">4</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="label5">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Alive:&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </widget>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="right_attach">3</property>
-                            <property name="x_options">GTK_FILL</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="lab_status">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="label" translatable="yes">?</property>
-                            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
-                          </widget>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="label3">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Status:&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </widget>
-                          <packing>
-                            <property name="x_options">GTK_FILL</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="lab_skillstring">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="selectable">True</property>
-                            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
-                          </widget>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">6</property>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="label2">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Skill:&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </widget>
-                          <packing>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
-                            <property name="x_options">GTK_FILL</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="lab_error">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
-                          </widget>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">6</property>
-                            <property name="top_attach">2</property>
-                            <property name="bottom_attach">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="label8">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Error:&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </widget>
-                          <packing>
-                            <property name="top_attach">2</property>
-                            <property name="bottom_attach">3</property>
-                            <property name="x_options">GTK_FILL</property>
-                          </packing>
-                        </child>
-                      </widget>
-                    </child>
-                  </widget>
-                </child>
-                <child>
-                  <widget class="GtkLabel" id="label1">
-                    <property name="visible">True</property>
-                    <property name="label" translatable="yes">&lt;b&gt;Skiller&lt;/b&gt;</property>
-                    <property name="use_markup">True</property>
-                  </widget>
-                  <packing>
-                    <property name="type">label_item</property>
-                  </packing>
-                </child>
-              </widget>
-            </child>
-            <child>
-              <widget class="GtkButton" id="but_stop">
+              <widget class="GtkButton" id="but_exec">
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-stop</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
+                <property name="label" translatable="yes">gtk-execute</property>
                 <property name="use_stock">True</property>
-                <property name="image_position">GTK_POS_TOP</property>
                 <property name="response_id">0</property>
               </widget>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
                 <property name="x_options">GTK_FILL</property>
-                <property name="y_padding">2</property>
               </packing>
             </child>
             <child>
@@ -488,29 +375,249 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkButton" id="but_exec">
+              <widget class="GtkButton" id="but_stop">
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
-                <property name="can_default">True</property>
-                <property name="has_default">True</property>
-                <property name="label" translatable="yes">gtk-execute</property>
+                <property name="receives_default">True</property>
+                <property name="label" translatable="yes">gtk-stop</property>
                 <property name="use_stock">True</property>
+                <property name="image_position">GTK_POS_TOP</property>
                 <property name="response_id">0</property>
               </widget>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
                 <property name="x_options">GTK_FILL</property>
+                <property name="y_padding">2</property>
               </packing>
+            </child>
+            <child>
+              <widget class="GtkFrame" id="frame1">
+                <property name="visible">True</property>
+                <property name="border_width">2</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">GTK_SHADOW_OUT</property>
+                <child>
+                  <widget class="GtkAlignment" id="alignment1">
+                    <property name="visible">True</property>
+                    <property name="top_padding">8</property>
+                    <property name="bottom_padding">4</property>
+                    <property name="left_padding">8</property>
+                    <property name="right_padding">4</property>
+                    <child>
+                      <widget class="GtkTable" id="table2">
+                        <property name="visible">True</property>
+                        <property name="n_rows">3</property>
+                        <property name="n_columns">6</property>
+                        <property name="column_spacing">2</property>
+                        <property name="row_spacing">2</property>
+                        <child>
+                          <widget class="GtkLabel" id="label8">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Error:&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </widget>
+                          <packing>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                            <property name="x_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="lab_error">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">6</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label2">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Skill:&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </widget>
+                          <packing>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="x_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="lab_skillstring">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="selectable">True</property>
+                            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">6</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label3">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Status:&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </widget>
+                          <packing>
+                            <property name="x_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="lab_status">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">?</property>
+                            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label5">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Alive:&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
+                            <property name="x_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="lab_alive">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">?</property>
+                            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">3</property>
+                            <property name="right_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label7">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Continuous:&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">4</property>
+                            <property name="right_attach">5</property>
+                            <property name="x_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="lab_continuous">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">?</property>
+                            <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">5</property>
+                            <property name="right_attach">6</property>
+                          </packing>
+                        </child>
+                      </widget>
+                    </child>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="label1">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Skiller&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </widget>
+                  <packing>
+                    <property name="type">label_item</property>
+                  </packing>
+                </child>
+              </widget>
             </child>
           </widget>
           <packing>
             <property name="expand">False</property>
             <property name="position">2</property>
           </packing>
+        </child>
+      </widget>
+    </child>
+  </widget>
+  <widget class="GtkMenu" id="menu_graphdir">
+    <property name="visible">True</property>
+    <property name="active">0</property>
+    <child>
+      <widget class="GtkMenuItem" id="mi_graphdir_title">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Graph Direction</property>
+        <property name="use_underline">True</property>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkImageMenuItem" id="mi_top_bottom">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Top to Bottom</property>
+        <property name="use_underline">True</property>
+        <child internal-child="image">
+          <widget class="GtkImage" id="mii_top_bottom">
+            <property name="stock">gtk-go-down</property>
+          </widget>
+        </child>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkImageMenuItem" id="mi_bottom_top">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Bottom to Top</property>
+        <property name="use_underline">True</property>
+        <child internal-child="image">
+          <widget class="GtkImage" id="mii_bottom_top">
+            <property name="stock">gtk-go-up</property>
+          </widget>
+        </child>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkImageMenuItem" id="mi_left_right">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Left to Right</property>
+        <property name="use_underline">True</property>
+        <child internal-child="image">
+          <widget class="GtkImage" id="mii_left_right">
+            <property name="stock">gtk-go-forward</property>
+          </widget>
+        </child>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkImageMenuItem" id="mi_right_left">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Right to Left</property>
+        <property name="use_underline">True</property>
+        <child internal-child="image">
+          <widget class="GtkImage" id="mii_right_left">
+            <property name="stock">gtk-go-back</property>
+          </widget>
         </child>
       </widget>
     </child>
