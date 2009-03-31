@@ -22,33 +22,33 @@
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
 -- store reference to global environment
-local _G = _G;
+local _G = _G
 -- these functions we need to register all the others
-local pairs = pairs;
-local type  = type;
+local pairs = pairs
+local type  = type
 
-module("fawkes.logprint");
+module(...)
 
 -- we want all functions here, basically what register_global_funcs does for others
 for k,v in pairs(_G) do
-   _M[k] = v;
+   _M[k] = v
 end
 
-require("fawkes.stringext");
+require("fawkes.stringext")
 
-local logger = nil;
+local logger = nil
 
 --- Set logger.
 -- @param logger_ logger to use
 function init(logger_)
-   logger = logger_;
+   logger = logger_
 end
 
 --- Write to log with log level debug.
 -- @param format format of the string
 -- @param ... Anything, will be converted to string
 function print_debug(format, ...)
-   logger:log_debug(string.format(format, ...));
+   logger:log_debug(string.format(format, ...))
 end
 
 
@@ -56,7 +56,7 @@ end
 -- @param format format of the string
 -- @param ... Anything, will be converted to string
 function print_info(format, ...)
-   logger:log_info(string.format(format, ...));
+   logger:log_info(string.format(format, ...))
 end
 
 
@@ -64,7 +64,7 @@ end
 -- @param format format of the string
 -- @param ... Anything, will be converted to string
 function print_warn(format, ...)
-   logger:log_warn(string.format(format, ...));
+   logger:log_warn(string.format(format, ...))
 end
 
 
@@ -72,7 +72,14 @@ end
 -- @param format format of the string
 -- @param ... Anything, will be converted to string
 function print_error(format, ...)
-   logger:log_error(string.format(format, ...));
+   logger:log_error(string.format(format, ...))
+end
+
+
+--- Write unformatted to log with log level info.
+-- @param ... Anything, will be converted to string
+function print_info_unformatted(...)
+   logger:log_info(string.join(", ", {...}))
 end
 
 
@@ -84,13 +91,27 @@ function printf(format, ...)
 end
 
 
+local function fallback_printf(format, ...)
+   print(string.format(format, ...))
+end
+
+
 --- Register print functions for module.
 -- @param m module
 function register_print_funcs(m)
-   m.print_debug = print_debug;
-   m.print_info  = print_info;
-   m.print_warn  = print_warn;
-   m.print_error = print_error;
-   m.print       = print_info;
-   m.printf      = printf;
+   if logger then
+      m.print_debug = print_debug
+      m.print_info  = print_info
+      m.print_warn  = print_warn
+      m.print_error = print_error
+      m.print       = print_info_unformatted
+      m.printf      = printf
+   else
+      m.print_debug = fallback_printf
+      m.print_info  = fallback_printf
+      m.print_warn  = fallback_printf
+      m.print_error = fallback_printf
+      m.print       = print
+      m.printf      = fallback_printf
+   end
 end
