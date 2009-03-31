@@ -22,18 +22,18 @@
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
 -- store reference to global environment
-local _G = _G;
+local _G = _G
 -- these functions we need to register all the others
-local pairs   = pairs;
-local type    = type;
-local require = require;
+local pairs   = pairs
+local type    = type
+local require = require
 
-module("fawkes.modinit");
-require("fawkes.logprint");
+module("fawkes.modinit")
+require("fawkes.logprint")
 
 -- we want all functions here, basically what register_global_funcs does for others
 for k,v in pairs(_G) do
-   _M[k] = v;
+   _M[k] = v
 end
 
 --- Registers global functions for module.
@@ -41,7 +41,7 @@ end
 function register_global_funcs(m)
    for k,v in pairs(_G) do
       if type(v) == "function" then
-	 m[k] = v;
+	 m[k] = v
       end
    end
 end
@@ -51,7 +51,7 @@ end
 -- @param m module that contains a skill
 function register_all(m)
    for k,v in pairs(_G) do
-      m[k] = v;
+      m[k] = v
    end
    fawkes.logprint.register_print_funcs(m)
 end
@@ -62,7 +62,7 @@ end
 function module_init(m)
    for k,v in pairs(_G) do
       if type(v) == "function" or type(v) == "table" then
-	 m[k] = v;
+	 m[k] = v
       end
    end
    fawkes.logprint.register_print_funcs(m);
