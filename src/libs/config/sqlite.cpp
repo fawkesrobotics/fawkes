@@ -156,6 +156,9 @@ SQLiteConfiguration::SQLiteConfiguration(const char *conf_path)
   this->conf_path = conf_path;
   opened = false;
   mutex = new Mutex();
+
+  __default_file = NULL;
+  __default_dump = NULL;
 }
 
 
@@ -424,7 +427,7 @@ SQLiteConfiguration::merge_default(const char *default_file,
  * given tag.
  * @param name name of the host-based database. This should be a name of the form
  * hostname.db, where hostname is the unqualified part of the hostname.
- * @param defaults_name name of the default database. Should be defaults.db
+ * @param defaults_name name of the default database. Should be default.db
  * @param tag optional tag to restore
  */
 void
@@ -436,9 +439,6 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
 
   mutex->lock();
 
-  __default_file = strdup("default.db");
-  __default_dump = strdup("default.sql");
-
   if ( name ) {
     __host_file = strdup(name);
   } else {
@@ -447,12 +447,16 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
       __host_file = strdup(hostinfo.short_name());
     }
   }
+  free(__default_file);
+  free(__default_dump);
   if (defaults_name) {
     __default_file = strdup(defaults_name);
-    free(__default_dump);
     __default_dump = (char *)malloc(strlen(__default_file) + 5);
     strcpy(__default_dump, __default_file);
     strcat(__default_dump, ".sql");
+  } else {
+    __default_file = strdup("default.db");
+    __default_dump = strdup("default.sql");
   }
 
   if ( conf_path == NULL ) {
