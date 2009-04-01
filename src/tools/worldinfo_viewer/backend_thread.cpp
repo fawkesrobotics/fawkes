@@ -55,8 +55,16 @@ WorldInfoViewerBackendThread::WorldInfoViewerBackendThread( WorldInfoDataContain
   m_key  = key;
   m_iv   = iv;
 
-  m_transceiver = new WorldInfoTransceiver( m_addr.c_str(), m_port, 
-					    m_key.c_str(), m_iv.c_str() );
+  m_avahi = new AvahiThread();
+  m_avahi->start();
+
+  m_resolver = new NetworkNameResolver( m_avahi );
+
+  m_transceiver = new WorldInfoTransceiver( m_addr.c_str(),
+					    m_port, 
+					    m_key.c_str(),
+					    m_iv.c_str(),
+					    m_resolver );
   m_transceiver->add_handler(this);
 }
 
@@ -64,6 +72,11 @@ WorldInfoViewerBackendThread::WorldInfoViewerBackendThread( WorldInfoDataContain
 WorldInfoViewerBackendThread::~WorldInfoViewerBackendThread()
 {
   delete m_transceiver;
+  delete m_resolver;
+
+  m_avahi->cancel();
+  m_avahi->join();
+  delete m_avahi;
 }
 
 /** Access the dispatcher that is emitted whenever new data has

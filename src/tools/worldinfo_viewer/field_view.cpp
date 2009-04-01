@@ -199,7 +199,7 @@ FieldView::on_expose_event(GdkEventExpose* event)
       if ( m_data_container->get_robot_pose( host, pose ) )
       {
 	if ( show_pose )
-	{ draw_robot( context, pose.x(), pose.y(), pose.yaw() ); }
+	{ draw_robot( context, pose.x(), pose.y(), pose.yaw(), host ); }
 	
 	if ( m_data_container->get_ball_pos_global( host, ball_pos ) &&
 	     show_ball )
@@ -303,7 +303,11 @@ FieldView::draw_field_msl(Cairo::RefPtr<Cairo::Context> context)
 }
 
 void
-FieldView::draw_robot(Cairo::RefPtr<Cairo::Context> context, float x, float y, float ori)
+FieldView::draw_robot( Cairo::RefPtr<Cairo::Context> context,
+		       float x,
+		       float y,
+		       float ori,
+		       Glib::ustring name )
 {
   context->save();
   context->set_source_rgb(0.2, 0.2, 0.2);
@@ -312,6 +316,33 @@ FieldView::draw_robot(Cairo::RefPtr<Cairo::Context> context, float x, float y, f
   context->arc(x, y, 0.3, ori, 2*M_PI + ori);
   context->stroke();
   context->restore();
+
+  context->save();
+  context->select_font_face( "Sans",
+			     Cairo::FONT_SLANT_NORMAL,
+			     Cairo::FONT_WEIGHT_NORMAL );
+  context->set_font_size( 4 );
+  context->scale(0.1, -0.1);
+  
+  Cairo::TextExtents extents;
+  context->get_text_extents( name.c_str(), extents );
+
+  context->move_to(  10 * x - extents.width/2.0  - extents.x_bearing,
+		    -10 * y - extents.height/2.0 - extents.y_bearing + 8 );
+  context->show_text( name.c_str() );
+
+  char* pos;
+  asprintf( &pos, "%.2f, %.2f [%.2f]", x, y, ori );
+  context->get_text_extents( pos, extents );
+
+  context->move_to(  10 * x -  extents.width/2.0  - extents.x_bearing,
+		    -10 * y - extents.height/2.0 - extents.y_bearing + 12 );
+  context->show_text( pos );
+
+  context->stroke();
+  context->restore();
+
+  free( pos );
 }
 
 void

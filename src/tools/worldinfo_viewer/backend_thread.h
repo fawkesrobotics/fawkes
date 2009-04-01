@@ -26,6 +26,8 @@
 #define __TOOL_WORLDINFO_VIEWER_BACKEND_THREAD_H_
 
 #include <netcomm/worldinfo/handler.h>
+#include <netcomm/utils/resolver.h>
+#include <netcomm/dns-sd/avahi_thread.h>
 #include <core/threading/thread.h>
 
 #include <gtkmm.h>
@@ -95,6 +97,9 @@ class WorldInfoViewerBackendThread
   unsigned short m_port;
   std::string    m_key;
   std::string    m_iv;
+
+  fawkes::NetworkNameResolver* m_resolver;
+  fawkes::AvahiThread*         m_avahi;
 
 };
 

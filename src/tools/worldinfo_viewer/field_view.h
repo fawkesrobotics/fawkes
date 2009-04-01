@@ -54,7 +54,8 @@ class FieldView : public Gtk::DrawingArea
  private:
   void draw_field_msl( Cairo::RefPtr<Cairo::Context> context );
   void draw_robot( Cairo::RefPtr<Cairo::Context> context, 
-		   float x, float y, float ori );
+		   float x, float y, float ori,
+		   Glib::ustring name );
   void draw_obstacle( Cairo::RefPtr<Cairo::Context> context, 
 		      float x, float y, float extend );
   void draw_ball( Cairo::RefPtr<Cairo::Context> context, 

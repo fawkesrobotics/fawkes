@@ -31,6 +31,7 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 
 using namespace std;
 using namespace fawkes;
