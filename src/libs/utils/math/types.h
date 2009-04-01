@@ -26,6 +26,10 @@
 #ifndef __UTILS_MATH_TYPES_H_
 #define __UTILS_MATH_TYPES_H_
 
+#ifndef M_TWO_PI
+#define M_TWO_PI 6.28318530717959
+#endif
+
 namespace fawkes {
 
 /** Point with cartesian coordinates as unsigned integers. */
@@ -70,7 +74,7 @@ typedef struct field_line_struct{
   cart_coord_2d_t start;   /**< start of the line [m] */
   cart_coord_2d_t end;     /**< end of the line [m] */
 
-  /** 
+  /**
    * Constructor
    * @param start of the line
    * @param end of the line
@@ -81,7 +85,7 @@ typedef struct field_line_struct{
     this->end   = end;
   }
 
-  /** 
+  /**
    * Constructor
    * @param start_x of the line
    * @param start_y of the line
@@ -97,6 +101,28 @@ typedef struct field_line_struct{
   }
 } field_line_t;
 
+/** Defines an arc (or circle) */
+typedef struct arc_struct {
+  /** Constructor.
+   * @param radius The radius of the arc or circle
+   * @param center_x The x-coordinate of the center of the arc or circle
+   * @param center_y The y-coordinate of the center of the arc or circle
+   * @param start_phi The start angle of the arc
+   * @param end_phi The end angle of the arc
+   */
+  arc_struct(float radius, float center_x, float center_y, float start_phi = 0, float end_phi = M_TWO_PI) {
+    this->radius    = radius;
+    this->center.x  = center_x;
+    this->center.y  = center_y;
+    this->start_phi = start_phi;
+    this->end_phi   = end_phi;
+  }
+
+  float radius;           /**< The radius of the arc or circle */
+  cart_coord_2d_t center; /**< The center of the arc or circle */
+  float start_phi;        /**< The start angle of the arc */
+  float end_phi;          /**< The end angle of the arc */
+} arc_t;
 
 } // end namespace fawkes
 

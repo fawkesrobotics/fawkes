@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  plugin_gui.h - Plugin Tool Gui
+ *  yuv_viewer.h - YUV viewer gui
  *
- *  Created: Thu Nov 09 20:15:27 2007
- *  Copyright  2007  Daniel Beck
- *             2008  Tim Niemueller [www.niemueller.de]
+ *  Created:  Sat Mar 22 16:34:02 2009
+ *  Copyright 2009 Christof Rath <c.rath@student.tugraz.at>
  *
  *  $Id$
  *

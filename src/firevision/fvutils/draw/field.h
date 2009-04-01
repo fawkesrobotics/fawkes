@@ -1,7 +1,7 @@
 /***************************************************************************
  *  field.h - Encapsulates a soccer field
  *
- *  Created:  23.09.2008
+ *  Created:  Tue Sep 23 12:00:00 2008
  *  Copyright 2008 Christof Rath <christof.rath@gmail.com>
  *
  *  $Id$
@@ -26,69 +26,29 @@
 
 #include "field_lines.h"
 
-#include <utils/math/types.h>
-#include <fvutils/color/yuv.h>
-
-#include <list>
 #include <string>
+#include <list>
 
-class SharedMemoryImageBuffer;
-
-typedef std::list<fawkes::cart_coord_2d_t> fld_line_points;
+typedef std::list<fawkes::cart_coord_2d_t> fld_line_points_t;
 
 class Field
 {
 public:
-  virtual ~Field();
+  ~Field();
 
-  FieldLines* get_lines() const;
+  const FieldLines& get_lines() const { return *__lines; }
   float get_field_length() const;
   float get_field_width() const;
 
-  void set_head_yaw(float head_yaw);
-  void set_own_pos(fawkes::field_pos_t own_position);
-  void set_own_pos_est(fawkes::field_pos_t own_position_estimate);
-  void clear_own_pos();
-
-  virtual void set_line_points(const fld_line_points *points);
-  virtual void set_line_points_est(const fld_line_points *points_est);
-
-  void set_color_background(YUV_t color);
-  void set_color_field(YUV_t color);
-  void set_color_lines(YUV_t color);
-  void set_color_line_points(YUV_t color);
-  void set_color_line_points_est(YUV_t color);
-  void set_color_own_pos(YUV_t color);
-  void set_color_own_pos_est(YUV_t color);
-
-  virtual void draw_field(SharedMemoryImageBuffer *target, bool draw_background = true, bool draw_landscape = true) const;
-
-  virtual void print(bool in_mm) const;
-
-  virtual float get_scale(unsigned int img_width, unsigned int img_height, bool draw_landscape = true) const;
+  void print(bool in_mm) const;
 
   static Field* field_for_name(std::string field_name, float field_length, float field_width);
 
-protected:
-  Field(FieldLines *lines, bool destroy_on_delete = true);
-  virtual void draw_line_points(SharedMemoryImageBuffer *target, bool draw_landscape = true, float scale = 0) const;
+private:
+  Field(FieldLines *lines, bool manage_lines_memory = true);
 
-private: //Members
-  FieldLines           *__lines;
-  fawkes::field_pos_t   __own_position, __own_pos_est;
-  float                 __head_yaw;
-
-  bool                  __destroy_on_delete;
-
-  fld_line_points       __points, __points_est;
-
-  YUV_t __c_background;
-  YUV_t __c_field;
-  YUV_t __c_lines;
-  YUV_t __c_line_points;
-  YUV_t __c_line_points_est;
-  YUV_t __c_own_pos;
-  YUV_t __c_own_pos_est;
+  FieldLines  *__lines;
+  bool         __manage_lines_memory;
 };
 
 #endif /* __FIREVISION_APPS_NAO_LOC_FIELD__ */

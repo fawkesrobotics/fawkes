@@ -29,8 +29,8 @@
 #include <stdint.h>
 #include <arpa/inet.h>
 
-#define __ntoh64(x) (((uint64_t)(ntohl((uint32_t)((x << 32) >> 32))) << 32) | \
-		       (uint32_t)ntohl(((uint32_t)(x >> 32))))
+#define __ntoh64(x) (((uint64_t)(ntohl((uint32_t)(((uint64_t)x << 32) >> 32))) << 32) | \
+		       (uint32_t)ntohl(((uint32_t)((uint64_t)x >> 32))))
 
 #define __hton64(x) ntohll(x)
 

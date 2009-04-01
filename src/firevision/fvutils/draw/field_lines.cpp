@@ -1,7 +1,7 @@
 /***************************************************************************
  *  field_lines.cpp - Container for field lines
  *
- *  Created:  22.09.2008
+ *  Created:  Mon Sep 22 12:00:00 2008
  *  Copyright 2008 Christof Rath <christof.rath@gmail.com>
  *
  *  $Id$
@@ -32,13 +32,47 @@ using fawkes::field_line_t;
 using std::min;
 using std::max;
 
-/** @class FieldLines field_lines.h <firevision/apps/nao_loc/field_lines.cpp/field_lines.h>
+/** @class FieldLines field_lines.h <nao_utils/field_lines.h>
  * This class acts as a container for lines on a soccer field.
  *
  * @fn void FieldLines::init()
  * Initializes the field (creates all field lines)
  *
+ * @fn float FieldLines::get_field_length() const
+ * Field length getter
+ * @return The length of the soccer field
+ *
+ * @fn float FieldLines::get_field_width() const
+ * Field width getter
+ * @return The width of the soccer field
+ *
+ * @fn cart_coord_2d_t FieldLines::get_field_offsets() const
+ * Offset getter.
+ * The field's offset (x,y) is usually zero as the soccer field is symetrically. But in some cases
+ * only a part of the field is used and then we need the offset to place the field at the center of
+ * a debug image.
+ * @return The offest of the field's center.
+ *
+ * @fn const field_circles_t& FieldLines::get_circles() const
+ * Returns a reference to a std::list of arcs and/or circles on the field
+ *
  * @author Christof Rath
+ */
+
+/** @var float FieldLines::__line_width
+ * The width of the field lines
+ */
+/** @var float FieldLines::__field_length
+ * The total length of the field (actually of the field lines)
+ */
+/** @var float FieldLines::__field_width
+ * The total width of the field (actually of the field lines)
+ */
+/** @var fawkes::cart_coord_2d_t FieldLines::__field_offsets
+ * The center offset (used to draw unsymmetrically fields - usually zero)
+ */
+/** @var field_circles_t FieldLines::__field_circles
+ * A std::list of arcs and/or circles on the field
  */
 
 /**
@@ -64,89 +98,13 @@ FieldLines::~FieldLines()
 }
 
 /**
- * Field length getter
- * @return The length of the soccer field
- */
-float
-FieldLines::get_field_length()
-{
-  return __field_length;
-}
-
-/**
- * Field width getter
- * @return The width of the soccer field
- */
-float
-FieldLines::get_field_width()
-{
-  return __field_width;
-}
-
-/**
  * Line width getter
  * @return The width of a single field line
  */
 float
-FieldLines::get_line_width()
+FieldLines::get_line_width() const
 {
   return __line_width;
-}
-
-/**
- * Offset getter.
- * The field's offset (x,y) is usually zero as the soccer field is symetrically. But in some cases
- * only a part of the field is used and then we need the offset to place the field at the center of
- * a debug image.
- * @return The offest of the field's center.
- */
-cart_coord_2d_t
-FieldLines::get_field_offsets()
-{
-  if (__field_offsets.x == 12345) throw fawkes::IllegalArgumentException("Field offsets not calculated! Call FieldLines::calc_offsets() at the end of init()");
-
-  return __field_offsets;
-}
-
-/**
- * Adds the piecewise approximation of a circle.
- * @param r radius of the circle
- * @param pieces number of pieces
- * @param center_x center x of the circle
- * @param center_y center y of the circle
- * @param theta_start used if only a part of a circle should be drawn
- * @param theta_end used if only a part of a circle should be drawn
- */
-void
-FieldLines::add_circle(float r, unsigned int pieces, float center_x, float center_y, float theta_start, float theta_end)
-{
-  if (!theta_end) theta_end = 2 * M_PI;
-
-  float theta_diff = theta_end - theta_start;
-  float theta_piece = theta_diff / pieces;
-
-  cart_coord_2d_t initial = { 12345, 12345 };
-  cart_coord_2d_t start   = { 0, 0 };
-  cart_coord_2d_t end     = { 0, 0 };
-
-  unsigned int i = 0;
-  for (float t = theta_start; i < pieces; t += theta_piece, ++i) {
-    if (initial.x == 12345) {
-      initial.x = r * cosf(t) + center_x;
-      initial.y = r * sinf(t) + center_y;
-
-      start = initial;
-      continue;
-    }
-
-    end.x = r * cosf(t) + center_x;
-    end.y = r * sinf(t) + center_y;
-
-    push_back(field_line_t(start, end));
-    start = end;
-  }
-
-  push_back(field_line_t(start, initial));
 }
 
 /**
@@ -176,43 +134,6 @@ FieldLines::calc_offsets()
 
   __field_offsets.x = -(mins.x + maxs.x) / 2.f;
   __field_offsets.y = -(mins.y + maxs.y) / 2.f;
-}
-
-/**
- * Draws the field lines to a SharedMemoryImageBuffer
- *
- * @param target the SharedMemoryImageBuffer
- * @param color of the lines
- * @param draw_landscape if true (default) the field is supposed to be landscape
- * @param scale the conversation factor between [m] and [px] (if 0 this value gets calculated)
- */
-void
-FieldLines::draw_lines(SharedMemoryImageBuffer *target, YUV_t color, bool draw_landscape, float scale)
-{
-  if (!scale) {
-    if (draw_landscape) scale = std::min(target->width() / __field_length, target->height() / __field_width);
-    else scale = std::min(target->width() / __field_width, target->height() / __field_length);
-  }
-
-  cart_coord_2d_t f_offs = get_field_offsets();
-  int f_off_x = static_cast<int>(f_offs.x * scale);
-  int f_off_y = static_cast<int>(f_offs.y * scale);
-
-  unsigned int off_x = std::max(0, static_cast<int>(target->width() / 2) + f_off_x);
-  unsigned int off_y = std::max(0, static_cast<int>(target->height() / 2) + f_off_y);
-
-  Drawer d;
-  d.set_buffer(target->buffer(), target->width(), target->height());
-  d.set_color(color);
-
-  for (FieldLines::iterator it = begin(); it != end(); ++it) {
-    unsigned int sx = static_cast<unsigned int>((draw_landscape ? (*it).start.x : (*it).start.y) * scale);
-    unsigned int sy = static_cast<unsigned int>((draw_landscape ? (*it).start.y : (*it).start.x) * scale);
-    unsigned int ex = static_cast<unsigned int>((draw_landscape ? (*it).end.x : (*it).end.y) * scale);
-    unsigned int ey = static_cast<unsigned int>((draw_landscape ? (*it).end.y : (*it).end.x) * scale);
-
-    d.draw_line(off_x + sx, off_y + sy, off_x + ex, off_y + ey);
-  }
 }
 
 
@@ -264,7 +185,7 @@ FieldLines6x4::init()
   push_back(field_line_t(3.f, -2.f, -3.f, -2.f));
 
   //center circle (approximated by 12 lines from )
-  add_circle(0.6f, 12);
+  __field_circles.push_back(fawkes::arc_t(0.6f, 0.f, 0.f));
 
   //own goal line (corner to corner)
   push_back(field_line_t(-3.f, 2.f, -3.f, -2.f));
@@ -326,7 +247,7 @@ FieldLinesCityTower::init()
   push_back(field_line_t(4.97f, -2.455f, -1.44f, -2.455f));
 
   //center circle (approximated by 12 lines from )
-  add_circle(1.1, 12);
+  __field_circles.push_back(fawkes::arc_t(1.1f, 0.f, 0.f));
 
 /* Not Available...
   //own goal line (corner to corner)
@@ -392,7 +313,7 @@ FieldLinesCityTowerSeminar::init()
   push_back(field_line_t(2.725f, -1.825f, -2.725f, -1.825f));
 
   //center circle (approximated by 12 lines from )
-  add_circle(0.57, 12);
+  __field_circles.push_back(fawkes::arc_t(0.57f, 0.f, 0.f));
 
 
   //own goal line (corner to corner)

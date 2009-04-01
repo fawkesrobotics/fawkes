@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  loc_viewer_gui.cpp -  Localization Viewer Gui
+ *  yuv_viewer.cpp - YUV viewer gui
  *
- *  Created: Fri Nov 21 14:16:23 2008
- *  Copyright  2008  Christof Rath <c.rath@student.tugraz.at>
+ *  Created:  Sat Mar 22 16:34:02 2009
+ *  Copyright 2009 Christof Rath <c.rath@student.tugraz.at>
  *
  *  $Id$
  *
@@ -36,7 +36,7 @@
 using namespace fawkes;
 
 /** @class YuvViewerGtkWindow "yuv_viewer_gui.h"
- * YUV color space visualization.
+ * Tool to show the YUV color space
  *
  * @author Christof Rath
  */
@@ -88,6 +88,10 @@ YuvViewerGtkWindow::~YuvViewerGtkWindow()
 {
 }
 
+/** Signal hander that gets called after a click on the YUV pane
+ * @param event provides the x/y-coordinate
+ * @return true
+ */
 bool
 YuvViewerGtkWindow::on_click_on_yuv(GdkEventButton *event)
 {
@@ -97,6 +101,10 @@ YuvViewerGtkWindow::on_click_on_yuv(GdkEventButton *event)
   return on_mouse_over_yuv(&mot);
 }
 
+/** Signal hander that gets called during a movement on the YUV pane (if the left button is pressed)
+ * @param event provides the x/y-coordinate
+ * @return true
+ */
 bool
 YuvViewerGtkWindow::on_mouse_over_yuv(GdkEventMotion *event)
 {
@@ -112,6 +120,7 @@ YuvViewerGtkWindow::on_mouse_over_yuv(GdkEventMotion *event)
   return true;
 }
 
+/** Signal handler called when the Y value changes (HSlider) */
 void
 YuvViewerGtkWindow::on_y_value_changed()
 {
@@ -137,6 +146,7 @@ YuvViewerGtkWindow::on_y_value_changed()
   __yuv_widget->show(YUV422_PLANAR, __yuv_buffer);
   __cur_widget->show(YUV422_PLANAR, __cur_buffer);
 }
+
 
 void
 YuvViewerGtkWindow::on_y_res_changed()
@@ -192,6 +202,7 @@ YuvViewerGtkWindow::convert_float2str(float f, unsigned int width)
 #endif
 }
 
+/** Calculates the segmented window */
 void
 YuvViewerGtkWindow::calc_seg()
 {

@@ -25,12 +25,12 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-LIBS_yuv_viewer = fawkescore fvutils fvwidgets
-OBJS_yuv_viewer = $(patsubst %.cpp,%.o,$(patsubst cox/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
-OBJS_all += $(OBJS_yuv_viewer)
+LIBS_fvyuv_viewer = fawkescore fvutils fvwidgets
+OBJS_fvyuv_viewer = $(patsubst %.cpp,%.o,$(patsubst cox/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+OBJS_all += $(OBJS_fvyuv_viewer)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)
-  BINS_gui += $(BINDIR)/yuv_viewer
+  BINS_gui += $(BINDIR)/fvyuv_viewer
 else
   WARN_TARGETS += warning_guilibs
 endif
@@ -40,7 +40,7 @@ gui: $(WARN_TARGETS)
 
 .PHONY: $(WARN_TARGETS)
 warning_guilibs:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building yuv_viewer$(TNORMAL) $(GUI_ERROR)";
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvyuv_viewer$(TNORMAL) $(GUI_ERROR)";
 endif
 
 include $(BASEDIR)/etc/buildsys/base.mk

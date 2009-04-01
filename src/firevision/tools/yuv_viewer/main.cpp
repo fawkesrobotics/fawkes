@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  main.cpp - Plugin Tool Gui
+ *  main.cpp - YUV viewer gui
  *
- *  Created: Thu Nov 09 20:13:45 2007
- *  Copyright  2007  Daniel Beck
+ *  Created:  Sat Mar 22 16:34:02 2009
+ *  Copyright 2009 Christof Rath <c.rath@student.tugraz.at>
  *
  *  $Id$
  *

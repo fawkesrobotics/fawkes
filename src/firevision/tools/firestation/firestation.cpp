@@ -1115,7 +1115,7 @@ Firestation::ct_get_fg_object()
                         return H_GOAL_BLUE;
 
                 case 7: //Background
-                        return H_BACKGROUND;
+                        return H_UNKNOWN;
 
 		default:
 			printf("ct_get_fg_object(): UNKNOWN\n");

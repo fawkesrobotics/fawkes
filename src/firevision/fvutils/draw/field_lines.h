@@ -1,7 +1,7 @@
 /***************************************************************************
  *  field_lines.h - Container for field lines
  *
- *  Created:  22.09.2008
+ *  Created:  Mon Sep 22 12:00:00 2008
  *  Copyright 2008 Christof Rath <christof.rath@gmail.com>
  *
  *  $Id$
@@ -21,39 +21,36 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_APPS_NAO_LOC_FIELD_LINES__
-#define __FIREVISION_APPS_NAO_LOC_FIELD_LINES__
+#ifndef __NAO_UTILS_FIELD_LINES_H__
+#define __NAO_UTILS_FIELD_LINES_H__
 
 #include <utils/math/types.h>
 #include <list>
-#include <fvutils/color/yuv.h>
-#include <fvutils/ipc/shm_image.h>
 
+typedef std::list<fawkes::arc_t> field_circles_t;
 
 class FieldLines: public std::list<fawkes::field_line_t>
 {
 public:
   virtual ~FieldLines();
 
-  float get_line_width();
-  float get_field_length();
-  float get_field_width();
-  fawkes::cart_coord_2d_t get_field_offsets();
-
-  void draw_lines(SharedMemoryImageBuffer *target, YUV_t color, bool draw_landscape = true, float scale = 0);
+  float get_line_width() const;
+  float get_field_length() const { return __field_length; }
+  float get_field_width() const { return __field_width; }
+  fawkes::cart_coord_2d_t get_field_offsets() const { return __field_offsets; }
+  const field_circles_t& get_circles() const { return __field_circles; }
 
 protected:
   FieldLines(float field_length, float field_width, float line_width);
-
-  void calc_offsets();
-  void add_circle(float r, unsigned int pieces = 8, float center_x = 0, float center_y = 0, float theta_start = 0, float theta_end = 0);
   virtual void init() = 0;
 
-private: //fields
-  float __line_width;
-  float __field_length;
-  float __field_width;
+  void calc_offsets();
+
+  float                   __line_width;
+  float                   __field_length;
+  float                   __field_width;
   fawkes::cart_coord_2d_t __field_offsets;
+  field_circles_t         __field_circles;
 };
 
 class FieldLines6x4: public FieldLines
@@ -85,4 +82,4 @@ public:
 private:
   virtual void init();
 };
-#endif /* __FIREVISION_APPS_NAO_LOC_FIELD_LINES__ */
+#endif /* __NAO_UTILS_FIELD_LINES_H__ */

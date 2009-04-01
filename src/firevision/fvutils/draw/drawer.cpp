@@ -109,7 +109,7 @@ Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
 
   unsigned int x_tmp, y_tmp, ind_tmp;
 
-  while (x < y) {
+  while (x <= y) {
 
     x_tmp = center_x + x;
     y_tmp = center_y + y;
