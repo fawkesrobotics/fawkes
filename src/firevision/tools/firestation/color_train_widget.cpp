@@ -596,8 +596,9 @@ ColorTrainWidget::save_colormap()
     case(Gtk::RESPONSE_OK):
       {
         std::string filename = m_fcd_filechooser->get_filename();
-	ColormapFile cmf;
-	cmf.add_colormap( m_generator->get_current() );
+	YuvColormap *current = m_generator->get_current();
+	ColormapFile cmf(current->depth(), current->width(), current->height());
+	cmf.add_colormap(current);
 	cmf.write( filename.c_str() );
         break;
       }

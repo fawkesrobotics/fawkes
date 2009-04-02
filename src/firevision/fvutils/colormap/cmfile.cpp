@@ -56,7 +56,10 @@ ColormapFile::ColormapBlockVector::~ColormapBlockVector()
  */
 
 /** Constructor.
- * Creates a plain empty colormap file.
+ * Creates a plain empty colormap file with given dimensions.
+ * @param depth depth of colormap
+ * @param width width of colormap
+ * @param height height of colormap
  */
 ColormapFile::ColormapFile(uint16_t depth, uint16_t width, uint16_t height)
   : FireVisionDataFile(CMFILE_MAGIC_TOKEN, CMFILE_CUR_VERSION)
@@ -230,6 +233,10 @@ ColormapFile::clear()
   __header = NULL;
 }
 
+
+/** Get depth of colormap.
+ * @return depth
+ */
 uint16_t
 ColormapFile::get_depth()
 {
@@ -237,6 +244,9 @@ ColormapFile::get_depth()
   return __header->depth;
 }
 
+/** Get width of colormap.
+ * @return width
+ */
 uint16_t
 ColormapFile::get_width()
 {
@@ -244,6 +254,9 @@ ColormapFile::get_width()
   return __header->width;
 }
 
+/** Get height of colormap.
+ * @return height
+ */
 uint16_t
 ColormapFile::get_height()
 {
