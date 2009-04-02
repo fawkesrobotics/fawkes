@@ -269,6 +269,10 @@ ScanlineStar::current_angle() const
   return m_ray_iter->first;
 }
 
+/** Checks whether the current scanpoint is the first scanpoint on the
+ * current ray.
+ * @return true, if the it is the first scanpoint on the current ray
+ */
 bool
 ScanlineStar::first_on_ray() const
 {
