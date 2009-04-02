@@ -77,6 +77,8 @@ FirewireCamera::FirewireCamera(dc1394framerate_t framerate,
   _do_set_shutter = false;
   _do_set_white_balance = false;
   _do_set_focus = false;
+  _gain = 0;
+  _auto_gain = true;
 
   _dc1394 = NULL;
   _camera = NULL;
@@ -153,7 +155,7 @@ FirewireCamera::open()
     if (_camera->bmode_capable > 0) {
       dc1394_video_set_operation_mode(_camera, DC1394_OPERATION_MODE_1394B);
     }
-    if ( //((err = dc1394_cleanup_iso_channels_and_bandwidth(camera)) != DC1394_SUCCESS) ||
+    if ( //((err = dc1394_cleanup_iso_channels_and_bandwidth(_camera)) != DC1394_SUCCESS) ||
          ((err = dc1394_video_set_iso_speed(_camera, _speed)) != DC1394_SUCCESS) ||
          ((err = dc1394_video_set_mode(_camera, _mode)) != DC1394_SUCCESS) ||
          ((err = dc1394_video_set_framerate(_camera, _framerate)) != DC1394_SUCCESS) ) {
@@ -161,6 +163,12 @@ FirewireCamera::open()
     }
 
     if (_format7_mode_enabled) {
+      if (_format7_bpp == 0) {
+	uint32_t rps;
+	dc1394_format7_get_recommended_packet_size(_camera, _mode, &rps);
+	_format7_bpp = rps;
+      }
+
       if ( ((err = dc1394_format7_set_image_size(_camera, _mode, _format7_width, _format7_height)) != DC1394_SUCCESS) ||
            ((err = dc1394_format7_set_image_position(_camera, _mode, _format7_startx, _format7_starty)) != DC1394_SUCCESS) ||
            ((err = dc1394_format7_set_color_coding(_camera, _mode, _format7_coding)) != DC1394_SUCCESS) ||
@@ -185,6 +193,10 @@ FirewireCamera::open()
 	 (_white_balance_vr != 0xFFFFFFFF) &&
 	 _do_set_white_balance ) {
       set_white_balance(_white_balance_ub, _white_balance_vr);
+    }
+    
+    if ( !_auto_gain ) {
+      set_gain(_gain);
     }
 
   } else {
@@ -683,6 +695,30 @@ FirewireCamera::set_white_balance(unsigned int ub, unsigned int vr)
   }
 }
 
+/** Set the gain.
+ * @param gain the gain value
+ */
+void
+FirewireCamera::set_gain(unsigned int gain)
+{
+  uint32_t min;
+  uint32_t max;
+  if ( dc1394_feature_get_boundaries(_camera, DC1394_FEATURE_GAIN, &min, &max) != DC1394_SUCCESS ) {
+    throw Exception("Failed to get boundaries for feature gain");
+  }
+  if (gain < min) {
+    gain = min;
+  }
+  if (max < gain) {
+    gain = max;
+  }
+  if ( dc1394_feature_set_mode( _camera, DC1394_FEATURE_GAIN, DC1394_FEATURE_MODE_MANUAL ) != DC1394_SUCCESS ) {
+    throw Exception("Failed to set manual mode for feature gain");
+  }
+  if ( dc1394_feature_set_value( _camera, DC1394_FEATURE_GAIN, gain ) != DC1394_SUCCESS) {
+    throw Exception("Failed to set value for feature gain");
+  }
+}
 
 /** Parse focus and set value.
  * Parses the given string for a valid focus value and sets it.
@@ -843,6 +879,8 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
   _model = strdup(cap->cam_id().c_str());
   _num_buffers = 8;
   _shutter = 0;
+  _auto_gain = true;
+  _gain = 0;
 
   if ( cap->has("mode") ) {
     string m = cap->get("mode");
@@ -931,7 +969,19 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
     _format7_starty = atoi(cap->get("starty").c_str());
   }
   if ( cap->has("packetsize") ) {
-    _format7_bpp = atoi(cap->get("packetsize").c_str());
+    string p = cap->get("packetsize");
+    if ( p == "recommended" ) {
+      _format7_bpp = 0;
+    } else {
+      _format7_bpp = atoi(p.c_str());
+    }
+  }
+  if ( cap->has("gain") ) {
+    string g = cap->get("gain");
+    if ( g != "auto" ) {
+      _gain = atoi(g.c_str());
+      _auto_gain = false;
+    }
   }
   if ( cap->has("white_balance") ) {
     parse_set_white_balance(cap->get("white_balance").c_str());

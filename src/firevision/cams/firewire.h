@@ -94,6 +94,8 @@ class FirewireCamera : public Camera, public CameraControl
   virtual void           white_balance(unsigned int *ub, unsigned int *vr);
   virtual void           set_white_balance(unsigned int ub, unsigned int vr);
 
+  virtual void           set_gain(unsigned int gain);
+
   virtual void           parse_set_focus(const char *focus);
   virtual void           parse_set_white_balance(const char *white_balance);
   virtual void           parse_set_shutter(const char *shutter);
@@ -162,6 +164,11 @@ class FirewireCamera : public Camera, public CameraControl
 
   /** Focus value */
   unsigned int                   _focus;
+
+  /** Gain value */
+  unsigned int                   _gain;
+  /** True, if gain is set automatically */
+  bool                           _auto_gain;
 
   /** Camera model, used in open to identify the camera, if empty first found camera is used */
   char *_model;
