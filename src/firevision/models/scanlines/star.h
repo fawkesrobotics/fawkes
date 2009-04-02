@@ -59,6 +59,7 @@ class ScanlineStar : public ScanlineModel
   unsigned int ray_index() const;
   unsigned int current_radius() const;
   float current_angle() const;
+  bool first_on_ray() const;
 
  private:
   void generate_scan_points();
@@ -74,6 +75,7 @@ class ScanlineStar : public ScanlineModel
   float m_angle_incr;
   unsigned char* m_mask;
 
+  bool m_first_on_ray;
   bool m_done;
 
   fawkes::point_t m_current_point;

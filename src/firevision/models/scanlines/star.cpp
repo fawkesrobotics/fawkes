@@ -75,6 +75,8 @@ ScanlineStar::ScanlineStar( unsigned int image_width, unsigned int image_height,
   m_first_ray = 0;
   m_previous_ray = 0;
 
+  m_first_on_ray = true;
+  
   // -- sanity checks --
   // margin
   if (m_margin > m_radius_incr / 2)
@@ -137,6 +139,7 @@ ScanlineStar::advance()
   if (m_done) { return; }
 
   ++m_point_iter;
+  m_first_on_ray = false;
 
   if ( (*m_ray_iter).second->end() == m_point_iter )
     {
@@ -150,6 +153,7 @@ ScanlineStar::advance()
       
       ++m_ray_index;
       m_point_iter = (*m_ray_iter).second->begin();
+      m_first_on_ray = true;
     }
   
   m_current_point = (*m_point_iter).second;
@@ -167,6 +171,7 @@ void
 ScanlineStar::reset()
 {
   m_done = false;
+  m_first_on_ray = true;
 
   m_ray_index = 0;
   m_ray_iter = m_rays.begin();
@@ -219,6 +224,7 @@ ScanlineStar::skip_current_ray()
     }
   
   ++m_ray_index;
+  m_first_on_ray = true;
   m_point_iter = m_ray_iter->second->begin();
   m_current_point = (*m_point_iter).second;
 }
@@ -261,6 +267,12 @@ float
 ScanlineStar::current_angle() const
 {
   return m_ray_iter->first;
+}
+
+bool
+ScanlineStar::first_on_ray() const
+{
+  return m_first_on_ray;
 }
 
 void
