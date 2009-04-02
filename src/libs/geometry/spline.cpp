@@ -213,6 +213,9 @@ Spline::construct_bezier_curves()
 {
   m_bezier_curves.clear();
 
+  if ( 0 == m_control_points.size() )
+  { return; }
+
   vector<HomPoint>::iterator i    = m_control_points.begin();
   vector<HomPoint>::iterator prev = i;
   vector<HomPoint>::iterator cur  = ++i;

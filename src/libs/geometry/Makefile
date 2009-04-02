@@ -31,10 +31,11 @@ OBJS_libfawkesgeometry = matrix.o		\
 			 hom_vector.o		\
 			 hom_polar.o		\
 			 hom_pose.o		\
+			 hom_pose_2d.o		\
 			 bezier.o		\
 			 spline.o		\
-			 line_segment.o		#\
-#			 hom_pose_2d.o		\
+			 line_segment.o		\
+			 hom_pose_2d.o
 
 OBJS_all = $(OBJS_libfawkesgeometry)
 LIBS_all = $(LIBDIR)/libfawkesgeometry.so

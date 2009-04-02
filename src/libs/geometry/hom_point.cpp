@@ -23,7 +23,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <geometry/hom_point.h>
+#include "hom_point.h"
+#include "hom_vector.h"
 #include <cmath>
 #include <cstdio>
 #include <exception>
@@ -54,7 +55,7 @@ HomPoint::HomPoint(const HomCoord& h)
   if ( 1.0 != w() )
     { 
       printf("HomPoint(const HomCoord& h): The forth component of a "
-	     "homogeneous point has to be 1.0\n");
+	     "homogeneous point has to be 1.0 but is %f\n", w());
       throw std::exception(); 
     }
 }
@@ -104,6 +105,21 @@ HomPoint::move_to(float x, float y, float z)
   this->z() = z;
 
   return *this;
+}
+
+/** Compute the vector between two points.                                                                                                
+ * @param p the other point                                                                                                               
+ * @return the vector between the two points                                                                                              
+ */
+HomVector
+HomPoint::operator-(const HomPoint& p) const
+{
+  HomVector v;
+  v.x( x() - p.x() );
+  v.y( y() - p.y() );
+  v.z( z() - p.z() );
+  
+  return v;
 }
 
 } // end namespace fawkes

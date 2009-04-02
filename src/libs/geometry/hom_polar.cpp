@@ -40,14 +40,11 @@ namespace fawkes {
  * @param phi the rotation around the z-axis
  */
 HomPolar::HomPolar(float r, float phi)
+  : HomVector(r, 0.0, 0.0)
 {
   m_r   = r;
   m_phi_z = phi;
   m_phi_y = 0.0;
-
-  x() = m_r;
-  y() = 0.0;
-  z() = 0.0;
 
   HomCoord::rotate_z(phi);
 }
@@ -58,15 +55,12 @@ HomPolar::HomPolar(float r, float phi)
  * @param phi_y the rotation around the new y-axis (after rotating around the z-axis)
  */
 HomPolar::HomPolar(float r, float phi_z, float phi_y)
+  : HomVector(r, 0.0, 0.0)
 {
   m_r     = r;
   m_phi_z = phi_z;
   m_phi_y = phi_y;
   
-  x() = m_r;
-  y() = 0.0;
-  z() = 0.0;
-
   HomCoord::rotate_z(m_phi_z);
   HomCoord::rotate_y(m_phi_y);
 }
@@ -75,11 +69,8 @@ HomPolar::HomPolar(float r, float phi_z, float phi_y)
  * @param h a HomCoord
  */
 HomPolar::HomPolar(const HomCoord& h)
+  : HomVector(h) 
 {
-  x() = h.x();
-  y() = h.y();
-  z() = h.z();
-
   m_r     = sqrt( x() * x() + y() * y() + z() * z() );
   m_phi_z = atan2f(y(), x());;
   m_phi_y = atan2f(z(), sqrt( x() * x() + y() * y() ) );
