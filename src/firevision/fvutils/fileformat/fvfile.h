@@ -48,8 +48,8 @@ class FireVisionDataFile
 
   void          set_owns_blocks(bool owns_blocks);
 
-  void add_block(FireVisionDataFileBlock *block);
-  void clear();
+  virtual void add_block(FireVisionDataFileBlock *block);
+  virtual void clear();
 
   virtual void write(const char *file_name);
   virtual void read(const char *file_name);

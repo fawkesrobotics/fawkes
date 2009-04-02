@@ -45,25 +45,30 @@ LIBS_fv_qa_shmlut := fvutils
 OBJS_fv_qa_colormap := qa_colormap.o
 LIBS_fv_qa_colormap := fvutils fvwidgets
 
-OBJS_fv_qa_randomtree := qa_randomtree.o
-LIBS_fv_qa_randomtree := fvutils
+ifneq ($(wildcard $(FVBASEDIR)/fvutils/recognition/forest/forest.h),)
+  OBJS_fv_qa_randomtree := qa_randomtree.o
+  LIBS_fv_qa_randomtree := fvutils
+  OBJS_all += $(OBJS_fv_qa_randomtree)
+  BINS_all += $(BINDIR)/fv_qa_randomtree
+endif
 
-OBJS_all = $(OBJS_fv_qa_camargp)		\
-	   $(OBJS_fv_qa_jpegbm)			\
-	   $(OBJS_fv_qa_shmimg)			\
-	   $(OBJS_fv_qa_shmlut)			\
-	   $(OBJS_fv_qa_rectlut)		\
-	   $(OBJS_fv_qa_fuse)			\
-	   $(OBJS_fv_qa_colormap)		\
-	   $(OBJS_fv_qa_randomtree)
-BINS_all = $(BINDIR)/fv_qa_camargp		\
-	   $(BINDIR)/fv_qa_jpegbm		\
-	   $(BINDIR)/fv_qa_shmimg		\
-	   $(BINDIR)/fv_qa_shmlut		\
-	   $(BINDIR)/fv_qa_rectlut		\
-	   $(BINDIR)/fv_qa_fuse			\
-	   $(BINDIR)/fv_qa_colormap 		\
-	   $(BINDIR)/fv_qa_randomtree	
+OBJS_all += $(OBJS_fv_qa_camargp)		\
+	    $(OBJS_fv_qa_jpegbm)		\
+	    $(OBJS_fv_qa_shmimg)		\
+	    $(OBJS_fv_qa_shmlut)		\
+	    $(OBJS_fv_qa_rectlut)		\
+	    $(OBJS_fv_qa_fuse)			\
+	    $(OBJS_fv_qa_colormap)
+
+
+BINS_all += $(BINDIR)/fv_qa_camargp		\
+	    $(BINDIR)/fv_qa_jpegbm		\
+	    $(BINDIR)/fv_qa_shmimg		\
+	    $(BINDIR)/fv_qa_shmlut		\
+	    $(BINDIR)/fv_qa_rectlut		\
+	    $(BINDIR)/fv_qa_fuse			\
+	    $(BINDIR)/fv_qa_colormap
+
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

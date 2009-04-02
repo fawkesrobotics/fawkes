@@ -48,7 +48,6 @@ main(int argc, char **argv)
     filename = argv[1];
   }
 
-
   printf("Creating simple one-plane colormap\n");
   YuvColormap *cm = new YuvColormap();
 
@@ -125,8 +124,22 @@ main(int argc, char **argv)
 
   delete cm;
 
-  delete imgd;
-  free(imgb);
+  unsigned int depth = 4, width = 128, height = 128;
+  printf("Trying colormap with low resolution, choosing %dx%dx%d\n", depth, width, height);
+  cm = new YuvColormap(depth, width, height);
+  printf("YuvColormap dimensions: %dx%dx%d\n", cm->depth(), cm->width(), cm->height());
+  ColormapFile cmfr(depth, width, height);
+  delete cm;
+  cmfr.write(filename);
+  cmfr.clear();
+  cmfr.read(filename);
+  cm = dynamic_cast<YuvColormap *>(cmfr.get_colormap());
+  printf("Read back colormap dimensions %dx%dx%d\n",
+	 cm->depth(), cm->width(), cm->height());
+  delete cm;
+
+  //delete imgd;
+  //free(imgb);
   return 0;
 }
 

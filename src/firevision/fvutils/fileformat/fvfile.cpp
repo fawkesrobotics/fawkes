@@ -340,7 +340,7 @@ FireVisionDataFile::read(const char *file_name)
 #endif
        ) {
     fclose(f);
-    throw Exception("Rectification information cannot be translated for endianess by now");
+    throw Exception("FVFile header cannot be translated for endianess by now");
   }
 
   free(__comment);
@@ -351,7 +351,7 @@ FireVisionDataFile::read(const char *file_name)
   }
   _spec_header = calloc(1, __header->spec_head_size);
   if ( ! _spec_header ) {
-    throw OutOfMemoryException("Cannot alloate memory for content specific header");
+    throw OutOfMemoryException("Cannot allocate memory for content specific header");
   }
 
   if ( __header->spec_head_size > 0 ) {

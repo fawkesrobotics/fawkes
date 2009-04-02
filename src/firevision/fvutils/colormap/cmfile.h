@@ -30,19 +30,30 @@
 #include <fvutils/colormap/cmfile_block.h>
 #include <vector>
 #include <string>
+#include <stdint.h>
 
 class Colormap;
 
 #define CMFILE_MAGIC_TOKEN  0xFF01
-#define CMFILE_CUR_VERSION  1
+#define CMFILE_CUR_VERSION  2
 
-#define CMFILE_TYPE_YUV  1
-#define CMFILE_TYPE_HEADER  2
+#define CMFILE_TYPE_YUV     1
+
+#pragma pack(push,4)
+/** Block header for a Colormap header block in a ColormapFile. */
+typedef struct {
+  uint16_t depth;      /**< Y resolution */
+  uint16_t width;      /**< U resolution */
+  uint16_t height;     /**< V resolution */
+  uint16_t reserved;   /**< reserved for future use, padding */
+} cmfile_header_t;
+#pragma pack(pop)
 
 class ColormapFile : public FireVisionDataFile
 {
  public:
   ColormapFile();
+  ColormapFile(uint16_t depth, uint16_t width, uint16_t height);
 
   class ColormapBlockVector : public std::vector<ColormapFileBlock *>
   {
@@ -54,8 +65,19 @@ class ColormapFile : public FireVisionDataFile
   ColormapBlockVector *  colormap_blocks();
   Colormap *             get_colormap();
 
+  uint16_t                get_depth();
+  uint16_t                get_width();
+  uint16_t                get_height();
+
   static bool            is_colormap_file(const char *filename);
   static std::string     compose_filename(const std::string format);
+
+  virtual void           clear();
+
+ private:
+  inline void assert_header();
+ private:
+  cmfile_header_t  *__header;
 };
 
 #endif

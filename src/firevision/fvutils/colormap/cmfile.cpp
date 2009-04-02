@@ -27,7 +27,6 @@
 
 #include <fvutils/colormap/colormap.h>
 #include <fvutils/colormap/cmfile_yuvblock.h>
-#include <fvutils/colormap/cmfile_headerblock.h>
 
 #include <fvutils/colormap/yuvcm.h>
 #include <core/exception.h>
@@ -59,9 +58,24 @@ ColormapFile::ColormapBlockVector::~ColormapBlockVector()
 /** Constructor.
  * Creates a plain empty colormap file.
  */
+ColormapFile::ColormapFile(uint16_t depth, uint16_t width, uint16_t height)
+  : FireVisionDataFile(CMFILE_MAGIC_TOKEN, CMFILE_CUR_VERSION)
+{
+  _spec_header      = calloc(1, sizeof(cmfile_header_t));
+  _spec_header_size = sizeof(cmfile_header_t);
+  __header = (cmfile_header_t *)_spec_header;
+  __header->depth  = depth;
+  __header->width  = width;
+  __header->height = height;
+}
+
+/** Constructor.
+ * Creates a plain empty colormap file.
+ */
 ColormapFile::ColormapFile()
   : FireVisionDataFile(CMFILE_MAGIC_TOKEN, CMFILE_CUR_VERSION)
 {
+  __header = NULL;
 }
 
 
@@ -75,7 +89,28 @@ ColormapFile::ColormapFile()
 void
 ColormapFile::add_colormap(Colormap *colormap)
 {
-  add_block(new ColormapFileHeaderBlock(colormap));
+  if (! __header) {
+    if ( _spec_header) {
+      __header = (cmfile_header_t *)_spec_header;
+    } else {
+      _spec_header      = calloc(1, sizeof(cmfile_header_t));
+      _spec_header_size = sizeof(cmfile_header_t);
+      __header = (cmfile_header_t *)_spec_header;
+      __header->depth  = colormap->depth();
+      __header->width  = colormap->width();
+      __header->height = colormap->height();
+    }
+  }
+
+  if ( (colormap->depth()  != __header->depth) ||
+       (colormap->width()  != __header->width) ||
+       (colormap->height() != __header->height) ) {
+    throw fawkes::Exception("Colormap dimensions %dx%dx%d do not match expected dimensions %dx%dx%d",
+			    colormap->depth(), colormap->width(), colormap->height(),
+			    __header->depth, __header->width, __header->height);
+  }
+
+  printf("Adding colormap with dimensions %dx%dx%d\n", colormap->width(), colormap->height(), colormap->depth());
 
   std::list<ColormapFileBlock *> blocks = colormap->get_blocks();
   for (std::list<ColormapFileBlock *>::iterator i = blocks.begin(); i != blocks.end(); ++i) {
@@ -103,6 +138,18 @@ ColormapFile::colormap_blocks()
 }
 
 
+void
+ColormapFile::assert_header()
+{
+  if ( ! __header ) {
+    if (! _spec_header) {
+      throw fawkes::Exception("Cannot get header information, invalid ctor used or file not read?");
+    }
+    __header = (cmfile_header_t *)_spec_header;
+  }
+
+}
+
 /** Get a freshly generated colormap based on current file content.
  * This returns an instance of a colormap that uses all current blocks of this instance.
  * Currently it only supports file which contain a valid YuvColormap. This means that it
@@ -115,31 +162,22 @@ ColormapFile::get_colormap()
 {
   // Make sure we only have YUV blocks
   BlockList &bl = blocks();
-  bool has_header = false;
   YuvColormap *cm = NULL;
 
   for (BlockList::iterator b = bl.begin(); b != bl.end(); ++b) {
-    if (b == bl.begin() && (*b)->type() == CMFILE_TYPE_HEADER) {
-      has_header = true;
-      continue;
-    }
     if ( (*b)->type() != CMFILE_TYPE_YUV ) {
       throw fawkes::Exception("Colormap file contains block of unknown type");
     }
   }
 
-  if (has_header) {
-    ColormapFileHeaderBlock *hb = new ColormapFileHeaderBlock(*(bl.begin()));
-    cm = new YuvColormap(hb->depth(), hb->width(), hb->height());
-  }
-  else {
-    // create colormap, throws an exception is depth/num_blocks is invalid
-    cm = new YuvColormap(num_blocks());
-  }
+  assert_header();
+
+  // create colormap, throws an exception is depth/num_blocks is invalid
+  printf("File header dimensions: %dx%dx%d\n", __header->depth, __header->width, __header->height);
+  cm = new YuvColormap(__header->depth, __header->width, __header->height);
 
   unsigned int level = 0;
   for (BlockList::iterator b = bl.begin(); b != bl.end(); ++b) {
-    if ((*b)->type() == CMFILE_TYPE_HEADER) continue;
     if ( (*b)->data_size() != cm->plane_size() ) {
       // invalid size, for a YUV colormap we must have this for one plane!
       delete cm;
@@ -182,4 +220,33 @@ ColormapFile::compose_filename(const std::string format)
   }
 
   return rv;
+}
+
+
+void
+ColormapFile::clear()
+{
+  FireVisionDataFile::clear();
+  __header = NULL;
+}
+
+uint16_t
+ColormapFile::get_depth()
+{
+  assert_header();
+  return __header->depth;
+}
+
+uint16_t
+ColormapFile::get_width()
+{
+  assert_header();
+  return __header->width;
+}
+
+uint16_t
+ColormapFile::get_height()
+{
+  assert_header();
+  return __header->height;
 }
