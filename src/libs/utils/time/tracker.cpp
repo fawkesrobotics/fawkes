@@ -451,7 +451,8 @@ TimeTracker::print_to_file()
 	    average, average_ms, avgsum, deviation, deviation_ms);
   }
   fprintf(__timelog, "\n");
+  fflush(__timelog);
 }
 
-
 } // end namespace fawkes
+
