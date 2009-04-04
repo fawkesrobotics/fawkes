@@ -3,7 +3,9 @@
  *  matrix.cpp - A matrix class
  *
  *  Created: Wed Sep 26 13:54:12 2007
- *  Copyright  2007  Daniel Beck
+ *  Copyright  2007-2009  Daniel Beck <beck@kbsg.rwth-aachen.de>
+ *             2009       Masrur Doostdar <doostdar@kbsg.rwth-aachen.de>
+ *             2009       Christof Rath <c.rath@student.tugraz.at>
  *
  *  $Id$
  *
@@ -23,98 +25,141 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <geometry/matrix.h>
-#include <geometry/vector.h>
+#include "matrix.h"
+#include "vector.h"
 
-#include <exception>
+#include <core/exceptions/software.h>
+
 #include <cstdlib>
 #include <cstdio>
 #include <algorithm>
 
-namespace fawkes {
+#ifdef HAVE_OPENCV
+#  include <opencv/cv.h>
+#endif
 
-/** @class Matrix matrix.h <geometry/matrix.h>
- * A general matrix class. It provides all the
- * operations that are commonly used with a matrix.
+namespace fawkes
+{
+
+/** @class Matrix <geometry/matrix.h>
+ * A general matrix class.
+ * It provides all the operations that are commonly used with a matrix, but has
+ * been optimized with typical robotic applications in mind. That meas especially
+ * that the chose data type is single-precision float and the class has been
+ * optimized for small matrices (up to about 10x10).
  * @author Daniel Beck
+ * @author Masrur Doostdar
+ * @author Christof Rath
  */
 
-/** @fn virtual inline unsigned int Matrix::num_rows() const
+/** @fn inline unsigned int Matrix::num_rows() const
  * Return the number of rows in the Matrix
  * @return the number of rows
  */
 
-/** @fn virtual inline unsigned int Matrix::num_cols() const
+/** @fn inline unsigned int Matrix::num_cols() const
  * Return the number of columns in the Matrix
  * @return the number of columns
+ */
+
+/** @fn inline float* Matrix::get_data()
+ * Returns the data pointer
+ * @return the data pointer
+ */
+
+/** @fn inline const float* Matrix::get_data() const
+ * Returns the const data pointer
+ * @return the data pointer
+ */
+
+/** @fn float Matrix::data(unsigned int row, unsigned int col) const
+ * (Read-only) Access to matrix data without index check.
+ * With this operator it is possible to access a specific
+ * element of the matrix.
+ * Make sure the indices are correct, there is no sanity
+ * check!
+ * @param row the row of the element
+ * @param col the column of the element
+ * @return the value of the specified element
+ */
+
+ /** @fn float& Matrix::data(unsigned int row, unsigned int col)
+ * (RW) Access  to matrix data without index check.
+ * see the read-only access operator for operational details
+ * Make sure the indizes are correct, there is no sanity
+ * check!
+ * @param row the row of the element
+ * @param col the column of the element
+ * @return a reference to the specified element
  */
 
 /** Constructor.
  * @param num_rows number of rows
  * @param num_cols number of columns
- * @param data array containing elements of the matrix in row-order
- * @param manage_memory true if the memory should be managed internaly
+ * @param data array containing elements of the matrix in row-by-row-order
+ * @param manage_own_memory if true, the Matrix will manage its memory on its own, else it
+ *        will not allocate new memory but works with the provided array
  */
-Matrix::Matrix(unsigned int num_rows,
-               unsigned int num_cols,
-               float *data, bool manage_memory )
+Matrix::Matrix(unsigned int num_rows, unsigned int num_cols,
+               float *data, bool manage_own_memory)
 {
-	m_int_num_rows = num_rows;
-	m_int_num_cols = num_cols;
+  m_num_rows = num_rows;
+  m_num_cols = num_cols;
+  m_num_elements = m_num_rows * m_num_cols;
 
-	m_transposed = false;
+  if (!m_num_elements) printf("WTF?\n");
 
-	m_columns = new Vector *[m_int_num_cols];
+  if (data == NULL || manage_own_memory)
+  {
+    m_data = (float*) malloc(sizeof(float) * m_num_elements);
+    m_own_memory = true;
 
-	for (unsigned int i = 0; i < m_int_num_cols; ++i)
-	{
-		if ( data )
-		{ m_columns[i] = new Vector(m_int_num_rows, &data[i * m_int_num_rows], manage_memory); }
-		else
-		{ m_columns[i] = new Vector(m_int_num_rows); }
-	}
+    /* It showed that for arrays up to approx. 1000 elements an optimized for-loop
+     * is faster than a memcpy() call. It is assumed that the same is true for
+     * memset(). */
+    if (data != NULL)
+    {
+      for (unsigned int i = 0; i < m_num_elements; ++i) m_data[i] = data[i];
+    }
+    else
+    {
+      for (unsigned int i = 0; i < m_num_elements; ++i) m_data[i] = 0.f;
+    }
+  }
+  else
+  {
+    m_data = data;
+    m_own_memory = false;
+  }
 }
-
 
 /** Copy-constructor.
- * @param m another matrix
+ * @param tbc matrix to be copied
  */
-Matrix::Matrix(const Matrix &m)
+Matrix::Matrix(const Matrix &tbc)
 {
-  m_int_num_rows = m.m_int_num_rows;
-  m_int_num_cols = m.m_int_num_cols;
-  
-  m_transposed = m.m_transposed;
-  
-  m_columns = new Vector *[m_int_num_cols];
-  
-  for (unsigned int i = 0; i < m_int_num_cols; ++i)
-    {
-      m_columns[i] = new Vector(*(m.m_columns[i]));
-    }
+  m_num_rows   = tbc.m_num_rows;
+  m_num_cols   = tbc.m_num_cols;
+  m_num_elements = tbc.m_num_elements;
+
+  m_own_memory = true;
+
+  m_data = (float*) malloc(sizeof(float) * m_num_elements);
+  for (unsigned int i = 0; i < m_num_elements; ++i) m_data[i] = tbc.m_data[i];
 }
-  
-  
+
 /** Destructor. */
 Matrix::~Matrix()
 {
-  for (unsigned int i = 0; i < m_int_num_cols; ++i)
-    {
-      delete m_columns[i];
-    }
-  delete[] m_columns;
+  if (m_own_memory) free(m_data);
 }
 
-
 /** Determines the dimensions of the matrix.
- * @param num_cols pointer to an unsigned int to where the number of
- * columns is copied to
- * @param num_rows pointer to an unsigned int to where the number of
- * rows is copied to
+ * @param num_cols pointer to an unsigned int to where the number of columns is copied to
+ * @param num_rows pointer to an unsigned int to where the number of rows is copied to
  */
 void
-Matrix::size(unsigned int &num_rows,
-             unsigned int &num_cols) const
+Matrix::size(unsigned int &num_rows, unsigned int &num_cols) const
 {
   num_rows = this->num_rows();
   num_cols = this->num_cols();
@@ -127,62 +172,121 @@ Matrix::size(unsigned int &num_rows,
 Matrix &
 Matrix::id()
 {
-  for (unsigned int row = 0; row < num_rows(); row++)
+  for (unsigned int row = 0; row < num_rows(); ++row)
+  {
+    for (unsigned int col = 0; col < num_cols(); ++col)
     {
-      for (unsigned int col = 0; col < num_cols(); col++)
-	{
-	  (*this)(row, col) = (row == col) ? 1.0 : 0.0;
-	}
+      data(row, col) = (row == col) ? 1.0 : 0.0;
     }
-  
+  }
+
   return *this;
 }
 
-
-/** Creates a square matrix with dimension size and sets the diagonal elements to 1.0.
-* All other elements are set to 0.0.
-* @param size the dimension of the matrix
-* @return the id matrix object
-*/
+/** Creates a quadratic matrix with dimension size and sets the diagonal elements to 1.0.
+ * All other elements are set to 0.0.
+ * @param size dimension of the matrix
+ * @param data_buffer if != NULL the given float array will be used as data internal data store
+ *        (the object will not perform any memory management in this case)
+ * @return the id matrix object
+ */
 Matrix
-Matrix::get_id(unsigned int size)
+Matrix::get_id(unsigned int size, float *data_buffer)
 {
-  return Matrix::get_diag(size, 1.f);
+  return get_diag(size, 1.f, data_buffer);
 }
 
 /** Creates a quadratic matrix with dimension size and sets the diagonal elements to value.
  * All other elements are set to 0.0.
  * @param size dimension of the matrix
  * @param value of the elements of the main diagonal
+ * @param data_buffer if != NULL the given float array will be used as data internal data store
+ *        (the object will not perform any memory management in this case)
  * @return the diag matrix object
  */
 Matrix
-Matrix::get_diag(unsigned int size, float value)
+Matrix::get_diag(unsigned int size, float value, float *data_buffer)
 {
-  Matrix res(size, size);
+  Matrix res(size, size, data_buffer, data_buffer == NULL);
 
-  for (unsigned int i = 0; i < size; ++i)
+  if (data_buffer != NULL)
   {
-    res(i, i) = value;
+    unsigned int diag_elem = 0;
+    for (unsigned int i = 0; i < size * size; ++i)
+    {
+      if (i == diag_elem)
+      {
+        diag_elem += size + 1;
+        data_buffer[i] = value;
+      }
+      else data_buffer[i] = 0.f;
+    }
   }
+  else for (unsigned int i = 0; i < size; ++i) res.data(i, i) = value;
 
   return res;
 }
 
-
 /** Transposes the matrix.
- * Simply inverts m_transposed.
- * @return a reference to the matrix object now containing the
- * transposed matrix
+ * @return a reference to the matrix object now containing the transposed matrix
  */
-Matrix&
+Matrix &
 Matrix::transpose()
 {
-  m_transposed = !m_transposed;
-  
+#ifdef HAVE_OPENCV
+  if (m_num_cols == m_num_rows)
+  {
+    CvMat cvmat = cvMat(m_num_rows, m_num_cols, CV_32FC1, m_data);
+    cvTranspose(&cvmat, &cvmat);
+
+    return *this;
+  }
+#endif
+  if (m_num_cols == m_num_rows) // Perform a in-place transpose
+  {
+    for (unsigned int row = 0; row < m_num_rows - 1; ++row)
+    {
+      for (unsigned int col = row + 1; col < m_num_cols; ++col)
+      {
+        float &a = data(row, col);
+        float &b = data(col, row);
+        float t = a;
+        a = b;
+        b = t;
+      }
+    }
+  }
+  else // Could not find a in-place transpose, so we use a temporary data array
+  {
+    float *new_data = (float*) malloc(sizeof(float) * m_num_elements);
+    float *cur = new_data;
+
+    for (unsigned int col = 0; col < m_num_cols; ++col)
+    {
+      for (unsigned int row = 0; row < m_num_rows; ++row)
+      {
+        *cur++ = data(row, col);
+      }
+    }
+
+    unsigned int cols = m_num_cols;
+    m_num_cols = m_num_rows;
+    m_num_rows = cols;
+
+    if (m_own_memory)
+    {
+      free(m_data);
+      m_data = new_data;
+    }
+    else
+    {
+      for (unsigned int i = 0; i < m_num_elements; ++i) m_data[i] = new_data[i];
+      free(new_data);
+    }
+  }
+
   return *this;
 }
-
 
 /** Computes a matrix that is the transposed of this matrix.
  * @return a matrix that is the transposed of this matrix
@@ -190,62 +294,67 @@ Matrix::transpose()
 Matrix
 Matrix::get_transpose() const
 {
-  Matrix m(*this);
-  
-  m.transpose();
-  
-  return m;
+  Matrix res(m_num_cols, m_num_rows);
+  float *cur = res.get_data();
+
+  for (unsigned int col = 0; col < m_num_cols; ++col)
+  {
+    for (unsigned int row = 0; row < m_num_rows; ++row)
+    {
+      *cur++ = data(row, col);
+    }
+  }
+  return res;
 }
-  
-  
+
 /** Inverts the matrix.
  * The algorithm that is implemented for computing the inverse
  * of the matrix is the Gauss-Jordan-Algorithm. Hereby, the block-
  * matrix (A|I) consisting of the matrix to be inverted (A) and the
  * identity matrix (I) is transformed into (I|A^(-1)).
- * @return a reference to the matrix object which contains now the
- * inverted matrix
+ * @return a reference to the matrix object which contains now the inverted matrix
  */
 Matrix &
 Matrix::invert()
 {
-  if (m_int_num_rows != m_int_num_cols)
-    {
-      printf("Matrix::invert(): Trying to compute inverse of "
-	     "non-quadratic matrix!\n");
-      throw std::exception();
-    }
-  
-  Matrix i(m_int_num_rows, m_int_num_cols);
-  i.id();
-  
+  if (m_num_rows != m_num_cols)
+  {
+    throw fawkes::Exception("Matrix::invert(): Trying to compute inverse of non-quadratic matrix!");
+  }
+
+#ifdef HAVE_OPENCV
+  CvMat cvmat = cvMat(m_num_rows, m_num_cols, CV_32FC1, m_data);
+  cvInv(&cvmat, &cvmat, CV_LU);
+#else
+  Matrix i = Matrix::get_id(m_num_rows);
+
   // for each column...
-  for (unsigned int col = 0; col < num_cols(); col++)
+  for (unsigned int col = 0; col < m_num_cols; ++col)
+  {
+    // ...multiply the row by the inverse of the element
+    // on the diagonal...
+    float factor = 1.f / data(col, col);
+    i.mult_row(col, factor);
+    this->mult_row(col, factor);
+
+    // ...and subtract that row multiplied by the elements
+    // in the current column from all other rows.
+    for (unsigned int row = 0; row < m_num_rows; ++row)
     {
-      // ...multiply the row by the inverse of the element
-      // on the diagonal...
-      float factor = 1.0f / (*this)(col, col);
-      i.mult_row(col, factor);
-      this->mult_row(col, factor);
-      
-      // ...and subtract that row multiplied by the elements
-      // in the current column from all other rows.
-      for (unsigned int row = 0; row < num_rows(); row++)
-	{
-	  if (row != col)
-	    {
-	      float factor2 = (*this)(row, col);
-	      i.sub_row(row, col, factor2);
-	      this->sub_row(row, col, factor2);
-	    }
-	}
+      if (row != col)
+      {
+        float factor2 = data(row, col);
+        i.sub_row(row, col, factor2);
+        this->sub_row(row, col, factor2);
+      }
     }
-  
-  *this = i;
-  
+  }
+
+  overlay(0, 0, i);
+#endif
+
   return *this;
 }
-  
 
 /** Computes a matrix that is the inverse of this matrix.
  * @return a matrix that is the inverse of this matrix
@@ -253,13 +362,11 @@ Matrix::invert()
 Matrix
 Matrix::get_inverse() const
 {
-  Matrix m(*this);
-  
-  m.invert();
-  
-  return m;
-}
+  Matrix res(*this);
+  res.invert();
 
+  return res;
+}
 
 /** Computes the determinant of the matrix.
  * @return the determinant
@@ -267,108 +374,111 @@ Matrix::get_inverse() const
 float
 Matrix::det() const
 {
-  if (m_int_num_rows != m_int_num_cols)
-    {
-      printf("Matrix::det(): The determinant can only be calculated "
-	     "for nxn matrices.\n");
-      throw std::exception();
-    }
-  
-  Matrix m(*this);
-  float result = 1.0f;
-  
+  if (m_num_rows != m_num_cols)
+  {
+    throw fawkes::Exception("Matrix::det(): The determinant can only be calculated for quadratic matrices.");
+  }
+
+#ifdef HAVE_OPENCV
+  CvMat cvmat = cvMat(m_num_rows, m_num_cols, CV_32FC1, m_data);
+
+  return (float)cvDet(&cvmat);
+#else
+  Matrix tmp_matrix(*this);
+  float result = 1.f;
+
   // compute the upper triangular matrix
-  for (unsigned int col = 0; col < num_cols(); col++)
+  for (unsigned int col = 0; col < m_num_cols; ++col)
+  {
+    float diag_elem = tmp_matrix.data(col, col);
+    result *= diag_elem;
+
+    // multiply n-th row by m(n,n)^{-1}
+    tmp_matrix.mult_row(col, (1.f / diag_elem));
+    for (unsigned int row = col + 1; row < m_num_rows; ++row)
     {
-      float diag_elem = m(col, col);
-      result *= diag_elem;
-      
-      // multiply n-th row by m(n,n)^{-1}
-      m.mult_row( col, 1.0 / diag_elem );
-      for (unsigned int row = col + 1; row < num_rows(); row++)
-	{
-	  m.sub_row( row, col, m(row, col) );
-	}
+      tmp_matrix.sub_row(row, col, tmp_matrix.data(row, col));
     }
-  
+  }
+
   return result;
+#endif
 }
 
-
 /** Returns a submatrix of the matrix.
- * @param row the row in the original matrix of the top-left element
- * in the submatrix
- * @param col the column in the original matrix of the top-left
- * element in the submatrix
+ * @param row the row in the original matrix of the top-left element in the submatrix
+ * @param col the column in the original matrix of the top-left element in the submatrix
  * @param num_rows the number of rows of the submatrix
  * @param num_cols the number of columns of the submatrix
  * @return the submatrix
  */
 Matrix
-Matrix::get_submatrix( unsigned int row,
-		       unsigned int col,
-		       unsigned int num_rows,
-		       unsigned int num_cols ) const
+Matrix::get_submatrix(unsigned int row, unsigned int col,
+                      unsigned int num_rows, unsigned int num_cols) const
 {
-  if ( (row + num_rows) > this->num_rows() )
-    { num_rows = this->num_rows() - row; }
-  
-  if ( (col + num_cols) > this->num_cols() )
-    { num_cols = this->num_cols() - col; }
-  
-  Matrix m(num_rows, num_cols);
-  
-  for (unsigned int r = 0; r < num_rows; r++)
+  if ((m_num_rows < row + num_rows) || (m_num_cols < col + num_cols))
+  {
+    throw fawkes::OutOfBoundsException("Matrix::get_submatrix(): The current matrix doesn't contain a submatrix of the requested dimension at the requested position.");
+  }
+
+  Matrix res(num_rows, num_cols);
+  float *res_data = res.get_data();
+
+  for (unsigned int r = 0; r < num_rows; ++r)
+  {
+    for (unsigned int c = 0; c < num_cols; ++c)
     {
-      for (unsigned int c = 0; c < num_cols; c++)
-	{ m(r, c) = (*this)(row + r, col + c); }
+      *res_data++ = data(row + r, col + c);
     }
-  
-  return m;
+  }
+
+  return res;
 }
-  
 
 /** Overlays another matrix over this matrix.
  * @param row the top-most row from which onwards the the elements are
  * exchanged for corresponding elements in the given matrix
  * @param col the left-most column from which onwards the the elements
  * are exchanged for corresponding elements in the given matrix
- * @param m the other matrix
+ * @param over the matrix to be overlaid
  */
 void
-Matrix::overlay( unsigned int row,
-		 unsigned int col,
-		 const Matrix& m )
+Matrix::overlay(unsigned int row, unsigned int col, const Matrix &over)
 {
-  unsigned int max_row = std::min(row + m.num_rows(), num_rows());
-  unsigned int max_col = std::min(col + m.num_cols(), num_cols());
-  
-  for (unsigned int r = row; r < max_row; r++)
+  unsigned int max_row = std::min(m_num_rows, over.m_num_rows + row);
+  unsigned int max_col = std::min(m_num_cols, over.m_num_cols + col);
+
+  for (unsigned int r = row; r < max_row; ++r)
+  {
+    for (unsigned int c = col; c < max_col; ++c)
     {
-      for (unsigned int c = col; c < max_col; c++)
-	{ (*this)(r, c) = m(r - row, c - col); }
+      data(r, c) = over.data(r - row, c - col);
     }
+  }
 }
-  
 
 /** (Read-only) Access-operator.
  * With this operator it is possible to access a specific
- * element of the matrix.
+ * element of the matrix. (First element is at (0, 0)
  * @param row the row of the element
  * @param col the column of the element
  * @return the value of the specified element
  */
+/* Not True: To conform with the mathematical
+ * fashion of specifying the elements of a matrix the top
+ * left element of the matrix is accessed with (1, 1)
+ * (i.e., numeration starts with 1 and not with 0).
+ */
 float
-Matrix::operator()( unsigned int row, unsigned int col) const
+Matrix::operator()(unsigned int row, unsigned int col) const
 {
-  // TODO: sanity check
-  
-  if (m_transposed)
-    { return (*m_columns[row])[col]; }
-  else
-    { return (*m_columns[col])[row]; }
-}
+  if (row >= m_num_rows || col >= m_num_cols)
+  {
+    throw fawkes::OutOfBoundsException("Matrix::operator() The requested element is not within the dimension of the matrix.");
+  }
 
+  return data(row, col);
+}
 
 /** (RW) Access operator.
  * see the read-only access operator for operational details
@@ -376,18 +486,17 @@ Matrix::operator()( unsigned int row, unsigned int col) const
  * @param col the column of the element
  * @return a reference to the specified element
  */
-float&
+float &
 Matrix::operator()(unsigned int row,
-                   unsigned int col)
+    unsigned int col)
 {
-  // TODO: sanity check
-  
-  if (m_transposed)
-    { return (*m_columns[row])[col]; }
-  else
-    { return (*m_columns[col])[row]; }
-}
+  if (row >= m_num_rows || col >= m_num_cols)
+  {
+    throw fawkes::OutOfBoundsException("Matrix::operator() The requested element (%d, %d) is not within the dimension of the %dx%d matrix.");
+  }
 
+  return data(row, col);
+}
 
 /** Assignment operator.
  * Copies the data form the rhs Matrix to the lhs Matrix.
@@ -397,83 +506,119 @@ Matrix::operator()(unsigned int row,
 Matrix &
 Matrix::operator=(const Matrix &m)
 {
-  for (unsigned int i = 0; i < m_int_num_cols; ++i)
+  if (m_num_elements != m.m_num_elements)
+  {
+    if (!m_own_memory)
     {
-      delete m_columns[i];
+      throw fawkes::OutOfBoundsException("Matrix::operator=(): The rhs matrix has not the same number of elements. This isn't possible if not self managing memory.");
     }
-  delete[] m_columns;
-  
-  m_int_num_rows = m.m_int_num_rows;
-  m_int_num_cols = m.m_int_num_cols;
-  
-  m_transposed = m.m_transposed;
-  
-  m_columns = new Vector *[m_int_num_cols];
-  
-  for (unsigned int i = 0; i < m_int_num_cols; ++i)
-    {
-      m_columns[i] = new Vector(*(m.m_columns[i]));
-	}
-  
+
+    m_num_elements = m.m_num_elements;
+    free(m_data);
+    m_data = (float*) malloc(sizeof(float) * m_num_elements);
+  }
+
+  m_num_rows = m.m_num_rows;
+  m_num_cols = m.m_num_cols;
+
+  for (unsigned int i = 0; i < m_num_elements; ++i) m_data[i] = m.m_data[i];
+
   return *this;
 }
-
 
 /** Matrix multiplication operator.
  * (Matrix)a.operator*((Matrix)b) computes a * b;
  * i.e., the 2nd matrix is right-multiplied to the 1st matrix
- * @param b the other matrix
+ * @param rhs the right-hand-side matrix
  * @return the product of the two matrices (a * b)
  */
 Matrix
-Matrix::operator*(const Matrix &b) const
+Matrix::operator*(const Matrix &rhs) const
 {
-  const Matrix &a = (*this);
-  
-  if (a.num_cols() != b.num_rows())
+  if (m_num_cols != rhs.m_num_rows)
+  {
+    throw fawkes::Exception("Matrix::operator*(...): Dimension mismatch: a %d x %d matrix can't be multiplied "
+                            "with a %d x %d matrix.\n",
+                            m_num_rows, m_num_cols, rhs.num_rows(), rhs.num_cols());
+  }
+
+  unsigned int res_rows = m_num_rows;
+  unsigned int res_cols = rhs.m_num_cols;
+
+  Matrix res(res_rows, res_cols);
+
+  for (unsigned int r = 0; r < res_rows; ++r)
+  {
+    for (unsigned int c = 0; c < res_cols; ++c)
     {
-      printf("Matrix::operator*(...): Dimension mismatch: a %d x %d "
-	     "matrix can't be multiplied with a %d x %d matrix.\n",
-	     a.num_rows(), a.num_cols(), b.num_rows(), b.num_cols());
-      throw std::exception();
+      float t = 0.0f;
+
+      for (unsigned int i = 0; i < m_num_cols; ++i)
+      {
+        t += data(r, i) * rhs.data(i, c);
+      }
+
+      res.data(r, c) = t;
     }
-  
-  unsigned int rows = a.num_rows();
-  unsigned int cols = b.num_cols();
-  
-  Matrix result(rows, cols);
-  
-  for (unsigned int c = 0; c < cols; c++)
-    {
-      for (unsigned int r = 0; r < rows; r++)
-	{
-	  float t = 0.0f;
-	  
-	  for (unsigned int i = 0; i < a.num_cols(); i++)
-	    { t += a(r, i) * b(i, c); }
-	  
-	  result(r,c) = t;
-	}
-    }
-  
-  return result;
+  }
+
+  return res;
 }
-  
 
 /** Combined matrix-multipliation and assignement operator.
- * @param m the rhs Matrix
- * @return a reference to the Matrix that contains the result of the
- * multiplication
+ * @param rhs the right-hand-side Matrix
+ * @return a reference to the Matrix that contains the result of the multiplication
  */
 Matrix &
-Matrix::operator*=(const Matrix &m)
+Matrix::operator*=(const Matrix &rhs)
 {
-  //TODO: more efficient direct mult
-  *this = *this * m;
-  
+  if (m_num_cols != rhs.m_num_rows)
+  {
+    throw fawkes::Exception("Matrix::operator*(...): Dimension mismatch: a %d x %d matrix can't be multiplied "
+                            "with a %d x %d matrix.\n",
+                            m_num_rows, m_num_cols, rhs.num_rows(), rhs.num_cols());
+  }
+
+  unsigned int res_rows     = m_num_rows;
+  unsigned int res_cols     = rhs.m_num_cols;
+  unsigned int res_num_elem = res_rows * res_cols;
+
+  if (!m_own_memory && (m_num_elements != res_num_elem))
+  {
+    throw fawkes::Exception("Matrix::operator*=(): The resulting matrix has not the same number of elements. This doesn't work if not self managing memory.");
+  }
+
+  float *new_data = (float*) malloc(sizeof(float) * res_num_elem);
+  float *cur = new_data;
+
+  for (unsigned int r = 0; r < res_rows; ++r)
+  {
+    for (unsigned int c = 0; c < res_cols; ++c)
+    {
+      float t = 0.0f;
+
+      for (unsigned int i = 0; i < m_num_cols; ++i)
+      {
+        t += data(r, i) * rhs.data(i, c);
+      }
+
+      *cur++ = t;
+    }
+  }
+
+  if (m_own_memory)
+  {
+    free(m_data);
+    m_data = new_data;
+  }
+  else
+  {
+    for (unsigned int i = 0; i < m_num_elements; ++i) m_data[i] = new_data[i];
+    free(new_data);
+  }
+
   return *this;
 }
-  
 
 /** Multiply the matrix with given vector.
  * @param v a vector
@@ -483,28 +628,29 @@ Vector
 Matrix::operator*(const Vector &v) const
 {
   unsigned int cols = v.size();
-  
-  if (num_cols() != cols)
-    {
-      printf("Matrix::operator*(...): Dimension mismatch: a %d x %d "
-	     "matrix can't be multiplied with a vector of length %d.\n",
-	     num_rows(), num_cols(), cols);
-      throw std::exception();
-    }
-  
-  Vector result(num_rows());
-  
-  for (unsigned int r = 0; r < num_rows(); ++r)
-    {
-      float row_result = 0.0;
-      for (unsigned int c = 0; c < cols; ++c)
-	{ row_result += (*this)(r, c) * v[c]; }
-      result[r] = row_result;
-    }
-  
-  return result;
-}
 
+  if (m_num_cols != cols)
+  {
+    throw fawkes::Exception("Matrix::operator*(...): Dimension mismatch: a %d x %d matrix can't be multiplied "
+        "with a vector of length %d.\n", num_rows(), num_cols(), cols);
+  }
+
+  Vector res(m_num_rows);
+  const float *vector_data = v.data_ptr();
+
+  for (unsigned int r = 0; r < num_rows(); ++r)
+  {
+    float row_result = 0.f;
+
+    for (unsigned int c = 0; c < cols; ++c)
+    {
+      row_result += data(r, c) * vector_data[c];
+    }
+    res[r] = row_result;
+  }
+
+  return res;
+}
 
 /** Mulitply every element of the matrix with the given scalar.
  * @param f a scalar
@@ -513,14 +659,17 @@ Matrix::operator*(const Vector &v) const
 Matrix
 Matrix::operator*(const float &f) const
 {
-  Matrix result(*this);
-  
-  for (unsigned int i = 0; i < result.m_int_num_cols; ++i)
-    { (*(result.m_columns[i])) *= f; }
-  
-  return result;
+  Matrix res(*this);
+  float *data = res.get_data();
+
+  for (unsigned int i = 0; i < res.m_num_elements; ++i)
+  {
+    data[i] *= f;
+  }
+
+  return res;
 }
-  
+
 /** Combined scalar multiplication and assignment operator.
  * @param f a scalar
  * @return reference to the result
@@ -528,12 +677,13 @@ Matrix::operator*(const float &f) const
 Matrix &
 Matrix::operator*=(const float &f)
 {
-  for (unsigned int i = 0; i < m_int_num_cols; ++i)
-    { *(m_columns[i]) *= f; }
-  
+  for (unsigned int i = 0; i < m_num_elements; ++i)
+  {
+    m_data[i] *= f;
+  }
+
   return *this;
 }
-  
 
 /** Divide every element of the matrix with the given scalar.
  * @param f a scalar
@@ -542,14 +692,16 @@ Matrix::operator*=(const float &f)
 Matrix
 Matrix::operator/(const float &f) const
 {
-  Matrix result(*this);
-  
-  for (unsigned int i = 0; i < result.m_int_num_cols; ++i)
-    { (*(result.m_columns[i])) /= f; }
-  
-  return result;
-}
+  Matrix res(*this);
+  float *data = res.get_data();
 
+  for (unsigned int i = 0; i < res.m_num_elements; ++i)
+  {
+    data[i] /= f;
+  }
+
+  return res;
+}
 
 /** Combined scalar division and assignment operator.
  * @param f a scalar
@@ -558,202 +710,210 @@ Matrix::operator/(const float &f) const
 Matrix &
 Matrix::operator/=(const float &f)
 {
-  for (unsigned int i = 0; i < m_int_num_cols; ++i)
-    { (*(m_columns[i])) /= f; }
-  
+  for (unsigned int i = 0; i < m_num_elements; ++i)
+  {
+    m_data[i] /= f;
+  }
+
   return *this;
 }
-
 
 /** Addition operator.
  * Adds the corresponding elements of the two matrices.
- * @param m the rhs matrix
+ * @param rhs the right-hand-side matrix
  * @return the resulting matrix
  */
 Matrix
-Matrix::operator+(const Matrix &m) const
+Matrix::operator+(const Matrix &rhs) const
 {
-  if ((num_rows() != m.num_rows()) || (num_cols() != m.num_cols()))
-    {
-      printf("Matrix::operator+(...): Dimension mismatch: a %d x %d "
-	     "matrix can't be added to a %d x %d matrix\n",
-	     num_rows(), num_cols(), m.num_rows(), m.num_cols());
-      throw std::exception();
-    }
-  
-  Matrix result(*this);
-  
-  for (unsigned int row = 0; row < num_rows(); row++)
-    {
-      for (unsigned int col = 0; col < num_cols(); col++)
-	{ result(row, col) += m(row, col); }
-    }
-  
-  return result;
+  if ((m_num_rows != rhs.m_num_rows) || (m_num_cols != rhs.m_num_cols))
+  {
+    throw fawkes::Exception("Matrix::operator+(...): Dimension mismatch: a %d x %d matrix can't be added to a %d x %d matrix\n",
+                            num_rows(), num_cols(), rhs.num_rows(), rhs.num_cols());
+  }
+
+  Matrix res(*this);
+  const float *rhs_d = rhs.get_data();
+  float *res_d = res.get_data();
+
+  for (unsigned int i = 0; i < m_num_elements; ++i)
+  {
+    res_d[i] += rhs_d[i];
+  }
+
+  return res;
 }
 
-
 /**Add-assign operator.
- * @param m the rhs matrix
+ * @param rhs the right-hand-side matrix
  * @return a reference to the resulting matrix (this)
  */
 Matrix &
-Matrix::operator+=(const Matrix &m)
+Matrix::operator+=(const Matrix &rhs)
 {
-  //TODO: more efficient direct add
-  *this = *this + m;
-  
+  if ((m_num_rows != rhs.m_num_rows) || (m_num_cols != rhs.m_num_cols))
+  {
+    throw fawkes::Exception("Matrix::operator+(...): Dimension mismatch: a %d x %d matrix can't be added to a %d x %d matrix\n",
+                            num_rows(), num_cols(), rhs.num_rows(), rhs.num_cols());
+  }
+
+  const float *rhs_d = rhs.get_data();
+
+  for (unsigned int i = 0; i < m_num_elements; ++i)
+  {
+    m_data[i] += rhs_d[i];
+  }
+
   return *this;
 }
 
-
-/** Subtract operator.
+/** Subtraction operator.
  * Subtracts the corresponding elements of the two matrices.
- * @param m the rhs matrix
+ * @param rhs the right-hand-side matrix
  * @return the resulting matrix
  */
 Matrix
-Matrix::operator-(const Matrix &m) const
+Matrix::operator-(const Matrix &rhs) const
 {
-	if ((num_rows() != m.num_rows()) || (num_cols() != m.num_cols()))
-	{
-		printf("Matrix::operator-(...): Dimension mismatch: a %d x %d matrix can't be added to a %d x %d matrix\n",
-		       num_rows(), num_cols(), m.num_rows(), m.num_cols());
-		throw std::exception();
-	}
+  if ((num_rows() != rhs.num_rows()) || (num_cols() != rhs.num_cols()))
+  {
+    throw fawkes::Exception("Matrix::operator-(...): Dimension mismatch: a %d x %d matrix can't be subtracted from a %d x %d matrix\n",
+        num_rows(), num_cols(), rhs.num_rows(), rhs.num_cols());
+  }
 
-	Matrix result(*this);
+  Matrix res(*this);
 
-	for (unsigned int row = 0; row < num_rows(); row++)
-	{
-		for (unsigned int col = 0; col < num_cols(); col++)
-		{
-			result(row, col) -= m(row, col);
-		}
-	}
+  const float *rhs_d = rhs.get_data();
+  float *res_d = res.get_data();
 
-	return result;
+  for (unsigned int i = 0; i < m_num_elements; ++i)
+  {
+    res_d[i] -= rhs_d[i];
+  }
+
+  return res;
 }
 
-
 /**Subtract-assign operator.
- * @param m the rhs matrix
+ * @param rhs the right-hand-side matrix
  * @return a reference to the resulting matrix (this)
  */
 Matrix &
-Matrix::operator-=(const Matrix &m)
+Matrix::operator-=(const Matrix &rhs)
 {
-	//TODO: more efficient direct add
-	*this = *this - m;
+  if ((num_rows() != rhs.num_rows()) || (num_cols() != rhs.num_cols()))
+  {
+    throw fawkes::Exception("Matrix::operator-=(...): Dimension mismatch: a %d x %d matrix can't be subtracted from a %d x %d matrix\n",
+        num_rows(), num_cols(), rhs.num_rows(), rhs.num_cols());
+  }
 
-	return *this;
+  const float *rhs_d = rhs.get_data();
+
+  for (unsigned int i = 0; i < m_num_elements; ++i)
+  {
+    m_data[i] -= rhs_d[i];
+  }
+
+  return *this;
 }
 
-
 /** Comparison operator.
- * @param m the rhs Matrix
+ * @param rhs the right-hand-side Matrix
  * @return true if every element of this matrix is equal to the
  * corresponding element of the other matrix
  */
 bool
-Matrix::operator==(const Matrix &m) const
+Matrix::operator==(const Matrix &rhs) const
 {
-  if ((num_rows() != m.num_rows()) || (num_cols() != m.num_cols()))
+  if ((num_rows() != rhs.num_rows()) || (num_cols() != rhs.num_cols()))
+  {
     return false;
-  
-  for (unsigned int r = 0; r < num_rows(); r++)
-    {
-      for (unsigned int c = 0; c < num_cols(); c++)
-	{
-	  if ((*this)(r, c) != m(r, c))
-	    return false;
-	}
-    }
-  
+  }
+
+  const float *rhs_d = rhs.get_data();
+
+  for (unsigned int i = 0; i < m_num_elements; ++i)
+  {
+    if (m_data[i] != rhs_d[i]) return false;
+  }
+
   return true;
 }
-
 
 /** Changes the matrix by multiplying a row with a factor.
  * @param row the row
  * @param factor the factor
  */
 void
-Matrix::mult_row(unsigned int row,
-                 float factor)
+Matrix::mult_row(unsigned int row, float factor)
 {
-  if (row > num_rows())
-    {
-      printf("Matrix::mult_row(...): Out of range: matrix has %d rows "
-	     "-- no %dth row.\n", num_rows(), row);
-      throw std::exception();
-    }
-  
-  for (unsigned int col = 0; col < num_cols(); col++)
-    { (*this)(row, col) *= factor; }
-}
+  if (row >= m_num_rows)
+  {
+    throw fawkes::OutOfBoundsException("Matrix::mult_row(...)", row, 0, m_num_rows);
+  }
 
+  for (unsigned int col = 0; col < m_num_cols; ++col)
+  {
+    data(row, col) *= factor;
+  }
+}
 
 /** For two rows A and B and a factor f, A is changed to A - f*B.
  * @param row_a the row that is changed
  * @param row_b the row that is substracted from row_a
- * @param factor the factor by which every element of row_b is
- * multiplied before it is substracted from row_a
+ * @param factor the factor by which every element of row_b is multiplied before it is
+ *        substracted from row_a
  */
 void
-Matrix::sub_row(unsigned int row_a,
-                unsigned int row_b,
-                float factor)
+Matrix::sub_row(unsigned int row_a, unsigned int row_b, float factor)
 {
-  if ((row_a > num_rows()) || (row_b > num_rows()))
-    {
-      printf("Matrix::sub_row(...): Out of range: one of the arguments "
-	     "\"row_a\"=%d or \"row_b\"=%d is greater than the number "
-	     "of rows (%d)\n", row_a, row_b, num_rows());
-      throw std::exception();
-    }
-  
-  for (unsigned int col = 0; col < num_cols(); col++)
-    { (*this)(row_a, col) -= factor * (*this)(row_b, col); }
-}
-  
-  
-/** Print matrix to standard out.
+  if (row_a >= m_num_rows)
+  {
+    throw fawkes::OutOfBoundsException("Matrix::sub_row(...) row_a", row_a, 0, m_num_rows);
+  }
+  if (row_b >= m_num_rows)
+  {
+    throw fawkes::OutOfBoundsException("Matrix::sub_row(...) row_b", row_b, 0, m_num_rows);
+  }
 
- * @param name a name that is printed before the content of the matrix
- * (not required)
+  for (unsigned int col = 0; col < m_num_cols; ++col)
+  {
+    data(row_a, col) -= factor * data(row_b, col);
+  }
+}
+
+/** Print matrix to standard out.
+ * @param name a name that is printed before the content of the matrix (not required)
  * @param col_sep a string used to separate columns (defaults to '\\t')
  * @param row_sep a string used to separate rows (defaults to '\\n')
  */
 void
-Matrix::print_info( const char *name,
-		    const char *col_sep,
-		    const char *row_sep ) const
+Matrix::print_info(const char *name, const char *col_sep, const char *row_sep) const
 {
   if (name)
-    { printf("%s:\n", name); }
-  
+  {
+    printf("%s:\n", name);
+  }
+
   for (unsigned int r = 0; r < num_rows(); ++r)
+  {
+    printf((r == 0 ? "[" : " "));
+    for (unsigned int c = 0; c < num_cols(); ++c)
     {
-      printf((r == 0 ? "[" : " "));
-      for (unsigned int c = 0; c < num_cols(); ++c)
-	{
-	  printf("%f", (*this)(r, c));
-	  if (c+1 < num_cols())
-	    {
-	      if (col_sep) printf("%s", col_sep);
-	      else printf("\t");
-	    }
-	}
-      if (r+1 < num_rows())
-	{
-	  if (row_sep) printf("%s", row_sep);
-	  else printf("\n");
-	}
-      else
-	printf("]\n\n");
+      printf("%f", (*this)(r, c));
+      if (c+1 < num_cols())
+      {
+        if (col_sep) printf("%s", col_sep);
+        else printf("\t");
+      }
     }
+    if (r+1 < num_rows())
+    {
+      if (row_sep) printf("%s", row_sep);
+      else printf("\n");
+    }
+    else printf("]\n\n");
+  }
 }
 
 } // end namespace fawkes
-
