@@ -103,8 +103,9 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::ToolButton        *tb_exit;
   Gtk::Button            *but_exec;
   Gtk::Button            *but_stop;
+  Gtk::ToggleButton      *but_continuous;
+  Gtk::Button            *but_clearlog;
   Gtk::ComboBoxEntry     *cbe_skillstring;
-  Gtk::ToggleToolButton  *tb_continuous;
   Gtk::Label             *lab_status;
   Gtk::Label             *lab_alive;
   Gtk::Label             *lab_continuous;

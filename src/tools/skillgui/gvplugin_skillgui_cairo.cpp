@@ -283,6 +283,7 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
   }
   if (fontweight && (strcmp(fontweight, "bold") == 0)) {
     weight = Cairo::FONT_WEIGHT_BOLD;
+    p.x -= 8;
   }
   char *fontslant;
   if (obj->type == CLUSTER_OBJTYPE) {

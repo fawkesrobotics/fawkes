@@ -74,7 +74,8 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
 
   refxml->get_widget_derived("trv_log", __logview);
   refxml->get_widget("tb_connection", tb_connection);
-  refxml->get_widget("tb_continuous", tb_continuous);
+  refxml->get_widget("but_continuous", but_continuous);
+  refxml->get_widget("but_clearlog", but_clearlog);
   refxml->get_widget("tb_exit", tb_exit);
   refxml->get_widget("cbe_skillstring", cbe_skillstring);
   refxml->get_widget("but_exec", but_exec);
@@ -167,7 +168,8 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   tb_controller->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_controller_clicked));
   tb_exit->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_exit_clicked));
   but_stop->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_stop_clicked));
-  tb_continuous->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_contexec_toggled));
+  but_continuous->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_contexec_toggled));
+  but_clearlog->signal_clicked().connect(sigc::mem_fun(*__logview, &LogView::clear));
   tb_skiller->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_skdbg_data_changed));
   tb_skiller->signal_toggled().connect(sigc::bind(sigc::mem_fun(*cb_graphlist, &Gtk::ComboBoxText::set_sensitive),true));
   tb_agent->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_agdbg_data_changed));
@@ -235,7 +237,7 @@ SkillGuiGtkWindow::on_config_changed()
   bool continuous = __gconf->get_bool(GCONF_PREFIX"/continuous_exec", error);
   bool colored    = __gconf->get_bool(GCONF_PREFIX"/graph_colored", error);
 #endif
-  tb_continuous->set_active(continuous);
+  but_continuous->set_active(continuous);
   tb_graphcolored->set_active(colored);
 #endif
 }
@@ -256,7 +258,7 @@ void
 SkillGuiGtkWindow::on_contexec_toggled()
 {
 #ifdef HAVE_GCONFMM
-  __gconf->set(GCONF_PREFIX"/continuous_exec", tb_continuous->get_active());
+  __gconf->set(GCONF_PREFIX"/continuous_exec", but_continuous->get_active());
 #endif
 }
 
@@ -379,7 +381,7 @@ SkillGuiGtkWindow::on_connect()
     tb_connection->set_stock_id(Gtk::Stock::DISCONNECT);
     __logview->set_client(connection_dispatcher.get_client());
 
-    tb_continuous->set_sensitive(true);
+    but_continuous->set_sensitive(true);
     tb_controller->set_sensitive(true);
     cbe_skillstring->set_sensitive(true);
 
@@ -400,7 +402,7 @@ SkillGuiGtkWindow::on_connect()
 void
 SkillGuiGtkWindow::on_disconnect()
 {
-  tb_continuous->set_sensitive(false);
+  but_continuous->set_sensitive(false);
   tb_controller->set_sensitive(false);
   cbe_skillstring->set_sensitive(false);
   but_exec->set_sensitive(false);
@@ -434,7 +436,7 @@ SkillGuiGtkWindow::on_exec_clicked()
     if (__skiller_if && __skiller_if->is_valid() && __skiller_if->has_writer() &&
 	__skiller_if->exclusive_controller() == __skiller_if->serial()) {
 
-      if ( tb_continuous->get_active() ) {
+      if ( but_continuous->get_active() ) {
 	SkillerInterface::ExecSkillContinuousMessage *escm = new SkillerInterface::ExecSkillContinuousMessage(sks.c_str());
 	__skiller_if->msgq_enqueue(escm);
       } else {
