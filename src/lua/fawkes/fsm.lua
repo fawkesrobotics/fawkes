@@ -244,13 +244,25 @@ end
 function FSM:apply_deftrans(state)
    assert(type(state) == "table" and state.name, "Passed state must be a state object")
 
-   for _,t in ipairs(self.default_transitions) do
+   for i,t in ipairs(self.default_transitions) do
       local compto = type(t.state) == "table" and state or state.name
 
       if compto ~= t.state
 	 and state.name ~= self.exit_state and state.name ~= self.fail_state then
 
-	 state:add_transition(t.state, t.jumpcond, t.description)
+	 local exists = false
+	 for _,t2 in ipairs(state.transitions) do
+	    if t2.deftransindex == i then
+	       exists = true
+	       break;
+	    end
+	 end
+	 if not exists then
+	    printf("Adding transition %s -> %s (%s, %s)", state.name, tostring(t.state),
+		   tostring(t.jumpcond), tostring(t.description))
+	    local tr = state:add_transition(t.state, t.jumpcond, t.description)
+	    tr.deftransindex = i
+	 end
       end
    end
 end

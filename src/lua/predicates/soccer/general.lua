@@ -34,19 +34,39 @@ depends_interfaces = {
    {v="gamestate", id="WM GameState", type="GameStateInterface"}
 }
 
-local ball_close_dist  = 0.18
-local ball_front_angle = 0.25
+TEAM_NONE     = gamestate.TEAM_NONE
+TEAM_CYAN     = gamestate.TEAM_CYAN
+TEAM_MAGENTA  = gamestate.TEAM_MAGENTA
+TEAM_BOTH     = gamestate.TEAM_BOTH
+
+GOAL_BLUE     = gamestate.GOAL_BLUE
+GOAL_YELLOW   = gamestate.GOAL_YELLOW
+
+ROLE_GOALIE   = gamestate.ROLE_GOALIE
+ROLE_DEFENDER = gamestate.ROLE_DEFENDER
+ROLE_ATTACKER = gamestate.ROLE_ATTACKER
+
+predparams = {
+   ball_close_dist  = 0.18,
+   ball_front_angle = 0.25,
+   own_team = TEAM_CYAN,
+   own_goal = GOAL_BLUE,
+   own_role = ROLE_ATTACKER,
+   ball_moved_min_dist = 0.1,
+   ball_moved_ref_x = 0.0,
+   ball_moved_ref_y = 0.0
+}
 
 function ball_visible()
    return wm_ball:is_valid() and wm_ball:is_visible()
 end
 
 function ball_close()
-   return wm_ball:distance() < ball_close_dist
+   return wm_ball:distance() < predparams.ball_close_dist
 end
 
 function ball_infront()
-   return math.abs(wm_ball:bearing()) < ball_front_angle
+   return math.abs(wm_ball:bearing()) < predparams.ball_front_angle
 end
 
 function gamestate_frozen()
@@ -87,4 +107,27 @@ end
 
 function gamestate_half_time()
    return gamestate:game_state() == gamestate.GS_HALF_TIME
+end
+
+function gamestate_own_team()
+   return gamestate:state_team() == predparams.own_team
+end
+
+function attacker()
+   return gamestate:role() == ROLE_ATTACKER
+end
+
+function defender()
+   return gamestate:role() == ROLE_DEFENDER
+end
+
+function goalie()
+   return gamestate:role() == ROLE_GOALIE
+end
+
+function ball_moved()
+   local dx = wm_ball:world_x() - ball_moved_ref_x
+   local dy = wm_ball:world_y() - ball_moved_ref_y
+
+   return math.sqrt(dx*dx + dy*dy) >= ball_moved_min_dist
 end

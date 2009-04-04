@@ -52,7 +52,7 @@ function WaitState:new(o)
    js.loop = WaitState.loop
    js.exit = WaitState.exit
 
-   js:add_transition(o.next_state, WaitState.jumpcond_timeover, "Time is over")
+   js:add_transition(o.next_state, WaitState.jumpcond_timeover, "Timeout")
 
    return js
 end

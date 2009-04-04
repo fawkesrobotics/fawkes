@@ -32,7 +32,9 @@ local predlibs = {}
 
 local function create_newindex_func(predicates)
    return function (module, key, value)
-	     --printf("Called for %s=%s", key, tostring(value))
+
+	     local valtype = type(value)
+
 	     if key == "depends_interfaces" then
 		-- special, interface requirements
 		depinit.init_interfaces(module._NAME, value, predlibs[module._NAME].interfaces)
@@ -40,6 +42,13 @@ local function create_newindex_func(predicates)
 		   rawset(module, n, i)
 		end
 		rawset(module, key, value)
+	     elseif key == "predparams" or key == "setup"
+		    or valtype == "table" or valtype == "table"
+		    or valtype == "string" or valtype == "number"
+		    or valtype == "boolean" then
+
+		    -- constants, params or setup function
+		   rawset(module, key, value)
 	     else
 		predname = key
 		predfunc = value
@@ -67,6 +76,17 @@ local function create_index_func(predicates)
 		rawset(module, predname, p)
 	     end
 	     return p
+	  end
+end
+
+local function create_setup_func(module)
+   return function (args)
+	     if not module.predparams then
+		module.predparams = {}
+	     end
+	     for k,v in pairs(args) do
+		module.predparams[k] = v
+	     end
 	  end
 end
 
@@ -108,6 +128,10 @@ function module_init(module)
       --__metatable = "MT protected for predlib"
    }
    setmetatable(module, metatable)
+
+   if not rawget(module, "setup") then
+      module.setup = create_setup_func(module)
+   end
 
    predlibs[module._NAME] = {module=module, predicates=predicates, interfaces = {}}
 end

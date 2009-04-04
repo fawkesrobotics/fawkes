@@ -109,7 +109,6 @@ end
 
 
 function AgentHSM:add_transitions(trans)
-   printf("self.debug = %s", tostring(self.debug))
    for _,t in ipairs(trans) do
       if t[2] then -- Normal from -> to transition
 	 assert(t[1], "Must have an originating state")
@@ -180,7 +179,8 @@ function AgentHSM:add_transitions(trans)
 	       self.states[from] = nil
 	    end
 	    s = WaitState:new{name=from, fsm=self, next_state=to,
-			      time_sec=t.wait_sec, labeltime=t.labeltime}
+			      time_sec=t.wait_sec, labeltime=t.labeltime,
+			      closure=trans.closure}
 
 	 else              -- Simple state
 	    printf("Creating simple state %s", from)
