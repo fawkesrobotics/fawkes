@@ -90,6 +90,10 @@ main(int argc, char **argv)
 
   ht.invert().print_info("HomTransform");
   tt->print_to_stdout();
+
+  ht *= ht;
+
+  delete tt;
 }
 
 

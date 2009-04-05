@@ -48,8 +48,7 @@ HomTransform::HomTransform()
  */
 HomTransform::HomTransform(const HomTransform& t)
 {
-  m_matrix = new Matrix(4, 4);
-  (*m_matrix) = (*t.m_matrix);
+  m_matrix = new Matrix(*(t.m_matrix));
 }
 
 /** Constructor from a Matrix.
@@ -208,14 +207,14 @@ HomTransform::set_trans(float x, float y, float z)
   matrix_ref(2, 3) = z;
 }
 
-/** Assignement operator.
+/** Assignment operator.
  * @param t the other transformation
  * @return reference to the lhs transformation
  */
 HomTransform&
 HomTransform::operator=(const HomTransform& t)
 {
-  m_matrix = t.m_matrix;
+  (*m_matrix) = *(t.m_matrix);
 
   return *this;
 }
@@ -238,11 +237,7 @@ HomTransform::operator*=(const HomTransform& t)
 bool
 HomTransform::operator==(const HomTransform& t) const
 {
-  bool result = false;
-  if ( m_matrix == t.m_matrix )
-    { result = true; }
-
-  return true;
+  return ((*m_matrix) == *(t.m_matrix));
 }
 
 /** Prints the matrix.
