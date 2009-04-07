@@ -33,6 +33,8 @@
 
 #include <sys/utsname.h>
 
+#include <cstdio>
+
 /** @class ColormapFile::ColormapBlockVector <fvutils/colormap/cmfile.h>
  * Vector of colormap blocks.
  * @author Tim Niemueller
