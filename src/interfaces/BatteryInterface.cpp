@@ -52,7 +52,9 @@ BatteryInterface::BatteryInterface() : Interface()
   add_fieldinfo(Interface::IFT_UINT, "current", 1, &data->current);
   add_fieldinfo(Interface::IFT_UINT, "voltage", 1, &data->voltage);
   add_fieldinfo(Interface::IFT_UINT, "temperature", 1, &data->temperature);
-  unsigned char tmp_hash[] = {0x1b, 0x21, 0x6b, 0x87, 0xfd, 0x51, 0x4c, 0xf1, 0xec, 0x82, 0xb4, 0xa3, 0x6f, 0xbf, 0x7e, 0x25};
+  add_fieldinfo(Interface::IFT_FLOAT, "absolute_soc", 1, &data->absolute_soc);
+  add_fieldinfo(Interface::IFT_FLOAT, "relative_soc", 1, &data->relative_soc);
+  unsigned char tmp_hash[] = {0xaf, 0x87, 0xbb, 0x32, 0x19, 0x6b, 0x9, 0x3d, 0x7a, 0x6c, 0xf0, 0x4a, 0xb0, 0xd8, 0xa, 0x1d};
   set_hash(tmp_hash);
 }
 
@@ -150,6 +152,66 @@ void
 BatteryInterface::set_temperature(const unsigned int new_temperature)
 {
   data->temperature = new_temperature;
+}
+
+/** Get absolute_soc value.
+ * Absolute state of charge [%]
+ * @return absolute_soc value
+ */
+float
+BatteryInterface::absolute_soc() const
+{
+  return data->absolute_soc;
+}
+
+/** Get maximum length of absolute_soc value.
+ * @return length of absolute_soc value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+BatteryInterface::maxlenof_absolute_soc() const
+{
+  return 1;
+}
+
+/** Set absolute_soc value.
+ * Absolute state of charge [%]
+ * @param new_absolute_soc new absolute_soc value
+ */
+void
+BatteryInterface::set_absolute_soc(const float new_absolute_soc)
+{
+  data->absolute_soc = new_absolute_soc;
+}
+
+/** Get relative_soc value.
+ * Relative state of charge [%]
+ * @return relative_soc value
+ */
+float
+BatteryInterface::relative_soc() const
+{
+  return data->relative_soc;
+}
+
+/** Get maximum length of relative_soc value.
+ * @return length of relative_soc value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+BatteryInterface::maxlenof_relative_soc() const
+{
+  return 1;
+}
+
+/** Set relative_soc value.
+ * Relative state of charge [%]
+ * @param new_relative_soc new relative_soc value
+ */
+void
+BatteryInterface::set_relative_soc(const float new_relative_soc)
+{
+  data->relative_soc = new_relative_soc;
 }
 
 /* =========== message create =========== */

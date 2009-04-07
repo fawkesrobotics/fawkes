@@ -8,6 +8,8 @@
     <field type="unsigned int" name="current">Battery Current [mA]</field>
     <field type="unsigned int" name="voltage">Battery Voltage [mV]</field>
     <field type="unsigned int" name="temperature">Battery Temperature [°C]</field>
+    <field type="float" name="absolute_soc">Absolute state of charge [%]</field>
+    <field type="float" name="relative_soc">Relative state of charge [%]</field>
   </data>
   <message name="PushButton">
     <comment>Push the button</comment>

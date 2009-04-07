@@ -45,6 +45,8 @@ class BatteryInterface : public Interface
     unsigned int current; /**< Battery Current [mA] */
     unsigned int voltage; /**< Battery Voltage [mV] */
     unsigned int temperature; /**< Battery Temperature [°C] */
+    float absolute_soc; /**< Absolute state of charge [%] */
+    float relative_soc; /**< Relative state of charge [%] */
   } BatteryInterface_data_t;
 
   BatteryInterface_data_t *data;
@@ -89,6 +91,12 @@ class BatteryInterface : public Interface
   unsigned int temperature() const;
   void set_temperature(const unsigned int new_temperature);
   size_t maxlenof_temperature() const;
+  float absolute_soc() const;
+  void set_absolute_soc(const float new_absolute_soc);
+  size_t maxlenof_absolute_soc() const;
+  float relative_soc() const;
+  void set_relative_soc(const float new_relative_soc);
+  size_t maxlenof_relative_soc() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

@@ -27,6 +27,12 @@ class BatteryInterface : public Interface
   unsigned int temperature();
   void set_temperature(const unsigned int new_temperature);
   int maxlenof_temperature() const;
+  float absolute_soc();
+  void set_absolute_soc(const float new_absolute_soc);
+  int maxlenof_absolute_soc() const;
+  float relative_soc();
+  void set_relative_soc(const float new_relative_soc);
+  int maxlenof_relative_soc() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
