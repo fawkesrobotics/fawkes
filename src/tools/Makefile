@@ -16,7 +16,8 @@
 BASEDIR = ../..
 
 SUBDIRS = plugin logview config plugin_gui netloggui refboxrep \
-	  worldinfo_viewer config_editor lasergui skillgui
+	  worldinfo_viewer config_editor lasergui skillgui \
+	  battery_monitor
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/rules.mk
