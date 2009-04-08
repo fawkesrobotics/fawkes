@@ -32,7 +32,6 @@
 class FieldView;
 namespace fawkes {
   class WorldInfoDataContainer;
-  class BlackBoard;
   class BatteryInterface;
 }
 

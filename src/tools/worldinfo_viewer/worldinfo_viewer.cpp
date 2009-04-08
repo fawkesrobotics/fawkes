@@ -93,6 +93,7 @@ WorldInfoViewer::WorldInfoViewer( Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 /** Destructor. */
 WorldInfoViewer::~WorldInfoViewer()
 {
+  delete m_field_view;
   delete m_wnd_main;
 }
 
@@ -187,9 +188,11 @@ WorldInfoViewer::update()
 
       fqdn = strdup( hit->c_str() );
       hostname = strtok( fqdn, &delim );
-      Gtk::TreeModel::Row row = *m_robots_list->append();
+      int i = atoi( hostname );
       
-      if ( hostname )
+      Gtk::TreeModel::Row row = *m_robots_list->append();
+    
+      if ( 0 == i ) /* fqdn is not an IP address */
       { row[ m_robot_record.hostname ] = Glib::ustring( hostname ); }
       else
       { row[ m_robot_record.hostname ] = fqdn_str; }
