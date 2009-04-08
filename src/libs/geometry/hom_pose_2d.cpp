@@ -138,7 +138,7 @@ HomPose2d::y(float y)
   m_position->y(y);
 }
 
-/** Get the angle of the current orientation.
+/** Get the angle of the current orientation [0...2pi].
  * @return the angle of the current orientation
  */
 float
@@ -153,10 +153,17 @@ HomPose2d::yaw() const
 void
 HomPose2d::yaw(float yaw)
 {
+  if ( yaw < 0 ||
+       yaw > 2 * M_PI )
+  {
+    m_yaw = yaw - 2 * M_PI * floorf( yaw / ( 2 * M_PI ) );
+  }
+  else
+  { m_yaw = yaw; }
+
   delete m_orientation;
   m_orientation = new HomVector(1.0, 0.0);
-  m_orientation->rotate_z(yaw);
-  m_yaw = yaw;
+  m_orientation->rotate_z(m_yaw);
 }
 
 /** Get the position.
@@ -197,6 +204,12 @@ void
 HomPose2d::post_transform()
 {
   m_yaw = atan2f( m_orientation->y(), m_orientation->x() );
+
+  if ( m_yaw < 0 ||
+       m_yaw > 2 * M_PI )
+  {
+    m_yaw = m_yaw - 2 * M_PI * floorf( m_yaw / ( 2 * M_PI ) );
+  }
 }
 
 } // end namespace fawkes
