@@ -57,14 +57,18 @@ class BatteryMonitorTreeView : public Gtk::TreeView
     {
       add( fqdn );
       add( short_name );
+      add( absolute_soc );
+      add( relative_soc );
       add( current );
       add( voltage );
     }
     
-    Gtk::TreeModelColumn< Glib::ustring > fqdn;        /**< The FQDN */
-    Gtk::TreeModelColumn< Glib::ustring > short_name;  /**< A shorter hostname (w/o domain) */
-    Gtk::TreeModelColumn< float >         current;     /**< The battery's current */
-    Gtk::TreeModelColumn< float >         voltage;     /**< The battery's voltage */
+    Gtk::TreeModelColumn< Glib::ustring > fqdn;         /**< The FQDN */
+    Gtk::TreeModelColumn< Glib::ustring > short_name;   /**< A shorter hostname (w/o domain) */
+    Gtk::TreeModelColumn< float >         absolute_soc; /**< The battery's absolute state of charge */
+    Gtk::TreeModelColumn< float >         relative_soc; /**< The battery's relative state of charge */
+    Gtk::TreeModelColumn< float >         current;      /**< The battery's current */
+    Gtk::TreeModelColumn< float >         voltage;      /**< The battery's voltage */
   };
 
   BatteryRecord m_battery_record;
@@ -81,8 +85,11 @@ class BatteryMonitorTreeView : public Gtk::TreeView
 
   void update();
 
+  Gtk::MessageDialog* m_dlg_warning;
+
   Glib::Dispatcher m_trigger_update;
-  float m_voltage_threshold;
+  float m_relative_soc_threshold;
+  std::map< std::string, unsigned int > m_below_threshold_counter;
 };
 
 #endif /* __TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H_ */

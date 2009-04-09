@@ -27,6 +27,7 @@
 
 #include <blackboard/remote.h>
 #include <gui_utils/interface_dispatcher.h>
+#include <gui_utils/utils.h>
 #include <interfaces/BatteryInterface.h>
 
 #include <cstring>
@@ -77,12 +78,17 @@ BatteryMonitorTreeView::BatteryMonitorTreeView( BaseObjectType* cobject,
   set_model( m_battery_list );
 
   append_column( "Host", m_battery_record.short_name );
+  append_column_numeric( "Abs. SOC [%]", m_battery_record.absolute_soc, "%.1f" ); 
+  append_column_numeric( "Rel. SOC [%]", m_battery_record.relative_soc, "%.1f" ); 
   append_column_numeric( "Voltage [V]", m_battery_record.voltage, "%.3f" );
   append_column_numeric( "Current [A]", m_battery_record.current, "%.3f" );
 
+  m_dlg_warning = dynamic_cast< Gtk::MessageDialog* >( get_widget( ref_xml, "dlgWarning" ) );
+  m_dlg_warning->hide();
+
   m_trigger_update.connect( sigc::mem_fun( *this, &BatteryMonitorTreeView::update ) );
 
-  m_voltage_threshold = 23.5;
+  m_relative_soc_threshold = 20.0;
 }
 
 /** Destructor. */
@@ -121,6 +127,8 @@ BatteryMonitorTreeView::~BatteryMonitorTreeView()
   {
     delete i->second;
   }
+
+  delete m_dlg_warning;
 }
 
 /** Add given host.
@@ -134,7 +142,8 @@ BatteryMonitorTreeView::add_host( const char* h )
   BlackBoard* rbb;
   std::map< string, BlackBoard* >::iterator i = m_remote_bbs.find( host );
 
-  if ( m_remote_bbs.end() == i )
+  if ( i == m_remote_bbs.end() )
+    // no remote blackboard opened, yet
   {
     try
     { 
@@ -145,12 +154,14 @@ BatteryMonitorTreeView::add_host( const char* h )
     {
       e.append( "Could not open remote blackboard on host %s", h );
       e.print_trace();
+      return;
     }
   }
   else
   { rbb = i->second; }
 
   if ( m_battery_interfaces.find( host ) == m_battery_interfaces.end() )
+    // no battery interface opened, yet
   {
     try
     {
@@ -158,8 +169,7 @@ BatteryMonitorTreeView::add_host( const char* h )
       bi = rbb->open_for_reading< BatteryInterface >( "Battery" );
       m_battery_interfaces[ host ] = bi;
 
-      InterfaceDispatcher* id = new InterfaceDispatcher( "BatteryMonitorTreeView",
-							 bi );
+      InterfaceDispatcher* id = new InterfaceDispatcher( "BatteryMonitorTreeView", bi );
 
       id->signal_data_changed().connect( sigc::mem_fun( *this,
 							&BatteryMonitorTreeView::on_data_changed ) );
@@ -167,14 +177,16 @@ BatteryMonitorTreeView::add_host( const char* h )
 							&BatteryMonitorTreeView::on_writer_added ) );
       id->signal_writer_removed().connect( sigc::mem_fun( *this,
 							  &BatteryMonitorTreeView::on_writer_removed ) );
-      rbb->register_listener( id,
-			      BlackBoard::BBIL_FLAG_DATA || BlackBoard::BBIL_FLAG_WRITER );
+      rbb->register_listener( id, BlackBoard::BBIL_FLAG_DATA || BlackBoard::BBIL_FLAG_WRITER );
     }
     catch ( Exception& e )
     {
       e.append( "Opening battery interface on host %s failed", h );
       e.print_trace();
     }
+
+    // add below threshold counter
+    m_below_threshold_counter[ host ] = 0;
   }
   
   m_trigger_update();
@@ -190,11 +202,14 @@ BatteryMonitorTreeView::rem_host( const char* h )
 
   std::map< string, BlackBoard* >::iterator rbbit = m_remote_bbs.find( host );
   if ( m_remote_bbs.end() == rbbit )
+    // no blackboard opened---nothing to do
   { return; }
 
   std::map< string, BatteryInterface* >::iterator biit = m_battery_interfaces.find( host );
 
   if ( m_battery_interfaces.end() != biit )
+    // battery inteface opened. listener need to be unregistered and
+    // interface nees to be closed
   {
     try
     {
@@ -211,8 +226,12 @@ BatteryMonitorTreeView::rem_host( const char* h )
     }
   }
 
+  // destroy blackboard
   delete rbbit->second;
   m_remote_bbs.erase( rbbit );
+
+  // remove below threshold counter
+  m_below_threshold_counter.erase( host );
 
   m_trigger_update();
 }
@@ -254,19 +273,46 @@ BatteryMonitorTreeView::update()
     else
     { row[ m_battery_record.short_name ] = Glib::ustring( sh ); }
     
-    free(fqdn);
-    
-    row[ m_battery_record.voltage ] = bi->voltage() / 1000.0;
+    row[ m_battery_record.absolute_soc ] = bi->absolute_soc() * 100.0;
+    row[ m_battery_record.relative_soc ] = bi->relative_soc() * 100.0;
     row[ m_battery_record.current ] = bi->current() / 1000.0;
+    row[ m_battery_record.voltage ] = bi->voltage() / 1000.0;
 
-    if ( row[ m_battery_record.voltage ] <= m_voltage_threshold )
+    string fqdn_str = string( fqdn );
+    if ( row[ m_battery_record.relative_soc ] <= m_relative_soc_threshold )
     {
-      Gtk::MessageDialog dialog( "Low battery warning" );
-      dialog.set_secondary_text( "The voltage level on " +
-				 row[ m_battery_record.short_name ],
-				 " is low." );
-      dialog.run();
+      unsigned int cnt = m_below_threshold_counter[ fqdn_str ];
+      m_below_threshold_counter[ fqdn_str ] = ++cnt;
     }
+    else
+    { m_below_threshold_counter[ fqdn_str ] = 0; }
+
+    free(fqdn);
+  }
+  
+  Glib::ustring secondary = "The batteries on ";
+  bool below_threshold = false;
+
+  for ( std::map< string, unsigned int >::iterator i = m_below_threshold_counter.begin();
+	i != m_below_threshold_counter.end();
+	++i )
+  {
+    if ( i->second > 2 )
+    {
+      secondary += "<b>" + Glib::ustring( (i->first).c_str() ) + "</b>" + " ";
+      i->second = 0;
+
+      below_threshold = true;
+    }
+  }
+  secondary += "need to be replaced.";
+
+  if ( below_threshold )
+  {
+    m_dlg_warning->set_secondary_text( secondary, true );
+    m_dlg_warning->set_urgency_hint();
+    m_dlg_warning->run();
+    m_dlg_warning->hide();
   }
 }
 
