@@ -133,28 +133,37 @@ WorldInfoViewer::get_widget(Glib::RefPtr<Gnome::Glade::Xml> ref_xml,
 bool
 WorldInfoViewer::update()
 {
-  if ( !m_data_container->new_data_available() )
-  { return true; }
+  bool robot_removed = false;
 
   if ( m_data_container->check_timeout() )
   {
+    robot_removed = true;
     list<string> timedout_hosts = m_data_container->get_timedout_hosts();
-    
+
     // remove timed out hosts
     for ( list<string>::iterator hit = timedout_hosts.begin();
 	  hit != timedout_hosts.end();
 	  ++hit )
     {
       Gtk::TreeModel::Children children = m_robots_list->children();
-      for ( Gtk::TreeModel::iterator i = children.begin();
-	    i != children.end();
-	    ++i )
+      Gtk::TreeModel::iterator cit = children.begin();
+      while ( cit != children.end() )
       {
-	Gtk::TreeModel::Row row = *i;
+	Gtk::TreeModel::Row row = *cit;
 	if ( Glib::ustring( *hit ) == row[ m_robot_record.fqdn ] )
-	{ i = m_robots_list->erase(i); }
+	{ cit = m_robots_list->erase( cit ); }
+	else
+	{ ++cit; }
       }
-    }      
+    }
+  }
+
+  // return if no new data is available
+  if ( !m_data_container->new_data_available() )
+  {
+    if ( robot_removed )
+    { m_field_view->queue_draw(); }
+    return true;
   }
 
   list<string> hosts = m_data_container->get_hosts();
@@ -263,4 +272,3 @@ WorldInfoViewer::on_show_opponents_toggled( const Glib::ustring& path )
   
   m_field_view->queue_draw();
 }
-
