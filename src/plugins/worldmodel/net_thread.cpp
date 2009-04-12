@@ -97,6 +97,31 @@ WorldModelNetworkThread::init()
 void
 WorldModelNetworkThread::finalize()
 {
+  // close all WI pose interfaces
+  for (LockMap<string, ObjectPositionInterface*>::iterator i = __pose_ifs.begin();
+       i != __pose_ifs.end();
+       ++i) {
+    blackboard->close(i->second);
+  }
+
+  // close all WI ball interfaces
+  for (LockMap<string, ObjectPositionInterface*>::iterator i = __ball_ifs.begin();
+       i != __ball_ifs.end();
+       ++i) {
+    blackboard->close(i->second);
+  }
+
+  // close all WI opponent interfaces
+  for (LockMap<string, UidTimeObjPosMap>::iterator i = __opponent_ifs.begin();
+       i != __opponent_ifs.end();
+       ++i) {
+    for (UidTimeObjPosMap::iterator j = i->second.begin();
+	 j != i->second.end();
+	 ++j) {
+      blackboard->close(j->second.second);
+    }
+  }
+
   blackboard->close(__gamestate_if);
   delete __worldinfo_transceiver;
 }
