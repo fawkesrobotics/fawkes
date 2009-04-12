@@ -1,0 +1,69 @@
+
+/***************************************************************************
+ *  hom_coord.h - Homogeneous coordinates - tolua++ template
+ *
+ *  Created: Sat Apr 11 19:20:38 2009
+ *  Copyright  2009  Daniel Beck
+ *
+ *  $Id: hom_coord.h 1944 2009-03-03 01:21:18Z tim $
+ *
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
+ */
+
+$#include <geometry/hom_coord.h>
+
+namespace fawkes {
+
+class HomCoord : public Printable
+{
+  HomCoord(const HomCoord& c);
+
+  virtual ~HomCoord();
+
+  virtual float  x() const;
+  virtual float& x();
+  virtual HomCoord& x(float x);
+
+  virtual float  y() const;
+  virtual float& y();
+  virtual HomCoord& y(float y);
+
+  virtual float  z() const;
+  virtual float& z();
+  virtual HomCoord& z(float z);
+
+  virtual float  w() const;
+  virtual float& w();
+  virtual HomCoord& w(float w);
+
+  virtual HomCoord& rotate_x(float rad);
+  virtual HomCoord& rotate_y(float rad);
+  virtual HomCoord& rotate_z(float rad);
+
+  HomCoord& transform(const HomTransform& t);
+
+  virtual HomCoord  operator-(const HomCoord& h) const;
+
+  virtual HomCoord  operator+(const HomCoord& h) const;
+		
+  virtual float operator*(const HomCoord& h) const;
+
+  virtual HomCoord  operator*(const float s) const;
+		
+  virtual bool operator==(const HomCoord& h) const;
+};
+
+} // end namespace fawkes

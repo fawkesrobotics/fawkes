@@ -17,6 +17,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/etc/buildsys/lua.mk
 
 HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
 ifeq ($(HAVE_OPENCV),1)
@@ -43,8 +44,26 @@ OBJS_libfawkesgeometry = matrix.o		\
 			 line_segment.o		\
 			 hom_pose_2d.o
 
-OBJS_all = $(OBJS_libfawkesgeometry)
+CFLAGS_fawkesgeometry_tolua = -Wno-unused-function $(CFLAGS_LUA)
+TOLUA_fawkesgeometry = $(wildcard $(SRCDIR)/*.tolua $(SRCDIR)/*/*.tolua $(SRCDIR)/*/*/*.tolua)
+LDFLAGS_lua_fawkesgeometry = $(LDFLAGS_LUA)
+LIBS_lua_fawkesgeometry = fawkescore fawkesgeometry $(TOLUA_LIBS)
+OBJS_lua_fawkesgeometry = fawkesgeometry_tolua.o
+
+OBJS_all = $(OBJS_libfawkesgeometry) $(OBJS_lua_fawkesgeometry)
 LIBS_all = $(LIBDIR)/libfawkesgeometry.so
+ifeq ($(HAVE_TOLUA),1)
+  LIBS_all += $(LUALIBDIR)/fawkesgeometry.so
+  TARGETS_all += $(SRCDIR)/fawkesgeometry_tolua.cpp
+else
+  WARN_TARGETS += warning_tolua_wrapper
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+endif
+
+$(LUALIBDIR)/fawkesutils.so: | $(LIBDIR)/libfawkesutils.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 

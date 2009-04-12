@@ -1,0 +1,46 @@
+
+/***************************************************************************
+ *  hom_point.h - Homogenous point - tolua++ template
+ *
+ *  Created: Sat Apr 11 16:33:55 2009
+ *  Copyright  2009  Daniel Beck
+ *
+ *  $Id: hom_point.h 2090 2009-04-02 20:14:25Z beck $
+ *
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
+ */
+
+$#include <geometry/hom_coord.h>
+$#include <geometry/hom_vector.h>
+
+namespace fawkes {
+
+class HomPoint : public HomCoord
+{
+ public:
+  HomPoint(float x = 0.0, float y = 0.0, float z = 0.0);
+  HomPoint(const fawkes::HomCoord& h);
+  virtual ~HomPoint();
+
+  float distance() const;
+
+  HomPoint& move(float dx, float dy, float dz);
+  HomPoint& move_to(float x, float y, float z); 
+
+  HomVector operator-(const HomPoint& p) const;
+};
+
+} // end namespace fawkes

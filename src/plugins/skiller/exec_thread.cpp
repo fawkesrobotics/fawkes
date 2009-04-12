@@ -149,6 +149,7 @@ SkillerExecutionThread::init()
     __lua->add_package("fawkesutils");
     __lua->add_package("fawkesconfig");
     __lua->add_package("fawkesinterface");
+    __lua->add_package("fawkesgeometry");
 
     __lua->set_string("SKILLSPACE", __cfg_skillspace.c_str());
     __lua->set_usertype("config", config, "Configuration", "fawkes");
