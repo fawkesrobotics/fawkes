@@ -53,14 +53,18 @@ public:
   void set_color_own_pos(YUV_t color);
   void set_color_own_pos_est(YUV_t color);
 
-  virtual void draw_field(SharedMemoryImageBuffer *target, bool draw_background = true, bool draw_landscape = true);
+  virtual void draw_field(unsigned char *yuv422_planar, unsigned int img_width, unsigned int img_height,
+                          bool draw_background = true, bool draw_landscape = true);
 
 protected:
   inline void clear_own_pos();
   inline float get_scale(unsigned int img_width, unsigned int img_height, bool draw_landscape = true) const;
-  virtual void draw_line_points(SharedMemoryImageBuffer *target, bool draw_landscape = true, float scale = 0) const;
-  virtual void draw_lines(SharedMemoryImageBuffer *target, YUV_t color, bool draw_landscape = true, float scale = 0) const;
+  virtual void draw_line_points(bool draw_landscape = true, float scale = 0) const;
+  virtual void draw_lines(YUV_t color, bool draw_landscape = true, float scale = 0) const;
 
+  unsigned char *_img_buffer;
+  unsigned int   _img_width;
+  unsigned int   _img_height;
 
 private: //Members
   const FieldLines     &__lines;

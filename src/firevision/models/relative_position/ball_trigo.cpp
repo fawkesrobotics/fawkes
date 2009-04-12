@@ -63,7 +63,9 @@ BallTrigoRelativePos::BallTrigoRelativePos(unsigned int image_width,
 					   float ball_circumference)
 {
   __image_width        = image_width;
+  __image_width_2      = __image_width / 2;
   __image_height       = image_height;
+  __image_height_2     = __image_height / 2;
   __ball_circumference = ball_circumference;
   __camera_height      = camera_height;
   __camera_offset_x    = camera_offset_x;
@@ -87,7 +89,7 @@ BallTrigoRelativePos::BallTrigoRelativePos(unsigned int image_width,
 
 
 float
-BallTrigoRelativePos::get_distance() const 
+BallTrigoRelativePos::get_distance() const
 {
   return __distance;
 }
@@ -176,19 +178,19 @@ BallTrigoRelativePos::calc()
 {
 #ifdef OLD_COORD_SYS
   /* Bearing shall be clockwise positive. */
-  __bearing =   (((__cirt_center.x - __image_width/2) * __pan_rad_per_pixel
+  __bearing =   (((__cirt_center.x - __image_width_2) * __pan_rad_per_pixel
 		  + __pan + __camera_base_pan));
 #else
   /* Bearing shall be counter-clockwise positive. */
-  __bearing = - (((__cirt_center.x - __image_width/2) * __pan_rad_per_pixel
+  __bearing = - (((__cirt_center.x - __image_width_2) * __pan_rad_per_pixel
 		  + __pan + __camera_base_pan));
 #endif
 
   /* Slope shall be downward negative */
-  __slope   = - ((__cirt_center.y - __image_height / 2) * __tilt_rad_per_pixel
+  __slope   = ((__image_height_2 - __cirt_center.y) * __tilt_rad_per_pixel
 		 - __tilt - __camera_base_tilt);
 
-  float alpha = 0.5 * M_PI - __slope;
+  float alpha = M_PI_2 - __slope;
 
   float e = __camera_height - __ball_radius - __ball_radius * cos(alpha);
   __distance = - (e * tan(alpha) + __ball_radius * sin(alpha));

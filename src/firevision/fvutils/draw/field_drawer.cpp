@@ -39,6 +39,15 @@ using namespace fawkes;
  *
  * @author Christof Rath
  */
+/** @var float FieldDrawer::_img_buffer
+ * The pointer to the target image buffer
+ */
+/** @var float FieldDrawer::_img_width
+ * The width of the target image buffer
+ */
+/** @var float FieldDrawer::_img_height
+ * The height of the target image buffer
+ */
 
 /**
  * Created a new field object
@@ -60,8 +69,8 @@ FieldDrawer::FieldDrawer(const FieldLines &lines) :
   set_color_own_pos(YUV_t::cyan());
   set_color_line_points(YUV_t::cyan());
 
-  set_color_own_pos_est(YUV_t(180, 128, 0)); //yellowish
-  set_color_line_points_est(YUV_t(180, 128, 0));
+  set_color_own_pos_est(YUV_t::yellow()); //yellowish
+  set_color_line_points_est(YUV_t::yellow());
 }
 
 /**
@@ -116,6 +125,10 @@ FieldDrawer::clear_own_pos()
   __head_yaw          = 12345;
   __points            = NULL;
   __points_est        = NULL;
+
+  _img_buffer = NULL;
+  _img_width  = 0;
+  _img_height = 0;
 }
 
 /**
@@ -233,110 +246,84 @@ FieldDrawer::set_color_own_pos_est(YUV_t color)
  * Draws the field (including the own position [est]).
  * The position [est] and line points [est] gets reseted after drawing
  *
- * @param target the image buffer
+ * @param yuv422_planar the image buffer
+ * @param img_width the image width
+ * @param img_height the image height
  * @param draw_background true if the background (field and border) should be drawn
  * @param draw_landscape true if the field should be drawn landscape
  */
 void
-FieldDrawer::draw_field(SharedMemoryImageBuffer *target, bool draw_background, bool draw_landscape)
+FieldDrawer::draw_field(unsigned char *yuv422_planar, unsigned int img_width, unsigned int img_height,
+                        bool draw_background, bool draw_landscape)
 {
+  _img_buffer = yuv422_planar;
+  _img_width  = img_width;
+  _img_height = img_height;
+
   float f_width  = (draw_landscape ? __lines.get_field_length() : __lines.get_field_width());
   float f_height = (draw_landscape ? __lines.get_field_width() : __lines.get_field_length());
-  float scale = std::min(target->width() / f_width, target->height() / f_height);
+  float scale = std::min(_img_width / f_width, _img_height / f_height);
 
   if (draw_background) {
     unsigned int draw_width  = static_cast<unsigned int>(f_width * scale);
     unsigned int draw_height = static_cast<unsigned int>(f_height * scale);
-    unsigned int u_offset = target->width() * target->height();
+    unsigned int u_offset = _img_width * _img_height;
     unsigned int v_offset = u_offset + u_offset / 2;
 
-    if (target->width() == draw_width) {//use memcpy
-      unsigned int offset = (target->height() - draw_height) / 2;
-      memset(target->buffer(), __c_background.Y, offset * target->width());
-      memset(target->buffer() + offset * target->width(), __c_field.Y, draw_height * target->width());
-      memset(target->buffer() + (offset + draw_height) * target->width(), __c_background.Y, offset * target->width());
+    if (_img_width == draw_width) {//use memcpy
+      unsigned int offset = (_img_height - draw_height) / 2;
+      memset(_img_buffer, __c_background.Y, offset * _img_width);
+      memset(_img_buffer + offset * _img_width, __c_field.Y, draw_height * _img_width);
+      memset(_img_buffer + (offset + draw_height) * _img_width, __c_background.Y, offset * _img_width);
 
       offset /= 2;
       draw_height /= 2;
 
-      memset(target->buffer() + u_offset, __c_background.U, offset * target->width());
-      memset(target->buffer() + u_offset + offset * target->width(), __c_field.U, draw_height * target->width());
-      memset(target->buffer() + u_offset + (offset + draw_height) * target->width(), __c_background.U, offset * target->width());
+      memset(_img_buffer + u_offset, __c_background.U, offset * _img_width);
+      memset(_img_buffer + u_offset + offset * _img_width, __c_field.U, draw_height * _img_width);
+      memset(_img_buffer + u_offset + (offset + draw_height) * _img_width, __c_background.U, offset * _img_width);
 
-      memset(target->buffer() + v_offset, __c_background.V, offset * target->width());
-      memset(target->buffer() + v_offset + offset * target->width(), __c_field.V, draw_height * target->width());
-      memset(target->buffer() + v_offset + (offset + draw_height) * target->width(), __c_background.V, offset * target->width());
+      memset(_img_buffer + v_offset, __c_background.V, offset * _img_width);
+      memset(_img_buffer + v_offset + offset * _img_width, __c_field.V, draw_height * _img_width);
+      memset(_img_buffer + v_offset + (offset + draw_height) * _img_width, __c_background.V, offset * _img_width);
     } else {
       //center the field
-      unsigned int sx = (target->width() - draw_width) / 2;
-      unsigned int sy = (target->height() - draw_height) / 2;
+      unsigned int sx = (_img_width - draw_width) / 2;
+      unsigned int sy = (_img_height - draw_height) / 2;
 
-      ROI f_roi(sx,sy, draw_width,draw_height, target->width(),target->height());
-      for (unsigned int x = 0; x < target->width(); ++x) {
-        for (unsigned int y = 0; y < target->height(); ++y) {
+      ROI f_roi(sx,sy, draw_width,draw_height, _img_width,_img_height);
+      for (unsigned int x = 0; x < _img_width; ++x) {
+        for (unsigned int y = 0; y < _img_height; ++y) {
           if (f_roi.contains(x, y)) {
-            target->buffer()[y * target->width() + x] = __c_field.Y;
-            target->buffer()[(y * target->width() + x) / 2 + u_offset] = __c_field.U;
-            target->buffer()[(y * target->width() + x) / 2 + v_offset] = __c_field.V;
+            _img_buffer[y * _img_width + x] = __c_field.Y;
+            _img_buffer[(y * _img_width + x) / 2 + u_offset] = __c_field.U;
+            _img_buffer[(y * _img_width + x) / 2 + v_offset] = __c_field.V;
           } else {
-            target->buffer()[y * target->width() + x] = __c_background.Y;
-            target->buffer()[(y * target->width() + x) / 2 + u_offset] = __c_background.U;
-            target->buffer()[(y * target->width() + x) / 2 + v_offset] = __c_background.V;
+            _img_buffer[y * _img_width + x] = __c_background.Y;
+            _img_buffer[(y * _img_width + x) / 2 + u_offset] = __c_background.U;
+            _img_buffer[(y * _img_width + x) / 2 + v_offset] = __c_background.V;
           }
         }
       }
     }
   } else {
-    unsigned int size = target->width() * target->height();
-    memset(target->buffer(), 0, size);
-    memset(target->buffer() + size, 128, size);
+    unsigned int size = _img_width * _img_height;
+    memset(_img_buffer, 0, size);
+    memset(_img_buffer + size, 128, size);
   } //END: if (draw_background)
 
 
-  draw_lines(target, __c_lines, draw_landscape, scale);
+  draw_lines(__c_lines, draw_landscape, scale);
 
   cart_coord_2d_t f_offs = __lines.get_field_offsets();
-  unsigned int center_x = std::max(0, static_cast<int>(target->width() / 2) + static_cast<int>(f_offs.x * scale));
-  unsigned int center_y = std::max(0, static_cast<int>(target->height() / 2) + static_cast<int>(f_offs.y * scale));
-
-  if (__own_position.ori != 12345) {
-    Drawer d;
-    d.set_buffer(target->buffer(), target->width(), target->height());
-    d.set_color(__c_own_pos);
-    unsigned int r = target->width() / 40;
-    int x   = static_cast<int>(__own_position.x * scale);
-    int y   = static_cast<int>(__own_position.y * scale);
-    int dx  = static_cast<int>(r * cosf(__own_position.ori));
-    int dy  = static_cast<int>(r * sinf(__own_position.ori));
-
-    if (draw_landscape) {
-      x += center_x;
-      y = center_y - y;
-      d.draw_circle(x, y, r);
-      d.draw_line(x, y, x + dx, y - dy);
-    } else {
-      x += center_y;
-      y = center_x - y;
-      d.draw_circle(y, x, r);
-      d.draw_line(y, x, y + dy, x - dx);
-    }
-
-    if(__head_yaw != 12345) {
-      int hx = static_cast<int>(r * cosf(__own_position.ori + __head_yaw));
-      int hy = static_cast<int>(r * sinf(__own_position.ori + __head_yaw));
-      int hdx = static_cast<int>((r + 4) * cosf(__own_position.ori + __head_yaw));
-      int hdy = static_cast<int>((r + 4) * sinf(__own_position.ori + __head_yaw));
-
-      if (draw_landscape) d.draw_line(x + hx, y - hy, x + hdx, y - hdy);
-      else d.draw_line(y + hy, x - hx, y + hdy, x - hdx);
-    }
-  }
+  unsigned int center_x = std::max(0, static_cast<int>(_img_width / 2) + static_cast<int>(f_offs.x * scale));
+  unsigned int center_y = std::max(0, static_cast<int>(_img_height / 2) + static_cast<int>(f_offs.y * scale));
 
   if (__own_pos_est.ori != 12345) {
     Drawer d;
-    d.set_buffer(target->buffer(), target->width(), target->height());
+    d.set_buffer(_img_buffer, _img_width, _img_height);
     d.set_color(__c_own_pos_est);
-    unsigned int r = target->width() / 40;
+    unsigned int r = _img_width / 40;
     int x = static_cast<int>(__own_pos_est.x * scale);
     int y = static_cast<int>(__own_pos_est.y * scale);
     int dx = static_cast<int>(r * cosf(__own_pos_est.ori));
@@ -365,40 +352,62 @@ FieldDrawer::draw_field(SharedMemoryImageBuffer *target, bool draw_background, b
     }
   }
 
-  draw_line_points(target, draw_landscape, scale);
+  if (__own_position.ori != 12345) {
+    Drawer d;
+    d.set_buffer(_img_buffer, _img_width, _img_height);
+    d.set_color(__c_own_pos);
+    unsigned int r = _img_width / 40;
+    int x   = static_cast<int>(__own_position.x * scale);
+    int y   = static_cast<int>(__own_position.y * scale);
+    int dx  = static_cast<int>(r * cosf(__own_position.ori));
+    int dy  = static_cast<int>(r * sinf(__own_position.ori));
+
+    if (draw_landscape) {
+      x += center_x;
+      y = center_y - y;
+      d.draw_circle(x, y, r);
+      d.draw_line(x, y, x + dx, y - dy);
+    } else {
+      x += center_y;
+      y = center_x - y;
+      d.draw_circle(y, x, r);
+      d.draw_line(y, x, y + dy, x - dx);
+    }
+
+    if(__head_yaw != 12345) {
+      int hx = static_cast<int>(r * cosf(__own_position.ori + __head_yaw));
+      int hy = static_cast<int>(r * sinf(__own_position.ori + __head_yaw));
+      int hdx = static_cast<int>((r + 4) * cosf(__own_position.ori + __head_yaw));
+      int hdy = static_cast<int>((r + 4) * sinf(__own_position.ori + __head_yaw));
+
+      if (draw_landscape) d.draw_line(x + hx, y - hy, x + hdx, y - hdy);
+      else d.draw_line(y + hy, x - hx, y + hdy, x - hdx);
+    }
+  }
+
+  draw_line_points(draw_landscape, scale);
   clear_own_pos();
 }
 
 /**
  * Draws the line points
- * @param target the image buffer
  * @param draw_landscape true if the field should be drawn landscape
  * @param scale the pre calculated scale (conversion factor between image size and field size - if 0 the value gets calculated)
  */
 void
-FieldDrawer::draw_line_points(SharedMemoryImageBuffer *target, bool draw_landscape, float scale) const
+FieldDrawer::draw_line_points(bool draw_landscape, float scale) const
 {
   if (!scale) {
-    if (draw_landscape) scale = std::min(target->width() / __lines.get_field_length(), target->height() / __lines.get_field_width());
-    else scale = std::min(target->width() / __lines.get_field_width(), target->height() / __lines.get_field_length());
+    if (draw_landscape) scale = std::min(_img_width / __lines.get_field_length(), _img_height / __lines.get_field_width());
+    else scale = std::min(_img_width / __lines.get_field_width(), _img_height / __lines.get_field_length());
   }
 
   cart_coord_2d_t f_offs = __lines.get_field_offsets();
-  unsigned int center_x = std::max(0, static_cast<int>(target->width() / 2) + static_cast<int>(f_offs.x * scale));
-  unsigned int center_y = std::max(0, static_cast<int>(target->height() / 2) + static_cast<int>(f_offs.y * scale));
+  unsigned int center_x = std::max(0, static_cast<int>(_img_width / 2) + static_cast<int>(f_offs.x * scale));
+  unsigned int center_y = std::max(0, static_cast<int>(_img_height / 2) + static_cast<int>(f_offs.y * scale));
 
   Drawer d;
-  d.set_buffer(target->buffer(), target->width(), target->height());
-
-  if (__points) {
-    d.set_color(__c_line_points);
-    for (fld_line_points_t::const_iterator it = __points->begin(); it != __points->end(); ++it) {
-      unsigned int y = static_cast<unsigned int>(center_y - (draw_landscape ? it->y : it->x) * scale);
-      unsigned int x = static_cast<unsigned int>((draw_landscape ? it->x : it->y) * scale + center_x);
-
-      d.draw_cross(x, y, 4);
-    }
-  }
+  d.set_buffer(_img_buffer, _img_width, _img_height);
 
   if (__points_est) {
     d.set_color(__c_line_points_est);
@@ -409,34 +418,43 @@ FieldDrawer::draw_line_points(SharedMemoryImageBuffer *target, bool draw_landsca
       d.draw_cross(x, y, 4);
     }
   }
+
+  if (__points) {
+    d.set_color(__c_line_points);
+    for (fld_line_points_t::const_iterator it = __points->begin(); it != __points->end(); ++it) {
+      unsigned int y = static_cast<unsigned int>(center_y - (draw_landscape ? it->y : it->x) * scale);
+      unsigned int x = static_cast<unsigned int>((draw_landscape ? it->x : it->y) * scale + center_x);
+
+      d.draw_cross(x, y, 4);
+    }
+  }
 }
 
 
 /**
  * Draws the field lines to a SharedMemoryImageBuffer
  *
- * @param target the SharedMemoryImageBuffer
  * @param color of the lines
  * @param draw_landscape if true (default) the field is supposed to be landscape
  * @param scale the conversation factor between [m] and [px] (if 0 this value gets calculated)
  */
 void
-FieldDrawer::draw_lines(SharedMemoryImageBuffer *target, YUV_t color, bool draw_landscape, float scale) const
+FieldDrawer::draw_lines(YUV_t color, bool draw_landscape, float scale) const
 {
   if (!scale) {
-    if (draw_landscape) scale = std::min(target->width() / __lines.get_field_length(), target->height() / __lines.get_field_width());
-    else scale = std::min(target->width() / __lines.get_field_width(), target->height() / __lines.get_field_length());
+    if (draw_landscape) scale = std::min(_img_width / __lines.get_field_length(), _img_height / __lines.get_field_width());
+    else scale = std::min(_img_width / __lines.get_field_width(), _img_height / __lines.get_field_length());
   }
 
   cart_coord_2d_t f_offs = __lines.get_field_offsets();
   int f_off_x = static_cast<int>(f_offs.x * scale);
   int f_off_y = static_cast<int>(f_offs.y * scale);
 
-  unsigned int off_x = std::max(0, static_cast<int>(target->width() / 2) + f_off_x);
-  unsigned int off_y = std::max(0, static_cast<int>(target->height() / 2) + f_off_y);
+  unsigned int off_x = std::max(0, static_cast<int>(_img_width / 2) + f_off_x);
+  unsigned int off_y = std::max(0, static_cast<int>(_img_height / 2) + f_off_y);
 
   Drawer d;
-  d.set_buffer(target->buffer(), target->width(), target->height());
+  d.set_buffer(_img_buffer, _img_width, _img_height);
   d.set_color(color);
 
   for (FieldLines::const_iterator it = __lines.begin(); it != __lines.end(); ++it) {

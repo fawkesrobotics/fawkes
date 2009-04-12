@@ -40,7 +40,8 @@ class Vector
   unsigned int size() const;
   void         set_size(unsigned int size);
 
-  float* data_ptr() const;
+  float* data_ptr() { return m_data; }
+  const float* data_ptr() const { return m_data; }
 
   float  get(unsigned int d) const;
   float& get(unsigned int d);
@@ -65,7 +66,7 @@ class Vector
   Vector& operator*=(const float& f);
   Vector  operator/(const float& f) const;
   Vector& operator/=(const float& f);
-	
+
   float   operator*(const Vector& v) const;
 
   Vector  operator+(const Vector& v) const;

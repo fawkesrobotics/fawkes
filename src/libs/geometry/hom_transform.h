@@ -57,7 +57,7 @@ class HomTransform
   HomTransform&           operator*=(const HomTransform& t);
 
   bool operator==(const HomTransform& t) const;
-  
+
   void print_info( const char* name = 0,
 		   const char* col_sep = 0,
 		   const char* row_sep = 0 ) const;
@@ -85,12 +85,9 @@ template <typename T> inline T HomTransform::operator*(const T& p) const
  */
 template <> inline HomTransform HomTransform::operator*<HomTransform>(const HomTransform& t) const
   {
-    Matrix m(4, 4);
-    m = (*m_matrix) * (*t.m_matrix);
-    
-    return HomTransform(m);
+    return HomTransform((*m_matrix) * (*t.m_matrix));
   }
- 
+
 } // end namespace fawkes
 
 #endif /* __GEOMETRY_TRANSFORM_H_ */

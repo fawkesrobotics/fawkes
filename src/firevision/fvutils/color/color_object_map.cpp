@@ -1,3 +1,4 @@
+
 /***************************************************************************
  *  color_object_map.cpp - Mapping between color and roi
  *
@@ -22,102 +23,113 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-
 #include "color_object_map.h"
 
 /** @class ColorObjectMap color_object_map.h <fvutils/color/color_object_map.h>
  * Color mapping class.
- * This class defines a mapping between regions of interest and @see color_t 
+ * This class defines a mapping between regions of interest and @see color_t
  * values. It also provides corresponding @see YUVColor values for a color_t.
- *
- * @param singelton_ A singelton instance of ColorObjectMap
- * @param cols_ A list of color_t with hint_t (ROI's) as index
- * @param rois_ A list of ROI's with color_t as index
  *
  * @author Christof Rath
  */
 
-/** Static initialzer */
-ColorObjectMap* ColorObjectMap::singleton_ = NULL;
+/** @var static ColorObjectMap* ColorObjectMap::__singleton
+ * A singelton instance of ColorObjectMap
+ */
+/** @var std::map<hint_t, color_t> ColorObjectMap::__color_for_hint
+ * A list of color_t with hint_t (ROI's) as index
+ */
+/** @var std::map<color_t, hint_t> ColorObjectMap::__hint_for_color
+ * A list of hint_t (ROI's) with color_t as index
+ */
+/** @var color_t ColorObjectMap::__c_other
+ * The default color
+ */
+/** @var hint_t ColorObjectMap::__h_unknown
+ * The default hint
+ */
 
-/** Default Contructor. 
+/** @fn static const ColorObjectMap& ColorObjectMap::get_instance()
+ * ColorObjectMap getter.
+ * @return the one and only instance of ColorObjectMap
+ */
+
+/** @fn const color_t& ColorObjectMap::get(hint_t hint) const
+ * Inline color_t reference getter.
+ * @param hint the ROI of interest
+ * @return the matching color_t value
+ */
+
+/** @fn const hint_t ColorObjectMap::get(color_t color) const
+ * Inline hint_t(ROI) reference getter
+ * @param color value of interest
+ * @return corresponding ROI
+ */
+
+/** Static initialzer */
+ColorObjectMap* ColorObjectMap::__singleton = new ColorObjectMap();
+
+/** Default Contructor.
  * The constructor is private to implement a singelton pattern
  */
 ColorObjectMap::ColorObjectMap()
 {
-	col_ = new std::map<hint_t, color_t>();
-	roi_ = new std::map<color_t, hint_t>();
+  __c_other   = C_OTHER;
+  __h_unknown = H_UNKNOWN;
 
-	//Standard mapping:
-	set_mapping(H_BALL,        C_ORANGE);
-	set_mapping(H_ROBOT,       C_BLACK);
-	set_mapping(H_ROBOT_OPP,   C_RED);
-	set_mapping(H_FIELD,       C_GREEN);
-	set_mapping(H_GOAL_YELLOW, C_YELLOW);
-	set_mapping(H_GOAL_BLUE,   C_CYAN);
-	set_mapping(H_LINE,        C_WHITE);
-	set_mapping(H_BACKGROUND,  C_BACKGROUND);
+  //Standard mapping:
+  set_mapping(H_BALL, C_ORANGE);
+  set_mapping(H_ROBOT, C_BLACK);
+  set_mapping(H_ROBOT_OPP, C_RED);
+  set_mapping(H_FIELD, C_GREEN);
+  set_mapping(H_GOAL_YELLOW, C_YELLOW);
+  set_mapping(H_GOAL_BLUE, C_CYAN);
+  set_mapping(H_LINE, C_WHITE);
+  set_mapping(H_BACKGROUND, C_BACKGROUND);
 }
 
 /** Destructor */
 ColorObjectMap::~ColorObjectMap()
 {
-	delete col_;
-	delete roi_;
-}
-
-/**
- * ColorObjectMap getter.
- * @return the one and only instance of ColorObjectMap
- */
-ColorObjectMap* 
-ColorObjectMap::get_instance()
-{
-	if (!singleton_)
-		singleton_ = new ColorObjectMap();
-
-	return singleton_;
 }
 
 /** YUV_t getter.
  * @param color a color_t value (@see color_t enumeration)
  * @return a corresponding YUV color
  */
-YUV_t
-ColorObjectMap::get_color(color_t color)
+YUV_t ColorObjectMap::get_color(color_t color)
 {
-	switch (color)
-	{
-		case C_ORANGE:
-			return YUV_t(128, 30, 230);
+  switch (color) {
+    case C_ORANGE:
+      return YUV_t::orange();
 
-		case C_MAGENTA:
-			return YUV_t(105, 212, 234);
+    case C_MAGENTA:
+      return YUV_t::magenta();
 
-		case C_CYAN:
-			return YUV_t(178, 170, 0);
+    case C_CYAN:
+      return YUV_t::cyan();
 
-		case C_BLUE:
-			return YUV_t(29, 255, 107);
+    case C_BLUE:
+      return YUV_t::blue();
 
-		case C_YELLOW:
-			return YUV_t(225, 0, 148);
+    case C_YELLOW:
+      return YUV_t::yellow();
 
-		case C_GREEN:
-			return YUV_t(64, 95, 85);
+    case C_GREEN:
+      return YUV_t::green();
 
-		case C_WHITE:
-			return YUV_t(255, 128, 128);
+    case C_WHITE:
+      return YUV_t::white();
 
-		case C_RED:
-			return YUV_t(76, 86, 252);
+    case C_RED:
+      return YUV_t::red();
 
-		case C_BLACK:
-			return YUV_t(0, 128, 128);
+    case C_BLACK:
+      return YUV_t::black();
 
-		default: //also C_BACKGROUND
-			return YUV_t(128, 128, 128);
-	}
+    default: //also C_BACKGROUND
+      return YUV_t::gray();
+  }
 }
 
 /** Mapping setter.
@@ -125,44 +137,16 @@ ColorObjectMap::get_color(color_t color)
  * @param roi region of interest (@see hint_t enumeration)
  * @param color matching color_t value (@see color_t enumeration)
  */
-void
-ColorObjectMap::set_mapping(hint_t roi, color_t color)
+void ColorObjectMap::set_mapping(hint_t roi, color_t color)
 {
-	hint_t cur_roi = get(color);
-	if (cur_roi != H_UNKNOWN)
-	{
-		color_t cur_col = get(roi);
-		(*col_)[cur_roi] = C_OTHER;
-		(*roi_)[cur_col] = H_UNKNOWN;
-	}
+  hint_t cur_roi = get(color);
+  if (cur_roi != H_UNKNOWN) //There is a previous mapping -> unlink it
+  {
+    color_t cur_col = get(roi);
+    __color_for_hint[cur_roi] = C_OTHER;
+    __hint_for_color[cur_col] = H_UNKNOWN;
+  }
 
-	(*col_)[roi] = color;
-	(*roi_)[color] = roi;
+  __color_for_hint[roi] = color;
+  __hint_for_color[color] = roi;
 }
-
-/** color_t getter.
- * @param roi the ROI of interest
- * @return the matching color_t value
- */
-color_t
-ColorObjectMap::get(hint_t roi)
-{
-	if (col_->count(roi))
-		return (*col_)[roi];
-
-	return C_OTHER;
-}
-
-/** ROI getter
- * @param color value of interest
- * @return corresponding ROI
- */
-hint_t
-ColorObjectMap::get(color_t color)
-{
-	if (roi_->count(color))
-		return (*roi_)[color];
-
-	return H_UNKNOWN;
-}
-

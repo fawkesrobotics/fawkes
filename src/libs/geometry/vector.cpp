@@ -33,6 +33,15 @@ namespace fawkes {
 
 /** @class Vector geometry/vector.h
  * A simple column vector.
+ *
+ * @fn float* Vector::data_ptr()
+ * Get pointer to the internal data container.
+ * @return pointer to the internal data container
+ *
+ * @fn const float* Vector::data_ptr() const
+ * Get pointer to the internal data container.
+ * @return pointer to the internal data container
+ *
  * @author Daniel Beck
  */
 
@@ -120,17 +129,8 @@ Vector::set_size(unsigned int size)
     { delete[] m_data; }
   else
     { m_manage_memory = true;}
-  
-  m_data = t;
-}
 
-/** Get pointer to the internal data container.
- * @return pointer to the internal data container
- */
-float*
-Vector::data_ptr() const
-{
-  return m_data;
+  m_data = t;
 }
 
 /** Get a certain element.
@@ -510,15 +510,15 @@ std::ostream&
 operator<<(std::ostream& stream, const Vector &v)
 {
   stream << "[";
-  
+
   for (unsigned int i = 0; i < v.m_size; ++i)
     {
       stream << v.get(i);
-      
+
       if (i + 1 < v.m_size)
 	stream << ",";
     }
-  
+
   return stream << "]";
 }
 

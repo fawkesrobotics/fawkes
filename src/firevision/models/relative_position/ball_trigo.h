@@ -73,7 +73,9 @@ private:
   float	                __tilt_rad_per_pixel;
 
   unsigned int          __image_width;
+  unsigned int          __image_width_2;  // image_width / 2
   unsigned int          __image_height;
+  unsigned int          __image_height_2; // image_height / 2
 
   float                 __camera_height;
   float                 __camera_offset_x;

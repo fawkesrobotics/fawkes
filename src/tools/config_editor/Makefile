@@ -28,9 +28,10 @@ OBJS_ffconfiggui = main.o			\
 		   config_edit_dialog.o		\
 		   config_add_dialog.o		\
 		   config_remove_dialog.o	\
-		   config_editor.o		\
+		   config_editor.o			\
+		   config_editor_plugin.o	\
 		   retriever_config_plugin.o	\
-		   config_editor_plugin.o
+		   naostiffness_config_plugin.o
 OBJS_all = $(OBJS_ffconfiggui)
 
 ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM),11)

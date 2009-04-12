@@ -252,7 +252,7 @@ NetworkConfiguration::send_get(const char *path, unsigned int msgid)
     mutex->unlock();
     throw NullPointerException("NetworkConfiguration::send_get: msg == NULL");
   }
- 
+
   if ( msg->msgid() != msgid ) {
     msg->unref();
     msg = NULL;
@@ -282,6 +282,7 @@ NetworkConfiguration::get_float(const char *path)
       f = mirror_config->get_float(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_float: exception in mirror database");
+      mutex->unlock();
       throw;
     }
   } else {

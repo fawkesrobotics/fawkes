@@ -26,6 +26,7 @@
 
 #include <utils/math/types.h>
 #include <list>
+#include <string>
 
 typedef std::list<fawkes::arc_t> field_circles_t;
 
@@ -35,22 +36,24 @@ public:
   virtual ~FieldLines();
 
   float get_line_width() const;
-  float get_field_length() const { return __field_length; }
-  float get_field_width() const { return __field_width; }
-  fawkes::cart_coord_2d_t get_field_offsets() const { return __field_offsets; }
-  const field_circles_t& get_circles() const { return __field_circles; }
+  float get_field_length() const { return _field_length; }
+  float get_field_width() const { return _field_width; }
+  fawkes::cart_coord_2d_t get_field_offsets() const { return _field_offsets; }
+  const field_circles_t& get_circles() const { return _field_circles; }
+  const std::string& get_name() const;
 
 protected:
-  FieldLines(float field_length, float field_width, float line_width);
+  FieldLines(std::string field_name, float field_length, float field_width, float line_width);
   virtual void init() = 0;
 
   void calc_offsets();
 
-  float                   __line_width;
-  float                   __field_length;
-  float                   __field_width;
-  fawkes::cart_coord_2d_t __field_offsets;
-  field_circles_t         __field_circles;
+  std::string             _field_name;
+  float                   _line_width;
+  float                   _field_length;
+  float                   _field_width;
+  fawkes::cart_coord_2d_t _field_offsets;
+  field_circles_t         _field_circles;
 };
 
 class FieldLines6x4: public FieldLines

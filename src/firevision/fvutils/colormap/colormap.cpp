@@ -25,7 +25,7 @@
 
 #include <fvutils/colormap/colormap.h>
 
-#include <fvutils/color/yuv.h>
+#include <fvutils/color/color_object_map.h>
 #include <cstring>
 
 /** @class Colormap <fvutils/colormap/colormap.h>
@@ -133,26 +133,17 @@ Colormap::to_image(unsigned char *yuv422_planar_buffer, unsigned int level)
 
   unsigned int y = level * deepness() / depth();
 
-  color_t c;
+  YUV_t c;
   for (unsigned int v = lwidth; v > 0 ; --v) {
     unsigned int v_index = (v - 1) * deepness() / lwidth;
     for (unsigned int u = 0; u < lheight; ++u) {
       unsigned int u_index = u * deepness() / lheight;
-      c = determine(y, u_index, v_index);
+      c = ColorObjectMap::get_color(determine(y, u_index, v_index));
 
-      switch (c) {
-      case C_ORANGE:     *yp++ = 128; *yp++ = 128; *up++ =  30; *vp++ = 220; break;
-      case C_BLUE:       *yp++ =   0; *yp++ =   0; *up++ = 255; *vp++ = 128; break;
-      case C_YELLOW:     *yp++ = 255; *yp++ = 255; *up++ =   0; *vp++ = 128; break;
-      case C_CYAN:       *yp++ = 255; *yp++ = 255; *up++ = 128; *vp++ =   0; break;
-      case C_MAGENTA:    *yp++ = 128; *yp++ = 128; *up++ = 128; *vp++ = 255; break;
-      case C_WHITE:      *yp++ = 255; *yp++ = 255; *up++ = 128; *vp++ = 128; break;
-      case C_BLACK:      *yp++ =   0; *yp++ =   0; *up++ = 128; *vp++ = 128; break;
-      case C_BACKGROUND: *yp++ =  64; *yp++ =  64; *up++ = 128; *vp++ = 128; break;
-      case C_GREEN:      *yp++ = 128; *yp++ = 128; *up++ =   0; *vp++ =   0; break;
-      case C_RED:        *yp++ = 128; *yp++ = 128; *up++ =   0; *vp++ = 255; break;
-      default:           *yp++ = 128; *yp++ = 128; *up++ = 128; *vp++ = 128; break;
-      }
+      *yp++ = c.Y;
+      *yp++ = c.Y;
+      *up++ = c.U;
+      *vp++ = c.V;
     }
     // Double line
     memcpy(yp, (yp - lwidth * 2), lwidth *2);

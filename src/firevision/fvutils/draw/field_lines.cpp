@@ -58,36 +58,40 @@ using std::max;
  *
  * @author Christof Rath
  */
-
-/** @var float FieldLines::__line_width
+/** @var float FieldLines::_field_name
+ * The name of the field
+ */
+/** @var float FieldLines::_line_width
  * The width of the field lines
  */
-/** @var float FieldLines::__field_length
+/** @var float FieldLines::_field_length
  * The total length of the field (actually of the field lines)
  */
-/** @var float FieldLines::__field_width
+/** @var float FieldLines::_field_width
  * The total width of the field (actually of the field lines)
  */
-/** @var fawkes::cart_coord_2d_t FieldLines::__field_offsets
+/** @var fawkes::cart_coord_2d_t FieldLines::_field_offsets
  * The center offset (used to draw unsymmetrically fields - usually zero)
  */
-/** @var field_circles_t FieldLines::__field_circles
+/** @var field_circles_t FieldLines::_field_circles
  * A std::list of arcs and/or circles on the field
  */
 
 /**
  * Creates a new FieldLines container.
- *
+ * @param field_name   The name of the field
  * @param field_length Length of the soccer field [m]
  * @param field_width  Width of the soccer field [m]
  * @param line_width   Width of a single line [m]
  */
-FieldLines::FieldLines(float field_length, float field_width, float line_width): std::list<field_line_t>()
+FieldLines::FieldLines(std::string field_name, float field_length, float field_width, float line_width):
+  std::list<field_line_t>(),
+  _field_name(field_name)
 {
-  __field_length = field_length;
-  __field_width  = field_width;
-  __line_width   = line_width;
-  __field_offsets.x = 12345;
+  _field_length = field_length;
+  _field_width  = field_width;
+  _line_width   = line_width;
+  _field_offsets.x = 12345;
 }
 
 /**
@@ -104,8 +108,18 @@ FieldLines::~FieldLines()
 float
 FieldLines::get_line_width() const
 {
-  return __line_width;
+  return _line_width;
 }
+
+/** Returns the field name
+ * @return The field name
+ */
+const std::string&
+FieldLines::get_name() const
+{
+  return _field_name;
+}
+
 
 /**
  * Calculates the field's offsets
@@ -132,8 +146,8 @@ FieldLines::calc_offsets()
     if (f > maxs.y) maxs.y = f;
   }
 
-  __field_offsets.x = -(mins.x + maxs.x) / 2.f;
-  __field_offsets.y = -(mins.y + maxs.y) / 2.f;
+  _field_offsets.x = -(mins.x + maxs.x) / 2.f;
+  _field_offsets.y = -(mins.y + maxs.y) / 2.f;
 }
 
 
@@ -153,7 +167,8 @@ FieldLines::calc_offsets()
  * @param length of the soccer field
  * @param width of the soccer field
  */
-FieldLines6x4::FieldLines6x4(float length, float width): FieldLines(length, width, 0.05f)
+FieldLines6x4::FieldLines6x4(float length, float width):
+  FieldLines("FieldLines6x4", length, width, 0.05f)
 {
   init();
   calc_offsets();
@@ -185,7 +200,7 @@ FieldLines6x4::init()
   push_back(field_line_t(3.f, -2.f, -3.f, -2.f));
 
   //center circle (approximated by 12 lines from )
-  __field_circles.push_back(fawkes::arc_t(0.6f, 0.f, 0.f));
+  _field_circles.push_back(fawkes::arc_t(0.6f, 0.f, 0.f));
 
   //own goal line (corner to corner)
   push_back(field_line_t(-3.f, 2.f, -3.f, -2.f));
@@ -219,7 +234,8 @@ FieldLines6x4::init()
  * @param length of the soccer field
  * @param width of the soccer field
  */
-FieldLinesCityTower::FieldLinesCityTower(float length, float width): FieldLines(length, width, 0.09f)
+FieldLinesCityTower::FieldLinesCityTower(float length, float width):
+  FieldLines("FieldLinesCityTower", length, width, 0.09f)
 {
   init();
   calc_offsets();
@@ -247,7 +263,7 @@ FieldLinesCityTower::init()
   push_back(field_line_t(4.97f, -2.455f, -1.44f, -2.455f));
 
   //center circle (approximated by 12 lines from )
-  __field_circles.push_back(fawkes::arc_t(1.1f, 0.f, 0.f));
+  _field_circles.push_back(fawkes::arc_t(1.1f, 0.f, 0.f));
 
 /* Not Available...
   //own goal line (corner to corner)
@@ -281,7 +297,7 @@ FieldLinesCityTower::init()
  * @param width of the soccer field
  */
 FieldLinesCityTowerSeminar::FieldLinesCityTowerSeminar(float length, float width):
-  FieldLines(length, width, 0.05f)
+  FieldLines("FieldLinesCityTowerSeminar", length, width, 0.05f)
 {
   init();
   calc_offsets();
@@ -313,7 +329,7 @@ FieldLinesCityTowerSeminar::init()
   push_back(field_line_t(2.725f, -1.825f, -2.725f, -1.825f));
 
   //center circle (approximated by 12 lines from )
-  __field_circles.push_back(fawkes::arc_t(0.57f, 0.f, 0.f));
+  _field_circles.push_back(fawkes::arc_t(0.57f, 0.f, 0.f));
 
 
   //own goal line (corner to corner)

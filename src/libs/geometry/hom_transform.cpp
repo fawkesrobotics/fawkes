@@ -23,9 +23,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <geometry/hom_transform.h>
-#include <geometry/hom_coord.h>
-#include <geometry/matrix.h>
+#include "hom_transform.h"
+#include "hom_coord.h"
+#include "matrix.h"
+
+#include <core/exceptions/software.h>
 
 #include <cmath>
 
@@ -56,6 +58,11 @@ HomTransform::HomTransform(const HomTransform& t)
  */
 HomTransform::HomTransform(const Matrix& m)
 {
+  if ((m.num_rows() != 4) || (m.num_cols() != 4))
+  {
+    throw fawkes::IllegalArgumentException("The matrix to create a HomTransform has to be 4x4.");
+  }
+
   m_matrix = new Matrix(m);
 }
 
@@ -80,7 +87,7 @@ HomTransform&
 HomTransform::invert()
 {
   float ct[3] = { (*m_matrix)(0, 3), (*m_matrix)(1, 3), (*m_matrix)(2, 3) };
-  Matrix rot   = m_matrix->get_submatrix(0, 0, 3, 3);
+  Matrix rot  = m_matrix->get_submatrix(0, 0, 3, 3);
 
   m_matrix->overlay(0, 0, rot.transpose());
   (*m_matrix)(0, 3) = -ct[0] * (*m_matrix)(0, 0) - ct[1] * (*m_matrix)(0, 1) - ct[2] * (*m_matrix)(0, 2);
@@ -226,7 +233,8 @@ HomTransform::operator=(const HomTransform& t)
 HomTransform&
 HomTransform::operator*=(const HomTransform& t)
 {
-  *this = (*this) * t;
+  (*m_matrix) *= (*t.m_matrix);
+
   return *this;
 }
 

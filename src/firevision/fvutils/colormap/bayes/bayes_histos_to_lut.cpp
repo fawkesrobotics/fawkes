@@ -363,7 +363,7 @@ BayesHistosToLut::calculateLutAllColors()
 	}
 
 	// set lut value for color (u, v) to most probable color
-	lut->set(y_index, u, v, ColorObjectMap::get_instance()->get(color_with_highest_prob));
+	lut->set(y_index, u, v, ColorObjectMap::get_instance().get(color_with_highest_prob));
       }
     }
   }
@@ -496,7 +496,7 @@ BayesHistosToLut::calculateLutValues( bool penalty )
 	  exit(-1);
 	  break;
 	}
-        lut->set(y_index, u_index, v_index, ColorObjectMap::get_instance()->get(mostLikelyObject));
+        lut->set(y_index, u_index, v_index, ColorObjectMap::get_instance().get(mostLikelyObject));
       }
     }
   }
