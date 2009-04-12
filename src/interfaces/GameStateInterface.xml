@@ -51,6 +51,8 @@
       </comment>
       <item name="ROLE_GOALIE">Goalie</item>
       <item name="ROLE_DEFENDER">Defender</item>
+      <item name="ROLE_MID_LEFT">Midfield left</item>
+      <item name="ROLE_MID_RIGHT">Midfield right</item>
       <item name="ROLE_ATTACKER">Attacker</item>
     </enum>
   </constants>

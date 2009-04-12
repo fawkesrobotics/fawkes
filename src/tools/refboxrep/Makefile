@@ -18,10 +18,13 @@
 BASEDIR = ../../..
 
 LIBS_ffrefboxrep = fawkescore fawkesutils fawkesconfig fawkesnetcomm
-OBJS_ffrefboxrep = main.o refbox_state_sender.o midsize.o spl.o
+#OBJS_ffrefboxrep = main.o refbox_state_sender.o midsize.o spl.o
+OBJS_ffrefboxrep = main.o refbox_state_sender.o msl2007.o msl2008.o spl.o
 
 OBJS_all =	$(OBJS_ffrefboxrep)
 BINS_all =	$(BINDIR)/ffrefboxrep
 
-include $(BASEDIR)/etc/buildsys/base.mk
+CFLAGS  += $(shell $(PKGCONFIG) --cflags libxml++-2.6)
+LDFLAGS += $(shell $(PKGCONFIG) --libs libxml++-2.6)
 
+include $(BASEDIR)/etc/buildsys/base.mk

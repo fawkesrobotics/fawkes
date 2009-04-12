@@ -79,5 +79,11 @@ function GOTO:init()
    local relx = x - rx;
    local rely = y - ry;
 
+   -- taking robots current rotation into account
+   local length = math.sqrt(relx^2 + rely^2)
+   local phi = math.atan2(rely, relx) - wm_pose:yaw()
+   relx = length * math.cos(phi)
+   rely = length * math.sin(phi)
+
    self.args = {x=relx, y=rely, ori=ori}
 end

@@ -37,6 +37,8 @@ class GameStateInterface : public Interface
   typedef enum {
     ROLE_GOALIE,
     ROLE_DEFENDER,
+    ROLE_MID_LEFT,
+    ROLE_MID_RIGHT,
     ROLE_ATTACKER
   } if_gamestate_role_t;
 

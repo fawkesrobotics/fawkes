@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  midsize.h - Fawkes mid-size refbox repeater
+ *  msl2008.h - Fawkes mid-size refbox 2008 protocol repeater
  *
- *  Created: Wed Apr 09 10:36:08 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Apr 01 10:36:08 2009
+ *  Copyright  2009  Stefan Schiffer [stefanschiffer.de]
  *
  *  $Id$
  *
@@ -22,22 +22,30 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_REFBOXREP_MIDSIZE_H_
-#define __TOOLS_REFBOXREP_MIDSIZE_H_
+#ifndef __TOOLS_REFBOXREP_MSL2008_H_
+#define __TOOLS_REFBOXREP_MSL2008_H_
 
 #include "refbox_state_sender.h"
+
 #include <cstdlib>
+#include <string>
+#include <vector>
 
 namespace fawkes {
-  class StreamSocket;
+  class MulticastDatagramSocket;
 }
 
-class MidsizeRefBoxRepeater
+namespace xmlpp {
+  class DomParser;
+  class Node;
+}
+
+class Msl2008RefBoxRepeater
 {
  public:
-  MidsizeRefBoxRepeater(RefBoxStateSender &rss,
+  Msl2008RefBoxRepeater(RefBoxStateSender &rss,
 			const char *refbox_host, unsigned short int refbox_port);
-  ~MidsizeRefBoxRepeater();
+  ~Msl2008RefBoxRepeater();
 
   void run();
 
@@ -47,7 +55,7 @@ class MidsizeRefBoxRepeater
 
  private:
   RefBoxStateSender    &__rss;
-  fawkes::StreamSocket *__s;
+  fawkes::MulticastDatagramSocket *__s;
 
   unsigned int __score_cyan;
   unsigned int __score_magenta;
@@ -56,6 +64,11 @@ class MidsizeRefBoxRepeater
 
   char *__refbox_host;
   unsigned short int __refbox_port;
+
+
+  xmlpp::DomParser *dom;
+  xmlpp::Node      *root;
+
 };
 
 #endif

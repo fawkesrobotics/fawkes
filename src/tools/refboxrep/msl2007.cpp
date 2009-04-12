@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  midsize.cpp - Fawkes mid-size refbox repeater
+ *  msl2007.cpp - Fawkes mid-size refbox repeater
  *
  *  Created: Wed Apr 09 10:38:16 2008
  *  Copyright  2008  Tim Niemueller [www.niemueller.de]
@@ -22,7 +22,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/refboxrep/midsize.h>
+#include <tools/refboxrep/msl2007.h>
 #include <netcomm/socket/stream.h>
 
 #include <cstring>
@@ -64,7 +64,7 @@ static const char REFBOX_PENALTY_MAGENTA     = 'p';
 static const char *  REFBOX_WELCOME          = "Welcome..";
 //static const char *  REFBOX_RECONNECT        = "Reconnect";
 
-/** @class MidsizeRefBoxRepeater <tools/refboxrep/midsize.h>
+/** @class MidsizeRefBoxRepeater <tools/refboxrep/msl2007.h>
  * Mid-size league refbox repeater.
  * This class will communicate with the mid-size league refbox and derive matching
  * game states from the communiation stream and send this via the world info.

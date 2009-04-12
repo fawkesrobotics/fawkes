@@ -34,17 +34,19 @@ depends_interfaces = {
    {v="gamestate", id="WM GameState", type="GameStateInterface"}
 }
 
-TEAM_NONE     = gamestate.TEAM_NONE
-TEAM_CYAN     = gamestate.TEAM_CYAN
-TEAM_MAGENTA  = gamestate.TEAM_MAGENTA
-TEAM_BOTH     = gamestate.TEAM_BOTH
+TEAM_NONE      = gamestate.TEAM_NONE
+TEAM_CYAN      = gamestate.TEAM_CYAN
+TEAM_MAGENTA   = gamestate.TEAM_MAGENTA
+TEAM_BOTH      = gamestate.TEAM_BOTH
 
-GOAL_BLUE     = gamestate.GOAL_BLUE
-GOAL_YELLOW   = gamestate.GOAL_YELLOW
+GOAL_BLUE      = gamestate.GOAL_BLUE
+GOAL_YELLOW    = gamestate.GOAL_YELLOW
 
-ROLE_GOALIE   = gamestate.ROLE_GOALIE
-ROLE_DEFENDER = gamestate.ROLE_DEFENDER
-ROLE_ATTACKER = gamestate.ROLE_ATTACKER
+ROLE_GOALIE    = gamestate.ROLE_GOALIE
+ROLE_DEFENDER  = gamestate.ROLE_DEFENDER
+ROLE_MID_LEFT  = gamestate.ROLE_MID_LEFT
+ROLE_MID_RIGHT = gamestate.ROLE_MID_RIGHT
+ROLE_ATTACKER  = gamestate.ROLE_ATTACKER
 
 predparams = {
    ball_close_dist  = 0.18,
@@ -119,6 +121,14 @@ end
 
 function defender()
    return gamestate:role() == ROLE_DEFENDER
+end
+
+function mid_left()
+   return gamestate:role() == ROLE_MID_LEFT
+end
+
+function mid_right()
+   return gamestate:role() == ROLE_MID_RIGHT
 end
 
 function goalie()
