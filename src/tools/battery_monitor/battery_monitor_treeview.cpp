@@ -252,7 +252,17 @@ BatteryMonitorTreeView::update()
   {
     // update data in interface
     BatteryInterface* bi = biit->second;
-    bi->read();
+
+    try
+    {
+      bi->read();
+    }
+    catch ( Exception& e )
+    {
+      e.append( "read() failed" );
+      e.print_trace();
+      continue;
+    }
 
     if ( !bi->has_writer() )
       // only consider interfaces which have a writer
