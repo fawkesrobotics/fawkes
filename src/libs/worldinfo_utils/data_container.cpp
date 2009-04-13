@@ -590,7 +590,7 @@ WorldInfoDataContainer::get_ball_pos_relative( const char* host,
       pos = iter->second.pos_relative();
       found = true;
     }
-  m_robot_poses.unlock();
+  m_ball_positions.unlock();
 
   return found;
 }
