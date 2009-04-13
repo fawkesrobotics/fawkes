@@ -92,7 +92,7 @@ WorldModelObjPosAverageFuser::~WorldModelObjPosAverageFuser()
   __blackboard->unregister_observer(this);
 
   __input_ifs.lock();
-  for (__iii == __input_ifs.begin(); __iii != __input_ifs.end(); ++__iii) {
+  for (__iii = __input_ifs.begin(); __iii != __input_ifs.end(); ++__iii) {
     __blackboard->close(*__iii);
   }
   __input_ifs.clear();

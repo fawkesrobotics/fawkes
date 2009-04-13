@@ -15,6 +15,10 @@ INSERT INTO "config" VALUES('/worldinfo/udp_port','unsigned int','2806','UDP por
 INSERT INTO "config" VALUES('/worldinfo/encryption_key','string','AllemaniACsX0rz','Default encryption key for world info.');
 INSERT INTO "config" VALUES('/worldinfo/encryption_iv','string','DoesAnyOneCare','Default encryption initialization vector for world info.');
 INSERT INTO "config" VALUES('/worldinfo/enable_fatmsg','bool','0','Send legacy fat message?');
+INSERT INTO "config" VALUES('/worldinfo/sleep_time_msec','unsigned int','10','Time to sleep between two send/receive operations; miliseconds');
+INSERT INTO "config" VALUES('/worldinfo/max_msgs_per_recv','unsigned int','20','Maximum number of messages to process per receive');
+INSERT INTO "config" VALUES('/worldinfo/flush_time_sec','unsigned int','5','Time of inactivity after which the world info message sequence number is resetted; sec');
+INSERT INTO "config" VALUES('/worldinfo/multicast_loopback','bool','1','Enable loopback for multicast messages?');
 INSERT INTO "config" VALUES('/webview/port','unsigned int','10117','TCP port for Webview HTTP requests');
 INSERT INTO "config" VALUES('/ballposlog/log_level','unsigned int','0','Log level for ballposlog example plugin; sum of any of debug=0, info=1, warn=2, error=4, none=8');
 INSERT INTO "config" VALUES('/skiller/skillspace','string','test','Skill space');
@@ -38,6 +42,7 @@ INSERT INTO "config" VALUES('/laser/btr0btr1','unsigned int',20,'Baud rate key, 
 INSERT INTO "config" VALUES('/laser/port','unsigned int',0,'Port, 0 for default');
 INSERT INTO "config" VALUES('/laser/irq','unsigned int',0,'IRQ, 0 for default');
 INSERT INTO "config" VALUES('/worldmodel/confspace','string','trunk',NULL);
+INSERT INTO "config" VALUES('/worldmodel/wi_send/trunk/enable_send','bool','0','Enable sending of world info messages?');
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/pose/type','string','ObjectPositionInterface',NULL);
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/pose/from_id','string','Pose',NULL);
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/pose/to_id','string','WM Pose',NULL);

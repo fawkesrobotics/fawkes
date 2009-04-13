@@ -3,7 +3,7 @@
  *  net_thread.cpp - Fawkes WorldModel Plugin Network Thread
  *
  *  Created: Fri Jun 29 16:56:15 2007 (on flight to RoboCup 2007, Atlanta)
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -65,15 +65,19 @@ WorldModelNetworkThread::init()
   unsigned int port;
   std::string encryption_key;
   std::string encryption_iv;
+  bool        cfg_multicast_loopback;
   try {
     multicast_addr = config->get_string("/worldinfo/multicast_addr");
     port = config->get_uint("/worldinfo/udp_port");
     encryption_key = config->get_string("/worldinfo/encryption_key");
     encryption_iv  = config->get_string("/worldinfo/encryption_iv");
-    __sleep_time_msec   = 10; //config->get_uint("/worldinfo/sleep_time_msec");
-    __max_msgs_per_recv = 10; //config->get_uint("/worldinfo/max_msgs_per_recv");
+    __cfg_sleep_time_msec   = config->get_uint("/worldinfo/sleep_time_msec");
+    __cfg_max_msgs_per_recv = config->get_uint("/worldinfo/max_msgs_per_recv");
+    __cfg_flush_time_sec    = config->get_uint("/worldinfo/flush_time_sec");
+    cfg_multicast_loopback  = config->get_bool("/worldinfo/multicast_loopback");
   } catch (Exception &e) {
     e.append("Could not get required configuration data for worldmodel");
+    e.print_trace();
     throw;
   }
 
@@ -82,13 +86,13 @@ WorldModelNetworkThread::init()
 						     nnresolver);
 
   __worldinfo_transceiver->add_handler(this);
-  // DEBUG
-  __worldinfo_transceiver->set_loop(true);
+  __worldinfo_transceiver->set_loop(cfg_multicast_loopback);
 
   try {
     __gamestate_if = blackboard->open_for_writing<GameStateInterface>("WI GameState");
   } catch (Exception &e) {
     delete __worldinfo_transceiver;
+    e.print_trace();
     throw;
   }
 }
@@ -130,8 +134,9 @@ WorldModelNetworkThread::finalize()
 void
 WorldModelNetworkThread::loop()
 {
-  __worldinfo_transceiver->recv(false, __max_msgs_per_recv);
-  usleep( __sleep_time_msec * 1000 );
+  __worldinfo_transceiver->flush_sequence_numbers(__cfg_flush_time_sec);
+  __worldinfo_transceiver->recv(false, __cfg_max_msgs_per_recv);
+  usleep( __cfg_sleep_time_msec * 1000 );
   // check for dead ones
   std::map<std::string, fawkes::Time>::iterator lsi = __last_seen.begin();
   Time now;

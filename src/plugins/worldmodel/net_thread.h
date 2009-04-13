@@ -98,8 +98,10 @@ class WorldModelNetworkThread
  private:
   fawkes::WorldInfoTransceiver *__worldinfo_transceiver;
 
-  unsigned int __sleep_time_msec;
-  unsigned int __max_msgs_per_recv;
+  unsigned int __cfg_sleep_time_msec;
+  unsigned int __cfg_max_msgs_per_recv;
+  unsigned int __cfg_flush_time_sec;
+  bool         __cfg_multicast_loopback;
 
   typedef std::pair<fawkes::Time, fawkes::ObjectPositionInterface *> TimeObjPosPair;
   typedef std::map<unsigned int, TimeObjPosPair> UidTimeObjPosMap;

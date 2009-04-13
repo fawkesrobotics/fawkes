@@ -131,6 +131,7 @@ WorldModelThread::init()
     e.print_trace();
   }
 
+  __wi_send_enabled = false;
   try {
     std::string prefix = "/worldmodel/wi_send/" + __cfg_confspace;
     __wi_send_enabled = config->get_bool((prefix + "/enable_send").c_str());
@@ -154,7 +155,11 @@ WorldModelThread::init()
     }
     
   } catch (Exception& e) {
-    e.print_trace();
+    if ( __wi_send_enabled) {
+      throw;
+    } else {
+      logger->log_debug(name(), "Sending worldinfo messages disabled (enable not set)");
+    }
   }
 
 }
