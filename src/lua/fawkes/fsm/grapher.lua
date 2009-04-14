@@ -72,7 +72,7 @@ function set_integrated_subfsm(integrated)
    integrated_subfsm = integrated
 end
 
-local function generate_dotgraph(fsm, g)
+local function generate_dotgraph(fsm, g, subgraph_name)
    assert(fsm, "Grapher requires valid FSM")
    assert(fsm.states, "No states table, not an FSM?")
 
@@ -83,6 +83,8 @@ local function generate_dotgraph(fsm, g)
 
    local defnode = gmod.get_current_default_node(g)
    local defedge = gmod.get_current_default_edge(g)
+
+   local subfsm_num = 1
 
    if is_subgraph then
       gmod.setv(g, "label", fsm.name)
@@ -119,7 +121,7 @@ local function generate_dotgraph(fsm, g)
    assert(fsm.start and fsm.states[fsm.start], "FSM grapher: No start node set " ..
 	  "for FSM or start node not created")
    local start_state = fsm.states[fsm.start]
-   local snn = is_subgraph and g.name .. "_" .. fsm.start or fsm.start
+   local snn = is_subgraph and subgraph_name .. "_" .. fsm.start or fsm.start
    local start_node = gmod.node(g, snn)
    gmod.setv(start_node, "penwidth", "4.0")
    if colored_output then
@@ -140,7 +142,7 @@ local function generate_dotgraph(fsm, g)
    for name, state in pairs(fsm.states) do
       --print("*** Adding state " .. name)
       if name ~= fsm.start then
-	 local nn = is_subgraph and g.name .. "_" .. name or name
+	 local nn = is_subgraph and subgraph_name .. "_" .. name or name
 	 local n = gmod.node(g, nn)
 	 gmod.setvl(n, state.dotattr)
 
@@ -189,12 +191,14 @@ local function generate_dotgraph(fsm, g)
       if state.subfsm then
 	 local subfsm   = state.subfsm
 	 local name     = subfsm.name
+	 local subgraph_name = "g" .. tostring(subfsm_num)
 	 if not string.match(name, "^cluster") then
-	    name = "cluster_" .. name
+	    name = "cluster_" .. tostring(subfsm_num)
+	    subfsm_num = subfsm_num + 1
 	 end
 	 local subgraph = gmod.subgraph(g, name)
-	 generate_dotgraph(subfsm, subgraph)
-	 local e = gmod.edge(g, state.name, name .. "_" .. subfsm.start)
+	 generate_dotgraph(subfsm, subgraph, subgraph_name)
+	 local e = gmod.edge(g, state.name, subgraph_name .. "_" .. subfsm.start)
 	 if not integrated_subfsm then
 	    gmod.setv(e, "lhead", name)
 	    gmod.setv(e, "arrowhead", "dot")
@@ -202,10 +206,10 @@ local function generate_dotgraph(fsm, g)
 	    gmod.setv(e, "style", "dashed")
 	 else
 	    if state.exit_to and subfsm.exit_state then
-	       gmod.edge(g, name .. "_" .. subfsm.exit_state, state.exit_to)
+	       gmod.edge(g, subgraph_name .. "_" .. subfsm.exit_state, state.exit_to)
 	    end
 	    if state.fail_to and subfsm.fail_state then
-	       gmod.edge(g, name .. "_" .. subfsm.fail_state, state.fail_to)
+	       gmod.edge(g, subgraph_name .. "_" .. subfsm.fail_state, state.fail_to)
 	    end
 	 end
 	 if fsm.current and state_name == fsm.current.name then
@@ -219,8 +223,8 @@ local function generate_dotgraph(fsm, g)
 	       state.fail_to ~= tr.state.name and state.exit_to ~= tr.state.name then
 
 	       --print("*** Adding transition " .. name .. " -> " .. tr.state.name .. "(" .. tr.description .. ")")
-	       local from = is_subgraph and g.name .. "_" .. name or name
-	       local to = is_subgraph and g.name .. "_" .. tr.state.name or tr.state.name
+	       local from = is_subgraph and subgraph_name .. "_" .. name or name
+	       local to = is_subgraph and subgraph_name .. "_" .. tr.state.name or tr.state.name
 
 	       local e = gmod.edge(g, from, to)
 	       if tr.description then
