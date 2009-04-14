@@ -1,0 +1,37 @@
+For an updated version look into the Fawkes wiki.
+
+= Fawkes Time-Tracking Main Loop Plugin =
+== Requires ==
+=== BlackBoard Interfaces ===
+None.
+
+=== Config Values ===
+||'''Path'''||'''Type'''||'''Description'''||'''R'''||
+||/fawkes/mainapp/max_thread_time||unsigned int||Maximum time in miliseconds a single thread may take until it is considered broken.||*||
+||/fawkes/mainapp/desired_loop_time||unsigned int||Desired time in miliseconds a single loop iteration should take. The main loop will run at most as fast as this time, if a cycle takes longer a warning is printed||*||
+||/ttmainloop/output_interval||unsigned int||Time in seconds after which the data is averaged, printed to stdout and written to the time.log file. Defaults to 5 seconds.||*||
+
+== Provides ==
+=== BlackBoard Interfaces ===
+None.
+=== Other ===
+time.log file in BINDIR with timing data.
+
+== Description ==
+The plugin replaces the standard main loop with a similar loop that has additional time tracking features. It measures the time spent in the different hooks via the [source:trunk/src/libs/utils/time/tracker.h TimeTracker] class. In specified intervals (see config values) the data is averaged for the interval, printed to stdout for manual observation and written to a file called time.log in BINDIR. That file has the following entries:
+ 1. Running number
+ 1. Times per hook. The hooks are in the standard main loop order. The recorded times per hook are:
+    1. Average time (seconds)
+    1. Average time (mili seconds)
+    1. Average time (summed seconds, contains the hook time summed with all previous hook's times of the particular cycle, useful for histograms)
+    1. Deviation (seconds)
+    1. Deviation (miliseconds)
+
+== Compilation and Runtime Requirements ==
+ None.
+
+== Usage Instructions ==
+ * Build the plugin
+ * Load the plugin, main loop is replaced, depending on the interval time information about hook run-time is printed and time.log is written.
+ * Use the [source:trunk/src/plugins/ttmainloop/chart.gnuplot chart.gnuplot] script in the ttmainloop directory to plot the data with {{{gnuplot chart.gnuplot}}} (time.log file must be in the current directory).
+
