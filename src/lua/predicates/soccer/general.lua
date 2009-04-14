@@ -136,8 +136,8 @@ function goalie()
 end
 
 function ball_moved()
-   local dx = wm_ball:world_x() - ball_moved_ref_x
-   local dy = wm_ball:world_y() - ball_moved_ref_y
+   local dx = wm_ball:world_x() - predparams.ball_moved_ref_x
+   local dy = wm_ball:world_y() - predparams.ball_moved_ref_y
 
-   return math.sqrt(dx*dx + dy*dy) >= ball_moved_min_dist
+   return math.sqrt(dx*dx + dy*dy) >= predparams.ball_moved_min_dist
 end
