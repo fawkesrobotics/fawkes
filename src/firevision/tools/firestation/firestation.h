@@ -30,7 +30,6 @@
 #include <fvutils/base/roi.h>
 #include <fvutils/color/colorspaces.h>
 #include <netcomm/dns-sd/avahi_thread.h>
-#include <netcomm/service_discovery/browse_handler.h>
 
 class Camera;
 class SharedMemoryImageBuffer;
@@ -42,34 +41,18 @@ class ColorTrainWidget;
 class FuseTransferWidget;
 class FuseImageListWidget;
 
+namespace fawkes {
+  class AvahiDispatcher;
+}
+
 class Firestation
-: public Gtk::Window,
-  public fawkes::ServiceBrowseHandler
+: public Gtk::Window
 {
  public:
   Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml);
   virtual ~Firestation();
 
   Gtk::Window& get_window() const;
-
-  // service browser handler
-  void all_for_now();
-  void cache_exhausted();
-  void browse_failed( const char* name,
-		      const char* type,
-		      const char* domain );
-  void service_added( const char* name,
-		      const char* type,
-		      const char* domain,
-		      const char* host_name,
-		      const struct sockaddr* addr,
-		      const socklen_t addr_size,
-		      uint16_t port,
-		      std::list<std::string>& txt,
-		      int flags );
-  void service_removed( const char* name,
-			const char* type,
-			const char* domain );
 
  private:
   class ShmColumnRecord : public Gtk::TreeModel::ColumnRecord
@@ -140,6 +123,9 @@ class Firestation
   void on_colormap_updated();
   bool image_click(GdkEventButton*);
 
+  void on_service_added( fawkes::NetworkService* service );
+  void on_service_removed( fawkes::NetworkService* service );
+
   void pre_open_img_src();
   void post_open_img_src();
   void resize_image(Gtk::Allocation& allocation);
@@ -154,6 +140,8 @@ class Firestation
   void mc_load();
 
   Glib::Dispatcher m_update_img;
+
+  fawkes::AvahiDispatcher* m_avahi_dispatcher;
 
   // widgets
   Gtk::Window* m_wnd_main;

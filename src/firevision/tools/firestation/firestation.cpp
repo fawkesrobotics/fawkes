@@ -22,12 +22,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <tools/firestation/firestation.h>
-#include <tools/firestation/mirror_calib.h>
-#include <tools/firestation/color_train_widget.h>
-#include <tools/firestation/fuse_transfer_widget.h>
+#include "firestation.h"
+#include "mirror_calib.h"
+#include "color_train_widget.h"
+#include "fuse_transfer_widget.h"
 
 #include <fvwidgets/fuse_image_list_widget.h>
+#include <gui_utils/avahi_dispatcher.h>
 
 #include <cams/fileloader.h>
 #include <cams/shmem.h>
@@ -247,12 +248,12 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   // --- mirror calibration -----------------------------------------
   m_calib_tool = new MirrorCalibTool();
 
-#ifndef HAVE_BULB
+#ifndef HAVE_BULB_CREATOR
   Gtk::Notebook *nb = dynamic_cast<Gtk::Notebook*>( get_widget(ref_xml, "ntbOptions") );
   Gtk::HBox *box = dynamic_cast<Gtk::HBox*>( get_widget(ref_xml, "boxMirrorCalib") );
   nb->get_tab_label(*box)->set_sensitive(false);
   box->set_sensitive(false);
-#endif
+#endif /* HAVE_BULB_CREATOR */
 
   m_btn_mc_start = dynamic_cast<Gtk::Button*>( get_widget(ref_xml, "btnMcStart") );
   m_btn_mc_start->signal_clicked().connect( sigc::mem_fun(*this, &Firestation::mc_start) );
@@ -302,7 +303,6 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_filw->image_selected().connect( sigc::mem_fun(*this, &Firestation::on_fuse_image_selected) );
   // ----------------------------------------------------------------
 
-
   m_yuv_orig_buffer   = 0;
   m_yuv_draw_buffer   = 0;
   m_yuv_scaled_buffer = 0;
@@ -329,7 +329,12 @@ Firestation::Firestation(Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
   m_scale_factor = 1.0;
 
   m_avahi_thread = new AvahiThread();
-  m_avahi_thread->watch_service("_fountain._tcp", this);
+  m_avahi_dispatcher = new AvahiDispatcher;
+  
+  m_avahi_dispatcher->signal_service_added().connect( sigc::mem_fun( *this, &Firestation::on_service_added ) );
+  m_avahi_dispatcher->signal_service_removed().connect( sigc::mem_fun( *this, &Firestation::on_service_removed ) );
+
+  m_avahi_thread->watch_service("_fountain._tcp", m_avahi_dispatcher);
   m_avahi_thread->start();
 }
 
@@ -350,6 +355,7 @@ Firestation::~Firestation()
   delete m_filw;
 
   delete m_avahi_thread;
+  delete m_avahi_dispatcher;
 
   delete m_wnd_main;
   delete m_fcd_open_image;
@@ -1239,35 +1245,16 @@ Firestation::mc_save()
 }
 
 void
-Firestation::all_for_now()
+Firestation::on_service_added( NetworkService* service )
 {
-}
-
-void
-Firestation::cache_exhausted()
-{
-}
-
-void
-Firestation::browse_failed( const char* name,
-			      const char* type,
-			      const char* domain )
-{
-}
-
-void
-Firestation::service_added( const char* name,
-			    const char* type,
-			    const char* domain,
-			    const char* host_name,
-			    const struct sockaddr* addr,
-			    const socklen_t addr_size,
-			    uint16_t port,
-			    std::list<std::string>& txt,
-			    int flags )
-{
+  const char* host        = service->host();
+  const char* name        = service->name();
+  const char* type        = service->type();
+  const char* domain      = service->domain();
+  unsigned short int port = service->port();
+  
   std::vector<FUSE_imageinfo_t> image_list;
-  NetworkCamera cam(host_name, port);
+  NetworkCamera cam(host, port);
   try
     {
       cam.open();
@@ -1276,10 +1263,15 @@ Firestation::service_added( const char* name,
     }
   catch (Exception& e)
     {
+      e.append("Could not open camera on %s:%d", host, port);
       e.print_trace();
       return;
     }
   cam.close();
+
+#ifdef DEBUG_PRINT
+  printf("%zu images available on host %s.\n", image_list.size(), host);
+#endif /* DEBUG_PRINT */
 
   std::vector<FUSE_imageinfo_t>::iterator fit;
 
@@ -1290,7 +1282,7 @@ Firestation::service_added( const char* name,
   row[m_fuse_columns.m_service_name] = Glib::ustring(name);
   row[m_fuse_columns.m_service_type] = Glib::ustring(type);
   row[m_fuse_columns.m_service_domain] = Glib::ustring(domain);
-  row[m_fuse_columns.m_service_hostname] = Glib::ustring(host_name);
+  row[m_fuse_columns.m_service_hostname] = Glib::ustring(host);
   row[m_fuse_columns.m_service_port] = port;
 
   for (fit = image_list.begin(); fit != image_list.end(); ++fit)
@@ -1300,7 +1292,7 @@ Firestation::service_added( const char* name,
       childrow[m_fuse_columns.m_service_name] = Glib::ustring(name);
       childrow[m_fuse_columns.m_service_type] = Glib::ustring(type);
       childrow[m_fuse_columns.m_service_domain] = Glib::ustring(domain);
-      childrow[m_fuse_columns.m_service_hostname] = Glib::ustring(host_name);
+      childrow[m_fuse_columns.m_service_hostname] = Glib::ustring(host);
       childrow[m_fuse_columns.m_service_port] = port;
       childrow[m_fuse_columns.m_image_id] = Glib::ustring(fit->image_id);
       childrow[m_fuse_columns.m_image_width] = fit->width;
@@ -1308,15 +1300,17 @@ Firestation::service_added( const char* name,
       childrow[m_fuse_columns.m_image_colorspace] = Glib::ustring( colorspace_to_string((colorspace_t) fit->colorspace) );
     }
 
-  m_ftw->add_fountain_service(name, host_name, port);
-  m_filw->add_fountain_service(name, host_name, port);
+  m_ftw->add_fountain_service(name, host, port);
+  m_filw->add_fountain_service(name, host, port);
 }
 
 void
-Firestation::service_removed( const char* name,
-			      const char* type,
-			      const char* domain )
+Firestation::on_service_removed( NetworkService* service )
 {
+  const char* name   = service->name();
+  const char* type   = service->type();
+  const char* domain = service->domain();
+
   Gtk::TreeModel::Children children = m_fuse_tree_store->children();
   Gtk::TreeModel::iterator rit;
   for (rit = children.begin(); rit != children.end(); ++rit)
