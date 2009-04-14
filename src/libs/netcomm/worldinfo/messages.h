@@ -197,10 +197,10 @@ typedef struct {
   uint32_t   state_team     : 2;	/**< Team the game state references */
   uint32_t   score_cyan     : 8;	/**< Score of team cyan */
   uint32_t   score_magenta  : 8;	/**< Score of team magenta */
-  uint32_t   our_team       : 1;	/**< Our team color */
+  uint32_t   our_team       : 2;	/**< Our team color */
   uint32_t   our_goal_color : 1;	/**< Our own goal color */
   uint32_t   half           : 1;	/**< Game time half */
-  uint32_t   reserved       : 7;	/**< Reserved for future use */
+  uint32_t   reserved       : 6;	/**< Reserved for future use */
 } worldinfo_gamestate_message_t;
 
 } // end namespace fawkes
