@@ -52,11 +52,8 @@ FvAqtVisionThreads::FvAqtVisionThreads(Clock *clock)
   clock->get_systime(_empty_time);
 
   running_threads_cyclic = new ThreadList();
-  running_threads_cyclic_raw = new ThreadList();
   running_threads_cont = new ThreadList();
-  running_threads_cont_raw = new ThreadList();
   waiting_threads = new ThreadList();
-  waiting_threads_raw = new ThreadList();
 
   cyclic_barrier = new Barrier(1);
 }
@@ -69,11 +66,8 @@ FvAqtVisionThreads::~FvAqtVisionThreads()
   delete cyclic_barrier;
 
   delete running_threads_cyclic;
-  delete running_threads_cyclic_raw;
   delete running_threads_cont;
-  delete running_threads_cont_raw;
   delete waiting_threads;
-  delete waiting_threads_raw;
 
 }
 
@@ -81,17 +75,12 @@ FvAqtVisionThreads::~FvAqtVisionThreads()
 /** Add a thread in waiting state.
  * The thread is marked as dependant but it is otherwise ignored.
  * @param thread thread to add
- * @param raw true if the thread needs access to the raw image, false
  * for access to the YUV422_PLANAR image.
  */
 void
-FvAqtVisionThreads::add_waiting_thread(Thread *thread, bool raw)
+FvAqtVisionThreads::add_waiting_thread(Thread *thread)
 {
-  if ( raw ) {
-    waiting_threads_raw->push_back_locked(thread);
-  } else {
-    waiting_threads->push_back_locked(thread);
-  }
+  waiting_threads->push_back_locked(thread);
 }
 
 
@@ -106,23 +95,11 @@ FvAqtVisionThreads::set_thread_running(Thread *thread)
     if ( vision_thread->vision_thread_mode() == VisionAspect::CYCLIC ) {
       running_threads_cyclic->push_back_locked(thread);
       delete cyclic_barrier;
-      cyclic_barrier = new Barrier( running_threads_cyclic->size() +
-				    running_threads_cyclic_raw->size() + 1 );
+      cyclic_barrier = new Barrier( running_threads_cyclic->size() + 1 );
     } else {
       running_threads_cont->push_back_locked(thread);
     }
     waiting_threads->remove_locked(thread);
-  }
-  if ( find(waiting_threads_raw->begin(), waiting_threads_raw->end(), thread) != waiting_threads_raw->end()) {
-    if ( vision_thread->vision_thread_mode() == VisionAspect::CYCLIC ) {
-      running_threads_cyclic_raw->push_back_locked(thread);
-      delete cyclic_barrier;
-      cyclic_barrier = new Barrier( running_threads_cyclic->size() +
-				    running_threads_cyclic_raw->size() + 1 );
-    } else {
-      running_threads_cont_raw->push_back_locked(thread);
-    }
-    waiting_threads_raw->remove_locked(thread);
   }
 }
 
@@ -135,21 +112,15 @@ void
 FvAqtVisionThreads::remove_thread(Thread *thread)
 {
   waiting_threads->remove_locked(thread);
-  waiting_threads_raw->remove_locked(thread);
-  if ( (find(running_threads_cyclic->begin(), running_threads_cyclic->end(), thread) !=
-	running_threads_cyclic->end()) ||
-       (find(running_threads_cyclic_raw->begin(), running_threads_cyclic_raw->end(), thread) !=
-	running_threads_cyclic_raw->end()) ) {
+  if ( find(running_threads_cyclic->begin(), running_threads_cyclic->end(), thread) !=
+       running_threads_cyclic->end()) {
 
     running_threads_cyclic->remove_locked(thread);
-    running_threads_cyclic_raw->remove_locked(thread);
 
     delete cyclic_barrier;
-    cyclic_barrier = new Barrier( running_threads_cyclic->size() +
-				  running_threads_cyclic_raw->size() + 1 );
+    cyclic_barrier = new Barrier( running_threads_cyclic->size() + 1 );
   }
   running_threads_cont->remove_locked(thread);
-  running_threads_cont_raw->remove_locked(thread);
   if ( empty() ) {
     clock->get_systime(_empty_time);
   }
@@ -163,7 +134,6 @@ void
 FvAqtVisionThreads::remove_waiting_thread(Thread *thread)
 {
   waiting_threads->remove_locked(thread);
-  waiting_threads_raw->remove_locked(thread);
   if ( empty() ) {
     clock->get_systime(_empty_time);
   }
@@ -176,8 +146,7 @@ FvAqtVisionThreads::remove_waiting_thread(Thread *thread)
 bool
 FvAqtVisionThreads::has_cyclic_thread()
 {
-  return ( ! running_threads_cyclic->empty() ||
-	   ! running_threads_cyclic_raw->empty() );
+  return ( ! running_threads_cyclic->empty() );
 }
 
 
@@ -188,8 +157,7 @@ FvAqtVisionThreads::has_cyclic_thread()
 bool
 FvAqtVisionThreads::has_waiting_thread(Thread *t)
 {
-  return ( (find(waiting_threads->begin(), waiting_threads->end(), t) != waiting_threads->end()) ||
-	   (find(waiting_threads_raw->begin(), waiting_threads_raw->end(), t) != waiting_threads_raw->end()) );
+  return (find(waiting_threads->begin(), waiting_threads->end(), t) != waiting_threads->end());
 }
 
 
@@ -201,11 +169,8 @@ bool
 FvAqtVisionThreads::empty()
 {
   return ( waiting_threads->empty() &&
-	   waiting_threads_raw->empty() &&
 	   running_threads_cyclic->empty() &&
-	   running_threads_cyclic_raw->empty() &&
-	   running_threads_cont->empty() &&
-	   running_threads_cont_raw->empty() );
+	   running_threads_cont->empty() );
 }
 
 
@@ -225,7 +190,6 @@ FvAqtVisionThreads::wakeup_and_wait_cyclic_threads()
 {
   if ( has_cyclic_thread() ) {
     running_threads_cyclic->wakeup(cyclic_barrier);
-    running_threads_cyclic_raw->wakeup(cyclic_barrier);
     cyclic_barrier->wait();
   }
 }
@@ -244,10 +208,8 @@ FvAqtVisionThreads::set_prepfin_hold(bool hold)
 {
   try {
     running_threads_cyclic->set_prepfin_hold(hold);
-    running_threads_cyclic_raw->set_prepfin_hold(hold);
   } catch (Exception &e) {
     running_threads_cyclic->set_prepfin_hold(false);
-    running_threads_cyclic_raw->set_prepfin_hold(false);
     throw;
   }
 }

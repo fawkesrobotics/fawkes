@@ -3,7 +3,7 @@
  *  acquisition_thread.h - FireVision Acquisition Thread
  *
  *  Created: Wed Jun 06 19:01:10 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -30,6 +30,8 @@
 #include <cams/shmem.h>
 #include <fvutils/color/colorspaces.h>
 
+#include <map>
+
 class SharedMemoryImageBuffer;
 class FvBaseThread;
 class FvAqtVisionThreads;
@@ -45,8 +47,6 @@ class FvAcquisitionThread
 : public fawkes::Thread
 {
  public:
-  friend class FvBaseThread;
-
   /** Acquisition thread mode. */
   typedef enum {
     AqtCyclic,		/**< cyclic mode, use if there is at least one cyclic thread
@@ -63,30 +63,33 @@ class FvAcquisitionThread
 
   void set_aqtmode(AqtMode mode);
   AqtMode aqtmode();
-  SharedMemoryCamera *  camera_instance(bool raw, bool deep_copy);
+  SharedMemoryCamera *  camera_instance(colorspace_t cspace, bool deep_copy);
 
   void set_vt_prepfin_hold(bool hold);
   void set_enabled(bool enabled);
 
+ public:
+  /** Vision threads assigned to this acquisition thread. To be used only by the
+   * base thread. */
+  FvAqtVisionThreads       *vision_threads;
+
  private:
-  bool                      _enabled;
+  bool                      __enabled;
 
-  Camera                   *_camera;
-  SharedMemoryImageBuffer  *_shm;
-  SharedMemoryImageBuffer  *_shm_raw;
-  char                     *_image_id;
-  char                     *_image_id_raw;
+  Camera                   *__camera;
 
-  fawkes::Logger           *_logger;
+  char                     *__image_id;
 
-  colorspace_t              _colorspace;
-  unsigned int              _width;
-  unsigned int              _height;
-  unsigned char            *_buffer;
-  unsigned char            *_buffer_raw;
+  fawkes::Logger           *__logger;
 
-  AqtMode                   _mode;
-  FvAqtVisionThreads       *_vision_threads;
+  colorspace_t              __colorspace;
+  unsigned int              __width;
+  unsigned int              __height;
+
+  AqtMode                   __mode;
+
+  std::map<colorspace_t, SharedMemoryImageBuffer *> __shm;
+  std::map<colorspace_t, SharedMemoryImageBuffer *>::iterator __shmit;
 
 #ifdef FVBASE_TIMETRACKER
   fawkes::TimeTracker *__tt;

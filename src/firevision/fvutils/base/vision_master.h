@@ -3,7 +3,7 @@
  *  vision_master.h - FireVision Vision Master
  *
  *  Created: Wed May 30 10:28:06 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -26,6 +26,8 @@
 #ifndef __FIREVISION_FVUTILS_BASE_VISION_MASTER_H_
 #define __FIREVISION_FVUTILS_BASE_VISION_MASTER_H_
 
+#include <fvutils/color/colorspaces.h>
+
 class Camera;
 namespace fawkes {
   class Thread;
@@ -38,8 +40,8 @@ class VisionMaster
 
   virtual Camera *  register_for_camera(const char *camera_string,
 					fawkes::Thread *thread,
-					bool raw = false) = 0;
-  virtual void      unregister_thread(fawkes::Thread *thread)                     = 0;
+					colorspace_t cspace = YUV422_PLANAR) = 0;
+  virtual void      unregister_thread(fawkes::Thread *thread)                = 0;
 };
 
 

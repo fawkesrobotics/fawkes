@@ -41,7 +41,7 @@ class FvAqtVisionThreads
   FvAqtVisionThreads(fawkes::Clock *clock);
   ~FvAqtVisionThreads();
 
-  void add_waiting_thread(fawkes::Thread *thread, bool raw);
+  void add_waiting_thread(fawkes::Thread *thread);
   void remove_thread(fawkes::Thread *thread);
   void remove_waiting_thread(fawkes::Thread *thread);
   void set_thread_running(fawkes::Thread *thread);
@@ -59,11 +59,8 @@ class FvAqtVisionThreads
 
  private:
   fawkes::ThreadList  *running_threads_cyclic;
-  fawkes::ThreadList  *running_threads_cyclic_raw;
   fawkes::ThreadList  *running_threads_cont;
-  fawkes::ThreadList  *running_threads_cont_raw;
   fawkes::ThreadList  *waiting_threads;
-  fawkes::ThreadList  *waiting_threads_raw;
 
   fawkes::Barrier     *cyclic_barrier;
 

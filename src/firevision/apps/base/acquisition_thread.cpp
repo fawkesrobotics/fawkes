@@ -3,7 +3,7 @@
  *  acquisition_thread.h - FireVision Acquisition Thread
  *
  *  Created: Wed Jun 06 19:01:10 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <apps/base/acquisition_thread.h>
-#include <apps/base/aqt_vision_threads.h>
+#include "acquisition_thread.h"
+#include "aqt_vision_threads.h"
 
 #include <core/exceptions/system.h>
 #include <core/exceptions/software.h>
@@ -45,7 +45,7 @@
 
 using namespace fawkes;
 
-/** @class FvAcquisitionThread <apps/base/acquisition_thread.h>
+/** @class FvAcquisitionThread "acquisition_thread.h"
  * FireVision base application acquisition thread.
  * This thread is used by the base application to acquire images from a camera
  * and call dependant threads when new images are available so that these
@@ -64,27 +64,20 @@ FvAcquisitionThread::FvAcquisitionThread(const char *id,  Camera *camera,
 					 Logger *logger, Clock *clock)
   : Thread((std::string("FvAcquisitionThread::") + id).c_str())
 {
-  _logger        = logger;
-  _image_id      = strdup(id);
-  if ( asprintf(&_image_id_raw, "%s::RAW", _image_id) == -1 ) {
-    throw OutOfMemoryException();
-  }
+  __logger        = logger;
+  __image_id      = strdup(id);
 
-  _vision_threads = new FvAqtVisionThreads(clock);
+  vision_threads  = new FvAqtVisionThreads(clock);
 
-  _camera        = camera;
-  _width         = _camera->pixel_width();
-  _height        = _camera->pixel_height();
-  _colorspace    = _camera->colorspace();
-  logger->log_debug(name(), "Camera opened, w=%u  h=%u  c=%s", _width, _height,
-		    colorspace_to_string(_colorspace));
-  _shm         = NULL;
-  _shm_raw     = NULL;
-  _buffer      = NULL;
-  _buffer_raw  = NULL;
+  __camera        = camera;
+  __width         = __camera->pixel_width();
+  __height        = __camera->pixel_height();
+  __colorspace    = __camera->colorspace();
+  logger->log_debug(name(), "Camera opened, w=%u  h=%u  c=%s", __width, __height,
+		    colorspace_to_string(__colorspace));
 
-  _mode = AqtContinuous;
-  _enabled = false;
+  __mode = AqtContinuous;
+  __enabled = false;
 
 #ifdef FVBASE_TIMETRACKER
   __tt = new TimeTracker();
@@ -101,15 +94,11 @@ FvAcquisitionThread::FvAcquisitionThread(const char *id,  Camera *camera,
 /** Destructor. */
 FvAcquisitionThread::~FvAcquisitionThread()
 {
-  _camera->close();
+  __camera->close();
 
-  delete _vision_threads;
-
-  delete _shm;
-  delete _shm_raw;
-  delete _camera;
-  free(_image_id);
-  free(_image_id_raw);
+  delete vision_threads;
+  delete __camera;
+  free(__image_id);
 }
 
 
@@ -140,30 +129,31 @@ FvAcquisitionThread::~FvAcquisitionThread()
  * then quickly loaded again the overhead of closing the camera and then
  * opening it again is avoided.
  *
- * @param raw true to get access to the raw camera image and not the (maybe)
- * converted YUV422_PLANAR image.
+ * @param cspace the desired colorspace the image should be converted to.
+ * See general notes in VisionMaster::register_for_camera().
  * @param deep_copy given to the shared memory camera.
  * @return camera instance
  * @see SharedMemoryCamera
  */
 SharedMemoryCamera *
-FvAcquisitionThread::camera_instance(bool raw, bool deep_copy)
+FvAcquisitionThread::camera_instance(colorspace_t cspace, bool deep_copy)
 {
-  if ( raw && (_shm_raw == NULL) ) {
-    _shm_raw = new SharedMemoryImageBuffer(_image_id_raw, _colorspace,
-					   _width, _height);
-    _buffer_raw = _shm_raw->buffer();
-  } else if ( _shm == NULL ) {
-    _shm = new SharedMemoryImageBuffer(_image_id, YUV422_PLANAR,
-				       _width, _height);
-    _buffer = _shm->buffer();
+  const char *img_id = NULL;
+  char *tmp =  NULL;
+  if (__shm.find(cspace) == __shm.end()) {
+    if ( asprintf(&tmp, "%s.%zu", __image_id, __shm.size()) == -1) {
+      throw OutOfMemoryException("FvAcqThread::camera_instance(): Could not create image ID");
+    }
+    img_id = tmp;
+    __shm[cspace] = new SharedMemoryImageBuffer(img_id, cspace, __width, __height);
+  } else {
+    img_id = __shm[cspace]->image_id();
   }
 
-  if ( raw ) {
-    return new SharedMemoryCamera(_image_id_raw, deep_copy);
-  } else {
-    return new SharedMemoryCamera(_image_id, deep_copy);
-  }
+  SharedMemoryCamera *c = new SharedMemoryCamera(img_id, deep_copy);
+
+  if (tmp)  free(tmp);
+  return c;
 }
 
 
@@ -176,13 +166,13 @@ void
 FvAcquisitionThread::set_aqtmode(AqtMode mode)
 {
   if ( mode == AqtCyclic ) {
-    //_logger->log_info(name(), "Setting WAITFORWAKEUPMODE");
+    //__logger->log_info(name(), "Setting WAITFORWAKEUPMODE");
     set_opmode(Thread::OPMODE_WAITFORWAKEUP);
   } else if ( mode == AqtContinuous ) {
-    //_logger->log_info(name(), "Setting CONTINUOUS");
+    //__logger->log_info(name(), "Setting CONTINUOUS");
     set_opmode(Thread::OPMODE_CONTINUOUS);
   }
-  _mode = mode;
+  __mode = mode;
 }
 
 
@@ -195,7 +185,7 @@ FvAcquisitionThread::set_aqtmode(AqtMode mode)
 void
 FvAcquisitionThread::set_enabled(bool enabled)
 {
-  _enabled = enabled;
+  __enabled = enabled;
 }
 
 
@@ -205,7 +195,7 @@ FvAcquisitionThread::set_enabled(bool enabled)
 FvAcquisitionThread::AqtMode
 FvAcquisitionThread::aqtmode()
 {
-  return _mode;
+  return __mode;
 }
 
 
@@ -217,9 +207,9 @@ void
 FvAcquisitionThread::set_vt_prepfin_hold(bool hold)
 {
   try {
-    _vision_threads->set_prepfin_hold(hold);
+    vision_threads->set_prepfin_hold(hold);
   } catch (Exception &e) {
-    _logger->log_warn(name(), "At least one thread was being finalized while prepfin hold "
+    __logger->log_warn(name(), "At least one thread was being finalized while prepfin hold "
 		      "was about to be acquired");
     throw;
   }
@@ -236,37 +226,35 @@ FvAcquisitionThread::loop()
 #ifdef FVBASE_TIMETRACKER
   try {
     __tt->ping_start(__ttc_capture);
-    _camera->capture();
+    __camera->capture();
     __tt->ping_end(__ttc_capture);
-    if ( _shm && _enabled ) {
-      __tt->ping_start(__ttc_lock);
-      _shm->lock_for_write();
-      __tt->ping_end(__ttc_lock);
-      __tt->ping_start(__ttc_convert);
-      convert(_colorspace, YUV422_PLANAR,
-	      _camera->buffer(), _buffer,
-	      _width, _height);
-      __tt->ping_end(__ttc_convert);
-      __tt->ping_start(__ttc_unlock);
-      try {
-	_shm->set_capture_time(_camera->capture_time());
-      } catch (NotImplementedException &e) {
-	// ignored
+
+    if ( __enabled ) {
+      for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
+	__tt->ping_start(__ttc_lock);
+	__shmit->second->lock_for_write();
+	__tt->ping_end(__ttc_lock);
+	__tt->ping_start(__ttc_convert);
+	convert(__colorspace, __shmit->first,
+		__camera->buffer(), __shmit->second->buffer(),
+		__width, __height);
+	try {
+	  __shmit->second->set_capture_time(__camera->capture_time());
+	} catch (NotImplementedException &e) {
+	  // ignored
+	}
+	__tt->ping_end(__ttc_convert);
+	__tt->ping_start(__ttc_unlock);
+	__shmit->second->unlock();
+	__tt->ping_end(__ttc_unlock);
       }
-      _shm->unlock();
-      __tt->ping_end(__ttc_unlock);
-    }
-    if ( _shm_raw && _enabled ) {
-      _shm_raw->lock_for_write();
-      memcpy(_buffer_raw, _camera->buffer(), _camera->buffer_size());
-      _shm_raw->unlock();
     }
   } catch (Exception &e) {
-    _logger->log_error(name(), "Cannot convert image data");
-    _logger->log_error(name(), e);
+    __logger->log_error(name(), "Cannot convert image data");
+    __logger->log_error(name(), e);
   }
   __tt->ping_start(__ttc_dispose);
-  _camera->dispose_buffer();
+  __camera->dispose_buffer();
   __tt->ping_end(__ttc_dispose);
 
   if ( (++__loop_count % FVBASE_TT_PRINT_INT) == 0 ) {
@@ -275,32 +263,29 @@ FvAcquisitionThread::loop()
 
 #else // no time tracking
   try {
-    _camera->capture();
-    if ( _shm && _enabled ) {
-      _shm->lock_for_write();
-      convert(_colorspace, YUV422_PLANAR,
-	      _camera->buffer(), _buffer,
-	      _width, _height);
-      try {
-	_shm->set_capture_time(_camera->capture_time());
-      } catch (NotImplementedException &e) {
-	// ignored
+    __camera->capture();
+    if ( __enabled ) {
+      for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
+	__shmit->second->lock_for_write();
+	convert(__colorspace, __shmit->first,
+		__camera->buffer(), __shmit->second->buffer(),
+		__width, __height);
+	try {
+	  __shmit->second->set_capture_time(__camera->capture_time());
+	} catch (NotImplementedException &e) {
+	  // ignored
+	}
+	__shmit->second->unlock();
       }
-      _shm->unlock();
-    }
-    if ( _shm_raw && _enabled ) {
-      _shm_raw->lock_for_write();
-      memcpy(_buffer_raw, _camera->buffer(), _camera->buffer_size());
-      _shm_raw->unlock();
     }
   } catch (Exception &e) {
-    _logger->log_error(name(), e);
+    __logger->log_error(name(), e);
   }
-  _camera->dispose_buffer();
+  __camera->dispose_buffer();
 #endif
 
-  if ( _mode == AqtCyclic ) {
-    _vision_threads->wakeup_and_wait_cyclic_threads();
+  if ( __mode == AqtCyclic ) {
+    vision_threads->wakeup_and_wait_cyclic_threads();
   }
 
   // reset to the original cancel state, cancelling is now safe

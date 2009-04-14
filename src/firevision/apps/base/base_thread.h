@@ -3,7 +3,7 @@
  *  base_thread.h - FireVision Base Thread
  *
  *  Created: Tue May 29 16:40:10 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -67,7 +67,7 @@ class FvBaseThread
 
   virtual Camera *  register_for_camera(const char *camera_string,
 					fawkes::Thread *thread,
-					bool raw = false);
+					colorspace_t cspace = YUV422_PLANAR);
   virtual void      unregister_thread(fawkes::Thread *thread);
 
   virtual bool thread_started(fawkes::Thread *thread) throw();
@@ -77,13 +77,13 @@ class FvBaseThread
   void cond_recreate_barrier(unsigned int num_cyclic_threads);
 
  private:
-  fawkes::LockMap<std::string, FvAcquisitionThread *> aqts;
-  fawkes::LockMap<std::string, FvAcquisitionThread *>::iterator ait;
-  unsigned int _aqt_timeout;
+  fawkes::LockMap<std::string, FvAcquisitionThread *> __aqts;
+  fawkes::LockMap<std::string, FvAcquisitionThread *>::iterator __ait;
+  unsigned int __aqt_timeout;
 
-  fawkes::LockMap<Thread *, FvAcquisitionThread *> started_threads;
+  fawkes::LockMap<Thread *, FvAcquisitionThread *> __started_threads;
 
-  fawkes::Barrier *aqt_barrier;
+  fawkes::Barrier *__aqt_barrier;
 };
 
 

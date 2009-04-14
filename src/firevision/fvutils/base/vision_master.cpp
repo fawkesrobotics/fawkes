@@ -3,7 +3,7 @@
  *  vision_master.cpp - FireVision Vision Master
  *
  *  Created: Wed May 30 10:52:08 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -37,7 +37,7 @@ using namespace fawkes;
  *
  * @author Tim Niemueller
  *
- * @fn Camera *  VisionMaster::register_for_camera(const char *camera_string, Thread *thread, bool raw) = 0
+ * @fn Camera *  VisionMaster::register_for_camera(const char *camera_string, Thread *thread, colorspace_t cspace=YUV422_PLANAR) = 0
  * Register thread for camera.
  * This will register a relation between the given thread and the camera identified
  * by the camera string. If the requested camera has not been opened before this
@@ -52,11 +52,14 @@ using namespace fawkes;
  * @param camera_string camera that can be used by CameraFactory to open a
  * camera.
  * @param thread thread to register for this camera
- * @param raw true to retrieve the raw unconverted image from the camera, false to
- * get the image in YUV422 planar format
- * @return a reference to the requested camera. Note that this may not be
+ * @param cspace the colorspace in which the images should be provided for the
+ * camera. Note that using images in different formats at the same time can cause
+ * a severe performance penalty. The default is to produce YUV422_PLANAR images,
+ * which is used in the FireVision framework as main image format.
+ * @return a pointer to the requested camera. Note that this may not be
  * of the C++ type that you may expect for the requested camera, but it may
- * have layers of indirection.
+ * have layers of indirection. For example when opening a USB camera you could
+ * get a shared memory camera to share the camera (image) with multiple threads.
  *
  * @fn void VisionMaster::unregister_thread(Thread *thread) = 0
  * Unregister a thread.
