@@ -21,6 +21,7 @@
 
     <field type="float" name="dest_x">X-coordinate of the current destination, or 0.0 if no target has been set.</field>
     <field type="float" name="dest_y">Y-coordinate of the current destination, or 0.0 if no target has been set.</field>
+    <field type="float" name="dest_ori">Orientation of the current destination, or 0.0 if no target has been set.</field>
 
     <field type="float" name="dest_dist">Distance to destination in m.</field>
 

@@ -63,10 +63,11 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(Interface::IFT_FLOAT, "dest_x", 1, &data->dest_x);
   add_fieldinfo(Interface::IFT_FLOAT, "dest_y", 1, &data->dest_y);
+  add_fieldinfo(Interface::IFT_FLOAT, "dest_ori", 1, &data->dest_ori);
   add_fieldinfo(Interface::IFT_FLOAT, "dest_dist", 1, &data->dest_dist);
   add_fieldinfo(Interface::IFT_UINT, "msgid", 1, &data->msgid);
   add_fieldinfo(Interface::IFT_BOOL, "final", 1, &data->final);
-  unsigned char tmp_hash[] = {0xdc, 0x5e, 0x7b, 0xa9, 0x38, 0x5c, 0x71, 0xe2, 0xb7, 0x5a, 0x82, 0x43, 0x5e, 0x50, 0x13, 0xe1};
+  unsigned char tmp_hash[] = {0x4f, 0x19, 0xa0, 0x52, 0xd7, 0x8a, 0x12, 0x90, 0xb7, 0xf3, 0x37, 0x88, 0x17, 0x2f, 0x22, 0xdf};
   set_hash(tmp_hash);
 }
 
@@ -194,6 +195,36 @@ void
 NavigatorInterface::set_dest_y(const float new_dest_y)
 {
   data->dest_y = new_dest_y;
+}
+
+/** Get dest_ori value.
+ * Orientation of the current destination, or 0.0 if no target has been set.
+ * @return dest_ori value
+ */
+float
+NavigatorInterface::dest_ori() const
+{
+  return data->dest_ori;
+}
+
+/** Get maximum length of dest_ori value.
+ * @return length of dest_ori value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_dest_ori() const
+{
+  return 1;
+}
+
+/** Set dest_ori value.
+ * Orientation of the current destination, or 0.0 if no target has been set.
+ * @param new_dest_ori new dest_ori value
+ */
+void
+NavigatorInterface::set_dest_ori(const float new_dest_ori)
+{
+  data->dest_ori = new_dest_ori;
 }
 
 /** Get dest_dist value.

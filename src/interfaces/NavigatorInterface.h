@@ -48,6 +48,7 @@ class NavigatorInterface : public Interface
     float y; /**< Current Y-coordinate in the navigator coordinate system. */
     float dest_x; /**< X-coordinate of the current destination, or 0.0 if no target has been set. */
     float dest_y; /**< Y-coordinate of the current destination, or 0.0 if no target has been set. */
+    float dest_ori; /**< Orientation of the current destination, or 0.0 if no target has been set. */
     float dest_dist; /**< Distance to destination in m. */
     bool final; /**< True, if the last goto command has been finished,
       false if it is still running */
@@ -242,6 +243,9 @@ class NavigatorInterface : public Interface
   float dest_y() const;
   void set_dest_y(const float new_dest_y);
   size_t maxlenof_dest_y() const;
+  float dest_ori() const;
+  void set_dest_ori(const float new_dest_ori);
+  size_t maxlenof_dest_ori() const;
   float dest_dist() const;
   void set_dest_dist(const float new_dest_dist);
   size_t maxlenof_dest_dist() const;

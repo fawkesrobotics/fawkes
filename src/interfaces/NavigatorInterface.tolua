@@ -106,6 +106,9 @@ class NavigatorInterface : public Interface
   float dest_y();
   void set_dest_y(const float new_dest_y);
   int maxlenof_dest_y() const;
+  float dest_ori();
+  void set_dest_ori(const float new_dest_ori);
+  int maxlenof_dest_ori() const;
   float dest_dist();
   void set_dest_dist(const float new_dest_dist);
   int maxlenof_dest_dist() const;
