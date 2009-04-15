@@ -193,7 +193,7 @@ WorldModelNetworkThread::loop()
     if (o->second.empty()) {
       std::map<std::string, UidTimeObjPosMap>::iterator tmp = o;
       ++o;
-      __opponent_ifs.erase(o);
+      __opponent_ifs.erase(tmp);
     } else {
       ++o;
     }
