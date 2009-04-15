@@ -302,6 +302,8 @@ WorldModelNetworkThread::opponent_pose_rcvd(const char *from_host,
 {
   __opponent_ifs.lock();
   std::map<std::string, std::map<unsigned int, std::pair<Time, ObjectPositionInterface *> > >::iterator f;
+
+  bool iface_exists = true;
   if ( ((f = __opponent_ifs.find(from_host)) == __opponent_ifs.end()) ||
        (f->second.find(uid) == f->second.end()) ) {
 
@@ -316,11 +318,15 @@ WorldModelNetworkThread::opponent_pose_rcvd(const char *from_host,
 	logger->log_warn("WorldModelNetworkThread", "Failed to create ObjectPositionInterface "
 			 "for opponent %s:%u, exception follows", from_host, uid);
 	logger->log_warn("WorldModelNetworkThread", e);
-	__opponent_ifs.unlock();
-	return;
+        iface_exists = false;
       }
+    } else {
+      logger->log_error("WorldModelNetworkThread", "Could not create interface ID string, out of memory during asprintf().");
+      iface_exists = false;
     }
+  }
 
+  if (iface_exists) {
     logger->log_debug("WorldModelNetworkThread", "Setting opponent %s:%u", from_host, uid);
     ObjectPositionInterface *iface = __opponent_ifs[from_host][uid].second;
     iface->set_distance(distance);
@@ -330,7 +336,7 @@ WorldModelNetworkThread::opponent_pose_rcvd(const char *from_host,
 
     __opponent_ifs[from_host][uid].first.stamp();
   } else {
-    logger->log_error("WorldModelNetworkThread", "Could not create interface ID string, out of memory during asprintf().");
+    logger->log_warn("WorldModelNetworkThread", "Opponent pose interface does not exist, ignoring");
   }
   __opponent_ifs.unlock();
 }
