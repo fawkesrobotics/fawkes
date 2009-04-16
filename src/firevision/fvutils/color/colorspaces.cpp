@@ -53,6 +53,8 @@ colorspace_by_name(const char *mode)
     return YVU444_PACKED;
   } else if (strcmp(mode, "YUV422_PLANAR") == 0) {
     return YUV422_PLANAR;
+  } else if (strcmp(mode, "YUV422_PLANAR_QUARTER") == 0) {
+    return YUV422_PLANAR_QUARTER;
   } else if (strcmp(mode, "GRAY8") == 0) {
     return GRAY8;
   } else if (strcmp(mode, "RGB_WITH_ALPHA") == 0) {
@@ -99,6 +101,8 @@ colorspace_to_string(colorspace_t colorspace)
     return "YVU444_PACKED";
   case YUV422_PLANAR:
     return "YUV422_PLANAR";
+  case YUV422_PLANAR_QUARTER:
+    return "YUV422_PLANAR_QUARTER";
   case GRAY8:
     return "GRAY8";
   case RGB_WITH_ALPHA:
@@ -160,9 +164,11 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
   case BAYER_MOSAIC_GRBG:
   case BAYER_MOSAIC_BGGR:
     return (width * height);
-    
+
+  case YUV422_PLANAR_QUARTER:
+    return (width * height) / 2;
+
   default:
     return 0;
   }
 }
-

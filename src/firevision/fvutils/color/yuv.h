@@ -117,6 +117,13 @@ void yuv422planar_copy_uv(unsigned char *src, unsigned char *dst,
 void yuv422planar_to_yuv422packed(unsigned char *planar, unsigned char *packed,
 				  unsigned int width, unsigned int height);
 
+/** Convert YUV422_PLANAR_QUARTER images to YUV422_PACKED
+ */
+void yuv422planar_quarter_to_yuv422packed(unsigned char *planar,
+					  unsigned char *packed,
+					  const unsigned int width,
+					  const unsigned int height);
+
 
 /** Convert YUV422_PACKED images to YUV422_PLANAR
  */
@@ -127,6 +134,11 @@ void yuv422packed_to_yuv422planar(unsigned char *packed, unsigned char *planar,
  */
 void yuy2_to_yuv422planar(unsigned char *packed, unsigned char *planar,
 				  unsigned int width, unsigned int height);
+
+/** Convert YUY2 images to quarter-sized YUV422_PLANAR buffer.
+ */
+void yuy2_to_yuv422planar_quarter(unsigned char *packed, unsigned char *planar,
+				  const unsigned int width, const unsigned int height);
 
 /** Convert YVY2 images to YUV422_PLANAR
  */

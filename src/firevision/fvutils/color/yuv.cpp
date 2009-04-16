@@ -137,6 +137,35 @@ yuv422planar_to_yuv422packed(unsigned char *planar, unsigned char *packed,
 }
 
 void
+yuv422planar_quarter_to_yuv422packed(unsigned char *planar, unsigned char *packed,
+				     const unsigned int width,
+				     const unsigned int height)
+{
+  volatile unsigned char *y, *u, *v;
+  register unsigned int w, h;
+
+  const unsigned int w_h_4 = (width * height) / 4;
+  const unsigned int w_h_8 = (width * height) / 8;
+  const unsigned int w_t_2   = width * 2;
+  const unsigned int w_b_2   = width / 2;
+  const unsigned int w_b_4   = width / 4;
+
+
+  for (h = 0; h < height / 2; ++h) {
+    y = planar + (h * w_b_2);
+    u = planar + w_h_4 + (h * w_b_4);
+    v = planar + w_h_4 + w_h_8 + (h * w_b_4);
+
+    for (w = 0; w < w_b_4; ++w) {
+      packed[h * w_t_2 + w * 4    ] = *u++;
+      packed[h * w_t_2 + w * 4 + 1] = *y++;
+      packed[h * w_t_2 + w * 4 + 2] = *v++;
+      packed[h * w_t_2 + w * 4 + 3] = *y++;
+    }
+  }
+}
+
+void
 yuv422packed_to_yuv422planar(unsigned char *packed, unsigned char *planar,
 			     unsigned int width, unsigned int height)
 {
@@ -213,6 +242,35 @@ yvy2_to_yuv422planar(unsigned char *packed, unsigned char *planar,
     v[i]    = packed[iiy + 1];
     y[iy+1] = packed[iiy + 2];
     u[i]    = packed[iiy + 3];
+  }
+}
+
+
+void
+yuy2_to_yuv422planar_quarter(unsigned char *packed, unsigned char *planar,
+			     const unsigned int width, const unsigned int height)
+{
+  register volatile unsigned char *y, *u, *v;
+  register unsigned int h, w;
+
+  unsigned int wh = (width * height);
+  y = planar;
+  u = planar + (wh / 4);
+  v = u + (wh / 8);
+
+  const unsigned int w_b_2 = width / 2;
+  const unsigned int w_b_4 = width / 4;
+  const unsigned int w_t_2 = width * 2;
+  unsigned int packpix;
+
+  for (h = 0; h < height / 2; ++h) {
+    for (w = 0; w < width; w += 4) {
+      packpix = (h * w_t_2 + w) * 2;
+      y[h * w_b_2 + w / 2    ] = (packed[packpix + 0] + packed[packpix + 2]) / 2;
+      u[h * w_b_4 + w / 4    ] = (packed[packpix + 1] + packed[packpix + 5]) / 2;
+      y[h * w_b_2 + w / 2 + 1] = (packed[packpix + 4] + packed[packpix + 6]) / 2;
+      v[h * w_b_4 + w / 4    ] = (packed[packpix + 3] + packed[packpix + 7]) / 2;
+    }
   }
 }
 

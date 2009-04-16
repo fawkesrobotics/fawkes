@@ -60,6 +60,8 @@ convert(colorspace_t   from,  colorspace_t   to,
     }
   } else if ( (from == YUV422_PACKED) && (to == YUV422_PLANAR) ) {
     yuv422packed_to_yuv422planar(src, dst, width, height);
+  } else if ( (from == YUY2) && (to == YUV422_PLANAR_QUARTER) ) {
+    yuy2_to_yuv422planar_quarter(src, dst, width, height);
   } else if ( (from == YUY2) && (to == YUV422_PLANAR) ) {
     yuy2_to_yuv422planar(src, dst, width, height);
   } else if ( (from == YVY2) && (to == YUV422_PLANAR) ) {
@@ -91,6 +93,8 @@ convert(colorspace_t   from,  colorspace_t   to,
     gray8_to_yuv422planar_plainc(src, dst, width, height);
   } else if ( (from == YUV422_PLANAR) && (to == YUV422_PACKED) ) {
     yuv422planar_to_yuv422packed(src, dst, width, height);
+  } else if ( (from == YUV422_PLANAR_QUARTER) && (to == YUV422_PACKED) ) {
+    yuv422planar_quarter_to_yuv422packed(src, dst, width, height);
   } else if ( (from == YUV422_PLANAR) && (to == RGB) ) {
     yuv422planar_to_rgb_plainc(src, dst, width, height);
   } else if ( (from == YUV422_PACKED) && (to == RGB) ) {
