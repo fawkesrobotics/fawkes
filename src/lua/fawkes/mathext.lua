@@ -71,3 +71,20 @@ function math.normalize_mirror_rad(angle_rad)
     return angle_rad
   end
 end
+
+--- Get algebraic sign (-1 or +1)
+-- @param value value to get the sign from
+function math.sign(value)
+   if value == 0 then
+      return 0
+   else
+      return value/math.abs(value)
+   end
+end
+
+--- Calculate the length of a vector
+-- @param x x-coordinate
+-- @param y y-coordinate
+function math.vec_length(x, y)
+   return math.sqrt(x^2 + y^2)
+end

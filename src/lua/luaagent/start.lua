@@ -24,6 +24,8 @@
 require("fawkes.logprint")
 fawkes.logprint.init(logger)
 
+require("fawkes.mathext")
+
 agentenv = require("luaagent.agentenv")
 
 skiller = interfaces.reading.skiller

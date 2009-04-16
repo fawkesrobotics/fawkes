@@ -704,7 +704,9 @@ SkillGuiGtkWindow::on_graphdir_changed(SkillerDebugInterface::GraphDirectionEnum
 void
 SkillGuiGtkWindow::on_graphcolor_toggled()
 {
+#ifdef HAVE_GCONFMM
   __gconf->set(GCONF_PREFIX"/graph_colored", tb_graphcolored->get_active());
+#endif
 
   SkillerDebugInterface *iface = __skdbg_if;
   if (tb_agent->get_active()) {
