@@ -903,7 +903,6 @@ Thread::run()
     // Wait for initial wakeup
     __sleep_condition->wait();
     __wakeup_finished = true;
-    __wakeup_finished = true;
   }
 
   forever {
@@ -927,7 +926,6 @@ Thread::run()
     }
     if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
       __sleep_condition->wait();
-      __wakeup_finished = true;
       __wakeup_finished = true;
     }
     yield();
