@@ -141,7 +141,7 @@ yuv422planar_quarter_to_yuv422packed(const unsigned char *planar, unsigned char 
 				     const unsigned int width,
 				     const unsigned int height)
 {
-  volatile unsigned char *y, *u, *v;
+  volatile const unsigned char *y, *u, *v;
   register unsigned int w, h;
 
   const unsigned int w_h_4 = (width * height) / 4;
