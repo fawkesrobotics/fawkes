@@ -61,6 +61,7 @@ class InterruptibleBarrierData
   ~InterruptibleBarrierData()
   {
     if (own_mutex)  delete mutex;
+    delete waitcond;
   }
 };
 /// @endcond
