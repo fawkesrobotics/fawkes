@@ -29,6 +29,7 @@
 #include <config/net_list_content.h>
 
 #include <core/threading/mutex.h>
+#include <core/threading/interruptible_barrier.h>
 #include <netcomm/fawkes/client.h>
 #include <netcomm/fawkes/message.h>
 #include <netcomm/utils/exceptions.h>
@@ -39,6 +40,8 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+
+#define MIRROR_INIT_TOUT 15 /**< Timeout in seconds to wait for initial response */
 
 namespace fawkes {
 
@@ -88,6 +91,7 @@ NetworkConfiguration::NetworkConfiguration(FawkesNetworkClient *c)
   msg = NULL;
   __mirror_mode = false;
   __mirror_mode_before_connection_dead = false;
+  __mirror_init_barrier = NULL;
 }
 
 
@@ -99,6 +103,7 @@ NetworkConfiguration::~NetworkConfiguration()
   if (msg != NULL) {
     msg->unref();
   }
+  delete __mirror_init_barrier;
   delete mutex;
 }
 
@@ -332,6 +337,7 @@ NetworkConfiguration::get_uint(const char *path)
       u = mirror_config->get_uint(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_uint: exception in mirror database");
+      mutex->unlock();
       throw;
     }
   } else {
@@ -381,6 +387,7 @@ NetworkConfiguration::get_int(const char *path)
       i = mirror_config->get_int(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_int: exception in mirror database");
+      mutex->unlock();
       throw;
     }
   } else {
@@ -480,6 +487,7 @@ NetworkConfiguration::get_string(const char *path)
       s = mirror_config->get_string(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_string: exception in mirror database");
+      mutex->unlock();
       throw;
     }
   } else {
@@ -532,6 +540,7 @@ NetworkConfiguration::get_value(const char *path)
       i = mirror_config->get_value(path);
     } catch (Exception &e) {
       e.append("NetworkConfiguration[mirroring]::get_float: exception in mirror database");
+      mutex->unlock();
       throw;
     }
   } else {
@@ -926,7 +935,8 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 	    mirror_config->add_change_handler((*i).second);
 	  }
 	}
-	mutex->unlock();
+	// initial answer received -> wake up set_mirror_mode()
+	if (__mirror_init_barrier) __mirror_init_barrier->wait();
 	break;
 
       case MSG_CONFIG_VALUE_ERASED:
@@ -1013,6 +1023,7 @@ NetworkConfiguration::connection_died(unsigned int id) throw()
   __connected = false;
   __mirror_mode_before_connection_dead = __mirror_mode;
   set_mirror_mode(false);
+  mutex->unlock(); //Just in case...
 }
 
 
@@ -1071,6 +1082,9 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
       mirror_config = new SQLiteConfiguration();
       mirror_config->load(tmp_volatile, tmp_default);
 
+      __mirror_init_barrier = new InterruptibleBarrier(2);
+      mutex->lock();
+
       // subscribe
       FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							    MSG_CONFIG_SUBSCRIBE);
@@ -1079,8 +1093,21 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
 
       __mirror_mode = true;
 
-      // unlocked after all data has been received once
-      mutex->lock();
+      // wait until all data has been received (or timeout)
+      if (!__mirror_init_barrier->wait(MIRROR_INIT_TOUT,0))
+      {
+        // timeout
+        delete mirror_config;
+        unlink(tmp_volatile);
+        unlink(tmp_default);
+        free(tmp_volatile);
+        free(tmp_default);
+        mutex->unlock();
+        throw CannotEnableMirroringException("Didn't receive data in time");
+      }
+      mutex->unlock();
+      delete __mirror_init_barrier;
+      __mirror_init_barrier = NULL;
     }
   } else {
     if ( __mirror_mode ) {

@@ -34,7 +34,7 @@
  * @param height height in pixels
  */
 void
-rgb_to_rgb_with_alpha_plainc(unsigned char *rgb, unsigned char *rgb_alpha,
+rgb_to_rgb_with_alpha_plainc(const unsigned char *rgb, unsigned char *rgb_alpha,
 			     unsigned int width, unsigned int height)
 {
   for ( unsigned int i = 0; i < width * height; ++i) {
@@ -54,7 +54,7 @@ rgb_to_rgb_with_alpha_plainc(unsigned char *rgb, unsigned char *rgb_alpha,
  * @param height height in pixels
  */
 void
-rgb_to_bgr_with_alpha_plainc(unsigned char *rgb, unsigned char *bgr_alpha,
+rgb_to_bgr_with_alpha_plainc(const unsigned char *rgb, unsigned char *bgr_alpha,
 			     unsigned int width, unsigned int height)
 {
   for ( unsigned int i = 0; i < width * height; ++i) {
@@ -75,7 +75,7 @@ rgb_to_bgr_with_alpha_plainc(unsigned char *rgb, unsigned char *bgr_alpha,
  * @param height height in pixels
  */
 void
-bgr_to_rgb_plainc(unsigned char *BGR, unsigned char *RGB,
+bgr_to_rgb_plainc(const unsigned char *BGR, unsigned char *RGB,
 		  unsigned int width, unsigned int height)
 {
   RGB_t *rgb;
@@ -103,32 +103,32 @@ bgr_to_rgb_plainc(unsigned char *BGR, unsigned char *RGB,
  * @param yuv_line the index of the line to convert to in the YUV buffer
  */
 
-void convert_line_bgr_rgb( unsigned char *BGR, unsigned char *RGB,
+void convert_line_bgr_rgb(const unsigned char *BGR, unsigned char *RGB,
 			    unsigned int width, unsigned int height)
  {
-  register unsigned int i = 0; 
-  register unsigned char *r1, *r2, *r3; 
-  register unsigned char *n1, *n2, *n3; 
+  register unsigned int i = 0;
+  register const unsigned char *r1, *r2, *r3;
+  register unsigned char *n1, *n2, *n3;
 
-  while( i < width ) { 
+  while( i < width ) {
 
     n1 = RGB++;
-    n2 = RGB++; 
-    n3 = RGB++; 
+    n2 = RGB++;
+    n3 = RGB++;
 
     r1 = BGR++;
-    r2 = BGR++; 
-    r3 = BGR++; 
+    r2 = BGR++;
+    r3 = BGR++;
 
-    *n1 = *r3; 
-    *n2 = *r2; 
-    *n3 = *r1; 
-    
-    
-    i += 1; 
+    *n1 = *r3;
+    *n2 = *r2;
+    *n3 = *r1;
+
+
+    i += 1;
   }
 }
- 
-    
+
+
 
 

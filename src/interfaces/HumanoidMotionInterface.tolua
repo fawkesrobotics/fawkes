@@ -15,6 +15,11 @@ class HumanoidMotionInterface : public Interface
     STANDUP_FRONT
   } StandupEnum;
 
+  typedef enum {
+    WALK,
+    KICK
+  } StiffnessBehaviourEnum;
+
   class SetWalkParamsMessage : public Message
   {
     SetWalkParamsMessage(float ini_max_step_length, float ini_max_step_height, float ini_max_step_side, float ini_max_step_turn, float ini_zmp_offset_forward, float ini_zmp_offset_sideward, float ini_l_hip_roll_compensation, float ini_r_hip_roll_compensation, float ini_hip_height, float ini_torso_sideward_orientation);
@@ -204,6 +209,28 @@ class HumanoidMotionInterface : public Interface
     float time_sec();
     void set_time_sec(const float new_time_sec);
     int maxlenof_time_sec() const;
+  };
+
+  class UpdateStiffnessParamsMessage : public Message
+  {
+    UpdateStiffnessParamsMessage(StiffnessBehaviourEnum ini_behaviour);
+    UpdateStiffnessParamsMessage();
+    ~UpdateStiffnessParamsMessage();
+
+    StiffnessBehaviourEnum behaviour();
+    void set_behaviour(const StiffnessBehaviourEnum new_behaviour);
+    int maxlenof_behaviour() const;
+  };
+
+  class UpdateStiffnessInterfaceMessage : public Message
+  {
+    UpdateStiffnessInterfaceMessage(StiffnessBehaviourEnum ini_behaviour);
+    UpdateStiffnessInterfaceMessage();
+    ~UpdateStiffnessInterfaceMessage();
+
+    StiffnessBehaviourEnum behaviour();
+    void set_behaviour(const StiffnessBehaviourEnum new_behaviour);
+    int maxlenof_behaviour() const;
   };
 
   bool is_moving();

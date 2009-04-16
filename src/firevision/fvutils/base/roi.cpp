@@ -531,7 +531,7 @@ ROI::get_roi_buffer_start(unsigned char *buffer) const
  *
  */
 unsigned int
-ROI::get_num_hint_points()
+ROI::get_num_hint_points() const
 {
   return num_hint_points;
 }

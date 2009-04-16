@@ -77,6 +77,7 @@ NaoStiffnessConfigDialog::NaoStiffnessConfigDialog(BaseObjectType *cobject,
   __lap = dynamic_cast<SpinButton *>(get_widget(ref_xml, "lap"));
   __rap = dynamic_cast<SpinButton *>(get_widget(ref_xml, "rap"));
 
+  __def = dynamic_cast<CheckButton *>(get_widget(ref_xml, "checkbutton_default"));
   __lck = dynamic_cast<CheckButton *>(get_widget(ref_xml, "checkbutton_lock"));
   __lck->signal_toggled().connect(mem_fun(*this, &NaoStiffnessConfigDialog::on_checkbutton_lock_toggled));
   on_checkbutton_lock_toggled();
@@ -210,6 +211,14 @@ string NaoStiffnessConfigDialog::get_cur_behaviour()
   return __cur_bhv;
 }
 
+/** Return whether default checkbox is checked.
+ * @return true if default is checked
+ */
+bool NaoStiffnessConfigDialog::get_save_default()
+{
+  return __def->get_active();
+}
+
 /** Set the callback function for loading values in the plugin.
  * Config is not accessible in the dialog, so it has to be done there.
  * @param cb the callback
@@ -317,30 +326,35 @@ NaoStiffnessConfigPlugin::save_vals()
     dlg->get_stiffnesses(vals);
     string path = string(STIFFNESS_CFG_PATH"/").append(dlg->get_cur_behaviour());
 
-    if (vals.hy != __initial_vals.hy) m_config->set_float(string(path).append("/head_yaw").c_str(), vals.hy);
-    if (vals.hp != __initial_vals.hp) m_config->set_float(string(path).append("/head_pitch").c_str(), vals.hp);
+    void (Configuration::*my_set_float)(const char *, float) = NULL;
 
-    if (vals.lsp != __initial_vals.lsp) m_config->set_float(string(path).append("/l_shoulder_pitch").c_str(), vals.lsp);
-    if (vals.rsp != __initial_vals.rsp) m_config->set_float(string(path).append("/r_shoulder_pitch").c_str(), vals.rsp);
-    if (vals.lsr != __initial_vals.lsr) m_config->set_float(string(path).append("/l_shoulder_roll").c_str(), vals.lsr);
-    if (vals.rsr != __initial_vals.rsr) m_config->set_float(string(path).append("/r_shoulder_roll").c_str(), vals.rsr);
-    if (vals.ley != __initial_vals.ley) m_config->set_float(string(path).append("/l_elbow_yaw").c_str(), vals.ley);
-    if (vals.rey != __initial_vals.rey) m_config->set_float(string(path).append("/r_elbow_yaw").c_str(), vals.rey);
-    if (vals.ler != __initial_vals.ler) m_config->set_float(string(path).append("/l_elbow_roll").c_str(), vals.ler);
-    if (vals.rer != __initial_vals.rer) m_config->set_float(string(path).append("/r_elbow_roll").c_str(), vals.rer);
+    if (dlg->get_save_default()) my_set_float = &Configuration::set_default_float;
+    else my_set_float = &Configuration::set_float;
 
-    if (vals.lhyp != __initial_vals.lhyp) m_config->set_float(string(path).append("/l_hip_yaw_pitch").c_str(), vals.lhyp);
-    if (vals.rhyp != __initial_vals.rhyp) m_config->set_float(string(path).append("/r_hip_yaw_pitch").c_str(), vals.rhyp);
-    if (vals.lhr != __initial_vals.lhr) m_config->set_float(string(path).append("/l_hip_roll").c_str(), vals.lhr);
-    if (vals.rhr != __initial_vals.rhr) m_config->set_float(string(path).append("/r_hip_roll").c_str(), vals.rhr);
-    if (vals.lhp != __initial_vals.lhp) m_config->set_float(string(path).append("/l_hip_roll").c_str(), vals.lhp);
-    if (vals.rhp != __initial_vals.rhp) m_config->set_float(string(path).append("/r_hip_roll").c_str(), vals.rhp);
-    if (vals.lkp != __initial_vals.lkp) m_config->set_float(string(path).append("/l_knee_pitch").c_str(), vals.lkp);
-    if (vals.rkp != __initial_vals.rkp) m_config->set_float(string(path).append("/r_knee_pitch").c_str(), vals.rkp);
-    if (vals.lar != __initial_vals.lar) m_config->set_float(string(path).append("/l_ankle_roll").c_str(), vals.lar);
-    if (vals.rar != __initial_vals.rar) m_config->set_float(string(path).append("/r_ankle_roll").c_str(), vals.rar);
-    if (vals.lap != __initial_vals.lap) m_config->set_float(string(path).append("/l_ankle_pitch").c_str(), vals.lap);
-    if (vals.rap != __initial_vals.rap) m_config->set_float(string(path).append("/r_ankle_pitch").c_str(), vals.rap);
+    if (vals.hy != __initial_vals.hy) (m_config->*my_set_float)(string(path).append("/head_yaw").c_str(), vals.hy);
+    if (vals.hp != __initial_vals.hp) (m_config->*my_set_float)(string(path).append("/head_pitch").c_str(), vals.hp);
+
+    if (vals.lsp != __initial_vals.lsp) (m_config->*my_set_float)(string(path).append("/l_shoulder_pitch").c_str(), vals.lsp);
+    if (vals.rsp != __initial_vals.rsp) (m_config->*my_set_float)(string(path).append("/r_shoulder_pitch").c_str(), vals.rsp);
+    if (vals.lsr != __initial_vals.lsr) (m_config->*my_set_float)(string(path).append("/l_shoulder_roll").c_str(), vals.lsr);
+    if (vals.rsr != __initial_vals.rsr) (m_config->*my_set_float)(string(path).append("/r_shoulder_roll").c_str(), vals.rsr);
+    if (vals.ley != __initial_vals.ley) (m_config->*my_set_float)(string(path).append("/l_elbow_yaw").c_str(), vals.ley);
+    if (vals.rey != __initial_vals.rey) (m_config->*my_set_float)(string(path).append("/r_elbow_yaw").c_str(), vals.rey);
+    if (vals.ler != __initial_vals.ler) (m_config->*my_set_float)(string(path).append("/l_elbow_roll").c_str(), vals.ler);
+    if (vals.rer != __initial_vals.rer) (m_config->*my_set_float)(string(path).append("/r_elbow_roll").c_str(), vals.rer);
+
+    if (vals.lhyp != __initial_vals.lhyp) (m_config->*my_set_float)(string(path).append("/l_hip_yaw_pitch").c_str(), vals.lhyp);
+    if (vals.rhyp != __initial_vals.rhyp) (m_config->*my_set_float)(string(path).append("/r_hip_yaw_pitch").c_str(), vals.rhyp);
+    if (vals.lhr != __initial_vals.lhr) (m_config->*my_set_float)(string(path).append("/l_hip_roll").c_str(), vals.lhr);
+    if (vals.rhr != __initial_vals.rhr) (m_config->*my_set_float)(string(path).append("/r_hip_roll").c_str(), vals.rhr);
+    if (vals.lhp != __initial_vals.lhp) (m_config->*my_set_float)(string(path).append("/l_hip_roll").c_str(), vals.lhp);
+    if (vals.rhp != __initial_vals.rhp) (m_config->*my_set_float)(string(path).append("/r_hip_roll").c_str(), vals.rhp);
+    if (vals.lkp != __initial_vals.lkp) (m_config->*my_set_float)(string(path).append("/l_knee_pitch").c_str(), vals.lkp);
+    if (vals.rkp != __initial_vals.rkp) (m_config->*my_set_float)(string(path).append("/r_knee_pitch").c_str(), vals.rkp);
+    if (vals.lar != __initial_vals.lar) (m_config->*my_set_float)(string(path).append("/l_ankle_roll").c_str(), vals.lar);
+    if (vals.rar != __initial_vals.rar) (m_config->*my_set_float)(string(path).append("/r_ankle_roll").c_str(), vals.rar);
+    if (vals.lap != __initial_vals.lap) (m_config->*my_set_float)(string(path).append("/l_ankle_pitch").c_str(), vals.lap);
+    if (vals.rap != __initial_vals.rap) (m_config->*my_set_float)(string(path).append("/r_ankle_pitch").c_str(), vals.rap);
   }
   catch (Exception &e)
   {

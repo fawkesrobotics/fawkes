@@ -13,6 +13,11 @@
       <item name="STANDUP_BACK">Standup from lying on the back.</item>
       <item name="STANDUP_FRONT">Standup from lying on the tummy.</item>
     </enum>
+    <enum name="StiffnessBehaviourEnum">
+      <comment>The behaviours that need specific stiffness settings</comment>
+      <item name="WALK">The walk behaviour</item>
+      <item name="KICK">The kick behaviour</item>
+    </enum>
   </constants>
   <data>
     <comment>
@@ -165,5 +170,13 @@
     <field type="float" name="yaw">Desired yaw (horizontal orientation).</field>
     <field type="float" name="pitch">Desired pitch (vertical orientation).</field>
     <field type="float" name="time_sec">Time in seconds when to reach the target.</field>
+  </message>
+  <message name="UpdateStiffnessParams">
+    <comment>Updates Stiffness values for a certain behaviour</comment>
+    <field type="StiffnessBehaviourEnum" name="behaviour">the behaviour to update</field>
+  </message>
+  <message name="UpdateStiffnessInterface">
+    <comment>Reads current Stiffness values for a certain behaviour into the interface</comment>
+    <field type="StiffnessBehaviourEnum" name="behaviour">the behaviour to read the parameters from</field>
   </message>
 </interface>

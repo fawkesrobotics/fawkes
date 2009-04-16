@@ -51,7 +51,7 @@
  */
 inline void
 convert(colorspace_t   from,  colorspace_t   to,
-	unsigned char *src,   unsigned char *dst,
+	const unsigned char *src,   unsigned char *dst,
 	unsigned int   width, unsigned int   height)
 {
   if (from == to) {

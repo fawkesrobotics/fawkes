@@ -64,7 +64,7 @@
  * @param width Width of the image contained in the YUV buffer
  * @param height Height of the image contained in the YUV buffer
  */
-void yuv411packed_to_rgb_plainc(unsigned char *YUV, unsigned char *RGB,
+void yuv411packed_to_rgb_plainc(const unsigned char *YUV, unsigned char *RGB,
 				unsigned int width, unsigned int height);
 
 
@@ -83,23 +83,23 @@ void yuv411packed_to_rgb_plainc(unsigned char *YUV, unsigned char *RGB,
  * @param width Width of the image contained in the YUV buffer
  * @param height Height of the image contained in the YUV buffer
  */
-void yuv422planar_to_rgb_plainc(unsigned char *planar, unsigned char *RGB,
+void yuv422planar_to_rgb_plainc(const unsigned char *planar, unsigned char *RGB,
 				unsigned int width, unsigned int height);
 
-void yuv422packed_to_rgb_plainc(unsigned char *planar, unsigned char *RGB,
+void yuv422packed_to_rgb_plainc(const unsigned char *planar, unsigned char *RGB,
 				unsigned int width, unsigned int height);
 
-void yuv422planar_to_bgr_plainc(unsigned char *planar, unsigned char *BGR,
+void yuv422planar_to_bgr_plainc(const unsigned char *planar, unsigned char *BGR,
 				unsigned int width, unsigned int height);
 
 
-void yuv422planar_to_rgb_with_alpha_plainc(unsigned char *planar, unsigned char *RGB,
+void yuv422planar_to_rgb_with_alpha_plainc(const unsigned char *planar, unsigned char *RGB,
 					   unsigned int width, unsigned int height);
 
-void yuv422planar_to_bgr_with_alpha_plainc(unsigned char *planar, unsigned char *BGR,
+void yuv422planar_to_bgr_with_alpha_plainc(const unsigned char *planar, unsigned char *BGR,
 					   unsigned int width, unsigned int height);
 
-void yuv422packed_to_bgr_with_alpha_plainc(unsigned char *YUV, unsigned char *BGR,
+void yuv422packed_to_bgr_with_alpha_plainc(const unsigned char *YUV, unsigned char *BGR,
 					   unsigned int width, unsigned int height);
 
 
@@ -108,14 +108,14 @@ void yuv422packed_to_bgr_with_alpha_plainc(unsigned char *YUV, unsigned char *BG
      defined __X86__ ||	    \
      defined _M_IX86 ||	    \
      defined i386 )
-void yuv411planar_to_rgb_mmx (unsigned char *yuv, unsigned char *rgb,
+void yuv411planar_to_rgb_mmx (const unsigned char *yuv, unsigned char *rgb,
 			      unsigned int w, unsigned int h);
 #endif
 
 
 
 inline void
-pixel_yuv_to_rgb(unsigned char y, unsigned u, unsigned char v,
+pixel_yuv_to_rgb(const unsigned char y, unsigned u, unsigned char v,
 		 unsigned char *r, unsigned char *g, unsigned char *b)
 {
   int yt, ut, vt;
@@ -127,7 +127,7 @@ pixel_yuv_to_rgb(unsigned char y, unsigned u, unsigned char v,
   *r = clip( (76284 * yt + 104595 * vt              ) >> 16 );
   *g = clip( (76284 * yt -  25625 * ut - 53281 * vt ) >> 16 );
   *b = clip( (76284 * yt + 132252 * ut              ) >> 16 );
-  
+
 }
 
 
@@ -143,13 +143,13 @@ pixel_yuv_to_rgb(unsigned char y, unsigned u, unsigned char v,
  * @param yuv_line the index of the line to convert to in the YUV buffer
  */
 inline void
-convert_line_yuv422planar_to_rgb(unsigned char *YUV, unsigned char *RGB,
+convert_line_yuv422planar_to_rgb(const unsigned char *YUV, unsigned char *RGB,
 				 unsigned int width, unsigned int height,
 				 unsigned int yuv_line, unsigned int rgb_line)
 {
   register unsigned int i = 0;
   register RGB_t *r1, *r2;
-  register unsigned char *yp, *up, *vp;
+  register const unsigned char *yp, *up, *vp;
 
   yp = YUV + (width * yuv_line);
   up = YUV422_PLANAR_U_PLANE(YUV, width, height) + (width * yuv_line / 2);

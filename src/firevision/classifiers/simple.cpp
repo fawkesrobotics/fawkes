@@ -166,7 +166,7 @@ SimpleColorClassifier::classify()
 
   unsigned int  x = 0, y = 0;
   unsigned char yp = 0, up = 0, vp = 0;
-  unsigned int num_what;
+  unsigned int num_what = 0;
 
   ROI r;
 
@@ -199,8 +199,10 @@ SimpleColorClassifier::classify()
       // as the name suggests this one is really ABSOLUTELY simple and not
       // useful for anything else than quick testing
 
-      num_what = consider_neighbourhood((*scanline_model)->x, (*scanline_model)->y, c);
-      if (num_what > neighbourhood_min_match) {
+      if (neighbourhood_min_match) {
+        num_what = consider_neighbourhood((*scanline_model)->x, (*scanline_model)->y, c);
+      }
+      if (num_what >= neighbourhood_min_match) {
 
         bool ok = false;
 

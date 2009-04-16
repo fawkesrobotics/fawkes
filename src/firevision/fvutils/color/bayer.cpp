@@ -36,17 +36,17 @@
     *y++ = y1;					  \
     *y++ = y2;					  \
     *u++ = ((u1 + u2) >> 1);			  \
-    *v++ = ((v1 + v2) >> 1); }  
+    *v++ = ((v1 + v2) >> 1); }
 
 
 void
-bayerGBRG_to_yuv422planar_nearest_neighbour(unsigned char *bayer, unsigned char *yuv,
+bayerGBRG_to_yuv422planar_nearest_neighbour(const unsigned char *bayer, unsigned char *yuv,
 					    unsigned int width, unsigned int height)
 {
   unsigned char *y = yuv;
   unsigned char *u = YUV422_PLANAR_U_PLANE(yuv, width, height);
   unsigned char *v = YUV422_PLANAR_V_PLANE(yuv, width, height);
-  unsigned char *b = bayer;
+  const unsigned char *b = bayer;
 
   int y1, u1, v1, y2, u2, v2;
   int t1, t2;
@@ -66,7 +66,7 @@ bayerGBRG_to_yuv422planar_nearest_neighbour(unsigned char *bayer, unsigned char 
       ++b;
 
       assign(y, u, v, y1, u1, v1, y2, u2, v2);
-    }    
+    }
 
     // r  g  ... line
     for (unsigned int w = 0; w < width; w += 2) {
@@ -88,13 +88,13 @@ bayerGBRG_to_yuv422planar_nearest_neighbour(unsigned char *bayer, unsigned char 
 
 
 void
-bayerGBRG_to_yuv422planar_bilinear(unsigned char *bayer, unsigned char *yuv,
+bayerGBRG_to_yuv422planar_bilinear(const unsigned char *bayer, unsigned char *yuv,
 				   unsigned int width, unsigned int height)
 {
   unsigned char *y = yuv;
   unsigned char *u = YUV422_PLANAR_U_PLANE(yuv, width, height);
   unsigned char *v = YUV422_PLANAR_V_PLANE(yuv, width, height);
-  unsigned char *bf = bayer;
+  const unsigned char *bf = bayer;
 
   int y1, u1, v1, y2, u2, v2;
   int r, g, b;
@@ -112,7 +112,7 @@ bayerGBRG_to_yuv422planar_bilinear(unsigned char *bayer, unsigned char *yuv,
   g = (bf[-1] + bf[1]) >> 1;
   RGB2YUV(r, g, *bf, y2, u2, v2);
   ++bf;
-      
+
   assign(y, u, v, y1, u1, v1, y2, u2, v2);
 
   // rest of first line
@@ -128,9 +128,9 @@ bayerGBRG_to_yuv422planar_bilinear(unsigned char *bayer, unsigned char *yuv,
     g = (bf[-1] + bf[1]) >> 1;
     RGB2YUV(r, g, *bf, y2, u2, v2);
     ++bf;
-      
+
     assign(y, u, v, y1, u1, v1, y2, u2, v2);
-  }    
+  }
 
   // not full data in last columns
   b = (bf[-1] + bf[1]) >> 1;
@@ -196,7 +196,7 @@ bayerGBRG_to_yuv422planar_bilinear(unsigned char *bayer, unsigned char *yuv,
     g = (bf[-width] + bf[1] + bf[width] + bf[-1]) >> 2;
     RGB2YUV(r, g, *bf, y2, u2, v2);
     ++bf;
-      
+
     assign(y, u, v, y1, u1, v1, y2, u2, v2);
 
     for (unsigned int w = 2; w < width - 2; w += 2) {
@@ -211,7 +211,7 @@ bayerGBRG_to_yuv422planar_bilinear(unsigned char *bayer, unsigned char *yuv,
       ++bf;
 
       assign(y, u, v, y1, u1, v1, y2, u2, v2);
-    }    
+    }
 
     r = (bf[width] + bf[-width]) >> 1;
     b = (bf[-1] + bf[1]) >> 1;
@@ -276,13 +276,13 @@ bayerGBRG_to_yuv422planar_bilinear(unsigned char *bayer, unsigned char *yuv,
 
 
 void
-bayerGBRG_to_yuv422planar_bilinear2(unsigned char *bayer, unsigned char *yuv,
+bayerGBRG_to_yuv422planar_bilinear2(const unsigned char *bayer, unsigned char *yuv,
 				   unsigned int width, unsigned int height)
 {
   unsigned char *y = yuv;
   unsigned char *u = YUV422_PLANAR_U_PLANE(yuv, width, height);
   unsigned char *v = YUV422_PLANAR_V_PLANE(yuv, width, height);
-  unsigned char *bf = bayer;
+  const unsigned char *bf = bayer;
 
   int y1, u1, v1, y2, u2, v2;
   int r, g, b;
@@ -338,7 +338,7 @@ bayerGBRG_to_yuv422planar_bilinear2(unsigned char *bayer, unsigned char *yuv,
       ++bf;
 
       assign(y, u, v, y1, u1, v1, y2, u2, v2);
-    }    
+    }
 
     // ignore last two columns
     ++bf; ++bf;
@@ -352,7 +352,7 @@ bayerGBRG_to_yuv422planar_bilinear2(unsigned char *bayer, unsigned char *yuv,
 
 /* Not faster in benchmarks
 void
-bayerGBRG_to_yuv422planar_bilinear2(unsigned char *bayer, unsigned char *yuv,
+bayerGBRG_to_yuv422planar_bilinear2(const unsigned char *bayer, unsigned char *yuv,
 				    unsigned int width, unsigned int height)
 {
   unsigned char *y = yuv;
@@ -376,7 +376,7 @@ bayerGBRG_to_yuv422planar_bilinear2(unsigned char *bayer, unsigned char *yuv,
   g = (*(bf -1) + *(bf +1)) >> 1;
   RGB2YUV(r, g, *bf, y2, u2, v2);
   ++bf;
-      
+
   assign(y, u, v, y1, u1, v1, y2, u2, v2);
 
   // rest of first line
@@ -392,9 +392,9 @@ bayerGBRG_to_yuv422planar_bilinear2(unsigned char *bayer, unsigned char *yuv,
     g = (*(bf - 1) + *(bf + 1)) >> 1;
     RGB2YUV(r, g, *bf, y2, u2, v2);
     ++bf;
-      
+
     assign(y, u, v, y1, u1, v1, y2, u2, v2);
-  }    
+  }
 
   // not full data in last columns
   b = (*(bf - 1) + *(bf + 1)) >> 1;
@@ -460,7 +460,7 @@ bayerGBRG_to_yuv422planar_bilinear2(unsigned char *bayer, unsigned char *yuv,
     g = (*(bf - width) + *(bf + 1) + *(bf + width) + *(bf - 1)) >> 2;
     RGB2YUV(r, g, *bf, y2, u2, v2);
     ++bf;
-      
+
     assign(y, u, v, y1, u1, v1, y2, u2, v2);
 
     for (unsigned int w = 2; w < width - 2; w += 2) {
@@ -475,7 +475,7 @@ bayerGBRG_to_yuv422planar_bilinear2(unsigned char *bayer, unsigned char *yuv,
       ++bf;
 
       assign(y, u, v, y1, u1, v1, y2, u2, v2);
-    }    
+    }
 
     r = (*(bf + width) + *(bf - width)) >> 1;
     b = (*(bf - 1) + *(bf + 1)) >> 1;

@@ -32,12 +32,12 @@
 #include <cstring>
 
 void
-rgb_to_yuy2(unsigned char *RGB, unsigned char *YUV, unsigned int width, unsigned int height)
+rgb_to_yuy2(const unsigned char *RGB, unsigned char *YUV, unsigned int width, unsigned int height)
 {
   unsigned int i, j;
   register int y0, y1, u0, u1, v0, v1 ;
   register int r, g, b;
-  
+
   for (i = 0, j = 0; i < 3 * width * height; i += 6, j += 4) {
     r = RGB[i + 0];
     g = RGB[i + 1];
@@ -72,7 +72,7 @@ rgb_to_yuy2(unsigned char *RGB, unsigned char *YUV, unsigned int width, unsigned
  * @param height Height of the image contained in the RGB buffer
  */
 void
-rgb_to_yuv411packed_plainc(unsigned char *RGB, unsigned char *YUV,
+rgb_to_yuv411packed_plainc(const unsigned char *RGB, unsigned char *YUV,
 			   unsigned int width, unsigned int height)
 {
   register unsigned int i = 0, j = 0;
@@ -80,7 +80,7 @@ rgb_to_yuv411packed_plainc(unsigned char *RGB, unsigned char *YUV,
   register RGB_t *r;
   register unsigned int su = 0;
   register unsigned int sv = 0;
-  
+
   while (i < (width * height)) {
     r = (RGB_t *)RGB;
     for (register unsigned int k = 0; j <= 4; ++j) {
@@ -111,7 +111,7 @@ rgb_to_yuv411packed_plainc(unsigned char *RGB, unsigned char *YUV,
  * @param yuv_line the index of the line to convert to in the YUV buffer
  */
 void
-convert_line_rgb_to_yuv422planar(unsigned char *RGB, unsigned char *YUV,
+convert_line_rgb_to_yuv422planar(const unsigned char *RGB, unsigned char *YUV,
 				 unsigned int width, unsigned int height,
 				 unsigned int rgb_line, unsigned int yuv_line)
 {
@@ -155,7 +155,7 @@ convert_line_rgb_to_yuv422planar(unsigned char *RGB, unsigned char *YUV,
  * @param height Height of the image contained in the RGB buffer
  */
 void
-rgb_to_yuv422planar_plainc(unsigned char *RGB, unsigned char *YUV,
+rgb_to_yuv422planar_plainc(const unsigned char *RGB, unsigned char *YUV,
 			   unsigned int width, unsigned int height)
 {
   register unsigned int i = 0;
@@ -197,7 +197,7 @@ rgb_to_yuv422planar_plainc(unsigned char *RGB, unsigned char *YUV,
  * @param yuv_line the index of the line to convert to in the YUV buffer
  */
 void
-convert_line_rgb_to_yuv422packed(unsigned char *RGB, unsigned char *YUV,
+convert_line_rgb_to_yuv422packed(const unsigned char *RGB, unsigned char *YUV,
 				 unsigned int width, unsigned int height,
 				 unsigned int rgb_line, unsigned int yuv_line)
 {
@@ -238,7 +238,7 @@ convert_line_rgb_to_yuv422packed(unsigned char *RGB, unsigned char *YUV,
  * @param height Height of the image contained in the RGB buffer
  */
 void
-rgb_to_yuv422packed_plainc(unsigned char *RGB, unsigned char *YUV,
+rgb_to_yuv422packed_plainc(const unsigned char *RGB, unsigned char *YUV,
 			   unsigned int width, unsigned int height)
 {
   register unsigned int i = 0;
@@ -276,7 +276,7 @@ rgb_to_yuv422packed_plainc(unsigned char *RGB, unsigned char *YUV,
  * @param height Height of the image contained in the RGB buffer
  */
 void
-bgr_to_yuv422planar_plainc(unsigned char *BGR, unsigned char *YUV,
+bgr_to_yuv422planar_plainc(const unsigned char *BGR, unsigned char *YUV,
 			   unsigned int width, unsigned int height)
 {
   register unsigned int i = 0;
@@ -287,7 +287,7 @@ bgr_to_yuv422planar_plainc(unsigned char *BGR, unsigned char *YUV,
   yp = YUV;
   up = YUV422_PLANAR_U_PLANE(YUV, width, height);
   vp = YUV422_PLANAR_V_PLANE(YUV, width, height);
-  
+
   while (i < (width * height)) {
     r1 = (BGR_t *)BGR;
     BGR += 3;

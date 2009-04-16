@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Wed Apr  8 18:30:17 2009 -->
+<!--Generated with glade3 3.4.5 on Thu Apr 16 16:11:28 2009 -->
 <glade-interface>
   <widget class="GtkDialog" id="PluginDialog">
     <property name="border_width">5</property>
@@ -17,8 +17,40 @@
             <property name="visible">True</property>
             <property name="spacing">10</property>
             <child>
-              <widget class="GtkHBox" id="hbox_behaviour">
+              <widget class="GtkTable" id="table_top">
                 <property name="visible">True</property>
+                <property name="n_rows">2</property>
+                <property name="n_columns">2</property>
+                <property name="homogeneous">True</property>
+                <child>
+                  <widget class="GtkCheckButton" id="checkbutton_default">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Save values as _default</property>
+                    <property name="use_underline">True</property>
+                    <property name="response_id">0</property>
+                    <property name="draw_indicator">True</property>
+                  </widget>
+                  <packing>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                    <property name="x_options">GTK_EXPAND</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkComboBox" id="combobox_behaviour">
+                    <property name="visible">True</property>
+                    <property name="items" translatable="yes">walk
+kick
+</property>
+                    <signal name="changed" handler="on_combobox_behaviour_changed"/>
+                  </widget>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                  </packing>
+                </child>
                 <child>
                   <widget class="GtkLabel" id="label_behaviour">
                     <property name="visible">True</property>
@@ -28,20 +60,6 @@
 (change resets!)</property>
                     <property name="justify">GTK_JUSTIFY_CENTER</property>
                   </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkComboBox" id="combobox_behaviour">
-                    <property name="visible">True</property>
-                    <property name="items" translatable="yes">walk
-</property>
-                    <signal name="changed" handler="on_combobox_behaviour_changed"/>
-                  </widget>
-                  <packing>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
               </widget>
             </child>
@@ -700,14 +718,15 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkAlignment" id="alignment1">
+              <widget class="GtkAlignment" id="alignment_lock">
                 <property name="visible">True</property>
                 <property name="xscale">0.0099999997764825821</property>
                 <child>
                   <widget class="GtkCheckButton" id="checkbutton_lock">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">lock left/right values</property>
+                    <property name="label" translatable="yes">_lock left/right values</property>
+                    <property name="use_underline">True</property>
                     <property name="response_id">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>

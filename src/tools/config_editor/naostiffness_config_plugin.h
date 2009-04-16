@@ -76,6 +76,7 @@ public:
   virtual void on_combobox_behaviour_changed();
 
   virtual std::string get_cur_behaviour();
+  virtual bool get_save_default();
   virtual void set_load_vals(sigc::slot<void> cb);
 
  private:
@@ -104,6 +105,7 @@ public:
   Gtk::SpinButton *__lap;
   Gtk::SpinButton *__rap;
 
+  Gtk::CheckButton *__def;
   Gtk::CheckButton *__lck;
   std::vector<sigc::connection> __connections;
 

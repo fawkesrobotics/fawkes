@@ -22,7 +22,7 @@ include $(BASEDIR)/etc/buildsys/lua.mk
 HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
 ifeq ($(HAVE_OPENCV),1)
   CFLAGS += -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
-  LDFLAGS += $(shell $(PKGCONFIG) --libs 'opencv')
+  LDFLAGS += $(subst -lhighgui,,$(shell $(PKGCONFIG) --libs 'opencv'))
 endif
 
 SUBDIRS = gtk

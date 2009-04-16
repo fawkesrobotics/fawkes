@@ -66,7 +66,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "elbow_roll_median", 1, &data->elbow_roll_median);
   add_fieldinfo(Interface::IFT_FLOAT, "elbow_roll_amplitude", 1, &data->elbow_roll_amplitude);
   add_fieldinfo(Interface::IFT_UINT, "msgid", 1, &data->msgid);
-  unsigned char tmp_hash[] = {0x4, 0x3f, 0x29, 0xef, 0x3d, 0x76, 0x7a, 0x9a, 0x2f, 0x9, 0xcb, 0x3c, 0xb, 0x8a, 0x5f, 0x82};
+  unsigned char tmp_hash[] = {0xeb, 0xee, 0xe7, 0xb3, 0xbc, 0xe4, 0x88, 0x6d, 0x46, 0x5c, 0x37, 0xa2, 0x8c, 0x92, 0x3c, 0x9e};
   set_hash(tmp_hash);
 }
 
@@ -718,6 +718,10 @@ HumanoidMotionInterface::create_message(const char *type) const
     return new StandupMessage();
   } else if ( strncmp("YawPitchHeadMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new YawPitchHeadMessage();
+  } else if ( strncmp("UpdateStiffnessParamsMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new UpdateStiffnessParamsMessage();
+  } else if ( strncmp("UpdateStiffnessInterfaceMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new UpdateStiffnessInterfaceMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -2470,6 +2474,176 @@ HumanoidMotionInterface::YawPitchHeadMessage::clone() const
 {
   return new HumanoidMotionInterface::YawPitchHeadMessage(this);
 }
+/** @class HumanoidMotionInterface::UpdateStiffnessParamsMessage <interfaces/HumanoidMotionInterface.h>
+ * UpdateStiffnessParamsMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_behaviour initial value for behaviour
+ */
+HumanoidMotionInterface::UpdateStiffnessParamsMessage::UpdateStiffnessParamsMessage(const StiffnessBehaviourEnum ini_behaviour) : Message("UpdateStiffnessParamsMessage")
+{
+  data_size = sizeof(UpdateStiffnessParamsMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (UpdateStiffnessParamsMessage_data_t *)data_ptr;
+  data->behaviour = ini_behaviour;
+}
+/** Constructor */
+HumanoidMotionInterface::UpdateStiffnessParamsMessage::UpdateStiffnessParamsMessage() : Message("UpdateStiffnessParamsMessage")
+{
+  data_size = sizeof(UpdateStiffnessParamsMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (UpdateStiffnessParamsMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+HumanoidMotionInterface::UpdateStiffnessParamsMessage::~UpdateStiffnessParamsMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+HumanoidMotionInterface::UpdateStiffnessParamsMessage::UpdateStiffnessParamsMessage(const UpdateStiffnessParamsMessage *m) : Message("UpdateStiffnessParamsMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (UpdateStiffnessParamsMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get behaviour value.
+ * the behaviour to update
+ * @return behaviour value
+ */
+HumanoidMotionInterface::StiffnessBehaviourEnum
+HumanoidMotionInterface::UpdateStiffnessParamsMessage::behaviour() const
+{
+  return data->behaviour;
+}
+
+/** Get maximum length of behaviour value.
+ * @return length of behaviour value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::UpdateStiffnessParamsMessage::maxlenof_behaviour() const
+{
+  return 1;
+}
+
+/** Set behaviour value.
+ * the behaviour to update
+ * @param new_behaviour new behaviour value
+ */
+void
+HumanoidMotionInterface::UpdateStiffnessParamsMessage::set_behaviour(const StiffnessBehaviourEnum new_behaviour)
+{
+  data->behaviour = new_behaviour;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+HumanoidMotionInterface::UpdateStiffnessParamsMessage::clone() const
+{
+  return new HumanoidMotionInterface::UpdateStiffnessParamsMessage(this);
+}
+/** @class HumanoidMotionInterface::UpdateStiffnessInterfaceMessage <interfaces/HumanoidMotionInterface.h>
+ * UpdateStiffnessInterfaceMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_behaviour initial value for behaviour
+ */
+HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::UpdateStiffnessInterfaceMessage(const StiffnessBehaviourEnum ini_behaviour) : Message("UpdateStiffnessInterfaceMessage")
+{
+  data_size = sizeof(UpdateStiffnessInterfaceMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (UpdateStiffnessInterfaceMessage_data_t *)data_ptr;
+  data->behaviour = ini_behaviour;
+}
+/** Constructor */
+HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::UpdateStiffnessInterfaceMessage() : Message("UpdateStiffnessInterfaceMessage")
+{
+  data_size = sizeof(UpdateStiffnessInterfaceMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (UpdateStiffnessInterfaceMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::~UpdateStiffnessInterfaceMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::UpdateStiffnessInterfaceMessage(const UpdateStiffnessInterfaceMessage *m) : Message("UpdateStiffnessInterfaceMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (UpdateStiffnessInterfaceMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get behaviour value.
+ * the behaviour to read the parameters from
+ * @return behaviour value
+ */
+HumanoidMotionInterface::StiffnessBehaviourEnum
+HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::behaviour() const
+{
+  return data->behaviour;
+}
+
+/** Get maximum length of behaviour value.
+ * @return length of behaviour value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::maxlenof_behaviour() const
+{
+  return 1;
+}
+
+/** Set behaviour value.
+ * the behaviour to read the parameters from
+ * @param new_behaviour new behaviour value
+ */
+void
+HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::set_behaviour(const StiffnessBehaviourEnum new_behaviour)
+{
+  data->behaviour = new_behaviour;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::clone() const
+{
+  return new HumanoidMotionInterface::UpdateStiffnessInterfaceMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
@@ -2522,6 +2696,14 @@ HumanoidMotionInterface::message_valid(const Message *message) const
   }
   const YawPitchHeadMessage *m11 = dynamic_cast<const YawPitchHeadMessage *>(message);
   if ( m11 != NULL ) {
+    return true;
+  }
+  const UpdateStiffnessParamsMessage *m12 = dynamic_cast<const UpdateStiffnessParamsMessage *>(message);
+  if ( m12 != NULL ) {
+    return true;
+  }
+  const UpdateStiffnessInterfaceMessage *m13 = dynamic_cast<const UpdateStiffnessInterfaceMessage *>(message);
+  if ( m13 != NULL ) {
     return true;
   }
   return false;

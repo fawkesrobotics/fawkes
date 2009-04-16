@@ -30,6 +30,7 @@
 #include <core/plugin.h>
 #include <core/threading/thread_collector.h>
 #include <core/threading/thread_initializer.h>
+#include <core/exception.h>
 #include <utils/logging/liblogger.h>
 #include <utils/system/fam_thread.h>
 #include <config/config.h>
@@ -79,7 +80,7 @@ PluginManager::PluginManager(ThreadCollector *thread_collector,
 
   __fam_thread = new FamThread();
   RefPtr<FileAlterationMonitor> fam = __fam_thread->get_fam();
-  fam->add_filter("^[^.].*\\.so$"); 
+  fam->add_filter("^[^.].*\\.so$");
   fam->add_listener(this);
   fam->watch_dir(PLUGINDIR);
   __fam_thread->start();
@@ -145,7 +146,7 @@ PluginManager::init_pinfo_cache()
       if (i->is_string()) {
 	std::string p = std::string(i->path()).substr(__meta_plugin_prefix.length());
 	std::string s = std::string("Meta: ") + i->get_string();
-	
+
 	__pinfo_cache.push_back(make_pair(p, s));
       }
     }
@@ -257,25 +258,27 @@ PluginManager::load(const char *plugin_list)
       std::string meta_plugin = __meta_plugin_prefix + *i;
       try {
 	std::string pset = __config->get_string(meta_plugin.c_str());
-	if (pset.length() > 0) {
-	  //printf("Going to load meta plugin %s (%s)\n", i->c_str(), pset.c_str());
-	  __meta_plugins.lock();
-	  // Setting has to happen here, so that a meta plugin will not cause an endless
-	  // loop if it references itself!
-	  __meta_plugins[*i] = pset;
-	  try {
-	    LibLogger::log_info("PluginManager", "Loading plugins %s for meta plugin %s",
-				pset.c_str(), i->c_str());
-	    load(pset.c_str());
-	    notify_loaded(i->c_str());
-	  } catch (Exception &e) {
-	    e.append("Could not initialize meta plugin %s, aborting loading.", i->c_str());
-	    __meta_plugins.erase(*i);
-	    __meta_plugins.unlock();
-	    throw;
-	  }
-	  __meta_plugins.unlock();
+	if (pset.length() == 0) {
+	  throw Exception("Refusing to load an empty meta plugin");
 	}
+	//printf("Going to load meta plugin %s (%s)\n", i->c_str(), pset.c_str());
+	__meta_plugins.lock();
+	// Setting has to happen here, so that a meta plugin will not cause an endless
+	// loop if it references itself!
+	__meta_plugins[*i] = pset;
+	try {
+	  LibLogger::log_info("PluginManager", "Loading plugins %s for meta plugin %s",
+	                      pset.c_str(), i->c_str());
+	  load(pset.c_str());
+	  notify_loaded(i->c_str());
+	} catch (Exception &e) {
+	  e.append("Could not initialize meta plugin %s, aborting loading.", i->c_str());
+	  __meta_plugins.erase(*i);
+	  __meta_plugins.unlock();
+	  throw;
+	}
+	__meta_plugins.unlock();
+
 	try_real_plugin = false;
       } catch (ConfigEntryNotFoundException &e) {
 	// no meta plugin defined by that name
@@ -352,7 +355,7 @@ PluginManager::unload(const char *plugin_name)
 	}
       }
       __meta_plugins.unlock();
-      
+
     } catch (Exception &e) {
       LibLogger::log_error("PluginManager", "Could not finalize one or more threads of plugin %s, NOT unloading plugin", plugin_name);
       plugins.unlock();
@@ -471,7 +474,7 @@ PluginManager::fam_event(const char *filename, unsigned int mask)
 	    i->second = plugin_loader->get_description(p.c_str());
 	  } catch (Exception &e) {
 	    LibLogger::log_warn("PluginManager", "Could not get possibly modified "
-				"description of plugin %s, exception follows", 
+				"description of plugin %s, exception follows",
 				p.c_str());
 	    LibLogger::log_warn("PluginManager", e);
 	  }
@@ -492,7 +495,7 @@ PluginManager::fam_event(const char *filename, unsigned int mask)
 	__pinfo_cache.push_back(make_pair(p, s));
       } catch (Exception &e) {
 	LibLogger::log_warn("PluginManager", "Could not get possibly modified "
-			    "description of plugin %s, exception follows", 
+			    "description of plugin %s, exception follows",
 			    p.c_str());
 	LibLogger::log_warn("PluginManager", e);
       }

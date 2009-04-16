@@ -51,16 +51,16 @@ typedef struct {
   unsigned char R;	/**< R value */
 } BGR_t;
 
-void rgb_to_rgb_with_alpha_plainc(unsigned char *rgb, unsigned char *rgb_alpha,
+void rgb_to_rgb_with_alpha_plainc(const unsigned char *rgb, unsigned char *rgb_alpha,
 				  unsigned int width, unsigned int height);
 
-void rgb_to_bgr_with_alpha_plainc(unsigned char *rgb, unsigned char *bgr_alpha,
+void rgb_to_bgr_with_alpha_plainc(const unsigned char *rgb, unsigned char *bgr_alpha,
 				  unsigned int width, unsigned int height);
 
-void bgr_to_rgb_plainc(unsigned char *BGR, unsigned char *RGB,
+void bgr_to_rgb_plainc(const unsigned char *BGR, unsigned char *RGB,
 		       unsigned int width, unsigned int height);
 
-void convert_line_bgr_rgb( unsigned char *BGR, unsigned char *RGB,
-			   unsigned int width, unsigned int height); 
+void convert_line_bgr_rgb(const unsigned char *BGR, unsigned char *RGB,
+			   unsigned int width, unsigned int height);
 
 #endif

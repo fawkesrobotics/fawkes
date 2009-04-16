@@ -29,7 +29,7 @@
 #include <cstring>
 
 void
-iyu1_to_yuy2(unsigned char *src, unsigned char *dest, unsigned int width, unsigned int height)
+iyu1_to_yuy2(const unsigned char *src, unsigned char *dest, unsigned int width, unsigned int height)
 {
   unsigned int i=0, j=0;
   register int y0, y1, y2, y3, u, v;
@@ -45,7 +45,7 @@ iyu1_to_yuy2(unsigned char *src, unsigned char *dest, unsigned int width, unsign
     dest[j++] = u;
     dest[j++] = y1;
     dest[j++] = v;
-    
+
     dest[j++] = y2;
     dest[j++] = u;
     dest[j++] = y3;
@@ -58,7 +58,7 @@ iyu1_to_yuy2(unsigned char *src, unsigned char *dest, unsigned int width, unsign
  * This function takes the gray value as Y and sets U and V to 128.
  */
 void
-gray8_to_yuy2(unsigned char *src, unsigned char *dest, unsigned int width, unsigned int height)
+gray8_to_yuy2(const unsigned char *src, unsigned char *dest, unsigned int width, unsigned int height)
 {
   register unsigned int i=0, j=0;
   while (i < width * height) {
@@ -73,7 +73,7 @@ gray8_to_yuy2(unsigned char *src, unsigned char *dest, unsigned int width, unsig
 /** 8-Bit gray to YUV422_PLANAR
  */
 void
-gray8_to_yuv422planar_plainc(unsigned char *src, unsigned char *dst,
+gray8_to_yuv422planar_plainc(const unsigned char *src, unsigned char *dst,
 			     unsigned int width, unsigned int height)
 {
   // copy Y plane
@@ -87,14 +87,14 @@ gray8_to_yuv422planar_plainc(unsigned char *src, unsigned char *dst,
 /** Copy part of the U anv V planes of a YUV422planar image to another
  */
 void
-yuv422planar_copy_uv(unsigned char *src, unsigned char *dst,
+yuv422planar_copy_uv(const unsigned char *src, unsigned char *dst,
 		     unsigned int width, unsigned int height,
 		     unsigned int x, unsigned int y,
 		     unsigned int copy_width, unsigned int copy_height)
 {
 
-  register unsigned char *sup = YUV422_PLANAR_U_PLANE(src, width, height) + (x / 2);
-  register unsigned char *svp = YUV422_PLANAR_V_PLANE(src, width, height) + (x / 2);
+  register const unsigned char *sup = YUV422_PLANAR_U_PLANE(src, width, height) + (x / 2);
+  register const unsigned char *svp = YUV422_PLANAR_V_PLANE(src, width, height) + (x / 2);
 
   register unsigned char *dup = YUV422_PLANAR_U_PLANE(dst, width, height) + (x / 2);
   register unsigned char *dvp = YUV422_PLANAR_V_PLANE(dst, width, height) + (x / 2);
@@ -102,7 +102,7 @@ yuv422planar_copy_uv(unsigned char *src, unsigned char *dst,
   register unsigned int w;
   register unsigned int h;
 
-  unsigned char *lsup = sup, *lsvp = svp, *ldup = dup, *ldvp = dvp;
+  unsigned const char *lsup = sup, *lsvp = svp, *ldup = dup, *ldvp = dvp;
 
   for (h = 0; h < copy_height; ++h) {
     for ( w = 0; w < copy_width; w += 2 ) {
@@ -118,10 +118,10 @@ yuv422planar_copy_uv(unsigned char *src, unsigned char *dst,
 
 
 void
-yuv422planar_to_yuv422packed(unsigned char *planar, unsigned char *packed,
+yuv422planar_to_yuv422packed(const unsigned char *planar, unsigned char *packed,
 			     unsigned int width, unsigned int height)
 {
-  register unsigned char *y, *u, *v;
+  register const unsigned char *y, *u, *v;
   register unsigned int i;
 
   y = planar;
@@ -137,7 +137,7 @@ yuv422planar_to_yuv422packed(unsigned char *planar, unsigned char *packed,
 }
 
 void
-yuv422planar_quarter_to_yuv422packed(unsigned char *planar, unsigned char *packed,
+yuv422planar_quarter_to_yuv422packed(const unsigned char *planar, unsigned char *packed,
 				     const unsigned int width,
 				     const unsigned int height)
 {
@@ -166,7 +166,7 @@ yuv422planar_quarter_to_yuv422packed(unsigned char *planar, unsigned char *packe
 }
 
 void
-yuv422packed_to_yuv422planar(unsigned char *packed, unsigned char *planar,
+yuv422packed_to_yuv422planar(const unsigned char *packed, unsigned char *planar,
 			     unsigned int width, unsigned int height)
 {
   register volatile unsigned char *y, *u, *v;
@@ -193,7 +193,7 @@ yuv422packed_to_yuv422planar(unsigned char *packed, unsigned char *planar,
 
 
 void
-yuy2_to_yuv422planar(unsigned char *packed, unsigned char *planar,
+yuy2_to_yuv422planar(const unsigned char *packed, unsigned char *planar,
 			     unsigned int width, unsigned int height)
 {
   register volatile unsigned char *y, *u, *v;
@@ -220,7 +220,7 @@ yuy2_to_yuv422planar(unsigned char *packed, unsigned char *planar,
 
 
 void
-yvy2_to_yuv422planar(unsigned char *packed, unsigned char *planar,
+yvy2_to_yuv422planar(const unsigned char *packed, unsigned char *planar,
 			     unsigned int width, unsigned int height)
 {
   register volatile unsigned char *y, *u, *v;
@@ -247,7 +247,7 @@ yvy2_to_yuv422planar(unsigned char *packed, unsigned char *planar,
 
 
 void
-yuy2_to_yuv422planar_quarter(unsigned char *packed, unsigned char *planar,
+yuy2_to_yuv422planar_quarter(const unsigned char *packed, unsigned char *planar,
 			     const unsigned int width, const unsigned int height)
 {
   register volatile unsigned char *y, *u, *v;
@@ -276,7 +276,7 @@ yuy2_to_yuv422planar_quarter(unsigned char *packed, unsigned char *planar,
 
 
 void
-yuv444packed_to_yuv422planar(unsigned char *yuv444, unsigned char *yuv422,
+yuv444packed_to_yuv422planar(const unsigned char *yuv444, unsigned char *yuv422,
 			     unsigned int width, unsigned int height)
 {
   register volatile unsigned char *y, *u, *v;
@@ -303,7 +303,7 @@ yuv444packed_to_yuv422planar(unsigned char *yuv444, unsigned char *yuv422,
 
 
 void
-yuv444packed_to_yuv422packed(unsigned char *yvu444, unsigned char *yuv422,
+yuv444packed_to_yuv422packed(const unsigned char *yvu444, unsigned char *yuv422,
 			     unsigned int width, unsigned int height)
 {
   register int i, iiy;
@@ -325,7 +325,7 @@ yuv444packed_to_yuv422packed(unsigned char *yvu444, unsigned char *yuv422,
 
 
 void
-yvu444packed_to_yuv422planar(unsigned char *yvu444, unsigned char *yuv422,
+yvu444packed_to_yuv422planar(const unsigned char *yvu444, unsigned char *yuv422,
 			     unsigned int width, unsigned int height)
 {
   register volatile unsigned char *y, *u, *v;
@@ -352,7 +352,7 @@ yvu444packed_to_yuv422planar(unsigned char *yvu444, unsigned char *yuv422,
 
 
 void
-yvu444packed_to_yuv422packed(unsigned char *yvu444, unsigned char *yuv422,
+yvu444packed_to_yuv422packed(const unsigned char *yvu444, unsigned char *yuv422,
 			     unsigned int width, unsigned int height)
 {
   register int i, iiy;
@@ -395,7 +395,7 @@ yuv422planar_erase_v_plane(unsigned char *yuv, unsigned int width, unsigned int 
 
 
 void
-grayscale_yuv422packed(unsigned char *src,   unsigned char *dst,
+grayscale_yuv422packed(const unsigned char *src,   unsigned char *dst,
 		       unsigned int   width, unsigned int   height)
 {
   unsigned int p = 0;
@@ -412,7 +412,7 @@ grayscale_yuv422packed(unsigned char *src,   unsigned char *dst,
 
 
 void
-grayscale_yuv422planar(unsigned char *src, unsigned char *dst,
+grayscale_yuv422planar(const unsigned char *src, unsigned char *dst,
 		       unsigned int width, unsigned int height)
 {
   memcpy(dst, src, width * height);

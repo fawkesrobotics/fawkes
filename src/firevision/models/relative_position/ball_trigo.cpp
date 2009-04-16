@@ -188,7 +188,7 @@ BallTrigoRelativePos::calc()
 
   /* Slope shall be downward negative */
   __slope   = ((__image_height_2 - __cirt_center.y) * __tilt_rad_per_pixel
-		 - __tilt - __camera_base_tilt);
+		 + __tilt + __camera_base_tilt);
 
   float alpha = M_PI_2 - __slope;
 

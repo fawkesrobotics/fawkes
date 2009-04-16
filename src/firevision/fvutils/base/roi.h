@@ -32,7 +32,7 @@
    beginning with 0. The last value has to be "H_SIZE = ...".
    You may add further values at the end (but before H_SIZE!)
    just continue the indexing properly.
-   NOTE: The indexing must be in correct order wrt the histograms 
+   NOTE: The indexing must be in correct order wrt the histograms
    used in "genlut"
    Do NOT change the order as this may invalidate already created
    color maps.
@@ -102,7 +102,7 @@ class ROI {
   bool         operator!=(ROI &roi);
   ROI&         operator=(ROI &roi);
 
-  unsigned int get_num_hint_points();
+  unsigned int get_num_hint_points() const;
 
 
   unsigned char*  get_roi_buffer_start(unsigned char *buffer) const;

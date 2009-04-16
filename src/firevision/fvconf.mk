@@ -155,8 +155,9 @@ endif
 
 HAVE_OPENCV = $(if $(shell $(PKGCONFIG) --exists 'opencv'; echo $${?/1/}),1,0)
 ifeq ($(HAVE_OPENCV),1)
-  CFLAGS_OPENCV = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
-  LDFLAGS_OPENCV = $(shell $(PKGCONFIG) --libs 'opencv')
+  CFLAGS_OPENCV      = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv')
+  LDFLAGS_OPENCV     = $(subst -lhighgui,,$(shell $(PKGCONFIG) --libs 'opencv'))
+  LDFLAGS_OPENCV_GUI = -lhighgui
 endif
 
 ## check for SIFT-support (patent-encumbered!)

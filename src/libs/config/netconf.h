@@ -37,6 +37,7 @@
 namespace fawkes {
 
 class Mutex;
+class InterruptibleBarrier;
 class FawkesNetworkClient;
 class SQLiteConfiguration;
 
@@ -69,7 +70,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual bool          is_int(const char *path);
   virtual bool          is_bool(const char *path);
   virtual bool          is_string(const char *path);
-  
+
   virtual bool          is_default(const char *path);
 
   virtual std::string     get_type(const char *path);
@@ -129,10 +130,10 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
     virtual ~NetConfValueIterator();
     virtual bool          next();
     virtual bool          valid();
-    
+
     virtual const char *  path();
     virtual const char *  type();
-    
+
     virtual bool          is_float();
     virtual bool          is_uint();
     virtual bool          is_int();
@@ -180,6 +181,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   FawkesNetworkClient  *c;
   FawkesNetworkMessage *msg;
   Mutex *mutex;
+  InterruptibleBarrier *__mirror_init_barrier;
 
   bool __mirror_mode;
   bool __mirror_mode_before_connection_dead;

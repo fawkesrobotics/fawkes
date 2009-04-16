@@ -52,6 +52,12 @@ class HumanoidMotionInterface : public Interface
     STANDUP_FRONT /**< Standup from lying on the tummy. */
   } StandupEnum;
 
+  /** The behaviours that need specific stiffness settings */
+  typedef enum {
+    WALK /**< The walk behaviour */,
+    KICK /**< The kick behaviour */
+  } StiffnessBehaviourEnum;
+
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
@@ -503,6 +509,52 @@ class HumanoidMotionInterface : public Interface
     float time_sec() const;
     void set_time_sec(const float new_time_sec);
     size_t maxlenof_time_sec() const;
+    virtual Message * clone() const;
+  };
+
+  class UpdateStiffnessParamsMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      StiffnessBehaviourEnum behaviour; /**< the behaviour to update */
+    } UpdateStiffnessParamsMessage_data_t;
+
+    UpdateStiffnessParamsMessage_data_t *data;
+
+   public:
+    UpdateStiffnessParamsMessage(const StiffnessBehaviourEnum ini_behaviour);
+    UpdateStiffnessParamsMessage();
+    ~UpdateStiffnessParamsMessage();
+
+    UpdateStiffnessParamsMessage(const UpdateStiffnessParamsMessage *m);
+    /* Methods */
+    StiffnessBehaviourEnum behaviour() const;
+    void set_behaviour(const StiffnessBehaviourEnum new_behaviour);
+    size_t maxlenof_behaviour() const;
+    virtual Message * clone() const;
+  };
+
+  class UpdateStiffnessInterfaceMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      StiffnessBehaviourEnum behaviour; /**< the behaviour to read the parameters from */
+    } UpdateStiffnessInterfaceMessage_data_t;
+
+    UpdateStiffnessInterfaceMessage_data_t *data;
+
+   public:
+    UpdateStiffnessInterfaceMessage(const StiffnessBehaviourEnum ini_behaviour);
+    UpdateStiffnessInterfaceMessage();
+    ~UpdateStiffnessInterfaceMessage();
+
+    UpdateStiffnessInterfaceMessage(const UpdateStiffnessInterfaceMessage *m);
+    /* Methods */
+    StiffnessBehaviourEnum behaviour() const;
+    void set_behaviour(const StiffnessBehaviourEnum new_behaviour);
+    size_t maxlenof_behaviour() const;
     virtual Message * clone() const;
   };
 
