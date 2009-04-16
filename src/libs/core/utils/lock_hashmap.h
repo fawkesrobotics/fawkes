@@ -27,6 +27,7 @@
 #define __CORE_UTILS_LOCK_HASHMAP_H_
 
 #include <core/threading/mutex.h>
+#include <core/utils/refptr.h>
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
 #  include <tr1/unordered_map>
 #else
@@ -53,13 +54,13 @@ class LockHashMap : public __gnu_cxx::hash_map<KeyType, ValueType, HashFunction,
   LockHashMap(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &lh);
   virtual ~LockHashMap();
 
-  void     lock();
-  bool     try_lock();
-  void     unlock();
-  Mutex *  mutex() const;
+  void          lock();
+  bool          try_lock();
+  void          unlock();
+  RefPtr<Mutex> mutex() const;
 
  private:
-  Mutex *__mutex;
+  RefPtr<Mutex> __mutex;
 
 };
 
@@ -78,8 +79,8 @@ class LockHashMap : public __gnu_cxx::hash_map<KeyType, ValueType, HashFunction,
 /** Constructor. */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap()
+  : __mutex(new Mutex())
 {
-  __mutex = new Mutex();
 }
 
 
@@ -93,8 +94,8 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap(const LockH
 #else
   : __gnu_cxx::hash_map<KeyType, ValueType, HashFunction, EqualKey>::hash_map(lh)
 #endif
+    , __mutex(new Mutex())
 {
-  __mutex = new Mutex();
 }
 
 
@@ -102,7 +103,6 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap(const LockH
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::~LockHashMap()
 {
-  delete __mutex;
 }
 
 
@@ -140,7 +140,7 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::unlock()
  * @return internal mutex
  */
 template <typename KeyType, typename ValueType, class HashFunction, typename EqualKey>
-Mutex *
+RefPtr<Mutex>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::mutex() const
 {
   return __mutex;
