@@ -170,10 +170,14 @@ end
 
 function SkillJumpState:jumpcond_skill_failed()
    if self.skill_status == skillstati.S_FAILED then
-      local error = self.skill.error
-      if self.skill.fsm then
-	 error = self.skill.fsm.error
+      local error = ""
+      if self.skill then
+	 error = self.skill.error
+	 if self.skill.fsm then
+	    error = self.skill.fsm.error
+	 end
       end
+
       if error and error ~= "" then
 	 self.fsm:set_error(self.name .. "() failed, " .. error)
       end
