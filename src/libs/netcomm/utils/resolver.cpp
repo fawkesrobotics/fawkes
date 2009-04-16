@@ -38,6 +38,9 @@
 #include <cstdio>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class NetworkNameResolver <netcomm/utils/resolver.h>
  * Network name and address resolver.
@@ -88,6 +91,7 @@ NetworkNameResolver::NetworkNameResolver(AvahiThread *avahi_thread)
 {
   addr2name_cache.clear();
   name2addr_cache.clear();
+  __cache_timeout = 30;
 
   resolver_thread = new NetworkNameResolverThread(this, avahi_thread);
   resolver_thread->start();
@@ -106,6 +110,28 @@ NetworkNameResolver::~NetworkNameResolver()
   resolver_thread->join();
   delete resolver_thread;
   delete __host_info;
+}
+
+/** Set cache timeout.
+ * The apply only applies to consecutive lookups, existing entries will expire
+ * with the old timeout.
+ * @param sec the timeout in seconds determines after which time successful
+ * resolutions are purged from the cache.
+ */
+void
+NetworkNameResolver::set_cache_timeout(unsigned int sec)
+{
+  __cache_timeout = sec;
+}
+
+
+/** Get cache timeout.
+ * @return resolution cache timeout in seconds
+ */
+unsigned int
+NetworkNameResolver::cache_timeout()
+{
+  return __cache_timeout;
 }
 
 
@@ -241,12 +267,9 @@ NetworkNameResolver::resolve_address(struct sockaddr *addr, socklen_t addr_len, 
   } else {
     char tmp[INET_ADDRSTRLEN];
     if ( inet_ntop(AF_INET, &(saddr->sin_addr), tmp, sizeof(tmp)) ) {
-      size_t s = strlen(tmp) + 1;
-      char *n = (char *)malloc(s);
-      memset(n, 0, s);
-      strcpy(n, tmp);
+      char *n = strdup(tmp);
 
-      addr2name_cache[saddr->sin_addr.s_addr] = std::pair<char *, time_t>(n, time(NULL) + 30);
+      addr2name_cache[saddr->sin_addr.s_addr] = std::pair<char *, time_t>(n, time(NULL) + __cache_timeout);
       name = n;
       addr2name_cache.unlock();
     } else {
@@ -297,7 +320,7 @@ NetworkNameResolver::name_resolved(char *name, struct sockaddr *addr,
     name2addr_cache.erase(n2acit);
     free(n);
   }
-  name2addr_cache[name] = std::pair<struct sockaddr *, time_t>(addr, time(NULL) + 30);
+  name2addr_cache[name] = std::pair<struct sockaddr *, time_t>(addr, time(NULL) + __cache_timeout);
   name2addr_cache.unlock();
 }
 
@@ -314,7 +337,7 @@ NetworkNameResolver::addr_resolved(struct sockaddr *addr,
       // delete old entry
       free(a2ncit->second.first);
       addr2name_cache.erase(a2ncit);
-      addr2name_cache[saddr->sin_addr.s_addr] = std::pair<char *, time_t>(name, time(NULL)+3);
+      addr2name_cache[saddr->sin_addr.s_addr] = std::pair<char *, time_t>(name, time(NULL) + __cache_timeout);
     } else {
       free(name);
     }

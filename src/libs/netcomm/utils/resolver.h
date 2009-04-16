@@ -39,6 +39,9 @@
 #include <utility>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class AvahiThread;
 class NetworkNameResolverThread;
@@ -57,6 +60,8 @@ class NetworkNameResolver
   bool resolve_address(struct sockaddr *addr, socklen_t addr_len, std::string &name);
 
   void flush_cache();
+  void set_cache_timeout(unsigned int sec);
+  unsigned int cache_timeout();
 
   const char * hostname();
   const char * short_hostname();
@@ -70,6 +75,7 @@ class NetworkNameResolver
  private:
   NetworkNameResolverThread *resolver_thread;
   HostInfo *__host_info;
+  unsigned int __cache_timeout;
 
   LockHashMap<uint32_t, std::pair<char *, time_t> >       addr2name_cache;
   LockHashMap<char *,
