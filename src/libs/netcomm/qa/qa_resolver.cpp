@@ -28,7 +28,7 @@
 #include <netcomm/utils/resolver.h>
 #include <utils/system/signal.h>
 #include <utils/system/argparser.h>
-#ifdef HAVA_AVAHI
+#ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
 #endif
 
@@ -61,6 +61,9 @@ class ResolverQAMain : public SignalHandler
     }
     r = new NetworkNameResolver(at);
 #else
+    if ( argp->has_arg("a") ) {
+      printf("Avahi not available at compile time\n");
+    }
     r = new NetworkNameResolver();
 #endif
 
@@ -102,11 +105,11 @@ class ResolverQAMain : public SignalHandler
       printf("Successfully resolved to 0x%x again\n", s->sin_addr.s_addr);
     }
 
-    const char *name;
-    if ( ! r->resolve_address((struct sockaddr *)s, slen, &name) ) {
+    std::string name;
+    if ( ! r->resolve_address((struct sockaddr *)s, slen, name) ) {
       // printf("Resolving address failed\n");
     } else {
-      printf("Successfully resolved address to '%s'\n", name);
+      printf("Successfully resolved address to '%s'\n", name.c_str());
     }
 
     const char *atmp;
@@ -123,16 +126,37 @@ class ResolverQAMain : public SignalHandler
       printf("Successfully resolved to 0x%x (%s)\n", s->sin_addr.s_addr, addrp);
 
       struct sockaddr_in so;
-      const char *tmp;
+      std::string tmp;
       slen = sizeof(so);
       so.sin_addr.s_addr = s->sin_addr.s_addr;
-      r->resolve_address((struct sockaddr *)&so, slen, &tmp);
+      r->resolve_address((struct sockaddr *)&so, slen, tmp);
       printf("Waiting one second to allow resolver thread to suceed\n");
       sleep(1);
-      if ( r->resolve_address((struct sockaddr *)&so, slen, &tmp) ) {
-	printf("Successfully resolved 0x%x to %s\n", so.sin_addr.s_addr, tmp);
+      if ( r->resolve_address((struct sockaddr *)&so, slen, tmp) ) {
+	printf("Successfully resolved 0x%x to %s\n", so.sin_addr.s_addr, tmp.c_str());
+      } 
+    }
+
+    if ( (atmp = argp->arg("i")) != NULL ) {
+      printf("Resolving %s, press Ctrl-C to end...\n", atmp);
+      struct in_addr ia;
+      if (inet_pton(AF_INET, atmp, &ia) == 1) {
+	while ( ! quit) {
+	  struct sockaddr_in so;
+	  so.sin_addr.s_addr = ia.s_addr;
+	  std::string name;
+	  if ( r->resolve_address((struct sockaddr *)&so, sizeof(so), name) ) {
+	    //printf("Successfully resolved to %s\n", name);
+	    //if (name != "zadeat-1.local") {
+	    //  printf("Unexpected results: %s\n", name.c_str());
+	    //}
+	    printf("Result: %s\n", name.c_str());
+	  }
+	  usleep(50000);
+	}
+      } else {
+	printf("Address could not be converted to binary form. Skipping.\n");
       }
-      
     }
   }
 
@@ -153,7 +177,7 @@ class ResolverQAMain : public SignalHandler
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "ah:");
+  ArgumentParser argp(argc, argv, "ah:i:");
 
   ResolverQAMain m(&argp);
   SignalManager::register_handler(SIGINT, &m);

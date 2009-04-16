@@ -3,7 +3,7 @@
  *  resolver.cpp - Fawkes network name resolver
  *
  *  Created: Tue Nov 14 14:25:52 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -26,6 +26,7 @@
 #include <netcomm/utils/resolver.h>
 #include <netcomm/utils/resolver_thread.h>
 #include <core/exceptions/system.h>
+#include <core/threading/mutex_locker.h>
 #include <utils/system/hostinfo.h>
 
 #include <sys/types.h>
@@ -114,11 +115,14 @@ NetworkNameResolver::~NetworkNameResolver()
 void
 NetworkNameResolver::flush_cache()
 {
+  addr2name_cache.lock();
   while ( ! addr2name_cache.empty() ) {
     a2ncit = addr2name_cache.begin();
     free((*a2ncit).second.first);
     addr2name_cache.erase(a2ncit);
   }
+  addr2name_cache.unlock();
+  name2addr_cache.lock();
   while ( ! name2addr_cache.empty() ) {
     n2acit = name2addr_cache.begin();
     char *name = (*n2acit).first;
@@ -126,6 +130,7 @@ NetworkNameResolver::flush_cache()
     name2addr_cache.erase(n2acit);
     free(name);
   }
+  name2addr_cache.unlock();
   __host_info->update();
 
   /* Leads to a segfault, if one element is in the queue it is deleted
@@ -153,17 +158,21 @@ bool
 NetworkNameResolver::resolve_name(const char *name,
 				  struct sockaddr **addr, socklen_t *addrlen)
 {
+  name2addr_cache.lock();
+
   if ( name2addr_cache.find( (char *)name ) != name2addr_cache.end() ) {
     // the name is in the cache, refetch?
     std::pair<struct sockaddr *, time_t> &nrec = name2addr_cache[(char *)name];
-    if ( nrec.second >= time(NULL) ) {
+    if ( nrec.second <= time(NULL) ) {
       // entry outdated, retry
       resolver_thread->resolve_name(name);
     }
     *addr = nrec.first;
     *addrlen = sizeof(struct sockaddr_in);
+    name2addr_cache.unlock();
     return true;
   } else {
+    name2addr_cache.unlock();
     resolver_thread->resolve_name(name);
     return false;
   }
@@ -213,18 +222,22 @@ NetworkNameResolver::resolve_name_blocking(const char *name,
  * @return true if resolution was successful, false otherwise
  */
 bool
-NetworkNameResolver::resolve_address(struct sockaddr *addr, socklen_t addr_len, const char **name)
+NetworkNameResolver::resolve_address(struct sockaddr *addr, socklen_t addr_len, std::string &name)
 {
+  addr2name_cache.lock();
   struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
 
   if ( addr2name_cache.find( saddr->sin_addr.s_addr ) != addr2name_cache.end() ) {
     // the name is in the cache, refetch?
     std::pair<char *, time_t> &nrec = addr2name_cache[saddr->sin_addr.s_addr];
-    if ( nrec.second >= time(NULL) ) {
+    name = nrec.first;
+    if ( nrec.second <= time(NULL) ) {
       // entry outdated, retry
+      addr2name_cache.unlock();
       resolver_thread->resolve_address(addr, addr_len);
+    } else {
+      addr2name_cache.unlock();
     }
-    *name = nrec.first;
   } else {
     char tmp[INET_ADDRSTRLEN];
     if ( inet_ntop(AF_INET, &(saddr->sin_addr), tmp, sizeof(tmp)) ) {
@@ -233,9 +246,11 @@ NetworkNameResolver::resolve_address(struct sockaddr *addr, socklen_t addr_len, 
       memset(n, 0, s);
       strcpy(n, tmp);
 
-      addr2name_cache[saddr->sin_addr.s_addr] = std::pair<char *, time_t>(n, time(NULL) + 10);
-      *name = n;
+      addr2name_cache[saddr->sin_addr.s_addr] = std::pair<char *, time_t>(n, time(NULL) + 30);
+      name = n;
+      addr2name_cache.unlock();
     } else {
+      addr2name_cache.unlock();
       return false;
     }
     
@@ -274,6 +289,7 @@ void
 NetworkNameResolver::name_resolved(char *name, struct sockaddr *addr,
 				   socklen_t addrlen)
 {
+  name2addr_cache.lock();
   if ( (n2acit = name2addr_cache.find( name )) != name2addr_cache.end() ) {
     // delete old entry
     char *n = (*n2acit).first;
@@ -281,7 +297,8 @@ NetworkNameResolver::name_resolved(char *name, struct sockaddr *addr,
     name2addr_cache.erase(n2acit);
     free(n);
   }
-  name2addr_cache[name] = std::pair<struct sockaddr *, time_t>(addr, 0);
+  name2addr_cache[name] = std::pair<struct sockaddr *, time_t>(addr, time(NULL) + 30);
+  name2addr_cache.unlock();
 }
 
 
@@ -290,15 +307,26 @@ NetworkNameResolver::addr_resolved(struct sockaddr *addr,
 				   socklen_t addrlen,
 				   char *name, bool namefound)
 {
+  addr2name_cache.lock();
   struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
-  if ( (a2ncit = addr2name_cache.find( saddr->sin_addr.s_addr )) != addr2name_cache.end() ) {
-    // delete old entry
-    free((*a2ncit).second.first);
-    addr2name_cache.erase(a2ncit);
+  if (namefound) {
+    if ((a2ncit = addr2name_cache.find( saddr->sin_addr.s_addr )) != addr2name_cache.end() ) {
+      // delete old entry
+      free(a2ncit->second.first);
+      addr2name_cache.erase(a2ncit);
+      addr2name_cache[saddr->sin_addr.s_addr] = std::pair<char *, time_t>(name, time(NULL)+3);
+    } else {
+      free(name);
+    }
+  } else {
+    if ((a2ncit = addr2name_cache.find( saddr->sin_addr.s_addr )) == addr2name_cache.end() ) {
+      addr2name_cache[saddr->sin_addr.s_addr] = std::pair<char *, time_t>(name, 0);
+    } else {
+      free(name);
+    }
   }
-  addr2name_cache[saddr->sin_addr.s_addr] =
-    std::pair<char *, time_t>(name, (namefound ? 0 : time(NULL) + 10));
   free(addr);
+  addr2name_cache.unlock();
 }
 
 

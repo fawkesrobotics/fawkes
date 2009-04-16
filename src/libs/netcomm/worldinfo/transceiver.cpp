@@ -804,10 +804,11 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
     inbound_bytes -= sizeof(worldinfo_header_t);
     inbound_buffer = (unsigned char *)in_buffer + sizeof(worldinfo_header_t);
 
-    const char *hostname = NULL;
-    if ( ! resolver->resolve_address((struct sockaddr *)&from, sizeof(from), &hostname) ) {
-      hostname = "unknown";
+    std::string hostname_s;
+    if ( ! resolver->resolve_address((struct sockaddr *)&from, sizeof(from), hostname_s) ) {
+      hostname_s = "unknown";
     }
+    const char *hostname = hostname_s.c_str();
 
     // Go through messages
     while ( inbound_bytes > 0 ) {

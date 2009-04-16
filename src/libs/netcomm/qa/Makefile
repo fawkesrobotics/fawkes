@@ -22,7 +22,8 @@ else
 include ../netcomm.mk
 endif
 
-CFLAGS = -g
+CFLAGS  = $(CFLAGS_AVAHI)  -g
+LDFALGS = $(LDFLAGS_AVAHI)
 
 ifeq ($(HAVE_AVAHI),1)
 LIBS_qa_netcomm_avahi_publisher = fawkesnetcomm fawkesutils

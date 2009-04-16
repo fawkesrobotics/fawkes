@@ -38,11 +38,13 @@
 #include <stdint.h>
 #include <cstddef>
 #include <utility>
+#include <map>
 
 namespace fawkes {
 
 class AvahiThread;
 class NetworkNameResolver;
+class Mutex;
 
 #ifdef HAVE_AVAHI
 class NetworkNameResolverThread : public Thread, public AvahiResolverHandler
@@ -71,21 +73,29 @@ class NetworkNameResolverThread : public Thread
   virtual void loop();
 
  private:
-  NetworkNameResolver  *resolver;
+  NetworkNameResolver  *__resolver;
 #ifdef HAVE_AVAHI
-  AvahiThread          *avahi_thread;
+  AvahiThread          *__avahi_thread;
 #endif
 
+  Mutex *__namesq_mutex;
+  unsigned int __namesq_active;
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
-  LockHashSet<char *, std::tr1::hash<char *>, StringEquality>              namesq;
-  LockHashSet<char *, std::tr1::hash<char *>, StringEquality>::iterator    nqit;
+  typedef LockHashSet<char *, std::tr1::hash<char *>, StringEquality>  NamesQMap;
 #else
-  LockHashSet<char *, __gnu_cxx::hash<char *>, StringEquality>             namesq;
-  LockHashSet<char *, __gnu_cxx::hash<char *>, StringEquality>::iterator   nqit;
+  typedef LockHashSet<char *, __gnu_cxx::hash<char *>, StringEquality> NamesQMap;
 #endif
+  NamesQMap   __namesqs[2];
+  NamesQMap  *__namesq;
+  NamesQMap  *__namesq_proc;
 
-  LockHashMap<uint32_t, std::pair<struct sockaddr *, socklen_t> >             addrq;
-  LockHashMap<uint32_t, std::pair<struct sockaddr *, socklen_t> >::iterator   aqit;
+
+  Mutex *__addrq_mutex;
+  unsigned int __addrq_active;
+  typedef std::map<uint32_t, std::pair<struct sockaddr *, socklen_t> > AddrQMap;
+  AddrQMap   __addrqs[2];
+  AddrQMap  *__addrq;
+  AddrQMap  *__addrq_proc;
 };
 
 } // end namespace fawkes

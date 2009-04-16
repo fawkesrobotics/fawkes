@@ -3,7 +3,7 @@
  *  resolver.h - Fawkes network name resolver
  *
  *  Created: Tue Nov 14 14:25:52 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -54,7 +54,7 @@ class NetworkNameResolver
 
   bool resolve_name(const char *name, struct sockaddr **addr, socklen_t *addrlen);
   bool resolve_name_blocking(const char *name, struct sockaddr **addr, socklen_t *addrlen);
-  bool resolve_address(struct sockaddr *addr, socklen_t addr_len, const char **name);
+  bool resolve_address(struct sockaddr *addr, socklen_t addr_len, std::string &name);
 
   void flush_cache();
 
