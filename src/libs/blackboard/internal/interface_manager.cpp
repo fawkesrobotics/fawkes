@@ -449,6 +449,9 @@ BlackBoardInterfaceManager::close(Interface *interface)
   bool killed_writer = interface->__write_access;
   if ( --(ih->refcount) == 0 ) {
     // redeem from memory
+    if ( interface->__write_access ) {
+      writer_interfaces.erase( interface->__mem_serial );
+    }
     memmgr->free( interface->__mem_real_ptr );
     destroyed = true;
   } else {
