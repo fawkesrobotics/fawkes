@@ -18,9 +18,8 @@ include $(BASEDIR)/src/firevision/fvconf.mk
 include $(BASEDIR)/etc/buildsys/gui.mk
 include $(LIBSRCDIR)/netcomm/netcomm.mk
 
-CFLAGS   = $(VISION_CFLAGS)
-CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
-LDFLAGS  = $(VISION_LDFLAGS) $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
+CFLAGS   = $(VISION_CFLAGS) $(CFLAGS_GUI)
+LDFLAGS  = $(VISION_LDFLAGS) $(LDFLAGS_GUI)
 INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
@@ -29,7 +28,7 @@ LIBS_fvfuseviewer = fawkescore fawkesnetcomm fawkesplugin fawkesutils fawkesguiu
 OBJS_fvfuseviewer = $(patsubst %.cpp,%.o,$(patsubst cox/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 OBJS_all += $(OBJS_fvfuseviewer)
 
-ifeq ($(HAVE_GTKMM)$(HAVE_GLADEMM)$(HAVE_AVAHI),111)
+ifeq ($(HAVE_GUI),1)
   BINS_gui += $(BINDIR)/fvfuseviewer
 else
   ifneq ($(HAVE_AVAHI),1)
