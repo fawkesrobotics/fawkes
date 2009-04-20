@@ -28,7 +28,7 @@
 #include <geometry/matrix.h>
 #include <geometry/hom_point.h>
 #include <geometry/hom_polar.h>
-#include <geometry/hom_pose.h>
+#include <geometry/hom_pose_2d.h>
 #include <core/utils/lock_map.h>
 #include <core/utils/lock_list.h>
 #include <netcomm/worldinfo/enums.h>
@@ -71,8 +71,8 @@ class WorldInfoDataContainer
   // (own) pose
   void set_robot_pose( const char* from_host, float x, float y, float theta,
 		       float* covariance );
-  bool get_robot_pose( const char* host, HomPose& robot_pose );
-  bool get_robot_pose( const char* host, HomPose& robot_pose,
+  bool get_robot_pose( const char* host, HomPose2d& robot_pose );
+  bool get_robot_pose( const char* host, HomPose2d& robot_pose,
 		       Matrix& robot_pose_cov );
 
   // (own) velocity
@@ -168,13 +168,13 @@ class WorldInfoDataContainer
     void set_velocity( float vel_x, float vel_y, float vel_theta,
 		       float* covariance = NULL );
 
-    HomPose   pose();
+    HomPose2d pose();
     Matrix    pose_covariance();
     HomVector velocity();
     Matrix    velocity_covariance();
 
   private:
-    HomPose   m_pose;
+    HomPose2d m_pose;
     Matrix    m_pose_covariance;
     HomVector m_velocity;
     Matrix    m_velocity_covariance;
@@ -187,16 +187,17 @@ class WorldInfoDataContainer
     OpponentsRecord();
     virtual ~OpponentsRecord();
 
-    void set_pos( unsigned int id, float distance, float bearing,
+    void set_pos( unsigned int opp_id, float distance, float bearing,
 		  float* covariance = NULL );
-    void disappeared( unsigned int id );
+    void set_pos( HomPose2d robot_pose,
+		  unsigned int opp_id, float rel_dist, float rel_bearing,
+		  float* rel_covariance = NULL );
+    void disappeared( unsigned int opp_id );
 
-    std::map<unsigned int, HomPoint> positions( float ref_x,
-						float ref_y,
-						float ref_theta );
+    std::map<unsigned int, HomPoint> positions();
 
   private:
-    std::map<unsigned int, HomPoint> m_rel_opp_positions;
+    std::map<unsigned int, HomPoint> m_glob_opp_positions;
   };
 
   /* private methods */

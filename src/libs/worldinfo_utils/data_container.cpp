@@ -137,9 +137,9 @@ WorldInfoDataContainer::PoseRecord::set_pose( float x,
 					      float theta,
 					      float* covariance )
 {
-  m_pose.x() = x;
-  m_pose.y() = y;
-  m_pose.yaw() = theta;
+  m_pose.x( x );
+  m_pose.y( y );
+  m_pose.yaw( theta );
   // TODO: covariance
 }
 
@@ -155,7 +155,7 @@ WorldInfoDataContainer::PoseRecord::set_velocity( float vel_x,
   // TODO: covariance
 }
 
-HomPose
+HomPose2d
 WorldInfoDataContainer::PoseRecord::pose()
 {
   return m_pose;
@@ -191,22 +191,34 @@ WorldInfoDataContainer::OpponentsRecord::set_pos( unsigned int id,
 }
 
 void
-WorldInfoDataContainer::OpponentsRecord::disappeared( unsigned int id )
+WorldInfoDataContainer::OpponentsRecord::set_pos( HomPose2d robot_pose,
+						  unsigned int opp_id,
+						  float rel_distance,
+						  float rel_bearing,
+						  float* rel_covariance )
 {
-  // TODO
+  HomTransform local_to_global;
+  local_to_global.rotate_z( robot_pose.yaw() );
+  local_to_global.trans( robot_pose.x(), robot_pose.y() );
+  HomPoint o = local_to_global * HomPoint( cos( rel_bearing ) * rel_distance,
+					   sin( rel_bearing ) * rel_distance );
+
+  m_glob_opp_positions[ opp_id ] = o;
+
+  // TODO: covariance
+}
+
+void
+WorldInfoDataContainer::OpponentsRecord::disappeared( unsigned int opp_id )
+{
+  m_glob_opp_positions.erase( opp_id );
 }
 
 map<unsigned int, HomPoint>
-WorldInfoDataContainer::OpponentsRecord::positions( float ref_x,
-						    float ref_y,
-						    float ref_theta )
+WorldInfoDataContainer::OpponentsRecord::positions()
 {
-  // TODO
-  return m_rel_opp_positions;
+  return m_glob_opp_positions;
 }
-
-
-
 
 
 /** @class WorldInfoDataContainer <worldinfo_utils/data_container.h>
@@ -426,7 +438,7 @@ WorldInfoDataContainer::set_robot_pose( const char* host,
  */
 bool
 WorldInfoDataContainer::get_robot_pose( const char* host,
-					HomPose& pose )
+					HomPose2d& pose )
 {
   bool found = false;
   unsigned int id = get_host_id( host );
@@ -455,7 +467,7 @@ WorldInfoDataContainer::get_robot_pose( const char* host,
  */
 bool
 WorldInfoDataContainer::get_robot_pose( const char* host,
-					HomPose& pose,
+					HomPose2d& pose,
 					Matrix& pose_cov )
 {
   bool found = false;
@@ -588,7 +600,7 @@ WorldInfoDataContainer::get_ball_pos_relative( const char* host,
   if ( iter != m_ball_positions.end() )
     {
       pos = iter->second.pos_relative();
-      found = true;
+      found = iter->second.visible();
     }
   m_ball_positions.unlock();
 
@@ -618,7 +630,7 @@ WorldInfoDataContainer::get_ball_pos_relative( const char* host,
     {
       pos = iter->second.pos_relative();
       pos_cov = iter->second.covariance_relative();
-      found = true;
+      found = iter->second.visible();
     }
   m_ball_positions.unlock();
 
@@ -647,7 +659,7 @@ WorldInfoDataContainer::get_ball_pos_global( const char* host,
   if ( ball_iter != m_ball_positions.end() &&
        pose_iter != m_robot_poses.end() )
     {
-      HomPose robot_pose = pose_iter->second.pose();
+      HomPose2d robot_pose = pose_iter->second.pose();
       pos = ball_iter->second.pos_global( robot_pose.x(),
 					  robot_pose.y(),
 					  robot_pose.yaw() );
@@ -728,22 +740,29 @@ WorldInfoDataContainer::set_opponent_pos( const char* host,
 					  float angle,
 					  float* covariance )
 {
-  OpponentsLockMap::iterator iter;
   unsigned int id = get_host_id( host );
   clock_in_host( id );
 
   m_opponents.lock();
-  iter = m_opponents.find( id );
-  if ( iter == m_opponents.end() )
-    {
-      OpponentsRecord opponents_record;
-      opponents_record.set_pos( uid, distance, angle, covariance );
-      m_opponents[ id ] = opponents_record;
-    }
+  m_robot_poses.lock();
+  OpponentsLockMap::iterator oit = m_opponents.find( id );
+  PoseLockMap::iterator      pit = m_robot_poses.find( id );
+
+  HomPose2d pose;
+  if ( pit != m_robot_poses.end() )
+  { pose = pit->second.pose(); }
+
+  if ( oit == m_opponents.end() )
+  {
+    OpponentsRecord opponents_record;
+    opponents_record.set_pos( pose, uid, distance, angle, covariance );
+    m_opponents[ id ] = opponents_record;
+  }
   else
-    {
-      iter->second.set_pos( uid, distance, angle, covariance );
-    }
+  {
+    oit->second.set_pos( pose, uid, distance, angle, covariance );
+  }
+  m_robot_poses.unlock();
   m_opponents.unlock();
 
   m_new_data_available = true;
@@ -785,22 +804,16 @@ WorldInfoDataContainer::get_opponent_pos( const char* host,
   unsigned int id = get_host_id( host );
 
   m_opponents.lock();
-  m_robot_poses.lock();
-  OpponentsLockMap::iterator opp_iter = m_opponents.find( id );
-  PoseLockMap::iterator pose_iter = m_robot_poses.find( id );
-  if ( opp_iter != m_opponents.end() &&
-       pose_iter != m_robot_poses.end() )
-    {
-      HomPose pose = pose_iter->second.pose();
-      opp_positions = opp_iter->second.positions( pose.x(), pose.y(), pose.yaw() );
-      found = true;
-    }
-  m_robot_poses.lock();
+  OpponentsLockMap::iterator iter = m_opponents.find( id );
+  if ( iter != m_opponents.end() )
+  {
+    opp_positions = iter->second.positions();
+    found = true;
+  }
   m_opponents.unlock();
 
   return found;
 }
-
 
 /** Set the gamestate.
  * @param game_state the current game state
