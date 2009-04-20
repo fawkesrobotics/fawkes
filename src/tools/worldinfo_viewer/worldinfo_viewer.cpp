@@ -140,11 +140,17 @@ WorldInfoViewer::update()
     robot_removed = true;
     list<string> timedout_hosts = m_data_container->get_timedout_hosts();
 
+#ifdef DEBUG_PRINT
+    printf( "Removing %zu timed out host.\n", timedout_hosts.size() );
+#endif /* DEBUG_PRINT */
+    
     // remove timed out hosts
     for ( list<string>::iterator hit = timedout_hosts.begin();
 	  hit != timedout_hosts.end();
 	  ++hit )
     {
+      m_field_view->remove_host( Glib::ustring( *hit ) );
+
       Gtk::TreeModel::Children children = m_robots_list->children();
       Gtk::TreeModel::iterator cit = children.begin();
       while ( cit != children.end() )

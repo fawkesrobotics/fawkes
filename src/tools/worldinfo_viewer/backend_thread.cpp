@@ -102,6 +102,7 @@ WorldInfoViewerBackendThread::new_gamestate_data()
 void
 WorldInfoViewerBackendThread::loop()
 {
+  m_transceiver->flush_sequence_numbers( 10 );
   m_transceiver->recv(true, 100);
   usleep(100000);
 }
@@ -113,6 +114,11 @@ WorldInfoViewerBackendThread::pose_rcvd( const char* from_host,
 					 float theta,
 					 float* covariance )
 {
+#ifdef DEBUG_PRINT
+  printf( "Received pose data from host %s: x=%.3f y=%.3f theta=%.3f\n",
+	  from_host, x, y, theta );
+#endif /* DEBUG_PRING */
+  
   m_data_container->set_robot_pose( from_host, x, y, theta, covariance );
   m_signal_new_worldinfo_data();
 }
@@ -124,6 +130,11 @@ WorldInfoViewerBackendThread::velocity_rcvd( const char* from_host,
 					     float vel_theta,
 					     float* covariance )
 {
+#ifdef DEBUG_PRINT
+  printf( "Received velocity data from host %s: vx=%.3f vy=%.3f vtheta=%.3f\n",
+	  from_host, vel_x, vel_y, vel_theta );
+#endif /* DEBUG_PRINT */
+  
   m_data_container->set_robot_velocity( from_host, vel_x, vel_y, vel_theta,
 					covariance );
   m_signal_new_worldinfo_data();
@@ -138,6 +149,14 @@ WorldInfoViewerBackendThread::ball_pos_rcvd( const char* from_host,
 					     float slope,
 					     float* covariance )
 {
+#ifdef DEBUG_PRINT
+  if ( visible )
+  { printf( "Received ball data from host %s: dist=%.3f bearing=%.3f\n",
+	    from_host, dist, bearing ); }
+  else
+  { printf( "Received ball not visible from host %s\n", from_host ); }
+#endif /* DEBUG_PRINT */
+  
   m_data_container->set_ball_pos( from_host, visible, visibility_history,
 				  dist, bearing, slope, covariance );
   m_signal_new_worldinfo_data();
@@ -162,6 +181,10 @@ WorldInfoViewerBackendThread::opponent_pose_rcvd( const char* from_host,
 						  float angle,
 						  float* covariance )
 {
+// #ifdef DEBUG_PRINT
+//   printf("Received opponent pose data form host %s\n", from_host );
+// #endif /* DEBUG_PRINT */
+
   m_data_container->set_opponent_pos( from_host, uid, distance, angle,
 				      covariance );
   m_signal_new_worldinfo_data();
@@ -187,6 +210,10 @@ WorldInfoViewerBackendThread::gamestate_rcvd( const char* from_host,
 					      worldinfo_gamestate_goalcolor_t own_goal_color,
 					      worldinfo_gamestate_half_t half )
 {
+#ifdef DEBUG_PRINT
+  printf( "Received gamestate data from host %s\n", from_host );
+#endif /* DEBUG_PRINT */
+
   m_data_container->set_game_state( game_state, state_team,
 				    score_cyan, score_magenta,
 				    own_team, own_goal_color, half );

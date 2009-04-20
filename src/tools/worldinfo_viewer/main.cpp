@@ -66,7 +66,7 @@ int main(int argc, char** argv)
   delete config;
 
   Clock* clock = Clock::instance();
-  WorldInfoDataContainer* data_container = new WorldInfoDataContainer(clock);
+  WorldInfoDataContainer* data_container = new WorldInfoDataContainer(clock, 10000);
   WorldInfoViewerBackendThread* backend_thread = 
     new WorldInfoViewerBackendThread( data_container, addr.c_str(), port,
 				      key.c_str(), iv.c_str() );

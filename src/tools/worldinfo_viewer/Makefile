@@ -23,6 +23,9 @@ include $(BASEDIR)/etc/buildsys/gui.mk
 CFLAGS  += $(CFLAGS_GTKMM) $(CFLAGS_GLADEMM)
 LDFLAGS += $(LDFLAGS_GTKMM) $(LDFLAGS_GLADEMM)
 
+# enable for debug output
+#CFLAGS += -DDEBUG_PRINT
+
 LIBS_wiv = fawkesblackboard fawkesconfig fawkescore fawkesgeometry fawkesinterfaces fawkesnetcomm fawkesutils fawkesworldinfo_utils
 OBJS_wiv = main.o			\
 	   worldinfo_viewer.o		\

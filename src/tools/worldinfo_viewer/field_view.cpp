@@ -123,6 +123,14 @@ FieldView::toggle_show_opponents( Glib::ustring name )
   }
 }
 
+void
+FieldView::remove_host( Glib::ustring name )
+{
+  m_show_pose.erase( name );
+  m_show_ball.erase( name );
+  m_show_opponents.erase( name );
+}
+
 /** Overloaded signal handler.
  * This is were the drawing action happens.
  * @param event the event that triggered the signal
@@ -168,8 +176,8 @@ FieldView::on_expose_event(GdkEventExpose* event)
     {
       const char* host = i->c_str();
       
-      HomPose pose;
-      HomPoint ball_pos;
+      HomPose2d pose;
+      HomPoint  ball_pos;
       std::map<unsigned int, HomPoint> opp_positions;
       
       bool show_pose;
@@ -213,6 +221,29 @@ FieldView::on_expose_event(GdkEventExpose* event)
 // 	     show_opponents )
 // 	{ 
 // 	}
+      }
+      else
+      {
+	HomPolar ball_pos;
+	if ( m_data_container->get_ball_pos_relative( host, ball_pos ) &&
+	     show_ball )
+	{
+	  draw_ball( context, ball_pos.x(), ball_pos.y(), 0.0, 0.0 );
+	}
+      }
+
+      // opponents are always global
+      std::map<unsigned int, HomPoint> opponents;
+      if ( m_data_container->get_opponent_pos( host, opponents ) &&
+	   show_opponents )
+      {
+	for ( std::map<unsigned int, HomPoint>::iterator i = opponents.begin();
+	      i != opponents.end();
+	      ++i )
+	{
+	  HomPoint p = i->second;
+	  draw_obstacle( context, p.x(), p.y(), 0.2 ); 
+	}
       }
     }
   }
@@ -349,12 +380,9 @@ void
 FieldView::draw_obstacle(Cairo::RefPtr<Cairo::Context> context, float x, float y, float extend)
 {
   context->save();
-  context->set_line_width(0.02);
-  context->save();
-  context->arc(x, y, extend, 0.0, 2.0 * M_PI);
-  context->set_source_rgba(0.0, 0.0, 0.0, 0.6);
-  context->fill_preserve();
-  context->restore();
+  context->set_source_rgba(0.0, 0.0, 1.0, 0.6);
+  context->set_line_width(0.05);
+  context->arc(x, y, 0.25 /*extend*/, 0.0, 2.0 * M_PI);
   context->stroke();
   context->restore();
 }

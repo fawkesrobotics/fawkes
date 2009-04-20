@@ -48,6 +48,8 @@ class FieldView : public Gtk::DrawingArea
   bool toggle_show_ball( Glib::ustring name );
   bool toggle_show_opponents( Glib::ustring name );
 
+  void remove_host( Glib::ustring name );
+
  protected:
   virtual bool on_expose_event(GdkEventExpose* event);
 
