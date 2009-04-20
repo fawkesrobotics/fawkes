@@ -265,6 +265,25 @@ FieldView::draw_field_msl(Cairo::RefPtr<Cairo::Context> context)
   context->save();
   context->set_line_width(0.125);
   context->set_source_rgb(1.0, 1.0, 1.0);
+
+  // goals
+  context->save();
+  context->set_source_rgb(237.0 / 255.0, 240.0 / 255.0, 12.0 / 255.0);
+  context->move_to(9.0, 1.0625);
+  context->line_to(9.5, 1.0625);
+  context->line_to(9.5,-1.0625);
+  context->line_to(9.0,-1.0625);
+  context->stroke();
+  context->restore();
+
+  context->save();
+  context->set_source_rgb(12.0 / 255.0, 14.0 / 255.0, 240.0 / 255.0);
+  context->move_to(-9.0, 1.0625);
+  context->line_to(-9.5, 1.0625);
+  context->line_to(-9.5,-1.0625);
+  context->line_to(-9.0,-1.0625);
+  context->stroke();
+  context->restore();
   
   // center circle
   context->arc(0.0, 0.0, 2.0, 0.0, 2 * M_PI);
@@ -278,16 +297,6 @@ FieldView::draw_field_msl(Cairo::RefPtr<Cairo::Context> context)
   context->arc(-9.0, -6.0, 0.75, 0.0, M_PI/2.0);
   context->move_to(-9.0, 6.0);
   context->arc(-9.0, 6.0, 0.75, -M_PI/2.0, 0.0);
-  
-  // goals
-  context->move_to(9.0, 1.0625);
-  context->line_to(9.5, 1.0625);
-  context->line_to(9.5,-1.0625);
-  context->line_to(9.0,-1.0625);
-  context->move_to(-9.0, 1.0625);
-  context->line_to(-9.5, 1.0625);
-  context->line_to(-9.5,-1.0625);
-  context->line_to(-9.0,-1.0625);
   
   // lines
   context->save();
