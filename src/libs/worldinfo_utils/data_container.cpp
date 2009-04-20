@@ -663,7 +663,7 @@ WorldInfoDataContainer::get_ball_pos_global( const char* host,
       pos = ball_iter->second.pos_global( robot_pose.x(),
 					  robot_pose.y(),
 					  robot_pose.yaw() );
-      found = true;
+      found = ball_iter->second.visible();
     }
   m_robot_poses.unlock();
   m_ball_positions.unlock();
