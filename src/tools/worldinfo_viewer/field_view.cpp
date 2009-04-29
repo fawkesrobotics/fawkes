@@ -123,6 +123,9 @@ FieldView::toggle_show_opponents( Glib::ustring name )
   }
 }
 
+/** Remove a host.
+ * @param name the name of the host to be removed.
+ */
 void
 FieldView::remove_host( Glib::ustring name )
 {
