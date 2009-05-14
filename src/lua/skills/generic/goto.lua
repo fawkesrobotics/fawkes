@@ -29,7 +29,8 @@ name               = "goto"
 fsm                = SkillHSM:new{name=name, start="GOTO"}
 depends_skills     = {"relgoto"}
 depends_interfaces = {
-   {v = "wm_pose", id = "WM Pose", type="ObjectPositionInterface"}
+   {v = "wm_pose",   id = "WM Pose",   type = "ObjectPositionInterface"},
+   {v = "navigator", id = "Navigator", type = "NavigatorInterface"}
 }
 
 documentation      = [==[Global goto skill.
@@ -51,8 +52,8 @@ There are several forms to call this skill:
    Go to the relative cartesian coordinates (X,Y) with the optional final orientation ORI.
 
 Parameters:
-x, y:      robot-relative cartesian coordinates of target point
-ori:       orientation of robot at destination
+x, y:      global target point
+ori:       global orientation
 margin:    radius of a circle around the destination point, if the robot is within
            that circle the goto is considered final.
 
@@ -62,28 +63,101 @@ brake fast enough or if another robot crashed into this robot). The skill is S_F
 the navigator started processing another goto message.
 ]==]
 
+-- Constants
+local DEFAULT_ORI = 0.0
+local DEFAULT_MARGIN = 0.2
+
 -- Initialize as skill module
 skillenv.skill_module(...)
 
--- States
-fsm:new_jump_state("GOTO", relgoto, FINAL, FAILED)
+local function check_target_distance(state)
+   if navigator:msgid() ~= relgoto.fsm.vars.msgid then
+      return false
+   end
+
+   local target_x_glob = state.fsm.vars.x or state.fsm.vars[1] or wm_pose:world_x()
+   local target_y_glob = state.fsm.vars.y or state.fsm.vars[2] or wm_pose:world_y()
+   local target_ori_glob = state.fsm.vars.ori or state.fsm.vars[3] or DEFAULT_ORI
+
+   local rx, ry, rori = wm_pose:world_x(), wm_pose:world_y(), wm_pose:world_z()
+
+   local global_to_local = fawkes.HomTransform:new()
+   global_to_local:rotate_z( -rori )
+   global_to_local:trans( -rx, -ry )
+
+   local proj_target = fawkes.HomPoint:new( target_x_glob, target_y_glob )
+   proj_target:transform( global_to_local )
+
+   local target_x_nav = navigator:dest_x()
+   local target_y_nav = navigator:dest_y()
+   local target_ori_nav = navigator:dest_ori()
+   local target = fawkes.HomPoint:new( target_x_nav, target_y_nav)--, target_ori_nav )
+
+   -- check distance
+   local margin = state.fsm.vars.margin
+   local dist = fawkes.HomVector:new( target - proj_target ):length()
+
+   --[[
+   printf("Global target %.2f %.2f %.2f", target_x_glob,
+	  target_y_glob, target_ori_glob)
+   printf("Current pos   %.2f %.2f %.2f", rx, ry, rori)
+   printf("Proj. target  %.2f %.2f", proj_target:x(),
+	  proj_target:y())
+   printf("Distance:     %.2f Margin:    %.2f", dist, margin)
+   --]]
+
+   if dist > margin then
+      if state.fsm.vars.counter < 30 then
+	 state.fsm.vars.counter = state.fsm.vars.counter + 1
+	 return false
+      else
+	 printf("Recalculating target position")
+	 return true
+      end
+   else
+      state.fsm.vars.counter = 0
+      return false
+   end
+end
+
+fsm:add_transitions{
+   closure={p=p},
+   {"GOTO", "FINAL", skill=relgoto, fail_to="FAILED"},
+   {"GOTO", "GOTO", cond=check_target_distance}
+}
 
 function GOTO:init()
-   local x = self.fsm.vars.x or self.fsm.vars[1]
-   local y = self.fsm.vars.y or self.fsm.vars[2]
-   local ori = self.fsm.vars.ori or self.fsm.vars[3]
+   local x   = self.fsm.vars.x   or self.fsm.vars[1] or wm_pose:world_x()
+   local y   = self.fsm.vars.y   or self.fsm.vars[2] or wm_pose:world_y()
+   local ori = self.fsm.vars.ori or self.fsm.vars[3] or DEFAULT_ORI
+   self.fsm.vars.margin = self.fsm.vars.margin or DEFAULT_MARGIN
+   
+   -- global robot pose
+   local rx, ry, rori = wm_pose:world_x(), wm_pose:world_y(), wm_pose:world_z()
 
-   -- ori not yet calculated, not yet in interface
-   local rx, ry= wm_pose:world_x(), wm_pose:world_y(); -- robot position
+   --printf("current pos: %.2f %.2f %.2f", rx, ry, rori)
 
-   local relx = x - rx;
-   local rely = y - ry;
+   -- global to local transform
+   local global_to_local = fawkes.HomTransform:new()
+   global_to_local:rotate_z( -rori )
+   global_to_local:trans( -rx, -ry )
 
-   -- taking robots current rotation into account
-   local length = math.sqrt(relx^2 + rely^2)
-   local phi = math.atan2(rely, relx) - wm_pose:yaw()
-   relx = length * math.cos(phi)
-   rely = length * math.sin(phi)
+   -- transform target
+   local target_pos = fawkes.HomPoint:new(x, y)
+   local target_ori = fawkes.HomVector:new( math.cos( ori ),
+					    math.sin( ori ) )
+   target_pos:transform( global_to_local )
+   target_ori:transform( global_to_local )
 
-   self.args = {x=relx, y=rely, ori=ori}
+   local relx   = target_pos:x()
+   local rely   = target_pos:y()
+   local relori = math.atan2( target_ori:y(), target_ori:x() )
+
+   --printf("relative target coords: %.2f %.2f %.2f", relx, rely, relori)
+
+   -- reset counter
+   self.fsm.vars.counter = 0
+
+   self.args = {x=relx, y=rely, ori=relori}
 end
+   

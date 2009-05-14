@@ -619,7 +619,7 @@ Time::str_r(char *s, bool utc)
       localtime_r( &(__time.tv_sec), &time_tm );
     }
     asctime_r(&time_tm, s);
-    __timestr[strlen(s) - 1] = 0;
+    s[strlen(s) - 1] = 0;
   }
 }
 

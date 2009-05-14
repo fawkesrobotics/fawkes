@@ -1,11 +1,12 @@
 
 /***************************************************************************
- *  refbox_state_sender.h - Fawkes RefBox state sender
+ *  refbox_state_writer.h - Fawkes RefBox state writer
  *
- *  Created: Wed Apr 09 09:56:57 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Wed Apr 22 02:32:52 2009
+ *  Copyright  2009       Christpoh Schwering
+ *             2008-2009  Tim Niemueller [www.niemueller.de]
  *
- *  $Id$
+ *  $Id: refbox_state_writer.h 1083 2008-05-21 15:34:51Z tim $
  *
  ****************************************************************************/
 
@@ -22,23 +23,24 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_REFBOXREP_REFBOX_STATE_SENDER_H_
-#define __TOOLS_REFBOXREP_REFBOX_STATE_SENDER_H_
+#ifndef __TOOLS_REFBOXREP_REFBOX_STATE_WRITER_H_
+#define __TOOLS_REFBOXREP_REFBOX_STATE_WRITER_H_
 
-#include <core/threading/thread.h>
+#include "refbox_state_sender.h"
+
+#include <blackboard/remote.h>
+#include <interfaces/GameStateInterface.h>
 #include <netcomm/worldinfo/enums.h>
 
-namespace fawkes {
-  class WorldInfoTransceiver;
-}
+#include <vector>
+#include <string>
+#include <map>
 
-class RefBoxStateSender
+class RefBoxStateBBWriter : public RefBoxStateSender
 {
  public:
-  RefBoxStateSender(const char *addr, unsigned short port,
-		    const char *key, const char *iv,
-		    bool debug = false);
-  virtual ~RefBoxStateSender();
+  RefBoxStateBBWriter(std::vector<std::string> hosts, bool debug = false);
+  virtual ~RefBoxStateBBWriter();
 
   virtual void send();
   virtual void set_gamestate(fawkes::worldinfo_gamestate_t game_state,
@@ -48,28 +50,15 @@ class RefBoxStateSender
 			     fawkes::worldinfo_gamestate_goalcolor_t goal_color);
   virtual void set_half(fawkes::worldinfo_gamestate_half_t half);
 
-  class TimeoutThread : public fawkes::Thread
-  {
-   public:
-    TimeoutThread(RefBoxStateSender *rss);
-    virtual ~TimeoutThread();
-    virtual void loop();
-   private:
-    unsigned int __timeout_usec;
-    RefBoxStateSender *__rss;
-  };
-
- protected:
-  RefBoxStateSender();
-
  private:
-  void execute_send();
+  void connect(const std::string &host);
 
- private:
+  unsigned int __counter;
+
+  std::map<fawkes::RemoteBlackBoard *, std::string> __rbbs;
+  std::map<fawkes::RemoteBlackBoard *, fawkes::GameStateInterface *> __giss;
+
   bool                                    __debug;
-  fawkes::WorldInfoTransceiver           *__transceiver;
-  TimeoutThread                          *__timeout_thread;
-
   fawkes::worldinfo_gamestate_t           __game_state;
   fawkes::worldinfo_gamestate_team_t      __state_team;
   unsigned int                            __score_cyan;

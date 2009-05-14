@@ -42,7 +42,9 @@ typedef enum {
   WORLDINFO_MSGTYPE_OPP_POSE       = 5,	/** Observed opponent pose */
   WORLDINFO_MSGTYPE_OPP_DISAPP     = 6,	/** Observed opponent disappered */
   WORLDINFO_MSGTYPE_FAT_WORLDINFO  = 7,	/** Fat message containing all the information, @deprecated */
-  WORLDINFO_MSGTYPE_GAMESTATE      = 8	/** Gamestate info */
+  WORLDINFO_MSGTYPE_GAMESTATE      = 8,	/** Gamestate info */
+  WORLDINFO_MSGTYPE_GLOBBALL       = 9,
+  WORLDINFO_MSGTYPE_GLOBBALLVELO   = 10
 } worldinfo_msgid_t;
 
 
@@ -125,6 +127,27 @@ typedef struct {
 } worldinfo_relballpos_message_t;
 
 
+/** Global ball position message.
+ * This message describes a robots belief about the global position of a ball.
+ * This is NOT meant to be send with information about any other object but the ball.
+ */
+typedef struct {
+  int32_t  history  : 24;	/**< visibility history, positive means number of positive
+				 * observations in a row, 0 means vision has just been
+				 * initialized, negative number means the number of negative
+				 * observations in a row (not seen for three loops results
+				 * in a history of -3). */
+  int32_t  visible  :  1;	/**< -1 if ball visible, 0 otherwise. If the ball is not
+				 * visible the position will be the last known position.
+				 */
+  int32_t  reserved :  7;	/**< reserved for future use. */
+  float x;               /**< x-coordinate of the global ball positions */
+  float y;               /**< y-coordinate of the global ball positions */
+  float z;               /**< z-coordinate of the global ball positions */
+  float covariance[WORLDINFO_COVARIANCE_SIZE_3X3];	/**< ball covariance matrix */
+} worldinfo_globballpos_message_t;
+
+
 /** Relative ball velocity message.
  * This message describes a robots belief about the velocity of a ball relative
  * to itself.
@@ -139,6 +162,17 @@ typedef struct {
   float vel_z;	/**< relative velocity of the ball in z direction */
   float covariance[WORLDINFO_COVARIANCE_SIZE_3X3];	/**< ball velocity covariance matrix */
 } worldinfo_relballvelo_message_t;
+
+
+/** Global ball velocity message.
+ * This message describes a robots belief about the velocity wrt. the global frame.
+ */
+typedef struct {
+  float vel_x;	/**< global velocity of the ball in x direction */
+  float vel_y;	/**< global velocity of the ball in y direction */
+  float vel_z;	/**< global velocity of the ball in z direction */
+  float covariance[WORLDINFO_COVARIANCE_SIZE_3X3];	/**< ball velocity covariance matrix */
+} worldinfo_globballvelo_message_t;
 
 
 /** Opponent message.

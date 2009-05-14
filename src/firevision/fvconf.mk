@@ -133,23 +133,30 @@ ifeq ($(HAVE_NAO_CAM),1)
 endif
 
 ### Check for external libraries
-IPP_DIR  = $(SYSROOT)/opt/intel/ipp
+IPP_DIR  = $(SYSROOT)/opt/intel/Compiler/11.0/081/ipp
+ICC_DIR  = $(SYSROOT)/opt/intel/Compiler/11.0/081/
 HAVE_IPP = 0
 ifneq ($(wildcard $(realpath $(IPP_DIR))),)
   # Check versions, use first one found
-  IPP_VERSION = $(firstword $(shell ls $(IPP_DIR)))
+  #IPP_VERSION = $(firstword $(shell ls $(IPP_DIR)))
   # We at least have a IPP, check if it matches our system
-  INTEL_ARCH = ia32
+  IPP_ARCH = ia32
+  ICC_ARCH = ia32
   ifeq ($(ARCH),x86_64)
-    INTEL_ARCH = em64t
     IPP_ARCH   = em64t
+    ICC_ARCH   = intel64
   endif
-  ifneq ($(wildcard $(realpath $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/include/ipp.h)),)
+  ifneq ($(wildcard $(realpath $(IPP_DIR)/$(IPP_ARCH)/include/ipp.h)),)
     HAVE_IPP = 1
     VISION_CFLAGS  += -DHAVE_IPP
     VISION_LIBS    += pthread
-    VISION_LIBDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/sharedlib
-    VISION_INCDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(INTEL_ARCH)/include
+    ifeq ($(wildcard $(IPP_DIR)/$(IPP_VERSION)/$(IPP_ARCH)/sharedlib/libguide.so),)
+      # IPP is used from ICC installation, possibly without actually using icc atm
+      VISION_LIBDIRS += $(ICC_DIR)/lib/$(ICC_ARCH)
+      VISION_INCDIRS += $(IPP_DIR)/include
+    endif
+    VISION_LIBDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(IPP_ARCH)/sharedlib
+    VISION_INCDIRS += $(IPP_DIR)/$(IPP_VERSION)/$(IPP_ARCH)/include
   endif
 endif
 
@@ -190,7 +197,7 @@ endif
 # Set to 1 to build shape models
 HAVE_SHAPE_MODELS = 1
 
-ifneq ($(wildcard $(FVBASEDIR)/models/mirror/bulb/*),)
+ifneq ($(wildcard $(FVBASEDIR)/models/mirror/bulb*),)
   HAVE_BULB_CREATOR = 1
   VISION_CFLAGS += -DHAVE_BULB_CREATOR
 endif

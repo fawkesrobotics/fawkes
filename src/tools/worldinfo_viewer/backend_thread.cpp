@@ -163,6 +163,20 @@ WorldInfoViewerBackendThread::ball_pos_rcvd( const char* from_host,
 }
 
 void
+WorldInfoViewerBackendThread::global_ball_pos_rcvd( const char* from_host,
+						    bool visible,
+						    int visibility_history,
+						    float x,
+						    float y,
+						    float z,
+						    float* covariance )
+{
+//   m_data_container->set_ball_pos_global( from_host, visible, visibility_history,
+// 					 x, y, z, covariance );
+  m_signal_new_worldinfo_data();
+}
+
+void
 WorldInfoViewerBackendThread::ball_velocity_rcvd( const char* from_host,
 						  float vel_x,
 						  float vel_y,
@@ -173,6 +187,21 @@ WorldInfoViewerBackendThread::ball_velocity_rcvd( const char* from_host,
 				       covariance );
   m_signal_new_worldinfo_data();
 }
+
+void
+WorldInfoViewerBackendThread::global_ball_velocity_rcvd( const char *from_host,
+							 float vel_x,
+							 float vel_y,
+							 float vel_z,
+							 float *covariance )
+{
+  // TODO
+
+//   m_data_container->set_global_ball_velocity( from_host, vel_x, vel_y, vel_z,
+// 					      covariance );
+//   m_signal_new_worldinfo_data();
+}
+
 
 void
 WorldInfoViewerBackendThread::opponent_pose_rcvd( const char* from_host,

@@ -31,6 +31,8 @@
 
 #include <netcomm/worldinfo/transceiver.h>
 #include <utils/system/pathparser.h>
+#include <geometry/hom_point.h>
+#include <geometry/hom_vector.h>
 
 #include <interfaces/GameStateInterface.h>
 #include <interfaces/ObjectPositionInterface.h>
@@ -57,8 +59,15 @@ WorldModelThread::WorldModelThread(WorldModelNetworkThread* net_thread)
   __net_thread = net_thread;
 
   __wi_send_enabled = false;
+  __wi_send_interval = 20;
+  __wi_send_counter  =  1;
+
   __wi_send_pose    = NULL;
   __wi_send_ball    = NULL;
+
+
+  __wi_send_interval = 15;
+  __wi_send_counter  =  1;
 }
 
 
@@ -139,16 +148,16 @@ WorldModelThread::init()
     if (__wi_send_enabled) {
       logger->log_debug(name(), "Sending worldinfo messages enabled");
 
-      std::string ball_id = config->get_string((prefix + "/ball_id").c_str());
       std::string pose_id = config->get_string((prefix + "/pose_id").c_str());
+      std::string ball_id = config->get_string((prefix + "/ball_id").c_str());
 
       logger->log_debug(name(), "Obtaining pose worldinfo data from interface %s.",
 			pose_id.c_str());
       logger->log_debug(name(), "Obtaining ball worldinfo data from interface %s.",
 			ball_id.c_str());
            
-      __wi_send_ball = blackboard->open_for_reading<ObjectPositionInterface>(ball_id.c_str());
-      __wi_send_pose = blackboard->open_for_reading<ObjectPositionInterface>(pose_id.c_str());
+      __wi_send_pose      = blackboard->open_for_reading<ObjectPositionInterface>(pose_id.c_str());
+      __wi_send_ball      = blackboard->open_for_reading<ObjectPositionInterface>(ball_id.c_str());
   
     } else {
       logger->log_debug(name(), "Sending worldinfo messages disabled");
@@ -185,8 +194,8 @@ WorldModelThread::finalize()
 
   if (__wi_send_enabled) {
     try {
-      blackboard->close(__wi_send_ball);
       blackboard->close(__wi_send_pose);
+      blackboard->close(__wi_send_ball);
     } catch (Exception& e) {
       e.print_trace();
     }
@@ -201,40 +210,63 @@ WorldModelThread::loop()
     (*__fit)->fuse();
   }
 
+  // only send every __wi_send_interval loop
+  if ( 0 != (__wi_send_counter % __wi_send_interval) ) {
+    ++__wi_send_counter;
+    return;
+  }
+
+  __wi_send_counter = 1;
+
   WorldInfoTransceiver* transceiver = __net_thread->get_transceiver();
 
   if (__wi_send_enabled) {
-    __wi_send_ball->read();
     __wi_send_pose->read();
+    __wi_send_ball->read();
 
     bool do_send = false;
 
-    // ball
-    if (__wi_send_ball->has_writer()) {
-      do_send = true;
-      transceiver->set_ball_pos(__wi_send_ball->distance(),
-				__wi_send_ball->bearing(),
-				__wi_send_ball->slope(),
-				__wi_send_ball->dbs_covariance());
-      transceiver->set_ball_visible(__wi_send_ball->is_visible(),
-				    __wi_send_ball->visibility_history());
-      transceiver->set_ball_velocity(__wi_send_ball->relative_x_velocity(),
-				     __wi_send_ball->relative_y_velocity(),
-				     __wi_send_ball->relative_z_velocity(),
-				     __wi_send_ball->relative_xyz_velocity_covariance());
-    }
-     
     // pose
+    HomPoint pos;
+    pos.x( __wi_send_pose->world_x() );
+    pos.y( __wi_send_pose->world_y() );
+    float yaw = __wi_send_pose->world_z();
     if (__wi_send_pose->has_writer()) {
       do_send = true;
-      transceiver->set_pose(__wi_send_pose->world_x(),
-			    __wi_send_pose->world_y(),
-			    __wi_send_pose->world_z(),
-			    __wi_send_pose->world_xyz_covariance());
+      transceiver->set_pose(pos.x(), pos.y(), yaw,
+			    __wi_send_pose->world_xyz_covariance() /* TODO */);
       transceiver->set_velocity(__wi_send_pose->world_x_velocity(),
 				__wi_send_pose->world_y_velocity(),
 				__wi_send_pose->world_z_velocity(),
 				__wi_send_pose->world_xyz_velocity_covariance());
+      
+      // ball
+      if (__wi_send_ball->has_writer() && __wi_send_ball->is_valid()) {
+	if (__wi_send_ball->flags() & ObjectPositionInterface::FLAG_HAS_WORLD) {
+	  transceiver->set_glob_ball_pos(__wi_send_ball->world_x(),
+					 __wi_send_ball->world_y(),
+					 __wi_send_ball->world_z(),
+					 __wi_send_ball->world_xyz_covariance() );
+	} else {
+	  // compute global ball position
+	  HomVector relative_ball;
+	  relative_ball.x( __wi_send_ball->relative_x() );
+	  relative_ball.y( __wi_send_ball->relative_y() );
+	  relative_ball.rotate_z( yaw );
+	  HomPoint global_ball = pos + relative_ball;
+	  
+	  transceiver->set_glob_ball_pos(global_ball.x(), global_ball.y(), 0.0,
+					 __wi_send_ball->dbs_covariance() /* TODO */);
+	}
+	transceiver->set_glob_ball_visible(__wi_send_ball->is_visible(),
+					   __wi_send_ball->visibility_history());
+
+	// TODO
+// 	transceiver->set_glob_ball_velocity(__wi_send_ball->relative_x_velocity(),
+// 					    __wi_send_ball->relative_y_velocity(),
+// 					    __wi_send_ball->relative_z_velocity(),
+// 					    __wi_send_ball->relative_xyz_velocity_covariance());
+      }
     }
     
     if (do_send) {

@@ -458,7 +458,12 @@ function FSM:reset()
       self.current:do_exit()
    end
 
-   self.vars          = {}
+   for k,_ in pairs(self.vars) do
+      self.vars[k] = nil
+   end
+   -- Do not do the following, it breaks jump conditions that are passed as
+   -- Lua string
+   --self.vars          = {}
 
    if not self.prepared then
       for n,s in pairs(self.states) do

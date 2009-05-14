@@ -126,7 +126,9 @@ WorldModelObjPosAverageFuser::fuse()
   MutexLocker lock(__input_ifs.mutex());
 
   unsigned int flags = 0;
-  unsigned int num_inputs = 0;
+  unsigned int base_flags = 0;
+  unsigned int world_num_inputs=0, extent_num_inputs=0, euler_num_inputs = 0,
+    worldvel_num_inputs = 0, relcart_num_inputs = 0, relpolar_num_inputs = 0;
   float roll = 0, pitch = 0, yaw = 0, distance = 0, bearing = 0, slope = 0,
     world_x = 0, world_y = 0, world_z = 0,
     relative_x = 0, relative_y = 0, relative_z = 0,
@@ -137,6 +139,8 @@ WorldModelObjPosAverageFuser::fuse()
   int vishistory_min = 0, vishistory_max = 0;
   unsigned int object_type = 0;
   bool object_type_warned = false;
+  bool flags_read = false;
+  bool have_world = false, have_relative = false;
 
   for (__iii = __input_ifs.begin(); __iii != __input_ifs.end(); ++__iii) {
     ObjectPositionInterface *iface = *__iii;
@@ -153,30 +157,83 @@ WorldModelObjPosAverageFuser::fuse()
 	} else {
 	  object_type = iface->object_type();
 	}
+
+	if (flags_read) {
+	  unsigned int iflags = iface->flags()
+	    & (0xFFFFFFFF^ObjectPositionInterface::FLAG_HAS_WORLD)
+	    & (0xFFFFFFFF^ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN)
+	    & (0xFFFFFFFF^ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR);
+	  if (iflags != base_flags) {
+	    __logger->log_warn("WMObjPosAvgFus", "Interface flags for %s "
+			       "disagree. Exected %x, got %x", base_flags, iflags);
+	  }
+	} else {
+	  base_flags = iface->flags()
+	    & (0xFFFFFFFF^ObjectPositionInterface::FLAG_HAS_WORLD)
+	    & (0xFFFFFFFF^ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN)
+	    & (0xFFFFFFFF^ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR);
+	  flags_read = true;
+	}
+
 	if (iface->is_visible()) {
-	  flags               |= iface->flags();
-	  roll                += iface->roll();
-	  pitch               += iface->pitch();
-	  yaw                 += iface->yaw();
-	  distance            += iface->distance();
-	  bearing             += iface->bearing();
-	  slope               += iface->slope();
-	  world_x             += iface->world_x();
-	  world_y             += iface->world_y();
-	  world_z             += iface->world_z();
-	  relative_x          += iface->relative_x();
-	  relative_y          += iface->relative_y();
-	  relative_z          += iface->relative_z();
-	  extent_x            += iface->extent_x();
-	  extent_y            += iface->extent_y();
-	  extent_z            += iface->extent_z();
-	  world_x_velocity    += iface->world_x_velocity();
-	  world_y_velocity    += iface->world_y_velocity();
-	  world_z_velocity    += iface->world_z_velocity();
-	  relative_x_velocity += iface->relative_x_velocity();
-	  relative_y_velocity += iface->relative_y_velocity();
-	  relative_z_velocity += iface->relative_z_velocity();
-	  ++num_inputs;
+	  if (iface->flags() & ObjectPositionInterface::FLAG_HAS_WORLD) {
+	    have_world = true;
+
+	    flags |= ObjectPositionInterface::FLAG_HAS_WORLD;
+	    world_x             += iface->world_x();
+	    world_y             += iface->world_y();
+	    world_z             += iface->world_z();
+	    world_num_inputs    += 1;
+
+	    if (iface->flags() & ObjectPositionInterface::FLAG_HAS_EULER_ANGLES) {
+	      roll              += iface->roll();
+	      pitch             += iface->pitch();
+	      yaw               += iface->yaw();
+	      flags             |= ObjectPositionInterface::FLAG_HAS_EULER_ANGLES;
+	      euler_num_inputs  += 1;
+	    }
+
+	    if (iface->flags() & ObjectPositionInterface::FLAG_HAS_WORLD_VELOCITY) {
+	      world_x_velocity    += iface->world_x_velocity();
+	      world_y_velocity    += iface->world_y_velocity();
+	      world_z_velocity    += iface->world_z_velocity();
+	      flags               |= ObjectPositionInterface::FLAG_HAS_WORLD_VELOCITY;
+	      worldvel_num_inputs += 1;
+	    }
+	  }
+
+	  if (iface->flags() & ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN) {
+	    have_relative = true;
+
+	    flags |= ObjectPositionInterface::FLAG_HAS_RELATIVE_CARTESIAN;
+	    
+	    relative_x          += iface->relative_x();
+	    relative_y          += iface->relative_y();
+	    relative_z          += iface->relative_z();
+	    relative_x_velocity += iface->relative_x_velocity();
+	    relative_y_velocity += iface->relative_y_velocity();
+	    relative_z_velocity += iface->relative_z_velocity();
+	    relcart_num_inputs  += 1;
+	  }
+
+	  if (iface->flags() & ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR) {
+	    have_relative = true;
+	    
+	    flags |= ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR;
+	    
+	    distance            += iface->distance();
+	    bearing             += iface->bearing();
+	    slope               += iface->slope();
+	    relpolar_num_inputs += 1;
+	  }
+
+	  if (iface->flags() & ObjectPositionInterface::FLAG_HAS_EXTENT) {
+	    extent_x          += iface->extent_x();
+	    extent_y          += iface->extent_y();
+	    extent_z          += iface->extent_z();
+	    flags               |= ObjectPositionInterface::FLAG_HAS_EXTENT;
+	    extent_num_inputs += 1;
+	  }
 
 	  if (iface->visibility_history() > vishistory_max) {
 	    vishistory_max = iface->visibility_history();
@@ -190,38 +247,44 @@ WorldModelObjPosAverageFuser::fuse()
     }
   }
 
-  if ( num_inputs == 0 ) {
-    roll = pitch = yaw = distance = bearing = slope = 0.;
-    world_x = world_y = world_z = 0.;
-    relative_x = relative_y = relative_z = 0.;
-    extent_x = extent_y = extent_z = 0.;
-    world_x_velocity = world_y_velocity = world_z_velocity = 0.;
-    relative_x_velocity = relative_y_velocity = relative_z_velocity = 0.;
-    num_inputs = 1;
-    visible = false;
+  if ( world_num_inputs > 0 ) {
+    __output_if->set_world_x(world_x / (float)world_num_inputs);
+    __output_if->set_world_y(world_y / (float)world_num_inputs);
+    __output_if->set_world_z(world_z / (float)world_num_inputs);
+  }
+  if ( euler_num_inputs > 0 ) {
+    __output_if->set_roll(roll / (float)euler_num_inputs);
+    __output_if->set_pitch(pitch  / (float)euler_num_inputs);
+    __output_if->set_yaw(yaw / (float)euler_num_inputs);
+  }
+  if ( worldvel_num_inputs > 0) {
+    __output_if->set_world_x_velocity(world_x_velocity / (float)worldvel_num_inputs);
+    __output_if->set_world_y_velocity(world_y_velocity / (float)worldvel_num_inputs);
+    __output_if->set_world_z_velocity(world_z_velocity / (float)worldvel_num_inputs);
   }
 
-  __output_if->set_roll(roll / (float)num_inputs);
-  __output_if->set_pitch (pitch  / (float)num_inputs);
-  __output_if->set_yaw(yaw / (float)num_inputs);
-  __output_if->set_distance(distance / (float)num_inputs);
-  __output_if->set_bearing(bearing / (float)num_inputs);
-  __output_if->set_slope(slope / (float)num_inputs);
-  __output_if->set_world_x(world_x / (float)num_inputs);
-  __output_if->set_world_y(world_y / (float)num_inputs);
-  __output_if->set_world_z(world_z / (float)num_inputs);
-  __output_if->set_relative_x(relative_x / (float)num_inputs);
-  __output_if->set_relative_y(relative_y / (float)num_inputs);
-  __output_if->set_relative_z(relative_z / (float)num_inputs);
-  __output_if->set_extent_x(extent_x / (float)num_inputs);
-  __output_if->set_extent_y(extent_y / (float)num_inputs);
-  __output_if->set_extent_z(extent_z / (float)num_inputs);
-  __output_if->set_world_x_velocity(world_x_velocity / (float)num_inputs);
-  __output_if->set_world_y_velocity(world_y_velocity / (float)num_inputs);
-  __output_if->set_world_z_velocity(world_z_velocity / (float)num_inputs);
-  __output_if->set_relative_x_velocity(relative_x_velocity / (float)num_inputs);
-  __output_if->set_relative_y_velocity(relative_y_velocity / (float)num_inputs);
-  __output_if->set_relative_z_velocity(relative_z_velocity / (float)num_inputs);
+  if ( extent_num_inputs > 0 ) {
+    __output_if->set_extent_x(extent_x / (float)extent_num_inputs);
+    __output_if->set_extent_y(extent_y / (float)extent_num_inputs);
+    __output_if->set_extent_z(extent_z / (float)extent_num_inputs);
+  }
+  if ( relcart_num_inputs > 0) {
+  __output_if->set_relative_x(relative_x / (float)relcart_num_inputs);
+  __output_if->set_relative_y(relative_y / (float)relcart_num_inputs);
+  __output_if->set_relative_z(relative_z / (float)relcart_num_inputs);
+  __output_if->set_relative_x_velocity(relative_x_velocity / (float)relcart_num_inputs);
+  __output_if->set_relative_y_velocity(relative_y_velocity / (float)relcart_num_inputs);
+  __output_if->set_relative_z_velocity(relative_z_velocity / (float)relcart_num_inputs);
+  }
+  if ( relpolar_num_inputs > 0) {
+    __output_if->set_distance(distance / (float)relpolar_num_inputs);
+    __output_if->set_bearing(bearing / (float)relpolar_num_inputs);
+    __output_if->set_slope(slope / (float)relpolar_num_inputs);
+  }
+
+  visible = have_world || have_relative;
+
+  __output_if->set_flags(flags);
   __output_if->set_valid(valid);
   __output_if->set_visible(visible);
   __output_if->set_visibility_history(visible ? vishistory_max : vishistory_min);

@@ -70,9 +70,11 @@ class WorldModelThread
   std::list<WorldModelFuser *>::iterator __fit;
 
   bool __wi_send_enabled;
+  unsigned int __wi_send_interval;
+  unsigned int __wi_send_counter;
+
   fawkes::ObjectPositionInterface* __wi_send_ball;
   fawkes::ObjectPositionInterface* __wi_send_pose;
-
 };
 
 

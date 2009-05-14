@@ -72,27 +72,33 @@ fsm:new_jump_state("RELGOTO")
 
 function RELGOTO:init()
    if navigator:has_writer() then
-      local vm = navigator.MaxVelocityMessage:new(1.0)
-      navigator:msgq_enqueue_copy(vm)
-
+      local vm = navigator.MaxVelocityMessage:new(2.0)
       if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil or
-	 self.fsm.vars[1] ~= nil and self.fsm.vars[2] ~= nil then
-	 -- cartesian goto
-	 local x = self.fsm.vars.x or self.fsm.vars[1]
-	 local y = self.fsm.vars.y or self.fsm.vars[2]
-	 local ori = self.fsm.vars.ori or self.fsm.vars[3] or math.atan2(y, x)
-	 local m = navigator.CartesianGotoMessage:new(x, y, ori)
-	 printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
-	 self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+         self.fsm.vars[1] ~= nil and self.fsm.vars[2] ~= nil then
+         -- cartesian goto
+         local x = self.fsm.vars.x or self.fsm.vars[1]
+         local y = self.fsm.vars.y or self.fsm.vars[2]
+         local ori = self.fsm.vars.ori or self.fsm.vars[3] or math.atan2(y, x)
+         if math.sqrt(x*x + y*y) <= 0.5 then
+            vm = navigator.MaxVelocityMessage:new(1.0)
+         end
+         navigator:msgq_enqueue_copy(vm)
+         local m = navigator.CartesianGotoMessage:new(x, y, ori)
+         printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
+         self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
       elseif self.fsm.vars.phi ~= nil and self.fsm.vars.dist ~= nil then
-	 -- polar goto
-	 local phi, dist = self.fsm.vars.phi, self.fsm.vars.dist
-	 local ori = self.fsm.vars.ori or phi
-	 local m = navigator.PolarGotoMessage:new(phi, dist, ori)
-	 printf("Sending PolarGotoMessage(%f, %f, %f)", phi, dist, ori)
-	 self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+         -- polar goto
+         local phi, dist = self.fsm.vars.phi, self.fsm.vars.dist
+         local ori = self.fsm.vars.ori or phi
+         if tonumber(dist) <= 0.5 then
+            vm = navigator.MaxVelocityMessage:new(1.0)
+         end
+         navigator:msgq_enqueue_copy(vm)
+         local m = navigator.PolarGotoMessage:new(phi, dist, ori)
+         printf("Sending PolarGotoMessage(%f, %f, %f)", phi, dist, ori)
+         self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
       else
-	 self.param_fail = true
+         self.fsm.vars.param_fail = true
       end
    end
    self.wait_start = 1
@@ -108,7 +114,7 @@ function RELGOTO:reset()
 end
 
 function RELGOTO:jumpcond_paramfail()
-   return self.param_fail
+   return self.fsm.vars.param_fail
 end
 
 function RELGOTO:jumpcond_navifail()

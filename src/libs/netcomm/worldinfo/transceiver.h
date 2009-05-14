@@ -67,9 +67,13 @@ class WorldInfoTransceiver
   void set_pose(float x, float y, float theta, float *covariance);
   void set_velocity(float vel_x, float vel_y, float vel_theta, float *covariance);
 
-  void set_ball_pos(float dist, float bearing, float slope, float *covariance);
-  void set_ball_visible(bool visible, int visibility_history);
-  void set_ball_velocity(float vel_x, float vel_y, float vel_z, float *covariance);
+  void set_rel_ball_pos(float dist, float bearing, float slope, float *covariance);
+  void set_rel_ball_visible(bool visible, int visibility_history);
+  void set_rel_ball_velocity(float vel_x, float vel_y, float vel_z, float *covariance);
+
+  void set_glob_ball_pos(float x, float y, float z, float *covariance);
+  void set_glob_ball_visible(bool visible, int visibility_history);
+  void set_glob_ball_velocity(float vel_x, float vel_y, float vel_z, float *covariance);
 
   void set_gamestate(worldinfo_gamestate_t gamestate, worldinfo_gamestate_team_t state_team);
   void set_score(unsigned int score_cyan, unsigned int score_magenta);
@@ -145,19 +149,33 @@ class WorldInfoTransceiver
   float  vel_theta;
   float *vel_covariance;
 
-  bool   ball_changed;
-  bool   ball_visible;
-  int    ball_visibility_history;
-  float  ball_dist;
-  float  ball_bearing;
-  float  ball_slope;
-  float *ball_covariance;
+  bool   rel_ball_changed;
+  bool   rel_ball_visible;
+  int    rel_ball_visibility_history;
+  float  rel_ball_dist;
+  float  rel_ball_bearing;
+  float  rel_ball_slope;
+  float *rel_ball_covariance;
 
-  bool   ball_vel_changed;
-  float  ball_vel_x;
-  float  ball_vel_y;
-  float  ball_vel_z;
-  float *ball_vel_covariance;
+  bool   rel_ball_vel_changed;
+  float  rel_ball_vel_x;
+  float  rel_ball_vel_y;
+  float  rel_ball_vel_z;
+  float *rel_ball_vel_covariance;
+
+  bool   glob_ball_changed;
+  bool   glob_ball_visible;
+  int    glob_ball_visibility_history;
+  float  glob_ball_x;
+  float  glob_ball_y;
+  float  glob_ball_z;
+  float *glob_ball_covariance;
+
+  bool   glob_ball_vel_changed;
+  float  glob_ball_vel_x;
+  float  glob_ball_vel_y;
+  float  glob_ball_vel_z;
+  float *glob_ball_vel_covariance;
 
   bool gamestate_changed;
   worldinfo_gamestate_message_t gamestate_msg;

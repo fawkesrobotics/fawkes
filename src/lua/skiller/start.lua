@@ -52,6 +52,8 @@ end
 require("fawkes.logprint")
 fawkes.logprint.init(logger)
 
+require("fawkes.mathext")
+
 skillenv = require("skiller.skillenv")
 require("skiller.skillhsm")
 

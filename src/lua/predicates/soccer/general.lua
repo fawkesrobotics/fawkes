@@ -116,23 +116,23 @@ function gamestate_own_team()
 end
 
 function attacker()
-   return gamestate:role() == ROLE_ATTACKER
+   return predparams.own_role == ROLE_ATTACKER
 end
 
 function defender()
-   return gamestate:role() == ROLE_DEFENDER
+   return predparams.own_role == ROLE_DEFENDER
 end
 
 function mid_left()
-   return gamestate:role() == ROLE_MID_LEFT
+   return predparams.own_role == ROLE_MID_LEFT
 end
 
 function mid_right()
-   return gamestate:role() == ROLE_MID_RIGHT
+   return predparams.own_role == ROLE_MID_RIGHT
 end
 
 function goalie()
-   return gamestate:role() == ROLE_GOALIE
+   return predparams.own_role == ROLE_GOALIE
 end
 
 function ball_moved()

@@ -68,9 +68,18 @@ class WorldInfoViewerBackendThread
 			      float dist, float pitch, float yaw,
 			      float *covariance );
 
+  virtual void global_ball_pos_rcvd( const char *from_host,
+				     bool visible, int visibility_history,
+				     float x, float y, float z,
+				     float *covariance );
+
   virtual void ball_velocity_rcvd( const char *from_host,
 				   float vel_x, float vel_y, float vel_z,
 				   float *covariance );
+
+  virtual void global_ball_velocity_rcvd(const char *from_host,
+					 float vel_x, float vel_y, float vel_z,
+					 float *covariance);
 
   virtual void opponent_pose_rcvd( const char *from_host, unsigned int uid,
 				   float distance, float angle,

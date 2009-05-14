@@ -25,11 +25,13 @@
 #include <utils/system/argparser.h>
 
 #include "refbox_state_sender.h"
-//#include "midsize.h"
+#include "refbox_state_writer.h"
 #include "msl2007.h"
 #include "msl2008.h"
 #include "spl.h"
 
+#include <vector>
+#include <string>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -39,15 +41,18 @@ using namespace fawkes;
 void
 print_usage(const char *program_name)
 {
-  printf("Usage: %s [-d] -l league -t team -g goal_color\n"
+  printf("Usage: %s [-d] -l league -t team -g goal_color [hosts]\n"
 	 "  -d             Turn on debug mode (prints to stdout)\n"
-	 "  -l league      Define league, may be one of midsize, msl2007, msl2008, spl\n"
+	 "  -b             Use blackboard writer instead of world info sender\n"
+	 "  -l league      Define league, may be one of\n"
+	 "                 midsize, msl2007, msl2008, spl\n"
 	 "  -t team        Our team, either cyan or magenta\n"
 	 "  -g goal_color  Our goal color, either blue or yellow\n"
 	 "  -p port        UDP port to send to (default 2806)\n"
 	 "  -m addr        Multicast address to send to (default 224.16.0.1)\n"
 	 "  -k key         Encryption key (default AllemaniACs)\n"
-	 "  -i iv          Encryption initialization vector (default AllemaniACs)\n",
+	 "  -i iv          Encryption initialization vector (default AllemaniACs)\n"
+	 " hosts           The hosts of the robots; only when -b is used\n",
 	 program_name);
 }
 
@@ -58,7 +63,7 @@ print_usage(const char *program_name)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hdl:t:g:p:m:k:i:");
+  ArgumentParser argp(argc, argv, "hdbl:t:g:p:m:k:i:");
 
   if ( argp.has_arg("h") ) {
     print_usage(argv[0]);
@@ -129,18 +134,25 @@ main(int argc, char **argv)
   printf("Sending to: %s:%u\n"
 	 "Key: %s  IV: %s\n", addr, port, key, iv);
 
-  RefBoxStateSender rss(addr, port, key, iv, argp.has_arg("d"));
-  rss.set_team_goal(our_team, our_goal);
+  RefBoxStateSender *rss;
+  if ( argp.has_arg("b") ) {
+    std::vector<const char*> items = argp.items();
+    std::vector<std::string> hosts(items.begin(), items.end());
+    rss = new RefBoxStateBBWriter(hosts, argp.has_arg("d"));
+  } else {
+    rss = new RefBoxStateSender(addr, port, key, iv, argp.has_arg("d"));
+  }
+  rss->set_team_goal(our_team, our_goal);
 
   printf("League: %s\n", argp.arg("l"));
   if ( strcmp(argp.arg("l"), "msl2007") == 0 || strcmp(argp.arg("l"), "midsize") == 0 ) {
-    MidsizeRefBoxRepeater mrr(rss, "127.0.0.1", 28097);
+    MidsizeRefBoxRepeater mrr(*rss, "127.0.0.1", 28097);
     mrr.run();
   } else if ( strcmp(argp.arg("l"), "msl2008") == 0 ) {
-    Msl2008RefBoxRepeater m8rr(rss, "230.0.0.1", 30000);
+    Msl2008RefBoxRepeater m8rr(*rss, "230.0.0.1", 30000);
     m8rr.run();
   } else if ( strcmp(argp.arg("l"), "spl") == 0 ) {
-    SplRefBoxRepeater nrr(rss, "255.255.255.0", 3838);
+    SplRefBoxRepeater nrr(*rss, "255.255.255.0", 3838);
     nrr.run();
   } else {
     printf("Invalid league name given.\n\n");

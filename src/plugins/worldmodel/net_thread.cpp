@@ -274,6 +274,10 @@ WorldModelNetworkThread::ball_pos_rcvd(const char *from_host,
   }
 
   ObjectPositionInterface *iface = __ball_ifs[from_host];
+  iface->set_flags( iface->flags() |
+		    ObjectPositionInterface::TYPE_BALL |
+		    ObjectPositionInterface::FLAG_HAS_RELATIVE_POLAR |
+		    ObjectPositionInterface::FLAG_HAS_COVARIANCES );
   iface->set_visible(visible);
   iface->set_visibility_history(visibility_history);
   iface->set_distance(dist);
@@ -286,9 +290,54 @@ WorldModelNetworkThread::ball_pos_rcvd(const char *from_host,
 
 
 void
+WorldModelNetworkThread::global_ball_pos_rcvd(const char *from_host,
+					      bool visible, int visibility_history,
+					      float x, float y, float z,
+					      float *covariance)
+{
+  __ball_ifs.lock();
+  if (__ball_ifs.find(from_host) == __ball_ifs.end()) {
+    try {
+      std::string id = std::string("WI BPos ") + from_host;
+      __ball_ifs[from_host] = blackboard->open_for_writing<ObjectPositionInterface>(id.c_str());
+    } catch (Exception &e) {
+      logger->log_warn("WorldModelNetworkThread", "Failed to create ObjectPositionInterface "
+		       "for ball pos of %s, exception follows", from_host);
+      logger->log_warn("WorldModelNetworkThread", e);
+      return;
+    }
+  }
+
+  ObjectPositionInterface *iface = __ball_ifs[from_host];
+  iface->set_flags( iface->flags() | 
+		    ObjectPositionInterface::TYPE_BALL |
+		    ObjectPositionInterface::FLAG_HAS_WORLD |
+		    ObjectPositionInterface::FLAG_HAS_Z_AS_ORI |
+		    ObjectPositionInterface::FLAG_HAS_COVARIANCES );
+  iface->set_visible(visible);
+  iface->set_visibility_history(visibility_history);
+  iface->set_world_x(x);
+  iface->set_world_y(y);
+  iface->set_world_z(z);
+  iface->set_world_xyz_covariance(covariance);
+  iface->write();
+  __ball_ifs.unlock();
+}
+
+
+void
 WorldModelNetworkThread::ball_velocity_rcvd(const char *from_host,
 					    float vel_x, float vel_y, float vel_z,
 					    float *covariance)
+{
+  // TODO
+}
+
+
+void
+WorldModelNetworkThread::global_ball_velocity_rcvd(const char *from_host,
+						   float vel_x, float vel_y, float vel_z,
+						   float *covariance)
 {
   // TODO
 }
@@ -365,6 +414,8 @@ WorldModelNetworkThread::gamestate_rcvd(const char *from_host,
 					fawkes::worldinfo_gamestate_goalcolor_t our_goal_color,
 					fawkes::worldinfo_gamestate_half_t half)
 {
+  logger->log_debug("WorldModelNetworkThread", "Received Gamestate %i from %s, state team %i, score %u:%u, our team: %i, our goal: %i, half: %i",
+                    game_state, from_host, state_team, score_magenta, our_team, our_goal_color, half);
   switch (game_state) {
     case GS_FROZEN:
       __gamestate_if->set_game_state(GameStateInterface::GS_FROZEN);       break;

@@ -28,7 +28,7 @@ require("fawkes.mathext")
 
 agentenv = require("luaagent.agentenv")
 
-skiller = interfaces.reading.skiller
+--skiller = interfaces.reading.skiller
 
 for k,i in pairs(interfaces.reading) do
    fawkes.logprint.print_debug("Interface %s opened for reading as %s", i:uid(), k)

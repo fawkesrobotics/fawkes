@@ -25,12 +25,13 @@
 #include "refbox_state_sender.h"
 
 #include <netcomm/worldinfo/transceiver.h>
+#include <core/macros.h>
 
 #include <cstdio>
 
 using namespace fawkes;
 
-/** @class RefBoxStateSender <tools/refboxrep/refbox_state_sender.h>
+/** @class RefBoxStateSender "refbox_state_sender.h"
  * RefBox repeater state sender.
  * Adapter to the WorldInfoTransceiver, provides easy optional debugging output
  * to stdout.
@@ -53,6 +54,23 @@ RefBoxStateSender::RefBoxStateSender(const char *addr, unsigned short port,
   __transceiver = new WorldInfoTransceiver(addr, port, key, iv);
   __transceiver->set_loop( true );
 
+  __game_state = GS_FROZEN;
+  __state_team = TEAM_BOTH;
+  __score_cyan = 0;
+  __score_magenta = 0;
+  __our_team = TEAM_CYAN;
+  __our_goal_color = GOAL_BLUE;
+  __half = HALF_FIRST;
+  __timeout_thread = NULL;
+}
+
+/** Constructor.
+ * Only to be used by derivatives. These must implement the send() method!
+ */
+RefBoxStateSender::RefBoxStateSender()
+{
+  __debug = false;
+  __transceiver = NULL;
   __game_state = GS_FROZEN;
   __state_team = TEAM_BOTH;
   __score_cyan = 0;
@@ -166,11 +184,15 @@ RefBoxStateSender::send()
 void
 RefBoxStateSender::execute_send()
 {
-  __transceiver->set_gamestate(__game_state, __state_team);
-  __transceiver->set_score(__score_cyan, __score_magenta);
-  __transceiver->set_team_goal(__our_team, __our_goal_color);
-  __transceiver->set_half(__half);
-  __transceiver->send();
+  if (unlikely(! __transceiver)) {
+    return;
+  } else {
+    __transceiver->set_gamestate(__game_state, __state_team);
+    __transceiver->set_score(__score_cyan, __score_magenta);
+    __transceiver->set_team_goal(__our_team, __our_goal_color);
+    __transceiver->set_half(__half);
+    __transceiver->send();
+  }
 }
 
 /** @class RefBoxStateSender::TimeoutThread <tools/refboxrep/refbox_state_sender.h>
@@ -206,9 +228,9 @@ RefBoxStateSender::TimeoutThread::loop()
   case      0: __timeout_usec =       1; break;
   case      1: __timeout_usec =       2; break;
   case      2: __timeout_usec =   50000; break;
-  case  50000: __timeout_usec =  250000; break;
-  case 250000: __timeout_usec =  500000; break;
-  case 500000: __timeout_usec = 1000000; break;
+  //case  50000: __timeout_usec =  250000; break;
+  //case 250000: __timeout_usec =  500000; break;
+  //case 500000: __timeout_usec = 1000000; break;
   }
 
   usleep(__timeout_usec);

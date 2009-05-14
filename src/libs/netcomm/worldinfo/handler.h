@@ -47,9 +47,18 @@ class WorldInfoHandler
 			     float dist,  float bearing, float slope,
 			     float *covariance)                                 = 0;
 
+  virtual void global_ball_pos_rcvd(const char *from_host,
+				    bool visible, int visibility_history,
+				    float x,  float y, float z,
+				    float *covariance)                          = 0;
+
   virtual void ball_velocity_rcvd(const char *from_host,
 				  float vel_x, float vel_y, float vel_z,
 				  float *covariance)                            = 0;
+
+  virtual void global_ball_velocity_rcvd(const char *from_host,
+					 float vel_x, float vel_y, float vel_z,
+					 float *covariance)                     = 0;
 
   virtual void opponent_pose_rcvd(const char *from_host,
 				  unsigned int uid, float distance,

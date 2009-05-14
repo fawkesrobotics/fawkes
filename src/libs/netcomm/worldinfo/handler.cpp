@@ -72,7 +72,34 @@ namespace fawkes {
  * @see WorldInfoTransceiver::set_ball_pos()
  * @see WorldInfoTransceiver::set_ball_visible()
  *
+ * @fn void WorldInfoHandler::global_ball_pos_rcvd(const char *from_host, bool visible, int visibility_history, float x, float y, float z, float *covariance)
+ * Global ball position information received.
+ * @param from_host transmitting host of this information, if available symbolic name
+ * @param visible true if ball is visible, false otherwise. If the ball is not visible
+ * the given position is the last known position and may be invalid. Use visibility history
+ * to decide whether you expect useful data.
+ * @param visibility_history Ball visibility history.
+ * @param x global x-coordinates of the ball
+ * @param y global y-coordinates of the ball
+ * @param z global z-coordinates of the ball
+ * @param covariance covariance matrix with 9 entries, ordered as three concatenated
+ * rows (first row, three floats, second row, three floats, third row, three
+ * floats).
+ * @see WorldInfoTransceiver::set_ball_pos()
+ * @see WorldInfoTransceiver::set_ball_visible()
+ *
  * @fn void WorldInfoHandler::ball_velocity_rcvd(const char *from_host, float vel_x, float vel_y, float vel_z, float *covariance)
+ * Ball velocity information received.
+ * @param from_host transmitting host of this information, if available symbolic name
+ * @param vel_x velocity in x direction
+ * @param vel_y velocity in y direction
+ * @param vel_z velocity in z direction
+ * @param covariance covariance matrix with 9 entries, ordered as three concatenated
+ * rows (first row, three floats, second row, three floats, third row, three
+ * floats).
+ * @see WorldInfoTransceiver::set_ball_velocity()
+ *
+ * @fn void WorldInfoHandler::global_ball_velocity_rcvd(const char *from_host, float vel_x, float vel_y, float vel_z, float *covariance)
  * Ball velocity information received.
  * @param from_host transmitting host of this information, if available symbolic name
  * @param vel_x velocity in x direction

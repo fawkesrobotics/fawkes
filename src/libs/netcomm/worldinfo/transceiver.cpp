@@ -100,8 +100,10 @@ WorldInfoTransceiver::WorldInfoTransceiver(const char *addr, unsigned short port
 					   NetworkNameResolver *resolver) :
   pose_changed( false ),
   vel_changed( false ),
-  ball_changed( false ),
-  ball_vel_changed( false ),
+  rel_ball_changed( false ),
+  rel_ball_vel_changed( false ),
+  glob_ball_changed( false ),
+  glob_ball_vel_changed( false ),
   gamestate_changed( false )
 {
   try {
@@ -170,6 +172,7 @@ WorldInfoTransceiver::~WorldInfoTransceiver()
   free(__iv);
   delete s;
   delete encryptor;
+  delete decryptor;
   if ( resolver_delete ) {
     delete resolver;
   }
@@ -345,13 +348,38 @@ WorldInfoTransceiver::set_velocity(float vel_x, float vel_y, float vel_theta, fl
  * send() is called!
  */
 void
-WorldInfoTransceiver::set_ball_pos(float dist, float bearing, float slope, float *covariance)
+WorldInfoTransceiver::set_rel_ball_pos(float dist, float bearing, float slope, float *covariance)
 {
-  ball_dist       = dist;
-  ball_bearing    = bearing;
-  ball_slope      = slope;
-  ball_covariance = covariance;
-  ball_changed    = true;
+  rel_ball_dist       = dist;
+  rel_ball_bearing    = bearing;
+  rel_ball_slope      = slope;
+  rel_ball_covariance = covariance;
+  rel_ball_changed    = true;
+}
+
+
+/** Set global ball position.
+ * Note that the ball position is given in polar coordinates in
+ * 3D space!
+ * The confidence about the ball position is transmitted as a 3x3 covariance
+ * matrix.
+ * @param x the x-coordinate of the global ball position
+ * @param y the y-coordinate of the global ball position
+ * @param z the z-coordinate of the global ball position
+ * @param covariance covariance matrix with 9 entries, ordered as three concatenated
+ * rows (first row, three floats, second row, three floats, third row, three
+ * floats). No length check or whatsoever is done. This will crash if c is not
+ * long enough! c will not be copied but referenced so it has to exist when
+ * send() is called!
+ */
+void
+WorldInfoTransceiver::set_glob_ball_pos(float x, float y, float z, float *covariance)
+{
+  glob_ball_x          = x;
+  glob_ball_y          = y;
+  glob_ball_z          = z;
+  glob_ball_covariance = covariance;
+  glob_ball_changed    = true;
 }
 
 
@@ -368,11 +396,25 @@ WorldInfoTransceiver::set_ball_pos(float dist, float bearing, float slope, float
  * @param visibility_history visibility history, see above.
  */
 void
-WorldInfoTransceiver::set_ball_visible(bool visible, int visibility_history)
+WorldInfoTransceiver::set_rel_ball_visible(bool visible, int visibility_history)
 {
-  ball_visible            = visible;
-  ball_visibility_history = visibility_history;
-  ball_changed            = true;
+  rel_ball_visible            = visible;
+  rel_ball_visibility_history = visibility_history;
+  rel_ball_changed            = true;
+}
+
+
+/** Set ball visibility for the global ball.
+ * Same semantics as set_ball_visible().
+ * @param visible true if the ball is visible, false otherwise
+ * @param visibility_history visibility history, see above.
+ */
+void
+WorldInfoTransceiver::set_glob_ball_visible(bool visible, int visibility_history)
+{
+  glob_ball_visible            = visible;
+  glob_ball_visibility_history = visibility_history;
+  glob_ball_changed            = true;
 }
 
 
@@ -388,14 +430,37 @@ WorldInfoTransceiver::set_ball_visible(bool visible, int visibility_history)
  * send() is called!
  */
 void
-WorldInfoTransceiver::set_ball_velocity(float vel_x, float vel_y, float vel_z,
-					float *covariance)
+WorldInfoTransceiver::set_rel_ball_velocity(float vel_x, float vel_y, float vel_z,
+					    float *covariance)
 {
-  ball_vel_x          = vel_x;
-  ball_vel_y          = vel_y;
-  ball_vel_z          = vel_z;
-  ball_vel_covariance = covariance;
-  ball_vel_changed    = true;
+  rel_ball_vel_x          = vel_x;
+  rel_ball_vel_y          = vel_y;
+  rel_ball_vel_z          = vel_z;
+  rel_ball_vel_covariance = covariance;
+  rel_ball_vel_changed    = true;
+}
+
+
+/** Set global ball velocity.
+ * Set the current, global velocity of the robot.
+ * @param vel_x velocity in x direction wrt. to the global frame
+ * @param vel_y velocity in y direction wrt. to the global frame
+ * @param vel_z velocity in z direction wrt. to the global frame
+ * @param covariance covariance matrix with 9 entries, ordered as three concatenated
+ * rows (first row, three floats, second row, three floats, third row, three
+ * floats). No length check or whatsoever is done. This will crash if c is not
+ * long enough! c will not be copied but referenced so it has to exist when
+ * send() is called!
+ */
+void
+WorldInfoTransceiver::set_glob_ball_velocity(float vel_x, float vel_y, float vel_z,
+					    float *covariance)
+{
+  glob_ball_vel_x          = vel_x;
+  glob_ball_vel_y          = vel_y;
+  glob_ball_vel_z          = vel_z;
+  glob_ball_vel_covariance = covariance;
+  glob_ball_vel_changed    = true;
 }
 
 
@@ -608,18 +673,18 @@ WorldInfoTransceiver::send()
     }
   }
 
-  if ( ball_changed ) {
+  if ( rel_ball_changed ) {
     worldinfo_relballpos_message_t bm;
-    bm.dist    = ball_dist;
-    bm.bearing = ball_bearing;
-    bm.slope   = ball_slope;
-    bm.history = ball_visibility_history;
-    bm.visible = ball_visible ? -1 : 0;
-    memcpy(&(bm.covariance), ball_covariance, sizeof(bm.covariance));
+    bm.dist    = rel_ball_dist;
+    bm.bearing = rel_ball_bearing;
+    bm.slope   = rel_ball_slope;
+    bm.history = rel_ball_visibility_history;
+    bm.visible = rel_ball_visible ? -1 : 0;
+    memcpy(&(bm.covariance), rel_ball_covariance, sizeof(bm.covariance));
 
-    ball_changed = false;
+    rel_ball_changed = false;
 
-    append_outbound(WORLDINFO_MSGTYPE_RELBALL, &bm, sizeof(bm));
+    append_outbound(WORLDINFO_MSGTYPE_GLOBBALL, &bm, sizeof(bm));
 
     if ( fatmsg_enabled ) {
       // fill fat msg
@@ -632,19 +697,33 @@ WorldInfoTransceiver::send()
     }
   }
 
+  if ( glob_ball_changed ) {
+    worldinfo_globballpos_message_t bm;
+    bm.x       = glob_ball_x;
+    bm.y       = glob_ball_y;
+    bm.z       = glob_ball_z;
+    bm.history = glob_ball_visibility_history;
+    bm.visible = glob_ball_visible ? -1 : 0;
+    memcpy(&(bm.covariance), glob_ball_covariance, sizeof(bm.covariance));
+
+    glob_ball_changed = false;
+
+    append_outbound(WORLDINFO_MSGTYPE_GLOBBALL, &bm, sizeof(bm));
+  }
+
   if ( gamestate_changed ) {
     append_outbound(WORLDINFO_MSGTYPE_GAMESTATE,
 		    &gamestate_msg, sizeof(worldinfo_gamestate_message_t));
     gamestate_changed = false;
   }
 
-  if ( ball_vel_changed ) {
+  if ( rel_ball_vel_changed ) {
     worldinfo_relballvelo_message_t rbvm;
-    rbvm.vel_x = ball_vel_x;
-    rbvm.vel_y = ball_vel_y;
-    rbvm.vel_z = ball_vel_z;
-    memcpy(&(rbvm.covariance), ball_vel_covariance, sizeof(rbvm.covariance));
-    ball_vel_changed = false;
+    rbvm.vel_x = rel_ball_vel_x;
+    rbvm.vel_y = rel_ball_vel_y;
+    rbvm.vel_z = rel_ball_vel_z;
+    memcpy(&(rbvm.covariance), rel_ball_vel_covariance, sizeof(rbvm.covariance));
+    rel_ball_vel_changed = false;
 
     append_outbound(WORLDINFO_MSGTYPE_RELBALLVELO, &rbvm, sizeof(rbvm));
 
@@ -657,6 +736,17 @@ WorldInfoTransceiver::send()
     if ( fatmsg_enabled ) {
       fatmsg->valid_relball_velo = 0;
     }
+  }
+
+  if ( glob_ball_vel_changed ) {
+    worldinfo_globballvelo_message_t rbvm;
+    rbvm.vel_x = glob_ball_vel_x;
+    rbvm.vel_y = glob_ball_vel_y;
+    rbvm.vel_z = glob_ball_vel_z;
+    memcpy(&(rbvm.covariance), glob_ball_vel_covariance, sizeof(rbvm.covariance));
+    glob_ball_vel_changed = false;
+
+    append_outbound(WORLDINFO_MSGTYPE_GLOBBALLVELO, &rbvm, sizeof(rbvm));
   }
 
   // Append opponents
@@ -872,6 +962,22 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	}
 	break;
 
+      case WORLDINFO_MSGTYPE_GLOBBALL:
+	if ( msg_size == sizeof(worldinfo_globballpos_message_t) ) {
+	  worldinfo_globballpos_message_t *ball_msg = (worldinfo_globballpos_message_t *)inbound_buffer;
+	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
+	    (*hit)->global_ball_pos_rcvd(hostname,
+					 (ball_msg->visible == -1), ball_msg->history,
+					 ball_msg->x, ball_msg->y, ball_msg->z,
+					 ball_msg->covariance);
+	  }
+	} else {
+	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid global ball pos message received "
+			      "(got %zu bytes but expected %zu bytes), ignoring",
+			      msg_size, sizeof(worldinfo_globballpos_message_t));
+	}
+	break;
+
       case WORLDINFO_MSGTYPE_RELBALLVELO:
 	if ( msg_size == sizeof(worldinfo_relballvelo_message_t) ) {
 	  worldinfo_relballvelo_message_t *bvel_msg = (worldinfo_relballvelo_message_t *)inbound_buffer;
@@ -884,6 +990,21 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid relative ball velocity message received "
 			      "(got %zu bytes but expected %zu bytes), ignoring",
 			      msg_size, sizeof(worldinfo_relballvelo_message_t));
+	}
+	break;
+
+      case WORLDINFO_MSGTYPE_GLOBBALLVELO:
+	if ( msg_size == sizeof(worldinfo_globballvelo_message_t) ) {
+	  worldinfo_globballvelo_message_t *bvel_msg = (worldinfo_globballvelo_message_t *)inbound_buffer;
+	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
+	    (*hit)->global_ball_velocity_rcvd(hostname,
+					      bvel_msg->vel_x, bvel_msg->vel_y, bvel_msg->vel_z,
+					      bvel_msg->covariance);
+	  }
+	} else {
+	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid global ball velocity message received "
+			      "(got %zu bytes but expected %zu bytes), ignoring",
+			      msg_size, sizeof(worldinfo_globballvelo_message_t));
 	}
 	break;
 
