@@ -29,12 +29,12 @@
 
 namespace fawkes {
 
-/** Convert gamestate to a string.
+/** Convert MSL gamestate to a string.
  * @param gamestate game state to translate into a string
  * @return string representation of the given state.
  */
 const char *
-worldinfo_gamestate_tostring(worldinfo_gamestate_t gamestate)
+worldinfo_msl_gamestate_tostring(worldinfo_msl_gamestate_t gamestate)
 {
   switch (gamestate) {
     CASE_STRING(GS_FROZEN);
@@ -47,7 +47,24 @@ worldinfo_gamestate_tostring(worldinfo_gamestate_t gamestate)
     CASE_STRING(GS_FREE_KICK);
     CASE_STRING(GS_GOAL_KICK);
     CASE_STRING(GS_HALF_TIME);
-  default: return "Unknown Gamestate";
+  default: return "Unknown MSL Gamestate";
+  }
+}
+
+/** Convert MSL gamestate to a string.
+ * @param gamestate game state to translate into a string
+ * @return string representation of the given state.
+ */
+const char *
+worldinfo_spl_gamestate_tostring(worldinfo_spl_gamestate_t gamestate)
+{
+  switch (gamestate) {
+    CASE_STRING(GS_SPL_INITIAL);
+    CASE_STRING(GS_SPL_READY);
+    CASE_STRING(GS_SPL_SET);
+    CASE_STRING(GS_SPL_PLAY);
+    CASE_STRING(GS_SPL_FINISHED);
+  default: return "Unknown SPL Gamestate";
   }
 }
 
@@ -96,6 +113,30 @@ worldinfo_gamestate_half_tostring(worldinfo_gamestate_half_t half)
     CASE_STRING(HALF_FIRST);
     CASE_STRING(HALF_SECOND);
   default: return "Unknown Half";
+  }
+}
+
+
+/** Convert penalty to a string.
+ * @param penalty penalty to translate into a string
+ * @return string representation of the penalty
+ */
+const char *
+worldinfo_penalty_tostring(worldinfo_penalty_t penalty)
+{
+  switch (penalty) {
+    CASE_STRING(PENALTY_NONE);
+    CASE_STRING(PENALTY_BALL_HOLDING);
+    CASE_STRING(PENALTY_GOALIE_PUSHING);
+    CASE_STRING(PENALTY_PLAYER_PUSHING);
+    CASE_STRING(PENALTY_ILLEGAL_DEFENDER);
+    CASE_STRING(PENALTY_ILLEGAL_DEFENSE);
+    CASE_STRING(PENALTY_OBSTRUCTION);
+    CASE_STRING(PENALTY_REQ_FOR_PICKUP);
+    CASE_STRING(PENALTY_LEAVING);
+    CASE_STRING(PENALTY_DAMAGE);
+    CASE_STRING(PENALTY_MANUAL);
+  default: return "Unknown Penalty";
   }
 }
 

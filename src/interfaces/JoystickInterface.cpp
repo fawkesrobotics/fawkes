@@ -246,6 +246,21 @@ JoystickInterface::axis_x() const
   return data->axis_x;
 }
 
+/** Get axis_x value at given index.
+ * X values of axes
+ * @param index index of value
+ * @return axis_x value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+JoystickInterface::axis_x(unsigned int index) const
+{
+  if (index > 4) {
+    throw Exception("Index value %u out of bounds (0..4)", index);
+  }
+  return data->axis_x[index];
+}
+
 /** Get maximum length of axis_x value.
  * @return length of axis_x value, can be length of the array or number of 
  * maximum number of characters for a string
@@ -266,6 +281,19 @@ JoystickInterface::set_axis_x(const float * new_axis_x)
   memcpy(data->axis_x, new_axis_x, sizeof(float) * 4);
 }
 
+/** Set axis_x value at given index.
+ * X values of axes
+ * @param new_axis_x new axis_x value
+ * @param index index for of the value
+ */
+void
+JoystickInterface::set_axis_x(unsigned int index, const float new_axis_x)
+{
+  if (index > 4) {
+    throw Exception("Index value %u out of bounds (0..4)", index);
+  }
+  data->axis_x[index] = new_axis_x;
+}
 /** Get axis_y value.
  * Y values of axes
  * @return axis_y value
@@ -274,6 +302,21 @@ float *
 JoystickInterface::axis_y() const
 {
   return data->axis_y;
+}
+
+/** Get axis_y value at given index.
+ * Y values of axes
+ * @param index index of value
+ * @return axis_y value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+JoystickInterface::axis_y(unsigned int index) const
+{
+  if (index > 4) {
+    throw Exception("Index value %u out of bounds (0..4)", index);
+  }
+  return data->axis_y[index];
 }
 
 /** Get maximum length of axis_y value.
@@ -296,6 +339,19 @@ JoystickInterface::set_axis_y(const float * new_axis_y)
   memcpy(data->axis_y, new_axis_y, sizeof(float) * 4);
 }
 
+/** Set axis_y value at given index.
+ * Y values of axes
+ * @param new_axis_y new axis_y value
+ * @param index index for of the value
+ */
+void
+JoystickInterface::set_axis_y(unsigned int index, const float new_axis_y)
+{
+  if (index > 4) {
+    throw Exception("Index value %u out of bounds (0..4)", index);
+  }
+  data->axis_y[index] = new_axis_y;
+}
 /* =========== message create =========== */
 Message *
 JoystickInterface::create_message(const char *type) const

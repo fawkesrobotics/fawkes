@@ -231,7 +231,7 @@ WorldInfoViewerBackendThread::opponent_disapp_rcvd( const char *from_host,
 
 void
 WorldInfoViewerBackendThread::gamestate_rcvd( const char* from_host, 
-					      worldinfo_gamestate_t game_state, 
+					      unsigned int game_state, 
 					      worldinfo_gamestate_team_t state_team, 
 					      unsigned int score_cyan, 
 					      unsigned int score_magenta, 
@@ -247,4 +247,12 @@ WorldInfoViewerBackendThread::gamestate_rcvd( const char* from_host,
 				    score_cyan, score_magenta,
 				    own_team, own_goal_color, half );
   m_signal_new_gamestate_data();
+}
+
+void
+WorldInfoViewerBackendThread::penalty_rcvd(const char *from_host,
+					   unsigned int player,
+					   unsigned int penalty,
+					   unsigned int seconds_remaining)
+{
 }

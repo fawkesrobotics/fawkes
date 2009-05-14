@@ -27,6 +27,7 @@
 
 #include <core/threading/thread.h>
 #include <netcomm/worldinfo/enums.h>
+#include <map>
 
 namespace fawkes {
   class WorldInfoTransceiver;
@@ -47,6 +48,8 @@ class RefBoxStateSender
   virtual void set_team_goal(fawkes::worldinfo_gamestate_team_t our_team,
 			     fawkes::worldinfo_gamestate_goalcolor_t goal_color);
   virtual void set_half(fawkes::worldinfo_gamestate_half_t half);
+  virtual void add_penalty(unsigned int player, unsigned int penalty,
+			   unsigned int seconds_remaining);
 
   class TimeoutThread : public fawkes::Thread
   {
@@ -70,13 +73,22 @@ class RefBoxStateSender
   fawkes::WorldInfoTransceiver           *__transceiver;
   TimeoutThread                          *__timeout_thread;
 
-  fawkes::worldinfo_gamestate_t           __game_state;
+  int                                     __game_state;
   fawkes::worldinfo_gamestate_team_t      __state_team;
   unsigned int                            __score_cyan;
   unsigned int                            __score_magenta;
   fawkes::worldinfo_gamestate_team_t      __our_team;
   fawkes::worldinfo_gamestate_goalcolor_t __our_goal_color;
   fawkes::worldinfo_gamestate_half_t      __half;
+
+  typedef struct {
+    unsigned int player;
+    unsigned int penalty;
+    unsigned int seconds_remaining;
+  } rss_penalty_t;
+  std::map<unsigned int, rss_penalty_t> __penalties;
+  std::map<unsigned int, rss_penalty_t>::iterator __pit;
+
 };
 
 #endif

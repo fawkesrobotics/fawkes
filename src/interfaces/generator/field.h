@@ -52,6 +52,7 @@ class InterfaceField
   std::string               getComment() const;
   std::string               getType() const;
   std::string               getAccessType() const;
+  std::string               getPlainAccessType() const;
   std::string               getLength() const;
   unsigned int              getLengthValue() const;
   std::vector<std::string>  getFlags() const;

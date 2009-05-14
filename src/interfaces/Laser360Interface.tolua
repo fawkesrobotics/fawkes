@@ -4,8 +4,8 @@ namespace fawkes {
 class Laser360Interface : public Interface
 {
 
-  float * distances();
-  void set_distances(const float * new_distances);
+  float distances(int index);
+  void set_distances(unsigned int index, const float new_distances);
   int maxlenof_distances() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;

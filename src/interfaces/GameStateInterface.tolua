@@ -3,19 +3,21 @@ $using namespace fawkes;
 namespace fawkes {
 class GameStateInterface : public Interface
 {
-
-  typedef enum {
-    GS_FROZEN,
-    GS_PLAY,
-    GS_KICK_OFF,
-    GS_DROP_BALL,
-    GS_PENALTY,
-    GS_CORNER_KICK,
-    GS_THROW_IN,
-    GS_FREE_KICK,
-    GS_GOAL_KICK,
-    GS_HALF_TIME
-  } if_gamestate_t;
+  static const unsigned int GS_FROZEN;
+  static const unsigned int GS_PLAY;
+  static const unsigned int GS_KICK_OFF;
+  static const unsigned int GS_DROP_BALL;
+  static const unsigned int GS_PENALTY;
+  static const unsigned int GS_CORNER_KICK;
+  static const unsigned int GS_THROW_IN;
+  static const unsigned int GS_FREE_KICK;
+  static const unsigned int GS_GOAL_KICK;
+  static const unsigned int GS_HALF_TIME;
+  static const unsigned int GS_SPL_INITIAL;
+  static const unsigned int GS_SPL_READY;
+  static const unsigned int GS_SPL_SET;
+  static const unsigned int GS_SPL_PLAY;
+  static const unsigned int GS_SPL_FINISHED;
 
   typedef enum {
     TEAM_NONE,
@@ -42,8 +44,30 @@ class GameStateInterface : public Interface
     ROLE_ATTACKER
   } if_gamestate_role_t;
 
-  if_gamestate_t game_state();
-  void set_game_state(const if_gamestate_t new_game_state);
+  class SetTeamColorMessage : public Message
+  {
+    SetTeamColorMessage(if_gamestate_team_t ini_our_team);
+    SetTeamColorMessage();
+    ~SetTeamColorMessage();
+
+    if_gamestate_team_t our_team();
+    void set_our_team(const if_gamestate_team_t new_our_team);
+    int maxlenof_our_team() const;
+  };
+
+  class SetStateTeamMessage : public Message
+  {
+    SetStateTeamMessage(if_gamestate_team_t ini_state_team);
+    SetStateTeamMessage();
+    ~SetStateTeamMessage();
+
+    if_gamestate_team_t state_team();
+    void set_state_team(const if_gamestate_team_t new_state_team);
+    int maxlenof_state_team() const;
+  };
+
+  unsigned int game_state();
+  void set_game_state(const unsigned int new_game_state);
   int maxlenof_game_state() const;
   if_gamestate_team_t state_team();
   void set_state_team(const if_gamestate_team_t new_state_team);

@@ -35,6 +35,9 @@
 #include <fvutils/ipc/shm_image.h>
 #include <fvutils/ipc/shm_lut.h>
 #include <cams/factory.h>
+#include <cams/cam_exceptions.h>
+#include <cams/control/factory.h>
+#include <core/exceptions/software.h>
 
 #include <aspect/vision.h>
 
@@ -277,6 +280,34 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread,
 
   __aqts.unlock();
   return c;
+}
+
+
+CameraControl *
+FvBaseThread::register_for_camera_control(const char *camera_string,
+                                          CameraControl::TypeID type_id)
+{
+  CameraArgumentParser cap(camera_string);
+  std::string id = cap.cam_type() + "." + cap.cam_id();
+
+  CameraControl *cc = NULL;
+
+  // Has this camera been loaded?
+  __aqts.lock();
+  if (__aqts.find(id) != __aqts.end()) {
+    try {
+      cc = CameraControlFactory::instance(type_id, __aqts[id]->get_camera());
+    } catch (Exception &e) {
+      __aqts.unlock();
+      throw;
+    }
+  } else {
+    cc = CameraControlFactory::instance(camera_string);
+  }
+  __aqts.unlock();
+
+  if (!cc) throw Exception("Requested CameraControl not available");
+  return cc;
 }
 
 

@@ -446,17 +446,16 @@ SkillerExecutionThread::loop()
       if ( m->sender_id() == excl_ctrl ) {
 	if ( curss != "" ) {
 	  logger->log_warn("SkillerExecutionThread", "More than one skill string enqueued, "
-			   "ignoring successive string (%s).", m->skill_string());
-	} else {	  
-	  logger->log_debug("SkillerExecutionThread", "%s wants me to execute '%s'",
-			    m->sender_thread_name(), m->skill_string());
-
-	  if ( __continuous_run ) {
-	    __continuous_run = false;
-	    __continuous_reset = true;
-	  }
-	  curss = m->skill_string();
+			   "ignoring previous string (%s).", curss.c_str());
 	}
+	logger->log_debug("SkillerExecutionThread", "%s wants me to execute '%s'",
+			  m->sender_thread_name(), m->skill_string());
+
+	if ( __continuous_run ) {
+	  __continuous_run = false;
+	  __continuous_reset = true;
+	}
+	curss = m->skill_string();
       } else {
 	logger->log_debug("SkillerExecutionThread", "%s tries to exec while not controller",
 			  m->sender_thread_name());

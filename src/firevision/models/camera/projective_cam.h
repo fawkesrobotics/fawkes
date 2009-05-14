@@ -35,12 +35,12 @@
 
 class AboveHorizonException : public fawkes::Exception {
   public:
-    AboveHorizonException(const char *msg, fawkes::point_t img_pt) throw();
+    AboveHorizonException(const char *msg, const center_in_roi_t img_pt) throw();
 
-    fawkes::point_t get_img_pt() const;
+    const center_in_roi_t& get_img_pt() const;
 
   private:
-    fawkes::point_t __img_pt;
+    center_in_roi_t __img_pt;
 };
 
 class ProjectiveCam
@@ -54,8 +54,8 @@ class ProjectiveCam
     virtual ProjectiveCam& set_location(const fawkes::HomTransform& loc);
     virtual ProjectiveCam& set_location(float roll, float pitch, float yaw, float height, float x = 0, float y = 0);
 
-    virtual fawkes::cart_coord_2d_t get_GPA_world_coord(const fawkes::point_t img_p) const;
-    virtual fawkes::point_t         get_GPA_image_coord(const fawkes::cart_coord_2d_t wld_p) const;
+    virtual fawkes::cart_coord_2d_t get_GPA_world_coord(const center_in_roi_t &img_p) const;
+    virtual center_in_roi_t         get_GPA_image_coord(const fawkes::cart_coord_2d_t &wld_p) const;
 
     virtual void print_info (const char* name = 0, const char *col_sep = 0, const char *row_sep = 0) const;
 

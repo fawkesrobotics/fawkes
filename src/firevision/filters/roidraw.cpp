@@ -36,15 +36,15 @@
 /** Constructor.
  * @param rois optional list of ROIs to draw additionally to the dst_roi
  */
-FilterROIDraw::FilterROIDraw(std::list<ROI> *rois)
-  : Filter("FilterROIDraw")
+FilterROIDraw::FilterROIDraw(const std::list<ROI> *rois)
+  : Filter("FilterROIDraw"),
+  __rois(rois)
 {
-  __rois = rois;
 }
 
 
 void
-FilterROIDraw::draw_roi(ROI *roi)
+FilterROIDraw::draw_roi(const ROI *roi)
 {
   // destination y-plane
   unsigned char *dyp  = dst + (roi->start.y * roi->line_step) + (roi->start.x * roi->pixel_step);
@@ -83,7 +83,7 @@ FilterROIDraw::apply()
     draw_roi(dst_roi);
   }
   if ( __rois ) {
-    for (std::list<ROI>::iterator r = __rois->begin(); r != __rois->end(); ++r) {
+    for (std::list<ROI>::const_iterator r = __rois->begin(); r != __rois->end(); ++r) {
       draw_roi(&(*r));
     }
   }
@@ -96,7 +96,7 @@ FilterROIDraw::apply()
  * @param rois list of ROIs to draw additionally to the dst_roi.
  */
 void
-FilterROIDraw::set_rois(std::list<ROI> *rois)
+FilterROIDraw::set_rois(const std::list<ROI> *rois)
 {
   __rois = rois;
 }

@@ -99,13 +99,12 @@ RefBoxStateSender::~RefBoxStateSender()
  * @param state_team team referenced by the game state
  */
 void
-RefBoxStateSender::set_gamestate(worldinfo_gamestate_t game_state,
+RefBoxStateSender::set_gamestate(int game_state,
 				 worldinfo_gamestate_team_t state_team)
 {
   if ( __debug ) {
-    printf("Setting gamestate to '%s' for team '%s'\n",
-	   worldinfo_gamestate_tostring(game_state),
-	   worldinfo_gamestate_team_tostring(state_team));
+    printf("Setting gamestate to '%d' for team '%s'\n",
+	   game_state, worldinfo_gamestate_team_tostring(state_team));
   }
 
   __game_state = game_state;
@@ -160,6 +159,22 @@ RefBoxStateSender::set_half(worldinfo_gamestate_half_t half)
 }
 
 
+/** Add penalty.
+ * @param player number of the player to add the penalty for
+ * @param penalty penalty code
+ * @param seconds_remaining estimated time when the penalty will be lifted
+ */
+void
+RefBoxStateSender::add_penalty(unsigned int player, unsigned int penalty,
+			       unsigned int seconds_remaining)
+{
+  rss_penalty_t p;
+  p.player            = player;
+  p.penalty           = penalty;
+  p.seconds_remaining = seconds_remaining;
+}
+
+
 /** Send worldinfo. */
 void
 RefBoxStateSender::send()
@@ -191,6 +206,11 @@ RefBoxStateSender::execute_send()
     __transceiver->set_score(__score_cyan, __score_magenta);
     __transceiver->set_team_goal(__our_team, __our_goal_color);
     __transceiver->set_half(__half);
+    for (__pit = __penalties.begin(); __pit != __penalties.end(); ++__pit) {
+      __transceiver->add_penalty(__pit->second.player, __pit->second.penalty,
+				 __pit->second.seconds_remaining);
+    }
+    __penalties.clear();
     __transceiver->send();
   }
 }

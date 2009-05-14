@@ -45,11 +45,11 @@ class JoystickInterface : public Interface
   unsigned int pressed_buttons();
   void set_pressed_buttons(const unsigned int new_pressed_buttons);
   int maxlenof_pressed_buttons() const;
-  float * axis_x();
-  void set_axis_x(const float * new_axis_x);
+  float axis_x(int index);
+  void set_axis_x(unsigned int index, const float new_axis_x);
   int maxlenof_axis_x() const;
-  float * axis_y();
-  void set_axis_y(const float * new_axis_y);
+  float axis_y(int index);
+  void set_axis_y(unsigned int index, const float new_axis_y);
   int maxlenof_axis_y() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;

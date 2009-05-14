@@ -627,6 +627,7 @@ V4L2Camera::select_format()
   //LibLogger::log_debug("V4L2Cam", "setting %dx%d (%s) - type %d", _width, _height, fourcc, format.type);
 
   format.fmt.pix.pixelformat = v4l2_fourcc(fourcc[0], fourcc[1], fourcc[2], fourcc[3]);
+  format.fmt.pix.field       = V4L2_FIELD_ANY;
   if (_width)
     format.fmt.pix.width = _width;
   if (_height)
@@ -634,7 +635,11 @@ V4L2Camera::select_format()
 
   if (ioctl(_dev, VIDIOC_S_FMT, &format))
   {
-    /* Nao workaround (Hack alert) */
+    //throw Exception(errno, "Failed to set video format");
+    //}
+
+    /* According to nao cam driver source code, G/S_STD isn't supported */
+    // Nao workaround (Hack alert)
     LibLogger::log_warn("V4L2Cam", "Format setting failed (driver sucks) - %d: %s", errno, strerror(errno));
     LibLogger::log_info("V4L2Cam", "Trying workaround");
     _nao_hacks = true;
@@ -648,11 +653,11 @@ V4L2Camera::select_format()
 
     if ((_width == 320) && (_height == 240))
     {
-      std = 0x04000000UL; /*QVGA*/
+      std = 0x04000000UL; // QVGA
     }
     else
     {
-      std = 0x08000000UL; /*VGA*/
+      std = 0x08000000UL; // VGA
       _width = 640;
       _height = 480;
     }
@@ -662,9 +667,10 @@ V4L2Camera::select_format()
       throw Exception("V4L2Cam: Standard setting (workaround) failed");
     }
 
-    format.fmt.pix.width = _width;
-    format.fmt.pix.height = _height;
+    format.fmt.pix.width       = _width;
+    format.fmt.pix.height      = _height;
     format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+    format.fmt.pix.field       = V4L2_FIELD_ANY;
 
     if (ioctl(_dev, VIDIOC_S_FMT, &format))
     {
@@ -686,7 +692,7 @@ V4L2Camera::select_format()
     if (strcmp(_format, "RGB3") == 0) _colorspace = RGB;
     else if (strcmp(_format, "Y41P") == 0) _colorspace = YUV411_PACKED; //different byte ordering
     else if (strcmp(_format, "411P") == 0) _colorspace = YUV411_PLANAR;
-    else if (strcmp(_format, "YUYV") == 0) _colorspace= YUY2;
+    else if (strcmp(_format, "YUYV") == 0) _colorspace = YUY2;
     else if (strcmp(_format, "BGR3") == 0) _colorspace = BGR;
     else if (strcmp(_format, "UYVY") == 0) _colorspace = YUV422_PACKED;
     else if (strcmp(_format, "422P") == 0) _colorspace = YUV422_PLANAR;
@@ -739,16 +745,18 @@ V4L2Camera::set_fps()
   param.parm.capture.timeperframe.numerator = 1;
   param.parm.capture.timeperframe.denominator = _fps;
   param.parm.capture.capability = V4L2_CAP_TIMEPERFRAME;
-  if (ioctl(_dev, VIDIOC_S_PARM, &param));
+  if (ioctl(_dev, VIDIOC_S_PARM, &param))
   {
     //close();
     //throw Exception("V4L2Cam: Streaming parameter setting failed");
     LibLogger::log_warn("V4L2Cam", "Streaming parameter setting failed - %d: %2", errno, strerror(errno));
   }
-
-  LibLogger::log_debug("V4L2Cam", "FPS set - %d/%d",
-                      param.parm.capture.timeperframe.numerator,
-                      param.parm.capture.timeperframe.denominator);
+  else
+  {
+    LibLogger::log_debug("V4L2Cam", "FPS set - %d/%d",
+			 param.parm.capture.timeperframe.numerator,
+			 param.parm.capture.timeperframe.denominator);
+  }
 }
 
 /**
@@ -834,7 +842,7 @@ V4L2Camera::set_controls()
 
   if (_gain.set)
   {
-    LibLogger::log_debug("V4L2Cam", "Setting exposure to %d", _gain.value);
+    LibLogger::log_debug("V4L2Cam", "Setting gain to %d", _gain.value);
     set_one_control("gain", V4L2_CID_GAIN, _gain.value);
   }
 
@@ -1295,6 +1303,90 @@ V4L2Camera::set_image_number(unsigned int n)
 
   /* not needed */
 }
+
+
+/* --- CameraControls --- */
+/*
+void
+V4L2Camera::set_auto_gain(bool enabled)
+{
+  LibLogger::log_debug("V4L2Cam", (enabled ? "enabling AGC" : "disabling AGC"));
+  set_one_control("AGC", V4L2_CID_AUTOGAIN, (enabled ? 1 : 0));
+}
+
+void
+V4L2Camera::set_auto_white_balance(bool enabled)
+{
+  LibLogger::log_debug("V4L2Cam", (enabled ? "enabling AWB" : "disabling AWB"));
+  set_one_control("AWB", V4L2_CID_AUTO_WHITE_BALANCE, (enabled ? 1 : 0));
+}
+
+void
+V4L2Camera::set_auto_exposure(bool enabled)
+{
+  LibLogger::log_debug("V4L2Cam", (enabled ? "enabling AEC" : "disabling AEC"));
+  if (!_nao_hacks) LibLogger::log_warn("V4L2Cam", "AEC toggling will only work on Nao");
+
+  set_one_control("AEC", V4L2_CID_AUDIO_MUTE, //<- this is why it will only work on Naos ;)
+                  (enabled ? 1 : 0));
+}
+
+void
+V4L2Camera::set_red_balance(int red_balance)
+{
+  LibLogger::log_debug("V4L2Cam", "Setting red balance to %d", red_balance);
+  set_one_control("red balance", V4L2_CID_RED_BALANCE, red_balance);
+}
+
+void
+V4L2Camera::set_blue_balance(int blue_balance)
+{
+  LibLogger::log_debug("V4L2Cam", "Setting blue balance to %d", blue_balance);
+  set_one_control("blue balance", V4L2_CID_BLUE_BALANCE, blue_balance);
+}
+
+void
+V4L2Camera::set_brightness(unsigned int brightness)
+{
+  LibLogger::log_debug("V4L2Cam", "Setting brighness to %d", brightness);
+  set_one_control("brightness", V4L2_CID_BRIGHTNESS, brightness);
+}
+
+void
+V4L2Camera::set_contrast(unsigned int contrast)
+{
+  LibLogger::log_debug("V4L2Cam", "Setting contrast to %d", contrast);
+  set_one_control("contrast", V4L2_CID_CONTRAST, contrast);
+}
+
+void
+V4L2Camera::set_saturation(unsigned int saturation)
+{
+  LibLogger::log_debug("V4L2Cam", "Setting saturation to %d", saturation);
+  set_one_control("saturation", V4L2_CID_SATURATION, saturation);
+}
+
+void
+V4L2Camera::set_hue(int hue)
+{
+  LibLogger::log_debug("V4L2Cam", "Setting hue to %d", hue);
+  set_one_control("hue", V4L2_CID_HUE, hue);
+}
+
+void
+V4L2Camera::set_exposure(unsigned int exposure)
+{
+  LibLogger::log_debug("V4L2Cam", "Setting exposure to %d", exposure);
+  set_one_control("exposure", V4L2_CID_EXPOSURE, exposure);
+}
+
+void
+V4L2Camera::set_gain(unsigned int gain)
+{
+  LibLogger::log_debug("V4L2Cam", "Setting gain to %u", gain);
+  set_one_control("gain", V4L2_CID_GAIN, gain);
+}
+*/
 
 void
 V4L2Camera::print_info()

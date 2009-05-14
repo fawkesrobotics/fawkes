@@ -71,6 +71,15 @@ using namespace fawkes;
  * restarted the camera does not have to be re-opened. The time to wait is
  * defined by the implementation.
  * @param thread thread to unregister
+ * 
+ * @fn CameraControl * VisionMaster::register_for_camera_control(const char *camera_string, CameraControl::TypeID type_id)
+ * Retrieve a certain CameraControl for the specified Camera.
+ * This control (if available) can be used to control certain aspects of the Camera.
+ * @param camera_string Camera whose CameraControl shall be returned
+ * @param type_id ID of the type of CameraControl which shall be returned
+ * @return a pointer to the requested CameraControl.
+ * @throws NotImplementedException This Camera doesn't implement the requested type of control
+ * @throws UnknownCameraException Unknown Camera (Camera has not been loaded through register_for_camera)
  */
 
 /** Virtual empty destructor. */

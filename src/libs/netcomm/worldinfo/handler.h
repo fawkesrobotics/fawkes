@@ -67,12 +67,17 @@ class WorldInfoHandler
   virtual void opponent_disapp_rcvd(const char *from_host, unsigned int uid)    = 0;
 
   virtual void gamestate_rcvd(const char *from_host,
-			      worldinfo_gamestate_t game_state,
+			      unsigned int game_state,
 			      worldinfo_gamestate_team_t state_team,
 			      unsigned int score_cyan, unsigned int score_magenta,
 			      worldinfo_gamestate_team_t our_team,
 			      worldinfo_gamestate_goalcolor_t our_goal_color,
 			      worldinfo_gamestate_half_t half)                  = 0;
+
+  virtual void penalty_rcvd(const char *from_host,
+			    unsigned int player, unsigned int penalty,
+			    unsigned int seconds_remaining)                     = 0;
+
 };
 
 } // end namespace fawkes

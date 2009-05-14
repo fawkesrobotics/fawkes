@@ -407,7 +407,7 @@ WorldModelNetworkThread::opponent_disapp_rcvd(const char *from_host, unsigned in
 
 void
 WorldModelNetworkThread::gamestate_rcvd(const char *from_host,
-					fawkes::worldinfo_gamestate_t game_state,
+					unsigned int game_state,
 					fawkes::worldinfo_gamestate_team_t state_team,
 					unsigned int score_cyan, unsigned int score_magenta,
 					fawkes::worldinfo_gamestate_team_t our_team,
@@ -479,5 +479,14 @@ WorldModelNetworkThread::gamestate_rcvd(const char *from_host,
   __gamestate_if->set_score_magenta(score_magenta);
 
   __gamestate_if->write();
+}
+
+
+void
+WorldModelNetworkThread::penalty_rcvd(const char *from_host,
+				      unsigned int player, unsigned int penalty,
+				      unsigned int seconds_remaining)
+{
+  // TBD
 }
 

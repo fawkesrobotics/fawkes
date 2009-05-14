@@ -39,6 +39,8 @@ class ColorModel
 
   virtual const char *  get_name()                        = 0;
 
+  virtual void uv_to_image(unsigned char *yuv422_planar_buffer, unsigned int y);
+
 };
 
 #endif

@@ -124,6 +124,16 @@ typedef struct arc_struct {
   float end_phi;          /**< The end angle of the arc */
 } arc_t;
 
+/** Defines a point with 6-degrees of freedom */
+typedef struct point_6D_struct {
+  float x;      /**< The x-coordinate of the point */
+  float y;      /**< The y-coordinate of the point */
+  float z;      /**< The z-coordinate of the point */
+  float roll;   /**< The angle around the x-axis */
+  float pitch;  /**< The angle around the y-axis */
+  float yaw;    /**< The angle around the z-axis */
+} point_6D_t;
+
 } // end namespace fawkes
 
 #endif

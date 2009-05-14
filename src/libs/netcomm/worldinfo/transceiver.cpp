@@ -24,6 +24,7 @@
  */
 
 #include <core/exceptions/system.h>
+#include <core/exceptions/software.h>
 
 #include <netcomm/worldinfo/transceiver.h>
 #include <netcomm/worldinfo/messages.h>
@@ -469,9 +470,12 @@ WorldInfoTransceiver::set_glob_ball_velocity(float vel_x, float vel_y, float vel
  * @param state_team team referenced by the game state
  */
 void
-WorldInfoTransceiver::set_gamestate(worldinfo_gamestate_t gamestate,
+WorldInfoTransceiver::set_gamestate(int gamestate,
 				    worldinfo_gamestate_team_t state_team)
 {
+  if ((gamestate < 0) || (gamestate >= 16)) {
+    throw OutOfBoundsException("Illegal gamestate", gamestate, 0, 15);
+  }
   gamestate_msg.game_state = gamestate;
   gamestate_msg.state_team = state_team;
   gamestate_changed = true;
@@ -490,6 +494,23 @@ WorldInfoTransceiver::set_score(unsigned int score_cyan, unsigned int score_mage
   gamestate_changed = true;
 }
 
+
+/** Add penalty message.
+ * @param player player for which the penalty applies
+ * @param penalty penalty code
+ * @param seconds_remaining estimated time in seconds until the penalty is lifted
+ */
+void
+WorldInfoTransceiver::add_penalty(unsigned int player, unsigned int penalty,
+				  unsigned int seconds_remaining)
+{
+  worldinfo_penalty_message_t pm;
+  pm.reserved = 0;
+  pm.player = player;
+  pm.penalty = penalty;
+  pm.seconds_remaining = seconds_remaining;
+  penalties[player] = pm;
+}
 
 /** Set team and goal info.
  * @param our_team our team color
@@ -748,6 +769,13 @@ WorldInfoTransceiver::send()
 
     append_outbound(WORLDINFO_MSGTYPE_GLOBBALLVELO, &rbvm, sizeof(rbvm));
   }
+
+  // Append penalties
+  for (penit = penalties.begin(); penit != penalties.end(); ++penit) {
+    append_outbound(WORLDINFO_MSGTYPE_PENALTY,
+		    &(penit->second), sizeof(worldinfo_penalty_message_t));
+  }
+  penalties.clear();
 
   // Append opponents
   unsigned int num_opponents = 0;
@@ -1041,7 +1069,7 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  worldinfo_gamestate_message_t *gs_msg = (worldinfo_gamestate_message_t *)inbound_buffer;
 	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
 	    (*hit)->gamestate_rcvd(hostname,
-				   (worldinfo_gamestate_t)gs_msg->game_state,
+				   gs_msg->game_state,
 				   (worldinfo_gamestate_team_t)gs_msg->state_team,
 				   gs_msg->score_cyan, gs_msg->score_magenta,
 				   (worldinfo_gamestate_team_t)gs_msg->our_team,
@@ -1052,6 +1080,21 @@ WorldInfoTransceiver::recv(bool block, unsigned int max_num_msgs)
 	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid gamestate message received "
 			      "(got %zu bytes but expected %zu bytes), ignoring",
 			      msg_size, sizeof(worldinfo_gamestate_message_t));
+	}
+	break;
+
+      case WORLDINFO_MSGTYPE_PENALTY:
+	if ( msg_size == sizeof(worldinfo_penalty_message_t) ) {
+	  worldinfo_penalty_message_t *p_msg = (worldinfo_penalty_message_t *)inbound_buffer;
+	  for ( hit = handlers.begin(); hit != handlers.end(); ++hit ) {
+	    (*hit)->penalty_rcvd(hostname,
+				 p_msg->player, p_msg->penalty, p_msg->seconds_remaining);
+	  }
+
+	} else {
+	  LibLogger::log_warn("WorldInfoTransceiver", "Invalid penalty message received "
+			      "(got %zu bytes but expected %zu bytes), ignoring",
+			      msg_size, sizeof(worldinfo_penalty_message_t));
 	}
 	break;
 

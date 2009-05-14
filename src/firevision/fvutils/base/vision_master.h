@@ -27,10 +27,12 @@
 #define __FIREVISION_FVUTILS_BASE_VISION_MASTER_H_
 
 #include <fvutils/color/colorspaces.h>
+#include <cams/control/control.h>
 
 class Camera;
 namespace fawkes {
   class Thread;
+  class TypeMismatchException;
 }
 
 class VisionMaster
@@ -42,8 +44,29 @@ class VisionMaster
 					fawkes::Thread *thread,
 					colorspace_t cspace = YUV422_PLANAR) = 0;
   virtual void      unregister_thread(fawkes::Thread *thread)                = 0;
+
+  virtual CameraControl *register_for_camera_control(const char *camera_string,
+                                                     CameraControl::TypeID type_id) = 0;
+
+ /** Retrieve a typed instance of a certain CameraControl for the specified Camera.
+  * Creates a new instance and converts it to the requested type. If the type
+  * does not match the requested camera control an exception is thrown.
+  * This control (if available) can be used to control certain aspects of the Camera.
+  * @param camera_string Camera whose CameraControl shall be returned
+  * @return typed camera control instance
+  * @exception TypeMismatchException thrown if requested camera control does not match
+  * requested type.
+  */
+  template <class CC>
+  CC *register_for_camera_control(const char *camera_string);
 };
 
-
+template <class CC>
+CC *
+VisionMaster::register_for_camera_control(const char *camera_string)
+{
+  // register_for_camera_control already checks for correct type
+  return 0; //dynamic_cast<CC *>(register_for_camera_control(camera_string, CC::TYPE_ID));
+}
 
 #endif

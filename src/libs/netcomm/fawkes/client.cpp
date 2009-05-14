@@ -257,11 +257,13 @@ class FawkesNetworkClientRecvThread : public Thread
 /** Constructor.
  * @param hostname remote host to connect to.
  * @param port port to connect to.
+ * @param ip optional: use ip to connect, and hostname for cosmetic purposes
  */
-FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short int port)
+FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short int port, const char *ip)
 {
-  this->hostname = strdup(hostname);
-  this->port     = port;
+  __hostname = strdup(hostname);
+  __ip = ip ? strdup(ip) : NULL;
+  __port     = port;
 
   s = NULL;
   __send_slave = NULL;
@@ -290,8 +292,9 @@ FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short in
  */
 FawkesNetworkClient::FawkesNetworkClient()
 {
-  this->hostname = NULL;
-  this->port     = 0;
+  __hostname = NULL;
+  __ip = NULL;
+  __port     = 0;
 
   s = NULL;
   __send_slave = NULL;
@@ -318,12 +321,14 @@ FawkesNetworkClient::FawkesNetworkClient()
  * @param id id of the client.
  * @param hostname remote host to connect to.
  * @param port port to connect to.
+ * @param ip optional: use ip to connect, and hostname for cosmetic purposes
  */
 FawkesNetworkClient::FawkesNetworkClient(unsigned int id, const char *hostname,
-					 unsigned short int port)
+                                         unsigned short int port, const char *ip)
 {
-  this->hostname = strdup(hostname);
-  this->port     = port;
+  __hostname = strdup(hostname);
+  __ip = ip ? strdup(ip) : NULL;
+  __port     = port;
 
   s = NULL;
   __send_slave = NULL;
@@ -356,7 +361,8 @@ FawkesNetworkClient::~FawkesNetworkClient()
   }
   waitconds.clear();
   delete s;
-  if (hostname) free(hostname);
+  if (__hostname) free(__hostname);
+  if (__ip) free(__ip);
   delete slave_status_mutex;
 
   delete __connest_waitcond;
@@ -372,7 +378,7 @@ FawkesNetworkClient::~FawkesNetworkClient()
 void
 FawkesNetworkClient::connect()
 {
-  if ( hostname == NULL ) {
+  if ( __hostname == NULL && __ip == NULL) {
     throw NullPointerException("Hostname not set. Cannot connect.");
   }
 
@@ -385,7 +391,7 @@ FawkesNetworkClient::connect()
 
   try {
     s = new StreamSocket();
-    s->connect(hostname, port);
+    s->connect(__ip ? __ip : __hostname, __port);
     __send_slave = new FawkesNetworkClientSendThread(s, this);
     __send_slave->start();
     __recv_slave = new FawkesNetworkClientRecvThread(s, this, __recv_mutex);
@@ -435,9 +441,24 @@ FawkesNetworkClient::connect()
 void
 FawkesNetworkClient::connect(const char *hostname, unsigned short int port)
 {
-  if (this->hostname)  free(this->hostname);
-  this->hostname = strdup(hostname);
-  this->port = port;
+  connect(hostname, NULL, port);
+}
+
+/** Connect to new ip and port, and set hostname.
+ * @param hostname remote host name
+ * @param ip new ip to connect to
+ * @param port new port to connect to
+ * @see connect() Look there for more documentation and notes about possible
+ * exceptions.
+ */
+void
+FawkesNetworkClient::connect(const char *hostname, const char *ip, unsigned short int port)
+{
+  if (__hostname)  free(__hostname);
+  if (__ip) free(__ip);
+  __hostname = strdup(hostname);
+  __ip = ip ? strdup(ip) : NULL;
+  __port = port;
   connect();
 }
 
@@ -708,6 +729,24 @@ FawkesNetworkClient::id() const
   }
 
   return _id;
+}
+
+/** Get the client's hostname
+ * @return hostname or NULL
+ */
+const char *
+FawkesNetworkClient::get_hostname() const
+{
+  return __hostname;
+}
+
+/** Get the client's ip
+ * @return ip or NULL
+ */
+const char *
+FawkesNetworkClient::get_ip() const
+{
+  return __ip;
 }
 
 } // end namespace fawkes

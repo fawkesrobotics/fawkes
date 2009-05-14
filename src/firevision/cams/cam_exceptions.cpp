@@ -69,3 +69,50 @@ CaptureException::CaptureException(const char *format, ...)
   append_va(format, va);
   va_end(va);
 }
+
+
+/** @class UnknownCameraTypeException <cams/cam_exceptions.h>
+ * Unknown camera type exception.
+ * Thrown if the requested camera has not been recognized or the needed
+ * libraries were not available at compile time.
+ */
+
+/** Constructor.
+ * @param msg optional extra message
+ */
+UnknownCameraTypeException::UnknownCameraTypeException(const char *msg)
+  : Exception("Unknown camera type")
+{
+  append(msg);
+}
+
+
+/** @class UnknownCameraException <cams/cam_exceptions.h>
+ * Unknown camera exception.
+ * Thrown if the requested camera is not available.
+ */
+
+/** Constructor.
+ * @param msg optional extra message
+ */
+UnknownCameraException::UnknownCameraException(const char *msg)
+  : Exception("Unknown camera")
+{
+  append(msg);
+}
+
+
+/** @class UnknownCameraControlTypeException <cams/cam_exceptions.h>
+ * Unknown camera control exception.
+ * Thrown if the requested camera control has not been recognized or the needed
+ * libraries were not available at compile time.
+ */
+
+/** Constructor.
+ * @param msg optional extra message
+ */
+UnknownCameraControlTypeException::UnknownCameraControlTypeException(const char *msg)
+  : Exception("Unknown camera control type")
+{
+  append(msg);
+}

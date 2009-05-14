@@ -185,7 +185,11 @@ end
 --- Set change state of FSM.
 -- @param changed true to mark FSM as changed, false otherwise
 function FSM:set_changed(changed)
-   self.state_changed = changed ~= nil and changed or true
+   if changed ~= nil then
+      self.state_changed = changed
+   else
+      self.state_changed = true
+   end
 end
 
 --- Convenience method to create a new state.

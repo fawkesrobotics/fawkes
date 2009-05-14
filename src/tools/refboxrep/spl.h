@@ -28,6 +28,7 @@
 #include "refbox_state_sender.h"
 #include <cstdlib>
 #include <stdint.h>
+#include <map>
 
 namespace fawkes {
   class DatagramSocket;
@@ -39,7 +40,7 @@ namespace fawkes {
 /** SPL RefBox protocol robot info struct. */
 typedef struct {
   uint16_t penalty;               /**< penalty state of the player */
-  uint16_t secs_till_unpenalised; /**< estimate of time till unpenalised */
+  uint16_t secs_till_unpenalized; /**< estimate of time till unpenalised */
 } spl_robotinfo_t;
 
 /** SPL RefBox protocol team info struct. */
@@ -70,7 +71,9 @@ class SplRefBoxRepeater
 {
  public:
   SplRefBoxRepeater(RefBoxStateSender &rss,
-		    const char *broadcast_ip, unsigned short int broadcast_port);
+		    const char *broadcast_ip, unsigned short int broadcast_port,
+		    fawkes::worldinfo_gamestate_team_t our_team,
+		    fawkes::worldinfo_gamestate_goalcolor_t our_goal);
   ~SplRefBoxRepeater();
 
   void run();
@@ -85,6 +88,10 @@ class SplRefBoxRepeater
   fawkes::DatagramSocket *__s;
 
   bool __quit;
+  std::map<unsigned int, unsigned int> __penalties;
+
+  fawkes::worldinfo_gamestate_team_t      __our_team;
+  fawkes::worldinfo_gamestate_goalcolor_t __our_goal;
 };
 
 #endif

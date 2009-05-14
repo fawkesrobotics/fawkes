@@ -70,6 +70,8 @@ class FvBaseThread
 					colorspace_t cspace = YUV422_PLANAR);
   virtual void      unregister_thread(fawkes::Thread *thread);
 
+  virtual CameraControl *register_for_camera_control(const char *camera_string,
+                                                     CameraControl::TypeID type_id);
   virtual bool thread_started(fawkes::Thread *thread) throw();
   virtual bool thread_init_failed(fawkes::Thread *thread) throw();
 

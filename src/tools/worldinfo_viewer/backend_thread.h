@@ -88,12 +88,16 @@ class WorldInfoViewerBackendThread
   virtual void opponent_disapp_rcvd( const char *from_host, unsigned int uid );
 
   virtual void gamestate_rcvd( const char *from_host,
-			       fawkes::worldinfo_gamestate_t game_state, 
+			       unsigned int game_state, 
 			       fawkes::worldinfo_gamestate_team_t state_team, 
 			       unsigned int score_cyan, unsigned int score_magenta, 
 			       fawkes::worldinfo_gamestate_team_t our_team, 
 			       fawkes::worldinfo_gamestate_goalcolor_t our_goal_color,
 			       fawkes::worldinfo_gamestate_half_t half );
+
+  virtual void penalty_rcvd(const char *from_host,
+			    unsigned int player, unsigned int penalty,
+			    unsigned int seconds_remaining);
 
  private:
   fawkes::WorldInfoTransceiver*   m_transceiver;

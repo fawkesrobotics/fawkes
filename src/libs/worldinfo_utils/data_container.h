@@ -51,7 +51,7 @@ class WorldInfoDataContainer
   /** Container struct for momentary game state infos. */
   struct GameState
   {
-    worldinfo_gamestate_t game_state;       /**< current game state */
+    int game_state;       /**< current game state */
     worldinfo_gamestate_team_t state_team;  /**< team association of the game state */
     unsigned int score_cyan;                /**< socre of the cyan-colored team */
     unsigned int score_magenta;             /**< score of the magenta-colored team */
@@ -103,7 +103,7 @@ class WorldInfoDataContainer
 			 std::map<unsigned int, HomPoint>& opp_positions );
 
   // gamestate
-  void set_game_state( worldinfo_gamestate_t game_state,
+  void set_game_state( int game_state,
 		       worldinfo_gamestate_team_t state_team,
 		       unsigned int score_cyan,
 		       unsigned int score_magenta,

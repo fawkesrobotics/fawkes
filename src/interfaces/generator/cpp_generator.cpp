@@ -764,6 +764,33 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	    inclusion_prefix.c_str(), classname.c_str(), ( ((*i).getType() == "bool" ) ? "is_" : ""), (*i).getName().c_str(),
 	    (*i).getName().c_str() );
 
+    if ( (i->getLengthValue() > 0) && (i->getType() != "char") ) {
+      fprintf(f,
+	      "/** Get %s value at given index.\n"
+	      " * %s\n"
+	      " * @param index index of value\n"
+	      " * @return %s value\n"
+	      " * @exception Exception thrown if index is out of bounds\n"
+	      " */\n"
+	      "%s%s\n"
+	      "%s%s::%s%s(unsigned int index) const\n"
+	      "{\n"
+	      "  if (index > %s) {\n"
+	      "    throw Exception(\"Index value %%u out of bounds (0..%s)\", index);\n"
+	      "  }\n"
+	      "  return data->%s[index];\n"
+	      "}\n\n",
+	      (*i).getName().c_str(),
+	      (*i).getComment().c_str(),
+	      (*i).getName().c_str(),
+	      (*i).isEnumType() ? (interface_classname + "::").c_str() : "",
+	      (*i).getPlainAccessType().c_str(),
+	      inclusion_prefix.c_str(), classname.c_str(),
+	      ( ((*i).getType() == "bool" ) ? "is_" : ""), (*i).getName().c_str(),
+	      i->getLength().c_str(), i->getLength().c_str(),
+	      (*i).getName().c_str() );
+    }
+
     fprintf(f,
 	    "/** Get maximum length of %s value.\n"
 	    " * @return length of %s value, can be length of the array or number of \n"
@@ -806,6 +833,30 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	      (*i).getName().c_str(), (*i).getName().c_str());
     }
     fprintf(f, "}\n\n");
+
+    if ( ((*i).getType() != "char") && ((*i).getLengthValue() > 0) ) {
+      fprintf(f,
+	      "/** Set %s value at given index.\n"
+	      " * %s\n"
+	      " * @param new_%s new %s value\n"
+	      " * @param index index for of the value\n"
+	      " */\n"
+	      "void\n"
+	      "%s%s::set_%s(unsigned int index, const %s new_%s)\n"
+	      "{\n"
+	      "  if (index > %s) {\n"
+	      "    throw Exception(\"Index value %%u out of bounds (0..%s)\", index);\n"
+	      "  }\n"
+	      "  data->%s[index] = new_%s;\n"
+	      "}\n",
+	      (*i).getName().c_str(),
+	      (*i).getComment().c_str(),	    
+	      (*i).getName().c_str(), (*i).getName().c_str(),
+	      inclusion_prefix.c_str(), classname.c_str(), (*i).getName().c_str(),
+	      (*i).getPlainAccessType().c_str(), i->getName().c_str(),
+	      i->getLength().c_str(), i->getLength().c_str(),
+	      i->getName().c_str(), i->getName().c_str());
+    }
   }
 }
 
@@ -901,12 +952,25 @@ CppInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ i
   fprintf(f, "%s/* Methods */\n", is.c_str());
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
     fprintf(f,
-	    "%s%s %s%s() const;\n"
-	    "%svoid set_%s(const %s new_%s);\n"
-	    "%ssize_t maxlenof_%s() const;\n",
+	    "%s%s %s%s() const;\n",
 	    is.c_str(), (*i).getAccessType().c_str(),
 	    ( ((*i).getType() == "bool" ) ? "is_" : ""),
-	    (*i).getName().c_str(),
+	    (*i).getName().c_str());
+
+    if ((i->getLengthValue() > 0) && (i->getType() != "char")) {
+      fprintf(f,
+	      "%s%s %s%s(unsigned int index) const;\n"
+	      "%svoid set_%s(unsigned int index, const %s new_%s);\n",
+	      is.c_str(), i->getPlainAccessType().c_str(),
+	      ( ((*i).getType() == "bool" ) ? "is_" : ""),
+	      (*i).getName().c_str(),
+	      is.c_str(), (*i).getName().c_str(),
+	      i->getPlainAccessType().c_str(), i->getName().c_str());
+    }
+
+    fprintf(f,
+	    "%svoid set_%s(const %s new_%s);\n"
+	    "%ssize_t maxlenof_%s() const;\n",
 	    is.c_str(), (*i).getName().c_str(),
 	    i->getAccessType().c_str(), i->getName().c_str(),
 	    is.c_str(), i->getName().c_str()

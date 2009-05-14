@@ -28,7 +28,7 @@ ifneq ($(HAVE_SHAPE_MODELS),1)
   MODELS_FILTEROUT += shape/%
 endif
 
-OBJS_libfvmodels := $(patsubst %.cpp,%.o,$(filter-out $(MODELS_FILTEROUT),$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
+OBJS_libfvmodels := $(patsubst %.cpp,%.o,$(filter-out $(MODELS_FILTEROUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 LIBS_libfvmodels := fawkesutils fvutils fvclassifiers fawkesgeometry
 
 OBJS_all = $(OBJS_libfvmodels)

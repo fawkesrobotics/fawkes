@@ -59,22 +59,6 @@
 
 using namespace std;
 
-/** @class UnknownCameraTypeException factory.h <cams/factory.h>
- * Unknown camera exception.
- * Thrown if the requested camera has not been recognized or the needed
- * libraries were not available at compile time.
- */
-
-/** Constructor.
- * @param msg optional extra message
- */
-UnknownCameraTypeException::UnknownCameraTypeException(const char *msg)
-  : Exception("Unknown camera type")
-{
-  append(msg);
-}
-
-
 /** @class CameraFactory factory.h <cams/factory.h>
  * Camera factory.
  * This camera factory provides access to all cameras in a unified way. You just

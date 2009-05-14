@@ -73,6 +73,23 @@ Laser360Interface::distances() const
   return data->distances;
 }
 
+/** Get distances value at given index.
+ * 
+      The distances in meter of the beams.
+    
+ * @param index index of value
+ * @return distances value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+Laser360Interface::distances(unsigned int index) const
+{
+  if (index > 360) {
+    throw Exception("Index value %u out of bounds (0..360)", index);
+  }
+  return data->distances[index];
+}
+
 /** Get maximum length of distances value.
  * @return length of distances value, can be length of the array or number of 
  * maximum number of characters for a string
@@ -95,6 +112,21 @@ Laser360Interface::set_distances(const float * new_distances)
   memcpy(data->distances, new_distances, sizeof(float) * 360);
 }
 
+/** Set distances value at given index.
+ * 
+      The distances in meter of the beams.
+    
+ * @param new_distances new distances value
+ * @param index index for of the value
+ */
+void
+Laser360Interface::set_distances(unsigned int index, const float new_distances)
+{
+  if (index > 360) {
+    throw Exception("Index value %u out of bounds (0..360)", index);
+  }
+  data->distances[index] = new_distances;
+}
 /* =========== message create =========== */
 Message *
 Laser360Interface::create_message(const char *type) const

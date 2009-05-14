@@ -35,7 +35,7 @@ local grapher  = require("fawkes.fsm.grapher")
 
 local agent = nil
 
-local graphing_enabled = false
+local graphing_enabled = true
 
 --- Initialize agent module.
 -- Exports some basic features like AgentHSM, SkillQueue, JumpState etc.
@@ -47,6 +47,7 @@ function module_init(m)
    m.SkillQueue = skqmod.SkillQueue
    m.State      = fsmstmod.State
    m.JumpState  = fsmjsmod.JumpState
+   m.config     = config
 
    for k,v in pairs(skillstati) do
       if string.match(k, "^S_([%a_]+)$") then m[k] = v end

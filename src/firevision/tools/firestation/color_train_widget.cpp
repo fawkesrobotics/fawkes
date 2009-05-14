@@ -507,6 +507,13 @@ ColorTrainWidget::add_to_colormap()
 void
 ColorTrainWidget::reset_colormap()
 {
+  Gtk::MessageDialog dialog(*m_wnd_parent, "Are you sure you want to reset the colormap?",
+                            false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
+
+  int result = dialog.run();
+
+  if (result != Gtk::RESPONSE_OK) return;
+
   if (m_generator)
     {
       m_generator->reset();

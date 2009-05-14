@@ -534,6 +534,25 @@ ObjectPositionInterface::dbs_covariance() const
   return data->dbs_covariance;
 }
 
+/** Get dbs_covariance value at given index.
+ * 
+      Covariance of Distance/Yaw/Pitch values. This is a 3x3 matrix ordered line by line,
+      first three values represent row, next tree values second row and last three values
+      last row from left to right each.
+    
+ * @param index index of value
+ * @return dbs_covariance value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+ObjectPositionInterface::dbs_covariance(unsigned int index) const
+{
+  if (index > 9) {
+    throw Exception("Index value %u out of bounds (0..9)", index);
+  }
+  return data->dbs_covariance[index];
+}
+
 /** Get maximum length of dbs_covariance value.
  * @return length of dbs_covariance value, can be length of the array or number of 
  * maximum number of characters for a string
@@ -558,6 +577,23 @@ ObjectPositionInterface::set_dbs_covariance(const float * new_dbs_covariance)
   memcpy(data->dbs_covariance, new_dbs_covariance, sizeof(float) * 9);
 }
 
+/** Set dbs_covariance value at given index.
+ * 
+      Covariance of Distance/Yaw/Pitch values. This is a 3x3 matrix ordered line by line,
+      first three values represent row, next tree values second row and last three values
+      last row from left to right each.
+    
+ * @param new_dbs_covariance new dbs_covariance value
+ * @param index index for of the value
+ */
+void
+ObjectPositionInterface::set_dbs_covariance(unsigned int index, const float new_dbs_covariance)
+{
+  if (index > 9) {
+    throw Exception("Index value %u out of bounds (0..9)", index);
+  }
+  data->dbs_covariance[index] = new_dbs_covariance;
+}
 /** Get world_x value.
  * 
       This is the X coordinate in the cartesian right-handed world coordinate system.
@@ -686,6 +722,25 @@ ObjectPositionInterface::world_xyz_covariance() const
   return data->world_xyz_covariance;
 }
 
+/** Get world_xyz_covariance value at given index.
+ * 
+      Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
+      first three values represent row, next tree values second row and last three values
+      last row from left to right each.
+    
+ * @param index index of value
+ * @return world_xyz_covariance value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+ObjectPositionInterface::world_xyz_covariance(unsigned int index) const
+{
+  if (index > 9) {
+    throw Exception("Index value %u out of bounds (0..9)", index);
+  }
+  return data->world_xyz_covariance[index];
+}
+
 /** Get maximum length of world_xyz_covariance value.
  * @return length of world_xyz_covariance value, can be length of the array or number of 
  * maximum number of characters for a string
@@ -710,6 +765,23 @@ ObjectPositionInterface::set_world_xyz_covariance(const float * new_world_xyz_co
   memcpy(data->world_xyz_covariance, new_world_xyz_covariance, sizeof(float) * 9);
 }
 
+/** Set world_xyz_covariance value at given index.
+ * 
+      Covariance of WorldX/WorldY/WorldZ values. This is a 3x3 matrix ordered line by line,
+      first three values represent row, next tree values second row and last three values
+      last row from left to right each.
+    
+ * @param new_world_xyz_covariance new world_xyz_covariance value
+ * @param index index for of the value
+ */
+void
+ObjectPositionInterface::set_world_xyz_covariance(unsigned int index, const float new_world_xyz_covariance)
+{
+  if (index > 9) {
+    throw Exception("Index value %u out of bounds (0..9)", index);
+  }
+  data->world_xyz_covariance[index] = new_world_xyz_covariance;
+}
 /** Get relative_x value.
  * 
       This is the X coordinate in the cartesian right-handed robot coordinate system.
@@ -826,6 +898,25 @@ ObjectPositionInterface::relative_xyz_covariance() const
   return data->relative_xyz_covariance;
 }
 
+/** Get relative_xyz_covariance value at given index.
+ * 
+      Covariance of relative x/y/z values. This is a 3x3 matrix ordered line by line,
+      first three values represent row, next tree values second row and last three values
+      last row from left to right each.
+    
+ * @param index index of value
+ * @return relative_xyz_covariance value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+ObjectPositionInterface::relative_xyz_covariance(unsigned int index) const
+{
+  if (index > 9) {
+    throw Exception("Index value %u out of bounds (0..9)", index);
+  }
+  return data->relative_xyz_covariance[index];
+}
+
 /** Get maximum length of relative_xyz_covariance value.
  * @return length of relative_xyz_covariance value, can be length of the array or number of 
  * maximum number of characters for a string
@@ -850,6 +941,23 @@ ObjectPositionInterface::set_relative_xyz_covariance(const float * new_relative_
   memcpy(data->relative_xyz_covariance, new_relative_xyz_covariance, sizeof(float) * 9);
 }
 
+/** Set relative_xyz_covariance value at given index.
+ * 
+      Covariance of relative x/y/z values. This is a 3x3 matrix ordered line by line,
+      first three values represent row, next tree values second row and last three values
+      last row from left to right each.
+    
+ * @param new_relative_xyz_covariance new relative_xyz_covariance value
+ * @param index index for of the value
+ */
+void
+ObjectPositionInterface::set_relative_xyz_covariance(unsigned int index, const float new_relative_xyz_covariance)
+{
+  if (index > 9) {
+    throw Exception("Index value %u out of bounds (0..9)", index);
+  }
+  data->relative_xyz_covariance[index] = new_relative_xyz_covariance;
+}
 /** Get extent_x value.
  * 
       Extent of the seen object given in the relative x cartesian coordinate in m.
@@ -1068,6 +1176,25 @@ ObjectPositionInterface::world_xyz_velocity_covariance() const
   return data->world_xyz_velocity_covariance;
 }
 
+/** Get world_xyz_velocity_covariance value at given index.
+ * 
+      Covariance of WorldX/WorldY/WorldZ velocity values. This is a 3x3 matrix ordered line
+      by line, first three values represent row, next tree values second row and last three
+      values last row from left to right each.
+    
+ * @param index index of value
+ * @return world_xyz_velocity_covariance value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+ObjectPositionInterface::world_xyz_velocity_covariance(unsigned int index) const
+{
+  if (index > 9) {
+    throw Exception("Index value %u out of bounds (0..9)", index);
+  }
+  return data->world_xyz_velocity_covariance[index];
+}
+
 /** Get maximum length of world_xyz_velocity_covariance value.
  * @return length of world_xyz_velocity_covariance value, can be length of the array or number of 
  * maximum number of characters for a string
@@ -1092,6 +1219,23 @@ ObjectPositionInterface::set_world_xyz_velocity_covariance(const float * new_wor
   memcpy(data->world_xyz_velocity_covariance, new_world_xyz_velocity_covariance, sizeof(float) * 9);
 }
 
+/** Set world_xyz_velocity_covariance value at given index.
+ * 
+      Covariance of WorldX/WorldY/WorldZ velocity values. This is a 3x3 matrix ordered line
+      by line, first three values represent row, next tree values second row and last three
+      values last row from left to right each.
+    
+ * @param new_world_xyz_velocity_covariance new world_xyz_velocity_covariance value
+ * @param index index for of the value
+ */
+void
+ObjectPositionInterface::set_world_xyz_velocity_covariance(unsigned int index, const float new_world_xyz_velocity_covariance)
+{
+  if (index > 9) {
+    throw Exception("Index value %u out of bounds (0..9)", index);
+  }
+  data->world_xyz_velocity_covariance[index] = new_world_xyz_velocity_covariance;
+}
 /** Get relative_x_velocity value.
  * 
       Velocity of object in the world coordinate system in X-direction in meter per second.
@@ -1208,6 +1352,25 @@ ObjectPositionInterface::relative_xyz_velocity_covariance() const
   return data->relative_xyz_velocity_covariance;
 }
 
+/** Get relative_xyz_velocity_covariance value at given index.
+ * 
+      Covariance of relative x/y/z velocity values. This is a 3x3 matrix ordered line
+      by line, first three values represent row, next tree values second row and last three
+      values last row from left to right each.
+    
+ * @param index index of value
+ * @return relative_xyz_velocity_covariance value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+ObjectPositionInterface::relative_xyz_velocity_covariance(unsigned int index) const
+{
+  if (index > 9) {
+    throw Exception("Index value %u out of bounds (0..9)", index);
+  }
+  return data->relative_xyz_velocity_covariance[index];
+}
+
 /** Get maximum length of relative_xyz_velocity_covariance value.
  * @return length of relative_xyz_velocity_covariance value, can be length of the array or number of 
  * maximum number of characters for a string
@@ -1232,6 +1395,23 @@ ObjectPositionInterface::set_relative_xyz_velocity_covariance(const float * new_
   memcpy(data->relative_xyz_velocity_covariance, new_relative_xyz_velocity_covariance, sizeof(float) * 9);
 }
 
+/** Set relative_xyz_velocity_covariance value at given index.
+ * 
+      Covariance of relative x/y/z velocity values. This is a 3x3 matrix ordered line
+      by line, first three values represent row, next tree values second row and last three
+      values last row from left to right each.
+    
+ * @param new_relative_xyz_velocity_covariance new relative_xyz_velocity_covariance value
+ * @param index index for of the value
+ */
+void
+ObjectPositionInterface::set_relative_xyz_velocity_covariance(unsigned int index, const float new_relative_xyz_velocity_covariance)
+{
+  if (index > 9) {
+    throw Exception("Index value %u out of bounds (0..9)", index);
+  }
+  data->relative_xyz_velocity_covariance[index] = new_relative_xyz_velocity_covariance;
+}
 /* =========== message create =========== */
 Message *
 ObjectPositionInterface::create_message(const char *type) const

@@ -297,15 +297,32 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */
 					 std::vector<InterfaceField> fields)
 {
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
+
+    if ( (i->getLengthValue() > 0) && (i->getType() != "char" ) ) {
+      fprintf(f,
+	      "%s%s %s%s(int index);\n",
+	      is.c_str(), (*i).getPlainAccessType().c_str(),
+	      ( ((*i).getType() == "bool" ) ? "is_" : ""),
+	      (*i).getName().c_str());
+
+      fprintf(f,
+	      "%svoid set_%s(unsigned int index, const %s new_%s);\n",
+	      is.c_str(), (*i).getName().c_str(),
+	      (*i).getPlainAccessType().c_str(), (*i).getName().c_str());
+    } else {
+      fprintf(f,
+	      "%s%s %s%s();\n",
+	      is.c_str(), (*i).getAccessType().c_str(),
+	      ( ((*i).getType() == "bool" ) ? "is_" : ""),
+	      (*i).getName().c_str());
+
+      fprintf(f,
+	      "%svoid set_%s(const %s new_%s);\n",
+	      is.c_str(), (*i).getName().c_str(),
+	      (*i).getAccessType().c_str(), (*i).getName().c_str());
+    }
     fprintf(f,
-	    "%s%s %s%s();\n"
-	    "%svoid set_%s(const %s new_%s);\n"
 	    "%sint maxlenof_%s() const;\n",
-	    is.c_str(), (*i).getAccessType().c_str(),
-	    ( ((*i).getType() == "bool" ) ? "is_" : ""),
-	    (*i).getName().c_str(),
-	    is.c_str(), (*i).getName().c_str(),
-	    (*i).getAccessType().c_str(), (*i).getName().c_str(),
 	    is.c_str(), (*i).getName().c_str()
 	    );
   }

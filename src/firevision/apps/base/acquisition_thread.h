@@ -65,6 +65,8 @@ class FvAcquisitionThread
   AqtMode aqtmode();
   SharedMemoryCamera *  camera_instance(colorspace_t cspace, bool deep_copy);
 
+  Camera *get_camera();
+
   void set_vt_prepfin_hold(bool hold);
   void set_enabled(bool enabled);
 

@@ -1,7 +1,0 @@
-The pling.wav and longpling.wav files are taken from the Gnome Project [1] and
-can be downloaded from [2] as info.wav and error.wav.
-
-According to gnome-audio.spec.in the files are placed in the Public Domain.
-
-[1]  http://www.gnome.org
-[2]  http://svn.gnome.org/viewvc/gnome-audio/trunk/

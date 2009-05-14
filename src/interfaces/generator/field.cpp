@@ -92,6 +92,16 @@ InterfaceField::getAccessType() const
 }
 
 
+/** Get non-array accessor type.
+ * @return accessor type
+ */
+std::string
+InterfaceField::getPlainAccessType() const
+{
+  return type;
+}
+
+
 /** Check if type is an enum type.
  * @return true if the type of this field is an enum type, false otherwise
  */

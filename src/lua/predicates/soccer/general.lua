@@ -56,7 +56,8 @@ predparams = {
    own_role = ROLE_ATTACKER,
    ball_moved_min_dist = 0.1,
    ball_moved_ref_x = 0.0,
-   ball_moved_ref_y = 0.0
+   ball_moved_ref_y = 0.0,
+   last_gamestate = gamestate.GS_SPL_INITIAL
 }
 
 function ball_visible()
@@ -69,6 +70,16 @@ end
 
 function ball_infront()
    return math.abs(wm_ball:bearing()) < predparams.ball_front_angle
+end
+
+function gamestate_changed()
+   local rv = (predparams.last_gamestate ~= gamestate:game_state())
+   predparams.last_gamestate = gamestate:game_state()
+   return rv
+end
+
+function gamestate_has_writer()
+   return gamestate:has_writer()
 end
 
 function gamestate_frozen()
@@ -109,6 +120,26 @@ end
 
 function gamestate_half_time()
    return gamestate:game_state() == gamestate.GS_HALF_TIME
+end
+
+function gamestate_spl_initial()
+   return gamestate:game_state() == gamestate.GS_SPL_INITIAL
+end
+
+function gamestate_spl_ready()
+   return gamestate:game_state() == gamestate.GS_SPL_READY
+end
+
+function gamestate_spl_set()
+   return gamestate:game_state() == gamestate.GS_SPL_SET
+end
+
+function gamestate_spl_play()
+   return gamestate:game_state() == gamestate.GS_SPL_PLAY
+end
+
+function gamestate_spl_finished()
+   return gamestate:game_state() == gamestate.GS_SPL_FINISHED
 end
 
 function gamestate_own_team()

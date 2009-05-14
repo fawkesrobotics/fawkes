@@ -35,16 +35,17 @@ namespace fawkes {
 
 /** WorldInfo message IDs. */
 typedef enum {
-  WORLDINFO_MSGTYPE_POSE           = 1,	/** Sending robot's pose */
-  WORLDINFO_MSGTYPE_VELO           = 2,	/** Sending robot's velocity */
-  WORLDINFO_MSGTYPE_RELBALL        = 3,	/** Observed relative ball position */
-  WORLDINFO_MSGTYPE_RELBALLVELO    = 4,	/** Observed relative ball velocity */
-  WORLDINFO_MSGTYPE_OPP_POSE       = 5,	/** Observed opponent pose */
-  WORLDINFO_MSGTYPE_OPP_DISAPP     = 6,	/** Observed opponent disappered */
-  WORLDINFO_MSGTYPE_FAT_WORLDINFO  = 7,	/** Fat message containing all the information, @deprecated */
-  WORLDINFO_MSGTYPE_GAMESTATE      = 8,	/** Gamestate info */
-  WORLDINFO_MSGTYPE_GLOBBALL       = 9,
-  WORLDINFO_MSGTYPE_GLOBBALLVELO   = 10
+  WORLDINFO_MSGTYPE_POSE           = 1,	/**< Sending robot's pose */
+  WORLDINFO_MSGTYPE_VELO           = 2,	/**< Sending robot's velocity */
+  WORLDINFO_MSGTYPE_RELBALL        = 3,	/**< Observed relative ball position */
+  WORLDINFO_MSGTYPE_RELBALLVELO    = 4,	/**< Observed relative ball velocity */
+  WORLDINFO_MSGTYPE_OPP_POSE       = 5,	/**< Observed opponent pose */
+  WORLDINFO_MSGTYPE_OPP_DISAPP     = 6,	/**< Observed opponent disappered */
+  WORLDINFO_MSGTYPE_FAT_WORLDINFO  = 7,	/**< Fat message containing all the information, @deprecated */
+  WORLDINFO_MSGTYPE_GAMESTATE      = 8,	/**< Gamestate info */
+  WORLDINFO_MSGTYPE_PENALTY        = 9	/**< Penalty info */
+  WORLDINFO_MSGTYPE_GLOBBALL       = 10,/**< Global ball position */
+  WORLDINFO_MSGTYPE_GLOBBALLVELO   = 11 /**< Global ball velocity */
 } worldinfo_msgid_t;
 
 
@@ -227,7 +228,9 @@ typedef struct {
  * This message is sent by the refbox repeater to indicate the current game state.
  */
 typedef struct {
-  uint32_t   game_state     : 4;	/**< Current game state, one of worldinfo_gamestate_t */
+  uint32_t   game_state     : 4;	/**< Current game state, can be freely chosen,
+					 * worldinfo_gamestate_t provides recommended
+					 * values for soccer games. */
   uint32_t   state_team     : 2;	/**< Team the game state references */
   uint32_t   score_cyan     : 8;	/**< Score of team cyan */
   uint32_t   score_magenta  : 8;	/**< Score of team magenta */
@@ -236,6 +239,17 @@ typedef struct {
   uint32_t   half           : 1;	/**< Game time half */
   uint32_t   reserved       : 6;	/**< Reserved for future use */
 } worldinfo_gamestate_message_t;
+
+/** Penalty message.
+ * This message is sent by the refbox repeater to indicate individual penalties
+ * for particular robots. This is optional and used in the SPL.
+ */
+typedef struct {
+  uint32_t   player            :  4;	/**< Number of penalized robot. */
+  uint32_t   penalty           :  6;	/**< Penalty code, cf. worldinfo_penalty_t. */
+  uint32_t   reserved          :  6;	/**< Reserved for future use. */
+  uint32_t   seconds_remaining : 16;	/**< Estimate in seconds when unpenalized. */ 
+} worldinfo_penalty_message_t;
 
 } // end namespace fawkes
 

@@ -825,7 +825,7 @@ WorldInfoDataContainer::get_opponent_pos( const char* host,
  * @param half first or second half
  */
 void
-WorldInfoDataContainer::set_game_state( worldinfo_gamestate_t game_state,
+WorldInfoDataContainer::set_game_state( int game_state,
 					worldinfo_gamestate_team_t state_team,
 					unsigned int score_cyan,
 					unsigned int score_magenta,
@@ -860,7 +860,7 @@ WorldInfoDataContainer::get_game_state_string() const
 {
   char* game_state;
   asprintf( &game_state, "%s [%s]",
-	    worldinfo_gamestate_tostring(m_game_state.game_state),
+	    worldinfo_msl_gamestate_tostring((worldinfo_msl_gamestate_t)m_game_state.game_state),
 	    worldinfo_gamestate_team_tostring(m_game_state.state_team) );
 
   string state_string(game_state);

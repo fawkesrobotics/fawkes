@@ -219,8 +219,8 @@ local function generate_dotgraph(fsm, g, subgraph_name)
 
       if state.transitions then
 	 for _, tr in ipairs(state.transitions) do
-	    if not integrated_subfsm or
-	       state.fail_to ~= tr.state.name and state.exit_to ~= tr.state.name then
+	    if not state.subfsm or not integrated_subfsm or
+	       state.final_transition ~= tr and state.failure_transition ~= tr then
 
 	       --print("*** Adding transition " .. name .. " -> " .. tr.state.name .. "(" .. tr.description .. ")")
 	       local from = is_subgraph and subgraph_name .. "_" .. name or name

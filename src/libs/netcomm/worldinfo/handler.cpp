@@ -126,7 +126,7 @@ namespace fawkes {
  * @param from_host transmitting host of this information, if available symbolic name
  * @param uid unique ID of the opponent
  *
- * @fn void WorldInfoHandler::gamestate_rcvd(const char *from_host, worldinfo_gamestate_t game_state, worldinfo_gamestate_team_t state_team, unsigned int score_cyan, unsigned int score_magenta, worldinfo_gamestate_team_t our_team, worldinfo_gamestate_goalcolor_t our_goal_color, worldinfo_gamestate_half_t half)
+ * @fn void WorldInfoHandler::gamestate_rcvd(const char *from_host, unsigned int game_state, worldinfo_gamestate_team_t state_team, unsigned int score_cyan, unsigned int score_magenta, worldinfo_gamestate_team_t our_team, worldinfo_gamestate_goalcolor_t our_goal_color, worldinfo_gamestate_half_t half)
  * Gamestate information received.
  * @param from_host transmitting host of this information, if available symbolic name
  * @param game_state current gamestate
@@ -138,6 +138,12 @@ namespace fawkes {
  * @param half current half of the game, first or second
  * @see WorldInfoTransceiver::set_gamestate()
  *
+ * @fn void WorldInfoHandler::penalty_rcvd(const char *from_host, unsigned int player, unsigned int penalty, unsigned int seconds_remaining)
+ * Penalty info received.
+ * @param from_host transmitting host of this information, if available symbolic name
+ * @param player player number for penalty info
+ * @param penalty penalty code
+ * @param seconds_remaining time in seconds when penalty is expected to be lifted
  */
 
 /** Virtual empty destructor. */

@@ -30,16 +30,11 @@
 #include <core/exceptions/software.h>
 
 #include <cams/camera.h>
+#include <cams/cam_exceptions.h>
 
 #include <cstddef>
 
 class CameraArgumentParser;
-
-class UnknownCameraTypeException : public fawkes::Exception
-{
- public:
-  UnknownCameraTypeException(const char *msg = NULL);
-};
 
 class CameraFactory
 {

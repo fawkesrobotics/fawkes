@@ -105,3 +105,45 @@
 RelativePositionModel::~RelativePositionModel()
 {
 }
+
+/** Sets the camera orientation
+ * @param pan pan value (rad)
+ * @param tilt tilt value (rad)
+ * @param roll roll value (rad)
+ */
+void
+RelativePositionModel::set_cam_rotation(float pan, float tilt, float roll)
+{
+}
+
+/** Returns the camera orientation
+ * @param pan pan value (rad)
+ * @param tilt tilt value (rad)
+ * @param roll roll value (rad)
+ */
+void
+RelativePositionModel::get_cam_rotation(float &pan, float &tilt, float &roll) const
+{
+  roll = 0;
+  get_pan_tilt(&pan, &tilt);
+}
+
+/** Sets the current translation of the camera
+ * @param height height of the camera [m]
+ * @param rel_x distance to the center of the robot [m]
+ * @param rel_y distance to the center of the robot [m]
+ */
+void
+RelativePositionModel::set_cam_translation(float height, float rel_x, float rel_y)
+{
+}
+
+/** Returns the current translation of the camera
+ * @param height height of the camera [m]
+ * @param rel_x distance to the center of the robot [m]
+ * @param rel_y distance to the center of the robot [m]
+ */
+void
+RelativePositionModel::get_cam_translation(float &height, float &rel_x, float &rel_y) const
+{
+}

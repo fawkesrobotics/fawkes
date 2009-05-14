@@ -102,7 +102,7 @@ FvAcquisitionThread::~FvAcquisitionThread()
 }
 
 
-/** Get a camera instace.
+/** Get a camera instance.
  * This will return a camera instance suitable for accessing the image
  * buffer. Note, that this is not the camera provided to the constructor,
  * but rather a SharedMemoryCamera instance accessing a shared memory buffer
@@ -154,6 +154,18 @@ FvAcquisitionThread::camera_instance(colorspace_t cspace, bool deep_copy)
 
   if (tmp)  free(tmp);
   return c;
+}
+
+
+/** Get the Camera of this acquisition thread.
+ * This is just used for the camera controls, if you want to access the camera,
+ * use camera_instance()
+ * @return a pointer to the Camera
+ */
+Camera *
+FvAcquisitionThread::get_camera()
+{
+  return __camera;
 }
 
 

@@ -27,6 +27,8 @@
 #include <gui_utils/plugin_tree_view.h>
 #include <gui_utils/service_selector_cbe.h>
 
+#include <string>
+
 using namespace fawkes;
 
 /** @class PluginGuiGtkWindow "plugin_gui.h"
@@ -54,6 +56,9 @@ PluginGuiGtkWindow::PluginGuiGtkWindow(BaseObjectType* cobject,
   m_service_selector = new ServiceSelectorCBE(ref_xml, "cbeHosts", "btnConnect", "wndMain");
   m_trv_plugins->set_network_client( m_service_selector->get_network_client() );
 
+  m_service_selector->signal_connected().connect(sigc::mem_fun(*this, &PluginGuiGtkWindow::on_connect));
+  m_service_selector->signal_disconnected().connect(sigc::mem_fun(*this, &PluginGuiGtkWindow::on_disconnect));
+
   m_stb_status->push("Started");
 }
 
@@ -61,4 +66,18 @@ PluginGuiGtkWindow::PluginGuiGtkWindow(BaseObjectType* cobject,
 PluginGuiGtkWindow::~PluginGuiGtkWindow()
 {
   m_stb_status->push("Exiting");
+}
+
+/** Connected handler. */
+void
+PluginGuiGtkWindow::on_connect()
+{
+  this->set_title(std::string("Fawkes Plugin Tool @ ") + m_service_selector->get_hostname());
+}
+
+/** Disconnected handler. */
+void
+PluginGuiGtkWindow::on_disconnect()
+{
+  this->set_title("Fawkes Plugin Tool");
 }

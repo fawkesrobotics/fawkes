@@ -40,6 +40,7 @@
 #include <gui_utils/plugin_tree_view.h>
 
 #include <cstring>
+#include <string>
 
 #include <gvc.h>
 
@@ -385,6 +386,7 @@ SkillGuiGtkWindow::on_connect()
     tb_controller->set_sensitive(true);
     cbe_skillstring->set_sensitive(true);
 
+    this->set_title(std::string("Skill GUI @ ") + connection_dispatcher.get_client()->get_hostname());
   } catch (Exception &e) {
     Glib::ustring message = *(e.begin());
     Gtk::MessageDialog md(*this, message, /* markup */ false,
@@ -415,6 +417,8 @@ SkillGuiGtkWindow::on_disconnect()
   pvp_graph->queue_draw();
 #endif
   __logview->set_client(NULL);
+
+  this->set_title("Skill GUI");
 }
 
 
@@ -524,12 +528,14 @@ SkillGuiGtkWindow::on_skiller_data_changed()
     if ( __skiller_if->exclusive_controller() == __skiller_if->serial() ) {
       if ( tb_controller->get_stock_id() == Gtk::Stock::NO.id ) {
 	tb_controller->set_stock_id(Gtk::Stock::YES);
+	tb_controller->set_tooltip_text("Release exclusive control");
       }
       but_exec->set_sensitive(true);
       but_stop->set_sensitive(true);
     } else {
       if ( tb_controller->get_stock_id() == Gtk::Stock::YES.id ) {
 	tb_controller->set_stock_id(Gtk::Stock::NO);
+	tb_controller->set_tooltip_text("Gain exclusive control");
       }
       but_exec->set_sensitive(false);
       but_stop->set_sensitive(false);

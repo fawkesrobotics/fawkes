@@ -260,7 +260,7 @@ function write_fsm_graph(fsm, interface)
    assert(interface, "skillenv.write_fsm_graph: no interface!")
    if fsm then
       if fsm:changed() then
-	 --print_warn("Writing graph to interface")
+	 --print_warn("Writing graph %s to interface", fsm.name)
 	 --interface:set_graph_fsm(fsm.name)
 	 local graph = fsm:graph()
 	 if #graph > interface:maxlenof_graph() then
@@ -510,7 +510,7 @@ function use_skill(module_name)
    if not m.reset or type(m.reset) ~= "function" then
       -- no execute function, check if has fsm
       assert(m.fsm and m.fsm.exit_state,
-	     "Skill " .. module_name .. " does neither provide execute() " ..
+	     "Skill " .. module_name .. " does neither provide reset() " ..
 	     "function nor FSM with valid exit state")
 
       m.reset = skill_fsm_reset_wrapper(m.fsm)

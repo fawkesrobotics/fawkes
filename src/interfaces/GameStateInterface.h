@@ -38,23 +38,21 @@ class GameStateInterface : public Interface
  /// @endcond
  public:
   /* constants */
-
-  /** 
-        Enumeration defining the different game states. Keep in sync with
-	worldinfo_gamestate_t.
-       */
-  typedef enum {
-    GS_FROZEN /**< Frozen, nothing moves. */,
-    GS_PLAY /**< Play, normal play */,
-    GS_KICK_OFF /**< Kick off */,
-    GS_DROP_BALL /**< Referee drops ball, both teams can wrestle for the ball */,
-    GS_PENALTY /**< Penalty kick */,
-    GS_CORNER_KICK /**< Corner kick */,
-    GS_THROW_IN /**< Throw in */,
-    GS_FREE_KICK /**< Free kick */,
-    GS_GOAL_KICK /**< Goal kick */,
-    GS_HALF_TIME /**< Half time */
-  } if_gamestate_t;
+  static const unsigned int GS_FROZEN;
+  static const unsigned int GS_PLAY;
+  static const unsigned int GS_KICK_OFF;
+  static const unsigned int GS_DROP_BALL;
+  static const unsigned int GS_PENALTY;
+  static const unsigned int GS_CORNER_KICK;
+  static const unsigned int GS_THROW_IN;
+  static const unsigned int GS_FREE_KICK;
+  static const unsigned int GS_GOAL_KICK;
+  static const unsigned int GS_HALF_TIME;
+  static const unsigned int GS_SPL_INITIAL;
+  static const unsigned int GS_SPL_READY;
+  static const unsigned int GS_SPL_SET;
+  static const unsigned int GS_SPL_PLAY;
+  static const unsigned int GS_SPL_FINISHED;
 
   /** 
         Enumeration defining the different teams. Keep in sync with
@@ -100,9 +98,9 @@ class GameStateInterface : public Interface
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
+    unsigned int game_state; /**< Current game state */
     unsigned int score_cyan; /**< Score of team cyan */
     unsigned int score_magenta; /**< Score of team magenta */
-    if_gamestate_t game_state; /**< Current game state */
     if_gamestate_team_t state_team; /**< Team referred to by game state */
     if_gamestate_team_t our_team; /**< Our team color */
     if_gamestate_goalcolor_t our_goal_color; /**< Our own goal color */
@@ -114,6 +112,52 @@ class GameStateInterface : public Interface
 
  public:
   /* messages */
+  class SetTeamColorMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      if_gamestate_team_t our_team; /**< Our team color */
+    } SetTeamColorMessage_data_t;
+
+    SetTeamColorMessage_data_t *data;
+
+   public:
+    SetTeamColorMessage(const if_gamestate_team_t ini_our_team);
+    SetTeamColorMessage();
+    ~SetTeamColorMessage();
+
+    SetTeamColorMessage(const SetTeamColorMessage *m);
+    /* Methods */
+    if_gamestate_team_t our_team() const;
+    void set_our_team(const if_gamestate_team_t new_our_team);
+    size_t maxlenof_our_team() const;
+    virtual Message * clone() const;
+  };
+
+  class SetStateTeamMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      if_gamestate_team_t state_team; /**< Team referred to by game state */
+    } SetStateTeamMessage_data_t;
+
+    SetStateTeamMessage_data_t *data;
+
+   public:
+    SetStateTeamMessage(const if_gamestate_team_t ini_state_team);
+    SetStateTeamMessage();
+    ~SetStateTeamMessage();
+
+    SetStateTeamMessage(const SetStateTeamMessage *m);
+    /* Methods */
+    if_gamestate_team_t state_team() const;
+    void set_state_team(const if_gamestate_team_t new_state_team);
+    size_t maxlenof_state_team() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   GameStateInterface();
@@ -121,8 +165,8 @@ class GameStateInterface : public Interface
 
  public:
   /* Methods */
-  if_gamestate_t game_state() const;
-  void set_game_state(const if_gamestate_t new_game_state);
+  unsigned int game_state() const;
+  void set_game_state(const unsigned int new_game_state);
   size_t maxlenof_game_state() const;
   if_gamestate_team_t state_team() const;
   void set_state_team(const if_gamestate_team_t new_state_team);

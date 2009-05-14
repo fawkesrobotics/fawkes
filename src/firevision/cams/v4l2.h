@@ -31,13 +31,20 @@
 #include <linux/types.h>
 #include <linux/videodev2.h>
 
+//include <cams/cameracontrol_color.h>
+//include <cams/cameracontrol_image.h>
+
 /* Number of buffers to use for memory mapped IO */
 #define MMAP_NUM_BUFFERS 2;
 
 class CameraArgumentParser;
 class V4L2CameraData;
 
-class V4L2Camera: public Camera
+class V4L2Camera:
+  public Camera
+  // Implementation incomplete:
+  //  public CameraControlColor,
+  //public CameraControlImage
 {
   friend class V4LCamera;
 
@@ -65,6 +72,20 @@ class V4L2Camera: public Camera
   virtual fawkes::Time * capture_time();
 
   virtual void           set_image_number(unsigned int n);
+
+  /*
+  virtual void         set_auto_gain(bool enabled);
+  virtual void         set_auto_white_balance(bool enabled);
+  virtual void         set_auto_exposure(bool enabled);
+  virtual void         set_red_balance(int red_balance);
+  virtual void         set_blue_balance(int blue_balance);
+  virtual void         set_brightness(unsigned int brightness);
+  virtual void         set_contrast(unsigned int contrast);
+  virtual void         set_saturation(unsigned int saturation);
+  virtual void         set_hue(int hue);
+  virtual void         set_exposure(unsigned int exposure);
+  virtual void         set_gain(unsigned int gain);
+  */
 
  protected:
   V4L2Camera(const char *device_name, int dev);

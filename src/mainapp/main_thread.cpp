@@ -219,6 +219,15 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   }
 
   __desired_loop_time_sec  = (float)__desired_loop_time_usec / 1000000.f;
+
+  try {
+    __enable_looptime_warnings = __config->get_bool("/fawkes/mainapp/enable_looptime_warnings");
+    if(!__enable_looptime_warnings) {
+      __multi_logger->log_debug(name(), "loop time warnings are disabled");
+    }
+  } catch(Exception &e) {
+    __enable_looptime_warnings = true;
+  }
 }
 
 
@@ -359,7 +368,9 @@ FawkesMainThread::loop()
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_usec );
 	__thread_manager->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_usec );
       } catch (Exception &e) {
-	__multi_logger->log_error("FawkesMainThread", e);
+        if(__enable_looptime_warnings) {
+          __multi_logger->log_error("FawkesMainThread", e);
+        }
       }
 
       test_cancel();
@@ -379,17 +390,21 @@ FawkesMainThread::loop()
 	  }
 	}
 	__recovered_threads.clear();
-	__multi_logger->log_warn("FawkesMainThread", "%s", s.c_str());
+	if(__enable_looptime_warnings) {
+	  __multi_logger->log_warn("FawkesMainThread", "%s", s.c_str());
+	}
       }
 
       if (__desired_loop_time_sec > 0) {
 	__loop_end->stamp_systime();
 	float loop_time = *__loop_end - __loop_start;
-	if (loop_time > __desired_loop_time_sec) {
-	  __multi_logger->log_warn("FawkesMainThread", "Loop time exceeded, "
-				   "desired: %f sec (%u usec),  actual: %f sec",
-				   __desired_loop_time_sec, __desired_loop_time_usec,
-				   loop_time);
+	if(__enable_looptime_warnings) {
+	  if (loop_time > __desired_loop_time_sec) {
+	    __multi_logger->log_warn("FawkesMainThread", "Loop time exceeded, "
+	        "desired: %f sec (%u usec),  actual: %f sec",
+	        __desired_loop_time_sec, __desired_loop_time_usec,
+	        loop_time);
+	  }
 	}
       }
       if ( __time_wait ) {

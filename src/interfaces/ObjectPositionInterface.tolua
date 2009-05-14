@@ -57,8 +57,8 @@ class ObjectPositionInterface : public Interface
   float slope();
   void set_slope(const float new_slope);
   int maxlenof_slope() const;
-  float * dbs_covariance();
-  void set_dbs_covariance(const float * new_dbs_covariance);
+  float dbs_covariance(int index);
+  void set_dbs_covariance(unsigned int index, const float new_dbs_covariance);
   int maxlenof_dbs_covariance() const;
   float world_x();
   void set_world_x(const float new_world_x);
@@ -69,8 +69,8 @@ class ObjectPositionInterface : public Interface
   float world_z();
   void set_world_z(const float new_world_z);
   int maxlenof_world_z() const;
-  float * world_xyz_covariance();
-  void set_world_xyz_covariance(const float * new_world_xyz_covariance);
+  float world_xyz_covariance(int index);
+  void set_world_xyz_covariance(unsigned int index, const float new_world_xyz_covariance);
   int maxlenof_world_xyz_covariance() const;
   float relative_x();
   void set_relative_x(const float new_relative_x);
@@ -81,8 +81,8 @@ class ObjectPositionInterface : public Interface
   float relative_z();
   void set_relative_z(const float new_relative_z);
   int maxlenof_relative_z() const;
-  float * relative_xyz_covariance();
-  void set_relative_xyz_covariance(const float * new_relative_xyz_covariance);
+  float relative_xyz_covariance(int index);
+  void set_relative_xyz_covariance(unsigned int index, const float new_relative_xyz_covariance);
   int maxlenof_relative_xyz_covariance() const;
   float extent_x();
   void set_extent_x(const float new_extent_x);
@@ -102,8 +102,8 @@ class ObjectPositionInterface : public Interface
   float world_z_velocity();
   void set_world_z_velocity(const float new_world_z_velocity);
   int maxlenof_world_z_velocity() const;
-  float * world_xyz_velocity_covariance();
-  void set_world_xyz_velocity_covariance(const float * new_world_xyz_velocity_covariance);
+  float world_xyz_velocity_covariance(int index);
+  void set_world_xyz_velocity_covariance(unsigned int index, const float new_world_xyz_velocity_covariance);
   int maxlenof_world_xyz_velocity_covariance() const;
   float relative_x_velocity();
   void set_relative_x_velocity(const float new_relative_x_velocity);
@@ -114,8 +114,8 @@ class ObjectPositionInterface : public Interface
   float relative_z_velocity();
   void set_relative_z_velocity(const float new_relative_z_velocity);
   int maxlenof_relative_z_velocity() const;
-  float * relative_xyz_velocity_covariance();
-  void set_relative_xyz_velocity_covariance(const float * new_relative_xyz_velocity_covariance);
+  float relative_xyz_velocity_covariance(int index);
+  void set_relative_xyz_velocity_covariance(unsigned int index, const float new_relative_xyz_velocity_covariance);
   int maxlenof_relative_xyz_velocity_covariance() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;

@@ -59,6 +59,8 @@ class Laser360Interface : public Interface
  public:
   /* Methods */
   float * distances() const;
+  float distances(unsigned int index) const;
+  void set_distances(unsigned int index, const float new_distances);
   void set_distances(const float * new_distances);
   size_t maxlenof_distances() const;
   virtual Message * create_message(const char *type) const;

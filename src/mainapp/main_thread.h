@@ -97,6 +97,7 @@ class FawkesMainThread
   unsigned int                  __max_thread_time_usec;
   fawkes::Time                 *__loop_start;
   fawkes::Time                 *__loop_end;
+  bool                          __enable_looptime_warnings;
 };
 
 #endif

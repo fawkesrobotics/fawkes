@@ -123,6 +123,8 @@ function SkillQueue:skill_string()
 	       for k2,v2 in ipairs(v) do
 		  table.insert(subp, string.format("%s = %q", k2, self.fsm.vars[v2]))
 	       end
+	    elseif type(v) == "boolean" then
+	       table.insert(subp, string.format("%s = %s", k, tostring(v)))
 	    else
 	       table.insert(subp, string.format("%s = %q", k, tostring(v)))
 	    end
@@ -182,4 +184,13 @@ function SkillQueue:reset()
       s.args = nil
    end
    self.skillstring = ""
+end
+
+
+function SkillQueue.oneshot(skills, skiller)
+   local skiller = skiller or interfaces.reading.skiller
+   local s = SkillQueue:new{name="oneshot", skills=skills}
+   local skillstring = s:skill_string()
+   local msg = skiller.ExecSkillMessage:new(skillstring)
+   skiller:msgq_enqueue_copy(msg)
 end

@@ -45,8 +45,8 @@ using std::endl;
  * @param msg message, appended to exception, base message "PostureException"
  * @param img_pt the point in the image
  */
-AboveHorizonException::AboveHorizonException(const char *msg, fawkes::point_t img_pt) throw()
-  : fawkes::Exception("AboveHorizonException: %s", msg)
+AboveHorizonException::AboveHorizonException(const char *msg, const center_in_roi_t img_pt) throw()
+  : fawkes::Exception("AboveHorizonException: %s (%0.1f, %0.1f)", msg, img_pt.x, img_pt.y)
 {
   __img_pt = img_pt;
 }
@@ -54,7 +54,7 @@ AboveHorizonException::AboveHorizonException(const char *msg, fawkes::point_t im
 /**
  * @return the point in the image that caused the exception
  */
-fawkes::point_t
+const center_in_roi_t &
 AboveHorizonException::get_img_pt() const
 {
   return __img_pt;
@@ -192,7 +192,7 @@ ProjectiveCam::set_location(const HomTransform& loc)
  * @return a point in the world (x-meters, y-meters)
  */
 fawkes::cart_coord_2d_t
-ProjectiveCam::get_GPA_world_coord(fawkes::point_t img_p) const
+ProjectiveCam::get_GPA_world_coord(const center_in_roi_t &img_p) const
 {
   Vector img_v(3);
   img_v.x(img_p.x);
@@ -214,8 +214,8 @@ ProjectiveCam::get_GPA_world_coord(fawkes::point_t img_p) const
  * @param wld_p a point on the ground (x-meters, y-meters)
  * @return a point in the image (x-px, y-px)
  */
-fawkes::point_t
-ProjectiveCam::get_GPA_image_coord(const fawkes::cart_coord_2d_t wld_p) const
+center_in_roi_t
+ProjectiveCam::get_GPA_image_coord(const fawkes::cart_coord_2d_t &wld_p) const
 {
   Vector wld_v(4);
   wld_v.x(wld_p.x);
@@ -226,9 +226,9 @@ ProjectiveCam::get_GPA_image_coord(const fawkes::cart_coord_2d_t wld_p) const
   Vector img_v = *__p * wld_v;
   img_v /= img_v.z();
 
-  point_t res;
-  res.x = static_cast<unsigned int>(roundf(img_v.x()));
-  res.y = static_cast<unsigned int>(roundf(img_v.y()));
+  center_in_roi_t res;
+  res.x = img_v.x();
+  res.y = img_v.y();
 
   return res;
 }

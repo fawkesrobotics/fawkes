@@ -72,15 +72,25 @@ static const char    SPL_GAMECONTROL_HEADER[GCHS]  = {'R', 'G', 'm', 'e'};
  * @param rss refbox state sender
  * @param broadcast_ip Broadcast IP
  * @param broadcast_port Broadcast port
+ * @param our_team our initial team
+ * @param our_goal our initial goal
  */
 SplRefBoxRepeater::SplRefBoxRepeater(RefBoxStateSender &rss,
 				     const char *broadcast_ip,
-				     unsigned short int broadcast_port)
+				     unsigned short int broadcast_port,
+				     fawkes::worldinfo_gamestate_team_t our_team,
+				     fawkes::worldinfo_gamestate_goalcolor_t our_goal)
   : __rss(rss)
 {
   __quit = false;
+  __our_team = our_team;
+  __our_goal = our_goal;
   __s = new DatagramSocket();
   __s->bind(broadcast_port);
+
+  for (unsigned int i = 0; i < MAX_NUM_PLAYERS; ++i) {
+    __penalties[i] = SPL_PENALTY_NONE;
+  }
 }
 
 
@@ -97,12 +107,24 @@ void
 SplRefBoxRepeater::process_struct(spl_gamecontrol_t *msg)
 {
   switch (msg->state) {
+  case SPL_STATE_INITIAL:
+    __rss.set_gamestate(GS_SPL_INITIAL, TEAM_BOTH);
+    break;
   case SPL_STATE_READY:
-    __rss.set_gamestate(GS_KICK_OFF,
+    __rss.set_gamestate(GS_SPL_READY,
+			(msg->kick_off_team == SPL_TEAM_BLUE) ? TEAM_CYAN : TEAM_MAGENTA);
+    break;
+  case SPL_STATE_SET:
+    __rss.set_gamestate(GS_SPL_SET,
 			(msg->kick_off_team == SPL_TEAM_BLUE) ? TEAM_CYAN : TEAM_MAGENTA);
     break;
   case SPL_STATE_PLAYING:
-    __rss.set_gamestate(GS_PLAY, TEAM_BOTH); break;
+    __rss.set_gamestate(GS_SPL_PLAY,
+			(msg->kick_off_team == SPL_TEAM_BLUE) ? TEAM_CYAN : TEAM_MAGENTA);
+    break;
+  case SPL_STATE_FINISHED:
+    __rss.set_gamestate(GS_SPL_FINISHED, TEAM_BOTH);
+    break;
   default:
     __rss.set_gamestate(GS_FROZEN, TEAM_BOTH); break;
   }
@@ -113,6 +135,15 @@ SplRefBoxRepeater::process_struct(spl_gamecontrol_t *msg)
     __rss.set_score( msg->teams[0].score, msg->teams[1].score);
   } else {
     __rss.set_score( msg->teams[1].score, msg->teams[0].score);
+  }
+
+  int oti = (msg->teams[0].team_color == __our_team) ? 0 : 1;
+  for (unsigned int i = 0; i < MAX_NUM_PLAYERS; ++i) {
+    if ( (__penalties[i] != msg->teams[oti].players[i].penalty) ||
+	 (msg->teams[oti].players[i].penalty != SPL_PENALTY_NONE) ) {
+      __rss.add_penalty(i, msg->teams[oti].players[i].penalty,
+			msg->teams[oti].players[i].secs_till_unpenalized);
+    }
   }
 
   __rss.send();

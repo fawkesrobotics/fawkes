@@ -28,7 +28,7 @@
 
 namespace fawkes {
 
-/** Game states. */
+/** Game states for RoboCup MSL. */
 typedef enum {
   GS_FROZEN       =  0,	/**< Frozen, nothing moves */
   GS_PLAY         =  1,	/**< Play, normal play */
@@ -40,7 +40,16 @@ typedef enum {
   GS_FREE_KICK    =  7,	/**< Free kick */
   GS_GOAL_KICK    =  8,	/**< Goal kick */
   GS_HALF_TIME    =  9	/**< Half time */
-} worldinfo_gamestate_t;
+} worldinfo_msl_gamestate_t;
+
+/** Game states for RoboCup SPL. */
+typedef enum {
+  GS_SPL_INITIAL       =  0,	/**< Initial setup phase. */
+  GS_SPL_READY         =  1,	/**< Move to kick-off positions. */
+  GS_SPL_SET           =  2,	/**< Wait for kick-off. */
+  GS_SPL_PLAY          =  3,	/**< Play! */
+  GS_SPL_FINISHED      =  4	/**< Corner kick */
+} worldinfo_spl_gamestate_t;
 
 
 /** Team. */
@@ -65,11 +74,28 @@ typedef enum {
   HALF_SECOND  = 1	/**< Second half */
 } worldinfo_gamestate_half_t;
 
+/** Robot penalty code. */
+typedef enum {
+  PENALTY_NONE              =  0,	/**< No penalty. */
+  PENALTY_BALL_HOLDING      =  1,	/**< Robot hold the ball. */
+  PENALTY_GOALIE_PUSHING    =  2,	/**< Robot pushed the goalie. */
+  PENALTY_PLAYER_PUSHING    =  3,	/**< Robot pushed a player. */
+  PENALTY_ILLEGAL_DEFENDER  =  4,	/**< Robot is an illegal defender. */
+  PENALTY_ILLEGAL_DEFENSE   =  5,	/**< Illegal defense. */
+  PENALTY_OBSTRUCTION       =  6,	/**< Robot obstructs path way. */
+  PENALTY_REQ_FOR_PICKUP    =  7,	/**< Robot was requested for pick up. */
+  PENALTY_LEAVING           =  8,	/**< Robot has to leave. */
+  PENALTY_DAMAGE            =  9,	/**< Robot is damaged. */
+  PENALTY_MANUAL            = 10	/**< Manually penalized. */
+} worldinfo_penalty_t;
 
-const char * worldinfo_gamestate_tostring(worldinfo_gamestate_t gamestate);
+const char * worldinfo_msl_gamestate_tostring(worldinfo_msl_gamestate_t gamestate);
+const char * worldinfo_spl_gamestate_tostring(worldinfo_spl_gamestate_t gamestate);
 const char * worldinfo_gamestate_team_tostring(worldinfo_gamestate_team_t team);
 const char * worldinfo_gamestate_goalcolor_tostring(worldinfo_gamestate_goalcolor_t goal_color);
 const char * worldinfo_gamestate_half_tostring(worldinfo_gamestate_half_t half);
+
+const char * worldinfo_penalty_tostring(worldinfo_penalty_t penalty);
 
 } // end namespace fawkes
 

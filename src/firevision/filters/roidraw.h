@@ -34,16 +34,16 @@ class ROI;
 class FilterROIDraw : public Filter
 {
  public:
-  FilterROIDraw(std::list<ROI> *rois = NULL);
+  FilterROIDraw(const std::list<ROI> *rois = NULL);
 
   virtual void apply();
 
-  void set_rois(std::list<ROI> *rois);
+  void set_rois(const std::list<ROI> *rois);
 
  private:
-  void draw_roi(ROI *roi);
+  void draw_roi(const ROI *roi);
 
-  std::list<ROI> *__rois;
+  const std::list<ROI> *__rois;
 };
 
 #endif

@@ -256,7 +256,7 @@ ServiceChooserDialog::run_and_connect()
       get_selected_service(name, hostname, ipaddr, port);
       if ( port == 0 )  port = 1910;
 
-      __client->connect(ipaddr.c_str(), port);
+      __client->connect(hostname.c_str(), ipaddr.c_str(), port);
     } catch (Exception &e) {
       Glib::ustring message = *(e.begin());
       Gtk::MessageDialog md(__parent, message, /* markup */ false,

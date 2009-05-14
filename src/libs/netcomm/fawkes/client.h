@@ -54,14 +54,15 @@ class FawkesNetworkClient
  friend class FawkesNetworkClientRecvThread;
  public:
  FawkesNetworkClient();
- FawkesNetworkClient(const char *hostname, unsigned short int port);
+ FawkesNetworkClient(const char *hostname, unsigned short int port, const char *ip = NULL);
  FawkesNetworkClient(unsigned int id, const char *hostname, 
-		     unsigned short int port);
+                     unsigned short int port, const char *ip = NULL);
   ~FawkesNetworkClient();
 
   void connect();
   void disconnect();
   void connect(const char *hostname, unsigned short int port);
+  void connect(const char *hostname, const char *ip, unsigned short int port);
 
   void enqueue(FawkesNetworkMessage *message);
   void enqueue_and_wait(FawkesNetworkMessage *message);
@@ -78,6 +79,10 @@ class FawkesNetworkClient
 
   bool has_id() const;
   unsigned int id() const;
+
+  const char *get_hostname() const;
+  const char *get_ip() const;
+
  private:
   void recv();
   void notify_of_connection_established();
@@ -89,8 +94,9 @@ class FawkesNetworkClient
   void set_send_slave_alive();
   void set_recv_slave_alive();
 
-  char *hostname;
-  unsigned short int port;
+  char *__hostname;
+  char *__ip;
+  unsigned short int __port;
 
   StreamSocket *s;
 

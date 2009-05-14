@@ -43,6 +43,12 @@ class RelativePositionModel
   virtual void		set_pan_tilt(float pan, float tilt)         = 0;
   virtual void		get_pan_tilt(float *pan, float *tilt) const = 0;
 
+  virtual void          set_cam_rotation(float pan, float tilt, float roll = 0.f);
+  virtual void          get_cam_rotation(float &pan, float &tilt, float &roll) const;
+
+  virtual void          set_cam_translation(float height, float rel_x = 0.f, float rel_y = 0.f);
+  virtual void          get_cam_translation(float &height, float &rel_x, float &rel_y) const;
+
   virtual void          calc()                                      = 0;
   virtual void          calc_unfiltered()                           = 0;
 

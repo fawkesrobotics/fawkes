@@ -46,4 +46,23 @@ class CaptureException : public fawkes::Exception
  public:
   CaptureException(const char *format, ...);
 };
+
+class UnknownCameraTypeException : public fawkes::Exception
+{
+ public:
+  UnknownCameraTypeException(const char *msg = 0);
+};
+
+class UnknownCameraException : public fawkes::Exception
+{
+ public:
+  UnknownCameraException(const char *msg = 0);
+};
+
+class UnknownCameraControlTypeException : public fawkes::Exception
+{
+ public:
+  UnknownCameraControlTypeException(const char *msg = 0);
+};
+
 #endif

@@ -79,6 +79,7 @@ NaoStiffnessConfigDialog::NaoStiffnessConfigDialog(BaseObjectType *cobject,
 
   __def = dynamic_cast<CheckButton *>(get_widget(ref_xml, "checkbutton_default"));
   __lck = dynamic_cast<CheckButton *>(get_widget(ref_xml, "checkbutton_lock"));
+
   __lck->signal_toggled().connect(mem_fun(*this, &NaoStiffnessConfigDialog::on_checkbutton_lock_toggled));
   on_checkbutton_lock_toggled();
 
@@ -122,6 +123,19 @@ void NaoStiffnessConfigDialog::set_stiffnesses(const nao_stiffnesses &vals)
   __rar->set_value(vals.rar);
   __lap->set_value(vals.lap);
   __rap->set_value(vals.rap);
+
+  __lck->set_active(
+                    __lsp->get_value() == __rsp->get_value() &&
+                    __lsr->get_value() == __rsr->get_value() &&
+                    __ley->get_value() == __rey->get_value() &&
+                    __ler->get_value() == __rer->get_value() &&
+                    __lhyp->get_value() == __rhyp->get_value() &&
+                    __lhr->get_value() == __rhr->get_value() &&
+                    __lhp->get_value() == __rhp->get_value() &&
+                    __lkp->get_value() == __rkp->get_value() &&
+                    __lar->get_value() == __rar->get_value() &&
+                    __lap->get_value() == __rap->get_value()
+                    );
 }
 
 /** Get joint stiffness values from the dialog
@@ -185,6 +199,18 @@ void NaoStiffnessConfigDialog::on_checkbutton_lock_toggled()
     __connections.push_back(__lkp->signal_value_changed().connect(compose(mem_fun(*__rkp, &SpinButton::set_value), mem_fun(*__lkp, &SpinButton::get_value))));
     __connections.push_back(__lar->signal_value_changed().connect(compose(mem_fun(*__rar, &SpinButton::set_value), mem_fun(*__lar, &SpinButton::get_value))));
     __connections.push_back(__lap->signal_value_changed().connect(compose(mem_fun(*__rap, &SpinButton::set_value), mem_fun(*__lap, &SpinButton::get_value))));
+
+    __rsp->set_value(__lsp->get_value());
+    __rsr->set_value(__lsr->get_value());
+    __rey->set_value(__ley->get_value());
+    __rer->set_value(__ler->get_value());
+
+    __rhyp->set_value(__lhyp->get_value());
+    __rhr->set_value(__lhr->get_value());
+    __rhp->set_value(__lhp->get_value());
+    __rkp->set_value(__lkp->get_value());
+    __rar->set_value(__lar->get_value());
+    __rap->set_value(__lap->get_value());
   }
   else
   {

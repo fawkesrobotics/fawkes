@@ -75,11 +75,13 @@ class WorldInfoTransceiver
   void set_glob_ball_visible(bool visible, int visibility_history);
   void set_glob_ball_velocity(float vel_x, float vel_y, float vel_z, float *covariance);
 
-  void set_gamestate(worldinfo_gamestate_t gamestate, worldinfo_gamestate_team_t state_team);
+  void set_gamestate(int gamestate, worldinfo_gamestate_team_t state_team);
   void set_score(unsigned int score_cyan, unsigned int score_magenta);
   void set_team_goal(worldinfo_gamestate_team_t our_color,
 		     worldinfo_gamestate_goalcolor_t goal_color);
   void set_half(worldinfo_gamestate_half_t half);
+  void add_penalty(unsigned int player, unsigned int penalty,
+		   unsigned int seconds_remaining);
 
   void clear_opponents();
   void add_opponent(unsigned int uid, float distance, float bearing, float *covariance);
@@ -191,6 +193,9 @@ class WorldInfoTransceiver
 
   std::list<unsigned int>  disappeared_opponents;
   std::list<unsigned int>::iterator  doppit;
+
+  std::map<unsigned int, worldinfo_penalty_message_t> penalties;
+  std::map<unsigned int, worldinfo_penalty_message_t>::iterator penit;
 
   LockList<WorldInfoHandler *> handlers;
   LockList<WorldInfoHandler *>::iterator hit;
