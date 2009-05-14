@@ -39,13 +39,13 @@ OBJS_libfvcams = camera.o			\
                  control/factory.o
 
 ifeq ($(HAVE_VISCA_CTRL),1)
-OBJS_libfvcams += visca.o
+OBJS_libfvcams += control/visca.o
 endif
 ifeq ($(HAVE_EVID100P_CTRL),1)
-OBJS_libfvcams += sony_evid100p_control.o
+OBJS_libfvcams += control/sony_evid100p.o
 endif
 ifeq ($(HAVE_DPPTU_CTRL),1)
-OBJS_libfvcams += dp_ptu.o
+OBJS_libfvcams += control/dp_ptu.o
 endif
 ifeq ($(HAVE_FIREWIRE_CAM),1)
 OBJS_libfvcams += firewire.o

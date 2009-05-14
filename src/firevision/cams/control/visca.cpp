@@ -23,7 +23,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/visca.h>
+#include <cams/control/visca.h>
 
 #include <sys/ioctl.h>
 #include <stdio.h>
@@ -34,7 +34,7 @@
 
 #include <utils/system/console_colors.h>
 
-/** @class ViscaException <cams/visca.h>
+/** @class ViscaException <cams/control/visca.h>
  * Visca exception.
  */
 
@@ -56,7 +56,7 @@ ViscaException::ViscaException(const char *msg, const int _errno)
 {
 }
 
-/** @class ViscaInquiryRunningException <cams/visca.h>
+/** @class ViscaInquiryRunningException <cams/control/visca.h>
  * Visca inquire running exception.
  */
 
@@ -79,7 +79,7 @@ const unsigned int Visca::VISCA_WHITEBALANCE_ATW      = VISCA_WB_ATW;
 /** Manual white balance. */
 const unsigned int Visca::VISCA_WHITEBALANCE_MANUAL   = VISCA_WB_MANUAL;
 
-/** @class Visca <cams/visca.h>
+/** @class Visca <cams/control/visca.h>
  * Visca control protocol implementation over a serial line.
  * @author Tim Niemueller
  */

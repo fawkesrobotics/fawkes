@@ -43,7 +43,7 @@ typedef enum {
   WORLDINFO_MSGTYPE_OPP_DISAPP     = 6,	/**< Observed opponent disappered */
   WORLDINFO_MSGTYPE_FAT_WORLDINFO  = 7,	/**< Fat message containing all the information, @deprecated */
   WORLDINFO_MSGTYPE_GAMESTATE      = 8,	/**< Gamestate info */
-  WORLDINFO_MSGTYPE_PENALTY        = 9	/**< Penalty info */
+  WORLDINFO_MSGTYPE_PENALTY        = 9,	/**< Penalty info */
   WORLDINFO_MSGTYPE_GLOBBALL       = 10,/**< Global ball position */
   WORLDINFO_MSGTYPE_GLOBBALLVELO   = 11 /**< Global ball velocity */
 } worldinfo_msgid_t;

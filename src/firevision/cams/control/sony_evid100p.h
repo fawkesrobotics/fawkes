@@ -2,8 +2,8 @@
 /***************************************************************************
  *  sony_evid100p_control.h - Controller for Sony EVI-D100P
  *
- *  Generated: Tue Jun 07 15:52:46 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Jun 07 15:52:46 2005
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -26,12 +26,17 @@
 #ifndef __FIREVISION_CONTROL_SONYEVID100P_H_
 #define __FIREVISION_CONTROL_SONYEVID100P_H_
 
-#include <cams/cameracontrol.h>
+#include <cams/control/pantilt.h>
+#include <cams/control/zoom.h>
+#include <cams/control/effect.h>
 
 class CameraArgumentParser;
 class Visca;
 
-class SonyEviD100PControl : public CameraControl
+class SonyEviD100PControl
+: public CameraControlPanTilt,
+  public CameraControlZoom,
+  public CameraControlEffect
 {
 
  public:
@@ -51,15 +56,7 @@ class SonyEviD100PControl : public CameraControl
 
   void open();
   void close();
-  void process_control();
-
-  bool         supports_focus();
-  bool         auto_focus();
-  void         set_auto_focus(bool enabled);
-  unsigned int focus();
-  void         set_focus(unsigned int focus);
-  unsigned int focus_min();
-  unsigned int focus_max();
+  void process_pantilt();
 
   // pan/tilt
   bool         supports_pan();
@@ -71,8 +68,8 @@ class SonyEviD100PControl : public CameraControl
   int          pan();
   int          tilt();
   void         start_get_pan_tilt();
-  void         pan_tilt(int *pan, int *tilt);
-  void         pan_tilt_rad(float *pan, float *tilt);
+  void         pan_tilt(int &pan, int &tilt);
+  void         pan_tilt_rad(float &pan, float &tilt);
   int          min_pan();
   int          max_pan();
   int          min_tilt();
@@ -83,7 +80,6 @@ class SonyEviD100PControl : public CameraControl
   void         reset_pan_tilt_limit();
 
   // zoom
-  bool         supports_zoom();
   void         reset_zoom();
   void         set_zoom(unsigned int zoom);
   unsigned int zoom();
@@ -96,7 +92,6 @@ class SonyEviD100PControl : public CameraControl
   unsigned int white_balance_mode();
 
   // effect
-  bool         supports_effects();
   bool         supports_effect(unsigned int effect);
   void         set_effect(unsigned int effect);
   unsigned int effect();

@@ -518,13 +518,6 @@ FirewireCamera::set_image_number(unsigned int n)
 
 /* CAMERA CONTROL STUFF */
 
-bool
-FirewireCamera::supports_focus()
-{
-  return true;
-}
-
-
 void
 FirewireCamera::set_auto_focus(bool enabled)
 {

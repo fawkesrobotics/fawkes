@@ -3,7 +3,7 @@
  *  dp_ptu.cpp - Controller for Directed Perception, Inc. Pan-Tilt Unit on B21
  *
  *  Created: Wed Nov 29 23:05:49 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -25,7 +25,7 @@
 
 #include <core/exception.h>
 
-#include <cams/dp_ptu.h>
+#include <cams/control/dp_ptu.h>
 #include <fvutils/system/camargp.h>
 
 #include <utils/math/angle.h>
@@ -34,6 +34,7 @@
 #include <sys/time.h>
 #include <termios.h>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <cerrno>
 #include <sys/types.h>
@@ -41,8 +42,9 @@
 #include <fcntl.h>
 
 using namespace std;
+using namespace fawkes;
 
-/** @class DPPTUControl <cams/dp_ptu.h>
+/** @class DPPTUControl <cams/control/dp_ptu.h>
  * DP PTU Control implementation.
  * Control object to use the DP PTU Pan/Tilt unit mounted
  * on carl.
@@ -100,7 +102,6 @@ DPPTUControl::DPPTUControl(const char *tty_port)
   this->tty_port = strdup(tty_port);
   opened = false;
   max_wait_ms = 10;
-  effect = EFFECT_NONE;
 
   open();
 }
@@ -116,7 +117,6 @@ DPPTUControl::DPPTUControl(const CameraArgumentParser *cap)
   tty_port = strdup(cap->cam_id().c_str());
   opened = false;
   max_wait_ms = 10;
-  effect = EFFECT_NONE;
 
   open();
 }
@@ -193,6 +193,10 @@ DPPTUControl::open()
   opened = true;
 }
 
+void
+DPPTUControl::process_pantilt()
+{
+}
 
 bool
 DPPTUControl::supports_pan()
@@ -249,23 +253,23 @@ DPPTUControl::start_get_pan_tilt()
 
 
 void
-DPPTUControl::pan_tilt(int *pan, int *tilt)
+DPPTUControl::pan_tilt(int &pan, int &tilt)
 {
-  *pan  = query_int(DPPTU_PAN_ABSPOS);
-  *tilt = query_int(DPPTU_TILT_ABSPOS);
+  pan  = query_int(DPPTU_PAN_ABSPOS);
+  tilt = query_int(DPPTU_TILT_ABSPOS);
 }
 
 
 void
-DPPTUControl::pan_tilt_rad(float *pan, float *tilt)
+DPPTUControl::pan_tilt_rad(float &pan, float &tilt)
 {
   int tpan = 0, ttilt = 0;
 
   tpan  = query_int(DPPTU_PAN_ABSPOS);
   ttilt = query_int(DPPTU_TILT_ABSPOS);
 
-  *pan  = pan_ticks2rad(tpan);
-  *tilt = tilt_ticks2rad(ttilt);
+  pan  = pan_ticks2rad(tpan);
+  tilt = tilt_ticks2rad(ttilt);
 }
 
 

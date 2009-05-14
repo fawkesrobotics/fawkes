@@ -2,8 +2,8 @@
 /***************************************************************************
  *  sony_evid100p_control.cpp - Controller for Sony EVI-D100P
  *
- *  Generated: Tue Jun 07 19:27:20 2005
- *  Copyright  2005  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Jun 07 19:27:20 2005
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -23,12 +23,15 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cams/sony_evid100p_control.h>
-#include <cams/visca.h>
+#include <cams/control/sony_evid100p.h>
+#include <cams/control/visca.h>
 #include <fvutils/system/camargp.h>
-#include <termios.h>
 
 #include <utils/math/angle.h>
+
+#include <termios.h>
+#include <cstring>
+#include <cstdlib>
 
 using namespace std;
 using namespace fawkes;
@@ -88,7 +91,7 @@ const unsigned int SonyEviD100PControl::EFFECT_SLIM     = 7;
 const unsigned int SonyEviD100PControl::EFFECT_STRETCH  = 8;
 
 
-/** @class SonyEviD100PControl <cams/sony_evid100p_control.h>
+/** @class SonyEviD100PControl <cams/control/sony_evid100p.h>
  * Sony Evi D100P pan/tilt control.
  * Internally uses Visca.
  * @author Tim Niemueller
@@ -172,56 +175,9 @@ SonyEviD100PControl::close()
 
 
 void
-SonyEviD100PControl::process_control()
+SonyEviD100PControl::process_pantilt()
 {
   visca->process();
-}
-
-
-bool
-SonyEviD100PControl::supports_focus()
-{
-  return false;
-}
-
-
-bool
-SonyEviD100PControl::auto_focus()
-{
-  return true;
-}
-
-
-void
-SonyEviD100PControl::set_auto_focus(bool enabled)
-{
-}
-
-
-unsigned int
-SonyEviD100PControl::focus()
-{
-  return 0;
-}
-
-
-void
-SonyEviD100PControl::set_focus(unsigned int focus)
-{
-}
-
-
-unsigned int
-SonyEviD100PControl::focus_min()
-{
-  return 0;
-}
-
-
-unsigned int
-SonyEviD100PControl::focus_max()
-{
-  return 0;
 }
 
 
@@ -284,21 +240,23 @@ SonyEviD100PControl::start_get_pan_tilt()
 
 
 void
-SonyEviD100PControl::pan_tilt(int *pan, int *tilt)
+SonyEviD100PControl::pan_tilt(int &pan, int &tilt)
 {
-  visca->getPanTilt(pan, tilt);
+  int tpan, ttilt;
+  visca->getPanTilt(&tpan, &ttilt);
+  pan  = tpan;
+  tilt = ttilt;
 }
 
 
 void
-SonyEviD100PControl::pan_tilt_rad(float *pan, float *tilt)
+SonyEviD100PControl::pan_tilt_rad(float &pan, float &tilt)
 {
   int tpan = 0, ttilt = 0;
   visca->getPanTilt(&tpan, &ttilt);
 
-  *pan  = tpan  / PAN_STEPS_PER_RAD;
-  *tilt = ttilt / PAN_STEPS_PER_RAD;
-
+  pan  = tpan  / PAN_STEPS_PER_RAD;
+  tilt = ttilt / PAN_STEPS_PER_RAD;
 }
 
 
@@ -369,12 +327,6 @@ SonyEviD100PControl::reset_pan_tilt_limit()
   visca->resetPanTiltLimit();
 }
 
-bool
-SonyEviD100PControl::supports_zoom()
-{
-  return true;
-}
-
 
 void
 SonyEviD100PControl::reset_zoom()
@@ -433,12 +385,6 @@ SonyEviD100PControl::set_zoom_digital_enabled(bool enabled)
   visca->setZoomDigitalEnabled(enabled);
 }
 
-
-bool
-SonyEviD100PControl::supports_effects()
-{
-  return true;
-}
 
 bool
 SonyEviD100PControl::supports_effect(unsigned int __effect)
@@ -517,6 +463,9 @@ SonyEviD100PControl::reset_effect()
 }
 
 
+/** Get current white balance mode.
+ * @return white balance mode
+ */
 unsigned int
 SonyEviD100PControl::white_balance_mode()
 {

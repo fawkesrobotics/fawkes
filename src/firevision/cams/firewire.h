@@ -23,11 +23,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FIREWIRE_H_
-#define __FIREVISION_FIREWIRE_H_
+#ifndef __FIREVISION_CAMS_FIREWIRE_H_
+#define __FIREVISION_CAMS_FIREWIRE_H_
 
 #include <cams/camera.h>
-#include <cams/cameracontrol.h>
+#include <cams/control/focus.h>
 
 #include <dc1394/dc1394.h>
 
@@ -38,7 +38,9 @@
 
 class CameraArgumentParser;
 
-class FirewireCamera : public Camera, public CameraControl
+class FirewireCamera
+: public Camera,
+  public CameraControlFocus
 {
 
  public:
@@ -73,7 +75,6 @@ class FirewireCamera : public Camera, public CameraControl
 
   bool    iso_mode_enabled();
 
-  virtual bool           supports_focus();
   virtual bool           auto_focus();
   virtual void           set_auto_focus(bool enabled);
 

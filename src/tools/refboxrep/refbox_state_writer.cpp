@@ -129,12 +129,11 @@ void RefBoxStateBBWriter::connect(const string& host)
  * @param state_team team referenced by the game state
  */
 void
-RefBoxStateBBWriter::set_gamestate(worldinfo_gamestate_t game_state,
-    worldinfo_gamestate_team_t state_team)
+RefBoxStateBBWriter::set_gamestate(int game_state,
+				   worldinfo_gamestate_team_t state_team)
 {
-  log("Setting gamestate to '%s' for team '%s'\n",
-      worldinfo_gamestate_tostring(game_state),
-      worldinfo_gamestate_team_tostring(state_team));
+  log("Setting gamestate to '%d' for team '%s'\n",
+      game_state, worldinfo_gamestate_team_tostring(state_team));
 
   __game_state = game_state;
   __state_team = state_team;

@@ -3,7 +3,7 @@
  *  dp_ptu.h - Controller for Directed Perception, Inc. Pan-Tilt Unit on B21
  *
  *  Created: Wed Nov 29 23:02:42 2006
- *  Copyright  2005-2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -26,23 +26,23 @@
 #ifndef __FIREVISION_CAMS_DP_PTU_H_
 #define __FIREVISION_CAMS_DP_PTU_H_
 
-#include <cams/cameracontrol.h>
+#include <cams/control/pantilt.h>
 
 #define DPPTU_MAX_OBUFFER_SIZE  20
 #define DPPTU_MAX_IBUFFER_SIZE 255
 
 class CameraArgumentParser;
 
-class DPPTUControl : public CameraControl
+class DPPTUControl : public CameraControlPanTilt
 {
 
  public:
-
   DPPTUControl(const char *port);
   DPPTUControl(const CameraArgumentParser *cap);
   virtual ~DPPTUControl();
 
   // pan/tilt
+  virtual void process_pantilt();
   virtual bool supports_pan();
   virtual bool supports_tilt();
   virtual void set_pan(int pan);
@@ -52,8 +52,8 @@ class DPPTUControl : public CameraControl
   virtual int  pan();
   virtual int  tilt();
   virtual void start_get_pan_tilt();
-  virtual void pan_tilt(int *pan, int *tilt);
-  virtual void pan_tilt_rad(float *pan, float *tilt);
+  virtual void pan_tilt(int &pan, int &tilt);
+  virtual void pan_tilt_rad(float &pan, float &tilt);
   virtual int  min_pan();
   virtual int  max_pan();
   virtual int  min_tilt();
@@ -136,7 +136,6 @@ class DPPTUControl : public CameraControl
   int tilt_upper_limit;
 
   unsigned int max_wait_ms;
-  unsigned int effect;
 
 };
 

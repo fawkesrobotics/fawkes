@@ -152,7 +152,7 @@ main(int argc, char **argv)
     Msl2008RefBoxRepeater m8rr(*rss, "230.0.0.1", 30000);
     m8rr.run();
   } else if ( strcmp(argp.arg("l"), "spl") == 0 ) {
-    SplRefBoxRepeater nrr(*rss, "255.255.255.0", 3838);
+    SplRefBoxRepeater nrr(*rss, "255.255.255.0", 3838, our_team, our_goal);
     nrr.run();
   } else {
     printf("Invalid league name given.\n\n");

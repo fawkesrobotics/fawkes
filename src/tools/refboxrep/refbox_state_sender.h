@@ -42,7 +42,7 @@ class RefBoxStateSender
   virtual ~RefBoxStateSender();
 
   virtual void send();
-  virtual void set_gamestate(fawkes::worldinfo_gamestate_t game_state,
+  virtual void set_gamestate(int game_state,
 			     fawkes::worldinfo_gamestate_team_t state_team);
   virtual void set_score(unsigned int score_cyan, unsigned int score_magenta);
   virtual void set_team_goal(fawkes::worldinfo_gamestate_team_t our_team,

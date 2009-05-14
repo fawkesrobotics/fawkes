@@ -37,13 +37,13 @@
 #include <cams/cam_exceptions.h>
 
 #ifdef HAVE_VISCA_CTRL
-#include <cams/visca.h>
+#include <cams/control/visca.h>
 #endif
 #ifdef HAVE_EVID100P_CTRL
-#include <cams/sony_evid100p_control.h>
+#include <cams/control/sony_evid100p.h>
 #endif
 #ifdef HAVE_DPPTU_CTRL
-#include <cams/dpptu.h>
+#include <cams/control/dp_ptu.h>
 #endif
 
 using namespace std;
@@ -83,7 +83,7 @@ CameraControlFactory::instance(const CameraArgumentParser *cap)
   // ######
   if ( cap->cam_type() == "dpptu" ) {
 #ifdef HAVE_DPPTU_CTRL
-    c = new DPPTUControl();
+    c = new DPPTUControl(cap);
 #else
     throw UnknownCameraControlTypeException("No DPPTU support at compile time");
 #endif

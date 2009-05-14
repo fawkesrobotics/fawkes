@@ -43,7 +43,7 @@ class RefBoxStateBBWriter : public RefBoxStateSender
   virtual ~RefBoxStateBBWriter();
 
   virtual void send();
-  virtual void set_gamestate(fawkes::worldinfo_gamestate_t game_state,
+  virtual void set_gamestate(int game_state,
 			     fawkes::worldinfo_gamestate_team_t state_team);
   virtual void set_score(unsigned int score_cyan, unsigned int score_magenta);
   virtual void set_team_goal(fawkes::worldinfo_gamestate_team_t our_team,
@@ -59,7 +59,7 @@ class RefBoxStateBBWriter : public RefBoxStateSender
   std::map<fawkes::RemoteBlackBoard *, fawkes::GameStateInterface *> __giss;
 
   bool                                    __debug;
-  fawkes::worldinfo_gamestate_t           __game_state;
+  int                                     __game_state;
   fawkes::worldinfo_gamestate_team_t      __state_team;
   unsigned int                            __score_cyan;
   unsigned int                            __score_magenta;

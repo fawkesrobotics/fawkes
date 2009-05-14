@@ -31,14 +31,14 @@ VISION_CFLAGS       = -D__STDC_LIMIT_MACROS -DFVCONFDIR=\"$(FVCONFDIR)\"
 TRICLOPS_SDK=$(SYSROOT)/opt/Triclops3.2.0.8-FC3
 
 ifneq ($(wildcard $(SYSROOT)/usr/include/lvsds),)
-HAVE_LEUTRON_CAM    = 1
-HAVE_VISCA_CTRL     = 1
-VISION_LIBDIRs     += $(SYSROOT)/usr/lib/lvsds
-VISION_INCDIRS     += $(SYSROOT)/usr/include/lvsds
-VISION_CAM_LIBS    += lvsds.34
+  HAVE_LEUTRON_CAM    = 1
+  HAVE_VISCA_CTRL     = 1
+  VISION_LIBDIRs     += $(SYSROOT)/usr/lib/lvsds
+  VISION_INCDIRS     += $(SYSROOT)/usr/include/lvsds
+  VISION_CAM_LIBS    += lvsds.34
 endif
 ifeq ($(HAVE_VISCA_CTRL),1)
-HAVE_EVID100P_CTRL  = 1
+  HAVE_EVID100P_CTRL  = 1
 endif
 
 # check for JPEG lib
@@ -197,7 +197,7 @@ endif
 # Set to 1 to build shape models
 HAVE_SHAPE_MODELS = 1
 
-ifneq ($(wildcard $(FVBASEDIR)/models/mirror/bulb*),)
+ifneq ($(wildcard $(FVBASEDIR)/models/mirror/bulb/*),)
   HAVE_BULB_CREATOR = 1
   VISION_CFLAGS += -DHAVE_BULB_CREATOR
 endif
