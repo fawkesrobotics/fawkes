@@ -3,7 +3,7 @@
  *  thread_manager.h - Fawkes thread manager
  *
  *  Created: Thu Nov  3 19:08:23 2006 (on train to Cologne)
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *

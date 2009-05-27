@@ -69,6 +69,9 @@ class FawkesMainThread
   virtual void add_logger(fawkes::Logger *logger);
   virtual void remove_logger(fawkes::Logger *logger);
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   void destruct();
 

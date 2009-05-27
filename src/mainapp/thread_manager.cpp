@@ -2,8 +2,8 @@
 /***************************************************************************
  *  thread_manager.cpp - Thread manager
  *
- *  Generated: Thu Nov  3 19:11:31 2006 (on train to Cologne)
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Nov  3 19:11:31 2006 (on train to Cologne)
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -330,6 +330,7 @@ FawkesThreadManager::remove_maybelocked(ThreadList &tl, bool lock)
   }
 
   tl.lock();
+  MutexLocker locker(threads.mutex(), lock);
 
   try {
     if ( ! tl.prepare_finalize(finalizer) ) {
@@ -346,8 +347,6 @@ FawkesThreadManager::remove_maybelocked(ThreadList &tl, bool lock)
     e.append("One or more threads in list '%s' cannot be finalized", tl.name());
     throw CannotFinalizeThreadException(e);
   }
-
-  MutexLocker locker(threads.mutex(), lock);
 
   tl.stop();
   tl.finalize(finalizer);
@@ -479,23 +478,17 @@ void
 FawkesThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook,
 				     unsigned int timeout_usec)
 {
-  threads.lock();
+  MutexLocker lock(threads.mutex());
+
   unsigned int timeout_sec = 0;
   if (timeout_usec >= 1000000) {
     timeout_sec   = timeout_usec / 1000000;
     timeout_usec -= timeout_sec  * 1000000;
   }
 
+  // Note that the following lines might throw an exception, we just pass it on
   if ( threads.find(hook) != threads.end() ) {
-    threads.unlock();
     threads[hook].wakeup_and_wait(timeout_sec, timeout_usec * 1000);
-    threads.lock();
-    if ( threads[hook].size() == 0 ) {
-      threads.erase(hook);
-    }
-    threads.unlock();
-  } else {
-    threads.unlock();
   }
 }
 
@@ -503,21 +496,17 @@ FawkesThreadManager::wakeup_and_wait(BlockedTimingAspect::WakeupHook hook,
 void
 FawkesThreadManager::wakeup(BlockedTimingAspect::WakeupHook hook, Barrier *barrier)
 {
-  threads.lock();
+  MutexLocker lock(threads.mutex());
+
   if ( threads.find(hook) != threads.end() ) {
-    threads.unlock();
     if ( barrier ) {
       threads[hook].wakeup(barrier);
     } else {
       threads[hook].wakeup();
     }
-    threads.lock();
     if ( threads[hook].size() == 0 ) {
       threads.erase(hook);
     }
-    threads.unlock();
-  } else {
-    threads.unlock();
   }
 }
 
