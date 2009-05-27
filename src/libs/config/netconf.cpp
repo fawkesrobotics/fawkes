@@ -3,7 +3,7 @@
  *  netconf.cpp - Fawkes remote configuration access via Fawkes net
  *
  *  Created: Sun Jan 07 15:04:41 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -41,14 +41,11 @@
 #include <cstring>
 #include <cstdlib>
 
-#define MIRROR_INIT_TOUT 15 /**< Timeout in seconds to wait for initial response */
-
 namespace fawkes {
 
-/** @class CannotEnableMirroringException config/netconf.h
+/** @class CannotEnableMirroringException <config/netconf.h>
  * Thrown if enabling mirror mode failed.
  */
-
 
 /** Constructor.
  * @param msg message describing the problem
@@ -59,7 +56,7 @@ CannotEnableMirroringException::CannotEnableMirroringException(const char *msg)
 }
 
 
-/** @class NetworkConfiguration config/netconf.h
+/** @class NetworkConfiguration <config/netconf.h>
  * Remote configuration via Fawkes net.
  * This implementation of the Configuration interface allows for remote access
  * to a Fawkes process implemented using the ConfigurationManager.
@@ -76,9 +73,12 @@ CannotEnableMirroringException::CannotEnableMirroringException(const char *msg)
 
 /** Constructor.
  * @param c Fawkes network client (thread).
+ * @param mirror_timeout_sec timeout in seconds for initiating mirroring
  */
-NetworkConfiguration::NetworkConfiguration(FawkesNetworkClient *c)
+NetworkConfiguration::NetworkConfiguration(FawkesNetworkClient *c,
+					   unsigned int mirror_timeout_sec)
 {
+  __mirror_timeout_sec = mirror_timeout_sec;
   __connected = c->connected();
   this->c = c;
   try {
@@ -861,6 +861,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
       case MSG_CONFIG_LIST:
 	// put all values into mirror database
 	{
+	  mirror_config->transaction_begin();
 	  ConfigListContent *clc = m->msgc<ConfigListContent>();
 	  while ( clc->has_next() ) {
 	    size_t cle_size = 0;
@@ -925,6 +926,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 	      }
 	    }
 	  }
+	  mirror_config->transaction_commit();
 	  delete clc;
 	}
 
@@ -1064,23 +1066,13 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
 {
   if ( mirror ) {
     if ( ! __mirror_mode ) {
+
       if ( ! __connected ) {
 	throw CannotEnableMirroringException("Client connection is dead");
       }
 
-      // Create local temporary database
-      tmp_volatile = (char *)malloc(L_tmpnam);
-      tmp_default  = (char *)malloc(L_tmpnam);
-      if ( (tmpnam(tmp_volatile) == NULL) ||
-	   (tmpnam(tmp_default) == NULL) ) {
-	free(tmp_volatile);
-	free(tmp_default);
-	__mirror_mode = false;
-	throw CannotEnableMirroringException("Could not create temp files");
-      }
-
       mirror_config = new SQLiteConfiguration();
-      mirror_config->load(tmp_volatile, tmp_default);
+      mirror_config->load(":memory:", ":memory:");
 
       __mirror_init_barrier = new InterruptibleBarrier(2);
       mutex->lock();
@@ -1094,14 +1086,11 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
       __mirror_mode = true;
 
       // wait until all data has been received (or timeout)
-      if (!__mirror_init_barrier->wait(MIRROR_INIT_TOUT,0))
-      {
+      if (! __mirror_init_barrier->wait(__mirror_timeout_sec, 0)) {
         // timeout
         delete mirror_config;
-        unlink(tmp_volatile);
-        unlink(tmp_default);
-        free(tmp_volatile);
-        free(tmp_default);
+	__mirror_init_barrier = NULL;
+	delete __mirror_init_barrier;
         mutex->unlock();
         throw CannotEnableMirroringException("Didn't receive data in time");
       }
@@ -1122,14 +1111,9 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
 
       // delete local temporary mirror database
       delete mirror_config;
-      unlink(tmp_volatile);
-      unlink(tmp_default);
-      free(tmp_volatile);
-      free(tmp_default);
     }
   }
 }
-
 
 
 void

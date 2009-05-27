@@ -99,6 +99,19 @@ class SQLiteConfiguration : public Configuration
 
   virtual void          erase_default(const char *path);
 
+  /** Transaction type.
+   * See SQLite Documentation for BEGIN TRANSACTION.
+   */
+  typedef enum {
+    TRANSACTION_DEFERRED,	/**< Deferred transaction, lock acquired late. */
+    TRANSACTION_IMMEDIATE,	/**< Immediately acquire lock, reading remains possible. */
+    TRANSACTION_EXCLUSIVE	/**< Immediately acquire lock, no more reading or writing possible. */
+  } transaction_type_t;
+
+  void transaction_begin(transaction_type_t ttype = TRANSACTION_DEFERRED);
+  void transaction_commit();
+  void transaction_rollback();
+
  public:
  class SQLiteValueIterator : public Configuration::ValueIterator
   {

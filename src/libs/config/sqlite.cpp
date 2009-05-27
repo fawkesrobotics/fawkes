@@ -422,9 +422,56 @@ SQLiteConfiguration::merge_default(const char *default_file,
 }
 
 
+/** Begin SQL Transaction.
+ * @param ttype transaction type
+ */
+void
+SQLiteConfiguration::transaction_begin(transaction_type_t ttype)
+{
+  const char *sql = "BEGIN DEFERRED TRANSACTION;";
+  if (ttype == TRANSACTION_IMMEDIATE) {
+    sql = "BEGIN IMMEDIATE TRANSACTION;";
+  } else if (ttype == TRANSACTION_EXCLUSIVE) {
+    sql = "BEGIN EXCLUSIVE TRANSACTION;";
+  }
+
+  char *errmsg;
+  if ( (sqlite3_exec(db, sql, NULL, NULL, &errmsg) != SQLITE_OK) ) {
+    throw ConfigurationException("Could not begin transaction (%s)", errmsg);
+  }
+}
+
+/** Commit SQL Transaction. */
+void
+SQLiteConfiguration::transaction_commit()
+{
+  const char *sql = "COMMIT TRANSACTION;";
+
+  char *errmsg;
+  if ( (sqlite3_exec(db, sql, NULL, NULL, &errmsg) != SQLITE_OK) ) {
+    throw ConfigurationException("Could not commit transaction (%s)", errmsg);
+  }
+}
+
+
+/** Rollback SQL Transaction. */
+void
+SQLiteConfiguration::transaction_rollback()
+{
+  const char *sql = "ROLLBACK TRANSACTION;";
+
+  char *errmsg;
+  if ( (sqlite3_exec(db, sql, NULL, NULL, &errmsg) != SQLITE_OK) ) {
+    throw ConfigurationException("Could not rollback transaction (%s)", errmsg);
+  }
+}
+
+
 /** Load configuration.
  * This load the configuration and if requested restores the configuration for the
- * given tag.
+ * given tag. The special name ":memory:" can be used for the \p name and
+ * \p defaults_name parameters, which will cause the appropriate database to
+ * be created in memory only.
  * @param name name of the host-based database. This should be a name of the form
  * hostname.db, where hostname is the unqualified part of the hostname.
  * @param defaults_name name of the default database. Should be default.db
@@ -463,14 +510,16 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
     conf_path = ".";
   }
 
-  if ( (access(__default_file, F_OK) != 0) && (__default_file[0] != '/') ) {
-    // the given path was not found as file, add the config path
-    char *tdf = __default_file;
-    if ( asprintf(&__default_file, "%s/%s", conf_path, tdf) == -1 ) {
+  if (strcmp(__default_file, ":memory:") != 0) {
+    if ( (access(__default_file, F_OK) != 0) && (__default_file[0] != '/') ) {
+      // the given path was not found as file, add the config path
+      char *tdf = __default_file;
+      if ( asprintf(&__default_file, "%s/%s", conf_path, tdf) == -1 ) {
+	free(tdf);
+	throw CouldNotOpenConfigException("Could not create default filename");
+      }
       free(tdf);
-      throw CouldNotOpenConfigException("Could not create default filename");
     }
-    free(tdf);
   }
 
   if ( (access(__default_dump, F_OK) != 0) && (__default_dump[0] != '/') ) {
@@ -483,14 +532,16 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
     free(tdf);
   }
 
-  if ( (access(__host_file, F_OK) != 0) && (__host_file[0] != '/') ) {
-    // the given path was not found as file, add the config path
-    char *thf = __host_file;
-    if ( asprintf(&__host_file, "%s/%s", conf_path, thf) == -1 ) {
+  if (strcmp(__host_file, ":memory:") != 0) {
+    if ( (access(__host_file, F_OK) != 0) && (__host_file[0] != '/') ) {
+      // the given path was not found as file, add the config path
+      char *thf = __host_file;
+      if ( asprintf(&__host_file, "%s/%s", conf_path, thf) == -1 ) {
+	free(thf);
+	throw CouldNotOpenConfigException("Could not create filename");
+      }
       free(thf);
-      throw CouldNotOpenConfigException("Could not create filename");
     }
-    free(thf);
   }
 
   if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, __default_file) == -1 ) {

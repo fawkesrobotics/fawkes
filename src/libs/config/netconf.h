@@ -3,7 +3,7 @@
  *  netconf.h - Fawkes remote configuration access via Fawkes net
  *
  *  Created: Sun Jan 07 15:01:50 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -50,7 +50,7 @@ class CannotEnableMirroringException : public Exception
 class NetworkConfiguration : public Configuration, public FawkesNetworkClientHandler
 {
  public:
-  NetworkConfiguration(FawkesNetworkClient *c);
+  NetworkConfiguration(FawkesNetworkClient *c, unsigned int mirror_timeout_sec);
   virtual ~NetworkConfiguration();
 
   virtual void          copy(Configuration *copyconf);
@@ -185,9 +185,8 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
 
   bool __mirror_mode;
   bool __mirror_mode_before_connection_dead;
+  unsigned int __mirror_timeout_sec;
   SQLiteConfiguration *mirror_config;
-  char *tmp_volatile;
-  char *tmp_default;
 
   bool __connected;
 };
