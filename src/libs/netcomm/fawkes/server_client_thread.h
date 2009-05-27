@@ -57,8 +57,12 @@ class FawkesNetworkServerClientThread : public Thread
   void force_send();
   void connection_died();
 
- private:
+  void stop_slave();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
+ private:
   void recv();
 
   unsigned int                _clid;

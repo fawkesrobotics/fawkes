@@ -103,6 +103,8 @@ class FawkesNetworkServerClientSendThread
     loop_mutex->unlock();
   }
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
 
  private:
   StreamSocket                    *_s;
@@ -147,11 +149,17 @@ FawkesNetworkServerClientThread::FawkesNetworkServerClientThread(StreamSocket *s
 /** Destructor. */
 FawkesNetworkServerClientThread::~FawkesNetworkServerClientThread()
 {
-  _send_slave->cancel();
-  _send_slave->join();
   delete _send_slave;
   delete _s;
   delete _inbound_queue;
+}
+
+/** Stop send slave. */
+void
+FawkesNetworkServerClientThread::stop_slave()
+{
+  _send_slave->cancel();
+  _send_slave->join();
 }
 
 

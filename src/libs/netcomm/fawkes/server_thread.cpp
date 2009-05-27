@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  server_thread.cpp - manage Fawkes network connection
+ *  server_thread.cpp - Fawkes Network Protocol (server part)
  *
  *  Created: Sun Nov 19 15:08:30 2006
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -32,8 +32,9 @@
 #include <netcomm/fawkes/message_content.h>
 #include <core/threading/thread_collector.h>
 #include <core/threading/mutex.h>
+#include <core/exception.h>
 
-#include <cstdio>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -93,8 +94,6 @@ FawkesNetworkServerThread::~FawkesNetworkServerThread()
 }
 
 
-
-
 /** Add a new connection.
  * Called by the NetworkAcceptorThread if a new client connected.
  * @param s socket for new client
@@ -104,19 +103,19 @@ FawkesNetworkServerThread::add_connection(StreamSocket *s) throw()
 {
   FawkesNetworkServerClientThread *client = new FawkesNetworkServerClientThread(s, this);
 
+  clients.lock();
   client->set_clid(next_client_id);
   if ( thread_collector ) {
     thread_collector->add(client);
   } else {
     client->start();
   }
-  clients.lock();
   clients[next_client_id] = client;
-  clients.unlock();
   for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
     (*hit).second->client_connected(next_client_id);
   }
   ++next_client_id;
+  clients.unlock();
 
   wakeup();
 }
@@ -166,14 +165,16 @@ FawkesNetworkServerThread::loop()
   // check for dead clients
   cit = clients.begin();
   while (cit != clients.end()) {
-    if ( ! (*cit).second->alive() ) {
+    if ( ! cit->second->alive() ) {
       if ( thread_collector ) {
 	thread_collector->remove((*cit).second);
       } else {
-	(*cit).second->cancel();
-	(*cit).second->join();
+	cit->second->cancel();
+	cit->second->join();
       }
-      delete (*cit).second;
+      usleep(5000);
+      cit->second->stop_slave();
+      delete cit->second;
       unsigned int clid = (*cit).first;
       ++cit;
       clients.erase(clid);
@@ -275,7 +276,11 @@ FawkesNetworkServerThread::send(FawkesNetworkMessage *msg)
   if ( clients.find(clid) != clients.end() ) {
     if ( clients[clid]->alive() ) {
       clients[clid]->enqueue(msg);
+    } else {
+      throw Exception("Client %u not alive", clid);
     }
+  } else {
+    throw Exception("Client %u not found", clid);
   }
 }
 

@@ -77,6 +77,9 @@ class FawkesNetworkServerThread
 
   void force_send();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   ThreadCollector       *thread_collector;
   unsigned int           next_client_id;
