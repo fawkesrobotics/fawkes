@@ -6,7 +6,7 @@
     <property name="width_request">800</property>
     <property name="height_request">600</property>
     <property name="title" translatable="yes">Skill GUI</property>
-    <property name="icon">soccer_ball.svg</property>
+    <property name="icon">skillgui.svg</property>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
