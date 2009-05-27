@@ -50,7 +50,7 @@ class CannotEnableMirroringException : public Exception
 class NetworkConfiguration : public Configuration, public FawkesNetworkClientHandler
 {
  public:
-  NetworkConfiguration(FawkesNetworkClient *c, unsigned int mirror_timeout_sec);
+  NetworkConfiguration(FawkesNetworkClient *c, unsigned int mirror_timeout_sec = 15);
   virtual ~NetworkConfiguration();
 
   virtual void          copy(Configuration *copyconf);
