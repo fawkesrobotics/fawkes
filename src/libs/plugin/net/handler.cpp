@@ -130,20 +130,30 @@ void
 PluginNetworkHandler::send_load_failure(const char *plugin_name,
 				       unsigned int client_id)
 {
-  plugin_load_failed_msg_t *r = (plugin_load_failed_msg_t *)calloc(1, sizeof(plugin_load_failed_msg_t));
-  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
-  __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOAD_FAILED,
-	      r, sizeof(plugin_load_failed_msg_t));
+  try {
+    plugin_load_failed_msg_t *r = (plugin_load_failed_msg_t *)calloc(1, sizeof(plugin_load_failed_msg_t));
+    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+    __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOAD_FAILED,
+		r, sizeof(plugin_load_failed_msg_t));
+  } catch (Exception &e) {
+    LibLogger::log_warn("PluginNetworkHandler", "Failed to send load failure, exception follows");
+    LibLogger::log_warn("PluginNetworkHandler", e);
+  }
 }
 
 
 void
 PluginNetworkHandler::send_load_success(const char *plugin_name, unsigned int client_id)
 {
-  plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
-  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
-  __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED,
-	      r, sizeof(plugin_loaded_msg_t));
+  try {
+    plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
+    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+    __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED,
+		r, sizeof(plugin_loaded_msg_t));
+  } catch (Exception &e) {
+    LibLogger::log_warn("PluginNetworkHandler", "Failed to send load success, exception follows");
+    LibLogger::log_warn("PluginNetworkHandler", e);
+  }
 }
 
 
@@ -151,8 +161,13 @@ void
 PluginNetworkHandler::send_unloaded(const char *plugin_name)
 {
   __subscribers.lock();
-  for (__ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
-    send_unload_success(plugin_name, *__ssit);
+  try {
+    for (__ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
+      send_unload_success(plugin_name, *__ssit);
+    }
+  } catch (Exception &e) {
+    LibLogger::log_warn("PluginNetworkHandler", "Failed to send unloaded, exception follows");
+    LibLogger::log_warn("PluginNetworkHandler", e);
   }
   __subscribers.unlock();
 }
@@ -162,8 +177,13 @@ void
 PluginNetworkHandler::send_loaded(const char *plugin_name)
 {
   __subscribers.lock();
-  for (__ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
-    send_load_success(plugin_name, *__ssit);
+  try {
+    for (__ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
+      send_load_success(plugin_name, *__ssit);
+    }
+  } catch (Exception &e) {
+    LibLogger::log_warn("PluginNetworkHandler", "Failed to send loaded, exception follows");
+    LibLogger::log_warn("PluginNetworkHandler", e);
   }
   __subscribers.unlock();
 }
@@ -173,20 +193,30 @@ void
 PluginNetworkHandler::send_unload_failure(const char *plugin_name,
 					 unsigned int client_id)
 {
-  plugin_unload_failed_msg_t *r = (plugin_unload_failed_msg_t *)calloc(1, sizeof(plugin_unload_failed_msg_t));
-  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
-  __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOAD_FAILED,
-	      r, sizeof(plugin_unload_failed_msg_t));
+  try {
+    plugin_unload_failed_msg_t *r = (plugin_unload_failed_msg_t *)calloc(1, sizeof(plugin_unload_failed_msg_t));
+    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+    __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOAD_FAILED,
+		r, sizeof(plugin_unload_failed_msg_t));
+  } catch (Exception &e) {
+    LibLogger::log_warn("PluginNetworkHandler", "Failed to send unload failure, exception follows");
+    LibLogger::log_warn("PluginNetworkHandler", e);
+  }
 }
 
 
 void
 PluginNetworkHandler::send_unload_success(const char *plugin_name, unsigned int client_id)
 {
-  plugin_unloaded_msg_t *r = (plugin_unloaded_msg_t *)calloc(1, sizeof(plugin_unloaded_msg_t));
-  strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
-  __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOADED,
-	      r, sizeof(plugin_unloaded_msg_t));
+  try {
+    plugin_unloaded_msg_t *r = (plugin_unloaded_msg_t *)calloc(1, sizeof(plugin_unloaded_msg_t));
+    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+    __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOADED,
+		r, sizeof(plugin_unloaded_msg_t));
+  } catch (Exception &e) {
+    LibLogger::log_warn("PluginNetworkHandler", "Failed to send unload success, exception follows");
+    LibLogger::log_warn("PluginNetworkHandler", e);
+  }
 }
 
 

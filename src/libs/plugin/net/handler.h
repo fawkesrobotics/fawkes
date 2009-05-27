@@ -85,6 +85,9 @@ class PluginNetworkHandler
   void load(const char *plugin_list, unsigned int clid);
   void unload(const char *plugin_list, unsigned int clid);
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   PluginManager     *__manager;
   FawkesNetworkHub  *__hub;
