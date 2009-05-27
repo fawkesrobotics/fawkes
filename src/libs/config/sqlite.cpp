@@ -602,8 +602,8 @@ SQLiteConfiguration::load(const char *tag)
 void
 SQLiteConfiguration::copy(Configuration *copyconf)
 {
-  mutex->lock();
   copyconf->lock();
+  transaction_begin();
   Configuration::ValueIterator *i = copyconf->iterator();
   while ( i->next() ) {
     if ( i->is_float() ) {
@@ -619,8 +619,8 @@ SQLiteConfiguration::copy(Configuration *copyconf)
     }
   }
   delete i;
+  transaction_commit();
   copyconf->unlock();
-  mutex->unlock();
 }
 
 

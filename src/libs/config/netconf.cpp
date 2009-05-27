@@ -126,7 +126,6 @@ NetworkConfiguration::load(const char *name,
 void
 NetworkConfiguration::copy(Configuration *copyconf)
 {
-  mutex->lock();
   copyconf->lock();
   Configuration::ValueIterator *i = copyconf->iterator();
   while ( i->next() ) {
@@ -144,7 +143,6 @@ NetworkConfiguration::copy(Configuration *copyconf)
   }
   delete i;
   copyconf->unlock();
-  mutex->unlock();
 }
 
 
