@@ -44,6 +44,9 @@ class ExampleThread
   virtual void loop();
   virtual void finalize();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   unsigned int m;
   unsigned int modc;

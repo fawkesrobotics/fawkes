@@ -55,6 +55,9 @@ class LaserAcquisitionThread
   unsigned int   get_distance_data_size();
   unsigned int   get_echo_data_size();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  protected:
   fawkes::Mutex    *_data_mutex;
 

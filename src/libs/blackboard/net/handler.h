@@ -55,6 +55,9 @@ class BlackBoardNetworkHandler
   virtual void client_disconnected(unsigned int clid);
   virtual void loop();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   void send_opensuccess(unsigned int clid, Interface *interface);
   void send_openfailure(unsigned int clid, unsigned int errno);

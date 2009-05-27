@@ -57,6 +57,9 @@ class FestivalSynthThread
   virtual bool bb_interface_message_received(fawkes::Interface *interface,
 					     fawkes::Message *message) throw();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   fawkes::SpeechSynthInterface   *__speechsynth_if;
 

@@ -75,6 +75,9 @@ class FvBaseThread
   virtual bool thread_started(fawkes::Thread *thread) throw();
   virtual bool thread_init_failed(fawkes::Thread *thread) throw();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   void cond_recreate_barrier(unsigned int num_cyclic_threads);
 

@@ -72,6 +72,9 @@ class NetworkNameResolverThread : public Thread
 
   virtual void loop();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   NetworkNameResolver  *__resolver;
 #ifdef HAVE_AVAHI

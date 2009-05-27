@@ -42,6 +42,10 @@ class FamThread : public Thread
   RefPtr<FileAlterationMonitor> get_fam();
 
   virtual void loop();
+
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   RefPtr<FileAlterationMonitor> __fam;
   bool                          __own_fam;

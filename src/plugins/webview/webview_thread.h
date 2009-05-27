@@ -66,6 +66,9 @@ class WebviewThread
   static const char *BLACKBOARD_URL_PREFIX;
   static const char *PLUGINS_URL_PREFIX;
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   struct MHD_Daemon    *__daemon;
   WebRequestDispatcher *__dispatcher;

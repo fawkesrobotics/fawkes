@@ -63,6 +63,9 @@ class LuaAgentExecutionThread
   virtual void loop();
   virtual void finalize();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private: /* methods */
   void init_failure_cleanup();
   void process_agdbg_messages();

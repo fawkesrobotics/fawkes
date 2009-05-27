@@ -71,6 +71,9 @@ class SkillerExecutionThread
   void bb_interface_reader_removed(fawkes::Interface *interface,
 				   unsigned int instance_serial) throw();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private: /* methods */
   void init_failure_cleanup();
   void publish_skill_status(std::string &curss);

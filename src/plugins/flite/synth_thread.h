@@ -59,6 +59,9 @@ class FliteSynthThread
   virtual bool bb_interface_message_received(fawkes::Interface *interface,
 					     fawkes::Message *message) throw();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private: /* methods */
   void  play_wave(cst_wave *wave);
   float get_duration(cst_wave *wave);

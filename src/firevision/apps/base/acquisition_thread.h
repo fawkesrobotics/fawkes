@@ -75,6 +75,9 @@ class FvAcquisitionThread
    * base thread. */
   FvAqtVisionThreads       *vision_threads;
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   bool                      __enabled;
 

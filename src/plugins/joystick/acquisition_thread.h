@@ -73,6 +73,9 @@ class JoystickAcquisitionThread
   float *            axis_x_values();
   float *            axis_y_values();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   void init(std::string device_file);
   void open_joystick();

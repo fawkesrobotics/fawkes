@@ -52,6 +52,9 @@ class LaserSensorThread
   virtual void finalize();
   virtual void loop();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   fawkes::Laser360Interface *__laser_if;
 

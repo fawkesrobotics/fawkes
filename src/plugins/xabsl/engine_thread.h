@@ -69,6 +69,9 @@ class XabslEngineThread
 
   unsigned long int current_time();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   xabsl::Engine             *__xe;
   XabslLoggingErrorHandler  *__xleh;

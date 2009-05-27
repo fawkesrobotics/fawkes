@@ -68,6 +68,9 @@ class ConfigNetworkHandler
   virtual void config_value_changed(const char *path, const char *value);
   virtual void config_value_erased(const char *path);
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   void send_value(unsigned int clid, Configuration::ValueIterator *i);
   void send_inv_value(unsigned int clid, const char *path);

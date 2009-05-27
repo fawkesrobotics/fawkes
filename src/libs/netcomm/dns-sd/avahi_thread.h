@@ -80,6 +80,8 @@ class AvahiThread
   void resolve_address(struct sockaddr *addr, socklen_t addrlen,
 		       AvahiResolverHandler *handler);
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
 
  private:
   /* Callbacks */

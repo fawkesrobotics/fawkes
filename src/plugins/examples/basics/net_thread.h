@@ -50,6 +50,9 @@ class ExampleNetworkThread
   virtual void client_connected(unsigned int clid);
   virtual void client_disconnected(unsigned int clid);
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
 };
 
 

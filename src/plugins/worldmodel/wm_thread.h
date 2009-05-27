@@ -61,6 +61,9 @@ class WorldModelThread
 
   void init_failure_cleanup();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   std::string   __cfg_confspace;
 

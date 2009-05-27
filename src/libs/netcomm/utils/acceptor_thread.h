@@ -46,6 +46,9 @@ class NetworkAcceptorThread : public Thread
 
   virtual void loop();
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
   unsigned short int        __port;
   StreamSocket             *__socket;
