@@ -42,7 +42,6 @@ class ThreadList;
 class Mutex;
 class Barrier;
 class InterruptibleBarrier;
-class ReadWriteLock;
 
 class ThreadListSealedException : public Exception
 {
@@ -124,7 +123,6 @@ class ThreadList : private LockList<Thread *>
   char                   *__name;
   bool                    __sealed;
   Mutex                  *__finalize_mutex;
-  ReadWriteLock          *__sync_lock;
   InterruptibleBarrier   *__wnw_barrier;
 
   std::list<std::pair<InterruptibleBarrier *, ThreadList> >  __wnw_bad_barriers;

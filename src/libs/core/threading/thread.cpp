@@ -27,7 +27,6 @@
 #include <core/threading/mutex.h>
 #include <core/threading/barrier.h>
 #include <core/threading/wait_condition.h>
-#include <core/threading/read_write_lock.h>
 #include <core/threading/thread_finalizer.h>
 #include <core/threading/thread_notification_listener.h>
 #include <core/exceptions/software.h>
@@ -257,7 +256,6 @@ Thread::__constructor(const char *name, OpMode op_mode)
   __delete_on_exit  = false;
   __prepfin_hold    = false;
 
-  __finalize_sync_lock = NULL;
   loop_mutex = new Mutex();
   finalize_prepared = false;
 
@@ -328,16 +326,6 @@ Thread::operator=(const Thread &t)
 void
 Thread::init()
 {
-}
-
-
-/** Set finalize barrier.
- * @param lock sync lock
- */
-void
-Thread::set_finalize_sync_lock(ReadWriteLock *lock)
-{
-  __finalize_sync_lock = lock;
 }
 
 
@@ -749,10 +737,10 @@ Thread::set_prepfin_hold(bool hold)
 		    "been called already()", __name);
   }
   __prepfin_hold = hold;
-  __prepfin_hold_mutex->unlock();
   if ( ! hold ) {
     __prepfin_hold_waitcond->wake_all();
   }
+  __prepfin_hold_mutex->unlock();
 }
 
 
@@ -895,6 +883,16 @@ Thread::operator==(const Thread &thread)
  * Executes loop() in each cycle. This is the default implementation and if
  * you need a more specific behaviour you can override this run() method and
  * ignore loop().
+ * Although this method is declared virtual, it should not be overridden, other
+ * than with the following trivial snippet:
+ * @code
+ * protected: virtual void run() { Thread::run(); }
+ * @endcode
+ * The reason not to do other changes is that it contains complex house keeping
+ * code that the system relies on. The reason for still allowing the override is
+ * solely to make reading back traces in your debugger easier. Because now there
+ * the class name of the thread sub-class will appear in the back trace, while
+ * it would not otherwise.
  */
 void
 Thread::run()
@@ -907,8 +905,6 @@ Thread::run()
 
   forever {
 
-    if ( __finalize_sync_lock )  __finalize_sync_lock->lock_for_read();
-
     loopinterrupt_antistarve_mutex->stopby();
 
     loop_mutex->lock();
@@ -916,8 +912,6 @@ Thread::run()
       loop();
     }
     loop_mutex->unlock();
-
-    if ( __finalize_sync_lock )  __finalize_sync_lock->unlock();
 
     test_cancel();
     if ( __barrier ) {

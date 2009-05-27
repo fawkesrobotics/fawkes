@@ -37,7 +37,6 @@ namespace fawkes {
 class WaitCondition;
 class Mutex;
 class Barrier;
-class ReadWriteLock;
 class ThreadNotificationListener;
 class ThreadList;
 template <typename Type> class LockList;
@@ -121,6 +120,7 @@ class Thread {
   void exit();
   void test_cancel();
   void yield();
+  virtual void run();
 
   void set_opmode(OpMode op_mode);
   void set_prepfin_conc_loop(bool concurrent);
@@ -139,9 +139,7 @@ class Thread {
   Thread(const char *name, pthread_t id);
   Thread & operator=(const Thread &t);
   static void * entry(void * pthis);
-  void run();
   void __constructor(const char *name, OpMode op_mode);
-  void set_finalize_sync_lock(ReadWriteLock *lock);
   void notify_of_failed_init();
   void notify_of_startup();
   void lock_sleep_mutex();
@@ -159,8 +157,6 @@ class Thread {
   bool           __prepfin_hold;
   Mutex         *__prepfin_hold_mutex;
   WaitCondition *__prepfin_hold_waitcond;
-
-  ReadWriteLock *__finalize_sync_lock;
 
   bool           __started;
   bool           __cancelled;

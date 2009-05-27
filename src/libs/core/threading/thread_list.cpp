@@ -28,7 +28,6 @@
 #include <core/threading/mutex.h>
 #include <core/threading/barrier.h>
 #include <core/threading/interruptible_barrier.h>
-#include <core/threading/read_write_lock.h>
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
 
@@ -97,7 +96,6 @@ ThreadList::ThreadList(const char *tlname)
   __name = strdup(tlname);
   __sealed = false;
   __finalize_mutex = new Mutex();
-  __sync_lock = new ReadWriteLock();
   __wnw_barrier = NULL;
   clear();
 }
@@ -114,7 +112,6 @@ ThreadList::ThreadList(bool maintain_barrier, const char *tlname)
   __name = strdup(tlname);
   __sealed = false;
   __finalize_mutex = new Mutex();
-  __sync_lock = new ReadWriteLock();
   __wnw_barrier = NULL;
   clear();
   if ( maintain_barrier)  update_barrier();
@@ -130,7 +127,6 @@ ThreadList::ThreadList(const ThreadList &tl)
   __name = strdup(tl.__name);
   __sealed = tl.__sealed;
   __finalize_mutex = new Mutex();
-  __sync_lock = new ReadWriteLock();
   __wnw_barrier = NULL;
   if ( tl.__wnw_barrier != NULL )  update_barrier();
 }
@@ -140,7 +136,6 @@ ThreadList::ThreadList(const ThreadList &tl)
 ThreadList::~ThreadList()
 {
   free(__name);
-  delete __sync_lock;
   delete __finalize_mutex;
   delete __wnw_barrier;
 }
@@ -346,8 +341,6 @@ ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
     try {
       initializer->init(*i);
       (*i)->init();
-      if ((*i)->opmode() != Thread::OPMODE_CONTINUOUS )
-	(*i)->set_finalize_sync_lock(__sync_lock);
       initialized_threads.push_back(*i);
     } catch (CannotInitializeThreadException &e) {
       notify_of_failed_init();
@@ -474,7 +467,6 @@ bool
 ThreadList::prepare_finalize(ThreadFinalizer *finalizer)
 {
   __finalize_mutex->lock();
-  __sync_lock->lock_for_write();
   bool can_finalize = true;
   CannotFinalizeThreadException cfte("Cannot finalize one or more threads");
   bool threw_exception = false;
@@ -495,7 +487,6 @@ ThreadList::prepare_finalize(ThreadFinalizer *finalizer)
       threw_exception = true;
     }
   }
-  __sync_lock->unlock();
   __finalize_mutex->unlock();
   if ( threw_exception ) {
     throw cfte;
@@ -528,8 +519,6 @@ ThreadList::finalize(ThreadFinalizer *finalizer)
     }
     try {
       (*i)->finalize();
-      if ((*i)->opmode() != Thread::OPMODE_CONTINUOUS )
-	(*i)->set_finalize_sync_lock(NULL);
     } catch (CannotFinalizeThreadException &e) {
       error = true;
       me.append("AspectIniFin called Thread[%s]::finalize() which failed", (*i)->name());
