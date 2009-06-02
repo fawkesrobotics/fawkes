@@ -152,6 +152,7 @@ class Thread {
   Barrier       *__startup_barrier;
   mutable Mutex *__sleep_mutex;
   WaitCondition *__sleep_condition;
+  unsigned int   __pending_wakeups;
   Barrier       *__barrier;
 
   bool           __prepfin_hold;
@@ -161,7 +162,7 @@ class Thread {
   bool           __started;
   bool           __cancelled;
   bool           __detached;
-  bool           __wakeup_finished;
+  bool           __waiting_for_wakeup;
   bool           __delete_on_exit;
   char          *__name;
 

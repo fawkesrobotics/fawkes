@@ -27,6 +27,7 @@
 #include <core/threading/mutex.h>
 #include <core/threading/barrier.h>
 #include <core/threading/wait_condition.h>
+#include <core/threading/read_write_lock.h>
 #include <core/threading/thread_finalizer.h>
 #include <core/threading/thread_notification_listener.h>
 #include <core/exceptions/software.h>
@@ -240,11 +241,13 @@ Thread::__constructor(const char *name, OpMode op_mode)
   __notification_listeners = new LockList<ThreadNotificationListener *>();
 
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
-    __sleep_mutex     = new Mutex();
-    __sleep_condition = new WaitCondition(__sleep_mutex);
+    __sleep_mutex        = new Mutex();
+    __sleep_condition    = new WaitCondition(__sleep_mutex);
+    __waiting_for_wakeup = true;
   } else {
-    __sleep_condition = NULL;
-    __sleep_mutex = NULL;
+    __sleep_condition    = NULL;
+    __sleep_mutex        = NULL;
+    __waiting_for_wakeup = false;
   }
 
   __thread_id       = 0;
@@ -252,9 +255,9 @@ Thread::__constructor(const char *name, OpMode op_mode)
   __barrier         = NULL;
   __started         = false;
   __cancelled       = false;
-  __wakeup_finished = false;
   __delete_on_exit  = false;
   __prepfin_hold    = false;
+  __pending_wakeups = 0;
 
   loop_mutex = new Mutex();
   finalize_prepared = false;
@@ -825,19 +828,8 @@ Thread::waiting() const
 {
   if (__op_mode != OPMODE_WAITFORWAKEUP) {
     return false;
-  }
-
-  if (__sleep_mutex->try_lock()) {
-    // We have to check __wakeup_finished. It can happen that a threads was woken
-    // up, another thread waiting for the same barrier timed out, then checks
-    // for waiting() to decide if the thread recovered and it seems to have
-    // recovered only because the wakeup wasn't through yet and the wait
-    // condition still blocks, but will unblock at an unpredictable time
-    bool waiting = __wakeup_finished;
-    __sleep_mutex->unlock();
-    return waiting;
   } else {
-    return false;
+    return __waiting_for_wakeup;
   }
 }
 
@@ -900,7 +892,8 @@ Thread::run()
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
     // Wait for initial wakeup
     __sleep_condition->wait();
-    __wakeup_finished = true;
+    __pending_wakeups -= 1;
+    __sleep_mutex->unlock();
   }
 
   forever {
@@ -919,8 +912,13 @@ Thread::run()
       __barrier = NULL;
     }
     if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
-      __sleep_condition->wait();
-      __wakeup_finished = true;
+      __sleep_mutex->lock();
+      while (__pending_wakeups == 0) {
+	__waiting_for_wakeup = true;
+	__sleep_condition->wait();
+      }
+      __pending_wakeups -= 1;
+      __sleep_mutex->unlock();
     }
     yield();
   }
@@ -936,8 +934,12 @@ Thread::wakeup()
 {
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
     __sleep_mutex->lock();
-    __wakeup_finished = false;
-    __sleep_condition->wake_all();
+    __pending_wakeups += 1;
+    if (__waiting_for_wakeup) {
+      // currently waiting
+      __waiting_for_wakeup = false;
+      __sleep_condition->wake_all();
+    }
     __sleep_mutex->unlock();
   }
 }
@@ -958,9 +960,18 @@ Thread::wakeup(Barrier *barrier)
   }
 
   __sleep_mutex->lock();
-  __wakeup_finished = false;
+  if ( ! __waiting_for_wakeup && __barrier && (__barrier != barrier)) {
+    __sleep_mutex->unlock();
+    throw Exception("Thread already running with other barrier, cannot wakeup");
+  }
+
+  __pending_wakeups += 1;
   __barrier = barrier;
-  __sleep_condition->wake_all();
+  if (__waiting_for_wakeup) {
+    // currently waiting
+    __waiting_for_wakeup = false;
+    __sleep_condition->wake_all();
+  }
   __sleep_mutex->unlock();
 }
 
