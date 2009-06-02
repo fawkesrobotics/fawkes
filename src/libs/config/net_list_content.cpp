@@ -99,6 +99,13 @@ ConfigListContent::append(Configuration::ValueIterator *i)
     append_bool(i->path(), i->get_bool(), i->is_default());
   } else if ( i->is_string() ) {
     append_string(i->path(), i->get_string().c_str(), i->is_default());
+  } else {
+    throw TypeMismatchException("Invalid type of config iterator value");
+  }
+
+  std::string comment = i->get_comment();
+  if (comment != "") {
+    append_comment(i->path(), comment.c_str(), i->is_default());
   }
 }
 
@@ -182,13 +189,37 @@ ConfigListContent::append_bool(const char *path, bool b, bool def_val)
 void
 ConfigListContent::append_string(const char *path, const char *s, bool def_val)
 {
-  config_list_string_entity_t cle;
-  memset(&cle, 0, sizeof(cle));
-  strncpy(cle.header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
-  cle.header.type = MSG_CONFIG_STRING_VALUE;
-  cle.header.cp.is_default = (def_val ? 1 : 0);
-  strncpy(cle.s, s, CONFIG_MSG_MAX_STRING_LENGTH);
-  config_list->append(&cle, sizeof(cle));
+  size_t s_length = strlen(s);
+  size_t sl = sizeof(config_list_string_entity_t) + s_length;
+  config_list_string_entity_t *cle = (config_list_string_entity_t *)calloc(1, sl);
+  strncpy(cle->header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
+  cle->header.type = MSG_CONFIG_STRING_VALUE;
+  cle->header.cp.is_default = (def_val ? 1 : 0);
+  cle->s_length = s_length;
+  strcpy(cle->s, s);
+  config_list->append(cle, sl);
+  free(cle);
+}
+
+
+/** Append comment.
+ * @param path of value
+ * @param s comment
+ * @param def_val true if this is a default value, false otherwise
+ */
+void
+ConfigListContent::append_comment(const char *path, const char *s, bool def_val)
+{
+  size_t s_length = strlen(s);
+  size_t sl = sizeof(config_list_string_entity_t) + s_length;
+  config_list_comment_entity_t *cle = (config_list_comment_entity_t *)calloc(1, sl);
+  strncpy(cle->header.cp.path, path, CONFIG_MSG_PATH_LENGTH);
+  cle->header.type = MSG_CONFIG_COMMENT_VALUE;
+  cle->header.cp.is_default = (def_val ? 1 : 0);
+  cle->s_length = s_length;
+  strcpy(cle->s, s);
+  config_list->append(cle, sl);
+  free(cle);
 }
 
 

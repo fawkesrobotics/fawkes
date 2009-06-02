@@ -61,12 +61,13 @@ class PluginManager
 
   // for ConfigurationChangeHandler
   virtual void config_tag_changed(const char *new_tag);
-  virtual void config_value_changed(const char *path, int value);
-  virtual void config_value_changed(const char *path, unsigned int value);
-  virtual void config_value_changed(const char *path, float value);
-  virtual void config_value_changed(const char *path, bool value);
-  virtual void config_value_changed(const char *path, const char *value);
-  virtual void config_value_erased(const char *path);
+  virtual void config_value_changed(const char *path, bool is_default, int value);
+  virtual void config_value_changed(const char *path, bool is_default, unsigned int value);
+  virtual void config_value_changed(const char *path, bool is_default, float value);
+  virtual void config_value_changed(const char *path, bool is_default, bool value);
+  virtual void config_value_changed(const char *path, bool is_default, const char *value);
+  virtual void config_comment_changed(const char *path, bool is_default, const char *comment);
+  virtual void config_value_erased(const char *path, bool is_default);
 
   // for FamListener
   virtual void fam_event(const char *filename, unsigned int mask);

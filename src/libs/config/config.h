@@ -88,6 +88,8 @@ class Configuration
     virtual bool          get_bool()                                      = 0;
     virtual std::string   get_string()                                    = 0;
 
+    virtual std::string   get_comment()                                   = 0;
+
     virtual bool          is_default()                                    = 0;
   };
 
@@ -117,19 +119,20 @@ class Configuration
   virtual bool            get_bool(const char *path)                      = 0;
   virtual std::string     get_string(const char *path)                    = 0;
   virtual ValueIterator * get_value(const char *path)                     = 0;
+  virtual std::string     get_type(const char *path)                      = 0;
+  virtual std::string     get_comment(const char *path)                   = 0;
+  virtual std::string     get_default_comment(const char *path)           = 0;
 
-  virtual void          set_float(const char *path,
-				  float f)                                = 0;
-  virtual void          set_uint(const char *path,
-				 unsigned int uint)                       = 0;
-  virtual void          set_int(const char *path,
-				int i)                                    = 0;
-  virtual void          set_bool(const char *path,
-				 bool b)                                  = 0;
-  virtual void          set_string(const char *path,
-				   std::string s)                         = 0;
-  virtual void          set_string(const char *path,
-				   const char *s)                         = 0;
+  virtual void          set_float(const char *path, float f)              = 0;
+  virtual void          set_uint(const char *path, unsigned int uint)     = 0;
+  virtual void          set_int(const char *path, int i)                  = 0;
+  virtual void          set_bool(const char *path, bool b)                = 0;
+  virtual void          set_string(const char *path, std::string &s)      = 0;
+  virtual void          set_string(const char *path, const char *s)       = 0;
+  virtual void          set_comment(const char *path,
+				    const char *comment)                  = 0;
+  virtual void          set_comment(const char *path,
+				    std::string &comment)                 = 0;
 
   virtual void          erase(const char *path)                           = 0;
 
@@ -139,9 +142,14 @@ class Configuration
   virtual void          set_default_int(const char *path, int i)          = 0;
   virtual void          set_default_bool(const char *path, bool b)        = 0;
   virtual void          set_default_string(const char *path,
-					   std::string s)                 = 0;
+					   std::string &s)                 = 0;
   virtual void          set_default_string(const char *path,
 					   const char *s)                 = 0;
+
+  virtual void          set_default_comment(const char *path,
+					    const char *comment)          = 0;
+  virtual void          set_default_comment(const char *path,
+					    std::string &comment)         = 0;
 
   virtual void          erase_default(const char *path)                   = 0;
 

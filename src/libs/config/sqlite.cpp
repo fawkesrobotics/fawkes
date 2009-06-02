@@ -95,11 +95,24 @@ namespace fawkes {
   "WHERE path=? AND NOT EXISTS "					\
   "(SELECT path FROM config WHERE dc.path = path)"
 
+#define SQL_SELECT_COMMENT						\
+  "SELECT comment, 0 AS is_default FROM config WHERE path=?"
+
+#define SQL_SELECT_DEFAULT_COMMENT					\
+  "SELECT comment, 1 AS is_default FROM defaults.config AS dc "		\
+  "WHERE dc.path=?"
+
 #define SQL_UPDATE_VALUE						\
   "UPDATE config SET value=? WHERE path=?"
 
 #define SQL_UPDATE_DEFAULT_VALUE					\
   "UPDATE defaults.config SET value=? WHERE path=?"
+
+#define SQL_UPDATE_COMMENT						\
+  "UPDATE config SET comment=? WHERE path=?"
+
+#define SQL_UPDATE_DEFAULT_COMMENT					\
+  "UPDATE defaults.config SET comment=? WHERE path=?"
 
 #define SQL_INSERT_VALUE						\
   "INSERT INTO config (path, type, value) VALUES (?, ?, ?)"
@@ -467,16 +480,6 @@ SQLiteConfiguration::transaction_rollback()
 }
 
 
-/** Load configuration.
- * This load the configuration and if requested restores the configuration for the
- * given tag. The special name ":memory:" can be used for the \p name and
- * \p defaults_name parameters, which will cause the appropriate database to
- * be created in memory only.
- * @param name name of the host-based database. This should be a name of the form
- * hostname.db, where hostname is the unqualified part of the hostname.
- * @param defaults_name name of the default database. Should be default.db
- * @param tag optional tag to restore
- */
 void
 SQLiteConfiguration::load(const char *name, const char *defaults_name,
 			  const char *tag)
@@ -590,15 +593,6 @@ SQLiteConfiguration::load(const char *tag)
 }
 
 
-/*
- * @fn void Configuration::copy(Configuration *copyconf)
- * Copy all values from the given configuration.
- * All values from the given configuration are copied. Old values are not erased
- * so that the copied values will overwrite existing values, new values are
- * created, but values existent in current config but not in the copie config
- * will remain unchanged.
- * @param copyconf configuration to copy
- */ 
 void
 SQLiteConfiguration::copy(Configuration *copyconf)
 {
@@ -615,7 +609,8 @@ SQLiteConfiguration::copy(Configuration *copyconf)
     } else if ( i->is_bool() ) {
       set_bool(i->path(), i->get_bool());
     } else if ( i->is_string() ) {
-      set_string(i->path(), i->get_string());
+      std::string s = i->get_string();
+      set_string(i->path(), s);
     }
   }
   delete i;
@@ -654,9 +649,6 @@ SQLiteConfiguration::tag(const char *tag)
 }
 
 
-/** List of tags.
- * @return list of tags
- */
 std::list<std::string>
 SQLiteConfiguration::tags()
 {
@@ -677,10 +669,6 @@ SQLiteConfiguration::tags()
 }
 
 
-/** Check if a given value exists.
- * @param path path to value
- * @return true if the value exists, false otherwise
- */
 bool
 SQLiteConfiguration::exists(const char *path)
 {
@@ -709,10 +697,6 @@ SQLiteConfiguration::exists(const char *path)
 }
 
 
-/** Get type of value.
- * @param path path to value
- * @return string representation of value type
- */
 std::string
 SQLiteConfiguration::get_type(const char *path)
 {
@@ -747,10 +731,66 @@ SQLiteConfiguration::get_type(const char *path)
 }
 
 
-/** Check if a value is of type float
- * @param path path to value
- * @return true if the value exists and is of type float
- */
+std::string
+SQLiteConfiguration::get_comment(const char *path)
+{
+  sqlite3_stmt *stmt;
+  const char   *tail;
+  std::string   s = "";
+
+  mutex->lock();
+
+  if ( sqlite3_prepare(db, SQL_SELECT_COMMENT, -1, &stmt, &tail) != SQLITE_OK ) {
+    mutex->unlock();
+    throw ConfigurationException("get_comment: Preparation SQL failed");
+  }
+  if ( sqlite3_bind_text(stmt, 1, path, -1, NULL) != SQLITE_OK ) {
+    mutex->unlock();
+    throw ConfigurationException("get_comment: Binding text for path failed (1)");
+  }
+  if ( sqlite3_step(stmt) == SQLITE_ROW ) {
+    s = (char *)sqlite3_column_text(stmt, 0);
+    sqlite3_finalize(stmt);
+    mutex->unlock();
+    return s;
+  } else {
+    sqlite3_finalize(stmt);
+    mutex->unlock();
+    throw ConfigEntryNotFoundException(path);
+  }
+}
+
+
+std::string
+SQLiteConfiguration::get_default_comment(const char *path)
+{
+  sqlite3_stmt *stmt;
+  const char   *tail;
+  std::string   s = "";
+
+  mutex->lock();
+
+  if ( sqlite3_prepare(db, SQL_SELECT_DEFAULT_COMMENT, -1, &stmt, &tail) != SQLITE_OK ) {
+    mutex->unlock();
+    throw ConfigurationException("get_default_comment: Preparation SQL failed");
+  }
+  if ( sqlite3_bind_text(stmt, 1, path, -1, NULL) != SQLITE_OK ) {
+    mutex->unlock();
+    throw ConfigurationException("get_default_comment: Binding text for path failed (1)");
+  }
+  if ( sqlite3_step(stmt) == SQLITE_ROW ) {
+    s = (char *)sqlite3_column_text(stmt, 0);
+    sqlite3_finalize(stmt);
+    mutex->unlock();
+    return s;
+  } else {
+    sqlite3_finalize(stmt);
+    mutex->unlock();
+    throw ConfigEntryNotFoundException(path);
+  }
+}
+
+
 bool
 SQLiteConfiguration::is_float(const char *path)
 {
@@ -758,10 +798,6 @@ SQLiteConfiguration::is_float(const char *path)
 }
 
 
-/** Check if a value is of type unsigned int
- * @param path path to value
- * @return true if the value exists and is of type unsigned int
- */
 bool
 SQLiteConfiguration::is_uint(const char *path)
 {
@@ -769,10 +805,6 @@ SQLiteConfiguration::is_uint(const char *path)
 }
 
 
-/** Check if a value is of type int
- * @param path path to value
- * @return true if the value exists and is of type int
- */
 bool
 SQLiteConfiguration::is_int(const char *path)
 {
@@ -780,10 +812,6 @@ SQLiteConfiguration::is_int(const char *path)
 }
 
 
-/** Check if a value is of type bool
- * @param path path to value
- * @return true if the value exists and is of type bool
- */
 bool
 SQLiteConfiguration::is_bool(const char *path)
 {
@@ -791,10 +819,6 @@ SQLiteConfiguration::is_bool(const char *path)
 }
 
 
-/** Check if a value is of type string
- * @param path path to value
- * @return true if the value exists and is of type string
- */
 bool
 SQLiteConfiguration::is_string(const char *path)
 {
@@ -802,10 +826,6 @@ SQLiteConfiguration::is_string(const char *path)
 }
 
 
-/** Check if a given value is a default value.
- * @param path path to value
- * @return true if the value is default, false otherwise
- */
 bool
 SQLiteConfiguration::is_default(const char *path)
 {
@@ -876,10 +896,6 @@ SQLiteConfiguration::get_value(const char *path,
 }
 
 
-/** Get value from configuration which is of type float
- * @param path path to value
- * @return value
- */
 float
 SQLiteConfiguration::get_float(const char *path)
 {
@@ -899,10 +915,6 @@ SQLiteConfiguration::get_float(const char *path)
 }
 
 
-/** Get value from configuration which is of type unsigned int
- * @param path path to value
- * @return value
- */
 unsigned int
 SQLiteConfiguration::get_uint(const char *path)
 {
@@ -926,10 +938,6 @@ SQLiteConfiguration::get_uint(const char *path)
 }
 
 
-/** Get value from configuration which is of type int
- * @param path path to value
- * @return value
- */
 int
 SQLiteConfiguration::get_int(const char *path)
 {
@@ -949,10 +957,6 @@ SQLiteConfiguration::get_int(const char *path)
 }
 
 
-/** Get value from configuration which is of type bool
- * @param path path to value
- * @return value
- */
 bool
 SQLiteConfiguration::get_bool(const char *path)
 {
@@ -971,10 +975,6 @@ SQLiteConfiguration::get_bool(const char *path)
   }
 }
 
-/** Get value from configuration which is of type string
- * @param path path to value
- * @return value
- */
 std::string
 SQLiteConfiguration::get_string(const char *path)
 {
@@ -996,11 +996,6 @@ SQLiteConfiguration::get_string(const char *path)
 }
 
 
-/** Get value from configuration.
- * @param path path to value
- * @return value iterator for just this one value, maybe invalid if value does not
- * exists.
- */
 Configuration::ValueIterator *
 SQLiteConfiguration::get_value(const char *path)
 {
@@ -1022,17 +1017,17 @@ SQLiteConfiguration::get_value(const char *path)
 
 
 sqlite3_stmt *
-SQLiteConfiguration::prepare_update_value(const char *sql,
+SQLiteConfiguration::prepare_update(const char *sql,
 					  const char *path)
 {
   sqlite3_stmt *stmt;
   const char   *tail;
 
   if ( sqlite3_prepare(db, sql, -1, &stmt, &tail) != SQLITE_OK ) {
-    throw ConfigurationException("prepare_update_value/prepare", sqlite3_errmsg(db));
+    throw ConfigurationException("prepare_update/prepare", sqlite3_errmsg(db));
   }
   if ( sqlite3_bind_text(stmt, 2, path, -1, NULL) != SQLITE_OK ) {
-    ConfigurationException ce("prepare_update_value/bind", sqlite3_errmsg(db));
+    ConfigurationException ce("prepare_update/bind", sqlite3_errmsg(db));
     sqlite3_finalize(stmt);
     throw ce;
   }
@@ -1073,10 +1068,6 @@ SQLiteConfiguration::execute_insert_or_update(sqlite3_stmt *stmt)
 }
 
 
-/** Set new value in configuration of type float
- * @param path path to value
- * @param f new value
- */
 void
 SQLiteConfiguration::set_float(const char *path, float f)
 {
@@ -1085,7 +1076,7 @@ SQLiteConfiguration::set_float(const char *path, float f)
   mutex->lock();
 
   try {
-    stmt = prepare_update_value(SQL_UPDATE_VALUE, path);
+    stmt = prepare_update(SQL_UPDATE_VALUE, path);
     if ( (sqlite3_bind_double(stmt, 1, f) != SQLITE_OK) ) {
       ConfigurationException ce("set_float/update/bind", sqlite3_errmsg(db));
       sqlite3_finalize(stmt);
@@ -1124,16 +1115,12 @@ SQLiteConfiguration::set_float(const char *path, float f)
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, f);
+    (*i)->config_value_changed(path, false, f);
   }
   delete h;
 }
 
 
-/** Set new value in configuration of type unsigned int
- * @param path path to value
- * @param uint new value
- */
 void
 SQLiteConfiguration::set_uint(const char *path, unsigned int uint)
 {
@@ -1142,7 +1129,7 @@ SQLiteConfiguration::set_uint(const char *path, unsigned int uint)
   mutex->lock();
 
   try {
-    stmt = prepare_update_value(SQL_UPDATE_VALUE, path);
+    stmt = prepare_update(SQL_UPDATE_VALUE, path);
     if ( (sqlite3_bind_int(stmt, 1, uint) != SQLITE_OK) ) {
       ConfigurationException ce("set_uint/update/bind", sqlite3_errmsg(db));
       sqlite3_finalize(stmt);
@@ -1180,16 +1167,12 @@ SQLiteConfiguration::set_uint(const char *path, unsigned int uint)
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, uint);
+    (*i)->config_value_changed(path, false, uint);
   }
   delete h;
 }
 
 
-/** Set new value in configuration of type int
- * @param path path to value
- * @param i new value
- */
 void
 SQLiteConfiguration::set_int(const char *path, int i)
 {
@@ -1198,7 +1181,7 @@ SQLiteConfiguration::set_int(const char *path, int i)
   mutex->lock();
 
   try {
-    stmt = prepare_update_value(SQL_UPDATE_VALUE, path);
+    stmt = prepare_update(SQL_UPDATE_VALUE, path);
     if ( (sqlite3_bind_int(stmt, 1, i) != SQLITE_OK) ) {
       ConfigurationException ce("set_int/update/bind", sqlite3_errmsg(db));
       sqlite3_finalize(stmt);
@@ -1237,16 +1220,12 @@ SQLiteConfiguration::set_int(const char *path, int i)
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator j = h->begin(); j != h->end(); ++j) {
-    (*j)->config_value_changed(path, i);
+    (*j)->config_value_changed(path, false, i);
   }
   delete h;
 }
 
 
-/** Set new value in configuration of type bool
- * @param path path to value
- * @param b new value
- */
 void
 SQLiteConfiguration::set_bool(const char *path, bool b)
 {
@@ -1255,7 +1234,7 @@ SQLiteConfiguration::set_bool(const char *path, bool b)
   mutex->lock();
 
   try {
-    stmt = prepare_update_value(SQL_UPDATE_VALUE, path);
+    stmt = prepare_update(SQL_UPDATE_VALUE, path);
     if ( (sqlite3_bind_int(stmt, 1, (b ? 1 : 0)) != SQLITE_OK) ) {
       ConfigurationException ce("set_bool/update/bind", sqlite3_errmsg(db));
       sqlite3_finalize(stmt);
@@ -1294,7 +1273,7 @@ SQLiteConfiguration::set_bool(const char *path, bool b)
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, b);
+    (*i)->config_value_changed(path, false, b);
   }
   delete h;
 }
@@ -1311,7 +1290,7 @@ SQLiteConfiguration::set_string(const char *path,
   size_t s_length = strlen(s);
 
   try {
-    stmt = prepare_update_value(SQL_UPDATE_VALUE, path);
+    stmt = prepare_update(SQL_UPDATE_VALUE, path);
     if ( (sqlite3_bind_text(stmt, 1, s, s_length, SQLITE_STATIC) != SQLITE_OK) ) {
       ConfigurationException ce("set_string/update/bind", sqlite3_errmsg(db));
       sqlite3_finalize(stmt);
@@ -1350,27 +1329,67 @@ SQLiteConfiguration::set_string(const char *path,
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, s);
+    (*i)->config_value_changed(path, false, s);
   }
   delete h;
 }
 
 
-/** Set new value in configuration of type string
- * @param path path to value
- * @param s new value
- */
 void
-SQLiteConfiguration::set_string(const char *path, std::string s)
+SQLiteConfiguration::set_string(const char *path, std::string &s)
 {
   set_string(path, s.c_str());
 }
 
 
-/** Erase the given value from the configuration. It is not an error if the value does
- * not exists before deletion.
- * @param path path to value
- */
+void
+SQLiteConfiguration::set_comment(const char *path, const char *comment)
+{
+  sqlite3_stmt *stmt = NULL;
+
+  mutex->lock();
+
+  size_t s_length = strlen(comment);
+
+  try {
+    stmt = prepare_update(SQL_UPDATE_COMMENT, path);
+    if ( (sqlite3_bind_text(stmt, 1, comment, s_length, SQLITE_STATIC) != SQLITE_OK) ) {
+      ConfigurationException ce("set_string/update/bind", sqlite3_errmsg(db));
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw ce;
+    }
+    execute_insert_or_update(stmt);
+    sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
+    mutex->unlock();
+    throw;
+  }
+
+  if ( sqlite3_changes(db) == 0 ) {
+    // value did not exist, insert
+    mutex->unlock();
+    throw ConfigurationException("set_comment", "Cannot set comment for inexistent path");
+  }
+
+  mutex->unlock();
+
+  ChangeHandlerList *h = find_handlers(path);
+  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
+    (*i)->config_comment_changed(path, false, comment);
+  }
+  delete h;
+}
+
+
+void
+SQLiteConfiguration::set_comment(const char *path, std::string &comment)
+{
+  set_comment(path, comment.c_str());
+}
+
+
 void
 SQLiteConfiguration::erase(const char *path)
 {
@@ -1396,7 +1415,7 @@ SQLiteConfiguration::erase(const char *path)
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_erased(path);
+    (*i)->config_value_erased(path, false);
   }
   delete h;
 }
@@ -1410,7 +1429,7 @@ SQLiteConfiguration::set_default_float(const char *path, float f)
   mutex->lock();
 
   try {
-    stmt = prepare_update_value(SQL_UPDATE_DEFAULT_VALUE, path);
+    stmt = prepare_update(SQL_UPDATE_DEFAULT_VALUE, path);
     if ( (sqlite3_bind_double(stmt, 1, f) != SQLITE_OK) ) {
       ConfigurationException ce("set_default_float/update/bind", sqlite3_errmsg(db));
       sqlite3_finalize(stmt);
@@ -1449,7 +1468,7 @@ SQLiteConfiguration::set_default_float(const char *path, float f)
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, f);
+    (*i)->config_value_changed(path, true, f);
   }
   delete h;
 }
@@ -1463,7 +1482,7 @@ SQLiteConfiguration::set_default_uint(const char *path, unsigned int uint)
   mutex->lock();
 
   try {
-    stmt = prepare_update_value(SQL_UPDATE_DEFAULT_VALUE, path);
+    stmt = prepare_update(SQL_UPDATE_DEFAULT_VALUE, path);
     if ( (sqlite3_bind_int(stmt, 1, uint) != SQLITE_OK) ) {
       ConfigurationException ce("set_default_uint/update/bind", sqlite3_errmsg(db));
       sqlite3_finalize(stmt);
@@ -1501,7 +1520,7 @@ SQLiteConfiguration::set_default_uint(const char *path, unsigned int uint)
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, uint);
+    (*i)->config_value_changed(path, true, uint);
   }
   delete h;
 }
@@ -1514,7 +1533,7 @@ SQLiteConfiguration::set_default_int(const char *path, int i)
   mutex->lock();
 
   try {
-    stmt = prepare_update_value(SQL_UPDATE_DEFAULT_VALUE, path);
+    stmt = prepare_update(SQL_UPDATE_DEFAULT_VALUE, path);
     if ( (sqlite3_bind_int(stmt, 1, i) != SQLITE_OK) ) {
       ConfigurationException ce("set_default_int/update/bind", sqlite3_errmsg(db));
       sqlite3_finalize(stmt);
@@ -1552,7 +1571,7 @@ SQLiteConfiguration::set_default_int(const char *path, int i)
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator j = h->begin(); j != h->end(); ++j) {
-    (*j)->config_value_changed(path, i);
+    (*j)->config_value_changed(path, true, i);
   }
   delete h;
 }
@@ -1566,7 +1585,7 @@ SQLiteConfiguration::set_default_bool(const char *path, bool b)
   mutex->lock();
 
   try {
-    stmt = prepare_update_value(SQL_UPDATE_DEFAULT_VALUE, path);
+    stmt = prepare_update(SQL_UPDATE_DEFAULT_VALUE, path);
     if ( (sqlite3_bind_int(stmt, 1, (b ? 1 : 0)) != SQLITE_OK) ) {
       ConfigurationException ce("set_default_bool/update/bind", sqlite3_errmsg(db));
       sqlite3_finalize(stmt);
@@ -1605,7 +1624,7 @@ SQLiteConfiguration::set_default_bool(const char *path, bool b)
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, b);
+    (*i)->config_value_changed(path, true, b);
   }
   delete h;
 }
@@ -1621,7 +1640,7 @@ SQLiteConfiguration::set_default_string(const char *path,
   size_t s_length = strlen(s);
 
   try {
-    stmt = prepare_update_value(SQL_UPDATE_DEFAULT_VALUE, path);
+    stmt = prepare_update(SQL_UPDATE_DEFAULT_VALUE, path);
     if ( (sqlite3_bind_text(stmt, 1, s, s_length, SQLITE_STATIC) != SQLITE_OK) ) {
       ConfigurationException ce("set_default_string/update/bind", sqlite3_errmsg(db));
       sqlite3_finalize(stmt);
@@ -1660,16 +1679,63 @@ SQLiteConfiguration::set_default_string(const char *path,
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_changed(path, s);
+    (*i)->config_value_changed(path, true, s);
   }
   delete h;
 }
 
 
 void
-SQLiteConfiguration::set_default_string(const char *path, std::string s)
+SQLiteConfiguration::set_default_string(const char *path, std::string &s)
 {
   set_default_string(path, s.c_str());
+}
+
+
+void
+SQLiteConfiguration::set_default_comment(const char *path, const char *comment)
+{
+  sqlite3_stmt *stmt = NULL;
+
+  mutex->lock();
+  size_t s_length = strlen(comment);
+
+  try {
+    stmt = prepare_update(SQL_UPDATE_DEFAULT_COMMENT, path);
+    if ( (sqlite3_bind_text(stmt, 1, comment, s_length, SQLITE_STATIC) != SQLITE_OK) ) {
+      ConfigurationException ce("set_default_comment/update/bind", sqlite3_errmsg(db));
+      sqlite3_finalize(stmt);
+      mutex->unlock();
+      throw ce;
+    }
+    execute_insert_or_update(stmt);
+    sqlite3_finalize(stmt);
+  } catch (Exception &e) {
+    if ( stmt != NULL ) sqlite3_finalize(stmt);
+    mutex->unlock();
+    throw;
+  }
+
+  if ( sqlite3_changes(db) == 0 ) {
+    // value did not exist, insert
+    mutex->unlock();
+    throw ConfigurationException("set_default_comment", "Cannot set comment for inexistent path");
+  }
+
+  mutex->unlock();
+
+  ChangeHandlerList *h = find_handlers(path);
+  for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
+    (*i)->config_comment_changed(path, true, comment);
+  }
+  delete h;
+}
+
+
+void
+SQLiteConfiguration::set_default_comment(const char *path, std::string &comment)
+{
+  set_default_comment(path, comment.c_str());
 }
 
 
@@ -1698,7 +1764,7 @@ SQLiteConfiguration::erase_default(const char *path)
 
   ChangeHandlerList *h = find_handlers(path);
   for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-    (*i)->config_value_erased(path);
+    (*i)->config_value_erased(path, true);
   }
   delete h;
 }
@@ -1804,7 +1870,7 @@ SQLiteConfiguration::search(const char *path)
  */
 SQLiteConfiguration::SQLiteValueIterator::SQLiteValueIterator(::sqlite3_stmt *stmt, void *p)
 {
-  this->stmt = stmt;
+  __stmt = stmt;
   __p = p;
 }
 
@@ -1812,9 +1878,9 @@ SQLiteConfiguration::SQLiteValueIterator::SQLiteValueIterator(::sqlite3_stmt *st
 /** Destructor. */
 SQLiteConfiguration::SQLiteValueIterator::~SQLiteValueIterator()
 {
-  if ( stmt != NULL ) {
-    sqlite3_finalize(stmt);
-    stmt = NULL;
+  if ( __stmt != NULL ) {
+    sqlite3_finalize(__stmt);
+    __stmt = NULL;
   }
   if ( __p != NULL ) {
     free(__p);
@@ -1829,13 +1895,13 @@ SQLiteConfiguration::SQLiteValueIterator::~SQLiteValueIterator()
 bool
 SQLiteConfiguration::SQLiteValueIterator::next()
 {
-  if ( stmt == NULL) return false;
+  if ( __stmt == NULL) return false;
 
-  if (sqlite3_step(stmt) == SQLITE_ROW ) {
+  if (sqlite3_step(__stmt) == SQLITE_ROW ) {
     return true;
   } else {
-    sqlite3_finalize(stmt);
-    stmt = NULL;
+    sqlite3_finalize(__stmt);
+    __stmt = NULL;
     return false;
   }
 }
@@ -1848,7 +1914,7 @@ SQLiteConfiguration::SQLiteValueIterator::next()
 bool
 SQLiteConfiguration::SQLiteValueIterator::valid()
 {
-  return ( stmt != NULL);
+  return ( __stmt != NULL);
 }
 
 
@@ -1858,7 +1924,7 @@ SQLiteConfiguration::SQLiteValueIterator::valid()
 const char *
 SQLiteConfiguration::SQLiteValueIterator::path()
 {
-  return (const char *)sqlite3_column_text(stmt, 0);
+  return (const char *)sqlite3_column_text(__stmt, 0);
 }
 
 
@@ -1868,7 +1934,7 @@ SQLiteConfiguration::SQLiteValueIterator::path()
 const char *
 SQLiteConfiguration::SQLiteValueIterator::type()
 {
-  return (const char *)sqlite3_column_text(stmt, 1);
+  return (const char *)sqlite3_column_text(__stmt, 1);
 }
 
 
@@ -1878,7 +1944,7 @@ SQLiteConfiguration::SQLiteValueIterator::type()
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_float()
 {
-  return (strcmp("float", (const char *)sqlite3_column_text(stmt, 1)) == 0);
+  return (strcmp("float", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
 }
 
 
@@ -1888,7 +1954,7 @@ SQLiteConfiguration::SQLiteValueIterator::is_float()
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_uint()
 {
-  return (strcmp("unsigned int", (const char *)sqlite3_column_text(stmt, 1)) == 0);
+  return (strcmp("unsigned int", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
 }
 
 /** Check if current value is a int.
@@ -1897,7 +1963,7 @@ SQLiteConfiguration::SQLiteValueIterator::is_uint()
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_int()
 {
-  return (strcmp("int", (const char *)sqlite3_column_text(stmt, 1)) == 0);
+  return (strcmp("int", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
 }
 
 
@@ -1907,7 +1973,7 @@ SQLiteConfiguration::SQLiteValueIterator::is_int()
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_bool()
 {
-  return (strcmp("bool", (const char *)sqlite3_column_text(stmt, 1)) == 0);
+  return (strcmp("bool", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
 }
 
 
@@ -1917,13 +1983,13 @@ SQLiteConfiguration::SQLiteValueIterator::is_bool()
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_string()
 {
-  return (strcmp("string", (const char *)sqlite3_column_text(stmt, 1)) == 0);
+  return (strcmp("string", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
 }
 
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_default()
 {
-  return (sqlite3_column_int(stmt, 4) == 1);
+  return (sqlite3_column_int(__stmt, 4) == 1);
 }
 
 
@@ -1933,7 +1999,7 @@ SQLiteConfiguration::SQLiteValueIterator::is_default()
 float
 SQLiteConfiguration::SQLiteValueIterator::get_float()
 {
-  return (float)sqlite3_column_double(stmt, 2);
+  return (float)sqlite3_column_double(__stmt, 2);
 }
 
 
@@ -1943,7 +2009,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_float()
 unsigned int
 SQLiteConfiguration::SQLiteValueIterator::get_uint()
 {
-  int i = sqlite3_column_int(stmt, 2);
+  int i = sqlite3_column_int(__stmt, 2);
   if( i < 0 ) {
     return 0;
   } else {
@@ -1958,7 +2024,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_uint()
 int
 SQLiteConfiguration::SQLiteValueIterator::get_int()
 {
-  return sqlite3_column_int(stmt, 2);
+  return sqlite3_column_int(__stmt, 2);
 }
 
 /** Get bool value.
@@ -1967,7 +2033,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_int()
 bool
 SQLiteConfiguration::SQLiteValueIterator::get_bool()
 {
-  return (sqlite3_column_int(stmt, 2) != 0);
+  return (sqlite3_column_int(__stmt, 2) != 0);
 }
 
 /** Get string value.
@@ -1976,7 +2042,18 @@ SQLiteConfiguration::SQLiteValueIterator::get_bool()
 std::string
 SQLiteConfiguration::SQLiteValueIterator::get_string()
 {
-  return (const char *)sqlite3_column_text(stmt, 2);
+  return (const char *)sqlite3_column_text(__stmt, 2);
 }
+
+/** Get comment.
+ * @return string comment value
+ */
+std::string
+SQLiteConfiguration::SQLiteValueIterator::get_comment()
+{
+  const char *c = (const char *)sqlite3_column_text(__stmt, 3);
+  return c ? c : "";
+}
+
 
 } // end namespace fawkes

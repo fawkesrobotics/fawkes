@@ -68,34 +68,28 @@ class SQLiteConfiguration : public Configuration
   virtual bool            get_bool(const char *path);
   virtual std::string     get_string(const char *path);
   virtual ValueIterator * get_value(const char *path);
+  virtual std::string     get_comment(const char *path);
+  virtual std::string     get_default_comment(const char *path);
 
-  virtual void          set_float(const char *path,
-				  float f);
-  virtual void          set_uint(const char *path,
-				 unsigned int uint);
-  virtual void          set_int(const char *path,
-				int i);
-  virtual void          set_bool(const char *path,
-				 bool b);
-  virtual void          set_string(const char *path,
-				   std::string s);
-  virtual void          set_string(const char *path,
-				   const char *s);
+  virtual void          set_float(const char *path, float f);
+  virtual void          set_uint(const char *path, unsigned int uint);
+  virtual void          set_int(const char *path, int i);
+  virtual void          set_bool(const char *path, bool b);
+  virtual void          set_string(const char *path, std::string &s);
+  virtual void          set_string(const char *path, const char *s);
+  virtual void          set_comment(const char *path, std::string &comment);
+  virtual void          set_comment(const char *path, const char *comment);
 
   virtual void          erase(const char *path);
 
-  virtual void          set_default_float(const char *path,
-				  float f);
-  virtual void          set_default_uint(const char *path,
-				 unsigned int uint);
-  virtual void          set_default_int(const char *path,
-				int i);
-  virtual void          set_default_bool(const char *path,
-				 bool b);
-  virtual void          set_default_string(const char *path,
-				   std::string s);
-  virtual void          set_default_string(const char *path,
-				   const char *s);
+  virtual void          set_default_float(const char *path, float f);
+  virtual void          set_default_uint(const char *path, unsigned int uint);
+  virtual void          set_default_int(const char *path, int i);
+  virtual void          set_default_bool(const char *path, bool b);
+  virtual void          set_default_string(const char *path, std::string &s);
+  virtual void          set_default_string(const char *path, const char *s);
+  virtual void          set_default_comment(const char *path, const char *comment);
+  virtual void          set_default_comment(const char *path, std::string &comment);
 
   virtual void          erase_default(const char *path);
 
@@ -140,8 +134,10 @@ class SQLiteConfiguration : public Configuration
     virtual bool          get_bool();
     virtual std::string   get_string();
 
+    virtual std::string   get_comment();
+
    private:
-    ::sqlite3_stmt *stmt;
+    ::sqlite3_stmt *__stmt;
     void *__p;
   };
 
@@ -157,8 +153,7 @@ class SQLiteConfiguration : public Configuration
   std::string     get_type(const char *table, const char *path);
   bool            exists(const char *sql, const char *path);
   ::sqlite3_stmt *  get_value(const char *type, const char *path);
-  ::sqlite3_stmt *  prepare_update_value(const char *sql,
-				       const char *path);
+  ::sqlite3_stmt *  prepare_update(const char *sql, const char *path);
   ::sqlite3_stmt *  prepare_insert_value(const char *sql, const char *type,
 				       const char *path);
   void            execute_insert_or_update(sqlite3_stmt *stmt);

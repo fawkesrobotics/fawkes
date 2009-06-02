@@ -46,34 +46,46 @@ namespace fawkes {
  * loaded.
  * @param new_tag new tag
  *
- * @fn void ConfigurationChangeHandler::config_value_changed(const char *path, int value)
+ * @fn void ConfigurationChangeHandler::config_value_changed(const char *path, bool is_default, int value)
  * Called whenever an int value has changed.
  * @param path path of value
+ * @param is_default true if modified value is a default value, false otherwise
  * @param value new value
  *
- * @fn void ConfigurationChangeHandler::config_value_changed(const char *path, unsigned int value)
+ * @fn void ConfigurationChangeHandler::config_value_changed(const char *path, bool is_default, unsigned int value)
  * Called whenever an unsigned int value has changed.
  * @param path path of value
+ * @param is_default true if modified value is a default value, false otherwise
  * @param value new value
  *
- * @fn void ConfigurationChangeHandler::config_value_changed(const char *path, float value)
+ * @fn void ConfigurationChangeHandler::config_value_changed(const char *path, bool is_default, float value)
  * Called whenever an float value has changed.
  * @param path path of value
+ * @param is_default true if modified value is a default value, false otherwise
  * @param value new value
  *
- * @fn virtual void ConfigurationChangeHandler::config_value_changed(const char *path, bool value)
+ * @fn virtual void ConfigurationChangeHandler::config_value_changed(const char *path, bool is_default, bool value)
  * Called whenever an boolean value has changed.
  * @param path path of value
+ * @param is_default true if modified value is a default value, false otherwise
  * @param value new value
  *
- * @fn void ConfigurationChangeHandler::config_value_changed(const char *path, const char *value)
+ * @fn void ConfigurationChangeHandler::config_value_changed(const char *path, bool is_default, const char *value)
  * Called whenever a string value has changed.
  * @param path path of value
+ * @param is_default true if modified value is a default value, false otherwise
  * @param value new value
  *
- * @fn void ConfigurationChangeHandler::config_value_erased(const char *path)
+ * @fn void ConfigurationChangeHandler::config_comment_changed(const char *path, bool is_default, const char *comment)
+ * Called whenever a comment has changed.
+ * @param path path of value
+ * @param is_default true if modified comment is of a default value, false otherwise
+ * @param comment new comment
+ *
+ * @fn void ConfigurationChangeHandler::config_value_erased(const char *path, bool is_default)
  * Called whenever a value has been erased from the config.
  * @param path path of value
+ * @param is_default true if erased value was a default value, false otherwise
  */
 
 

@@ -61,12 +61,13 @@ class ConfigNetworkHandler
 
   /* from ConfigurationChangeHandler interface */
   virtual void config_tag_changed(const char *new_location);
-  virtual void config_value_changed(const char *path, int value);
-  virtual void config_value_changed(const char *path, unsigned int value);
-  virtual void config_value_changed(const char *path, float value);
-  virtual void config_value_changed(const char *path, bool value);
-  virtual void config_value_changed(const char *path, const char *value);
-  virtual void config_value_erased(const char *path);
+  virtual void config_value_changed(const char *path, bool is_default, int value);
+  virtual void config_value_changed(const char *path, bool is_default, unsigned int value);
+  virtual void config_value_changed(const char *path, bool is_default, float value);
+  virtual void config_value_changed(const char *path, bool is_default, bool value);
+  virtual void config_value_changed(const char *path, bool is_default, const char *value);
+  virtual void config_comment_changed(const char *path, bool is_default, const char *comment);
+  virtual void config_value_erased(const char *path, bool is_default);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -81,6 +82,16 @@ class ConfigNetworkHandler
       T * m = (T *)calloc(1, sizeof(T));
       strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
       m->cp.is_default = is_default;
+      return m;
+    }
+
+  template <typename T>
+    T *  prepare_string_msg(const char *path, bool is_default, size_t s_length)
+    {
+      T * m = (T *)calloc(1, sizeof(T) + s_length);
+      strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
+      m->cp.is_default = is_default;
+      m->s_length = s_length;
       return m;
     }
 

@@ -63,34 +63,39 @@ class ConfigChangeWatcherTool : public ConfigurationChangeHandler, public Signal
     printf("--> New tag loaded: %s\n", new_tag);
   }
 
-  virtual void config_value_changed(const char *path, int value)
+  virtual void config_value_changed(const char *path, bool is_default, int value)
   {
-    printf("? %-55s| %-8s| %-14i\n", path, "int", value);
+    printf("%s %-55s| %-8s| %-14i\n", is_default ? "*" : " ", path, "int", value);
   }
 
-  virtual void config_value_changed(const char *path, unsigned int value)
+  virtual void config_value_changed(const char *path, bool is_default, unsigned int value)
   {
-    printf("? %-55s| %-8s| %-14u\n", path, "uint", value);
+    printf("%s %-55s| %-8s| %-14u\n", is_default ? "*" : " ", path, "uint", value);
   }
 
-  virtual void config_value_changed(const char *path, float value)
+  virtual void config_value_changed(const char *path, bool is_default, float value)
   {
-    printf("? %-55s| %-8s| %-14f\n", path, "float", value);
+    printf("%s %-55s| %-8s| %-14f\n", is_default ? "*" : " ", path, "float", value);
   }
 
-  virtual void config_value_changed(const char *path, bool value)
+  virtual void config_value_changed(const char *path, bool is_default, bool value)
   {
-    printf("? %-55s| %-8s| %-14s\n", path, "bool", (value ? "true" : "false"));
+    printf("%s %-55s| %-8s| %-14s\n", is_default ? "*" : " ", path, "bool", (value ? "true" : "false"));
   }
 
-  virtual void config_value_changed(const char *path, const char *value)
+  virtual void config_value_changed(const char *path, bool is_default, const char *value)
   {
-    printf("? %-55s| %-8s| %-14s\n", path, "string", value);
+    printf("%s %-55s| %-8s| %-14s\n", is_default ? "*" : " ", path, "string", value);
   }
 
-  virtual void config_value_erased(const char *path)
+  virtual void config_comment_changed(const char *path, bool is_default, const char *comment)
   {
-    printf("? %-55s| %-8s| %-14s\n", path, "", "ERASED");
+    printf("%s %s: %s\n", is_default ? "C" : "c", path, comment);
+  }
+
+  virtual void config_value_erased(const char *path, bool is_default)
+  {
+    printf("%s %-55s| %-8s| %-14s\n", is_default ? "*" : " ", path, "", "ERASED");
   }
 
 
@@ -139,6 +144,14 @@ print_line(Configuration::ValueIterator *i)
   } else if ( i->is_string() ) {
     printf("%s %-55s| %-8s| %-14s\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_string().c_str());
   }
+  try {
+    std::string comment = i->get_comment();
+    if (comment != "") {
+      printf("C %-55s: %s\n", i->path(), comment.c_str());
+    }
+  } catch (Exception &e) {
+    // maybe there is no comment, ignore it...
+  }
 }
 
 
@@ -161,6 +174,12 @@ print_usage(const char *program_name)
 	    << "    Set default value for the given path to the given type and value" << std::endl
 	    << "    where type is one of float/uint/int/bool/string. The type" << std::endl
 	    << "    is only necessary if you are creating a new value" << std::endl << std::endl
+	    << "  set_comment <path> <comment>" << std::endl
+	    << "    Set comment for the given path to the given value. The value at" << std::endl
+	    << "    the given path must already exist in the host-specific configuration." << std::endl << std::endl
+	    << "  set_default_comment <path> <comment>" << std::endl
+	    << "    Set default comment for the given path to the given value. The value at" << std::endl
+	    << "    the given path must already exist in the default configuration." << std::endl << std::endl
 	    << "  erase <path>" << std::endl
 	    << "    Erase value for given path from config" << std::endl
 	    << "  erase_default <path>" << std::endl
@@ -211,7 +230,7 @@ main(int argc, char **argv)
   } else if ((strcmp("set", args[0]) == 0) || (strcmp("set_default", args[0]) == 0)) {
     bool set_def = (strcmp("set_default", args[0]) == 0);
     if (args.size() >= 3) {
-      // we have at least "set component path value"
+      // we have at least "set path value"
       printf("Requesting old value for %s\n", args[1]);
       Configuration::ValueIterator *i = netconf->get_value(args[1]);
       print_header();
@@ -316,7 +335,22 @@ main(int argc, char **argv)
 
       }
     } else {
-      printf("Usage: %s set <component> <path> <value> [type]\n", argp.program_name());
+      printf("Usage: %s set <path> <value> [type]\n", argp.program_name());
+    }
+  } else if ((strcmp("set_comment", args[0]) == 0) ||
+	     (strcmp("set_default_comment", args[0]) == 0)) {
+    bool set_def = (strcmp("set_default_comment", args[0]) == 0);
+    if (args.size() >= 3) {
+      // we have at least "set_comment path value"
+
+      if ( ! set_def ) {
+	netconf->set_comment(args[1], args[2]);
+      } else {
+	netconf->set_default_comment(args[1], args[2]);
+      }
+
+    } else {
+      printf("Usage: %s set_(default_)comment <path> <value>\n", argp.program_name());
     }
   } else if ((strcmp("erase", args[0]) == 0) || (strcmp("erase_default", args[0]) == 0)) {
     bool erase_def = (strcmp("erase_default", args[0]) == 0);
@@ -348,7 +382,7 @@ main(int argc, char **argv)
       }
     } else {
       // Error!
-      printf("You must supply component and path arguments\n");
+      printf("You must supply path argument\n");
     }
   } else if (strcmp("watch", args[0]) == 0) {
     try {

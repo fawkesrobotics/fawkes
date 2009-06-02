@@ -28,7 +28,7 @@
 
 namespace fawkes {
 
-/** @class Configuration config/config.h
+/** @class Configuration <config/config.h>
  * Interface for configuration handling.
  * We know that half of robotics is about parameter tuning. The Configuration
  * interface defines a unified way of storing parameters and other
@@ -135,6 +135,30 @@ namespace fawkes {
  * @return value iterator for just this one value, maybe invalid if value does not
  * exists.
  *
+ * @fn std::string Configuration::get_type(const char *path)
+ * Get type of value at given path.
+ * @param path path to value
+ * @return string representation of type, one of float, unsigned int, int, bool,
+ * or string
+ * @exception ConfigurationException shall be thrown if value does not exist or
+ * on any other error.
+ *
+ * @fn std::string Configuration::get_comment(const char *path)
+ * Get comment of value at given path.
+ * The value at the given path must exist in the host-specific configuration.
+ * @param path path to value
+ * @return comment
+ * @exception ConfigEntryNotFoundException shall be thrown if value does not exist
+ * @exception ConfigurationException shall be thrown on any other error
+ *
+ * @fn std::string Configuration::get_default_comment(const char *path)
+ * Get comment of value at given path.
+ * The value at the given path must exist in the default configuration.
+ * @param path path to value
+ * @return comment
+ * @exception ConfigEntryNotFoundException shall be thrown if value does not exist
+ * @exception ConfigurationException shall be thrown on any other error
+ *
  * 
  * @fn void Configuration::set_float(const char *path, float f)
  * Set new value in configuration of type float
@@ -156,7 +180,7 @@ namespace fawkes {
  * @param path path to value
  * @param b new bool value
  * 
- * @fn void Configuration::set_string(const char *path, std::string s)
+ * @fn void Configuration::set_string(const char *path, std::string &s)
  * Set new value in configuration of type string
  * @param path path to value
  * @param s new string value
@@ -166,6 +190,17 @@ namespace fawkes {
  * Just takes an good ol' char array instead of a std::string.
  * @param path path to value
  * @param s new string value
+ *
+ * @fn void Configuration::set_comment(const char *path, std::string &comment)
+ * Set new comment for existing value.
+ * @param path path to value
+ * @param comment new comment string
+ *
+ * @fn void Configuration::set_comment(const char *path, const char *comment)
+ * Set new comment for existing value. Works like the aforementioned method.
+ * Just takes an good ol' char array instead of a std::string.
+ * @param path path to value
+ * @param comment new comment string
  *
  * @fn void Configuration::erase(const char *path)
  * Erase the given value from the configuration. It is not an error if the value does
@@ -192,7 +227,7 @@ namespace fawkes {
  * @param path path to value
  * @param b new bool value
  * 
- * @fn void Configuration::set_default_string(const char *path, std::string s)
+ * @fn void Configuration::set_default_string(const char *path, std::string &s)
  * Set new default value in configuration of type string
  * @param path path to value
  * @param s new string value
@@ -202,6 +237,18 @@ namespace fawkes {
  * Just takes an good ol' char array instead of a std::string.
  * @param path path to value
  * @param s new string value
+ *
+ * @fn void Configuration::set_default_comment(const char *path, std::string &comment)
+ * Set new default comment for existing default configuration value.
+ * @param path path to value
+ * @param comment new comment string
+ *
+ * @fn void Configuration::set_default_comment(const char *path, const char *comment)
+ * Set new default comment for existing default configuration value.
+ * Works like the aforementioned method. Just takes an good ol' char array
+ * instead of a std::string.
+ * @param path path to value
+ * @param comment new comment string
  *
  * @fn void Configuration::erase_default(const char *path)
  * Erase the given default value from the configuration. It is not an error if the value does
@@ -320,7 +367,7 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...
 }
 
 
-/** @class Configuration::ValueIterator config/config.h
+/** @class Configuration::ValueIterator <config/config.h>
  * Iterator interface to iterate over config values. This does not implement a
  * classic iterator interface with begin and end nodes but rather mimics a more
  * Java-like interface where you iterate over the entries in a while loop until
@@ -393,6 +440,10 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...
  * @fn std::string Configuration::ValueIterator::get_string()
  * Get string value.
  * @return value
+ *
+ * @fn std::string Configuration::ValueIterator::get_comment()
+ * Get comment of value.
+ * @return comment
  *
  */
 

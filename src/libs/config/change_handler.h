@@ -3,7 +3,7 @@
  *  change_handler.h - Fawkes configuration change handler interface
  *
  *  Created: Mon Dec 04 18:48:54 2006
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -35,12 +35,13 @@ class ConfigurationChangeHandler
   virtual ~ConfigurationChangeHandler();
 
   virtual void config_tag_changed(const char *new_tag)                       = 0;
-  virtual void config_value_changed(const char *path, int value)             = 0;
-  virtual void config_value_changed(const char *path, unsigned int value)    = 0;
-  virtual void config_value_changed(const char *path, float value)           = 0;
-  virtual void config_value_changed(const char *path, bool value)            = 0;
-  virtual void config_value_changed(const char *path, const char *value)     = 0;
-  virtual void config_value_erased(const char *path)                         = 0;
+  virtual void config_value_changed(const char *path, bool is_default, int value)             = 0;
+  virtual void config_value_changed(const char *path, bool is_default, unsigned int value)    = 0;
+  virtual void config_value_changed(const char *path, bool is_default, float value)           = 0;
+  virtual void config_value_changed(const char *path, bool is_default, bool value)            = 0;
+  virtual void config_value_changed(const char *path, bool is_default, const char *value)     = 0;
+  virtual void config_comment_changed(const char *path, bool is_default, const char *comment) = 0;
+  virtual void config_value_erased(const char *path, bool is_default)                         = 0;
   const char *  config_monitor_prefix();
 
  private:

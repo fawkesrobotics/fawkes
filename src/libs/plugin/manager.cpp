@@ -388,35 +388,41 @@ PluginManager::config_tag_changed(const char *new_tag)
 }
 
 void
-PluginManager::config_value_changed(const char *path, int value)
+PluginManager::config_value_changed(const char *path, bool is_default, int value)
 {
   LibLogger::log_warn("PluginManager", "Integer value changed in meta plugins "
 		      "path prefix at %s, ignoring", path);
 }
 
 void
-PluginManager::config_value_changed(const char *path, unsigned int value)
+PluginManager::config_value_changed(const char *path, bool is_default, unsigned int value)
 {
   LibLogger::log_warn("PluginManager", "Unsigned integer value changed in meta "
 		      "plugins path prefix at %s, ignoring", path);
 }
 
 void
-PluginManager::config_value_changed(const char *path, float value)
+PluginManager::config_value_changed(const char *path, bool is_default, float value)
 {
   LibLogger::log_warn("PluginManager", "Float value changed in meta "
 		      "plugins path prefix at %s, ignoring", path);
 }
 
 void
-PluginManager::config_value_changed(const char *path, bool value)
+PluginManager::config_value_changed(const char *path, bool is_default, bool value)
 {
   LibLogger::log_warn("PluginManager", "Boolean value changed in meta "
 		      "plugins path prefix at %s, ignoring", path);
 }
 
 void
-PluginManager::config_value_changed(const char *path, const char *value)
+PluginManager::config_comment_changed(const char *path, bool is_default, const char *comment)
+{
+  // ignored
+}
+
+void
+PluginManager::config_value_changed(const char *path, bool is_default, const char *value)
 {
   __pinfo_cache.lock();
   std::string p = std::string(path).substr(__meta_plugin_prefix.length());
@@ -437,7 +443,7 @@ PluginManager::config_value_changed(const char *path, const char *value)
 }
 
 void
-PluginManager::config_value_erased(const char *path)
+PluginManager::config_value_erased(const char *path, bool is_default)
 {
   __pinfo_cache.lock();
   std::string p = std::string(path).substr(__meta_plugin_prefix.length());
