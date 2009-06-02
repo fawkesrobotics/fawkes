@@ -84,7 +84,7 @@ WorldModelThread::init()
 
     logger->log_debug("WorldModelThread", "Config space: %s", __cfg_confspace.c_str());
 
-    std::string prefix = "/worldmodel/interfaces/" + __cfg_confspace;
+    std::string prefix = "/worldmodel/interfaces/" + __cfg_confspace + "/";
     std::list<std::string> combos;
     // Read interfaces
     Configuration::ValueIterator *vi = config->search(prefix.c_str());
@@ -100,10 +100,10 @@ WorldModelThread::init()
     combos.unique();
 
     for (std::list<std::string>::iterator i = combos.begin(); i != combos.end(); ++i) {
-      std::string type    = config->get_string((prefix + "/" + *i + "/type").c_str());
-      std::string from_id = config->get_string((prefix + "/" + *i + "/from_id").c_str());
-      std::string to_id   = config->get_string((prefix + "/" + *i + "/to_id").c_str());
-      std::string method  = config->get_string((prefix + "/" + *i + "/method").c_str());
+      std::string type    = config->get_string((prefix + *i + "/type").c_str());
+      std::string from_id = config->get_string((prefix + *i + "/from_id").c_str());
+      std::string to_id   = config->get_string((prefix + *i + "/to_id").c_str());
+      std::string method  = config->get_string((prefix + *i + "/method").c_str());
 
       if (method == "copy") {
 	if (from_id.find_first_of("*?[") == std::string::npos) {
@@ -142,14 +142,14 @@ WorldModelThread::init()
 
   __wi_send_enabled = false;
   try {
-    std::string prefix = "/worldmodel/wi_send/" + __cfg_confspace;
-    __wi_send_enabled = config->get_bool((prefix + "/enable_send").c_str());
+    std::string prefix = "/worldmodel/wi_send/" + __cfg_confspace + "/";
+    __wi_send_enabled = config->get_bool((prefix + "enable_send").c_str());
 
     if (__wi_send_enabled) {
       logger->log_debug(name(), "Sending worldinfo messages enabled");
 
-      std::string pose_id = config->get_string((prefix + "/pose_id").c_str());
-      std::string ball_id = config->get_string((prefix + "/ball_id").c_str());
+      std::string pose_id = config->get_string((prefix + "pose_id").c_str());
+      std::string ball_id = config->get_string((prefix + "ball_id").c_str());
 
       logger->log_debug(name(), "Obtaining pose worldinfo data from interface %s.",
 			pose_id.c_str());
