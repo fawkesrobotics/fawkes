@@ -91,7 +91,11 @@ NetworkLogger::send_message(Logger::LogLevel level, struct timeval *t,
 
   for ( __ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
     NetworkLoggerMessageContent *content_copy = new NetworkLoggerMessageContent(content);
-    hub->send(*__ssit, FAWKES_CID_NETWORKLOGGER, MSGTYPE_LOGMESSAGE, content_copy);
+    try {
+      hub->send(*__ssit, FAWKES_CID_NETWORKLOGGER, MSGTYPE_LOGMESSAGE, content_copy);
+    } catch (Exception &e) {
+      // Boom, can't do anything about it, logging could cause infinite loop...
+    }
   }
   
   delete content;
@@ -116,7 +120,11 @@ NetworkLogger::send_message(Logger::LogLevel level, struct timeval *t,
   
   for ( __ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
     NetworkLoggerMessageContent *content_copy = new NetworkLoggerMessageContent(content);
-    hub->send(*__ssit, FAWKES_CID_NETWORKLOGGER, MSGTYPE_LOGMESSAGE, content_copy);
+    try {
+      hub->send(*__ssit, FAWKES_CID_NETWORKLOGGER, MSGTYPE_LOGMESSAGE, content_copy);
+    } catch (Exception &e) {
+      // Boom, can't do anything about it, logging could cause infinite loop...
+    }
   }
 
   delete content;

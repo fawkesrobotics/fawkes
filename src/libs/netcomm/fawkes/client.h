@@ -101,9 +101,7 @@ class FawkesNetworkClient
   StreamSocket *s;
 
   typedef LockMap<unsigned int, FawkesNetworkClientHandler *> HandlerMap;
-  typedef LockMap<unsigned int, WaitCondition *> WaitCondMap;
   HandlerMap  handlers;
-  WaitCondMap waitconds;
 
   WaitCondition *__connest_waitcond;
   Mutex         *__connest_mutex;
@@ -111,6 +109,8 @@ class FawkesNetworkClient
   bool           __connest_interrupted;
 
   Mutex                         *__recv_mutex;
+  WaitCondition                 *__recv_waitcond;
+  std::map<unsigned int, bool>   __recv_received;
   FawkesNetworkClientRecvThread *__recv_slave;
   FawkesNetworkClientSendThread *__send_slave;
   bool                           __recv_slave_alive;

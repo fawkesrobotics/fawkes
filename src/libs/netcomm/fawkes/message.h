@@ -122,6 +122,25 @@ class FawkesNetworkMessage : public RefCount
       return (MT *)(_msg.payload);
     }
 
+  /** Get correctly casted payload.
+   * Use this method to cast the payload to a specific type. The size is
+   * check as a sanity check and a TypeMismatchException is thrown if the
+   * size does not match. The size of the received message must be greater or
+   * equal to the size of the message type. Useful if message contains a variable
+   * length string.
+   * @return casted message
+   * @exception TypeMismatchException payload size does not match requested type
+   */
+  template <typename MT>
+    MT *
+    msgge() const
+    {
+      if ( payload_size() < sizeof(MT) ) {
+	throw TypeMismatchException("FawkesNetworkMessage: message has incorrect size for this type");
+      }
+      return (MT *)(_msg.payload);
+    }
+
   /** Get correctly parsed output.
    * Use this method to cast the payload to a specific complex type. You can use this
    * routine to parse complex messages that are derived from FawkesNetworkMessageContent.

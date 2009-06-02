@@ -173,7 +173,6 @@ FawkesNetworkServerThread::loop()
 	cit->second->join();
       }
       usleep(5000);
-      cit->second->stop_slave();
       delete cit->second;
       unsigned int clid = (*cit).first;
       ++cit;
