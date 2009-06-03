@@ -155,6 +155,12 @@ namespace fawkes {
   "(SELECT path FROM config WHERE dc.path = path) "			\
   "ORDER BY path"
 
+#define SQL_SELECT_ALL_DEFAULT						\
+  "SELECT *, 1 AS is_default FROM defaults.config"
+
+#define SQL_SELECT_ALL_HOSTSPECIFIC					\
+  "SELECT *, 0 AS is_default FROM config"
+
 #define SQL_DELETE_VALUE						\
   "DELETE FROM config WHERE path=?"
 
@@ -233,7 +239,7 @@ SQLiteConfiguration::~SQLiteConfiguration()
     opened = false;
     if ( sqlite3_close(db) == SQLITE_BUSY ) {
       printf("Boom, we are dead, database cannot be closed because there are open handles\n");
-    } else {
+    } else if ( __default_dump) {
       sqlite3 *tdb;
       if ( sqlite3_open(__default_file, &tdb) == SQLITE_OK ) {
 	try {
@@ -246,9 +252,9 @@ SQLiteConfiguration::~SQLiteConfiguration()
     }
   }
 
-  free(__host_file);
-  free(__default_file);
-  free(__default_dump);
+  if (__host_file)    free(__host_file);
+  if (__default_file) free(__default_file);
+  if (__default_dump) free(__default_dump);
   delete mutex;
 }
 
@@ -422,8 +428,7 @@ SQLiteConfiguration::import(::sqlite3 *tdb, const char *dumpfile)
 
 
 void
-SQLiteConfiguration::import_default(const char *default_file,
-				    const char *default_dump)
+SQLiteConfiguration::import_default(const char *default_dump)
 {
   char *tmpfile = (char *)malloc(strlen(conf_path) + strlen("/tmp_default_XXXXXX") + 1);
   sprintf(tmpfile, "%s/tmp_default_XXXXXX", conf_path);
@@ -553,13 +558,16 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
       __host_file = strdup(hostinfo.short_name());
     }
   }
-  free(__default_file);
-  free(__default_dump);
+
+  if (__default_file)  free(__default_file);
+  if (__default_dump)  free(__default_dump);
   if (defaults_name) {
     __default_file = strdup(defaults_name);
-    __default_dump = (char *)malloc(strlen(__default_file) + 5);
-    strcpy(__default_dump, __default_file);
-    strcat(__default_dump, ".sql");
+    if (strcmp(defaults_name, ":memory:") != 0) {
+      __default_dump = (char *)malloc(strlen(__default_file) + 5);
+      strcpy(__default_dump, __default_file);
+      strcat(__default_dump, ".sql");
+    }
   } else {
     __default_file = strdup("default.db");
     __default_dump = strdup("default.sql");
@@ -581,7 +589,7 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
     }
   }
 
-  if ( (access(__default_dump, F_OK) != 0) && (__default_dump[0] != '/') ) {
+  if (__default_dump && (access(__default_dump, F_OK) != 0) && (__default_dump[0] != '/') ) {
     // the given path was not found as file, add the config path
     char *tdf = __default_dump;
     if ( asprintf(&__default_dump, "%s/%s", conf_path, tdf) == -1 ) {
@@ -606,7 +614,7 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
   if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, __default_file) == -1 ) {
     free(__host_file);
     free(__default_file);
-    free(__default_dump);
+    if (__default_dump) free(__default_dump);
     throw CouldNotOpenConfigException("Could not create attachment SQL");
   }
 
@@ -619,7 +627,7 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
     free(attach_sql);
     free(__host_file);
     free(__default_file);
-    free(__default_dump);
+    if (__default_dump) free(__default_dump);
     sqlite3_close(db);
     throw ce;
   }
@@ -627,8 +635,8 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
 
   init_dbs();
 
-  if ( access(__default_dump, R_OK) == 0 ) {
-    import_default(__default_file, __default_dump);
+  if ( __default_dump && access(__default_dump, F_OK | R_OK) == 0 ) {
+    import_default(__default_dump);
   }
 
   mutex->unlock();
@@ -1864,7 +1872,34 @@ SQLiteConfiguration::iterator()
   const char *tail;
 
   if ( sqlite3_prepare(db, SQL_SELECT_ALL, -1, &stmt, &tail) != SQLITE_OK ) {
-    throw ConfigurationException("begin: Preparation SQL failed");
+    throw ConfigurationException("iterator: Preparation SQL failed");
+  }
+
+  return new SQLiteValueIterator(stmt);
+}
+
+
+Configuration::ValueIterator *
+SQLiteConfiguration::iterator_default()
+{
+  sqlite3_stmt *stmt;
+  const char *tail;
+
+  if ( sqlite3_prepare(db, SQL_SELECT_ALL_DEFAULT, -1, &stmt, &tail) != SQLITE_OK ) {
+    throw ConfigurationException("iterator_default: Preparation SQL failed");
+  }
+
+  return new SQLiteValueIterator(stmt);
+}
+
+Configuration::ValueIterator *
+SQLiteConfiguration::iterator_hostspecific()
+{
+  sqlite3_stmt *stmt;
+  const char *tail;
+
+  if ( sqlite3_prepare(db, SQL_SELECT_ALL_HOSTSPECIFIC, -1, &stmt, &tail) != SQLITE_OK ) {
+    throw ConfigurationException("iterator_hostspecific: Preparation SQL failed");
   }
 
   return new SQLiteValueIterator(stmt);

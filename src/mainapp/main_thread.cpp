@@ -134,22 +134,26 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
   __config = sqliteconf;
   __config->load(__argp->arg("c"), __argp->arg("d"));
 
-  SQLiteConfiguration::SQLiteValueIterator *i = sqliteconf->modified_iterator();
-  while (i->next()) {
-    std::string modtype = i->get_modtype();
-    if (modtype == "changed") {
-      __multi_logger->log_warn("FawkesMainThread",  "Default config value CHANGED: %s (was: %s now: %s)",
-			       i->path(), i->get_oldvalue().c_str(),
-			       i->get_as_string().c_str());
-    } else if (modtype == "erased") {
-      __multi_logger->log_warn("FawkesMainThread",  "Default config value ERASED:  %s",
-			       i->path());
-    } else {
-      __multi_logger->log_debug("FawkesMainThread", "Default config value ADDED:   %s (value: %s)",
-			       i->path(), i->get_as_string().c_str());
+  try {
+    SQLiteConfiguration::SQLiteValueIterator *i = sqliteconf->modified_iterator();
+    while (i->next()) {
+      std::string modtype = i->get_modtype();
+      if (modtype == "changed") {
+	__multi_logger->log_warn("FawkesMainThread",  "Default config value CHANGED: %s (was: %s now: %s)",
+				 i->path(), i->get_oldvalue().c_str(),
+				 i->get_as_string().c_str());
+      } else if (modtype == "erased") {
+	__multi_logger->log_warn("FawkesMainThread",  "Default config value ERASED:  %s",
+				 i->path());
+      } else {
+	__multi_logger->log_debug("FawkesMainThread", "Default config value ADDED:   %s (value: %s)",
+				  i->path(), i->get_as_string().c_str());
+      }
     }
+    delete i;
+  } catch (Exception &e) {
+    __multi_logger->log_warn("FawkesMainThread", "Failed to read modified default config values, no dump?");
   }
-  delete i;
 
   /* Clock */
   __clock = Clock::instance();

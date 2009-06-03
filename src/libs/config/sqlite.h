@@ -147,6 +147,8 @@ class SQLiteConfiguration : public Configuration
   };
 
   ValueIterator * iterator();
+  ValueIterator * iterator_default();
+  ValueIterator * iterator_hostspecific();
   ValueIterator * search(const char *path);
 
   void lock();
@@ -166,7 +168,7 @@ class SQLiteConfiguration : public Configuration
   void execute_insert_or_update(sqlite3_stmt *stmt);
   void dump(::sqlite3 *tdb, const char *dumpfile);
   void import(::sqlite3 *tdb, const char *dumpfile);
-  void import_default(const char *default_file, const char *default_dump);
+  void import_default(const char *default_dump);
 
  private:
   ::sqlite3 *db;

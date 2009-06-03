@@ -131,7 +131,7 @@ print_header()
  * @param i config item to print.
  */
 void
-print_line(Configuration::ValueIterator *i)
+print_line(Configuration::ValueIterator *i, bool show_comment = false)
 {
   if ( i->is_float() ) {
     printf("%s %-55s| %-8s| %-14f\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_float());
@@ -144,13 +144,16 @@ print_line(Configuration::ValueIterator *i)
   } else if ( i->is_string() ) {
     printf("%s %-55s| %-8s| %-14s\n", (i->is_default() ? "*" : " "), i->path(), i->type(), i->get_string().c_str());
   }
-  try {
-    std::string comment = i->get_comment();
-    if (comment != "") {
-      printf("C %-55s: %s\n", i->path(), comment.c_str());
+
+  if (show_comment) {
+    try {
+      std::string comment = i->get_comment();
+      if (comment != "") {
+	printf("C %-55s: %s\n", i->path(), comment.c_str());
+      }
+    } catch (Exception &e) {
+      // maybe there is no comment, ignore it...
     }
-  } catch (Exception &e) {
-    // maybe there is no comment, ignore it...
   }
 }
 
@@ -158,7 +161,7 @@ print_line(Configuration::ValueIterator *i)
 void
 print_usage(const char *program_name)
 {
-  std::cout << "Usage: " << program_name << " <cmd>" << std::endl
+  std::cout << "Usage: " << program_name << " [options] <cmd>" << std::endl
 	    << "where cmd is one of the following:" << std::endl << std::endl
 	    << "  list" << std::endl
 	    << "    List all configuration items" << std::endl << std::endl
@@ -183,7 +186,11 @@ print_usage(const char *program_name)
 	    << "  erase <path>" << std::endl
 	    << "    Erase value for given path from config" << std::endl
 	    << "  erase_default <path>" << std::endl
-	    << "    Erase default value for given path from config" << std::endl
+	    << "    Erase default value for given path from config" << std::endl << std::endl
+	    << "and options is none, one or more of the following:" << std::endl << std::endl
+	    << "  -c   Show comments (only available with list and watch cmd)" << std::endl
+	    << "  -a   Show all values, even double if default and host-specific " << std::endl
+	    << "       values exist (only available with list)" << std::endl
 	    << std::endl;
 }
 
@@ -194,7 +201,7 @@ print_usage(const char *program_name)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "+h");
+  ArgumentParser argp(argc, argv, "+hca");
 
   if ( argp.has_arg("h") ) {
     print_usage(argv[0]);
@@ -395,7 +402,7 @@ main(int argc, char **argv)
     netconf->lock();
     Configuration::ValueIterator *i = netconf->iterator();
     while ( i->next() ) {
-      print_line(i);
+      print_line(i, argp.has_arg("c"));
     }
     delete i;
     netconf->unlock();
@@ -416,11 +423,27 @@ main(int argc, char **argv)
     netconf->lock();
     printf("done\n");
     print_header();
-    Configuration::ValueIterator *i = netconf->iterator();
-    while ( i->next() ) {
-      print_line(i);
+    bool show_comments = argp.has_arg("c");
+    if (argp.has_arg("a")) {
+      printf("DEFAULT ENTRIES\n");
+      Configuration::ValueIterator *i = netconf->iterator_default();
+      while ( i->next() ) {
+	print_line(i, show_comments);
+      }
+      delete i;
+      printf("HOST-SPECIFIC ENTRIES\n");
+      i = netconf->iterator_hostspecific();
+      while ( i->next() ) {
+	print_line(i, show_comments);
+      }
+      delete i;
+    } else {
+      Configuration::ValueIterator *i = netconf->iterator();
+      while ( i->next() ) {
+	print_line(i, show_comments);
+      }
+      delete i;
     }
-    delete i;
     netconf->unlock();
   }
 

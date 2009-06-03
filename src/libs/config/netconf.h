@@ -152,6 +152,8 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   };
 
   ValueIterator * iterator();
+  ValueIterator * iterator_default();
+  ValueIterator * iterator_hostspecific();
   ValueIterator * search(const char *path);
 
   void lock();

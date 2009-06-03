@@ -258,8 +258,25 @@ namespace fawkes {
  * @fn Configuration::ValueIterator * Configuration::iterator()
  * Iterator for all values.
  * Returns an iterator that can be used to iterate over all values in the current
- * configuration.
+ * configuration, it will value the overlay. If a default and a host-specific value
+ * exists you will only see the host-specific value.
  * @return iterator over all values
+ *
+ * @fn Configuration::ValueIterator * Configuration::iterator_default()
+ * Iterator for all default values.
+ * Returns an iterator that can be used to iterate over all default values in
+ * the current default configuration. Note that this might return less paths than
+ * available, because the values for which no default entry exists are not
+ * returned.
+ * @return iterator over all default values
+ *
+ * @fn Configuration::ValueIterator * Configuration::iterator_hostspecific()
+ * Iterator for all host-specific values.
+ * Returns an iterator that can be used to iterate over all host-specific values
+ * in the current configuration. Note that this might return less paths than
+ * available, because the default values for which no host-specific entry exists
+ * are not returned.
+ * @return iterator over all host-specific values
  *
  * @fn Configuration::ValueIterator * Configuration::search(const char *path)
  * Iterator with search results.

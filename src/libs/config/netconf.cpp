@@ -1348,6 +1348,28 @@ NetworkConfiguration::iterator()
 
 
 Configuration::ValueIterator *
+NetworkConfiguration::iterator_default()
+{
+  if ( __mirror_mode ) {
+    return mirror_config->iterator_default();
+  } else {
+    throw Exception("NetworkConfiguration: Iterating only supported in mirror mode");
+  }
+}
+
+
+Configuration::ValueIterator *
+NetworkConfiguration::iterator_hostspecific()
+{
+  if ( __mirror_mode ) {
+    return mirror_config->iterator_hostspecific();
+  } else {
+    throw Exception("NetworkConfiguration: Iterating only supported in mirror mode");
+  }
+}
+
+
+Configuration::ValueIterator *
 NetworkConfiguration::search(const char *path)
 {
   if ( __mirror_mode ) {

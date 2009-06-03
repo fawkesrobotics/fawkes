@@ -154,6 +154,8 @@ class Configuration
   virtual void          erase_default(const char *path)                   = 0;
 
   virtual ValueIterator * iterator()                                      = 0;
+  virtual ValueIterator * iterator_default()                              = 0;
+  virtual ValueIterator * iterator_hostspecific()                         = 0;
 
   virtual ValueIterator * search(const char *path)                        = 0;
 
