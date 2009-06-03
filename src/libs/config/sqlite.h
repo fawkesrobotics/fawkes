@@ -3,7 +3,7 @@
  *  sqlite.h - Fawkes configuration stored in a SQLite database
  *
  *  Created: Wed Dec 06 17:20:41 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -134,7 +134,12 @@ class SQLiteConfiguration : public Configuration
     virtual bool          get_bool();
     virtual std::string   get_string();
 
+    virtual std::string   get_as_string();
+
     virtual std::string   get_comment();
+
+    std::string           get_modtype();
+    std::string           get_oldvalue();
 
    private:
     ::sqlite3_stmt *__stmt;
@@ -148,18 +153,20 @@ class SQLiteConfiguration : public Configuration
   bool try_lock();
   void unlock();
 
+  SQLiteValueIterator * modified_iterator();
+
  private:
-  void            init();
+  void            init_dbs();
   std::string     get_type(const char *table, const char *path);
   bool            exists(const char *sql, const char *path);
   ::sqlite3_stmt *  get_value(const char *type, const char *path);
   ::sqlite3_stmt *  prepare_update(const char *sql, const char *path);
   ::sqlite3_stmt *  prepare_insert_value(const char *sql, const char *type,
 				       const char *path);
-  void            execute_insert_or_update(sqlite3_stmt *stmt);
-  void dump       (::sqlite3 *tdb, const char *dumpfile);
-  void import     (::sqlite3 *tdb, const char *dumpfile);
-  void merge_default(const char *default_file, const char *default_dump);
+  void execute_insert_or_update(sqlite3_stmt *stmt);
+  void dump(::sqlite3 *tdb, const char *dumpfile);
+  void import(::sqlite3 *tdb, const char *dumpfile);
+  void import_default(const char *default_file, const char *default_dump);
 
  private:
   ::sqlite3 *db;

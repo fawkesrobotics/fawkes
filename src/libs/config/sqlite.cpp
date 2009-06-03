@@ -3,7 +3,7 @@
  *  sqlite.cpp - Fawkes configuration stored in a SQLite database
  *
  *  Created: Wed Dec 06 17:23:00 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -73,8 +73,28 @@ namespace fawkes {
   "  PRIMARY KEY (tag, path)\n"						\
   ")"
 
-#define SQL_ATTACH_DEFAULTS			\
+#define SQL_CREATE_TABLE_MODIFIED_CONFIG				\
+  "CREATE TABLE IF NOT EXISTS modified.config (\n"			\
+  "  path      TEXT NOT NULL,\n"					\
+  "  type      TEXT NOT NULL,\n"					\
+  "  value     NOT NULL,\n"						\
+  "  comment   TEXT,\n"							\
+  "  modtype   TEXT NOT NULL,\n"					\
+  "  oldvalue  NOT NULL,\n"						\
+  "  PRIMARY KEY (path)\n"						\
+  ")"
+
+#define SQL_ATTACH_DEFAULTS						\
   "ATTACH DATABASE '%s' AS defaults"
+
+#define SQL_ATTACH_MODIFIED						\
+  "ATTACH DATABASE ':memory:' AS modified"
+
+#define SQL_ATTACH_DUMPED						\
+  "ATTACH DATABASE '%s' AS dumped"
+
+#define SQL_DETACH_DUMPED						\
+  "DETACH DATABASE dumped"
 
 #define SQL_SELECT_VALUE_TYPE						\
   "SELECT type, value, 0 AS is_default FROM config WHERE path=? UNION "	\
@@ -135,15 +155,46 @@ namespace fawkes {
   "(SELECT path FROM config WHERE dc.path = path) "			\
   "ORDER BY path"
 
-#define SQL_DELETE_VALUE			\
+#define SQL_DELETE_VALUE						\
   "DELETE FROM config WHERE path=?"
 
-#define SQL_DELETE_DEFAULT_VALUE		\
+#define SQL_DELETE_DEFAULT_VALUE					\
   "DELETE FROM defaults.config WHERE path=?"
 
 #define SQL_UPDATE_DEFAULT_DB						\
   "INSERT INTO config SELECT * FROM defaults.config AS dc "		\
   "WHERE NOT EXISTS (SELECT path from config WHERE path = dc.path)"
+
+#define SQL_UPDATE_MODIFIED_DB_ADDED					\
+  "INSERT INTO modified.config "					\
+  "  SELECT duc.*,'added' AS modtype, duc.value "			\
+  "    FROM dumped.config AS duc "					\
+  "    WHERE NOT EXISTS (SELECT dc.path FROM defaults.config AS dc "	\
+  "                        WHERE dc.path=duc.path) "			\
+  "    ORDER BY path"
+
+#define SQL_UPDATE_MODIFIED_DB_ERASED					\
+  "INSERT INTO modified.config "					\
+  "  SELECT dc.*,'erased' AS modtype, dc.value "			\
+  "    FROM defaults.config AS dc "					\
+  "    WHERE NOT EXISTS (SELECT duc.path FROM dumped.config AS duc "	\
+  "                        WHERE duc.path=dc.path) "			\
+  "    ORDER BY path"
+
+#define SQL_UPDATE_MODIFIED_DB_CHANGED					\
+  "INSERT INTO modified.config "					\
+  "  SELECT duc.*,'changed' AS modtype, dc.value "			\
+  "    FROM dumped.config AS duc, defaults.config AS dc "		\
+  "    WHERE duc.path = dc.path "					\
+  "      AND (dc.type != duc.type OR dc.value != duc.value) "		\
+  "    ORDER BY duc.path"
+
+#define SQL_COPY_DUMP							\
+  "DELETE FROM defaults.config; "					\
+  "INSERT INTO defaults.config SELECT * FROM dumped.config"
+
+#define SQL_SELECT_MODIFIED_ALL						\
+  "SELECT * FROM modified.config"
 
 /** @class SQLiteConfiguration <config/sqlite.h>
  * Configuration storage using SQLite.
@@ -252,7 +303,7 @@ SQLiteConfiguration::~SQLiteConfiguration()
  * structure as the 'config' table in the host-specific database.
  */
 void
-SQLiteConfiguration::init()
+SQLiteConfiguration::init_dbs()
 {
   char *errmsg;
   if ( (sqlite3_exec(db, SQL_CREATE_TABLE_HOST_CONFIG, NULL, NULL, &errmsg) != SQLITE_OK) ||
@@ -371,67 +422,72 @@ SQLiteConfiguration::import(::sqlite3 *tdb, const char *dumpfile)
 
 
 void
-SQLiteConfiguration::merge_default(const char *default_file,
-				   const char *default_dump)
+SQLiteConfiguration::import_default(const char *default_file,
+				    const char *default_dump)
 {
-  if ( access(default_file, F_OK) == 0 ) {
-    // Default database exists, import dump into temporary database, then merge
-
-    char *tmpfile = (char *)malloc(strlen(conf_path) + strlen("/tmp_default_XXXXXX") + 1);
-    sprintf(tmpfile, "%s/tmp_default_XXXXXX", conf_path);
-    tmpfile = mktemp(tmpfile);
-    if ( tmpfile[0] == 0 ) {
-      throw CouldNotOpenConfigException("Failed to create temp file for default DB import");
-    }
-
-    sqlite3 *dump_db;
-    if ( sqlite3_open(tmpfile, &dump_db) == SQLITE_OK ) {
-      import(dump_db, default_dump);
-      sqlite3_close(dump_db);
-    } else {
-      throw CouldNotOpenConfigException("Failed to import dump file into temp DB");
-    }
-
-    sqlite3 *dflt_db;
-    char *errmsg;
-    if ( sqlite3_open(default_file, &dflt_db) == SQLITE_OK ) {
-      char *attach_sql;
-      if ( asprintf(&attach_sql, SQL_ATTACH_DEFAULTS, tmpfile) == -1 ) {
-	sqlite3_close(dump_db);
-	sqlite3_close(dflt_db);
-	throw CouldNotOpenConfigException("Could not create attachment SQL in merge");
-      }
-      if ( sqlite3_exec(dflt_db, attach_sql, NULL, NULL, &errmsg) != SQLITE_OK ) {
-	sqlite3_close(dump_db);
-	sqlite3_close(dflt_db);
-	free(attach_sql);
-	CouldNotOpenConfigException e("Could not attach dump DB in merge: %s", errmsg);
-	sqlite3_free(errmsg);
-	throw e;
-      }
-      free(attach_sql);
-    }
-
-    if ( sqlite3_exec(dflt_db, SQL_UPDATE_DEFAULT_DB, 0, 0, &errmsg) != SQLITE_OK ) {
-      sqlite3_close(dflt_db);
-      CouldNotOpenConfigException e("Failed to merge dump into default DB: %s", errmsg);
-      sqlite3_free(errmsg);
-      throw e;
-    }
-
-    sqlite3_close(dflt_db);
-    unlink(tmpfile);
-    free(tmpfile);
-  } else {
-    // Default database does *not* exist, simply import
-    sqlite3 *dflt_db;
-    if ( sqlite3_open(default_file, &dflt_db) == SQLITE_OK ) {
-      import(dflt_db, default_dump);
-      sqlite3_close(dflt_db);
-    } else {
-      throw CouldNotOpenConfigException("Failed to import dump file into default DB");
-    }
+  char *tmpfile = (char *)malloc(strlen(conf_path) + strlen("/tmp_default_XXXXXX") + 1);
+  sprintf(tmpfile, "%s/tmp_default_XXXXXX", conf_path);
+  tmpfile = mktemp(tmpfile);
+  if ( tmpfile[0] == 0 ) {
+    throw CouldNotOpenConfigException("Failed to create temp file for default DB import");
   }
+
+  // Import .sql file into dump database (temporary file)
+  sqlite3 *dump_db;
+  if ( sqlite3_open(tmpfile, &dump_db) == SQLITE_OK ) {
+    import(dump_db, default_dump);
+    sqlite3_close(dump_db);
+  } else {
+    throw CouldNotOpenConfigException("Failed to import dump file into temp DB");
+  }
+
+  // Attach dump database as "dumped"
+  char *attach_sql;
+  char *errmsg;
+  if ( asprintf(&attach_sql, SQL_ATTACH_DUMPED, tmpfile) == -1 ) {
+    throw CouldNotOpenConfigException("Could not create attachment SQL in merge");
+  }
+  if ( sqlite3_exec(db, attach_sql, NULL, NULL, &errmsg) != SQLITE_OK ) {
+    free(attach_sql);
+    CouldNotOpenConfigException e("Could not attach dump DB in merge: %s", errmsg);
+    sqlite3_free(errmsg);
+    throw e;
+  }
+  free(attach_sql);
+
+  // Create "modified" database for a list of modified values, only stored in RAM
+  if ( (sqlite3_exec(db, SQL_ATTACH_MODIFIED, NULL, NULL, &errmsg) != SQLITE_OK) ||
+       (sqlite3_exec(db, SQL_CREATE_TABLE_MODIFIED_CONFIG, NULL, NULL, &errmsg) != SQLITE_OK) ) {
+    CouldNotOpenConfigException ce("Could not create or attach modified memory database: %s", errmsg);
+    sqlite3_free(errmsg);
+    throw ce;
+  }
+
+  // Compare old and new database, copying modifications to "modified" database
+  if ( (sqlite3_exec(db, SQL_UPDATE_MODIFIED_DB_ADDED, NULL, NULL, &errmsg) != SQLITE_OK) ||
+       (sqlite3_exec(db, SQL_UPDATE_MODIFIED_DB_ERASED, NULL, NULL, &errmsg) != SQLITE_OK) ||
+       (sqlite3_exec(db, SQL_UPDATE_MODIFIED_DB_CHANGED, NULL, NULL, &errmsg) != SQLITE_OK) ) {
+    CouldNotOpenConfigException ce("Could not update modified memory database: %s", errmsg);
+    sqlite3_free(errmsg);
+    throw ce;
+  }
+
+  // Copy dump to defaults DB, overwriting everything
+  if ( (sqlite3_exec(db, SQL_COPY_DUMP, NULL, NULL, &errmsg) != SQLITE_OK) ) {
+    CouldNotOpenConfigException ce("Could not copy dump to default: %s", errmsg);
+    sqlite3_free(errmsg);
+    throw ce;
+  }
+
+  // Detach dumped DB, no longer required
+  if ( sqlite3_exec(db, SQL_DETACH_DUMPED, NULL, NULL, &errmsg) != SQLITE_OK ) {
+    CouldNotOpenConfigException e("Could not detach dump DB in import: %s", errmsg);
+    sqlite3_free(errmsg);
+    throw e;
+  }
+
+  unlink(tmpfile);
+  free(tmpfile);
 }
 
 
@@ -554,10 +610,6 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
     throw CouldNotOpenConfigException("Could not create attachment SQL");
   }
 
-  if ( access(__default_dump, R_OK) == 0 ) {
-    merge_default(__default_file, __default_dump);
-  }
-
   // Now really open the config databases
   if ( (sqlite3_open(__host_file, &db) != SQLITE_OK) ||
        (sqlite3_exec(db, attach_sql, NULL, NULL, &errmsg) != SQLITE_OK) ) {
@@ -573,7 +625,11 @@ SQLiteConfiguration::load(const char *name, const char *defaults_name,
   }
   free(attach_sql);
 
-  init();
+  init_dbs();
+
+  if ( access(__default_dump, R_OK) == 0 ) {
+    import_default(__default_file, __default_dump);
+  }
 
   mutex->unlock();
 
@@ -1801,11 +1857,6 @@ SQLiteConfiguration::unlock()
 }
 
 
-/** Iterator for all values.
- * Returns an iterator that can be used to iterate over all values in the current
- * configuration.
- * @return iterator over all values
- */
 Configuration::ValueIterator *
 SQLiteConfiguration::iterator()
 {
@@ -1814,6 +1865,24 @@ SQLiteConfiguration::iterator()
 
   if ( sqlite3_prepare(db, SQL_SELECT_ALL, -1, &stmt, &tail) != SQLITE_OK ) {
     throw ConfigurationException("begin: Preparation SQL failed");
+  }
+
+  return new SQLiteValueIterator(stmt);
+}
+
+/** Iterator for modified values.
+ * Returns an iterator that can be used to iterate over all values that have been
+ * modified in the default database in the last load (added, erased or changed).
+ * @return iterator over all values
+ */
+SQLiteConfiguration::SQLiteValueIterator *
+SQLiteConfiguration::modified_iterator()
+{
+  sqlite3_stmt *stmt;
+  const char *tail;
+
+  if ( sqlite3_prepare(db, SQL_SELECT_MODIFIED_ALL, -1, &stmt, &tail) != SQLITE_OK ) {
+    throw ConfigurationException("modified_iterator: Preparation SQL failed");
   }
 
   return new SQLiteValueIterator(stmt);
@@ -2045,6 +2114,16 @@ SQLiteConfiguration::SQLiteValueIterator::get_string()
   return (const char *)sqlite3_column_text(__stmt, 2);
 }
 
+
+/** Get value as string.
+ * @return value
+ */
+std::string
+SQLiteConfiguration::SQLiteValueIterator::get_as_string()
+{
+  return (const char *)sqlite3_column_text(__stmt, 2);
+}
+
 /** Get comment.
  * @return string comment value
  */
@@ -2052,6 +2131,35 @@ std::string
 SQLiteConfiguration::SQLiteValueIterator::get_comment()
 {
   const char *c = (const char *)sqlite3_column_text(__stmt, 3);
+  return c ? c : "";
+}
+
+/** Get modification type.
+ * This can only be called if the iterator has been retrieved via
+ * SQLiteConfiguration::modified_iterator(). Otherwise the return value is
+ * always and empty string.
+ * @return string modification type
+ */
+std::string
+SQLiteConfiguration::SQLiteValueIterator::get_modtype()
+{
+  const char *c = (const char *)sqlite3_column_text(__stmt, 4);
+  return c ? c : "";
+}
+
+
+
+/** Get old value (as string).
+ * This can only be called if the iterator has been retrieved via
+ * SQLiteConfiguration::modified_iterator(). The value is always returned
+ * as string, as it is meant for debugging purposes only. Otherwise the
+ * return value is always and empty string.
+ * @return string modification type
+ */
+std::string
+SQLiteConfiguration::SQLiteValueIterator::get_oldvalue()
+{
+  const char *c = (const char *)sqlite3_column_text(__stmt, 5);
   return c ? c : "";
 }
 
