@@ -1,9 +1,10 @@
 
 /***************************************************************************
- *  acquisition_thread.h - Thread that retrieves the laser data
+ * lase_edl_aqt.cpp - Thread to retrieves laser data from Lase LD A OEM
  *
  *  Created: Wed Oct 08 13:41:02 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2002       Christian Fritz
+ *             2008-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -89,6 +90,7 @@ class LaseEdlAcquisitionThread : public LaserAcquisitionThread
   unsigned int __cfg_btr0btr1;
   unsigned int __cfg_port;
   unsigned int __cfg_irq;
+  unsigned int __cfg_num_init_tries;
 
   unsigned int __min_angle_step;
   unsigned int __number_of_values;

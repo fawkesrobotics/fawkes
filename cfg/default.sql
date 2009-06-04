@@ -41,6 +41,7 @@ INSERT INTO "config" VALUES('/laser/sensor_id_resp','unsigned int',3,'Sensor ID 
 INSERT INTO "config" VALUES('/laser/btr0btr1','unsigned int',20,'Baud rate key, 0x14 for 1 MBit/s');
 INSERT INTO "config" VALUES('/laser/port','unsigned int',0,'Port, 0 for default');
 INSERT INTO "config" VALUES('/laser/irq','unsigned int',0,'IRQ, 0 for default');
+INSERT INTO "config" VALUES('/laser/num_init_tries','unsigned int',0,'Number of times to try initialization');
 INSERT INTO "config" VALUES('/worldmodel/confspace','string','trunk',NULL);
 INSERT INTO "config" VALUES('/worldmodel/wi_send/trunk/enable_send','bool','0','Enable sending of world info messages?');
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/pose/type','string','ObjectPositionInterface',NULL);

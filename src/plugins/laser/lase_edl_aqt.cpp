@@ -3,8 +3,8 @@
  *  acqusition_thread.cpp - Thread that retrieves the laser data
  *
  *  Created: Wed Oct 08 13:42:32 2008
- *  Copyright  2002  Christian Fritz
- *             2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2002       Christian Fritz
+ *             2008-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -65,6 +65,7 @@ LaseEdlAcquisitionThread::init()
     __cfg_btr0btr1       = config->get_uint("/laser/btr0btr1");
     __cfg_port           = config->get_uint("/laser/port");
     __cfg_irq            = config->get_uint("/laser/irq");
+    __cfg_num_init_tries = config->get_uint("/laser/num_init_tries");
 
     __min_angle_step     = calc_angle_step(__cfg_rotation_freq, __cfg_max_pulse_freq);
     if ( __cfg_angle_step < __min_angle_step )  __cfg_angle_step = __min_angle_step;
@@ -90,30 +91,45 @@ LaseEdlAcquisitionThread::init()
 
   init_bus();
 
-  try {
-    CANCEL_PROFILE();
-  } catch (Exception &e) {
-    // ignored, happens often
-  }
+  for (unsigned int i = 1; i <= __cfg_num_init_tries; ++i) {
 
-  logger->log_debug("LaseEdlAcquisitionThread", "Resetting Laser");
-  DO_RESET(0x0002);
-  if ( ! __cfg_use_default ) {
-    logger->log_debug("LaseEdlAcquisitionThread", "Setting configuration");
-    // set configuration (rotation and anglestep)
-    SET_CONFIG( 0x0010, 3, __cfg_sensor_id, __cfg_rotation_freq, __cfg_angle_step);
-    
-    // set functions (sector definition)
-    SET_FUNCTION( 0x0000, 0x0003, (16 * 360) - __cfg_angle_step, __cfg_set_default);
-    SET_FUNCTION( 0x0001, 0x0000, 0, __cfg_set_default);
-  }
+    try {
+      CANCEL_PROFILE();
+    } catch (Exception &e) {
+      // ignored, happens often
+    }
 
-  logger->log_debug("LaseEdlAcquisitionThread", "Starting rotating");
-  TRANS_ROTATE(__cfg_rotation_freq);
-  logger->log_debug("LaseEdlAcquisitionThread", "Starting measuring");
-  TRANS_MEASURE();
-  logger->log_debug("LaseEdlAcquisitionThread", "Enable profile retrieval");
-  GET_PROFILE(0, __cfg_profile_format);
+    try {
+      logger->log_debug("LaseEdlAcquisitionThread", "Resetting Laser");
+      DO_RESET(0x0002);
+
+      if ( ! __cfg_use_default ) {
+	logger->log_debug("LaseEdlAcquisitionThread", "Setting configuration");
+	// set configuration (rotation and anglestep)
+	SET_CONFIG( 0x0010, 3, __cfg_sensor_id, __cfg_rotation_freq, __cfg_angle_step);
+
+	// set functions (sector definition)
+	SET_FUNCTION( 0x0000, 0x0003, (16 * 360) - __cfg_angle_step, __cfg_set_default);
+	SET_FUNCTION( 0x0001, 0x0000, 0, __cfg_set_default);
+      }
+
+      logger->log_debug("LaseEdlAcquisitionThread", "Starting rotating");
+      TRANS_ROTATE(__cfg_rotation_freq);
+      logger->log_debug("LaseEdlAcquisitionThread", "Starting measuring");
+      TRANS_MEASURE();
+      logger->log_debug("LaseEdlAcquisitionThread", "Enable profile retrieval");
+      GET_PROFILE(0, __cfg_profile_format);
+
+      break; // break for loop if initialization was successful
+    } catch (Exception &e) {
+      if (i < __cfg_num_init_tries) {
+        logger->log_warn("LaseEdlAcquisitionThread", "Initialization, retrying %d more times", __cfg_num_init_tries - i);
+      } else {
+        logger->log_error("LaseEdlAcquisitionThread", "Initialization failed, giving up after %u tries", __cfg_num_init_tries);
+        throw;
+      }
+    }
+  }
 
   _distances  = (float *)malloc(sizeof(float) * __number_of_values);
   _echoes     = (float *)malloc(sizeof(float) * __number_of_values);
@@ -499,6 +515,10 @@ LaseEdlAcquisitionThread::send_and_check(WORD *command_data, int command_length,
   }
   send(command_data, command_length);
   int  response_s = recv(response);
+
+  if (response_s <= 0) {
+    throw Exception("Did not receive data for command");
+  }
 
   bool match = compare_word_arrays(n, *response, expected_response);
 
