@@ -457,6 +457,7 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
   if ( (tmplen = vasprintf(&tmp, format, va)) != -1 ) {
     _payload_size = sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + tmplen + 2;
     _payload = calloc(1, _payload_size);
+    __own_payload = true;
     header = (NetworkLogger::network_logger_header_t *)_payload;
     header->log_level    = log_level;
     header->exception    = is_exception ? 1 : 0;
@@ -466,6 +467,7 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
     copy_payload(sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + 1, tmp, tmplen);
     __component = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
     __message   = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + 1;
+    free(tmp);
   }
 }
 
@@ -485,6 +487,7 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
 {
   _payload_size = sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + strlen(message) + 2;
   _payload = calloc(1, _payload_size);
+  __own_payload = true;
   header = (NetworkLogger::network_logger_header_t *)_payload;
   header->log_level    = log_level;
   header->exception    = is_exception ? 1 : 0;
@@ -504,6 +507,7 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(const NetworkLoggerMess
 {
   _payload_size = content->_payload_size;
   _payload = malloc(_payload_size);
+  __own_payload = true;
   memcpy(_payload, content->_payload, _payload_size);
   header = (NetworkLogger::network_logger_header_t *)_payload;
   __component = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
@@ -528,6 +532,7 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(unsigned int component_
 
   _payload = payload;
   _payload_size = payload_size;
+  __own_payload = false;
   header = (NetworkLogger::network_logger_header_t *)_payload;
   __component = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
   __message   = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t) + strlen(__component) + 1;
@@ -536,6 +541,7 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(unsigned int component_
 /** Destructor. */
 NetworkLoggerMessageContent::~NetworkLoggerMessageContent()
 {
+  if (__own_payload)  free(_payload);
 }
 
 /** Get time.

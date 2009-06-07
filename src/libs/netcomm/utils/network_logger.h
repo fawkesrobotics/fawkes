@@ -145,6 +145,7 @@ class NetworkLoggerMessageContent : public FawkesNetworkMessageContent
   NetworkLogger::network_logger_header_t *header;
   const char *__component;
   const char *__message;
+  bool __own_payload;
 };
 
 } // end namespace fawkes
