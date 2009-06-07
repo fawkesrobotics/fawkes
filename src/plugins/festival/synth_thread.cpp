@@ -80,7 +80,7 @@ FestivalSynthThread::loop()
   }
 
   // process messages, blocking
-  while ( ! __speechsynth_if->msgq_empty() ) {
+  if ( ! __speechsynth_if->msgq_empty() ) {
     if ( __speechsynth_if->msgq_first_is<SpeechSynthInterface::SayMessage>() ) {
       SpeechSynthInterface::SayMessage *msg = __speechsynth_if->msgq_first<SpeechSynthInterface::SayMessage>();
       __speechsynth_if->set_msgid(msg->id());

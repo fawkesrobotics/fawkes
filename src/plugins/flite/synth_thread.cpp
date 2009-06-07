@@ -68,6 +68,7 @@ void
 FliteSynthThread::finalize()
 {
   unregister_cmu_us_kal(__voice);
+  blackboard->unregister_listener(this);
   blackboard->close(__speechsynth_if);
 }
 
@@ -79,8 +80,9 @@ FliteSynthThread::loop()
     usleep(100);
   }
 
-  // process messages, blocking
-  while ( ! __speechsynth_if->msgq_empty() ) {
+  // process message, blocking
+  // only one at a time, loop() will be run as many times as wakeup() was called
+  if ( ! __speechsynth_if->msgq_empty() ) {
     if ( __speechsynth_if->msgq_first_is<SpeechSynthInterface::SayMessage>() ) {
       SpeechSynthInterface::SayMessage *msg = __speechsynth_if->msgq_first<SpeechSynthInterface::SayMessage>();
       __speechsynth_if->set_msgid(msg->id());
