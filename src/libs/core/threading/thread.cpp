@@ -891,7 +891,11 @@ Thread::run()
 {
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
     // Wait for initial wakeup
-    __sleep_condition->wait();
+    // __sleep_mutex has been locked in entry() already!
+    while (__pending_wakeups == 0) {
+      __waiting_for_wakeup = true;
+      __sleep_condition->wait();
+    }
     __pending_wakeups -= 1;
     __sleep_mutex->unlock();
   }
