@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                  Makefile Build System for Fawkes: Plugins
+#     Makefile Build System for Fawkes: BlackBoard Synchronization Plugin
 #                            -------------------
-#   Created on Mon Dec 04 14:54:17 2006
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Thu Jun 04 15:06:39 2009
+#   copyright (C) 2006-2009 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -13,11 +13,13 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
-include $(BASEDIR)/etc/buildsys/config.mk
+BASEDIR = ../../..
 
-SUBDIRS	= bbsync webview laser skiller flite joystick
-	#festival luaagent player ttmainloop worldmodel xabsl
+LIBS_bbsync = fawkesaspects fawkesinterface fawkesgeometry fawkesblackboard
+OBJS_bbsync = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
 
-include $(BASEDIR)/etc/buildsys/rules.mk
+OBJS_all    = $(OBJS_bbsync)
+PLUGINS_all = $(PLUGINDIR)/bbsync.so
+
+include $(BASEDIR)/etc/buildsys/base.mk
 

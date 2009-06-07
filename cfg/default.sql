@@ -62,4 +62,11 @@ INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/gamestate/type','strin
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/gamestate/from_id','string','WI GameState',NULL);
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/gamestate/to_id','string','WM GameState',NULL);
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/gamestate/method','string','copy',NULL);
+INSERT INTO "config" VALUES('/fawkes/bbsync/check_interval','unsigned int',5000,'Interval between checking for remote BB aliveness; ms');
+INSERT INTO "config" VALUES('/fawkes/bbsync/peers/localhost/host','string','localhost','Host name of remote peer; hostname');
+INSERT INTO "config" VALUES('/fawkes/bbsync/peers/localhost/port','unsigned int',1911,'Port of remote peer; TCP port');
+INSERT INTO "config" VALUES('/fawkes/bbsync/peers/localhost/active','bool','1','Is peer active? If omitted 1 is assumed.');
+INSERT INTO "config" VALUES('/fawkes/bbsync/peers/localhost/check_interval','unsigned int',1000,'Interval in which to check for aliveness, if omitted defaults to 5 seconds; ms');
+INSERT INTO "config" VALUES('/fawkes/bbsync/peers/localhost/reading/laser','string','Laser360Interface::Laser','Interface to synchronize, reading instance on remote, mapped to remote instance locally');
+INSERT INTO "config" VALUES('/fawkes/bbsync/peers/localhost/reading/speechsynth','string','SpeechSynthInterface::Flite',NULL);
 COMMIT;
