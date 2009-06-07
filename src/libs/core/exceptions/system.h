@@ -45,6 +45,13 @@ class InterruptedException : public Exception {
 };
 
 
+class TimeoutException : public Exception {
+ public:
+  TimeoutException() throw();
+  TimeoutException(const char *format, ...) throw();
+};
+
+
 class CouldNotOpenFileException : public Exception {
  public:
   CouldNotOpenFileException(const char *filename, int errno,

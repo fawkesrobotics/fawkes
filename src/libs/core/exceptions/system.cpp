@@ -79,6 +79,32 @@ InterruptedException::InterruptedException(const char *format, ...) throw()
 }
 
 
+/** @class TimeoutException <core/exceptions/system.h>
+ * The current system call has timed out before completion.
+ * Throw this exception for instance when a timed wait on a WaitCondition
+ * timed out.
+ * @ingroup Exceptions
+ */
+/** Constructor */
+TimeoutException::TimeoutException() throw()
+  : Exception("Timeout reached.")
+{
+}
+
+
+/** Constructor
+ * @param format message format string
+ */
+TimeoutException::TimeoutException(const char *format, ...) throw()
+  : Exception()
+{
+  va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
+}
+
+
 /** @class CouldNotOpenFileException <core/exceptions/system.h>
  * File could not be opened.
  * The file could not be opened. Optional error number and message describe the
