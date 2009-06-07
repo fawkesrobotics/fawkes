@@ -103,6 +103,7 @@ LuaInterfaceImporter::open_interfaces(std::string &prefix, InterfaceMap &imap, b
     std::string uid = vi->get_string();
 
     if (uid.find("::") == std::string::npos) {
+      delete vi;
       throw Exception("Interface UID '%s' at %s is not valid, missing double colon",
 		      uid.c_str(), vi->path());
     }
@@ -111,12 +112,15 @@ LuaInterfaceImporter::open_interfaces(std::string &prefix, InterfaceMap &imap, b
     std::string ifname = uid.substr(uid.find("::") + 2);
 
     if ( __reading_ifs.find(varname) != __reading_ifs.end() ) {
+      delete vi;
       throw Exception("Reading interface with varname %s already opened", varname.c_str());
     }
     if ( __reading_multi_ifs.find(varname) != __reading_multi_ifs.end() ) {
+      delete vi;
       throw Exception("Reading multi interface with varname %s already opened", varname.c_str());
     }
     if ( __writing_ifs.find(varname) != __writing_ifs.end() ) {
+      delete vi;
       throw Exception("Writing interface with varname %s already opened", varname.c_str());
     }
 
@@ -139,6 +143,7 @@ LuaInterfaceImporter::open_interfaces(std::string &prefix, InterfaceMap &imap, b
       }
     } else {
       if (write) {
+	delete vi;
 	throw Exception("Illegal config entry %s=%s, multiple interfaces can "
 			"only be opened for reading", vi->path(), uid.c_str());
       }
