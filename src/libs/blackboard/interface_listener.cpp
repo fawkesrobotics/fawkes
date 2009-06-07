@@ -25,6 +25,7 @@
 
 #include <blackboard/interface_listener.h>
 #include <core/exceptions/system.h>
+#include <core/threading/mutex_locker.h>
 #include <interface/interface.h>
 #include <cstdlib>
 #include <cstring>
@@ -224,6 +225,7 @@ BlackBoardInterfaceListener::bb_interface_writer_removed(Interface *interface,
 void
 BlackBoardInterfaceListener::bbil_add_data_interface(Interface *interface)
 {
+  MutexLocker lock(__bbil_data_interfaces.mutex());
   if ( __bbil_data_interfaces.find((char *)interface->uid()) != __bbil_data_interfaces.end() ) {
     throw Exception("Interface %s already registered (data)", interface->uid());
   }
@@ -236,6 +238,7 @@ BlackBoardInterfaceListener::bbil_add_data_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_add_message_interface(Interface *interface)
 {
+  MutexLocker lock(__bbil_message_interfaces.mutex());
   if ( ! interface->is_writer() ) {
     throw Exception("Message received events can only be watched by writing instances");
   }
@@ -255,6 +258,7 @@ BlackBoardInterfaceListener::bbil_add_message_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_add_reader_interface(Interface *interface)
 {
+  MutexLocker lock(__bbil_reader_interfaces.mutex());
   if ( __bbil_reader_interfaces.find((char *)interface->uid()) != __bbil_reader_interfaces.end() ) {
     throw Exception("Interface %s already registered (reader)", interface->uid());
   }
@@ -271,6 +275,7 @@ BlackBoardInterfaceListener::bbil_add_reader_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_add_writer_interface(Interface *interface)
 {
+  MutexLocker lock(__bbil_writer_interfaces.mutex());
   if ( __bbil_writer_interfaces.find((char *)interface->uid()) != __bbil_writer_interfaces.end() ) {
     throw Exception("Interface %s already registered (writer)", interface->uid());
   }
@@ -287,6 +292,7 @@ BlackBoardInterfaceListener::bbil_add_writer_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_remove_data_interface(Interface *interface)
 {
+  MutexLocker lock(__bbil_data_interfaces.mutex());
   if ( __bbil_data_interfaces.find((char *)interface->uid()) != __bbil_data_interfaces.end() ) {
     __bbil_data_interfaces.erase(interface->uid());
   }
@@ -300,6 +306,7 @@ BlackBoardInterfaceListener::bbil_remove_data_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_remove_message_interface(Interface *interface)
 {
+  MutexLocker lock(__bbil_message_interfaces.mutex());
   if ( ! interface->is_writer() ) {
     throw Exception("Message received events can only be watched by writing instances");
   }
@@ -317,6 +324,7 @@ BlackBoardInterfaceListener::bbil_remove_message_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_remove_reader_interface(Interface *interface)
 {
+  MutexLocker lock(__bbil_reader_interfaces.mutex());
   if ( __bbil_reader_interfaces.find((char *)interface->uid()) != __bbil_reader_interfaces.end() ) {
     __bbil_reader_interfaces.erase(interface->uid());
   }
@@ -331,6 +339,7 @@ BlackBoardInterfaceListener::bbil_remove_reader_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_remove_writer_interface(Interface *interface)
 {
+  MutexLocker lock(__bbil_writer_interfaces.mutex());
   if ( __bbil_writer_interfaces.find((char *)interface->uid()) != __bbil_writer_interfaces.end() ) {
     __bbil_writer_interfaces.erase(interface->uid());
   }
@@ -383,11 +392,9 @@ BlackBoardInterfaceListener::bbil_writer_interfaces() throw()
 Interface *
 BlackBoardInterfaceListener::bbil_data_interface(const char *iuid) throw()
 {
-  __bbil_data_interfaces.lock();
-  bool found = ((__bbil_ii = __bbil_data_interfaces.find((char *)iuid)) != __bbil_data_interfaces.end());
-  __bbil_data_interfaces.unlock();
-  if ( found ) {
-    return (*__bbil_ii).second;
+  MutexLocker lock(__bbil_data_interfaces.mutex());
+  if ((__bbil_ii = __bbil_data_interfaces.find((char *)iuid)) != __bbil_data_interfaces.end()) {
+    return __bbil_ii->second;
   } else {
     return NULL;
   }
@@ -403,11 +410,9 @@ BlackBoardInterfaceListener::bbil_data_interface(const char *iuid) throw()
 Interface *
 BlackBoardInterfaceListener::bbil_message_interface(const char *iuid) throw()
 {
-  __bbil_message_interfaces.lock();
-  bool found = ((__bbil_ii = __bbil_message_interfaces.find((char *)iuid)) != __bbil_message_interfaces.end());
-  __bbil_message_interfaces.unlock();
-  if ( found ) {
-    return (*__bbil_ii).second;
+  MutexLocker lock(__bbil_data_interfaces.mutex());
+  if ((__bbil_ii = __bbil_message_interfaces.find((char *)iuid)) != __bbil_message_interfaces.end()) {
+    return __bbil_ii->second;
   } else {
     return NULL;
   }
@@ -423,11 +428,9 @@ BlackBoardInterfaceListener::bbil_message_interface(const char *iuid) throw()
 Interface *
 BlackBoardInterfaceListener::bbil_reader_interface(const char *iuid) throw()
 {
-  __bbil_reader_interfaces.lock();
-  bool found = ((__bbil_ii = __bbil_reader_interfaces.find((char *)iuid)) != __bbil_reader_interfaces.end());
-  __bbil_reader_interfaces.unlock();
-  if ( found ) {
-    return (*__bbil_ii).second;
+  MutexLocker lock(__bbil_data_interfaces.mutex());
+  if ((__bbil_ii = __bbil_reader_interfaces.find((char *)iuid)) != __bbil_reader_interfaces.end()) {
+    return __bbil_ii->second;
   } else {
     return NULL;
   }
@@ -443,11 +446,9 @@ BlackBoardInterfaceListener::bbil_reader_interface(const char *iuid) throw()
 Interface *
 BlackBoardInterfaceListener::bbil_writer_interface(const char *iuid) throw()
 {
-  __bbil_writer_interfaces.lock();
-  bool found = ((__bbil_ii = __bbil_writer_interfaces.find((char *)iuid)) != __bbil_writer_interfaces.end());
-  __bbil_writer_interfaces.unlock();
-  if ( found ) {
-    return (*__bbil_ii).second;
+  MutexLocker lock(__bbil_data_interfaces.mutex());
+  if ((__bbil_ii = __bbil_writer_interfaces.find((char *)iuid)) != __bbil_writer_interfaces.end()) {
+    return __bbil_ii->second;
   } else {
     return NULL;
   }

@@ -26,7 +26,8 @@
 #ifndef __BLACKBOARD_INTERFACE_OBSERVER_H_
 #define __BLACKBOARD_INTERFACE_OBSERVER_H_
 
-#include <map>
+#include <core/utils/lock_map.h>
+
 #include <list>
 #include <string>
 
@@ -49,18 +50,18 @@ class BlackBoardInterfaceObserver
   void bbio_add_observed_destroy(const char *type, const char *id_pattern = "*") throw();
 
   /** Type for lockable interface type hash sets. */
-  typedef  std::map<std::string, std::list<std::string> >  ObservedInterfaceMap;
+  typedef  LockMap<std::string, std::list<std::string> >  ObservedInterfaceLockMap;
 
   /** Type for iterator of lockable interface type hash sets. */
-  typedef  ObservedInterfaceMap::iterator   ObservedInterfaceMapIterator;
+  typedef  ObservedInterfaceLockMap::iterator   ObservedInterfaceLockMapIterator;
 
-  ObservedInterfaceMap *  bbio_get_observed_create() throw();
-  ObservedInterfaceMap *  bbio_get_observed_destroy() throw();
+  ObservedInterfaceLockMap *  bbio_get_observed_create() throw();
+  ObservedInterfaceLockMap *  bbio_get_observed_destroy() throw();
 
  private:
-  ObservedInterfaceMap         __bbio_observed_create;
-  ObservedInterfaceMap         __bbio_observed_destroy;
-  ObservedInterfaceMapIterator __bbio_iti;
+  ObservedInterfaceLockMap         __bbio_observed_create;
+  ObservedInterfaceLockMap         __bbio_observed_destroy;
+  ObservedInterfaceLockMapIterator __bbio_iti;
 };
 
 } // end namespace fawkes

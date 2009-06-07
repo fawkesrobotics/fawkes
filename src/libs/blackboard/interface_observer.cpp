@@ -121,9 +121,11 @@ BlackBoardInterfaceObserver::bb_interface_destroyed(const char *type, const char
 void
 BlackBoardInterfaceObserver::bbio_add_observed_create(const char *type, const char *id_pattern) throw()
 {
+  __bbio_observed_create.lock();
   __bbio_observed_create[type].push_back(id_pattern);
   __bbio_observed_create[type].sort();
   __bbio_observed_create[type].unique();
+  __bbio_observed_create.unlock();
 }
 
 
@@ -137,16 +139,18 @@ BlackBoardInterfaceObserver::bbio_add_observed_create(const char *type, const ch
 void
 BlackBoardInterfaceObserver::bbio_add_observed_destroy(const char *type, const char *id_pattern) throw()
 {
+  __bbio_observed_destroy.lock();
   __bbio_observed_destroy[type].push_back(id_pattern);
   __bbio_observed_destroy[type].sort();
   __bbio_observed_destroy[type].unique();
+  __bbio_observed_destroy.unlock();
 }
 
 
 /** Get interface creation type watch list.
  * @return interface type watch list
  */
-BlackBoardInterfaceObserver::ObservedInterfaceMap *
+BlackBoardInterfaceObserver::ObservedInterfaceLockMap *
 BlackBoardInterfaceObserver::bbio_get_observed_create() throw()
 {
   return &__bbio_observed_create;
@@ -156,7 +160,7 @@ BlackBoardInterfaceObserver::bbio_get_observed_create() throw()
 /** Get interface destriction type watch list.
  * @return interface type watch list
  */
-BlackBoardInterfaceObserver::ObservedInterfaceMap *
+BlackBoardInterfaceObserver::ObservedInterfaceLockMap *
 BlackBoardInterfaceObserver::bbio_get_observed_destroy() throw()
 {
   return &__bbio_observed_destroy;
