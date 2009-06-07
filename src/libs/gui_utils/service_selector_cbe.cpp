@@ -110,7 +110,7 @@ void
 ServiceSelectorCBE::initialize()
 {
   m_cbe_services->set_model( m_service_model->get_list_store() );
-  m_cbe_services->set_text_column(m_service_model->get_column_record().hostname);
+  m_cbe_services->set_text_column(m_service_model->get_column_record().name);
   m_cbe_services->get_entry()->set_activates_default(true);
   m_cbe_services->signal_changed().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_service_selected) );
   
