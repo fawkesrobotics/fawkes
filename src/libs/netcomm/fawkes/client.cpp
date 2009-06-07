@@ -559,9 +559,12 @@ FawkesNetworkClient::enqueue(FawkesNetworkMessage *message)
  * This message also calls unref() on the message. If you want to use it
  * after enqueuing make sure you ref() before calling this method.
  * @param message message to send
+ * @param timeout_sec timeout for the waiting operation in seconds, 0 to wait
+ * forever (warning, this may result in a deadlock!)
  */
 void
-FawkesNetworkClient::enqueue_and_wait(FawkesNetworkMessage *message)
+FawkesNetworkClient::enqueue_and_wait(FawkesNetworkMessage *message,
+				      unsigned int timeout_sec)
 {
   if (__send_slave && __recv_slave) {
     __recv_mutex->lock();
@@ -575,7 +578,12 @@ FawkesNetworkClient::enqueue_and_wait(FawkesNetworkMessage *message)
     unsigned int cid = message->cid();
     __recv_received[cid] = false;
     while (!__recv_received[cid] && ! connection_died_recently) {
-      __recv_waitcond->wait();
+      if (!__recv_waitcond->reltimed_wait(timeout_sec, 0)) {
+	__recv_received.erase(cid);
+	__recv_mutex->unlock();
+	throw TimeoutException("Timeout reached while waiting for incoming message "
+			       "(outgoing was %u:%u)", message->cid(), message->msgid());
+      }
     }
     __recv_received.erase(cid);
     __recv_mutex->unlock();
@@ -727,9 +735,11 @@ FawkesNetworkClient::set_recv_slave_alive()
  * This will wait for messages of the given component ID to arrive. The calling
  * thread is blocked until messages are available.
  * @param component_id component ID to monitor
+ * @param timeout_sec timeout for the waiting operation in seconds, 0 to wait
+ * forever (warning, this may result in a deadlock!)
  */
 void
-FawkesNetworkClient::wait(unsigned int component_id)
+FawkesNetworkClient::wait(unsigned int component_id, unsigned int timeout_sec)
 {
   __recv_mutex->lock();
   if ( __recv_received.find(component_id) != __recv_received.end()) {
@@ -739,7 +749,12 @@ FawkesNetworkClient::wait(unsigned int component_id)
   }
   __recv_received[component_id] = false;
   while (! __recv_received[component_id] && ! connection_died_recently) {
-    __recv_waitcond->wait();
+    if (!__recv_waitcond->reltimed_wait(timeout_sec, 0)) {
+      __recv_received.erase(component_id);
+      __recv_mutex->unlock();
+      throw TimeoutException("Timeout reached while waiting for incoming message "
+			     "(component %u)", component_id);
+    }
   }
   __recv_received.erase(component_id);
   __recv_mutex->unlock();

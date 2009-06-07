@@ -65,9 +65,9 @@ class FawkesNetworkClient
   void connect(const char *hostname, const char *ip, unsigned short int port);
 
   void enqueue(FawkesNetworkMessage *message);
-  void enqueue_and_wait(FawkesNetworkMessage *message);
+  void enqueue_and_wait(FawkesNetworkMessage *message, unsigned int timeout_sec = 15);
 
-  void wait(unsigned int component_id);
+  void wait(unsigned int component_id, unsigned int timeout_sec = 15);
   void wake(unsigned int component_id);
 
   void interrupt_connect();
