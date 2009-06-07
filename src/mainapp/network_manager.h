@@ -40,7 +40,9 @@ namespace fawkes {
 class FawkesNetworkManager
 {
  public:
-  FawkesNetworkManager(FawkesThreadManager *thread_manager, unsigned short int fawkes_port);
+  FawkesNetworkManager(FawkesThreadManager *thread_manager,
+		       unsigned short int fawkes_port,
+		       const char *service_name);
   ~FawkesNetworkManager();
 
   fawkes::FawkesNetworkHub *     hub();

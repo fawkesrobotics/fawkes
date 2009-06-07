@@ -7,11 +7,13 @@ CREATE TABLE config (
   PRIMARY KEY (path)
 );
 INSERT INTO "config" VALUES('/fawkes/mainapp/blackboard_size','unsigned int','2097152','Size of BlackBoard memory segment; bytes');
-INSERT INTO "config" VALUES('/fawkes/mainapp/desired_loop_time','unsigned int',30000,'Desired loop time of main thread; microseconds; 0 to disable');
-INSERT INTO "config" VALUES('/fawkes/mainapp/max_thread_time','unsigned int',30000,'Maximum time a thread may run per loop; microseconds; 0 to disable');
-INSERT INTO "config" VALUES('/firevision/fountain/tcp_port','unsigned int',2208,'Fountain TCP Port');
+INSERT INTO "config" VALUES('/fawkes/mainapp/desired_loop_time','unsigned int',30000,'Desired loop time of main thread, 0 to disable; microseconds');
+INSERT INTO "config" VALUES('/fawkes/mainapp/max_thread_time','unsigned int',30000,'Maximum time a thread may run per loop, 0 to disable; microseconds');
+INSERT INTO "config" VALUES('/fawkes/mainapp/net/tcp_port','unsigned int',1910,'Port for Fawkes Network Protocol service; TCP port');
+INSERT INTO "config" VALUES('/fawkes/mainapp/net/service_name','string','Fawkes on %h','Name for Fawkes service, announced via Avahi, %h is replaced by short hostname');
+INSERT INTO "config" VALUES('/firevision/fountain/tcp_port','unsigned int',2208,'Fountain TCP Port; TCP port');
 INSERT INTO "config" VALUES('/worldinfo/multicast_addr','string','224.16.0.1','Multicast address to send world info messages to.');
-INSERT INTO "config" VALUES('/worldinfo/udp_port','unsigned int','2806','UDP port to listen for and send world info messages to.');
+INSERT INTO "config" VALUES('/worldinfo/udp_port','unsigned int','2806','UDP port to listen for and send world info messages to; UDP port');
 INSERT INTO "config" VALUES('/worldinfo/encryption_key','string','AllemaniACsX0rz','Default encryption key for world info.');
 INSERT INTO "config" VALUES('/worldinfo/encryption_iv','string','DoesAnyOneCare','Default encryption initialization vector for world info.');
 INSERT INTO "config" VALUES('/worldinfo/enable_fatmsg','bool','0','Send legacy fat message?');
@@ -19,14 +21,14 @@ INSERT INTO "config" VALUES('/worldinfo/sleep_time_msec','unsigned int','10','Ti
 INSERT INTO "config" VALUES('/worldinfo/max_msgs_per_recv','unsigned int','20','Maximum number of messages to process per receive');
 INSERT INTO "config" VALUES('/worldinfo/flush_time_sec','unsigned int','5','Time of inactivity after which the world info message sequence number is resetted; sec');
 INSERT INTO "config" VALUES('/worldinfo/multicast_loopback','bool','1','Enable loopback for multicast messages?');
-INSERT INTO "config" VALUES('/webview/port','unsigned int','10117','TCP port for Webview HTTP requests');
+INSERT INTO "config" VALUES('/webview/port','unsigned int','10117','TCP port for Webview HTTP requests; TCP port');
 INSERT INTO "config" VALUES('/ballposlog/log_level','unsigned int','0','Log level for ballposlog example plugin; sum of any of debug=0, info=1, warn=2, error=4, none=8');
 INSERT INTO "config" VALUES('/skiller/skillspace','string','test','Skill space');
 INSERT INTO "config" VALUES('/skiller/watch_files','bool',1,'Watch lua files for modification and automatically reload Lua if files have been changed; true to enable');
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/navigator','string','NavigatorInterface::Navigator',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/wm_pose','string','ObjectPositionInterface::WM Pose',NULL);
 INSERT INTO "config" VALUES('/skiller/interfaces/test/reading/speechsynth','string','SpeechSynthInterface::Flite',NULL);
-INSERT INTO "config" VALUES('/joystick/device_file','string','/dev/js0',NULL);
+INSERT INTO "config" VALUES('/joystick/device_file','string','/dev/js0','Joystick device file');
 INSERT INTO "config" VALUES('/laser/interface_type','string','usb','Interface type, currently only usb');
 INSERT INTO "config" VALUES('/laser/use_default','bool',0,'Use default settings from flash?');
 INSERT INTO "config" VALUES('/laser/set_default','bool',0,'Store default settings in flash?');
@@ -41,7 +43,7 @@ INSERT INTO "config" VALUES('/laser/sensor_id_resp','unsigned int',3,'Sensor ID 
 INSERT INTO "config" VALUES('/laser/btr0btr1','unsigned int',20,'Baud rate key, 0x14 for 1 MBit/s');
 INSERT INTO "config" VALUES('/laser/port','unsigned int',0,'Port, 0 for default');
 INSERT INTO "config" VALUES('/laser/irq','unsigned int',0,'IRQ, 0 for default');
-INSERT INTO "config" VALUES('/laser/num_init_tries','unsigned int',0,'Number of times to try initialization');
+INSERT INTO "config" VALUES('/laser/num_init_tries','unsigned int',5,'Number of times to try initialization');
 INSERT INTO "config" VALUES('/worldmodel/confspace','string','trunk',NULL);
 INSERT INTO "config" VALUES('/worldmodel/wi_send/trunk/enable_send','bool','0','Enable sending of world info messages?');
 INSERT INTO "config" VALUES('/worldmodel/interfaces/trunk/pose/type','string','ObjectPositionInterface',NULL);

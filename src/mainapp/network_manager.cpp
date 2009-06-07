@@ -53,9 +53,11 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_manager thread manager that threads shall be registered to
  * @param fawkes_port port to listen on for Fawkes network connections
+ * @param service_name Avahi service name for Fawkes network service
  */
 FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
-					   unsigned short int fawkes_port)
+					   unsigned short int fawkes_port,
+					   const char *service_name)
 {
   this->fawkes_port    = fawkes_port;
   this->thread_manager = thread_manager;
@@ -67,7 +69,7 @@ FawkesNetworkManager::FawkesNetworkManager(FawkesThreadManager *thread_manager,
   _service_browser       = avahi_thread;
   thread_manager->add(avahi_thread);
   _nnresolver = new NetworkNameResolver(avahi_thread);
-  NetworkService *fawkes_service = new NetworkService(_nnresolver, "Fawkes on %h",
+  NetworkService *fawkes_service = new NetworkService(_nnresolver, service_name,
 						      "_fawkes._tcp", fawkes_port);
   avahi_thread->publish_service(fawkes_service);
   delete fawkes_service;

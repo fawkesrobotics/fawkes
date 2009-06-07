@@ -175,6 +175,16 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     __config->set_default_uint("/fawkes/mainapp/blackboard_size", bb_size);
   }
 
+  unsigned int net_tcp_port     = 1910;
+  std::string  net_service_name = "Fawkes on %h";
+  try {
+    net_tcp_port = __config->get_uint("/fawkes/mainapp/net/tcp_port");
+  } catch (Exception &e) {}  // ignore, we stick with the default
+  if (net_tcp_port > 65535)  net_tcp_port = 1910;
+  try {
+    net_service_name = __config->get_string("/fawkes/mainapp/net/service_name");
+  } catch (Exception &e) {}  // ignore, we stick with the default
+
   // Cleanup stale BlackBoard shared memory segments if requested
   if ( __argp->has_arg("C") ) {
     LocalBlackBoard::cleanup(bb_magic_token.c_str(), /* output with lister? */ true);
@@ -194,7 +204,8 @@ FawkesMainThread::FawkesMainThread(ArgumentParser *argp)
     __thread_manager->set_inifin(__aspect_inifin, __aspect_inifin);
     __plugin_manager     = new PluginManager(__thread_manager, __config,
 					     "/fawkes/meta_plugins/");
-    __network_manager    = new FawkesNetworkManager(__thread_manager, 1910);
+    __network_manager    = new FawkesNetworkManager(__thread_manager, net_tcp_port,
+						    net_service_name.c_str());
     __config_nethandler  = new ConfigNetworkHandler(__config, __network_manager->hub());
   } catch (Exception &e) {
     e.append("Initializing managers failed");
