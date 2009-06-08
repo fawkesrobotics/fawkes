@@ -72,7 +72,7 @@ fsm:new_jump_state("RELGOTO")
 
 function RELGOTO:init()
    if navigator:has_writer() then
-      local vm = navigator.MaxVelocityMessage:new(2.0)
+      local vm = navigator.SetMaxVelocityMessage:new(2.0)
       if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil or
          self.fsm.vars[1] ~= nil and self.fsm.vars[2] ~= nil then
          -- cartesian goto
@@ -80,7 +80,7 @@ function RELGOTO:init()
          local y = self.fsm.vars.y or self.fsm.vars[2]
          local ori = self.fsm.vars.ori or self.fsm.vars[3] or math.atan2(y, x)
          if math.sqrt(x*x + y*y) <= 0.5 then
-            vm = navigator.MaxVelocityMessage:new(1.0)
+            vm = navigator.SetMaxVelocityMessage:new(1.0)
          end
          navigator:msgq_enqueue_copy(vm)
          local m = navigator.CartesianGotoMessage:new(x, y, ori)
@@ -91,7 +91,7 @@ function RELGOTO:init()
          local phi, dist = self.fsm.vars.phi, self.fsm.vars.dist
          local ori = self.fsm.vars.ori or phi
          if tonumber(dist) <= 0.5 then
-            vm = navigator.MaxVelocityMessage:new(1.0)
+            vm = navigator.SetMaxVelocityMessage:new(1.0)
          end
          navigator:msgq_enqueue_copy(vm)
          local m = navigator.PolarGotoMessage:new(phi, dist, ori)
@@ -119,7 +119,7 @@ end
 
 function RELGOTO:jumpcond_navifail()
    return (self.fsm.vars.msgid == 0
-	   or (self.fsm.vars.msgid ~= navigator:msgid() and self.wait_start > 2)
+	   or (self.fsm.vars.msgid ~= navigator:msgid() and self.wait_start > 5)
 	   or not navigator:has_writer()
 	   or self.failed)
 end
