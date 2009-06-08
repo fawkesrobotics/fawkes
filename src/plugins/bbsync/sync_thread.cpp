@@ -273,20 +273,25 @@ BlackBoardSynchronizationThread::close_interfaces()
   MutexLocker lock(__interfaces.mutex());
   InterfaceMap::iterator i;
   for (i = __interfaces.begin(); i != __interfaces.end(); ++i) {
-    logger->log_debug(name(), "Closing remote %s interface %s",
-		      i->second.combo->remote_writer ? "writing" : "reading",
+    logger->log_debug(name(), "Closing %s reading interface %s",
+		      i->second.combo->remote_writer ? "local" : "remote",
 		      i->first->uid());
     if (i->second.combo->remote_writer) {
       __wsl_local->remove_interface(i->first);
+      blackboard->close(i->first);
     } else {
       __wsl_remote->remove_interface(i->first);
+      __remote_bb->close(i->first);
     }
-    __remote_bb->close(i->first);
     if (i->second.writer) {
-      logger->log_debug(name(), "Closing local %s interface %s",
-			i->second.combo->remote_writer ? "reading" : "writing",
+      logger->log_debug(name(), "Closing %s writing interface %s",
+			i->second.combo->remote_writer ? "remote" : "local",
 			i->second.writer->uid());
-      blackboard->close(i->second.writer);
+      if (i->second.combo->remote_writer) {
+	__remote_bb->close(i->second.writer);
+      } else {
+	blackboard->close(i->second.writer);
+      }
     }
   }
   __interfaces.clear();
