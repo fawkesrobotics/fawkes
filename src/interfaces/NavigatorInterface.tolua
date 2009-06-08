@@ -3,6 +3,17 @@ $using namespace fawkes;
 namespace fawkes {
 class NavigatorInterface : public Interface
 {
+  static const unsigned int ERROR_NONE;
+  static const unsigned int ERROR_MOTOR;
+  static const unsigned int ERROR_OBSTRUCTION;
+  static const unsigned int ERROR_UNKNOWN_PLACE;
+  static const unsigned int FLAG_NONE;
+  static const unsigned int FLAG_CART_GOTO;
+  static const unsigned int FLAG_POLAR_GOTO;
+  static const unsigned int FLAG_PLACE_GOTO;
+  static const unsigned int FLAG_UPDATES_DEST_DIST;
+  static const unsigned int FLAG_SECURITY_DISTANCE;
+  static const unsigned int FLAG_ESCAPING;
 
   class StopMessage : public Message
   {
@@ -59,15 +70,15 @@ class NavigatorInterface : public Interface
     int maxlenof_orientation() const;
   };
 
-  class MaxVelocityMessage : public Message
+  class PlaceGotoMessage : public Message
   {
-    MaxVelocityMessage(float ini_velocity);
-    MaxVelocityMessage();
-    ~MaxVelocityMessage();
+    PlaceGotoMessage(char * ini_place);
+    PlaceGotoMessage();
+    ~PlaceGotoMessage();
 
-    float velocity();
-    void set_velocity(const float new_velocity);
-    int maxlenof_velocity() const;
+    char * place();
+    void set_place(const char * new_place);
+    int maxlenof_place() const;
   };
 
   class ObstacleMessage : public Message
@@ -94,6 +105,42 @@ class NavigatorInterface : public Interface
 
   };
 
+  class SetMaxVelocityMessage : public Message
+  {
+    SetMaxVelocityMessage(float ini_max_velocity);
+    SetMaxVelocityMessage();
+    ~SetMaxVelocityMessage();
+
+    float max_velocity();
+    void set_max_velocity(const float new_max_velocity);
+    int maxlenof_max_velocity() const;
+  };
+
+  class SetEscapingMessage : public Message
+  {
+    SetEscapingMessage(bool ini_escaping_enabled);
+    SetEscapingMessage();
+    ~SetEscapingMessage();
+
+    bool is_escaping_enabled();
+    void set_escaping_enabled(const bool new_escaping_enabled);
+    int maxlenof_escaping_enabled() const;
+  };
+
+  class SetSecurityDistanceMessage : public Message
+  {
+    SetSecurityDistanceMessage(float ini_security_distance);
+    SetSecurityDistanceMessage();
+    ~SetSecurityDistanceMessage();
+
+    float security_distance();
+    void set_security_distance(const float new_security_distance);
+    int maxlenof_security_distance() const;
+  };
+
+  unsigned int flags();
+  void set_flags(const unsigned int new_flags);
+  int maxlenof_flags() const;
   float x();
   void set_x(const float new_x);
   int maxlenof_x() const;
@@ -118,6 +165,18 @@ class NavigatorInterface : public Interface
   bool is_final();
   void set_final(const bool new_final);
   int maxlenof_final() const;
+  unsigned int error_code();
+  void set_error_code(const unsigned int new_error_code);
+  int maxlenof_error_code() const;
+  float max_velocity();
+  void set_max_velocity(const float new_max_velocity);
+  int maxlenof_max_velocity() const;
+  float security_distance();
+  void set_security_distance(const float new_security_distance);
+  int maxlenof_security_distance() const;
+  bool is_escaping_enabled();
+  void set_escaping_enabled(const bool new_escaping_enabled);
+  int maxlenof_escaping_enabled() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

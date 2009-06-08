@@ -3,7 +3,7 @@
  *  NavigatorInterface.cpp - Fawkes BlackBoard Interface - NavigatorInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2007  Martin Liebenberg
+ *  Copyright  2007-2009  Martin Liebenberg, Daniel Beck, Tim Niemueller
  *
  *  $Id$
  *
@@ -51,6 +51,28 @@ namespace fawkes {
  */
 
 
+/** ERROR_NONE constant */
+const unsigned int NavigatorInterface::ERROR_NONE = 0;
+/** ERROR_MOTOR constant */
+const unsigned int NavigatorInterface::ERROR_MOTOR = 1;
+/** ERROR_OBSTRUCTION constant */
+const unsigned int NavigatorInterface::ERROR_OBSTRUCTION = 2;
+/** ERROR_UNKNOWN_PLACE constant */
+const unsigned int NavigatorInterface::ERROR_UNKNOWN_PLACE = 4;
+/** FLAG_NONE constant */
+const unsigned int NavigatorInterface::FLAG_NONE = 0;
+/** FLAG_CART_GOTO constant */
+const unsigned int NavigatorInterface::FLAG_CART_GOTO = 1;
+/** FLAG_POLAR_GOTO constant */
+const unsigned int NavigatorInterface::FLAG_POLAR_GOTO = 2;
+/** FLAG_PLACE_GOTO constant */
+const unsigned int NavigatorInterface::FLAG_PLACE_GOTO = 4;
+/** FLAG_UPDATES_DEST_DIST constant */
+const unsigned int NavigatorInterface::FLAG_UPDATES_DEST_DIST = 8;
+/** FLAG_SECURITY_DISTANCE constant */
+const unsigned int NavigatorInterface::FLAG_SECURITY_DISTANCE = 16;
+/** FLAG_ESCAPING constant */
+const unsigned int NavigatorInterface::FLAG_ESCAPING = 32;
 
 /** Constructor */
 NavigatorInterface::NavigatorInterface() : Interface()
@@ -59,6 +81,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (NavigatorInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  add_fieldinfo(Interface::IFT_UINT, "flags", 1, &data->flags);
   add_fieldinfo(Interface::IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(Interface::IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(Interface::IFT_FLOAT, "dest_x", 1, &data->dest_x);
@@ -67,7 +90,11 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "dest_dist", 1, &data->dest_dist);
   add_fieldinfo(Interface::IFT_UINT, "msgid", 1, &data->msgid);
   add_fieldinfo(Interface::IFT_BOOL, "final", 1, &data->final);
-  unsigned char tmp_hash[] = {0x4f, 0x19, 0xa0, 0x52, 0xd7, 0x8a, 0x12, 0x90, 0xb7, 0xf3, 0x37, 0x88, 0x17, 0x2f, 0x22, 0xdf};
+  add_fieldinfo(Interface::IFT_UINT, "error_code", 1, &data->error_code);
+  add_fieldinfo(Interface::IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
+  add_fieldinfo(Interface::IFT_FLOAT, "security_distance", 1, &data->security_distance);
+  add_fieldinfo(Interface::IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
+  unsigned char tmp_hash[] = {0x27, 0xba, 0x2d, 0x5e, 0xb7, 0xe5, 0x67, 0x3, 0x39, 0x40, 0xee, 0xe9, 0xe1, 0x82, 0x37, 0x29};
   set_hash(tmp_hash);
 }
 
@@ -77,6 +104,38 @@ NavigatorInterface::~NavigatorInterface()
   free(data_ptr);
 }
 /* Methods */
+/** Get flags value.
+ * Bit-wise combination of
+    FLAG_* constants denoting navigator component features.
+ * @return flags value
+ */
+unsigned int
+NavigatorInterface::flags() const
+{
+  return data->flags;
+}
+
+/** Get maximum length of flags value.
+ * @return length of flags value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_flags() const
+{
+  return 1;
+}
+
+/** Set flags value.
+ * Bit-wise combination of
+    FLAG_* constants denoting navigator component features.
+ * @param new_flags new flags value
+ */
+void
+NavigatorInterface::set_flags(const unsigned int new_flags)
+{
+  data->flags = new_flags;
+}
+
 /** Get x value.
  * Current X-coordinate in the navigator coordinate system.
  * @return x value
@@ -321,6 +380,138 @@ NavigatorInterface::set_final(const bool new_final)
   data->final = new_final;
 }
 
+/** Get error_code value.
+ * Failure code set if
+    final is true. 0 if no error occured, an error code from ERROR_*
+    constants otherwise (or a bit-wise combination).
+ * @return error_code value
+ */
+unsigned int
+NavigatorInterface::error_code() const
+{
+  return data->error_code;
+}
+
+/** Get maximum length of error_code value.
+ * @return length of error_code value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_error_code() const
+{
+  return 1;
+}
+
+/** Set error_code value.
+ * Failure code set if
+    final is true. 0 if no error occured, an error code from ERROR_*
+    constants otherwise (or a bit-wise combination).
+ * @param new_error_code new error_code value
+ */
+void
+NavigatorInterface::set_error_code(const unsigned int new_error_code)
+{
+  data->error_code = new_error_code;
+}
+
+/** Get max_velocity value.
+ * Maximum velocity
+ * @return max_velocity value
+ */
+float
+NavigatorInterface::max_velocity() const
+{
+  return data->max_velocity;
+}
+
+/** Get maximum length of max_velocity value.
+ * @return length of max_velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_max_velocity() const
+{
+  return 1;
+}
+
+/** Set max_velocity value.
+ * Maximum velocity
+ * @param new_max_velocity new max_velocity value
+ */
+void
+NavigatorInterface::set_max_velocity(const float new_max_velocity)
+{
+  data->max_velocity = new_max_velocity;
+}
+
+/** Get security_distance value.
+ * Security distance to
+    keep to obstacles
+ * @return security_distance value
+ */
+float
+NavigatorInterface::security_distance() const
+{
+  return data->security_distance;
+}
+
+/** Get maximum length of security_distance value.
+ * @return length of security_distance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_security_distance() const
+{
+  return 1;
+}
+
+/** Set security_distance value.
+ * Security distance to
+    keep to obstacles
+ * @param new_security_distance new security_distance value
+ */
+void
+NavigatorInterface::set_security_distance(const float new_security_distance)
+{
+  data->security_distance = new_security_distance;
+}
+
+/** Get escaping_enabled value.
+ * This is used for
+	navigation components with integrated collision avoidance, to
+	check whether the navigator should stop when an obstacle
+	obstructs the path, or if it should escape.
+ * @return escaping_enabled value
+ */
+bool
+NavigatorInterface::is_escaping_enabled() const
+{
+  return data->escaping_enabled;
+}
+
+/** Get maximum length of escaping_enabled value.
+ * @return length of escaping_enabled value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_escaping_enabled() const
+{
+  return 1;
+}
+
+/** Set escaping_enabled value.
+ * This is used for
+	navigation components with integrated collision avoidance, to
+	check whether the navigator should stop when an obstacle
+	obstructs the path, or if it should escape.
+ * @param new_escaping_enabled new escaping_enabled value
+ */
+void
+NavigatorInterface::set_escaping_enabled(const bool new_escaping_enabled)
+{
+  data->escaping_enabled = new_escaping_enabled;
+}
+
 /* =========== message create =========== */
 Message *
 NavigatorInterface::create_message(const char *type) const
@@ -333,12 +524,18 @@ NavigatorInterface::create_message(const char *type) const
     return new CartesianGotoMessage();
   } else if ( strncmp("PolarGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new PolarGotoMessage();
-  } else if ( strncmp("MaxVelocityMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new MaxVelocityMessage();
+  } else if ( strncmp("PlaceGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new PlaceGotoMessage();
   } else if ( strncmp("ObstacleMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new ObstacleMessage();
   } else if ( strncmp("ResetOdometryMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new ResetOdometryMessage();
+  } else if ( strncmp("SetMaxVelocityMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetMaxVelocityMessage();
+  } else if ( strncmp("SetEscapingMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetEscapingMessage();
+  } else if ( strncmp("SetSecurityDistanceMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetSecurityDistanceMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -817,35 +1014,35 @@ NavigatorInterface::PolarGotoMessage::clone() const
 {
   return new NavigatorInterface::PolarGotoMessage(this);
 }
-/** @class NavigatorInterface::MaxVelocityMessage <interfaces/NavigatorInterface.h>
- * MaxVelocityMessage Fawkes BlackBoard Interface Message.
+/** @class NavigatorInterface::PlaceGotoMessage <interfaces/NavigatorInterface.h>
+ * PlaceGotoMessage Fawkes BlackBoard Interface Message.
  * 
     
  */
 
 
 /** Constructor with initial values.
- * @param ini_velocity initial value for velocity
+ * @param ini_place initial value for place
  */
-NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage(const float ini_velocity) : Message("MaxVelocityMessage")
+NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage(const char * ini_place) : Message("PlaceGotoMessage")
 {
-  data_size = sizeof(MaxVelocityMessage_data_t);
+  data_size = sizeof(PlaceGotoMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (MaxVelocityMessage_data_t *)data_ptr;
-  data->velocity = ini_velocity;
+  data      = (PlaceGotoMessage_data_t *)data_ptr;
+  strncpy(data->place, ini_place, 64);
 }
 /** Constructor */
-NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage() : Message("MaxVelocityMessage")
+NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage() : Message("PlaceGotoMessage")
 {
-  data_size = sizeof(MaxVelocityMessage_data_t);
+  data_size = sizeof(PlaceGotoMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (MaxVelocityMessage_data_t *)data_ptr;
+  data      = (PlaceGotoMessage_data_t *)data_ptr;
 }
 
 /** Destructor */
-NavigatorInterface::MaxVelocityMessage::~MaxVelocityMessage()
+NavigatorInterface::PlaceGotoMessage::~PlaceGotoMessage()
 {
   free(data_ptr);
 }
@@ -853,43 +1050,43 @@ NavigatorInterface::MaxVelocityMessage::~MaxVelocityMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-NavigatorInterface::MaxVelocityMessage::MaxVelocityMessage(const MaxVelocityMessage *m) : Message("MaxVelocityMessage")
+NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage(const PlaceGotoMessage *m) : Message("PlaceGotoMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
-  data      = (MaxVelocityMessage_data_t *)data_ptr;
+  data      = (PlaceGotoMessage_data_t *)data_ptr;
 }
 
 /* Methods */
-/** Get velocity value.
- * Maximum velocity of the robot.
- * @return velocity value
+/** Get place value.
+ * Place to go to.
+ * @return place value
  */
-float
-NavigatorInterface::MaxVelocityMessage::velocity() const
+char *
+NavigatorInterface::PlaceGotoMessage::place() const
 {
-  return data->velocity;
+  return data->place;
 }
 
-/** Get maximum length of velocity value.
- * @return length of velocity value, can be length of the array or number of 
+/** Get maximum length of place value.
+ * @return length of place value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NavigatorInterface::MaxVelocityMessage::maxlenof_velocity() const
+NavigatorInterface::PlaceGotoMessage::maxlenof_place() const
 {
-  return 1;
+  return 64;
 }
 
-/** Set velocity value.
- * Maximum velocity of the robot.
- * @param new_velocity new velocity value
+/** Set place value.
+ * Place to go to.
+ * @param new_place new place value
  */
 void
-NavigatorInterface::MaxVelocityMessage::set_velocity(const float new_velocity)
+NavigatorInterface::PlaceGotoMessage::set_place(const char * new_place)
 {
-  data->velocity = new_velocity;
+  strncpy(data->place, new_place, sizeof(data->place));
 }
 
 /** Clone this message.
@@ -898,9 +1095,9 @@ NavigatorInterface::MaxVelocityMessage::set_velocity(const float new_velocity)
  * @return clone of this message
  */
 Message *
-NavigatorInterface::MaxVelocityMessage::clone() const
+NavigatorInterface::PlaceGotoMessage::clone() const
 {
-  return new NavigatorInterface::MaxVelocityMessage(this);
+  return new NavigatorInterface::PlaceGotoMessage(this);
 }
 /** @class NavigatorInterface::ObstacleMessage <interfaces/NavigatorInterface.h>
  * ObstacleMessage Fawkes BlackBoard Interface Message.
@@ -1090,6 +1287,269 @@ NavigatorInterface::ResetOdometryMessage::clone() const
 {
   return new NavigatorInterface::ResetOdometryMessage(this);
 }
+/** @class NavigatorInterface::SetMaxVelocityMessage <interfaces/NavigatorInterface.h>
+ * SetMaxVelocityMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_max_velocity initial value for max_velocity
+ */
+NavigatorInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const float ini_max_velocity) : Message("SetMaxVelocityMessage")
+{
+  data_size = sizeof(SetMaxVelocityMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+  data->max_velocity = ini_max_velocity;
+}
+/** Constructor */
+NavigatorInterface::SetMaxVelocityMessage::SetMaxVelocityMessage() : Message("SetMaxVelocityMessage")
+{
+  data_size = sizeof(SetMaxVelocityMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+NavigatorInterface::SetMaxVelocityMessage::~SetMaxVelocityMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const SetMaxVelocityMessage *m) : Message("SetMaxVelocityMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetMaxVelocityMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get max_velocity value.
+ * Maximum velocity
+ * @return max_velocity value
+ */
+float
+NavigatorInterface::SetMaxVelocityMessage::max_velocity() const
+{
+  return data->max_velocity;
+}
+
+/** Get maximum length of max_velocity value.
+ * @return length of max_velocity value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::SetMaxVelocityMessage::maxlenof_max_velocity() const
+{
+  return 1;
+}
+
+/** Set max_velocity value.
+ * Maximum velocity
+ * @param new_max_velocity new max_velocity value
+ */
+void
+NavigatorInterface::SetMaxVelocityMessage::set_max_velocity(const float new_max_velocity)
+{
+  data->max_velocity = new_max_velocity;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::SetMaxVelocityMessage::clone() const
+{
+  return new NavigatorInterface::SetMaxVelocityMessage(this);
+}
+/** @class NavigatorInterface::SetEscapingMessage <interfaces/NavigatorInterface.h>
+ * SetEscapingMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_escaping_enabled initial value for escaping_enabled
+ */
+NavigatorInterface::SetEscapingMessage::SetEscapingMessage(const bool ini_escaping_enabled) : Message("SetEscapingMessage")
+{
+  data_size = sizeof(SetEscapingMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetEscapingMessage_data_t *)data_ptr;
+  data->escaping_enabled = ini_escaping_enabled;
+}
+/** Constructor */
+NavigatorInterface::SetEscapingMessage::SetEscapingMessage() : Message("SetEscapingMessage")
+{
+  data_size = sizeof(SetEscapingMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetEscapingMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+NavigatorInterface::SetEscapingMessage::~SetEscapingMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::SetEscapingMessage::SetEscapingMessage(const SetEscapingMessage *m) : Message("SetEscapingMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetEscapingMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get escaping_enabled value.
+ * This is used for
+	navigation components with integrated collision avoidance, to
+	check whether the navigator should stop when an obstacle
+	obstructs the path, or if it should escape.
+ * @return escaping_enabled value
+ */
+bool
+NavigatorInterface::SetEscapingMessage::is_escaping_enabled() const
+{
+  return data->escaping_enabled;
+}
+
+/** Get maximum length of escaping_enabled value.
+ * @return length of escaping_enabled value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::SetEscapingMessage::maxlenof_escaping_enabled() const
+{
+  return 1;
+}
+
+/** Set escaping_enabled value.
+ * This is used for
+	navigation components with integrated collision avoidance, to
+	check whether the navigator should stop when an obstacle
+	obstructs the path, or if it should escape.
+ * @param new_escaping_enabled new escaping_enabled value
+ */
+void
+NavigatorInterface::SetEscapingMessage::set_escaping_enabled(const bool new_escaping_enabled)
+{
+  data->escaping_enabled = new_escaping_enabled;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::SetEscapingMessage::clone() const
+{
+  return new NavigatorInterface::SetEscapingMessage(this);
+}
+/** @class NavigatorInterface::SetSecurityDistanceMessage <interfaces/NavigatorInterface.h>
+ * SetSecurityDistanceMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_security_distance initial value for security_distance
+ */
+NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage(const float ini_security_distance) : Message("SetSecurityDistanceMessage")
+{
+  data_size = sizeof(SetSecurityDistanceMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetSecurityDistanceMessage_data_t *)data_ptr;
+  data->security_distance = ini_security_distance;
+}
+/** Constructor */
+NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage() : Message("SetSecurityDistanceMessage")
+{
+  data_size = sizeof(SetSecurityDistanceMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetSecurityDistanceMessage_data_t *)data_ptr;
+}
+
+/** Destructor */
+NavigatorInterface::SetSecurityDistanceMessage::~SetSecurityDistanceMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage(const SetSecurityDistanceMessage *m) : Message("SetSecurityDistanceMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetSecurityDistanceMessage_data_t *)data_ptr;
+}
+
+/* Methods */
+/** Get security_distance value.
+ * Security distance to
+    keep to obstacles
+ * @return security_distance value
+ */
+float
+NavigatorInterface::SetSecurityDistanceMessage::security_distance() const
+{
+  return data->security_distance;
+}
+
+/** Get maximum length of security_distance value.
+ * @return length of security_distance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::SetSecurityDistanceMessage::maxlenof_security_distance() const
+{
+  return 1;
+}
+
+/** Set security_distance value.
+ * Security distance to
+    keep to obstacles
+ * @param new_security_distance new security_distance value
+ */
+void
+NavigatorInterface::SetSecurityDistanceMessage::set_security_distance(const float new_security_distance)
+{
+  data->security_distance = new_security_distance;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::SetSecurityDistanceMessage::clone() const
+{
+  return new NavigatorInterface::SetSecurityDistanceMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  */
@@ -1112,7 +1572,7 @@ NavigatorInterface::message_valid(const Message *message) const
   if ( m3 != NULL ) {
     return true;
   }
-  const MaxVelocityMessage *m4 = dynamic_cast<const MaxVelocityMessage *>(message);
+  const PlaceGotoMessage *m4 = dynamic_cast<const PlaceGotoMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
@@ -1122,6 +1582,18 @@ NavigatorInterface::message_valid(const Message *message) const
   }
   const ResetOdometryMessage *m6 = dynamic_cast<const ResetOdometryMessage *>(message);
   if ( m6 != NULL ) {
+    return true;
+  }
+  const SetMaxVelocityMessage *m7 = dynamic_cast<const SetMaxVelocityMessage *>(message);
+  if ( m7 != NULL ) {
+    return true;
+  }
+  const SetEscapingMessage *m8 = dynamic_cast<const SetEscapingMessage *>(message);
+  if ( m8 != NULL ) {
+    return true;
+  }
+  const SetSecurityDistanceMessage *m9 = dynamic_cast<const SetSecurityDistanceMessage *>(message);
+  if ( m9 != NULL ) {
     return true;
   }
   return false;

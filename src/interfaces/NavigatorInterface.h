@@ -3,7 +3,7 @@
  *  NavigatorInterface.h - Fawkes BlackBoard Interface - NavigatorInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2007  Martin Liebenberg
+ *  Copyright  2007-2009  Martin Liebenberg, Daniel Beck, Tim Niemueller
  *
  *  $Id$
  *
@@ -38,20 +38,43 @@ class NavigatorInterface : public Interface
  /// @endcond
  public:
   /* constants */
+  static const unsigned int ERROR_NONE;
+  static const unsigned int ERROR_MOTOR;
+  static const unsigned int ERROR_OBSTRUCTION;
+  static const unsigned int ERROR_UNKNOWN_PLACE;
+  static const unsigned int FLAG_NONE;
+  static const unsigned int FLAG_CART_GOTO;
+  static const unsigned int FLAG_POLAR_GOTO;
+  static const unsigned int FLAG_PLACE_GOTO;
+  static const unsigned int FLAG_UPDATES_DEST_DIST;
+  static const unsigned int FLAG_SECURITY_DISTANCE;
+  static const unsigned int FLAG_ESCAPING;
 
  private:
   /** Internal data storage, do NOT modify! */
   typedef struct {
+    unsigned int flags; /**< Bit-wise combination of
+    FLAG_* constants denoting navigator component features. */
     unsigned int msgid; /**< The ID of the message that is currently being
       processed, or 0 if no message is being processed. */
+    unsigned int error_code; /**< Failure code set if
+    final is true. 0 if no error occured, an error code from ERROR_*
+    constants otherwise (or a bit-wise combination). */
     float x; /**< Current X-coordinate in the navigator coordinate system. */
     float y; /**< Current Y-coordinate in the navigator coordinate system. */
     float dest_x; /**< X-coordinate of the current destination, or 0.0 if no target has been set. */
     float dest_y; /**< Y-coordinate of the current destination, or 0.0 if no target has been set. */
     float dest_ori; /**< Orientation of the current destination, or 0.0 if no target has been set. */
     float dest_dist; /**< Distance to destination in m. */
+    float max_velocity; /**< Maximum velocity */
+    float security_distance; /**< Security distance to
+    keep to obstacles */
     bool final; /**< True, if the last goto command has been finished,
       false if it is still running */
+    bool escaping_enabled; /**< This is used for
+	navigation components with integrated collision avoidance, to
+	check whether the navigator should stop when an obstacle
+	obstructs the path, or if it should escape. */
   } NavigatorInterface_data_t;
 
   NavigatorInterface_data_t *data;
@@ -159,26 +182,26 @@ class NavigatorInterface : public Interface
     virtual Message * clone() const;
   };
 
-  class MaxVelocityMessage : public Message
+  class PlaceGotoMessage : public Message
   {
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      float velocity; /**< Maximum velocity of the robot. */
-    } MaxVelocityMessage_data_t;
+      char place[64]; /**< Place to go to. */
+    } PlaceGotoMessage_data_t;
 
-    MaxVelocityMessage_data_t *data;
+    PlaceGotoMessage_data_t *data;
 
    public:
-    MaxVelocityMessage(const float ini_velocity);
-    MaxVelocityMessage();
-    ~MaxVelocityMessage();
+    PlaceGotoMessage(const char * ini_place);
+    PlaceGotoMessage();
+    ~PlaceGotoMessage();
 
-    MaxVelocityMessage(const MaxVelocityMessage *m);
+    PlaceGotoMessage(const PlaceGotoMessage *m);
     /* Methods */
-    float velocity() const;
-    void set_velocity(const float new_velocity);
-    size_t maxlenof_velocity() const;
+    char * place() const;
+    void set_place(const char * new_place);
+    size_t maxlenof_place() const;
     virtual Message * clone() const;
   };
 
@@ -224,6 +247,79 @@ class NavigatorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetMaxVelocityMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float max_velocity; /**< Maximum velocity */
+    } SetMaxVelocityMessage_data_t;
+
+    SetMaxVelocityMessage_data_t *data;
+
+   public:
+    SetMaxVelocityMessage(const float ini_max_velocity);
+    SetMaxVelocityMessage();
+    ~SetMaxVelocityMessage();
+
+    SetMaxVelocityMessage(const SetMaxVelocityMessage *m);
+    /* Methods */
+    float max_velocity() const;
+    void set_max_velocity(const float new_max_velocity);
+    size_t maxlenof_max_velocity() const;
+    virtual Message * clone() const;
+  };
+
+  class SetEscapingMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      bool escaping_enabled; /**< This is used for
+	navigation components with integrated collision avoidance, to
+	check whether the navigator should stop when an obstacle
+	obstructs the path, or if it should escape. */
+    } SetEscapingMessage_data_t;
+
+    SetEscapingMessage_data_t *data;
+
+   public:
+    SetEscapingMessage(const bool ini_escaping_enabled);
+    SetEscapingMessage();
+    ~SetEscapingMessage();
+
+    SetEscapingMessage(const SetEscapingMessage *m);
+    /* Methods */
+    bool is_escaping_enabled() const;
+    void set_escaping_enabled(const bool new_escaping_enabled);
+    size_t maxlenof_escaping_enabled() const;
+    virtual Message * clone() const;
+  };
+
+  class SetSecurityDistanceMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      float security_distance; /**< Security distance to
+    keep to obstacles */
+    } SetSecurityDistanceMessage_data_t;
+
+    SetSecurityDistanceMessage_data_t *data;
+
+   public:
+    SetSecurityDistanceMessage(const float ini_security_distance);
+    SetSecurityDistanceMessage();
+    ~SetSecurityDistanceMessage();
+
+    SetSecurityDistanceMessage(const SetSecurityDistanceMessage *m);
+    /* Methods */
+    float security_distance() const;
+    void set_security_distance(const float new_security_distance);
+    size_t maxlenof_security_distance() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   NavigatorInterface();
@@ -231,6 +327,9 @@ class NavigatorInterface : public Interface
 
  public:
   /* Methods */
+  unsigned int flags() const;
+  void set_flags(const unsigned int new_flags);
+  size_t maxlenof_flags() const;
   float x() const;
   void set_x(const float new_x);
   size_t maxlenof_x() const;
@@ -255,6 +354,18 @@ class NavigatorInterface : public Interface
   bool is_final() const;
   void set_final(const bool new_final);
   size_t maxlenof_final() const;
+  unsigned int error_code() const;
+  void set_error_code(const unsigned int new_error_code);
+  size_t maxlenof_error_code() const;
+  float max_velocity() const;
+  void set_max_velocity(const float new_max_velocity);
+  size_t maxlenof_max_velocity() const;
+  float security_distance() const;
+  void set_security_distance(const float new_security_distance);
+  size_t maxlenof_security_distance() const;
+  bool is_escaping_enabled() const;
+  void set_escaping_enabled(const bool new_escaping_enabled);
+  size_t maxlenof_escaping_enabled() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

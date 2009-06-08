@@ -1,6 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
-<interface name="NavigatorInterface" author="Martin Liebenberg" year="2007">
+<interface name="NavigatorInterface" author="Martin Liebenberg, Daniel Beck, Tim Niemueller" year="2007-2009">
+  <constants>
+    <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
+	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
+    <constant type="unsigned int" value="0" name="ERROR_NONE">No error.</constant>
+    <constant type="unsigned int" value="1" name="ERROR_MOTOR">Cannot
+      communicate with motor.</constant>
+    <constant type="unsigned int" value="2" name="ERROR_OBSTRUCTION">
+      Target cannot be reached, something is standing in the way.
+    </constant>
+    <constant type="unsigned int" value="4" name="ERROR_UNKNOWN_PLACE">
+      The last GotoPlaceMessages could not be processed as the given
+      place is unknown.
+    </constant>
+
+    <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
+	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
+    <constant type="unsigned int" value="0" name="FLAG_NONE">No flags set.</constant>
+    <constant type="unsigned int" value="1" name="FLAG_CART_GOTO">
+      Navigator component supports cartesian goto commands.
+    </constant>
+    <constant type="unsigned int" value="2" name="FLAG_POLAR_GOTO">
+      Navigator component supports polar goto commands.
+    </constant>
+    <constant type="unsigned int" value="4" name="FLAG_PLACE_GOTO">
+      Navigator components supports place goto messages. Know places
+      have to be communicated out of band.
+    </constant>
+    <constant type="unsigned int" value="8" name="FLAG_UPDATES_DEST_DIST">
+      Navigator component updates dest_dist field with destination to
+      target while moving.
+    </constant>
+    <constant type="unsigned int" value="16" name="FLAG_SECURITY_DISTANCE">
+      Security distance can be set at run-time.
+    </constant>
+    <constant type="unsigned int" value="32" name="FLAG_ESCAPING">
+      Navigator component supports escaping which can be enabled and disabled.
+    </constant>
+  </constants>
   <data>
     <comment>
       The navigator interface is used by the navigator to export information about
@@ -16,6 +54,9 @@
       to time and the robot's position in this system gives the odometry deltas.
     </comment>
 
+    <field type="unsigned int" name="flags">Bit-wise combination of
+    FLAG_* constants denoting navigator component features.</field>
+
     <field type="float" name="x">Current X-coordinate in the navigator coordinate system.</field>
     <field type="float" name="y">Current Y-coordinate in the navigator coordinate system.</field>
 
@@ -29,6 +70,17 @@
       processed, or 0 if no message is being processed.</field>
     <field type="bool" name="final">True, if the last goto command has been finished,
       false if it is still running</field>
+    <field type="unsigned int" name="error_code">Failure code set if
+    final is true. 0 if no error occured, an error code from ERROR_*
+    constants otherwise (or a bit-wise combination).</field>
+
+    <field type="float" name="max_velocity">Maximum velocity</field>
+    <field type="float" name="security_distance">Security distance to
+    keep to obstacles</field>
+    <field type="bool" name="escaping_enabled">This is used for
+	navigation components with integrated collision avoidance, to
+	check whether the navigator should stop when an obstacle
+	obstructs the path, or if it should escape.</field>
   </data>
   <message name="Stop">
     <comment>Stop motion immediately.</comment>
@@ -53,9 +105,9 @@
     <field type="float" name="dist">Distance to the target.</field>
     <field type="float" name="orientation">The orientation of the robot at the target.</field>
   </message>
-  <message name="MaxVelocity">
-    <comment>States the maximum velocity of the robot for driving/walking, but not for turning.</comment>
-    <field type="float" name="velocity">Maximum velocity of the robot.</field>
+  <message name="PlaceGoto">
+    <comment>States the next target to navigate to.</comment>
+    <field type="char" length="64" name="place">Place to go to.</field>
   </message>
   <message name="Obstacle">
     <comment>Adds an obstacle within the scan area. It's just for the Navigator GUI.</comment>
@@ -65,5 +117,18 @@
   </message>
   <message name="ResetOdometry">
     <comment>Resets the origin of the odometry system</comment>
+  </message>
+  <message name="SetMaxVelocity">
+    <comment>States the maximum velocity of the robot for driving/walking, but not for turning.</comment>
+    <ref>max_velocity</ref>
+  </message>
+  <message name="SetEscaping">
+    <comment>Sets if escaping is allowed (true) or not (false).</comment>
+    <ref>escaping_enabled</ref>
+  </message>
+  <message name="SetSecurityDistance">
+    <comment>Sets the desired security distance (in meters) for
+    collision avoidance.</comment>
+    <ref>security_distance</ref>
   </message>
 </interface>
