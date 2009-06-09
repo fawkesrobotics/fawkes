@@ -54,9 +54,9 @@ class FacerInterface : public Interface
   typedef struct {
     unsigned int num_detections; /**< Number of currently detected faces */
     float sec_since_detection; /**< Time in seconds since the last successful detection. */
+    bool learning_done; /**< True if opmode is learning and learning has been completed, false otherwise */
     if_facer_opmode_t opmode; /**< Current opmode. */
     char face_label[64]; /**< Label of the recognized face */
-    bool learning_done; /**< True if opmode is learning and learning has been completed, false otherwise */
   } FacerInterface_data_t;
 
   FacerInterface_data_t *data;

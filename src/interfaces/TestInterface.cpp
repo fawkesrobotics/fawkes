@@ -54,13 +54,13 @@ TestInterface::TestInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(Interface::IFT_BOOL, "test_bool", 1, &data->test_bool);
   add_fieldinfo(Interface::IFT_INT, "test_int", 1, &data->test_int);
-  add_fieldinfo(Interface::IFT_STRING, "_flags", 1, &data->_flags);
+  add_fieldinfo(Interface::IFT_BYTE, "flags", 1, &data->flags);
   add_fieldinfo(Interface::IFT_STRING, "test_string", 30, data->test_string);
   add_fieldinfo(Interface::IFT_INT, "result", 1, &data->result);
   add_fieldinfo(Interface::IFT_UINT, "test_uint", 1, &data->test_uint);
   add_fieldinfo(Interface::IFT_LONGUINT, "test_ulint", 1, &data->test_ulint);
   add_fieldinfo(Interface::IFT_LONGINT, "test_lint", 1, &data->test_lint);
-  unsigned char tmp_hash[] = {0x2b, 0xa5, 0x54, 0xfd, 0xe4, 0x89, 0xa0, 0x5, 0xa7, 0x52, 0x19, 0x2e, 0x43, 0x96, 0x11, 0x82};
+  unsigned char tmp_hash[] = {0x69, 0xac, 0x2a, 0x88, 0xec, 0xcf, 0x7, 0x18, 0x1, 0xf7, 0xfb, 0x54, 0xc, 0xb7, 0xa2, 0x1f};
   set_hash(tmp_hash);
 }
 
@@ -130,34 +130,34 @@ TestInterface::set_test_int(const int new_test_int)
   data->test_int = new_test_int;
 }
 
-/** Get _flags value.
+/** Get flags value.
  * Flags spit down by the writer
- * @return _flags value
+ * @return flags value
  */
-char
-TestInterface::_flags() const
+unsigned char
+TestInterface::flags() const
 {
-  return data->_flags;
+  return data->flags;
 }
 
-/** Get maximum length of _flags value.
- * @return length of _flags value, can be length of the array or number of 
+/** Get maximum length of flags value.
+ * @return length of flags value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-TestInterface::maxlenof__flags() const
+TestInterface::maxlenof_flags() const
 {
   return 1;
 }
 
-/** Set _flags value.
+/** Set flags value.
  * Flags spit down by the writer
- * @param new__flags new _flags value
+ * @param new_flags new flags value
  */
 void
-TestInterface::set__flags(const char new__flags)
+TestInterface::set_flags(const unsigned char new_flags)
 {
-  data->_flags = new__flags;
+  data->flags = new_flags;
 }
 
 /** Get test_string value.

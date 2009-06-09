@@ -8,7 +8,7 @@
       re-position, etc.)
     </comment>
 
-    <field type="char" length="30" name="map_name">The name of the current
+    <field type="string" length="30" name="map_name">The name of the current
     map</field>
   </data>
 

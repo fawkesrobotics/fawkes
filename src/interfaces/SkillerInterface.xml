@@ -19,11 +19,11 @@
       calling skills via messages. It can also be used to manually restart
       the Lua interpreter if something is wedged.
     </comment>
-    <field type="char" length="1024" name="skill_string">
+    <field type="string" length="1024" name="skill_string">
       Currently executed skill string, at least the first 1023 bytes of it.
       Must be properly null-terminated.
     </field>
-    <field type="char" length="128" name="error">
+    <field type="string" length="128" name="error">
       String describing the error. Can be set by a skill when it fails.
     </field>
     <field type="unsigned int" name="exclusive_controller">

@@ -298,10 +298,11 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */
 {
   for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
 
-    if ( (i->getLengthValue() > 0) && (i->getType() != "char" ) ) {
+    if ( (i->getLengthValue() > 0) && (i->getType() != "string" ) ) {
       fprintf(f,
 	      "%s%s %s%s(int index);\n",
-	      is.c_str(), (*i).getPlainAccessType().c_str(),
+	      is.c_str(),
+	      (i->getType() == "byte") ? "unsigned int" : i->getPlainAccessType().c_str(),
 	      ( ((*i).getType() == "bool" ) ? "is_" : ""),
 	      (*i).getName().c_str());
 

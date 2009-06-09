@@ -56,7 +56,7 @@ class TestInterface : public Interface
     unsigned long int test_ulint; /**< Test unsigned long int */
     long int test_lint; /**< Test long int */
     bool test_bool; /**< Test Bool */
-    char _flags; /**< Flags spit down by the writer */
+    unsigned char flags; /**< Flags spit down by the writer */
     char test_string[30]; /**< A test sring */
   } TestInterface_data_t;
 
@@ -150,9 +150,9 @@ class TestInterface : public Interface
   int test_int() const;
   void set_test_int(const int new_test_int);
   size_t maxlenof_test_int() const;
-  char _flags() const;
-  void set__flags(const char new__flags);
-  size_t maxlenof__flags() const;
+  unsigned char flags() const;
+  void set_flags(const unsigned char new_flags);
+  size_t maxlenof_flags() const;
   char * test_string() const;
   void set_test_string(const char * new_test_string);
   size_t maxlenof_test_string() const;

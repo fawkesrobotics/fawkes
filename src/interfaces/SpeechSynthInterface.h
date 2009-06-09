@@ -51,11 +51,11 @@ class SpeechSynthInterface : public Interface
       unknown. This is the total duration of the current string, *not* the
       duration of already spoken or yet to speak text!
      */
-    char text[1024]; /**< 
-      Last spoken string. Must be properly null-terminated.
-     */
     bool final; /**< 
       True, if the last text has been spoken, false if it is still running.
+     */
+    char text[1024]; /**< 
+      Last spoken string. Must be properly null-terminated.
      */
   } SpeechSynthInterface_data_t;
 

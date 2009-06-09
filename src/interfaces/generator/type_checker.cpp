@@ -43,7 +43,8 @@
  * - bool
  * - float
  * - double
- * - char
+ * - byte (unsigned 8-bit number)
+ * - string
  */
 
 
@@ -63,6 +64,8 @@ InterfaceDataTypeChecker::validType(const std::string &type, std::vector<Interfa
 	(type == "bool") ||
 	(type == "char") ||
 	(type == "float") ||
+	(type == "byte") ||
+	(type == "string") ||
 	(type == "double") ) {
     return true;
   } else if ( enum_constants != NULL ) {
@@ -123,6 +126,21 @@ InterfaceDataTypeChecker::validValue(const std::string &type, const std::string 
     } else {
       return (val >= 0);
     }
+  } else if (type == "byte") {
+    std::string::size_type notofnumber = value.find_first_not_of("0123456789");
+    if ( notofnumber != std::string::npos ) {
+      std::string suffix = value.substr(notofnumber);
+      if ( (suffix != "U") && (suffix != "u") ) {
+        return false;
+      }
+    }
+    char *endptr;
+    long int val = strtol(value.substr(0, notofnumber).c_str(), &endptr, 11);
+    if ( (endptr == NULL) || (endptr[0] != '\0') ) {
+      return false;
+    } else {
+      return ((val >= 0) && (val <= 255));
+    }
   } else if ( type == "bool" ) {
     return ( (value == "true") ||
 	     (value == "false") ||
@@ -138,7 +156,7 @@ InterfaceDataTypeChecker::validValue(const std::string &type, const std::string 
       throw fawkes::Exception("Could not convert string '%s' to float", value.c_str());
     }
     return ((endptr != NULL) && (endptr[0] == '\0'));
-  } else if ( type == "char" ) {
+  } else if ( type == "string" ) {
     return true;
   } else {
     return false;

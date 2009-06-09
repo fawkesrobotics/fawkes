@@ -116,7 +116,8 @@ CppInterfaceGenerator::~CppInterfaceGenerator()
  * 5. float
  * 6. double
  * 7. bool
- * 8. char *
+ * 8. byte
+ * 8. string
  * @param f file to write to
  * @param name name of struct
  * @param is indentation space
@@ -136,7 +137,7 @@ CppInterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* in
 	    "%stypedef struct {\n", is.c_str(), is.c_str());
 
     for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
-      fprintf(f, "%s  %s %s", is.c_str(), (*i).getType().c_str(), (*i).getName().c_str());
+      fprintf(f, "%s  %s %s", is.c_str(), (*i).getStructType().c_str(), (*i).getName().c_str());
       if ( (*i).getLength().length() > 0 ) {
 	fprintf(f, "[%s]", (*i).getLength().c_str());
       }
@@ -566,17 +567,17 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 	type = "INT";
       } else if ( i->getType() == "unsigned int" ) {
 	type = "UINT";
+      } else if ( i->getType() == "byte" ) {
+	type = "BYTE";
       } else if ( i->getType() == "long int" ) {
 	type = "LONGINT";
       } else if ( i->getType() == "unsigned long int" ) {
 	type = "LONGUINT";
       } else if ( i->getType() == "float" ) {
 	type = "FLOAT";
-      } else if ( i->getType() == "char" ) {
+      } else if ( i->getType() == "string" ) {
 	type = "STRING";
-	if ( i->getLengthValue() > 0 ) {
-	  dataptr = "";
-	}
+	dataptr = "";
       } else {
 	do_print = false;
       }
@@ -661,7 +662,7 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	    super_class.c_str(), classname.c_str(), classname.c_str(), classname.c_str());
     
     for (i = fields.begin(); i != fields.end(); ++i) {
-      if ( (*i).getType() == "char" ) {
+      if ( (*i).getType() == "string" ) {
 	fprintf(f, "  strncpy(data->%s, ini_%s, %s);\n",
 		(*i).getName().c_str(), (*i).getName().c_str(),
 		(*i).getLength().c_str());
@@ -764,7 +765,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	    inclusion_prefix.c_str(), classname.c_str(), ( ((*i).getType() == "bool" ) ? "is_" : ""), (*i).getName().c_str(),
 	    (*i).getName().c_str() );
 
-    if ( (i->getLengthValue() > 0) && (i->getType() != "char") ) {
+    if ( (i->getLengthValue() > 0) && (i->getType() != "string") ) {
       fprintf(f,
 	      "/** Get %s value at given index.\n"
 	      " * %s\n"
@@ -818,7 +819,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	    (*i).getName().c_str(), (*i).getName().c_str(),
 	    inclusion_prefix.c_str(), classname.c_str(), (*i).getName().c_str(), (*i).getAccessType().c_str(), (*i).getName().c_str()
 	    );
-    if ( ((*i).getType() == "char") && ((*i).getLengthValue() > 0) ) {
+    if ( (*i).getType() == "string" ) {
       fprintf(f,
 	      "  strncpy(data->%s, new_%s, sizeof(data->%s));\n",
 	      (*i).getName().c_str(), (*i).getName().c_str(), (*i).getName().c_str());
@@ -826,7 +827,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
       fprintf(f,
 	      "  memcpy(data->%s, new_%s, sizeof(%s) * %s);\n",
 	      (*i).getName().c_str(), (*i).getName().c_str(),
-	      (*i).getType().c_str(), (*i).getLength().c_str());
+	      (*i).getPlainAccessType().c_str(), (*i).getLength().c_str());
     } else {
       fprintf(f,
 	      "  data->%s = new_%s;\n",
@@ -834,7 +835,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
     }
     fprintf(f, "}\n\n");
 
-    if ( ((*i).getType() != "char") && ((*i).getLengthValue() > 0) ) {
+    if ( ((*i).getType() != "string") && ((*i).getLengthValue() > 0) ) {
       fprintf(f,
 	      "/** Set %s value at given index.\n"
 	      " * %s\n"
@@ -957,7 +958,7 @@ CppInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ i
 	    ( ((*i).getType() == "bool" ) ? "is_" : ""),
 	    (*i).getName().c_str());
 
-    if ((i->getLengthValue() > 0) && (i->getType() != "char")) {
+    if ((i->getLengthValue() > 0) && (i->getType() != "string")) {
       fprintf(f,
 	      "%s%s %s%s(unsigned int index) const;\n"
 	      "%svoid set_%s(unsigned int index, const %s new_%s);\n",

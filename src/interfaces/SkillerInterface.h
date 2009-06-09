@@ -57,6 +57,10 @@ class SkillerInterface : public Interface
       carry your instance serial your exec messages will be ignored. Aquire control with
       the AquireControlMessage. Make sure you release control before exiting.
      */
+    bool continuous; /**< 
+      True if continuous execution is in progress, false if no skill string is executed
+      at all or it is executed one-shot with ExecSkillMessage.
+     */
     char skill_string[1024]; /**< 
       Currently executed skill string, at least the first 1023 bytes of it.
       Must be properly null-terminated.
@@ -66,10 +70,6 @@ class SkillerInterface : public Interface
      */
     SkillStatusEnum status; /**< 
       The status of the current skill execution.
-     */
-    bool continuous; /**< 
-      True if continuous execution is in progress, false if no skill string is executed
-      at all or it is executed one-shot with ExecSkillMessage.
      */
   } SkillerInterface_data_t;
 

@@ -8,7 +8,7 @@
       synthesis and audio output. Multiple messages ordering speech
       should be enqueued and processed one after another by providers.
     </comment>
-    <field type="char" length="1024" name="text">
+    <field type="string" length="1024" name="text">
       Last spoken string. Must be properly null-terminated.
     </field>
     <field type="unsigned int" name="msgid">

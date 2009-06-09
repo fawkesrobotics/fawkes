@@ -81,10 +81,10 @@ class JoystickInterface : public Interface
      */
     float axis_x[4]; /**< X values of axes */
     float axis_y[4]; /**< Y values of axes */
-    char num_axes; /**< 
+    unsigned char num_axes; /**< 
       The number of axes of this joystick
      */
-    char num_buttons; /**< 
+    unsigned char num_buttons; /**< 
       The number of buttons of this joystick.
      */
   } JoystickInterface_data_t;
@@ -100,11 +100,11 @@ class JoystickInterface : public Interface
 
  public:
   /* Methods */
-  char num_axes() const;
-  void set_num_axes(const char new_num_axes);
+  unsigned char num_axes() const;
+  void set_num_axes(const unsigned char new_num_axes);
   size_t maxlenof_num_axes() const;
-  char num_buttons() const;
-  void set_num_buttons(const char new_num_buttons);
+  unsigned char num_buttons() const;
+  void set_num_buttons(const unsigned char new_num_buttons);
   size_t maxlenof_num_buttons() const;
   unsigned int pressed_buttons() const;
   void set_pressed_buttons(const unsigned int new_pressed_buttons);

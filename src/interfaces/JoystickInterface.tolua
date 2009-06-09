@@ -36,11 +36,11 @@ class JoystickInterface : public Interface
   static const unsigned int BUTTON_31;
   static const unsigned int BUTTON_32;
 
-  char num_axes();
-  void set_num_axes(const char new_num_axes);
+  unsigned char num_axes();
+  void set_num_axes(const unsigned char new_num_axes);
   int maxlenof_num_axes() const;
-  char num_buttons();
-  void set_num_buttons(const char new_num_buttons);
+  unsigned char num_buttons();
+  void set_num_buttons(const unsigned char new_num_buttons);
   int maxlenof_num_buttons() const;
   unsigned int pressed_buttons();
   void set_pressed_buttons(const unsigned int new_pressed_buttons);

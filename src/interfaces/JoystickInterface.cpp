@@ -115,12 +115,12 @@ JoystickInterface::JoystickInterface() : Interface()
   data_ptr  = malloc(data_size);
   data      = (JoystickInterface_data_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(Interface::IFT_STRING, "num_axes", 1, &data->num_axes);
-  add_fieldinfo(Interface::IFT_STRING, "num_buttons", 1, &data->num_buttons);
+  add_fieldinfo(Interface::IFT_BYTE, "num_axes", 1, &data->num_axes);
+  add_fieldinfo(Interface::IFT_BYTE, "num_buttons", 1, &data->num_buttons);
   add_fieldinfo(Interface::IFT_UINT, "pressed_buttons", 1, &data->pressed_buttons);
   add_fieldinfo(Interface::IFT_FLOAT, "axis_x", 4, &data->axis_x);
   add_fieldinfo(Interface::IFT_FLOAT, "axis_y", 4, &data->axis_y);
-  unsigned char tmp_hash[] = {0x5d, 0x1a, 0x93, 0x31, 0x57, 0x5d, 0x6c, 0x7, 0x40, 0xb5, 0xcd, 0x4c, 0xba, 0x8b, 0x82, 0xa1};
+  unsigned char tmp_hash[] = {0xc1, 0x79, 0x75, 0x4e, 0x3e, 0xfa, 0x1, 0x53, 0x18, 0xb0, 0x9d, 0x9b, 0x43, 0x41, 0xa, 0x86};
   set_hash(tmp_hash);
 }
 
@@ -136,7 +136,7 @@ JoystickInterface::~JoystickInterface()
     
  * @return num_axes value
  */
-char
+unsigned char
 JoystickInterface::num_axes() const
 {
   return data->num_axes;
@@ -159,7 +159,7 @@ JoystickInterface::maxlenof_num_axes() const
  * @param new_num_axes new num_axes value
  */
 void
-JoystickInterface::set_num_axes(const char new_num_axes)
+JoystickInterface::set_num_axes(const unsigned char new_num_axes)
 {
   data->num_axes = new_num_axes;
 }
@@ -170,7 +170,7 @@ JoystickInterface::set_num_axes(const char new_num_axes)
     
  * @return num_buttons value
  */
-char
+unsigned char
 JoystickInterface::num_buttons() const
 {
   return data->num_buttons;
@@ -193,7 +193,7 @@ JoystickInterface::maxlenof_num_buttons() const
  * @param new_num_buttons new num_buttons value
  */
 void
-JoystickInterface::set_num_buttons(const char new_num_buttons)
+JoystickInterface::set_num_buttons(const unsigned char new_num_buttons)
 {
   data->num_buttons = new_num_buttons;
 }

@@ -107,7 +107,7 @@
   </message>
   <message name="PlaceGoto">
     <comment>States the next target to navigate to.</comment>
-    <field type="char" length="64" name="place">Place to go to.</field>
+    <field type="string" length="64" name="place">Place to go to.</field>
   </message>
   <message name="Obstacle">
     <comment>Adds an obstacle within the scan area. It's just for the Navigator GUI.</comment>

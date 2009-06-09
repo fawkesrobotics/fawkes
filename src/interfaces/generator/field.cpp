@@ -84,10 +84,22 @@ InterfaceField::getComment() const
 std::string
 InterfaceField::getAccessType() const
 {
-  if ( length != "" ) {
-    return type + " *";
+  if (type == "string") {
+    return "char *";
   } else {
-    return type;
+    if ( length != "" ) {
+      if (type == "byte") {
+	return "unsigned char *";
+      } else {
+	return type + " *";
+      }
+    } else {
+      if (type == "byte") {
+	return "unsigned char";
+      } else {
+	return type;
+      }
+    }
   }
 }
 
@@ -98,7 +110,29 @@ InterfaceField::getAccessType() const
 std::string
 InterfaceField::getPlainAccessType() const
 {
-  return type;
+  if (type == "string") {
+    return "char *";
+  } else if (type == "byte") {
+    return "unsigned char";
+  } else {
+    return type;
+  }
+}
+
+
+/** Get type used to formulate struct.
+ * @return struct type
+ */
+std::string
+InterfaceField::getStructType() const
+{
+  if (type == "string") {
+    return "char";
+  } else if (type == "byte") {
+    return "unsigned char";
+  } else {
+    return type;
+  }
 }
 
 
@@ -342,7 +376,8 @@ InterfaceField::valid()
  * 5. float
  * 6. double
  * 7. bool
- * 8. char *
+ * 8. byte
+ * 9. char *
  * @param f field to compare to
  * @return true, if current instance is small than f, false otherwise
  */
@@ -378,6 +413,22 @@ InterfaceField::operator< (const InterfaceField &f) const
 	     (f.type != "unsigned int") &&
 	     (f.type != "int") &&
 	     (f.type != "float") );
+
+  } else if ( type == "bool" ) {
+    return ( (f.type != "bool") &&
+	     (f.type != "double") &&  
+	     (f.type != "unsigned int") &&
+	     (f.type != "int") &&
+	     (f.type != "float") );
+
+  } else if ( type == "byte" ) {
+    return ( (f.type != "byte") &&
+	     (f.type != "bool") &&
+	     (f.type != "double") &&  
+	     (f.type != "unsigned int") &&
+	     (f.type != "int") &&
+	     (f.type != "float") );
+
   } else {
     // char or unknown, char is always last and thus >=
     return false;

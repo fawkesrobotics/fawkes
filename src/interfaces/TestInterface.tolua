@@ -53,9 +53,9 @@ class TestInterface : public Interface
   int test_int();
   void set_test_int(const int new_test_int);
   int maxlenof_test_int() const;
-  char _flags();
-  void set__flags(const char new__flags);
-  int maxlenof__flags() const;
+  unsigned char flags();
+  void set_flags(const unsigned char new_flags);
+  int maxlenof_flags() const;
   char * test_string();
   void set_test_string(const char * new_test_string);
   int maxlenof_test_string() const;

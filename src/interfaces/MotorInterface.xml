@@ -72,7 +72,7 @@
      The ID of the controller. The controller ID is the instance serial of the sending
      interface. Only from this interface instance command messages are accepted.
     </field>
-    <field type="char" length="64" name="controller_thread_name">
+    <field type="string" length="64" name="controller_thread_name">
      The name of the controlling thread, for easier debugging. This is informative only
      and actually two threads may share an interface instance (although this should be
      avoided since the interface locking has to be reproduced for these threads then).

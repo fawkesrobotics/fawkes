@@ -41,10 +41,10 @@
       five axes, where each has a X and a Y value between -1.0 and 1.0.
       Up to 32 buttons are support via an unsigned int bit field.
     </comment>
-    <field type="char" name="num_axes">
+    <field type="byte" name="num_axes">
       The number of axes of this joystick
     </field>
-    <field type="char" name="num_buttons">
+    <field type="byte" name="num_buttons">
       The number of buttons of this joystick.
     </field>
     <field type="unsigned int" name="pressed_buttons">

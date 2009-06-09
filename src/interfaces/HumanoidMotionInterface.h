@@ -112,10 +112,10 @@ class HumanoidMotionInterface : public Interface
       Amplitude of the elbow roll movement during walking.
      */
     bool moving; /**< True if the robot is currently moving. */
-    LegEnum supporting_leg; /**< Marks the supporting leg */
     bool arms_enabled; /**< 
       If true the arms are controlled during walking for balancing.
      */
+    LegEnum supporting_leg; /**< Marks the supporting leg */
   } HumanoidMotionInterface_data_t;
 
   HumanoidMotionInterface_data_t *data;
