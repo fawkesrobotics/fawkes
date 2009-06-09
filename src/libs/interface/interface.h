@@ -143,7 +143,8 @@ class Interface
     IFT_LONGINT,	/**< long int field */
     IFT_LONGUINT,	/**< unsigned long int field */
     IFT_FLOAT,		/**< float field */
-    IFT_STRING		/**< string field */
+    IFT_STRING,		/**< string field */
+    IFT_BYTE		/**< byte field */
   } interface_fieldtype_t;
 
   /** Interface field info list */
@@ -177,12 +178,20 @@ class Interface
     const void *           get_value() const;
     const char *           get_value_string();
     size_t                 get_length() const;
-    bool                   get_bool() const;
-    int                    get_int() const;
-    unsigned int           get_uint() const;
-    long int               get_longint() const;
-    unsigned long int      get_longuint() const;
-    float                  get_float() const;
+    bool                   get_bool(unsigned int index = 0) const;
+    int                    get_int(unsigned int index = 0) const;
+    unsigned int           get_uint(unsigned int index = 0) const;
+    long int               get_longint(unsigned int index = 0) const;
+    unsigned long int      get_longuint(unsigned int index = 0) const;
+    float                  get_float(unsigned int index = 0) const;
+    unsigned char          get_byte(unsigned int index = 0) const;
+    bool *                 get_bools() const;
+    int *                  get_ints() const;
+    unsigned int *         get_uints() const;
+    long int *             get_longints() const;
+    unsigned long int *    get_longuints() const;
+    float *                get_floats() const;
+    unsigned char *        get_bytes() const;
     const char *           get_string() const;
 
    protected:

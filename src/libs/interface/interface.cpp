@@ -1056,6 +1056,7 @@ Interface::FieldIterator::get_typename() const
     case IFT_LONGINT:  return "long int";
     case IFT_LONGUINT: return "long unsigned int";
     case IFT_FLOAT:    return "float";
+    case IFT_BYTE:     return "byte";
     case IFT_STRING:   return "string";
     default:           return "unknown";
     }
@@ -1143,6 +1144,9 @@ Interface::FieldIterator::get_value_string()
 	  case IFT_FLOAT:
 	    rv = asprintf(&tmp2, "%s%f", tmp1, ((float *)__infol->value)[i]);
 	    break;
+	  case IFT_BYTE:
+	    rv = asprintf(&tmp2, "%s%u", tmp1, ((unsigned char *)__infol->value)[i]);
+	    break;
 	  case IFT_STRING:
 	    // cannot happen, caught with surrounding if statement
 	    break;
@@ -1184,102 +1188,297 @@ Interface::FieldIterator::get_value_string()
 
 /** Get value of current field as bool.
  * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type bool
+ * @exception OutOfBoundsException thrown if index is out of bounds
  */
 bool
-Interface::FieldIterator::get_bool() const
+Interface::FieldIterator::get_bool(unsigned int index) const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
   } else if ( __infol->type != IFT_BOOL ) {
     throw TypeMismatchException("Requested value is not of type bool");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    return *((bool *)__infol->value);
+    return ((bool *)__infol->value)[index];
   }
 }
 
 
 /** Get value of current field as integer.
  * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int
+ * @exception OutOfBoundsException thrown if index is out of bounds
  */
 int
-Interface::FieldIterator::get_int() const
+Interface::FieldIterator::get_int(unsigned int index) const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
   } else if ( __infol->type != IFT_INT ) {
     throw TypeMismatchException("Requested value is not of type int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    return *((int *)__infol->value);
+    return ((int *)__infol->value)[index];
   }
 }
 
 
 /** Get value of current field as unsigned integer.
  * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type unsigned int
+ * @exception OutOfBoundsException thrown if index is out of bounds
  */
 unsigned int
-Interface::FieldIterator::get_uint() const
+Interface::FieldIterator::get_uint(unsigned int index) const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
   } else if ( __infol->type != IFT_UINT ) {
     throw TypeMismatchException("Requested value is not of type unsigned int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    return *((unsigned int *)__infol->value);
+    return ((unsigned int *)__infol->value)[index];
   }
 }
 
 
 /** Get value of current field as long integer.
  * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type long int
+ * @exception OutOfBoundsException thrown if index is out of bounds
  */
 long int
-Interface::FieldIterator::get_longint() const
+Interface::FieldIterator::get_longint(unsigned int index) const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
   } else if ( __infol->type != IFT_LONGINT ) {
     throw TypeMismatchException("Requested value is not of type long int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    return *((long int *)__infol->value);
+    return ((long int *)__infol->value)[index];
   }
 }
 
 
 /** Get value of current field as unsigned long int.
  * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type long unsigned int
+ * @exception OutOfBoundsException thrown if index is out of bounds
  */
 unsigned long int
-Interface::FieldIterator::get_longuint() const
+Interface::FieldIterator::get_longuint(unsigned int index) const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
   } else if ( __infol->type != IFT_LONGUINT ) {
     throw TypeMismatchException("Requested value is not of type unsigned long int");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
-    return *((unsigned long int *)__infol->value);
+    return ((unsigned long int *)__infol->value)[index];
   }
 }
 
 
 /** Get value of current field as float.
  * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type float
+ * @exception OutOfBoundsException thrown if index is out of bounds
  */
 float
-Interface::FieldIterator::get_float() const
+Interface::FieldIterator::get_float(unsigned int index) const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_FLOAT ) {
+    throw TypeMismatchException("Requested value is not of type float");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    return ((float *)__infol->value)[index];
+  }
+}
+
+
+/** Get value of current field as byte.
+ * @return field value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type byte
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+unsigned char
+Interface::FieldIterator::get_byte(unsigned int index) const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_BYTE ) {
+    throw TypeMismatchException("Requested value is not of type float");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    return ((unsigned char *)__infol->value)[index];
+  }
+}
+
+
+/** Get value of current field as bool array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type bool or field
+ * is not an array (length is 1)
+ */
+bool *
+Interface::FieldIterator::get_bools() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_BOOL ) {
+    throw TypeMismatchException("Requested value is not of type bool");
+  } else if (__infol->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else {
+    return (bool *)__infol->value;
+  }
+}
+
+
+/** Get value of current field as integer array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int or field
+ * is not an array (length is 1)
+ */
+int *
+Interface::FieldIterator::get_ints() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_INT ) {
+    throw TypeMismatchException("Requested value is not of type int");
+  } else {
+    return (int *)__infol->value;
+  }
+}
+
+
+/** Get value of current field as unsigned integer array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type unsigned int
+ * or field is not an array (length is 1)
+ */
+unsigned int *
+Interface::FieldIterator::get_uints() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_UINT ) {
+    throw TypeMismatchException("Requested value is not of type unsigned int");
+  } else {
+    return (unsigned int *)__infol->value;
+  }
+}
+
+
+/** Get value of current field as long integer array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type long int
+ * or field is not an array (length is 1)
+ */
+long int *
+Interface::FieldIterator::get_longints() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_LONGINT ) {
+    throw TypeMismatchException("Requested value is not of type long int");
+  } else {
+    return (long int *)__infol->value;
+  }
+}
+
+
+/** Get value of current field as unsigned long int array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type long unsigned
+ * int or field is not an array (length is 1)
+ */
+unsigned long int *
+Interface::FieldIterator::get_longuints() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_LONGUINT ) {
+    throw TypeMismatchException("Requested value is not of type unsigned long int");
+  } else {
+    return (unsigned long int *)__infol->value;
+  }
+}
+
+
+/** Get value of current field as float array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type float or field
+ * is not an array (length is 1)
+ */
+float *
+Interface::FieldIterator::get_floats() const
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
   } else if ( __infol->type != IFT_FLOAT ) {
     throw TypeMismatchException("Requested value is not of type float");
   } else {
-    return *((float *)__infol->value);
+    return (float *)__infol->value;
+  }
+}
+
+
+/** Get value of current field as byte array.
+ * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type byte or field
+ * is not an array (length is 1)
+ */
+unsigned char *
+Interface::FieldIterator::get_bytes() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_BYTE ) {
+    throw TypeMismatchException("Requested value is not of type float");
+  } else {
+    return (unsigned char *)__infol->value;
   }
 }
 
 
 /** Get value of current field as string.
  * @return field value
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type string
  */
 const char *
 Interface::FieldIterator::get_string() const
