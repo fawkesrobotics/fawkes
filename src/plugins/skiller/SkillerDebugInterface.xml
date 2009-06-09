@@ -17,10 +17,10 @@
       feature is a graph representation in the dot language of the available
       skills (and highlighting for the currently active skill).
     </comment>
-    <field type="char" length="32" name="graph_fsm">
+    <field type="string" length="32" name="graph_fsm">
       The finite state machine (FSM) the current graph has been updated for.
     </field>
-    <field type="char" length="8192" name="graph">
+    <field type="string" length="8192" name="graph">
       The selected graph in a dot string representation.
     </field>
     <field type="GraphDirectionEnum" name="graph_dir">
