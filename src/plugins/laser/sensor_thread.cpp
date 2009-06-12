@@ -30,7 +30,7 @@
 
 using namespace fawkes;
 
-/** @class LaserSensorThread "playerc_thread.h"
+/** @class LaserSensorThread "sensor_thread.h"
  * Laser sensor thread.
  * This thread integrates into the Fawkes main loop at the sensor hook and
  * publishes new data when available from the LaserAcquisitionThread.

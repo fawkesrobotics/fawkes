@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  laser_plugin.h - Fawkes Laser Plugin
+ *  laser_plugin.cpp - Fawkes Laser Plugin
  *
  *  Created: Tue Aug 05 13:11:02 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -29,7 +29,7 @@
 
 using namespace fawkes;
 
-/** @class LaserPlugin <plugins/laser/laser_plugin.h>
+/** @class LaserPlugin "laser_plugin.h"
  * Laser plugin for Fawkes.
  * This plugin integrates Fawkes with Laser, for example for accessing
  * a simulator.
