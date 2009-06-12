@@ -52,13 +52,15 @@ _LIBS_TOLUA       = fawkescore fawkesinterface $(TOLUA_LIBS)
 _CFLAGS_TOLUA     = -Wno-unused-function $(CFLAGS_LUA)
 _LDFLAGS_TOLUA    = $(LDFLAGS_LUA)
 
-$(foreach I,$(INTERFACES_all),							\
+ifneq ($(INTERFACES_all),)
+  $(foreach I,$(INTERFACES_all),							\
 	$(eval LIBS_interfaces_lib$I     = $$(_LIBS_INTERFACE))			\
 	$(eval OBJS_interfaces_lib$I     = $I.o)				\
 	$(eval OBJS_all                 += $$(OBJS_interfaces_lib$I))		\
 	$(eval INTERFACES_SRCS          += $(SRCDIR)/$I.cpp)			\
 	$(eval INTERFACES_HDRS          += $(IFACEDIR)/$I.h)			\
 	$(eval INTERFACES_LIBS          += $(LIBDIR)/interfaces/lib$I.so)	\
+	$(eval INTERFACES_TOUCH         += $(SRCDIR)/$(OBJDIR)/$I.touch)		\
 	$(eval INTERFACES_OBJS          += $I.o)				\
 	$(eval LIBS_all                 += $$(LIBDIR)/interfaces/lib$I.so)	\
 										\
@@ -72,76 +74,57 @@ $(foreach I,$(INTERFACES_all),							\
 	$(eval TOLUA_PKGPREFIX_$(I)      = interfaces_)				\
 	$(eval OBJS_all                 += $(I)_tolua.o)			\
 	$(eval LIBS_all_tolua           += $$(LUALIBDIR)/interfaces/$(I).so)	\
-)
+  )
 
-ifeq ($(IFACEDIR),$(SRCDIR))
-  INTERFACE_GENERATOR_BUILD = 1
-else
-  ifneq ($(wildcard $(BINDIR)/interface_generator),)
+  ifeq ($(IFACEDIR),$(SRCDIR))
     INTERFACE_GENERATOR_BUILD = 1
-  endif
-endif
-
-ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
-
-  ifneq ($(INTERFACES_all),)
-$(INTERFACES_SRCS): $(BINDIR)/interface_generator
-$(TOLUA_ALL): $(BINDIR)/interface_generator
-
-$(INTERFACES_SRCS): %.cpp: %.xml
-	$(SILENT) echo "$(INDENT_PRINT)--> Generating $(@F) (Interface XML Template)"
-	$(SILENT)$(BINDIR)/interface_generator -d $(SRCDIR) $<
-	$(if $(filter-out $(IFACEDIR),$(SRCDIR)),$(SILENT)mv $*.h $*.h_ext; cp -a $*.h_ext $(IFACEDIR)/$(notdir $*.h))
-
-
-    ifeq ($(abspath $(IFACEDIR)),$(abspath $(SRCDIR)))
-$(INTERFACES_HDRS): %.h: %.cpp
-
+  else
+    ifneq ($(wildcard $(BINDIR)/interface_generator),)
+      INTERFACE_GENERATOR_BUILD = 1
     endif
-
   endif
 
-  ifeq ($(MAKECMDGOALS),clean-interfaces)
-.PHONY: clean-interfaces
-clean-interfaces:
-	$(SILENT) rm -f $(addsuffix .cpp,$(INTERFACES_all)) \
-			$(addsuffix .h,$(INTERFACES_all))
-
+ifeq ($(OBJSSUBMAKE),1)
+  ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
+$(INTERFACES_SRCS): $(BINDIR)/interface_generator
+$(INTERFACES_HDRS): $(BINDIR)/interface_generator
+$(INTERFACES_LIBS): | $(BINDIR)/interface_generator
+$(INTERFACES_TOUCH): $(BINDIR)/interface_generator
+$(TOLUA_ALL): $(BINDIR)/interface_generator
   endif
-else
-  # no interface generator available
-  ifneq ($(abspath $(IFACEDIR)),$(abspath $(SRCDIR)))
-$(INTERFACES_SRCS): %.cpp: %.xml
-	$(SILENT)if [ ! -e $*.h_ext -a ! -e $*.cpp ]; then \
+
+$(INTERFACES_SRCS): $(SRCDIR)/%.cpp: $(SRCDIR)/$(OBJDIR)/%.touch
+$(INTERFACES_HDRS): $(IFACEDIR)/%.h: $(SRCDIR)/$(OBJDIR)/%.touch
+
+$(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
+	$(SILENT) echo "$(INDENT_PRINT)--> Generating $* (Interface XML Template)"
+  ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
+	$(SILENT)$(BINDIR)/interface_generator -d $(SRCDIR) $<
+	$(if $(filter-out $(IFACEDIR),$(SRCDIR)),$(SILENT)mv $(SRCDIR)/$*.h $(SRCDIR)/$*.h_ext; cp -a $(SRCDIR)/$*.h_ext $(IFACEDIR)/$*.h)
+  else
+    ifneq ($(abspath $(IFACEDIR)),$(abspath $(SRCDIR)))
+	$(SILENT)if [ ! -e $(SRCDIR)/$*.h_ext -o ! -e $(SRCDIR)/$*.cpp ]; then \
 		echo -e "$(INDENT_PRINT)--- $(TRED)Interfaces cannot be generated and pre-generated code does not exist!$(TNORMAL)"; \
 		exit 1; \
 	else \
-		echo -e "$(INDENT_PRINT)--- $(TYELLOW)Generator not available, only copying $(notdir $*.h)(_ext)$(TNORMAL)"; \
-		cp -a $*.h_ext $(IFACEDIR)/$*.h; \
-		touch $*.cpp; \
+		echo -e "$(INDENT_PRINT)--- $(TYELLOW)Generator not available, only copying $*.h(_ext)$(TNORMAL)"; \
+		cp -a $(SRCDIR)/$*.h_ext $(IFACEDIR)/$*.h; \
+		touch $(SRCDIR)/$*.cpp; \
 	fi
-
-$(INTERFACES_HDRS): $(IFACEDIR)/%.h: $(SRCDIR)/%.cpp
-	$(SILENT)cp -a $(SRCDIR)/$*.h_ext $(IFACEDIR)/$*.h;
-
+    endif
   endif
+	$(SILENT) mkdir -p $(@D)
+	$(SILENT) touch $@
+
+.SECONDARY: $(INTERFACES_SRCS) $(INTERFACES_HDRS) $(TOLUA_SRCS) $(TOLUA_ALL)
+
+endif # OBJSSUBMAKE != 1
+
+ifneq ($(PLUGINS_all),)
+$(PLUGINS_all): | $(INTERFACES_LIBS)
 endif
-
-$(INTERFACES_OBJS): %.o: $(IFACEDIR)/%.h
-
-ifneq ($(INTERFACES_all),)
-.PHONY: clean-ext-interfaces
-ifneq ($(abspath $(IFACEDIR)),$(abspath $(SRCDIR)))
-clean-ext-interfaces:
-	$(SILENT)$(foreach I,$(INTERFACES_all),rm -f $(IFACEDIR)/$I.h; )
-
-else
-clean-ext-interfaces:
-
-endif
-
-.PHONY: clean
-clean: clean-ext-interfaces
+ifneq ($(filter-out $(BINDIR)/interface_generator,$(BINS_all)),)
+$(BINS_all): | $(INTERFACES_LIBS)
 endif
 
 ifeq ($(HAVE_TOLUA),1)
@@ -150,10 +133,8 @@ ifeq ($(HAVE_TOLUA),1)
 $(LIBS_all_tolua): $(LUALIBDIR)/interfaces/%.so: | $(LIBDIR)/interfaces/lib%.so
 
 else
-  all: warning_tolua_wrapper
+all: warning_tolua_wrapper
 endif
 
-
-.SECONDARY: $(INTERFACES_SRCS) $(INTERFACES_HDRS) $(TOLUA_SRCS) $(TOLUA_ALL)
-
+endif # INTERFACES_all != ""
 endif # __buildsys_interface_mk_
