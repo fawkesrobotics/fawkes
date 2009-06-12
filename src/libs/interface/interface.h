@@ -121,14 +121,27 @@ class Interface
   Message *     msgq_first();
   bool          msgq_empty();
 
-  template <class MessageType>
-    bool           msgq_first_is();
-
   /** Check if first message has desired type.
    * @return true, if message has desired type, false otherwise
    */
   template <class MessageType>
+    bool           msgq_first_is();
+
+  /** Get first message casted to the desired type.
+   * @return message casted to desired type
+   * @exception TypeMismatchException thrown if message is not of desired type
+   */
+  template <class MessageType>
     MessageType *  msgq_first();
+
+  /** Get first message casted to the desired type.
+   * @param msg reference to pointer to message of desired type, upon successful
+   * return points to the message. 
+   * @return message casted to desired type (same as msg parameter)
+   * @exception TypeMismatchException thrown if message is not of desired type
+   */
+  template <class MessageType>
+    MessageType *  msgq_first(MessageType *&msg);
 
   MessageQueue::MessageIterator  msgq_begin();
   MessageQueue::MessageIterator  msgq_end();
@@ -253,7 +266,21 @@ template <class MessageType>
 MessageType *
 Interface::msgq_first()
 {
-  return dynamic_cast<MessageType *>(__message_queue->first());
+  MessageType *m = dynamic_cast<MessageType *>(__message_queue->first());
+  if (m) {
+    return m;
+  } else {
+    throw TypeMismatchException("Message is not of desired type");
+  }
+}
+
+
+template <class MessageType>
+MessageType *
+Interface::msgq_first(MessageType *&msg)
+{
+  msg = this->msgq_first<MessageType>();
+  return msg;
 }
 
 

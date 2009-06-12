@@ -78,6 +78,12 @@ class Message : public RefCount
 
   virtual Message * clone() const;
 
+  /** Check if message has desired type.
+   * @return true, if message has desired type, false otherwise
+   */
+  template <class MessageType>
+    bool           is_of_type();
+
  private:
 
   void              set_interface(Interface *iface);
@@ -101,6 +107,14 @@ class Message : public RefCount
   void         *data_ptr;
   unsigned int  data_size;
 };
+
+template <class MessageType>
+bool
+Message::is_of_type()
+{
+  return (dynamic_cast<MessageType *>(this) != 0);
+}
+
 
 } // end namespace fawkes
 
