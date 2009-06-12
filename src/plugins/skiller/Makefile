@@ -22,17 +22,12 @@ SUBDIRS = consoletool
 
 # Uncomment to enable time tracking for the skiller
 # CFLAGS += -DSKILLER_TIMETRACKING -DSKILLER_TT_MOD=50
-
-
 CFLAGS  += $(CFLAGS_LUA)
 
 LIBS_skiller = fawkescore fawkesutils fawkesnetcomm fawkeslua SkillerInterface SkillerDebugInterface
 OBJS_skiller = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_skiller)
-
-INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
-include $(BASEDIR)/etc/buildsys/interface.mk
 
 ifeq ($(HAVE_LUA),1)
   ifeq ($(HAVE_TOLUA),1)
@@ -44,10 +39,8 @@ else
   WARN_TARGETS += warning_lua
 endif
 
-ifneq ($(PLUGINS_all),)
-PLUGINS_all: | $(LIBS_all)
-
-endif
+INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
+include $(BASEDIR)/etc/buildsys/interface.mk
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
