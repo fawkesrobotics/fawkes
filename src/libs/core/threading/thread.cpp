@@ -173,6 +173,13 @@ namespace fawkes {
  * lock the loop_mutex. See loop_mutex for an example.
  */
 
+/** @fn const char * Thread::name() const
+ * Get name of thread.
+ * This name is mainly used for debugging purposes. Give it a descriptive
+ * name. Is nothing is given the raw class name is used.
+ * @return thread name
+ */
+
 
 /** We need not initialize this one timely by ourselves thus we do not use Mutex */
 pthread_mutex_t Thread::__thread_key_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -484,9 +491,11 @@ Thread::cancel_finalize()
  * This method has to be called after the thread has been instantiated and
  * initialized to start it. To meet the Fawkes guarantees you this may only
  * be called if the initialization of the thread has been successful.
+ * @param wait if true this method will block until the thread is really
+ * started, otherwise it will only initiate the startup and return immediately
  */
 void
-Thread::start()
+Thread::start(bool wait)
 {
   int err;
   if (__started) {
@@ -496,13 +505,14 @@ Thread::start()
   __cancelled = false;
   __detached  = false;
   __started   = true;
+  __wait      = wait;
 
   if ( (err = pthread_create(&__thread_id, NULL, Thread::entry, this)) != 0) {
     // An error occured
     throw Exception("Could not start thread", err);
   }
 
-  __startup_barrier->wait();
+  if (__wait)  __startup_barrier->wait();
 }
 
 
@@ -538,7 +548,7 @@ Thread::entry(void *pthis)
   t->notify_of_startup();
 
   // Thread is started now, thread that called start() will continue
-  t->__startup_barrier->wait();
+  if (t->__wait)  t->__startup_barrier->wait();
 
   // Run thread
   t->loop_mutex->lock();
@@ -744,18 +754,6 @@ Thread::set_prepfin_hold(bool hold)
     __prepfin_hold_waitcond->wake_all();
   }
   __prepfin_hold_mutex->unlock();
-}
-
-
-/** Get name of thread.
- * This name is mainly used for debugging purposes. Give it a descriptive
- * name. Is nothing is given the raw class name is used.
- * @return thread name
- */
-const char *
-Thread::name() const
-{
-  return __name;
 }
 
 

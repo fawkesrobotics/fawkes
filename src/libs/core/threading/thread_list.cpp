@@ -35,6 +35,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -449,6 +450,8 @@ ThreadList::stop()
   for (reverse_iterator i = rbegin(); i != rend(); ++i) {
     (*i)->cancel();
     (*i)->join();
+    // Workaround for pthreads annoyance
+    usleep(5000);
   }
 }
 

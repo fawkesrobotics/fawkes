@@ -74,7 +74,7 @@ class Thread {
   virtual void finalize();
           void cancel_finalize();
 
-  void start();
+  void start(bool wait=true);
   void cancel();
   void join();
   void detach();
@@ -86,13 +86,13 @@ class Thread {
   void wakeup(Barrier *barrier);
 
   OpMode        opmode() const;
-  const char *  name() const;
   pthread_t     thread_id() const;
   bool          started() const;
   bool          cancelled() const;
   bool          detached() const;
   bool          running() const;
   bool          waiting() const;
+  const char *  name() const { return __name; }
 
   void  set_flags(uint32_t flags);
   void  set_flag(uint32_t flag);
@@ -164,6 +164,7 @@ class Thread {
   bool           __detached;
   bool           __waiting_for_wakeup;
   bool           __delete_on_exit;
+  bool           __wait;
   char          *__name;
 
   OpMode         __op_mode;
