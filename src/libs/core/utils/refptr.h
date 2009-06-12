@@ -104,6 +104,13 @@ class RefPtr
   template <class T_CastFrom>
   inline RefPtr<T_CppObject>& operator=(const RefPtr<T_CastFrom>& src);
 
+  /** Assign object and claim ownership.
+   * @param ptr pointer to object, this refptr will claim ownership of the src!
+   * @return reference to this instance
+   */
+  inline RefPtr<T_CppObject>& operator=(T_CppObject *ptr);
+
+
   /** Tests whether the RefPtr<> point to the same underlying instance.
    * @param src refptr to compare to
    * @return true if both refptrs point to the same instance.
@@ -363,6 +370,16 @@ RefPtr<T_CppObject>::operator=(const RefPtr<T_CppObject>& src)
   this->swap(temp);
   return *this;
 }
+
+template <class T_CppObject> inline
+RefPtr<T_CppObject>&
+RefPtr<T_CppObject>::operator=(T_CppObject *ptr)
+{
+  RefPtr<T_CppObject> temp(ptr);
+  this->swap(temp);
+  return *this;
+}
+
 
 template <class T_CppObject>
   template <class T_CastFrom>
