@@ -36,7 +36,7 @@ local skill_status  = { running = {}, final = {}, failed = {} }
 local active_skills = {}
 
 local skill_space      = ""
-local graphing_enabled = false
+local graphing_enabled = true
 
 -- Print skill info.
 -- @param skill_entry skill entry to print
@@ -164,12 +164,15 @@ function gensandbox()
       if string.match(k, "^S_([%a_]+)$") then rv[k] = v end
    end
    for _, s in ipairs(skills) do
+      assert(not rv[s.name], "Sandbox: Name " .. s.name .. " has already been registered")
       rv[s.name] = create_skill_functable(s)
    end
    for n, i in pairs(interfaces.reading) do
+      assert(not rv[n], "Sandbox: Name " .. n .. " has already been registered")
       rv[n] = i
    end
    for n, i in pairs(interfaces.writing) do
+      assert(not rv[n], "Sandbox: Name " .. n .. " has already been registered")
       rv[n] = i
    end
 
