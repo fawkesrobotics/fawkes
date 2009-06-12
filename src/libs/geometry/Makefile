@@ -63,7 +63,7 @@ ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 endif
 
-$(LUALIBDIR)/fawkesutils.so: | $(LIBDIR)/libfawkesutils.so
+$(LUALIBDIR)/fawkesgeometry.so: | $(LIBDIR)/libfawkesgeometry.so
 
 include $(BASEDIR)/etc/buildsys/base.mk
 
