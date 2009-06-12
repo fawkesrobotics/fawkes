@@ -26,7 +26,8 @@ LIBS     += $(VISION_LIBS)
 
 ifneq ($(HAVE_LIBJPEG),1)
   WARN_TARGETS += warning_libjpeg
-  FILTER_OUT   += readers/jpeg.o writers/jpeg.o compression/jpeg.o
+  FILTER_OUT   += readers/jpeg.o writers/jpeg.o compression/jpeg_compressor.o \
+		compression/jpeg_decompressor.o
 else
   UTILS_EXTRA_LIBS += jpeg
 endif

@@ -35,6 +35,7 @@
 #include <fvutils/colormap/yuvcm.h>
 #include <fvutils/colormap/cmfile.h>
 
+#include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
 #include <core/exceptions/software.h>
 #include <utils/system/argparser.h>
