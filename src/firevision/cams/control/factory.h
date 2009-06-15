@@ -3,7 +3,7 @@
  *  factory.h - Camera control factory
  *
  *  Created: Fri Jun 15 13:11:11 2007
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -40,50 +40,10 @@ class CameraControlFactory
 {
  public:
   static CameraControl * instance(const char *as);
-  static CameraControl * instance(CameraControl::TypeID type_id, Camera *camera);
+  static CameraControl * instance(Camera *camera);
   static CameraControl * instance(const CameraArgumentParser *cap);
 
-  /** Get typed instance of camera control.
-   * Creates a new instance and converts it to the requested type. If the type
-   * does not match the requested camera control an exception is thrown.
-   * @param as camera argument string
-   * @return typed camera control instance
-   * @exception TypeMismatchException thrown if requested camera control does not match
-   * requested type.
-   */
-  template <class CC>
-    static CC* instance(const char *as);
-
-  /** Get typed instance of camera control.
-   * This checks if the given camera provides the desired camera control. If it
-   * the properly casted camera is returned, otherwise an exception is thrown.
-   * @param camera camera
-   * @return typed camera control instance
-   * @exception TypeMismatchException thrown if requested camera control does not match
-   * requested type.
-   */
-  template <class CC>
-    static CC* instance(Camera *camera);
+  static CameraControl * instance(const std::type_info &typeinf, Camera *camera);
 };
-
-
-template <class CC>
-CC *
-CameraControlFactory::instance(const char *as)
-{
-  CameraControl *cc = CameraControlFactory::instance(as);
-  CC *tcc = dynamic_cast<CC *>(cc);
-  if (tcc == NULL) throw fawkes::TypeMismatchException();
-  return tcc;
-}
-
-template <class CC>
-CC *
-CameraControlFactory::instance(Camera *camera)
-{
-  CC *tcc = dynamic_cast<CC *>(camera);
-  if (tcc == NULL) throw fawkes::TypeMismatchException();
-  return tcc;
-}
 
 #endif

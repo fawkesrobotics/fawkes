@@ -28,6 +28,9 @@
 
 #include <fvutils/color/colorspaces.h>
 #include <cams/control/control.h>
+#include <core/exceptions/software.h>
+
+#include <typeinfo>
 
 class Camera;
 namespace fawkes {
@@ -45,28 +48,90 @@ class VisionMaster
 					colorspace_t cspace = YUV422_PLANAR) = 0;
   virtual void      unregister_thread(fawkes::Thread *thread)                = 0;
 
-  virtual CameraControl *register_for_camera_control(const char *camera_string,
-                                                     CameraControl::TypeID type_id) = 0;
+  virtual CameraControl *acquire_camctrl(const char *cam_string)             = 0;
+  virtual void           release_camctrl(CameraControl *cc)                  = 0;
 
- /** Retrieve a typed instance of a certain CameraControl for the specified Camera.
-  * Creates a new instance and converts it to the requested type. If the type
-  * does not match the requested camera control an exception is thrown.
-  * This control (if available) can be used to control certain aspects of the Camera.
-  * @param camera_string Camera whose CameraControl shall be returned
+ /** Retrieve a typed camera control instance.
+  * Like the non-template method this class will try to instantiate the camera
+  * control based on the camera string (see there for details on the two possible
+  * contents of the string). The camera control will be verified to be of the
+  * desired type.
+  * @param camera_string camera string of camera for the control or the argument
+  * string for a new instance. See documentation of non-template method.
   * @return typed camera control instance
-  * @exception TypeMismatchException thrown if requested camera control does not match
-  * requested type.
+  * @exception TypeMismatchException thrown if requested camera control does not
+  * match the requested type.
   */
   template <class CC>
-  CC *register_for_camera_control(const char *camera_string);
+    CC *
+    acquire_camctrl(const char *camera_string);
+
+ /** Retrieve a typed camera control instance.
+  * Like the non-template method this class will try to instantiate the camera
+  * control based on the camera string (see there for details on the two possible
+  * contents of the string). The camera control will be verified to be of the
+  * desired type.
+  * Unlike the other template method you do not need to explicitly state the type
+  * of the requested type as it is inferred based on the \p cc argument. You can
+  * write something like this:
+  * @code
+  * CameraControlImage *cci = vision_master->acquire_camctrl("camstring...", cci);
+  * @endcode
+  * instead of
+  * @code
+  * CameraControlImage *cci = vision_master->acquire_camctrl<CameraControlImage>("camstring...");
+  * @endcode
+  * @param camera_string camera string of camera for the control or the argument
+  * string for a new instance. See documentation of non-template method.
+  * @param cc reference to pointer of camera control of the intended type, used
+  * to automatically infer the template method. On successful return points to
+  * the camera control instance
+  * @return typed camera control instance (same as \p cc)
+  * @exception TypeMismatchException thrown if requested camera control does not
+  * match the requested type.
+  */
+  template <class CC>
+    CC *
+    acquire_camctrl(const char *camera_string, CC *&cc);
+
+ protected:
+  virtual CameraControl *acquire_camctrl(const char *cam_string,
+					 const std::type_info &typeinf) = 0;
+
 };
 
 template <class CC>
 CC *
-VisionMaster::register_for_camera_control(const char *camera_string)
+VisionMaster::acquire_camctrl(const char *camera_string, CC *&cc)
 {
-  // register_for_camera_control already checks for correct type
-  return 0; //dynamic_cast<CC *>(register_for_camera_control(camera_string, CC::TYPE_ID));
+  const std::type_info &t = typeid(CC);
+  CameraControl *pcc = acquire_camctrl(camera_string, t);
+  CC *tcc = dynamic_cast<CC *>(pcc);
+  if (tcc) {
+    if (cc) cc = tcc;
+    return tcc;
+  } else {
+    release_camctrl(tcc);
+    throw fawkes::TypeMismatchException("CameraControl defined by string does "
+					"not match desired type");
+  }
+}
+
+
+template <class CC>
+CC *
+VisionMaster::acquire_camctrl(const char *camera_string)
+{
+  const std::type_info &t = typeid(CC);
+  CameraControl *pcc = acquire_camctrl(camera_string, t);
+  CC *tcc = dynamic_cast<CC *>(pcc);
+  if (tcc) {
+    return tcc;
+  } else {
+    release_camctrl(tcc);
+    throw fawkes::TypeMismatchException("CameraControl defined by string does "
+					"not match desired type");
+  }
 }
 
 #endif

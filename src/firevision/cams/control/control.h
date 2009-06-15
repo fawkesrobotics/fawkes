@@ -30,16 +30,6 @@
 class CameraControl
 {
  public:
-  /** Control Type ID */
-  typedef enum {
-    CTRL_TYPE_COLOR,	/**< CameraControlColor */
-    CTRL_TYPE_IMAGE,	/**< CameraControlImage */
-    CTRL_TYPE_PANTILT,	/**< CameraControlPanTilt */
-    CTRL_TYPE_FOCUS,	/**< CameraControlFocus */
-    CTRL_TYPE_ZOOM,	/**< CameraControlZoom */
-    CTRL_TYPE_EFFECT	/**< CameraControlEffect */
-  } TypeID;
-
   virtual ~CameraControl();
 };
 

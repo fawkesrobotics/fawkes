@@ -3,7 +3,7 @@
  *  factory.cpp - Camera control factory
  *
  *  Created: Fri Jun 15 13:11:28 2007
- *  Copyright  2005-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
  *
  *  $Id$
  *
@@ -45,6 +45,8 @@
 #ifdef HAVE_DPPTU_CTRL
 #include <cams/control/dp_ptu.h>
 #endif
+
+#include <typeinfo>
 
 using namespace std;
 
@@ -128,10 +130,33 @@ CameraControlFactory::instance(const char *as)
 
 
 /** Get camera control instance.
+ * Get an instance of a camera control from the passed camera.
+ * It is tried to cast the camera to the appropriate camera control type. If that
+ * succeeds the camera control is returned, otherwise an exception is thrown.
+ * @param camera camera to cast
+ * @return camera control instance.
+ * @exception UnknownCameraControlTypeException thrown, if the desired camera control could
+ * not be instantiated. This could be either to a misspelled camera ID, generally
+ * missing support or unset definition due to configuration in fvconf.mk or missing
+ * libraries and camera support compile-time autodetection.
+ */
+CameraControl *
+CameraControlFactory::instance(Camera *camera)
+{
+  CameraControl *c = dynamic_cast<CameraControl *>(camera);
+  if (c) {
+    return c;
+  } else {
+    throw fawkes::TypeMismatchException("Camera does not provide requested camera control");
+  }
+}
+
+
+/** Get camera control instance.
  * Get an instance of a camera of the given type based on the given camera.
  * It is tried to cast the camera to the appropriate camera control type. If that
  * succeeds the camera control is returned, otherwise an exception is thrown.
- * @param type_id type ID of the camera control
+ * @param typeinf type info for the intended type of the camera control
  * @param camera camera to cast
  * @return camera control instance of requested type
  * @exception UnknownCameraControlTypeException thrown, if the desired camera control could
@@ -140,29 +165,31 @@ CameraControlFactory::instance(const char *as)
  * libraries and camera support compile-time autodetection.
  */
 CameraControl *
-CameraControlFactory::instance(CameraControl::TypeID type_id, Camera *camera)
+CameraControlFactory::instance(const std::type_info &typeinf, Camera *camera)
 {
   CameraControl *c = NULL;
-  switch (type_id) {
-  case CameraControl::CTRL_TYPE_COLOR:
-    c = dynamic_cast<CameraControlColor *>(camera);   break;
 
-  case CameraControl::CTRL_TYPE_IMAGE:
-    c = dynamic_cast<CameraControlImage *>(camera);   break;
+  printf("typeinf open called for %s\n", typeinf.name());
 
-  case CameraControl::CTRL_TYPE_PANTILT:
-    c = dynamic_cast<CameraControlPanTilt *>(camera); break;
+  if (typeid(CameraControlColor) == typeinf) {
+    c = dynamic_cast<CameraControlImage *>(camera);
 
-  case CameraControl::CTRL_TYPE_FOCUS:
-    c = dynamic_cast<CameraControlFocus *>(camera);   break;
+  } else if (typeid(CameraControlImage) == typeinf) {
+    c = dynamic_cast<CameraControlImage *>(camera);
 
-  case CameraControl::CTRL_TYPE_ZOOM:
-    c = dynamic_cast<CameraControlZoom *>(camera);    break;
+  } else if (typeid(CameraControlPanTilt) == typeinf) {
+    c = dynamic_cast<CameraControlPanTilt *>(camera);
 
-  case CameraControl::CTRL_TYPE_EFFECT:
-    c = dynamic_cast<CameraControlEffect *>(camera);  break;
-    
-  default:
+  } else if (typeid(CameraControlFocus) == typeinf) {
+    c = dynamic_cast<CameraControlFocus *>(camera);
+
+  } else if (typeid(CameraControlZoom) == typeinf) {
+    c = dynamic_cast<CameraControlZoom *>(camera);
+
+  } else if (typeid(CameraControlEffect) == typeinf) {
+    c = dynamic_cast<CameraControlEffect *>(camera);
+
+  } else {
     throw UnknownCameraControlTypeException();
   }
 

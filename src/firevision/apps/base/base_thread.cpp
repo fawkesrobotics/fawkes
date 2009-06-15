@@ -28,6 +28,7 @@
 
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <core/threading/barrier.h>
 #include <utils/logging/logger.h>
 
@@ -41,6 +42,7 @@
 
 #include <aspect/vision.h>
 
+#include <algorithm>
 #include <unistd.h>
 
 using namespace fawkes;
@@ -90,6 +92,13 @@ FvBaseThread::finalize()
   }
   __aqts.clear();
   __aqts.unlock();
+  __owned_controls.lock();
+  LockList<CameraControl *>::iterator i;
+  for (i = __owned_controls.begin(); i != __owned_controls.end(); ++i) {
+    delete *i;
+  }
+  __owned_controls.clear();
+  __owned_controls.unlock();
 }
 
 
@@ -284,30 +293,64 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread,
 
 
 CameraControl *
-FvBaseThread::register_for_camera_control(const char *camera_string,
-                                          CameraControl::TypeID type_id)
+FvBaseThread::create_camctrl(const char *camera_string)
 {
-  CameraArgumentParser cap(camera_string);
+  CameraControl *cc = CameraControlFactory::instance(camera_string);
+  if (cc) {
+    __owned_controls.lock();
+    __owned_controls.push_back(cc);
+    __owned_controls.sort();
+    __owned_controls.unique();
+    __owned_controls.unlock();
+    return cc;
+  } else {
+    throw Exception("Cannot create camera control of desired type");
+  }
+}
+
+CameraControl *
+FvBaseThread::acquire_camctrl(const char *cam_string)
+{
+  CameraArgumentParser cap(cam_string);
   std::string id = cap.cam_type() + "." + cap.cam_id();
 
-  CameraControl *cc = NULL;
+  // Has this camera been loaded?
+  MutexLocker lock(__aqts.mutex());
+  if (__aqts.find(id) != __aqts.end()) {
+    return CameraControlFactory::instance(__aqts[id]->get_camera());
+  } else {
+    return create_camctrl(cam_string);
+  }
+}
+
+
+CameraControl *
+FvBaseThread::acquire_camctrl(const char *cam_string,
+			      const std::type_info &typeinf)
+{
+  CameraArgumentParser cap(cam_string);
+  std::string id = cap.cam_type() + "." + cap.cam_id();
 
   // Has this camera been loaded?
-  __aqts.lock();
+  MutexLocker lock(__aqts.mutex());
   if (__aqts.find(id) != __aqts.end()) {
-    try {
-      cc = CameraControlFactory::instance(type_id, __aqts[id]->get_camera());
-    } catch (Exception &e) {
-      __aqts.unlock();
-      throw;
-    }
+    return CameraControlFactory::instance(typeinf, __aqts[id]->get_camera());
   } else {
-    cc = CameraControlFactory::instance(camera_string);
+    return create_camctrl(cam_string);
   }
-  __aqts.unlock();
+}
 
-  if (!cc) throw Exception("Requested CameraControl not available");
-  return cc;
+
+void
+FvBaseThread::release_camctrl(CameraControl *cc)
+{
+  __owned_controls.lock();
+  LockList<CameraControl *>::iterator f;
+  if ((f = std::find(__owned_controls.begin(), __owned_controls.end(), cc)) != __owned_controls.end()) {
+    delete *f;
+    __owned_controls.erase(f);
+  }
+  __owned_controls.unlock();
 }
 
 

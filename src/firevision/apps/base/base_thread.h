@@ -28,6 +28,7 @@
 #include <core/threading/thread.h>
 #include <core/threading/thread_notification_listener.h>
 #include <core/utils/lock_map.h>
+#include <core/utils/lock_list.h>
 
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
@@ -70,22 +71,29 @@ class FvBaseThread
 					colorspace_t cspace = YUV422_PLANAR);
   virtual void      unregister_thread(fawkes::Thread *thread);
 
-  virtual CameraControl *register_for_camera_control(const char *camera_string,
-                                                     CameraControl::TypeID type_id);
+  virtual CameraControl *acquire_camctrl(const char *cam_string);
+  virtual void           release_camctrl(CameraControl *cc);
+
   virtual bool thread_started(fawkes::Thread *thread) throw();
   virtual bool thread_init_failed(fawkes::Thread *thread) throw();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
+ protected:
+  virtual CameraControl *acquire_camctrl(const char *cam_string,
+					 const std::type_info &typeinf);
+
  private:
   void cond_recreate_barrier(unsigned int num_cyclic_threads);
+  CameraControl * create_camctrl(const char *camera_string);
 
  private:
   fawkes::LockMap<std::string, FvAcquisitionThread *> __aqts;
   fawkes::LockMap<std::string, FvAcquisitionThread *>::iterator __ait;
   unsigned int __aqt_timeout;
 
+  fawkes::LockList<CameraControl *>  __owned_controls;
   fawkes::LockMap<Thread *, FvAcquisitionThread *> __started_threads;
 
   fawkes::Barrier *__aqt_barrier;

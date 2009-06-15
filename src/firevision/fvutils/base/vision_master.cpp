@@ -72,14 +72,39 @@ using namespace fawkes;
  * defined by the implementation.
  * @param thread thread to unregister
  * 
- * @fn CameraControl * VisionMaster::register_for_camera_control(const char *camera_string, CameraControl::TypeID type_id)
- * Retrieve a certain CameraControl for the specified Camera.
+ * @fn CameraControl * VisionMaster::acquire_camctrl(const char *cam_string)
+ * Retrieve a CameraControl for the specified camera string.
  * This control (if available) can be used to control certain aspects of the Camera.
- * @param camera_string Camera whose CameraControl shall be returned
- * @param type_id ID of the type of CameraControl which shall be returned
+ * The \p cam_string argument either is the string that has been used to register
+ * for a particular camera, or it is a string denoting a camera control by itself.
+ * In the former case the vision master will look if the camera has been registered,
+ * and then checks if the camera provides a camera control. If so the control is
+ * returned. Note that it might implement multiple different camera controls. If
+ * you want a specific camera control use one of the template methods to get a
+ * correctly typed and verified control. If no camera that matches the \p cam_string
+ * is found, the vision master will try to instantiate a new camera control using
+ * the \p cam_string as argument to the CameraControlFactory.
+ * @param cam_string Camera argument string, see method description for details
  * @return a pointer to the requested CameraControl.
- * @throws NotImplementedException This Camera doesn't implement the requested type of control
- * @throws UnknownCameraException Unknown Camera (Camera has not been loaded through register_for_camera)
+ * @throws Exception no camera was found matching the \p cam_string and the factory
+ * could not instantiate a camera control with the given string.
+ *
+ * @fn CameraControl * VisionMaster::acquire_camctrl(const char *cam_string, const std::type_info &typeinf)
+ * Retrieve a CameraControl for the specified camera string and type info.
+ * This utility method is used by the template methods to instantiate the cameras
+ * with a specified intended type.
+ * @param cam_string Camera argument string, see method description for details
+ * @param typeinf type info for intended camera control type
+ * @return a pointer to the requested CameraControl.
+ * @throws Exception no camera was found matching the \p cam_string and the factory
+ * could not instantiate a camera control with the given string.
+ *
+ * @fn void VisionMaster::release_camctrl(CameraControl *cc)
+ * Release a camera control.
+ * This has to be called when you are done with the camera control. This will
+ * release the control and it is no longer valid. The vision master might collect
+ * the memory that has been used for the control.
+ * @param cc camera control instance to release
  */
 
 /** Virtual empty destructor. */
