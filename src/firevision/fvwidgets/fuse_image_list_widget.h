@@ -100,18 +100,22 @@ class FuseImageListWidget : FuseClientHandler, public Gtk::TreeView
     bool active;
   };
 
+  bool on_image_event(GdkEvent *event);
+  void on_add_host_manually();
   void on_image_selected();
   void on_auto_update_toggled();
   void on_compression_toggled();
   void get_image_list();
   void delete_clients();
-  bool update_image_list();
+  void update_image_list();
+  bool on_update_timeout();
 
   fawkes::LockList<ClientData> m_new_clients;
   fawkes::LockQueue<FuseClient*> m_delete_clients;
 
   ClientData m_cur_client;
-  
+
+  Gtk::Menu* m_popup_menu;
   Gtk::CheckButton* m_chk_auto_update;
   Gtk::CheckButton* m_chk_compression;
   Gtk::TreeView* m_trv_image_list;
@@ -123,8 +127,11 @@ class FuseImageListWidget : FuseClientHandler, public Gtk::TreeView
   Glib::Dispatcher m_signal_get_image_list;
   Glib::Dispatcher m_signal_delete_clients;
   Glib::Dispatcher m_signal_image_selected;
+  Glib::Dispatcher m_signal_update_image_l;
 
-  bool m_auto_update;
+  bool             m_auto_update;
+  unsigned int     m_interval_sec;
+  sigc::connection m_timeout_conn;
 
   Glib::ustring m_cur_image_id;
 };

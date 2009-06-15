@@ -31,8 +31,8 @@
 #include <linux/types.h>
 #include <linux/videodev2.h>
 
-//include <cams/cameracontrol_color.h>
-//include <cams/cameracontrol_image.h>
+#include <cams/control/color.h>
+//include <cams/control/image.h>
 
 /* Number of buffers to use for memory mapped IO */
 #define MMAP_NUM_BUFFERS 2;
@@ -41,9 +41,8 @@ class CameraArgumentParser;
 class V4L2CameraData;
 
 class V4L2Camera:
-  public Camera
-  // Implementation incomplete:
-  //  public CameraControlColor,
+  public Camera,
+  public CameraControlColor
   //public CameraControlImage
 {
   friend class V4LCamera;
@@ -73,19 +72,33 @@ class V4L2Camera:
 
   virtual void           set_image_number(unsigned int n);
 
-  /*
+  virtual bool         auto_gain();
   virtual void         set_auto_gain(bool enabled);
+  virtual bool         auto_white_balance();
   virtual void         set_auto_white_balance(bool enabled);
+  virtual bool         auto_exposure();
   virtual void         set_auto_exposure(bool enabled);
+  virtual int          red_balance();
   virtual void         set_red_balance(int red_balance);
+  virtual int          blue_balance();
   virtual void         set_blue_balance(int blue_balance);
+  virtual int          u_balance();
+  virtual void         set_u_balance(int u_balance);
+  virtual int          v_balance();
+  virtual void         set_v_balance(int v_balance);
+  virtual unsigned int brightness();
   virtual void         set_brightness(unsigned int brightness);
+  virtual unsigned int contrast();
   virtual void         set_contrast(unsigned int contrast);
+  virtual unsigned int saturation();
   virtual void         set_saturation(unsigned int saturation);
+  virtual int          hue();
   virtual void         set_hue(int hue);
+  virtual unsigned int exposure();
   virtual void         set_exposure(unsigned int exposure);
+  virtual unsigned int gain();
   virtual void         set_gain(unsigned int gain);
-  */
+
 
  protected:
   V4L2Camera(const char *device_name, int dev);
@@ -97,6 +110,7 @@ class V4L2Camera:
   virtual void set_fps();
   virtual void set_controls();
   virtual void set_one_control(const char *ctrl, unsigned int id, int value);
+  virtual int get_one_control(const char *ctrl, unsigned int id);
   virtual void create_buffer();
   virtual void reset_cropping();
 

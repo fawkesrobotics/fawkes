@@ -3,8 +3,7 @@
  *  fuse_viewer.h - Fuse (network camera) Viewer Gui
  *
  *  Created: Thu Dec 18 14:16:23 2008
- *  Copyright  2007  Daniel Beck
- *             2008  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2008-2009  Christof Rath <c.rath@student.tugraz.at>
  *
  *  $Id$
  *
@@ -29,22 +28,19 @@
 #define FUSE_PLUGIN_NAME      "fvfountain"
 #define FOUNTAIN_PORT_PATH    "/firevision/fountain/tcp_port"
 
-#include <gui_utils/connection_dispatcher.h>
-#include <fvwidgets/image_widget.h>
-#include <core/threading/thread.h>
-#include <utils/math/types.h>
+#include <netcomm/dns-sd/avahi_thread.h>
 
+#include <map>
 
 #include <gtkmm.h>
 #include <libglademm/xml.h>
 
 class NetworkCamera;
 class FuseImageListWidget;
+class ImageWidget;
 
 namespace fawkes {
-  class ServiceSelectorCBE;
-  class FawkesNetworkClient;
-  class FawkesNetworkMessage;
+  class AvahiDispatcher;
 }
 
 class FuseViewerGtkWindow : public Gtk::Window
@@ -54,41 +50,41 @@ public:
   virtual ~FuseViewerGtkWindow();
 
 private:
-  void on_connected();
-  void on_disconnected();
-  void on_message_received(fawkes::FawkesNetworkMessage *msg);
+  void on_service_added(fawkes::NetworkService* service);
+  void on_service_removed(fawkes::NetworkService* service);
+
   void on_fuse_image_selected();
   void on_auto_save_cbt_change();
   void on_save_type_change();
   void on_save_image_clicked();
 
-  void open_img_list();
   void close_image();
-  void set_status(bool conn, bool fuse);
-  
+  void set_status(std::string img_id, std::string host = "", unsigned short port = 0);
+
 private:
   // widgets
-  Gtk::ScrolledWindow    *m_image_list_scroll;
-  Gtk::Viewport          *m_image_viewport;
-  Gtk::AspectFrame       *m_save_box;
-  Gtk::ComboBoxText      *m_save_type;
-  Gtk::FileChooserButton *m_save_filechooser;
-  Gtk::CheckButton       *m_auto_save;
-  Gtk::Button            *m_save_btn;
-  Gtk::Statusbar         *m_stb;
+  Gtk::ScrolledWindow     *__image_list_scroll;
+  Gtk::Viewport           *__image_viewport;
+  Gtk::AspectFrame        *__save_box;
+  Gtk::ComboBoxText       *__save_type;
+  Gtk::FileChooserButton  *__save_filechooser;
+  Gtk::CheckButton        *__auto_save;
+  Gtk::Button             *__save_btn;
+  Gtk::Statusbar          *__statusbar;
 
-  fawkes::ServiceSelectorCBE      *__service_selector;
-  fawkes::ConnectionDispatcher     __conn_dispatcher;
+  fawkes::AvahiThread     *__avahi_thread;
+  fawkes::AvahiDispatcher *__avahi_dispatcher;
 
-  FuseImageListWidget *__img_list_widget;
+  FuseImageListWidget     *__img_list_widget;
 
-  ImageWidget   *__img_widget;
-  NetworkCamera *__cam;
+  ImageWidget             *__img_widget;
+  NetworkCamera           *__cam;
 
-  unsigned int __cfg_fountain_port;
-  bool         __is_connected;
-  bool         __has_fuse;
-  unsigned int __img_num;
+
+  std::map<std::string, std::string> __host_service_map;
+
+  std::string    __cur_service_name;
+  unsigned int   __img_num;
 };
 
 #endif /* __FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_ */

@@ -24,6 +24,8 @@
  */
 
 #include <filters/roidraw.h>
+#include <fvutils/color/color_object_map.h>
+#include <fvutils/draw/drawer.h>
 
 #include <cstddef>
 
@@ -35,44 +37,83 @@
 
 /** Constructor.
  * @param rois optional list of ROIs to draw additionally to the dst_roi
+ * @param style optional border style (default is INVERTED)
  */
-FilterROIDraw::FilterROIDraw(const std::list<ROI> *rois)
+FilterROIDraw::FilterROIDraw(const std::list<ROI> *rois, border_style_t style)
   : Filter("FilterROIDraw"),
-  __rois(rois)
+  __rois(rois),
+  __border_style(style)
 {
+  __drawer = new Drawer;
 }
 
+/** Destructor */
+FilterROIDraw::~FilterROIDraw() {
+  delete __drawer;
+}
 
 void
 FilterROIDraw::draw_roi(const ROI *roi)
 {
-  // destination y-plane
-  unsigned char *dyp  = dst + (roi->start.y * roi->line_step) + (roi->start.x * roi->pixel_step);
+  if (__border_style == DASHED_HINT) {
+    YUV_t hint_color = ColorObjectMap::get_color(ColorObjectMap::get_instance().get(roi->hint));
+    __drawer->set_buffer(dst, roi->image_width, roi->image_height);
+    bool draw_black = false;
+    fawkes::point_t end;
+    end.x = std::min(roi->image_width - 1, roi->start.x + roi->width);
+    end.y = std::min(roi->image_height - 1, roi->start.y + roi->height);
 
-  // line starts
-  unsigned char *ldyp = dyp;  // destination y-plane
+    //Top and bottom line
+    for (unsigned int x = roi->start.x; x <= end.x ; ++x) {
+      if (!(x % 2)) {
+        __drawer->set_color(draw_black ? YUV_t::black() : hint_color);
+        draw_black = !draw_black;
+      }
 
-  // top border
-  for (unsigned int i = roi->start.x; i < (roi->start.x + roi->width); ++i) {
-    *dyp = 255 - *dyp;
-    dyp++;
+      __drawer->color_point(x, roi->start.y);
+      __drawer->color_point(x, end.y);
+    }
+
+    //Side lines
+    for (unsigned int y = roi->start.y; y <= end.y; ++y) {
+      if (!(y % 2)) {
+        __drawer->set_color(draw_black ? YUV_t::black() : hint_color);
+        draw_black = !draw_black;
+      }
+
+      __drawer->color_point(roi->start.x, y);
+      __drawer->color_point(end.x, y);
+    }
   }
+  else {
+    // destination y-plane
+    unsigned char *dyp  = dst + (roi->start.y * roi->line_step) + (roi->start.x * roi->pixel_step);
 
-  // left and right borders
-  for (unsigned int i = roi->start.y; i < (roi->start.y + roi->height); ++i) {
+    // line starts
+    unsigned char *ldyp = dyp;  // destination y-plane
+
+    // top border
+    for (unsigned int i = roi->start.x; i < (roi->start.x + roi->width); ++i) {
+      *dyp = 255 - *dyp;
+      dyp++;
+    }
+
+    // left and right borders
+    for (unsigned int i = roi->start.y; i < (roi->start.y + roi->height); ++i) {
+      ldyp += roi->line_step;
+      dyp = ldyp;
+      *dyp = 255 - *dyp;
+      dyp += roi->width;
+      *dyp = 255 - *dyp;
+    }
     ldyp += roi->line_step;
     dyp = ldyp;
-    *dyp = 255 - *dyp;
-    dyp += roi->width;
-    *dyp = 255 - *dyp;
-  }
-  ldyp += roi->line_step;
-  dyp = ldyp;
 
-  // bottom border
-  for (unsigned int i = roi->start.x; i < (roi->start.x + roi->width); ++i) {
-    *dyp = 255 - *dyp;
-    dyp++;
+    // bottom border
+    for (unsigned int i = roi->start.x; i < (roi->start.x + roi->width); ++i) {
+      *dyp = 255 - *dyp;
+      dyp++;
+    }
   }
 }
 
@@ -99,4 +140,14 @@ void
 FilterROIDraw::set_rois(const std::list<ROI> *rois)
 {
   __rois = rois;
+}
+
+
+/** Sets the preferred style
+ * @param style The preferred style
+ */
+void
+FilterROIDraw::set_style(border_style_t style)
+{
+  __border_style = style;
 }

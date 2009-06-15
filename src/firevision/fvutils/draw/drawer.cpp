@@ -343,6 +343,28 @@ Drawer::color_point(unsigned int x, unsigned int y)
 }
 
 
+/** Color the given point.
+ * This will color a single point (to save excessive function calls the color
+ * is also a parameter)
+ * @param x x coordinate of point
+ * @param y y coordinate of point
+ * @param color Color to set
+ */
+void
+Drawer::color_point(unsigned int x, unsigned int y, YUV_t color)
+{
+  if ( x > __width) return;
+  if ( y > __height) return;
+
+  unsigned char *up = YUV422_PLANAR_U_PLANE(__buffer, __width, __height);
+  unsigned char *vp = YUV422_PLANAR_V_PLANE(__buffer, __width, __height);
+
+  __buffer[ y * __width + x ] = color.Y;
+  up[ (y * __width + x) / 2 ] = color.U;
+  vp[ (y * __width + x) / 2 ] = color.V;
+}
+
+
 /** Draw line.
  * Standard Bresenham in all directions. For in-depth information
  * have a look at http://de.wikipedia.org/wiki/Bresenham-Algorithmus

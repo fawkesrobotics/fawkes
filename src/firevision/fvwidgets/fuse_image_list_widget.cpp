@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  fuse_image_list_widget.cpp - Fuse image list widget
  *
@@ -29,6 +29,7 @@
 
 #include <netinet/in.h>
 #include <cstring>
+#include <sstream>
 
 using namespace fawkes;
 
@@ -41,6 +42,9 @@ using namespace fawkes;
 /** Constructor. */
 FuseImageListWidget::FuseImageListWidget()
 {
+  m_chk_compression   = NULL;
+  m_chk_auto_update   = NULL;
+
   m_cur_client.active = false;
 
   m_new_clients.clear();
@@ -50,6 +54,13 @@ FuseImageListWidget::FuseImageListWidget()
 
   m_signal_get_image_list.connect( sigc::mem_fun( *this, &FuseImageListWidget::get_image_list) );
   m_signal_delete_clients.connect( sigc::mem_fun( *this, &FuseImageListWidget::delete_clients) );
+  m_signal_update_image_l.connect( sigc::mem_fun( *this, &FuseImageListWidget::update_image_list) );
+
+  m_popup_menu = Gtk::manage( new Gtk::Menu() );
+  Gtk::Menu::MenuList& menulist = m_popup_menu->items();
+  menulist.push_back( Gtk::Menu_Helpers::MenuElem("Update now", sigc::mem_fun( *this, &FuseImageListWidget::update_image_list) ) );
+  menulist.push_back( Gtk::Menu_Helpers::SeparatorElem() );
+  menulist.push_back( Gtk::Menu_Helpers::MenuElem("Add host manually", sigc::mem_fun( *this, &FuseImageListWidget::on_add_host_manually) ) );
 
   set_image_list_trv(this);
 }
@@ -163,6 +174,7 @@ FuseImageListWidget::set_image_list_trv(Gtk::TreeView* trv)
   m_trv_image_list->set_model(m_image_list);
   m_trv_image_list->append_column("asdf", m_image_record.display_text);
   m_trv_image_list->set_headers_visible(false);
+  m_trv_image_list->signal_event().connect( sigc::mem_fun(*this, &FuseImageListWidget::on_image_event) );
   m_trv_image_list->signal_cursor_changed().connect( sigc::mem_fun(*this, &FuseImageListWidget::on_image_selected) );
   m_img_list_mutex.unlock();
 }
@@ -214,13 +226,15 @@ FuseImageListWidget::auto_update()
 void
 FuseImageListWidget::set_auto_update(bool active, unsigned int interval_sec)
 {
-  m_auto_update = active;
+  m_auto_update  = active;
+  m_interval_sec = interval_sec;
 
   if (m_auto_update)
     {
-      sigc::connection conn = Glib::signal_timeout().connect( sigc::mem_fun(*this, &FuseImageListWidget::update_image_list),
-                                                              interval_sec * 1000);
+      m_timeout_conn = Glib::signal_timeout().connect_seconds( sigc::mem_fun(*this, &FuseImageListWidget::on_update_timeout),
+                                                               m_interval_sec);
     }
+  else m_timeout_conn.disconnect();
 }
 
 /** Get the host name, port, and image id of the selected image.
@@ -237,11 +251,15 @@ FuseImageListWidget::get_selected_image( std::string& host_name, unsigned short&
   if ( !m_trv_image_list )
     { return false; }
 
+  m_img_list_mutex.lock();
   Glib::RefPtr<Gtk::TreeSelection> selection = m_trv_image_list->get_selection();
 
   if ( selection->count_selected_rows() != 1 )
-    { return false; }
-  
+    {
+      m_img_list_mutex.unlock();
+      return false;
+    }
+
   Gtk::TreeModel::iterator iter = selection->get_selected();
   host_name = iter->get_value(m_image_record.host_name);
   port      = iter->get_value(m_image_record.port);
@@ -256,18 +274,31 @@ FuseImageListWidget::get_selected_image( std::string& host_name, unsigned short&
   return true;
 }
 
+
+bool
+FuseImageListWidget::on_image_event(GdkEvent *event)
+{
+  GdkEventButton btn = event->button;
+  if (btn.type == GDK_BUTTON_PRESS && btn.button == 3) {
+    m_popup_menu->popup(btn.button, btn.time);
+    return true;
+  }
+  return false;
+}
+
 void
 FuseImageListWidget::on_image_selected()
 {
   m_img_list_mutex.lock();
   Glib::RefPtr<Gtk::TreeSelection> selection = m_trv_image_list->get_selection();
-  m_img_list_mutex.unlock();
 
   Gtk::TreeModel::iterator iter = selection->get_selected();
   Glib::ustring image_id;
   image_id = (*iter)[m_image_record.image_id];
-  if (image_id != m_cur_image_id)
-    { 
+  m_img_list_mutex.unlock();
+
+  if ((image_id != m_cur_image_id) && (image_id != "invalid"))
+    {
       m_cur_image_id = image_id;
       m_signal_image_selected();
     }
@@ -295,6 +326,11 @@ FuseImageListWidget::get_image_list()
   m_new_clients.lock();
   if (m_new_clients.size() == 0)
     {
+      if (m_auto_update)
+        {
+          m_timeout_conn = Glib::signal_timeout().connect_seconds( sigc::mem_fun(*this, &FuseImageListWidget::on_update_timeout),
+                                                                   m_interval_sec);
+        }
       m_new_clients.unlock();
       return;
     }
@@ -342,8 +378,16 @@ FuseImageListWidget::delete_clients()
 }
 
 bool
+FuseImageListWidget::on_update_timeout()
+{
+  m_signal_update_image_l();
+  return m_auto_update;
+}
+
+void
 FuseImageListWidget::update_image_list()
 {
+  m_timeout_conn.disconnect();
   if (m_img_list_mutex.try_lock())
     {
       Gtk::TreeModel::Children children = m_image_list->children();
@@ -368,12 +412,10 @@ FuseImageListWidget::update_image_list()
     }
 
   m_signal_get_image_list();
-
-  return m_auto_update;
 }
 
 void
-FuseImageListWidget::fuse_invalid_server_version(uint32_t local_version, 
+FuseImageListWidget::fuse_invalid_server_version(uint32_t local_version,
                                                 uint32_t remote_version) throw()
 {
   printf("Invalid versions: local: %u   remote: %u\n", local_version, remote_version);
@@ -481,4 +523,62 @@ FuseImageListWidget::fuse_inbound_received (FuseNetworkMessage *m) throw()
     default:
       printf("Unhandled message type\n");
     }
+}
+
+void
+FuseImageListWidget::on_add_host_manually()
+{
+  Gtk::Dialog* add_host = new Gtk::Dialog("Add host manually", this->get_window(), true);
+  add_host->add_button(Gtk::Stock::ADD, Gtk::RESPONSE_OK);
+  add_host->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+
+  Gtk::Table* tab = Gtk::manage( new Gtk::Table(2, 2, false) );
+  Gtk::Label* hlab = Gtk::manage( new Gtk::Label("Host:") );
+  Gtk::Label* plab = Gtk::manage( new Gtk::Label("Port:") );
+  Gtk::Entry* hent = Gtk::manage( new Gtk::Entry() );
+  Gtk::HBox*  pbox = Gtk::manage( new Gtk::HBox() );
+
+  Gtk::Adjustment prange(2208, 1, 65535);
+  Gtk::SpinButton *pent = Gtk::manage( new Gtk::SpinButton(prange) );
+
+  char * fawkes_ip = getenv("FAWKES_IP");
+  if (fawkes_ip) hent->set_text(std::string(fawkes_ip).append(":2208"));
+  else hent->set_text("localhost:2208");
+
+  pbox->pack_start(*pent, false, false, 0);
+  tab->attach(*hlab, 1, 2, 1, 2);
+  tab->attach(*plab, 1, 2, 2, 3);
+  tab->attach(*hent, 2, 3, 1, 2);
+  tab->attach(*pbox, 2, 3, 2, 3);
+
+  add_host->get_vbox()->pack_start(*tab, false, true, 0);
+  add_host->get_vbox()->show_all_children(true);
+
+  if (add_host->run() == Gtk::RESPONSE_OK) {
+    std::string name = "fountain on ";
+    std::string host = hent->get_text();
+    unsigned short port = 2208;
+
+    Glib::ustring::size_type pos;
+    if ((pos = host.find(':')) != Glib::ustring::npos)
+    {
+      Glib::ustring tmp_host = "";
+      unsigned int tmp_port = 1234567; //Greater than max port num (i.e. 65535)
+      std::istringstream is(host.replace(pos, 1, " "));
+      is >> tmp_host;
+      is >> tmp_port;
+
+      if (tmp_port != 1234567 && tmp_host.size())
+      {
+        host = tmp_host;
+        port = tmp_port;
+      }
+    }
+
+    name.append(host);
+    add_fountain_service(name.c_str(), host.c_str(), port);
+  }
+
+  add_host->hide();
+  delete add_host;
 }

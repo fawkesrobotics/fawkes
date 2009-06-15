@@ -27,6 +27,7 @@
 
 #include <core/threading/thread.h>
 #include <core/threading/wait_condition.h>
+#include <core/exceptions/system.h>
 #include <netcomm/fawkes/client.h>
 #include <blackboard/remote.h>
 #include <blackboard/interface_listener.h>
@@ -34,6 +35,7 @@
 #include <utils/system/signal.h>
 #include <utils/logging/console.h>
 #include <netcomm/fawkes/client_handler.h>
+#include <netcomm/socket/socket.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -50,9 +52,11 @@ bool quit = false;
 void
 print_usage(const char *program_name)
 {
-  printf("Usage: %s [-h] [-r host[:port]]\n"
+  printf("Usage: %s [-h] [-r host[:port]] [-d device] [-l]\n"
 	 " -h              This help message\n"
-	 " -r host[:port]  Remote host (and optionally port) to connect to\n",
+	 " -r host[:port]  Remote host (and optionally port) to connect to\n"
+	 " -d device       Joystick device to use\n"
+	 " -l              Start in logging mode - print data read from bb\n",
 	 program_name);
 }
 
@@ -259,33 +263,50 @@ class JoystickBlackBoardLogger
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hr:dl");
+  try
+  {
+    ArgumentParser argp(argc, argv, "hr:d:l");
+    
+    if ( argp.has_arg("h") ) {
+      print_usage(argv[0]);
+      exit(0);
+    }
 
-  if ( argp.has_arg("h") ) {
+    const char *joystick_device = "/dev/input/js0";
+    if ( argp.has_arg("d") ) {
+      joystick_device = argp.arg("d");
+    }
+
+    ConsoleLogger logger;
+
+    if ( argp.has_arg("l") ) {
+      JoystickBlackBoardLogger jbl(argp, &logger);
+      SignalManager::register_handler(SIGINT, &jbl);
+      jbl.run();
+    } else {
+      JoystickBlackBoardPoster jbp(argp, &logger);
+      JoystickAcquisitionThread aqt(joystick_device, &jbp, &logger);
+
+      JoystickQuitHandler jqh(aqt);
+      SignalManager::register_handler(SIGINT, &jqh);
+
+      aqt.start();
+      aqt.join();
+    }
+  }
+  catch (UnknownArgumentException e)
+  {
+    printf("Error: Unknown Argument\n\n");
     print_usage(argv[0]);
     exit(0);
   }
-
-  const char *joystick_device = "/dev/js0";
-  if ( argp.has_arg("d") ) {
-    joystick_device = argp.arg("d");
+  catch (SocketException e)
+  {
+    printf("\nError: could not connect:\n%s\n", e.what());
   }
-
-  ConsoleLogger logger;
-
-  if ( argp.has_arg("l") ) {
-    JoystickBlackBoardLogger jbl(argp, &logger);
-    SignalManager::register_handler(SIGINT, &jbl);
-    jbl.run();
-  } else {
-    JoystickBlackBoardPoster jbp(argp, &logger);
-    JoystickAcquisitionThread aqt(joystick_device, &jbp, &logger);
-
-    JoystickQuitHandler jqh(aqt);
-    SignalManager::register_handler(SIGINT, &jqh);
-
-    aqt.start();
-    aqt.join();
+  catch (CouldNotOpenFileException e)
+  {
+    printf("\nError: could not open joystick device:\n%s\n", e.what());
   }
 
   return 0;

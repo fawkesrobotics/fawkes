@@ -13,10 +13,10 @@
       <item name="STANDUP_BACK">Standup from lying on the back.</item>
       <item name="STANDUP_FRONT">Standup from lying on the tummy.</item>
     </enum>
-    <enum name="StiffnessBehaviourEnum">
-      <comment>The behaviours that need specific stiffness settings</comment>
-      <item name="WALK">The walk behaviour</item>
-      <item name="KICK">The kick behaviour</item>
+    <enum name="StiffnessMotionPatternEnum">
+      <comment>The motion patterns that need specific stiffness settings</comment>
+      <item name="WALK">The walk pattern</item>
+      <item name="KICK">The kick pattern</item>
     </enum>
   </constants>
   <data>
@@ -171,12 +171,30 @@
     <field type="float" name="pitch">Desired pitch (vertical orientation).</field>
     <field type="float" name="time_sec">Time in seconds when to reach the target.</field>
   </message>
-  <message name="UpdateStiffnessParams">
-    <comment>Updates Stiffness values for a certain behaviour</comment>
-    <field type="StiffnessBehaviourEnum" name="behaviour">the behaviour to update</field>
-  </message>
-  <message name="UpdateStiffnessInterface">
-    <comment>Reads current Stiffness values for a certain behaviour into the interface</comment>
-    <field type="StiffnessBehaviourEnum" name="behaviour">the behaviour to read the parameters from</field>
+  <message name="SetStiffnessParams">
+    <comment>Updates Stiffness values for a certain motion pattern</comment>
+    <field type="StiffnessMotionPatternEnum" name="motion_pattern">the motion pattern to update</field>
+    <field type="float" name="head_yaw">head_yaw</field>
+    <field type="float" name="head_pitch">head_pitch</field>
+    <field type="float" name="l_shoulder_pitch">l_shoulder_pitch</field>
+    <field type="float" name="l_shoulder_roll">l_shoulder_roll</field>
+    <field type="float" name="l_elbow_yaw">l_elbow_yaw</field>
+    <field type="float" name="l_elbow_roll">l_elbow_roll</field>
+    <field type="float" name="l_hip_yaw_pitch">l_hip_yaw_pitch</field>
+    <field type="float" name="l_hip_roll">l_hip_roll</field>
+    <field type="float" name="l_hip_pitch">l_hip_pitch</field>
+    <field type="float" name="l_knee_pitch">l_knee_pitch</field>
+    <field type="float" name="l_ankle_pitch">l_ankle_pitch</field>
+    <field type="float" name="l_ankle_roll">l_ankle_roll</field>
+    <field type="float" name="r_hip_yaw_pitch">r_hip_yaw_pitch</field>
+    <field type="float" name="r_hip_roll">r_hip_roll</field>
+    <field type="float" name="r_hip_pitch">r_hip_pitch</field>
+    <field type="float" name="r_knee_pitch">r_knee_pitch</field>
+    <field type="float" name="r_ankle_pitch">r_ankle_pitch</field>
+    <field type="float" name="r_ankle_roll">r_ankle_roll</field>
+    <field type="float" name="r_shoulder_pitch">r_shoulder_pitch</field>
+    <field type="float" name="r_shoulder_roll">r_shoulder_roll</field>
+    <field type="float" name="r_elbow_yaw">r_elbow_yaw</field>
+    <field type="float" name="r_elbow_roll">r_elbow_roll</field>
   </message>
 </interface>

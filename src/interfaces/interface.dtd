@@ -46,7 +46,7 @@
 
     <!ELEMENT comment (#PCDATA)>
 
-    <!ELEMENT pseudomap (comment, paref+)>
+    <!ELEMENT pseudomap (comment, mapref+)>
     <!ATTLIST pseudomap
 	      type      CDATA  #REQUIRED
 	      keytype CDATA  #REQUIRED

@@ -52,11 +52,11 @@ class HumanoidMotionInterface : public Interface
     STANDUP_FRONT /**< Standup from lying on the tummy. */
   } StandupEnum;
 
-  /** The behaviours that need specific stiffness settings */
+  /** The motion patterns that need specific stiffness settings */
   typedef enum {
-    WALK /**< The walk behaviour */,
-    KICK /**< The kick behaviour */
-  } StiffnessBehaviourEnum;
+    WALK /**< The walk pattern */,
+    KICK /**< The kick pattern */
+  } StiffnessMotionPatternEnum;
 
  private:
   /** Internal data storage, do NOT modify! */
@@ -512,49 +512,114 @@ class HumanoidMotionInterface : public Interface
     virtual Message * clone() const;
   };
 
-  class UpdateStiffnessParamsMessage : public Message
+  class SetStiffnessParamsMessage : public Message
   {
    private:
     /** Internal data storage, do NOT modify! */
     typedef struct {
-      StiffnessBehaviourEnum behaviour; /**< the behaviour to update */
-    } UpdateStiffnessParamsMessage_data_t;
+      float head_yaw; /**< head_yaw */
+      float head_pitch; /**< head_pitch */
+      float l_shoulder_pitch; /**< l_shoulder_pitch */
+      float l_shoulder_roll; /**< l_shoulder_roll */
+      float l_elbow_yaw; /**< l_elbow_yaw */
+      float l_elbow_roll; /**< l_elbow_roll */
+      float l_hip_yaw_pitch; /**< l_hip_yaw_pitch */
+      float l_hip_roll; /**< l_hip_roll */
+      float l_hip_pitch; /**< l_hip_pitch */
+      float l_knee_pitch; /**< l_knee_pitch */
+      float l_ankle_pitch; /**< l_ankle_pitch */
+      float l_ankle_roll; /**< l_ankle_roll */
+      float r_hip_yaw_pitch; /**< r_hip_yaw_pitch */
+      float r_hip_roll; /**< r_hip_roll */
+      float r_hip_pitch; /**< r_hip_pitch */
+      float r_knee_pitch; /**< r_knee_pitch */
+      float r_ankle_pitch; /**< r_ankle_pitch */
+      float r_ankle_roll; /**< r_ankle_roll */
+      float r_shoulder_pitch; /**< r_shoulder_pitch */
+      float r_shoulder_roll; /**< r_shoulder_roll */
+      float r_elbow_yaw; /**< r_elbow_yaw */
+      float r_elbow_roll; /**< r_elbow_roll */
+      StiffnessMotionPatternEnum motion_pattern; /**< the motion pattern to update */
+    } SetStiffnessParamsMessage_data_t;
 
-    UpdateStiffnessParamsMessage_data_t *data;
+    SetStiffnessParamsMessage_data_t *data;
 
    public:
-    UpdateStiffnessParamsMessage(const StiffnessBehaviourEnum ini_behaviour);
-    UpdateStiffnessParamsMessage();
-    ~UpdateStiffnessParamsMessage();
+    SetStiffnessParamsMessage(const StiffnessMotionPatternEnum ini_motion_pattern, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll);
+    SetStiffnessParamsMessage();
+    ~SetStiffnessParamsMessage();
 
-    UpdateStiffnessParamsMessage(const UpdateStiffnessParamsMessage *m);
+    SetStiffnessParamsMessage(const SetStiffnessParamsMessage *m);
     /* Methods */
-    StiffnessBehaviourEnum behaviour() const;
-    void set_behaviour(const StiffnessBehaviourEnum new_behaviour);
-    size_t maxlenof_behaviour() const;
-    virtual Message * clone() const;
-  };
-
-  class UpdateStiffnessInterfaceMessage : public Message
-  {
-   private:
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-      StiffnessBehaviourEnum behaviour; /**< the behaviour to read the parameters from */
-    } UpdateStiffnessInterfaceMessage_data_t;
-
-    UpdateStiffnessInterfaceMessage_data_t *data;
-
-   public:
-    UpdateStiffnessInterfaceMessage(const StiffnessBehaviourEnum ini_behaviour);
-    UpdateStiffnessInterfaceMessage();
-    ~UpdateStiffnessInterfaceMessage();
-
-    UpdateStiffnessInterfaceMessage(const UpdateStiffnessInterfaceMessage *m);
-    /* Methods */
-    StiffnessBehaviourEnum behaviour() const;
-    void set_behaviour(const StiffnessBehaviourEnum new_behaviour);
-    size_t maxlenof_behaviour() const;
+    StiffnessMotionPatternEnum motion_pattern() const;
+    void set_motion_pattern(const StiffnessMotionPatternEnum new_motion_pattern);
+    size_t maxlenof_motion_pattern() const;
+    float head_yaw() const;
+    void set_head_yaw(const float new_head_yaw);
+    size_t maxlenof_head_yaw() const;
+    float head_pitch() const;
+    void set_head_pitch(const float new_head_pitch);
+    size_t maxlenof_head_pitch() const;
+    float l_shoulder_pitch() const;
+    void set_l_shoulder_pitch(const float new_l_shoulder_pitch);
+    size_t maxlenof_l_shoulder_pitch() const;
+    float l_shoulder_roll() const;
+    void set_l_shoulder_roll(const float new_l_shoulder_roll);
+    size_t maxlenof_l_shoulder_roll() const;
+    float l_elbow_yaw() const;
+    void set_l_elbow_yaw(const float new_l_elbow_yaw);
+    size_t maxlenof_l_elbow_yaw() const;
+    float l_elbow_roll() const;
+    void set_l_elbow_roll(const float new_l_elbow_roll);
+    size_t maxlenof_l_elbow_roll() const;
+    float l_hip_yaw_pitch() const;
+    void set_l_hip_yaw_pitch(const float new_l_hip_yaw_pitch);
+    size_t maxlenof_l_hip_yaw_pitch() const;
+    float l_hip_roll() const;
+    void set_l_hip_roll(const float new_l_hip_roll);
+    size_t maxlenof_l_hip_roll() const;
+    float l_hip_pitch() const;
+    void set_l_hip_pitch(const float new_l_hip_pitch);
+    size_t maxlenof_l_hip_pitch() const;
+    float l_knee_pitch() const;
+    void set_l_knee_pitch(const float new_l_knee_pitch);
+    size_t maxlenof_l_knee_pitch() const;
+    float l_ankle_pitch() const;
+    void set_l_ankle_pitch(const float new_l_ankle_pitch);
+    size_t maxlenof_l_ankle_pitch() const;
+    float l_ankle_roll() const;
+    void set_l_ankle_roll(const float new_l_ankle_roll);
+    size_t maxlenof_l_ankle_roll() const;
+    float r_hip_yaw_pitch() const;
+    void set_r_hip_yaw_pitch(const float new_r_hip_yaw_pitch);
+    size_t maxlenof_r_hip_yaw_pitch() const;
+    float r_hip_roll() const;
+    void set_r_hip_roll(const float new_r_hip_roll);
+    size_t maxlenof_r_hip_roll() const;
+    float r_hip_pitch() const;
+    void set_r_hip_pitch(const float new_r_hip_pitch);
+    size_t maxlenof_r_hip_pitch() const;
+    float r_knee_pitch() const;
+    void set_r_knee_pitch(const float new_r_knee_pitch);
+    size_t maxlenof_r_knee_pitch() const;
+    float r_ankle_pitch() const;
+    void set_r_ankle_pitch(const float new_r_ankle_pitch);
+    size_t maxlenof_r_ankle_pitch() const;
+    float r_ankle_roll() const;
+    void set_r_ankle_roll(const float new_r_ankle_roll);
+    size_t maxlenof_r_ankle_roll() const;
+    float r_shoulder_pitch() const;
+    void set_r_shoulder_pitch(const float new_r_shoulder_pitch);
+    size_t maxlenof_r_shoulder_pitch() const;
+    float r_shoulder_roll() const;
+    void set_r_shoulder_roll(const float new_r_shoulder_roll);
+    size_t maxlenof_r_shoulder_roll() const;
+    float r_elbow_yaw() const;
+    void set_r_elbow_yaw(const float new_r_elbow_yaw);
+    size_t maxlenof_r_elbow_yaw() const;
+    float r_elbow_roll() const;
+    void set_r_elbow_roll(const float new_r_elbow_roll);
+    size_t maxlenof_r_elbow_roll() const;
     virtual Message * clone() const;
   };
 

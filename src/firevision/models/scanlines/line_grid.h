@@ -43,7 +43,7 @@ private:
 
 public:
   ScanlineLineGrid(unsigned int width, unsigned int height,
-                   unsigned int offset_x, unsigned int offset_y,
+                   unsigned int offset_hor, unsigned int offset_ver,
                    ROI* roi = NULL, unsigned int gap = 0);
   virtual ~ScanlineLineGrid();
 
@@ -60,17 +60,17 @@ public:
   virtual void set_robot_pose(float x, float y, float ori);
   virtual void set_pan_tilt(float pan, float tilt);
 
-  void setDimensions(unsigned int width, unsigned int height, ROI* roi = NULL);
-  void setOffset(unsigned int offset_x, unsigned int offset_y);
-  void setGridParams(unsigned int width, unsigned int height,
-                     unsigned int offset_x, unsigned int offset_y, ROI* roi = NULL);
-  void draw_grid(unsigned char *yuv422_planar, YUV_t color);
+  virtual void set_dimensions(unsigned int width, unsigned int height, ROI* roi = NULL);
+  virtual void set_offset(unsigned int offset_x, unsigned int offset_y);
+  virtual void set_grid_params(unsigned int width, unsigned int height,
+                             unsigned int offset_hor, unsigned int offset_ver, ROI* roi = NULL);
+  virtual void set_roi(ROI* roi = NULL);
 
 private:
   unsigned int __width;
   unsigned int __height;
-  unsigned int __offset_x;
-  unsigned int __offset_y;
+  unsigned int __offset_ver;
+  unsigned int __offset_hor;
   unsigned int __next_pixel;
 
   ROI*         __roi;

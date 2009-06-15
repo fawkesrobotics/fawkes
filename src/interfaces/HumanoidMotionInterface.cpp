@@ -66,7 +66,7 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   add_fieldinfo(Interface::IFT_FLOAT, "elbow_roll_median", 1, &data->elbow_roll_median);
   add_fieldinfo(Interface::IFT_FLOAT, "elbow_roll_amplitude", 1, &data->elbow_roll_amplitude);
   add_fieldinfo(Interface::IFT_UINT, "msgid", 1, &data->msgid);
-  unsigned char tmp_hash[] = {0xeb, 0xee, 0xe7, 0xb3, 0xbc, 0xe4, 0x88, 0x6d, 0x46, 0x5c, 0x37, 0xa2, 0x8c, 0x92, 0x3c, 0x9e};
+  unsigned char tmp_hash[] = {0x69, 0x80, 0xac, 0xd5, 0xa4, 0x71, 0xad, 0xe8, 0xd6, 0xdf, 0xbb, 0x13, 0xfb, 0x10, 0x28, 0xf1};
   set_hash(tmp_hash);
 }
 
@@ -718,10 +718,8 @@ HumanoidMotionInterface::create_message(const char *type) const
     return new StandupMessage();
   } else if ( strncmp("YawPitchHeadMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new YawPitchHeadMessage();
-  } else if ( strncmp("UpdateStiffnessParamsMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new UpdateStiffnessParamsMessage();
-  } else if ( strncmp("UpdateStiffnessInterfaceMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new UpdateStiffnessInterfaceMessage();
+  } else if ( strncmp("SetStiffnessParamsMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetStiffnessParamsMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -2474,35 +2472,79 @@ HumanoidMotionInterface::YawPitchHeadMessage::clone() const
 {
   return new HumanoidMotionInterface::YawPitchHeadMessage(this);
 }
-/** @class HumanoidMotionInterface::UpdateStiffnessParamsMessage <interfaces/HumanoidMotionInterface.h>
- * UpdateStiffnessParamsMessage Fawkes BlackBoard Interface Message.
+/** @class HumanoidMotionInterface::SetStiffnessParamsMessage <interfaces/HumanoidMotionInterface.h>
+ * SetStiffnessParamsMessage Fawkes BlackBoard Interface Message.
  * 
     
  */
 
 
 /** Constructor with initial values.
- * @param ini_behaviour initial value for behaviour
+ * @param ini_motion_pattern initial value for motion_pattern
+ * @param ini_head_yaw initial value for head_yaw
+ * @param ini_head_pitch initial value for head_pitch
+ * @param ini_l_shoulder_pitch initial value for l_shoulder_pitch
+ * @param ini_l_shoulder_roll initial value for l_shoulder_roll
+ * @param ini_l_elbow_yaw initial value for l_elbow_yaw
+ * @param ini_l_elbow_roll initial value for l_elbow_roll
+ * @param ini_l_hip_yaw_pitch initial value for l_hip_yaw_pitch
+ * @param ini_l_hip_roll initial value for l_hip_roll
+ * @param ini_l_hip_pitch initial value for l_hip_pitch
+ * @param ini_l_knee_pitch initial value for l_knee_pitch
+ * @param ini_l_ankle_pitch initial value for l_ankle_pitch
+ * @param ini_l_ankle_roll initial value for l_ankle_roll
+ * @param ini_r_hip_yaw_pitch initial value for r_hip_yaw_pitch
+ * @param ini_r_hip_roll initial value for r_hip_roll
+ * @param ini_r_hip_pitch initial value for r_hip_pitch
+ * @param ini_r_knee_pitch initial value for r_knee_pitch
+ * @param ini_r_ankle_pitch initial value for r_ankle_pitch
+ * @param ini_r_ankle_roll initial value for r_ankle_roll
+ * @param ini_r_shoulder_pitch initial value for r_shoulder_pitch
+ * @param ini_r_shoulder_roll initial value for r_shoulder_roll
+ * @param ini_r_elbow_yaw initial value for r_elbow_yaw
+ * @param ini_r_elbow_roll initial value for r_elbow_roll
  */
-HumanoidMotionInterface::UpdateStiffnessParamsMessage::UpdateStiffnessParamsMessage(const StiffnessBehaviourEnum ini_behaviour) : Message("UpdateStiffnessParamsMessage")
+HumanoidMotionInterface::SetStiffnessParamsMessage::SetStiffnessParamsMessage(const StiffnessMotionPatternEnum ini_motion_pattern, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll) : Message("SetStiffnessParamsMessage")
 {
-  data_size = sizeof(UpdateStiffnessParamsMessage_data_t);
+  data_size = sizeof(SetStiffnessParamsMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (UpdateStiffnessParamsMessage_data_t *)data_ptr;
-  data->behaviour = ini_behaviour;
+  data      = (SetStiffnessParamsMessage_data_t *)data_ptr;
+  data->motion_pattern = ini_motion_pattern;
+  data->head_yaw = ini_head_yaw;
+  data->head_pitch = ini_head_pitch;
+  data->l_shoulder_pitch = ini_l_shoulder_pitch;
+  data->l_shoulder_roll = ini_l_shoulder_roll;
+  data->l_elbow_yaw = ini_l_elbow_yaw;
+  data->l_elbow_roll = ini_l_elbow_roll;
+  data->l_hip_yaw_pitch = ini_l_hip_yaw_pitch;
+  data->l_hip_roll = ini_l_hip_roll;
+  data->l_hip_pitch = ini_l_hip_pitch;
+  data->l_knee_pitch = ini_l_knee_pitch;
+  data->l_ankle_pitch = ini_l_ankle_pitch;
+  data->l_ankle_roll = ini_l_ankle_roll;
+  data->r_hip_yaw_pitch = ini_r_hip_yaw_pitch;
+  data->r_hip_roll = ini_r_hip_roll;
+  data->r_hip_pitch = ini_r_hip_pitch;
+  data->r_knee_pitch = ini_r_knee_pitch;
+  data->r_ankle_pitch = ini_r_ankle_pitch;
+  data->r_ankle_roll = ini_r_ankle_roll;
+  data->r_shoulder_pitch = ini_r_shoulder_pitch;
+  data->r_shoulder_roll = ini_r_shoulder_roll;
+  data->r_elbow_yaw = ini_r_elbow_yaw;
+  data->r_elbow_roll = ini_r_elbow_roll;
 }
 /** Constructor */
-HumanoidMotionInterface::UpdateStiffnessParamsMessage::UpdateStiffnessParamsMessage() : Message("UpdateStiffnessParamsMessage")
+HumanoidMotionInterface::SetStiffnessParamsMessage::SetStiffnessParamsMessage() : Message("SetStiffnessParamsMessage")
 {
-  data_size = sizeof(UpdateStiffnessParamsMessage_data_t);
+  data_size = sizeof(SetStiffnessParamsMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (UpdateStiffnessParamsMessage_data_t *)data_ptr;
+  data      = (SetStiffnessParamsMessage_data_t *)data_ptr;
 }
 
 /** Destructor */
-HumanoidMotionInterface::UpdateStiffnessParamsMessage::~UpdateStiffnessParamsMessage()
+HumanoidMotionInterface::SetStiffnessParamsMessage::~SetStiffnessParamsMessage()
 {
   free(data_ptr);
 }
@@ -2510,43 +2552,703 @@ HumanoidMotionInterface::UpdateStiffnessParamsMessage::~UpdateStiffnessParamsMes
 /** Copy constructor.
  * @param m message to copy from
  */
-HumanoidMotionInterface::UpdateStiffnessParamsMessage::UpdateStiffnessParamsMessage(const UpdateStiffnessParamsMessage *m) : Message("UpdateStiffnessParamsMessage")
+HumanoidMotionInterface::SetStiffnessParamsMessage::SetStiffnessParamsMessage(const SetStiffnessParamsMessage *m) : Message("SetStiffnessParamsMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
-  data      = (UpdateStiffnessParamsMessage_data_t *)data_ptr;
+  data      = (SetStiffnessParamsMessage_data_t *)data_ptr;
 }
 
 /* Methods */
-/** Get behaviour value.
- * the behaviour to update
- * @return behaviour value
+/** Get motion_pattern value.
+ * the motion pattern to update
+ * @return motion_pattern value
  */
-HumanoidMotionInterface::StiffnessBehaviourEnum
-HumanoidMotionInterface::UpdateStiffnessParamsMessage::behaviour() const
+HumanoidMotionInterface::StiffnessMotionPatternEnum
+HumanoidMotionInterface::SetStiffnessParamsMessage::motion_pattern() const
 {
-  return data->behaviour;
+  return data->motion_pattern;
 }
 
-/** Get maximum length of behaviour value.
- * @return length of behaviour value, can be length of the array or number of 
+/** Get maximum length of motion_pattern value.
+ * @return length of motion_pattern value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-HumanoidMotionInterface::UpdateStiffnessParamsMessage::maxlenof_behaviour() const
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_motion_pattern() const
 {
   return 1;
 }
 
-/** Set behaviour value.
- * the behaviour to update
- * @param new_behaviour new behaviour value
+/** Set motion_pattern value.
+ * the motion pattern to update
+ * @param new_motion_pattern new motion_pattern value
  */
 void
-HumanoidMotionInterface::UpdateStiffnessParamsMessage::set_behaviour(const StiffnessBehaviourEnum new_behaviour)
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_motion_pattern(const StiffnessMotionPatternEnum new_motion_pattern)
 {
-  data->behaviour = new_behaviour;
+  data->motion_pattern = new_motion_pattern;
+}
+
+/** Get head_yaw value.
+ * head_yaw
+ * @return head_yaw value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::head_yaw() const
+{
+  return data->head_yaw;
+}
+
+/** Get maximum length of head_yaw value.
+ * @return length of head_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_head_yaw() const
+{
+  return 1;
+}
+
+/** Set head_yaw value.
+ * head_yaw
+ * @param new_head_yaw new head_yaw value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_head_yaw(const float new_head_yaw)
+{
+  data->head_yaw = new_head_yaw;
+}
+
+/** Get head_pitch value.
+ * head_pitch
+ * @return head_pitch value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::head_pitch() const
+{
+  return data->head_pitch;
+}
+
+/** Get maximum length of head_pitch value.
+ * @return length of head_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_head_pitch() const
+{
+  return 1;
+}
+
+/** Set head_pitch value.
+ * head_pitch
+ * @param new_head_pitch new head_pitch value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_head_pitch(const float new_head_pitch)
+{
+  data->head_pitch = new_head_pitch;
+}
+
+/** Get l_shoulder_pitch value.
+ * l_shoulder_pitch
+ * @return l_shoulder_pitch value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::l_shoulder_pitch() const
+{
+  return data->l_shoulder_pitch;
+}
+
+/** Get maximum length of l_shoulder_pitch value.
+ * @return length of l_shoulder_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_l_shoulder_pitch() const
+{
+  return 1;
+}
+
+/** Set l_shoulder_pitch value.
+ * l_shoulder_pitch
+ * @param new_l_shoulder_pitch new l_shoulder_pitch value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_l_shoulder_pitch(const float new_l_shoulder_pitch)
+{
+  data->l_shoulder_pitch = new_l_shoulder_pitch;
+}
+
+/** Get l_shoulder_roll value.
+ * l_shoulder_roll
+ * @return l_shoulder_roll value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::l_shoulder_roll() const
+{
+  return data->l_shoulder_roll;
+}
+
+/** Get maximum length of l_shoulder_roll value.
+ * @return length of l_shoulder_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_l_shoulder_roll() const
+{
+  return 1;
+}
+
+/** Set l_shoulder_roll value.
+ * l_shoulder_roll
+ * @param new_l_shoulder_roll new l_shoulder_roll value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_l_shoulder_roll(const float new_l_shoulder_roll)
+{
+  data->l_shoulder_roll = new_l_shoulder_roll;
+}
+
+/** Get l_elbow_yaw value.
+ * l_elbow_yaw
+ * @return l_elbow_yaw value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::l_elbow_yaw() const
+{
+  return data->l_elbow_yaw;
+}
+
+/** Get maximum length of l_elbow_yaw value.
+ * @return length of l_elbow_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_l_elbow_yaw() const
+{
+  return 1;
+}
+
+/** Set l_elbow_yaw value.
+ * l_elbow_yaw
+ * @param new_l_elbow_yaw new l_elbow_yaw value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_l_elbow_yaw(const float new_l_elbow_yaw)
+{
+  data->l_elbow_yaw = new_l_elbow_yaw;
+}
+
+/** Get l_elbow_roll value.
+ * l_elbow_roll
+ * @return l_elbow_roll value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::l_elbow_roll() const
+{
+  return data->l_elbow_roll;
+}
+
+/** Get maximum length of l_elbow_roll value.
+ * @return length of l_elbow_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_l_elbow_roll() const
+{
+  return 1;
+}
+
+/** Set l_elbow_roll value.
+ * l_elbow_roll
+ * @param new_l_elbow_roll new l_elbow_roll value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_l_elbow_roll(const float new_l_elbow_roll)
+{
+  data->l_elbow_roll = new_l_elbow_roll;
+}
+
+/** Get l_hip_yaw_pitch value.
+ * l_hip_yaw_pitch
+ * @return l_hip_yaw_pitch value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::l_hip_yaw_pitch() const
+{
+  return data->l_hip_yaw_pitch;
+}
+
+/** Get maximum length of l_hip_yaw_pitch value.
+ * @return length of l_hip_yaw_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_l_hip_yaw_pitch() const
+{
+  return 1;
+}
+
+/** Set l_hip_yaw_pitch value.
+ * l_hip_yaw_pitch
+ * @param new_l_hip_yaw_pitch new l_hip_yaw_pitch value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_l_hip_yaw_pitch(const float new_l_hip_yaw_pitch)
+{
+  data->l_hip_yaw_pitch = new_l_hip_yaw_pitch;
+}
+
+/** Get l_hip_roll value.
+ * l_hip_roll
+ * @return l_hip_roll value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::l_hip_roll() const
+{
+  return data->l_hip_roll;
+}
+
+/** Get maximum length of l_hip_roll value.
+ * @return length of l_hip_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_l_hip_roll() const
+{
+  return 1;
+}
+
+/** Set l_hip_roll value.
+ * l_hip_roll
+ * @param new_l_hip_roll new l_hip_roll value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_l_hip_roll(const float new_l_hip_roll)
+{
+  data->l_hip_roll = new_l_hip_roll;
+}
+
+/** Get l_hip_pitch value.
+ * l_hip_pitch
+ * @return l_hip_pitch value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::l_hip_pitch() const
+{
+  return data->l_hip_pitch;
+}
+
+/** Get maximum length of l_hip_pitch value.
+ * @return length of l_hip_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_l_hip_pitch() const
+{
+  return 1;
+}
+
+/** Set l_hip_pitch value.
+ * l_hip_pitch
+ * @param new_l_hip_pitch new l_hip_pitch value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_l_hip_pitch(const float new_l_hip_pitch)
+{
+  data->l_hip_pitch = new_l_hip_pitch;
+}
+
+/** Get l_knee_pitch value.
+ * l_knee_pitch
+ * @return l_knee_pitch value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::l_knee_pitch() const
+{
+  return data->l_knee_pitch;
+}
+
+/** Get maximum length of l_knee_pitch value.
+ * @return length of l_knee_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_l_knee_pitch() const
+{
+  return 1;
+}
+
+/** Set l_knee_pitch value.
+ * l_knee_pitch
+ * @param new_l_knee_pitch new l_knee_pitch value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_l_knee_pitch(const float new_l_knee_pitch)
+{
+  data->l_knee_pitch = new_l_knee_pitch;
+}
+
+/** Get l_ankle_pitch value.
+ * l_ankle_pitch
+ * @return l_ankle_pitch value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::l_ankle_pitch() const
+{
+  return data->l_ankle_pitch;
+}
+
+/** Get maximum length of l_ankle_pitch value.
+ * @return length of l_ankle_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_l_ankle_pitch() const
+{
+  return 1;
+}
+
+/** Set l_ankle_pitch value.
+ * l_ankle_pitch
+ * @param new_l_ankle_pitch new l_ankle_pitch value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_l_ankle_pitch(const float new_l_ankle_pitch)
+{
+  data->l_ankle_pitch = new_l_ankle_pitch;
+}
+
+/** Get l_ankle_roll value.
+ * l_ankle_roll
+ * @return l_ankle_roll value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::l_ankle_roll() const
+{
+  return data->l_ankle_roll;
+}
+
+/** Get maximum length of l_ankle_roll value.
+ * @return length of l_ankle_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_l_ankle_roll() const
+{
+  return 1;
+}
+
+/** Set l_ankle_roll value.
+ * l_ankle_roll
+ * @param new_l_ankle_roll new l_ankle_roll value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_l_ankle_roll(const float new_l_ankle_roll)
+{
+  data->l_ankle_roll = new_l_ankle_roll;
+}
+
+/** Get r_hip_yaw_pitch value.
+ * r_hip_yaw_pitch
+ * @return r_hip_yaw_pitch value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::r_hip_yaw_pitch() const
+{
+  return data->r_hip_yaw_pitch;
+}
+
+/** Get maximum length of r_hip_yaw_pitch value.
+ * @return length of r_hip_yaw_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_r_hip_yaw_pitch() const
+{
+  return 1;
+}
+
+/** Set r_hip_yaw_pitch value.
+ * r_hip_yaw_pitch
+ * @param new_r_hip_yaw_pitch new r_hip_yaw_pitch value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_r_hip_yaw_pitch(const float new_r_hip_yaw_pitch)
+{
+  data->r_hip_yaw_pitch = new_r_hip_yaw_pitch;
+}
+
+/** Get r_hip_roll value.
+ * r_hip_roll
+ * @return r_hip_roll value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::r_hip_roll() const
+{
+  return data->r_hip_roll;
+}
+
+/** Get maximum length of r_hip_roll value.
+ * @return length of r_hip_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_r_hip_roll() const
+{
+  return 1;
+}
+
+/** Set r_hip_roll value.
+ * r_hip_roll
+ * @param new_r_hip_roll new r_hip_roll value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_r_hip_roll(const float new_r_hip_roll)
+{
+  data->r_hip_roll = new_r_hip_roll;
+}
+
+/** Get r_hip_pitch value.
+ * r_hip_pitch
+ * @return r_hip_pitch value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::r_hip_pitch() const
+{
+  return data->r_hip_pitch;
+}
+
+/** Get maximum length of r_hip_pitch value.
+ * @return length of r_hip_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_r_hip_pitch() const
+{
+  return 1;
+}
+
+/** Set r_hip_pitch value.
+ * r_hip_pitch
+ * @param new_r_hip_pitch new r_hip_pitch value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_r_hip_pitch(const float new_r_hip_pitch)
+{
+  data->r_hip_pitch = new_r_hip_pitch;
+}
+
+/** Get r_knee_pitch value.
+ * r_knee_pitch
+ * @return r_knee_pitch value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::r_knee_pitch() const
+{
+  return data->r_knee_pitch;
+}
+
+/** Get maximum length of r_knee_pitch value.
+ * @return length of r_knee_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_r_knee_pitch() const
+{
+  return 1;
+}
+
+/** Set r_knee_pitch value.
+ * r_knee_pitch
+ * @param new_r_knee_pitch new r_knee_pitch value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_r_knee_pitch(const float new_r_knee_pitch)
+{
+  data->r_knee_pitch = new_r_knee_pitch;
+}
+
+/** Get r_ankle_pitch value.
+ * r_ankle_pitch
+ * @return r_ankle_pitch value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::r_ankle_pitch() const
+{
+  return data->r_ankle_pitch;
+}
+
+/** Get maximum length of r_ankle_pitch value.
+ * @return length of r_ankle_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_r_ankle_pitch() const
+{
+  return 1;
+}
+
+/** Set r_ankle_pitch value.
+ * r_ankle_pitch
+ * @param new_r_ankle_pitch new r_ankle_pitch value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_r_ankle_pitch(const float new_r_ankle_pitch)
+{
+  data->r_ankle_pitch = new_r_ankle_pitch;
+}
+
+/** Get r_ankle_roll value.
+ * r_ankle_roll
+ * @return r_ankle_roll value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::r_ankle_roll() const
+{
+  return data->r_ankle_roll;
+}
+
+/** Get maximum length of r_ankle_roll value.
+ * @return length of r_ankle_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_r_ankle_roll() const
+{
+  return 1;
+}
+
+/** Set r_ankle_roll value.
+ * r_ankle_roll
+ * @param new_r_ankle_roll new r_ankle_roll value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_r_ankle_roll(const float new_r_ankle_roll)
+{
+  data->r_ankle_roll = new_r_ankle_roll;
+}
+
+/** Get r_shoulder_pitch value.
+ * r_shoulder_pitch
+ * @return r_shoulder_pitch value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::r_shoulder_pitch() const
+{
+  return data->r_shoulder_pitch;
+}
+
+/** Get maximum length of r_shoulder_pitch value.
+ * @return length of r_shoulder_pitch value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_r_shoulder_pitch() const
+{
+  return 1;
+}
+
+/** Set r_shoulder_pitch value.
+ * r_shoulder_pitch
+ * @param new_r_shoulder_pitch new r_shoulder_pitch value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_r_shoulder_pitch(const float new_r_shoulder_pitch)
+{
+  data->r_shoulder_pitch = new_r_shoulder_pitch;
+}
+
+/** Get r_shoulder_roll value.
+ * r_shoulder_roll
+ * @return r_shoulder_roll value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::r_shoulder_roll() const
+{
+  return data->r_shoulder_roll;
+}
+
+/** Get maximum length of r_shoulder_roll value.
+ * @return length of r_shoulder_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_r_shoulder_roll() const
+{
+  return 1;
+}
+
+/** Set r_shoulder_roll value.
+ * r_shoulder_roll
+ * @param new_r_shoulder_roll new r_shoulder_roll value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_r_shoulder_roll(const float new_r_shoulder_roll)
+{
+  data->r_shoulder_roll = new_r_shoulder_roll;
+}
+
+/** Get r_elbow_yaw value.
+ * r_elbow_yaw
+ * @return r_elbow_yaw value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::r_elbow_yaw() const
+{
+  return data->r_elbow_yaw;
+}
+
+/** Get maximum length of r_elbow_yaw value.
+ * @return length of r_elbow_yaw value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_r_elbow_yaw() const
+{
+  return 1;
+}
+
+/** Set r_elbow_yaw value.
+ * r_elbow_yaw
+ * @param new_r_elbow_yaw new r_elbow_yaw value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_r_elbow_yaw(const float new_r_elbow_yaw)
+{
+  data->r_elbow_yaw = new_r_elbow_yaw;
+}
+
+/** Get r_elbow_roll value.
+ * r_elbow_roll
+ * @return r_elbow_roll value
+ */
+float
+HumanoidMotionInterface::SetStiffnessParamsMessage::r_elbow_roll() const
+{
+  return data->r_elbow_roll;
+}
+
+/** Get maximum length of r_elbow_roll value.
+ * @return length of r_elbow_roll value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+HumanoidMotionInterface::SetStiffnessParamsMessage::maxlenof_r_elbow_roll() const
+{
+  return 1;
+}
+
+/** Set r_elbow_roll value.
+ * r_elbow_roll
+ * @param new_r_elbow_roll new r_elbow_roll value
+ */
+void
+HumanoidMotionInterface::SetStiffnessParamsMessage::set_r_elbow_roll(const float new_r_elbow_roll)
+{
+  data->r_elbow_roll = new_r_elbow_roll;
 }
 
 /** Clone this message.
@@ -2555,94 +3257,9 @@ HumanoidMotionInterface::UpdateStiffnessParamsMessage::set_behaviour(const Stiff
  * @return clone of this message
  */
 Message *
-HumanoidMotionInterface::UpdateStiffnessParamsMessage::clone() const
+HumanoidMotionInterface::SetStiffnessParamsMessage::clone() const
 {
-  return new HumanoidMotionInterface::UpdateStiffnessParamsMessage(this);
-}
-/** @class HumanoidMotionInterface::UpdateStiffnessInterfaceMessage <interfaces/HumanoidMotionInterface.h>
- * UpdateStiffnessInterfaceMessage Fawkes BlackBoard Interface Message.
- * 
-    
- */
-
-
-/** Constructor with initial values.
- * @param ini_behaviour initial value for behaviour
- */
-HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::UpdateStiffnessInterfaceMessage(const StiffnessBehaviourEnum ini_behaviour) : Message("UpdateStiffnessInterfaceMessage")
-{
-  data_size = sizeof(UpdateStiffnessInterfaceMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (UpdateStiffnessInterfaceMessage_data_t *)data_ptr;
-  data->behaviour = ini_behaviour;
-}
-/** Constructor */
-HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::UpdateStiffnessInterfaceMessage() : Message("UpdateStiffnessInterfaceMessage")
-{
-  data_size = sizeof(UpdateStiffnessInterfaceMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (UpdateStiffnessInterfaceMessage_data_t *)data_ptr;
-}
-
-/** Destructor */
-HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::~UpdateStiffnessInterfaceMessage()
-{
-  free(data_ptr);
-}
-
-/** Copy constructor.
- * @param m message to copy from
- */
-HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::UpdateStiffnessInterfaceMessage(const UpdateStiffnessInterfaceMessage *m) : Message("UpdateStiffnessInterfaceMessage")
-{
-  data_size = m->data_size;
-  data_ptr  = malloc(data_size);
-  memcpy(data_ptr, m->data_ptr, data_size);
-  data      = (UpdateStiffnessInterfaceMessage_data_t *)data_ptr;
-}
-
-/* Methods */
-/** Get behaviour value.
- * the behaviour to read the parameters from
- * @return behaviour value
- */
-HumanoidMotionInterface::StiffnessBehaviourEnum
-HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::behaviour() const
-{
-  return data->behaviour;
-}
-
-/** Get maximum length of behaviour value.
- * @return length of behaviour value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::maxlenof_behaviour() const
-{
-  return 1;
-}
-
-/** Set behaviour value.
- * the behaviour to read the parameters from
- * @param new_behaviour new behaviour value
- */
-void
-HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::set_behaviour(const StiffnessBehaviourEnum new_behaviour)
-{
-  data->behaviour = new_behaviour;
-}
-
-/** Clone this message.
- * Produces a message of the same type as this message and copies the
- * data to the new message.
- * @return clone of this message
- */
-Message *
-HumanoidMotionInterface::UpdateStiffnessInterfaceMessage::clone() const
-{
-  return new HumanoidMotionInterface::UpdateStiffnessInterfaceMessage(this);
+  return new HumanoidMotionInterface::SetStiffnessParamsMessage(this);
 }
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
@@ -2698,12 +3315,8 @@ HumanoidMotionInterface::message_valid(const Message *message) const
   if ( m11 != NULL ) {
     return true;
   }
-  const UpdateStiffnessParamsMessage *m12 = dynamic_cast<const UpdateStiffnessParamsMessage *>(message);
+  const SetStiffnessParamsMessage *m12 = dynamic_cast<const SetStiffnessParamsMessage *>(message);
   if ( m12 != NULL ) {
-    return true;
-  }
-  const UpdateStiffnessInterfaceMessage *m13 = dynamic_cast<const UpdateStiffnessInterfaceMessage *>(message);
-  if ( m13 != NULL ) {
     return true;
   }
   return false;

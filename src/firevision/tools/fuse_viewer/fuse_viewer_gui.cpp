@@ -3,7 +3,7 @@
  *  fuse_viewer_gui.cpp -  Fuse (network camera) Viewer Gui
  *
  *  Created: Thu Dec 18 14:16:23 2008
- *  Copyright  2008  Christof Rath <c.rath@student.tugraz.at>
+ *  Copyright  2008-2009  Christof Rath <c.rath@student.tugraz.at>
  *
  *  $Id$
  *
@@ -24,31 +24,24 @@
 
 #include "fuse_viewer_gui.h"
 
-#include <gui_utils/service_selector_cbe.h>
-#include <netcomm/fawkes/client.h>
-#include <plugin/net/messages.h>
-#include <plugin/net/list_message.h>
-#include <config/netconf.h>
-#include <blackboard/remote.h>
-
+#include <gui_utils/avahi_dispatcher.h>
+#include <core/exception.h>
 #include <fvwidgets/fuse_image_list_widget.h>
-#include <fvutils/system/camargp.h>
+#include <fvwidgets/image_widget.h>
 #include <cams/net.h>
 
 #include <cstring>
-#include <iomanip>
-#include <sstream>
 
 using namespace fawkes;
 
 /** @class FuseViewerGtkWindow fuse_viewer_gui.h  <tools/fuse_viewer/fuse_viewer_gui.h>
  * Fawkes network camera viewer.
- * 
- * Currently the image refreshes 300ms after the retrieval and display of the 
+ *
+ * Currently the image refreshes 300ms after the retrieval and display of the
  * last refresh (e.g. every 300ms in an ideal system)
  * The FUSE list doesn't get updated (due to a bug?), restarting the fvfountain
  * plugin on the remote host does the job.
- * 
+ *
  * @author Christof Rath
  */
 
@@ -58,181 +51,94 @@ using namespace fawkes;
  */
 FuseViewerGtkWindow::FuseViewerGtkWindow(BaseObjectType* cobject,
 				       const Glib::RefPtr<Gnome::Glade::Xml> ref_xml)
-  : Gtk::Window(cobject),
-    __conn_dispatcher(FAWKES_CID_PLUGINMANAGER)
+  : Gtk::Window(cobject)
 {
-  ref_xml->get_widget("swFuseList", m_image_list_scroll);
-  ref_xml->get_widget("vpImage", m_image_viewport);
-  ref_xml->get_widget("afSaveType", m_save_box);
-  ref_xml->get_widget("fcbSaveTo", m_save_filechooser);
-  ref_xml->get_widget("cbtAutoSave", m_auto_save);
-  ref_xml->get_widget("btSaveImage", m_save_btn);
-  ref_xml->get_widget("stb", m_stb);
-  
-  __service_selector = new ServiceSelectorCBE(ref_xml, "cbeHosts", "btnConnect", "wndMain");
-
-  __conn_dispatcher.set_client(__service_selector->get_network_client());
-  __conn_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &FuseViewerGtkWindow::on_connected));
-  __conn_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &FuseViewerGtkWindow::on_disconnected));
-  __conn_dispatcher.signal_message_received().connect(sigc::mem_fun(*this, &FuseViewerGtkWindow::on_message_received));
+  ref_xml->get_widget("swFuseList",  __image_list_scroll);
+  ref_xml->get_widget("vpImage",     __image_viewport);
+  ref_xml->get_widget("afSaveType",  __save_box);
+  ref_xml->get_widget("fcbSaveTo",   __save_filechooser);
+  ref_xml->get_widget("cbtAutoSave", __auto_save);
+  ref_xml->get_widget("btSaveImage", __save_btn);
+  ref_xml->get_widget("stb",         __statusbar);
 
   __img_list_widget = Gtk::manage(new FuseImageListWidget());
   __img_list_widget->image_selected().connect( sigc::mem_fun(*this, &FuseViewerGtkWindow::on_fuse_image_selected) );
-  m_image_list_scroll->add(*__img_list_widget);
+//  __img_list_widget->set_auto_update(true, 1);
+  __image_list_scroll->add(*__img_list_widget);
 
-  m_save_type = Gtk::manage(new Gtk::ComboBoxText);
-  m_save_box->add(*m_save_type);
-  
+  __save_type = Gtk::manage(new Gtk::ComboBoxText);
+  __save_box->add(*__save_type);
+
   Gdk::Pixbuf::SListHandle_PixbufFormat fmts = Gdk::Pixbuf::get_formats();
   Gdk::Pixbuf::SListHandle_PixbufFormat::const_iterator it = fmts.begin();
-  m_save_type->append_text("Don't save");
+  __save_type->append_text("Don't save");
   for (; it != fmts.end(); ++it) {
-//    printf("type: %s writable: %s\n", (*it).get_name().c_str(), (*it).is_writable() ? "true" : "false");
     if ((*it).is_writable()) {
-      m_save_type->append_text((*it).get_name());
+      __save_type->append_text((*it).get_name());
     }
   }
 
-  m_save_type->set_active(0);
-  m_save_type->set_sensitive(false);
-  m_save_type->signal_changed().connect( sigc::mem_fun(*this, &FuseViewerGtkWindow::on_save_type_change) );
-  m_auto_save->signal_toggled().connect( sigc::mem_fun(*this, &FuseViewerGtkWindow::on_auto_save_cbt_change) );
-  m_save_btn->signal_clicked().connect( sigc::mem_fun(*this, &FuseViewerGtkWindow::on_save_image_clicked) );
+  __save_type->set_active(0);
+  __save_type->set_sensitive(false);
+  __save_type->signal_changed().connect( sigc::mem_fun(*this, &FuseViewerGtkWindow::on_save_type_change) );
+  __auto_save->signal_toggled().connect( sigc::mem_fun(*this, &FuseViewerGtkWindow::on_auto_save_cbt_change) );
+  __save_btn->signal_clicked().connect( sigc::mem_fun(*this, &FuseViewerGtkWindow::on_save_image_clicked) );
   show_all_children();
 
-  __cfg_fountain_port   = 0;
-  __img_num    = 0;
-  __img_widget = NULL;
-  __cam        = NULL;
-  set_status(false, false);
+  __cur_service_name = "";
+  __img_num          = 0;
+  __img_widget       = NULL;
+  __cam              = NULL;
+
+  set_status("");
+
+  __avahi_thread = new AvahiThread();
+  __avahi_dispatcher = new AvahiDispatcher;
+
+  __avahi_dispatcher->signal_service_added().connect( sigc::mem_fun( *this, &FuseViewerGtkWindow::on_service_added ) );
+  __avahi_dispatcher->signal_service_removed().connect( sigc::mem_fun( *this, &FuseViewerGtkWindow::on_service_removed ) );
+
+  __avahi_thread->watch_service("_fountain._tcp", __avahi_dispatcher);
+  __avahi_thread->start();
 }
 
 /** Destructor. */
 FuseViewerGtkWindow::~FuseViewerGtkWindow()
 {
-  on_disconnected();
-  
-  if ( __conn_dispatcher.get_client()->connected() )
-  {
-    // unsubscribe
-    FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-                                                         MSG_PLUGIN_UNSUBSCRIBE_WATCH);
-    __conn_dispatcher.get_client()->enqueue(msg);
-    msg->unref();                       
-
-    __conn_dispatcher.get_client()->deregister_handler(FAWKES_CID_PLUGINMANAGER);
-  }
+  delete __avahi_thread;
+  delete __avahi_dispatcher;
 }
 
-/** Signal handler called after FawkesNetworkClient connection is established */
+/** Signal handler called after AvahiThread detects a new NetworkService */
 void
-FuseViewerGtkWindow::on_connected()
+FuseViewerGtkWindow::on_service_added(fawkes::NetworkService* service)
 {
-  try {
-    FawkesNetworkClient *client = __conn_dispatcher.get_client();
+  const char* name = service->name();
+  const char* host = service->host();
 
-    //Read the config
-    NetworkConfiguration* netconf = new NetworkConfiguration(client);
-    netconf->set_mirror_mode(true);
-    __cfg_fountain_port   = netconf->get_uint(FOUNTAIN_PORT_PATH);
-    delete netconf;
-    
-    FawkesNetworkMessage* msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-                                                         MSG_PLUGIN_SUBSCRIBE_WATCH);
-    client->enqueue(msg);
-    msg->unref();
-      
-    // request list of loaded plugins
-    msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
-                                   MSG_PLUGIN_LIST_LOADED);
-    client->enqueue(msg);
-    msg->unref();
-    set_status(true, __has_fuse);
-  }
-  catch (Exception& e) {
-    e.print_trace();
-  }
+  __host_service_map[host] = name;
+  __img_list_widget->add_fountain_service(
+      name,
+      host,
+      service->port());
 }
 
-/** Signal handler that is called whenever the connection is terminated. */
+/** Signal handler called after AvahiThread detects a NetworkService removal */
 void
-FuseViewerGtkWindow::on_disconnected()
+FuseViewerGtkWindow::on_service_removed( fawkes::NetworkService* service )
 {
-  set_status(false, false);
+  __img_list_widget->remove_fountain_service( service->name() );
 
-  close_image();
-  __img_list_widget->remove_fountain_service("test");
-}
-
-/**
- * Signal handler that is called whenever a new fawkes network message is received.
- * Used to determine the remote plugin status
- * @param msg the received message
- */
-void
-FuseViewerGtkWindow::on_message_received(fawkes::FawkesNetworkMessage* msg)
-{
-  if (msg->cid() != FAWKES_CID_PLUGINMANAGER)  return;
-
-  // loading
-  unsigned int msgid = msg->msgid();
-  if ( (msgid == MSG_PLUGIN_LOADED) ||
-       (msgid == MSG_PLUGIN_UNLOADED) )
-  {
-    Glib::ustring fuse = FUSE_PLUGIN_NAME;
-
-    if ( msgid == MSG_PLUGIN_LOADED)
-    {
-      if ( msg->payload_size() != sizeof(plugin_loaded_msg_t) ) 
-      {
-        printf("Invalid message size (load succeeded)\n");
-      } 
-      else 
-      {
-        plugin_loaded_msg_t* m = (plugin_loaded_msg_t*) msg->payload();
-        if (fuse == m->name) open_img_list();
-      }
-    }
-    else if ( msg->msgid() == MSG_PLUGIN_UNLOADED ) 
-    {
-      if ( msg->payload_size() != sizeof(plugin_unloaded_msg_t) ) 
-      {
-        printf("Invalid message size (unload succeeded)\n");
-      } 
-      else 
-      {
-        plugin_unloaded_msg_t* m = (plugin_unloaded_msg_t*) msg->payload();
-        if (fuse == m->name) {
-          set_status(__is_connected, false);
-          __img_list_widget->remove_fountain_service("test");
-          close_image();
-        }
-      }
-    }
-  }
-  else if (msg->msgid() == MSG_PLUGIN_LOADED_LIST ) 
-  {
-    Glib::ustring fuse = FUSE_PLUGIN_NAME;
-    
-    PluginListMessage* plm = msg->msgc<PluginListMessage>();
-    while ( plm->has_next() ) 
-    {
-      char* name = plm->next();
-
-      if ( fuse == name ) open_img_list();
-
-      free(name);
-    }
-  }
-  else if ( msg->msgid() == MSG_PLUGIN_LOADED_LIST_FAILED) 
-  {
-    printf("Obtaining list of loaded plugins failed\n");
+  if (__cur_service_name == service->name()) {
+    close_image();
   }
 
-  // unknown message received
-  else
-  {
-    printf("received message with msg-id %d\n", msg->msgid());
+  std::map<std::string, std::string>::const_iterator it = __host_service_map.begin();
+  for (; it != __host_service_map.end(); ++it) {
+    if (__cur_service_name == it->second) {
+      __host_service_map.erase(it->first);
+      break;
+    }
   }
 }
 
@@ -240,51 +146,55 @@ FuseViewerGtkWindow::on_message_received(fawkes::FawkesNetworkMessage* msg)
 void
 FuseViewerGtkWindow::on_fuse_image_selected()
 {
-  std::string host_name;
+  __img_list_widget->set_sensitive(Gtk::SENSITIVITY_OFF);
+  std::string host;
   unsigned short port;
   std::string image_id;
   bool compression;
 
-  __img_list_widget->get_selected_image(host_name, port, image_id, compression);
+  __img_list_widget->get_selected_image(host, port, image_id, compression);
 
   close_image();
-  
+
   try {
-    __cam = new NetworkCamera( host_name.c_str(), port, image_id.c_str(), compression );
+    __cam = new NetworkCamera( host.c_str(), port, image_id.c_str(), compression );
     __cam->open();
     __cam->start();
+    __cur_service_name = __host_service_map[host];
+
     __img_widget = new ImageWidget(__cam, 300);
-    m_image_viewport->add(*__img_widget);
-    m_image_viewport->set_size_request(__cam->pixel_width(), __cam->pixel_height());
+    __image_viewport->add(*__img_widget);
+    __image_viewport->set_size_request(__cam->pixel_width(), __cam->pixel_height());
     show_all_children();
-    m_save_type->set_sensitive(Gtk::SENSITIVITY_ON);
+    __save_type->set_sensitive(Gtk::SENSITIVITY_ON);
+
+    set_status(image_id, host, port);
   }
   catch (Exception& e) {
     __cam = NULL;
     e.print_trace();
   }
-  
-//  post_open_img_src();
 
+  __img_list_widget->set_sensitive(Gtk::SENSITIVITY_ON);
 }
 
 /** Signal handler that is called if the 'Auto save' checkbox status changes */
 void
 FuseViewerGtkWindow::on_auto_save_cbt_change()
 {
-  if (m_auto_save->get_active()) {
-    m_save_btn->set_sensitive(false);
+  if (__auto_save->get_active()) {
+    __save_btn->set_sensitive(false);
 
     __img_widget->save_on_refresh_cam(true,
-        m_save_filechooser->get_current_folder(),
-        m_save_type->get_active_text(),
+        __save_filechooser->get_current_folder(),
+        __save_type->get_active_text(),
         __img_num);
   }
   else {
     __img_widget->save_on_refresh_cam(false);
     __img_num = __img_widget->get_image_num();
 
-    m_save_btn->set_sensitive(true);
+    __save_btn->set_sensitive(true);
   }
 }
 
@@ -292,16 +202,16 @@ FuseViewerGtkWindow::on_auto_save_cbt_change()
 void
 FuseViewerGtkWindow::on_save_type_change()
 {
-  if (m_save_type->get_active_row_number()) {
-    m_auto_save->set_sensitive(true);
+  if (__save_type->get_active_row_number()) {
+    __auto_save->set_sensitive(true);
 
-    if (m_auto_save->get_active()) __img_num = __img_widget->get_image_num();
+    if (__auto_save->get_active()) __img_num = __img_widget->get_image_num();
     on_auto_save_cbt_change();
   }
   else {
-    m_auto_save->set_active(false);
-    m_auto_save->set_sensitive(false);
-    m_save_btn->set_sensitive(false);
+    __auto_save->set_active(false);
+    __auto_save->set_sensitive(false);
+    __save_btn->set_sensitive(false);
   }
 }
 
@@ -310,47 +220,36 @@ void
 FuseViewerGtkWindow::on_save_image_clicked()
 {
   char *ctmp;
-  if (asprintf(&ctmp, "%s/%06u.%s", m_save_filechooser->get_current_folder().c_str(),
-	       ++__img_num, m_save_type->get_active_text().c_str()) != -1) {
+  if (asprintf(&ctmp, "%s/%06u.%s", __save_filechooser->get_current_folder().c_str(),
+	       ++__img_num, __save_type->get_active_text().c_str()) != -1) {
     Glib::ustring fn = ctmp;
     free(ctmp);
 
-    __img_widget->save_image(fn, m_save_type->get_active_text());
+    __img_widget->save_image(fn, __save_type->get_active_text());
   } else {
     printf("Could not save file, asprintf() ran out of memory");
   }
 }
 
-/** 
- * Activates the fuse image list. 
- * If or as soon as the fountain plugin is loaded on the remote side
- */
-void
-FuseViewerGtkWindow::open_img_list()
-{
-  set_status(__is_connected, true);
-  __img_list_widget->add_fountain_service("test", __service_selector->get_hostname().c_str(), __cfg_fountain_port);
-  //__img_list_widget->set_auto_update(true, 2);
-}
-
 /**
  * Sets the current status (to the statusbar)
- * @param conn TRUE if the connection is established
- * @param fuse TRUE if the fountain plugin is loaded on the remote host
+ * @param img_id the id of the current selected image
+ * @param host the host that provides the image
+ * @param port the port to transfer the image
  */
 void
-FuseViewerGtkWindow::set_status(bool conn, bool fuse)
+FuseViewerGtkWindow::set_status(std::string img_id, std::string host, unsigned short port)
 {
-  __is_connected = conn;
-  __has_fuse     = fuse;
-
-  char *ctmp;
-  if (asprintf(&ctmp, "%s - %s",
-	       __is_connected ? "connected" : "disconnected",
-	       __has_fuse ? FUSE_PLUGIN_NAME" loaded" : FUSE_PLUGIN_NAME" NOT loaded") != -1) {
-
-    m_stb->push(Glib::ustring(ctmp));
-    free(ctmp);
+  if (!img_id.length()) {
+    __statusbar->push(Glib::ustring("Not connected."));
+  }
+  else {
+    char *ctmp = NULL;
+    if (asprintf(&ctmp, "Host: %s:%u\tId: %s",
+                 host.c_str(), port, img_id.c_str())) {
+      __statusbar->push(Glib::ustring(ctmp));
+      free(ctmp);
+    }
   }
 }
 
@@ -359,17 +258,19 @@ void
 FuseViewerGtkWindow::close_image()
 {
   if (__img_widget) {
-    m_image_viewport->remove();
+    __image_viewport->remove();
     delete __img_widget;
     __img_widget = NULL;
-    m_save_type->set_sensitive(Gtk::SENSITIVITY_OFF);
+    __save_type->set_sensitive(Gtk::SENSITIVITY_OFF);
   }
-  
+
   if (__cam) {
     __cam->stop();
     __cam->close();
     delete __cam;
     __cam = NULL;
   }
+
+  set_status("");
 }
 

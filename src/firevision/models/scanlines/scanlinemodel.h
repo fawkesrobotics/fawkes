@@ -33,7 +33,9 @@
  * header that does not require any linking. Thus you may not split the file.
  */
 
+#include <core/exceptions/software.h>
 #include <fvutils/base/types.h>
+#include <fvutils/base/roi.h>
 #include <string>
 
 /** @class ScanlineModel <models/scanlines/scanlinemodel.h>
@@ -115,6 +117,11 @@ class ScanlineModel
    */
   virtual void          set_pan_tilt(float pan, float tilt)            = 0;
 
+  /** Set the region-of-interest.
+   * If not NULL the scanlines gets only calculated within the ROI
+   * @param roi the region where scanlines should be calculated
+   */
+  virtual void          set_roi(ROI* roi = NULL) { throw fawkes::NotImplementedException("Setting ROI is not implemented."); }
 };
 
 #endif

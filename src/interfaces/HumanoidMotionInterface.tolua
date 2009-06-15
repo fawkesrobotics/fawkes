@@ -18,7 +18,7 @@ class HumanoidMotionInterface : public Interface
   typedef enum {
     WALK,
     KICK
-  } StiffnessBehaviourEnum;
+  } StiffnessMotionPatternEnum;
 
   class SetWalkParamsMessage : public Message
   {
@@ -211,26 +211,81 @@ class HumanoidMotionInterface : public Interface
     int maxlenof_time_sec() const;
   };
 
-  class UpdateStiffnessParamsMessage : public Message
+  class SetStiffnessParamsMessage : public Message
   {
-    UpdateStiffnessParamsMessage(StiffnessBehaviourEnum ini_behaviour);
-    UpdateStiffnessParamsMessage();
-    ~UpdateStiffnessParamsMessage();
+    SetStiffnessParamsMessage(StiffnessMotionPatternEnum ini_motion_pattern, float ini_head_yaw, float ini_head_pitch, float ini_l_shoulder_pitch, float ini_l_shoulder_roll, float ini_l_elbow_yaw, float ini_l_elbow_roll, float ini_l_hip_yaw_pitch, float ini_l_hip_roll, float ini_l_hip_pitch, float ini_l_knee_pitch, float ini_l_ankle_pitch, float ini_l_ankle_roll, float ini_r_hip_yaw_pitch, float ini_r_hip_roll, float ini_r_hip_pitch, float ini_r_knee_pitch, float ini_r_ankle_pitch, float ini_r_ankle_roll, float ini_r_shoulder_pitch, float ini_r_shoulder_roll, float ini_r_elbow_yaw, float ini_r_elbow_roll);
+    SetStiffnessParamsMessage();
+    ~SetStiffnessParamsMessage();
 
-    StiffnessBehaviourEnum behaviour();
-    void set_behaviour(const StiffnessBehaviourEnum new_behaviour);
-    int maxlenof_behaviour() const;
-  };
-
-  class UpdateStiffnessInterfaceMessage : public Message
-  {
-    UpdateStiffnessInterfaceMessage(StiffnessBehaviourEnum ini_behaviour);
-    UpdateStiffnessInterfaceMessage();
-    ~UpdateStiffnessInterfaceMessage();
-
-    StiffnessBehaviourEnum behaviour();
-    void set_behaviour(const StiffnessBehaviourEnum new_behaviour);
-    int maxlenof_behaviour() const;
+    StiffnessMotionPatternEnum motion_pattern();
+    void set_motion_pattern(const StiffnessMotionPatternEnum new_motion_pattern);
+    int maxlenof_motion_pattern() const;
+    float head_yaw();
+    void set_head_yaw(const float new_head_yaw);
+    int maxlenof_head_yaw() const;
+    float head_pitch();
+    void set_head_pitch(const float new_head_pitch);
+    int maxlenof_head_pitch() const;
+    float l_shoulder_pitch();
+    void set_l_shoulder_pitch(const float new_l_shoulder_pitch);
+    int maxlenof_l_shoulder_pitch() const;
+    float l_shoulder_roll();
+    void set_l_shoulder_roll(const float new_l_shoulder_roll);
+    int maxlenof_l_shoulder_roll() const;
+    float l_elbow_yaw();
+    void set_l_elbow_yaw(const float new_l_elbow_yaw);
+    int maxlenof_l_elbow_yaw() const;
+    float l_elbow_roll();
+    void set_l_elbow_roll(const float new_l_elbow_roll);
+    int maxlenof_l_elbow_roll() const;
+    float l_hip_yaw_pitch();
+    void set_l_hip_yaw_pitch(const float new_l_hip_yaw_pitch);
+    int maxlenof_l_hip_yaw_pitch() const;
+    float l_hip_roll();
+    void set_l_hip_roll(const float new_l_hip_roll);
+    int maxlenof_l_hip_roll() const;
+    float l_hip_pitch();
+    void set_l_hip_pitch(const float new_l_hip_pitch);
+    int maxlenof_l_hip_pitch() const;
+    float l_knee_pitch();
+    void set_l_knee_pitch(const float new_l_knee_pitch);
+    int maxlenof_l_knee_pitch() const;
+    float l_ankle_pitch();
+    void set_l_ankle_pitch(const float new_l_ankle_pitch);
+    int maxlenof_l_ankle_pitch() const;
+    float l_ankle_roll();
+    void set_l_ankle_roll(const float new_l_ankle_roll);
+    int maxlenof_l_ankle_roll() const;
+    float r_hip_yaw_pitch();
+    void set_r_hip_yaw_pitch(const float new_r_hip_yaw_pitch);
+    int maxlenof_r_hip_yaw_pitch() const;
+    float r_hip_roll();
+    void set_r_hip_roll(const float new_r_hip_roll);
+    int maxlenof_r_hip_roll() const;
+    float r_hip_pitch();
+    void set_r_hip_pitch(const float new_r_hip_pitch);
+    int maxlenof_r_hip_pitch() const;
+    float r_knee_pitch();
+    void set_r_knee_pitch(const float new_r_knee_pitch);
+    int maxlenof_r_knee_pitch() const;
+    float r_ankle_pitch();
+    void set_r_ankle_pitch(const float new_r_ankle_pitch);
+    int maxlenof_r_ankle_pitch() const;
+    float r_ankle_roll();
+    void set_r_ankle_roll(const float new_r_ankle_roll);
+    int maxlenof_r_ankle_roll() const;
+    float r_shoulder_pitch();
+    void set_r_shoulder_pitch(const float new_r_shoulder_pitch);
+    int maxlenof_r_shoulder_pitch() const;
+    float r_shoulder_roll();
+    void set_r_shoulder_roll(const float new_r_shoulder_roll);
+    int maxlenof_r_shoulder_roll() const;
+    float r_elbow_yaw();
+    void set_r_elbow_yaw(const float new_r_elbow_yaw);
+    int maxlenof_r_elbow_yaw() const;
+    float r_elbow_roll();
+    void set_r_elbow_roll(const float new_r_elbow_roll);
+    int maxlenof_r_elbow_roll() const;
   };
 
   bool is_moving();

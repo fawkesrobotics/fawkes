@@ -30,20 +30,32 @@
 #include <list>
 
 class ROI;
+class Drawer;
 
 class FilterROIDraw : public Filter
 {
+ public: // Typedefs
+  /** Defines the possible border styles to display a ROI */
+  typedef enum {
+    INVERTED,    /**< Displays border with inverted Y-value */
+    DASHED_HINT  /**< Displays border dashed black and color of hint*/
+  } border_style_t;
+
  public:
-  FilterROIDraw(const std::list<ROI> *rois = NULL);
+  FilterROIDraw(const std::list<ROI> *rois = NULL, border_style_t style = INVERTED);
+  virtual ~FilterROIDraw();
 
   virtual void apply();
 
   void set_rois(const std::list<ROI> *rois);
+  void set_style(border_style_t style);
 
  private:
   void draw_roi(const ROI *roi);
 
   const std::list<ROI> *__rois;
+  Drawer *__drawer;
+  border_style_t __border_style;
 };
 
 #endif

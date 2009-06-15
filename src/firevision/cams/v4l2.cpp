@@ -44,6 +44,7 @@ using std::endl;
 using std::string;
 using fawkes::Exception;
 using fawkes::MissingParameterException;
+using fawkes::NotImplementedException;
 using fawkes::LibLogger;
 
 /// @cond INTERNALS
@@ -754,8 +755,8 @@ V4L2Camera::set_fps()
   else
   {
     LibLogger::log_debug("V4L2Cam", "FPS set - %d/%d",
-			 param.parm.capture.timeperframe.numerator,
-			 param.parm.capture.timeperframe.denominator);
+                         param.parm.capture.timeperframe.numerator,
+                         param.parm.capture.timeperframe.denominator);
   }
 }
 
@@ -900,6 +901,50 @@ V4L2Camera::set_one_control(const char *ctrl, unsigned int id, int value)
     close();
     throw Exception("V4L2Cam: %s Control setting failed", ctrl);
   }
+}
+
+/**
+ * Get one Camera control value.
+ * @param ctrl name of the value
+ * @param id ID of the value
+ * @return current value
+ */
+int
+V4L2Camera::get_one_control(const char *ctrl, unsigned int id)
+{
+  v4l2_queryctrl queryctrl;
+  v4l2_control control;
+
+  memset(&queryctrl, 0, sizeof(queryctrl));
+  queryctrl.id = id;
+
+  if (ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl))
+  {
+    if (errno == EINVAL)
+    {
+      LibLogger::log_error("V4L2Cam", "Control %s not supported", ctrl);
+      return 0;
+    }
+
+    close();
+    throw Exception("V4L2Cam: %s Control query failed", ctrl);
+  }
+  if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED)
+  {
+    LibLogger::log_error("V4L2Cam", "Control %s disabled", ctrl);
+    return 0;
+  }
+
+  memset(&control, 0, sizeof(control));
+  control.id = id;
+
+  if (ioctl(_dev, VIDIOC_G_CTRL, &control))
+  {
+    close();
+    throw Exception("V4L2Cam: %s Control value reading failed", ctrl);
+  }
+
+  return control.value;
 }
 
 /**
@@ -1306,7 +1351,13 @@ V4L2Camera::set_image_number(unsigned int n)
 
 
 /* --- CameraControls --- */
-/*
+
+bool
+V4L2Camera::auto_gain()
+{
+  return get_one_control("AGC", V4L2_CID_AUTOGAIN);
+}
+
 void
 V4L2Camera::set_auto_gain(bool enabled)
 {
@@ -1314,11 +1365,24 @@ V4L2Camera::set_auto_gain(bool enabled)
   set_one_control("AGC", V4L2_CID_AUTOGAIN, (enabled ? 1 : 0));
 }
 
+bool
+V4L2Camera::auto_white_balance()
+{
+  return get_one_control("AWB", V4L2_CID_AUTO_WHITE_BALANCE);
+}
+
 void
 V4L2Camera::set_auto_white_balance(bool enabled)
 {
   LibLogger::log_debug("V4L2Cam", (enabled ? "enabling AWB" : "disabling AWB"));
   set_one_control("AWB", V4L2_CID_AUTO_WHITE_BALANCE, (enabled ? 1 : 0));
+}
+
+bool
+V4L2Camera::auto_exposure()
+{
+  if (!_nao_hacks) LibLogger::log_warn("V4L2Cam", "AEC will only work on Nao");
+  return get_one_control("AEC", V4L2_CID_AUDIO_MUTE);
 }
 
 void
@@ -1331,11 +1395,23 @@ V4L2Camera::set_auto_exposure(bool enabled)
                   (enabled ? 1 : 0));
 }
 
+int
+V4L2Camera::red_balance()
+{
+  return get_one_control("red balance", V4L2_CID_RED_BALANCE);
+}
+
 void
 V4L2Camera::set_red_balance(int red_balance)
 {
   LibLogger::log_debug("V4L2Cam", "Setting red balance to %d", red_balance);
   set_one_control("red balance", V4L2_CID_RED_BALANCE, red_balance);
+}
+
+int
+V4L2Camera::blue_balance()
+{
+  return get_one_control("blue balance", V4L2_CID_BLUE_BALANCE);
 }
 
 void
@@ -1345,11 +1421,47 @@ V4L2Camera::set_blue_balance(int blue_balance)
   set_one_control("blue balance", V4L2_CID_BLUE_BALANCE, blue_balance);
 }
 
+int
+V4L2Camera::u_balance()
+{
+  throw NotImplementedException("No such method in the V4L2 standard");
+}
+
+void
+V4L2Camera::set_u_balance(int u_balance)
+{
+  throw NotImplementedException("No such method in the V4L2 standard");
+}
+
+int
+V4L2Camera::v_balance()
+{
+  throw NotImplementedException("No such method in the V4L2 standard");
+}
+
+void
+V4L2Camera::set_v_balance(int v_balance)
+{
+  throw NotImplementedException("No such method in the V4L2 standard");
+}
+
+unsigned int
+V4L2Camera::brightness()
+{
+  return get_one_control("brightness", V4L2_CID_BRIGHTNESS);
+}
+
 void
 V4L2Camera::set_brightness(unsigned int brightness)
 {
   LibLogger::log_debug("V4L2Cam", "Setting brighness to %d", brightness);
   set_one_control("brightness", V4L2_CID_BRIGHTNESS, brightness);
+}
+
+unsigned int
+V4L2Camera::contrast()
+{
+  return get_one_control("contrast", V4L2_CID_CONTRAST);
 }
 
 void
@@ -1359,11 +1471,23 @@ V4L2Camera::set_contrast(unsigned int contrast)
   set_one_control("contrast", V4L2_CID_CONTRAST, contrast);
 }
 
+unsigned int
+V4L2Camera::saturation()
+{
+  return get_one_control("saturation", V4L2_CID_SATURATION);
+}
+
 void
 V4L2Camera::set_saturation(unsigned int saturation)
 {
   LibLogger::log_debug("V4L2Cam", "Setting saturation to %d", saturation);
   set_one_control("saturation", V4L2_CID_SATURATION, saturation);
+}
+
+int
+V4L2Camera::hue()
+{
+  return get_one_control("hue", V4L2_CID_HUE);
 }
 
 void
@@ -1373,11 +1497,23 @@ V4L2Camera::set_hue(int hue)
   set_one_control("hue", V4L2_CID_HUE, hue);
 }
 
+unsigned int
+V4L2Camera::exposure()
+{
+  return get_one_control("exposure", V4L2_CID_EXPOSURE);
+}
+
 void
 V4L2Camera::set_exposure(unsigned int exposure)
 {
   LibLogger::log_debug("V4L2Cam", "Setting exposure to %d", exposure);
   set_one_control("exposure", V4L2_CID_EXPOSURE, exposure);
+}
+
+unsigned int
+V4L2Camera::gain()
+{
+  return get_one_control("gain", V4L2_CID_GAIN);
 }
 
 void
@@ -1386,7 +1522,7 @@ V4L2Camera::set_gain(unsigned int gain)
   LibLogger::log_debug("V4L2Cam", "Setting gain to %u", gain);
   set_one_control("gain", V4L2_CID_GAIN, gain);
 }
-*/
+
 
 void
 V4L2Camera::print_info()
@@ -1699,11 +1835,11 @@ V4L2Camera::print_info()
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
       case V4L2_CTRL_TYPE_INTEGER64:
         cout << "int64";
-	break;
+        break;
 
       case V4L2_CTRL_TYPE_CTRL_CLASS:
         cout << "ctrl_class";
-	break;
+        break;
 #endif
     }
     cout << ")" << endl;

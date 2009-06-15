@@ -203,5 +203,5 @@ BallTrigoRelativePos::calc()
 bool
 BallTrigoRelativePos::is_pos_valid() const
 {
-  return true;
+  return __distance > 0; //Distance is < 0 if the ROI is above the horizon
 }
