@@ -169,8 +169,6 @@ CameraControlFactory::instance(const std::type_info &typeinf, Camera *camera)
 {
   CameraControl *c = NULL;
 
-  printf("typeinf open called for %s\n", typeinf.name());
-
   if (typeid(CameraControlColor) == typeinf) {
     c = dynamic_cast<CameraControlImage *>(camera);
 
