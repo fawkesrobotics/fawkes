@@ -121,7 +121,6 @@ $(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
 endif # OBJSSUBMAKE != 1
 
 ifneq ($(PLUGINS_all),)
-$(warning HERE)
 $(PLUGINS_all): | $(INTERFACES_LIBS)
 endif
 ifneq ($(filter-out $(BINDIR)/interface_generator,$(BINS_all)),)
