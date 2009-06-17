@@ -25,19 +25,22 @@
 
 /// @cond QA
 
-#include <fvutils/color/colorspaces.h>
-#include <fvutils/readers/jpeg.h>
-#include <fvutils/draw/drawer.h>
+#include <cams/factory.h>
 #include <classifiers/faces.h>
 #include <filters/roidraw.h>
+#include <fvutils/adapters/iplimage.h>
+#include <fvutils/color/colorspaces.h>
+#include <fvutils/color/conversions.h>
+#include <fvutils/draw/drawer.h>
+#include <fvutils/readers/jpeg.h>
 #include <fvwidgets/image_display.h>
 #include <utils/system/argparser.h>
-#include <cams/factory.h>
 
 #include <SDL.h>
+#include <opencv/cv.h>
 
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 
 using namespace fawkes;
 
@@ -107,15 +110,29 @@ main(int argc, char **argv)
       return( -1 );
     }
 
+    printf ( "using cascade file %s\n", cascade_file );
     printf( "successfully opened camera: w=%d h=%d\n",
 	    camera->pixel_width(), camera->pixel_height() );
+    
+    size_t buf_size = colorspace_buffer_size( YUV422_PLANAR,
+					      camera->pixel_width(),
+					      camera->pixel_height() );
+ 
+    unsigned char* yuv422_planar_buffer = (unsigned char*) malloc( buf_size );
+    unsigned char* display_buffer       = (unsigned char*) malloc( buf_size );
+
+    IplImage* image = cvCreateImage( cvSize( camera->pixel_width(),
+					     camera->pixel_height() ),
+				     IPL_DEPTH_8U, 3 );
 
     FacesClassifier *classifier = new FacesClassifier( cascade_file,
 						       camera->pixel_width(),
-						       camera->pixel_height() );
+						       camera->pixel_height(),
+						       image,
+						       1.2 /* scale factor */,
+						       2 /* num neighbours */,
+						       CV_HAAR_DO_CANNY_PRUNING );
     
-    unsigned char* display_buffer = (unsigned char*) malloc( camera->buffer_size() );
-
     ImageDisplay* display = new ImageDisplay( camera->pixel_width(),
 					      camera->pixel_height(),
 					      "QA Faces Classifier" );
@@ -150,34 +167,34 @@ main(int argc, char **argv)
 	    
 	    if ( camera->buffer() != NULL )
 	    {
-	      memcpy( display_buffer, camera->buffer(), camera->buffer_size() );
-
-	      classifier->set_src_buffer( camera->buffer(),
-					  camera->pixel_width(),
-					  camera->pixel_height() );
+	      convert( camera->colorspace(), YUV422_PLANAR,
+		       camera->buffer(), yuv422_planar_buffer,
+		       camera->pixel_width(), camera->pixel_height() );
+ 	      memcpy( display_buffer, yuv422_planar_buffer, buf_size );
+	      IplImageAdapter::convert_image_bgr( yuv422_planar_buffer, image );
 
 	      std::list< ROI > *rois = classifier->classify();
 	      
 	      camera->dispose_buffer();
     
 	      bool first = true;
-	      for ( std::list< ROI >::iterator i = rois->begin();
-		    i != rois->end();
+	      for ( std::list< ROI >::reverse_iterator i = rois->rbegin();
+		    i != rois->rend();
 		    ++i )
 	      {
-		printf("ROI: start (%u, %u)  extent %u x %u\n",
-		       (*i).start.x, (*i).start.y,
-		       (*i).width, (*i).height);
+// 		printf("ROI: start (%u, %u)  extent %u x %u\n",
+// 		       (*i).start.x, (*i).start.y,
+// 		       (*i).width, (*i).height);
 
 		if ( first ) { drawer->set_color( 127, 70, 200 ); }
 		drawer->draw_rectangle( i->start.x, i->start.y, i->width, i->height );
 		if ( first ) { drawer->set_color( 30, 30, 30 ); first = false; }
 	      }
 
+	      delete rois;
 	      display->show( display_buffer );
 	    }
 
-	    usleep ( 100000 );
 	    SDL_PushEvent( &redraw_event );
 	  }
 
@@ -197,7 +214,10 @@ main(int argc, char **argv)
     delete camera;
     delete display;
     delete drawer;
+    delete classifier;
     free( display_buffer );
+    free( yuv422_planar_buffer );
+    cvReleaseImage( &image );
   }
 
   else
