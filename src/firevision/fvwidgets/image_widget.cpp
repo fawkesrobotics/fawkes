@@ -95,12 +95,67 @@ ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay)
 }
 
 /**
+ * Constructor that can be used to instantiate an ImageWidget as a
+ * derived widget from a Glade file.
+ * @param cobject pointer to the base object
+ * @param refxml the Glade XML file
+ */
+ImageWidget::ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gnome::Glade::Xml> refxml)
+  : Gtk::Image( cobject )
+{
+  __width  = 0;
+  __height = 0;
+
+  __cam            = NULL;
+  __cam_mutex      = new fawkes::Mutex;
+  __refresh_thread = NULL;
+}
+
+/**
  * Destructor
  */
 ImageWidget::~ImageWidget()
 {
   if (__refresh_thread) __refresh_thread->stop();
   delete __cam_mutex;
+}
+
+/** Set the camera from which the ImageWidget obtains the images.
+ * @param cam the camera
+ * @param refresh_delay the delay between two refreshs in milliseconds
+ */
+void
+ImageWidget::set_camera(Camera *cam, unsigned int refresh_delay)
+{
+  if ( __refresh_thread ) { 
+    __refresh_thread->set_delay( refresh_delay );
+  } else {
+    __refresh_thread = new RefThread(this, refresh_delay);
+    __refresh_thread->start();
+  }
+
+  __cam            = cam;
+  __cam_has_buffer = false;
+  __width          = __cam->pixel_width();
+  __height         = __cam->pixel_height();
+
+  try {
+    fawkes::Time *time = __cam->capture_time();
+    delete time;
+    __cam_has_timestamp = true;
+  }
+  catch (fawkes::Exception &e) {
+    __cam_has_timestamp = false;
+  }
+
+
+  __pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, __width, __height);
+
+  __refresh_thread->refresh_cam();
+
+  if (refresh_delay) set_refresh_delay(refresh_delay);
+
+  set_size_request(__width, __height);
 }
 
 /**

@@ -29,6 +29,7 @@
 #include <fvutils/color/rgb.h>
 
 #include <gtkmm.h>
+#include <libglademm/xml.h>
 
 class Camera;
 
@@ -69,8 +70,10 @@ private:
 public:
   ImageWidget(unsigned int width, unsigned int height);
   ImageWidget(Camera *cam, unsigned int refresh_delay = 0);
+  ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gnome::Glade::Xml> refxml);
   virtual ~ImageWidget();
 
+  void set_camera(Camera *cam, unsigned int refresh_delay = 0);
   virtual void show(colorspace_t colorspace, unsigned char *buffer);
   void set_refresh_delay(unsigned int refresh_delay);
   void refresh_cam();
