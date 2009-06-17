@@ -25,7 +25,7 @@ LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
 OBJS_fv_qa_facesclassifier := qa_facesclassifier.o
-LIBS_fv_qa_facesclassifier := fvclassifiers fvutils fvwidgets fvfilters
+LIBS_fv_qa_facesclassifier := fvclassifiers fvutils fvwidgets fvfilters fvcams
 CFLAGS_qa_facesclassifier += $(CFLAGS_SDL)
 LDFLAGS_fv_qa_facesclassifier += $(LDFLAGS_SDL)
 

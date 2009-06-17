@@ -118,7 +118,7 @@ FacesClassifier::classify()
     rv->push_back(r);
   }
 
-  // sort, biggest first, we define num_hint_points as area enclosed by the ROI
+  // sort, smallest first, we define num_hint_points as area enclosed by the ROI
   rv->sort();
 
   return rv;
